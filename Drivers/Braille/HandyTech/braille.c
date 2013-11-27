@@ -235,7 +235,11 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(bkwm),
 END_KEY_TABLE_LIST
 
-static const unsigned char BookwormSessionEnd[] = {0X05, 0X07};	/* bookworm trailer to display braille */
+static int
+endBookwormSession(BrailleDisplay *brl) {
+  static const unsigned char sessionEnd[] = {0X05, 0X07};
+  return writeBraillePacket(brl, NULL, sessionEnd, sizeof(sessionEnd));
+}
 
 typedef int ByteInterpreter (BrailleDisplay *brl, unsigned char byte);
 static ByteInterpreter interpretByte_key;
@@ -260,18 +264,15 @@ typedef struct {
   BrailleFirmnessSetter *setFirmness;
   BrailleSensitivitySetter *setSensitivity;
 
-  const unsigned char *sessionEndAddress;
+  BrailleSessionEnder *sessionEnder;
 
   HT_ModelIdentifier identifier:8;
   unsigned char textCells;
   unsigned char statusCells;
 
-  unsigned char sessionEndLength;
-
   unsigned hasATC:1; /* Active Tactile Control */
 } ModelEntry;
 
-#define HT_BYTE_SEQUENCE(name,bytes) .name##Address = bytes, .name##Length = sizeof(bytes)
 static const ModelEntry modelTable[] = {
   { .identifier = HT_MODEL_Modular20,
     .name = "Modular 20+4",
@@ -338,7 +339,7 @@ static const ModelEntry modelTable[] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(bkwm),
     .interpretByte = interpretByte_Bookworm,
     .writeCells = writeCells_Bookworm,
-    HT_BYTE_SEQUENCE(sessionEnd, BookwormSessionEnd)
+    .sessionEnder = endBookwormSession
   }
   ,
   { .identifier = HT_MODEL_Braillino,
@@ -412,86 +413,31 @@ static const ModelEntry modelTable[] = {
     .name = NULL
   }
 };
-#undef HT_BYTE_SEQUENCE
 
-#define BRLROWS		1
-#define MAX_STCELLS	4	/* highest number of status cells */
+#define BRLROWS              1
+#define MAXIMUM_TEXT_CELLS   160
+#define MAXIMUM_STATUS_CELLS 4
 
-/* Global variables */
-static unsigned char *rawData = NULL;		/* translated data to send to Braille */
-static unsigned char *prevData = NULL;	/* previously sent raw data */
-static unsigned char rawStatus[MAX_STCELLS];		/* to hold status info */
-static unsigned char prevStatus[MAX_STCELLS];	/* to hold previous status */
-static const ModelEntry *model;		/* points to terminal model config struct */
+typedef enum {
+  BDS_OFF,
+  BDS_READY,
+  BDS_WRITING
+} BrailleDisplayState;
 
-typedef struct {
-  int (*openPort) (char **parameters, const char *device);
-  void (*closePort) ();
-  int (*awaitInput) (int milliseconds);
-  int (*readBytes) (unsigned char *buffer, int length, int wait);
-  int (*writeBytes) (const unsigned char *buffer, int length, unsigned int *delay);
-} InputOutputOperations;
-
-static const InputOutputOperations *io;
-static const unsigned int baud = 19200;
-static unsigned int charactersPerSecond;
-
-/* Serial IO */
-#include "io_serial.h"
-
-static SerialDevice *serialDevice = NULL;			/* file descriptor for Braille display */
-
-static int
-openSerialPort (char **parameters, const char *device) {
-  if ((serialDevice = serialOpenDevice(device))) {
-    serialSetParity(serialDevice, SERIAL_PARITY_ODD);
-
-    if (serialRestartDevice(serialDevice, baud)) {
-      return 1;
-    }
-
-    serialCloseDevice(serialDevice);
-    serialDevice = NULL;
-  }
-  return 0;
-}
-
-static void
-closeSerialPort (void) {
-  if (serialDevice) {
-    serialCloseDevice(serialDevice);
-    serialDevice = NULL;
-  }
-}
-
-static int
-awaitSerialInput (int milliseconds) {
-  return serialAwaitInput(serialDevice, milliseconds);
-}
-
-static int
-readSerialBytes (unsigned char *buffer, int count, int wait) {
-  const int timeout = 100;
-  return serialReadData(serialDevice, buffer, count,
-                        (wait? timeout: 0), timeout);
-}
-
-static int
-writeSerialBytes (const unsigned char *buffer, int length, unsigned int *delay) {
-  int count = serialWriteData(serialDevice, buffer, length);
-  if (delay && (count != -1)) *delay += (length * 1000 / charactersPerSecond) + 1;
-  return count;
-}
-
-static const InputOutputOperations serialOperations = {
-  openSerialPort, closeSerialPort,
-  awaitSerialInput, readSerialBytes, writeSerialBytes
+struct BrailleDataStruct {
+  unsigned char rawData[MAXIMUM_TEXT_CELLS];            /* translated data to send to Braille */
+  unsigned char prevData[MAXIMUM_TEXT_CELLS];   /* previously sent raw data */
+  unsigned char rawStatus[MAXIMUM_STATUS_CELLS];         /* to hold status info */
+  unsigned char prevStatus[MAXIMUM_STATUS_CELLS];        /* to hold previous status */
+  const ModelEntry *model;              /* points to terminal model config struct */
+  BrailleDisplayState currentState;
+  TimePeriod statePeriod;
+  unsigned int retryCount;
+  unsigned char updateRequired;
 };
 
 /* USB IO */
 #include "io_usb.h"
-
-static UsbChannel *usb = NULL;
 
 #define HT_HID_REPORT_TIMEOUT 100
 
@@ -522,8 +468,11 @@ static unsigned char *hidInputReport = NULL;
 static unsigned char hidInputOffset;
 
 static int
-getHidReport (unsigned char number, unsigned char *buffer, int size) {
-  int result = usbHidGetReport(usb->device, usb->definition.interface,
+getHidReport (
+  UsbDevice *device, const UsbChannelDefinition *definition,
+  unsigned char number, unsigned char *buffer, int size
+) {
+  int result = usbHidGetReport(device, definition->interface,
                                number, buffer, size, HT_HID_REPORT_TIMEOUT);
   if (result > 0 && buffer[0] != number) {
     logMessage(LOG_WARNING, "unexpected HID report number: expected %02X, received %02X",
@@ -535,32 +484,18 @@ getHidReport (unsigned char number, unsigned char *buffer, int size) {
   return result;
 }
 
-static int
-setHidReport (const unsigned char *report, int size) {
-  return usbHidSetReport(usb->device, usb->definition.interface,
-                         report[0], report, size, HT_HID_REPORT_TIMEOUT);
-}
-
 typedef struct {
   HT_HidReportNumber number;
   size_t *size;
 } ReportEntry;
 
 static void
-getHidReportSizes (const ReportEntry *table) {
-  unsigned char *items;
-  ssize_t length = usbHidGetItems(usb->device, usb->definition.interface, 0,
-                                  &items, HT_HID_REPORT_TIMEOUT);
+getHidReportSizes (BrailleDisplay *brl, const ReportEntry *table) {
+  const ReportEntry *report = table;
 
-  if (items) {
-    const ReportEntry *report = table;
-
-    while (report->number) {
-      usbHidGetReportSize(items, length, report->number, report->size);
-      report += 1;
-    }
-
-    free(items);
+  while (report->number) {
+    *report->size = gioGetHidReportSize(brl->gioEndpoint, report->number);
+    report += 1;
   }
 }
 
@@ -577,12 +512,13 @@ allocateHidInputBuffer (void) {
 }
 
 static void
-getHidFirmwareVersion (void) {
+getHidFirmwareVersion (BrailleDisplay *brl) {
   hidFirmwareVersion = 0;
 
   if (hidReportSize_OutVersion) {
     unsigned char report[hidReportSize_OutVersion];
-    int result = getHidReport(HT_HID_RPT_OutVersion, report, sizeof(report));
+    int result = gioGetHidReport(brl->gioEndpoint,
+                                 HT_HID_RPT_OutVersion, report, sizeof(report));
 
     if (result > 0) {
       hidFirmwareVersion = (report[1] << 8) | report[2];
@@ -592,58 +528,26 @@ getHidFirmwareVersion (void) {
 }
 
 static void
-executeHidFirmwareCommand (HtHidCommand command) {
+executeHidFirmwareCommand (BrailleDisplay *brl, HtHidCommand command) {
   if (hidReportSize_InCommand) {
     unsigned char report[hidReportSize_InCommand];
 
     report[0] = HT_HID_RPT_InCommand;
     report[1] = command;
 
-    setHidReport(report, sizeof(report));
+    gioWriteHidReport(brl->gioEndpoint, report, sizeof(report));
   }
 }
 
 typedef struct {
-  void (*initialize) (void);
-  int (*awaitInput) (int milliseconds);
-  int (*readBytes) (unsigned char *buffer, int length, int wait);
-  int (*writeBytes) (const unsigned char *buffer, int length);
+  void (*initialize) (BrailleDisplay *brl);
+  GioUsbWriteDataMethod *writeData;
+  GioUsbAwaitInputMethod *awaitInput;
+  GioUsbReadDataMethod *readData;
 } UsbOperations;
 
-static const UsbOperations *usbOps;
-
 static void
-initializeUsb1 (void) {
-}
-
-static int
-awaitUsbInput1 (int milliseconds) {
-  return usbAwaitInput(usb->device, usb->definition.inputEndpoint, milliseconds);
-}
-
-static int
-readUsbBytes1 (unsigned char *buffer, int length, int wait) {
-  int timeout = 100;
-
-  return usbReadData(usb->device, usb->definition.inputEndpoint, buffer, length,
-                     (wait? timeout: 0), timeout);
-}
-
-static int
-writeUsbBytes1 (const unsigned char *buffer, int length) {
-  return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint,
-                          buffer, length, 1000);
-}
-
-static const UsbOperations usbOperations1 = {
-  .initialize = initializeUsb1,
-  .awaitInput = awaitUsbInput1,
-  .readBytes = readUsbBytes1,
-  .writeBytes = writeUsbBytes1
-};
-
-static void
-initializeUsb2 (void) {
+initializeUsb2 (BrailleDisplay *brl) {
   static const ReportEntry reportTable[] = {
     {.number=HT_HID_RPT_OutData, .size=&hidReportSize_OutData},
     {.number=HT_HID_RPT_InData, .size=&hidReportSize_InData},
@@ -653,14 +557,16 @@ initializeUsb2 (void) {
     {.number=HT_HID_RPT_InBaud, .size=&hidReportSize_InBaud},
     {.number=0}
   };
-  getHidReportSizes(reportTable);
+  getHidReportSizes(brl, reportTable);
   allocateHidInputBuffer();
-  getHidFirmwareVersion();
-  executeHidFirmwareCommand(HT_HID_CMD_FlushBuffers);
+  getHidFirmwareVersion(brl);
+  executeHidFirmwareCommand(brl, HT_HID_CMD_FlushBuffers);
 }
 
 static int
-awaitUsbInput2 (int milliseconds) {
+awaitUsbInput2 (
+  UsbDevice *device, const UsbChannelDefinition *definition, int milliseconds
+) {
   if (hidReportSize_OutData) {
     TimePeriod period;
 
@@ -668,7 +574,7 @@ awaitUsbInput2 (int milliseconds) {
     startTimePeriod(&period, milliseconds);
 
     while (1) {
-      int result = getHidReport(HT_HID_RPT_OutData, hidInputReport,
+      int result = getHidReport(device, definition, HT_HID_RPT_OutData, hidInputReport,
                                 hidReportSize_OutData);
 
       if (result == -1) return 0;
@@ -684,18 +590,23 @@ awaitUsbInput2 (int milliseconds) {
   return 0;
 }
 
-static int
-readUsbBytes2 (unsigned char *buffer, int length, int wait) {
+static ssize_t
+readUsbBytes2 (
+  UsbDevice *device, const UsbChannelDefinition *definition,
+  void *data, size_t size,
+  int initialTimeout, int subsequentTimeout
+) {
   int count = 0;
+  unsigned char *buffer = data;
 
-  while (count < length) {
-    if (!io->awaitInput(wait? 100: 0)) {
+  while (count < size) {
+    if (!awaitUsbInput2(device, definition, count? subsequentTimeout: initialTimeout)) {
       count = -1;
       break;
     }
 
     {
-      int amount = MIN(length-count, hidInputLength-hidInputOffset);
+      size_t amount = MIN(size-count, hidInputLength-hidInputOffset);
 
       memcpy(&buffer[count], &hidInputBuffer[hidInputOffset], amount);
       hidInputOffset += amount;
@@ -706,14 +617,18 @@ readUsbBytes2 (unsigned char *buffer, int length, int wait) {
   return count;
 }
 
-static int
-writeUsbBytes2 (const unsigned char *buffer, int length) {
+static ssize_t
+writeUsbBytes2 (
+  UsbDevice *device, const UsbChannelDefinition *definition,
+  const void *data, size_t size, int timeout
+) {
+  const unsigned char *buffer = data;
   int index = 0;
 
   if (hidReportSize_InData) {
-    while (length) {
+    while (size) {
       unsigned char report[hidReportSize_InData];
-      unsigned char count = MIN(length, (sizeof(report) - 2));
+      unsigned char count = MIN(size, (sizeof(report) - 2));
       int result;
 
       report[0] = HT_HID_RPT_InData;
@@ -721,11 +636,13 @@ writeUsbBytes2 (const unsigned char *buffer, int length) {
       memcpy(report+2, &buffer[index], count);
       memset(&report[count+2], 0, sizeof(report)-count-2);
 
-      result = setHidReport(report, sizeof(report));
+      result = usbHidSetReport(device, definition->interface,
+                               report[0], report, sizeof(report),
+                               HT_HID_REPORT_TIMEOUT);
       if (result == -1) return -1;
 
       index += count;
-      length -= count;
+      size -= count;
     }
   }
 
@@ -735,23 +652,25 @@ writeUsbBytes2 (const unsigned char *buffer, int length) {
 static const UsbOperations usbOperations2 = {
   .initialize = initializeUsb2,
   .awaitInput = awaitUsbInput2,
-  .readBytes = readUsbBytes2,
-  .writeBytes = writeUsbBytes2
+  .readData = readUsbBytes2,
+  .writeData = writeUsbBytes2
 };
 
 static void
-initializeUsb3 (void) {
+initializeUsb3 (BrailleDisplay *brl) {
   static const ReportEntry reportTable[] = {
     {.number=HT_HID_RPT_OutData, .size=&hidReportSize_OutData},
     {.number=HT_HID_RPT_InData, .size=&hidReportSize_InData},
     {.number=0}
   };
-  getHidReportSizes(reportTable);
+  getHidReportSizes(brl, reportTable);
   allocateHidInputBuffer();
 }
 
 static int
-awaitUsbInput3 (int milliseconds) {
+awaitUsbInput3 (
+  UsbDevice *device, const UsbChannelDefinition *definition, int milliseconds
+) {
   if (hidReportSize_OutData) {
     TimePeriod period;
 
@@ -759,7 +678,7 @@ awaitUsbInput3 (int milliseconds) {
     startTimePeriod(&period, milliseconds);
 
     while (1) {
-      int result = usbReadData(usb->device, usb->definition.inputEndpoint,
+      int result = usbReadData(device, definition->inputEndpoint,
                                hidInputReport, hidReportSize_OutData,
                                0, 100);
 
@@ -778,14 +697,18 @@ awaitUsbInput3 (int milliseconds) {
   return 0;
 }
 
-static int
-writeUsbBytes3 (const unsigned char *buffer, int length) {
+static ssize_t
+writeUsbBytes3 (
+  UsbDevice *device, const UsbChannelDefinition *definition,
+  const void *data, size_t size, int timeout
+) {
+  const unsigned char *buffer = data;
   int index = 0;
 
   if (hidReportSize_InData) {
-    while (length) {
+    while (size) {
       unsigned char report[hidReportSize_InData];
-      unsigned char count = MIN(length, (sizeof(report) - 2));
+      unsigned char count = MIN(size, (sizeof(report) - 2));
       int result;
 
       report[0] = HT_HID_RPT_InData;
@@ -793,12 +716,12 @@ writeUsbBytes3 (const unsigned char *buffer, int length) {
       memcpy(report+2, &buffer[index], count);
       memset(&report[count+2], 0, sizeof(report)-count-2);
 
-      result = usbWriteEndpoint(usb->device, usb->definition.outputEndpoint,
+      result = usbWriteEndpoint(device, definition->outputEndpoint,
                                 report, sizeof(report), 1000);
       if (result == -1) return -1;
 
       index += count;
-      length -= count;
+      size -= count;
     }
   }
 
@@ -808,33 +731,282 @@ writeUsbBytes3 (const unsigned char *buffer, int length) {
 static const UsbOperations usbOperations3 = {
   .initialize = initializeUsb3,
   .awaitInput = awaitUsbInput3,
-  .readBytes = readUsbBytes2,
-  .writeBytes = writeUsbBytes3
+  .readData = readUsbBytes2,
+  .writeData = writeUsbBytes3
 };
 
 static int
-openUsbPort (char **parameters, const char *device) {
-  const SerialParameters serial = {
+verifyPacket (
+  BrailleDisplay *brl,
+  const unsigned char *bytes, size_t size,
+  size_t *length, void *data
+) {
+  unsigned char byte = bytes[size-1];
+
+  switch (size) {
+    case 1:
+      switch (byte) {
+        default:
+          *length = 1;
+          break;
+
+        case HT_PKT_OK:
+          *length = 2;
+          break;
+
+        case HT_PKT_Extended:
+          *length = 4;
+          break;
+      }
+      break;
+
+    case 3:
+      if (bytes[0] == HT_PKT_Extended) *length += byte;
+      break;
+
+    case 5:
+      if ((bytes[0] == HT_PKT_Extended) &&
+          (bytes[1] == HT_MODEL_ActiveBraille) &&
+          (bytes[2] == 2) &&
+          (bytes[3] == HT_EXTPKT_Confirmation) &&
+          (byte == 0X15))
+        *length += 1;
+      break;
+
+    default:
+      break;
+  }
+
+  if ((size == *length) && (bytes[0] == HT_PKT_Extended) && (byte != SYN))
+    return 0;
+
+  return 1;
+}
+
+static ssize_t
+brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
+  return readBraillePacket(brl, NULL, buffer, size, verifyPacket, NULL);
+}
+
+static ssize_t
+brl_writePacket (BrailleDisplay *brl, const void *packet, size_t length) {
+  return writeBraillePacket(brl, NULL, packet, length)? length: 0;
+}
+
+static void
+setState (BrailleDisplay *brl, BrailleDisplayState state) {
+  if (state == brl->data->currentState) {
+    ++brl->data->retryCount;
+  } else {
+    brl->data->retryCount = 0;
+    brl->data->currentState = state;
+  }
+
+  startTimePeriod(&brl->data->statePeriod, 1000);
+  // logMessage(LOG_DEBUG, "State: %d+%d", brl->data->currentState, brl->data->retryCount);
+}
+
+static int
+brl_reset (BrailleDisplay *brl) {
+  static const unsigned char packet[] = {HT_PKT_Reset};
+  return writeBraillePacket(brl, NULL, packet, sizeof(packet));
+}
+
+static int
+identifyModel (BrailleDisplay *brl, unsigned char identifier) {
+  for (
+    brl->data->model = modelTable;
+    brl->data->model->name && (brl->data->model->identifier != identifier);
+    brl->data->model++
+  );
+
+  if (!brl->data->model->name) {
+    logMessage(LOG_ERR, "Detected unknown HandyTech model with ID %02X.",
+               identifier);
+    return 0;
+  }
+
+  logMessage(LOG_INFO, "Detected %s: %d data %s, %d status %s.",
+             brl->data->model->name,
+             brl->data->model->textCells, (brl->data->model->textCells == 1)? "cell": "cells",
+             brl->data->model->statusCells, (brl->data->model->statusCells == 1)? "cell": "cells");
+
+  brl->textColumns = brl->data->model->textCells;                       /* initialise size of display */
+  brl->textRows = BRLROWS;
+  brl->statusColumns = brl->data->model->statusCells;
+  brl->statusRows = 1;
+
+  brl->keyBindings = brl->data->model->keyTableDefinition->bindings;
+  brl->keyNameTables = brl->data->model->keyTableDefinition->names;
+
+  brl->setFirmness = brl->data->model->setFirmness;
+  brl->setSensitivity = brl->data->model->setSensitivity;
+
+  memset(brl->data->rawStatus, 0, brl->data->model->statusCells);
+  memset(brl->data->rawData, 0, brl->data->model->textCells);
+
+  brl->data->retryCount = 0;
+  brl->data->updateRequired = 0;
+  brl->data->currentState = BDS_OFF;
+  setState(brl, BDS_READY);
+
+  return 1;
+}
+
+static int
+writeExtendedPacket (
+  BrailleDisplay *brl, HT_ExtendedPacketType type,
+  const unsigned char *data, unsigned char size
+) {
+  HT_Packet packet;
+  packet.fields.type = HT_PKT_Extended;
+  packet.fields.data.extended.model = brl->data->model->identifier;
+  packet.fields.data.extended.length = size + 1; /* type byte is included */
+  packet.fields.data.extended.type = type;
+  memcpy(packet.fields.data.extended.data.bytes, data, size);
+  packet.fields.data.extended.data.bytes[size] = SYN;
+  size += 5; /* EXT, ID, LEN, TYPE, ..., SYN */
+  return writeBraillePacket(brl, NULL, &packet, size);
+}
+
+static int
+setAtcMode (BrailleDisplay *brl, unsigned char value) {
+  const unsigned char data[] = {value};
+  return writeExtendedPacket(brl, HT_EXTPKT_SetAtcMode, data, sizeof(data));
+}
+
+static int
+setFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
+  const unsigned char data[] = {setting * 2 / BRL_FIRMNESS_MAXIMUM};
+  return writeExtendedPacket(brl, HT_EXTPKT_SetFirmness, data, sizeof(data));
+}
+
+static int
+setSensitivity_Evolution (BrailleDisplay *brl, BrailleSensitivity setting) {
+  const unsigned char data[] = {0XFF - (setting * 0XF0 / BRL_SENSITIVITY_MAXIMUM)};
+  return writeExtendedPacket(brl, HT_EXTPKT_SetAtcSensitivity, data, sizeof(data));
+}
+
+static int
+setSensitivity_ActiveBraille (BrailleDisplay *brl, BrailleSensitivity setting) {
+  const unsigned char data[] = {setting * 6 / BRL_SENSITIVITY_MAXIMUM};
+  return writeExtendedPacket(brl, HT_EXTPKT_SetAtcSensitivity2, data, sizeof(data));
+}
+
+typedef int (DateTimeProcessor) (BrailleDisplay *brl, const HT_DateTime *dateTime);
+static DateTimeProcessor *dateTimeProcessor = NULL;
+
+static int
+requestDateTime (BrailleDisplay *brl, DateTimeProcessor *processor) {
+  int result = writeExtendedPacket(brl, HT_EXTPKT_GetRTC, NULL, 0);
+
+  if (result) {
+    dateTimeProcessor = processor;
+  }
+
+  return result;
+}
+
+static int
+logDateTime (BrailleDisplay *brl, const HT_DateTime *dateTime) {
+  logMessage(LOG_INFO,
+             "date and time of %s:"
+             " %04" PRIu16 "-%02" PRIu8 "-%02" PRIu8
+             " %02" PRIu8 ":%02" PRIu8 ":%02" PRIu8,
+             brl->data->model->name,
+             getBigEndian16(dateTime->year), dateTime->month, dateTime->day,
+             dateTime->hour, dateTime->minute, dateTime->second);
+
+  return 1;
+}
+
+static int
+synchronizeDateTime (BrailleDisplay *brl, const HT_DateTime *dateTime) {
+  long int delta;
+  TimeValue hostTime;
+  getCurrentTime(&hostTime);
+
+  {
+    TimeValue deviceTime;
+
+    {
+      TimeComponents components = {
+        .year = getBigEndian16(dateTime->year),
+        .month = dateTime->month - 1,
+        .day = dateTime->day - 1,
+        .hour = dateTime->hour,
+        .minute = dateTime->minute,
+        .second = dateTime->second
+      };
+
+      makeTimeValue(&deviceTime, &components);
+    }
+
+    delta = millisecondsBetween(&hostTime, &deviceTime);
+    if (delta < 0) delta = -delta;
+  }
+
+  if (delta > 1000) {
+    TimeComponents components;
+    HT_DateTime payload;
+
+    expandTimeValue(&hostTime, &components);
+    putLittleEndian16(&payload.year, components.year);
+    payload.month = components.month + 1;
+    payload.day = components.day + 1;
+    payload.hour = components.hour;
+    payload.minute = components.minute;
+    payload.second = components.second;
+
+    logMessage(LOG_DEBUG, "Time difference between host and device: %ld.%03ld",
+               (delta / MSECS_PER_SEC), (delta % MSECS_PER_SEC));
+
+    if (writeExtendedPacket(brl, HT_EXTPKT_SetRTC,
+                            (unsigned char *)&payload, sizeof(payload))) {
+      return requestDateTime(brl, logDateTime);
+    }
+  }
+
+  return 1;
+}
+
+static void
+setUsbConnectionProperties (
+  GioUsbConnectionProperties *properties,
+  const UsbChannelDefinition *definition
+) {
+  logMessage(LOG_DEBUG, "setUsbConnectionProperties called");
+  if (definition->data) {
+    logMessage(LOG_DEBUG, "setUsbConnectionProperties with definition->data");
+    const UsbOperations *usbOps = definition->data;
+    properties->applicationData = definition->data;
+    properties->writeData = usbOps->writeData;
+    properties->readData = usbOps->readData;
+    properties->awaitInput = usbOps->awaitInput;
+  }
+}
+
+static int
+connectResource (BrailleDisplay *brl, const char *identifier) {
+  static const SerialParameters serialParameters = {
     SERIAL_DEFAULT_PARAMETERS,
-    .baud = baud,
+    .baud = 19200,
     .parity = SERIAL_PARITY_ODD
   };
 
-  const UsbChannelDefinition definitions[] = {
+  static const UsbChannelDefinition usbChannelDefinitions[] = {
     { /* GoHubs chip */
       .vendor=0X0921, .product=0X1200,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
-      .serial = &serial,
-      .data=&usbOperations1
+      .serial = &serialParameters
     }
     ,
     { /* FTDI chip */
       .vendor=0X0403, .product=0X6001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .serial = &serial,
-      .data=&usbOperations1
+      .serial = &serialParameters
     }
     ,
     { /* Easy Braille (HID) */
@@ -921,478 +1093,85 @@ openUsbPort (char **parameters, const char *device) {
     { .vendor=0 }
   };
 
-  if ((usb = usbOpenChannel(definitions, (void *)device))) {
-    usbOps = usb->definition.data;
-    usbOps->initialize();
+  GioDescriptor descriptor;
+  gioInitializeDescriptor(&descriptor);
 
+  descriptor.serial.parameters = &serialParameters;
+  descriptor.usb.channelDefinitions = usbChannelDefinitions;
+  descriptor.usb.setConnectionProperties = setUsbConnectionProperties;
+  descriptor.usb.options.inputTimeout = 100;
+  descriptor.usb.options.requestTimeout = 100;
+
+  descriptor.bluetooth.channelNumber = 1;
+
+  if (connectBrailleResource(brl, identifier, &descriptor)) {
+    const UsbOperations *usb = gioGetApplicationData(brl->gioEndpoint);
+    if (usb && usb->initialize) usb->initialize(brl);
     return 1;
   }
+
   return 0;
-}
-
-static void
-closeUsbPort (void) {
-  if (hidInputReport) {
-    free(hidInputReport);
-    hidInputReport = NULL;
-  }
-
-  if (usb) {
-    usbCloseChannel(usb);
-    usb = NULL;
-  }
-}
-
-static int
-awaitUsbInput (int milliseconds) {
-  return usbOps->awaitInput(milliseconds);
-}
-
-static int
-readUsbBytes (unsigned char *buffer, int length, int wait) {
-  int count = usbOps->readBytes(buffer, length, wait);
-
-  if (count != -1) return count;
-  if (errno == EAGAIN) return 0;
-  return -1;
-}
-
-static int
-writeUsbBytes (const unsigned char *buffer, int length, unsigned int *delay) {
-  if (delay) *delay += (length * 1000 / charactersPerSecond) + 1;
-
-  return usbOps->writeBytes(buffer, length);
-}
-
-static const InputOutputOperations usbOperations = {
-  openUsbPort, closeUsbPort,
-  awaitUsbInput, readUsbBytes, writeUsbBytes
-};
-
-/* Bluetooth IO */
-#include "io_bluetooth.h"
-
-static BluetoothConnection *bluetoothConnection = NULL;
-
-static int
-openBluetoothPort (char **parameters, const char *device) {
-  BluetoothConnectionRequest request;
-
-  bthInitializeConnectionRequest(&request);
-  request.identifier = device;
-  request.channel = 1;
-
-  return (bluetoothConnection = bthOpenConnection(&request)) != NULL;
-}
-
-static void
-closeBluetoothPort (void) {
-  if (bluetoothConnection) {
-    bthCloseConnection(bluetoothConnection);
-    bluetoothConnection = NULL;
-  }
-}
-
-static int
-awaitBluetoothInput (int milliseconds) {
-  return bthAwaitInput(bluetoothConnection, milliseconds);
-}
-
-static int
-readBluetoothBytes (unsigned char *buffer, int length, int wait) {
-  const int timeout = 100;
-  return bthReadData(bluetoothConnection, buffer, length,
-                     (wait? timeout: 0), timeout);
-}
-
-static int
-writeBluetoothBytes (const unsigned char *buffer, int length, unsigned int *delay) {
-  int count = bthWriteData(bluetoothConnection, buffer, length);
-  if (delay) *delay += (length * 1000 / charactersPerSecond) + 1;
-  if (count != length) {
-    if (count == -1) {
-      logSystemError("HandyTech Bluetooth write");
-    } else {
-      logMessage(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
-    }
-  }
-  return count;
-}
-
-static const InputOutputOperations bluetoothOperations = {
-  openBluetoothPort, closeBluetoothPort,
-  awaitBluetoothInput, readBluetoothBytes, writeBluetoothBytes
-};
-
-typedef enum {
-  BDS_OFF,
-  BDS_READY,
-  BDS_WRITING
-} BrailleDisplayState;
-static BrailleDisplayState currentState = BDS_OFF;
-static TimePeriod statePeriod;
-static unsigned int retryCount = 0;
-static unsigned char updateRequired = 0;
-
-static ssize_t
-brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
-  unsigned char *packet = buffer;
-  size_t offset = 0;
-  size_t length = 0;
-
-  while (1) {
-    unsigned char byte;
-
-    {
-      int started = offset > 0;
-      int count = io->readBytes(&byte, 1, started);
-
-      if (count != 1) {
-        if (!count && started) logPartialPacket(packet, offset);
-        return count;
-      }
-    }
-
-    if (offset == 0) {
-      switch (byte) {
-        default:
-          length = 1;
-          break;
-
-        case HT_PKT_OK:
-          length = 2;
-          break;
-
-        case HT_PKT_Extended:
-          length = 4;
-          break;
-      }
-    } else {
-      switch (packet[0]) {
-        case HT_PKT_Extended:
-          if (offset == 2) {
-            length += byte;
-          } else if (offset == 4) {
-            if ((packet[1] == HT_MODEL_ActiveBraille) && 
-                (packet[2] == 2) &&
-                (packet[3] == HT_EXTPKT_Confirmation) &&
-                (byte == 0X15))
-              length += 1;
-          }
-          break;
-      }
-    }
-
-    if (offset < size) {
-      packet[offset] = byte;
-    } else {
-      if (offset == size) logTruncatedPacket(packet, offset);
-      logDiscardedByte(byte);
-    }
-
-    if (++offset == length) {
-      if (offset <= size) {
-        int ok = 0;
-
-        switch (packet[0]) {
-          case HT_PKT_Extended:
-            if (packet[length-1] == SYN) ok = 1;
-            break;
-
-          default:
-            ok = 1;
-            break;
-        }
-
-        if (ok) {
-          logInputPacket(packet, offset);
-          return length;
-        }
-
-        logCorruptPacket(packet, offset);
-      }
-
-      offset = 0;
-      length = 0;
-    }
-  }
-}
-
-static ssize_t
-brl_writePacket (BrailleDisplay *brl, const void *packet, size_t length) {
-  logOutputPacket(packet, length);
-  return io->writeBytes(packet, length, &brl->writeDelay);
-}
-
-static void
-setState (BrailleDisplayState state) {
-  if (state == currentState) {
-    ++retryCount;
-  } else {
-    retryCount = 0;
-    currentState = state;
-  }
-
-  startTimePeriod(&statePeriod, 1000);
-  // logMessage(LOG_DEBUG, "State: %d+%d", currentState, retryCount);
-}
-
-static int
-brl_reset (BrailleDisplay *brl) {
-  static const unsigned char packet[] = {HT_PKT_Reset};
-  return brl_writePacket(brl, packet, sizeof(packet)) != -1;
-}
-
-static void
-deallocateBuffers (void) {
-  if (rawData) {
-    free(rawData);
-    rawData = NULL;
-  }
-
-  if (prevData) {
-    free(prevData);
-    prevData = NULL;
-  }
-}
-
-static int
-reallocateBuffer (unsigned char **buffer, size_t size) {
-  void *address = realloc(*buffer, size);
-  int allocated = address != NULL;
-  if (allocated) {
-    *buffer = address;
-  } else {
-    logSystemError("buffer allocation");
-  }
-  return allocated;
-}
-
-static int
-identifyModel (BrailleDisplay *brl, unsigned char identifier) {
-  for (
-    model = modelTable;
-    model->name && (model->identifier != identifier);
-    model++
-  );
-
-  if (!model->name) {
-    logMessage(LOG_ERR, "Detected unknown HandyTech model with ID %02X.",
-               identifier);
-    return 0;
-  }
-
-  logMessage(LOG_INFO, "Detected %s: %d data %s, %d status %s.",
-             model->name,
-             model->textCells, (model->textCells == 1)? "cell": "cells",
-             model->statusCells, (model->statusCells == 1)? "cell": "cells");
-
-  brl->textColumns = model->textCells;			/* initialise size of display */
-  brl->textRows = BRLROWS;
-  brl->statusColumns = model->statusCells;
-  brl->statusRows = 1;
-
-  brl->keyBindings = model->keyTableDefinition->bindings;
-  brl->keyNameTables = model->keyTableDefinition->names;
-
-  brl->setFirmness = model->setFirmness;
-  brl->setSensitivity = model->setSensitivity;
-
-  if (!reallocateBuffer(&rawData, brl->textColumns*brl->textRows)) return 0;
-  if (!reallocateBuffer(&prevData, brl->textColumns*brl->textRows)) return 0;
-
-  memset(rawStatus, 0, model->statusCells);
-  memset(rawData, 0, model->textCells);
-
-  retryCount = 0;
-  updateRequired = 0;
-  currentState = BDS_OFF;
-  setState(BDS_READY);
-
-  return 1;
-}
-
-static int
-writeExtendedPacket (
-  BrailleDisplay *brl, HT_ExtendedPacketType type,
-  const unsigned char *data, unsigned char size
-) {
-  HT_Packet packet;
-  packet.fields.type = HT_PKT_Extended;
-  packet.fields.data.extended.model = model->identifier;
-  packet.fields.data.extended.length = size + 1; /* type byte is included */
-  packet.fields.data.extended.type = type;
-  memcpy(packet.fields.data.extended.data.bytes, data, size);
-  packet.fields.data.extended.data.bytes[size] = SYN;
-  size += 5; /* EXT, ID, LEN, TYPE, ..., SYN */
-  return brl_writePacket(brl, (unsigned char *)&packet, size) == size;
-}
-
-static int
-setAtcMode (BrailleDisplay *brl, unsigned char value) {
-  const unsigned char data[] = {value};
-  return writeExtendedPacket(brl, HT_EXTPKT_SetAtcMode, data, sizeof(data));
-}
-
-static int
-setFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
-  const unsigned char data[] = {setting * 2 / BRL_FIRMNESS_MAXIMUM};
-  return writeExtendedPacket(brl, HT_EXTPKT_SetFirmness, data, sizeof(data));
-}
-
-static int
-setSensitivity_Evolution (BrailleDisplay *brl, BrailleSensitivity setting) {
-  const unsigned char data[] = {0XFF - (setting * 0XF0 / BRL_SENSITIVITY_MAXIMUM)};
-  return writeExtendedPacket(brl, HT_EXTPKT_SetAtcSensitivity, data, sizeof(data));
-}
-
-static int
-setSensitivity_ActiveBraille (BrailleDisplay *brl, BrailleSensitivity setting) {
-  const unsigned char data[] = {setting * 6 / BRL_SENSITIVITY_MAXIMUM};
-  return writeExtendedPacket(brl, HT_EXTPKT_SetAtcSensitivity2, data, sizeof(data));
-}
-
-typedef int (DateTimeProcessor) (BrailleDisplay *brl, const HT_DateTime *dateTime);
-static DateTimeProcessor *dateTimeProcessor = NULL;
-
-static int
-requestDateTime (BrailleDisplay *brl, DateTimeProcessor *processor) {
-  int result = writeExtendedPacket(brl, HT_EXTPKT_GetRTC, NULL, 0);
-
-  if (result) {
-    dateTimeProcessor = processor;
-  }
-
-  return result;
-}
-
-static int
-logDateTime (BrailleDisplay *brl, const HT_DateTime *dateTime) {
-  logMessage(LOG_INFO,
-             "date and time of %s:"
-             " %04" PRIu16 "-%02" PRIu8 "-%02" PRIu8
-             " %02" PRIu8 ":%02" PRIu8 ":%02" PRIu8,
-             model->name,
-             getBigEndian16(dateTime->year), dateTime->month, dateTime->day,
-             dateTime->hour, dateTime->minute, dateTime->second);
-
-  return 1;
-}
-
-static int
-synchronizeDateTime (BrailleDisplay *brl, const HT_DateTime *dateTime) {
-  long int delta;
-  TimeValue hostTime;
-  getCurrentTime(&hostTime);
-
-  {
-    TimeValue deviceTime;
-
-    {
-      TimeComponents components = {
-        .year = getBigEndian16(dateTime->year),
-        .month = dateTime->month - 1,
-        .day = dateTime->day - 1,
-        .hour = dateTime->hour,
-        .minute = dateTime->minute,
-        .second = dateTime->second
-      };
-
-      makeTimeValue(&deviceTime, &components);
-    }
-
-    delta = millisecondsBetween(&hostTime, &deviceTime);
-    if (delta < 0) delta = -delta;
-  }
-
-  if (delta > 1000) {
-    TimeComponents components;
-    HT_DateTime payload;
-
-    expandTimeValue(&hostTime, &components);
-    putLittleEndian16(&payload.year, components.year);
-    payload.month = components.month + 1;
-    payload.day = components.day + 1;
-    payload.hour = components.hour;
-    payload.minute = components.minute;
-    payload.second = components.second;
-
-    logMessage(LOG_DEBUG, "Time difference between host and device: %ld.%03ld",
-               (delta / MSECS_PER_SEC), (delta % MSECS_PER_SEC));
-
-    if (writeExtendedPacket(brl, HT_EXTPKT_SetRTC,
-                            (unsigned char *)&payload, sizeof(payload))) {
-      return requestDateTime(brl, logDateTime);
-    }
-  }
-
-  return 1;
 }
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  unsigned int setTime = 0;
+  if ((brl->data = malloc(sizeof(*brl->data)))) {
+    memset(brl->data, 0, sizeof(*brl->data));
 
-  if (isSerialDevice(&device)) {
-    io = &serialOperations;
-  } else if (isUsbDevice(&device)) {
-    io = &usbOperations;
-  } else if (isBluetoothDevice(&device)) {
-    io = &bluetoothOperations;
-  } else {
-    unsupportedDevice(device);
-    return 0;
-  }
+    if (connectResource(brl, device)) {
+      unsigned int setTime = 0;
 
-  rawData = prevData = NULL;		/* clear pointers */
-  charactersPerSecond = baud / 11;
+      if (*parameters[PARM_SETTIME])
+        if (!validateYesNo(&setTime, parameters[PARM_SETTIME]))
+          logMessage(LOG_WARNING, "%s: %s", "invalid set time setting",
+                     parameters[PARM_SETTIME]);
+      setTime = !!setTime;
 
-  if (*parameters[PARM_SETTIME])
-    if (!validateYesNo(&setTime, parameters[PARM_SETTIME]))
-      logMessage(LOG_WARNING, "%s: %s", "invalid set time setting", parameters[PARM_SETTIME]);
-  setTime = !!setTime;
+      {
+        int tries = 0;
 
-  if (io->openPort(parameters, device)) {
-    int tries = 0;
+        while (brl_reset(brl)) {
+          while (gioAwaitInput(brl->gioEndpoint, 100)) {
+            HT_Packet response;
+            ssize_t length = brl_readPacket(brl, &response, sizeof(response));
+            if (length > 0) {
+              if (response.fields.type == HT_PKT_OK) {
+                if (identifyModel(brl, response.fields.data.ok.model)) {
+                  makeOutputTable(dotsTable_ISO11548_1);
 
-    while (brl_reset(brl)) {
-      while (io->awaitInput(100)) {
-        HT_Packet response;
-        int length = brl_readPacket(brl, &response, sizeof(response));
+                  if (brl->data->model->hasATC) {
+                    setAtcMode(brl, 1);
 
-        if (length > 0) {
-          if (response.fields.type == HT_PKT_OK) {
-            if (identifyModel(brl, response.fields.data.ok.model)) {
-              makeOutputTable(dotsTable_ISO11548_1);
+                    touchAnalyzeCells(brl, NULL);
+                    brl->touchEnabled = 1;
+                  }
 
-              if (model->hasATC) {
-                setAtcMode(brl, 1);
+                  if (setTime) {
+                    if (brl->data->model->identifier == HT_MODEL_ActiveBraille) {
+                      requestDateTime(brl, synchronizeDateTime);
+                    } else {
+                      logMessage(LOG_INFO, "%s does not support setting the clock",
+                                 brl->data->model->name);
+                    }
+                  }
 
-                touchAnalyzeCells(brl, NULL);
-                brl->touchEnabled = 1;
-              }
-
-              if (setTime) {
-                if (model->identifier == HT_MODEL_ActiveBraille) {
-                  requestDateTime(brl, synchronizeDateTime);
-                } else {
-                  logMessage(LOG_INFO, "%s does not support setting the clock", model->name);
+                  return 1;
                 }
               }
-
-              return 1;
             }
-
-            deallocateBuffers();
           }
+          if (errno != EAGAIN) break;
+
+          if (++tries == 3) break;
         }
       }
-      if (errno != EAGAIN) break;
 
-      if (++tries == 3) break;
+      disconnectBrailleResource(brl, NULL);
     }
 
-    io->closePort();
+    free(brl->data);
+  } else {
+    logMallocError();
   }
 
   return 0;
@@ -1400,68 +1179,69 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  if (model->sessionEndLength) {
-    brl_writePacket(brl, model->sessionEndAddress, model->sessionEndLength);
-  }
-  io->closePort();
+  disconnectBrailleResource(brl, brl->data->model->sessionEnder);
 
-  deallocateBuffers();
+  if (brl->data) {
+    free(brl->data);
+    brl->data = NULL;
+  }
 }
 
 static int
 writeCells (BrailleDisplay *brl) {
-  if (!model->writeCells(brl)) return 0;
-  setState(BDS_WRITING);
+  if (!brl->data->model->writeCells(brl)) return 0;
+  setState(brl, BDS_WRITING);
   return 1;
 }
 
 static int
 writeCells_statusAndText (BrailleDisplay *brl) {
-  unsigned char buffer[1 + model->statusCells + model->textCells];
+  unsigned char buffer[1 + brl->data->model->statusCells + brl->data->model->textCells];
   unsigned char *byte = buffer;
 
   *byte++ = 0X01;
-  byte = mempcpy(byte, rawStatus, model->statusCells);
-  byte = mempcpy(byte, rawData, model->textCells);
+  byte = mempcpy(byte, brl->data->rawStatus, brl->data->model->statusCells);
+  byte = mempcpy(byte, brl->data->rawData, brl->data->model->textCells);
 
-  return brl_writePacket(brl, buffer, byte-buffer) != -1;
+  return writeBraillePacket(brl, NULL, buffer, byte-buffer);
 }
 
 static int
 writeCells_Bookworm (BrailleDisplay *brl) {
-  unsigned char buffer[1 + model->statusCells + model->textCells + 1];
+  unsigned char buffer[1 + brl->data->model->statusCells + brl->data->model->textCells + 1];
 
   buffer[0] = 0X01;
-  memcpy(buffer+1, rawData, model->textCells);
+  memcpy(buffer+1, brl->data->rawData, brl->data->model->textCells);
   buffer[sizeof(buffer)-1] = SYN;
-  return brl_writePacket(brl, buffer, sizeof(buffer)) != -1;
+  return writeBraillePacket(brl, NULL, buffer, sizeof(buffer));
 }
 
 static int
 writeCells_Evolution (BrailleDisplay *brl) {
-  return writeExtendedPacket(brl, HT_EXTPKT_Braille, rawData, model->textCells);
+  return writeExtendedPacket(brl, HT_EXTPKT_Braille,
+                             brl->data->rawData, brl->data->model->textCells);
 }
 
 static int
 updateCells (BrailleDisplay *brl) {
-  if (!updateRequired) return 1;
-  if (currentState != BDS_READY) return 1;
+  if (!brl->data->updateRequired) return 1;
+  if (brl->data->currentState != BDS_READY) return 1;
 
   if (!writeCells(brl)) {
-    setState(BDS_OFF);
+    setState(brl, BDS_OFF);
     return 0;
   }
 
-  updateRequired = 0;
+  brl->data->updateRequired = 0;
   return 1;
 }
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  const size_t cellCount = model->textCells;
-  if (cellsHaveChanged(prevData, brl->buffer, cellCount, NULL, NULL, NULL)) {
-    translateOutputCells(rawData, prevData, cellCount);
-    updateRequired = 1;
+  const size_t cellCount = brl->data->model->textCells;
+  if (cellsHaveChanged(brl->data->prevData, brl->buffer, cellCount, NULL, NULL, NULL)) {
+    translateOutputCells(brl->data->rawData, brl->data->prevData, cellCount);
+    brl->data->updateRequired = 1;
   }
   updateCells(brl);
   return 1;
@@ -1469,10 +1249,10 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
-  const size_t cellCount = model->statusCells;
-  if (cellsHaveChanged(prevStatus, st, cellCount, NULL, NULL, NULL)) {
-    translateOutputCells(rawStatus, prevStatus, cellCount);
-    updateRequired = 1;
+  const size_t cellCount = brl->data->model->statusCells;
+  if (cellsHaveChanged(brl->data->prevStatus, st, cellCount, NULL, NULL, NULL)) {
+    translateOutputCells(brl->data->rawStatus, brl->data->prevStatus, cellCount);
+    brl->data->updateRequired = 1;
   }
   return 1;
 }
@@ -1483,12 +1263,12 @@ interpretByte_key (BrailleDisplay *brl, unsigned char byte) {
   if (release) byte ^= HT_KEY_RELEASE;
 
   if ((byte >= HT_KEY_ROUTING) &&
-      (byte < (HT_KEY_ROUTING + model->textCells))) {
+      (byte < (HT_KEY_ROUTING + brl->data->model->textCells))) {
     return enqueueKeyEvent(brl, HT_SET_RoutingKeys, byte - HT_KEY_ROUTING, !release);
   }
 
   if ((byte >= HT_KEY_STATUS) &&
-      (byte < (HT_KEY_STATUS + model->statusCells))) {
+      (byte < (HT_KEY_STATUS + brl->data->model->statusCells))) {
     return enqueueKeyEvent(brl, HT_SET_NavigationKeys, byte, !release);
   }
 
@@ -1539,21 +1319,21 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
   while (1) {
     HT_Packet packet;
-    int size = brl_readPacket(brl, &packet, sizeof(packet));
+    ssize_t size = brl_readPacket(brl, &packet, sizeof(packet));
 
     if (size == -1) return BRL_CMD_RESTARTBRL;
     if (size == 0) break;
     noInput = 0;
 
     /* a kludge to handle the Bookworm going offline */
-    if (model->identifier == HT_MODEL_Bookworm) {
+    if (brl->data->model->identifier == HT_MODEL_Bookworm) {
       if (packet.fields.type == 0X06) {
-        if (currentState != BDS_OFF) {
+        if (brl->data->currentState != BDS_OFF) {
           /* if we get another byte right away then the device
            * has gone offline and is echoing its display
            */
-          if (io->awaitInput(10)) {
-            setState(BDS_OFF);
+          if (gioAwaitInput(brl->gioEndpoint, 10)) {
+            setState(brl, BDS_OFF);
             continue;
           }
 
@@ -1567,25 +1347,25 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
     switch (packet.fields.type) {
       case HT_PKT_OK:
-        if (packet.fields.data.ok.model == model->identifier) {
-          setState(BDS_READY);
-          updateRequired = 1;
+        if (packet.fields.data.ok.model == brl->data->model->identifier) {
+          setState(brl, BDS_READY);
+          brl->data->updateRequired = 1;
           continue;
         }
         break;
 
       default:
-        switch (currentState) {
+        switch (brl->data->currentState) {
           case BDS_OFF:
             continue;
 
           case BDS_WRITING:
             switch (packet.fields.type) {
               case HT_PKT_NAK:
-                updateRequired = 1;
+                brl->data->updateRequired = 1;
               case HT_PKT_ACK:
-                if (model->hasATC) touchAnalyzeCells(brl, prevData);
-                setState(BDS_READY);
+                if (brl->data->model->hasATC) touchAnalyzeCells(brl, brl->data->prevData);
+                setState(brl, BDS_READY);
                 continue;
 
               case HT_PKT_Extended: {
@@ -1596,10 +1376,11 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                   case HT_EXTPKT_Confirmation:
                     switch (bytes[0]) {
                       case HT_PKT_NAK:
-                        updateRequired = 1;
+                        brl->data->updateRequired = 1;
                       case HT_PKT_ACK:
-                        if (model->hasATC) touchAnalyzeCells(brl, prevData);
-                        setState(BDS_READY);
+                        if (brl->data->model->hasATC)
+			  touchAnalyzeCells(brl, brl->data->prevData);
+                        setState(brl, BDS_READY);
                         continue;
 
                       default:
@@ -1625,7 +1406,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
                 switch (packet.fields.data.extended.type) {
                   case HT_EXTPKT_Key:
-                    if (model->interpretByte(brl, bytes[0])) {
+                    if (brl->data->model->interpretByte(brl, bytes[0])) {
                       updateCells(brl);
                       return EOF;
                     }
@@ -1652,7 +1433,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                   }
 
                   case HT_EXTPKT_AtcInfo: {
-                    unsigned int cellCount = model->textCells + model->statusCells;
+                    unsigned int cellCount = brl->data->model->textCells + brl->data->model->statusCells;
                     unsigned char pressureValues[cellCount];
                     const unsigned char *pressure;
 
@@ -1688,7 +1469,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                   }
 
                   case HT_EXTPKT_ReadingPosition: {
-                    const size_t cellCount = model->textCells + model->statusCells;
+                    const size_t cellCount = brl->data->model->textCells + brl->data->model->statusCells;
                     unsigned char pressureValues[cellCount];
                     const unsigned char *pressure = NULL;
 
@@ -1717,7 +1498,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
               }
 
               default:
-                if (model->interpretByte(brl, packet.fields.type)) {
+                if (brl->data->model->interpretByte(brl, packet.fields.type)) {
                   updateCells(brl);
                   return EOF;
                 }
@@ -1729,11 +1510,11 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
     }
 
     logUnexpectedPacket(packet.bytes, size);
-    logMessage(LOG_WARNING, "state %d", currentState);
+    logMessage(LOG_WARNING, "state %d", brl->data->currentState);
   }
 
   if (noInput) {
-    switch (currentState) {
+    switch (brl->data->currentState) {
       case BDS_OFF:
         break;
 
@@ -1741,8 +1522,8 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         break;
 
       case BDS_WRITING:
-        if (afterTimePeriod(&statePeriod, NULL)) {
-          if (retryCount > 3) return BRL_CMD_RESTARTBRL;
+        if (afterTimePeriod(&brl->data->statePeriod, NULL)) {
+          if (brl->data->retryCount > 3) return BRL_CMD_RESTARTBRL;
           if (!writeCells(brl)) return BRL_CMD_RESTARTBRL;
         }
         break;
