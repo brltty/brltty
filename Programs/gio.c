@@ -85,11 +85,7 @@ gioStartEndpoint (GioEndpoint *endpoint) {
     if (delay) asyncWait(delay);
   }
 
-  if (gioDiscardInput(endpoint)) {
-    return 1;
-  }
-
-  return 0;
+  return 1;
 }
 
 static const GioClass *
