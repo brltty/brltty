@@ -373,7 +373,7 @@ initializeMonitor (MonitorEntry *monitor, const FunctionEntry *function, const O
 
 static int
 testMonitor (const MonitorEntry *monitor, const FunctionEntry *function) {
-  return (monitor->revents & function->poll.events) != 0;
+  return monitor->revents != 0;
 }
 
 static void
