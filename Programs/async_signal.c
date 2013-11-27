@@ -20,6 +20,10 @@
 
 #include <string.h>
 
+#ifdef HAVE_POSIX_THREADS
+#include <pthread.h>
+#endif /* HAVE_POSIX_THREADS */
+
 #include "log.h"
 #include "async_signal.h"
 #include "async_internal.h"
