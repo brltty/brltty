@@ -594,16 +594,17 @@ awaitUsbInput2 (
 }
 
 static ssize_t
-readUsbBytes2 (
+readUsbData2 (
   UsbDevice *device, const UsbChannelDefinition *definition,
   void *data, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  int count = 0;
   unsigned char *buffer = data;
+  int count = 0;
 
   while (count < size) {
-    if (!awaitUsbInput2(device, definition, count? subsequentTimeout: initialTimeout)) {
+    if (!awaitUsbInput2(device, definition,
+                        count? subsequentTimeout: initialTimeout)) {
       count = -1;
       break;
     }
@@ -621,7 +622,7 @@ readUsbBytes2 (
 }
 
 static ssize_t
-writeUsbBytes2 (
+writeUsbData2 (
   UsbDevice *device, const UsbChannelDefinition *definition,
   const void *data, size_t size, int timeout
 ) {
@@ -655,8 +656,8 @@ writeUsbBytes2 (
 static const UsbOperations usbOperations2 = {
   .initialize = initializeUsb2,
   .awaitInput = awaitUsbInput2,
-  .readData = readUsbBytes2,
-  .writeData = writeUsbBytes2
+  .readData = readUsbData2,
+  .writeData = writeUsbData2
 };
 
 static void
@@ -681,9 +682,9 @@ awaitUsbInput3 (
     startTimePeriod(&period, milliseconds);
 
     while (1) {
-      int result = usbReadData(device, definition->inputEndpoint,
-                               hidInputReport, hidReportSize_OutData,
-                               0, 100);
+      ssize_t result = usbReadData(device, definition->inputEndpoint,
+                                   hidInputReport, hidReportSize_OutData,
+                                   0, 100);
 
       if (result == -1) return 0;
       if (result > 0 && hidInputLength > 0) {
@@ -701,7 +702,7 @@ awaitUsbInput3 (
 }
 
 static ssize_t
-writeUsbBytes3 (
+writeUsbData3 (
   UsbDevice *device, const UsbChannelDefinition *definition,
   const void *data, size_t size, int timeout
 ) {
@@ -734,8 +735,8 @@ writeUsbBytes3 (
 static const UsbOperations usbOperations3 = {
   .initialize = initializeUsb3,
   .awaitInput = awaitUsbInput3,
-  .readData = readUsbBytes2,
-  .writeData = writeUsbBytes3
+  .readData = readUsbData2,
+  .writeData = writeUsbData3
 };
 
 static int
@@ -793,7 +794,7 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
 
 static ssize_t
 brl_writePacket (BrailleDisplay *brl, const void *packet, size_t length) {
-  return writeBraillePacket(brl, NULL, packet, length)? length: 0;
+  return writeBraillePacket(brl, NULL, packet, length)? length: -1;
 }
 
 static void
@@ -978,10 +979,9 @@ setUsbConnectionProperties (
   GioUsbConnectionProperties *properties,
   const UsbChannelDefinition *definition
 ) {
-  logMessage(LOG_DEBUG, "setUsbConnectionProperties called");
   if (definition->data) {
-    logMessage(LOG_DEBUG, "setUsbConnectionProperties with definition->data");
     const UsbOperations *usbOps = definition->data;
+
     properties->applicationData = definition->data;
     properties->writeData = usbOps->writeData;
     properties->readData = usbOps->readData;
@@ -1100,6 +1100,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   gioInitializeDescriptor(&descriptor);
 
   descriptor.serial.parameters = &serialParameters;
+
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
   descriptor.usb.setConnectionProperties = setUsbConnectionProperties;
   descriptor.usb.options.inputTimeout = 100;
@@ -1124,11 +1125,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (connectResource(brl, device)) {
       unsigned int setTime = 0;
 
-      if (*parameters[PARM_SETTIME])
-        if (!validateYesNo(&setTime, parameters[PARM_SETTIME]))
-          logMessage(LOG_WARNING, "%s: %s", "invalid set time setting",
-                     parameters[PARM_SETTIME]);
-      setTime = !!setTime;
+      {
+        if (*parameters[PARM_SETTIME])
+          if (!validateYesNo(&setTime, parameters[PARM_SETTIME]))
+            logMessage(LOG_WARNING, "%s: %s", "invalid set time setting",
+                       parameters[PARM_SETTIME]);
+
+        setTime = !!setTime;
+      }
 
       {
         int tries = 0;
@@ -1137,6 +1141,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           while (gioAwaitInput(brl->gioEndpoint, 100)) {
             HT_Packet response;
             ssize_t length = brl_readPacket(brl, &response, sizeof(response));
+
             if (length > 0) {
               if (response.fields.type == HT_PKT_OK) {
                 if (identifyModel(brl, response.fields.data.ok.model)) {
@@ -1163,8 +1168,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               }
             }
           }
-          if (errno != EAGAIN) break;
 
+          if (errno != EAGAIN) break;
           if (++tries == 3) break;
         }
       }
@@ -1242,10 +1247,12 @@ updateCells (BrailleDisplay *brl) {
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   const size_t cellCount = brl->data->model->textCells;
+
   if (cellsHaveChanged(brl->data->prevData, brl->buffer, cellCount, NULL, NULL, NULL)) {
     translateOutputCells(brl->data->rawData, brl->data->prevData, cellCount);
     brl->data->updateRequired = 1;
   }
+
   updateCells(brl);
   return 1;
 }
@@ -1253,10 +1260,12 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
   const size_t cellCount = brl->data->model->statusCells;
+
   if (cellsHaveChanged(brl->data->prevStatus, st, cellCount, NULL, NULL, NULL)) {
     translateOutputCells(brl->data->rawStatus, brl->data->prevStatus, cellCount);
     brl->data->updateRequired = 1;
   }
+
   return 1;
 }
 
@@ -1381,8 +1390,10 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                       case HT_PKT_NAK:
                         brl->data->updateRequired = 1;
                       case HT_PKT_ACK:
-                        if (brl->data->model->hasATC)
-			  touchAnalyzeCells(brl, brl->data->prevData);
+                        if (brl->data->model->hasATC) {
+                          touchAnalyzeCells(brl, brl->data->prevData);
+                        }
+
                         setState(brl, BDS_READY);
                         continue;
 
