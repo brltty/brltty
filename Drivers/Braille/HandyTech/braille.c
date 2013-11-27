@@ -271,6 +271,7 @@ typedef struct {
   unsigned char statusCells;
 
   unsigned hasATC:1; /* Active Tactile Control */
+  unsigned hasTime:1;
 } ModelEntry;
 
 static const ModelEntry modelTable[] = {
@@ -387,7 +388,8 @@ static const ModelEntry modelTable[] = {
     .writeCells = writeCells_Evolution,
     .setFirmness = setFirmness,
     .setSensitivity = setSensitivity_ActiveBraille,
-    .hasATC = 1
+    .hasATC = 1,
+    .hasTime = 1
   },
 
 #define HT_BASIC_BRAILLE(cells)                     \
@@ -1155,7 +1157,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                   }
 
                   if (setTime) {
-                    if (brl->data->model->identifier == HT_MODEL_ActiveBraille) {
+                    if (brl->data->model->hasTime) {
                       requestDateTime(brl, synchronizeDateTime);
                     } else {
                       logMessage(LOG_INFO, "%s does not support setting the clock",
