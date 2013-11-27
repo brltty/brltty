@@ -546,9 +546,13 @@ executeHidFirmwareCommand (BrailleDisplay *brl, HtHidCommand command) {
 
 typedef struct {
   void (*initialize) (BrailleDisplay *brl);
-  GioUsbWriteDataMethod *writeData;
+} GeneralOperations;
+
+typedef struct {
+  const GeneralOperations *general;
   GioUsbAwaitInputMethod *awaitInput;
   GioUsbReadDataMethod *readData;
+  GioUsbWriteDataMethod *writeData;
 } UsbOperations;
 
 static void
@@ -655,8 +659,12 @@ writeUsbData2 (
   return index;
 }
 
+static const GeneralOperations generalOperations2 = {
+  .initialize = initializeUsb2
+};
+
 static const UsbOperations usbOperations2 = {
-  .initialize = initializeUsb2,
+  .general = &generalOperations2,
   .awaitInput = awaitUsbInput2,
   .readData = readUsbData2,
   .writeData = writeUsbData2
@@ -734,8 +742,12 @@ writeUsbData3 (
   return index;
 }
 
+static const GeneralOperations generalOperations3 = {
+  .initialize = initializeUsb3
+};
+
 static const UsbOperations usbOperations3 = {
-  .initialize = initializeUsb3,
+  .general = &generalOperations3,
   .awaitInput = awaitUsbInput3,
   .readData = readUsbData2,
   .writeData = writeUsbData3
@@ -984,7 +996,7 @@ setUsbConnectionProperties (
   if (definition->data) {
     const UsbOperations *usbOps = definition->data;
 
-    properties->applicationData = definition->data;
+    properties->applicationData = usbOps->general;
     properties->writeData = usbOps->writeData;
     properties->readData = usbOps->readData;
     properties->awaitInput = usbOps->awaitInput;
@@ -1111,8 +1123,12 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   descriptor.bluetooth.channelNumber = 1;
 
   if (connectBrailleResource(brl, identifier, &descriptor)) {
-    const UsbOperations *usb = gioGetApplicationData(brl->gioEndpoint);
-    if (usb && usb->initialize) usb->initialize(brl);
+    const GeneralOperations *ops = gioGetApplicationData(brl->gioEndpoint);
+
+    if (ops) {
+      if (ops->initialize) ops->initialize(brl);
+    }
+
     return 1;
   }
 
