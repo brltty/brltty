@@ -104,15 +104,13 @@ connectBrailleResource (
   const char *identifier,
   const GioDescriptor *descriptor
 ) {
-  GioEndpoint *endpoint = gioConnectResource(identifier, descriptor);
-
-  if (endpoint) {
-    if (gioDiscardInput(endpoint)) {
-      brl->gioEndpoint = endpoint;
+  if ((brl->gioEndpoint = gioConnectResource(identifier, descriptor))) {
+    if (gioDiscardInput(brl->gioEndpoint)) {
       return 1;
     }
 
-    gioDisconnectResource(endpoint);
+    gioDisconnectResource(brl->gioEndpoint);
+    brl->gioEndpoint = NULL;
   }
 
   return 0;
