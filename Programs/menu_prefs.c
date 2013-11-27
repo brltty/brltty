@@ -1065,50 +1065,60 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Log Generic Input"));
+      NAME(strtext("Generic Input"));
       ITEM(newBooleanMenuItem(internalSubmenu, &LOG_CATEGORY_FLAG(GENERIC_INPUT), &itemName));
     }
 
     {
-      NAME(strtext("Log Input Packets"));
+      NAME(strtext("Input Packets"));
       ITEM(newBooleanMenuItem(internalSubmenu, &LOG_CATEGORY_FLAG(INPUT_PACKETS), &itemName));
     }
 
     {
-      NAME(strtext("Log Output Packets"));
+      NAME(strtext("Output Packets"));
       ITEM(newBooleanMenuItem(internalSubmenu, &LOG_CATEGORY_FLAG(OUTPUT_PACKETS), &itemName));
     }
 
     {
-      NAME(strtext("Log Braille Key Events"));
+      NAME(strtext("Braille Key Events"));
       ITEM(newBooleanMenuItem(internalSubmenu, &LOG_CATEGORY_FLAG(BRAILLE_KEY_EVENTS), &itemName));
       TEST(BrailleKeyTable);
     }
 
     {
-      NAME(strtext("Log Keyboard Key Events"));
+      NAME(strtext("Keyboard Key Events"));
       ITEM(newBooleanMenuItem(internalSubmenu, &LOG_CATEGORY_FLAG(KEYBOARD_KEY_EVENTS), &itemName));
       TEST(KeyboardKeyTable);
     }
 
     {
-      NAME(strtext("Log Cursor Tracking"));
+      NAME(strtext("Cursor Tracking"));
       ITEM(newBooleanMenuItem(internalSubmenu, &LOG_CATEGORY_FLAG(CURSOR_TRACKING), &itemName));
     }
 
     {
-      NAME(strtext("Log Cursor Routing"));
+      NAME(strtext("Cursor Routing"));
       ITEM(newBooleanMenuItem(internalSubmenu, &LOG_CATEGORY_FLAG(CURSOR_ROUTING), &itemName));
     }
 
     {
-      NAME(strtext("Log Update Events"));
+      NAME(strtext("Update Events"));
       ITEM(newBooleanMenuItem(internalSubmenu, &LOG_CATEGORY_FLAG(UPDATE_EVENTS), &itemName));
     }
 
     {
-      NAME(strtext("Log Speech Events"));
+      NAME(strtext("Speech Events"));
       ITEM(newBooleanMenuItem(internalSubmenu, &LOG_CATEGORY_FLAG(SPEECH_EVENTS), &itemName));
+    }
+
+    {
+      NAME(strtext("Async Events"));
+      ITEM(newBooleanMenuItem(internalSubmenu, &LOG_CATEGORY_FLAG(ASYNC_EVENTS), &itemName));
+    }
+
+    {
+      NAME(strtext("Server Events"));
+      ITEM(newBooleanMenuItem(internalSubmenu, &LOG_CATEGORY_FLAG(SERVER_EVENTS), &itemName));
     }
   }
 

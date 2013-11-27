@@ -104,6 +104,16 @@ static const LogCategoryEntry logCategoryTable[LOG_CATEGORY_COUNT] = {
     .name = "speech",
     .prefix = "speech"
   },
+
+  [LOG_CATEGORY_INDEX(ASYNC_EVENTS)] = {
+    .name = "async",
+    .prefix = "async"
+  },
+
+  [LOG_CATEGORY_INDEX(SERVER_EVENTS)] = {
+    .name = "server",
+    .prefix = "server"
+  },
 };
 
 unsigned char categoryLogLevel = LOG_WARNING;
