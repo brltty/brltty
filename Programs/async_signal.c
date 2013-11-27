@@ -589,14 +589,16 @@ asyncPerformSignal (AsyncSignalData *sd) {
 
           if (monitorElement) {
             MonitorEntry *mon = getElementItem(monitorElement);
+            AsyncSignalCallback *callback = mon->callback;
 
             const AsyncSignalCallbackParameters parameters = {
               .signal = sig->number,
               .data = mon->data
             };
 
+            logMessage(LOG_CATEGORY(ASYNC_EVENTS), "signal %d: %p", sig->number, callback);
             mon->active = 1;
-            if (!mon->callback(&parameters)) mon->delete = 1;
+            if (!callback(&parameters)) mon->delete = 1;
             mon->active = 0;
             if (mon->delete) deleteMonitor(monitorElement);
 

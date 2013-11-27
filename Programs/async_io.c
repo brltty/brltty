@@ -189,6 +189,13 @@ getIoData (void) {
   return tsd->ioData;
 }
 
+static void
+logOperation (const OperationEntry *operation, void *callback) {
+  logMessage(LOG_CATEGORY(ASYNC_EVENTS),
+             "%s: %p",
+             operation->function->methods->functionName, callback);
+}
+
 #ifdef __MINGW32__
 static void
 prepareMonitors (void) {
@@ -568,6 +575,8 @@ invokeMonitorCallback (OperationEntry *operation) {
   MonitorExtension *extension = operation->extension;
   AsyncMonitorCallback *callback = extension->callback;
 
+  logOperation(operation, callback);
+
   if (callback) {
     const AsyncMonitorCallbackParameters parameters = {
       .data = operation->data
@@ -582,9 +591,12 @@ invokeMonitorCallback (OperationEntry *operation) {
 static int
 invokeInputCallback (OperationEntry *operation) {
   TransferExtension *extension = operation->extension;
+  AsyncInputCallback *callback = extension->direction.input.callback;
   size_t count;
 
-  if (!extension->direction.input.callback) return 0;
+  logOperation(operation, callback);
+
+  if (!callback) return 0;
 
   {
     const AsyncInputCallbackParameters parameters = {
@@ -596,7 +608,7 @@ invokeInputCallback (OperationEntry *operation) {
       .end = extension->direction.input.end
     };
 
-    count = extension->direction.input.callback(&parameters);
+    count = callback(&parameters);
   }
 
   if (operation->error) return 0;
@@ -615,13 +627,16 @@ invokeInputCallback (OperationEntry *operation) {
 static int
 invokeOutputCallback (OperationEntry *operation) {
   TransferExtension *extension = operation->extension;
+  AsyncOutputCallback *callback = extension->direction.output.callback;
+
+  logOperation(operation, callback);
 
   if (!operation->error && (extension->length < extension->size)) {
     operation->finished = 0;
     return 1;
   }
 
-  if (extension->direction.output.callback) {
+  if (callback) {
     const AsyncOutputCallbackParameters parameters = {
       .data = operation->data,
       .buffer = extension->buffer,
@@ -629,7 +644,7 @@ invokeOutputCallback (OperationEntry *operation) {
       .error = operation->error
     };
 
-    extension->direction.output.callback(&parameters);
+    callback(&parameters);
   }
 
   return 0;
@@ -989,7 +1004,7 @@ newInputOperation (const void *parameters) {
   };
 
   static const FunctionMethods methods = {
-    .functionName = "transferInput",
+    .functionName = "input transfer",
 
 #ifdef __MINGW32__
     .beginFunction = beginWindowsFunction,
@@ -1027,7 +1042,7 @@ newOutputOperation (const void *parameters) {
   };
 
   static const FunctionMethods methods = {
-    .functionName = "transferOutput",
+    .functionName = "output transfer",
 
 #ifdef __MINGW32__
     .beginFunction = beginWindowsFunction,
@@ -1062,7 +1077,7 @@ asyncMonitorFileInput (
 ) {
 #ifdef ASYNC_CAN_MONITOR_IO
   static const FunctionMethods methods = {
-    .functionName = "monitorFileInput",
+    .functionName = "file input monitor",
 
 #ifdef __MINGW32__
     .beginFunction = beginWindowsFunction,
@@ -1096,7 +1111,7 @@ asyncMonitorFileOutput (
 ) {
 #ifdef ASYNC_CAN_MONITOR_IO
   static const FunctionMethods methods = {
-    .functionName = "monitorFileOutput",
+    .functionName = "file output monitor",
 
 #ifdef __MINGW32__
     .beginFunction = beginWindowsFunction,
@@ -1130,7 +1145,7 @@ asyncMonitorFileAlert (
 ) {
 #ifdef ASYNC_CAN_MONITOR_IO
   static const FunctionMethods methods = {
-    .functionName = "monitorFileAlert",
+    .functionName = "file alert monitor",
 
 #ifdef __MINGW32__
     .beginFunction = beginWindowsFunction,

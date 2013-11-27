@@ -136,7 +136,10 @@ asyncPerformTask (AsyncTaskData *td) {
       TaskDefinition *task = dequeueItem(queue);
 
       if (task) {
-        if (task->function) task->function(task->data);
+        AsyncTaskFunction *function = task->function;
+
+        logMessage(LOG_CATEGORY(ASYNC_EVENTS), "task: %p", function);
+        if (function) function(task->data);
         free(task);
         return 1;
       }

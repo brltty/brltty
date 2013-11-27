@@ -207,6 +207,7 @@ asyncPerformAlarm (AsyncAlarmData *ad, long int *timeout) {
           };
 
           deleteElement(element);
+          logMessage(LOG_CATEGORY(ASYNC_EVENTS), "alarm: %p", callback);
           if (callback) callback(&parameters);
           return 1;
         }

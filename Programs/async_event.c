@@ -56,12 +56,15 @@ monitorEventPipe (const AsyncMonitorCallbackParameters *parameters) {
 #endif /* __MINGW32__ */
 
     if (event->handler) {
+      AsyncEventHandler *handler = event->handler;
+
       const AsyncEventHandlerParameters parameters = {
         .eventData = event->data,
         .signalData = data
       };
 
-      event->handler(&parameters);
+      logMessage(LOG_CATEGORY(ASYNC_EVENTS), "event: %p", handler);
+      handler(&parameters);
     }
 
     return 1;
