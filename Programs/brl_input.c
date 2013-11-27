@@ -108,7 +108,7 @@ setPollAlarm (int delay, void *data) {
 static int
 monitorInput (const AsyncMonitorCallbackParameters *parameters) {
   handleInput();
-  return 1;
+  return !restartRequired;
 }
 
 void
