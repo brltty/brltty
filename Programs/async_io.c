@@ -720,8 +720,6 @@ testFunctionMonitor (void *item, void *data) {
 
 int
 asyncPerformOperation (AsyncIoData *iod, long int timeout) {
-  int performed = 0;
-
   if (iod) {
     Queue *functions = iod->functionQueue;
     unsigned int functionCount = functions? getQueueSize(functions): 0;
@@ -734,6 +732,8 @@ asyncPerformOperation (AsyncIoData *iod, long int timeout) {
         .array = monitorArray,
         .count = 0
       };
+
+      int performed = 0;
       Element *functionElement = processQueue(functions, addFunctionMonitor, &monitors);
 
       if (!functionElement) {
@@ -770,12 +770,13 @@ asyncPerformOperation (AsyncIoData *iod, long int timeout) {
           deleteElement(functionElement);
         }
       }
-    } else {
-      approximateDelay(timeout);
+
+      return performed;
     }
   }
 
-  return performed;
+  approximateDelay(timeout);
+  return 0;
 }
 
 static void
