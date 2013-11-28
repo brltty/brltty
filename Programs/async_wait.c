@@ -53,6 +53,7 @@ asyncAwaitAction (long int timeout) {
 
     tsd->waitDepth -= 1;
   } else {
+    logMessage(LOG_CATEGORY(ASYNC_EVENTS), "waiting: %ld", timeout);
     approximateDelay(timeout);
   }
 }
@@ -64,6 +65,7 @@ asyncAwaitCondition (int timeout, AsyncConditionTester *testCondition, void *dat
 
   while (!(testCondition && testCondition(data))) {
     long int elapsed;
+
     if (afterTimePeriod(&period, &elapsed)) return 0;
     asyncAwaitAction(timeout - elapsed);
   }

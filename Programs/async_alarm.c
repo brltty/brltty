@@ -212,7 +212,10 @@ asyncPerformAlarm (AsyncAlarmData *ad, long int *timeout) {
           return 1;
         }
 
-        if (milliseconds < *timeout) *timeout = milliseconds;
+        if (milliseconds < *timeout) {
+          *timeout = milliseconds;
+          logMessage(LOG_CATEGORY(ASYNC_EVENTS), "next alarm: %ld", *timeout);
+        }
       }
     }
   }
