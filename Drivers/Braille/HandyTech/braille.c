@@ -499,7 +499,7 @@ getHidReportSizes (BrailleDisplay *brl, const ReportEntry *table) {
   const ReportEntry *report = table;
 
   while (report->number) {
-    *report->size = gioGetHidReportSize(brl->gioEndpoint, report->number);
+    if (!(*report->size = gioGetHidReportSize(brl->gioEndpoint, report->number))) return 0;
     report += 1;
   }
 
@@ -548,8 +548,9 @@ executeHidFirmwareCommand (BrailleDisplay *brl, HtHidCommand command) {
     report[0] = HT_HID_RPT_InCommand;
     report[1] = command;
 
-    gioWriteHidReport(brl->gioEndpoint, report, sizeof(report));
-    return 1;
+    if (gioWriteHidReport(brl->gioEndpoint, report, sizeof(report)) != -1) {
+      return 1;
+    }
   }
 
   return 0;
