@@ -782,12 +782,22 @@ usbHandleEndpointInput (const AsyncSignalCallbackParameters *parameters) {
                                   &response, 0);
 
   if (request) {
-    if (request == eptx->monitor.urb) {
-      if (response.count > 0) {
+    struct usbdevfs_urb *urb = eptx->monitor.urb;
+
+    if (request == urb) {
+      int written = 0;
+
+      if (response.count == 0) {
+        written = 1;
+      } else if (response.count > 0) {
         if (usbEnqueueInput(endpoint, response.buffer, response.count)) {
-          if (usbSubmitURB(request, endpoint)) {
-            return 1;
-          }
+          written = 1;
+        }
+      }
+
+      if (written) {
+        if (usbSubmitURB(request, endpoint)) {
+          return 1;
         }
       }
 
