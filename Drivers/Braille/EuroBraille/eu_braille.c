@@ -247,7 +247,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   descriptor.bluetooth.channelNumber = 1;
   descriptor.bluetooth.options.applicationData = &bluetoothOperations;
 
-  if (connectBrailleResource(brl, identifier, &descriptor)) {
+  if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
     io = gioGetApplicationData(brl->gioEndpoint);
     return 1;
   }

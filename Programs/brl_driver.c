@@ -102,11 +102,14 @@ int
 connectBrailleResource (
   BrailleDisplay *brl,
   const char *identifier,
-  const GioDescriptor *descriptor
+  const GioDescriptor *descriptor,
+  BrailleSessionInitializer *initializeSession
 ) {
   if ((brl->gioEndpoint = gioConnectResource(identifier, descriptor))) {
-    if (gioDiscardInput(brl->gioEndpoint)) {
-      return 1;
+    if (!initializeSession || initializeSession(brl)) {
+      if (gioDiscardInput(brl->gioEndpoint)) {
+        return 1;
+      }
     }
 
     gioDisconnectResource(brl->gioEndpoint);

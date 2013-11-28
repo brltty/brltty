@@ -338,7 +338,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
   descriptor.serial.parameters = &serialParameters;
 
-  if (connectBrailleResource(brl, identifier, &descriptor)) {
+  if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
     return 1;
   }
 

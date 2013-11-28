@@ -109,7 +109,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
 
-  if (connectBrailleResource(brl, identifier, &descriptor)) {
+  if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
     return 1;
   }
 

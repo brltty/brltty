@@ -278,7 +278,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
   descriptor.bluetooth.channelNumber = 1;
 
-  if (connectBrailleResource(brl, identifier, &descriptor)) {
+  if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
     return 1;
   }
 

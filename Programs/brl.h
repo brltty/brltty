@@ -87,10 +87,13 @@ extern int setStatusText (BrailleDisplay *brl, const char *text);
 extern int readBrailleCommand (BrailleDisplay *, KeyTableCommandContext);
 extern void applyBrailleOrientation (unsigned char *cells, size_t count);
 
+typedef int BrailleSessionInitializer (BrailleDisplay *brl);
+
 extern int connectBrailleResource (
   BrailleDisplay *brl,
   const char *identifier,
-  const GioDescriptor *descriptor
+  const GioDescriptor *descriptor,
+  BrailleSessionInitializer *initializeSession
 );
 
 typedef int BrailleSessionEnder (BrailleDisplay *brl);

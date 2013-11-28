@@ -719,7 +719,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   descriptor.bluetooth.options.readyDelay = BLUETOOTH_READY_DELAY;
   descriptor.bluetooth.options.inputTimeout = SERIAL_INPUT_TIMEOUT;
 
-  if (connectBrailleResource(brl, identifier, &descriptor)) {
+  if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
     protocol = gioGetApplicationData(brl->gioEndpoint);
     return 1;
   }
