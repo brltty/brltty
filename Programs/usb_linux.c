@@ -67,8 +67,9 @@ struct UsbEndpointExtensionStruct {
   Queue *completedRequests;
 
   struct {
-    AsyncHandle handle;
     struct usbdevfs_urb *urb;
+    AsyncHandle signalHandle;
+    AsyncHandle alarmHandle;
   } monitor;
 };
 
@@ -778,6 +779,9 @@ usbHandleInputAlarm (const AsyncAlarmCallbackParameters *parameters) {
   UsbEndpointExtension *eptx = endpoint->extension;
   struct usbdevfs_urb *urb = eptx->monitor.urb;
 
+  asyncDiscardHandle(eptx->monitor.alarmHandle);
+  eptx->monitor.alarmHandle = NULL;
+
   urb->actual_length = 0;
   usbSubmitURB(urb, endpoint);
 }
@@ -813,7 +817,7 @@ usbHandleInputSignal (const AsyncSignalCallbackParameters *parameters) {
           interval = BRAILLE_INPUT_POLL_INTERVAL;
         }
 
-        if (asyncSetAlarmIn(NULL, interval, usbHandleInputAlarm, endpoint)) {
+        if (asyncSetAlarmIn(&eptx->monitor.alarmHandle, interval, usbHandleInputAlarm, endpoint)) {
           return 1;
         }
       }
@@ -825,8 +829,8 @@ usbHandleInputSignal (const AsyncSignalCallbackParameters *parameters) {
   }
 
   usbSetInputError(endpoint, errno);
-  asyncDiscardHandle(eptx->monitor.handle);
-  eptx->monitor.handle = NULL;
+  asyncDiscardHandle(eptx->monitor.signalHandle);
+  eptx->monitor.signalHandle = NULL;
   return 0;
 }
 
@@ -840,7 +844,7 @@ usbPrepareInputEndpoint (UsbEndpoint *endpoint) {
 
     if ((eptx->monitor.urb = usbMakeURB(descriptor, NULL, size, endpoint))) {
       if ((eptx->monitor.urb->signr = asyncObtainSignalNumber())) {
-        if (asyncMonitorSignal(&eptx->monitor.handle,
+        if (asyncMonitorSignal(&eptx->monitor.signalHandle,
                                eptx->monitor.urb->signr,
                                usbHandleInputSignal, endpoint)) {
           if (usbSubmitURB(eptx->monitor.urb, endpoint)) {
@@ -848,8 +852,8 @@ usbPrepareInputEndpoint (UsbEndpoint *endpoint) {
             return 1;
           }
 
-          asyncCancelRequest(eptx->monitor.handle);
-          eptx->monitor.handle = NULL;
+          asyncCancelRequest(eptx->monitor.signalHandle);
+          eptx->monitor.signalHandle = NULL;
         }
 
         asyncRelinquishSignalNumber(eptx->monitor.urb->signr);
@@ -872,8 +876,9 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
   if ((eptx = malloc(sizeof(*eptx)))) {
     memset(eptx, 0, sizeof(*eptx));
 
-    eptx->monitor.handle = NULL;
     eptx->monitor.urb = NULL;
+    eptx->monitor.signalHandle = NULL;
+    eptx->monitor.alarmHandle = NULL;
 
     if ((eptx->completedRequests = newQueue(NULL, NULL))) {
       switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
@@ -898,21 +903,27 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 
 void
 usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
-  if (eptx->monitor.urb) {
+  if (eptx->monitor.alarmHandle) {
+    asyncCancelRequest(eptx->monitor.alarmHandle);
+    eptx->monitor.alarmHandle = NULL;
+  } else if (eptx->monitor.urb) {
     UsbEndpoint *endpoint = eptx->monitor.urb->usercontext;
     UsbDevice *device = endpoint->device;
     UsbDeviceExtension *devx = device->extension;
 
     ioctl(devx->usbfsFile, USBDEVFS_DISCARDURB, eptx->monitor.urb);
+  }
+
+  if (eptx->monitor.urb) {
     asyncRelinquishSignalNumber(eptx->monitor.urb->signr);
 
     free(eptx->monitor.urb);
     eptx->monitor.urb = NULL;
   }
 
-  if (eptx->monitor.handle) {
-    asyncCancelRequest(eptx->monitor.handle);
-    eptx->monitor.handle = NULL;
+  if (eptx->monitor.signalHandle) {
+    asyncCancelRequest(eptx->monitor.signalHandle);
+    eptx->monitor.signalHandle = NULL;
   }
 
   if (eptx->completedRequests) {
