@@ -478,7 +478,7 @@ getHidReport (
   unsigned char number, unsigned char *buffer, uint16_t size
 ) {
   ssize_t result = usbHidGetReport(device, definition->interface,
-                               number, buffer, size, HT_HID_REPORT_TIMEOUT);
+                                   number, buffer, size, HT_HID_REPORT_TIMEOUT);
   if (result > 0 && buffer[0] != number) {
     logMessage(LOG_WARNING, "unexpected HID report number: expected %02X, received %02X",
                number, buffer[0]);
@@ -738,6 +738,34 @@ awaitUsbInput3 (
 }
 
 static ssize_t
+readUsbData3 (
+  UsbDevice *device, const UsbChannelDefinition *definition,
+  void *data, size_t size,
+  int initialTimeout, int subsequentTimeout
+) {
+  unsigned char *buffer = data;
+  int count = 0;
+
+  while (count < size) {
+    if (!awaitUsbInput3(device, definition,
+                        count? subsequentTimeout: initialTimeout)) {
+      count = -1;
+      break;
+    }
+
+    {
+      size_t amount = MIN(size-count, hidInputLength-hidInputOffset);
+
+      memcpy(&buffer[count], &hidInputBuffer[hidInputOffset], amount);
+      hidInputOffset += amount;
+      count += amount;
+    }
+  }
+
+  return count;
+}
+
+static ssize_t
 writeUsbData3 (
   UsbDevice *device, const UsbChannelDefinition *definition,
   const void *data, size_t size, int timeout
@@ -775,7 +803,7 @@ static const GeneralOperations generalOperations3 = {
 static const UsbOperations usbOperations3 = {
   .general = &generalOperations3,
   .awaitInput = awaitUsbInput3,
-  .readData = readUsbData2,
+  .readData = readUsbData3,
   .writeData = writeUsbData3
 };
 
