@@ -988,6 +988,17 @@ synchronizeDateTime (BrailleDisplay *brl, const HT_DateTime *dateTime) {
   return 1;
 }
 
+static int
+initializeSession (BrailleDisplay *brl) {
+  const GeneralOperations *ops = gioGetApplicationData(brl->gioEndpoint);
+
+  if (ops) {
+    if (ops->initialize) ops->initialize(brl);
+  }
+
+  return 1;
+}
+
 static void
 setUsbConnectionProperties (
   GioUsbConnectionProperties *properties,
@@ -1122,13 +1133,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
   descriptor.bluetooth.channelNumber = 1;
 
-  if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
-    const GeneralOperations *ops = gioGetApplicationData(brl->gioEndpoint);
-
-    if (ops) {
-      if (ops->initialize) ops->initialize(brl);
-    }
-
+  if (connectBrailleResource(brl, identifier, &descriptor, initializeSession)) {
     return 1;
   }
 
