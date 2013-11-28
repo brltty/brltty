@@ -494,7 +494,7 @@ typedef struct {
   size_t *size;
 } ReportEntry;
 
-static void
+static int
 getHidReportSizes (BrailleDisplay *brl, const ReportEntry *table) {
   const ReportEntry *report = table;
 
@@ -502,21 +502,26 @@ getHidReportSizes (BrailleDisplay *brl, const ReportEntry *table) {
     *report->size = gioGetHidReportSize(brl->gioEndpoint, report->number);
     report += 1;
   }
+
+  return 1;
 }
 
-static void
+static int
 allocateHidInputBuffer (void) {
   if (hidReportSize_OutData) {
     if ((hidInputReport = malloc(hidReportSize_OutData))) {
       hidInputLength = 0;
       hidInputOffset = 0;
+      return 1;
     } else {
-      logMessage(LOG_ERR, "HID input buffer not allocated: %s", strerror(errno));
+      logMallocError();
     }
   }
+
+  return 0;
 }
 
-static void
+static int
 getHidFirmwareVersion (BrailleDisplay *brl) {
   hidFirmwareVersion = 0;
 
@@ -528,11 +533,14 @@ getHidFirmwareVersion (BrailleDisplay *brl) {
     if (result > 0) {
       hidFirmwareVersion = (report[1] << 8) | report[2];
       logMessage(LOG_INFO, "Firmware Version: %u.%u", report[1], report[2]);
+      return 1;
     }
   }
+
+  return 0;
 }
 
-static void
+static int
 executeHidFirmwareCommand (BrailleDisplay *brl, HtHidCommand command) {
   if (hidReportSize_InCommand) {
     unsigned char report[hidReportSize_InCommand];
@@ -541,11 +549,14 @@ executeHidFirmwareCommand (BrailleDisplay *brl, HtHidCommand command) {
     report[1] = command;
 
     gioWriteHidReport(brl->gioEndpoint, report, sizeof(report));
+    return 1;
   }
+
+  return 0;
 }
 
 typedef struct {
-  void (*initialize) (BrailleDisplay *brl);
+  int (*initialize) (BrailleDisplay *brl);
 } GeneralOperations;
 
 typedef struct {
@@ -555,7 +566,7 @@ typedef struct {
   GioUsbWriteDataMethod *writeData;
 } UsbOperations;
 
-static void
+static int
 initializeUsb2 (BrailleDisplay *brl) {
   static const ReportEntry reportTable[] = {
     {.number=HT_HID_RPT_OutData, .size=&hidReportSize_OutData},
@@ -566,10 +577,18 @@ initializeUsb2 (BrailleDisplay *brl) {
     {.number=HT_HID_RPT_InBaud, .size=&hidReportSize_InBaud},
     {.number=0}
   };
-  getHidReportSizes(brl, reportTable);
-  allocateHidInputBuffer();
-  getHidFirmwareVersion(brl);
-  executeHidFirmwareCommand(brl, HT_HID_CMD_FlushBuffers);
+
+  if (getHidReportSizes(brl, reportTable)) {
+    if (allocateHidInputBuffer()) {
+      if (getHidFirmwareVersion(brl)) {
+        if (executeHidFirmwareCommand(brl, HT_HID_CMD_FlushBuffers)) {
+          return 1;
+        }
+      }
+    }
+  }
+
+  return 0;
 }
 
 static int
@@ -670,15 +689,21 @@ static const UsbOperations usbOperations2 = {
   .writeData = writeUsbData2
 };
 
-static void
+static int
 initializeUsb3 (BrailleDisplay *brl) {
   static const ReportEntry reportTable[] = {
     {.number=HT_HID_RPT_OutData, .size=&hidReportSize_OutData},
     {.number=HT_HID_RPT_InData, .size=&hidReportSize_InData},
     {.number=0}
   };
-  getHidReportSizes(brl, reportTable);
-  allocateHidInputBuffer();
+
+  if (getHidReportSizes(brl, reportTable)) {
+    if (allocateHidInputBuffer()) {
+      return 1;
+    }
+  }
+
+  return 0;
 }
 
 static int
@@ -993,7 +1018,11 @@ initializeSession (BrailleDisplay *brl) {
   const GeneralOperations *ops = gioGetApplicationData(brl->gioEndpoint);
 
   if (ops) {
-    if (ops->initialize) ops->initialize(brl);
+    if (ops->initialize) {
+      if (!ops->initialize(brl)) {
+        return 0;
+      }
+    }
   }
 
   return 1;
