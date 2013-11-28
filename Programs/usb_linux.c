@@ -42,8 +42,9 @@
 #include "file.h"
 #include "parse.h"
 #include "timing.h"
-#include "async_io.h"
 #include "async_signal.h"
+#include "async_alarm.h"
+#include "async_io.h"
 #include "async_wait.h"
 #include "mntpt.h"
 #include "io_usb.h"
@@ -771,8 +772,18 @@ usbReadDeviceDescriptor (UsbDevice *device) {
   return 1;
 }
 
+static void
+usbHandleInputAlarm (const AsyncAlarmCallbackParameters *parameters) {
+  UsbEndpoint *endpoint = parameters->data;
+  UsbEndpointExtension *eptx = endpoint->extension;
+  struct usbdevfs_urb *urb = eptx->monitor.urb;
+
+  urb->actual_length = 0;
+  usbSubmitURB(urb, endpoint);
+}
+
 static int
-usbHandleEndpointInput (const AsyncSignalCallbackParameters *parameters) {
+usbHandleInputSignal (const AsyncSignalCallbackParameters *parameters) {
   UsbEndpoint *endpoint = parameters->data;
   UsbEndpointExtension *eptx = endpoint->extension;
 
@@ -796,7 +807,13 @@ usbHandleEndpointInput (const AsyncSignalCallbackParameters *parameters) {
       }
 
       if (written) {
-        if (usbSubmitURB(request, endpoint)) {
+        uint8_t interval = endpoint->descriptor->bInterval;
+
+        if (!interval) {
+          interval = BRAILLE_INPUT_POLL_INTERVAL;
+        }
+
+        if (asyncSetAlarmIn(NULL, interval, usbHandleInputAlarm, endpoint)) {
           return 1;
         }
       }
@@ -825,7 +842,7 @@ usbPrepareInputEndpoint (UsbEndpoint *endpoint) {
       if ((eptx->monitor.urb->signr = asyncObtainSignalNumber())) {
         if (asyncMonitorSignal(&eptx->monitor.handle,
                                eptx->monitor.urb->signr,
-                               usbHandleEndpointInput, endpoint)) {
+                               usbHandleInputSignal, endpoint)) {
           if (usbSubmitURB(eptx->monitor.urb, endpoint)) {
             endpoint->direction.input.asynchronous = 0;
             return 1;
