@@ -1268,11 +1268,16 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  disconnectBrailleResource(brl, brl->data->model->sessionEnder);
-
   if (brl->data) {
+    disconnectBrailleResource(brl, brl->data->model->sessionEnder);
+
     free(brl->data);
     brl->data = NULL;
+  }
+
+  if (hidInputReport) {
+    free(hidInputReport);
+    hidInputReport = NULL;
   }
 }
 
