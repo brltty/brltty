@@ -27,6 +27,7 @@
 #include "log.h"
 #include "parse.h"
 #include "timing.h"
+#include "async_wait.h"
 #include "ascii.h"
 
 typedef enum {
@@ -729,7 +730,7 @@ awaitUsbInput3 (
       }
 
       if (afterTimePeriod(&period, NULL)) break;
-      approximateDelay(10);
+      asyncWait(10);
     }
   }
 
