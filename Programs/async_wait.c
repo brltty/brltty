@@ -25,9 +25,65 @@
 #include "async_internal.h"
 #include "timing.h"
 
+typedef struct {
+  AsyncThreadSpecificData *tsd;
+  long int timeout;
+} CallbackExecuterParameters;
+
+typedef int CallbackExecuter (CallbackExecuterParameters *parameters);
+
+typedef struct {
+  CallbackExecuter *execute;
+  const char *action;
+} CallbackExecuterEntry;
+
 struct AsyncWaitDataStruct {
   AsyncThreadSpecificData *tsd;
   unsigned int waitDepth;
+  const CallbackExecuterEntry *callbackExecuter;
+};
+
+static int
+signalCallbackExecuter (CallbackExecuterParameters *parameters) {
+  return asyncExecuteSignalCallback(parameters->tsd->signalData);
+}
+
+static int
+alarmCallbackExecuter (CallbackExecuterParameters *parameters) {
+  return asyncExecuteAlarmCallback(parameters->tsd->alarmData, &parameters->timeout);
+}
+
+static int
+taskCallbackExecuter (CallbackExecuterParameters *parameters) {
+  AsyncThreadSpecificData *tsd = parameters->tsd;
+
+  if (tsd->waitData->waitDepth != 1) return 0;
+  return asyncExecuteTaskCallback(tsd->taskData);
+}
+
+static int
+ioCallbackExecuter (CallbackExecuterParameters *parameters) {
+  return asyncExecuteIoCallback(parameters->tsd->ioData, 0);
+}
+
+static const CallbackExecuterEntry callbackExecuterTable[] = {
+  { .execute = signalCallbackExecuter,
+    .action = "signal handled"
+  },
+
+  { .execute = alarmCallbackExecuter,
+    .action = "alarm handled"
+  },
+
+  { .execute = taskCallbackExecuter,
+    .action = "task performed"
+  },
+
+  { .execute = ioCallbackExecuter,
+    .action = "I/O operation handled"
+  },
+
+  { .execute = NULL }
 };
 
 void
@@ -53,6 +109,7 @@ getWaitData (void) {
     memset(wd, 0, sizeof(*wd));
     wd->tsd = tsd;
     wd->waitDepth = 0;
+    wd->callbackExecuter = callbackExecuterTable;
     tsd->waitData = wd;
   }
 
@@ -60,28 +117,37 @@ getWaitData (void) {
 }
 
 static void
-asyncAwaitAction (long int timeout) {
+awaitAction (long int timeout) {
   AsyncWaitData *wd = getWaitData();
 
   if (wd) {
-    AsyncThreadSpecificData *tsd = wd->tsd;
     const char *action;
+    const CallbackExecuterEntry *firstCallbackExecuter = wd->callbackExecuter;
+
+    CallbackExecuterParameters parameters = {
+      .tsd = wd->tsd,
+      .timeout = timeout
+    };
 
     wd->waitDepth += 1;
     logMessage(LOG_CATEGORY(ASYNC_EVENTS),
                "begin: level %u: timeout %ld",
                wd->waitDepth, timeout);
 
-    if (asyncExecuteSignalCallback(tsd->signalData)) {
-      action = "signal handled";
-    } else if (asyncExecuteAlarmCallback(tsd->alarmData, &timeout)) {
-      action = "alarm handled";
-    } else if ((wd->waitDepth == 1) && asyncExecuteTaskCallback(tsd->taskData)) {
-      action = "task handled";
-    } else if (asyncExecuteIoCallback(tsd->ioData, timeout)) {
-      action = "I/O operation handled";
-    } else {
-      action = "wait timed out";
+    while (1) {
+      if (!(++wd->callbackExecuter)->execute) {
+        wd->callbackExecuter = callbackExecuterTable;
+      }
+
+      if (wd->callbackExecuter->execute(&parameters)) {
+        action = wd->callbackExecuter->action;
+        break;
+      }
+
+      if (wd->callbackExecuter == firstCallbackExecuter) {
+        action = asyncExecuteIoCallback(parameters.tsd->ioData, parameters.timeout)? "I/O operation handled": "wait timed out";
+        break;
+      }
     }
 
     logMessage(LOG_CATEGORY(ASYNC_EVENTS),
@@ -104,7 +170,7 @@ asyncAwaitCondition (int timeout, AsyncConditionTester *testCondition, void *dat
     long int elapsed;
 
     if (afterTimePeriod(&period, &elapsed)) return 0;
-    asyncAwaitAction(timeout - elapsed);
+    awaitAction(timeout - elapsed);
   }
 
   return 1;
