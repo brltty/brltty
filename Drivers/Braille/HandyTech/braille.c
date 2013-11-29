@@ -631,7 +631,7 @@ readUsbData2 (
   while (count < size) {
     if (!awaitUsbInput2(device, definition,
                         count? subsequentTimeout: initialTimeout)) {
-      count = -1;
+      if (errno != EAGAIN) count = -1;
       break;
     }
 
@@ -749,7 +749,7 @@ readUsbData3 (
   while (count < size) {
     if (!awaitUsbInput3(device, definition,
                         count? subsequentTimeout: initialTimeout)) {
-      count = -1;
+      if (errno != EAGAIN) count = -1;
       break;
     }
 
