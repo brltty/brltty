@@ -42,12 +42,15 @@ typedef struct AsyncIoDataStruct AsyncIoData;
 extern void asyncDeallocateIoData (AsyncIoData *ioData);
 extern int asyncPerformOperation (AsyncIoData *iod, long int timeout);
 
+typedef struct AsyncWaitDataStruct AsyncWaitData;
+extern void asyncDeallocateWaitData (AsyncWaitData *waitData);
+
 typedef struct {
   AsyncSignalData *signalData;
   AsyncAlarmData *alarmData;
   AsyncTaskData *taskData;
   AsyncIoData *ioData;
-  unsigned int waitDepth;
+  AsyncWaitData *waitData;
 } AsyncThreadSpecificData;
 
 extern AsyncThreadSpecificData *asyncGetThreadSpecificData (void);

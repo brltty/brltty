@@ -18,28 +18,65 @@
 
 #include "prologue.h"
 
+#include <string.h>
+
 #include "log.h"
 #include "async_wait.h"
 #include "async_internal.h"
 #include "timing.h"
 
+struct AsyncWaitDataStruct {
+  AsyncThreadSpecificData *tsd;
+  unsigned int waitDepth;
+};
+
+void
+asyncDeallocateWaitData (AsyncWaitData *wd) {
+  if (wd) {
+    free(wd);
+  }
+}
+
+static AsyncWaitData *
+getWaitData (void) {
+  AsyncThreadSpecificData *tsd = asyncGetThreadSpecificData();
+  if (!tsd) return NULL;
+
+  if (!tsd->waitData) {
+    AsyncWaitData *wd;
+
+    if (!(wd = malloc(sizeof(*wd)))) {
+      logMallocError();
+      return NULL;
+    }
+
+    memset(wd, 0, sizeof(*wd));
+    wd->tsd = tsd;
+    wd->waitDepth = 0;
+    tsd->waitData = wd;
+  }
+
+  return tsd->waitData;
+}
+
 static void
 asyncAwaitAction (long int timeout) {
-  AsyncThreadSpecificData *tsd = asyncGetThreadSpecificData();
+  AsyncWaitData *wd = getWaitData();
 
-  if (tsd) {
+  if (wd) {
+    AsyncThreadSpecificData *tsd = wd->tsd;
     const char *action;
 
-    tsd->waitDepth += 1;
+    wd->waitDepth += 1;
     logMessage(LOG_CATEGORY(ASYNC_EVENTS),
                "begin: level %u: timeout %ld",
-               tsd->waitDepth, timeout);
+               wd->waitDepth, timeout);
 
     if (asyncPerformSignal(tsd->signalData)) {
       action = "signal handled";
     } else if (asyncPerformAlarm(tsd->alarmData, &timeout)) {
       action = "alarm handled";
-    } else if ((tsd->waitDepth == 1) && asyncPerformTask(tsd->taskData)) {
+    } else if ((wd->waitDepth == 1) && asyncPerformTask(tsd->taskData)) {
       action = "task handled";
     } else if (asyncPerformOperation(tsd->ioData, timeout)) {
       action = "I/O operation handled";
@@ -49,9 +86,9 @@ asyncAwaitAction (long int timeout) {
 
     logMessage(LOG_CATEGORY(ASYNC_EVENTS),
                "end: level %u: %s",
-               tsd->waitDepth, action);
+               wd->waitDepth, action);
 
-    tsd->waitDepth -= 1;
+    wd->waitDepth -= 1;
   } else {
     logMessage(LOG_CATEGORY(ASYNC_EVENTS), "waiting: %ld", timeout);
     approximateDelay(timeout);
