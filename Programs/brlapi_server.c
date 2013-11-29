@@ -2726,7 +2726,7 @@ out:
   return ok;
 }
 
-static void handleFlushEvent (const AsyncEventHandlerParameters *parameters) {
+static void handleFlushEvent (const AsyncEventCallbackParameters *parameters) {
   BrailleDisplay *brl = parameters->eventData;
   flushWrites(brl);
 }

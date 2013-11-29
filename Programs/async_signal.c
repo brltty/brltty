@@ -564,7 +564,7 @@ asyncRelinquishSignalNumber (int signal) {
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */
 
 int
-asyncPerformSignal (AsyncSignalData *sd) {
+asyncExecuteSignalCallback (AsyncSignalData *sd) {
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
   if (sd) {
     Queue *signals = sd->signalQueue;

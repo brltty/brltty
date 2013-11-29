@@ -719,7 +719,7 @@ testFunctionMonitor (void *item, void *data) {
 }
 
 int
-asyncPerformOperation (AsyncIoData *iod, long int timeout) {
+asyncExecuteIoCallback (AsyncIoData *iod, long int timeout) {
   if (iod) {
     Queue *functions = iod->functionQueue;
     unsigned int functionCount = functions? getQueueSize(functions): 0;
@@ -733,7 +733,7 @@ asyncPerformOperation (AsyncIoData *iod, long int timeout) {
         .count = 0
       };
 
-      int performed = 0;
+      int executed = 0;
       Element *functionElement = processQueue(functions, addFunctionMonitor, &monitors);
 
       if (!functionElement) {
@@ -754,7 +754,7 @@ asyncPerformOperation (AsyncIoData *iod, long int timeout) {
         operation->active = 1;
         if (!function->methods->invokeCallback(operation)) operation->cancel = 1;
         operation->active = 0;
-        performed = 1;
+        executed = 1;
 
         if (operation->cancel) {
           deleteElement(operationElement);
@@ -771,7 +771,7 @@ asyncPerformOperation (AsyncIoData *iod, long int timeout) {
         }
       }
 
-      return performed;
+      return executed;
     }
   }
 
@@ -1005,7 +1005,7 @@ newInputOperation (const void *parameters) {
   };
 
   static const FunctionMethods methods = {
-    .functionName = "input transfer",
+    .functionName = "input transferred",
 
 #ifdef __MINGW32__
     .beginFunction = beginWindowsFunction,
@@ -1043,7 +1043,7 @@ newOutputOperation (const void *parameters) {
   };
 
   static const FunctionMethods methods = {
-    .functionName = "output transfer",
+    .functionName = "output transferred",
 
 #ifdef __MINGW32__
     .beginFunction = beginWindowsFunction,

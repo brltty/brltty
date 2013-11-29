@@ -28,19 +28,19 @@ extern "C" {
 
 typedef struct AsyncSignalDataStruct AsyncSignalData;
 extern void asyncDeallocateSignalData (AsyncSignalData *sd);
-extern int asyncPerformSignal (AsyncSignalData *sd);
+extern int asyncExecuteSignalCallback (AsyncSignalData *sd);
 
 typedef struct AsyncAlarmDataStruct AsyncAlarmData;
 extern void asyncDeallocateAlarmData (AsyncAlarmData *alarmData);
-extern int asyncPerformAlarm (AsyncAlarmData *ad, long int *timeout);
+extern int asyncExecuteAlarmCallback (AsyncAlarmData *ad, long int *timeout);
 
 typedef struct AsyncTaskDataStruct AsyncTaskData;
 extern void asyncDeallocateTaskData (AsyncTaskData *taskData);
-extern int asyncPerformTask (AsyncTaskData *td);
+extern int asyncExecuteTaskCallback (AsyncTaskData *td);
 
 typedef struct AsyncIoDataStruct AsyncIoData;
 extern void asyncDeallocateIoData (AsyncIoData *ioData);
-extern int asyncPerformOperation (AsyncIoData *iod, long int timeout);
+extern int asyncExecuteIoCallback (AsyncIoData *iod, long int timeout);
 
 typedef struct AsyncWaitDataStruct AsyncWaitData;
 extern void asyncDeallocateWaitData (AsyncWaitData *waitData);

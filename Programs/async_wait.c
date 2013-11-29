@@ -72,13 +72,13 @@ asyncAwaitAction (long int timeout) {
                "begin: level %u: timeout %ld",
                wd->waitDepth, timeout);
 
-    if (asyncPerformSignal(tsd->signalData)) {
+    if (asyncExecuteSignalCallback(tsd->signalData)) {
       action = "signal handled";
-    } else if (asyncPerformAlarm(tsd->alarmData, &timeout)) {
+    } else if (asyncExecuteAlarmCallback(tsd->alarmData, &timeout)) {
       action = "alarm handled";
-    } else if ((wd->waitDepth == 1) && asyncPerformTask(tsd->taskData)) {
+    } else if ((wd->waitDepth == 1) && asyncExecuteTaskCallback(tsd->taskData)) {
       action = "task handled";
-    } else if (asyncPerformOperation(tsd->ioData, timeout)) {
+    } else if (asyncExecuteIoCallback(tsd->ioData, timeout)) {
       action = "I/O operation handled";
     } else {
       action = "wait timed out";

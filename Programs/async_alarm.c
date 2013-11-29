@@ -184,7 +184,7 @@ asyncResetAlarmIn (AsyncHandle handle, int interval) {
 }
 
 int
-asyncPerformAlarm (AsyncAlarmData *ad, long int *timeout) {
+asyncExecuteAlarmCallback (AsyncAlarmData *ad, long int *timeout) {
   if (ad) {
     Queue *alarms = ad->alarmQueue;
 

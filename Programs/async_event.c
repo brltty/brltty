@@ -27,7 +27,7 @@
 #include "file.h"
 
 struct AsyncEventStruct {
-  AsyncEventHandler *handler;
+  AsyncEventCallback *callback;
   void *data;
 
   FileDescriptor pipeInput;
@@ -55,16 +55,16 @@ monitorEventPipe (const AsyncMonitorCallbackParameters *parameters) {
     LeaveCriticalSection(&event->criticalSection);
 #endif /* __MINGW32__ */
 
-    if (event->handler) {
-      AsyncEventHandler *handler = event->handler;
+    {
+      AsyncEventCallback *callback = event->callback;
 
-      const AsyncEventHandlerParameters parameters = {
+      const AsyncEventCallbackParameters parameters = {
         .eventData = event->data,
         .signalData = data
       };
 
-      logMessage(LOG_CATEGORY(ASYNC_EVENTS), "event: %p", handler);
-      handler(&parameters);
+      logMessage(LOG_CATEGORY(ASYNC_EVENTS), "event signaled: %p", callback);
+      if (callback) callback(&parameters);
     }
 
     return 1;
@@ -98,12 +98,12 @@ asyncSignalEvent (AsyncEvent *event, void *data) {
 }
 
 AsyncEvent *
-asyncNewEvent (AsyncEventHandler *handler, void *data) {
+asyncNewEvent (AsyncEventCallback *callback, void *data) {
   AsyncEvent *event;
 
   if ((event = malloc(sizeof(*event)))) {
     memset(event, 0, sizeof(*event));
-    event->handler = handler;
+    event->callback = callback;
     event->data = data;
 
     if (createAnonymousPipe(&event->pipeInput, &event->pipeOutput)) {

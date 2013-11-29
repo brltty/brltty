@@ -26,11 +26,11 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef void AsyncTaskFunction (void *data);
+typedef void AsyncTaskCallback (void *data);
 
 extern int asyncAddTask (
   AsyncEvent *event,
-  AsyncTaskFunction *function, void *data
+  AsyncTaskCallback *callback, void *data
 );
 
 extern AsyncEvent *asyncNewAddTaskEvent (void);

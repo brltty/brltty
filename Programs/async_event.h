@@ -30,11 +30,11 @@ typedef struct AsyncEventStruct AsyncEvent;
 typedef struct {
   void *eventData;
   void *signalData;
-} AsyncEventHandlerParameters;
+} AsyncEventCallbackParameters;
 
-typedef void AsyncEventHandler (const AsyncEventHandlerParameters *parameters);
+typedef void AsyncEventCallback (const AsyncEventCallbackParameters *parameters);
 
-extern AsyncEvent *asyncNewEvent (AsyncEventHandler *handler, void *data);
+extern AsyncEvent *asyncNewEvent (AsyncEventCallback *callback, void *data);
 extern void asyncDiscardEvent (AsyncEvent *event);
 extern int asyncSignalEvent (AsyncEvent *event, void *data);
 

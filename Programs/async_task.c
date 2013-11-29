@@ -25,7 +25,7 @@
 #include "async_internal.h"
 
 typedef struct {
-  AsyncTaskFunction *function;
+  AsyncTaskCallback *callback;
   void *data;
 } TaskDefinition;
 
@@ -95,12 +95,12 @@ addTask (TaskDefinition *task) {
 }
 
 int
-asyncAddTask (AsyncEvent *event, AsyncTaskFunction *function, void *data) {
+asyncAddTask (AsyncEvent *event, AsyncTaskCallback *callback, void *data) {
   TaskDefinition *task;
 
   if ((task = malloc(sizeof(*task)))) {
     memset(task, 0, sizeof(*task));
-    task->function = function;
+    task->callback = callback;
     task->data = data;
 
     if (event) {
@@ -118,7 +118,7 @@ asyncAddTask (AsyncEvent *event, AsyncTaskFunction *function, void *data) {
 }
 
 static void
-handleAddTaskEvent (const AsyncEventHandlerParameters *parameters) {
+handleAddTaskEvent (const AsyncEventCallbackParameters *parameters) {
   addTask(parameters->signalData);
 }
 
@@ -128,7 +128,7 @@ asyncNewAddTaskEvent (void) {
 }
 
 int
-asyncPerformTask (AsyncTaskData *td) {
+asyncExecuteTaskCallback (AsyncTaskData *td) {
   if (td) {
     Queue *queue = td->taskQueue;
 
@@ -136,10 +136,10 @@ asyncPerformTask (AsyncTaskData *td) {
       TaskDefinition *task = dequeueItem(queue);
 
       if (task) {
-        AsyncTaskFunction *function = task->function;
+        AsyncTaskCallback *callback = task->callback;
 
-        logMessage(LOG_CATEGORY(ASYNC_EVENTS), "task: %p", function);
-        if (function) function(task->data);
+        logMessage(LOG_CATEGORY(ASYNC_EVENTS), "task starting: %p", callback);
+        if (callback) callback(task->data);
         free(task);
         return 1;
       }
