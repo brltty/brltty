@@ -70,6 +70,7 @@ struct UsbEndpointExtensionStruct {
     struct usbdevfs_urb *urb;
     AsyncHandle signalHandle;
     AsyncHandle alarmHandle;
+    int submitDelay;
   } monitor;
 };
 
@@ -801,23 +802,25 @@ usbHandleInputSignal (const AsyncSignalCallbackParameters *parameters) {
 
     if (request == urb) {
       int written = 0;
+      int *delay = &eptx->monitor.submitDelay;
 
       if (response.count == 0) {
         written = 1;
+        *delay = *delay? (*delay << 1): 1;
+        *delay = MIN(*delay, BRAILLE_INPUT_POLL_INTERVAL);
       } else if (response.count > 0) {
         if (usbEnqueueInput(endpoint, response.buffer, response.count)) {
           written = 1;
+          *delay = 0;
         }
       }
 
       if (written) {
-        uint8_t interval = endpoint->descriptor->bInterval;
-
-        if (!interval) {
-          interval = BRAILLE_INPUT_POLL_INTERVAL;
-        }
-
-        if (asyncSetAlarmIn(&eptx->monitor.alarmHandle, interval, usbHandleInputAlarm, endpoint)) {
+        if (*delay) {
+          if (asyncSetAlarmIn(&eptx->monitor.alarmHandle, *delay, usbHandleInputAlarm, endpoint)) {
+            return 1;
+          }
+        } else if (usbSubmitURB(urb, endpoint)) {
           return 1;
         }
       }
@@ -879,6 +882,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
     eptx->monitor.urb = NULL;
     eptx->monitor.signalHandle = NULL;
     eptx->monitor.alarmHandle = NULL;
+    eptx->monitor.submitDelay = 0;
 
     if ((eptx->completedRequests = newQueue(NULL, NULL))) {
       switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
