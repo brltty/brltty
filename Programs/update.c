@@ -945,8 +945,7 @@ scheduleUpdate (const char *reason) {
   scheduleUpdateIn(reason, 0);
 }
 
-static void
-handleUpdateAlarm (const AsyncAlarmCallbackParameters *parameters) {
+static ASYNC_ALARM_CALLBACK(handleUpdateAlarm) {
   asyncDiscardHandle(updateAlarm);
   updateAlarm = NULL;
 

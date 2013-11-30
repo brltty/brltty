@@ -90,8 +90,7 @@ handleInput (void) {
 static void setPollAlarm (int delay, void *data);
 static AsyncHandle pollAlarm = NULL;
 
-static void
-handlePollAlarm (const AsyncAlarmCallbackParameters *parameters) {
+static ASYNC_ALARM_CALLBACK(handlePollAlarm) {
   asyncDiscardHandle(pollAlarm);
   pollAlarm = NULL;
 
@@ -105,8 +104,7 @@ setPollAlarm (int delay, void *data) {
   }
 }
 
-static int
-monitorInput (const AsyncMonitorCallbackParameters *parameters) {
+static ASYNC_MONITOR_CALLBACK(monitorInput) {
   handleInput();
   return !restartRequired;
 }

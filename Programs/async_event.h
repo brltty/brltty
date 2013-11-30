@@ -32,7 +32,8 @@ typedef struct {
   void *signalData;
 } AsyncEventCallbackParameters;
 
-typedef void AsyncEventCallback (const AsyncEventCallbackParameters *parameters);
+#define ASYNC_EVENT_CALLBACK(name) void name (const AsyncEventCallbackParameters *parameters)
+typedef ASYNC_EVENT_CALLBACK(AsyncEventCallback);
 
 extern AsyncEvent *asyncNewEvent (AsyncEventCallback *callback, void *data);
 extern void asyncDiscardEvent (AsyncEvent *event);

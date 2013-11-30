@@ -48,8 +48,7 @@ int speechScreen = -1;
 int speechLine = 0;
 int speechIndex = -1;
 
-static void
-handleSpeechTrackingAlarm (const AsyncAlarmCallbackParameters *parameters) {
+static ASYNC_ALARM_CALLBACK(handleSpeechTrackingAlarm) {
   SpeechSynthesizer *spk = parameters->data;
 
   asyncDiscardHandle(speechTrackingAlarm);

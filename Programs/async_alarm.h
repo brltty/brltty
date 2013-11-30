@@ -31,7 +31,8 @@ typedef struct {
   void *data;
 } AsyncAlarmCallbackParameters;
 
-typedef void AsyncAlarmCallback (const AsyncAlarmCallbackParameters *parameters);
+#define ASYNC_ALARM_CALLBACK(name) void name (const AsyncAlarmCallbackParameters *parameters)
+typedef ASYNC_ALARM_CALLBACK(AsyncAlarmCallback);
 
 extern int asyncSetAlarmTo (
   AsyncHandle *handle,

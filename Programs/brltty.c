@@ -1124,8 +1124,7 @@ brlttyInterrupt (WaitResult waitResult) {
   return 0;
 }
 
-static void
-handleInterruptEvent (const AsyncEventCallbackParameters *parameters) {
+static ASYNC_EVENT_CALLBACK(handleInterruptEvent) {
   InterruptEventParameters *iep = parameters->signalData;
 
   if (iep) {

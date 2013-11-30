@@ -29,7 +29,8 @@ typedef struct {
   void *data;
 } AsyncMonitorCallbackParameters;
 
-typedef int AsyncMonitorCallback (const AsyncMonitorCallbackParameters *parameters);
+#define ASYNC_MONITOR_CALLBACK(name) int name (const AsyncMonitorCallbackParameters *parameters)
+typedef ASYNC_MONITOR_CALLBACK(AsyncMonitorCallback);
 
 extern int asyncMonitorFileInput (
   AsyncHandle *handle,
@@ -76,7 +77,8 @@ typedef struct {
   unsigned end:1;
 } AsyncInputCallbackParameters;
 
-typedef size_t AsyncInputCallback (const AsyncInputCallbackParameters *parameters);
+#define ASYNC_INPUT_CALLBACK(name) size_t name (const AsyncInputCallbackParameters *parameters)
+typedef ASYNC_INPUT_CALLBACK(AsyncInputCallback);
 
 extern int asyncReadFile (
   AsyncHandle *handle,
@@ -99,7 +101,8 @@ typedef struct {
   int error;
 } AsyncOutputCallbackParameters;
 
-typedef void AsyncOutputCallback (const AsyncOutputCallbackParameters *parameters);
+#define ASYNC_OUTPUT_CALLBACK(name) void name (const AsyncOutputCallbackParameters *parameters)
+typedef ASYNC_OUTPUT_CALLBACK(AsyncOutputCallback);
 
 extern int asyncWriteFile (
   AsyncHandle *handle,

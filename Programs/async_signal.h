@@ -40,7 +40,8 @@ typedef struct {
   void *data;
 } AsyncSignalCallbackParameters;
 
-typedef int AsyncSignalCallback (const AsyncSignalCallbackParameters *parameters);
+#define ASYNC_SIGNAL_CALLBACK(name) int name (const AsyncSignalCallbackParameters *parameters)
+typedef ASYNC_SIGNAL_CALLBACK(AsyncSignalCallback);
 
 extern int asyncMonitorSignal (
   AsyncHandle *handle, int signal,

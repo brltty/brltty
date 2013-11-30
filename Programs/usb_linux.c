@@ -774,8 +774,7 @@ usbReadDeviceDescriptor (UsbDevice *device) {
   return 1;
 }
 
-static void
-usbHandleInputAlarm (const AsyncAlarmCallbackParameters *parameters) {
+static ASYNC_ALARM_CALLBACK(usbHandleInputAlarm) {
   UsbEndpoint *endpoint = parameters->data;
   UsbEndpointExtension *eptx = endpoint->extension;
   struct usbdevfs_urb *urb = eptx->monitor.urb;
@@ -787,8 +786,7 @@ usbHandleInputAlarm (const AsyncAlarmCallbackParameters *parameters) {
   usbSubmitURB(urb, endpoint);
 }
 
-static int
-usbHandleInputSignal (const AsyncSignalCallbackParameters *parameters) {
+static ASYNC_SIGNAL_CALLBACK(usbHandleInputSignal) {
   UsbEndpoint *endpoint = parameters->data;
   UsbEndpointExtension *eptx = endpoint->extension;
 

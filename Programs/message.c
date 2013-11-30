@@ -61,8 +61,7 @@ typedef struct {
   char text[0];
 } MessageParameters;
 
-static void
-presentMessage (void *data) {
+static ASYNC_TASK_CALLBACK(presentMessage) {
   MessageParameters *mgp = data;
 
 #ifdef ENABLE_SPEECH_SUPPORT

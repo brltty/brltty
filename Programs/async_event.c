@@ -42,8 +42,7 @@ struct AsyncEventStruct {
 #endif /* __MINGW32__ */
 };
 
-static int
-monitorEventPipe (const AsyncMonitorCallbackParameters *parameters) {
+static ASYNC_MONITOR_CALLBACK(monitorEventPipe) {
   AsyncEvent *event = parameters->data;
   void *data;
   const size_t size = sizeof(data);

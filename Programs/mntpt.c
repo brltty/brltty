@@ -70,8 +70,7 @@ findMountPoint (MountPointTester test) {
 
 static void updateMountsTable (MountEntry *entry);
 
-static void
-retryMountsTableUpdate (const AsyncAlarmCallbackParameters *parameters) {
+static ASYNC_ALARM_CALLBACK(retryMountsTableUpdate) {
   MountEntry *entry = parameters->data;
   updateMountsTable(entry);
 }

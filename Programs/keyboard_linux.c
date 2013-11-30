@@ -495,8 +495,7 @@ forwardKeyEvent (int code, int press) {
   return writeKeyEvent(code, (press? 1: 0));
 }
 
-static size_t
-handleKeyboardEvent (const AsyncInputCallbackParameters *parameters) {
+static ASYNC_INPUT_CALLBACK(handleKeyboardEvent) {
   KeyboardPlatformData *kpd = parameters->data;
 
   if (parameters->error) {
@@ -643,8 +642,7 @@ typedef struct {
   KeyboardCommonData *kcd;
 } InputDeviceData;
 
-static void
-doOpenInputDevice (const AsyncAlarmCallbackParameters *parameters) {
+static ASYNC_ALARM_CALLBACK(doOpenInputDevice) {
   InputDeviceData *idd = parameters->data;
   int device = openCharacterDevice(idd->name, O_RDONLY, idd->major, idd->minor);
 
@@ -663,8 +661,7 @@ doOpenInputDevice (const AsyncAlarmCallbackParameters *parameters) {
   free(idd);
 }
 
-static size_t
-handleKobjectUeventString (const AsyncInputCallbackParameters *parameters) {
+static ASYNC_INPUT_CALLBACK(handleKobjectUeventString) {
   if (parameters->error) {
     logMessage(LOG_DEBUG, "netlink read error: %s", strerror(parameters->error));
   } else if (parameters->end) {

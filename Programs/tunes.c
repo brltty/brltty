@@ -338,8 +338,7 @@ closeTunes (void) {
   }
 }
 
-static void
-handleTunesTimeout (const AsyncAlarmCallbackParameters *parameters) {
+static ASYNC_ALARM_CALLBACK(handleTunesTimeout) {
   if (tunesCloseTimer) {
     asyncDiscardHandle(tunesCloseTimer);
     tunesCloseTimer = NULL;

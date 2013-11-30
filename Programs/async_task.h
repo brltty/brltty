@@ -26,7 +26,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef void AsyncTaskCallback (void *data);
+#define ASYNC_TASK_CALLBACK(name) void name (void *data)
+typedef ASYNC_TASK_CALLBACK(AsyncTaskCallback);
 
 extern int asyncAddTask (
   AsyncEvent *event,

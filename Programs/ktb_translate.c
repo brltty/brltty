@@ -310,8 +310,7 @@ logKeyEvent (
 
 static void setLongPressAlarm (KeyTable *table, unsigned char when);
 
-static void
-handleLongPressAlarm (const AsyncAlarmCallbackParameters *parameters) {
+static ASYNC_ALARM_CALLBACK(handleLongPressAlarm) {
   KeyTable *table = parameters->data;
   int command = table->longPress.command;
 

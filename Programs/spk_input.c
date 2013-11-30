@@ -89,8 +89,7 @@ stopInputMonitor (SpeechInputObject *obj) {
   initializeInputMonitor(obj);
 }
 
-static size_t
-handleInput (const AsyncInputCallbackParameters *parameters) {
+static ASYNC_INPUT_CALLBACK(handleInput) {
   SpeechInputObject *obj = parameters->data;
 
   if (parameters->error) {
@@ -157,8 +156,7 @@ doWindowsConnected (SpeechInputObject *obj) {
   return monitorInput(obj);
 }
 
-static int
-handleWindowsConnect (const AsyncMonitorCallbackParameters *parameters) {
+static ASYNC_MONITOR_CALLBACK(handleWindowsConnect) {
   SpeechInputObject *obj = parameters->data;
 
   asyncDiscardHandle(obj->windows.connectMonitor);

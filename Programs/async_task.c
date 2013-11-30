@@ -117,8 +117,7 @@ asyncAddTask (AsyncEvent *event, AsyncTaskCallback *callback, void *data) {
   return 0;
 }
 
-static void
-handleAddTaskEvent (const AsyncEventCallbackParameters *parameters) {
+static ASYNC_EVENT_CALLBACK(handleAddTaskEvent) {
   addTask(parameters->signalData);
 }
 
