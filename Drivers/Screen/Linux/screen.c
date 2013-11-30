@@ -428,7 +428,7 @@ readScreenDevice (off_t offset, void *buffer, size_t size) {
   return 0;
 }
 
-static ASYNC_MONITOR_CALLBACK(handleScreenAlert) {
+ASYNC_MONITOR_CALLBACK(handleScreenAlert) {
   asyncDiscardHandle(screenMonitor);
   screenMonitor = NULL;
 
