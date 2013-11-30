@@ -43,3 +43,8 @@ findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
   logWindowsSystemError("looking up symbol in library");
   return 0;
 }
+
+const char *
+getSharedSymbolName (void *address, unsigned int *offset) {
+  return NULL;
+}

@@ -2726,7 +2726,7 @@ out:
   return ok;
 }
 
-static ASYNC_EVENT_CALLBACK(handleFlushEvent) {
+ASYNC_EVENT_CALLBACK(handleFlushEvent) {
   BrailleDisplay *brl = parameters->eventData;
   flushWrites(brl);
 }

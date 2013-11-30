@@ -42,7 +42,7 @@ struct AsyncEventStruct {
 #endif /* __MINGW32__ */
 };
 
-static ASYNC_MONITOR_CALLBACK(monitorEventPipe) {
+ASYNC_MONITOR_CALLBACK(monitorEventPipe) {
   AsyncEvent *event = parameters->data;
   void *data;
   const size_t size = sizeof(data);
@@ -62,7 +62,7 @@ static ASYNC_MONITOR_CALLBACK(monitorEventPipe) {
         .signalData = data
       };
 
-      logMessage(LOG_CATEGORY(ASYNC_EVENTS), "event signaled: %p", callback);
+      logSymbol(LOG_CATEGORY(ASYNC_EVENTS), "event signaled", callback);
       if (callback) callback(&parameters);
     }
 

@@ -57,7 +57,7 @@ struct InputOutputMethodsStruct {
   WriteDataMethod *writeData;
 };
 
-static ASYNC_MONITOR_CALLBACK(setEventMonitor) {
+ASYNC_MONITOR_CALLBACK(setEventMonitor) {
   EventMonitor *evm = parameters->data;
 
   evm->ready = 1;

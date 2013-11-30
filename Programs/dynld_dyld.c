@@ -92,3 +92,8 @@ findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
   }
   return 0;
 }
+
+const char *
+getSharedSymbolName (void *address, unsigned int *offset) {
+  return NULL;
+}

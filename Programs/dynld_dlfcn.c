@@ -74,3 +74,16 @@ findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
   *address = dlsym(object, symbol);
   return logError();
 }
+
+const char *
+getSharedSymbolName (void *address, unsigned int *offset) {
+#ifdef __USE_GNU
+  Dl_info info;
+
+  if (dladdr(address, &info)) {
+    return info.dli_sname;
+  }
+#endif /* __USE_GNU */
+
+  return NULL;
+}

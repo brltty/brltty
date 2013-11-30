@@ -191,9 +191,9 @@ getIoData (void) {
 
 static void
 logOperation (const OperationEntry *operation, void *callback) {
-  logMessage(LOG_CATEGORY(ASYNC_EVENTS),
-             "%s: %p",
-             operation->function->methods->functionName, callback);
+  logSymbol(LOG_CATEGORY(ASYNC_EVENTS),
+            operation->function->methods->functionName,
+            callback);
 }
 
 #ifdef __MINGW32__

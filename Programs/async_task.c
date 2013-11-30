@@ -117,7 +117,7 @@ asyncAddTask (AsyncEvent *event, AsyncTaskCallback *callback, void *data) {
   return 0;
 }
 
-static ASYNC_EVENT_CALLBACK(handleAddTaskEvent) {
+ASYNC_EVENT_CALLBACK(handleAddTaskEvent) {
   addTask(parameters->signalData);
 }
 
@@ -137,7 +137,7 @@ asyncExecuteTaskCallback (AsyncTaskData *td) {
       if (task) {
         AsyncTaskCallback *callback = task->callback;
 
-        logMessage(LOG_CATEGORY(ASYNC_EVENTS), "task starting: %p", callback);
+        logSymbol(LOG_CATEGORY(ASYNC_EVENTS), "task starting", callback);
         if (callback) callback(task->data);
         free(task);
         return 1;

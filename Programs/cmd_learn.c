@@ -87,7 +87,7 @@ typedef struct {
   int timeout;
 } LearnModeParameters;
 
-static ASYNC_TASK_CALLBACK(presentLearnMode) {
+ASYNC_TASK_CALLBACK(presentLearnMode) {
   LearnModeParameters *lmp = data;
 
   LearnModeData lmd = {

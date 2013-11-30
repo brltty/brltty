@@ -172,7 +172,7 @@ dequeueCommand (Queue *queue) {
 static void setCommandAlarm (void *data);
 static AsyncHandle commandAlarm = NULL;
 
-static ASYNC_ALARM_CALLBACK(handleCommandAlarm) {
+ASYNC_ALARM_CALLBACK(handleCommandAlarm) {
   Queue *queue = getCommandQueue(0);
 
   asyncDiscardHandle(commandAlarm);

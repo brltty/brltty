@@ -25,7 +25,9 @@ extern "C" {
 
 extern void *loadSharedObject (const char *path);
 extern void unloadSharedObject (void *object);
+
 extern int findSharedSymbol (void *object, const char *symbol, void *pointerAddress);
+extern const char *getSharedSymbolName (void *address, unsigned int *offset);
 
 #ifdef __cplusplus
 }

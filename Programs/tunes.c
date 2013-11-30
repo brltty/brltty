@@ -338,7 +338,7 @@ closeTunes (void) {
   }
 }
 
-static ASYNC_ALARM_CALLBACK(handleTunesTimeout) {
+ASYNC_ALARM_CALLBACK(handleTunesTimeout) {
   if (tunesCloseTimer) {
     asyncDiscardHandle(tunesCloseTimer);
     tunesCloseTimer = NULL;

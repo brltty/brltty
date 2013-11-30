@@ -121,8 +121,8 @@ awaitAction (long int timeout) {
   AsyncWaitData *wd = getWaitData();
 
   if (wd) {
-    const char *action;
-    const CallbackExecuterEntry *firstCallbackExecuter = wd->callbackExecuter;
+    const char *action = "unknown action";
+    const CallbackExecuterEntry *const firstCallbackExecuter = wd->callbackExecuter;
 
     CallbackExecuterParameters parameters = {
       .tsd = wd->tsd,
@@ -145,7 +145,12 @@ awaitAction (long int timeout) {
       }
 
       if (wd->callbackExecuter == firstCallbackExecuter) {
-        action = asyncExecuteIoCallback(parameters.tsd->ioData, parameters.timeout)? "I/O operation handled": "wait timed out";
+        if (asyncExecuteIoCallback(parameters.tsd->ioData, parameters.timeout)) {
+          action = "I/O operation handled";
+        } else {
+          action = "wait timed out";
+        }
+
         break;
       }
     }

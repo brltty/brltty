@@ -57,3 +57,8 @@ findSharedSymbol (void *object, const char *symbol, const void **address) {
 #endif /* HAVE_SHL_LOAD */
   return 0;
 }
+
+const char *
+getSharedSymbolName (void *address, unsigned int *offset) {
+  return NULL;
+}
