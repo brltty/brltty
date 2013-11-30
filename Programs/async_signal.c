@@ -281,6 +281,8 @@ static void
 deleteMonitor (Element *monitorElement) {
   MonitorEntry *mon = getElementItem(monitorElement);
   SignalEntry *sig = mon->signal;
+
+  logSymbol(LOG_CATEGORY(ASYNC_EVENTS), mon->callback, "signal %d removed", sig->number);
   deleteElement(monitorElement);
 
   if (getQueueSize(sig->monitors) == 0) {
@@ -432,6 +434,7 @@ newMonitorElement (const void *parameters) {
         Element *monitorElement = enqueueItem(sig->monitors, mon);
 
         if (monitorElement) {
+          logSymbol(LOG_CATEGORY(ASYNC_EVENTS), mon->callback, "signal %d added", sig->number);
           if (!newSignal) return monitorElement;
 
           if (asyncHandleSignal(mep->signal, handleMonitoredSignal, &sig->oldHandler)) {
@@ -596,7 +599,7 @@ asyncExecuteSignalCallback (AsyncSignalData *sd) {
               .data = mon->data
             };
 
-            logMessage(LOG_CATEGORY(ASYNC_EVENTS), "signal %d: %p", sig->number, callback);
+            logSymbol(LOG_CATEGORY(ASYNC_EVENTS), callback, "signal %d starting", sig->number);
             mon->active = 1;
             if (!callback(&parameters)) mon->delete = 1;
             mon->active = 0;
