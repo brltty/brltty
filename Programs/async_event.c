@@ -62,7 +62,7 @@ ASYNC_MONITOR_CALLBACK(monitorEventPipe) {
         .signalData = data
       };
 
-      logSymbol(LOG_CATEGORY(ASYNC_EVENTS), "event signaled", callback);
+      logSymbol(LOG_CATEGORY(ASYNC_EVENTS), callback, "event signaled");
       if (callback) callback(&parameters);
     }
 
@@ -122,7 +122,7 @@ asyncNewEvent (AsyncEventCallback *callback, void *data) {
           event->pendingCount = 0;
 #endif /* __MINGW32__ */
 
-          logSymbol(LOG_CATEGORY(ASYNC_EVENTS), "event added", event->callback);
+          logSymbol(LOG_CATEGORY(ASYNC_EVENTS), event->callback, "event added");
           return event;
         }
 
@@ -153,7 +153,7 @@ asyncDiscardEvent (AsyncEvent *event) {
   DeleteCriticalSection(&event->criticalSection);
 #endif /* __MINGW32__ */
 
-  logSymbol(LOG_CATEGORY(ASYNC_EVENTS), "event removed", event->callback);
+  logSymbol(LOG_CATEGORY(ASYNC_EVENTS), event->callback, "event removed");
   free(event);
 }
 

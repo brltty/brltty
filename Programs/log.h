@@ -97,7 +97,7 @@ extern void logMessage (int level, const char *format, ...) PRINTF(2, 3);
 extern void vlogMessage (int level, const char *format, va_list *arguments);
 
 extern void logBytes (int level, const char *description, const void *data, size_t length);
-extern void logSymbol (int level, const char *description, void *address);
+extern void logSymbol (int level, void *address, const char *format, ...) PRINTF(3, 4);
 
 extern void logActionError (int error, const char *action);
 extern void logSystemError (const char *action);

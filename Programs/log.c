@@ -386,6 +386,15 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
   }
 }
 
+static size_t
+formatLogArguments (char *buffer, size_t size, const char *format, va_list *arguments) {
+  int length = vsnprintf(buffer, size, format, *arguments);
+
+  if (length < 0) return 0;
+  if (length < size) return length;
+  return size;
+}
+
 typedef struct {
   const char *format;
   va_list *arguments;
@@ -394,11 +403,8 @@ typedef struct {
 static size_t
 formatLogMessageData (char *buffer, size_t size, const void *data) {
   const LogMessageData *msg = data;
-  int length = vsnprintf(buffer, size, msg->format, *msg->arguments);
 
-  if (length < 0) return 0;
-  if (length < size) return length;
-  return size;
+  return formatLogArguments(buffer, size, msg->format, msg->arguments);
 }
 
 void
@@ -453,8 +459,9 @@ logBytes (int level, const char *description, const void *data, size_t length) {
 }
 
 typedef struct {
-  const char *description;
   void *address;
+  const char *format;
+  va_list *arguments;
 } LogSymbolData;
 
 static size_t
@@ -466,7 +473,10 @@ formatLogSymbolData (char *buffer, size_t size, const void *data) {
   const char *name = getSharedSymbolName(symbol->address, &offset);
 
   STR_BEGIN(buffer, size);
-  STR_PRINTF("%s: ", symbol->description);
+
+  length = formatLogArguments(STR_NEXT, STR_LEFT, symbol->format, symbol->arguments);
+  STR_ADJUST(length);
+  STR_PRINTF(": ");
 
   if (name && *name) {
     STR_PRINTF("%s", name);
@@ -481,13 +491,21 @@ formatLogSymbolData (char *buffer, size_t size, const void *data) {
 }
 
 void
-logSymbol (int level, const char *description, void *address) {
-  const LogSymbolData symbol = {
-    .description = description,
-    .address = address
-  };
+logSymbol (int level, void *address, const char *format, ...) {
+  va_list arguments;
+  va_start(arguments, format);
 
-  logData(level, formatLogSymbolData, &symbol);
+  {
+    const LogSymbolData symbol = {
+      .address = address,
+      .format = format,
+      .arguments = &arguments
+    };
+
+    logData(level, formatLogSymbolData, &symbol);
+  }
+
+  va_end(arguments);
 }
 
 void

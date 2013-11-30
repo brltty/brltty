@@ -87,7 +87,7 @@ addTask (TaskDefinition *task) {
 
   if (queue) {
     if (enqueueItem(queue, task)) {
-      logSymbol(LOG_CATEGORY(ASYNC_EVENTS), "task added", task->callback);
+      logSymbol(LOG_CATEGORY(ASYNC_EVENTS), task->callback, "task added");
       return 1;
     }
   }
@@ -138,7 +138,7 @@ asyncExecuteTaskCallback (AsyncTaskData *td) {
       if (task) {
         AsyncTaskCallback *callback = task->callback;
 
-        logSymbol(LOG_CATEGORY(ASYNC_EVENTS), "task starting", callback);
+        logSymbol(LOG_CATEGORY(ASYNC_EVENTS), callback, "task starting");
         if (callback) callback(task->data);
         free(task);
         return 1;
