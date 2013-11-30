@@ -452,24 +452,42 @@ logBytes (int level, const char *description, const void *data, size_t length) {
   logData(level, formatLogBytesData, &bytes);
 }
 
-void
-logSymbol (int level, const char *description, void *address) {
-  char message[0X100];
-  unsigned int offset = 0;
-  const char *name = getSharedSymbolName(address, &offset);
+typedef struct {
+  const char *description;
+  void *address;
+} LogSymbolData;
 
-  STR_BEGIN(message, sizeof(message));
-  STR_PRINTF("%s: ", description);
+static size_t
+formatLogSymbolData (char *buffer, size_t size, const void *data) {
+  const LogSymbolData *symbol = data;
+  size_t length;
+
+  unsigned int offset = 0;
+  const char *name = getSharedSymbolName(symbol->address, &offset);
+
+  STR_BEGIN(buffer, size);
+  STR_PRINTF("%s: ", symbol->description);
 
   if (name && *name) {
     STR_PRINTF("%s", name);
     if (offset) STR_PRINTF("+0X%X", offset);
   } else {
-    STR_PRINTF("%p", address);
+    STR_PRINTF("%p", symbol->address);
   }
 
+  length = STR_LENGTH;
   STR_END;
-  logMessage(level, "%s", message);
+  return length;
+}
+
+void
+logSymbol (int level, const char *description, void *address) {
+  const LogSymbolData symbol = {
+    .description = description,
+    .address = address
+  };
+
+  logData(level, formatLogSymbolData, &symbol);
 }
 
 void
