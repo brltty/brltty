@@ -612,7 +612,7 @@ awaitUsbInput2 (
       if (hidInputLength > 0) return 1;
 
       if (afterTimePeriod(&period, NULL)) break;
-      approximateDelay(10);
+      asyncWait(10);
     }
   }
 
