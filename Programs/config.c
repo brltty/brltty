@@ -1273,20 +1273,22 @@ startBrailleDriver (void) {
 static int tryBrailleDriver (void);
 
 static ASYNC_ALARM_CALLBACK(retryBrailleDriver) {
-  if (!brailleDriver) tryBrailleDriver();
+  tryBrailleDriver();
 }
 
 static void
 scheduleBrailleDriver (int delay) {
-  asyncSetAlarmIn(NULL, delay, retryBrailleDriver, NULL);
+  if (!brailleDriver) {
+    asyncSetAlarmIn(NULL, delay, retryBrailleDriver, NULL);
+    initializeBraille();
+    ensureBrailleBuffer(&brl, LOG_DEBUG);
+  }
 }
 
 static int
 tryBrailleDriver (void) {
   if (startBrailleDriver()) return 1;
   scheduleBrailleDriver(BRAILLE_DRIVER_START_RETRY_INTERVAL);
-  initializeBraille();
-  ensureBrailleBuffer(&brl, LOG_DEBUG);
   return 0;
 }
 
@@ -1491,12 +1493,14 @@ startSpeechDriver (void) {
 static int trySpeechDriver (void);
 
 static ASYNC_ALARM_CALLBACK(retrySpeechDriver) {
-  if (!speechDriver) trySpeechDriver();
+  trySpeechDriver();
 }
 
 static void
 scheduleSpeechDriver (int delay) {
-  asyncSetAlarmIn(NULL, delay, retrySpeechDriver, NULL);
+  if (!speechDriver) {
+    asyncSetAlarmIn(NULL, delay, retrySpeechDriver, NULL);
+  }
 }
 
 static int
