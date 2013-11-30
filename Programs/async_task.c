@@ -87,6 +87,7 @@ addTask (TaskDefinition *task) {
 
   if (queue) {
     if (enqueueItem(queue, task)) {
+      logSymbol(LOG_CATEGORY(ASYNC_EVENTS), "task added", task->callback);
       return 1;
     }
   }

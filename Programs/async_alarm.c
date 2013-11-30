@@ -112,7 +112,10 @@ newAlarmElement (const void *parameters) {
       {
         Element *element = enqueueItem(alarms, alarm);
 
-        if (element) return element;
+        if (element) {
+          logSymbol(LOG_CATEGORY(ASYNC_EVENTS), "alarm added", aep->callback);
+          return element;
+        }
       }
 
       free(alarm);
@@ -207,7 +210,7 @@ asyncExecuteAlarmCallback (AsyncAlarmData *ad, long int *timeout) {
           };
 
           deleteElement(element);
-          logSymbol(LOG_CATEGORY(ASYNC_EVENTS), "alarm", callback);
+          logSymbol(LOG_CATEGORY(ASYNC_EVENTS), "alarm starting", callback);
           if (callback) callback(&parameters);
           return 1;
         }

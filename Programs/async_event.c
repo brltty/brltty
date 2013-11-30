@@ -122,6 +122,7 @@ asyncNewEvent (AsyncEventCallback *callback, void *data) {
           event->pendingCount = 0;
 #endif /* __MINGW32__ */
 
+          logSymbol(LOG_CATEGORY(ASYNC_EVENTS), "event added", event->callback);
           return event;
         }
 
@@ -152,6 +153,7 @@ asyncDiscardEvent (AsyncEvent *event) {
   DeleteCriticalSection(&event->criticalSection);
 #endif /* __MINGW32__ */
 
+  logSymbol(LOG_CATEGORY(ASYNC_EVENTS), "event removed", event->callback);
   free(event);
 }
 
