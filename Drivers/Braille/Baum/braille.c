@@ -24,8 +24,7 @@
 
 #include "log.h"
 #include "parse.h"
-#include "timing.h"
-#include "serialdefs.h"
+#include "async_wait.h"
 #include "ascii.h"
 
 typedef enum {
@@ -2513,7 +2512,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       }
 
       if (++attempts == 2) break;
-      approximateDelay(700);
+      asyncWait(700);
     }
 
   failed:
