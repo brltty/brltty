@@ -1278,10 +1278,15 @@ retryBrailleDriver (const AsyncAlarmCallbackParameters *parameters UNUSED) {
   if (!brailleDriver) tryBrailleDriver();
 }
 
+static void
+scheduleBrailleDriver (int delay) {
+  asyncSetAlarmIn(NULL, delay, retryBrailleDriver, NULL);
+}
+
 static int
 tryBrailleDriver (void) {
   if (startBrailleDriver()) return 1;
-  asyncSetAlarmIn(NULL, BRAILLE_DRIVER_START_RETRY_INTERVAL, retryBrailleDriver, NULL);
+  scheduleBrailleDriver(BRAILLE_DRIVER_START_RETRY_INTERVAL);
   initializeBraille();
   ensureBrailleBuffer(&brl, LOG_DEBUG);
   return 0;
@@ -1492,10 +1497,15 @@ retrySpeechDriver (const AsyncAlarmCallbackParameters *parameters UNUSED) {
   if (!speechDriver) trySpeechDriver();
 }
 
+static void
+scheduleSpeechDriver (int delay) {
+  asyncSetAlarmIn(NULL, delay, retrySpeechDriver, NULL);
+}
+
 static int
 trySpeechDriver (void) {
   if (startSpeechDriver()) return 1;
-  asyncSetAlarmIn(NULL, SPEECH_DRIVER_START_RETRY_INTERVAL, retrySpeechDriver, NULL);
+  scheduleSpeechDriver(SPEECH_DRIVER_START_RETRY_INTERVAL);
   return 0;
 }
 
@@ -1640,10 +1650,15 @@ retryScreenDriver (const AsyncAlarmCallbackParameters *parameters UNUSED) {
   if (!screenDriver) tryScreenDriver();
 }
 
+static void
+scheduleScreenDriver (int delay) {
+  asyncSetAlarmIn(NULL, delay, retryScreenDriver, NULL);
+}
+
 static int
 tryScreenDriver (void) {
   if (startScreenDriver()) return 1;
-  asyncSetAlarmIn(NULL, SCREEN_DRIVER_START_RETRY_INTERVAL, retryScreenDriver, NULL);
+  scheduleScreenDriver(SCREEN_DRIVER_START_RETRY_INTERVAL);
   initializeScreen();
   return 0;
 }
@@ -2194,7 +2209,7 @@ brlttyStart (int argc, char *argv[]) {
     if (activateBrailleDriver(1)) deactivateBrailleDriver();
   } else {
     onProgramExit("braille-driver", exitBrailleDriver, NULL);
-    tryBrailleDriver();
+    scheduleBrailleDriver(0);
   }
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -2204,7 +2219,7 @@ brlttyStart (int argc, char *argv[]) {
     if (activateSpeechDriver(1)) deactivateSpeechDriver();
   } else {
     onProgramExit("speech-driver", exitSpeechDriver, NULL);
-    trySpeechDriver();
+    scheduleSpeechDriver(0);
   }
 
   /* Create the file system object for speech input. */
