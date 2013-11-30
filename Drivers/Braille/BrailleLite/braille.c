@@ -33,6 +33,7 @@
 #include "log.h"
 #include "parse.h"
 #include "timing.h"
+#include "async_wait.h"
 #include "message.h"
 
 typedef enum {
@@ -262,7 +263,7 @@ await_ack (void) {
   startTimePeriod(&period, ACK_TIMEOUT);
   waiting_ack = 1;
   do {
-    approximateDelay(10);	/* sleep for 10 ms */
+    asyncWait(10);	/* sleep for 10 ms */
     qfill();
     if (!waiting_ack) return 1;
   } while (!afterTimePeriod(&period, NULL));
@@ -317,7 +318,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
               memset(cells, 0, sizeof(cells));
               serialWriteData(BL_serialDevice, cells, sizeof(cells));
               waiting_ack = 1;
-              approximateDelay(400);
+              asyncWait(400);
               qfill();
 
               if (waiting_ack) {
@@ -333,11 +334,11 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
             {
               static const unsigned char request[] = {0X05, 0X57};			/* code to send before Braille */
 
-              approximateDelay(200);
+              asyncWait(200);
               qflush();
               serialWriteData(BL_serialDevice, request, sizeof(request));
               waiting_ack = 0;
-              approximateDelay(200);
+              asyncWait(200);
               qfill();
 
               if (qlen) {

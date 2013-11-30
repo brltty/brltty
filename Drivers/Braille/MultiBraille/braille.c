@@ -59,6 +59,7 @@
 
 #include "log.h"
 #include "timing.h"
+#include "async_wait.h"
 #include "ascii.h"
 
 #define BRL_STATUS_FIELDS sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots
@@ -126,7 +127,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 	startTimePeriod (&period, ACK_TIMEOUT);		/* initialise timeout testing */
 	n = 0;
 	do {
-		approximateDelay (20);
+		asyncWait (20);
 		if (serialReadData (MB_serialDevice, &c, 1, 0, 0) == 0)
 			continue;
 		if (n < init_ack[0] && c != init_ack[1 + n])

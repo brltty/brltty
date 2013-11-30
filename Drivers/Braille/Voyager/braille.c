@@ -48,7 +48,7 @@
 #include <errno.h>
 
 #include "log.h"
-#include "timing.h"
+#include "async_wait.h"
 #include "ascii.h"
 #include "bitfield.h"
 
@@ -920,7 +920,7 @@ setFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
 static int
 soundBeep (BrailleDisplay *brl, unsigned char duration) {
   if (!protocol->soundBeep(brl, duration)) return 0;
-  approximateDelay(duration);
+  asyncWait(duration);
   return 1;
 }
 

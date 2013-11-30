@@ -39,7 +39,7 @@ typedef enum {
 #define BRL_HAVE_PACKET_IO
 #include "brl_driver.h"
 #include "parse.h"
-#include "timing.h"
+#include "async_wait.h"
 
 #include	"eu_protocol.h"
 
@@ -318,7 +318,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
         logMessage(LOG_NOTICE, "trying protocol: %s", protocol->protocolName);
         if (protocol->initializeDevice(brl)) return 1;
-	approximateDelay(700);
+	asyncWait(700);
       }
     }
 

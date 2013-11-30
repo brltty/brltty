@@ -42,7 +42,7 @@
 
 #include "log.h"
 #include "bitfield.h"
-#include "timing.h"
+#include "async_wait.h"
 #include "ascii.h"
 
 #define BRL_STATUS_FIELDS sfGeneric
@@ -458,7 +458,7 @@ readCommand1 (BrailleDisplay *brl, KeyTableCommandContext context) {
     switch (packet[1]) {
       case PM1_PKT_IDENTITY:
         if (interpretIdentity1(brl, packet)) brl->resizeRequired = 1;
-        approximateDelay(200);
+        asyncWait(200);
         initializeTerminal1(brl);
         break;
 

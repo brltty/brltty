@@ -59,7 +59,7 @@
 #include "io_misc.h"
 #include "device.h"
 #include "parse.h"
-#include "timing.h"
+#include "async_wait.h"
 #include "charset.h"
 #include "cmd.h"
 
@@ -1048,7 +1048,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           }
         }
       } else {
-        approximateDelay(1000);
+        asyncWait(1000);
       }
     }
     if (line) free(line);

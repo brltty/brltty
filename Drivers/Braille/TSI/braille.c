@@ -84,6 +84,7 @@
 
 #include "log.h"
 #include "timing.h"
+#include "async_wait.h"
 #include "message.h"
 
 #include "brl_driver.h"
@@ -466,7 +467,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
   if(speed == 2){ /* if supported (PB) go to 19.2Kbps */
     serialWriteData (serialDevice, BRL_UART192, DIM_BRL_UART192);
     serialAwaitOutput(serialDevice);
-    approximateDelay(BAUD_DELAY);
+    asyncWait(BAUD_DELAY);
     if(!serialSetBaud(serialDevice, serialBaud=19200)) goto failure;
     logMessage(LOG_DEBUG,"Switched to 19200bps. Checking if display followed.");
     if(QueryDisplay(reply))
@@ -476,7 +477,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 	         "falling back to 9600bps.");
       if(!serialSetBaud(serialDevice, serialBaud=9600)) goto failure;
       serialAwaitOutput(serialDevice);
-      approximateDelay(BAUD_DELAY); /* just to be safe */
+      asyncWait(BAUD_DELAY); /* just to be safe */
       if(QueryDisplay(reply)) {
 	logMessage(LOG_INFO,"Found display again at 9600bps.");
 	logMessage(LOG_INFO, "Must be a TSI emulator.");
@@ -765,7 +766,7 @@ cut_cursor (BrailleDisplay *brl)
       display_all (brl, prevdata);
       prevdata[pos] = oldchar;
 
-      while ((key = brl_readCommand (brl, KTB_CTX_DEFAULT)) == EOF) approximateDelay(1); /* just yield */
+      while ((key = brl_readCommand (brl, KTB_CTX_DEFAULT)) == EOF) asyncWait(1); /* just yield */
       if((key &BRL_MSK_BLK) == BRL_BLK_CLIP_NEW)
 	  res = BRL_BLK_CLIP_NEW + pos;
       else if((key &BRL_MSK_BLK) == BRL_BLK_CLIP_ADD)
@@ -907,13 +908,13 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
       else if(ping_due){
 	logMessage(LOG_DEBUG,"Display idle: sending query");
 	serialAwaitOutput(serialDevice);
-	approximateDelay(2*SEND_DELAY);
+	asyncWait(2*SEND_DELAY);
 	serialWriteData (serialDevice, BRL_QUERY, DIM_BRL_QUERY);
 	if(slow_update == 1)
 	  serialAwaitOutput(serialDevice);
 	else if(slow_update == 2){
 	  serialAwaitOutput(serialDevice);
-	  approximateDelay(SEND_DELAY);
+	  asyncWait(SEND_DELAY);
 	}
 	pings++;
 	getMonotonicTime(&last_ping_sent);

@@ -29,6 +29,7 @@
 #include "log.h"
 #include "parse.h"
 #include "timing.h"
+#include "async_wait.h"
 #include "ports.h"
 #include "message.h"
 
@@ -229,14 +230,14 @@ static void closePort(Port *port)
 static void activateBraille(void)
 {
   writePort1(IRIS_GIO_OUTPUT, 0x01);
-  approximateDelay(9);
+  asyncWait(9);
   writePort1(IRIS_GIO_OUTPUT, 0);
 }
 
 static void deactivateBraille(void)
 {
   writePort1(IRIS_GIO_OUTPUT, 0x02);
-  approximateDelay(9);
+  asyncWait(9);
   writePort1(IRIS_GIO_OUTPUT, 0);
 }
 
@@ -1101,7 +1102,7 @@ static int suspendDevice(BrailleDisplay *brl)
   while (! clearWindow(brl, &internalPort)) {
     if (errno != EAGAIN) return 0;
   }
-  approximateDelay(10);
+  asyncWait(10);
   closePort(&internalPort);
   internalPort.waitingForAck = 0;
 

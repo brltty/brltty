@@ -32,7 +32,7 @@
 
 #include "log.h"
 #include "device.h"
-#include "timing.h"
+#include "async_wait.h"
 #include "ascii.h"
 
 #define BRL_STATUS_FIELDS sfGeneric
@@ -299,7 +299,7 @@ readKey (void) {
       case KEY_FUNCTION:
       case KEY_FUNCTION2:
       case KEY_UPDATE:
-         while (serialReadData(serialDevice, &arg, 1, 0, 0) != 1) approximateDelay(1);
+         while (serialReadData(serialDevice, &arg, 1, 0, 0) != 1) asyncWait(1);
          break;
    }
    {
@@ -355,7 +355,7 @@ askUser (const unsigned char *prompt) {
    while (1) {
       int key = readKey();
       if (key == EOF) {
-         approximateDelay(1);
+         asyncWait(1);
          continue;
       }
       if ((key & KEY_MASK) == KEY_UPDATE) {
@@ -547,7 +547,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
             return BRL_BLK_PASSKEY + BRL_KEY_FUNCTION + 9;
          case KEY_COMMAND: {
             int command;
-            while ((command = readKey()) == EOF) approximateDelay(1);
+            while ((command = readKey()) == EOF) asyncWait(1);
             logMessage(LOG_DEBUG, "Received command: (0x%2.2X) 0x%4.4X", KEY_COMMAND, command);
             switch (command) {
                case KEY_COMMAND:

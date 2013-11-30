@@ -30,6 +30,7 @@
 
 #include "log.h"
 #include "timing.h"
+#include "async_wait.h"
 
 #define BRL_HAVE_STATUS_CELLS
 #include "brl_driver.h"
@@ -308,7 +309,7 @@ acknowledgeDisplay (BrailleDisplay *brl) {
     if (!writeBytes(brl, acknowledgement, sizeof(acknowledgement))) return 0;
 
     discardInput();
-    approximateDelay(100);
+    asyncWait(100);
     discardInput();
   }
   logMessage(LOG_DEBUG, "Albatross description byte: %02X", description);
