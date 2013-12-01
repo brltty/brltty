@@ -953,6 +953,8 @@ static int
 usbPrepareInputEndpoint (UsbEndpoint *endpoint) {
   UsbEndpointExtension *eptx = endpoint->extension;
 
+  if (LINUX_USB_INPUT_PIPE_DISABLE) return 1;
+
   if (usbMakeInputPipe(endpoint)) {
     const UsbEndpointDescriptor *descriptor = endpoint->descriptor;
     size_t size = getLittleEndian16(descriptor->wMaxPacketSize);
