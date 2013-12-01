@@ -896,6 +896,12 @@ usbReadDeviceDescriptor (UsbDevice *device) {
   return 1;
 }
 
+static void
+usbLogInputProblem (UsbEndpoint *endpoint, const char *problem) {
+  logMessage(LOG_WARNING, "%s: Ept:%02X",
+             problem, endpoint->descriptor->bEndpointAddress);
+}
+
 ASYNC_ALARM_CALLBACK(usbHandleInputAlarm) {
   UsbEndpoint *endpoint = parameters->data;
   UsbEndpointExtension *eptx = endpoint->extension;
@@ -905,7 +911,10 @@ ASYNC_ALARM_CALLBACK(usbHandleInputAlarm) {
   eptx->monitor.alarmHandle = NULL;
 
   urb->actual_length = 0;
-  usbSubmitURB(urb, endpoint);
+
+  if (!usbSubmitURB(urb, endpoint)) {
+    usbLogInputProblem(endpoint, "input URB not resubmitted");
+  }
 }
 
 ASYNC_SIGNAL_CALLBACK(usbHandleInputSignal) {
@@ -933,23 +942,35 @@ ASYNC_SIGNAL_CALLBACK(usbHandleInputSignal) {
           written = 1;
           *delay = endpoint->descriptor->bInterval;
           if (!*delay) *delay = USB_INPUT_URB_RESUBMIT_DELAY;
+        } else {
+          usbLogInputProblem(endpoint, "input data not enqueued");
         }
+      } else {
+        usbLogInputProblem(endpoint, "input data not available");
       }
 
       if (written) {
         if (*delay) {
           if (asyncSetAlarmIn(&eptx->monitor.alarmHandle, *delay, usbHandleInputAlarm, endpoint)) {
             return 1;
+          } else {
+            usbLogInputProblem(endpoint, "input URB resubmit not scheduled");
           }
         } else if (usbSubmitURB(urb, endpoint)) {
           return 1;
+        } else {
+          usbLogInputProblem(endpoint, "input URB not resubmitted");
         }
       }
 
       eptx->monitor.urb = NULL;
+    } else {
+      usbLogInputProblem(endpoint, "unexpected input URB");
     }
 
     free(request);
+  } else {
+    usbLogInputProblem(endpoint, "input URB not available");
   }
 
   usbSetInputError(endpoint, errno);
@@ -976,20 +997,30 @@ usbPrepareInputEndpoint (UsbEndpoint *endpoint) {
           if (usbSubmitURB(eptx->monitor.urb, endpoint)) {
             endpoint->direction.input.asynchronous = 0;
             return 1;
+          } else {
+            usbLogInputProblem(endpoint, "input URB not submitted");
           }
 
           asyncCancelRequest(eptx->monitor.signalHandle);
           eptx->monitor.signalHandle = NULL;
+        } else {
+          usbLogInputProblem(endpoint, "input monitor not registered");
         }
 
         asyncRelinquishSignalNumber(eptx->monitor.urb->signr);
+      } else {
+        usbLogInputProblem(endpoint, "input signal number not obtained");
       }
 
       free(eptx->monitor.urb);
       eptx->monitor.urb = NULL;
+    } else {
+      usbLogInputProblem(endpoint, "input URB not created");
     }
 
     usbDestroyInputPipe(endpoint);
+  } else {
+    usbLogInputProblem(endpoint, "input pipe not created");
   }
 
   return 0;
