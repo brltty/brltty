@@ -250,6 +250,7 @@ deallocateSignalEntry (void *item, void *data) {
   SignalEntry *sig = item;
 
   deallocateQueue(sig->monitors);
+  asyncDiscardEvent(sig->event);
   free(sig);
 }
 
