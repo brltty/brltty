@@ -573,6 +573,11 @@ usbSubmitURB (struct usbdevfs_urb *urb, UsbEndpoint *endpoint) {
   UsbDevice *device = endpoint->device;
   UsbDeviceExtension *devx = device->extension;
 
+  usbLogURB(urb);
+  if ((urb->endpoint & UsbEndpointDirection_Mask) == UsbEndpointDirection_Output) {
+    logBytes(LOG_CATEGORY(USB_IO), "URB output", urb->buffer, urb->buffer_length);
+  }
+
   while (1) {
     if (ioctl(devx->usbfsFile, USBDEVFS_SUBMITURB, urb) != -1) return 1;
     if ((errno == EINVAL) &&
@@ -853,6 +858,8 @@ usbWriteEndpoint (
   int timeout
 ) {
   UsbEndpoint *endpoint;
+
+  logBytes(LOG_CATEGORY(USB_IO), "endpoint output", buffer, length);
 
   if ((endpoint = usbGetOutputEndpoint(device, endpointNumber))) {
     UsbEndpointTransfer transfer = USB_ENDPOINT_TRANSFER(endpoint->descriptor);
