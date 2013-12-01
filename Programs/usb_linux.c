@@ -963,6 +963,7 @@ ASYNC_SIGNAL_CALLBACK(usbHandleInputSignal) {
         }
       }
 
+      asyncRelinquishSignalNumber(urb->signr);
       eptx->monitor.urb = NULL;
     } else {
       usbLogInputProblem(endpoint, "unexpected input URB");
