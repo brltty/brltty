@@ -62,7 +62,7 @@ ASYNC_MONITOR_CALLBACK(monitorEventPipe) {
         .signalData = data
       };
 
-      logSymbol(LOG_CATEGORY(ASYNC_EVENTS), callback, "event signaled");
+      logSymbol(LOG_CATEGORY(ASYNC_EVENTS), callback, "event starting");
       if (callback) callback(&parameters);
     }
 
