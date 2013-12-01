@@ -67,7 +67,7 @@ static const LogCategoryEntry logCategoryTable[LOG_CATEGORY_COUNT] = {
   },
 
   [LOG_CATEGORY_INDEX(USB_IO)] = {
-    .name = "usbio",
+    .name = "usb",
     .prefix = "USB I/O"
   },
 
