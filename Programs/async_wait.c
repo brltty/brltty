@@ -44,11 +44,6 @@ struct AsyncWaitDataStruct {
 };
 
 static int
-signalCallbackExecuter (CallbackExecuterParameters *parameters) {
-  return asyncExecuteSignalCallback(parameters->tsd->signalData);
-}
-
-static int
 alarmCallbackExecuter (CallbackExecuterParameters *parameters) {
   return asyncExecuteAlarmCallback(parameters->tsd->alarmData, &parameters->timeout);
 }
@@ -67,10 +62,6 @@ ioCallbackExecuter (CallbackExecuterParameters *parameters) {
 }
 
 static const CallbackExecuterEntry callbackExecuterTable[] = {
-  { .execute = signalCallbackExecuter,
-    .action = "signal handled"
-  },
-
   { .execute = alarmCallbackExecuter,
     .action = "alarm handled"
   },

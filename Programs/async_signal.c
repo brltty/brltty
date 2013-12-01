@@ -26,12 +26,13 @@
 
 #include "log.h"
 #include "async_signal.h"
+#include "async_event.h"
 #include "async_internal.h"
 
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
 typedef struct {
   int number;
-  unsigned int count;
+  AsyncEvent *event;
   Queue *monitors;
 
   SignalHandler oldHandler;
@@ -310,6 +311,27 @@ cancelMonitor (Element *monitorElement) {
   }
 }
 
+ASYNC_EVENT_CALLBACK (handlePendingSignal) {
+  SignalEntry *sig = parameters->eventData;
+  Element *monitorElement = getQueueHead(sig->monitors);
+
+  if (monitorElement) {
+    MonitorEntry *mon = getElementItem(monitorElement);
+    AsyncSignalCallback *callback = mon->callback;
+
+    const AsyncSignalCallbackParameters parameters = {
+      .signal = sig->number,
+      .data = mon->data
+    };
+
+    logSymbol(LOG_CATEGORY(ASYNC_EVENTS), callback, "signal %d starting", sig->number);
+    mon->active = 1;
+    if (!callback(&parameters)) mon->delete = 1;
+    mon->active = 0;
+    if (mon->delete) deleteMonitor(monitorElement);
+  }
+}
+
 typedef struct {
   Queue *const signalQueue;
   SignalEntry *const signalEntry;
@@ -359,30 +381,33 @@ getSignalElement (int signalNumber, int create) {
       if ((sig = malloc(sizeof(*sig)))) {
         memset(sig, 0, sizeof(*sig));
         sig->number = signalNumber;
-        sig->count = 0;
 
-        if ((sig->monitors = newQueue(deallocateMonitorEntry, NULL))) {
-          {
-            static AsyncQueueMethods methods = {
-              .cancelRequest = cancelMonitor
-            };
+        if ((sig->event = asyncNewEvent(handlePendingSignal, sig))) {
+          if ((sig->monitors = newQueue(deallocateMonitorEntry, NULL))) {
+            {
+              static AsyncQueueMethods methods = {
+                .cancelRequest = cancelMonitor
+              };
 
-            setQueueData(sig->monitors, &methods);
+              setQueueData(sig->monitors, &methods);
+            }
+
+            {
+              AddSignalEntryParameters parameters = {
+                .signalQueue = signals,
+                .signalEntry = sig,
+
+                .signalElement = NULL
+              };
+
+              asyncCallWithAllSignalsBlocked(addSignalEntry, &parameters);
+              if (parameters.signalElement) return parameters.signalElement;
+            }
+
+            deallocateQueue(sig->monitors);
           }
 
-          {
-            AddSignalEntryParameters parameters = {
-              .signalQueue = signals,
-              .signalEntry = sig,
-
-              .signalElement = NULL
-            };
-
-            asyncCallWithAllSignalsBlocked(addSignalEntry, &parameters);
-            if (parameters.signalElement) return parameters.signalElement;
-          }
-
-          deallocateQueue(sig->monitors);
+          asyncDiscardEvent(sig->event);
         }
 
         free(sig);
@@ -402,7 +427,7 @@ handleMonitoredSignal (int signalNumber) {
   if (signalElement) {
     SignalEntry *sig = getElementItem(signalElement);
 
-    sig->count += 1;
+    asyncSignalEvent(sig->event, NULL);
   }
 }
 
@@ -544,81 +569,4 @@ asyncRelinquishSignalNumber (int signal) {
   logMessage(LOG_ERR, "signal number not obtained: %d", signal);
   return 0;
 }
-
-static int
-testPendingSignal (const void *item, const void *data) {
-  const SignalEntry *sig = item;
-
-  return sig->count > 0;
-}
-
-typedef struct {
-  AsyncSignalData *signalData;
-
-  SignalEntry *signalEntry;
-} GetPendingSignalParameters;
-
-static void
-getPendingSignal (void *data) {
-  GetPendingSignalParameters *parameters = data;
-  AsyncSignalData *sd = parameters->signalData;
-  Queue *signals = sd->signalQueue;
-
-  if (signals) {
-    Element *signalElement = findElement(signals, testPendingSignal, NULL);
-
-    if (signalElement) {
-      SignalEntry *sig = getElementItem(signalElement);
-
-      sig->count -= 1;
-      requeueElement(signalElement);
-
-      parameters->signalEntry = sig;
-    }
-  }
-}
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */
-
-int
-asyncExecuteSignalCallback (AsyncSignalData *sd) {
-#ifdef ASYNC_CAN_HANDLE_SIGNALS
-  if (sd) {
-    SignalEntry *sig;
-
-    {
-      GetPendingSignalParameters parameters = {
-        .signalData = sd,
-
-        .signalEntry = NULL
-      };
-
-      asyncCallWithAllSignalsBlocked(getPendingSignal, &parameters);
-      sig = parameters.signalEntry;
-    }
-
-    if (sig) {
-      Element *monitorElement = getQueueHead(sig->monitors);
-
-      if (monitorElement) {
-        MonitorEntry *mon = getElementItem(monitorElement);
-        AsyncSignalCallback *callback = mon->callback;
-
-        const AsyncSignalCallbackParameters parameters = {
-          .signal = sig->number,
-          .data = mon->data
-        };
-
-        logSymbol(LOG_CATEGORY(ASYNC_EVENTS), callback, "signal %d starting", sig->number);
-        mon->active = 1;
-        if (!callback(&parameters)) mon->delete = 1;
-        mon->active = 0;
-        if (mon->delete) deleteMonitor(monitorElement);
-
-        return 1;
-      }
-    }
-  }
-#endif /* ASYNC_CAN_HANDLE_SIGNALS */
-
-  return 0;
-}

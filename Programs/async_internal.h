@@ -28,7 +28,6 @@ extern "C" {
 
 typedef struct AsyncSignalDataStruct AsyncSignalData;
 extern void asyncDeallocateSignalData (AsyncSignalData *sd);
-extern int asyncExecuteSignalCallback (AsyncSignalData *sd);
 
 typedef struct AsyncAlarmDataStruct AsyncAlarmData;
 extern void asyncDeallocateAlarmData (AsyncAlarmData *alarmData);
