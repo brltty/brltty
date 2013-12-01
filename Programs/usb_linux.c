@@ -902,6 +902,14 @@ usbLogInputProblem (UsbEndpoint *endpoint, const char *problem) {
              problem, endpoint->descriptor->bEndpointAddress);
 }
 
+static unsigned char
+usbGetResubmitDelay (UsbEndpoint *endpoint) {
+  unsigned char interval = endpoint->descriptor->bInterval;
+
+  if (!interval) interval = USB_INPUT_URB_RESUBMIT_DELAY;
+  return interval;
+}
+
 ASYNC_ALARM_CALLBACK(usbHandleInputAlarm) {
   UsbEndpoint *endpoint = parameters->data;
   UsbEndpointExtension *eptx = endpoint->extension;
@@ -931,7 +939,7 @@ ASYNC_SIGNAL_CALLBACK(usbHandleInputSignal) {
 
     if (request == urb) {
       int written = 0;
-      int *delay = &eptx->monitor.submitDelay;
+      int *const delay = &eptx->monitor.submitDelay;
 
       if (response.count == 0) {
         written = 1;
@@ -940,8 +948,7 @@ ASYNC_SIGNAL_CALLBACK(usbHandleInputSignal) {
       } else if (response.count > 0) {
         if (usbEnqueueInput(endpoint, response.buffer, response.count)) {
           written = 1;
-          *delay = endpoint->descriptor->bInterval;
-          if (!*delay) *delay = USB_INPUT_URB_RESUBMIT_DELAY;
+          *delay = usbGetResubmitDelay(endpoint);
         } else {
           usbLogInputProblem(endpoint, "input data not enqueued");
         }
@@ -1037,7 +1044,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
     eptx->monitor.urb = NULL;
     eptx->monitor.signalHandle = NULL;
     eptx->monitor.alarmHandle = NULL;
-    eptx->monitor.submitDelay = USB_INPUT_URB_RESUBMIT_DELAY;
+    eptx->monitor.submitDelay = usbGetResubmitDelay(endpoint);
 
     if ((eptx->completedRequests = newQueue(NULL, NULL))) {
       switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
