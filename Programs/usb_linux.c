@@ -413,7 +413,9 @@ usbFormatURB (char *buffer, size_t size, const void *data) {
   size_t length;
 
   STR_BEGIN(buffer, size);
-  STR_PRINTF("USB URB: Loc:%p", urb);
+  STR_PRINTF("URB:");
+
+  STR_PRINTF(" Adr:%p", urb);
   STR_PRINTF(" Ept:%02X", urb->endpoint);
 
   STR_PRINTF(" Typ:%u", urb->type);
