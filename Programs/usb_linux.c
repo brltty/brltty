@@ -922,7 +922,8 @@ ASYNC_SIGNAL_CALLBACK(usbHandleInputSignal) {
       } else if (response.count > 0) {
         if (usbEnqueueInput(endpoint, response.buffer, response.count)) {
           written = 1;
-          *delay = USB_INPUT_URB_RESUBMIT_DELAY;
+          *delay = endpoint->descriptor->bInterval;
+          if (!*delay) *delay = USB_INPUT_URB_RESUBMIT_DELAY;
         }
       }
 
