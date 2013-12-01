@@ -81,6 +81,7 @@ getSharedSymbolName (void *address, unsigned int *offset) {
   Dl_info info;
 
   if (dladdr(address, &info)) {
+    if (offset) *offset = address - info.dli_saddr;
     return info.dli_sname;
   }
 #endif /* __USE_GNU */
