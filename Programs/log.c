@@ -445,8 +445,13 @@ formatLogBytesData (char *buffer, size_t size, const void *data) {
   size_t length;
 
   STR_BEGIN(buffer, size);
-  STR_PRINTF("%s:", bytes->description);
-  while (byte < end) STR_PRINTF(" %2.2X", *byte++);
+  if (bytes->description) STR_PRINTF("%s: ", bytes->description);
+
+  while (byte < end) {
+    if (byte != bytes->data) STR_PRINTF(" ");
+    STR_PRINTF("%2.2X", *byte++);
+  }
+
   length = STR_LENGTH;
   STR_END
   return length;

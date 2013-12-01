@@ -298,10 +298,7 @@ gioReadData (GioEndpoint *endpoint, void *buffer, size_t size, int wait) {
                                 (wait? endpoint->options.inputTimeout: 0), 0);
 
         if (result > 0) {
-          if (LOG_CATEGORY_FLAG(GENERIC_INPUT)) {
-            logBytes(categoryLogLevel, "generic input", &endpoint->input.buffer[endpoint->input.to], result);
-          }
-
+          logBytes(LOG_CATEGORY(GENERIC_INPUT), NULL, &endpoint->input.buffer[endpoint->input.to], result);
           endpoint->input.to += result;
           wait = 1;
         } else {
