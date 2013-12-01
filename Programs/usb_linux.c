@@ -407,6 +407,117 @@ usbReapUrb (
   return 0;
 }
 
+static size_t
+usbFormatURB (char *buffer, size_t size, const void *data) {
+  const struct usbdevfs_urb *urb = data;
+  size_t length;
+
+  STR_BEGIN(buffer, size);
+  STR_PRINTF("USB URB: Loc:%p", urb);
+  STR_PRINTF(" Ept:%02X", urb->endpoint);
+
+  STR_PRINTF(" Typ:%u", urb->type);
+  {
+    static const char *const types[] = {
+      [USBDEVFS_URB_TYPE_CONTROL] = "ctl",
+      [USBDEVFS_URB_TYPE_BULK] = "blk",
+      [USBDEVFS_URB_TYPE_INTERRUPT] = "int",
+      [USBDEVFS_URB_TYPE_ISO] = "iso"
+    };
+
+    if (urb->type < ARRAY_COUNT(types)) {
+      const char *type = types[urb->type];
+      if (type) STR_PRINTF("(%s)", type);
+    }
+  }
+
+  STR_PRINTF(" Flg:%02X", urb->flags);
+  {
+    typedef struct {
+      unsigned char bit;
+      const char *name;
+    } UrbFlagEntry;
+
+    static const UrbFlagEntry urbFlagTable[] = {
+#ifdef USBDEVFS_URB_SHORT_NOT_OK
+      { .bit = USBDEVFS_URB_SHORT_NOT_OK,
+        .name = "spd"
+      },
+#endif /* USBDEVFS_URB_SHORT_NOT_OK */
+
+#ifdef USBDEVFS_URB_ISO_ASAP
+      { .bit = USBDEVFS_URB_ISO_ASAP,
+        .name = "isa"
+      },
+#endif /* USBDEVFS_URB_ISO_ASAP */
+
+#ifdef USBDEVFS_URB_BULK_CONTINUATION
+      { .bit = USBDEVFS_URB_BULK_CONTINUATION,
+        .name = "bkc"
+      },
+#endif /* USBDEVFS_URB_BULK_CONTINUATION */
+
+#ifdef USBDEVFS_URB_NO_FSBR
+      { .bit = USBDEVFS_URB_NO_FSBR,
+        .name = "nof"
+      },
+#endif /* USBDEVFS_URB_NO_FSBR */
+
+#ifdef USBDEVFS_URB_ZERO_PACKET
+      { .bit = USBDEVFS_URB_ZERO_PACKET,
+        .name = "zpk"
+      },
+#endif /* USBDEVFS_URB_ZERO_PACKET */
+
+#ifdef USBDEVFS_URB_NO_INTERRUPT
+      { .bit = USBDEVFS_URB_NO_INTERRUPT,
+        .name = "noi"
+      },
+#endif /* USBDEVFS_URB_NO_INTERRUPT */
+
+      { .bit=0, .name=NULL }
+    };
+
+    int first = 1;
+    const UrbFlagEntry *flag = urbFlagTable;
+
+    while (flag->bit) {
+      if (urb->flags & flag->bit) {
+        STR_PRINTF("%c%s", (first? '(': ','), flag->name);
+        first = 0;
+      }
+
+      flag += 1;
+    }
+
+    if (!first) STR_PRINTF(")");
+  }
+
+  STR_PRINTF(" Buf:%p", urb->buffer);
+  STR_PRINTF(" Siz:%d", urb->buffer_length);
+  STR_PRINTF(" Len:%d", urb->actual_length);
+  STR_PRINTF(" Sig:%d", urb->signr);
+
+  {
+    int error = urb->status;
+    STR_PRINTF(" Err:%d", error);
+
+    if (error) {
+      if (error < 0) error = -error;
+      STR_PRINTF("(%s)", strerror(error));
+    }
+  }
+
+  length = STR_LENGTH;
+  STR_END;
+  return length;
+}
+
+static void
+usbLogURB (const struct usbdevfs_urb *urb) {
+  logData(LOG_CATEGORY(USB_IO), usbFormatURB, urb);
+}
+
 static struct usbdevfs_urb *
 usbMakeURB (
   const UsbEndpointDescriptor *endpoint,
@@ -573,6 +684,8 @@ usbReapResponse (
     while (!(urb = dequeueItem(eptx->completedRequests))) {
       if (!usbReapUrb(device, wait)) return NULL;
     }
+
+    usbLogURB(urb);
 
     response->context = urb->usercontext;
     response->buffer = urb->buffer;
@@ -809,7 +922,7 @@ ASYNC_SIGNAL_CALLBACK(usbHandleInputSignal) {
       } else if (response.count > 0) {
         if (usbEnqueueInput(endpoint, response.buffer, response.count)) {
           written = 1;
-          *delay = 0;
+          *delay = USB_INPUT_URB_RESUBMIT_DELAY;
         }
       }
 
@@ -880,7 +993,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
     eptx->monitor.urb = NULL;
     eptx->monitor.signalHandle = NULL;
     eptx->monitor.alarmHandle = NULL;
-    eptx->monitor.submitDelay = 0;
+    eptx->monitor.submitDelay = USB_INPUT_URB_RESUBMIT_DELAY;
 
     if ((eptx->completedRequests = newQueue(NULL, NULL))) {
       switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {

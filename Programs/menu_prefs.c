@@ -1074,6 +1074,11 @@ makePreferencesMenu (void) {
       }
 
       {
+        NAME(strtext("USB I/O"));
+        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(USB_IO), &itemName));
+      }
+
+      {
         NAME(strtext("Input Packets"));
         ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(INPUT_PACKETS), &itemName));
       }

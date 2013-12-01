@@ -748,6 +748,8 @@ usbApplyInputFilters (UsbDevice *device, void *buffer, size_t size, ssize_t *len
     .length = *length
   };
 
+  logBytes(LOG_CATEGORY(USB_IO), "USB input", buffer, *length);
+
   if (processQueue(device->inputFilters, usbApplyInputFilter, &data)) {
     errno = EIO;
     return 0;

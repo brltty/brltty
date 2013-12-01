@@ -66,6 +66,11 @@ static const LogCategoryEntry logCategoryTable[LOG_CATEGORY_COUNT] = {
     .prefix = "generic input"
   },
 
+  [LOG_CATEGORY_INDEX(USB_IO)] = {
+    .name = "usbio",
+    .prefix = "USB I/O"
+  },
+
   [LOG_CATEGORY_INDEX(INPUT_PACKETS)] = {
     .name = "inpkts",
     .prefix = "input packet"
