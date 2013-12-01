@@ -959,7 +959,7 @@ usbAwaitInput (
   }
 
   retryInterval = endpoint->descriptor->bInterval;
-  retryInterval = MAX(USB_INPUT_RETRY_INTERVAL_MINIMUM, retryInterval);
+  retryInterval = MAX(USB_INPUT_AWAIT_RETRY_INTERVAL_MINIMUM, retryInterval);
 
   if (!(endpoint->direction.input.pending && getQueueSize(endpoint->direction.input.pending))) {
     int size = getLittleEndian16(endpoint->descriptor->wMaxPacketSize);
@@ -1058,7 +1058,7 @@ usbReadData (
     while (length > 0) {
       int timeout = (target != bytes)? subsequentTimeout:
                     initialTimeout? initialTimeout:
-                    USB_INPUT_ENDPOINT_READ_INTERVAL_DEFAULT;
+                    USB_INPUT_READ_INITIAL_TIMEOUT_DEFAULT;
 
       if (!usbAwaitInput(device, endpointNumber, timeout)) {
         if (errno == EAGAIN) break;
