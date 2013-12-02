@@ -607,7 +607,7 @@ doUpdate (void) {
 
         trackCursor(0);
         logMessage(LOG_CATEGORY(CURSOR_TRACKING),
-                   "cursor tracking: scr=%u csr=[%u,%u]->[%u,%u] win=[%u,%u]->[%u,%u]",
+                   "scr=%u csr=[%u,%u]->[%u,%u] win=[%u,%u]->[%u,%u]",
                    scr.number,
                    ses->trkx, ses->trky, scr.posx, scr.posy,
                    oldx, oldy, ses->winx, ses->winy);
