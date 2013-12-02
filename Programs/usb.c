@@ -948,7 +948,11 @@ usbAwaitInput (
   }
 
   if (usbHaveInputPipe(endpoint)) {
-    if (usbHaveInputError(endpoint)) return 1;
+    if (usbHaveInputError(endpoint)) {
+      errno = endpoint->direction.input.pipe.error;
+      return 0;
+    }
+
     return awaitFileInput(endpoint->direction.input.pipe.output, timeout);
   }
 
