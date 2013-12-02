@@ -40,7 +40,6 @@ typedef struct {
 struct AsyncWaitDataStruct {
   AsyncThreadSpecificData *tsd;
   unsigned int waitDepth;
-  const CallbackExecuterEntry *callbackExecuter;
 };
 
 static int
@@ -58,7 +57,7 @@ taskCallbackExecuter (CallbackExecuterParameters *parameters) {
 
 static int
 ioCallbackExecuter (CallbackExecuterParameters *parameters) {
-  return asyncExecuteIoCallback(parameters->tsd->ioData, 0);
+  return asyncExecuteIoCallback(parameters->tsd->ioData, parameters->timeout);
 }
 
 static const CallbackExecuterEntry callbackExecuterTable[] = {
@@ -74,7 +73,9 @@ static const CallbackExecuterEntry callbackExecuterTable[] = {
     .action = "I/O operation handled"
   },
 
-  { .execute = NULL }
+  { .execute = NULL,
+    .action = "wait timed out"
+  }
 };
 
 void
@@ -100,7 +101,6 @@ getWaitData (void) {
     memset(wd, 0, sizeof(*wd));
     wd->tsd = tsd;
     wd->waitDepth = 0;
-    wd->callbackExecuter = callbackExecuterTable;
     tsd->waitData = wd;
   }
 
@@ -112,8 +112,7 @@ awaitAction (long int timeout) {
   AsyncWaitData *wd = getWaitData();
 
   if (wd) {
-    const char *action = "unknown action";
-    const CallbackExecuterEntry *const firstCallbackExecuter = wd->callbackExecuter;
+    const CallbackExecuterEntry *cbx = callbackExecuterTable;
 
     CallbackExecuterParameters parameters = {
       .tsd = wd->tsd,
@@ -125,30 +124,14 @@ awaitAction (long int timeout) {
                "begin: level %u: timeout %ld",
                wd->waitDepth, timeout);
 
-    while (1) {
-      if (!(++wd->callbackExecuter)->execute) {
-        wd->callbackExecuter = callbackExecuterTable;
-      }
-
-      if (wd->callbackExecuter->execute(&parameters)) {
-        action = wd->callbackExecuter->action;
-        break;
-      }
-
-      if (wd->callbackExecuter == firstCallbackExecuter) {
-        if (asyncExecuteIoCallback(parameters.tsd->ioData, parameters.timeout)) {
-          action = "I/O operation handled";
-        } else {
-          action = "wait timed out";
-        }
-
-        break;
-      }
+    while (cbx->execute) {
+      if (cbx->execute(&parameters)) break;
+      cbx += 1;
     }
 
     logMessage(LOG_CATEGORY(ASYNC_EVENTS),
                "end: level %u: %s",
-               wd->waitDepth, action);
+               wd->waitDepth, cbx->action);
 
     wd->waitDepth -= 1;
   } else {
