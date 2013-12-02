@@ -1248,6 +1248,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                   return 1;
                 }
               }
+            } else if (errno != EAGAIN) {
+              break;
             }
           }
 
