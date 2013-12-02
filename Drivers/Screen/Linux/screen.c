@@ -1114,6 +1114,7 @@ toScreenCacheSize (const ScreenSize *screenSize) {
 
 static int
 refresh_LinuxScreen (void) {
+  if (!isMonitorable) return 1;
   if (!screenUpdated) return 1;
 
   if (!cacheBuffer) {
