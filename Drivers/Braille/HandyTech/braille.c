@@ -558,7 +558,7 @@ executeHidFirmwareCommand (BrailleDisplay *brl, HtHidCommand command) {
 }
 
 typedef struct {
-  int (*initialize) (BrailleDisplay *brl);
+  int (*initializeSession) (BrailleDisplay *brl);
 } GeneralOperations;
 
 typedef struct {
@@ -569,7 +569,7 @@ typedef struct {
 } UsbOperations;
 
 static int
-initializeUsb2 (BrailleDisplay *brl) {
+initializeUsbSession2 (BrailleDisplay *brl) {
   static const ReportEntry reportTable[] = {
     {.number=HT_HID_RPT_OutData, .size=&hidReportSize_OutData},
     {.number=HT_HID_RPT_InData, .size=&hidReportSize_InData},
@@ -681,7 +681,7 @@ writeUsbData2 (
 }
 
 static const GeneralOperations generalOperations2 = {
-  .initialize = initializeUsb2
+  .initializeSession = initializeUsbSession2
 };
 
 static const UsbOperations usbOperations2 = {
@@ -692,7 +692,7 @@ static const UsbOperations usbOperations2 = {
 };
 
 static int
-initializeUsb3 (BrailleDisplay *brl) {
+initializeUsbSession3 (BrailleDisplay *brl) {
   static const ReportEntry reportTable[] = {
     {.number=HT_HID_RPT_OutData, .size=&hidReportSize_OutData},
     {.number=HT_HID_RPT_InData, .size=&hidReportSize_InData},
@@ -798,7 +798,7 @@ writeUsbData3 (
 }
 
 static const GeneralOperations generalOperations3 = {
-  .initialize = initializeUsb3
+  .initializeSession = initializeUsbSession3
 };
 
 static const UsbOperations usbOperations3 = {
@@ -1048,8 +1048,8 @@ initializeSession (BrailleDisplay *brl) {
   const GeneralOperations *ops = gioGetApplicationData(brl->gioEndpoint);
 
   if (ops) {
-    if (ops->initialize) {
-      if (!ops->initialize(brl)) {
+    if (ops->initializeSession) {
+      if (!ops->initializeSession(brl)) {
         return 0;
       }
     }
