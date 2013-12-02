@@ -1199,6 +1199,18 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   return 0;
 }
 
+static size_t
+readResponse (BrailleDisplay *brl, void *packet, size_t size) {
+  return readBraillePacket(brl, NULL, packet, size, verifyPacket, NULL);
+}
+
+static BrailleResponseResult
+isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
+  const HT_Packet *response = packet;
+
+  return (response->fields.type == HT_PKT_OK)? BRL_RSP_DONE: BRL_RSP_UNEXPECTED;
+}
+
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
@@ -1206,55 +1218,39 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
     if (connectResource(brl, device)) {
       unsigned int setTime = 0;
+      HT_Packet response;
 
-      {
-        if (*parameters[PARM_SETTIME])
-          if (!validateYesNo(&setTime, parameters[PARM_SETTIME]))
-            logMessage(LOG_WARNING, "%s: %s", "invalid set time setting",
-                       parameters[PARM_SETTIME]);
+      if (*parameters[PARM_SETTIME])
+        if (!validateYesNo(&setTime, parameters[PARM_SETTIME]))
+          logMessage(LOG_WARNING, "%s: %s", "invalid set time setting",
+                     parameters[PARM_SETTIME]);
 
-        setTime = !!setTime;
-      }
+      setTime = !!setTime;
 
-      {
-        int tries = 0;
+      if (probeBrailleDisplay(brl, 3, NULL, 100,
+                              brl_reset,
+                              readResponse, &response, sizeof(response),
+                              isIdentityResponse)) {
+        if (identifyModel(brl, response.fields.data.ok.model)) {
+          makeOutputTable(dotsTable_ISO11548_1);
 
-        while (brl_reset(brl)) {
-          while (gioAwaitInput(brl->gioEndpoint, 100)) {
-            HT_Packet response;
-            ssize_t length = brl_readPacket(brl, &response, sizeof(response));
+          if (brl->data->model->hasATC) {
+            setAtcMode(brl, 1);
 
-            if (length > 0) {
-              if (response.fields.type == HT_PKT_OK) {
-                if (identifyModel(brl, response.fields.data.ok.model)) {
-                  makeOutputTable(dotsTable_ISO11548_1);
+            touchAnalyzeCells(brl, NULL);
+            brl->touchEnabled = 1;
+          }
 
-                  if (brl->data->model->hasATC) {
-                    setAtcMode(brl, 1);
-
-                    touchAnalyzeCells(brl, NULL);
-                    brl->touchEnabled = 1;
-                  }
-
-                  if (setTime) {
-                    if (brl->data->model->hasTime) {
-                      requestDateTime(brl, synchronizeDateTime);
-                    } else {
-                      logMessage(LOG_INFO, "%s does not support setting the clock",
-                                 brl->data->model->name);
-                    }
-                  }
-
-                  return 1;
-                }
-              }
-            } else if (errno != EAGAIN) {
-              break;
+          if (setTime) {
+            if (brl->data->model->hasTime) {
+              requestDateTime(brl, synchronizeDateTime);
+            } else {
+              logMessage(LOG_INFO, "%s does not support setting the clock",
+                         brl->data->model->name);
             }
           }
 
-          if (errno != EAGAIN) break;
-          if (++tries == 3) break;
+          return 1;
         }
       }
 
