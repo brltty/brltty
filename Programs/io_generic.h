@@ -58,6 +58,7 @@ typedef struct {
   GioUsbWriteDataMethod *writeData;
   GioUsbAwaitInputMethod *awaitInput;
   GioUsbReadDataMethod *readData;
+  UsbInputFilter *inputFilter;
 } GioUsbConnectionProperties;
 
 typedef void GioUsbSetConnectionPropertiesMethod (

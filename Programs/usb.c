@@ -723,13 +723,18 @@ usbDeallocateInputFilter (void *item, void *data) {
 }
 
 int
-usbAddInputFilter (UsbDevice *device, UsbInputFilter filter) {
+usbAddInputFilter (UsbDevice *device, UsbInputFilter *filter) {
   UsbInputFilterEntry *entry;
+
   if ((entry = malloc(sizeof(*entry)))) {
+    memset(entry, 0, sizeof(*entry));
     entry->filter = filter;
+
     if (enqueueItem(device->inputFilters, entry)) return 1;
+
     free(entry);
   }
+
   return 0;
 }
 

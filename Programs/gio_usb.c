@@ -287,7 +287,8 @@ connectUsbResource (
 
     if ((handle->channel = usbOpenChannel(descriptor->usb.channelDefinitions, identifier))) {
       {
-        const UsbChannelDefinition *definition = &handle->channel->definition;
+        const UsbChannel *channel = handle->channel;
+        const UsbChannelDefinition *definition = &channel->definition;
         GioUsbConnectionProperties *properties = &handle->properties;
 
         memset(properties, 0, sizeof(*properties));
@@ -295,11 +296,16 @@ connectUsbResource (
         properties->writeData = NULL;
         properties->awaitInput = NULL;
         properties->readData = NULL;
+        properties->inputFilter = NULL;
 
         {
           GioUsbSetConnectionPropertiesMethod *method = descriptor->usb.setConnectionProperties;
 
           if (method) method(properties, definition);
+        }
+
+        if (properties->inputFilter) {
+          usbAddInputFilter(channel->device, properties->inputFilter);
         }
       }
 

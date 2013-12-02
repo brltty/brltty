@@ -27,7 +27,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct {
-  UsbInputFilter filter;
+  UsbInputFilter *filter;
 } UsbInputFilterEntry;
 
 typedef struct UsbEndpointExtensionStruct UsbEndpointExtension;

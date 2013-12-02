@@ -857,7 +857,7 @@ typedef struct {
   uint16_t vendor;
   uint16_t product;
   const UsbSerialOperations *operations;
-  UsbInputFilter inputFilter;
+  UsbInputFilter *inputFilter;
 } UsbSerialAdapter;
 
 static const UsbSerialAdapter usbSerialAdapters[] = {

@@ -302,13 +302,7 @@ extern ssize_t usbHidSetFeature (
   int timeout
 );
 
-typedef struct {
-  void *const buffer;
-  const size_t size;
-  ssize_t length;
-} UsbInputFilterData;
-typedef int (*UsbInputFilter) (UsbInputFilterData *data);
-extern int usbAddInputFilter (UsbDevice *device, UsbInputFilter filter);
+extern int usbAddInputFilter (UsbDevice *device, UsbInputFilter *filter);
 
 typedef struct {
   int (*setLineConfiguration) (UsbDevice *device, unsigned int baud, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity, SerialFlowControl flowControl);

@@ -318,6 +318,15 @@ typedef struct {
 
 typedef struct UsbDeviceStruct UsbDevice;
 
+typedef struct {
+  void *const buffer;
+  const size_t size;
+
+  ssize_t length;
+} UsbInputFilterData;
+
+typedef int UsbInputFilter (UsbInputFilterData *data);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
