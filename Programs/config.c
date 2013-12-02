@@ -1253,6 +1253,9 @@ startBrailleDriver (void) {
     ensureStatusFields();
     playTune(&tune_braille_on);
 
+    ses->winx = 0;
+    trackCursor(1);
+
     if (clearStatusCells(&brl)) {
       if (opt_quiet) return 1;
 
