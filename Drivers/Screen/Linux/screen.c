@@ -1102,9 +1102,13 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
 
 static int
 poll_LinuxScreen (void) {
-  if (!isMonitorable) return 1;
-  if (screenMonitor) return 0;
-  return !asyncMonitorFileAlert(&screenMonitor, screenDescriptor, handleScreenAlert, NULL);
+  int poll = !isMonitorable? 1:
+             screenMonitor? 0:
+             !asyncMonitorFileAlert(&screenMonitor, screenDescriptor,
+                                    handleScreenAlert, NULL);
+
+  if (poll) screenUpdated = 1;
+  return poll;
 }
 
 static size_t
@@ -1114,7 +1118,6 @@ toScreenCacheSize (const ScreenSize *screenSize) {
 
 static int
 refresh_LinuxScreen (void) {
-  if (!isMonitorable) return 1;
   if (!screenUpdated) return 1;
 
   if (!cacheBuffer) {
