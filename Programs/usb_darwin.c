@@ -274,16 +274,6 @@ usbAsynchronousRequestCallback (void *context, IOReturn result, void *arg) {
 }
 
 int
-usbResetDevice (UsbDevice *device) {
-  UsbDeviceExtension *devx = device->extension;
-  IOReturn result = (*devx->device)->ResetDevice(devx->device);
-  if (result == kIOReturnSuccess) return 1;
-
-  setUsbError(result, "USB device reset");
-  return 0;
-}
-
-int
 usbDisableAutosuspend (UsbDevice *device) {
   logUnsupportedFunction();
   return 0;

@@ -449,12 +449,6 @@ usbSetInterface (UsbDeviceExtension *devx, uint8_t identifier) {
 }
 
 int
-usbResetDevice (UsbDevice *device) {
-  logUnsupportedFunction();
-  return 0;
-}
-
-int
 usbDisableAutosuspend (UsbDevice *device) {
   logUnsupportedFunction();
   return 0;

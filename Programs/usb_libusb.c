@@ -32,17 +32,6 @@ struct UsbDeviceExtensionStruct {
 };
 
 int
-usbResetDevice (UsbDevice *device) {
-  UsbDeviceExtension *devx = device->extension;
-  int result = usb_reset(devx->handle);
-  if (result >= 0) return 1;
-
-  errno = -result;
-  logSystemError("USB device reset");
-  return 0;
-}
-
-int
 usbDisableAutosuspend (UsbDevice *device) {
   logUnsupportedFunction();
   return 0;

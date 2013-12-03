@@ -104,19 +104,6 @@ usbGetHandle (UsbDeviceExtension *devx) {
 }
 
 int
-usbResetDevice (UsbDevice *device) {
-  UsbDeviceExtension *devx = device->extension;
-
-  if (usbGetHandle(devx)) {
-    int result = libusb_reset_device(devx->handle);
-    if (result == LIBUSB_SUCCESS) return 1;
-    usbSetErrno(result, "libusb_reset_device");
-  }
-
-  return 0;
-}
-
-int
 usbDisableAutosuspend (UsbDevice *device) {
   logUnsupportedFunction();
   return 0;

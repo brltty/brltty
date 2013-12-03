@@ -96,18 +96,6 @@ usbCloseUsbfsFile (UsbDeviceExtension *devx) {
 }
 
 int
-usbResetDevice (UsbDevice *device) {
-  UsbDeviceExtension *devx = device->extension;
-
-  if (usbOpenUsbfsFile(devx)) {
-    if (ioctl(devx->usbfsFile, USBDEVFS_RESET, NULL) != -1) return 1;
-    logSystemError("USB device reset");
-  }
-
-  return 0;
-}
-
-int
 usbDisableAutosuspend (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
   int ok = 0;

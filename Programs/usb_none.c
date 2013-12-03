@@ -26,12 +26,6 @@
 #include "usb_internal.h"
 
 int
-usbResetDevice (UsbDevice *device) {
-  logUnsupportedFunction();
-  return 0;
-}
-
-int
 usbDisableAutosuspend (UsbDevice *device) {
   logUnsupportedFunction();
   return 0;
