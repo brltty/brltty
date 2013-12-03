@@ -707,7 +707,7 @@ determineAttributesMasks (void) {
       }
     }
 
-    if (lseek(screenDescriptor, 0, SEEK_SET) != -1) {
+    {
       ScreenSize size;
 
       if (readScreenSize(&size)) {
@@ -726,8 +726,6 @@ determineAttributesMasks (void) {
           return 1;
         }
       }
-    } else {
-      logSystemError("lseek");
     }
   }
 
