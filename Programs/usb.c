@@ -896,7 +896,7 @@ UsbDevice *
 usbTestDevice (UsbDeviceExtension *extension, UsbDeviceChooser chooser, void *data) {
   UsbDevice *device;
   if ((device = usbOpenDevice(extension))) {
-    logMessage(LOG_DEBUG, "USB: testing: vendor=%04X product=%04X",
+    logMessage(LOG_CATEGORY(USB_IO), "testing device: vendor=%04X product=%04X",
                getLittleEndian16(device->descriptor.idVendor),
                getLittleEndian16(device->descriptor.idProduct));
     if (chooser(device, data)) {
