@@ -566,6 +566,7 @@ typedef struct {
   GioUsbAwaitInputMethod *awaitInput;
   GioUsbReadDataMethod *readData;
   GioUsbWriteDataMethod *writeData;
+  UsbInputFilter *inputFilter;
 } UsbOperations;
 
 static int
@@ -700,70 +701,10 @@ initializeUsbSession3 (BrailleDisplay *brl) {
   };
 
   if (getHidReportSizes(brl, reportTable)) {
-    if (allocateHidInputBuffer()) {
-      return 1;
-    }
+    return 1;
   }
 
   return 0;
-}
-
-static int
-awaitUsbInput3 (
-  UsbDevice *device, const UsbChannelDefinition *definition, int milliseconds
-) {
-  if (hidReportSize_OutData) {
-    TimePeriod period;
-
-    if (hidInputOffset < hidInputLength) return 1;
-    startTimePeriod(&period, milliseconds);
-
-    while (1) {
-      ssize_t result = usbReadData(device, definition->inputEndpoint,
-                                   hidInputReport, hidReportSize_OutData,
-                                   0, 100);
-
-      if (result == -1) return 0;
-      if (result > 0 && hidInputLength > 0) {
-        hidInputOffset = 0;
-        return 1;
-      }
-
-      if (afterTimePeriod(&period, NULL)) break;
-      asyncWait(10);
-    }
-  }
-
-  errno = EAGAIN;
-  return 0;
-}
-
-static ssize_t
-readUsbData3 (
-  UsbDevice *device, const UsbChannelDefinition *definition,
-  void *data, size_t size,
-  int initialTimeout, int subsequentTimeout
-) {
-  unsigned char *buffer = data;
-  int count = 0;
-
-  while (count < size) {
-    if (!awaitUsbInput3(device, definition,
-                        count? subsequentTimeout: initialTimeout)) {
-      if (errno != EAGAIN) count = -1;
-      break;
-    }
-
-    {
-      size_t amount = MIN(size-count, hidInputLength-hidInputOffset);
-
-      memcpy(&buffer[count], &hidInputBuffer[hidInputOffset], amount);
-      hidInputOffset += amount;
-      count += amount;
-    }
-  }
-
-  return count;
 }
 
 static ssize_t
@@ -797,15 +738,26 @@ writeUsbData3 (
   return index;
 }
 
+static int
+filterUsbInput3 (UsbInputFilterData *data) {
+  unsigned char *buffer = data->buffer;
+  if (data->length == hidReportSize_OutData && buffer[0] == HT_HID_RPT_OutData) {
+    data->length = buffer[1];
+    if (data->length < data->size) {
+      memmove(data->buffer, data->buffer+2, data->length);
+    }
+  }
+  return 1;
+}
+
 static const GeneralOperations generalOperations3 = {
   .initializeSession = initializeUsbSession3
 };
 
 static const UsbOperations usbOperations3 = {
   .general = &generalOperations3,
-  .awaitInput = awaitUsbInput3,
-  .readData = readUsbData3,
-  .writeData = writeUsbData3
+  .writeData = writeUsbData3,
+  .inputFilter = filterUsbInput3
 };
 
 static int
@@ -1070,6 +1022,7 @@ setUsbConnectionProperties (
     properties->writeData = usbOps->writeData;
     properties->readData = usbOps->readData;
     properties->awaitInput = usbOps->awaitInput;
+    properties->inputFilter = usbOps->inputFilter;
   }
 }
 
