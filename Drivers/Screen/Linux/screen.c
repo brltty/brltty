@@ -413,16 +413,12 @@ canMonitorScreen (void) {
 
 static size_t
 readScreenDevice (off_t offset, void *buffer, size_t size) {
-  if (lseek(screenDescriptor, offset, SEEK_SET) != -1) {
-    ssize_t count = read(screenDescriptor, buffer, size);
+  const ssize_t count = pread(screenDescriptor, buffer, size, offset);
 
-    if (count != -1) {
-      return count;
-    } else {
-      logSystemError("screen read");
-    }
+  if (count != -1) {
+    return count;
   } else {
-    logSystemError("screen seek");
+    logSystemError("screen read");
   }
 
   return 0;
