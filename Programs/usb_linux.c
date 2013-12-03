@@ -363,9 +363,22 @@ usbControlTransfer (
     arg.transfer.data = buffer;
     arg.transfer.timeout = timeout;
 
+    usbLogSetupPacket(&arg.setup);
+    if (direction == UsbControlDirection_Output) {
+      if (length) logBytes(LOG_CATEGORY(USB_IO), "control output", buffer, length);
+    }
+
     {
       int count = ioctl(devx->usbfsFile, USBDEVFS_CONTROL, &arg);
-      if (count != -1) return count;
+
+      if (count != -1) {
+        if (direction == UsbControlDirection_Input) {
+          logBytes(LOG_CATEGORY(USB_IO), "control input", buffer, length);
+        }
+
+        return count;
+      }
+
       logSystemError("USB control transfer");
     }
   }

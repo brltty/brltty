@@ -140,6 +140,8 @@ extern int usbAllocateEndpointExtension (UsbEndpoint *endpoint);
 extern void usbDeallocateEndpointExtension (UsbEndpointExtension *eptx);
 extern void usbDeallocateDeviceExtension (UsbDeviceExtension *devx);
 
+extern void usbLogSetupPacket (const UsbSetupPacket *setup);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

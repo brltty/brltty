@@ -172,6 +172,28 @@ usbGetSerialNumber (UsbDevice *device, int timeout) {
   return usbGetString(device, device->descriptor.iSerialNumber, timeout);
 }
 
+static size_t
+usbFormatLogSetupPacket (char *buffer, size_t size, const void *data) {
+  const UsbSetupPacket *setup = data;
+  size_t length;
+  STR_BEGIN(buffer, size);
+
+  STR_PRINTF("setup packet: Typ:%02X Req:%02X Val:%04X Idx:%04X Len:%04X",
+             setup->bRequestType, setup->bRequest,
+             getLittleEndian16(setup->wValue),
+             getLittleEndian16(setup->wIndex),
+             getLittleEndian16(setup->wLength));
+
+  length = STR_LENGTH;
+  STR_END;
+  return length;
+}
+
+void
+usbLogSetupPacket (const UsbSetupPacket *setup) {
+  logData(LOG_CATEGORY(USB_IO), usbFormatLogSetupPacket, setup);
+}
+
 void
 usbLogString (
   UsbDevice *device,
