@@ -741,12 +741,14 @@ writeUsbData3 (
 static int
 filterUsbInput3 (UsbInputFilterData *data) {
   unsigned char *buffer = data->buffer;
-  if (data->length == hidReportSize_OutData && buffer[0] == HT_HID_RPT_OutData) {
+
+  if ((data->length == hidReportSize_OutData) && 
+      (buffer[0] == HT_HID_RPT_OutData) &&
+      (buffer[1] <= (data->length - 2))) {
     data->length = buffer[1];
-    if (data->length < data->size) {
-      memmove(data->buffer, data->buffer+2, data->length);
-    }
+    memmove(data->buffer, data->buffer+2, data->length);
   }
+
   return 1;
 }
 
