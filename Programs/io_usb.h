@@ -305,6 +305,7 @@ extern ssize_t usbHidSetFeature (
 extern int usbAddInputFilter (UsbDevice *device, UsbInputFilter *filter);
 
 typedef struct {
+  const char *name;
   int (*setLineConfiguration) (UsbDevice *device, unsigned int baud, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity, SerialFlowControl flowControl);
   int (*setLineProperties) (UsbDevice *device, unsigned int baud, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity);
   int (*setBaud) (UsbDevice *device, unsigned int baud);

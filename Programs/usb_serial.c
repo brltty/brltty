@@ -180,6 +180,7 @@ usbEnableAdapter_CDC_ACM (UsbDevice *device) {
 }
 
 static const UsbSerialOperations usbSerialOperations_CDC_ACM = {
+  .name = "CDC_ACM",
   .setLineProperties = usbSetLineProperties_CDC_ACM,
   .setFlowControl = usbSetFlowControl_CDC_ACM,
   .enableAdapter = usbEnableAdapter_CDC_ACM
@@ -294,6 +295,7 @@ usbSetRtsState_Belkin (UsbDevice *device, int state) {
 }
 
 static const UsbSerialOperations usbSerialOperations_Belkin = {
+  .name = "Belkin",
   .setBaud = usbSetBaud_Belkin,
   .setDataFormat = usbSetDataFormat_Belkin,
   .setFlowControl = usbSetFlowControl_Belkin,
@@ -453,6 +455,7 @@ usbSetRtsState_FTDI (UsbDevice *device, int state) {
 }
 
 static const UsbSerialOperations usbSerialOperations_FTDI_SIO = {
+  .name = "FTDI_SIO",
   .setBaud = usbSetBaud_FTDI_SIO,
   .setDataFormat = usbSetDataFormat_FTDI,
   .setFlowControl = usbSetFlowControl_FTDI,
@@ -461,6 +464,7 @@ static const UsbSerialOperations usbSerialOperations_FTDI_SIO = {
 };
 
 static const UsbSerialOperations usbSerialOperations_FTDI_FT8U232AM = {
+  .name = "FTDI_FT8U232AM",
   .setBaud = usbSetBaud_FTDI_FT8U232AM,
   .setDataFormat = usbSetDataFormat_FTDI,
   .setFlowControl = usbSetFlowControl_FTDI,
@@ -469,6 +473,7 @@ static const UsbSerialOperations usbSerialOperations_FTDI_FT8U232AM = {
 };
 
 static const UsbSerialOperations usbSerialOperations_FTDI_FT232BM = {
+  .name = "FTDI_FT232BM",
   .setBaud = usbSetBaud_FTDI_FT232BM,
   .setDataFormat = usbSetDataFormat_FTDI,
   .setFlowControl = usbSetFlowControl_FTDI,
@@ -658,6 +663,7 @@ usbEnableAdapter_CP2101 (UsbDevice *device) {
 }
 
 static const UsbSerialOperations usbSerialOperations_CP2101 = {
+  .name = "CP2101",     
   .setBaud = usbSetBaud_CP2101,
   .setDataFormat = usbSetDataFormat_CP2101,
   .setFlowControl = usbSetFlowControl_CP2101,
@@ -847,6 +853,7 @@ usbWriteData_CP2110 (UsbDevice *device, const void *data, size_t size) {
 }
 
 static const UsbSerialOperations usbSerialOperations_CP2110 = {
+  .name = "CP2110",
   .setLineConfiguration = &usbSetLineConfiguration_CP2110,
   .enableAdapter = usbEnableAdapter_CP2110,
   .writeData = usbWriteData_CP2110

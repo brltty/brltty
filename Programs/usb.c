@@ -1170,9 +1170,14 @@ usbChooseChannel (UsbDevice *device, void *data) {
           if (usbOpenInterface(device, definition->interface, definition->alternative)) {
             int ok = 1;
 
-            if (ok)
-              if (!usbSetSerialOperations(device))
+            if (ok) {
+              if (!usbSetSerialOperations(device)) {
                 ok = 0;
+              } else if (device->serialOperations) {
+                logMessage(LOG_CATEGORY(USB_IO), "serial adapter: %s",
+                           device->serialOperations->name);
+              }
+            }
 
             if (ok)
               if (device->serialOperations)
