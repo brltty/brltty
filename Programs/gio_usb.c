@@ -286,30 +286,29 @@ connectUsbResource (
     memset(handle, 0, sizeof(*handle));
 
     if ((handle->channel = usbOpenChannel(descriptor->usb.channelDefinitions, identifier))) {
+      const UsbChannel *channel = handle->channel;
+      const UsbChannelDefinition *definition = &channel->definition;
+      GioUsbConnectionProperties *properties = &handle->properties;
+
+      memset(properties, 0, sizeof(*properties));
+      properties->applicationData = definition->data;
+      properties->writeData = NULL;
+      properties->awaitInput = NULL;
+      properties->readData = NULL;
+      properties->inputFilter = NULL;
+
       {
-        const UsbChannel *channel = handle->channel;
-        const UsbChannelDefinition *definition = &channel->definition;
-        GioUsbConnectionProperties *properties = &handle->properties;
+        GioUsbSetConnectionPropertiesMethod *method = descriptor->usb.setConnectionProperties;
 
-        memset(properties, 0, sizeof(*properties));
-        properties->applicationData = definition->data;
-        properties->writeData = NULL;
-        properties->awaitInput = NULL;
-        properties->readData = NULL;
-        properties->inputFilter = NULL;
-
-        {
-          GioUsbSetConnectionPropertiesMethod *method = descriptor->usb.setConnectionProperties;
-
-          if (method) method(properties, definition);
-        }
-
-        if (properties->inputFilter) {
-          usbAddInputFilter(channel->device, properties->inputFilter);
-        }
+        if (method) method(properties, definition);
       }
 
-      return handle;
+      if (!properties->inputFilter ||
+          usbAddInputFilter(channel->device, properties->inputFilter)) {
+        return handle;
+      }
+
+      usbCloseChannel(handle->channel);
     }
 
     free(handle);
