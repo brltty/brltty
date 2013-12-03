@@ -1327,7 +1327,9 @@ usbGetFileSystem (const char *type, const FileSystemCandidate *candidates, Mount
     const FileSystemCandidate *candidate = candidates;
 
     while (candidate->path) {
-      logMessage(LOG_DEBUG, "verifying file system path: %s: %s", type, candidate->path);
+      logMessage(LOG_CATEGORY(USB_IO),
+                 "USBFS root candidate: %s: %s",
+                 type, candidate->path);
 
       if (candidate->verify(candidate->path)) {
         char *path = strdup(candidate->path);
@@ -1407,12 +1409,12 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
       char *root;
 
       if ((root = usbGetUsbfs())) {
-        logMessage(LOG_DEBUG, "USBFS Root: %s", root);
+        logMessage(LOG_CATEGORY(USB_IO), "USBFS root: %s", root);
         if (usbAddHostDevices(root)) ok = 1;
 
         free(root);
       } else {
-        logMessage(LOG_DEBUG, "USBFS not mounted");
+        logMessage(LOG_CATEGORY(USB_IO), "USBFS not mounted");
       }
 
       if (!ok) {
