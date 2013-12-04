@@ -1074,11 +1074,6 @@ makePreferencesMenu (void) {
       }
 
       {
-        NAME(strtext("USB I/O"));
-        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(USB_IO), &itemName));
-      }
-
-      {
         NAME(strtext("Input Packets"));
         ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(INPUT_PACKETS), &itemName));
       }
@@ -1090,13 +1085,13 @@ makePreferencesMenu (void) {
 
       {
         NAME(strtext("Braille Key Events"));
-        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(BRAILLE_KEY_EVENTS), &itemName));
+        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(BRAILLE_KEYS), &itemName));
         TEST(BrailleKeyTable);
       }
 
       {
         NAME(strtext("Keyboard Key Events"));
-        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(KEYBOARD_KEY_EVENTS), &itemName));
+        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(KEYBOARD_KEYS), &itemName));
         TEST(KeyboardKeyTable);
       }
 
@@ -1128,6 +1123,21 @@ makePreferencesMenu (void) {
       {
         NAME(strtext("Server Events"));
         ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(SERVER_EVENTS), &itemName));
+      }
+
+      {
+        NAME(strtext("Serial I/O"));
+        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(SERIAL_IO), &itemName));
+      }
+
+      {
+        NAME(strtext("USB I/O"));
+        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(USB_IO), &itemName));
+      }
+
+      {
+        NAME(strtext("Bluetooth I/O"));
+        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(BLUETOOTH_IO), &itemName));
       }
     }
   }

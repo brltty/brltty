@@ -66,11 +66,6 @@ static const LogCategoryEntry logCategoryTable[LOG_CATEGORY_COUNT] = {
     .prefix = "generic input"
   },
 
-  [LOG_CATEGORY_INDEX(USB_IO)] = {
-    .name = "usb",
-    .prefix = "USB I/O"
-  },
-
   [LOG_CATEGORY_INDEX(INPUT_PACKETS)] = {
     .name = "inpkts",
     .prefix = "input packet"
@@ -81,12 +76,12 @@ static const LogCategoryEntry logCategoryTable[LOG_CATEGORY_COUNT] = {
     .prefix = "output packet"
   },
 
-  [LOG_CATEGORY_INDEX(BRAILLE_KEY_EVENTS)] = {
+  [LOG_CATEGORY_INDEX(BRAILLE_KEYS)] = {
     .name = "brlkeys",
     .prefix = "braille key"
   },
 
-  [LOG_CATEGORY_INDEX(KEYBOARD_KEY_EVENTS)] = {
+  [LOG_CATEGORY_INDEX(KEYBOARD_KEYS)] = {
     .name = "kbdkeys",
     .prefix = "keyboard key"
   },
@@ -119,6 +114,21 @@ static const LogCategoryEntry logCategoryTable[LOG_CATEGORY_COUNT] = {
   [LOG_CATEGORY_INDEX(SERVER_EVENTS)] = {
     .name = "server",
     .prefix = "server"
+  },
+
+  [LOG_CATEGORY_INDEX(SERIAL_IO)] = {
+    .name = "serial",
+    .prefix = "serial I/O"
+  },
+
+  [LOG_CATEGORY_INDEX(USB_IO)] = {
+    .name = "usb",
+    .prefix = "USB I/O"
+  },
+
+  [LOG_CATEGORY_INDEX(BLUETOOTH_IO)] = {
+    .name = "bluetooth",
+    .prefix = "Bluetooth I/O"
   },
 };
 
