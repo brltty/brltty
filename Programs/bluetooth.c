@@ -43,13 +43,13 @@ bthDiscoverSerialPortChannel (uint8_t *channel, BluetoothConnectionExtension *bc
     0X00, 0X80, 0X5F, 0X9B, 0X34, 0XFB
   };
 
-  logMessage(LOG_DEBUG, "discovering serial port channel");
+  logMessage(LOG_CATEGORY(BLUETOOTH_IO), "discovering serial port channel");
   discovered = bthDiscoverChannel(channel, bcx, uuid, sizeof(uuid), timeout);
 
   if (discovered) {
-    logMessage(LOG_DEBUG, "serial port channel discovered: %u", *channel);
+    logMessage(LOG_CATEGORY(BLUETOOTH_IO), "serial port channel discovered: %u", *channel);
   } else {
-    logMessage(LOG_DEBUG, "serial port channel not discovered");
+    logMessage(LOG_CATEGORY(BLUETOOTH_IO), "serial port channel not discovered");
   }
 
   return discovered;
@@ -57,7 +57,7 @@ bthDiscoverSerialPortChannel (uint8_t *channel, BluetoothConnectionExtension *bc
 
 static void
 bthLogChannel (uint8_t channel) {
-  logMessage(LOG_DEBUG, "using RFCOMM channel %u", channel);
+  logMessage(LOG_CATEGORY(BLUETOOTH_IO), "RFCOMM channel: %u", channel);
 }
 
 typedef struct {
@@ -377,12 +377,12 @@ bthGetDeviceName (uint64_t bda, int timeout) {
 
   if (entry) {
     if (!entry->deviceName) {
-      logMessage(LOG_DEBUG, "obtaining device name");
+      logMessage(LOG_CATEGORY(BLUETOOTH_IO), "obtaining device name");
 
       if ((entry->deviceName = bthObtainDeviceName(bda, timeout))) {
-        logMessage(LOG_DEBUG, "device name: %s", entry->deviceName);
+        logMessage(LOG_CATEGORY(BLUETOOTH_IO), "device name: %s", entry->deviceName);
       } else {
-        logMessage(LOG_DEBUG, "device name not obtained");
+        logMessage(LOG_CATEGORY(BLUETOOTH_IO), "device name not obtained");
       }
     }
 
