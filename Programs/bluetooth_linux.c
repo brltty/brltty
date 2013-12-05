@@ -29,13 +29,11 @@
 #include <bluetooth/rfcomm.h>
 
 #include "log.h"
+#include "parameters.h"
 #include "io_bluetooth.h"
 #include "bluetooth_internal.h"
 #include "io_misc.h"
 #include "timing.h"
-
-#define ASYNCHRONOUS_NAME_QUERY
-#define ASYNCHRONOUS_CHANNEL_DISCOVERY
 
 struct BluetoothConnectionExtensionStruct {
   SocketDescriptor socketDescriptor;
@@ -189,7 +187,6 @@ bthFindChannel (uint8_t *channel, sdp_record_t *record) {
   return foundChannel;
 }
 
-#ifdef ASYNCHRONOUS_CHANNEL_DISCOVERY
 static SocketDescriptor
 bthNewL2capConnection (const bdaddr_t *address, int timeout) {
   SocketDescriptor socketDescriptor = socket(PF_BLUETOOTH, SOCK_SEQPACKET, BTPROTO_L2CAP);
@@ -291,7 +288,6 @@ bthHandleChannelDiscoveryResponse (
       break;
   }
 }
-#endif /* ASYNCHRONOUS_CHANNEL_DISCOVERY */
 
 int
 bthDiscoverChannel (
@@ -312,88 +308,88 @@ bthDiscoverChannel (
     sdp_list_t *attributesList = sdp_list_append(NULL, &attributesRange);
 
     if (attributesList) {
-#ifdef ASYNCHRONOUS_CHANNEL_DISCOVERY
-      SocketDescriptor l2capSocket;
-      TimePeriod period;
-      startTimePeriod(&period, timeout);
+      if (LINUX_BLUETOOTH_CHANNEL_DISCOVER_ASYNCHRONOUS) {
+        SocketDescriptor l2capSocket;
+        TimePeriod period;
+        startTimePeriod(&period, timeout);
 
-      if ((l2capSocket = bthNewL2capConnection(&bcx->remoteAddress.rc_bdaddr, timeout)) != INVALID_SOCKET_DESCRIPTOR) {
-        sdp_session_t *session = sdp_create(l2capSocket, 0);
+        if ((l2capSocket = bthNewL2capConnection(&bcx->remoteAddress.rc_bdaddr, timeout)) != INVALID_SOCKET_DESCRIPTOR) {
+          sdp_session_t *session = sdp_create(l2capSocket, 0);
 
-        if (session) {
-          BluetoothChannelDiscoveryData bcd = {
-            .session = session,
-            .found = &foundChannel,
-            .channel = channel
-          };
+          if (session) {
+            BluetoothChannelDiscoveryData bcd = {
+              .session = session,
+              .found = &foundChannel,
+              .channel = channel
+            };
 
-          if (sdp_set_notify(session, bthHandleChannelDiscoveryResponse, &bcd) != -1) {
-            int queryStatus = sdp_service_search_attr_async(session, searchList,
-                                                            SDP_ATTR_REQ_RANGE, attributesList);
+            if (sdp_set_notify(session, bthHandleChannelDiscoveryResponse, &bcd) != -1) {
+              int queryStatus = sdp_service_search_attr_async(session, searchList,
+                                                              SDP_ATTR_REQ_RANGE, attributesList);
 
-            if (!queryStatus) {
-              long int elapsed;
+              if (!queryStatus) {
+                long int elapsed;
 
-              while (!afterTimePeriod(&period, &elapsed)) {
-                if (!awaitSocketInput(l2capSocket, (timeout - elapsed))) break;
-                if (sdp_process(session) == -1) break;
+                while (!afterTimePeriod(&period, &elapsed)) {
+                  if (!awaitSocketInput(l2capSocket, (timeout - elapsed))) break;
+                  if (sdp_process(session) == -1) break;
+                }
+              } else {
+                logSystemError("sdp_service_search_attr_async");
               }
             } else {
-              logSystemError("sdp_service_search_attr_async");
+              logSystemError("sdp_set_notify");
             }
+
+            sdp_close(session);
           } else {
-            logSystemError("sdp_set_notify");
+            logSystemError("sdp_create");
+          }
+
+          close(l2capSocket);
+        }
+      } else {
+        sdp_session_t *session = sdp_connect(BDADDR_ANY, &bcx->remoteAddress.rc_bdaddr, SDP_RETRY_IF_BUSY);
+
+        if (session) {
+          sdp_list_t *recordList = NULL;
+          int queryStatus = sdp_service_search_attr_req(session, searchList,
+                                                        SDP_ATTR_REQ_RANGE, attributesList,
+                                                        &recordList);
+
+          if (!queryStatus) {
+            int stopSearching = 0;
+            sdp_list_t *recordElement = recordList;
+
+            while (recordElement) {
+              sdp_record_t *record = (sdp_record_t *)recordElement->data;
+
+              if (record) {
+                if (bthFindChannel(channel, record)) {
+                  foundChannel = 1;
+                  stopSearching = 1;
+                }
+
+                sdp_record_free(record);
+              } else {
+                logMallocError();
+                stopSearching = 1;
+              }
+
+              if (stopSearching) break;
+              recordElement = recordElement->next;
+            }
+
+            sdp_list_free(recordList, NULL);
+          } else {
+            logSystemError("sdp_service_search_attr_req");
           }
 
           sdp_close(session);
         } else {
-          logSystemError("sdp_create");
+          logSystemError("sdp_connect");
         }
-
-        close(l2capSocket);
       }
-#else /* ASYNCHRONOUS_CHANNEL_DISCOVERY */
-      sdp_session_t *session = sdp_connect(BDADDR_ANY, &bcx->remoteAddress.rc_bdaddr, SDP_RETRY_IF_BUSY);
-
-      if (session) {
-        sdp_list_t *recordList = NULL;
-        int queryStatus = sdp_service_search_attr_req(session, searchList,
-                                                      SDP_ATTR_REQ_RANGE, attributesList,
-                                                      &recordList);
-
-        if (!queryStatus) {
-          int stopSearching = 0;
-          sdp_list_t *recordElement = recordList;
-
-          while (recordElement) {
-            sdp_record_t *record = (sdp_record_t *)recordElement->data;
-
-            if (record) {
-              if (bthFindChannel(channel, record)) {
-                foundChannel = 1;
-                stopSearching = 1;
-              }
-
-              sdp_record_free(record);
-            } else {
-              logMallocError();
-              stopSearching = 1;
-            }
-
-            if (stopSearching) break;
-            recordElement = recordElement->next;
-          }
-
-          sdp_list_free(recordList, NULL);
-        } else {
-          logSystemError("sdp_service_search_attr_req");
-        }
-
-        sdp_close(session);
-      } else {
-        logSystemError("sdp_connect");
-      }
-#endif /* ASYNCHRONOUS_CHANNEL_DISCOVERY */
 
       sdp_list_free(attributesList, NULL);
     } else {
@@ -455,128 +451,127 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
       bthMakeAddress(&address, bda);
       memset(buffer, 0, sizeof(buffer));
 
-#ifdef ASYNCHRONOUS_NAME_QUERY
-      if (setBlockingIo(socketDescriptor, 0)) {
-        struct hci_filter oldFilter;
-        socklen_t oldLength = sizeof(oldFilter);
+      if (LINUX_BLUETOOTH_NAME_OBTAIN_ASYNCHRONOUS) {
+        if (setBlockingIo(socketDescriptor, 0)) {
+          struct hci_filter oldFilter;
+          socklen_t oldLength = sizeof(oldFilter);
 
-        if (getsockopt(socketDescriptor, SOL_HCI, HCI_FILTER, &oldFilter, &oldLength) != -1) {
-          uint16_t ogf = OGF_LINK_CTL;
-          uint16_t ocf = OCF_REMOTE_NAME_REQ;
-          uint16_t opcode = htobs(cmd_opcode_pack(ogf, ocf));
-          struct hci_filter newFilter;
+          if (getsockopt(socketDescriptor, SOL_HCI, HCI_FILTER, &oldFilter, &oldLength) != -1) {
+            uint16_t ogf = OGF_LINK_CTL;
+            uint16_t ocf = OCF_REMOTE_NAME_REQ;
+            uint16_t opcode = htobs(cmd_opcode_pack(ogf, ocf));
+            struct hci_filter newFilter;
 
-          hci_filter_clear(&newFilter);
-          hci_filter_set_ptype(HCI_EVENT_PKT, &newFilter);
-          hci_filter_set_event(EVT_CMD_STATUS, &newFilter);
-          hci_filter_set_event(EVT_CMD_COMPLETE, &newFilter);
-          hci_filter_set_event(EVT_REMOTE_NAME_REQ_COMPLETE, &newFilter);
-          hci_filter_set_opcode(opcode, &newFilter);
+            hci_filter_clear(&newFilter);
+            hci_filter_set_ptype(HCI_EVENT_PKT, &newFilter);
+            hci_filter_set_event(EVT_CMD_STATUS, &newFilter);
+            hci_filter_set_event(EVT_CMD_COMPLETE, &newFilter);
+            hci_filter_set_event(EVT_REMOTE_NAME_REQ_COMPLETE, &newFilter);
+            hci_filter_set_opcode(opcode, &newFilter);
 
-          if (setsockopt(socketDescriptor, SOL_HCI, HCI_FILTER, &newFilter, sizeof(newFilter)) != -1) {
-            remote_name_req_cp parameters;
+            if (setsockopt(socketDescriptor, SOL_HCI, HCI_FILTER, &newFilter, sizeof(newFilter)) != -1) {
+              remote_name_req_cp parameters;
 
-            memset(&parameters, 0, sizeof(parameters));
-            bacpy(&parameters.bdaddr, &address);
-            parameters.pscan_rep_mode = 0X02;
-            parameters.clock_offset = 0;
+              memset(&parameters, 0, sizeof(parameters));
+              bacpy(&parameters.bdaddr, &address);
+              parameters.pscan_rep_mode = 0X02;
+              parameters.clock_offset = 0;
 
-            if (hci_send_cmd(socketDescriptor, ogf, ocf, sizeof(parameters), &parameters) != -1) {
-              long int elapsed = 0;
-              TimePeriod period;
-              startTimePeriod(&period, timeout);
+              if (hci_send_cmd(socketDescriptor, ogf, ocf, sizeof(parameters), &parameters) != -1) {
+                long int elapsed = 0;
+                TimePeriod period;
+                startTimePeriod(&period, timeout);
 
-              while (awaitSocketInput(socketDescriptor, (timeout - elapsed))) {
-                enum {
-                  UNEXPECTED,
-                  HANDLED,
-                  DONE
-                } state = UNEXPECTED;
+                while (awaitSocketInput(socketDescriptor, (timeout - elapsed))) {
+                  enum {
+                    UNEXPECTED,
+                    HANDLED,
+                    DONE
+                  } state = UNEXPECTED;
 
-                BluetoothPacket packet;
-                int result = read(socketDescriptor, &packet, sizeof(packet));
+                  BluetoothPacket packet;
+                  int result = read(socketDescriptor, &packet, sizeof(packet));
 
-                if (result == -1) {
-                  if (errno == EAGAIN) continue;
-                  if (errno == EINTR) continue;
+                  if (result == -1) {
+                    if (errno == EAGAIN) continue;
+                    if (errno == EINTR) continue;
 
-                  logSystemError("read");
-                  break;
-                }
-
-                switch (packet.fields.type) {
-                  case HCI_EVENT_PKT: {
-                    hci_event_hdr *header = &packet.fields.data.hciEvent.header;
-
-                    switch (header->evt) {
-                      case EVT_REMOTE_NAME_REQ_COMPLETE: {
-                        evt_remote_name_req_complete *rn = &packet.fields.data.hciEvent.data.rn;
-
-                        if (bacmp(&rn->bdaddr, &address) == 0) {
-                          state = DONE;
-
-                          if (!rn->status) {
-                            size_t length = header->plen;
-
-                            length -= rn->name - (unsigned char *)rn;
-                            length = MIN(length, sizeof(rn->name));
-                            length = MIN(length, sizeof(buffer)-1);
-
-                            memcpy(buffer, rn->name, length);
-                            buffer[length] = 0;
-                            obtained = 1;
-                          }
-                        }
-
-                        break;
-                      }
-
-                      case EVT_CMD_STATUS: {
-                        evt_cmd_status *cs = &packet.fields.data.hciEvent.data.cs;
-
-                        if (cs->opcode == opcode) {
-                          state = HANDLED;
-
-                          if (cs->status) {
-                          }
-                        }
-
-                        break;
-                      }
-
-                      default:
-                        logMessage(LOG_DEBUG, "unexpected HCI event type: %u", header->evt);
-                        break;
-                    }
-
+                    logSystemError("read");
                     break;
                   }
 
-                  default:
-                    logMessage(LOG_DEBUG, "unexpected Bluetooth packet type: %u", packet.fields.type);
-                    break;
-                }
+                  switch (packet.fields.type) {
+                    case HCI_EVENT_PKT: {
+                      hci_event_hdr *header = &packet.fields.data.hciEvent.header;
 
-                if (state == DONE) break;
-                if (state == UNEXPECTED) logBytes(LOG_WARNING, "unexpected Bluetooth packet", &packet, result);
-                if (afterTimePeriod(&period, &elapsed)) break;
+                      switch (header->evt) {
+                        case EVT_REMOTE_NAME_REQ_COMPLETE: {
+                          evt_remote_name_req_complete *rn = &packet.fields.data.hciEvent.data.rn;
+
+                          if (bacmp(&rn->bdaddr, &address) == 0) {
+                            state = DONE;
+
+                            if (!rn->status) {
+                              size_t length = header->plen;
+
+                              length -= rn->name - (unsigned char *)rn;
+                              length = MIN(length, sizeof(rn->name));
+                              length = MIN(length, sizeof(buffer)-1);
+
+                              memcpy(buffer, rn->name, length);
+                              buffer[length] = 0;
+                              obtained = 1;
+                            }
+                          }
+
+                          break;
+                        }
+
+                        case EVT_CMD_STATUS: {
+                          evt_cmd_status *cs = &packet.fields.data.hciEvent.data.cs;
+
+                          if (cs->opcode == opcode) {
+                            state = HANDLED;
+
+                            if (cs->status) {
+                            }
+                          }
+
+                          break;
+                        }
+
+                        default:
+                          logMessage(LOG_DEBUG, "unexpected HCI event type: %u", header->evt);
+                          break;
+                      }
+
+                      break;
+                    }
+
+                    default:
+                      logMessage(LOG_DEBUG, "unexpected Bluetooth packet type: %u", packet.fields.type);
+                      break;
+                  }
+
+                  if (state == DONE) break;
+                  if (state == UNEXPECTED) logBytes(LOG_WARNING, "unexpected Bluetooth packet", &packet, result);
+                  if (afterTimePeriod(&period, &elapsed)) break;
+                }
+              } else {
+                logSystemError("hci_send_cmd");
+              }
+
+              if (setsockopt(socketDescriptor, SOL_HCI, HCI_FILTER, &oldFilter, oldLength) == -1) {
+                logSystemError("setsockopt[SOL_HCI,HCI_FILTER]");
               }
             } else {
-              logSystemError("hci_send_cmd");
-            }
-
-            if (setsockopt(socketDescriptor, SOL_HCI, HCI_FILTER, &oldFilter, oldLength) == -1) {
               logSystemError("setsockopt[SOL_HCI,HCI_FILTER]");
             }
           } else {
-            logSystemError("setsockopt[SOL_HCI,HCI_FILTER]");
+            logSystemError("getsockopt[SOL_HCI,HCI_FILTER]");
           }
-        } else {
-          logSystemError("getsockopt[SOL_HCI,HCI_FILTER]");
         }
-      }
-#else /* ASYNCHRONOUS_NAME_QUERY */
-      {
+      } else {
         int result = hci_read_remote_name(socketDescriptor, &address, sizeof(buffer), buffer, timeout);
 
         if (result >= 0) {
@@ -585,7 +580,6 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
           logSystemError("hci_read_remote_name");
         }
       }
-#endif /* ASYNCHRONOUS_NAME_QUERY */
 
       if (obtained) {
         if (!(name = strdup(buffer))) {
