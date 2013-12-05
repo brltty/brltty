@@ -116,7 +116,16 @@ bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout)
   if ((bcx->socketDescriptor = socket(PF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) != -1) {
     if (bind(bcx->socketDescriptor, (struct sockaddr *)&bcx->localAddress, sizeof(bcx->localAddress)) != -1) {
       if (setBlockingIo(bcx->socketDescriptor, 0)) {
-        if (connectSocket(bcx->socketDescriptor, (struct sockaddr *)&bcx->remoteAddress, sizeof(bcx->remoteAddress), timeout) != -1) {
+        int connectResult = LINUX_BLUETOOTH_CHANNEL_CONNECT_ASYNCHRONOUS?
+                              connectSocket(bcx->socketDescriptor,
+                                            (struct sockaddr *)&bcx->remoteAddress,
+                                            sizeof(bcx->remoteAddress),
+                                            timeout):
+                              connect(bcx->socketDescriptor,
+                                      (struct sockaddr *)&bcx->remoteAddress,
+                                      sizeof(bcx->remoteAddress));
+
+        if (connectResult != -1) {
           return 1;
         } else if ((errno != EHOSTDOWN) && (errno != EHOSTUNREACH)) {
           logSystemError("RFCOMM connect");
