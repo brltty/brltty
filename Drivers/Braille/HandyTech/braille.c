@@ -762,7 +762,7 @@ static const UsbOperations usbOperations3 = {
   .inputFilter = filterUsbInput3
 };
 
-static int
+static BraillePacketVerifierResult
 verifyPacket (
   BrailleDisplay *brl,
   const unsigned char *bytes, size_t size,
@@ -805,9 +805,9 @@ verifyPacket (
   }
 
   if ((size == *length) && (bytes[0] == HT_PKT_Extended) && (byte != SYN))
-    return 0;
+    return BRL_PVR_INVALID;
 
-  return 1;
+  return BRL_PVR_INCLUDE;
 }
 
 static ssize_t

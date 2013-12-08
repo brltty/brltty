@@ -525,7 +525,7 @@ typedef struct {
   unsigned char checksum;
 } ReadPacketData;
 
-static int
+static BraillePacketVerifierResult
 verifyPacket (
   BrailleDisplay *brl,
   const unsigned char *bytes, size_t size,
@@ -548,7 +548,7 @@ verifyPacket (
           break;
 
         default:
-          return 0;
+          return BRL_PVR_INVALID;
       }
 
       rpd->checksum = 0;
@@ -563,10 +563,10 @@ verifyPacket (
   }
 
   rpd->checksum -= byte;
-  if ((size == *length) && (size > sizeof(PacketHeader)) && rpd->checksum) return 0;
+  if ((size == *length) && (size > sizeof(PacketHeader)) && rpd->checksum) return BRL_PVR_INVALID;
 
   brl->data->acknowledgementsMissing = 0;
-  return 1;
+  return BRL_PVR_INCLUDE;
 }
 
 static int

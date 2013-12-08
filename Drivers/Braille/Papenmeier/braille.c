@@ -199,7 +199,7 @@ static unsigned char xmtTextOffset;
 
 static unsigned char switchState1;
 
-static int
+static BraillePacketVerifierResult
 verifyPacket1 (
   BrailleDisplay *brl,
   const unsigned char *bytes, size_t size,
@@ -210,7 +210,7 @@ verifyPacket1 (
   switch (size) {
     case 1:
       *length = 2;
-      if (byte != STX) return 0;
+      if (byte != STX) return BRL_PVR_INVALID;
       break;
 
     case 2:
@@ -232,7 +232,7 @@ verifyPacket1 (
           break;
 
         default:
-          return 0;
+          return BRL_PVR_INVALID;
       }
       break;
 
@@ -240,7 +240,7 @@ verifyPacket1 (
       switch (bytes[1]) {
         case PM1_PKT_RECEIVE:
           *length = (bytes[4] << 8) | byte;
-          if (*length != 10) return 0;
+          if (*length != 10) return BRL_PVR_INVALID;
           break;
 
         default:
@@ -254,11 +254,11 @@ verifyPacket1 (
 
   if (size == *length) {
     if (byte != ETX) {
-      return 0;
+      return BRL_PVR_INVALID;
     }
   }
 
-  return 1;
+  return BRL_PVR_INCLUDE;
 }
 
 static size_t

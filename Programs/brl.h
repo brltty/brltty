@@ -103,7 +103,13 @@ extern void disconnectBrailleResource (
   BrailleSessionEnder *endSession
 );
 
-typedef int BraillePacketVerifier (
+typedef enum {
+  BRL_PVR_INVALID,
+  BRL_PVR_INCLUDE,
+  BRL_PVR_EXCLUDE
+} BraillePacketVerifierResult;
+
+typedef BraillePacketVerifierResult BraillePacketVerifier (
   BrailleDisplay *brl,
   const unsigned char *bytes, size_t size,
   size_t *length, void *data

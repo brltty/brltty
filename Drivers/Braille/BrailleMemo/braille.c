@@ -154,7 +154,7 @@ writePacket (
   return writeBytes(brl, bytes, byte-bytes);
 }
 
-static int
+static BraillePacketVerifierResult
 verifyPacket (
   BrailleDisplay *brl,
   const unsigned char *bytes, size_t size,
@@ -180,12 +180,12 @@ verifyPacket (
             break;
           }
 
-          return 0;
+          return BRL_PVR_INVALID;
       }
       break;
 
     case 2:
-      if (byte != MM_HEADER_ID2) return 0;
+      if (byte != MM_HEADER_ID2) return BRL_PVR_INVALID;
       break;
 
     case 5:
@@ -200,7 +200,7 @@ verifyPacket (
       break;
   }
 
-  return 1;
+  return BRL_PVR_INCLUDE;
 }
 
 static size_t

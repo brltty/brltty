@@ -203,7 +203,7 @@ writePacket (BrailleDisplay *brl, unsigned char type, size_t size, const unsigne
   return writeBytes(brl, bytes, byte-bytes);
 }
 
-static int
+static BraillePacketVerifierResult
 verifyPacket (
   BrailleDisplay *brl,
   const unsigned char *bytes, size_t size,
@@ -222,20 +222,20 @@ verifyPacket (
         break;
 
       default:
-        return 0;
+        return BRL_PVR_INVALID;
     }
   } else {
     switch (bytes[0]) {
       case CE_PKT_BEGIN:
         if (size == 2) {
           if (byte != brl->data->model->identifier) {
-            if (!setModel(brl, byte)) return 0;
+            if (!setModel(brl, byte)) return BRL_PVR_INVALID;
             brl->resizeRequired = 1;
           }
         } else if (size == 3) {
           *length += byte + 1;
         } else if (size == *length) {
-          if (byte != CE_PKT_END) return 0;
+          if (byte != CE_PKT_END) return BRL_PVR_INVALID;
         }
         break;
 
@@ -244,7 +244,7 @@ verifyPacket (
     }
   }
 
-  return 1;
+  return BRL_PVR_INCLUDE;
 }
 
 static size_t

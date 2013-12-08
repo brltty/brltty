@@ -64,7 +64,7 @@ writePacket (BrailleDisplay *brl, const unsigned char *packet, size_t size) {
   return writeBytes(brl, bytes, byte-bytes);
 }
 
-static int
+static BraillePacketVerifierResult
 verifyPacket (
   BrailleDisplay *brl,
   const unsigned char *bytes, size_t size,
@@ -76,7 +76,7 @@ verifyPacket (
     case 1:
       switch (byte) {
         default:
-          return 0;
+          return BRL_PVR_INVALID;
       }
       break;
 
@@ -84,7 +84,7 @@ verifyPacket (
       break;
   }
 
-  return 1;
+  return BRL_PVR_INCLUDE;
 }
 
 static size_t

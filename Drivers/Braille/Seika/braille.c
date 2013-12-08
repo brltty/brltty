@@ -300,7 +300,7 @@ typedef struct {
   const TemplateEntry *const alternate;
 } BdpReadPacketData;
 
-static int
+static BraillePacketVerifierResult
 bdpVerifyPacket (
   BrailleDisplay *brl,
   const unsigned char *bytes, size_t size,
@@ -320,7 +320,7 @@ checkByte:
       }
 
       if (!rpd->template) {
-        if ((byte & 0XE0) != 0X60) return 0;
+        if ((byte & 0XE0) != 0X60) return BRL_PVR_INVALID;
         rpd->template = &templateEntry_keys;
       }
 
@@ -366,7 +366,7 @@ checkByte:
   }
 
   *length = rpd->template->length;
-  return 1;
+  return BRL_PVR_INCLUDE;
 
 unexpectedByte:
   if ((offset == 1) && (rpd->template->type == IPT_identity)) {
@@ -374,7 +374,7 @@ unexpectedByte:
     goto checkByte;
   }
 
-  return 0;
+  return BRL_PVR_INVALID;
 }
 
 static int
@@ -530,7 +530,7 @@ static void
 ntkInitializeData (void) {
 }
 
-static int
+static BraillePacketVerifierResult
 ntkVerifyPacket (
   BrailleDisplay *brl,
   const unsigned char *bytes, size_t size,
@@ -542,7 +542,7 @@ ntkVerifyPacket (
     case 1:
       *length = 4;
     case 2:
-      if (byte != 0XFF) return 0;
+      if (byte != 0XFF) return BRL_PVR_INVALID;
       break;
 
     case 4:
@@ -553,7 +553,7 @@ ntkVerifyPacket (
       break;
   }
 
-  return 1;
+  return BRL_PVR_INCLUDE;
 }
 
 static int

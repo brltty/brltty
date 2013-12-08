@@ -70,7 +70,7 @@ struct BrailleDataStruct {
   unsigned char textCells[0XFF];
 };
 
-static int
+static BraillePacketVerifierResult
 verifyPacket (
   BrailleDisplay *brl,
   const unsigned char *bytes, size_t size,
@@ -80,7 +80,7 @@ verifyPacket (
 
   switch (size) {
     case 1:
-      if (byte != ESC) return 0;
+      if (byte != ESC) return BRL_PVR_INVALID;
       *length = 3;
       break;
 
@@ -92,7 +92,7 @@ verifyPacket (
       break;
   }
 
-  return 1;
+  return BRL_PVR_INCLUDE;
 }
 
 static int
