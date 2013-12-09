@@ -23,41 +23,9 @@
 
 #include "log.h"
 #include "usb_serial.h"
+#include "usb_cdc_acm.h"
 #include "usb_internal.h"
 #include "bitfield.h"
-
-typedef enum {
-  USB_CDC_ACM_CTL_SetLineCoding   = 0X20,
-  USB_CDC_ACM_CTL_GetLineCoding   = 0X21,
-  USB_CDC_ACM_CTL_SetControlLines = 0X22,
-  USB_CDC_ACM_CTL_SendBreak       = 0X23
-} USB_CDC_ACM_ControlRequest;
-
-typedef enum {
-  USB_CDC_ACM_LINE_DTR = 0X01,
-  USB_CDC_ACM_LINE_RTS = 0X02
-} USB_CDC_ACM_ControlLine;
-
-typedef enum {
-  USB_CDC_ACM_STOP_1,
-  USB_CDC_ACM_STOP_1_5,
-  USB_CDC_ACM_STOP_2
-} USB_CDC_ACM_StopBits;
-
-typedef enum {
-  USB_CDC_ACM_PARITY_NONE,
-  USB_CDC_ACM_PARITY_ODD,
-  USB_CDC_ACM_PARITY_EVEN,
-  USB_CDC_ACM_PARITY_MARK,
-  USB_CDC_ACM_PARITY_SPACE
-} USB_CDC_ACM_Parity;
-
-typedef struct {
-  uint32_t dwDTERate; /* transmission rate - bits per second */
-  uint8_t bCharFormat; /* number of stop bits */
-  uint8_t bParityType; /* type of parity */
-  uint8_t bDataBits; /* number of data bits - 5,6,7,8,16 */
-} PACKED USB_CDC_ACM_LineCoding;
 
 static int
 usbSetLineProperties_CDC_ACM (UsbDevice *device, unsigned int baud, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity) {

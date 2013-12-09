@@ -23,6 +23,7 @@
 
 #include "log.h"
 #include "usb_serial.h"
+#include "usb_ftdi.h"
 
 static int
 usbInputFilter_FTDI (UsbInputFilterData *data) {

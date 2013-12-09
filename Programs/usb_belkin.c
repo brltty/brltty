@@ -23,6 +23,7 @@
 
 #include "log.h"
 #include "usb_serial.h"
+#include "usb_belkin.h"
 
 static int
 usbSetAttribute_Belkin (UsbDevice *device, unsigned char request, unsigned int value, unsigned int index) {

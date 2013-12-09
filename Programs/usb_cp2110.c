@@ -23,6 +23,7 @@
 
 #include "log.h"
 #include "usb_serial.h"
+#include "usb_cp2110.h"
 #include "bitfield.h"
 
 typedef enum {
