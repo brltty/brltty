@@ -40,8 +40,8 @@
 #include <linux/netlink.h>
 #include <linux/input.h>
 
-#include "async_io.h"
 #include "async_alarm.h"
+#include "async_io.h"
 
 typedef struct {
   KeyboardInstanceData *kid;
