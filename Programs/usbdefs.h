@@ -327,6 +327,24 @@ typedef struct {
 
 typedef int UsbInputFilter (UsbInputFilterData *data);
 
+typedef struct {
+  const char *name;
+
+  int (*setLineConfiguration) (UsbDevice *device, unsigned int baud, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity, SerialFlowControl flowControl);
+  int (*setLineProperties) (UsbDevice *device, unsigned int baud, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity);
+  int (*setBaud) (UsbDevice *device, unsigned int baud);
+  int (*setDataFormat) (UsbDevice *device, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity);
+  int (*setFlowControl) (UsbDevice *device, SerialFlowControl flow);
+
+  int (*setDtrState) (UsbDevice *device, int state);
+  int (*setRtsState) (UsbDevice *device, int state);
+
+  int (*enableAdapter) (UsbDevice *device);
+
+  UsbInputFilter *inputFilter;
+  ssize_t (*writeData) (UsbDevice *device, const void *data, size_t size);
+} UsbSerialOperations;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

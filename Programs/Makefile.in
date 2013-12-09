@@ -137,6 +137,21 @@ usb_hid.$O:
 usb_serial.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/usb_serial.c
 
+usb_cdc_acm.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/usb_cdc_acm.c
+
+usb_belkin.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/usb_belkin.c
+
+usb_cp2101.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/usb_cp2101.c
+
+usb_cp2110.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/usb_cp2110.c
+
+usb_ftdi.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/usb_ftdi.c
+
 $(USB_OBJECT).$O:
 	$(CC) $(LIBCFLAGS) $(USB_INCLUDES) -c $(SRC_DIR)/$(USB_OBJECT).c
 
