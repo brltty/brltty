@@ -2018,23 +2018,36 @@ static void handleTtyFds(fd_set *fds, time_t currentTime, Tty *tty) {
   }
 }
 
+#ifndef __MINGW32__
+static sigset_t blockedSignalsMask;
+#endif /* __MINGW32__ */
+
+static void initializeBlockedSignalsMask(void) {
+#ifndef __MINGW32__
+  sigemptyset(&blockedSignalsMask);
+
+  sigaddset(&blockedSignalsMask, SIGTERM);
+  sigaddset(&blockedSignalsMask, SIGINT);
+  sigaddset(&blockedSignalsMask, SIGPIPE);
+  sigaddset(&blockedSignalsMask, SIGCHLD);
+  sigaddset(&blockedSignalsMask, SIGUSR1);
+
+  {
+    int i;
+
+    for (i=SIGRTMIN; i<=SIGRTMAX; i+=1) {
+      sigaddset(&blockedSignalsMask, i);
+    }
+  }
+#endif /* __MINGW32__ */
+}
+
 static int prepareThread(void)
 {
 #ifndef __MINGW32__
-  {
-    sigset_t blockedSignals;
-
-    sigemptyset(&blockedSignals);
-    sigaddset(&blockedSignals, SIGTERM);
-    sigaddset(&blockedSignals, SIGINT);
-    sigaddset(&blockedSignals, SIGPIPE);
-    sigaddset(&blockedSignals, SIGCHLD);
-    sigaddset(&blockedSignals, SIGUSR1);
-
-    if (pthread_sigmask(SIG_BLOCK, &blockedSignals, NULL) != 0) {
-      logSystemError("pthread_sigmask[SIG_BLOCK]");
-      return 0;
-    }
+  if (pthread_sigmask(SIG_BLOCK, &blockedSignalsMask, NULL) != 0) {
+    logSystemError("pthread_sigmask[SIG_BLOCK]");
+    return 0;
   }
 #endif /* __MINGW32__ */
 
@@ -2926,6 +2939,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
   if (!(flushEvent = asyncNewEvent(handleFlushEvent, brl))) goto noFlushEvent;
 
 #ifndef __MINGW32__
+  initializeBlockedSignalsMask();
   signal(SIGUSR2, empty_handler);
 #endif /* __MINGW32__ */
 
