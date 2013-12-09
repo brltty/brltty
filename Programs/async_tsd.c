@@ -26,12 +26,9 @@
 #if defined(__MINGW32__)
 #include "win_pthread.h"
 
-#elif defined(__MSDOS__)
-
-#elif defined(GRUB_RUNTIME)
-
-#else /* posix thread definitions */
+#elif defined(HAVE_POSIX_THREADS)
 #include <pthread.h>
+
 #endif /* posix thread definitions */
 
 static AsyncThreadSpecificData *
