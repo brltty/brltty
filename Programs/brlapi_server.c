@@ -2020,10 +2020,9 @@ static void handleTtyFds(fd_set *fds, time_t currentTime, Tty *tty) {
 
 #ifndef __MINGW32__
 static sigset_t blockedSignalsMask;
-#endif /* __MINGW32__ */
 
-static void initializeBlockedSignalsMask(void) {
-#ifndef __MINGW32__
+static void initializeBlockedSignalsMask(void)
+{
   sigemptyset(&blockedSignalsMask);
 
   sigaddset(&blockedSignalsMask, SIGTERM);
@@ -2039,8 +2038,8 @@ static void initializeBlockedSignalsMask(void) {
       sigaddset(&blockedSignalsMask, i);
     }
   }
-#endif /* __MINGW32__ */
 }
+#endif /* __MINGW32__ */
 
 static int prepareThread(void)
 {
