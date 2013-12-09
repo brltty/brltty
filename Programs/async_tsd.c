@@ -34,6 +34,39 @@
 #include <pthread.h>
 #endif /* posix thread definitions */
 
+static AsyncThreadSpecificData *
+newThreadSpecificData (void) {
+  AsyncThreadSpecificData *tsd;
+
+  if ((tsd = malloc(sizeof(*tsd)))) {
+    memset(tsd, 0, sizeof(*tsd));
+
+    tsd->alarmData = NULL;
+    tsd->taskData = NULL;
+    tsd->ioData = NULL;
+    tsd->signalData = NULL;
+    tsd->waitData = NULL;
+
+    return tsd;
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
+
+static void
+destroyThreadSpecificData (AsyncThreadSpecificData *tsd) {
+  if (tsd) {
+    asyncDeallocateAlarmData(tsd->alarmData);
+    asyncDeallocateTaskData(tsd->taskData);
+    asyncDeallocateIoData(tsd->ioData);
+    asyncDeallocateSignalData(tsd->signalData);
+    asyncDeallocateWaitData(tsd->waitData);
+    free(tsd);
+  }
+}
+
 #ifdef PTHREAD_ONCE_INIT
 static pthread_once_t tsdOnce = PTHREAD_ONCE_INIT;
 static pthread_key_t tsdKey;
@@ -43,14 +76,7 @@ static void
 tsdDestroyData (void *data) {
   AsyncThreadSpecificData *tsd = data;
 
-  if (tsd) {
-    asyncDeallocateSignalData(tsd->signalData);
-    asyncDeallocateAlarmData(tsd->alarmData);
-    asyncDeallocateTaskData(tsd->taskData);
-    asyncDeallocateIoData(tsd->ioData);
-    asyncDeallocateWaitData(tsd->waitData);
-    free(tsd);
-  }
+  destroyThreadSpecificData(tsd);
 }
 
 static void
@@ -73,21 +99,14 @@ asyncGetThreadSpecificData (void) {
       AsyncThreadSpecificData *tsd = pthread_getspecific(tsdKey);
       if (tsd) return tsd;
 
-      if ((tsd = malloc(sizeof(*tsd)))) {
-        memset(tsd, 0, sizeof(*tsd));
-        tsd->signalData = NULL;
-        tsd->alarmData = NULL;
-        tsd->taskData = NULL;
-        tsd->ioData = NULL;
-        tsd->waitData = NULL;
-
+      if ((tsd = newThreadSpecificData())) {
         if (!(error = pthread_setspecific(tsdKey, tsd))) {
           return tsd;
         } else {
           logActionError(error, "pthread_setspecific");
         }
-      } else {
-        logMallocError();
+
+        destroyThreadSpecificData(tsd);
       }
     }
   } else {
@@ -98,16 +117,26 @@ asyncGetThreadSpecificData (void) {
 }
 
 #else /* PTHREAD_ONCE_INIT */
-static AsyncThreadSpecificData tsd = {
-  .signalData = NULL,
-  .alarmData = NULL,
-  .taskData = NULL,
-  .ioData = NULL,
-  .waitData = NULL
-};
+#include "program.h"
+
+static AsyncThreadSpecificData *threadSpecificData = NULL;
+
+static void
+exitThreadSpecificData (void *data) {
+  if (threadSpecificData) {
+    destroyThreadSpecificData(threadSpecificData);
+    threadSpecificData = NULL;
+  }
+}
 
 AsyncThreadSpecificData *
 asyncGetThreadSpecificData (void) {
-  return &tsd;
+  if (!threadSpecificData) {
+    if ((threadSpecificData = newThreadSpecificData())) {
+      onProgramExit("async-data", exitThreadSpecificData, NULL);
+    }
+  }
+
+  return threadSpecificData;
 }
 #endif /* PTHREAD_ONCE_INIT */
