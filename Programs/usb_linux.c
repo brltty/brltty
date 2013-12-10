@@ -408,13 +408,19 @@ usbReapUrb (
   return 0;
 }
 
+typedef struct {
+  const struct usbdevfs_urb *urb;
+  const char *action;
+} UsbFormatUrbData;
+
 static size_t
 usbFormatURB (char *buffer, size_t size, const void *data) {
-  const struct usbdevfs_urb *urb = data;
+  const UsbFormatUrbData *fud = data;
+  const struct usbdevfs_urb *urb = fud->urb;
   size_t length;
 
   STR_BEGIN(buffer, size);
-  STR_PRINTF("URB:");
+  STR_PRINTF("%s URB:", fud->action);
 
   STR_PRINTF(" Adr:%p", urb);
   STR_PRINTF(" Ept:%02X", urb->endpoint);
@@ -517,8 +523,13 @@ usbFormatURB (char *buffer, size_t size, const void *data) {
 }
 
 static void
-usbLogURB (const struct usbdevfs_urb *urb) {
-  logData(LOG_CATEGORY(USB_IO), usbFormatURB, urb);
+usbLogURB (const struct usbdevfs_urb *urb, const char *action) {
+  const UsbFormatUrbData fud = {
+    .urb = urb,
+    .action = action
+  };
+
+  logData(LOG_CATEGORY(USB_IO), usbFormatURB, &fud);
 }
 
 static struct usbdevfs_urb *
@@ -576,7 +587,7 @@ usbSubmitURB (struct usbdevfs_urb *urb, UsbEndpoint *endpoint) {
   UsbDevice *device = endpoint->device;
   UsbDeviceExtension *devx = device->extension;
 
-  usbLogURB(urb);
+  usbLogURB(urb, "submit");
   if ((urb->endpoint & UsbEndpointDirection_Mask) == UsbEndpointDirection_Output) {
     logBytes(LOG_CATEGORY(USB_IO), "URB output", urb->buffer, urb->buffer_length);
   }
@@ -693,7 +704,7 @@ usbReapResponse (
       if (!usbReapUrb(device, wait)) return NULL;
     }
 
-    usbLogURB(urb);
+    usbLogURB(urb, "reaped");
 
     response->context = urb->usercontext;
     response->buffer = urb->buffer;
