@@ -810,9 +810,14 @@ verifyPacket (
   return BRL_PVR_INCLUDE;
 }
 
+static size_t
+readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
+  return readBraillePacket(brl, NULL, buffer, size, verifyPacket, NULL);
+}
+
 static ssize_t
 brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
-  const size_t length = readBraillePacket(brl, NULL, buffer, size, verifyPacket, NULL);
+  const size_t length = readPacket(brl, buffer, size);
 
   if (length == 0 && errno != EAGAIN) return -1;
   return length;
@@ -1159,7 +1164,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
 static size_t
 readResponse (BrailleDisplay *brl, void *packet, size_t size) {
-  return readBraillePacket(brl, NULL, packet, size, verifyPacket, NULL);
+  return readPacket(brl, packet, size);
 }
 
 static BrailleResponseResult
@@ -1374,7 +1379,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
   while (1) {
     HT_Packet packet;
-    size_t size = readBraillePacket(brl, NULL, &packet, sizeof(packet), verifyPacket, NULL);
+    size_t size = readPacket(brl, &packet, sizeof(packet));
 
     if (size == 0) {
       if (errno != EAGAIN) return BRL_CMD_RESTARTBRL;
