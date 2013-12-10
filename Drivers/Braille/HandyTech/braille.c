@@ -1498,19 +1498,28 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                       unsigned int cellIndex = bytes[0] - 1;
                       unsigned int dataIndex;
 
-#define PRESSURE(pressure) \
-  if ((pressure) > highestPressure) { \
-    highestPressure = (pressure); \
-    readingPosition = cellIndex; \
-  } \
-  cellIndex += 1;
                       for (dataIndex=1; dataIndex<length; dataIndex+=1) {
-                        unsigned char byte = bytes[dataIndex];
+                        const unsigned char byte = bytes[dataIndex];
 
-                        PRESSURE(HIGH_NIBBLE(byte) >> 4);
-                        PRESSURE(LOW_NIBBLE(byte));
+                        const unsigned char pressures[] = {
+                          HIGH_NIBBLE(byte) >> 4,
+                          LOW_NIBBLE(byte)
+                        };
+
+                        const unsigned int pressureCount = ARRAY_COUNT(pressures);
+                        unsigned int pressureIndex;
+
+                        for (pressureIndex=0; pressureIndex<pressureCount; pressureIndex+=1) {
+                          const unsigned char pressure = pressures[pressureIndex];
+
+                          if (pressure > highestPressure) {
+                            highestPressure = pressure;
+                            readingPosition = cellIndex;
+                          }
+
+                          cellIndex += 1;
+                        }
                       }
-#undef PRESSURE
 
                       if (readingPosition >= cellCount) readingPosition = BRL_MSK_ARG;
                     }
