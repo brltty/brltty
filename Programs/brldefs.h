@@ -242,7 +242,6 @@ typedef enum {
 #define BRL_BLK_NXDIFCHAR   0X0F00 /* go down to nearest line with different character */
 #define BRL_BLK_CLIP_COPY   0X1000 /* copy characters to clipboard */
 #define BRL_BLK_CLIP_APPEND 0X1100 /* append characters to clipboard */
-#define BRL_BLK_READ_LOCN   0X1200 /* reading location */
 
 /* For entering a special key. */
 #define BRL_BLK_PASSKEY 0X2000 /* emulate special key */
@@ -308,7 +307,8 @@ typedef enum {
 #define BRL_FLG_KBD_EMUL0 0X020000 /* it is an emulation 0 scan code */
 #define BRL_FLG_KBD_EMUL1 0X040000 /* it is an emulation 1 scan code */
 
-#define BRL_BLK_CONTEXT 0X2600 /* switch to command context */
+#define BRL_BLK_CONTEXT   0X2600 /* switch to command context */
+#define BRL_BLK_READ_LOCN 0X2700 /* reading location */
 
 typedef enum {
   BRL_FIRMNESS_MINIMUM,
