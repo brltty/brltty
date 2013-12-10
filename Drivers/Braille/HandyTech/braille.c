@@ -812,7 +812,10 @@ verifyPacket (
 
 static ssize_t
 brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
-  return readBraillePacket(brl, NULL, buffer, size, verifyPacket, NULL);
+  const size_t length = readBraillePacket(brl, NULL, buffer, size, verifyPacket, NULL);
+
+  if (length == 0 && errno != EAGAIN) return -1;
+  return length;
 }
 
 static ssize_t
@@ -1371,10 +1374,13 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
   while (1) {
     HT_Packet packet;
-    ssize_t size = brl_readPacket(brl, &packet, sizeof(packet));
+    size_t size = readBraillePacket(brl, NULL, &packet, sizeof(packet), verifyPacket, NULL);
 
-    if (size == -1) return BRL_CMD_RESTARTBRL;
-    if (size == 0) break;
+    if (size == 0) {
+      if (errno != EAGAIN) return BRL_CMD_RESTARTBRL;
+      break;
+    }
+
     noInput = 0;
 
     /* a kludge to handle the Bookworm going offline */
