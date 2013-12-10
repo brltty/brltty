@@ -39,7 +39,6 @@ typedef enum {
 #define BRL_HAVE_STATUS_CELLS
 #define BRL_HAVE_PACKET_IO
 #include "brl_driver.h"
-#include "touch.h"
 #include "brldefs-ht.h"
 
 BEGIN_KEY_NAME_TABLE(routing)
@@ -1199,8 +1198,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
           if (brl->data->model->hasATC) {
             setAtcMode(brl, 1);
-
-            touchAnalyzeCells(brl, NULL);
             brl->touchEnabled = 1;
           }
 
@@ -1427,7 +1424,6 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
               case HT_PKT_NAK:
                 brl->data->updateRequired = 1;
               case HT_PKT_ACK:
-                if (brl->data->model->hasATC) touchAnalyzeCells(brl, brl->data->prevData);
                 setState(brl, BDS_READY);
                 continue;
 
@@ -1441,10 +1437,6 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                       case HT_PKT_NAK:
                         brl->data->updateRequired = 1;
                       case HT_PKT_ACK:
-                        if (brl->data->model->hasATC) {
-                          touchAnalyzeCells(brl, brl->data->prevData);
-                        }
-
                         setState(brl, BDS_READY);
                         continue;
 
@@ -1498,61 +1490,44 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                   }
 
                   case HT_EXTPKT_AtcInfo: {
-                    unsigned int cellCount = brl->data->model->textCells + brl->data->model->statusCells;
-                    unsigned char pressureValues[cellCount];
-                    const unsigned char *pressure;
+                    unsigned int readingPosition = BRL_MSK_ARG;
+                    unsigned int highestPressure = 0;
 
                     if (bytes[0]) {
-                      int cellIndex = bytes[0] - 1;
-                      int dataIndex;
+                      const unsigned int cellCount = brl->data->model->textCells + brl->data->model->statusCells;
+                      unsigned int cellIndex = bytes[0] - 1;
+                      unsigned int dataIndex;
 
-                      memset(pressureValues, 0, cellCount);
-                      for (dataIndex=1; dataIndex<length; dataIndex++) {
+#define PRESSURE(pressure) \
+  if ((pressure) > highestPressure) { \
+    highestPressure = (pressure); \
+    readingPosition = cellIndex; \
+  } \
+  cellIndex += 1;
+                      for (dataIndex=1; dataIndex<length; dataIndex+=1) {
                         unsigned char byte = bytes[dataIndex];
-                        unsigned char nibble;
 
-                        if (cellIndex >= cellCount) break;
-                        nibble = HIGH_NIBBLE(byte);
-                        pressureValues[cellIndex++] = nibble | (nibble >> 4);
-
-                        if (cellIndex >= cellCount) break;
-                        nibble = LOW_NIBBLE(byte);
-                        pressureValues[cellIndex++] = nibble | (nibble << 4);
+                        PRESSURE(HIGH_NIBBLE(byte) >> 4);
+                        PRESSURE(LOW_NIBBLE(byte));
                       }
+#undef PRESSURE
 
-                      pressure = &pressureValues[0];
-                    } else {
-                      pressure = NULL;
+                      if (readingPosition >= cellCount) readingPosition = BRL_MSK_ARG;
                     }
 
-                    {
-                      int command = touchAnalyzePressure(brl, pressure);
-                      if (command != EOF) return command;
-                    }
-
+                    enqueueCommand(BRL_BLK_READ_LOCN | readingPosition);
                     continue;
                   }
 
                   case HT_EXTPKT_ReadingPosition: {
-                    const size_t cellCount = brl->data->model->textCells + brl->data->model->statusCells;
-                    unsigned char pressureValues[cellCount];
-                    const unsigned char *pressure = NULL;
+                    const unsigned int cellCount = brl->data->model->textCells + brl->data->model->statusCells;
+                    unsigned int readingPosition = bytes[0];
 
-                    if (bytes[0] != 0XFF) {
-                      const int cellIndex = bytes[0];
-
-                      if (cellIndex < cellCount) {
-                        memset(pressureValues, 0, cellCount);
-                        pressureValues[cellIndex] = 0XFF;
-                        pressure = &pressureValues[0];
-                      }
+                    if ((readingPosition == 0XFF) || (readingPosition >= cellCount)) {
+                      readingPosition = BRL_MSK_ARG;
                     }
 
-                    {
-                      int command = touchAnalyzePressure(brl, pressure);
-                      if (command != EOF) return command;
-                    }
-
+                    enqueueCommand(BRL_BLK_READ_LOCN | readingPosition);
                     continue;
                   }
 

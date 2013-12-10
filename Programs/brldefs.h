@@ -234,7 +234,7 @@ typedef enum {
 #define BRL_BLK_SETMARK   0X0B00 /* remember current window position */
 #define BRL_BLK_GOTOMARK  0X0C00 /* go to remembered window position */
 
-#define BRL_BLK_GOTOLINE  0X0D00 /* go to selected line */
+#define BRL_BLK_GOTOLINE    0X0D00 /* go to selected line */
 #define BRL_FLG_LINE_SCALED 0X010000 /* scale arg=0X00-0XFF to screen height */
 #define BRL_FLG_LINE_TOLEFT 0X020000 /* go to beginning of line */
 
@@ -242,6 +242,7 @@ typedef enum {
 #define BRL_BLK_NXDIFCHAR   0X0F00 /* go down to nearest line with different character */
 #define BRL_BLK_CLIP_COPY   0X1000 /* copy characters to clipboard */
 #define BRL_BLK_CLIP_APPEND 0X1100 /* append characters to clipboard */
+#define BRL_BLK_READ_LOCN   0X1200 /* reading location */
 
 /* For entering a special key. */
 #define BRL_BLK_PASSKEY 0X2000 /* emulate special key */
