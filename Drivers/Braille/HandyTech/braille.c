@@ -1162,11 +1162,6 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   return 0;
 }
 
-static size_t
-readResponse (BrailleDisplay *brl, void *packet, size_t size) {
-  return readPacket(brl, packet, size);
-}
-
 static BrailleResponseResult
 isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
   const HT_Packet *response = packet;
@@ -1192,7 +1187,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
       if (probeBrailleDisplay(brl, 3, NULL, 100,
                               brl_reset,
-                              readResponse, &response, sizeof(response),
+                              readPacket, &response, sizeof(response),
                               isIdentityResponse)) {
         if (identifyModel(brl, response.fields.data.ok.model)) {
           makeOutputTable(dotsTable_ISO11548_1);
