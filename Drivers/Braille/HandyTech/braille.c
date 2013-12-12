@@ -741,7 +741,8 @@ static int
 filterUsbInput3 (UsbInputFilterData *data) {
   unsigned char *buffer = data->buffer;
 
-  if ((data->length == hidReportSize_OutData) && 
+  if ((data->length >= 2) &&
+      (data->length == hidReportSize_OutData) && 
       (buffer[0] == HT_HID_RPT_OutData) &&
       (buffer[1] <= (data->length - 2))) {
     data->length = buffer[1];
