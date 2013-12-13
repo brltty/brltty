@@ -19,7 +19,7 @@
 #include "prologue.h"
 
 #include "log.h"
-#include "timing.h"
+#include "async_wait.h"
 #include "beep.h"
 #include "notes.h"
 
@@ -51,7 +51,7 @@ beepPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
   logMessage(LOG_DEBUG, "tone: msec=%d note=%d", duration, note);
 
   if (!note) {
-    accurateDelay(duration);
+    asyncWait(duration);
     return 1;
   }
 
