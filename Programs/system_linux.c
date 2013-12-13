@@ -33,7 +33,7 @@
 #include "log.h"
 #include "file.h"
 #include "device.h"
-#include "timing.h"
+#include "async_wait.h"
 #include "hostcmd.h"
 #include "bitmask.h"
 #include "system.h"
@@ -193,7 +193,7 @@ getUinputDevice (void) {
       static int status = 0;
       int wait = !status;
       if (!installKernelModule("uinput", &status)) wait = 0;
-      if (wait) approximateDelay(500);
+      if (wait) asyncWait(500);
     }
 
     {
