@@ -699,11 +699,7 @@ initializeUsbSession3 (BrailleDisplay *brl) {
     {.number=0}
   };
 
-  if (getHidReportSizes(brl, reportTable)) {
-    return 1;
-  }
-
-  return 0;
+  return getHidReportSizes(brl, reportTable);
 }
 
 static ssize_t
@@ -717,13 +713,12 @@ writeUsbData3 (
   if (hidReportSize_InData) {
     while (size) {
       unsigned char report[hidReportSize_InData];
-      unsigned char count = MIN(size, (sizeof(report) - 2));
+      const unsigned char count = MIN(size, (sizeof(report) - 2));
       int result;
 
       report[0] = HT_HID_RPT_InData;
       report[1] = count;
-      memcpy(report+2, &buffer[index], count);
-      memset(&report[count+2], 0, sizeof(report)-count-2);
+      memset(mempcpy(report+2, &buffer[index], count), 0, sizeof(report)-count-2);
 
       result = usbWriteEndpoint(device, definition->outputEndpoint,
                                 report, sizeof(report), 1000);
