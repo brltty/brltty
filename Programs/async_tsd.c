@@ -21,15 +21,8 @@
 #include <string.h>
 
 #include "log.h"
+#include "async_thread.h"
 #include "async_internal.h"
-
-#if defined(__MINGW32__)
-#include "win_pthread.h"
-
-#elif defined(HAVE_POSIX_THREADS)
-#include <pthread.h>
-
-#endif /* posix thread definitions */
 
 static AsyncThreadSpecificData *
 newThreadSpecificData (void) {
