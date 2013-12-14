@@ -1299,6 +1299,10 @@ brlttyConstruct (int argc, char *argv[]) {
   programTerminationRequestCount = 0;
   programTerminationRequestTime = time(NULL);
 
+#ifdef ASYNC_CAN_HANDLE_SIGNALS
+  asyncBlockObtainableSignals();
+#endif /* ASYNC_CAN_HANDLE_SIGNALS */
+
 #ifdef SIGPIPE
   /* We ignore SIGPIPE before calling brlttyStart() so that a driver which uses
    * a broken pipe won't abort program execution.

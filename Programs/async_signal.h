@@ -91,6 +91,7 @@ extern int asyncReleaseSignalNumber (int signal);
 
 extern int asyncObtainSignalNumber (void);
 extern int asyncRelinquishSignalNumber (int signal);
+extern int asyncBlockObtainableSignals (void);
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */
 
 #ifdef __cplusplus

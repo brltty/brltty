@@ -602,4 +602,17 @@ asyncRelinquishSignalNumber (int signal) {
   logMessage(LOG_ERR, "signal number not obtained: %d", signal);
   return 0;
 }
+
+int
+asyncBlockObtainableSignals (void) {
+  AsyncSignalData *sd = getSignalData();
+
+  if (sd) {
+    if (setSignalMask(SIG_BLOCK, &sd->obtainableSignals, NULL)) {
+      return 1;
+    }
+  }
+
+  return 0;
+}
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */
