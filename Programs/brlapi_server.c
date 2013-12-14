@@ -26,7 +26,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <signal.h>
 #include <time.h>
 
 #ifdef HAVE_ICONV_H
@@ -80,6 +79,7 @@
 #include "tunes.h"
 #include "charset.h"
 #include "async_event.h"
+#include "async_signal.h"
 
 #ifdef __MINGW32__
 #define LogSocketError(msg) logWindowsSocketError(msg)
@@ -153,12 +153,6 @@ static brlapi_error_t brlapiserver_error;
 #define BRL_COMMANDS 0
 /** ask for raw driver keycodes */
 #define BRL_KEYCODES 1
-
-#ifndef __MINGW32__
-static void empty_handler(int sig)
-{
-}
-#endif /* __MINGW32__ */
 
 /****************************************************************************/
 /** GLOBAL TYPES AND VARIABLES                                              */
@@ -2939,7 +2933,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
 
 #ifndef __MINGW32__
   initializeBlockedSignalsMask();
-  signal(SIGUSR2, empty_handler);
+  asyncHandleSignal(SIGUSR2, asyncEmptySignalHandler, NULL);
 #endif /* __MINGW32__ */
 
   running = 1;

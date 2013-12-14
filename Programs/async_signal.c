@@ -124,6 +124,10 @@ asyncRevertSignal (int signalNumber, SignalHandler *oldHandler) {
   return asyncHandleSignal(signalNumber, SIG_DFL, oldHandler);
 }
 
+void
+asyncEmptySignalHandler (int signal) {
+}
+
 static int
 setSignalMask (int how, const sigset_t *newMask, sigset_t *oldMask) {
 #ifdef HAVE_POSIX_THREADS

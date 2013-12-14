@@ -55,6 +55,7 @@ typedef void (*SignalHandler) (int signalNumber);
 extern int asyncHandleSignal (int signalNumber, SignalHandler newHandler, SignalHandler *oldHandler);
 extern int asyncIgnoreSignal (int signalNumber, SignalHandler *oldHandler);
 extern int asyncRevertSignal (int signalNumber, SignalHandler *oldHandler);
+extern void asyncEmptySignalHandler (int signal);
 
 extern int asyncSetSignalBlocked (int signalNumber, int state);
 extern int asyncIsSignalBlocked (int signalNumber);
