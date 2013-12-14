@@ -80,6 +80,7 @@
 #include "charset.h"
 #include "async_event.h"
 #include "async_signal.h"
+#include "async_thread.h"
 
 #ifdef __MINGW32__
 #define LogSocketError(msg) logWindowsSocketError(msg)
@@ -2024,14 +2025,6 @@ static void initializeBlockedSignalsMask(void)
   sigaddset(&blockedSignalsMask, SIGPIPE);
   sigaddset(&blockedSignalsMask, SIGCHLD);
   sigaddset(&blockedSignalsMask, SIGUSR1);
-
-  {
-    int i;
-
-    for (i=SIGRTMIN; i<=SIGRTMAX; i+=1) {
-      sigaddset(&blockedSignalsMask, i);
-    }
-  }
 }
 #endif /* __MINGW32__ */
 
@@ -2130,7 +2123,7 @@ static void *runServer(void *arg)
 #ifdef __MINGW32__
     if (socketInfo[i].addrfamily != PF_LOCAL) {
 #endif /* __MINGW32__ */
-      if ((res = pthread_create(&socketThreads[i],&attr,runCreateSocket,(void *)(intptr_t)i)) != 0) {
+      if ((res = asyncCreateThread(&socketThreads[i],&attr,runCreateSocket,(void *)(intptr_t)i)) != 0) {
 	logMessage(LOG_WARNING,"pthread_create: %s",strerror(res));
 
 	for (i--;i>=0;i--) {
@@ -2939,7 +2932,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
   running = 1;
   trueBraille=&noBraille;
 
-  if ((res = pthread_create(&serverThread,&attr,runServer,hosts)) != 0) {
+  if ((res = asyncCreateThread(&serverThread,&attr,runServer,hosts)) != 0) {
     logMessage(LOG_WARNING,"pthread_create: %s",strerror(res));
     running = 0;
 

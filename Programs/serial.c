@@ -181,7 +181,7 @@ serialStartFlowControlThread (SerialDevice *serial) {
     pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_DETACHED);
 
     serial->flowControlStop = 0;
-    if (pthread_create(&thread, &attributes, serial->currentFlowControlProc, serial)) {
+    if (asyncCreateThread(&thread, &attributes, serial->currentFlowControlProc, serial)) {
       logSystemError("pthread_create");
       return 0;
     }

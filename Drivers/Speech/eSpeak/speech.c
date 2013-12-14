@@ -22,12 +22,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef HAVE_POSIX_THREADS
-#include <pthread.h>
-#endif /* HAVE_POSIX_THREADS */
-
 #include "log.h"
 #include "parse.h"
+#include "async_thread.h"
 
 typedef enum {
 	PARM_PATH,
@@ -289,7 +286,7 @@ static int spk_construct(SpeechSynthesizer *spk, char **parameters)
 	pthread_cond_init(&queue_cond, NULL);
 
 	alive = 1;
-	result = pthread_create(&request_thread, NULL, process_request, NULL);
+	result = asyncCreateThread(&request_thread, NULL, process_request, NULL);
 	if (result) {
 		logMessage(LOG_ERR, "eSpeak: unable to create thread");
 		espeak_Terminate();

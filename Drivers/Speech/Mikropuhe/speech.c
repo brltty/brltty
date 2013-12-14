@@ -29,17 +29,12 @@
 #include <time.h>
 #include <sys/time.h>
 
-#ifdef __MINGW32__
-#include "win_pthread.h"
-#else /* __MINGW32__ */
-#include <pthread.h>
-#endif /* __MINGW32__ */
-
 #include "log.h"
 #include "file.h"
 #include "parse.h"
-#include "dynld.h"
+#include "async_thread.h"
 #include "queue.h"
+#include "dynld.h"
 #include "brltty.h"
 
 typedef enum {
@@ -299,7 +294,7 @@ startSynthesisThread (void) {
       pthread_attr_t attributes;
       if (!(error = pthread_attr_init(&attributes))) {
         pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_JOINABLE);
-        error = pthread_create(&synthesisThread, &attributes, doSynthesisThread, NULL);
+        error = asyncCreateThread(&synthesisThread, &attributes, doSynthesisThread, NULL);
         pthread_attr_destroy(&attributes);
         if (!error) {
           return 1;

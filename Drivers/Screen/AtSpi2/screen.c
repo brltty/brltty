@@ -22,7 +22,6 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <pthread.h>
 #include <limits.h>
 #include <locale.h>
 
@@ -59,6 +58,7 @@
 
 #include "log.h"
 #include "parse.h"
+#include "async_thread.h"
 #include "brldefs.h"
 #include "charset.h"
 
@@ -843,7 +843,7 @@ construct_AtSpi2Screen (void) {
   sem_t SPI2_init_sem;
   sem_init(&SPI2_init_sem,0,0);
   finished = 0;
-  if (pthread_create(&SPI2_main_thread,NULL,doAtSpi2ScreenOpen,(void *)&SPI2_init_sem)) {
+  if (asyncCreateThread(&SPI2_main_thread,NULL,doAtSpi2ScreenOpen,(void *)&SPI2_init_sem)) {
     logMessage(LOG_ERR,"main SPI2 thread failed to be launched");
     return 0;
   }

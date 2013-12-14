@@ -22,7 +22,6 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <pthread.h>
 #include <limits.h>
 #include <locale.h>
 
@@ -42,6 +41,7 @@
 
 #include "log.h"
 #include "parse.h"
+#include "async_thread.h"
 #include "brldefs.h"
 #include "charset.h"
 
@@ -546,7 +546,7 @@ construct_AtSpiScreen (void) {
   sem_t SPI_init_sem;
   sem_init(&SPI_init_sem,0,0);
   XInitThreads();
-  if (pthread_create(&SPI_main_thread,NULL,doAtSpiScreenOpen,(void *)&SPI_init_sem)) {
+  if (asyncCreateThread(&SPI_main_thread,NULL,doAtSpiScreenOpen,(void *)&SPI_init_sem)) {
     logMessage(LOG_ERR,"main SPI thread failed to be launched");
     return 0;
   }

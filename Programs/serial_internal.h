@@ -23,15 +23,8 @@
 
 #include <stdio.h>
 
-#ifdef HAVE_POSIX_THREADS
-#ifdef __MINGW32__
-#include "win_pthread.h"
-#else /* __MINGW32__ */
-#include <pthread.h>
-#endif /* __MINGW32__ */
-#endif /* HAVE_POSIX_THREADS */
-
 #include "io_serial.h"
+#include "async_thread.h"
 
 #ifdef __cplusplus
 extern "C" {
