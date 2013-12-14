@@ -51,6 +51,7 @@ struct AsyncSignalDataStruct {
   Queue *signalQueue;
   sigset_t claimedSignals;
   sigset_t obtainedSignals;
+  sigset_t obtainableSignals;
 };
 
 void
@@ -76,8 +77,19 @@ getSignalData (void) {
 
     memset(sd, 0, sizeof(*sd));
     sd->signalQueue = NULL;
+
     sigemptyset(&sd->claimedSignals);
     sigemptyset(&sd->obtainedSignals);
+    sigemptyset(&sd->obtainableSignals);
+
+    {
+      int signalNumber;
+
+      for (signalNumber=SIGRTMIN; signalNumber<=SIGRTMAX; signalNumber+=1) {
+        sigaddset(&sd->obtainableSignals, signalNumber);
+      }
+    }
+
     tsd->signalData = sd;
   }
 
@@ -237,6 +249,22 @@ asyncCallWithAllSignalsBlocked (
     }
   } else {
     logSystemError("sigfillset");
+  }
+
+  return 0;
+}
+
+int
+asyncCallWithObtainableSignalsBlocked (
+  AsyncWithBlockedSignalsFunction *function,
+  void *data
+) {
+  AsyncSignalData *sd = getSignalData();
+
+  if (sd) {
+    if (asyncCallWithSignalsBlocked(&sd->obtainableSignals, function, data)) {
+      return 1;
+    }
   }
 
   return 0;

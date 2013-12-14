@@ -80,6 +80,11 @@ extern int asyncCallWithAllSignalsBlocked (
   void *data
 );
 
+extern int asyncCallWithObtainableSignalsBlocked (
+  AsyncWithBlockedSignalsFunction *function,
+  void *data
+);
+
 
 extern int asyncClaimSignalNumber (int signal);
 extern int asyncReleaseSignalNumber (int signal);
