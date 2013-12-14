@@ -497,7 +497,10 @@ newMonitorElement (const void *parameters) {
 
           if (asyncHandleSignal(mep->signal, handleMonitoredSignal, &sig->oldHandler)) {
             sig->wasBlocked = asyncIsSignalBlocked(mep->signal);
-            return monitorElement;
+
+            if (!sig->wasBlocked || asyncSetSignalBlocked(sig->number, 0)) {
+              return monitorElement;
+            }
           }
 
           deleteElement(monitorElement);
