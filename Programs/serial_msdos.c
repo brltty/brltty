@@ -304,7 +304,7 @@ serialConnectDevice (SerialDevice *serial, const char *device) {
 
     if (serial->package.deviceIndex >= 0) {
       if (serialPrepareDevice(serial)) {
-        logMessage(LOG_DEBUG, "serial device opened: %s: fd=%d",
+        logMessage(LOG_CATEGORY(SERIAL_IO), "device opened: %s: fd=%d",
                    device, serial->fileDescriptor);
         return 1;
       }

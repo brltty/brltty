@@ -491,7 +491,7 @@ serialConnectDevice (SerialDevice *serial, const char *device) {
   if ((serial->fileDescriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
     if (isatty(serial->fileDescriptor)) {
       if (serialPrepareDevice(serial)) {
-        logMessage(LOG_DEBUG, "serial device opened: %s: fd=%d",
+        logMessage(LOG_CATEGORY(SERIAL_IO), "device opened: %s: fd=%d",
                    device, serial->fileDescriptor);
         return 1;
       }

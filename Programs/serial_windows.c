@@ -466,7 +466,7 @@ serialConnectDevice (SerialDevice *serial, const char *device) {
     serial->package.pendingCharacter = -1;
 
     if (serialPrepareDevice(serial)) {
-      logMessage(LOG_DEBUG, "serial device opened: %s: fh=%" PRIfd,
+      logMessage(LOG_CATEGORY(SERIAL_IO), "device opened: %s: fh=%" PRIfd,
                  device, serial->package.fileHandle);
       return 1;
     }

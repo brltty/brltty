@@ -253,7 +253,7 @@ serialConnectDevice (SerialDevice *serial, const char *device) {
     serial->package.byte = SERIAL_NO_BYTE;
 
     if (serialPrepareDevice(serial)) {
-      logMessage(LOG_DEBUG, "serial device opened: %s",
+      logMessage(LOG_CATEGORY(SERIAL_IO), "device opened: %s",
                  device);
       return 1;
     }
