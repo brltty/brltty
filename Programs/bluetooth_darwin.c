@@ -353,7 +353,7 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
 - (IOReturn) run
   {
     IOReturn result;
-    logMessage(LOG_DEBUG, "RFCOMM channel delegate started");
+    logMessage(LOG_CATEGORY(BLUETOOTH_IO), "RFCOMM channel delegate started");
 
     {
       BluetoothConnectionExtension *bcx = self.bluetoothConnectionExtension;
@@ -366,7 +366,7 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
       }
     }
 
-    logMessage(LOG_DEBUG, "RFCOMM channel delegate finished");
+    logMessage(LOG_CATEGORY(BLUETOOTH_IO), "RFCOMM channel delegate finished");
     return result;
   }
 @end

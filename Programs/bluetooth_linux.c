@@ -130,7 +130,7 @@ bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout)
         } else if ((errno != EHOSTDOWN) && (errno != EHOSTUNREACH)) {
           logSystemError("RFCOMM connect");
         } else {
-          logMessage(LOG_DEBUG, "Bluetooth connect error: %s", strerror(errno));
+          logMessage(LOG_CATEGORY(BLUETOOTH_IO), "connect error: %s", strerror(errno));
         }
       }
     } else {
@@ -550,7 +550,7 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
                         }
 
                         default:
-                          logMessage(LOG_DEBUG, "unexpected HCI event type: %u", header->evt);
+                          logMessage(LOG_CATEGORY(BLUETOOTH_IO), "unexpected HCI event type: %u", header->evt);
                           break;
                       }
 
@@ -558,7 +558,7 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
                     }
 
                     default:
-                      logMessage(LOG_DEBUG, "unexpected Bluetooth packet type: %u", packet.fields.type);
+                      logMessage(LOG_CATEGORY(BLUETOOTH_IO), "unexpected Bluetooth packet type: %u", packet.fields.type);
                       break;
                   }
 
