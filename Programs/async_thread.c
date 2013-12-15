@@ -26,7 +26,7 @@
 typedef struct {
   pthread_t *const thread;
   const pthread_attr_t *const attributes;
-  ThreadFunction *const function;
+  AsyncThreadFunction *const function;
   void *const argument;
 
   int result;
@@ -43,7 +43,7 @@ createThread (void *data) {
 int
 asyncCreateThread (
   pthread_t *thread, const pthread_attr_t *attributes,
-  ThreadFunction *function, void *argument
+  AsyncThreadFunction *function, void *argument
 ) {
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
   CreateThreadData ctd = {

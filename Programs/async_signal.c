@@ -35,7 +35,7 @@ typedef struct {
   AsyncEvent *event;
   Queue *monitors;
 
-  SignalHandler oldHandler;
+  AsyncSignalHandler *oldHandler;
   unsigned wasBlocked:1;
 } SignalEntry;
 
@@ -97,7 +97,7 @@ getSignalData (void) {
 }
 
 int
-asyncHandleSignal (int signalNumber, SignalHandler newHandler, SignalHandler *oldHandler) {
+asyncHandleSignal (int signalNumber, AsyncSignalHandler *newHandler, AsyncSignalHandler **oldHandler) {
 #ifdef HAVE_SIGACTION
   struct sigaction newAction;
   struct sigaction oldAction;
@@ -113,7 +113,7 @@ asyncHandleSignal (int signalNumber, SignalHandler newHandler, SignalHandler *ol
 
   logSystemError("sigaction");
 #else /* HAVE_SIGACTION */
-  SignalHandler result = signal(signalNumber, newHandler);
+  AsyncSignalHandler *result = signal(signalNumber, newHandler);
 
   if (result != SIG_ERR) {
     if (oldHandler) *oldHandler = result;
@@ -127,12 +127,12 @@ asyncHandleSignal (int signalNumber, SignalHandler newHandler, SignalHandler *ol
 }
 
 int
-asyncIgnoreSignal (int signalNumber, SignalHandler *oldHandler) {
+asyncIgnoreSignal (int signalNumber, AsyncSignalHandler **oldHandler) {
   return asyncHandleSignal(signalNumber, SIG_IGN, oldHandler);
 }
 
 int
-asyncRevertSignal (int signalNumber, SignalHandler *oldHandler) {
+asyncRevertSignal (int signalNumber, AsyncSignalHandler **oldHandler) {
   return asyncHandleSignal(signalNumber, SIG_DFL, oldHandler);
 }
 

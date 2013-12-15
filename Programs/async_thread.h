@@ -40,11 +40,11 @@ extern "C" {
 #endif /* __cplusplus */
 
 #ifdef ASYNC_CAN_HANDLE_THREADS
-typedef void *ThreadFunction (void *argument);
+typedef void *AsyncThreadFunction (void *argument);
 
 extern int asyncCreateThread (
   pthread_t *thread, const pthread_attr_t *attributes,
-  ThreadFunction *function, void *argument
+  AsyncThreadFunction *function, void *argument
 );
 #endif /* ASYNC_CAN_HANDLE_THREADS */
 
