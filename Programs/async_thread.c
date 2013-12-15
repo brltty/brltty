@@ -26,7 +26,6 @@
 #include "async_signal.h"
 
 #ifdef ASYNC_CAN_HANDLE_THREADS
-#ifdef ASYNC_CAN_HANDLE_SIGNALS
 typedef struct {
   AsyncThreadFunction *function;
   void *argument;
@@ -56,7 +55,7 @@ typedef struct {
   int error;
 } CreateThreadParameters;
 
-static void
+static int
 createThread (void *parameters) {
   CreateThreadParameters *create = parameters;
   RunThreadArgument *run;
@@ -69,14 +68,24 @@ createThread (void *parameters) {
 
     logMessage(LOG_CATEGORY(ASYNC_EVENTS), "creating thread: %s", create->name);
     create->error = pthread_create(create->thread, create->attributes, runThread, run);
-    if (!create->error) return;
+    if (!create->error) return 1;
     logMessage(LOG_CATEGORY(ASYNC_EVENTS), "thread not created: %s: %s", create->name, strerror(create->error));
 
-    errno = create->error;
     free(run);
   } else {
+    create->error = errno;
     logMallocError();
   }
+
+  return 0;
+}
+
+#ifdef ASYNC_CAN_HANDLE_SIGNALS
+static void
+createThreadWithObtinableSignalsBlocked (void *parameters) {
+  CreateThreadParameters *create = parameters;
+
+  createThread(create);
 }
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */
 
@@ -86,7 +95,6 @@ asyncCreateThread (
   pthread_t *thread, const pthread_attr_t *attributes,
   AsyncThreadFunction *function, void *argument
 ) {
-#ifdef ASYNC_CAN_HANDLE_SIGNALS
   CreateThreadParameters create = {
     .name = name,
     .thread = thread,
@@ -95,10 +103,12 @@ asyncCreateThread (
     .argument = argument
   };
 
-  asyncCallWithObtainableSignalsBlocked(createThread, &create);
-  return create.error;
+#ifdef ASYNC_CAN_HANDLE_SIGNALS
+  asyncCallWithObtainableSignalsBlocked(createThreadWithObtinableSignalsBlocked, &create);
 #else /* ASYNC_CAN_HANDLE_SIGNALS */
-  return pthread_create(thread, attributes, function, argument);
+  createThread(&create);
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */
+
+  return create.error;
 }
 #endif /* ASYNC_CAN_HANDLE_THREADS */
