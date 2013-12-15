@@ -112,6 +112,8 @@ preprocessCommand (void) {
   if ((pre = malloc(sizeof(*pre)))) {
     pre->motionColumn = ses->winx;
     pre->motionRow = ses->winy;
+
+    suspendUpdates();
     return pre;
   } else {
     logMallocError();
@@ -125,6 +127,7 @@ postprocessCommand (void *state, int command, int handled) {
   PrecommandState *pre = state;
 
   if (pre) {
+    resumeUpdates();
     if (handled) scheduleUpdate("command executed");
 
     if ((ses->winx != pre->motionColumn) || (ses->winy != pre->motionRow)) {
