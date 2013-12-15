@@ -118,17 +118,17 @@ static const LogCategoryEntry logCategoryTable[LOG_CATEGORY_COUNT] = {
 
   [LOG_CATEGORY_INDEX(SERIAL_IO)] = {
     .name = "serial",
-    .prefix = "serial I/O"
+    .prefix = "serial"
   },
 
   [LOG_CATEGORY_INDEX(USB_IO)] = {
     .name = "usb",
-    .prefix = "USB I/O"
+    .prefix = "USB"
   },
 
   [LOG_CATEGORY_INDEX(BLUETOOTH_IO)] = {
     .name = "bluetooth",
-    .prefix = "Bluetooth I/O"
+    .prefix = "Bluetooth"
   },
 };
 
