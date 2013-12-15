@@ -587,22 +587,28 @@ usbSubmitURB (struct usbdevfs_urb *urb, UsbEndpoint *endpoint) {
   UsbDevice *device = endpoint->device;
   UsbDeviceExtension *devx = device->extension;
 
-  usbLogURB(urb, "submit");
-  if ((urb->endpoint & UsbEndpointDirection_Mask) == UsbEndpointDirection_Output) {
-    logBytes(LOG_CATEGORY(USB_IO), "URB output", urb->buffer, urb->buffer_length);
-  }
-
   while (1) {
-    if (ioctl(devx->usbfsFile, USBDEVFS_SUBMITURB, urb) != -1) return 1;
+    usbLogURB(urb, "submitting");
+
+    if ((urb->endpoint & UsbEndpointDirection_Mask) == UsbEndpointDirection_Output) {
+      logBytes(LOG_CATEGORY(USB_IO), "URB output", urb->buffer, urb->buffer_length);
+    }
+
+    if (ioctl(devx->usbfsFile, USBDEVFS_SUBMITURB, urb) != -1) {
+      logMessage(LOG_CATEGORY(USB_IO), "URB submitted");
+      return 1;
+    }
+
     if ((errno == EINVAL) &&
         (USB_ENDPOINT_TRANSFER(descriptor) == UsbEndpointTransfer_Interrupt) &&
         (urb->type == USBDEVFS_URB_TYPE_BULK)) {
+      logMessage(LOG_CATEGORY(USB_IO), "changing URB type from bulk to interrupt");
       urb->type = USBDEVFS_URB_TYPE_INTERRUPT;
       continue;
     }
 
     /* UHCI support returns ENXIO if a URB is already submitted. */
-    if (errno != ENXIO) logSystemError("USB URB submit");
+    logSystemError("USB URB submit");
     return 0;
   }
 }
@@ -922,6 +928,15 @@ usbGetResubmitDelay (UsbEndpoint *endpoint) {
   return interval;
 }
 
+static int
+usbResubmitInputURB (struct usbdevfs_urb *urb, UsbEndpoint *endpoint) {
+  urb->actual_length = 0;
+  if (usbSubmitURB(urb, endpoint)) return 1;
+
+  usbLogInputProblem(endpoint, "input URB not resubmitted");
+  return 0;
+}
+
 ASYNC_ALARM_CALLBACK(usbHandleInputAlarm) {
   UsbEndpoint *endpoint = parameters->data;
   UsbEndpointExtension *eptx = endpoint->extension;
@@ -930,11 +945,7 @@ ASYNC_ALARM_CALLBACK(usbHandleInputAlarm) {
   asyncDiscardHandle(eptx->monitor.alarmHandle);
   eptx->monitor.alarmHandle = NULL;
 
-  urb->actual_length = 0;
-
-  if (!usbSubmitURB(urb, endpoint)) {
-    usbLogInputProblem(endpoint, "input URB not resubmitted");
-  }
+  usbResubmitInputURB(urb, endpoint);
 }
 
 ASYNC_SIGNAL_CALLBACK(usbHandleInputSignal) {
@@ -966,6 +977,7 @@ ASYNC_SIGNAL_CALLBACK(usbHandleInputSignal) {
         }
       } else {
         usbLogInputProblem(endpoint, "input data not available");
+        errno = response.error;
       }
 
       if (written) {
@@ -975,10 +987,8 @@ ASYNC_SIGNAL_CALLBACK(usbHandleInputSignal) {
           } else {
             usbLogInputProblem(endpoint, "input URB resubmit not scheduled");
           }
-        } else if (usbSubmitURB(urb, endpoint)) {
+        } else if (usbResubmitInputURB(urb, endpoint)) {
           return 1;
-        } else {
-          usbLogInputProblem(endpoint, "input URB not resubmitted");
         }
       }
 
@@ -986,6 +996,7 @@ ASYNC_SIGNAL_CALLBACK(usbHandleInputSignal) {
       eptx->monitor.urb = NULL;
     } else {
       usbLogInputProblem(endpoint, "unexpected input URB");
+      errno = EIO;
     }
 
     free(request);
