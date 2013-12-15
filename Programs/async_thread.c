@@ -28,14 +28,14 @@
 #ifdef ASYNC_CAN_HANDLE_THREADS
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
 typedef struct {
-  const char *name;
   AsyncThreadFunction *function;
   void *argument;
-} RunThreadData;
+  char name[0];
+} RunThreadArgument;
 
 static void *
 runThread (void *argument) {
-  RunThreadData *run = argument;
+  RunThreadArgument *run = argument;
   void *result;
 
   logMessage(LOG_CATEGORY(ASYNC_EVENTS), "thread starting: %s", run->name);
@@ -54,18 +54,18 @@ typedef struct {
   void *const argument;
 
   int error;
-} CreateThreadData;
+} CreateThreadParameters;
 
 static void
-createThread (void *data) {
-  CreateThreadData *create = data;
-  RunThreadData *run;
+createThread (void *parameters) {
+  CreateThreadParameters *create = parameters;
+  RunThreadArgument *run;
 
-  if ((run = malloc(sizeof(*run)))) {
+  if ((run = malloc(sizeof(*run) + strlen(create->name) + 1))) {
     memset(run, 0, sizeof(*run));
-    run->name = create->name;
     run->function = create->function;
     run->argument = create->argument;
+    strcpy(run->name, create->name);
 
     logMessage(LOG_CATEGORY(ASYNC_EVENTS), "creating thread: %s", create->name);
     create->error = pthread_create(create->thread, create->attributes, runThread, run);
@@ -87,7 +87,7 @@ asyncCreateThread (
   AsyncThreadFunction *function, void *argument
 ) {
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
-  CreateThreadData create = {
+  CreateThreadParameters create = {
     .name = name,
     .thread = thread,
     .attributes = attributes,

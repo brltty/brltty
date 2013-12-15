@@ -2123,9 +2123,15 @@ static void *runServer(void *arg)
 #ifdef __MINGW32__
     if (socketInfo[i].addrfamily != PF_LOCAL) {
 #endif /* __MINGW32__ */
-      if ((res = asyncCreateThread("server-socket-create",
-                                   &socketThreads[i], &attr,
-                                   runCreateSocket, (void *)(intptr_t)i)) != 0) {
+      {
+        char name[0X100];
+
+        snprintf(name, sizeof(name), "server-socket-create-%d", i);
+        res = asyncCreateThread(name, &socketThreads[i], &attr,
+                                runCreateSocket, (void *)(intptr_t)i);
+      }
+
+      if (res != 0) {
 	logMessage(LOG_WARNING,"pthread_create: %s",strerror(res));
 
 	for (i--;i>=0;i--) {
