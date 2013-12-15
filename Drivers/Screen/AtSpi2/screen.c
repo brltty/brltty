@@ -843,7 +843,7 @@ construct_AtSpi2Screen (void) {
   sem_t SPI2_init_sem;
   sem_init(&SPI2_init_sem,0,0);
   finished = 0;
-  if (asyncCreateThread("driver-screen-atspi2",
+  if (asyncCreateThread("driver-screen-AtSpi2",
                         &SPI2_main_thread, NULL,
                         doAtSpi2ScreenOpen, (void *)&SPI2_init_sem)) {
     logMessage(LOG_ERR,"main SPI2 thread failed to be launched");

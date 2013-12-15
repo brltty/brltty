@@ -286,7 +286,7 @@ static int spk_construct(SpeechSynthesizer *spk, char **parameters)
 	pthread_cond_init(&queue_cond, NULL);
 
 	alive = 1;
-	result = asyncCreateThread("driver-speech-espeak",
+	result = asyncCreateThread("driver-speech-eSpeak",
                                    &request_thread, NULL,
                                    process_request, NULL);
 	if (result) {
