@@ -74,6 +74,13 @@ LOG_CATEGORY_LABEL_brlkeys Braille Device Key Events
 LOG_CATEGORY_LABEL_kbdkeys Keyboard Key Events
 LOG_CATEGORY_LABEL_csrtrk Cursor Tracking
 LOG_CATEGORY_LABEL_csrrtg Cursor Routing
+LOG_CATEGORY_LABEL_update Update Events
+LOG_CATEGORY_LABEL_speech Speech Events
+LOG_CATEGORY_LABEL_async Async Events
+LOG_CATEGORY_LABEL_server Server Events
+LOG_CATEGORY_LABEL_serial Serial I/O
+LOG_CATEGORY_LABEL_usb USB I/O
+LOG_CATEGORY_LABEL_bluetooth Bluetooth I/O
 
 BRAILLE_DRIVER_LABEL_auto autodetect
 

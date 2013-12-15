@@ -81,6 +81,13 @@
   <string name="LOG_CATEGORY_LABEL_kbdkeys">Keyboard Key Events</string>
   <string name="LOG_CATEGORY_LABEL_csrtrk">Cursor Tracking</string>
   <string name="LOG_CATEGORY_LABEL_csrrtg">Cursor Routing</string>
+  <string name="LOG_CATEGORY_LABEL_update">Update Events</string>
+  <string name="LOG_CATEGORY_LABEL_speech">Speech Events</string>
+  <string name="LOG_CATEGORY_LABEL_async">Async Events</string>
+  <string name="LOG_CATEGORY_LABEL_server">Server Events</string>
+  <string name="LOG_CATEGORY_LABEL_serial">Serial I/O</string>
+  <string name="LOG_CATEGORY_LABEL_usb">USB I/O</string>
+  <string name="LOG_CATEGORY_LABEL_bluetooth">Bluetooth I/O</string>
 
   <string-array name="LOG_CATEGORY_LABELS">
     <item>@string/LOG_CATEGORY_LABEL_ingio</item>
@@ -90,6 +97,13 @@
     <item>@string/LOG_CATEGORY_LABEL_kbdkeys</item>
     <item>@string/LOG_CATEGORY_LABEL_csrtrk</item>
     <item>@string/LOG_CATEGORY_LABEL_csrrtg</item>
+    <item>@string/LOG_CATEGORY_LABEL_update</item>
+    <item>@string/LOG_CATEGORY_LABEL_speech</item>
+    <item>@string/LOG_CATEGORY_LABEL_async</item>
+    <item>@string/LOG_CATEGORY_LABEL_server</item>
+    <item>@string/LOG_CATEGORY_LABEL_serial</item>
+    <item>@string/LOG_CATEGORY_LABEL_usb</item>
+    <item>@string/LOG_CATEGORY_LABEL_bluetooth</item>
   </string-array>
 
   <string-array name="LOG_CATEGORY_VALUES">
@@ -100,5 +114,12 @@
     <item>kbdkeys</item>
     <item>csrtrk</item>
     <item>csrrtg</item>
+    <item>update</item>
+    <item>speech</item>
+    <item>async</item>
+    <item>server</item>
+    <item>serial</item>
+    <item>usb</item>
+    <item>bluetooth</item>
   </string-array>
 </resources>
