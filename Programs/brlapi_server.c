@@ -2123,7 +2123,9 @@ static void *runServer(void *arg)
 #ifdef __MINGW32__
     if (socketInfo[i].addrfamily != PF_LOCAL) {
 #endif /* __MINGW32__ */
-      if ((res = asyncCreateThread(&socketThreads[i],&attr,runCreateSocket,(void *)(intptr_t)i)) != 0) {
+      if ((res = asyncCreateThread("server-socket-create",
+                                   &socketThreads[i], &attr,
+                                   runCreateSocket, (void *)(intptr_t)i)) != 0) {
 	logMessage(LOG_WARNING,"pthread_create: %s",strerror(res));
 
 	for (i--;i>=0;i--) {
@@ -2932,7 +2934,8 @@ int api_start(BrailleDisplay *brl, char **parameters)
   running = 1;
   trueBraille=&noBraille;
 
-  if ((res = asyncCreateThread(&serverThread,&attr,runServer,hosts)) != 0) {
+  if ((res = asyncCreateThread("server-main", &serverThread, &attr,
+                               runServer, hosts)) != 0) {
     logMessage(LOG_WARNING,"pthread_create: %s",strerror(res));
     running = 0;
 

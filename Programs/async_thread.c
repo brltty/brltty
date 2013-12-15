@@ -18,43 +18,85 @@
 
 #include "prologue.h"
 
+#include <string.h>
+#include <errno.h>
+
+#include "log.h"
 #include "async_thread.h"
 #include "async_signal.h"
 
 #ifdef ASYNC_CAN_HANDLE_THREADS
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
 typedef struct {
+  const char *name;
+  AsyncThreadFunction *function;
+  void *argument;
+} RunThreadData;
+
+static void *
+runThread (void *argument) {
+  RunThreadData *run = argument;
+  void *result;
+
+  logMessage(LOG_CATEGORY(ASYNC_EVENTS), "thread starting: %s", run->name);
+  result = run->function(run->argument);
+  logMessage(LOG_CATEGORY(ASYNC_EVENTS), "thread finished: %s", run->name);
+
+  free(run);
+  return result;
+}
+
+typedef struct {
+  const char *const name;
   pthread_t *const thread;
   const pthread_attr_t *const attributes;
   AsyncThreadFunction *const function;
   void *const argument;
 
-  int result;
+  int error;
 } CreateThreadData;
 
 static void
 createThread (void *data) {
-  CreateThreadData *ctd = data;
+  CreateThreadData *create = data;
+  RunThreadData *run;
 
-  ctd->result = pthread_create(ctd->thread, ctd->attributes, ctd->function, ctd->argument);
+  if ((run = malloc(sizeof(*run)))) {
+    memset(run, 0, sizeof(*run));
+    run->name = create->name;
+    run->function = create->function;
+    run->argument = create->argument;
+
+    logMessage(LOG_CATEGORY(ASYNC_EVENTS), "creating thread: %s", create->name);
+    create->error = pthread_create(create->thread, create->attributes, runThread, run);
+    if (!create->error) return;
+    logMessage(LOG_CATEGORY(ASYNC_EVENTS), "thread not created: %s: %s", create->name, strerror(create->error));
+
+    errno = create->error;
+    free(run);
+  } else {
+    logMallocError();
+  }
 }
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */
 
 int
 asyncCreateThread (
+  const char *name,
   pthread_t *thread, const pthread_attr_t *attributes,
   AsyncThreadFunction *function, void *argument
 ) {
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
-  CreateThreadData ctd = {
+  CreateThreadData create = {
+    .name = name,
     .thread = thread,
     .attributes = attributes,
     .function = function,
     .argument = argument
   };
 
-  asyncCallWithObtainableSignalsBlocked(createThread, &ctd);
-  return ctd.result;
+  asyncCallWithObtainableSignalsBlocked(createThread, &create);
+  return create.error;
 #else /* ASYNC_CAN_HANDLE_SIGNALS */
   return pthread_create(thread, attributes, function, argument);
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */

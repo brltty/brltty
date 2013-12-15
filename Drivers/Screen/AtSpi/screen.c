@@ -546,7 +546,9 @@ construct_AtSpiScreen (void) {
   sem_t SPI_init_sem;
   sem_init(&SPI_init_sem,0,0);
   XInitThreads();
-  if (asyncCreateThread(&SPI_main_thread,NULL,doAtSpiScreenOpen,(void *)&SPI_init_sem)) {
+  if (asyncCreateThread("driver-screen-atspi",
+                        &SPI_main_thread, NULL,
+                        doAtSpiScreenOpen, (void *)&SPI_init_sem)) {
     logMessage(LOG_ERR,"main SPI thread failed to be launched");
     return 0;
   }

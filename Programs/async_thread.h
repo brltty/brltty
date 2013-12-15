@@ -43,6 +43,7 @@ extern "C" {
 typedef void *AsyncThreadFunction (void *argument);
 
 extern int asyncCreateThread (
+  const char *name,
   pthread_t *thread, const pthread_attr_t *attributes,
   AsyncThreadFunction *function, void *argument
 );

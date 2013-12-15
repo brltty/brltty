@@ -294,7 +294,9 @@ startSynthesisThread (void) {
       pthread_attr_t attributes;
       if (!(error = pthread_attr_init(&attributes))) {
         pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_JOINABLE);
-        error = asyncCreateThread(&synthesisThread, &attributes, doSynthesisThread, NULL);
+        error = asyncCreateThread("driver-speech-mikropuhe",
+                                  &synthesisThread, &attributes,
+                                  doSynthesisThread, NULL);
         pthread_attr_destroy(&attributes);
         if (!error) {
           return 1;
