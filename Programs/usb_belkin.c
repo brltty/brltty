@@ -27,7 +27,7 @@
 
 static int
 usbSetAttribute_Belkin (UsbDevice *device, unsigned char request, unsigned int value, unsigned int index) {
-  logMessage(LOG_DEBUG, "Belkin Request: %02X %04X %04X", request, value, index);
+  logMessage(LOG_CATEGORY(USB_IO), "Belkin request: %02X %04X %04X", request, value, index);
   return usbControlWrite(device, UsbControlRecipient_Device, UsbControlType_Vendor,
                          request, value, index, NULL, 0, 1000) != -1;
 }

@@ -32,7 +32,7 @@ usbInputFilter_FTDI (UsbInputFilterData *data) {
 
 static int
 usbSetAttribute_FTDI (UsbDevice *device, unsigned char request, unsigned int value, unsigned int index) {
-  logMessage(LOG_DEBUG, "FTDI Request: %02X %04X %04X", request, value, index);
+  logMessage(LOG_CATEGORY(USB_IO), "FTDI request: %02X %04X %04X", request, value, index);
   return usbControlWrite(device, UsbControlRecipient_Device, UsbControlType_Vendor,
                          request, value, index, NULL, 0, 1000) != -1;
 }

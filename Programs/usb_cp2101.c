@@ -37,8 +37,8 @@ usbGetAttributes_CP2101 (UsbDevice *device, uint8_t request, void *data, size_t 
     memset(&bytes[result], 0, length-result);
   }
 
-  logMessage(LOG_DEBUG, "CP2101 Get: %02X", request);
-  logBytes(LOG_DEBUG, "CP2101 Data", data, result);
+  logMessage(LOG_CATEGORY(USB_IO), "CP2101 get attributes: %02X", request);
+  logBytes(LOG_CATEGORY(USB_IO), "CP2101 input data", data, result);
   return result;
 }
 
@@ -48,8 +48,8 @@ usbSetAttributes_CP2101 (
   uint8_t request, uint16_t value,
   const void *data, size_t length
 ) {
-  logMessage(LOG_DEBUG, "CP2101 Set: %02X %04X", request, value);
-  if (length) logBytes(LOG_DEBUG, "CP2101 Data", data, length);
+  logMessage(LOG_CATEGORY(USB_IO), "CP2101 set attributes: %02X %04X", request, value);
+  if (length) logBytes(LOG_CATEGORY(USB_IO), "CP2101 output data", data, length);
 
   return usbControlWrite(device, UsbControlRecipient_Interface, UsbControlType_Vendor,
                          request, value, 0, data, length, 1000) != -1;

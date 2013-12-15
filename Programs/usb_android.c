@@ -137,7 +137,7 @@ usbGetInterfaceEndpoint (JNIEnv *env, jobject interface, jint address) {
 
 static jobject
 usbOpenDeviceConnection (JNIEnv *env, jobject device) {
-  logMessage(LOG_DEBUG, "USB: opening device connection");
+  logMessage(LOG_CATEGORY(USB_IO), "opening device connection");
 
   if (usbFindHelperClass(env)) {
     static jmethodID method = 0;

@@ -112,7 +112,7 @@ usbGetLanguage (
   if (size != -1) {
     if (size >= 4) {
       *language = getLittleEndian16(descriptor.string.wData[0]);
-      logMessage(LOG_DEBUG, "USB Language: %02X", *language);
+      logMessage(LOG_CATEGORY(USB_IO), "USB language: %02X", *language);
       return 1;
     }
     errno = EIO;
@@ -651,7 +651,7 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
         case UsbEndpointTransfer_Interrupt:   transfer = "int"; break;
       }
 
-      logMessage(LOG_DEBUG, "USB: ept=%02X dir=%s xfr=%s pkt=%d ivl=%dms",
+      logMessage(LOG_CATEGORY(USB_IO), "ept=%02X dir=%s xfr=%s pkt=%d ivl=%dms",
                  descriptor->bEndpointAddress, direction, transfer,
                  getLittleEndian16(descriptor->wMaxPacketSize),
                  descriptor->bInterval);
@@ -1177,7 +1177,7 @@ usbChooseChannel (UsbDevice *device, void *data) {
           ssize_t result = usbGetDeviceDescriptor(device, &actualDescriptor);
 
           if (result == UsbDescriptorSize_Device) {
-            logMessage(LOG_DEBUG, "USB: using actual device descriptor");
+            logMessage(LOG_CATEGORY(USB_IO), "using actual device descriptor");
             device->descriptor = actualDescriptor;
           }
         }
@@ -1308,7 +1308,7 @@ usbOpenChannel (const UsbChannelDefinition *definitions, const char *identifier)
 
     if (ok) {
       if (!(channel = usbNewChannel(&choose))) {
-        logMessage(LOG_DEBUG, "USB device not found%s%s",
+        logMessage(LOG_CATEGORY(USB_IO), "device not found%s%s",
                    (*identifier? ": ": ""), identifier);
       }
     }

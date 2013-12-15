@@ -77,7 +77,7 @@ usbToErrno (enum libusb_error error) {
       return ENOSYS;
 
     default:
-      logMessage(LOG_DEBUG, "unsupported libusb1 error code: %d", error);
+      logMessage(LOG_CATEGORY(USB_IO), "unsupported libusb1 error code: %d", error);
     case LIBUSB_ERROR_OTHER:
       return EIO;
   }

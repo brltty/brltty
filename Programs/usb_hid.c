@@ -176,7 +176,7 @@ usbHidGetReportSize (
       if (description.defined & USB_HID_ITEM_BIT(UsbHidItemType_ReportSize)) {
         uint32_t bytes = ((description.reportCount * description.reportSize) + 7) / 8;
 
-        logMessage(LOG_DEBUG, "HID Report Size: %02X = %"PRIu32, identifier, bytes);
+        logMessage(LOG_CATEGORY(USB_IO), "HID report size: %02X = %"PRIu32, identifier, bytes);
         *size = 1 + bytes;
         return 1;
       } else {

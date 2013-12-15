@@ -278,7 +278,7 @@ usbSetSerialParameters (UsbDevice *device, const SerialParameters *parameters) {
   const UsbSerialOperations *serial = usbGetSerialOperations(device);
 
   if (!serial) {
-    logMessage(LOG_DEBUG, "USB: no serial operations: vendor=%04X product=%04X",
+    logMessage(LOG_CATEGORY(USB_IO), "no serial operations: vendor=%04X product=%04X",
                getLittleEndian16(device->descriptor.idVendor),
                getLittleEndian16(device->descriptor.idProduct));
     errno = ENOSYS;

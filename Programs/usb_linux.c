@@ -129,7 +129,7 @@ usbDisableAutosuspend (UsbDevice *device) {
 
         close(file);
       } else {
-        logMessage((errno == ENOENT)? LOG_DEBUG: LOG_ERR,
+        logMessage((errno == ENOENT)? LOG_CATEGORY(USB_IO): LOG_ERR,
                    "open error: %s: %s", path, strerror(errno));
       }
 

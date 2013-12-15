@@ -695,7 +695,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
           if ((eptx->endpointNumber == number) &&
               (((eptx->transferDirection == kUSBIn) && (direction == UsbEndpointDirection_Input)) ||
                ((eptx->transferDirection == kUSBOut) && (direction == UsbEndpointDirection_Output)))) {
-            logMessage(LOG_DEBUG, "USB: ept=%02X -> pip=%d (num=%d dir=%d xfr=%d int=%d pkt=%d)",
+            logMessage(LOG_CATEGORY(USB_IO), "ept=%02X -> pip=%d (num=%d dir=%d xfr=%d int=%d pkt=%d)",
                        endpoint->descriptor->bEndpointAddress, eptx->pipeNumber,
                        eptx->endpointNumber, eptx->transferDirection, eptx->transferMode,
                        eptx->pollInterval, eptx->packetSize);
