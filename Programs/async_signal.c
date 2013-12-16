@@ -136,8 +136,7 @@ asyncRevertSignal (int signalNumber, AsyncSignalHandler **oldHandler) {
   return asyncHandleSignal(signalNumber, SIG_DFL, oldHandler);
 }
 
-void
-asyncEmptySignalHandler (int signal) {
+ASYNC_SIGNAL_HANDLER(asyncEmptySignalHandler) {
 }
 
 static int
@@ -453,8 +452,7 @@ getSignalElement (int signalNumber, int create) {
   return NULL;
 }
 
-static void
-handleMonitoredSignal (int signalNumber) {
+ASYNC_SIGNAL_HANDLER(handleMonitoredSignal) {
   Element *signalElement = getSignalElement(signalNumber, 0);
 
   if (signalElement) {

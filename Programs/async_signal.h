@@ -50,12 +50,13 @@ extern int asyncMonitorSignal (
 
 
 /* Type sighandler_t isn't defined on all platforms. */
-typedef void AsyncSignalHandler (int signalNumber);
+#define ASYNC_SIGNAL_HANDLER(name) void name (int signalNumber)
+typedef ASYNC_SIGNAL_HANDLER(AsyncSignalHandler);
 
 extern int asyncHandleSignal (int signalNumber, AsyncSignalHandler *newHandler, AsyncSignalHandler **oldHandler);
 extern int asyncIgnoreSignal (int signalNumber, AsyncSignalHandler **oldHandler);
 extern int asyncRevertSignal (int signalNumber, AsyncSignalHandler **oldHandler);
-extern void asyncEmptySignalHandler (int signal);
+extern ASYNC_SIGNAL_HANDLER(asyncEmptySignalHandler);
 
 extern int asyncSetSignalBlocked (int signalNumber, int state);
 extern int asyncIsSignalBlocked (int signalNumber);

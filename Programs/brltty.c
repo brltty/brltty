@@ -1270,8 +1270,7 @@ exitSessions (void *data) {
 }
 
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
-static void 
-handleProgramTerminationRequest (int signalNumber) {
+ASYNC_SIGNAL_HANDLER(handleProgramTerminationRequest) {
   time_t now = time(NULL);
 
   if (difftime(now, programTerminationRequestTime) > PROGRAM_TERMINATION_REQUEST_RESET_SECONDS) {
