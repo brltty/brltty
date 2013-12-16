@@ -784,10 +784,10 @@ static int watch(const char *message, const char *event) {
   return 1;
 }
 
-static void *doAtSpi2ScreenOpen(void *arg) {
+ASYNC_THREAD_FUNCTION(doAtSpi2ScreenOpen) {
   DBusError error;
 
-  sem_t *SPI2_init_sem = (sem_t *)arg;
+  sem_t *SPI2_init_sem = argument;
 
   dbus_error_init(&error);
 #ifdef HAVE_ATSPI_GET_A11Y_BUS

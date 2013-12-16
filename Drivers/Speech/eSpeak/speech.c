@@ -77,8 +77,7 @@ static void free_queue(void)
 	}
 }
 	
-static void *process_request(void *unused)
-{
+ASYNC_THREAD_FUNCTION(process_eSpeak_request) {
 	struct request *curr;
 	int result;
 
@@ -288,7 +287,7 @@ static int spk_construct(SpeechSynthesizer *spk, char **parameters)
 	alive = 1;
 	result = asyncCreateThread("driver-speech-eSpeak",
                                    &request_thread, NULL,
-                                   process_request, NULL);
+                                   process_eSpeak_request, NULL);
 	if (result) {
 		logMessage(LOG_ERR, "eSpeak: unable to create thread");
 		espeak_Terminate();

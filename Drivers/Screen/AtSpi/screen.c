@@ -509,9 +509,9 @@ static void evListenerCB(const AccessibleEvent *event, void *user_data) {
   running = 0;
 }
 
-static void *doAtSpiScreenOpen(void *arg) {
+ASYNC_THREAD_FUNCTION(doAtSpiScreenOpen) {
   AccessibleEventListener *evListener;
-  sem_t *SPI_init_sem = (sem_t *)arg;
+  sem_t *SPI_init_sem = argument;
   int res;
   static const char *events[] = {
     "object:text-changed",

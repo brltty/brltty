@@ -2040,9 +2040,8 @@ static int prepareThread(void)
   return 1;
 }
 
-static void *runCreateSocket(void *arg)
-{
-  intptr_t num = (intptr_t) arg;
+ASYNC_THREAD_FUNCTION(createServerSocket) {
+  intptr_t num = (intptr_t) argument;
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "socket creation started: %"PRIdPTR, num);
 
   if (prepareThread()) {
@@ -2056,9 +2055,8 @@ static void *runCreateSocket(void *arg)
 /* Function : server */
 /* The server thread */
 /* Returns NULL in any case */
-static void *runServer(void *arg)
-{
-  char *hosts = (char *)arg;
+ASYNC_THREAD_FUNCTION(runServer) {
+  char *hosts = (char *)argument;
   pthread_attr_t attr;
   int i;
   int res;
@@ -2128,7 +2126,7 @@ static void *runServer(void *arg)
 
         snprintf(name, sizeof(name), "server-socket-create-%d", i);
         res = asyncCreateThread(name, &socketThreads[i], &attr,
-                                runCreateSocket, (void *)(intptr_t)i);
+                                createServerSocket, (void *)(intptr_t)i);
       }
 
       if (res != 0) {

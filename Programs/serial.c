@@ -158,9 +158,8 @@ serialSetParity (SerialDevice *serial, SerialParity parity) {
 }
 
 #ifdef HAVE_POSIX_THREADS
-static void *
-flowControlProc_InputCts (void *arg) {
-  SerialDevice *serial = arg;
+ASYNC_THREAD_FUNCTION(flowControlProc_InputCts) {
+  SerialDevice *serial = argument;
   int up = serialTestLineCTS(serial);
 
   while (!serial->flowControlStop) {

@@ -40,7 +40,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 #ifdef ASYNC_CAN_HANDLE_THREADS
-typedef void *AsyncThreadFunction (void *argument);
+#define ASYNC_THREAD_FUNCTION(name) void *name (void *argument)
+typedef ASYNC_THREAD_FUNCTION(AsyncThreadFunction);
 
 extern int asyncCreateThread (
   const char *name,
