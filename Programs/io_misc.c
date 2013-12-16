@@ -64,8 +64,7 @@ ASYNC_MONITOR_CALLBACK(setEventMonitor) {
   return 0;
 }
 
-static int
-testEventMonitor (void *data) {
+ASYNC_CONDITION_TESTER(testEventMonitor) {
   EventMonitor *evm = data;
 
   return evm->ready;

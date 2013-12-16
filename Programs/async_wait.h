@@ -25,7 +25,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef int AsyncConditionTester (void *data);
+#define ASYNC_CONDITION_TESTER(name) int name (void *data)
+typedef ASYNC_CONDITION_TESTER(AsyncConditionTester);
 
 extern int asyncAwaitCondition (int timeout, AsyncConditionTester *testCondition, void *data);
 extern void asyncWait (int duration);

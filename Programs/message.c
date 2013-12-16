@@ -38,8 +38,7 @@ typedef struct {
   unsigned endWait:1;
 } MessageData;
 
-static int
-testEndMessageWait (void *data) {
+ASYNC_CONDITION_TESTER(testEndMessageWait) {
   MessageData *mgd = data;
 
   return mgd->endWait;

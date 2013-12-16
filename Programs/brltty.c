@@ -1185,8 +1185,7 @@ typedef struct {
   const void *data;
 } UnmonitoredConditionDescriptor;
 
-static int
-checkUnmonitoredConditions (void *data) {
+ASYNC_CONDITION_TESTER(checkUnmonitoredConditions) {
   UnmonitoredConditionDescriptor *ucd = data;
 
   if (interruptPending) {

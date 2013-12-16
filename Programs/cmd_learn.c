@@ -44,8 +44,7 @@ typedef struct {
   LearnModeState state;
 } LearnModeData;
 
-static int
-testEndLearnWait (void *data) {
+ASYNC_CONDITION_TESTER(testEndLearnWait) {
   LearnModeData *lmd = data;
 
   return lmd->state != LMS_TIMEOUT;
