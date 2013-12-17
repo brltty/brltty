@@ -349,6 +349,7 @@ newSpeechRequest (SpeechRequestType type, SpeechRequestDatum *data) {
 
 static int
 sendSpeechRequest (SpeechThreadObject *obj, SpeechRequest *req) {
+  if (!obj) return 0;
   setResponsePending(obj);
   return asyncSignalEvent(obj->requestEvent, req);
 }
