@@ -33,6 +33,7 @@
 #include "prefs.h"
 #include "charset.h"
 #include "spk.h"
+#include "spk_thread.h"
 #include "brltty.h"
 
 void
@@ -81,13 +82,34 @@ setSpeechTrackingAlarm (void *data) {
   }
 }
 
-void
-muteSpeech (SpeechSynthesizer *spk, const char *reason) {
-  speech->mute(spk);
-  logMessage(LOG_CATEGORY(SPEECH_EVENTS), "mute: %s", reason);
+static SpeechThreadObject *speechThreadObject = NULL;
+
+int
+startSpeechDriverThread (SpeechSynthesizer *spk, char **parameters) {
+  if (!speechThreadObject) {
+    if (!(speechThreadObject = newSpeechThreadObject(spk, parameters))) {
+      return 0;
+    }
+  }
+
+  return 1;
 }
 
 void
+stopSpeechDriverThread (void) {
+  if (speechThreadObject) {
+    destroySpeechThreadObject(speechThreadObject);
+    speechThreadObject = NULL;
+  }
+}
+
+int
+muteSpeech (SpeechSynthesizer *spk, const char *reason) {
+  logMessage(LOG_CATEGORY(SPEECH_EVENTS), "mute: %s", reason);
+  return sendSpeechRequest_muteSpeech(speechThreadObject);
+}
+
+int
 sayUtf8Characters (
   SpeechSynthesizer *spk,
   const char *text, const unsigned char *attributes,
@@ -96,13 +118,21 @@ sayUtf8Characters (
 ) {
   if (count) {
     if (immediate) {
-      muteSpeech(spk, "say immediate");
+      if (!muteSpeech(spk, "say immediate")) {
+        return 0;
+      }
     }
 
     logMessage(LOG_CATEGORY(SPEECH_EVENTS), "say: %s", text);
-    speech->say(spk, (const unsigned char *)text, length, count, attributes);
+
+    if (!sendSpeechRequest_sayText(speechThreadObject, text, length, count, attributes)) {
+      return 0;
+    }
+
     if (speechTracking) setSpeechTrackingAlarm(spk);
   }
+
+  return 1;
 }
 
 void

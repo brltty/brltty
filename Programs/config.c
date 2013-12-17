@@ -1386,7 +1386,7 @@ int
 constructSpeechDriver (void) {
   initializeSpeech();
 
-  if (speech->construct(&spk, speechParameters)) {
+  if (startSpeechDriverThread(&spk, speechParameters)) {
     return 1;
   } else {
     logMessage(LOG_DEBUG, "speech driver initialization failed: %s",
@@ -1398,7 +1398,7 @@ constructSpeechDriver (void) {
 
 void
 destructSpeechDriver (void) {
-  speech->destruct(&spk);
+  stopSpeechDriverThread();
 }
 
 static int
