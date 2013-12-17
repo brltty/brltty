@@ -894,7 +894,7 @@ doUpdate (void) {
   logMessage(LOG_CATEGORY(UPDATE_EVENTS), "finished");
 }
 
-static void setUpdateAlarm (void *data);
+static void setUpdateAlarm (void);
 static AsyncHandle updateAlarm;
 static int updateSuspendCount;
 
@@ -949,20 +949,21 @@ ASYNC_ALARM_CALLBACK(handleUpdateAlarm) {
   asyncDiscardHandle(updateAlarm);
   updateAlarm = NULL;
 
+  suspendUpdates();
   setUpdateTime((pollScreen()? UPDATE_SCREEN_POLL_INTERVAL: (SECS_PER_DAY * MSECS_PER_SEC)),
                 parameters->now, 0);
-  doUpdate();
 
+  doUpdate();
   setUpdateDelay(MAX((brl.writeDelay + 1), UPDATE_SCHEDULE_DELAY));
   brl.writeDelay = 0;
 
-  setUpdateAlarm(parameters->data);
+  resumeUpdates();
 }
 
 static void
-setUpdateAlarm (void *data) {
+setUpdateAlarm (void) {
   if (!updateSuspendCount && !updateAlarm) {
-    asyncSetAlarmTo(&updateAlarm, &updateTime, handleUpdateAlarm, data);
+    asyncSetAlarmTo(&updateAlarm, &updateTime, handleUpdateAlarm, NULL);
   }
 }
 
@@ -993,7 +994,7 @@ suspendUpdates (void) {
 void
 resumeUpdates (void) {
   if (!--updateSuspendCount) {
-    setUpdateAlarm(NULL);
+    setUpdateAlarm();
     scheduleUpdate("updates resumed");
   }
 
