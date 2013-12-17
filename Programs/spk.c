@@ -36,6 +36,8 @@
 #include "spk_thread.h"
 #include "brltty.h"
 
+static SpeechThreadObject *speechThreadObject = NULL;
+
 void
 initializeSpeechSynthesizer (SpeechSynthesizer *spk) {
   spk->data = NULL;
@@ -50,18 +52,16 @@ int speechLine = 0;
 int speechIndex = -1;
 
 ASYNC_ALARM_CALLBACK(handleSpeechTrackingAlarm) {
-  SpeechSynthesizer *spk = parameters->data;
-
   asyncDiscardHandle(speechTrackingAlarm);
   speechTrackingAlarm = NULL;
 
   if (speechTracking) {
     if (scr.number == speechScreen) {
-      speech->doTrack(spk);
+      sendSpeechRequest_doTrack(speechThreadObject);
 
-      if (speech->isSpeaking(spk)) {
+      if (sendSpeechRequest_isSpeaking(speechThreadObject)) {
         if (ses->trackCursor) {
-          int index = speech->getTrack(spk);
+          int index = sendSpeechRequest_getTrack(speechThreadObject);
 
           if (index != speechIndex) trackSpeech(speechIndex = index);
         }
@@ -81,8 +81,6 @@ setSpeechTrackingAlarm (void *data) {
     asyncSetAlarmIn(&speechTrackingAlarm, SPEECH_TRACKING_POLL_INTERVAL, handleSpeechTrackingAlarm, data);
   }
 }
-
-static SpeechThreadObject *speechThreadObject = NULL;
 
 int
 startSpeechDriverThread (SpeechSynthesizer *spk, char **parameters) {
@@ -129,7 +127,7 @@ sayUtf8Characters (
       return 0;
     }
 
-    if (speechTracking) setSpeechTrackingAlarm(spk);
+    if (speechTracking) setSpeechTrackingAlarm(NULL);
   }
 
   return 1;
@@ -163,7 +161,7 @@ int
 setSpeechVolume (SpeechSynthesizer *spk, int setting, int say) {
   if (!speech->setVolume) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set volume: %d", setting);
-  speech->setVolume(spk, setting);
+  sendSpeechRequest_setVolume(speechThreadObject, setting);
   if (say) sayIntegerSetting(spk, gettext("volume"), setting);
   return 1;
 }
@@ -184,7 +182,7 @@ int
 setSpeechRate (SpeechSynthesizer *spk, int setting, int say) {
   if (!speech->setRate) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set rate: %d", setting);
-  speech->setRate(spk, setting);
+  sendSpeechRequest_setRate(speechThreadObject, setting);
   if (say) sayIntegerSetting(spk, gettext("rate"), setting);
   return 1;
 }
@@ -229,7 +227,7 @@ int
 setSpeechPitch (SpeechSynthesizer *spk, int setting, int say) {
   if (!speech->setPitch) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set pitch: %d", setting);
-  speech->setPitch(spk, setting);
+  sendSpeechRequest_setPitch(speechThreadObject, setting);
   if (say) sayIntegerSetting(spk, gettext("pitch"), setting);
   return 1;
 }
@@ -250,6 +248,6 @@ int
 setSpeechPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting, int say) {
   if (!speech->setPunctuation) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set punctuation: %d", setting);
-  speech->setPunctuation(spk, setting);
+  sendSpeechRequest_setPunctuation(speechThreadObject, setting);
   return 1;
 }
