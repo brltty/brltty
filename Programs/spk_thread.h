@@ -42,6 +42,38 @@ extern int sendSpeechRequest_sayText (
 extern int sendSpeechRequest_muteSpeech (
   SpeechThreadObject *obj
 );
+
+extern int sendSpeechRequest_doTrack (
+  SpeechThreadObject *obj
+);
+
+extern int sendSpeechRequest_getTrack (
+  SpeechThreadObject *obj
+);
+
+extern int sendSpeechRequest_isSpeaking (
+  SpeechThreadObject *obj
+);
+
+extern int sendSpeechRequest_setVolume (
+  SpeechThreadObject *obj,
+  unsigned char setting
+);
+
+extern int sendSpeechRequest_setRate (
+  SpeechThreadObject *obj,
+  unsigned char setting
+);
+
+extern int sendSpeechRequest_setPitch (
+  SpeechThreadObject *obj,
+  unsigned char setting
+);
+
+extern int sendSpeechRequest_setPunctuation (
+  SpeechThreadObject *obj,
+  SpeechPunctuation setting
+);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 #ifdef __cplusplus

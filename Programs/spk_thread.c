@@ -196,15 +196,19 @@ ASYNC_EVENT_CALLBACK(handleSpeechRequest) {
         sendIntegerResponse(obj, 1);
         break;
 
-      case REQ_GET_TRACK:
-        speech->getTrack(obj->speechSynthesizer);
-        sendIntegerResponse(obj, 1);
-        break;
+      case REQ_GET_TRACK: {
+        int result = speech->getTrack(obj->speechSynthesizer);
 
-      case REQ_IS_SPEAKING:
-        speech->isSpeaking(obj->speechSynthesizer);
-        sendIntegerResponse(obj, 1);
+        sendIntegerResponse(obj, result);
         break;
+      }
+
+      case REQ_IS_SPEAKING: {
+        int result = speech->isSpeaking(obj->speechSynthesizer);
+
+        sendIntegerResponse(obj, result);
+        break;
+      }
 
       case REQ_SET_VOLUME:
         speech->setVolume(obj->speechSynthesizer, req->arguments.setVolume.setting);
@@ -388,6 +392,137 @@ sendSpeechRequest_muteSpeech (
   SpeechRequest *req;
 
   if ((req = newSpeechRequest(REQ_MUTE_SPEECH, NULL))) {
+    if (sendSpeechRequest(obj, req)) {
+      return getIntegerResult(obj);
+    }
+
+    free(req);
+  }
+
+  return 0;
+}
+
+int
+sendSpeechRequest_doTrack (
+  SpeechThreadObject *obj
+) {
+  SpeechRequest *req;
+
+  if ((req = newSpeechRequest(REQ_DO_TRACK, NULL))) {
+    if (sendSpeechRequest(obj, req)) {
+      return getIntegerResult(obj);
+    }
+
+    free(req);
+  }
+
+  return 0;
+}
+
+int
+sendSpeechRequest_getTrack (
+  SpeechThreadObject *obj
+) {
+  SpeechRequest *req;
+
+  if ((req = newSpeechRequest(REQ_GET_TRACK, NULL))) {
+    if (sendSpeechRequest(obj, req)) {
+      return getIntegerResult(obj);
+    }
+
+    free(req);
+  }
+
+  return 0;
+}
+
+int
+sendSpeechRequest_isSpeaking (
+  SpeechThreadObject *obj
+) {
+  SpeechRequest *req;
+
+  if ((req = newSpeechRequest(REQ_IS_SPEAKING, NULL))) {
+    if (sendSpeechRequest(obj, req)) {
+      return getIntegerResult(obj);
+    }
+
+    free(req);
+  }
+
+  return 0;
+}
+
+int
+sendSpeechRequest_setVolume (
+  SpeechThreadObject *obj,
+  unsigned char setting
+) {
+  SpeechRequest *req;
+
+  if ((req = newSpeechRequest(REQ_SET_VOLUME, NULL))) {
+    req->arguments.setVolume.setting = setting;
+
+    if (sendSpeechRequest(obj, req)) {
+      return getIntegerResult(obj);
+    }
+
+    free(req);
+  }
+
+  return 0;
+}
+
+int
+sendSpeechRequest_setRate (
+  SpeechThreadObject *obj,
+  unsigned char setting
+) {
+  SpeechRequest *req;
+
+  if ((req = newSpeechRequest(REQ_SET_RATE, NULL))) {
+    req->arguments.setRate.setting = setting;
+
+    if (sendSpeechRequest(obj, req)) {
+      return getIntegerResult(obj);
+    }
+
+    free(req);
+  }
+
+  return 0;
+}
+
+int
+sendSpeechRequest_setPitch (
+  SpeechThreadObject *obj,
+  unsigned char setting
+) {
+  SpeechRequest *req;
+
+  if ((req = newSpeechRequest(REQ_SET_PITCH, NULL))) {
+    req->arguments.setPitch.setting = setting;
+
+    if (sendSpeechRequest(obj, req)) {
+      return getIntegerResult(obj);
+    }
+
+    free(req);
+  }
+
+  return 0;
+}
+
+int
+sendSpeechRequest_setPunctuation (
+  SpeechThreadObject *obj,
+  SpeechPunctuation setting
+) {
+  SpeechRequest *req;
+
+  if ((req = newSpeechRequest(REQ_SET_PUNCTUATION, NULL))) {
+    req->arguments.setPunctuation.setting = setting;
+
     if (sendSpeechRequest(obj, req)) {
       return getIntegerResult(obj);
     }
