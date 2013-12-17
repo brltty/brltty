@@ -24,7 +24,6 @@
 
 #include "log.h"
 #include "parse.h"
-#include "async_thread.h"
 
 typedef enum {
 	PARM_PATH,
@@ -51,93 +50,9 @@ typedef enum {
 static int maxrate = espeakRATE_MAXIMUM;
 static volatile int IndexPos;
 
-#ifdef HAVE_POSIX_THREADS
-
-static pthread_t request_thread;
-static pthread_mutex_t queue_lock;
-static pthread_cond_t queue_cond;
-static volatile int alive;
-
-struct request {
-	struct request *next;
-	unsigned buflength;
-	unsigned char buffer[0];
-};
-
-static struct request *request_queue;
-
-static void free_queue(void)
-{
-	struct request *curr = request_queue;
-	request_queue = NULL;
-	while (curr) {
-		struct request *next = curr->next;
-		free(curr);
-		curr = next;
-	}
-}
-	
-ASYNC_THREAD_FUNCTION(process_eSpeak_request) {
-	struct request *curr;
-	int result;
-
-	pthread_mutex_lock(&queue_lock);
-	while (alive) {
-		curr = request_queue;
-		if (!curr) {
-			pthread_cond_wait(&queue_cond, &queue_lock);
-			continue;
-		}
-		request_queue = curr->next;
-		pthread_mutex_unlock(&queue_lock);
-		if (curr->buflength) {
-			result = espeak_Synth(curr->buffer, curr->buflength, 0,
-					POS_CHARACTER, 0, espeakCHARS_UTF8,
-					NULL, NULL);
-			if (result != EE_OK)
-				logMessage(LOG_ERR, "eSpeak: Synth() returned error %d", result);
-		} else {
-			espeak_Cancel();
-		}
-		free(curr);
-		pthread_mutex_lock(&queue_lock);
-	}
-	pthread_mutex_unlock(&queue_lock);
-
-	return NULL;
-}
-
-#endif /* HAVE_POSIX_THREADS */
-
 static void
 spk_say(SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes)
 {
-#ifdef HAVE_POSIX_THREADS
-	struct request *new, **prev_next;
-
-	IndexPos = 0;
-
-	if (!length)
-		return;
-
-	new = malloc(sizeof(*new) + length + 1);
-	if (!new) {
-		logSystemError("eSpeak: malloc");
-		return;
-	}
-	new->next = NULL;
-	new->buflength = length + 1;
-	memcpy(new->buffer, buffer, length);
-	new->buffer[length] = 0;
-
-	pthread_mutex_lock(&queue_lock);
-	prev_next = &request_queue;
-	while (*prev_next)
-		prev_next = &(*prev_next)->next;
-	*prev_next = new;
-	pthread_cond_signal(&queue_cond);
-	pthread_mutex_unlock(&queue_lock);
-#else /* HAVE_POSIX_THREADS */
 	int result;
 
 	IndexPos = 0;
@@ -147,28 +62,12 @@ spk_say(SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size
 			espeakCHARS_UTF8, NULL, NULL);
 	if (result != EE_OK)
 		logMessage(LOG_ERR, "eSpeak: Synth() returned error %d", result);
-#endif /* HAVE_POSIX_THREADS */
 }
 
 static void
 spk_mute(SpeechSynthesizer *spk)
 {
-#ifdef HAVE_POSIX_THREADS
-	struct request *stop = malloc(sizeof(*stop));
-	if (!stop) {
-		logSystemError("eSpeak: malloc");
-		return;
-	}
-	stop->next = NULL;
-	stop->buflength = 0;
-	pthread_mutex_lock(&queue_lock);
-	free_queue();
-	request_queue = stop;
-	pthread_cond_signal(&queue_cond);
-	pthread_mutex_unlock(&queue_lock);
-#else /* HAVE_POSIX_THREADS */
 	espeak_Cancel();
-#endif /* HAVE_POSIX_THREADS */
 }
 
 static int SynthCallback(short *audio, int numsamples, espeak_EVENT *events)
@@ -279,41 +178,11 @@ static int spk_construct(SpeechSynthesizer *spk, char **parameters)
 
 	espeak_SetSynthCallback(SynthCallback);
 
-#ifdef HAVE_POSIX_THREADS
-
-	pthread_mutex_init(&queue_lock, NULL);
-	pthread_cond_init(&queue_cond, NULL);
-
-	alive = 1;
-	result = asyncCreateThread("driver-speech-eSpeak",
-                                   &request_thread, NULL,
-                                   process_eSpeak_request, NULL);
-	if (result) {
-		logMessage(LOG_ERR, "eSpeak: unable to create thread");
-		espeak_Terminate();
-		pthread_mutex_destroy(&queue_lock);
-		pthread_cond_destroy(&queue_cond);
-		return 0;
-	}
-
-#endif /* HAVE_POSIX_THREADS */
-
 	return 1;
 }
 
 static void spk_destruct(SpeechSynthesizer *spk)
 {
-#ifdef HAVE_POSIX_THREADS
-	pthread_mutex_lock(&queue_lock);
-	alive = 0;
-	pthread_cond_signal(&queue_cond);
-	pthread_mutex_unlock(&queue_lock);
-	pthread_join(request_thread, NULL);
-	pthread_mutex_destroy(&queue_lock);
-	pthread_cond_destroy(&queue_cond);
-	free_queue();
-#endif /* HAVE_POSIX_THREADS */
-
 	espeak_Cancel();
 	espeak_Terminate();
 }
