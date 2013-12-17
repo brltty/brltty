@@ -172,7 +172,7 @@ testSpeechVolume (void) {
 
 static int
 changedSpeechVolume (const MenuItem *item UNUSED, unsigned char setting) {
-  return setSpeechVolume(&spk, setting, !prefs.autospeak);
+  return setSpeechVolume(setting, !prefs.autospeak);
 }
 
 static int
@@ -182,7 +182,7 @@ testSpeechRate (void) {
 
 static int
 changedSpeechRate (const MenuItem *item UNUSED, unsigned char setting) {
-  return setSpeechRate(&spk, setting, !prefs.autospeak);
+  return setSpeechRate(setting, !prefs.autospeak);
 }
 
 static int
@@ -192,7 +192,7 @@ testSpeechPitch (void) {
 
 static int
 changedSpeechPitch (const MenuItem *item UNUSED, unsigned char setting) {
-  return setSpeechPitch(&spk, setting, !prefs.autospeak);
+  return setSpeechPitch(setting, !prefs.autospeak);
 }
 
 static int
@@ -202,7 +202,7 @@ testSpeechPunctuation (void) {
 
 static int
 changedSpeechPunctuation (const MenuItem *item UNUSED, unsigned char setting) {
-  return setSpeechPunctuation(&spk, setting, !prefs.autospeak);
+  return setSpeechPunctuation(setting, !prefs.autospeak);
 }
 
 static int

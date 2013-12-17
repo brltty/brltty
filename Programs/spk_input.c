@@ -101,7 +101,7 @@ ASYNC_INPUT_CALLBACK(handleInput) {
 
     memcpy(string, buffer, length);
     string[length] = 0;
-    sayString(&spk, string, 0);
+    sayString(string, 0);
     return length;
   }
 

@@ -31,7 +31,7 @@ typedef struct SpeechThreadObjectStruct SpeechThreadObject;
 extern SpeechThreadObject *newSpeechThreadObject (SpeechSynthesizer *spk, char **parameters);
 extern void destroySpeechThreadObject (SpeechThreadObject *obj);
 
-extern int sendSpeechRequest_sayText (
+extern int speechFunction_sayText (
   SpeechThreadObject *obj,
   const char *text,
   size_t length,
@@ -39,38 +39,38 @@ extern int sendSpeechRequest_sayText (
   const unsigned char *attributes
 );
 
-extern int sendSpeechRequest_muteSpeech (
+extern int speechFunction_muteSpeech (
   SpeechThreadObject *obj
 );
 
-extern int sendSpeechRequest_doTrack (
+extern int speechFunction_doTrack (
   SpeechThreadObject *obj
 );
 
-extern int sendSpeechRequest_getTrack (
+extern int speechFunction_getTrack (
   SpeechThreadObject *obj
 );
 
-extern int sendSpeechRequest_isSpeaking (
+extern int speechFunction_isSpeaking (
   SpeechThreadObject *obj
 );
 
-extern int sendSpeechRequest_setVolume (
+extern int speechFunction_setVolume (
   SpeechThreadObject *obj,
   unsigned char setting
 );
 
-extern int sendSpeechRequest_setRate (
+extern int speechFunction_setRate (
   SpeechThreadObject *obj,
   unsigned char setting
 );
 
-extern int sendSpeechRequest_setPitch (
+extern int speechFunction_setPitch (
   SpeechThreadObject *obj,
   unsigned char setting
 );
 
-extern int sendSpeechRequest_setPunctuation (
+extern int speechFunction_setPunctuation (
   SpeechThreadObject *obj,
   SpeechPunctuation setting
 );

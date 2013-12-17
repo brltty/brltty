@@ -366,7 +366,7 @@ doSpeechTime (const TimeFormattingData *fmt) {
 
   STR_PRINTF(".");
   STR_END
-  sayString(&spk, announcement, 1);
+  sayString(announcement, 1);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 

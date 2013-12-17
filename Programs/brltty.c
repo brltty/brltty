@@ -790,7 +790,7 @@ sayWideCharacters (const wchar_t *characters, const unsigned char *attributes, s
   void *text = makeUtf8FromWchars(characters, count, &length);
 
   if (text) {
-    sayUtf8Characters(&spk, text, attributes, length, count, immediate);
+    sayUtf8Characters(text, attributes, length, count, immediate);
     free(text);
   } else {
     logMallocError();
@@ -826,7 +826,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
     switch (prefs.whitespaceIndicator) {
       default:
       case wsNone:
-        if (immediate) muteSpeech(&spk, "white space");
+        if (immediate) muteSpeech("white space");
         break;
 
       case wsSaySpace: {
@@ -861,7 +861,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
             if (pitch > SPK_PITCH_MAXIMUM) pitch = SPK_PITCH_MAXIMUM;
 
             if (pitch != prefs.speechPitch) {
-              setSpeechPitch(&spk, pitch, 0);
+              setSpeechPitch(pitch, 0);
               restorePitch = 1;
             }
           }
@@ -873,7 +873,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
       unsigned char punctuation = SPK_PUNCTUATION_ALL;
 
       if (punctuation != prefs.speechPunctuation) {
-        setSpeechPunctuation(&spk, punctuation, 0);
+        setSpeechPunctuation(punctuation, 0);
         restorePunctuation = 1;
       }
     }
@@ -888,8 +888,8 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
       sayWideCharacters(&character, NULL, 1, immediate);
     }
 
-    if (restorePunctuation) setSpeechPunctuation(&spk, prefs.speechPunctuation, 0);
-    if (restorePitch) setSpeechPitch(&spk, prefs.speechPitch, 0);
+    if (restorePunctuation) setSpeechPunctuation(prefs.speechPunctuation, 0);
+    if (restorePitch) setSpeechPitch(prefs.speechPitch, 0);
   } else if (spell) {
     wchar_t string[count * 2];
     size_t length = 0;

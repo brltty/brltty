@@ -354,7 +354,7 @@ sendSpeechRequest (SpeechThreadObject *obj, SpeechRequest *req) {
 }
 
 int
-sendSpeechRequest_sayText (
+speechFunction_sayText (
   SpeechThreadObject *obj,
   const char *text,
   size_t length,
@@ -386,7 +386,7 @@ sendSpeechRequest_sayText (
 }
 
 int
-sendSpeechRequest_muteSpeech (
+speechFunction_muteSpeech (
   SpeechThreadObject *obj
 ) {
   SpeechRequest *req;
@@ -403,7 +403,7 @@ sendSpeechRequest_muteSpeech (
 }
 
 int
-sendSpeechRequest_doTrack (
+speechFunction_doTrack (
   SpeechThreadObject *obj
 ) {
   SpeechRequest *req;
@@ -420,7 +420,7 @@ sendSpeechRequest_doTrack (
 }
 
 int
-sendSpeechRequest_getTrack (
+speechFunction_getTrack (
   SpeechThreadObject *obj
 ) {
   SpeechRequest *req;
@@ -437,7 +437,7 @@ sendSpeechRequest_getTrack (
 }
 
 int
-sendSpeechRequest_isSpeaking (
+speechFunction_isSpeaking (
   SpeechThreadObject *obj
 ) {
   SpeechRequest *req;
@@ -454,7 +454,7 @@ sendSpeechRequest_isSpeaking (
 }
 
 int
-sendSpeechRequest_setVolume (
+speechFunction_setVolume (
   SpeechThreadObject *obj,
   unsigned char setting
 ) {
@@ -474,7 +474,7 @@ sendSpeechRequest_setVolume (
 }
 
 int
-sendSpeechRequest_setRate (
+speechFunction_setRate (
   SpeechThreadObject *obj,
   unsigned char setting
 ) {
@@ -494,7 +494,7 @@ sendSpeechRequest_setRate (
 }
 
 int
-sendSpeechRequest_setPitch (
+speechFunction_setPitch (
   SpeechThreadObject *obj,
   unsigned char setting
 ) {
@@ -514,7 +514,7 @@ sendSpeechRequest_setPitch (
 }
 
 int
-sendSpeechRequest_setPunctuation (
+speechFunction_setPunctuation (
   SpeechThreadObject *obj,
   SpeechPunctuation setting
 ) {

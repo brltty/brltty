@@ -114,7 +114,7 @@ handleSpeechCommand (int command, void *datga) {
       break;
 
     case BRL_CMD_MUTE:
-      muteSpeech(&spk, "command");
+      muteSpeech("command");
       break;
 
     case BRL_CMD_SAY_LINE:
@@ -131,7 +131,7 @@ handleSpeechCommand (int command, void *datga) {
       if (!speech->setRate) {
         playTune(&tune_command_rejected);
       } else if (prefs.speechRate > 0) {
-        setSpeechRate(&spk, --prefs.speechRate, 1);
+        setSpeechRate(--prefs.speechRate, 1);
       } else {
         playTune(&tune_no_change);
       }
@@ -141,7 +141,7 @@ handleSpeechCommand (int command, void *datga) {
       if (!speech->setRate) {
         playTune(&tune_command_rejected);
       } else if (prefs.speechRate < SPK_RATE_MAXIMUM) {
-        setSpeechRate(&spk, ++prefs.speechRate, 1);
+        setSpeechRate(++prefs.speechRate, 1);
       } else {
         playTune(&tune_no_change);
       }
@@ -151,7 +151,7 @@ handleSpeechCommand (int command, void *datga) {
       if (!speech->setVolume) {
         playTune(&tune_command_rejected);
       } else if (prefs.speechVolume > 0) {
-        setSpeechVolume(&spk, --prefs.speechVolume, 1);
+        setSpeechVolume(--prefs.speechVolume, 1);
       } else {
         playTune(&tune_no_change);
       }
@@ -161,7 +161,7 @@ handleSpeechCommand (int command, void *datga) {
       if (!speech->setVolume) {
         playTune(&tune_command_rejected);
       } else if (prefs.speechVolume < SPK_VOLUME_MAXIMUM) {
-        setSpeechVolume(&spk, ++prefs.speechVolume, 1);
+        setSpeechVolume(++prefs.speechVolume, 1);
       } else {
         playTune(&tune_no_change);
       }
@@ -457,7 +457,7 @@ handleSpeechCommand (int command, void *datga) {
     case BRL_CMD_DESC_CURR_CHAR: {
       char description[0X50];
       formatCharacterDescription(description, sizeof(description), ses->spkx, ses->spky);
-      sayString(&spk, description, 1);
+      sayString(description, 1);
       break;
     }
 
@@ -474,7 +474,7 @@ handleSpeechCommand (int command, void *datga) {
       snprintf(buffer, sizeof(buffer), "%s %d, %s %d",
                gettext("line"), ses->spky+1,
                gettext("column"), ses->spkx+1);
-      sayString(&spk, buffer, 1);
+      sayString(buffer, 1);
       break;
     }
 

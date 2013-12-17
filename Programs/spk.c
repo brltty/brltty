@@ -57,11 +57,11 @@ ASYNC_ALARM_CALLBACK(handleSpeechTrackingAlarm) {
 
   if (speechTracking) {
     if (scr.number == speechScreen) {
-      sendSpeechRequest_doTrack(speechThreadObject);
+      speechFunction_doTrack(speechThreadObject);
 
-      if (sendSpeechRequest_isSpeaking(speechThreadObject)) {
+      if (speechFunction_isSpeaking(speechThreadObject)) {
         if (ses->trackCursor) {
-          int index = sendSpeechRequest_getTrack(speechThreadObject);
+          int index = speechFunction_getTrack(speechThreadObject);
 
           if (index != speechIndex) trackSpeech(speechIndex = index);
         }
@@ -102,28 +102,27 @@ stopSpeechDriverThread (void) {
 }
 
 int
-muteSpeech (SpeechSynthesizer *spk, const char *reason) {
+muteSpeech (const char *reason) {
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "mute: %s", reason);
-  return sendSpeechRequest_muteSpeech(speechThreadObject);
+  return speechFunction_muteSpeech(speechThreadObject);
 }
 
 int
 sayUtf8Characters (
-  SpeechSynthesizer *spk,
   const char *text, const unsigned char *attributes,
   size_t length, size_t count,
   int immediate
 ) {
   if (count) {
     if (immediate) {
-      if (!muteSpeech(spk, "say immediate")) {
+      if (!muteSpeech("say immediate")) {
         return 0;
       }
     }
 
     logMessage(LOG_CATEGORY(SPEECH_EVENTS), "say: %s", text);
 
-    if (!sendSpeechRequest_sayText(speechThreadObject, text, length, count, attributes)) {
+    if (!speechFunction_sayText(speechThreadObject, text, length, count, attributes)) {
       return 0;
     }
 
@@ -134,22 +133,22 @@ sayUtf8Characters (
 }
 
 void
-sayString (SpeechSynthesizer *spk, const char *string, int immediate) {
-  sayUtf8Characters(spk, string, NULL, strlen(string), getTextLength(string), immediate);
+sayString (const char *string, int immediate) {
+  sayUtf8Characters(string, NULL, strlen(string), getTextLength(string), immediate);
 }
 
 static void
-sayStringSetting (SpeechSynthesizer *spk, const char *name, const char *string) {
+sayStringSetting (const char *name, const char *string) {
   char statement[0X40];
   snprintf(statement, sizeof(statement), "%s %s", name, string);
-  sayString(spk, statement, 1);
+  sayString(statement, 1);
 }
 
 static void
-sayIntegerSetting (SpeechSynthesizer *spk, const char *name, int integer) {
+sayIntegerSetting (const char *name, int integer) {
   char string[0X10];
   snprintf(string, sizeof(string), "%d", integer);
-  sayStringSetting(spk, name, string);
+  sayStringSetting(name, string);
 }
 
 static unsigned int
@@ -158,11 +157,11 @@ getIntegerSetting (unsigned char setting, unsigned char internal, unsigned int e
 }
 
 int
-setSpeechVolume (SpeechSynthesizer *spk, int setting, int say) {
+setSpeechVolume (int setting, int say) {
   if (!speech->setVolume) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set volume: %d", setting);
-  sendSpeechRequest_setVolume(speechThreadObject, setting);
-  if (say) sayIntegerSetting(spk, gettext("volume"), setting);
+  speechFunction_setVolume(speechThreadObject, setting);
+  if (say) sayIntegerSetting(gettext("volume"), setting);
   return 1;
 }
 
@@ -179,11 +178,11 @@ getFloatSpeechVolume (unsigned char setting) {
 #endif /* NO_FLOAT */
 
 int
-setSpeechRate (SpeechSynthesizer *spk, int setting, int say) {
+setSpeechRate (int setting, int say) {
   if (!speech->setRate) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set rate: %d", setting);
-  sendSpeechRequest_setRate(speechThreadObject, setting);
-  if (say) sayIntegerSetting(spk, gettext("rate"), setting);
+  speechFunction_setRate(speechThreadObject, setting);
+  if (say) sayIntegerSetting(gettext("rate"), setting);
   return 1;
 }
 
@@ -224,11 +223,11 @@ getFloatSpeechRate (unsigned char setting) {
 #endif /* NO_FLOAT */
 
 int
-setSpeechPitch (SpeechSynthesizer *spk, int setting, int say) {
+setSpeechPitch (int setting, int say) {
   if (!speech->setPitch) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set pitch: %d", setting);
-  sendSpeechRequest_setPitch(speechThreadObject, setting);
-  if (say) sayIntegerSetting(spk, gettext("pitch"), setting);
+  speechFunction_setPitch(speechThreadObject, setting);
+  if (say) sayIntegerSetting(gettext("pitch"), setting);
   return 1;
 }
 
@@ -245,9 +244,9 @@ getFloatSpeechPitch (unsigned char setting) {
 #endif /* NO_FLOAT */
 
 int
-setSpeechPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting, int say) {
+setSpeechPunctuation (SpeechPunctuation setting, int say) {
   if (!speech->setPunctuation) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set punctuation: %d", setting);
-  sendSpeechRequest_setPunctuation(speechThreadObject, setting);
+  speechFunction_setPunctuation(speechThreadObject, setting);
   return 1;
 }

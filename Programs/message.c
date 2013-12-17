@@ -66,7 +66,7 @@ ASYNC_TASK_CALLBACK(presentMessage) {
 #ifdef ENABLE_SPEECH_SUPPORT
   if (!(mgp->options & MSG_SILENT)) {
     if (autospeak()) {
-      sayString(&spk, mgp->text, 1);
+      sayString(mgp->text, 1);
     }
   }
 #endif /* ENABLE_SPEECH_SUPPORT */

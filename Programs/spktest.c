@@ -83,7 +83,7 @@ END_OPTION_TABLE
 
 static int
 sayLine (char *line, void *data) {
-  sayString(&spk, line, 0);
+  sayString(line, 0);
   return 1;
 }
 
@@ -191,7 +191,7 @@ main (int argc, char *argv[]) {
       if (speech->setRate) speech->setRate(&spk, speechRate);
 
       if (opt_textString && *opt_textString) {
-        sayString(&spk, opt_textString, 0);
+        sayString(opt_textString, 0);
       } else {
         processLines(stdin, sayLine, NULL);
       }

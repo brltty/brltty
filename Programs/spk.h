@@ -37,36 +37,35 @@ extern void initializeSpeechSynthesizer (SpeechSynthesizer *spk);
 extern int startSpeechDriverThread (SpeechSynthesizer *spk, char **parameters);
 extern void stopSpeechDriverThread (void);
 
-extern int muteSpeech (SpeechSynthesizer *spk, const char *reason);
+extern int muteSpeech (const char *reason);
 
 extern int sayUtf8Characters (
-  SpeechSynthesizer *spk,
   const char *text, const unsigned char *attributes,
   size_t length, size_t count,
   int immediate
 );
 
-extern void sayString (SpeechSynthesizer *spk, const char *string, int immediate);
+extern void sayString (const char *string, int immediate);
 
-extern int setSpeechVolume (SpeechSynthesizer *spk, int setting, int say);
+extern int setSpeechVolume (int setting, int say);
 extern unsigned int getIntegerSpeechVolume (unsigned char setting, unsigned int normal);
 #ifndef NO_FLOAT
 extern float getFloatSpeechVolume (unsigned char setting);
 #endif /* NO_FLOAT */
 
-extern int setSpeechRate (SpeechSynthesizer *spk, int setting, int say);
+extern int setSpeechRate (int setting, int say);
 extern unsigned int getIntegerSpeechRate (unsigned char setting, unsigned int normal);
 #ifndef NO_FLOAT
 extern float getFloatSpeechRate (unsigned char setting);
 #endif /* NO_FLOAT */
 
-extern int setSpeechPitch (SpeechSynthesizer *spk, int setting, int say);
+extern int setSpeechPitch (int setting, int say);
 extern unsigned int getIntegerSpeechPitch (unsigned char setting, unsigned int normal);
 #ifndef NO_FLOAT
 extern float getFloatSpeechPitch (unsigned char setting);
 #endif /* NO_FLOAT */
 
-extern int setSpeechPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting, int say);
+extern int setSpeechPunctuation (SpeechPunctuation setting, int say);
 
 typedef struct {
   DRIVER_DEFINITION_DECLARATION;
