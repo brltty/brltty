@@ -38,6 +38,7 @@ extern int startSpeechDriverThread (SpeechSynthesizer *spk, char **parameters);
 extern void stopSpeechDriverThread (void);
 
 extern int muteSpeech (const char *reason);
+extern int getSpeechIndex (void);
 
 extern int sayUtf8Characters (
   const char *text, const unsigned char *attributes,

@@ -51,6 +51,11 @@ int speechScreen = -1;
 int speechLine = 0;
 int speechIndex = -1;
 
+int
+getSpeechIndex (void) {
+  return speechFunction_getTrack(speechThreadObject);
+}
+
 ASYNC_ALARM_CALLBACK(handleSpeechTrackingAlarm) {
   asyncDiscardHandle(speechTrackingAlarm);
   speechTrackingAlarm = NULL;
@@ -61,7 +66,7 @@ ASYNC_ALARM_CALLBACK(handleSpeechTrackingAlarm) {
 
       if (speechFunction_isSpeaking(speechThreadObject)) {
         if (ses->trackCursor) {
-          int index = speechFunction_getTrack(speechThreadObject);
+          int index = getSpeechIndex();
 
           if (index != speechIndex) trackSpeech(speechIndex = index);
         }
