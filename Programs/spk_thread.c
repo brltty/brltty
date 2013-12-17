@@ -27,6 +27,11 @@
 #include "async_wait.h"
 
 #ifdef ENABLE_SPEECH_SUPPORT
+#define SPEECH_REQUEST_WAIT_DURATION 1000000
+#define SPEECH_RESPONSE_WAIT_TIMEOUT 5000
+#define DRIVER_THREAD_START_TIMEOUT 15000
+#define DRIVER_THREAD_STOP_TIMEOUT 5000
+
 typedef enum {
   OBJ_ALLOCATED,
   OBJ_STARTING,
@@ -69,8 +74,7 @@ getObjectStateEntry (ObjectState state) {
 
 typedef enum {
   RSP_PENDING,
-  RSP_SUCCESS,
-  RSP_FAILURE
+  RSP_INTEGER
 } SpeechResponseType;
 
 struct SpeechThreadObjectStruct {
@@ -82,13 +86,28 @@ struct SpeechThreadObjectStruct {
   pthread_t threadIdentifier;
   AsyncEvent *requestEvent;
 
-  AsyncEvent *responseEvent;
-  SpeechResponseType responseType;
+  struct {
+    AsyncEvent *event;
+    SpeechResponseType type;
+
+    union {
+      int INTEGER;
+    } value;
+  } response;
 };
 
 typedef enum {
   REQ_SAY_TEXT,
-  REQ_MUTE_SPEECH
+  REQ_MUTE_SPEECH,
+
+  REQ_DO_TRACK,
+  REQ_GET_TRACK,
+  REQ_IS_SPEAKING,
+
+  REQ_SET_VOLUME,
+  REQ_SET_RATE,
+  REQ_SET_PITCH,
+  REQ_SET_PUNCTUATION
 } SpeechRequestType;
 
 typedef struct {
@@ -101,6 +120,22 @@ typedef struct {
       size_t count;
       const unsigned char *attributes;
     } sayText;
+
+    struct {
+      unsigned char setting;
+    } setVolume;
+
+    struct {
+      unsigned char setting;
+    } setRate;
+
+    struct {
+      unsigned char setting;
+    } setPitch;
+
+    struct {
+      SpeechPunctuation setting;
+    } setPunctuation;
   } arguments;
 
   unsigned char data[0];
@@ -109,6 +144,7 @@ typedef struct {
 typedef struct {
   const void *address;
   size_t size;
+  unsigned end:1;
 } SpeechRequestDatum;
 
 static void
@@ -123,13 +159,14 @@ setObjectState (SpeechThreadObject *obj, ObjectState state) {
 
 static inline void
 setResponsePending (SpeechThreadObject *obj) {
-  obj->responseType = RSP_PENDING;
+  obj->response.type = RSP_PENDING;
 }
 
 static int
-sendSpeechResponse (SpeechThreadObject *obj, int success) {
-  obj->responseType = success? RSP_SUCCESS: RSP_FAILURE;
-  return asyncSignalEvent(obj->responseEvent, NULL);
+sendIntegerResponse (SpeechThreadObject *obj, int value) {
+  obj->response.type = RSP_INTEGER;
+  obj->response.value.INTEGER = value;
+  return asyncSignalEvent(obj->response.event, NULL);
 }
 
 ASYNC_EVENT_CALLBACK(handleSpeechRequest) {
@@ -146,17 +183,52 @@ ASYNC_EVENT_CALLBACK(handleSpeechRequest) {
           req->arguments.sayText.count,
           req->arguments.sayText.attributes
         );
-        sendSpeechResponse(obj, 1);
+        sendIntegerResponse(obj, 1);
         break;
 
       case REQ_MUTE_SPEECH:
         speech->mute(obj->speechSynthesizer);
-        sendSpeechResponse(obj, 1);
+        sendIntegerResponse(obj, 1);
+        break;
+
+      case REQ_DO_TRACK:
+        speech->doTrack(obj->speechSynthesizer);
+        sendIntegerResponse(obj, 1);
+        break;
+
+      case REQ_GET_TRACK:
+        speech->getTrack(obj->speechSynthesizer);
+        sendIntegerResponse(obj, 1);
+        break;
+
+      case REQ_IS_SPEAKING:
+        speech->isSpeaking(obj->speechSynthesizer);
+        sendIntegerResponse(obj, 1);
+        break;
+
+      case REQ_SET_VOLUME:
+        speech->setVolume(obj->speechSynthesizer, req->arguments.setVolume.setting);
+        sendIntegerResponse(obj, 1);
+        break;
+
+      case REQ_SET_RATE:
+        speech->setRate(obj->speechSynthesizer, req->arguments.setRate.setting);
+        sendIntegerResponse(obj, 1);
+        break;
+
+      case REQ_SET_PITCH:
+        speech->setPitch(obj->speechSynthesizer, req->arguments.setPitch.setting);
+        sendIntegerResponse(obj, 1);
+        break;
+
+      case REQ_SET_PUNCTUATION:
+        speech->setPunctuation(obj->speechSynthesizer, req->arguments.setPunctuation.setting);
+        sendIntegerResponse(obj, 1);
         break;
 
       default:
         logMessage(LOG_CATEGORY(SPEECH_EVENTS), "unimplemented speech request type: %u", req->type);
-        sendSpeechResponse(obj, 0);
+        sendIntegerResponse(obj, 0);
         break;
     }
 
@@ -166,7 +238,7 @@ ASYNC_EVENT_CALLBACK(handleSpeechRequest) {
   }
 }
 
-ASYNC_CONDITION_TESTER(testSpeechThreadStopping) {
+ASYNC_CONDITION_TESTER(testDriverThreadStopping) {
   SpeechThreadObject *obj = data;
 
   return obj->objectState == OBJ_STOPPING;
@@ -180,9 +252,10 @@ ASYNC_THREAD_FUNCTION(runSpeechThread) {
   if ((obj->requestEvent = asyncNewEvent(handleSpeechRequest, obj))) {
     if (speech->construct(obj->speechSynthesizer, obj->driverParameters)) {
       setObjectState(obj, OBJ_READY);
-      sendSpeechResponse(obj, 1);
+      sendIntegerResponse(obj, 1);
 
-      while (!asyncAwaitCondition(8000, testSpeechThreadStopping, obj)) {
+      while (!asyncAwaitCondition(SPEECH_REQUEST_WAIT_DURATION,
+                                  testDriverThreadStopping, obj)) {
       }
 
       speech->destruct(obj->speechSynthesizer);
@@ -201,7 +274,7 @@ ASYNC_THREAD_FUNCTION(runSpeechThread) {
     int ok = obj->objectState = OBJ_STOPPING;
 
     setObjectState(obj, OBJ_FINISHED);
-    sendSpeechResponse(obj, ok);
+    sendIntegerResponse(obj, ok);
   }
 
   return NULL;
@@ -210,7 +283,7 @@ ASYNC_THREAD_FUNCTION(runSpeechThread) {
 ASYNC_CONDITION_TESTER(testSpeechRequestComplete) {
   SpeechThreadObject *obj = data;
 
-  return obj->responseType != RSP_PENDING;
+  return obj->response.type != RSP_PENDING;
 }
 
 static int
@@ -219,10 +292,10 @@ awaitSpeechResponse (SpeechThreadObject *obj, int timeout) {
 }
 
 static inline int
-getSpeechResult (SpeechThreadObject *obj) {
-  if (awaitSpeechResponse(obj, 5000)) {
-    if (obj->responseType == RSP_SUCCESS) {
-      return 1;
+getIntegerResult (SpeechThreadObject *obj) {
+  if (awaitSpeechResponse(obj, SPEECH_RESPONSE_WAIT_TIMEOUT)) {
+    if (obj->response.type == RSP_INTEGER) {
+      return obj->response.value.INTEGER;
     }
   }
 
@@ -237,7 +310,10 @@ newSpeechRequest (SpeechRequestType type, SpeechRequestDatum *data) {
   if (data) {
     const SpeechRequestDatum *datum = data;
 
-    while (datum->address) size += (datum++)->size;
+    while (!datum->end) {
+      if (datum->address) size += datum->size;
+      datum += 1;
+    }
   }
 
   if ((req = malloc(size))) {
@@ -248,10 +324,13 @@ newSpeechRequest (SpeechRequestType type, SpeechRequestDatum *data) {
       SpeechRequestDatum *datum = data;
       unsigned char *target = req->data;
 
-      while (datum->address) {
-        memcpy(target, datum->address, datum->size);
-        datum->address = target;
-        target += datum->size;
+      while (!datum->end) {
+        if (datum->address) {
+          memcpy(target, datum->address, datum->size);
+          datum->address = target;
+          target += datum->size;
+        }
+
         datum += 1;
       }
     }
@@ -283,7 +362,7 @@ sendSpeechRequest_sayText (
   SpeechRequestDatum data[] = {
     {.address=text, .size=length},
     {.address=attributes, .size=length},
-    {.address=NULL}
+    {.end=1}
   };
 
   if ((req = newSpeechRequest(REQ_SAY_TEXT, data))) {
@@ -293,7 +372,7 @@ sendSpeechRequest_sayText (
     req->arguments.sayText.attributes = data[1].address;
 
     if (sendSpeechRequest(obj, req)) {
-      return getSpeechResult(obj);
+      return getIntegerResult(obj);
     }
 
     free(req);
@@ -310,7 +389,7 @@ sendSpeechRequest_muteSpeech (
 
   if ((req = newSpeechRequest(REQ_MUTE_SPEECH, NULL))) {
     if (sendSpeechRequest(obj, req)) {
-      return getSpeechResult(obj);
+      return getIntegerResult(obj);
     }
 
     free(req);
@@ -341,14 +420,19 @@ newSpeechThreadObject (SpeechSynthesizer *spk, char **parameters) {
     obj->speechSynthesizer = spk;
     obj->driverParameters = parameters;
 
-    if ((obj->responseEvent = asyncNewEvent(handleSpeechResponse, obj))) {
+    if ((obj->response.event = asyncNewEvent(handleSpeechResponse, obj))) {
       int createError = asyncCreateThread("speech-driver",
                                           &obj->threadIdentifier, NULL,
                                           runSpeechThread, obj);
 
       if (!createError) {
-        if (awaitSpeechResponse(obj, 15000)) {
-          if (obj->responseType == RSP_SUCCESS) return obj;
+        if (awaitSpeechResponse(obj, DRIVER_THREAD_START_TIMEOUT)) {
+          if (obj->response.type == RSP_INTEGER) {
+            if (obj->response.value.INTEGER) {
+              return obj;
+            }
+          }
+
           logMessage(LOG_CATEGORY(SPEECH_EVENTS), "driver thread initialization failure");
           awaitSpeechThreadTermination(obj);
         } else {
@@ -356,8 +440,8 @@ newSpeechThreadObject (SpeechSynthesizer *spk, char **parameters) {
         }
       }
 
-      asyncDiscardEvent(obj->responseEvent);
-      obj->responseEvent = NULL;
+      asyncDiscardEvent(obj->response.event);
+      obj->response.event = NULL;
     } else {
       logMessage(LOG_CATEGORY(SPEECH_EVENTS), "response event construction failure");
     }
@@ -370,7 +454,7 @@ newSpeechThreadObject (SpeechSynthesizer *spk, char **parameters) {
   return NULL;
 }
 
-ASYNC_CONDITION_TESTER(testSpeechThreadFinished) {
+ASYNC_CONDITION_TESTER(testDriverThreadFinished) {
   SpeechThreadObject *obj = data;
 
   return obj->objectState == OBJ_FINISHED;
@@ -379,11 +463,11 @@ ASYNC_CONDITION_TESTER(testSpeechThreadFinished) {
 void
 destroySpeechThreadObject (SpeechThreadObject *obj) {
   if (sendSpeechRequest(obj, NULL)) {
-    asyncAwaitCondition(12000, testSpeechThreadFinished, obj);
+    asyncAwaitCondition(DRIVER_THREAD_STOP_TIMEOUT, testDriverThreadFinished, obj);
     awaitSpeechThreadTermination(obj);
   }
 
-  if (obj->responseEvent) asyncDiscardEvent(obj->responseEvent);
+  if (obj->response.event) asyncDiscardEvent(obj->response.event);
   free(obj);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
