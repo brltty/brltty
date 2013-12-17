@@ -101,8 +101,10 @@ startSpeechDriverThread (SpeechSynthesizer *spk, char **parameters) {
 void
 stopSpeechDriverThread (void) {
   if (speechThreadObject) {
-    destroySpeechThreadObject(speechThreadObject);
+    SpeechThreadObject *obj = speechThreadObject;
+
     speechThreadObject = NULL;
+    destroySpeechThreadObject(obj);
   }
 }
 
