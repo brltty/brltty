@@ -186,16 +186,17 @@ main (int argc, char *argv[]) {
 
     initializeSpeechSynthesizer(&spk);
     identifySpeechDriver(speech, 0);		/* start-up messages */
-    if (speech->construct(&spk, parameterSettings)) {
-      if (speech->setVolume) speech->setVolume(&spk, speechVolume);
-      if (speech->setRate) speech->setRate(&spk, speechRate);
+    if (startSpeechDriverThread(&spk, parameterSettings)) {
+      if (speech->setVolume) setSpeechVolume(speechVolume, 0);
+      if (speech->setRate) setSpeechRate(speechRate, 0);
 
       if (opt_textString && *opt_textString) {
         sayString(opt_textString, 0);
       } else {
         processLines(stdin, sayLine, NULL);
       }
-      speech->destruct(&spk);		/* finish with the display */
+
+      stopSpeechDriverThread();		/* finish with the display */
       exitStatus = PROG_EXIT_SUCCESS;
     } else {
       logMessage(LOG_ERR, "can't initialize speech driver.");
