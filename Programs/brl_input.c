@@ -87,20 +87,20 @@ handleInput (void) {
   return processed;
 }
 
-static void setPollAlarm (int delay, void *data);
-static AsyncHandle pollAlarm = NULL;
+static void setBrailleInputAlarm (int delay, void *data);
+static AsyncHandle brailleInputAlarm = NULL;
 
-ASYNC_ALARM_CALLBACK(handlePollAlarm) {
-  asyncDiscardHandle(pollAlarm);
-  pollAlarm = NULL;
+ASYNC_ALARM_CALLBACK(handleBrailleInputAlarm) {
+  asyncDiscardHandle(brailleInputAlarm);
+  brailleInputAlarm = NULL;
 
-  setPollAlarm((handleInput()? 0: BRAILLE_INPUT_POLL_INTERVAL), parameters->data);
+  setBrailleInputAlarm((handleInput()? 0: BRAILLE_INPUT_POLL_INTERVAL), parameters->data);
 }
 
 static void
-setPollAlarm (int delay, void *data) {
-  if (!pollAlarm) {
-    asyncSetAlarmIn(&pollAlarm, delay, handlePollAlarm, data);
+setBrailleInputAlarm (int delay, void *data) {
+  if (!brailleInputAlarm) {
+    asyncSetAlarmIn(&brailleInputAlarm, delay, handleBrailleInputAlarm, data);
   }
 }
 
@@ -118,13 +118,13 @@ startBrailleInput (void) {
     }
   }
 
-  setPollAlarm(0, NULL);
+  setBrailleInputAlarm(0, NULL);
 }
 
 void
 stopBrailleInput (void) {
-  if (pollAlarm) {
-    asyncCancelRequest(pollAlarm);
-    pollAlarm = NULL;
+  if (brailleInputAlarm) {
+    asyncCancelRequest(brailleInputAlarm);
+    brailleInputAlarm = NULL;
   }
 }
