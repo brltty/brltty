@@ -83,6 +83,13 @@ createThread (void *parameters) {
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
 ASYNC_WITH_SIGNALS_BLOCKED_FUNCTION(createThreadWithObtainableSignalsBlocked) {
   CreateThreadParameters *create = data;
+  static const int signals[] = {SIGINT, SIGTERM, SIGCHLD, 0};
+  const int *signal = signals;
+
+  while (*signal) {
+    asyncSetSignalBlocked(*signal, 1);
+    signal += 1;
+  }
 
   createThread(create);
 }
