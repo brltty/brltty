@@ -1351,6 +1351,7 @@ brlttyConstruct (int argc, char *argv[]) {
 
 int
 brlttyDestruct (void) {
+  suspendUpdates();
   endProgram();
   endCommandQueue();
   return 1;
