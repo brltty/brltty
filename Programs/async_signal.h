@@ -62,7 +62,8 @@ extern int asyncSetSignalBlocked (int signalNumber, int state);
 extern int asyncIsSignalBlocked (int signalNumber);
 
 
-typedef void AsyncWithBlockedSignalsFunction (void *data);
+#define ASYNC_WITH_BLOCKED_SIGNALS_FUNCTION(name) void name (void *data)
+typedef ASYNC_WITH_BLOCKED_SIGNALS_FUNCTION(AsyncWithBlockedSignalsFunction);
 
 extern int asyncCallWithSignalsBlocked (
   const sigset_t *mask,

@@ -301,8 +301,7 @@ typedef struct {
   SignalEntry *const signalEntry;
 } DeleteSignalEntryParameters;
 
-static void
-deleteSignalEntry (void *data) {
+ASYNC_WITH_BLOCKED_SIGNALS_FUNCTION(deleteSignalEntry) {
   DeleteSignalEntryParameters *parameters = data;
   Queue *signals = getSignalQueue(0);
   Element *signalElement = findElementWithItem(signals, parameters->signalEntry);
@@ -371,8 +370,7 @@ typedef struct {
   Element *signalElement;
 } AddSignalEntryParameters;
 
-static void
-addSignalEntry (void *data) {
+ASYNC_WITH_BLOCKED_SIGNALS_FUNCTION(addSignalEntry) {
   AddSignalEntryParameters *parameters = data;
 
   parameters->signalElement = enqueueItem(parameters->signalQueue, parameters->signalEntry);
