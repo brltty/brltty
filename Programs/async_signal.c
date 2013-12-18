@@ -49,9 +49,13 @@ typedef struct {
 
 struct AsyncSignalDataStruct {
   Queue *signalQueue;
+
   sigset_t claimedSignals;
   sigset_t obtainedSignals;
   sigset_t obtainableSignals;
+
+  int firstObtainableSignal;
+  int lastObtainableSignal;
 };
 
 void
@@ -82,13 +86,18 @@ getSignalData (void) {
     sigemptyset(&sd->obtainedSignals);
     sigemptyset(&sd->obtainableSignals);
 
+#ifdef SIGRTMIN
     {
       int signalNumber;
 
-      for (signalNumber=SIGRTMIN; signalNumber<=SIGRTMAX; signalNumber+=1) {
+      sd->firstObtainableSignal = SIGRTMIN;
+      sd->lastObtainableSignal = SIGRTMAX;
+
+      for (signalNumber=sd->firstObtainableSignal; signalNumber<=sd->lastObtainableSignal; signalNumber+=1) {
         sigaddset(&sd->obtainableSignals, signalNumber);
       }
     }
+#endif /* SIGRTMIN */
 
     tsd->signalData = sd;
   }
@@ -204,7 +213,7 @@ asyncIsSignalBlocked (int signalNumber) {
 int
 asyncCallWithSignalsBlocked (
   const sigset_t *mask,
-  AsyncWithBlockedSignalsFunction *function,
+  AsyncWithSignalsBlockedFunction *function,
   void *data
 ) {
   sigset_t oldMask;
@@ -221,7 +230,7 @@ asyncCallWithSignalsBlocked (
 int
 asyncCallWithSignalBlocked (
   int number,
-  AsyncWithBlockedSignalsFunction *function,
+  AsyncWithSignalsBlockedFunction *function,
   void *data
 ) {
   sigset_t mask;
@@ -237,7 +246,7 @@ asyncCallWithSignalBlocked (
 
 int
 asyncCallWithAllSignalsBlocked (
-  AsyncWithBlockedSignalsFunction *function,
+  AsyncWithSignalsBlockedFunction *function,
   void *data
 ) {
   sigset_t mask;
@@ -255,7 +264,7 @@ asyncCallWithAllSignalsBlocked (
 
 int
 asyncCallWithObtainableSignalsBlocked (
-  AsyncWithBlockedSignalsFunction *function,
+  AsyncWithSignalsBlockedFunction *function,
   void *data
 ) {
   AsyncSignalData *sd = getSignalData();
@@ -301,7 +310,7 @@ typedef struct {
   SignalEntry *const signalEntry;
 } DeleteSignalEntryParameters;
 
-ASYNC_WITH_BLOCKED_SIGNALS_FUNCTION(deleteSignalEntry) {
+ASYNC_WITH_SIGNALS_BLOCKED_FUNCTION(deleteSignalEntry) {
   DeleteSignalEntryParameters *parameters = data;
   Queue *signals = getSignalQueue(0);
   Element *signalElement = findElementWithItem(signals, parameters->signalEntry);
@@ -370,7 +379,7 @@ typedef struct {
   Element *signalElement;
 } AddSignalEntryParameters;
 
-ASYNC_WITH_BLOCKED_SIGNALS_FUNCTION(addSignalEntry) {
+ASYNC_WITH_SIGNALS_BLOCKED_FUNCTION(addSignalEntry) {
   AddSignalEntryParameters *parameters = data;
 
   parameters->signalElement = enqueueItem(parameters->signalQueue, parameters->signalEntry);
@@ -530,12 +539,12 @@ asyncMonitorSignal (
 
 int
 asyncClaimSignalNumber (int signal) {
-  const char *reason = "signal number not claimable";
+  AsyncSignalData *sd = getSignalData();
 
-  if ((signal >= SIGRTMIN) && (signal <= SIGRTMAX)) {
-    AsyncSignalData *sd = getSignalData();
+  if (sd) {
+    const char *reason = "signal number not claimable";
 
-    if (sd) {
+    if (sigismember(&sd->obtainableSignals, signal)) {
       if (sigismember(&sd->claimedSignals, signal)) {
         reason = "signal number already claimed";
       } else if (sigismember(&sd->obtainedSignals, signal)) {
@@ -545,9 +554,10 @@ asyncClaimSignalNumber (int signal) {
         return 1;
       }
     }
+
+    logMessage(LOG_ERR, "%s: %d", reason, signal);
   }
 
-  logMessage(LOG_ERR, "%s: %d", reason, signal);
   return 0;
 }
 
@@ -573,11 +583,13 @@ asyncObtainSignalNumber (void) {
   if (sd) {
     int signal;
 
-    for (signal=SIGRTMIN; signal<=SIGRTMAX; signal+=1) {
-      if (!sigismember(&sd->claimedSignals, signal)) {
-        if (!sigismember(&sd->obtainedSignals, signal)) {
-          sigaddset(&sd->obtainedSignals, signal);
-          return signal;
+    for (signal=sd->firstObtainableSignal; signal<=sd->lastObtainableSignal; signal+=1) {
+      if (sigismember(&sd->obtainableSignals, signal)) {
+        if (!sigismember(&sd->claimedSignals, signal)) {
+          if (!sigismember(&sd->obtainedSignals, signal)) {
+            sigaddset(&sd->obtainedSignals, signal);
+            return signal;
+          }
         }
       }
     }

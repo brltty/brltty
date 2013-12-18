@@ -81,7 +81,7 @@ createThread (void *parameters) {
 }
 
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
-ASYNC_WITH_BLOCKED_SIGNALS_FUNCTION(createThreadWithObtainableSignalsBlocked) {
+ASYNC_WITH_SIGNALS_BLOCKED_FUNCTION(createThreadWithObtainableSignalsBlocked) {
   CreateThreadParameters *create = data;
 
   createThread(create);
