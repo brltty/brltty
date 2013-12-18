@@ -62,25 +62,10 @@ usbSetAttribute_CP2101 (UsbDevice *device, uint8_t request, uint16_t value) {
 
 static int
 usbSetBaud_CP2101 (UsbDevice *device, unsigned int baud) {
-  const unsigned int base = USB_CP2101_BAUD_BASE;
-  unsigned int divisor = base / baud;
+  uint32_t data;
 
-  if ((baud * divisor) != base) {
-    logMessage(LOG_WARNING, "unsupported CP2101 baud: %u", baud);
-    errno = EINVAL;
-    return 0;
-  }
-
-  if (usbSetAttribute_CP2101(device, USB_CP2101_CTL_SetBaudDivisor, divisor)) {
-    uint32_t data;
-    putLittleEndian32(&data, baud);
-
-    if (usbSetAttributes_CP2101(device, USB_CP2101_CTL_SetBaudRate, 0, &data, sizeof(data))) {
-      return 1;
-    }
-  }
-
-  return 0;
+  putLittleEndian32(&data, baud);
+  return usbSetAttributes_CP2101(device, USB_CP2101_CTL_SetBaudRate, 0, &data, sizeof(data));
 }
 
 static int
