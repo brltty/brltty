@@ -57,7 +57,8 @@ spk_say(SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size
 
 	IndexPos = 0;
 
-	result = espeak_Synth(buffer, length, 0, POS_CHARACTER, 0,
+	/* add 1 to the length in order to pass along the trailing zero */
+	result = espeak_Synth(buffer, length+1, 0, POS_CHARACTER, 0,
 			espeakCHARS_UTF8, NULL, NULL);
 	if (result != EE_OK)
 		logMessage(LOG_ERR, "eSpeak: Synth() returned error %d", result);
