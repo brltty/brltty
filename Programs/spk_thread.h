@@ -26,52 +26,56 @@ extern "C" {
 #endif /* __cplusplus */
 
 #ifdef ENABLE_SPEECH_SUPPORT
-typedef struct SpeechThreadObjectStruct SpeechThreadObject;
+typedef struct SpeechDriverThreadStruct SpeechDriverThread;
 
-extern SpeechThreadObject *newSpeechThreadObject (SpeechSynthesizer *spk, char **parameters);
-extern void destroySpeechThreadObject (SpeechThreadObject *obj);
+extern SpeechDriverThread *newSpeechDriverThread (
+  SpeechSynthesizer *spk,
+  char **parameters
+);
+
+extern void destroySpeechDriverThread (
+  SpeechDriverThread *sdt
+);
 
 extern int speechFunction_sayText (
-  SpeechThreadObject *obj,
-  const char *text,
-  size_t length,
-  size_t count,
-  const unsigned char *attributes
+  SpeechDriverThread *sdt,
+  const char *text, size_t length,
+  size_t count, const unsigned char *attributes
 );
 
 extern int speechFunction_muteSpeech (
-  SpeechThreadObject *obj
+  SpeechDriverThread *sdt
 );
 
 extern int speechFunction_doTrack (
-  SpeechThreadObject *obj
+  SpeechDriverThread *sdt
 );
 
 extern int speechFunction_getTrack (
-  SpeechThreadObject *obj
+  SpeechDriverThread *sdt
 );
 
 extern int speechFunction_isSpeaking (
-  SpeechThreadObject *obj
+  SpeechDriverThread *sdt
 );
 
 extern int speechFunction_setVolume (
-  SpeechThreadObject *obj,
+  SpeechDriverThread *sdt,
   unsigned char setting
 );
 
 extern int speechFunction_setRate (
-  SpeechThreadObject *obj,
+  SpeechDriverThread *sdt,
   unsigned char setting
 );
 
 extern int speechFunction_setPitch (
-  SpeechThreadObject *obj,
+  SpeechDriverThread *sdt,
   unsigned char setting
 );
 
 extern int speechFunction_setPunctuation (
-  SpeechThreadObject *obj,
+  SpeechDriverThread *sdt,
   SpeechPunctuation setting
 );
 #endif /* ENABLE_SPEECH_SUPPORT */
