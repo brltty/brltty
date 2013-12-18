@@ -99,6 +99,8 @@ serviceMain (DWORD argc, LPSTR *argv) {
         } else {
           serviceExitStatus = PROG_EXIT_FATAL;
         }
+
+        brlttyDestruct();
       } else if (serviceExitStatus == PROG_EXIT_FORCE) {
         serviceExitStatus = PROG_EXIT_SUCCESS;
       }
@@ -182,6 +184,7 @@ main (int argc, char *argv[]) {
 
     if (exitStatus == PROG_EXIT_SUCCESS) {
       exitStatus = brlttyRun();
+      brlttyDestruct();
     } else if (exitStatus == PROG_EXIT_FORCE) {
       exitStatus = PROG_EXIT_SUCCESS;
     }
