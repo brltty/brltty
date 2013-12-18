@@ -366,7 +366,7 @@ speechFunction_sayText (
 
   SpeechRequestDatum data[] = {
     {.address=text, .size=length+1},
-    {.address=attributes, .size=length},
+    {.address=attributes, .size=count},
     {.end=1}
   };
 
