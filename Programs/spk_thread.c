@@ -78,14 +78,17 @@ typedef enum {
 } SpeechResponseType;
 
 struct SpeechDriverThreadStruct {
-  ThreadState threadState;
-  pthread_t threadIdentifier;
-
   SpeechSynthesizer *speechSynthesizer;
   char **driverParameters;
 
-  AsyncEvent *requestEvent;
-  AsyncEvent *messageEvent;
+  struct {
+    ThreadState state;
+    pthread_t identifier;
+  } thread;
+
+  struct {
+    AsyncEvent *event;
+  } request;
 
   struct {
     SpeechResponseType type;
@@ -94,6 +97,10 @@ struct SpeechDriverThreadStruct {
       int INTEGER;
     } value;
   } response;
+
+  struct {
+    AsyncEvent *event;
+  } message;
 };
 
 typedef enum {
@@ -174,7 +181,7 @@ setThreadState (SpeechDriverThread *sdt, ThreadState state) {
 
   if (!name) name = "?";
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "driver thread %s", name);
-  sdt->threadState = state;
+  sdt->thread.state = state;
 }
 
 static size_t
@@ -212,7 +219,7 @@ moveSpeechData (unsigned char *target, SpeechDatum *data) {
 
 static int
 sendSpeechMessage (SpeechDriverThread *sdt, SpeechMessage *msg) {
-  return asyncSignalEvent(sdt->messageEvent, msg);
+  return asyncSignalEvent(sdt->message.event, msg);
 }
 
 static SpeechMessage *
@@ -376,7 +383,7 @@ ASYNC_EVENT_CALLBACK(handleSpeechRequest) {
 ASYNC_CONDITION_TESTER(testDriverThreadStopping) {
   SpeechDriverThread *sdt = data;
 
-  return sdt->threadState == THD_STOPPING;
+  return sdt->thread.state == THD_STOPPING;
 }
 
 ASYNC_THREAD_FUNCTION(runSpeechDriverThread) {
@@ -384,7 +391,7 @@ ASYNC_THREAD_FUNCTION(runSpeechDriverThread) {
 
   setThreadState(sdt, THD_STARTING);
 
-  if ((sdt->requestEvent = asyncNewEvent(handleSpeechRequest, sdt))) {
+  if ((sdt->request.event = asyncNewEvent(handleSpeechRequest, sdt))) {
     if (speech->construct(sdt->speechSynthesizer, sdt->driverParameters)) {
       setThreadState(sdt, THD_READY);
       sendIntegerResponse(sdt, 1);
@@ -399,14 +406,14 @@ ASYNC_THREAD_FUNCTION(runSpeechDriverThread) {
       logMessage(LOG_CATEGORY(SPEECH_EVENTS), "driver construction failure");
     }
 
-    asyncDiscardEvent(sdt->requestEvent);
-    sdt->requestEvent = NULL;
+    asyncDiscardEvent(sdt->request.event);
+    sdt->request.event = NULL;
   } else {
     logMessage(LOG_CATEGORY(SPEECH_EVENTS), "request event construction failure");
   }
 
   {
-    int ok = sdt->threadState = THD_STOPPING;
+    int ok = sdt->thread.state = THD_STOPPING;
 
     setThreadState(sdt, THD_FINISHED);
     sendIntegerResponse(sdt, ok);
@@ -458,7 +465,7 @@ static int
 sendSpeechRequest (SpeechDriverThread *sdt, SpeechRequest *req) {
   if (!sdt) return 0;
   setResponsePending(sdt);
-  return asyncSignalEvent(sdt->requestEvent, req);
+  return asyncSignalEvent(sdt->request.event, req);
 }
 
 int
@@ -619,7 +626,7 @@ static void
 awaitDriverThreadTermination (SpeechDriverThread *sdt) {
   void *result;
 
-  pthread_join(sdt->threadIdentifier, &result);
+  pthread_join(sdt->thread.identifier, &result);
 }
 
 ASYNC_EVENT_CALLBACK(handleSpeechMessage) {
@@ -657,9 +664,9 @@ newSpeechDriverThread (
     sdt->speechSynthesizer = spk;
     sdt->driverParameters = parameters;
 
-    if ((sdt->messageEvent = asyncNewEvent(handleSpeechMessage, sdt))) {
+    if ((sdt->message.event = asyncNewEvent(handleSpeechMessage, sdt))) {
       int createError = asyncCreateThread("speech-driver",
-                                          &sdt->threadIdentifier, NULL,
+                                          &sdt->thread.identifier, NULL,
                                           runSpeechDriverThread, sdt);
 
       if (!createError) {
@@ -679,8 +686,8 @@ newSpeechDriverThread (
         logMessage(LOG_CATEGORY(SPEECH_EVENTS), "driver thread creation failure: %s", strerror(createError));
       }
 
-      asyncDiscardEvent(sdt->messageEvent);
-      sdt->messageEvent = NULL;
+      asyncDiscardEvent(sdt->message.event);
+      sdt->message.event = NULL;
     } else {
       logMessage(LOG_CATEGORY(SPEECH_EVENTS), "response event construction failure");
     }
@@ -696,7 +703,7 @@ newSpeechDriverThread (
 ASYNC_CONDITION_TESTER(testDriverThreadFinished) {
   SpeechDriverThread *sdt = data;
 
-  return sdt->threadState == THD_FINISHED;
+  return sdt->thread.state == THD_FINISHED;
 }
 
 void
@@ -708,7 +715,7 @@ destroySpeechDriverThread (
     awaitDriverThreadTermination(sdt);
   }
 
-  if (sdt->messageEvent) asyncDiscardEvent(sdt->messageEvent);
+  if (sdt->message.event) asyncDiscardEvent(sdt->message.event);
   free(sdt);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
