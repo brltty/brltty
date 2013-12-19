@@ -29,7 +29,7 @@
 #include <string.h>
 
 #include "log.h"
-#include "timing.h"
+#include "async_wait.h"
 
 #include "spk_driver.h"
 #include "speech.h"		/* for speech definitions */
@@ -83,7 +83,7 @@ spk_write (const unsigned char *address, unsigned int count)
 static void
 spk_flush (void)
 {
-  approximateDelay(spk_written * 1000 / CB_charactersPerSecond);
+  asyncWait(spk_written * 1000 / CB_charactersPerSecond);
   spk_written = 0;
 }
 
