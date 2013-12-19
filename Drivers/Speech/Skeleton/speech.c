@@ -20,9 +20,8 @@
 
 #include <stdio.h>
 
-//#define SPK_HAVE_TRACK
-//#define SPK_HAVE_RATE
 //#define SPK_HAVE_VOLUME
+//#define SPK_HAVE_RATE
 //#define SPK_HAVE_PITCH
 //#define SPK_HAVE_PUNCTUATION
 #include "spk_driver.h"
@@ -43,22 +42,6 @@ spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, siz
 static void
 spk_mute (SpeechSynthesizer *spk) {
 }
-
-#ifdef SPK_HAVE_TRACK
-static void
-spk_doTrack (SpeechSynthesizer *spk) {
-}
-
-static int
-spk_getTrack (SpeechSynthesizer *spk) {
-  return 0;
-}
-
-static int
-spk_isSpeaking (SpeechSynthesizer *spk) {
-  return 0;
-}
-#endif /* SPK_HAVE_TRACK */
 
 #ifdef SPK_HAVE_VOLUME
 static void
