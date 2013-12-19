@@ -44,6 +44,7 @@
 
 #include "log.h"
 #include "timing.h"
+#include "async_io.h"
 
 typedef enum {
   PARM_PROGRAM=0,
@@ -51,14 +52,13 @@ typedef enum {
 } DriverParameter;
 #define SPKPARMS "program", "uid", "gid"
 
-#define SPK_HAVE_TRACK
 #define SPK_HAVE_RATE
 #include "spk_driver.h"
 #include "speech.h"
 
 static int helper_fd_in = -1, helper_fd_out = -1;
-static unsigned short lastIndex, finalIndex;
-static char speaking = 0;
+static AsyncHandle trackHandle = NULL;
+static uint16_t finalIndex;
 
 #define ERRBUFLEN 200
 static void myerror(SpeechSynthesizer *spk, char *fmt, ...)
@@ -92,6 +92,27 @@ static void myperror(SpeechSynthesizer *spk, char *fmt, ...)
   va_end(argp);
   logMessage(LOG_ERR, "%s", buf);
   spk_destruct(spk);
+}
+
+ASYNC_INPUT_CALLBACK(esHandleSpeechTracking) {
+  if (parameters->error) {
+    logMessage(LOG_WARNING, "speech tracking input error: %s", strerror(parameters->error));
+  } else if (parameters->end) {
+    logMessage(LOG_WARNING, "speech tracking end-of-file");
+  } else if (parameters->length >= 2) {
+    const unsigned char *buffer = parameters->buffer;
+    uint16_t index = (buffer[0] << 8) | buffer[1];
+
+    if (index < finalIndex) {
+      tellSpeechIndex(index);
+    } else {
+      tellSpeechFinished();
+    }
+
+    return 2;
+  }
+
+  return 0;
 }
 
 static int spk_construct (SpeechSynthesizer *spk, char **parameters)
@@ -231,6 +252,7 @@ static int spk_construct (SpeechSynthesizer *spk, char **parameters)
   logMessage(LOG_INFO,"Opened pipe to external speech program '%s'",
 	     extProgPath);
 
+  asyncReadFile(&trackHandle, helper_fd_in, 2, esHandleSpeechTracking, spk);
   return 1;
 }
 
@@ -256,34 +278,6 @@ static void mywrite(SpeechSynthesizer *spk, int fd, const void *buf, int len)
     myerror(spk, "ExternalSpeech: pipe to helper program: write timed out");
 }
 
-static int myread(SpeechSynthesizer *spk, int fd, void *buf, int len)
-{
-  char *pos = (char *)buf;
-  int r;
-  int firstTime = 1;
-  TimePeriod period;
-  if(fd<0) return 0;
-  startTimePeriod(&period, 400);
-  do {
-    if((r = read(fd, pos, len)) < 0) {
-      if(errno == EINTR) continue;
-      else if(errno == EAGAIN) {
-	if(firstTime) return 0;
-	else continue;
-      }else myperror(spk, "ExternalSpeech: pipe to helper program: read");
-    }else if(r==0)
-      myerror(spk, "ExternalSpeech: pipe to helper program: read: EOF!");
-    if(r<=0) return 0;
-    firstTime = 0;
-    pos += r; len -= r;
-  } while(len && !afterTimePeriod(&period, NULL));
-  if(len) {
-    myerror(spk, "ExternalSpeech: pipe to helper program: read timed out");
-    return 0;
-  }
-  return 1;
-}
-
 static void spk_say(SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes)
 {
   unsigned char l[5];
@@ -298,39 +292,10 @@ static void spk_say(SpeechSynthesizer *spk, const unsigned char *text, size_t le
     l[3] = 0;
     l[4] = 0;
   }
-  speaking = 1;
   mywrite(spk, helper_fd_out, l, 5);
   mywrite(spk, helper_fd_out, text, length);
   if (attributes) mywrite(spk, helper_fd_out, attributes, count);
-  lastIndex = 0;
   finalIndex = count;
-}
-
-static void spk_doTrack(SpeechSynthesizer *spk)
-{
-  unsigned char b[2];
-  if(helper_fd_in < 0) return;
-  while(myread(spk, helper_fd_in, b, 2)) {
-    unsigned inx;
-    inx = (b[0]<<8 | b[1]);
-    logMessage(LOG_DEBUG, "spktrk: Received index %u", inx);
-    if(inx >= finalIndex) {
-      speaking = 0;
-      logMessage(LOG_DEBUG, "spktrk: Done speaking %d", lastIndex);
-	/* do not change last_inx: remain on position of last spoken words,
-	   not after them. */
-    }else lastIndex = inx;
-  }
-}
-
-static int spk_getTrack(SpeechSynthesizer *spk)
-{
-  return lastIndex;
-}
-
-static int spk_isSpeaking(SpeechSynthesizer *spk)
-{
-  return speaking;
 }
 
 static void spk_mute (SpeechSynthesizer *spk)
@@ -338,7 +303,6 @@ static void spk_mute (SpeechSynthesizer *spk)
   unsigned char c = 1;
   if(helper_fd_out < 0) return;
   logMessage(LOG_DEBUG,"mute");
-  speaking = 0;
   mywrite(spk, helper_fd_out, &c,1);
 }
 
@@ -360,10 +324,12 @@ static void spk_setRate (SpeechSynthesizer *spk, unsigned char setting)
 
 static void spk_destruct (SpeechSynthesizer *spk)
 {
+  if(trackHandle)
+    asyncCancelRequest(trackHandle);
   if(helper_fd_in >= 0)
     close(helper_fd_in);
   if(helper_fd_out >= 0)
     close(helper_fd_out);
   helper_fd_in = helper_fd_out = -1;
-  speaking = 0;
+  trackHandle = NULL;
 }
