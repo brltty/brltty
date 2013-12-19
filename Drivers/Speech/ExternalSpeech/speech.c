@@ -57,8 +57,10 @@ typedef enum {
 #include "speech.h"
 
 static int helper_fd_in = -1, helper_fd_out = -1;
-static AsyncHandle trackHandle = NULL;
 static uint16_t finalIndex;
+
+#define TRACK_DATA_SIZE 2
+static AsyncHandle trackHandle = NULL;
 
 #define ERRBUFLEN 200
 static void myerror(SpeechSynthesizer *spk, char *fmt, ...)
@@ -99,7 +101,7 @@ ASYNC_INPUT_CALLBACK(xsHandleSpeechTracking) {
     logMessage(LOG_WARNING, "speech tracking input error: %s", strerror(parameters->error));
   } else if (parameters->end) {
     logMessage(LOG_WARNING, "speech tracking end-of-file");
-  } else if (parameters->length >= 2) {
+  } else if (parameters->length >= TRACK_DATA_SIZE) {
     const unsigned char *buffer = parameters->buffer;
     uint16_t index = (buffer[0] << 8) | buffer[1];
 
@@ -109,7 +111,7 @@ ASYNC_INPUT_CALLBACK(xsHandleSpeechTracking) {
       tellSpeechFinished();
     }
 
-    return 2;
+    return TRACK_DATA_SIZE;
   }
 
   return 0;
@@ -252,7 +254,7 @@ static int spk_construct (SpeechSynthesizer *spk, char **parameters)
   logMessage(LOG_INFO,"Opened pipe to external speech program '%s'",
 	     extProgPath);
 
-  asyncReadFile(&trackHandle, helper_fd_in, 2, xsHandleSpeechTracking, spk);
+  asyncReadFile(&trackHandle, helper_fd_in, TRACK_DATA_SIZE*10, xsHandleSpeechTracking, spk);
   return 1;
 }
 
