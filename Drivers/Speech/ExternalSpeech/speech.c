@@ -94,7 +94,7 @@ static void myperror(SpeechSynthesizer *spk, char *fmt, ...)
   spk_destruct(spk);
 }
 
-ASYNC_INPUT_CALLBACK(esHandleSpeechTracking) {
+ASYNC_INPUT_CALLBACK(xsHandleSpeechTracking) {
   if (parameters->error) {
     logMessage(LOG_WARNING, "speech tracking input error: %s", strerror(parameters->error));
   } else if (parameters->end) {
@@ -252,7 +252,7 @@ static int spk_construct (SpeechSynthesizer *spk, char **parameters)
   logMessage(LOG_INFO,"Opened pipe to external speech program '%s'",
 	     extProgPath);
 
-  asyncReadFile(&trackHandle, helper_fd_in, 2, esHandleSpeechTracking, spk);
+  asyncReadFile(&trackHandle, helper_fd_in, 2, xsHandleSpeechTracking, spk);
   return 1;
 }
 
