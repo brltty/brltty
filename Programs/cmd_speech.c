@@ -38,6 +38,7 @@ sayScreenRegion (int left, int top, int width, int height, int track, SayMode mo
   speechTracking = track;
   speechScreen = scr.number;
   speechLine = top;
+  speechIndex = SPK_INDEX_NONE;
   sayScreenCharacters(characters, count, mode==sayImmediate);
 }
 

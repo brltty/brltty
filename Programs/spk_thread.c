@@ -85,9 +85,9 @@ struct SpeechDriverThreadStruct {
   char **driverParameters;
 
   AsyncEvent *requestEvent;
+  AsyncEvent *messageEvent;
 
   struct {
-    AsyncEvent *event;
     SpeechResponseType type;
 
     union {
@@ -150,6 +150,23 @@ typedef struct {
 #define BEGIN_SPEECH_REQUEST_DATA SpeechRequestDatum data[] = {
 #define END_SPEECH_REQUEST_DATA {.end=1} };
 
+typedef enum {
+  MSG_SPEECH_LOCATION,
+  MSG_SPEECH_STOPPED
+} DriverMessageType;
+
+typedef struct {
+  DriverMessageType type;
+
+  union {
+    struct {
+      int index;
+    } speechLocation;
+  } arguments;
+
+  unsigned char data[0];
+} DriverMessage;
+
 static void
 setThreadState (SpeechDriverThread *sdt, ThreadState state) {
   const ThreadStateEntry *entry = getThreadStateEntry(state);
@@ -158,6 +175,44 @@ setThreadState (SpeechDriverThread *sdt, ThreadState state) {
   if (!name) name = "?";
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "driver thread %s", name);
   sdt->threadState = state;
+}
+
+static size_t
+getDataSize (const SpeechRequestDatum *data) {
+  size_t size = 0;
+
+  if (data) {
+    const SpeechRequestDatum *datum = data;
+
+    while (!datum->end) {
+      if (datum->address) size += datum->size;
+      datum += 1;
+    }
+  }
+
+  return size;
+}
+
+static void
+moveData (unsigned char *target, SpeechRequestDatum *data) {
+  if (data) {
+    SpeechRequestDatum *datum = data;
+
+    while (!datum->end) {
+      if (datum->address) {
+        memcpy(target, datum->address, datum->size);
+        datum->address = target;
+        target += datum->size;
+      }
+
+      datum += 1;
+    }
+  }
+}
+
+static int
+sendDriverMessage (SpeechDriverThread *sdt, DriverMessage *msg) {
+  return asyncSignalEvent(sdt->messageEvent, msg);
 }
 
 static inline void
@@ -169,7 +224,7 @@ static int
 sendIntegerResponse (SpeechDriverThread *sdt, int value) {
   sdt->response.type = RSP_INTEGER;
   sdt->response.value.INTEGER = value;
-  return asyncSignalEvent(sdt->response.event, NULL);
+  return sendDriverMessage(sdt, NULL);
 }
 
 ASYNC_EVENT_CALLBACK(handleSpeechRequest) {
@@ -336,36 +391,12 @@ getIntegerResult (SpeechDriverThread *sdt) {
 static SpeechRequest *
 newSpeechRequest (SpeechRequestType type, SpeechRequestDatum *data) {
   SpeechRequest *req;
-  size_t size = sizeof(*req);
-
-  if (data) {
-    const SpeechRequestDatum *datum = data;
-
-    while (!datum->end) {
-      if (datum->address) size += datum->size;
-      datum += 1;
-    }
-  }
+  size_t size = sizeof(*req) + getDataSize(data);
 
   if ((req = malloc(size))) {
     memset(req, 0, sizeof(*req));
     req->type = type;
-
-    if (data) {
-      SpeechRequestDatum *datum = data;
-      unsigned char *target = req->data;
-
-      while (!datum->end) {
-        if (datum->address) {
-          memcpy(target, datum->address, datum->size);
-          datum->address = target;
-          target += datum->size;
-        }
-
-        datum += 1;
-      }
-    }
-
+    moveData(req->data, data);
     return req;
   } else {
     logMallocError();
@@ -542,7 +573,12 @@ awaitDriverThreadTermination (SpeechDriverThread *sdt) {
   pthread_join(sdt->threadIdentifier, &result);
 }
 
-ASYNC_EVENT_CALLBACK(handleSpeechResponse) {
+ASYNC_EVENT_CALLBACK(handleDriverMessage) {
+  DriverMessage *msg = parameters->signalData;
+
+  if (msg) {
+    free(msg);
+  }
 }
 
 SpeechDriverThread *
@@ -560,7 +596,7 @@ newSpeechDriverThread (
     sdt->speechSynthesizer = spk;
     sdt->driverParameters = parameters;
 
-    if ((sdt->response.event = asyncNewEvent(handleSpeechResponse, sdt))) {
+    if ((sdt->messageEvent = asyncNewEvent(handleDriverMessage, sdt))) {
       int createError = asyncCreateThread("speech-driver",
                                           &sdt->threadIdentifier, NULL,
                                           runSpeechDriverThread, sdt);
@@ -582,8 +618,8 @@ newSpeechDriverThread (
         logMessage(LOG_CATEGORY(SPEECH_EVENTS), "driver thread creation failure: %s", strerror(createError));
       }
 
-      asyncDiscardEvent(sdt->response.event);
-      sdt->response.event = NULL;
+      asyncDiscardEvent(sdt->messageEvent);
+      sdt->messageEvent = NULL;
     } else {
       logMessage(LOG_CATEGORY(SPEECH_EVENTS), "response event construction failure");
     }
@@ -611,7 +647,7 @@ destroySpeechDriverThread (
     awaitDriverThreadTermination(sdt);
   }
 
-  if (sdt->response.event) asyncDiscardEvent(sdt->response.event);
+  if (sdt->messageEvent) asyncDiscardEvent(sdt->messageEvent);
   free(sdt);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */

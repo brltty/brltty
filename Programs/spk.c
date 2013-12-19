@@ -49,7 +49,7 @@ static AsyncHandle speechTrackingAlarm = NULL;
 int speechTracking = 0;
 int speechScreen = -1;
 int speechLine = 0;
-int speechIndex = -1;
+int speechIndex = SPK_INDEX_NONE;
 
 int
 getSpeechIndex (void) {
@@ -77,6 +77,7 @@ ASYNC_ALARM_CALLBACK(handleSpeechTrackingAlarm) {
     }
 
     speechTracking = 0;
+    speechIndex = SPK_INDEX_NONE;
   }
 }
 
