@@ -46,9 +46,8 @@ typedef enum {
 } DriverParameter;
 #define SPKPARMS "inifile", "samplerate", "abbreviationmode", "numbermode", "synthmode", "textmode", "language", "voice", "vocaltract", "breathiness", "headsize", "pitchbaseline", "pitchfluctuation", "roughness"
 
-#define SPK_HAVE_TRACK
-#define SPK_HAVE_RATE
 #define SPK_HAVE_VOLUME
+#define SPK_HAVE_RATE
 #include "spk_driver.h"
 #include "speech.h"
 
@@ -655,33 +654,6 @@ spk_mute (SpeechSynthesizer *spk) {
          reportError(eci, "eciStop");
       }
    }
-}
-
-static void
-spk_doTrack (SpeechSynthesizer *spk) {
-   if (eci) {
-      eciSpeaking(eci);
-   }
-}
-
-static int
-spk_getTrack (SpeechSynthesizer *spk) {
-   if (eci) {
-      int index = eciGetIndex(eci);
-      logMessage(LOG_DEBUG, "speech tracked at %d", index);
-      return index;
-   }
-   return 0;
-}
-
-static int
-spk_isSpeaking (SpeechSynthesizer *spk) {
-   if (eci) {
-      if (eciSpeaking(eci)) {
-         return 1;
-      }
-   }
-   return 0;
 }
 
 static int
