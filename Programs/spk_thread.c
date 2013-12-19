@@ -145,18 +145,18 @@ typedef struct {
   const void *address;
   size_t size;
   unsigned end:1;
-} SpeechRequestDatum;
+} SpeechDatum;
 
-#define BEGIN_SPEECH_REQUEST_DATA SpeechRequestDatum data[] = {
-#define END_SPEECH_REQUEST_DATA {.end=1} };
+#define BEGIN_SPEECH_DATA SpeechDatum data[] = {
+#define END_SPEECH_DATA {.end=1} };
 
 typedef enum {
   MSG_SPEECH_LOCATION,
   MSG_SPEECH_END
-} DriverMessageType;
+} SpeechMessageType;
 
 typedef struct {
-  DriverMessageType type;
+  SpeechMessageType type;
 
   union {
     struct {
@@ -165,7 +165,7 @@ typedef struct {
   } arguments;
 
   unsigned char data[0];
-} DriverMessage;
+} SpeechMessage;
 
 static void
 setThreadState (SpeechDriverThread *sdt, ThreadState state) {
@@ -178,11 +178,11 @@ setThreadState (SpeechDriverThread *sdt, ThreadState state) {
 }
 
 static size_t
-getDataSize (const SpeechRequestDatum *data) {
+getSpeechDataSize (const SpeechDatum *data) {
   size_t size = 0;
 
   if (data) {
-    const SpeechRequestDatum *datum = data;
+    const SpeechDatum *datum = data;
 
     while (!datum->end) {
       if (datum->address) size += datum->size;
@@ -194,9 +194,9 @@ getDataSize (const SpeechRequestDatum *data) {
 }
 
 static void
-moveData (unsigned char *target, SpeechRequestDatum *data) {
+moveSpeechData (unsigned char *target, SpeechDatum *data) {
   if (data) {
-    SpeechRequestDatum *datum = data;
+    SpeechDatum *datum = data;
 
     while (!datum->end) {
       if (datum->address) {
@@ -211,19 +211,19 @@ moveData (unsigned char *target, SpeechRequestDatum *data) {
 }
 
 static int
-sendDriverMessage (SpeechDriverThread *sdt, DriverMessage *msg) {
+sendSpeechMessage (SpeechDriverThread *sdt, SpeechMessage *msg) {
   return asyncSignalEvent(sdt->messageEvent, msg);
 }
 
-static DriverMessage *
-newDriverMessage (DriverMessageType type, SpeechRequestDatum *data) {
-  DriverMessage *msg;
-  size_t size = sizeof(*msg) + getDataSize(data);
+static SpeechMessage *
+newSpeechMessage (SpeechMessageType type, SpeechDatum *data) {
+  SpeechMessage *msg;
+  size_t size = sizeof(*msg) + getSpeechDataSize(data);
 
   if ((msg = malloc(size))) {
     memset(msg, 0, sizeof(*msg));
     msg->type = type;
-    moveData(msg->data, data);
+    moveSpeechData(msg->data, data);
     return msg;
   } else {
     logMallocError();
@@ -233,15 +233,15 @@ newDriverMessage (DriverMessageType type, SpeechRequestDatum *data) {
 }
 
 int
-driverMessage_speechLocation (
+speechMessage_speechLocation (
   SpeechDriverThread *sdt,
   int index
 ) {
-  DriverMessage *msg;
+  SpeechMessage *msg;
 
-  if ((msg = newDriverMessage(MSG_SPEECH_LOCATION, NULL))) {
+  if ((msg = newSpeechMessage(MSG_SPEECH_LOCATION, NULL))) {
     msg->arguments.speechLocation.index = index;
-    if (sendDriverMessage(sdt, msg)) return 1;
+    if (sendSpeechMessage(sdt, msg)) return 1;
 
     free(msg);
   }
@@ -250,13 +250,13 @@ driverMessage_speechLocation (
 }
 
 int
-driverMessage_speechEnd (
+speechMessage_speechEnd (
   SpeechDriverThread *sdt
 ) {
-  DriverMessage *msg;
+  SpeechMessage *msg;
 
-  if ((msg = newDriverMessage(MSG_SPEECH_END, NULL))) {
-    if (sendDriverMessage(sdt, msg)) return 1;
+  if ((msg = newSpeechMessage(MSG_SPEECH_END, NULL))) {
+    if (sendSpeechMessage(sdt, msg)) return 1;
 
     free(msg);
   }
@@ -273,7 +273,7 @@ static int
 sendIntegerResponse (SpeechDriverThread *sdt, int value) {
   sdt->response.type = RSP_INTEGER;
   sdt->response.value.INTEGER = value;
-  return sendDriverMessage(sdt, NULL);
+  return sendSpeechMessage(sdt, NULL);
 }
 
 ASYNC_EVENT_CALLBACK(handleSpeechRequest) {
@@ -438,14 +438,14 @@ getIntegerResult (SpeechDriverThread *sdt) {
 }
 
 static SpeechRequest *
-newSpeechRequest (SpeechRequestType type, SpeechRequestDatum *data) {
+newSpeechRequest (SpeechRequestType type, SpeechDatum *data) {
   SpeechRequest *req;
-  size_t size = sizeof(*req) + getDataSize(data);
+  size_t size = sizeof(*req) + getSpeechDataSize(data);
 
   if ((req = malloc(size))) {
     memset(req, 0, sizeof(*req));
     req->type = type;
-    moveData(req->data, data);
+    moveSpeechData(req->data, data);
     return req;
   } else {
     logMallocError();
@@ -462,17 +462,17 @@ sendSpeechRequest (SpeechDriverThread *sdt, SpeechRequest *req) {
 }
 
 int
-speechFunction_sayText (
+speechRequest_sayText (
   SpeechDriverThread *sdt,
   const char *text, size_t length,
   size_t count, const unsigned char *attributes
 ) {
   SpeechRequest *req;
 
-  BEGIN_SPEECH_REQUEST_DATA
+  BEGIN_SPEECH_DATA
     {.address=text, .size=length+1},
     {.address=attributes, .size=count},
-  END_SPEECH_REQUEST_DATA
+  END_SPEECH_DATA
 
   if ((req = newSpeechRequest(REQ_SAY_TEXT, data))) {
     req->arguments.sayText.text = data[0].address;
@@ -488,7 +488,7 @@ speechFunction_sayText (
 }
 
 int
-speechFunction_muteSpeech (
+speechRequest_muteSpeech (
   SpeechDriverThread *sdt
 ) {
   SpeechRequest *req;
@@ -503,7 +503,7 @@ speechFunction_muteSpeech (
 }
 
 int
-speechFunction_doTrack (
+speechRequest_doTrack (
   SpeechDriverThread *sdt
 ) {
   SpeechRequest *req;
@@ -518,7 +518,7 @@ speechFunction_doTrack (
 }
 
 int
-speechFunction_getTrack (
+speechRequest_getTrack (
   SpeechDriverThread *sdt
 ) {
   SpeechRequest *req;
@@ -533,7 +533,7 @@ speechFunction_getTrack (
 }
 
 int
-speechFunction_isSpeaking (
+speechRequest_isSpeaking (
   SpeechDriverThread *sdt
 ) {
   SpeechRequest *req;
@@ -548,7 +548,7 @@ speechFunction_isSpeaking (
 }
 
 int
-speechFunction_setVolume (
+speechRequest_setVolume (
   SpeechDriverThread *sdt,
   unsigned char setting
 ) {
@@ -565,7 +565,7 @@ speechFunction_setVolume (
 }
 
 int
-speechFunction_setRate (
+speechRequest_setRate (
   SpeechDriverThread *sdt,
   unsigned char setting
 ) {
@@ -582,7 +582,7 @@ speechFunction_setRate (
 }
 
 int
-speechFunction_setPitch (
+speechRequest_setPitch (
   SpeechDriverThread *sdt,
   unsigned char setting
 ) {
@@ -599,7 +599,7 @@ speechFunction_setPitch (
 }
 
 int
-speechFunction_setPunctuation (
+speechRequest_setPunctuation (
   SpeechDriverThread *sdt,
   SpeechPunctuation setting
 ) {
@@ -622,8 +622,8 @@ awaitDriverThreadTermination (SpeechDriverThread *sdt) {
   pthread_join(sdt->threadIdentifier, &result);
 }
 
-ASYNC_EVENT_CALLBACK(handleDriverMessage) {
-  DriverMessage *msg = parameters->signalData;
+ASYNC_EVENT_CALLBACK(handleSpeechMessage) {
+  SpeechMessage *msg = parameters->signalData;
 
   if (msg) {
     switch (msg->type) {
@@ -657,7 +657,7 @@ newSpeechDriverThread (
     sdt->speechSynthesizer = spk;
     sdt->driverParameters = parameters;
 
-    if ((sdt->messageEvent = asyncNewEvent(handleDriverMessage, sdt))) {
+    if ((sdt->messageEvent = asyncNewEvent(handleSpeechMessage, sdt))) {
       int createError = asyncCreateThread("speech-driver",
                                           &sdt->threadIdentifier, NULL,
                                           runSpeechDriverThread, sdt);

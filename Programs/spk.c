@@ -53,7 +53,7 @@ int speechIndex = SPK_INDEX_NONE;
 
 int
 getSpeechIndex (void) {
-  return speechFunction_getTrack(speechDriverThread);
+  return speechRequest_getTrack(speechDriverThread);
 }
 
 ASYNC_ALARM_CALLBACK(handleSpeechTrackingAlarm) {
@@ -62,9 +62,9 @@ ASYNC_ALARM_CALLBACK(handleSpeechTrackingAlarm) {
 
   if (speechTracking) {
     if (scr.number == speechScreen) {
-      speechFunction_doTrack(speechDriverThread);
+      speechRequest_doTrack(speechDriverThread);
 
-      if (speechFunction_isSpeaking(speechDriverThread)) {
+      if (speechRequest_isSpeaking(speechDriverThread)) {
         if (ses->trackCursor) {
           int index = getSpeechIndex();
 
@@ -112,7 +112,7 @@ stopSpeechDriverThread (void) {
 int
 muteSpeech (const char *reason) {
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "mute: %s", reason);
-  return speechFunction_muteSpeech(speechDriverThread);
+  return speechRequest_muteSpeech(speechDriverThread);
 }
 
 int
@@ -130,7 +130,7 @@ sayUtf8Characters (
 
     logMessage(LOG_CATEGORY(SPEECH_EVENTS), "say: %s", text);
 
-    if (!speechFunction_sayText(speechDriverThread, text, length, count, attributes)) {
+    if (!speechRequest_sayText(speechDriverThread, text, length, count, attributes)) {
       return 0;
     }
 
@@ -168,7 +168,7 @@ int
 setSpeechVolume (int setting, int say) {
   if (!speech->setVolume) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set volume: %d", setting);
-  speechFunction_setVolume(speechDriverThread, setting);
+  speechRequest_setVolume(speechDriverThread, setting);
   if (say) sayIntegerSetting(gettext("volume"), setting);
   return 1;
 }
@@ -189,7 +189,7 @@ int
 setSpeechRate (int setting, int say) {
   if (!speech->setRate) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set rate: %d", setting);
-  speechFunction_setRate(speechDriverThread, setting);
+  speechRequest_setRate(speechDriverThread, setting);
   if (say) sayIntegerSetting(gettext("rate"), setting);
   return 1;
 }
@@ -234,7 +234,7 @@ int
 setSpeechPitch (int setting, int say) {
   if (!speech->setPitch) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set pitch: %d", setting);
-  speechFunction_setPitch(speechDriverThread, setting);
+  speechRequest_setPitch(speechDriverThread, setting);
   if (say) sayIntegerSetting(gettext("pitch"), setting);
   return 1;
 }
@@ -255,6 +255,6 @@ int
 setSpeechPunctuation (SpeechPunctuation setting, int say) {
   if (!speech->setPunctuation) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set punctuation: %d", setting);
-  speechFunction_setPunctuation(speechDriverThread, setting);
+  speechRequest_setPunctuation(speechDriverThread, setting);
   return 1;
 }

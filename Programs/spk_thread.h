@@ -37,54 +37,54 @@ extern void destroySpeechDriverThread (
   SpeechDriverThread *sdt
 );
 
-extern int speechFunction_sayText (
+extern int speechRequest_sayText (
   SpeechDriverThread *sdt,
   const char *text, size_t length,
   size_t count, const unsigned char *attributes
 );
 
-extern int speechFunction_muteSpeech (
+extern int speechRequest_muteSpeech (
   SpeechDriverThread *sdt
 );
 
-extern int speechFunction_doTrack (
+extern int speechRequest_doTrack (
   SpeechDriverThread *sdt
 );
 
-extern int speechFunction_getTrack (
+extern int speechRequest_getTrack (
   SpeechDriverThread *sdt
 );
 
-extern int speechFunction_isSpeaking (
+extern int speechRequest_isSpeaking (
   SpeechDriverThread *sdt
 );
 
-extern int speechFunction_setVolume (
+extern int speechRequest_setVolume (
   SpeechDriverThread *sdt,
   unsigned char setting
 );
 
-extern int speechFunction_setRate (
+extern int speechRequest_setRate (
   SpeechDriverThread *sdt,
   unsigned char setting
 );
 
-extern int speechFunction_setPitch (
+extern int speechRequest_setPitch (
   SpeechDriverThread *sdt,
   unsigned char setting
 );
 
-extern int speechFunction_setPunctuation (
+extern int speechRequest_setPunctuation (
   SpeechDriverThread *sdt,
   SpeechPunctuation setting
 );
 
-extern int driverMessage_speechLocation (
+extern int speechMessage_speechLocation (
   SpeechDriverThread *sdt,
   int index
 );
 
-extern int driverMessage_speechEnd (
+extern int speechMessage_speechEnd (
   SpeechDriverThread *sdt
 );
 #endif /* ENABLE_SPEECH_SUPPORT */
