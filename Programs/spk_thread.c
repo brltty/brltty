@@ -145,9 +145,9 @@ typedef struct {
   const void *address;
   size_t size;
   unsigned end:1;
-} SpeechRequesdtatum;
+} SpeechRequestDatum;
 
-#define BEGIN_SPEECH_REQUEST_DATA SpeechRequesdtatum data[] = {
+#define BEGIN_SPEECH_REQUEST_DATA SpeechRequestDatum data[] = {
 #define END_SPEECH_REQUEST_DATA {.end=1} };
 
 static void
@@ -334,12 +334,12 @@ getIntegerResult (SpeechDriverThread *sdt) {
 }
 
 static SpeechRequest *
-newSpeechRequest (SpeechRequestType type, SpeechRequesdtatum *data) {
+newSpeechRequest (SpeechRequestType type, SpeechRequestDatum *data) {
   SpeechRequest *req;
   size_t size = sizeof(*req);
 
   if (data) {
-    const SpeechRequesdtatum *datum = data;
+    const SpeechRequestDatum *datum = data;
 
     while (!datum->end) {
       if (datum->address) size += datum->size;
@@ -352,7 +352,7 @@ newSpeechRequest (SpeechRequestType type, SpeechRequesdtatum *data) {
     req->type = type;
 
     if (data) {
-      SpeechRequesdtatum *datum = data;
+      SpeechRequestDatum *datum = data;
       unsigned char *target = req->data;
 
       while (!datum->end) {
