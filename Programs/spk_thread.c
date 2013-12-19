@@ -152,7 +152,7 @@ typedef struct {
 
 typedef enum {
   MSG_SPEECH_LOCATION,
-  MSG_SPEECH_STOPPED
+  MSG_SPEECH_END
 } DriverMessageType;
 
 typedef struct {
@@ -213,6 +213,55 @@ moveData (unsigned char *target, SpeechRequestDatum *data) {
 static int
 sendDriverMessage (SpeechDriverThread *sdt, DriverMessage *msg) {
   return asyncSignalEvent(sdt->messageEvent, msg);
+}
+
+static DriverMessage *
+newDriverMessage (DriverMessageType type, SpeechRequestDatum *data) {
+  DriverMessage *msg;
+  size_t size = sizeof(*msg) + getDataSize(data);
+
+  if ((msg = malloc(size))) {
+    memset(msg, 0, sizeof(*msg));
+    msg->type = type;
+    moveData(msg->data, data);
+    return msg;
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
+
+int
+driverMessage_speechLocation (
+  SpeechDriverThread *sdt,
+  int index
+) {
+  DriverMessage *msg;
+
+  if ((msg = newDriverMessage(MSG_SPEECH_LOCATION, NULL))) {
+    msg->arguments.speechLocation.index = index;
+    if (sendDriverMessage(sdt, msg)) return 1;
+
+    free(msg);
+  }
+
+  return 0;
+}
+
+int
+driverMessage_speechEnd (
+  SpeechDriverThread *sdt
+) {
+  DriverMessage *msg;
+
+  if ((msg = newDriverMessage(MSG_SPEECH_END, NULL))) {
+    if (sendDriverMessage(sdt, msg)) return 1;
+
+    free(msg);
+  }
+
+  return 0;
 }
 
 static inline void
@@ -577,6 +626,18 @@ ASYNC_EVENT_CALLBACK(handleDriverMessage) {
   DriverMessage *msg = parameters->signalData;
 
   if (msg) {
+    switch (msg->type) {
+      case MSG_SPEECH_LOCATION:
+        break;
+
+      case MSG_SPEECH_END:
+        break;
+
+      default:
+        logMessage(LOG_CATEGORY(SPEECH_EVENTS), "unimplemented driver message type: %u", msg->type);
+        break;
+    }
+
     free(msg);
   }
 }

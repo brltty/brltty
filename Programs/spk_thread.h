@@ -78,6 +78,15 @@ extern int speechFunction_setPunctuation (
   SpeechDriverThread *sdt,
   SpeechPunctuation setting
 );
+
+extern int driverMessage_speechLocation (
+  SpeechDriverThread *sdt,
+  int index
+);
+
+extern int driverMessage_speechEnd (
+  SpeechDriverThread *sdt
+);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 #ifdef __cplusplus
