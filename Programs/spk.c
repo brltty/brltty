@@ -26,7 +26,6 @@
 
 #include "log.h"
 #include "parameters.h"
-#include "async_alarm.h"
 #include "program.h"
 #include "file.h"
 #include "parse.h"
@@ -43,9 +42,6 @@ initializeSpeechSynthesizer (SpeechSynthesizer *spk) {
   spk->data = NULL;
 }
 
-static void setSpeechTrackingAlarm (void *data);
-static AsyncHandle speechTrackingAlarm = NULL;
-
 int speechTracking = 0;
 int speechScreen = -1;
 int speechLine = 0;
@@ -54,38 +50,6 @@ int speechIndex = SPK_INDEX_NONE;
 int
 getSpeechIndex (void) {
   return speechRequest_getTrack(speechDriverThread);
-}
-
-ASYNC_ALARM_CALLBACK(handleSpeechTrackingAlarm) {
-  asyncDiscardHandle(speechTrackingAlarm);
-  speechTrackingAlarm = NULL;
-
-  if (speechTracking) {
-    if (scr.number == speechScreen) {
-      speechRequest_doTrack(speechDriverThread);
-
-      if (speechRequest_isSpeaking(speechDriverThread)) {
-        if (ses->trackCursor) {
-          int index = getSpeechIndex();
-
-          if (index != speechIndex) trackSpeech(speechIndex = index);
-        }
-
-        setSpeechTrackingAlarm(parameters->data);
-        return;
-      }
-    }
-
-    speechTracking = 0;
-    speechIndex = SPK_INDEX_NONE;
-  }
-}
-
-static void
-setSpeechTrackingAlarm (void *data) {
-  if (!speechTrackingAlarm) {
-    asyncSetAlarmIn(&speechTrackingAlarm, SPEECH_TRACKING_POLL_INTERVAL, handleSpeechTrackingAlarm, data);
-  }
 }
 
 int
@@ -110,6 +74,35 @@ stopSpeechDriverThread (void) {
 }
 
 int
+tellSpeechIndex (int index) {
+  if (!speechTracking) return 1;
+  return speechMessage_speechLocation(speechDriverThread, index);
+}
+
+void
+setSpeechIndex (int index) {
+  if (speechTracking) {
+    if (scr.number == speechScreen) {
+      if (ses->trackCursor) {
+        if (index != speechIndex) trackSpeech(speechIndex = index);
+      }
+    }
+  }
+}
+
+int
+tellSpeechFinished (void) {
+  if (!speechTracking) return 1;
+  return speechMessage_speechFinished(speechDriverThread);
+}
+
+void
+setSpeechFinished (void) {
+  speechTracking = 0;
+  speechIndex = SPK_INDEX_NONE;
+}
+
+int
 muteSpeech (const char *reason) {
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "mute: %s", reason);
   return speechRequest_muteSpeech(speechDriverThread);
@@ -129,12 +122,7 @@ sayUtf8Characters (
     }
 
     logMessage(LOG_CATEGORY(SPEECH_EVENTS), "say: %s", text);
-
-    if (!speechRequest_sayText(speechDriverThread, text, length, count, attributes)) {
-      return 0;
-    }
-
-    if (speechTracking) setSpeechTrackingAlarm(NULL);
+    if (!speechRequest_sayText(speechDriverThread, text, length, count, attributes)) return 0;
   }
 
   return 1;

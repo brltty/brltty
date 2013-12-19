@@ -84,7 +84,7 @@ extern int speechMessage_speechLocation (
   int index
 );
 
-extern int speechMessage_speechEnd (
+extern int speechMessage_speechFinished (
   SpeechDriverThread *sdt
 );
 #endif /* ENABLE_SPEECH_SUPPORT */

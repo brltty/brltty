@@ -159,7 +159,7 @@ typedef struct {
 
 typedef enum {
   MSG_SPEECH_LOCATION,
-  MSG_SPEECH_END
+  MSG_SPEECH_FINISHED
 } SpeechMessageType;
 
 typedef struct {
@@ -257,12 +257,12 @@ speechMessage_speechLocation (
 }
 
 int
-speechMessage_speechEnd (
+speechMessage_speechFinished (
   SpeechDriverThread *sdt
 ) {
   SpeechMessage *msg;
 
-  if ((msg = newSpeechMessage(MSG_SPEECH_END, NULL))) {
+  if ((msg = newSpeechMessage(MSG_SPEECH_FINISHED, NULL))) {
     if (sendSpeechMessage(sdt, msg)) return 1;
 
     free(msg);
@@ -635,9 +635,11 @@ ASYNC_EVENT_CALLBACK(handleSpeechMessage) {
   if (msg) {
     switch (msg->type) {
       case MSG_SPEECH_LOCATION:
+        setSpeechIndex(msg->arguments.speechLocation.index);
         break;
 
-      case MSG_SPEECH_END:
+      case MSG_SPEECH_FINISHED:
+        setSpeechFinished();
         break;
 
       default:
