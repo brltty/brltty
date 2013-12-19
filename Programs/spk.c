@@ -35,22 +35,17 @@
 #include "spk_thread.h"
 #include "brltty.h"
 
-static SpeechDriverThread *speechDriverThread = NULL;
-
 void
 initializeSpeechSynthesizer (SpeechSynthesizer *spk) {
   spk->data = NULL;
 }
 
+static SpeechDriverThread *speechDriverThread = NULL;
+
 int speechTracking = 0;
 int speechScreen = -1;
 int speechLine = 0;
 int speechIndex = SPK_INDEX_NONE;
-
-int
-getSpeechIndex (void) {
-  return speechRequest_getTrack(speechDriverThread);
-}
 
 int
 startSpeechDriverThread (SpeechSynthesizer *spk, char **parameters) {
@@ -74,23 +69,6 @@ stopSpeechDriverThread (void) {
 }
 
 int
-tellSpeechIndex (int index) {
-  if (!speechTracking) return 1;
-  return speechMessage_speechLocation(speechDriverThread, index);
-}
-
-void
-setSpeechIndex (int index) {
-  if (speechTracking) {
-    if (scr.number == speechScreen) {
-      if (ses->trackCursor) {
-        if (index != speechIndex) trackSpeech(speechIndex = index);
-      }
-    }
-  }
-}
-
-int
 tellSpeechFinished (void) {
   if (!speechTracking) return 1;
   return speechMessage_speechFinished(speechDriverThread);
@@ -100,6 +78,28 @@ void
 setSpeechFinished (void) {
   speechTracking = 0;
   speechIndex = SPK_INDEX_NONE;
+}
+
+int
+tellSpeechIndex (int index) {
+  if (!speechTracking) return 1;
+  return speechMessage_speechLocation(speechDriverThread, index);
+}
+
+void
+setSpeechIndex (int index) {
+  if (speechTracking) {
+    if (scr.number == speechScreen) {
+      if (index != speechIndex) {
+        speechIndex = index;
+        if (ses->trackCursor) trackSpeech();
+      }
+
+      return;
+    }
+
+    setSpeechFinished();
+  }
 }
 
 int

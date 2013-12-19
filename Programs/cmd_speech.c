@@ -81,7 +81,7 @@ handleSpeechCommand (int command, void *datga) {
       break;
     case BRL_CMD_SPKHOME:
       if (scr.number == speechScreen) {
-        trackSpeech(getSpeechIndex());
+        trackSpeech();
       } else {
         playTune(&tune_command_rejected);
       }

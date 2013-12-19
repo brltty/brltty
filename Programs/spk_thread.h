@@ -79,13 +79,13 @@ extern int speechRequest_setPunctuation (
   SpeechPunctuation setting
 );
 
+extern int speechMessage_speechFinished (
+  SpeechDriverThread *sdt
+);
+
 extern int speechMessage_speechLocation (
   SpeechDriverThread *sdt,
   int index
-);
-
-extern int speechMessage_speechFinished (
-  SpeechDriverThread *sdt
 );
 #endif /* ENABLE_SPEECH_SUPPORT */
 

@@ -37,11 +37,11 @@ extern void initializeSpeechSynthesizer (SpeechSynthesizer *spk);
 extern int startSpeechDriverThread (SpeechSynthesizer *spk, char **parameters);
 extern void stopSpeechDriverThread (void);
 
-extern int tellSpeechIndex (int index);
-extern void setSpeechIndex (int index);
-
 extern int tellSpeechFinished (void);
 extern void setSpeechFinished (void);
+
+extern int tellSpeechIndex (int index);
+extern void setSpeechIndex (int index);
 
 extern int muteSpeech (const char *reason);
 
@@ -102,7 +102,6 @@ extern void identifySpeechDrivers (int full);
 extern const SpeechDriver *speech;
 extern const SpeechDriver noSpeech;
 
-extern int getSpeechIndex (void);
 extern int speechTracking;
 extern int speechScreen;
 extern int speechLine;

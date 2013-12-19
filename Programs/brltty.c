@@ -770,9 +770,9 @@ isAllSpaceCharacters (const ScreenCharacter *characters, int count) {
 SpeechSynthesizer spk;
 
 void
-trackSpeech (int index) {
-  placeWindowHorizontally(index % scr.cols);
-  slideWindowVertically((index / scr.cols) + speechLine);
+trackSpeech (void) {
+  placeWindowHorizontally(speechIndex % scr.cols);
+  slideWindowVertically((speechIndex / scr.cols) + speechLine);
   scheduleUpdate("speech tracked");
 }
 

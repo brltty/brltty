@@ -216,7 +216,7 @@ extern int opt_quietIfNoBraille;
 extern int autospeak (void);
 extern void sayScreenCharacters (const ScreenCharacter *characters, size_t count, int immediate);
 extern void speakCharacters (const ScreenCharacter *characters, size_t count, int spell);
-extern void trackSpeech (int index);
+extern void trackSpeech (void);
 
 FUNCTION_DECLARE(restartSpeechDriver, void, (void));
 FUNCTION_DECLARE(changeSpeechDriver, int, (const char *driver));

@@ -158,8 +158,8 @@ typedef struct {
 #define END_SPEECH_DATA {.end=1} };
 
 typedef enum {
-  MSG_SPEECH_LOCATION,
-  MSG_SPEECH_FINISHED
+  MSG_SPEECH_FINISHED,
+  MSG_SPEECH_LOCATION
 } SpeechMessageType;
 
 typedef struct {
@@ -240,14 +240,12 @@ newSpeechMessage (SpeechMessageType type, SpeechDatum *data) {
 }
 
 int
-speechMessage_speechLocation (
-  SpeechDriverThread *sdt,
-  int index
+speechMessage_speechFinished (
+  SpeechDriverThread *sdt
 ) {
   SpeechMessage *msg;
 
-  if ((msg = newSpeechMessage(MSG_SPEECH_LOCATION, NULL))) {
-    msg->arguments.speechLocation.index = index;
+  if ((msg = newSpeechMessage(MSG_SPEECH_FINISHED, NULL))) {
     if (sendSpeechMessage(sdt, msg)) return 1;
 
     free(msg);
@@ -257,12 +255,14 @@ speechMessage_speechLocation (
 }
 
 int
-speechMessage_speechFinished (
-  SpeechDriverThread *sdt
+speechMessage_speechLocation (
+  SpeechDriverThread *sdt,
+  int index
 ) {
   SpeechMessage *msg;
 
-  if ((msg = newSpeechMessage(MSG_SPEECH_FINISHED, NULL))) {
+  if ((msg = newSpeechMessage(MSG_SPEECH_LOCATION, NULL))) {
+    msg->arguments.speechLocation.index = index;
     if (sendSpeechMessage(sdt, msg)) return 1;
 
     free(msg);
@@ -634,12 +634,12 @@ ASYNC_EVENT_CALLBACK(handleSpeechMessage) {
 
   if (msg) {
     switch (msg->type) {
-      case MSG_SPEECH_LOCATION:
-        setSpeechIndex(msg->arguments.speechLocation.index);
-        break;
-
       case MSG_SPEECH_FINISHED:
         setSpeechFinished();
+        break;
+
+      case MSG_SPEECH_LOCATION:
+        setSpeechIndex(msg->arguments.speechLocation.index);
         break;
 
       default:
