@@ -957,7 +957,7 @@ ASYNC_ALARM_CALLBACK(handleUpdateAlarm) {
   setUpdateDelay(MAX((brl.writeDelay + 1), UPDATE_SCHEDULE_DELAY));
   brl.writeDelay = 0;
 
-  resumeUpdates();
+  resumeUpdates(0);
 }
 
 static void
@@ -992,10 +992,10 @@ suspendUpdates (void) {
 }
 
 void
-resumeUpdates (void) {
+resumeUpdates (int refresh) {
   if (!--updateSuspendCount) {
     setUpdateAlarm();
-    scheduleUpdate("updates resumed");
+    if (refresh) scheduleUpdate("updates resumed");
   }
 
   logMessage(LOG_CATEGORY(UPDATE_EVENTS), "resume: %u", updateSuspendCount);

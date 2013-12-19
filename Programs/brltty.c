@@ -127,7 +127,7 @@ postprocessCommand (void *state, int command, int handled) {
   PrecommandState *pre = state;
 
   if (pre) {
-    resumeUpdates();
+    resumeUpdates(0);
     if (handled) scheduleUpdate("command executed");
 
     if ((ses->winx != pre->motionColumn) || (ses->winy != pre->motionRow)) {
@@ -1339,7 +1339,7 @@ brlttyConstruct (int argc, char *argv[]) {
   if (!trackCursor(1)) ses->winx = ses->winy = 0;
   ses->motx = ses->winx; ses->moty = ses->winy;
   ses->spkx = ses->winx; ses->spky = ses->winy;
-  resumeUpdates();
+  resumeUpdates(1);
 
   restartRequired = 0;
   isOffline = 0;

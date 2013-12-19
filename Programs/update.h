@@ -28,7 +28,7 @@ extern void scheduleUpdateIn (const char *reason, int delay);
 
 extern void beginUpdates (void);
 extern void suspendUpdates (void);
-extern void resumeUpdates (void);
+extern void resumeUpdates (int refresh);
 
 #ifdef __cplusplus
 }

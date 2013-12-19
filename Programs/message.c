@@ -137,7 +137,7 @@ ASYNC_TASK_CALLBACK(presentMessage) {
     }
 
     popCommandEnvironment();
-    resumeUpdates();
+    resumeUpdates(1);
 
     apiStarted = apiWasStarted;
     apiLink();

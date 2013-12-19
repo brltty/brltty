@@ -113,7 +113,7 @@ ASYNC_TASK_CALLBACK(presentLearnMode) {
   }
 
   popCommandEnvironment();
-  resumeUpdates();
+  resumeUpdates(1);
   free(lmp);
 }
 
