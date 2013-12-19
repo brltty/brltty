@@ -47,18 +47,6 @@ extern int speechRequest_muteSpeech (
   SpeechDriverThread *sdt
 );
 
-extern int speechRequest_doTrack (
-  SpeechDriverThread *sdt
-);
-
-extern int speechRequest_getTrack (
-  SpeechDriverThread *sdt
-);
-
-extern int speechRequest_isSpeaking (
-  SpeechDriverThread *sdt
-);
-
 extern int speechRequest_setVolume (
   SpeechDriverThread *sdt,
   unsigned char setting

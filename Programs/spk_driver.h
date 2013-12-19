@@ -37,16 +37,6 @@ static void spk_destruct (SpeechSynthesizer *spk);
 static void spk_say (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes);
 static void spk_mute (SpeechSynthesizer *spk);
 
-#ifdef SPK_HAVE_TRACK
-static void spk_doTrack (SpeechSynthesizer *spk);
-static int spk_getTrack (SpeechSynthesizer *spk);
-static int spk_isSpeaking (SpeechSynthesizer *spk);
-#else
-static void spk_doTrack (SpeechSynthesizer *spk) { }
-static int spk_getTrack (SpeechSynthesizer *spk) { return 0; }
-static int spk_isSpeaking (SpeechSynthesizer *spk) { return 0; }
-#endif /* SPK_HAVE_TRACK */
-
 #ifdef SPK_HAVE_VOLUME
 static void spk_setVolume (SpeechSynthesizer *spk, unsigned char setting);
 #else /* SPK_HAVE_VOLUME */
@@ -90,10 +80,6 @@ SPKCONST SpeechDriver SPKSYMBOL = {
 
   spk_say,
   spk_mute,
-
-  spk_doTrack,
-  spk_getTrack,
-  spk_isSpeaking,
 
   spk_setVolume,
   spk_setRate,

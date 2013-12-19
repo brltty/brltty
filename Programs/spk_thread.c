@@ -107,10 +107,6 @@ typedef enum {
   REQ_SAY_TEXT,
   REQ_MUTE_SPEECH,
 
-  REQ_DO_TRACK,
-  REQ_GET_TRACK,
-  REQ_IS_SPEAKING,
-
   REQ_SET_VOLUME,
   REQ_SET_RATE,
   REQ_SET_PITCH,
@@ -307,27 +303,6 @@ ASYNC_EVENT_CALLBACK(handleSpeechRequest) {
         break;
       }
 
-      case REQ_DO_TRACK: {
-        speech->doTrack(sdt->speechSynthesizer);
-
-        sendIntegerResponse(sdt, 1);
-        break;
-      }
-
-      case REQ_GET_TRACK: {
-        int result = speech->getTrack(sdt->speechSynthesizer);
-
-        sendIntegerResponse(sdt, result);
-        break;
-      }
-
-      case REQ_IS_SPEAKING: {
-        int result = speech->isSpeaking(sdt->speechSynthesizer);
-
-        sendIntegerResponse(sdt, result);
-        break;
-      }
-
       case REQ_SET_VOLUME: {
         speech->setVolume(
           sdt->speechSynthesizer,
@@ -501,51 +476,6 @@ speechRequest_muteSpeech (
   SpeechRequest *req;
 
   if ((req = newSpeechRequest(REQ_MUTE_SPEECH, NULL))) {
-    if (sendSpeechRequest(sdt, req)) return getIntegerResult(sdt);
-
-    free(req);
-  }
-
-  return 0;
-}
-
-int
-speechRequest_doTrack (
-  SpeechDriverThread *sdt
-) {
-  SpeechRequest *req;
-
-  if ((req = newSpeechRequest(REQ_DO_TRACK, NULL))) {
-    if (sendSpeechRequest(sdt, req)) return getIntegerResult(sdt);
-
-    free(req);
-  }
-
-  return 0;
-}
-
-int
-speechRequest_getTrack (
-  SpeechDriverThread *sdt
-) {
-  SpeechRequest *req;
-
-  if ((req = newSpeechRequest(REQ_GET_TRACK, NULL))) {
-    if (sendSpeechRequest(sdt, req)) return getIntegerResult(sdt);
-
-    free(req);
-  }
-
-  return 0;
-}
-
-int
-speechRequest_isSpeaking (
-  SpeechDriverThread *sdt
-) {
-  SpeechRequest *req;
-
-  if ((req = newSpeechRequest(REQ_IS_SPEAKING, NULL))) {
     if (sendSpeechRequest(sdt, req)) return getIntegerResult(sdt);
 
     free(req);

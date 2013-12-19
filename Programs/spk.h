@@ -84,10 +84,6 @@ typedef struct {
   void (*say) (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes);
   void (*mute) (SpeechSynthesizer *spk);
 
-  void (*doTrack) (SpeechSynthesizer *spk);
-  int (*getTrack) (SpeechSynthesizer *spk);
-  int (*isSpeaking) (SpeechSynthesizer *spk);
-
   void (*setVolume) (SpeechSynthesizer *spk, unsigned char setting);
   void (*setRate) (SpeechSynthesizer *spk, unsigned char setting);
   void (*setPitch) (SpeechSynthesizer *spk, unsigned char setting);
