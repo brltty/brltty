@@ -404,13 +404,13 @@ reportParameter (const char *description, int setting, const char *const *choice
 }
 
 static void
-reportEnvironmentParameter (ECIHand eci, const char *description, ECIParam parameter, int setting, const char *const *choices, const int *map) {
+reportEnvironmentParameter (ECIHand eci, const char *description, enum ECIParam parameter, int setting, const char *const *choices, const int *map) {
    if (parameter != eciNumParams) setting = eciGetParam(eci, parameter);
    reportParameter(description, setting, choices, map);
 }
 
 static int
-setEnvironmentParameter (ECIHand eci, const char *description, ECIParam parameter, int setting) {
+setEnvironmentParameter (ECIHand eci, const char *description, enum ECIParam parameter, int setting) {
    if (parameter == eciNumParams) {
       int ok = eciCopyVoice(eci, setting, 0);
       if (!ok) reportError(eci, "eciCopyVoice");
@@ -420,7 +420,7 @@ setEnvironmentParameter (ECIHand eci, const char *description, ECIParam paramete
 }
 
 static int
-choiceEnvironmentParameter (ECIHand eci, const char *description, const char *value, ECIParam parameter, const char *const *choices, const int *map) {
+choiceEnvironmentParameter (ECIHand eci, const char *description, const char *value, enum ECIParam parameter, const char *const *choices, const int *map) {
    int ok = 0;
    int assume = 1;
    if (*value) {
@@ -439,9 +439,9 @@ choiceEnvironmentParameter (ECIHand eci, const char *description, const char *va
    return ok;
 }
 
-static int rangeEnvironmentParameter (ECIHand eci, const char *description, const char *value, ECIParam parameter, int minimum, int maximum) UNUSED;
+static int rangeEnvironmentParameter (ECIHand eci, const char *description, const char *value, enum ECIParam parameter, int minimum, int maximum) UNUSED;
 static int
-rangeEnvironmentParameter (ECIHand eci, const char *description, const char *value, ECIParam parameter, int minimum, int maximum) {
+rangeEnvironmentParameter (ECIHand eci, const char *description, const char *value, enum ECIParam parameter, int minimum, int maximum) {
    int ok = 0;
    int assume = 1;
    if (*value) {
@@ -460,17 +460,17 @@ rangeEnvironmentParameter (ECIHand eci, const char *description, const char *val
 }
 
 static void
-reportVoiceParameter (ECIHand eci, const char *description, ECIVoiceParam parameter, const char *const *choices, const int *map) {
+reportVoiceParameter (ECIHand eci, const char *description, enum ECIVoiceParam parameter, const char *const *choices, const int *map) {
    reportParameter(description, eciGetVoiceParam(eci, 0, parameter), choices, map);
 }
 
 static int
-setVoiceParameter (ECIHand eci, const char *description, ECIVoiceParam parameter, int setting) {
+setVoiceParameter (ECIHand eci, const char *description, enum ECIVoiceParam parameter, int setting) {
    return eciSetVoiceParam(eci, 0, parameter, setting) >= 0;
 }
 
 static int
-choiceVoiceParameter (ECIHand eci, const char *description, const char *value, ECIVoiceParam parameter, const char *const *choices, const int *map) {
+choiceVoiceParameter (ECIHand eci, const char *description, const char *value, enum ECIVoiceParam parameter, const char *const *choices, const int *map) {
    int ok = 0;
    if (*value) {
       unsigned int setting;
@@ -488,7 +488,7 @@ choiceVoiceParameter (ECIHand eci, const char *description, const char *value, E
 }
 
 static int
-rangeVoiceParameter (ECIHand eci, const char *description, const char *value, ECIVoiceParam parameter, int minimum, int maximum) {
+rangeVoiceParameter (ECIHand eci, const char *description, const char *value, enum ECIVoiceParam parameter, int minimum, int maximum) {
    int ok = 0;
    if (*value) {
       int setting;
