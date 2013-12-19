@@ -33,9 +33,8 @@ typedef enum {
 } DriverParameter;
 #define SPKPARMS "path", "punctlist", "voice", "maxrate"
 
-#define SPK_HAVE_TRACK
-#define SPK_HAVE_RATE
 #define SPK_HAVE_VOLUME
+#define SPK_HAVE_RATE
 #define SPK_HAVE_PITCH
 #define SPK_HAVE_PUNCTUATION
 #include "spk_driver.h"
@@ -48,14 +47,11 @@ typedef enum {
 #endif /* ESPEAK_API_REVISION < 6 */
 
 static int maxrate = espeakRATE_MAXIMUM;
-static volatile int IndexPos;
 
 static void
 spk_say(SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes)
 {
 	int result;
-
-	IndexPos = 0;
 
 	/* add 1 to the length in order to pass along the trailing zero */
 	result = espeak_Synth(buffer, length+1, 0, POS_CHARACTER, 0,
@@ -74,27 +70,12 @@ static int SynthCallback(short *audio, int numsamples, espeak_EVENT *events)
 {
 	while (events->type != espeakEVENT_LIST_TERMINATED) {
 		if (events->type == espeakEVENT_WORD)
-			IndexPos = events->text_position - 1;
+			tellSpeechIndex(events->text_position - 1);
+		if (events->type == espeakEVENT_MSG_TERMINATED)
+			tellSpeechFinished();
 		events++;
 	}
 	return 0;
-}
-
-static void
-spk_doTrack(SpeechSynthesizer *spk)
-{
-}
-
-static int
-spk_getTrack(SpeechSynthesizer *spk)
-{
-	return IndexPos;
-}
-
-static int
-spk_isSpeaking(SpeechSynthesizer *spk)
-{
-	return espeak_IsPlaying();
 }
 
 static void
