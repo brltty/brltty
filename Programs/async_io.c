@@ -690,9 +690,7 @@ addFunctionMonitor (void *item, void *data) {
     operation->monitor = NULL;
 
     if (!operation->active) {
-      if (operation->finished) {
-        return 1;
-      }
+      if (operation->finished) return 1;
 
       operation->monitor = &monitors->array[monitors->count++];
       initializeMonitor(operation->monitor, function, operation);
@@ -707,12 +705,8 @@ testFunctionMonitor (void *item, void *data) {
   FunctionEntry *function = item;
   OperationEntry *operation = getActiveOperation(function);
 
-  if (operation) {
-    if (operation->monitor) {
-      if (testMonitor(operation->monitor, function)) {
-        return 1;
-      }
-    }
+  if (operation && operation->monitor) {
+    if (testMonitor(operation->monitor, function)) return 1;
   }
 
   return 0;
@@ -805,10 +799,7 @@ cancelOperation (Element *operationElement) {
     }
 
     if (getQueueSize(function->operations) == 1) {
-      Queue *functionQueue = getFunctionQueue(0);
-      Element *functionElement = findElementWithItem(functionQueue, function);
-
-      deleteElement(functionElement);
+      deleteElement(findElementWithItem(getFunctionQueue(0), function));
     } else {
       deleteElement(operationElement);
 
