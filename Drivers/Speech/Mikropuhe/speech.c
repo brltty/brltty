@@ -269,7 +269,7 @@ awaitSpeechSegment (void) {
   return 0;
 }
 
-ASYNC_THREAD_FUNCTION(doMikropuheSynthesis) {
+ASYNC_THREAD_FUNCTION(mpSpeechSynthesisThread) {
   pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
   pthread_mutex_lock(&speechMutex);
 
@@ -295,7 +295,7 @@ startSynthesisThread (void) {
         pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_JOINABLE);
         error = asyncCreateThread("driver-speech-Mikropuhe",
                                   &synthesisThread, &attributes,
-                                  doMikropuheSynthesis, NULL);
+                                  mpSpeechSynthesisThread, NULL);
         pthread_attr_destroy(&attributes);
         if (!error) {
           return 1;

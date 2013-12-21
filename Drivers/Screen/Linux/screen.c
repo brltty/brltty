@@ -424,7 +424,7 @@ readScreenDevice (off_t offset, void *buffer, size_t size) {
   return 0;
 }
 
-ASYNC_MONITOR_CALLBACK(handleScreenAlert) {
+ASYNC_MONITOR_CALLBACK(lxScreenUpdated) {
   asyncDiscardHandle(screenMonitor);
   screenMonitor = NULL;
 
@@ -1099,7 +1099,7 @@ poll_LinuxScreen (void) {
   int poll = !isMonitorable? 1:
              screenMonitor? 0:
              !asyncMonitorFileAlert(&screenMonitor, screenDescriptor,
-                                    handleScreenAlert, NULL);
+                                    lxScreenUpdated, NULL);
 
   if (poll) screenUpdated = 1;
   return poll;

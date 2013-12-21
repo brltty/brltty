@@ -161,7 +161,7 @@ static void spk_setRate (SpeechSynthesizer *spk, unsigned char setting)
   mywrite(spk, helper_fd_out, &l, 5);
 }
 
-ASYNC_INPUT_CALLBACK(xsHandleSpeechTracking) {
+ASYNC_INPUT_CALLBACK(xsHandleSpeechTrackingInput) {
   if (parameters->error) {
     logMessage(LOG_WARNING, "speech tracking input error: %s", strerror(parameters->error));
   } else if (parameters->end) {
@@ -321,7 +321,7 @@ static int spk_construct (SpeechSynthesizer *spk, char **parameters)
   logMessage(LOG_INFO,"Opened pipe to external speech program '%s'",
 	     extProgPath);
 
-  asyncReadFile(&trackHandle, helper_fd_in, TRACK_DATA_SIZE*10, xsHandleSpeechTracking, spk);
+  asyncReadFile(&trackHandle, helper_fd_in, TRACK_DATA_SIZE*10, xsHandleSpeechTrackingInput, spk);
   return 1;
 }
 

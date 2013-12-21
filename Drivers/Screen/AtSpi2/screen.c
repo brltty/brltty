@@ -784,7 +784,7 @@ static int watch(const char *message, const char *event) {
   return 1;
 }
 
-ASYNC_THREAD_FUNCTION(doAtSpi2ScreenOpen) {
+ASYNC_THREAD_FUNCTION(a2OpenScreenThread) {
   DBusError error;
 
   sem_t *SPI2_init_sem = argument;
@@ -845,7 +845,7 @@ construct_AtSpi2Screen (void) {
   finished = 0;
   if (asyncCreateThread("driver-screen-AtSpi2",
                         &SPI2_main_thread, NULL,
-                        doAtSpi2ScreenOpen, (void *)&SPI2_init_sem)) {
+                        a2OpenScreenThread, (void *)&SPI2_init_sem)) {
     logMessage(LOG_ERR,"main SPI2 thread failed to be launched");
     return 0;
   }
