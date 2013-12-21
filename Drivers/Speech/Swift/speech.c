@@ -32,8 +32,6 @@ typedef enum {
 } DriverParameter;
 #define SPKPARMS "name"
 
-#define SPK_HAVE_RATE
-#define SPK_HAVE_VOLUME
 #include "spk_driver.h"
 #include <swift.h>
 
@@ -87,9 +85,41 @@ setEnvironmentVariable (const char *name, const char *value) {
   return 0;
 }
 
+static void
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
+  swift_result_t result;
+  swift_background_t job;
+
+  if ((result = swift_port_speak_text(swiftPort, buffer, length, NULL, &job, NULL)) != SWIFT_SUCCESS) {
+    speechError(result, "port speak");
+  }
+}
+
+static void
+spk_mute (SpeechSynthesizer *spk) {
+  swift_result_t result;
+
+  if ((result = swift_port_stop(swiftPort, SWIFT_ASYNC_CURRENT, SWIFT_EVENT_NOW)) != SWIFT_SUCCESS) {
+  //speechError(result, "port stop");
+  }
+}
+
+static void
+spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
+  setVolume(getIntegerSpeechVolume(setting, 100));
+}
+
+static void
+spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
+  setRate((int)(getFloatSpeechRate(setting) * 170.0));
+}
+
 static int
 spk_construct (SpeechSynthesizer *spk, char **parameters) {
   swift_result_t result;
+
+  spk->setVolume = spk_setVolume;
+  spk->setRate = spk_setRate;
 
   if (setEnvironmentVariable("SWIFT_HOME", SWIFT_ROOT)) {
     swift_params *engineParameters;
@@ -156,33 +186,4 @@ spk_destruct (SpeechSynthesizer *spk) {
     }
     swiftEngine = NULL;
   }
-}
-
-static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
-  swift_result_t result;
-  swift_background_t job;
-
-  if ((result = swift_port_speak_text(swiftPort, buffer, length, NULL, &job, NULL)) != SWIFT_SUCCESS) {
-    speechError(result, "port speak");
-  }
-}
-
-static void
-spk_mute (SpeechSynthesizer *spk) {
-  swift_result_t result;
-
-  if ((result = swift_port_stop(swiftPort, SWIFT_ASYNC_CURRENT, SWIFT_EVENT_NOW)) != SWIFT_SUCCESS) {
-  //speechError(result, "port stop");
-  }
-}
-
-static void
-spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
-  setVolume(getIntegerSpeechVolume(setting, 100));
-}
-
-static void
-spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
-  setRate((int)(getFloatSpeechRate(setting) * 170.0));
 }

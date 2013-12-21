@@ -30,9 +30,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef struct BrailleDisplayStruct BrailleDisplay;
 typedef struct BrailleDataStruct BrailleData;
 
-typedef struct BrailleDisplayStruct BrailleDisplay;
 typedef int BrailleFirmnessSetter (BrailleDisplay *brl, BrailleFirmness setting);
 typedef int BrailleSensitivitySetter (BrailleDisplay *brl, BrailleSensitivity setting);
 typedef void BrailleKeyRotator (BrailleDisplay *brl, unsigned char *set, unsigned char *key);

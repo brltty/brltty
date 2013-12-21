@@ -46,8 +46,6 @@ typedef enum {
 } DriverParameter;
 #define SPKPARMS "inifile", "samplerate", "abbreviationmode", "numbermode", "synthmode", "textmode", "language", "voice", "vocaltract", "breathiness", "headsize", "pitchbaseline", "pitchfluctuation", "roughness"
 
-#define SPK_HAVE_VOLUME
-#define SPK_HAVE_RATE
 #include "spk_driver.h"
 #include "speech.h"
 
@@ -527,60 +525,6 @@ isSet:
 }
 
 static int
-spk_construct (SpeechSynthesizer *spk, char **parameters) {
-   if (!eci) {
-      if (setIni(parameters[PARM_IniFile])) {
-	 if ((eci = eciNew()) != NULL_ECI_HAND) {
-            units = 0;
-	    if (eciSetOutputDevice(eci, 0)) {
-	       const char *sampleRates[] = {"8000", "11025", "22050", NULL};
-	       const char *abbreviationModes[] = {"on", "off", NULL};
-	       const char *numberModes[] = {"word", "year", NULL};
-	       const char *synthModes[] = {"sentence", "none", NULL};
-	       const char *textModes[] = {"talk", "spell", "literal", "phonetic", NULL};
-	       const char *voices[] = {"", "AdultMale", "AdultFemale", "Child", "", "", "", "ElderlyFemale", "ElderlyMale", NULL};
-	       const char *vocalTracts[] = {"male", "female", NULL};
-	       choiceEnvironmentParameter(eci, "sample rate", parameters[PARM_SampleRate], eciSampleRate, sampleRates, NULL);
-	       choiceEnvironmentParameter(eci, "abbreviation mode", parameters[PARM_AbbreviationMode], eciDictionary, abbreviationModes, NULL);
-	       choiceEnvironmentParameter(eci, "number mode", parameters[PARM_NumberMode], eciNumberMode, numberModes, NULL);
-	       choiceEnvironmentParameter(eci, "synth mode", parameters[PARM_SynthMode], eciSynthMode, synthModes, NULL);
-	       choiceEnvironmentParameter(eci, "text mode", parameters[PARM_TextMode], eciTextMode, textModes, NULL);
-	       choiceEnvironmentParameter(eci, "language", parameters[PARM_Language], eciLanguageDialect, languageNames, languageMap);
-	       choiceEnvironmentParameter(eci, "voice", parameters[PARM_Voice], eciNumParams, voices, NULL);
-	       choiceVoiceParameter(eci, "vocal tract", parameters[PARM_VocalTract], eciGender, vocalTracts, NULL);
-	       rangeVoiceParameter(eci, "breathiness", parameters[PARM_Breathiness], eciBreathiness, 0, 100);
-	       rangeVoiceParameter(eci, "head size", parameters[PARM_HeadSize], eciHeadSize, 0, 100);
-	       rangeVoiceParameter(eci, "pitch baseline", parameters[PARM_PitchBaseline], eciPitchBaseline, 0, 100);
-	       rangeVoiceParameter(eci, "pitch fluctuation", parameters[PARM_PitchFluctuation], eciPitchFluctuation, 0, 100);
-	       rangeVoiceParameter(eci, "roughness", parameters[PARM_Roughness], eciRoughness, 0, 100);
-               {
-                  char version[0X80];
-                  eciVersion(version);
-                  logMessage(LOG_INFO, "ViaVoice Engine: version %s", version);
-               }
-               return 1;
-	    } else {
-	       reportError(eci, "eciSetOutputDevice");
-	    }
-            eciDelete(eci);
-            eci = NULL_ECI_HAND;
-	 } else {
-	    logMessage(LOG_ERR, "ViaVoice initialization error.");
-	 }
-      }
-   }
-   return 0;
-}
-
-static void
-spk_destruct (SpeechSynthesizer *spk) {
-   if (eci) {
-      eciDelete(eci);
-      eci = NULL_ECI_HAND;
-   }
-}
-
-static int
 ensureSayBuffer (int size) {
    if (size > saySize) {
       char *newBuffer = malloc(size |= 0XFF);
@@ -683,4 +627,61 @@ spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
 static void
 spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
    if (setExternalUnits()) setVoiceParameter (eci, "rate", eciSpeed, (int)(getFloatSpeechRate(setting) * 210.0));
+}
+
+static int
+spk_construct (SpeechSynthesizer *spk, char **parameters) {
+   spk->setVolume = spk_setVolume;
+   spk->setRate = spk_setRate;
+
+   if (!eci) {
+      if (setIni(parameters[PARM_IniFile])) {
+	 if ((eci = eciNew()) != NULL_ECI_HAND) {
+            units = 0;
+	    if (eciSetOutputDevice(eci, 0)) {
+	       const char *sampleRates[] = {"8000", "11025", "22050", NULL};
+	       const char *abbreviationModes[] = {"on", "off", NULL};
+	       const char *numberModes[] = {"word", "year", NULL};
+	       const char *synthModes[] = {"sentence", "none", NULL};
+	       const char *textModes[] = {"talk", "spell", "literal", "phonetic", NULL};
+	       const char *voices[] = {"", "AdultMale", "AdultFemale", "Child", "", "", "", "ElderlyFemale", "ElderlyMale", NULL};
+	       const char *vocalTracts[] = {"male", "female", NULL};
+	       choiceEnvironmentParameter(eci, "sample rate", parameters[PARM_SampleRate], eciSampleRate, sampleRates, NULL);
+	       choiceEnvironmentParameter(eci, "abbreviation mode", parameters[PARM_AbbreviationMode], eciDictionary, abbreviationModes, NULL);
+	       choiceEnvironmentParameter(eci, "number mode", parameters[PARM_NumberMode], eciNumberMode, numberModes, NULL);
+	       choiceEnvironmentParameter(eci, "synth mode", parameters[PARM_SynthMode], eciSynthMode, synthModes, NULL);
+	       choiceEnvironmentParameter(eci, "text mode", parameters[PARM_TextMode], eciTextMode, textModes, NULL);
+	       choiceEnvironmentParameter(eci, "language", parameters[PARM_Language], eciLanguageDialect, languageNames, languageMap);
+	       choiceEnvironmentParameter(eci, "voice", parameters[PARM_Voice], eciNumParams, voices, NULL);
+	       choiceVoiceParameter(eci, "vocal tract", parameters[PARM_VocalTract], eciGender, vocalTracts, NULL);
+	       rangeVoiceParameter(eci, "breathiness", parameters[PARM_Breathiness], eciBreathiness, 0, 100);
+	       rangeVoiceParameter(eci, "head size", parameters[PARM_HeadSize], eciHeadSize, 0, 100);
+	       rangeVoiceParameter(eci, "pitch baseline", parameters[PARM_PitchBaseline], eciPitchBaseline, 0, 100);
+	       rangeVoiceParameter(eci, "pitch fluctuation", parameters[PARM_PitchFluctuation], eciPitchFluctuation, 0, 100);
+	       rangeVoiceParameter(eci, "roughness", parameters[PARM_Roughness], eciRoughness, 0, 100);
+               {
+                  char version[0X80];
+                  eciVersion(version);
+                  logMessage(LOG_INFO, "ViaVoice Engine: version %s", version);
+               }
+               return 1;
+	    } else {
+	       reportError(eci, "eciSetOutputDevice");
+	    }
+            eciDelete(eci);
+            eci = NULL_ECI_HAND;
+	 } else {
+	    logMessage(LOG_ERR, "ViaVoice initialization error.");
+	 }
+      }
+   }
+   return 0;
+}
+
+static void
+spk_destruct (SpeechSynthesizer *spk) {
+   if (eci) {
+      eciDelete(eci);
+      eci = NULL_ECI_HAND;
+   }
 }

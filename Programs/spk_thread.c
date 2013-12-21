@@ -304,7 +304,7 @@ ASYNC_EVENT_CALLBACK(handleSpeechRequest) {
       }
 
       case REQ_SET_VOLUME: {
-        speech->setVolume(
+        sdt->speechSynthesizer->setVolume(
           sdt->speechSynthesizer,
           req->arguments.setVolume.setting
         );
@@ -314,7 +314,7 @@ ASYNC_EVENT_CALLBACK(handleSpeechRequest) {
       }
 
       case REQ_SET_RATE: {
-        speech->setRate(
+        sdt->speechSynthesizer->setRate(
           sdt->speechSynthesizer,
           req->arguments.setRate.setting
         );
@@ -324,7 +324,7 @@ ASYNC_EVENT_CALLBACK(handleSpeechRequest) {
       }
 
       case REQ_SET_PITCH: {
-        speech->setPitch(
+        sdt->speechSynthesizer->setPitch(
           sdt->speechSynthesizer,
           req->arguments.setPitch.setting
         );
@@ -334,7 +334,7 @@ ASYNC_EVENT_CALLBACK(handleSpeechRequest) {
       }
 
       case REQ_SET_PUNCTUATION: {
-        speech->setPunctuation(
+        sdt->speechSynthesizer->setPunctuation(
           sdt->speechSynthesizer,
           req->arguments.setPunctuation.setting
         );

@@ -32,10 +32,6 @@ typedef enum {
 } DriverParameter;
 #define SPKPARMS "port", "module", "language", "voice"
 
-#define SPK_HAVE_RATE
-#define SPK_HAVE_VOLUME
-#define SPK_HAVE_PITCH
-#define SPK_HAVE_PUNCTUATION
 #include "spk_driver.h"
 
 #include <libspeechd.h>
@@ -99,8 +95,22 @@ setVolume (const void *data) {
 }
 
 static void
+spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
+  relativeVolume = getIntegerSpeechVolume(setting, 100) - 100;
+  speechdAction(setVolume, NULL);
+  logMessage(LOG_DEBUG, "set volume: %u -> %d", setting, relativeVolume);
+}
+
+static void
 setRate (const void *data) {
   spd_set_voice_rate(connectionHandle, relativeRate);
+}
+
+static void
+spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
+  relativeRate = getIntegerSpeechRate(setting, 100) - 100;
+  speechdAction(setRate, NULL);
+  logMessage(LOG_DEBUG, "set rate: %u -> %d", setting, relativeRate);
 }
 
 static void
@@ -109,8 +119,24 @@ setPitch (const void *data) {
 }
 
 static void
+spk_setPitch (SpeechSynthesizer *spk, unsigned char setting) {
+  relativePitch = getIntegerSpeechPitch(setting, 100) - 100;
+  speechdAction(setPitch, NULL);
+  logMessage(LOG_DEBUG, "set pitch: %u -> %d", setting, relativePitch);
+}
+
+static void
 setPunctuation (const void *data) {
   if (punctuationVerbosity != -1) spd_set_punctuation(connectionHandle, punctuationVerbosity);
+}
+
+static void
+spk_setPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting) {
+  punctuationVerbosity = (setting <= SPK_PUNCTUATION_NONE)? SPD_PUNCT_NONE: 
+                         (setting >= SPK_PUNCTUATION_ALL)? SPD_PUNCT_ALL: 
+                         SPD_PUNCT_SOME;
+  speechdAction(setPunctuation, NULL);
+  logMessage(LOG_DEBUG, "set punctuation: %u -> %d", setting, punctuationVerbosity);
 }
 
 static void
@@ -147,6 +173,11 @@ openConnection (void) {
 
 static int
 spk_construct (SpeechSynthesizer *spk, char **parameters) {
+  spk->setVolume = spk_setVolume;
+  spk->setRate = spk_setRate;
+  spk->setPitch = spk_setPitch;
+  spk->setPunctuation = spk_setPunctuation;
+
   clearSettings();
 
   if (parameters[PARM_PORT] && *parameters[PARM_PORT]) {
@@ -246,34 +277,4 @@ spk_say (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_
 static void
 spk_mute (SpeechSynthesizer *spk) {
   speechdAction(cancelSpeech, NULL);
-}
-
-static void
-spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
-  relativeVolume = getIntegerSpeechVolume(setting, 100) - 100;
-  speechdAction(setVolume, NULL);
-  logMessage(LOG_DEBUG, "set volume: %u -> %d", setting, relativeVolume);
-}
-
-static void
-spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
-  relativeRate = getIntegerSpeechRate(setting, 100) - 100;
-  speechdAction(setRate, NULL);
-  logMessage(LOG_DEBUG, "set rate: %u -> %d", setting, relativeRate);
-}
-
-static void
-spk_setPitch (SpeechSynthesizer *spk, unsigned char setting) {
-  relativePitch = getIntegerSpeechPitch(setting, 100) - 100;
-  speechdAction(setPitch, NULL);
-  logMessage(LOG_DEBUG, "set pitch: %u -> %d", setting, relativePitch);
-}
-
-static void
-spk_setPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting) {
-  punctuationVerbosity = (setting <= SPK_PUNCTUATION_NONE)? SPD_PUNCT_NONE: 
-                         (setting >= SPK_PUNCTUATION_ALL)? SPD_PUNCT_ALL: 
-                         SPD_PUNCT_SOME;
-  speechdAction(setPunctuation, NULL);
-  logMessage(LOG_DEBUG, "set punctuation: %u -> %d", setting, punctuationVerbosity);
 }

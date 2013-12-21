@@ -36,7 +36,6 @@ typedef enum {
 } DriverParameter;
 #define SPKPARMS "command", "name"
 
-#define SPK_HAVE_RATE
 #include "spk_driver.h"
 #include "speech.h"		/* for speech definitions */
 
@@ -116,8 +115,15 @@ writeCommand (const char *command, int reopen) {
   return writeString(command, reopen) && writeString("\n", 0);
 }
 
+static void
+spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
+  setRate(festivalRate=getFloatSpeechRate(setting), 1);
+}
+
 static int
 spk_construct (SpeechSynthesizer *spk, char **parameters) {
+  spk->setRate = spk_setRate;
+
   festivalParameters = parameters;
   festivalRate = 0.0;
   return openStream();
@@ -162,9 +168,4 @@ spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, siz
 static void
 spk_mute (SpeechSynthesizer *spk) {
   writeCommand("(audio_mode 'shutup)", 0);
-}
-
-static void
-spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
-  setRate(festivalRate=getFloatSpeechRate(setting), 1);
 }

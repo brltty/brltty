@@ -41,8 +41,6 @@ typedef enum {
 } DriverParameter;
 #define SPKPARMS "age", "gender", "language", "name", "pitch"
 
-#define SPK_HAVE_RATE
-#define SPK_HAVE_VOLUME
 #include "spk_driver.h"
 
 struct theta_sfx_block_ops { /* used but not defined in header */
@@ -85,10 +83,74 @@ loadVoice (theta_voice_desc *descriptor) {
 }
 
 static int
+doChild (void) {
+  FILE *stream = fdopen(*pipeOutput, "r");
+  char buffer[0X400];
+  char *line;
+  while ((line = fgets(buffer, sizeof(buffer), stream))) {
+    theta_tts(line, voice);
+  }
+  return 0;
+}
+
+static void
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
+  if (voice) {
+    if (child != -1) goto ready;
+
+    if (pipe(pipeDescriptors) != -1) {
+      if ((child = fork()) == -1) {
+        logSystemError("fork");
+      } else if (child == 0) {
+        _exit(doChild());
+      } else
+      ready: {
+        unsigned char text[length + 1];
+        memcpy(text, buffer, length);
+        text[length] = '\n';
+        write(*pipeInput, text, sizeof(text));
+        return;
+      }
+
+      close(*pipeInput);
+      close(*pipeOutput);
+    } else {
+      logSystemError("pipe");
+    }
+  }
+}
+
+static void
+spk_mute (SpeechSynthesizer *spk) {
+  if (child != -1) {
+    close(*pipeInput);
+    close(*pipeOutput);
+
+    kill(child, SIGKILL);
+    waitpid(child, NULL, 0);
+    child = -1;
+  }
+}
+
+static void
+spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
+  theta_set_rescale(voice, getFloatSpeechVolume(setting), NULL);
+}
+
+static void
+spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
+  theta_set_rate_stretch(voice, 1.0/getFloatSpeechRate(setting), NULL);
+}
+
+static int
 spk_construct (SpeechSynthesizer *spk, char **parameters) {
   theta_voice_search criteria;
+
   memset(&criteria, 0, sizeof(criteria));
   initializeTheta();
+
+  spk->setVolume = spk_setVolume;
+  spk->setRate = spk_setRate;
 
   if (*parameters[PARM_GENDER]) {
     const char *const choices[] = {"male", "female", "neuter", NULL};
@@ -169,64 +231,4 @@ spk_destruct (SpeechSynthesizer *spk) {
     theta_unload_voice(voice);
     voice = NULL;
   }
-}
-
-static int
-doChild (void) {
-  FILE *stream = fdopen(*pipeOutput, "r");
-  char buffer[0X400];
-  char *line;
-  while ((line = fgets(buffer, sizeof(buffer), stream))) {
-    theta_tts(line, voice);
-  }
-  return 0;
-}
-
-static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
-  if (voice) {
-    if (child != -1) goto ready;
-
-    if (pipe(pipeDescriptors) != -1) {
-      if ((child = fork()) == -1) {
-        logSystemError("fork");
-      } else if (child == 0) {
-        _exit(doChild());
-      } else
-      ready: {
-        unsigned char text[length + 1];
-        memcpy(text, buffer, length);
-        text[length] = '\n';
-        write(*pipeInput, text, sizeof(text));
-        return;
-      }
-
-      close(*pipeInput);
-      close(*pipeOutput);
-    } else {
-      logSystemError("pipe");
-    }
-  }
-}
-
-static void
-spk_mute (SpeechSynthesizer *spk) {
-  if (child != -1) {
-    close(*pipeInput);
-    close(*pipeOutput);
-
-    kill(child, SIGKILL);
-    waitpid(child, NULL, 0);
-    child = -1;
-  }
-}
-
-static void
-spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
-  theta_set_rescale(voice, getFloatSpeechVolume(setting), NULL);
-}
-
-static void
-spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
-  theta_set_rate_stretch(voice, 1.0/getFloatSpeechRate(setting), NULL);
 }

@@ -38,6 +38,11 @@
 void
 initializeSpeechSynthesizer (SpeechSynthesizer *spk) {
   spk->data = NULL;
+
+  spk->setVolume = NULL;
+  spk->setRate = NULL;
+  spk->setPitch = NULL;
+  spk->setPunctuation = NULL;
 }
 
 static SpeechDriverThread *speechDriverThread = NULL;
@@ -153,8 +158,13 @@ getIntegerSetting (unsigned char setting, unsigned char internal, unsigned int e
 }
 
 int
+canSetSpeechVolume (void) {
+  return spk.setVolume != NULL;
+}
+
+int
 setSpeechVolume (int setting, int say) {
-  if (!speech->setVolume) return 0;
+  if (!canSetSpeechVolume()) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set volume: %d", setting);
   speechRequest_setVolume(speechDriverThread, setting);
   if (say) sayIntegerSetting(gettext("volume"), setting);
@@ -174,8 +184,13 @@ getFloatSpeechVolume (unsigned char setting) {
 #endif /* NO_FLOAT */
 
 int
+canSetSpeechRate (void) {
+  return spk.setRate != NULL;
+}
+
+int
 setSpeechRate (int setting, int say) {
-  if (!speech->setRate) return 0;
+  if (!canSetSpeechRate()) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set rate: %d", setting);
   speechRequest_setRate(speechDriverThread, setting);
   if (say) sayIntegerSetting(gettext("rate"), setting);
@@ -219,8 +234,13 @@ getFloatSpeechRate (unsigned char setting) {
 #endif /* NO_FLOAT */
 
 int
+canSetSpeechPitch (void) {
+  return spk.setPitch != NULL;
+}
+
+int
 setSpeechPitch (int setting, int say) {
-  if (!speech->setPitch) return 0;
+  if (!canSetSpeechPitch()) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set pitch: %d", setting);
   speechRequest_setPitch(speechDriverThread, setting);
   if (say) sayIntegerSetting(gettext("pitch"), setting);
@@ -240,8 +260,13 @@ getFloatSpeechPitch (unsigned char setting) {
 #endif /* NO_FLOAT */
 
 int
+canSetSpeechPunctuation (void) {
+  return spk.setPunctuation != NULL;
+}
+
+int
 setSpeechPunctuation (SpeechPunctuation setting, int say) {
-  if (!speech->setPunctuation) return 0;
+  if (!canSetSpeechPunctuation()) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set punctuation: %d", setting);
   speechRequest_setPunctuation(speechDriverThread, setting);
   return 1;

@@ -33,10 +33,6 @@ typedef enum {
 } DriverParameter;
 #define SPKPARMS "path", "punctlist", "voice", "maxrate"
 
-#define SPK_HAVE_VOLUME
-#define SPK_HAVE_RATE
-#define SPK_HAVE_PITCH
-#define SPK_HAVE_PUNCTUATION
 #include "spk_driver.h"
 
 #include <espeak/speak_lib.h>
@@ -117,6 +113,11 @@ static int spk_construct(SpeechSynthesizer *spk, char **parameters)
 {
 	char *data_path, *voicename, *punctlist;
 	int result;
+
+	spk->setVolume = spk_setVolume;;
+	spk->setRate = spk_setRate;;
+	spk->setPitch = spk_setPitch;;
+	spk->setPunctuation = spk_setPunctuation;;
 
 	logMessage(LOG_INFO, "eSpeak version %s", espeak_Info(NULL));
 

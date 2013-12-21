@@ -52,7 +52,6 @@ typedef enum {
 } DriverParameter;
 #define SPKPARMS "program", "uid", "gid"
 
-#define SPK_HAVE_RATE
 #include "spk_driver.h"
 #include "speech.h"
 
@@ -96,6 +95,72 @@ static void myperror(SpeechSynthesizer *spk, char *fmt, ...)
   spk_destruct(spk);
 }
 
+static void mywrite(SpeechSynthesizer *spk, int fd, const void *buf, int len)
+{
+  char *pos = (char *)buf;
+  int w;
+  TimePeriod period;
+  if(fd<0) return;
+  startTimePeriod(&period, 2000);
+  do {
+    if((w = write(fd, pos, len)) < 0) {
+      if(errno == EINTR || errno == EAGAIN) continue;
+      else if(errno == EPIPE)
+	myerror(spk, "ExternalSpeech: pipe to helper program was broken");
+         /* try to reinit may be ??? */
+      else myperror(spk, "ExternalSpeech: pipe to helper program: write");
+      return;
+    }
+    pos += w; len -= w;
+  } while(len && !afterTimePeriod(&period, NULL));
+  if(len)
+    myerror(spk, "ExternalSpeech: pipe to helper program: write timed out");
+}
+
+static void spk_say(SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes)
+{
+  unsigned char l[5];
+  if(helper_fd_out < 0) return;
+  l[0] = 4; /* say code */
+  l[1] = length >> 8;
+  l[2] = length & 0xFF;
+  if (attributes) {
+    l[3] = count >> 8;
+    l[4] = count & 0xFF;
+  } else {
+    l[3] = 0;
+    l[4] = 0;
+  }
+  mywrite(spk, helper_fd_out, l, 5);
+  mywrite(spk, helper_fd_out, text, length);
+  if (attributes) mywrite(spk, helper_fd_out, attributes, count);
+  finalIndex = count;
+}
+
+static void spk_mute (SpeechSynthesizer *spk)
+{
+  unsigned char c = 1;
+  if(helper_fd_out < 0) return;
+  logMessage(LOG_DEBUG,"mute");
+  mywrite(spk, helper_fd_out, &c,1);
+}
+
+static void spk_setRate (SpeechSynthesizer *spk, unsigned char setting)
+{
+  float expand = 1.0 / getFloatSpeechRate(setting); 
+  unsigned char *p = (unsigned char *)&expand;
+  unsigned char l[5];
+  if(helper_fd_out < 0) return;
+  logMessage(LOG_DEBUG,"set rate to %u (time scale %f)", setting, expand);
+  l[0] = 3; /* time scale code */
+#ifdef WORDS_BIGENDIAN
+  l[1] = p[0]; l[2] = p[1]; l[3] = p[2]; l[4] = p[3];
+#else /* WORDS_BIGENDIAN */
+  l[1] = p[3]; l[2] = p[2]; l[3] = p[1]; l[4] = p[0];
+#endif /* WORDS_BIGENDIAN */
+  mywrite(spk, helper_fd_out, &l, 5);
+}
+
 ASYNC_INPUT_CALLBACK(xsHandleSpeechTracking) {
   if (parameters->error) {
     logMessage(LOG_WARNING, "speech tracking input error: %s", strerror(parameters->error));
@@ -120,6 +185,8 @@ ASYNC_INPUT_CALLBACK(xsHandleSpeechTracking) {
 static int spk_construct (SpeechSynthesizer *spk, char **parameters)
 {
   char *extProgPath = parameters[PARM_PROGRAM];
+
+  spk->setRate = spk_setRate;
 
   if(!*extProgPath) extProgPath = HELPER_PROG_PATH;
 
@@ -256,72 +323,6 @@ static int spk_construct (SpeechSynthesizer *spk, char **parameters)
 
   asyncReadFile(&trackHandle, helper_fd_in, TRACK_DATA_SIZE*10, xsHandleSpeechTracking, spk);
   return 1;
-}
-
-static void mywrite(SpeechSynthesizer *spk, int fd, const void *buf, int len)
-{
-  char *pos = (char *)buf;
-  int w;
-  TimePeriod period;
-  if(fd<0) return;
-  startTimePeriod(&period, 2000);
-  do {
-    if((w = write(fd, pos, len)) < 0) {
-      if(errno == EINTR || errno == EAGAIN) continue;
-      else if(errno == EPIPE)
-	myerror(spk, "ExternalSpeech: pipe to helper program was broken");
-         /* try to reinit may be ??? */
-      else myperror(spk, "ExternalSpeech: pipe to helper program: write");
-      return;
-    }
-    pos += w; len -= w;
-  } while(len && !afterTimePeriod(&period, NULL));
-  if(len)
-    myerror(spk, "ExternalSpeech: pipe to helper program: write timed out");
-}
-
-static void spk_say(SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes)
-{
-  unsigned char l[5];
-  if(helper_fd_out < 0) return;
-  l[0] = 4; /* say code */
-  l[1] = length >> 8;
-  l[2] = length & 0xFF;
-  if (attributes) {
-    l[3] = count >> 8;
-    l[4] = count & 0xFF;
-  } else {
-    l[3] = 0;
-    l[4] = 0;
-  }
-  mywrite(spk, helper_fd_out, l, 5);
-  mywrite(spk, helper_fd_out, text, length);
-  if (attributes) mywrite(spk, helper_fd_out, attributes, count);
-  finalIndex = count;
-}
-
-static void spk_mute (SpeechSynthesizer *spk)
-{
-  unsigned char c = 1;
-  if(helper_fd_out < 0) return;
-  logMessage(LOG_DEBUG,"mute");
-  mywrite(spk, helper_fd_out, &c,1);
-}
-
-static void spk_setRate (SpeechSynthesizer *spk, unsigned char setting)
-{
-  float expand = 1.0 / getFloatSpeechRate(setting); 
-  unsigned char *p = (unsigned char *)&expand;
-  unsigned char l[5];
-  if(helper_fd_out < 0) return;
-  logMessage(LOG_DEBUG,"set rate to %u (time scale %f)", setting, expand);
-  l[0] = 3; /* time scale code */
-#ifdef WORDS_BIGENDIAN
-  l[1] = p[0]; l[2] = p[1]; l[3] = p[2]; l[4] = p[3];
-#else /* WORDS_BIGENDIAN */
-  l[1] = p[3]; l[2] = p[2]; l[3] = p[1]; l[4] = p[0];
-#endif /* WORDS_BIGENDIAN */
-  mywrite(spk, helper_fd_out, &l, 5);
 }
 
 static void spk_destruct (SpeechSynthesizer *spk)

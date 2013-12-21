@@ -26,11 +26,22 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef struct SpeechSynthesizerStruct SpeechSynthesizer;
 typedef struct SpeechDataStruct SpeechData;
 
-typedef struct {
+typedef void SpeechVolumeSetter (SpeechSynthesizer *spk, unsigned char setting);
+typedef void SpeechRateSetter (SpeechSynthesizer *spk, unsigned char setting);
+typedef void SpeechPitchSetter (SpeechSynthesizer *spk, unsigned char setting);
+typedef void SpeechPunctuationSetter (SpeechSynthesizer *spk, SpeechPunctuation setting);
+
+struct SpeechSynthesizerStruct {
   SpeechData *data;
-} SpeechSynthesizer;
+
+  SpeechVolumeSetter *setVolume;
+  SpeechRateSetter *setRate;
+  SpeechPitchSetter *setPitch;
+  SpeechPunctuationSetter *setPunctuation;
+};
 
 extern void initializeSpeechSynthesizer (SpeechSynthesizer *spk);
 
@@ -53,24 +64,28 @@ extern int sayUtf8Characters (
 
 extern void sayString (const char *string, int immediate);
 
+extern int canSetSpeechVolume (void);
 extern int setSpeechVolume (int setting, int say);
 extern unsigned int getIntegerSpeechVolume (unsigned char setting, unsigned int normal);
 #ifndef NO_FLOAT
 extern float getFloatSpeechVolume (unsigned char setting);
 #endif /* NO_FLOAT */
 
+extern int canSetSpeechRate (void);
 extern int setSpeechRate (int setting, int say);
 extern unsigned int getIntegerSpeechRate (unsigned char setting, unsigned int normal);
 #ifndef NO_FLOAT
 extern float getFloatSpeechRate (unsigned char setting);
 #endif /* NO_FLOAT */
 
+extern int canSetSpeechPitch (void);
 extern int setSpeechPitch (int setting, int say);
 extern unsigned int getIntegerSpeechPitch (unsigned char setting, unsigned int normal);
 #ifndef NO_FLOAT
 extern float getFloatSpeechPitch (unsigned char setting);
 #endif /* NO_FLOAT */
 
+extern int canSetSpeechPunctuation (void);
 extern int setSpeechPunctuation (SpeechPunctuation setting, int say);
 
 typedef struct {
@@ -83,11 +98,6 @@ typedef struct {
 
   void (*say) (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes);
   void (*mute) (SpeechSynthesizer *spk);
-
-  void (*setVolume) (SpeechSynthesizer *spk, unsigned char setting);
-  void (*setRate) (SpeechSynthesizer *spk, unsigned char setting);
-  void (*setPitch) (SpeechSynthesizer *spk, unsigned char setting);
-  void (*setPunctuation) (SpeechSynthesizer *spk, SpeechPunctuation setting);
 } SpeechDriver;
 
 extern int haveSpeechDriver (const char *code);

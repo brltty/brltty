@@ -34,6 +34,8 @@
 #include "parse.h"
 #include "async_thread.h"
 #include "queue.h"
+#include "notes.h"
+#include "pcm.h"
 #include "dynld.h"
 #include "brltty.h"
 
@@ -43,8 +45,6 @@ typedef enum {
 } DriverParameter;
 #define SPKPARMS "name", "pitch"
 
-#define SPK_HAVE_RATE
-#define SPK_HAVE_VOLUME
 #include "spk_driver.h"
 #include <mpwrfile.h>
 
@@ -390,9 +390,42 @@ loadSynthesisLibrary (void) {
 #endif /* ENABLE_SHARED_OBJECTS */
 }
 
+static void
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
+  if (enqueueText(buffer, length))
+    enqueueTag("<break time=\"none\"/>");
+}
+
+static void
+spk_mute (SpeechSynthesizer *spk) {
+  stopSynthesisThread();
+  if (pcm) cancelPcmOutput(pcm);
+}
+
+static void
+spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
+  char tag[0X40];
+  unsigned int percentage = getIntegerSpeechVolume(setting, 100);
+  snprintf(tag, sizeof(tag), "<volume level=\"%d\"/>",
+           MAX(percentage, 1));
+  enqueueTag(tag);
+}
+
+static void
+spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
+  char tag[0X40];
+  snprintf(tag, sizeof(tag), "<rate absspeed=\"%d\"/>",
+           getIntegerSpeechRate(setting, 10)-10);
+  enqueueTag(tag);
+}
+
 static int
 spk_construct (SpeechSynthesizer *spk, char **parameters) {
   int code;
+
+  spk->setVolume = spk_setVolume;
+  spk->setRate = spk_setRate;
+
   loadSynthesisLibrary();
 
   if ((speechQueue = newQueue(deallocateSpeechItem, NULL))) {
@@ -468,33 +501,4 @@ spk_destruct (SpeechSynthesizer *spk) {
     speechLibrary = NULL;
   }
 #endif /* ENABLE_SHARED_OBJECTS */
-}
-
-static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
-  if (enqueueText(buffer, length))
-    enqueueTag("<break time=\"none\"/>");
-}
-
-static void
-spk_mute (SpeechSynthesizer *spk) {
-  stopSynthesisThread();
-  if (pcm) cancelPcmOutput(pcm);
-}
-
-static void
-spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
-  char tag[0X40];
-  unsigned int percentage = getIntegerSpeechVolume(setting, 100);
-  snprintf(tag, sizeof(tag), "<volume level=\"%d\"/>",
-           MAX(percentage, 1));
-  enqueueTag(tag);
-}
-
-static void
-spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
-  char tag[0X40];
-  snprintf(tag, sizeof(tag), "<rate absspeed=\"%d\"/>",
-           getIntegerSpeechRate(setting, 10)-10);
-  enqueueTag(tag);
 }

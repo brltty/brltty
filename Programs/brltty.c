@@ -856,7 +856,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
           break;
 
         case ucRaisePitch:
-          if (speech->setPitch) {
+          if (canSetSpeechPitch()) {
             unsigned char pitch = prefs.speechPitch + 7;
             if (pitch > SPK_PITCH_MAXIMUM) pitch = SPK_PITCH_MAXIMUM;
 
@@ -869,7 +869,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
       }
     }
 
-    if (speech->setPunctuation) {
+    if (canSetSpeechPunctuation()) {
       unsigned char punctuation = SPK_PUNCTUATION_ALL;
 
       if (punctuation != prefs.speechPunctuation) {

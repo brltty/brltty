@@ -36,7 +36,6 @@ typedef enum {
 } DriverParameter;
 #define SPKPARMS "pitch"
 
-#define SPK_HAVE_RATE
 #include "spk_driver.h"
 #include <flite.h>
 #include <flite_version.h>
@@ -53,9 +52,17 @@ static	int		fds[2];
 static	int		*const readfd	= &fds[0];
 static	int		*const writefd	= &fds[1];
 
+static void
+spk_setRate (SpeechSynthesizer *spk, unsigned char setting)
+{
+  feat_set_float(voice->features, "duration_stretch", 1.0/getFloatSpeechRate(setting));
+}
+
 static int
 spk_construct (SpeechSynthesizer *spk, char **parameters)
 {
+  spk->setRate = spk_setRate;
+
   child = -1;
   flite_init();
   voice = REGISTER_VOX(NULL);
@@ -132,10 +139,4 @@ spk_mute (SpeechSynthesizer *spk)
     waitpid(child, NULL, 0);
     child = -1;
   }
-}
-
-static void
-spk_setRate (SpeechSynthesizer *spk, unsigned char setting)
-{
-  feat_set_float(voice->features, "duration_stretch", 1.0/getFloatSpeechRate(setting));
 }

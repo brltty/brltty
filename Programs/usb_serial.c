@@ -165,7 +165,7 @@ static const UsbSerialAdapter usbSerialAdapters[] = {
     .operations = &usbSerialOperations_CP2101
   },
 
-  { /* Seika NoteTaker */
+  { /* Seika Note Taker */
     .vendor=0X10C4, .product=0XEA80,
     .operations = &usbSerialOperations_CP2110
   },

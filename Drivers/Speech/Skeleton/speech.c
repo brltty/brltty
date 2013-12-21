@@ -20,20 +20,7 @@
 
 #include <stdio.h>
 
-//#define SPK_HAVE_VOLUME
-//#define SPK_HAVE_RATE
-//#define SPK_HAVE_PITCH
-//#define SPK_HAVE_PUNCTUATION
 #include "spk_driver.h"
-
-static int
-spk_construct (SpeechSynthesizer *spk, char **parameters) {
-  return 0;
-}
-
-static void
-spk_destruct (SpeechSynthesizer *spk) {
-}
 
 static void
 spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
@@ -43,26 +30,32 @@ static void
 spk_mute (SpeechSynthesizer *spk) {
 }
 
-#ifdef SPK_HAVE_VOLUME
 static void
 spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
 }
-#endif /* SPK_HAVE_VOLUME */
 
-#ifdef SPK_HAVE_RATE
 static void
 spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
 }
-#endif /* SPK_HAVE_RATE */
 
-#ifdef SPK_HAVE_PITCH
 static void
 spk_setPitch (SpeechSynthesizer *spk, unsigned char setting) {
 }
-#endif /* SPK_HAVE_PITCH */
 
-#ifdef SPK_HAVE_PUNCTUATION
 static void
 spk_setPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting) {
 }
-#endif /* SPK_HAVE_PUNCTUATION */
+
+static int
+spk_construct (SpeechSynthesizer *spk, char **parameters) {
+  spk->setVolume = spk_setVolume;
+  spk->setRate = spk_setRate;
+  spk->setPitch = spk_setPitch;
+  spk->setPunctuation = spk_setPunctuation;
+
+  return 0;
+}
+
+static void
+spk_destruct (SpeechSynthesizer *spk) {
+}

@@ -37,30 +37,6 @@ static void spk_destruct (SpeechSynthesizer *spk);
 static void spk_say (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes);
 static void spk_mute (SpeechSynthesizer *spk);
 
-#ifdef SPK_HAVE_VOLUME
-static void spk_setVolume (SpeechSynthesizer *spk, unsigned char setting);
-#else /* SPK_HAVE_VOLUME */
-#define spk_setVolume NULL
-#endif /* SPK_HAVE_VOLUME */
-
-#ifdef SPK_HAVE_RATE
-static void spk_setRate (SpeechSynthesizer *spk, unsigned char setting);
-#else /* SPK_HAVE_RATE */
-#define spk_setRate NULL
-#endif /* SPK_HAVE_RATE */
-
-#ifdef SPK_HAVE_PITCH
-static void spk_setPitch (SpeechSynthesizer *spk, unsigned char setting);
-#else /* SPK_HAVE_PITCH */
-#define spk_setPitch NULL
-#endif /* SPK_HAVE_PITCH */
-
-#ifdef SPK_HAVE_PUNCTUATION
-static void spk_setPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting);
-#else /* SPK_HAVE_PUNCTUATION */
-#define spk_setPunctuation NULL
-#endif /* SPK_HAVE_PUNCTUATION */
-
 #ifndef SPKSYMBOL
 #define SPKSYMBOL CONCATENATE(spk_driver_,DRIVER_CODE)
 #endif /* SPKSYMBOL */
@@ -79,12 +55,7 @@ SPKCONST SpeechDriver SPKSYMBOL = {
   spk_destruct,
 
   spk_say,
-  spk_mute,
-
-  spk_setVolume,
-  spk_setRate,
-  spk_setPitch,
-  spk_setPunctuation
+  spk_mute
 };
 
 DRIVER_VERSION_DECLARATION(spk);

@@ -167,7 +167,7 @@ testTunesFm (void) {
 #ifdef ENABLE_SPEECH_SUPPORT
 static int
 testSpeechVolume (void) {
-  return speech->setVolume != NULL;
+  return canSetSpeechVolume();
 }
 
 static int
@@ -177,7 +177,7 @@ changedSpeechVolume (const MenuItem *item UNUSED, unsigned char setting) {
 
 static int
 testSpeechRate (void) {
-  return speech->setRate != NULL;
+  return canSetSpeechRate();
 }
 
 static int
@@ -187,7 +187,7 @@ changedSpeechRate (const MenuItem *item UNUSED, unsigned char setting) {
 
 static int
 testSpeechPitch (void) {
-  return speech->setPitch != NULL;
+  return canSetSpeechPitch();
 }
 
 static int
@@ -197,7 +197,7 @@ changedSpeechPitch (const MenuItem *item UNUSED, unsigned char setting) {
 
 static int
 testSpeechPunctuation (void) {
-  return speech->setPunctuation != NULL;
+  return canSetSpeechPunctuation();
 }
 
 static int
