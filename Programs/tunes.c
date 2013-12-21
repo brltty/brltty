@@ -338,7 +338,7 @@ closeTunes (void) {
   }
 }
 
-ASYNC_ALARM_CALLBACK(handleTunesTimeout) {
+ASYNC_ALARM_CALLBACK(handleTunesCloseTimeout) {
   if (tunesCloseTimer) {
     asyncDiscardHandle(tunesCloseTimer);
     tunesCloseTimer = NULL;
@@ -362,7 +362,7 @@ openTunes (void) {
   if (noteDevice) {
     asyncResetAlarmIn(tunesCloseTimer, timeout);
   } else if ((noteDevice = noteMethods->construct(openErrorLevel)) != NULL) {
-    if (asyncSetAlarmIn(&tunesCloseTimer, timeout, handleTunesTimeout, NULL)) {
+    if (asyncSetAlarmIn(&tunesCloseTimer, timeout, handleTunesCloseTimeout, NULL)) {
       if (!tunesInitialized) {
         tunesInitialized = 1;
         onProgramExit("tunes", exitTunes, NULL);

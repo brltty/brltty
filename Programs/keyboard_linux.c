@@ -495,7 +495,7 @@ forwardKeyEvent (int code, int press) {
   return writeKeyEvent(code, (press? 1: 0));
 }
 
-ASYNC_INPUT_CALLBACK(handleKeyboardEvent) {
+ASYNC_INPUT_CALLBACK(handleLinuxKeyboardEvent) {
   KeyboardPlatformData *kpd = parameters->data;
 
   if (parameters->error) {
@@ -575,7 +575,7 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
             if (checkKeyboardProperties(&kpd->kid->actualProperties, &kcd->requiredProperties)) {
               if (hasInputEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
                 if (asyncReadFile(NULL, device, sizeof(struct input_event),
-                                  handleKeyboardEvent, kpd)) {
+                                  handleLinuxKeyboardEvent, kpd)) {
   #ifdef EVIOCGRAB
                   ioctl(device, EVIOCGRAB, 1);
   #endif /* EVIOCGRAB */
@@ -642,7 +642,7 @@ typedef struct {
   KeyboardCommonData *kcd;
 } InputDeviceData;
 
-ASYNC_ALARM_CALLBACK(doOpenInputDevice) {
+ASYNC_ALARM_CALLBACK(openLinuxInputDevice) {
   InputDeviceData *idd = parameters->data;
   int device = openCharacterDevice(idd->name, O_RDONLY, idd->major, idd->minor);
 
@@ -707,7 +707,7 @@ ASYNC_INPUT_CALLBACK(handleKobjectUeventString) {
                       if ((idd->name = strdup(eventDevice))) {
                         idd->kcd = parameters->data;
 
-                        if (asyncSetAlarmIn(NULL, LINUX_INPUT_DEVICE_OPEN_DELAY, doOpenInputDevice, idd)) {
+                        if (asyncSetAlarmIn(NULL, LINUX_INPUT_DEVICE_OPEN_DELAY, openLinuxInputDevice, idd)) {
                           claimKeyboardCommonData(idd->kcd);
                           close(descriptor);
                           break;

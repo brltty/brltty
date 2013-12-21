@@ -118,13 +118,13 @@ asyncAddTask (AsyncEvent *event, AsyncTaskCallback *callback, void *data) {
   return 0;
 }
 
-ASYNC_EVENT_CALLBACK(handleAddTaskEvent) {
+ASYNC_EVENT_CALLBACK(asyncHandleAddTaskEvent) {
   addTask(parameters->signalData);
 }
 
 AsyncEvent *
 asyncNewAddTaskEvent (void) {
-  return asyncNewEvent(handleAddTaskEvent, NULL);
+  return asyncNewEvent(asyncHandleAddTaskEvent, NULL);
 }
 
 int

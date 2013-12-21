@@ -42,7 +42,7 @@ struct AsyncEventStruct {
 #endif /* __MINGW32__ */
 };
 
-ASYNC_MONITOR_CALLBACK(monitorEventPipe) {
+ASYNC_MONITOR_CALLBACK(asyncMonitorEventPipe) {
   AsyncEvent *event = parameters->data;
   void *data;
   const size_t size = sizeof(data);
@@ -116,7 +116,8 @@ asyncNewEvent (AsyncEventCallback *callback, void *data) {
 #endif /* __MINGW32__ */
 
       if (event->monitorDescriptor != INVALID_FILE_DESCRIPTOR) {
-        if (asyncMonitorFileInput(&event->monitorHandle, event->monitorDescriptor, monitorEventPipe, event)) {
+        if (asyncMonitorFileInput(&event->monitorHandle, event->monitorDescriptor,
+                                  asyncMonitorEventPipe, event)) {
 #ifdef __MINGW32__
           InitializeCriticalSection(&event->criticalSection);
           event->pendingCount = 0;

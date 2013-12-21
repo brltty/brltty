@@ -158,15 +158,20 @@ serialSetParity (SerialDevice *serial, SerialParity parity) {
 }
 
 #ifdef HAVE_POSIX_THREADS
-ASYNC_THREAD_FUNCTION(flowControlProc_InputCts) {
-  SerialDevice *serial = argument;
+static void
+serialFlowControlProc_inputCTS (SerialDevice *serial) {
   int up = serialTestLineCTS(serial);
 
   while (!serial->flowControlStop) {
     serialSetLineRTS(serial, up);
     serialWaitLineCTS(serial, (up = !up), 0);
   }
+}
 
+ASYNC_THREAD_FUNCTION(serialFlowControlThread) {
+  SerialDevice *serial = argument;
+
+  serial->currentFlowControlProc(serial);
   return NULL;
 }
 
@@ -181,7 +186,7 @@ serialStartFlowControlThread (SerialDevice *serial) {
 
     serial->flowControlStop = 0;
     if (asyncCreateThread("serial-input-cts", &thread, &attributes,
-                          serial->currentFlowControlProc, serial)) {
+                          serialFlowControlThread, serial)) {
       logSystemError("pthread_create");
       return 0;
     }
@@ -209,7 +214,7 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
 #ifdef HAVE_POSIX_THREADS
   if (flow & SERIAL_FLOW_INPUT_CTS) {
     flow &= ~SERIAL_FLOW_INPUT_CTS;
-    serial->pendingFlowControlProc = flowControlProc_InputCts;
+    serial->pendingFlowControlProc = serialFlowControlProc_inputCTS;
   } else {
     serial->pendingFlowControlProc = NULL;
   }
@@ -745,7 +750,7 @@ serialRestartDevice (SerialDevice *serial, unsigned int baud) {
   int usingB0;
 
 #ifdef HAVE_POSIX_THREADS
-  FlowControlProc flowControlProc = serial->pendingFlowControlProc;
+  SerialFlowControlProc *flowControlProc = serial->pendingFlowControlProc;
 #endif /* HAVE_POSIX_THREADS */
 
   if (serial->stream) {

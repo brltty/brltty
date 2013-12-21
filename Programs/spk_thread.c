@@ -355,7 +355,7 @@ ASYNC_EVENT_CALLBACK(handleSpeechRequest) {
   }
 }
 
-ASYNC_CONDITION_TESTER(testDriverThreadStopping) {
+ASYNC_CONDITION_TESTER(testSpeechDriverThreadStopping) {
   SpeechDriverThread *sdt = data;
 
   return sdt->thread.state == THD_STOPPING;
@@ -372,7 +372,7 @@ ASYNC_THREAD_FUNCTION(runSpeechDriverThread) {
       sendIntegerResponse(sdt, 1);
 
       while (!asyncAwaitCondition(SPEECH_REQUEST_WAIT_DURATION,
-                                  testDriverThreadStopping, sdt)) {
+                                  testSpeechDriverThreadStopping, sdt)) {
       }
 
       speech->destruct(sdt->speechSynthesizer);
@@ -632,7 +632,7 @@ newSpeechDriverThread (
   return NULL;
 }
 
-ASYNC_CONDITION_TESTER(testDriverThreadFinished) {
+ASYNC_CONDITION_TESTER(testSpeechDriverThreadFinished) {
   SpeechDriverThread *sdt = data;
 
   return sdt->thread.state == THD_FINISHED;
@@ -643,7 +643,7 @@ destroySpeechDriverThread (
   SpeechDriverThread *sdt
 ) {
   if (sendSpeechRequest(sdt, NULL)) {
-    asyncAwaitCondition(DRIVER_THREAD_STOP_TIMEOUT, testDriverThreadFinished, sdt);
+    asyncAwaitCondition(DRIVER_THREAD_STOP_TIMEOUT, testSpeechDriverThreadFinished, sdt);
     awaitDriverThreadTermination(sdt);
   }
 

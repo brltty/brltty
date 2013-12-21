@@ -2731,7 +2731,7 @@ out:
   return ok;
 }
 
-ASYNC_EVENT_CALLBACK(handleFlushEvent) {
+ASYNC_EVENT_CALLBACK(handleServerFlushEvent) {
   BrailleDisplay *brl = parameters->eventData;
   flushWrites(brl);
 }
@@ -2928,7 +2928,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
   pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED);
 #endif /* __MINGW32__ */
 
-  if (!(flushEvent = asyncNewEvent(handleFlushEvent, brl))) goto noFlushEvent;
+  if (!(flushEvent = asyncNewEvent(handleServerFlushEvent, brl))) goto noFlushEvent;
 
 #ifndef __MINGW32__
   initializeBlockedSignalsMask();

@@ -310,7 +310,7 @@ typedef struct {
   SignalEntry *const signalEntry;
 } DeleteSignalEntryParameters;
 
-ASYNC_WITH_SIGNALS_BLOCKED_FUNCTION(deleteSignalEntry) {
+ASYNC_WITH_SIGNALS_BLOCKED_FUNCTION(asyncDeleteSignalEntry) {
   DeleteSignalEntryParameters *parameters = data;
   Queue *signals = getSignalQueue(0);
   Element *signalElement = findElementWithItem(signals, parameters->signalEntry);
@@ -335,7 +335,7 @@ deleteMonitor (Element *monitorElement) {
         .signalEntry = sig
       };
 
-      asyncCallWithAllSignalsBlocked(deleteSignalEntry, &parameters);
+      asyncCallWithAllSignalsBlocked(asyncDeleteSignalEntry, &parameters);
     }
   }
 }
@@ -351,7 +351,7 @@ cancelMonitor (Element *monitorElement) {
   }
 }
 
-ASYNC_EVENT_CALLBACK (handlePendingSignal) {
+ASYNC_EVENT_CALLBACK(asyncHandlePendingSignal) {
   SignalEntry *sig = parameters->eventData;
   Element *monitorElement = getQueueHead(sig->monitors);
 
@@ -379,7 +379,7 @@ typedef struct {
   Element *signalElement;
 } AddSignalEntryParameters;
 
-ASYNC_WITH_SIGNALS_BLOCKED_FUNCTION(addSignalEntry) {
+ASYNC_WITH_SIGNALS_BLOCKED_FUNCTION(asyncAddSignalEntry) {
   AddSignalEntryParameters *parameters = data;
 
   parameters->signalElement = enqueueItem(parameters->signalQueue, parameters->signalEntry);
@@ -421,7 +421,7 @@ getSignalElement (int signalNumber, int create) {
         memset(sig, 0, sizeof(*sig));
         sig->number = signalNumber;
 
-        if ((sig->event = asyncNewEvent(handlePendingSignal, sig))) {
+        if ((sig->event = asyncNewEvent(asyncHandlePendingSignal, sig))) {
           if ((sig->monitors = newQueue(deallocateMonitorEntry, NULL))) {
             {
               static AsyncQueueMethods methods = {
@@ -439,7 +439,7 @@ getSignalElement (int signalNumber, int create) {
                 .signalElement = NULL
               };
 
-              asyncCallWithAllSignalsBlocked(addSignalEntry, &parameters);
+              asyncCallWithAllSignalsBlocked(asyncAddSignalEntry, &parameters);
               if (parameters.signalElement) return parameters.signalElement;
             }
 
@@ -459,7 +459,7 @@ getSignalElement (int signalNumber, int create) {
   return NULL;
 }
 
-ASYNC_SIGNAL_HANDLER(handleMonitoredSignal) {
+ASYNC_SIGNAL_HANDLER(asyncHandleMonitoredSignal) {
   Element *signalElement = getSignalElement(signalNumber, 0);
 
   if (signalElement) {
@@ -500,7 +500,7 @@ newMonitorElement (const void *parameters) {
           logSymbol(LOG_CATEGORY(ASYNC_EVENTS), mon->callback, "signal %d added", sig->number);
           if (!newSignal) return monitorElement;
 
-          if (asyncHandleSignal(mep->signal, handleMonitoredSignal, &sig->oldHandler)) {
+          if (asyncHandleSignal(mep->signal, asyncHandleMonitoredSignal, &sig->oldHandler)) {
             sig->wasBlocked = asyncIsSignalBlocked(mep->signal);
 
             if (!sig->wasBlocked || asyncSetSignalBlocked(sig->number, 0)) {

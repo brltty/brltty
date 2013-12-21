@@ -104,7 +104,7 @@ setBrailleInputAlarm (int delay, void *data) {
   }
 }
 
-ASYNC_MONITOR_CALLBACK(monitorInput) {
+ASYNC_MONITOR_CALLBACK(monitorBrailleInput) {
   handleInput();
   return !restartRequired;
 }
@@ -112,7 +112,7 @@ ASYNC_MONITOR_CALLBACK(monitorInput) {
 void
 startBrailleInput (void) {
   if (brl.gioEndpoint) {
-    if (gioMonitorInput(brl.gioEndpoint, monitorInput, NULL)) {
+    if (gioMonitorInput(brl.gioEndpoint, monitorBrailleInput, NULL)) {
       handleInput();
       return;
     }

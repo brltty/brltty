@@ -89,7 +89,7 @@ stopInputMonitor (SpeechInputObject *obj) {
   initializeInputMonitor(obj);
 }
 
-ASYNC_INPUT_CALLBACK(handleInput) {
+ASYNC_INPUT_CALLBACK(handleSpeechInput) {
   SpeechInputObject *obj = parameters->data;
 
   if (parameters->error) {
@@ -117,7 +117,7 @@ ASYNC_INPUT_CALLBACK(handleInput) {
 static int
 monitorInput (SpeechInputObject *obj) {
   if (!obj->inputMonitor) {
-    if (!asyncReadFile(&obj->inputMonitor, obj->pipeDescriptor, 0x1000, handleInput, obj)) {
+    if (!asyncReadFile(&obj->inputMonitor, obj->pipeDescriptor, 0x1000, handleSpeechInput, obj)) {
       return 0;
     }
   }
@@ -156,7 +156,7 @@ doWindowsConnected (SpeechInputObject *obj) {
   return monitorInput(obj);
 }
 
-ASYNC_MONITOR_CALLBACK(handleWindowsConnect) {
+ASYNC_MONITOR_CALLBACK(handleWindowsSpeechConnect) {
   SpeechInputObject *obj = parameters->data;
 
   asyncDiscardHandle(obj->windows.connectMonitor);
@@ -184,7 +184,7 @@ monitorWindowsConnect (SpeechInputObject *obj) {
           return 1;
         }
       } else if (error == ERROR_IO_PENDING) {
-        if (asyncMonitorFileInput(&obj->windows.connectMonitor, obj->windows.connectEvent, handleWindowsConnect, obj)) {
+        if (asyncMonitorFileInput(&obj->windows.connectMonitor, obj->windows.connectEvent, handleWindowsSpeechConnect, obj)) {
           return 1;
         }
       } else {

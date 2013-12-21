@@ -30,7 +30,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef void * (*FlowControlProc) (void *arg);
+typedef void SerialFlowControlProc (SerialDevice *serial);
 
 struct SerialDeviceStruct {
   int fileDescriptor;
@@ -44,8 +44,8 @@ struct SerialDeviceStruct {
   SerialLines waitLines;
 
 #ifdef HAVE_POSIX_THREADS
-  FlowControlProc currentFlowControlProc;
-  FlowControlProc pendingFlowControlProc;
+  SerialFlowControlProc *currentFlowControlProc;
+  SerialFlowControlProc *pendingFlowControlProc;
   pthread_t flowControlThread;
   unsigned flowControlRunning:1;
   unsigned flowControlStop:1;
