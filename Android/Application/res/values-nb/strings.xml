@@ -77,6 +77,13 @@
   <string name="LOG_CATEGORY_LABEL_kbdkeys">Hendelser knyttet til taster på et tastatur</string>
   <string name="LOG_CATEGORY_LABEL_csrtrk">Markørfølging</string>
   <string name="LOG_CATEGORY_LABEL_csrrtg">Markørhenting</string>
+  <string name="LOG_CATEGORY_LABEL_update">Hendelser knyttet til oppdatering</string>
+  <string name="LOG_CATEGORY_LABEL_speech">Hendelser knyttet til tale</string>
+  <string name="LOG_CATEGORY_LABEL_async">Hendelser knyttet til asynkron kommunikasjon</string>
+  <string name="LOG_CATEGORY_LABEL_server">Hendelser knyttet til tjeneren</string>
+  <string name="LOG_CATEGORY_LABEL_serial">Serielle inn- eller utdata</string>
+  <string name="LOG_CATEGORY_LABEL_usb">Inn- eller utdata for USB</string>
+  <string name="LOG_CATEGORY_LABEL_bluetooth">Inn- eller utdata for Bluetooth</string>
 
   <string name="BRAILLE_DRIVER_LABEL_auto">automatisk gjenkjenning</string>
 
