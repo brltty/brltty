@@ -388,7 +388,7 @@ ASYNC_THREAD_FUNCTION(runSpeechDriverThread) {
   }
 
   {
-    int ok = sdt->thread.state = THD_STOPPING;
+    int ok = sdt->thread.state == THD_STOPPING;
 
     setThreadState(sdt, THD_FINISHED);
     sendIntegerResponse(sdt, ok);
