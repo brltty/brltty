@@ -116,7 +116,7 @@ setJavaClassLoader (JNIEnv *env, jobject instance) {
         class = NULL;
 
         if (javaClassLoaderClass) {
-          jmethodID method = (*env)->GetMethodID(env, class, "loadClass",
+          jmethodID method = (*env)->GetMethodID(env, javaClassLoaderClass, "loadClass",
                                                  JAVA_SIG_METHOD(JAVA_SIG_OBJECT(java/lang/Class),
                                                                  JAVA_SIG_OBJECT(java/lang/String) // className
                                                                 ));
