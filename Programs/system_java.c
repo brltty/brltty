@@ -104,11 +104,18 @@ static jmethodID loadClassMethod = 0;
 int
 setJavaClassLoader (JNIEnv *env, jobject instance) {
   if (instance) {
-    if ((javaClassLoaderInstance = (*env)->NewGlobalRef(env, instance))) {
+    javaClassLoaderInstance = (*env)->NewGlobalRef(env, instance);
+
+    if (javaClassLoaderInstance) {
       jclass class = (*env)->GetObjectClass(env, instance);
 
       if (class) {
-        if ((javaClassLoaderClass = (*env)->NewGlobalRef(env, class))) {
+        javaClassLoaderClass = (*env)->NewGlobalRef(env, class);
+
+        (*env)->DeleteLocalRef(env, class);
+        class = NULL;
+
+        if (javaClassLoaderClass) {
           jmethodID method = (*env)->GetMethodID(env, class, "loadClass",
                                                  JAVA_SIG_METHOD(JAVA_SIG_OBJECT(java/lang/Class),
                                                                  JAVA_SIG_OBJECT(java/lang/String) // className
@@ -121,8 +128,6 @@ setJavaClassLoader (JNIEnv *env, jobject instance) {
 
           (*env)->DeleteGlobalRef(env, javaClassLoaderClass);
         }
-
-        (*env)->DeleteLocalRef(env, class);
       }
 
       (*env)->DeleteGlobalRef(env, javaClassLoaderInstance);
