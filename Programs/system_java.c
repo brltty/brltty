@@ -97,12 +97,89 @@ clearJavaException (JNIEnv *env, int describe) {
   return exceptionOccurred;
 }
 
+static jobject javaClassLoaderInstance = NULL;
+static jclass javaClassLoaderClass = NULL;
+static jmethodID loadClassMethod = 0;
+
+int
+setJavaClassLoader (JNIEnv *env, jobject instance) {
+  if (instance) {
+    if ((javaClassLoaderInstance = (*env)->NewGlobalRef(env, instance))) {
+      jclass class = (*env)->GetObjectClass(env, instance);
+
+      if (class) {
+        if ((javaClassLoaderClass = (*env)->NewGlobalRef(env, class))) {
+          jmethodID method = (*env)->GetMethodID(env, class, "loadClass",
+                                                 JAVA_SIG_METHOD(JAVA_SIG_OBJECT(java/lang/Class),
+                                                                 JAVA_SIG_OBJECT(java/lang/String) // className
+                                                                ));
+
+          if (method) {
+            loadClassMethod = method;
+            return 1;
+          }
+
+          (*env)->DeleteGlobalRef(env, javaClassLoaderClass);
+        }
+
+        (*env)->DeleteLocalRef(env, class);
+      }
+
+      (*env)->DeleteGlobalRef(env, javaClassLoaderInstance);
+    }
+  }
+
+  javaClassLoaderInstance = NULL;
+  javaClassLoaderClass = NULL;
+  loadClassMethod = 0;
+  return 0;
+}
+
+static jclass
+loadJavaClass (JNIEnv *env, const char *path) {
+  size_t size = strlen(path) + 1;
+  char cName[size];
+
+  jclass class = NULL;
+  jobject jName;
+
+  {
+    const char *p = path;
+    char *n = cName;
+    char c;
+
+    do {
+      c = *p++;
+      if (c == '/') c = '.';
+      *n++ = c;
+    } while (c);
+  }
+
+  if ((jName = (*env)->NewStringUTF(env, cName))) {
+    jclass result = (*env)->CallObjectMethod(env, javaClassLoaderInstance, loadClassMethod, jName);
+
+    if (clearJavaException(env, 1)) {
+      (*env)->DeleteLocalRef(env, result);
+    } else {
+      class = result;
+    }
+
+    (*env)->DeleteLocalRef(env, jName);
+  } else {
+    logMallocError();
+  }
+
+  return class;
+}
+
 int
 findJavaClass (JNIEnv *env, jclass *class, const char *path) {
   if (*class) return 1;
 
   {
-    jclass localReference = (*env)->FindClass(env, path);
+    jclass localReference = loadClassMethod?
+                              loadJavaClass(env, path):
+                              (*env)->FindClass(env, path);
 
     if (localReference) {
       jclass globalReference = (*env)->NewGlobalRef(env, localReference);

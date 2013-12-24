@@ -26,7 +26,17 @@
 #include "embed.h"
 #include "system_java.h"
 
+#if defined(__ANDROID__)
+#include <android/log.h>
+#define LOG(...) __android_log_print(ANDROID_LOG_DEBUG, PACKAGE_NAME, __VA_ARGS__)
+
+#else /* LOG() */
+#warning logging not supported
+#define LOG(...)
+#endif /* LOG() */
+
 SYMBOL_POINTER(brlttyConstruct);
+SYMBOL_POINTER(setJavaClassLoader);
 SYMBOL_POINTER(brlttyDestruct);
 
 SYMBOL_POINTER(brlttyEnableInterrupt);
@@ -61,6 +71,7 @@ typedef struct {
 
 BEGIN_SYMBOL_TABLE
   SYMBOL_ENTRY(brlttyConstruct),
+  SYMBOL_ENTRY(setJavaClassLoader),
   SYMBOL_ENTRY(brlttyDestruct),
 
   SYMBOL_ENTRY(brlttyEnableInterrupt),
@@ -183,29 +194,36 @@ loadCoreLibrary (JNIEnv *env) {
   if (coreHandle) return 1;
 
   if ((coreHandle = dlopen("libbrltty_core.so", RTLD_NOW | RTLD_GLOBAL))) {
+    int allFound = 1;
     const SymbolEntry *symbol = symbolTable;
 
     while (symbol->name) {
       const void **pointer = symbol->pointer;
 
-      if (!(*pointer = dlsym(coreHandle, symbol->name))) goto error;
+      if ((*pointer = dlsym(coreHandle, symbol->name))) {
+        LOG("core symbol: %s -> %p", symbol->name, *pointer);
+      } else {
+        LOG("core symbol not found: %s", symbol->name);
+        allFound = 0;
+      }
+
       symbol += 1;
     }
 
-    return 1;
+    if (allFound) return 1;
   }
 
-error:
   reportProblem(env, "java/lang/UnsatisfiedLinkError", "%s", dlerror());
   return 0;
 }
 
 JAVA_METHOD (
   org_a11y_brltty_core_CoreWrapper, coreConstruct, jint,
-  jobjectArray arguments
+  jobjectArray arguments, jobject classLoader
 ) {
   if (prepareProgramArguments(env, arguments)) {
     if (loadCoreLibrary(env)) {
+      setJavaClassLoader_p(env, classLoader);
       return brlttyConstruct_p(cArgumentCount, (char **)cArgumentArray);
     }
   }

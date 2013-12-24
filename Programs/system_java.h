@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_SYSTEM_JAVA
 #define BRLTTY_INCLUDED_SYSTEM_JAVA
 
+#include "prologue.h"
+
 #include <jni.h>
 
 #ifdef __cplusplus
@@ -51,7 +53,9 @@ extern int clearJavaException (JNIEnv *env, int describe);
 #define JAVA_SIG_METHOD(returns,arguments) "(" arguments ")" returns
 #define JAVA_SIG_CONSTRUCTOR(arguments)    JAVA_SIG_METHOD(JAVA_SIG_VOID, arguments)
 
+FUNCTION_DECLARE(setJavaClassLoader, int, (JNIEnv *env, jobject instance));
 extern int findJavaClass (JNIEnv *env, jclass *class, const char *path);
+
 extern int findJavaConstructor (
   JNIEnv *env, jmethodID *constructor,
   jclass class, const char *signature

@@ -39,7 +39,15 @@ extern "C" {
 #define ARRAY_SIZE(pointer, count) ((count) * sizeof(*(pointer)))
 
 #define SYMBOL_TYPE(name) name ## _t
-#define SYMBOL_POINTER(name) static const SYMBOL_TYPE(name) *name##_p = NULL;
+#define SYMBOL_POINTER(name) static SYMBOL_TYPE(name) *name##_p = NULL;
+
+#define VARIABLE_DECLARATION(variableName, variableType) \
+  variableType variableName
+#define VARIABLE_TYPEDEF(variableName, variableType) \
+  typedef VARIABLE_DECLARATION(SYMBOL_TYPE(variableName), variableType)
+#define VARIABLE_DECLARE(variableName, variableType) \
+  VARIABLE_TYPEDEF(variableName, variableType); \
+  extern SYMBOL_TYPE(variableName) variableName
 
 #define FUNCTION_DECLARATION(functionName, returnType, argumentList) \
   returnType functionName argumentList

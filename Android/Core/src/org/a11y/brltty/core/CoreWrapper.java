@@ -24,7 +24,7 @@ import java.util.AbstractQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
 public class CoreWrapper {
-  public static native int coreConstruct (String[] arguments);
+  public static native int coreConstruct (String[] arguments, ClassLoader classLoader);
   public static native boolean coreDestruct ();
 
   public static native boolean coreEnableInterrupt ();
@@ -87,7 +87,7 @@ public class CoreWrapper {
   public static int run (String[] arguments, int waitDuration) {
     clearRunQueue();
 
-    int exitStatus = coreConstruct(arguments);
+    int exitStatus = coreConstruct(arguments, CoreWrapper.class.getClassLoader());
     if (exitStatus == ProgramExitStatus.SUCCESS.value) {
       boolean interruptEnabled = coreEnableInterrupt();
 
