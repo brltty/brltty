@@ -79,7 +79,7 @@ HKR,,Icon,,-20
 "LibUSB-1.0: Metec [all models]"=LIBUSB_DEV, USB\VID_0452&PID_0100
 
 ; Device: 045E:930A
-"LibUSB-1.0: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)]"=LIBUSB_DEV, USB\VID_045E&PID_930A
+"LibUSB-1.0: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)], HIMS [Braille Sense U2 (USB 2.0)]"=LIBUSB_DEV, USB\VID_045E&PID_930A
 
 ; Device: 045E:930B
 "LibUSB-1.0: HIMS [Braille Edge]"=LIBUSB_DEV, USB\VID_045E&PID_930B
@@ -154,7 +154,7 @@ HKR,,Icon,,-20
 ; Generic Identifier
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge / myAVR mySmartUSB light
-"LibUSB-1.0: Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
+"LibUSB-1.0: BrailleMemo [all models], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
 
 ; Device: 10C4:EA80
 ; Generic Identifier
@@ -297,7 +297,7 @@ HKR,,Icon,,-20
 "LibUSB-1.0: Metec [all models]"=LIBUSB_DEV, USB\VID_0452&PID_0100
 
 ; Device: 045E:930A
-"LibUSB-1.0: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)]"=LIBUSB_DEV, USB\VID_045E&PID_930A
+"LibUSB-1.0: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)], HIMS [Braille Sense U2 (USB 2.0)]"=LIBUSB_DEV, USB\VID_045E&PID_930A
 
 ; Device: 045E:930B
 "LibUSB-1.0: HIMS [Braille Edge]"=LIBUSB_DEV, USB\VID_045E&PID_930B
@@ -372,7 +372,7 @@ HKR,,Icon,,-20
 ; Generic Identifier
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge / myAVR mySmartUSB light
-"LibUSB-1.0: Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
+"LibUSB-1.0: BrailleMemo [all models], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
 
 ; Device: 10C4:EA80
 ; Generic Identifier

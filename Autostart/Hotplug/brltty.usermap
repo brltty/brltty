@@ -71,6 +71,7 @@ brltty-mt 0x0003 0x0452 0x0100
 # Device: 045E:930A
 # HIMS [Braille Sense (USB 1.1)]
 # HIMS [Braille Sense (USB 2.0)]
+# HIMS [Braille Sense U2 (USB 2.0)]
 brltty-hm 0x0003 0x045e 0x930a
 
 # Device: 045E:930B
@@ -169,8 +170,9 @@ brltty-fs 0x0003 0x0f4e 0x0114
 # Generic Identifier
 # Vendor: Cygnal Integrated Products, Inc.
 # Product: CP210x UART Bridge / myAVR mySmartUSB light
+# BrailleMemo [all models]
 # Seika [Braille Display]
-brltty-sk 0x0003 0x10c4 0xea60
+brltty-mm,sk 0x0003 0x10c4 0xea60
 
 # Device: 10C4:EA80
 # Generic Identifier

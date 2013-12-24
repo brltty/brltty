@@ -158,7 +158,7 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUSB-Win32: Metec [all models]"=LIBUSB_DEV, USB\VID_0452&PID_0100
 
 ; Device: 045E:930A
-"LibUSB-Win32: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)]"=LIBUSB_DEV, USB\VID_045E&PID_930A
+"LibUSB-Win32: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)], HIMS [Braille Sense U2 (USB 2.0)]"=LIBUSB_DEV, USB\VID_045E&PID_930A
 
 ; Device: 045E:930B
 "LibUSB-Win32: HIMS [Braille Edge]"=LIBUSB_DEV, USB\VID_045E&PID_930B
@@ -233,7 +233,7 @@ ServiceBinary  = %12%\libusb0.sys
 ; Generic Identifier
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge / myAVR mySmartUSB light
-"LibUSB-Win32: Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
+"LibUSB-Win32: BrailleMemo [all models], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
 
 ; Device: 10C4:EA80
 ; Generic Identifier
@@ -376,7 +376,7 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUSB-Win32: Metec [all models]"=LIBUSB_DEV, USB\VID_0452&PID_0100
 
 ; Device: 045E:930A
-"LibUSB-Win32: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)]"=LIBUSB_DEV, USB\VID_045E&PID_930A
+"LibUSB-Win32: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)], HIMS [Braille Sense U2 (USB 2.0)]"=LIBUSB_DEV, USB\VID_045E&PID_930A
 
 ; Device: 045E:930B
 "LibUSB-Win32: HIMS [Braille Edge]"=LIBUSB_DEV, USB\VID_045E&PID_930B
@@ -451,7 +451,7 @@ ServiceBinary  = %12%\libusb0.sys
 ; Generic Identifier
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge / myAVR mySmartUSB light
-"LibUSB-Win32: Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
+"LibUSB-Win32: BrailleMemo [all models], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
 
 ; Device: 10C4:EA80
 ; Generic Identifier
@@ -594,7 +594,7 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUSB-Win32: Metec [all models]"=LIBUSB_DEV, USB\VID_0452&PID_0100
 
 ; Device: 045E:930A
-"LibUSB-Win32: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)]"=LIBUSB_DEV, USB\VID_045E&PID_930A
+"LibUSB-Win32: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)], HIMS [Braille Sense U2 (USB 2.0)]"=LIBUSB_DEV, USB\VID_045E&PID_930A
 
 ; Device: 045E:930B
 "LibUSB-Win32: HIMS [Braille Edge]"=LIBUSB_DEV, USB\VID_045E&PID_930B
@@ -669,7 +669,7 @@ ServiceBinary  = %12%\libusb0.sys
 ; Generic Identifier
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge / myAVR mySmartUSB light
-"LibUSB-Win32: Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
+"LibUSB-Win32: BrailleMemo [all models], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
 
 ; Device: 10C4:EA80
 ; Generic Identifier

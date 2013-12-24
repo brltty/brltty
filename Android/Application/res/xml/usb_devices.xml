@@ -56,6 +56,7 @@
   <!-- Device: 045E:930A -->
   <!-- HIMS [Braille Sense (USB 1.1)] -->
   <!-- HIMS [Braille Sense (USB 2.0)] -->
+  <!-- HIMS [Braille Sense U2 (USB 2.0)] -->
   <usb-device vendor-id="1118" product-id="37642" />
 
   <!-- Device: 045E:930B -->
@@ -154,6 +155,7 @@
   <!-- Generic Identifier -->
   <!-- Vendor: Cygnal Integrated Products, Inc. -->
   <!-- Product: CP210x UART Bridge / myAVR mySmartUSB light -->
+  <!-- BrailleMemo [all models] -->
   <!-- Seika [Braille Display] -->
   <usb-device vendor-id="4292" product-id="60000" />
 
