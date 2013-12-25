@@ -545,12 +545,14 @@ setThreadReady (SpeechDriverThread *sdt) {
 }
 
 static int
-constructSpeechDriver (SpeechDriverThread *sdt) {
-return speech->construct(sdt->speechSynthesizer, sdt->driverParameters);
+startSpeechDriver (SpeechDriverThread *sdt) {
+  logMessage(LOG_CATEGORY(SPEECH_EVENTS), "starting driver");
+  return speech->construct(sdt->speechSynthesizer, sdt->driverParameters);
 }
 
 static void
-destructSpeechDriver (SpeechDriverThread *sdt) {
+stopSpeechDriver (SpeechDriverThread *sdt) {
+  logMessage(LOG_CATEGORY(SPEECH_EVENTS), "stopping driver");
   speech->destruct(sdt->speechSynthesizer);
 }
 
@@ -594,14 +596,14 @@ ASYNC_THREAD_FUNCTION(runSpeechDriverThread) {
   setThreadState(sdt, THD_STARTING);
 
   if ((sdt->requestEvent = asyncNewEvent(handleSpeechRequestEvent, sdt))) {
-    if (constructSpeechDriver(sdt)) {
+    if (startSpeechDriver(sdt)) {
       setThreadReady(sdt);
 
       while (!asyncAwaitCondition(SPEECH_REQUEST_WAIT_DURATION,
                                   testSpeechDriverThreadStopping, sdt)) {
       }
 
-      destructSpeechDriver(sdt);
+      stopSpeechDriver(sdt);
     } else {
       logMessage(LOG_CATEGORY(SPEECH_EVENTS), "driver construction failure");
     }
@@ -667,7 +669,7 @@ newSpeechDriverThread (
       logMessage(LOG_CATEGORY(SPEECH_EVENTS), "response event construction failure");
     }
 #else /* ASYNC_CAN_HANDLE_THREADS */
-    if (constructSpeechDriver(sdt)) {
+    if (startSpeechDriver(sdt)) {
       setThreadReady(sdt);
       return sdt;
     }
@@ -693,7 +695,7 @@ destroySpeechDriverThread (
 
   if (sdt->messageEvent) asyncDiscardEvent(sdt->messageEvent);
 #else /* ASYNC_CAN_HANDLE_THREADS */
-  destructSpeechDriver(sdt);
+  stopSpeechDriver(sdt);
   setThreadState(sdt, THD_FINISHED);
 #endif /* ASYNC_CAN_HANDLE_THREADS */
 
