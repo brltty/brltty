@@ -91,14 +91,14 @@ PM_BEGIN_STATUS(22)
   OFFS_EMPTY,
   OFFS_FLAG  + gscShowCursor,
   OFFS_FLAG  + gscShowAttributes,
-  OFFS_FLAG  + gscBlinkingCapitals,
-  OFFS_FLAG  + gscTextStyle,
   OFFS_FLAG  + gscSkipIdenticalLines,
-  OFFS_FLAG  + gscAlertTunes,
+  OFFS_FLAG  + gscTextStyle,
   OFFS_EMPTY,
   OFFS_EMPTY,
   OFFS_FLAG  + gscAutospeak,
   OFFS_FLAG  + gscAutorepeat,
+  OFFS_EMPTY,
+  OFFS_EMPTY,
   OFFS_EMPTY
 PM_END_STATUS
 
