@@ -77,6 +77,13 @@
   <string name="LOG_CATEGORY_LABEL_kbdkeys">普通鍵盤事件</string>
   <string name="LOG_CATEGORY_LABEL_csrtrk">游標追蹤</string>
   <string name="LOG_CATEGORY_LABEL_csrrtg">游標定位</string>
+  <string name="LOG_CATEGORY_LABEL_update">更新事件</string>
+  <string name="LOG_CATEGORY_LABEL_speech">朗讀事件</string>
+  <string name="LOG_CATEGORY_LABEL_async">非同步事件</string>
+  <string name="LOG_CATEGORY_LABEL_server">服務事件</string>
+  <string name="LOG_CATEGORY_LABEL_serial">序列輸入輸出</string>
+  <string name="LOG_CATEGORY_LABEL_usb">USB 輸入輸出</string>
+  <string name="LOG_CATEGORY_LABEL_bluetooth">藍牙輸入輸出</string>
 
   <string name="BRAILLE_DRIVER_LABEL_auto">自動偵測</string>
 
