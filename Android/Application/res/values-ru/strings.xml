@@ -77,6 +77,13 @@
   <string name="LOG_CATEGORY_LABEL_kbdkeys">Ключевые события клавиатуры</string>
   <string name="LOG_CATEGORY_LABEL_csrtrk">Отслеживание курсора</string>
   <string name="LOG_CATEGORY_LABEL_csrrtg">Маршрутизация курсора</string>
+  <string name="LOG_CATEGORY_LABEL_update">Обновление событий</string>
+  <string name="LOG_CATEGORY_LABEL_speech">Речевые события</string>
+  <string name="LOG_CATEGORY_LABEL_async">Асинхронные события</string>
+  <string name="LOG_CATEGORY_LABEL_server">Серверные события</string>
+  <string name="LOG_CATEGORY_LABEL_serial">Последовательный I/O</string>
+  <string name="LOG_CATEGORY_LABEL_usb">USB I/O</string>
+  <string name="LOG_CATEGORY_LABEL_bluetooth">Bluetooth I/O</string>
 
   <string name="BRAILLE_DRIVER_LABEL_auto">автоопределение</string>
 
