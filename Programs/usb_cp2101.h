@@ -126,6 +126,34 @@ typedef struct {
   uint8_t xoff;  // sent to suspend input
 } PACKED USB_CP2101_SpecialCharacters;
 
+typedef struct {
+  uint32_t errors;
+  uint32_t holdReasons;
+  uint32_t inputCount;
+  uint32_t outputCount;
+  uint8_t eofReceived;
+  uint8_t waitForImmediate;
+  uint8_t reserved;
+} PACKED USB_CP2101_SerialStatus;
+
+typedef enum {
+  USB_CP2101_SS_ERR_BREAK_SIGNAL     = 0X00000001,
+  USB_CP2101_SS_ERR_FRAMING_ERROR    = 0X00000002,
+  USB_CP2101_SS_ERR_HARDWARE_OVERRUN = 0X00000004,
+  USB_CP2101_SS_ERR_QUEUE_OVERRUN    = 0X00000008,
+  USB_CP2101_SS_ERR_PARITY_ERROR     = 0X00000010
+} USB_CP2101_SerialError;
+
+typedef enum {
+  USB_CP2101_SS_HLD_XMT_CTS_WAIT  = 0X00000001,
+  USB_CP2101_SS_HLD_XMT_DSR_WAIT  = 0X00000002,
+  USB_CP2101_SS_HLD_XMT_DCD_WAIT  = 0X00000004,
+  USB_CP2101_SS_HLD_XMT_XON_WAIT  = 0X00000008,
+  USB_CP2101_SS_HLD_XMT_XOFF_SENT = 0X00000010,
+  USB_CP2101_SS_HLD_XMT_BRK_WAIT  = 0X00000020,
+  USB_CP2101_SS_HLD_RCV_DSR_WAIT  = 0X00000040,
+} USB_CP2101_HoldReason;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
