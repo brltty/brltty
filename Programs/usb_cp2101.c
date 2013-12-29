@@ -192,6 +192,18 @@ usbSetFlowControl_CP2101 (UsbDevice *device, SerialFlowControl flow) {
     return 0;
   }
 
+  flowControl.handshakeOptions = getLittleEndian32(flowControl.handshakeOptions);
+  flowControl.dataFlowOptions = getLittleEndian32(flowControl.dataFlowOptions);
+
+  flowControl.handshakeOptions &= ~USB_CP2101_FLOW_HSO_DTR_MASK;
+  flowControl.handshakeOptions |= USB_CP2101_FLOW_HSO_DTR_CONTROLLED;
+
+  flowControl.dataFlowOptions &= ~USB_CP2101_FLOW_DFO_RTS_MASK;
+  flowControl.dataFlowOptions |= USB_CP2101_FLOW_DFO_RTS_CONTROLLED;
+
+  putLittleEndian32(&flowControl.handshakeOptions, flowControl.handshakeOptions);
+  putLittleEndian32(&flowControl.dataFlowOptions, flowControl.dataFlowOptions);
+
   if (flow) {
     logMessage(LOG_WARNING, "unsupported CP2101 flow control: %02X", flow);
     errno = EINVAL;

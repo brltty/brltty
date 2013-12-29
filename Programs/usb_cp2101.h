@@ -111,7 +111,7 @@ typedef enum {
   USB_CP2101_FLOW_DFO_RTS_MASK        = 0X000000C0, // RTS line usage
   USB_CP2101_FLOW_DFO_RTS_STAY_LOW    = 0X00000000, // RTS stays inactive
   USB_CP2101_FLOW_DFO_RTS_STAY_HIGH   = 0X00000040, // RTS stays active
-  USB_CP2101_FLOW_DFO_RTS_RCV_FLOW    = 0X00000080, // RTS is used for receive flow control
+  USB_CP2101_FLOW_DFO_RTS_CONTROLLED  = 0X00000080, // RTS is used for receive flow control
   USB_CP2101_FLOW_DFO_RTS_XMT_ACTIVE  = 0X000000C0, // RTS signals transmit active
 
   USB_CP2101_FLOW_DFO_AUTO_RCV_ALWAYS = 0X80000000  // send XON/XOFF to device even when suspended
