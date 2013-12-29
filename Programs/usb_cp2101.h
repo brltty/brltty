@@ -83,11 +83,48 @@ typedef enum {
 } USB_CP2101_Parity;
 
 typedef struct {
-  uint32_t controlHandshake;
-  uint32_t flowReplace;
-  uint32_t xonLimit;
-  uint32_t xoffLimit;
+  uint32_t handshakeOptions;
+  uint32_t dataFlowOptions;
+  uint32_t xonThreshold;
+  uint32_t xoffThreshold;
 } PACKED USB_CP2101_FlowControl;
+
+typedef enum {
+  USB_CP2101_FLOW_HSO_DTR_MASK       = 0X00000003, // DTR line usage
+  USB_CP2101_FLOW_HSO_DTR_STAY_LOW   = 0X00000000, // DTR stays inactive
+  USB_CP2101_FLOW_HSO_DTR_STAY_HIGH  = 0X00000001, // DTR stays active
+  USB_CP2101_FLOW_HSO_DTR_CONTROLLED = 0X00000002, // DTR is controlled
+
+  USB_CP2101_FLOW_HSO_CTS_INTERPRET  = 0X00000008, // CTS is interpreted
+  USB_CP2101_FLOW_HSO_DSR_INTERPRET  = 0X00000010, // DSR is interpreted
+  USB_CP2101_FLOW_HSO_DCD_INTERPRET  = 0X00000020, // DCD is interpreted
+  USB_CP2101_FLOW_HSO_DSR_DISCARD    = 0X00000040  // DSR low discards data
+} USB_CP2101_ControlHandshake;
+
+typedef enum {
+  USB_CP2101_FLOW_DFO_AUTO_TRANSMIT   = 0X00000001, // respond to XON/XOFF from device
+  USB_CP2101_FLOW_DFO_AUTO_RECEIVE    = 0X00000002, // send XON/XOFF to device
+  USB_CP2101_FLOW_DFO_ERROR_CHARACTER = 0X00000004, // enable insertion of error special-character
+  USB_CP2101_FLOW_DFO_STRIP_NULS      = 0X00000008, // discard received NUL characters
+  USB_CP2101_FLOW_DFO_BREAK_CHARACTER = 0X00000010, // enable insertion of break special-character
+
+  USB_CP2101_FLOW_DFO_RTS_MASK        = 0X000000C0, // RTS line usage
+  USB_CP2101_FLOW_DFO_RTS_STAY_LOW    = 0X00000000, // RTS stays inactive
+  USB_CP2101_FLOW_DFO_RTS_STAY_HIGH   = 0X00000040, // RTS stays active
+  USB_CP2101_FLOW_DFO_RTS_RCV_FLOW    = 0X00000080, // RTS is used for receive flow control
+  USB_CP2101_FLOW_DFO_RTS_XMT_ACTIVE  = 0X000000C0, // RTS signals transmit active
+
+  USB_CP2101_FLOW_DFO_AUTO_RCV_ALWAYS = 0X80000000  // send XON/XOFF to device even when suspended
+} USB_CP2101_FlowReplace;
+
+typedef struct {
+  uint8_t eof;   // indicates end-of-file on input
+  uint8_t error; // inserted when an error is detected
+  uint8_t brk  ; // inserted when a break is detected
+  uint8_t event; // sets bit 2 of the event-occurred mask
+  uint8_t xon;   // sent to resume input
+  uint8_t xoff;  // sent to suspend input
+} PACKED USB_CP2101_SpecialCharacters;
 
 #ifdef __cplusplus
 }

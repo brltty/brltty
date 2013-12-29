@@ -30,7 +30,7 @@ static size_t
 usbGetProperty_CP2101 (UsbDevice *device, uint8_t request, void *data, size_t length) {
   ssize_t result;
 
-  logMessage(LOG_CATEGORY(USB_IO), "CP2101 get property: %02X", request);
+  logMessage(LOG_CATEGORY(USB_IO), "getting CP2101 property: %02X", request);
   result = usbControlRead(device, UsbControlRecipient_Interface, UsbControlType_Vendor,
                           request, 0, 0, data, length, 1000);
   if (result == -1) return 0;
@@ -50,7 +50,7 @@ usbSetComplexProperty_CP2101 (
   uint8_t request, uint16_t value,
   const void *data, size_t length
 ) {
-  logMessage(LOG_CATEGORY(USB_IO), "CP2101 set property: %02X %04X", request, value);
+  logMessage(LOG_CATEGORY(USB_IO), "setting CP2101 property: %02X %04X", request, value);
   if (length) logBytes(LOG_CATEGORY(USB_IO), "CP2101 output data", data, length);
 
   return usbControlWrite(device, UsbControlRecipient_Interface, UsbControlType_Vendor,
@@ -74,7 +74,7 @@ usbVerifyBaudRate_CP2101 (UsbDevice *device, USB_CP2101_BaudRate expected) {
   if (result == -1) {
     logMessage(LOG_WARNING, "unable to get CP2101 baud rate: %s", strerror(errno));
   } else if (result != sizeof(actual)) {
-    logMessage(LOG_WARNING, "unexpected CP2101 baud rate length: %d", (int)result);
+    logMessage(LOG_WARNING, "unexpected CP2101 baud rate size: %d", (int)result);
   } else if (getLittleEndian32(actual) != expected) {
     logMessage(LOG_WARNING,
                "unexpected CP2101 baud rate value: Expected:%u Actual:%u",
@@ -98,7 +98,7 @@ usbVerifyBaudDivisor_CP2101 (UsbDevice *device, USB_CP2101_BaudDivisor expected)
   if (result == -1) {
     logMessage(LOG_WARNING, "unable to get CP2101 baud divisor: %s", strerror(errno));
   } else if (result != sizeof(actual)) {
-    logMessage(LOG_WARNING, "unexpected CP2101 baud divisor length: %d", (int)result);
+    logMessage(LOG_WARNING, "unexpected CP2101 baud divisor size: %d", (int)result);
   } else if (getLittleEndian16(actual) != expected) {
     logMessage(LOG_WARNING,
                "unexpected CP2101 baud divisor value: Expected:%u Actual:%u",
@@ -166,7 +166,7 @@ usbVerifyFlowControl_CP2101 (UsbDevice *device, const USB_CP2101_FlowControl *ex
   if (result == -1) {
     logMessage(LOG_WARNING, "unable to get CP2101 flow control: %s", strerror(errno));
   } else if (result != size) {
-    logMessage(LOG_WARNING, "unexpected CP2101 flow control length: %d", (int)result);
+    logMessage(LOG_WARNING, "unexpected CP2101 flow control size: %d", (int)result);
   } else if (memcmp(&actual, expected, size) != 0) {
     logMessage(LOG_WARNING, "unexpected CP2101 flow control data");
     logBytes(LOG_WARNING, "expected flow control", expected, size);
@@ -222,7 +222,7 @@ usbVerifyLineControl_CP2101 (UsbDevice *device, USB_CP2101_LineControl expected)
   if (result == -1) {
     logMessage(LOG_WARNING, "unable to get CP2101 line control: %s", strerror(errno));
   } else if (result != sizeof(actual)) {
-    logMessage(LOG_WARNING, "unexpected CP2101 line control length: %d", (int)result);
+    logMessage(LOG_WARNING, "unexpected CP2101 line control size: %d", (int)result);
   } else if (getLittleEndian16(actual) != expected) {
     logMessage(LOG_WARNING,
                "unexpected CP2101 line control value: Expected:0X%04X Actual:0X%04X",
