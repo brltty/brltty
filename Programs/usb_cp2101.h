@@ -53,7 +53,41 @@ typedef enum {
   USB_CP2101_CTL_VendorSpecific         = 0xFF
 } USB_CP2101_ControlRequest;
 
+typedef uint32_t USB_CP2101_BaudRate;
+typedef uint16_t USB_CP2101_BaudDivisor;
 #define USB_CP2101_BAUD_BASE 0X384000
+
+typedef uint16_t USB_CP2101_LineControl;
+#define USB_CP2101_STOP_SHIFT 0
+#define USB_CP2101_STOP_WIDTH 4
+#define USB_CP2101_PARITY_SHIFT 4
+#define USB_CP2101_PARITY_WIDTH 4
+#define USB_CP2101_DATA_SHIFT 8
+#define USB_CP2101_DATA_WIDTH 8
+#define USB_CP2101_DATA_MINIMUM 5
+#define USB_CP2101_DATA_MAXIMUM 8
+
+
+typedef enum {
+  USB_CP2101_STOP_1,
+  USB_CP2101_STOP_1_5,
+  USB_CP2101_STOP_2
+} USB_CP2101_StopBits;
+
+typedef enum {
+  USB_CP2101_PARITY_NONE,
+  USB_CP2101_PARITY_ODD,
+  USB_CP2101_PARITY_EVEN,
+  USB_CP2101_PARITY_MARK,
+  USB_CP2101_PARITY_SPACE
+} USB_CP2101_Parity;
+
+typedef struct {
+  uint32_t controlHandshake;
+  uint32_t flowReplace;
+  uint32_t xonLimit;
+  uint32_t xoffLimit;
+} PACKED USB_CP2101_FlowControl;
 
 #ifdef __cplusplus
 }
