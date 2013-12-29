@@ -40,7 +40,7 @@ usbGetProperty_CP2101 (UsbDevice *device, uint8_t request, void *data, size_t le
     memset(&bytes[result], 0, length-result);
   }
 
-  logBytes(LOG_CATEGORY(USB_IO), "CP2101 input data", data, result);
+  logBytes(LOG_CATEGORY(USB_IO), "CP2101 property input", data, result);
   return result;
 }
 
@@ -51,7 +51,7 @@ usbSetComplexProperty_CP2101 (
   const void *data, size_t length
 ) {
   logMessage(LOG_CATEGORY(USB_IO), "setting CP2101 property: %02X %04X", request, value);
-  if (length) logBytes(LOG_CATEGORY(USB_IO), "CP2101 output data", data, length);
+  if (length) logBytes(LOG_CATEGORY(USB_IO), "CP2101 property output", data, length);
 
   return usbControlWrite(device, UsbControlRecipient_Interface, UsbControlType_Vendor,
                          request, value, 0, data, length, 1000) != -1;
@@ -205,56 +205,58 @@ usbVerifyFlowControl_CP2101 (UsbDevice *device, const USB_CP2101_FlowControl *ex
 
 static int
 usbSetFlowControl_CP2101 (UsbDevice *device, SerialFlowControl flow) {
-  USB_CP2101_FlowControl flowControl;
+  USB_CP2101_FlowControl oldSettings;
+  USB_CP2101_FlowControl newSettings;
   size_t size;
 
   logMessage(LOG_CATEGORY(USB_IO), "getting CP2101 flow control");
   size = usbGetProperty_CP2101(device, USB_CP2101_CTL_GetFlowControl,
-                               &flowControl, sizeof(flowControl));
+                               &oldSettings, sizeof(oldSettings));
 
   if (!size) {
     logMessage(LOG_WARNING, "unable to get CP2101 flow control");
     return 0;
   }
 
-  flowControl.handshakeOptions = getLittleEndian32(flowControl.handshakeOptions);
-  flowControl.dataFlowOptions = getLittleEndian32(flowControl.dataFlowOptions);
+  newSettings = oldSettings;
+  newSettings.handshakeOptions = getLittleEndian32(newSettings.handshakeOptions);
+  newSettings.dataFlowOptions = getLittleEndian32(newSettings.dataFlowOptions);
 
-  flowControl.handshakeOptions &= ~USB_CP2101_FLOW_HSO_DTR_MASK;
-  flowControl.handshakeOptions |= USB_CP2101_FLOW_HSO_DTR_ACTIVE;
+  newSettings.handshakeOptions &= ~USB_CP2101_FLOW_HSO_DTR_MASK;
+  newSettings.handshakeOptions |= USB_CP2101_FLOW_HSO_DTR_ACTIVE;
 
   if (flow & SERIAL_FLOW_OUTPUT_CTS) {
     flow &= ~SERIAL_FLOW_OUTPUT_CTS;
-    flowControl.handshakeOptions |= USB_CP2101_FLOW_HSO_CTS_INTERPRET;
+    newSettings.handshakeOptions |= USB_CP2101_FLOW_HSO_CTS_INTERPRET;
   } else {
-    flowControl.handshakeOptions &= ~USB_CP2101_FLOW_HSO_CTS_INTERPRET;
+    newSettings.handshakeOptions &= ~USB_CP2101_FLOW_HSO_CTS_INTERPRET;
   }
 
   if (flow & SERIAL_FLOW_OUTPUT_RTS) {
     flow &= ~SERIAL_FLOW_OUTPUT_RTS;
-    flowControl.dataFlowOptions &= ~USB_CP2101_FLOW_DFO_RTS_MASK;
-    flowControl.dataFlowOptions |= USB_CP2101_FLOW_DFO_RTS_XMT_ACTIVE;
+    newSettings.dataFlowOptions &= ~USB_CP2101_FLOW_DFO_RTS_MASK;
+    newSettings.dataFlowOptions |= USB_CP2101_FLOW_DFO_RTS_XMT_ACTIVE;
   } else {
-    flowControl.dataFlowOptions &= ~USB_CP2101_FLOW_DFO_RTS_MASK;
-    flowControl.dataFlowOptions |= USB_CP2101_FLOW_DFO_RTS_ACTIVE;
+    newSettings.dataFlowOptions &= ~USB_CP2101_FLOW_DFO_RTS_MASK;
+    newSettings.dataFlowOptions |= USB_CP2101_FLOW_DFO_RTS_ACTIVE;
   }
 
   if (flow & SERIAL_FLOW_OUTPUT_XON) {
     flow &= ~SERIAL_FLOW_OUTPUT_XON;
-    flowControl.dataFlowOptions |= USB_CP2101_FLOW_DFO_AUTO_TRANSMIT;
+    newSettings.dataFlowOptions |= USB_CP2101_FLOW_DFO_AUTO_TRANSMIT;
   } else {
-    flowControl.dataFlowOptions &= ~USB_CP2101_FLOW_DFO_AUTO_TRANSMIT;
+    newSettings.dataFlowOptions &= ~USB_CP2101_FLOW_DFO_AUTO_TRANSMIT;
   }
 
   if (flow & SERIAL_FLOW_INPUT_XON) {
     flow &= ~SERIAL_FLOW_INPUT_XON;
-    flowControl.dataFlowOptions |= USB_CP2101_FLOW_DFO_AUTO_RECEIVE;
+    newSettings.dataFlowOptions |= USB_CP2101_FLOW_DFO_AUTO_RECEIVE;
   } else {
-    flowControl.dataFlowOptions &= ~USB_CP2101_FLOW_DFO_AUTO_RECEIVE;
+    newSettings.dataFlowOptions &= ~USB_CP2101_FLOW_DFO_AUTO_RECEIVE;
   }
 
-  putLittleEndian32(&flowControl.handshakeOptions, flowControl.handshakeOptions);
-  putLittleEndian32(&flowControl.dataFlowOptions, flowControl.dataFlowOptions);
+  putLittleEndian32(&newSettings.handshakeOptions, newSettings.handshakeOptions);
+  putLittleEndian32(&newSettings.dataFlowOptions, newSettings.dataFlowOptions);
 
   if (flow) {
     logMessage(LOG_WARNING, "unsupported CP2101 flow control: %02X", flow);
@@ -262,12 +264,16 @@ usbSetFlowControl_CP2101 (UsbDevice *device, SerialFlowControl flow) {
     return 0;
   }
 
+  if (memcmp(&newSettings, &oldSettings, size) == 0) {
+    logMessage(LOG_CATEGORY(USB_IO), "CP2101 flow control unchanged");
+  }
+
   logMessage(LOG_CATEGORY(USB_IO), "setting CP2101 flow control");
 
   if (!usbSetComplexProperty_CP2101(device, USB_CP2101_CTL_SetFlowControl, 0,
-                                    &flowControl, size)) {
+                                    &newSettings, size)) {
     logMessage(LOG_WARNING, "unable to set CP2101 flow control: %s", strerror(errno));
-  } else if (usbVerifyFlowControl_CP2101(device, &flowControl, size)) {
+  } else if (usbVerifyFlowControl_CP2101(device, &newSettings, size)) {
     return 1;
   }
 
