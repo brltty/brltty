@@ -225,6 +225,8 @@ usbSetConfiguration (
 ) {
   UsbDeviceExtension *devx = device->extension;
 
+  logMessage(LOG_CATEGORY(USB_IO), "setting configuration: %u", configuration);
+
   if (usbOpenUsbfsFile(devx)) {
     unsigned int arg = configuration;
 
@@ -241,6 +243,8 @@ usbClaimInterface (
   unsigned char interface
 ) {
   UsbDeviceExtension *devx = device->extension;
+
+  logMessage(LOG_CATEGORY(USB_IO), "claiming interface: %u", interface);
 
   if (usbOpenUsbfsFile(devx)) {
     int disconnected = 0;
@@ -272,6 +276,8 @@ usbReleaseInterface (
 ) {
   UsbDeviceExtension *devx = device->extension;
 
+  logMessage(LOG_CATEGORY(USB_IO), "releasing interface: %u", interface);
+
   if (usbOpenUsbfsFile(devx)) {
     unsigned int arg = interface;
     if (ioctl(devx->usbfsFile, USBDEVFS_RELEASEINTERFACE, &arg) != -1) return 1;
@@ -289,6 +295,8 @@ usbSetAlternative (
   unsigned char alternative
 ) {
   UsbDeviceExtension *devx = device->extension;
+
+  logMessage(LOG_CATEGORY(USB_IO), "setting alternative: %u[%u]", interface, alternative);
 
   if (usbOpenUsbfsFile(devx)) {
     struct usbdevfs_setinterface arg;
