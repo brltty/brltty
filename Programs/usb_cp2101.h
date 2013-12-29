@@ -91,8 +91,8 @@ typedef struct {
 
 typedef enum {
   USB_CP2101_FLOW_HSO_DTR_MASK       = 0X00000003, // DTR line usage
-  USB_CP2101_FLOW_HSO_DTR_STAY_LOW   = 0X00000000, // DTR stays inactive
-  USB_CP2101_FLOW_HSO_DTR_STAY_HIGH  = 0X00000001, // DTR stays active
+  USB_CP2101_FLOW_HSO_DTR_INACTIVE   = 0X00000000, // DTR is held inactive
+  USB_CP2101_FLOW_HSO_DTR_ACTIVE     = 0X00000001, // DTR is held active
   USB_CP2101_FLOW_HSO_DTR_CONTROLLED = 0X00000002, // DTR is controlled
 
   USB_CP2101_FLOW_HSO_CTS_INTERPRET  = 0X00000008, // CTS is interpreted
@@ -109,9 +109,9 @@ typedef enum {
   USB_CP2101_FLOW_DFO_BREAK_CHARACTER = 0X00000010, // enable insertion of break special-character
 
   USB_CP2101_FLOW_DFO_RTS_MASK        = 0X000000C0, // RTS line usage
-  USB_CP2101_FLOW_DFO_RTS_STAY_LOW    = 0X00000000, // RTS stays inactive
-  USB_CP2101_FLOW_DFO_RTS_STAY_HIGH   = 0X00000040, // RTS stays active
-  USB_CP2101_FLOW_DFO_RTS_CONTROLLED  = 0X00000080, // RTS is used for receive flow control
+  USB_CP2101_FLOW_DFO_RTS_INACTIVE    = 0X00000000, // RTS is statically inactive
+  USB_CP2101_FLOW_DFO_RTS_ACTIVE      = 0X00000040, // RTS is statically active
+  USB_CP2101_FLOW_DFO_RTS_RCV_FLOW    = 0X00000080, // RTS is used for receive flow control
   USB_CP2101_FLOW_DFO_RTS_XMT_ACTIVE  = 0X000000C0, // RTS signals transmit active
 
   USB_CP2101_FLOW_DFO_AUTO_RCV_ALWAYS = 0X80000000  // send XON/XOFF to device even when suspended

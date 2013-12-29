@@ -155,6 +155,31 @@ usbSetBaud_CP2101 (UsbDevice *device, unsigned int baud) {
 }
 
 static int
+usbSetModemState_CP2101 (UsbDevice *device, int state, int shift, const char *name) {
+  if ((state < 0) || (state > 1)) {
+    logMessage(LOG_WARNING, "unsupported CP2101 %s state: %d", name, state);
+    errno = EINVAL;
+    return 0;
+  }
+
+  logMessage(LOG_CATEGORY(USB_IO),
+             "setting CP2101 %s state: %s",
+             name, (state? "high": "low"));
+
+  return usbSetSimpleProperty_CP2101(device, USB_CP2101_CTL_SetModemHandShaking, ((1 << (shift + 8)) | (state << shift)));
+}
+
+static int
+usbSetDtrState_CP2101 (UsbDevice *device, int state) {
+  return usbSetModemState_CP2101(device, state, 0, "DTR");
+}
+
+static int
+usbSetRtsState_CP2101 (UsbDevice *device, int state) {
+  return usbSetModemState_CP2101(device, state, 1, "RTS");
+}
+
+static int
 usbVerifyFlowControl_CP2101 (UsbDevice *device, const USB_CP2101_FlowControl *expected, size_t size) {
   USB_CP2101_FlowControl actual;
   ssize_t result;
@@ -192,6 +217,7 @@ usbSetFlowControl_CP2101 (UsbDevice *device, SerialFlowControl flow) {
     return 0;
   }
 
+/*
   flowControl.handshakeOptions = getLittleEndian32(flowControl.handshakeOptions);
   flowControl.dataFlowOptions = getLittleEndian32(flowControl.dataFlowOptions);
 
@@ -203,6 +229,7 @@ usbSetFlowControl_CP2101 (UsbDevice *device, SerialFlowControl flow) {
 
   putLittleEndian32(&flowControl.handshakeOptions, flowControl.handshakeOptions);
   putLittleEndian32(&flowControl.dataFlowOptions, flowControl.dataFlowOptions);
+*/
 
   if (flow) {
     logMessage(LOG_WARNING, "unsupported CP2101 flow control: %02X", flow);
@@ -216,6 +243,8 @@ usbSetFlowControl_CP2101 (UsbDevice *device, SerialFlowControl flow) {
                                     &flowControl, size)) {
     logMessage(LOG_WARNING, "unable to set CP2101 flow control: %s", strerror(errno));
   } else if (usbVerifyFlowControl_CP2101(device, &flowControl, size)) {
+    if (!usbSetDtrState_CP2101(device, 1)) return 0;
+    if (!usbSetRtsState_CP2101(device, 1)) return 0;
     return 1;
   }
 
@@ -319,31 +348,6 @@ usbSetDataFormat_CP2101 (UsbDevice *device, unsigned int dataBits, SerialStopBit
 }
 
 static int
-usbSetModemState_CP2101 (UsbDevice *device, int state, int shift, const char *name) {
-  if ((state < 0) || (state > 1)) {
-    logMessage(LOG_WARNING, "unsupported CP2101 %s state: %d", name, state);
-    errno = EINVAL;
-    return 0;
-  }
-
-  logMessage(LOG_CATEGORY(USB_IO),
-             "setting CP2101 %s state: %s",
-             name, (state? "high": "low"));
-
-  return usbSetSimpleProperty_CP2101(device, USB_CP2101_CTL_SetModemHandShaking, ((1 << (shift + 8)) | (state << shift)));
-}
-
-static int
-usbSetDtrState_CP2101 (UsbDevice *device, int state) {
-  return usbSetModemState_CP2101(device, state, 0, "DTR");
-}
-
-static int
-usbSetRtsState_CP2101 (UsbDevice *device, int state) {
-  return usbSetModemState_CP2101(device, state, 1, "RTS");
-}
-
-static int
 usbSetInterfaceState_CP2101 (UsbDevice *device, int state) {
   logMessage(LOG_CATEGORY(USB_IO),
              "setting CP2101 interface state: %s",
@@ -356,9 +360,6 @@ static int
 usbEnableAdapter_CP2101 (UsbDevice *device) {
   if (!usbSetInterfaceState_CP2101(device, 0)) return 0;
   if (!usbSetInterfaceState_CP2101(device, 1)) return 0;
-
-  if (!usbSetDtrState_CP2101(device, 1)) return 0;
-  if (!usbSetRtsState_CP2101(device, 1)) return 0;
 
   return 1;
 }
