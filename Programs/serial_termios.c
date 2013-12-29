@@ -244,6 +244,12 @@ serialPutParity (SerialAttributes *attributes, SerialParity parity) {
       attributes->c_cflag |= PARODD;
     } else
 
+#ifndef PARSTK
+#ifdef CMSPAR
+#define PARSTK CMSPAR
+#endif /* CMSPAR */
+#endif /* PARSTK */
+
 #ifdef PARSTK
     if (parity == SERIAL_PARITY_SPACE) {
       attributes->c_cflag |= PARSTK;
