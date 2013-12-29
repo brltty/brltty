@@ -50,7 +50,7 @@ typedef enum {
 
   SERIAL_FLOW_INPUT_CTS  = 0X100, /* input indicated by CTS(input) */
 
-  SERIAL_FLOW_HARDWARE   = (SERIAL_FLOW_OUTPUT_CTS | SERIAL_FLOW_INPUT_RTS),
+  SERIAL_FLOW_HARDWARE   = (SERIAL_FLOW_OUTPUT_CTS | SERIAL_FLOW_OUTPUT_RTS),
 
   SERIAL_FLOW_NONE       = 0X00  /* no input or output flow control */
 } SerialFlowControl;

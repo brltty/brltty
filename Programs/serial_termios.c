@@ -280,7 +280,7 @@ serialPutFlowControl (SerialAttributes *attributes, SerialFlowControl flow) {
 
   const FlowControlEntry flowControlTable[] = {
 #ifdef CRTSCTS
-    {&attributes->c_cflag, CRTSCTS, SERIAL_FLOW_INPUT_RTS | SERIAL_FLOW_OUTPUT_CTS},
+    {&attributes->c_cflag, CRTSCTS, SERIAL_FLOW_OUTPUT_RTS | SERIAL_FLOW_OUTPUT_CTS},
 #endif /* CRTSCTS */
 
 #ifdef IHFLOW

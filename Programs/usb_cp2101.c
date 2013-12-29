@@ -217,19 +217,44 @@ usbSetFlowControl_CP2101 (UsbDevice *device, SerialFlowControl flow) {
     return 0;
   }
 
-/*
   flowControl.handshakeOptions = getLittleEndian32(flowControl.handshakeOptions);
   flowControl.dataFlowOptions = getLittleEndian32(flowControl.dataFlowOptions);
 
   flowControl.handshakeOptions &= ~USB_CP2101_FLOW_HSO_DTR_MASK;
-  flowControl.handshakeOptions |= USB_CP2101_FLOW_HSO_DTR_CONTROLLED;
+  flowControl.handshakeOptions |= USB_CP2101_FLOW_HSO_DTR_ACTIVE;
 
-  flowControl.dataFlowOptions &= ~USB_CP2101_FLOW_DFO_RTS_MASK;
-  flowControl.dataFlowOptions |= USB_CP2101_FLOW_DFO_RTS_CONTROLLED;
+  if (flow & SERIAL_FLOW_OUTPUT_CTS) {
+    flow &= ~SERIAL_FLOW_OUTPUT_CTS;
+    flowControl.handshakeOptions |= USB_CP2101_FLOW_HSO_CTS_INTERPRET;
+  } else {
+    flowControl.handshakeOptions &= ~USB_CP2101_FLOW_HSO_CTS_INTERPRET;
+  }
+
+  if (flow & SERIAL_FLOW_OUTPUT_RTS) {
+    flow &= ~SERIAL_FLOW_OUTPUT_RTS;
+    flowControl.dataFlowOptions &= ~USB_CP2101_FLOW_DFO_RTS_MASK;
+    flowControl.dataFlowOptions |= USB_CP2101_FLOW_DFO_RTS_XMT_ACTIVE;
+  } else {
+    flowControl.dataFlowOptions &= ~USB_CP2101_FLOW_DFO_RTS_MASK;
+    flowControl.dataFlowOptions |= USB_CP2101_FLOW_DFO_RTS_ACTIVE;
+  }
+
+  if (flow & SERIAL_FLOW_OUTPUT_XON) {
+    flow &= ~SERIAL_FLOW_OUTPUT_XON;
+    flowControl.dataFlowOptions |= USB_CP2101_FLOW_DFO_AUTO_TRANSMIT;
+  } else {
+    flowControl.dataFlowOptions &= ~USB_CP2101_FLOW_DFO_AUTO_TRANSMIT;
+  }
+
+  if (flow & SERIAL_FLOW_INPUT_XON) {
+    flow &= ~SERIAL_FLOW_INPUT_XON;
+    flowControl.dataFlowOptions |= USB_CP2101_FLOW_DFO_AUTO_RECEIVE;
+  } else {
+    flowControl.dataFlowOptions &= ~USB_CP2101_FLOW_DFO_AUTO_RECEIVE;
+  }
 
   putLittleEndian32(&flowControl.handshakeOptions, flowControl.handshakeOptions);
   putLittleEndian32(&flowControl.dataFlowOptions, flowControl.dataFlowOptions);
-*/
 
   if (flow) {
     logMessage(LOG_WARNING, "unsupported CP2101 flow control: %02X", flow);
@@ -243,8 +268,6 @@ usbSetFlowControl_CP2101 (UsbDevice *device, SerialFlowControl flow) {
                                     &flowControl, size)) {
     logMessage(LOG_WARNING, "unable to set CP2101 flow control: %s", strerror(errno));
   } else if (usbVerifyFlowControl_CP2101(device, &flowControl, size)) {
-    if (!usbSetDtrState_CP2101(device, 1)) return 0;
-    if (!usbSetRtsState_CP2101(device, 1)) return 0;
     return 1;
   }
 
