@@ -265,7 +265,12 @@ probeBrailleDisplay (
       }
     }
 
-    if ((errno != EAGAIN) && (errno != ETIMEDOUT)) break;
+    if (errno != EAGAIN)
+#ifdef ETIMEDOUT
+      if (errno != ETIMEDOUT)
+#endif /* ETIMEDOUT */
+        break;
+
     if (retryCount == retryLimit) break;
     retryCount += 1;
   }
