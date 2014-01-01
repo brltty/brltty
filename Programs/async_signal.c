@@ -20,14 +20,14 @@
 
 #include <string.h>
 
-#ifdef HAVE_POSIX_THREADS
-#include <pthread.h>
-#endif /* HAVE_POSIX_THREADS */
-
 #include "log.h"
 #include "async_signal.h"
 #include "async_event.h"
 #include "async_internal.h"
+
+#ifdef HAVE_POSIX_THREADS
+#include <pthread.h>
+#endif /* HAVE_POSIX_THREADS */
 
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
 struct AsyncSignalDataStruct {

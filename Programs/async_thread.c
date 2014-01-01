@@ -22,8 +22,8 @@
 #include <errno.h>
 
 #include "log.h"
-#include "async_thread.h"
 #include "async_signal.h"
+#include "async_thread.h"
 
 #ifdef ASYNC_CAN_HANDLE_THREADS
 typedef struct {
