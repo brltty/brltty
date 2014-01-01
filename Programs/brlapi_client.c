@@ -436,38 +436,49 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
   if (handle->addrfamily == PF_LOCAL) {
     int lpath = strlen(BRLAPI_SOCKETPATH),lport;
     lport = strlen(port);
+
 #ifdef __MINGW32__
     {
+      HANDLE pipefd;
       char path[lpath+lport+1];
-      memcpy(path,BRLAPI_SOCKETPATH,lpath);
-      memcpy(path+lpath,port,lport+1);
-      while ((sockfd = CreateFile(path,GENERIC_READ|GENERIC_WRITE,
+
+      memcpy(path, BRLAPI_SOCKETPATH, lpath);
+      memcpy(path+lpath, port, lport+1);
+
+      while ((pipefd = CreateFile(path,GENERIC_READ|GENERIC_WRITE,
 	      FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,SECURITY_IMPERSONATION,NULL))
 	  == INVALID_HANDLE_VALUE) {
 	if (GetLastError() != ERROR_PIPE_BUSY) {
-	  brlapi_errfun="CreateFile";
+	  brlapi_errfun = "CreateFile";
 	  goto outlibc;
 	}
-	WaitNamedPipe(path,NMPWAIT_WAIT_FOREVER);
+
+	WaitNamedPipe(path, NMPWAIT_WAIT_FOREVER);
       }
+
+      sockfd = (SocketDescriptor)pipefd;
     }
 #else /* __MINGW32__ */
     {
       struct sockaddr_un sa;
-      if (lpath+1+lport+1>sizeof(sa.sun_path)) {
+
+      if (lpath+1+lport+1 > sizeof(sa.sun_path)) {
 	brlapi_libcerrno=ENAMETOOLONG;
 	brlapi_errfun="path";
 	brlapi_errno = BRLAPI_ERROR_LIBCERR;
 	goto out;
       }
+
       if ((sockfd = socket(PF_LOCAL, SOCK_STREAM, 0))<0) {
         brlapi_errfun="socket";
         setSocketErrno();
         goto outlibc;
       }
+
       sa.sun_family = AF_LOCAL;
       memcpy(sa.sun_path,BRLAPI_SOCKETPATH "/",lpath+1);
       memcpy(sa.sun_path+lpath+1,port,lport+1);
+
       if (connect(sockfd, (struct sockaddr *) &sa, sizeof(sa))<0) {
         brlapi_errfun="connect";
         setSocketErrno();
@@ -475,6 +486,7 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
       }
     }
 #endif /* __MINGW32__ */
+
     handle->fileDescriptor = (FileDescriptor) sockfd;
   } else {
 #else /* PF_LOCAL */
