@@ -26,6 +26,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef struct AsyncWaitDataStruct AsyncWaitData;
+extern void asyncDeallocateWaitData (AsyncWaitData *waitData);
+
 typedef struct AsyncAlarmDataStruct AsyncAlarmData;
 extern void asyncDeallocateAlarmData (AsyncAlarmData *alarmData);
 extern int asyncExecuteAlarmCallback (AsyncAlarmData *ad, long int *timeout);
@@ -41,15 +44,12 @@ extern int asyncExecuteIoCallback (AsyncIoData *iod, long int timeout);
 typedef struct AsyncSignalDataStruct AsyncSignalData;
 extern void asyncDeallocateSignalData (AsyncSignalData *sd);
 
-typedef struct AsyncWaitDataStruct AsyncWaitData;
-extern void asyncDeallocateWaitData (AsyncWaitData *waitData);
-
 typedef struct {
+  AsyncWaitData *waitData;
   AsyncAlarmData *alarmData;
   AsyncTaskData *taskData;
   AsyncIoData *ioData;
   AsyncSignalData *signalData;
-  AsyncWaitData *waitData;
 } AsyncThreadSpecificData;
 
 extern AsyncThreadSpecificData *asyncGetThreadSpecificData (void);

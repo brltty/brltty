@@ -31,11 +31,11 @@ newThreadSpecificData (void) {
   if ((tsd = malloc(sizeof(*tsd)))) {
     memset(tsd, 0, sizeof(*tsd));
 
+    tsd->waitData = NULL;
     tsd->alarmData = NULL;
     tsd->taskData = NULL;
     tsd->ioData = NULL;
     tsd->signalData = NULL;
-    tsd->waitData = NULL;
 
     return tsd;
   } else {
@@ -48,11 +48,15 @@ newThreadSpecificData (void) {
 static void
 destroyThreadSpecificData (AsyncThreadSpecificData *tsd) {
   if (tsd) {
+    asyncDeallocateWaitData(tsd->waitData);
     asyncDeallocateAlarmData(tsd->alarmData);
     asyncDeallocateTaskData(tsd->taskData);
     asyncDeallocateIoData(tsd->ioData);
+
+#ifdef ASYNC_CAN_HANDLE_SIGNALS
     asyncDeallocateSignalData(tsd->signalData);
-    asyncDeallocateWaitData(tsd->waitData);
+#endif /* ASYNC_CAN_HANDLE_SIGNALS */
+
     free(tsd);
   }
 }

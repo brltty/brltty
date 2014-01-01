@@ -198,6 +198,12 @@ gio_bluetooth.$O:
 async_handle.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async_handle.c
 
+async_tsd.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async_tsd.c
+
+async_wait.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async_wait.c
+
 async_alarm.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async_alarm.c
 
@@ -215,12 +221,6 @@ async_signal.$O:
 
 async_thread.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async_thread.c
-
-async_wait.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async_wait.c
-
-async_tsd.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async_tsd.c
 
 ###############################################################################
 

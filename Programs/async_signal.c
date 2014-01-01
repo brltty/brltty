@@ -30,32 +30,19 @@
 #include "async_internal.h"
 
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
-typedef struct {
-  int number;
-  AsyncEvent *event;
-  Queue *monitors;
-
-  AsyncSignalHandler *oldHandler;
-  unsigned wasBlocked:1;
-} SignalEntry;
-
-typedef struct {
-  SignalEntry *signal;
-  AsyncSignalCallback *callback;
-  void *data;
-  unsigned active:1;
-  unsigned delete:1;
-} MonitorEntry;
-
 struct AsyncSignalDataStruct {
   Queue *signalQueue;
 
+#ifdef ASYNC_CAN_BLOCK_SIGNALS
   sigset_t claimedSignals;
   sigset_t obtainedSignals;
   sigset_t obtainableSignals;
+#endif /* ASYNC_CAN_BLOCK_SIGNALS */
 
+#ifdef ASYNC_CAN_OBTAIN_SIGNALS
   int firstObtainableSignal;
   int lastObtainableSignal;
+#endif /* ASYNC_CAN_OBTAIN_SIGNALS */
 };
 
 void
@@ -82,22 +69,26 @@ getSignalData (void) {
     memset(sd, 0, sizeof(*sd));
     sd->signalQueue = NULL;
 
+#ifdef ASYNC_CAN_BLOCK_SIGNALS
     sigemptyset(&sd->claimedSignals);
     sigemptyset(&sd->obtainedSignals);
     sigemptyset(&sd->obtainableSignals);
+#endif /* ASYNC_CAN_BLOCK_SIGNALS */
 
-#ifdef SIGRTMIN
+#ifdef ASYNC_CAN_OBTAIN_SIGNALS
+    sd->firstObtainableSignal = SIGRTMIN;
+    sd->lastObtainableSignal = SIGRTMAX;
+
+#ifdef ASYNC_CAN_BLOCK_SIGNALS
     {
       int signalNumber;
-
-      sd->firstObtainableSignal = SIGRTMIN;
-      sd->lastObtainableSignal = SIGRTMAX;
 
       for (signalNumber=sd->firstObtainableSignal; signalNumber<=sd->lastObtainableSignal; signalNumber+=1) {
         sigaddset(&sd->obtainableSignals, signalNumber);
       }
     }
-#endif /* SIGRTMIN */
+#endif /* ASYNC_CAN_BLOCK_SIGNALS */
+#endif /* ASYNC_CAN_OBTAIN_SIGNALS */
 
     tsd->signalData = sd;
   }
@@ -148,6 +139,7 @@ asyncRevertSignal (int signalNumber, AsyncSignalHandler **oldHandler) {
 ASYNC_SIGNAL_HANDLER(asyncEmptySignalHandler) {
 }
 
+#ifdef ASYNC_CAN_BLOCK_SIGNALS
 static int
 setSignalMask (int how, const sigset_t *newMask, sigset_t *oldMask) {
 #ifdef HAVE_POSIX_THREADS
@@ -277,6 +269,25 @@ asyncCallWithObtainableSignalsBlocked (
 
   return 0;
 }
+#endif /* ASYNC_CAN_BLOCK_SIGNALS */
+
+#ifdef ASYNC_CAN_MONITOR_SIGNALS
+typedef struct {
+  int number;
+  AsyncEvent *event;
+  Queue *monitors;
+
+  AsyncSignalHandler *oldHandler;
+  unsigned wasBlocked:1;
+} SignalEntry;
+
+typedef struct {
+  SignalEntry *signal;
+  AsyncSignalCallback *callback;
+  void *data;
+  unsigned active:1;
+  unsigned delete:1;
+} MonitorEntry;
 
 static void
 deallocateMonitorEntry (void *item, void *data) {
@@ -536,7 +547,9 @@ asyncMonitorSignal (
 
   return asyncMakeHandle(handle, newMonitorElement, &mep);
 }
+#endif /* ASYNC_CAN_MONITOR_SIGNALS */
 
+#ifdef ASYNC_CAN_OBTAIN_SIGNALS
 int
 asyncClaimSignalNumber (int signal) {
   AsyncSignalData *sd = getSignalData();
@@ -614,6 +627,7 @@ asyncRelinquishSignalNumber (int signal) {
   return 0;
 }
 
+#ifdef ASYNC_CAN_BLOCK_SIGNALS
 int
 asyncBlockObtainableSignals (void) {
   AsyncSignalData *sd = getSignalData();
@@ -626,4 +640,6 @@ asyncBlockObtainableSignals (void) {
 
   return 0;
 }
+#endif /* ASYNC_CAN_BLOCK_SIGNALS */
+#endif /* ASYNC_CAN_OBTAIN_SIGNALS */
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */

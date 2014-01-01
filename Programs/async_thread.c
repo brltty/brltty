@@ -80,10 +80,25 @@ createThread (void *parameters) {
   return 0;
 }
 
-#ifdef ASYNC_CAN_HANDLE_SIGNALS
+#ifdef ASYNC_CAN_BLOCK_SIGNALS
 ASYNC_WITH_SIGNALS_BLOCKED_FUNCTION(asyncCreateSignalSafeThread) {
+  static const int signals[] = {
+#ifdef SIGINT
+    SIGINT,
+#endif /* SIGINT */
+
+#ifdef SIGTERM
+    SIGTERM,
+#endif /* SIGTERM */
+
+#ifdef SIGCHLD
+    SIGCHLD,
+#endif /* SIGCHLD */
+
+    0
+  };
+
   CreateThreadParameters *create = data;
-  static const int signals[] = {SIGINT, SIGTERM, SIGCHLD, 0};
   const int *signal = signals;
 
   while (*signal) {
@@ -93,7 +108,7 @@ ASYNC_WITH_SIGNALS_BLOCKED_FUNCTION(asyncCreateSignalSafeThread) {
 
   createThread(create);
 }
-#endif /* ASYNC_CAN_HANDLE_SIGNALS */
+#endif /* ASYNC_CAN_BLOCK_SIGNALS */
 
 int
 asyncCreateThread (
@@ -109,11 +124,11 @@ asyncCreateThread (
     .argument = argument
   };
 
-#ifdef ASYNC_CAN_HANDLE_SIGNALS
+#ifdef ASYNC_CAN_BLOCK_SIGNALS
   asyncCallWithObtainableSignalsBlocked(asyncCreateSignalSafeThread, &create);
-#else /* ASYNC_CAN_HANDLE_SIGNALS */
+#else /* ASYNC_CAN_BLOCK_SIGNALS */
   createThread(&create);
-#endif /* ASYNC_CAN_HANDLE_SIGNALS */
+#endif /* ASYNC_CAN_BLOCK_SIGNALS */
 
   return create.error;
 }

@@ -66,12 +66,14 @@ struct UsbDeviceExtensionStruct {
 struct UsbEndpointExtensionStruct {
   Queue *completedRequests;
 
+#ifdef ASYNC_CAN_OBTAIN_SIGNALS
   struct {
     struct usbdevfs_urb *urb;
     AsyncHandle signalHandle;
     AsyncHandle alarmHandle;
     int submitDelay;
   } monitor;
+#endif /* ASYNC_CAN_OBTAIN_SIGNALS */
 };
 
 static int
@@ -922,6 +924,7 @@ usbReadDeviceDescriptor (UsbDevice *device) {
   return 1;
 }
 
+#ifdef ASYNC_CAN_OBTAIN_SIGNALS
 static void
 usbLogInputProblem (UsbEndpoint *endpoint, const char *problem) {
   logMessage(LOG_WARNING, "%s: Ept:%02X",
@@ -1064,6 +1067,7 @@ usbPrepareInputEndpoint (UsbEndpoint *endpoint) {
 
   return 0;
 }
+#endif /* ASYNC_CAN_OBTAIN_SIGNALS */
 
 int
 usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
@@ -1072,15 +1076,19 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
   if ((eptx = malloc(sizeof(*eptx)))) {
     memset(eptx, 0, sizeof(*eptx));
 
+#ifdef ASYNC_CAN_OBTAIN_SIGNALS
     eptx->monitor.urb = NULL;
     eptx->monitor.signalHandle = NULL;
     eptx->monitor.alarmHandle = NULL;
     eptx->monitor.submitDelay = usbGetResubmitDelay(endpoint);
+#endif /* ASYNC_CAN_OBTAIN_SIGNALS */
 
     if ((eptx->completedRequests = newQueue(NULL, NULL))) {
       switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
         case UsbEndpointDirection_Input:
+#ifdef ASYNC_CAN_OBTAIN_SIGNALS
           endpoint->prepare = usbPrepareInputEndpoint;
+#endif /* ASYNC_CAN_OBTAIN_SIGNALS */
           break;
       }
 
@@ -1100,6 +1108,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 
 void
 usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
+#ifdef ASYNC_CAN_OBTAIN_SIGNALS
   if (eptx->monitor.alarmHandle) {
     asyncCancelRequest(eptx->monitor.alarmHandle);
     eptx->monitor.alarmHandle = NULL;
@@ -1122,6 +1131,7 @@ usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
     asyncCancelRequest(eptx->monitor.signalHandle);
     eptx->monitor.signalHandle = NULL;
   }
+#endif /* ASYNC_CAN_OBTAIN_SIGNALS */
 
   if (eptx->completedRequests) {
     deallocateQueue(eptx->completedRequests);
