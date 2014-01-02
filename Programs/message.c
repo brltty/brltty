@@ -22,8 +22,8 @@
 
 #include "message.h"
 #include "defaults.h"
-#include "async_task.h"
 #include "async_wait.h"
+#include "async_task.h"
 #include "charset.h"
 #include "spk.h"
 #include "ktbdefs.h"

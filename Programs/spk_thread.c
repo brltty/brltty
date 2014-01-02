@@ -22,12 +22,9 @@
 
 #include "log.h"
 #include "spk_thread.h"
-#include "async_thread.h"
 #include "async_wait.h"
-
-#ifdef ASYNC_CAN_HANDLE_THREADS
 #include "async_event.h"
-#endif /* ASYNC_CAN_HANDLE_THREADS */
+#include "async_thread.h"
 
 #ifdef ENABLE_SPEECH_SUPPORT
 #define DRIVER_THREAD_START_TIMEOUT 15000

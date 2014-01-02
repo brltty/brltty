@@ -21,8 +21,8 @@
 #include <string.h>
 
 #include "log.h"
-#include "async_event.h"
 #include "async_io.h"
+#include "async_event.h"
 #include "async_internal.h"
 #include "file.h"
 

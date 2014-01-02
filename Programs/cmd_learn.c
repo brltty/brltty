@@ -22,8 +22,8 @@
 
 #include "log.h"
 #include "message.h"
-#include "async_task.h"
 #include "async_wait.h"
+#include "async_task.h"
 #include "ktbdefs.h"
 #include "update.h"
 #include "cmd_queue.h"

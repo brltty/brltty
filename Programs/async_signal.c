@@ -21,8 +21,8 @@
 #include <string.h>
 
 #include "log.h"
-#include "async_signal.h"
 #include "async_event.h"
+#include "async_signal.h"
 #include "async_internal.h"
 
 #ifdef HAVE_POSIX_THREADS
