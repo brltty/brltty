@@ -198,8 +198,8 @@ gio_bluetooth.$O:
 async_handle.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async_handle.c
 
-async_tsd.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async_tsd.c
+async_data.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async_data.c
 
 async_wait.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async_wait.c
