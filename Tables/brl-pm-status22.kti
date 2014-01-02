@@ -37,9 +37,9 @@ bind !Status8 FREEZE
 bind \{toggleOff}+!Status8 FREEZE+off
 bind \{toggleOn}+!Status8 FREEZE+on
 
-bind !Status9 PREFMENU
-bind !Status10 PREFSAVE
-bind !Status11 PREFLOAD
+bind !Status9 PREFLOAD
+bind !Status10 PREFMENU
+bind !Status11 PREFSAVE
 
 bind !Status12 CSRVIS
 bind \{toggleOff}+!Status12 CSRVIS+off
