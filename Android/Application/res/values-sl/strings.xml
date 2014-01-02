@@ -77,6 +77,13 @@
   <string name="LOG_CATEGORY_LABEL_kbdkeys">Dogodki v Zvezi s Tipkami na Tipkovnici</string>
   <string name="LOG_CATEGORY_LABEL_csrtrk">Spremljanje Utripalke</string>
   <string name="LOG_CATEGORY_LABEL_csrrtg">Klicanje Utripalke</string>
+  <string name="LOG_CATEGORY_LABEL_update">Dogodki Posodobitev</string>
+  <string name="LOG_CATEGORY_LABEL_speech">Govorni Dogodki</string>
+  <string name="LOG_CATEGORY_LABEL_async">Asinhroni Dogodki</string>
+  <string name="LOG_CATEGORY_LABEL_server">Dogodki Strežnika</string>
+  <string name="LOG_CATEGORY_LABEL_serial">Serijski V/I</string>
+  <string name="LOG_CATEGORY_LABEL_usb">USB V/I</string>
+  <string name="LOG_CATEGORY_LABEL_bluetooth">Bluetooth V/I</string>
 
   <string name="BRAILLE_DRIVER_LABEL_auto">samodejna prepoznava</string>
 
