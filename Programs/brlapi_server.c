@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2013 by The BRLTTY Developers.
+ * Copyright (C) 1995-2014 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -113,7 +113,7 @@ static size_t stackSize;
 static AsyncEvent *flushEvent;
 
 #define RELEASE "BrlAPI Server: release " BRLAPI_RELEASE
-#define COPYRIGHT "   Copyright (C) 2002-2013 by Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>, \
+#define COPYRIGHT "   Copyright (C) 2002-2014 by Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>, \
 Samuel Thibault <samuel.thibault@ens-lyon.org>"
 
 #define WERR(x, y, ...) do { \

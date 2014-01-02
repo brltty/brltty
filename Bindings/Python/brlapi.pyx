@@ -58,7 +58,7 @@ except brlapi.ConnectionError as e:
 ###############################################################################
 # libbrlapi - A library providing access to braille terminals for applications.
 #
-# Copyright (C) 2005-2013 by
+# Copyright (C) 2005-2014 by
 #   Alexis Robert <alexissoft@free.fr>
 #   Samuel Thibault <Samuel.Thibault@ens-lyon.org>
 #

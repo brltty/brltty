@@ -1,7 +1,7 @@
 /*
  * libbrlapi - A library providing access to braille terminals for applications.
  *
- * Copyright (C) 2002-2013 by The BRLTTY Developers.
+ * Copyright (C) 2002-2014 by The BRLTTY Developers.
  *
  * libbrlapi comes with ABSOLUTELY NO WARRANTY.
  *
