@@ -135,7 +135,7 @@ createWindowsPipe (SpeechInputObject *obj) {
                                                PIPE_ACCESS_INBOUND | FILE_FLAG_OVERLAPPED,
                                                PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE,
                                                1, 0, 0, 0, NULL)) != INVALID_HANDLE_VALUE) {
-      logMessage(LOG_DEBUG, "speech input pipe created: %s: handle=%u",
+      logMessage(LOG_CATEGORY(SPEECH_EVENTS), "input pipe created: %s: handle=%u",
                  obj->pipePath, (unsigned int)obj->pipeDescriptor);
 
       return 1;
@@ -245,7 +245,7 @@ createUnixPipe (SpeechInputObject *obj) {
   if (result != -1) {
     if (chmod(obj->pipePath, S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH) != -1) {
       if ((obj->pipeDescriptor = open(obj->pipePath, O_RDONLY|O_NONBLOCK)) != -1) {
-        logMessage(LOG_DEBUG, "speech input FIFO created: %s: fd=%d",
+        logMessage(LOG_CATEGORY(SPEECH_EVENTS), "input FIFO created: %s: fd=%d",
                    obj->pipePath, obj->pipeDescriptor);
 
         return 1;
