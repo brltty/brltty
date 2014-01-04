@@ -32,7 +32,7 @@ typedef enum {
 
 extern int message (const char *mode, const char *text, MessageOptions options);
 
-extern int messageHoldTime;
+extern int messageHoldTimeout;
 
 #ifdef __cplusplus
 }

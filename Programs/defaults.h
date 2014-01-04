@@ -31,7 +31,7 @@ extern "C" {
 
 /* Edit as necessary for your system. */
 
-#define DEFAULT_MESSAGE_HOLD_TIME MESSAGE_HOLD_TIME
+#define DEFAULT_MESSAGE_HOLD_TIMEOUT MESSAGE_HOLD_TIMEOUT
 /* Under 5 seconds (init's SIGTERM-SIGKILL delay during shutdown)
  * is good as that allows "exiting" to be replaced by "terminated"
  * on the display.

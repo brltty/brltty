@@ -98,7 +98,7 @@ static char *opt_logLevel;
 static char *opt_logFile;
 static int opt_bootParameters = 1;
 static int opt_environmentVariables;
-static char *opt_messageHoldTime;
+static char *opt_messageHoldTimeout;
 
 static int opt_cancelExecution;
 static const char *const optionStrings_CancelExecution[] = {
@@ -457,11 +457,11 @@ BEGIN_OPTION_TABLE(programOptions)
 #endif /* HAVE_MIDI_SUPPORT */
 
   { .letter = 'M',
-    .word = "message-delay",
+    .word = "message-timeout",
     .flags = OPT_Hidden,
     .argument = strtext("csecs"),
-    .setting.string = &opt_messageHoldTime,
-    .description = strtext("Message hold time [400].")
+    .setting.string = &opt_messageHoldTimeout,
+    .description = strtext("Message hold timeout [400].")
   },
 
   { .letter = 'q',
@@ -1937,8 +1937,8 @@ brlttyStart (int argc, char *argv[]) {
     return exitStatus;
   }
 
-  if (!validateInterval(&messageHoldTime, opt_messageHoldTime)) {
-    logMessage(LOG_ERR, "%s: %s", gettext("invalid message hold time"), opt_messageHoldTime);
+  if (!validateInterval(&messageHoldTimeout, opt_messageHoldTimeout)) {
+    logMessage(LOG_ERR, "%s: %s", gettext("invalid message hold timeout"), opt_messageHoldTimeout);
   }
 
   /* Set logging levels. */

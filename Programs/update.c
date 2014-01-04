@@ -950,7 +950,7 @@ ASYNC_ALARM_CALLBACK(handleUpdateAlarm) {
   updateAlarm = NULL;
 
   suspendUpdates();
-  setUpdateTime((pollScreen()? UPDATE_SCREEN_POLL_INTERVAL: (SECS_PER_DAY * MSECS_PER_SEC)),
+  setUpdateTime((pollScreen()? SCREEN_UPDATE_POLL_INTERVAL: (SECS_PER_DAY * MSECS_PER_SEC)),
                 parameters->now, 0);
 
   doUpdate();

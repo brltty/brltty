@@ -32,7 +32,7 @@
 #include "api_control.h"
 #include "brltty.h"
 
-int messageHoldTime = DEFAULT_MESSAGE_HOLD_TIME;
+int messageHoldTimeout = DEFAULT_MESSAGE_HOLD_TIMEOUT;
 
 typedef struct {
   unsigned endWait:1;
@@ -121,7 +121,7 @@ ASYNC_TASK_CALLBACK(presentMessage) {
       }
 
       {
-        int delay = messageHoldTime - brl.writeDelay;
+        int delay = messageHoldTimeout - brl.writeDelay;
 
         mgd.endWait = 0;
         drainBrailleOutput(&brl, 0);

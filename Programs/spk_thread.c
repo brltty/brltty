@@ -21,17 +21,13 @@
 #include <string.h>
 
 #include "log.h"
+#include "parameters.h"
 #include "spk_thread.h"
 #include "async_wait.h"
 #include "async_event.h"
 #include "async_thread.h"
 
 #ifdef ENABLE_SPEECH_SUPPORT
-#define DRIVER_THREAD_START_TIMEOUT 15000
-#define DRIVER_THREAD_STOP_TIMEOUT 5000
-#define SPEECH_REQUEST_WAIT_DURATION 1000000
-#define SPEECH_RESPONSE_WAIT_TIMEOUT 5000
-
 typedef enum {
   THD_CONSTRUCTING,
   THD_STARTING,
@@ -644,7 +640,7 @@ newSpeechDriverThread (
                                           runSpeechDriverThread, sdt);
 
       if (!createError) {
-        if (awaitSpeechResponse(sdt, DRIVER_THREAD_START_TIMEOUT)) {
+        if (awaitSpeechResponse(sdt, SPEECH_DRIVER_THREAD_START_TIMEOUT)) {
           if (sdt->response.type == RSP_INTEGER) {
             if (sdt->response.value.INTEGER) {
               return sdt;
@@ -686,7 +682,7 @@ destroySpeechDriverThread (
 ) {
 #ifdef ASYNC_CAN_HANDLE_THREADS
   if (sendSpeechRequest(sdt, NULL)) {
-    asyncAwaitCondition(DRIVER_THREAD_STOP_TIMEOUT, testSpeechDriverThreadFinished, sdt);
+    asyncAwaitCondition(SPEECH_DRIVER_THREAD_STOP_TIMEOUT, testSpeechDriverThreadFinished, sdt);
     awaitSpeechDriverThreadTermination(sdt);
   }
 
