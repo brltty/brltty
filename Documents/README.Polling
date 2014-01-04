@@ -2,8 +2,8 @@ As of release 5.0, brltty was converted from being polling-based to being
 event-based. This means, among other things, that it's now able to become 
 completely idle whenever it doesn't have anything useful to do. For comparison, 
 it formerly used a huge, central, main loop which was run frequently (about 25 
-times per second), and which had to be aware of, and which had to check, every 
-possible task that might need to be taken care of.
+times per second), and which was aware of, and to check for, every single task 
+that might need to be performed.
 
 In practical terms, this change, when compared with how brltty used to work, 
 delivers at least the following significant benefits:
@@ -22,21 +22,24 @@ using one of the following:
 *  A Linux text console and the kernel is at least 2.6.37 which was released on
    2011 January 4.
 
-Serial input still uses polling unless you are using one of the following:
+Serial input still uses frequent polling (about every 40 milliseconds) unless
+you are using one of the following:
 *  Linux.
 
-USB input still uses polling unless you are using one of the following:
+USB input still uses frequent polling (about every 40 milliseconds) unless you
+are using one of the following:
 *  Linux.
 
-Bluetooth input still uses polling unless you are using one of the following:
+Bluetooth input still uses frequent polling (about every 40 milliseconds)
+unless you are using one of the following:
 *  Android.
 *  Linux.
 
 Waiting for a braille device to become available for use still uses regular 
-polling (about once every five seconds).
+polling (about every five seconds).
 
 Waiting for a speech device or package to become available for use still uses 
-regular polling (about once every five seconds).
+regular polling (about every five seconds).
 
 Waiting for the screen to become readable still uses regular polling (about
-once every five seconds).
+every five seconds).
