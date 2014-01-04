@@ -1235,7 +1235,7 @@ build options.
 
 If all is well, BRLTTY's version identification message
 should appear on the braille display for a few seconds
-(see the <ref id="options-message-delay" name="-M"> command line option).
+(see the <ref id="options-message-timeout" name="-M"> command line option).
 After it goes away (which you can hasten by pressing any key on the display),
 the area of the screen where the cursor is should appear.
 This means that you should expect to see your shell's command prompt.
@@ -1945,7 +1945,7 @@ for alternatives regarding how to pass parameters to the driver for your braille
 
 A message giving the program name (BRLTTY) and its version number
 will appear briefly
-(see the <ref id="options-message-delay" name="-M"> command line option)
+(see the <ref id="options-message-timeout" name="-M"> command line option)
 on the braille display.
 The display will then show a small area of the screen including the cursor.
 By default, the cursor is represented as
@@ -2386,7 +2386,7 @@ See also the <ref id="command-SWITCHVT" name="SWITCHVT"> routing key command.
     Go up/down to the nearest line which isn't indented
     more than the column associated with the routing key.
   <tag>DESCCHAR<label id="command-DESCCHAR"></tag>
-    Momentarily (see the <ref id="options-message-delay" name="-M"> command line option)
+    Momentarily (see the <ref id="options-message-timeout" name="-M"> command line option)
     display a message describing the character associated with the routing key.
     It reveals
     the decimal and hexadecimal values of the character,
@@ -2906,7 +2906,7 @@ The <tt/brltty/ command accepts the following options:
     for a list of the properties which may be specified.
     See the <ref id="configure-keyboard-properties" name="keyboard-properties">
     configuration file directive for the default run-time settings.
-  <tag><tt/-M/<em/csecs/ <tt/--message-delay=/<em/csecs/<label id="options-message-delay"></tag>
+  <tag><tt/-M/<em/csecs/ <tt/--message-timeout=/<em/csecs/<label id="options-message-timeout"></tag>
     Specify the amount of time (in hundredths of a second)
     that BRLTTY keeps its own internally generated messages on the braille display.
     If not specified, then <tt/400/ (4 seconds) is assumed.
@@ -3177,7 +3177,7 @@ with one or more of the following:
     If a message has been associated with the event,
     and if the <ref id="preference-alert-messages" name="Alert Messages"> preference is active,
     then it is displayed for a few seconds
-    (see the <ref id="options-message-delay" name="-M"> command line option).
+    (see the <ref id="options-message-timeout" name="-M"> command line option).
 </descrip>
 
 These events include:
@@ -3228,7 +3228,7 @@ BRLTTY, however, has a simple menu from which you can easily change them.
 
 The meny is activated by the <ref id="command-PREFMENU" name="PREFMENU"> command.
 The braille display briefly
-(see the <ref id="options-message-delay" name="-M"> command line option)
+(see the <ref id="options-message-timeout" name="-M"> command line option)
 shows the menu title,
 and then presents the current item and its current setting.
 
@@ -4098,7 +4098,7 @@ The length of each segment but the last is one less than the display's width,
 with the rightmost character on the display being set to a minus sign.
 Each such segment remains on the display
 either for a few seconds
-(see the <ref id="options-message-delay" name="-M"> command line option)
+(see the <ref id="options-message-timeout" name="-M"> command line option)
 or until any key on the display is pressed.
 
 <sect>Tables<label id="tables"><p>
