@@ -16,8 +16,8 @@ will eventually be resolved by future code changes, while others,
 unfortunately, are required due to host platform limitations.
 
 Determining that the screen has been updated (size change, content change, 
-highlighting change, cursor location, etc) still uses polling unless you are
-using one of the following:
+highlighting change, cursor location, etc) still uses frequent polling (about
+every 40 milliseconds) unless you are using one of the following:
 *  Android.
 *  A Linux text console and the kernel is at least 2.6.37 which was released on
    2011 January 4.
