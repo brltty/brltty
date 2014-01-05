@@ -224,7 +224,7 @@ plus faible, à un ou plusieurs des éléments suivants:
   <tag>un message</tag>
     Si un message a été associé à l'événement, et si la préférence
     <ref id="preference-alert-messages" name="Messages d'avertissement"> est active,
-    il est affiché pendant quelques secondes (voir l'option <ref id="options-message-delay" name="-M">
+    il est affiché pendant quelques secondes (voir l'option <ref id="options-message-timeout" name="-M">
     en ligne de commande.
 </descrip>
 
@@ -277,7 +277,7 @@ changer.
 
 le menu est activé par la commande <ref id="command-PREFMENU" name="PREFMENU">.
 L'afficheur braille affiche brièvement (voir l'option
-<ref id="options-message-delay" name="-M"> en ligne de commande) le titre du
+<ref id="options-message-timeout" name="-M"> en ligne de commande) le titre du
 menu, puis présente l'item du paramètre actuel.
 
 <Sect3>Navigation dans le menu<p>
@@ -944,9 +944,7 @@ Remarques:
 <itemize>
   <item><label id="time-settings">
     Tous les paramètres de temps sont en centièmes de seconde. Ce sont des
-    multiples de la fréquence de mise à jour de la plage braille (voir l'option
-    <ref id="options-update-interval" name="-U"> en ligne de commande)
-    dans un intervalle de 1 à 100.
+    multiples de 4 compris entre 1 et 100.
 </itemize>
 
 <sect1>L'affichage des états<label id="status"><p>
@@ -1146,5 +1144,5 @@ affiché en segments. La longueur d'un segment est de un soustrait à
 la largeur de l'afficheur braillle, avec le caractère le plus à droite sur
 l'afficheur qui affiche le signe moins.
 Chaque segment reste sur l'afficheur, soit pendant quelques secondes (voir
-l'option <ref id="options-message-delay" name="-M"> en ligne de commande)
+l'option <ref id="options-message-timeout" name="-M"> en ligne de commande)
 soit jusqu'à ce qu'une touche de l'afficheur soit pressée.

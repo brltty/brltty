@@ -146,45 +146,61 @@ Chacun des huit points braille représente l'un des huit bits d'attributs
 <tt>VGA</tt>.
 Les tables d'attributs suivantes sont fournies:
 <descrip>
-  <tag>attributes</tag>
+  <tag/left_right/
     La colonne à gauche représente les couleurs de premier plan:
     <descrip>
-      <tag>Point 1</tag>Rouge
-      <tag>Point 2</tag>Vert
-      <tag>Point 3</tag>Bleu
-      <tag>Point 7</tag>Brillant
+      <tag/Point 1/Bleu
+      <tag/Point 2/Vert
+      <tag/Point 3/Rouge
+      <tag/Point 7/Brillant
     </descrip>
     La colonne à droite représente les couleurs de fond:
     <descrip>
-      <tag>Point 4</tag>Rouge
-      <tag>Point 5</tag>Vert
-      <tag>Point 6</tag>Bleu
-      <tag>Point 8</tag>Clignotant
+      <tag/Point 4/Bleu
+      <tag/Point 5/Vert
+      <tag/Point 6/Rouge
+      <tag/Point 8/Clignotant
     </descrip>
     Un point est affiché quand son bit d'attribut correspondant est actif.
     C'est la table d'attributs par défaut car c'est la plus
     intuitive. Cependant, l'un de ses problèmes est qu'il est difficile de
     distinguer la différence entre la vidéo normale (noir sur blanc) et inversée
     (blanc sur noir).
-  <tag>attrib</tag>
+  <tag/invleft_right/
     La colonne à gauche représente les couleurs de premier plan: 
     <descrip>
-      <tag>Point 1</tag>Rouge
-      <tag>Point 2</tag>Vert
-      <tag>Point 3</tag>Bleu
-      <tag>Point 7</tag>Brillant
+      <tag/Point 1/Bleu
+      <tag/Point 2/Vert
+      <tag/Point 3/Rouge
+      <tag/Point 7/Brillant
     </descrip>
     La colonne à droite représente les couleurs de fond:
     <descrip>
-      <tag>Point 4</tag>Rouge
-      <tag>Point 5</tag>Vert
-      <tag>Point 6</tag>Bleu
-      <tag>Point 8</tag>Clignotant
+      <tag/Point 4/Bleu
+      <tag/Point 5/Vert
+      <tag/Point 6/Rouge
+      <tag/Point 8/Clignotant
     </descrip>
     Un bit de fond est actif pour générer ses points correspondant, tandis
     qu'un bit de premier plan est inactif pour générer son point correspondant.
     Cette logique non intuitive facilite en fait la lecture de la plupart des
     combinaisons d'attributs communément utilisées.
+  <tag/upper_lower/
+    Le carré supérieur représente les couleurs de premier plan:
+    <descrip>
+      <tag/Point 1/Rouge
+      <tag/Point 4/Vert
+      <tag/Point 2/Bleu
+      <tag/Point 5/Brillant
+    </descrip>
+    Le carré inférieur représente les couleurs d'arrière-plan:
+    <descrip>
+      <tag/Point 3/Rouge
+      <tag/Point 6/Vert
+      <tag/Point 7/Bleu
+      <tag/Point 8/Clignotant
+    </descrip>
+    Un point s'affiche quand le bit de l'attribut qui y correspond est actif.
 </descrip>
 Voir l'option <ref id="options-attributes-table" name="-a"> en ligne de
 commande, la ligne <ref id="configure-attributes-table" name="attributes-table">
@@ -579,9 +595,10 @@ de touches.
 
 Les tables de touches suivantes sont fournies:
 <descrip>
-  <tag/kbd-desktop/associations pour les claviers complets
-  <tag/kbd-keypad/associations pour la navigation à partir du pavé numérique
-  <tag/kbd-laptop/associations pour les claviers sans pavé numérique
+  <tag/braille/associations pour les claviers braille
+  <tag/desktop/associations pour les claviers complets
+  <tag/keypad/associations pour la navigation à partir du pavé numérique
+  <tag/laptop/associations pour les claviers sans pavé numérique
 </descrip>
       Voir l'option <ref id="options-key-table" name="-k"> en ligne de commande
       et la ligne 

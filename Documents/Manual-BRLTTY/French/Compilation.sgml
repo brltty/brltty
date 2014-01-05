@@ -965,7 +965,7 @@ et <ref id="build-braille-device" name="--with-braille-device">.
 
 Si tout va bien, le message d'identification de BRLTTY devrait
 apparaître sur l'afficheur braille pendant quelques secondes (voir
-l'option <ref id="options-message-delay" name="-M"> de la ligne de commande). Après qu'il ait disparu, (ce
+l'option <ref id="options-message-timeout" name="-M"> de la ligne de commande). Après qu'il ait disparu, (ce
 que vous pouvez accélérer en appuyant sur n'importe quelle touche de
 l'afficheur), la zone de l'écran où le curseur se situe devrait
 apparaître. Cela signifie que vous devriez vous attendre à voir
