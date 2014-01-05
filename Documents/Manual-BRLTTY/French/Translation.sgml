@@ -599,6 +599,7 @@ Les tables de touches suivantes sont fournies:
   <tag/desktop/associations pour les claviers complets
   <tag/keypad/associations pour la navigation à partir du pavé numérique
   <tag/laptop/associations pour les claviers sans pavé numérique
+  <tag/sun_type6/associations pour les claviers Sun Type 6
 </descrip>
       Voir l'option <ref id="options-key-table" name="-k"> en ligne de commande
       et la ligne 
