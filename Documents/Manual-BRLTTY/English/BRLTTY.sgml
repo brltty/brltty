@@ -4698,7 +4698,7 @@ The following keyboard key tables are provided:
   <tag/desktop/bindings for full keyboards
   <tag/keypad/bindings for keypad-based navigation
   <tag/laptop/bindings for keyboards without a keypad
-  <tag/sun_type6/bindings for Sun Microsystems, Inc. type 6 keyboards
+  <tag/sun_type6/bindings for Sun Type 6 keyboards
 </descrip>
 See the <ref id="options-key-table" name="-k"> command line option,
 and the <ref id="configure-key-table" name="key-table"> configuration file directive
