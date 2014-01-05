@@ -1346,6 +1346,9 @@ handleNavigationCommand (int command, void *datga) {
           break;
         }
 
+        case BRL_BLK_READ_LOCN:
+          break;
+
         default:
           return 0;
       }
