@@ -42,7 +42,7 @@ extern int isUnqualifiedDevice (const char *identifier);
 extern char **getDeviceParameters (const char *const *names, const char *identifier);
 
 #undef ALLOW_DOS_DEVICE_NAMES
-#if defined(__MSDOS__) || (defined(WINDOWS) && !defined(__CYGWIN32__))
+#if defined(__MSDOS__) || (defined(WINDOWS) && !defined(__CYGWIN__))
 #define ALLOW_DOS_DEVICE_NAMES 1
 extern int isDosDevice (const char *identifier, const char *prefix);
 #endif /* DOS or Windows (but not Cygwin) */

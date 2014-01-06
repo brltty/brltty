@@ -75,7 +75,7 @@ extern "C" {
   STR_ADJUST(strLength); \
 }
 
-#if defined(__CYGWIN32__) || defined(__MINGW32__)
+#if defined(__CYGWIN__) || defined(__MINGW32__)
 #define WINDOWS
 
 #include <w32api.h>
@@ -258,12 +258,12 @@ typedef int SocketDescriptor;
 #ifdef WINDOWS
 #define getSystemError() GetLastError()
 
-#ifdef __CYGWIN32__
+#ifdef __CYGWIN__
 #include <sys/cygwin.h>
 
 #define getSocketError() errno
 #define setErrno(error) errno = cygwin_internal(CW_GET_ERRNO_FROM_WINERROR, (error))
-#else /* __CYGWIN32__ */
+#else /* __CYGWIN__ */
 #define getSocketError() WSAGetLastError()
 #define setErrno(error) errno = win_toErrno((error))
 
@@ -272,7 +272,7 @@ typedef int SocketDescriptor;
 extern
 #endif /* WIN_ERRNO_STORAGE_CLASS */
 WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
-#endif /* __CYGWIN32__ */
+#endif /* __CYGWIN__ */
 
 #else /* WINDOWS */
 #define getSystemError() errno

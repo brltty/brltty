@@ -1116,7 +1116,7 @@ static size_t getCharset(void *buffer, int wide) {
   if (wide
 #ifdef __MINGW32__
       && CHECKPROC("ntdll.dll", wcslen)
-#endif /* __CYGWIN32__ */
+#endif /* __MINGW32__ */
   ) {
     size_t length = strlen(WCHAR_CHARSET);
     *p++ = length;
@@ -1337,7 +1337,7 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeArguments_t *s)
     if (s->textSize != -1)
       strLen = s->textSize;
     else
-#if defined(__CYGWIN32__)
+#if defined(__CYGWIN__)
       if (wide)
 	strLen = sizeof(wchar_t) * wcslen((wchar_t *) s->text);
       else
@@ -1345,7 +1345,7 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeArguments_t *s)
       if (CHECKGETPROC("ntdll.dll", wcslen) && wide)
 	strLen = sizeof(wchar_t) * wcslenProc((wchar_t *) s->text);
       else
-#endif /* __CYGWIN32__ */
+#endif /* windows wide string length */
 	strLen = strlen(s->text);
     *((uint32_t *) p) = htonl(strLen); p += sizeof(uint32_t);
     wa->flags |= BRLAPI_WF_TEXT;

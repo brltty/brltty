@@ -88,9 +88,9 @@
 #define LogSocketError(msg) logSystemError(msg)
 #endif /* __MINGW32__ */
 
-#ifdef __CYGWIN32__
+#ifdef __CYGWIN__
 #undef PF_LOCAL
-#endif
+#endif /* __CYGWIN__ */
 
 #define UNAUTH_MAX 5
 #define UNAUTH_DELAY 30

@@ -26,13 +26,6 @@
 #include "system.h"
 #include "system_windows.h"
 
-#ifdef __CYGWIN32__
-
-#else /* __CYGWIN32__ */
-
-#endif /* __CYGWIN32__ */
-
-
 /* ntdll.dll */
 WIN_PROC_STUB(NtSetInformationProcess);
 

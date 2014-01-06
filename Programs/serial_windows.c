@@ -487,13 +487,13 @@ serialDisconnectDevice (SerialDevice *serial) {
 
 int
 serialEnsureFileDescriptor (SerialDevice *serial) {
-#ifdef __CYGWIN32__
+#ifdef __CYGWIN__
   if ((serial->fileDescriptor = cygwin_attach_handle_to_fd("serialdevice", -1, serial->package.fileHandle, TRUE, GENERIC_READ|GENERIC_WRITE)) >= 0) return 1;
   logSystemError("cygwin_attach_handle_to_fd");
-#else /* __CYGWIN32__ */
+#else /* __CYGWIN__ */
   if ((serial->fileDescriptor = _open_osfhandle((long)serial->package.fileHandle, O_RDWR)) >= 0) return 1;
   logSystemError("open_osfhandle");
-#endif /* __CYGWIN32__ */
+#endif /* __CYGWIN__ */
 
   return 0;
 }
