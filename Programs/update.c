@@ -304,8 +304,10 @@ showInfo (void) {
 }
 
 #ifdef ENABLE_SPEECH_SUPPORT
+static int wasAutospeaking;
+
 static void
-doAutospeak (void) {
+doAutospeak (int force) {
   static int oldScreen = -1;
   static int oldX = -1;
   static int oldY = -1;
@@ -328,8 +330,11 @@ doAutospeak (void) {
     int count = newWidth;
     const char *reason = NULL;
 
-    if (!oldCharacters) {
+    if (force) {
       reason = "current line";
+    } else if (!oldCharacters) {
+      reason = "initial line";
+      count = 0;
     } else if ((newScreen != oldScreen) || (ses->winy != oldwiny) || (newWidth != oldWidth)) {
       if (!prefs.autospeakSelectedLine) count = 0;
       reason = "line selected";
@@ -496,11 +501,12 @@ doAutospeak (void) {
     }
 
   autospeak:
-    if (!reason) reason = "unknown reason";
-    characters += column;
-
     if (count) {
+      characters += column;
+
+      if (!reason) reason = "unknown reason";
       logMessage(LOG_CATEGORY(SPEECH_EVENTS), "autospeak: %s: %d", reason, count);
+
       speakCharacters(characters, count, 0);
     }
   }
@@ -626,7 +632,12 @@ doUpdate (void) {
   }
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  if (autospeak()) doAutospeak();
+  {
+    int isAutospeaking = autospeak();
+
+    if (isAutospeaking) doAutospeak(!wasAutospeaking);
+    wasAutospeaking = isAutospeaking;
+  }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   /* There are a few things to take care of if the display has moved. */
@@ -978,6 +989,10 @@ beginUpdates (void) {
 
   oldwinx = -1;
   oldwiny = -1;
+
+#ifdef ENABLE_SPEECH_SUPPORT
+  wasAutospeaking = 0;
+#endif /* ENABLE_SPEECH_SUPPORT */
 }
 
 void
