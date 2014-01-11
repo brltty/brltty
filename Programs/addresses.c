@@ -18,6 +18,8 @@
 
 #include "prologue.h"
 
+#include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 
 #include "addresses.h"
@@ -104,9 +106,20 @@ removeAddressEntry (int index) {
 }
 
 int
-setAddressName (void *address, const char *name) {
+setAddressName (void *address, const char *format, ...) {
+  char name[0X1000];
   AddressEntry *entry;
-  size_t size = sizeof(*entry) + strlen(name) + 1;
+  size_t size;
+
+  {
+    va_list arguments;
+
+    va_start(arguments, format);
+    vsnprintf(name, sizeof(name), format, arguments);
+    va_end(arguments);
+  }
+
+  size = sizeof(*entry) + strlen(name) + 1;
 
   if ((entry = malloc(size))) {
     int index;

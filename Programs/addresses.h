@@ -24,7 +24,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern const char *getAddressName (void *address, intptr_t *offset);
-extern int setAddressName (void *address, const char *name);
+extern int setAddressName (void *address, const char *format, ...);
 extern void unsetAddressName (void *address);
 
 #ifdef __cplusplus
