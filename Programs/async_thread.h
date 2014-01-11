@@ -48,6 +48,9 @@ extern int asyncCreateThread (
   pthread_t *thread, const pthread_attr_t *attributes,
   AsyncThreadFunction *function, void *argument
 );
+
+extern int asyncLockMutex (pthread_mutex_t *mutex);
+extern int asyncUnlockMutex (pthread_mutex_t *mutex);
 #endif /* ASYNC_CAN_HANDLE_THREADS */
 
 #ifdef __cplusplus

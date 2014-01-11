@@ -132,4 +132,18 @@ asyncCreateThread (
 
   return create.error;
 }
+
+int
+asyncLockMutex (pthread_mutex_t *mutex) {
+  int result = pthread_mutex_lock(mutex);
+
+  logSymbol(LOG_CATEGORY(ASYNC_EVENTS), mutex, "mutex lock");
+  return result;
+}
+
+int
+asyncUnlockMutex (pthread_mutex_t *mutex) {
+  logSymbol(LOG_CATEGORY(ASYNC_EVENTS), mutex, "mutex unlock");
+  return pthread_mutex_unlock(mutex);
+}
 #endif /* ASYNC_CAN_HANDLE_THREADS */
