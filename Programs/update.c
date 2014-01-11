@@ -635,7 +635,12 @@ doUpdate (void) {
   if (spk.canAutospeak) {
     int isAutospeaking = autospeak();
 
-    if (isAutospeaking) doAutospeak(!wasAutospeaking);
+    if (isAutospeaking) {
+      doAutospeak(!wasAutospeaking);
+    } else if (wasAutospeaking) {
+      muteSpeech("autospeak disabled");
+    }
+
     wasAutospeaking = isAutospeaking;
   }
 #endif /* ENABLE_SPEECH_SUPPORT */
