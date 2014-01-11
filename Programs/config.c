@@ -1405,6 +1405,14 @@ ASYNC_ALARM_CALLBACK(handleAutospeakDelayAlarm) {
   endAutospeakDelay();
 }
 
+static void
+beginAutospeakDelay (int duration) {
+  if (asyncSetAlarmIn(&autospeakDelayAlarm, duration,
+                      handleAutospeakDelayAlarm, NULL)) {
+    spk.canAutospeak = 0;
+  }
+}
+
 void
 initializeSpeech (void) {
   initializeSpeechSynthesizer(&spk);
@@ -1517,11 +1525,7 @@ startSpeechDriver (void) {
 
     makeProgramBanner(banner, sizeof(banner));
     sayString(banner, 1);
-
-    if (asyncSetAlarmIn(&autospeakDelayAlarm, SPEECH_DRIVER_START_AUTOSPEAK_DELAY,
-                        handleAutospeakDelayAlarm, NULL)) {
-      spk.canAutospeak = 0;
-    }
+    beginAutospeakDelay(SPEECH_DRIVER_START_AUTOSPEAK_DELAY);
   }
 
   return 1;
