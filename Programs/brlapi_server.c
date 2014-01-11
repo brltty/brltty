@@ -70,6 +70,7 @@
 #include "brltty.h"
 #include "api_control.h"
 #include "log.h"
+#include "addresses.h"
 #include "file.h"
 #include "parse.h"
 #include "timing.h"
@@ -201,7 +202,7 @@ typedef struct Connection {
   unsigned int how; /* how keys must be delivered to clients */
   BrailleWindow brailleWindow;
   BrlBufState brlbufstate;
-  pthread_mutex_t brlMutex;
+  pthread_mutex_t brailleWindowMutex;
   KeyrangeList *acceptedKeys;
   pthread_mutex_t acceptedKeysMutex;
   time_t upTime;
@@ -236,18 +237,18 @@ static struct socketInfo {
 static int numSockets; /* number of sockets */
 
 /* Protects from connection addition / remove from the server thread */
-static pthread_mutex_t connectionsMutex;
+pthread_mutex_t apiConnectionsMutex;
 
 /* Protects the real driver's functions */
-static pthread_mutex_t driverMutex;
+pthread_mutex_t apiDriverMutex;
 
 /* Which connection currently has raw mode */
-static pthread_mutex_t rawMutex;
+pthread_mutex_t apiRawMutex;
 static Connection *rawConnection = NULL;
 static Connection *suspendConnection = NULL;
 
-/* mutex lock order is connectionsMutex first, then rawMutex, then (acceptedKeysMutex
- * or brlMutex) then driverMutex */
+/* mutex lock order is apiConnectionsMutex first, then apiRawMutex, then (acceptedKeysMutex
+ * or brailleWindowMutex) then apiDriverMutex */
 
 static Tty notty;
 static Tty ttys;
@@ -298,11 +299,11 @@ static BrailleDisplay *disp; /* Parameter to pass to braille drivers */
 
 static int coreActive; /* Whether core is active */
 static int offline; /* Whether device is offline */
-static int driverConstructed; /* Whether device is really opened, protected by driverMutex */
+static int driverConstructed; /* Whether device is really opened, protected by apiDriverMutex */
 static wchar_t *coreWindowText; /* Last text written by the core */
 static unsigned char *coreWindowDots; /* Last dots written by the core */
 static int coreWindowCursor; /* Last cursor position set by the core */
-static pthread_mutex_t suspendMutex; /* Protects use of driverConstructed state */
+pthread_mutex_t apiSuspendMutex; /* Protects use of driverConstructed state */
 
 static const char *auth = BRLAPI_DEFAUTH;
 static AuthDescriptor *authDescriptor;
@@ -338,9 +339,9 @@ static int isRawCapable(const BrailleDriver *brl)
 static int isKeyCapable(const BrailleDriver *brl)
 {
   int ret;
-  pthread_mutex_lock(&driverMutex);
+  asyncLockMutex(&apiDriverMutex);
   ret = ((brl->readKey!=NULL) && (brl->keyToCommand!=NULL)) || (disp && disp->keyNameTables!=NULL);
-  pthread_mutex_unlock(&driverMutex);
+  asyncUnlockMutex(&apiDriverMutex);
   return ret;
 }
 
@@ -349,23 +350,23 @@ static int isKeyCapable(const BrailleDriver *brl)
 static void suspendDriver(BrailleDisplay *brl) {
   if (trueBraille == &noBraille) return; /* core unlinked api */
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "driver suspended");
-  pthread_mutex_lock(&suspendMutex);
+  asyncLockMutex(&apiSuspendMutex);
   driverConstructed = 0;
   destructBrailleDriver();
-  pthread_mutex_unlock(&suspendMutex);
+  asyncUnlockMutex(&apiSuspendMutex);
 }
 
 /* Function : resumeDriver */
 /* Re-open driver */
 static int resumeDriver(BrailleDisplay *brl) {
   if (trueBraille == &noBraille) return 0; /* core unlinked api */
-  pthread_mutex_lock(&suspendMutex);
+  asyncLockMutex(&apiSuspendMutex);
   driverConstructed = constructBrailleDriver();
   if (driverConstructed) {
     logMessage(LOG_CATEGORY(SERVER_EVENTS), "driver resumed");
     brlResize(brl);
   }
-  pthread_mutex_unlock(&suspendMutex);
+  asyncUnlockMutex(&apiSuspendMutex);
   return driverConstructed;
 }
 
@@ -617,19 +618,29 @@ static void handleResize(BrailleDisplay *brl)
 /* Creates a connection */
 static Connection *createConnection(FileDescriptor fd, time_t currentTime)
 {
-  pthread_mutexattr_t mattr;
   Connection *c =  malloc(sizeof(Connection));
   if (c==NULL) goto out;
+
   c->auth = -1;
   c->fd = fd;
   c->tty = NULL;
   c->raw = 0;
   c->suspend = 0;
   c->brlbufstate = EMPTY;
-  pthread_mutexattr_init(&mattr);
-  pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
-  pthread_mutex_init(&c->brlMutex,&mattr);
-  pthread_mutex_init(&c->acceptedKeysMutex,&mattr);
+
+  {
+    pthread_mutexattr_t mattr;
+
+    pthread_mutexattr_init(&mattr);
+    pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
+
+    pthread_mutex_init(&c->brailleWindowMutex,&mattr);
+    setAddressName(&c->brailleWindowMutex, "apiBrailleWindowMutex[" PRIfd "]", fd);
+
+    pthread_mutex_init(&c->acceptedKeysMutex,&mattr);
+    setAddressName(&c->acceptedKeysMutex, "apiAcceptedKeysMutex[" PRIfd "]", fd);
+  }
+
   c->how = 0;
   c->acceptedKeys = NULL;
   c->upTime = currentTime;
@@ -656,8 +667,13 @@ static void freeConnection(Connection *c)
     if (c->auth != 1) unauthConnections--;
     closeFileDescriptor(c->fd);
   }
-  pthread_mutex_destroy(&c->brlMutex);
+
+  pthread_mutex_destroy(&c->brailleWindowMutex);
+  unsetAddressName(&c->brailleWindowMutex);
+
   pthread_mutex_destroy(&c->acceptedKeysMutex);
+  unsetAddressName(&c->acceptedKeysMutex);
+
   freeBrailleWindow(&c->brailleWindow);
   freeKeyrangeList(&c->acceptedKeys);
   free(c);
@@ -674,9 +690,9 @@ static void __addConnection(Connection *c, Connection *connections)
 }
 static void addConnection(Connection *c, Connection *connections)
 {
-  pthread_mutex_lock(&connectionsMutex);
+  asyncLockMutex(&apiConnectionsMutex);
   __addConnection(c,connections);
-  pthread_mutex_unlock(&connectionsMutex);
+  asyncUnlockMutex(&apiConnectionsMutex);
 }
 
 /* Function : removeConnection */
@@ -688,9 +704,9 @@ static void __removeConnection(Connection *c)
 }
 static void removeConnection(Connection *c)
 {
-  pthread_mutex_lock(&connectionsMutex);
+  asyncLockMutex(&apiConnectionsMutex);
   __removeConnection(c);
-  pthread_mutex_unlock(&connectionsMutex);
+  asyncUnlockMutex(&apiConnectionsMutex);
 }
 
 /* Function: removeFreeConnection */
@@ -814,7 +830,7 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
     return 0;
   }
 
-  pthread_mutex_lock(&connectionsMutex);
+  asyncLockMutex(&apiConnectionsMutex);
   tty = tty2 = &ttys;
 
   for (ptty=ints+1; ptty<=ints+nbTtys; ptty++) {
@@ -832,7 +848,7 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
     if (c->tty) {
       /* uhu, we already got a tty, but not this one, since the path
        * doesn't exist yet. This is forbidden. */
-      pthread_mutex_unlock(&connectionsMutex);
+      asyncUnlockMutex(&apiConnectionsMutex);
       WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "already having another tty");
       freeBrailleWindow(&c->brailleWindow);
       return 0;
@@ -840,7 +856,7 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
     /* ok, allocate path */
     /* we lock the entire subtree for easier cleanup */
     if (!(tty2 = newTty(tty,ntohl(*ptty)))) {
-      pthread_mutex_unlock(&connectionsMutex);
+      asyncUnlockMutex(&apiConnectionsMutex);
       WERR(c->fd,BRLAPI_ERROR_NOMEM, "no memory for new tty");
       freeBrailleWindow(&c->brailleWindow);
       return 0;
@@ -854,7 +870,7 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
           tty3 = tty2->subttys;
           freeTty(tty2);
         }
-        pthread_mutex_unlock(&connectionsMutex);
+        asyncUnlockMutex(&apiConnectionsMutex);
         WERR(c->fd,BRLAPI_ERROR_NOMEM, "no memory for new tty");
         freeBrailleWindow(&c->brailleWindow);
   	return 0;
@@ -864,7 +880,7 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
     tty = tty2;
   }
   if (c->tty) {
-    pthread_mutex_unlock(&connectionsMutex);
+    asyncUnlockMutex(&apiConnectionsMutex);
     if (c->tty == tty) {
       if (c->how==how) {
 	WERR(c->fd, BRLAPI_ERROR_ILLEGAL_INSTRUCTION, "already controlling tty %#010x", c->tty->number);
@@ -887,7 +903,7 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
   c->how = how;
   __removeConnection(c);
   __addConnection(c,tty->connections);
-  pthread_mutex_unlock(&connectionsMutex);
+  asyncUnlockMutex(&apiConnectionsMutex);
   writeAck(c->fd);
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "taking control of tty %#010x (how=%d)",tty->number,how);
   return 0;
@@ -910,10 +926,10 @@ static void doLeaveTty(Connection *c)
   Tty *tty = c->tty;
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "releasing tty %#010x",tty->number);
   c->tty = NULL;
-  pthread_mutex_lock(&connectionsMutex);
+  asyncLockMutex(&apiConnectionsMutex);
   __removeConnection(c);
   __addConnection(c,notty.connections);
-  pthread_mutex_unlock(&connectionsMutex);
+  asyncUnlockMutex(&apiConnectionsMutex);
   freeKeyrangeList(&c->acceptedKeys);
   freeBrailleWindow(&c->brailleWindow);
 }
@@ -936,7 +952,7 @@ static int handleKeyRanges(Connection *c, brlapi_packetType_t type, brlapi_packe
   CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   CHECKERR(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
   CHECKERR(!(size%2*sizeof(brlapi_keyCode_t)),BRLAPI_ERROR_INVALID_PACKET,"wrong packet size");
-  pthread_mutex_lock(&c->acceptedKeysMutex);
+  asyncLockMutex(&c->acceptedKeysMutex);
   for (i=0; i<size/(2*sizeof(brlapi_keyCode_t)); i++) {
     x = ((brlapi_keyCode_t)ntohl(ints[i][0]) << 32) | ntohl(ints[i][1]);
     y = ((brlapi_keyCode_t)ntohl(ints[i][2]) << 32) | ntohl(ints[i][3]);
@@ -949,7 +965,7 @@ static int handleKeyRanges(Connection *c, brlapi_packetType_t type, brlapi_packe
       break;
     }
   }
-  pthread_mutex_unlock(&c->acceptedKeysMutex);
+  asyncUnlockMutex(&c->acceptedKeysMutex);
   if (!res) writeAck(c->fd);
   return 0;
 }
@@ -1066,25 +1082,25 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
       CHECKEXC(!sin, BRLAPI_ERROR_INVALID_PACKET, "text too big");
       CHECKEXC(!sout, BRLAPI_ERROR_INVALID_PACKET, "text too small");
       if (coreCharset) unlockCharset();
-      pthread_mutex_lock(&c->brlMutex);
+      asyncLockMutex(&c->brailleWindowMutex);
       memcpy(c->brailleWindow.text+rbeg-1,textBuf,rsiz*sizeof(wchar_t));
     } else
 #endif /* HAVE_ICONV_H */
     {
       int i;
-      pthread_mutex_lock(&c->brlMutex);
+      asyncLockMutex(&c->brailleWindowMutex);
       for (i=0; i<rsiz; i++)
 	/* assume latin1 */
         c->brailleWindow.text[rbeg-1+i] = text[i];
     }
     if (!andAttr) memset(c->brailleWindow.andAttr+rbeg-1,0xFF,rsiz);
     if (!orAttr)  memset(c->brailleWindow.orAttr+rbeg-1,0x00,rsiz);
-  } else pthread_mutex_lock(&c->brlMutex);
+  } else asyncLockMutex(&c->brailleWindowMutex);
   if (andAttr) memcpy(c->brailleWindow.andAttr+rbeg-1,andAttr,rsiz);
   if (orAttr) memcpy(c->brailleWindow.orAttr+rbeg-1,orAttr,rsiz);
   if (cursor>=0) c->brailleWindow.cursor = cursor;
   c->brlbufstate = TODISPLAY;
-  pthread_mutex_unlock(&c->brlMutex);
+  asyncUnlockMutex(&c->brailleWindowMutex);
   asyncSignalEvent(flushEvent, NULL);
   return 0;
 }
@@ -1108,23 +1124,23 @@ static int handleEnterRawMode(Connection *c, brlapi_packetType_t type, brlapi_pa
   CHECKERR(!c->raw, BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   if (!checkDriverSpecificModePacket(c, packet, size)) return 0;
   CHECKERR(isRawCapable(trueBraille), BRLAPI_ERROR_OPNOTSUPP, "driver doesn't support Raw mode");
-  pthread_mutex_lock(&rawMutex);
+  asyncLockMutex(&apiRawMutex);
   if (rawConnection || suspendConnection) {
     WERR(c->fd,BRLAPI_ERROR_DEVICEBUSY,"driver busy (%s)", rawConnection?"raw":"suspend");
-    pthread_mutex_unlock(&rawMutex);
+    asyncUnlockMutex(&apiRawMutex);
     return 0;
   }
-  pthread_mutex_lock(&driverMutex);
+  asyncLockMutex(&apiDriverMutex);
   if (!driverConstructed && (!disp || !resumeDriver(disp))) {
     WERR(c->fd, BRLAPI_ERROR_DRIVERERROR,"driver resume error");
-    pthread_mutex_unlock(&driverMutex);
-    pthread_mutex_unlock(&rawMutex);
+    asyncUnlockMutex(&apiDriverMutex);
+    asyncUnlockMutex(&apiRawMutex);
     return 0;
   }
-  pthread_mutex_unlock(&driverMutex);
+  asyncUnlockMutex(&apiDriverMutex);
   c->raw = 1;
   rawConnection = c;
-  pthread_mutex_unlock(&rawMutex);
+  asyncUnlockMutex(&apiRawMutex);
   writeAck(c->fd);
   return 0;
 }
@@ -1133,10 +1149,10 @@ static int handleLeaveRawMode(Connection *c, brlapi_packetType_t type, brlapi_pa
 {
   CHECKERR(c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of raw mode");
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "going out of raw mode");
-  pthread_mutex_lock(&rawMutex);
+  asyncLockMutex(&apiRawMutex);
   c->raw = 0;
   rawConnection = NULL;
-  pthread_mutex_unlock(&rawMutex);
+  asyncUnlockMutex(&apiRawMutex);
   writeAck(c->fd);
   return 0;
 }
@@ -1144,9 +1160,9 @@ static int handleLeaveRawMode(Connection *c, brlapi_packetType_t type, brlapi_pa
 static int handlePacket(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
   CHECKEXC(c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of raw mode");
-  pthread_mutex_lock(&driverMutex);
+  asyncLockMutex(&apiDriverMutex);
   trueBraille->writePacket(disp,&packet->data,size);
-  pthread_mutex_unlock(&driverMutex);
+  asyncUnlockMutex(&apiDriverMutex);
   return 0;
 }
 
@@ -1154,18 +1170,18 @@ static int handleSuspendDriver(Connection *c, brlapi_packetType_t type, brlapi_p
 {
   if (!checkDriverSpecificModePacket(c, packet, size)) return 0;
   CHECKERR(!c->suspend,BRLAPI_ERROR_ILLEGAL_INSTRUCTION, "not allowed in suspend mode");
-  pthread_mutex_lock(&rawMutex);
+  asyncLockMutex(&apiRawMutex);
   if (suspendConnection || rawConnection) {
     WERR(c->fd, BRLAPI_ERROR_DEVICEBUSY,"driver busy (%s)", rawConnection?"raw":"suspend");
-    pthread_mutex_unlock(&rawMutex);
+    asyncUnlockMutex(&apiRawMutex);
     return 0;
   }
   c->suspend = 1;
   suspendConnection = c;
-  pthread_mutex_unlock(&rawMutex);
-  pthread_mutex_lock(&driverMutex);
+  asyncUnlockMutex(&apiRawMutex);
+  asyncLockMutex(&apiDriverMutex);
   if (driverConstructed) suspendDriver(disp);
-  pthread_mutex_unlock(&driverMutex);
+  asyncUnlockMutex(&apiDriverMutex);
   writeAck(c->fd);
   return 0;
 }
@@ -1173,13 +1189,13 @@ static int handleSuspendDriver(Connection *c, brlapi_packetType_t type, brlapi_p
 static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
   CHECKERR(c->suspend,BRLAPI_ERROR_ILLEGAL_INSTRUCTION, "not allowed out of suspend mode");
-  pthread_mutex_lock(&rawMutex);
+  asyncLockMutex(&apiRawMutex);
   c->suspend = 0;
   suspendConnection = NULL;
-  pthread_mutex_unlock(&rawMutex);
-  pthread_mutex_lock(&driverMutex);
+  asyncUnlockMutex(&apiRawMutex);
+  asyncLockMutex(&apiDriverMutex);
   if (!driverConstructed) resumeDriver(disp);
-  pthread_mutex_unlock(&driverMutex);
+  asyncUnlockMutex(&apiDriverMutex);
   writeAck(c->fd);
   return 0;
 }
@@ -1311,25 +1327,25 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
       logMessage(LOG_CATEGORY(SERVER_EVENTS), "closing connection on fd %"PRIfd,c->fd);
     }
     if (c->raw) {
-      pthread_mutex_lock(&rawMutex);
+      asyncLockMutex(&apiRawMutex);
       c->raw = 0;
       rawConnection = NULL;
       logMessage(LOG_WARNING,"Client on fd %"PRIfd" did not give up raw mode properly",c->fd);
-      pthread_mutex_lock(&driverMutex);
+      asyncLockMutex(&apiDriverMutex);
       logMessage(LOG_WARNING,"Trying to reset braille terminal");
       if (!trueBraille->reset || !disp || !trueBraille->reset(disp)) {
 	if (trueBraille->reset)
           logMessage(LOG_WARNING,"Reset failed. Restarting braille driver");
         restartBrailleDriver();
       }
-      pthread_mutex_unlock(&driverMutex);
-      pthread_mutex_unlock(&rawMutex);
+      asyncUnlockMutex(&apiDriverMutex);
+      asyncUnlockMutex(&apiRawMutex);
     } else if (c->suspend) {
-      pthread_mutex_lock(&rawMutex);
+      asyncLockMutex(&apiRawMutex);
       c->suspend = 0;
       suspendConnection = NULL;
       logMessage(LOG_WARNING,"Client on fd %"PRIfd" did not give up suspended mode properly",c->fd);
-      pthread_mutex_lock(&driverMutex);
+      asyncLockMutex(&apiDriverMutex);
       if (!driverConstructed && (!disp || !resumeDriver(disp)))
 	logMessage(LOG_WARNING,"Couldn't resume braille driver");
       if (driverConstructed && trueBraille->reset) {
@@ -1337,8 +1353,8 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
 	if (!trueBraille->reset(disp))
 	  logMessage(LOG_WARNING,"Resetting braille terminal failed, hoping it's ok");
       }
-      pthread_mutex_unlock(&driverMutex);
-      pthread_mutex_unlock(&rawMutex);
+      asyncUnlockMutex(&apiDriverMutex);
+      asyncUnlockMutex(&apiRawMutex);
     }
     if (c->tty) {
       logMessage(LOG_CATEGORY(SERVER_EVENTS), "client on fd %"PRIfd" did not give up control of tty %#010x properly",c->fd,c->tty->number);
@@ -2006,10 +2022,10 @@ static void handleTtyFds(fd_set *fds, time_t currentTime, Tty *tty) {
   if (tty!=&ttys && tty!=&notty
       && tty->connections->next == tty->connections && !tty->subttys) {
     logMessage(LOG_CATEGORY(SERVER_EVENTS), "freeing tty %#010x",tty->number);
-    pthread_mutex_lock(&connectionsMutex);
+    asyncLockMutex(&apiConnectionsMutex);
     removeTty(tty);
     freeTty(tty);
-    pthread_mutex_unlock(&connectionsMutex);
+    asyncUnlockMutex(&apiConnectionsMutex);
   }
 }
 
@@ -2168,10 +2184,10 @@ ASYNC_THREAD_FUNCTION(runServer) {
       }
     }
 
-    pthread_mutex_lock(&connectionsMutex);
+    asyncLockMutex(&apiConnectionsMutex);
     addTtyFds(&lpHandles, &nbAlloc, &nbHandles, &notty);
     addTtyFds(&lpHandles, &nbAlloc, &nbHandles, &ttys);
-    pthread_mutex_unlock(&connectionsMutex);
+    asyncUnlockMutex(&apiConnectionsMutex);
 
     if (!nbHandles) {
       free(lpHandles);
@@ -2204,10 +2220,10 @@ ASYNC_THREAD_FUNCTION(runServer) {
       }
     }
 
-    pthread_mutex_lock(&connectionsMutex);
+    asyncLockMutex(&apiConnectionsMutex);
     addTtyFds(&sockset, &fdmax, &notty);
     addTtyFds(&sockset, &fdmax, &ttys);
-    pthread_mutex_unlock(&connectionsMutex);
+    asyncUnlockMutex(&apiConnectionsMutex);
 
     tv.tv_sec = 1;
     tv.tv_usec = 0;
@@ -2499,15 +2515,15 @@ static int api_writeWindow(BrailleDisplay *brl, const wchar_t *text)
   memcpy(coreWindowDots, brl->buffer, displaySize * sizeof(*coreWindowDots));
   coreWindowCursor = brl->cursor;
   setCurrentRootTty();
-  pthread_mutex_lock(&connectionsMutex);
-  pthread_mutex_lock(&rawMutex);
+  asyncLockMutex(&apiConnectionsMutex);
+  asyncLockMutex(&apiRawMutex);
   if (!offline && !suspendConnection && !rawConnection && !whoFillsTty(&ttys)) {
-    pthread_mutex_lock(&driverMutex);
+    asyncLockMutex(&apiDriverMutex);
     if (!trueBraille->writeWindow(brl, text)) ok = 0;
-    pthread_mutex_unlock(&driverMutex);
+    asyncUnlockMutex(&apiDriverMutex);
   }
-  pthread_mutex_unlock(&rawMutex);
-  pthread_mutex_unlock(&connectionsMutex);
+  asyncUnlockMutex(&apiRawMutex);
+  asyncUnlockMutex(&apiConnectionsMutex);
   return ok;
 }
 
@@ -2519,9 +2535,9 @@ static Connection *whoGetsKey(Tty *tty, brlapi_keyCode_t code, unsigned int how)
   Tty *t;
   int passKey;
   for (c=tty->connections->next; c!=tty->connections; c = c->next) {
-    pthread_mutex_lock(&c->acceptedKeysMutex);
+    asyncLockMutex(&c->acceptedKeysMutex);
     passKey = (c->how==how) && (inKeyrangeList(c->acceptedKeys,code) != NULL);
-    pthread_mutex_unlock(&c->acceptedKeysMutex);
+    asyncUnlockMutex(&c->acceptedKeysMutex);
     if (passKey) goto found;
   }
   c = NULL;
@@ -2540,10 +2556,10 @@ static void broadcastKey(Tty *tty, brlapi_keyCode_t code, unsigned int how) {
   Connection *c;
   Tty *t;
   for (c=tty->connections->next; c!=tty->connections; c = c->next) {
-    pthread_mutex_lock(&c->acceptedKeysMutex);
+    asyncLockMutex(&c->acceptedKeysMutex);
     if ((c->how==how) && (inKeyrangeList(c->acceptedKeys,code) != NULL))
       writeKey(c->fd,code);
-    pthread_mutex_unlock(&c->acceptedKeysMutex);
+    asyncUnlockMutex(&c->acceptedKeysMutex);
   }
   for (t = tty->subttys; t; t = t->next)
     broadcastKey(t, code, how);
@@ -2572,9 +2588,9 @@ int api_handleKeyEvent(unsigned char set, unsigned char key, int press) {
   clientCode = ((brlapi_keyCode_t)set << 8) | key | ((brlapi_keyCode_t)press << 63);
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "API got key %02x %02x (press %d), thus client code %016"BRLAPI_PRIxKEYCODE, set, key, press, clientCode);
 
-  pthread_mutex_lock(&connectionsMutex);
+  asyncLockMutex(&apiConnectionsMutex);
   ret = api__handleKeyEvent(clientCode);
-  pthread_mutex_unlock(&connectionsMutex);
+  asyncUnlockMutex(&apiConnectionsMutex);
   return ret;
 }
 
@@ -2609,9 +2625,9 @@ static int api__handleCommand(int command) {
 }
 
 int api_handleCommand(int command) {
-  pthread_mutex_lock(&connectionsMutex);
+  asyncLockMutex(&apiConnectionsMutex);
   command = api__handleCommand(command);
-  pthread_mutex_unlock(&connectionsMutex);
+  asyncUnlockMutex(&apiConnectionsMutex);
   return command;
 }
 
@@ -2624,34 +2640,34 @@ static int api_readCommand(BrailleDisplay *brl, KeyTableCommandContext context) 
   int res;
   int command = EOF;
 
-  pthread_mutex_lock(&connectionsMutex);
-  pthread_mutex_lock(&rawMutex);
+  asyncLockMutex(&apiConnectionsMutex);
+  asyncLockMutex(&apiRawMutex);
   if (suspendConnection || !driverConstructed) {
-    pthread_mutex_unlock(&rawMutex);
+    asyncUnlockMutex(&apiRawMutex);
     goto out;
   }
   if (rawConnection!=NULL) {
-    pthread_mutex_lock(&driverMutex);
+    asyncLockMutex(&apiDriverMutex);
     size = trueBraille->readPacket(brl, &packet.data, BRLAPI_MAXPACKETSIZE);
-    pthread_mutex_unlock(&driverMutex);
+    asyncUnlockMutex(&apiDriverMutex);
     if (size<0)
       writeException(rawConnection->fd, BRLAPI_ERROR_DRIVERERROR, BRLAPI_PACKET_PACKET, NULL, 0);
     else if (size)
       brlapiserver_writePacket(rawConnection->fd,BRLAPI_PACKET_PACKET,&packet.data,size);
-    pthread_mutex_unlock(&rawMutex);
+    asyncUnlockMutex(&apiRawMutex);
     goto out;
   }
   if ((context == KTB_CTX_DEFAULT) && retainDots) context = KTB_CTX_CHORDS;
-  pthread_mutex_lock(&driverMutex);
+  asyncLockMutex(&apiDriverMutex);
   res = trueBraille->readCommand(brl,context);
-  pthread_mutex_unlock(&driverMutex);
+  asyncUnlockMutex(&apiDriverMutex);
   if (brl->resizeRequired)
     handleResize(brl);
   command = res;
   /* some client may get raw mode only from now */
-  pthread_mutex_unlock(&rawMutex);
+  asyncUnlockMutex(&apiRawMutex);
 out:
-  pthread_mutex_unlock(&connectionsMutex);
+  asyncUnlockMutex(&apiConnectionsMutex);
   return command;
 }
 
@@ -2664,22 +2680,22 @@ static int flushWrites(BrailleDisplay *brl) {
   int drain = 0;
   unsigned char newCursorShape;
 
-  pthread_mutex_lock(&connectionsMutex);
-  pthread_mutex_lock(&rawMutex);
+  asyncLockMutex(&apiConnectionsMutex);
+  asyncLockMutex(&apiRawMutex);
   if (suspendConnection) {
-    pthread_mutex_unlock(&rawMutex);
+    asyncUnlockMutex(&apiRawMutex);
     goto out;
   }
   setCurrentRootTty();
   c = whoFillsTty(&ttys);
   if (!offline && c) {
-    pthread_mutex_lock(&c->brlMutex);
-    pthread_mutex_lock(&driverMutex);
+    asyncLockMutex(&c->brailleWindowMutex);
+    asyncLockMutex(&apiDriverMutex);
     if (!driverConstructed) {
       if (!resumeDriver(brl)) {
-	pthread_mutex_unlock(&driverMutex);
-	pthread_mutex_unlock(&c->brlMutex);
-        pthread_mutex_unlock(&rawMutex);
+	asyncUnlockMutex(&apiDriverMutex);
+	asyncUnlockMutex(&c->brailleWindowMutex);
+        asyncUnlockMutex(&apiRawMutex);
 	goto out;
       }
     }
@@ -2696,38 +2712,38 @@ static int flushWrites(BrailleDisplay *brl) {
       drain = 1;
       disp->buffer = oldbuf;
     }
-    pthread_mutex_unlock(&driverMutex);
-    pthread_mutex_unlock(&c->brlMutex);
+    asyncUnlockMutex(&apiDriverMutex);
+    asyncUnlockMutex(&c->brailleWindowMutex);
   } else {
     /* no RAW, no connection filling tty, hence suspend if needed */
-    pthread_mutex_lock(&driverMutex);
+    asyncLockMutex(&apiDriverMutex);
     if (!coreActive) {
       if (driverConstructed) {
 	/* Put back core output before suspending */
 	unsigned char *oldbuf = disp->buffer;
 	disp->buffer = coreWindowDots;
 	brl->cursor = coreWindowCursor;
-	pthread_mutex_lock(&driverMutex);
+	asyncLockMutex(&apiDriverMutex);
 	trueBraille->writeWindow(brl, coreWindowText);
-	pthread_mutex_unlock(&driverMutex);
+	asyncUnlockMutex(&apiDriverMutex);
 	disp->buffer = oldbuf;
 	suspendDriver(brl);
       }
-      pthread_mutex_unlock(&driverMutex);
-      pthread_mutex_unlock(&rawMutex);
+      asyncUnlockMutex(&apiDriverMutex);
+      asyncUnlockMutex(&apiRawMutex);
       goto out;
     }
-    pthread_mutex_unlock(&driverMutex);
+    asyncUnlockMutex(&apiDriverMutex);
   }
   if (!ok) {
-    pthread_mutex_unlock(&rawMutex);
+    asyncUnlockMutex(&apiRawMutex);
     goto out;
   }
   if (drain)
     drainBrailleOutput(brl, 0);
-  pthread_mutex_unlock(&rawMutex);
+  asyncUnlockMutex(&apiRawMutex);
 out:
-  pthread_mutex_unlock(&connectionsMutex);
+  asyncUnlockMutex(&apiConnectionsMutex);
   return ok;
 }
 
@@ -2739,27 +2755,27 @@ ASYNC_EVENT_CALLBACK(handleServerFlushEvent) {
 int api_resume(BrailleDisplay *brl) {
   /* core is resuming or opening the device for the first time, let's try to go
    * to normal state */
-  pthread_mutex_lock(&rawMutex);
-  pthread_mutex_lock(&driverMutex);
+  asyncLockMutex(&apiRawMutex);
+  asyncLockMutex(&apiDriverMutex);
   if (!suspendConnection && !driverConstructed)
     resumeDriver(brl);
-  pthread_mutex_unlock(&driverMutex);
-  pthread_mutex_unlock(&rawMutex);
+  asyncUnlockMutex(&apiDriverMutex);
+  asyncUnlockMutex(&apiRawMutex);
   return (coreActive = driverConstructed);
 }
 
 /* try to get access to device. If suspended, returns 0 */
 int api_claimDriver (BrailleDisplay *brl)
 {
-  pthread_mutex_lock(&suspendMutex);
+  asyncLockMutex(&apiSuspendMutex);
   if (driverConstructed) return 1;
-  pthread_mutex_unlock(&suspendMutex);
+  asyncUnlockMutex(&apiSuspendMutex);
   return 0;
 }
 
 void api_releaseDriver(BrailleDisplay *brl)
 {
-  pthread_mutex_unlock(&suspendMutex);
+  asyncUnlockMutex(&apiSuspendMutex);
 }
 
 void api_suspend(BrailleDisplay *brl) {
@@ -2795,13 +2811,13 @@ void api_link(BrailleDisplay *brl)
   ApiBraille.readPacket = NULL;
   ApiBraille.writePacket = NULL;
   braille=&ApiBraille;
-  pthread_mutex_lock(&driverMutex);
+  asyncLockMutex(&apiDriverMutex);
   brlResize(brl);
   driverConstructed=1;
-  pthread_mutex_unlock(&driverMutex);
-  pthread_mutex_lock(&connectionsMutex);
+  asyncUnlockMutex(&apiDriverMutex);
+  asyncLockMutex(&apiConnectionsMutex);
   broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP, BRL_COMMANDS);
-  pthread_mutex_unlock(&connectionsMutex);
+  asyncUnlockMutex(&apiConnectionsMutex);
 }
 
 /* Function : api_unlink */
@@ -2809,21 +2825,21 @@ void api_link(BrailleDisplay *brl)
 void api_unlink(BrailleDisplay *brl)
 {
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "api unlink");
-  pthread_mutex_lock(&connectionsMutex);
+  asyncLockMutex(&apiConnectionsMutex);
   broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_OFFLINE, BRL_COMMANDS);
-  pthread_mutex_unlock(&connectionsMutex);
+  asyncUnlockMutex(&apiConnectionsMutex);
   free(coreWindowText);
   coreWindowText = NULL;
   free(coreWindowDots);
   coreWindowDots = NULL;
   braille=trueBraille;
   trueBraille=&noBraille;
-  pthread_mutex_lock(&driverMutex);
+  asyncLockMutex(&apiDriverMutex);
   if (!coreActive && driverConstructed)
     suspendDriver(disp);
   driverConstructed=0;
   disp = NULL;
-  pthread_mutex_unlock(&driverMutex);
+  asyncUnlockMutex(&apiDriverMutex);
 }
 
 /* Function : api_identify */
@@ -2916,10 +2932,10 @@ int api_start(BrailleDisplay *brl, char **parameters)
   pthread_mutexattr_init(&mattr);
   pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
 
-  pthread_mutex_init(&connectionsMutex,&mattr);
-  pthread_mutex_init(&driverMutex,&mattr);
-  pthread_mutex_init(&rawMutex,&mattr);
-  pthread_mutex_init(&suspendMutex,&mattr);
+  pthread_mutex_init(&apiConnectionsMutex,&mattr);
+  pthread_mutex_init(&apiDriverMutex,&mattr);
+  pthread_mutex_init(&apiRawMutex,&mattr);
+  pthread_mutex_init(&apiSuspendMutex,&mattr);
 
   pthread_attr_init(&attr);
   pthread_attr_setstacksize(&attr,stackSize);
