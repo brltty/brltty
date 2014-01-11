@@ -35,12 +35,14 @@ typedef void SpeechPitchSetter (SpeechSynthesizer *spk, unsigned char setting);
 typedef void SpeechPunctuationSetter (SpeechSynthesizer *spk, SpeechPunctuation setting);
 
 struct SpeechSynthesizerStruct {
-  SpeechData *data;
+  unsigned canAutospeak:1;
 
   SpeechVolumeSetter *setVolume;
   SpeechRateSetter *setRate;
   SpeechPitchSetter *setPitch;
   SpeechPunctuationSetter *setPunctuation;
+
+  SpeechData *data;
 };
 
 extern void initializeSpeechSynthesizer (SpeechSynthesizer *spk);

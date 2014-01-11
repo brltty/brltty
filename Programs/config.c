@@ -30,6 +30,7 @@
 #include <fcntl.h>
 
 #include "parameters.h"
+#include "update.h"
 #include "cmd.h"
 #include "brl.h"
 #include "spk.h"
@@ -1377,6 +1378,16 @@ exitApiServer (void *data) {
 #endif /* ENABLE_API */
 
 #ifdef ENABLE_SPEECH_SUPPORT
+static AsyncHandle autospeakDelayAlarm = NULL;
+
+ASYNC_ALARM_CALLBACK(handleAutospeakDelayAlarm) {
+  asyncDiscardHandle(autospeakDelayAlarm);
+  autospeakDelayAlarm = NULL;
+
+  spk.canAutospeak = 1;
+  scheduleUpdate("banner spoken");
+}
+
 void
 initializeSpeech (void) {
   initializeSpeechSynthesizer(&spk);
@@ -1486,8 +1497,14 @@ startSpeechDriver (void) {
 
   if (!opt_quiet) {
     char banner[0X100];
+
     makeProgramBanner(banner, sizeof(banner));
     sayString(banner, 1);
+
+    if (asyncSetAlarmIn(&autospeakDelayAlarm, SPEECH_DRIVER_START_AUTOSPEAK_DELAY,
+                        handleAutospeakDelayAlarm, NULL)) {
+      spk.canAutospeak = 0;
+    }
   }
 
   return 1;
@@ -1517,6 +1534,11 @@ static void
 stopSpeechDriver (void) {
   muteSpeech("driver stop");
   deactivateSpeechDriver();
+
+  if (autospeakDelayAlarm) {
+    asyncCancelRequest(autospeakDelayAlarm);
+    autospeakDelayAlarm = NULL;
+  }
 }
 
 void

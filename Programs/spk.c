@@ -37,12 +37,14 @@
 
 void
 initializeSpeechSynthesizer (SpeechSynthesizer *spk) {
-  spk->data = NULL;
+  spk->canAutospeak = 1;
 
   spk->setVolume = NULL;
   spk->setRate = NULL;
   spk->setPitch = NULL;
   spk->setPunctuation = NULL;
+
+  spk->data = NULL;
 }
 
 static SpeechDriverThread *speechDriverThread = NULL;

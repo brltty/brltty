@@ -632,7 +632,7 @@ doUpdate (void) {
   }
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  {
+  if (spk.canAutospeak) {
     int isAutospeaking = autospeak();
 
     if (isAutospeaking) doAutospeak(!wasAutospeaking);
