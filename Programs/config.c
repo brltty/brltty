@@ -1380,12 +1380,29 @@ exitApiServer (void *data) {
 #ifdef ENABLE_SPEECH_SUPPORT
 static AsyncHandle autospeakDelayAlarm = NULL;
 
+static void
+cancelAutospeakDelayAlarm (void) {
+  if (autospeakDelayAlarm) {
+    asyncCancelRequest(autospeakDelayAlarm);
+    autospeakDelayAlarm = NULL;
+  }
+}
+
+void
+endAutospeakDelay (void) {
+  cancelAutospeakDelayAlarm();
+
+  if (!spk.canAutospeak) {
+    spk.canAutospeak = 1;
+    scheduleUpdate("banner spoken");
+  }
+}
+
 ASYNC_ALARM_CALLBACK(handleAutospeakDelayAlarm) {
   asyncDiscardHandle(autospeakDelayAlarm);
   autospeakDelayAlarm = NULL;
 
-  spk.canAutospeak = 1;
-  scheduleUpdate("banner spoken");
+  endAutospeakDelay();
 }
 
 void
@@ -1534,11 +1551,7 @@ static void
 stopSpeechDriver (void) {
   muteSpeech("driver stop");
   deactivateSpeechDriver();
-
-  if (autospeakDelayAlarm) {
-    asyncCancelRequest(autospeakDelayAlarm);
-    autospeakDelayAlarm = NULL;
-  }
+  cancelAutospeakDelayAlarm();
 }
 
 void

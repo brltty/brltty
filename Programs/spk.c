@@ -85,6 +85,8 @@ void
 setSpeechFinished (void) {
   speechTracking = 0;
   speechIndex = SPK_INDEX_NONE;
+
+  endAutospeakDelay();
 }
 
 int
