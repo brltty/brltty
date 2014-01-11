@@ -197,7 +197,7 @@ dia a dia, no web site BRLTTY [http://mielke.cc/brltty]. Composto por:
   ·  Nicolas Pitre
 
      Web
-        http://www.cam.org/~nico/
+        http://www.fluxnic.net/
 
      Email
         <nico@fluxnic.net>
