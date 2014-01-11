@@ -227,6 +227,9 @@ async_thread.$O:
 log.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/log.c
 
+addresses.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/addresses.c
+
 file.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/file.c
 

@@ -44,7 +44,7 @@
 
 #include "log.h"
 #include "timing.h"
-#include "dynld.h"
+#include "addresses.h"
 
 const char *const logLevelNames[] = {
   "emergency", "alert", "critical", "error",
@@ -489,8 +489,8 @@ formatLogSymbolData (char *buffer, size_t size, const void *data) {
   const LogSymbolData *symbol = data;
   size_t length;
 
-  unsigned int offset = 0;
-  const char *name = getSharedSymbolName(symbol->address, &offset);
+  intptr_t offset = 0;
+  const char *name = getAddressName(symbol->address, &offset);
 
   STR_BEGIN(buffer, size);
 
@@ -500,7 +500,7 @@ formatLogSymbolData (char *buffer, size_t size, const void *data) {
 
   if (name && *name) {
     STR_PRINTF("%s", name);
-    if (offset) STR_PRINTF("+0X%X", offset);
+    if (offset) STR_PRINTF("+0X%"PRIXPTR, offset);
   } else {
     STR_PRINTF("%p", symbol->address);
   }

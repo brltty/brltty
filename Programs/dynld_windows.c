@@ -45,6 +45,6 @@ findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
 }
 
 const char *
-getSharedSymbolName (void *address, unsigned int *offset) {
+getSharedSymbolName (void *address, intptr_t *offset) {
   return NULL;
 }

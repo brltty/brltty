@@ -16,33 +16,19 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include "prologue.h"
+#ifndef BRLTTY_INCLUDED_ADDRESSES
+#define BRLTTY_INCLUDED_ADDRESSES
 
-#include <grub/dl.h>
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-#include "dynld.h"
+extern const char *getAddressName (void *address, intptr_t *offset);
+extern int setAddressName (void *address, const char *name);
+extern void unsetAddressName (void *address);
 
-void *
-loadSharedObject (const char *name) {
-  return grub_dl_load(name);
+#ifdef __cplusplus
 }
+#endif /* __cplusplus */
 
-void 
-unloadSharedObject (void *object) {
-  grub_dl_unload(object);
-}
-
-int 
-findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
-  void **address = pointerAddress;
-  grub_symbol_t sym = grub_get_symbol(symbol, object);
-
-  if (!sym) return 0;
-  *address = sym->addr;
-  return 1;
-}
-
-const char *
-getSharedSymbolName (void *address, intptr_t *offset) {
-  return NULL;
-}
+#endif /* BRLTTY_INCLUDED_ADDRESSES */
