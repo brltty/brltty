@@ -30,6 +30,7 @@ does _not_ understand MSYS paths.
 
 ------------------------------------------------------------------------------
 
+
 Windows 98 and Me Limitation
 ============================
 
@@ -67,6 +68,42 @@ to BrlAPI.
 
 ------------------------------------------------------------------------------
 
+
+Cygwin Package Management from the Cygwin Command Line
+======================================================
+
+A convenient way to manage Cygwin packages from the Cygwin command line is to 
+use the "apt-cyg" tool. It is similar to the "apt-get" command which some Linux 
+distributions use. As of the time of this writing, this is how you can install 
+it:
+
+   svn --force export http://apt-cyg.googlecode.com/svn/trunk/ /usr/local/bin/
+   chmod +x /usr/local/bin/apt-cyg
+
+If you're using the 64-bit Cygwin platform, then, after installing apt-cyg, you
+will need to make a couple of simple modifications to it. Using your favourite
+text editor, and remembering that the actual line numbers within your version
+may differ from those quoted below, edit /usr/local/bin/apt-cyg and make the
+following changes:
+
+1) On line 98, change "$mirror/setup.bz2" to "$mirror/x86_64/setup.bz2".
+2) On line 105, change "$mirror/setup.ini" to "$mirror/x86_64/setup.ini".
+
+To search for a package, you can do:
+
+   apt-cyg find pattern
+
+To install a package, you can do:
+
+   apt-cyg install name
+
+For full details, you can do:
+
+   apt-cyg help
+
+------------------------------------------------------------------------------
+
+
 USB Support
 ===========
 
@@ -86,7 +123,7 @@ like "libusb-win32-bin-<version>.exe", and should be available on
 Unpack it in some place.
 
 As of the time of this writing, the libusb-1.0 binary snapshots can be found on
-http://www.libusb.org/wiki/windows_backend . The file will be called something
+[http://www.libusb.org/wiki/windows_backend]. The file will be called something
 like "libusb_<date>.7z". Unpack it in some place.
 
 The Cygwin or MinGW toolchain then needs to get aware of the presence of
@@ -148,6 +185,7 @@ device plug, point at the brltty/hotplug/brltty-libusb-1.0.inf file.
 
 ------------------------------------------------------------------------------
 
+
 Configuring BRLTTY
 ==================
 
@@ -161,6 +199,7 @@ arbitrary directory and so that it can be moved around thereafter as well. This
 option builds BRLTTY such that relative paths are used.
 
 ------------------------------------------------------------------------------
+
 
 Missing Java Class Definitions on Cygwin
 ========================================
@@ -182,6 +221,7 @@ installing it into "/usr/share/java/ecj.jar".
 
 ------------------------------------------------------------------------------
 
+
 Sticking to a console
 =====================
 
@@ -192,6 +232,7 @@ command line (-XFollowFocus=no) or in brltty.conf (screen-parameter
 FollowFocus=no).
 
 ------------------------------------------------------------------------------
+
 
 Sharing the Braille Display with Other Screen Readers
 =====================================================
@@ -210,6 +251,7 @@ window which it can handle. Note that these actions take a noticeable amount of
 time so you should only use this option if it's actually needed.
 
 ------------------------------------------------------------------------------
+
 
 Sharing BRLTTY with JAWS
 ========================
@@ -250,6 +292,7 @@ which word in the title to use as the name of the file set:
 2) If there is at least one slash (/) or backslash (\) in the title then JAWS 
    uses the last word. Thus, if the title is "$PWD - Cygwin" then JAWS will 
    similarly load the Cygwin configuration files.
+
 Setting Cygwin's Window Title
 -----------------------------
 
@@ -320,4 +363,5 @@ JAWS to regain control. In extreme cases you may need to exit BRLTTY before
 going to Windows.
 
 ------------------------------------------------------------------------------
+
 
