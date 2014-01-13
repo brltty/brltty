@@ -73,6 +73,11 @@ int
 api_handleKeyEvent (unsigned char set, unsigned char key, int press) {
   return 0;
 }
+
+int
+api_flush (BrailleDisplay *brl) {
+  return 0;
+}
 #endif /* ENABLE_API */
 
 int apiStarted;
@@ -120,4 +125,9 @@ apiReleaseDriver (void) {
     api_releaseDriver(&brl);
     driverClaimed = 0;
   }
+}
+
+int
+apiFlush (void) {
+  return api_flush(&brl);
 }

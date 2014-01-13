@@ -2671,10 +2671,10 @@ out:
   return command;
 }
 
-/* Function : flushWrites
+/* Function : api_flush
  * Flush writes to the braille device.
  */
-static int flushWrites(BrailleDisplay *brl) {
+int api_flush(BrailleDisplay *brl) {
   Connection *c;
   int ok = 1;
   int drain = 0;
@@ -2749,7 +2749,7 @@ out:
 
 ASYNC_EVENT_CALLBACK(handleServerFlushEvent) {
   BrailleDisplay *brl = parameters->eventData;
-  flushWrites(brl);
+  api_flush(brl);
 }
 
 int api_resume(BrailleDisplay *brl) {
