@@ -949,19 +949,19 @@ static int getControllingTty(void)
 #ifdef WINDOWS
   if (CHECKGETPROC("kernel32.dll", GetConsoleWindow))
     /* really good guess */
-    if ((tty = (int) GetConsoleWindowProc())) return tty;
-  if ((tty = (int) GetActiveWindow()) || (tty = (int) GetFocus())) {
+    if ((tty = (LONG_PTR) GetConsoleWindowProc())) return tty;
+  if ((tty = (LONG_PTR) GetActiveWindow()) || (tty = (LONG_PTR) GetFocus())) {
     /* good guess, but need to get back up to parent window */
     HWND root = GetDesktopWindow();
-    HWND tmp = (HWND) tty;
+    HWND tmp = (HWND) (LONG_PTR) tty;
     while (1) {
       tmp = GetParent(tmp);
       if (!tmp || tmp == root) return tty;
-      tty = (int) tmp;
+      tty = (LONG_PTR) tmp;
     }
   }
   /* poor guess: assumes that focus is here */
-  if ((tty = (int) GetForegroundWindow())) return tty;
+  if ((tty = (LONG_PTR) GetForegroundWindow())) return tty;
 #endif /* WINDOWS */
 
 #ifdef linux
