@@ -558,22 +558,25 @@ logUnsupportedOperation (const char *name) {
 void
 logWindowsError (DWORD error, const char *action) {
   char *message;
+
   FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
                 NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
                 (char *)&message, 0, NULL);
 
   {
     char *end = strpbrk(message, "\r\n");
+
     if (end) *end = 0;
   }
 
-  logMessage(LOG_ERR, "%s error %ld: %s", action, error, message);
+  logMessage(LOG_ERR, "%s error %d: %s", action, (int)error, message);
   LocalFree(message);
 }
 
 void
 logWindowsSystemError (const char *action) {
   DWORD error = GetLastError();
+
   logWindowsError(error, action);
 }
 
@@ -581,6 +584,7 @@ logWindowsSystemError (const char *action) {
 void
 logWindowsSocketError (const char *action) {
   DWORD error = WSAGetLastError();
+
   logWindowsError(error, action);
 }
 #endif /* __MINGW32__ */
