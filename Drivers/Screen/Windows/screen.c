@@ -176,7 +176,7 @@ currentVirtualTerminal_WindowsScreen (void) {
     consoleOutput = INVALID_HANDLE_VALUE;
   }
 
-  return (int)win;
+  return (LONG_PTR)win;
 }
 
 static void
@@ -338,7 +338,7 @@ doInsertWriteConsoleInput (BOOL down, WCHAR wchar, WORD vk, WORD scancode, DWORD
     if (num == 1) {
       return 1;
     } else {
-      logMessage(LOG_ERR, "inserted %ld keys, expected 1", num);
+      logMessage(LOG_ERR, "inserted %d keys, expected 1", (int)num);
     }
   } else {
     if (GetLastError() == ERROR_CALL_NOT_IMPLEMENTED) {
@@ -347,7 +347,7 @@ doInsertWriteConsoleInput (BOOL down, WCHAR wchar, WORD vk, WORD scancode, DWORD
 	if (num == 1) {
 	  return 1;
 	} else {
-	  logMessage(LOG_ERR, "inserted %ld keys, expected 1", num);
+	  logMessage(LOG_ERR, "inserted %d keys, expected 1", (int)num);
 	}
       }
     }
@@ -481,7 +481,7 @@ insertKey_WindowsScreen (ScreenKey key) {
 
   scancode = MapVirtualKey(vk, 0);
 
-  logMessage(LOG_DEBUG,"wchar %x vk %x scancode %d ks %ld", wchar, vk, scancode, controlKeyState);
+  logMessage(LOG_DEBUG,"wchar %x vk %x scancode %d ks %d", wchar, vk, scancode, (int)controlKeyState);
   if (consoleInput != INVALID_HANDLE_VALUE && !unreadable) {
     logMessage(LOG_DEBUG, "using WriteConsoleInput");
     if (!doInsertWriteConsoleInput(TRUE, wchar, vk, scancode, controlKeyState))
