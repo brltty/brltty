@@ -1265,7 +1265,7 @@ BRLTTY_ARG_PACKAGE([serial], [serial I/O], [termios], [dnl
       ;;
 ])
 
-BRLTTY_ARG_PACKAGE([usb], [USB I/O], [libusb libusb-1.0], [dnl
+BRLTTY_ARG_PACKAGE([usb], [USB I/O], [libusb-1.0 libusb], [dnl
    *android*)
       usb_package="android"
       ;;
