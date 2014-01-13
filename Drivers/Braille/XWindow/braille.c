@@ -439,7 +439,7 @@ static inline Widget crKeyBut(char *name, long keycode, int repeat,
   XtAddCallback(button, Ncallback, KeyPressCB, (XtPointer) keycode);
 #elif defined(USE_WINDOWS)
   button = CreateWindow(WC_BUTTON, name, WS_CHILD | WS_VISIBLE, horizDistance, totlines*CHRY+1+vertDistance, BUTWIDTH, BUTHEIGHT, toplevel, NULL, NULL, NULL);
-  SetWindowLong(button, GWL_USERDATA, (long) keycode);
+  SetWindowLongPtr(button, GWLP_USERDATA, (LONG_PTR) keycode);
 #else /* USE_ */
 #error Toolkit button creation unspecified
 #endif /* USE_ */
@@ -621,7 +621,7 @@ static LRESULT CALLBACK wndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
   if (uMsg == WM_COMMAND) {
     long keypressed;
     hwnd = GET_WM_COMMAND_HWND(wParam, lParam);
-    keypressed = GetWindowLong(hwnd, GWL_USERDATA);
+    keypressed = GetWindowLongPtr(hwnd, GWLP_USERDATA);
     if (keypressed) {
       enqueueCommand(keypressed);
     } else {
@@ -966,10 +966,10 @@ static int generateToplevel(void)
 #endif /* USE_XAW */
 #elif defined(USE_WINDOWS)
       display[y*cols+x] = CreateWindow(WC_BUTTON, " ", WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_PUSHLIKE, x*CHRX, y*CHRY, CHRX, CHRY, toplevel, NULL, NULL, NULL);
-      SetWindowLong(display[y*cols+x], GWL_USERDATA, (long) (BRL_BLK_ROUTE | ((y*cols+x)&BRL_MSK_ARG)));
+      SetWindowLongPtr(display[y*cols+x], GWLP_USERDATA, (LONG_PTR) (BRL_BLK_ROUTE | ((y*cols+x)&BRL_MSK_ARG)));
       if (font) {
         displayb[y*cols+x] = CreateWindowW(WC_BUTTONW, WS_C(" "), WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_PUSHLIKE, x*CHRX, (lines+y)*CHRY, CHRX, CHRY, toplevel, NULL, NULL, NULL);
-        SetWindowLong(displayb[y*cols+x], GWL_USERDATA, (long) (BRL_BLK_ROUTE | ((y*cols+x)&BRL_MSK_ARG)));
+        SetWindowLongPtr(displayb[y*cols+x], GWLP_USERDATA, (LONG_PTR) (BRL_BLK_ROUTE | ((y*cols+x)&BRL_MSK_ARG)));
 	SendMessage(displayb[y*cols+x], WM_SETFONT, (WPARAM) font, TRUE);
       }
 #else /* USE_ */
