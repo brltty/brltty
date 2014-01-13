@@ -833,4 +833,4 @@ using only those drivers which are known to be reliable for this purpose.
 For full documentation, see
 .BR brltty 's
 on-line manual at
-.RB "[" "http://mielke.cc/brltty/doc/Manual-HTML/Manual.html" "]."
+.RB "[" "http://mielke.cc/brltty/documentation.html" "]."

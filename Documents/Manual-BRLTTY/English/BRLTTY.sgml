@@ -244,7 +244,7 @@ This capability:
     Makes it much easier for a braille user to perform boot-time system administration tasks.
 </itemize>
 
-A patch for the <tt/screen/ program is provide
+A patch for the <tt/screen/ program is provided
 (see the <tt/Patches/ subdirectory).
 It allows BRLTTY to access <tt/screen/'s screen image via shared memory,
 and, therefore, allows BRLTTY to be used quite effectively on platforms
