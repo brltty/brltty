@@ -165,7 +165,7 @@ AC_SUBST([$1_package])
 AC_SUBST([$1_includes])
 AC_SUBST([$1_libs])
 AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE_TRANSLATE([$1_package]), [${$1_package}], [Define this to the name of the selected $2 package.])
-BRLTTY_UPPERCASE_ASSIGN([brltty_uc], [use_pkg_$1_${$1_package}])
+BRLTTY_UPPERCASE_ASSIGN([brltty_uc], [use_pkg_$1_${$1_package}], [-.], [__])
 AC_DEFINE_UNQUOTED([${brltty_uc}])
 BRLTTY_SUMMARY_ITEM([$1-package], [$1_package])])
 
