@@ -137,7 +137,7 @@ bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout)
     if ((bcx->socket = socket(PF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM)) != INVALID_SOCKET) {
       if (bind(bcx->socket, (SOCKADDR *)&bcx->local, sizeof(bcx->local)) != SOCKET_ERROR) {
         if (connect(bcx->socket, (SOCKADDR *)&bcx->remote, sizeof(bcx->remote)) != SOCKET_ERROR) {
-          unsigned long nonblocking = 1;
+          unsigned int nonblocking = 1;
 
           if (ioctlsocket(bcx->socket, FIONBIO, &nonblocking) != SOCKET_ERROR) {
             return 1;
@@ -291,7 +291,7 @@ int
 bthAwaitInput (BluetoothConnection *connection, int milliseconds) {
   BluetoothConnectionExtension *bcx = connection->extension;
   fd_set input;
-  struct timeval timeout;
+  TIMEVAL timeout;
 
   FD_ZERO(&input);
   FD_SET(bcx->socket, &input);
