@@ -1744,29 +1744,34 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
   char pids[16];
   pid_t pid;
   int lock,n,done,res;
+  mode_t permissions = S_IRWXU | S_IRWXG | S_IRWXO;
 
-  mode_t oldmode;
   if ((fd = socket(PF_LOCAL, SOCK_STREAM, 0))==-1) {
     logSystemError("socket");
     goto out;
   }
+
   sa.sun_family = AF_LOCAL;
+
   if (lpath+lport+1>sizeof(sa.sun_path)) {
     logMessage(LOG_ERR, "Unix path too long");
     goto outfd;
   }
 
-  oldmode = umask(0);
-  while (mkdir(BRLAPI_SOCKETPATH,01777)<0) {
-    if (errno == EEXIST)
+  while (mkdir(BRLAPI_SOCKETPATH, (permissions | S_ISVTX)) == -1) {
+    if (errno == EEXIST) {
       break;
-    if (errno != EROFS && errno != ENOENT) {
-      logSystemError("making socket directory");
-      goto outmode;
     }
+
+    if ((errno != EROFS) && (errno != ENOENT)) {
+      logSystemError("making socket directory");
+      goto outfd;
+    }
+
     /* read-only, or not mounted yet, wait */
     approximateDelay(1000);
   }
+
   memcpy(sa.sun_path,BRLAPI_SOCKETPATH "/",lpath+1);
   memcpy(sa.sun_path+lpath+1,info->port,lport+1);
   memcpy(tmppath, BRLAPI_SOCKETPATH "/", lpath+1);
@@ -1776,39 +1781,46 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
   tmppath[lpath+2+lport]='_';
   tmppath[lpath+2+lport+1]=0;
   lockpath[lpath+2+lport]=0;
+
   while ((lock = open(tmppath, O_WRONLY|O_CREAT|O_EXCL, 
-                      S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1) {
+                      (permissions & (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)))) == -1) {
     if (errno == EROFS) {
       approximateDelay(1000);
       continue;
     }
+
     if (errno != EEXIST) {
       logSystemError("opening local socket lock");
-      goto outmode;
+      goto outfd;
     }
+
     if ((pid = readPid(tmppath)) && pid != getpid()
 	&& (kill(pid, 0) != -1 || errno != ESRCH)) {
       logMessage(LOG_ERR,"another BrlAPI server is already listening on %s (file %s exists)",info->port, tmppath);
-      goto outmode;
+      goto outfd;
     }
+
     /* bogus file, myself or non-existent process, remove */
     while (unlink(tmppath)) {
       if (errno != EROFS) {
 	logSystemError("removing stale local socket lock");
-	goto outmode;
+	goto outfd;
       }
+
       approximateDelay(1000);
     }
   }
 
   n = snprintf(pids,sizeof(pids),"%d",getpid());
   done = 0;
+
   while ((res = write(lock,pids+done,n)) < n) {
     if (res == -1) {
       if (errno != ENOSPC) {
 	logSystemError("writing pid in local socket lock");
 	goto outtmp;
       }
+
       approximateDelay(1000);
     } else {
       done += res;
@@ -1816,41 +1828,57 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
     }
   }
 
-  while(1) {
-    if (link(tmppath, lockpath))
+  while (1) {
+    if (link(tmppath, lockpath) == -1) {
       logMessage(LOG_CATEGORY(SERVER_EVENTS), "linking local socket lock: %s", strerror(errno));
       /* but no action: link() might erroneously return errors, see manpage */
-    if (fstat(lock, &st)) {
+    }
+
+    if (fstat(lock, &st) == -1) {
       logSystemError("checking local socket lock");
       goto outtmp;
     }
-    if (st.st_nlink == 2)
+
+    if (st.st_nlink == 2) {
       /* success */
       break;
+    }
+
     /* failed to link */
     if ((pid = readPid(lockpath)) && pid != getpid()
 	&& (kill(pid, 0) != -1 || errno != ESRCH)) {
       logMessage(LOG_ERR,"another BrlAPI server is already listening on %s (file %s exists)",info->port, lockpath);
       goto outtmp;
     }
+
     /* bogus file, myself or non-existent process, remove */
     if (unlink(lockpath)) {
       logSystemError("removing stale local socket lock");
       goto outtmp;
     }
   }
+
   closeFileDescriptor(lock);
-  if (unlink(tmppath))
+
+  if (unlink(tmppath) == -1) {
     logSystemError("removing temp local socket lock");
+  }
+
   if (unlink(sa.sun_path) && errno != ENOENT) {
     logSystemError("removing old socket");
     goto outtmp;
   }
-  if (loopBind(fd, (struct sockaddr *) &sa, sizeof(sa))<0) {
-    logMessage(LOG_WARNING,"bind: %s",strerror(errno));
+
+  if (loopBind(fd, (struct sockaddr *) &sa, sizeof(sa)) == -1) {
+    logMessage(LOG_WARNING, "bind: %s", strerror(errno));
     goto outlock;
   }
-  umask(oldmode);
+
+  if (chmod(sa.sun_path, permissions) == -1) {
+    logMessage(LOG_WARNING, "chmod: %s", strerror(errno));
+    goto outlock;
+  }
+
   if (listen(fd,1)<0) {
     logSystemError("listen");
     goto outlock;
@@ -1861,8 +1889,6 @@ outlock:
   unlink(lockpath);
 outtmp:
   unlink(tmppath);
-outmode:
-  umask(oldmode);
 #endif /* __MINGW32__ */
 outfd:
   closeFileDescriptor(fd);
