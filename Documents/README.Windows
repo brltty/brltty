@@ -108,7 +108,7 @@ USB Support
 ===========
 
 USB devices are supported thanks to the libusb-win32 or libusb-1.0
-packages.
+packages. If both are installed, preferrence is given to libusb-1.0.
 
 Pre-built versions of brltty have USB support compiled in, and the required
 drivers are shipped, you just need to let the installer set them up.
