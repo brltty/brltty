@@ -40,9 +40,9 @@ initializeSpeechSynthesizer (volatile SpeechSynthesizer *spk) {
   spk->canAutospeak = 1;
 
   spk->track.isActive = 0;
-  spk->track.screenNumber = -1;
+  spk->track.screenNumber = SPK_SCR_NONE;
   spk->track.firstLine = 0;
-  spk->track.speechLocation = SPK_INDEX_NONE;
+  spk->track.speechLocation = SPK_LOC_NONE;
 
   spk->setVolume = NULL;
   spk->setRate = NULL;
@@ -84,7 +84,7 @@ tellSpeechFinished (void) {
 void
 setSpeechFinished (void) {
   spk.track.isActive = 0;
-  spk.track.speechLocation = SPK_INDEX_NONE;
+  spk.track.speechLocation = SPK_LOC_NONE;
 
   endAutospeakDelay();
 }

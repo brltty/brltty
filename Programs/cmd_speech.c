@@ -39,7 +39,7 @@ sayScreenRegion (int left, int top, int width, int height, int track, SayMode mo
   spk.track.isActive = track;
   spk.track.screenNumber = scr.number;
   spk.track.firstLine = top;
-  spk.track.speechLocation = SPK_INDEX_NONE;
+  spk.track.speechLocation = SPK_LOC_NONE;
   sayScreenCharacters(characters, count, 0);
 }
 

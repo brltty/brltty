@@ -29,6 +29,9 @@ extern "C" {
 typedef struct SpeechSynthesizerStruct SpeechSynthesizer;
 typedef struct SpeechDataStruct SpeechData;
 
+#define SPK_SCR_NONE -1
+#define SPK_LOC_NONE -1
+
 typedef void SpeechVolumeSetter (volatile SpeechSynthesizer *spk, unsigned char setting);
 typedef void SpeechRateSetter (volatile SpeechSynthesizer *spk, unsigned char setting);
 typedef void SpeechPitchSetter (volatile SpeechSynthesizer *spk, unsigned char setting);
@@ -116,8 +119,6 @@ extern void identifySpeechDriver (const SpeechDriver *driver, int full);
 extern void identifySpeechDrivers (int full);
 extern const SpeechDriver *speech;
 extern const SpeechDriver noSpeech;
-
-#define SPK_INDEX_NONE -1
 
 #ifdef __cplusplus
 }

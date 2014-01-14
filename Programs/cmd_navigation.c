@@ -842,7 +842,7 @@ handleNavigationCommand (int command, void *datga) {
       if (ses->trackCursor) {
 #ifdef ENABLE_SPEECH_SUPPORT
         if (spk.track.isActive && (scr.number == spk.track.screenNumber)) {
-          spk.track.speechLocation = SPK_INDEX_NONE;
+          spk.track.speechLocation = SPK_LOC_NONE;
         } else
 #endif /* ENABLE_SPEECH_SUPPORT */
 
