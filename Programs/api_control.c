@@ -129,5 +129,6 @@ apiReleaseDriver (void) {
 
 int
 apiFlush (void) {
+  if (!apiStarted) return 1;
   return api_flush(&brl);
 }
