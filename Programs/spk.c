@@ -130,7 +130,7 @@ sayUtf8Characters (
 ) {
   if (count) {
     if (immediate) {
-      if (!muteSpeech("say immediate")) {
+      if (!muteSpeech(__func__)) {
         return 0;
       }
     }

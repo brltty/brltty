@@ -34,12 +34,13 @@ sayScreenRegion (int left, int top, int width, int height, int track, SayMode mo
   size_t count = width * height;
   ScreenCharacter characters[count];
 
+  if (mode == sayImmediate) muteSpeech(__func__);
   readScreen(left, top, width, height, characters);
   spk.track.isActive = track;
   spk.track.screenNumber = scr.number;
   spk.track.firstLine = top;
   spk.track.speechLocation = SPK_INDEX_NONE;
-  sayScreenCharacters(characters, count, mode==sayImmediate);
+  sayScreenCharacters(characters, count, 0);
 }
 
 static void
