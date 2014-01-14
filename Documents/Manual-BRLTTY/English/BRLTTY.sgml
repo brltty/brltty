@@ -596,7 +596,7 @@ for any additional display-specific instructions.
         Link all of the drivers into the binary.
         Don't build any of them as dynamically loadable shared objects.
         This word may also be specified as the final element of a driver list.
-        This is how to specify the dfault driver when all the drivers are to be linked in.
+        This is how to specify the default driver when all the drivers are to be linked in.
       <tag/-all/
         Only build those drivers which have been explicitly included via this option.
       <tag/no/
@@ -764,7 +764,7 @@ for any additional display-specific instructions.
         Link all of the drivers into the binary.
         Don't build any of them as dynamically loadable shared objects.
         This word may also be specified as the final element of a driver list.
-        This is how to specify the dfault driver when all the drivers are to be linked in.
+        This is how to specify the default driver when all the drivers are to be linked in.
       <tag/-all/
         Only build those drivers which have been explicitly included via this option.
       <tag/no/
@@ -1366,7 +1366,7 @@ You have two choices if you choose this route.
 <itemize>
   <item>
     If you want it to be started really early
-    but don't need it to be automatially restarted if it dies,
+    but don't need it to be automatically restarted if it dies,
     then add a line like this before the first <tt/:sysinit:/ line which is already in there.
     <tscreen>brl::sysinit:/bin/brltty</tscreen>
   <item>
@@ -1834,7 +1834,7 @@ is rewritten to standard output as contracted braille.
     The maximum length of an output line.
     Each contracted input line is wrapped into as many output lines as necessary.
     If this option isn't specified then there's no limit,
-    and there's a one-to-one correspondance between input and output lines.
+    and there's a one-to-one correspondence between input and output lines.
   <tag><tt/-h/ <tt/--help/</tag>
     Display a summary of the command line options, and then exit.
 </descrip>
@@ -1979,7 +1979,7 @@ in order to find out exactly what its keys do.
 
 BRLTTY commands are referred to by name within this manual.
 If you forget which key(s) on your braille display to use
-for a paticular command, then refer to its driver's help page.
+for a particular command, then refer to its driver's help page.
 The main key you should immediately commit to memory, therefore, is the one
 for the <ref id="command-HELP" name="HELP"> command.
 Use the regular motion keys (as described below) to navigate the help page,
@@ -2441,7 +2441,7 @@ and continues to the end of the line.
 The following directives are recognized:
 <descrip>
   <tag><tt/api-parameters/ <em/name/<tt/=/<em/value/<tt/,/...<label id="configure-api-parameters"></tag>
-    Specify parameters for the Application Programming Interrface.
+    Specify parameters for the Application Programming Interface.
     If the same parameter is specified more than once,
     then its rightmost assignment is used.
     For a description of the parameters accepted by the interface,
@@ -3011,7 +3011,7 @@ BRLTTY keeps trying to route the cursor to the desired location until
 a timeout expires before the cursor reaches that location,
 the cursor seems to be moving in the wrong direction,
 or you switch to a different virtual terminal.
-An attempt is first made to use virtical motion
+An attempt is first made to use vertical motion
 to bring the cursor to the right line,
 and, only if that succeeds, an attempt is then made
 to use horizontal motion to bring the cursor to the right column.
@@ -3226,7 +3226,7 @@ The preferences settings are saved as binary data
 which, therefore, can't be edited by hand.
 BRLTTY, however, has a simple menu from which you can easily change them.
 
-The meny is activated by the <ref id="command-PREFMENU" name="PREFMENU"> command.
+The menu is activated by the <ref id="command-PREFMENU" name="PREFMENU"> command.
 The braille display briefly
 (see the <ref id="options-message-timeout" name="-M"> command line option)
 shows the menu title,
@@ -5361,7 +5361,7 @@ BRLTTY supports the following screen drivers:
 
 <sect>Operand Syntax<p>
 
-<sect1>Driver Specificationn<label id="operand-driver"><p>
+<sect1>Driver Specification<label id="operand-driver"><p>
 A braille display or speech synthesizer driver must be specified
 via its two-letter <ref id="drivers" name="driver identification code">.
 
@@ -5373,7 +5373,7 @@ since some drivers autodetect better than others.
 If the single word <tt/auto/ is specified then autodetection is performed
 using only those drivers which are known to be reliable for this purpose.
 
-<sect1>Braille Device Specificationn<label id="operand-braille-device"><p>
+<sect1>Braille Device Specification<label id="operand-braille-device"><p>
 The general form of a braille device specification
 (see the <ref id="options-braille-device" name="-d"> command line option,
 the <ref id="configure-braille-device" name="braille-device"> configuration file directive,
@@ -5426,7 +5426,7 @@ In this case it's usually better to list the USB port first,
 e.g. <tt>usb:,serial:/dev/ttyS0</tt>,
 since the former tends to autodetect more reliably than the latter.
 
-<sect1>PCM Device Specificationn<label id="operand-pcm-device"><p>
+<sect1>PCM Device Specification<label id="operand-pcm-device"><p>
 In most cases the PCM device is
 the full path to an appropriate system device.
 Exceptions are:
@@ -5450,7 +5450,7 @@ The default PCM device is:
   </tabular>
 </table>
 
-<sect1>MIDI Device Specificationn<label id="operand-midi-device"><p>
+<sect1>MIDI Device Specification<label id="operand-midi-device"><p>
 In most cases the MIDI device is
 the full path to an appropriate system device.
 Exceptions are:
