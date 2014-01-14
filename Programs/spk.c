@@ -47,7 +47,7 @@ initializeSpeechSynthesizer (volatile SpeechSynthesizer *spk) {
   spk->data = NULL;
 }
 
-static SpeechDriverThread *speechDriverThread = NULL;
+static volatile SpeechDriverThread *speechDriverThread = NULL;
 
 int speechTracking = 0;
 int speechScreen = -1;
@@ -68,7 +68,7 @@ startSpeechDriverThread (volatile SpeechSynthesizer *spk, char **parameters) {
 void
 stopSpeechDriverThread (void) {
   if (speechDriverThread) {
-    SpeechDriverThread *sdt = speechDriverThread;
+    volatile SpeechDriverThread *sdt = speechDriverThread;
 
     speechDriverThread = NULL;
     destroySpeechDriverThread(sdt);
