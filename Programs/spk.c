@@ -77,7 +77,6 @@ stopSpeechDriverThread (void) {
 
 int
 tellSpeechFinished (void) {
-  if (!spk.track.isActive) return 1;
   return speechMessage_speechFinished(speechDriverThread);
 }
 
