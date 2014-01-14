@@ -154,7 +154,7 @@ typedef struct {
 
   union {
     struct {
-      int index;
+      int location;
     } speechLocation;
   } arguments;
 
@@ -213,7 +213,7 @@ handleSpeechMessage (volatile SpeechDriverThread *sdt, SpeechMessage *msg) {
         break;
 
       case MSG_SPEECH_LOCATION:
-        setSpeechIndex(msg->arguments.speechLocation.index);
+        setSpeechLocation(msg->arguments.speechLocation.location);
         break;
 
       default:
@@ -270,12 +270,12 @@ speechMessage_speechFinished (
 int
 speechMessage_speechLocation (
   volatile SpeechDriverThread *sdt,
-  int index
+  int location
 ) {
   SpeechMessage *msg;
 
   if ((msg = newSpeechMessage(MSG_SPEECH_LOCATION, NULL))) {
-    msg->arguments.speechLocation.index = index;
+    msg->arguments.speechLocation.location = location;
     if (sendSpeechMessage(sdt, msg)) return 1;
 
     free(msg);

@@ -60,8 +60,8 @@ extern void stopSpeechDriverThread (void);
 extern int tellSpeechFinished (void);
 extern void setSpeechFinished (void);
 
-extern int tellSpeechIndex (int index);
-extern void setSpeechIndex (int index);
+extern int tellSpeechLocation (int index);
+extern void setSpeechLocation (int location);
 
 extern int muteSpeech (const char *reason);
 

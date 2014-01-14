@@ -66,7 +66,7 @@ static int SynthCallback(short *audio, int numsamples, espeak_EVENT *events)
 {
 	while (events->type != espeakEVENT_LIST_TERMINATED) {
 		if (events->type == espeakEVENT_WORD)
-			tellSpeechIndex(events->text_position - 1);
+			tellSpeechLocation(events->text_position - 1);
 		if (events->type == espeakEVENT_MSG_TERMINATED)
 			tellSpeechFinished();
 		events++;

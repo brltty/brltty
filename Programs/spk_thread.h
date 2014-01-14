@@ -73,7 +73,7 @@ extern int speechMessage_speechFinished (
 
 extern int speechMessage_speechLocation (
   volatile SpeechDriverThread *sdt,
-  int index
+  int location
 );
 #endif /* ENABLE_SPEECH_SUPPORT */
 

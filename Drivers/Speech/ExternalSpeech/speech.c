@@ -56,7 +56,7 @@ typedef enum {
 #include "speech.h"
 
 static int helper_fd_in = -1, helper_fd_out = -1;
-static uint16_t finalIndex;
+static uint16_t totalCharacterCount;
 
 #define TRACK_DATA_SIZE 2
 static AsyncHandle trackHandle = NULL;
@@ -134,7 +134,7 @@ static void spk_say(volatile SpeechSynthesizer *spk, const unsigned char *text, 
   mywrite(spk, helper_fd_out, l, 5);
   mywrite(spk, helper_fd_out, text, length);
   if (attributes) mywrite(spk, helper_fd_out, attributes, count);
-  finalIndex = count;
+  totalCharacterCount = count;
 }
 
 static void spk_mute (volatile SpeechSynthesizer *spk)
@@ -168,10 +168,10 @@ ASYNC_INPUT_CALLBACK(xsHandleSpeechTrackingInput) {
     logMessage(LOG_WARNING, "speech tracking end-of-file");
   } else if (parameters->length >= TRACK_DATA_SIZE) {
     const unsigned char *buffer = parameters->buffer;
-    uint16_t index = (buffer[0] << 8) | buffer[1];
+    uint16_t location = (buffer[0] << 8) | buffer[1];
 
-    if (index < finalIndex) {
-      tellSpeechIndex(index);
+    if (location < totalCharacterCount) {
+      tellSpeechLocation(location);
     } else {
       tellSpeechFinished();
     }

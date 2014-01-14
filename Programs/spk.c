@@ -90,17 +90,17 @@ setSpeechFinished (void) {
 }
 
 int
-tellSpeechIndex (int index) {
+tellSpeechLocation (int index) {
   if (!spk.track.isActive) return 1;
   return speechMessage_speechLocation(speechDriverThread, index);
 }
 
 void
-setSpeechIndex (int index) {
+setSpeechLocation (int location) {
   if (spk.track.isActive) {
     if (scr.number == spk.track.screenNumber) {
-      if (index != spk.track.speechLocation) {
-        spk.track.speechLocation = index;
+      if (location != spk.track.speechLocation) {
+        spk.track.speechLocation = location;
         if (ses->trackCursor) trackSpeech();
       }
 
