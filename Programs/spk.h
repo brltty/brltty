@@ -29,10 +29,10 @@ extern "C" {
 typedef struct SpeechSynthesizerStruct SpeechSynthesizer;
 typedef struct SpeechDataStruct SpeechData;
 
-typedef void SpeechVolumeSetter (SpeechSynthesizer *spk, unsigned char setting);
-typedef void SpeechRateSetter (SpeechSynthesizer *spk, unsigned char setting);
-typedef void SpeechPitchSetter (SpeechSynthesizer *spk, unsigned char setting);
-typedef void SpeechPunctuationSetter (SpeechSynthesizer *spk, SpeechPunctuation setting);
+typedef void SpeechVolumeSetter (volatile SpeechSynthesizer *spk, unsigned char setting);
+typedef void SpeechRateSetter (volatile SpeechSynthesizer *spk, unsigned char setting);
+typedef void SpeechPitchSetter (volatile SpeechSynthesizer *spk, unsigned char setting);
+typedef void SpeechPunctuationSetter (volatile SpeechSynthesizer *spk, SpeechPunctuation setting);
 
 struct SpeechSynthesizerStruct {
   unsigned canAutospeak:1;
@@ -45,9 +45,9 @@ struct SpeechSynthesizerStruct {
   SpeechData *data;
 };
 
-extern void initializeSpeechSynthesizer (SpeechSynthesizer *spk);
+extern void initializeSpeechSynthesizer (volatile SpeechSynthesizer *spk);
 
-extern int startSpeechDriverThread (SpeechSynthesizer *spk, char **parameters);
+extern int startSpeechDriverThread (volatile SpeechSynthesizer *spk, char **parameters);
 extern void stopSpeechDriverThread (void);
 
 extern int tellSpeechFinished (void);
@@ -95,11 +95,11 @@ typedef struct {
 
   const char *const *parameters;
 
-  int (*construct) (SpeechSynthesizer *spk, char **parameters);
-  void (*destruct) (SpeechSynthesizer *spk);
+  int (*construct) (volatile SpeechSynthesizer *spk, char **parameters);
+  void (*destruct) (volatile SpeechSynthesizer *spk);
 
-  void (*say) (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes);
-  void (*mute) (SpeechSynthesizer *spk);
+  void (*say) (volatile SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes);
+  void (*mute) (volatile SpeechSynthesizer *spk);
 } SpeechDriver;
 
 extern int haveSpeechDriver (const char *code);

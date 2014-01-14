@@ -29,7 +29,7 @@ extern "C" {
 typedef struct SpeechDriverThreadStruct SpeechDriverThread;
 
 extern SpeechDriverThread *newSpeechDriverThread (
-  SpeechSynthesizer *spk,
+  volatile SpeechSynthesizer *spk,
   char **parameters
 );
 

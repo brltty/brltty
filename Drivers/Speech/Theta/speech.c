@@ -94,7 +94,7 @@ doChild (void) {
 }
 
 static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
+spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
   if (voice) {
     if (child != -1) goto ready;
 
@@ -121,7 +121,7 @@ spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, siz
 }
 
 static void
-spk_mute (SpeechSynthesizer *spk) {
+spk_mute (volatile SpeechSynthesizer *spk) {
   if (child != -1) {
     close(*pipeInput);
     close(*pipeOutput);
@@ -133,17 +133,17 @@ spk_mute (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
+spk_setVolume (volatile SpeechSynthesizer *spk, unsigned char setting) {
   theta_set_rescale(voice, getFloatSpeechVolume(setting), NULL);
 }
 
 static void
-spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
+spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting) {
   theta_set_rate_stretch(voice, 1.0/getFloatSpeechRate(setting), NULL);
 }
 
 static int
-spk_construct (SpeechSynthesizer *spk, char **parameters) {
+spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
   theta_voice_search criteria;
 
   memset(&criteria, 0, sizeof(criteria));
@@ -224,7 +224,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
 }
 
 static void
-spk_destruct (SpeechSynthesizer *spk) {
+spk_destruct (volatile SpeechSynthesizer *spk) {
   spk_mute(spk);
 
   if (voice) {

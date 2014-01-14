@@ -86,7 +86,7 @@ setEnvironmentVariable (const char *name, const char *value) {
 }
 
 static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
+spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
   swift_result_t result;
   swift_background_t job;
 
@@ -96,7 +96,7 @@ spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, siz
 }
 
 static void
-spk_mute (SpeechSynthesizer *spk) {
+spk_mute (volatile SpeechSynthesizer *spk) {
   swift_result_t result;
 
   if ((result = swift_port_stop(swiftPort, SWIFT_ASYNC_CURRENT, SWIFT_EVENT_NOW)) != SWIFT_SUCCESS) {
@@ -105,17 +105,17 @@ spk_mute (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
+spk_setVolume (volatile SpeechSynthesizer *spk, unsigned char setting) {
   setVolume(getIntegerSpeechVolume(setting, 100));
 }
 
 static void
-spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
+spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting) {
   setRate((int)(getFloatSpeechRate(setting) * 170.0));
 }
 
 static int
-spk_construct (SpeechSynthesizer *spk, char **parameters) {
+spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
   swift_result_t result;
 
   spk->setVolume = spk_setVolume;
@@ -170,7 +170,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
 }
 
 static void
-spk_destruct (SpeechSynthesizer *spk) {
+spk_destruct (volatile SpeechSynthesizer *spk) {
   swift_result_t result;
 
   if (swiftPort) {

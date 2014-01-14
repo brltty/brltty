@@ -53,13 +53,13 @@ static	int		*const readfd	= &fds[0];
 static	int		*const writefd	= &fds[1];
 
 static void
-spk_setRate (SpeechSynthesizer *spk, unsigned char setting)
+spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting)
 {
   feat_set_float(voice->features, "duration_stretch", 1.0/getFloatSpeechRate(setting));
 }
 
 static int
-spk_construct (SpeechSynthesizer *spk, char **parameters)
+spk_construct (volatile SpeechSynthesizer *spk, char **parameters)
 {
   spk->setRate = spk_setRate;
 
@@ -82,7 +82,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters)
 }
 
 static void
-spk_destruct (SpeechSynthesizer *spk)
+spk_destruct (volatile SpeechSynthesizer *spk)
 {
   spk_mute(spk);
 
@@ -103,7 +103,7 @@ doChild (void)
 }
 
 static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes)
+spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes)
 {
   if (child != -1) goto ready;
 
@@ -129,7 +129,7 @@ spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, siz
 }
 
 static void
-spk_mute (SpeechSynthesizer *spk)
+spk_mute (volatile SpeechSynthesizer *spk)
 {
   if (child != -1) {
     close(*readfd);

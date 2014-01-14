@@ -36,7 +36,7 @@
 #include "brltty.h"
 
 void
-initializeSpeechSynthesizer (SpeechSynthesizer *spk) {
+initializeSpeechSynthesizer (volatile SpeechSynthesizer *spk) {
   spk->canAutospeak = 1;
 
   spk->setVolume = NULL;
@@ -55,7 +55,7 @@ int speechLine = 0;
 int speechIndex = SPK_INDEX_NONE;
 
 int
-startSpeechDriverThread (SpeechSynthesizer *spk, char **parameters) {
+startSpeechDriverThread (volatile SpeechSynthesizer *spk, char **parameters) {
   if (!speechDriverThread) {
     if (!(speechDriverThread = newSpeechDriverThread(spk, parameters))) {
       return 0;
@@ -113,8 +113,13 @@ setSpeechIndex (int index) {
 
 int
 muteSpeech (const char *reason) {
+  int result;
+
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "mute: %s", reason);
-  return speechRequest_muteSpeech(speechDriverThread);
+  result = speechRequest_muteSpeech(speechDriverThread);
+
+  setSpeechFinished();
+  return result;
 }
 
 int

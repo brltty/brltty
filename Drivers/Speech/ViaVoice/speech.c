@@ -560,7 +560,7 @@ saySegment (ECIHand eci, const unsigned char *buffer, int from, int to) {
 }
 
 static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
+spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
    if (eci) {
       int onSpace = -1;
       int sayFrom = 0;
@@ -591,7 +591,7 @@ spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, siz
 }
 
 static void
-spk_mute (SpeechSynthesizer *spk) {
+spk_mute (volatile SpeechSynthesizer *spk) {
    if (eci) {
       if (eciStop(eci)) {
       } else {
@@ -620,17 +620,17 @@ setExternalUnits (void) {
 }
 
 static void
-spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
+spk_setVolume (volatile SpeechSynthesizer *spk, unsigned char setting) {
    if (setInternalUnits()) setVoiceParameter(eci, "volume", eciVolume, getIntegerSpeechVolume(setting, 100));
 }
 
 static void
-spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
+spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting) {
    if (setExternalUnits()) setVoiceParameter (eci, "rate", eciSpeed, (int)(getFloatSpeechRate(setting) * 210.0));
 }
 
 static int
-spk_construct (SpeechSynthesizer *spk, char **parameters) {
+spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
    spk->setVolume = spk_setVolume;
    spk->setRate = spk_setRate;
 
@@ -679,7 +679,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
 }
 
 static void
-spk_destruct (SpeechSynthesizer *spk) {
+spk_destruct (volatile SpeechSynthesizer *spk) {
    if (eci) {
       eciDelete(eci);
       eci = NULL_ECI_HAND;

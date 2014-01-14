@@ -391,19 +391,19 @@ loadSynthesisLibrary (void) {
 }
 
 static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
+spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
   if (enqueueText(buffer, length))
     enqueueTag("<break time=\"none\"/>");
 }
 
 static void
-spk_mute (SpeechSynthesizer *spk) {
+spk_mute (volatile SpeechSynthesizer *spk) {
   stopSynthesisThread();
   if (pcm) cancelPcmOutput(pcm);
 }
 
 static void
-spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
+spk_setVolume (volatile SpeechSynthesizer *spk, unsigned char setting) {
   char tag[0X40];
   unsigned int percentage = getIntegerSpeechVolume(setting, 100);
   snprintf(tag, sizeof(tag), "<volume level=\"%d\"/>",
@@ -412,7 +412,7 @@ spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
 }
 
 static void
-spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
+spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting) {
   char tag[0X40];
   snprintf(tag, sizeof(tag), "<rate absspeed=\"%d\"/>",
            getIntegerSpeechRate(setting, 10)-10);
@@ -420,7 +420,7 @@ spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
 }
 
 static int
-spk_construct (SpeechSynthesizer *spk, char **parameters) {
+spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
   int code;
 
   spk->setVolume = spk_setVolume;
@@ -475,7 +475,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
 }
 
 static void
-spk_destruct (SpeechSynthesizer *spk) {
+spk_destruct (volatile SpeechSynthesizer *spk) {
   stopSynthesisThread();
   closeSoundDevice();
 

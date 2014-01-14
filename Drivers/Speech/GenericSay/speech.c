@@ -40,7 +40,7 @@ static const char *commandPath;	/* default full path for the say command */
 static FILE *commandStream = NULL;
 
 static int
-spk_construct (SpeechSynthesizer *spk, char **parameters)
+spk_construct (volatile SpeechSynthesizer *spk, char **parameters)
 {
   const char *command = parameters[PARM_COMMAND];
   commandPath = *command? command: SAY_CMD;
@@ -49,7 +49,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters)
 }
 
 static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
+spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
   if (!commandStream) {
     if (!(commandStream = popen(commandPath, "w"))) {
       logMessage(LOG_WARNING, "cannot start command: %s: %s",
@@ -76,7 +76,7 @@ spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, siz
 }
 
 static void
-spk_mute (SpeechSynthesizer *spk)
+spk_mute (volatile SpeechSynthesizer *spk)
 {
   if (commandStream)
     {
@@ -86,7 +86,7 @@ spk_mute (SpeechSynthesizer *spk)
 }
 
 static void
-spk_destruct (SpeechSynthesizer *spk)
+spk_destruct (volatile SpeechSynthesizer *spk)
 {
    spk_mute(spk);
 }

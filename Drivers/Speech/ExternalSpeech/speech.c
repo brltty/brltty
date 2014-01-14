@@ -62,7 +62,7 @@ static uint16_t finalIndex;
 static AsyncHandle trackHandle = NULL;
 
 #define ERRBUFLEN 200
-static void myerror(SpeechSynthesizer *spk, char *fmt, ...)
+static void myerror(volatile SpeechSynthesizer *spk, char *fmt, ...)
 {
   char buf[ERRBUFLEN];
   int offs;
@@ -77,7 +77,7 @@ static void myerror(SpeechSynthesizer *spk, char *fmt, ...)
   logMessage(LOG_ERR, "%s", buf);
   spk_destruct(spk);
 }
-static void myperror(SpeechSynthesizer *spk, char *fmt, ...)
+static void myperror(volatile SpeechSynthesizer *spk, char *fmt, ...)
 {
   char buf[ERRBUFLEN];
   int offs;
@@ -95,7 +95,7 @@ static void myperror(SpeechSynthesizer *spk, char *fmt, ...)
   spk_destruct(spk);
 }
 
-static void mywrite(SpeechSynthesizer *spk, int fd, const void *buf, int len)
+static void mywrite(volatile SpeechSynthesizer *spk, int fd, const void *buf, int len)
 {
   char *pos = (char *)buf;
   int w;
@@ -117,7 +117,7 @@ static void mywrite(SpeechSynthesizer *spk, int fd, const void *buf, int len)
     myerror(spk, "ExternalSpeech: pipe to helper program: write timed out");
 }
 
-static void spk_say(SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes)
+static void spk_say(volatile SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes)
 {
   unsigned char l[5];
   if(helper_fd_out < 0) return;
@@ -137,7 +137,7 @@ static void spk_say(SpeechSynthesizer *spk, const unsigned char *text, size_t le
   finalIndex = count;
 }
 
-static void spk_mute (SpeechSynthesizer *spk)
+static void spk_mute (volatile SpeechSynthesizer *spk)
 {
   unsigned char c = 1;
   if(helper_fd_out < 0) return;
@@ -145,7 +145,7 @@ static void spk_mute (SpeechSynthesizer *spk)
   mywrite(spk, helper_fd_out, &c,1);
 }
 
-static void spk_setRate (SpeechSynthesizer *spk, unsigned char setting)
+static void spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting)
 {
   float expand = 1.0 / getFloatSpeechRate(setting); 
   unsigned char *p = (unsigned char *)&expand;
@@ -182,7 +182,7 @@ ASYNC_INPUT_CALLBACK(xsHandleSpeechTrackingInput) {
   return 0;
 }
 
-static int spk_construct (SpeechSynthesizer *spk, char **parameters)
+static int spk_construct (volatile SpeechSynthesizer *spk, char **parameters)
 {
   char *extProgPath = parameters[PARM_PROGRAM];
 
@@ -321,11 +321,11 @@ static int spk_construct (SpeechSynthesizer *spk, char **parameters)
   logMessage(LOG_INFO,"Opened pipe to external speech program '%s'",
 	     extProgPath);
 
-  asyncReadFile(&trackHandle, helper_fd_in, TRACK_DATA_SIZE*10, xsHandleSpeechTrackingInput, spk);
+  asyncReadFile(&trackHandle, helper_fd_in, TRACK_DATA_SIZE*10, xsHandleSpeechTrackingInput, NULL);
   return 1;
 }
 
-static void spk_destruct (SpeechSynthesizer *spk)
+static void spk_destruct (volatile SpeechSynthesizer *spk)
 {
   if(trackHandle)
     asyncCancelRequest(trackHandle);

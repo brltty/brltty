@@ -76,7 +76,7 @@ typedef enum {
 struct SpeechDriverThreadStruct {
   ThreadState threadState;
 
-  SpeechSynthesizer *speechSynthesizer;
+  volatile SpeechSynthesizer *speechSynthesizer;
   char **driverParameters;
 
 #ifdef ASYNC_CAN_HANDLE_THREADS
@@ -620,7 +620,7 @@ ASYNC_THREAD_FUNCTION(runSpeechDriverThread) {
 
 SpeechDriverThread *
 newSpeechDriverThread (
-  SpeechSynthesizer *spk,
+  volatile SpeechSynthesizer *spk,
   char **parameters
 ) {
   SpeechDriverThread *sdt;

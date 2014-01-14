@@ -45,7 +45,7 @@ typedef enum {
 static int maxrate = espeakRATE_MAXIMUM;
 
 static void
-spk_say(SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes)
+spk_say(volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes)
 {
 	int result;
 
@@ -57,7 +57,7 @@ spk_say(SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size
 }
 
 static void
-spk_mute(SpeechSynthesizer *spk)
+spk_mute(volatile SpeechSynthesizer *spk)
 {
 	espeak_Cancel();
 }
@@ -75,14 +75,14 @@ static int SynthCallback(short *audio, int numsamples, espeak_EVENT *events)
 }
 
 static void
-spk_setVolume(SpeechSynthesizer *spk, unsigned char setting)
+spk_setVolume(volatile SpeechSynthesizer *spk, unsigned char setting)
 {
 	int volume = getIntegerSpeechVolume(setting, 50);
 	espeak_SetParameter(espeakVOLUME, volume, 0);
 }
 
 static void
-spk_setRate(SpeechSynthesizer *spk, unsigned char setting)
+spk_setRate(volatile SpeechSynthesizer *spk, unsigned char setting)
 {
 	int h_range = (maxrate - espeakRATE_MINIMUM)/2;
 	int rate = getIntegerSpeechRate(setting, h_range) + espeakRATE_MINIMUM;
@@ -90,14 +90,14 @@ spk_setRate(SpeechSynthesizer *spk, unsigned char setting)
 }
 
 static void
-spk_setPitch(SpeechSynthesizer *spk, unsigned char setting)
+spk_setPitch(volatile SpeechSynthesizer *spk, unsigned char setting)
 {
 	int pitch = getIntegerSpeechPitch(setting, 50);
 	espeak_SetParameter(espeakPITCH, pitch, 0);
 }
 
 static void
-spk_setPunctuation(SpeechSynthesizer *spk, SpeechPunctuation setting)
+spk_setPunctuation(volatile SpeechSynthesizer *spk, SpeechPunctuation setting)
 {
 	espeak_PUNCT_TYPE punct;
 	if (setting <= SPK_PUNCTUATION_NONE)
@@ -109,7 +109,7 @@ spk_setPunctuation(SpeechSynthesizer *spk, SpeechPunctuation setting)
 	espeak_SetParameter(espeakPUNCTUATION, punct, 0);
 }
 
-static int spk_construct(SpeechSynthesizer *spk, char **parameters)
+static int spk_construct(volatile SpeechSynthesizer *spk, char **parameters)
 {
 	char *data_path, *voicename, *punctlist;
 	int result;
@@ -163,7 +163,7 @@ static int spk_construct(SpeechSynthesizer *spk, char **parameters)
 	return 1;
 }
 
-static void spk_destruct(SpeechSynthesizer *spk)
+static void spk_destruct(volatile SpeechSynthesizer *spk)
 {
 	espeak_Cancel();
 	espeak_Terminate();

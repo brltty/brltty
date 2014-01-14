@@ -54,14 +54,14 @@ static unsigned char latin2cp437[0X80] =
    176, 151, 163, 150, 129, 178, 254, 152};
 
 static int
-spk_construct (SpeechSynthesizer *spk, char **parameters)
+spk_construct (volatile SpeechSynthesizer *spk, char **parameters)
 {
   return 1;
 }
 
 
 static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t len, size_t count, const unsigned char *attributes)
+spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t len, size_t count, const unsigned char *attributes)
 {
   unsigned char *pre_speech = (unsigned char *)PRE_SPEECH;
   unsigned char *post_speech = (unsigned char *)POST_SPEECH;
@@ -97,7 +97,7 @@ spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t len, size_t
 
 
 static void
-spk_mute (SpeechSynthesizer *spk)
+spk_mute (volatile SpeechSynthesizer *spk)
 {
   unsigned char *mute_seq = (unsigned char *)MUTE_SEQ;
   serialWriteData (MB_serialDevice, mute_seq+1, mute_seq[0]);
@@ -105,6 +105,6 @@ spk_mute (SpeechSynthesizer *spk)
 
 
 static void
-spk_destruct (SpeechSynthesizer *spk)
+spk_destruct (volatile SpeechSynthesizer *spk)
 {
 }
