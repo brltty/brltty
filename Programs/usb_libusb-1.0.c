@@ -294,12 +294,12 @@ usbReadEndpoint (
       }
 
       if (result == LIBUSB_SUCCESS) {
-        if (!usbApplyInputFilters(device, buffer, length, &result)) {
-          result = LIBUSB_ERROR_IO;
-        }
+        ssize_t count = result;
+
+        if (usbApplyInputFilters(device, buffer, length, &count)) return count;
+        result = LIBUSB_ERROR_IO;
       }
 
-      if (result == LIBUSB_SUCCESS) return actual_length;
       usbSetErrno(result, NULL);
     }
   }
