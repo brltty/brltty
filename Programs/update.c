@@ -324,7 +324,7 @@ doAutospeak (int force) {
 
   readScreen(0, ses->winy, newWidth, 1, newCharacters);
 
-  if (!speechTracking) {
+  if (!spk.track.isActive) {
     const ScreenCharacter *characters = newCharacters;
     int column = 0;
     int count = newWidth;
@@ -598,7 +598,7 @@ doUpdate (void) {
 
   if (ses->trackCursor) {
 #ifdef ENABLE_SPEECH_SUPPORT
-    if (!speechTracking)
+    if (!spk.track.isActive)
 #endif /* ENABLE_SPEECH_SUPPORT */
     {
       /* If cursor moves while blinking is on */

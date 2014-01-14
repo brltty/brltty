@@ -140,7 +140,7 @@ postprocessCommand (void *state, int command, int handled) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
 #ifdef ENABLE_SPEECH_SUPPORT
-      if (ses->trackCursor && speechTracking && (scr.number == speechScreen)) {
+      if (ses->trackCursor && spk.track.isActive && (scr.number == spk.track.screenNumber)) {
         ses->trackCursor = 0;
         playTune(&tune_cursor_unlinked);
       }
@@ -771,8 +771,8 @@ volatile SpeechSynthesizer spk;
 
 void
 trackSpeech (void) {
-  placeWindowHorizontally(speechIndex % scr.cols);
-  slideWindowVertically((speechIndex / scr.cols) + speechLine);
+  placeWindowHorizontally(spk.track.speechLocation % scr.cols);
+  slideWindowVertically(spk.track.firstLine + (spk.track.speechLocation / scr.cols));
   scheduleUpdate("speech tracked");
 }
 

@@ -35,10 +35,10 @@ sayScreenRegion (int left, int top, int width, int height, int track, SayMode mo
   ScreenCharacter characters[count];
 
   readScreen(left, top, width, height, characters);
-  speechTracking = track;
-  speechScreen = scr.number;
-  speechLine = top;
-  speechIndex = SPK_INDEX_NONE;
+  spk.track.isActive = track;
+  spk.track.screenNumber = scr.number;
+  spk.track.firstLine = top;
+  spk.track.speechLocation = SPK_INDEX_NONE;
   sayScreenCharacters(characters, count, mode==sayImmediate);
 }
 
@@ -80,7 +80,7 @@ handleSpeechCommand (int command, void *datga) {
       restartSpeechDriver();
       break;
     case BRL_CMD_SPKHOME:
-      if (scr.number == speechScreen) {
+      if (scr.number == spk.track.screenNumber) {
         trackSpeech();
       } else {
         playTune(&tune_command_rejected);

@@ -39,6 +39,11 @@ void
 initializeSpeechSynthesizer (volatile SpeechSynthesizer *spk) {
   spk->canAutospeak = 1;
 
+  spk->track.isActive = 0;
+  spk->track.screenNumber = -1;
+  spk->track.firstLine = 0;
+  spk->track.speechLocation = SPK_INDEX_NONE;
+
   spk->setVolume = NULL;
   spk->setRate = NULL;
   spk->setPitch = NULL;
@@ -48,11 +53,6 @@ initializeSpeechSynthesizer (volatile SpeechSynthesizer *spk) {
 }
 
 static volatile SpeechDriverThread *speechDriverThread = NULL;
-
-int speechTracking = 0;
-int speechScreen = -1;
-int speechLine = 0;
-int speechIndex = SPK_INDEX_NONE;
 
 int
 startSpeechDriverThread (volatile SpeechSynthesizer *spk, char **parameters) {
@@ -77,30 +77,30 @@ stopSpeechDriverThread (void) {
 
 int
 tellSpeechFinished (void) {
-  if (!speechTracking) return 1;
+  if (!spk.track.isActive) return 1;
   return speechMessage_speechFinished(speechDriverThread);
 }
 
 void
 setSpeechFinished (void) {
-  speechTracking = 0;
-  speechIndex = SPK_INDEX_NONE;
+  spk.track.isActive = 0;
+  spk.track.speechLocation = SPK_INDEX_NONE;
 
   endAutospeakDelay();
 }
 
 int
 tellSpeechIndex (int index) {
-  if (!speechTracking) return 1;
+  if (!spk.track.isActive) return 1;
   return speechMessage_speechLocation(speechDriverThread, index);
 }
 
 void
 setSpeechIndex (int index) {
-  if (speechTracking) {
-    if (scr.number == speechScreen) {
-      if (index != speechIndex) {
-        speechIndex = index;
+  if (spk.track.isActive) {
+    if (scr.number == spk.track.screenNumber) {
+      if (index != spk.track.speechLocation) {
+        spk.track.speechLocation = index;
         if (ses->trackCursor) trackSpeech();
       }
 

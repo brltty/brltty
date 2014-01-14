@@ -37,6 +37,13 @@ typedef void SpeechPunctuationSetter (volatile SpeechSynthesizer *spk, SpeechPun
 struct SpeechSynthesizerStruct {
   unsigned canAutospeak:1;
 
+  struct {
+    unsigned isActive:1;
+    int screenNumber;
+    int firstLine;
+    int speechLocation;
+  } track;
+
   SpeechVolumeSetter *setVolume;
   SpeechRateSetter *setRate;
   SpeechPitchSetter *setPitch;
@@ -110,10 +117,6 @@ extern void identifySpeechDrivers (int full);
 extern const SpeechDriver *speech;
 extern const SpeechDriver noSpeech;
 
-extern int speechTracking;
-extern int speechScreen;
-extern int speechLine;
-extern int speechIndex;
 #define SPK_INDEX_NONE -1
 
 #ifdef __cplusplus
