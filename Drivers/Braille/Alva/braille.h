@@ -23,7 +23,3 @@
 
 /* used by speech.c */
 extern int AL_writeData (unsigned char *data, int len );
-
-
-/* Define next line to 1 if you have a firmware older than version 010495 */
-#define ABT3_OLD_FIRMWARE 0

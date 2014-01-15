@@ -710,7 +710,6 @@ readPacket1 (BrailleDisplay *brl, unsigned char *packet, int size) {
 
   gotByte:
     if (offset == 0) {
-#if ! ABT3_OLD_FIRMWARE
       if (byte == 0X7F) {
         length = PACKET_SIZE(0);
       } else if ((byte & 0XF0) == 0X70) {
@@ -723,13 +722,9 @@ readPacket1 (BrailleDisplay *brl, unsigned char *packet, int size) {
         logIgnoredByte(byte);
         continue;
       }
-#else /* ABT3_OLD_FIRMWARE */
-      length = 1;
-#endif /* ! ABT3_OLD_FIRMWARE */
     } else {
       int unexpected = 0;
 
-#if ! ABT3_OLD_FIRMWARE
       unsigned char type = packet[0];
 
       if (type == 0X7F) {
@@ -740,8 +735,6 @@ readPacket1 (BrailleDisplay *brl, unsigned char *packet, int size) {
       } else if (!type) {
         if (byte) unexpected = 1;
       }
-#else /* ABT3_OLD_FIRMWARE */
-#endif /* ! ABT3_OLD_FIRMWARE */
 
       if (unexpected) {
         logShortPacket(packet, offset);
@@ -801,7 +794,6 @@ readCommand1 (BrailleDisplay *brl) {
   int length;
 
   while ((length = protocol->readPacket(brl, packet, sizeof(packet))) > 0) {
-#if !ABT3_OLD_FIRMWARE
     unsigned char group = packet[0];
     unsigned char key = packet[1];
     int press = !(key & AL_KEY_RELEASE);
@@ -895,52 +887,6 @@ readCommand1 (BrailleDisplay *brl) {
 
         break;
     }
-#else /* ABT3_OLD_FIRMWARE */
-    const unsigned char routingBase = 0XA8;
-    unsigned char byte = packet[0];
-
-    if (!(byte & 0X80)) {
-      static const unsigned char keys[7] = {
-        AL_KEY_Up, AL_KEY_Cursor, AL_KEY_Home, AL_KEY_Prog, AL_KEY_Left, AL_KEY_Right, AL_KEY_Down
-      };
-
-      unsigned char pressedKeys[ARRAY_COUNT(keys)];
-      unsigned char pressedCount = 0;
-
-      const unsigned char set = AL_SET_NavigationKeys;
-      const unsigned char *key = keys;
-      unsigned char bit = 0X01;
-
-      while (byte) {
-        if (byte & bit) {
-          byte &= ~bit;
-          enqueueKeyEvent(brl, set, *key, 1);
-          pressedKeys[pressedCount++] = *key;
-        }
-
-        key += 1;
-        bit <<= 1;
-      }
-
-      while (pressedCount) enqueueKeyEvent(brl, set, pressedKeys[--pressedCount], 0);
-      continue;
-    }
-
-    if (byte >= routingBase) {
-      if ((byte -= routingBase) < brl->textColumns) {
-        enqueueKeyEvent(brl, AL_SET_RoutingKeys1, byte, 1);
-        enqueueKeyEvent(brl, AL_SET_RoutingKeys1, byte, 0);
-        continue;
-      }
-
-      if ((byte -= brl->textColumns) < brl->statusColumns) {
-        byte += AL_KEY_STATUS1;
-        enqueueKeyEvent(brl, AL_SET_NavigationKeys, byte, 1);
-        enqueueKeyEvent(brl, AL_SET_NavigationKeys, byte, 0);
-        continue;
-      }
-    }
-#endif /* ! ABT3_OLD_FIRMWARE */
 
     logUnexpectedPacket(packet, length);
   }
