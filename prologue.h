@@ -109,6 +109,7 @@ extern "C" {
 #endif /* interface */
 
 #include <sys/types.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <unistd.h>
 

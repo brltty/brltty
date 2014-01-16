@@ -489,7 +489,7 @@ formatLogSymbolData (char *buffer, size_t size, const void *data) {
   const LogSymbolData *symbol = data;
   size_t length;
 
-  intptr_t offset = 0;
+  ptrdiff_t offset = 0;
   const char *name = getAddressName(symbol->address, &offset);
 
   STR_BEGIN(buffer, size);
@@ -500,7 +500,7 @@ formatLogSymbolData (char *buffer, size_t size, const void *data) {
 
   if (name && *name) {
     STR_PRINTF("%s", name);
-    if (offset) STR_PRINTF("+0X%"PRIXPTR, offset);
+    if (offset) STR_PRINTF("+0X%tX", offset);
   } else {
     STR_PRINTF("%p", symbol->address);
   }
