@@ -152,7 +152,7 @@ unsetAddressName (void *address) {
 }
 
 const char *
-getAddressName (void *address, intptr_t *offset) {
+getAddressName (void *address, ptrdiff_t *offset) {
   {
     int index;
 
