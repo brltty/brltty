@@ -1694,6 +1694,36 @@ static int readPid(char *path)
 }
 #endif /* __MINGW32__ */
 
+static int
+adjustPermissions (const char *path) {
+  if (!getegid()) {
+    struct stat status;
+
+    if (stat(path, &status) == -1) {
+      logSystemError("stat");
+      return 0;
+    }
+
+    {
+      mode_t oldPermissions = status.st_mode & ~S_IFMT;
+      mode_t newPermissions = oldPermissions;
+
+      if (oldPermissions & S_IRUSR) newPermissions |= S_IRGRP | S_IROTH;
+      if (oldPermissions & S_IWUSR) newPermissions |= S_IWGRP | S_IWOTH;
+      if (oldPermissions & S_IXUSR) newPermissions |= S_IXGRP | S_IXOTH;
+
+      if (newPermissions != oldPermissions) {
+        if (chmod(path, newPermissions) == -1) {
+          logSystemError("chmod");
+          return 0;
+        }
+      }
+    }
+  }
+
+  return 1;
+}
+
 /* Function : createLocalSocket */
 /* Creates the listening socket for in-connections */
 /* Returns 1, or 0 if an error occurred */
@@ -1770,6 +1800,10 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
 
     /* read-only, or not mounted yet, wait */
     approximateDelay(1000);
+  }
+
+  if (!adjustPermissions(BRLAPI_SOCKETPATH)) {
+    goto outfd;
   }
 
   memcpy(sa.sun_path,BRLAPI_SOCKETPATH "/",lpath+1);
@@ -1874,8 +1908,7 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
     goto outlock;
   }
 
-  if (chmod(sa.sun_path, permissions) == -1) {
-    logMessage(LOG_WARNING, "chmod: %s", strerror(errno));
+  if (!adjustPermissions(sa.sun_path)) {
     goto outlock;
   }
 
