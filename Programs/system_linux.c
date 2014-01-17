@@ -116,6 +116,40 @@ installKernelModule (const char *name, int *status) {
   return 1;
 }
 
+static int
+openDevice (const char *path, mode_t flags, int allowModeSubset) {
+  int descriptor;
+
+  if ((descriptor = open(path, flags)) != -1) goto opened;
+  if (!allowModeSubset) goto failed;
+  if ((flags & O_ACCMODE) != O_RDWR) goto failed;
+  flags &= ~O_ACCMODE;
+
+  {
+    int error = errno;
+
+    if (errno == EACCES) goto tryReadOnly;
+    if (errno == EROFS) goto tryWriteOnly;
+    goto failed;
+
+  tryReadOnly:
+    if ((descriptor = open(path, (flags | O_RDONLY))) != -1) goto opened;
+
+  tryWriteOnly:
+    if ((descriptor = open(path, (flags | O_WRONLY))) != -1) goto opened;
+
+    errno = error;
+  }
+
+failed:
+  logMessage(LOG_DEBUG, "cannot open device: %s: %s", path, strerror(errno));
+  return -1;
+
+opened:
+  logMessage(LOG_DEBUG, "device opened: %s: fd=%d", path, descriptor);
+  return descriptor;
+}
+
 int
 openCharacterDevice (const char *name, int flags, int major, int minor) {
   char *path = getDevicePath(name);
@@ -123,19 +157,12 @@ openCharacterDevice (const char *name, int flags, int major, int minor) {
 
   if (!path) {
     descriptor = -1;
-  } else if ((descriptor = open(path, flags)) != -1) {
-    logMessage(LOG_DEBUG, "device opened: %s: fd=%d", path, descriptor);
-  } else {
-    logMessage(LOG_DEBUG, "cannot open device: %s: %s", path, strerror(errno));
-
+  } else if ((descriptor = openDevice(path, flags, 1)) == -1) {
     if (errno == ENOENT) {
       free(path);
-      if ((path = makeWritablePath(locatePathName(name)))) {
-        if ((descriptor = open(path, flags)) != -1) {
-          logMessage(LOG_DEBUG, "device opened: %s: fd=%d", path, descriptor);
-        } else {
-          logMessage(LOG_DEBUG, "cannot open device: %s: %s", path, strerror(errno));
 
+      if ((path = makeWritablePath(locatePathName(name)))) {
+        if ((descriptor = openDevice(path, flags, 0)) == -1) {
           if (errno == ENOENT) {
             mode_t mode = S_IFCHR | S_IRUSR | S_IWUSR;
 
@@ -145,11 +172,7 @@ openCharacterDevice (const char *name, int flags, int major, int minor) {
               logMessage(LOG_DEBUG, "device created: %s mode=%06o major=%d minor=%d",
                          path, mode, major, minor);
 
-              if ((descriptor = open(path, flags)) != -1) {
-                logMessage(LOG_DEBUG, "device opened: %s: fd=%d", path, descriptor);
-              } else {
-                logMessage(LOG_DEBUG, "cannot open device: %s: %s", path, strerror(errno));
-              }
+              descriptor = openDevice(path, flags, 0);
             }
           }
         }
