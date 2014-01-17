@@ -128,15 +128,15 @@ openDevice (const char *path, mode_t flags, int allowModeSubset) {
   {
     int error = errno;
 
-    if (errno == EACCES) goto tryReadOnly;
-    if (errno == EROFS) goto tryWriteOnly;
+    if (errno == EACCES) goto tryWriteOnly;
+    if (errno == EROFS) goto tryReadOnly;
     goto failed;
-
-  tryReadOnly:
-    if ((descriptor = open(path, (flags | O_RDONLY))) != -1) goto opened;
 
   tryWriteOnly:
     if ((descriptor = open(path, (flags | O_WRONLY))) != -1) goto opened;
+
+  tryReadOnly:
+    if ((descriptor = open(path, (flags | O_RDONLY))) != -1) goto opened;
 
     errno = error;
   }
