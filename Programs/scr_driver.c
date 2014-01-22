@@ -18,10 +18,17 @@
 
 #include "prologue.h"
 
+#include <string.h>
+
 #include "drivers.h"
 #include "scr.h"
 #include "scr_main.h"
 #include "scr.auto.h"
+
+typedef enum {
+  PARM_MESSAGE
+} ScreenParameters;
+#define SCRPARMS "message"
 
 #define SCRSYMBOL noScreen
 #define DRIVER_NAME NoScreen
@@ -31,9 +38,52 @@
 #define DRIVER_DEVELOPERS ""
 #include "scr_driver.h"
 
+static const char defaultScreenMessage[] = strtext("no screen");
+static const char *screenMessage = defaultScreenMessage;
+
+static int
+processParameters_NoScreen (char **parameters) {
+  {
+    const char *message = parameters[PARM_MESSAGE];
+
+    screenMessage = (message && *message)? message: defaultScreenMessage;
+  }
+
+  return 1;
+}
+
+static void
+describe_NoScreen (ScreenDescription *description) {
+  description->rows = 1;
+  description->cols = strlen(screenMessage);
+  description->posx = 0;
+  description->posy = 0;
+  description->number = 1;
+}
+
+static int
+readCharacters_NoScreen (const ScreenBox *box, ScreenCharacter *buffer) {
+  ScreenDescription description;
+  describe_NoScreen(&description);
+  if (!validateScreenBox(box, description.cols, description.rows)) return 0;
+  setScreenMessage(box, buffer, screenMessage);
+  return 1;
+}
+
+static int
+poll_NoScreen (void) {
+  return 0;
+}
+
 static void
 scr_initialize (MainScreen *main) {
   initializeMainScreen(main);
+
+  main->base.poll = poll_NoScreen;
+  main->base.describe = describe_NoScreen;
+  main->base.readCharacters = readCharacters_NoScreen;
+
+  main->processParameters = processParameters_NoScreen;
 }
 
 const ScreenDriver *screen = &noScreen;

@@ -83,7 +83,7 @@ setKeyModifiers (ScreenKey *key, ScreenKey which) {
   }
 }
 
-static const char *text_BaseScreen = "no screen";
+static const char text_BaseScreen[] = " ";
 
 static int
 selectVirtualTerminal_BaseScreen (int vt) {
@@ -172,18 +172,23 @@ getCommandContext_BaseScreen (void) {
 void
 initializeBaseScreen (BaseScreen *base) {
   base->formatTitle = formatTitle_BaseScreen;
+
   base->poll = poll_BaseScreen;
   base->refresh = refresh_BaseScreen;
+
   base->describe = describe_BaseScreen;
   base->readCharacters = readCharacters_BaseScreen;
   base->insertKey = insertKey_BaseScreen;
+
   base->routeCursor = routeCursor_BaseScreen;
   base->highlightRegion = highlightRegion_BaseScreen;
   base->unhighlightRegion = unhighlightRegion_BaseScreen;
   base->getPointer = getPointer_BaseScreen;
+
   base->selectVirtualTerminal = selectVirtualTerminal_BaseScreen;
   base->switchVirtualTerminal = switchVirtualTerminal_BaseScreen;
   base->currentVirtualTerminal = currentVirtualTerminal_BaseScreen;
+
   base->handleCommand = handleCommand_BaseScreen;
   base->getCommandContext = getCommandContext_BaseScreen;
 }
