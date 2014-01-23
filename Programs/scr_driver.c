@@ -46,7 +46,7 @@ processParameters_NoScreen (char **parameters) {
   {
     const char *message = parameters[PARM_MESSAGE];
 
-    screenMessage = (message && *message)? message: defaultScreenMessage;
+    screenMessage = (message && *message)? message: gettext(defaultScreenMessage);
   }
 
   return 1;
