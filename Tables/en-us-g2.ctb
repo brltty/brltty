@@ -241,8 +241,10 @@ always bless 12-46-234 joblessness
 before vowel always blind 12-123-35-145
 always blind 12-123
 contraction bl
+begword bluenos = bluenosed
 sufword boende 12-135-26-145-15 town (Republic of Congo)
 sufword boer = boerhaave
+begword bottlenos = bottlenose dolphin
 always braille 12-1235-123
 contraction brl
 sufword brigham =
@@ -968,6 +970,7 @@ sufword roseann =
 endnum s = 40s (no letter sign)
 always s 234
 always S 234
+begword saddlenos 234-1-256-123-15-1345-135-234 saddlenose
 word said 234-145
 contraction sd
 sufword salmon = salmonella
@@ -1112,6 +1115,7 @@ begword trans = transtype
 sufword tranship 2345-1235-1-1345-146-24-1234
 begword trinod = trinodal
 begword trinom = trinomial
+begword tubenos = tubenosed
 sufword tuberose =
 begword tweedled 2345-2456-15-1246-123-15-145 tweedledee
 begword typea = typeahead
