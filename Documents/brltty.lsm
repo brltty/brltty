@@ -1,7 +1,7 @@
 Begin4
 Title: brltty
-Version: 4.5
-Entered-date: 2013/04/01
+Version: 5.0
+Entered-date: 2014/01/27
 Description: Braille Display Driver for Linux/Unix
              BRLTTY is a background process (daemon) which provides access
              to the console screen (when in text mode) for a blind person
@@ -15,19 +15,21 @@ Author: dave@mielke.cc (Dave Mielke)
         nn201@cus.cam.ac.uk (Nikhil Nair)
 Maintained-by: dave@mielke.cc (Dave Mielke)
 Primary-site: ftp.ibiblio.org /pub/Linux/system/access
-              3300KB brltty-4.5.tar.gz
-              3200KB brltty-4.5-1.src.rpm
-              2000KB brltty-4.5-1.i686.rpm
-               110KB brltty-utils-4.5-1.i686.rpm
-                13KB brltty-braille-brlapi-4.5-1.i686.rpm
-                13KB brltty-speech-espeak-4.5-1.i686.rpm
-                13KB brltty-speech-festival-4.5-1.i686.rpm
-                13KB brltty-speech-flite-4.5-1.i686.rpm
-                13KB brltty-speech-speechd-4.5-1.i686.rpm
-                19KB brltty-screen-atspi2-4.5-1.i686.rpm
-                14KB brltty-screen-screen-4.5-1.i686.rpm
-                14KB brltty-4.5.README
-                 5KB brltty-4.5.lsm
+              3500KB brltty-5.0.tar.gz
+              3400KB brltty-5.0-1.src.rpm
+              1900KB brltty-5.0-1.i686.rpm
+               111KB brltty-utils-5.0-1.i686.rpm
+                 9KB brltty-braille-brlapi-5.0-1.i686.rpm
+                15KB brltty-braille-xwindow-5.0-1.i686.rpm
+                 9KB brltty-speech-espeak-5.0-1.i686.rpm
+                10KB brltty-speech-festival-5.0-1.i686.rpm
+                10KB brltty-speech-flite-5.0-1.i686.rpm
+                10KB brltty-speech-speechd-5.0-1.i686.rpm
+                15KB brltty-screen-atspi-5.0-1.i686.rpm
+                16KB brltty-screen-atspi2-5.0-1.i686.rpm
+                10KB brltty-screen-screen-5.0-1.i686.rpm
+                14KB brltty-5.0.README
+                 5KB brltty-5.0.lsm
 Alternate-site: ftp://leb.net /pub/blinux/brltty
 Original-site:
 Platforms: Linux (kernel 1.1.92 or later)
