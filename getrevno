@@ -18,7 +18,6 @@
 ###############################################################################
 
 . "`dirname "${0}"`/prologue.sh"
-set -e
 
 [ "${#}" -gt 0 ] || syntaxError "missing source root"
 sourceRoot="${1}"
@@ -26,10 +25,21 @@ shift
 
 [ "${#}" -eq 0 ] || syntaxError "too many parameters"
 
-revision="`svnversion -n "${sourceRoot}" 2>/dev/null`" || revision=""
-[ "${revision}" != "exported" ] || revision=""
-[ -n "${revision}" ] || read <"${sourceRoot}/REVISION" x revision x
+[ -e "${sourceRoot}" ] || semanticError "directory not found: ${sourceRoot}"
+[ -d "${sourceRoot}" ] || semanticError "not a directory: ${sourceRoot}"
+cd "${sourceRoot}" || semanticError "directory not usable: ${sourceRoot}"
 
-[ -n "${revision}" ] || semanticError "build revision not known"
-echo "${revision}"
+if [ -d .git ]
+then
+   identifier="`git describe --tags --abbrev=8 --dirty='(modified)' --match='BRLTTY-*' 2>/dev/null`"
+elif [ -d .svn ]
+then
+   identifier="`svnversion -n . 2>/dev/null`"
+   [ "${identifier}" != "exported" ] || identifier=""
+else
+   identifier=""
+fi
+
+[ -n "${identifier}" ] || semanticError "build identifier not known"
+echo "${identifier}"
 exit 0
