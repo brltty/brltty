@@ -1,10 +1,7 @@
-Makefile
-reldeps.mk
-setup.py
-*.auto.c
-*.auto.dep
-*.auto.pyx
-brlapi.so
-build
-installed-files
-brlapi.html
+/setup.py
+/*.auto.pyx
+
+/build/
+/installed-files
+
+/brlapi.html
