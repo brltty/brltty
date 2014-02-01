@@ -1,6 +1,5 @@
-Makefile
-reldeps.mk
-local.properties
-bin
-libs
-gen
+/local.properties
+
+/bin/
+/libs/
+/gen/
