@@ -4,7 +4,7 @@ reldeps.mk
 
 /configure
 /autom4te*.cache
-/BinTree
+/BinTree/
 
 /config.log
 /config.status
