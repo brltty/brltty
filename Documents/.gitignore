@@ -1,8 +1,7 @@
-Makefile
-reldeps.mk
-*.made
-brltty.conf
-brltty.1
-BrlAPIref.doxy
-BrlAPIref
-*.txt
+/*.made
+
+/brltty.conf
+/brltty.1
+
+/BrlAPIref.doxy
+/BrlAPIref/

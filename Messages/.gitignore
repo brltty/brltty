@@ -1,5 +1,3 @@
-Makefile
-reldeps.mk
-*.mo
-*.pot
-LINGUAS
+/*.pot
+/*.mo
+/LINGUAS

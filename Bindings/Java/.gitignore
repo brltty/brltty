@@ -1,9 +1,7 @@
-Makefile
-reldeps.mk
-Constants.java
-classes.made
-classes
-brlapi.jar
-libbrlapi_java.so
-doc.made
-doc
+/Constants.java
+
+/classes.made
+/classes/
+
+/doc.made
+/doc/
