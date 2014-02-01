@@ -53,7 +53,7 @@ AC_SUBST([PACKAGE_TITLE])
 AC_DEFINE_UNQUOTED([PACKAGE_TITLE], ["${PACKAGE_TITLE}"],
                    [Define this to be a string containing the package title.])
 
-PACKAGE_REVISION="`"${srcdir}/getrevno" "${srcdir}"`"
+PACKAGE_REVISION="`"${srcdir}/getrevid" "${srcdir}"`"
 if test -z "${PACKAGE_REVISION}"
 then
    PACKAGE_REVISION=""

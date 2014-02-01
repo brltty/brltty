@@ -31,15 +31,15 @@ cd "${sourceRoot}" || semanticError "directory not usable: ${sourceRoot}"
 
 if [ -d .git ]
 then
-   identifier="`git describe --tags --abbrev=8 --dirty='(modified)' --match='BRLTTY-*' 2>/dev/null`"
+   revisionIdentifier="`git describe --tags --abbrev=8 --dirty='(modified)' --match='BRLTTY-*' 2>/dev/null`"
 elif [ -d .svn ]
 then
-   identifier="`svnversion -n . 2>/dev/null`"
-   [ "${identifier}" != "exported" ] || identifier=""
+   revisionIdentifier="`svnversion -n . 2>/dev/null`"
+   [ "${revisionIdentifier}" != "exported" ] || revisionIdentifier=""
 else
-   identifier=""
+   semanticError "unrecognized source repository type: ${sourceRoot}"
 fi
 
-[ -n "${identifier}" ] || semanticError "build identifier not known"
-echo "${identifier}"
+[ -n "${revisionIdentifier}" ] || semanticError "revision identifier not known"
+echo "${revisionIdentifier}"
 exit 0
