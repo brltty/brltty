@@ -16,12 +16,11 @@ reldeps.mk
 /forbuild.mk
 /forbuild.h
 
-brltty.spec
-
 *.o
 *.a
 *.so
 *.dylib
+
 *.dll
 *.def
 *.lib
@@ -33,10 +32,12 @@ brltty.spec
 *.auto.h
 *.auto.c
 
+/brltty.spec
+*.rpm
+
 *.tar
 *.gz
 *.bz2
 *.xz
-*.rpm
 
 /lib/
