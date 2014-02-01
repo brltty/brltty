@@ -13,6 +13,7 @@ forbuild.mk
 forbuild.h
 brltty.spec
 BinTree
+*.o
 *.tar
 *.gz
 *.bz2
