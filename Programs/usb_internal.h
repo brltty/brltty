@@ -91,20 +91,11 @@ extern int usbApplyInputFilters (UsbDevice *device, void *buffer, size_t size, s
 
 extern int usbSetSerialOperations (UsbDevice *device);
 
-extern int usbSetConfiguration (
-  UsbDevice *device,
-  unsigned char configuration
-);
+extern int usbSetConfiguration (UsbDevice *device, unsigned char configuration);
 
-extern int usbClaimInterface (
-  UsbDevice *device,
-  unsigned char interface
-);
+extern int usbClaimInterface (UsbDevice *device, unsigned char interface);
 
-extern int usbReleaseInterface (
-  UsbDevice *device,
-  unsigned char interface
-);
+extern int usbReleaseInterface (UsbDevice *device, unsigned char interface);
 
 extern int usbSetAlternative (
   UsbDevice *device,

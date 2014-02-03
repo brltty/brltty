@@ -221,10 +221,7 @@ usbDisconnectInterface (UsbDevice *device, unsigned char interface) {
 }
 
 int
-usbSetConfiguration (
-  UsbDevice *device,
-  unsigned char configuration
-) {
+usbSetConfiguration (UsbDevice *device, unsigned char configuration) {
   UsbDeviceExtension *devx = device->extension;
 
   logMessage(LOG_CATEGORY(USB_IO), "setting configuration: %u", configuration);
@@ -240,10 +237,7 @@ usbSetConfiguration (
 }
 
 int
-usbClaimInterface (
-  UsbDevice *device,
-  unsigned char interface
-) {
+usbClaimInterface (UsbDevice *device, unsigned char interface) {
   UsbDeviceExtension *devx = device->extension;
 
   logMessage(LOG_CATEGORY(USB_IO), "claiming interface: %u", interface);
@@ -272,10 +266,7 @@ usbClaimInterface (
 }
 
 int
-usbReleaseInterface (
-  UsbDevice *device,
-  unsigned char interface
-) {
+usbReleaseInterface (UsbDevice *device, unsigned char interface) {
   UsbDeviceExtension *devx = device->extension;
 
   logMessage(LOG_CATEGORY(USB_IO), "releasing interface: %u", interface);
@@ -315,10 +306,7 @@ usbSetAlternative (
 }
 
 int
-usbClearEndpoint (
-  UsbDevice *device,
-  unsigned char endpointAddress
-) {
+usbClearEndpoint (UsbDevice *device, unsigned char endpointAddress) {
   UsbDeviceExtension *devx = device->extension;
 
   if (usbOpenUsbfsFile(devx)) {
@@ -385,10 +373,7 @@ usbControlTransfer (
 }
 
 static int
-usbReapUrb (
-  UsbDevice *device,
-  int wait
-) {
+usbReapUrb (UsbDevice *device, int wait) {
   UsbDeviceExtension *devx = device->extension;
 
   if (usbOpenUsbfsFile(devx)) {
@@ -655,17 +640,14 @@ usbSubmitRequest (
 }
 
 int
-usbCancelRequest (
-  UsbDevice *device,
-  void *request
-) {
+usbCancelRequest (UsbDevice *device, void *request) {
   UsbDeviceExtension *devx = device->extension;
 
   if (usbOpenUsbfsFile(devx)) {
     int reap = 1;
 
     if (ioctl(devx->usbfsFile, USBDEVFS_DISCARDURB, request) == -1) {
-      if (errno == ENODEV)  {
+      if (errno == ENODEV) {
         reap = 0;
       } else if (errno != EINVAL) {
         logSystemError("USB URB discard");

@@ -227,7 +227,7 @@ public final class ScreenUtilities {
       return text;
     }
 
-    if (node.getActions() != 0)  {
+    if (node.getActions() != 0) {
       return "";
     }
 
