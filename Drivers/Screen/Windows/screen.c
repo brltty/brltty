@@ -372,9 +372,13 @@ doInsertSendInput (BOOL down, WCHAR wchar, WORD vk, WORD scancode, DWORD flags) 
       ki->wVk = 0;
       ki->wScan = wchar;
       ki->dwFlags |= KEYEVENTF_UNICODE;
-    } else {
+    } else if (vk) {
       ki->wVk = vk;
       ki->wScan = scancode;
+    } else {
+      ki->wVk = 0;
+      ki->wScan = scancode;
+      ki->dwFlags |= KEYEVENTF_SCANCODE;
     }
 
     if (!down)
@@ -535,9 +539,11 @@ handleCommand_WindowsScreen (int command) {
       press = !(arg & 0X80);
       arg &= 0X7F;
       /* fallthrough */
+      goto do_send;
     case BRL_BLK_PASSAT: {
       press |= !(command & BRL_FLG_KBD_RELEASE);
 
+do_send:
       if (arg >= 0X80)
 	return 0;
 
