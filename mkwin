@@ -193,7 +193,7 @@ echo alt-space menu for instance) and see %CD%\debug.log
 .\bin\brltty -l debug -n -e > debug.log 2>&1
 EOF
 
-cp ${sourceRoot}/Hotplug/brltty.inf "${installRoot}/bin"
+cp ${sourceRoot}/Autostart/Windows/brltty.inf "${installRoot}/bin"
 echo "not yet" > "${installRoot}/bin/brltty.cat"
 echo "not yet" > "${installRoot}/bin/brltty_x64.cat"
 cp "$SYSTEMROOT/system32/drivers/libusb0.sys" "${installRoot}/bin"
