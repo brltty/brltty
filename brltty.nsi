@@ -166,7 +166,7 @@ Section "install"
 	File /oname=etc\brltty.conf "${DISTDIR}\etc\brltty.conf"
 	SetOverwrite IfNewer
 
-	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\brlapi-0.5.dll" "$SYSDIR\brlapi-0.5.dll" "$SYSDIR"
+	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\brlapi-0.6.dll" "$SYSDIR\brlapi-0.6.dll" "$SYSDIR"
 	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\libusb0.dll" "$SYSDIR\libusb0.dll" "$SYSDIR"
 	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\libusb0.sys" "$SYSDIR\drivers\libusb0.sys" "$SYSDIR\drivers"
 	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\msvcr90.dll" "$SYSDIR\msvcr90.dll" "$SYSDIR"
@@ -226,7 +226,7 @@ Section "Uninstall"
 	ExecWait "$INSTDIR\bin\brltty.exe -R"
 	ExecWait "rundll32 libusb0.dll,usb_uninstall_service_np_rundll"
 
-	!insertmacro UninstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "$SYSDIR\brlapi-0.5.dll"
+	!insertmacro UninstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "$SYSDIR\brlapi-0.6.dll"
 	!insertmacro UninstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "$SYSDIR\libusb0.dll"
 
 	RMDir /r "$INSTDIR"

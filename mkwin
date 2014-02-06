@@ -17,9 +17,9 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-version=4.3
+version=5.0
 subversion=x
-apiversion=0.5.6
+apiversion=0.6.1
 whole_version=$version-$subversion
 autohotkey="/c/Program Files/AutoHotkey"
 nsis="/c/Program Files/NSIS"
@@ -32,6 +32,8 @@ on brltty.
 
 For a very quick startguide:
 
+- BRLTTY only gives access to text consoles, for the rest of the windows
+  environment you need to also install and run NVDA.
 - use the BRLTTY configurator (brlttycnf.exe) or uncomment by hand the proper
   lines from etc/brltty.conf.
 - For Python support (e.g. for NVDA), run Brlapi-$apiversion.win32.exe
@@ -163,7 +165,7 @@ $README_head
   http://libusb-win32.sourceforge.net/
 - to install libusb-win32 drivers, right-click on bin/brltty.inf
   and select install
-- If your braille device is serial, is connect through a serial to USB
+- If your braille device is serial, or is connect through a serial to USB
   converter, just select the proper COM port.  Make sure to select the proper
   braille display as incorrect probing seems to possibly brick some devices.
 - If your braille device is bluetooth, you can either use the windows bluetooth
@@ -200,9 +202,10 @@ cp "$SYSTEMROOT/system32/libusb0.dll" "${installRoot}/bin"
 cp "$SYSTEMROOT/system32/libusb0_x64.dll" "${installRoot}/bin"
 cp "$SYSTEMROOT/system32/braille.dll" "${installRoot}/bin"
 cp "$SYSTEMROOT/system32/msvcr90.dll" "${installRoot}/bin"
-(cd "${installRoot}/lib" ; lib /def:brlapi.def /name:brlapi-0.5.dll /out:brlapi.lib )
+(cd "${installRoot}/lib" ; lib /def:brlapi.def /name:brlapi-0.6.dll /out:brlapi.lib )
 cp /mingw/bin/libiconv-2.dll "${installRoot}/bin"
-cp /mingw/bin/curses2.dll "${installRoot}/bin"
+cp /mingw/bin/libpdcurses*.dll "${installRoot}/bin"
+cp /mingw/bin/libgcc_s_dw2-1.dll "${installRoot}/bin"
 rm -f "${installRoot}/bin/brltty-config"
 rm -f "${installRoot}/bin/brltty-install"
 rm -f "${installRoot}/etc/brlapi.key"
