@@ -1708,9 +1708,11 @@ adjustPermissions (const char *path) {
       mode_t oldPermissions = status.st_mode & ~S_IFMT;
       mode_t newPermissions = oldPermissions;
 
+#ifdef S_IRGRP
       if (oldPermissions & S_IRUSR) newPermissions |= S_IRGRP | S_IROTH;
       if (oldPermissions & S_IWUSR) newPermissions |= S_IWGRP | S_IWOTH;
       if (oldPermissions & S_IXUSR) newPermissions |= S_IXGRP | S_IXOTH;
+#endif
 
       if (newPermissions != oldPermissions) {
         if (chmod(path, newPermissions) == -1) {
