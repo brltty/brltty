@@ -100,6 +100,29 @@ handleCommand (int command) {
       }
     }
 
+    if (prefs.skipBlankWindows) {
+      switch (command & BRL_MSK_CMD) {
+        case BRL_CMD_FWINLT:
+          real = BRL_CMD_FWINLTSKIP;
+          break;
+
+        case BRL_CMD_FWINRT:
+          real = BRL_CMD_FWINRTSKIP;
+          break;
+
+        case BRL_CMD_FWINLTSKIP:
+          real = BRL_CMD_FWINLT;
+          break;
+
+        case BRL_CMD_FWINRTSKIP:
+          real = BRL_CMD_FWINRT;
+          break;
+
+        default:
+          break;
+      }
+    }
+
     if (real == command) {
       logCommand(command);
     } else {

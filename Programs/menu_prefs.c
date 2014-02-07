@@ -62,11 +62,6 @@ setAdvancedSubmenu (Menu *submenu) {
 }
 
 static int
-testSkipBlankWindows (void) {
-  return prefs.skipBlankWindows;
-}
-
-static int
 testSlidingWindow (void) {
   return prefs.slidingWindow;
 }
@@ -595,9 +590,8 @@ makePreferencesMenu (void) {
         {.label=strtext("Rest of Line")}
       };
 
-      NAME(strtext("Which Blank Windows"));
+      NAME(strtext("Skip Which Blank Windows"));
       ITEM(newEnumeratedMenuItem(navigationSubmenu, &prefs.skipBlankWindowsMode, &itemName, strings));
-      TEST(SkipBlankWindows);
     }
 
     {

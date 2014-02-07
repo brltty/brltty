@@ -633,12 +633,72 @@ handleNavigationCommand (int command, void *datga) {
       if (!shiftWindowRight(halfWindowShift)) playTune(&tune_bounce);
       break;
 
-    case BRL_CMD_FWINLT:
-      if (!(prefs.skipBlankWindows && (prefs.skipBlankWindowsMode == sbwAll))) {
+    case BRL_CMD_FWINLTSKIP:
+      if (prefs.skipBlankWindowsMode == sbwAll) {
         int oldX = ses->winx;
+        int oldY = ses->winy;
+        int tuneLimit = 3;
+        ScreenCharacter characters[scr.cols];
+
+        while (1) {
+          int charCount;
+          int charIndex;
+
+          if (!shiftWindowLeft(fullWindowShift)) {
+            if (ses->winy == 0) {
+              ses->winx = oldX;
+              ses->winy = oldY;
+
+              playTune(&tune_bounce);
+              break;
+            }
+
+            if (tuneLimit-- > 0) playTune(&tune_wrap_up);
+            upLine(isSameText);
+            placeWindowRight();
+          }
+
+          charCount = getWindowLength();
+          charCount = MIN(charCount, scr.cols-ses->winx);
+          readScreen(ses->winx, ses->winy, charCount, 1, characters);
+
+          for (charIndex=charCount-1; charIndex>=0; charIndex-=1) {
+            wchar_t text = characters[charIndex].text;
+
+            if (text != WC_C(' ')) break;
+          }
+
+          if (showCursor() &&
+              (scr.posy == ses->winy) &&
+              (scr.posx >= 0) &&
+              (scr.posx < (ses->winx + charCount))) {
+            charIndex = MAX(charIndex, scr.posx-ses->winx);
+          }
+
+          if (charIndex >= 0) break;
+        }
+
+        break;
+      }
+
+    {
+      int skipBlankWindows;
+
+      skipBlankWindows = 1;
+      goto moveLeft;
+
+    case BRL_CMD_FWINLT:
+      skipBlankWindows = 0;
+      goto moveLeft;
+
+    moveLeft:
+      {
+        int oldX = ses->winx;
+
         if (shiftWindowLeft(fullWindowShift)) {
-          if (prefs.skipBlankWindows) {
+          if (skipBlankWindows) {
             int charCount;
+
             if (prefs.skipBlankWindowsMode == sbwEndOfLine) goto skipEndOfLine;
             charCount = MIN(scr.cols, ses->winx+textCount);
             if (!showCursor() ||
@@ -647,144 +707,157 @@ handleNavigationCommand (int command, void *datga) {
                 (scr.posx >= charCount)) {
               int charIndex;
               ScreenCharacter characters[charCount];
+
               readScreen(0, ses->winy, charCount, 1, characters);
-              for (charIndex=0; charIndex<charCount; ++charIndex) {
+
+              for (charIndex=0; charIndex<charCount; charIndex+=1) {
                 wchar_t text = characters[charIndex].text;
+
                 if (text != WC_C(' ')) break;
               }
+
               if (charIndex == charCount) goto wrapUp;
             }
           }
+
           break;
         }
+
       wrapUp:
         if (ses->winy == 0) {
-          playTune(&tune_bounce);
           ses->winx = oldX;
+
+          playTune(&tune_bounce);
           break;
         }
+
         playTune(&tune_wrap_up);
         upLine(isSameText);
         placeWindowRight();
+
       skipEndOfLine:
-        if (prefs.skipBlankWindows && (prefs.skipBlankWindowsMode == sbwEndOfLine)) {
+        if (skipBlankWindows && (prefs.skipBlankWindowsMode == sbwEndOfLine)) {
           int charIndex;
           ScreenCharacter characters[scr.cols];
+
           readScreen(0, ses->winy, scr.cols, 1, characters);
-          for (charIndex=scr.cols-1; charIndex>0; --charIndex) {
+
+          for (charIndex=scr.cols-1; charIndex>0; charIndex-=1) {
             wchar_t text = characters[charIndex].text;
+
             if (text != WC_C(' ')) break;
           }
+
           if (showCursor() && (scr.posy == ses->winy) && SCR_COLUMN_OK(scr.posx)) {
             charIndex = MAX(charIndex, scr.posx);
           }
+
           if (charIndex < ses->winx) placeRightEdge(charIndex);
         }
-        break;
       }
-    case BRL_CMD_FWINLTSKIP: {
-      int oldX = ses->winx;
-      int oldY = ses->winy;
-      int tuneLimit = 3;
-      int charCount;
-      int charIndex;
-      ScreenCharacter characters[scr.cols];
-      while (1) {
-        if (!shiftWindowLeft(fullWindowShift)) {
-          if (ses->winy == 0) {
-            playTune(&tune_bounce);
-            ses->winx = oldX;
-            ses->winy = oldY;
-            break;
-          }
-          if (tuneLimit-- > 0) playTune(&tune_wrap_up);
-          upLine(isSameText);
-          placeWindowRight();
-        }
-        charCount = getWindowLength();
-        charCount = MIN(charCount, scr.cols-ses->winx);
-        readScreen(ses->winx, ses->winy, charCount, 1, characters);
-        for (charIndex=charCount-1; charIndex>=0; charIndex--) {
-          wchar_t text = characters[charIndex].text;
-          if (text != WC_C(' ')) break;
-        }
-        if (showCursor() &&
-            (scr.posy == ses->winy) &&
-            (scr.posx >= 0) &&
-            (scr.posx < (ses->winx + charCount))) {
-          charIndex = MAX(charIndex, scr.posx-ses->winx);
-        }
-        if (charIndex >= 0) break;
-      }
+
       break;
     }
 
-    case BRL_CMD_FWINRT:
-      if (!(prefs.skipBlankWindows && (prefs.skipBlankWindowsMode == sbwAll))) {
+    case BRL_CMD_FWINRTSKIP:
+      if (prefs.skipBlankWindowsMode == sbwAll) {
         int oldX = ses->winx;
+        int oldY = ses->winy;
+        int tuneLimit = 3;
+        ScreenCharacter characters[scr.cols];
+
+        while (1) {
+          int charCount;
+          int charIndex;
+
+          if (!shiftWindowRight(fullWindowShift)) {
+            if (ses->winy >= (scr.rows - brl.textRows)) {
+              ses->winx = oldX;
+              ses->winy = oldY;
+
+              playTune(&tune_bounce);
+              break;
+            }
+
+            if (tuneLimit-- > 0) playTune(&tune_wrap_down);
+            downLine(isSameText);
+            ses->winx = 0;
+          }
+
+          charCount = getWindowLength();
+          charCount = MIN(charCount, scr.cols-ses->winx);
+          readScreen(ses->winx, ses->winy, charCount, 1, characters);
+
+          for (charIndex=0; charIndex<charCount; charIndex+=1) {
+            wchar_t text = characters[charIndex].text;
+
+            if (text != WC_C(' ')) break;
+          }
+
+          if (showCursor() &&
+              (scr.posy == ses->winy) &&
+              (scr.posx < scr.cols) &&
+              (scr.posx >= ses->winx)) {
+            charIndex = MIN(charIndex, scr.posx-ses->winx);
+          }
+
+          if (charIndex < charCount) break;
+        }
+
+        break;
+      }
+
+    {
+      int skipBlankWindows;
+
+      skipBlankWindows = 1;
+      goto moveRight;
+
+    case BRL_CMD_FWINRT:
+      skipBlankWindows = 0;
+      goto moveRight;
+
+    moveRight:
+      {
+        int oldX = ses->winx;
+
         if (shiftWindowRight(fullWindowShift)) {
-          if (prefs.skipBlankWindows) {
+          if (skipBlankWindows) {
             if (!showCursor() ||
                 (scr.posy != ses->winy) ||
                 (scr.posx < ses->winx)) {
               int charCount = scr.cols - ses->winx;
               int charIndex;
               ScreenCharacter characters[charCount];
+
               readScreen(ses->winx, ses->winy, charCount, 1, characters);
-              for (charIndex=0; charIndex<charCount; ++charIndex) {
+
+              for (charIndex=0; charIndex<charCount; charIndex+=1) {
                 wchar_t text = characters[charIndex].text;
+
                 if (text != WC_C(' ')) break;
               }
+
               if (charIndex == charCount) goto wrapDown;
             }
           }
+
           break;
         }
+
       wrapDown:
         if (ses->winy >= (scr.rows - brl.textRows)) {
-          playTune(&tune_bounce);
           ses->winx = oldX;
+
+          playTune(&tune_bounce);
           break;
         }
+
         playTune(&tune_wrap_down);
         downLine(isSameText);
         ses->winx = 0;
-        break;
       }
-    case BRL_CMD_FWINRTSKIP: {
-      int oldX = ses->winx;
-      int oldY = ses->winy;
-      int tuneLimit = 3;
-      int charCount;
-      int charIndex;
-      ScreenCharacter characters[scr.cols];
-      while (1) {
-        if (!shiftWindowRight(fullWindowShift)) {
-          if (ses->winy >= (scr.rows - brl.textRows)) {
-            playTune(&tune_bounce);
-            ses->winx = oldX;
-            ses->winy = oldY;
-            break;
-          }
-          if (tuneLimit-- > 0) playTune(&tune_wrap_down);
-          downLine(isSameText);
-          ses->winx = 0;
-        }
-        charCount = getWindowLength();
-        charCount = MIN(charCount, scr.cols-ses->winx);
-        readScreen(ses->winx, ses->winy, charCount, 1, characters);
-        for (charIndex=0; charIndex<charCount; charIndex++) {
-          wchar_t text = characters[charIndex].text;
-          if (text != WC_C(' ')) break;
-        }
-        if (showCursor() &&
-            (scr.posy == ses->winy) &&
-            (scr.posx < scr.cols) &&
-            (scr.posx >= ses->winx)) {
-          charIndex = MIN(charIndex, scr.posx-ses->winx);
-        }
-        if (charIndex < charCount) break;
-      }
+
       break;
     }
 
