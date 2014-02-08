@@ -29,6 +29,8 @@
 #include "params.h"
 #include "log.h"
 #include "file.h"
+#include "datafile.h"
+#include "charset.h"
 #include "parse.h"
 
 #undef ALLOW_DOS_OPTION_SYNTAX
@@ -652,10 +654,7 @@ typedef struct {
 } ConfigurationFileProcessingData;
 
 static int
-processConfigurationLine (
-  char *line,
-  void *data
-) {
+processConfigurationOperands (char *line, void *data) {
   const ConfigurationFileProcessingData *conf = data;
   static const char *delimiters = " \t"; /* Characters which separate words. */
   char *directive; /* Points to first word of each line. */
@@ -712,6 +711,34 @@ processConfigurationLine (
   return 1;
 }
 
+static int
+processConfigurationDirective (DataFile *file, void *data) {
+  int ok = 0;
+  DataOperand directive;
+
+  if (getDataText(file, &directive, "configuration directive")) {
+    char *utf8 = makeUtf8FromWchars(directive.characters, directive.length, NULL);
+
+    if (utf8) {
+      if (processConfigurationOperands(utf8, data)) ok = 1;
+
+      free(utf8);
+    }
+  }
+
+  return ok;
+}
+
+static int
+processConfigurationLine (DataFile *file, void *data) {
+  static const DataProperty properties[] = {
+    {.name=WS_C("include"), .processor=processIncludeOperands},
+    {.name=NULL, .processor=processConfigurationDirective}
+  };
+
+  return processPropertyOperand(file, properties, "configuration file directive", data);
+}
+
 static void
 processConfigurationFile (
   OptionProcessingInformation *info,
@@ -721,16 +748,16 @@ processConfigurationFile (
   FILE *file = openDataFile(path, "r", optional);
 
   if (file) {
-    ConfigurationFileProcessingData conf;
+    ConfigurationFileProcessingData conf = {
+      .info = info
+    };
 
-    conf.info = info;
-      ;
     if ((conf.settings = malloc(info->optionCount * sizeof(*conf.settings)))) {
       int processed;
       unsigned int index;
 
       for (index=0; index<info->optionCount; index+=1) conf.settings[index] = NULL;
-      processed = processLines(file, processConfigurationLine, &conf);
+      processed = processDataStream(NULL, file, path, processConfigurationLine, &conf);
 
       for (index=0; index<info->optionCount; index+=1) {
         char *setting = conf.settings[index];

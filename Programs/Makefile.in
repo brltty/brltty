@@ -245,6 +245,15 @@ timing.$O:
 queue.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/queue.c
 
+datafile.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/datafile.c
+
+unicode.$O:
+	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/unicode.c
+
+lock.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/lock.c
+
 ###############################################################################
 
 pid.$O:
@@ -257,15 +266,6 @@ auth.$O:
 
 dataarea.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/dataarea.c
-
-datafile.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/datafile.c
-
-lock.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/lock.c
-
-unicode.$O:
-	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/unicode.c
 
 ###############################################################################
 
@@ -431,7 +431,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) config.$O $(PREFS_OBJECTS) menu.$O ses.$O message.$O status.$O update.$O blink.$O clipboard.$O touch.$O $(CHARSET_OBJECTS) dataarea.$O datafile.$O lock.$O unicode.$O cmd.$O cmd_queue.$O cmd_navigation.$O cmd_speech.$O cmd_learn.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(TUNE_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) api_control.$O $(API_OBJECTS)
+CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) config.$O $(PREFS_OBJECTS) menu.$O ses.$O message.$O status.$O update.$O blink.$O clipboard.$O touch.$O dataarea.$O cmd.$O cmd_queue.$O cmd_navigation.$O cmd_speech.$O cmd_learn.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(TUNE_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) api_control.$O $(API_OBJECTS)
 CORE_NAME = brltty
 
 brltty-core: $(CORE_OBJECTS)
@@ -496,7 +496,7 @@ driver.$O:
 ###############################################################################
 
 BRLTTY_OBJECTS = main.$O $(CORE_OBJECTS)
-BRLTTY_LIBRARIES = $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(PCM_LIBS) $(MIDI_LIBS) $(USB_LIBS) $(BLUETOOTH_LIBS) $(ICU_LIBS) $(LDLIBS)
+BRLTTY_LIBRARIES = $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(PCM_LIBS) $(MIDI_LIBS) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LDLIBS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRLTTY_LIBRARIES)
@@ -534,20 +534,20 @@ brltty_jni.$O:
 
 ###############################################################################
 
-BRLTTY_TRTXT_OBJECTS = brltty-trtxt.$O $(PROGRAM_OBJECTS) ttb_translate.$O ttb_compile.$O ttb_native.$O $(CHARSET_OBJECTS) dataarea.$O datafile.$O lock.$O unicode.$O
+BRLTTY_TRTXT_OBJECTS = brltty-trtxt.$O $(PROGRAM_OBJECTS) ttb_translate.$O ttb_compile.$O ttb_native.$O dataarea.$O
 
 brltty-trtxt$X: $(BRLTTY_TRTXT_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_TRTXT_OBJECTS) $(ICU_LIBS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_TRTXT_OBJECTS) $(LDLIBS)
 
 brltty-trtxt.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-trtxt.c
 
 ###############################################################################
 
-BRLTTY_TTB_OBJECTS = brltty-ttb.$O $(PROGRAM_OBJECTS) lock.$O $(CHARSET_OBJECTS) dataarea.$O datafile.$O unicode.$O ttb_compile.$O ttb_native.$O ttb_gnome.$O ttb_louis.$O
+BRLTTY_TTB_OBJECTS = brltty-ttb.$O $(PROGRAM_OBJECTS) dataarea.$O ttb_compile.$O ttb_native.$O ttb_gnome.$O ttb_louis.$O
 
 brltty-ttb$X: $(BRLTTY_TTB_OBJECTS) $(BUILD_API)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_TTB_OBJECTS) $(API_REF) $(CURSES_LIBS) $(ICU_LIBS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_TTB_OBJECTS) $(API_REF) $(CURSES_LIBS) $(LDLIBS)
 
 brltty-ttb.$O:
 	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/brltty-ttb.c
@@ -572,10 +572,10 @@ check-text-tables: brltty-ttb$X
 
 ###############################################################################
 
-BRLTTY_CTB_OBJECTS = brltty-ctb.$O $(PROGRAM_OBJECTS) $(PREFS_OBJECTS) dataarea.$O datafile.$O lock.$O unicode.$O ttb_compile.$O ttb_native.$O ttb_translate.$O ctb_compile.$O ctb_translate.$O $(CHARSET_OBJECTS)
+BRLTTY_CTB_OBJECTS = brltty-ctb.$O $(PROGRAM_OBJECTS) $(PREFS_OBJECTS) dataarea.$O ttb_compile.$O ttb_native.$O ttb_translate.$O ctb_compile.$O ctb_translate.$O
 
 brltty-ctb$X: $(BRLTTY_CTB_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_CTB_OBJECTS) $(ICU_LIBS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_CTB_OBJECTS) $(LDLIBS)
 
 brltty-ctb.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-ctb.c
@@ -591,7 +591,7 @@ check-contraction-tables: brltty-ctb$X
 
 ###############################################################################
 
-BRLTEST_OBJECTS = brltest.$O $(PROGRAM_OBJECTS) ttb_translate.$O cmd.$O $(CHARSET_OBJECTS) lock.$O hidkeys.$O drivers.$O driver.$O $(BRAILLE_OBJECTS) touch.$O
+BRLTEST_OBJECTS = brltest.$O $(PROGRAM_OBJECTS) ttb_translate.$O cmd.$O hidkeys.$O drivers.$O driver.$O $(BRAILLE_OBJECTS) touch.$O
 
 brltest$X: $(BRLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LDLIBS)
@@ -601,7 +601,7 @@ brltest.$O:
 
 ###############################################################################
 
-SPKTEST_OBJECTS = spktest.$O $(PROGRAM_OBJECTS) lock.$O $(CHARSET_OBJECTS) drivers.$O driver.$O $(SPEECH_OBJECTS)
+SPKTEST_OBJECTS = spktest.$O $(PROGRAM_OBJECTS) drivers.$O driver.$O $(SPEECH_OBJECTS)
 
 spktest$X: $(SPKTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(SPKTEST_OBJECTS) $(SPEECH_DRIVER_LIBRARIES) $(LDLIBS)
@@ -611,10 +611,10 @@ spktest.$O:
 
 ###############################################################################
 
-SCRTEST_OBJECTS = scrtest.$O $(PROGRAM_OBJECTS) drivers.$O driver.$O $(SCREEN_OBJECTS) $(CHARSET_OBJECTS) lock.$O unicode.$O scancodes.$O
+SCRTEST_OBJECTS = scrtest.$O $(PROGRAM_OBJECTS) drivers.$O driver.$O $(SCREEN_OBJECTS) scancodes.$O
 
 scrtest$X: $(SCRTEST_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(SCREEN_DRIVER_LIBRARIES) $(ICU_LIBS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(SCREEN_DRIVER_LIBRARIES) $(LDLIBS)
 
 scrtest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scrtest.c
@@ -629,10 +629,10 @@ atb_translate.$O:
 
 ###############################################################################
 
-KTBTEST_OBJECTS = ktbtest.$O $(PROGRAM_OBJECTS) ktb_compile.$O ktb_list.$O datafile.$O unicode.$O $(CHARSET_OBJECTS) lock.$O cmd.$O ktb_keyboard.$O ttb_translate.$O ttb_compile.$O ttb_native.$O dataarea.$O drivers.$O driver.$O brl_driver.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) $(PREFS_OBJECTS) cmd_queue.$O
+KTBTEST_OBJECTS = ktbtest.$O $(PROGRAM_OBJECTS) ktb_compile.$O ktb_list.$O cmd.$O ktb_keyboard.$O ttb_translate.$O ttb_compile.$O ttb_native.$O dataarea.$O drivers.$O driver.$O brl_driver.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) $(PREFS_OBJECTS) cmd_queue.$O
 
 ktbtest$X: $(KTBTEST_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(KTBTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(ICU_LIBS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(KTBTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LDLIBS)
 
 ktbtest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ktbtest.c
@@ -664,10 +664,10 @@ tunetest.$O:
 
 ###############################################################################
 
-APITEST_OBJECTS = apitest.$O $(PROGRAM_OBJECTS) cmd.$O ttb_translate.$O ttb_compile.$O ttb_native.$O $(CHARSET_OBJECTS) dataarea.$O datafile.$O lock.$O unicode.$O
+APITEST_OBJECTS = apitest.$O $(PROGRAM_OBJECTS) cmd.$O ttb_translate.$O ttb_compile.$O ttb_native.$O dataarea.$O
 
 apitest$X: $(APITEST_OBJECTS) api
-	$(CC) $(LDFLAGS) -o $@ $(APITEST_OBJECTS) $(API_LIBS) $(ICU_LIBS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(APITEST_OBJECTS) $(API_LIBS) $(LDLIBS)
 
 apitest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/apitest.c
@@ -727,11 +727,11 @@ xbrlapi.$O:
 
 ###############################################################################
 
-TBL2HEX_OBJECTS_FOR_BUILD = tbl2hex.$(O_FOR_BUILD) $(PROGRAM_OBJECTS_FOR_BUILD) $(CHARSET_OBJECTS_FOR_BUILD) dataarea.$(O_FOR_BUILD) datafile.$(O_FOR_BUILD) lock.$(O_FOR_BUILD) unicode.$(O_FOR_BUILD) ttb_compile.$(O_FOR_BUILD) ttb_native.$(O_FOR_BUILD) atb_compile.$(O_FOR_BUILD) ctb_compile.$(O_FOR_BUILD)
+TBL2HEX_OBJECTS_FOR_BUILD = tbl2hex.$(O_FOR_BUILD) $(PROGRAM_OBJECTS_FOR_BUILD) dataarea.$(O_FOR_BUILD) ttb_compile.$(O_FOR_BUILD) ttb_native.$(O_FOR_BUILD) atb_compile.$(O_FOR_BUILD) ctb_compile.$(O_FOR_BUILD)
 TBL2HEX_OBJECTS = $(TBL2HEX_OBJECTS_FOR_BUILD:.$(O_FOR_BUILD)=.$B)
 
 tbl2hex$(X_FOR_BUILD): $(TBL2HEX_OBJECTS)
-	$(CC_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@ $(TBL2HEX_OBJECTS) $(ICU_LIBS_FOR_BUILD) $(LDLIBS_FOR_BUILD)
+	$(CC_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@ $(TBL2HEX_OBJECTS) $(LDLIBS_FOR_BUILD)
 
 ###############################################################################
 

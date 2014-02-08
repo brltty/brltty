@@ -194,7 +194,7 @@ MOUNT_OBJECTS = $(MNTPT_OBJECTS) $(MNTFS_OBJECTS)
 IO_OBJECTS = io_misc.$O gio.$O $(SERIAL_OBJECTS) $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) $(MOUNT_OBJECTS)
 TUNE_OBJECTS = tunes.$O notes.$O $(BEEP_OBJECTS) $(PCM_OBJECTS) $(MIDI_OBJECTS) $(FM_OBJECTS)
 ASYNC_OBJECTS = async_handle.$O async_data.$O async_wait.$O async_alarm.$O async_task.$O async_io.$O async_event.$O async_signal.$O async_thread.$O
-BASE_OBJECTS = log.$O addresses.$O file.$O device.$O parse.$O timing.$O $(ASYNC_OBJECTS) queue.$O $(DYNLD_OBJECTS) $(PORTS_OBJECTS) $(SYSTEM_OBJECTS)
+BASE_OBJECTS = log.$O addresses.$O file.$O device.$O parse.$O timing.$O $(ASYNC_OBJECTS) queue.$O $(DYNLD_OBJECTS) $(PORTS_OBJECTS) $(SYSTEM_OBJECTS) datafile.$O unicode.$O lock.$O $(CHARSET_OBJECTS)
 OPTIONS_OBJECTS = options.$O $(PARAMS_OBJECTS)
 PROGRAM_OBJECTS = program.$O $(PGMPATH_OBJECTS) $(SERVICE_OBJECTS) pid.$O $(OPTIONS_OBJECTS) $(BASE_OBJECTS)
 
@@ -209,7 +209,7 @@ LIBCXXFLAGS = $(CXXFLAGS) @LIBCXXFLAGS@
 
 LD = @LD@
 LDFLAGS = @LDFLAGS@
-LDLIBS = $(SYSTEM_LIBS) @LIBS@
+LDLIBS = $(ICU_LIBS) $(SYSTEM_LIBS) @LIBS@
 
 MKOBJ = @MKOBJ@
 MKMOD = @MKMOD@
