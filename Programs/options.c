@@ -649,49 +649,82 @@ setDefaultOptions (
 }
 
 typedef struct {
+  unsigned int option;
+  wchar_t keyword[0];
+} ConfigurationDirective;
+
+static int
+compareKeywords (const wchar_t *keyword1, const wchar_t *keyword2) {
+  return wcscasecmp(keyword1, keyword2);
+}
+
+static int
+sortConfigurationDirectives (const void *element1, const void *element2) {
+  const ConfigurationDirective *const *directive1 = element1;
+  const ConfigurationDirective *const *directive2 = element2;
+
+  return compareKeywords((*directive1)->keyword, (*directive2)->keyword);
+}
+
+static int
+searchConfigurationDirective (const void *target, const void *element) {
+  const wchar_t *keyword = target;
+  const ConfigurationDirective *const *directive = element;
+
+  return compareKeywords(keyword, (*directive)->keyword);
+}
+
+typedef struct {
   OptionProcessingInformation *info;
   char **settings;
+
+  struct {
+    ConfigurationDirective **table;
+    unsigned int count;
+  } directive;
 } ConfigurationFileProcessingData;
+
+static const ConfigurationDirective *
+findConfigurationDirective (const wchar_t *keyword, const ConfigurationFileProcessingData *conf) {
+  const ConfigurationDirective *const *directive = bsearch(keyword, conf->directive.table, conf->directive.count, sizeof(*conf->directive.table), searchConfigurationDirective);
+
+  if (directive) return *directive;
+  return NULL;
+}
 
 static int
 processConfigurationDirective (
-  const char *directive,
+  const wchar_t *keyword,
   const char *value,
   const ConfigurationFileProcessingData *conf
 ) {
-  unsigned int optionIndex;
+  const ConfigurationDirective *directive = findConfigurationDirective(keyword, conf);
 
-  for (optionIndex=0; optionIndex<conf->info->optionCount; optionIndex+=1) {
-    const OptionEntry *option = &conf->info->optionTable[optionIndex];
+  if (directive) {
+    const OptionEntry *option = &conf->info->optionTable[directive->option];
+    char **setting = &conf->settings[directive->option];
 
-    if ((option->flags & OPT_Config) && option->word) {
-      if (strcasecmp(directive, option->word) == 0) {
-        char **setting = &conf->settings[optionIndex];
+    if (*setting && !(option->argument && (option->flags & OPT_Extend))) {
+      logMessage(LOG_ERR, "%s: %" PRIws, gettext("configuration directive specified more than once"), keyword);
+      conf->info->warning = 1;
 
-        if (*setting && !(option->argument && (option->flags & OPT_Extend))) {
-          logMessage(LOG_ERR, "%s: %s", gettext("configuration directive specified more than once"), directive);
-          conf->info->warning = 1;
+      free(*setting);
+      *setting = NULL;
+    }
 
-          free(*setting);
-          *setting = NULL;
-        }
-
-        if (*setting) {
-          if (!extendStringSetting(setting, value, 0)) return 0;
-        } else {
-          if (!(*setting = strdup(value))) {
-            logMallocError();
-            return 0;
-          }
-        }
-
-        return 1;
+    if (*setting) {
+      if (!extendStringSetting(setting, value, 0)) return 0;
+    } else {
+      if (!(*setting = strdup(value))) {
+        logMallocError();
+        return 0;
       }
     }
+  } else {
+    logMessage(LOG_ERR, "%s: %" PRIws, gettext("unknown configuration directive"), keyword);
+    conf->info->warning = 1;
   }
 
-  logMessage(LOG_ERR, "%s: %s", gettext("unknown configuration directive"), directive);
-  conf->info->warning = 1;
   return 1;
 }
 
@@ -699,26 +732,18 @@ static int
 processConfigurationOperands (DataFile *file, void *data) {
   const ConfigurationFileProcessingData *conf = data;
   int ok = 1;
-  DataOperand directive;
+  DataString keyword;
 
-  if (getDataOperand(file, &directive, "configuration directive")) {
+  if (getDataString(file, &keyword, 0, "configuration directive")) {
     DataString value;
 
     if (getDataString(file, &value, 0, "configuration value")) {
-      char *d = makeUtf8FromWchars(directive.characters, directive.length, NULL);
+      char *v = makeUtf8FromWchars(value.characters, value.length, NULL);
 
-      if (d) {
-        char *v = makeUtf8FromWchars(value.characters, value.length, NULL);
+      if (v) {
+        if (!processConfigurationDirective(keyword.characters, v, conf)) ok = 0;
 
-        if (v) {
-          if (!processConfigurationDirective(d, v, conf)) ok = 0;
-
-          free(v);
-        } else {
-          ok = 0;
-        }
-
-        free(d);
+        free(v);
       } else {
         ok = 0;
       }
@@ -744,6 +769,48 @@ processConfigurationLine (DataFile *file, void *data) {
 }
 
 static void
+freeConfigurationDirectives (ConfigurationFileProcessingData *conf) {
+  while (conf->directive.count > 0) free(conf->directive.table[--conf->directive.count]);
+}
+
+static int
+addConfigurationDirectives (ConfigurationFileProcessingData *conf) {
+  unsigned int optionIndex;
+
+  for (optionIndex=0; optionIndex<conf->info->optionCount; optionIndex+=1) {
+    const OptionEntry *option = &conf->info->optionTable[optionIndex];
+
+    if ((option->flags & OPT_Config) && option->word) {
+      ConfigurationDirective *directive;
+      const char *keyword = option->word;
+      size_t length = getUtf8Length(keyword);
+      size_t size = sizeof(*directive) + ((length + 1) * sizeof(wchar_t));
+
+      if (!(directive = malloc(size))) {
+        logMallocError();
+        freeConfigurationDirectives(conf);
+        return 0;
+      }
+
+      directive->option = optionIndex;
+
+      {
+        const char *utf8 = keyword;
+        wchar_t *wc = directive->keyword;
+        convertUtf8ToWchars(&utf8, &wc, length+1);
+      }
+
+      conf->directive.table[conf->directive.count++] = directive;
+    }
+  }
+
+  qsort(conf->directive.table, conf->directive.count,
+        sizeof(*conf->directive.table), sortConfigurationDirectives);
+
+  return 1;
+}
+
+static void
 processConfigurationFile (
   OptionProcessingInformation *info,
   const char *path,
@@ -752,13 +819,22 @@ processConfigurationFile (
   FILE *file = openDataFile(path, "r", optional);
 
   if (file) {
+    char *settings[info->optionCount];
+    ConfigurationDirective *directives[info->optionCount];
+
     ConfigurationFileProcessingData conf = {
-      .info = info
+      .info = info,
+      .settings = settings,
+
+      .directive = {
+        .table = directives,
+        .count = 0
+      }
     };
 
-    if ((conf.settings = malloc(info->optionCount * sizeof(*conf.settings)))) {
-      int processed;
+    if (addConfigurationDirectives(&conf)) {
       unsigned int index;
+      int processed;
 
       for (index=0; index<info->optionCount; index+=1) conf.settings[index] = NULL;
       processed = processDataStream(NULL, file, path, processConfigurationLine, &conf);
@@ -777,9 +853,7 @@ processConfigurationFile (
         info->warning = 1;
       }
 
-      free(conf.settings);
-    } else {
-      logMallocError();
+      freeConfigurationDirectives(&conf);
     }
 
     fclose(file);
