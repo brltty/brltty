@@ -654,76 +654,79 @@ typedef struct {
 } ConfigurationFileProcessingData;
 
 static int
-processConfigurationOperands (char *line, void *data) {
-  const ConfigurationFileProcessingData *conf = data;
-  static const char *delimiters = " \t"; /* Characters which separate words. */
-  char *directive; /* Points to first word of each line. */
+processConfigurationDirective (
+  const char *directive,
+  const char *value,
+  const ConfigurationFileProcessingData *conf
+) {
+  unsigned int optionIndex;
 
-  /* Remove comment from end of line. */
-  {
-    char *comment = strchr(line, '#');
-    if (comment) *comment = 0;
-  }
+  for (optionIndex=0; optionIndex<conf->info->optionCount; optionIndex+=1) {
+    const OptionEntry *option = &conf->info->optionTable[optionIndex];
 
-  if ((directive = strtok(line, delimiters))) {
-    int optionIndex;
-    for (optionIndex=0; optionIndex<conf->info->optionCount; ++optionIndex) {
-      const OptionEntry *option = &conf->info->optionTable[optionIndex];
-      if ((option->flags & OPT_Config) && option->word) {
-        if (strcasecmp(directive, option->word) == 0) {
-          const char *operand = strtok(NULL, delimiters);
+    if ((option->flags & OPT_Config) && option->word) {
+      if (strcasecmp(directive, option->word) == 0) {
+        char **setting = &conf->settings[optionIndex];
 
-          if (!operand) {
-            logMessage(LOG_ERR, "%s: %s", gettext("operand not supplied for configuration directive"), line);
-            conf->info->warning = 1;
-          } else if (strtok(NULL, delimiters)) {
-            while (strtok(NULL, delimiters));
-            logMessage(LOG_ERR, "%s: %s", gettext("too many operands for configuration directive"), line);
-            conf->info->warning = 1;
-          } else {
-            char **setting = &conf->settings[optionIndex];
+        if (*setting && !(option->argument && (option->flags & OPT_Extend))) {
+          logMessage(LOG_ERR, "%s: %s", gettext("configuration directive specified more than once"), directive);
+          conf->info->warning = 1;
 
-            if (*setting && !(option->argument && (option->flags & OPT_Extend))) {
-              logMessage(LOG_ERR, "%s: %s", gettext("configuration directive specified more than once"), line);
-              conf->info->warning = 1;
-
-              free(*setting);
-              *setting = NULL;
-            }
-
-            if (*setting) {
-              if (!extendStringSetting(setting, operand, 0)) return 0;
-            } else {
-              if (!(*setting = strdup(operand))) {
-                logMallocError();
-                return 0;
-              }
-            }
-          }
-
-          return 1;
+          free(*setting);
+          *setting = NULL;
         }
+
+        if (*setting) {
+          if (!extendStringSetting(setting, value, 0)) return 0;
+        } else {
+          if (!(*setting = strdup(value))) {
+            logMallocError();
+            return 0;
+          }
+        }
+
+        return 1;
       }
     }
-    logMessage(LOG_ERR, "%s: %s", gettext("unknown configuration directive"), line);
-    conf->info->warning = 1;
   }
+
+  logMessage(LOG_ERR, "%s: %s", gettext("unknown configuration directive"), directive);
+  conf->info->warning = 1;
   return 1;
 }
 
 static int
-processConfigurationDirective (DataFile *file, void *data) {
-  int ok = 0;
+processConfigurationOperands (DataFile *file, void *data) {
+  const ConfigurationFileProcessingData *conf = data;
+  int ok = 1;
   DataOperand directive;
 
-  if (getDataText(file, &directive, "configuration directive")) {
-    char *utf8 = makeUtf8FromWchars(directive.characters, directive.length, NULL);
+  if (getDataOperand(file, &directive, "configuration directive")) {
+    DataString value;
 
-    if (utf8) {
-      if (processConfigurationOperands(utf8, data)) ok = 1;
+    if (getDataString(file, &value, 0, "configuration value")) {
+      char *d = makeUtf8FromWchars(directive.characters, directive.length, NULL);
 
-      free(utf8);
+      if (d) {
+        char *v = makeUtf8FromWchars(value.characters, value.length, NULL);
+
+        if (v) {
+          if (!processConfigurationDirective(d, v, conf)) ok = 0;
+
+          free(v);
+        } else {
+          ok = 0;
+        }
+
+        free(d);
+      } else {
+        ok = 0;
+      }
+    } else {
+      conf->info->warning = 1;
     }
+  } else {
+    conf->info->warning = 1;
   }
 
   return ok;
@@ -732,8 +735,9 @@ processConfigurationDirective (DataFile *file, void *data) {
 static int
 processConfigurationLine (DataFile *file, void *data) {
   static const DataProperty properties[] = {
+    {.name=WS_C("assign"), .processor=processAssignOperands},
     {.name=WS_C("include"), .processor=processIncludeOperands},
-    {.name=NULL, .processor=processConfigurationDirective}
+    {.name=NULL, .processor=processConfigurationOperands}
   };
 
   return processPropertyOperand(file, properties, "configuration file directive", data);
