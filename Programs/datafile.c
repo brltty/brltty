@@ -179,7 +179,7 @@ newDataVariableQueue (Queue *previous) {
 }
 
 static int
-testDataVariableName (const void *item, const void *data) {
+testDataVariableName (const void *item, void *data) {
   const DataVariable *variable = item;
   const DataOperand *name = data;
   if (variable->name.length == name->length)
@@ -191,8 +191,13 @@ testDataVariableName (const void *item, const void *data) {
 
 static DataVariable *
 getDataVariable (Queue *variables, const DataOperand *name, int create) {
-  DataVariable *variable = findItem(variables, testDataVariableName, name);
-  if (variable) return variable;
+  DataVariable *variable;
+
+  {
+    DataOperand data = *name;
+
+    if ((variable = findItem(variables, testDataVariableName, &data))) return variable;
+  }
 
   if (create) {
     if ((variable = malloc(sizeof(*variable)))) {

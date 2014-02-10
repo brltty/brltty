@@ -401,7 +401,7 @@ typedef struct {
 } TestMonitoredSignalKey;
 
 static int
-testMonitoredSignal (const void *item, const void *data) {
+testMonitoredSignal (const void *item, void *data) {
   const SignalEntry *sig = item;
   const TestMonitoredSignalKey *key = data;
 
@@ -414,7 +414,7 @@ getSignalElement (int signalNumber, int create) {
 
   if (signals) {
     {
-      const TestMonitoredSignalKey key = {
+      TestMonitoredSignalKey key = {
         .signalNumber = signalNumber
       };
 

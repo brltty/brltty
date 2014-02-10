@@ -814,7 +814,7 @@ cancelOperation (Element *operationElement) {
 }
 
 static int
-testFunctionEntry (const void *item, const void *data) {
+testFunctionEntry (const void *item, void *data) {
   const FunctionEntry *function = item;
   const FunctionKey *key = data;
   return (function->fileDescriptor == key->fileDescriptor) &&
@@ -827,7 +827,7 @@ getFunctionElement (FileDescriptor fileDescriptor, const FunctionMethods *method
 
   if (functions) {
     {
-      const FunctionKey key = {
+      FunctionKey key = {
         .fileDescriptor = fileDescriptor,
         .methods = methods
       };

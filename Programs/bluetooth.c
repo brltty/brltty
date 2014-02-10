@@ -88,7 +88,7 @@ bthGetDeviceQueue (int create) {
 }
 
 static int
-bthTestDeviceEntry (const void *item, const void *data) {
+bthTestDeviceEntry (const void *item, void *data) {
   const BluetoothDeviceEntry *entry = item;
   const uint64_t *bda = data;
 

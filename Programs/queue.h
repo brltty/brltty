@@ -45,7 +45,7 @@ extern void *setQueueData (Queue *queue, void *data);
 
 extern Element *enqueueItem (Queue *queue, void *item);
 extern void *dequeueItem (Queue *queue);
-extern int deleteItem (Queue *queue, const void *item);
+extern int deleteItem (Queue *queue, void *item);
 
 extern Queue *getElementQueue (const Element *element);
 extern int getElementIdentifier (const Element *element);
@@ -56,9 +56,9 @@ extern void deleteElement (Element *element);
 extern void requeueElement (Element *element);
 extern void moveElement (Element *element, Queue *queue);
 
-typedef int ItemTester (const void *item, const void *data);
-extern Element *findElement (const Queue *queue, ItemTester *testItem, const void *data);
-extern void *findItem (const Queue *queue, ItemTester *testItem, const void *data);
+typedef int ItemTester (const void *item, void *data);
+extern Element *findElement (const Queue *queue, ItemTester *testItem, void *data);
+extern void *findItem (const Queue *queue, ItemTester *testItem, void *data);
 extern Element *findElementWithItem (Queue *queue, void *item);
 
 typedef int ItemProcessor (void *item, void *data);
