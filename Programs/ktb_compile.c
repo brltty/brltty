@@ -1093,7 +1093,6 @@ processTitleOperands (DataFile *file, void *data) {
 static int
 processKeyTableLine (DataFile *file, void *data) {
   static const DataProperty properties[] = {
-    {.name=WS_C("assign"), .processor=processAssignOperands},
     {.name=WS_C("bind"), .processor=processBindOperands},
     {.name=WS_C("context"), .processor=processContextOperands},
     {.name=WS_C("hide"), .processor=processHideOperands},
@@ -1104,6 +1103,8 @@ processKeyTableLine (DataFile *file, void *data) {
     {.name=WS_C("note"), .processor=processNoteOperands},
     {.name=WS_C("superimpose"), .processor=processSuperimposeOperands},
     {.name=WS_C("title"), .processor=processTitleOperands},
+    DATA_CONDITION_PROPERTIES,
+    DATA_VARIABLE_PROPERTIES,
     {.name=NULL, .processor=NULL}
   };
 
