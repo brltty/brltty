@@ -950,17 +950,23 @@ processHotkeyOperands (DataFile *file, void *data) {
 }
 
 static int
+testKeyDefined (DataFile *file, const DataOperand *name, void *data) {
+  return !!findKeyName(name->characters, name->length, data);
+}
+
+static int
+processKeyTestOperands (DataFile *file, int isDefined, void *data) {
+  return processConditionOperands(file, testKeyDefined, !isDefined, "key name", data);
+}
+
+static int
 processIfKeyOperands (DataFile *file, void *data) {
-  KeyTableData *ktd = data;
-  DataString name;
+  return processKeyTestOperands(file, 1, data);
+}
 
-  if (getDataString(file, &name, 1, "key name")) {
-    if (findKeyName(name.characters, name.length, ktd)) {
-      return processKeyTableLine(file, ktd);
-    }
-  }
-
-  return 1;
+static int
+processIfNoKeyOperands (DataFile *file, void *data) {
+  return processKeyTestOperands(file, 0, data);
 }
 
 static int
@@ -1098,6 +1104,7 @@ processKeyTableLine (DataFile *file, void *data) {
     {.name=WS_C("hide"), .processor=processHideOperands},
     {.name=WS_C("hotkey"), .processor=processHotkeyOperands},
     {.name=WS_C("ifkey"), .processor=processIfKeyOperands},
+    {.name=WS_C("ifnokey"), .processor=processIfNoKeyOperands},
     {.name=WS_C("include"), .processor=processIncludeWrapper},
     {.name=WS_C("map"), .processor=processMapOperands},
     {.name=WS_C("note"), .processor=processNoteOperands},
