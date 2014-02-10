@@ -84,9 +84,7 @@ static const wchar_t *const opcodeNames[CTO_None] = {
 
   WS_C("class"),
   WS_C("after"),
-  WS_C("before"),
-
-  WS_C("include")
+  WS_C("before")
 };
 
 typedef struct {
@@ -369,8 +367,9 @@ getFindText (DataFile *file, DataString *find) {
 }
 
 static int
-processContractionTableLine (DataFile *file, void *data) {
+processContractionTableDirective (DataFile *file, void *data) {
   ContractionTableData *ctd = data;
+
   ContractionTableCharacterAttributes after = 0;
   ContractionTableCharacterAttributes before = 0;
 
@@ -379,10 +378,6 @@ processContractionTableLine (DataFile *file, void *data) {
 
     switch ((opcode = getOpcode(file, ctd))) {
       case CTO_None:
-        break;
-
-      case CTO_IncludeFile:
-        if (!processIncludeOperands(file, data)) return 0;
         break;
 
       case CTO_Always:
@@ -524,6 +519,16 @@ processContractionTableLine (DataFile *file, void *data) {
 
     return 1;
   }
+}
+
+static int
+processContractionTableLine (DataFile *file, void *data) {
+  static const DataProperty properties[] = {
+    DATA_NESTING_PROPERTIES,
+    {.name=NULL, .processor=processContractionTableDirective}
+  };
+
+  return processPropertyOperand(file, properties, "contraction table directive", data);
 }
 
 int

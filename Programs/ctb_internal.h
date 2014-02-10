@@ -87,7 +87,6 @@ typedef enum {
   CTO_After, /*only match if after character in class*/
   CTO_Before, /*only match if before character in class*/
 
-  CTO_IncludeFile, /*include a file*/
   CTO_None /*For internal use only*/
 } ContractionTableOpcode;
 
