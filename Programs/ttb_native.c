@@ -180,7 +180,7 @@ processTextTableLine (DataFile *file, void *data) {
     {.name=WS_C("char"), .processor=processCharOperands},
     {.name=WS_C("glyph"), .processor=processGlyphOperands},
     {.name=WS_C("byte"), .processor=processByteOperands},
-    {.name=WS_C("include"), .processor=processIncludeOperands},
+    DATA_NESTING_PROPERTIES,
     {.name=NULL, .processor=NULL}
   };
 

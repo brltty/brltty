@@ -157,7 +157,7 @@ static int
 processAttributesTableLine (DataFile *file, void *data) {
   static const DataProperty properties[] = {
     {.name=WS_C("dot"), .processor=processDotOperands},
-    {.name=WS_C("include"), .processor=processIncludeOperands},
+    DATA_NESTING_PROPERTIES,
     {.name=NULL, .processor=NULL}
   };
 
