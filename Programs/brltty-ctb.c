@@ -359,8 +359,7 @@ outputError:
   return 0;
 }
 
-static int
-processContractsOperands (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processContractsOperands) {
   DataString text;
 
   if (getDataString(file, &text, 1, "uncontracted text")) {

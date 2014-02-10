@@ -233,7 +233,7 @@ destroyTextTableData (TextTableData *ttd) {
 }
 
 TextTableData *
-processTextTableLines (FILE *stream, const char *name, DataProcessor processor) {
+processTextTableLines (FILE *stream, const char *name, DataOperandsProcessor processor) {
   if (setGlobalTableVariables(TEXT_TABLE_EXTENSION, TEXT_SUBTABLE_EXTENSION)) {
     TextTableData *ttd;
 

@@ -31,7 +31,7 @@ typedef struct TextTableDataStruct TextTableData;
 extern TextTableData *newTextTableData (void);
 extern void destroyTextTableData (TextTableData *ttd);
 
-extern TextTableData *processTextTableLines (FILE *stream, const char *name, DataProcessor processor);
+extern TextTableData *processTextTableLines (FILE *stream, const char *name, DataOperandsProcessor processor);
 extern TextTable *makeTextTable (TextTableData *ttd);
 
 typedef TextTableData *TextTableProcessor (FILE *stream, const char *name);

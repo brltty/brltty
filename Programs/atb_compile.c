@@ -139,8 +139,7 @@ getAttributeOperand (DataFile *file, unsigned char *bit, unsigned char *operatio
   return 0;
 }
 
-static int
-processDotOperands (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processDotOperands) {
   AttributesTableData *atd = data;
   int dotIndex;
 

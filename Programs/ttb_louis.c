@@ -96,8 +96,7 @@ getDots (DataFile *file, unsigned char *dots, const char *description) {
   return 1;
 }
 
-static int
-processChar (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processChar) {
   TextTableData *ttd = data;
   wchar_t character;
 
@@ -112,8 +111,7 @@ processChar (DataFile *file, void *data) {
   return 1;
 }
 
-static int
-processUplow (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processUplow) {
   TextTableData *ttd = data;
   wchar_t characters[2];
 
@@ -129,8 +127,7 @@ processUplow (DataFile *file, void *data) {
   return 1;
 }
 
-static int
-processInclude (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processInclude) {
   reportDataError(file, "no support for include");
   return 1;
 }

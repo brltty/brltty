@@ -32,15 +32,16 @@ extern int setGlobalTableVariables (const char *tableExtension, const char *subt
 
 typedef struct DataFileStruct DataFile;
 
-typedef int DataProcessor (DataFile *file, void *data);
+#define DATA_OPERANDS_PROCESSOR(name) int name (DataFile *file, void *data)
+typedef DATA_OPERANDS_PROCESSOR(DataOperandsProcessor);
 
-extern int processDataFile (const char *name, DataProcessor *processLine, void *data);
+extern int processDataFile (const char *name, DataOperandsProcessor *processLine, void *data);
 extern void reportDataError (DataFile *file, char *format, ...) PRINTF(2, 3);
 
 extern int processDataStream (
   Queue *variables,
   FILE *stream, const char *name,
-  DataProcessor *processLine, void *data
+  DataOperandsProcessor *processLine, void *data
 );
 
 extern int isKeyword (const wchar_t *keyword, const wchar_t *characters, size_t length);
@@ -90,6 +91,14 @@ extern int writeDotsCells (FILE *stream, const unsigned char *cells, size_t coun
 extern int writeUtf8Cell (FILE *stream, unsigned char cell);
 extern int writeUtf8Cells (FILE *stream, const unsigned char *cells, size_t count);
 
+typedef struct {
+  const wchar_t *name;
+  DataOperandsProcessor *processor;
+  unsigned unconditional:1;
+} DataProperty;
+
+extern int processPropertyOperand (DataFile *file, const DataProperty *properties, const char *description, void *data);
+
 typedef int DataConditionTester (DataFile *file, const DataOperand *name, void *data);
 
 extern int processConditionOperands (
@@ -98,33 +107,25 @@ extern int processConditionOperands (
   const char *description, void *data
 );
 
-extern int processEndIfOperands (DataFile *file, void *data);
-
-#define DATA_CONDITION_PROPERTIES \
-  {.name=WS_C("endif"), .processor=processEndIfOperands, .unconditional=1}
-
-typedef struct {
-  const wchar_t *name;
-  DataProcessor *processor;
-  unsigned unconditional:1;
-} DataProperty;
-
-extern int processPropertyOperand (DataFile *file, const DataProperty *properties, const char *description, void *data);
-
-extern int processAssignOperands (DataFile *file, void *data);
-extern int processIfVarOperands (DataFile *file, void *data);
-extern int processIfNoVarOperands (DataFile *file, void *data);
-
-#define DATA_VARIABLE_PROPERTIES \
-  {.name=WS_C("ifvar"), .processor=processIfVarOperands, .unconditional=1}, \
-  {.name=WS_C("ifnovar"), .processor=processIfNoVarOperands, .unconditional=1}, \
-  {.name=WS_C("assign"), .processor=processAssignOperands}
-
 extern int processIncludeOperands (DataFile *file, void *data);
 extern int includeDataFile (DataFile *file, const wchar_t *name, unsigned int length);
 
 #define DATA_NESTING_PROPERTIES \
   {.name=WS_C("include"), .processor=processIncludeOperands}
+
+extern int processEndIfOperands (DataFile *file, void *data);
+
+#define DATA_CONDITION_PROPERTIES \
+  {.name=WS_C("endif"), .processor=processEndIfOperands, .unconditional=1}
+
+extern int processIfVarOperands (DataFile *file, void *data);
+extern int processIfNoVarOperands (DataFile *file, void *data);
+extern int processAssignOperands (DataFile *file, void *data);
+
+#define DATA_VARIABLE_PROPERTIES \
+  {.name=WS_C("ifvar"), .processor=processIfVarOperands, .unconditional=1}, \
+  {.name=WS_C("ifnovar"), .processor=processIfNoVarOperands, .unconditional=1}, \
+  {.name=WS_C("assign"), .processor=processAssignOperands}
 
 #define BRL_DOT_COUNT 8
 extern const wchar_t brlDotNumbers[BRL_DOT_COUNT];

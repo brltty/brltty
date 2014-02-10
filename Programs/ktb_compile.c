@@ -823,8 +823,7 @@ addKeyBinding (KeyContext *ctx, const KeyBinding *binding) {
 
 static int processKeyTableLine (DataFile *file, void *data);
 
-static int
-processBindOperands (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processBindOperands) {
   KeyTableData *ktd = data;
   KeyContext *ctx = getCurrentKeyContext(ktd);
   KeyBinding binding;
@@ -849,8 +848,7 @@ processBindOperands (DataFile *file, void *data) {
   return 1;
 }
 
-static int
-processContextOperands (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processContextOperands) {
   KeyTableData *ktd = data;
   DataString context;
 
@@ -900,8 +898,7 @@ processContextOperands (DataFile *file, void *data) {
   return 1;
 }
 
-static int
-processHideOperands (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processHideOperands) {
   KeyTableData *ktd = data;
   DataString state;
 
@@ -918,8 +915,7 @@ processHideOperands (DataFile *file, void *data) {
   return 1;
 }
 
-static int
-processHotkeyOperands (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processHotkeyOperands) {
   KeyTableData *ktd = data;
   KeyContext *ctx = getCurrentKeyContext(ktd);
   HotkeyEntry hotkey;
@@ -959,18 +955,15 @@ processKeyTestOperands (DataFile *file, int isDefined, void *data) {
   return processConditionOperands(file, testKeyDefined, !isDefined, "key name", data);
 }
 
-static int
-processIfKeyOperands (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processIfKeyOperands) {
   return processKeyTestOperands(file, 1, data);
 }
 
-static int
-processIfNoKeyOperands (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processIfNoKeyOperands) {
   return processKeyTestOperands(file, 0, data);
 }
 
-static int
-processIncludeWrapper (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processIncludeWrapper) {
   KeyTableData *ktd = data;
   int result;
 
@@ -985,8 +978,7 @@ processIncludeWrapper (DataFile *file, void *data) {
   return result;
 }
 
-static int
-processMapOperands (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processMapOperands) {
   KeyTableData *ktd = data;
   KeyContext *ctx = getCurrentKeyContext(ktd);
   MappedKeyEntry map;
@@ -1017,8 +1009,7 @@ processMapOperands (DataFile *file, void *data) {
   return 1;
 }
 
-static int
-processNoteOperands (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processNoteOperands) {
   KeyTableData *ktd = data;
   DataOperand operand;
 
@@ -1057,8 +1048,7 @@ processNoteOperands (DataFile *file, void *data) {
   return 1;
 }
 
-static int
-processSuperimposeOperands (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processSuperimposeOperands) {
   KeyTableData *ktd = data;
   KeyContext *ctx = getCurrentKeyContext(ktd);
   if (!ctx) return 0;
@@ -1075,8 +1065,7 @@ processSuperimposeOperands (DataFile *file, void *data) {
   return 1;
 }
 
-static int
-processTitleOperands (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processTitleOperands) {
   KeyTableData *ktd = data;
   DataOperand title;
 

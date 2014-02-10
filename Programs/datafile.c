@@ -35,7 +35,7 @@ struct DataFileStruct {
   const char *name;
   int line;
 
-  DataProcessor *processLine;
+  DataOperandsProcessor *processLine;
   void *data;
 
   Queue *conditions;
@@ -837,78 +837,6 @@ writeUtf8Cells (FILE *stream, const unsigned char *cells, size_t count) {
   return 1;
 }
 
-int
-processAssignOperands (DataFile *file, void *data UNUSED) {
-  DataOperand name;
-
-  if (getDataOperand(file, &name, "variable name")) {
-    DataString value;
-
-    if (!getDataString(file, &value, 0, NULL)) {
-      value.length = 0;
-    }
-
-    {
-      DataVariable *variable = getWritableDataVariable(file, &name);
-
-      if (variable) {
-        if (setDataVariable(variable, value.characters, value.length)) return 1;
-      }
-    }
-  }
-
-  return 1;
-}
-
-int
-includeDataFile (DataFile *file, const wchar_t *name, unsigned int length) {
-  int ok = 0;
-
-  const char *prefixAddress = file->name;
-  size_t prefixLength = 0;
-
-  size_t suffixLength;
-  char *suffixAddress = makeUtf8FromWchars(name, length, &suffixLength);
-
-  if (suffixAddress) {
-    if (!isAbsolutePath(suffixAddress)) {
-      const char *prefixEnd = strrchr(prefixAddress, '/');
-      if (prefixEnd) prefixLength = prefixEnd - prefixAddress + 1;
-    }
-
-    {
-      char path[prefixLength + suffixLength + 1];
-      FILE *stream;
-
-      snprintf(path, sizeof(path), "%.*s%.*s",
-               (int)prefixLength, prefixAddress,
-               (int)suffixLength, suffixAddress);
-
-      if ((stream = openDataFile(path, "r", 0))) {
-        if (processDataStream(file->variables, stream, path, file->processLine, file->data)) ok = 1;
-        fclose(stream);
-      }
-    }
-
-    free(suffixAddress);
-  } else {
-    logMallocError();
-  }
-
-  return ok;
-}
-
-int
-processIncludeOperands (DataFile *file, void *data UNUSED) {
-  DataString path;
-
-  if (getDataString(file, &path, 0, "include file path"))
-    if (!includeDataFile(file, path.characters, path.length))
-      return 0;
-
-  return 1;
-}
-
 typedef struct {
   DataConditionTester *test;
   int negate;
@@ -1004,7 +932,7 @@ processPropertyOperand (DataFile *file, const DataProperty *properties, const ch
 }
 
 static int
-processDataLine (DataFile *file, const wchar_t *line) {
+processDataOperands (DataFile *file, const wchar_t *line) {
   file->end = file->start = line;
 
   if (!findDataOperand(file, NULL)) return 1;			/*blank line */
@@ -1024,12 +952,60 @@ processConditionOperands (
     if (!pushDataCondition(file, &name, testCondition, negateCondition)) return 0;
 
     if (findDataOperand(file, NULL)) {
-      int result = processDataLine(file, file->start);
+      int result = processDataOperands(file, file->start);
 
       popDataCondition(file);
       return result;
     }
   }
+
+  return 1;
+}
+
+int
+includeDataFile (DataFile *file, const wchar_t *name, unsigned int length) {
+  int ok = 0;
+
+  const char *prefixAddress = file->name;
+  size_t prefixLength = 0;
+
+  size_t suffixLength;
+  char *suffixAddress = makeUtf8FromWchars(name, length, &suffixLength);
+
+  if (suffixAddress) {
+    if (!isAbsolutePath(suffixAddress)) {
+      const char *prefixEnd = strrchr(prefixAddress, '/');
+      if (prefixEnd) prefixLength = prefixEnd - prefixAddress + 1;
+    }
+
+    {
+      char path[prefixLength + suffixLength + 1];
+      FILE *stream;
+
+      snprintf(path, sizeof(path), "%.*s%.*s",
+               (int)prefixLength, prefixAddress,
+               (int)suffixLength, suffixAddress);
+
+      if ((stream = openDataFile(path, "r", 0))) {
+        if (processDataStream(file->variables, stream, path, file->processLine, file->data)) ok = 1;
+        fclose(stream);
+      }
+    }
+
+    free(suffixAddress);
+  } else {
+    logMallocError();
+  }
+
+  return ok;
+}
+
+DATA_OPERANDS_PROCESSOR(processIncludeOperands) {
+  DataString path;
+
+  if (getDataString(file, &path, 0, "include file path"))
+    if (!includeDataFile(file, path.characters, path.length))
+      return 0;
 
   return 1;
 }
@@ -1044,18 +1020,37 @@ processVariableTestOperands (DataFile *file, int isDefined, void *data) {
   return processConditionOperands(file, testVariableDefined, !isDefined, "variable name", data);
 }
 
-int
-processIfVarOperands (DataFile *file, void *data) {
+DATA_OPERANDS_PROCESSOR(processIfVarOperands) {
   return processVariableTestOperands(file, 1, data);
 }
 
-int
-processIfNoVarOperands (DataFile *file, void *data) {
+DATA_OPERANDS_PROCESSOR(processIfNoVarOperands) {
   return processVariableTestOperands(file, 0, data);
 }
 
-int
-processEndIfOperands (DataFile *file, void *data) {
+DATA_OPERANDS_PROCESSOR(processAssignOperands) {
+  DataOperand name;
+
+  if (getDataOperand(file, &name, "variable name")) {
+    DataString value;
+
+    if (!getDataString(file, &value, 0, NULL)) {
+      value.length = 0;
+    }
+
+    {
+      DataVariable *variable = getWritableDataVariable(file, &name);
+
+      if (variable) {
+        if (setDataVariable(variable, value.characters, value.length)) return 1;
+      }
+    }
+  }
+
+  return 1;
+}
+
+DATA_OPERANDS_PROCESSOR(processEndIfOperands) {
   if (!popDataCondition(file)) {
     reportDataError(file, "no outstanding condition");
   }
@@ -1064,7 +1059,7 @@ processEndIfOperands (DataFile *file, void *data) {
 }
 
 static int
-processUtf8Line (char *line, void *dataAddress) {
+processDataLine (char *line, void *dataAddress) {
   DataFile *file = dataAddress;
   size_t size = strlen(line) + 1;
   const char *byte = line;
@@ -1080,14 +1075,14 @@ processUtf8Line (char *line, void *dataAddress) {
     return 1;
   }
 
-  return processDataLine(file, characters);
+  return processDataOperands(file, characters);
 }
 
 int
 processDataStream (
   Queue *variables,
   FILE *stream, const char *name,
-  DataProcessor *processLine, void *data
+  DataOperandsProcessor *processLine, void *data
 ) {
   int ok = 0;
   DataFile file;
@@ -1106,7 +1101,7 @@ processDataStream (
 
   if ((file.conditions = newQueue(deallocateDataCondition, NULL))) {
     if ((file.variables = newDataVariableQueue(variables))) {
-      if (processLines(stream, processUtf8Line, &file)) ok = 1;
+      if (processLines(stream, processDataLine, &file)) ok = 1;
 
       if (isDataConditionOutstanding(&file)) {
         reportDataError(&file, "outstanding condition at end-of-file");
@@ -1122,7 +1117,7 @@ processDataStream (
 }
 
 int
-processDataFile (const char *name, DataProcessor *processLine, void *data) {
+processDataFile (const char *name, DataOperandsProcessor *processLine, void *data) {
   int ok = 0;
   FILE *stream;
 

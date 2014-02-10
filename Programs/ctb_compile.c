@@ -366,8 +366,7 @@ getFindText (DataFile *file, DataString *find) {
   return getDataString(file, find, 0, "find text");
 }
 
-static int
-processContractionTableDirective (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processContractionTableDirective) {
   ContractionTableData *ctd = data;
 
   ContractionTableCharacterAttributes after = 0;

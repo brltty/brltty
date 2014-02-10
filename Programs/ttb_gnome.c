@@ -68,8 +68,7 @@ testBrailleRepresentation (DataFile *file, wchar_t representation, unsigned char
   return 0;
 }
 
-static int
-processEncodingOperands (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processEncodingOperands) {
   DataOperand encoding;
 
   if (getDataOperand(file, &encoding, "character encoding name")) {
@@ -82,8 +81,7 @@ processEncodingOperands (DataFile *file, void *data) {
   return 1;
 }
 
-static int
-processDelegateOperands (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processDelegateOperands) {
   DataOperand type;
 
   if (getDataOperand(file, &type, "delegate type")) {
@@ -101,8 +99,7 @@ processDelegateOperands (DataFile *file, void *data) {
   return 1;
 }
 
-static int
-processUcsBlockOperands (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processUcsBlockOperands) {
   DataOperand action;
 
   if (getDataOperand(file, &action, "UCS block action")) {
@@ -119,8 +116,7 @@ processUcsBlockOperands (DataFile *file, void *data) {
   return 1;
 }
 
-static int
-processUcsCharOperands (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processUcsCharOperands) {
   TextTableData *ttd = data;
   DataOperand string;
 
@@ -147,8 +143,7 @@ processUcsCharOperands (DataFile *file, void *data) {
   return 1;
 }
 
-static int
-processUnicodeCharOperands (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processUnicodeCharOperands) {
   TextTableData *ttd = data;
   wchar_t character;
 

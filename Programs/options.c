@@ -728,8 +728,7 @@ processConfigurationDirective (
   return 1;
 }
 
-static int
-processConfigurationOperands (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processConfigurationOperands) {
   const ConfigurationFileProcessingData *conf = data;
   int ok = 1;
   DataString keyword;

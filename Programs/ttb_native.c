@@ -126,8 +126,7 @@ getDotsOperand (DataFile *file, unsigned char *dots) {
   return 0;
 }
 
-static int
-processByteOperands (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processByteOperands) {
   TextTableData *ttd = data;
   unsigned char byte;
 
@@ -142,8 +141,7 @@ processByteOperands (DataFile *file, void *data) {
   return 1;
 }
 
-static int
-processCharOperands (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processCharOperands) {
   TextTableData *ttd = data;
   wchar_t character;
 
@@ -158,8 +156,7 @@ processCharOperands (DataFile *file, void *data) {
   return 1;
 }
 
-static int
-processGlyphOperands (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processGlyphOperands) {
   TextTableData *ttd = data;
   wchar_t character;
 
