@@ -49,42 +49,42 @@ struct CharacterClass {
 };
 
 static const wchar_t *const opcodeNames[CTO_None] = {
-  WS_C("capsign"),
-  WS_C("begcaps"),
-  WS_C("endcaps"),
+  [CTO_CapitalSign] = WS_C("capsign"),
+  [CTO_BeginCapitalSign] = WS_C("begcaps"),
+  [CTO_EndCapitalSign] = WS_C("endcaps"),
 
-  WS_C("letsign"),
-  WS_C("numsign"),
+  [CTO_EnglishLetterSign] = WS_C("letsign"),
+  [CTO_NumberSign] = WS_C("numsign"),
 
-  WS_C("literal"),
-  WS_C("always"),
-  WS_C("repeatable"),
+  [CTO_Literal] = WS_C("literal"),
+  [CTO_Always] = WS_C("always"),
+  [CTO_Repeatable] = WS_C("repeatable"),
 
-  WS_C("largesign"),
-  WS_C("lastlargesign"),
-  WS_C("word"),
-  WS_C("joinword"),
-  WS_C("lowword"),
-  WS_C("contraction"),
+  [CTO_LargeSign] = WS_C("largesign"),
+  [CTO_LastLargeSign] = WS_C("lastlargesign"),
+  [CTO_WholeWord] = WS_C("word"),
+  [CTO_JoinedWord] = WS_C("joinword"),
+  [CTO_LowWord] = WS_C("lowword"),
+  [CTO_Contraction] = WS_C("contraction"),
 
-  WS_C("sufword"),
-  WS_C("prfword"),
-  WS_C("begword"),
-  WS_C("begmidword"),
-  WS_C("midword"),
-  WS_C("midendword"),
-  WS_C("endword"),
+  [CTO_SuffixableWord] = WS_C("sufword"),
+  [CTO_PrefixableWord] = WS_C("prfword"),
+  [CTO_BegWord] = WS_C("begword"),
+  [CTO_BegMidWord] = WS_C("begmidword"),
+  [CTO_MidWord] = WS_C("midword"),
+  [CTO_MidEndWord] = WS_C("midendword"),
+  [CTO_EndWord] = WS_C("endword"),
 
-  WS_C("prepunc"),
-  WS_C("postpunc"),
+  [CTO_PrePunc] = WS_C("prepunc"),
+  [CTO_PostPunc] = WS_C("postpunc"),
 
-  WS_C("begnum"),
-  WS_C("midnum"),
-  WS_C("endnum"),
+  [CTO_BegNum] = WS_C("begnum"),
+  [CTO_MidNum] = WS_C("midnum"),
+  [CTO_EndNum] = WS_C("endnum"),
 
-  WS_C("class"),
-  WS_C("after"),
-  WS_C("before")
+  [CTO_Class] = WS_C("class"),
+  [CTO_After] = WS_C("after"),
+  [CTO_Before] = WS_C("before")
 };
 
 typedef struct {
