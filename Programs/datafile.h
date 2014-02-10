@@ -34,13 +34,13 @@ typedef struct DataFileStruct DataFile;
 
 typedef int DataProcessor (DataFile *file, void *data);
 
-extern int processDataFile (const char *name, DataProcessor processor, void *data);
+extern int processDataFile (const char *name, DataProcessor *processLine, void *data);
 extern void reportDataError (DataFile *file, char *format, ...) PRINTF(2, 3);
 
 extern int processDataStream (
   Queue *variables,
   FILE *stream, const char *name,
-  DataProcessor processor, void *data
+  DataProcessor *processLine, void *data
 );
 
 extern int isKeyword (const wchar_t *keyword, const wchar_t *characters, size_t length);
@@ -90,9 +90,22 @@ extern int writeDotsCells (FILE *stream, const unsigned char *cells, size_t coun
 extern int writeUtf8Cell (FILE *stream, unsigned char cell);
 extern int writeUtf8Cells (FILE *stream, const unsigned char *cells, size_t count);
 
+typedef int DataConditionTester (DataFile *file, const DataOperand *name, void *data);
+
+extern int processConditionOperands (
+  DataFile *file,
+  DataConditionTester *testCondition, int negateCondition,
+  const char *description, void *data
+);
+
+extern int processIfVarOperands (DataFile *file, void *data);
+extern int processIfNoVarOperands (DataFile *file, void *data);
+extern int processEndIfOperands (DataFile *file, void *data);
+
 typedef struct {
   const wchar_t *name;
   DataProcessor *processor;
+  unsigned unconditional:1;
 } DataProperty;
 
 extern int processPropertyOperand (DataFile *file, const DataProperty *properties, const char *description, void *data);

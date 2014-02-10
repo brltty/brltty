@@ -35,9 +35,10 @@ struct DataFileStruct {
   const char *name;
   int line;
 
-  DataProcessor *processor;
+  DataProcessor *processLine;
   void *data;
 
+  Queue *conditions;
   Queue *variables;
 
   const wchar_t *start;
@@ -181,7 +182,8 @@ newDataVariableQueue (Queue *previous) {
 static int
 testDataVariableName (const void *item, void *data) {
   const DataVariable *variable = item;
-  const DataOperand *name = data;
+  DataOperand *name = data;
+
   if (variable->name.length == name->length)
     if (wmemcmp(variable->name.characters, name->characters, name->length) == 0)
       return 1;
@@ -883,7 +885,7 @@ includeDataFile (DataFile *file, const wchar_t *name, unsigned int length) {
                (int)suffixLength, suffixAddress);
 
       if ((stream = openDataFile(path, "r", 0))) {
-        if (processDataStream(file->variables, stream, path, file->processor, file->data)) ok = 1;
+        if (processDataStream(file->variables, stream, path, file->processLine, file->data)) ok = 1;
         fclose(stream);
       }
     }
@@ -907,27 +909,95 @@ processIncludeOperands (DataFile *file, void *data UNUSED) {
   return 1;
 }
 
+typedef struct {
+  DataConditionTester *test;
+  int negate;
+  DataString name;
+} DataCondition;
+
+static void
+deallocateDataCondition (void *item, void *data UNUSED) {
+  DataCondition *condition = item;
+
+  free(condition);
+}
+
+static int
+pushDataCondition (
+  DataFile *file, const DataString *name,
+  DataConditionTester *testCondition, int negateCondition
+) {
+  DataCondition *condition;
+
+  if ((condition = malloc(sizeof(*condition)))) {
+    memset(condition, 0, sizeof(*condition));
+    condition->test = testCondition;
+    condition->negate = negateCondition;
+    condition->name = *name;
+
+    if (enqueueItem(file->conditions, condition)) {
+      return 1;
+    }
+
+    free(condition);
+  } else {
+    logMallocError();
+  }
+
+  return 0;
+}
+
+static int
+popDataCondition (DataFile *file) {
+  Queue *conditions = file->conditions;
+
+  if (!getQueueSize(conditions)) return 0;
+  deleteElement(getQueueTail(conditions));
+  return 1;
+}
+
+static int
+testDataCondition (const void *item, void *data) {
+  const DataCondition *condition = item;
+  DataFile *file = data;
+
+  const DataOperand name = {
+    .characters = condition->name.characters,
+    .length = condition->name.length
+  };
+
+  int yes = condition->test(file, &name, file->data);
+  if (condition->negate) yes = !yes;
+  return !yes;
+}
+
+static int
+testDataConditions (DataFile *file) {
+  DataCondition *condition = findItem(file->conditions, testDataCondition, file);
+
+  return !condition;
+}
+
+static int
+testVariableDefined (DataFile *file, const DataOperand *name, void *data) {
+  return !!getReadableDataVariable(file, name);
+}
+
 int
 processPropertyOperand (DataFile *file, const DataProperty *properties, const char *description, void *data) {
   DataOperand name;
 
   if (getDataOperand(file, &name, description)) {
-    {
-      const DataProperty *property = properties;
+    const DataProperty *property = properties;
 
-      while (property->name) {
-        if (isKeyword(property->name, name.characters, name.length))
-          return property->processor(file, data);
-
-        property += 1;
-      }
-
-      if (property->processor) {
-        ungetDataCharacters(file, name.length);
-        return property->processor(file, data);
-      }
+    while (property->name) {
+      if (isKeyword(property->name, name.characters, name.length)) break;
+      property += 1;
     }
 
+    if (!property->name) ungetDataCharacters(file, name.length);
+    if (!(property->unconditional || testDataConditions(file))) return 1;
+    if (property->processor) return property->processor(file, data);
     reportDataError(file, "unknown %s: %.*" PRIws,
                     description, name.length, name.characters);
   }
@@ -936,11 +1006,58 @@ processPropertyOperand (DataFile *file, const DataProperty *properties, const ch
 }
 
 static int
-processWcharLine (DataFile *file, const wchar_t *line) {
+processDataLine (DataFile *file, const wchar_t *line) {
   file->end = file->start = line;
+
   if (!findDataOperand(file, NULL)) return 1;			/*blank line */
   if (file->start[0] == WC_C('#')) return 1;
-  return file->processor(file, file->data);
+  return file->processLine(file, file->data);
+}
+
+int
+processConditionOperands (
+  DataFile *file,
+  DataConditionTester *testCondition, int negateCondition,
+  const char *description, void *data
+) {
+  DataString name;
+
+  if (getDataString(file, &name, 1, description)) {
+    if (!pushDataCondition(file, &name, testCondition, negateCondition)) return 0;
+
+    if (findDataOperand(file, NULL)) {
+      int result = processDataLine(file, file->start);
+
+      popDataCondition(file);
+      return result;
+    }
+  }
+
+  return 1;
+}
+
+static int
+processTestVariableOperands (DataFile *file, int isDefined, void *data) {
+  return processConditionOperands(file, testVariableDefined, !isDefined, "variable name", data);
+}
+
+int
+processIfVarOperands (DataFile *file, void *data) {
+  return processTestVariableOperands(file, 1, data);
+}
+
+int
+processIfNoVarOperands (DataFile *file, void *data) {
+  return processTestVariableOperands(file, 0, data);
+}
+
+int
+processEndIfOperands (DataFile *file, void *data) {
+  if (!popDataCondition(file)) {
+    reportDataError(file, "no outstanding condition");
+  }
+
+  return 1;
 }
 
 static int
@@ -960,14 +1077,14 @@ processUtf8Line (char *line, void *dataAddress) {
     return 1;
   }
 
-  return processWcharLine(file, characters);
+  return processDataLine(file, characters);
 }
 
 int
 processDataStream (
   Queue *variables,
   FILE *stream, const char *name,
-  DataProcessor processor, void *data
+  DataProcessor *processLine, void *data
 ) {
   int ok = 0;
   DataFile file;
@@ -975,7 +1092,7 @@ processDataStream (
   file.name = name;
   file.line = 0;
 
-  file.processor = processor;
+  file.processLine = processLine;
   file.data = data;
 
   if (!variables)
@@ -983,21 +1100,27 @@ processDataStream (
       return 0;
 
   logMessage(LOG_DEBUG, "including data file: %s", file.name);
-  if ((file.variables = newDataVariableQueue(variables))) {
-    if (processLines(stream, processUtf8Line, &file)) ok = 1;
-    deallocateQueue(file.variables);
+
+  if ((file.conditions = newQueue(deallocateDataCondition, NULL))) {
+    if ((file.variables = newDataVariableQueue(variables))) {
+      if (processLines(stream, processUtf8Line, &file)) ok = 1;
+
+      deallocateQueue(file.variables);
+    }
+
+    deallocateQueue(file.conditions);
   }
 
   return ok;
 }
 
 int
-processDataFile (const char *name, DataProcessor processor, void *data) {
+processDataFile (const char *name, DataProcessor *processLine, void *data) {
   int ok = 0;
   FILE *stream;
 
   if ((stream = openDataFile(name, "r", 0))) {
-    if (processDataStream(NULL, stream, name, processor, data)) ok = 1;
+    if (processDataStream(NULL, stream, name, processLine, data)) ok = 1;
     fclose(stream);
   }
 
