@@ -404,9 +404,7 @@ processContractsOperands (DataFile *file, void *data) {
 static int
 processVerificationLine (DataFile *file, void *data) {
   static const DataProperty properties[] = {
-    {.name=WS_C("assign"), .processor=processAssignOperands},
     {.name=WS_C("contracts"), .processor=processContractsOperands},
-    {.name=WS_C("include"), .processor=processIncludeOperands},
     {.name=NULL, .processor=NULL}
   };
 
