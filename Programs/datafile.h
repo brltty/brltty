@@ -99,7 +99,8 @@ typedef struct {
 
 extern int processPropertyOperand (DataFile *file, const DataProperty *properties, const char *description, void *data);
 
-typedef int DataConditionTester (DataFile *file, const DataOperand *name, void *data);
+#define DATA_CONDITION_TESTER(name) int name (DataFile *file, const DataOperand *identifier, void *data)
+typedef DATA_CONDITION_TESTER(DataConditionTester);
 
 extern int processConditionOperands (
   DataFile *file,

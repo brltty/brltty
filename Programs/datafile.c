@@ -1010,9 +1010,8 @@ DATA_OPERANDS_PROCESSOR(processIncludeOperands) {
   return 1;
 }
 
-static int
-testVariableDefined (DataFile *file, const DataOperand *name, void *data) {
-  return !!getReadableDataVariable(file, name);
+static DATA_CONDITION_TESTER(testVariableDefined) {
+  return !!getReadableDataVariable(file, identifier);
 }
 
 static int

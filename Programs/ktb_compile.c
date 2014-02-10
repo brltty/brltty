@@ -945,9 +945,8 @@ static DATA_OPERANDS_PROCESSOR(processHotkeyOperands) {
   return 1;
 }
 
-static int
-testKeyDefined (DataFile *file, const DataOperand *name, void *data) {
-  return !!findKeyName(name->characters, name->length, data);
+static DATA_CONDITION_TESTER(testKeyDefined) {
+  return !!findKeyName(identifier->characters, identifier->length, data);
 }
 
 static int
