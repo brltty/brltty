@@ -28,6 +28,25 @@ all-xbrlapi: xbrlapi$X
 
 ###############################################################################
 
+REVISION_HEADER = revision.auto.h
+NEW_REVISION_HEADER = new_$(REVISION_HEADER)
+
+.PHONY: $(REVISION_HEADER)
+.INTERMEDIATE: $(NEW_REVISION_HEADER)
+
+$(REVISION_HEADER): $(SRC_TOP)getrevid
+	$(SRC_TOP)getrevid $(SRC_TOP) | \
+	sed -e 's/.*/"&"/' >$(NEW_REVISION_HEADER)
+	test -f $(REVISION_HEADER) && \
+	cmp -s $(NEW_REVISION_HEADER) $(REVISION_HEADER) && \
+	rm $(NEW_REVISION_HEADER) || \
+	mv $(NEW_REVISION_HEADER) $(REVISION_HEADER)
+
+revision.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/revision.c
+
+###############################################################################
+
 program.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/program.c
 
@@ -440,7 +459,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) config.$O $(PREFS_OBJECTS) menu.$O ses.$O message.$O status.$O update.$O blink.$O clipboard.$O touch.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_navigation.$O cmd_speech.$O cmd_learn.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(TUNE_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) api_control.$O $(API_OBJECTS)
+CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O config.$O $(PREFS_OBJECTS) menu.$O ses.$O message.$O status.$O update.$O blink.$O clipboard.$O touch.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_navigation.$O cmd_speech.$O cmd_learn.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(TUNE_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) api_control.$O $(API_OBJECTS)
 CORE_NAME = brltty
 
 brltty-core: $(CORE_OBJECTS)
@@ -796,8 +815,9 @@ install-drivers: $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS) install-
 	$(INSTALL_PROGRAM) $(BLD_TOP)$(DRV_DIR)/*.$(MOD_EXT) $(INSTALL_DRIVERS_DIRECTORY)
 
 CORE_HEADERS = \
-   $(SRC_DIR)/program.h $(SRC_DIR)/pid.h $(SRC_DIR)/options.h $(SRC_DIR)/service.h \
-   $(SRC_DIR)/embed.h $(SRC_DIR)/log.h $(SRC_DIR)/addresses.h \
+   $(SRC_DIR)/program.h $(SRC_DIR)/revision.h $(SRC_DIR)/service.h \
+   $(SRC_DIR)/embed.h $(SRC_DIR)/options.h \
+   $(SRC_DIR)/log.h $(SRC_DIR)/addresses.h $(SRC_DIR)/pid.h \
    $(SRC_DIR)/async.h $(SRC_DIR)/async_wait.h $(SRC_DIR)/async_alarm.h $(SRC_DIR)/async_task.h $(SRC_DIR)/async_io.h $(SRC_DIR)/async_event.h $(SRC_DIR)/async_signal.h $(SRC_DIR)/async_thread.h \
    $(SRC_DIR)/parse.h $(SRC_DIR)/file.h $(SRC_DIR)/device.h \
    $(SRC_DIR)/datafile.h $(SRC_DIR)/dataarea.h \

@@ -55,6 +55,7 @@
 #include "dynld.h"
 #include "async_alarm.h"
 #include "program.h"
+#include "revision.h"
 #include "service.h"
 #include "options.h"
 #include "brl_input.h"
@@ -1025,6 +1026,14 @@ static void
 forgetDevices (void) {
   usbForgetDevices();
   bthForgetDevices();
+}
+
+static void
+makeProgramBanner (char *buffer, size_t size) {
+  const char *revision = getRevisionIdentifier();
+  snprintf(buffer, size, "%s %s%s%s",
+           PACKAGE_TITLE, PACKAGE_VERSION,
+           (*revision? " rev ": ""), revision);
 }
 
 void

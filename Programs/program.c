@@ -154,14 +154,6 @@ beginProgram (int argumentCount, char **argumentVector) {
 }
 
 void
-makeProgramBanner (char *buffer, size_t size) {
-  const char *revision = PACKAGE_REVISION;
-  snprintf(buffer, size, "%s %s%s%s",
-           PACKAGE_TITLE, PACKAGE_VERSION,
-           (*revision? " rev ": ""), revision);
-}
-
-void
 fixInstallPaths (char **const *paths) {
   static const char *programDirectory = NULL;
 

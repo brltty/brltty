@@ -48,8 +48,6 @@ typedef void ProgramExitHandler (void *data);
 extern void onProgramExit (const char *name, ProgramExitHandler *handler, void *data);
 extern void registerProgramMemory (const char *name, void *pointer);
 
-extern void makeProgramBanner (char *buffer, size_t size);
-
 extern void fixInstallPaths (char **const *paths);
 extern void fixInstallPath (char **path);
 

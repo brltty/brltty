@@ -53,14 +53,6 @@ AC_SUBST([PACKAGE_TITLE])
 AC_DEFINE_UNQUOTED([PACKAGE_TITLE], ["${PACKAGE_TITLE}"],
                    [Define this to be a string containing the package title.])
 
-PACKAGE_REVISION="`"${srcdir}/getrevid" "${srcdir}"`"
-if test -z "${PACKAGE_REVISION}"
-then
-   PACKAGE_REVISION=""
-fi
-AC_DEFINE_UNQUOTED([PACKAGE_REVISION], ["${PACKAGE_REVISION}"],
-                   [Define this to be a string containing the package revision.])
-
 AC_SUBST([package_date], ["`date "+%Y/%m/%d"`"])
 
 AC_CONFIG_HEADER([config.h])
