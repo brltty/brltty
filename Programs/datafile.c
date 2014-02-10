@@ -923,6 +923,18 @@ deallocateDataCondition (void *item, void *data UNUSED) {
 }
 
 static int
+isDataConditionOutstanding (DataFile *file) {
+  return getQueueSize(file->conditions) > 0;
+}
+
+static int
+popDataCondition (DataFile *file) {
+  if (!isDataConditionOutstanding(file)) return 0;
+  deleteElement(getQueueTail(file->conditions));
+  return 1;
+}
+
+static int
 pushDataCondition (
   DataFile *file, const DataString *name,
   DataConditionTester *testCondition, int negateCondition
@@ -948,15 +960,6 @@ pushDataCondition (
 }
 
 static int
-popDataCondition (DataFile *file) {
-  Queue *conditions = file->conditions;
-
-  if (!getQueueSize(conditions)) return 0;
-  deleteElement(getQueueTail(conditions));
-  return 1;
-}
-
-static int
 testDataCondition (const void *item, void *data) {
   const DataCondition *condition = item;
   DataFile *file = data;
@@ -976,11 +979,6 @@ testDataConditions (DataFile *file) {
   DataCondition *condition = findItem(file->conditions, testDataCondition, file);
 
   return !condition;
-}
-
-static int
-testVariableDefined (DataFile *file, const DataOperand *name, void *data) {
-  return !!getReadableDataVariable(file, name);
 }
 
 int
@@ -1037,18 +1035,23 @@ processConditionOperands (
 }
 
 static int
-processTestVariableOperands (DataFile *file, int isDefined, void *data) {
+testVariableDefined (DataFile *file, const DataOperand *name, void *data) {
+  return !!getReadableDataVariable(file, name);
+}
+
+static int
+processVariableTestOperands (DataFile *file, int isDefined, void *data) {
   return processConditionOperands(file, testVariableDefined, !isDefined, "variable name", data);
 }
 
 int
 processIfVarOperands (DataFile *file, void *data) {
-  return processTestVariableOperands(file, 1, data);
+  return processVariableTestOperands(file, 1, data);
 }
 
 int
 processIfNoVarOperands (DataFile *file, void *data) {
-  return processTestVariableOperands(file, 0, data);
+  return processVariableTestOperands(file, 0, data);
 }
 
 int
@@ -1104,6 +1107,10 @@ processDataStream (
   if ((file.conditions = newQueue(deallocateDataCondition, NULL))) {
     if ((file.variables = newDataVariableQueue(variables))) {
       if (processLines(stream, processUtf8Line, &file)) ok = 1;
+
+      if (isDataConditionOutstanding(&file)) {
+        reportDataError(&file, "outstanding condition at end-of-file");
+      }
 
       deallocateQueue(file.variables);
     }

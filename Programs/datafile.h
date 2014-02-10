@@ -98,9 +98,10 @@ extern int processConditionOperands (
   const char *description, void *data
 );
 
-extern int processIfVarOperands (DataFile *file, void *data);
-extern int processIfNoVarOperands (DataFile *file, void *data);
 extern int processEndIfOperands (DataFile *file, void *data);
+
+#define DATA_CONDITION_PROPERTIES \
+  {.name=WS_C("endif"), .processor=processEndIfOperands, .unconditional=1}
 
 typedef struct {
   const wchar_t *name;
@@ -111,9 +112,19 @@ typedef struct {
 extern int processPropertyOperand (DataFile *file, const DataProperty *properties, const char *description, void *data);
 
 extern int processAssignOperands (DataFile *file, void *data);
+extern int processIfVarOperands (DataFile *file, void *data);
+extern int processIfNoVarOperands (DataFile *file, void *data);
+
+#define DATA_VARIABLE_PROPERTIES \
+  {.name=WS_C("ifvar"), .processor=processIfVarOperands, .unconditional=1}, \
+  {.name=WS_C("ifnovar"), .processor=processIfNoVarOperands, .unconditional=1}, \
+  {.name=WS_C("assign"), .processor=processAssignOperands}
 
 extern int processIncludeOperands (DataFile *file, void *data);
 extern int includeDataFile (DataFile *file, const wchar_t *name, unsigned int length);
+
+#define DATA_NESTING_PROPERTIES \
+  {.name=WS_C("include"), .processor=processIncludeOperands}
 
 #define BRL_DOT_COUNT 8
 extern const wchar_t brlDotNumbers[BRL_DOT_COUNT];

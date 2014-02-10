@@ -760,8 +760,9 @@ processConfigurationOperands (DataFile *file, void *data) {
 static int
 processConfigurationLine (DataFile *file, void *data) {
   static const DataProperty properties[] = {
-    {.name=WS_C("assign"), .processor=processAssignOperands},
-    {.name=WS_C("include"), .processor=processIncludeOperands},
+    DATA_NESTING_PROPERTIES,
+    DATA_CONDITION_PROPERTIES,
+    DATA_VARIABLE_PROPERTIES,
     {.name=NULL, .processor=processConfigurationOperands}
   };
 
