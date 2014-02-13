@@ -77,6 +77,13 @@
   <string name="LOG_CATEGORY_LABEL_kbdkeys">Eventos de Teclas de Teclados</string>
   <string name="LOG_CATEGORY_LABEL_csrtrk">Seguimiento de Cursor</string>
   <string name="LOG_CATEGORY_LABEL_csrrtg">Enrutamiento de Cursor</string>
+  <string name="LOG_CATEGORY_LABEL_update">Eventos de Actualización</string>
+  <string name="LOG_CATEGORY_LABEL_speech">Eventos del Habla</string>
+  <string name="LOG_CATEGORY_LABEL_async">Eventos de Async</string>
+  <string name="LOG_CATEGORY_LABEL_server">Eventos de Servidor</string>
+  <string name="LOG_CATEGORY_LABEL_serial">E/S en Serie</string>
+  <string name="LOG_CATEGORY_LABEL_usb">E/S USB</string>
+  <string name="LOG_CATEGORY_LABEL_bluetooth">E/S Bluetooth</string>
 
   <string name="BRAILLE_DRIVER_LABEL_auto">Autodetecte</string>
 
