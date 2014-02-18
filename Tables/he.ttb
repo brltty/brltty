@@ -105,16 +105,4 @@ glyph	\uFB43	(1234    )  # ⠏ ףּ [HEBREW LETTER FINAL PE WITH DAGESH]
 glyph	\uFB44	(1234    )  # ⠏ פּ [HEBREW LETTER PE WITH DAGESH]
 glyph	\uFB4A	(12  56  )  # ⠳ תּ [HEBREW LETTER TAV WITH DAGESH]
 
-glyph	\u2002	(        )  # ⠀   [EN SPACE]
-glyph	\u2003	(        )  # ⠀   [EM SPACE]
-glyph	\u2004	(        )  # ⠀   [THREE-PER-EM SPACE]
-glyph	\u2005	(        )  # ⠀   [FOUR-PER-EM SPACE]
-glyph	\u2006	(        )  # ⠀   [SIX-PER-EM SPACE]
-glyph	\u2007	(        )  # ⠀   [FIGURE SPACE]
-glyph	\u2008	(        )  # ⠀   [PUNCTUATION SPACE]
-glyph	\u2009	(        )  # ⠀   [THIN SPACE]
-glyph	\u200A	(        )  # ⠀   [HAIR SPACE]
-glyph	\u202F	(        )  # ⠀   [NARROW NO-BREAK SPACE]
-glyph	\u205F	(        )  # ⠀   [MEDIUM MATHEMATICAL SPACE]
-
 include common.tti
