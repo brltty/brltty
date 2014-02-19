@@ -2462,6 +2462,11 @@ static int initializeAcceptedKeys(Connection *c, int how)
           .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_PASSPS2
         },
 
+        { .action = removeKeyrange,
+          .type = brlapi_rangeType_command,
+          .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_PASSDOTS
+        },
+
         { .action = NULL }
       };
 
@@ -2658,30 +2663,44 @@ int api_handleKeyEvent(unsigned char set, unsigned char key, int press) {
 /* The core produced a command, try to send it to a brlapi client.
  * On success, return EOF, else return the command.  */
 static int api__handleCommand(int command) {
-  Connection *c;
-  brlapi_keyCode_t clientCode;
-
   if (command == BRL_CMD_OFFLINE) {
     if (!offline) {
       broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_OFFLINE, BRL_COMMANDS);
       offline = 1;
     }
+
     return BRL_CMD_OFFLINE;
   }
+
   if (offline) {
     broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP, BRL_COMMANDS);
     offline = 0;
   }
+
   if (command != EOF) {
-    clientCode = cmdBrlttyToBrlapi(command, retainDots);
-    logMessage(LOG_CATEGORY(SERVER_EVENTS), "API got command %08x, thus client code %016"BRLAPI_PRIxKEYCODE, command, clientCode);
-    /* nobody needs the raw code */
-    if ((c = whoGetsKey(&ttys,clientCode,BRL_COMMANDS))) {
-      logMessage(LOG_CATEGORY(SERVER_EVENTS), "transmitting accepted command %lx as client code %016"BRLAPI_PRIxKEYCODE,(unsigned long)command, clientCode);
-      writeKey(c->fd,clientCode);
+    Connection *c;
+    brlapi_keyCode_t code = cmdBrlttyToBrlapi(command, 1);
+
+    logMessage(LOG_CATEGORY(SERVER_EVENTS), "command %08x -> client code %016"BRLAPI_PRIxKEYCODE, command, code);
+    c = whoGetsKey(&ttys, code, BRL_COMMANDS);
+
+    if (!c) {
+      brlapi_keyCode_t alternate = cmdBrlttyToBrlapi(command, 0);
+
+      if (alternate != code) {
+        logMessage(LOG_CATEGORY(SERVER_EVENTS), "command %08x -> client code %016"BRLAPI_PRIxKEYCODE, command, alternate);
+        c = whoGetsKey(&ttys, alternate, BRL_COMMANDS);
+        if (c) code = alternate;
+      }
+    }
+
+    if (c) {
+      logMessage(LOG_CATEGORY(SERVER_EVENTS), "transmitting accepted command %lx as client code %016"BRLAPI_PRIxKEYCODE,(unsigned long)command, code);
+      writeKey(c->fd, code);
       return EOF;
     }
   }
+
   return command;
 }
 
