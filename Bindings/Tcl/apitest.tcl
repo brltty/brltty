@@ -58,8 +58,48 @@ puts "DisplaySize: [expandList $displaySize width height]"
 set tty [$session enterTtyMode]
 puts "Tty: $tty"
 
+package require Tclx
+set channel [dup $fileDescriptor]
+
+proc setTimeout {} {
+   global timeoutEvent
+
+   set timeoutEvent [after 10000 [list set returnCode 0]]
+}
+
+proc resetTimeout {} {
+   global timeoutEvent
+
+   after cancel $timeoutEvent
+   unset timeoutEvent
+
+   setTimeout
+}
+
+proc handleCommand {session} {
+   set code [$session readKey 0]
+   set text "code:$code"
+   brlapi describeKeyCode $code properties
+
+   foreach {property name} {type type command cmd argument arg flags flg} {
+      if {[info exists properties($property)]} {
+         append text " $name:$properties($property)"
+         unset properties($property)
+      }
+   }
+
+   foreach property [lsort [array names properties]] {
+      append text " $property:$properties($property)"
+   }
+
+   $session write -text $text
+   resetTimeout
+}
+
 $session write -text "The TCL bindings for BrlAPI seem to be working."
-after 5000
+fileevent $channel readable [list handleCommand $session]
+setTimeout
+vwait returnCode
 
 $session leaveTtyMode
 $session closeConnection; unset session
