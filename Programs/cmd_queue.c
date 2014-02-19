@@ -174,17 +174,11 @@ static int
 dequeueCommand (Queue *queue) {
   CommandQueueItem *item;
 
-  while ((item = dequeueItem(queue))) {
+  if ((item = dequeueItem(queue))) {
     int command = item->command;
-    free(item);
 
-#ifdef ENABLE_API
-    if (apiStarted) {
-      if ((command = api_handleCommand(command)) == EOF) {
-        continue;
-      }
-    }
-#endif /* ENABLE_API */
+    free(item);
+    item = NULL;
 
     return command;
   }
@@ -245,7 +239,17 @@ cancelCommandAlarm (void) {
 
 int
 enqueueCommand (int command) {
-  if (command != EOF) {
+  if (command == EOF) return 1;
+
+#ifdef ENABLE_API
+  if (apiStarted) {
+    if ((command = api_handleCommand(command)) == EOF) {
+      return 1;
+    }
+  }
+#endif /* ENABLE_API */
+
+  {
     Queue *queue = getCommandQueue(1);
 
     if (queue) {
@@ -260,6 +264,8 @@ enqueueCommand (int command) {
         }
 
         free(item);
+      } else {
+        logMallocError();
       }
     }
   }
