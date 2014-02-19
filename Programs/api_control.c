@@ -66,7 +66,7 @@ api_releaseDriver (BrailleDisplay *brl) {
 
 int
 api_handleCommand (int command) {
-  return command;
+  return 0;
 }
 
 int

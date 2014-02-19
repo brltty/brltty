@@ -243,7 +243,7 @@ enqueueCommand (int command) {
 
 #ifdef ENABLE_API
   if (apiStarted) {
-    if ((command = api_handleCommand(command)) == EOF) {
+    if (api_handleCommand(command)) {
       return 1;
     }
   }

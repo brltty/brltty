@@ -2659,7 +2659,7 @@ int api_handleKeyEvent(unsigned char set, unsigned char key, int press) {
 }
 
 /* The core produced a command, try to send it to a brlapi client.
- * On success, return EOF, else return the command.  */
+ * Return true if handled and false otherwise.  */
 static int api__handleCommand(int command) {
   if (command == BRL_CMD_OFFLINE) {
     if (!offline) {
@@ -2667,7 +2667,7 @@ static int api__handleCommand(int command) {
       offline = 1;
     }
 
-    return BRL_CMD_OFFLINE;
+    return 0;
   }
 
   if (offline) {
@@ -2695,18 +2695,21 @@ static int api__handleCommand(int command) {
     if (c) {
       logMessage(LOG_CATEGORY(SERVER_EVENTS), "transmitting accepted command %lx as client code %016"BRLAPI_PRIxKEYCODE,(unsigned long)command, code);
       writeKey(c->fd, code);
-      return EOF;
+      return 1;
     }
   }
 
-  return command;
+  return 0;
 }
 
 int api_handleCommand(int command) {
+  int handled;
+
   asyncLockMutex(&apiConnectionsMutex);
-  command = api__handleCommand(command);
+  handled = api__handleCommand(command);
   asyncUnlockMutex(&apiConnectionsMutex);
-  return command;
+
+  return handled;
 }
 
 /* Function : api_readCommand
