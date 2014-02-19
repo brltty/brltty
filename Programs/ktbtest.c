@@ -256,12 +256,12 @@ getCursorDots (void) {
 
 int
 api_handleCommand (int command) {
-  return command;
+  return 0;
 }
 
 int
 api_handleKeyEvent (unsigned char set, unsigned char key, int press) {
-  return EOF;
+  return 0;
 }
 
 #include "message.h"
