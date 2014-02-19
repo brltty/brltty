@@ -2737,7 +2737,7 @@ static int api_readCommand(BrailleDisplay *brl, KeyTableCommandContext context) 
     asyncUnlockMutex(&apiRawMutex);
     goto out;
   }
-  if ((context == KTB_CTX_DEFAULT) && retainDots) context = KTB_CTX_CHORDS;
+
   asyncLockMutex(&apiDriverMutex);
   res = trueBraille->readCommand(brl,context);
   asyncUnlockMutex(&apiDriverMutex);

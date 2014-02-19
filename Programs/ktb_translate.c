@@ -146,10 +146,7 @@ findMappedKeyEntry (const KeyContext *ctx, const KeyValue *keyValue) {
 
 static int
 makeKeyboardCommand (KeyTable *table, unsigned char context) {
-  int chordsRequested = context == KTB_CTX_CHORDS;
   const KeyContext *ctx;
-
-  if (chordsRequested) context = table->context.persistent;
 
   if ((ctx = getKeyContext(table, context))) {
     int keyboardCommand = BRL_BLK_PASSDOTS;
@@ -170,12 +167,9 @@ makeKeyboardCommand (KeyTable *table, unsigned char context) {
       int dotPressed = !!(keyboardCommand & (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8));
       int spacePressed = !!(keyboardCommand & BRL_DOTC);
 
+      if (dotPressed == spacePressed) return EOF;
       if (dotPressed) keyboardCommand |= ctx->mappedKeys.superimpose;
-
-      if (!chordsRequested) {
-        if (dotPressed == spacePressed) return EOF;
-        keyboardCommand &= ~BRL_DOTC;
-      }
+      keyboardCommand &= ~BRL_DOTC;
     }
 
     return keyboardCommand;
