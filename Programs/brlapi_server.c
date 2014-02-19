@@ -104,11 +104,10 @@
 typedef enum {
   PARM_AUTH,
   PARM_HOST,
-  PARM_RETAINDOTS,
   PARM_STACKSIZE
 } Parameters;
 
-const char *const api_parameters[] = { "auth", "host", "retaindots", "stacksize", NULL };
+const char *const api_parameters[] = { "auth", "host", "stacksize", NULL };
 
 static size_t stackSize;
 static AsyncEvent *flushEvent;
@@ -313,7 +312,6 @@ static WSADATA wsadata;
 #endif /* __MINGW32__ */
 
 static unsigned char cursorShape;
-static unsigned int retainDots;
 
 /****************************************************************************/
 /** SOME PROTOTYPES                                                        **/
@@ -2952,17 +2950,6 @@ int api_start(BrailleDisplay *brl, char **parameters)
     char *operand = parameters[PARM_HOST];
 
     if (*operand) hosts = operand;
-  }
-
-  retainDots = 0;
-  {
-    const char *operand = parameters[PARM_RETAINDOTS];
-
-    if (*operand) {
-      if (!validateYesNo(&retainDots, operand)) {
-        logMessage(LOG_WARNING, "%s: %s", gettext("invalid retain dots setting"), operand);
-      }
-    }
   }
 
   stackSize = MAX(PTHREAD_STACK_MIN, OUR_STACK_MIN);
