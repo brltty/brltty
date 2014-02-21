@@ -321,6 +321,7 @@ word chn =
 sufword chisholm 16-24-234-125-135-123-134
 sufword clever 14-123-5-15 cleverest
 sufword credo 14-1235-1246-135 credos
+sufword cross = crosstree
 
 # the letter d
 always d 145
@@ -664,6 +665,8 @@ midword menth 134-26-1456 Blumenthal
 always mention 134-26-56-1345
 sufword merioneth 134-12456-24-135-1345-15-1456 Merionethshire
 sufword messagerie =
+sufword midafternoon 134-24-145-1-124-1345
+sufword middorsal =
 always mideast 134-24-145-15-1-34
 begword midwifer = midwifery
 sufword milliner 134-24-123-123-35-12456
