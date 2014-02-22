@@ -545,19 +545,25 @@ BRLTTY_ARG_DISABLE(
       api_dynamic_library="api-dynamic-library"
       install_api_libraries="install-api-libraries"
       uninstall_api_libraries="uninstall-api-libraries"
-      api_socket_path="${localstatedir}/lib/BrlAPI"
+      default_api_socket_path="${localstatedir}/lib/BrlAPI"
 
       case "${host_os}"
       in
          cygwin*|mingw*)
             AC_DEFINE([BRLAPI_WIN32], [1],
                       [Define this if the Win32 programming interface is available.])
-	    api_socket_path='\\\\\\\\.\\\\pipe\\\\BrlAPI'
+	    default_api_socket_path='\\\\\\\\.\\\\pipe\\\\BrlAPI'
             api_dynamic_library="api-dynamic-library-windows"
             install_api_libraries="install-api-libraries-windows"
             uninstall_api_libraries="uninstall-api-libraries-windows"
             ;;
       esac
+
+      BRLTTY_ARG_WITH(
+          [api-socket-path], [PATH],
+          [where local sockets for teh api are stored],
+          [api_socket_path], [${default_api_socket_path}]
+      )
 
       BRLTTY_BINDINGS([Java])
       BRLTTY_BINDINGS([Lisp])
@@ -590,6 +596,7 @@ AC_SUBST([install_api_libraries])
 AC_SUBST([uninstall_api_libraries])
 AC_SUBST([api_authkeyfile], [brlapi.key])
 AC_SUBST([api_socket_path])
+BRLTTY_SUMMARY_ITEM([api-socket-path], [api_socket_path])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHKEYFILE], ["${api_authkeyfile}"],
                        [Define this to be a string containing the name of the file containing the authorization key.])
 
