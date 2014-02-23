@@ -193,7 +193,7 @@ static void
 logOperation (const OperationEntry *operation, void *callback) {
   logSymbol(LOG_CATEGORY(ASYNC_EVENTS),
             callback,
-            operation->function->methods->functionName);
+            "%s", operation->function->methods->functionName);
 }
 
 #ifdef __MINGW32__
