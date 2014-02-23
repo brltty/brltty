@@ -77,10 +77,7 @@ extern void usbCloseInterface (
   UsbDevice *device
 );
 
-extern int usbClearEndpoint (
-  UsbDevice *device,
-  unsigned char endpointAddress
-);
+extern int usbClearEndpoint (UsbDevice *device, unsigned char endpointAddress);
 
 extern ssize_t usbControlRead (
   UsbDevice *device,
@@ -197,10 +194,7 @@ extern void *usbSubmitRequest (
   size_t length,
   void *context
 );
-extern int usbCancelRequest (
-  UsbDevice *device,
-  void *request
-);
+extern int usbCancelRequest (UsbDevice *device, void *request);
 extern void *usbReapResponse (
   UsbDevice *device,
   unsigned char endpointAddress,

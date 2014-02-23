@@ -260,7 +260,7 @@ serialPutParity (SerialAttributes *attributes, SerialParity parity) {
     } else
 #endif /* PARSTK */
 
-    if (parity != SERIAL_PARITY_EVEN)  {
+    if (parity != SERIAL_PARITY_EVEN) {
       return 0;
     }
 

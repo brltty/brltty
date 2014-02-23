@@ -32,28 +32,19 @@ usbDisableAutosuspend (UsbDevice *device) {
 }
 
 int
-usbSetConfiguration (
-  UsbDevice *device,
-  unsigned char configuration
-) {
+usbSetConfiguration (UsbDevice *device, unsigned char configuration) {
   logUnsupportedFunction();
   return 0;
 }
 
 int
-usbClaimInterface (
-  UsbDevice *device,
-  unsigned char interface
-) {
+usbClaimInterface (UsbDevice *device, unsigned char interface) {
   logUnsupportedFunction();
   return 0;
 }
 
 int
-usbReleaseInterface (
-  UsbDevice *device,
-  unsigned char interface
-) {
+usbReleaseInterface (UsbDevice *device, unsigned char interface) {
   logUnsupportedFunction();
   return 0;
 }
@@ -69,10 +60,7 @@ usbSetAlternative (
 }
 
 int
-usbClearEndpoint (
-  UsbDevice *device,
-  unsigned char endpointAddress
-) {
+usbClearEndpoint (UsbDevice *device, unsigned char endpointAddress) {
   logUnsupportedFunction();
   return 0;
 }
@@ -107,10 +95,7 @@ usbSubmitRequest (
 }
 
 int
-usbCancelRequest (
-  UsbDevice *device,
-  void *request
-) {
+usbCancelRequest (UsbDevice *device, void *request) {
   logUnsupportedFunction();
   return 0;
 }
