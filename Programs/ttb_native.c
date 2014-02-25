@@ -173,15 +173,15 @@ static DATA_OPERANDS_PROCESSOR(processGlyphOperands) {
 
 static int
 processTextTableLine (DataFile *file, void *data) {
-  static const DataProperty properties[] = {
+  static const DataDirective directives[] = {
     {.name=WS_C("char"), .processor=processCharOperands},
     {.name=WS_C("glyph"), .processor=processGlyphOperands},
     {.name=WS_C("byte"), .processor=processByteOperands},
-    DATA_NESTING_PROPERTIES,
+    DATA_NESTING_DIRECTIVES,
     {.name=NULL, .processor=NULL}
   };
 
-  return processPropertyOperand(file, properties, "text table directive", data);
+  return processDirectiveOperand(file, directives, "text table directive", data);
 }
 
 TextTableData *

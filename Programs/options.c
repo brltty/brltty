@@ -758,14 +758,14 @@ static DATA_OPERANDS_PROCESSOR(processConfigurationOperands) {
 
 static int
 processConfigurationLine (DataFile *file, void *data) {
-  static const DataProperty properties[] = {
-    DATA_NESTING_PROPERTIES,
-    DATA_CONDITION_PROPERTIES,
-    DATA_VARIABLE_PROPERTIES,
+  static const DataDirective directives[] = {
+    DATA_NESTING_DIRECTIVES,
+    DATA_CONDITION_DIRECTIVES,
+    DATA_VARIABLE_DIRECTIVES,
     {.name=NULL, .processor=processConfigurationOperands}
   };
 
-  return processPropertyOperand(file, properties, "configuration file directive", data);
+  return processDirectiveOperand(file, directives, "configuration file directive", data);
 }
 
 static void

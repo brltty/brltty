@@ -1086,7 +1086,7 @@ static DATA_OPERANDS_PROCESSOR(processTitleOperands) {
 
 static int
 processKeyTableLine (DataFile *file, void *data) {
-  static const DataProperty properties[] = {
+  static const DataDirective directives[] = {
     {.name=WS_C("bind"), .processor=processBindOperands},
     {.name=WS_C("context"), .processor=processContextOperands},
     {.name=WS_C("hide"), .processor=processHideOperands},
@@ -1098,12 +1098,12 @@ processKeyTableLine (DataFile *file, void *data) {
     {.name=WS_C("note"), .processor=processNoteOperands},
     {.name=WS_C("superimpose"), .processor=processSuperimposeOperands},
     {.name=WS_C("title"), .processor=processTitleOperands},
-    DATA_CONDITION_PROPERTIES,
-    DATA_VARIABLE_PROPERTIES,
+    DATA_CONDITION_DIRECTIVES,
+    DATA_VARIABLE_DIRECTIVES,
     {.name=NULL, .processor=NULL}
   };
 
-  return processPropertyOperand(file, properties, "key table directive", data);
+  return processDirectiveOperand(file, directives, "key table directive", data);
 }
 
 void

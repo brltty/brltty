@@ -154,13 +154,13 @@ static DATA_OPERANDS_PROCESSOR(processDotOperands) {
 
 static int
 processAttributesTableLine (DataFile *file, void *data) {
-  static const DataProperty properties[] = {
+  static const DataDirective directives[] = {
     {.name=WS_C("dot"), .processor=processDotOperands},
-    DATA_NESTING_PROPERTIES,
+    DATA_NESTING_DIRECTIVES,
     {.name=NULL, .processor=NULL}
   };
 
-  return processPropertyOperand(file, properties, "attributes table directive", data);
+  return processDirectiveOperand(file, directives, "attributes table directive", data);
 }
 
 AttributesTable *

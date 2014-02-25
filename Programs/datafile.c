@@ -926,20 +926,20 @@ testDataConditions (DataFile *file) {
 }
 
 int
-processPropertyOperand (DataFile *file, const DataProperty *properties, const char *description, void *data) {
+processDirectiveOperand (DataFile *file, const DataDirective *directives, const char *description, void *data) {
   DataOperand name;
 
   if (getDataOperand(file, &name, description)) {
-    const DataProperty *property = properties;
+    const DataDirective *directive = directives;
 
-    while (property->name) {
-      if (isKeyword(property->name, name.characters, name.length)) break;
-      property += 1;
+    while (directive->name) {
+      if (isKeyword(directive->name, name.characters, name.length)) break;
+      directive += 1;
     }
 
-    if (!property->name) ungetDataCharacters(file, name.length);
-    if (!(property->unconditional || testDataConditions(file))) return 1;
-    if (property->processor) return property->processor(file, data);
+    if (!directive->name) ungetDataCharacters(file, name.length);
+    if (!(directive->unconditional || testDataConditions(file))) return 1;
+    if (directive->processor) return directive->processor(file, data);
     reportDataError(file, "unknown %s: %.*" PRIws,
                     description, name.length, name.characters);
   }

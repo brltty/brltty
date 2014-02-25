@@ -95,9 +95,9 @@ typedef struct {
   const wchar_t *name;
   DataOperandsProcessor *processor;
   unsigned unconditional:1;
-} DataProperty;
+} DataDirective;
 
-extern int processPropertyOperand (DataFile *file, const DataProperty *properties, const char *description, void *data);
+extern int processDirectiveOperand (DataFile *file, const DataDirective *directives, const char *description, void *data);
 
 #define DATA_CONDITION_TESTER(name) int name (DataFile *file, const DataOperand *identifier, void *data)
 typedef DATA_CONDITION_TESTER(DataConditionTester);
@@ -111,13 +111,13 @@ extern int processConditionOperands (
 extern int processIncludeOperands (DataFile *file, void *data);
 extern int includeDataFile (DataFile *file, const wchar_t *name, unsigned int length);
 
-#define DATA_NESTING_PROPERTIES \
+#define DATA_NESTING_DIRECTIVES \
   {.name=WS_C("include"), .processor=processIncludeOperands}
 
 extern int processElseOperands (DataFile *file, void *data);
 extern int processEndIfOperands (DataFile *file, void *data);
 
-#define DATA_CONDITION_PROPERTIES \
+#define DATA_CONDITION_DIRECTIVES \
   {.name=WS_C("else"), .processor=processElseOperands, .unconditional=1}, \
   {.name=WS_C("endif"), .processor=processEndIfOperands, .unconditional=1}
 
@@ -125,7 +125,7 @@ extern int processIfVarOperands (DataFile *file, void *data);
 extern int processIfNoVarOperands (DataFile *file, void *data);
 extern int processAssignOperands (DataFile *file, void *data);
 
-#define DATA_VARIABLE_PROPERTIES \
+#define DATA_VARIABLE_DIRECTIVES \
   {.name=WS_C("ifvar"), .processor=processIfVarOperands, .unconditional=1}, \
   {.name=WS_C("ifnovar"), .processor=processIfNoVarOperands, .unconditional=1}, \
   {.name=WS_C("assign"), .processor=processAssignOperands}

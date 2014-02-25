@@ -134,7 +134,7 @@ static DATA_OPERANDS_PROCESSOR(processInclude) {
 
 static int
 processLibLouisLine (DataFile *file, void *data) {
-  static const DataProperty propertyTable[] = {
+  static const DataDirective properties[] = {
     {.name=WS_C("space"), .processor=processChar},
     {.name=WS_C("punctuation"), .processor=processChar},
     {.name=WS_C("digit"), .processor=processChar},
@@ -151,7 +151,7 @@ processLibLouisLine (DataFile *file, void *data) {
     {.name=NULL, .processor=NULL}
   };
 
-  return processPropertyOperand(file, propertyTable, "lib louis directive", data);
+  return processDirectiveOperand(file, properties, "lib louis directive", data);
 }
 
 TextTableData *
