@@ -114,9 +114,11 @@ extern int includeDataFile (DataFile *file, const wchar_t *name, unsigned int le
 #define DATA_NESTING_PROPERTIES \
   {.name=WS_C("include"), .processor=processIncludeOperands}
 
+extern int processElseOperands (DataFile *file, void *data);
 extern int processEndIfOperands (DataFile *file, void *data);
 
 #define DATA_CONDITION_PROPERTIES \
+  {.name=WS_C("else"), .processor=processElseOperands, .unconditional=1}, \
   {.name=WS_C("endif"), .processor=processEndIfOperands, .unconditional=1}
 
 extern int processIfVarOperands (DataFile *file, void *data);

@@ -840,6 +840,7 @@ writeUtf8Cells (FILE *stream, const unsigned char *cells, size_t count) {
 typedef struct {
   DataConditionTester *test;
   int negate;
+  int inElse;
   DataString name;
 } DataCondition;
 
@@ -850,19 +851,31 @@ deallocateDataCondition (void *item, void *data UNUSED) {
   free(condition);
 }
 
-static int
-isDataConditionOutstanding (DataFile *file) {
-  return getQueueSize(file->conditions) > 0;
+static Element *
+getInnermostDataCondition (DataFile *file) {
+  return getQueueTail(file->conditions);
+}
+
+static Element *
+getCurrentDataCondition (DataFile *file) {
+  {
+    Element *element = getInnermostDataCondition(file);
+
+    if (element) return element;
+  }
+
+  reportDataError(file, "no outstanding condition");
+  return NULL;
 }
 
 static int
-popDataCondition (DataFile *file) {
-  if (!isDataConditionOutstanding(file)) return 0;
-  deleteElement(getQueueTail(file->conditions));
+removeDataCondition (DataFile *file, Element *element, int identifier) {
+  if (!(element && (identifier == getElementIdentifier(element)))) return 0;
+  deleteElement(element);
   return 1;
 }
 
-static int
+static Element *
 pushDataCondition (
   DataFile *file, const DataString *name,
   DataConditionTester *testCondition, int negateCondition
@@ -873,10 +886,13 @@ pushDataCondition (
     memset(condition, 0, sizeof(*condition));
     condition->test = testCondition;
     condition->negate = negateCondition;
+    condition->inElse = 0;
     condition->name = *name;
 
-    if (enqueueItem(file->conditions, condition)) {
-      return 1;
+    {
+      Element *element = enqueueItem(file->conditions, condition);
+
+      if (element) return element;
     }
 
     free(condition);
@@ -884,7 +900,7 @@ pushDataCondition (
     logMallocError();
   }
 
-  return 0;
+  return NULL;
 }
 
 static int
@@ -940,6 +956,20 @@ processDataOperands (DataFile *file, const wchar_t *line) {
   return file->processLine(file, file->data);
 }
 
+static int
+processConditionSubdirective (DataFile *file, Element *element) {
+  int identifier = getElementIdentifier(element);
+
+  if (findDataOperand(file, NULL)) {
+    int result = processDataOperands(file, file->start);
+
+    removeDataCondition(file, element, identifier);
+    return result;
+  }
+
+  return 1;
+}
+
 int
 processConditionOperands (
   DataFile *file,
@@ -949,14 +979,10 @@ processConditionOperands (
   DataString name;
 
   if (getDataString(file, &name, 1, description)) {
-    if (!pushDataCondition(file, &name, testCondition, negateCondition)) return 0;
+    Element *element = pushDataCondition(file, &name, testCondition, negateCondition);
 
-    if (findDataOperand(file, NULL)) {
-      int result = processDataOperands(file, file->start);
-
-      popDataCondition(file);
-      return result;
-    }
+    if (!element) return 0;
+    if (!processConditionSubdirective(file, element)) return 0;
   }
 
   return 1;
@@ -1049,9 +1075,29 @@ DATA_OPERANDS_PROCESSOR(processAssignOperands) {
   return 1;
 }
 
+DATA_OPERANDS_PROCESSOR(processElseOperands) {
+  Element *element = getCurrentDataCondition(file);
+
+  if (element) {
+    DataCondition *condition = getElementItem(element);
+
+    if (condition->inElse) {
+      reportDataError(file, "already in else");
+    } else {
+      condition->inElse = 1;
+      condition->negate = !condition->negate;
+      if (!processConditionSubdirective(file, element)) return 0;
+    }
+  }
+
+  return 1;
+}
+
 DATA_OPERANDS_PROCESSOR(processEndIfOperands) {
-  if (!popDataCondition(file)) {
-    reportDataError(file, "no outstanding condition");
+  Element *element = getCurrentDataCondition(file);
+
+  if (element) {
+    removeDataCondition(file, element, getElementIdentifier(element));
   }
 
   return 1;
@@ -1102,8 +1148,8 @@ processDataStream (
     if ((file.variables = newDataVariableQueue(variables))) {
       if (processLines(stream, processDataLine, &file)) ok = 1;
 
-      if (isDataConditionOutstanding(&file)) {
-        reportDataError(&file, "outstanding condition at end-of-file");
+      if (getInnermostDataCondition(&file)) {
+        reportDataError(&file, "outstanding condition at end of file");
       }
 
       deallocateQueue(file.variables);
