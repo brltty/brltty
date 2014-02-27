@@ -326,6 +326,16 @@ const TuneDefinition tune_routing_failed = {
   .elements = elements_routing_failed
 };
 
+static const TuneElement elements_freeze_reminder[] = {
+  TUNE_NOTE( 50,  60),
+  TUNE_REST( 30),
+  TUNE_NOTE( 50,  60),
+  TUNE_STOP()
+};
+const TuneDefinition tune_freeze_reminder = {
+  .elements = elements_freeze_reminder
+};
+
 static const NoteMethods *noteMethods = NULL;
 static NoteDevice *noteDevice = NULL;
 static AsyncHandle tunesCloseTimer = NULL;

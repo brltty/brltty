@@ -22,33 +22,70 @@
 #include <string.h>
 
 #include "log.h"
+#include "parameters.h"
+#include "async_alarm.h"
+#include "tunes.h"
 #include "scr.h"
 #include "scr_frozen.h"
 
 static ScreenDescription screenDescription;
 static ScreenCharacter *screenCharacters;
 
+static int startFreezeReminderAlarm (void);
+static AsyncHandle freezeReminderAlarm = NULL;
+
+ASYNC_ALARM_CALLBACK(handleFreezeReminderAlarm) {
+  asyncDiscardHandle(freezeReminderAlarm);
+  freezeReminderAlarm = NULL;
+
+  playTune(&tune_freeze_reminder);
+  startFreezeReminderAlarm();
+}
+
+static int
+startFreezeReminderAlarm (void) {
+  if (freezeReminderAlarm) return 1;
+  return asyncSetAlarmIn(&freezeReminderAlarm,
+                         SCREEN_FREEZE_REMINDER_INTERVAL,
+                         handleFreezeReminderAlarm, NULL);
+}
+
+static void
+stopFreezeReminderAlarm (void) {
+  if (freezeReminderAlarm) {
+    asyncCancelRequest(freezeReminderAlarm);
+    freezeReminderAlarm = NULL;
+  }
+}
+
 static int
 construct_FrozenScreen (BaseScreen *source) {
   describeBaseScreen(source, &screenDescription);
+
   if ((screenCharacters = calloc(screenDescription.rows*screenDescription.cols, sizeof(*screenCharacters)))) {
     const ScreenBox box = {
       .left=0, .width=screenDescription.cols,
       .top=0, .height=screenDescription.rows
     };
+
     if (source->readCharacters(&box, screenCharacters)) {
+      startFreezeReminderAlarm();
       return 1;
     }
+
     free(screenCharacters);
     screenCharacters = NULL;
   } else {
     logMallocError();
   }
+
   return 0;
 }
 
 static void
 destruct_FrozenScreen (void) {
+  stopFreezeReminderAlarm();
+
   if (screenCharacters) {
     free(screenCharacters);
     screenCharacters = NULL;

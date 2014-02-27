@@ -66,6 +66,7 @@ extern const TuneDefinition tune_bounce;
 extern const TuneDefinition tune_routing_started;
 extern const TuneDefinition tune_routing_succeeded;
 extern const TuneDefinition tune_routing_failed;
+extern const TuneDefinition tune_freeze_reminder;
 
 extern void suppressTuneDeviceOpenErrors (void);
 extern int setTuneDevice (TuneDevice device);
