@@ -258,7 +258,10 @@ main (int argc, char *argv[]) {
     }
 
     {
-      TuneDefinition tune = {NULL, 0, elements};
+      const TuneDefinition tune = {
+        .elements = elements
+      };
+
       playTune(&tune);
       closeTunes();
     }

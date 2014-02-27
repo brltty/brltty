@@ -36,9 +36,9 @@ typedef struct {
 #define TUNE_STOP() TUNE_REST(0)
 
 typedef struct {
-  const char *message;
-  unsigned int tactile;
   const TuneElement *elements;
+  const char *message;
+  uint16_t tactile;
 } TuneDefinition;
 
 #define TUNE_TACTILE(duration,pattern) (((duration) << 8) | (pattern))
