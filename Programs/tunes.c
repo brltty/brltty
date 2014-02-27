@@ -68,7 +68,7 @@ static const TuneElement elements_command_rejected[] = {
   TUNE_STOP()
 };
 const TuneDefinition tune_command_rejected = {
-  .tactile = TUNE_TACTILE(50,BRL_DOT1|BRL_DOT2|BRL_DOT3|BRL_DOT4|BRL_DOT5|BRL_DOT6|BRL_DOT7|BRL_DOT8),
+  .tactile = TUNE_TACTILE(50, BRL_DOT1 | BRL_DOT3 | BRL_DOT4 | BRL_DOT6),
   .elements = elements_command_rejected
 };
 
@@ -110,7 +110,7 @@ static const TuneElement elements_no_change[] = {
   TUNE_STOP()
 };
 const TuneDefinition tune_no_change = {
-  .tactile = TUNE_TACTILE(30,BRL_DOT2|BRL_DOT3|BRL_DOT5|BRL_DOT6),
+  .tactile = TUNE_TACTILE(30, BRL_DOT2 | BRL_DOT3 | BRL_DOT5 | BRL_DOT6),
   .elements = elements_no_change
 };
 
@@ -123,7 +123,7 @@ static const TuneElement elements_toggle_on[] = {
   TUNE_STOP()
 };
 const TuneDefinition tune_toggle_on = {
-  .tactile = TUNE_TACTILE(30,BRL_DOT1|BRL_DOT2|BRL_DOT4|BRL_DOT5),
+  .tactile = TUNE_TACTILE(30, BRL_DOT1 | BRL_DOT2 | BRL_DOT4 | BRL_DOT5),
   .elements = elements_toggle_on
 };
 
@@ -136,7 +136,7 @@ static const TuneElement elements_toggle_off[] = {
   TUNE_STOP()
 };
 const TuneDefinition tune_toggle_off = {
-  .tactile = TUNE_TACTILE(30,BRL_DOT3|BRL_DOT7|BRL_DOT6|BRL_DOT8),
+  .tactile = TUNE_TACTILE(30, BRL_DOT3 | BRL_DOT7 | BRL_DOT6 | BRL_DOT8),
   .elements = elements_toggle_off
 };
 
@@ -232,7 +232,7 @@ static const TuneElement elements_wrap_down[] = {
   TUNE_STOP()
 };
 const TuneDefinition tune_wrap_down = {
-  .tactile = TUNE_TACTILE(20,BRL_DOT1|BRL_DOT2|BRL_DOT3|BRL_DOT7),
+  .tactile = TUNE_TACTILE(20, BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT8),
   .elements = elements_wrap_down
 };
 
@@ -244,7 +244,7 @@ static const TuneElement elements_wrap_up[] = {
   TUNE_STOP()
 };
 const TuneDefinition tune_wrap_up = {
-  .tactile = TUNE_TACTILE(20,BRL_DOT4|BRL_DOT5|BRL_DOT6|BRL_DOT8),
+  .tactile = TUNE_TACTILE(20, BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT7),
   .elements = elements_wrap_up
 };
 
@@ -257,7 +257,7 @@ static const TuneElement elements_skip_first[] = {
   TUNE_STOP()
 };
 const TuneDefinition tune_skip_first = {
-  .tactile = TUNE_TACTILE(30,BRL_DOT1|BRL_DOT4|BRL_DOT7|BRL_DOT8),
+  .tactile = TUNE_TACTILE(30, BRL_DOT1 | BRL_DOT4 | BRL_DOT7 | BRL_DOT8),
   .elements = elements_skip_first
 };
 
@@ -288,7 +288,7 @@ static const TuneElement elements_bounce[] = {
   TUNE_STOP()
 };
 const TuneDefinition tune_bounce = {
-  .tactile = TUNE_TACTILE(50,BRL_DOT1|BRL_DOT2|BRL_DOT3|BRL_DOT4|BRL_DOT5|BRL_DOT6|BRL_DOT7|BRL_DOT8),
+  .tactile = TUNE_TACTILE(50, BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8),
   .elements = elements_bounce
 };
 
