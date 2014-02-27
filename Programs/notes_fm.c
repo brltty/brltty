@@ -53,6 +53,13 @@ fmConstruct (int errorLevel) {
   return NULL;
 }
 
+static void
+fmDestruct (NoteDevice *device) {
+  free(device);
+  fmDisablePorts();
+  logMessage(LOG_DEBUG, "FM disabled");
+}
+
 static int
 fmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
   logMessage(LOG_DEBUG, "tone: msec=%d note=%d",
@@ -72,16 +79,10 @@ fmFlush (NoteDevice *device) {
   return 1;
 }
 
-static void
-fmDestruct (NoteDevice *device) {
-  free(device);
-  fmDisablePorts();
-  logMessage(LOG_DEBUG, "FM disabled");
-}
-
 const NoteMethods fmNoteMethods = {
-  fmConstruct,
-  fmPlay,
-  fmFlush,
-  fmDestruct
+  .construct = fmConstruct,
+  .destruct = fmDestruct,
+
+  .play = fmPlay,
+  .flush = fmFlush
 };

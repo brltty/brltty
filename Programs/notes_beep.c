@@ -46,6 +46,13 @@ beepConstruct (int errorLevel) {
   return NULL;
 }
 
+static void
+beepDestruct (NoteDevice *device) {
+  endBeep();
+  free(device);
+  logMessage(LOG_DEBUG, "beeper disabled");
+}
+
 static int
 beepPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
   logMessage(LOG_DEBUG, "tone: msec=%d note=%d", duration, note);
@@ -63,16 +70,10 @@ beepFlush (NoteDevice *device) {
   return 1;
 }
 
-static void
-beepDestruct (NoteDevice *device) {
-  endBeep();
-  free(device);
-  logMessage(LOG_DEBUG, "beeper disabled");
-}
-
 const NoteMethods beepNoteMethods = {
-  beepConstruct,
-  beepPlay,
-  beepFlush,
-  beepDestruct
+  .construct = beepConstruct,
+  .destruct = beepDestruct,
+
+  .play = beepPlay,
+  .flush = beepFlush
 };

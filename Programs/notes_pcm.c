@@ -38,6 +38,60 @@ struct NoteDeviceStruct {
   size_t blockUsed;
 };
 
+static int
+pcmFlushBytes (NoteDevice *device) {
+  int ok = writePcmData(device->pcm, device->blockAddress, device->blockUsed);
+  if (ok) device->blockUsed = 0;
+  return ok;
+}
+
+static int
+pcmWriteBytes (NoteDevice *device, const unsigned char *address, size_t length) {
+  while (length > 0) {
+    size_t count = device->blockSize - device->blockUsed;
+    if (length < count) count = length;
+    memcpy(&device->blockAddress[device->blockUsed], address, count);
+    address += count;
+    length -= count;
+
+    if ((device->blockUsed += count) == device->blockSize)
+      if (!pcmFlushBytes(device))
+        return 0;
+  }
+
+  return 1;
+}
+
+static int
+pcmWriteSample (NoteDevice *device, int amplitude) {
+  PcmAmplitudeFormat format = device->amplitudeFormat;
+  size_t length = getPcmSampleLength(format);
+
+  if (length) {
+    unsigned char buffer[length];
+    length = makePcmSample(format, amplitude, buffer, sizeof(buffer));
+
+    {
+      int channel;
+
+      for (channel=0; channel<device->channelCount; channel+=1) {
+        if (!pcmWriteBytes(device, buffer, length)) return 0;
+      }
+    }
+  }
+
+  return 1;
+}
+
+static int
+pcmFlushBlock (NoteDevice *device) {
+  while (device->blockUsed)
+    if (!pcmWriteSample(device, 0))
+      return 0;
+
+  return 1;
+}
+
 static NoteDevice *
 pcmConstruct (int errorLevel) {
   NoteDevice *device;
@@ -70,49 +124,13 @@ pcmConstruct (int errorLevel) {
   return NULL;
 }
 
-static int
-flushBytes (NoteDevice *device) {
-  int ok = writePcmData(device->pcm, device->blockAddress, device->blockUsed);
-  if (ok) device->blockUsed = 0;
-  return ok;
-}
-
-static int
-writeBytes (NoteDevice *device, const unsigned char *address, size_t length) {
-  while (length > 0) {
-    size_t count = device->blockSize - device->blockUsed;
-    if (length < count) count = length;
-    memcpy(&device->blockAddress[device->blockUsed], address, count);
-    address += count;
-    length -= count;
-
-    if ((device->blockUsed += count) == device->blockSize)
-      if (!flushBytes(device))
-        return 0;
-  }
-
-  return 1;
-}
-
-static int
-writeSample (NoteDevice *device, int amplitude) {
-  PcmAmplitudeFormat format = device->amplitudeFormat;
-  size_t length = getPcmSampleLength(format);
-
-  if (length) {
-    unsigned char buffer[length];
-    length = makePcmSample(format, amplitude, buffer, sizeof(buffer));
-
-    {
-      int channel;
-
-      for (channel=0; channel<device->channelCount; channel+=1) {
-        if (!writeBytes(device, buffer, length)) return 0;
-      }
-    }
-  }
-
-  return 1;
+static void
+pcmDestruct (NoteDevice *device) {
+  pcmFlushBlock(device);
+  free(device->blockAddress);
+  closePcmDevice(device->pcm);
+  free(device);
+  logMessage(LOG_DEBUG, "PCM disabled");
 }
 
 static int
@@ -158,7 +176,7 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
 
           {
             int32_t actualAmplitude = normalizedAmplitude / amplitudeGranularity;
-            if (!writeSample(device, actualAmplitude)) return 0;
+            if (!pcmWriteSample(device, actualAmplitude)) return 0;
             sampleCount -= 1;
           }
         }
@@ -173,7 +191,7 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
                duration, sampleCount, note);
 
     while (sampleCount > 0) {
-      if (!writeSample(device, 0)) return 0;
+      if (!pcmWriteSample(device, 0)) return 0;
       --sampleCount;
     }
   }
@@ -182,31 +200,14 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
 }
 
 static int
-flushBlock (NoteDevice *device) {
-  while (device->blockUsed)
-    if (!writeSample(device, 0))
-      return 0;
-
-  return 1;
-}
-
-static int
 pcmFlush (NoteDevice *device) {
-  return flushBlock(device);
-}
-
-static void
-pcmDestruct (NoteDevice *device) {
-  flushBlock(device);
-  free(device->blockAddress);
-  closePcmDevice(device->pcm);
-  free(device);
-  logMessage(LOG_DEBUG, "PCM disabled");
+  return pcmFlushBlock(device);
 }
 
 const NoteMethods pcmNoteMethods = {
-  pcmConstruct,
-  pcmPlay,
-  pcmFlush,
-  pcmDestruct
+  .construct = pcmConstruct,
+  .destruct = pcmDestruct,
+
+  .play = pcmPlay,
+  .flush = pcmFlush
 };

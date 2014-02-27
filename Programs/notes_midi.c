@@ -55,6 +55,13 @@ midiConstruct (int errorLevel) {
   return NULL;
 }
 
+static void
+midiDestruct (NoteDevice *device) {
+  closeMidiDevice(device->midi);
+  free(device);
+  logMessage(LOG_DEBUG, "MIDI disabled");
+}
+
 static int
 midiPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
   beginMidiBlock(device->midi);
@@ -78,16 +85,10 @@ midiFlush (NoteDevice *device) {
   return flushMidiDevice(device->midi);
 }
 
-static void
-midiDestruct (NoteDevice *device) {
-  closeMidiDevice(device->midi);
-  free(device);
-  logMessage(LOG_DEBUG, "MIDI disabled");
-}
-
 const NoteMethods midiNoteMethods = {
-  midiConstruct,
-  midiPlay,
-  midiFlush,
-  midiDestruct
+  .construct = midiConstruct,
+  .destruct = midiDestruct,
+
+  .play = midiPlay,
+  .flush = midiFlush
 };

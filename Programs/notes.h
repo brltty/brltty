@@ -41,9 +41,10 @@ typedef struct NoteDeviceStruct NoteDevice;
 
 typedef struct {
   NoteDevice * (*construct) (int errorLevel);
+  void (*destruct) (NoteDevice *device);
+
   int (*play) (NoteDevice *device, unsigned char note, unsigned int duration);
   int (*flush) (NoteDevice *device);
-  void (*destruct) (NoteDevice *device);
 } NoteMethods;
 
 extern const NoteMethods beepNoteMethods;
