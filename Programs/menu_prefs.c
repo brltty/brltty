@@ -1071,12 +1071,25 @@ makePreferencesMenu (void) {
           if (!(name = malloc(sizeof(*name)))) goto noItem;
           memset(name, 0, sizeof(*name));
           name->label = getLogCategoryDescription(category);
-          ITEM(newBooleanMenuItem(logCategoriesSubmenu, &logCategoryFlags[category], name));
+
+          {
+            ITEM(newBooleanMenuItem(logCategoriesSubmenu, &logCategoryFlags[category], name));
+
+            switch (category) {
+              case LOG_CATEGORY_INDEX(BRAILLE_KEYS):
+                TEST(BrailleKeyTable);
+                break;
+
+              case LOG_CATEGORY_INDEX(KEYBOARD_KEYS):
+                TEST(KeyboardKeyTable);
+                break;
+
+              default:
+                break;
+            }
+          }
         }
       }
-
-      setMenuItemTester(getMenuItem(logCategoriesSubmenu, LOG_CATEGORY_INDEX(BRAILLE_KEYS)), testBrailleKeyTable);
-      setMenuItemTester(getMenuItem(logCategoriesSubmenu, LOG_CATEGORY_INDEX(KEYBOARD_KEYS)), testKeyboardKeyTable);
     }
   }
 
