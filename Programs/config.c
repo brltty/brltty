@@ -75,6 +75,9 @@ int isWindowsService = 0;
 #include "system_msdos.h"
 #endif /* __MSDOS__ */
 
+static const char optionOperand_none[] = "no";
+static const char optionOperand_autodetect[] = "auto";
+
 #define SERVICE_NAME "BrlAPI"
 #define SERVICE_DESCRIPTION "Braille API (BrlAPI)"
 
@@ -177,18 +180,29 @@ static const char *const optionStrings_LogLevel[] = {
   NULL
 };
 
+static const char *const optionStrings_TextTable[] = {
+  optionOperand_autodetect,
+  NULL
+};
+
 static const char *const optionStrings_BrailleDriver[] = {
+  optionOperand_autodetect,
+  optionOperand_none,
   BRAILLE_DRIVER_CODES,
   NULL
 };
 
 static const char *const optionStrings_ScreenDriver[] = {
+  optionOperand_autodetect,
+  optionOperand_none,
   SCREEN_DRIVER_CODES,
   NULL
 };
 
 #ifdef ENABLE_SPEECH_SUPPORT
 static const char *const optionStrings_SpeechDriver[] = {
+  optionOperand_autodetect,
+  optionOperand_none,
   SPEECH_DRIVER_CODES,
   NULL
 };
@@ -233,7 +247,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("directory"),
     .setting.string = &opt_driversDirectory,
     .defaultSetting = DRIVERS_DIRECTORY,
-    .description = strtext("Path to directory for loading drivers.")
+    .description = strtext("Path to directory containing drivers.")
   },
 
   { .letter = 'W',
@@ -260,7 +274,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("file"),
     .setting.string = &opt_preferencesFile,
     .defaultSetting = PREFERENCES_FILE,
-    .description = strtext("Path to default preferences file.")
+    .description = strtext("Name of or path to default preferences file.")
   },
 
   { .letter = 'E',
@@ -274,7 +288,7 @@ BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'A',
     .word = "api-parameters",
     .flags = OPT_Extend | OPT_Config | OPT_Environ,
-    .argument = strtext("arg,..."),
+    .argument = strtext("name=value,..."),
     .setting.string = &opt_apiParameters,
     .defaultSetting = API_PARAMETERS,
     .description = strtext("Parameters for the application programming interface.")
@@ -292,17 +306,17 @@ BEGIN_OPTION_TABLE(programOptions)
     .word = "braille-driver",
     .bootParameter = 1,
     .flags = OPT_Config | OPT_Environ,
-    .argument = strtext("driver"),
+    .argument = strtext("driver,..."),
     .setting.string = &opt_brailleDriver,
-    .defaultSetting = "auto",
-    .description = strtext("Braille driver: one of {%s}"),
+    .defaultSetting = optionOperand_autodetect,
+    .description = strtext("Braille driver: one of {%s %s %s}"),
     .strings = optionStrings_BrailleDriver
   },
 
   { .letter = 'B',
     .word = "braille-parameters",
     .flags = OPT_Extend | OPT_Config | OPT_Environ,
-    .argument = strtext("arg,..."),
+    .argument = strtext("name=value,..."),
     .setting.string = &opt_brailleParameters,
     .defaultSetting = BRAILLE_PARAMETERS,
     .description = strtext("Parameters for the braille driver.")
@@ -312,10 +326,10 @@ BEGIN_OPTION_TABLE(programOptions)
     .word = "braille-device",
     .bootParameter = 2,
     .flags = OPT_Config | OPT_Environ,
-    .argument = strtext("device"),
+    .argument = strtext("identifier,..."),
     .setting.string = &opt_brailleDevice,
     .defaultSetting = BRAILLE_DEVICE,
-    .description = strtext("Path to device for accessing braille display.")
+    .description = strtext("Device for accessing braille display.")
   },
 
   { .letter = 'r',
@@ -336,7 +350,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
     .defaultSetting = TABLES_DIRECTORY,
-    .description = strtext("Path to directory for text and attributes tables.")
+    .description = strtext("Path to directory containing tables.")
   },
 
   { .letter = 't',
@@ -345,8 +359,9 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Config | OPT_Environ,
     .argument = strtext("file"),
     .setting.string = &opt_textTable,
-    .defaultSetting = "auto",
-    .description = strtext("Path to text translation table file.")
+    .defaultSetting = optionOperand_autodetect,
+    .description = strtext("Name of or path to text table (or %s)."),
+    .strings = optionStrings_TextTable
   },
 
   { .letter = 'a',
@@ -354,7 +369,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Config | OPT_Environ,
     .argument = strtext("file"),
     .setting.string = &opt_attributesTable,
-    .description = strtext("Path to attributes translation table file.")
+    .description = strtext("Name of or path to attributes table.")
   },
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
@@ -363,7 +378,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Config | OPT_Environ,
     .argument = strtext("file"),
     .setting.string = &opt_contractionTable,
-    .description = strtext("Path to contraction table file.")
+    .description = strtext("Name of or path to contraction table.")
   },
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
@@ -372,32 +387,32 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Config | OPT_Environ,
     .argument = strtext("file"),
     .setting.string = &opt_keyTable,
-    .description = strtext("Path to key table file.")
+    .description = strtext("Name of or path to key table.")
   },
 
   { .letter = 'K',
     .word = "keyboard-properties",
     .flags = OPT_Hidden | OPT_Extend | OPT_Config | OPT_Environ,
-    .argument = strtext("arg,..."),
+    .argument = strtext("name=value,..."),
     .setting.string = &opt_keyboardProperties,
-    .description = strtext("Properties of the keyboard.")
+    .description = strtext("Properties of eligible keyboards.")
   },
 
 #ifdef ENABLE_SPEECH_SUPPORT
   { .letter = 's',
     .word = "speech-driver",
     .flags = OPT_Config | OPT_Environ,
-    .argument = strtext("driver"),
+    .argument = strtext("driver,..."),
     .setting.string = &opt_speechDriver,
-    .defaultSetting = "auto",
-    .description = strtext("Speech driver: one of {%s}"),
+    .defaultSetting = optionOperand_autodetect,
+    .description = strtext("Speech driver: one of {%s %s %s}"),
     .strings = optionStrings_SpeechDriver
   },
 
   { .letter = 'S',
     .word = "speech-parameters",
     .flags = OPT_Extend | OPT_Config | OPT_Environ,
-    .argument = strtext("arg,..."),
+    .argument = strtext("name=value,..."),
     .setting.string = &opt_speechParameters,
     .defaultSetting = SPEECH_PARAMETERS,
     .description = strtext("Parameters for the speech driver.")
@@ -408,7 +423,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("file"),
     .setting.string = &opt_speechInput,
-    .description = strtext("Path to speech input file system object.")
+    .description = strtext("Name of or path to speech input object.")
   },
 
   { .letter = 'Q',
@@ -421,17 +436,17 @@ BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'x',
     .word = "screen-driver",
     .flags = OPT_Config | OPT_Environ,
-    .argument = strtext("driver"),
+    .argument = strtext("driver,..."),
     .setting.string = &opt_screenDriver,
     .defaultSetting = SCREEN_DRIVER,
-    .description = strtext("Screen driver: one of {%s}"),
+    .description = strtext("Screen driver: one of {%s %s %s}"),
     .strings = optionStrings_ScreenDriver
   },
 
   { .letter = 'X',
     .word = "screen-parameters",
     .flags = OPT_Extend | OPT_Config | OPT_Environ,
-    .argument = strtext("arg,..."),
+    .argument = strtext("name=value,..."),
     .setting.string = &opt_screenParameters,
     .defaultSetting = SCREEN_PARAMETERS,
     .description = strtext("Parameters for the screen driver.")
@@ -443,7 +458,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("device"),
     .setting.string = &opt_pcmDevice,
-    .description = strtext("Device specifier for soundcard digital audio.")
+    .description = strtext("PCM (soundcard digital audio) device specifier.")
   },
 #endif /* HAVE_PCM_SUPPORT */
 
@@ -453,7 +468,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("device"),
     .setting.string = &opt_midiDevice,
-    .description = strtext("Device specifier for the Musical Instrument Digital Interface.")
+    .description = strtext("MIDI (Musical Instrument Digital Interface) device specifier.")
   },
 #endif /* HAVE_MIDI_SUPPORT */
 
@@ -462,7 +477,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Hidden,
     .argument = strtext("csecs"),
     .setting.string = &opt_messageHoldTimeout,
-    .description = strtext("Message hold timeout [400].")
+    .description = strtext("Message hold timeout (in 10ms units).")
   },
 
   { .letter = 'q',
@@ -921,7 +936,7 @@ typedef struct {
 static int
 activateDriver (const DriverActivationData *data, int verify) {
   int oneDriver = data->requestedDrivers[0] && !data->requestedDrivers[1];
-  int autodetect = oneDriver && (strcmp(data->requestedDrivers[0], "auto") == 0);
+  int autodetect = oneDriver && (strcmp(data->requestedDrivers[0], optionOperand_autodetect) == 0);
   const char *const defaultDrivers[] = {data->getDefaultDriver(), NULL};
   const char *const *driver;
 
@@ -938,7 +953,7 @@ activateDriver (const DriverActivationData *data, int verify) {
   }
 
   if (!*driver) {
-    static const char *const fallbackDrivers[] = {"no", NULL};
+    static const char *const fallbackDrivers[] = {optionOperand_none, NULL};
     driver = fallbackDrivers;
     autodetect = 0;
   }
@@ -2149,7 +2164,7 @@ brlttyStart (int argc, char *argv[]) {
 
   /* handle text table option */
   if (*opt_textTable) {
-    if (strcmp(opt_textTable, "auto") == 0) {
+    if (strcmp(opt_textTable, optionOperand_autodetect) == 0) {
       char *name = selectTextTable(opt_tablesDirectory);
 
       changeStringSetting(&opt_textTable, "");
