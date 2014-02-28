@@ -31,7 +31,7 @@ cd "${sourceRoot}" || semanticError "directory not usable: ${sourceRoot}"
 
 if [ -d .git ]
 then
-   revisionIdentifier="`git describe --tags --abbrev=8 --dirty='(modified)' --match='BRLTTY-*' 2>/dev/null`"
+   revisionIdentifier="`git describe --tags --abbrev=8 --dirty='M' --match='BRLTTY-*' 2>/dev/null`"
 elif [ -d .svn ]
 then
    revisionIdentifier="`svnversion -n . 2>/dev/null`"
