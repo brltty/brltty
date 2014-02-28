@@ -280,6 +280,26 @@ Summary: Commands for maintaining BRLTTY data files.
 This package provides a set of commands for maintaining BRLTTY's datafiles.
 
 
+%package -n brltty-devel
+Version: @PACKAGE_VERSION@
+Release: 1
+Group: Development/Tools
+License: GPL
+
+AutoProv: no
+AutoReq: yes
+
+Summary: Headers for BRLTTY.
+%description -n brltty-devel
+This package provides many of the header files for BRLTTY's core, as well as
+header files which define the packets and keys for several braille devices.
+
+Install this package if you're developing or maintaining an application which
+needs to (or wishes to) use functionality provided by BRLTTY's core, which
+needs to interpret and/or create raw braille device packets, or which needs to
+interpret key codes as delivered by BrlAPI's raw mode.
+
+
 %package -n brlapi
 Version: @api_release@
 Release: 1
@@ -498,6 +518,9 @@ rm -fr "${RPM_BUILD_ROOT}"
 %files -n brltty-utils
 %{_bindir}/brltty-*
 
+%files -n brltty-devel
+%{_includedir}/brltty
+
 %files -n brlapi
 %defattr(-,root,root)
 %{_libdir}/libbrlapi.so.*
@@ -523,7 +546,6 @@ rm -fr "${RPM_BUILD_ROOT}"
 %{_libdir}/libbrlapi.so
 %{_includedir}/brlapi.h
 %{_includedir}/brlapi_*.h
-%{_includedir}/brltty
 %doc %{_mandir}/man3/*
 %doc %{_docdir}/*/BrlAPIref
 
