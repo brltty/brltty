@@ -408,9 +408,6 @@ brlapi_constants.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/brlap
 brlapi_keytab.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/brlapi_keytab.awk
 	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/brlapi_keytab.awk $(SRC_DIR)/brldefs.h >$@
 
-brlapi_brldefs.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/brlapi_brldefs.awk
-	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/brlapi_brldefs.awk $(SRC_DIR)/brldefs.h >$@
-
 all-api-bindings: api
 	set -- $(API_BINDINGS); \
 	for language \
@@ -785,9 +782,13 @@ install-drivers: $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS) install-
 
 CORE_HEADERS = \
    $(SRC_DIR)/program.h $(SRC_DIR)/pid.h $(SRC_DIR)/options.h $(SRC_DIR)/service.h \
+   $(SRC_DIR)/log.h \
    $(SRC_DIR)/unicode.h $(SRC_DIR)/ascii.h $(SRC_DIR)/charset.h \
+   $(SRC_DIR)/bitfield.h $(SRC_DIR)/bitmask.h \
    $(SRC_DIR)/datafile.h $(SRC_DIR)/dataarea.h \
+   $(SRC_DIR)/parse.h $(SRC_DIR)/file.h $(SRC_DIR)/device.h \
    $(SRC_DIR)/queue.h $(SRC_DIR)/lock.h $(SRC_DIR)/timing.h \
+   $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldots.h \
    $(SRC_DIR)/ttb.h $(SRC_DIR)/atb.h $(SRC_DIR)/ctbdefs.h $(SRC_DIR)/ctb.h $(SRC_DIR)/ktbdefs.h $(SRC_DIR)/ktb.h \
    $(SRC_DIR)/async.h $(SRC_DIR)/async_wait.h $(SRC_DIR)/async_alarm.h $(SRC_DIR)/async_task.h $(SRC_DIR)/async_io.h $(SRC_DIR)/async_event.h $(SRC_DIR)/async_signal.h $(SRC_DIR)/async_thread.h \
    $(SRC_DIR)/io_misc.h $(SRC_DIR)/io_generic.h $(SRC_DIR)/serialdefs.h $(SRC_DIR)/io_serial.h $(SRC_DIR)/usbdefs.h $(SRC_DIR)/io_usb.h $(SRC_DIR)/io_bluetooth.h \
@@ -824,13 +825,11 @@ install-api-libraries-windows: $(API_DLL) $(API_ARC) install-program-directory i
 	$(INSTALL_DATA) $(API_ARC) $(INSTALL_APILIB_DIRECTORY)
 	$(INSTALL_DATA) $(API_DEF) $(INSTALL_APILIB_DIRECTORY)
 
-install-api-headers: brlapi_constants.h brlapi_brldefs.auto.h install-apihdr-directory install-include-directory
+install-api-headers: brlapi_constants.h install-apihdr-directory
 	$(INSTALL_DATA) brlapi.h $(INSTALL_APIHDR_DIRECTORY)
 	$(INSTALL_DATA) brlapi_constants.h $(INSTALL_APIHDR_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_DIR)/brlapi_keycodes.h $(INSTALL_APIHDR_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_DIR)/brlapi_protocol.h $(INSTALL_APIHDR_DIRECTORY)
-	$(INSTALL_DATA) brlapi_brldefs.auto.h $(INSTALL_INCLUDE_DIRECTORY)/brldefs.h
-	$(INSTALL_DATA) $(SRC_DIR)/api.h $(INSTALL_INCLUDE_DIRECTORY)
 
 install-api-manpages: install-man3-directory
 	cd $(BLD_TOP)$(DOC_DIR) && $(MAKE) man3
