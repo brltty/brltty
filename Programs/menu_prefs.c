@@ -1066,26 +1066,30 @@ makePreferencesMenu (void) {
         unsigned int category;
 
         for (category=0; category<LOG_CATEGORY_COUNT; category+=1) {
-          MenuString *name;
+          const char *description = getLogCategoryDescription(category);
 
-          if (!(name = malloc(sizeof(*name)))) goto noItem;
-          memset(name, 0, sizeof(*name));
-          name->label = getLogCategoryDescription(category);
+          if (description && *description) {
+            MenuString *name;
 
-          {
-            ITEM(newBooleanMenuItem(logCategoriesSubmenu, &logCategoryFlags[category], name));
+            if (!(name = malloc(sizeof(*name)))) goto noItem;
+            memset(name, 0, sizeof(*name));
+            name->label = description;
 
-            switch (category) {
-              case LOG_CATEGORY_INDEX(BRAILLE_KEYS):
-                TEST(BrailleKeyTable);
-                break;
+            {
+              ITEM(newBooleanMenuItem(logCategoriesSubmenu, &logCategoryFlags[category], name));
 
-              case LOG_CATEGORY_INDEX(KEYBOARD_KEYS):
-                TEST(KeyboardKeyTable);
-                break;
+              switch (category) {
+                case LOG_CATEGORY_INDEX(BRAILLE_KEYS):
+                  TEST(BrailleKeyTable);
+                  break;
 
-              default:
-                break;
+                case LOG_CATEGORY_INDEX(KEYBOARD_KEYS):
+                  TEST(KeyboardKeyTable);
+                  break;
+
+                default:
+                  break;
+              }
             }
           }
         }
