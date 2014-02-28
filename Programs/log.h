@@ -77,6 +77,8 @@ typedef enum {
   LOG_CATEGORY_COUNT /* must be last */
 } LogCategoryIndex;
 
+extern const char *getLogCategoryName (unsigned int category);
+extern const char *getLogCategoryDescription (unsigned int category);
 extern void disableAllLogCategories (void);
 extern int enableLogCategory (const char *name);
 extern unsigned char categoryLogLevel;

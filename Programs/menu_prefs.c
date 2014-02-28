@@ -1063,76 +1063,20 @@ makePreferencesMenu (void) {
       setAdvancedSubmenu(logCategoriesSubmenu);
 
       {
-        NAME(strtext("Generic Input"));
-        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(GENERIC_INPUT), &itemName));
+        unsigned int category;
+
+        for (category=0; category<LOG_CATEGORY_COUNT; category+=1) {
+          MenuString *name;
+
+          if (!(name = malloc(sizeof(*name)))) goto noItem;
+          memset(name, 0, sizeof(*name));
+          name->label = getLogCategoryDescription(category);
+          ITEM(newBooleanMenuItem(logCategoriesSubmenu, &logCategoryFlags[category], name));
+        }
       }
 
-      {
-        NAME(strtext("Input Packets"));
-        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(INPUT_PACKETS), &itemName));
-      }
-
-      {
-        NAME(strtext("Output Packets"));
-        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(OUTPUT_PACKETS), &itemName));
-      }
-
-      {
-        NAME(strtext("Braille Key Events"));
-        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(BRAILLE_KEYS), &itemName));
-        TEST(BrailleKeyTable);
-      }
-
-      {
-        NAME(strtext("Keyboard Key Events"));
-        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(KEYBOARD_KEYS), &itemName));
-        TEST(KeyboardKeyTable);
-      }
-
-      {
-        NAME(strtext("Cursor Tracking"));
-        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(CURSOR_TRACKING), &itemName));
-      }
-
-      {
-        NAME(strtext("Cursor Routing"));
-        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(CURSOR_ROUTING), &itemName));
-      }
-
-      {
-        NAME(strtext("Update Events"));
-        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(UPDATE_EVENTS), &itemName));
-      }
-
-      {
-        NAME(strtext("Speech Events"));
-        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(SPEECH_EVENTS), &itemName));
-      }
-
-      {
-        NAME(strtext("Async Events"));
-        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(ASYNC_EVENTS), &itemName));
-      }
-
-      {
-        NAME(strtext("Server Events"));
-        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(SERVER_EVENTS), &itemName));
-      }
-
-      {
-        NAME(strtext("Serial I/O"));
-        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(SERIAL_IO), &itemName));
-      }
-
-      {
-        NAME(strtext("USB I/O"));
-        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(USB_IO), &itemName));
-      }
-
-      {
-        NAME(strtext("Bluetooth I/O"));
-        ITEM(newBooleanMenuItem(logCategoriesSubmenu, &LOG_CATEGORY_FLAG(BLUETOOTH_IO), &itemName));
-      }
+      setMenuItemTester(getMenuItem(logCategoriesSubmenu, LOG_CATEGORY_INDEX(BRAILLE_KEYS)), testBrailleKeyTable);
+      setMenuItemTester(getMenuItem(logCategoriesSubmenu, LOG_CATEGORY_INDEX(KEYBOARD_KEYS)), testKeyboardKeyTable);
     }
   }
 
