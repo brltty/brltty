@@ -749,7 +749,7 @@ check-speech: brltty speech-drivers
 
 ###############################################################################
 
-install:: install-programs install-tables $(INSTALL_DRIVERS) $(INSTALL_MESSAGES) install-manpages $(INSTALL_API)
+install:: install-programs install-tables $(INSTALL_DRIVERS) install-core-headers $(INSTALL_MESSAGES) install-manpages $(INSTALL_API)
 
 install-programs: brltty$X brltty-trtxt$X brltty-ttb$X brltty-ctb$X install-program-directory install-writable-directory
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY) 
@@ -782,6 +782,21 @@ install-help-files: install-tables-directory
 
 install-drivers: $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS) install-drivers-directory
 	$(INSTALL_PROGRAM) $(BLD_TOP)$(DRV_DIR)/*.$(MOD_EXT) $(INSTALL_DRIVERS_DIRECTORY)
+
+CORE_HEADERS = \
+   $(SRC_DIR)/program.h $(SRC_DIR)/pid.h $(SRC_DIR)/options.h $(SRC_DIR)/service.h \
+   $(SRC_DIR)/unicode.h $(SRC_DIR)/ascii.h $(SRC_DIR)/charset.h \
+   $(SRC_DIR)/datafile.h $(SRC_DIR)/dataarea.h \
+   $(SRC_DIR)/queue.h $(SRC_DIR)/lock.h $(SRC_DIR)/timing.h \
+   $(SRC_DIR)/ttb.h $(SRC_DIR)/atb.h $(SRC_DIR)/ctbdefs.h $(SRC_DIR)/ctb.h $(SRC_DIR)/ktbdefs.h $(SRC_DIR)/ktb.h \
+   $(SRC_DIR)/async.h $(SRC_DIR)/async_wait.h $(SRC_DIR)/async_alarm.h $(SRC_DIR)/async_task.h $(SRC_DIR)/async_io.h $(SRC_DIR)/async_event.h $(SRC_DIR)/async_signal.h $(SRC_DIR)/async_thread.h \
+   $(SRC_DIR)/io_misc.h $(SRC_DIR)/io_generic.h $(SRC_DIR)/serialdefs.h $(SRC_DIR)/io_serial.h $(SRC_DIR)/usbdefs.h $(SRC_DIR)/io_usb.h $(SRC_DIR)/io_bluetooth.h \
+   $(SRC_DIR)/system.h $(SRC_DIR)/system_darwin.h $(SRC_DIR)/system_java.h $(SRC_DIR)/system_linux.h $(SRC_DIR)/system_msdos.h $(SRC_DIR)/system_windows.h \
+   $(SRC_DIR)/win_errno.h $(SRC_DIR)/win_pthread.h \
+   $(SRC_TOP)prologue.h $(BLD_TOP)config.h $(BLD_TOP)forbuild.h
+
+install-core-headers: install-include-directory
+	$(INSTALL_DATA) $(CORE_HEADERS) $(INSTALL_INCLUDE_DIRECTORY)
 
 install-messages:
 	cd $(BLD_TOP)$(MSG_DIR) && $(MAKE) install
@@ -875,10 +890,7 @@ uninstall-documents:
 uninstall-headers:
 	-rm -f $(INSTALL_APIHDR_DIRECTORY)/brlapi.h
 	-rm -f $(INSTALL_APIHDR_DIRECTORY)/brlapi_*.h
-	-rm -f $(INSTALL_INCLUDE_DIRECTORY)/api.h
-	-rm -f $(INSTALL_INCLUDE_DIRECTORY)/brldefs.h
-	-rm -f $(INSTALL_INCLUDE_DIRECTORY)/brldefs-*.h
-	-[ ! -d $(INSTALL_INCLUDE_DIRECTORY) ] || rmdir $(INSTALL_INCLUDE_DIRECTORY)
+	-[ ! -d $(INSTALL_INCLUDE_DIRECTORY) ] || rm -f -r $(INSTALL_INCLUDE_DIRECTORY)
 
 ###############################################################################
 
