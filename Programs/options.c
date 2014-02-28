@@ -118,11 +118,18 @@ printHelp (
   char line[lineWidth+1];
   unsigned int wordWidth = 0;
   unsigned int argumentWidth = 0;
-  int optionIndex;
+  unsigned int optionIndex;
 
   for (optionIndex=0; optionIndex<info->optionCount; ++optionIndex) {
     const OptionEntry *option = &info->optionTable[optionIndex];
-    if (option->word) wordWidth = MAX(wordWidth, strlen(option->word));
+
+    if (option->word) {
+      unsigned int length = strlen(option->word);
+
+      if (option->argument) length += 1;
+      wordWidth = MAX(wordWidth, length);
+    }
+
     if (option->argument) argumentWidth = MAX(argumentWidth, strlen(option->argument));
   }
 
@@ -150,25 +157,31 @@ printHelp (
 
     {
       unsigned int end = lineLength + argumentWidth;
+
       if (option->argument) {
         size_t argumentLength = strlen(option->argument);
+
         memcpy(line+lineLength, option->argument, argumentLength);
         lineLength += argumentLength;
       }
+
       while (lineLength < end) line[lineLength++] = ' ';
     }
     line[lineLength++] = ' ';
 
     {
-      unsigned int end = lineLength + 2 + wordWidth + 1;
+      unsigned int end = lineLength + 2 + wordWidth;
+
       if (option->word) {
         size_t wordLength = strlen(option->word);
+
         line[lineLength++] = '-';
         line[lineLength++] = '-';
         memcpy(line+lineLength, option->word, wordLength);
         lineLength += wordLength;
         if (option->argument) line[lineLength++] = '=';
       }
+
       while (lineLength < end) line[lineLength++] = ' ';
     }
     line[lineLength++] = ' ';
@@ -181,13 +194,13 @@ printHelp (
       char buffer[0X100];
 
       if (option->strings) {
-        int index = 0;
-        int count = 4;
+        unsigned int index = 0;
+        unsigned int count = 4;
         const char *strings[count];
 
         while (option->strings[index]) {
           strings[index] = option->strings[index];
-          index += 1;
+          if ((index += 1) == count) break;
         }
 
         while (index < count) strings[index++] = "";
