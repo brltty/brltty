@@ -1066,7 +1066,7 @@ makePreferencesMenu (void) {
         unsigned int category;
 
         for (category=0; category<LOG_CATEGORY_COUNT; category+=1) {
-          const char *description = getLogCategoryDescription(category);
+          const char *description = getLogCategoryTitle(category);
 
           if (description && *description) {
             MenuString *name;

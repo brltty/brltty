@@ -78,7 +78,7 @@ typedef enum {
 } LogCategoryIndex;
 
 extern const char *getLogCategoryName (unsigned int category);
-extern const char *getLogCategoryDescription (unsigned int category);
+extern const char *getLogCategoryTitle (unsigned int category);
 extern void disableAllLogCategories (void);
 extern int enableLogCategory (const char *name);
 extern unsigned char categoryLogLevel;

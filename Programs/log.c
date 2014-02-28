@@ -57,92 +57,92 @@ unsigned char stderrLogLevel = LOG_NOTICE;
 
 typedef struct {
   const char *name;
-  const char *description;
+  const char *title;
   const char *prefix;
 } LogCategoryEntry;
 
 static const LogCategoryEntry logCategoryTable[LOG_CATEGORY_COUNT] = {
   [LOG_CATEGORY_INDEX(GENERIC_INPUT)] = {
     .name = "ingio",
-    .description = strtext("Generic Input"),
+    .title = strtext("Generic Input"),
     .prefix = "generic input"
   },
 
   [LOG_CATEGORY_INDEX(INPUT_PACKETS)] = {
     .name = "inpkts",
-    .description = strtext("Input Packets"),
+    .title = strtext("Input Packets"),
     .prefix = "input packet"
   },
 
   [LOG_CATEGORY_INDEX(OUTPUT_PACKETS)] = {
     .name = "outpkts",
-    .description = strtext("Output Packets"),
+    .title = strtext("Output Packets"),
     .prefix = "output packet"
   },
 
   [LOG_CATEGORY_INDEX(BRAILLE_KEYS)] = {
     .name = "brlkeys",
-    .description = strtext("Braille Key Events"),
+    .title = strtext("Braille Key Events"),
     .prefix = "braille key"
   },
 
   [LOG_CATEGORY_INDEX(KEYBOARD_KEYS)] = {
     .name = "kbdkeys",
-    .description = strtext("Keyboard Key Events"),
+    .title = strtext("Keyboard Key Events"),
     .prefix = "keyboard key"
   },
 
   [LOG_CATEGORY_INDEX(CURSOR_TRACKING)] = {
     .name = "csrtrk",
-    .description = strtext("Cursor Tracking"),
+    .title = strtext("Cursor Tracking"),
     .prefix = "cursor tracking"
   },
 
   [LOG_CATEGORY_INDEX(CURSOR_ROUTING)] = {
     .name = "csrrtg",
-    .description = strtext("Cursor Routing"),
+    .title = strtext("Cursor Routing"),
     .prefix = "cursor routing"
   },
 
   [LOG_CATEGORY_INDEX(UPDATE_EVENTS)] = {
     .name = "update",
-    .description = strtext("Update Events"),
+    .title = strtext("Update Events"),
     .prefix = "update"
   },
 
   [LOG_CATEGORY_INDEX(SPEECH_EVENTS)] = {
     .name = "speech",
-    .description = strtext("Speech Events"),
+    .title = strtext("Speech Events"),
     .prefix = "speech"
   },
 
   [LOG_CATEGORY_INDEX(ASYNC_EVENTS)] = {
     .name = "async",
-    .description = strtext("Async Events"),
+    .title = strtext("Async Events"),
     .prefix = "async"
   },
 
   [LOG_CATEGORY_INDEX(SERVER_EVENTS)] = {
     .name = "server",
-    .description = strtext("Server Events"),
+    .title = strtext("Server Events"),
     .prefix = "server"
   },
 
   [LOG_CATEGORY_INDEX(SERIAL_IO)] = {
     .name = "serial",
-    .description = strtext("Serial I/O"),
+    .title = strtext("Serial I/O"),
     .prefix = "serial"
   },
 
   [LOG_CATEGORY_INDEX(USB_IO)] = {
     .name = "usb",
-    .description = strtext("USB I/O"),
+    .title = strtext("USB I/O"),
     .prefix = "USB"
   },
 
   [LOG_CATEGORY_INDEX(BLUETOOTH_IO)] = {
     .name = "bluetooth",
-    .description = strtext("Bluetooth I/O"),
+    .title = strtext("Bluetooth I/O"),
     .prefix = "Bluetooth"
   },
 };
@@ -204,10 +204,10 @@ getLogCategoryName (unsigned int category) {
 }
 
 const char *
-getLogCategoryDescription (unsigned int category) {
+getLogCategoryTitle (unsigned int category) {
   const LogCategoryEntry *ctg = getLogCategoryEntry(category);
 
-  return (ctg && ctg->description)? ctg->description: "";
+  return (ctg && ctg->title)? ctg->title: "";
 }
 
 static void
