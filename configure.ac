@@ -1608,7 +1608,6 @@ BRLTTY_ARG_DISABLE(
    BRLTTY_SPEECH_DRIVER([bl], [BrailleLite])
    BRLTTY_SPEECH_DRIVER([cb], [CombiBraille])
    BRLTTY_IF_PACKAGE([eSpeak], [espeak], [include/espeak/speak_lib.h], [BRLTTY_SPEECH_DRIVER([es], [eSpeak], [-L$(ESPEAK_ROOT)/lib -lespeak])])
-   BRLTTY_SPEECH_DRIVER([xs], [ExternalSpeech])
    BRLTTY_IF_PACKAGE([FestivalLite], [flite], [include/flite/flite.h], [dnl
       BRLTTY_ARG_REQUIRED(
          [flite-language], [LANGUAGE],
@@ -1637,6 +1636,7 @@ BRLTTY_ARG_DISABLE(
    BRLTTY_IF_PACKAGE([Swift], [swift], [include/swift.h], [BRLTTY_SPEECH_DRIVER([sw], [Swift], [-L$(SWIFT_ROOT)/lib -lswift -lm])])
    BRLTTY_IF_PACKAGE([Theta], [theta], [include/theta.h], [BRLTTY_SPEECH_DRIVER([th], [Theta], [-L$(THETA_ROOT)/lib -ltheta])])
    BRLTTY_IF_PACKAGE([ViaVoice], [viavoice], [include/eci.h], [BRLTTY_SPEECH_DRIVER([vv], [ViaVoice], [-L$(VIAVOICE_ROOT)/lib -libmeci50])])
+   BRLTTY_SPEECH_DRIVER([xs], [ExternalSpeech])
    case "${host_os}"
    in
       *android*)
