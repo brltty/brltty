@@ -81,10 +81,10 @@ static const char optionOperand_autodetect[] = "auto";
 #define SERVICE_NAME "BrlAPI"
 #define SERVICE_DESCRIPTION "Braille API (BrlAPI)"
 
-static char *
-getLogLevelString (unsigned int index) {
-  char buffer[0X100];
-  STR_BEGIN(buffer, sizeof(buffer));
+static size_t
+formatLogLevelString (unsigned int index, char *buffer, size_t size) {
+  size_t length;
+  STR_BEGIN(buffer, size);
 
   switch (index) {
     case 0:
@@ -120,16 +120,10 @@ getLogLevelString (unsigned int index) {
     default:
       break;
   }
+
+  length = STR_LENGTH;  
   STR_END;
-
-  if (buffer[0]) {
-    char *string = strdup(buffer);
-
-    if (string) return string;
-    logMallocError();
-  }
-
-  return NULL;
+  return length;
 }
 
 static int opt_installService;
@@ -533,11 +527,11 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'l',
     .word = "log-level",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ | OPT_StrsFunc,
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ | OPT_Format,
     .argument = strtext("lvl|cat,..."),
     .setting.string = &opt_logLevel,
     .description = strtext("Logging level (%s or one of {%s}) and/or log categories to enable (one of {%s})"),
-    .strings.function = getLogLevelString
+    .strings.format = formatLogLevelString
   },
 
   { .letter = 'L',

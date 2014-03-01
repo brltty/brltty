@@ -30,7 +30,7 @@ typedef enum {
   OPT_Extend	= 0X02,
   OPT_Config	= 0X04,
   OPT_Environ	= 0X08,
-  OPT_StrsFunc	= 0X10
+  OPT_Format  	= 0X10
 } OptionFlag;
 
 #define FLAG_TRUE_WORD "on"
@@ -52,7 +52,7 @@ typedef struct {
 
   union {
     const char *const *array;
-    char *(*function) (unsigned int index);
+    size_t (*format) (unsigned int index, char *buffer, size_t size);
   } strings;
 } OptionEntry;
 

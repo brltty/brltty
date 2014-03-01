@@ -190,36 +190,42 @@ printHelp (
     {
       const unsigned int headerWidth = lineLength;
       const unsigned int descriptionWidth = lineWidth - headerWidth;
-      const int useStringsFunction = !!(option->flags & OPT_StrsFunc);
+      const int formatStrings = !!(option->flags & OPT_Format);
       const char *description = option->description? gettext(option->description): "";
-      char buffer[0X400];
 
-      if (useStringsFunction? !!option->strings.function: !!option->strings.array) {
+      char buffer[0X400];
+      char *from = buffer;
+      const char *const to = from + sizeof(buffer);
+
+      if (formatStrings? !!option->strings.format: !!option->strings.array) {
         unsigned int index = 0;
-        unsigned int count = 0;
         const unsigned int limit = 4;
         const char *strings[limit];
 
         while (index < limit) {
-          const char *string = useStringsFunction?
-                                 option->strings.function(index):
-                                 option->strings.array[index];
+          const char *string;
+
+          if (formatStrings) {
+            size_t length = option->strings.format(index, from, (to - from));
+
+            if (length) {
+              string = from;
+              from += length + 1;
+            } else {
+              string = NULL;
+            }
+          } else {
+            string = option->strings.array[index];
+          }
 
           if (!string) break;
           strings[index++] = string;
         }
 
-        count = index;
         while (index < limit) strings[index++] = "";
-        snprintf(buffer, sizeof(buffer),
+        snprintf(from, (to - from),
                  description, strings[0], strings[1], strings[2], strings[3]);
-        description = buffer;
-
-        if (useStringsFunction) {
-          while (count) {
-            free((void *)strings[--count]);
-          }
-        }
+        description = from;
       }
 
       {
