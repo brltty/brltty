@@ -1063,7 +1063,7 @@ makePreferencesMenu (void) {
       setAdvancedSubmenu(logCategoriesSubmenu);
 
       {
-        unsigned int category;
+        LogCategoryIndex category;
 
         for (category=0; category<LOG_CATEGORY_COUNT; category+=1) {
           const char *description = getLogCategoryTitle(category);

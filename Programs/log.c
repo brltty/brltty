@@ -192,20 +192,20 @@ struct LogPrefixEntryStruct {
 };
 
 static inline const LogCategoryEntry *
-getLogCategoryEntry (unsigned int category) {
-  return (category < LOG_CATEGORY_COUNT)? &logCategoryTable[category]: NULL;
+getLogCategoryEntry (LogCategoryIndex index) {
+  return ((index >= 0) && (index < LOG_CATEGORY_COUNT))? &logCategoryTable[index]: NULL;
 }
 
 const char *
-getLogCategoryName (unsigned int category) {
-  const LogCategoryEntry *ctg = getLogCategoryEntry(category);
+getLogCategoryName (LogCategoryIndex index) {
+  const LogCategoryEntry *ctg = getLogCategoryEntry(index);
 
   return (ctg && ctg->name)? ctg->name: "";
 }
 
 const char *
-getLogCategoryTitle (unsigned int category) {
-  const LogCategoryEntry *ctg = getLogCategoryEntry(category);
+getLogCategoryTitle (LogCategoryIndex index) {
+  const LogCategoryEntry *ctg = getLogCategoryEntry(index);
 
   return (ctg && ctg->title)? ctg->title: "";
 }
