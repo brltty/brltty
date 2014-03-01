@@ -335,7 +335,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'N',
     .word = "no-api",
-    .flags = OPT_Hidden,
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .setting.flag = &opt_noApi,
     .description = strtext("Disable the application programming interface.")
   },
@@ -530,7 +530,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Hidden | OPT_Config | OPT_Environ | OPT_Format,
     .argument = strtext("lvl|cat,..."),
     .setting.string = &opt_logLevel,
-    .description = strtext("Logging level (%s or one of {%s}) and/or log categories to enable (one of {%s})"),
+    .description = strtext("Logging level (%s or one of {%s}) and/or log categories to enable (any combination of {%s})"),
     .strings.format = formatLogLevelString
   },
 

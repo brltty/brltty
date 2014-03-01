@@ -513,6 +513,10 @@
 # Application Programming Interface Parameters #
 ################################################
 
+# The no-api directive disables the Application Programming Interface (API).
+# (can be overridden with the -N [--no-api=] option)
+#no-api	off	# [off,on]
+
 # The api-parameters directive passes parameters to the Application
 # Programming Interface.
 # (can be overridden with the -A [--api-parameters=] option)
