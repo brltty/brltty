@@ -81,6 +81,57 @@ static const char optionOperand_autodetect[] = "auto";
 #define SERVICE_NAME "BrlAPI"
 #define SERVICE_DESCRIPTION "Braille API (BrlAPI)"
 
+static char *
+getLogLevelString (unsigned int index) {
+  char buffer[0X100];
+  STR_BEGIN(buffer, sizeof(buffer));
+
+  switch (index) {
+    case 0:
+      STR_PRINTF("0-%u", logLevelCount-1);
+      break;
+
+    case 1: {
+      unsigned int level;
+
+      for (level=0; level<logLevelCount; level+=1) {
+        if (level) STR_PRINTF(" ");
+        STR_PRINTF("%s", logLevelNames[level]);
+      }
+
+      break;
+    }
+
+    case 2: {
+      LogCategoryIndex category;
+
+      for (category=0; category<LOG_CATEGORY_COUNT; category+=1) {
+        const char *name = getLogCategoryName(category);
+
+        if (name && *name) {
+          if (category) STR_PRINTF(" ");
+          STR_PRINTF("%s", name);
+        }
+      }
+
+      break;
+    }
+
+    default:
+      break;
+  }
+  STR_END;
+
+  if (buffer[0]) {
+    char *string = strdup(buffer);
+
+    if (string) return string;
+    logMallocError();
+  }
+
+  return NULL;
+}
+
 static int opt_installService;
 static const char *const optionStrings_InstallService[] = {
   SERVICE_NAME,
@@ -174,12 +225,6 @@ static void *screenObject = NULL;
 static char *opt_screenParameters;
 static char **screenParameters = NULL;
 
-static const char *const optionStrings_LogLevel[] = {
-  "0-7 [5]",
-  "emergency alert critical error warning [notice] information debug",
-  NULL
-};
-
 static const char *const optionStrings_TextTable[] = {
   optionOperand_autodetect,
   NULL
@@ -214,7 +259,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Hidden,
     .setting.flag = &opt_installService,
     .description = strtext("Install the %s service, and then exit."),
-    .strings = optionStrings_InstallService
+    .strings.array = optionStrings_InstallService
   },
 
   { .letter = 'R',
@@ -222,7 +267,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Hidden,
     .setting.flag = &opt_removeService,
     .description = strtext("Remove the %s service, and then exit."),
-    .strings = optionStrings_RemoveService
+    .strings.array = optionStrings_RemoveService
   },
 
   { .letter = 'C',
@@ -230,7 +275,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Hidden,
     .setting.flag = &opt_cancelExecution,
     .description = strtext("Stop an existing instance of %s, and then exit."),
-    .strings = optionStrings_CancelExecution
+    .strings.array = optionStrings_CancelExecution
   },
 
   { .letter = 'P',
@@ -310,7 +355,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_brailleDriver,
     .defaultSetting = optionOperand_autodetect,
     .description = strtext("Braille driver: one of {%s %s %s}"),
-    .strings = optionStrings_BrailleDriver
+    .strings.array = optionStrings_BrailleDriver
   },
 
   { .letter = 'B',
@@ -361,7 +406,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_textTable,
     .defaultSetting = optionOperand_autodetect,
     .description = strtext("Name of or path to text table (or %s)."),
-    .strings = optionStrings_TextTable
+    .strings.array = optionStrings_TextTable
   },
 
   { .letter = 'a',
@@ -406,7 +451,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_speechDriver,
     .defaultSetting = optionOperand_autodetect,
     .description = strtext("Speech driver: one of {%s %s %s}"),
-    .strings = optionStrings_SpeechDriver
+    .strings.array = optionStrings_SpeechDriver
   },
 
   { .letter = 'S',
@@ -440,7 +485,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_screenDriver,
     .defaultSetting = SCREEN_DRIVER,
     .description = strtext("Screen driver: one of {%s %s %s}"),
-    .strings = optionStrings_ScreenDriver
+    .strings.array = optionStrings_ScreenDriver
   },
 
   { .letter = 'X',
@@ -488,11 +533,11 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'l',
     .word = "log-level",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
-    .argument = strtext("level"),
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ | OPT_StrsFunc,
+    .argument = strtext("lvl|cat,..."),
     .setting.string = &opt_logLevel,
-    .description = strtext("Diagnostic logging level: %s, or one of {%s}"),
-    .strings = optionStrings_LogLevel
+    .description = strtext("Logging level (%s or one of {%s}) and/or log categories to enable (one of {%s})"),
+    .strings.function = getLogLevelString
   },
 
   { .letter = 'L',

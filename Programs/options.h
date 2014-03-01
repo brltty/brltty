@@ -25,10 +25,13 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#define OPT_Hidden	0X01
-#define OPT_Extend	0X02
-#define OPT_Config	0X04
-#define OPT_Environ	0X08
+typedef enum {
+  OPT_Hidden	= 0X01,
+  OPT_Extend	= 0X02,
+  OPT_Config	= 0X04,
+  OPT_Environ	= 0X08,
+  OPT_StrsFunc	= 0X10
+} OptionFlag;
 
 #define FLAG_TRUE_WORD "on"
 #define FLAG_FALSE_WORD "off"
@@ -39,15 +42,18 @@ typedef struct {
   unsigned char letter;
   unsigned char bootParameter;
   unsigned char flags;
+  const char *defaultSetting;
+  const char *description;
 
   union {
     int *flag;
     char **string;
   } setting;
-  const char *defaultSetting;
 
-  const char *description;
-  const char *const *strings;
+  union {
+    const char *const *array;
+    char *(*function) (unsigned int index);
+  } strings;
 } OptionEntry;
 
 #define BEGIN_OPTION_TABLE(name) static const OptionEntry name[] = {

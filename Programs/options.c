@@ -188,25 +188,38 @@ printHelp (
 
     line[lineLength++] = ' ';
     {
-      unsigned int headerWidth = lineLength;
-      unsigned int descriptionWidth = lineWidth - headerWidth;
+      const unsigned int headerWidth = lineLength;
+      const unsigned int descriptionWidth = lineWidth - headerWidth;
+      const int useStringsFunction = !!(option->flags & OPT_StrsFunc);
       const char *description = option->description? gettext(option->description): "";
-      char buffer[0X100];
+      char buffer[0X400];
 
-      if (option->strings) {
+      if (useStringsFunction? !!option->strings.function: !!option->strings.array) {
         unsigned int index = 0;
-        unsigned int count = 4;
-        const char *strings[count];
+        unsigned int count = 0;
+        const unsigned int limit = 4;
+        const char *strings[limit];
 
-        while (option->strings[index]) {
-          strings[index] = option->strings[index];
-          if ((index += 1) == count) break;
+        while (index < limit) {
+          const char *string = useStringsFunction?
+                                 option->strings.function(index):
+                                 option->strings.array[index];
+
+          if (!string) break;
+          strings[index++] = string;
         }
 
-        while (index < count) strings[index++] = "";
+        count = index;
+        while (index < limit) strings[index++] = "";
         snprintf(buffer, sizeof(buffer),
                  description, strings[0], strings[1], strings[2], strings[3]);
         description = buffer;
+
+        if (useStringsFunction) {
+          while (count) {
+            free((void *)strings[--count]);
+          }
+        }
       }
 
       {
