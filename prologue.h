@@ -60,7 +60,8 @@ extern "C" {
 #define STR_BEGIN(buffer, size) { \
   char *strNext = (buffer); \
   char *strStart = strNext; \
-  char *strEnd = strStart + (size);
+  char *strEnd = strStart + (size); \
+  *strNext = 0;
 #define STR_END }
 #define STR_LENGTH (size_t)(strNext - strStart)
 #define STR_NEXT strNext
