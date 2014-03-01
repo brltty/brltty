@@ -708,7 +708,7 @@ static void removeConnection(Connection *c)
 }
 
 /* Function: removeFreeConnection */
-/* Removes the connection from the list and frees its ressources */
+/* Removes the connection from the list and frees its resources */
 static void removeFreeConnection(Connection *c)
 {
   removeConnection(c);
@@ -822,7 +822,7 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
   freeBrailleWindow(&c->brailleWindow); /* In case of multiple enterTtyMode requests */
 
   if ((initializeAcceptedKeys(c, how)==-1) || (allocBrailleWindow(&c->brailleWindow)==-1)) {
-    logMessage(LOG_WARNING,"Failed to allocate some ressources");
+    logMessage(LOG_WARNING,"Failed to allocate some resources");
     freeKeyrangeList(&c->acceptedKeys);
     WERR(c->fd,BRLAPI_ERROR_NOMEM, "no memory for accepted keys");
     return 0;
@@ -1309,7 +1309,7 @@ static int handleUnauthorizedConnection(Connection *c, brlapi_packetType_t type,
 /* Function : processRequest */
 /* Reads a packet fro c->fd and processes it */
 /* Returns 1 if connection has to be removed */
-/* If EOF is reached, closes fd and frees all associated ressources */
+/* If EOF is reached, closes fd and frees all associated resources */
 static int processRequest(Connection *c, PacketHandlers *handlers)
 {
   PacketHandler p = NULL;
