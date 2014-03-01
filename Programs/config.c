@@ -348,7 +348,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("driver,..."),
     .setting.string = &opt_brailleDriver,
     .defaultSetting = optionOperand_autodetect,
-    .description = strtext("Braille driver: one of {%s %s %s}"),
+    .description = strtext("Braille driver code (%s, %s, or one of {%s})."),
     .strings.array = optionStrings_BrailleDriver
   },
 
@@ -444,7 +444,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("driver,..."),
     .setting.string = &opt_speechDriver,
     .defaultSetting = optionOperand_autodetect,
-    .description = strtext("Speech driver: one of {%s %s %s}"),
+    .description = strtext("Speech driver code (%s, %s, or one of {%s})."),
     .strings.array = optionStrings_SpeechDriver
   },
 
@@ -478,7 +478,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("driver,..."),
     .setting.string = &opt_screenDriver,
     .defaultSetting = SCREEN_DRIVER,
-    .description = strtext("Screen driver: one of {%s %s %s}"),
+    .description = strtext("Screen driver code (%s, %s, or one of {%s})."),
     .strings.array = optionStrings_ScreenDriver
   },
 
