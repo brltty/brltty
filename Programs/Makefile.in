@@ -408,6 +408,9 @@ brlapi_constants.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/brlap
 brlapi_keytab.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/brlapi_keytab.awk
 	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/brlapi_keytab.awk $(SRC_DIR)/brldefs.h >$@
 
+brlapi_brldefs.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/brlapi_brldefs.awk
+	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/brlapi_brldefs.awk $(SRC_DIR)/brldefs.h >$@
+
 all-api-bindings: api
 	set -- $(API_BINDINGS); \
 	for language \
@@ -838,11 +841,12 @@ install-api-libraries-windows: $(API_DLL) $(API_ARC) install-program-directory i
 	$(INSTALL_DATA) $(API_ARC) $(INSTALL_APILIB_DIRECTORY)
 	$(INSTALL_DATA) $(API_DEF) $(INSTALL_APILIB_DIRECTORY)
 
-install-api-headers: brlapi_constants.h install-apihdr-directory
+install-api-headers: brlapi_constants.h brlapi_brldefs.auto.h install-apihdr-directory
 	$(INSTALL_DATA) brlapi.h $(INSTALL_APIHDR_DIRECTORY)
 	$(INSTALL_DATA) brlapi_constants.h $(INSTALL_APIHDR_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_DIR)/brlapi_keycodes.h $(INSTALL_APIHDR_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_DIR)/brlapi_protocol.h $(INSTALL_APIHDR_DIRECTORY)
+	$(INSTALL_DATA) brlapi_brldefs.auto.h $(INSTALL_APIHDR_DIRECTORY)/brlapi_brldefs.h
 
 install-api-manpages: install-man3-directory
 	cd $(BLD_TOP)$(DOC_DIR) && $(MAKE) man3
