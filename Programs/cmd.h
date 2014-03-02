@@ -19,12 +19,6 @@
 #ifndef BRLTTY_INCLUDED_CMD
 #define BRLTTY_INCLUDED_CMD
 
-#include "prologue.h"
-
-#ifdef ENABLE_API
-#include "brlapi_keycodes.h"
-#endif /* ENABLE_API */
-
 #include "cmddefs.h"
 
 #ifdef __cplusplus
@@ -56,11 +50,6 @@ typedef enum {
 extern size_t describeCommand (int command, char *buffer, size_t size, CommandDescriptionOption options);
 extern void logCommand (int command);
 extern void logTransformedCommand (int oldCommand, int newCommand);
-
-#ifdef ENABLE_API
-extern brlapi_keyCode_t cmdBrlttyToBrlapi (int command, int retainDots);
-extern int cmdBrlapiToBrltty (brlapi_keyCode_t code);
-#endif /* ENABLE_API */
 
 #ifdef __cplusplus
 }

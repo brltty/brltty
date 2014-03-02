@@ -27,6 +27,7 @@
 #include "options.h"
 #include "brldefs.h"
 #include "cmd.h"
+#include "cmd_brlapi.h"
 
 #define BRLAPI_NO_DEPRECATED
 #include "brlapi.h"
