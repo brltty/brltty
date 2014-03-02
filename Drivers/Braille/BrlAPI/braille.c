@@ -23,7 +23,7 @@
 
 #include "log.h"
 #include "scr.h"
-#include "cmd.h"
+#include "cmd_brlapi.h"
 #include "charset.h"
 
 #define BRLAPI_NO_DEPRECATED
