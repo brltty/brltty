@@ -17,7 +17,7 @@
 ###############################################################################
 
 BEGIN {
-  writeHeaderPrologue("BRLAPI_INCLUDED_BRLDEFS", "api.h")
+  writeHeaderPrologue("BRLAPI_INCLUDED_BRLAPI_BRLDEFS", "api.h")
 }
 
 END {
