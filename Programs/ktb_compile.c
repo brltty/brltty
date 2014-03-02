@@ -958,7 +958,7 @@ static DATA_OPERANDS_PROCESSOR(processIfKeyOperands) {
   return processKeyTestOperands(file, 1, data);
 }
 
-static DATA_OPERANDS_PROCESSOR(processIfNoKeyOperands) {
+static DATA_OPERANDS_PROCESSOR(processIfNotKeyOperands) {
   return processKeyTestOperands(file, 0, data);
 }
 
@@ -1092,7 +1092,7 @@ processKeyTableLine (DataFile *file, void *data) {
     {.name=WS_C("hide"), .processor=processHideOperands},
     {.name=WS_C("hotkey"), .processor=processHotkeyOperands},
     {.name=WS_C("ifkey"), .processor=processIfKeyOperands, .unconditional=1},
-    {.name=WS_C("ifnokey"), .processor=processIfNoKeyOperands, .unconditional=1},
+    {.name=WS_C("ifnotkey"), .processor=processIfNotKeyOperands, .unconditional=1},
     {.name=WS_C("include"), .processor=processIncludeWrapper},
     {.name=WS_C("map"), .processor=processMapOperands},
     {.name=WS_C("note"), .processor=processNoteOperands},

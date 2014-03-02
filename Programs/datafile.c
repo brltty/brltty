@@ -1049,7 +1049,7 @@ DATA_OPERANDS_PROCESSOR(processIfVarOperands) {
   return processVariableTestOperands(file, 1, data);
 }
 
-DATA_OPERANDS_PROCESSOR(processIfNoVarOperands) {
+DATA_OPERANDS_PROCESSOR(processIfNotVarOperands) {
   return processVariableTestOperands(file, 0, data);
 }
 
