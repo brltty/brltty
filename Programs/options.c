@@ -788,12 +788,47 @@ static DATA_OPERANDS_PROCESSOR(processConfigurationOperands) {
   return ok;
 }
 
+static DATA_CONDITION_TESTER(testConfigurationDirectiveSet) {
+  const ConfigurationFileProcessingData *conf = data;
+  wchar_t keyword[identifier->length + 1];
+
+  wmemcpy(keyword, identifier->characters, identifier->length);
+  keyword[identifier->length] = 0;
+
+  {
+    const ConfigurationDirective *directive = findConfigurationDirective(keyword, conf);
+
+    if (directive) {
+      if (conf->settings[directive->option]) {
+        return 1;
+      }
+    }
+  }
+
+  return 0;
+}
+
+static int
+processConfigurationDirectiveTestOperands (DataFile *file, int isDefined, void *data) {
+  return processConditionOperands(file, testConfigurationDirectiveSet, !isDefined, "configuration directive", data);
+}
+
+static DATA_OPERANDS_PROCESSOR(processIfSetOperands) {
+  return processConfigurationDirectiveTestOperands(file, 1, data);
+}
+
+static DATA_OPERANDS_PROCESSOR(processIfNotSetOperands) {
+  return processConfigurationDirectiveTestOperands(file, 0, data);
+}
+
 static int
 processConfigurationLine (DataFile *file, void *data) {
   static const DataDirective directives[] = {
     DATA_NESTING_DIRECTIVES,
     DATA_CONDITION_DIRECTIVES,
     DATA_VARIABLE_DIRECTIVES,
+    {.name=WC_C("ifset"), .processor=processIfSetOperands},
+    {.name=WC_C("ifnotset"), .processor=processIfNotSetOperands},
     {.name=NULL, .processor=processConfigurationOperands}
   };
 
