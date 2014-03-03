@@ -22,7 +22,9 @@
 #include <stdio.h>
 
 #include "cmd_queue.h"
+#include "brlcmds.h"
 #include "brl.h"
+#include "io_generic.h"
 #include "statdefs.h"
 
 #ifdef __cplusplus

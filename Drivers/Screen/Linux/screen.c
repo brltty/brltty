@@ -34,7 +34,7 @@
 #include "device.h"
 #include "io_misc.h"
 #include "parse.h"
-#include "brldefs.h"
+#include "brlcmds.h"
 #include "ascii.h"
 #include "charset.h"
 #include "system_linux.h"

@@ -65,6 +65,7 @@ BEGIN {
   value = getDefineValue()
   sub("^.*\\(", "", value)
   sub("\\).*$", "", value)
+  value = lshift(1, (value - 1))
   brlDot(substr($2, 8), $2, value, getComment($0))
   next
 }

@@ -25,7 +25,8 @@
 #include <signal.h>
 
 #include "options.h"
-#include "brldefs.h"
+#include "brlcmds.h"
+#include "brldots.h"
 #include "cmd.h"
 #include "cmd_brlapi.h"
 
@@ -146,14 +147,14 @@ static void showDots(void)
     wa.regionSize = sizeof(or);
     wa.text = text;
     memset(or,0,sizeof(or));
-    or[DOTS_TEXTLEN+0] = BRL_DOT1;
-    or[DOTS_TEXTLEN+1] = BRL_DOT2;
-    or[DOTS_TEXTLEN+2] = BRL_DOT3;
-    or[DOTS_TEXTLEN+3] = BRL_DOT4;
-    or[DOTS_TEXTLEN+4] = BRL_DOT5;
-    or[DOTS_TEXTLEN+5] = BRL_DOT6;
-    or[DOTS_TEXTLEN+6] = BRL_DOT7;
-    or[DOTS_TEXTLEN+7] = BRL_DOT8;
+    or[DOTS_TEXTLEN+0] = BRL_DOT_1;
+    or[DOTS_TEXTLEN+1] = BRL_DOT_2;
+    or[DOTS_TEXTLEN+2] = BRL_DOT_3;
+    or[DOTS_TEXTLEN+3] = BRL_DOT_4;
+    or[DOTS_TEXTLEN+4] = BRL_DOT_5;
+    or[DOTS_TEXTLEN+5] = BRL_DOT_6;
+    or[DOTS_TEXTLEN+6] = BRL_DOT_7;
+    or[DOTS_TEXTLEN+7] = BRL_DOT_8;
     wa.orMask = or;
     if (brlapi_write(&wa)<0) {
       brlapi_perror("brlapi_write");

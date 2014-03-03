@@ -402,14 +402,14 @@ $(API_ARC): $(API_OBJS)
 brlapi_client.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brlapi_client.c
 
-brlapi_constants.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/brlapi_constants.awk
-	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/brlapi_constants.awk $(SRC_DIR)/brldefs.h >$@
+brlapi_constants.h: $(SRC_DIR)/brlcmds.h $(SRC_DIR)/brlcmds.awk $(SRC_DIR)/brlapi_constants.awk
+	$(AWK) -f $(SRC_DIR)/brlcmds.awk -f $(SRC_DIR)/brlapi_constants.awk $(SRC_DIR)/brlcmds.h >$@
 
-brlapi_keytab.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/brlapi_keytab.awk
-	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/brlapi_keytab.awk $(SRC_DIR)/brldefs.h >$@
+brlapi_keytab.auto.h: $(SRC_DIR)/brlcmds.h $(SRC_DIR)/brlcmds.awk $(SRC_DIR)/brlapi_keytab.awk
+	$(AWK) -f $(SRC_DIR)/brlcmds.awk -f $(SRC_DIR)/brlapi_keytab.awk $(SRC_DIR)/brlcmds.h >$@
 
-brlapi_brldefs.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/brlapi_brldefs.awk
-	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/brlapi_brldefs.awk $(SRC_DIR)/brldefs.h >$@
+brlapi_brldefs.auto.h: $(SRC_DIR)/brlcmds.h $(SRC_DIR)/brlcmds.awk $(SRC_DIR)/brlapi_brldefs.awk
+	$(AWK) -f $(SRC_DIR)/brlcmds.awk -f $(SRC_DIR)/brlapi_brldefs.awk $(SRC_DIR)/brlcmds.h >$@
 
 all-api-bindings: api
 	set -- $(API_BINDINGS); \
@@ -706,8 +706,8 @@ ATTRIBUTES_TABLE_FILE = $(SRC_TOP)$(TBL_DIR)/$(ATTRIBUTES_TABLE).atb
 attr.auto.h: $(ATTRIBUTES_TABLE_FILE) tbl2hex$(X_FOR_BUILD)
 	./tbl2hex$(X_FOR_BUILD) -- $(ATTRIBUTES_TABLE_FILE) >$@
 
-cmds.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/cmds.awk
-	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/cmds.awk $(SRC_DIR)/brldefs.h >$@
+cmds.auto.h: $(SRC_DIR)/brlcmds.h $(SRC_DIR)/brlcmds.awk $(SRC_DIR)/cmds.awk
+	$(AWK) -f $(SRC_DIR)/brlcmds.awk -f $(SRC_DIR)/cmds.awk $(SRC_DIR)/brlcmds.h >$@
 
 brl.auto.h: $(SRC_DIR)/mkdrvtab
 	$(SRC_DIR)/mkdrvtab BrailleDriver brl_driver_ $(BRAILLE_INTERNAL_DRIVER_CODES) >$@
@@ -803,9 +803,13 @@ CORE_HEADERS = \
    $(SRC_DIR)/ttb.h $(SRC_DIR)/atb.h $(SRC_DIR)/ctbdefs.h $(SRC_DIR)/ctb.h $(SRC_DIR)/ktbdefs.h $(SRC_DIR)/ktb.h \
    $(SRC_DIR)/tunes.h $(SRC_DIR)/tunedefs.h \
    $(SRC_DIR)/notes.h $(SRC_DIR)/beep.h $(SRC_DIR)/pcm.h $(SRC_DIR)/midi.h $(SRC_DIR)/fm.h \
-   $(SRC_DIR)/io_misc.h $(SRC_DIR)/io_generic.h $(SRC_DIR)/io_serial.h $(SRC_DIR)/serialdefs.h $(SRC_DIR)/io_usb.h $(SRC_DIR)/usbdefs.h $(SRC_DIR)/io_bluetooth.h $(SRC_DIR)/ports.h \
+   $(SRC_DIR)/io_generic.h $(SRC_DIR)/giodefs.h \
+   $(SRC_DIR)/io_serial.h $(SRC_DIR)/serialdefs.h \
+   $(SRC_DIR)/io_usb.h $(SRC_DIR)/usbdefs.h \
+   $(SRC_DIR)/io_bluetooth.h \
+   $(SRC_DIR)/io_misc.h $(SRC_DIR)/ports.h \
    $(SRC_DIR)/driver.h $(SRC_DIR)/drivers.h \
-   $(SRC_DIR)/brl_driver.h $(SRC_DIR)/brl.h $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldots.h \
+   $(SRC_DIR)/brl_driver.h $(SRC_DIR)/brl.h $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldots.h $(SRC_DIR)/brlcmds.h \
    $(SRC_DIR)/spk_driver.h $(SRC_DIR)/spk.h $(SRC_DIR)/spkdefs.h \
    $(SRC_DIR)/scr_driver.h $(SRC_DIR)/scr.h $(SRC_DIR)/scrdefs.h $(SRC_DIR)/scr_base.h $(SRC_DIR)/scr_real.h $(SRC_DIR)/scr_main.h \
    $(SRC_DIR)/system.h $(SRC_DIR)/system_darwin.h $(SRC_DIR)/system_java.h $(SRC_DIR)/system_linux.h $(SRC_DIR)/system_msdos.h $(SRC_DIR)/system_windows.h \

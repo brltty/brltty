@@ -87,8 +87,8 @@ BEGIN_OPTION_TABLE(programOptions)
 END_OPTION_TABLE
 
 static const BrlDotTable dotsInternal = {
-  BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4,
-  BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8
+  BRL_DOT_1, BRL_DOT_2, BRL_DOT_3, BRL_DOT_4,
+  BRL_DOT_5, BRL_DOT_6, BRL_DOT_7, BRL_DOT_8
 };
 
 static const BrlDotTable dots12345678 = {

@@ -36,7 +36,6 @@
 #include "charset.h"
 #include "unicode.h"
 #include "ascii.h"
-#include "brldots.h"
 #include "ttb.h"
 #include "ctb.h"
 

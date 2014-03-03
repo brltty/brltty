@@ -28,7 +28,7 @@
 #include <hurd/console.h>
 
 #include "log.h"
-#include "brldefs.h"
+#include "brlcmds.h"
 #include "charset.h"
 
 #include "scr_driver.h"

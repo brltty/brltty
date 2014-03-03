@@ -48,14 +48,14 @@ extern "C" {
 #define BRL_DOT_COUNT 8
 
 #define BRL_DOT(number) (1 << ((number) - 1))
-#define BRL_DOT1 BRL_DOT(1) /* upper-left dot of standard braille cell */
-#define BRL_DOT2 BRL_DOT(2) /* middle-left dot of standard braille cell */
-#define BRL_DOT3 BRL_DOT(3) /* lower-left dot of standard braille cell */
-#define BRL_DOT4 BRL_DOT(4) /* upper-right dot of standard braille cell */
-#define BRL_DOT5 BRL_DOT(5) /* middle-right dot of standard braille cell */
-#define BRL_DOT6 BRL_DOT(6) /* lower-right dot of standard braille cell */
-#define BRL_DOT7 BRL_DOT(7) /* lower-left dot of computer braille cell */
-#define BRL_DOT8 BRL_DOT(8) /* lower-right dot of computer braille cell */
+#define BRL_DOT_1 BRL_DOT(1) /* upper-left dot of standard braille cell */
+#define BRL_DOT_2 BRL_DOT(2) /* middle-left dot of standard braille cell */
+#define BRL_DOT_3 BRL_DOT(3) /* lower-left dot of standard braille cell */
+#define BRL_DOT_4 BRL_DOT(4) /* upper-right dot of standard braille cell */
+#define BRL_DOT_5 BRL_DOT(5) /* middle-right dot of standard braille cell */
+#define BRL_DOT_6 BRL_DOT(6) /* lower-right dot of standard braille cell */
+#define BRL_DOT_7 BRL_DOT(7) /* lower-left dot of computer braille cell */
+#define BRL_DOT_8 BRL_DOT(8) /* lower-right dot of computer braille cell */
 
 typedef unsigned char BrlDots;
 

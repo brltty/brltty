@@ -33,6 +33,7 @@
 #include "log.h"
 #include "parse.h"
 #include "brl.h"
+#include "brldots.h"
 #include "file.h"
 #include "async_wait.h"
 #include "cmd_learn.h"
@@ -223,7 +224,7 @@ main (int argc, char *argv[]) {
 /* dummy functions to allow drivers to link... */
 unsigned char
 getCursorDots (void) {
-  return (BRL_DOT7 | BRL_DOT8);
+  return (BRL_DOT_7 | BRL_DOT_8);
 }
 
 int

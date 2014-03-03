@@ -21,7 +21,7 @@
 #include <errno.h>
 
 #include "log.h"
-#include "brldefs.h"
+#include "brlcmds.h"
 
 #include "scr_driver.h"
 #include "system_java.h"

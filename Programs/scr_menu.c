@@ -21,7 +21,7 @@
 #include <stdio.h>
 
 #include "brltty.h"
-#include "brldefs.h"
+#include "brlcmds.h"
 #include "tunes.h"
 #include "charset.h"
 #include "scr.h"

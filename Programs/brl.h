@@ -21,47 +21,12 @@
 
 #include "prologue.h"
 
-#include "driver.h"
-#include "io_generic.h"
 #include "brldefs.h"
-#include "ktbdefs.h"
+#include "driver.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-typedef struct BrailleDisplayStruct BrailleDisplay;
-typedef struct BrailleDataStruct BrailleData;
-
-typedef int BrailleFirmnessSetter (BrailleDisplay *brl, BrailleFirmness setting);
-typedef int BrailleSensitivitySetter (BrailleDisplay *brl, BrailleSensitivity setting);
-typedef void BrailleKeyRotator (BrailleDisplay *brl, unsigned char *set, unsigned char *key);
-
-struct BrailleDisplayStruct {
-  unsigned int textColumns, textRows;
-  unsigned int statusColumns, statusRows;
-
-  const char *keyBindings;
-  KEY_NAME_TABLES_REFERENCE keyNameTables;
-  KeyTable *keyTable;
-
-  GioEndpoint *gioEndpoint;
-  unsigned char *buffer;
-  unsigned int writeDelay;
-
-  int cursor;
-  unsigned isCoreBuffer:1;
-  unsigned resizeRequired:1;
-  unsigned noDisplay:1;
-  void (*bufferResized) (unsigned int rows, unsigned int columns);
-  unsigned touchEnabled:1;
-  unsigned highlightWindow:1;
-  BrailleData *data;
-
-  BrailleFirmnessSetter *setFirmness;
-  BrailleSensitivitySetter *setSensitivity;
-  BrailleKeyRotator *rotateKey;
-};
 
 extern void initializeBrailleDisplay (BrailleDisplay *brl);
 extern void drainBrailleOutput (BrailleDisplay *brl, int minimumDelay);

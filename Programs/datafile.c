@@ -50,8 +50,8 @@ const wchar_t brlDotNumbers[BRL_DOT_COUNT] = {
   WC_C('5'), WC_C('6'), WC_C('7'), WC_C('8')
 };
 const unsigned char brlDotBits[BRL_DOT_COUNT] = {
-  BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4,
-  BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8
+  BRL_DOT_1, BRL_DOT_2, BRL_DOT_3, BRL_DOT_4,
+  BRL_DOT_5, BRL_DOT_6, BRL_DOT_7, BRL_DOT_8
 };
 
 int
@@ -694,35 +694,35 @@ parseCellsOperand (DataFile *file, ByteOperand *cells, const wchar_t *characters
         int dot;
 
       case WC_C('1'):
-        dot = BRL_DOT1;
+        dot = BRL_DOT_1;
         goto doDot;
 
       case WC_C('2'):
-        dot = BRL_DOT2;
+        dot = BRL_DOT_2;
         goto doDot;
 
       case WC_C('3'):
-        dot = BRL_DOT3;
+        dot = BRL_DOT_3;
         goto doDot;
 
       case WC_C('4'):
-        dot = BRL_DOT4;
+        dot = BRL_DOT_4;
         goto doDot;
 
       case WC_C('5'):
-        dot = BRL_DOT5;
+        dot = BRL_DOT_5;
         goto doDot;
 
       case WC_C('6'):
-        dot = BRL_DOT6;
+        dot = BRL_DOT_6;
         goto doDot;
 
       case WC_C('7'):
-        dot = BRL_DOT7;
+        dot = BRL_DOT_7;
         goto doDot;
 
       case WC_C('8'):
-        dot = BRL_DOT8;
+        dot = BRL_DOT_8;
         goto doDot;
 
       doDot:

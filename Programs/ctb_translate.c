@@ -447,7 +447,7 @@ putReplace (const ContractionTableRule *rule, wchar_t character) {
 
   if ((prefs.capitalizationMode == CTB_CAP_DOT7) &&
       testCharacter(character, CTC_UpperCase)) {
-    if (!putCell(*cells++ | BRL_DOT7)) return 0;
+    if (!putCell(*cells++ | BRL_DOT_7)) return 0;
     if (!(count -= 1)) return 1;
   }
 
@@ -510,7 +510,7 @@ putCharacter (wchar_t character) {
     }
   }
 
-  return putCell(BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8);
+  return putCell(BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_7 | BRL_DOT_8);
 }
 
 static int
@@ -1258,69 +1258,69 @@ outputError:
 
 static const unsigned char brfTable[0X40] = {
   /* 0X20   */ 0,
-  /* 0X21 ! */ BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT6,
-  /* 0X22 " */ BRL_DOT5,
-  /* 0X23 # */ BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6,
-  /* 0X24 $ */ BRL_DOT1 | BRL_DOT2 | BRL_DOT4 | BRL_DOT6,
-  /* 0X25 % */ BRL_DOT1 | BRL_DOT4 | BRL_DOT6,
-  /* 0X26 & */ BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT6,
-  /* 0X27 ' */ BRL_DOT3,
-  /* 0X28 ( */ BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT5 | BRL_DOT6,
-  /* 0X29 ) */ BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6,
-  /* 0X2A * */ BRL_DOT1 | BRL_DOT6,
-  /* 0X2B + */ BRL_DOT3 | BRL_DOT4 | BRL_DOT6,
-  /* 0X2C , */ BRL_DOT6,
-  /* 0X2D - */ BRL_DOT3 | BRL_DOT6,
-  /* 0X2E . */ BRL_DOT4 | BRL_DOT6,
-  /* 0X2F / */ BRL_DOT3 | BRL_DOT4,
-  /* 0X30 0 */ BRL_DOT3 | BRL_DOT5 | BRL_DOT6,
-  /* 0X31 1 */ BRL_DOT2,
-  /* 0X32 2 */ BRL_DOT2 | BRL_DOT3,
-  /* 0X33 3 */ BRL_DOT2 | BRL_DOT5,
-  /* 0X34 4 */ BRL_DOT2 | BRL_DOT5 | BRL_DOT6,
-  /* 0X35 5 */ BRL_DOT2 | BRL_DOT6,
-  /* 0X36 6 */ BRL_DOT2 | BRL_DOT3 | BRL_DOT5,
-  /* 0X37 7 */ BRL_DOT2 | BRL_DOT3 | BRL_DOT5 | BRL_DOT6,
-  /* 0X38 8 */ BRL_DOT2 | BRL_DOT3 | BRL_DOT6,
-  /* 0X39 9 */ BRL_DOT3 | BRL_DOT5,
-  /* 0X3A : */ BRL_DOT1 | BRL_DOT5 | BRL_DOT6,
-  /* 0X3B ; */ BRL_DOT5 | BRL_DOT6,
-  /* 0X3C < */ BRL_DOT1 | BRL_DOT2 | BRL_DOT6,
-  /* 0X3D = */ BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6,
-  /* 0X3E > */ BRL_DOT3 | BRL_DOT4 | BRL_DOT5,
-  /* 0X3F ? */ BRL_DOT1 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6,
-  /* 0X40 @ */ BRL_DOT4,
-  /* 0X41 A */ BRL_DOT1,
-  /* 0X42 B */ BRL_DOT1 | BRL_DOT2,
-  /* 0X43 C */ BRL_DOT1 | BRL_DOT4,
-  /* 0X44 D */ BRL_DOT1 | BRL_DOT4 | BRL_DOT5,
-  /* 0X45 E */ BRL_DOT1 | BRL_DOT5,
-  /* 0X46 F */ BRL_DOT1 | BRL_DOT2 | BRL_DOT4,
-  /* 0X47 G */ BRL_DOT1 | BRL_DOT2 | BRL_DOT4 | BRL_DOT5,
-  /* 0X48 H */ BRL_DOT1 | BRL_DOT2 | BRL_DOT5,
-  /* 0X49 I */ BRL_DOT2 | BRL_DOT4,
-  /* 0X4A J */ BRL_DOT2 | BRL_DOT4 | BRL_DOT5,
-  /* 0X4B K */  BRL_DOT1 | BRL_DOT3,
-  /* 0X4C L */ BRL_DOT1 | BRL_DOT2 | BRL_DOT3,
-  /* 0X4D M */ BRL_DOT1 | BRL_DOT3 | BRL_DOT4,
-  /* 0X4E N */ BRL_DOT1 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5,
-  /* 0X4F O */ BRL_DOT1 | BRL_DOT3 | BRL_DOT5,
-  /* 0X50 P */ BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4,
-  /* 0X51 Q */ BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5,
-  /* 0X52 R */ BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT5,
-  /* 0X53 S */ BRL_DOT2 | BRL_DOT3 | BRL_DOT4,
-  /* 0X54 T */ BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5,
-  /* 0X55 U */ BRL_DOT1 | BRL_DOT3 | BRL_DOT6,
-  /* 0X56 V */ BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT6,
-  /* 0X57 W */ BRL_DOT2 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6,
-  /* 0X58 X */ BRL_DOT1 | BRL_DOT3 | BRL_DOT4 | BRL_DOT6,
-  /* 0X59 Y */ BRL_DOT1 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6,
-  /* 0X5A Z */ BRL_DOT1 | BRL_DOT3 | BRL_DOT5 | BRL_DOT6,
-  /* 0X5B [ */ BRL_DOT2 | BRL_DOT4 | BRL_DOT6,
-  /* 0X5C \ */ BRL_DOT1 | BRL_DOT2 | BRL_DOT5 | BRL_DOT6,
-  /* 0X5D ] */ BRL_DOT1 | BRL_DOT2 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6,
-  /* 0X5E ^ */ BRL_DOT4 | BRL_DOT5,
-  /* 0X5F _ */ BRL_DOT4 | BRL_DOT5 | BRL_DOT6
+  /* 0X21 ! */ BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_6,
+  /* 0X22 " */ BRL_DOT_5,
+  /* 0X23 # */ BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6,
+  /* 0X24 $ */ BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_6,
+  /* 0X25 % */ BRL_DOT_1 | BRL_DOT_4 | BRL_DOT_6,
+  /* 0X26 & */ BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_6,
+  /* 0X27 ' */ BRL_DOT_3,
+  /* 0X28 ( */ BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_5 | BRL_DOT_6,
+  /* 0X29 ) */ BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6,
+  /* 0X2A * */ BRL_DOT_1 | BRL_DOT_6,
+  /* 0X2B + */ BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_6,
+  /* 0X2C , */ BRL_DOT_6,
+  /* 0X2D - */ BRL_DOT_3 | BRL_DOT_6,
+  /* 0X2E . */ BRL_DOT_4 | BRL_DOT_6,
+  /* 0X2F / */ BRL_DOT_3 | BRL_DOT_4,
+  /* 0X30 0 */ BRL_DOT_3 | BRL_DOT_5 | BRL_DOT_6,
+  /* 0X31 1 */ BRL_DOT_2,
+  /* 0X32 2 */ BRL_DOT_2 | BRL_DOT_3,
+  /* 0X33 3 */ BRL_DOT_2 | BRL_DOT_5,
+  /* 0X34 4 */ BRL_DOT_2 | BRL_DOT_5 | BRL_DOT_6,
+  /* 0X35 5 */ BRL_DOT_2 | BRL_DOT_6,
+  /* 0X36 6 */ BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_5,
+  /* 0X37 7 */ BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_5 | BRL_DOT_6,
+  /* 0X38 8 */ BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_6,
+  /* 0X39 9 */ BRL_DOT_3 | BRL_DOT_5,
+  /* 0X3A : */ BRL_DOT_1 | BRL_DOT_5 | BRL_DOT_6,
+  /* 0X3B ; */ BRL_DOT_5 | BRL_DOT_6,
+  /* 0X3C < */ BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_6,
+  /* 0X3D = */ BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6,
+  /* 0X3E > */ BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_5,
+  /* 0X3F ? */ BRL_DOT_1 | BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6,
+  /* 0X40 @ */ BRL_DOT_4,
+  /* 0X41 A */ BRL_DOT_1,
+  /* 0X42 B */ BRL_DOT_1 | BRL_DOT_2,
+  /* 0X43 C */ BRL_DOT_1 | BRL_DOT_4,
+  /* 0X44 D */ BRL_DOT_1 | BRL_DOT_4 | BRL_DOT_5,
+  /* 0X45 E */ BRL_DOT_1 | BRL_DOT_5,
+  /* 0X46 F */ BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4,
+  /* 0X47 G */ BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5,
+  /* 0X48 H */ BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_5,
+  /* 0X49 I */ BRL_DOT_2 | BRL_DOT_4,
+  /* 0X4A J */ BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5,
+  /* 0X4B K */  BRL_DOT_1 | BRL_DOT_3,
+  /* 0X4C L */ BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3,
+  /* 0X4D M */ BRL_DOT_1 | BRL_DOT_3 | BRL_DOT_4,
+  /* 0X4E N */ BRL_DOT_1 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_5,
+  /* 0X4F O */ BRL_DOT_1 | BRL_DOT_3 | BRL_DOT_5,
+  /* 0X50 P */ BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_4,
+  /* 0X51 Q */ BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_5,
+  /* 0X52 R */ BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_5,
+  /* 0X53 S */ BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_4,
+  /* 0X54 T */ BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_5,
+  /* 0X55 U */ BRL_DOT_1 | BRL_DOT_3 | BRL_DOT_6,
+  /* 0X56 V */ BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_6,
+  /* 0X57 W */ BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6,
+  /* 0X58 X */ BRL_DOT_1 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_6,
+  /* 0X59 Y */ BRL_DOT_1 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6,
+  /* 0X5A Z */ BRL_DOT_1 | BRL_DOT_3 | BRL_DOT_5 | BRL_DOT_6,
+  /* 0X5B [ */ BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_6,
+  /* 0X5C \ */ BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_5 | BRL_DOT_6,
+  /* 0X5D ] */ BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6,
+  /* 0X5E ^ */ BRL_DOT_4 | BRL_DOT_5,
+  /* 0X5F _ */ BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6
 };
 
 static int
@@ -1335,7 +1335,7 @@ handleExternalResponse_brf (const char *value) {
     if ((brf >= 0X60) && (brf <= 0X7F)) {
       brf -= 0X20;
     } else if ((brf >= 0X41) && (brf <= 0X5A)) {
-      if (useDot7) superimpose |= BRL_DOT7;
+      if (useDot7) superimpose |= BRL_DOT_7;
     }
 
     if ((brf >= 0X20) && (brf <= 0X5F)) dots = brfTable[brf - 0X20] | superimpose;

@@ -23,7 +23,7 @@
 #include "cmd_speech.h"
 #include "prefs.h"
 #include "tunes.h"
-#include "brldefs.h"
+#include "brlcmds.h"
 #include "spk.h"
 #include "scr.h"
 #include "brltty.h"

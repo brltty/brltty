@@ -30,7 +30,7 @@
 #include "charset.h"
 #include "ttb.h"
 #include "atb.h"
-#include "brl.h"
+#include "brldots.h"
 #include "spk.h"
 #include "scr.h"
 #include "prefs.h"
@@ -114,10 +114,10 @@ highlightWindow (void) {
 }
 
 static const unsigned char cursorStyles[] = {
-  [csUnderline] = (BRL_DOT7 | BRL_DOT8),
-  [csBlock] = (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8),
-  [csLowerLeftDot] = (BRL_DOT7),
-  [csLowerRightDot] = (BRL_DOT8)
+  [csUnderline] = (BRL_DOT_7 | BRL_DOT_8),
+  [csBlock] = (BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_7 | BRL_DOT_8),
+  [csLowerLeftDot] = (BRL_DOT_7),
+  [csLowerRightDot] = (BRL_DOT_8)
 };
 
 unsigned char
@@ -169,12 +169,12 @@ overlayAttributesUnderline (unsigned char *cell, unsigned char attributes) {
       return;
 
     case SCR_COLOUR_FG_BLACK | SCR_COLOUR_BG_LIGHT_GREY:
-      dots = BRL_DOT7 | BRL_DOT8;
+      dots = BRL_DOT_7 | BRL_DOT_8;
       break;
 
     case SCR_COLOUR_FG_WHITE | SCR_COLOUR_BG_BLACK:
     default:
-      dots = BRL_DOT8;
+      dots = BRL_DOT_8;
       break;
   }
 
@@ -859,7 +859,7 @@ doUpdate (void) {
                 if (!isBlinkVisible(blink)) *dots = 0;
               }
 
-              if (prefs.textStyle) *dots &= ~(BRL_DOT7 | BRL_DOT8);
+              if (prefs.textStyle) *dots &= ~(BRL_DOT_7 | BRL_DOT_8);
               if (prefs.showAttributes) overlayAttributesUnderline(dots, character->attributes);
 
               text[column] = character->text;

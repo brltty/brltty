@@ -30,7 +30,7 @@
 #include "routing.h"
 #include "clipboard.h"
 #include "message.h"
-#include "brldefs.h"
+#include "brlcmds.h"
 #include "scancodes.h"
 #include "ttb.h"
 #include "scr.h"

@@ -59,7 +59,7 @@
 #include "log.h"
 #include "parse.h"
 #include "async_thread.h"
-#include "brldefs.h"
+#include "brlcmds.h"
 #include "charset.h"
 
 typedef enum {

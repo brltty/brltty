@@ -19,8 +19,6 @@
 #ifndef BRLTTY_INCLUDED_KTB_INSPECT
 #define BRLTTY_INCLUDED_KTB_INSPECT
 
-#include "brldefs.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */

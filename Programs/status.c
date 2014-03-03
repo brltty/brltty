@@ -21,7 +21,7 @@
 #include "status.h"
 #include "timing.h"
 #include "update.h"
-#include "brldefs.h"
+#include "brldots.h"
 #include "scr.h"
 #include "brltty.h"
 #include "prefs.h"
@@ -140,14 +140,14 @@ renderStatusField_screenNumber (unsigned char *cells) {
 
 static void
 renderStatusField_stateDots (unsigned char *cells) {
-  *cells = (isFrozenScreen()    ? BRL_DOT1: 0) |
-           (prefs.showCursor    ? BRL_DOT4: 0) |
-           (ses->displayMode    ? BRL_DOT2: 0) |
-           (prefs.cursorStyle   ? BRL_DOT5: 0) |
-           (prefs.alertTunes    ? BRL_DOT3: 0) |
-           (prefs.blinkingCursor? BRL_DOT6: 0) |
-           (ses->trackCursor      ? BRL_DOT7: 0) |
-           (prefs.slidingWindow ? BRL_DOT8: 0);
+  *cells = (isFrozenScreen()    ? BRL_DOT_1: 0) |
+           (prefs.showCursor    ? BRL_DOT_4: 0) |
+           (ses->displayMode    ? BRL_DOT_2: 0) |
+           (prefs.cursorStyle   ? BRL_DOT_5: 0) |
+           (prefs.alertTunes    ? BRL_DOT_3: 0) |
+           (prefs.blinkingCursor? BRL_DOT_6: 0) |
+           (ses->trackCursor      ? BRL_DOT_7: 0) |
+           (prefs.slidingWindow ? BRL_DOT_8: 0);
 }
 
 static void

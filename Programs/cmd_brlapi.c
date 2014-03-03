@@ -18,10 +18,10 @@
 
 #include "prologue.h"
 
- #include <stdio.h>
+#include <stdio.h>
 
 #include "cmd_brlapi.h"
-#include "brldefs.h"
+#include "brlcmds.h"
 #include "ttb.h"
 
 #ifdef ENABLE_API

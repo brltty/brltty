@@ -19,71 +19,12 @@
 #ifndef BRLTTY_INCLUDED_IO_GENERIC
 #define BRLTTY_INCLUDED_IO_GENERIC
 
-#include "serialdefs.h"
-#include "usbdefs.h"
+#include "giodefs.h"
 #include "async_io.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-typedef struct GioEndpointStruct GioEndpoint;
-
-typedef struct {
-  const void *applicationData;
-  int readyDelay;
-  int inputTimeout;
-  int outputTimeout;
-  int requestTimeout;
-} GioOptions;
-
-typedef ssize_t GioUsbWriteDataMethod (
-  UsbDevice *device, const UsbChannelDefinition *definition,
-  const void *data, size_t size, int timeout
-);
-
-typedef int GioUsbAwaitInputMethod (
-  UsbDevice *device, const UsbChannelDefinition *definition,
-  int timeout
-);
-
-typedef ssize_t GioUsbReadDataMethod (
-  UsbDevice *device, const UsbChannelDefinition *definition,
-  void *buffer, size_t size,
-  int initialTimeout, int subsequentTimeout
-);
-
-typedef struct {
-  const void *applicationData;
-  GioUsbWriteDataMethod *writeData;
-  GioUsbAwaitInputMethod *awaitInput;
-  GioUsbReadDataMethod *readData;
-  UsbInputFilter *inputFilter;
-} GioUsbConnectionProperties;
-
-typedef void GioUsbSetConnectionPropertiesMethod (
-  GioUsbConnectionProperties *properties,
-  const UsbChannelDefinition *definition
-);
-
-typedef struct {
-  struct {
-    const SerialParameters *parameters;
-    GioOptions options;
-  } serial;
-
-  struct {
-    const UsbChannelDefinition *channelDefinitions;
-    GioUsbSetConnectionPropertiesMethod *setConnectionProperties;
-    GioOptions options;
-  } usb;
-
-  struct {
-    uint8_t channelNumber;
-    unsigned discoverChannel:1;
-    GioOptions options;
-  } bluetooth;
-} GioDescriptor;
 
 extern void gioInitializeDescriptor (GioDescriptor *descriptor);
 extern void gioInitializeSerialParameters (SerialParameters *parameters);

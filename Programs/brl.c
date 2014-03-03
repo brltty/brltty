@@ -32,6 +32,7 @@
 #include "drivers.h"
 #include "io_generic.h"
 #include "brl.h"
+#include "brldots.h"
 #include "ttb.h"
 #include "ktb.h"
 #include "cmd.h"
@@ -223,8 +224,8 @@ applyBrailleOrientation (unsigned char *cells, size_t count) {
 
       if (!rotateTable[1]) {
         static const DotsTable dotsTable = {
-          BRL_DOT8, BRL_DOT6, BRL_DOT5, BRL_DOT7,
-          BRL_DOT3, BRL_DOT2, BRL_DOT4, BRL_DOT1
+          BRL_DOT_8, BRL_DOT_6, BRL_DOT_5, BRL_DOT_7,
+          BRL_DOT_3, BRL_DOT_2, BRL_DOT_4, BRL_DOT_1
         };
 
         makeTranslationTable(dotsTable, rotateTable);
@@ -246,21 +247,26 @@ applyBrailleOrientation (unsigned char *cells, size_t count) {
 unsigned char
 lowerDigit (unsigned char upper) {
   unsigned char lower = 0;
-  if (upper & BRL_DOT1) lower |= BRL_DOT3;
-  if (upper & BRL_DOT2) lower |= BRL_DOT7;
-  if (upper & BRL_DOT4) lower |= BRL_DOT6;
-  if (upper & BRL_DOT5) lower |= BRL_DOT8;
+  if (upper & BRL_DOT_1) lower |= BRL_DOT_3;
+  if (upper & BRL_DOT_2) lower |= BRL_DOT_7;
+  if (upper & BRL_DOT_4) lower |= BRL_DOT_6;
+  if (upper & BRL_DOT_5) lower |= BRL_DOT_8;
   return lower;
 }
 
 /* Dots for landscape (counterclockwise-rotated) digits. */
 const unsigned char landscapeDigits[11] = {
-  BRL_DOT1+BRL_DOT5+BRL_DOT2, BRL_DOT4,
-  BRL_DOT4+BRL_DOT1,          BRL_DOT4+BRL_DOT5,
-  BRL_DOT4+BRL_DOT5+BRL_DOT2, BRL_DOT4+BRL_DOT2,
-  BRL_DOT4+BRL_DOT1+BRL_DOT5, BRL_DOT4+BRL_DOT1+BRL_DOT5+BRL_DOT2,
-  BRL_DOT4+BRL_DOT1+BRL_DOT2, BRL_DOT1+BRL_DOT5,
-  BRL_DOT1+BRL_DOT2+BRL_DOT4+BRL_DOT5
+  BRL_DOT_1 | BRL_DOT_5 | BRL_DOT_2,
+  BRL_DOT_4,
+  BRL_DOT_4 | BRL_DOT_1,
+  BRL_DOT_4 | BRL_DOT_5,
+  BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_2,
+  BRL_DOT_4 | BRL_DOT_2,
+  BRL_DOT_4 | BRL_DOT_1 | BRL_DOT_5,
+  BRL_DOT_4 | BRL_DOT_1 | BRL_DOT_5 | BRL_DOT_2,
+  BRL_DOT_4 | BRL_DOT_1 | BRL_DOT_2,
+  BRL_DOT_1 | BRL_DOT_5,
+  BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5
 };
 
 /* Format landscape representation of numbers 0 through 99. */
@@ -279,12 +285,17 @@ landscapeFlag (int number, int on) {
 
 /* Dots for seascape (clockwise-rotated) digits. */
 const unsigned char seascapeDigits[11] = {
-  BRL_DOT5+BRL_DOT1+BRL_DOT4, BRL_DOT2,
-  BRL_DOT2+BRL_DOT5,          BRL_DOT2+BRL_DOT1,
-  BRL_DOT2+BRL_DOT1+BRL_DOT4, BRL_DOT2+BRL_DOT4,
-  BRL_DOT2+BRL_DOT5+BRL_DOT1, BRL_DOT2+BRL_DOT5+BRL_DOT1+BRL_DOT4,
-  BRL_DOT2+BRL_DOT5+BRL_DOT4, BRL_DOT5+BRL_DOT1,
-  BRL_DOT1+BRL_DOT2+BRL_DOT4+BRL_DOT5
+  BRL_DOT_5 | BRL_DOT_1 | BRL_DOT_4,
+  BRL_DOT_2,
+  BRL_DOT_2 | BRL_DOT_5,
+  BRL_DOT_2 | BRL_DOT_1,
+  BRL_DOT_2 | BRL_DOT_1 | BRL_DOT_4,
+  BRL_DOT_2 | BRL_DOT_4,
+  BRL_DOT_2 | BRL_DOT_5 | BRL_DOT_1,
+  BRL_DOT_2 | BRL_DOT_5 | BRL_DOT_1 | BRL_DOT_4,
+  BRL_DOT_2 | BRL_DOT_5 | BRL_DOT_4,
+  BRL_DOT_5 | BRL_DOT_1,
+  BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5
 };
 
 /* Format seascape representation of numbers 0 through 99. */
@@ -303,12 +314,17 @@ seascapeFlag (int number, int on) {
 
 /* Dots for portrait digits - 2 numbers in one cells */
 const unsigned char portraitDigits[11] = {
-  BRL_DOT2+BRL_DOT4+BRL_DOT5, BRL_DOT1,
-  BRL_DOT1+BRL_DOT2,          BRL_DOT1+BRL_DOT4,
-  BRL_DOT1+BRL_DOT4+BRL_DOT5, BRL_DOT1+BRL_DOT5,
-  BRL_DOT1+BRL_DOT2+BRL_DOT4, BRL_DOT1+BRL_DOT2+BRL_DOT4+BRL_DOT5,
-  BRL_DOT1+BRL_DOT2+BRL_DOT5, BRL_DOT2+BRL_DOT4,
-  BRL_DOT1+BRL_DOT2+BRL_DOT4+BRL_DOT5
+  BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5,
+  BRL_DOT_1,
+  BRL_DOT_1 | BRL_DOT_2,
+  BRL_DOT_1 | BRL_DOT_4,
+  BRL_DOT_1 | BRL_DOT_4 | BRL_DOT_5,
+  BRL_DOT_1 | BRL_DOT_5,
+  BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4,
+  BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5,
+  BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_5,
+  BRL_DOT_2 | BRL_DOT_4,
+  BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5
 };
 
 /* Format portrait representation of numbers 0 through 99. */

@@ -19,7 +19,7 @@
 #include "prologue.h"
 
 #include "scancodes.h"
-#include "brldefs.h"
+#include "brlcmds.h"
 
 const unsigned char at2Xt[0X80] = {
   [0X76] = 0X01,

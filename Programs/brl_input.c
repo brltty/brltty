@@ -23,8 +23,10 @@
 #include "log.h"
 #include "parameters.h"
 #include "brl_input.h"
+#include "brlcmds.h"
 #include "cmd_queue.h"
 #include "async_alarm.h"
+#include "io_generic.h"
 #include "api_control.h"
 #include "brltty.h"
 

@@ -93,7 +93,7 @@ static unsigned char
 toDots_unicode (wchar_t character) {
   return ((character & UNICODE_ROW_MASK) == UNICODE_BRAILLE_ROW)?
          character & UNICODE_CELL_MASK:
-         (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8);
+         (BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_7 | BRL_DOT_8);
 }
 
 static wchar_t
@@ -154,7 +154,7 @@ processStream (FILE *inputStream, const char *inputName) {
           unsigned char dots = toDots(character);
 
           if (dots || !iswspace(character)) {
-            if (opt_sixDots) dots &= ~(BRL_DOT7 | BRL_DOT8);
+            if (opt_sixDots) dots &= ~(BRL_DOT_7 | BRL_DOT_8);
             character = toCharacter(dots);
           }
         }

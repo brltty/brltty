@@ -25,7 +25,7 @@
 #include "file.h"
 #include "datafile.h"
 #include "cmd.h"
-#include "brldefs.h"
+#include "brlcmds.h"
 #include "ktb.h"
 #include "ktb_internal.h"
 #include "program.h"
