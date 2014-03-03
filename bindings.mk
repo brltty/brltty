@@ -28,7 +28,7 @@ API_KEYCODES = $(SRC_TOP)$(PGM_DIR)/$(API_NAME)_keycodes.h
 API_CONSTANTS = $(API_DIR)/$(API_NAME)_constants.h
 API_HDRS = $(API_HDR) $(API_KEYCODES) $(API_CONSTANTS)
 
-BRL_NAME = brldefs
+BRL_NAME = brlcmds
 BRL_HDR = $(SRC_TOP)$(PGM_DIR)/$(BRL_NAME).h
 BRL_AWK = $(SRC_TOP)$(PGM_DIR)/$(BRL_NAME).awk
 
