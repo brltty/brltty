@@ -27,10 +27,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/* this header file is used to create the driver structure
- * for a dynamically loadable screen driver.
- */
-
 /* Routines provided by this screen driver. */
 static void scr_initialize (MainScreen *main);
 

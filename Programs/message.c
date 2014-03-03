@@ -25,6 +25,7 @@
 #include "async_wait.h"
 #include "async_task.h"
 #include "charset.h"
+#include "brl_utils.h"
 #include "spk.h"
 #include "ktbdefs.h"
 #include "update.h"

@@ -279,16 +279,22 @@ prefs_table.$O:
 
 ###############################################################################
 
-BRAILLE_OBJECTS = brl.$O brl_input.$O brl_driver.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS)
+BRAILLE_OBJECTS = brl.$O brl_utils.$O brl_input.$O brl_driver.$O brl_base.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS)
 
 brl.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brl.c
+
+brl_utils.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brl_utils.c
 
 brl_input.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brl_input.c
 
 brl_driver.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brl_driver.c
+
+brl_base.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brl_base.c
 
 ###############################################################################
 
@@ -635,7 +641,7 @@ atb_translate.$O:
 
 ###############################################################################
 
-KTBTEST_OBJECTS = ktbtest.$O $(PROGRAM_OBJECTS) ktb_compile.$O ktb_list.$O cmd.$O ktb_keyboard.$O ttb_translate.$O ttb_compile.$O ttb_native.$O dataarea.$O drivers.$O driver.$O brl_driver.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) $(PREFS_OBJECTS) cmd_queue.$O
+KTBTEST_OBJECTS = ktbtest.$O $(PROGRAM_OBJECTS) ktb_compile.$O ktb_list.$O ktb_keyboard.$O ttb_translate.$O ttb_compile.$O ttb_native.$O dataarea.$O drivers.$O driver.$O brl_utils.$O brl_driver.$O brl_base.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) $(PREFS_OBJECTS) cmd.$O cmd_queue.$O
 
 ktbtest$X: $(KTBTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(KTBTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LDLIBS)
@@ -811,7 +817,7 @@ CORE_HEADERS = \
    $(SRC_DIR)/io_bluetooth.h \
    $(SRC_DIR)/io_misc.h $(SRC_DIR)/ports.h \
    $(SRC_DIR)/driver.h $(SRC_DIR)/drivers.h \
-   $(SRC_DIR)/brl_driver.h $(SRC_DIR)/brl.h $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldots.h $(SRC_DIR)/brlcmds.h \
+   $(SRC_DIR)/brl_driver.h $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldots.h $(SRC_DIR)/brlcmds.h $(SRC_DIR)/brl_utils.h $(SRC_DIR)/brl_base.h \
    $(SRC_DIR)/spk_driver.h $(SRC_DIR)/spk.h $(SRC_DIR)/spkdefs.h \
    $(SRC_DIR)/scr_driver.h $(SRC_DIR)/scrdefs.h $(SRC_DIR)/scr_utils.h $(SRC_DIR)/scr_base.h $(SRC_DIR)/scr_real.h $(SRC_DIR)/scr_main.h \
    $(SRC_DIR)/system.h $(SRC_DIR)/system_darwin.h $(SRC_DIR)/system_java.h $(SRC_DIR)/system_linux.h $(SRC_DIR)/system_msdos.h $(SRC_DIR)/system_windows.h \

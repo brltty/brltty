@@ -21,11 +21,13 @@
 
 #include <stdio.h>
 
-#include "cmd_enqueue.h"
+#include "brldefs.h"
 #include "brlcmds.h"
-#include "brl.h"
-#include "io_generic.h"
+#include "brl_utils.h"
+#include "brl_base.h"
 #include "statdefs.h"
+#include "io_generic.h"
+#include "cmd_enqueue.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -100,91 +102,6 @@ const BrailleDriver BRLSYMBOL = {
 };
 
 DRIVER_VERSION_DECLARATION(brl);
-
-#define KEY_TABLE_LIST_REFERENCE const KeyTableDefinition *const *
-#define KEY_TABLE_LIST_SYMBOL CONCATENATE(brl_ktb_,DRIVER_CODE)
-#define KEY_TABLE_LIST_DECLARATION const KeyTableDefinition *const KEY_TABLE_LIST_SYMBOL[]
-#define LAST_KEY_TABLE_DEFINITION NULL
-#define BEGIN_KEY_TABLE_LIST \
-  extern KEY_TABLE_LIST_DECLARATION; \
-  KEY_TABLE_LIST_DECLARATION = {
-#define END_KEY_TABLE_LIST LAST_KEY_TABLE_DEFINITION};
-
-#define BRL_SET_NAME(d,s) d ## _SET_ ## s
-#define BRL_KEY_NAME(d,s,k) d ## _ ## s ## _ ## k
-
-#define BRL_KEY_SET_ENTRY(d,s,n) KEY_SET_ENTRY(BRL_SET_NAME(d, s), n)
-#define BRL_KEY_NAME_ENTRY(d,s,k,n) {.value={.set=BRL_SET_NAME(d, s), .key=BRL_KEY_NAME(d, s, k)}, .name=n}
-
-extern void applyBrailleOrientation (unsigned char *cells, size_t count);
-
-typedef int BrailleSessionInitializer (BrailleDisplay *brl);
-
-extern int connectBrailleResource (
-  BrailleDisplay *brl,
-  const char *identifier,
-  const GioDescriptor *descriptor,
-  BrailleSessionInitializer *initializeSession
-);
-
-typedef int BrailleSessionEnder (BrailleDisplay *brl);
-
-extern void disconnectBrailleResource (
-  BrailleDisplay *brl,
-  BrailleSessionEnder *endSession
-);
-
-typedef enum {
-  BRL_PVR_INVALID,
-  BRL_PVR_INCLUDE,
-  BRL_PVR_EXCLUDE
-} BraillePacketVerifierResult;
-
-typedef BraillePacketVerifierResult BraillePacketVerifier (
-  BrailleDisplay *brl,
-  const unsigned char *bytes, size_t size,
-  size_t *length, void *data
-);
-
-extern size_t readBraillePacket (
-  BrailleDisplay *brl,
-  GioEndpoint *endpoint,
-  void *packet, size_t size,
-  BraillePacketVerifier *verifyPacket, void *data
-);
-
-extern int writeBraillePacket (
-  BrailleDisplay *brl,
-  GioEndpoint *endpoint,
-  const void *packet, size_t size
-);
-
-typedef int BrailleRequestWriter (BrailleDisplay *brl);
-
-typedef size_t BraillePacketReader (
-  BrailleDisplay *brl,
-  void *packet, size_t size
-);
-
-typedef enum {
-  BRL_RSP_CONTINUE,
-  BRL_RSP_DONE,
-  BRL_RSP_FAIL,
-  BRL_RSP_UNEXPECTED
-} BrailleResponseResult;
-
-typedef BrailleResponseResult BrailleResponseHandler (
-  BrailleDisplay *brl,
-  const void *packet, size_t size
-);
-
-extern int probeBrailleDisplay (
-  BrailleDisplay *brl, unsigned int retryLimit,
-  GioEndpoint *endpoint, int inputTimeout,
-  BrailleRequestWriter *writeRequest,
-  BraillePacketReader *readPacket, void *responsePacket, size_t responseSize,
-  BrailleResponseHandler *handleResponse
-);
 
 #ifdef __cplusplus
 }

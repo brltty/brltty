@@ -22,14 +22,13 @@
 #include "prologue.h"
 
 #include "brldefs.h"
-#include "driver.h"
+#include "ktbdefs.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 extern void initializeBrailleDisplay (BrailleDisplay *brl);
-extern void drainBrailleOutput (BrailleDisplay *brl, int minimumDelay);
 extern int ensureBrailleBuffer (BrailleDisplay *brl, int infoLevel);
 
 extern void fillTextRegion (
@@ -54,31 +53,6 @@ extern int readBrailleCommand (BrailleDisplay *, KeyTableCommandContext);
 extern int setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting);
 extern int setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting);
 
-/* Routines provided by each braille driver.
- * These are loaded dynamically at run-time into this structure
- * with pointers to all the functions and variables.
- */
-typedef struct {
-  DRIVER_DEFINITION_DECLARATION;
-
-  const char *const *parameters;
-  const unsigned char *statusFields;
-
-  int (*construct) (BrailleDisplay *brl, char **parameters, const char *device);
-  void (*destruct) (BrailleDisplay *brl);
-
-  int (*readCommand) (BrailleDisplay *brl, KeyTableCommandContext context);
-  int (*writeWindow) (BrailleDisplay *brl, const wchar_t *characters);
-  int (*writeStatus) (BrailleDisplay *brl, const unsigned char *cells);
-
-  ssize_t (*readPacket) (BrailleDisplay *brl, void *buffer, size_t size);
-  ssize_t (*writePacket) (BrailleDisplay *brl, const void *packet, size_t size);
-  int (*reset) (BrailleDisplay *brl);
-  
-  int (*readKey) (BrailleDisplay *brl);
-  int (*keyToCommand) (BrailleDisplay *brl, KeyTableCommandContext context, int key);
-} BrailleDriver;
-
 extern int haveBrailleDriver (const char *code);
 extern const char *getDefaultBrailleDriver (void);
 extern const BrailleDriver *loadBrailleDriver (const char *code, void **driverObject, const char *driverDirectory);
@@ -86,80 +60,6 @@ extern void identifyBrailleDriver (const BrailleDriver *driver, int full);
 extern void identifyBrailleDrivers (int full);
 extern const BrailleDriver *braille;
 extern const BrailleDriver noBraille;
-
-extern int cellsHaveChanged (
-  unsigned char *cells, const unsigned char *new, unsigned int count,
-  unsigned int *from, unsigned int *to, int *force
-);
-
-extern int textHasChanged (
-  wchar_t *text, const wchar_t *new, unsigned int count,
-  unsigned int *from, unsigned int *to, int *force
-);
-
-extern int cursorHasChanged (int *cursor, int new, int *force);
-
-#define TRANSLATION_TABLE_SIZE 0X100
-typedef unsigned char TranslationTable[TRANSLATION_TABLE_SIZE];
-
-#define DOTS_TABLE_SIZE 8
-typedef unsigned char DotsTable[DOTS_TABLE_SIZE];
-extern const DotsTable dotsTable_ISO11548_1;
-
-extern void makeTranslationTable (const DotsTable dots, TranslationTable table);
-extern void reverseTranslationTable (const TranslationTable from, TranslationTable to);
-
-extern void setOutputTable (const TranslationTable table);
-extern void makeOutputTable (const DotsTable dots);
-extern void *translateOutputCells (unsigned char *target, const unsigned char *source, size_t count);
-extern unsigned char translateOutputCell (unsigned char cell);
-
-extern void makeInputTable (void);
-extern void *translateInputCells (unsigned char *target, const unsigned char *source, size_t count);
-extern unsigned char translateInputCell (unsigned char cell);
-
-extern int enqueueKeyEvent (
-  BrailleDisplay *brl,
-  unsigned char set, unsigned char key, int press
-);
-
-extern int enqueueKeyEvents (
-  BrailleDisplay *brl,
-  uint32_t bits, unsigned char set, unsigned char key, int press
-);
-
-extern int enqueueKey (
-  BrailleDisplay *brl,
-  unsigned char set, unsigned char key
-);
-
-extern int enqueueKeys (
-  BrailleDisplay *brl,
-  uint32_t bits, unsigned char set, unsigned char key
-);
-
-extern int enqueueUpdatedKeys (
-  BrailleDisplay *brl,
-  uint32_t new, uint32_t *old, unsigned char set, unsigned char key
-);
-
-extern int enqueueXtScanCode (
-  BrailleDisplay *brl,
-  unsigned char code, unsigned char escape,
-  unsigned char set00, unsigned char setE0, unsigned char setE1
-);
-
-/* Formatting of status cells. */
-extern unsigned char lowerDigit (unsigned char upper);
-extern const unsigned char landscapeDigits[11];
-extern int landscapeNumber (int x);
-extern int landscapeFlag (int number, int on);
-extern const unsigned char seascapeDigits[11];
-extern int seascapeNumber (int x);
-extern int seascapeFlag (int number, int on);
-extern const unsigned char portraitDigits[11];
-extern int portraitNumber (int x);
-extern int portraitFlag (int number, int on);
 
 #ifdef __cplusplus
 }

@@ -33,6 +33,7 @@
 #include "update.h"
 #include "cmd.h"
 #include "brl.h"
+#include "brl_utils.h"
 #include "spk.h"
 #include "spk_input.h"
 #include "scr.h"

@@ -66,6 +66,7 @@
 
 #include "cmd_brlapi.h"
 #include "brlcmds.h"
+#include "brl_utils.h"
 #include "ttb.h"
 #include "brltty.h"
 #include "api_control.h"

@@ -30,8 +30,9 @@
 
 #include "cmd_enqueue.h"
 #include "ktbdefs.h"
-#include "brl.h"
 #include "brlcmds.h"
+#include "brl_utils.h"
+#include "brl_base.h"
 
 typedef struct {
   const char *protocolName;

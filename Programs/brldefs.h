@@ -19,6 +19,7 @@
 #ifndef BRLTTY_INCLUDED_BRLDEFS
 #define BRLTTY_INCLUDED_BRLDEFS
 
+#include "driver.h"
 #include "ktbdefs.h"
 #include "giodefs.h"
 
@@ -79,6 +80,27 @@ struct BrailleDisplayStruct {
   BrailleSensitivitySetter *setSensitivity;
   BrailleKeyRotator *rotateKey;
 };
+
+typedef struct {
+  DRIVER_DEFINITION_DECLARATION;
+
+  const char *const *parameters;
+  const unsigned char *statusFields;
+
+  int (*construct) (BrailleDisplay *brl, char **parameters, const char *device);
+  void (*destruct) (BrailleDisplay *brl);
+
+  int (*readCommand) (BrailleDisplay *brl, KeyTableCommandContext context);
+  int (*writeWindow) (BrailleDisplay *brl, const wchar_t *characters);
+  int (*writeStatus) (BrailleDisplay *brl, const unsigned char *cells);
+
+  ssize_t (*readPacket) (BrailleDisplay *brl, void *buffer, size_t size);
+  ssize_t (*writePacket) (BrailleDisplay *brl, const void *packet, size_t size);
+  int (*reset) (BrailleDisplay *brl);
+  
+  int (*readKey) (BrailleDisplay *brl);
+  int (*keyToCommand) (BrailleDisplay *brl, KeyTableCommandContext context, int key);
+} BrailleDriver;
 
 #ifdef __cplusplus
 }

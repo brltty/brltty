@@ -56,6 +56,7 @@
 #include "ses.h"
 #include "scancodes.h"
 #include "brl.h"
+#include "brl_utils.h"
 #include "prefs.h"
 #include "api_control.h"
 #include "brltty.h"
