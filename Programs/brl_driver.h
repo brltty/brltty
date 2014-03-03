@@ -21,7 +21,7 @@
 
 #include <stdio.h>
 
-#include "cmd_queue.h"
+#include "cmd_enqueue.h"
 #include "brlcmds.h"
 #include "brl.h"
 #include "io_generic.h"

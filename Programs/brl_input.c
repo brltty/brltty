@@ -25,6 +25,7 @@
 #include "brl_input.h"
 #include "brlcmds.h"
 #include "cmd_queue.h"
+#include "cmd_enqueue.h"
 #include "async_alarm.h"
 #include "io_generic.h"
 #include "api_control.h"

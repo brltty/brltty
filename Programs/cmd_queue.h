@@ -55,8 +55,6 @@ extern int popCommandHandler (void);
 extern int handleCommand (int command);
 extern KeyTableCommandContext getCurrentCommandContext (void);
 
-extern int enqueueCommand (int command);
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

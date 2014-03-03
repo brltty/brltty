@@ -23,6 +23,7 @@
 
 #include "log.h"
 #include "prefs.h"
+#include "cmd_queue.h"
 #include "ktb.h"
 #include "async_wait.h"
 #include "api_control.h"

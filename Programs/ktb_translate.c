@@ -28,7 +28,7 @@
 #include "ktb_inspect.h"
 #include "cmd.h"
 #include "brlcmds.h"
-#include "cmd_queue.h"
+#include "cmd_enqueue.h"
 #include "async_alarm.h"
 
 static int
