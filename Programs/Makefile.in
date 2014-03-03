@@ -788,7 +788,7 @@ install-drivers: $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS) install-
 
 CORE_HEADERS = \
    $(SRC_DIR)/program.h $(SRC_DIR)/pid.h $(SRC_DIR)/options.h $(SRC_DIR)/service.h \
-   $(SRC_DIR)/embed.h $(SRC_DIR)/brltty.h \
+   $(SRC_DIR)/embed.h \
    $(SRC_DIR)/log.h $(SRC_DIR)/addresses.h \
    $(SRC_DIR)/async.h $(SRC_DIR)/async_wait.h $(SRC_DIR)/async_alarm.h $(SRC_DIR)/async_task.h $(SRC_DIR)/async_io.h $(SRC_DIR)/async_event.h $(SRC_DIR)/async_signal.h $(SRC_DIR)/async_thread.h \
    $(SRC_DIR)/parse.h $(SRC_DIR)/file.h $(SRC_DIR)/device.h \
@@ -798,7 +798,7 @@ CORE_HEADERS = \
    $(SRC_DIR)/unicode.h $(SRC_DIR)/ascii.h $(SRC_DIR)/charset.h \
    $(SRC_DIR)/bitfield.h $(SRC_DIR)/bitmask.h \
    $(SRC_DIR)/clipboard.h $(SRC_DIR)/menu.h \
-   $(SRC_DIR)/prefs.h $(SRC_DIR)/ses.h $(SRC_DIR)/statdefs.h \
+   $(SRC_DIR)/prefs.h $(SRC_DIR)/statdefs.h \
    $(SRC_DIR)/cmd.h $(SRC_DIR)/cmddefs.h $(SRC_DIR)/cmd_queue.h \
    $(SRC_DIR)/ttb.h $(SRC_DIR)/atb.h $(SRC_DIR)/ctbdefs.h $(SRC_DIR)/ctb.h $(SRC_DIR)/ktbdefs.h $(SRC_DIR)/ktb.h \
    $(SRC_DIR)/tunes.h $(SRC_DIR)/tunedefs.h \
