@@ -23,6 +23,7 @@
 
 #include "log.h"
 #include "scr.h"
+#include "scr_utils.h"
 #include "scr_base.h"
 
 int

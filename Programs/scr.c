@@ -168,26 +168,6 @@ destructSpecialScreens (void) {
 }
 
 
-void
-setScreenCharacterText (ScreenCharacter *characters, wchar_t text, size_t count) {
-  while (count > 0) {
-    characters[--count].text = text;
-  }
-}
-
-void
-setScreenCharacterAttributes (ScreenCharacter *characters, unsigned char attributes, size_t count) {
-  while (count > 0) {
-    characters[--count].attributes = attributes;
-  }
-}
-
-void
-clearScreenCharacters (ScreenCharacter *characters, size_t count) {
-  setScreenCharacterText(characters, WC_C(' '), count);
-  setScreenCharacterAttributes(characters, SCR_COLOUR_DEFAULT, count);
-}
-
 size_t
 formatScreenTitle (char *buffer, size_t size) {
   return currentScreen->formatTitle(buffer, size);

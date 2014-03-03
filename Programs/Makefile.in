@@ -308,10 +308,13 @@ spk_driver.$O:
 
 ###############################################################################
 
-SCREEN_OBJECTS = scr.$O scr_base.$O scr_help.$O scr_frozen.$O scr_menu.$O menu_prefs.$O scr_main.$O scr_real.$O scr_driver.$O routing.$O $(SCREEN_DRIVER_OBJECTS)
+SCREEN_OBJECTS = scr.$O scr_utils.$O scr_base.$O scr_help.$O scr_frozen.$O scr_menu.$O menu_prefs.$O scr_main.$O scr_real.$O scr_driver.$O routing.$O $(SCREEN_DRIVER_OBJECTS)
 
 scr.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr.c
+
+scr_utils.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr_utils.c
 
 scr_base.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr_base.c
@@ -810,7 +813,7 @@ CORE_HEADERS = \
    $(SRC_DIR)/driver.h $(SRC_DIR)/drivers.h \
    $(SRC_DIR)/brl_driver.h $(SRC_DIR)/brl.h $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldots.h $(SRC_DIR)/brlcmds.h \
    $(SRC_DIR)/spk_driver.h $(SRC_DIR)/spk.h $(SRC_DIR)/spkdefs.h \
-   $(SRC_DIR)/scr_driver.h $(SRC_DIR)/scr.h $(SRC_DIR)/scrdefs.h $(SRC_DIR)/scr_base.h $(SRC_DIR)/scr_real.h $(SRC_DIR)/scr_main.h \
+   $(SRC_DIR)/scr_driver.h $(SRC_DIR)/scrdefs.h $(SRC_DIR)/scr_utils.h $(SRC_DIR)/scr_base.h $(SRC_DIR)/scr_real.h $(SRC_DIR)/scr_main.h \
    $(SRC_DIR)/system.h $(SRC_DIR)/system_darwin.h $(SRC_DIR)/system_java.h $(SRC_DIR)/system_linux.h $(SRC_DIR)/system_msdos.h $(SRC_DIR)/system_windows.h \
    $(SRC_DIR)/win_errno.h $(SRC_DIR)/win_pthread.h \
    $(SRC_TOP)prologue.h $(BLD_TOP)config.h $(BLD_TOP)forbuild.h

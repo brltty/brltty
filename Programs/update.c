@@ -33,6 +33,7 @@
 #include "brldots.h"
 #include "spk.h"
 #include "scr.h"
+#include "scr_utils.h"
 #include "prefs.h"
 #include "status.h"
 #include "blink.h"

@@ -130,6 +130,8 @@ typedef enum {
   SCR_KEY_F24,
 } ScreenKey;
 
+typedef struct ScreenDriverStruct ScreenDriver;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

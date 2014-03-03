@@ -28,10 +28,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern void clearScreenCharacters (ScreenCharacter *characters, size_t count);
-extern void setScreenCharacterText (ScreenCharacter *characters, wchar_t text, size_t count);
-extern void setScreenCharacterAttributes (ScreenCharacter *characters, unsigned char attributes, size_t count);
-
 /* Routines which apply to all screens. */
 extern void constructSpecialScreens (void);
 extern void destructSpecialScreens (void);
@@ -91,7 +87,6 @@ extern int clearHelpPage (void);
 extern int addHelpLine (const wchar_t *characters);
 extern unsigned int getHelpLineCount (void);
 
-typedef struct ScreenDriverStruct ScreenDriver;
 extern const char *const *getScreenParameters (const ScreenDriver *driver);
 extern const DriverDefinition *getScreenDriverDefinition (const ScreenDriver *driver);
 
