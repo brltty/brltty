@@ -210,38 +210,6 @@ readBrailleCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   return command;
 }
 
-void
-applyBrailleOrientation (unsigned char *cells, size_t count) {
-  switch (prefs.brailleOrientation) {
-    case BRL_ORIENTATION_ROTATED: {
-      static TranslationTable rotateTable = {[1] = 0};
-
-      const unsigned char *source = cells;
-      const unsigned char *end = source + count;
-
-      unsigned char buffer[count];
-      unsigned char *target = &buffer[count];
-
-      if (!rotateTable[1]) {
-        static const DotsTable dotsTable = {
-          BRL_DOT_8, BRL_DOT_6, BRL_DOT_5, BRL_DOT_7,
-          BRL_DOT_3, BRL_DOT_2, BRL_DOT_4, BRL_DOT_1
-        };
-
-        makeTranslationTable(dotsTable, rotateTable);
-      }
-
-      while (source < end) *--target = rotateTable[*source++];
-      memcpy(cells, buffer, count);
-      break;
-    }
-
-    default:
-    case BRL_ORIENTATION_NORMAL:
-      break;
-  }
-}
-
 /* Functions which support vertical and horizontal status cells. */
 
 unsigned char
