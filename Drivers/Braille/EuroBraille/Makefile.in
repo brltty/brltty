@@ -38,7 +38,7 @@ braille.$O: $(OBJ_FILES)
 EU_TRANSFER_OBJECTS = eutp_brl.$O eutp_convert.$O eutp_debug.$O eutp_pc.$O eutp_tools.$O eutp_transfer.$O eutp_main.$O
 
 EU_TRANSFER_TOOL = eutp$X
-EU_TRANSFER_MAN = eutp.1
+EU_TRANSFER_MAN = $(SRC_DIR)/eutp.1
 
 $(EU_TRANSFER_TOOL): $(EU_TRANSFER_OBJECTS) brlapi
 	$(CC) $(LDFLAGS) -o $@ $(EU_TRANSFER_OBJECTS) $(API_LIBS)

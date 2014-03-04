@@ -49,7 +49,7 @@ install-api:: install-vstp
 
 install-vstp: vstp$X install-program-directory install-man1-directory
 	$(INSTALL_PROGRAM) vstp$X $(INSTALL_PROGRAM_DIRECTORY)
-	$(INSTALL_DATA) vstp.1 $(INSTALL_MAN1_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_DIR)/vstp.1 $(INSTALL_MAN1_DIRECTORY)
 
 uninstall::
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/vstp$X
