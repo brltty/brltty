@@ -853,12 +853,14 @@ install-api-libraries-windows: $(API_DLL) $(API_ARC) install-program-directory i
 	$(INSTALL_DATA) $(API_ARC) $(INSTALL_APILIB_DIRECTORY)
 	$(INSTALL_DATA) $(API_DEF) $(INSTALL_APILIB_DIRECTORY)
 
-install-api-headers: brlapi_constants.h brlapi_brldefs.auto.h install-apihdr-directory
+install-api-headers: brlapi_constants.h brlapi_brldefs.auto.h install-apihdr-directory install-include-directory
 	$(INSTALL_DATA) brlapi.h $(INSTALL_APIHDR_DIRECTORY)
 	$(INSTALL_DATA) brlapi_constants.h $(INSTALL_APIHDR_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_DIR)/brlapi_keycodes.h $(INSTALL_APIHDR_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_DIR)/brlapi_protocol.h $(INSTALL_APIHDR_DIRECTORY)
 	$(INSTALL_DATA) brlapi_brldefs.auto.h $(INSTALL_APIHDR_DIRECTORY)/brlapi_brldefs.h
+	$(INSTALL_DATA) $(SRC_DIR)/api.h $(INSTALL_INCLUDE_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_DIR)/brldefs.h $(INSTALL_INCLUDE_DIRECTORY)
 
 install-api-manpages: install-man3-directory
 	cd $(BLD_TOP)$(DOC_DIR) && $(MAKE) man3
