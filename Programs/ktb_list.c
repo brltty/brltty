@@ -24,7 +24,7 @@
 #include "log.h"
 #include "charset.h"
 #include "cmd.h"
-#include "brlcmds.h"
+#include "brl_cmds.h"
 #include "ktb.h"
 #include "ktb_internal.h"
 #include "ktb_inspect.h"

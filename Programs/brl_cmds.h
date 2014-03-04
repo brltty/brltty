@@ -16,10 +16,10 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_BRLCMDS
-#define BRLTTY_INCLUDED_BRLCMDS
+#ifndef BRLTTY_INCLUDED_BRL_CMDS
+#define BRLTTY_INCLUDED_BRL_CMDS
 
-#include "brldots.h"
+#include "brl_dots.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -317,4 +317,4 @@ typedef enum {
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_BRLCMDS */
+#endif /* BRLTTY_INCLUDED_BRL_CMDS */

@@ -28,7 +28,7 @@
 #include "file.h"
 #include "unicode.h"
 #include "charset.h"
-#include "brldots.h"
+#include "brl_dots.h"
 #include "ttb.h"
 
 static char *opt_tablesDirectory;

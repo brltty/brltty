@@ -24,7 +24,7 @@
 #include "log.h"
 #include "cmd_queue.h"
 #include "cmd_enqueue.h"
-#include "brlcmds.h"
+#include "brl_cmds.h"
 #include "queue.h"
 #include "async_alarm.h"
 #include "prefs.h"

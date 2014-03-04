@@ -32,7 +32,7 @@
 #include "unicode.h"
 #include "charset.h"
 #include "ascii.h"
-#include "brldots.h"
+#include "brl_dots.h"
 #include "log.h"
 #include "file.h"
 #include "parse.h"

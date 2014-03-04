@@ -19,7 +19,7 @@
 #include "prologue.h"
 
 #include "brl_utils.h"
-#include "brldots.h"
+#include "brl_dots.h"
 #include "async_wait.h"
 
 void

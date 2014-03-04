@@ -22,7 +22,7 @@
 
 #include "hidkeys.h"
 #include "bitmask.h"
-#include "brlcmds.h"
+#include "brl_cmds.h"
 #include "cmd_enqueue.h"
 
 typedef struct {

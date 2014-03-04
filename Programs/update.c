@@ -30,7 +30,7 @@
 #include "charset.h"
 #include "ttb.h"
 #include "atb.h"
-#include "brldots.h"
+#include "brl_dots.h"
 #include "spk.h"
 #include "scr.h"
 #include "scr_utils.h"

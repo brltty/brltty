@@ -29,7 +29,7 @@
 #include "cmd_queue.h"
 #include "cmd_learn.h"
 #include "cmd.h"
-#include "brlcmds.h"
+#include "brl_cmds.h"
 #include "brltty.h"
 
 typedef enum {

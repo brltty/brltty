@@ -20,7 +20,7 @@
 
 #include "log.h"
 #include "parse.h"
-#include "brlcmds.h"
+#include "brl_cmds.h"
 #include "system_windows.h"
 #include "scancodes.h"
 #include "unicode.h"

@@ -22,7 +22,7 @@
 #include <string.h>
 
 #include "log.h"
-#include "brlcmds.h"
+#include "brl_cmds.h"
 #include "cmd.h"
 #include "program.h"
 

@@ -33,7 +33,7 @@
 #include "log.h"
 #include "parse.h"
 #include "brl.h"
-#include "brldots.h"
+#include "brl_dots.h"
 #include "file.h"
 #include "async_wait.h"
 #include "cmd_learn.h"

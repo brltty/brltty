@@ -23,7 +23,7 @@
 #ifndef BRLTTY_INCLUDED_BL_BINDINGS
 #define BRLTTY_INCLUDED_BL_BINDINGS
 
-#include "brlcmds.h"		/* for BRL_CMD_* codes */
+#include "brl_cmds.h"		/* for BRL_CMD_* codes */
 
 /* When the Braille Lite sends braille key information, bits 0-5 represent
  * dots 1-6 and bit 6 represents the space bar.  For now, we mask out bit 6

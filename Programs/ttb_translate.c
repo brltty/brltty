@@ -25,7 +25,7 @@
 #include "charset.h"
 #include "ttb.h"
 #include "ttb_internal.h"
-#include "brldots.h"
+#include "brl_dots.h"
 
 static const unsigned char internalTextTableBytes[] = {
 #include "text.auto.h"

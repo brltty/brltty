@@ -39,7 +39,7 @@
 #include "embed.h"
 #include "log.h"
 #include "parameters.h"
-#include "brlcmds.h"
+#include "brl_cmds.h"
 #include "cmd_queue.h"
 #include "cmd_navigation.h"
 #include "cmd_speech.h"

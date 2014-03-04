@@ -24,7 +24,7 @@
 #include "log.h"
 #include "brl_base.h"
 #include "brl_utils.h"
-#include "brldots.h"
+#include "brl_dots.h"
 #include "prefs.h"
 #include "io_generic.h"
 #include "cmd_queue.h"

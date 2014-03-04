@@ -30,7 +30,7 @@
 
 #include "cmd_enqueue.h"
 #include "ktb_types.h"
-#include "brlcmds.h"
+#include "brl_cmds.h"
 #include "brl_utils.h"
 #include "brl_base.h"
 

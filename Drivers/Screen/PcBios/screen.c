@@ -27,7 +27,7 @@
 #include <sys/farptr.h>
 
 #include "log.h"
-#include "brlcmds.h"
+#include "brl_cmds.h"
 #include "charset.h"
 #include "scancodes.h"
 

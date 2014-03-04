@@ -25,8 +25,8 @@
 #include <signal.h>
 
 #include "options.h"
-#include "brlcmds.h"
-#include "brldots.h"
+#include "brl_cmds.h"
+#include "brl_dots.h"
 #include "cmd.h"
 #include "cmd_brlapi.h"
 

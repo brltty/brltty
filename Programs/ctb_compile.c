@@ -28,7 +28,7 @@
 #include "ctb_internal.h"
 #include "datafile.h"
 #include "dataarea.h"
-#include "brldots.h"
+#include "brl_dots.h"
 #include "hostcmd.h"
 
 static const wchar_t *const characterClassNames[] = {

@@ -21,7 +21,7 @@
 #include "status.h"
 #include "timing.h"
 #include "update.h"
-#include "brldots.h"
+#include "brl_dots.h"
 #include "brl_utils.h"
 #include "scr.h"
 #include "brltty.h"

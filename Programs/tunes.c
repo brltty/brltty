@@ -28,7 +28,7 @@
 #include "prefs.h"
 #include "notes.h"
 #include "message.h"
-#include "brldots.h"
+#include "brl_dots.h"
 
 static const TuneElement elements_braille_on[] = {
   TUNE_NOTE( 60,  64),

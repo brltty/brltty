@@ -21,7 +21,7 @@
 #include <stdio.h>
 
 #include "cmd_brlapi.h"
-#include "brlcmds.h"
+#include "brl_cmds.h"
 #include "ttb.h"
 
 #ifdef ENABLE_API

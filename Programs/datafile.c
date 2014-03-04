@@ -29,7 +29,7 @@
 #include "datafile.h"
 #include "charset.h"
 #include "unicode.h"
-#include "brldots.h"
+#include "brl_dots.h"
 
 struct DataFileStruct {
   const char *name;

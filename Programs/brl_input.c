@@ -23,7 +23,7 @@
 #include "log.h"
 #include "parameters.h"
 #include "brl_input.h"
-#include "brlcmds.h"
+#include "brl_cmds.h"
 #include "cmd_queue.h"
 #include "cmd_enqueue.h"
 #include "async_alarm.h"

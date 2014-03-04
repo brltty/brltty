@@ -27,7 +27,7 @@
 #include "ktb_internal.h"
 #include "ktb_inspect.h"
 #include "cmd.h"
-#include "brlcmds.h"
+#include "brl_cmds.h"
 #include "cmd_enqueue.h"
 #include "async_alarm.h"
 

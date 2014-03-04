@@ -65,7 +65,7 @@
 #include "brlapi_keyranges.h"
 
 #include "cmd_brlapi.h"
-#include "brlcmds.h"
+#include "brl_cmds.h"
 #include "brl_utils.h"
 #include "ttb.h"
 #include "brltty.h"

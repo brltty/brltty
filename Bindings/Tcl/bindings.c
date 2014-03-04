@@ -24,7 +24,7 @@
 #include "brlapi.h"
 
 #include <tcl.h>
-#include "brldots.h"
+#include "brl_dots.h"
 
 #define allocateMemory(size) ((void *)ckalloc((size)))
 #define deallocateMemory(address) ckfree((void *)(address))
