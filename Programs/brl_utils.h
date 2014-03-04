@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_BRL_UTILS
 #define BRLTTY_INCLUDED_BRL_UTILS
 
-#include "brldefs.h"
+#include "brl_types.h"
 
 #ifdef __cplusplus
 extern "C" {

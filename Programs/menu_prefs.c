@@ -24,7 +24,7 @@
 #include "log.h"
 #include "menu.h"
 #include "prefs.h"
-#include "statdefs.h"
+#include "stat_types.h"
 #include "brltty.h"
 #include "ttb.h"
 #include "atb.h"

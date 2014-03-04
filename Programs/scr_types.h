@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_SCRDEFS
-#define BRLTTY_INCLUDED_SCRDEFS
+#ifndef BRLTTY_INCLUDED_SCR_TYPES
+#define BRLTTY_INCLUDED_SCR_TYPES
 
 #ifdef __cplusplus
 extern "C" {
@@ -136,4 +136,4 @@ typedef struct ScreenDriverStruct ScreenDriver;
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_SCRDEFS */
+#endif /* BRLTTY_INCLUDED_SCR_TYPES */

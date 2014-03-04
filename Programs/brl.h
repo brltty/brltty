@@ -21,8 +21,8 @@
 
 #include "prologue.h"
 
-#include "brldefs.h"
-#include "ktbdefs.h"
+#include "brl_types.h"
+#include "ktb_types.h"
 
 #ifdef __cplusplus
 extern "C" {

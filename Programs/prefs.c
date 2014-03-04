@@ -24,7 +24,7 @@
 
 #include "prefs.h"
 #include "prefs_internal.h"
-#include "statdefs.h"
+#include "stat_types.h"
 #include "defaults.h"
 #include "log.h"
 #include "file.h"

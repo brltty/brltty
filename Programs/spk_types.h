@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_SPKDEFS
-#define BRLTTY_INCLUDED_SPKDEFS
+#ifndef BRLTTY_INCLUDED_SPK_TYPES
+#define BRLTTY_INCLUDED_SPK_TYPES
 
 #include "driver.h"
 
@@ -85,4 +85,4 @@ typedef struct {
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_SPKDEFS */
+#endif /* BRLTTY_INCLUDED_SPK_TYPES */

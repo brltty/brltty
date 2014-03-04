@@ -26,7 +26,7 @@
 #include "cmd.h"
 #include "brl.h"
 #include "spk.h"
-#include "scrdefs.h"
+#include "scr_types.h"
 #include "ses.h"
 #include "ctb.h"
 #include "ktb.h"

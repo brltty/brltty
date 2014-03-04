@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_TUNES
 #define BRLTTY_INCLUDED_TUNES
 
-#include "tunedefs.h"
+#include "tune_types.h"
 
 #ifdef __cplusplus
 extern "C" {

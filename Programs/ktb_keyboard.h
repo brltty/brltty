@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_KTB_KEYBOARD
 #define BRLTTY_INCLUDED_KTB_KEYBOARD
 
-#include "ktbdefs.h"
+#include "ktb_types.h"
 
 #ifdef __cplusplus
 extern "C" {

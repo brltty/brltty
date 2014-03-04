@@ -806,20 +806,20 @@ CORE_HEADERS = \
    $(SRC_DIR)/unicode.h $(SRC_DIR)/ascii.h $(SRC_DIR)/charset.h \
    $(SRC_DIR)/bitfield.h $(SRC_DIR)/bitmask.h \
    $(SRC_DIR)/clipboard.h $(SRC_DIR)/menu.h \
-   $(SRC_DIR)/prefs.h $(SRC_DIR)/statdefs.h \
-   $(SRC_DIR)/cmd.h $(SRC_DIR)/cmddefs.h $(SRC_DIR)/cmd_enqueue.h \
-   $(SRC_DIR)/ttb.h $(SRC_DIR)/atb.h $(SRC_DIR)/ctbdefs.h $(SRC_DIR)/ctb.h $(SRC_DIR)/ktbdefs.h $(SRC_DIR)/ktb.h \
-   $(SRC_DIR)/tunes.h $(SRC_DIR)/tunedefs.h \
+   $(SRC_DIR)/prefs.h $(SRC_DIR)/stat_types.h \
+   $(SRC_DIR)/cmd.h $(SRC_DIR)/cmd_types.h $(SRC_DIR)/cmd_enqueue.h \
+   $(SRC_DIR)/ttb.h $(SRC_DIR)/atb.h $(SRC_DIR)/ctb_types.h $(SRC_DIR)/ctb.h $(SRC_DIR)/ktb_types.h $(SRC_DIR)/ktb.h \
+   $(SRC_DIR)/tunes.h $(SRC_DIR)/tune_types.h \
    $(SRC_DIR)/notes.h $(SRC_DIR)/beep.h $(SRC_DIR)/pcm.h $(SRC_DIR)/midi.h $(SRC_DIR)/fm.h \
-   $(SRC_DIR)/io_generic.h $(SRC_DIR)/giodefs.h \
-   $(SRC_DIR)/io_serial.h $(SRC_DIR)/serialdefs.h \
-   $(SRC_DIR)/io_usb.h $(SRC_DIR)/usbdefs.h \
+   $(SRC_DIR)/io_generic.h $(SRC_DIR)/gio_types.h \
+   $(SRC_DIR)/io_serial.h $(SRC_DIR)/serial_types.h \
+   $(SRC_DIR)/io_usb.h $(SRC_DIR)/usb_types.h \
    $(SRC_DIR)/io_bluetooth.h \
    $(SRC_DIR)/io_misc.h $(SRC_DIR)/ports.h \
    $(SRC_DIR)/driver.h $(SRC_DIR)/drivers.h \
-   $(SRC_DIR)/brl_driver.h $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldots.h $(SRC_DIR)/brlcmds.h $(SRC_DIR)/brl_utils.h $(SRC_DIR)/brl_base.h \
-   $(SRC_DIR)/spk_driver.h $(SRC_DIR)/spk.h $(SRC_DIR)/spkdefs.h \
-   $(SRC_DIR)/scr_driver.h $(SRC_DIR)/scrdefs.h $(SRC_DIR)/scr_utils.h $(SRC_DIR)/scr_base.h $(SRC_DIR)/scr_real.h $(SRC_DIR)/scr_main.h \
+   $(SRC_DIR)/brl_driver.h $(SRC_DIR)/brl_types.h $(SRC_DIR)/brldots.h $(SRC_DIR)/brlcmds.h $(SRC_DIR)/brl_utils.h $(SRC_DIR)/brl_base.h \
+   $(SRC_DIR)/spk_driver.h $(SRC_DIR)/spk.h $(SRC_DIR)/spk_types.h \
+   $(SRC_DIR)/scr_driver.h $(SRC_DIR)/scr_types.h $(SRC_DIR)/scr_utils.h $(SRC_DIR)/scr_base.h $(SRC_DIR)/scr_real.h $(SRC_DIR)/scr_main.h \
    $(SRC_DIR)/system.h $(SRC_DIR)/system_darwin.h $(SRC_DIR)/system_java.h $(SRC_DIR)/system_linux.h $(SRC_DIR)/system_msdos.h $(SRC_DIR)/system_windows.h \
    $(SRC_DIR)/win_errno.h $(SRC_DIR)/win_pthread.h \
    $(SRC_TOP)prologue.h $(BLD_TOP)config.h $(BLD_TOP)forbuild.h

@@ -16,32 +16,24 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_CMDDEFS
-#define BRLTTY_INCLUDED_CMDDEFS
+#ifndef BRLTTY_INCLUDED_CTB_TYPES
+#define BRLTTY_INCLUDED_CTB_TYPES
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct {
-  const char *name;
-  const char *description;
-  int code;
-  unsigned isToggle:1;
-  unsigned isMotion:1;
-  unsigned isRouting:1;
-  unsigned isColumn:1;
-  unsigned isRow:1;
-  unsigned isOffset:1;
-  unsigned isRange:1;
-  unsigned isInput:1;
-  unsigned isCharacter:1;
-  unsigned isBraille:1;
-  unsigned isKeyboard:1;
-} CommandEntry;
+#define CTB_NO_OFFSET -1
+#define CTB_NO_CURSOR -1
+
+typedef enum {
+  CTB_CAP_NONE,
+  CTB_CAP_SIGN,
+  CTB_CAP_DOT7
+} CTB_CapitalizationMode;
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_CMDDEFS */
+#endif /* BRLTTY_INCLUDED_CTB_TYPES */

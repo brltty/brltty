@@ -21,7 +21,7 @@
 
 #include <stdio.h>
 
-#include "serialdefs.h"
+#include "serial_types.h"
 #include "async_io.h"
 
 #ifdef __cplusplus

@@ -21,11 +21,11 @@
 
 #include <stdio.h>
 
-#include "brldefs.h"
+#include "brl_types.h"
 #include "brlcmds.h"
 #include "brl_utils.h"
 #include "brl_base.h"
-#include "statdefs.h"
+#include "stat_types.h"
 #include "io_generic.h"
 #include "cmd_enqueue.h"
 

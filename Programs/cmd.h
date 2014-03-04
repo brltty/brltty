@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_CMD
 #define BRLTTY_INCLUDED_CMD
 
-#include "cmddefs.h"
+#include "cmd_types.h"
 
 #ifdef __cplusplus
 extern "C" {

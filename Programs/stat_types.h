@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_STATDEFS
-#define BRLTTY_INCLUDED_STATDEFS
+#ifndef BRLTTY_INCLUDED_STAT_TYPES
+#define BRLTTY_INCLUDED_STAT_TYPES
 
 #ifdef __cplusplus
 extern "C" {
@@ -81,4 +81,4 @@ typedef enum {
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_STATDEFS */
+#endif /* BRLTTY_INCLUDED_STAT_TYPES */

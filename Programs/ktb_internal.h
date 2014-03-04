@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_KTB_INTERNAL
 #define BRLTTY_INCLUDED_KTB_INTERNAL
 
-#include "cmddefs.h"
+#include "cmd_types.h"
 #include "async.h"
 
 #ifdef __cplusplus

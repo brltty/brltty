@@ -29,7 +29,7 @@
 #include "async_alarm.h"
 #include "prefs.h"
 #include "api_control.h"
-#include "ktbdefs.h"
+#include "ktb_types.h"
 #include "scr.h"
 #include "brltty.h"
 

@@ -16,12 +16,12 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_BRLDEFS
-#define BRLTTY_INCLUDED_BRLDEFS
+#ifndef BRLTTY_INCLUDED_BRL_TYPES
+#define BRLTTY_INCLUDED_BRL_TYPES
 
 #include "driver.h"
-#include "ktbdefs.h"
-#include "giodefs.h"
+#include "ktb_types.h"
+#include "gio_types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -106,4 +106,4 @@ typedef struct {
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_BRLDEFS */
+#endif /* BRLTTY_INCLUDED_BRL_TYPES */

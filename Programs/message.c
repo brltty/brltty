@@ -27,7 +27,7 @@
 #include "charset.h"
 #include "brl_utils.h"
 #include "spk.h"
-#include "ktbdefs.h"
+#include "ktb_types.h"
 #include "update.h"
 #include "cmd_queue.h"
 #include "api_control.h"

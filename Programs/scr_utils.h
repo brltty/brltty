@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_SCR_UTILS
 #define BRLTTY_INCLUDED_SCR_UTILS
 
-#include "scrdefs.h"
+#include "scr_types.h"
 
 #ifdef __cplusplus
 extern "C" {

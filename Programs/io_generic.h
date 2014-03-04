@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_IO_GENERIC
 #define BRLTTY_INCLUDED_IO_GENERIC
 
-#include "giodefs.h"
+#include "gio_types.h"
 #include "async_io.h"
 
 #ifdef __cplusplus

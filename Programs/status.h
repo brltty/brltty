@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_STATUS
 #define BRLTTY_INCLUDED_STATUS
 
-#include "statdefs.h"
+#include "stat_types.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -271,7 +271,7 @@ message (const char *mode, const char *text, MessageOptions options) {
   return 1;
 }
 
-#include "scrdefs.h"
+#include "scr.h"
 
 KeyTableCommandContext
 getScreenCommandContext (void) {

@@ -19,8 +19,8 @@
 #ifndef BRLTTY_INCLUDED_BRL_BASE
 #define BRLTTY_INCLUDED_BRL_BASE
 
-#include "brldefs.h"
-#include "giodefs.h"
+#include "brl_types.h"
+#include "gio_types.h"
 
 #ifdef __cplusplus
 extern "C" {

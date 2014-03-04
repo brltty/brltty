@@ -29,7 +29,7 @@
 #define __EU_PROTOCOL_H__
 
 #include "cmd_enqueue.h"
-#include "ktbdefs.h"
+#include "ktb_types.h"
 #include "brlcmds.h"
 #include "brl_utils.h"
 #include "brl_base.h"

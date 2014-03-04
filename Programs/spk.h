@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_SPK
 #define BRLTTY_INCLUDED_SPK
 
-#include "spkdefs.h"
+#include "spk_types.h"
 
 #ifdef __cplusplus
 extern "C" {

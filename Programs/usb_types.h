@@ -16,10 +16,10 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_USBDEFS
-#define BRLTTY_INCLUDED_USBDEFS
+#ifndef BRLTTY_INCLUDED_USB_TYPES
+#define BRLTTY_INCLUDED_USB_TYPES
 
-#include "serialdefs.h"
+#include "serial_types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -349,4 +349,4 @@ typedef struct {
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_USBDEFS */
+#endif /* BRLTTY_INCLUDED_USB_TYPES */

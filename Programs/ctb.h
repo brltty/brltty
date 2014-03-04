@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_CTB
 #define BRLTTY_INCLUDED_CTB
 
-#include "ctbdefs.h"
+#include "ctb_types.h"
 
 #ifdef __cplusplus
 extern "C" {

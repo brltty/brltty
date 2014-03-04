@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_KTBDEFS
-#define BRLTTY_INCLUDED_KTBDEFS
+#ifndef BRLTTY_INCLUDED_KTB_TYPES
+#define BRLTTY_INCLUDED_KTB_TYPES
 
 #ifdef __cplusplus
 extern "C" {
@@ -86,4 +86,4 @@ typedef enum {
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_KTBDEFS */
+#endif /* BRLTTY_INCLUDED_KTB_TYPES */

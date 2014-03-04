@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_KTB
 #define BRLTTY_INCLUDED_KTB
 
-#include "ktbdefs.h"
+#include "ktb_types.h"
 
 #ifdef __cplusplus
 extern "C" {

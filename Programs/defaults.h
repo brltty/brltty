@@ -20,10 +20,10 @@
 #define BRLTTY_INCLUDED_DEFAULTS
 
 #include "parameters.h"
-#include "ctbdefs.h"
-#include "brldefs.h"
-#include "spkdefs.h"
-#include "tunedefs.h"
+#include "ctb_types.h"
+#include "brl_types.h"
+#include "spk_types.h"
+#include "tune_types.h"
 
 #ifdef __cplusplus
 extern "C" {

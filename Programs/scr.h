@@ -19,8 +19,8 @@
 #ifndef BRLTTY_INCLUDED_SCR
 #define BRLTTY_INCLUDED_SCR
 
-#include "scrdefs.h"
-#include "ktbdefs.h"
+#include "scr_types.h"
+#include "ktb_types.h"
 #include "driver.h"
 #include "cmd_queue.h"
 

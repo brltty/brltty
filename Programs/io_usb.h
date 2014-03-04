@@ -21,7 +21,7 @@
 
 #include "prologue.h"
 
-#include "usbdefs.h"
+#include "usb_types.h"
 #include "async_io.h"
 
 #ifdef __cplusplus

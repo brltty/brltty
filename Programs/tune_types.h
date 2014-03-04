@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_TUNEDEFS
-#define BRLTTY_INCLUDED_TUNEDEFS
+#ifndef BRLTTY_INCLUDED_TUNE_TYPES
+#define BRLTTY_INCLUDED_TUNE_TYPES
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,4 +34,4 @@ typedef enum {
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_TUNEDEFS */
+#endif /* BRLTTY_INCLUDED_TUNE_TYPES */

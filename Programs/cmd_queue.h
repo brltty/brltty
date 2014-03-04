@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_CMD_QUEUE
 #define BRLTTY_INCLUDED_CMD_QUEUE
 
-#include "ktbdefs.h"
+#include "ktb_types.h"
 
 #ifdef __cplusplus
 extern "C" {

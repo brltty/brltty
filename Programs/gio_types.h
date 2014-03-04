@@ -16,11 +16,11 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_GIODEFS
-#define BRLTTY_INCLUDED_GIODEFS
+#ifndef BRLTTY_INCLUDED_GIO_TYPES
+#define BRLTTY_INCLUDED_GIO_TYPES
 
-#include "serialdefs.h"
-#include "usbdefs.h"
+#include "serial_types.h"
+#include "usb_types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -88,4 +88,4 @@ typedef struct GioEndpointStruct GioEndpoint;
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_GIODEFS */
+#endif /* BRLTTY_INCLUDED_GIO_TYPES */
