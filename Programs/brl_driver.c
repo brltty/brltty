@@ -19,7 +19,6 @@
 #include "prologue.h"
 
 #include "drivers.h"
-#include "driver.h"
 #include "brl.h"
 #include "brl.auto.h"
 

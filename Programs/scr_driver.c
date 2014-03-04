@@ -22,8 +22,8 @@
 
 #include "drivers.h"
 #include "scr.h"
-#include "scr_main.h"
 #include "scr.auto.h"
+#include "scr_main.h"
 
 typedef enum {
   PARM_MESSAGE

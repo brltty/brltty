@@ -24,19 +24,11 @@
 #include <fcntl.h>
 
 #include "log.h"
-#include "timing.h"
-#include "async_wait.h"
-#include "message.h"
 #include "charset.h"
 #include "unicode.h"
-#include "drivers.h"
-#include "io_generic.h"
 #include "brl.h"
 #include "ttb.h"
-#include "ktb.h"
-#include "cmd.h"
-#include "prefs.h"
-#include "brltty.h"
+#include "ktb_types.h"
 
 void
 initializeBrailleDisplay (BrailleDisplay *brl) {

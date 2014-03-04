@@ -19,6 +19,7 @@
 #ifndef BRLTTY_INCLUDED_SCR_BASE
 #define BRLTTY_INCLUDED_SCR_BASE
 
+#include "scr_types.h"
 #include "ktb_types.h"
 
 #ifdef __cplusplus
