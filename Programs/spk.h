@@ -20,40 +20,10 @@
 #define BRLTTY_INCLUDED_SPK
 
 #include "spkdefs.h"
-#include "driver.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-typedef struct SpeechSynthesizerStruct SpeechSynthesizer;
-typedef struct SpeechDataStruct SpeechData;
-
-#define SPK_SCR_NONE -1
-#define SPK_LOC_NONE -1
-
-typedef void SpeechVolumeSetter (volatile SpeechSynthesizer *spk, unsigned char setting);
-typedef void SpeechRateSetter (volatile SpeechSynthesizer *spk, unsigned char setting);
-typedef void SpeechPitchSetter (volatile SpeechSynthesizer *spk, unsigned char setting);
-typedef void SpeechPunctuationSetter (volatile SpeechSynthesizer *spk, SpeechPunctuation setting);
-
-struct SpeechSynthesizerStruct {
-  unsigned canAutospeak:1;
-
-  struct {
-    unsigned isActive:1;
-    int screenNumber;
-    int firstLine;
-    int speechLocation;
-  } track;
-
-  SpeechVolumeSetter *setVolume;
-  SpeechRateSetter *setRate;
-  SpeechPitchSetter *setPitch;
-  SpeechPunctuationSetter *setPunctuation;
-
-  SpeechData *data;
-};
 
 extern void initializeSpeechSynthesizer (volatile SpeechSynthesizer *spk);
 
@@ -99,18 +69,6 @@ extern float getFloatSpeechPitch (unsigned char setting);
 
 extern int canSetSpeechPunctuation (void);
 extern int setSpeechPunctuation (SpeechPunctuation setting, int say);
-
-typedef struct {
-  DRIVER_DEFINITION_DECLARATION;
-
-  const char *const *parameters;
-
-  int (*construct) (volatile SpeechSynthesizer *spk, char **parameters);
-  void (*destruct) (volatile SpeechSynthesizer *spk);
-
-  void (*say) (volatile SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes);
-  void (*mute) (volatile SpeechSynthesizer *spk);
-} SpeechDriver;
 
 extern int haveSpeechDriver (const char *code);
 extern const char *getDefaultSpeechDriver (void);
