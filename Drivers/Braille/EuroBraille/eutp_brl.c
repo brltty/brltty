@@ -133,11 +133,10 @@ void	brl_writeStr(char *str)
 */
 int		brl_init(t_env *env)
 {
-  brlapi_settings_t settings;
+  int res;
   char p[100];
   unsigned int x, y;
 
-  settings.host = NULL;
   /* Connect to BrlAPI */
   if (brlapi_initializeConnection(NULL, NULL) < 0)
     {
@@ -147,8 +146,8 @@ int		brl_init(t_env *env)
 
   /* Get driver id & name */
 
-  brlapi_getDriverName(p, 100);
-  if (!p)
+  res = brlapi_getDriverName(p, sizeof(p));
+  if (res == -1)
     brlapi_perror("brlapi_getDriverName");
   else
     printf("Driver name: %s\n",p);

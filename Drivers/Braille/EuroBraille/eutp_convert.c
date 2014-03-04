@@ -126,18 +126,6 @@ int		k2txt(t_env* env, char* srcfile, char* destfile)
   return 1;
 }
 
-static unsigned int	word_len(char* map, int* index)
-{
-  unsigned int i = 0;
-
-  while (map[i] && map[i] != ' ' && map[i] != '\n' && map[i] != '\t')
-    {
-      (*index)++;
-      i++;
-    }
-  return i;
-}
-
 /*
 Cette fonction prend le nom du fichier PC (.txt ou .k ou autre) et le
 met sous la forme xxxxxxxx (8 lettres) et exhibe l'extension.
@@ -191,9 +179,6 @@ int		txt2k(char* srcfile, char* destfile)
   int		fd;
   size_t	size;
   char* map;
-  char buf[BUFFER_SIZE];
-  unsigned int		i = 0;
-  unsigned int		count = 0;
 
   if ((fd = open(srcfile, O_RDONLY)) == -1)
     {
