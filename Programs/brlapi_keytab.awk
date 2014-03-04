@@ -16,6 +16,14 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+BEGIN {
+  writeHeaderPrologue("BRLAPI_INCLUDED_KEYTAB", "api.h")
+}
+
+END {
+  writeHeaderEpilogue()
+}
+
 function brlCommand(name, symbol, value, help) {
   writeSimpleKey("CMD", name)
 }

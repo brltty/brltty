@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLAPI_INCLUDED_BRLDEFS
-#define BRLAPI_INCLUDED_BRLDEFS
+#ifndef BRLAPI_INCLUDED_BRLTTY_BRLDEFS
+#define BRLAPI_INCLUDED_BRLTTY_BRLDEFS
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,4 +30,4 @@ extern "C" {
 }
 #endif /* __cplusplus */
 
-#endif /* BRLAPI_INCLUDED_BRLDEFS */
+#endif /* BRLAPI_INCLUDED_BRLTTY_BRLDEFS */
