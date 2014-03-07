@@ -29,7 +29,7 @@
 
 #include "log.h"
 #include "parse.h"
-#include "timing.h"
+#include "async_alarm.h"
 
 #define BRLSTAT ST_AlvaStyle
 #define BRL_HAVE_PACKET_IO
@@ -302,8 +302,7 @@ struct BrailleDataStruct {
   int writingLast;
 
   AcknowledgementHandler acknowledgementHandler;
-  TimePeriod acknowledgementPeriod;
-  int acknowledgementsMissing;
+  AsyncHandle missingAcknowledgementAlarm;
 
   unsigned char configFlags;
   int firmnessSetting;
@@ -447,10 +446,42 @@ handleWriteAcknowledgement (BrailleDisplay *brl, int ok) {
   }
 }
 
+static int handleAcknowledgement (BrailleDisplay *brl, int ok);
+
+ASYNC_ALARM_CALLBACK(handleMissingAcknowledgementAlarm) {
+  BrailleDisplay *brl = parameters->data;
+
+  asyncDiscardHandle(brl->data->missingAcknowledgementAlarm);
+  brl->data->missingAcknowledgementAlarm = NULL;
+
+  logMessage(LOG_WARNING, "missing ACK: assuming NAK");
+  handleAcknowledgement(brl, 0);
+}
+
+static int
+setMissingAcknowledgementAlarm (BrailleDisplay *brl, int timeout) {
+  if (!brl->data->missingAcknowledgementAlarm) {
+    if (!asyncSetAlarmIn(&brl->data->missingAcknowledgementAlarm, timeout,
+                         handleMissingAcknowledgementAlarm, brl)) {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+static void
+cancelMissingAcknowledgementAlarm (BrailleDisplay *brl) {
+  if (brl->data->missingAcknowledgementAlarm) {
+    asyncCancelRequest(brl->data->missingAcknowledgementAlarm);
+    brl->data->missingAcknowledgementAlarm = NULL;
+  }
+}
+
 static void
 setAcknowledgementHandler (BrailleDisplay *brl, AcknowledgementHandler handler) {
   brl->data->acknowledgementHandler = handler;
-  startTimePeriod(&brl->data->acknowledgementPeriod, 500);
+  setMissingAcknowledgementAlarm(brl, 500);
 }
 
 static int
@@ -458,16 +489,18 @@ writeRequest (BrailleDisplay *brl) {
   if (brl->data->acknowledgementHandler) return 1;
 
   if (brl->data->configFlags) {
-    if (writePacket(brl, PKT_CONFIG, brl->data->configFlags, 0, 0, NULL) == -1)
+    if (!writePacket(brl, PKT_CONFIG, brl->data->configFlags, 0, 0, NULL)) {
       return 0;
+    }
 
     setAcknowledgementHandler(brl, handleConfigAcknowledgement);
     return 1;
   }
 
   if (brl->data->firmnessSetting >= 0) {
-    if (writePacket(brl, PKT_HVADJ, brl->data->firmnessSetting, 0, 0, NULL) == -1)
+    if (!writePacket(brl, PKT_HVADJ, brl->data->firmnessSetting, 0, 0, NULL)) {
       return 0;
+    }
 
     setAcknowledgementHandler(brl, handleFirmnessAcknowledgement);
     return 1;
@@ -480,8 +513,9 @@ writeRequest (BrailleDisplay *brl) {
 
     if (truncate) count = brl->data->outputPayloadLimit;
     translateOutputCells(buffer, &brl->data->outputBuffer[brl->data->writeFirst], count);
-    if (writePacket(brl, PKT_WRITE, count, brl->data->writeFirst, 0, buffer) == -1)
+    if (!writePacket(brl, PKT_WRITE, count, brl->data->writeFirst, 0, buffer)) {
       return 0;
+    }
 
     setAcknowledgementHandler(brl, handleWriteAcknowledgement);
     brl->data->writingFirst = brl->data->writeFirst;
@@ -498,6 +532,13 @@ writeRequest (BrailleDisplay *brl) {
   }
 
   return 1;
+}
+
+static int
+handleAcknowledgement (BrailleDisplay *brl, int ok) {
+  brl->data->acknowledgementHandler(brl, ok);
+  brl->data->acknowledgementHandler = NULL;
+  return writeRequest(brl);
 }
 
 static void
@@ -565,21 +606,20 @@ verifyPacket (
   rpd->checksum -= byte;
   if ((size == *length) && (size > sizeof(PacketHeader)) && rpd->checksum) return BRL_PVR_INVALID;
 
-  brl->data->acknowledgementsMissing = 0;
   return BRL_PVR_INCLUDE;
 }
 
-static int
+static size_t
 readPacket (BrailleDisplay *brl, Packet *packet) {
   ReadPacketData rpd;
 
   return readBraillePacket(brl, NULL, packet, sizeof(*packet), verifyPacket, &rpd);
 }
 
-static int
+static size_t
 getPacket (BrailleDisplay *brl, Packet *packet) {
   while (1) {
-    int count = readPacket(brl, packet);
+    size_t count = readPacket(brl, packet);
 
     if (count > 0) {
       switch (packet->header.type) {
@@ -587,10 +627,11 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
           int ok;
 
         case PKT_NAK:
+          cancelMissingAcknowledgementAlarm(brl);
           logNegativeAcknowledgement(packet);
 
           if (!brl->data->acknowledgementHandler) {
-            logMessage(LOG_WARNING, "Unexpected NAK.");
+            logMessage(LOG_WARNING, "unexpected NAK");
             continue;
           }
 
@@ -602,44 +643,40 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
                 brl->data->outputPayloadLimit = brl->data->model->cellCount;
 
               if (brl->data->outputPayloadLimit > 1)
-                brl->data->outputPayloadLimit--;
+                brl->data->outputPayloadLimit -= 1;
 
-              if (brl->data->outputPayloadLimit != originalLimit)
-                logMessage(LOG_WARNING, "Maximum payload length reduced from %d to %d.",
+              if (brl->data->outputPayloadLimit != originalLimit) {
+                logMessage(LOG_WARNING, "maximum payload length reduced from %d to %d",
                            originalLimit, brl->data->outputPayloadLimit);
+              }
+
               break;
             }
           }
 
-        handleNegativeAcknowledgement:
           ok = 0;
-          goto handleAcknowledgement;
+          goto doAcknowledgement;
 
         case PKT_ACK:
+          cancelMissingAcknowledgementAlarm(brl);
+
           if (!brl->data->acknowledgementHandler) {
-            logMessage(LOG_WARNING, "Unexpected ACK.");
+            logMessage(LOG_WARNING, "unexpected ACK");
             continue;
           }
 
           ok = 1;
-        handleAcknowledgement:
-          brl->data->acknowledgementHandler(brl, ok);
-          brl->data->acknowledgementHandler = NULL;
-          if (writeRequest(brl)) continue;
+          goto doAcknowledgement;
 
-          count = -1;
+        doAcknowledgement:
+          if (handleAcknowledgement(brl, ok)) continue;
+          count = 0;
           break;
         }
-      }
-    } else if ((count == 0) && brl->data->acknowledgementHandler &&
-               afterTimePeriod(&brl->data->acknowledgementPeriod, NULL)) {
-      if (++brl->data->acknowledgementsMissing < 5) {
-        logMessage(LOG_WARNING, "Missing ACK; assuming NAK.");
-        goto handleNegativeAcknowledgement;
-      }
 
-      logMessage(LOG_WARNING, "Too many missing ACKs.");
-      count = -1;
+        default:
+          break;
+      }
     }
 
     return count;
@@ -775,7 +812,7 @@ setModel (BrailleDisplay *brl, const char *modelName, const char *firmware) {
     brl->data->writeLast = brl->data->model->cellCount - 1;
 
     brl->data->acknowledgementHandler = NULL;
-    brl->data->acknowledgementsMissing = 0;
+    brl->data->missingAcknowledgementAlarm = NULL;
     brl->data->configFlags = 0;
     brl->data->firmnessSetting = -1;
 
@@ -810,7 +847,7 @@ static int
 writeIdentityRequest (BrailleDisplay *brl) {
   brl->data->queryAcknowledged = 0;
   brl->data->model = NULL;
-  return writePacket(brl, PKT_QUERY, 0, 0, 0, NULL) > 0;
+  return writePacket(brl, PKT_QUERY, 0, 0, 0, NULL);
 }
 
 static size_t
@@ -886,6 +923,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
+  cancelMissingAcknowledgementAlarm(brl);
   disconnectBrailleResource(brl, NULL);
 
   if (brl->data) {
@@ -934,15 +972,10 @@ updateKeys (BrailleDisplay *brl, uint64_t newKeys, unsigned char keyBase, unsign
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   Packet packet;
-  int count;
+  size_t count;
 
   while ((count = getPacket(brl, &packet))) {
-    if (count == -1) return BRL_CMD_RESTARTBRL;
-
     switch (packet.header.type) {
-      default:
-        break;
-
       case PKT_KEY: {
         uint64_t newKeys = packet.header.arg1 |
                            (packet.header.arg2 << 8) |
@@ -971,6 +1004,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
             FS_KEY_HOT+4, FS_KEY_HOT+5, FS_KEY_HOT+6, FS_KEY_HOT+7,
             FS_KEY_RightGdf
           };
+
           static const unsigned char keyCount = ARRAY_COUNT(keys);
           const unsigned char base = (brl->data->model->cellCount - keyCount) / 2;
 
@@ -1004,53 +1038,64 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
         continue;
       }
+
+      default:
+        break;
     }
 
-    logMessage(LOG_WARNING, "unsupported packet: %02X %02X %02X %02X",
-               packet.header.type,
-               packet.header.arg1,
-               packet.header.arg2,
-               packet.header.arg3);
+    logUnexpectedPacket(&packet, count);
   }
 
-  return EOF;
+  return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
 }
 
 static ssize_t
 brl_readPacket (BrailleDisplay *brl, void *buffer, size_t length) {
   Packet packet;
-  int count = readPacket(brl, &packet);
-  if (count > 0) {
-    if (count > sizeof(packet.header)) count--;
-    if (length < count) {
-      logMessage(LOG_WARNING, "Input packet buffer too small: %d < %d", (int)length, count);
-      count = length;
-    }
-    memcpy(buffer, &packet, count);
+  size_t count = readPacket(brl, &packet);
+
+  if (count == 0) return (errno == EAGAIN)? 0: -1;
+  if (count > sizeof(packet.header)) count -= 1;
+
+  if (length < count) {
+    logMessage(LOG_WARNING, "Input packet buffer too small: %zu < %zu", length, count);
+    count = length;
   }
+
+  memcpy(buffer, &packet, count);
   return count;
 }
 
 static ssize_t
 brl_writePacket (BrailleDisplay *brl, const void *packet, size_t length) {
   const unsigned char *bytes = packet;
-  int size = 4;
+  size_t size = 4;
+
   if (length >= size) {
     int hasPayload = 0;
+
     if (bytes[0] & 0X80) {
       size += bytes[1];
       hasPayload = 1;
     }
+
     if (length >= size) {
-      if (length > size)
-        logMessage(LOG_WARNING, "Output packet buffer larger than necessary: %d > %d",
-                   (int)length, size);
+      if (length > size) {
+        logMessage(LOG_WARNING, "output packet buffer larger than necessary: %zu > %zu",
+                   length, size);
+      }
+
       return writePacket(brl, bytes[0], bytes[1], bytes[2], bytes[3],
-                         (hasPayload? &bytes[4]: NULL));
+                         (hasPayload? &bytes[4]: NULL))?
+             size: -1;
     }
   }
-  logMessage(LOG_WARNING, "Output packet buffer too small: %d < %d", (int)length, size);
-  return 0;
+
+  logMessage(LOG_WARNING, "output packet buffer too small: %zu < %zu",
+             length, size);
+
+  errno = EIO;
+  return -1;
 }
 
 static int
