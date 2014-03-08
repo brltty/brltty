@@ -80,7 +80,7 @@
   <string name="LOG_CATEGORY_LABEL_update">Evénements liés à la mise à jour</string>
   <string name="LOG_CATEGORY_LABEL_speech">Evénements liés à la parole</string>
   <string name="LOG_CATEGORY_LABEL_async">Evénements asynchrones</string>
-  <string name="LOG_CATEGORY_LABEL_serveur">Evénements liés au serveur</string>
+  <string name="LOG_CATEGORY_LABEL_server">Evénements liés au serveur</string>
   <string name="LOG_CATEGORY_LABEL_serial">E/S série</string>
   <string name="LOG_CATEGORY_LABEL_usb">E/S USB</string>
   <string name="LOG_CATEGORY_LABEL_bluetooth">E/S Bluetooth</string>
