@@ -77,6 +77,13 @@
   <string name="LOG_CATEGORY_LABEL_kbdkeys">Tastatur Ereignisse</string>
   <string name="LOG_CATEGORY_LABEL_csrtrk">Cursor Tracking</string>
   <string name="LOG_CATEGORY_LABEL_csrrtg">Cursor Routing</string>
+  <string name="LOG_CATEGORY_LABEL_update">Update Ereignisse</string>
+  <string name="LOG_CATEGORY_LABEL_speech">Sprachereignisse</string>
+  <string name="LOG_CATEGORY_LABEL_async">Asynchrone Ereignisse</string>
+  <string name="LOG_CATEGORY_LABEL_server">Server Ereignisse</string>
+  <string name="LOG_CATEGORY_LABEL_serial">Serielle E/A</string>
+  <string name="LOG_CATEGORY_LABEL_usb">USB E/A</string>
+  <string name="LOG_CATEGORY_LABEL_bluetooth">Bluetooth E/A</string>
 
   <string name="BRAILLE_DRIVER_LABEL_auto">Automatische Erkennung</string>
 
