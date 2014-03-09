@@ -58,6 +58,10 @@ PREFERENCE_STRING_TABLE(brailleSensitivity,
   "minimum", "low", "medium", "high", "maximum"
 )
 
+PREFERENCE_STRING_TABLE(brailleInputMode,
+  "text-table", "unicode-braille"
+)
+
 PREFERENCE_STRING_TABLE(brailleOrientation,
   "normal", "rotated"
 )
@@ -310,6 +314,12 @@ const PreferenceEntry preferenceTable[] = {
     .defaultValue = DEFAULT_BRAILLE_SENSITIVITY,
     .settingNames = &preferenceStringTable_brailleSensitivity,
     .setting = &prefs.brailleSensitivity
+  },
+
+  { .name = "braille-input-mode",
+    .defaultValue = DEFAULT_BRAILLE_INPUT_MODE,
+    .settingNames = &preferenceStringTable_brailleInputMode,
+    .setting = &prefs.brailleInputMode
   },
 
   { .name = "braille-orientation",

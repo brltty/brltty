@@ -44,6 +44,11 @@ typedef enum {
 } BrailleSensitivity;
 
 typedef enum {
+  BRL_INPUT_TEXT,
+  BRL_INPUT_UNICODE
+} BrailleInputMode;
+
+typedef enum {
   BRL_ORIENTATION_NORMAL,
   BRL_ORIENTATION_ROTATED
 } BrailleOrientation;

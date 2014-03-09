@@ -161,6 +161,7 @@ typedef struct {
   /*****************************************************************************/
 
   unsigned char brailleOrientation;
+  unsigned char brailleInputMode;
 
   unsigned char capitalizationMode;
   unsigned char uppercaseIndicator;

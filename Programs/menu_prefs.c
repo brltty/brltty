@@ -666,6 +666,16 @@ makePreferencesMenu (void) {
 
     {
       static const MenuString strings[] = {
+        {.label=strtext("Translated via Text Table")},
+        {.label=strtext("Unicode Braille")}
+      };
+
+      NAME(strtext("Braille Input Mode"));
+      ITEM(newEnumeratedMenuItem(inputSubmenu, &prefs.brailleInputMode, &itemName, strings));
+    }
+
+    {
+      static const MenuString strings[] = {
         {.label=strtext("Normal")},
         {.label=strtext("Rotated")}
       };

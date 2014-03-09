@@ -34,6 +34,7 @@
 #include "scancodes.h"
 #include "ttb.h"
 #include "scr.h"
+#include "unicode.h"
 #include "charset.h"
 #include "brltty.h"
 
@@ -1209,10 +1210,27 @@ handleNavigationCommand (int command, void *datga) {
           break;
         }
 
-        case BRL_BLK_PASSDOTS:
+        case BRL_BLK_PASSDOTS: {
+          wchar_t character;
+
+          switch (prefs.brailleInputMode) {
+            case BRL_INPUT_TEXT:
+              character = convertDotsToCharacter(textTable, arg);
+              break;
+
+            case BRL_INPUT_UNICODE:
+              character = UNICODE_BRAILLE_ROW | arg;
+              break;
+
+            default:
+              character = UNICODE_REPLACEMENT_CHARACTER;
+              break;
+          }
+
           applyInputModifiers(&flags);
-          if (!insertKey(convertDotsToCharacter(textTable, arg), flags)) playTune(&tune_command_rejected);
+          if (!insertKey(character, flags)) playTune(&tune_command_rejected);
           break;
+        }
 
         case BRL_BLK_PASSAT:
           if (flags & BRL_FLG_KBD_RELEASE) atInterpretScanCode(&command, 0XF0);
