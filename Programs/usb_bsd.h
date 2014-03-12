@@ -289,7 +289,7 @@ usbDeallocateDeviceExtension (UsbDeviceExtension *devx) {
 }
 
 UsbDevice *
-usbFindDevice (UsbDeviceChooser chooser, void *data) {
+usbFindDevice (UsbDeviceChooser *chooser, UsbChooseChannelData *data) {
   UsbDevice *device = NULL;
   int busNumber = 0;
   while (1) {

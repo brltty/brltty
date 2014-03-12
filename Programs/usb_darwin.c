@@ -741,7 +741,7 @@ usbDeallocateDeviceExtension (UsbDeviceExtension *devx) {
 }
 
 UsbDevice *
-usbFindDevice (UsbDeviceChooser chooser, void *data) {
+usbFindDevice (UsbDeviceChooser *chooser, UsbChooseChannelData *data) {
   UsbDevice *device = NULL;
   kern_return_t kernelResult;
   IOReturn ioResult;

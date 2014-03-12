@@ -81,8 +81,8 @@ struct UsbDeviceStruct {
 
 extern UsbDevice *usbTestDevice (
   UsbDeviceExtension *extension,
-  UsbDeviceChooser chooser,
-  void *data
+  UsbDeviceChooser *chooser,
+  UsbChooseChannelData *data
 );
 extern UsbEndpoint *usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress);
 extern UsbEndpoint *usbGetInputEndpoint (UsbDevice *device, unsigned char endpointNumber);

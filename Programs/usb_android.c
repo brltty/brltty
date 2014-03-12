@@ -828,7 +828,7 @@ usbTestHostDevice (void *item, void *data) {
 }
 
 UsbDevice *
-usbFindDevice (UsbDeviceChooser chooser, void *data) {
+usbFindDevice (UsbDeviceChooser *chooser, UsbChooseChannelData *data) {
   if (!usbHostDevices) {
     int ok = 0;
 

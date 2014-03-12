@@ -561,7 +561,7 @@ usbDeallocateDeviceExtension (UsbDeviceExtension *devx) {
 }
 
 UsbDevice *
-usbFindDevice (UsbDeviceChooser chooser, void *data) {
+usbFindDevice (UsbDeviceChooser *chooser, UsbChooseChannelData *data) {
   UsbDevice *device = NULL;
   static const char *const rootPath = "/dev/usb";
   int rootLength = strlen(rootPath);

@@ -1139,8 +1139,8 @@ usbDeallocateHostDevice (void *item, void *data) {
 }
 
 typedef struct {
-  UsbDeviceChooser chooser;
-  void *data;
+  UsbDeviceChooser *chooser;
+  UsbChooseChannelData *data;
   UsbDevice *device;
 } UsbTestHostDeviceData;
 
@@ -1423,7 +1423,7 @@ usbGetUsbfs (void) {
 }
 
 UsbDevice *
-usbFindDevice (UsbDeviceChooser chooser, void *data) {
+usbFindDevice (UsbDeviceChooser *chooser, UsbChooseChannelData *data) {
   if (!usbHostDevices) {
     int ok = 0;
 

@@ -893,12 +893,14 @@ usbOpenDevice (UsbDeviceExtension *extension) {
 }
 
 UsbDevice *
-usbTestDevice (UsbDeviceExtension *extension, UsbDeviceChooser chooser, void *data) {
+usbTestDevice (UsbDeviceExtension *extension, UsbDeviceChooser *chooser, UsbChooseChannelData *data) {
   UsbDevice *device;
+
   if ((device = usbOpenDevice(extension))) {
     logMessage(LOG_CATEGORY(USB_IO), "testing device: vendor=%04X product=%04X",
                getLittleEndian16(device->descriptor.idVendor),
                getLittleEndian16(device->descriptor.idProduct));
+
     if (chooser(device, data)) {
       usbLogString(device, device->descriptor.iManufacturer, "Manufacturer Name");
       usbLogString(device, device->descriptor.iProduct, "Product Description");
@@ -910,6 +912,7 @@ usbTestDevice (UsbDeviceExtension *extension, UsbDeviceChooser chooser, void *da
     device->extension = NULL;
     usbCloseDevice(device);
   }
+
   return NULL;
 }
 
@@ -1153,38 +1156,37 @@ usbWriteData (
   return -1;
 }
 
-typedef struct {
+struct UsbChooseChannelDataStruct {
   const UsbChannelDefinition *definition;
 
   const char *serialNumber;
   uint16_t vendorIdentifier;
   uint16_t productIdentifier;
-} UsbChooseChannelData;
+};
 
 static int
-usbChooseChannel (UsbDevice *device, void *data) {
-  const UsbDeviceDescriptor *descriptor = usbDeviceDescriptor(device);
-  UsbChooseChannelData *choose = data;
-  const UsbChannelDefinition *definition = choose->definition;
+usbChooseChannel (UsbDevice *device, UsbChooseChannelData *data) {
+  const UsbDeviceDescriptor *descriptor = &device->descriptor;
+  const UsbChannelDefinition *definition = data->definition;
+
+  if (!(descriptor->iManufacturer ||
+        descriptor->iProduct ||
+        descriptor->iSerialNumber)) {
+    UsbDeviceDescriptor actualDescriptor;
+    ssize_t result = usbGetDeviceDescriptor(device, &actualDescriptor);
+
+    if (result == UsbDescriptorSize_Device) {
+      logMessage(LOG_CATEGORY(USB_IO), "using actual device descriptor");
+      device->descriptor = actualDescriptor;
+    }
+  }
 
   while (definition->vendor) {
     if (!definition->version || (definition->version == getLittleEndian16(descriptor->bcdUSB))) {
       if (USB_IS_PRODUCT(descriptor, definition->vendor, definition->product)) {
-        if (!(descriptor->iManufacturer ||
-              descriptor->iProduct ||
-              descriptor->iSerialNumber)) {
-          UsbDeviceDescriptor actualDescriptor;
-          ssize_t result = usbGetDeviceDescriptor(device, &actualDescriptor);
-
-          if (result == UsbDescriptorSize_Device) {
-            logMessage(LOG_CATEGORY(USB_IO), "using actual device descriptor");
-            device->descriptor = actualDescriptor;
-          }
-        }
-
-        if (!usbVerifyVendorIdentifier(descriptor, choose->vendorIdentifier)) break;
-        if (!usbVerifyProductIdentifier(descriptor, choose->productIdentifier)) break;
-        if (!usbVerifySerialNumber(device, choose->serialNumber)) break;
+        if (!usbVerifyVendorIdentifier(descriptor, data->vendorIdentifier)) break;
+        if (!usbVerifyProductIdentifier(descriptor, data->productIdentifier)) break;
+        if (!usbVerifySerialNumber(device, data->serialNumber)) break;
 
         if (definition->disableAutosuspend) usbDisableAutosuspend(device);
 
@@ -1237,7 +1239,7 @@ usbChooseChannel (UsbDevice *device, void *data) {
             }
 
             if (ok) {
-              choose->definition = definition;
+              data->definition = definition;
               return 1;
             }
             usbCloseInterface(device);
@@ -1252,14 +1254,14 @@ usbChooseChannel (UsbDevice *device, void *data) {
 }
 
 static UsbChannel *
-usbNewChannel (UsbChooseChannelData *choose) {
+usbNewChannel (UsbChooseChannelData *data) {
   UsbChannel *channel;
 
   if ((channel = malloc(sizeof(*channel)))) {
     memset(channel, 0, sizeof(*channel));
 
-    if ((channel->device = usbFindDevice(usbChooseChannel, choose))) {
-      channel->definition = *choose->definition;
+    if ((channel->device = usbFindDevice(usbChooseChannel, data))) {
+      channel->definition = *data->definition;
       return channel;
     }
 
