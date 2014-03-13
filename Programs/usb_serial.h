@@ -26,9 +26,9 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct {
+  const UsbSerialOperations *operations;
   uint16_t vendor;
   uint16_t product;
-  const UsbSerialOperations *operations;
   unsigned generic:1;
 } UsbSerialAdapter;
 
