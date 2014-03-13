@@ -168,7 +168,7 @@ SERIAL_LIBS = @serial_libs@
 
 USB_PACKAGE = @usb_package@
 USB_OBJECT = usb_$(USB_PACKAGE)
-USB_OBJECTS = gio_usb.$O usb.$O usb_hid.$O usb_serial.$O usb_cdc_acm.$O usb_belkin.$O usb_cp2101.$O usb_cp2110.$O usb_ftdi.$O $(USB_OBJECT).$O
+USB_OBJECTS = gio_usb.$O usb.$O usb_hid.$O usb_serial.$O usb_adapters.$O usb_cdc_acm.$O usb_belkin.$O usb_cp2101.$O usb_cp2110.$O usb_ftdi.$O $(USB_OBJECT).$O
 USB_INCLUDES = @usb_includes@
 USB_LIBS = @usb_libs@
 

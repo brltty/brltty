@@ -156,6 +156,9 @@ usb_hid.$O:
 usb_serial.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/usb_serial.c
 
+usb_adapters.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/usb_adapters.c
+
 usb_cdc_acm.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/usb_cdc_acm.c
 
