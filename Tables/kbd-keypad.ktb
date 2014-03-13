@@ -34,7 +34,8 @@ bind KP0+!KP9 PRDIFLN
 bind KP0+!KP3 NXDIFLN
 bind KP0+!KPDivide CSRTRK
 bind KP0+!KPMultiply DISPMD
-bind KP0+!KPMinus SIXDOTS
+bind KP0+!KPMinus SIXDOTS+off
+bind KP0+!KPPlus SIXDOTS+on
 
 bind KPPeriod+!KP5 BACK
 bind KPPeriod+!KP4 FWINLTSKIP
@@ -47,7 +48,8 @@ bind KPPeriod+!KP9 ATTRUP
 bind KPPeriod+!KP3 ATTRDN
 bind KPPeriod+!KPDivide CSRVIS
 bind KPPeriod+!KPMultiply ATTRVIS
-bind KPPeriod+!KPMinus FREEZE
+bind KPPeriod+!KPMinus BRLUCDOTS+off
+bind KPPeriod+!KPPlus BRLUCDOTS+on
 
 bind KP0+KPPeriod+!KP1 CHRLT
 bind KP0+KPPeriod+!KP2 DESCCHAR
@@ -64,6 +66,7 @@ bind KPMinus+!KP7 HELP
 bind KPMinus+!KP9 LEARN
 bind KPMinus+!KP2 CSRJMP_VERT
 bind KPMinus+!KP1 TIME
+bind KPMinus+!KP3 FREEZE        
 bind KPMinus+!KPDivide RESTARTBRL
 bind KPMinus+!KPMultiply RESTARTSPEECH
 
