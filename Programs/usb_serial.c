@@ -22,6 +22,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "program.h"
 #include "io_usb.h"
 #include "usb_internal.h"
 #include "usb_serial.h"
@@ -261,6 +262,7 @@ usbFindSerialAdapter (const UsbDeviceDescriptor *descriptor) {
     }
 
     usbSerialAdapters = adapters;
+    registerProgramMemory("sorted-usb-serial-adapters", &usbSerialAdapters);
   }
 
   {
