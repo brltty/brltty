@@ -30,6 +30,7 @@
 #include "file.h"
 #include "parse.h"
 
+#define PREFS_COMMENT_CHARACTER '#'
 #define PREFS_MAGIC_NUMBER 0x4005
 
 Preferences prefs;                /* environment (i.e. global) parameters */
@@ -161,7 +162,7 @@ processPreferenceLine (char *line, void *data) {
   static const char delimiters[] = " \t";
   const char *name = strtok(line, delimiters);
 
-  if (name) {
+  if (name && (*name != PREFS_COMMENT_CHARACTER)) {
     const PreferenceEntry *pref = findPreferenceEntry(name);
 
     if (pref) {
@@ -345,6 +346,28 @@ loadPreferencesFile (const char *path) {
 }
 
 static int
+putPreferenceComment (FILE *file, const PreferenceEntry *pref) {
+  if (fprintf(file, "%c %s", PREFS_COMMENT_CHARACTER, pref->name) < 0) return 0;
+
+  if (pref->settingCount) {
+    if (fprintf(file, "[%u]", pref->settingCount) < 0) return 0;
+  }
+
+  if (fputc(':', file) == EOF) return 0;
+
+  if (pref->settingNames) {
+    unsigned int index;
+
+    for (index=0; index<pref->settingNames->count; index+=1) {
+      if (fprintf(file, " %s", pref->settingNames->table[index]) < 0) return 0;
+    }
+  }
+
+  if (fputc('\n', file) == EOF) return 0;
+  return 1;
+}
+
+static int
 putPreferenceSetting (FILE *file, unsigned char setting, const PreferenceStringTable *names) {
   if (fputc(' ', file) == EOF) return 0;
 
@@ -367,7 +390,7 @@ savePreferencesFile (const char *path) {
     const PreferenceEntry *const end = pref + preferenceCount;
 
     while (pref < end) {
-
+      if (!putPreferenceComment(file, pref)) break;
       if (fputs(pref->name, file) == EOF) break;
 
       if (pref->settingCount) {
@@ -381,7 +404,7 @@ savePreferencesFile (const char *path) {
         break;
       }
 
-      if (fputc('\n', file) == EOF) break;
+      if (fputs("\n\n", file) == EOF) break;
 
       pref += 1;
     }
