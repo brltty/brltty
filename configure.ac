@@ -688,7 +688,7 @@ AC_CHECK_FUNCS([sigaction])
 AC_CHECK_HEADERS([alloca.h getopt.h glob.h langinfo.h regex.h syslog.h])
 AC_CHECK_HEADERS([sys/file.h sys/socket.h])
 AC_CHECK_HEADERS([pwd.h grp.h])
-AC_CHECK_HEADERS([sys/io.h sys/modem.h machine/speaker.h linux/vt.h])
+AC_CHECK_HEADERS([sys/io.h sys/modem.h machine/speaker.h dev/speaker/speaker.h linux/vt.h])
 
 AC_CHECK_HEADERS([linux/input.h], [
    AC_CHECK_HEADERS([linux/uinput.h], [], [], [

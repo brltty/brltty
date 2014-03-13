@@ -18,9 +18,24 @@
 
 #include "prologue.h"
 
-#ifdef HAVE_MACHINE_SPEAKER_H
-#include <machine/speaker.h>
+#include <string.h>
+#include <fcntl.h>
 
+#undef CAN_BEEP
+
+#if defined(HAVE_DEV_SPEAKER_SPEAKER_H
+#include <dev/speaker/speaker.h>
+#define CAN_BEEP
+
+#elif defined(HAVE_MACHINE_SPEAKER_H
+#include <machine/speaker.h>
+#define CAN_BEEP
+
+#else /* speaker.h */
+#warning beeps not available on this installation: no speaker.h
+#endif /* speaker.h */
+
+#ifdef CAN_BEEP
 #include "log.h"
 #include "beep.h"
 
@@ -37,22 +52,20 @@ getSpeaker (void) {
   }
   return speaker;
 }
-#else /* HAVE_MACHINE_SPEAKER_H */
-#warning beeps not available on this installation: no <machine/speaker.h>
-#endif /* HAVE_MACHINE_SPEAKER_H */
+#endif /* CAN_BEEP */
 
 int
 canBeep (void) {
-#ifdef HAVE_MACHINE_SPEAKER_H
+#ifdef CAN_BEEP
   return 1;
-#else /* HAVE_MACHINE_SPEAKER_H */
+#else /* CAN_BEEP */
   return 0;
-#endif /* HAVE_MACHINE_SPEAKER_H */
+#endif /* CAN_BEEP */
 }
 
 int
 synchronousBeep (unsigned short frequency, unsigned short milliseconds) {
-#ifdef HAVE_MACHINE_SPEAKER_H
+#ifdef CAN_BEEP
   int speaker = getSpeaker();
   if (speaker != -1) {
     tone_t tone;
@@ -62,7 +75,7 @@ synchronousBeep (unsigned short frequency, unsigned short milliseconds) {
     if (ioctl(speaker, SPKRTONE, &tone) != -1) return 1;
     logSystemError("speaker tone");
   }
-#endif /* HAVE_MACHINE_SPEAKER_H */
+#endif /* CAN_BEEP */
   return 0;
 }
 
@@ -83,10 +96,10 @@ stopBeep (void) {
 
 void
 endBeep (void) {
-#ifdef HAVE_MACHINE_SPEAKER_H
+#ifdef CAN_BEEP
   if (speaker != -1) {
     close(speaker);
     speaker = -1;
   }
-#endif /* HAVE_MACHINE_SPEAKER_H */
+#endif /* CAN_BEEP */
 }

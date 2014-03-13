@@ -140,6 +140,9 @@ extern "C" {
 /* Define this if the header file machine/speaker.h exists. */
 #undef HAVE_MACHINE_SPEAKER_H
 
+/* Define this if the header file dev/speaker/speaker.h exists. */
+#undef HAVE_DEV_SPEAKER_SPEAKER_H
+
 /* Define this if the header file linux/vt.h exists. */
 #undef HAVE_LINUX_VT_H
 
