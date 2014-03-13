@@ -38,7 +38,7 @@ usbSkipInitialBytes (UsbInputFilterData *data, unsigned int count) {
   return 1;
 }
 
-static const UsbSerialAdapter usbSerialAdapters[] = {
+static const UsbSerialAdapter usbSerialAdapterTable[] = {
   { /* Albatross, Cebra, HIMS, HandyTech FTDI */
     .vendor=0X0403, .product=0X6001,
     .generic = 1,
@@ -165,10 +165,11 @@ static const UsbSerialAdapter usbSerialAdapters[] = {
     .vendor=0X10C4, .product=0XEA80,
     .generic = 1,
     .operations = &usbSerialOperations_CP2110
-  },
-
-  {.vendor=0, .product=0}
+  }
 };
+
+static size_t usbSerialAdapterCount = ARRAY_COUNT(usbSerialAdapterTable);
+static const UsbSerialAdapter **usbSerialAdapters = NULL;
 
 static const UsbInterfaceDescriptor *
 usbFindCommunicationInterface (UsbDevice *device) {
@@ -202,21 +203,74 @@ usbFindInterruptInputEndpoint (UsbDevice *device, const UsbInterfaceDescriptor *
   return NULL;
 }
 
+static int
+usbCompareSerialAdapters (const UsbSerialAdapter *adapter1, const UsbSerialAdapter *adapter2) {
+  if (adapter1->vendor < adapter2->vendor) return -1;
+  if (adapter1->vendor > adapter2->vendor) return 1;
+
+  if (adapter1->product < adapter2->product) return -1;
+  if (adapter1->product > adapter2->product) return 1;
+
+  return 0;
+}
+
+static int
+usbSortSerialAdapters (const void *element1, const void *element2) {
+  const UsbSerialAdapter *const *adapter1 = element1;
+  const UsbSerialAdapter *const *adapter2 = element2;
+
+  return usbCompareSerialAdapters(*adapter1, *adapter2);
+}
+
+static int
+usbSearchSerialAdapter (const void *target, const void *element) {
+  const UsbSerialAdapter *const *adapter = element;
+
+  return usbCompareSerialAdapters(target, *adapter);
+}
+
+static const UsbSerialAdapter *
+usbGetSerialAdapter (uint16_t vendor, uint16_t product) {
+  const UsbSerialAdapter target = {
+    .vendor = vendor,
+    .product = product
+  };
+
+  const UsbSerialAdapter *const *adapter = bsearch(&target, usbSerialAdapters, usbSerialAdapterCount, sizeof(*usbSerialAdapters), usbSearchSerialAdapter);
+
+  return adapter? *adapter: NULL;
+}
+
 const UsbSerialAdapter *
 usbFindSerialAdapter (const UsbDeviceDescriptor *descriptor) {
-  const UsbSerialAdapter *adapter = usbSerialAdapters;
+  if (!usbSerialAdapters) {
+    const UsbSerialAdapter **adapters;
 
-  while (adapter->vendor) {
-    if (adapter->vendor == getLittleEndian16(descriptor->idVendor)) {
-      if (!adapter->product || (adapter->product == getLittleEndian16(descriptor->idProduct))) {
-        return adapter;
-      }
+    if (!(adapters = malloc(usbSerialAdapterCount * sizeof(*adapters)))) {
+      logMallocError();
+      return NULL;
     }
 
-    adapter += 1;
+    {
+      const UsbSerialAdapter *source = usbSerialAdapterTable;
+      const UsbSerialAdapter *end = source + usbSerialAdapterCount;
+      const UsbSerialAdapter **target = adapters;
+
+      while (source < end) *target++ = source++;
+      qsort(adapters, usbSerialAdapterCount, sizeof(*adapters), usbSortSerialAdapters);
+    }
+
+    usbSerialAdapters = adapters;
   }
 
-  return NULL;
+  {
+    uint16_t vendor = getLittleEndian16(descriptor->idVendor);
+    uint16_t product = getLittleEndian16(descriptor->idProduct);
+    const UsbSerialAdapter *adapter = usbGetSerialAdapter(vendor, product);
+
+    if (!adapter) adapter = usbGetSerialAdapter(vendor, 0);
+    return adapter;
+  }
 }
 
 int
