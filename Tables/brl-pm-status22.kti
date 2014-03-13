@@ -68,5 +68,9 @@ bind !Status19 AUTOREPEAT
 bind \{toggleOff}+!Status19 AUTOREPEAT+off
 bind \{toggleOn}+!Status19 AUTOREPEAT+on
 
+bind !Status20 BRLUCDOTS
+bind \{toggleOff}+!Status20 BRLUCDOTS+off
+bind \{toggleOn}+!Status20 BRLUCDOTS+on
+
 bind !Status21 TIME
 bind !Status22 PASTE

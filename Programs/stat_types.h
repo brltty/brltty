@@ -73,6 +73,7 @@ typedef enum {
   gscInfoMode /* info mode */,
   gscAutorepeat /* autorepeat */,
   gscAutospeak /* autospeak */,
+  gscBrailleInputMode /* braille input mode */,
 
   GSC_COUNT /* must be last */
 } BRL_GenericStatusCell;
