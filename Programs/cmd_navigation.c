@@ -960,6 +960,11 @@ handleNavigationCommand (int command, void *datga) {
     case BRL_CMD_AUTOREPEAT:
       toggleFeatureSetting(&prefs.autorepeat, command);
       break;
+
+    case BRL_CMD_BRLUCDOTS:
+      toggleFeatureSetting(&prefs.brailleInputMode, command);
+      break;
+
     case BRL_CMD_TUNES:
       toggleFeatureSetting(&prefs.alertTunes, command);        /* toggle sound on/off */
       break;
@@ -1218,7 +1223,7 @@ handleNavigationCommand (int command, void *datga) {
               character = convertDotsToCharacter(textTable, arg);
               break;
 
-            case BRL_INPUT_UNICODE:
+            case BRL_INPUT_DOTS:
               character = UNICODE_BRAILLE_ROW | arg;
               break;
 

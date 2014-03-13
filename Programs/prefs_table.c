@@ -59,7 +59,7 @@ PREFERENCE_STRING_TABLE(brailleSensitivity,
 )
 
 PREFERENCE_STRING_TABLE(brailleInputMode,
-  "text-table", "unicode-braille"
+  "text", "dots"
 )
 
 PREFERENCE_STRING_TABLE(brailleOrientation,

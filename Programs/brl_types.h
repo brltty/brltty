@@ -45,7 +45,7 @@ typedef enum {
 
 typedef enum {
   BRL_INPUT_TEXT,
-  BRL_INPUT_UNICODE
+  BRL_INPUT_DOTS
 } BrailleInputMode;
 
 typedef enum {

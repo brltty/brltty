@@ -667,7 +667,7 @@ makePreferencesMenu (void) {
     {
       static const MenuString strings[] = {
         {.label=strtext("Translated via Text Table")},
-        {.label=strtext("Unicode Braille")}
+        {.label=strtext("Dots via Unicode Braille")}
       };
 
       NAME(strtext("Braille Input Mode"));
