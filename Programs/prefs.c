@@ -347,20 +347,34 @@ loadPreferencesFile (const char *path) {
 
 static int
 putPreferenceComment (FILE *file, const PreferenceEntry *pref) {
-  if (fprintf(file, "%c %s", PREFS_COMMENT_CHARACTER, pref->name) < 0) return 0;
+  if (fprintf(file, "\n%c %s", PREFS_COMMENT_CHARACTER, pref->name) < 0) return 0;
 
   if (pref->settingCount) {
     if (fprintf(file, "[%u]", pref->settingCount) < 0) return 0;
   }
 
-  if (fputc(':', file) == EOF) return 0;
+  if (fputs(": ", file) == EOF) return 0;
 
-  if (pref->settingNames) {
+  if (pref->settingNames && (pref->defaultValue < pref->settingNames->count)) {
+    if (fputs(pref->settingNames->table[pref->defaultValue], file) == EOF) return 0;
+  } else {
+    if (fprintf(file, "%u", pref->defaultValue) < 0) return 0;
+  }
+
+  if (pref->settingNames && (pref->settingNames->count > 0)) {
     unsigned int index;
 
+    if (fputs(" {", file) == EOF) return 0;
+
     for (index=0; index<pref->settingNames->count; index+=1) {
-      if (fprintf(file, " %s", pref->settingNames->table[index]) < 0) return 0;
+      if (index > 0) {
+        if (fputc(' ', file) == EOF) return 0;
+      }
+
+      if (fputs(pref->settingNames->table[index], file) == EOF) return 0;
     }
+
+    if (fputc('}', file) == EOF) return 0;
   }
 
   if (fputc('\n', file) == EOF) return 0;
@@ -389,6 +403,8 @@ savePreferencesFile (const char *path) {
     const PreferenceEntry *pref = preferenceTable;
     const PreferenceEntry *const end = pref + preferenceCount;
 
+    if (fprintf(file, "%c %s Preferences File\n", PREFS_COMMENT_CHARACTER, PACKAGE_TITLE) < 0) goto done;
+
     while (pref < end) {
       if (!putPreferenceComment(file, pref)) break;
       if (fputs(pref->name, file) == EOF) break;
@@ -401,15 +417,15 @@ savePreferencesFile (const char *path) {
           if (!putPreferenceSetting(file, *setting++, pref->settingNames)) goto done;
         }
       } else if (!putPreferenceSetting(file, *pref->setting, pref->settingNames)) {
-        break;
+        goto done;
       }
 
-      if (fputs("\n\n", file) == EOF) break;
+      if (fputs("\n", file) == EOF) goto done;
 
       pref += 1;
     }
-    if (pref == end) ok = 1;
 
+    ok = 1;
   done:
     if (!ok) {
       if (!ferror(file)) errno = EIO;
