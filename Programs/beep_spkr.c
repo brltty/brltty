@@ -23,11 +23,11 @@
 
 #undef CAN_BEEP
 
-#if defined(HAVE_DEV_SPEAKER_SPEAKER_H
+#if defined(HAVE_DEV_SPEAKER_SPEAKER_H)
 #include <dev/speaker/speaker.h>
 #define CAN_BEEP
 
-#elif defined(HAVE_MACHINE_SPEAKER_H
+#elif defined(HAVE_MACHINE_SPEAKER_H)
 #include <machine/speaker.h>
 #define CAN_BEEP
 
