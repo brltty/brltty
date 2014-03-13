@@ -25,6 +25,15 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef struct {
+  uint16_t vendor;
+  uint16_t product;
+  const UsbSerialOperations *operations;
+  unsigned generic:1;
+} UsbSerialAdapter;
+
+extern const UsbSerialAdapter *usbFindSerialAdapter (const UsbDeviceDescriptor *descriptor);
+
 extern int usbSkipInitialBytes (UsbInputFilterData *data, unsigned int count);
 
 extern const UsbSerialOperations usbSerialOperations_CDC_ACM;

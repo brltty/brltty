@@ -108,6 +108,7 @@ USB device identifiers support the following parameters:
    serialNumber=       one or more arbitrary characters
    vendorIdentifier=   an integer within the range 1-65535 (0X0001-0XFFFF)
    productIdentifier=  an integer within the range 1-65535 (0X0001-0XFFFF)
+   genericDevices=     yes, no
 
 All of the parameters are optional. It shouldn't normally be necessary to
 supply any of them.
@@ -125,6 +126,11 @@ The productIdentifier= parameter acts as a filter. It specifies the USB product
 identifier that the device must have. It's value must be an integer within the
 range 1-65535 (0X0001-0XFFFF). If this parameter isn't supplied then this
 filter isn't applied.
+
+The genericDevices= parameter specifies whether or not a device which has a
+generic vendor/product identifier pair may be used. It's value must be
+either "yes" or "no" - it is case insensitive, and any abbreviation may be
+used. If this parameter isn't supplied, "yes" is assumed.
 
 -------------------------------------------------------------------------------
 

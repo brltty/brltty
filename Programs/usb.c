@@ -38,6 +38,7 @@
 #include "io_misc.h"
 #include "io_usb.h"
 #include "usb_internal.h"
+#include "usb_serial.h"
 
 ssize_t
 usbControlRead (
@@ -1162,6 +1163,7 @@ struct UsbChooseChannelDataStruct {
   const char *serialNumber;
   uint16_t vendorIdentifier;
   uint16_t productIdentifier;
+  unsigned genericDevices:1;
 };
 
 static int
@@ -1184,6 +1186,12 @@ usbChooseChannel (UsbDevice *device, UsbChooseChannelData *data) {
   while (definition->vendor) {
     if (!definition->version || (definition->version == getLittleEndian16(descriptor->bcdUSB))) {
       if (USB_IS_PRODUCT(descriptor, definition->vendor, definition->product)) {
+        if (!data->genericDevices) {
+          const UsbSerialAdapter *adapter = usbFindSerialAdapter(descriptor);
+
+          if (adapter && adapter->generic) break;
+        }
+
         if (!usbVerifyVendorIdentifier(descriptor, data->vendorIdentifier)) break;
         if (!usbVerifyProductIdentifier(descriptor, data->productIdentifier)) break;
         if (!usbVerifySerialNumber(device, data->serialNumber)) break;
@@ -1276,7 +1284,8 @@ usbNewChannel (UsbChooseChannelData *data) {
 typedef enum {
   USB_CHAN_SERIAL_NUMBER,
   USB_CHAN_VENDOR_IDENTIFIER,
-  USB_CHAN_PRODUCT_IDENTIFIER
+  USB_CHAN_PRODUCT_IDENTIFIER,
+  USB_CHAN_GENERIC_DEVICES
 } UsbChannelParameter;
 
 static char **
@@ -1285,6 +1294,7 @@ usbGetChannelParameters (const char *identifier) {
     "serialNumber",
     "vendorIdentifier",
     "productIdentifier",
+    "genericDevices",
     NULL
   };
 
@@ -1307,6 +1317,23 @@ usbOpenChannel (const UsbChannelDefinition *definitions, const char *identifier)
 
     if (!usbParseVendorIdentifier(&choose.vendorIdentifier, parameters[USB_CHAN_VENDOR_IDENTIFIER])) ok = 0;
     if (!usbParseProductIdentifier(&choose.productIdentifier, parameters[USB_CHAN_PRODUCT_IDENTIFIER])) ok = 0;
+
+    {
+      const char *parameter = parameters[USB_CHAN_GENERIC_DEVICES];
+
+      if (!(parameter && *parameter)) {
+        choose.genericDevices = 1;
+      } else {
+        unsigned int flag;
+
+        if (validateYesNo(&flag, parameter)) {
+          choose.genericDevices = flag;
+        } else {
+          logMessage(LOG_WARNING, "invalid generic devices option: %s", parameter);
+          ok = 0;
+        }
+      }
+    }
 
     if (ok) {
       if (!(channel = usbNewChannel(&choose))) {

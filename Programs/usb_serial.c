@@ -38,15 +38,10 @@ usbSkipInitialBytes (UsbInputFilterData *data, unsigned int count) {
   return 1;
 }
 
-typedef struct {
-  uint16_t vendor;
-  uint16_t product;
-  const UsbSerialOperations *operations;
-} UsbSerialAdapter;
-
 static const UsbSerialAdapter usbSerialAdapters[] = {
   { /* Albatross, Cebra, HIMS, HandyTech FTDI */
     .vendor=0X0403, .product=0X6001,
+    .generic = 1,
     .operations = &usbSerialOperations_FTDI_FT8U232AM
   },
 
@@ -162,11 +157,13 @@ static const UsbSerialAdapter usbSerialAdapters[] = {
 
   { /* Braille Memo, Seika Braille Display */
     .vendor=0X10C4, .product=0XEA60,
+    .generic = 1,
     .operations = &usbSerialOperations_CP2101
   },
 
   { /* Seika Note Taker */
     .vendor=0X10C4, .product=0XEA80,
+    .generic = 1,
     .operations = &usbSerialOperations_CP2110
   },
 
@@ -205,30 +202,41 @@ usbFindInterruptInputEndpoint (UsbDevice *device, const UsbInterfaceDescriptor *
   return NULL;
 }
 
+const UsbSerialAdapter *
+usbFindSerialAdapter (const UsbDeviceDescriptor *descriptor) {
+  const UsbSerialAdapter *adapter = usbSerialAdapters;
+
+  while (adapter->vendor) {
+    if (adapter->vendor == getLittleEndian16(descriptor->idVendor)) {
+      if (!adapter->product || (adapter->product == getLittleEndian16(descriptor->idProduct))) {
+        return adapter;
+      }
+    }
+
+    adapter += 1;
+  }
+
+  return NULL;
+}
+
 int
 usbSetSerialOperations (UsbDevice *device) {
   if (device->serialOperations) return 1;
 
   {
-    const UsbSerialAdapter *sa = usbSerialAdapters;
+    const UsbSerialAdapter *adapter = usbFindSerialAdapter(&device->descriptor);
 
-    while (sa->vendor) {
-      if (sa->vendor == getLittleEndian16(device->descriptor.idVendor)) {
-        if (!sa->product || (sa->product == getLittleEndian16(device->descriptor.idProduct))) {
-          const UsbSerialOperations *operations = sa->operations;
+    if (adapter) {
+      const UsbSerialOperations *operations = adapter->operations;
 
-          if (operations) {
-            UsbInputFilter *filter = operations->inputFilter;
-           
-            if (filter && !usbAddInputFilter(device, filter)) return 0;
-          }
-
-          device->serialOperations = operations;
-          return 1;
-        }
+      if (operations) {
+        UsbInputFilter *filter = operations->inputFilter;
+       
+        if (filter && !usbAddInputFilter(device, filter)) return 0;
       }
 
-      sa += 1;
+      device->serialOperations = operations;
+      return 1;
     }
   }
 
