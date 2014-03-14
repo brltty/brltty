@@ -227,27 +227,40 @@ getMonotonicTime (TimeValue *now) {
   now->seconds = milliseconds / MSECS_PER_SEC;
   now->nanoseconds = (milliseconds % MSECS_PER_SEC) * NSECS_PER_MSEC;
 
-#elif defined(CLOCK_MONOTONIC_RAW)
-  struct timespec ts;
-  clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
-  now->seconds = ts.tv_sec;
-  now->nanoseconds = ts.tv_nsec;
+#elif defined(CLOCK_REALTIME)
+  static const clockid_t clocks[] = {
+#ifdef CLOCK_MONOTONIC_RAW
+    CLOCK_MONOTONIC_RAW,
+#endif /* CLOCK_MONOTONIC_RAW */
 
-#elif defined(CLOCK_MONOTONIC_HR)
-  struct timespec ts;
-  clock_gettime(CLOCK_MONOTONIC_HR, &ts);
-  now->seconds = ts.tv_sec;
-  now->nanoseconds = ts.tv_nsec;
+#ifdef CLOCK_MONOTONIC_HR
+    CLOCK_MONOTONIC_HR,
+#endif /* CLOCK_MONOTONIC_HR */
 
-#elif defined(CLOCK_MONOTONIC)
-  struct timespec ts;
-  clock_gettime(CLOCK_MONOTONIC, &ts);
-  now->seconds = ts.tv_sec;
-  now->nanoseconds = ts.tv_nsec;
+#ifdef CLOCK_MONOTONIC
+    CLOCK_MONOTONIC,
+#endif /* CLOCK_MONOTONIC */
 
-#else /* fall back to clock time */
-  getCurrentTime(now);
+    CLOCK_REALTIME
+  };
+
+  static const clockid_t *clock = clocks;
+
+  while (*clock != CLOCK_REALTIME) {
+    struct timespec ts;
+
+    if (clock_gettime(*clock, &ts) != -1) {
+      now->seconds = ts.tv_sec;
+      now->nanoseconds = ts.tv_nsec;
+      return;
+    }
+
+    logMessage(LOG_WARNING, "clock not available: %u", *clock);
+    clock += 1;
+  }
 #endif /* get monotonic time */
+
+  getCurrentTime(now);
 }
 
 long int
