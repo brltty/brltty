@@ -227,6 +227,12 @@ getMonotonicTime (TimeValue *now) {
   now->seconds = milliseconds / MSECS_PER_SEC;
   now->nanoseconds = (milliseconds % MSECS_PER_SEC) * NSECS_PER_MSEC;
 
+#elif defined(CLOCK_MONOTONIC_RAW)
+  struct timespec ts;
+  clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+  now->seconds = ts.tv_sec;
+  now->nanoseconds = ts.tv_nsec;
+
 #elif defined(CLOCK_MONOTONIC_HR)
   struct timespec ts;
   clock_gettime(CLOCK_MONOTONIC_HR, &ts);
