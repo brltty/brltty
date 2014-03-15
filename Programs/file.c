@@ -359,108 +359,144 @@ getHomeDirectory (void) {
   return NULL;
 }
 
-static int
-makeOverrideDirectory (const char **directory, const char *base, int xdg) {
-  char *path = makePath(base, (xdg? PACKAGE_NAME: ("." PACKAGE_NAME)));
-
-  if (path) {
-    if (testDirectoryPath(path)) {
-      *directory = path;
-      logMessage(LOG_INFO, "Override Directory: %s", *directory);
-      registerProgramMemory("override-directory", directory);
-      return 1;
-    }
-
-    free(path);
-  }
-
-  return 0;
+static char *
+makeOverridePath (const char *base, int xdg) {
+  return makePath(base, (xdg? PACKAGE_NAME: ("." PACKAGE_NAME)));
 }
 
-const char *
-getOverrideDirectory (void) {
-  static const char *directory = NULL;
-  if (directory) goto done;
+static int
+addOverridePath (char **paths, size_t *index, const char *base, int xdg) {
+  char *path = makeOverridePath(base, xdg);
 
-  {
-    const char *base = getenv("XDG_CONFIG_HOME");
+  if (!path) return 0;
+  logMessage(LOG_INFO, "Override Directory: %s", path);
+  paths[(*index)++] = path;
+  return 1;
+}
 
-    if (base && *base) {
-      if (makeOverrideDirectory(&directory, base, 1)) goto done;
-    } else {
-      char *home = getHomeDirectory();
+const char *const *
+getAllOverrideDirectories (void) {
+  static const char *const *overrideDirectories = NULL;
 
-      if (home) {
-        char *base = *home? makePath(home, ".config"): NULL;
+  if (!overrideDirectories) {
+    const char *secondaryList = getenv("XDG_CONFIG_DIRS");
+    int secondaryCount;
+    char **secondaryBases = splitString(((secondaryList && *secondaryList)? secondaryList: "/etc/xdg"), ':', &secondaryCount);
 
-        free(home);
-        home = NULL;
+    if (secondaryBases) {
+      size_t count = 1 + secondaryCount + 1;
+      char **paths;
 
-        if (base) {
-          int made = makeOverrideDirectory(&directory, base, 1);
+      if ((paths = malloc(sizeof(*paths) * (count + 1)))) {
+        size_t index = 0;
 
-          free(base);
-          base = NULL;
+        {
+          const char *primary = getenv("XDG_CONFIG_HOME");
 
-          if (made) goto done;
+          if (primary && *primary) {
+            if (!addOverridePath(paths, &index, primary, 1)) goto done;
+          } else {
+            char *home = getHomeDirectory();
+
+            if (home) {
+              char *base = *home? makePath(home, ".config"): NULL;
+
+              free(home);
+              home = NULL;
+
+              if (base) {
+                int added = addOverridePath(paths, &index, base, 1);
+
+                free(base);
+                base = NULL;
+
+                if (!added) goto done;
+              }
+            }
+          }
         }
-      }
-    }
-  }
 
-  {
-    const char *path = getenv("XDG_CONFIG_DIRS");
-    if (!(path && *path)) path = "/etc/xdg";
+        if (!index) {
+          char *primary = strdup("");
 
-    {
-      int made = 0;
-      char **bases = splitString(path, ':', NULL);
+          if (!primary) {
+            logMallocError();
+            goto done;
+          }
 
-      if (bases) {
-        char **base = bases;
+          paths[index++] = primary;
+        }
 
-        while (*base) {
-          if (**base) {
-            if (makeOverrideDirectory(&directory, *base, 1)) {
-              made = 1;
-              break;
+        {
+          char **base = secondaryBases;
+
+          while (*base) {
+            if (**base) {
+              if (!addOverridePath(paths, &index, *base, 1)) {
+                break;
+              }
+            } else {
+              count -= 1;
+            }
+
+            base += 1;
+          }
+
+          if (*base) goto done;
+        }
+
+        {
+          int added = 0;
+          char *home = getHomeDirectory();
+
+          if (home && *home) {
+            if (addOverridePath(paths, &index, home, 0)) added = 1;
+          } else {
+            char *current = getWorkingDirectory();
+
+            if (current) {
+              if (addOverridePath(paths, &index, current, 0)) added = 1;
+              free(current);
             }
           }
 
-          base += 1;
+          if (home) free(home);
+          if (!added) goto done;
         }
 
-        deallocateStrings(bases);
-      }
-
-      if (made) goto done;
-    }
-  }
-
-  {
-    int made = 0;
-    char *home = getHomeDirectory();
-
-    if (home && *home) {
-      if (makeOverrideDirectory(&directory, home, 0)) made = 1;
-    } else {
-      char *current = getWorkingDirectory();
-
-      if (current) {
-        if (makeOverrideDirectory(&directory, current, 0)) made = 1;
-        free(current);
-      }
-    }
-
-    if (home) free(home);
-    if (made) goto done;
-  }
-
-  directory = "";
-  logMessage(LOG_WARNING, "no override directory");
-
 done:
-  return directory;
+        paths[index] = NULL;
+
+        if (index == count) {
+          overrideDirectories = (const char *const *)paths;
+        } else {
+          deallocateStrings(paths);
+        }
+      } else {
+        logMallocError();
+      }
+
+      deallocateStrings(secondaryBases);
+    }
+
+    if (!overrideDirectories) logMessage(LOG_WARNING, "no override directories");
+  }
+
+  return overrideDirectories;
+}
+
+const char *
+getPrimaryOverrideDirectory (void) {
+  const char *const *directories = getAllOverrideDirectories();
+
+  if (directories) {
+    const char *directory = directories[0];
+
+    if (directory && *directory) return directory;
+  }
+
+  logMessage(LOG_WARNING, "no primary override directory");
+  return NULL;
 }
 
 static void
@@ -494,22 +530,39 @@ openFile (const char *path, const char *mode, int optional) {
 
 FILE *
 openDataFile (const char *path, const char *mode, int optional) {
+  const char *const *overrideDirectories = getAllOverrideDirectories();
+  const char *overrideDirectory = NULL;
+  char *overridePath = NULL;
+
+  int writable = (*mode == 'w') || (*mode == 'a');
   const char *name = locatePathName(path);
-  const char *overrideDirectory = getOverrideDirectory();
-  char *overridePath;
   FILE *file;
 
-  if (!overrideDirectory) {
-    overridePath = NULL;
-  } else if ((overridePath = makePath(overrideDirectory, name))) {
-    if (testFilePath(overridePath)) {
-      file = openFile(overridePath, mode, optional);
-      goto done;
+  if (overrideDirectories) {
+    const char *const *directory = overrideDirectories;
+
+    while (*directory) {
+      if (**directory) {
+        char *path = makePath(*directory, name);
+
+        if (path) {
+          if (testFilePath(path)) {
+            file = openFile(path, mode, optional);
+            overrideDirectory = *directory;
+            overridePath = path;
+            goto done;
+          }
+
+          free(path);
+        }
+      }
+
+      directory += 1;
     }
   }
 
   if (!(file = openFile(path, mode, optional))) {
-    if ((*mode == 'w') || (*mode == 'a')) {
+    if (writable) {
       if (errno == ENOENT) {
         char *directory = getPathDirectory(path);
 
@@ -524,10 +577,14 @@ openDataFile (const char *path, const char *mode, int optional) {
         }
       }
 
-      if (((errno == EACCES) || (errno == EROFS)) && overridePath) {
-        if (ensureDirectory(overrideDirectory)) {
-          file = openFile(overridePath, mode, optional);
-          goto done;
+      if ((errno == EACCES) || (errno == EROFS)) {
+        if ((overrideDirectory = getPrimaryOverrideDirectory())) {
+          if ((overridePath = makePath(overrideDirectory, name))) {
+            if (ensureDirectory(overrideDirectory)) {
+              file = openFile(overridePath, mode, optional);
+              goto done;
+            }
+          }
         }
       }
     }
