@@ -359,54 +359,88 @@ getHomeDirectory (void) {
   return NULL;
 }
 
+static int
+makeOverrideDirectory (const char **directory, const char *base) {
+  char *path = makePath(base, PACKAGE_NAME);
+
+  if (path) {
+    if (testDirectoryPath(path)) {
+      *directory = path;
+      logMessage(LOG_INFO, "Override Directory: %s", *directory);
+      registerProgramMemory("override-directory", directory);
+      return 1;
+    }
+
+    free(path);
+  }
+
+  return 0;
+}
+
 const char *
 getOverrideDirectory (void) {
   static const char *directory = NULL;
+  if (directory) return directory;
 
-  if (!directory) {
-    static const char subdirectory[] = "." PACKAGE_NAME;
+  {
+    const char *base = getenv("XDG_CONFIG_HOME");
 
-    {
-      const char *xdg = getenv("XDG_CONFIG_HOME");
-
-      if (xdg && *xdg) {
-        if ((directory = makePath(xdg, PACKAGE_NAME))) {
-          goto gotDirectory;
-        }
+    if (base && *base) {
+      if (makeOverrideDirectory(&directory, base)) {
+        return directory;
       }
     }
-
-    {
-      char *home = getHomeDirectory();
-
-      if (home && *home) {
-        directory = makePath(home, subdirectory);
-        free(home);
-        if (directory) goto gotDirectory;
-      }
-    }
-
-    {
-      char *workingDirectory = getWorkingDirectory();
-
-      if (workingDirectory) {
-        directory = makePath(workingDirectory, subdirectory);
-        free(workingDirectory);
-        if (directory) goto gotDirectory;
-      }
-    }
-
-    directory = "";
-    logMessage(LOG_WARNING, "no override directory");
-    goto ready;
-
-  gotDirectory:
-    logMessage(LOG_INFO, "Override Directory: %s", directory);
-    registerProgramMemory("override-directory", &directory);
   }
 
-ready:
-  return *directory? directory: NULL;
+  {
+    char *home = getHomeDirectory();
+
+    if (home && *home) {
+      char *base = makePath(home, ".config");
+
+      free(home);
+      home = NULL;
+
+      if (base) {
+        int made = makeOverrideDirectory(&directory, base);
+
+        free(base);
+        base = NULL;
+
+        if (made) return directory;
+      }
+    }
+  }
+
+  {
+    const char *path = getenv("XDG_CONFIG_DIRS");
+    if (!(path && *path)) path = "/etc/xdg";
+
+    {
+      int made = 0;
+      char **bases = splitString(path, ':', NULL);
+
+      if (bases) {
+        char **base = bases;
+
+        while (*base) {
+          if (makeOverrideDirectory(&directory, *base)) {
+            made = 1;
+            break;
+          }
+
+          base += 1;
+        }
+
+        deallocateStrings(bases);
+      }
+
+      if (made) return directory;
+    }
+  }
+
+  logMessage(LOG_WARNING, "no override directory");
+  return (directory = "");
 }
 
 static void
