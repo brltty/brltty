@@ -360,8 +360,8 @@ getHomeDirectory (void) {
 }
 
 static int
-makeOverrideDirectory (const char **directory, const char *base) {
-  char *path = makePath(base, PACKAGE_NAME);
+makeOverrideDirectory (const char **directory, const char *base, int xdg) {
+  char *path = makePath(base, (xdg? PACKAGE_NAME: ("." PACKAGE_NAME)));
 
   if (path) {
     if (testDirectoryPath(path)) {
@@ -380,14 +380,14 @@ makeOverrideDirectory (const char **directory, const char *base) {
 const char *
 getOverrideDirectory (void) {
   static const char *directory = NULL;
-  if (directory) return directory;
+  if (directory) goto done;
 
   {
     const char *base = getenv("XDG_CONFIG_HOME");
 
     if (base && *base) {
-      if (makeOverrideDirectory(&directory, base)) {
-        return directory;
+      if (makeOverrideDirectory(&directory, base, 1)) {
+        goto done;
       }
     }
   }
@@ -395,19 +395,19 @@ getOverrideDirectory (void) {
   {
     char *home = getHomeDirectory();
 
-    if (home && *home) {
-      char *base = makePath(home, ".config");
+    if (home) {
+      char *base = *home? makePath(home, ".config"): NULL;
 
       free(home);
       home = NULL;
 
       if (base) {
-        int made = makeOverrideDirectory(&directory, base);
+        int made = makeOverrideDirectory(&directory, base, 1);
 
         free(base);
         base = NULL;
 
-        if (made) return directory;
+        if (made) goto done;
       }
     }
   }
@@ -424,7 +424,7 @@ getOverrideDirectory (void) {
         char **base = bases;
 
         while (*base) {
-          if (makeOverrideDirectory(&directory, *base)) {
+          if (makeOverrideDirectory(&directory, *base, 1)) {
             made = 1;
             break;
           }
@@ -435,12 +435,41 @@ getOverrideDirectory (void) {
         deallocateStrings(bases);
       }
 
-      if (made) return directory;
+      if (made) goto done;
     }
   }
 
+  {
+    char *home = getHomeDirectory();
+
+    if (home) {
+      int made = *home? makeOverrideDirectory(&directory, home, 0): 0;
+
+      free(home);
+      home = NULL;
+
+      if (made) goto done;
+    }
+  }
+
+  {
+    char *current = getWorkingDirectory();
+
+    if (current) {
+      int made = makeOverrideDirectory(&directory, current, 0);
+
+      free(current);
+      current = NULL;
+
+      if (made) goto done;
+    }
+  }
+
+  directory = "";
   logMessage(LOG_WARNING, "no override directory");
-  return (directory = "");
+
+done:
+  return directory;
 }
 
 static void
