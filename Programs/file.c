@@ -367,11 +367,21 @@ getOverrideDirectory (void) {
     static const char subdirectory[] = "." PACKAGE_NAME;
 
     {
-      char *homeDirectory = getHomeDirectory();
+      const char *xdg = getenv("XDG_CONFIG_HOME");
 
-      if (homeDirectory) {
-        directory = makePath(homeDirectory, subdirectory);
-        free(homeDirectory);
+      if (xdg && *xdg) {
+        if ((directory = makePath(xdg, PACKAGE_NAME))) {
+          goto gotDirectory;
+        }
+      }
+    }
+
+    {
+      char *home = getHomeDirectory();
+
+      if (home && *home) {
+        directory = makePath(home, subdirectory);
+        free(home);
         if (directory) goto gotDirectory;
       }
     }
