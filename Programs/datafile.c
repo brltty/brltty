@@ -94,14 +94,15 @@ reportDataError (DataFile *file, char *format, ...) {
 
 int
 compareToKeyword (const wchar_t *keyword, const wchar_t *characters, size_t count) {
-  size_t length = wcslen(keyword);
-
-  if (length < count) return -1;
-  if (length > count) return 1;
-
   while (count > 0) {
-    wchar_t character1 = towlower(*keyword++);
-    wchar_t character2 = towlower(*characters++);
+    wchar_t character1;
+    wchar_t character2;
+
+    if (!(character1 = *keyword)) return -1;
+    keyword += 1;
+
+    character1 = towlower(character1);
+    character2 = towlower(*characters++);
 
     if (character1 < character2) return -1;
     if (character1 > character2) return 1;
@@ -109,7 +110,7 @@ compareToKeyword (const wchar_t *keyword, const wchar_t *characters, size_t coun
     count -= 1;
   }
 
-  return 0;
+  return *keyword? 1: 0;
 }
 
 int
