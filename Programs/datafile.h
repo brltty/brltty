@@ -44,10 +44,10 @@ extern int processDataStream (
   DataOperandsProcessor *processLine, void *data
 );
 
-extern int compareToKeyword (const wchar_t *keyword, const wchar_t *characters, size_t count);
+extern int compareKeyword (const wchar_t *keyword, const wchar_t *characters, size_t count);
 extern int compareKeywords (const wchar_t *keyword1, const wchar_t *keyword2);
-extern int isKeyword (const wchar_t *keyword, const wchar_t *characters, size_t count);
 
+extern int isKeyword (const wchar_t *keyword, const wchar_t *characters, size_t count);
 extern int isNumber (int *number, const wchar_t *characters, int length);
 extern int isHexadecimalDigit (wchar_t character, int *value, int *shift);
 extern int isOctalDigit (wchar_t character, int *value, int *shift);

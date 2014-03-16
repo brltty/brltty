@@ -93,7 +93,7 @@ reportDataError (DataFile *file, char *format, ...) {
 }
 
 int
-compareToKeyword (const wchar_t *keyword, const wchar_t *characters, size_t count) {
+compareKeyword (const wchar_t *keyword, const wchar_t *characters, size_t count) {
   while (count > 0) {
     wchar_t character1;
     wchar_t character2;
@@ -115,12 +115,12 @@ compareToKeyword (const wchar_t *keyword, const wchar_t *characters, size_t coun
 
 int
 compareKeywords (const wchar_t *keyword1, const wchar_t *keyword2) {
-  return compareToKeyword(keyword1, keyword2, wcslen(keyword2));
+  return compareKeyword(keyword1, keyword2, wcslen(keyword2));
 }
 
 int
 isKeyword (const wchar_t *keyword, const wchar_t *characters, size_t count) {
-  return compareToKeyword(keyword, characters, count) == 0;
+  return compareKeyword(keyword, characters, count) == 0;
 }
 
 int
