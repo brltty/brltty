@@ -93,15 +93,33 @@ reportDataError (DataFile *file, char *format, ...) {
 }
 
 int
-isKeyword (const wchar_t *keyword, const wchar_t *characters, size_t length) {
-  if (length != wcslen(keyword)) return 0;
+compareToKeyword (const wchar_t *keyword, const wchar_t *characters, size_t count) {
+  size_t length = wcslen(keyword);
 
-  while (length > 0) {
-    if (towlower(*characters++) != towlower(*keyword++)) return 0;
-    length -= 1;
+  if (length < count) return -1;
+  if (length > count) return 1;
+
+  while (count > 0) {
+    wchar_t character1 = towlower(*keyword++);
+    wchar_t character2 = towlower(*characters++);
+
+    if (character1 < character2) return -1;
+    if (character1 > character2) return 1;
+
+    count -= 1;
   }
 
-  return 1;
+  return 0;
+}
+
+int
+compareKeywords (const wchar_t *keyword1, const wchar_t *keyword2) {
+  return compareToKeyword(keyword1, keyword2, wcslen(keyword2));
+}
+
+int
+isKeyword (const wchar_t *keyword, const wchar_t *characters, size_t count) {
+  return compareToKeyword(keyword, characters, count) == 0;
 }
 
 int

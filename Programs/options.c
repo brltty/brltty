@@ -686,11 +686,6 @@ typedef struct {
 } ConfigurationDirective;
 
 static int
-compareKeywords (const wchar_t *keyword1, const wchar_t *keyword2) {
-  return wcscasecmp(keyword1, keyword2);
-}
-
-static int
 sortConfigurationDirectives (const void *element1, const void *element2) {
   const ConfigurationDirective *const *directive1 = element1;
   const ConfigurationDirective *const *directive2 = element2;
