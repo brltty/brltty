@@ -18,7 +18,7 @@ dnl Process this file with autoconf 2.53 to produce a configure script.
 ###############################################################################
 
 AC_PREREQ([2.53])
-AC_INIT([brltty], [5.1dev], [brltty@mielke.cc], [], [http://brltty.com])
+AC_INIT([BRLTTY], [5.1dev], [brltty@mielke.cc], [brltty], [http://brltty.com])
 AC_CONFIG_SRCDIR([Programs/brltty.h])
 BRLTTY_SUMMARY_BEGIN
 brltty_build_directories=". Programs Documents Messages Android/Core Android/Application"
@@ -48,11 +48,6 @@ AC_DEFINE_UNQUOTED([BRLAPI_MINOR], [${api_minor}],
 AC_DEFINE_UNQUOTED([BRLAPI_REVISION], [${api_revision}],
                    [Define this to be the API library revision number.])
 
-BRLTTY_UPPERCASE_ASSIGN([PACKAGE_TITLE], [${PACKAGE_NAME}])
-AC_SUBST([PACKAGE_TITLE])
-AC_DEFINE_UNQUOTED([PACKAGE_TITLE], ["${PACKAGE_TITLE}"],
-                   [Define this to be a string containing the package title.])
-
 AC_SUBST([package_date], ["`date "+%Y/%m/%d"`"])
 
 AC_CONFIG_HEADER([config.h])
@@ -61,7 +56,7 @@ AC_PREFIX_DEFAULT([])
 AC_CONFIG_AUX_DIR([acdir])
 AC_CANONICAL_SYSTEM
 
-brltty_default_execute_root="/${PACKAGE_NAME}-${PACKAGE_VERSION}"
+brltty_default_execute_root="/${PACKAGE_TARNAME}-${PACKAGE_VERSION}"
 BRLTTY_ARG_WITH(
    [execute-root], [DIRECTORY],
    [where the package is to be anchored at run-time],
@@ -77,7 +72,7 @@ fi
 AC_SUBST([execute_root])
 BRLTTY_SUMMARY_ITEM([execute-root], [execute_root])
 
-brltty_default_install_root="/tmp/${PACKAGE_NAME}-${PACKAGE_VERSION}"
+brltty_default_install_root="/tmp/${PACKAGE_TARNAME}-${PACKAGE_VERSION}"
 BRLTTY_ARG_WITH(
    [install-root], [DIRECTORY],
    [where to install the package],
@@ -93,11 +88,11 @@ fi
 AC_SUBST([install_root])
 BRLTTY_SUMMARY_ITEM([install-root], [install_root])
 
-AC_SUBST([CONFIGURATION_FILE], ["${PACKAGE_NAME}.conf"])
+AC_SUBST([CONFIGURATION_FILE], ["${PACKAGE_TARNAME}.conf"])
 BRLTTY_DEFINE_EXPANDED([CONFIGURATION_FILE], ["${CONFIGURATION_FILE}"],
                        [Define this to be a string containing the name of the default configuration file.])
 
-AC_SUBST([PREFERENCES_FILE], ["${PACKAGE_NAME}.prefs"])
+AC_SUBST([PREFERENCES_FILE], ["${PACKAGE_TARNAME}.prefs"])
 BRLTTY_DEFINE_EXPANDED([PREFERENCES_FILE], ["${PREFERENCES_FILE}"],
                        [Define this to be a string containing the name of the default preferences file.])
 
@@ -117,7 +112,7 @@ BRLTTY_ARG_REQUIRED(
 BRLTTY_ARG_REQUIRED(
    [drivers-directory], [DIRECTORY],
    [path to directory containing drivers],
-   [drivers_directory], ["${libdir}/${PACKAGE_NAME}"]
+   [drivers_directory], ["${libdir}/${PACKAGE_TARNAME}"]
 )
 
 BRLTTY_ARG_WITH(
@@ -130,7 +125,7 @@ then
    writable_directory=""
 elif test "${writable_directory}" = "yes"
 then
-   writable_directory="${localstatedir}/run/${PACKAGE_NAME}"
+   writable_directory="${localstatedir}/run/${PACKAGE_TARNAME}"
 fi
 AC_SUBST([writable_directory])
 BRLTTY_SUMMARY_ITEM([writable-directory], [writable_directory])
@@ -138,7 +133,7 @@ BRLTTY_SUMMARY_ITEM([writable-directory], [writable_directory])
 BRLTTY_ARG_REQUIRED(
    [tables-directory], [DIRECTORY],
    [path to directory containing data files],
-   [tables_directory], ["${sysconfdir}/${PACKAGE_NAME}"]
+   [tables_directory], ["${sysconfdir}/${PACKAGE_TARNAME}"]
 )
 
 BRLTTY_ARG_REQUIRED(
@@ -150,7 +145,7 @@ BRLTTY_ARG_REQUIRED(
 BRLTTY_ARG_REQUIRED(
    [include-directory], [DIRECTORY],
    [path to directory containing header files],
-   [include_directory], ["${includedir}/${PACKAGE_NAME}"]
+   [include_directory], ["${includedir}/${PACKAGE_TARNAME}"]
 )
 
 BRLTTY_ARG_REQUIRED(
@@ -931,7 +926,7 @@ AC_SUBST([library_extension])
 AC_DEFINE_UNQUOTED([LIBRARY_EXTENSION], ["${library_extension}"],
                    [Define this to be a string containing the library extension.])
 
-AC_SUBST([module_name], ["${library_prefix}${PACKAGE_NAME}"])
+AC_SUBST([module_name], ["${library_prefix}${PACKAGE_TARNAME}"])
 AC_DEFINE_UNQUOTED([MODULE_NAME], ["${module_name}"],
                    [Define this to be a string containing the base module name.])
 
@@ -1749,7 +1744,7 @@ BRLTTY_DEFINE_DIRECTORY([DRIVERS_DIRECTORY], [${execute_root}${drivers_directory
                         [Define this to be a string containing the path to the drivers directory.])
 BRLTTY_DEFINE_DIRECTORY([CONFIGURATION_DIRECTORY], [${sysconfdir}],
                         [Define this to be a string containing the path to the configuration directory.])
-BRLTTY_DEFINE_DIRECTORY([STATE_DIRECTORY], [${localstatedir}/lib/${PACKAGE_NAME}],
+BRLTTY_DEFINE_DIRECTORY([STATE_DIRECTORY], [${localstatedir}/lib/${PACKAGE_TARNAME}],
                         [Define this to be a string containing the path to the state directory.])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_ETCDIR], ["${CONFIGURATION_DIRECTORY}"],
                        [Define this to be a string containing the path to the directory where the authorization key and driver-dependent key names are found.])

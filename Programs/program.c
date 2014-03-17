@@ -52,8 +52,8 @@ prepareLocale (void) {
   setlocale(LC_ALL, "");
 
 #ifdef ENABLE_I18N_SUPPORT
-  bindtextdomain(PACKAGE_NAME, LOCALE_DIRECTORY);
-  textdomain(PACKAGE_NAME);
+  bindtextdomain(PACKAGE_TARNAME, LOCALE_DIRECTORY);
+  textdomain(PACKAGE_TARNAME);
 #endif /* ENABLE_I18N_SUPPORT */
 }
 

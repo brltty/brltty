@@ -361,7 +361,7 @@ getHomeDirectory (void) {
 
 static char *
 makeOverridePath (const char *base, int xdg) {
-  return makePath(base, (xdg? PACKAGE_NAME: ("." PACKAGE_NAME)));
+  return makePath(base, (xdg? PACKAGE_TARNAME: ("." PACKAGE_TARNAME)));
 }
 
 static int

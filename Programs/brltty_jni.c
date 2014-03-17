@@ -28,7 +28,7 @@
 
 #if defined(__ANDROID__)
 #include <android/log.h>
-#define LOG(...) __android_log_print(ANDROID_LOG_DEBUG, PACKAGE_NAME, __VA_ARGS__)
+#define LOG(...) __android_log_print(ANDROID_LOG_DEBUG, PACKAGE_TARNAME, __VA_ARGS__)
 
 #else /* LOG() */
 #warning logging not supported
@@ -150,7 +150,7 @@ prepareProgramArguments (JNIEnv *env, jstring arguments) {
 
   if ((jArgumentArray = (*env)->NewGlobalRef(env, arguments))) {
     if ((cArgumentArray = malloc((count + 2) * sizeof(*cArgumentArray)))) {
-      cArgumentArray[0] = PACKAGE_NAME;
+      cArgumentArray[0] = PACKAGE_TARNAME;
       cArgumentArray[count+1] = NULL;
 
       {

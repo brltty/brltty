@@ -321,17 +321,17 @@ void
 openSystemLog (void) {
 #if defined(WINDOWS)
   if (windowsEventLog == INVALID_HANDLE_VALUE) {
-    windowsEventLog = RegisterEventSource(NULL, PACKAGE_NAME);
+    windowsEventLog = RegisterEventSource(NULL, PACKAGE_TARNAME);
   }
 
 #elif defined(__MSDOS__)
-  openLogFile(PACKAGE_NAME ".log");
+  openLogFile(PACKAGE_TARNAME ".log");
 
 #elif defined(__ANDROID__)
 
 #elif defined(HAVE_SYSLOG_H)
   if (!syslogOpened) {
-    openlog(PACKAGE_NAME, LOG_PID, LOG_DAEMON);
+    openlog(PACKAGE_TARNAME, LOG_PID, LOG_DAEMON);
     syslogOpened = 1;
   }
 #endif /* open system log */
@@ -404,7 +404,7 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
 #elif defined(__MSDOS__)
 
 #elif defined(__ANDROID__)
-        __android_log_write(toAndroidLogPriority(level), PACKAGE_NAME, record);
+        __android_log_write(toAndroidLogPriority(level), PACKAGE_TARNAME, record);
 
 #elif defined(HAVE_SYSLOG_H)
         if (syslogOpened) syslog(level, "%s", record);

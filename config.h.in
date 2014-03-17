@@ -216,9 +216,6 @@ extern "C" {
 /* Define this if the function shl_load is available. */
 #undef HAVE_SHL_LOAD
 
-/* Define this to be a string containing the (capitalized) title of the package. */
-#undef PACKAGE_TITLE
-
 /* Define this to be a string containing the short name of the package. */
 #undef PACKAGE_TARNAME
 

@@ -22,7 +22,7 @@ all install uninstall install-documents:
 install-messages uninstall-messages:
 	cd $(MSG_DIR) && $(MAKE) $(@:-messages=)
 
-ARCHIVE_NAME = $(PACKAGE_NAME)-$(PACKAGE_VERSION)
+ARCHIVE_NAME = $(PACKAGE_TARNAME)-$(PACKAGE_VERSION)
 TAR_EXTENSION = tar
 GZIP_EXTENSION = gz
 BZIP2_EXTENSION = bz2

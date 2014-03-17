@@ -19,7 +19,6 @@
 all:: objects languages
 
 COPYRIGHT_HOLDER = The BRLTTY Developers
-BUGS_ADDRESS = dave@mielke.cc
 
 TEMPLATE_EXTENSION = pot
 SOURCE_EXTENSION = po
@@ -33,9 +32,9 @@ OBJECT_FILES = $(LANGUAGE_CODES:=.$(OBJECT_EXTENSION))
 
 objects: $(OBJECT_FILES)
 
-TEMPLATE_FILE = $(PACKAGE_NAME).$(TEMPLATE_EXTENSION)
+TEMPLATE_FILE = $(PACKAGE_TARNAME).$(TEMPLATE_EXTENSION)
 $(TEMPLATE_FILE): $(BLD_TOP)$(PGM_DIR)/cmds.auto.h
-	$(SRC_TOP)mkpot -n "$(PACKAGE_NAME)" -v "$(PACKAGE_VERSION)" -o $@ -b "$(BUGS_ADDRESS)" -c "$(COPYRIGHT_HOLDER)" $(SRC_TOP) $(BLD_TOP)
+	$(SRC_TOP)mkpot -n "$(PACKAGE_TARNAME)" -v "$(PACKAGE_VERSION)" -o $@ -b "$(PACKAGE_BUGREPORT)" -c "$(COPYRIGHT_HOLDER)" $(SRC_TOP) $(BLD_TOP)
 template $(TEMPLATE_EXTENSION): $(TEMPLATE_FILE)
 
 %.$(SOURCE_EXTENSION): $(TEMPLATE_FILE)
@@ -54,9 +53,9 @@ install:: objects install-locale-directory
 	do \
 	   directory="$(INSTALL_LOCALE_DIRECTORY)/$${language}/LC_MESSAGES"; \
            $(INSTALL_DIRECTORY) "$${directory}"; \
-	   $(INSTALL_DATA) "$${language}.$(OBJECT_EXTENSION)" "$${directory}/$(PACKAGE_NAME).$(OBJECT_EXTENSION)"; \
+	   $(INSTALL_DATA) "$${language}.$(OBJECT_EXTENSION)" "$${directory}/$(PACKAGE_TARNAME).$(OBJECT_EXTENSION)"; \
 	done
 
 uninstall::
-	-rm -f -- $(INSTALL_LOCALE_DIRECTORY)/*/*/$(PACKAGE_NAME).$(OBJECT_EXTENSION)
+	-rm -f -- $(INSTALL_LOCALE_DIRECTORY)/*/*/$(PACKAGE_TARNAME).$(OBJECT_EXTENSION)
 

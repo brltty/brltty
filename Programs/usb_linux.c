@@ -1376,7 +1376,7 @@ usbGetFileSystem (const char *type, const FileSystemCandidate *candidates, Mount
         if (verify(directory)) return directory;
 
         {
-          const char *strings[] = {PACKAGE_NAME, "-", type};
+          const char *strings[] = {PACKAGE_TARNAME, "-", type};
           char *name = joinStrings(strings, ARRAY_COUNT(strings));
           if (makeMountPoint(directory, name, type)) return directory;
         }

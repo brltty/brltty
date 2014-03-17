@@ -137,13 +137,13 @@ main (int argc, char *argv[]) {
 #define INIT_NAME "init"
 
   if ((getpid() == 1) || strstr(argv[0], "linuxrc")) {
-    fprintf(stderr, gettext("\"%s\" started as \"%s\"\n"), PACKAGE_TITLE, argv[0]);
+    fprintf(stderr, gettext("\"%s\" started as \"%s\"\n"), PACKAGE_NAME, argv[0]);
     fflush(stderr);
 
     switch (fork()) {
       case -1: /* failed */
         fprintf(stderr, gettext("fork of \"%s\" failed: %s\n"),
-                PACKAGE_TITLE, strerror(errno));
+                PACKAGE_NAME, strerror(errno));
         fflush(stderr);
 
       default: /* parent */

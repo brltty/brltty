@@ -287,7 +287,7 @@ openMidiDevice (int errorLevel, const char *device) {
     int result;
 
     if ((result = midiAlsa_seq_open(&midi->sequencer, sequencerName, SND_SEQ_OPEN_OUTPUT, 0)) >= 0) {
-      midiAlsa_seq_set_client_name(midi->sequencer, PACKAGE_TITLE);
+      midiAlsa_seq_set_client_name(midi->sequencer, PACKAGE_NAME);
 
       if ((midi->port = midiAlsa_seq_create_simple_port(midi->sequencer, "out0",
                                                         SND_SEQ_PORT_CAP_READ|SND_SEQ_PORT_CAP_SUBS_READ,

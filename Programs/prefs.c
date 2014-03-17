@@ -403,7 +403,7 @@ savePreferencesFile (const char *path) {
     const PreferenceEntry *pref = preferenceTable;
     const PreferenceEntry *const end = pref + preferenceCount;
 
-    if (fprintf(file, "%c %s Preferences File\n", PREFS_COMMENT_CHARACTER, PACKAGE_TITLE) < 0) goto done;
+    if (fprintf(file, "%c %s Preferences File\n", PREFS_COMMENT_CHARACTER, PACKAGE_NAME) < 0) goto done;
 
     while (pref < end) {
       if (!putPreferenceComment(file, pref)) break;

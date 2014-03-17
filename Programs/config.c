@@ -153,7 +153,7 @@ static char *opt_messageHoldTimeout;
 
 static int opt_cancelExecution;
 static const char *const optionStrings_CancelExecution[] = {
-  PACKAGE_NAME,
+  PACKAGE_TARNAME,
   NULL
 };
 
@@ -1032,7 +1032,7 @@ static void
 makeProgramBanner (char *buffer, size_t size) {
   const char *revision = getRevisionIdentifier();
   snprintf(buffer, size, "%s %s%s%s",
-           PACKAGE_TITLE, PACKAGE_VERSION,
+           PACKAGE_NAME, PACKAGE_VERSION,
            (*revision? " rev ": ""), revision);
 }
 
@@ -1189,7 +1189,7 @@ initializeBrailleDriver (const char *code, int verify) {
         {
           const char *strings[] = {
             CONFIGURATION_DIRECTORY, "/",
-            PACKAGE_NAME, "-",
+            PACKAGE_TARNAME, "-",
             braille->definition.code, ".prefs"
           };
 

@@ -17,7 +17,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-Name: @PACKAGE_NAME@
+Name: @PACKAGE_TARNAME@
 Version: @PACKAGE_VERSION@
 Release: 1
 Group: System Environment/Daemons
@@ -445,7 +445,7 @@ This package provides a set of commands for maintaining BRLTTY's datafiles.
 
 %prep
 # %setup -n %{name}-%{version}
-%setup -n @PACKAGE_NAME@-@PACKAGE_VERSION@
+%setup -n @PACKAGE_TARNAME@-@PACKAGE_VERSION@
 
 %build
 %configure --disable-relocatable-install --with-install-root="${RPM_BUILD_ROOT}" --disable-gpm --without-mikropuhe --without-swift --without-theta --without-viavoice --without-libbraille --with-braille-driver=-tt,-vr
