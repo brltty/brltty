@@ -311,7 +311,7 @@ brl_base.$O:
 
 ###############################################################################
 
-SPEECH_OBJECTS = $(SPEECH_OBJECT) spk_thread.$O spk_input.$O spk_driver.$O $(SPEECH_DRIVER_OBJECTS)
+SPEECH_OBJECTS = $(SPEECH_OBJECT) spk_thread.$O spk_input.$O spk_driver.$O spk_base.$O $(SPEECH_DRIVER_OBJECTS)
 
 spk.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/spk.c
@@ -324,6 +324,9 @@ spk_input.$O:
 
 spk_driver.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/spk_driver.c
+
+spk_base.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/spk_base.c
 
 ###############################################################################
 

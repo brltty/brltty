@@ -20,6 +20,7 @@
 #define BRLTTY_INCLUDED_SPK_DRIVER
 
 #include "spk.h"
+#include "spk_base.h"
 
 #ifdef __cplusplus
 extern "C" {
