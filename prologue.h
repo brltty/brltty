@@ -24,7 +24,6 @@ extern "C" {
 #endif /* __cplusplus */
 
 #define PACKAGE_COPYRIGHT "Copyright (C) 1995-2014 by The BRLTTY Developers."
-#define PACKAGE_URL "http://mielke.cc/brltty/"
 
 #define _CONCATENATE(a,b) a##b
 #define CONCATENATE(a,b) _CONCATENATE(a,b)
