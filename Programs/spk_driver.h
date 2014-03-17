@@ -19,8 +19,9 @@
 #ifndef BRLTTY_INCLUDED_SPK_DRIVER
 #define BRLTTY_INCLUDED_SPK_DRIVER
 
-#include "spk.h"
+#include "spk_types.h"
 #include "spk_base.h"
+#include "spk.h"
 
 #ifdef __cplusplus
 extern "C" {

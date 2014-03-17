@@ -23,6 +23,21 @@
 extern "C" {
 #endif /* __cplusplus */
 
+extern unsigned int getIntegerSpeechVolume (unsigned char setting, unsigned int normal);
+#ifndef NO_FLOAT
+extern float getFloatSpeechVolume (unsigned char setting);
+#endif /* NO_FLOAT */
+
+extern unsigned int getIntegerSpeechRate (unsigned char setting, unsigned int normal);
+#ifndef NO_FLOAT
+extern float getFloatSpeechRate (unsigned char setting);
+#endif /* NO_FLOAT */
+
+extern unsigned int getIntegerSpeechPitch (unsigned char setting, unsigned int normal);
+#ifndef NO_FLOAT
+extern float getFloatSpeechPitch (unsigned char setting);
+#endif /* NO_FLOAT */
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

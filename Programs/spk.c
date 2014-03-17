@@ -160,11 +160,6 @@ sayIntegerSetting (const char *name, int integer) {
   sayStringSetting(name, string);
 }
 
-static unsigned int
-getIntegerSetting (unsigned char setting, unsigned char internal, unsigned int external) {
-  return rescaleInteger(setting, internal, external);
-}
-
 int
 canSetSpeechVolume (void) {
   return spk.setVolume != NULL;
@@ -178,18 +173,6 @@ setSpeechVolume (int setting, int say) {
   if (say) sayIntegerSetting(gettext("volume"), setting);
   return 1;
 }
-
-unsigned int
-getIntegerSpeechVolume (unsigned char setting, unsigned int normal) {
-  return getIntegerSetting(setting, SPK_VOLUME_DEFAULT, normal);
-}
-
-#ifndef NO_FLOAT
-float
-getFloatSpeechVolume (unsigned char setting) {
-  return (float)setting / (float)SPK_VOLUME_DEFAULT;
-}
-#endif /* NO_FLOAT */
 
 int
 canSetSpeechRate (void) {
@@ -205,42 +188,6 @@ setSpeechRate (int setting, int say) {
   return 1;
 }
 
-unsigned int
-getIntegerSpeechRate (unsigned char setting, unsigned int normal) {
-  return getIntegerSetting(setting, SPK_RATE_DEFAULT, normal);
-}
-
-#ifndef NO_FLOAT
-float
-getFloatSpeechRate (unsigned char setting) {
-  static const float spkRateTable[] = {
-    0.3333,
-    0.3720,
-    0.4152,
-    0.4635,
-    0.5173,
-    0.5774,
-    0.6444,
-    0.7192,
-    0.8027,
-    0.8960,
-    1.0000,
-    1.1161,
-    1.2457,
-    1.3904,
-    1.5518,
-    1.7320,
-    1.9332,
-    2.1577,
-    2.4082,
-    2.6879,
-    3.0000
-  };
-
-  return spkRateTable[setting];
-}
-#endif /* NO_FLOAT */
-
 int
 canSetSpeechPitch (void) {
   return spk.setPitch != NULL;
@@ -254,18 +201,6 @@ setSpeechPitch (int setting, int say) {
   if (say) sayIntegerSetting(gettext("pitch"), setting);
   return 1;
 }
-
-unsigned int
-getIntegerSpeechPitch (unsigned char setting, unsigned int normal) {
-  return getIntegerSetting(setting, SPK_PITCH_DEFAULT, normal);
-}
-
-#ifndef NO_FLOAT
-float
-getFloatSpeechPitch (unsigned char setting) {
-  return (float)setting / (float)SPK_PITCH_DEFAULT;
-}
-#endif /* NO_FLOAT */
 
 int
 canSetSpeechPunctuation (void) {

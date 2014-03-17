@@ -48,24 +48,12 @@ extern void sayString (const char *string, int immediate);
 
 extern int canSetSpeechVolume (void);
 extern int setSpeechVolume (int setting, int say);
-extern unsigned int getIntegerSpeechVolume (unsigned char setting, unsigned int normal);
-#ifndef NO_FLOAT
-extern float getFloatSpeechVolume (unsigned char setting);
-#endif /* NO_FLOAT */
 
 extern int canSetSpeechRate (void);
 extern int setSpeechRate (int setting, int say);
-extern unsigned int getIntegerSpeechRate (unsigned char setting, unsigned int normal);
-#ifndef NO_FLOAT
-extern float getFloatSpeechRate (unsigned char setting);
-#endif /* NO_FLOAT */
 
 extern int canSetSpeechPitch (void);
 extern int setSpeechPitch (int setting, int say);
-extern unsigned int getIntegerSpeechPitch (unsigned char setting, unsigned int normal);
-#ifndef NO_FLOAT
-extern float getFloatSpeechPitch (unsigned char setting);
-#endif /* NO_FLOAT */
 
 extern int canSetSpeechPunctuation (void);
 extern int setSpeechPunctuation (SpeechPunctuation setting, int say);
