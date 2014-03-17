@@ -12,6 +12,7 @@
 /spktest
 /tunetest
 
+/revision_identifier.h
 /brlapi.h
 /brlapi_constants.h
 

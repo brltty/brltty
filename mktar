@@ -19,7 +19,7 @@
 
 . "`dirname "${0}"`/prologue.sh"
 
-[ "${#}" -eq 0 ] && syntaxError "missing source root."
+[ "${#}" -gt 0 ] || syntaxError "missing source root"
 sourceRoot="${1}"
 shift
 cd "${sourceRoot}" || exit "${?}"
@@ -42,7 +42,7 @@ else
 fi
 [ "${archiveFile#/}" = "${archiveFile}" ] && archiveFile="${initialDirectory}/${archiveFile}"
 
-[ "${#}" -eq 0 ] || syntaxError "too many parameters."
+[ "${#}" -eq 0 ] || syntaxError "too many parameters"
 
 needTemporaryDirectory
 set -e
@@ -58,11 +58,18 @@ make -s clean
 make -s
 cd ..
 
+cd Programs
+make -s revision_identifier.h
+cd ..
+
 specFile="brltty.spec"
 mv -- "${specFile}" "${temporaryDirectory}"
 make -s distclean
 mv -- "${temporaryDirectory}/${specFile}" .
 
+rm -f -r -- .git
+rm -f -r -- .svn
+
 cd ..
-tar --create --exclude=.svn --exclude=.git --no-anchored --file "${archiveFile}" "${archiveName}"
+tar --create --no-anchored --file "${archiveFile}" "${archiveName}"
 exit 0

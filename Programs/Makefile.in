@@ -28,8 +28,8 @@ all-xbrlapi: xbrlapi$X
 
 ###############################################################################
 
-REVISION_HEADER = revision.auto.h
-NEW_REVISION_HEADER = new_$(REVISION_HEADER)
+REVISION_HEADER = revision_identifier.h
+NEW_REVISION_HEADER = $(REVISION_HEADER:.h=.auto.h)
 
 .PHONY: $(REVISION_HEADER)
 .INTERMEDIATE: $(NEW_REVISION_HEADER)
