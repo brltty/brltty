@@ -68,6 +68,7 @@ make -s distclean
 mv -- "${temporaryDirectory}/${specFile}" .
 
 rm -f -r -- .git
+find . -name .gitignore -exec rm {} \;
 rm -f -r -- .svn
 
 cd ..
