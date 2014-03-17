@@ -116,7 +116,6 @@
 #include "hidkeys.h"
 #include "io_generic.h"
 #include "io_usb.h"
-#include "brltty.h"
 
 typedef enum {
   PARM_SECONDARY_ROUTING_KEY_EMULATION
@@ -1501,9 +1500,11 @@ static const ProtocolOperations protocol2uOperations = {
   readCommand2u, writeBraille2u
 };
 
+static BrailleDisplay *brailleDisplay = NULL;
+
 int
 AL_writeData (unsigned char *data, int len ) {
-  return writeBraillePacket(&brl, NULL, data, len);
+  return writeBraillePacket(brailleDisplay, NULL, data, len);
 }
 
 static void
@@ -1602,6 +1603,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       }
 
       makeOutputTable(dotsTable_ISO11548_1);
+      brailleDisplay = brl;
       return 1;
     }
 
@@ -1613,6 +1615,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
+  brailleDisplay = brl;
   disconnectBrailleResource(brl, NULL);
 
   if (previousText) {
