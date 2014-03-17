@@ -20,12 +20,12 @@
 . "`dirname "${0}"`/prologue.sh"
 needTemporaryDirectory
 
-[ "${#}" -eq 0 ] && syntaxError "missing archive."
+[ "${#}" -gt 0 ] || syntaxError "missing archive"
 archiveFile="${1}"
 [ "${archiveFile#/}" = "${archiveFile}" ] && archiveFile="${initialDirectory}/${archiveFile}"
 shift
 
-[ "${#}" -eq 0 ] || syntaxError "too many parameters."
+[ "${#}" -eq 0 ] || syntaxError "too many parameters"
 
 set -e
 mkdir SPECS SOURCES BUILD RPMS SRPMS

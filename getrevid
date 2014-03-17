@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash -p
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -19,6 +19,23 @@
 
 . "`dirname "${0}"`/prologue.sh"
 
+outputFile=""
+quoteIdentifier=false
+
+while getopts ":o:q" option
+do
+   case "${option}"
+   in
+      o) outputFile="${OPTARG}";;
+      q) quoteIdentifier=true;;
+
+      :) syntaxError "missing value: -${OPTARG}";;
+     \?) syntaxError "unknown option: -${OPTARG}";;
+      *) syntaxError "unimplemented option: -${option}";;
+   esac
+done
+shift $((OPTIND - 1))
+
 [ "${#}" -gt 0 ] || syntaxError "missing source root"
 sourceRoot="${1}"
 shift
@@ -27,19 +44,46 @@ shift
 
 [ -e "${sourceRoot}" ] || semanticError "directory not found: ${sourceRoot}"
 [ -d "${sourceRoot}" ] || semanticError "not a directory: ${sourceRoot}"
-cd "${sourceRoot}" || semanticError "directory not usable: ${sourceRoot}"
 
-if [ -d .git ]
+export GIT_DIR="${sourceRoot}/.git"
+
+if [ -d "${GIT_DIR}" ]
 then
    revisionIdentifier="`git describe --tags --abbrev=8 --dirty='M' --match='BRLTTY-*' 2>/dev/null`"
-elif [ -d .svn ]
+elif [ -d "${sourceRoot}/.svn" ]
 then
-   revisionIdentifier="`svnversion -n . 2>/dev/null`"
+   revisionIdentifier="`svnversion -n "${sourceRoot}" 2>/dev/null`"
    [ "${revisionIdentifier}" != "exported" ] || revisionIdentifier=""
 else
    semanticError "unrecognized source repository type: ${sourceRoot}"
 fi
 
 [ -n "${revisionIdentifier}" ] || semanticError "revision identifier not known"
-echo "${revisionIdentifier}"
+"${quoteIdentifier}" && revisionIdentifier='"'"${revisionIdentifier}"'"'
+
+if [ -z "${outputFile}" ]
+then
+   echo "${revisionIdentifier}"
+else
+   if [ -e "${outputFile}" ]
+   then
+      [ -f "${outputFile}" ] || semanticError "not a file: ${outputFile}"
+      [ -r "${outputFile}" ] || semanticError "file not readable: ${outputFile}"
+
+      exec 3<"${outputFile}"
+      read -u3 && {
+         [ "${REPLY}" != "${revisionIdentifier}" ] || read -u3 || exit 0
+      }
+      exec 3<&-
+
+      [ -w "${outputFile}" ] || semanticError "file not writable: ${outputFile}"
+   else
+      outputDirectory="$(dirname "${outputFile}")"
+      [ -d "${outputDirectory}" ] || semanticError "not a directory: ${outputDirectory}"
+      [ -w "${outputDirectory}" ] || semanticError "directory not writable: ${outputDirectory}"
+   fi
+
+   echo "${revisionIdentifier}" >"${outputFile}"
+fi
+
 exit 0

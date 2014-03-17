@@ -29,18 +29,9 @@ all-xbrlapi: xbrlapi$X
 ###############################################################################
 
 REVISION_HEADER = revision_identifier.h
-NEW_REVISION_HEADER = $(REVISION_HEADER:.h=.auto.h)
-
-.PHONY: $(REVISION_HEADER)
-.INTERMEDIATE: $(NEW_REVISION_HEADER)
 
 $(REVISION_HEADER): $(SRC_TOP)getrevid
-	$(SRC_TOP)getrevid $(SRC_TOP) | \
-	sed -e 's/.*/"&"/' >$(NEW_REVISION_HEADER)
-	test -f $(REVISION_HEADER) && \
-	cmp -s $(NEW_REVISION_HEADER) $(REVISION_HEADER) && \
-	rm $(NEW_REVISION_HEADER) || \
-	mv $(NEW_REVISION_HEADER) $(REVISION_HEADER)
+	-$(SRC_TOP)getrevid -q -o $@ $(SRC_TOP)
 
 revision.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/revision.c
