@@ -216,17 +216,26 @@ extern "C" {
 /* Define this if the function shl_load is available. */
 #undef HAVE_SHL_LOAD
 
-/* Define this to be a string containing the package name. */
-#undef PACKAGE_NAME
-
-/* Define this to be a string containing the package title. */
+/* Define this to be a string containing the (capitalized) title of the package. */
 #undef PACKAGE_TITLE
 
-/* Define this to be a string containing the package version. */
+/* Define this to be a string containing the short name of the package. */
+#undef PACKAGE_TARNAME
+
+/* Define this to be a string containing the full name of the package. */
+#undef PACKAGE_NAME
+
+/* Define this to be a string containing the version of the package. */
 #undef PACKAGE_VERSION
 
-/* Define this to be a string containing the package URL. */
+/* Define this to be a string containing the full name and version of the package. */
+#undef PACKAGE_STRING
+
+/* Define this to be a string containing the URL of the home page of the package. */
 #undef PACKAGE_URL
+
+/* Define this to be a string containing the address where bug reports should be sent. */
+#undef PACKAGE_BUGREPORT
 
 /* Define this if BRLTTY is to be run as init. */
 #undef INIT_PATH
