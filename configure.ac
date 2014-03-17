@@ -48,8 +48,6 @@ AC_DEFINE_UNQUOTED([BRLAPI_MINOR], [${api_minor}],
 AC_DEFINE_UNQUOTED([BRLAPI_REVISION], [${api_revision}],
                    [Define this to be the API library revision number.])
 
-AC_SUBST([package_date], ["`date "+%Y/%m/%d"`"])
-
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_HEADER([Programs/brlapi.h])
 AC_PREFIX_DEFAULT([])
