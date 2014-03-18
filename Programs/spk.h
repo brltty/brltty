@@ -27,13 +27,10 @@ extern "C" {
 
 extern void initializeSpeechSynthesizer (volatile SpeechSynthesizer *spk);
 
-extern int startSpeechDriverThread (volatile SpeechSynthesizer *spk, char **parameters);
+extern int startSpeechDriverThread (char **parameters);
 extern void stopSpeechDriverThread (void);
 
-extern int tellSpeechFinished (void);
 extern void setSpeechFinished (void);
-
-extern int tellSpeechLocation (int index);
 extern void setSpeechLocation (int location);
 
 extern int muteSpeech (const char *reason);

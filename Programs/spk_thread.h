@@ -19,15 +19,13 @@
 #ifndef BRLTTY_INCLUDED_SPK_THREAD
 #define BRLTTY_INCLUDED_SPK_THREAD
 
-#include "spk.h"
+#include "spk_types.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 #ifdef ENABLE_SPEECH_SUPPORT
-typedef struct SpeechDriverThreadStruct SpeechDriverThread;
-
 extern volatile SpeechDriverThread *newSpeechDriverThread (
   volatile SpeechSynthesizer *spk,
   char **parameters

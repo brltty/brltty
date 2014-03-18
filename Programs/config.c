@@ -1486,7 +1486,7 @@ int
 constructSpeechDriver (void) {
   initializeSpeech();
 
-  if (startSpeechDriverThread(&spk, speechParameters)) {
+  if (startSpeechDriverThread(speechParameters)) {
     return 1;
   } else {
     logMessage(LOG_DEBUG, "speech driver initialization failed: %s",

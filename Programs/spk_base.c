@@ -21,7 +21,20 @@
 #include "log.h"
 #include "spk_types.h"
 #include "spk_base.h"
+#include "spk_thread.h"
 #include "parse.h"
+#include "brltty.h"
+
+int
+tellSpeechFinished (void) {
+  return speechMessage_speechFinished(spk.driver.thread);
+}
+
+int
+tellSpeechLocation (int index) {
+  if (!spk.track.isActive) return 1;
+  return speechMessage_speechLocation(spk.driver.thread, index);
+}
 
 static unsigned int
 getIntegerSetting (unsigned char setting, unsigned char internal, unsigned int external) {
@@ -33,19 +46,22 @@ getIntegerSpeechVolume (unsigned char setting, unsigned int normal) {
   return getIntegerSetting(setting, SPK_VOLUME_DEFAULT, normal);
 }
 
-#ifndef NO_FLOAT
-float
-getFloatSpeechVolume (unsigned char setting) {
-  return (float)setting / (float)SPK_VOLUME_DEFAULT;
-}
-#endif /* NO_FLOAT */
-
 unsigned int
 getIntegerSpeechRate (unsigned char setting, unsigned int normal) {
   return getIntegerSetting(setting, SPK_RATE_DEFAULT, normal);
 }
 
+unsigned int
+getIntegerSpeechPitch (unsigned char setting, unsigned int normal) {
+  return getIntegerSetting(setting, SPK_PITCH_DEFAULT, normal);
+}
+
 #ifndef NO_FLOAT
+float
+getFloatSpeechVolume (unsigned char setting) {
+  return (float)setting / (float)SPK_VOLUME_DEFAULT;
+}
+
 float
 getFloatSpeechRate (unsigned char setting) {
   static const float spkRateTable[] = {
@@ -74,14 +90,7 @@ getFloatSpeechRate (unsigned char setting) {
 
   return spkRateTable[setting];
 }
-#endif /* NO_FLOAT */
 
-unsigned int
-getIntegerSpeechPitch (unsigned char setting, unsigned int normal) {
-  return getIntegerSetting(setting, SPK_PITCH_DEFAULT, normal);
-}
-
-#ifndef NO_FLOAT
 float
 getFloatSpeechPitch (unsigned char setting) {
   return (float)setting / (float)SPK_PITCH_DEFAULT;

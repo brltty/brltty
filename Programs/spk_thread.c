@@ -23,6 +23,7 @@
 #include "log.h"
 #include "parameters.h"
 #include "spk_thread.h"
+#include "spk.h"
 #include "async_wait.h"
 #include "async_event.h"
 #include "async_thread.h"

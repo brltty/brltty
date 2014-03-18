@@ -19,22 +19,22 @@
 #ifndef BRLTTY_INCLUDED_SPK_BASE
 #define BRLTTY_INCLUDED_SPK_BASE
 
+#include "spk_types.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
+extern int tellSpeechFinished (void);
+extern int tellSpeechLocation (int index);
+
 extern unsigned int getIntegerSpeechVolume (unsigned char setting, unsigned int normal);
+extern unsigned int getIntegerSpeechRate (unsigned char setting, unsigned int normal);
+extern unsigned int getIntegerSpeechPitch (unsigned char setting, unsigned int normal);
+
 #ifndef NO_FLOAT
 extern float getFloatSpeechVolume (unsigned char setting);
-#endif /* NO_FLOAT */
-
-extern unsigned int getIntegerSpeechRate (unsigned char setting, unsigned int normal);
-#ifndef NO_FLOAT
 extern float getFloatSpeechRate (unsigned char setting);
-#endif /* NO_FLOAT */
-
-extern unsigned int getIntegerSpeechPitch (unsigned char setting, unsigned int normal);
-#ifndef NO_FLOAT
 extern float getFloatSpeechPitch (unsigned char setting);
 #endif /* NO_FLOAT */
 

@@ -41,6 +41,7 @@ typedef enum {
 } SpeechPunctuation;
 
 typedef struct SpeechSynthesizerStruct SpeechSynthesizer;
+typedef struct SpeechDriverThreadStruct SpeechDriverThread;
 typedef struct SpeechDataStruct SpeechData;
 
 #define SPK_SCR_NONE -1
@@ -66,7 +67,10 @@ struct SpeechSynthesizerStruct {
   SpeechPitchSetter *setPitch;
   SpeechPunctuationSetter *setPunctuation;
 
-  SpeechData *data;
+  struct {
+    volatile SpeechDriverThread *thread;
+    SpeechData *data;
+  } driver;
 };
 
 typedef struct {
