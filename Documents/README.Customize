@@ -40,9 +40,9 @@ check before the standard directory is checked. If it's set and not empty then
 the primary override directory is "$XDG_CONFIG_HOME/brltty". If it either isn't 
 set or is empty, but the HOME environment variable is set and not empty (the 
 usual case when you're logged in) then the primary override directory is 
-"$HOME/.config/brltty". If both the XDG_CONFIG_HOME and the HOME environment 
-variables are either not set or empty then the primary override directory isn't 
-defined.
+"$HOME/.config/brltty". If both the XDG_CONFIG_HOME and HOME environment 
+variables are either not set or empty (the usual case during the system boot 
+sequence) then the primary override directory isn't defined.
 
 The XDG_CONFIG_DIRS environment variable defines a colon-separated list of 
 secondary base directories. The "brltty" subdirectory of each of these 
