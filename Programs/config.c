@@ -1683,6 +1683,7 @@ deactivateScreenDriver (void) {
 static int
 startScreenDriver (void) {
   if (!activateScreenDriver(0)) return 0;
+  if (isMainScreen()) scheduleUpdate("main screen started");
   return 1;
 }
 
