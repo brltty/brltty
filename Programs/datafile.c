@@ -1167,31 +1167,33 @@ processDataStream (
   DataOperandsProcessor *processLine, void *data
 ) {
   int ok = 0;
-  Queue *variables = includer? includer->variables: getGlobalDataVariables(1);
-  DataFile file;
+  Queue *variables;
 
-  file.name = name;
-  file.includer = includer;
-  file.line = 0;
+  logMessage(LOG_DEBUG, "including data file: %s", name);
 
-  file.processLine = processLine;
-  file.data = data;
+  if ((variables = includer? includer->variables: getGlobalDataVariables(1))) {
+    DataFile file = {
+      .name = name,
+      .includer = includer,
+      .line = 0,
 
-  if (!variables) return 0;
-  logMessage(LOG_DEBUG, "including data file: %s", file.name);
+      .processLine = processLine,
+      .data = data
+    };
 
-  if ((file.conditions = newQueue(deallocateDataCondition, NULL))) {
-    if ((file.variables = newDataVariableQueue(variables))) {
-      if (processLines(stream, processDataLine, &file)) ok = 1;
+    if ((file.conditions = newQueue(deallocateDataCondition, NULL))) {
+      if ((file.variables = newDataVariableQueue(variables))) {
+        if (processLines(stream, processDataLine, &file)) ok = 1;
 
-      if (getInnermostDataCondition(&file)) {
-        reportDataError(&file, "outstanding condition at end of file");
+        if (getInnermostDataCondition(&file)) {
+          reportDataError(&file, "outstanding condition at end of file");
+        }
+
+        deallocateQueue(file.variables);
       }
 
-      deallocateQueue(file.variables);
+      deallocateQueue(file.conditions);
     }
-
-    deallocateQueue(file.conditions);
   }
 
   return ok;
