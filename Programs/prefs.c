@@ -28,6 +28,7 @@
 #include "defaults.h"
 #include "log.h"
 #include "file.h"
+#include "datafile.h"
 #include "parse.h"
 
 #define PREFS_COMMENT_CHARACTER '#'

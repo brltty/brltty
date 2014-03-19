@@ -28,6 +28,8 @@ extern "C" {
 extern int setGlobalDataVariable (const char *name, const char *value);
 extern int setGlobalTableVariables (const char *tableExtension, const char *subtableExtension);
 
+extern FILE *openDataFile (const char *path, const char *mode, int optional);
+
 typedef struct DataFileStruct DataFile;
 
 #define DATA_OPERANDS_PROCESSOR(name) int name (DataFile *file, void *data)

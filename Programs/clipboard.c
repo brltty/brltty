@@ -28,6 +28,7 @@
 #include "clipboard.h"
 #include "queue.h"
 #include "file.h"
+#include "datafile.h"
 #include "charset.h"
 
 static wchar_t *clipboardCharacters = NULL;

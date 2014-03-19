@@ -22,6 +22,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/stat.h>
 
 #include "log.h"
 #include "file.h"
@@ -35,6 +36,11 @@ struct DataFileStruct {
   const char *name;
   DataFile *includer;
   int line;
+
+  struct {
+    dev_t device;
+    ino_t file;
+  } identity;
 
   DataOperandsProcessor *processLine;
   void *data;
@@ -1008,71 +1014,6 @@ processConditionOperands (
   return 1;
 }
 
-static int
-isDataFileIncluded (DataFile *file, const char *name) {
-  while (file) {
-    if (strcmp(file->name, name) == 0) {
-      logMessage(LOG_WARNING, "nested data file include: %s", name);
-      errno = EMFILE;
-      return 1;
-    }
-
-    file = file->includer;
-  }
-
-  return 0;
-}
-
-int
-includeDataFile (DataFile *file, const wchar_t *name, unsigned int length) {
-  int ok = 0;
-
-  const char *prefixAddress = file->name;
-  size_t prefixLength = 0;
-
-  size_t suffixLength;
-  char *suffixAddress = makeUtf8FromWchars(name, length, &suffixLength);
-
-  if (suffixAddress) {
-    if (!isAbsolutePath(suffixAddress)) {
-      const char *prefixEnd = strrchr(prefixAddress, '/');
-      if (prefixEnd) prefixLength = prefixEnd - prefixAddress + 1;
-    }
-
-    {
-      char path[prefixLength + suffixLength + 1];
-      FILE *stream;
-
-      snprintf(path, sizeof(path), "%.*s%.*s",
-               (int)prefixLength, prefixAddress,
-               (int)suffixLength, suffixAddress);
-
-      if (!isDataFileIncluded(file, path)) {
-        if ((stream = openDataFile(path, "r", 0))) {
-          if (processDataStream(file, stream, path, file->processLine, file->data)) ok = 1;
-          fclose(stream);
-        }
-      }
-    }
-
-    free(suffixAddress);
-  } else {
-    logMallocError();
-  }
-
-  return ok;
-}
-
-DATA_OPERANDS_PROCESSOR(processIncludeOperands) {
-  DataString path;
-
-  if (getDataString(file, &path, 0, "include file path"))
-    if (!includeDataFile(file, path.characters, path.length))
-      return 0;
-
-  return 1;
-}
-
 static DATA_CONDITION_TESTER(testVariableDefined) {
   return !!getReadableDataVariable(file, identifier);
 }
@@ -1141,6 +1082,146 @@ DATA_OPERANDS_PROCESSOR(processEndIfOperands) {
 }
 
 static int
+isDataFileIncluded (DataFile *file, const char *path) {
+  struct stat info;
+
+  if (stat(path, &info) != -1) {
+    while (file) {
+      if ((file->identity.device == info.st_dev) && (file->identity.file == info.st_ino)) return 1;
+      file = file->includer;
+    }
+  }
+
+  return 0;
+}
+
+static FILE *
+openIncludedDataFile (DataFile *includer, const char *path, const char *mode, int optional) {
+  const char *const *overrideDirectories = getAllOverrideDirectories();
+  const char *overrideDirectory = NULL;
+  char *overridePath = NULL;
+
+  int writable = (*mode == 'w') || (*mode == 'a');
+  const char *name = locatePathName(path);
+  FILE *file;
+
+  if (overrideDirectories) {
+    const char *const *directory = overrideDirectories;
+
+    while (*directory) {
+      if (**directory) {
+        char *path = makePath(*directory, name);
+
+        if (path) {
+          if (!isDataFileIncluded(includer, path)) {
+            if (testFilePath(path)) {
+              file = openFile(path, mode, optional);
+              overrideDirectory = *directory;
+              overridePath = path;
+              goto done;
+            }
+          }
+
+          free(path);
+        }
+      }
+
+      directory += 1;
+    }
+  }
+
+  if (isDataFileIncluded(includer, path)) {
+    logMessage(LOG_WARNING, "data file include loop: %s", path);
+    file = NULL;
+    errno = ENOENT;
+  } else if (!(file = openFile(path, mode, optional))) {
+    if (writable) {
+      if (errno == ENOENT) {
+        char *directory = getPathDirectory(path);
+
+        if (directory) {
+          int exists = ensureDirectory(directory);
+          free(directory);
+
+          if (exists) {
+            file = openFile(path, mode, optional);
+            goto done;
+          }
+        }
+      }
+
+      if ((errno == EACCES) || (errno == EROFS)) {
+        if ((overrideDirectory = getPrimaryOverrideDirectory())) {
+          if ((overridePath = makePath(overrideDirectory, name))) {
+            if (ensureDirectory(overrideDirectory)) {
+              file = openFile(overridePath, mode, optional);
+              goto done;
+            }
+          }
+        }
+      }
+    }
+  }
+
+done:
+  if (overridePath) free(overridePath);
+  return file;
+}
+
+FILE *
+openDataFile (const char *path, const char *mode, int optional) {
+  return openIncludedDataFile(NULL, path, mode, optional);
+}
+
+int
+includeDataFile (DataFile *file, const wchar_t *name, unsigned int length) {
+  int ok = 0;
+
+  const char *prefixAddress = file->name;
+  size_t prefixLength = 0;
+
+  size_t suffixLength;
+  char *suffixAddress = makeUtf8FromWchars(name, length, &suffixLength);
+
+  if (suffixAddress) {
+    if (!isAbsolutePath(suffixAddress)) {
+      const char *prefixEnd = strrchr(prefixAddress, '/');
+      if (prefixEnd) prefixLength = prefixEnd - prefixAddress + 1;
+    }
+
+    {
+      char path[prefixLength + suffixLength + 1];
+      FILE *stream;
+
+      snprintf(path, sizeof(path), "%.*s%.*s",
+               (int)prefixLength, prefixAddress,
+               (int)suffixLength, suffixAddress);
+
+      if ((stream = openIncludedDataFile(file, path, "r", 0))) {
+        if (processDataStream(file, stream, path, file->processLine, file->data)) ok = 1;
+        fclose(stream);
+      }
+    }
+
+    free(suffixAddress);
+  } else {
+    logMallocError();
+  }
+
+  return ok;
+}
+
+DATA_OPERANDS_PROCESSOR(processIncludeOperands) {
+  DataString path;
+
+  if (getDataString(file, &path, 0, "include file path"))
+    if (!includeDataFile(file, path.characters, path.length))
+      return 0;
+
+  return 1;
+}
+
+static int
 processDataLine (char *line, void *dataAddress) {
   DataFile *file = dataAddress;
   size_t size = strlen(line) + 1;
@@ -1180,6 +1261,15 @@ processDataStream (
       .processLine = processLine,
       .data = data
     };
+
+    {
+      struct stat info;
+
+      if (fstat(fileno(stream), &info) != -1) {
+        file.identity.device = info.st_dev;
+        file.identity.file = info.st_ino;
+      }
+    }
 
     if ((file.conditions = newQueue(deallocateDataCondition, NULL))) {
       if ((file.variables = newDataVariableQueue(variables))) {
