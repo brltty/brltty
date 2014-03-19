@@ -33,6 +33,7 @@
 
 struct DataFileStruct {
   const char *name;
+  DataFile *includer;
   int line;
 
   DataOperandsProcessor *processLine;
@@ -1007,6 +1008,21 @@ processConditionOperands (
   return 1;
 }
 
+static int
+isDataFileIncluded (DataFile *file, const char *name) {
+  while (file) {
+    if (strcmp(file->name, name) == 0) {
+      logMessage(LOG_WARNING, "nested data file include: %s", name);
+      errno = EMFILE;
+      return 1;
+    }
+
+    file = file->includer;
+  }
+
+  return 0;
+}
+
 int
 includeDataFile (DataFile *file, const wchar_t *name, unsigned int length) {
   int ok = 0;
@@ -1031,9 +1047,11 @@ includeDataFile (DataFile *file, const wchar_t *name, unsigned int length) {
                (int)prefixLength, prefixAddress,
                (int)suffixLength, suffixAddress);
 
-      if ((stream = openDataFile(path, "r", 0))) {
-        if (processDataStream(file->variables, stream, path, file->processLine, file->data)) ok = 1;
-        fclose(stream);
+      if (!isDataFileIncluded(file, path)) {
+        if ((stream = openDataFile(path, "r", 0))) {
+          if (processDataStream(file, stream, path, file->processLine, file->data)) ok = 1;
+          fclose(stream);
+        }
       }
     }
 
@@ -1144,23 +1162,22 @@ processDataLine (char *line, void *dataAddress) {
 
 int
 processDataStream (
-  Queue *variables,
+  DataFile *includer,
   FILE *stream, const char *name,
   DataOperandsProcessor *processLine, void *data
 ) {
   int ok = 0;
+  Queue *variables = includer? includer->variables: getGlobalDataVariables(1);
   DataFile file;
 
   file.name = name;
+  file.includer = includer;
   file.line = 0;
 
   file.processLine = processLine;
   file.data = data;
 
-  if (!variables)
-    if (!(variables = getGlobalDataVariables(1)))
-      return 0;
-
+  if (!variables) return 0;
   logMessage(LOG_DEBUG, "including data file: %s", file.name);
 
   if ((file.conditions = newQueue(deallocateDataCondition, NULL))) {

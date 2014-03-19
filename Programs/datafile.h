@@ -21,8 +21,6 @@
 
 #include <stdio.h>
 
-#include "queue.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -39,7 +37,7 @@ extern int processDataFile (const char *name, DataOperandsProcessor *processLine
 extern void reportDataError (DataFile *file, char *format, ...) PRINTF(2, 3);
 
 extern int processDataStream (
-  Queue *variables,
+  DataFile *includer,
   FILE *stream, const char *name,
   DataOperandsProcessor *processLine, void *data
 );
