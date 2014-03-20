@@ -30,6 +30,8 @@ all-xbrlapi: xbrlapi$X
 
 REVISION_HEADER = revision_identifier.h
 
+.PHONY: $(REVISION_HEADER)
+
 $(REVISION_HEADER): $(SRC_TOP)getrevid
 	-$(SRC_TOP)getrevid -q -o $@ $(SRC_TOP)
 
