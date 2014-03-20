@@ -45,9 +45,12 @@ shift
 [ -e "${sourceRoot}" ] || semanticError "directory not found: ${sourceRoot}"
 [ -d "${sourceRoot}" ] || semanticError "not a directory: ${sourceRoot}"
 
-if [ -d "${sourceRoot}/.git" ]
+export GIT_WORK_TREE="${sourceRoot}"
+export GIT_DIR="${GIT_WORK_TREE}/.git"
+
+if [ -d "${GIT_DIR}" ]
 then
-   revisionIdentifier="`git --work-tree="${sourceRoot}" describe --tags --abbrev=8 --dirty='M' --match='BRLTTY-*' 2>/dev/null`"
+   revisionIdentifier="`git describe --tags --abbrev=8 --dirty='M' --match='BRLTTY-*' 2>/dev/null`"
 elif [ -d "${sourceRoot}/.svn" ]
 then
    revisionIdentifier="`svnversion -n "${sourceRoot}" 2>/dev/null`"
