@@ -69,6 +69,7 @@
 #braille-driver	ec	# EcoBraille
 #braille-driver	eu	# EuroBraille
 #braille-driver	fs	# FreedomScientific
+#braille-driver	hd	# Hedo
 #braille-driver	hm	# HIMS
 #braille-driver	ht	# HandyTech
 #braille-driver	hw	# HumanWare

@@ -729,6 +729,9 @@ Festival
 .B gs
 GenericSay
 .TP 4
+.B hd
+Hedo
+.TP 4
 .B hm
 HIMS
 .TP 4

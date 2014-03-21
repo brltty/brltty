@@ -1,0 +1,34 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2014 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+title Hedo ProfiLine
+note The keys behind the text cells are named routing keys.
+note The rectangular navigation keys are named K1 through K3.
+note The square navigation keys are named B1 through B8.
+note From left to right, the navigation keys are: K1 B7 B3 B2 B1 K1 K2 K3 B4 B5 B6 B8 K3
+note Both K1 keys are hard-wired together.
+note Both K3 keys are hard-wired together.
+note The K2 and B1 keys are hard-wired together.
+
+bind K1 FWINLT
+bind K3 FWINRT
+
+bind B2 LNUP
+bind B5 LNDN
+
+bind RoutingKey ROUTE

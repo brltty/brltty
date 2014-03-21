@@ -61,6 +61,7 @@ Platforms: Linux (kernel 1.1.92 or later)
                         Active Braille, Basic Braille 16/20/32/40/48/64/80,
                         Braillino, Braille Wave, Easy Braille,
                         Braille Star 40/80, Bookworm]
+           - Hedo [ProfiLine, MobilLine]
            - HIMS [Braille Sense, SyncBraille, Braille Edge]
            - HumanWare [Brailliant 32/40/80 bi]
            - Iris

@@ -27,6 +27,16 @@ const UsbSerialAdapter usbSerialAdapterTable[] = {
     .operations = &usbSerialOperations_FTDI_FT8U232AM
   },
 
+  { /* Hedo MobilLine */
+    .vendor=0X0403, .product=0XDE58,
+    .operations = &usbSerialOperations_FTDI_FT232BM
+  },
+
+  { /* Hedo ProfiLine */
+    .vendor=0X0403, .product=0XDE59,
+    .operations = &usbSerialOperations_FTDI_FT232BM
+  },
+
   { /* Papenmeier FTDI */
     .vendor=0X0403, .product=0XF208,
     .operations = &usbSerialOperations_FTDI_FT232BM
