@@ -313,7 +313,7 @@ typedef enum {
 #define BRL_FLG_KBD_EMUL1 0X040000 /* it is an emulation 1 scan code */
 
 #define BRL_BLK_CONTEXT   0X2600 /* switch to command context */
-#define BRL_BLK_READ_LOCN 0X2700 /* reading location */
+#define BRL_BLK_TOUCH 0X2700 /* current reading location */
 
 #ifdef __cplusplus
 }

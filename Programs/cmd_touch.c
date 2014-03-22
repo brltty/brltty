@@ -16,22 +16,21 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_TOUCH
-#define BRLTTY_INCLUDED_TOUCH
+#include "prologue.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+#include "cmd_touch.h"
+#include "brl_cmds.h"
 
-#include "brl.h"
+int
+handleTouchCommand (int command, void *data) {
+  switch (command & BRL_MSK_BLK) {
+    case BRL_BLK_TOUCH: {
+      return 1;
+    }
 
-extern int touchAnalyzePressure (BrailleDisplay *brl, const unsigned char *pressure);
-extern void touchAnalyzeCells (BrailleDisplay *brl, const unsigned char *cells);
+    default:
+      break;
+  }
 
-extern int touchGetRegion (int *left, int *right, int *top, int *bottom);
-
-#ifdef __cplusplus
+  return 0;
 }
-#endif /* __cplusplus */
-
-#endif /* BRLTTY_INCLUDED_TOUCH */

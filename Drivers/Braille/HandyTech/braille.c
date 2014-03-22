@@ -1189,7 +1189,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
           if (brl->data->model->hasATC) {
             setAtcMode(brl, 1);
-            brl->touchEnabled = 1;
           }
 
           if (setTime) {
@@ -1515,7 +1514,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                       if (readingPosition >= cellCount) readingPosition = BRL_MSK_ARG;
                     }
 
-                    enqueueCommand(BRL_BLK_READ_LOCN | readingPosition);
+                    enqueueCommand(BRL_BLK_TOUCH | readingPosition);
                     continue;
                   }
 
@@ -1527,7 +1526,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                       readingPosition = BRL_MSK_ARG;
                     }
 
-                    enqueueCommand(BRL_BLK_READ_LOCN | readingPosition);
+                    enqueueCommand(BRL_BLK_TOUCH | readingPosition);
                     continue;
                   }
 

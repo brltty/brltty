@@ -1442,9 +1442,6 @@ handleNavigationCommand (int command, void *data) {
           break;
         }
 
-        case BRL_BLK_READ_LOCN:
-          break;
-
         default:
           return 0;
       }

@@ -43,6 +43,7 @@
 #include "cmd_queue.h"
 #include "cmd_navigation.h"
 #include "cmd_speech.h"
+#include "cmd_touch.h"
 #include "timing.h"
 #include "async_wait.h"
 #include "async_event.h"
@@ -211,6 +212,7 @@ setSessionEntry (void) {
         pushCommandHandler("speech", KTB_CTX_DEFAULT, handleSpeechCommand, NULL);
 #endif /*  ENABLE_SPEECH_SUPPORT */
 
+        pushCommandHandler("touch", KTB_CTX_DEFAULT, handleTouchCommand, NULL);
         pushCommandHandler("navigation", KTB_CTX_DEFAULT, handleNavigationCommand, NULL);
         pushCommandHandler("screen", KTB_CTX_DEFAULT, handleScreenCommand, NULL);
       }
