@@ -75,7 +75,7 @@ speakCurrentLine (void) {
 }
 
 int
-handleSpeechCommand (int command, void *datga) {
+handleSpeechCommand (int command, void *data) {
   switch (command & BRL_MSK_CMD) {
     case BRL_CMD_RESTARTSPEECH:
       restartSpeechDriver();

@@ -68,7 +68,7 @@ getLocaleCharset (void) {
 }
 
 static void
-exitCharsetIconv (void *datga) {
+exitCharsetIconv (void *data) {
   static iconv_t *const handles[] = {
     &iconvCharToWchar,
     &iconvWcharToChar

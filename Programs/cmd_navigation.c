@@ -408,7 +408,7 @@ applyInputModifiers (int *modifiers) {
 }
 
 int
-handleNavigationCommand (int command, void *datga) {
+handleNavigationCommand (int command, void *data) {
   static const char modeString_preferences[] = "prf";
   static Preferences savedPreferences;
 

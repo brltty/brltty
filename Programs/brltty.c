@@ -184,7 +184,7 @@ postprocessCommand (void *state, int command, int handled) {
 }
 
 static int
-handleUnhandledCommand (int command, void *datga) {
+handleUnhandledCommand (int command, void *data) {
   playTune(&tune_command_rejected);
   return 0;
 }
