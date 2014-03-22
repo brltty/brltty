@@ -619,11 +619,6 @@ doUpdate (void) {
     }
   }
 
-  if (brl.highlightWindow) {
-    brl.highlightWindow = 0;
-    highlightWindow();
-  }
-
 #ifdef ENABLE_SPEECH_SUPPORT
   if (spk.canAutospeak) {
     int isAutospeaking = autospeak();
