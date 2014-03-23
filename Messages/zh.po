@@ -42,7 +42,6 @@ msgstr "1 方"
 #: Programs/menu_prefs.c:893
 msgid "12 Hour"
 msgstr "12 小時"
-B
 #: Programs/menu_prefs.c:343 Programs/menu_prefs.c:346
 #: Programs/menu_prefs.c:349 Programs/menu_prefs.c:350
 #: Programs/menu_prefs.c:354
@@ -454,7 +453,7 @@ msgstr "音效卡數位音效的設備指定碼"
 
 #: Programs/config.c:450
 msgid "Device specifier for the Musical Instrument Digital Interface."
-msgst "樂器數位界面的設備指定碼"
+msgstr "樂器數位界面的設備指定碼"
 
 #: Programs/config.c:481
 #, c-format
@@ -1587,7 +1586,7 @@ msgid "Tremolo Strings"
 msgstr "陣音弦樂"
 
 #: Programs/midi.c:120
-msg "trumbone"
+msgid "trumbone"
 msgstr "伸縮喇叭"
 
 #. Brass
