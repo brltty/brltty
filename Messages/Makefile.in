@@ -16,37 +16,41 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-all:: objects languages
+all:: languages sources
 
 COPYRIGHT_HOLDER = The BRLTTY Developers
 
+LANGUAGE_CODES = de fr zh
 TEMPLATE_EXTENSION = pot
 SOURCE_EXTENSION = po
 OBJECT_EXTENSION = mo
 
-LANGUAGE_CODES = de fr zh
-OBJECT_FILES = $(LANGUAGE_CODES:=.$(OBJECT_EXTENSION))
+LANGUAGES_FILE = LINGUAS
+languages: $(LANGUAGES_FILE)
 
-%.$(OBJECT_EXTENSION): $(SRC_DIR)/%.$(SOURCE_EXTENSION)
-	$(MSGFMT) --output-file $@ $<
-
-objects: $(OBJECT_FILES)
+$(LANGUAGES_FILE):
+	ls -1 *.$(SOURCE_EXTENSION) | sed -e 's/\..*//' | sort >$@
 
 TEMPLATE_FILE = $(PACKAGE_TARNAME).$(TEMPLATE_EXTENSION)
+template $(TEMPLATE_EXTENSION): $(TEMPLATE_FILE)
+
 $(TEMPLATE_FILE): $(BLD_TOP)$(PGM_DIR)/cmds.auto.h
 	$(SRC_TOP)mkpot -n "$(PACKAGE_TARNAME)" -v "$(PACKAGE_VERSION)" -o $@ -b "$(PACKAGE_BUGREPORT)" -c "$(COPYRIGHT_HOLDER)" $(SRC_TOP) $(BLD_TOP)
-template $(TEMPLATE_EXTENSION): $(TEMPLATE_FILE)
+
+SOURCE_FILES = $(LANGUAGE_CODES:=.$(SOURCE_EXTENSION))
+sources: $(SOURCE_FILES)
 
 %.$(SOURCE_EXTENSION): $(TEMPLATE_FILE)
 	$(MSGMERGE) --quiet --force-po --no-wrap --sort-output --update -- $@ $(TEMPLATE_FILE)
 
-LANGUAGES_FILE = LINGUAS
-$(LANGUAGES_FILE):
-	ls -1 *.$(SOURCE_EXTENSION) | sed -e 's/\..*//' | sort >$@
-languages: $(LANGUAGES_FILE)
+OBJECT_FILES = $(LANGUAGE_CODES:=.$(OBJECT_EXTENSION))
+objects: $(OBJECT_FILES)
+
+%.$(OBJECT_EXTENSION): $(SRC_DIR)/%.$(SOURCE_EXTENSION)
+	$(MSGFMT) --output-file $@ $<
 
 clean::
-	-rm -f -- *.$(OBJECT_EXTENSION) *.$(TEMPLATE_EXTENSION) $(LANGUAGES_FILE) *~
+	-rm -f -- $(LANGUAGES_FILE) *.$(TEMPLATE_EXTENSION) *.$(OBJECT_EXTENSION) *~
 
 install:: objects install-locale-directory
 	for language in $(LANGUAGE_CODES); \
