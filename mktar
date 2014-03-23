@@ -58,6 +58,12 @@ make -s clean
 make -s
 cd ..
 
+cd Messages
+make -s clean
+make -s
+make -s clean
+cd ..
+
 cd Programs
 make -s revision_identifier.h
 cd ..

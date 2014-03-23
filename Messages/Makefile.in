@@ -19,8 +19,8 @@
 all:: languages sources
 
 COPYRIGHT_HOLDER = The BRLTTY Developers
-
 LANGUAGE_CODES = de fr zh
+
 TEMPLATE_EXTENSION = pot
 SOURCE_EXTENSION = po
 OBJECT_EXTENSION = mo
@@ -28,7 +28,7 @@ OBJECT_EXTENSION = mo
 LANGUAGES_FILE = LINGUAS
 languages: $(LANGUAGES_FILE)
 
-$(LANGUAGES_FILE):
+$(LANGUAGES_FILE): sources
 	ls -1 *.$(SOURCE_EXTENSION) | sed -e 's/\..*//' | sort >$@
 
 TEMPLATE_FILE = $(PACKAGE_TARNAME).$(TEMPLATE_EXTENSION)
@@ -50,7 +50,7 @@ objects: $(OBJECT_FILES)
 	$(MSGFMT) --output-file $@ $<
 
 clean::
-	-rm -f -- $(LANGUAGES_FILE) *.$(TEMPLATE_EXTENSION) *.$(OBJECT_EXTENSION) *~
+	-rm -f -- *.$(OBJECT_EXTENSION) *~
 
 install:: objects install-locale-directory
 	for language in $(LANGUAGE_CODES); \
