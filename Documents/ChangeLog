@@ -1,6 +1,84 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+March 27, 2014:
+ - BRLTTY 5.1 released:
+   General Changes:
+      An alert (2 beeps every 30 seconds) is now played when the screen is frozen.
+      Saving the preferences file now adds comments showing the possible values
+      (and the default value) for each property.
+      USB device identifiers now support the genericDevices= (yes, no) parameter.
+   Command Changes:
+      Unicode braille dots input is now supported:
+         The BRLUCDOTS toggle command has been added.
+         The "Braille Input Mode" preference has been added to "Input Options".
+      Skip Blank Windows now works like Skip Identical Lines:
+         FWINLT/FWINRT are unchanged:
+            If SBW is off then don't skip blank windows.
+            If SBW is on then honour Skip Blank Windows Mode.
+         FWINLTSKIP/FWINRTSKIP now work as follows:
+            If SBW is off then honour Skip Blank Windows Mode.
+            If SBW is on then don't skip blank windows.
+   The FreedomScientific Braille Driver:
+      Various problems with detecting a connection error have been resolved.
+      A problem causing a braille display freeze has been resolved.
+   The Papenmeier Braille Driver:
+      The following bindings have been added for models with 22 status cells:
+         Binding        Command
+         Status20       BRLUCDOTS
+         Dot7+Status20  BRLUCDOTS+off
+         Dot8+Status20  BRLUCDOTS+on
+   The Application Programming Interface (BrlAPI):
+      The version has been increased to 0.6.2 (from 0.6.1).
+      The retainDots= parameter has been removed.
+      The PASSDOTS command is no longer implicitly accepted by default.
+      Explicitly accepting PASSDOTS bypasses the conversion to PASSCHAR.
+   Environment Variables:
+      BRLTTY_NO_API (yes, no) is now supported.
+   The Configuration File (brltty.conf):
+      no-api (yes, no) can now be specified.
+      The following directives have been added:
+         include <file>
+         ifSet <property> [<statement>]
+         ifNotSet <property> [<statement>]
+         assign <variable> <value>
+         ifVar <variable> [<statement>]
+         ifNotVar <variable> [<statement>]
+         else
+         endIf
+      The special syntax \{variable} is now supported.
+   Text Tables:
+      The Hebrew text table (he) has been modernized.
+   Contraction Tables:
+      The US English Grade 2 (en-us-g2) contraction table has been updated.
+   Key Tables:
+      The following binding changes have been made to the "keypad" key table:
+         Binding           Old      New
+         KP0+KPMinus       SIXDOTS  SIXDOTS+off
+         KP0+KPPlus        -        SIXDOTS+on
+         KPPeriod+KPMinus  FREEZE   BRLUCDOTS+off
+         KPPeriod+KPPlus   -        BRLUCDOTS+on
+         KPMinus+KP3       -        FREEZE
+      The <statement> operand of the ifKey directive is now optional.
+      The following directives have been added:
+         ifNotKey <key> [<statement>]
+         ifVar <variable> [<statement>]
+         ifNotVar <variable> [<statement>]
+         else
+         endIf
+   Data File Customization:
+      The XDG configuration file paradigm is now supported.
+      A local version of any data file can be placed in "/etc/xdg/brltty/".
+      The XDG_CONFIG_HOME and XDG_CONFIG_DIRS environment variables are supported.
+      See "README.Customize" for full details.
+   Build Changes:
+      The source has been moved from an svn repository to a git repository at:
+         "https://github.com/brltty/brltty.git".
+      The URL of the web site has been changed to "http://brltty.com".
+      Many of the core headers are now installed (in "/usr/include/brltty/").
+      The brltty-devel rpm is now created.
+      The --with-api-socket-path= configure option has been added.
+
 January 27, 2014:
  - BRLTTY 5.0 released:
    Major Changes:
