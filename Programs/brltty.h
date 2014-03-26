@@ -158,17 +158,9 @@ extern int getContractedCursor (void);
 extern int getContractedLength (unsigned int outputLimit);
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-FUNCTION_DECLARE(changeLogLevel, int, (const char *operand));
-FUNCTION_DECLARE(changeLogCategories, int, (const char *operand));
-
-FUNCTION_DECLARE(changeTextTable, int, (const char *name));
-FUNCTION_DECLARE(changeAttributesTable, int, (const char *name));
-
 extern ContractionTable *contractionTable;
-FUNCTION_DECLARE(changeContractionTable, int, (const char *name));
 
 extern KeyTable *keyboardKeyTable;
-FUNCTION_DECLARE(changeKeyboardKeyTable, int, (const char *name));
 
 extern ProgramExitStatus brlttyStart (int argc, char *argv[]);
 
@@ -187,10 +179,6 @@ extern unsigned int statusCount;
 extern unsigned int fullWindowShift;			/* Full window horizontal distance */
 extern unsigned int halfWindowShift;			/* Half window horizontal distance */
 extern unsigned int verticalWindowShift;			/* Window vertical distance */
-
-FUNCTION_DECLARE(restartBrailleDriver, void, (void));
-FUNCTION_DECLARE(changeBrailleDriver, int, (const char *driver));
-FUNCTION_DECLARE(changeBrailleDevice, int, (const char *device));
 
 extern int constructBrailleDriver (void);
 extern void destructBrailleDriver (void);
@@ -219,9 +207,6 @@ extern void endAutospeakDelay (void);
 extern void sayScreenCharacters (const ScreenCharacter *characters, size_t count, int immediate);
 extern void speakCharacters (const ScreenCharacter *characters, size_t count, int spell);
 extern void trackSpeech (void);
-
-FUNCTION_DECLARE(restartSpeechDriver, void, (void));
-FUNCTION_DECLARE(changeSpeechDriver, int, (const char *driver));
 
 extern int constructSpeechDriver (void);
 extern void destructSpeechDriver (void);

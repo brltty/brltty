@@ -39,6 +39,21 @@ FUNCTION_DECLARE(brlttyDisableInterrupt, int, (void));
 FUNCTION_DECLARE(brlttyInterrupt, int, (WaitResult waitResult));
 FUNCTION_DECLARE(brlttyWait, WaitResult, (int duration));
 
+FUNCTION_DECLARE(changeLogLevel, int, (const char *operand));
+FUNCTION_DECLARE(changeLogCategories, int, (const char *operand));
+
+FUNCTION_DECLARE(changeTextTable, int, (const char *name));
+FUNCTION_DECLARE(changeAttributesTable, int, (const char *name));
+FUNCTION_DECLARE(changeContractionTable, int, (const char *name));
+FUNCTION_DECLARE(changeKeyboardKeyTable, int, (const char *name));
+
+FUNCTION_DECLARE(restartBrailleDriver, void, (void));
+FUNCTION_DECLARE(changeBrailleDriver, int, (const char *driver));
+FUNCTION_DECLARE(changeBrailleDevice, int, (const char *device));
+
+FUNCTION_DECLARE(restartSpeechDriver, void, (void));
+FUNCTION_DECLARE(changeSpeechDriver, int, (const char *driver));
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

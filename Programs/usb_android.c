@@ -800,7 +800,7 @@ usbAddHostDevice (JNIEnv *env, jobject device) {
 }
 
 typedef struct {
-  UsbDeviceChooser chooser;
+  UsbDeviceChooser *chooser;
   void *data;
   UsbDevice *device;
 } UsbTestHostDeviceData;

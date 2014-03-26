@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <fcntl.h>
 
+#include "embed.h"
 #include "parameters.h"
 #include "update.h"
 #include "cmd.h"
