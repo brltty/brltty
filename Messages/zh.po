@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 4.3\n"
 "Report-Msgid-Bugs-To: brltty@mielke.cc\n"
-"POT-Creation-Date: 2014-03-23 11:56-0400\n"
+"POT-Creation-Date: 2014-03-25 20:28-0400\n"
 "PO-Revision-Date: 2012-12-19 17:03+0100\n"
 "Last-Translator: 高生旺 <coscell@molerat.net>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -152,7 +152,7 @@ msgstr ""
 msgid "Attributes Invisible Time"
 msgstr "屬性隱藏時間"
 
-#: Programs/menu_prefs.c:1027 Programs/config.c:2252
+#: Programs/config.c:2252 Programs/menu_prefs.c:1027
 msgid "Attributes Table"
 msgstr "屬性表"
 
@@ -382,7 +382,7 @@ msgstr "倍低音"
 msgid "Contracted Braille"
 msgstr "縮寫點字"
 
-#: Programs/menu_prefs.c:1034 Programs/config.c:2259
+#: Programs/config.c:2259 Programs/menu_prefs.c:1034
 msgid "Contraction Table"
 msgstr "縮寫表"
 
@@ -778,7 +778,7 @@ msgstr "卡淋巴"
 msgid "Key Bindings"
 msgstr "按鍵設定"
 
-#: Programs/ktb_list.c:351 Programs/config.c:1071
+#: Programs/config.c:1071 Programs/ktb_list.c:351
 msgid "Key Table"
 msgstr "按鍵表"
 
@@ -1132,7 +1132,7 @@ msgstr "內定設定檔案路徑"
 msgid "Path to directory containing drivers."
 msgstr "對照表所在目錄路徑"
 
-#: Programs/brltty-ctb.c:57 Programs/ktbtest.c:69 Programs/config.c:394
+#: Programs/brltty-ctb.c:57 Programs/config.c:394 Programs/ktbtest.c:69
 msgid "Path to directory containing tables."
 msgstr "對照表所在目錄路徑"
 
@@ -1642,7 +1642,7 @@ msgstr "文字邊"
 msgid "Text Style"
 msgstr "文自行太"
 
-#: Programs/menu_prefs.c:1021 Programs/config.c:2238
+#: Programs/config.c:2238 Programs/menu_prefs.c:1021
 msgid "Text Table"
 msgstr "文字表"
 
@@ -1863,7 +1863,7 @@ msgstr "錯誤 VT 格式編號\n"
 msgid "bad type for VT number\n"
 msgstr "錯誤 VT 編號型態\n"
 
-#: Drivers/Braille/TSI/braille.c:975 Drivers/Braille/Baum/braille.c:890
+#: Drivers/Braille/Baum/braille.c:890 Drivers/Braille/TSI/braille.c:975
 msgid "battery low"
 msgstr "電量低"
 
@@ -1947,7 +1947,7 @@ msgstr "無法建立目錄"
 msgid "cannot determine program directory"
 msgstr "無法定義程式目錄"
 
-#: Programs/menu.c:452 Programs/config.c:2199
+#: Programs/config.c:2199 Programs/menu.c:452
 msgid "cannot determine working directory"
 msgstr "無法定義工作目錄"
 
@@ -2023,7 +2023,7 @@ msgstr "無法讀取偏好設定檔"
 msgid "cannot set focus to %#010x\n"
 msgstr "無法設定焦點到 %#010x\n"
 
-#: Programs/menu.c:439 Programs/file.c:342
+#: Programs/file.c:342 Programs/menu.c:439
 msgid "cannot set working directory"
 msgstr "無法設定工作目錄"
 
@@ -2139,8 +2139,8 @@ msgid "didn't grab window %#010lx but got focus\n"
 msgstr "無法擷取視窗 %#010lx 不過得到焦點\n"
 
 #: Programs/brltest.c:64 Programs/brltty-ctb.c:54 Programs/brltty-trtxt.c:46
-#: Programs/ktbtest.c:57 Programs/ktbtest.c:66 Programs/config.c:288
-#: Programs/config.c:297 Programs/config.c:391
+#: Programs/config.c:288 Programs/config.c:297 Programs/config.c:391
+#: Programs/ktbtest.c:57 Programs/ktbtest.c:66
 msgid "directory"
 msgstr "目錄"
 
@@ -2241,10 +2241,10 @@ msgstr "\"%s\" 執行失敗: %s\n"
 msgid "failed to get first focus\n"
 msgstr "或取締一個焦點失敗\n"
 
-#: Programs/brltty-trtxt.c:55 Programs/brltty-trtxt.c:64 Programs/xbrlapi.c:88
-#: Programs/config.c:280 Programs/config.c:306 Programs/config.c:315
-#: Programs/config.c:401 Programs/config.c:411 Programs/config.c:420
-#: Programs/config.c:429 Programs/config.c:465 Programs/config.c:542
+#: Programs/brltty-trtxt.c:55 Programs/brltty-trtxt.c:64 Programs/config.c:280
+#: Programs/config.c:306 Programs/config.c:315 Programs/config.c:401
+#: Programs/config.c:411 Programs/config.c:420 Programs/config.c:429
+#: Programs/config.c:465 Programs/config.c:542 Programs/xbrlapi.c:88
 msgid "file"
 msgstr "檔案"
 
@@ -2901,7 +2901,7 @@ msgstr "音效卡數位音效"
 msgid "soundcard synthesizer"
 msgstr "音效卡合成器"
 
-#: Programs/cmd.c:276 Programs/brltty.c:838
+#: Programs/brltty.c:838 Programs/cmd.c:276
 msgid "space"
 msgstr "空白"
 

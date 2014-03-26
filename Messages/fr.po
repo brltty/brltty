@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 4.3\n"
 "Report-Msgid-Bugs-To: brltty@mielke.cc\n"
-"POT-Creation-Date: 2014-03-23 09:31-0400\n"
+"POT-Creation-Date: 2014-03-25 20:28-0400\n"
 "PO-Revision-Date: 2011-05-10 19:39+0200\n"
 "Last-Translator: Jean-Philippe MENGUAL (de Traduc.org) <mengualjeanphi@free.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -152,7 +152,7 @@ msgstr ""
 msgid "Attributes Invisible Time"
 msgstr "Durée de l'invisibilité des attributs"
 
-#: Programs/menu_prefs.c:1027 Programs/config.c:2252
+#: Programs/config.c:2252 Programs/menu_prefs.c:1027
 msgid "Attributes Table"
 msgstr "Table d'attributs"
 
@@ -378,7 +378,7 @@ msgstr "Contrebasse"
 msgid "Contracted Braille"
 msgstr "Braille abrégé"
 
-#: Programs/menu_prefs.c:1034 Programs/config.c:2259
+#: Programs/config.c:2259 Programs/menu_prefs.c:1034
 msgid "Contraction Table"
 msgstr "Table de braille abrégé"
 
@@ -766,7 +766,7 @@ msgstr "Kalimba"
 msgid "Key Bindings"
 msgstr "Associations de touches"
 
-#: Programs/ktb_list.c:351 Programs/config.c:1071
+#: Programs/config.c:1071 Programs/ktb_list.c:351
 msgid "Key Table"
 msgstr "Table de touches"
 
@@ -1113,7 +1113,7 @@ msgstr "Chemin du fichier des paramètres par défaut."
 msgid "Path to directory containing drivers."
 msgstr "Chemin du répertoire contenant les tables."
 
-#: Programs/brltty-ctb.c:57 Programs/ktbtest.c:69 Programs/config.c:394
+#: Programs/brltty-ctb.c:57 Programs/config.c:394 Programs/ktbtest.c:69
 msgid "Path to directory containing tables."
 msgstr "Chemin du répertoire contenant les tables."
 
@@ -1618,7 +1618,7 @@ msgstr "Limite du texte"
 msgid "Text Style"
 msgstr "Apparence du texte"
 
-#: Programs/menu_prefs.c:1021 Programs/config.c:2238
+#: Programs/config.c:2238 Programs/menu_prefs.c:1021
 msgid "Text Table"
 msgstr "Table de texte"
 
@@ -1836,7 +1836,7 @@ msgstr "Mauvais format de numéro de terminal virtuel\n"
 msgid "bad type for VT number\n"
 msgstr "Mauvais type de numéro de terminal virtuel\n"
 
-#: Drivers/Braille/TSI/braille.c:975 Drivers/Braille/Baum/braille.c:890
+#: Drivers/Braille/Baum/braille.c:890 Drivers/Braille/TSI/braille.c:975
 msgid "battery low"
 msgstr "Batterie faible"
 
@@ -1920,7 +1920,7 @@ msgstr "Ne peut pas créer de répertoire"
 msgid "cannot determine program directory"
 msgstr "Ne peut pas déterminer le répertoire du programme"
 
-#: Programs/menu.c:452 Programs/config.c:2199
+#: Programs/config.c:2199 Programs/menu.c:452
 msgid "cannot determine working directory"
 msgstr "Ne peut pas déterminer le répertoire de travail"
 
@@ -1996,7 +1996,7 @@ msgstr "Ne peut pas lire le fichier des préférences"
 msgid "cannot set focus to %#010x\n"
 msgstr "Ne peut pas paramétrer le focus sur %#010x\n"
 
-#: Programs/menu.c:439 Programs/file.c:342
+#: Programs/file.c:342 Programs/menu.c:439
 msgid "cannot set working directory"
 msgstr "Ne peut pas paramétrer le répertoire de travail"
 
@@ -2112,8 +2112,8 @@ msgid "didn't grab window %#010lx but got focus\n"
 msgstr "n'a pas extrait la fenêtre %#010lx mais a récupéré le focus\n"
 
 #: Programs/brltest.c:64 Programs/brltty-ctb.c:54 Programs/brltty-trtxt.c:46
-#: Programs/ktbtest.c:57 Programs/ktbtest.c:66 Programs/config.c:288
-#: Programs/config.c:297 Programs/config.c:391
+#: Programs/config.c:288 Programs/config.c:297 Programs/config.c:391
+#: Programs/ktbtest.c:57 Programs/ktbtest.c:66
 msgid "directory"
 msgstr "répertoire"
 
@@ -2214,10 +2214,10 @@ msgstr "Échec de l'exécution de \"%s\" : %s\n"
 msgid "failed to get first focus\n"
 msgstr "échec de la récupÃ§ration du premier focus\n"
 
-#: Programs/brltty-trtxt.c:55 Programs/brltty-trtxt.c:64 Programs/xbrlapi.c:88
-#: Programs/config.c:280 Programs/config.c:306 Programs/config.c:315
-#: Programs/config.c:401 Programs/config.c:411 Programs/config.c:420
-#: Programs/config.c:429 Programs/config.c:465 Programs/config.c:542
+#: Programs/brltty-trtxt.c:55 Programs/brltty-trtxt.c:64 Programs/config.c:280
+#: Programs/config.c:306 Programs/config.c:315 Programs/config.c:401
+#: Programs/config.c:411 Programs/config.c:420 Programs/config.c:429
+#: Programs/config.c:465 Programs/config.c:542 Programs/xbrlapi.c:88
 msgid "file"
 msgstr "fichier"
 
@@ -2867,7 +2867,7 @@ msgstr "Son numérique de la carte son"
 msgid "soundcard synthesizer"
 msgstr "Synthétiseur de la carte son"
 
-#: Programs/cmd.c:276 Programs/brltty.c:838
+#: Programs/brltty.c:838 Programs/cmd.c:276
 msgid "space"
 msgstr "Espace"
 

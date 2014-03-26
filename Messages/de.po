@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 4.5\n"
 "Report-Msgid-Bugs-To: brltty@mielke.cc\n"
-"POT-Creation-Date: 2014-03-23 11:56-0400\n"
+"POT-Creation-Date: 2014-03-25 20:28-0400\n"
 "PO-Revision-Date: 2014-01-23 19:47+0100\n"
 "Last-Translator: Angela Engel <angela.engel@gmx.at>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -152,7 +152,7 @@ msgstr "Asynchrone Ereignisse"
 msgid "Attributes Invisible Time"
 msgstr "Attribute sind unsichtbar für"
 
-#: Programs/menu_prefs.c:1027 Programs/config.c:2252
+#: Programs/config.c:2252 Programs/menu_prefs.c:1027
 msgid "Attributes Table"
 msgstr "Attributtabelle"
 
@@ -378,7 +378,7 @@ msgstr "Kontrabass"
 msgid "Contracted Braille"
 msgstr "Braille-Kurzschrift"
 
-#: Programs/menu_prefs.c:1034 Programs/config.c:2259
+#: Programs/config.c:2259 Programs/menu_prefs.c:1034
 msgid "Contraction Table"
 msgstr "Kurzschrifttabelle"
 
@@ -767,7 +767,7 @@ msgstr "Kalimba"
 msgid "Key Bindings"
 msgstr "Tastenbelegungen"
 
-#: Programs/ktb_list.c:351 Programs/config.c:1071
+#: Programs/config.c:1071 Programs/ktb_list.c:351
 msgid "Key Table"
 msgstr "Tastentabelle"
 
@@ -1107,7 +1107,7 @@ msgstr "Pfad zur Standardkonfigurationsdatei."
 msgid "Path to directory containing drivers."
 msgstr "Pfad zum Verzeichnis das Treiber enthält."
 
-#: Programs/brltty-ctb.c:57 Programs/ktbtest.c:69 Programs/config.c:394
+#: Programs/brltty-ctb.c:57 Programs/config.c:394 Programs/ktbtest.c:69
 msgid "Path to directory containing tables."
 msgstr "Pfad zum Tabellen-Verzeichnis."
 
@@ -1611,7 +1611,7 @@ msgstr "Textseitig"
 msgid "Text Style"
 msgstr "Textdarstellung"
 
-#: Programs/menu_prefs.c:1021 Programs/config.c:2238
+#: Programs/config.c:2238 Programs/menu_prefs.c:1021
 msgid "Text Table"
 msgstr "Texttabelle"
 
@@ -1829,7 +1829,7 @@ msgstr "ungültiges Format für VT Nummer\n"
 msgid "bad type for VT number\n"
 msgstr "ungültiger Typ für VT Nummer\n"
 
-#: Drivers/Braille/TSI/braille.c:975 Drivers/Braille/Baum/braille.c:890
+#: Drivers/Braille/Baum/braille.c:890 Drivers/Braille/TSI/braille.c:975
 msgid "battery low"
 msgstr "Akku schwach"
 
@@ -1913,7 +1913,7 @@ msgstr "kann Verzeichnis nicht erstellen"
 msgid "cannot determine program directory"
 msgstr "kann Programmverzeichnis nicht bestimmen"
 
-#: Programs/menu.c:452 Programs/config.c:2199
+#: Programs/config.c:2199 Programs/menu.c:452
 msgid "cannot determine working directory"
 msgstr "kann Arbeitsverzeichnis nicht bestimmen"
 
@@ -1989,7 +1989,7 @@ msgstr "kann Einstellungsdatei nicht lesen"
 msgid "cannot set focus to %#010x\n"
 msgstr "kann Fokus nicht auf %#010x setzen\n"
 
-#: Programs/menu.c:439 Programs/file.c:342
+#: Programs/file.c:342 Programs/menu.c:439
 msgid "cannot set working directory"
 msgstr "kann Arbeitsverzeichnis nicht wechseln"
 
@@ -2106,8 +2106,8 @@ msgid "didn't grab window %#010lx but got focus\n"
 msgstr ""
 
 #: Programs/brltest.c:64 Programs/brltty-ctb.c:54 Programs/brltty-trtxt.c:46
-#: Programs/ktbtest.c:57 Programs/ktbtest.c:66 Programs/config.c:288
-#: Programs/config.c:297 Programs/config.c:391
+#: Programs/config.c:288 Programs/config.c:297 Programs/config.c:391
+#: Programs/ktbtest.c:57 Programs/ktbtest.c:66
 msgid "directory"
 msgstr "Verzeichnis"
 
@@ -2207,10 +2207,10 @@ msgstr "Ausführen von \"%s\" fehlgeschlagen: %s\n"
 msgid "failed to get first focus\n"
 msgstr ""
 
-#: Programs/brltty-trtxt.c:55 Programs/brltty-trtxt.c:64 Programs/xbrlapi.c:88
-#: Programs/config.c:280 Programs/config.c:306 Programs/config.c:315
-#: Programs/config.c:401 Programs/config.c:411 Programs/config.c:420
-#: Programs/config.c:429 Programs/config.c:465 Programs/config.c:542
+#: Programs/brltty-trtxt.c:55 Programs/brltty-trtxt.c:64 Programs/config.c:280
+#: Programs/config.c:306 Programs/config.c:315 Programs/config.c:401
+#: Programs/config.c:411 Programs/config.c:420 Programs/config.c:429
+#: Programs/config.c:465 Programs/config.c:542 Programs/xbrlapi.c:88
 msgid "file"
 msgstr "Datei"
 
@@ -2859,7 +2859,7 @@ msgstr "Digital Audio Soundkarte"
 msgid "soundcard synthesizer"
 msgstr "Synthesizer der Soundkarte"
 
-#: Programs/cmd.c:276 Programs/brltty.c:838
+#: Programs/brltty.c:838 Programs/cmd.c:276
 msgid "space"
 msgstr "leer"
 
