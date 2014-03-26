@@ -21,6 +21,7 @@
 #include <stdio.h>
 
 #include "log.h"
+#include "embed.h"
 #include "parameters.h"
 #include "brl_input.h"
 #include "brl_cmds.h"

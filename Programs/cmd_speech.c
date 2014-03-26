@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 
+#include "embed.h"
 #include "cmd_speech.h"
 #include "prefs.h"
 #include "tunes.h"

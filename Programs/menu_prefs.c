@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "embed.h"
 #include "menu.h"
 #include "prefs.h"
 #include "stat_types.h"

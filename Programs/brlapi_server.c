@@ -67,6 +67,7 @@
 #include "cmd_brlapi.h"
 #include "brl_cmds.h"
 #include "brl_utils.h"
+#include "embed.h"
 #include "ttb.h"
 #include "brltty.h"
 #include "api_control.h"
