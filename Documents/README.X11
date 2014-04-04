@@ -37,10 +37,10 @@ XKBOPTIONS="grp:shift_caps_toggle,grp_led:scroll"
 
 By default, the result will be unicode braille patterns, because X11 does not
 know which braille table it should use. To tell X11 the conversion that should
-be performed, use the ttbtest tool to convert your brltty table into an XCompose
-table, for instance:
+be performed, use the brltty-ttb tool to convert your brltty table into an
+XCompose table, for instance:
 
-ttbtest -i ttb -o XCompose en_US.ttb /tmp/my.XCompose
+brltty-ttb -i ttb -o XCompose en_US.ttb /tmp/my.XCompose
 
 The XCompose table can then be enabled by:
 
