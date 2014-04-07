@@ -6,6 +6,7 @@ reldeps.mk
 /autom4te*.cache
 /BinTree/
 
+/config.cache
 /config.log
 /config.status
 /config.mk
@@ -16,6 +17,7 @@ reldeps.mk
 /forbuild.mk
 /forbuild.h
 
+*~
 *.o
 *.a
 *.so

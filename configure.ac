@@ -54,6 +54,9 @@ AC_PREFIX_DEFAULT([])
 AC_CONFIG_AUX_DIR([acdir])
 AC_CANONICAL_SYSTEM
 
+dnl This really should be using PKG_PROG_PKG_CONFIG.
+: ${PKG_CONFIG:=pkg-config}
+
 brltty_default_execute_root="/${PACKAGE_TARNAME}-${PACKAGE_VERSION}"
 BRLTTY_ARG_WITH(
    [execute-root], [DIRECTORY],
@@ -605,28 +608,28 @@ BRLTTY_ARG_DISABLE(
    [support for X11],
    [],
 [dnl
-   pkg-config --exists x11 && {
-      xsv_includes="`pkg-config --cflags-only-I x11`"
-      xsv_libs="`pkg-config ${pkgconfig_flags_libs} x11`"
+   ${PKG_CONFIG} --exists x11 && {
+      xsv_includes="`${PKG_CONFIG} --cflags-only-I x11`"
+      xsv_libs="`${PKG_CONFIG} ${pkgconfig_flags_libs} x11`"
 
       all_xbrlapi="all-xbrlapi"
       install_xbrlapi="install-xbrlapi"
 
       AC_CHECK_HEADERS([X11/keysym.h])
 
-      pkg-config --exists xext && {
-         xkb_libs="`pkg-config ${pkgconfig_flags_libs} xext` ${xkb_libs}"
+      ${PKG_CONFIG} --exists xext && {
+         xkb_libs="`${PKG_CONFIG} ${pkgconfig_flags_libs} xext` ${xkb_libs}"
 
-         pkg-config --exists xtst && {
-            xkb_libs="`pkg-config ${pkgconfig_flags_libs} xtst` ${xkb_libs}"
+         ${PKG_CONFIG} --exists xtst && {
+            xkb_libs="`${PKG_CONFIG} ${pkgconfig_flags_libs} xtst` ${xkb_libs}"
 
             AC_CHECK_HEADERS([X11/extensions/XTest.h])
             AC_CHECK_HEADERS([X11/extensions/XKB.h])
          }
       }
 
-      pkg-config --exists xt && {
-         xtk_libs="`pkg-config ${pkgconfig_flags_libs} xt` ${xtk_libs}"
+      ${PKG_CONFIG} --exists xt && {
+         xtk_libs="`${PKG_CONFIG} ${pkgconfig_flags_libs} xt` ${xtk_libs}"
 
          brltty_cppflags_save="${CPPFLAGS}"
          CPPFLAGS="${CPPFLAGS} ${xsv_includes}"

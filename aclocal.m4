@@ -134,10 +134,10 @@ test -z "${$1_package}" && {
    test -n "${packages}" && {
       for package in ${packages}
       do
-         pkg-config --exists "${package}" && {
+         ${PKG_CONFIG} --exists "${package}" && {
             $1_package="${package}"
-            $1_includes=`pkg-config --cflags-only-I "${package}"`
-            $1_libs=`pkg-config ${pkgconfig_flags_libs} "${package}"`
+            $1_includes=`${PKG_CONFIG} --cflags-only-I "${package}"`
+            $1_libs=`${PKG_CONFIG} ${pkgconfig_flags_libs} "${package}"`
             break
          }
 
@@ -551,10 +551,10 @@ $1_includes=""
 $1_libs=""
 for package_specification in $2
 do
-   pkg-config --exists "${package_specification}" && {
+   ${PKG_CONFIG} --exists "${package_specification}" && {
       package_name="${package_specification%% *}"
-      $1_includes=`pkg-config --cflags-only-I "${package_name}"`
-      $1_libs=`pkg-config ${pkgconfig_flags_libs} "${package_name}"`
+      $1_includes=`${PKG_CONFIG} --cflags-only-I "${package_name}"`
+      $1_libs=`${PKG_CONFIG} ${pkgconfig_flags_libs} "${package_name}"`
       $3
       break
    }
