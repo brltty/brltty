@@ -134,12 +134,8 @@ test -z "${$1_package}" && {
    test -n "${packages}" && {
       for package in ${packages}
       do
-         pkg-config --exists "${package}" && {
-            $1_package="${package}"
-            $1_includes=`pkg-config --cflags-only-I "${package}"`
-            $1_libs=`pkg-config ${pkgconfig_flags_libs} "${package}"`
-            break
-         }
+         BRLTTY_HAVE_PACKAGE([$1], ["${package}"])
+         test -n "${$1_package}" && break
 
          ifelse(len([$5]), 0, [], [dnl
             case "${package}"
@@ -547,18 +543,22 @@ then
 fi])
 
 AC_DEFUN([BRLTTY_HAVE_PACKAGE], [dnl
+$1_package=""
 $1_includes=""
 $1_libs=""
+
 for package_specification in $2
 do
-   pkg-config --exists "${package_specification}" && {
-      package_name="${package_specification%% *}"
-      $1_includes=`pkg-config --cflags-only-I "${package_name}"`
-      $1_libs=`pkg-config ${pkgconfig_flags_libs} "${package_name}"`
+   ${PKG_CONFIG} --exists "${package_specification}" && {
+      $1_package="${package_specification%% *}"
+      $1_includes=`${PKG_CONFIG} --cflags-only-I "${$1_package}"`
+      $1_libs=`${PKG_CONFIG} ${pkgconfig_flags_libs} "${$1_package}"`
       $3
       break
    }
 done
+
+AC_SUBST([$1_package])
 AC_SUBST([$1_includes])
 AC_SUBST([$1_libs])
 ])

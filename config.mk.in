@@ -61,8 +61,22 @@ API_LIBS = -L$(BLD_TOP)$(PGM_DIR) -lbrlapi
 INSTALL_ROOT = @install_root@
 EXECUTE_ROOT = @execute_root@
 
+XSV_PACKAGE = @xsv_package@
 XSV_INCLUDES = @xsv_includes@
 XSV_LIBS = @xsv_libs@
+
+XEXT_PACKAGE = @xext_package@
+XEXT_INCLUDES = @xext_includes@
+XEXT_LIBS = @xext_libs@
+
+XTST_PACKAGE = @xtst_package@
+XTST_INCLUDES = @xtst_includes@
+XTST_LIBS = @xtst_libs@
+
+XT_PACKAGE = @xt_package@
+XT_INCLUDES = @xt_includes@
+XT_LIBS = @xt_libs@
+
 XKB_LIBS = @xkb_libs@
 XTK_LIBS = @xtk_libs@
 
@@ -71,15 +85,19 @@ CURSES_LIBS = @curses_libs@
 
 GUI_TOOLKIT_PACKAGE = @gui_toolkit_package@
 
+CSPI_PACKAGE = @cspi_package@
 CSPI_INCLUDES = @cspi_includes@
 CSPI_LIBS = @cspi_libs@
 
+ATSPI2_PACKAGE = @atspi2_package@
 ATSPI2_INCLUDES = @atspi2_includes@
 ATSPI2_LIBS = @atspi2_libs@
 
+GLIB2_PACKAGE = @glib2_package@
 GLIB2_INCLUDES = @glib2_includes@
 GLIB2_LIBS = @glib2_libs@
 
+DBUS_PACKAGE = @dbus_package@
 DBUS_INCLUDES = @dbus_includes@
 DBUS_LIBS = @dbus_libs@
 
@@ -226,6 +244,7 @@ AWK = @AWK@
 SYMLINK = @LN_S@
 DOXYGEN = @DOXYGEN@
 
+PKG_CONFIG = @PKG_CONFIG@
 MSGMERGE = @MSGMERGE@
 MSGFMT = @MSGFMT@
 

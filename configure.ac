@@ -248,6 +248,7 @@ AC_PATH_TOOL([RANLIB], [ranlib])
 AC_PROG_AWK
 AC_PROG_LN_S
 
+AC_PATH_PROG([PKG_CONFIG], [pkg-config])
 AC_PATH_PROG([MSGMERGE], [msgmerge])
 AC_PATH_PROG([MSGFMT], [msgfmt])
 
@@ -594,8 +595,6 @@ curses_libs="${LIBS%${brltty_curses_libs_save}}"
 LIBS="${brltty_curses_libs_save}"
 AC_SUBST([curses_libs])
 
-xsv_includes=""
-xsv_libs=""
 xkb_libs=""
 xtk_libs=""
 all_xbrlapi=""
@@ -605,28 +604,25 @@ BRLTTY_ARG_DISABLE(
    [support for X11],
    [],
 [dnl
-   pkg-config --exists x11 && {
-      xsv_includes="`pkg-config --cflags-only-I x11`"
-      xsv_libs="`pkg-config ${pkgconfig_flags_libs} x11`"
-
+   BRLTTY_HAVE_PACKAGE([xsv], [x11], [dnl
       all_xbrlapi="all-xbrlapi"
       install_xbrlapi="install-xbrlapi"
 
       AC_CHECK_HEADERS([X11/keysym.h])
 
-      pkg-config --exists xext && {
-         xkb_libs="`pkg-config ${pkgconfig_flags_libs} xext` ${xkb_libs}"
+      BRLTTY_HAVE_PACKAGE([xext], [xext], [dnl
+         xkb_libs="${xext_libs} ${xkb_libs}"
 
-         pkg-config --exists xtst && {
-            xkb_libs="`pkg-config ${pkgconfig_flags_libs} xtst` ${xkb_libs}"
-
+         BRLTTY_HAVE_PACKAGE([xtst], [xtst], [dnl
+            xkb_libs="${xtst_libs} ${xkb_libs}"
+             
             AC_CHECK_HEADERS([X11/extensions/XTest.h])
             AC_CHECK_HEADERS([X11/extensions/XKB.h])
-         }
-      }
+         ])
+      ])
 
-      pkg-config --exists xt && {
-         xtk_libs="`pkg-config ${pkgconfig_flags_libs} xt` ${xtk_libs}"
+      BRLTTY_HAVE_PACKAGE([xt], [xt], [dnl
+         xtk_libs="${xt_libs} ${xtk_libs}"
 
          brltty_cppflags_save="${CPPFLAGS}"
          CPPFLAGS="${CPPFLAGS} ${xsv_includes}"
@@ -645,11 +641,9 @@ BRLTTY_ARG_DISABLE(
 
          CPPFLAGS="${brltty_cppflags_save}"
          LIBS="${brltty_libs_save}"
-      }
-   }
+      ])
+   ])
 ])
-AC_SUBST([xsv_includes])
-AC_SUBST([xsv_libs])
 AC_SUBST([xkb_libs])
 AC_SUBST([xtk_libs])
 AC_SUBST([all_xbrlapi])
