@@ -1360,6 +1360,7 @@ repeatable \xa0 0 no break space
 
 always \u00A9 45-14 copyright sign
 always \u00AE 45-1235 registered sign
+always \u2014 36-36 em dash
 always \u2122 45-2345 trade mark sign
 
 always -com =
@@ -1376,6 +1377,7 @@ repeatable === 123456-123456-123456
 always ­ 36
 repeatable ­­­ 36-36-36
 always \s­\s 36-36
+always \s\u2014\s 36-36
 
 # accented letters
 always À 6-4-1      [C0] upper a grave
