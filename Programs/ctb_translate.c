@@ -318,10 +318,13 @@ selectRule (int length) {
             return 1;
 
           case CTO_WholeWord:
-          case CTO_Contraction:
             if (testCharacter(before, CTC_Space|CTC_Punctuation) &&
                 testCharacter(after, CTC_Space|CTC_Punctuation))
               return 1;
+            break;
+
+          case CTO_Contraction:
+            if (isBeginning() && isEnding()) return 1;
             break;
 
           case CTO_LowWord:
