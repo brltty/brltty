@@ -95,6 +95,28 @@ getContractionTableCharacter (wchar_t character) {
   return NULL;
 }
 
+static int
+setAlwaysRule (wchar_t character, void *data) {
+  const ContractionTableCharacter *ctc = getContractionTableCharacter(character);
+
+  if (ctc) {
+    ContractionTableOffset offset = ctc->always;
+
+    if (offset) {
+      const ContractionTableRule *rule = getContractionTableItem(offset);
+
+      if (rule->replen) {
+        CharacterEntry *entry = data;
+
+        entry->always = rule;
+        return 1;
+      }
+    }
+  }
+
+  return 0;
+}
+
 static CharacterEntry *
 getCharacterEntry (wchar_t character) {
   int first = 0;
@@ -165,8 +187,33 @@ getCharacterEntry (wchar_t character) {
       if (ctc) entry->attributes |= ctc->attributes;
     }
 
+    if (!handleBestCharacter(character, setAlwaysRule, entry)) {
+      entry->always = NULL;
+    }
+
     return entry;
   }
+}
+
+static const ContractionTableRule *
+getAlwaysRule (wchar_t character) {
+  const CharacterEntry *entry = getCharacterEntry(character);
+
+  return entry? entry->always: NULL;
+}
+
+static wchar_t
+getBestCharacter (wchar_t character) {
+  const ContractionTableRule *rule = getAlwaysRule(character);
+
+  return rule? rule->findrep[0]: 0;
+}
+
+static int
+sameCharacters (wchar_t character1, wchar_t character2) {
+  wchar_t best1 = getBestCharacter(character1);
+
+  return best1 && (best1 == getBestCharacter(character2));
 }
 
 static int
@@ -336,7 +383,7 @@ selectRule (int length) {
 
           case CTO_JoinedWord:
             if (testCharacter(before, CTC_Space|CTC_Punctuation) &&
-                (before != '-') &&
+                !sameCharacters(before, WC_C('-')) &&
                 (dest + currentRule->replen < destmax)) {
               const wchar_t *end = src + currentFindLength;
               const wchar_t *ptr = end;
@@ -457,46 +504,12 @@ putReplace (const ContractionTableRule *rule, wchar_t character) {
   return putCells(cells, count);
 }
 
-static const ContractionTableRule *
-getAlwaysRule (wchar_t character) {
-  const ContractionTableCharacter *ctc = getContractionTableCharacter(character);
-  if (ctc) {
-    ContractionTableOffset offset = ctc->always;
-    if (offset) {
-      const ContractionTableRule *rule = getContractionTableItem(offset);
-      if (rule->replen) return rule;
-    }
-  }
-  return NULL;
-}
-
-typedef struct {
-  const ContractionTableRule *rule;
-} SetCharacterRuleData;
-
-static int
-setCharacterRule (wchar_t character, void *data) {
-  const ContractionTableRule *rule = getAlwaysRule(character);
-
-  if (rule) {
-    SetCharacterRuleData *scr = data;
-    scr->rule = rule;
-    return 1;
-  }
-
-  return 0;
-}
-
 static int
 putCharacter (wchar_t character) {
   {
-    SetCharacterRuleData scr = {
-      .rule = NULL
-    };
+    const ContractionTableRule *rule = getAlwaysRule(character);
 
-    if (handleBestCharacter(character, setCharacterRule, &scr)) {
-      return putReplace(scr.rule, character);
-    }
+    if (rule) return putReplace(rule, character);
   }
 
   {
@@ -1015,7 +1028,9 @@ contractTextInternally (void) {
              testCharacter(before, CTC_Space) &&
              (((src + 1) == srcmax) ||
               testCharacter(src[1], CTC_Space) ||
-              (testCharacter(src[1], CTC_Punctuation) && (src[1] != '.') && (src[1] != '\''))))) {
+              (testCharacter(src[1], CTC_Punctuation) &&
+               !sameCharacters(src[1], WC_C('.')) &&
+               !sameCharacters(src[1], WC_C('\'')))))) {
           if (!putSequence(getContractionTableHeader()->englishLetterSign)) break;
         }
       }

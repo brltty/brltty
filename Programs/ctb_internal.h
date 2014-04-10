@@ -116,6 +116,7 @@ typedef struct {
   wchar_t uppercase;
   wchar_t lowercase;
   ContractionTableCharacterAttributes attributes;
+  const ContractionTableRule *always;
 } CharacterEntry;
 
 struct ContractionTableStruct {
