@@ -371,6 +371,7 @@ selectRule (int length) {
             break;
 
           case CTO_Contraction:
+            if ((src > srcmin) && sameCharacters(src[-1], WC_C('\''))) break;
             if (isBeginning() && isEnding()) return 1;
             break;
 
