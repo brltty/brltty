@@ -328,6 +328,13 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(el),
 END_KEY_TABLE_LIST
 
+struct BrailleDataStruct {
+  struct {
+    unsigned char buffer[0X100];
+    unsigned char *end;
+  } restore;
+};
+
 typedef struct {
   const char *name;
   const KeyTableDefinition *keyTableDefinition;
@@ -487,10 +494,24 @@ static const ModelEntry modelEL12 = {
 };
 
 typedef struct {
+  int (*test) (BrailleDisplay *brl);
+  unsigned char report;
+  unsigned char offset;
+  unsigned char disable;
+  unsigned char enable;
+} SettingsUpdateEntry;
+
+typedef struct {
   void (*initializeVariables) (void);
+
+  const SettingsUpdateEntry *settingsUpdateTable;
+  int (*tellDevice) (BrailleDisplay *brl, const unsigned char *data, size_t size);
+  size_t (*askDevice) (BrailleDisplay *brl, unsigned char report, unsigned char *buffer, size_t size);
+
   int (*readPacket) (BrailleDisplay *brl, unsigned char *packet, int size);
   int (*updateConfiguration) (BrailleDisplay *brl, int autodetecting, const unsigned char *packet);
   int (*detectModel) (BrailleDisplay *brl);
+
   int (*readCommand) (BrailleDisplay *brl);
   int (*writeBraille) (BrailleDisplay *brl, const unsigned char *cells, int start, int count);
 } ProtocolOperations;
@@ -511,6 +532,79 @@ static unsigned char statusOffset;
 
 static int textRewriteRequired = 0;
 static int statusRewriteRequired;
+
+static int
+flushSettingsUpdate (
+  BrailleDisplay *brl, size_t length,
+  const unsigned char *old, const unsigned char *new
+) {
+  if (length) {
+    if (memcmp(old, new, length) != 0) {
+      {
+        unsigned char **const end = &brl->data->restore.end;
+
+        *end = mempcpy(*end, old, length);
+        *(*end)++ = length;
+      }
+
+      if (!protocol->tellDevice(brl, new, length)) return 0;
+    }
+  }
+
+  return 1;
+}
+
+static int
+updateSettings (BrailleDisplay *brl) {
+  size_t length = 0;
+  const size_t size = sizeof(brl->data->restore.buffer);
+  unsigned char old[size];
+  unsigned char new[size];
+  const SettingsUpdateEntry *settings = protocol->settingsUpdateTable;
+
+  if (settings) {
+    unsigned char previous = 0;
+
+    while (settings->report) {
+      if (!settings->test || settings->test(brl)) {
+        if (settings->report != previous) {
+          if (!flushSettingsUpdate(brl, length, old, new)) return 0;
+
+          length = protocol->askDevice(brl, settings->report, old, size);
+          if (!length) return 0;
+
+          memcpy(new, old, length);
+          previous = settings->report;
+        }
+
+        {
+          unsigned char *byte = &new[settings->offset];
+
+          *byte &= ~settings->disable;
+          *byte |= settings->enable;
+        }
+      }
+
+      settings += 1;
+    }
+  }
+
+  return flushSettingsUpdate(brl, length, old, new);
+}
+
+static int
+restoreSettings (BrailleDisplay *brl) {
+  const unsigned char *request = brl->data->restore.end;
+
+  while (request > brl->data->restore.buffer) {
+    unsigned char length = *--request;
+
+    request -= length;
+    if (!protocol->tellDevice(brl, request, length)) return 0;
+  }
+
+  return 1;
+}
 
 static int
 reallocateBuffer (unsigned char **buffer, int size) {
@@ -911,9 +1005,14 @@ writeBraille1 (BrailleDisplay *brl, const unsigned char *cells, int start, int c
 }
 
 static const ProtocolOperations protocol1Operations = {
-  initializeVariables1,
-  readPacket1, updateConfiguration1, detectModel1,
-  readCommand1, writeBraille1
+  .initializeVariables = initializeVariables1,
+
+  .readPacket = readPacket1,
+  .updateConfiguration = updateConfiguration1,
+  .detectModel = detectModel1,
+
+  .readCommand = readCommand1,
+  .writeBraille = writeBraille1
 };
 
 static uint32_t hardwareVersion2;
@@ -933,6 +1032,11 @@ initializeVariables2 (void) {
   btfpVersion2 = 0;
 
   initializeHidKeyboardPacket(&hidKeyboardPacket2);
+}
+
+static int
+testFeaturePackPresent2 (BrailleDisplay *brl) {
+  return btfpVersion2 > 0;
 }
 
 static void
@@ -1129,9 +1233,11 @@ readPacket2s (BrailleDisplay *brl, unsigned char *packet, int size) {
 
     if (offset == 1) {
       switch (byte) {
+        case 0X32: /* 2 */ length =  5; break;
         case 0X3F: /* ? */ length =  3; break;
         case 0X45: /* E */ length =  3; break;
         case 0X4B: /* K */ length =  4; break;
+        case 0X50: /* P */ length =  3; break;
         case 0X54: /* T */ length =  4; break;
         case 0X56: /* V */ length = 13; break;
         case 0X68: /* h */ length = 10; break;
@@ -1153,20 +1259,20 @@ readPacket2s (BrailleDisplay *brl, unsigned char *packet, int size) {
 }
 
 static int
-tellDevice2s (BrailleDisplay *brl, unsigned char command, unsigned char operand) {
-  unsigned char packet[] = {ESC, command, operand};
-
-  return writeBraillePacket(brl, NULL, packet, sizeof(packet));
+tellDevice2s (BrailleDisplay *brl, const unsigned char *request, size_t size) {
+  return writeBraillePacket(brl, NULL, request, size);
 }
 
-static int
-askDevice2s (BrailleDisplay *brl, unsigned char command, unsigned char *response, int size) {
-  if (tellDevice2s(brl, command, 0X3F)) {
+static size_t
+askDevice2s (BrailleDisplay *brl, unsigned char report, unsigned char *response, size_t size) {
+  const unsigned char request[] = {ESC, report, 0X3F};
+
+  if (protocol->tellDevice(brl, request, sizeof(request))) {
     while (gioAwaitInput(brl->gioEndpoint, 1000)) {
       int length = protocol->readPacket(brl, response, size);
 
       if (length <= 0) break;
-      if ((response[0] == ESC) && (response[1] == command)) return 1;
+      if ((response[0] == ESC) && (response[1] == report)) return length;
     }
   }
 
@@ -1228,7 +1334,6 @@ identifyModel2s (BrailleDisplay *brl, unsigned char identifier) {
 
         if (setDefaultConfiguration(brl)) {
           if (updateConfiguration2s(brl, 1, NULL)) {
-            tellDevice2s(brl, 0X72, 1);
             return 1;
           }
         }
@@ -1312,10 +1417,43 @@ writeBraille2s (BrailleDisplay *brl, const unsigned char *cells, int start, int 
   return writeBraillePacket(brl, NULL, packet, byte-packet);
 }
 
+static const SettingsUpdateEntry settingsUpdateTable2s[] = {
+  { /* enable raw feature pack keys */
+    .report = 0X72 /* r */,
+    .test = testFeaturePackPresent2,
+    .offset = 2,
+    .disable = 0XFF,
+    .enable = 0X01
+  },
+
+  { /* disable key repeat */
+    .report = 0X50 /* P */,
+    .offset = 2,
+    .disable = 0XFF
+  },
+
+  { /* disable second routing key row emulation */
+    .report = 0X32 /* 2 */,
+    .offset = 2,
+    .disable = 0XFF
+  },
+
+  { .report = 0 }
+};
+
 static const ProtocolOperations protocol2sOperations = {
-  initializeVariables2,
-  readPacket2s, updateConfiguration2s, detectModel2s,
-  readCommand2s, writeBraille2s
+  .initializeVariables = initializeVariables2,
+
+  .settingsUpdateTable = settingsUpdateTable2s,
+  .tellDevice = tellDevice2s,
+  .askDevice = askDevice2s,
+
+  .readPacket = readPacket2s,
+  .updateConfiguration = updateConfiguration2s,
+  .detectModel = detectModel2s,
+
+  .readCommand = readCommand2s,
+  .writeBraille = writeBraille2s
 };
 
 static int
@@ -1373,6 +1511,24 @@ readPacket2u (BrailleDisplay *brl, unsigned char *packet, int size) {
 }
 
 static int
+tellDevice2u (BrailleDisplay *brl, const unsigned char *request, size_t size) {
+  logOutputPacket(request, size);
+  return gioSetHidFeature(brl->gioEndpoint, request[0], request, size) != -1;
+}
+
+static size_t
+askDevice2u (BrailleDisplay *brl, unsigned char report, unsigned char *response, size_t size) {
+  ssize_t length = gioGetHidFeature(brl->gioEndpoint, report, response, size);
+
+  if (length > 0) {
+    logInputPacket(response, length);
+    return length;
+  }
+
+  return 0;
+}
+
+static int
 updateConfiguration2u (BrailleDisplay *brl, int autodetecting, const unsigned char *packet) {
   unsigned char buffer[0X20];
   int length = gioGetHidFeature(brl->gioEndpoint, 0X05, buffer, sizeof(buffer));
@@ -1403,26 +1559,6 @@ detectModel2u (BrailleDisplay *brl) {
     int length = gioGetHidFeature(brl->gioEndpoint, 0X09, buffer, sizeof(buffer));
 
     if (length >= 3) setVersions2(&buffer[3], length-3);
-  }
-
-  {
-    int updated = 0;
-    unsigned char buffer[0X20];
-    int length = gioGetHidFeature(brl->gioEndpoint, 0X06, buffer, sizeof(buffer));
-
-    if (length >= 2) {
-      unsigned char *old = &buffer[1];
-      unsigned char new = *old | 0X20;
-
-      if (new != *old) {
-        *old = new;
-        updated = 1;
-      }
-    }
-
-    if (updated) {
-      gioSetHidFeature(brl->gioEndpoint, 0X06, buffer, length);
-    }
   }
 
   if (setDefaultConfiguration(brl))
@@ -1494,10 +1630,41 @@ writeData2u (
                          bytes[0], bytes, size, timeout);
 }
 
+static const SettingsUpdateEntry settingsUpdateTable2u[] = {
+  { /* enable raw feature pack keys */
+    .report = 6,
+    .offset = 1,
+    .enable = 0X20
+  },
+
+  { /* disable key repeat */
+    .report = 6,
+    .offset = 1,
+    .disable = 0X08
+  },
+
+  { /* disable second routing key row emulation */
+    .report = 7,
+    .offset = 1,
+    .disable = 0X01
+  },
+
+  { .report = 0 }
+};
+
 static const ProtocolOperations protocol2uOperations = {
-  initializeVariables2,
-  readPacket2u, updateConfiguration2u, detectModel2u,
-  readCommand2u, writeBraille2u
+  .initializeVariables = initializeVariables2,
+
+  .settingsUpdateTable = settingsUpdateTable2u,
+  .tellDevice = tellDevice2u,
+  .askDevice = askDevice2u,
+
+  .readPacket = readPacket2u,
+  .updateConfiguration = updateConfiguration2u,
+  .detectModel = detectModel2u,
+
+  .readCommand = readCommand2u,
+  .writeBraille = writeBraille2u
 };
 
 static BrailleDisplay *brailleDisplay = NULL;
@@ -1584,30 +1751,40 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  /* Open the Braille display device */
-  if (connectResource(brl, device)) {
-    protocol->initializeVariables();
+  secondaryRoutingKeyEmulation2 = 0;
+  if (*parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION])
+    if (!validateYesNo(&secondaryRoutingKeyEmulation2, parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION]))
+      logMessage(LOG_WARNING, "%s: %s", "invalid secondary routing key emulation setting",
+                 parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION]);
 
-    secondaryRoutingKeyEmulation2 = 0;
-    if (*parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION])
-      if (!validateYesNo(&secondaryRoutingKeyEmulation2, parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION]))
-        logMessage(LOG_WARNING, "%s: %s", "invalid secondary routing key emulation setting",
-                   parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION]);
+  if ((brl->data = malloc(sizeof(*brl->data)))) {
+    memset(brl->data, 0, sizeof(*brl->data));
+    brl->data->restore.end = brl->data->restore.buffer;
 
-    if (protocol->detectModel(brl)) {
-      {
-        const KeyTableDefinition *ktd = model->keyTableDefinition;
+    if (connectResource(brl, device)) {
+      protocol->initializeVariables();
 
-        brl->keyBindings = ktd->bindings;
-        brl->keyNameTables = ktd->names;
+      if (protocol->detectModel(brl)) {
+        if (updateSettings(brl)) {
+          {
+            const KeyTableDefinition *ktd = model->keyTableDefinition;
+
+            brl->keyBindings = ktd->bindings;
+            brl->keyNameTables = ktd->names;
+          }
+
+          makeOutputTable(dotsTable_ISO11548_1);
+          brailleDisplay = brl;
+          return 1;
+        }
       }
 
-      makeOutputTable(dotsTable_ISO11548_1);
-      brailleDisplay = brl;
-      return 1;
+      disconnectBrailleResource(brl, NULL);
     }
 
-    disconnectBrailleResource(brl, NULL);
+    free(brl->data);
+  } else {
+    logMallocError();
   }
 
   return 0;
@@ -1615,8 +1792,10 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  brailleDisplay = brl;
+  brailleDisplay = NULL;
+  restoreSettings(brl);
   disconnectBrailleResource(brl, NULL);
+  free(brl->data);
 
   if (previousText) {
     free(previousText);
