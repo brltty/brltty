@@ -330,7 +330,7 @@ END_KEY_TABLE_LIST
 
 struct BrailleDataStruct {
   struct {
-    unsigned char buffer[0X100];
+    unsigned char buffer[0X20];
     unsigned char *end;
   } restore;
 };
@@ -504,7 +504,7 @@ typedef struct {
 typedef struct {
   void (*initializeVariables) (void);
 
-  const SettingsUpdateEntry *settingsUpdateTable;
+  const SettingsUpdateEntry *requiredSettings;
   int (*tellDevice) (BrailleDisplay *brl, const unsigned char *data, size_t size);
   size_t (*askDevice) (BrailleDisplay *brl, unsigned char report, unsigned char *buffer, size_t size);
 
@@ -540,14 +540,20 @@ flushSettingsUpdate (
 ) {
   if (length) {
     if (memcmp(old, new, length) != 0) {
+      if (!protocol->tellDevice(brl, new, length)) return 0;
+
       {
         unsigned char **const end = &brl->data->restore.end;
 
-        *end = mempcpy(*end, old, length);
-        *(*end)++ = length;
+        if (length > UINT8_MAX) {
+          logBytes(LOG_WARNING, "settings update too long", new, length);
+        } else if ((*end + length + 1) > (brl->data->restore.buffer + sizeof(brl->data->restore.buffer))) {
+          logBytes(LOG_WARNING, "settings update not saved", new, length);
+        } else {
+          *end = mempcpy(*end, old, length);
+          *(*end)++ = length;
+        }
       }
-
-      if (!protocol->tellDevice(brl, new, length)) return 0;
     }
   }
 
@@ -557,10 +563,10 @@ flushSettingsUpdate (
 static int
 updateSettings (BrailleDisplay *brl) {
   size_t length = 0;
-  const size_t size = sizeof(brl->data->restore.buffer);
+  const size_t size = 0X20;
   unsigned char old[size];
   unsigned char new[size];
-  const SettingsUpdateEntry *settings = protocol->settingsUpdateTable;
+  const SettingsUpdateEntry *settings = protocol->requiredSettings;
 
   if (settings) {
     unsigned char previous = 0;
@@ -570,8 +576,10 @@ updateSettings (BrailleDisplay *brl) {
         if (settings->report != previous) {
           if (!flushSettingsUpdate(brl, length, old, new)) return 0;
 
-          length = protocol->askDevice(brl, settings->report, old, size);
-          if (!length) return 0;
+          if (!(length = protocol->askDevice(brl, settings->report, old, size))) {
+            if (errno == ETIMEDOUT) goto next;
+            return 0;
+          }
 
           memcpy(new, old, length);
           previous = settings->report;
@@ -585,6 +593,7 @@ updateSettings (BrailleDisplay *brl) {
         }
       }
 
+    next:
       settings += 1;
     }
   }
@@ -1035,7 +1044,7 @@ initializeVariables2 (void) {
 }
 
 static int
-testFeaturePackPresent2 (BrailleDisplay *brl) {
+testRawKeyboard2 (BrailleDisplay *brl) {
   return btfpVersion2 > 0;
 }
 
@@ -1273,6 +1282,7 @@ askDevice2s (BrailleDisplay *brl, unsigned char report, unsigned char *response,
 
       if (length <= 0) break;
       if ((response[0] == ESC) && (response[1] == report)) return length;
+      logUnexpectedPacket(response, length);
     }
   }
 
@@ -1417,10 +1427,10 @@ writeBraille2s (BrailleDisplay *brl, const unsigned char *cells, int start, int 
   return writeBraillePacket(brl, NULL, packet, byte-packet);
 }
 
-static const SettingsUpdateEntry settingsUpdateTable2s[] = {
+static const SettingsUpdateEntry requiredSettings2s[] = {
   { /* enable raw feature pack keys */
     .report = 0X72 /* r */,
-    .test = testFeaturePackPresent2,
+    .test = testRawKeyboard2,
     .offset = 2,
     .disable = 0XFF,
     .enable = 0X01
@@ -1444,7 +1454,7 @@ static const SettingsUpdateEntry settingsUpdateTable2s[] = {
 static const ProtocolOperations protocol2sOperations = {
   .initializeVariables = initializeVariables2,
 
-  .settingsUpdateTable = settingsUpdateTable2s,
+  .requiredSettings = requiredSettings2s,
   .tellDevice = tellDevice2s,
   .askDevice = askDevice2s,
 
@@ -1630,7 +1640,7 @@ writeData2u (
                          bytes[0], bytes, size, timeout);
 }
 
-static const SettingsUpdateEntry settingsUpdateTable2u[] = {
+static const SettingsUpdateEntry requiredSettings2u[] = {
   { /* enable raw feature pack keys */
     .report = 6,
     .offset = 1,
@@ -1655,7 +1665,7 @@ static const SettingsUpdateEntry settingsUpdateTable2u[] = {
 static const ProtocolOperations protocol2uOperations = {
   .initializeVariables = initializeVariables2,
 
-  .settingsUpdateTable = settingsUpdateTable2u,
+  .requiredSettings = requiredSettings2u,
   .tellDevice = tellDevice2u,
   .askDevice = askDevice2u,
 
