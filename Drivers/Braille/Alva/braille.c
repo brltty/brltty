@@ -495,7 +495,7 @@ static const ModelEntry modelEL12 = {
 
 typedef struct {
   int (*test) (BrailleDisplay *brl);
-  unsigned char report;
+  unsigned char feature;
   unsigned char offset;
   unsigned char disable;
   unsigned char enable;
@@ -505,8 +505,8 @@ typedef struct {
   void (*initializeVariables) (void);
 
   const SettingsUpdateEntry *requiredSettings;
-  int (*tellDevice) (BrailleDisplay *brl, const unsigned char *data, size_t size);
-  size_t (*askDevice) (BrailleDisplay *brl, unsigned char report, unsigned char *buffer, size_t size);
+  int (*setFeature) (BrailleDisplay *brl, const unsigned char *data, size_t size);
+  size_t (*getFeature) (BrailleDisplay *brl, unsigned char feature, unsigned char *buffer, size_t size);
 
   int (*readPacket) (BrailleDisplay *brl, unsigned char *packet, int size);
   int (*updateConfiguration) (BrailleDisplay *brl, int autodetecting, const unsigned char *packet);
@@ -540,7 +540,7 @@ flushSettingsUpdate (
 ) {
   if (length) {
     if (memcmp(old, new, length) != 0) {
-      if (!protocol->tellDevice(brl, new, length)) return 0;
+      if (!protocol->setFeature(brl, new, length)) return 0;
 
       {
         unsigned char **const end = &brl->data->restore.end;
@@ -571,18 +571,18 @@ updateSettings (BrailleDisplay *brl) {
   if (settings) {
     unsigned char previous = 0;
 
-    while (settings->report) {
+    while (settings->feature) {
       if (!settings->test || settings->test(brl)) {
-        if (settings->report != previous) {
+        if (settings->feature != previous) {
           if (!flushSettingsUpdate(brl, length, old, new)) return 0;
 
-          if (!(length = protocol->askDevice(brl, settings->report, old, size))) {
+          if (!(length = protocol->getFeature(brl, settings->feature, old, size))) {
             if (errno == ETIMEDOUT) goto next;
             return 0;
           }
 
           memcpy(new, old, length);
-          previous = settings->report;
+          previous = settings->feature;
         }
 
         {
@@ -609,7 +609,7 @@ restoreSettings (BrailleDisplay *brl) {
     unsigned char length = *--request;
 
     request -= length;
-    if (!protocol->tellDevice(brl, request, length)) return 0;
+    if (!protocol->setFeature(brl, request, length)) return 0;
   }
 
   return 1;
@@ -1044,7 +1044,7 @@ initializeVariables2 (void) {
 }
 
 static int
-testRawKeyboard2 (BrailleDisplay *brl) {
+testHaveRawKeyboard2 (BrailleDisplay *brl) {
   return btfpVersion2 > 0;
 }
 
@@ -1268,20 +1268,20 @@ readPacket2s (BrailleDisplay *brl, unsigned char *packet, int size) {
 }
 
 static int
-tellDevice2s (BrailleDisplay *brl, const unsigned char *request, size_t size) {
+setFeature2s (BrailleDisplay *brl, const unsigned char *request, size_t size) {
   return writeBraillePacket(brl, NULL, request, size);
 }
 
 static size_t
-askDevice2s (BrailleDisplay *brl, unsigned char report, unsigned char *response, size_t size) {
-  const unsigned char request[] = {ESC, report, 0X3F};
+getFeature2s (BrailleDisplay *brl, unsigned char feature, unsigned char *response, size_t size) {
+  const unsigned char request[] = {ESC, feature, 0X3F};
 
-  if (protocol->tellDevice(brl, request, sizeof(request))) {
+  if (protocol->setFeature(brl, request, sizeof(request))) {
     while (gioAwaitInput(brl->gioEndpoint, 1000)) {
       int length = protocol->readPacket(brl, response, size);
 
       if (length <= 0) break;
-      if ((response[0] == ESC) && (response[1] == report)) return length;
+      if ((response[0] == ESC) && (response[1] == feature)) return length;
       logUnexpectedPacket(response, length);
     }
   }
@@ -1293,7 +1293,7 @@ static int
 updateConfiguration2s (BrailleDisplay *brl, int autodetecting, const unsigned char *packet) {
   unsigned char response[0X20];
 
-  if (askDevice2s(brl, 0X45, response, sizeof(response))) {
+  if (getFeature2s(brl, 0X45, response, sizeof(response))) {
     unsigned char textColumns = response[2];
 
     if (autodetecting) {
@@ -1312,7 +1312,7 @@ updateConfiguration2s (BrailleDisplay *brl, int autodetecting, const unsigned ch
       }
     }
 
-    if (askDevice2s(brl, 0X54, response, sizeof(response))) {
+    if (getFeature2s(brl, 0X54, response, sizeof(response))) {
       unsigned char statusColumns = response[2];
       unsigned char statusSide = response[3];
 
@@ -1339,7 +1339,7 @@ identifyModel2s (BrailleDisplay *brl, unsigned char identifier) {
 
   while ((model = *modelEntry++)) {
     if (model->identifier == identifier) {
-      if (askDevice2s(brl, 0X56, response, sizeof(response))) {
+      if (getFeature2s(brl, 0X56, response, sizeof(response))) {
         setVersions2(&response[2], sizeof(response)-2);
 
         if (setDefaultConfiguration(brl)) {
@@ -1364,7 +1364,7 @@ detectModel2s (BrailleDisplay *brl) {
   do {
     unsigned char response[0X20];
 
-    if (askDevice2s(brl, 0X3F, response, sizeof(response))) {
+    if (getFeature2s(brl, 0X3F, response, sizeof(response))) {
       if (identifyModel2s(brl, response[2])) {
         return 1;
       }
@@ -1429,34 +1429,34 @@ writeBraille2s (BrailleDisplay *brl, const unsigned char *cells, int start, int 
 
 static const SettingsUpdateEntry requiredSettings2s[] = {
   { /* enable raw feature pack keys */
-    .report = 0X72 /* r */,
-    .test = testRawKeyboard2,
+    .feature = 0X72 /* r */,
+    .test = testHaveRawKeyboard2,
     .offset = 2,
     .disable = 0XFF,
     .enable = 0X01
   },
 
   { /* disable key repeat */
-    .report = 0X50 /* P */,
+    .feature = 0X50 /* P */,
     .offset = 2,
     .disable = 0XFF
   },
 
   { /* disable second routing key row emulation */
-    .report = 0X32 /* 2 */,
+    .feature = 0X32 /* 2 */,
     .offset = 2,
     .disable = 0XFF
   },
 
-  { .report = 0 }
+  { .feature = 0 }
 };
 
 static const ProtocolOperations protocol2sOperations = {
   .initializeVariables = initializeVariables2,
 
   .requiredSettings = requiredSettings2s,
-  .tellDevice = tellDevice2s,
-  .askDevice = askDevice2s,
+  .setFeature = setFeature2s,
+  .getFeature = getFeature2s,
 
   .readPacket = readPacket2s,
   .updateConfiguration = updateConfiguration2s,
@@ -1521,14 +1521,14 @@ readPacket2u (BrailleDisplay *brl, unsigned char *packet, int size) {
 }
 
 static int
-tellDevice2u (BrailleDisplay *brl, const unsigned char *request, size_t size) {
+setFeature2u (BrailleDisplay *brl, const unsigned char *request, size_t size) {
   logOutputPacket(request, size);
   return gioSetHidFeature(brl->gioEndpoint, request[0], request, size) != -1;
 }
 
 static size_t
-askDevice2u (BrailleDisplay *brl, unsigned char report, unsigned char *response, size_t size) {
-  ssize_t length = gioGetHidFeature(brl->gioEndpoint, report, response, size);
+getFeature2u (BrailleDisplay *brl, unsigned char feature, unsigned char *response, size_t size) {
+  ssize_t length = gioGetHidFeature(brl->gioEndpoint, feature, response, size);
 
   if (length > 0) {
     logInputPacket(response, length);
@@ -1642,32 +1642,33 @@ writeData2u (
 
 static const SettingsUpdateEntry requiredSettings2u[] = {
   { /* enable raw feature pack keys */
-    .report = 6,
+    .feature = 6,
+    .test = testHaveRawKeyboard2,
     .offset = 1,
     .enable = 0X20
   },
 
   { /* disable key repeat */
-    .report = 6,
+    .feature = 6,
     .offset = 1,
     .disable = 0X08
   },
 
   { /* disable second routing key row emulation */
-    .report = 7,
+    .feature = 7,
     .offset = 1,
     .disable = 0X01
   },
 
-  { .report = 0 }
+  { .feature = 0 }
 };
 
 static const ProtocolOperations protocol2uOperations = {
   .initializeVariables = initializeVariables2,
 
   .requiredSettings = requiredSettings2u,
-  .tellDevice = tellDevice2u,
-  .askDevice = askDevice2u,
+  .setFeature = setFeature2u,
+  .getFeature = getFeature2u,
 
   .readPacket = readPacket2u,
   .updateConfiguration = updateConfiguration2u,
