@@ -27,6 +27,17 @@ they switch groups by accident. Other shortcuts and LEDs can be used, see the
 XKB documentation. The default keyboard mapping for braille dots is "asdfjkl,",
 but other layouts are available, see the variants in XKB.
 
+Applications then need to be made to use the standard X11 Input Module, this can
+be done by setting
+
+export GTK_IM_MODULE=xim
+export QT_IM_MODULE=xim
+export XMODIFIERS=@im=xim
+
+This is however not enough for recent gnome desktops, which also need to run
+
+gsettings set org.gnome.settings-daemon.plugins.keyboard active false
+
 The setxkbmap command above enables it just for the current session.  For
 permanent configuration, the two groups have to be configured properly in the
 system.  On Debian for instance, this can be achieved by setting the following
