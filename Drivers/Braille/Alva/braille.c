@@ -1642,22 +1642,22 @@ writeData2u (
 
 static const SettingsUpdateEntry requiredSettings2u[] = {
   { /* enable raw feature pack keys */
-    .feature = 6,
+    .feature = 6 /* Key Settings Report */,
     .test = testHaveRawKeyboard2,
     .offset = 1,
     .enable = 0X20
   },
 
   { /* disable key repeat */
-    .feature = 6,
+    .feature = 6 /* Key Settings Report */,
     .offset = 1,
     .disable = 0X08
   },
 
   { /* disable second routing key row emulation */
-    .feature = 7,
+    .feature = 7 /* CR Key Settings Report */,
     .offset = 1,
-    .disable = 0X01
+    .disable = 0X02
   },
 
   { .feature = 0 }
