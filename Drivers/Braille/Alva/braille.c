@@ -504,11 +504,13 @@ typedef struct {
 typedef struct {
   void (*initializeVariables) (void);
 
+  BraillePacketVerifier *verifyPacket;
+  int (*readPacket) (BrailleDisplay *brl, unsigned char *packet, int size);
+
   const SettingsUpdateEntry *requiredSettings;
   int (*setFeature) (BrailleDisplay *brl, const unsigned char *data, size_t size);
   size_t (*getFeature) (BrailleDisplay *brl, unsigned char feature, unsigned char *buffer, size_t size);
 
-  int (*readPacket) (BrailleDisplay *brl, unsigned char *packet, int size);
   int (*updateConfiguration) (BrailleDisplay *brl, int autodetecting, const unsigned char *packet);
   int (*detectModel) (BrailleDisplay *brl);
 
@@ -532,6 +534,11 @@ static unsigned char statusOffset;
 
 static int textRewriteRequired = 0;
 static int statusRewriteRequired;
+
+static int
+readPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
+  return readBraillePacket(brl, NULL, packet, size, protocol->verifyPacket, NULL);
+}
 
 static int
 flushSettingsUpdate (
@@ -1017,6 +1024,7 @@ static const ProtocolOperations protocol1Operations = {
   .initializeVariables = initializeVariables1,
 
   .readPacket = readPacket1,
+
   .updateConfiguration = updateConfiguration1,
   .detectModel = detectModel1,
 
@@ -1203,68 +1211,48 @@ interpretKeyEvent2 (BrailleDisplay *brl, unsigned char group, unsigned char key)
   return EOF;
 }
 
-static int
-readPacket2s (BrailleDisplay *brl, unsigned char *packet, int size) {
-  int offset = 0;
-  int length = 0;
+static BraillePacketVerifierResult
+verifyPacket2s (
+  BrailleDisplay *brl,
+  const unsigned char *bytes, size_t size,
+  size_t *length, void *data
+) {
+  unsigned char byte = bytes[size-1];
 
-  while (1) {
-    unsigned char byte;
-
-    {
-      int started = offset > 0;
-
-      if (!gioReadByte(brl->gioEndpoint, &byte, started)) {
-        int result = (errno == EAGAIN)? 0: -1;
-        if (started) logPartialPacket(packet, offset);
-        return result;
-      }
-    }
-
-    if (offset == 0) {
+  switch (size) {
+    case 1:
       switch (byte) {
         case ESC:
-          length = 2;
+          *length = 2;
           break;
 
         default:
-          logIgnoredByte(byte);
-          continue;
+          return BRL_PVR_INVALID;
       }
-    }
+      break;
 
-    if (offset < size) {
-      packet[offset] = byte;
-    } else {
-      if (offset == size) logTruncatedPacket(packet, offset);
-      logDiscardedByte(byte);
-    }
-
-    if (offset == 1) {
+    case 2:
       switch (byte) {
-        case 0X32: /* 2 */ length =  5; break;
-        case 0X3F: /* ? */ length =  3; break;
-        case 0X45: /* E */ length =  3; break;
-        case 0X4B: /* K */ length =  4; break;
-        case 0X50: /* P */ length =  3; break;
-        case 0X54: /* T */ length =  4; break;
-        case 0X56: /* V */ length = 13; break;
-        case 0X68: /* h */ length = 10; break;
-        case 0X72: /* r */ length = 3; break;
-      }
-    }
+        case 0X32: /* 2 */ *length =  5; break;
+        case 0X3F: /* ? */ *length =  3; break;
+        case 0X45: /* E */ *length =  3; break;
+        case 0X4B: /* K */ *length =  4; break;
+        case 0X50: /* P */ *length =  3; break;
+        case 0X54: /* T */ *length =  4; break;
+        case 0X56: /* V */ *length = 13; break;
+        case 0X68: /* h */ *length = 10; break;
+        case 0X72: /* r */ *length = 3; break;
 
-    if (++offset == length) {
-      if (offset > size) {
-        offset = 0;
-        length = 0;
-        continue;
+        default:
+          return BRL_PVR_INVALID;
       }
+      break;
 
-      logInputPacket(packet, offset);
-      return length;
-    }
+    default:
+      break;
   }
+
+  return BRL_PVR_INCLUDE;
 }
 
 static int
@@ -1454,11 +1442,13 @@ static const SettingsUpdateEntry requiredSettings2s[] = {
 static const ProtocolOperations protocol2sOperations = {
   .initializeVariables = initializeVariables2,
 
+  .verifyPacket = verifyPacket2s,
+  .readPacket = readPacket,
+
   .requiredSettings = requiredSettings2s,
   .setFeature = setFeature2s,
   .getFeature = getFeature2s,
 
-  .readPacket = readPacket2s,
   .updateConfiguration = updateConfiguration2s,
   .detectModel = detectModel2s,
 
@@ -1466,58 +1456,30 @@ static const ProtocolOperations protocol2sOperations = {
   .writeBraille = writeBraille2s
 };
 
-static int
-readPacket2u (BrailleDisplay *brl, unsigned char *packet, int size) {
-  int offset = 0;
-  int length = 0;
+static BraillePacketVerifierResult
+verifyPacket2u (
+  BrailleDisplay *brl,
+  const unsigned char *bytes, size_t size,
+  size_t *length, void *data
+) {
+  unsigned char byte = bytes[size-1];
 
-  while (1) {
-    unsigned char byte;
-
-    {
-      int started = offset > 0;
-
-      if (!gioReadByte(brl->gioEndpoint, &byte, started)) {
-        int result = (errno == EAGAIN)? 0: -1;
-        if (started) logPartialPacket(packet, offset);
-        return result;
-      }
-    }
-
-    if (offset == 0) {
+  switch (size) {
+    case 1:
       switch (byte) {
-        case 0X01:
-          length = 9;
-          break;
-
-        case 0X04:
-          length = 3;
-          break;
+        case 0X01: *length = 9; break;
+        case 0X04: *length = 3; break;
 
         default:
-          logIgnoredByte(byte);
-          continue;
+          return BRL_PVR_INVALID;
       }
-    }
+      break;
 
-    if (offset < size) {
-      packet[offset] = byte;
-    } else {
-      if (offset == size) logTruncatedPacket(packet, offset);
-      logDiscardedByte(byte);
-    }
-
-    if (++offset == length) {
-      if (offset > size) {
-        offset = 0;
-        length = 0;
-        continue;
-      }
-
-      logInputPacket(packet, offset);
-      return length;
-    }
+    default:
+      break;
   }
+
+  return BRL_PVR_INCLUDE;
 }
 
 static int
@@ -1666,11 +1628,13 @@ static const SettingsUpdateEntry requiredSettings2u[] = {
 static const ProtocolOperations protocol2uOperations = {
   .initializeVariables = initializeVariables2,
 
+  .verifyPacket = verifyPacket2u,
+  .readPacket = readPacket,
+
   .requiredSettings = requiredSettings2u,
   .setFeature = setFeature2u,
   .getFeature = getFeature2u,
 
-  .readPacket = readPacket2u,
   .updateConfiguration = updateConfiguration2u,
   .detectModel = detectModel2u,
 
