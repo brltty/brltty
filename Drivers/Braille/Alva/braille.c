@@ -347,6 +347,11 @@ struct BrailleDataStruct {
         uint32_t btBase;
         uint32_t btFP;
       } version;
+
+      struct {
+        uint64_t base;
+        uint64_t featurePack;
+      } macAddress;
     } bc;
   } protocol;
 };
@@ -550,6 +555,60 @@ static unsigned char statusOffset;
 
 static int textRewriteRequired = 0;
 static int statusRewriteRequired;
+
+typedef unsigned char FieldByteConverter (unsigned char byte);
+
+static uint64_t
+parseNumericField (
+  const unsigned char **bytes, size_t *count,
+  size_t size, size_t width,
+  FieldByteConverter *convertByte
+) {
+  uint64_t result = 0;
+
+  while (width > 0) {
+    result <<= 8;
+
+    if (size > 0) {
+      if (*count > 0) {
+        result |= convertByte(*(*bytes)++);
+        *count -= 1;
+      }
+
+      size -= 1;
+    }
+
+    width -= 1;
+  }
+
+  return result;
+}
+
+static unsigned char
+convertHexadecimalByte (unsigned char byte) {
+  return byte;
+}
+
+static uint64_t
+parseHexadecimalField (
+  const unsigned char **bytes, size_t *count,
+  size_t size, size_t width
+) {
+  return parseNumericField(bytes, count, size, width, convertHexadecimalByte);
+}
+
+static unsigned char
+convertDecimalByte (unsigned char byte) {
+  return byte - '0';
+}
+
+static uint64_t
+parseDecimalField (
+  const unsigned char **bytes, size_t *count,
+  size_t size, size_t width
+) {
+  return parseNumericField(bytes, count, size, width, convertDecimalByte);
+}
 
 static int
 readPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
@@ -1055,12 +1114,21 @@ initializeVariables2 (BrailleDisplay *brl) {
   brl->data->protocol.bc.version.btBase = 0;
   brl->data->protocol.bc.version.btFP = 0;
 
+  brl->data->protocol.bc.macAddress.base = 0;
+  brl->data->protocol.bc.macAddress.featurePack = 0;
+
   initializeHidKeyboardPacket(&brl->data->protocol.bc.hidKeyboardPacket);
 }
 
 static int
+testHaveFeaturePack2 (BrailleDisplay *brl) {
+  return brl->data->protocol.bc.macAddress.featurePack != 0;
+}
+
+static int
 testHaveRawKeyboard2 (BrailleDisplay *brl) {
-  return brl->data->protocol.bc.version.btFP > 0;
+  return testHaveFeaturePack2(brl) &&
+         (brl->data->protocol.bc.version.firmware >= 0X020801);
 }
 
 static void
@@ -1093,25 +1161,31 @@ logVersion2 (uint32_t version, const char *label) {
 
 static void
 setVersions2 (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
-  if (count >=  1) brl->data->protocol.bc.version.hardware |= ((bytes[0] - '0') << 16);
-  if (count >=  2) brl->data->protocol.bc.version.hardware |= ((bytes[1] - '0') <<  8);
-
-  if (count >=  3) brl->data->protocol.bc.version.firmware |= (bytes[2] << 16);
-  if (count >=  4) brl->data->protocol.bc.version.firmware |= (bytes[3] <<  8);
-  if (count >=  5) brl->data->protocol.bc.version.firmware |= (bytes[4] <<  0);
-
-  if (count >=  6) brl->data->protocol.bc.version.btBase |= (bytes[5] << 16);
-  if (count >=  7) brl->data->protocol.bc.version.btBase |= (bytes[6] <<  8);
-  if (count >=  8) brl->data->protocol.bc.version.btBase |= (bytes[7] <<  0);
-
-  if (count >=  9) brl->data->protocol.bc.version.btFP |= (bytes[ 8] << 16);
-  if (count >= 10) brl->data->protocol.bc.version.btFP |= (bytes[ 9] <<  8);
-  if (count >= 11) brl->data->protocol.bc.version.btFP |= (bytes[10] <<  0);
-
+  brl->data->protocol.bc.version.hardware = parseDecimalField(&bytes, &count, 2, 3);
   logVersion2(brl->data->protocol.bc.version.hardware, "Hardware Version");
+
+  brl->data->protocol.bc.version.firmware = parseHexadecimalField(&bytes, &count, 3, 3);
   logVersion2(brl->data->protocol.bc.version.firmware, "Firmware Version");
+
+  brl->data->protocol.bc.version.btBase = parseHexadecimalField(&bytes, &count, 3, 3);
   logVersion2(brl->data->protocol.bc.version.btBase, "Base Bluetooth Module Version");
+
+  brl->data->protocol.bc.version.btFP = parseHexadecimalField(&bytes, &count, 3, 3);
   logVersion2(brl->data->protocol.bc.version.btFP, "Feature Pack Bluetooth Module Version");
+}
+
+static void
+logMacAddress2 (uint64_t address, const char *label) {
+  logMessage(LOG_DEBUG, "%s: %012" PRIX64, label, address);
+}
+
+static void
+setMacAddresses2 (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
+  brl->data->protocol.bc.macAddress.base = parseHexadecimalField(&bytes, &count, 6, 6);
+  logMacAddress2(brl->data->protocol.bc.macAddress.base, "Base Mac Address");
+
+  brl->data->protocol.bc.macAddress.featurePack = parseHexadecimalField(&bytes, &count, 6, 6);
+  logMacAddress2(brl->data->protocol.bc.macAddress.featurePack, "Feature Pack Mac Address");
 }
 
 static int
@@ -1246,6 +1320,7 @@ verifyPacket2s (
         case 0X3F: /* ? */ *length =  3; break;
         case 0X45: /* E */ *length =  3; break;
         case 0X4B: /* K */ *length =  4; break;
+        case 0X4E: /* N */ *length = 14; break;
         case 0X50: /* P */ *length =  3; break;
         case 0X54: /* T */ *length =  4; break;
         case 0X56: /* V */ *length = 13; break;
@@ -1290,7 +1365,7 @@ static int
 updateConfiguration2s (BrailleDisplay *brl, int autodetecting, const unsigned char *packet) {
   unsigned char response[0X20];
 
-  if (getFeature2s(brl, 0X45, response, sizeof(response))) {
+  if (protocol->getFeature(brl, 0X45, response, sizeof(response))) {
     unsigned char textColumns = response[2];
 
     if (autodetecting) {
@@ -1309,7 +1384,7 @@ updateConfiguration2s (BrailleDisplay *brl, int autodetecting, const unsigned ch
       }
     }
 
-    if (getFeature2s(brl, 0X54, response, sizeof(response))) {
+    if (protocol->getFeature(brl, 0X54, response, sizeof(response))) {
       unsigned char statusColumns = response[2];
       unsigned char statusSide = response[3];
 
@@ -1336,12 +1411,16 @@ identifyModel2s (BrailleDisplay *brl, unsigned char identifier) {
 
   while ((model = *modelEntry++)) {
     if (model->identifier == identifier) {
-      if (getFeature2s(brl, 0X56, response, sizeof(response))) {
+      if (protocol->getFeature(brl, 0X56, response, sizeof(response))) {
         setVersions2(brl, &response[2], sizeof(response)-2);
 
-        if (setDefaultConfiguration(brl)) {
-          if (updateConfiguration2s(brl, 1, NULL)) {
-            return 1;
+        if (protocol->getFeature(brl, 0X4E, response, sizeof(response))) {
+          setMacAddresses2(brl, &response[2], sizeof(response)-2);
+
+          if (setDefaultConfiguration(brl)) {
+            if (updateConfiguration2s(brl, 1, NULL)) {
+              return 1;
+            }
           }
         }
       }
@@ -1361,7 +1440,7 @@ detectModel2s (BrailleDisplay *brl) {
   do {
     unsigned char response[0X20];
 
-    if (getFeature2s(brl, 0X3F, response, sizeof(response))) {
+    if (protocol->getFeature(brl, 0X3F, response, sizeof(response))) {
       if (identifyModel2s(brl, response[2])) {
         return 1;
       }
@@ -1512,9 +1591,9 @@ getFeature2u (BrailleDisplay *brl, unsigned char feature, unsigned char *respons
 static int
 updateConfiguration2u (BrailleDisplay *brl, int autodetecting, const unsigned char *packet) {
   unsigned char buffer[0X20];
-  int length = gioGetHidFeature(brl->gioEndpoint, 0X05, buffer, sizeof(buffer));
+  size_t length = protocol->getFeature(brl, 0X05, buffer, sizeof(buffer));
 
-  if (length != -1) {
+  if (length > 0) {
     int textColumns = brl->textColumns;
     int statusColumns = brl->statusColumns;
     int statusSide = 0;
@@ -1537,9 +1616,16 @@ static int
 detectModel2u (BrailleDisplay *brl) {
   {
     unsigned char buffer[0X20];
-    int length = gioGetHidFeature(brl->gioEndpoint, 0X09, buffer, sizeof(buffer));
+    size_t length = protocol->getFeature(brl, 0X09, buffer, sizeof(buffer));
 
-    if (length >= 3) setVersions2(brl, &buffer[3], length-3);
+    if (length > 3) setVersions2(brl, &buffer[3], length-3);
+  }
+
+  {
+    unsigned char buffer[0X20];
+    size_t length = protocol->getFeature(brl, 0X0D, buffer, sizeof(buffer));
+
+    if (length > 1) setMacAddresses2(brl, &buffer[1], length-1);
   }
 
   if (setDefaultConfiguration(brl))
@@ -1735,18 +1821,18 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  brl->data->protocol.bc.secondaryRoutingKeyEmulation = 0;
-  if (*parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION])
-    if (!validateYesNo(&brl->data->protocol.bc.secondaryRoutingKeyEmulation, parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION]))
-      logMessage(LOG_WARNING, "%s: %s", "invalid secondary routing key emulation setting",
-                 parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION]);
-
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
     brl->data->restore.end = brl->data->restore.buffer;
 
     if (connectResource(brl, device)) {
       protocol->initializeVariables(brl);
+
+      brl->data->protocol.bc.secondaryRoutingKeyEmulation = 0;
+      if (*parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION])
+        if (!validateYesNo(&brl->data->protocol.bc.secondaryRoutingKeyEmulation, parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION]))
+          logMessage(LOG_WARNING, "%s: %s", "invalid secondary routing key emulation setting",
+                     parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION]);
 
       if (protocol->detectModel(brl)) {
         if (updateSettings(brl)) {
