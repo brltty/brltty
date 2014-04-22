@@ -333,6 +333,22 @@ struct BrailleDataStruct {
     unsigned char buffer[0X20];
     unsigned char *end;
   } restore;
+
+  union {
+    struct {
+      unsigned int secondaryRoutingKeyEmulation;
+
+      unsigned char splitOffset;
+      HidKeyboardPacket hidKeyboardPacket;
+
+      struct {
+        uint32_t hardware;
+        uint32_t firmware;
+        uint32_t btBase;
+        uint32_t btFP;
+      } version;
+    } bc;
+  } protocol;
 };
 
 typedef struct {
@@ -502,7 +518,7 @@ typedef struct {
 } SettingsUpdateEntry;
 
 typedef struct {
-  void (*initializeVariables) (void);
+  void (*initializeVariables) (BrailleDisplay *brl);
 
   BraillePacketVerifier *verifyPacket;
   int (*readPacket) (BrailleDisplay *brl, unsigned char *packet, int size);
@@ -796,7 +812,7 @@ identifyModel1 (BrailleDisplay *brl, unsigned char identifier) {
 }
 
 static void
-initializeVariables1 (void) {
+initializeVariables1 (BrailleDisplay *brl) {
 }
 
 static int
@@ -1032,28 +1048,19 @@ static const ProtocolOperations protocol1Operations = {
   .writeBraille = writeBraille1
 };
 
-static uint32_t hardwareVersion2;
-static uint32_t firmwareVersion2;
-static uint32_t btbaseVersion2;
-static uint32_t btfpVersion2;
-
-static unsigned char splitOffset2;
-static HidKeyboardPacket hidKeyboardPacket2;
-static unsigned int secondaryRoutingKeyEmulation2;
-
 static void
-initializeVariables2 (void) {
-  hardwareVersion2 = 0;
-  firmwareVersion2 = 0;
-  btbaseVersion2 = 0;
-  btfpVersion2 = 0;
+initializeVariables2 (BrailleDisplay *brl) {
+  brl->data->protocol.bc.version.hardware = 0;
+  brl->data->protocol.bc.version.firmware = 0;
+  brl->data->protocol.bc.version.btBase = 0;
+  brl->data->protocol.bc.version.btFP = 0;
 
-  initializeHidKeyboardPacket(&hidKeyboardPacket2);
+  initializeHidKeyboardPacket(&brl->data->protocol.bc.hidKeyboardPacket);
 }
 
 static int
 testHaveRawKeyboard2 (BrailleDisplay *brl) {
-  return btfpVersion2 > 0;
+  return brl->data->protocol.bc.version.btFP > 0;
 }
 
 static void
@@ -1085,32 +1092,32 @@ logVersion2 (uint32_t version, const char *label) {
 }
 
 static void
-setVersions2 (const unsigned char *bytes, size_t count) {
-  if (count >=  1) hardwareVersion2 |= ((bytes[0] - '0') << 16);
-  if (count >=  2) hardwareVersion2 |= ((bytes[1] - '0') <<  8);
+setVersions2 (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
+  if (count >=  1) brl->data->protocol.bc.version.hardware |= ((bytes[0] - '0') << 16);
+  if (count >=  2) brl->data->protocol.bc.version.hardware |= ((bytes[1] - '0') <<  8);
 
-  if (count >=  3) firmwareVersion2 |= (bytes[2] << 16);
-  if (count >=  4) firmwareVersion2 |= (bytes[3] <<  8);
-  if (count >=  5) firmwareVersion2 |= (bytes[4] <<  0);
+  if (count >=  3) brl->data->protocol.bc.version.firmware |= (bytes[2] << 16);
+  if (count >=  4) brl->data->protocol.bc.version.firmware |= (bytes[3] <<  8);
+  if (count >=  5) brl->data->protocol.bc.version.firmware |= (bytes[4] <<  0);
 
-  if (count >=  6) btbaseVersion2 |= (bytes[5] << 16);
-  if (count >=  7) btbaseVersion2 |= (bytes[6] <<  8);
-  if (count >=  8) btbaseVersion2 |= (bytes[7] <<  0);
+  if (count >=  6) brl->data->protocol.bc.version.btBase |= (bytes[5] << 16);
+  if (count >=  7) brl->data->protocol.bc.version.btBase |= (bytes[6] <<  8);
+  if (count >=  8) brl->data->protocol.bc.version.btBase |= (bytes[7] <<  0);
 
-  if (count >=  9) btfpVersion2 |= (bytes[ 8] << 16);
-  if (count >= 10) btfpVersion2 |= (bytes[ 9] <<  8);
-  if (count >= 11) btfpVersion2 |= (bytes[10] <<  0);
+  if (count >=  9) brl->data->protocol.bc.version.btFP |= (bytes[ 8] << 16);
+  if (count >= 10) brl->data->protocol.bc.version.btFP |= (bytes[ 9] <<  8);
+  if (count >= 11) brl->data->protocol.bc.version.btFP |= (bytes[10] <<  0);
 
-  logVersion2(hardwareVersion2, "Hardware Version");
-  logVersion2(firmwareVersion2, "Firmware Version");
-  logVersion2(btbaseVersion2, "Base Bluetooth Module Version");
-  logVersion2(btfpVersion2, "Feature Pack Bluetooth Module Version");
+  logVersion2(brl->data->protocol.bc.version.hardware, "Hardware Version");
+  logVersion2(brl->data->protocol.bc.version.firmware, "Firmware Version");
+  logVersion2(brl->data->protocol.bc.version.btBase, "Base Bluetooth Module Version");
+  logVersion2(brl->data->protocol.bc.version.btFP, "Feature Pack Bluetooth Module Version");
 }
 
 static int
 interpretKeyboardEvent2 (BrailleDisplay *brl, const unsigned char *packet) {
   const void *newPacket = packet;
-  processHidKeyboardPacket(&hidKeyboardPacket2, newPacket);
+  processHidKeyboardPacket(&brl->data->protocol.bc.hidKeyboardPacket, newPacket);
   return EOF;
 }
 
@@ -1187,11 +1194,13 @@ interpretKeyEvent2 (BrailleDisplay *brl, unsigned char group, unsigned char key)
        * on, we just interpret these keys as primary routing keys by
        * default, unless overriden by a driver parameter.
        */
-      if (!secondaryRoutingKeyEmulation2) secondary = 0;
+      if (!brl->data->protocol.bc.secondaryRoutingKeyEmulation) secondary = 0;
 
-      if (firmwareVersion2 < 0X011102)
-        if (key >= splitOffset2)
-          key -= splitOffset2;
+      if (brl->data->protocol.bc.version.firmware < 0X011102) {
+        if (key >= brl->data->protocol.bc.splitOffset) {
+          key -= brl->data->protocol.bc.splitOffset;
+        }
+      }
 
       if (key >= textOffset) {
         if ((key -= textOffset) < brl->textColumns) {
@@ -1285,7 +1294,7 @@ updateConfiguration2s (BrailleDisplay *brl, int autodetecting, const unsigned ch
     unsigned char textColumns = response[2];
 
     if (autodetecting) {
-      if (firmwareVersion2 < 0X010A00) {
+      if (brl->data->protocol.bc.version.firmware < 0X010A00) {
         switch (textColumns) {
           case 12:
             if (model == &modelBC640) {
@@ -1306,7 +1315,7 @@ updateConfiguration2s (BrailleDisplay *brl, int autodetecting, const unsigned ch
 
       if (updateConfiguration(brl, autodetecting, textColumns, statusColumns,
                               (statusSide == 'R')? STATUS_RIGHT: STATUS_LEFT)) {
-        splitOffset2 = (model->columns == actualColumns)? 0: actualColumns+1;
+        brl->data->protocol.bc.splitOffset = (model->columns == actualColumns)? 0: actualColumns+1;
         return 1;
       }
     }
@@ -1328,7 +1337,7 @@ identifyModel2s (BrailleDisplay *brl, unsigned char identifier) {
   while ((model = *modelEntry++)) {
     if (model->identifier == identifier) {
       if (getFeature2s(brl, 0X56, response, sizeof(response))) {
-        setVersions2(&response[2], sizeof(response)-2);
+        setVersions2(brl, &response[2], sizeof(response)-2);
 
         if (setDefaultConfiguration(brl)) {
           if (updateConfiguration2s(brl, 1, NULL)) {
@@ -1516,7 +1525,7 @@ updateConfiguration2u (BrailleDisplay *brl, int autodetecting, const unsigned ch
 
     if (updateConfiguration(brl, autodetecting, textColumns, statusColumns,
                             statusSide? STATUS_RIGHT: STATUS_LEFT)) {
-      splitOffset2 = model->columns - actualColumns;
+      brl->data->protocol.bc.splitOffset = model->columns - actualColumns;
       return 1;
     }
   }
@@ -1530,7 +1539,7 @@ detectModel2u (BrailleDisplay *brl) {
     unsigned char buffer[0X20];
     int length = gioGetHidFeature(brl->gioEndpoint, 0X09, buffer, sizeof(buffer));
 
-    if (length >= 3) setVersions2(&buffer[3], length-3);
+    if (length >= 3) setVersions2(brl, &buffer[3], length-3);
   }
 
   if (setDefaultConfiguration(brl))
@@ -1726,9 +1735,9 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  secondaryRoutingKeyEmulation2 = 0;
+  brl->data->protocol.bc.secondaryRoutingKeyEmulation = 0;
   if (*parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION])
-    if (!validateYesNo(&secondaryRoutingKeyEmulation2, parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION]))
+    if (!validateYesNo(&brl->data->protocol.bc.secondaryRoutingKeyEmulation, parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION]))
       logMessage(LOG_WARNING, "%s: %s", "invalid secondary routing key emulation setting",
                  parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION]);
 
@@ -1737,7 +1746,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     brl->data->restore.end = brl->data->restore.buffer;
 
     if (connectResource(brl, device)) {
-      protocol->initializeVariables();
+      protocol->initializeVariables(brl);
 
       if (protocol->detectModel(brl)) {
         if (updateSettings(brl)) {
