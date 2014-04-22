@@ -523,7 +523,7 @@ typedef struct {
 } SettingsUpdateEntry;
 
 typedef struct {
-  void (*initializeVariables) (BrailleDisplay *brl);
+  void (*initializeVariables) (BrailleDisplay *brl, char **parameters);
 
   BraillePacketVerifier *verifyPacket;
   int (*readPacket) (BrailleDisplay *brl, unsigned char *packet, int size);
@@ -871,7 +871,7 @@ identifyModel1 (BrailleDisplay *brl, unsigned char identifier) {
 }
 
 static void
-initializeVariables1 (BrailleDisplay *brl) {
+initializeVariables1 (BrailleDisplay *brl, char **parameters) {
 }
 
 static int
@@ -1108,7 +1108,16 @@ static const ProtocolOperations protocol1Operations = {
 };
 
 static void
-initializeVariables2 (BrailleDisplay *brl) {
+initializeVariables2 (BrailleDisplay *brl, char **parameters) {
+  brl->data->protocol.bc.secondaryRoutingKeyEmulation = 0;
+  if (*parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION]) {
+    if (!validateYesNo(&brl->data->protocol.bc.secondaryRoutingKeyEmulation, parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION]))
+      logMessage(LOG_WARNING, "%s: %s", "invalid secondary routing key emulation setting",
+                 parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION]);
+  }
+
+  initializeHidKeyboardPacket(&brl->data->protocol.bc.hidKeyboardPacket);
+
   brl->data->protocol.bc.version.hardware = 0;
   brl->data->protocol.bc.version.firmware = 0;
   brl->data->protocol.bc.version.btBase = 0;
@@ -1116,8 +1125,6 @@ initializeVariables2 (BrailleDisplay *brl) {
 
   brl->data->protocol.bc.macAddress.base = 0;
   brl->data->protocol.bc.macAddress.featurePack = 0;
-
-  initializeHidKeyboardPacket(&brl->data->protocol.bc.hidKeyboardPacket);
 }
 
 static int
@@ -1826,13 +1833,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     brl->data->restore.end = brl->data->restore.buffer;
 
     if (connectResource(brl, device)) {
-      protocol->initializeVariables(brl);
-
-      brl->data->protocol.bc.secondaryRoutingKeyEmulation = 0;
-      if (*parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION])
-        if (!validateYesNo(&brl->data->protocol.bc.secondaryRoutingKeyEmulation, parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION]))
-          logMessage(LOG_WARNING, "%s: %s", "invalid secondary routing key emulation setting",
-                     parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION]);
+      protocol->initializeVariables(brl, parameters);
 
       if (protocol->detectModel(brl)) {
         if (updateSettings(brl)) {
