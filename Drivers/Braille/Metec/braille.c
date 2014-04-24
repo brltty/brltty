@@ -88,19 +88,21 @@ writeDevice (unsigned char request, const void *buffer, int length) {
 
 static int
 getDeviceIdentity (char *buffer, int *length) {
-  int result;
+  ssize_t result;
 
   {
     static const unsigned char data[1] = {0};
+
     result = writeDevice(0X04, data, sizeof(data));
     if (result == -1) return 0;
   }
 
   result = usbReadEndpoint(usbChannel->device, usbChannel->definition.inputEndpoint,
                            buffer, *length, MT_REQUEST_TIMEOUT);
-  if (result == -1) return 0;
 
-  logMessage(LOG_INFO, "Device Identity: %.*s", result, buffer);
+  if (result == -1) return 0;
+  logMessage(LOG_INFO, "Device Identity: %.*s", (int)result, buffer);
+
   *length = result;
   return 1;
 }
