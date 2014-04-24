@@ -70,44 +70,27 @@ DEFINE_PHYSICAL_ENDIAN_FUNCTIONS(16)
 DEFINE_PHYSICAL_ENDIAN_FUNCTIONS(32)
 DEFINE_PHYSICAL_ENDIAN_FUNCTIONS(64)
 
+#define DEFINE_ENDIAN_FUNCTIONS_FOR_BITS(bits, logical, physical) \
+  static inline uint##bits##_t \
+  get##logical##Endian##bits (uint##bits##_t from) { \
+    return get##physical##Endian##bits(from); \
+  } \
+  static inline void \
+  put##logical##Endian##bits (uint##bits##_t *to, uint##bits##_t from) { \
+    put##physical##Endian##bits(to, from); \
+  }
+
+#define DEFINE_ENDIAN_FUNCTIONS(logical, physical) \
+  DEFINE_ENDIAN_FUNCTIONS_FOR_BITS(16, logical, physical) \
+  DEFINE_ENDIAN_FUNCTIONS_FOR_BITS(32, logical, physical) \
+  DEFINE_ENDIAN_FUNCTIONS_FOR_BITS(64, logical, physical)
+
 #ifdef WORDS_BIGENDIAN
-#  define getLittleEndian16 getOtherEndian16
-#  define putLittleEndian16 putOtherEndian16
-
-#  define getBigEndian16 getNativeEndian16
-#  define putBigEndian16 putNativeEndian16
-
-#  define getLittleEndian32 getOtherEndian32
-#  define putLittleEndian32 putOtherEndian32
-
-#  define getBigEndian32 getNativeEndian32
-#  define putBigEndian32 putNativeEndian32
-
-#  define getLittleEndian64 getOtherEndian64
-#  define putLittleEndian64 putOtherEndian64
-
-#  define getBigEndian64 getNativeEndian64
-#  define putBigEndian64 putNativeEndian64
-
+  DEFINE_ENDIAN_FUNCTIONS(Little, Other)
+  DEFINE_ENDIAN_FUNCTIONS(Big, Native)
 #else /* WORDS_BIGENDIAN */
-#  define getLittleEndian16 getNativeEndian16
-#  define putLittleEndian16 putNativeEndian16
-
-#  define getBigEndian16 getOtherEndian16
-#  define putBigEndian16 putOtherEndian16
-
-#  define getLittleEndian32 getNativeEndian32
-#  define putLittleEndian32 putNativeEndian32
-
-#  define getBigEndian32 getOtherEndian32
-#  define putBigEndian32 putOtherEndian32
-
-#  define getLittleEndian64 getNativeEndian64
-#  define putLittleEndian64 putNativeEndian64
-
-#  define getBigEndian64 getOtherEndian64
-#  define putBigEndian64 putOtherEndian64
-
+  DEFINE_ENDIAN_FUNCTIONS(Little, Native)
+  DEFINE_ENDIAN_FUNCTIONS(Big, Other)
 #endif /* WORDS_BIGENDIAN */
 
 #ifdef __cplusplus
