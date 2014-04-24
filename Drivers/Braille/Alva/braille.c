@@ -1140,23 +1140,20 @@ testHaveRawKeyboard2 (BrailleDisplay *brl) {
 
 static void
 logVersion2 (uint32_t version, const char *label) {
-  union {
-    uint32_t u32;
-    unsigned char bytes[4];
-  } value;
+  BytesOverlay overlay;
 
-  unsigned char *byte = &value.bytes[2];
+  unsigned char *byte = &overlay.bytes[2];
   char string[0X40];
 
-  putLittleEndian32(&value.u32, version);
+  putLittleEndian32(&overlay.u32, version);
   STR_BEGIN(string, sizeof(string));
 
   while (1) {
     STR_PRINTF("%u", *byte);
-    if (byte == value.bytes) break;
+    if (byte == overlay.bytes) break;
 
     *byte = 0;
-    if (!value.u32) break;
+    if (!overlay.u32) break;
 
     STR_PRINTF(".");
     byte -= 1;
@@ -1197,20 +1194,17 @@ setVersions2 (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
 
 static void
 logMacAddress2 (uint64_t address, const char *label) {
-  union {
-    uint64_t u64;
-    unsigned char bytes[8];
-  } value;
+  BytesOverlay overlay;
 
-  const unsigned char *byte = &value.bytes[5];
+  const unsigned char *byte = &overlay.bytes[5];
   char string[0X20];
 
-  putLittleEndian64(&value.u64, address);
+  putLittleEndian64(&overlay.u64, address);
   STR_BEGIN(string, sizeof(string));
 
   while (1) {
     STR_PRINTF("%02X", *byte);
-    if (byte == value.bytes) break;
+    if (byte == overlay.bytes) break;
     byte -= 1;
     STR_PRINTF("%c", ':');
   }
@@ -1223,15 +1217,12 @@ static uint64_t
 parseMacAddress2 (
   const unsigned char **bytes, size_t *count
 ) {
-  union {
-    uint64_t u64;
-    unsigned char bytes[8];
-  } value;
+  BytesOverlay overlay;
 
-  putLittleEndian64(&value.u64, parseHexadecimalField(bytes, count, 6, 6));
-  swapBytes(&value.bytes[5], &value.bytes[4]);
-  swapBytes(&value.bytes[2], &value.bytes[0]);
-  return getLittleEndian64(value.u64);
+  putLittleEndian64(&overlay.u64, parseHexadecimalField(bytes, count, 6, 6));
+  swapBytes(&overlay.bytes[5], &overlay.bytes[4]);
+  swapBytes(&overlay.bytes[2], &overlay.bytes[0]);
+  return getLittleEndian64(overlay.u64);
 }
 
 static void
