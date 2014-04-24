@@ -1166,32 +1166,80 @@ logVersion2 (uint32_t version, const char *label) {
   logMessage(LOG_DEBUG, "%s: %s", label, string);
 }
 
+static uint64_t
+parseHardwareVersion2 (
+  const unsigned char **bytes, size_t *count
+) {
+  return parseDecimalField(bytes, count, 2, 3);
+}
+
+static uint64_t
+parseFirmwareVersion2 (
+  const unsigned char **bytes, size_t *count
+) {
+  return parseHexadecimalField(bytes, count, 3, 3);
+}
+
 static void
 setVersions2 (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
-  brl->data->protocol.bc.version.hardware = parseDecimalField(&bytes, &count, 2, 3);
+  brl->data->protocol.bc.version.hardware = parseHardwareVersion2(&bytes, &count);
   logVersion2(brl->data->protocol.bc.version.hardware, "Hardware Version");
 
-  brl->data->protocol.bc.version.firmware = parseHexadecimalField(&bytes, &count, 3, 3);
+  brl->data->protocol.bc.version.firmware = parseFirmwareVersion2(&bytes, &count);
   logVersion2(brl->data->protocol.bc.version.firmware, "Firmware Version");
 
-  brl->data->protocol.bc.version.btBase = parseHexadecimalField(&bytes, &count, 3, 3);
+  brl->data->protocol.bc.version.btBase = parseFirmwareVersion2(&bytes, &count);
   logVersion2(brl->data->protocol.bc.version.btBase, "Base Bluetooth Module Version");
 
-  brl->data->protocol.bc.version.btFP = parseHexadecimalField(&bytes, &count, 3, 3);
+  brl->data->protocol.bc.version.btFP = parseFirmwareVersion2(&bytes, &count);
   logVersion2(brl->data->protocol.bc.version.btFP, "Feature Pack Bluetooth Module Version");
 }
 
 static void
 logMacAddress2 (uint64_t address, const char *label) {
-  logMessage(LOG_DEBUG, "%s: %012" PRIX64, label, address);
+  union {
+    uint64_t u64;
+    unsigned char bytes[8];
+  } value;
+
+  const unsigned char *byte = &value.bytes[5];
+  char string[0X20];
+
+  putLittleEndian64(&value.u64, address);
+  STR_BEGIN(string, sizeof(string));
+
+  while (1) {
+    STR_PRINTF("%02X", *byte);
+    if (byte == value.bytes) break;
+    byte -= 1;
+    STR_PRINTF("%c", ':');
+  }
+
+  STR_END;
+  logMessage(LOG_DEBUG, "%s: %s", label, string);
+}
+
+static uint64_t
+parseMacAddress2 (
+  const unsigned char **bytes, size_t *count
+) {
+  union {
+    uint64_t u64;
+    unsigned char bytes[8];
+  } value;
+
+  putLittleEndian64(&value.u64, parseHexadecimalField(bytes, count, 6, 6));
+  swapBytes(&value.bytes[5], &value.bytes[4]);
+  swapBytes(&value.bytes[2], &value.bytes[0]);
+  return getLittleEndian64(value.u64);
 }
 
 static void
 setMacAddresses2 (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
-  brl->data->protocol.bc.macAddress.base = parseHexadecimalField(&bytes, &count, 6, 6);
+  brl->data->protocol.bc.macAddress.base = parseMacAddress2(&bytes, &count);
   logMacAddress2(brl->data->protocol.bc.macAddress.base, "Base Mac Address");
 
-  brl->data->protocol.bc.macAddress.featurePack = parseHexadecimalField(&bytes, &count, 6, 6);
+  brl->data->protocol.bc.macAddress.featurePack = parseMacAddress2(&bytes, &count);
   logMacAddress2(brl->data->protocol.bc.macAddress.featurePack, "Feature Pack Mac Address");
 }
 

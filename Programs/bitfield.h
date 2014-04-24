@@ -37,8 +37,8 @@ static inline uint16_t
 getOtherEndian16 (uint16_t from) {
   const unsigned char *bytes = (const unsigned char *)&from;
 
-  return (bytes[0] << 0x08)
-       | (bytes[1] << 0x00);
+  return ((uint16_t)bytes[0] << 0x08)
+       | ((uint16_t)bytes[1] << 0x00);
 }
 
 static inline void
@@ -60,10 +60,10 @@ static inline uint32_t
 getOtherEndian32 (uint32_t from) {
   const unsigned char *bytes = (const unsigned char *)&from;
 
-  return (bytes[0] << 0x18)
-       | (bytes[1] << 0x10)
-       | (bytes[2] << 0x08)
-       | (bytes[3] << 0x00);
+  return ((uint32_t)bytes[0] << 0x18)
+       | ((uint32_t)bytes[1] << 0x10)
+       | ((uint32_t)bytes[2] << 0x08)
+       | ((uint32_t)bytes[3] << 0x00);
 }
 
 static inline void
@@ -74,6 +74,35 @@ putNativeEndian32 (uint32_t *to, uint32_t from) {
 static inline void
 putOtherEndian32 (uint32_t *to, uint32_t from) {
   *to = getOtherEndian32(from);
+}
+
+static inline uint64_t
+getNativeEndian64 (uint64_t from) {
+  return from;
+}
+
+static inline uint64_t
+getOtherEndian64 (uint64_t from) {
+  const unsigned char *bytes = (const unsigned char *)&from;
+
+  return ((uint64_t)bytes[0] << 0x38)
+       | ((uint64_t)bytes[1] << 0x30)
+       | ((uint64_t)bytes[2] << 0x28)
+       | ((uint64_t)bytes[3] << 0x20)
+       | ((uint64_t)bytes[4] << 0x18)
+       | ((uint64_t)bytes[5] << 0x10)
+       | ((uint64_t)bytes[6] << 0x08)
+       | ((uint64_t)bytes[7] << 0x00);
+}
+
+static inline void
+putNativeEndian64 (uint64_t *to, uint64_t from) {
+  *to = getNativeEndian64(from);
+}
+
+static inline void
+putOtherEndian64 (uint64_t *to, uint64_t from) {
+  *to = getOtherEndian64(from);
 }
 
 #ifdef WORDS_BIGENDIAN
@@ -89,6 +118,12 @@ putOtherEndian32 (uint32_t *to, uint32_t from) {
 #  define getBigEndian32 getNativeEndian32
 #  define putBigEndian32 putNativeEndian32
 
+#  define getLittleEndian64 getOtherEndian64
+#  define putLittleEndian64 putOtherEndian64
+
+#  define getBigEndian64 getNativeEndian64
+#  define putBigEndian64 putNativeEndian64
+
 #else /* WORDS_BIGENDIAN */
 #  define getLittleEndian16 getNativeEndian16
 #  define putLittleEndian16 putNativeEndian16
@@ -102,7 +137,20 @@ putOtherEndian32 (uint32_t *to, uint32_t from) {
 #  define getBigEndian32 getOtherEndian32
 #  define putBigEndian32 putOtherEndian32
 
+#  define getLittleEndian64 getNativeEndian64
+#  define putLittleEndian64 putNativeEndian64
+
+#  define getBigEndian64 getOtherEndian64
+#  define putBigEndian64 putOtherEndian64
+
 #endif /* WORDS_BIGENDIAN */
+
+static inline void
+swapBytes (unsigned char *byte1, unsigned char *byte2) {
+  unsigned char byte = *byte1;
+  *byte1 = *byte2;
+  *byte2 = byte;
+}
 
 #ifdef __cplusplus
 }
