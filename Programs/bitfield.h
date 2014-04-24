@@ -28,82 +28,47 @@ extern "C" {
 #define HIGH_NIBBLE(byte) ((byte) & 0XF0)
 #define LOW_NIBBLE(byte) ((byte) & 0XF)
 
-static inline uint16_t
-getNativeEndian16 (uint16_t from) {
-  return from;
-}
-
-static inline uint16_t
-getOtherEndian16 (uint16_t from) {
-  const unsigned char *bytes = (const unsigned char *)&from;
-
-  return ((uint16_t)bytes[0] << 0x08)
-       | ((uint16_t)bytes[1] << 0x00);
-}
-
 static inline void
-putNativeEndian16 (uint16_t *to, uint16_t from) {
-  *to = getNativeEndian16(from);
+swapBytes (unsigned char *byte1, unsigned char *byte2) {
+  unsigned char byte = *byte1;
+  *byte1 = *byte2;
+  *byte2 = byte;
 }
 
-static inline void
-putOtherEndian16 (uint16_t *to, uint16_t from) {
-  *to = getOtherEndian16(from);
-}
+typedef union {
+  uint8_t bytes[0];
+  uint16_t u16;
+  uint32_t u32;
+  uint64_t u64;
+} BytesOverlay;
 
-static inline uint32_t
-getNativeEndian32 (uint32_t from) {
-  return from;
-}
+#define DEFINE_PHYSICAL_ENDIAN_FUNCTIONS(bits) \
+  static inline uint##bits##_t \
+  getNativeEndian##bits (uint##bits##_t from) { \
+    return from; \
+  } \
+  static inline uint##bits##_t \
+  getOtherEndian##bits (uint##bits##_t from) { \
+    BytesOverlay overlay = {.u##bits = from}; \
+    uint8_t *first = overlay.bytes; \
+    uint8_t *second = first + (bits / 8); \
+    do { \
+      swapBytes(first++, --second); \
+    } while (first != second); \
+    return overlay.u##bits; \
+  } \
+  static inline void \
+  putNativeEndian##bits (uint##bits##_t *to, uint##bits##_t from) { \
+    *to = getNativeEndian##bits(from); \
+  } \
+  static inline void \
+  putOtherEndian##bits (uint##bits##_t *to, uint##bits##_t from) { \
+    *to = getOtherEndian##bits(from); \
+  }
 
-static inline uint32_t
-getOtherEndian32 (uint32_t from) {
-  const unsigned char *bytes = (const unsigned char *)&from;
-
-  return ((uint32_t)bytes[0] << 0x18)
-       | ((uint32_t)bytes[1] << 0x10)
-       | ((uint32_t)bytes[2] << 0x08)
-       | ((uint32_t)bytes[3] << 0x00);
-}
-
-static inline void
-putNativeEndian32 (uint32_t *to, uint32_t from) {
-  *to = getNativeEndian32(from);
-}
-
-static inline void
-putOtherEndian32 (uint32_t *to, uint32_t from) {
-  *to = getOtherEndian32(from);
-}
-
-static inline uint64_t
-getNativeEndian64 (uint64_t from) {
-  return from;
-}
-
-static inline uint64_t
-getOtherEndian64 (uint64_t from) {
-  const unsigned char *bytes = (const unsigned char *)&from;
-
-  return ((uint64_t)bytes[0] << 0x38)
-       | ((uint64_t)bytes[1] << 0x30)
-       | ((uint64_t)bytes[2] << 0x28)
-       | ((uint64_t)bytes[3] << 0x20)
-       | ((uint64_t)bytes[4] << 0x18)
-       | ((uint64_t)bytes[5] << 0x10)
-       | ((uint64_t)bytes[6] << 0x08)
-       | ((uint64_t)bytes[7] << 0x00);
-}
-
-static inline void
-putNativeEndian64 (uint64_t *to, uint64_t from) {
-  *to = getNativeEndian64(from);
-}
-
-static inline void
-putOtherEndian64 (uint64_t *to, uint64_t from) {
-  *to = getOtherEndian64(from);
-}
+DEFINE_PHYSICAL_ENDIAN_FUNCTIONS(16)
+DEFINE_PHYSICAL_ENDIAN_FUNCTIONS(32)
+DEFINE_PHYSICAL_ENDIAN_FUNCTIONS(64)
 
 #ifdef WORDS_BIGENDIAN
 #  define getLittleEndian16 getOtherEndian16
@@ -144,13 +109,6 @@ putOtherEndian64 (uint64_t *to, uint64_t from) {
 #  define putBigEndian64 putOtherEndian64
 
 #endif /* WORDS_BIGENDIAN */
-
-static inline void
-swapBytes (unsigned char *byte1, unsigned char *byte2) {
-  unsigned char byte = *byte1;
-  *byte1 = *byte2;
-  *byte2 = byte;
-}
 
 #ifdef __cplusplus
 }
