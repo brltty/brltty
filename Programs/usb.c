@@ -32,6 +32,7 @@
 #include "parameters.h"
 #include "parse.h"
 #include "file.h"
+#include "charset.h"
 #include "device.h"
 #include "timing.h"
 #include "async_wait.h"
@@ -123,19 +124,26 @@ usbGetLanguage (
 
 char *
 usbDecodeString (const UsbStringDescriptor *descriptor) {
-  int count = (descriptor->bLength - 2) / sizeof(descriptor->wData[0]);
-  char *string = malloc(count+1);
-  if (string) {
-    string[count] = 0;
-    while (count--) {
-      uint16_t character = getLittleEndian16(descriptor->wData[count]);
-      if (character & 0XFF00) character = '?';
-      string[count] = character;
-    }
-  } else {
-    logSystemError("USB string allocate");
+  size_t count = (descriptor->bLength - 2) / sizeof(descriptor->wData[0]);
+  char buffer[(count * UTF8_LEN_MAX) + 1];
+
+  const uint16_t *source = descriptor->wData;
+  const uint16_t *end = source + count;
+  char *target = buffer;
+
+  while (source < end) {
+    size_t length = convertWcharToUtf8(getLittleEndian16(*source++), target);
+
+    target += length;
   }
-  return string;
+  *target = 0;
+
+  {
+    char *string = strdup(buffer);
+
+    if (!string) logMallocError();
+    return string;
+  }
 }
 
 char *
