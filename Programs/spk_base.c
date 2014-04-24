@@ -25,6 +25,7 @@
 #include "parse.h"
 #include "brltty.h"
 
+#ifdef ENABLE_SPEECH_SUPPORT
 int
 tellSpeechFinished (void) {
   return speechMessage_speechFinished(spk.driver.thread);
@@ -96,3 +97,4 @@ getFloatSpeechPitch (unsigned char setting) {
   return (float)setting / (float)SPK_PITCH_DEFAULT;
 }
 #endif /* NO_FLOAT */
+#endif /* ENABLE_SPEECH_SUPPORT */
