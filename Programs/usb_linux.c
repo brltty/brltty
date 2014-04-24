@@ -355,11 +355,11 @@ usbControlTransfer (
     }
 
     {
-      int count = ioctl(devx->usbfsFile, USBDEVFS_CONTROL, &arg);
+      ssize_t count = ioctl(devx->usbfsFile, USBDEVFS_CONTROL, &arg);
 
       if (count != -1) {
         if (direction == UsbControlDirection_Input) {
-          logBytes(LOG_CATEGORY(USB_IO), "control input", buffer, length);
+          logBytes(LOG_CATEGORY(USB_IO), "control input", buffer, count);
         }
 
         return count;
