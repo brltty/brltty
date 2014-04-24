@@ -42,27 +42,34 @@ typedef union {
   uint64_t u64;
 } BytesOverlay;
 
+#define GET_ENDIAN_FUNCTION(which, bits) \
+  static inline uint##bits##_t get##which##Endian##bits (uint##bits##_t from)
+
+#define PUT_ENDIAN_FUNCTION(which, bits) \
+  static inline void put##which##Endian##bits (uint##bits##_t *to, uint##bits##_t from)
+
 #define DEFINE_PHYSICAL_ENDIAN_FUNCTIONS(bits) \
-  static inline uint##bits##_t \
-  getNativeEndian##bits (uint##bits##_t from) { \
+  GET_ENDIAN_FUNCTION(Native, bits) { \
     return from; \
   } \
-  static inline uint##bits##_t \
-  getOtherEndian##bits (uint##bits##_t from) { \
+  \
+  GET_ENDIAN_FUNCTION(Other, bits) { \
     BytesOverlay overlay = {.u##bits = from}; \
     uint8_t *first = overlay.bytes; \
     uint8_t *second = first + (bits / 8); \
+    \
     do { \
       swapBytes(first++, --second); \
     } while (first != second); \
+    \
     return overlay.u##bits; \
   } \
-  static inline void \
-  putNativeEndian##bits (uint##bits##_t *to, uint##bits##_t from) { \
+  \
+  PUT_ENDIAN_FUNCTION(Native, bits) { \
     *to = getNativeEndian##bits(from); \
   } \
-  static inline void \
-  putOtherEndian##bits (uint##bits##_t *to, uint##bits##_t from) { \
+  \
+  PUT_ENDIAN_FUNCTION(Other, bits) { \
     *to = getOtherEndian##bits(from); \
   }
 
@@ -71,12 +78,11 @@ DEFINE_PHYSICAL_ENDIAN_FUNCTIONS(32)
 DEFINE_PHYSICAL_ENDIAN_FUNCTIONS(64)
 
 #define DEFINE_ENDIAN_FUNCTIONS_FOR_BITS(bits, logical, physical) \
-  static inline uint##bits##_t \
-  get##logical##Endian##bits (uint##bits##_t from) { \
+  GET_ENDIAN_FUNCTION(logical, bits) { \
     return get##physical##Endian##bits(from); \
   } \
-  static inline void \
-  put##logical##Endian##bits (uint##bits##_t *to, uint##bits##_t from) { \
+  \
+  PUT_ENDIAN_FUNCTION(logical, bits) { \
     put##physical##Endian##bits(to, from); \
   }
 
