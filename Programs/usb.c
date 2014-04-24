@@ -109,16 +109,22 @@ usbGetLanguage (
   int timeout
 ) {
   UsbDescriptor descriptor;
-  int size = usbGetDescriptor(device, UsbDescriptorType_String,
+  ssize_t size = usbGetDescriptor(device, UsbDescriptorType_String,
                               0, 0, &descriptor, timeout);
+
   if (size != -1) {
     if (size >= 4) {
       *language = getLittleEndian16(descriptor.string.wData[0]);
       logMessage(LOG_CATEGORY(USB_IO), "USB language: %02X", *language);
       return 1;
+    } else {
+      logMessage(LOG_ERR, "USB language code string too short: %zu", size);
+      errno = EIO;
     }
-    errno = EIO;
+  } else {
+    logMessage(LOG_ERR, "USB language code string read error");
   }
+
   return 0;
 }
 
@@ -154,14 +160,18 @@ usbGetString (
 ) {
   UsbDescriptor descriptor;
 
-  if (!device->language)
-    if (!usbGetLanguage(device, &device->language, timeout))
+  if (!device->language) {
+    if (!usbGetLanguage(device, &device->language, timeout)) {
       return NULL;
+    }
+  }
 
   if (usbGetDescriptor(device, UsbDescriptorType_String,
                        number, device->language,
-                       &descriptor, timeout) == -1)
+                       &descriptor, timeout) == -1) {
+    logMessage(LOG_ERR, "USB string read error: %u", number);
     return NULL;
+  }
 
   return usbDecodeString(&descriptor.string);
 }
