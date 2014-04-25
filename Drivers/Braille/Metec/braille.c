@@ -32,6 +32,7 @@ BEGIN_KEY_NAME_TABLE(all)
   KEY_NAME_ENTRY(MT_KEY_LeftUp, "LeftUp"),
   KEY_NAME_ENTRY(MT_KEY_LeftSelect, "LeftSelect"),
   KEY_NAME_ENTRY(MT_KEY_LeftDown, "LeftDown"),
+
   KEY_NAME_ENTRY(MT_KEY_RightUp, "RightUp"),
   KEY_NAME_ENTRY(MT_KEY_RightSelect, "RightSelect"),
   KEY_NAME_ENTRY(MT_KEY_RightDown, "RightDown"),
@@ -42,7 +43,10 @@ BEGIN_KEY_NAME_TABLE(all)
   KEY_NAME_ENTRY(MT_KEY_CursorDown, "CursorDown"),
 
   KEY_SET_ENTRY(MT_SET_RoutingKeys1, "RoutingKey1"),
+  KEY_SET_ENTRY(MT_SET_StatusKeys1, "StatusKey1"),
+
   KEY_SET_ENTRY(MT_SET_RoutingKeys2, "RoutingKey2"),
+  KEY_SET_ENTRY(MT_SET_StatusKeys2, "StatusKey2"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(all)
@@ -127,20 +131,34 @@ handleNavigationKeys (BrailleDisplay *brl, uint32_t keys) {
 static void
 handleRoutingKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
   if (key != MT_ROUTING_KEYS_NONE) {
-    MT_KeySet set;
+    MT_KeySet routing;
+    MT_KeySet status;
 
-    if (key < brl->textColumns) {
-      set = MT_SET_RoutingKeys1;
+    if (key < brl->data->cellCount) {
+      routing = MT_SET_RoutingKeys1;
+      status = MT_SET_StatusKeys1;
     } else if ((key >= MT_ROUTING_KEYS_SECONDARY) &&
-               (key < (MT_ROUTING_KEYS_SECONDARY + brl->textColumns))) {
+               (key < (MT_ROUTING_KEYS_SECONDARY + brl->data->cellCount))) {
       key -= MT_ROUTING_KEYS_SECONDARY;
-      set = MT_SET_RoutingKeys2;
+      routing = MT_SET_RoutingKeys2;
+      status = MT_SET_StatusKeys2;
     } else {
       logMessage(LOG_WARNING, "unexpected routing key: %u", key);
       return;
     }
 
-    enqueueKeyEvent(brl, set, key, press);
+    {
+      MT_KeySet set;
+
+      if (key < brl->data->statusCount) {
+        set = status;
+      } else {
+        key -= brl->data->statusCount;
+        set = routing;
+      }
+
+      enqueueKeyEvent(brl, set, key, press);
+    }
   }
 }
 

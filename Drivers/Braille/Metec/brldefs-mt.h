@@ -37,8 +37,12 @@ typedef enum {
 
 typedef enum {
   MT_SET_NavigationKeys = 0,
+
   MT_SET_RoutingKeys1,
-  MT_SET_RoutingKeys2
+  MT_SET_StatusKeys1,
+
+  MT_SET_RoutingKeys2,
+  MT_SET_StatusKeys2
 } MT_KeySet;
 
 #endif /* BRLTTY_INCLUDED_MT_BRLDEFS */ 
