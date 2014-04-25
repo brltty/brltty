@@ -63,6 +63,7 @@ END_KEY_TABLE_LIST
 
 #define MT_MODULE_SIZE 8
 #define MT_MODULES_MAXIMUM 10
+#define MT_CELLS_MAXIMUM (MT_MODULES_MAXIMUM * MT_MODULE_SIZE)
 
 typedef struct {
   int (*beginProtocol) (BrailleDisplay *brl);
@@ -77,9 +78,15 @@ typedef struct {
 struct BrailleDataStruct {
   const ProtocolOperations *protocol;
 
-  unsigned char textCells[MT_MODULES_MAXIMUM * MT_MODULE_SIZE];
-  int forceWrite[MT_MODULES_MAXIMUM];
-  unsigned int moduleCount;
+  unsigned char oldCells[MT_CELLS_MAXIMUM];
+  unsigned char newCells[MT_CELLS_MAXIMUM];
+
+  unsigned char cellCount;
+  unsigned char textCount;
+  unsigned char statusCount;
+
+  int writeModule[MT_MODULES_MAXIMUM];
+  unsigned char moduleCount;
 
   uint32_t navigationKeys;
   unsigned char routingKey;
@@ -93,12 +100,21 @@ struct BrailleDataStruct {
 
 static void
 setCellCount (BrailleDisplay *brl, unsigned char count) {
-  switch ((brl->textColumns = count)) {
+  brl->data->moduleCount = (brl->data->cellCount = count) / MT_MODULE_SIZE;
+
+  switch (count) {
+    case 42:
+      brl->data->statusCount = 2;
+      break;
+
     default:
+      brl->data->statusCount = 0;
       break;
   }
 
-  brl->data->moduleCount = brl->textColumns / MT_MODULE_SIZE;
+  brl->data->textCount = brl->data->cellCount - brl->data->statusCount;
+  brl->textColumns = brl->data->textCount;
+  brl->statusColumns = brl->data->statusCount;
 }
 
 static void
@@ -291,7 +307,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             unsigned int moduleNumber;
 
             for (moduleNumber=0; moduleNumber<brl->data->moduleCount; moduleNumber+=1) {
-              brl->data->forceWrite[moduleNumber] = 1;
+              brl->data->writeModule[moduleNumber] = 1;
             }
           }
 
@@ -340,16 +356,18 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  const unsigned char *source = brl->buffer;
-  unsigned char *target = brl->data->textCells;
+  const unsigned char *source = brl->data->newCells;
+  unsigned char *target = brl->data->oldCells;
   unsigned int moduleNumber;
 
+  memcpy(&brl->data->newCells[brl->data->statusCount], brl->buffer, brl->data->textCount);
+
   for (moduleNumber=0; moduleNumber<brl->data->moduleCount; moduleNumber+=1) {
-    if (cellsHaveChanged(target, source, MT_MODULE_SIZE, NULL, NULL, &brl->data->forceWrite[moduleNumber])) {
+    if (cellsHaveChanged(target, source, MT_MODULE_SIZE, NULL, NULL, &brl->data->writeModule[moduleNumber])) {
       unsigned char cells[MT_MODULE_SIZE];
 
       translateOutputCells(cells, source, MT_MODULE_SIZE);
-      if (tellUsbDevice(brl, 0X0A+moduleNumber, cells, sizeof(cells)) == -1) return 0;
+      if (tellUsbDevice(brl, 0X0A+moduleNumber, cells, MT_MODULE_SIZE) == -1) return 0;
     }
 
     source += MT_MODULE_SIZE;
