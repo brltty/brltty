@@ -131,20 +131,20 @@ handleNavigationKeys (BrailleDisplay *brl, uint32_t keys) {
 static void
 handleRoutingKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
   if (key != MT_ROUTING_KEYS_NONE) {
-    MT_KeySet routing;
-    MT_KeySet status;
-
-    if (key < MT_ROUTING_KEYS_SECONDARY) {
-      routing = MT_SET_RoutingKeys1;
-      status = MT_SET_StatusKeys1;
-    } else {
-      key -= MT_ROUTING_KEYS_SECONDARY;
-      routing = MT_SET_RoutingKeys2;
-      status = MT_SET_StatusKeys2;
-    }
+    MT_KeySet set;
 
     {
-      MT_KeySet set;
+      MT_KeySet routing;
+      MT_KeySet status;
+
+      if (key < MT_ROUTING_KEYS_SECONDARY) {
+        routing = MT_SET_RoutingKeys1;
+        status = MT_SET_StatusKeys1;
+      } else {
+        key -= MT_ROUTING_KEYS_SECONDARY;
+        routing = MT_SET_RoutingKeys2;
+        status = MT_SET_StatusKeys2;
+      }
 
       if (key < brl->data->statusCount) {
         set = status;
@@ -154,9 +154,9 @@ handleRoutingKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
       } else {
         return;
       }
-
-      enqueueKeyEvent(brl, set, key, press);
     }
+
+    enqueueKeyEvent(brl, set, key, press);
   }
 }
 
