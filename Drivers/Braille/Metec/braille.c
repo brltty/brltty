@@ -134,17 +134,13 @@ handleRoutingKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
     MT_KeySet routing;
     MT_KeySet status;
 
-    if (key < brl->data->cellCount) {
+    if (key < MT_ROUTING_KEYS_SECONDARY) {
       routing = MT_SET_RoutingKeys1;
       status = MT_SET_StatusKeys1;
-    } else if ((key >= MT_ROUTING_KEYS_SECONDARY) &&
-               (key < (MT_ROUTING_KEYS_SECONDARY + brl->data->cellCount))) {
+    } else {
       key -= MT_ROUTING_KEYS_SECONDARY;
       routing = MT_SET_RoutingKeys2;
       status = MT_SET_StatusKeys2;
-    } else {
-      logMessage(LOG_WARNING, "unexpected routing key: %u", key);
-      return;
     }
 
     {
@@ -152,9 +148,11 @@ handleRoutingKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
 
       if (key < brl->data->statusCount) {
         set = status;
-      } else {
+      } else if (key < brl->data->cellCount) {
         key -= brl->data->statusCount;
         set = routing;
+      } else {
+        return;
       }
 
       enqueueKeyEvent(brl, set, key, press);
