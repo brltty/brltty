@@ -119,6 +119,8 @@ setCellCount (BrailleDisplay *brl, unsigned char count) {
 
 static void
 handleNavigationKeys (BrailleDisplay *brl, uint32_t keys) {
+  if (keys & 0X80) keys &= ~0X8B;
+  keys &= ~0X20;
   enqueueUpdatedKeys(brl, keys, &brl->data->navigationKeys, MT_SET_NavigationKeys, 0);
 }
 
