@@ -22,6 +22,8 @@
 #include <errno.h>
 
 #include "log.h"
+#include "parameters.h"
+#include "async_alarm.h"
 
 #include "brl_driver.h"
 #include "brldefs-mt.h"
@@ -61,172 +63,36 @@ END_KEY_TABLE_LIST
 #define MT_MODULE_SIZE 8
 #define MT_MODULES_MAXIMUM 10
 
-static unsigned char textCells[MT_MODULES_MAXIMUM * MT_MODULE_SIZE];
-static int forceWrite;
-static uint16_t lastNavigationKeys;
-static unsigned char lastRoutingKey;
+typedef struct {
+  int (*beginProtocol) (BrailleDisplay *brl);
+  void (*endProtocol) (BrailleDisplay *brl);
 
-#include "io_usb.h"
+  int (*getDeviceIdentity) (BrailleDisplay *brl, char *buffer, size_t *length);
+  int (*setHighVoltage) (BrailleDisplay *brl, int on);
+} ProtocolOperations;
+
+struct BrailleDataStruct {
+  const ProtocolOperations *protocol;
+
+  unsigned char textCells[MT_MODULES_MAXIMUM * MT_MODULE_SIZE];
+  int forceWrite[MT_MODULES_MAXIMUM];
+  unsigned int moduleCount;
+
+  uint16_t lastNavigationKeys;
+  unsigned char lastRoutingKey;
+
+  union {
+    struct {
+      AsyncHandle inputAlarm;
+    } usb;
+  } proto;
+};
 
 #define MT_REQUEST_RECIPIENT UsbControlRecipient_Device
 #define MT_REQUEST_TYPE UsbControlType_Vendor
-#define MT_REQUEST_TIMEOUT 1000
-
-static UsbChannel *usbChannel = NULL;
-
-static int
-readDevice (unsigned char request, void *buffer, int length) {
-  return usbControlRead(usbChannel->device, MT_REQUEST_RECIPIENT, MT_REQUEST_TYPE,
-                        request, 0, 0, buffer, length, MT_REQUEST_TIMEOUT);
-}
-
-static int
-writeDevice (unsigned char request, const void *buffer, int length) {
-  return usbControlWrite(usbChannel->device, MT_REQUEST_RECIPIENT, MT_REQUEST_TYPE,
-                         request, 0, 0, buffer, length, MT_REQUEST_TIMEOUT);
-}
-
-static int
-getDeviceIdentity (char *buffer, int *length) {
-  ssize_t result;
-
-  {
-    static const unsigned char data[1] = {0};
-
-    result = writeDevice(0X04, data, sizeof(data));
-    if (result == -1) return 0;
-  }
-
-  result = usbReadEndpoint(usbChannel->device, usbChannel->definition.inputEndpoint,
-                           buffer, *length, MT_REQUEST_TIMEOUT);
-
-  if (result == -1) return 0;
-  logMessage(LOG_INFO, "Device Identity: %.*s", (int)result, buffer);
-
-  *length = result;
-  return 1;
-}
-
-static int
-setHighVoltage (int on) {
-  const unsigned char data[1] = {on? 0XFF: 0X7F};
-  return writeDevice(0X01, data, sizeof(data)) != -1;
-}
-
-static int
-getInputPacket (unsigned char *packet) {
-  return readDevice(0X80, packet, MT_INPUT_PACKET_LENGTH);
-}
-
-static int
-brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  forceWrite = 1;
-  lastNavigationKeys = 0;
-  lastRoutingKey = MT_ROUTING_KEYS_NONE;
-
-  if (isUsbDevice(&device)) {
-    static const UsbChannelDefinition definitions[] = {
-      { /* all models */
-        .vendor=0X0452, .product=0X0100,
-        .configuration=1, .interface=0, .alternative=0,
-        .inputEndpoint=1, .outputEndpoint=0
-      }
-      ,
-      { .vendor=0 }
-    };
-
-    if ((usbChannel = usbOpenChannel(definitions, (void *)device))) {
-      char identity[100];
-      int identityLength;
-      int retries = -1;
-
-      do {
-        identityLength = sizeof(identity);
-        if (getDeviceIdentity(identity, &identityLength)) break;
-        identityLength = 0;
-
-#ifdef EILSEQ
-        if (errno == EILSEQ) {
-          retries = MIN(retries, 1);
-          continue;
-        }
-#endif /* EILSEQ */
-
-        if (errno != EAGAIN) break;
-      } while (retries-- > 0);
-
-      if (identityLength || (retries < -1)) {
-        if (setHighVoltage(1)) {
-          unsigned char inputPacket[MT_INPUT_PACKET_LENGTH];
-
-          if (getInputPacket(inputPacket)) {
-            brl->textColumns = inputPacket[1];
-            brl->textRows = 1;
-
-            {
-              static const DotsTable dots = {
-                0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01
-              };
-              makeOutputTable(dots);
-            }
-
-            {
-              const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
-              brl->keyBindings = ktd->bindings;
-              brl->keyNameTables = ktd->names;
-            }
-
-            return 1;
-          }
-
-          setHighVoltage(0);
-        }
-      }
-
-      usbCloseChannel(usbChannel);
-      usbChannel = NULL;
-    }
-  } else {
-    unsupportedDevice(device);
-  }
-  
-  return 0;
-}
 
 static void
-brl_destruct (BrailleDisplay *brl) {
-  if (usbChannel) {
-    setHighVoltage(0);
-    usbCloseChannel(usbChannel);
-    usbChannel = NULL;
-  }
-}
-
-static int
-brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  const unsigned char *source = brl->buffer;
-  unsigned char *target = textCells;
-  const int moduleCount = brl->textColumns / MT_MODULE_SIZE;
-  int moduleNumber;
-
-  for (moduleNumber=0; moduleNumber<moduleCount; moduleNumber+=1) {
-    if (cellsHaveChanged(target, source, MT_MODULE_SIZE, NULL, NULL, NULL) || forceWrite) {
-      unsigned char buffer[MT_MODULE_SIZE];
-
-      translateOutputCells(buffer, source, MT_MODULE_SIZE);
-      if (writeDevice(0X0A+moduleNumber, buffer, sizeof(buffer)) == -1) return 0;
-    }
-
-    source += MT_MODULE_SIZE;
-    target += MT_MODULE_SIZE;
-  }
-
-  forceWrite = 0;
-  return 1;
-}
-
-static void
-routingKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
+handleRoutingKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
   if (key != MT_ROUTING_KEYS_NONE) {
     MT_KeySet set;
 
@@ -245,46 +111,257 @@ routingKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
   }
 }
 
+static ssize_t
+tellUsbDevice (BrailleDisplay *brl, unsigned char request, const void *buffer, int length) {
+  return gioTellResource(brl->gioEndpoint, MT_REQUEST_RECIPIENT, MT_REQUEST_TYPE,
+                         request, 0, 0, buffer, length);
+}
+
+static ssize_t
+askUsbDevice (BrailleDisplay *brl, unsigned char request, void *buffer, int length) {
+  return gioAskResource(brl->gioEndpoint, MT_REQUEST_RECIPIENT, MT_REQUEST_TYPE,
+                        request, 0, 0, buffer, length);
+}
+
 static int
-brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
+getUsbInputPacket (BrailleDisplay *brl, unsigned char *packet) {
+  return askUsbDevice(brl, 0X80, packet, MT_INPUT_PACKET_LENGTH);
+}
+
+static int setUsbInputAlarm (BrailleDisplay *brl);
+
+ASYNC_ALARM_CALLBACK(handleUsbInputAlarm) {
+  BrailleDisplay *brl = parameters->data;
   unsigned char packet[MT_INPUT_PACKET_LENGTH];
 
+  asyncDiscardHandle(brl->data->proto.usb.inputAlarm);
+  brl->data->proto.usb.inputAlarm = NULL;
+
   memset(packet, 0, sizeof(packet));
-  if (!getInputPacket(packet)) return BRL_CMD_RESTARTBRL;
-  logInputPacket(packet, sizeof(packet));
 
-  {
-    unsigned char key = packet[0];
+  if (getUsbInputPacket(brl, packet))  {
+    logInputPacket(packet, sizeof(packet));
 
-    if (key != lastRoutingKey) {
-      routingKeyEvent(brl, lastRoutingKey, 0);
-      routingKeyEvent(brl, key, 1);
-      lastRoutingKey = key;
-    }
-  }
+    {
+      unsigned char key = packet[0];
 
-  {
-    uint16_t keys = packet[2] | (packet[3] << 8);
-    uint16_t bit = 0X1;
-    unsigned char key = 0;
-    const unsigned char set = MT_SET_NavigationKeys;
-    unsigned char pressTable[0X10];
-    unsigned char pressCount = 0;
-
-    while (bit) {
-      if ((lastNavigationKeys & bit) && !(keys & bit)) {
-        enqueueKeyEvent(brl, set, key, 0);
-        lastNavigationKeys &= ~bit;
-      } else if (!(lastNavigationKeys & bit) && (keys & bit)) {
-        pressTable[pressCount++] = key;
-        lastNavigationKeys |= bit;
+      if (key != brl->data->lastRoutingKey) {
+        handleRoutingKeyEvent(brl, brl->data->lastRoutingKey, 0);
+        handleRoutingKeyEvent(brl, key, 1);
+        brl->data->lastRoutingKey = key;
       }
-      while (pressCount) enqueueKeyEvent(brl, set, pressTable[--pressCount], 1);
-
-      key += 1;
-      bit <<= 1;
     }
+
+    {
+      uint16_t keys = packet[2] | (packet[3] << 8);
+      uint16_t bit = 0X1;
+      unsigned char key = 0;
+      const unsigned char set = MT_SET_NavigationKeys;
+      unsigned char pressTable[0X10];
+      unsigned char pressCount = 0;
+
+      while (bit) {
+        if ((brl->data->lastNavigationKeys & bit) && !(keys & bit)) {
+          enqueueKeyEvent(brl, set, key, 0);
+          brl->data->lastNavigationKeys &= ~bit;
+        } else if (!(brl->data->lastNavigationKeys & bit) && (keys & bit)) {
+          pressTable[pressCount++] = key;
+          brl->data->lastNavigationKeys |= bit;
+        }
+        while (pressCount) enqueueKeyEvent(brl, set, pressTable[--pressCount], 1);
+
+        key += 1;
+        bit <<= 1;
+      }
+    }
+
+    setUsbInputAlarm(brl);
+  } else {
+    enqueueCommand(BRL_CMD_RESTARTBRL);
+  }
+}
+
+static int
+setUsbInputAlarm (BrailleDisplay *brl) {
+  return asyncSetAlarmIn(&brl->data->proto.usb.inputAlarm,
+                         BRAILLE_INPUT_POLL_INTERVAL,
+                         handleUsbInputAlarm, brl);
+}
+
+static int
+beginUsbProtocol (BrailleDisplay *brl) {
+  brl->data->proto.usb.inputAlarm = NULL;
+  setUsbInputAlarm(brl);
+
+  return 1;
+}
+
+static void
+endUsbProtocol (BrailleDisplay *brl) {
+  if (brl->data->proto.usb.inputAlarm) {
+    asyncCancelRequest(brl->data->proto.usb.inputAlarm);
+    brl->data->proto.usb.inputAlarm = NULL;
+  }
+}
+
+static int
+getUsbDeviceIdentity (BrailleDisplay *brl, char *buffer, size_t *length) {
+  ssize_t result;
+
+  {
+    static const unsigned char data[1] = {0};
+
+    result = tellUsbDevice(brl, 0X04, data, sizeof(data));
+    if (result == -1) return 0;
   }
 
+  result = gioReadData(brl->gioEndpoint, buffer, *length, 0);
+  if (result == -1) return 0;
+  logMessage(LOG_INFO, "Device Identity: %.*s", (int)result, buffer);
+
+  *length = result;
+  return 1;
+}
+
+static int
+setUsbHighVoltage (BrailleDisplay *brl, int on) {
+  const unsigned char data[1] = {on? 0XFF: 0X7F};
+
+  return tellUsbDevice(brl, 0X01, data, sizeof(data)) != -1;
+}
+
+static const ProtocolOperations usbProtocolOperations = {
+  .beginProtocol = beginUsbProtocol,
+  .endProtocol = endUsbProtocol,
+
+  .getDeviceIdentity = getUsbDeviceIdentity,
+  .setHighVoltage = setUsbHighVoltage
+};
+
+static int
+connectResource (BrailleDisplay *brl, const char *identifier) {
+  static const UsbChannelDefinition usbChannelDefinitions[] = {
+    { /* all models */
+      .vendor=0X0452, .product=0X0100,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    },
+
+    { .vendor=0 }
+  };
+
+  GioDescriptor descriptor;
+  gioInitializeDescriptor(&descriptor);
+
+  descriptor.usb.channelDefinitions = usbChannelDefinitions;
+  descriptor.usb.options.applicationData = &usbProtocolOperations;
+
+  if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
+    brl->data->protocol = gioGetApplicationData(brl->gioEndpoint);
+    return 1;
+  }
+
+  return 0;
+}
+
+static void
+disconnectResource (BrailleDisplay *brl) {
+  disconnectBrailleResource(brl, NULL);
+}
+
+static int
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
+  if ((brl->data = malloc(sizeof(*brl->data)))) {
+    memset(brl->data, 0, sizeof(*brl->data));
+    brl->data->lastNavigationKeys = 0;
+    brl->data->lastRoutingKey = MT_ROUTING_KEYS_NONE;
+
+    if (connectResource(brl, device)) {
+      {
+        char identity[100];
+        size_t length = sizeof(identity);
+
+        if (brl->data->protocol->getDeviceIdentity(brl, identity, &length)) {
+        }
+      }
+
+      if (brl->data->protocol->setHighVoltage(brl, 1)) {
+        unsigned char inputPacket[MT_INPUT_PACKET_LENGTH];
+
+        if (getUsbInputPacket(brl, inputPacket)) {
+          brl->textColumns = inputPacket[1];
+          brl->data->moduleCount = brl->textColumns / MT_MODULE_SIZE;
+
+          {
+            unsigned int moduleNumber;
+
+            for (moduleNumber=0; moduleNumber<brl->data->moduleCount; moduleNumber+=1) {
+              brl->data->forceWrite[moduleNumber] = 1;
+            }
+          }
+
+          {
+            static const DotsTable dots = {
+              0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01
+            };
+
+            makeOutputTable(dots);
+          }
+
+          {
+            const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+
+            brl->keyBindings = ktd->bindings;
+            brl->keyNameTables = ktd->names;
+          }
+
+          if (brl->data->protocol->beginProtocol(brl)) return 1;
+        }
+
+        brl->data->protocol->setHighVoltage(brl, 0);
+      }
+
+      disconnectResource(brl);
+    }
+
+    free(brl->data);
+  } else {
+    logMallocError();
+  }
+  
+  return 0;
+}
+
+static void
+brl_destruct (BrailleDisplay *brl) {
+  brl->data->protocol->endProtocol(brl);
+  brl->data->protocol->setHighVoltage(brl, 0);
+  disconnectResource(brl);
+  free(brl->data);
+}
+
+static int
+brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
+  const unsigned char *source = brl->buffer;
+  unsigned char *target = brl->data->textCells;
+  unsigned int moduleNumber;
+
+  for (moduleNumber=0; moduleNumber<brl->data->moduleCount; moduleNumber+=1) {
+    if (cellsHaveChanged(target, source, MT_MODULE_SIZE, NULL, NULL, &brl->data->forceWrite[moduleNumber])) {
+      unsigned char buffer[MT_MODULE_SIZE];
+
+      translateOutputCells(buffer, source, MT_MODULE_SIZE);
+      if (tellUsbDevice(brl, 0X0A+moduleNumber, buffer, sizeof(buffer)) == -1) return 0;
+    }
+
+    source += MT_MODULE_SIZE;
+    target += MT_MODULE_SIZE;
+  }
+
+  return 1;
+}
+
+static int
+brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   return EOF;
 }
