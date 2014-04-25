@@ -78,7 +78,7 @@ struct BrailleDataStruct {
   int forceWrite[MT_MODULES_MAXIMUM];
   unsigned int moduleCount;
 
-  uint16_t lastNavigationKeys;
+  uint32_t lastNavigationKeys;
   unsigned char lastRoutingKey;
 
   union {
@@ -108,6 +108,15 @@ handleRoutingKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
     }
 
     enqueueKeyEvent(brl, set, key, press);
+  }
+}
+
+static void
+handleRoutingKey (BrailleDisplay *brl, unsigned char key) {
+  if (key != brl->data->lastRoutingKey) {
+    handleRoutingKeyEvent(brl, brl->data->lastRoutingKey, 0);
+    handleRoutingKeyEvent(brl, key, 1);
+    brl->data->lastRoutingKey = key;
   }
 }
 
@@ -141,38 +150,12 @@ ASYNC_ALARM_CALLBACK(handleUsbInputAlarm) {
 
   if (getUsbInputPacket(brl, packet))  {
     logInputPacket(packet, sizeof(packet));
+    handleRoutingKey(brl, packet[0]);
 
     {
-      unsigned char key = packet[0];
+      uint32_t keys = packet[2] | (packet[3] << 8);
 
-      if (key != brl->data->lastRoutingKey) {
-        handleRoutingKeyEvent(brl, brl->data->lastRoutingKey, 0);
-        handleRoutingKeyEvent(brl, key, 1);
-        brl->data->lastRoutingKey = key;
-      }
-    }
-
-    {
-      uint16_t keys = packet[2] | (packet[3] << 8);
-      uint16_t bit = 0X1;
-      unsigned char key = 0;
-      const unsigned char set = MT_SET_NavigationKeys;
-      unsigned char pressTable[0X10];
-      unsigned char pressCount = 0;
-
-      while (bit) {
-        if ((brl->data->lastNavigationKeys & bit) && !(keys & bit)) {
-          enqueueKeyEvent(brl, set, key, 0);
-          brl->data->lastNavigationKeys &= ~bit;
-        } else if (!(brl->data->lastNavigationKeys & bit) && (keys & bit)) {
-          pressTable[pressCount++] = key;
-          brl->data->lastNavigationKeys |= bit;
-        }
-        while (pressCount) enqueueKeyEvent(brl, set, pressTable[--pressCount], 1);
-
-        key += 1;
-        bit <<= 1;
-      }
+      enqueueUpdatedKeys(brl, keys, &brl->data->lastNavigationKeys, MT_SET_NavigationKeys, 0);
     }
 
     setUsbInputAlarm(brl);
