@@ -67,8 +67,10 @@ typedef struct {
   int (*beginProtocol) (BrailleDisplay *brl);
   void (*endProtocol) (BrailleDisplay *brl);
 
-  int (*getDeviceIdentity) (BrailleDisplay *brl, char *buffer, size_t *length);
+  void (*logDeviceIdentity) (BrailleDisplay *brl);
   int (*setHighVoltage) (BrailleDisplay *brl, int on);
+
+  int (*handleInput) (BrailleDisplay *brl);
 } ProtocolOperations;
 
 struct BrailleDataStruct {
@@ -187,23 +189,11 @@ endUsbProtocol (BrailleDisplay *brl) {
   }
 }
 
-static int
-getUsbDeviceIdentity (BrailleDisplay *brl, char *buffer, size_t *length) {
-  ssize_t result;
+static void
+logUsbDeviceIdentity (BrailleDisplay *brl) {
+  static const unsigned char data[] = {0};
 
-  {
-    static const unsigned char data[1] = {0};
-
-    result = tellUsbDevice(brl, 0X04, data, sizeof(data));
-    if (result == -1) return 0;
-  }
-
-  result = gioReadData(brl->gioEndpoint, buffer, *length, 0);
-  if (result == -1) return 0;
-  logMessage(LOG_INFO, "Device Identity: %.*s", (int)result, buffer);
-
-  *length = result;
-  return 1;
+  tellUsbDevice(brl, 0X04, data, sizeof(data));
 }
 
 static int
@@ -213,12 +203,26 @@ setUsbHighVoltage (BrailleDisplay *brl, int on) {
   return tellUsbDevice(brl, 0X01, data, sizeof(data)) != -1;
 }
 
+static int
+handleUsbInput (BrailleDisplay *brl) {
+  unsigned char buffer[0X100];
+  ssize_t result = gioReadData(brl->gioEndpoint, buffer, sizeof(buffer), 0);
+
+  if (result != -1) {
+    logMessage(LOG_INFO, "Device Identity: %.*s", (int)result, buffer);
+  }
+
+  return 1;
+}
+
 static const ProtocolOperations usbProtocolOperations = {
   .beginProtocol = beginUsbProtocol,
   .endProtocol = endUsbProtocol,
 
-  .getDeviceIdentity = getUsbDeviceIdentity,
-  .setHighVoltage = setUsbHighVoltage
+  .logDeviceIdentity = logUsbDeviceIdentity,
+  .setHighVoltage = setUsbHighVoltage,
+
+  .handleInput = handleUsbInput
 };
 
 static int
@@ -260,13 +264,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     brl->data->lastRoutingKey = MT_ROUTING_KEYS_NONE;
 
     if (connectResource(brl, device)) {
-      {
-        char identity[100];
-        size_t length = sizeof(identity);
-
-        if (brl->data->protocol->getDeviceIdentity(brl, identity, &length)) {
-        }
-      }
+      brl->data->protocol->logDeviceIdentity(brl);
 
       if (brl->data->protocol->setHighVoltage(brl, 1)) {
         unsigned char inputPacket[MT_INPUT_PACKET_LENGTH];
@@ -346,5 +344,5 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  return EOF;
+  return brl->data->protocol->handleInput(brl)? EOF: BRL_CMD_RESTARTBRL;
 }
