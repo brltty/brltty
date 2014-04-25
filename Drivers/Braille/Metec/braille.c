@@ -29,12 +29,12 @@
 #include "brldefs-mt.h"
 
 BEGIN_KEY_NAME_TABLE(all)
-  KEY_NAME_ENTRY(MT_KEY_LeftRear, "LeftRear"),
-  KEY_NAME_ENTRY(MT_KEY_LeftMiddle, "LeftMiddle"),
-  KEY_NAME_ENTRY(MT_KEY_LeftFront, "LeftFront"),
-  KEY_NAME_ENTRY(MT_KEY_RightRear, "RightRear"),
-  KEY_NAME_ENTRY(MT_KEY_RightMiddle, "RightMiddle"),
-  KEY_NAME_ENTRY(MT_KEY_RightFront, "RightFront"),
+  KEY_NAME_ENTRY(MT_KEY_LeftUp, "LeftUp"),
+  KEY_NAME_ENTRY(MT_KEY_LeftSelect, "LeftSelect"),
+  KEY_NAME_ENTRY(MT_KEY_LeftDown, "LeftDown"),
+  KEY_NAME_ENTRY(MT_KEY_RightUp, "RightUp"),
+  KEY_NAME_ENTRY(MT_KEY_RightSelect, "RightSelect"),
+  KEY_NAME_ENTRY(MT_KEY_RightDown, "RightDown"),
 
   KEY_NAME_ENTRY(MT_KEY_CursorLeft, "CursorLeft"),
   KEY_NAME_ENTRY(MT_KEY_CursorUp, "CursorUp"),

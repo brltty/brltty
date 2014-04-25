@@ -23,91 +23,91 @@ title Metec
 # Default Bindings #
 ####################
 
-bind LeftMiddle FWINLT
-bind RightMiddle FWINRT
+bind LeftSelect FWINLT
+bind RightSelect FWINRT
 
-bind LeftRear+LeftFront CHRLT
-bind RightRear+RightFront CHRRT
+bind LeftUp+LeftDown CHRLT
+bind RightUp+RightDown CHRRT
 
-bind LeftRear+LeftMiddle+LeftFront LNBEG
-bind RightRear+RightMiddle+RightFront LNEND
+bind LeftUp+LeftSelect+LeftDown LNBEG
+bind RightUp+RightSelect+RightDown LNEND
 
-bind RightRear LNUP
-bind RightFront LNDN
+bind RightUp LNUP
+bind RightDown LNDN
 
-bind LeftRear+RightRear TOP
-bind LeftFront+RightFront BOT
+bind LeftUp+RightUp TOP
+bind LeftDown+RightDown BOT
 
-bind LeftMiddle+RightRear TOP_LEFT
-bind LeftMiddle+RightFront BOT_LEFT
+bind LeftSelect+RightUp TOP_LEFT
+bind LeftSelect+RightDown BOT_LEFT
 
-bind RightMiddle+RightRear PRDIFLN
-bind RightMiddle+RightFront NXDIFLN
+bind RightSelect+RightUp PRDIFLN
+bind RightSelect+RightDown NXDIFLN
 
-bind LeftMiddle+LeftRear ATTRUP
-bind LeftMiddle+LeftFront ATTRDN
+bind LeftSelect+LeftUp ATTRUP
+bind LeftSelect+LeftDown ATTRDN
 
-bind LeftMiddle+RightMiddle+LeftRear+RightRear PRPROMPT
-bind LeftMiddle+RightMiddle+LeftFront+RightFront NXPROMPT
+bind LeftSelect+RightSelect+LeftUp+RightUp PRPROMPT
+bind LeftSelect+RightSelect+LeftDown+RightDown NXPROMPT
 
-bind LeftMiddle+RightMiddle+RightRear PRPGRPH
-bind LeftMiddle+RightMiddle+RightFront NXPGRPH
+bind LeftSelect+RightSelect+RightUp PRPGRPH
+bind LeftSelect+RightSelect+RightDown NXPGRPH
 
-bind LeftMiddle+RightRear+RightFront+LeftRear PRSEARCH
-bind LeftMiddle+RightRear+RightFront+LeftFront NXSEARCH
+bind LeftSelect+RightUp+RightDown+LeftUp PRSEARCH
+bind LeftSelect+RightUp+RightDown+LeftDown NXSEARCH
 
-bind LeftRear CSRTRK+on
-bind LeftFront CSRTRK+off
+bind LeftUp CSRTRK+on
+bind LeftDown CSRTRK+off
 
-bind LeftRear+RightFront BACK
+bind LeftUp+RightDown BACK
 
-bind LeftMiddle+RightRear+RightFront HOME
-bind LeftRear+LeftFront+RightMiddle SPKHOME
+bind LeftSelect+RightUp+RightDown HOME
+bind LeftUp+LeftDown+RightSelect SPKHOME
 
-bind LeftRear+LeftFront+RightRear+RightFront CSRJMP_VERT
-bind LeftMiddle+RightMiddle INFO
+bind LeftUp+LeftDown+RightUp+RightDown CSRJMP_VERT
+bind LeftSelect+RightSelect INFO
 
-bind LeftRear+RightRear+RightMiddle DISPMD
-bind LeftRear+LeftMiddle+RightRear FREEZE
-bind LeftRear+LeftMiddle+RightMiddle HELP
-bind LeftRear+LeftFront+RightRear PREFMENU
-bind LeftRear+LeftMiddle+LeftFront+RightRear PASTE
-bind LeftRear+LeftMiddle+LeftFront+RightMiddle PREFLOAD
-bind LeftMiddle+LeftFront+RightRear RESTARTSPEECH
-bind LeftMiddle+LeftFront+RightRear+RightMiddle ATTRVIS
-bind LeftMiddle+RightRear+RightMiddle+RightFront PREFSAVE
+bind LeftUp+RightUp+RightSelect DISPMD
+bind LeftUp+LeftSelect+RightUp FREEZE
+bind LeftUp+LeftSelect+RightSelect HELP
+bind LeftUp+LeftDown+RightUp PREFMENU
+bind LeftUp+LeftSelect+LeftDown+RightUp PASTE
+bind LeftUp+LeftSelect+LeftDown+RightSelect PREFLOAD
+bind LeftSelect+LeftDown+RightUp RESTARTSPEECH
+bind LeftSelect+LeftDown+RightUp+RightSelect ATTRVIS
+bind LeftSelect+RightUp+RightSelect+RightDown PREFSAVE
 
-bind LeftMiddle+LeftFront+RightMiddle SIXDOTS+on
-bind LeftMiddle+LeftFront+RightFront SIXDOTS+off
+bind LeftSelect+LeftDown+RightSelect SIXDOTS+on
+bind LeftSelect+LeftDown+RightDown SIXDOTS+off
 
-bind LeftRear+RightRear+RightMiddle+RightFront LEARN
-bind LeftRear+LeftMiddle+LeftFront+RightFront SWITCHVT_NEXT
-bind LeftFront+RightRear+RightMiddle+RightFront SWITCHVT_PREV
+bind LeftUp+RightUp+RightSelect+RightDown LEARN
+bind LeftUp+LeftSelect+LeftDown+RightDown SWITCHVT_NEXT
+bind LeftDown+RightUp+RightSelect+RightDown SWITCHVT_PREV
 
-bind LeftFront+RightRear MUTE
-bind LeftFront+RightMiddle SAY_LINE
-bind LeftFront+RightMiddle+RightRear SAY_ABOVE
-bind LeftFront+RightMiddle+RightFront SAY_BELOW
-bind LeftFront+RightRear+RightFront AUTOSPEAK
+bind LeftDown+RightUp MUTE
+bind LeftDown+RightSelect SAY_LINE
+bind LeftDown+RightSelect+RightUp SAY_ABOVE
+bind LeftDown+RightSelect+RightDown SAY_BELOW
+bind LeftDown+RightUp+RightDown AUTOSPEAK
 
 bind !RoutingKey1 ROUTE
 
-bind LeftRear+!RoutingKey1 CLIP_NEW
-bind LeftMiddle+!RoutingKey1 CLIP_ADD
-bind RightRear+!RoutingKey1 COPY_LINE
-bind RightMiddle+!RoutingKey1 COPY_RECT
+bind LeftUp+!RoutingKey1 CLIP_NEW
+bind LeftSelect+!RoutingKey1 CLIP_ADD
+bind RightUp+!RoutingKey1 COPY_LINE
+bind RightSelect+!RoutingKey1 COPY_RECT
 
-bind LeftFront+!RoutingKey1 DESCCHAR
-bind RightFront+!RoutingKey1 SETLEFT
+bind LeftDown+!RoutingKey1 DESCCHAR
+bind RightDown+!RoutingKey1 SETLEFT
 
-bind LeftMiddle+LeftRear+!RoutingKey1 PRINDENT
-bind LeftMiddle+LeftFront+!RoutingKey1 NXINDENT
+bind LeftSelect+LeftUp+!RoutingKey1 PRINDENT
+bind LeftSelect+LeftDown+!RoutingKey1 NXINDENT
 
-bind RightMiddle+RightRear+!RoutingKey1 PRDIFCHAR
-bind RightMiddle+RightFront+!RoutingKey1 NXDIFCHAR
+bind RightSelect+RightUp+!RoutingKey1 PRDIFCHAR
+bind RightSelect+RightDown+!RoutingKey1 NXDIFCHAR
 
-bind LeftRear+LeftFront+!RoutingKey1 SETMARK
-bind RightRear+RightFront+!RoutingKey1 GOTOMARK
+bind LeftUp+LeftDown+!RoutingKey1 SETMARK
+bind RightUp+RightDown+!RoutingKey1 GOTOMARK
 
 
 #################

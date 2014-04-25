@@ -21,12 +21,12 @@
 
 typedef enum {
   /* byte 2 */
-  MT_KEY_LeftRear    =  6, // S1
-  MT_KEY_LeftMiddle  =  4, // S2
-  MT_KEY_LeftFront   =  2, // S3
-  MT_KEY_RightRear   =  3, // S4
-  MT_KEY_RightMiddle =  1, // S5
-  MT_KEY_RightFront  =  0, // S6
+  MT_KEY_LeftUp      =  6,
+  MT_KEY_LeftSelect  =  4,
+  MT_KEY_LeftDown    =  2,
+  MT_KEY_RightUp     =  3,
+  MT_KEY_RightSelect =  1,
+  MT_KEY_RightDown   =  0,
 
   /* byte 3 */
   MT_KEY_CursorLeft  = 10, // S7
