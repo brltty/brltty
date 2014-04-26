@@ -25,6 +25,7 @@
 #include "parameters.h"
 #include "async_alarm.h"
 
+#define BRL_HAVE_STATUS_CELLS
 #include "brl_driver.h"
 #include "brldefs-mt.h"
 
@@ -148,8 +149,7 @@ handleRoutingKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
 
       if (key < brl->data->statusCount) {
         set = status;
-      } else if (key < brl->data->cellCount) {
-        key -= brl->data->statusCount;
+      } else if ((key -= brl->data->statusCount) < brl->data->textCount) {
         set = routing;
       } else {
         return;
@@ -390,6 +390,27 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
     source += MT_MODULE_SIZE;
     target += MT_MODULE_SIZE;
+  }
+
+  return 1;
+}
+
+static int
+brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells) {
+  const unsigned int count = brl->data->statusCount;
+
+  if (count) {
+    unsigned char *target = &brl->data->newCells[0];
+    const unsigned char *end = target + count;
+
+    while (target < end) {
+      unsigned char cell = *cells++;
+
+      if (!cell) break;
+      *target++ = cell;
+    }
+
+    while (target < end) *target++ = 0;
   }
 
   return 1;
