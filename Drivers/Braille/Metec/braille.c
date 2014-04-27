@@ -260,7 +260,8 @@ handleUsbInput (BrailleDisplay *brl) {
   unsigned char buffer[MT_IDENTITY_PACKET_SIZE];
   ssize_t result = gioReadData(brl->gioEndpoint, buffer, sizeof(buffer), 0);
 
-  if (result != -1) {
+  if (result == -1) {
+  } else if (result > 0) {
     logMessage(LOG_INFO, "Device Identity: %.*s", (int)result, buffer);
   }
 
