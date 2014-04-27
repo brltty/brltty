@@ -524,6 +524,14 @@ usbEndpointDescriptor (
   return NULL;
 }
 
+static void
+usbCancelInputMonitor (UsbEndpoint *endpoint) {
+  if (endpoint->direction.input.pipe.monitor) {
+    asyncCancelRequest(endpoint->direction.input.pipe.monitor);
+    endpoint->direction.input.pipe.monitor = NULL;
+  }
+}
+
 static inline int
 usbHaveInputPipe (UsbEndpoint *endpoint) {
   return endpoint->direction.input.pipe.output != INVALID_FILE_DESCRIPTOR;
@@ -538,6 +546,7 @@ void
 usbSetInputError (UsbEndpoint *endpoint, int error) {
   if (!usbHaveInputError(endpoint)) {
     endpoint->direction.input.pipe.error = error;
+    usbCancelInputMonitor(endpoint);
     closeFile(&endpoint->direction.input.pipe.input);
   }
 }
@@ -554,11 +563,7 @@ usbEnqueueInput (UsbEndpoint *endpoint, const void *buffer, size_t length) {
 
 void
 usbDestroyInputPipe (UsbEndpoint *endpoint) {
-  if (endpoint->direction.input.pipe.monitor) {
-    asyncCancelRequest(endpoint->direction.input.pipe.monitor);
-    endpoint->direction.input.pipe.monitor = NULL;
-  }
-
+  usbCancelInputMonitor(endpoint);
   closeFile(&endpoint->direction.input.pipe.input);
   closeFile(&endpoint->direction.input.pipe.output);
 }
@@ -1105,6 +1110,7 @@ usbReadData (
     if (usbHaveInputPipe(endpoint)) {
       if (usbHaveInputError(endpoint)) {
         errno = endpoint->direction.input.pipe.error;
+        endpoint->direction.input.pipe.error = EAGAIN;
         return -1;
       }
 
