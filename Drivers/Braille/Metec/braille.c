@@ -108,6 +108,7 @@ setCellCount (BrailleDisplay *brl, unsigned char count) {
   brl->data->moduleCount = (brl->data->cellCount = count) / MT_MODULE_SIZE;
 
   switch (count) {
+    case 22:
     case 42:
       brl->data->statusCount = 2;
       break;
