@@ -41,6 +41,11 @@ struct GioHandleStruct {
   GioUsbConnectionProperties properties;
 };
 
+static void *
+getUsbResourceObject (GioHandle *handle) {
+  return handle->channel->device;
+}
+
 static int
 disconnectUsbResource (GioHandle *handle) {
   usbCloseChannel(handle->channel);
@@ -250,6 +255,7 @@ getUsbHidFeature (
 }
 
 static const GioMethods gioUsbMethods = {
+  .getResourceObject = getUsbResourceObject,
   .disconnectResource = disconnectUsbResource,
 
   .getResourceName = getUsbResourceName,

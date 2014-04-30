@@ -30,6 +30,8 @@ typedef struct {
   size_t size;
 } GioHidReportItemsData;
 
+typedef void *GioGetResourceObjectMethod (GioHandle *handle);
+
 typedef int GioDisconnectResourceMethod (GioHandle *handle);
 
 typedef char *GioGetResourceNameMethod (GioHandle *handle, int timeout);
@@ -84,6 +86,7 @@ typedef ssize_t GioGetHidFeatureMethod (
 );
 
 typedef struct {
+  GioGetResourceObjectMethod *getResourceObject;
   GioDisconnectResourceMethod *disconnectResource;
 
   GioGetResourceNameMethod *getResourceName;

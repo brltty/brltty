@@ -179,6 +179,15 @@ gioConnectResource (
   return NULL;
 }
 
+void *
+gioGetResourceObject (GioEndpoint *endpoint) {
+  GioGetResourceObjectMethod *method = endpoint->methods->getResourceObject;
+
+  if (method) return method(endpoint->handle);
+  logUnsupportedOperation("getResourceObject");
+  return NULL;
+}
+
 int
 gioDisconnectResource (GioEndpoint *endpoint) {
   int ok = 0;

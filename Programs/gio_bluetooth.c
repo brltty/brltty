@@ -29,6 +29,11 @@ struct GioHandleStruct {
   BluetoothConnection *connection;
 };
 
+static void *
+getBluetoothResourceObject (GioHandle *handle) {
+  return handle->connection;
+}
+
 static int
 disconnectBluetoothResource (GioHandle *handle) {
   bthCloseConnection(handle->connection);
@@ -66,6 +71,7 @@ readBluetoothData (
 }
 
 static const GioMethods gioBluetoothMethods = {
+  .getResourceObject = getBluetoothResourceObject,
   .disconnectResource = disconnectBluetoothResource,
 
   .getResourceName = getBluetoothResourceName,

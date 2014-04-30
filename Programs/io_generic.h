@@ -34,6 +34,7 @@ extern GioEndpoint *gioConnectResource (
   const GioDescriptor *descriptor
 );
 
+extern void *gioGetResourceObject (GioEndpoint *endpoint);
 extern int gioDisconnectResource (GioEndpoint *endpoint);
 
 extern const void *gioGetApplicationData (GioEndpoint *endpoint);
