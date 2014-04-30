@@ -29,7 +29,13 @@
 #include "brl_driver.h"
 #include "brldefs-mt.h"
 
-BEGIN_KEY_NAME_TABLE(all)
+BEGIN_KEY_NAME_TABLE(3keys)
+  KEY_NAME_ENTRY(MT_KEY_LeftUp, "Up"),
+  KEY_NAME_ENTRY(MT_KEY_LeftSelect, "Select"),
+  KEY_NAME_ENTRY(MT_KEY_LeftDown, "Down"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(6keys)
   KEY_NAME_ENTRY(MT_KEY_LeftUp, "LeftUp"),
   KEY_NAME_ENTRY(MT_KEY_LeftSelect, "LeftSelect"),
   KEY_NAME_ENTRY(MT_KEY_LeftDown, "LeftDown"),
@@ -37,27 +43,78 @@ BEGIN_KEY_NAME_TABLE(all)
   KEY_NAME_ENTRY(MT_KEY_RightUp, "RightUp"),
   KEY_NAME_ENTRY(MT_KEY_RightSelect, "RightSelect"),
   KEY_NAME_ENTRY(MT_KEY_RightDown, "RightDown"),
+END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(4keys)
+  KEY_NAME_ENTRY(MT_KEY_LeftUp, "LeftUp"),
+  KEY_NAME_ENTRY(MT_KEY_LeftDown, "LeftDown"),
+
+  KEY_NAME_ENTRY(MT_KEY_RightUp, "RightUp"),
+  KEY_NAME_ENTRY(MT_KEY_RightDown, "RightDown"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(front)
   KEY_NAME_ENTRY(MT_KEY_CursorLeft, "CursorLeft"),
   KEY_NAME_ENTRY(MT_KEY_CursorUp, "CursorUp"),
   KEY_NAME_ENTRY(MT_KEY_CursorRight, "CursorRight"),
   KEY_NAME_ENTRY(MT_KEY_CursorDown, "CursorDown"),
+END_KEY_NAME_TABLE
 
-  KEY_SET_ENTRY(MT_SET_RoutingKeys1, "RoutingKey1"),
-  KEY_SET_ENTRY(MT_SET_StatusKeys1, "StatusKey1"),
+BEGIN_KEY_NAME_TABLE(routing1)
+  KEY_SET_ENTRY(MT_SET_RoutingKeys1, "RoutingKey"),
+END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(status1)
+  KEY_SET_ENTRY(MT_SET_StatusKeys1, "StatusKey"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(routing2)
   KEY_SET_ENTRY(MT_SET_RoutingKeys2, "RoutingKey2"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(status2)
   KEY_SET_ENTRY(MT_SET_StatusKeys2, "StatusKey2"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLES(all)
-  KEY_NAME_TABLE(all),
+BEGIN_KEY_NAME_TABLES(bd1_3)
+  KEY_NAME_TABLE(3keys),
+  KEY_NAME_TABLE(routing1),
 END_KEY_NAME_TABLES
 
-DEFINE_KEY_TABLE(all)
+BEGIN_KEY_NAME_TABLES(bd1_3s)
+  KEY_NAME_TABLE(3keys),
+  KEY_NAME_TABLE(routing1),
+  KEY_NAME_TABLE(status1),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(bd1_6)
+  KEY_NAME_TABLE(6keys),
+  KEY_NAME_TABLE(routing1),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(bd1_6s)
+  KEY_NAME_TABLE(6keys),
+  KEY_NAME_TABLE(routing1),
+  KEY_NAME_TABLE(status1),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(bd2)
+  KEY_NAME_TABLE(4keys),
+  KEY_NAME_TABLE(routing1),
+END_KEY_NAME_TABLES
+
+DEFINE_KEY_TABLE(bd1_3)
+DEFINE_KEY_TABLE(bd1_3s)
+DEFINE_KEY_TABLE(bd1_6)
+DEFINE_KEY_TABLE(bd1_6s)
+DEFINE_KEY_TABLE(bd2)
 
 BEGIN_KEY_TABLE_LIST
-  &KEY_TABLE_DEFINITION(all),
+  &KEY_TABLE_DEFINITION(bd1_3),
+  &KEY_TABLE_DEFINITION(bd1_3s),
+  &KEY_TABLE_DEFINITION(bd1_6),
+  &KEY_TABLE_DEFINITION(bd1_6s),
+  &KEY_TABLE_DEFINITION(bd2),
 END_KEY_TABLE_LIST
 
 #define MT_IDENTITY_PACKET_SIZE 0X100
@@ -340,7 +397,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           }
 
           {
-            const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+            const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(bd1_6);
 
             brl->keyBindings = ktd->bindings;
             brl->keyNameTables = ktd->names;
