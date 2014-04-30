@@ -31,6 +31,7 @@
 
 #include "log.h"
 #include "parameters.h"
+#include "async_wait.h"
 #include "io_generic.h"
 #include "gio_internal.h"
 #include "io_usb.h"
@@ -90,8 +91,10 @@ static int
 monitorUsbInput (GioHandle *handle, AsyncMonitorCallback *callback, void *data) {
   if (!GIO_USB_INPUT_MONITOR_DISABLE) {
     UsbChannel *channel = handle->channel;
+    unsigned char endpoint = channel->definition.inputEndpoint;
 
-    return usbMonitorInputEndpoint(channel->device, channel->definition.inputEndpoint, callback, data);
+    if (!endpoint) return 1;
+    return usbMonitorInputEndpoint(channel->device, endpoint, callback, data);
   }
 
   return 0;
@@ -109,9 +112,16 @@ awaitUsbInput (GioHandle *handle, int timeout) {
     }
   }
 
-  return usbAwaitInput(channel->device,
-                       channel->definition.inputEndpoint,
-                       timeout);
+  {
+    unsigned char endpoint = channel->definition.inputEndpoint;
+
+    if (!endpoint) {
+      asyncWait(timeout);
+      return 0;
+    }
+
+    return usbAwaitInput(channel->device, endpoint, timeout);
+  }
 }
 
 static ssize_t
@@ -129,8 +139,17 @@ readUsbData (
     }
   }
 
-  return usbReadData(channel->device, channel->definition.inputEndpoint,
-                     buffer, size, initialTimeout, subsequentTimeout);
+  {
+    unsigned char endpoint = channel->definition.inputEndpoint;
+
+    if (!endpoint) {
+      errno = EAGAIN;
+      return -1;
+    }
+
+    return usbReadData(channel->device, endpoint,
+                       buffer, size, initialTimeout, subsequentTimeout);
+  }
 }
 
 static int
