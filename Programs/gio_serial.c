@@ -30,11 +30,6 @@ struct GioHandleStruct {
   SerialParameters parameters;
 };
 
-static void *
-getSerialResourceObject (GioHandle *handle) {
-  return handle->device;
-}
-
 static int
 disconnectSerialResource (GioHandle *handle) {
   serialCloseDevice(handle->device);
@@ -74,8 +69,12 @@ reconfigureSerialResource (GioHandle *handle, const SerialParameters *parameters
   return ok;
 }
 
+static void *
+getSerialResourceObject (GioHandle *handle) {
+  return handle->device;
+}
+
 static const GioMethods gioSerialMethods = {
-  .getResourceObject = getSerialResourceObject,
   .disconnectResource = disconnectSerialResource,
 
   .writeData = writeSerialData,
@@ -83,7 +82,9 @@ static const GioMethods gioSerialMethods = {
   .awaitInput = awaitSerialInput,
   .readData = readSerialData,
 
-  .reconfigureResource = reconfigureSerialResource
+  .reconfigureResource = reconfigureSerialResource,
+
+  .getResourceObject = getSerialResourceObject
 };
 
 static int
@@ -147,5 +148,7 @@ const GioClass gioSerialClass = {
   .getMethods = getSerialMethods,
 
   .connectResource = connectSerialResource,
-  .prepareEndpoint = prepareSerialEndpoint
+  .prepareEndpoint = prepareSerialEndpoint,
+
+  .resourceType = GIO_RESOURCE_SERIAL
 };

@@ -29,11 +29,6 @@ struct GioHandleStruct {
   BluetoothConnection *connection;
 };
 
-static void *
-getBluetoothResourceObject (GioHandle *handle) {
-  return handle->connection;
-}
-
 static int
 disconnectBluetoothResource (GioHandle *handle) {
   bthCloseConnection(handle->connection);
@@ -70,8 +65,12 @@ readBluetoothData (
                      initialTimeout, subsequentTimeout);
 }
 
+static void *
+getBluetoothResourceObject (GioHandle *handle) {
+  return handle->connection;
+}
+
 static const GioMethods gioBluetoothMethods = {
-  .getResourceObject = getBluetoothResourceObject,
   .disconnectResource = disconnectBluetoothResource,
 
   .getResourceName = getBluetoothResourceName,
@@ -79,7 +78,9 @@ static const GioMethods gioBluetoothMethods = {
   .writeData = writeBluetoothData,
   .monitorInput = monitorBluetoothInput,
   .awaitInput = awaitBluetoothInput,
-  .readData = readBluetoothData
+  .readData = readBluetoothData,
+
+  .getResourceObject = getBluetoothResourceObject
 };
 
 static int
@@ -138,5 +139,7 @@ const GioClass gioBluetoothClass = {
   .getOptions = getBluetoothOptions,
   .getMethods = getBluetoothMethods,
 
-  .connectResource = connectBluetoothResource
+  .connectResource = connectBluetoothResource,
+
+  .resourceType = GIO_RESOURCE_BLUETOOTH
 };

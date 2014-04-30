@@ -30,8 +30,6 @@ typedef struct {
   size_t size;
 } GioHidReportItemsData;
 
-typedef void *GioGetResourceObjectMethod (GioHandle *handle);
-
 typedef int GioDisconnectResourceMethod (GioHandle *handle);
 
 typedef char *GioGetResourceNameMethod (GioHandle *handle, int timeout);
@@ -85,8 +83,9 @@ typedef ssize_t GioGetHidFeatureMethod (
   void *buffer, uint16_t size, int timeout
 );
 
+typedef void *GioGetResourceObjectMethod (GioHandle *handle);
+
 typedef struct {
-  GioGetResourceObjectMethod *getResourceObject;
   GioDisconnectResourceMethod *disconnectResource;
 
   GioGetResourceNameMethod *getResourceName;
@@ -109,12 +108,15 @@ typedef struct {
 
   GioSetHidFeatureMethod *setHidFeature;
   GioGetHidFeatureMethod *getHidFeature;
+
+  GioGetResourceObjectMethod *getResourceObject;
 } GioMethods;
 
 struct GioEndpointStruct {
   GioHandle *handle;
   const GioMethods *methods;
   GioOptions options;
+  GioResourceType resourceType;
   unsigned int bytesPerSecond;
   GioHidReportItemsData hidReportItems;
 
@@ -150,6 +152,8 @@ typedef struct {
 
   GioConnectResourceMethod *connectResource;
   GioPrepareEndpointMethod *prepareEndpoint;
+
+  GioResourceType resourceType;
 } GioClass;
 
 extern const GioClass *const gioClasses[];

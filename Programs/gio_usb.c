@@ -41,11 +41,6 @@ struct GioHandleStruct {
   GioUsbConnectionProperties properties;
 };
 
-static void *
-getUsbResourceObject (GioHandle *handle) {
-  return handle->channel->device;
-}
-
 static int
 disconnectUsbResource (GioHandle *handle) {
   usbCloseChannel(handle->channel);
@@ -254,8 +249,12 @@ getUsbHidFeature (
                           report, buffer, size, timeout);
 }
 
+static void *
+getUsbResourceObject (GioHandle *handle) {
+  return handle->channel->device;
+}
+
 static const GioMethods gioUsbMethods = {
-  .getResourceObject = getUsbResourceObject,
   .disconnectResource = disconnectUsbResource,
 
   .getResourceName = getUsbResourceName,
@@ -277,7 +276,9 @@ static const GioMethods gioUsbMethods = {
   .getHidReport = getUsbHidReport,
 
   .setHidFeature = setUsbHidFeature,
-  .getHidFeature = getUsbHidFeature
+  .getHidFeature = getUsbHidFeature,
+
+  .getResourceObject = getUsbResourceObject
 };
 
 static int
@@ -372,5 +373,7 @@ const GioClass gioUsbClass = {
   .getMethods = getUsbMethods,
 
   .connectResource = connectUsbResource,
-  .prepareEndpoint = prepareUsbEndpoint
+  .prepareEndpoint = prepareUsbEndpoint,
+
+  .resourceType = GIO_RESOURCE_USB
 };

@@ -129,6 +129,7 @@ gioConnectResource (
     GioEndpoint *endpoint;
 
     if ((endpoint = malloc(sizeof(*endpoint)))) {
+      endpoint->resourceType = class->resourceType;
       endpoint->bytesPerSecond = 0;
 
       endpoint->input.error = 0;
@@ -176,15 +177,6 @@ gioConnectResource (
     }
   }
 
-  return NULL;
-}
-
-void *
-gioGetResourceObject (GioEndpoint *endpoint) {
-  GioGetResourceObjectMethod *method = endpoint->methods->getResourceObject;
-
-  if (method) return method(endpoint->handle);
-  logUnsupportedOperation("getResourceObject");
   return NULL;
 }
 
@@ -510,4 +502,18 @@ gioGetHidFeature (
 
   return method(endpoint->handle, report,
                 buffer, size, endpoint->options.requestTimeout);
+}
+
+GioResourceType
+gioGetResourceType (GioEndpoint *endpoint) {
+  return endpoint->resourceType;
+}
+
+void *
+gioGetResourceObject (GioEndpoint *endpoint) {
+  GioGetResourceObjectMethod *method = endpoint->methods->getResourceObject;
+
+  if (method) return method(endpoint->handle);
+  logUnsupportedOperation("getResourceObject");
+  return NULL;
 }

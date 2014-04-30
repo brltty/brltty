@@ -34,7 +34,6 @@ extern GioEndpoint *gioConnectResource (
   const GioDescriptor *descriptor
 );
 
-extern void *gioGetResourceObject (GioEndpoint *endpoint);
 extern int gioDisconnectResource (GioEndpoint *endpoint);
 
 extern const void *gioGetApplicationData (GioEndpoint *endpoint);
@@ -100,6 +99,16 @@ extern ssize_t gioGetHidFeature (
   GioEndpoint *endpoint, unsigned char report,
   void *buffer, uint16_t size
 );
+
+typedef enum {
+  GIO_RESOURCE_UNTYPED = 0,
+  GIO_RESOURCE_SERIAL,
+  GIO_RESOURCE_USB,
+  GIO_RESOURCE_BLUETOOTH
+} GioResourceType;
+
+extern GioResourceType gioGetResourceType (GioEndpoint *endpoint);
+extern void *gioGetResourceObject (GioEndpoint *endpoint);
 
 #ifdef __cplusplus
 }
