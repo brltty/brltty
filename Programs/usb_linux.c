@@ -309,6 +309,8 @@ int
 usbClearEndpoint (UsbDevice *device, unsigned char endpointAddress) {
   UsbDeviceExtension *devx = device->extension;
 
+  logMessage(LOG_CATEGORY(USB_IO), "clearing endpoint: %02X", endpointAddress);
+
   if (usbOpenUsbfsFile(devx)) {
     unsigned int arg = endpointAddress;
 
@@ -823,8 +825,11 @@ usbReadEndpoint (
   ssize_t count = -1;
   UsbEndpoint *endpoint;
 
+  logMessage(LOG_CATEGORY(USB_IO), "reading endpoint: %u", endpointNumber);
+
   if ((endpoint = usbGetInputEndpoint(device, endpointNumber))) {
     UsbEndpointTransfer transfer = USB_ENDPOINT_TRANSFER(endpoint->descriptor);
+
     switch (transfer) {
       case UsbEndpointTransfer_Interrupt:
         if (!LINUX_USB_INPUT_TREAT_INTERRUPT_AS_BULK) {
