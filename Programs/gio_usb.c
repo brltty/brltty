@@ -251,7 +251,7 @@ getUsbHidFeature (
 
 static void *
 getUsbResourceObject (GioHandle *handle) {
-  return handle->channel->device;
+  return handle->channel;
 }
 
 static const GioMethods gioUsbMethods = {
