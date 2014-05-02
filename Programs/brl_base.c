@@ -446,7 +446,7 @@ enqueueKeyEvent (
 int
 enqueueKeyEvents (
   BrailleDisplay *brl,
-  uint32_t bits, unsigned char set, unsigned char key, int press
+  KeyValueSet bits, unsigned char set, unsigned char key, int press
 ) {
   while (bits) {
     if (bits & 0X1) {
@@ -477,7 +477,7 @@ enqueueKey (
 int
 enqueueKeys (
   BrailleDisplay *brl,
-  uint32_t bits, unsigned char set, unsigned char key
+  KeyValueSet bits, unsigned char set, unsigned char key
 ) {
   unsigned char stack[0X20];
   unsigned char count = 0;
@@ -502,9 +502,9 @@ enqueueKeys (
 int
 enqueueUpdatedKeys (
   BrailleDisplay *brl,
-  uint32_t new, uint32_t *old, unsigned char set, unsigned char key
+  KeyValueSet new, KeyValueSet *old, unsigned char set, unsigned char key
 ) {
-  uint32_t bit = 0X1;
+  KeyValueSet bit = KEY_VALUE_BIT(0);
   unsigned char stack[0X20];
   unsigned char count = 0;
 
@@ -521,9 +521,11 @@ enqueueUpdatedKeys (
     bit <<= 1;
   }
 
-  while (count)
-    if (!enqueueKeyEvent(brl, set, stack[--count], 1))
+  while (count) {
+    if (!enqueueKeyEvent(brl, set, stack[--count], 1)) {
       return 0;
+    }
+  }
 
   return 1;
 }

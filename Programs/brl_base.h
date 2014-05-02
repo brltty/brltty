@@ -142,6 +142,9 @@ extern int textHasChanged (
 
 extern int cursorHasChanged (int *cursor, int new, int *force);
 
+typedef uint32_t KeyValueSet;
+#define KEY_VALUE_BIT(number) (UINT32_C(1) << (number))
+
 extern int enqueueKeyEvent (
   BrailleDisplay *brl,
   unsigned char set, unsigned char key, int press
@@ -149,7 +152,7 @@ extern int enqueueKeyEvent (
 
 extern int enqueueKeyEvents (
   BrailleDisplay *brl,
-  uint32_t bits, unsigned char set, unsigned char key, int press
+  KeyValueSet bits, unsigned char set, unsigned char key, int press
 );
 
 extern int enqueueKey (
@@ -159,12 +162,12 @@ extern int enqueueKey (
 
 extern int enqueueKeys (
   BrailleDisplay *brl,
-  uint32_t bits, unsigned char set, unsigned char key
+  KeyValueSet bits, unsigned char set, unsigned char key
 );
 
 extern int enqueueUpdatedKeys (
   BrailleDisplay *brl,
-  uint32_t new, uint32_t *old, unsigned char set, unsigned char key
+  KeyValueSet new, KeyValueSet *old, unsigned char set, unsigned char key
 );
 
 extern int enqueueXtScanCode (
