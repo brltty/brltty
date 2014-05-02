@@ -42,7 +42,7 @@ typedef struct {
 } ListGenerationData;
 
 static int
-handleLine (ListGenerationData *lgd, const wchar_t *line) {
+listLine (ListGenerationData *lgd, const wchar_t *line) {
   return lgd->handleLine(line, lgd->handlerData);
 }
 
@@ -51,8 +51,8 @@ putCharacters (ListGenerationData *lgd, const wchar_t *characters, size_t count)
   size_t newLength = lgd->lineLength + count;
 
   if (lgd->sectionTitle) {
-    if (!handleLine(lgd, WS_C(""))) return 0;
-    if (!handleLine(lgd, lgd->sectionTitle)) return 0;
+    if (!listLine(lgd, WS_C(""))) return 0;
+    if (!listLine(lgd, lgd->sectionTitle)) return 0;
     lgd->sectionTitle = NULL;
   }
 
@@ -193,7 +193,7 @@ putCommandDescription (ListGenerationData *lgd, const BoundCommand *cmd, int det
 static int
 endLine (ListGenerationData *lgd) {
   if (!putCharacter(lgd, 0)) return 0;
-  if (!handleLine(lgd, lgd->lineCharacters)) return 0;
+  if (!listLine(lgd, lgd->lineCharacters)) return 0;
 
   lgd->lineLength = 0;
   return 1;
@@ -447,8 +447,8 @@ forKeyNameEntries (KEY_NAME_TABLES_REFERENCE keys, KeyNameEntryHandler *handleKe
 }
 
 typedef struct {
-  KeyTableListHandler *handleLine;
-  void *data;
+  KeyTableListHandler *const handleLine;
+  void *const data;
 } ListKeyNameData;
 
 static int
