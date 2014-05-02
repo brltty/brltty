@@ -423,27 +423,20 @@ listKeyTable (KeyTable *table, KeyTableListHandler handleLine, void *data) {
 }
 
 int
-listKeyNames (KEY_NAME_TABLES_REFERENCE keys, KeyTableListHandler handleLine, void *data) {
+forKeyNameEntries (KEY_NAME_TABLES_REFERENCE keys, KeyNameEntryHandler *handleKeyNameEntry, void *data) {
   const KeyNameEntry *const *knt = keys;
 
   while (*knt) {
     const KeyNameEntry *kne = *knt;
 
-    if (knt != keys)
-      if (!handleLine(WS_C(""), data))
+    if (knt != keys) {
+      if (!handleKeyNameEntry(NULL, data)) {
         return 0;
+      }
+    }
 
     while (kne->name) {
-      const char *string = kne->name;
-      size_t size = strlen(string) + 1;
-      wchar_t characters[size];
-
-      {
-        wchar_t *character = characters;
-        convertUtf8ToWchars(&string, &character, size);
-      }
-
-      if (!handleLine(characters, data)) return 0;
+      if (!handleKeyNameEntry(kne, data)) return 0;
       kne += 1;
     }
 
@@ -451,4 +444,31 @@ listKeyNames (KEY_NAME_TABLES_REFERENCE keys, KeyTableListHandler handleLine, vo
   }
 
   return 1;
+}
+
+typedef struct {
+  KeyTableListHandler *handleLine;
+  void *data;
+} ListKeyNameData;
+
+static int
+listKeyNameEntry (const KeyNameEntry *kne, void *data) {
+  const ListKeyNameData *lkn = data;
+  const char *name = kne? kne->name: "";
+  size_t size = strlen(name) + 1;
+  wchar_t characters[size];
+  wchar_t *character = characters;
+
+  convertUtf8ToWchars(&name, &character, size);
+  return lkn->handleLine(characters, lkn->data);
+}
+
+int
+listKeyNames (KEY_NAME_TABLES_REFERENCE keys, KeyTableListHandler *handleLine, void *data) {
+  ListKeyNameData lkn = {
+    .handleLine = handleLine,
+    .data = data
+  };
+
+  return forKeyNameEntries(keys, listKeyNameEntry, &lkn);
 }
