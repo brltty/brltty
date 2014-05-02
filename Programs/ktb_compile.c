@@ -301,29 +301,54 @@ sortKeyValues (const void *element1, const void *element2) {
   return 0;
 }
 
+typedef struct {
+  unsigned int count;
+} CountKeyNameData;
+
+static int
+countKeyName (const KeyNameEntry *kne, void *data) {
+  if (kne) {
+    CountKeyNameData *ckd = data;
+
+    ckd->count += 1;
+  }
+
+  return 1;
+}
+
+typedef struct {
+  const KeyNameEntry **kne;
+} AddKeyNameData;
+
+static int
+addKeyName (const KeyNameEntry *kne, void *data) {
+  if (kne) {
+    AddKeyNameData *akd = data;
+
+    *akd->kne++ = kne;
+  }
+
+  return 1;
+}
+
 static int
 allocateKeyNameTable (KeyTableData *ktd, KEY_NAME_TABLES_REFERENCE keys) {
   {
-    const KeyNameEntry *const *knt = keys;
+    CountKeyNameData ckd = {
+      .count = 0
+    };
 
-    ktd->table->keyNames.count = 0;
-    while (*knt) {
-      const KeyNameEntry *kne = *knt;
-      while (kne->name) kne += 1;
-      ktd->table->keyNames.count += kne - *knt;
-      knt += 1;
-    }
+    forKeyNameEntries(keys, countKeyName, &ckd);
+    ktd->table->keyNames.count = ckd.count;
   }
 
   if ((ktd->table->keyNames.table = malloc(ARRAY_SIZE(ktd->table->keyNames.table, ktd->table->keyNames.count)))) {
     {
-      const KeyNameEntry **address = ktd->table->keyNames.table;
-      const KeyNameEntry *const *knt = keys;
+      AddKeyNameData akd = {
+        .kne = ktd->table->keyNames.table
+      };
 
-      while (*knt) {
-        const KeyNameEntry *kne = *knt++;
-        while (kne->name) *address++ = kne++;
-      }
+      forKeyNameEntries(keys, addKeyName, &akd);
     }
 
     qsort(ktd->table->keyNames.table, ktd->table->keyNames.count, sizeof(*ktd->table->keyNames.table), sortKeyNames);
