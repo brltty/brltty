@@ -150,8 +150,8 @@ struct BrailleDataStruct {
   int writeModule[MT_MODULES_MAXIMUM];
   unsigned char moduleCount;
 
-  uint32_t navigationKeysMask;
-  uint32_t navigationKeys;
+  KeyValueSet allNavigationKeys;
+  KeyValueSet pressedNavigationKeys;
   unsigned char routingKey;
 
   union {
@@ -182,9 +182,9 @@ setCellCount (BrailleDisplay *brl, unsigned char count) {
 }
 
 static void
-handleNavigationKeys (BrailleDisplay *brl, uint32_t keys) {
-  keys &= brl->data->navigationKeysMask;
-  enqueueUpdatedKeys(brl, keys, &brl->data->navigationKeys, MT_SET_NavigationKeys, 0);
+handleNavigationKeys (BrailleDisplay *brl, KeyValueSet keys) {
+  keys &= brl->data->allNavigationKeys;
+  enqueueUpdatedKeys(brl, keys, &brl->data->pressedNavigationKeys, MT_SET_NavigationKeys, 0);
 }
 
 static void
@@ -399,22 +399,20 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           {
             const KeyTableDefinition *ktd;
 
-            brl->data->navigationKeysMask = 0X54;
-
             if (statusPacket[2] & 0X80) {
               ktd = brl->data->statusCount? &KEY_TABLE_DEFINITION(bd1_3s):
                                             &KEY_TABLE_DEFINITION(bd1_3);
             } else {
-              brl->data->navigationKeysMask |= 0X0B;
               ktd = brl->data->statusCount? &KEY_TABLE_DEFINITION(bd1_6s):
                                             &KEY_TABLE_DEFINITION(bd1_6);
             }
 
+            brl->data->allNavigationKeys = makeKeyValueSet(ktd->names, MT_SET_NavigationKeys);
             brl->keyBindings = ktd->bindings;
             brl->keyNameTables = ktd->names;
           }
 
-          brl->data->navigationKeys = 0;
+          brl->data->pressedNavigationKeys = 0;
           brl->data->routingKey = MT_ROUTING_KEYS_NONE;
 
           if (brl->data->protocol->beginProtocol(brl)) return 1;
