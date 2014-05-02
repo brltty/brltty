@@ -33,22 +33,26 @@ typedef struct {
   KeyTable *const keyTable;
   const wchar_t *sectionTitle;
 
-  wchar_t *lineCharacters;
-  size_t lineSize;
-  size_t lineLength;
+  struct {
+    wchar_t *characters;
+    size_t size;
+    size_t length;
+  } line;
 
-  KeyTableListHandler *const handleLine;
-  void *const handlerData;
+  struct {
+    KeyTableListHandler *const handler;
+    void *const data;
+  } list;
 } ListGenerationData;
 
 static int
 listLine (ListGenerationData *lgd, const wchar_t *line) {
-  return lgd->handleLine(line, lgd->handlerData);
+  return lgd->list.handler(line, lgd->list.data);
 }
 
 static int
 putCharacters (ListGenerationData *lgd, const wchar_t *characters, size_t count) {
-  size_t newLength = lgd->lineLength + count;
+  size_t newLength = lgd->line.length + count;
 
   if (lgd->sectionTitle) {
     if (!listLine(lgd, WS_C(""))) return 0;
@@ -56,21 +60,21 @@ putCharacters (ListGenerationData *lgd, const wchar_t *characters, size_t count)
     lgd->sectionTitle = NULL;
   }
 
-  if (newLength > lgd->lineSize) {
+  if (newLength > lgd->line.size) {
     size_t newSize = (newLength | 0X3F) + 1;
-    wchar_t *newCharacters = realloc(lgd->lineCharacters, ARRAY_SIZE(newCharacters, newSize));
+    wchar_t *newCharacters = realloc(lgd->line.characters, ARRAY_SIZE(newCharacters, newSize));
 
     if (!newCharacters) {
       logSystemError("realloc");
       return 0;
     }
 
-    lgd->lineCharacters = newCharacters;
-    lgd->lineSize = newSize;
+    lgd->line.characters = newCharacters;
+    lgd->line.size = newSize;
   }
 
-  wmemcpy(&lgd->lineCharacters[lgd->lineLength], characters, count);
-  lgd->lineLength = newLength;
+  wmemcpy(&lgd->line.characters[lgd->line.length], characters, count);
+  lgd->line.length = newLength;
   return 1;
 }
 
@@ -193,9 +197,9 @@ putCommandDescription (ListGenerationData *lgd, const BoundCommand *cmd, int det
 static int
 endLine (ListGenerationData *lgd) {
   if (!putCharacter(lgd, 0)) return 0;
-  if (!listLine(lgd, lgd->lineCharacters)) return 0;
+  if (!listLine(lgd, lgd->line.characters)) return 0;
 
-  lgd->lineLength = 0;
+  lgd->line.length = 0;
   return 1;
 }
 
@@ -270,7 +274,7 @@ listKeyBinding (ListGenerationData *lgd, const KeyBinding *binding, int longPres
 
   if (!putCommandDescription(lgd, cmd, !binding->keyCombination.anyKeyCount)) return 0;
   if (!putCharacterString(lgd, WS_C(": "))) return 0;
-  keysOffset = lgd->lineLength;
+  keysOffset = lgd->line.length;
 
   if (keysPrefix) {
     if (!putCharacterString(lgd, keysPrefix)) return 0;
@@ -288,12 +292,12 @@ listKeyBinding (ListGenerationData *lgd, const KeyBinding *binding, int longPres
     if (!c) return 0;
 
     {
-      size_t length = lgd->lineLength - keysOffset;
+      size_t length = lgd->line.length - keysOffset;
       wchar_t keys[length + 1];
 
-      wmemcpy(keys, &lgd->lineCharacters[keysOffset], length);
+      wmemcpy(keys, &lgd->line.characters[keysOffset], length);
       keys[length] = 0;
-      lgd->lineLength = 0;
+      lgd->line.length = 0;
 
       if (isTemporaryKeyContext(lgd->keyTable, c)) {
         if (!listKeyContext(lgd, c, keys)) return 0;
@@ -404,21 +408,25 @@ doListKeyTable (ListGenerationData *lgd) {
 }
 
 int
-listKeyTable (KeyTable *table, KeyTableListHandler handleLine, void *data) {
+listKeyTable (KeyTable *table, KeyTableListHandler *handleLine, void *data) {
   ListGenerationData lgd = {
     .keyTable = table,
     .sectionTitle = NULL,
 
-    .lineCharacters = NULL,
-    .lineSize = 0,
-    .lineLength = 0,
+    .line = {
+      .characters = NULL,
+      .size = 0,
+      .length = 0,
+    },
 
-    .handleLine = handleLine,
-    .handlerData = data
+    .list = {
+      .handler = handleLine,
+      .data = data
+    }
   };
 
   int result = doListKeyTable(&lgd);
-  if (lgd.lineCharacters) free(lgd.lineCharacters);
+  if (lgd.line.characters) free(lgd.line.characters);
   return result;
 }
 
@@ -452,7 +460,7 @@ typedef struct {
 } ListKeyNameData;
 
 static int
-listKeyNameEntry (const KeyNameEntry *kne, void *data) {
+listKeyName (const KeyNameEntry *kne, void *data) {
   const ListKeyNameData *lkn = data;
   const char *name = kne? kne->name: "";
   size_t size = strlen(name) + 1;
@@ -470,5 +478,5 @@ listKeyNames (KEY_NAME_TABLES_REFERENCE keys, KeyTableListHandler *handleLine, v
     .data = data
   };
 
-  return forKeyNameEntries(keys, listKeyNameEntry, &lkn);
+  return forKeyNameEntries(keys, listKeyName, &lkn);
 }
