@@ -431,7 +431,7 @@ listKeyTable (KeyTable *table, KeyTableListHandler *handleLine, void *data) {
 }
 
 int
-forKeyNameEntries (KEY_NAME_TABLES_REFERENCE keys, KeyNameEntryHandler *handleKeyNameEntry, void *data) {
+forEachKeyName (KEY_NAME_TABLES_REFERENCE keys, KeyNameEntryHandler *handleKeyNameEntry, void *data) {
   const KeyNameEntry *const *knt = keys;
 
   while (*knt) {
@@ -478,5 +478,5 @@ listKeyNames (KEY_NAME_TABLES_REFERENCE keys, KeyTableListHandler *handleLine, v
     .data = data
   };
 
-  return forKeyNameEntries(keys, listKeyName, &lkn);
+  return forEachKeyName(keys, listKeyName, &lkn);
 }

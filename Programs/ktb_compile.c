@@ -338,7 +338,7 @@ allocateKeyNameTable (KeyTableData *ktd, KEY_NAME_TABLES_REFERENCE keys) {
       .count = 0
     };
 
-    forKeyNameEntries(keys, countKeyName, &ckd);
+    forEachKeyName(keys, countKeyName, &ckd);
     ktd->table->keyNames.count = ckd.count;
   }
 
@@ -348,7 +348,7 @@ allocateKeyNameTable (KeyTableData *ktd, KEY_NAME_TABLES_REFERENCE keys) {
         .kne = ktd->table->keyNames.table
       };
 
-      forKeyNameEntries(keys, addKeyName, &akd);
+      forEachKeyName(keys, addKeyName, &akd);
     }
 
     qsort(ktd->table->keyNames.table, ktd->table->keyNames.count, sizeof(*ktd->table->keyNames.table), sortKeyNames);

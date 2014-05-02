@@ -29,7 +29,7 @@ extern KeyTable *compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE ke
 extern void destroyKeyTable (KeyTable *table);
 
 typedef int KeyNameEntryHandler (const KeyNameEntry *kne, void *data);
-extern int forKeyNameEntries (KEY_NAME_TABLES_REFERENCE keys, KeyNameEntryHandler *handleKeyNameEntry, void *data);
+extern int forEachKeyName (KEY_NAME_TABLES_REFERENCE keys, KeyNameEntryHandler *handleKeyNameEntry, void *data);
 
 typedef int KeyTableListHandler (const wchar_t *line, void *data);
 extern int listKeyTable (KeyTable *table, KeyTableListHandler *handleLine, void *data);
