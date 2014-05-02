@@ -145,6 +145,8 @@ extern int cursorHasChanged (int *cursor, int new, int *force);
 typedef uint32_t KeyValueSet;
 #define KEY_VALUE_BIT(number) (UINT32_C(1) << (number))
 
+extern KeyValueSet makeKeyValueSet (KEY_NAME_TABLES_REFERENCE keys, unsigned char set);
+
 extern int enqueueKeyEvent (
   BrailleDisplay *brl,
   unsigned char set, unsigned char key, int press

@@ -412,6 +412,34 @@ cursorHasChanged (int *cursor, int new, int *force) {
   return 1;
 }
 
+typedef struct {
+  const unsigned char set;
+  KeyValueSet keys;
+} IncludeKeyValueData;
+
+static int
+includeKeyValue (const KeyNameEntry *kne, void *data) {
+  if (kne) {
+    IncludeKeyValueData *ikv = data;
+
+    if (kne->value.set == ikv->set) ikv->keys |= KEY_VALUE_BIT(kne->value.key);
+  }
+
+  return 1;
+}
+
+KeyValueSet
+makeKeyValueSet (KEY_NAME_TABLES_REFERENCE keys, unsigned char set) {
+  IncludeKeyValueData ikv = {
+    .set = set,
+
+    .keys = 0
+  };
+
+  forEachKeyName(keys, includeKeyValue, &ikv);
+  return ikv.keys;
+}
+
 int
 enqueueKeyEvent (
   BrailleDisplay *brl,
