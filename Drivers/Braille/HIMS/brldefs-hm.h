@@ -70,8 +70,8 @@ typedef enum {
 } HM_NavigationKey;
 
 typedef enum {
-  HM_SET_NavigationKeys = 0,
-  HM_SET_RoutingKeys
-} HM_KeySet;
+  HM_GRP_NavigationKeys = 0,
+  HM_GRP_RoutingKeys
+} HM_KeyGroup;
 
 #endif /* BRLTTY_INCLUDED_HM_BRLDEFS */ 

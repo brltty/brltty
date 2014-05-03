@@ -73,7 +73,7 @@ findKeyBinding (KeyTable *table, unsigned char context, const KeyValue *immediat
             KeyValue *modifier = &target.keyCombination.modifierKeys[index];
 
             *modifier = table->pressedKeys.table[index];
-            if (bits & bit) modifier->key = KTB_KEY_ANY;
+            if (bits & bit) modifier->number = KTB_KEY_ANY;
           }
         }
         qsort(target.keyCombination.modifierKeys, table->pressedKeys.count, sizeof(*target.keyCombination.modifierKeys), sortModifierKeys);
@@ -89,8 +89,8 @@ findKeyBinding (KeyTable *table, unsigned char context, const KeyValue *immediat
       }
 
       if (!(target.keyCombination.flags & KCF_IMMEDIATE_KEY)) break;
-      if (target.keyCombination.immediateKey.key == KTB_KEY_ANY) break;
-      target.keyCombination.immediateKey.key = KTB_KEY_ANY;
+      if (target.keyCombination.immediateKey.number == KTB_KEY_ANY) break;
+      target.keyCombination.immediateKey.number = KTB_KEY_ANY;
     }
   }
 
@@ -196,7 +196,7 @@ removePressedKey (KeyTable *table, unsigned int position) {
 
 static inline void
 deleteExplicitKeyValue (KeyValue *values, unsigned int *count, const KeyValue *value) {
-  if (value->key != KTB_KEY_ANY) deleteKeyValue(values, count, value);
+  if (value->number != KTB_KEY_ANY) deleteKeyValue(values, count, value);
 }
 
 static int
@@ -204,8 +204,8 @@ sortKeyOffsets (const void *element1, const void *element2) {
   const KeyValue *value1 = element1;
   const KeyValue *value2 = element2;
 
-  if (value1->key < value2->key) return -1;
-  if (value1->key > value2->key) return 1;
+  if (value1->number < value2->number) return -1;
+  if (value1->number > value2->number) return 1;
   return 0;
 }
 
@@ -231,10 +231,10 @@ addCommandArguments (KeyTable *table, int *command, const CommandEntry *entry, c
     if (keyCount > 0) {
       if (keyCount > 1) {
         qsort(keyValues, keyCount, sizeof(*keyValues), sortKeyOffsets);
-        if (entry->isRange) *command |= BRL_EXT(keyValues[1].key);
+        if (entry->isRange) *command |= BRL_EXT(keyValues[1].number);
       }
 
-      *command += keyValues[0].key;
+      *command += keyValues[0].number;
     } else if (entry->isColumn) {
       if (!entry->isRouting) *command |= BRL_MSK_ARG;
     }
@@ -289,7 +289,7 @@ logKeyEvent (
       STR_ADJUST(length);
     }
 
-    STR_PRINTF(" (Ctx:%u Set:%u Key:%u)", context, keyValue->set, keyValue->key);
+    STR_PRINTF(" (Ctx:%u Grp:%u Num:%u)", context, keyValue->group, keyValue->number);
 
     if (command != EOF) {
       const CommandEntry *cmd = getCommandEntry(command);
@@ -386,10 +386,13 @@ isRepeatableCommand (int command) {
 }
 
 KeyTableState
-processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsigned char key, int press) {
+processKeyEvent (
+  KeyTable *table, unsigned char context,
+  KeyGroup keyGroup, KeyNumber keyNumber, int press
+) {
   const KeyValue keyValue = {
-    .set = set,
-    .key = key
+    .group = keyGroup,
+    .number = keyNumber
   };
 
   KeyTableState state = KTS_UNBOUND;
@@ -404,8 +407,8 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
 
   if (!(hotkey = findHotkeyEntry(table, context, &keyValue))) {
     const KeyValue anyKey = {
-      .set = keyValue.set,
-      .key = KTB_KEY_ANY
+      .group = keyValue.group,
+      .number = KTB_KEY_ANY
     };
 
     hotkey = findHotkeyEntry(table, context, &anyKey);

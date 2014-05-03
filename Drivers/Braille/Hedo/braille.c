@@ -63,7 +63,7 @@ BEGIN_KEY_NAME_TABLE(mbl)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(routing)
-  KEY_SET_ENTRY(HD_SET_RoutingKeys, "RoutingKey"),
+  KEY_GROUP_ENTRY(HD_GRP_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(pfl)
@@ -103,7 +103,7 @@ struct BrailleDataStruct {
   unsigned char textCells[MAXIMUM_TEXT_CELL_COUNT];
   unsigned char statusCells[MAXIMUM_STATUS_CELL_COUNT];
 
-  uint32_t pressedKeys;
+  KeyNumberSet pressedKeys;
 };
 
 static int
@@ -111,18 +111,18 @@ interpretKeyCode_ProfiLine (BrailleDisplay *brl, unsigned char code) {
   const unsigned char release = 0X80;
   int press = !(code & release);
   unsigned char key = code & ~release;
-  unsigned char set;
+  KeyGroup group;
 
   if (key < brl->data->model->firstRoutingKey) {
-    set = HD_SET_NavigationKeys;
+    group = HD_GRP_NavigationKeys;
   } else if (key < (brl->data->model->firstRoutingKey + brl->textColumns)) {
-    set = HD_SET_RoutingKeys;
+    group = HD_GRP_RoutingKeys;
     key -= brl->data->model->firstRoutingKey;
   } else {
     return 0;
   }
 
-  enqueueKeyEvent(brl, set, key, press);
+  enqueueKeyEvent(brl, group, key, press);
   return 1;
 }
 
@@ -130,7 +130,7 @@ static int
 interpretKeyCode_MobilLine (BrailleDisplay *brl, unsigned char code) {
   if ((code >= brl->data->model->firstRoutingKey) &&
       (code < (brl->data->model->firstRoutingKey + brl->textColumns))) {
-    enqueueKey(brl, HD_SET_RoutingKeys, (code - brl->data->model->firstRoutingKey));
+    enqueueKey(brl, HD_GRP_RoutingKeys, (code - brl->data->model->firstRoutingKey));
     return 1;
   }
 
@@ -139,10 +139,10 @@ interpretKeyCode_MobilLine (BrailleDisplay *brl, unsigned char code) {
 
     if (group <= 2) {
       unsigned char shift = group * 4;
-      uint32_t pressedKeys = (brl->data->pressedKeys & ~(0XF << shift)) | ((code & 0XF) << shift);
+      KeyNumberSet pressedKeys = (brl->data->pressedKeys & ~(0XF << shift)) | ((code & 0XF) << shift);
 
       enqueueUpdatedKeys(brl, pressedKeys, &brl->data->pressedKeys,
-                         HD_SET_NavigationKeys, 0);
+                         HD_GRP_NavigationKeys, 0);
       return 1;
     }
   }

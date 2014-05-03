@@ -35,11 +35,11 @@ extern "C" {
   KEY_TABLE_LIST_DECLARATION = {
 #define END_KEY_TABLE_LIST LAST_KEY_TABLE_DEFINITION};
 
-#define BRL_SET_NAME(d,s) d ## _SET_ ## s
-#define BRL_KEY_NAME(d,s,k) d ## _ ## s ## _ ## k
+#define BRL_KEY_GROUP(drv,grp) drv ## _GRP_ ## grp
+#define BRL_KEY_NAME(drv,grp,key) drv ## _ ## grp ## _ ## key
 
-#define BRL_KEY_SET_ENTRY(d,s,n) KEY_SET_ENTRY(BRL_SET_NAME(d, s), n)
-#define BRL_KEY_NAME_ENTRY(d,s,k,n) {.value={.set=BRL_SET_NAME(d, s), .key=BRL_KEY_NAME(d, s, k)}, .name=n}
+#define BRL_KEY_GROUP_ENTRY(drv,grp,nam) KEY_GROUP_ENTRY(BRL_KEY_GROUP(drv, grp), nam)
+#define BRL_KEY_NAME_ENTRY(drv,grp,key,nam) {.value={.group=BRL_KEY_GROUP(drv, grp), .number=BRL_KEY_NAME(drv, grp, key)}, .name=nam}
 
 #define TRANSLATION_TABLE_SIZE 0X100
 typedef unsigned char TranslationTable[TRANSLATION_TABLE_SIZE];
@@ -142,40 +142,40 @@ extern int textHasChanged (
 
 extern int cursorHasChanged (int *cursor, int new, int *force);
 
-typedef uint32_t KeyValueSet;
-#define KEY_VALUE_BIT(number) (UINT32_C(1) << (number))
+typedef uint32_t KeyNumberSet;
+#define KEY_NUMBER_BIT(number) (UINT32_C(1) << (number))
 
-extern KeyValueSet makeKeyValueSet (KEY_NAME_TABLES_REFERENCE keys, unsigned char set);
+extern KeyNumberSet makeKeyNumberSet (KEY_NAME_TABLES_REFERENCE keys, KeyGroup group);
 
 extern int enqueueKeyEvent (
   BrailleDisplay *brl,
-  unsigned char set, unsigned char key, int press
+  KeyGroup group, KeyNumber number, int press
 );
 
 extern int enqueueKeyEvents (
   BrailleDisplay *brl,
-  KeyValueSet bits, unsigned char set, unsigned char key, int press
+  KeyNumberSet set, KeyGroup group, KeyNumber number, int press
 );
 
 extern int enqueueKey (
   BrailleDisplay *brl,
-  unsigned char set, unsigned char key
+  KeyGroup group, KeyNumber number
 );
 
 extern int enqueueKeys (
   BrailleDisplay *brl,
-  KeyValueSet bits, unsigned char set, unsigned char key
+  KeyNumberSet set, KeyGroup group, KeyNumber number
 );
 
 extern int enqueueUpdatedKeys (
   BrailleDisplay *brl,
-  KeyValueSet new, KeyValueSet *old, unsigned char set, unsigned char key
+  KeyNumberSet new, KeyNumberSet *old, KeyGroup group, KeyNumber number
 );
 
 extern int enqueueXtScanCode (
   BrailleDisplay *brl,
   unsigned char code, unsigned char escape,
-  unsigned char set00, unsigned char setE0, unsigned char setE1
+  KeyGroup group00, KeyGroup groupE0, KeyGroup groupE1
 );
 
 #ifdef __cplusplus

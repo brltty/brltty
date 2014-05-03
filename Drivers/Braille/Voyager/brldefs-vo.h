@@ -64,8 +64,8 @@ typedef enum {
 } BP_NavigationKey;
 
 typedef enum {
-  VO_SET_NavigationKeys = 0,
-  VO_SET_RoutingKeys
-} VO_KeySet;
+  VO_GRP_NavigationKeys = 0,
+  VO_GRP_RoutingKeys
+} VO_KeyGroup;
 
 #endif /* BRLTTY_INCLUDED_VO_BRLDEFS */ 

@@ -413,41 +413,42 @@ cursorHasChanged (int *cursor, int new, int *force) {
 }
 
 typedef struct {
-  const unsigned char set;
-  KeyValueSet keys;
-} IncludeKeyValueData;
+  const KeyGroup group;
+
+  KeyNumberSet set;
+} IncludeKeyNumberData;
 
 static int
-includeKeyValue (const KeyNameEntry *kne, void *data) {
+includeKeyNumber (const KeyNameEntry *kne, void *data) {
   if (kne) {
-    IncludeKeyValueData *ikv = data;
+    IncludeKeyNumberData *ikn = data;
 
-    if (kne->value.set == ikv->set) ikv->keys |= KEY_VALUE_BIT(kne->value.key);
+    if (kne->value.group == ikn->group) ikn->set |= KEY_NUMBER_BIT(kne->value.number);
   }
 
   return 1;
 }
 
-KeyValueSet
-makeKeyValueSet (KEY_NAME_TABLES_REFERENCE keys, unsigned char set) {
-  IncludeKeyValueData ikv = {
-    .set = set,
+KeyNumberSet
+makeKeyNumberSet (KEY_NAME_TABLES_REFERENCE keys, KeyGroup group) {
+  IncludeKeyNumberData ikn = {
+    .group = group,
 
-    .keys = 0
+    .set = 0
   };
 
-  forEachKeyName(keys, includeKeyValue, &ikv);
-  return ikv.keys;
+  forEachKeyName(keys, includeKeyNumber, &ikn);
+  return ikn.set;
 }
 
 int
 enqueueKeyEvent (
   BrailleDisplay *brl,
-  unsigned char set, unsigned char key, int press
+  KeyGroup group, KeyNumber number, int press
 ) {
 #ifdef ENABLE_API
   if (apiStarted) {
-    if (api_handleKeyEvent(set, key, press)) {
+    if (api_handleKeyEvent(group, number, press)) {
       return 1;
     }
   }
@@ -456,7 +457,7 @@ enqueueKeyEvent (
   if (brl->keyTable) {
     switch (prefs.brailleOrientation) {
       case BRL_ORIENTATION_ROTATED:
-        if (brl->rotateKey) brl->rotateKey(brl, &set, &key);
+        if (brl->rotateKey) brl->rotateKey(brl, &group, &number);
         break;
 
       default:
@@ -464,7 +465,7 @@ enqueueKeyEvent (
         break;
     }
 
-    processKeyEvent(brl->keyTable, getCurrentCommandContext(), set, key, press);
+    processKeyEvent(brl->keyTable, getCurrentCommandContext(), group, number, press);
     return 1;
   }
 
@@ -474,17 +475,17 @@ enqueueKeyEvent (
 int
 enqueueKeyEvents (
   BrailleDisplay *brl,
-  KeyValueSet bits, unsigned char set, unsigned char key, int press
+  KeyNumberSet set, KeyGroup group, KeyNumber number, int press
 ) {
-  while (bits) {
-    if (bits & 0X1) {
-      if (!enqueueKeyEvent(brl, set, key, press)) {
+  while (set) {
+    if (set & 0X1) {
+      if (!enqueueKeyEvent(brl, group, number, press)) {
         return 0;
       }
     }
 
-    bits >>= 1;
-    key += 1;
+    set >>= 1;
+    number += 1;
   }
 
   return 1;
@@ -493,11 +494,13 @@ enqueueKeyEvents (
 int
 enqueueKey (
   BrailleDisplay *brl,
-  unsigned char set, unsigned char key
+  KeyGroup group, KeyNumber number
 ) {
-  if (enqueueKeyEvent(brl, set, key, 1))
-    if (enqueueKeyEvent(brl, set, key, 0))
+  if (enqueueKeyEvent(brl, group, number, 1)) {
+    if (enqueueKeyEvent(brl, group, number, 0)) {
       return 1;
+    }
+  }
 
   return 0;
 }
@@ -505,24 +508,26 @@ enqueueKey (
 int
 enqueueKeys (
   BrailleDisplay *brl,
-  KeyValueSet bits, unsigned char set, unsigned char key
+  KeyNumberSet set, KeyGroup group, KeyNumber number
 ) {
-  unsigned char stack[0X20];
+  KeyNumber stack[UINT8_MAX + 1];
   unsigned char count = 0;
 
-  while (bits) {
-    if (bits & 0X1) {
-      if (!enqueueKeyEvent(brl, set, key, 1)) return 0;
-      stack[count++] = key;
+  while (set) {
+    if (set & 0X1) {
+      if (!enqueueKeyEvent(brl, group, number, 1)) return 0;
+      stack[count++] = number;
     }
 
-    bits >>= 1;
-    key += 1;
+    set >>= 1;
+    number += 1;
   }
 
-  while (count)
-    if (!enqueueKeyEvent(brl, set, stack[--count], 0))
+  while (count) {
+    if (!enqueueKeyEvent(brl, group, stack[--count], 0)) {
       return 0;
+    }
+  }
 
   return 1;
 }
@@ -530,27 +535,27 @@ enqueueKeys (
 int
 enqueueUpdatedKeys (
   BrailleDisplay *brl,
-  KeyValueSet new, KeyValueSet *old, unsigned char set, unsigned char key
+  KeyNumberSet new, KeyNumberSet *old, KeyGroup group, KeyNumber number
 ) {
-  KeyValueSet bit = KEY_VALUE_BIT(0);
-  unsigned char stack[0X20];
+  KeyNumberSet bit = KEY_NUMBER_BIT(0);
+  KeyNumber stack[UINT8_MAX + 1];
   unsigned char count = 0;
 
   while (*old != new) {
     if ((new & bit) && !(*old & bit)) {
-      stack[count++] = key;
+      stack[count++] = number;
       *old |= bit;
     } else if (!(new & bit) && (*old & bit)) {
-      if (!enqueueKeyEvent(brl, set, key, 0)) return 0;
+      if (!enqueueKeyEvent(brl, group, number, 0)) return 0;
       *old &= ~bit;
     }
 
-    key += 1;
+    number += 1;
     bit <<= 1;
   }
 
   while (count) {
-    if (!enqueueKeyEvent(brl, set, stack[--count], 1)) {
+    if (!enqueueKeyEvent(brl, group, stack[--count], 1)) {
       return 0;
     }
   }
@@ -562,19 +567,19 @@ int
 enqueueXtScanCode (
   BrailleDisplay *brl,
   unsigned char key, unsigned char escape,
-  unsigned char set00, unsigned char setE0, unsigned char setE1
+  KeyGroup group00, KeyGroup groupE0, KeyGroup groupE1
 ) {
-  unsigned char set;
+  KeyGroup group;
 
   switch (escape) {
-    case 0X00: set = set00; break;
-    case 0XE0: set = setE0; break;
-    case 0XE1: set = setE1; break;
+    case 0X00: group = group00; break;
+    case 0XE0: group = groupE0; break;
+    case 0XE1: group = groupE1; break;
 
     default:
       logMessage(LOG_WARNING, "unsupported XT scan code: %02X %02X", escape, key);
       return 0;
   }
 
-  return enqueueKey(brl, set, key);
+  return enqueueKey(brl, group, key);
 }

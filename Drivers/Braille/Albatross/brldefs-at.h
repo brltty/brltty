@@ -80,9 +80,9 @@ typedef enum {
 } AT_NavigationKey;
 
 typedef enum {
-  AT_SET_NavigationKeys = 0,
-  AT_SET_RoutingKeys1,
-  AT_SET_RoutingKeys2
-} AT_KeySet;
+  AT_GRP_NavigationKeys = 0,
+  AT_GRP_RoutingKeys1,
+  AT_GRP_RoutingKeys2
+} AT_KeyGroup;
 
 #endif /* BRLTTY_INCLUDED_AT_BRLDEFS */ 

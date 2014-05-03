@@ -60,10 +60,10 @@ typedef enum {
 } PM_NavigationKey;
 
 typedef enum {
-  PM_SET_NavigationKeys = 0,
-  PM_SET_RoutingKeys1,
-  PM_SET_RoutingKeys2,
-  PM_SET_StatusKeys2
-} PM_KeySet;
+  PM_GRP_NavigationKeys = 0,
+  PM_GRP_RoutingKeys1,
+  PM_GRP_RoutingKeys2,
+  PM_GRP_StatusKeys2
+} PM_KeyGroup;
 
 #endif /* BRLTTY_INCLUDED_PM_BRLDEFS */ 

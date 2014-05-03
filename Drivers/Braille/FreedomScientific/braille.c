@@ -50,8 +50,8 @@ BEGIN_KEY_NAME_TABLE(common)
   KEY_NAME_ENTRY(FS_KEY_WHEEL+2, "RightWheelDown"),
   KEY_NAME_ENTRY(FS_KEY_WHEEL+3, "RightWheelUp"),
 
-  KEY_SET_ENTRY(FS_SET_RoutingKeys, "RoutingKey"),
-  KEY_SET_ENTRY(FS_SET_NavrowKeys, "NavrowKey"),
+  KEY_GROUP_ENTRY(FS_GRP_RoutingKeys, "RoutingKey"),
+  KEY_GROUP_ENTRY(FS_GRP_NavrowKeys, "NavrowKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(focus)
@@ -939,34 +939,34 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 }
 
 static void
-updateKeys (BrailleDisplay *brl, uint64_t newKeys, unsigned char keyBase, unsigned char keyCount) {
-  const FS_KeySet set = FS_SET_NavigationKeys;
-  FS_NavigationKey key = keyBase;
+updateKeys (BrailleDisplay *brl, uint64_t newKeys, KeyNumber keyBase, unsigned char keyCount) {
+  const KeyGroup group = FS_GRP_NavigationKeys;
+  KeyNumber number = keyBase;
 
-  FS_NavigationKey pressKeys[keyCount];
+  KeyNumber pressKeys[keyCount];
   unsigned int pressCount = 0;
 
-  uint64_t keyBit = 0X1 << keyBase;
+  uint64_t keyBit = UINT64_C(0X1) << keyBase;
   newKeys <<= keyBase;
-  newKeys |= brl->data->oldKeys & ~(((0X1 << keyCount) - 1) << keyBase);
+  newKeys |= brl->data->oldKeys & ~(((UINT64_C(0X1) << keyCount) - 1) << keyBase);
 
   while (brl->data->oldKeys != newKeys) {
     uint64_t oldKey = brl->data->oldKeys & keyBit;
     uint64_t newKey = newKeys & keyBit;
 
     if (oldKey && !newKey) {
-      enqueueKeyEvent(brl, set, key, 0);
+      enqueueKeyEvent(brl, group, number, 0);
       brl->data->oldKeys &= ~keyBit;
     } else if (newKey && !oldKey) {
-      pressKeys[pressCount++] = key;
+      pressKeys[pressCount++] = number;
       brl->data->oldKeys |= keyBit;
     }
 
     keyBit <<= 1;
-    key += 1;
+    number += 1;
   }
 
-  while (pressCount) enqueueKeyEvent(brl, set, pressKeys[--pressCount], 1);
+  while (pressCount) enqueueKeyEvent(brl, group, pressKeys[--pressCount], 1);
 }
 
 static int
@@ -993,12 +993,12 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       }
 
       case PKT_BUTTON: {
-        unsigned char key = packet.header.arg1;
+        KeyNumber number = packet.header.arg1;
         unsigned char press = (packet.header.arg2 & 0X01) != 0;
-        unsigned char set = packet.header.arg3;
+        KeyGroup group = packet.header.arg3;
 
-        if (set == modelTypeTable[brl->data->model->type].hotkeysRow) {
-          static const unsigned char keys[] = {
+        if (group == modelTypeTable[brl->data->model->type].hotkeysRow) {
+          static const KeyNumber keys[] = {
             FS_KEY_LeftGdf,
             FS_KEY_HOT+0, FS_KEY_HOT+1, FS_KEY_HOT+2, FS_KEY_HOT+3,
             FS_KEY_HOT+4, FS_KEY_HOT+5, FS_KEY_HOT+6, FS_KEY_HOT+7,
@@ -1008,31 +1008,30 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
           static const unsigned char keyCount = ARRAY_COUNT(keys);
           const unsigned char base = (brl->data->model->cellCount - keyCount) / 2;
 
-          if (key < base) {
-            key = FS_KEY_LeftAdvance;
-          } else if ((key -= base) >= keyCount) {
-            key = FS_KEY_RightAdvance;
+          if (number < base) {
+            number = FS_KEY_LeftAdvance;
+          } else if ((number -= base) >= keyCount) {
+            number = FS_KEY_RightAdvance;
           } else {
-            key = keys[key];
+            number = keys[number];
           }
 
-          set = FS_SET_NavigationKeys;
+          group = FS_GRP_NavigationKeys;
         } else {
-          set += 1;
+          group += 1;
         }
 
-        enqueueKeyEvent(brl, set, key, press);
+        enqueueKeyEvent(brl, group, number, press);
         continue;
       }
 
       case PKT_WHEEL: {
-        const FS_KeySet set = FS_SET_NavigationKeys;
-        const FS_NavigationKey key = FS_KEY_WHEEL + ((packet.header.arg1 >> 3) & 0X7);
+        const KeyGroup group = FS_GRP_NavigationKeys;
+        const KeyNumber number = FS_KEY_WHEEL + ((packet.header.arg1 >> 3) & 0X7);
         unsigned int count = packet.header.arg1 & 0X7;
 
         while (count) {
-          enqueueKeyEvent(brl, set, key, 1);
-          enqueueKeyEvent(brl, set, key, 0);
+          enqueueKey(brl, group, number);
           count -= 1;
         }
 

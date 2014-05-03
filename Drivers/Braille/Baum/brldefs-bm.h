@@ -42,13 +42,13 @@ typedef enum {
 } BM_NavigationKey;
 
 typedef enum {
-  BM_SET_NavigationKeys = 0,
-  BM_SET_RoutingKeys,
-  BM_SET_HorizontalSensors,
-  BM_SET_LeftSensors,
-  BM_SET_RightSensors,
-  BM_SET_ScaledLeftSensors,
-  BM_SET_ScaledRightSensors
-} BM_KeySet;
+  BM_GRP_NavigationKeys = 0,
+  BM_GRP_RoutingKeys,
+  BM_GRP_HorizontalSensors,
+  BM_GRP_LeftSensors,
+  BM_GRP_RightSensors,
+  BM_GRP_ScaledLeftSensors,
+  BM_GRP_ScaledRightSensors
+} BM_KeyGroup;
 
 #endif /* BRLTTY_INCLUDED_BM_BRLDEFS */ 

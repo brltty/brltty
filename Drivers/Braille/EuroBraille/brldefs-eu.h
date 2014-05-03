@@ -210,12 +210,12 @@ typedef enum {
 } EU_BrailleKey;
 
 typedef enum {
-  EU_SET_NavigationKeys,
-  EU_SET_InteractiveKeys,
-  EU_SET_CommandKeys,
-  EU_SET_BrailleKeys,
-  EU_SET_RoutingKeys1,
-  EU_SET_RoutingKeys2
-} EU_KeySet;
+  EU_GRP_NavigationKeys,
+  EU_GRP_InteractiveKeys,
+  EU_GRP_CommandKeys,
+  EU_GRP_BrailleKeys,
+  EU_GRP_RoutingKeys1,
+  EU_GRP_RoutingKeys2
+} EU_KeyGroup;
 
 #endif /* BRLTTY_INCLUDED_EU_BRLDEFS */ 

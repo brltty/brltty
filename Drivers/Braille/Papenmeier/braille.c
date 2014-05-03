@@ -338,28 +338,30 @@ interpretIdentity1 (BrailleDisplay *brl, const unsigned char *identity) {
 static int
 handleSwitches1 (BrailleDisplay *brl, uint16_t time) {
   unsigned char state = time & 0XFF;
-  unsigned char pressStack[8];
+  KeyNumber pressStack[8];
   unsigned char pressCount = 0;
-  const unsigned char set = PM_SET_NavigationKeys;
-  unsigned char key = PM_KEY_SWITCH;
+  const KeyGroup group = PM_GRP_NavigationKeys;
+  KeyNumber number = PM_KEY_SWITCH;
   unsigned char bit = 0X1;
 
   while (switchState1 != state) {
     if ((state & bit) && !(switchState1 & bit)) {
-      pressStack[pressCount++] = key;
+      pressStack[pressCount++] = number;
       switchState1 |= bit;
     } else if (!(state & bit) && (switchState1 & bit)) {
-      if (!enqueueKeyEvent(brl, set, key, 0)) return 0;
+      if (!enqueueKeyEvent(brl, group, number, 0)) return 0;
       switchState1 &= ~bit;
     }
 
-    key += 1;
+    number += 1;
     bit <<= 1;
   }
 
-  while (pressCount)
-    if (!enqueueKeyEvent(brl, set, pressStack[--pressCount], 1))
+  while (pressCount) {
+    if (!enqueueKeyEvent(brl, group, pressStack[--pressCount], 1)) {
       return 0;
+    }
+  }
 
   return 1;
 }
@@ -371,13 +373,13 @@ handleKey1 (BrailleDisplay *brl, uint16_t code, int press, uint16_t time) {
   if (rcvFrontFirst <= code && 
       code <= rcvFrontLast) { /* front key */
     key = (code - rcvFrontFirst) / 3;
-    return enqueueKeyEvent(brl, PM_SET_NavigationKeys, PM_KEY_FRONT+key, press);
+    return enqueueKeyEvent(brl, PM_GRP_NavigationKeys, PM_KEY_FRONT+key, press);
   }
 
   if (rcvStatusFirst <= code && 
       code <= rcvStatusLast) { /* status key */
     key = (code - rcvStatusFirst) / 3;
-    return enqueueKeyEvent(brl, PM_SET_NavigationKeys, PM_KEY_STATUS+key, press);
+    return enqueueKeyEvent(brl, PM_GRP_NavigationKeys, PM_KEY_STATUS+key, press);
   }
 
   if (rcvBarFirst <= code && 
@@ -385,20 +387,20 @@ handleKey1 (BrailleDisplay *brl, uint16_t code, int press, uint16_t time) {
     if (!handleSwitches1(brl, time)) return 0;
 
     key = (code - rcvBarFirst) / 3;
-    return enqueueKeyEvent(brl, PM_SET_NavigationKeys, PM_KEY_BAR+key, press);
+    return enqueueKeyEvent(brl, PM_GRP_NavigationKeys, PM_KEY_BAR+key, press);
   }
 
   if (rcvSwitchFirst <= code && 
       code <= rcvSwitchLast) { /* easy access bar */
     return handleSwitches1(brl, time);
   //key = (code - rcvSwitchFirst) / 3;
-  //return enqueueKeyEvent(brl, PM_SET_NavigationKeys, PM_KEY_SWITCH+key, press);
+  //return enqueueKeyEvent(brl, PM_GRP_NavigationKeys, PM_KEY_SWITCH+key, press);
   }
 
   if (rcvCursorFirst <= code && 
       code <= rcvCursorLast) { /* Routing Keys */ 
     key = (code - rcvCursorFirst) / 3;
-    return enqueueKeyEvent(brl, PM_SET_RoutingKeys1, key, press);
+    return enqueueKeyEvent(brl, PM_GRP_RoutingKeys1, key, press);
   }
 
   logMessage(LOG_WARNING, "unexpected key: %04X", code);
@@ -575,8 +577,8 @@ typedef struct {
 } Packet2;
 
 typedef struct {
-  unsigned char set;
-  unsigned char key;
+  KeyGroup group;
+  KeyNumber number;
 } InputMapping2;
 static InputMapping2 *inputMap2 = NULL;
 static int inputBytes2;
@@ -826,7 +828,7 @@ readCommand2 (BrailleDisplay *brl, KeyTableCommandContext context) {
 
             while (bit) {
               if (!(new & bit) && (old & bit)) {
-                enqueueKeyEvent(brl, mapping->set, mapping->key, 0);
+                enqueueKeyEvent(brl, mapping->group, mapping->number, 0);
                 if ((inputState2[byte] &= ~bit) == new) break;
               }
 
@@ -847,7 +849,7 @@ readCommand2 (BrailleDisplay *brl, KeyTableCommandContext context) {
 
             while (bit) {
               if ((new & bit) && !(old & bit)) {
-                enqueueKeyEvent(brl, mapping->set, mapping->key, 1);
+                enqueueKeyEvent(brl, mapping->group, mapping->number, 1);
                 if ((inputState2[byte] |= bit) == new) break;
               }
 
@@ -864,10 +866,10 @@ readCommand2 (BrailleDisplay *brl, KeyTableCommandContext context) {
         unsigned char modifierKeys = packet.data.bytes[0];
         unsigned char dotKeys = packet.data.bytes[1];
         uint16_t allKeys = (modifierKeys << 8) | dotKeys;
-        PM_NavigationKey pressedKeys[0X10];
+        KeyNumber pressedKeys[0X10];
         unsigned char pressedCount = 0;
-        const PM_KeySet set = PM_SET_NavigationKeys;
-        unsigned char keyOffset;
+        const KeyGroup group = PM_GRP_NavigationKeys;
+        KeyNumber keyOffset;
 
 #define BIT(key) (1 << ((key) - PM_KEY_KEYBOARD))
         if (allKeys & (BIT(PM_KEY_LeftSpace) | BIT(PM_KEY_RightSpace))) allKeys &= ~BIT(PM_KEY_Space);
@@ -876,12 +878,12 @@ readCommand2 (BrailleDisplay *brl, KeyTableCommandContext context) {
         for (keyOffset=0; keyOffset<13; keyOffset+=1) {
           if (allKeys & (1 << keyOffset)) {
             PM_NavigationKey key = PM_KEY_KEYBOARD + keyOffset;
-            enqueueKeyEvent(brl, set, key, 1);
+            enqueueKeyEvent(brl, group, key, 1);
             pressedKeys[pressedCount++] = key;
           }
         }
 
-        while (pressedCount) enqueueKeyEvent(brl, set, pressedKeys[--pressedCount], 0);
+        while (pressedCount) enqueueKeyEvent(brl, group, pressedKeys[--pressedCount], 0);
         continue;
       }
     }
@@ -924,7 +926,7 @@ typedef struct {
 } InputModule2;
 
 static void
-addInputMapping2 (const InputModule2 *module, unsigned char bit, unsigned char set, unsigned char key) {
+addInputMapping2 (const InputModule2 *module, unsigned char bit, KeyGroup group, KeyNumber number) {
   if (model->protocolRevision < 2) {
     bit += module->bit;
   } else {
@@ -933,8 +935,8 @@ addInputMapping2 (const InputModule2 *module, unsigned char bit, unsigned char s
 
   {
     InputMapping2 *mapping = &inputMap2[(module->byte * 8) + bit];
-    mapping->set = set;
-    mapping->key = key;
+    mapping->group = group;
+    mapping->number = number;
   }
 }
 
@@ -953,8 +955,8 @@ static void
 mapInputKey2 (int count, InputModule2 *module, int rear, int front) {
   while (count--) {
     nextInputModule2(module, inputKeySize2);
-    addInputMapping2(module, 0, PM_SET_NavigationKeys, rear);
-    addInputMapping2(module, 1, PM_SET_NavigationKeys, front);
+    addInputMapping2(module, 0, PM_GRP_NavigationKeys, rear);
+    addInputMapping2(module, 1, PM_GRP_NavigationKeys, front);
   }
 }
 
@@ -968,8 +970,8 @@ mapInputModules2 (void) {
     int i;
     for (i=0; i<inputBits2; ++i) {
       InputMapping2 *mapping = &inputMap2[i];
-      mapping->set = 0;
-      mapping->key = 0;
+      mapping->group = 0;
+      mapping->number = 0;
     }
   }
 
@@ -979,10 +981,10 @@ mapInputModules2 (void) {
     unsigned char column = model->textColumns;
     while (column) {
       nextInputModule2(&module, 1);
-      addInputMapping2(&module, 0, PM_SET_RoutingKeys2, --column);
+      addInputMapping2(&module, 0, PM_GRP_RoutingKeys2, --column);
 
       nextInputModule2(&module, 1);
-      addInputMapping2(&module, 0, PM_SET_RoutingKeys1, column);
+      addInputMapping2(&module, 0, PM_GRP_RoutingKeys1, column);
     }
   }
 
@@ -992,23 +994,23 @@ mapInputModules2 (void) {
     unsigned char cell = model->statusCount;
     while (cell) {
       nextInputModule2(&module, 1);
-      addInputMapping2(&module, 0, PM_SET_StatusKeys2, cell-1);
+      addInputMapping2(&module, 0, PM_GRP_StatusKeys2, cell-1);
 
       nextInputModule2(&module, 1);
-      addInputMapping2(&module, 0, PM_SET_NavigationKeys, PM_KEY_STATUS+cell--);
+      addInputMapping2(&module, 0, PM_GRP_NavigationKeys, PM_KEY_STATUS+cell--);
     }
   }
 
   module.bit = 0;
   nextInputModule2(&module, 8);
-  addInputMapping2(&module, 0, PM_SET_NavigationKeys, PM_KEY_BarUp2);
-  addInputMapping2(&module, 1, PM_SET_NavigationKeys, PM_KEY_BarUp1);
-  addInputMapping2(&module, 2, PM_SET_NavigationKeys, PM_KEY_BarDown1);
-  addInputMapping2(&module, 3, PM_SET_NavigationKeys, PM_KEY_BarDown2);
-  addInputMapping2(&module, 4, PM_SET_NavigationKeys, PM_KEY_BarRight1);
-  addInputMapping2(&module, 5, PM_SET_NavigationKeys, PM_KEY_BarLeft1);
-  addInputMapping2(&module, 6, PM_SET_NavigationKeys, PM_KEY_BarRight2);
-  addInputMapping2(&module, 7, PM_SET_NavigationKeys, PM_KEY_BarLeft2);
+  addInputMapping2(&module, 0, PM_GRP_NavigationKeys, PM_KEY_BarUp2);
+  addInputMapping2(&module, 1, PM_GRP_NavigationKeys, PM_KEY_BarUp1);
+  addInputMapping2(&module, 2, PM_GRP_NavigationKeys, PM_KEY_BarDown1);
+  addInputMapping2(&module, 3, PM_GRP_NavigationKeys, PM_KEY_BarDown2);
+  addInputMapping2(&module, 4, PM_GRP_NavigationKeys, PM_KEY_BarRight1);
+  addInputMapping2(&module, 5, PM_GRP_NavigationKeys, PM_KEY_BarLeft1);
+  addInputMapping2(&module, 6, PM_GRP_NavigationKeys, PM_KEY_BarRight2);
+  addInputMapping2(&module, 7, PM_GRP_NavigationKeys, PM_KEY_BarLeft2);
 }
 
 static int

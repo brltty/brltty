@@ -43,7 +43,7 @@ typedef enum {
 } BG_KeyCode;
 
 typedef enum {
-  BG_SET_RoutingKeys = 5
-} BG_KeySet;
+  BG_GRP_RoutingKeys = 5
+} BG_KeyGroup;
 
 #endif /* BRLTTY_INCLUDED_BG_BRLDEFS */ 

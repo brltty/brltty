@@ -51,7 +51,7 @@ BEGIN_KEY_NAME_TABLE(all)
   KEY_NAME_ENTRY(PG_KEY_Enter, "Enter"),
   KEY_NAME_ENTRY(PG_KEY_Escape, "Escape"),
 
-  KEY_SET_ENTRY(PG_SET_RoutingKeys, "RoutingKey"),
+  KEY_GROUP_ENTRY(PG_GRP_RoutingKeys, "RoutingKey"),
   KEY_NAME_ENTRY(PG_KEY_Status+0, "Status1"),
   KEY_NAME_ENTRY(PG_KEY_Status+1, "Status2"),
 END_KEY_NAME_TABLE
@@ -530,13 +530,13 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells) {
 }
 
 static int
-enqueueNavigationKey (BrailleDisplay *brl, PG_NavigationKey modifier, PG_NavigationKey key) {
-  const PG_KeySet set = PG_SET_NavigationKeys;
+enqueueNavigationKey (BrailleDisplay *brl, KeyNumber modifier, KeyNumber key) {
+  const KeyGroup group = PG_GRP_NavigationKeys;
   const int modifierSpecified = modifier != PG_KEY_None;
 
-  if (modifierSpecified && !enqueueKeyEvent(brl, set, modifier, 1)) return 0;
-  if (!enqueueKey(brl, set, key)) return 0;
-  if (modifierSpecified && !enqueueKeyEvent(brl, set, modifier, 0)) return 0;
+  if (modifierSpecified && !enqueueKeyEvent(brl, group, modifier, 1)) return 0;
+  if (!enqueueKey(brl, group, key)) return 0;
+  if (modifierSpecified && !enqueueKeyEvent(brl, group, modifier, 0)) return 0;
   return 1;
 }
 
@@ -616,20 +616,20 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
       case IPT_KEY_ROUTING: {
         unsigned char code = packet.data.fields.key.value;
-        unsigned char set;
-        unsigned char key;
+        KeyGroup group;
+        KeyNumber number;
 
         if ((code >= 81) && (code <= 82)) {
-          set = PG_SET_NavigationKeys;
-          key = PG_KEY_Status + (code - 81);
+          group = PG_GRP_NavigationKeys;
+          number = PG_KEY_Status + (code - 81);
         } else if ((code > 0) && (code <= brl->textColumns)) {
-          set = PG_SET_RoutingKeys;
-          key = code - 1;
+          group = PG_GRP_RoutingKeys;
+          number = code - 1;
         } else {
           break;
         }
 
-        enqueueKey(brl, set, key);
+        enqueueKey(brl, group, number);
         continue;
       }
 

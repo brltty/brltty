@@ -51,7 +51,7 @@ BEGIN_KEY_NAME_TABLE(navigation)
   KEY_NAME_ENTRY(NP_KEY_NavLeft,   "NavLeft"),
   KEY_NAME_ENTRY(NP_KEY_NavRight,  "NavRight"),
 
-  KEY_SET_ENTRY(NP_SET_RoutingKeys, "RoutingKey"),
+  KEY_GROUP_ENTRY(NP_GRP_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(all)
@@ -273,12 +273,12 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       case 0XFC: {
         unsigned int key = packet[1];
         if ((key >= NP_KEY_ROUTING_MIN) && (key <= NP_KEY_ROUTING_MAX)) {
-          enqueueKey(brl, NP_SET_RoutingKeys, (key - NP_KEY_ROUTING_MIN));
+          enqueueKey(brl, NP_GRP_RoutingKeys, (key - NP_KEY_ROUTING_MIN));
           continue;
         } else {
           int press = !!(key & NP_KEY_NAVIGATION_PRESS);
           if (press) key &= ~NP_KEY_NAVIGATION_PRESS;
-          enqueueKeyEvent(brl, NP_SET_NavigationKeys, key, press);
+          enqueueKeyEvent(brl, NP_GRP_NavigationKeys, key, press);
           continue;
         }
         break;

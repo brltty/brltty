@@ -58,7 +58,7 @@ BEGIN_KEY_NAME_TABLE(navigation)
   KEY_NAME_ENTRY(CE_KEY_RightMiddle2, "RightMiddle2"),
   KEY_NAME_ENTRY(CE_KEY_RightLower2, "RightLower2"),
 
-  KEY_SET_ENTRY(CE_SET_RoutingKey, "RoutingKey"),
+  KEY_GROUP_ENTRY(CE_GRP_RoutingKey, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(novem)
@@ -372,19 +372,19 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         switch (packet[3]) {
           case CE_PKT_RSP_NavigationKey:
             if (count == 1) {
-              unsigned char set;
+              KeyGroup group;
               unsigned char key = bytes[0];
               int press = !(key & CE_KEY_RELEASE);
               key &= ~CE_KEY_RELEASE;
 
               if ((key >= CE_KEY_ROUTING_MIN) && (key <= CE_KEY_ROUTING_MAX)) {
-                set = CE_SET_RoutingKey;
+                group = CE_GRP_RoutingKey;
                 key -= CE_KEY_ROUTING_MIN;
               } else {
-                set = CE_SET_NavigationKey;
+                group = CE_GRP_NavigationKey;
               }
 
-              enqueueKeyEvent(brl, set, key, press);
+              enqueueKeyEvent(brl, group, key, press);
               continue;
             }
             break;

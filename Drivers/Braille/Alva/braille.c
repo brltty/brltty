@@ -129,11 +129,11 @@ typedef enum {
 #include "braille.h"
 
 BEGIN_KEY_NAME_TABLE(routing1)
-  KEY_SET_ENTRY(AL_SET_RoutingKeys1, "RoutingKey1"),
+  KEY_GROUP_ENTRY(AL_GRP_RoutingKeys1, "RoutingKey1"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(routing2)
-  KEY_SET_ENTRY(AL_SET_RoutingKeys2, "RoutingKey2"),
+  KEY_GROUP_ENTRY(AL_GRP_RoutingKeys2, "RoutingKey2"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(status1)
@@ -266,7 +266,7 @@ BEGIN_KEY_NAME_TABLE(el)
   KEY_NAME_ENTRY(AL_KEY_THUMB+0, "ScrollLeft"),
   KEY_NAME_ENTRY(AL_KEY_THUMB+4, "ScrollRight"),
 
-  KEY_SET_ENTRY(AL_SET_RoutingKeys1, "RoutingKey"),
+  KEY_GROUP_ENTRY(AL_GRP_RoutingKeys1, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(abt_small)
@@ -986,17 +986,17 @@ readCommand1 (BrailleDisplay *brl) {
     switch (group) {
       case 0X71: /* operating keys and status keys */
         if (key <= 0X0D) {
-          enqueueKeyEvent(brl, AL_SET_NavigationKeys, key+AL_KEY_OPERATION, press);
+          enqueueKeyEvent(brl, AL_GRP_NavigationKeys, key+AL_KEY_OPERATION, press);
           continue;
         }
 
         if ((key >= 0X20) && (key <= 0X25)) {
-          enqueueKeyEvent(brl, AL_SET_NavigationKeys, key-0X20+AL_KEY_STATUS1, press);
+          enqueueKeyEvent(brl, AL_GRP_NavigationKeys, key-0X20+AL_KEY_STATUS1, press);
           continue;
         }
 
         if ((key >= 0X30) && (key <= 0X35)) {
-          enqueueKeyEvent(brl, AL_SET_NavigationKeys, key-0X30+AL_KEY_STATUS2, press);
+          enqueueKeyEvent(brl, AL_GRP_NavigationKeys, key-0X30+AL_KEY_STATUS2, press);
           continue;
         }
 
@@ -1004,7 +1004,7 @@ readCommand1 (BrailleDisplay *brl) {
 
       case 0X72: /* primary (lower) routing keys */
         if (key <= 0X5F) {			/* make */
-          enqueueKeyEvent(brl, AL_SET_RoutingKeys1, key, press);
+          enqueueKeyEvent(brl, AL_GRP_RoutingKeys1, key, press);
           continue;
         }
 
@@ -1012,7 +1012,7 @@ readCommand1 (BrailleDisplay *brl) {
 
       case 0X75: /* secondary (upper) routing keys */
         if (key <= 0X5F) {			/* make */
-          enqueueKeyEvent(brl, AL_SET_RoutingKeys2, key, press);
+          enqueueKeyEvent(brl, AL_GRP_RoutingKeys2, key, press);
           continue;
         }
 
@@ -1020,12 +1020,12 @@ readCommand1 (BrailleDisplay *brl) {
 
       case 0X77: /* satellite keypads */
         if (key <= 0X05) {
-          enqueueKeyEvent(brl, AL_SET_NavigationKeys, key+AL_KEY_LEFT_PAD, press);
+          enqueueKeyEvent(brl, AL_GRP_NavigationKeys, key+AL_KEY_LEFT_PAD, press);
           continue;
         }
 
         if ((key >= 0X20) && (key <= 0X25)) {
-          enqueueKeyEvent(brl, AL_SET_NavigationKeys, key-0X20+AL_KEY_RIGHT_PAD, press);
+          enqueueKeyEvent(brl, AL_GRP_NavigationKeys, key-0X20+AL_KEY_RIGHT_PAD, press);
           continue;
         }
 
@@ -1296,7 +1296,7 @@ interpretKeyEvent2 (BrailleDisplay *brl, unsigned char group, unsigned char key)
       }
 
       if (key < count) {
-        enqueueKeyEvent(brl, AL_SET_NavigationKeys, base+key, press);
+        enqueueKeyEvent(brl, AL_GRP_NavigationKeys, base+key, press);
         return EOF;
       }
       break;
@@ -1324,8 +1324,9 @@ interpretKeyEvent2 (BrailleDisplay *brl, unsigned char group, unsigned char key)
 
       if (key >= textOffset) {
         if ((key -= textOffset) < brl->textColumns) {
-          unsigned char set = secondary? AL_SET_RoutingKeys2: AL_SET_RoutingKeys1;
-          enqueueKeyEvent(brl, set, key, press);
+          KeyGroup group = secondary? AL_GRP_RoutingKeys2: AL_GRP_RoutingKeys1;
+
+          enqueueKeyEvent(brl, group, key, press);
           return EOF;
         }
       }

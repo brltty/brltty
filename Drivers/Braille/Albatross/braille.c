@@ -96,8 +96,8 @@ BEGIN_KEY_NAME_TABLE(all)
   KEY_NAME_ENTRY(AT_KEY_RightWheelDown, "RightWheelDown"),
 
   /* routing keys */
-  KEY_SET_ENTRY(AT_SET_RoutingKeys1, "RoutingKey1"),
-  KEY_SET_ENTRY(AT_SET_RoutingKeys2, "RoutingKey2"),
+  KEY_GROUP_ENTRY(AT_GRP_RoutingKeys1, "RoutingKey1"),
+  KEY_GROUP_ENTRY(AT_GRP_RoutingKeys2, "RoutingKey2"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(all)
@@ -520,30 +520,29 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
     byte = inputMap[byte];
     {
-      unsigned char set;
-      unsigned char key;
+      KeyGroup group;
+      KeyNumber number;
 
       if ((byte >= 2) && (byte <= 41)) {
-        set = AT_SET_RoutingKeys1;
-        key = byte - 2;
+        group = AT_GRP_RoutingKeys1;
+        number = byte - 2;
       } else if ((byte >= 111) && (byte <= 150)) {
-        set = AT_SET_RoutingKeys1;
-        key = byte - 71;
+        group = AT_GRP_RoutingKeys1;
+        number = byte - 71;
       } else if ((byte >= 43) && (byte <= 82)) {
-        set = AT_SET_RoutingKeys2;
-        key = byte - 43;
+        group = AT_GRP_RoutingKeys2;
+        number = byte - 43;
       } else if ((byte >= 152) && (byte <= 191)) {
-        set = AT_SET_RoutingKeys2;
-        key = byte - 112;
+        group = AT_GRP_RoutingKeys2;
+        number = byte - 112;
       } else {
         goto notRouting;
       }
 
-      if ((key >= windowStart) &&
-          (key < (windowStart + windowWidth))) {
-        key -= windowStart;
-        enqueueKeyEvent(brl, set, key, 1);
-        enqueueKeyEvent(brl, set, key, 0);
+      if ((number >= windowStart) &&
+          (number < (windowStart + windowWidth))) {
+        number -= windowStart;
+        enqueueKey(brl, group, number);
         continue;
       }
     }
@@ -579,13 +578,13 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       case AT_KEY_Cursor2:
         if (byte == controlKey) {
           controlKey = NO_CONTROL_KEY;
-          enqueueKeyEvent(brl, AT_SET_NavigationKeys, byte, 0);
+          enqueueKeyEvent(brl, AT_GRP_NavigationKeys, byte, 0);
           continue;
         }
 
         if (controlKey == NO_CONTROL_KEY) {
           controlKey = byte;
-          enqueueKeyEvent(brl, AT_SET_NavigationKeys, byte, 1);
+          enqueueKeyEvent(brl, AT_GRP_NavigationKeys, byte, 1);
           continue;
         }
 
@@ -613,8 +612,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       case AT_KEY_RightWheelLeft:
       case AT_KEY_RightWheelUp:
       case AT_KEY_RightWheelDown:
-        enqueueKeyEvent(brl, AT_SET_NavigationKeys, byte, 1);
-        enqueueKeyEvent(brl, AT_SET_NavigationKeys, byte, 0);
+        enqueueKey(brl, AT_GRP_NavigationKeys, byte);
         continue;
     }
 

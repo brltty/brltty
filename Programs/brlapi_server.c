@@ -2648,11 +2648,11 @@ static int api__handleKeyEvent(brlapi_keyCode_t clientCode) {
   return 0;
 }
 
-int api_handleKeyEvent(unsigned char set, unsigned char key, int press) {
+int api_handleKeyEvent(KeyGroup group, KeyNumber number, int press) {
   int ret;
   brlapi_keyCode_t clientCode;
-  clientCode = ((brlapi_keyCode_t)set << 8) | key | ((brlapi_keyCode_t)press << 63);
-  logMessage(LOG_CATEGORY(SERVER_EVENTS), "API got key %02x %02x (press %d), thus client code %016"BRLAPI_PRIxKEYCODE, set, key, press, clientCode);
+  clientCode = ((brlapi_keyCode_t)group << 8) | number | ((brlapi_keyCode_t)press << 63);
+  logMessage(LOG_CATEGORY(SERVER_EVENTS), "API got key %02x %02x (press %d), thus client code %016"BRLAPI_PRIxKEYCODE, group, number, press, clientCode);
 
   asyncLockMutex(&apiConnectionsMutex);
   ret = api__handleKeyEvent(clientCode);

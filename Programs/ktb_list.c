@@ -132,14 +132,14 @@ formatKeyName (KeyTable *table, char *buffer, size_t size, const KeyValue *value
 
   if (kne) {
     STR_PRINTF("%s", kne->name);
-  } else if (value->key != KTB_KEY_ANY) {
+  } else if (value->number != KTB_KEY_ANY) {
     const KeyValue anyKey = {
-      .set = value->set,
-      .key = KTB_KEY_ANY
+      .group = value->group,
+      .number = KTB_KEY_ANY
     };
 
     if ((kne = findKeyNameEntry(table, &anyKey))) {
-      STR_PRINTF("%s.%u", kne->name, value->key+1);
+      STR_PRINTF("%s.%u", kne->name, value->number+1);
     }
   }
 
@@ -250,7 +250,7 @@ listHotkeyEvent (ListGenerationData *lgd, const KeyValue *keyValue, const char *
       if (!putUtf8String(lgd, "switch to ")) return 0;
       if (!putCharacterString(lgd, c->title)) return 0;
     } else {
-      if (!putCommandDescription(lgd, cmd, (keyValue->key != KTB_KEY_ANY))) return 0;
+      if (!putCommandDescription(lgd, cmd, (keyValue->number != KTB_KEY_ANY))) return 0;
     }
 
     if (!putCharacterString(lgd, WS_C(": "))) return 0;

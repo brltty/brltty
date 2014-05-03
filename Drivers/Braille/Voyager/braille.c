@@ -57,7 +57,7 @@
 
 
 BEGIN_KEY_NAME_TABLE(all)
-  KEY_SET_ENTRY(VO_SET_RoutingKeys, "RoutingKey"),
+  KEY_GROUP_ENTRY(VO_GRP_RoutingKeys, "RoutingKey"),
 
   KEY_NAME_ENTRY(VO_KEY_Dot1, "Dot1"),
   KEY_NAME_ENTRY(VO_KEY_Dot2, "Dot2"),
@@ -79,7 +79,7 @@ BEGIN_KEY_NAME_TABLE(all)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(bp)
-  KEY_SET_ENTRY(VO_SET_RoutingKeys, "RoutingKey"),
+  KEY_GROUP_ENTRY(VO_GRP_RoutingKeys, "RoutingKey"),
 
   KEY_NAME_ENTRY(BP_KEY_Dot1, "Dot1"),
   KEY_NAME_ENTRY(BP_KEY_Dot2, "Dot2"),
@@ -164,7 +164,7 @@ updateKeys (BrailleDisplay *brl, const unsigned char *packet) {
 
     while (key < 0X10) {
       if ((pressedKeys.navigation & bit) && !(currentKeys.navigation & bit)) {
-        enqueueKeyEvent(brl, VO_SET_NavigationKeys, key, 0);
+        enqueueKeyEvent(brl, VO_GRP_NavigationKeys, key, 0);
       } else if (!(pressedKeys.navigation & bit) && (currentKeys.navigation & bit)) {
         navigationPresses[navigationPressCount++] = key;
       }
@@ -197,14 +197,14 @@ updateKeys (BrailleDisplay *brl, const unsigned char *packet) {
 
     for (key=0; key<cellCount; key+=1)
       if (pressedKeys.routing[key] && !currentKeys.routing[key])
-        enqueueKeyEvent(brl, VO_SET_RoutingKeys, key, 0);
+        enqueueKeyEvent(brl, VO_GRP_RoutingKeys, key, 0);
   }
 
   while (navigationPressCount)
-    enqueueKeyEvent(brl, VO_SET_NavigationKeys, navigationPresses[--navigationPressCount], 1);
+    enqueueKeyEvent(brl, VO_GRP_NavigationKeys, navigationPresses[--navigationPressCount], 1);
 
   while (routingPressCount)
-    enqueueKeyEvent(brl, VO_SET_RoutingKeys, routingPresses[--routingPressCount], 1);
+    enqueueKeyEvent(brl, VO_GRP_RoutingKeys, routingPresses[--routingPressCount], 1);
 
   pressedKeys = currentKeys;
 }

@@ -52,7 +52,7 @@ BEGIN_KEY_NAME_TABLE(all)
   KEY_NAME_ENTRY(HW_KEY_Thumb3, "Thumb3"),
   KEY_NAME_ENTRY(HW_KEY_Thumb4, "Thumb4"),
 
-  KEY_SET_ENTRY(HW_SET_RoutingKeys, "RoutingKey"),
+  KEY_GROUP_ENTRY(HW_GRP_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(all)
@@ -233,16 +233,16 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static void
 handleKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
-  unsigned char set;
+  KeyGroup group;
 
   if (key < HW_KEY_ROUTING) {
-    set = HW_SET_NavigationKeys;
+    group = HW_GRP_NavigationKeys;
   } else {
-    set = HW_SET_RoutingKeys;
+    group = HW_GRP_RoutingKeys;
     key -= HW_KEY_ROUTING;
   }
 
-  enqueueKeyEvent(brl, set, key, press);
+  enqueueKeyEvent(brl, group, key, press);
 }
 
 static int

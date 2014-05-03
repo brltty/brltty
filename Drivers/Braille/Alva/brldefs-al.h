@@ -100,9 +100,9 @@ typedef enum {
 } AL_NavigationKey;
 
 typedef enum {
-  AL_SET_NavigationKeys = 0,
-  AL_SET_RoutingKeys1,
-  AL_SET_RoutingKeys2
-} AL_KeySet;
+  AL_GRP_NavigationKeys = 0,
+  AL_GRP_RoutingKeys1,
+  AL_GRP_RoutingKeys2
+} AL_KeyGroup;
 
 #endif /* BRLTTY_INCLUDED_AL_BRLDEFS */ 

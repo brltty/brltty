@@ -57,8 +57,8 @@ typedef enum {
 } BN_NavigationKey;
 
 typedef enum {
-  BN_SET_NavigationKeys,
-  BN_SET_RoutingKeys
-} SK_KeySet;
+  BN_GRP_NavigationKeys,
+  BN_GRP_RoutingKeys
+} SK_KeyGroup;
 
 #endif /* BRLTTY_INCLUDED_BN_BRLDEFS */ 

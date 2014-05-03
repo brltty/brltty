@@ -44,8 +44,8 @@ typedef enum {
 } NP_NavigationKey;
 
 typedef enum {
-  NP_SET_NavigationKeys,
-  NP_SET_RoutingKeys
-} NP_KeySet;
+  NP_GRP_NavigationKeys,
+  NP_GRP_RoutingKeys
+} NP_KeyGroup;
 
 #endif /* BRLTTY_INCLUDED_NP_BRLDEFS */ 

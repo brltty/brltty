@@ -316,30 +316,29 @@ typedef enum {
 } KBD_BrailleKey;
 
 typedef enum {
-  KBD_SET_SPECIAL = 0 /* for KBD_KEY_UNMAPPED */,
+  KBD_GRP_SPECIAL = 0 /* for KBD_KEY_UNMAPPED */,
 
-  KBD_SET_LETTER,
-  KBD_SET_NUMBER,
-  KBD_SET_SYMBOL,
+  KBD_GRP_LETTER,
+  KBD_GRP_NUMBER,
+  KBD_GRP_SYMBOL,
 
-  KBD_SET_ACTION,
-  KBD_SET_MEDIA,
-  KBD_SET_FUNCTION,
+  KBD_GRP_ACTION,
+  KBD_GRP_MEDIA,
+  KBD_GRP_FUNCTION,
 
-  KBD_SET_MODIFIER,
-  KBD_SET_LOCK,
+  KBD_GRP_MODIFIER,
+  KBD_GRP_LOCK,
 
-  KBD_SET_KPNUMBER,
-  KBD_SET_KPSYMBOL,
-  KBD_SET_KPACTION,
+  KBD_GRP_KPNUMBER,
+  KBD_GRP_KPSYMBOL,
+  KBD_GRP_KPACTION,
 
-  KBD_SET_BRAILLE,
-  KBD_SET_ROUTING,
+  KBD_GRP_BRAILLE,
+  KBD_GRP_ROUTING,
 } KBD_KeySet;
 
-#define KBD_SET_VALUE(s,k) {.set=KBD_SET_##s, .key=(k)}
-#define KBD_KEY_VALUE(s,k) {.set=KBD_SET_##s, .key=KBD_KEY_##s##_##k}
-#define KBD_NAME_ENTRY(s,k,n) {.value=KBD_KEY_VALUE(s, k), .name=n}
+#define KBD_KEY_VALUE(grp,num) {.group=KBD_GRP_##grp, .number=KBD_KEY_##grp##_##num}
+#define KBD_NAME_ENTRY(grp,num,nam) {.value=KBD_KEY_VALUE(grp, num), .name=nam}
 
 #define KBD_KEY_SPECIAL(name) KBD_KEY_VALUE(SPECIAL, name)
 #define KBD_KEY_UNMAPPED KBD_KEY_SPECIAL(Unmapped)

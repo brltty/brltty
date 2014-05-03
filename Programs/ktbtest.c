@@ -239,7 +239,7 @@ main (int argc, char *argv[]) {
 }
 
 KeyTableState
-processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsigned char key, int press) {
+processKeyEvent (KeyTable *table, unsigned char context, KeyGroup group, KeyNumber number, int press) {
   return KTS_UNBOUND;
 }
 
@@ -260,7 +260,7 @@ api_handleCommand (int command) {
 }
 
 int
-api_handleKeyEvent (unsigned char set, unsigned char key, int press) {
+api_handleKeyEvent (KeyGroup group, KeyNumber number, int press) {
   return 0;
 }
 

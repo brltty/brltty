@@ -87,8 +87,8 @@ typedef enum {
 } HW_NavigationKey;
 
 typedef enum {
-  HW_SET_NavigationKeys = 0,
-  HW_SET_RoutingKeys
-} HW_KeySet;
+  HW_GRP_NavigationKeys = 0,
+  HW_GRP_RoutingKeys
+} HW_KeyGroup;
 
 #endif /* BRLTTY_INCLUDED_HW_BRLDEFS */ 

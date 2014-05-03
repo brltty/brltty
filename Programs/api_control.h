@@ -43,7 +43,7 @@ extern int api_claimDriver (BrailleDisplay *brl);
 extern void api_releaseDriver (BrailleDisplay *brl);
 
 extern int api_handleCommand (int command);
-extern int api_handleKeyEvent (unsigned char set, unsigned char key, int press);
+extern int api_handleKeyEvent (KeyGroup group, KeyNumber number, int press);
 
 extern int api_flush (BrailleDisplay *brl);
 

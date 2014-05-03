@@ -124,8 +124,8 @@ BEGIN_KEY_NAME_TABLE(common)
   BRAILLE_KEY_ENTRY(Backspace, "Backspace"),
   BRAILLE_KEY_ENTRY(Space, "Space"),
 
-  KEY_SET_ENTRY(EU_SET_RoutingKeys1, "RoutingKey1"),
-  KEY_SET_ENTRY(EU_SET_RoutingKeys2, "RoutingKey2"),
+  KEY_GROUP_ENTRY(EU_GRP_RoutingKeys1, "RoutingKey1"),
+  KEY_GROUP_ENTRY(EU_GRP_RoutingKeys2, "RoutingKey2"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(iris)
@@ -324,7 +324,7 @@ static unsigned char sequenceCheck;
 static unsigned char sequenceKnown;
 static unsigned char sequenceNumber;
 
-static uint32_t commandKeys;
+static KeyNumberSet commandKeys;
 
 static inline void
 forceRewrite (void) {
@@ -683,8 +683,9 @@ static int
 handleKeyEvent (BrailleDisplay *brl, unsigned char *packet) {
   switch (packet[0]) {
     case 'B': {
-      uint32_t keys = ((packet[1] << 8) | packet[2]) & 0X3Ff;
-      enqueueKeys(brl, keys, EU_SET_BrailleKeys, 0);
+      KeyNumberSet keys = ((packet[1] << 8) | packet[2]) & 0X3Ff;
+
+      enqueueKeys(brl, keys, EU_GRP_BrailleKeys, 0);
       return 1;
     }
 
@@ -696,12 +697,12 @@ handleKeyEvent (BrailleDisplay *brl, unsigned char *packet) {
 
         switch (packet[1]) {
           case 1: // single click
-            enqueueKey(brl, EU_SET_RoutingKeys1, key);
+            enqueueKey(brl, EU_GRP_RoutingKeys1, key);
           case 2: // repeat
             return 1;
 
           case 3: // double click
-            enqueueKey(brl, EU_SET_RoutingKeys2, key);
+            enqueueKey(brl, EU_GRP_RoutingKeys2, key);
             return 1;
 
           default:
@@ -713,7 +714,7 @@ handleKeyEvent (BrailleDisplay *brl, unsigned char *packet) {
     }
 
     case 'C': {
-      uint32_t keys;
+      KeyNumberSet keys;
 
       if (model->isIris) {
         keys = ((packet[1] << 8) | packet[2]) & 0XFFF;
@@ -722,9 +723,9 @@ handleKeyEvent (BrailleDisplay *brl, unsigned char *packet) {
       }
 
       if (model->isIris) {
-        enqueueKeys(brl, keys, EU_SET_CommandKeys, 0);
+        enqueueKeys(brl, keys, EU_GRP_CommandKeys, 0);
       } else {
-        enqueueUpdatedKeys(brl, keys, &commandKeys, EU_SET_CommandKeys, 0);
+        enqueueUpdatedKeys(brl, keys, &commandKeys, EU_GRP_CommandKeys, 0);
       }
 
       return 1;

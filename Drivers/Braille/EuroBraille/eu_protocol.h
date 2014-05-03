@@ -61,7 +61,7 @@ extern const InputOutputOperations *io;
 extern const ProtocolOperations clioProtocolOperations;
 extern const ProtocolOperations esysirisProtocolOperations;
 
-#define KEY_ENTRY(s,t,k,n) {.value = {.set=EU_SET_##s, .key=EU_##t##_##k}, .name=n}
+#define KEY_ENTRY(s,t,k,n) {.value = {.group=EU_GRP_##s, .number=EU_##t##_##k}, .name=n}
 EXTERNAL_KEY_TABLE(clio)
 EXTERNAL_KEY_TABLE(iris)
 EXTERNAL_KEY_TABLE(esys_small)

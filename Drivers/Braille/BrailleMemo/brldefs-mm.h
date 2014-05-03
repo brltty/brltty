@@ -126,13 +126,13 @@ typedef enum {
 } MM_DisplayKey;
 
 typedef enum {
-  MM_SET_SHIFT   = 0,
-  MM_SET_DOT     = 1,
-  MM_SET_EDIT    = 2,
-  MM_SET_ARROW   = 3,
-  MM_SET_ROUTE   = 4,
-  MM_SET_ERROR   = 5,
-  MM_SET_DISPLAY = 6
-} MM_KeySet;
+  MM_GRP_SHIFT   = 0,
+  MM_GRP_DOT     = 1,
+  MM_GRP_EDIT    = 2,
+  MM_GRP_ARROW   = 3,
+  MM_GRP_ROUTE   = 4,
+  MM_GRP_ERROR   = 5,
+  MM_GRP_DISPLAY = 6
+} MM_KeyGroup;
 
 #endif /* BRLTTY_INCLUDED_MM_BRLDEFS */ 

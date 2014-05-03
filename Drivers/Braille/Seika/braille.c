@@ -67,7 +67,7 @@ BEGIN_KEY_NAME_TABLE(notetaker)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(routing)
-  KEY_SET_ENTRY(SK_SET_RoutingKeys, "RoutingKey"),
+  KEY_GROUP_ENTRY(SK_GRP_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(bdp)
@@ -100,11 +100,11 @@ typedef struct {
   unsigned char type;
 
   union {
-    uint32_t keys;
+    KeyNumberSet keys;
     const unsigned char *routing;
 
     struct {
-      uint32_t keys;
+      KeyNumberSet keys;
       const unsigned char *routing;
     } combined;
 
@@ -579,7 +579,7 @@ ntkReadPacket (BrailleDisplay *brl, InputPacket *packet) {
         break;
 
       {
-        uint32_t *keys;
+        KeyNumberSet *keys;
         const unsigned char *byte;
 
       case 0XA6:
@@ -770,44 +770,46 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 }
 
 static void
-processKeys (BrailleDisplay *brl, uint32_t keys, const unsigned char *routing) {
+processKeys (BrailleDisplay *brl, KeyNumberSet keys, const unsigned char *routing) {
   KeyValue pressedKeys[keyCount + routingCount];
   unsigned int pressedCount = 0;
 
   if (keys) {
-    uint32_t bit = UINT32_C(0X1);
-    unsigned char key = 0;
+    KeyNumberSet bit = KEY_NUMBER_BIT(0);
+    KeyNumber number = 0;
 
-    while (key < keyCount) {
+    while (number < keyCount) {
       if (keys & bit) {
         KeyValue *kv = &pressedKeys[pressedCount++];
-        enqueueKeyEvent(brl, (kv->set = SK_SET_NavigationKeys), (kv->key = key), 1);
+
+        enqueueKeyEvent(brl, (kv->group = SK_GRP_NavigationKeys), (kv->number = number), 1);
         if (!(keys &= ~bit)) break;
       }
 
       bit <<= 1;
-      key += 1;
+      number += 1;
     }
   }
 
   if (routing) {
     const unsigned char *byte = routing;
-    unsigned char key = 0;
+    unsigned char number = 0;
 
-    while (key < routingCount) {
+    while (number < routingCount) {
       if (*byte) {
         unsigned char bit = 0X1;
 
         do {
           if (*byte & bit) {
             KeyValue *kv = &pressedKeys[pressedCount++];
-            enqueueKeyEvent(brl, (kv->set = SK_SET_RoutingKeys), (kv->key = key), 1);
+
+            enqueueKeyEvent(brl, (kv->group = SK_GRP_RoutingKeys), (kv->number = number), 1);
           }
 
-          key += 1;
+          number += 1;
         } while ((bit <<= 1));
       } else {
-        key += 8;
+        number += 8;
       }
 
       byte += 1;
@@ -816,7 +818,7 @@ processKeys (BrailleDisplay *brl, uint32_t keys, const unsigned char *routing) {
 
   while (pressedCount) {
     KeyValue *kv = &pressedKeys[--pressedCount];
-    enqueueKeyEvent(brl, kv->set, kv->key, 0);
+    enqueueKeyEvent(brl, kv->group, kv->number, 0);
   }
 }
 

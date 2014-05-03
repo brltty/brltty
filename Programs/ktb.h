@@ -39,7 +39,11 @@ extern char *ensureKeyTableExtension (const char *path);
 extern char *makeKeyTablePath (const char *directory, const char *name);
 
 extern void resetKeyTable (KeyTable *table);
-extern KeyTableState processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsigned char key, int press);
+
+extern KeyTableState processKeyEvent (
+  KeyTable *table, unsigned char context,
+  KeyGroup keyGroup, KeyNumber keyNumber, int press
+);
 
 extern void setKeyTableLogLabel (KeyTable *table, const char *label);
 extern void setLogKeyEventsFlag (KeyTable *table, const unsigned char *flag);

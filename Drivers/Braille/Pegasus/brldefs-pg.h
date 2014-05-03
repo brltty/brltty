@@ -41,8 +41,8 @@ typedef enum {
 } PG_NavigationKey;
 
 typedef enum {
-  PG_SET_NavigationKeys = 0,
-  PG_SET_RoutingKeys
-} PG_KeySet;
+  PG_GRP_NavigationKeys = 0,
+  PG_GRP_RoutingKeys
+} PG_KeyGroup;
 
 #endif /* BRLTTY_INCLUDED_PG_BRLDEFS */ 

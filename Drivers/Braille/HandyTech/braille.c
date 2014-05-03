@@ -42,7 +42,7 @@ typedef enum {
 #include "brldefs-ht.h"
 
 BEGIN_KEY_NAME_TABLE(routing)
-  KEY_SET_ENTRY(HT_SET_RoutingKeys, "RoutingKey"),
+  KEY_GROUP_ENTRY(HT_GRP_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(dots)
@@ -1311,16 +1311,16 @@ interpretByte_key (BrailleDisplay *brl, unsigned char byte) {
 
   if ((byte >= HT_KEY_ROUTING) &&
       (byte < (HT_KEY_ROUTING + brl->data->model->textCells))) {
-    return enqueueKeyEvent(brl, HT_SET_RoutingKeys, byte - HT_KEY_ROUTING, !release);
+    return enqueueKeyEvent(brl, HT_GRP_RoutingKeys, byte - HT_KEY_ROUTING, !release);
   }
 
   if ((byte >= HT_KEY_STATUS) &&
       (byte < (HT_KEY_STATUS + brl->data->model->statusCells))) {
-    return enqueueKeyEvent(brl, HT_SET_NavigationKeys, byte, !release);
+    return enqueueKeyEvent(brl, HT_GRP_NavigationKeys, byte, !release);
   }
 
   if ((byte > 0) && (byte < 0X20)) {
-    return enqueueKeyEvent(brl, HT_SET_NavigationKeys, byte, !release);
+    return enqueueKeyEvent(brl, HT_GRP_NavigationKeys, byte, !release);
   }
 
   return 0;
@@ -1328,7 +1328,7 @@ interpretByte_key (BrailleDisplay *brl, unsigned char byte) {
 
 static int
 interpretByte_Bookworm (BrailleDisplay *brl, unsigned char byte) {
-  static const unsigned char keys[] = {
+  static const KeyNumber keys[] = {
     HT_BWK_Backward,
     HT_BWK_Forward,
     HT_BWK_Escape,
@@ -1336,25 +1336,26 @@ interpretByte_Bookworm (BrailleDisplay *brl, unsigned char byte) {
     0
   };
 
-  const unsigned char *key = keys;
-  const HT_KeySet set = HT_SET_NavigationKeys;
+  const KeyNumber *key = keys;
+  const KeyGroup group = HT_GRP_NavigationKeys;
 
   if (!byte) return 0;
   {
     unsigned char bits = byte;
+
     while (*key) bits &= ~*key++;
     if (bits) return 0;
     key = keys;
   }
 
   while (*key) {
-    if ((byte & *key) && !enqueueKeyEvent(brl, set, *key, 1)) return 0;
+    if ((byte & *key) && !enqueueKeyEvent(brl, group, *key, 1)) return 0;
     key += 1;
   }
 
   do {
     key -= 1;
-    if ((byte & *key) && !enqueueKeyEvent(brl, set, *key, 0)) return 0;
+    if ((byte & *key) && !enqueueKeyEvent(brl, group, *key, 0)) return 0;
   } while (key != keys);
 
   return 1;

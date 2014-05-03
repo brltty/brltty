@@ -60,7 +60,7 @@ BEGIN_KEY_NAME_TABLE(all)
   KEY_NAME_ENTRY(CB_KEY_Status5, "Status5"),
   KEY_NAME_ENTRY(CB_KEY_Status6, "Status6"),
 
-  KEY_SET_ENTRY(CB_SET_RoutingKeys, "RoutingKey"),
+  KEY_GROUP_ENTRY(CB_GRP_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(all)
@@ -275,13 +275,13 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
   while ((key = getKey()) != EOF) {
     if (key >= 0X86) {
-      enqueueKey(brl, CB_SET_RoutingKeys, (key - 0X86));
+      enqueueKey(brl, CB_GRP_RoutingKeys, (key - 0X86));
     } else if (key >= 0X80) {
-      enqueueKey(brl, CB_SET_NavigationKeys, (CB_KEY_Status1 + (key - 0X80)));
+      enqueueKey(brl, CB_GRP_NavigationKeys, (CB_KEY_Status1 + (key - 0X80)));
     } else if (key >= 0X60) {
-      enqueueKeys(brl, key & 0X1F, CB_SET_NavigationKeys, CB_KEY_Thumb1);
+      enqueueKeys(brl, key & 0X1F, CB_GRP_NavigationKeys, CB_KEY_Thumb1);
     } else if (key < 0X40) {
-      enqueueKeys(brl, key & 0X3F, CB_SET_NavigationKeys, CB_KEY_Dot6);
+      enqueueKeys(brl, key & 0X3F, CB_GRP_NavigationKeys, CB_KEY_Dot6);
     }
   }
 

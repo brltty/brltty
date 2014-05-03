@@ -757,10 +757,10 @@ changeKeyboardKeyTable (const char *name) {
 }
 
 static KeyTableState
-handleKeyboardKeyEvent (unsigned char set, unsigned char key, int press) {
+handleKeyboardKeyEvent (KeyGroup group, KeyNumber number, int press) {
   if (keyboardKeyTable) {
     if (!scr.unreadable) {
-      return processKeyEvent(keyboardKeyTable, getCurrentCommandContext(), set, key, press);
+      return processKeyEvent(keyboardKeyTable, getCurrentCommandContext(), group, number, press);
     }
 
     resetKeyTable(keyboardKeyTable);

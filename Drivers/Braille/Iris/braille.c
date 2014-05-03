@@ -93,7 +93,7 @@ BEGIN_KEY_NAME_TABLE(common)
   KEY_NAME_ENTRY(IR_KEY_Menu, "Menu"),
   KEY_NAME_ENTRY(IR_KEY_Z, "Z"),
 
-  KEY_SET_ENTRY(IR_SET_RoutingKeys, "RoutingKey"),
+  KEY_GROUP_ENTRY(IR_GRP_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(brl)
@@ -110,9 +110,9 @@ BEGIN_KEY_NAME_TABLE(brl)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(pc)
-  KEY_SET_ENTRY(IR_SET_Xt, "Xt"),
-  KEY_SET_ENTRY(IR_SET_XtE0, "XtE0"),
-  KEY_SET_ENTRY(IR_SET_XtE1, "XtE1"),
+  KEY_GROUP_ENTRY(IR_GRP_Xt, "Xt"),
+  KEY_GROUP_ENTRY(IR_GRP_XtE0, "XtE0"),
+  KEY_GROUP_ENTRY(IR_GRP_XtE1, "XtE1"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(brl)
@@ -165,7 +165,7 @@ static Port internalPort = {
 static unsigned char *previousBrailleWindow = NULL;
 static int refreshBrailleWindow = 0;
 /* static int debugMode = 0; */
-static uint32_t linearKeys;
+static KeyNumberSet linearKeys;
 
 /*
  * Function unused at the moment
@@ -1203,14 +1203,14 @@ typedef struct {
   int (*handleZKey) (BrailleDisplay *brl, Port *port);
   int (*handleRoutingKey) (BrailleDisplay *brl, Port *port, unsigned char key);
   int (*handlePCKey) (BrailleDisplay *brl, Port *port, int repeat, unsigned char escape, unsigned char key);
-  int (*handleFunctionKeys) (BrailleDisplay *brl, Port *port, uint16_t keys);
+  int (*handleFunctionKeys) (BrailleDisplay *brl, Port *port, KeyNumberSet keys);
   int (*handleBrailleKeys) (BrailleDisplay *brl, Port *port, unsigned int keys);
 } KeyHandlers;
 
 static int
 core_handleZKey(BrailleDisplay *brl, Port *port) {
   logMessage(LOG_DEBUG, DRIVER_LOG_PREFIX "Z key pressed");
-  /* return enqueueKey(IR_SET_NavigationKeys, IR_KEY_Z); */
+  /* return enqueueKey(IR_GRP_NavigationKeys, IR_KEY_Z); */
   protocol = (protocol == IR_PROTOCOL_EUROBRAILLE) ?
     IR_PROTOCOL_NATIVE : IR_PROTOCOL_EUROBRAILLE;
   return 1;
@@ -1218,22 +1218,22 @@ core_handleZKey(BrailleDisplay *brl, Port *port) {
 
 static int
 core_handleRoutingKey(BrailleDisplay *brl, Port *port, unsigned char key) {
-  return enqueueKey(brl, IR_SET_RoutingKeys, key-1);
+  return enqueueKey(brl, IR_GRP_RoutingKeys, key-1);
 }
 
 static int
 core_handlePCKey(BrailleDisplay *brl, Port *port, int repeat, unsigned char escape, unsigned char code) {
-  return enqueueXtScanCode(brl, code, escape, IR_SET_Xt, IR_SET_XtE0, IR_SET_XtE1);
+  return enqueueXtScanCode(brl, code, escape, IR_GRP_Xt, IR_GRP_XtE0, IR_GRP_XtE1);
 }
 
 static int
-core_handleFunctionKeys(BrailleDisplay *brl, Port *port, uint16_t keys) {
-  return enqueueUpdatedKeys(brl, keys, &linearKeys, IR_SET_NavigationKeys, IR_KEY_L1);
+core_handleFunctionKeys(BrailleDisplay *brl, Port *port, KeyNumberSet keys) {
+  return enqueueUpdatedKeys(brl, keys, &linearKeys, IR_GRP_NavigationKeys, IR_KEY_L1);
 }
 
 static int
-core_handleBrailleKeys(BrailleDisplay *brl, Port *port, unsigned int keys) {
-  return enqueueKeys(brl, keys, IR_SET_NavigationKeys, IR_KEY_Dot1);
+core_handleBrailleKeys(BrailleDisplay *brl, Port *port, KeyNumberSet keys) {
+  return enqueueKeys(brl, keys, IR_GRP_NavigationKeys, IR_KEY_Dot1);
 }
 
 static const KeyHandlers coreKeyHandlers = {
@@ -1392,7 +1392,7 @@ eurobrl_handlePCKey(BrailleDisplay *brl, Port *port, int repeat, unsigned char e
 }
 
 static int
-eurobrl_handleFunctionKeys(BrailleDisplay *brl, Port *port, uint16_t keys) {
+eurobrl_handleFunctionKeys(BrailleDisplay *brl, Port *port, KeyNumberSet keys) {
   if (keys) {
     unsigned char data[] = {
       0X4B, 0X43, 0, (
@@ -1408,12 +1408,13 @@ eurobrl_handleFunctionKeys(BrailleDisplay *brl, Port *port, uint16_t keys) {
 }
 
 static int
-eurobrl_handleBrailleKeys(BrailleDisplay *brl, Port *port, unsigned int keys) {
+eurobrl_handleBrailleKeys(BrailleDisplay *brl, Port *port, KeyNumberSet keys) {
   unsigned char data[] = {
     0X4B, 0X42,
     (keys >> 8) & 0XFF,
     keys & 0XFF
   };
+
   return writeEurobraillePacket(brl, port, data, sizeof(data));
 }
 
@@ -1444,7 +1445,8 @@ handleNativePacket (BrailleDisplay *brl, Port *port, const KeyHandlers *keyHandl
     }
 
     if (packet[0] == IR_IPT_LinearKeys) {
-      uint16_t keys = (packet[1] << 8) | packet[2];
+      KeyNumberSet keys = (packet[1] << 8) | packet[2];
+
       return keyHandlers->handleFunctionKeys(brl, port, keys);
     }
 

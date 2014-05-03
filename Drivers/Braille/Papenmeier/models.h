@@ -239,15 +239,15 @@ BEGIN_KEY_NAME_TABLE(keyboard)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(routingKeys1)
-  KEY_SET_ENTRY(PM_SET_RoutingKeys1, "RoutingKey1"),
+  KEY_GROUP_ENTRY(PM_GRP_RoutingKeys1, "RoutingKey1"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(routingKeys2)
-  KEY_SET_ENTRY(PM_SET_RoutingKeys2, "RoutingKey2"),
+  KEY_GROUP_ENTRY(PM_GRP_RoutingKeys2, "RoutingKey2"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(statusKeys2)
-  KEY_SET_ENTRY(PM_SET_StatusKeys2, "StatusKey2"),
+  KEY_GROUP_ENTRY(PM_GRP_StatusKeys2, "StatusKey2"),
 END_KEY_NAME_TABLE
 
 

@@ -42,8 +42,8 @@ typedef enum {
 } CB_NavigationKey;
 
 typedef enum {
-  CB_SET_NavigationKeys = 0,
-  CB_SET_RoutingKeys
-} CB_KeySet;
+  CB_GRP_NavigationKeys = 0,
+  CB_GRP_RoutingKeys
+} CB_KeyGroup;
 
 #endif /* BRLTTY_INCLUDED_CB_BRLDEFS */ 

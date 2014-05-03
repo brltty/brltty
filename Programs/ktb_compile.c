@@ -68,11 +68,11 @@ copyKeyValues (KeyValue *target, const KeyValue *source, unsigned int count) {
 
 int
 compareKeyValues (const KeyValue *value1, const KeyValue *value2) {
-  if (value1->set < value2->set) return -1;
-  if (value1->set > value2->set) return 1;
+  if (value1->group < value2->group) return -1;
+  if (value1->group > value2->group) return 1;
 
-  if (value1->key < value2->key) return -1;
-  if (value1->key > value2->key) return 1;
+  if (value1->number < value2->number) return -1;
+  if (value1->number > value2->number) return 1;
 
   return 0;
 }
@@ -414,12 +414,12 @@ parseKeyName (DataFile *file, KeyValue *value, const wchar_t *characters, int le
       return 0;
     }
 
-    if (value->key != KTB_KEY_ANY) {
+    if (value->number != KTB_KEY_ANY) {
       reportDataError(file, "not a key set: %.*" PRIws, prefixLength, characters);
       return 0;
     }
 
-    value->key = number;
+    value->number = number;
   }
 
   return 1;
@@ -441,7 +441,7 @@ getKeyOperand (DataFile *file, KeyValue *value, KeyTableData *ktd) {
 static int
 newModifierPosition (const KeyCombination *combination, const KeyValue *modifier, unsigned int *position) {
   int found = findKeyValue(combination->modifierKeys, combination->modifierCount, modifier, position);
-  return found && (modifier->key != KTB_KEY_ANY);
+  return found && (modifier->number != KTB_KEY_ANY);
 }
 
 static int
@@ -499,7 +499,7 @@ parseKeyCombination (DataFile *file, KeyCombination *combination, const wchar_t 
         }
 
         if (!insertModifier(file, combination, position, &value)) return 0;
-        if (value.key == KTB_KEY_ANY) combination->anyKeyCount += 1;
+        if (value.number == KTB_KEY_ANY) combination->anyKeyCount += 1;
       }
 
       length -= count + 1;
@@ -533,7 +533,7 @@ parseKeyCombination (DataFile *file, KeyCombination *combination, const wchar_t 
     } else if (!insertModifier(file, combination, position, &value)) {
       return 0;
     }
-    if (value.key == KTB_KEY_ANY) combination->anyKeyCount += 1;
+    if (value.number == KTB_KEY_ANY) combination->anyKeyCount += 1;
   }
 
   return 1;
@@ -1011,7 +1011,7 @@ static DATA_OPERANDS_PROCESSOR(processMapOperands) {
   memset(&map, 0, sizeof(map));
 
   if (getKeyOperand(file, &map.keyValue, ktd)) {
-    if (map.keyValue.key != KTB_KEY_ANY) {
+    if (map.keyValue.number != KTB_KEY_ANY) {
       if (getKeyboardFunctionOperand(file, &map.keyboardFunction, ktd)) {
         unsigned int newCount = ctx->mappedKeys.count + 1;
         MappedKeyEntry *newTable = realloc(ctx->mappedKeys.table, ARRAY_SIZE(newTable, newCount));
@@ -1145,8 +1145,8 @@ resetLongPressData (KeyTable *table) {
 
   table->longPress.keyAction = NULL;
   table->longPress.keyContext = KTB_CTX_DEFAULT;
-  table->longPress.keyValue.set = 0;
-  table->longPress.keyValue.key = KTB_KEY_ANY;
+  table->longPress.keyValue.group = 0;
+  table->longPress.keyValue.number = KTB_KEY_ANY;
 }
 
 void

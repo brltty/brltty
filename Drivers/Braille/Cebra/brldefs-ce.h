@@ -63,8 +63,8 @@ typedef enum {
 } CE_NavigationKey;
 
 typedef enum {
-  CE_SET_NavigationKey,
-  CE_SET_RoutingKey
-} CE_KeySet;
+  CE_GRP_NavigationKey,
+  CE_GRP_RoutingKey
+} CE_KeyGroup;
 
 #endif /* BRLTTY_INCLUDED_CE_BRLDEFS */ 

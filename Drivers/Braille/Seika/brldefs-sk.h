@@ -60,8 +60,8 @@ typedef enum {
 } SK_NoteTakerKey;
 
 typedef enum {
-  SK_SET_NavigationKeys = 0,
-  SK_SET_RoutingKeys
-} SK_KeySet;
+  SK_GRP_NavigationKeys = 0,
+  SK_GRP_RoutingKeys
+} SK_KeyGroup;
 
 #endif /* BRLTTY_INCLUDED_SK_BRLDEFS */ 

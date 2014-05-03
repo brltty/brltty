@@ -42,9 +42,9 @@
 #include "io_misc.h"
 #include "parse.h"
 
-#define BG_SET_VALUE(value) (((value) >> 8) & 0XFF)
-#define BG_KEY_VALUE(value) (((value) >> 0) & 0XFF)
-#define BG_KEY_ENTRY(n) {.name=#n, .value={.set=BG_SET_VALUE(BG_KEY_##n), .key=BG_KEY_VALUE(BG_KEY_##n)}}
+#define BG_KEY_GROUP(code) (((code) >> 8) & 0XFF)
+#define BG_KEY_NUMBER(code) (((code) >> 0) & 0XFF)
+#define BG_KEY_ENTRY(n) {.name=#n, .value={.group=BG_KEY_GROUP(BG_KEY_##n), .number=BG_KEY_NUMBER(BG_KEY_##n)}}
 
 BEGIN_KEY_NAME_TABLE(navigation)
   BG_KEY_ENTRY(Left),
@@ -66,7 +66,7 @@ BEGIN_KEY_NAME_TABLE(navigation)
   BG_KEY_ENTRY(Dot8),
   BG_KEY_ENTRY(Space),
 
-  KEY_SET_ENTRY(BG_SET_RoutingKeys, "RoutingKey"),
+  KEY_GROUP_ENTRY(BG_GRP_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(all)
@@ -307,16 +307,16 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
     if (event.type != EV_KEY) continue;
 
     {
-      unsigned char set;
-      unsigned char key;
+      KeyGroup group;
+      KeyNumber number;
       int press;
 
       if ((event.code >= BG_KEY_ROUTE) && (event.code < (BG_KEY_ROUTE + brl->textColumns))) {
-        set = BG_SET_RoutingKeys;
-        key = event.code - BG_KEY_ROUTE;
+        group = BG_GRP_RoutingKeys;
+        number = event.code - BG_KEY_ROUTE;
       } else {
-        set = BG_SET_VALUE(event.code);
-        key = BG_KEY_VALUE(event.code);
+        group = BG_KEY_GROUP(event.code);
+        number = BG_KEY_NUMBER(event.code);
       }
 
       switch (event.value) {
@@ -333,14 +333,14 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       }
 
       if ((event.code >= BG_KEY_ROUTE) && (event.code < (BG_KEY_ROUTE + brl->textColumns))) {
-        set = 2;
-        key = event.code - BG_KEY_ROUTE;
+        group = 2;
+        number = event.code - BG_KEY_ROUTE;
       } else {
-        set = BG_SET_VALUE(event.code);
-        key = BG_KEY_VALUE(event.code);
+        group = BG_KEY_GROUP(event.code);
+        number = BG_KEY_NUMBER(event.code);
       }
 
-      enqueueKeyEvent(brl, set, key, press);
+      enqueueKeyEvent(brl, group, number, press);
     }
   }
 

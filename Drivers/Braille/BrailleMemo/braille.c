@@ -30,7 +30,7 @@
 #define PROBE_INPUT_TIMEOUT 1000
 #define START_INPUT_TIMEOUT 1000
 
-#define MM_KEY_SET_ENTRY(s,n) BRL_KEY_SET_ENTRY(MM, s, n)
+#define MM_KEY_GROUP_ENTRY(s,n) BRL_KEY_GROUP_ENTRY(MM, s, n)
 #define MM_KEY_NAME_ENTRY(s,k,n) BRL_KEY_NAME_ENTRY(MM, s, k, n)
 
 #define MM_SHIFT_KEY_ENTRY(k,n) MM_KEY_NAME_ENTRY(SHIFT, k, n)
@@ -87,7 +87,7 @@ BEGIN_KEY_NAME_TABLE(arrow)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(route)
-  MM_KEY_SET_ENTRY(ROUTE, "RoutingKey"),
+  MM_KEY_GROUP_ENTRY(ROUTE, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(display)
@@ -369,36 +369,36 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       switch (packet.fields.header.code) {
         case MM_CMD_KeyCombination:
           switch (packet.fields.data.keys.group) {
-            case MM_SET_SHIFT:
+            case MM_GRP_SHIFT:
               if (!packet.fields.data.keys.value) {
-                enqueueKeys(brl, packet.fields.data.keys.shift, MM_SET_SHIFT, 0);
+                enqueueKeys(brl, packet.fields.data.keys.shift, MM_GRP_SHIFT, 0);
                 continue;
               }
               break;
 
-            case MM_SET_DOT:
-            case MM_SET_EDIT:
-            case MM_SET_ARROW:
-            case MM_SET_DISPLAY:
+            case MM_GRP_DOT:
+            case MM_GRP_EDIT:
+            case MM_GRP_ARROW:
+            case MM_GRP_DISPLAY:
             {
-              uint32_t shift = 0;
+              KeyNumberSet shift = 0;
 
-              enqueueUpdatedKeys(brl, packet.fields.data.keys.shift, &shift, MM_SET_SHIFT, 0);
+              enqueueUpdatedKeys(brl, packet.fields.data.keys.shift, &shift, MM_GRP_SHIFT, 0);
               enqueueKeys(brl, packet.fields.data.keys.value, packet.fields.data.keys.group, 0);
-              enqueueUpdatedKeys(brl, 0, &shift, MM_SET_SHIFT, 0);
+              enqueueUpdatedKeys(brl, 0, &shift, MM_GRP_SHIFT, 0);
               continue;
             }
 
-            case MM_SET_ROUTE:
+            case MM_GRP_ROUTE:
             {
               unsigned char key = packet.fields.data.keys.value;
 
               if ((key > 0) && (key <= brl->textColumns)) {
-                uint32_t shift = 0;
+                KeyNumberSet shift = 0;
 
-                enqueueUpdatedKeys(brl, packet.fields.data.keys.shift, &shift, MM_SET_SHIFT, 0);
+                enqueueUpdatedKeys(brl, packet.fields.data.keys.shift, &shift, MM_GRP_SHIFT, 0);
                 enqueueKey(brl, packet.fields.data.keys.group, key-1);
-                enqueueUpdatedKeys(brl, 0, &shift, MM_SET_SHIFT, 0);
+                enqueueUpdatedKeys(brl, 0, &shift, MM_GRP_SHIFT, 0);
                 continue;
               }
 

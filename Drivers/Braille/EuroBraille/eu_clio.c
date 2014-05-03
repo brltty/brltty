@@ -86,7 +86,7 @@ END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(interactive)
   INTERACTIVE_KEY_ENTRY(Dollar, "Dollar"),
-  KEY_SET_ENTRY(EU_SET_RoutingKeys1, "RoutingKey"),
+  KEY_GROUP_ENTRY(EU_GRP_RoutingKeys1, "RoutingKey"),
   INTERACTIVE_KEY_ENTRY(U, "U"),
   INTERACTIVE_KEY_ENTRY(V, "V"),
   INTERACTIVE_KEY_ENTRY(W, "W"),
@@ -609,8 +609,9 @@ static int
 handleKeyEvent (BrailleDisplay *brl, const unsigned char *packet) {
   switch (packet[0]) {
     case 'B': {
-      unsigned int keys = ((packet[2] << 8) | packet[1]) & 0X3FF;
-      enqueueKeys(brl, keys, EU_SET_BrailleKeys, 0);
+      KeyNumberSet keys = ((packet[2] << 8) | packet[1]) & 0X3FF;
+
+      enqueueKeys(brl, keys, EU_GRP_BrailleKeys, 0);
       return 1;
     }
 
@@ -618,16 +619,16 @@ handleKeyEvent (BrailleDisplay *brl, const unsigned char *packet) {
       unsigned char key = packet[1];
 
       if ((key >= 1) && (key <= brl->textColumns)) {
-        enqueueKey(brl, EU_SET_RoutingKeys1, key-1);
+        enqueueKey(brl, EU_GRP_RoutingKeys1, key-1);
       } else {
-        enqueueKey(brl, EU_SET_InteractiveKeys, key);
+        enqueueKey(brl, EU_GRP_InteractiveKeys, key);
       }
 
       return 1;
     }
 
     case 'T': 
-      enqueueKey(brl, EU_SET_NavigationKeys, packet[1]);
+      enqueueKey(brl, EU_GRP_NavigationKeys, packet[1]);
       return 1;
 
     default :

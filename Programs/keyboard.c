@@ -189,9 +189,9 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
   if ((code >= 0) && (code < keyCodeLimit)) {
     const KeyValue *kv = &keyCodeMap[code];
 
-    if ((kv->set != KBD_SET_SPECIAL) || (kv->key != KBD_KEY_SPECIAL_Unmapped)) {
-      if ((kv->set == KBD_SET_SPECIAL) && (kv->key == KBD_KEY_SPECIAL_Ignore)) return;
-      state = kid->kcd->handleKeyEvent(kv->set, kv->key, press);
+    if ((kv->group != KBD_GRP_SPECIAL) || (kv->number != KBD_KEY_SPECIAL_Unmapped)) {
+      if ((kv->group == KBD_GRP_SPECIAL) && (kv->number == KBD_KEY_SPECIAL_Ignore)) return;
+      state = kid->kcd->handleKeyEvent(kv->group, kv->number, press);
     }
   }
 

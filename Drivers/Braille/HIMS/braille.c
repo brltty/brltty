@@ -29,7 +29,7 @@
 #define MAXIMUM_CELL_COUNT 40
 
 BEGIN_KEY_NAME_TABLE(routing)
-  KEY_SET_ENTRY(HM_SET_RoutingKeys, "RoutingKey"),
+  KEY_GROUP_ENTRY(HM_GRP_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(dots)
@@ -528,17 +528,17 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       case IPT_CURSOR: {
         unsigned char key = packet.data.data;
 
-        enqueueKey(brl, HM_SET_RoutingKeys, key);
+        enqueueKey(brl, HM_GRP_RoutingKeys, key);
         continue;
       }
 
       case IPT_KEYS: {
-        uint32_t bits = (packet.data.reserved[0] << 0X00)
-                      | (packet.data.reserved[1] << 0X08)
-                      | (packet.data.reserved[2] << 0X10)
-                      | (packet.data.reserved[3] << 0X18);
+        KeyNumberSet bits = (packet.data.reserved[0] << 0X00)
+                          | (packet.data.reserved[1] << 0X08)
+                          | (packet.data.reserved[2] << 0X10)
+                          | (packet.data.reserved[3] << 0X18);
 
-        enqueueKeys(brl, bits, HM_SET_NavigationKeys, 0);
+        enqueueKeys(brl, bits, HM_GRP_NavigationKeys, 0);
         continue;
       }
 

@@ -52,7 +52,7 @@ BEGIN_KEY_NAME_TABLE(all)
   KEY_NAME_ENTRY(BN_KEY_Advance, "Advance"),
   KEY_NAME_ENTRY(BN_KEY_Next, "Next"),
 
-  KEY_SET_ENTRY(BN_SET_RoutingKeys, "RoutingKey"),
+  KEY_GROUP_ENTRY(BN_GRP_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(all)
@@ -435,7 +435,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   while ((size = getPacket(brl, &packet))) {
     switch (packet.data.code) {
       case BN_RSP_ROUTE:
-        enqueueKey(brl, BN_SET_RoutingKeys, packet.data.values.routingKey);
+        enqueueKey(brl, BN_GRP_RoutingKeys, packet.data.values.routingKey);
         break;
 
       case BN_RSP_DISPLAY:
@@ -443,10 +443,10 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         break;
 
       default: {
-        unsigned char set = BN_SET_NavigationKeys;
-        unsigned char keys = packet.data.values.dotKeys & 0X3F;
-        unsigned char base = BN_KEY_Dot1;
-        unsigned char modifier = 0;
+        const KeyGroup group = BN_GRP_NavigationKeys;
+        KeyNumberSet keys = packet.data.values.dotKeys & 0X3F;
+        KeyNumber base = BN_KEY_Dot1;
+        KeyNumber modifier = 0;
 
         switch (packet.data.code) {
           case BN_RSP_CHARACTER:
@@ -474,9 +474,9 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
             continue;
         }
 
-        if (modifier) enqueueKeyEvent(brl, set, modifier, 1);
-        enqueueKeys(brl, keys, set, base);
-        if (modifier) enqueueKeyEvent(brl, set, modifier, 0);
+        if (modifier) enqueueKeyEvent(brl, group, modifier, 1);
+        enqueueKeys(brl, keys, group, base);
+        if (modifier) enqueueKeyEvent(brl, group, modifier, 0);
         break;
       }
     }

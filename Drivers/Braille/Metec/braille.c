@@ -61,19 +61,19 @@ BEGIN_KEY_NAME_TABLE(front)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(routing1)
-  KEY_SET_ENTRY(MT_SET_RoutingKeys1, "RoutingKey"),
+  KEY_GROUP_ENTRY(MT_GRP_RoutingKeys1, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(status1)
-  KEY_SET_ENTRY(MT_SET_StatusKeys1, "StatusKey"),
+  KEY_GROUP_ENTRY(MT_GRP_StatusKeys1, "StatusKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(routing2)
-  KEY_SET_ENTRY(MT_SET_RoutingKeys2, "RoutingKey2"),
+  KEY_GROUP_ENTRY(MT_GRP_RoutingKeys2, "RoutingKey2"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(status2)
-  KEY_SET_ENTRY(MT_SET_StatusKeys2, "StatusKey2"),
+  KEY_GROUP_ENTRY(MT_GRP_StatusKeys2, "StatusKey2"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(bd1_3)
@@ -150,8 +150,8 @@ struct BrailleDataStruct {
   int writeModule[MT_MODULES_MAXIMUM];
   unsigned char moduleCount;
 
-  KeyValueSet allNavigationKeys;
-  KeyValueSet pressedNavigationKeys;
+  KeyNumberSet allNavigationKeys;
+  KeyNumberSet pressedNavigationKeys;
   unsigned char routingKey;
 
   union {
@@ -182,39 +182,39 @@ setCellCount (BrailleDisplay *brl, unsigned char count) {
 }
 
 static void
-handleNavigationKeys (BrailleDisplay *brl, KeyValueSet keys) {
+handleNavigationKeys (BrailleDisplay *brl, KeyNumberSet keys) {
   keys &= brl->data->allNavigationKeys;
-  enqueueUpdatedKeys(brl, keys, &brl->data->pressedNavigationKeys, MT_SET_NavigationKeys, 0);
+  enqueueUpdatedKeys(brl, keys, &brl->data->pressedNavigationKeys, MT_GRP_NavigationKeys, 0);
 }
 
 static void
 handleRoutingKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
   if (key != MT_ROUTING_KEYS_NONE) {
-    MT_KeySet set;
+    KeyGroup group;
 
     {
-      MT_KeySet routing;
-      MT_KeySet status;
+      KeyGroup routing;
+      KeyGroup status;
 
       if (key < MT_ROUTING_KEYS_SECONDARY) {
-        routing = MT_SET_RoutingKeys1;
-        status = MT_SET_StatusKeys1;
+        routing = MT_GRP_RoutingKeys1;
+        status = MT_GRP_StatusKeys1;
       } else {
         key -= MT_ROUTING_KEYS_SECONDARY;
-        routing = MT_SET_RoutingKeys2;
-        status = MT_SET_StatusKeys2;
+        routing = MT_GRP_RoutingKeys2;
+        status = MT_GRP_StatusKeys2;
       }
 
       if (key < brl->data->statusCount) {
-        set = status;
+        group = status;
       } else if ((key -= brl->data->statusCount) < brl->data->textCount) {
-        set = routing;
+        group = routing;
       } else {
         return;
       }
     }
 
-    enqueueKeyEvent(brl, set, key, press);
+    enqueueKeyEvent(brl, group, key, press);
   }
 }
 
@@ -407,7 +407,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                                             &KEY_TABLE_DEFINITION(bd1_6);
             }
 
-            brl->data->allNavigationKeys = makeKeyValueSet(ktd->names, MT_SET_NavigationKeys);
+            brl->data->allNavigationKeys = makeKeyNumberSet(ktd->names, MT_GRP_NavigationKeys);
             brl->keyBindings = ktd->bindings;
             brl->keyNameTables = ktd->names;
           }

@@ -53,8 +53,8 @@ typedef enum {
 } HD_KeyCode_MobilLine;
 
 typedef enum {
-  HD_SET_NavigationKeys,
-  HD_SET_RoutingKeys
-} HD_KeySet;
+  HD_GRP_NavigationKeys,
+  HD_GRP_RoutingKeys
+} HD_KeyGroup;
 
 #endif /* BRLTTY_INCLUDED_HD_BRLDEFS */ 

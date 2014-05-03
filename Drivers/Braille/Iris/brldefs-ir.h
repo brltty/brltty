@@ -78,11 +78,11 @@ typedef enum {
 } IR_NavigationKey;
 
 typedef enum {
-  IR_SET_NavigationKeys = 0,
-  IR_SET_RoutingKeys,
-  IR_SET_Xt,
-  IR_SET_XtE0,
-  IR_SET_XtE1
-} IR_KeySet;
+  IR_GRP_NavigationKeys = 0,
+  IR_GRP_RoutingKeys,
+  IR_GRP_Xt,
+  IR_GRP_XtE0,
+  IR_GRP_XtE1
+} IR_KeyGroup;
 
 #endif /* BRLTTY_INCLUDED_IR_BRLDEFS */ 

@@ -70,7 +70,7 @@ api_handleCommand (int command) {
 }
 
 int
-api_handleKeyEvent (unsigned char set, unsigned char key, int press) {
+api_handleKeyEvent (KeyGroup group, KeyNumber number, int press) {
   return 0;
 }
 
