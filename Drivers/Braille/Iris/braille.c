@@ -1204,7 +1204,7 @@ typedef struct {
   int (*handleRoutingKey) (BrailleDisplay *brl, Port *port, unsigned char key);
   int (*handlePCKey) (BrailleDisplay *brl, Port *port, int repeat, unsigned char escape, unsigned char key);
   int (*handleFunctionKeys) (BrailleDisplay *brl, Port *port, KeyNumberSet keys);
-  int (*handleBrailleKeys) (BrailleDisplay *brl, Port *port, unsigned int keys);
+  int (*handleBrailleKeys) (BrailleDisplay *brl, Port *port, KeyNumberSet keys);
 } KeyHandlers;
 
 static int
