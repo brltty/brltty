@@ -20,7 +20,7 @@
 #define BRLTTY_INCLUDED_MT_BRLDEFS
 
 typedef enum {
-  /* byte 2 */
+  /* status[2] */
   MT_KEY_LeftUp      =  6,
   MT_KEY_LeftSelect  =  4,
   MT_KEY_LeftDown    =  2,
@@ -28,11 +28,11 @@ typedef enum {
   MT_KEY_RightSelect =  1,
   MT_KEY_RightDown   =  0,
 
-  /* byte 3 */
-  MT_KEY_CursorLeft  = 10, // S7
-  MT_KEY_CursorUp    = 11, // S8
-  MT_KEY_CursorRight = 12, // S9
-  MT_KEY_CursorDown  = 14  // S10
+  /* status[3] (front keys from left to right) */
+  MT_KEY_CursorLeft  = 10,
+  MT_KEY_CursorDown  = 14,
+  MT_KEY_CursorUp    = 11,
+  MT_KEY_CursorRight = 12
 } MT_NavigationKey;
 
 typedef enum {
