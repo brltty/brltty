@@ -25,323 +25,11 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef enum {
-  KBD_KEY_SPECIAL_Unmapped = 0 /* for KBD_KEY_UNMAPPED */,
-  KBD_KEY_SPECIAL_Ignore,
-} KBD_SpecialKey;
+#define KBD_GROUP(grp) KBD_GRP_##grp
+#define KBD_KEY(grp,key) KBD_KEY_##grp##_##key
 
-typedef enum {
-  KBD_KEY_LETTER_A,
-  KBD_KEY_LETTER_B,
-  KBD_KEY_LETTER_C,
-  KBD_KEY_LETTER_D,
-  KBD_KEY_LETTER_E,
-  KBD_KEY_LETTER_F,
-  KBD_KEY_LETTER_G,
-  KBD_KEY_LETTER_H,
-  KBD_KEY_LETTER_I,
-  KBD_KEY_LETTER_J,
-  KBD_KEY_LETTER_K,
-  KBD_KEY_LETTER_L,
-  KBD_KEY_LETTER_M,
-  KBD_KEY_LETTER_N,
-  KBD_KEY_LETTER_O,
-  KBD_KEY_LETTER_P,
-  KBD_KEY_LETTER_Q,
-  KBD_KEY_LETTER_R,
-  KBD_KEY_LETTER_S,
-  KBD_KEY_LETTER_T,
-  KBD_KEY_LETTER_U,
-  KBD_KEY_LETTER_V,
-  KBD_KEY_LETTER_W,
-  KBD_KEY_LETTER_X,
-  KBD_KEY_LETTER_Y,
-  KBD_KEY_LETTER_Z,
-} KBD_LetterKey;
-
-typedef enum {
-  KBD_KEY_NUMBER_Zero,
-  KBD_KEY_NUMBER_One,
-  KBD_KEY_NUMBER_Two,
-  KBD_KEY_NUMBER_Three,
-  KBD_KEY_NUMBER_Four,
-  KBD_KEY_NUMBER_Five,
-  KBD_KEY_NUMBER_Six,
-  KBD_KEY_NUMBER_Seven,
-  KBD_KEY_NUMBER_Eight,
-  KBD_KEY_NUMBER_Nine,
-} KBD_NumberKey;
-
-typedef enum {
-  KBD_KEY_SYMBOL_Grave,
-  KBD_KEY_SYMBOL_Minus,
-  KBD_KEY_SYMBOL_Equals,
-  KBD_KEY_SYMBOL_Backslash,
-
-  KBD_KEY_SYMBOL_LeftBracket,
-  KBD_KEY_SYMBOL_RightBracket,
-
-  KBD_KEY_SYMBOL_Semicolon,
-  KBD_KEY_SYMBOL_Apostrophe,
-
-  KBD_KEY_SYMBOL_Europe2,
-  KBD_KEY_SYMBOL_Comma,
-  KBD_KEY_SYMBOL_Period,
-  KBD_KEY_SYMBOL_Slash,
-
-  KBD_KEY_SYMBOL_Space,
-} KBD_SymbolKey;
-
-typedef enum {
-  KBD_KEY_ACTION_Enter,
-  KBD_KEY_ACTION_Tab,
-  KBD_KEY_ACTION_Escape,
-
-  KBD_KEY_ACTION_Insert,
-  KBD_KEY_ACTION_DeleteBackward,
-  KBD_KEY_ACTION_DeleteForward,
-
-  KBD_KEY_ACTION_Home,
-  KBD_KEY_ACTION_End,
-
-  KBD_KEY_ACTION_PageUp,
-  KBD_KEY_ACTION_PageDown,
-
-  KBD_KEY_ACTION_ArrowUp,
-  KBD_KEY_ACTION_ArrowDown,
-  KBD_KEY_ACTION_ArrowLeft,
-  KBD_KEY_ACTION_ArrowRight,
-
-  KBD_KEY_ACTION_PrintScreen,
-  KBD_KEY_ACTION_SystemRequest,
-  KBD_KEY_ACTION_Pause,
-
-  KBD_KEY_ACTION_GuiLeft,
-  KBD_KEY_ACTION_GuiRight,
-  KBD_KEY_ACTION_Application,
-
-  KBD_KEY_ACTION_Help,
-  KBD_KEY_ACTION_Stop,
-  KBD_KEY_ACTION_Props,
-  KBD_KEY_ACTION_Front,
-  KBD_KEY_ACTION_Open,
-  KBD_KEY_ACTION_Find,
-  KBD_KEY_ACTION_Again,
-  KBD_KEY_ACTION_Undo,
-  KBD_KEY_ACTION_Copy,
-  KBD_KEY_ACTION_Paste,
-  KBD_KEY_ACTION_Cut,
-
-  KBD_KEY_ACTION_Power,
-  KBD_KEY_ACTION_Sleep,
-  KBD_KEY_ACTION_Wakeup,
-
-  KBD_KEY_ACTION_Menu,
-  KBD_KEY_ACTION_Select,
-
-  KBD_KEY_ACTION_Cancel,
-  KBD_KEY_ACTION_Clear,
-  KBD_KEY_ACTION_Prior,
-  KBD_KEY_ACTION_Return,
-  KBD_KEY_ACTION_Separator,
-  KBD_KEY_ACTION_Out,
-  KBD_KEY_ACTION_Oper,
-  KBD_KEY_ACTION_Clear_Again,
-  KBD_KEY_ACTION_CrSel_Props,
-  KBD_KEY_ACTION_ExSel,
-} KBD_ActionKey;
-
-typedef enum {
-  KBD_KEY_MEDIA_Mute,
-  KBD_KEY_MEDIA_VolumeDown,
-  KBD_KEY_MEDIA_VolumeUp,
-
-  KBD_KEY_MEDIA_Stop,
-  KBD_KEY_MEDIA_Play,
-  KBD_KEY_MEDIA_Record,
-  KBD_KEY_MEDIA_Pause,
-  KBD_KEY_MEDIA_PlayPause,
-
-  KBD_KEY_MEDIA_Previous,
-  KBD_KEY_MEDIA_Next,
-  KBD_KEY_MEDIA_Backward,
-  KBD_KEY_MEDIA_Forward,
-
-  KBD_KEY_MEDIA_Eject,
-  KBD_KEY_MEDIA_Close,
-  KBD_KEY_MEDIA_EjectClose,
-} KBD_MediaKey;
-
-typedef enum {
-  KBD_KEY_FUNCTION_F1,
-  KBD_KEY_FUNCTION_F2,
-  KBD_KEY_FUNCTION_F3,
-  KBD_KEY_FUNCTION_F4,
-  KBD_KEY_FUNCTION_F5,
-  KBD_KEY_FUNCTION_F6,
-  KBD_KEY_FUNCTION_F7,
-  KBD_KEY_FUNCTION_F8,
-  KBD_KEY_FUNCTION_F9,
-  KBD_KEY_FUNCTION_F10,
-  KBD_KEY_FUNCTION_F11,
-  KBD_KEY_FUNCTION_F12,
-  KBD_KEY_FUNCTION_F13,
-  KBD_KEY_FUNCTION_F14,
-  KBD_KEY_FUNCTION_F15,
-  KBD_KEY_FUNCTION_F16,
-  KBD_KEY_FUNCTION_F17,
-  KBD_KEY_FUNCTION_F18,
-  KBD_KEY_FUNCTION_F19,
-  KBD_KEY_FUNCTION_F20,
-  KBD_KEY_FUNCTION_F21,
-  KBD_KEY_FUNCTION_F22,
-  KBD_KEY_FUNCTION_F23,
-  KBD_KEY_FUNCTION_F24,
-} KBD_FunctionKey;
-
-typedef enum {
-  KBD_KEY_MODIFIER_ShiftLeft,
-  KBD_KEY_MODIFIER_ShiftRight,
-
-  KBD_KEY_MODIFIER_ControlLeft,
-  KBD_KEY_MODIFIER_ControlRight,
-
-  KBD_KEY_MODIFIER_AltLeft,
-  KBD_KEY_MODIFIER_AltRight,
-} KBD_ModifierKey;
-
-typedef enum {
-  KBD_KEY_LOCK_Capitals,
-  KBD_KEY_LOCK_Scroll,
-  KBD_KEY_LOCK_Numbers,
-} KBD_LockKey;
-
-typedef enum {
-  KBD_KEY_KPNUMBER_Zero,
-  KBD_KEY_KPNUMBER_One,
-  KBD_KEY_KPNUMBER_Two,
-  KBD_KEY_KPNUMBER_Three,
-  KBD_KEY_KPNUMBER_Four,
-  KBD_KEY_KPNUMBER_Five,
-  KBD_KEY_KPNUMBER_Six,
-  KBD_KEY_KPNUMBER_Seven,
-  KBD_KEY_KPNUMBER_Eight,
-  KBD_KEY_KPNUMBER_Nine,
-
-  KBD_KEY_KPNUMBER_A,
-  KBD_KEY_KPNUMBER_B,
-  KBD_KEY_KPNUMBER_C,
-  KBD_KEY_KPNUMBER_D,
-  KBD_KEY_KPNUMBER_E,
-  KBD_KEY_KPNUMBER_F,
-} KBD_KPNumberKey;
-
-typedef enum {
-  KBD_KEY_KPSYMBOL_DecimalSeparator,
-  KBD_KEY_KPSYMBOL_ThousandsSeparator,
-  KBD_KEY_KPSYMBOL_00,
-  KBD_KEY_KPSYMBOL_000,
-
-  KBD_KEY_KPSYMBOL_Plus,
-  KBD_KEY_KPSYMBOL_Minus,
-  KBD_KEY_KPSYMBOL_Multiply,
-  KBD_KEY_KPSYMBOL_Divide,
-  KBD_KEY_KPSYMBOL_Modulo,
-
-  KBD_KEY_KPSYMBOL_Equals,
-  KBD_KEY_KPSYMBOL_Less,
-  KBD_KEY_KPSYMBOL_Greater,
-  KBD_KEY_KPSYMBOL_PlusMinus,
-
-  KBD_KEY_KPSYMBOL_LeftParenthesis,
-  KBD_KEY_KPSYMBOL_RightParenthesis,
-  KBD_KEY_KPSYMBOL_LeftBrace,
-  KBD_KEY_KPSYMBOL_RightBrace,
-
-  KBD_KEY_KPSYMBOL_BitwiseAnd,
-  KBD_KEY_KPSYMBOL_BitwiseOr,
-  KBD_KEY_KPSYMBOL_BitwiseXor,
-
-  KBD_KEY_KPSYMBOL_BooleanNot,
-  KBD_KEY_KPSYMBOL_BooleanAnd,
-  KBD_KEY_KPSYMBOL_BooleanOr,
-  KBD_KEY_KPSYMBOL_BooleanXor,
-
-  KBD_KEY_KPSYMBOL_Space,
-  KBD_KEY_KPSYMBOL_Period,
-  KBD_KEY_KPSYMBOL_Comma,
-  KBD_KEY_KPSYMBOL_Colon,
-  KBD_KEY_KPSYMBOL_At,
-  KBD_KEY_KPSYMBOL_Number,
-  KBD_KEY_KPSYMBOL_CurrencyUnit,
-  KBD_KEY_KPSYMBOL_CurrencySubunit,
-} KBD_KPSymbolKey;
-
-typedef enum {
-  KBD_KEY_KPACTION_Enter,
-  KBD_KEY_KPACTION_Backspace,
-  KBD_KEY_KPACTION_Tab,
-
-  KBD_KEY_KPACTION_Clear,
-  KBD_KEY_KPACTION_ClearEntry,
-
-  KBD_KEY_KPACTION_MemoryClear,
-  KBD_KEY_KPACTION_MemoryStore,
-  KBD_KEY_KPACTION_MemoryRecall,
-  KBD_KEY_KPACTION_MemoryAdd,
-  KBD_KEY_KPACTION_MemorySubtract,
-  KBD_KEY_KPACTION_MemoryMultiply,
-  KBD_KEY_KPACTION_MemoryDivide,
-
-  KBD_KEY_KPACTION_Binary,
-  KBD_KEY_KPACTION_Octal,
-  KBD_KEY_KPACTION_Decimal,
-  KBD_KEY_KPACTION_Hexadecimal,
-} KBD_KPActionKey;
-
-typedef enum {
-  KBD_KEY_BRAILLE_Space,
-
-  KBD_KEY_BRAILLE_Dot1,
-  KBD_KEY_BRAILLE_Dot2,
-  KBD_KEY_BRAILLE_Dot3,
-  KBD_KEY_BRAILLE_Dot4,
-  KBD_KEY_BRAILLE_Dot5,
-  KBD_KEY_BRAILLE_Dot6,
-  KBD_KEY_BRAILLE_Dot7,
-  KBD_KEY_BRAILLE_Dot8,
-
-  KBD_KEY_BRAILLE_Backward,
-  KBD_KEY_BRAILLE_Forward,
-} KBD_BrailleKey;
-
-typedef enum {
-  KBD_GRP_SPECIAL = 0 /* for KBD_KEY_UNMAPPED */,
-
-  KBD_GRP_LETTER,
-  KBD_GRP_NUMBER,
-  KBD_GRP_SYMBOL,
-
-  KBD_GRP_ACTION,
-  KBD_GRP_MEDIA,
-  KBD_GRP_FUNCTION,
-
-  KBD_GRP_MODIFIER,
-  KBD_GRP_LOCK,
-
-  KBD_GRP_KPNUMBER,
-  KBD_GRP_KPSYMBOL,
-  KBD_GRP_KPACTION,
-
-  KBD_GRP_BRAILLE,
-  KBD_GRP_ROUTING,
-} KBD_KeyGroup;
-
-#define KBD_GROUP_IDENTIFIER(grp) KBD_GRP_##grp
-#define KBD_KEY_IDENTIFIER(grp,key) KBD_KEY_##grp##_##key
-
-#define KBD_KEY_VALUE(grp,num) {.group=KBD_GROUP_IDENTIFIER(grp), .number=num}
-#define KBD_KEY_ENTRY(grp,key) KBD_KEY_VALUE(grp, KBD_KEY_IDENTIFIER(grp, key))
+#define KBD_KEY_VALUE(grp,num) {.group=KBD_GROUP(grp), .number=num}
+#define KBD_KEY_ENTRY(grp,key) KBD_KEY_VALUE(grp, KBD_KEY(grp, key))
 
 #define KBD_GROUP_NAME(grp,nam) {.value=KBD_KEY_VALUE(grp, KTB_KEY_ANY), .name=nam}
 #define KBD_KEY_NAME(grp,key,nam) {.value=KBD_KEY_ENTRY(grp, key), .name=nam}
@@ -367,6 +55,318 @@ typedef enum {
 
 #define KBD_KEY_BRAILLE(name) KBD_KEY_ENTRY(BRAILLE, name)
 #define KBD_KEY_ROUTING(number) KBD_KEY_VALUE(ROUTING, (number))
+
+typedef enum {
+  KBD_GROUP(SPECIAL) = 0 /* KBD_KEY_UNMAPPED must be all zeros */,
+
+  KBD_GROUP(LETTER),
+  KBD_GROUP(NUMBER),
+  KBD_GROUP(SYMBOL),
+
+  KBD_GROUP(ACTION),
+  KBD_GROUP(MEDIA),
+  KBD_GROUP(FUNCTION),
+
+  KBD_GROUP(MODIFIER),
+  KBD_GROUP(LOCK),
+
+  KBD_GROUP(KPNUMBER),
+  KBD_GROUP(KPSYMBOL),
+  KBD_GROUP(KPACTION),
+
+  KBD_GROUP(BRAILLE),
+  KBD_GROUP(ROUTING),
+} KBD_KeyGroup;
+
+typedef enum {
+  KBD_KEY(SPECIAL, Unmapped) = 0 /* KBD_KEY_UNMAPPED must be all zeros */,
+  KBD_KEY(SPECIAL, Ignore),
+} KBD_SpecialKey;
+
+typedef enum {
+  KBD_KEY(LETTER, A),
+  KBD_KEY(LETTER, B),
+  KBD_KEY(LETTER, C),
+  KBD_KEY(LETTER, D),
+  KBD_KEY(LETTER, E),
+  KBD_KEY(LETTER, F),
+  KBD_KEY(LETTER, G),
+  KBD_KEY(LETTER, H),
+  KBD_KEY(LETTER, I),
+  KBD_KEY(LETTER, J),
+  KBD_KEY(LETTER, K),
+  KBD_KEY(LETTER, L),
+  KBD_KEY(LETTER, M),
+  KBD_KEY(LETTER, N),
+  KBD_KEY(LETTER, O),
+  KBD_KEY(LETTER, P),
+  KBD_KEY(LETTER, Q),
+  KBD_KEY(LETTER, R),
+  KBD_KEY(LETTER, S),
+  KBD_KEY(LETTER, T),
+  KBD_KEY(LETTER, U),
+  KBD_KEY(LETTER, V),
+  KBD_KEY(LETTER, W),
+  KBD_KEY(LETTER, X),
+  KBD_KEY(LETTER, Y),
+  KBD_KEY(LETTER, Z),
+} KBD_LetterKey;
+
+typedef enum {
+  KBD_KEY(NUMBER, Zero),
+  KBD_KEY(NUMBER, One),
+  KBD_KEY(NUMBER, Two),
+  KBD_KEY(NUMBER, Three),
+  KBD_KEY(NUMBER, Four),
+  KBD_KEY(NUMBER, Five),
+  KBD_KEY(NUMBER, Six),
+  KBD_KEY(NUMBER, Seven),
+  KBD_KEY(NUMBER, Eight),
+  KBD_KEY(NUMBER, Nine),
+} KBD_NumberKey;
+
+typedef enum {
+  KBD_KEY(SYMBOL, Grave),
+  KBD_KEY(SYMBOL, Minus),
+  KBD_KEY(SYMBOL, Equals),
+  KBD_KEY(SYMBOL, Backslash),
+
+  KBD_KEY(SYMBOL, LeftBracket),
+  KBD_KEY(SYMBOL, RightBracket),
+
+  KBD_KEY(SYMBOL, Semicolon),
+  KBD_KEY(SYMBOL, Apostrophe),
+
+  KBD_KEY(SYMBOL, Europe2),
+  KBD_KEY(SYMBOL, Comma),
+  KBD_KEY(SYMBOL, Period),
+  KBD_KEY(SYMBOL, Slash),
+
+  KBD_KEY(SYMBOL, Space),
+} KBD_SymbolKey;
+
+typedef enum {
+  KBD_KEY(ACTION, Enter),
+  KBD_KEY(ACTION, Tab),
+  KBD_KEY(ACTION, Escape),
+
+  KBD_KEY(ACTION, Insert),
+  KBD_KEY(ACTION, DeleteBackward),
+  KBD_KEY(ACTION, DeleteForward),
+
+  KBD_KEY(ACTION, Home),
+  KBD_KEY(ACTION, End),
+
+  KBD_KEY(ACTION, PageUp),
+  KBD_KEY(ACTION, PageDown),
+
+  KBD_KEY(ACTION, ArrowUp),
+  KBD_KEY(ACTION, ArrowDown),
+  KBD_KEY(ACTION, ArrowLeft),
+  KBD_KEY(ACTION, ArrowRight),
+
+  KBD_KEY(ACTION, PrintScreen),
+  KBD_KEY(ACTION, SystemRequest),
+  KBD_KEY(ACTION, Pause),
+
+  KBD_KEY(ACTION, GuiLeft),
+  KBD_KEY(ACTION, GuiRight),
+  KBD_KEY(ACTION, Application),
+
+  KBD_KEY(ACTION, Help),
+  KBD_KEY(ACTION, Stop),
+  KBD_KEY(ACTION, Props),
+  KBD_KEY(ACTION, Front),
+  KBD_KEY(ACTION, Open),
+  KBD_KEY(ACTION, Find),
+  KBD_KEY(ACTION, Again),
+  KBD_KEY(ACTION, Undo),
+  KBD_KEY(ACTION, Copy),
+  KBD_KEY(ACTION, Paste),
+  KBD_KEY(ACTION, Cut),
+
+  KBD_KEY(ACTION, Power),
+  KBD_KEY(ACTION, Sleep),
+  KBD_KEY(ACTION, Wakeup),
+
+  KBD_KEY(ACTION, Menu),
+  KBD_KEY(ACTION, Select),
+
+  KBD_KEY(ACTION, Cancel),
+  KBD_KEY(ACTION, Clear),
+  KBD_KEY(ACTION, Prior),
+  KBD_KEY(ACTION, Return),
+  KBD_KEY(ACTION, Separator),
+  KBD_KEY(ACTION, Out),
+  KBD_KEY(ACTION, Oper),
+  KBD_KEY(ACTION, Clear_Again),
+  KBD_KEY(ACTION, CrSel_Props),
+  KBD_KEY(ACTION, ExSel),
+} KBD_ActionKey;
+
+typedef enum {
+  KBD_KEY(MEDIA, Mute),
+  KBD_KEY(MEDIA, VolumeDown),
+  KBD_KEY(MEDIA, VolumeUp),
+
+  KBD_KEY(MEDIA, Stop),
+  KBD_KEY(MEDIA, Play),
+  KBD_KEY(MEDIA, Record),
+  KBD_KEY(MEDIA, Pause),
+  KBD_KEY(MEDIA, PlayPause),
+
+  KBD_KEY(MEDIA, Previous),
+  KBD_KEY(MEDIA, Next),
+  KBD_KEY(MEDIA, Backward),
+  KBD_KEY(MEDIA, Forward),
+
+  KBD_KEY(MEDIA, Eject),
+  KBD_KEY(MEDIA, Close),
+  KBD_KEY(MEDIA, EjectClose),
+} KBD_MediaKey;
+
+typedef enum {
+  KBD_KEY(FUNCTION, F1),
+  KBD_KEY(FUNCTION, F2),
+  KBD_KEY(FUNCTION, F3),
+  KBD_KEY(FUNCTION, F4),
+  KBD_KEY(FUNCTION, F5),
+  KBD_KEY(FUNCTION, F6),
+  KBD_KEY(FUNCTION, F7),
+  KBD_KEY(FUNCTION, F8),
+  KBD_KEY(FUNCTION, F9),
+  KBD_KEY(FUNCTION, F10),
+  KBD_KEY(FUNCTION, F11),
+  KBD_KEY(FUNCTION, F12),
+  KBD_KEY(FUNCTION, F13),
+  KBD_KEY(FUNCTION, F14),
+  KBD_KEY(FUNCTION, F15),
+  KBD_KEY(FUNCTION, F16),
+  KBD_KEY(FUNCTION, F17),
+  KBD_KEY(FUNCTION, F18),
+  KBD_KEY(FUNCTION, F19),
+  KBD_KEY(FUNCTION, F20),
+  KBD_KEY(FUNCTION, F21),
+  KBD_KEY(FUNCTION, F22),
+  KBD_KEY(FUNCTION, F23),
+  KBD_KEY(FUNCTION, F24),
+} KBD_FunctionKey;
+
+typedef enum {
+  KBD_KEY(MODIFIER, ShiftLeft),
+  KBD_KEY(MODIFIER, ShiftRight),
+
+  KBD_KEY(MODIFIER, ControlLeft),
+  KBD_KEY(MODIFIER, ControlRight),
+
+  KBD_KEY(MODIFIER, AltLeft),
+  KBD_KEY(MODIFIER, AltRight),
+} KBD_ModifierKey;
+
+typedef enum {
+  KBD_KEY(LOCK, Capitals),
+  KBD_KEY(LOCK, Scroll),
+  KBD_KEY(LOCK, Numbers),
+} KBD_LockKey;
+
+typedef enum {
+  KBD_KEY(KPNUMBER, Zero),
+  KBD_KEY(KPNUMBER, One),
+  KBD_KEY(KPNUMBER, Two),
+  KBD_KEY(KPNUMBER, Three),
+  KBD_KEY(KPNUMBER, Four),
+  KBD_KEY(KPNUMBER, Five),
+  KBD_KEY(KPNUMBER, Six),
+  KBD_KEY(KPNUMBER, Seven),
+  KBD_KEY(KPNUMBER, Eight),
+  KBD_KEY(KPNUMBER, Nine),
+
+  KBD_KEY(KPNUMBER, A),
+  KBD_KEY(KPNUMBER, B),
+  KBD_KEY(KPNUMBER, C),
+  KBD_KEY(KPNUMBER, D),
+  KBD_KEY(KPNUMBER, E),
+  KBD_KEY(KPNUMBER, F),
+} KBD_KPNumberKey;
+
+typedef enum {
+  KBD_KEY(KPSYMBOL, DecimalSeparator),
+  KBD_KEY(KPSYMBOL, ThousandsSeparator),
+  KBD_KEY(KPSYMBOL, 00),
+  KBD_KEY(KPSYMBOL, 000),
+
+  KBD_KEY(KPSYMBOL, Plus),
+  KBD_KEY(KPSYMBOL, Minus),
+  KBD_KEY(KPSYMBOL, Multiply),
+  KBD_KEY(KPSYMBOL, Divide),
+  KBD_KEY(KPSYMBOL, Modulo),
+
+  KBD_KEY(KPSYMBOL, Equals),
+  KBD_KEY(KPSYMBOL, Less),
+  KBD_KEY(KPSYMBOL, Greater),
+  KBD_KEY(KPSYMBOL, PlusMinus),
+
+  KBD_KEY(KPSYMBOL, LeftParenthesis),
+  KBD_KEY(KPSYMBOL, RightParenthesis),
+  KBD_KEY(KPSYMBOL, LeftBrace),
+  KBD_KEY(KPSYMBOL, RightBrace),
+
+  KBD_KEY(KPSYMBOL, BitwiseAnd),
+  KBD_KEY(KPSYMBOL, BitwiseOr),
+  KBD_KEY(KPSYMBOL, BitwiseXor),
+
+  KBD_KEY(KPSYMBOL, BooleanNot),
+  KBD_KEY(KPSYMBOL, BooleanAnd),
+  KBD_KEY(KPSYMBOL, BooleanOr),
+  KBD_KEY(KPSYMBOL, BooleanXor),
+
+  KBD_KEY(KPSYMBOL, Space),
+  KBD_KEY(KPSYMBOL, Period),
+  KBD_KEY(KPSYMBOL, Comma),
+  KBD_KEY(KPSYMBOL, Colon),
+  KBD_KEY(KPSYMBOL, At),
+  KBD_KEY(KPSYMBOL, Number),
+  KBD_KEY(KPSYMBOL, CurrencyUnit),
+  KBD_KEY(KPSYMBOL, CurrencySubunit),
+} KBD_KPSymbolKey;
+
+typedef enum {
+  KBD_KEY(KPACTION, Enter),
+  KBD_KEY(KPACTION, Backspace),
+  KBD_KEY(KPACTION, Tab),
+
+  KBD_KEY(KPACTION, Clear),
+  KBD_KEY(KPACTION, ClearEntry),
+
+  KBD_KEY(KPACTION, MemoryClear),
+  KBD_KEY(KPACTION, MemoryStore),
+  KBD_KEY(KPACTION, MemoryRecall),
+  KBD_KEY(KPACTION, MemoryAdd),
+  KBD_KEY(KPACTION, MemorySubtract),
+  KBD_KEY(KPACTION, MemoryMultiply),
+  KBD_KEY(KPACTION, MemoryDivide),
+
+  KBD_KEY(KPACTION, Binary),
+  KBD_KEY(KPACTION, Octal),
+  KBD_KEY(KPACTION, Decimal),
+  KBD_KEY(KPACTION, Hexadecimal),
+} KBD_KPActionKey;
+
+typedef enum {
+  KBD_KEY(BRAILLE, Space),
+
+  KBD_KEY(BRAILLE, Dot1),
+  KBD_KEY(BRAILLE, Dot2),
+  KBD_KEY(BRAILLE, Dot3),
+  KBD_KEY(BRAILLE, Dot4),
+  KBD_KEY(BRAILLE, Dot5),
+  KBD_KEY(BRAILLE, Dot6),
+  KBD_KEY(BRAILLE, Dot7),
+  KBD_KEY(BRAILLE, Dot8),
+
+  KBD_KEY(BRAILLE, Backward),
+  KBD_KEY(BRAILLE, Forward),
+} KBD_BrailleKey;
 
 extern KEY_NAME_TABLES_DECLARATION(keyboard);
 
