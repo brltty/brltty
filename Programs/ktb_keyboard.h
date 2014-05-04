@@ -337,31 +337,36 @@ typedef enum {
   KBD_GRP_ROUTING,
 } KBD_KeyGroup;
 
-#define KBD_KEY_VALUE(grp,num) {.group=KBD_GRP_##grp, .number=num}
-#define KBD_KEY_SYMBOLIC(grp,sym) KBD_KEY_VALUE(grp, KBD_KEY_##grp##_##sym)
-#define KBD_NAME_ENTRY(grp,num,nam) {.value=KBD_KEY_SYMBOLIC(grp, num), .name=nam}
+#define KBD_GROUP_IDENTIFIER(grp) KBD_GRP_##grp
+#define KBD_KEY_IDENTIFIER(grp,key) KBD_KEY_##grp##_##key
 
-#define KBD_KEY_SPECIAL(name) KBD_KEY_SYMBOLIC(SPECIAL, name)
+#define KBD_KEY_VALUE(grp,num) {.group=KBD_GROUP_IDENTIFIER(grp), .number=num}
+#define KBD_KEY_ENTRY(grp,key) KBD_KEY_VALUE(grp, KBD_KEY_IDENTIFIER(grp, key))
+
+#define KBD_GROUP_NAME(grp,nam) {.value=KBD_KEY_VALUE(grp, KTB_KEY_ANY), .name=nam}
+#define KBD_KEY_NAME(grp,key,nam) {.value=KBD_KEY_ENTRY(grp, key), .name=nam}
+
+#define KBD_KEY_SPECIAL(name) KBD_KEY_ENTRY(SPECIAL, name)
 #define KBD_KEY_UNMAPPED KBD_KEY_SPECIAL(Unmapped)
 #define KBD_KEY_IGNORE KBD_KEY_SPECIAL(Ignore)
 
-#define KBD_KEY_LETTER(name) KBD_KEY_SYMBOLIC(LETTER, name)
-#define KBD_KEY_NUMBER(name) KBD_KEY_SYMBOLIC(NUMBER, name)
-#define KBD_KEY_SYMBOL(name) KBD_KEY_SYMBOLIC(SYMBOL, name)
+#define KBD_KEY_LETTER(name) KBD_KEY_ENTRY(LETTER, name)
+#define KBD_KEY_NUMBER(name) KBD_KEY_ENTRY(NUMBER, name)
+#define KBD_KEY_SYMBOL(name) KBD_KEY_ENTRY(SYMBOL, name)
 
-#define KBD_KEY_ACTION(name) KBD_KEY_SYMBOLIC(ACTION, name)
-#define KBD_KEY_MEDIA(name) KBD_KEY_SYMBOLIC(MEDIA, name)
-#define KBD_KEY_FUNCTION(name) KBD_KEY_SYMBOLIC(FUNCTION, name)
+#define KBD_KEY_ACTION(name) KBD_KEY_ENTRY(ACTION, name)
+#define KBD_KEY_MEDIA(name) KBD_KEY_ENTRY(MEDIA, name)
+#define KBD_KEY_FUNCTION(name) KBD_KEY_ENTRY(FUNCTION, name)
 
-#define KBD_KEY_MODIFIER(name) KBD_KEY_SYMBOLIC(MODIFIER, name)
-#define KBD_KEY_LOCK(name) KBD_KEY_SYMBOLIC(LOCK, name)
+#define KBD_KEY_MODIFIER(name) KBD_KEY_ENTRY(MODIFIER, name)
+#define KBD_KEY_LOCK(name) KBD_KEY_ENTRY(LOCK, name)
 
-#define KBD_KEY_KPNUMBER(name) KBD_KEY_SYMBOLIC(KPNUMBER, name)
-#define KBD_KEY_KPSYMBOL(name) KBD_KEY_SYMBOLIC(KPSYMBOL, name)
-#define KBD_KEY_KPACTION(name) KBD_KEY_SYMBOLIC(KPACTION, name)
+#define KBD_KEY_KPNUMBER(name) KBD_KEY_ENTRY(KPNUMBER, name)
+#define KBD_KEY_KPSYMBOL(name) KBD_KEY_ENTRY(KPSYMBOL, name)
+#define KBD_KEY_KPACTION(name) KBD_KEY_ENTRY(KPACTION, name)
 
-#define KBD_KEY_BRAILLE(name) KBD_KEY_SYMBOLIC(BRAILLE, name)
-#define KBD_KEY_ROUTING(offset) KBD_KEY_VALUE(ROUTING, (offset))
+#define KBD_KEY_BRAILLE(name) KBD_KEY_ENTRY(BRAILLE, name)
+#define KBD_KEY_ROUTING(number) KBD_KEY_VALUE(ROUTING, (number))
 
 extern KEY_NAME_TABLES_DECLARATION(keyboard);
 
