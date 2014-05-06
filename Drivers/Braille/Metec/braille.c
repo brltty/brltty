@@ -117,7 +117,7 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(bd2),
 END_KEY_TABLE_LIST
 
-#define MT_IDENTITY_PACKET_SIZE 0X100
+#define MT_IDENTITY_PACKET_SIZE 0X400
 #define MT_STATUS_PACKET_SIZE 8
 
 #define MT_ROUTING_KEYS_SECONDARY 100
@@ -131,8 +131,8 @@ typedef struct {
   int (*beginProtocol) (BrailleDisplay *brl);
   void (*endProtocol) (BrailleDisplay *brl);
 
-  int (*logDeviceIdentity) (BrailleDisplay *brl);
   int (*setHighVoltage) (BrailleDisplay *brl, int on);
+  int (*getDeviceIdentity) (BrailleDisplay *brl);
 
   int (*handleInput) (BrailleDisplay *brl);
 } ProtocolOperations;
@@ -227,9 +227,12 @@ handleRoutingKey (BrailleDisplay *brl, unsigned char key) {
   }
 }
 
+#include "io_usb.h"
+
+#define MT_USB_CONTROL_RECIPIENT UsbControlRecipient_Device
+#define MT_USB_CONTROL_TYPE UsbControlType_Vendor
+
 static int setUsbStatusAlarm (BrailleDisplay *brl);
-#define MT_USB_REQUEST_RECIPIENT UsbControlRecipient_Device
-#define MT_USB_REQUEST_TYPE UsbControlType_Vendor
 
 static ssize_t
 tellUsbDevice (
@@ -237,7 +240,7 @@ tellUsbDevice (
   const void *data, size_t length
 ) {
   return gioTellResource(brl->gioEndpoint,
-                         MT_USB_REQUEST_RECIPIENT, MT_USB_REQUEST_TYPE,
+                         MT_USB_CONTROL_RECIPIENT, MT_USB_CONTROL_TYPE,
                          request, 0, 0, data, length);
 }
 
@@ -247,7 +250,7 @@ askUsbDevice (
   void *buffer, size_t size
 ) {
   return gioAskResource(brl->gioEndpoint,
-                        MT_USB_REQUEST_RECIPIENT, MT_USB_REQUEST_TYPE,
+                        MT_USB_CONTROL_RECIPIENT, MT_USB_CONTROL_TYPE,
                         request, 0, 0, buffer, size);
 }
 
@@ -299,29 +302,38 @@ endUsbProtocol (BrailleDisplay *brl) {
 }
 
 static int
-logUsbDeviceIdentity (BrailleDisplay *brl) {
-  static const unsigned char data[] = {0};
-
-  return tellUsbDevice(brl, 0X04, data, sizeof(data)) != -1;
-}
-
-static int
 setUsbHighVoltage (BrailleDisplay *brl, int on) {
-  const unsigned char data[] = {on? 0XFF: 0X7F};
+  const unsigned char data[] = {
+    (on? 0XEF: 0X00),
+    0, 0, 0, 0, 0, 0, 0
+  };
 
   return tellUsbDevice(brl, 0X01, data, sizeof(data)) != -1;
 }
 
 static int
+getUsbDeviceIdentity (BrailleDisplay *brl) {
+  UsbChannel *channel = gioGetResourceObject(brl->gioEndpoint);
+  UsbDevice *device = channel->device;
+  unsigned int counter = 2;
+
+  do {
+    static const unsigned char data[] = {0};
+
+    if (tellUsbDevice(brl, 0X04, data, sizeof(data)) != -1) {
+      unsigned char identity[MT_IDENTITY_PACKET_SIZE];
+      ssize_t result = usbReadEndpoint(device, 1, identity, sizeof(identity), 1000);
+
+      logMessage(LOG_NOTICE, "epread: r=%zd e=%d", result, errno);
+      if (result != -1) return 1;
+    }
+  } while (--counter);
+
+  return 0;
+}
+
+static int
 handleUsbInput (BrailleDisplay *brl) {
-  unsigned char buffer[MT_IDENTITY_PACKET_SIZE];
-  ssize_t result = gioReadData(brl->gioEndpoint, buffer, sizeof(buffer), 0);
-
-  if (result == -1) {
-  } else if (result > 0) {
-    logMessage(LOG_INFO, "Device Identity: %.*s", (int)result, buffer);
-  }
-
   return 1;
 }
 
@@ -329,8 +341,8 @@ static const ProtocolOperations usbProtocolOperations = {
   .beginProtocol = beginUsbProtocol,
   .endProtocol = endUsbProtocol,
 
-  .logDeviceIdentity = logUsbDeviceIdentity,
   .setHighVoltage = setUsbHighVoltage,
+  .getDeviceIdentity = getUsbDeviceIdentity,
 
   .handleInput = handleUsbInput
 };
@@ -340,8 +352,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   static const UsbChannelDefinition usbChannelDefinitions[] = {
     { /* all models */
       .vendor=0X0452, .product=0X0100,
-      .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=0
+      .configuration=1, .interface=0, .alternative=0
     },
 
     { .vendor=0 }
@@ -372,10 +383,10 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     memset(brl->data, 0, sizeof(*brl->data));
 
     if (connectResource(brl, device)) {
-      brl->data->protocol->logDeviceIdentity(brl);
-
       if (brl->data->protocol->setHighVoltage(brl, 1)) {
         unsigned char statusPacket[MT_STATUS_PACKET_SIZE];
+
+        brl->data->protocol->getDeviceIdentity(brl);
 
         if (getUsbStatusPacket(brl, statusPacket)) {
           setCellCount(brl, statusPacket[1]);
