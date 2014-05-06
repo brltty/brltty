@@ -425,12 +425,12 @@ makePreferencesMenu (void) {
   if (!rootMenu) goto noMenu;
 
   {
-    SUBMENU(optionsSubmenu, rootMenu, strtext("Menu Options"));
+    NAME(strtext("Save on Exit"));
+    ITEM(newBooleanMenuItem(rootMenu, &prefs.saveOnExit, &itemName));
+  }
 
-    {
-      NAME(strtext("Save on Exit"));
-      ITEM(newBooleanMenuItem(optionsSubmenu, &prefs.saveOnExit, &itemName));
-    }
+  {
+    SUBMENU(optionsSubmenu, rootMenu, strtext("Menu Options"));
 
     {
       NAME(strtext("Show Submenu Sizes"));
