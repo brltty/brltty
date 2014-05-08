@@ -23,6 +23,7 @@
 
 #ifdef HAVE_ICU
 #include <unicode/uchar.h>
+#include <unicode/unorm.h>
 #endif /* HAVE_ICU */
 
 #include "ctb.h"
@@ -941,6 +942,73 @@ findLineBreakOpportunities (
   }
 }
 
+static int
+nextBaseCharacter (const UChar **current, const UChar *end) {
+  do {
+    if (*current == end) return 0;
+  } while (u_getCombiningClass(*(*current)++));
+
+  return 1;
+}
+
+static int
+normalizeText (
+  const wchar_t *from, const wchar_t *to,
+  wchar_t *buffer, size_t *length,
+  unsigned int *map
+) {
+  const size_t size = to - from;
+  UChar source[size];
+  UChar target[size];
+  int32_t count;
+
+  {
+    const wchar_t *wc = from;
+    UChar *uc = source;
+
+    while (wc < to) {
+      *uc++ = *wc++;
+    }
+  }
+
+  {
+    UErrorCode error = U_ZERO_ERROR;
+
+    count = unorm_normalize(source, ARRAY_COUNT(source),
+                            UNORM_NFC, 0,
+                            target, ARRAY_COUNT(target),
+                            &error);
+
+    if (!U_SUCCESS(error)) return 0;
+  }
+
+  if (count == size) {
+    if (memcmp(source, target, (count * sizeof(source[0]))) == 0) {
+      return 0;
+    }
+  }
+
+  {
+    const UChar *src = source;
+    const UChar *srcEnd = src + ARRAY_COUNT(source);
+    const UChar *trg = target;
+    const UChar *trgEnd = target + count;
+    wchar_t *out = buffer;
+
+    while (trg < trgEnd) {
+      if (!nextBaseCharacter(&src, srcEnd)) return 0;
+      *map++ = src - source - 1;
+      *out++ = *trg++;
+    }
+
+    if (nextBaseCharacter(&src, srcEnd)) return 0;
+    *map = src - source;
+  }
+
+  *length = count;
+  return 1;
+}
+
 #else /* HAVE_ICU */
 typedef struct {
   unsigned int index;
@@ -966,6 +1034,14 @@ findLineBreakOpportunities (
     lbo->wasSpace = isSpace;
     lbo->index += 1;
   }
+}
+
+static int
+normalizeText (
+  const wchar_t *from, const wchar_t *to,
+  wchar_t *buffer, size_t *length
+) {
+  return 0;
 }
 #endif /* HAVE_ICU */
 
@@ -1636,7 +1712,65 @@ contractText (
     memcpy(destmin, table->cache.output.cells,
            ARRAY_SIZE(destmin, table->cache.output.count));
   } else {
-    if (!(table->command? contractTextExternally(): contractTextInternally())) {
+    int contracted;
+
+    {
+      int (*const contract) (void) = table->command? contractTextExternally: contractTextInternally;
+      const size_t size = srcmax - srcmin;
+      wchar_t buffer[size];
+      unsigned int map[size + 1];
+      size_t length;
+
+      if (normalizeText(srcmin, srcmax, buffer, &length, map)) {
+        const wchar_t *origmin = srcmin;
+        const wchar_t *origmax = srcmax;
+
+        srcmin = buffer;
+        src = srcmin + (src - origmin);
+        srcmax = srcmin + length;
+
+        if (cursor) {
+          ptrdiff_t offset = cursor - origmin;
+          unsigned int mapIndex;
+
+          cursor = NULL;
+
+          for (mapIndex=0; mapIndex<=length; mapIndex+=1) {
+            unsigned int mappedIndex = map[mapIndex];
+
+            if (mappedIndex > offset) break;
+            cursor = &srcmin[mappedIndex];
+          }
+        }
+
+        contracted = contract();
+
+        if (offsets) {
+          size_t mapIndex = length;
+          size_t offsetsIndex = origmax - origmin;
+
+          while (mapIndex > 0) {
+            size_t mappedIndex = map[--mapIndex];
+            int offset = offsets[mapIndex];
+
+            if (offset != CTB_NO_OFFSET) {
+              while (--offsetsIndex > mappedIndex) offsets[offsetsIndex] = CTB_NO_OFFSET;
+              offsets[offsetsIndex] = offset;
+            }
+          }
+
+          while (offsetsIndex > 0) offsets[--offsetsIndex] = CTB_NO_OFFSET;
+        }
+
+        srcmin = origmin;
+        src = srcmin + map[src - buffer];
+        srcmax = origmax;
+      } else {
+        contracted = contract();
+      }
+    }
+
+    if (!contracted) {
       src = srcmin;
       dest = destmin;
 
