@@ -69,14 +69,39 @@ typedef struct {
   } previous;
 } BrailleContractionData;
 
+static inline unsigned int
+getInputCount (BrailleContractionData *bcd) {
+  return bcd->input.end - bcd->input.begin;
+}
+
+static inline unsigned int
+getInputConsumed (BrailleContractionData *bcd) {
+  return bcd->input.current - bcd->input.begin;
+}
+
+static inline unsigned int
+getInputUnconsumed (BrailleContractionData *bcd) {
+  return bcd->input.end - bcd->input.current;
+}
+
+static inline unsigned int
+getOutputCount (BrailleContractionData *bcd) {
+  return bcd->output.end - bcd->output.begin;
+}
+
+static inline unsigned int
+getOutputConsumed (BrailleContractionData *bcd) {
+  return bcd->output.current - bcd->output.begin;
+}
+
 static inline void
 assignOffset (BrailleContractionData *bcd, size_t value) {
-  if (bcd->input.offsets) bcd->input.offsets[bcd->input.current - bcd->input.begin] = value;
+  if (bcd->input.offsets) bcd->input.offsets[getInputConsumed(bcd)] = value;
 }
 
 static inline void
 setOffset (BrailleContractionData *bcd) {
-  assignOffset(bcd, bcd->output.current - bcd->output.begin);
+  assignOffset(bcd, getOutputConsumed(bcd));
 }
 
 static inline void
@@ -255,6 +280,36 @@ testCharacter (BrailleContractionData *bcd, wchar_t character, ContractionTableC
   return entry && (attributes & entry->attributes);
 }
 
+static inline int
+testRelative (BrailleContractionData *bcd, int offset, ContractionTableCharacterAttributes attributes) {
+  return testCharacter(bcd, bcd->input.current[offset], attributes);
+}
+
+static inline int
+testCurrent (BrailleContractionData *bcd, ContractionTableCharacterAttributes attributes) {
+  return testRelative(bcd, 0, attributes);
+}
+
+static inline int
+testPrevious (BrailleContractionData *bcd, ContractionTableCharacterAttributes attributes) {
+  return testRelative(bcd, -1, attributes);
+}
+
+static inline int
+testNext (BrailleContractionData *bcd, ContractionTableCharacterAttributes attributes) {
+  return testRelative(bcd, 1, attributes);
+}
+
+static inline int
+testBefore (BrailleContractionData *bcd, ContractionTableCharacterAttributes attributes) {
+  return testCharacter(bcd, bcd->current.before, attributes);
+}
+
+static inline int
+testAfter (BrailleContractionData *bcd, ContractionTableCharacterAttributes attributes) {
+  return testCharacter(bcd, bcd->current.after, attributes);
+}
+
 static wchar_t
 toLowerCase (BrailleContractionData *bcd, wchar_t character) {
   const CharacterEntry *entry = getCharacterEntry(bcd, character);
@@ -384,8 +439,8 @@ selectRule (BrailleContractionData *bcd, int length) {
       }
 
       if ((bcd->current.length <= maximumLength) &&
-          (!bcd->current.rule->after || testCharacter(bcd, bcd->current.before, bcd->current.rule->after)) &&
-          (!bcd->current.rule->before || testCharacter(bcd, bcd->current.after, bcd->current.rule->before))) {
+          (!bcd->current.rule->after || testBefore(bcd, bcd->current.rule->after)) &&
+          (!bcd->current.rule->before || testAfter(bcd, bcd->current.rule->before))) {
         switch (bcd->current.opcode) {
           case CTO_Always:
           case CTO_Repeatable:
@@ -398,8 +453,8 @@ selectRule (BrailleContractionData *bcd, int length) {
             return 1;
 
           case CTO_WholeWord:
-            if (testCharacter(bcd, bcd->current.before, CTC_Space|CTC_Punctuation) &&
-                testCharacter(bcd, bcd->current.after, CTC_Space|CTC_Punctuation))
+            if (testBefore(bcd, CTC_Space|CTC_Punctuation) &&
+                testAfter(bcd, CTC_Space|CTC_Punctuation))
               return 1;
             break;
 
@@ -409,14 +464,14 @@ selectRule (BrailleContractionData *bcd, int length) {
             break;
 
           case CTO_LowWord:
-            if (testCharacter(bcd, bcd->current.before, CTC_Space) && testCharacter(bcd, bcd->current.after, CTC_Space) &&
+            if (testBefore(bcd, CTC_Space) && testAfter(bcd, CTC_Space) &&
                 (bcd->previous.opcode != CTO_JoinedWord) &&
                 ((bcd->output.current == bcd->output.begin) || !bcd->output.current[-1]))
               return 1;
             break;
 
           case CTO_JoinedWord:
-            if (testCharacter(bcd, bcd->current.before, CTC_Space|CTC_Punctuation) &&
+            if (testBefore(bcd, CTC_Space|CTC_Punctuation) &&
                 !sameCharacters(bcd, bcd->current.before, WC_C('-')) &&
                 (bcd->output.current + bcd->current.rule->replen < bcd->output.end)) {
               const wchar_t *end = bcd->input.current + bcd->current.length;
@@ -435,69 +490,69 @@ selectRule (BrailleContractionData *bcd, int length) {
             break;
 
           case CTO_SuffixableWord:
-            if (testCharacter(bcd, bcd->current.before, CTC_Space|CTC_Punctuation) &&
-                testCharacter(bcd, bcd->current.after, CTC_Space|CTC_Letter|CTC_Punctuation))
+            if (testBefore(bcd, CTC_Space|CTC_Punctuation) &&
+                testAfter(bcd, CTC_Space|CTC_Letter|CTC_Punctuation))
               return 1;
             break;
 
           case CTO_PrefixableWord:
-            if (testCharacter(bcd, bcd->current.before, CTC_Space|CTC_Letter|CTC_Punctuation) &&
-                testCharacter(bcd, bcd->current.after, CTC_Space|CTC_Punctuation))
+            if (testBefore(bcd, CTC_Space|CTC_Letter|CTC_Punctuation) &&
+                testAfter(bcd, CTC_Space|CTC_Punctuation))
               return 1;
             break;
 
           case CTO_BegWord:
-            if (testCharacter(bcd, bcd->current.before, CTC_Space|CTC_Punctuation) &&
-                testCharacter(bcd, bcd->current.after, CTC_Letter))
+            if (testBefore(bcd, CTC_Space|CTC_Punctuation) &&
+                testAfter(bcd, CTC_Letter))
               return 1;
             break;
 
           case CTO_BegMidWord:
-            if (testCharacter(bcd, bcd->current.before, CTC_Letter|CTC_Space|CTC_Punctuation) &&
-                testCharacter(bcd, bcd->current.after, CTC_Letter))
+            if (testBefore(bcd, CTC_Letter|CTC_Space|CTC_Punctuation) &&
+                testAfter(bcd, CTC_Letter))
               return 1;
             break;
 
           case CTO_MidWord:
-            if (testCharacter(bcd, bcd->current.before, CTC_Letter) && testCharacter(bcd, bcd->current.after, CTC_Letter))
+            if (testBefore(bcd, CTC_Letter) && testAfter(bcd, CTC_Letter))
               return 1;
             break;
 
           case CTO_MidEndWord:
-            if (testCharacter(bcd, bcd->current.before, CTC_Letter) &&
-                testCharacter(bcd, bcd->current.after, CTC_Letter|CTC_Space|CTC_Punctuation))
+            if (testBefore(bcd, CTC_Letter) &&
+                testAfter(bcd, CTC_Letter|CTC_Space|CTC_Punctuation))
               return 1;
             break;
 
           case CTO_EndWord:
-            if (testCharacter(bcd, bcd->current.before, CTC_Letter) &&
-                testCharacter(bcd, bcd->current.after, CTC_Space|CTC_Punctuation))
+            if (testBefore(bcd, CTC_Letter) &&
+                testAfter(bcd, CTC_Space|CTC_Punctuation))
               return 1;
             break;
 
           case CTO_BegNum:
-            if (testCharacter(bcd, bcd->current.before, CTC_Space|CTC_Punctuation) &&
-                testCharacter(bcd, bcd->current.after, CTC_Digit))
+            if (testBefore(bcd, CTC_Space|CTC_Punctuation) &&
+                testAfter(bcd, CTC_Digit))
               return 1;
             break;
 
           case CTO_MidNum:
-            if (testCharacter(bcd, bcd->current.before, CTC_Digit) && testCharacter(bcd, bcd->current.after, CTC_Digit))
+            if (testBefore(bcd, CTC_Digit) && testAfter(bcd, CTC_Digit))
               return 1;
             break;
 
           case CTO_EndNum:
-            if (testCharacter(bcd, bcd->current.before, CTC_Digit) &&
-                testCharacter(bcd, bcd->current.after, CTC_Space|CTC_Punctuation))
+            if (testBefore(bcd, CTC_Digit) &&
+                testAfter(bcd, CTC_Space|CTC_Punctuation))
               return 1;
             break;
 
           case CTO_PrePunc:
-            if (testCharacter(bcd, *bcd->input.current, CTC_Punctuation) && isBeginning(bcd) && !isEnding(bcd)) return 1;
+            if (testCurrent(bcd, CTC_Punctuation) && isBeginning(bcd) && !isEnding(bcd)) return 1;
             break;
 
           case CTO_PostPunc:
-            if (testCharacter(bcd, *bcd->input.current, CTC_Punctuation) && !isBeginning(bcd) && isEnding(bcd)) return 1;
+            if (testCurrent(bcd, CTC_Punctuation) && !isBeginning(bcd) && isEnding(bcd)) return 1;
             break;
 
           default:
@@ -1090,7 +1145,7 @@ contractTextInternally (BrailleContractionData *bcd) {
   BYTE *destlast = NULL;
   const wchar_t *literal = NULL;
 
-  unsigned char lineBreakOpportunities[bcd->input.end - bcd->input.begin];
+  unsigned char lineBreakOpportunities[getInputCount(bcd)];
   LineBreakOpportunitiesState lbo;
 
   prepareLineBreakOpportunitiesState(&lbo);
@@ -1105,10 +1160,10 @@ contractTextInternally (BrailleContractionData *bcd) {
 
     if (literal)
       if (bcd->input.current >= literal)
-        if (testCharacter(bcd, *bcd->input.current, CTC_Space) || testCharacter(bcd, bcd->input.current[-1], CTC_Space))
+        if (testCurrent(bcd, CTC_Space) || testPrevious(bcd, CTC_Space))
           literal = NULL;
 
-    if ((!literal && selectRule(bcd, bcd->input.end-bcd->input.current)) || selectRule(bcd, 1)) {
+    if ((!literal && selectRule(bcd, getInputUnconsumed(bcd))) || selectRule(bcd, 1)) {
       if (!literal &&
           ((bcd->current.opcode == CTO_Literal) ||
            (prefs.expandCurrentWord &&
@@ -1116,7 +1171,7 @@ contractTextInternally (BrailleContractionData *bcd) {
             (bcd->input.cursor < (bcd->input.current + bcd->current.length))))) {
         literal = bcd->input.current + bcd->current.length;
 
-        if (!testCharacter(bcd, *bcd->input.current, CTC_Space)) {
+        if (!testCurrent(bcd, CTC_Space)) {
           if (destjoin) {
             bcd->input.current = srcjoin;
             bcd->output.current = destjoin;
@@ -1130,18 +1185,18 @@ contractTextInternally (BrailleContractionData *bcd) {
       }
 
       if (getContractionTableHeader(bcd)->numberSign && (bcd->previous.opcode != CTO_MidNum) &&
-          !testCharacter(bcd, bcd->current.before, CTC_Digit) && testCharacter(bcd, *bcd->input.current, CTC_Digit)) {
+          !testBefore(bcd, CTC_Digit) && testCurrent(bcd, CTC_Digit)) {
         if (!putSequence(bcd, getContractionTableHeader(bcd)->numberSign)) break;
-      } else if (getContractionTableHeader(bcd)->englishLetterSign && testCharacter(bcd, *bcd->input.current, CTC_Letter)) {
+      } else if (getContractionTableHeader(bcd)->englishLetterSign && testCurrent(bcd, CTC_Letter)) {
         if ((bcd->current.opcode == CTO_Contraction) ||
-            ((bcd->current.opcode != CTO_EndNum) && testCharacter(bcd, bcd->current.before, CTC_Digit)) ||
-            (testCharacter(bcd, *bcd->input.current, CTC_Letter) &&
+            ((bcd->current.opcode != CTO_EndNum) && testBefore(bcd, CTC_Digit)) ||
+            (testCurrent(bcd, CTC_Letter) &&
              (bcd->current.opcode == CTO_Always) &&
              (bcd->current.length == 1) &&
-             testCharacter(bcd, bcd->current.before, CTC_Space) &&
+             testBefore(bcd, CTC_Space) &&
              (((bcd->input.current + 1) == bcd->input.end) ||
-              testCharacter(bcd, bcd->input.current[1], CTC_Space) ||
-              (testCharacter(bcd, bcd->input.current[1], CTC_Punctuation) &&
+              testNext(bcd, CTC_Space) ||
+              (testNext(bcd, CTC_Punctuation) &&
                !sameCharacters(bcd, bcd->input.current[1], WC_C('.')) &&
                !sameCharacters(bcd, bcd->input.current[1], WC_C('\'')))))) {
           if (!putSequence(bcd, getContractionTableHeader(bcd)->englishLetterSign)) break;
@@ -1149,18 +1204,18 @@ contractTextInternally (BrailleContractionData *bcd) {
       }
 
       if (prefs.capitalizationMode == CTB_CAP_SIGN) {
-        if (testCharacter(bcd, *bcd->input.current, CTC_UpperCase)) {
-          if (!testCharacter(bcd, bcd->current.before, CTC_UpperCase)) {
+        if (testCurrent(bcd, CTC_UpperCase)) {
+          if (!testBefore(bcd, CTC_UpperCase)) {
             if (getContractionTableHeader(bcd)->beginCapitalSign &&
-                (bcd->input.current + 1 < bcd->input.end) && testCharacter(bcd, bcd->input.current[1], CTC_UpperCase)) {
+                (bcd->input.current + 1 < bcd->input.end) && testNext(bcd, CTC_UpperCase)) {
               if (!putSequence(bcd, getContractionTableHeader(bcd)->beginCapitalSign)) break;
             } else if (getContractionTableHeader(bcd)->capitalSign) {
               if (!putSequence(bcd, getContractionTableHeader(bcd)->capitalSign)) break;
             }
           }
-        } else if (testCharacter(bcd, *bcd->input.current, CTC_LowerCase)) {
+        } else if (testCurrent(bcd, CTC_LowerCase)) {
           if (getContractionTableHeader(bcd)->endCapitalSign && (bcd->input.current - 2 >= bcd->input.begin) &&
-              testCharacter(bcd, bcd->input.current[-1], CTC_UpperCase) && testCharacter(bcd, bcd->input.current[-2], CTC_UpperCase)) {
+              testPrevious(bcd, CTC_UpperCase) && testRelative(bcd, -2, CTC_UpperCase)) {
             if (!putSequence(bcd, getContractionTableHeader(bcd)->endCapitalSign)) break;
           }
         }
@@ -1230,7 +1285,7 @@ contractTextInternally (BrailleContractionData *bcd) {
             srcbeg = bcd->input.current;
             destbeg = bcd->output.current;
 
-            while ((bcd->input.current < bcd->input.end) && testCharacter(bcd, *bcd->input.current, CTC_Space)) {
+            while ((bcd->input.current < bcd->input.end) && testCurrent(bcd, CTC_Space)) {
               clearOffset(bcd);
               bcd->input.current += 1;
             }
@@ -1259,8 +1314,8 @@ contractTextInternally (BrailleContractionData *bcd) {
       bcd->input.current += 1;
     }
 
-    findLineBreakOpportunities(&lbo, lineBreakOpportunities, bcd->input.begin, bcd->input.current-bcd->input.begin);
-    if (lineBreakOpportunities[bcd->input.current-bcd->input.begin]) {
+    findLineBreakOpportunities(&lbo, lineBreakOpportunities, bcd->input.begin, getInputConsumed(bcd));
+    if (lineBreakOpportunities[getInputConsumed(bcd)]) {
       srcjoin = bcd->input.current;
       destjoin = bcd->output.current;
 
@@ -1278,7 +1333,7 @@ contractTextInternally (BrailleContractionData *bcd) {
 done:
   if (bcd->input.current < bcd->input.end) {
     if (destword && (destword > bcd->output.begin) &&
-        (!(testCharacter(bcd, bcd->input.current[-1], CTC_Space) || testCharacter(bcd, *bcd->input.current, CTC_Space)) ||
+        (!(testPrevious(bcd, CTC_Space) || testCurrent(bcd, CTC_Space)) ||
          (bcd->previous.opcode == CTO_JoinedWord))) {
       bcd->input.current = srcword;
       bcd->output.current = destword;
@@ -1329,14 +1384,14 @@ putExternalRequests (BrailleContractionData *bcd) {
 
     { .name = "maximum-length",
       .type = REQ_NUMBER,
-      .value.number = bcd->output.end - bcd->output.begin
+      .value.number = getOutputCount(bcd)
     },
 
     { .name = "text",
       .type = REQ_TEXT,
       .value.text = {
         .start = bcd->input.begin,
-        .count = bcd->input.end - bcd->input.begin
+        .count = getInputCount(bcd)
       }
     },
 
@@ -1482,7 +1537,7 @@ handleExternalResponse_consumedLength (BrailleContractionData *bcd, const char *
 
   if (!isInteger(&length, value)) return 0;
   if (length < 1) return 0;
-  if (length > (bcd->input.end - bcd->input.begin)) return 0;
+  if (length > getInputCount(bcd)) return 0;
 
   bcd->input.current = bcd->input.begin + length;
   return 1;
@@ -1492,7 +1547,7 @@ static int
 handleExternalResponse_outputOffsets (BrailleContractionData *bcd, const char *value) {
   if (bcd->input.offsets) {
     int previous = CTB_NO_OFFSET;
-    unsigned int count = bcd->input.end - bcd->input.begin;
+    unsigned int count = getInputCount(bcd);
     unsigned int index = 0;
 
     while (*value && (index < count)) {
@@ -1521,7 +1576,7 @@ handleExternalResponse_outputOffsets (BrailleContractionData *bcd, const char *v
       }
 
       if (offset < ((index == 0)? 0: previous)) return 0;
-      if (offset >= (bcd->output.end - bcd->output.begin)) return 0;
+      if (offset >= getOutputCount(bcd)) return 0;
 
       bcd->input.offsets[index++] = (offset == previous)? CTB_NO_OFFSET: offset;
       previous = offset;
@@ -1608,16 +1663,6 @@ contractTextExternally (BrailleContractionData *bcd) {
   return 0;
 }
 
-static inline unsigned int
-makeCachedInputCount (BrailleContractionData *bcd) {
-  return bcd->input.end - bcd->input.begin;
-}
-
-static inline unsigned int
-makeCachedOutputMaximum (BrailleContractionData *bcd) {
-  return bcd->output.end - bcd->output.begin;
-}
-
 static inline int
 makeCachedCursorOffset (BrailleContractionData *bcd) {
   return bcd->input.cursor? (bcd->input.cursor - bcd->input.begin): CTB_NO_CURSOR;
@@ -1628,13 +1673,13 @@ checkCache (BrailleContractionData *bcd) {
   if (!bcd->table->cache.input.characters) return 0;
   if (!bcd->table->cache.output.cells) return 0;
   if (bcd->input.offsets && !bcd->table->cache.offsets.count) return 0;
-  if (bcd->table->cache.output.maximum != makeCachedOutputMaximum(bcd)) return 0;
+  if (bcd->table->cache.output.maximum != getOutputCount(bcd)) return 0;
   if (bcd->table->cache.cursorOffset != makeCachedCursorOffset(bcd)) return 0;
   if (bcd->table->cache.expandCurrentWord != prefs.expandCurrentWord) return 0;
   if (bcd->table->cache.capitalizationMode != prefs.capitalizationMode) return 0;
 
   {
-    unsigned int count = makeCachedInputCount(bcd);
+    unsigned int count = getInputCount(bcd);
     if (bcd->table->cache.input.count != count) return 0;
     if (wmemcmp(bcd->input.begin, bcd->table->cache.input.characters, count) != 0) return 0;
   }
@@ -1645,7 +1690,7 @@ checkCache (BrailleContractionData *bcd) {
 static void
 updateCache (BrailleContractionData *bcd) {
   {
-    unsigned int count = makeCachedInputCount(bcd);
+    unsigned int count = getInputCount(bcd);
 
     if (count > bcd->table->cache.input.size) {
       unsigned int newSize = count | 0X7F;
@@ -1664,12 +1709,12 @@ updateCache (BrailleContractionData *bcd) {
 
     wmemcpy(bcd->table->cache.input.characters, bcd->input.begin, count);
     bcd->table->cache.input.count = count;
-    bcd->table->cache.input.consumed = bcd->input.current - bcd->input.begin;
+    bcd->table->cache.input.consumed = getInputConsumed(bcd);
   }
 inputDone:
 
   {
-    unsigned int count = bcd->output.current - bcd->output.begin;
+    unsigned int count = getOutputConsumed(bcd);
 
     if (count > bcd->table->cache.output.size) {
       unsigned int newSize = count | 0X7F;
@@ -1688,12 +1733,12 @@ inputDone:
 
     memcpy(bcd->table->cache.output.cells, bcd->output.begin, count);
     bcd->table->cache.output.count = count;
-    bcd->table->cache.output.maximum = makeCachedOutputMaximum(bcd);
+    bcd->table->cache.output.maximum = getOutputCount(bcd);
   }
 outputDone:
 
   if (bcd->input.offsets) {
-    unsigned int count = makeCachedInputCount(bcd);
+    unsigned int count = getInputCount(bcd);
 
     if (count > bcd->table->cache.offsets.size) {
       unsigned int newSize = count | 0X7F;
@@ -1763,7 +1808,7 @@ contractText (
 
     {
       int (*const contract) (BrailleContractionData *bcd) = bcd.table->command? contractTextExternally: contractTextInternally;
-      const size_t size = bcd.input.end - bcd.input.begin;
+      const size_t size = getInputCount(&bcd);
       wchar_t buffer[size];
       unsigned int map[size + 1];
       size_t length;
@@ -1833,7 +1878,7 @@ contractText (
 
       setOffset(&bcd);
       while (1) {
-        if (done && !testCharacter(&bcd, *bcd.input.current, CTC_Space)) {
+        if (done && !testCurrent(&bcd, CTC_Space)) {
           done = 0;
 
           if (!bcd.input.cursor || (bcd.input.cursor < srcorig) || (bcd.input.cursor >= bcd.input.current)) {
@@ -1852,6 +1897,6 @@ contractText (
     updateCache(&bcd);
   }
 
-  *inputLength = bcd.input.current - bcd.input.begin;
-  *outputLength = bcd.output.current - bcd.output.begin;
+  *inputLength = getInputConsumed(&bcd);
+  *outputLength = getOutputConsumed(&bcd);
 }
