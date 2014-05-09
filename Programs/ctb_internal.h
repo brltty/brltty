@@ -168,6 +168,11 @@ struct ContractionTableStruct {
       unsigned commandStarted:1;
       FILE *standardInput;
       FILE *standardOutput;
+
+      struct {
+        char *buffer;
+        size_t size;
+      } input;
     } external;
   } data;
 };

@@ -559,6 +559,8 @@ stopContractionCommand (ContractionTable *table) {
 
     logMessage(LOG_DEBUG, "external contraction table stopped: %s", table->command);
     table->data.external.commandStarted = 0;
+
+    if (table->data.external.input.buffer) free(table->data.external.input.buffer);
   }
 }
 
@@ -592,6 +594,9 @@ compileContractionTable (const char *fileName) {
       if ((table->command = strdup(fileName))) {
         initializeCommonFields(table);
         table->data.external.commandStarted = 0;
+
+        table->data.external.input.buffer = NULL;
+        table->data.external.input.size = 0;
 
         if (startContractionCommand(table)) {
           return table;
