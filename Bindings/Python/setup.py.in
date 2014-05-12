@@ -25,7 +25,7 @@ if __name__ == "__main__":
         sources = ["brlapi.auto.c","@srcdir@/bindings.c"],
         include_dirs = ["@builddir@", "@srcdir@", "./@top_builddir@/Programs", "./@top_srcdir@/Programs", "./@top_builddir@/", "./@top_srcdir@/"],
         library_dirs = ["./@top_builddir@/Programs"],
-        libraries = ["brlapi"],
+        libraries = ["brlapi", "pthread"],
         language = "c",
         define_macros = [],
         extra_compile_args = "@CYTHON_CFLAGS@".split())
