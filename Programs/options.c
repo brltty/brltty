@@ -822,8 +822,8 @@ processConfigurationLine (DataFile *file, void *data) {
     DATA_NESTING_DIRECTIVES,
     DATA_CONDITION_DIRECTIVES,
     DATA_VARIABLE_DIRECTIVES,
-    {.name=WC_C("ifset"), .processor=processIfSetOperands},
-    {.name=WC_C("ifnotset"), .processor=processIfNotSetOperands},
+    {.name=WS_C("ifset"), .processor=processIfSetOperands},
+    {.name=WS_C("ifnotset"), .processor=processIfNotSetOperands},
     {.name=NULL, .processor=processConfigurationOperands}
   };
 
