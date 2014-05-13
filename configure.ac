@@ -1192,6 +1192,9 @@ BRLTTY_ARG_PACKAGE([pcm], [PCm], [alsa oss], [dnl
    mingw*)
       pcm_package="windows"
       ;;
+   msdos*)
+      pcm_package="none"
+      ;;
    netbsd*)
       pcm_package="audio"
       ;;
@@ -1216,6 +1219,9 @@ BRLTTY_ARG_PACKAGE([midi], [MIDI], [alsa oss], [dnl
       ;;
    mingw*)
       midi_package="windows"
+      ;;
+   msdos*)
+      midi_package="none"
       ;;
 ], [dnl
    oss)
