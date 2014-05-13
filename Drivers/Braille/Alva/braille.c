@@ -659,7 +659,12 @@ updateSettings (BrailleDisplay *brl) {
           if (!flushSettingsUpdate(brl, length, old, new)) return 0;
 
           if (!(length = protocol->getFeature(brl, settings->feature, old, size))) {
+            if (errno == EAGAIN) goto next;
+
+#ifdef ETIMEDOUT
             if (errno == ETIMEDOUT) goto next;
+#endif /* ETIMEDOUT */
+
             return 0;
           }
 
