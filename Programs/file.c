@@ -27,7 +27,9 @@
 #include <sys/stat.h>
 
 #ifndef SOL_SOCKET
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif /* HAVE_SYS_SOCKET_H */
 #endif /* SOL_SOCKET */
 
 #ifdef HAVE_SYS_FILE_H
@@ -908,6 +910,7 @@ createAnonymousPipe (FileDescriptor *pipeInput, FileDescriptor *pipeOutput) {
 }
 #endif /* basic file/socket descriptor operations */
 
+#ifdef HAVE_SYS_SOCKET_H
 ssize_t
 readSocketDescriptor (SocketDescriptor socketDescriptor, void *buffer, size_t size) {
   return recv(socketDescriptor, buffer, size, 0);
@@ -917,3 +920,4 @@ ssize_t
 writeSocketDescriptor (SocketDescriptor socketDescriptor, const void *buffer, size_t size) {
   return send(socketDescriptor, buffer, size, 0);
 }
+#endif /* HAVE_SYS_SOCKET_H */
