@@ -644,6 +644,7 @@ prepareLineBreakOpportunitiesState (LineBreakOpportunitiesState *lbo) {
 
 static void
 findLineBreakOpportunities (
+  BrailleContractionData *bcd,
   LineBreakOpportunitiesState *lbo,
   unsigned char *opportunities,
   const wchar_t *characters, unsigned int limit
@@ -1111,6 +1112,7 @@ prepareLineBreakOpportunitiesState (LineBreakOpportunitiesState *lbo) {
 
 static void
 findLineBreakOpportunities (
+  BrailleContractionData *bcd,
   LineBreakOpportunitiesState *lbo,
   unsigned char *opportunities,
   const wchar_t *characters, unsigned int limit
@@ -1128,7 +1130,8 @@ static int
 normalizeText (
   BrailleContractionData *bcd,
   const wchar_t *begin, const wchar_t *end,
-  wchar_t *buffer, size_t *length
+  wchar_t *buffer, size_t *length,
+  unsigned int *map
 ) {
   return 0;
 }
@@ -1314,7 +1317,7 @@ contractTextInternally (BrailleContractionData *bcd) {
       bcd->input.current += 1;
     }
 
-    findLineBreakOpportunities(&lbo, lineBreakOpportunities, bcd->input.begin, getInputConsumed(bcd));
+    findLineBreakOpportunities(bcd, &lbo, lineBreakOpportunities, bcd->input.begin, getInputConsumed(bcd));
     if (lineBreakOpportunities[getInputConsumed(bcd)]) {
       srcjoin = bcd->input.current;
       destjoin = bcd->output.current;
