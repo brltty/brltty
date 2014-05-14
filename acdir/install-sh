@@ -29,14 +29,15 @@ syntaxError() {
    exit 2
 }
 
+defaultMode="0755"
+defaultStripCommand="strip"
+
 copyCommand="cp"
-directoryCommand="mkdir"
+directoryCommand="mkdir -p"
 groupCommand="chgrp"
 modeCommand="chmod"
 ownerCommand="chown"
-stripCommand="strip"
-
-defaultMode="0755"
+stripCommand="${defaultStripCommand}"
 
 createDirectories=false
 newGroup=""
@@ -54,20 +55,21 @@ do
    case "${option}"
    in
       -c) ;;
-      -d) createDirectories=true;;
-      -g) operand=newGroup;;
-      -h) showUsage=true;;
-      -m) operand=newMode;;
-      -o) operand=newOwner;;
-      -s) stripSymbols=true;;
-      -v) showActions=true;;
+      -d|--directory) createDirectories=true;;
+      -g|--group) operand=newGroup;;
+      -h|--help) showUsage=true;;
+      -m|--mode) operand=newMode;;
+      -o|--owner) operand=newOwner;;
+      -s|--strip) stripSymbols=true;;
+      --strip-program) operand=stripCommand;;
+      -v|--verbose) showActions=true;;
       -*) syntaxError "unknown option: ${option}";;
       *) break;;
    esac
 
    shift
    [ -z "${operand}" ] && continue
-   [ "${#}" -eq 0 ] && syntaxError "missing operand: ${option}";
+   [ "${#}" -eq 0 ] && syntaxError "missing operand: ${option}"
    eval "${operand}"'="${1}"'
    shift
 done
@@ -76,18 +78,19 @@ done
    cat <<END_OF_USAGE
 Usage:
    ${programName} [-option ...] source destination
-   ${programName} [-option ...] source ... directory
-   ${programName} -d [-option ...] directory ...
+   ${programName} [-option ...] source ... destination-directory
+   ${programName} -d [-option ...] new-directory ...
 
 Options:
-   -c        (ignored for backward compatibility)
-   -d        Create all components of each directory (${directoryCommand}).
-   -g group  Set owning group (${groupCommand}).
-   -h        Display usage summary (this text) and exit.
-   -m mode   Set permission modes (${modeCommand}) instead of ${defaultMode}.
-   -o owner  Set owning user (${ownerCommand}).
-   -s        Strip symbols from executable (${stripCommand}).
-   -v        Display each successful action.
+   -c                ignored (for backward compatibility)
+   -d|--directory    create all components of specified directories
+   -g|--group group  set owning group
+   -h|--help         display usage summary (this text), and then exit
+   -m|--mode mode    set permission mode (default is ${defaultMode})
+   -o|--owner owner  set owning user
+   -s|--strip        strip symbols from executables
+   --strip-program   set symbol stripping command (default is ${defaultStripCommand})
+   -v|--verbose      re[prt each successful action
 END_OF_USAGE
 
    exit 0

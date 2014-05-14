@@ -1716,6 +1716,14 @@ in
       ;;
 esac
 
+if test "${cross_compiling}" != "no"
+then
+   if test -n "${INSTALL_OPTION_STRIP}"
+   then
+      INSTALL_OPTION_STRIP="${INSTALL_OPTION_STRIP} --strip-program ${STRIP}"
+   fi
+fi
+
 BRLTTY_ARG_DISABLE(
    [stripping],
    [stripping of executables and shared objects during installation],
