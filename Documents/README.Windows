@@ -365,3 +365,30 @@ going to Windows.
 ------------------------------------------------------------------------------
 
 
+Building the Windows installer and zip image
+============================================
+
+
+The mkwin script can be used to build the BRLTTY Windows installer and zip
+image.  This script however assumes that a bunch of software is already
+installed:
+
+- MinGW from http://mingw.org/ , including bison, m4, pdcurse, zip/unzip
+- libbraille from http://libbraille.sourceforge.net/
+- NSIS from http://nsis.sourceforge.net/
+- Python 2 and 3 from www.python.org
+- cython from http://cython.org/
+- autohotkey from http://www.autohotkey.com/
+- libusb-win32 devel-filter from http://libusb-win32.sourceforge.net/
+- libusb-1.0 from http://www.libusb.org/wiki/windows_backend
+- icu from http://icu-project.org/
+- glib, gettext-runtime and pkg-config.exe from http://gtk.org/download/win32.php
+
+mkwin can then be used this way:
+
+$ ~/brltty/mkwin ~/brltty
+
+and the .exe and .zip files will be generated in the current directory.
+
+
+------------------------------------------------------------------------------
