@@ -7,6 +7,11 @@ readonly autoconfOldVersion=2.13
 readonly autoconfNewVersion=2.59
 readonly automakeVersion=1.9.6
 
+readonly defaultArchivesSubdirectory="Archives"
+readonly defaultBuildSubdirectory="Build"
+readonly defaultInstallSubdirectory="Tools"
+readonly defaultTargetSystem="i586-pc-msdosdjgpp"
+
 function setVariable {
    local variable="${1}"
    local value="${2}"
@@ -57,7 +62,15 @@ function programMessage {
 }
 
 defineEnumeration logLevels error warning task build
-logLevel="${logLevels[task]}"
+declare -i logLevel="${logLevels[task]}"
+
+function logMore {
+   let "logLevel += 1"
+}
+
+function logLess {
+   let "logLevel -= 1"
+}
 
 function logMessage {
    local level="${1}"
@@ -88,18 +101,18 @@ function buildError {
 }
 
 function showUsage {
-   cat <<END-OF-USAGE
-usage: ${programName} [-option ...]
--h            display a usage summary (this text), and then exit
--q            decrease verbosity (may be specified more than once)
--v            increase verbosity (may be specified more than once)
--d directory  specify the root directory
--a directory  specify the archives directory
--b directory  specify the build directory
--i directory  specify the install directory
--t system     specify the target system
--g version    specify the gcc version to build
-END-OF-USAGE
+   cat <<-END-OF-USAGE
+	usage: ${programName} [-option ...]
+	-h            display a usage summary (this text), and then exit
+	-q            decrease output verbosity (may be specified more than once)
+	-v            increase output verbosity (may be specified more than once)
+	-d directory  specify the ROOT directory (default is the current directory)
+	-a directory  specify the archives directory (default is ROOT/${defaultArchivesSubdirectory})
+	-b directory  specify the build directory (default is ROOT/${defaultBuildSubdirectory})
+	-i directory  specify the install directory (default is ROOT/${defaultInstallSubdirectory})
+	-t system     specify the target system (default is ${defaultTargetSystem})
+	-g version    the gcc version to build (defaults if only one is archived)
+	END-OF-USAGE
 
    exit 0
 }
@@ -352,8 +365,8 @@ do
    in
       h) showUsage;;
 
-      q) let "logLevel -= 1";;
-      v) let "logLevel += 1";;
+      q) logLess;;
+      v) logMore;;
 
       d) rootDirectory="${OPTARG}";;
       a) archivesDirectory="${OPTARG}";;
@@ -371,11 +384,11 @@ done
 shift $((OPTIND - 1))
 
 setPath rootDirectory "${PWD}"
-setPath archivesDirectory "${rootDirectory}/Archives"
-setPath buildDirectory "${rootDirectory}/Build"
-setPath installDirectory "${rootDirectory}/Tools"
+setPath archivesDirectory "${rootDirectory}/${defaultArchivesSubdirectory}"
+setPath buildDirectory "${rootDirectory}/${defaultBuildSubdirectory}"
+setPath installDirectory "${rootDirectory}/${defaultInstallSubdirectory}"
 
-[ -n "${targetSystem}" ] || targetSystem="i586-pc-msdosdjgpp"
+[ -n "${targetSystem}" ] || targetSystem="${defaultTargetSystem}"
 readonly targetSystem
 
 logMessage task "finding host command paths"
