@@ -3,7 +3,6 @@
 set -e
 shopt -s nullglob
 
-readonly gccVersion=4.1.2
 readonly autoconfOldVersion=2.13
 readonly autoconfNewVersion=2.59
 readonly automakeVersion=1.9.6
@@ -293,9 +292,11 @@ rootDirectory=""
 archivesDirectory=""
 buildDirectory=""
 installDirectory=""
-targetSystem=""
 
-while getopts ":qvd:a:b:i:t:" option
+targetSystem=""
+gccVersion=""
+
+while getopts ":qvd:a:b:i:t:g:" option
 do
    case "${option}"
    in
@@ -306,7 +307,9 @@ do
       a) archivesDirectory="${OPTARG}";;
       b) buildDirectory="${OPTARG}";;
       i) installDirectory="${OPTARG}";;
+
       t) targetSystem="${OPTARG}";;
+      g) gccVersion="${OPTARG}";;
 
       :) syntaxError "missing ooperand: -${OPTARG}";;
      \?) syntaxError "unknown option: -${OPTARG}";;
