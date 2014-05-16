@@ -56,7 +56,7 @@ function programMessage {
    echo >&2 "${programName}: ${message}"
 }
 
-defineEnumeration logLevels error warning task
+defineEnumeration logLevels error warning task build
 logLevel="${logLevels[task]}"
 
 function logMessage {
@@ -104,39 +104,6 @@ function findHostCommand {
    done
 
    semanticError "host command not found: ${variable} (${*})"
-}
-
-function runVerboseCommand {
-   local logFile="${1}"
-   shift 1
-
-   "${@}" >&"${logFile}" || buildError "build error: for details, see ${PWD}/${logFile}"
-}
-
-function configurePackage {
-   local source="${1}"
-   shift 1
-
-   runVerboseCommand configure.log "${source}/configure" "${@}"
-}
-
-function configureTargetPackage {
-   local array="${1}"
-   shift 1
-
-   local sourceVariable="${array}[source]"
-   configurePackage "../${!sourceVariable}" \
-      "--prefix=${installDirectory}" \
-      "--target=${targetSystem}" \
-      "${@}"
-}
-
-function makePackage {
-   runVerboseCommand make.log make "${@}"
-}
-
-function installPackage {
-   runVerboseCommand install.log make install "${@}"
 }
 
 function verifyArchive {
@@ -236,6 +203,33 @@ function changeScriptVariable {
    sed -e "/^ *${variable} *=/s%=.*%='${value}'%" -i "${script}"
 }
 
+function logBuildDirectory {
+   logMessage build "build directory: ${PWD}"
+}
+
+function runBuildCommand {
+   local logFile="${1}"
+   shift 1
+
+   logMessage build "build command: ${*}"
+   "${@}" >&"${logFile}" || buildError "build error: for details, see ${PWD}/${logFile}"
+}
+
+function configurePackage {
+   local source="${1}"
+   shift 1
+
+   runBuildCommand configure.log "${source}/configure" "${@}"
+}
+
+function makePackage {
+   runBuildCommand make.log make "${@}"
+}
+
+function installPackage {
+   runBuildCommand install.log make install "${@}"
+}
+
 function buildHostPackage {
    local array="${1}"
    shift 1
@@ -248,6 +242,7 @@ function buildHostPackage {
    local pathVariable="${array}[path]"
    tar xfz "${!pathVariable}"
    cd "${!sourceVariable}"
+   logBuildDirectory
    configurePackage . --prefix="${prefix}"
    makePackage
    installPackage
@@ -274,6 +269,17 @@ function buildHostAutoconf {
    buildHostPackage "${array}" autoconf "${autoconfVariable}" autoheader "${autoheaderVariable}"
 }
 
+function configureTargetPackage {
+   local array="${1}"
+   shift 1
+
+   local sourceVariable="${array}[source]"
+   configurePackage "../${!sourceVariable}" \
+      "--prefix=${installDirectory}" \
+      "--target=${targetSystem}" \
+      "${@}"
+}
+
 function buildTargetPackage {
    local array="${1}"
    shift 1
@@ -282,6 +288,7 @@ function buildTargetPackage {
 
    local objectVariable="${array}[object]"
    cd "gnu/${!objectVariable}"
+   logBuildDirectory
    configureTargetPackage "${array}" "${@}"
    makePackage
    installPackage
@@ -356,8 +363,9 @@ buildHostAutoconf gnuAutoconfNew AUTOCONF AUTOHEADER
 buildHostPackage gnuAutomake
 
 logMessage task "patching gcc"
+logBuildDirectory
 chmod u=rwx,go=r "${gccUnpackScript}"
-runVerboseCommand unpack-gcc.log "./${gccUnpackScript}" "$(realpath --relative-to=. "${gnuGcc["path"]}")"
+runBuildCommand unpack-gcc.log "./${gccUnpackScript}" "$(realpath --relative-to=. "${gnuGcc["path"]}")"
 
 cd gnu
 unpackArchive gnuBinutils
@@ -373,7 +381,8 @@ cp -r include "${targetDirectory}"
 
 logMessage task "building stubify"
 cd src/stub
-"${CC}" -O2 stubify.c -o "${targetDirectory}/bin/stubify"
+logBuildDirectory
+runBuildCommand compile.log "${CC}" -O2 stubify.c -o "${targetDirectory}/bin/stubify"
 cd ../..
 
 buildTargetPackage gnuBinutils
