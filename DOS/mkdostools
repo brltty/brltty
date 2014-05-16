@@ -3,8 +3,10 @@
 set -e
 shopt -s nullglob
 
-readonly programName="${0##*/}"
-readonly programDirectory="$(realpath "$(dirname "${0}")")"
+readonly gccVersion=4.1.2
+readonly autoconfOldVersion=2.13
+readonly autoconfNewVersion=2.59
+readonly automakeVersion=1.9.6
 
 function setVariable {
    local variable="${1}"
@@ -45,6 +47,9 @@ function setPath {
    setVariable "${variable}" "$(realpath "${!variable}")"
    readonly "${variable}"
 }
+
+readonly programName="${0##*/}"
+readonly programDirectory="$(realpath "$(dirname "${0}")")"
 
 function programMessage {
    local message="${1}"
@@ -137,27 +142,36 @@ function installPackage {
 
 function verifyArchive {
    local array="${1}"
-   local prefix="${2}"
-   local suffix="${3}"
+   local type="${2}"
+   local prefix="${3}"
+   local suffix="${4}"
+   local version="${5}"
 
    local name="${prefix%-}"
 
    local originalDirectory="${PWD}"
    cd "${archivesDirectory}"
-   local files=("${prefix}"*"${suffix}")
+   if [ -n "${version}" ]
+   then
+      local file="${prefix}${version}${suffix}"
+      [ -f "${file}" ] || semanticError "${type} archive not found: ${file}"
+   else
+      local files=("${prefix}"*"${suffix}")
+      local count="${#files[*]}"
+      ((count > 0)) || semanticError "${type} archive not found: ${name}"
+      ((count == 1)) || semanticError "${type} package with multiple archives: ${files[*]}"
+
+      local file="${files[0]}"
+      version="${file%${suffix}}"
+      version="${version:${#prefix}}"
+   fi
    cd "${originalDirectory}"
 
-   local count="${#files[*]}"
-   ((count > 0)) || semanticError "archive not found: ${name} (${suffix})"
-   ((count == 1)) || semanticError "multiple archives: ${files[*]}"
-
-   local file="${files[0]}"
-   local version="${file%${suffix}}"
-   version="${version:${#prefix}}"
    [[ "${version}" =~ ^[0-9]{3}$ ]] && version="${version:0:1}.${version:1}"
    local source="${name}-${version}"
 
    declare -g -A "${array}"
+   setArrayElement "${array}" type "${type}"
    setArrayElement "${array}" name "${name}"
    setArrayElement "${array}" file "${file}"
    setArrayElement "${array}" path "${archivesDirectory}/${file}"
@@ -170,36 +184,49 @@ function verifyArchive {
 function gnuVerifyArchive {
    local array="${1}"
    local name="${2}"
+   local version="${3}"
 
-   verifyArchive "${array}" "${name}-" ".tar.gz"
+   verifyArchive "${array}" Gnu "${name}-" ".tar.gz" "${version}"
 }
 
 function djgppVerifyArchive {
    local array="${1}"
    local name="${2}"
    local type="${3}"
+   local version="${4}"
 
-   verifyArchive "${array}" "${name}" "${type}.zip"
+   verifyArchive "${array}" DJGPP "${name}" "${type}.zip" "${version//./}"
 }
 
-function gnuUnpackArchive {
+function logPackageTask {
    local array="${1}"
+   local task="${2}"
 
    local nameVariable="${array}[name]"
-   logMessage task "unpacking Gnu archive: ${!nameVariable}"
-
-   local pathVariable="${array}[path]"
-   tar xfz "${!pathVariable}"
+   local versionVariable="${array}[version]"
+   logMessage task "${task}: ${!nameVariable}-${!versionVariable}"
 }
 
-function djgppUnpackArchive {
+function unpackArchive {
    local array="${1}"
 
-   local nameVariable="${array}[name]"
-   logMessage task "unpacking DJGPP archive: ${!nameVariable}"
-
+   local typeVariable="${array}[type]"
    local pathVariable="${array}[path]"
-   unzip -q -a "${!pathVariable}"
+
+   logPackageTask "${array}" "unpacking ${!typeVariable} archive"
+   "unpackArchive_${!typeVariable}" "${!pathVariable}"
+}
+
+function unpackArchive_Gnu {
+   local path="${1}"
+
+   tar xfz "${path}"
+}
+
+function unpackArchive_DJGPP {
+   local path="${1}"
+
+   unzip -q -a "${path}"
 }
 
 function changeScriptVariable {
@@ -211,16 +238,17 @@ function changeScriptVariable {
 }
 
 function buildHostPackage {
-   local name="${1}"
-   local version="${2}"
-   shift 2
+   local array="${1}"
+   shift 1
 
-   logMessage  task "building host package: ${name}-${version}"
-   local source="${name}-${version}"
-   local prefix="$(realpath "${source}-host")"
+   logPackageTask "${array}" "building host package"
 
-   tar xfz "${archivesDirectory}/${name}-${version}.tar.gz"
-   cd "${source}"
+   local sourceVariable="${array}[source]"
+   local prefix="$(realpath "${!sourceVariable}-host")"
+
+   local pathVariable="${array}[path]"
+   tar xfz "${!pathVariable}"
+   cd "${!sourceVariable}"
    configurePackage . --prefix="${prefix}"
    makePackage
    installPackage
@@ -240,20 +268,18 @@ function buildHostPackage {
 }
 
 function buildHostAutoconf {
-   local version="${1}"
+   local array="${1}"
    local autoconfVariable="${2}"
    local autoheaderVariable="${3}"
 
-   buildHostPackage autoconf "${version}" autoconf "${autoconfVariable}" autoheader "${autoheaderVariable}"
+   buildHostPackage "${array}" autoconf "${autoconfVariable}" autoheader "${autoheaderVariable}"
 }
 
 function buildTargetPackage {
    local array="${1}"
    shift 1
 
-   local nameVariable="${array}[name]"
-   local versionVariable="${array}[version]"
-   logMessage task "building target package: ${!nameVariable}-${!versionVariable}"
+   logPackageTask "${array}" "building target package"
 
    local objectVariable="${array}[object]"
    cd "gnu/${!objectVariable}"
@@ -305,9 +331,12 @@ findHostCommand LIBTOOL libtool
 export PATH="${PATH}:${installDirectory}/bin"
 
 logMessage task "verifying archives"
+gnuVerifyArchive gnuAutoconfOld autoconf "${autoconfOldVersion}"
+gnuVerifyArchive gnuAutoconfNew autoconf "${autoconfNewVersion}"
+gnuVerifyArchive gnuAutomake automake "${automakeVersion}"
 djgppVerifyArchive djgppCrx djcrx
-djgppVerifyArchive djgppGcc gcc s2
-gnuVerifyArchive gnuGcc gcc
+djgppVerifyArchive djgppGcc gcc s2 "${gccVersion}"
+gnuVerifyArchive gnuGcc gcc "${gccVersion}"
 gnuVerifyArchive gnuBinutils binutils
 
 logMessage task "preparing build directory"
@@ -315,19 +344,20 @@ rm -f -r "${buildDirectory}"
 mkdir -p "${buildDirectory}"
 cd "${buildDirectory}"
 
-djgppUnpackArchive djgppCrx
-djgppUnpackArchive djgppGcc
+unpackArchive djgppCrx
+unpackArchive djgppGcc
 
 gccUnpackScript="unpack-gcc.sh"
-buildHostAutoconf 2.13 AUTOCONF_OLD AUTOHEADER_OLD
-buildHostAutoconf 2.59 AUTOCONF AUTOHEADER
-buildHostPackage automake 1.9.6
+buildHostAutoconf gnuAutoconfOld AUTOCONF_OLD AUTOHEADER_OLD
+buildHostAutoconf gnuAutoconfNew AUTOCONF AUTOHEADER
+buildHostPackage gnuAutomake
+
 logMessage task "patching gcc"
 chmod u=rwx,go=r "${gccUnpackScript}"
 runVerboseCommand unpack-gcc.log "./${gccUnpackScript}" "$(realpath --relative-to=. "${gnuGcc["path"]}")"
 
 cd gnu
-gnuUnpackArchive gnuBinutils
+unpackArchive gnuBinutils
 mkdir -p "${djgppGcc[object]}"
 mkdir -p "${gnuBinutils[object]}"
 cd ..
