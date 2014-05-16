@@ -87,6 +87,23 @@ function buildError {
    exit 4
 }
 
+function showUsage {
+   cat <<END-OF-USAGE
+usage: ${programName} [-option ...]
+-h            display a usage summary (this text), and then exit
+-q            decrease verbosity (may be specified more than once)
+-v            increase verbosity (may be specified more than once)
+-d directory  specify the root directory
+-a directory  specify the archives directory
+-b directory  specify the build directory
+-i directory  specify the install directory
+-t system     specify the target system
+-g version    specify the gcc version to build
+END-OF-USAGE
+
+   exit 0
+}
+
 function findHostCommand {
    local variable="${1}"
    shift 1
@@ -106,6 +123,25 @@ function findHostCommand {
    semanticError "host command not found: ${variable} (${*})"
 }
 
+function makeDirectory {
+   local path="${1}"
+
+   mkdir -p "${path}"
+}
+
+function emptyDirectory {
+   local path="${1}"
+
+   rm -f -r "${path}/"*
+}
+
+function initializeDirectory {
+   local path="${1}"
+
+   makeDirectory "${path}"
+   emptyDirectory "${path}"
+}
+
 function verifyArchive {
    local array="${1}"
    local type="${2}"
@@ -113,7 +149,13 @@ function verifyArchive {
    local suffix="${4}"
    local version="${5}"
 
+   declare -g -A "${array}"
+   setArrayElement "${array}" type "${type}"
+   setArrayElement "${array}" prefix "${prefix}"
+   setArrayElement "${array}" suffix "${suffix}"
+
    local name="${prefix%-}"
+   setArrayElement "${array}" name "${name}"
 
    local originalDirectory="${PWD}"
    cd "${archivesDirectory}"
@@ -134,16 +176,14 @@ function verifyArchive {
    cd "${originalDirectory}"
 
    [[ "${version}" =~ ^[0-9]{3}$ ]] && version="${version:0:1}.${version:1}"
-   local source="${name}-${version}"
+   setArrayElement "${array}" version "${version}" 
 
-   declare -g -A "${array}"
-   setArrayElement "${array}" type "${type}"
-   setArrayElement "${array}" name "${name}"
    setArrayElement "${array}" file "${file}"
    setArrayElement "${array}" path "${archivesDirectory}/${file}"
-   setArrayElement "${array}" version "${version}" 
+
+   local source="${name}-${version}"
    setArrayElement "${array}" source "${source}"
-   setArrayElement "${array}" object "${source}-obj"
+
    readonly "${array}"
 }
 
@@ -237,7 +277,7 @@ function buildHostPackage {
    logPackageTask "${array}" "building host package"
 
    local sourceVariable="${array}[source]"
-   local prefix="$(realpath "${!sourceVariable}-host")"
+   local prefix="$(realpath "${!sourceVariable}-install")"
 
    local pathVariable="${array}[path]"
    tar xfz "${!pathVariable}"
@@ -286,8 +326,11 @@ function buildTargetPackage {
 
    logPackageTask "${array}" "building target package"
 
-   local objectVariable="${array}[object]"
-   cd "gnu/${!objectVariable}"
+   cd gnu
+   local sourceVariable="${array}[source]"
+   local build="${!sourceVariable}-build"
+   makeDirectory "${build}"
+   cd "${build}"
    logBuildDirectory
    configureTargetPackage "${array}" "${@}"
    makePackage
@@ -303,10 +346,12 @@ installDirectory=""
 targetSystem=""
 gccVersion=""
 
-while getopts ":qvd:a:b:i:t:g:" option
+while getopts ":hqvd:a:b:i:t:g:" option
 do
    case "${option}"
    in
+      h) showUsage;;
+
       q) let "logLevel -= 1";;
       v) let "logLevel += 1";;
 
@@ -332,26 +377,23 @@ setPath installDirectory "${rootDirectory}/Tools"
 
 [ -n "${targetSystem}" ] || targetSystem="i586-pc-msdosdjgpp"
 readonly targetSystem
-readonly targetDirectory="${installDirectory}/${targetSystem}"
 
 logMessage task "finding host command paths"
-findHostCommand CC gcc cc
-findHostCommand CXX g++ c++
+findHostCommand CC cc gcc
+findHostCommand CXX c++ g++ cxx gxx
 findHostCommand LIBTOOL libtool
-export PATH="${PATH}:${installDirectory}/bin"
 
 logMessage task "verifying archives"
 gnuVerifyArchive gnuAutoconfOld autoconf "${autoconfOldVersion}"
 gnuVerifyArchive gnuAutoconfNew autoconf "${autoconfNewVersion}"
 gnuVerifyArchive gnuAutomake automake "${automakeVersion}"
-djgppVerifyArchive djgppCrx djcrx
-djgppVerifyArchive djgppGcc gcc s2 "${gccVersion}"
-gnuVerifyArchive gnuGcc gcc "${gccVersion}"
 gnuVerifyArchive gnuBinutils binutils
+gnuVerifyArchive gnuGcc gcc "${gccVersion}"
+djgppVerifyArchive djgppGcc gcc s2 "${gnuGcc[version]}"
+djgppVerifyArchive djgppCrx djcrx
 
 logMessage task "preparing build directory"
-rm -f -r "${buildDirectory}"
-mkdir -p "${buildDirectory}"
+initializeDirectory "${buildDirectory}"
 cd "${buildDirectory}"
 
 unpackArchive djgppCrx
@@ -369,13 +411,14 @@ runBuildCommand unpack-gcc.log "./${gccUnpackScript}" "$(realpath --relative-to=
 
 cd gnu
 unpackArchive gnuBinutils
-mkdir -p "${djgppGcc[object]}"
-mkdir -p "${gnuBinutils[object]}"
 cd ..
 
-logMessage task "preparing target directory"
-mkdir -p "${targetDirectory}"
-mkdir -p "${targetDirectory}/bin"
+logMessage task "preparing install directory"
+initializeDirectory "${installDirectory}"
+export PATH="${PATH}:${installDirectory}/bin"
+readonly targetDirectory="${installDirectory}/${targetSystem}"
+makeDirectory "${targetDirectory}"
+makeDirectory "${targetDirectory}/bin"
 cp -r lib "${targetDirectory}"
 cp -r include "${targetDirectory}"
 
@@ -395,7 +438,7 @@ ln -s libsupc++.a libsupcxx.a
 
 logMessage task "cleaning up"
 cd /
-rm -f -r "${buildDirectory}"
+emptyDirectory "${buildDirectory}"
 
 logMessage task "done"
 exit 0
