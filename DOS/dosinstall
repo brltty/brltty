@@ -1,0 +1,83 @@
+#!/bin/bash
+
+shopt -s nullglob
+
+TARGET=~/ens/projet/1/mielke-svn/brltty-dos/brltty
+
+rm -f "$TARGET/bin/brltty-config"
+rm -f "$TARGET/bin/brltty-install"
+
+install_text() {
+	cp "$1" "$2"
+	todos "$2"
+}
+
+for drivers in Drivers/Braille Drivers/Speech 
+do
+(
+	cd $drivers
+	mkdir -p $TARGET/$drivers
+	for i in * 
+	do
+		for j in $i/README*
+		do
+			prefix=${j#$i/README.}-
+			[ "$j" = $i/README ] && prefix=
+			install_text "$j" "$TARGET/$drivers/$prefix$i.txt"
+		done
+	done
+)
+done
+
+rm -f $TARGET/Drivers/Braille/XWindow.txt
+rm -f $TARGET/Drivers/Braille/TTY.txt
+rm -f $TARGET/Drivers/Braille/Virtual.txt
+rm -f $TARGET/Drivers/Braille/BrlAPI.txt
+
+rm -f $TARGET/Drivers/Speech/ExternalSpeech.txt
+rm -f $TARGET/Drivers/Speech/Festival.txt
+rm -f $TARGET/Drivers/Speech/FestivalLite.txt
+rm -f $TARGET/Drivers/Speech/GenericSay.txt
+rm -f $TARGET/Drivers/Speech/Mikropuhe.txt
+rm -f $TARGET/Drivers/Speech/SpeechDispatcher.txt
+rm -f $TARGET/Drivers/Speech/Swift.txt
+rm -f $TARGET/Drivers/Speech/Theta.txt
+rm -f $TARGET/Drivers/Speech/ViaVoice.txt
+rm -f $TARGET/Drivers/Speech/eSpeak.txt
+rmdir $TARGET/Drivers/Speech
+
+install_text LICENSE-GPL "$TARGET/license-gpl.txt"
+install_text LICENSE-LGPL "$TARGET/license-lgpl.txt"
+install_text README "$TARGET/README.txt"
+install_text Documents/README.MSDOS "$TARGET/README.MSDOS.txt"
+install_text Documents/brltty.conf "$TARGET/etc/brltty.conf"
+
+mkdir -p "$TARGET/doc"
+for i in ChangeLog HISTORY TODO
+do
+  install_text Documents/$i "$TARGET/doc/$i.txt"
+done
+
+todos $TARGET/etc/brltty/*.ttb
+todos $TARGET/etc/brltty/*.tti
+todos $TARGET/etc/brltty/*.ctb
+todos $TARGET/etc/brltty/*.cti
+
+(
+cd Documents
+for i in `find Manual-BRLTTY -type f | grep -v .svn`
+do
+  mkdir -p "$TARGET/doc/`dirname $i`"
+  install_text "$i" "$TARGET/doc/$i"
+done
+)
+
+MANDIR=$TARGET/share/man
+rm -f $MANDIR/man1/xbrlapi.1
+
+for i in $MANDIR/man1/*.1
+do
+	COLUMNS=80 LC_ALL=C man $i | sed -e 's/.//g' -e 's/$//' > ${i/%1/txt}
+done
+
+cp ~/brl/djgpp/brltty/CWSDPMI.EXE $TARGET/bin/

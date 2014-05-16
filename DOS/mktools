@@ -1,0 +1,359 @@
+#!/bin/bash -p
+
+set -e
+shopt -s nullglob
+
+readonly programName="${0##*/}"
+readonly programDirectory="$(realpath "$(dirname "${0}")")"
+
+function setVariable {
+   local variable="${1}"
+   local value="${2}"
+
+   eval "${variable}"'="${value}"'
+}
+
+function setArrayElement {
+   local array="${1}"
+   local index="${2}"
+   local value="${3}"
+
+   setVariable "${array}[${index}]" "${value}"
+}
+
+function defineEnumeration {
+   local array="${1}"
+   shift 1
+
+   declare -g -A "${array}"
+   local value=0
+
+   while [ "${#}" -gt 0 ]
+   do
+      setArrayElement "${array}" "${1}" $((value++))
+      shift 1
+   done
+
+   readonly "${array}"
+}
+
+function setPath {
+   local variable="${1}"
+   local default="${2}"
+
+   [ -n "${!variable}" ] || setVariable "${variable}" "${default}"
+   setVariable "${variable}" "$(realpath "${!variable}")"
+   readonly "${variable}"
+}
+
+function programMessage {
+   local message="${1}"
+
+   echo >&2 "${programName}: ${message}"
+}
+
+defineEnumeration logLevels error warning task
+logLevel="${logLevels[task]}"
+
+function logMessage {
+   local level="${1}"
+   local message="${2}"
+
+   [ "${logLevels[$level]}" -gt "${logLevel}" ] || programMessage "${message}"
+}
+
+function syntaxError {
+   local message="${1}"
+
+   logMessage error "${message}"
+   exit 2
+}
+
+function semanticError {
+   local message="${1}"
+
+   logMessage error "${message}"
+   exit 3
+}
+
+function buildError {
+   local message="${1}"
+
+   logMessage error "${message}"
+   exit 4
+}
+
+function findHostCommand {
+   local variable="${1}"
+   shift 1
+
+   local command
+   for command
+   do
+      local path="$(type -p "${command}")"
+
+      [ -z "${path}" ] || {
+         setVariable "${variable}" "${path}"
+         export "${variable}"
+         return 0
+      }
+   done
+
+   semanticError "host command not found: ${variable} (${*})"
+}
+
+function runVerboseCommand {
+   local logFile="${1}"
+   shift 1
+
+   "${@}" >&"${logFile}" || buildError "build error: for details, see ${PWD}/${logFile}"
+}
+
+function configurePackage {
+   local source="${1}"
+   shift 1
+
+   runVerboseCommand configure.log "${source}/configure" "${@}"
+}
+
+function configureTargetPackage {
+   local array="${1}"
+   shift 1
+
+   local sourceVariable="${array}[source]"
+   configurePackage "../${!sourceVariable}" \
+      "--prefix=${installDirectory}" \
+      "--target=${targetSystem}" \
+      "${@}"
+}
+
+function makePackage {
+   runVerboseCommand make.log make "${@}"
+}
+
+function installPackage {
+   runVerboseCommand install.log make install "${@}"
+}
+
+function verifyArchive {
+   local array="${1}"
+   local prefix="${2}"
+   local suffix="${3}"
+
+   local name="${prefix%-}"
+
+   local originalDirectory="${PWD}"
+   cd "${archivesDirectory}"
+   local files=("${prefix}"*"${suffix}")
+   cd "${originalDirectory}"
+
+   local count="${#files[*]}"
+   ((count > 0)) || semanticError "archive not found: ${name} (${suffix})"
+   ((count == 1)) || semanticError "multiple archives: ${files[*]}"
+
+   local file="${files[0]}"
+   local version="${file%${suffix}}"
+   version="${version:${#prefix}}"
+   [[ "${version}" =~ ^[0-9]{3}$ ]] && version="${version:0:1}.${version:1}"
+   local source="${name}-${version}"
+
+   declare -g -A "${array}"
+   setArrayElement "${array}" name "${name}"
+   setArrayElement "${array}" file "${file}"
+   setArrayElement "${array}" path "${archivesDirectory}/${file}"
+   setArrayElement "${array}" version "${version}" 
+   setArrayElement "${array}" source "${source}"
+   setArrayElement "${array}" object "${source}-obj"
+   readonly "${array}"
+}
+
+function gnuVerifyArchive {
+   local array="${1}"
+   local name="${2}"
+
+   verifyArchive "${array}" "${name}-" ".tar.gz"
+}
+
+function djgppVerifyArchive {
+   local array="${1}"
+   local name="${2}"
+   local type="${3}"
+
+   verifyArchive "${array}" "${name}" "${type}.zip"
+}
+
+function gnuUnpackArchive {
+   local array="${1}"
+
+   local nameVariable="${array}[name]"
+   logMessage task "unpacking Gnu archive: ${!nameVariable}"
+
+   local pathVariable="${array}[path]"
+   tar xfz "${!pathVariable}"
+}
+
+function djgppUnpackArchive {
+   local array="${1}"
+
+   local nameVariable="${array}[name]"
+   logMessage task "unpacking DJGPP archive: ${!nameVariable}"
+
+   local pathVariable="${array}[path]"
+   unzip -q -a "${!pathVariable}"
+}
+
+function changeScriptVariable {
+   local script="${1}"
+   local variable="${2}"
+   local value="${3}"
+
+   sed -e "/^ *${variable} *=/s%=.*%='${value}'%" -i "${script}"
+}
+
+function buildHostPackage {
+   local name="${1}"
+   local version="${2}"
+   shift 2
+
+   logMessage  task "building host package: ${name}-${version}"
+   local source="${name}-${version}"
+   local prefix="$(realpath "${source}-host")"
+
+   tar xfz "${archivesDirectory}/${name}-${version}.tar.gz"
+   cd "${source}"
+   configurePackage . --prefix="${prefix}"
+   makePackage
+   installPackage
+   cd ..
+
+   local bin="${prefix}/bin"
+   export PATH="${bin}:${PATH}"
+
+   while [ "${#}" -gt 0 ]
+   do
+      local command="${1}"
+      local variable="${2}"
+      shift 2
+
+      changeScriptVariable "${gccUnpackScript}" "${variable}" "${bin}/${command}"
+   done
+}
+
+function buildHostAutoconf {
+   local version="${1}"
+   local autoconfVariable="${2}"
+   local autoheaderVariable="${3}"
+
+   buildHostPackage autoconf "${version}" autoconf "${autoconfVariable}" autoheader "${autoheaderVariable}"
+}
+
+function buildTargetPackage {
+   local array="${1}"
+   shift 1
+
+   local nameVariable="${array}[name]"
+   local versionVariable="${array}[version]"
+   logMessage task "building target package: ${!nameVariable}-${!versionVariable}"
+
+   local objectVariable="${array}[object]"
+   cd "gnu/${!objectVariable}"
+   configureTargetPackage "${array}" "${@}"
+   makePackage
+   installPackage
+   cd ../..
+}
+
+rootDirectory=""
+archivesDirectory=""
+buildDirectory=""
+installDirectory=""
+targetSystem=""
+
+while getopts ":qvd:a:b:i:t:" option
+do
+   case "${option}"
+   in
+      q) let "logLevel -= 1";;
+      v) let "logLevel += 1";;
+
+      d) rootDirectory="${OPTARG}";;
+      a) archivesDirectory="${OPTARG}";;
+      b) buildDirectory="${OPTARG}";;
+      i) installDirectory="${OPTARG}";;
+      t) targetSystem="${OPTARG}";;
+
+      :) syntaxError "missing ooperand: -${OPTARG}";;
+     \?) syntaxError "unknown option: -${OPTARG}";;
+      *) syntaxError "unimplemented option: -${option}";;
+   esac
+done
+shift $((OPTIND - 1))
+
+setPath rootDirectory "${PWD}"
+setPath archivesDirectory "${rootDirectory}/Archives"
+setPath buildDirectory "${rootDirectory}/Build"
+setPath installDirectory "${rootDirectory}/Tools"
+
+[ -n "${targetSystem}" ] || targetSystem="i586-pc-msdosdjgpp"
+readonly targetSystem
+readonly targetDirectory="${installDirectory}/${targetSystem}"
+
+logMessage task "finding host command paths"
+findHostCommand CC gcc cc
+findHostCommand CXX g++ c++
+findHostCommand LIBTOOL libtool
+export PATH="${PATH}:${installDirectory}/bin"
+
+logMessage task "verifying archives"
+djgppVerifyArchive djgppCrx djcrx
+djgppVerifyArchive djgppGcc gcc s2
+gnuVerifyArchive gnuGcc gcc
+gnuVerifyArchive gnuBinutils binutils
+
+logMessage task "preparing build directory"
+rm -f -r "${buildDirectory}"
+mkdir -p "${buildDirectory}"
+cd "${buildDirectory}"
+
+djgppUnpackArchive djgppCrx
+djgppUnpackArchive djgppGcc
+
+gccUnpackScript="unpack-gcc.sh"
+buildHostAutoconf 2.13 AUTOCONF_OLD AUTOHEADER_OLD
+buildHostAutoconf 2.59 AUTOCONF AUTOHEADER
+buildHostPackage automake 1.9.6
+logMessage task "patching gcc"
+chmod u=rwx,go=r "${gccUnpackScript}"
+runVerboseCommand unpack-gcc.log "./${gccUnpackScript}" "$(realpath --relative-to=. "${gnuGcc["path"]}")"
+
+cd gnu
+gnuUnpackArchive gnuBinutils
+mkdir -p "${djgppGcc[object]}"
+mkdir -p "${gnuBinutils[object]}"
+cd ..
+
+logMessage task "preparing target directory"
+mkdir -p "${targetDirectory}"
+mkdir -p "${targetDirectory}/bin"
+cp -r lib "${targetDirectory}"
+cp -r include "${targetDirectory}"
+
+logMessage task "building stubify"
+cd src/stub
+"${CC}" -O2 stubify.c -o "${targetDirectory}/bin/stubify"
+cd ../..
+
+buildTargetPackage gnuBinutils
+buildTargetPackage djgppGcc --with-headers="${targetDirectory}/include"
+
+logMessage task "creating symbolic links"
+cd "${targetDirectory}/lib"
+ln -s libstdc++.a libstdcxx.a
+ln -s libsupc++.a libsupcxx.a
+
+logMessage task "cleaning up"
+cd /
+rm -f -r "${buildDirectory}"
+
+logMessage task "done"
+exit 0
