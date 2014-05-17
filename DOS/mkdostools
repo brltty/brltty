@@ -1,4 +1,21 @@
 #!/bin/bash -p
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2014 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any
+# later version. Please see the file LICENSE-GPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
 
 set -e
 shopt -s nullglob
@@ -31,7 +48,7 @@ function defineEnumeration {
    local array="${1}"
    shift 1
 
-   declare -g -A "${array}"
+   declare -g -i -A "${array}"
    local value=0
 
    while [ "${#}" -gt 0 ]
@@ -56,18 +73,25 @@ defineEnumeration logLevels error warning task step detail
 declare -i logLevel="${logLevels[task]}"
 
 function logMore {
-   let "logLevel += 1"
+   ((logLevel += 1)) || :
 }
 
 function logLess {
-   let "logLevel -= 1"
+   ((logLevel -= 1)) || :
 }
 
 function logMessage {
    local level="${1}"
    local message="${2}"
 
-   [ "${logLevels[$level]}" -gt "${logLevel}" ] || programMessage "${message}"
+   local value="${logLevels[$level]}"
+
+   [ -n "${value}" ] || {
+      logMessage warning "undefined log level: ${level}"
+      value=0
+   }
+
+   [ "${value}" -gt "${logLevel}" ] || programMessage "${message}"
 }
 
 function syntaxError {
