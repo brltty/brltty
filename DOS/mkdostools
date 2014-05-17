@@ -43,15 +43,6 @@ function defineEnumeration {
    readonly "${array}"
 }
 
-function setPath {
-   local variable="${1}"
-   local default="${2}"
-
-   [ -n "${!variable}" ] || setVariable "${variable}" "${default}"
-   setVariable "${variable}" "$(realpath "${!variable}")"
-   readonly "${variable}"
-}
-
 readonly programName="${0##*/}"
 readonly programDirectory="$(realpath "$(dirname "${0}")")"
 
@@ -61,7 +52,7 @@ function programMessage {
    echo >&2 "${programName}: ${message}"
 }
 
-defineEnumeration logLevels error warning task build
+defineEnumeration logLevels error warning task step detail
 declare -i logLevel="${logLevels[task]}"
 
 function logMore {
@@ -93,7 +84,7 @@ function semanticError {
    exit 3
 }
 
-function buildError {
+function externalError {
    local message="${1}"
 
    logMessage error "${message}"
@@ -117,6 +108,36 @@ function showUsage {
    exit 0
 }
 
+function handleDirectoryOption {
+   local variable="${1}"
+   local default="${2}"
+   local name="${3}"
+
+   [ -n "${!variable}" ] || setVariable "${variable}" "${default}"
+   setVariable "${variable}" "$(realpath "${!variable}")"
+   readonly "${variable}"
+
+   [ -z "${name}" ] || logMessage detail "${name} directory: ${!variable}"
+}
+
+function logArrayElements {
+   local array="${1}"
+   local name="${2}"
+
+   message="${name} properties:"
+
+   eval local 'indeces="${!'"${array}"'[*]}"'
+   local index
+
+   for index in ${indeces}
+   do
+      local variable="${array}[${index}]"
+      message+=" ${index}=${!variable}"
+   done
+
+   logMessage detail "${message}"
+}
+
 function findHostCommand {
    local variable="${1}"
    shift 1
@@ -134,6 +155,19 @@ function findHostCommand {
    done
 
    semanticError "host command not found: ${variable} (${*})"
+}
+
+function pathChange {
+   local newPath="${1}"
+
+   export PATH="${newPath}"
+   logMessage detail "command search path: ${PATH}"
+}
+
+function pathPrepend {
+   local directory="${1}"
+
+   pathChange "${directory}:${PATH}"
 }
 
 function makeDirectory {
@@ -198,6 +232,7 @@ function verifyArchive {
    setArrayElement "${array}" source "${source}"
 
    readonly "${array}"
+   logArrayElements "${array}" "archive"
 }
 
 function gnuVerifyArchive {
@@ -257,15 +292,15 @@ function changeScriptVariable {
 }
 
 function logBuildDirectory {
-   logMessage build "build directory: ${PWD}"
+   logMessage step "build directory: ${PWD}"
 }
 
 function runBuildCommand {
    local logFile="${1}"
    shift 1
 
-   logMessage build "build command: ${*}"
-   "${@}" >&"${logFile}" || buildError "build error: for details, see ${PWD}/${logFile}"
+   logMessage step "build command: ${*}"
+   "${@}" >&"${logFile}" || externalError "build error: for details, see ${PWD}/${logFile}"
 }
 
 function configurePackage {
@@ -302,7 +337,7 @@ function buildHostPackage {
    cd ..
 
    local bin="${prefix}/bin"
-   export PATH="${bin}:${PATH}"
+   pathPrepend "${bin}"
 
    while [ "${#}" -gt 0 ]
    do
@@ -383,10 +418,10 @@ do
 done
 shift $((OPTIND - 1))
 
-setPath rootDirectory "${PWD}"
-setPath archivesDirectory "${rootDirectory}/${defaultArchivesSubdirectory}"
-setPath buildDirectory "${rootDirectory}/${defaultBuildSubdirectory}"
-setPath installDirectory "${rootDirectory}/${defaultInstallSubdirectory}"
+handleDirectoryOption rootDirectory "${PWD}" "root"
+handleDirectoryOption archivesDirectory "${rootDirectory}/${defaultArchivesSubdirectory}" "archives"
+handleDirectoryOption buildDirectory "${rootDirectory}/${defaultBuildSubdirectory}" "build"
+handleDirectoryOption installDirectory "${rootDirectory}/${defaultInstallSubdirectory}" "install"
 
 [ -n "${targetSystem}" ] || targetSystem="${defaultTargetSystem}"
 readonly targetSystem
@@ -428,7 +463,7 @@ cd ..
 
 logMessage task "preparing install directory"
 initializeDirectory "${installDirectory}"
-export PATH="${PATH}:${installDirectory}/bin"
+pathPrepend "$${installDirectory}/bin"
 readonly targetDirectory="${installDirectory}/${targetSystem}"
 makeDirectory "${targetDirectory}"
 makeDirectory "${targetDirectory}/bin"
