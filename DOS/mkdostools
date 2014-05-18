@@ -18,11 +18,13 @@
 ###############################################################################
 
 set -e
+umask 022
 shopt -s nullglob
 
 readonly autoconfOldVersion=2.13
 readonly autoconfNewVersion=2.59
 readonly automakeVersion=1.9.6
+readonly crxVersion=2.04
 
 readonly defaultArchivesSubdirectory="Archives"
 readonly defaultBuildSubdirectory="Build"
@@ -174,6 +176,7 @@ function findHostCommand {
       [ -z "${path}" ] || {
          setVariable "${variable}" "${path}"
          export "${variable}"
+         logMessage detail "host command location: ${variable} -> ${!variable}"
          return 0
       }
    done
@@ -185,7 +188,7 @@ function pathChange {
    local newPath="${1}"
 
    export PATH="${newPath}"
-   logMessage detail "command search path: ${PATH}"
+   logMessage detail "host command search path: ${PATH}"
 }
 
 function pathPrepend {
@@ -349,13 +352,13 @@ function buildHostPackage {
    logPackageTask "${array}" "building host package"
 
    local sourceVariable="${array}[source]"
+   local build="${!sourceVariable}-host"
    local prefix="$(realpath "${!sourceVariable}-install")"
 
-   local pathVariable="${array}[path]"
-   tar xfz "${!pathVariable}"
-   cd "${!sourceVariable}"
+   makeDirectory "${build}"
+   cd "${build}"
    logBuildDirectory
-   configurePackage . --prefix="${prefix}"
+   configurePackage "../${!sourceVariable}" --prefix="${prefix}"
    makePackage
    installPackage
    cd ..
@@ -373,12 +376,20 @@ function buildHostPackage {
    done
 }
 
+function buildHostArchive {
+   local array="${1}"
+   shift 1
+
+   unpackArchive "${array}"
+   buildHostPackage "${array}" "${@}"
+}
+
 function buildHostAutoconf {
    local array="${1}"
    local autoconfVariable="${2}"
    local autoheaderVariable="${3}"
 
-   buildHostPackage "${array}" autoconf "${autoconfVariable}" autoheader "${autoheaderVariable}"
+   buildHostArchive "${array}" autoconf "${autoconfVariable}" autoheader "${autoheaderVariable}"
 }
 
 function configureTargetPackage {
@@ -400,7 +411,7 @@ function buildTargetPackage {
 
    cd gnu
    local sourceVariable="${array}[source]"
-   local build="${!sourceVariable}-build"
+   local build="${!sourceVariable}-target"
    makeDirectory "${build}"
    cd "${build}"
    logBuildDirectory
@@ -450,10 +461,11 @@ handleDirectoryOption installDirectory "${rootDirectory}/${defaultInstallSubdire
 [ -n "${targetSystem}" ] || targetSystem="${defaultTargetSystem}"
 readonly targetSystem
 
-logMessage task "finding host command paths"
+logMessage task "finding host commands"
 findHostCommand CC cc gcc
 findHostCommand CXX c++ g++ cxx gxx
 findHostCommand LIBTOOL libtool
+unset MAKEFLAGS
 
 logMessage task "verifying archives"
 gnuVerifyArchive gnuAutoconfOld autoconf "${autoconfOldVersion}"
@@ -462,7 +474,7 @@ gnuVerifyArchive gnuAutomake automake "${automakeVersion}"
 gnuVerifyArchive gnuBinutils binutils
 gnuVerifyArchive gnuGcc gcc "${gccVersion}"
 djgppVerifyArchive djgppGcc gcc s2 "${gnuGcc[version]}"
-djgppVerifyArchive djgppCrx djcrx
+djgppVerifyArchive djgppCrx djcrx "" "${crxVersion}"
 
 logMessage task "preparing build directory"
 initializeDirectory "${buildDirectory}"
@@ -474,9 +486,9 @@ unpackArchive djgppGcc
 gccUnpackScript="unpack-gcc.sh"
 buildHostAutoconf gnuAutoconfOld AUTOCONF_OLD AUTOHEADER_OLD
 buildHostAutoconf gnuAutoconfNew AUTOCONF AUTOHEADER
-buildHostPackage gnuAutomake
+buildHostArchive gnuAutomake
 
-logMessage task "patching gcc"
+logMessage task "patching gcc source"
 logBuildDirectory
 chmod u=rwx,go=r "${gccUnpackScript}"
 runBuildCommand unpack-gcc.log "./${gccUnpackScript}" "$(realpath --relative-to=. "${gnuGcc["path"]}")"
