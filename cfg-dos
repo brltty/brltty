@@ -46,7 +46,7 @@ checkTool() {
 }
 checkTool CC gcc
 
-export CFLAGS=""
+export CFLAGS="-fgnu89-inline"
 export LDFLAGS=""
 
 # Braille drivers already disabled:
@@ -59,7 +59,7 @@ export LDFLAGS=""
    --disable-x \
    \
    --without-libbraille \
-   --with-braille-driver=-tt,-vr \
+   --with-braille-driver=-tt,-vr,all \
    --disable-speech-support \
    --with-screen-driver=pb,-all \
    \
