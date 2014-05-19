@@ -77,8 +77,9 @@ usbVerifyBaudRate_CP2101 (UsbDevice *device, USB_CP2101_BaudRate expected) {
     logMessage(LOG_WARNING, "unexpected CP2101 baud rate size: %d", (int)result);
   } else if (getLittleEndian32(actual) != expected) {
     logMessage(LOG_WARNING,
-               "unexpected CP2101 baud rate value: Expected:%u Actual:%u",
-               expected, getLittleEndian32(actual));
+               "unexpected CP2101 baud rate value:"
+               " Expected:%"PRIu32 " Actual:%"PRIu32,
+               (uint32_t)expected, getLittleEndian32(actual));
   } else {
     return 1;
   }
