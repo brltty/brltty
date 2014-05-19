@@ -1,0 +1,155 @@
+#!/bin/bash -p
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2014 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any
+# later version. Please see the file LICENSE-GPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+. "`dirname "${0}"`/prologue.sh"
+sourceDirectory="${programDirectory}"
+
+set -e
+shopt -s nullglob
+
+function convertTextFile {
+   local file="${1}"
+   echo txt $file
+}
+
+function installTextFile {
+   local sourceFile="${1}"
+   local targetFile="${2}"
+
+   targetFile="${installDirectory}/${targetFile}"
+   local targetDirectory="${targetFile%/*}"
+   mkdir -p "${targetDirectory}"
+   cp "${sourceFile}" "${targetFile}"
+   convertTextFile "${targetFile}"
+}
+
+function installBinaryFile {
+   local sourceFile="${1}"
+   local targetFile="${2}"
+
+   targetFile="${installDirectory}/${targetFile}"
+   local targetDirectory="${targetFile%/*}"
+   mkdir -p "${targetDirectory}"
+   cp "${sourceFile}" "${targetFile}"
+}
+
+function installManualFiles {
+   local directory="${1}"
+
+   cd "${directory}/Documents/Manual-BRLTTY"
+
+   for file in $(find . -type f)
+   do
+      case "${file##*/}"
+      in
+         *.txt | *.htm | *.html)
+            installTextFile "${file}" "${manualSubdirectory}/${file}"
+            ;;
+
+         *.doc | *.pdf)
+            installBinaryFile "${file}" "${manualSubdirectory}/${file}"
+            ;;
+      esac
+   done
+}
+
+needTemporaryDirectory
+
+buildDirectory="${temporaryDirectory}/build"
+mkdir -p "${buildDirectory}"
+
+installDirectory="${temporaryDirectory}/BRLTTY"
+mkdir -p "${installDirectory}"
+documentSubdirectory="doc"
+manualSubdirectory="${documentSubdirectory}/Manual"
+
+cd "${buildDirectory}"
+"${sourceDirectory}/cfg-dos" --enable-relocatable-install --prefix="${installDirectory}"
+make -s
+make -s -C Documents
+make -s install
+
+cd "${installDirectory}/bin"
+rm brltty-config
+rm brltty-install
+mv brltty-ttb.exe brlttb.exe
+mv brltty-ctb.exe brlctb.exe
+mv brltty-trtxt.exe brltrtxt.exe
+cp "${sourceDirectory}/DOS/cwsdpmi.exe" .
+
+cd "${sourceDirectory}/Drivers"
+name=README
+for driverType in Braille Speech
+do
+   cd "${driverType}"
+
+   for driverName in *
+   do
+      cd "${driverName}"
+
+      for file in "${name}"*
+      do
+         document="${driverName}.txt"
+         [ "${file}" = "${name}" ] || document="${file#${name}.}-${document}"
+         installTextFile "${file}" "${documentSubdirectory}/Drivers/${driverType}/${document}"
+      done
+
+      cd ..
+   done
+
+   cd ..
+done
+
+cd "${sourceDirectory}"
+installTextFile "LICENSE-GPL" "LIC-GPL.txt"
+installTextFile "LICENSE-LGPL" "LIC-LGPL.txt"
+installTextFile "README" "README.txt"
+installTextFile "Documents/README.MSDOS" "MSDOS.txt"
+installTextFile "Documents/ChangeLog" "${documentSubdirectory}/CHANGES.txt"
+installTextFile "Documents/HISTORY" "${documentSubdirectory}/HISTORY.txt"
+installTextFile "Documents/TODO" "${documentSubdirectory}/TODO.txt"
+
+installManualFiles "${sourceDirectory}"
+installManualFiles "${buildDirectory}"
+
+cd "${buildDirectory}"
+installTextFile "Documents/brltty.conf" "etc/brltty.conf"
+
+cd "${installDirectory}"
+mv share/man .
+rm -f -r share
+cd man
+
+for source in */*
+do
+   target="${source/%?/txt}"
+   COLUMNS=80 LC_ALL=C man "${source}" | ul -t dumb | expand | uniq >"${target}"
+   rm "${source}"
+   convertTextFile "${target}"
+done
+
+cd "${installDirectory}/etc/brltty"
+for file in *.[tack]t[bi]
+do
+   convertTextFile "${file}"
+done
+
+cd "${installDirectory}/.."
+zip -q -r "${initialDirectory}/brltty-msdos.zip" "${installDirectory##*/}"
+exit 0

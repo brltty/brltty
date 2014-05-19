@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash -p
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -18,26 +18,14 @@
 ###############################################################################
 
 . "`dirname "${0}"`/prologue.sh"
-
-buildRoot="${initialDirectory}"
-sourceRoot="${programDirectory}"
+set -e
 
 toolsSystem="i586-pc-msdosdjgpp"
-toolsRoot="${buildRoot}/DOS/Tools"
 
-[ -d "${toolsRoot}" ] || {
-   [ -n "${DOS_TOOLS}" ] || {
-      semanticError "DOS tools directory not defined: ${toolsRoot}"
-   }
-
-   [  -f "${DOS_TOOLS}/bin/${toolsSystem}-gcc" ] || {
-      semanticError "not a DOS tools directory: ${DOS_TOOLS}"
-   }
-
-   programMessage "creating symbolic link: ${toolsRoot} -> ${DOS_TOOLS}"
-   ln -s "${DOS_TOOLS}" "${toolsRoot}" || exit "${?}"
-}
-
+toolsRootVariable=DOS_TOOLS_ROOT
+toolsRoot="${!toolsRootVariable}"
+[ -n "${toolsRoot}" ] || semanticError "${toolsRootVariable} not set"
+[  -f "${toolsRoot}/bin/${toolsSystem}-gcc" ] || semanticError "not a DOS tools root: ${toolsRoot}"
 export toolsDirectory="${toolsRoot}/bin"
 export PATH="${PATH}:${toolsDirectory}"
 
@@ -53,14 +41,24 @@ export LDFLAGS=""
 # lb (by --without-libbraille)
 # xw (by --disable-x)
 
-"${sourceRoot}/configure" \
+"${programDirectory}/configure" \
+   --disable-api \
    --disable-gpm \
    --disable-icu \
    --disable-x \
    \
    --without-libbraille \
-   --with-braille-driver=-tt,-vr,all \
-   --disable-speech-support \
+   --with-braille-driver=-vr,all \
+   \
+   --without-espeak \
+   --without-flite \
+   --without-mikropuhe \
+   --without-speechd \
+   --without-swift \
+   --without-theta \
+   --without-viavoice \
+   --with-speech-driver=all \
+   \
    --with-screen-driver=pb,-all \
    \
    --without-beep-package \
@@ -83,4 +81,5 @@ export LDFLAGS=""
    --host="${toolsSystem}" \
    --quiet \
    "${@}"
-exit "${?}"
+
+exit 0

@@ -19,6 +19,7 @@
 initialDirectory=`pwd`
 programName=`basename "${0}"`
 programDirectory=`dirname "${0}"`
+programDirectory=`realpath "${programDirectory}"`
 
 programMessage() {
    echo >&2 "${programName}: ${1}"
