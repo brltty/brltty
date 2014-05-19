@@ -22,10 +22,12 @@
 androidPlatform=android-14
 androidArchitecture=arm
 hostSystem=arm-linux-androideabi
+
 buildRoot="${initialDirectory}"
 sourceRoot="${programDirectory}"
 
 ndkRoot="${buildRoot}/Android/NDK"
+
 [ -d "${ndkRoot}" ] || {
    [ -n "${ANDROID_NDK}" ] || {
       semanticError "Android NDK directory not defined: ${ndkRoot}"
@@ -73,7 +75,6 @@ export CFLAGS="-mthumb"
 export LDFLAGS="-Wl,--fix-cortex-a8"
 
 # Braille drivers already disabled:
-# il (not on Linux)
 # lb (by --without-libbraille)
 # xw (by --disable-x)
 
@@ -107,6 +108,7 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
    --without-hostcmd-package \
    --without-mntpt-package \
    --without-mntfs-package \
+   \
    --without-ports-package \
    \
    --host="${hostSystem}" \

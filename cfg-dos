@@ -1,0 +1,86 @@
+#!/bin/sh
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2014 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any
+# later version. Please see the file LICENSE-GPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+. "`dirname "${0}"`/prologue.sh"
+
+buildRoot="${initialDirectory}"
+sourceRoot="${programDirectory}"
+
+toolsSystem="i586-pc-msdosdjgpp"
+toolsRoot="${buildRoot}/DOS/Tools"
+
+[ -d "${toolsRoot}" ] || {
+   [ -n "${DOS_TOOLS}" ] || {
+      semanticError "DOS tools directory not defined: ${toolsRoot}"
+   }
+
+   [  -f "${DOS_TOOLS}/bin/${toolsSystem}-gcc" ] || {
+      semanticError "not a DOS tools directory: ${DOS_TOOLS}"
+   }
+
+   programMessage "creating symbolic link: ${toolsRoot} -> ${DOS_TOOLS}"
+   ln -s "${DOS_TOOLS}" "${toolsRoot}" || exit "${?}"
+}
+
+export toolsDirectory="${toolsRoot}/bin"
+export PATH="${PATH}:${toolsDirectory}"
+
+checkTool() {
+   eval export "${1}=\`set -- \"${toolsDirectory}/\"*\"-$2\" && echo \"\${1}\"\`"
+}
+checkTool CC gcc
+
+export CFLAGS=""
+export LDFLAGS=""
+
+# Braille drivers already disabled:
+# lb (by --without-libbraille)
+# xw (by --disable-x)
+
+"${sourceRoot}/configure" \
+   --disable-gpm \
+   --disable-icu \
+   --disable-x \
+   \
+   --without-libbraille \
+   --with-braille-driver=-tt,-vr \
+   --disable-speech-support \
+   --with-screen-driver=pb,-all \
+   \
+   --without-beep-package \
+   --without-pcm-package \
+   --without-midi-package \
+   --without-fm-package \
+   \
+   --without-pgmpath-package \
+   --without-service-package \
+   --without-params-package \
+   --without-charset-package \
+   --without-hostcmd-package \
+   --without-mntpt-package \
+   --without-mntfs-package \
+   --without-keyboard-package \
+   \
+   --without-usb-package \
+   --without-bluetooth-package \
+   \
+   --host="${toolsSystem}" \
+   --quiet \
+   "${@}"
+exit "${?}"
