@@ -81,16 +81,44 @@ needTemporaryDirectory() {
    temporaryDirectory=`mktemp -d "${TMPDIR}/${programName}.XXXXXX"` && cd "${temporaryDirectory}" || exit "${?}"
 }
 
-[ \( "${programOptions}" = "" \) -a \( "${programOptions+set}" != "set" \) ] || {
-   while getopts ":${programOptions}" option
+programOptionsString=""
+programOptionDefault_string=""
+programOptionDefault_flag=false
+programOptionDefault_counter=0
+
+addProgramOption() {
+   programOptionsString="${programOptionsString}${1}"
+   eval 'programOptionType_'"${1}"'="'"${2}"'"'
+   eval 'programOptionVariable_'"${1}"'="'"${3}"'"'
+   eval 'programOptionUsage_'"${1}"'="'"${4}"'"'
+   eval "${3}"'="${programOptionDefault_'"${2}"'}"'
+   eval [ -n '"${'"${3}"'}"' ] || programOptionsString="${programOptionsString}:"
+}
+
+parseProgramOptions() {
+   while getopts ":${programOptionsString}" programOptionLetter
    do
-      case "${option}"
+      case "${programOptionLetter}"
       in
         \?) syntaxError "unrecognized option: -${OPTARG}";;
          :) syntaxError "missing operand: -${OPTARG}";;
-         *) "handleProgramOption_${option}" "${OPTARG}";;
+
+         *) eval 'programOptionVariable="${programOptionVariable_'"${programOptionLetter}"'}"'
+            eval 'programOptionType="${programOptionType_'"${programOptionLetter}"'}"'
+
+            case "${programOptionType}"
+            in
+               counter) eval "${programOptionVariable}"'=`expr "${'"${programOptionVariable}"'}" + 1`';;
+               flag) eval "${programOptionVariable}"'=true';;
+               string) eval "${programOptionVariable}"'="${OPTARG}"';;
+               *) semanticError "unimplemented program option type: ${programOptionType} (-${programOptionLetter})";;
+            esac
+            ;;
       esac
    done
-
-   shift `expr "${OPTIND}" - 1`
 }
+
+parseProgramOptions='
+   parseProgramOptions "${@}"
+   shift `expr "${OPTIND}" - 1`
+'

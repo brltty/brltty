@@ -20,23 +20,11 @@
 set -e
 shopt -s nullglob
 
-archiveName=""
-function handleProgramOption_n {
-   archiveName="${1}"
-}
-
-sourceDirectory=""
-function handleProgramOption_s {
-   sourceDirectory="${1}"
-}
-
-installDirectory=""
-function handleProgramOption_i {
-   installDirectory="${1}"
-}
-
-programOptions="n:s:i:"
 . "`dirname "${0}"`/prologue.sh"
+addProgramOption n string archiveName
+addProgramOption s string sourceDirectory
+addProgramOption i string installDirectory
+eval "${parseProgramOptions}"
 
 [ "${#}" -eq 0 ] || syntaxError "too many parameters"
 [ -n "${archiveName}" ] || archiveName="brltty-msdos"
