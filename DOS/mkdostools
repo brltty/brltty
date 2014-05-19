@@ -451,7 +451,9 @@ do
       *) syntaxError "unimplemented option: -${option}";;
    esac
 done
+
 shift $((OPTIND - 1))
+[ "${#}" -eq 0 ] || syntaxError "too many parameters"
 
 handleDirectoryOption rootDirectory "${PWD}" "root"
 handleDirectoryOption archivesDirectory "${rootDirectory}/${defaultArchivesSubdirectory}" "archives"
@@ -461,11 +463,13 @@ handleDirectoryOption installDirectory "${rootDirectory}/${defaultInstallSubdire
 [ -n "${targetSystem}" ] || targetSystem="${defaultTargetSystem}"
 readonly targetSystem
 
+pathChange "$(getconf PATH)"
+unset MAKEFLAGS
+
 logMessage task "finding host commands"
 findHostCommand CC cc gcc
 findHostCommand CXX c++ g++ cxx gxx
 findHostCommand LIBTOOL libtool
-unset MAKEFLAGS
 
 logMessage task "verifying archives"
 gnuVerifyArchive gnuAutoconfOld autoconf "${autoconfOldVersion}"
