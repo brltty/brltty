@@ -80,3 +80,17 @@ needTemporaryDirectory() {
    }
    temporaryDirectory=`mktemp -d "${TMPDIR}/${programName}.XXXXXX"` && cd "${temporaryDirectory}" || exit "${?}"
 }
+
+[ \( "${programOptions}" = "" \) -a \( "${programOptions+set}" != "set" \) ] || {
+   while getopts ":${programOptions}" option
+   do
+      case "${option}"
+      in
+        \?) syntaxError "unrecognized option: -${OPTARG}";;
+         :) syntaxError "missing operand: -${OPTARG}";;
+         *) "handleProgramOption_${option}" "${OPTARG}";;
+      esac
+   done
+
+   shift `expr "${OPTIND}" - 1`
+}

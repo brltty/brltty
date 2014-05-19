@@ -17,11 +17,31 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "`dirname "${0}"`/prologue.sh"
-sourceDirectory="${programDirectory}"
-
 set -e
 shopt -s nullglob
+
+archiveName=""
+function handleProgramOption_n {
+   archiveName="${1}"
+}
+
+sourceDirectory=""
+function handleProgramOption_s {
+   sourceDirectory="${1}"
+}
+
+installDirectory=""
+function handleProgramOption_i {
+   installDirectory="${1}"
+}
+
+programOptions="n:s:i:"
+. "`dirname "${0}"`/prologue.sh"
+
+[ "${#}" -eq 0 ] || syntaxError "too many parameters"
+[ -n "${archiveName}" ] || archiveName="brltty-msdos"
+[ -n "${sourceDirectory}" ] || sourceDirectory="${programDirectory}"
+[ -n "${installDirectory}" ] || installDirectory="BRLTTY"
 
 function convertTextFile {
    local file="${1}"
@@ -75,7 +95,7 @@ needTemporaryDirectory
 buildDirectory="${temporaryDirectory}/build"
 mkdir -p "${buildDirectory}"
 
-installDirectory="${temporaryDirectory}/BRLTTY"
+installDirectory="${temporaryDirectory}/intall/${installDirectory}"
 mkdir -p "${installDirectory}"
 documentSubdirectory="doc"
 manualSubdirectory="${documentSubdirectory}/Manual"
@@ -152,5 +172,5 @@ do
 done
 
 cd "${installDirectory}/.."
-zip -q -r "${initialDirectory}/brltty-msdos.zip" "${installDirectory##*/}"
+zip -q -r "${initialDirectory}/${archiveName}.zip" "${installDirectory##*/}"
 exit 0
