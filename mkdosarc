@@ -25,7 +25,8 @@ shopt -s nullglob
 
 function convertTextFile {
    local file="${1}"
-   echo txt $file
+
+   unix2dos -q -o "${file}"
 }
 
 function installTextFile {
