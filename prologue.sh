@@ -82,9 +82,10 @@ needTemporaryDirectory() {
 }
 
 programOptionsString=""
-programOptionDefault_string=""
-programOptionDefault_flag=false
 programOptionDefault_counter=0
+programOptionDefault_flag=false
+programOptionDefault_list=""
+programOptionDefault_string=""
 
 addProgramOption() {
    programOptionsString="${programOptionsString}${1}"
@@ -110,6 +111,7 @@ parseProgramOptions() {
             in
                counter) eval "${programOptionVariable}"'=`expr "${'"${programOptionVariable}"'}" + 1`';;
                flag) eval "${programOptionVariable}"'=true';;
+               list) eval "${programOptionVariable}"'="${'"${programOptionVariable}"'} ${OPTARG}"';;
                string) eval "${programOptionVariable}"'="${OPTARG}"';;
                *) semanticError "unimplemented program option type: ${programOptionType} (-${programOptionLetter})";;
             esac
