@@ -35,8 +35,6 @@ typedef int socklen_t;
 #endif /* WSAEINPROGRESS */
 #endif /* EINPROGRESS */
 
-#else /* have sockets */
-#warning sockets not supported on this platform
 #endif /* have sockets */
 
 #ifdef __cplusplus

@@ -432,6 +432,9 @@ connectSocket (
 
   return result;
 }
+
+#else /* have sockets */
+#warning sockets not supported on this platform
 #endif /* IO_HAVE_SOCKETS */
 
 int
