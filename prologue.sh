@@ -16,20 +16,62 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-getVariable() {
-   typeset variable="${1}"
+initialDirectory=`pwd`
+programName=`basename "${0}"`
+programDirectory=`dirname "${0}"`
+programDirectory=`realpath "${programDirectory}"`
 
-   echo "${!variable}"
+function programMessage {
+   typeset message="${1}"
+
+   [ -z "${message}" ] || echo >&2 "${programName}: ${message}"
 }
 
-setVariable() {
+function syntaxError {
+   typeset message="${1}"
+
+   [ "${#}" -eq 0 ] || programMessage "${message}"
+   exit 2
+}
+
+function semanticError {
+   typeset message="${1}"
+
+   programMessage "${message}"
+   exit 3
+}
+
+function internalError {
+   typeset message="${1}"
+
+   programMessage "${message}"
+   exit 4
+}
+
+if [ "${BASH+set}" = "set" ]
+then
+   function getVariable {
+      typeset variable="${1}"
+
+      echo "${!variable}"
+   }
+elif [ "${KSH_VERSION+set}" = "set" ]
+then
+   function getVariable {
+      typeset -n variable="${1}"
+
+      echo "${variable}"
+   }
+fi
+
+function setVariable {
    typeset variable="${1}"
    typeset value="${2}"
 
    eval "${variable}"'="${value}"'
 }
 
-quoteString() {
+function quoteString {
    typeset string="${1}"
 
    typeset pattern="'"
@@ -38,32 +80,7 @@ quoteString() {
    echo "'${string}'"
 }
 
-initialDirectory=`pwd`
-programName=`basename "${0}"`
-programDirectory=`dirname "${0}"`
-programDirectory=`realpath "${programDirectory}"`
-
-programMessage() {
-   typeset message="${1}"
-
-   echo >&2 "${programName}: ${message}"
-}
-
-syntaxError() {
-   typeset message="${1}"
-
-   [ "${#}" -eq 0 ] || programMessage "${message}"
-   exit 2
-}
-
-semanticError() {
-   typeset message="${1}"
-
-   [ "${#}" -eq 0 ] || programMessage "${message}"
-   exit 3
-}
-
-verifyProgram() {
+function verifyProgram {
    typeset path="${1}"
 
    [ -e "${path}" ] || semanticError "program not found: ${path}"
@@ -71,7 +88,7 @@ verifyProgram() {
    [ -x "${path}" ] || semanticError "not executable: ${path}"
 }
 
-testDirectory() {
+function testDirectory {
    typeset path="${1}"
 
    [ -e "${path}" ] || return 1
@@ -79,13 +96,13 @@ testDirectory() {
    return 0
 }
 
-verifyInputDirectory() {
+function verifyInputDirectory {
    typeset path="${1}"
 
    testDirectory "${path}" || semanticError "directory not found: ${path}"
 }
 
-verifyOutputDirectory() {
+function verifyOutputDirectory {
    typeset path="${1}"
 
    if testDirectory "${path}"
@@ -97,14 +114,14 @@ verifyOutputDirectory() {
    fi
 }
 
-resolveDirectory() {
+function resolveDirectory {
    typeset path="${1}"
 
    (cd "${path}" && pwd)
 }
 
-needTemporaryDirectory() {
-   cleanup() {
+function needTemporaryDirectory {
+   function cleanup {
       set +e
       cd /
       [ -z "${temporaryDirectory}" ] || rm -f -r -- "${temporaryDirectory}"
@@ -125,21 +142,24 @@ programOptionDefault_flag=false
 programOptionDefault_list=""
 programOptionDefault_string=""
 
-addProgramOption() {
+function addProgramOption {
    typeset letter="${1}"
    typeset type="${2}"
    typeset variable="${3}"
    typeset usage="${4}"
 
+   setVariable "programOptionType_${letter}" "${type}"
+   setVariable "programOptionVariable_${letter}" "${variable}"
+   setVariable "programOptionUsage_${letter}" "${usage}"
+
+   typeset default="$(getVariable "programOptionDefault_${type}")"
+   setVariable "${variable}" "${default}"
+
    programOptionsString="${programOptionsString}${letter}"
-   eval 'programOptionType_'"${letter}"'="'"${type}"'"'
-   eval 'programOptionVariable_'"${letter}"'="'"${variable}"'"'
-   eval 'programOptionUsage_'"${letter}"'="'"${usage}"'"'
-   eval "${variable}"'="${programOptionDefault_'"${type}"'}"'
-   eval [ -n '"${'"${variable}"'}"' ] || programOptionsString="${programOptionsString}:"
+   [ -n "${default}" ] || programOptionsString="${programOptionsString}:"
 }
 
-parseProgramOptions() {
+function parseProgramOptions {
    typeset letter
 
    while getopts ":${programOptionsString}" letter
@@ -156,10 +176,9 @@ parseProgramOptions() {
             in
                counter) let "${variable} += 1";;
                flag) setVariable "${variable}" true;;
-               lst) eval "${variable}"'="${'"${variable}"'} '"'"'${OPTARG}'"'"'"';;
                list) setVariable "${variable}" "$(getVariable "${variable}") $(quoteString "${OPTARG}")";;
                string) setVariable "${variable}" "${OPTARG}";;
-               *) semanticError "unimplemented program option type: ${type} (-${letter})";;
+               *) internalError "unimplemented program option type: ${type} (-${letter})";;
             esac
             ;;
       esac
