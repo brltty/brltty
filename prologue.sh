@@ -16,53 +16,91 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+getVariable() {
+   typeset variable="${1}"
+
+   echo "${!variable}"
+}
+
+setVariable() {
+   typeset variable="${1}"
+   typeset value="${2}"
+
+   eval "${variable}"'="${value}"'
+}
+
+quoteString() {
+   typeset string="${1}"
+
+   typeset pattern="'"
+   typeset replacement="'"'"'"'"'"'"'"
+   string="${string//${pattern}/${replacement}}"
+   echo "'${string}'"
+}
+
 initialDirectory=`pwd`
 programName=`basename "${0}"`
 programDirectory=`dirname "${0}"`
 programDirectory=`realpath "${programDirectory}"`
 
 programMessage() {
-   echo >&2 "${programName}: ${1}"
+   typeset message="${1}"
+
+   echo >&2 "${programName}: ${message}"
 }
 
 syntaxError() {
-   [ "${#}" -eq 0 ] || programMessage "${1}"
+   typeset message="${1}"
+
+   [ "${#}" -eq 0 ] || programMessage "${message}"
    exit 2
 }
 
 semanticError() {
-   [ "${#}" -eq 0 ] || programMessage "${1}"
+   typeset message="${1}"
+
+   [ "${#}" -eq 0 ] || programMessage "${message}"
    exit 3
 }
 
 verifyProgram() {
-   [ -e "${1}" ] || semanticError "program not found: ${1}"
-   [ -f "${1}" ] || semanticError "not a file: ${1}"
-   [ -x "${1}" ] || semanticError "not executable: ${1}"
+   typeset path="${1}"
+
+   [ -e "${path}" ] || semanticError "program not found: ${path}"
+   [ -f "${path}" ] || semanticError "not a file: ${path}"
+   [ -x "${path}" ] || semanticError "not executable: ${path}"
 }
 
 testDirectory() {
-   [ -e "${1}" ] || return 1
-   [ -d "${1}" ] || semanticError "not a directory: ${1}"
+   typeset path="${1}"
+
+   [ -e "${path}" ] || return 1
+   [ -d "${path}" ] || semanticError "not a directory: ${path}"
    return 0
 }
 
 verifyInputDirectory() {
-   testDirectory "${1}" || semanticError "directory not found: ${1}"
+   typeset path="${1}"
+
+   testDirectory "${path}" || semanticError "directory not found: ${path}"
 }
 
 verifyOutputDirectory() {
-   if testDirectory "${1}"
+   typeset path="${1}"
+
+   if testDirectory "${path}"
    then
-      [ -w "${1}" ] || semanticError "directory not writable: ${1}"
-      rm -f -r -- "${1}/"*
+      [ -w "${path}" ] || semanticError "directory not writable: ${path}"
+      rm -f -r -- "${path}/"*
    else
-      mkdir -p "${1}"
+      mkdir -p "${path}"
    fi
 }
 
 resolveDirectory() {
-   (cd "${1}" && pwd)
+   typeset path="${1}"
+
+   (cd "${path}" && pwd)
 }
 
 needTemporaryDirectory() {
@@ -88,32 +126,40 @@ programOptionDefault_list=""
 programOptionDefault_string=""
 
 addProgramOption() {
-   programOptionsString="${programOptionsString}${1}"
-   eval 'programOptionType_'"${1}"'="'"${2}"'"'
-   eval 'programOptionVariable_'"${1}"'="'"${3}"'"'
-   eval 'programOptionUsage_'"${1}"'="'"${4}"'"'
-   eval "${3}"'="${programOptionDefault_'"${2}"'}"'
-   eval [ -n '"${'"${3}"'}"' ] || programOptionsString="${programOptionsString}:"
+   typeset letter="${1}"
+   typeset type="${2}"
+   typeset variable="${3}"
+   typeset usage="${4}"
+
+   programOptionsString="${programOptionsString}${letter}"
+   eval 'programOptionType_'"${letter}"'="'"${type}"'"'
+   eval 'programOptionVariable_'"${letter}"'="'"${variable}"'"'
+   eval 'programOptionUsage_'"${letter}"'="'"${usage}"'"'
+   eval "${variable}"'="${programOptionDefault_'"${type}"'}"'
+   eval [ -n '"${'"${variable}"'}"' ] || programOptionsString="${programOptionsString}:"
 }
 
 parseProgramOptions() {
-   while getopts ":${programOptionsString}" programOptionLetter
+   typeset letter
+
+   while getopts ":${programOptionsString}" letter
    do
-      case "${programOptionLetter}"
+      case "${letter}"
       in
         \?) syntaxError "unrecognized option: -${OPTARG}";;
          :) syntaxError "missing operand: -${OPTARG}";;
 
-         *) eval 'programOptionVariable="${programOptionVariable_'"${programOptionLetter}"'}"'
-            eval 'programOptionType="${programOptionType_'"${programOptionLetter}"'}"'
+         *) eval 'typeset variable="${programOptionVariable_'"${letter}"'}"'
+            eval 'typeset type="${programOptionType_'"${letter}"'}"'
 
-            case "${programOptionType}"
+            case "${type}"
             in
-               counter) eval "${programOptionVariable}"'=`expr "${'"${programOptionVariable}"'}" + 1`';;
-               flag) eval "${programOptionVariable}"'=true';;
-               list) eval "${programOptionVariable}"'="${'"${programOptionVariable}"'} ${OPTARG}"';;
-               string) eval "${programOptionVariable}"'="${OPTARG}"';;
-               *) semanticError "unimplemented program option type: ${programOptionType} (-${programOptionLetter})";;
+               counter) let "${variable} += 1";;
+               flag) setVariable "${variable}" true;;
+               lst) eval "${variable}"'="${'"${variable}"'} '"'"'${OPTARG}'"'"'"';;
+               list) setVariable "${variable}" "$(getVariable "${variable}") $(quoteString "${OPTARG}")";;
+               string) setVariable "${variable}" "${OPTARG}";;
+               *) semanticError "unimplemented program option type: ${type} (-${letter})";;
             esac
             ;;
       esac
@@ -122,5 +168,5 @@ parseProgramOptions() {
 
 parseProgramOptions='
    parseProgramOptions "${@}"
-   shift `expr "${OPTIND}" - 1`
+   shift $((OPTIND - 1))
 '
