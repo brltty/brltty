@@ -18,8 +18,6 @@
 
 initialDirectory=`pwd`
 programName=`basename "${0}"`
-programDirectory=`dirname "${0}"`
-programDirectory=`realpath "${programDirectory}"`
 
 function programMessage {
    typeset message="${1}"
@@ -189,3 +187,6 @@ parseProgramOptions='
    parseProgramOptions "${@}"
    shift $((OPTIND - 1))
 '
+
+programDirectory=`dirname "${0}"`
+programDirectory=`resolveDirectory "${programDirectory}"`
