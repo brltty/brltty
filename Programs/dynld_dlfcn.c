@@ -20,6 +20,11 @@
 
 #include <dlfcn.h>
 
+#ifdef __MSDOS__
+#include <debug/syms.h>
+#include "program.h"
+#endif /* __MSDOS__ */
+
 #include "log.h"
 #include "dynld.h"
 
@@ -77,14 +82,37 @@ findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
 
 const char *
 getSharedSymbolName (void *address, ptrdiff_t *offset) {
-#ifdef __USE_GNU
+#if defined(__MSDOS__)
+  {
+    static int symsInitialized = 0;
+
+    if (!symsInitialized) {
+      syms_init((char *)programPath);
+      symsInitialized = 1;
+    }
+  }
+
+  {
+    unsigned long delta;
+    char *name = syms_val2name((unsigned long)address, &delta);
+
+    if (name) {
+      if (offset) *offset = delta;
+      return name;
+    }
+  }
+
+#elif defined(__USE_GNU)
   Dl_info info;
 
   if (dladdr(address, &info)) {
     if (offset) *offset = address - info.dli_saddr;
     return info.dli_sname;
   }
-#endif /* __USE_GNU */
+
+#else /* get symbol name */
+#warning symbol address to name lookup not supported on tghis platform
+#endif /* get symbol name */
 
   return NULL;
 }

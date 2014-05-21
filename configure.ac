@@ -994,6 +994,7 @@ BRLTTY_ARG_PACKAGE([system], [base system], [], [dnl
       ;;
    msdos*)
       system_package="msdos"
+      system_libs="-ldbg"
       ;;
 ])
 
