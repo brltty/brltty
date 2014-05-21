@@ -61,7 +61,6 @@ export LDFLAGS=""
    \
    --with-screen-driver=pb,-all \
    \
-   --without-beep-package \
    --without-pcm-package \
    --without-midi-package \
    --without-fm-package \
