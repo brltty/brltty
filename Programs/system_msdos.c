@@ -41,7 +41,7 @@ int _stklen = 0X2000;
 void __crt0_load_environment_file(char *_app_name) { return; }
 char **__crt0_glob_function(char *_arg) { return 0; }
 
-static void tsr_exit (void) NORETURN;
+static void tsrExit (void) NORETURN;
 
 /* Start undocumented way to make exception handling disappear (v2.03) */
 short __djgpp_ds_alias;
@@ -50,8 +50,8 @@ void __djgpp_exception_setup(void) { return; }
 void __djgpp_exception_toggle(void) { return; }
 int __djgpp_set_ctrl_c(int enable) { return 0; }
 void __maybe_fix_w2k_ntvdm_bug(void) { }
-void abort(void) { tsr_exit(); }
-void _exit(int status) { tsr_exit(); }
+void abort(void) { tsrExit(); }
+void _exit(int status) { tsrExit(); }
 int raise(int sig) { return 0; }
 void *signal(int signum, void*handler) { return NULL; }
 /* End undocumented way to make exception handling disappear */
@@ -228,7 +228,7 @@ restore (int vector, _go32_dpmi_seginfo *seginfo, _go32_dpmi_seginfo *orig_segin
 
 /* TSR exit: trying to free as many resources as possible */
 static void
-tsr_exit (void) {
+tsrExit (void) {
   if (isBackgrounded) {
     unsigned long pspAddress = _go32_info_block.linear_address_of_original_psp;
 
@@ -309,7 +309,7 @@ msdosBackground (void) {
 }
 
 unsigned long
-msdosUsleep (unsigned long microseconds) {
+msdosUSleep (unsigned long microseconds) {
   unsigned long ticks;
 
   if (!isBackgrounded) {
