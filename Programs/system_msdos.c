@@ -41,7 +41,7 @@ int _stklen = 0X2000;
 void __crt0_load_environment_file(char *_app_name) { return; }
 char **__crt0_glob_function(char *_arg) { return 0; }
 
-static void tsr_exit(void) NORETURN;
+static void tsr_exit (void) NORETURN;
 
 /* Start undocumented way to make exception handling disappear (v2.03) */
 short __djgpp_ds_alias;
@@ -80,7 +80,7 @@ static State interruptState;
 static jmp_buf mainContext;
 static jmp_buf interruptContext;
 
-static int isBackgrounded; /* whether we really TSR */
+static int isBackgrounded = 0; /* whether we really TSR */
 
 static unsigned long inDosFlagPointer;
 static unsigned long criticalOffset;
@@ -229,33 +229,35 @@ restore (int vector, _go32_dpmi_seginfo *seginfo, _go32_dpmi_seginfo *orig_segin
 /* TSR exit: trying to free as many resources as possible */
 static void
 tsr_exit (void) {
-  unsigned long pspAddress = _go32_info_block.linear_address_of_original_psp;
+  if (isBackgrounded) {
+    unsigned long pspAddress = _go32_info_block.linear_address_of_original_psp;
 
-  if (restore(TIMER_INTERRUPT, &timerSeginfo, &origTimerSeginfo) +
-      restore(IDLE_INTERRUPT,  &idleSeginfo,  &origIdleSeginfo)) {
-    /* failed, hang */
-    setjmp(mainContext);
+    if (restore(TIMER_INTERRUPT, &timerSeginfo, &origTimerSeginfo) +
+        restore(IDLE_INTERRUPT,  &idleSeginfo,  &origIdleSeginfo)) {
+      /* failed, hang */
+      setjmp(mainContext);
+      longjmp(interruptContext, 1);
+    }
+
+    {
+      __dpmi_regs r;
+
+      /* free environment */
+      r.x.es = _farpeekw(_dos_ds, pspAddress+0X2C);
+      r.x.ax = 0X4900;
+      __dpmi_int(DOS_INTERRUPT, &r);
+
+      /* free Program Segment Prefix */
+      r.x.es = pspAddress / 0X10;
+      r.x.ax = 0X4900;
+      __dpmi_int(DOS_INTERRUPT, &r);
+    }
+
+    /* and return */
     longjmp(interruptContext, 1);
+
+    /* TODO: free protected mode memory */
   }
-
-  {
-    __dpmi_regs r;
-
-    /* free environment */
-    r.x.es = _farpeekw(_dos_ds, pspAddress+0X2C);
-    r.x.ax = 0X4900;
-    __dpmi_int(DOS_INTERRUPT, &r);
-
-    /* free Program Segment Prefix */
-    r.x.es = pspAddress / 0X10;
-    r.x.ax = 0X4900;
-    __dpmi_int(DOS_INTERRUPT, &r);
-  }
-
-  /* and return */
-  longjmp(interruptContext, 1);
-
-  /* TODO: free protected mode memory */
 }
 
 /* go to background: TSR */
@@ -290,7 +292,6 @@ msdosBackground (void) {
     criticalOffset = msdosMakeAddress(regs.x.ds, regs.x.si);
 
     /* We are ready */
-    atexit(tsr_exit);
     isBackgrounded = 1;
 
     regs.x.ax = 0X3100;
