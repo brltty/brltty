@@ -234,7 +234,7 @@ convertWcharToChar (wchar_t wc) {
 const char *
 getLocaleCharset (void) {
   static char codepage[8];
-  snprintf(codepage, sizeof(codepage), "CP%03u", getCodePage());
+  snprintf(codepage, sizeof(codepage), "CP%03u", msdosGetCodePage());
   return codepage;
 }
 

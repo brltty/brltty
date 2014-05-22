@@ -144,7 +144,7 @@ setDiskTransferAddress (const DiskTransferAddress *dta) {
 }
 
 unsigned short
-getCodePage (void) {
+msdosGetCodePage (void) {
   __dpmi_regs r;
 
   r.h.ah = 0X66;

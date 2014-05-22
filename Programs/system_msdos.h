@@ -27,7 +27,7 @@ extern void msdosBackground (void);
 
 extern unsigned long msdosUsleep (unsigned long microseconds);
 
-extern unsigned short getCodePage (void);
+extern unsigned short msdosGetCodePage (void);
 
 static inline unsigned long
 msdosMakeAddress (unsigned short segment, unsigned short offset) {
