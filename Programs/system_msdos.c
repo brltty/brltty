@@ -36,12 +36,13 @@
 int _crt0_startup_flags = _CRT0_FLAG_LOCK_MEMORY;
 
 /* reduce image */
-int _stklen = 8192;
+int _stklen = 0X2000;
 
 void __crt0_load_environment_file(char *_app_name) { return; }
 char **__crt0_glob_function(char *_arg) { return 0; }
 
 static void tsr_exit(void) NORETURN;
+
 /* Start undocumented way to make exception handling disappear (v2.03) */
 short __djgpp_ds_alias;
 void __djgpp_exception_processor(void) { return; }
@@ -55,73 +56,101 @@ int raise(int sig) { return 0; }
 void *signal(int signum, void*handler) { return NULL; }
 /* End undocumented way to make exception handling disappear */
 
-#define TIMER_INT 0x8
-#define DOS_INT 0x21
-#define IDLE_INT 0x28
-
-#define PIT_FREQ UINT64_C(1193180)
+#define TIMER_INTERRUPT 0X08
+#define DOS_INTERRUPT   0X21
+#define IDLE_INTERRUPT  0X28
 
 /* For saving interrupt and main contexts */
 
 typedef char FpuState[(7+20)*8];
-struct Dta {
-  unsigned short seg;
-  unsigned short off;
-};
+typedef struct {
+  unsigned short segment;
+  unsigned short offset;
+} DiskTransferAddress;
 
-static struct State {
+typedef struct {
   FpuState fpu;
-  struct Dta dta;
+  DiskTransferAddress dta;
   unsigned short psp;
-} intState, mainState;
-static jmp_buf mainCtx, intCtx;
+} State;
 
-static int backgrounded; /* whether we really TSR */
-static unsigned long inDosOffset, criticalOffset;
-static volatile int inInt, inIdle; /* prevent reentrancy */
-static volatile unsigned long elapsedTicks, toBeElapsedTicks;
-static __dpmi_regs idleRegs;
+static State mainState;
+static State interruptState;
+
+static jmp_buf mainContext;
+static jmp_buf interruptContext;
+
+static int isBackgrounded; /* whether we really TSR */
+
+static unsigned long inDosFlagPointer;
+static unsigned long criticalOffset;
+
+/* prevent reentrancy */
+static volatile int inTimerInterrupt = 0;
+static volatile int inIdleInterrupt = 0;
+
+static inline int
+inInterrupt (void) {
+  return inTimerInterrupt || inIdleInterrupt;
+}
+
+static volatile unsigned long elapsedTickCount;
+static volatile unsigned long elapsedTickIncrement;
+
+static __dpmi_regs idleRegisters;
 
 static _go32_dpmi_seginfo origTimerSeginfo, timerSeginfo;
 static _go32_dpmi_seginfo origIdleSeginfo,  idleSeginfo;
 
-/* Handle PSP switch for proper file descriptor table */
-static unsigned short getPsp(void) {
+/* handle Program Segment Prefix switch for proper file descriptor table */
+static unsigned short
+getProgramSegmentPrefix (void) {
   __dpmi_regs r;
-  r.h.ah = 0x51;
-  __dpmi_int(DOS_INT, &r);
+
+  r.h.ah = 0X51;
+  __dpmi_int(DOS_INTERRUPT, &r);
   return r.x.bx;
 }
 
-static void setPsp(unsigned short psp) {
+static void
+setProgramSegmentPrefix (unsigned short segment) {
   __dpmi_regs r;
-  r.h.ah = 0x50;
-  r.x.bx = psp;
-  __dpmi_int(DOS_INT, &r);
+
+  r.h.ah = 0X50;
+  r.x.bx = segment;
+  __dpmi_int(DOS_INTERRUPT, &r);
 }
 
-/* Handle Dta switch since djgpp uses it for FindFirst/FindNext */
-static void getDta(struct Dta *dta) {
+/* handle Disk Transfer Address switch since djgpp uses it for FindFirst/FindNext */
+static void
+getDiskTransferAddress (DiskTransferAddress *dta) {
   __dpmi_regs r;
-  r.h.ah = 0x2f;
-  __dpmi_int(DOS_INT, &r);
-  dta->seg = r.x.es;
-  dta->off = r.x.bx;
+
+  r.h.ah = 0X2F;
+  __dpmi_int(DOS_INTERRUPT, &r);
+
+  dta->segment = r.x.es;
+  dta->offset = r.x.bx;
 }
 
-static void setDta(const struct Dta *dta) {
+static void
+setDiskTransferAddress (const DiskTransferAddress *dta) {
   __dpmi_regs r;
-  r.h.ah = 0x1a;
-  r.x.ds = dta->seg;
-  r.x.dx = dta->off;
-  __dpmi_int(DOS_INT, &r);
+
+  r.h.ah = 0X1A;
+  r.x.ds = dta->segment;
+  r.x.dx = dta->offset;
+  __dpmi_int(DOS_INTERRUPT, &r);
 }
 
-unsigned short getCodePage (void) {
+unsigned short
+getCodePage (void) {
   __dpmi_regs r;
-  r.h.ah = 0x66;
-  r.h.al = 0x01;
-  __dpmi_int(DOS_INT, &r);
+
+  r.h.ah = 0X66;
+  r.h.al = 0X01;
+  __dpmi_int(DOS_INTERRUPT, &r);
+
   return r.x.bx;
 }
 
@@ -129,62 +158,69 @@ unsigned short getCodePage (void) {
 #define saveFpuState(p) asm volatile("fnsave (%0); fwait"::"r"(p):"memory")
 #define restoreFpuState(p) asm volatile("frstor (%0)"::"r"(p))
 
-static void saveState(struct State *state) {
+static void
+saveState (State *state) {
   saveFpuState(&state->fpu);
-  getDta(&state->dta);
-  state->psp = getPsp();
-}
-static void restoreState(const struct State *state) {
-  restoreFpuState(&state->fpu);
-  setDta(&state->dta);
-  setPsp(state->psp);
+  getDiskTransferAddress(&state->dta);
+  state->psp = getProgramSegmentPrefix();
 }
 
-static unsigned short countToNextTimerInt(void) {
+static void
+restoreState (const State *state) {
+  restoreFpuState(&state->fpu);
+  setDiskTransferAddress(&state->dta);
+  setProgramSegmentPrefix(state->psp);
+}
+
+static unsigned short
+getTicksTillNextTimerInterrupt (void) {
   unsigned char clo, chi;
-  outportb(0x43, 0xd2);
-  clo = inportb(0x40);
-  chi = inportb(0x40);
-  return ((chi<<8) | clo);
+
+  outportb(0X43, 0XD2);
+  clo = inportb(0X40);
+  chi = inportb(0X40);
+
+  return (chi << 8) | clo;
 }
 
 /* Timer interrupt handler */
 static void
-timerInt(void) {
-  elapsedTicks += toBeElapsedTicks;
-  toBeElapsedTicks = countToNextTimerInt();
+timerInterruptHandler (void) {
+  elapsedTickCount += elapsedTickIncrement;
+  elapsedTickIncrement = getTicksTillNextTimerInterrupt();
 
-  if (!inIdle && !inInt) {
-    inInt = 1;
-    if (!setjmp(intCtx))
-      longjmp(mainCtx, 1);
-    inInt = 0;
+  if (!inInterrupt()) {
+    inTimerInterrupt = 1;
+    if (!setjmp(interruptContext)) longjmp(mainContext, 1);
+    inTimerInterrupt = 0;
   }
 }
 
 /* Idle interrupt handler */
 static void
-idleInt(_go32_dpmi_registers *r) {
-  if (!inIdle && !inInt) {
-    inIdle = 1;
-    if (!setjmp(intCtx))
-      longjmp(mainCtx, 1);
-    inIdle = 0;
+idleInterruptHandler (_go32_dpmi_registers *r) {
+  if (!inInterrupt()) {
+    inIdleInterrupt = 1;
+    if (!setjmp(interruptContext)) longjmp(mainContext, 1);
+    inIdleInterrupt = 0;
   }
+
   r->x.cs = origIdleSeginfo.rm_segment;
   r->x.ip = origIdleSeginfo.rm_offset;
   _go32_dpmi_simulate_fcall_iret(r);
 }
 
 /* Try to restore interrupt handler */
-static int restore(int vector, _go32_dpmi_seginfo *seginfo, _go32_dpmi_seginfo *orig_seginfo) {
+static int
+restore (int vector, _go32_dpmi_seginfo *seginfo, _go32_dpmi_seginfo *orig_seginfo) {
   _go32_dpmi_seginfo cur_seginfo;
 
   _go32_dpmi_get_protected_mode_interrupt_vector(vector, &cur_seginfo);
 
-  if (cur_seginfo.pm_selector != seginfo->pm_selector ||
-      cur_seginfo.pm_offset != seginfo->pm_offset)
+  if ((cur_seginfo.pm_selector != seginfo->pm_selector) ||
+      (cur_seginfo.pm_offset != seginfo->pm_offset)) {
     return 1;
+  }
 
   _go32_dpmi_set_protected_mode_interrupt_vector(vector, orig_seginfo);
   return 0;
@@ -192,122 +228,129 @@ static int restore(int vector, _go32_dpmi_seginfo *seginfo, _go32_dpmi_seginfo *
 
 /* TSR exit: trying to free as many resources as possible */
 static void
-tsr_exit(void) {
-  __dpmi_regs regs;
-  unsigned long pspAddr = _go32_info_block.linear_address_of_original_psp;
+tsr_exit (void) {
+  unsigned long pspAddress = _go32_info_block.linear_address_of_original_psp;
 
-  if (restore(TIMER_INT, &timerSeginfo, &origTimerSeginfo) +
-      restore(IDLE_INT,  &idleSeginfo,  &origIdleSeginfo)) {
+  if (restore(TIMER_INTERRUPT, &timerSeginfo, &origTimerSeginfo) +
+      restore(IDLE_INTERRUPT,  &idleSeginfo,  &origIdleSeginfo)) {
     /* failed, hang */
-    setjmp(mainCtx);
-    longjmp(intCtx, 1);
+    setjmp(mainContext);
+    longjmp(interruptContext, 1);
   }
 
-  /* free environment */
-  regs.x.es = _farpeekw(_dos_ds,pspAddr+0x2c);
-  regs.x.ax = 0x4900;
-  __dpmi_int(DOS_INT, &regs);
+  {
+    __dpmi_regs r;
 
-  /* free PSP */
-  regs.x.es = pspAddr/0x10;
-  regs.x.ax = 0x4900;
-  __dpmi_int(DOS_INT, &regs);
+    /* free environment */
+    r.x.es = _farpeekw(_dos_ds, pspAddress+0X2C);
+    r.x.ax = 0X4900;
+    __dpmi_int(DOS_INTERRUPT, &r);
+
+    /* free Program Segment Prefix */
+    r.x.es = pspAddress / 0X10;
+    r.x.ax = 0X4900;
+    __dpmi_int(DOS_INTERRUPT, &r);
+  }
 
   /* and return */
-  longjmp(intCtx, 1);
+  longjmp(interruptContext, 1);
 
   /* TODO: free protected mode memory */
 }
 
 /* go to background: TSR */
 void
-msdosBackground(void) {
+msdosBackground (void) {
   saveState(&mainState);
-  if (!setjmp(mainCtx)) {
+
+  if (!setjmp(mainContext)) {
     __dpmi_regs regs;
 
     /* set a chained Protected Mode Timer IRQ handler */
     timerSeginfo.pm_selector = _my_cs();
-    timerSeginfo.pm_offset = (unsigned long)&timerInt;
-    _go32_dpmi_get_protected_mode_interrupt_vector(TIMER_INT, &origTimerSeginfo);
-    _go32_dpmi_chain_protected_mode_interrupt_vector(TIMER_INT, &timerSeginfo);
+    timerSeginfo.pm_offset = (unsigned long)&timerInterruptHandler;
+    _go32_dpmi_get_protected_mode_interrupt_vector(TIMER_INTERRUPT, &origTimerSeginfo);
+    _go32_dpmi_chain_protected_mode_interrupt_vector(TIMER_INTERRUPT, &timerSeginfo);
 
     /* set a real mode DOS Idle handler which calls back our Idle handler */
     idleSeginfo.pm_selector = _my_cs();
-    idleSeginfo.pm_offset = (unsigned long)&idleInt;
-    memset(&idleRegs, 0, sizeof(idleRegs));
-    _go32_dpmi_get_real_mode_interrupt_vector(IDLE_INT, &origIdleSeginfo);
-    _go32_dpmi_allocate_real_mode_callback_iret(&idleSeginfo, &idleRegs);
-    _go32_dpmi_set_real_mode_interrupt_vector(IDLE_INT, &idleSeginfo);
+    idleSeginfo.pm_offset = (unsigned long)&idleInterruptHandler;
+    memset(&idleRegisters, 0, sizeof(idleRegisters));
+    _go32_dpmi_get_real_mode_interrupt_vector(IDLE_INTERRUPT, &origIdleSeginfo);
+    _go32_dpmi_allocate_real_mode_callback_iret(&idleSeginfo, &idleRegisters);
+    _go32_dpmi_set_real_mode_interrupt_vector(IDLE_INTERRUPT, &idleSeginfo);
 
     /* Get InDos and Critical flags addresses */
-    regs.h.ah = 0x34;
-    __dpmi_int(DOS_INT, &regs);
-    inDosOffset = regs.x.es*16 + regs.x.bx;
+    regs.h.ah = 0X34;
+    __dpmi_int(DOS_INTERRUPT, &regs);
+    inDosFlagPointer = msdosMakeAddress(regs.x.es, regs.x.bx);
 
-    regs.x.ax = 0x5D06;
-    __dpmi_int(DOS_INT, &regs);
-    criticalOffset = regs.x.ds*16 + regs.x.si;
+    regs.x.ax = 0X5D06;
+    __dpmi_int(DOS_INTERRUPT, &regs);
+    criticalOffset = msdosMakeAddress(regs.x.ds, regs.x.si);
 
     /* We are ready */
     atexit(tsr_exit);
-    backgrounded = 1;
+    isBackgrounded = 1;
 
-    regs.x.ax = 0x3100;
-    regs.x.dx = (/* PSP */ 256 + _go32_info_block.size_of_transfer_buffer) / 16;
-    __dpmi_int(DOS_INT, &regs);
+    regs.x.ax = 0X3100;
+    msdosBreakAddress(0X100/*psp*/ + _go32_info_block.size_of_transfer_buffer, 0,
+                      &regs.x.dx, NULL);
+    __dpmi_int(DOS_INTERRUPT, &regs);
 
     /* shouldn't be reached */
-    logMessage(LOG_ERR,"Installation failed");
-    backgrounded = 0;
+    logMessage(LOG_ERR, "TSR installation failed");
+    isBackgrounded = 0;
   }
-  saveState(&intState);
+
+  saveState(&interruptState);
   restoreState(&mainState);
 }
 
 unsigned long
-tsr_usleep(unsigned long usec) {
-  unsigned long count;
-  int intsWereEnabled;
+tsr_usleep (unsigned long microseconds) {
+  unsigned long ticks;
 
-  if (!backgrounded) {
-    usleep(usec);
-    return usec;
+  if (!isBackgrounded) {
+    usleep(microseconds);
+    return microseconds;
   }
 
   saveState(&mainState);
-  restoreState(&intState);
+  restoreState(&interruptState);
 
   /* clock ticks to wait */
-  count = (usec * PIT_FREQ) / UINT64_C(1000000);
+  ticks = (microseconds * MSDOS_PIT_FREQUENCY) / UINT64_C(1000000);
 
   /* we're starting in the middle of a timer period */
-  intsWereEnabled = disable();
-  toBeElapsedTicks = countToNextTimerInt();
-  elapsedTicks = 0;
-  if (intsWereEnabled)
-    enable();
+  {
+    int interruptsWereEnabled = disable();
 
-  while (elapsedTicks < count) {
+    elapsedTickIncrement = getTicksTillNextTimerInterrupt();
+    elapsedTickCount = 0;
+
+    if (interruptsWereEnabled) enable();
+  }
+
+  while (elapsedTickCount < ticks) {
     /* wait for next interrupt */
-    if (!setjmp(mainCtx))
-      longjmp(intCtx, 1);
+    if (!setjmp(mainContext)) longjmp(interruptContext, 1);
     /* interrupt returned */
   }
 
   /* wait for Dos to be free */
-  setjmp(mainCtx);
+  setjmp(mainContext);
 
   /* critical sections of DOS are never reentrant */
   if (_farpeekb(_dos_ds, criticalOffset)
   /* DOS is busy but not idle */
-   || (!inIdle && _farpeekb(_dos_ds, inDosOffset)))
-    longjmp(intCtx, 1);
+   || (!inIdleInterrupt && _farpeekb(_dos_ds, inDosFlagPointer)))
+    longjmp(interruptContext, 1);
 
-  saveState(&intState);
+  saveState(&interruptState);
   restoreState(&mainState);
 
-  return (elapsedTicks * UINT64_C(1000000)) / PIT_FREQ;
+  return (elapsedTickCount * UINT64_C(1000000)) / MSDOS_PIT_FREQUENCY;
 }
 
 int
@@ -315,12 +358,11 @@ vsnprintf (char *str, size_t size, const char *format, va_list ap) {
   size_t alloc = 1024;
   char *buf;
   int ret;
-  if (alloc < size)
-    alloc = size;
+
+  if (alloc < size) alloc = size;
   buf = alloca(alloc);
   ret = vsprintf(buf, format, ap);
-  if (size > ret + 1)
-    size = ret + 1;
+  if (size > (ret + 1)) size = ret + 1;
   memcpy(str, buf, size);
   return ret;
 }
@@ -329,9 +371,11 @@ int
 snprintf (char *str, size_t size, const char *format, ...) {
   va_list argp;
   int ret;
+
   va_start(argp, format);
   ret = vsnprintf(str, size, format, argp);
   va_end(argp);
+
   return ret;
 }
 

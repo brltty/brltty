@@ -25,9 +25,29 @@ extern "C" {
 
 extern void msdosBackground (void);
 
-extern unsigned long tsr_usleep (unsigned long usec);
+extern unsigned long tsr_usleep (unsigned long microseconds);
 
 extern unsigned short getCodePage (void);
+
+static inline unsigned long
+msdosMakeAddress (unsigned short segment, unsigned short offset) {
+  return ((unsigned long)segment << 4) + (unsigned long)offset;
+}
+
+static inline void msdosBreakAddress (
+  unsigned long address, int absolute,
+  unsigned short *segment, unsigned short *offset
+) {
+  if (absolute) {
+    if (segment) *segment = (address >> 4) & 0XF000;
+    if (offset) *offset = address & 0XFFFF;
+  } else {
+    if (segment) *segment = address >> 4;
+    if (offset) *offset = address & 0XF;
+  }
+}
+
+#define MSDOS_PIT_FREQUENCY UINT64_C(1193180)
 
 #ifdef __cplusplus
 }
