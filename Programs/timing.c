@@ -297,7 +297,7 @@ approximateDelay (int milliseconds) {
     Sleep(milliseconds);
 
 #elif defined(__MSDOS__)
-    tsr_usleep(milliseconds * USECS_PER_MSEC);
+    msdosUsleep(milliseconds * USECS_PER_MSEC);
 
 #elif defined (GRUB_RUNTIME)
     grub_millisleep(milliseconds);
@@ -367,7 +367,7 @@ accurateDelay (int milliseconds) {
     /* We're executing as a system clock interrupt TSR so we need to allow
      * them to occur in order for gettimeofday() to change.
      */
-    tsr_usleep(1);
+    msdosUsleep(1);
 #endif /* __MSDOS__ */
   }
 }

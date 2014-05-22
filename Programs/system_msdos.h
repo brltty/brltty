@@ -25,7 +25,7 @@ extern "C" {
 
 extern void msdosBackground (void);
 
-extern unsigned long tsr_usleep (unsigned long microseconds);
+extern unsigned long msdosUsleep (unsigned long microseconds);
 
 extern unsigned short getCodePage (void);
 

@@ -308,7 +308,7 @@ msdosBackground (void) {
 }
 
 unsigned long
-tsr_usleep (unsigned long microseconds) {
+msdosUsleep (unsigned long microseconds) {
   unsigned long ticks;
 
   if (!isBackgrounded) {
