@@ -42,6 +42,8 @@ export LDFLAGS=""
 # xw (by --disable-x)
 
 "${programDirectory}/configure" \
+   --with-configuration-file=brltty.cfg \
+   \
    --disable-api \
    --disable-gpm \
    --disable-icu \
@@ -68,7 +70,6 @@ export LDFLAGS=""
    --without-pgmpath-package \
    --without-service-package \
    --without-params-package \
-   --without-charset-package \
    --without-hostcmd-package \
    --without-mntpt-package \
    --without-mntfs-package \

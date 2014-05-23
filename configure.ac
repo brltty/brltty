@@ -86,7 +86,12 @@ fi
 AC_SUBST([install_root])
 BRLTTY_SUMMARY_ITEM([install-root], [install_root])
 
-AC_SUBST([CONFIGURATION_FILE], ["${PACKAGE_TARNAME}.conf"])
+BRLTTY_ARG_WITH(
+   [configuration-file], [FILE],
+   [name of configuration file],
+   [CONFIGURATION_FILE], ["${PACKAGE_TARNAME}.conf"]
+)
+AC_SUBST([CONFIGURATION_FILE])
 BRLTTY_DEFINE_EXPANDED([CONFIGURATION_FILE], ["${CONFIGURATION_FILE}"],
                        [Define this to be a string containing the name of the default configuration file.])
 

@@ -22,6 +22,7 @@ shopt -s nullglob
 
 . "`dirname "${0}"`/prologue.sh"
 addProgramOption n string archiveName
+addProgramOption p flag peek
 addProgramOption s string sourceDirectory
 addProgramOption i string installDirectory
 eval "${parseProgramOptions}"
@@ -90,7 +91,8 @@ manualSubdirectory="${documentSubdirectory}/Manual"
 
 cd "${buildDirectory}"
 "${sourceDirectory}/cfg-dos" --enable-relocatable-install --prefix="${installDirectory}"
-make -s
+make -s all
+make -s -C Programs ktbtest.exe tunetest.exe
 make -s -C Documents
 make -s install
 
@@ -100,7 +102,13 @@ rm brltty-install
 mv brltty-ttb.exe brlttb.exe
 mv brltty-ctb.exe brlctb.exe
 mv brltty-trtxt.exe brltrtxt.exe
-cp "${sourceDirectory}/DOS/cwsdpmi.exe" .
+
+cd "${buildDirectory}/Programs"
+installBinaryFile ktbtest.exe bin/brlktb.exe
+installBinaryFile tunetest.exe bin/brltune.exe
+
+cd "${sourceDirectory}/DOS"
+installBinaryFile cwsdpmi.exe "bin/cwsdpmi.exe"
 
 cd "${sourceDirectory}/Drivers"
 name=README
@@ -138,7 +146,7 @@ installManualFiles "${sourceDirectory}"
 installManualFiles "${buildDirectory}"
 
 cd "${buildDirectory}"
-installTextFile "Documents/brltty.conf" "etc/brltty.conf"
+installTextFile "Documents/brltty.conf" "etc/brltty.cfg"
 
 cd "${installDirectory}"
 mv share/man .
@@ -158,6 +166,11 @@ for file in *.[tack]t[bi]
 do
    convertTextFile "${file}"
 done
+
+! "${peek}" || {
+   cd "${installDirectory}"
+   "${SHELL:-/bin/sh}"
+}
 
 cd "${installDirectory}/.."
 zip -q -r "${initialDirectory}/${archiveName}.zip" "${installDirectory##*/}"
