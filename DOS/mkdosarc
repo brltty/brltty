@@ -20,12 +20,12 @@
 set -e
 shopt -s nullglob
 
-. "`dirname "${0}"`/prologue.sh"
-addProgramOption a string archiveName
-addProgramOption i string installDirectory
-addProgramOption n flag reportShortNameCollisions
-addProgramOption r flag replaceArchive
-addProgramOption s flag invokeShell
+. "`dirname "${0}"`/../prologue.sh"
+addProgramOption a string.name archiveName "specify name of archive"
+addProgramOption i string.directory installDirectory "specify installation directory on target system (use slashes [/])"
+addProgramOption n flag reportShortNameCollisions "report short name conflicts"
+addProgramOption o flag overwriteArchive "allow overwriting existing archive"
+addProgramOption s flag invokeShell "invoke interactive shell to inspect/modify result"
 eval "${parseProgramOptions}"
 
 [ "${#}" -gt 0 ] || syntaxError "missing source directory"
@@ -37,11 +37,12 @@ shift 1
 [ -n "${installDirectory}" ] || installDirectory="BRLTTY"
 
 [ -n "${sourceDirectory}" ] || sourceDirectory="."
+verifyInputDirectory "${sourceDirectory}" || semanticError
 sourceDirectory="$(resolveDirectory "${sourceDirectory}")"
 
 archivePath="${initialDirectory}/${archiveName}.zip"
 [ ! -e "${archivePath}" ] || {
-   "${replaceArchive}" ] || semanticError "archive already exists: ${archivePath}"
+   "${overwriteArchive}" ] || semanticError "archive already exists: ${archivePath}"
    rm -f -r "${archivePath}"
 }
 

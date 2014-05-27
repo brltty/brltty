@@ -135,6 +135,8 @@ function needTemporaryDirectory {
 }
 
 programOptionsString=""
+programOptionsOperandWidth=0
+
 programOptionDefault_counter=0
 programOptionDefault_flag=false
 programOptionDefault_list=""
@@ -146,15 +148,71 @@ function addProgramOption {
    typeset variable="${3}"
    typeset usage="${4}"
 
+   [ "$(expr "${letter}" : '^[[:alnum:]]*$')" -eq 1 ] || internalError "invalid program option: ${letter}"
+   [ -z "$(getVariable "programOptionType_${letter}")" ] || internalError "duplicate program option definition: -${letter}"
+
+   typeset operand
+   case "${type}"
+   in
+      flag | counter)
+         operand=""
+         ;;
+
+      string.* | list.*)
+         operand="${type#*.}"
+         type="${type%%.*}"
+         [ -n "${operand}" ] || internalError "missing program option operand type: -${letter}"
+         ;;
+
+      *) internalError "invalid program option type: ${type} (-${letter})";;
+   esac
+
    setVariable "programOptionType_${letter}" "${type}"
    setVariable "programOptionVariable_${letter}" "${variable}"
+   setVariable "programOptionOperand_${letter}" "${operand}"
    setVariable "programOptionUsage_${letter}" "${usage}"
 
    typeset default="$(getVariable "programOptionDefault_${type}")"
    setVariable "${variable}" "${default}"
 
+   typeset length="${#operand}"
+   [ "${length}" -le "${programOptionsOperandWidth}" ] || programOptionsOperandWidth="${length}"
+
    programOptionsString="${programOptionsString}${letter}"
-   [ -n "${default}" ] || programOptionsString="${programOptionsString}:"
+   [ "${length}" -eq 0 ] || programOptionsString="${programOptionsString}:"
+}
+
+addProgramOption h flag showProgramUsageSummary "show usage summary (this output), and then exit"
+
+function showProgramUsageSummary {
+   typeset options="${programOptionsString//:/}"
+   typeset count="${#options}"
+   typeset index=0
+   typeset indent=$((3 + programOptionsOperandWidth + 2))
+
+   typeset line="usage: ${programName}"
+   [ "${count}" -eq 0 ] || line="${line} [-option ...]"
+   typeset lines=("${line}")
+
+   while ((index < count))
+   do
+      typeset letter="${options:index:1}"
+      typeset line="-${letter} $(getVariable "programOptionOperand_${letter}")"
+
+      while [ "${#line}" -lt "${indent}" ]
+      do
+         line="${line} "
+      done
+
+      line="${line}$(getVariable "programOptionUsage_${letter}")"
+      lines[${#lines[*]}]="${line}"
+      ((index += 1))
+   done
+
+   for line in "${lines[@]}"
+   do
+      echo "${line}"
+   done
 }
 
 function parseProgramOptions {
@@ -186,6 +244,12 @@ function parseProgramOptions {
 parseProgramOptions='
    parseProgramOptions "${@}"
    shift $((OPTIND - 1))
+
+   if "${showProgramUsageSummary}"
+   then
+      showProgramUsageSummary
+      exit 0
+   fi
 '
 
 programDirectory=`dirname "${0}"`
