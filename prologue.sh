@@ -134,8 +134,27 @@ function needTemporaryDirectory {
    temporaryDirectory=`mktemp -d "${TMPDIR}/${programName}.XXXXXX"` && cd "${temporaryDirectory}" || exit "${?}"
 }
 
-programOptionsString=""
-programOptionsOperandWidth=0
+programParameterCount=0
+programParameterLabelWidth=0
+
+function addProgramParameter {
+   typeset label="${1}"
+   typeset variable="${2}"
+   typeset usage="${3}"
+
+   setVariable "programParameterLabel_${programParameterCount}" "${label}"
+   setVariable "programParameterVariable_${programParameterCount}" "${variable}"
+   setVariable "programParameterUsage_${programParameterCount}" "${usage}"
+
+   typeset length="${#label}"
+   [ "${length}" -le "${programParameterLabelWidth}" ] || programParameterLabelWidth="${length}"
+
+   setVariable "${variable}" ""
+   ((programParameterCount += 1))
+}
+
+programOptionString=""
+programOptionOperandWidth=0
 
 programOptionDefault_counter=0
 programOptionDefault_flag=false
@@ -176,38 +195,70 @@ function addProgramOption {
    setVariable "${variable}" "${default}"
 
    typeset length="${#operand}"
-   [ "${length}" -le "${programOptionsOperandWidth}" ] || programOptionsOperandWidth="${length}"
+   [ "${length}" -le "${programOptionOperandWidth}" ] || programOptionOperandWidth="${length}"
 
-   programOptionsString="${programOptionsString}${letter}"
-   [ "${length}" -eq 0 ] || programOptionsString="${programOptionsString}:"
+   programOptionString="${programOptionString}${letter}"
+   [ "${length}" -eq 0 ] || programOptionString="${programOptionString}:"
 }
 
-addProgramOption h flag showProgramUsageSummary "show usage summary (this output), and then exit"
-
 function showProgramUsageSummary {
-   typeset options="${programOptionsString//:/}"
+   typeset options="${programOptionString//:/}"
    typeset count="${#options}"
-   typeset index=0
-   typeset indent=$((3 + programOptionsOperandWidth + 2))
 
    typeset line="usage: ${programName}"
    [ "${count}" -eq 0 ] || line="${line} [-option ...]"
-   typeset lines=("${line}")
 
-   while ((index < count))
+   typeset index=0
+   while ((index < programParameterCount))
    do
-      typeset letter="${options:index:1}"
-      typeset line="-${letter} $(getVariable "programOptionOperand_${letter}")"
-
-      while [ "${#line}" -lt "${indent}" ]
-      do
-         line="${line} "
-      done
-
-      line="${line}$(getVariable "programOptionUsage_${letter}")"
-      lines[${#lines[*]}]="${line}"
+      line="${line} $(getVariable "programParameterLabel_${index}")"
       ((index += 1))
    done
+
+   typeset lines=("${line}")
+
+   [ "${programParameterCount}" -eq 0 ] || {
+      lines[${#lines[*]}]="parameters:"
+
+      typeset indent=$((programParameterLabelWidth + 2))
+      typeset index=0
+
+      while ((index < programParameterCount))
+      do
+         typeset line="$(getVariable "programParameterLabel_${index}")"
+
+         while [ "${#line}" -lt "${indent}" ]
+         do
+            line="${line} "
+         done
+
+         line="${line}$(getVariable "programParameterUsage_${index}")"
+         lines[${#lines[*]}]="  ${line}"
+         ((index += 1))
+      done
+   }
+
+   [ "${count}" -eq 0 ] || {
+      lines[${#lines[*]}]="options:"
+
+      typeset indent=$((3 + programOptionOperandWidth + 2))
+      typeset index=0
+
+      while ((index < count))
+      do
+         typeset letter="${options:index:1}"
+         typeset line="-${letter} $(getVariable "programOptionOperand_${letter}")"
+
+         while [ "${#line}" -lt "${indent}" ]
+         do
+            line="${line} "
+         done
+
+         line="${line}$(getVariable "programOptionUsage_${letter}")"
+         lines[${#lines[*]}]="  ${line}"
+         ((index += 1))
+      done
+   }
 
    for line in "${lines[@]}"
    do
@@ -215,10 +266,12 @@ function showProgramUsageSummary {
    done
 }
 
+addProgramOption h flag showProgramUsageSummary "show usage summary (this output), and then exit"
+
 function parseProgramOptions {
    typeset letter
 
-   while getopts ":${programOptionsString}" letter
+   while getopts ":${programOptionString}" letter
    do
       case "${letter}"
       in
@@ -250,6 +303,17 @@ parseProgramOptions='
       showProgramUsageSummary
       exit 0
    fi
+
+   programParameterIndex=0
+   while ((programParameterIndex < programParameterCount))
+   do
+      setVariable "programParameterVariable_${programParameterIndex}" "${1}"
+      shift 1
+      ((programParameterIndex += 1))
+   done
+   unset programParameterIndex
+
+   [ "${#}" -eq 0 ] || syntaxError "too many parameters"
 '
 
 programDirectory=`dirname "${0}"`

@@ -26,13 +26,9 @@ addProgramOption i string.directory installDirectory "specify installation direc
 addProgramOption n flag reportShortNameCollisions "report short name conflicts"
 addProgramOption o flag overwriteArchive "allow overwriting existing archive"
 addProgramOption s flag invokeShell "invoke interactive shell to inspect/modify result"
+addProgramParameter source sourceDirectory "top-level directory of source tree"
 eval "${parseProgramOptions}"
 
-[ "${#}" -gt 0 ] || syntaxError "missing source directory"
-sourceDirectory="${1}"
-shift 1
-
-[ "${#}" -eq 0 ] || syntaxError "too many parameters"
 [ -n "${archiveName}" ] || archiveName="brltty-msdos"
 [ -n "${installDirectory}" ] || installDirectory="BRLTTY"
 
