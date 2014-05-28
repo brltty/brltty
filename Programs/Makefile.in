@@ -598,7 +598,7 @@ ttb_translate.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ttb_translate.c
 
 check-text-tables: brltty-ttb$X
-	for file in $(SRC_TOP)$(TBL_DIR)/*.ttb; do LD_LIBRARY_PATH=$(BLD_DIR) ./brltty-ttb$X -T$(SRC_TOP)$(TBL_DIR) $$file; done
+	for file in $(SRC_TOP)$(TBL_DIR)/$(TEXT_TABLE_SUBDIRECTORY)/*$(TEXT_TABLE_EXTENSION); do LD_LIBRARY_PATH=$(BLD_DIR) ./brltty-ttb$X -T$(SRC_TOP)$(TBL_DIR) $$file; done
 
 ###############################################################################
 
@@ -725,11 +725,11 @@ screen-drivers:
 
 ###############################################################################
 
-TEXT_TABLE_FILE = $(SRC_TOP)$(TBL_DIR)/$(TEXT_TABLE).ttb
+TEXT_TABLE_FILE = $(SRC_TOP)$(TBL_DIR)/$(TEXT_TABLE_SUBDIRECTORY)/$(TEXT_TABLE)$(TEXT_TABLE_EXTENSION)
 text.auto.h: $(TEXT_TABLE_FILE) tbl2hex$(X_FOR_BUILD)
 	./tbl2hex$(X_FOR_BUILD) -- $(TEXT_TABLE_FILE) >$@
 
-ATTRIBUTES_TABLE_FILE = $(SRC_TOP)$(TBL_DIR)/$(ATTRIBUTES_TABLE).atb
+ATTRIBUTES_TABLE_FILE = $(SRC_TOP)$(TBL_DIR)/$(ATTRIBUTES_TABLE_SUBDIRECTORY)/$(ATTRIBUTES_TABLE)$(ATTRIBUTES_TABLE_EXTENSION)
 attr.auto.h: $(ATTRIBUTES_TABLE_FILE) tbl2hex$(X_FOR_BUILD)
 	./tbl2hex$(X_FOR_BUILD) -- $(ATTRIBUTES_TABLE_FILE) >$@
 
@@ -795,14 +795,16 @@ install-xbrlapi: xbrlapi$X install-program-directory install-gdm-autostart-direc
 
 install-tables: $(INSTALL_TEXT_TABLES) $(INSTALL_ATTRIBUTES_TABLES) $(INSTALL_CONTRACTION_TABLES) install-key-tables install-help-files
 
-install-text-tables: install-tables-directory
-	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.tt[bi] $(INSTALL_TABLES_DIRECTORY)
+install-text-tables: install-text-tables-directory
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(TEXT_TABLE_SUBDIRECTORY)/*$(TEXT_TABLE_EXTENSION) $(INSTALL_TEXT_TABLES_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(TEXT_TABLE_SUBDIRECTORY)/*$(TEXT_SUBTABLE_EXTENSION) $(INSTALL_TEXT_TABLES_DIRECTORY)
 
-install-attributes-tables: install-tables-directory
-	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.at[bi] $(INSTALL_TABLES_DIRECTORY)
+install-attributes-tables: install-attributes-tables-directory
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(ATTRIBUTES_TABLE_SUBDIRECTORY)/*$(ATTRIBUTES_TABLE_EXTENSION) $(INSTALL_ATTRIBUTES_TABLES_DIRECTORY)
 
-install-contraction-tables: install-tables-directory
-	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.ct[bi] $(INSTALL_TABLES_DIRECTORY)
+install-contraction-tables: install-contraction-tables-directory
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(CONTRACTION_TABLE_SUBDIRECTORY)/*$(CONTRACTION_TABLE_EXTENSION) $(INSTALL_CONTRACTION_TABLES_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(CONTRACTION_TABLE_SUBDIRECTORY)/*$(CONTRACTION_SUBTABLE_EXTENSION) $(INSTALL_CONTRACTION_TABLES_DIRECTORY)
 
 install-key-tables: install-tables-directory
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.kt[bi] $(INSTALL_TABLES_DIRECTORY)
@@ -902,7 +904,10 @@ uninstall-programs:
 	-rm -f $(INSTALL_GDM_AUTOSTART_DIRECTORY)/xbrlapi.desktop
 
 uninstall-tables:
-	-rm -f $(INSTALL_TABLES_DIRECTORY)/*.[tack]t[bi]
+	-rm -f -r $(INSTALL_TEXT_TABLES_DIRECTORY)
+	-rm -f -r $(INSTALL_ATTRIBUTES_TABLES_DIRECTORY)
+	-rm -f -r $(INSTALL_CONTRACTION_TABLES_DIRECTORY)
+	-rm -f $(INSTALL_TABLES_DIRECTORY)/*.[k]t[bi]
 	-rm -f $(INSTALL_TABLES_DIRECTORY)/brl-*.txt
 	-[ ! -d $(INSTALL_WRITABLE_DIRECTORY) ] || rmdir $(INSTALL_WRITABLE_DIRECTORY)
 	-[ ! -d $(INSTALL_TABLES_DIRECTORY) ] || rmdir $(INSTALL_TABLES_DIRECTORY)

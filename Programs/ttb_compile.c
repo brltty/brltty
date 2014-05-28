@@ -274,7 +274,16 @@ ensureTextTableExtension (const char *path) {
 
 char *
 makeTextTablePath (const char *directory, const char *name) {
-  return makeFilePath(directory, name, TEXT_TABLE_EXTENSION);
+  char *subdirectory = makePath(directory, TEXT_TABLE_SUBDIRECTORY);
+
+  if (subdirectory) {
+    char *file = makeFilePath(subdirectory, name, TEXT_TABLE_EXTENSION);
+
+    free(subdirectory);
+    if (file) return file;
+  }
+
+  return NULL;
 }
 
 static int

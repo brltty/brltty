@@ -1020,20 +1020,20 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Text Table"));
-      ITEM(newFilesMenuItem(tablesSubmenu, &itemName, opt_tablesDirectory, TEXT_TABLE_EXTENSION, opt_textTable, 0));
+      ITEM(newFilesMenuItem(tablesSubmenu, &itemName, opt_tablesDirectory, TEXT_TABLE_SUBDIRECTORY, TEXT_TABLE_EXTENSION, opt_textTable, 0));
       CHANGED(TextTable);
     }
 
     {
       NAME(strtext("Attributes Table"));
-      ITEM(newFilesMenuItem(tablesSubmenu, &itemName, opt_tablesDirectory, ATTRIBUTES_TABLE_EXTENSION, opt_attributesTable, 0));
+      ITEM(newFilesMenuItem(tablesSubmenu, &itemName, opt_tablesDirectory, ATTRIBUTES_TABLE_SUBDIRECTORY, ATTRIBUTES_TABLE_EXTENSION, opt_attributesTable, 0));
       CHANGED(AttributesTable);
     }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
     {
       NAME(strtext("Contraction Table"));
-      ITEM(newFilesMenuItem(tablesSubmenu, &itemName, opt_tablesDirectory, CONTRACTION_TABLE_EXTENSION, opt_contractionTable, 1));
+      ITEM(newFilesMenuItem(tablesSubmenu, &itemName, opt_tablesDirectory, CONTRACTION_TABLE_SUBDIRECTORY, CONTRACTION_TABLE_EXTENSION, opt_contractionTable, 1));
       CHANGED(ContractionTable);
     }
 #endif /* ENABLE_CONTRACTED_BRAILLE */

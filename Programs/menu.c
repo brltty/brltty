@@ -45,7 +45,7 @@
 #include "parse.h"
 
 typedef struct {
-  const char *directory;
+  char *directory;
   const char *extension;
   const char *pattern;
   char *initial;
@@ -531,7 +531,7 @@ static const MenuItemMethods menuItemMethods_files = {
 MenuItem *
 newFilesMenuItem (
   Menu *menu, const MenuString *name,
-  const char *directory, const char *extension,
+  const char *directory, const char *subdirectory, const char *extension,
   const char *initial, int none
 ) {
   FileData *files;
@@ -540,7 +540,6 @@ newFilesMenuItem (
     char *pattern;
 
     memset(files, 0, sizeof(*files));
-    files->directory = directory;
     files->extension = extension;
     files->none = !!none;
 
@@ -554,12 +553,22 @@ newFilesMenuItem (
 
       if ((files->initial = *initial? ensureFileExtension(initial, extension): strdup(""))) {
         if ((files->current = strdup(files->initial))) {
-          MenuItem *item = newMenuItem(menu, &files->setting, name);
+          if (subdirectory) {
+            files->directory = makePath(directory, subdirectory);
+          } else if (!(files->directory = strdup(directory))) {
+            logMallocError();
+          }
 
-          if (item) {
-            item->methods = &menuItemMethods_files;
-            item->data.files = files;
-            return item;
+          if (files->directory) {
+            MenuItem *item = newMenuItem(menu, &files->setting, name);
+
+            if (item) {
+              item->methods = &menuItemMethods_files;
+              item->data.files = files;
+              return item;
+            }
+
+            free(files->directory);
           }
 
           free(files->current);

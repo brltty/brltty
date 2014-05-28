@@ -705,5 +705,14 @@ ensureContractionTableExtension (const char *path) {
 
 char *
 makeContractionTablePath (const char *directory, const char *name) {
-  return makeFilePath(directory, name, CONTRACTION_TABLE_EXTENSION);
+  char *subdirectory = makePath(directory, CONTRACTION_TABLE_SUBDIRECTORY);
+
+  if (subdirectory) {
+    char *file = makeFilePath(subdirectory, name, CONTRACTION_TABLE_EXTENSION);
+
+    free(subdirectory);
+    if (file) return file;
+  }
+
+  return NULL;
 }

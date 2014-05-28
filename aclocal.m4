@@ -29,6 +29,11 @@ $1="`echo "${$1}" | sed -e 's/^ *//' -e 's/ *$//'`"
 AC_DEFUN([BRLTTY_VAR_EXPAND], [dnl
 eval '$1="'"$2"'"'])
 
+AC_DEFUN([BRLTTY_DEFINE_STRING], [dnl
+   AC_SUBST([$1], [$2])
+   AC_DEFINE([$1], ["$2"], [Define this to be a string containing $3.])
+])
+
 AC_DEFUN([BRLTTY_DEFINE_EXPANDED], [dnl
 BRLTTY_VAR_EXPAND([brltty_expanded], [$2])
 AC_DEFINE_UNQUOTED([$1], ["${brltty_expanded}"], [$3])])

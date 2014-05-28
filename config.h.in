@@ -504,17 +504,44 @@ extern "C" {
 /* Define this if the function atspi_get_a11y_bus exists in atspi2. */
 #undef HAVE_ATSPI_GET_A11Y_BUS
 
-#define TEXT_TABLE_EXTENSION ".ttb"
-#define TEXT_SUBTABLE_EXTENSION ".tti"
+/* Define this to be a string containing the subdirectory for text tables. */
+#undef TEXT_TABLE_SUBDIRECTORY
 
-#define ATTRIBUTES_TABLE_EXTENSION ".atb"
-#define ATTRIBUTES_SUBTABLE_EXTENSION ".ati"
+/* Define this to be a string containing the extension for text tables. */
+#undef TEXT_TABLE_EXTENSION
 
-#define CONTRACTION_TABLE_EXTENSION ".ctb"
-#define CONTRACTION_SUBTABLE_EXTENSION ".cti"
+/* Define this to be a string containing the extension for text subtables. */
+#undef TEXT_SUBTABLE_EXTENSION
 
-#define KEY_TABLE_EXTENSION ".ktb"
-#define KEY_SUBTABLE_EXTENSION ".kti"
+/* Define this to be a string containing the subdirectory for attributes tables. */
+#undef ATTRIBUTES_TABLE_SUBDIRECTORY
+
+/* Define this to be a string containing the extension for attributes tables. */
+#undef ATTRIBUTES_TABLE_EXTENSION
+
+/* Define this to be a string containing the extension for attributes subtables. */
+#undef ATTRIBUTES_SUBTABLE_EXTENSION
+
+/* Define this to be a string containing the subdirectory for contraction tables. */
+#undef CONTRACTION_TABLE_SUBDIRECTORY
+
+/* Define this to be a string containing the extension for contraction tables. */
+#undef CONTRACTION_TABLE_EXTENSION
+
+/* Define this to be a string containing the extension for contraction subtables. */
+#undef CONTRACTION_SUBTABLE_EXTENSION
+
+/* Define this to be a string containing the subdirectory for keyboard key tables. */
+#undef KEYBOARD_KEY_TABLE_SUBDIRECTORY
+
+/* Define this to be a string containing the subdirectory for braille device key tables. */
+#undef BRAILLE_KEY_TABLE_SUBDIRECTORY
+
+/* Define this to be a string containing the extension for key tables. */
+#undef KEY_TABLE_EXTENSION
+
+/* Define this to be a string containing the extension for key subtables. */
+#undef KEY_SUBTABLE_EXTENSION
 
 #ifdef __cplusplus
 }

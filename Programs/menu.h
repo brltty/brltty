@@ -49,7 +49,7 @@ extern MenuItem *newBooleanMenuItem (Menu *menu, unsigned char *setting, const M
 
 extern MenuItem *newFilesMenuItem (
   Menu *menu, const MenuString *name,
-  const char *directory, const char *extension,
+  const char *directory, const char *subdirectory, const char *extension,
   const char *initial, int none
 );
 
