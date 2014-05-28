@@ -234,24 +234,16 @@ function addProgramUsageText {
 
    while [ "${#text}" -gt "${length}" ]
    do
-      typeset index=$((length + 1))
+      typeset head="${text:0:length+1}"
+      head="${head% *}"
 
-      while ((--index > 0))
-      do
-         [ "${text:index:1}" != " " ] || break
-      done
-
-      if ((index > 0))
-      then
-         typeset head="${text:0:index}"
-      else
-         typeset head="${text%% *}"
+      [ "${#head}" -le "${length}" ] || {
+         head="${text%% *}"
          [ "${head}" != "${text}" ] || break
-         index="${#head}"
-      fi
+      }
 
       appendElement "${linesArray}" "${prefix}${head}"
-      text="${text:index+1}"
+      text="${text:${#head}+1}"
       prefix="${prefix//?/ }"
    done
 
