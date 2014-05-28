@@ -69,6 +69,21 @@ function setVariable {
    eval "${variable}"'="${value}"'
 }
 
+function setElement {
+   typeset array="${1}"
+   typeset index="${2}"
+   typeset value="${3}"
+
+   setVariable "${array}[${index}]" "${value}"
+}
+
+function appendElement {
+   typeset array="${1}"
+   typeset value="${2}"
+
+   setElement "${array}" "\${#${array}[*]}" "${value}"
+}
+
 function quoteString {
    typeset string="${1}"
 
@@ -201,9 +216,53 @@ function addProgramOption {
    [ "${length}" -eq 0 ] || programOptionString="${programOptionString}:"
 }
 
+function addProgramUsageText {
+   typeset linesArray="${1}"
+   typeset text="${2}"
+   typeset width="${3}"
+   typeset prefix="${4}"
+
+   typeset indent="${#prefix}"
+   typeset length=$((width - indent))
+
+   ((length > 0)) || {
+      appendElement "${linesArray}" "${prefix}"
+      prefix="${prefix:-length+1}"
+      prefix="${prefix//?/ }"
+      length=1
+   }
+
+   while [ "${#text}" -gt "${length}" ]
+   do
+      typeset index=$((length + 1))
+
+      while ((--index > 0))
+      do
+         [ "${text:index:1}" != " " ] || break
+      done
+
+      if ((index > 0))
+      then
+         typeset head="${text:0:index}"
+      else
+         typeset head="${text%% *}"
+         [ "${head}" != "${text}" ] || break
+         index="${#head}"
+      fi
+
+      appendElement "${linesArray}" "${prefix}${head}"
+      text="${text:index+1}"
+      prefix="${prefix//?/ }"
+   done
+
+   appendElement "${linesArray}" "${prefix}${text}"
+}
+
 function showProgramUsageSummary {
+   programUsageLines=()
    typeset options="${programOptionString//:/}"
    typeset count="${#options}"
+   typeset width="${COLUMNS:-72}"
 
    typeset line="usage: ${programName}"
    [ "${count}" -eq 0 ] || line="${line} [-option ...]"
@@ -215,10 +274,10 @@ function showProgramUsageSummary {
       ((index += 1))
    done
 
-   typeset lines=("${line}")
+   appendElement programUsageLines "${line}"
 
    [ "${programParameterCount}" -eq 0 ] || {
-      lines[${#lines[*]}]="parameters:"
+      appendElement programUsageLines "parameters:"
 
       typeset indent=$((programParameterLabelWidth + 2))
       typeset index=0
@@ -232,14 +291,13 @@ function showProgramUsageSummary {
             line="${line} "
          done
 
-         line="${line}$(getVariable "programParameterUsage_${index}")"
-         lines[${#lines[*]}]="  ${line}"
+         addProgramUsageText programUsageLines "$(getVariable "programParameterUsage_${index}")" "${width}" "  ${line}"
          ((index += 1))
       done
    }
 
    [ "${count}" -eq 0 ] || {
-      lines[${#lines[*]}]="options:"
+      appendElement programUsageLines "options:"
 
       typeset indent=$((3 + programOptionOperandWidth + 2))
       typeset index=0
@@ -254,13 +312,12 @@ function showProgramUsageSummary {
             line="${line} "
          done
 
-         line="${line}$(getVariable "programOptionUsage_${letter}")"
-         lines[${#lines[*]}]="  ${line}"
+         addProgramUsageText programUsageLines "$(getVariable "programOptionUsage_${letter}")" "${width}" "  ${line}"
          ((index += 1))
       done
    }
 
-   for line in "${lines[@]}"
+   for line in "${programUsageLines[@]}"
    do
       echo "${line}"
    done
