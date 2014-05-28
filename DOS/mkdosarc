@@ -132,12 +132,13 @@ do
    for driverName in *
    do
       cd "${driverName}"
+      typeset -u driverCode="$(sed -n -e '/^ *DRIVER_CODE *= */s/^.*= *//p' "Makefile.in")"
 
       for file in "${name}"*
       do
-         document="${driverName}.txt"
-         [ "${file}" = "${name}" ] || document="${file#${name}.}-${document}"
-         installTextFile "${file}" "${documentSubdirectory}/Drivers/${driverType}/${document}"
+         document="${file/#${name}/${driverCode}}"
+         document="${document//./-}"
+         installTextFile "${file}" "${documentSubdirectory}/Drivers/${driverType}/${document}.txt"
       done
 
       cd ..
