@@ -364,7 +364,7 @@ parseProgramOptions='
    programParameterIndex=0
    while ((programParameterIndex < programParameterCount))
    do
-      setVariable "programParameterVariable_${programParameterIndex}" "${1}"
+      setVariable "$(getVariable "programParameterVariable_${programParameterIndex}")" "${1}"
       shift 1
       ((programParameterIndex += 1))
    done

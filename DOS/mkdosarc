@@ -20,17 +20,20 @@
 set -e
 shopt -s nullglob
 
+defaultArchiveName="brltty-dos"
+defaultInstallDirectory="BRLTTY"
+
 . "`dirname "${0}"`/../prologue.sh"
-addProgramOption a string.name archiveName "specify name of archive"
-addProgramOption i string.directory installDirectory "specify installation directory on target system (use slashes [/])"
+addProgramOption a string.name archiveName "specify archive name (default is ${defaultArchiveName})"
+addProgramOption i string.directory installDirectory "specify installation directory on target system (default is ${defaultInstallDirectory})"
 addProgramOption n flag reportShortNameCollisions "report short name conflicts"
-addProgramOption o flag overwriteArchive "allow overwriting existing archive"
+addProgramOption o flag overwriteArchive "overwrite existing archive"
 addProgramOption s flag invokeShell "invoke interactive shell to inspect/modify result"
 addProgramParameter source sourceDirectory "top-level directory of source tree"
 eval "${parseProgramOptions}"
 
-[ -n "${archiveName}" ] || archiveName="brltty-msdos"
-[ -n "${installDirectory}" ] || installDirectory="BRLTTY"
+[ -n "${archiveName}" ] || archiveName="${defaultArchiveName}"
+[ -n "${installDirectory}" ] || installDirectory="${defaultInstallDirectory}"
 
 [ -n "${sourceDirectory}" ] || sourceDirectory="."
 verifyInputDirectory "${sourceDirectory}" || semanticError
