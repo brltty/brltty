@@ -137,12 +137,13 @@ static void showDots(void)
     exit(PROG_EXIT_SEMANTIC);
   }
   {
-    char text[x*y];
+    char text[x*y+1];
     unsigned char or[x*y];
     brlapi_writeArguments_t wa = BRLAPI_WRITEARGUMENTS_INITIALIZER;
     fprintf(stderr,"Showing dot patterns\n");
     memcpy(text,DOTS_TEXT,DOTS_TEXTLEN);
     memset(text+DOTS_TEXTLEN,' ',sizeof(text)-DOTS_TEXTLEN);
+    text[x*y] = 0;
     wa.regionBegin = 1;
     wa.regionSize = sizeof(or);
     wa.text = text;
