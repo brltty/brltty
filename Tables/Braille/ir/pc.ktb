@@ -1,0 +1,53 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2014 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+title Iris with PC Keyboard
+
+note The eight extra keys at the ends of the keyboard are known as linear keys:
+note * The four at the left, from top to bottom, are named L1 through L4.
+note * The four at the right, from bottom to top, are named L5 through L8.
+
+bind L1 FWINLTSKIP
+bind L2+L3 PASTE
+bind L4 CSRVIS
+bind L8 FWINRTSKIP
+bind L7 TOP_LEFT
+bind L6 BOT_LEFT
+bind L7+L6 HOME
+bind L1+L2 TUNES
+bind L4+L5 SIXDOTS
+
+bind !Xt PASSXT
+bind !XtE0 PASSXT+emul0
+bind !XtE1 PASSXT+emul1
+
+# The XT key numbers need to be 1 greater than the actual XT key codes.
+bind L5+!XtE0.0X4C FWINLT
+bind L5+!XtE0.0X4E FWINRT
+bind L5+!XtE0.0X49 LNUP
+bind L5+!XtE0.0X51 LNDN
+
+assign Dot1 L1
+assign Dot2 L2
+assign Dot3 L3
+assign Dot4 L8
+assign Dot5 L7
+assign Dot6 L6
+assign Dot7 L4
+assign Dot8 L5
+include all.kti

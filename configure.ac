@@ -140,21 +140,23 @@ BRLTTY_ARG_REQUIRED(
 )
 
 BRLTTY_DEFINE_STRING([TEXT_TABLE_SUBDIRECTORY], [Text], [the subdirectory for text tables])
+BRLTTY_DEFINE_STRING([ATTRIBUTES_TABLE_SUBDIRECTORY], [Attributes], [the subdirectory for attributes tables])
+BRLTTY_DEFINE_STRING([CONTRACTION_TABLE_SUBDIRECTORY], [Contraction], [the subdirectory for contraction tables])
+BRLTTY_DEFINE_STRING([KEYBOARD_KEY_TABLE_SUBDIRECTORY], [Keyboard], [the subdirectory for keyboard key tables])
+BRLTTY_DEFINE_STRING([BRAILLE_KEY_TABLE_SUBDIRECTORY], [Braille], [the subdirectory for braille device key tables])
+
 BRLTTY_DEFINE_STRING([TEXT_TABLE_EXTENSION], [.ttb], [the extension for text tables])
 BRLTTY_DEFINE_STRING([TEXT_SUBTABLE_EXTENSION], [.tti], [the extension for text subtables])
 
-BRLTTY_DEFINE_STRING([ATTRIBUTES_TABLE_SUBDIRECTORY], [Attributes], [the subdirectory for attributes tables])
 BRLTTY_DEFINE_STRING([ATTRIBUTES_TABLE_EXTENSION], [.atb], [the extension for attributes tables])
 BRLTTY_DEFINE_STRING([ATTRIBUTES_SUBTABLE_EXTENSION], [.ati], [the extension for attributes subtables])
 
-BRLTTY_DEFINE_STRING([CONTRACTION_TABLE_SUBDIRECTORY], [Contraction], [the subdirectory for contraction tables])
 BRLTTY_DEFINE_STRING([CONTRACTION_TABLE_EXTENSION], [.ctb], [the extension for contraction tables])
 BRLTTY_DEFINE_STRING([CONTRACTION_SUBTABLE_EXTENSION], [.cti], [the extension for contraction subtables])
 
-BRLTTY_DEFINE_STRING([KEYBOARD_KEY_TABLE_SUBDIRECTORY], [Keyboard], [the subdirectory for keyboard key tables])
-BRLTTY_DEFINE_STRING([BRAILLE_KEY_TABLE_SUBDIRECTORY], [Braille], [the subdirectory for braille device key tables])
 BRLTTY_DEFINE_STRING([KEY_TABLE_EXTENSION], [.ktb], [the extension for key tables])
 BRLTTY_DEFINE_STRING([KEY_SUBTABLE_EXTENSION], [.kti], [the extension for key subtables])
+BRLTTY_DEFINE_STRING([KEY_HELP_EXTENSION], [.txt], [the extension for key help files])
 
 BRLTTY_ARG_REQUIRED(
    [manpage-directory], [DIRECTORY],

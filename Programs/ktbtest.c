@@ -70,6 +70,8 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 END_OPTION_TABLE
 
+static void *driverObject;
+
 static int
 listLine (const wchar_t *line, void *data) {
   FILE *stream = stdout;
@@ -78,28 +80,38 @@ listLine (const wchar_t *line, void *data) {
   return !ferror(stream);
 }
 
-static KEY_NAME_TABLES_REFERENCE
-getKeyNameTables (const char *keyTableName) {
-  KEY_NAME_TABLES_REFERENCE keyNameTables = NULL;
+typedef struct {
+  KEY_NAME_TABLES_REFERENCE names;
+  char *path;
+} KeyTableDescriptor;
+
+static int
+getKeyTableDescriptor (KeyTableDescriptor *ktd, const char *name) {
+  int ok = 0;
   int componentsLeft;
-  char **nameComponents = splitString(keyTableName, '-', &componentsLeft);
+  char **nameComponents = splitString(name, '-', &componentsLeft);
+
+  memset(ktd, 0, sizeof(*ktd));
+  ktd->names = NULL;
+  ktd->path = NULL;
 
   if (nameComponents) {
     char **currentComponent = nameComponents;
 
     if (componentsLeft) {
-      const char *keyTableType = (componentsLeft--, *currentComponent++);
+      const char *tableType = (componentsLeft--, *currentComponent++);
 
-      if (strcmp(keyTableType, "kbd") == 0) {
+      if (strcmp(tableType, "kbd") == 0) {
         if (componentsLeft) {
-          componentsLeft--; currentComponent++;
-          keyNameTables = KEY_NAME_TABLES(keyboard);
+          const char *keyboardType = (componentsLeft--, *currentComponent++);
+
+          ktd->names = KEY_NAME_TABLES(keyboard);
+          if ((ktd->path = makeKeyboardKeyTablePath(opt_tablesDirectory, keyboardType))) ok = 1;
         } else {
-          logMessage(LOG_ERR, "missing keyboard bindings name");
+          logMessage(LOG_ERR, "missing keyboard type");
         }
-      } else if (strcmp(keyTableType, "brl") == 0) {
+      } else if (strcmp(tableType, "brl") == 0) {
         if (componentsLeft) {
-          void *driverObject;
           const char *driverCode = (componentsLeft--, *currentComponent++);
 
           if (loadBrailleDriver(driverCode, &driverObject, opt_driversDirectory)) {
@@ -117,23 +129,24 @@ getKeyNameTables (const char *keyTableName) {
                 const KeyTableDefinition *const *currentDefinition = keyTableDefinitions;
 
                 if (componentsLeft) {
-                  const char *bindingsName = (componentsLeft--, *currentComponent++);
+                  const char *deviceType = (componentsLeft--, *currentComponent++);
 
                   while (*currentDefinition) {
-                    if (strcmp(bindingsName, (*currentDefinition)->bindings) == 0) {
-                      keyNameTables = (*currentDefinition)->names;
+                    if (strcmp(deviceType, (*currentDefinition)->bindings) == 0) {
+                      ktd->names = (*currentDefinition)->names;
+                      if ((ktd->path = makeBrailleKeyTablePath(opt_tablesDirectory, driverCode, deviceType))) ok = 1;
                       break;
                     }
 
                     currentDefinition += 1;
                   }
 
-                  if (!keyNameTables) {
-                    logMessage(LOG_ERR, "unknown %s braille driver bindings name: %s",
-                               driverCode, bindingsName);
+                  if (!ktd->names) {
+                    logMessage(LOG_ERR, "unknown braille device type: %s-%s",
+                               driverCode, deviceType);
                   }
                 } else {
-                  logMessage(LOG_ERR, "missing braille driver bindings name");
+                  logMessage(LOG_ERR, "missing braille device type");
                 }
               }
 
@@ -146,22 +159,26 @@ getKeyNameTables (const char *keyTableName) {
           logMessage(LOG_ERR, "missing braille driver code");
         }
       } else {
-        logMessage(LOG_ERR, "unknown key table type: %s", keyTableType);
+        logMessage(LOG_ERR, "unknown key table type: %s", tableType);
       }
     } else {
       logMessage(LOG_ERR, "missing key table type");
     }
+
+    deallocateStrings(nameComponents);
   }
 
-  if (keyNameTables) {
+  if (ok) {
     if (componentsLeft) {
       logMessage(LOG_ERR, "too many key table name components");
-      keyNameTables = NULL;
+      ok = 0;
     }
   }
 
-  deallocateStrings(nameComponents);
-  return keyNameTables;
+  if (ok) return 1;
+  if (ktd->path) free(ktd->path);
+  memset(ktd, 0, sizeof(*ktd));
+  return 0;
 }
 
 int
@@ -186,47 +203,49 @@ main (int argc, char *argv[]) {
     fixInstallPaths(paths);
   }
 
+  driverObject = NULL;
+
   if (argc) {
-    const char *keyTableName = (argc--, *argv++);
-    char *keyTablePath = makeKeyTablePath(opt_tablesDirectory, keyTableName);
+    const char *tableName = (argc--, *argv++);
+    KeyTableDescriptor ktd;
+    int gotKeyTableDescriptor;
 
-    if (keyTablePath) {
-      KEY_NAME_TABLES_REFERENCE keyNameTables;
+    {
+      const char *file = locatePathName(tableName);
+      const char *delimiter = strrchr(file, '.');
+      size_t length = delimiter? (delimiter - file): strlen(file);
+      char name[length + 1];
 
-      {
-        const char *file = locatePathName(keyTablePath);
-        size_t length = strrchr(file, '.') - file;
-        char name[length + 1];
+      memcpy(name, file, length);
+      name[length] = 0;
 
-        memcpy(name, file, length);
-        name[length] = 0;
+      gotKeyTableDescriptor = getKeyTableDescriptor(&ktd, name);
+    }
 
-        keyNameTables = getKeyNameTables(name);
-      }
-
-      if (keyNameTables) {
-        if (opt_listKeyNames)
-          if (!listKeyNames(keyNameTables, listLine, NULL))
-            exitStatus = PROG_EXIT_FATAL;
-
-        if (exitStatus == PROG_EXIT_SUCCESS) {
-          KeyTable *keyTable = compileKeyTable(keyTablePath, keyNameTables);
-
-          if (keyTable) {
-            if (opt_listKeyTable)
-              if (!listKeyTable(keyTable, listLine, NULL))
-                exitStatus = PROG_EXIT_FATAL;
-
-            destroyKeyTable(keyTable);
-          } else {
-            exitStatus = PROG_EXIT_FATAL;
-          }
+    if (gotKeyTableDescriptor) {
+      if (opt_listKeyNames) {
+        if (!listKeyNames(ktd.names, listLine, NULL)) {
+          exitStatus = PROG_EXIT_FATAL;
         }
-      } else {
-        exitStatus = PROG_EXIT_FATAL;
       }
 
-      free(keyTablePath);
+      if (exitStatus == PROG_EXIT_SUCCESS) {
+        KeyTable *keyTable = compileKeyTable(ktd.path, ktd.names);
+
+        if (keyTable) {
+          if (opt_listKeyTable) {
+            if (!listKeyTable(keyTable, listLine, NULL)) {
+              exitStatus = PROG_EXIT_FATAL;
+            }
+          }
+
+          destroyKeyTable(keyTable);
+        } else {
+          exitStatus = PROG_EXIT_FATAL;
+        }
+      }
+
+      free(ktd.path);
     } else {
       exitStatus = PROG_EXIT_FATAL;
     }
@@ -235,6 +254,7 @@ main (int argc, char *argv[]) {
     exitStatus = PROG_EXIT_SYNTAX;
   }
 
+  if (driverObject) unloadSharedObject(driverObject);
   return exitStatus;
 }
 

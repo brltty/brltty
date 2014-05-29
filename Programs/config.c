@@ -1050,76 +1050,54 @@ constructBrailleDriver (void) {
   if (braille->construct(&brl, brailleParameters, brailleDevice)) {
     if (ensureBrailleBuffer(&brl, LOG_INFO)) {
       if (brl.keyBindings) {
+        char *keyTablePath = makeBrailleKeyTablePath(opt_tablesDirectory,
+                                             braille->definition.code,
+                                             brl.keyBindings);
+
         logMessage(LOG_INFO, "%s: %s", gettext("Key Bindings"), brl.keyBindings);
 
-        if (brl.keyNameTables) {
-          char *file;
+        if (keyTablePath) {
+          if (brl.keyNameTables) {
+            if ((brl.keyTable = compileKeyTable(keyTablePath, brl.keyNameTables))) {
+              setKeyTableLogLabel(brl.keyTable, "brl");
+              setLogKeyEventsFlag(brl.keyTable, &LOG_CATEGORY_FLAG(BRAILLE_KEYS));
+              logMessage(LOG_INFO, "%s: %s", gettext("Key Table"), keyTablePath);
 
-          {
-            const char *strings[] = {
-              "brl-", braille->definition.code, "-", brl.keyBindings, KEY_TABLE_EXTENSION
-            };
-            file = joinStrings(strings, ARRAY_COUNT(strings));
-          }
-
-          if (file) {
-            char *path;
-
-            if ((path = makePath(opt_tablesDirectory, file))) {
-              if ((brl.keyTable = compileKeyTable(path, brl.keyNameTables))) {
-                setKeyTableLogLabel(brl.keyTable, "brl");
-                setLogKeyEventsFlag(brl.keyTable, &LOG_CATEGORY_FLAG(BRAILLE_KEYS));
-                logMessage(LOG_INFO, "%s: %s", gettext("Key Table"), path);
-
-                if (enableBrailleHelpPage()) {
-                  listKeyTable(brl.keyTable, handleWcharHelpLine, NULL);
-                }
-              } else {
-                logMessage(LOG_WARNING, "%s: %s", gettext("cannot open key table"), path);
+              if (enableBrailleHelpPage()) {
+                listKeyTable(brl.keyTable, handleWcharHelpLine, NULL);
               }
-
-              free(path);
+            } else {
+              logMessage(LOG_WARNING, "%s: %s", gettext("cannot open key table"), keyTablePath);
             }
-
-            free(file);
-          }
-        }
-
-        if (!brl.keyTable) {
-          char *file;
-
-          {
-            const char *strings[] = {
-              "brl-", braille->definition.code, "-", brl.keyBindings, ".txt"
-            };
-            file = joinStrings(strings, ARRAY_COUNT(strings));
           }
 
-          if (file) {
-            char *path;
+          if (!brl.keyTable) {
+            char *keyHelpPath = replaceFileExtension(keyTablePath, KEY_HELP_EXTENSION);
 
-            if ((path = makePath(opt_tablesDirectory, file))) {
+            if (keyHelpPath) {
               int loaded = 0;
 
-              if (enableBrailleHelpPage())
-                if (loadHelpFile(path))
+              if (enableBrailleHelpPage()) {
+                if (loadHelpFile(keyHelpPath)) {
                   loaded = 1;
-
-              if (loaded) {
-                logMessage(LOG_INFO, "%s: %s", gettext("Help Path"), path);
-              } else {
-                logMessage(LOG_WARNING, "%s: %s", gettext("cannot open help file"), path);
+                }
               }
 
-              free(path);
+              if (loaded) {
+                logMessage(LOG_INFO, "%s: %s", gettext("Help Help"), keyHelpPath);
+              } else {
+                logMessage(LOG_WARNING, "%s: %s", gettext("cannot open key help"), keyHelpPath);
+              }
+
+              free(keyHelpPath);
             }
-
-            free(file);
           }
-        }
 
-        if (!getHelpLineCount()) {
-          addHelpLine(WS_C("help not available"));
+          if (!getHelpLineCount()) {
+            addHelpLine(WS_C("help not available"));
+          }
+
+          free(keyTablePath);
         }
       }
 

@@ -141,19 +141,48 @@ makePath (const char *directory, const char *file) {
   return joinStrings(&strings[first], count-first);
 }
 
+int
+hasFileExtension (const char *path, const char *extension) {
+  const char *tail = locatePathExtension(path);
+
+  if (!tail) return 0;
+  return strcmp(tail, extension) == 0;
+}
+
+char *
+replaceFileExtension (const char *path, const char *extension) {
+  const char *oldExtension = locatePathExtension(path);
+
+  if (oldExtension) {
+    size_t headLength = oldExtension - path;
+    size_t extensionLength = strlen(extension);
+    char *newPath = malloc(headLength + extensionLength + 1);
+
+    if (newPath) {
+      char *byte = newPath;
+
+      byte = mempcpy(byte, path, headLength);
+      byte = mempcpy(byte, extension, extensionLength);
+      *byte = 0;
+
+      return newPath;
+    } else {
+      logMallocError();
+    }
+  } else {
+    logMessage(LOG_WARNING, "path has no extension: %s", path);
+  }
+
+  return NULL;
+}
+
 char *
 ensureFileExtension (const char *path, const char *extension) {
   const char *strings[2];
   int count = 0;
-  const size_t pathLength = strlen(path);
-  const size_t extensionLength = strlen(extension);
 
   strings[count++] = path;
-  if (extensionLength)
-    if ((pathLength < extensionLength) ||
-        (strcmp(&path[pathLength-extensionLength], extension) != 0))
-      strings[count++] = extension;
-
+  if (!hasFileExtension(path, extension)) strings[count++] = extension;
   return joinStrings(strings, count);
 }
 

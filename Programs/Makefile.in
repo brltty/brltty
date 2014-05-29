@@ -793,7 +793,7 @@ install-xbrlapi: xbrlapi$X install-program-directory install-gdm-autostart-direc
 	$(INSTALL_PROGRAM) xbrlapi$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_DATA) $(SRC_TOP)$(PGM_DIR)/xbrlapi.desktop $(INSTALL_GDM_AUTOSTART_DIRECTORY)
 
-install-tables: $(INSTALL_TEXT_TABLES) $(INSTALL_ATTRIBUTES_TABLES) $(INSTALL_CONTRACTION_TABLES) install-key-tables install-help-files
+install-tables: $(INSTALL_TEXT_TABLES) $(INSTALL_ATTRIBUTES_TABLES) $(INSTALL_CONTRACTION_TABLES) install-keyboard-key-tables install-braille-key-tables
 
 install-text-tables: install-text-tables-directory
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(TEXT_TABLE_SUBDIRECTORY)/*$(TEXT_TABLE_EXTENSION) $(INSTALL_TEXT_TABLES_DIRECTORY)
@@ -801,16 +801,25 @@ install-text-tables: install-text-tables-directory
 
 install-attributes-tables: install-attributes-tables-directory
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(ATTRIBUTES_TABLE_SUBDIRECTORY)/*$(ATTRIBUTES_TABLE_EXTENSION) $(INSTALL_ATTRIBUTES_TABLES_DIRECTORY)
+	#$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(ATTRIBUTES_TABLE_SUBDIRECTORY)/*$(ATTRIBUTES_SUBTABLE_EXTENSION) $(INSTALL_ATTRIBUTES_TABLES_DIRECTORY)
 
 install-contraction-tables: install-contraction-tables-directory
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(CONTRACTION_TABLE_SUBDIRECTORY)/*$(CONTRACTION_TABLE_EXTENSION) $(INSTALL_CONTRACTION_TABLES_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(CONTRACTION_TABLE_SUBDIRECTORY)/*$(CONTRACTION_SUBTABLE_EXTENSION) $(INSTALL_CONTRACTION_TABLES_DIRECTORY)
 
-install-key-tables: install-tables-directory
-	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.kt[bi] $(INSTALL_TABLES_DIRECTORY)
+install-keyboard-key-tables: install-keyboard-key-tables-directory
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(KEYBOARD_KEY_TABLE_SUBDIRECTORY)/*$(KEY_TABLE_EXTENSION) $(INSTALL_KEYBOARD_KEY_TABLES_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(KEYBOARD_KEY_TABLE_SUBDIRECTORY)/*$(KEY_SUBTABLE_EXTENSION) $(INSTALL_KEYBOARD_KEY_TABLES_DIRECTORY)
 
-install-help-files: install-tables-directory
-	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.txt $(INSTALL_TABLES_DIRECTORY)
+install-braille-key-tables: install-braille-key-tables-directory
+	cd $(SRC_TOP)$(TBL_DIR)/$(BRAILLE_KEY_TABLE_SUBDIRECTORY) && \
+	set -- */*$(KEY_TABLE_EXTENSION) */*$(KEY_SUBTABLE_EXTENSION) */*$(KEY_HELP_EXTENSION) && \
+	for file; do \
+	driver=`dirname $$file` && \
+	target=$(INSTALL_BRAILLE_KEY_TABLES_DIRECTORY)/$$driver && \
+	$(INSTALL_DIRECTORY) $$target && \
+	$(INSTALL_DATA) $$file $$target; \
+	done
 
 install-drivers: $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS) install-drivers-directory
 	$(INSTALL_PROGRAM) $(BLD_TOP)$(DRV_DIR)/*.$(MOD_EXT) $(INSTALL_DRIVERS_DIRECTORY)
@@ -907,10 +916,10 @@ uninstall-tables:
 	-rm -f -r $(INSTALL_TEXT_TABLES_DIRECTORY)
 	-rm -f -r $(INSTALL_ATTRIBUTES_TABLES_DIRECTORY)
 	-rm -f -r $(INSTALL_CONTRACTION_TABLES_DIRECTORY)
-	-rm -f $(INSTALL_TABLES_DIRECTORY)/*.[k]t[bi]
-	-rm -f $(INSTALL_TABLES_DIRECTORY)/brl-*.txt
-	-[ ! -d $(INSTALL_WRITABLE_DIRECTORY) ] || rmdir $(INSTALL_WRITABLE_DIRECTORY)
+	-rm -f -r $(INSTALL_KEYBOARD_KEY_TABLES_DIRECTORY)
+	-rm -f -r $(INSTALL_BRAILLE_KEY_TABLES_DIRECTORY)
 	-[ ! -d $(INSTALL_TABLES_DIRECTORY) ] || rmdir $(INSTALL_TABLES_DIRECTORY)
+	-[ ! -d $(INSTALL_WRITABLE_DIRECTORY) ] || rmdir $(INSTALL_WRITABLE_DIRECTORY)
 
 uninstall-drivers: $(UNINSTALL_API_LIBRARIES)
 	-rm -f $(INSTALL_DRIVERS_DIRECTORY)/$(LIB_NAME)*

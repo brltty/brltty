@@ -1547,3 +1547,40 @@ char *
 makeKeyTablePath (const char *directory, const char *name) {
   return makeFilePath(directory, name, KEY_TABLE_EXTENSION);
 }
+
+char *
+makeKeyboardKeyTablePath (const char *directory, const char *name) {
+  char *subdirectory = makePath(directory, KEYBOARD_KEY_TABLE_SUBDIRECTORY);
+
+  if (subdirectory) {
+    char *file = makeKeyTablePath(subdirectory, name);
+
+    free(subdirectory);
+    if (file) return file;
+  }
+
+  return NULL;
+}
+
+char *
+makeBrailleKeyTablePath (const char *directory, const char *driver, const char *name) {
+  char *brailleSubdirectory = makePath(directory, BRAILLE_KEY_TABLE_SUBDIRECTORY);
+
+  if (brailleSubdirectory) {
+    char *driverSubdirectory = makePath(brailleSubdirectory, driver);
+
+    free(brailleSubdirectory);
+    brailleSubdirectory = NULL;
+
+    if (driverSubdirectory) {
+      char *tableFile = makeKeyTablePath(driverSubdirectory, name);
+
+      free(driverSubdirectory);
+      driverSubdirectory = NULL;
+
+      if (tableFile) return tableFile;
+    }
+  }
+
+  return NULL;
+}

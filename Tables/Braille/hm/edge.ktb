@@ -1,0 +1,138 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2014 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+title HIMS Braille Edge
+
+
+####################
+# Default Bindings #
+####################
+
+bind RoutingKey ROUTE
+bind LeftPadLeft+LeftPadRight CSRJMP_VERT
+
+bind LeftScrollUp LNUP
+bind LeftScrollDown LNDN
+bind RightScrollUp FWINLT
+bind RightScrollDown FWINRT
+
+bind LeftScrollUp+RightScrollUp TOP
+bind LeftScrollDown+RightScrollDown BOT
+bind LeftScrollUp+LeftScrollDown LNBEG
+bind RightScrollUp+RightScrollDown TIME
+
+bind LeftScrollUp+LeftScrollDown+RightScrollUp PRPGRPH
+bind LeftScrollUp+LeftScrollDown+RightScrollDown NXPGRPH
+
+bind RightScrollUp+RightScrollDown+LeftScrollUp PRPROMPT
+bind RightScrollUp+RightScrollDown+LeftScrollDown NXPROMPT
+
+bind LeftScrollUp+RightScrollDown SIXDOTS+off
+bind LeftScrollDown+RightScrollUp SIXDOTS+on
+
+bind LeftScrollUp+LeftScrollDown+RightScrollUp+RightScrollDown FREEZE
+
+bind F1 HELP
+bind F2 LEARN
+bind F3 INFO
+bind F4 PREFMENU
+
+bind F5 DISPMD
+bind F6 BACK
+bind F7 HOME
+bind F8 CSRTRK
+
+bind LeftPadUp ATTRUP
+bind LeftPadDown ATTRDN
+bind LeftPadLeft PRSEARCH
+bind LeftPadRight NXSEARCH
+
+bind RightPadUp PRDIFLN
+bind RightPadDown NXDIFLN
+bind RightPadLeft FWINLTSKIP
+bind RightPadRight FWINRTSKIP
+
+bind LeftPadLeft+LeftPadUp CONTEXT+5 # PRDIFCHAR
+bind LeftPadLeft+LeftPadDown CONTEXT+6 # NXDIFCHAR
+
+bind LeftPadRight+LeftPadUp CONTEXT+7 # PRINDENT
+bind LeftPadRight+LeftPadDown CONTEXT+8 # NXINDENT
+
+bind RightPadLeft+RightPadUp CONTEXT+1 # CLIP_NEW
+bind RightPadLeft+RightPadDown CONTEXT+2 # CLIP_APPEND
+
+bind RightPadRight+RightPadUp CONTEXT+3 # COPY_LINE
+bind RightPadRight+RightPadDown CONTEXT+4 # COPY_RECT
+bind RightPadLeft+RightPadRight PASTE
+
+bind LeftPadUp+LeftPadDown CONTEXT+9 # SETLEFT
+bind RightPadUp+RightPadDown CONTEXT+10 # DESCCHAR
+
+include dots.kti
+map F4 META
+map F5 CONTROL
+
+
+#################
+# Menu Bindings #
+#################
+
+context menu
+
+bind LeftScrollUp MENU_PREV_ITEM
+bind LeftScrollDown MENU_NEXT_ITEM
+bind RightScrollUp MENU_PREV_SETTING
+bind RightScrollDown MENU_NEXT_SETTING
+
+bind LeftScrollUp+LeftScrollDown FWINLT
+bind RightScrollUp+RightScrollDown FWINRT
+
+bind LeftScrollUp+RightScrollUp MENU_FIRST_ITEM
+bind LeftScrollDown+RightScrollDown MENU_LAST_ITEM
+
+
+context 1
+bind RoutingKey CLIP_NEW
+
+context 2
+bind RoutingKey CLIP_APPEND
+
+context 3
+bind RoutingKey COPY_LINE
+
+context 4
+bind RoutingKey COPY_RECT
+
+context 5
+bind RoutingKey PRDIFCHAR
+
+context 6
+bind RoutingKey NXDIFCHAR
+
+context 7
+bind RoutingKey PRINDENT
+
+context 8
+bind RoutingKey NXINDENT
+
+context 9
+bind RoutingKey SETLEFT
+
+context 10
+bind RoutingKey DESCCHAR
+
