@@ -170,7 +170,7 @@ cd man
 for source in */*
 do
    target="${source/%?/txt}"
-   COLUMNS=80 LC_ALL=C man "${source}" | ul -t dumb | expand | uniq >"${target}"
+   MANWIDTH=80 LC_ALL=C man "${source}" | ul -t dumb | expand | uniq >"${target}"
    rm "${source}"
    convertTextFile "${target}"
 done
