@@ -704,36 +704,16 @@ changeKeyboardKeyTable (const char *name) {
   KeyTable *table = NULL;
 
   if (*name) {
-    char *file;
+    char *path = makeKeyboardKeyTablePath(opt_tablesDirectory, name);
 
-    if ((file = ensureKeyTableExtension(name))) {
-      char *path;
+    if (path) {
+      logMessage(LOG_DEBUG, "compiling key table: %s", path);
 
-      if (file == locatePathName(file)) {
-        const char *prefix = "kbd-";
-
-        if (strncmp(file, prefix, strlen(prefix)) != 0) {
-          const char *strings[] = {prefix, file};
-          char *newFile = joinStrings(strings, ARRAY_COUNT(strings));
-
-          if (newFile) {
-            free(file);
-            file = newFile;
-          }
-        }
+      if (!(table = compileKeyTable(path, KEY_NAME_TABLES(keyboard)))) {
+        logMessage(LOG_ERR, "%s: %s", gettext("cannot compile key table"), path);
       }
 
-      if ((path = makePath(opt_tablesDirectory, file))) {
-        logMessage(LOG_DEBUG, "compiling key table: %s", path);
-
-        if (!(table = compileKeyTable(path, KEY_NAME_TABLES(keyboard)))) {
-          logMessage(LOG_ERR, "%s: %s", gettext("cannot compile key table"), path);
-        }
-
-        free(path);
-      }
-
-      free(file);
+      free(path);
     }
 
     if (!table) return 0;
