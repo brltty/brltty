@@ -382,13 +382,13 @@ BEGIN_KEY_NAME_TABLES(el2d_80s)
   KEY_NAME_TABLE(statusKeys2),
 END_KEY_NAME_TABLES
 
-BEGIN_KEY_NAME_TABLES(elba_trio_20)
+BEGIN_KEY_NAME_TABLES(elb_tr_20)
   KEY_NAME_TABLE(bar),
   KEY_NAME_TABLE(keys),
   KEY_NAME_TABLE(routingKeys1),
 END_KEY_NAME_TABLES
 
-BEGIN_KEY_NAME_TABLES(elba_trio_32)
+BEGIN_KEY_NAME_TABLES(elb_tr_32)
   KEY_NAME_TABLE(bar),
   KEY_NAME_TABLE(keys),
   KEY_NAME_TABLE(routingKeys1),
@@ -434,8 +434,8 @@ DEFINE_KEY_TABLE(el80s)
 DEFINE_KEY_TABLE(trio)
 DEFINE_KEY_TABLE(el70s)
 DEFINE_KEY_TABLE(el2d_80s)
-DEFINE_KEY_TABLE(elba_trio_20)
-DEFINE_KEY_TABLE(elba_trio_32)
+DEFINE_KEY_TABLE(elb_tr_20)
+DEFINE_KEY_TABLE(elb_tr_32)
 DEFINE_KEY_TABLE(el40c)
 DEFINE_KEY_TABLE(el60c)
 DEFINE_KEY_TABLE(el80c)
@@ -460,8 +460,8 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(trio),
   &KEY_TABLE_DEFINITION(el70s),
   &KEY_TABLE_DEFINITION(el2d_80s),
-  &KEY_TABLE_DEFINITION(elba_trio_20),
-  &KEY_TABLE_DEFINITION(elba_trio_32),
+  &KEY_TABLE_DEFINITION(elb_tr_20),
+  &KEY_TABLE_DEFINITION(elb_tr_32),
   &KEY_TABLE_DEFINITION(el40c),
   &KEY_TABLE_DEFINITION(el60c),
   &KEY_TABLE_DEFINITION(el80c),
@@ -564,12 +564,12 @@ static const ModelEntry modelTable[] = {
     PM_BAR(0, 0, 1, 1)
   },
 
-  { PM_MODEL_IDENTITY(92, elba_trio_20, "BrailleX Elba (Trio 20)", 2),
+  { PM_MODEL_IDENTITY(92, elb_tr_20, "BrailleX Elba (Trio 20)", 2),
     PM_CELL_COUNTS(20, 0),
     PM_BAR(0, 0, 1, 1)
   },
 
-  { PM_MODEL_IDENTITY(93, elba_trio_32, "BrailleX Elba (Trio 32)", 2),
+  { PM_MODEL_IDENTITY(93, elb_tr_32, "BrailleX Elba (Trio 32)", 2),
     PM_CELL_COUNTS(32, 0),
     PM_BAR(0, 0, 1, 1)
   },

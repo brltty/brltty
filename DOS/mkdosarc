@@ -26,7 +26,7 @@ defaultInstallDirectory="BRLTTY"
 . "`dirname "${0}"`/../prologue.sh"
 addProgramOption a string.name archiveName "specify archive name (default is ${defaultArchiveName})"
 addProgramOption i string.directory installDirectory "specify installation directory on target system (default is ${defaultInstallDirectory})"
-addProgramOption n flag reportShortNameCollisions "report short name conflicts"
+addProgramOption n flag reportShortNameCollisions "report short name collisions"
 addProgramOption o flag overwriteArchive "overwrite existing archive"
 addProgramOption s flag invokeShell "invoke interactive shell to inspect/modify result"
 addProgramParameter source sourceDirectory "top-level directory of source tree"
@@ -168,13 +168,13 @@ find . -type f -print |
 
       if [ "${extension}" = "${name}" ]
       then
-         programMessage "file with no extension: ${file}"
+         programMessage "file with no extension: ${file#.}"
       else
          case "${extension}"
          in
             txt | html | htm | cfg | [tack]t[bi] | h) convertTextFile "${file}";;
             exe | pdf | doc);;
-            *) programMessage "unexpected file extension: ${file}";;
+            *) programMessage "unexpected file extension: ${file#.}";;
          esac
       fi
    done
