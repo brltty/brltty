@@ -19,33 +19,6 @@
 readonly initialDirectory="$(pwd)"
 readonly programName="$(basename "${0}")"
 
-programMessage() {
-   local message="${1}"
-
-   [ -z "${message}" ] || echo >&2 "${programName}: ${message}"
-}
-
-syntaxError() {
-   local message="${1}"
-
-   programMessage "${message}"
-   exit 2
-}
-
-semanticError() {
-   local message="${1}"
-
-   programMessage "${message}"
-   exit 3
-}
-
-internalError() {
-   local message="${1}"
-
-   programMessage "${message}"
-   exit 4
-}
-
 getVariable() {
    local __variable__="${1}"
 
@@ -57,6 +30,19 @@ setVariable() {
    local value="${2}"
 
    eval "${__variable__}"'="${value}"'
+}
+
+defineEnumeration() {
+   local prefix="${1}"
+   shift 1
+
+   local value=0
+   for name
+   do
+      local variable="${prefix}${name}"
+      readonly "${variable}"="${value}"
+      value=$((value + 1))
+   done
 }
 
 stringHead() {
@@ -121,6 +107,51 @@ stringWrapped() {
 
    result="${result} $(stringQuoted "${string}")"
    echo "${result}"
+}
+
+programMessage() {
+   local message="${1}"
+
+   [ -z "${message}" ] || echo >&2 "${programName}: ${message}"
+}
+
+defineEnumeration programLogLevel_ error warning task step detail
+programLogLevel=$((${programLogLevel_task}))
+
+logMessage() {
+   local level="${1}"
+   local message="${2}"
+
+   local variable="programLogLevel_${level}"
+   local value=$((${variable}))
+
+   [ -n "${value}" ] || {
+      programMessage "unknown log level: ${level}"
+      value=0
+   }
+
+   [ "${value}" -gt "${programLogLevel}" ] || programMessage "${message}"
+}
+
+syntaxError() {
+   local message="${1}"
+
+   logMessage error "${message}"
+   exit 2
+}
+
+semanticError() {
+   local message="${1}"
+
+   logMessage error "${message}"
+   exit 3
+}
+
+internalError() {
+   local message="${1}"
+
+   logMessage error "${message}"
+   exit 4
 }
 
 verifyProgram() {
@@ -347,7 +378,9 @@ showProgramUsageSummary() {
    done
 }
 
-addProgramOption h flag showProgramUsageSummary "show usage summary (this output), and then exit"
+addProgramOption h flag programOption_showUsageSummary "show usage summary (this output), and then exit"
+addProgramOption q counter programOption_quietCount "decrease output verbosity"
+addProgramOption v counter programOption_verboseCount "increase output verbosity"
 
 parseProgramOptions() {
    local letter
@@ -380,7 +413,7 @@ readonly parseProgramOptions='
    parseProgramOptions "${@}"
    shift $((OPTIND - 1))
 
-   if "${showProgramUsageSummary}"
+   if "${programOption_showUsageSummary}"
    then
       showProgramUsageSummary
       exit 0
@@ -397,6 +430,7 @@ readonly parseProgramOptions='
    unset programParameterIndex
 
    [ "${#}" -eq 0 ] || syntaxError "too many parameters"
+   programLogLevel=$((programLogLevel + programOption_verboseCount - programOption_quietCount))
 '
 
 programDirectory="$(dirname "${0}")"
