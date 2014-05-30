@@ -16,8 +16,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-initialDirectory="$(pwd)"
-programName="$(basename "${0}")"
+readonly initialDirectory="$(pwd)"
+readonly programName="$(basename "${0}")"
 
 programMessage() {
    local message="${1}"
@@ -97,6 +97,30 @@ stringQuoted() {
    local replacement="'"'"'"'"'"'"'"
    string="$(stringReplaceAll "${string}" "${pattern}" "${replacement}")"
    echo "'${string}'"
+}
+
+stringWrapped() {
+   local string="${1}"
+   local width="${2}"
+
+   local result=""
+
+   while [ "${#string}" -gt "${width}" ]
+   do
+      local head="$(stringHead "${string}" $((width + 1)))"
+      head="${head% *}"
+
+      [ "${#head}" -le "${width}" ] || {
+         head="${string%% *}"
+         [ "${head}" != "${string}" ] || break
+      }
+
+      result="${result} $(stringQuoted "${head}")"
+      string="$(stringTail "${string}" $((${#head} + 1)))"
+   done
+
+   result="${result} $(stringQuoted "${string}")"
+   echo "${result}"
 }
 
 verifyProgram() {
@@ -233,32 +257,30 @@ addProgramUsageText() {
    local width="${2}"
    local prefix="${3}"
 
-   local indent="${#prefix}"
-   local length=$((width - indent))
+   width=$((width - ${#prefix}))
 
-   [ "${length}" -gt 0 ] || {
-      addProgramUsageLine "${prefix}"
-      prefix="$(stringTail "${prefix}" $((-length + 1)))"
-      prefix="$(stringReplaceAll "${prefix}" "." " ")"
-      length=1
-   }
-
-   while [ "${#text}" -gt "${length}" ]
+   while [ "${width}" -lt 1 ]
    do
-      local head="$(stringHead "${text}" $((length + 1)))"
-      head="${head% *}"
-
-      [ "${#head}" -le "${length}" ] || {
-         head="${text%% *}"
-         [ "${head}" != "${text}" ] || break
-      }
-
-      addProgramUsageLine "${prefix}${head}"
-      text="$(stringTail "${text}" $((${#head} + 1)))"
-      prefix="$(stringReplaceAll "${prefix}" "." " ")"
+      [ "${prefix%  }" != "${prefix}" ] || break
+      prefix="${prefix%?}"
+      width=$((width + 1))
    done
 
-   addProgramUsageLine "${prefix}${text}"
+   local indent="$(stringReplaceAll "${prefix}" '.' ' ')"
+
+   [ "${width}" -gt 0 ] || {
+      addProgramUsageLine "${prefix}"
+      indent="$(stringTail "${indent}" $((-width + 1)))"
+      prefix="${indent}"
+      width=1
+   }
+
+   eval set -- $(stringWrapped "${text}" "${width}")
+   for line
+   do
+      addProgramUsageLine "${prefix}${line}"
+      prefix="${indent}"
+   done
 }
 
 showProgramUsageSummary() {
@@ -354,7 +376,7 @@ parseProgramOptions() {
    done
 }
 
-parseProgramOptions='
+readonly parseProgramOptions='
    parseProgramOptions "${@}"
    shift $((OPTIND - 1))
 
@@ -378,4 +400,4 @@ parseProgramOptions='
 '
 
 programDirectory="$(dirname "${0}")"
-programDirectory="$(resolveDirectory "${programDirectory}")"
+readonly programDirectory="$(resolveDirectory "${programDirectory}")"
