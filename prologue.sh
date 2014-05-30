@@ -47,25 +47,55 @@ internalError() {
 }
 
 getVariable() {
-   local variable="${1}"
+   local __variable__="${1}"
 
-   eval 'echo "${'"${variable}"'}"'
+   eval 'echo "${'"${__variable__}"'}"'
 }
 
 setVariable() {
-   local variable="${1}"
+   local __variable__="${1}"
    local value="${2}"
 
-   eval "${variable}"'="${value}"'
+   eval "${__variable__}"'="${value}"'
 }
 
-quoteString() {
-return 0
+stringHead() {
+   local string="${1}"
+   local length="${2}"
+
+   expr substr "${string}" 1 "${length}"
+}
+
+stringTail() {
+   local string="${1}"
+   local start="${2}"
+
+   expr substr "${string}" $((start + 1)) $((${#string} - start))
+}
+
+stringReplace() {
+   local string="${1}"
+   local pattern="${2}"
+   local replacement="${3}"
+   local flags="${4}"
+
+   echo "${string}" | sed -e "s/${pattern}/${replacement}/${flags}"
+}
+
+stringReplaceAll() {
+   local string="${1}"
+   local pattern="${2}"
+   local replacement="${3}"
+
+   stringReplace "${string}" "${pattern}" "${replacement}" "g"
+}
+
+stringQuoted() {
    local string="${1}"
 
    local pattern="'"
    local replacement="'"'"'"'"'"'"'"
-   string="${string//${pattern}/${replacement}}"
+   string="$(stringReplaceAll "${string}" "${pattern}" "${replacement}")"
    echo "'${string}'"
 }
 
@@ -156,7 +186,7 @@ addProgramOption() {
    local variable="${3}"
    local usage="${4}"
 
-   [ "$(expr "${letter}" : '^[[:alnum:]]*$')" -eq 1 ] || internalError "invalid program option: ${letter}"
+   [ "$(expr "${letter}" : '^[[:alnum:]]*$')" -eq 1 ] || internalError "invalid program option: -${letter}"
    [ -z "$(getVariable "programOptionType_${letter}")" ] || internalError "duplicate program option definition: -${letter}"
 
    local operand
@@ -199,7 +229,6 @@ addProgramUsageLine() {
 }
 
 addProgramUsageText() {
-return 0
    local text="${1}"
    local width="${2}"
    local prefix="${3}"
@@ -209,14 +238,14 @@ return 0
 
    [ "${length}" -gt 0 ] || {
       addProgramUsageLine "${prefix}"
-      prefix="${prefix:-length+1}"
-      prefix="${prefix//?/ }"
+      prefix="$(stringTail "${prefix}" $((-length + 1)))"
+      prefix="$(stringReplaceAll "${prefix}" "." " ")"
       length=1
    }
 
    while [ "${#text}" -gt "${length}" ]
    do
-      local head="${text:0:length+1}"
+      local head="$(stringHead "${text}" $((length + 1)))"
       head="${head% *}"
 
       [ "${#head}" -le "${length}" ] || {
@@ -225,8 +254,8 @@ return 0
       }
 
       addProgramUsageLine "${prefix}${head}"
-      text="${text:${#head}+1}"
-      prefix="${prefix//?/ }"
+      text="$(stringTail "${text}" $((${#head} + 1)))"
+      prefix="$(stringReplaceAll "${prefix}" "." " ")"
    done
 
    addProgramUsageLine "${prefix}${text}"
@@ -308,14 +337,15 @@ parseProgramOptions() {
         \?) syntaxError "unrecognized option: -${OPTARG}";;
          :) syntaxError "missing operand: -${OPTARG}";;
 
-         *) eval 'local variable="${programOptionVariable_'"${letter}"'}"'
-            eval 'local type="${programOptionType_'"${letter}"'}"'
+         *) local variable type
+            setVariable variable "$(getVariable "programOptionVariable_${letter}")"
+            setVariable type "$(getVariable "programOptionType_${letter}")"
 
             case "${type}"
             in
-               counter) let "${variable} += 1";;
+               counter) setVariable "${variable}" $((${variable} + 1));;
                flag) setVariable "${variable}" true;;
-               list) setVariable "${variable}" "$(getVariable "${variable}") $(quoteString "${OPTARG}")";;
+               list) setVariable "${variable}" "$(getVariable "${variable}") $(stringQuoted "${OPTARG}")";;
                string) setVariable "${variable}" "${OPTARG}";;
                *) internalError "unimplemented program option type: ${type} (-${letter})";;
             esac
@@ -337,6 +367,7 @@ parseProgramOptions='
    programParameterIndex=0
    while [ "${programParameterIndex}" -lt "${programParameterCount}" ]
    do
+      [ "${#}" -gt 0 ] || syntaxError "$(getVariable "programParameterLabel_${programParameterIndex}") not specified"
       setVariable "$(getVariable "programParameterVariable_${programParameterIndex}")" "${1}"
       shift 1
       programParameterIndex=$((programParameterIndex + 1))
