@@ -16,107 +16,83 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-initialDirectory=`pwd`
-programName=`basename "${0}"`
+initialDirectory="$(pwd)"
+programName="$(basename "${0}")"
 
-function programMessage {
-   typeset message="${1}"
+programMessage() {
+   local message="${1}"
 
    [ -z "${message}" ] || echo >&2 "${programName}: ${message}"
 }
 
-function syntaxError {
-   typeset message="${1}"
+syntaxError() {
+   local message="${1}"
 
-   [ "${#}" -eq 0 ] || programMessage "${message}"
+   programMessage "${message}"
    exit 2
 }
 
-function semanticError {
-   typeset message="${1}"
+semanticError() {
+   local message="${1}"
 
    programMessage "${message}"
    exit 3
 }
 
-function internalError {
-   typeset message="${1}"
+internalError() {
+   local message="${1}"
 
    programMessage "${message}"
    exit 4
 }
 
-if [ "${BASH+set}" = "set" ]
-then
-   function getVariable {
-      typeset variable="${1}"
+getVariable() {
+   local variable="${1}"
 
-      echo "${!variable}"
-   }
-elif [ "${KSH_VERSION+set}" = "set" ]
-then
-   function getVariable {
-      typeset -n variable="${1}"
+   eval 'echo "${'"${variable}"'}"'
+}
 
-      echo "${variable}"
-   }
-fi
-
-function setVariable {
-   typeset variable="${1}"
-   typeset value="${2}"
+setVariable() {
+   local variable="${1}"
+   local value="${2}"
 
    eval "${variable}"'="${value}"'
 }
 
-function setElement {
-   typeset array="${1}"
-   typeset index="${2}"
-   typeset value="${3}"
+quoteString() {
+return 0
+   local string="${1}"
 
-   setVariable "${array}[${index}]" "${value}"
-}
-
-function appendElement {
-   typeset array="${1}"
-   typeset value="${2}"
-
-   setElement "${array}" "\${#${array}[*]}" "${value}"
-}
-
-function quoteString {
-   typeset string="${1}"
-
-   typeset pattern="'"
-   typeset replacement="'"'"'"'"'"'"'"
+   local pattern="'"
+   local replacement="'"'"'"'"'"'"'"
    string="${string//${pattern}/${replacement}}"
    echo "'${string}'"
 }
 
-function verifyProgram {
-   typeset path="${1}"
+verifyProgram() {
+   local path="${1}"
 
    [ -e "${path}" ] || semanticError "program not found: ${path}"
    [ -f "${path}" ] || semanticError "not a file: ${path}"
    [ -x "${path}" ] || semanticError "not executable: ${path}"
 }
 
-function testDirectory {
-   typeset path="${1}"
+testDirectory() {
+   local path="${1}"
 
    [ -e "${path}" ] || return 1
    [ -d "${path}" ] || semanticError "not a directory: ${path}"
    return 0
 }
 
-function verifyInputDirectory {
-   typeset path="${1}"
+verifyInputDirectory() {
+   local path="${1}"
 
    testDirectory "${path}" || semanticError "directory not found: ${path}"
 }
 
-function verifyOutputDirectory {
-   typeset path="${1}"
+verifyOutputDirectory() {
+   local path="${1}"
 
    if testDirectory "${path}"
    then
@@ -127,14 +103,14 @@ function verifyOutputDirectory {
    fi
 }
 
-function resolveDirectory {
-   typeset path="${1}"
+resolveDirectory() {
+   local path="${1}"
 
    (cd "${path}" && pwd)
 }
 
-function needTemporaryDirectory {
-   function cleanup {
+needTemporaryDirectory() {
+   cleanup() {
       set +e
       cd /
       [ -z "${temporaryDirectory}" ] || rm -f -r -- "${temporaryDirectory}"
@@ -142,32 +118,30 @@ function needTemporaryDirectory {
    trap "cleanup" 0
 
    umask 022
-   [ -n "${TMPDIR}" -a -d "${TMPDIR}" -a -r "${TMPDIR}" -a -w "${TMPDIR}" -a -x "${TMPDIR}" ] || {
-      TMPDIR="/tmp"
-      export TMPDIR
-   }
-   temporaryDirectory=`mktemp -d "${TMPDIR}/${programName}.XXXXXX"` && cd "${temporaryDirectory}" || exit "${?}"
+   [ -n "${TMPDIR}" -a -d "${TMPDIR}" -a -r "${TMPDIR}" -a -w "${TMPDIR}" -a -x "${TMPDIR}" ] || export TMPDIR="/tmp"
+   temporaryDirectory="$(mktemp -d "${TMPDIR}/${programName}.XXXXXX")" && cd "${temporaryDirectory}" || exit "${?}"
 }
 
 programParameterCount=0
 programParameterLabelWidth=0
 
-function addProgramParameter {
-   typeset label="${1}"
-   typeset variable="${2}"
-   typeset usage="${3}"
+addProgramParameter() {
+   local label="${1}"
+   local variable="${2}"
+   local usage="${3}"
 
    setVariable "programParameterLabel_${programParameterCount}" "${label}"
    setVariable "programParameterVariable_${programParameterCount}" "${variable}"
    setVariable "programParameterUsage_${programParameterCount}" "${usage}"
 
-   typeset length="${#label}"
+   local length="${#label}"
    [ "${length}" -le "${programParameterLabelWidth}" ] || programParameterLabelWidth="${length}"
 
    setVariable "${variable}" ""
-   ((programParameterCount += 1))
+   programParameterCount=$((programParameterCount + 1))
 }
 
+programOptionLetters=""
 programOptionString=""
 programOptionOperandWidth=0
 
@@ -176,16 +150,16 @@ programOptionDefault_flag=false
 programOptionDefault_list=""
 programOptionDefault_string=""
 
-function addProgramOption {
-   typeset letter="${1}"
-   typeset type="${2}"
-   typeset variable="${3}"
-   typeset usage="${4}"
+addProgramOption() {
+   local letter="${1}"
+   local type="${2}"
+   local variable="${3}"
+   local usage="${4}"
 
    [ "$(expr "${letter}" : '^[[:alnum:]]*$')" -eq 1 ] || internalError "invalid program option: ${letter}"
    [ -z "$(getVariable "programOptionType_${letter}")" ] || internalError "duplicate program option definition: -${letter}"
 
-   typeset operand
+   local operand
    case "${type}"
    in
       flag | counter)
@@ -206,27 +180,35 @@ function addProgramOption {
    setVariable "programOptionOperand_${letter}" "${operand}"
    setVariable "programOptionUsage_${letter}" "${usage}"
 
-   typeset default="$(getVariable "programOptionDefault_${type}")"
+   local default="$(getVariable "programOptionDefault_${type}")"
    setVariable "${variable}" "${default}"
 
-   typeset length="${#operand}"
+   local length="${#operand}"
    [ "${length}" -le "${programOptionOperandWidth}" ] || programOptionOperandWidth="${length}"
 
+   programOptionLetters="${programOptionLetters} ${letter}"
    programOptionString="${programOptionString}${letter}"
    [ "${length}" -eq 0 ] || programOptionString="${programOptionString}:"
 }
 
-function addProgramUsageText {
-   typeset linesArray="${1}"
-   typeset text="${2}"
-   typeset width="${3}"
-   typeset prefix="${4}"
+addProgramUsageLine() {
+   local line="${1}"
 
-   typeset indent="${#prefix}"
-   typeset length=$((width - indent))
+   setVariable "programUsageLine_${programUsageLineCount}" "${line}"
+   programUsageLineCount=$((programUsageLineCount + 1))
+}
 
-   ((length > 0)) || {
-      appendElement "${linesArray}" "${prefix}"
+addProgramUsageText() {
+return 0
+   local text="${1}"
+   local width="${2}"
+   local prefix="${3}"
+
+   local indent="${#prefix}"
+   local length=$((width - indent))
+
+   [ "${length}" -gt 0 ] || {
+      addProgramUsageLine "${prefix}"
       prefix="${prefix:-length+1}"
       prefix="${prefix//?/ }"
       length=1
@@ -234,7 +216,7 @@ function addProgramUsageText {
 
    while [ "${#text}" -gt "${length}" ]
    do
-      typeset head="${text:0:length+1}"
+      local head="${text:0:length+1}"
       head="${head% *}"
 
       [ "${#head}" -le "${length}" ] || {
@@ -242,83 +224,82 @@ function addProgramUsageText {
          [ "${head}" != "${text}" ] || break
       }
 
-      appendElement "${linesArray}" "${prefix}${head}"
+      addProgramUsageLine "${prefix}${head}"
       text="${text:${#head}+1}"
       prefix="${prefix//?/ }"
    done
 
-   appendElement "${linesArray}" "${prefix}${text}"
+   addProgramUsageLine "${prefix}${text}"
 }
 
-function showProgramUsageSummary {
-   programUsageLines=()
-   typeset options="${programOptionString//:/}"
-   typeset count="${#options}"
-   typeset width="${COLUMNS:-72}"
+showProgramUsageSummary() {
+   programUsageLineCount=0
+   set ${programOptionLetters}
+   local width="${COLUMNS:-72}"
 
-   typeset line="usage: ${programName}"
-   [ "${count}" -eq 0 ] || line="${line} [-option ...]"
+   local line="Usage: ${programName}"
+   [ "${#}" -eq 0 ] || line="${line} [-option ...]"
 
-   typeset index=0
-   while ((index < programParameterCount))
+   local index=0
+   while [ "${index}" -lt "${programParameterCount}" ]
    do
       line="${line} $(getVariable "programParameterLabel_${index}")"
-      ((index += 1))
+      index=$((index + 1))
    done
 
-   appendElement programUsageLines "${line}"
+   addProgramUsageLine "${line}"
 
    [ "${programParameterCount}" -eq 0 ] || {
-      appendElement programUsageLines "parameters:"
+      addProgramUsageLine "Parameters:"
 
-      typeset indent=$((programParameterLabelWidth + 2))
-      typeset index=0
+      local indent=$((programParameterLabelWidth + 2))
+      local index=0
 
-      while ((index < programParameterCount))
+      while [ "${index}" -lt "${programParameterCount}" ]
       do
-         typeset line="$(getVariable "programParameterLabel_${index}")"
+         local line="$(getVariable "programParameterLabel_${index}")"
 
          while [ "${#line}" -lt "${indent}" ]
          do
             line="${line} "
          done
 
-         addProgramUsageText programUsageLines "$(getVariable "programParameterUsage_${index}")" "${width}" "  ${line}"
-         ((index += 1))
+         addProgramUsageText "$(getVariable "programParameterUsage_${index}")" "${width}" "  ${line}"
+         index=$((index + 1))
       done
    }
 
-   [ "${count}" -eq 0 ] || {
-      appendElement programUsageLines "options:"
+   [ "${#}" -eq 0 ] || {
+      addProgramUsageLine "Options:"
 
-      typeset indent=$((3 + programOptionOperandWidth + 2))
-      typeset index=0
+      local indent=$((3 + programOptionOperandWidth + 2))
+      local letter
 
-      while ((index < count))
+      for letter
       do
-         typeset letter="${options:index:1}"
-         typeset line="-${letter} $(getVariable "programOptionOperand_${letter}")"
+         local line="-${letter} $(getVariable "programOptionOperand_${letter}")"
 
          while [ "${#line}" -lt "${indent}" ]
          do
             line="${line} "
          done
 
-         addProgramUsageText programUsageLines "$(getVariable "programOptionUsage_${letter}")" "${width}" "  ${line}"
-         ((index += 1))
+         addProgramUsageText "$(getVariable "programOptionUsage_${letter}")" "${width}" "  ${line}"
       done
    }
 
-   for line in "${programUsageLines[@]}"
+   local index=0
+   while [ "${index}" -lt "${programUsageLineCount}" ]
    do
-      echo "${line}"
+      getVariable "programUsageLine_${index}"
+      index=$((index + 1))
    done
 }
 
 addProgramOption h flag showProgramUsageSummary "show usage summary (this output), and then exit"
 
-function parseProgramOptions {
-   typeset letter
+parseProgramOptions() {
+   local letter
 
    while getopts ":${programOptionString}" letter
    do
@@ -327,8 +308,8 @@ function parseProgramOptions {
         \?) syntaxError "unrecognized option: -${OPTARG}";;
          :) syntaxError "missing operand: -${OPTARG}";;
 
-         *) eval 'typeset variable="${programOptionVariable_'"${letter}"'}"'
-            eval 'typeset type="${programOptionType_'"${letter}"'}"'
+         *) eval 'local variable="${programOptionVariable_'"${letter}"'}"'
+            eval 'local type="${programOptionType_'"${letter}"'}"'
 
             case "${type}"
             in
@@ -354,16 +335,16 @@ parseProgramOptions='
    fi
 
    programParameterIndex=0
-   while ((programParameterIndex < programParameterCount))
+   while [ "${programParameterIndex}" -lt "${programParameterCount}" ]
    do
       setVariable "$(getVariable "programParameterVariable_${programParameterIndex}")" "${1}"
       shift 1
-      ((programParameterIndex += 1))
+      programParameterIndex=$((programParameterIndex + 1))
    done
    unset programParameterIndex
 
    [ "${#}" -eq 0 ] || syntaxError "too many parameters"
 '
 
-programDirectory=`dirname "${0}"`
-programDirectory=`resolveDirectory "${programDirectory}"`
+programDirectory="$(dirname "${0}")"
+programDirectory="$(resolveDirectory "${programDirectory}")"
