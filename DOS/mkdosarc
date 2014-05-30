@@ -174,7 +174,16 @@ find . -print |
       name="${path##*/}"
       extension="${name##*.}"
 
-      if [ -f "${path}" ]
+      if [ "${name#*.*.}" != "${name}" ]
+      then
+         programMessage "name contains more than one dot: ${handle}"
+      elif [ "${name#.}" != "${name}" ]
+      then
+         programMessage "null name: ${handle}"
+      elif [ "${name%.}" != "${name}" ]
+      then
+         programMessage "null extension: ${handle}"
+      elif [ -f "${path}" ]
       then
          if [ "${extension}" = "${name}" ]
          then
