@@ -88,11 +88,16 @@ documentSubdirectory="doc"
 manualSubdirectory="${documentSubdirectory}/Manual"
 
 cd "${buildDirectory}"
+logMessage task "configuring build"
 "${sourceDirectory}/cfg-dos" --enable-relocatable-install --prefix="${installDirectory}"
+logMessage task "building programs"
 make -s all
 make -s -C Programs ktbtest.exe tunetest.exe
+logMessage task "creating documentation"
 make -s -C Documents
+logMessage task "installing files"
 make -s install
+logMessage task "updating files"
 
 cd "${installDirectory}/bin"
 rm brltty-config
@@ -160,10 +165,12 @@ do
 done
 
 ! "${invokeShell}" || {
+   logMessage task "invoking shell"
    cd "${installDirectory}"
    "${SHELL:-/bin/sh}" || :
 }
 
+logMessage task "checking files"
 cd "${installDirectory}"
 find . -print |
    while read path
@@ -176,38 +183,39 @@ find . -print |
 
       if [ "${name#*.*.}" != "${name}" ]
       then
-         programMessage "name contains more than one dot: ${handle}"
+         logMessage warning "name contains more than one dot: ${handle}"
       elif [ "${name#.}" != "${name}" ]
       then
-         programMessage "null name: ${handle}"
+         logMessage warning "null name: ${handle}"
       elif [ "${name%.}" != "${name}" ]
       then
-         programMessage "null extension: ${handle}"
+         logMessage warning "null extension: ${handle}"
       elif [ -f "${path}" ]
       then
          if [ "${extension}" = "${name}" ]
          then
-            programMessage "file without an extension: ${handle}"
+            logMessage warning "file without an extension: ${handle}"
          else
             case "${extension}"
             in
                txt | html | htm | cfg | [tack]t[bi] | h) convertTextFile "${path}";;
                exe | pdf | doc);;
-               *) programMessage "unexpected file extension: ${handle}";;
+               *) logMessage warning "unexpected file extension: ${handle}";;
             esac
          fi
       elif [ -d "${path}" ]
       then
          if [ "${extension}" != "${name}" ]
          then
-            programMessage "directory with an extension: ${handle}"
+            logMessage warning "directory with an extension: ${handle}"
          fi
       else
-         programMessage "special file: ${handle}"
+         logMessage warning "special file: ${handle}"
       fi
    done
 
 ! "${reportShortNameCollisions}" || {
+   logMessage task "checking for short name collisions"
    cd "${installDirectory}"
    find . -type d -print |
       while read directory
@@ -235,12 +243,15 @@ find . -print |
             then
                shortNames["${shortName}"]="${longName}"
             else
-               programMessage "short name collision: ${directory#.}: ${shortNames["${shortName}"]} & ${longName}"
+               logMessage warning "short name collision: ${directory#.}: ${shortNames["${shortName}"]} & ${longName}"
             fi
          done
       done
 }
 
+logMessage task "creating archive"
 cd "${installDirectory}/.."
 zip -q -r "${archivePath}" "${installDirectory##*/}"
+
+logMessage task "done"
 exit 0
