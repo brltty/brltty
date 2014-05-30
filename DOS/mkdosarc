@@ -25,8 +25,8 @@ defaultInstallDirectory="BRLTTY"
 
 . "`dirname "${0}"`/../prologue.sh"
 addProgramOption a string.name archiveName "specify archive name (default is ${defaultArchiveName})"
+addProgramOption c flag reportNameCollisions "report name collisions"
 addProgramOption i string.directory installDirectory "specify installation directory on target system (default is ${defaultInstallDirectory})"
-addProgramOption n flag reportShortNameCollisions "report short name collisions"
 addProgramOption o flag overwriteArchive "overwrite existing archive"
 addProgramOption s flag invokeShell "invoke interactive shell to inspect/modify result"
 addProgramParameter source sourceDirectory "top-level directory of source tree"
@@ -93,7 +93,7 @@ logMessage task "configuring build"
 logMessage task "building programs"
 make -s all
 make -s -C Programs ktbtest.exe tunetest.exe
-logMessage task "creating documentation"
+logMessage task "building documentation"
 make -s -C Documents
 logMessage task "installing files"
 make -s install
@@ -170,7 +170,7 @@ done
    "${SHELL:-/bin/sh}" || :
 }
 
-logMessage task "checking files"
+logMessage task "converting text files"
 cd "${installDirectory}"
 find . -print |
    while read path
@@ -210,12 +210,12 @@ find . -print |
             logMessage warning "directory with an extension: ${handle}"
          fi
       else
-         logMessage warning "special file: ${handle}"
+         logMessage warning "unsupported special file: ${handle}"
       fi
    done
 
-! "${reportShortNameCollisions}" || {
-   logMessage task "checking for short name collisions"
+! "${reportNameCollisions}" || {
+   logMessage task "checking for name collisions"
    cd "${installDirectory}"
    find . -type d -print |
       while read directory
@@ -237,13 +237,13 @@ find . -print |
 
             prefix="${prefix:0:8}"
             suffix="${suffix:0:3}"
-            declare -l shortName="${prefix}${delimiter}${suffix}"
+            declare -u shortName="${prefix}${delimiter}${suffix}"
 
             if [ "${#shortNames["${shortName}"]}" -eq 0 ]
             then
                shortNames["${shortName}"]="${longName}"
             else
-               logMessage warning "short name collision: ${directory#.}: ${shortNames["${shortName}"]} & ${longName}"
+               logMessage warning "name collision: ${directory#.}: ${shortNames["${shortName}"]} & ${longName}"
             fi
          done
       done
