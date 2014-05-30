@@ -159,30 +159,44 @@ do
    rm "${source}"
 done
 
-cd "${installDirectory}"
-find . -type f -print |
-   while read file
-   do
-      name="${file##*/}"
-      extension="${name##*.}"
-
-      if [ "${extension}" = "${name}" ]
-      then
-         programMessage "file with no extension: ${file#.}"
-      else
-         case "${extension}"
-         in
-            txt | html | htm | cfg | [tack]t[bi] | h) convertTextFile "${file}";;
-            exe | pdf | doc);;
-            *) programMessage "unexpected file extension: ${file#.}";;
-         esac
-      fi
-   done
-
 ! "${invokeShell}" || {
    cd "${installDirectory}"
    "${SHELL:-/bin/sh}" || :
 }
+
+cd "${installDirectory}"
+find . -print |
+   while read path
+   do
+      handle="${path#.}"
+      [ -n "${handle}" ] || continue
+
+      name="${path##*/}"
+      extension="${name##*.}"
+
+      if [ -f "${path}" ]
+      then
+         if [ "${extension}" = "${name}" ]
+         then
+            programMessage "file without an extension: ${handle}"
+         else
+            case "${extension}"
+            in
+               txt | html | htm | cfg | [tack]t[bi] | h) convertTextFile "${path}";;
+               exe | pdf | doc);;
+               *) programMessage "unexpected file extension: ${handle}";;
+            esac
+         fi
+      elif [ -d "${path}" ]
+      then
+         if [ "${extension}" != "${name}" ]
+         then
+            programMessage "directory with an extension: ${handle}"
+         fi
+      else
+         programMessage "special file: ${handle}"
+      fi
+   done
 
 ! "${reportShortNameCollisions}" || {
    cd "${installDirectory}"
