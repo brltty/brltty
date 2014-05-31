@@ -622,13 +622,15 @@ openTable (const char **file, const char *mode, const char *directory, FILE *std
   }
 
   if (directory) {
-    const char *path = makePath(directory, *file);
+    const char *path = makeTextTablePath(directory, *file);
+
     if (!path) return NULL;
     *file = path;
   }
 
   {
     FILE *stream = fopen(*file, mode);
+
     if (!stream) logMessage(LOG_ERR, "table open error: %s: %s", *file, strerror(errno));
     return stream;
   }
