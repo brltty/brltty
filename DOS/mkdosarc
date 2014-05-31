@@ -25,7 +25,6 @@ defaultInstallDirectory="BRLTTY"
 
 . "`dirname "${0}"`/../prologue.sh"
 addProgramOption a string.name archiveName "specify archive name (default is ${defaultArchiveName})"
-addProgramOption c flag reportNameCollisions "report name collisions"
 addProgramOption i string.directory installDirectory "specify installation directory on target system (default is ${defaultInstallDirectory})"
 addProgramOption o flag overwriteArchive "overwrite existing archive"
 addProgramOption s flag invokeShell "invoke interactive shell to inspect/modify result"
@@ -229,40 +228,38 @@ find . -print |
       fi
    done
 
-! "${reportNameCollisions}" || {
-   logMessage task "checking for name collisions"
-   cd "${installDirectory}"
-   find . -type d -print |
-      while read directory
+logMessage task "checking for name collisions"
+cd "${installDirectory}"
+find . -type d -print |
+   while read directory
+   do
+      declare -A shortNames=()
+
+      for longName in $(ls -1 --quote-name --quoting-style=shell "${directory}")
       do
-         declare -A shortNames=()
+         delimiter="."
+         prefix="${longName%${delimiter}*}"
 
-         for longName in $(ls -1 --quote-name --quoting-style=shell "${directory}")
-         do
-            delimiter="."
-            prefix="${longName%${delimiter}*}"
+         if [ "${prefix}" = "${longName}" ]
+         then
+            suffix=""
+            delimiter=""
+         else
+            suffix="${longName:${#prefix}+${#delimiter}}"
+         fi
 
-            if [ "${prefix}" = "${longName}" ]
-            then
-               suffix=""
-               delimiter=""
-            else
-               suffix="${longName:${#prefix}+${#delimiter}}"
-            fi
+         prefix="${prefix:0:8}"
+         suffix="${suffix:0:3}"
+         declare -u shortName="${prefix}${delimiter}${suffix}"
 
-            prefix="${prefix:0:8}"
-            suffix="${suffix:0:3}"
-            declare -u shortName="${prefix}${delimiter}${suffix}"
-
-            if [ "${#shortNames["${shortName}"]}" -eq 0 ]
-            then
-               shortNames["${shortName}"]="${longName}"
-            else
-               logMessage warning "name collision: ${directory#.}: ${shortNames["${shortName}"]} & ${longName}"
-            fi
-         done
+         if [ "${#shortNames["${shortName}"]}" -eq 0 ]
+         then
+            shortNames["${shortName}"]="${longName}"
+         else
+            logMessage warning "name collision: ${directory#.}: ${shortNames["${shortName}"]} & ${longName}"
+         fi
       done
-}
+   done
 
 logMessage task "creating archive"
 cd "${installDirectory}/.."
