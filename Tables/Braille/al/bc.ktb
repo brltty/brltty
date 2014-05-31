@@ -142,7 +142,7 @@ map Space SPACE
 map Control CONTROL
 map Alt META
 bind Enter KEY_ENTER
-bind Windows KEY_BACKSPACE
+bind Windows KEY_ESCAPE
 
 assign chord Space+
 include ../chords.kti
