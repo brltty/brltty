@@ -598,7 +598,11 @@ ttb_translate.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ttb_translate.c
 
 check-text-tables: brltty-ttb$X
-	for file in $(SRC_TOP)$(TBL_DIR)/$(TEXT_TABLE_SUBDIRECTORY)/*$(TEXT_TABLE_EXTENSION); do LD_LIBRARY_PATH=$(BLD_DIR) ./brltty-ttb$X -T$(SRC_TOP)$(TBL_DIR) $$file; done
+	LD_LIBRARY_PATH=$(BLD_DIR) && \
+	set -- $(SRC_TOP)$(TBL_DIR)/$(TEXT_TABLE_SUBDIRECTORY)/*$(TEXT_TABLE_EXTENSION) && \
+	for file; do \
+	./brltty-ttb$X -T$(SRC_TOP)$(TBL_DIR) $${file##*/}; \
+	done
 
 ###############################################################################
 
