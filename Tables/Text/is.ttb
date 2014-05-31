@@ -34,12 +34,12 @@ char \x1E       ( 234 678)  # ⣮ 1E [INFORMATION SEPARATOR TWO]
 char \x1F       (   45678)  # ⣸ 1F [INFORMATION SEPARATOR ONE]
 
 # the standard representations for the letters of the Latin alphabet
-include letters-latin.tti
+include let-latin.tti
 
 # the numbers 0-9 are represented by the letters j,a-i with dot 8 added
-include numbers-dot8.tti
+include num-dot8.tti
 
-include punctuation-basic.tti
+include punc-basic.tti
 
 char \x21	( 23 5 7 )  # ⡖ ! [EXCLAMATION MARK]
 char \x22	(    56  )  # ⠰ " [QUOTATION MARK]

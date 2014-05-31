@@ -20,10 +20,10 @@
 # by English-speaking North American users for the ASCII character set.
 
 # the standard representations for the letters of the Latin alphabet
-include letters-latin.tti
+include let-latin.tti
 
 # the numbers 0-9 are represented using the Nemeth (lower numbers) scheme
-include numbers-nemeth.tti
+include num-nemeth.tti
 
 char \x20	(        )  # ⠀   [SPACE]
 char \x21	( 234 6  )  # ⠮ ! [EXCLAMATION MARK]

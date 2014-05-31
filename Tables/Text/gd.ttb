@@ -26,7 +26,7 @@
 # The document is dated 1954, so this table may be quite outdated.
 
 # the standard representations for the letters of the Latin alphabet
-include letters-latin.tti
+include let-latin.tti
 
 # lowercase accented letters
 char \xE1	(1234 6  )  # ⠯ á [LATIN SMALL LETTER A WITH ACUTE]
@@ -61,8 +61,8 @@ char \u1E60	( 2 4 67 )  # ⡪ Ṡ [LATIN CAPITAL LETTER S WITH DOT ABOVE]
 char \u1E6A	( 2 4567 )  # ⡺ Ṫ [LATIN CAPITAL LETTER T WITH DOT ABOVE]
 
 # the numbers 0-9 are represented by the letters j,a-i with dot 8 added
-include numbers-dot8.tti
+include num-dot8.tti
 
-include punctuation-basic.tti
+include punc-basic.tti
 
 include common.tti

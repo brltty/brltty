@@ -26,9 +26,9 @@
 # The document is dated 1954, so this table may be quite outdated.
 
 # the standard representations for the letters of the Cyrillic alphabet
-include letters-cyrillic.tti
+include let-cyrillic.tti
 
-include letters-latin-dot8.tti
-include numbers-nemeth.tti
-include punctuation-alternate.tti
+include let-dot8.tti
+include num-nemeth.tti
+include punc-alternate.tti
 include common.tti

@@ -109,7 +109,7 @@ char \u0556	(12 4  7 )  # ⡋ Ֆ [ARMENIAN CAPITAL LETTER FEH]
 # punctuation
 char \u055D	(     6  )  # ⠠ ՝ [ARMENIAN COMMA]
 
-include letters-latin-dot8.tti
-include numbers-nemeth.tti
-include punctuation-alternate.tti
+include let-dot8.tti
+include num-nemeth.tti
+include punc-alternate.tti
 include common.tti

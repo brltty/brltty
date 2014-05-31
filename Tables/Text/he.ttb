@@ -20,8 +20,8 @@
 #
 # Adi Kushnir <adikushnir@gmail.com>
 
-include letters-latin.tti
-include numbers-nemeth.tti
+include let-latin.tti
+include num-nemeth.tti
 
 char	\x21	( 23 5  8)  # ⢖ ! [EXCLAMATION MARK]
 char	\x22	(    5   )  # ⠐ " [QUOTATION MARK]

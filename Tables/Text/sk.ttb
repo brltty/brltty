@@ -25,10 +25,10 @@
 # Modified by Dave Mielke <dave@mielke.cc>
 # with advice from Jan Buchal <buchal@brailcom.org>
 # the numbers 0-9 are represented by the letters j,a-i with dot 8 added
-include numbers-dot8.tti
+include num-dot8.tti
 
 # the standard representations for the letters of the Latin alphabet
-include letters-latin.tti
+include let-latin.tti
 
 # Slovak letters with accents
 char \xE1	(1    6  )  # ⠡ á [LATIN SMALL LETTER A WITH ACUTE]

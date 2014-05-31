@@ -18,11 +18,11 @@
 
 # BRLTTY Text Table - Tibetan
 
-include letters-tibetan.tti
-include punctuation-tibetan.tti
+include let-tibetan.tti
+include punc-tibetan.tti
 
-include letters-latin-dot8.tti
-include numbers-nemeth.tti
-include punctuation-alternate.tti
+include let-dot8.tti
+include num-nemeth.tti
+include punc-alternate.tti
 
 include common.tti

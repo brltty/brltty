@@ -19,7 +19,7 @@
 # BRLTTY Text Table - French (Canada)
 
 # the standard representations for the letters of the Latin alphabet
-include letters-latin.tti
+include let-latin.tti
 
 # the standard representations for the Latin control characters
 include control-latin.tti

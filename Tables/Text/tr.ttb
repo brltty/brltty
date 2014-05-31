@@ -26,7 +26,7 @@
 # The document is dated 1954, so this table may be quite outdated.
 
 # the standard representations for the letters of the Latin alphabet
-include letters-latin.tti
+include let-latin.tti
 char \u0131	(  3 5   )  # ⠔ ı [LATIN SMALL LETTER DOTLESS I]
 char \x49	(  3 5 7 )  # ⡔ I [LATIN CAPITAL LETTER I]
 char \x69	( 2 4    )  # ⠊ i [LATIN SMALL LETTER I]
@@ -53,9 +53,9 @@ char \xCE	(  34  7 )  # ⡌ Î [LATIN CAPITAL LETTER I WITH CIRCUMFLEX]
 char \xDB	(1   567 )  # ⡱ Û [LATIN CAPITAL LETTER U WITH CIRCUMFLEX]
 
 # the numbers 0-9 are represented by the letters j,a-i with dot 8 added
-include numbers-dot8.tti
+include num-dot8.tti
 
-include punctuation-basic.tti
+include punc-basic.tti
 char \x3F	( 2   6  )  # ⠢ ? [QUESTION MARK]
 
 include common.tti
