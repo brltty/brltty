@@ -36,7 +36,7 @@ defineEnumeration() {
    local prefix="${1}"
    shift 1
 
-   local value=0
+   local value=1
    for name
    do
       local variable="${prefix}${name}"
@@ -125,11 +125,7 @@ logMessage() {
    local variable="programLogLevel_${level}"
    local value=$((${variable}))
 
-   [ -n "${value}" ] || {
-      programMessage "unknown log level: ${level}"
-      value=0
-   }
-
+   [ "${value}" -gt 0 ] || programMessage "unknown log level: ${level}"
    [ "${value}" -gt "${programLogLevel}" ] || programMessage "${message}"
 }
 
@@ -430,7 +426,7 @@ readonly parseProgramOptions='
    unset programParameterIndex
 
    [ "${#}" -eq 0 ] || syntaxError "too many parameters"
-   programLogLevel=$((programLogLevel + programOption_verboseCount - programOption_quietCount))
+   readonly programLogLevel=$((programLogLevel + programOption_verboseCount - programOption_quietCount))
 '
 
 programDirectory="$(dirname "${0}")"
