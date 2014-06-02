@@ -206,6 +206,92 @@ decreases output verbosity. These two options are complementary, and both are
 cumulative - each may be specified any number of times.
 
 
+Unpacking the Archive
+---------------------
+
+If you would like to unpack the archive on your DOS system but don't have an 
+unzip command on it, you can get one from here:
+
+   ftp://ftp.delorie.com/pub/djgpp/current/v2/unzip32.exe
+
+If you would like to unpack the archive into your DOS file system from your 
+Linux system then you need to be able to mount your DOS partition on your Linux 
+system. If you do it this way then you must be careful about two things. The 
+first is that you must ensure that your DOS system is shut down first so that 
+two systems won't be accessing the same partition at the same time. The second 
+is that you must mount the partition in a way that prevents the long file names 
+which BRLTTY uses from being converted into those cryptic Windows short file 
+names - the ones which look like "longna~1.ext". One way to do this is to use 
+the "-o nonumtail" option when mounting your DOS partition. For example:
+
+   mkdir -p /mnt/dos
+   mount -o nonumtail /dev/sda1 /mnt/dos
+
+What you most likely have is an image of the whole hard disk, rather 
+than an image of just the DOS partition. There are a number of ways to 
+mount the DOS partition within the whole disk image. The simplest, but 
+also the most dangerous, is to do some simple math and to use an obscure 
+mount option.
+
+For our example, we'll assume that the DOS partition is the first 
+primary partition of a hard disk whose image is in the file disk.img:
+
+First, use the fdisk command to find out where the DOS partition starts 
+within the whole disk image. To do that, use this command:
+
+   fdisk -l disk.img
+
+You should see output that looks like this:
+
+   Disk disk.img: 1073 MB, 1073741824 bytes, 2097152 sectors
+   Units = sectors of 1 * 512 = 512 bytes
+   Sector size (logical/physical): 512 bytes / 512 bytes
+   I/O size (minimum/optimal): 512 bytes / 512 bytes
+   Disk identifier: 0x00000000
+
+      Device Boot      Start         End      Blocks   Id  System
+   disk.img1   *          63     2062367     1031152+   6  FAT16
+
+From the Start column, we see that the DOS partition starts in sector 63 
+of the hard disk. Since a sector is a 512-byte block, we need to 
+multiply 63 by 512 in order to get the partition's byte offset:
+
+   63 x 512 = 32256
+
+Now we can mount the DOS partition using that obscure mount option:
+
+   mount -o offset=32256 disk.img /mnt/dos
+
+But let's not forget the afore-mentioned long file name problem. The 
+command we should really use, therefore, is:
+
+   mount -o offset=32256,nonumtail disk.img /mnt/dos
+
+Another way to mount the DOS partition, which is much safer, is to use the 
+kpartx command to create a loop device for the desired partition within the 
+whole disk image. Use a command like this:
+
+   kpartx -v -s -a disk.img
+
+The -v (verbose) option tells kpartx to be informative, which is the easiest 
+way to find out the name of the loop device that it will create. The -s 
+(synchronous) option tells kpartx to wait until the loop device has been 
+created by udev before returning. The -a (add) option tells kpartx to create 
+the loop device. You should see output like this:
+
+   add map loop0p1 (253:11): 0 2062305 linear /dev/loop0 63
+
+So you now know that the loop device you want to mount is /dev/mapper/loop0p1.
+
+   mount -o nonumtail /dev/mapper/loop0p1 /mnt/dos
+
+When you're finished, you need to unmount the partition and to remove the loop 
+device:
+
+   umount /mnt/dos
+   kpartx -d disk.img
+
+
 DOSIDLE
 -------
 
