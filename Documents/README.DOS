@@ -20,7 +20,7 @@ Bluetooth is not supported.
 Compiling
 ---------
 
-The DOS version of BRLTTY can be compiled on Linux thanks to a cross-compiler. 
+The DOS version of BRLTTY can be compiled on Linux by using a cross-compiler. 
 To create it, get the following archives:
 
    ftp://ftp.delorie.com/pub/djgpp/current/v2gnu/gcc410s2.zip
@@ -30,7 +30,7 @@ The djcrx203.zip archive contains a file named cross/howto.32 which explains
 how to build a cross-compiler for gcc 3.2. You can build one for gcc 4.1 by
 applying the same instructions to the gcc410s2.zip archive (listed above)
 instead of to the gcc32s2.zip archive (mentioned in the howto). You can also
-use a more recent binutils package as well (2.2.24 works fine).
+use a more recent binutils package (2.2.24 works fine).
 
 If, when building the cross-compiler, you encounter an error which complains 
 that the writev function and the iovec structure have not been defined, then 
@@ -76,13 +76,14 @@ cross-compiler. DJGPP archives require the .zip extension, and Gnu archives
 require the .tar.gz extension. See below for the archives that you will need.
 
 The build directory will hold all of the files that are needed during the build 
-process. The script will create it if it does not already exist. If it does 
-already exist then it will be emptied at the start of the build process. It is 
-also emptied at the end of the build process if the build is successful.
+process. The script creates it if it does not already exist. If it does already 
+exist then it is emptied at the start of the build process. It is also emptied 
+upon the completion of a successful build. This directory needs to be on a 
+volume which has in the vicinity of 1.5GB of free file space.
 
-The install directory is where the cross-compiler file hierarchy will be 
-installed. The script will create it if it does not already exist. If it does 
-already exist then it will be emptied at the start of the build process.
+The install directory is where the cross-compiler file hierarchy is installed. 
+The script creates it if it does not already exist. If it does already exist 
+then it is emptied at the start of the build process.
 
 You will need the following DJGPP archives:
 
@@ -101,16 +102,16 @@ You will need the following Gnu archives:
 
 If you would prefer to build a different version of gcc, there are two 
 important things to know. One is that you need the gcc*s2.zip archives from 
-DJGPP. The other is that the versions of the Gnu and DJGPP archive must match. 
-If, for example, you would like to build gcc-4.1.2, then you will need both 
-gcc-4.1.2.tar.gz and gcc412s2.zip. The reason we use gcc-4.3.2 in our examples 
-here is because it's the highest version of gcc for which we could find an 
-s2.zip DJGPP archive.
+DJGPP. The other is that the versions of the Gnu and DJGPP gcc archives must 
+match. If, for example, you would like to build gcc-4.1.2, then you will need 
+both gcc-4.1.2.tar.gz and gcc412s2.zip. The reason we use gcc-4.3.2 in our 
+examples here is because it's the highest version of gcc for which we could 
+find an s2.zip DJGPP archive.
 
 If you only have one Gnu archive for gcc in your archives directory then that 
 version will be built. If you have more than one, then you will need to use the 
--g option (e.g. -g 4.3.2) in order to tell the script which of the available 
-versions you would like it to build.
+-g option (e.g. -g 4.3.2) to explicitly specify the version that is to be 
+built.
 
 
 Configuring
@@ -141,13 +142,13 @@ You should be able to use a configure command like this one:
       --without-speechd --with-speech-driver=all \
       --with-screen-driver=pb,-all
 
-We provide a script named cfg-dos, which can be found in the top-level 
-directory of BRLTTY's source tree, that should make configuring BRLTTY for DOS 
-a bit easier. It runs the configure script for you, and gives it all of the 
-required options. You can specify additional configure options simply by giving 
-them to cfg-dos, but that shouldn't be necessary. The only thing you do need to 
-do is to point the DOS_TOOLS_ROOT environment variable to the top-level 
-directory of your cross-compiler's installed file hierarchy. For example:
+We provide a script named cfg-dos, which resides in the top-level directory of 
+BRLTTY's source tree, that should make configuring BRLTTY for DOS a bit easier. 
+It runs the configure script for you, and gives it all of the required options. 
+You can specify additional configure options simply by giving them to cfg-dos, 
+but that shouldn't be necessary. The only thing you do need to do is to point 
+the DOS_TOOLS_ROOT environment variable to the top-level directory of your 
+cross-compiler's installed files hierarchy. For example:
 
    export DOS_TOOLS_ROOT=/usr/local/dostools
 
@@ -185,19 +186,21 @@ and if you're in the top-level directory then invoke it like this:
 The -a (archive) option allows you to specify the name of the archive (.zip) 
 file that will be created. The default archive name is "brltty-dos".
 
-the -o (overwrite) option allows the script to overwrite an already-existing 
+The -o (overwrite) option allows the script to overwrite an already-existing 
 archive. The default is that an already-existing archive will not be 
 overwritten.
 
 The -i (install) option allows you to specify the name of the directory on the 
 target DOS system into which the archive will be unpacked. The default 
-directory name is "BRLTTY". This directory will be an immediate subdirectory of 
-the current working directory when the archive is unpacked, and it will be 
-created if it does not already exist.
+directory name is "BRLTTY". This directory is an immediate subdirectory of the 
+current working directory when the archive is unpacked. It will be created if 
+it does not already exist.
 
-The -s (shell) option invokes a shell just before the archive is created so 
-that you can inspect what will become the archive's content. The current 
-working directory is set to the top-level directory of the content.
+The -s (shell) option invokes an interactive shell just before the archive is 
+created so that you can inspect what will become the archive's content. The 
+current working directory is set to the top-level directory of the content. The 
+shell specified by the SHELL environment variable is used. If it isn't set then 
+/bin/sh is assumed.
 
 The -h (help) option displays a brief usage summary.
 
@@ -227,17 +230,15 @@ the "-o nonumtail" option when mounting your DOS partition. For example:
    mkdir -p /mnt/dos
    mount -o nonumtail /dev/sda1 /mnt/dos
 
-What you most likely have is an image of the whole hard disk, rather 
-than an image of just the DOS partition. There are a number of ways to 
-mount the DOS partition within the whole disk image. The simplest, but 
-also the most dangerous, is to do some simple math and to use an obscure 
-mount option.
+What you most likely have is an image of the whole hard disk, rather than an 
+image of just the DOS partition. There are a number of ways to mount the DOS 
+partition within the hard disk image. We'll describe some of them here. For our 
+examples, we'll assume that the DOS partition is the first primary partition of 
+a hard disk whose image is in the file disk.img.
 
-For our example, we'll assume that the DOS partition is the first 
-primary partition of a hard disk whose image is in the file disk.img:
-
-First, use the fdisk command to find out where the DOS partition starts 
-within the whole disk image. To do that, use this command:
+The simplest, but also the most dangerous, way is to do some simple math and to 
+use an obscure mount option. First, use the fdisk command to find out where the 
+DOS partition starts within the hard disk image. To do this, use this command:
 
    fdisk -l disk.img
 
@@ -252,24 +253,29 @@ You should see output that looks like this:
       Device Boot      Start         End      Blocks   Id  System
    disk.img1   *          63     2062367     1031152+   6  FAT16
 
-From the Start column, we see that the DOS partition starts in sector 63 
-of the hard disk. Since a sector is a 512-byte block, we need to 
-multiply 63 by 512 in order to get the partition's byte offset:
+From the Start column, you can see that the DOS partition starts in sector 63 
+of the hard disk. Since a sector is a 512-byte block, you need to multiply 63 
+by 512 in order to calculate the partition's byte offset:
 
    63 x 512 = 32256
 
-Now we can mount the DOS partition using that obscure mount option:
+Now you can mount the DOS partition using that obscure option:
 
    mount -o offset=32256 disk.img /mnt/dos
 
-But let's not forget the afore-mentioned long file name problem. The 
-command we should really use, therefore, is:
+But don't forget the afore-mentioned Windows cryptic short file name problem. 
+The command you should really use, therefore, is:
 
    mount -o offset=32256,nonumtail disk.img /mnt/dos
 
+Before you restart your DOS system, don't forget to first unmount the DOS 
+partition from your Linux system:
+
+   umount /mnt/dos
+
 Another way to mount the DOS partition, which is much safer, is to use the 
 kpartx command to create a loop device for the desired partition within the 
-whole disk image. Use a command like this:
+hard disk image. Use a command like this:
 
    kpartx -v -s -a disk.img
 
@@ -296,11 +302,11 @@ DOSIDLE
 -------
 
 DOSIDLE is a DOS application which many users run in order to stop their 
-computer or virtual machine from consuming CPU time when DOS has nothing 
-meaningful for it to do. If you use it, don't use a cooling strategy more 
-invasive than weak. In other words, don't specify more than -fm1. Doing so will 
-cause DOSIDLE to correctly deduce that the system is idle when BRLTTY has 
-nothing to do, but that will cause BRLTTY to stop running, too, which is not 
-what you want.
+computer or virtual machine from needlessly consuming CPU time when DOS has 
+nothing meaningful for it to do. If you use it, don't use a cooling strategy 
+more invasive than weak. In other words, don't specify more than -fm1. Using a 
+cooling strategy which is too aggressive will cause DOSIDLE to correctly deduce 
+that the system is idle when BRLTTY has nothing to do, but that will cause 
+BRLTTY to stop running, too, which isn't what you want.
 
 
