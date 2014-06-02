@@ -43,6 +43,7 @@ export LDFLAGS=""
 
 "${programDirectory}/configure" \
    --with-configuration-file=brltty.cfg \
+   --enable-relocatable-install \
    \
    --disable-api \
    --disable-gpm \

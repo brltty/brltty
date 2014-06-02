@@ -133,6 +133,7 @@ You should be able to use a configure command like this one:
 
    ./configure \
       --prefix=/brltty-dos --host=i586-pc-msdosdjgpp \
+      --enable-relocatable-install \
       --disable-api --disable-icu --disable-x \
       --without-usb-package --without-bluetooth-package \
       --without-libbraille --with-braille-driver=-vr,all \
@@ -149,6 +150,60 @@ do is to point the DOS_TOOLS_ROOT environment variable to the top-level
 directory of your cross-compiler's installed file hierarchy. For example:
 
    export DOS_TOOLS_ROOT=/usr/local/dostools
+
+
+The mkdosarc Script
+-------------------
+
+The mkdosarc script, which resides in the DOS/ subdirectory of BRLTTY's source 
+tree, creates a DOS archive (a .zip file) of BRLTTY. It does everything 
+(configure, make, ..., zip) except for building the cross-compiler. If you 
+don't already have a cross-compiler for DOS then see the section "Compiling" in 
+this document for instructions on how to build one.
+
+Before running this script, ensure that the following commands have been 
+installed on your system:
+
+   linuxdoc, unix2dos, zip
+
+You'll also need to point the DOS_TOOLS_ROOT environment variable to the 
+top-level directory of the cross-compiler's installed files hierarchy. For 
+example:
+
+   export DOS_TOOLS_ROOT=/usr/local/dostools
+
+The script requires only one parameter - the path to the top-level directory of
+BRLTTY's source tree. For example, if you're in the DOS/ subdirectory then 
+invoke it like this:
+
+   ./mkdosarc ..
+
+and if you're in the top-level directory then invoke it like this:
+
+   DOS/mkdosarc .
+
+The -a (archive) option allows you to specify the name of the archive (.zip) 
+file that will be created. The default archive name is "brltty-dos".
+
+the -o (overwrite) option allows the script to overwrite an already-existing 
+archive. The default is that an already-existing archive will not be 
+overwritten.
+
+The -i (install) option allows you to specify the name of the directory on the 
+target DOS system into which the archive will be unpacked. The default 
+directory name is "BRLTTY". This directory will be an immediate subdirectory of 
+the current working directory when the archive is unpacked, and it will be 
+created if it does not already exist.
+
+The -s (shell) option invokes a shell just before the archive is created so 
+that you can inspect what will become the archive's content. The current 
+working directory is set to the top-level directory of the content.
+
+The -h (help) option displays a brief usage summary.
+
+The -v (verbose) option increases output verbosity, and the -q (quiet) option 
+decreases output verbosity. These two options are complementary, and both are 
+cumulative - each may be specified any number of times.
 
 
 DOSIDLE

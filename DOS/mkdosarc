@@ -103,7 +103,7 @@ manualSubdirectory="${documentSubdirectory}/Manual"
 
 cd "${buildDirectory}"
 logMessage task "configuring build"
-"${sourceDirectory}/cfg-dos" --enable-relocatable-install --prefix="${installDirectory}"
+"${sourceDirectory}/cfg-dos" --prefix="${installDirectory}"
 logMessage task "building programs"
 make -s all
 make -s -C Programs ktbtest.exe tunetest.exe
@@ -177,12 +177,6 @@ do
    MANWIDTH=80 LC_ALL=C man "${source}" | ul -t dumb | expand | uniq >"${target}"
    rm "${source}"
 done
-
-! "${invokeShell}" || {
-   logMessage task "invoking shell"
-   cd "${installDirectory}"
-   "${SHELL:-/bin/sh}" || :
-}
 
 logMessage task "converting text files"
 cd "${installDirectory}"
@@ -260,6 +254,12 @@ find . -type d -print |
          fi
       done
    done
+
+! "${invokeShell}" || {
+   logMessage task "invoking shell"
+   cd "${installDirectory}"
+   "${SHELL:-/bin/sh}" || :
+}
 
 logMessage task "creating archive"
 cd "${installDirectory}/.."
