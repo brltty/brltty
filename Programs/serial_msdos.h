@@ -27,19 +27,79 @@ extern "C" {
 
 typedef struct {
   unsigned short divisor;
-  unsigned short biosBPS;
+  unsigned short bps;
 } SerialSpeed;
 
 typedef union {
   unsigned char byte;
 
   struct {
-    unsigned bits:2;
-    unsigned stop:1;
+    unsigned dataBits:2;
+    unsigned stopBits:1;
     unsigned parity:2;
     unsigned bps:3;
   } fields;
 } SerialBiosConfiguration;
+
+typedef enum {
+  SERIAL_BIOS_DATA_7 = 2,
+  SERIAL_BIOS_DATA_8 = 3
+} serialBiosDataBits;
+
+typedef enum {
+  SERIAL_BIOS_STOP_1 = 0,
+  SERIAL_BIOS_STOP_2 = 1
+} SerialBiosStopBits;
+
+typedef enum {
+  SERIAL_BIOS_PARITY_NONE = 0,
+  SERIAL_BIOS_PARITY_ODD  = 1,
+  SERIAL_BIOS_PARITY_EVEN = 3
+} SerialBiosParity;
+
+typedef enum {
+  SERIAL_BIOS_BAUD_110    =  0,
+  SERIAL_BIOS_BAUD_150    =  1,
+  SERIAL_BIOS_BAUD_300    =  2,
+  SERIAL_BIOS_BAUD_600    =  3,
+  SERIAL_BIOS_BAUD_1200   =  4,
+  SERIAL_BIOS_BAUD_2400   =  5,
+  SERIAL_BIOS_BAUD_4800   =  6,
+  SERIAL_BIOS_BAUD_9600   =  7,
+  SERIAL_BIOS_BAUD_19200  =  8,
+  SERIAL_BIOS_BAUD_38400  =  9,
+  SERIAL_BIOS_BAUD_57600  = 10,
+  SERIAL_BIOS_BAUD_115200 = 11
+} SerialBiosBaud;
+
+typedef enum {
+  SERIAL_BIOS_STATUS_CTS_CHANGE    = 0X0001,
+  SERIAL_BIOS_STATUS_DSR_CHANGE    = 0X0002,
+  SERIAL_BIOS_STATUS_RNG_CHANGE    = 0X0004,
+  SERIAL_BIOS_STATUS_CAR_CHANGE    = 0X0008,
+
+  SERIAL_BIOS_STATUS_CTS_PRESENT   = 0X0010,
+  SERIAL_BIOS_STATUS_DSR_PRESENT   = 0X0020,
+  SERIAL_BIOS_STATUS_RNG_PRESENT   = 0X0040,
+  SERIAL_BIOS_STATUS_CAR_PRESENT   = 0X0080,
+
+  SERIAL_BIOS_STATUS_DATA_READY    = 0X0100,
+  SERIAL_BIOS_STATUS_OVERRUN_ERROR = 0X0200,
+  SERIAL_BIOS_STATUS_PARITY_ERROR  = 0X0400,
+  SERIAL_BIOS_STATUS_FRAMING_ERROR = 0X0800,
+
+  SERIAL_BIOS_STATUS_BRK_DETECT    = 0X1000,
+  SERIAL_BIOS_STATUS_THR_EMPTY     = 0X2000,
+  SERIAL_BIOS_STATUS_TSR_EMPTY     = 0X4000,
+  SERIAL_BIOS_STATUS_TIMEOUT       = 0X8000
+} SerialBiosStatus;
+
+typedef enum {
+  SERIAL_BIOS_COMMAND_CONFIG = 0,
+  SERIAL_BIOS_COMMAND_WRITE  = 1,
+  SERIAL_BIOS_COMMAND_READ   = 2,
+  SERIAL_BIOS_COMMAND_STATUS = 3
+} SerialBiosCommand;
 
 typedef struct {
   SerialBiosConfiguration bios;

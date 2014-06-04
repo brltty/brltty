@@ -24,6 +24,8 @@
 #include <fcntl.h>
 
 #include "log.h"
+#include "async_wait.h"
+#include "timing.h"
 #include "io_misc.h"
 #include "ports.h"
 
@@ -38,22 +40,22 @@
 
 #define SERIAL_DIVISOR_BASE 115200
 #define SERIAL_DIVISOR(baud) (SERIAL_DIVISOR_BASE / (baud))
-#define SERIAL_SPEED(baud, bios) {SERIAL_DIVISOR((baud)), (bios)}
-#define SERIAL_BAUD_ENTRY(baud, bios) {(baud), SERIAL_SPEED((baud),  (bios))}
+#define SERIAL_SPEED(baud) {.divisor=SERIAL_DIVISOR(baud), .bps=SERIAL_BIOS_BAUD_##baud}
+#define SERIAL_BAUD_ENTRY(baud) {baud, .speed=SERIAL_SPEED(baud)}
 
 BEGIN_SERIAL_BAUD_TABLE
-  SERIAL_BAUD_ENTRY(   110,  0),
-  SERIAL_BAUD_ENTRY(   150,  1),
-  SERIAL_BAUD_ENTRY(   300,  2),
-  SERIAL_BAUD_ENTRY(   600,  3),
-  SERIAL_BAUD_ENTRY(  1200,  4),
-  SERIAL_BAUD_ENTRY(  2400,  5),
-  SERIAL_BAUD_ENTRY(  4800,  6),
-  SERIAL_BAUD_ENTRY(  9600,  7),
-  SERIAL_BAUD_ENTRY( 19200,  8),
-  SERIAL_BAUD_ENTRY( 38400,  9),
-  SERIAL_BAUD_ENTRY( 57600, 10),
-  SERIAL_BAUD_ENTRY(115200, 11),
+  SERIAL_BAUD_ENTRY(110),
+  SERIAL_BAUD_ENTRY(150),
+  SERIAL_BAUD_ENTRY(300),
+  SERIAL_BAUD_ENTRY(600),
+  SERIAL_BAUD_ENTRY(1200),
+  SERIAL_BAUD_ENTRY(2400),
+  SERIAL_BAUD_ENTRY(4800),
+  SERIAL_BAUD_ENTRY(9600),
+  SERIAL_BAUD_ENTRY(19200),
+  SERIAL_BAUD_ENTRY(38400),
+  SERIAL_BAUD_ENTRY(57600),
+  SERIAL_BAUD_ENTRY(115200),
 END_SERIAL_BAUD_TABLE
 
 static unsigned short
@@ -71,30 +73,51 @@ serialWritePort (SerialDevice *serial, unsigned char port, unsigned char value) 
   writePort1(serialPortBase(serial)+port, value);
 }
 
+static int
+serialBiosCommand (SerialDevice *serial, SerialBiosCommand command, unsigned char data) {
+  return bioscom(command, data, serial->package.deviceIndex);
+}
+
+static int
+serialTestInput (SerialDevice *serial) {
+  return !!(serialBiosCommand(serial, SERIAL_BIOS_COMMAND_STATUS, 0) & SERIAL_BIOS_STATUS_DATA_READY);
+}
+
 void
 serialPutInitialAttributes (SerialAttributes *attributes) {
+  attributes->speed = serialGetBaudEntry(9600)->speed;
+  attributes->bios.fields.bps = attributes->speed.bps;
+  attributes->bios.fields.dataBits = SERIAL_BIOS_DATA_8;
+  attributes->bios.fields.stopBits = SERIAL_BIOS_STOP_1;
+  attributes->bios.fields.parity = SERIAL_BIOS_PARITY_NONE;
 }
 
 int
 serialPutSpeed (SerialAttributes *attributes, SerialSpeed speed) {
   attributes->speed = speed;
-  attributes->bios.fields.bps = attributes->speed.biosBPS;
+  attributes->bios.fields.bps = attributes->speed.bps;
   return 1;
 }
 
 int
 serialPutDataBits (SerialAttributes *attributes, unsigned int bits) {
-  if ((bits < 5) || (bits > 8)) return 0;
-  attributes->bios.fields.bits = bits - 5;
+  if (bits == 8) {
+    attributes->bios.fields.dataBits = SERIAL_BIOS_DATA_8;
+  } else if (bits == 7) {
+    attributes->bios.fields.dataBits = SERIAL_BIOS_DATA_7;
+  } else {
+    return 0;
+  }
+
   return 1;
 }
 
 int
 serialPutStopBits (SerialAttributes *attributes, SerialStopBits bits) {
   if (bits == SERIAL_STOP_1) {
-    attributes->bios.fields.stop = 0;
-  } else if (bits == 15 || bits == SERIAL_STOP_2) {
-    attributes->bios.fields.stop = 1;
+    attributes->bios.fields.stopBits = SERIAL_BIOS_STOP_1;
+  } else if (bits == SERIAL_STOP_2) {
+    attributes->bios.fields.stopBits = SERIAL_BIOS_STOP_2;
   } else {
     return 0;
   }
@@ -106,15 +129,15 @@ int
 serialPutParity (SerialAttributes *attributes, SerialParity parity) {
   switch (parity) {
     case SERIAL_PARITY_NONE:
-      attributes->bios.fields.parity = 0;
+      attributes->bios.fields.parity = SERIAL_BIOS_PARITY_NONE;
       break;
 
     case SERIAL_PARITY_ODD:
-      attributes->bios.fields.parity = 1;
+      attributes->bios.fields.parity = SERIAL_BIOS_PARITY_ODD;
       break;
 
     case SERIAL_PARITY_EVEN:
-      attributes->bios.fields.parity = 2;
+      attributes->bios.fields.parity = SERIAL_BIOS_PARITY_EVEN;
       break;
 
     default:
@@ -136,69 +159,82 @@ serialPutModemState (SerialAttributes *attributes, int enabled) {
 
 unsigned int
 serialGetDataBits (const SerialAttributes *attributes) {
-  return attributes->bios.fields.bits + 5;
+  switch (attributes->bios.fields.dataBits) {
+    default:
+    case SERIAL_BIOS_DATA_8: return 8;
+    case SERIAL_BIOS_DATA_7: return 7;
+  }
 }
 
 unsigned int
 serialGetStopBits (const SerialAttributes *attributes) {
-  return attributes->bios.fields.stop? 2: 1;
+  switch (attributes->bios.fields.stopBits) {
+    default:
+    case SERIAL_BIOS_STOP_1: return 1;
+    case SERIAL_BIOS_STOP_2: return 2;
+  }
 }
 
 unsigned int
 serialGetParityBits (const SerialAttributes *attributes) {
-  return attributes->bios.fields.parity? 1: 0;
+  return (attributes->bios.fields.parity == SERIAL_BIOS_PARITY_NONE)? 0: 1;
 }
 
 int
 serialGetAttributes (SerialDevice *serial, SerialAttributes *attributes) {
-  int interruptsWereEnabled = disable();
-  unsigned char lcr = serialReadPort(serial, UART_PORT_LCR);
+  unsigned char lcr;
   int divisor;
 
-  serialWritePort(serial, UART_PORT_LCR,
-                  lcr | UART_FLAG_LCR_DLAB);
-  divisor = (serialReadPort(serial, UART_PORT_DLH) << 8) |
-            serialReadPort(serial, UART_PORT_DLL);
-  serialWritePort(serial, UART_PORT_LCR, lcr);
-  if (interruptsWereEnabled) enable();
+  {
+    int interruptsWereEnabled = disable();
+
+    lcr = serialReadPort(serial, UART_PORT_LCR);
+    serialWritePort(serial, UART_PORT_LCR, (lcr | UART_FLAG_LCR_DLAB));
+
+    divisor = (serialReadPort(serial, UART_PORT_DLH) << 8) |
+               serialReadPort(serial, UART_PORT_DLL);
+    serialWritePort(serial, UART_PORT_LCR, lcr);
+
+    if (interruptsWereEnabled) enable();
+  }
 
   attributes->bios.byte = lcr;
+
   {
     const SerialBaudEntry *baud = serialGetBaudEntry(SERIAL_DIVISOR_BASE/divisor);
+
     if (baud) {
       attributes->speed = baud->speed;
     } else {
-      memset(&attributes->speed, 0,
-             sizeof(attributes->speed));
+      logMessage(LOG_WARNING, "unsupported serial divisor: %d", divisor);
+      memset(&attributes->speed, 0, sizeof(attributes->speed));
     }
   }
-  attributes->bios.fields.bps = attributes->speed.biosBPS;
 
+  attributes->bios.fields.bps = attributes->speed.bps;
   return 1;
 }
 
 int
 serialPutAttributes (SerialDevice *serial, const SerialAttributes *attributes) {
   {
-    if (attributes->speed.biosBPS <= 7) {
-      if (bioscom(0, attributes->bios.byte, serial->package.deviceIndex) & 0X0700) {
-        logMessage(LOG_ERR, "bioscom failed");
-        return 0;
-      }
+    if (attributes->speed.bps <= SERIAL_BIOS_BAUD_9600) {
+      serialBiosCommand(serial, SERIAL_BIOS_COMMAND_CONFIG, attributes->bios.byte);
     } else {
-      int interruptsWereEnabled = disable();
       SerialBiosConfiguration lcr = attributes->bios;
+
       lcr.fields.bps = 0;
 
-      serialWritePort(serial, UART_PORT_LCR,
-                      lcr.byte | UART_FLAG_LCR_DLAB);
-      serialWritePort(serial, UART_PORT_DLL,
-                      attributes->speed.divisor & 0XFF);
-      serialWritePort(serial, UART_PORT_DLH,
-                      attributes->speed.divisor >> 8);
-      serialWritePort(serial, UART_PORT_LCR, lcr.byte);
+      {
+        int interruptsWereEnabled = disable();
 
-      if (interruptsWereEnabled) enable();
+        serialWritePort(serial, UART_PORT_LCR, (lcr.byte | UART_FLAG_LCR_DLAB));
+        serialWritePort(serial, UART_PORT_DLL, (attributes->speed.divisor & 0XFF));
+        serialWritePort(serial, UART_PORT_DLH, (attributes->speed.divisor >> 8));
+        serialWritePort(serial, UART_PORT_LCR, lcr.byte);
+
+        if (interruptsWereEnabled) enable();
+      }
     }
   }
 
@@ -222,7 +258,19 @@ serialMonitorInput (SerialDevice *serial, AsyncMonitorCallback *callback, void *
 
 int
 serialPollInput (SerialDevice *serial, int timeout) {
-  return awaitFileInput(serial->fileDescriptor, timeout);
+  TimePeriod period;
+
+  if (timeout) startTimePeriod(&period, timeout);
+
+  while (1) {
+    if (serialTestInput(serial)) return 1;
+    if (!timeout) break;
+    if (afterTimePeriod(&period, NULL)) break;
+    asyncWait(1);
+  }
+
+  errno = EAGAIN;
+  return 0;
 }
 
 int
@@ -236,7 +284,23 @@ serialGetData (
   void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  return readFile(serial->fileDescriptor, buffer, size, initialTimeout, subsequentTimeout);
+  unsigned char *const start = buffer;
+  unsigned char *const end = start + size;
+  unsigned char *byte = start;
+  int timeout = initialTimeout;
+
+  while (byte < end) {
+    if (!serialPollInput(serial, timeout)) break;
+    timeout = subsequentTimeout;
+
+    {
+      int status = serialBiosCommand(serial, SERIAL_BIOS_COMMAND_READ, 0);
+
+      *byte++ = status & 0XFF;
+    }
+  }
+
+  return byte - start;
 }
 
 ssize_t

@@ -47,6 +47,7 @@
 const SerialBaudEntry *
 serialGetBaudEntry (unsigned int baud) {
   const SerialBaudEntry *entry = serialBaudTable;
+
   while (entry->baud) {
     if (baud == entry->baud) return entry;
     entry += 1;
