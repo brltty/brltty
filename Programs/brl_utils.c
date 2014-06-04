@@ -24,15 +24,11 @@
 
 void
 drainBrailleOutput (BrailleDisplay *brl, int minimumDelay) {
-  do {
-    int duration = brl->writeDelay + 1;
-    brl->writeDelay = 0;
+  int duration = brl->writeDelay + 1;
 
-    if (duration < minimumDelay) duration = minimumDelay;
-    minimumDelay = 0;
-
-    asyncWait(duration);
-  } while (brl->writeDelay > 0);
+  brl->writeDelay = 0;
+  if (duration < minimumDelay) duration = minimumDelay;
+  asyncWait(duration);
 }
 
 /* Functions which support vertical and horizontal status cells. */
