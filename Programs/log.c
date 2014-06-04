@@ -313,6 +313,11 @@ writeLogRecord (const char *record) {
     fputs(record, logFile);
     fputc('\n', logFile);
     fflush(logFile);
+
+#ifdef __MSDOS__
+    fsync(fileno(logFile));
+#endif /* __MSDOS__ */
+
     unlockStream(logFile);
   }
 }
