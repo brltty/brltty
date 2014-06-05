@@ -33,7 +33,9 @@ extern const char *locatePathName (const char *path);
 extern const char *locatePathExtension (const char *path);
 extern int isExplicitPath (const char *path);
 
+extern char *joinPath (const char *const *components, unsigned int count);
 extern char *makePath (const char *directory, const char *file);
+
 extern int hasFileExtension (const char *path, const char *extension);
 extern char *replaceFileExtension (const char *path, const char *extension);
 extern char *ensureFileExtension (const char *path, const char *extension);

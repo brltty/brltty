@@ -1564,22 +1564,18 @@ makeKeyboardKeyTablePath (const char *directory, const char *name) {
 
 char *
 makeBrailleKeyTablePath (const char *directory, const char *driver, const char *name) {
-  char *brailleSubdirectory = makePath(directory, BRAILLE_KEY_TABLE_SUBDIRECTORY);
+  const char *components[] = {
+    directory,
+    BRAILLE_KEY_TABLE_SUBDIRECTORY,
+    driver
+  };
+  char *subdirectory = joinPath(components, ARRAY_COUNT(components));
 
-  if (brailleSubdirectory) {
-    char *driverSubdirectory = makePath(brailleSubdirectory, driver);
+  if (subdirectory) {
+    char *file = makeKeyTablePath(subdirectory, name);
 
-    free(brailleSubdirectory);
-    brailleSubdirectory = NULL;
-
-    if (driverSubdirectory) {
-      char *tableFile = makeKeyTablePath(driverSubdirectory, name);
-
-      free(driverSubdirectory);
-      driverSubdirectory = NULL;
-
-      if (tableFile) return tableFile;
-    }
+    free(subdirectory);
+    if (file) return file;
   }
 
   return NULL;

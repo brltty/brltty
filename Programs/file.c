@@ -125,20 +125,33 @@ isExplicitPath (const char *path) {
 }
 
 char *
-makePath (const char *directory, const char *file) {
-  const int count = 3;
-  const char *strings[count];
-  int first = count;
+joinPath (const char *const *components, unsigned int count) {
+  const char *const *component = components + count;
+  unsigned int size = (count * 2) - 1;
+  const char *strings[size];
+  unsigned int first = size;
 
-  strings[--first] = file;
-  if (!isAbsolutePath(file)) {
-    if (directory && *directory) {
-      if (!isPathDelimiter(directory[strlen(directory)-1])) strings[--first] = "/";
-      strings[--first] = directory;
+  while (component != components) {
+    const char *next = *--component;
+
+    if (next && *next) {
+      if ((first != size) && !isPathDelimiter(next[strlen(next)-1])) {
+        strings[--first] = "/";
+      }
+
+      strings[--first] = next;
+      if (isAbsolutePath(next)) break;
     }
   }
 
-  return joinStrings(&strings[first], count-first);
+  return joinStrings(&strings[first], size-first);
+}
+
+char *
+makePath (const char *directory, const char *file) {
+  const char *const components[] = {directory, file};
+
+  return joinPath(components, ARRAY_COUNT(components));
 }
 
 int
