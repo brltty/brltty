@@ -73,14 +73,14 @@ serialWritePort (SerialDevice *serial, unsigned char port, unsigned char value) 
   writePort1(serialPortBase(serial)+port, value);
 }
 
-static int
-serialBiosCommand (SerialDevice *serial, SerialBiosCommand command, unsigned char data) {
-  return bioscom(command, data, serial->package.deviceIndex);
+static unsigned int
+serialBiosCommand (SerialDevice *serial, int command, unsigned char data) {
+  return _bios_serialcom(command, serial->package.deviceIndex, data);
 }
 
 static int
 serialTestInput (SerialDevice *serial) {
-  return !!(serialBiosCommand(serial, SERIAL_BIOS_COMMAND_STATUS, 0) & SERIAL_BIOS_STATUS_DATA_READY);
+  return !!(serialBiosCommand(serial, _COM_STATUS, 0) & SERIAL_BIOS_STATUS_DATA_READY);
 }
 
 void
@@ -217,24 +217,22 @@ serialGetAttributes (SerialDevice *serial, SerialAttributes *attributes) {
 
 int
 serialPutAttributes (SerialDevice *serial, const SerialAttributes *attributes) {
-  {
-    if (attributes->speed.bps <= SERIAL_BIOS_BAUD_9600) {
-      serialBiosCommand(serial, SERIAL_BIOS_COMMAND_CONFIG, attributes->bios.byte);
-    } else {
-      SerialBiosConfiguration lcr = attributes->bios;
+  if (attributes->speed.bps < (0X1 << 3)) {
+    serialBiosCommand(serial, _COM_INIT, attributes->bios.byte);
+  } else {
+    SerialBiosConfiguration lcr = attributes->bios;
 
-      lcr.fields.bps = 0;
+    lcr.fields.bps = 0;
 
-      {
-        int interruptsWereEnabled = disable();
+    {
+      int interruptsWereEnabled = disable();
 
-        serialWritePort(serial, UART_PORT_LCR, (lcr.byte | UART_FLAG_LCR_DLAB));
-        serialWritePort(serial, UART_PORT_DLL, (attributes->speed.divisor & 0XFF));
-        serialWritePort(serial, UART_PORT_DLH, (attributes->speed.divisor >> 8));
-        serialWritePort(serial, UART_PORT_LCR, lcr.byte);
+      serialWritePort(serial, UART_PORT_LCR, (lcr.byte | UART_FLAG_LCR_DLAB));
+      serialWritePort(serial, UART_PORT_DLL, (attributes->speed.divisor & 0XFF));
+      serialWritePort(serial, UART_PORT_DLH, (attributes->speed.divisor >> 8));
+      serialWritePort(serial, UART_PORT_LCR, lcr.byte);
 
-        if (interruptsWereEnabled) enable();
-      }
+      if (interruptsWereEnabled) enable();
     }
   }
 
@@ -294,7 +292,7 @@ serialGetData (
     timeout = subsequentTimeout;
 
     {
-      int status = serialBiosCommand(serial, SERIAL_BIOS_COMMAND_READ, 0);
+      int status = serialBiosCommand(serial, _COM_RECEIVE, 0);
 
       *byte++ = status & 0XFF;
     }

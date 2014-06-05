@@ -58,18 +58,24 @@ typedef enum {
 } SerialBiosParity;
 
 typedef enum {
-  SERIAL_BIOS_BAUD_110    =  0,
-  SERIAL_BIOS_BAUD_150    =  1,
-  SERIAL_BIOS_BAUD_300    =  2,
-  SERIAL_BIOS_BAUD_600    =  3,
-  SERIAL_BIOS_BAUD_1200   =  4,
-  SERIAL_BIOS_BAUD_2400   =  5,
-  SERIAL_BIOS_BAUD_4800   =  6,
-  SERIAL_BIOS_BAUD_9600   =  7,
-  SERIAL_BIOS_BAUD_19200  =  8,
-  SERIAL_BIOS_BAUD_38400  =  9,
-  SERIAL_BIOS_BAUD_57600  = 10,
-  SERIAL_BIOS_BAUD_115200 = 11
+  SERIAL_BIOS_BAUD_110 = 0,
+  SERIAL_BIOS_BAUD_150,
+  SERIAL_BIOS_BAUD_300,
+  SERIAL_BIOS_BAUD_600,
+  SERIAL_BIOS_BAUD_1200,
+  SERIAL_BIOS_BAUD_2400,
+  SERIAL_BIOS_BAUD_4800,
+  SERIAL_BIOS_BAUD_9600,
+
+  /* Do not reorder, add to, or delete from the preceding set of definitions
+   * because their values are significant within the operating system.
+   * The set defined below may be extended as needed.
+   */
+
+  SERIAL_BIOS_BAUD_19200,
+  SERIAL_BIOS_BAUD_38400,
+  SERIAL_BIOS_BAUD_57600,
+  SERIAL_BIOS_BAUD_115200
 } SerialBiosBaud;
 
 typedef enum {
@@ -93,13 +99,6 @@ typedef enum {
   SERIAL_BIOS_STATUS_TSR_EMPTY     = 0X4000,
   SERIAL_BIOS_STATUS_TIMEOUT       = 0X8000
 } SerialBiosStatus;
-
-typedef enum {
-  SERIAL_BIOS_COMMAND_CONFIG = 0,
-  SERIAL_BIOS_COMMAND_WRITE  = 1,
-  SERIAL_BIOS_COMMAND_READ   = 2,
-  SERIAL_BIOS_COMMAND_STATUS = 3
-} SerialBiosCommand;
 
 typedef struct {
   SerialBiosConfiguration bios;
