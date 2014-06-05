@@ -543,35 +543,6 @@ getPrimaryOverrideDirectory (void) {
   return NULL;
 }
 
-static void
-exitProgramStream (void *data) {
-  FILE **stream = data;
-
-  if (*stream) {
-    fclose(*stream);
-    *stream = NULL;
-  }
-}
-
-void
-registerProgramStream (const char *name, FILE **stream) {
-  onProgramExit(name, exitProgramStream, stream);
-}
-
-FILE *
-openFile (const char *path, const char *mode, int optional) {
-  FILE *file = fopen(path, mode);
-
-  if (file) {
-    logMessage(LOG_DEBUG, "file opened: %s fd=%d", path, fileno(file));
-  } else {
-    logMessage((optional && (errno == ENOENT))? LOG_DEBUG: LOG_ERR,
-               "cannot open file: %s: %s", path, strerror(errno));
-  }
-
-  return file;
-}
-
 #if defined(F_SETLK)
 static int
 modifyFileLock (int file, int action, short type) {
@@ -773,6 +744,44 @@ releaseFileLock (int file) {
   return 0;
 }
 #endif /* file locking */
+
+static void
+exitProgramStream (void *data) {
+  FILE **stream = data;
+
+  if (*stream) {
+    fclose(*stream);
+    *stream = NULL;
+  }
+}
+
+void
+registerProgramStream (const char *name, FILE **stream) {
+  onProgramExit(name, exitProgramStream, stream);
+}
+
+void
+flushStream (FILE *stream) {
+  fflush(stream);
+
+#ifdef __MSDOS__
+  fsync(fileno(stream));
+#endif /* __MSDOS__ */
+}
+
+FILE *
+openFile (const char *path, const char *mode, int optional) {
+  FILE *file = fopen(path, mode);
+
+  if (file) {
+    logMessage(LOG_DEBUG, "file opened: %s fd=%d", path, fileno(file));
+  } else {
+    logMessage((optional && (errno == ENOENT))? LOG_DEBUG: LOG_ERR,
+               "cannot open file: %s: %s", path, strerror(errno));
+  }
+
+  return file;
+}
 
 int
 readLine (FILE *file, char **buffer, size_t *size) {

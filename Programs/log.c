@@ -45,6 +45,7 @@
 #include "log.h"
 #include "timing.h"
 #include "addresses.h"
+#include "file.h"
 
 const char *const logLevelNames[] = {
   "emergency", "alert", "critical", "error",
@@ -161,7 +162,6 @@ toWindowsEventType (int level) {
 }
 
 #elif defined(__MSDOS__)
-#include "file.h"
 
 #elif defined(__ANDROID__)
 static int
@@ -279,15 +279,6 @@ popLogPrefix (void) {
   return 0;
 }
 
-static void
-flushLogStream (FILE *stream) {
-  fflush(stream);
-
-#ifdef __MSDOS__
-  fsync(fileno(stream));
-#endif /* __MSDOS__ */
-}
-
 void
 closeLogFile (void) {
   if (logFile) {
@@ -322,7 +313,7 @@ writeLogRecord (const char *record) {
 
     fputs(record, logFile);
     fputc('\n', logFile);
-    flushLogStream(logFile);
+    flushStream(logFile);
     unlockStream(logFile);
   }
 }
@@ -444,7 +435,7 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
         fputs(record, stream);
         fputc('\n', stream);
 
-        flushLogStream(stream);
+        flushStream(stream);
         unlockStream(stream);
       }
 
