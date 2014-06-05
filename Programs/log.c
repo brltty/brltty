@@ -161,6 +161,7 @@ toWindowsEventType (int level) {
 }
 
 #elif defined(__MSDOS__)
+#include "file.h"
 
 #elif defined(__ANDROID__)
 static int
@@ -278,6 +279,15 @@ popLogPrefix (void) {
   return 0;
 }
 
+static void
+flushLogStream (FILE *stream) {
+  fflush(stream);
+
+#ifdef __MSDOS__
+  fsync(fileno(stream));
+#endif /* __MSDOS__ */
+}
+
 void
 closeLogFile (void) {
   if (logFile) {
@@ -312,12 +322,7 @@ writeLogRecord (const char *record) {
 
     fputs(record, logFile);
     fputc('\n', logFile);
-    fflush(logFile);
-
-#ifdef __MSDOS__
-    fsync(fileno(logFile));
-#endif /* __MSDOS__ */
-
+    flushLogStream(logFile);
     unlockStream(logFile);
   }
 }
@@ -330,7 +335,14 @@ openSystemLog (void) {
   }
 
 #elif defined(__MSDOS__)
-  openLogFile(PACKAGE_TARNAME ".log");
+  if (!logFile) {
+    char *path = makeWritablePath(PACKAGE_TARNAME ".log");
+
+    if (path) {
+      openLogFile(path);
+      free(path);
+    }
+  }
 
 #elif defined(__ANDROID__)
 
@@ -431,7 +443,8 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
 
         fputs(record, stream);
         fputc('\n', stream);
-        fflush(stream);
+
+        flushLogStream(stream);
         unlockStream(stream);
       }
 

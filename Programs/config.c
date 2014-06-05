@@ -1956,8 +1956,14 @@ changeLogCategories (const char *operand) {
   return changeLogLevel(operand);
 }
 
+static void
+exitLog (void *data) {
+  closeSystemLog();
+  closeLogFile();
+}
+
 ProgramExitStatus
-brlttyStart (int argc, char *argv[]) {
+brlttyParse (int argc, char *argv[]) {
   {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
@@ -1966,8 +1972,13 @@ brlttyStart (int argc, char *argv[]) {
       .configurationFile = &opt_configurationFile,
       .applicationName = "brltty"
     };
+
     ProgramExitStatus exitStatus = processOptions(&descriptor, &argc, &argv);
     if (exitStatus == PROG_EXIT_FORCE) return PROG_EXIT_FORCE;
+  }
+
+  if (argc) {
+    logMessage(LOG_ERR, "%s: %s", gettext("excess argument"), argv[0]);
   }
 
   {
@@ -1978,13 +1989,41 @@ brlttyStart (int argc, char *argv[]) {
       &opt_pidFile,
       NULL
     };
+
     fixInstallPaths(paths);
+    writableDirectory = opt_writableDirectory;
   }
 
-  if (argc) {
-    logMessage(LOG_ERR, "%s: %s", gettext("excess argument"), argv[0]);
+  systemLogLevel = LOG_NOTICE;
+  disableAllLogCategories();
+  changeLogLevel(opt_logLevel);
+
+  {
+    unsigned char level;
+
+    if (opt_standardError) {
+      level = systemLogLevel;
+    } else {
+      level = LOG_NOTICE;
+      if (opt_version || opt_verify) level += 1;
+      if (opt_quiet) level -= 1;
+    }
+
+    stderrLogLevel = level;
   }
 
+  onProgramExit("log", exitLog, NULL);
+  if (*opt_logFile) {
+    openLogFile(opt_logFile);
+  } else {
+    openSystemLog();
+  }
+
+  return PROG_EXIT_SUCCESS;
+}
+
+ProgramExitStatus
+brlttyStart (void) {
   if (opt_cancelExecution) {
     ProgramExitStatus exitStatus;
 
@@ -2002,31 +2041,6 @@ brlttyStart (int argc, char *argv[]) {
 
   if (!validateInterval(&messageHoldTimeout, opt_messageHoldTimeout)) {
     logMessage(LOG_ERR, "%s: %s", gettext("invalid message hold timeout"), opt_messageHoldTimeout);
-  }
-
-  /* Set logging levels. */
-  systemLogLevel = LOG_NOTICE;
-  disableAllLogCategories();
-  changeLogLevel(opt_logLevel);
-
-  {
-    unsigned char level;
-
-    if (opt_standardError) {
-      level = systemLogLevel;
-      closeSystemLog();
-    } else {
-      level = LOG_NOTICE;
-      if (opt_version || opt_verify) level += 1;
-      if (opt_quiet) level -= 1;
-    }
-
-    stderrLogLevel = level;
-  }
-
-  if (*opt_logFile) {
-    openLogFile(opt_logFile);
-    closeSystemLog();
   }
 
   {
@@ -2160,7 +2174,6 @@ brlttyStart (int argc, char *argv[]) {
   }
 
   logMessage(LOG_INFO, "%s: %s", gettext("Writable Directory"), opt_writableDirectory);
-  writableDirectory = opt_writableDirectory;
 
   logMessage(LOG_INFO, "%s: %s", gettext("Configuration File"), opt_configurationFile);
   logMessage(LOG_INFO, "%s: %s", gettext("Preferences File"), opt_preferencesFile);

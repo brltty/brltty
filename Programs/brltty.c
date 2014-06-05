@@ -1258,12 +1258,6 @@ showDotPattern (unsigned char dots, unsigned char duration) {
 }
 
 static void
-exitLog (void *data) {
-  closeSystemLog();
-  closeLogFile();
-}
-
-static void
 exitSessions (void *data) {
   if (ses) {
     popCommandEnvironment();
@@ -1298,8 +1292,11 @@ brlttyConstruct (int argc, char *argv[]) {
     srand(now.seconds ^ now.nanoseconds);
   }
 
-  onProgramExit("log", exitLog, NULL);
-  openSystemLog();
+  {
+    ProgramExitStatus exitStatus = brlttyParse(argc, argv);
+
+    if (exitStatus != PROG_EXIT_SUCCESS) return exitStatus;
+  }
 
   programTerminationRequestCount = 0;
   programTerminationRequestTime = time(NULL);
@@ -1334,7 +1331,7 @@ brlttyConstruct (int argc, char *argv[]) {
   suspendUpdates();
 
   {
-    ProgramExitStatus exitStatus = brlttyStart(argc, argv);
+    ProgramExitStatus exitStatus = brlttyStart();
 
     if (exitStatus != PROG_EXIT_SUCCESS) return exitStatus;
   }
