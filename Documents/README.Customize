@@ -27,13 +27,13 @@ in your version of the file, and then include the provided file in order to
 automatically always pick up the latest versions of all the unchanged lines.
 
 For example: Let's say that you'd like to add your own key bindings to the 
-laptop keyboard key table. To do so, create "/etc/xdg/brltty/kbd-laptop.ktb", 
+laptop keyboard table. To do so, create "/etc/xdg/brltty/kbd-laptop.ktb", 
 and place lines like these in it:
 
    bind Key1 COMMAND1
    bind Key2 COMMAND2
 ...
-   include /etc/brltty/kbd-laptop.ktb
+   include kbd-laptop.ktb
 
 The XDG_CONFIG_HOME environment variable defines the base directory in which to 
 check before the standard directory is checked. If it's set and not empty then 

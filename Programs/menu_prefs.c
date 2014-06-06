@@ -125,8 +125,8 @@ changedBrailleSensitivity (const MenuItem *item UNUSED, unsigned char setting) {
 }
 
 static int
-testBrailleOrientation (void) {
-  return brl.rotateKey != NULL;
+testBrailleDisplayOrientation (void) {
+  return brl.rotateInput != NULL;
 }
 
 static int
@@ -320,7 +320,7 @@ changedContractionTable (const MenuItem *item, unsigned char setting UNUSED) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
 static int
-testBrailleKeyTable (void) {
+testInputTable (void) {
   return !!brl.keyTable;
 }
 
@@ -681,9 +681,9 @@ makePreferencesMenu (void) {
         {.label=strtext("Rotated")}
       };
 
-      NAME(strtext("Braille Orientation"));
-      ITEM(newEnumeratedMenuItem(inputSubmenu, &prefs.brailleOrientation, &itemName, strings));
-      TEST(BrailleOrientation);
+      NAME(strtext("Braille Display Orientation"));
+      ITEM(newEnumeratedMenuItem(inputSubmenu, &prefs.brailleDisplayOrientation, &itemName, strings));
+      TEST(BrailleDisplayOrientation);
     }
   }
 
@@ -1091,7 +1091,7 @@ makePreferencesMenu (void) {
 
               switch (category) {
                 case LOG_CATEGORY_INDEX(BRAILLE_KEYS):
-                  TEST(BrailleKeyTable);
+                  TEST(InputTable);
                   break;
 
                 case LOG_CATEGORY_INDEX(KEYBOARD_KEYS):

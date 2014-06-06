@@ -51,14 +51,14 @@ typedef enum {
 typedef enum {
   BRL_ORIENTATION_NORMAL,
   BRL_ORIENTATION_ROTATED
-} BrailleOrientation;
+} BrailleDisplayOrientation;
 
 typedef struct BrailleDisplayStruct BrailleDisplay;
 typedef struct BrailleDataStruct BrailleData;
 
 typedef int BrailleFirmnessSetter (BrailleDisplay *brl, BrailleFirmness setting);
 typedef int BrailleSensitivitySetter (BrailleDisplay *brl, BrailleSensitivity setting);
-typedef void BrailleKeyRotator (BrailleDisplay *brl, unsigned char *set, unsigned char *key);
+typedef void BrailleInputRotator (BrailleDisplay *brl, KeyGroup *group, KeyNumber *number);
 
 struct BrailleDisplayStruct {
   unsigned int textColumns, textRows;
@@ -81,7 +81,7 @@ struct BrailleDisplayStruct {
 
   BrailleFirmnessSetter *setFirmness;
   BrailleSensitivitySetter *setSensitivity;
-  BrailleKeyRotator *rotateKey;
+  BrailleInputRotator *rotateInput;
 };
 
 typedef struct {

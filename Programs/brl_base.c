@@ -132,8 +132,8 @@ translateInputCell (unsigned char cell) {
 }
 
 void
-applyBrailleOrientation (unsigned char *cells, size_t count) {
-  switch (prefs.brailleOrientation) {
+applyBrailleDisplayOrientation (unsigned char *cells, size_t count) {
+  switch (prefs.brailleDisplayOrientation) {
     case BRL_ORIENTATION_ROTATED: {
       static TranslationTable rotateTable = {[1] = 0};
 
@@ -455,9 +455,9 @@ enqueueKeyEvent (
 #endif /* ENABLE_API */
 
   if (brl->keyTable) {
-    switch (prefs.brailleOrientation) {
+    switch (prefs.brailleDisplayOrientation) {
       case BRL_ORIENTATION_ROTATED:
-        if (brl->rotateKey) brl->rotateKey(brl, &group, &number);
+        if (brl->rotateInput) brl->rotateInput(brl, &group, &number);
         break;
 
       default:

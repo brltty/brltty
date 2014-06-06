@@ -819,11 +819,11 @@ install-keyboard-tables: install-keyboard-tables-directory
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(KEYBOARD_TABLES_SUBDIRECTORY)/*$(KEY_SUBTABLE_EXTENSION) $(INSTALL_KEYBOARD_TABLES_DIRECTORY)
 
 install-braille-key-tables: install-braille-key-tables-directory
-	cd $(SRC_TOP)$(TBL_DIR)/$(BRAILLE_KEY_TABLES_SUBDIRECTORY) && \
+	cd $(SRC_TOP)$(TBL_DIR)/$(INPUT_TABLES_SUBDIRECTORY) && \
 	set -- *$(KEY_SUBTABLE_EXTENSION) */*$(KEY_TABLE_EXTENSION) */*$(KEY_SUBTABLE_EXTENSION) */*$(KEY_HELP_EXTENSION) && \
 	for file; do \
 	driver=`dirname $$file` && \
-	target=$(INSTALL_BRAILLE_KEY_TABLES_DIRECTORY)/$$driver && \
+	target=$(INSTALL_INPUT_TABLES_DIRECTORY)/$$driver && \
 	$(INSTALL_DIRECTORY) $$target && \
 	$(INSTALL_DATA) $$file $$target; \
 	done
@@ -924,7 +924,7 @@ uninstall-tables:
 	-rm -f -r $(INSTALL_ATTRIBUTES_TABLES_DIRECTORY)
 	-rm -f -r $(INSTALL_CONTRACTION_TABLES_DIRECTORY)
 	-rm -f -r $(INSTALL_KEYBOARD_TABLES_DIRECTORY)
-	-rm -f -r $(INSTALL_BRAILLE_KEY_TABLES_DIRECTORY)
+	-rm -f -r $(INSTALL_INPUT_TABLES_DIRECTORY)
 	-[ ! -d $(INSTALL_TABLES_DIRECTORY) ] || rmdir $(INSTALL_TABLES_DIRECTORY)
 	-[ ! -d $(INSTALL_WRITABLE_DIRECTORY) ] || rmdir $(INSTALL_WRITABLE_DIRECTORY)
 

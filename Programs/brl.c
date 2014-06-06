@@ -49,7 +49,7 @@ initializeBrailleDisplay (BrailleDisplay *brl) {
   brl->data = NULL;
   brl->setFirmness = NULL;
   brl->setSensitivity = NULL;
-  brl->rotateKey = NULL;
+  brl->rotateInput = NULL;
 }
 
 static void

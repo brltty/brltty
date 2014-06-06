@@ -813,10 +813,10 @@ changeKeyboardTable (const char *name) {
     char *path = makeKeyboardTablePath(opt_tablesDirectory, name);
 
     if (path) {
-      logMessage(LOG_DEBUG, "compiling key table: %s", path);
+      logMessage(LOG_DEBUG, "compiling keyboard table: %s", path);
 
       if (!(table = compileKeyTable(path, KEY_NAME_TABLES(keyboard)))) {
-        logMessage(LOG_ERR, "%s: %s", gettext("cannot compile key table"), path);
+        logMessage(LOG_ERR, "%s: %s", gettext("cannot compile keyboard table"), path);
       }
 
       free(path);
@@ -1136,7 +1136,7 @@ constructBrailleDriver (void) {
   if (braille->construct(&brl, brailleParameters, brailleDevice)) {
     if (ensureBrailleBuffer(&brl, LOG_INFO)) {
       if (brl.keyBindings) {
-        char *keyTablePath = makeBrailleKeyTablePath(opt_tablesDirectory,
+        char *keyTablePath = makeInputTablePath(opt_tablesDirectory,
                                              braille->definition.code,
                                              brl.keyBindings);
 
@@ -1153,7 +1153,7 @@ constructBrailleDriver (void) {
                 listKeyTable(brl.keyTable, handleWcharHelpLine, NULL);
               }
             } else {
-              logMessage(LOG_WARNING, "%s: %s", gettext("cannot open key table"), keyTablePath);
+              logMessage(LOG_WARNING, "%s: %s", gettext("cannot compile key table"), keyTablePath);
             }
           }
 
@@ -2239,7 +2239,6 @@ brlttyStart (void) {
              *opt_contractionTable? opt_contractionTable: gettext("none"));
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-  /* handle key table option */
   onProgramExit("keyboard-table", exitKeyboardTable, NULL);
   changeKeyboardTable(opt_keyboardTable);
   logMessage(LOG_INFO, "%s: %s", gettext("Keyboard Table"),

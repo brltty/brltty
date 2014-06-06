@@ -1563,10 +1563,10 @@ makeKeyboardTablePath (const char *directory, const char *name) {
 }
 
 char *
-makeBrailleKeyTablePath (const char *directory, const char *driver, const char *name) {
+makeInputTablePath (const char *directory, const char *driver, const char *name) {
   const char *components[] = {
     directory,
-    BRAILLE_KEY_TABLES_SUBDIRECTORY,
+    INPUT_TABLES_SUBDIRECTORY,
     driver
   };
   char *subdirectory = joinPath(components, ARRAY_COUNT(components));

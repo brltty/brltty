@@ -39,7 +39,7 @@ extern char *ensureKeyTableExtension (const char *path);
 extern char *makeKeyTablePath (const char *directory, const char *name);
 
 extern char *makeKeyboardTablePath (const char *directory, const char *name);
-extern char *makeBrailleKeyTablePath (const char *directory, const char *driver, const char *name);
+extern char *makeInputTablePath (const char *directory, const char *driver, const char *name);
 
 extern void resetKeyTable (KeyTable *table);
 

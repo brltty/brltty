@@ -516,8 +516,8 @@ extern "C" {
 /* Define this to be a string containing the subdirectory for keyboard tables. */
 #undef KEYBOARD_TABLES_SUBDIRECTORY
 
-/* Define this to be a string containing the subdirectory for braille device key tables. */
-#undef BRAILLE_KEY_TABLES_SUBDIRECTORY
+/* Define this to be a string containing the subdirectory for input tables. */
+#undef INPUT_TABLES_SUBDIRECTORY
 
 /* Define this to be a string containing the extension for text tables. */
 #undef TEXT_TABLE_EXTENSION

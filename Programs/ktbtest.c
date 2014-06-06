@@ -134,7 +134,7 @@ getKeyTableDescriptor (KeyTableDescriptor *ktd, const char *name) {
                   while (*currentDefinition) {
                     if (strcmp(deviceType, (*currentDefinition)->bindings) == 0) {
                       ktd->names = (*currentDefinition)->names;
-                      if ((ktd->path = makeBrailleKeyTablePath(opt_tablesDirectory, driverCode, deviceType))) ok = 1;
+                      if ((ktd->path = makeInputTablePath(opt_tablesDirectory, driverCode, deviceType))) ok = 1;
                       break;
                     }
 

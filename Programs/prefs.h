@@ -160,8 +160,8 @@ typedef struct {
   /* Fields below this point may be modified as needed.                        */
   /*****************************************************************************/
 
-  unsigned char brailleOrientation;
   unsigned char brailleInputMode;
+  unsigned char brailleDisplayOrientation;
 
   unsigned char capitalizationMode;
   unsigned char uppercaseIndicator;

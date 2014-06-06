@@ -62,7 +62,7 @@ PREFERENCE_STRING_TABLE(brailleInputMode,
   "text", "dots"
 )
 
-PREFERENCE_STRING_TABLE(brailleOrientation,
+PREFERENCE_STRING_TABLE(displayOrientation,
   "normal", "rotated"
 )
 
@@ -322,10 +322,10 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.brailleInputMode
   },
 
-  { .name = "braille-orientation",
-    .defaultValue = DEFAULT_BRAILLE_ORIENTATION,
-    .settingNames = &preferenceStringTable_brailleOrientation,
-    .setting = &prefs.brailleOrientation
+  { .name = "braille-display-orientation",
+    .defaultValue = DEFAULT_BRAILLE_DISPLAY_ORIENTATION,
+    .settingNames = &preferenceStringTable_displayOrientation,
+    .setting = &prefs.brailleDisplayOrientation
   },
 
   { .name = "alert-tunes",
