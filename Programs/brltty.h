@@ -162,7 +162,7 @@ extern ContractionTable *contractionTable;
 
 extern KeyTable *keyboardKeyTable;
 
-extern ProgramExitStatus brlttyParse (int argc, char *argv[]);
+extern ProgramExitStatus brlttyPrepare (int argc, char *argv[]);
 extern ProgramExitStatus brlttyStart (void);
 
 extern void setPreferences (const Preferences *newPreferences);

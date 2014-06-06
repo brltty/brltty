@@ -573,6 +573,112 @@ BEGIN_OPTION_TABLE(programOptions)
 END_OPTION_TABLE
 
 int
+changeLogLevel (const char *operand) {
+  int ok = 1;
+  char **strings = splitString(operand, ',', NULL);
+
+  if (strings) {
+    char **string = strings;
+
+    while (*string) {
+      unsigned int level;
+
+      if (isLogLevel(&level, *string)) {
+        systemLogLevel = level;
+      } else if (!enableLogCategory(*string)) {
+        logMessage(LOG_ERR, "%s: %s", gettext("unknown log level or category"), *string);
+        ok = 0;
+      }
+
+      string += 1;
+    }
+
+    deallocateStrings(strings);
+  }
+
+  return ok;
+}
+
+int
+changeLogCategories (const char *operand) {
+  disableAllLogCategories();
+  return changeLogLevel(operand);
+}
+
+static void
+exitLog (void *data) {
+  closeSystemLog();
+  closeLogFile();
+}
+
+ProgramExitStatus
+brlttyPrepare (int argc, char *argv[]) {
+  {
+    static const OptionsDescriptor descriptor = {
+      OPTION_TABLE(programOptions),
+      .doBootParameters = &opt_bootParameters,
+      .doEnvironmentVariables = &opt_environmentVariables,
+      .configurationFile = &opt_configurationFile,
+      .applicationName = "brltty"
+    };
+    ProgramExitStatus exitStatus = processOptions(&descriptor, &argc, &argv);
+
+    switch (exitStatus) {
+      case PROG_EXIT_SYNTAX:
+      case PROG_EXIT_SUCCESS:
+        break;
+
+      default:
+        return exitStatus;
+    }
+  }
+
+  if (argc) {
+    logMessage(LOG_ERR, "%s: %s", gettext("excess argument"), argv[0]);
+  }
+
+  {
+    char **const paths[] = {
+      &opt_driversDirectory,
+      &opt_writableDirectory,
+      &opt_tablesDirectory,
+      &opt_pidFile,
+      NULL
+    };
+
+    fixInstallPaths(paths);
+    writableDirectory = opt_writableDirectory;
+  }
+
+  systemLogLevel = LOG_NOTICE;
+  disableAllLogCategories();
+  changeLogLevel(opt_logLevel);
+
+  {
+    unsigned char level;
+
+    if (opt_standardError) {
+      level = systemLogLevel;
+    } else {
+      level = LOG_NOTICE;
+      if (opt_version || opt_verify) level += 1;
+      if (opt_quiet) level -= 1;
+    }
+
+    stderrLogLevel = level;
+  }
+
+  onProgramExit("log", exitLog, NULL);
+  if (*opt_logFile) {
+    openLogFile(opt_logFile);
+  } else {
+    openSystemLog();
+  }
+
+  return PROG_EXIT_SUCCESS;
+}
+
+int
 changeTextTable (const char *name) {
   return replaceTextTable(opt_tablesDirectory, name);
 }
@@ -1923,105 +2029,6 @@ validateInterval (int *value, const char *string) {
   }
 }
 
-int
-changeLogLevel (const char *operand) {
-  int ok = 1;
-  char **strings = splitString(operand, ',', NULL);
-
-  if (strings) {
-    char **string = strings;
-
-    while (*string) {
-      unsigned int level;
-
-      if (isLogLevel(&level, *string)) {
-        systemLogLevel = level;
-      } else if (!enableLogCategory(*string)) {
-        logMessage(LOG_ERR, "%s: %s", gettext("unknown log level or category"), *string);
-        ok = 0;
-      }
-
-      string += 1;
-    }
-
-    deallocateStrings(strings);
-  }
-
-  return ok;
-}
-
-int
-changeLogCategories (const char *operand) {
-  disableAllLogCategories();
-  return changeLogLevel(operand);
-}
-
-static void
-exitLog (void *data) {
-  closeSystemLog();
-  closeLogFile();
-}
-
-ProgramExitStatus
-brlttyParse (int argc, char *argv[]) {
-  {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
-      .doBootParameters = &opt_bootParameters,
-      .doEnvironmentVariables = &opt_environmentVariables,
-      .configurationFile = &opt_configurationFile,
-      .applicationName = "brltty"
-    };
-
-    ProgramExitStatus exitStatus = processOptions(&descriptor, &argc, &argv);
-    if (exitStatus == PROG_EXIT_FORCE) return PROG_EXIT_FORCE;
-  }
-
-  if (argc) {
-    logMessage(LOG_ERR, "%s: %s", gettext("excess argument"), argv[0]);
-  }
-
-  {
-    char **const paths[] = {
-      &opt_driversDirectory,
-      &opt_writableDirectory,
-      &opt_tablesDirectory,
-      &opt_pidFile,
-      NULL
-    };
-
-    fixInstallPaths(paths);
-    writableDirectory = opt_writableDirectory;
-  }
-
-  systemLogLevel = LOG_NOTICE;
-  disableAllLogCategories();
-  changeLogLevel(opt_logLevel);
-
-  {
-    unsigned char level;
-
-    if (opt_standardError) {
-      level = systemLogLevel;
-    } else {
-      level = LOG_NOTICE;
-      if (opt_version || opt_verify) level += 1;
-      if (opt_quiet) level -= 1;
-    }
-
-    stderrLogLevel = level;
-  }
-
-  onProgramExit("log", exitLog, NULL);
-  if (*opt_logFile) {
-    openLogFile(opt_logFile);
-  } else {
-    openSystemLog();
-  }
-
-  return PROG_EXIT_SUCCESS;
-}
-
 ProgramExitStatus
 brlttyStart (void) {
   if (opt_cancelExecution) {
@@ -2174,8 +2181,8 @@ brlttyStart (void) {
   }
 
   logMessage(LOG_INFO, "%s: %s", gettext("Writable Directory"), opt_writableDirectory);
-
   logMessage(LOG_INFO, "%s: %s", gettext("Configuration File"), opt_configurationFile);
+
   logMessage(LOG_INFO, "%s: %s", gettext("Preferences File"), opt_preferencesFile);
   loadPreferences();
 

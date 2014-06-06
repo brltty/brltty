@@ -1293,7 +1293,7 @@ brlttyConstruct (int argc, char *argv[]) {
   }
 
   {
-    ProgramExitStatus exitStatus = brlttyParse(argc, argv);
+    ProgramExitStatus exitStatus = brlttyPrepare(argc, argv);
 
     if (exitStatus != PROG_EXIT_SUCCESS) return exitStatus;
   }
