@@ -25,14 +25,6 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#ifdef _POSIX_THREAD_SAFE_FUNCTIONS
-#define lockStream(stream) flockfile((stream))
-#define unlockStream(stream) funlockfile((stream))
-#else /* _POSIX_THREAD_SAFE_FUNCTIONS */
-#define lockStream(stream)
-#define unlockStream(stream)
-#endif /* _POSIX_THREAD_SAFE_FUNCTIONS */
-
 #ifdef __MINGW32__
 /* MinGW defines localtime_r() in <pthread.h> */
 #include <pthread.h>
