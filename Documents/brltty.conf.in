@@ -426,14 +426,14 @@
 # Keyboard Settings #
 #####################
 
-# The key-table directive specifies which key table to use. Relative paths are
-# anchored at "@TABLES_DIRECTORY@". If not specified, no key table is used.
-# (can be overridden with the -k [--key-table=] option)
-#key-table	braille	# bindings for braille keyboards
-#key-table	desktop	# bindings for full keyboards
-#key-table	keypad	# bindings for keypad-based navigation
-#key-table	laptop	# bindings for keyboards without a keypad
-#key-table	sun_type6	# bindings for Sun Type 6 keyboards
+# The keyboard-table directive specifies which keyboard table to use. Relative paths are
+# anchored at "@TABLES_DIRECTORY@". If not specified, no keyboard table is used.
+# (can be overridden with the -k [--keyboard-table=] option)
+#keyboard-table	braille	# bindings for braille keyboards
+#keyboard-table	desktop	# bindings for full keyboards
+#keyboard-table	keypad	# bindings for keypad-based navigation
+#keyboard-table	laptop	# bindings for keyboards without a keypad
+#keyboard-table	sun_type6	# bindings for Sun Type 6 keyboards
 
 # The keyboard-properties directive specifies which keyboards to monitor.
 # If not specified, all keyboards are monitored.
@@ -504,8 +504,8 @@
 #writable-directory @WRITABLE_DIRECTORY@
 
 # The tables-directory directive specifies the absolute path to the directory
-# which contains the text, attributes, contraction, and key tables. If not
-# specified, "@TABLES_DIRECTORY@" will be used.
+# which contains the text, attributes, contraction, keyboard, and input tables.
+# If not specified, "@TABLES_DIRECTORY@" will be used.
 # (can be overridden with the -T [--tables-directory=] option)
 #tables-directory @TABLES_DIRECTORY@
 

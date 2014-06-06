@@ -51,7 +51,7 @@ SYMBOL_POINTER(changeLogCategories);
 SYMBOL_POINTER(changeTextTable);
 SYMBOL_POINTER(changeAttributesTable);
 SYMBOL_POINTER(changeContractionTable);
-SYMBOL_POINTER(changeKeyboardKeyTable);
+SYMBOL_POINTER(changeKeyboardTable);
 
 SYMBOL_POINTER(restartBrailleDriver);
 SYMBOL_POINTER(changeBrailleDriver);
@@ -86,7 +86,7 @@ BEGIN_SYMBOL_TABLE
   SYMBOL_ENTRY(changeTextTable),
   SYMBOL_ENTRY(changeAttributesTable),
   SYMBOL_ENTRY(changeContractionTable),
-  SYMBOL_ENTRY(changeKeyboardKeyTable),
+  SYMBOL_ENTRY(changeKeyboardTable),
 
   SYMBOL_ENTRY(restartBrailleDriver),
   SYMBOL_ENTRY(changeBrailleDriver),
@@ -352,10 +352,10 @@ JAVA_METHOD (
 }
 
 JAVA_METHOD (
-  org_a11y_brltty_core_CoreWrapper, changeKeyboardKeyTable, jboolean,
+  org_a11y_brltty_core_CoreWrapper, changeKeyboardTable, jboolean,
   jstring name
 ) {
-  return changeStringValue(env, changeKeyboardKeyTable_p, name);
+  return changeStringValue(env, changeKeyboardTable_p, name);
 }
 
 JAVA_METHOD (

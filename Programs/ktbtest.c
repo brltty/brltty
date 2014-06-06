@@ -106,7 +106,7 @@ getKeyTableDescriptor (KeyTableDescriptor *ktd, const char *name) {
           const char *keyboardType = (componentsLeft--, *currentComponent++);
 
           ktd->names = KEY_NAME_TABLES(keyboard);
-          if ((ktd->path = makeKeyboardKeyTablePath(opt_tablesDirectory, keyboardType))) ok = 1;
+          if ((ktd->path = makeKeyboardTablePath(opt_tablesDirectory, keyboardType))) ok = 1;
         } else {
           logMessage(LOG_ERR, "missing keyboard type");
         }

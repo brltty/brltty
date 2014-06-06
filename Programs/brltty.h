@@ -160,7 +160,7 @@ extern int getContractedLength (unsigned int outputLimit);
 
 extern ContractionTable *contractionTable;
 
-extern KeyTable *keyboardKeyTable;
+extern KeyTable *keyboardTable;
 
 extern ProgramExitStatus brlttyPrepare (int argc, char *argv[]);
 extern ProgramExitStatus brlttyStart (void);

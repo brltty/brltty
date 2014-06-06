@@ -497,21 +497,21 @@
     <item>zu</item>
   </string-array>
 
-  <string name="KEY_TABLE_LABEL_braille">bindings for braille keyboards</string>
-  <string name="KEY_TABLE_LABEL_desktop">bindings for full keyboards</string>
-  <string name="KEY_TABLE_LABEL_keypad">bindings for keypad-based navigation</string>
-  <string name="KEY_TABLE_LABEL_laptop">bindings for keyboards without a keypad</string>
-  <string name="KEY_TABLE_LABEL_sun_type6">bindings for Sun Type 6 keyboards</string>
+  <string name="KEYBOARD_TABLE_LABEL_braille">bindings for braille keyboards</string>
+  <string name="KEYBOARD_TABLE_LABEL_desktop">bindings for full keyboards</string>
+  <string name="KEYBOARD_TABLE_LABEL_keypad">bindings for keypad-based navigation</string>
+  <string name="KEYBOARD_TABLE_LABEL_laptop">bindings for keyboards without a keypad</string>
+  <string name="KEYBOARD_TABLE_LABEL_sun_type6">bindings for Sun Type 6 keyboards</string>
 
-  <string-array name="KEY_TABLE_LABELS">
-    <item>@string/KEY_TABLE_LABEL_braille</item>
-    <item>@string/KEY_TABLE_LABEL_desktop</item>
-    <item>@string/KEY_TABLE_LABEL_keypad</item>
-    <item>@string/KEY_TABLE_LABEL_laptop</item>
-    <item>@string/KEY_TABLE_LABEL_sun_type6</item>
+  <string-array name="KEYBOARD_TABLE_LABELS">
+    <item>@string/KEYBOARD_TABLE_LABEL_braille</item>
+    <item>@string/KEYBOARD_TABLE_LABEL_desktop</item>
+    <item>@string/KEYBOARD_TABLE_LABEL_keypad</item>
+    <item>@string/KEYBOARD_TABLE_LABEL_laptop</item>
+    <item>@string/KEYBOARD_TABLE_LABEL_sun_type6</item>
   </string-array>
 
-  <string-array name="KEY_TABLE_VALUES">
+  <string-array name="KEYBOARD_TABLE_VALUES">
     <item>braille</item>
     <item>desktop</item>
     <item>keypad</item>

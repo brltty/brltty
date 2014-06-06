@@ -325,8 +325,8 @@ testBrailleKeyTable (void) {
 }
 
 static int
-testKeyboardKeyTable (void) {
-  return !!keyboardKeyTable;
+testKeyboardTable (void) {
+  return !!keyboardTable;
 }
 
 static MenuItem *
@@ -1095,7 +1095,7 @@ makePreferencesMenu (void) {
                   break;
 
                 case LOG_CATEGORY_INDEX(KEYBOARD_KEYS):
-                  TEST(KeyboardKeyTable);
+                  TEST(KeyboardTable);
                   break;
 
                 default:

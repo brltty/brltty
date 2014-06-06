@@ -45,7 +45,7 @@ FUNCTION_DECLARE(changeLogCategories, int, (const char *operand));
 FUNCTION_DECLARE(changeTextTable, int, (const char *name));
 FUNCTION_DECLARE(changeAttributesTable, int, (const char *name));
 FUNCTION_DECLARE(changeContractionTable, int, (const char *name));
-FUNCTION_DECLARE(changeKeyboardKeyTable, int, (const char *name));
+FUNCTION_DECLARE(changeKeyboardTable, int, (const char *name));
 
 FUNCTION_DECLARE(restartBrailleDriver, void, (void));
 FUNCTION_DECLARE(changeBrailleDriver, int, (const char *driver));

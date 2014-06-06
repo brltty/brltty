@@ -126,10 +126,10 @@ public class ArgumentsBuilder {
     return oldValue;
   }
 
-  private String keyboardKeyTable = null;
-  public String setKeyboardKeyTable (String newValue) {
-    String oldValue = keyboardKeyTable;
-    keyboardKeyTable = newValue;
+  private String keyboardTable = null;
+  public String setKeyboardTable (String newValue) {
+    String oldValue = keyboardTable;
+    keyboardTable = newValue;
     return oldValue;
   }
 
@@ -213,7 +213,7 @@ public class ArgumentsBuilder {
     addOption(arguments, "-t", textTable);
     addOption(arguments, "-a", attributesTable);
     addOption(arguments, "-c", contractionTable);
-    addOption(arguments, "-k", keyboardKeyTable);
+    addOption(arguments, "-k", keyboardTable);
 
     addOption(arguments, "-b", brailleDriver);
     addOption(arguments, "-d", brailleDevice);

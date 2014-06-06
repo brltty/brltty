@@ -24,7 +24,7 @@
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Texttabelle</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Attributtabelle</string>
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Kurzschrifttabelle</string>
-  <string name="SETTINGS_BUTTON_KEY_TABLE">Tastatur Tastentabelle</string>
+  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tastatur Tastentabelle</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Protokollstufe</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Protokollkategorien</string>
@@ -208,9 +208,9 @@
   <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">Chinesisch (Taiwan, Unique Chinese Braille)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (Kurzschrift)</string>
 
-  <string name="KEY_TABLE_LABEL_braille">Tastenzuweisungen für Braille Tastaturen</string>
-  <string name="KEY_TABLE_LABEL_desktop">Tastenzuweisungen für desktop Tastaturen</string>
-  <string name="KEY_TABLE_LABEL_keypad">Tastenzuweisungen für Nummern-Block bassierte Navigation</string>
-  <string name="KEY_TABLE_LABEL_laptop">Tastenzuweisungen für Tastaturen ohne Nummernblock</string>
-  <string name="KEY_TABLE_LABEL_sun_type6">Tastenzuweisungen für Sun Type 6 Tastaturen</string>
+  <string name="KEYBOARD_TABLE_LABEL_braille">Tastenzuweisungen für Braille Tastaturen</string>
+  <string name="KEYBOARD_TABLE_LABEL_desktop">Tastenzuweisungen für desktop Tastaturen</string>
+  <string name="KEYBOARD_TABLE_LABEL_keypad">Tastenzuweisungen für Nummern-Block bassierte Navigation</string>
+  <string name="KEYBOARD_TABLE_LABEL_laptop">Tastenzuweisungen für Tastaturen ohne Nummernblock</string>
+  <string name="KEYBOARD_TABLE_LABEL_sun_type6">Tastenzuweisungen für Sun Type 6 Tastaturen</string>
 </resources>

@@ -24,7 +24,7 @@
   <string name="SETTINGS_BUTTON_TEXT_TABLE">普通點字</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">屬性點字</string>
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">縮寫點字</string>
-  <string name="SETTINGS_BUTTON_KEY_TABLE">鍵盤對應表</string>
+  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">鍵盤對應表</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">紀錄等級</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">紀錄分類</string>
@@ -208,9 +208,9 @@
   <string name="CONTRACTION_TABLE_LABEL_zh_tw">中文</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">祖魯語縮寫</string>
 
-  <string name="KEY_TABLE_LABEL_braille">點字鍵盤對應</string>
-  <string name="KEY_TABLE_LABEL_desktop">全鍵盤對應</string>
-  <string name="KEY_TABLE_LABEL_keypad">九宮鍵尋懶對應</string>
-  <string name="KEY_TABLE_LABEL_laptop">沒有九宮鍵的鍵盤對應</string>
-  <string name="KEY_TABLE_LABEL_sun_type6">Sun 第六形鍵盤對應</string>
+  <string name="KEYBOARD_TABLE_LABEL_braille">點字鍵盤對應</string>
+  <string name="KEYBOARD_TABLE_LABEL_desktop">全鍵盤對應</string>
+  <string name="KEYBOARD_TABLE_LABEL_keypad">九宮鍵尋懶對應</string>
+  <string name="KEYBOARD_TABLE_LABEL_laptop">沒有九宮鍵的鍵盤對應</string>
+  <string name="KEYBOARD_TABLE_LABEL_sun_type6">Sun 第六形鍵盤對應</string>
 </resources>

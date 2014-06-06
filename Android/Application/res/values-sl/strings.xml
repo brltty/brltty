@@ -24,7 +24,7 @@
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Tabela Besedila</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Attributes Table Tabela Prilastkov</string>
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Tabela Krajšav</string>
-  <string name="SETTINGS_BUTTON_KEY_TABLE">Razporeditev Tipk na Tipkovnici</string>
+  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Razporeditev Tipk na Tipkovnici</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Nivo Dnevnika</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Kategorije Dnevnikov</string>
@@ -208,9 +208,9 @@
   <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">Kitajska (Tajvan, Edinstvena Kitajska Brajica)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (s krajšavami)</string>
 
-  <string name="KEY_TABLE_LABEL_braille">bližnjice za brajeve tipkovnice</string>
-  <string name="KEY_TABLE_LABEL_desktop">bližnjice za polne tipkovnice</string>
-  <string name="KEY_TABLE_LABEL_keypad">bližnjice za krmarjenje ki bazira na številskih tipkovnicah</string>
-  <string name="KEY_TABLE_LABEL_laptop">bližnjice za tipkovnice brez številskega dela</string>
-  <string name="KEY_TABLE_LABEL_sun_type6">bližnjice za Sun Type 6 tipkovnice</string>
+  <string name="KEYBOARD_TABLE_LABEL_braille">bližnjice za brajeve tipkovnice</string>
+  <string name="KEYBOARD_TABLE_LABEL_desktop">bližnjice za polne tipkovnice</string>
+  <string name="KEYBOARD_TABLE_LABEL_keypad">bližnjice za krmarjenje ki bazira na številskih tipkovnicah</string>
+  <string name="KEYBOARD_TABLE_LABEL_laptop">bližnjice za tipkovnice brez številskega dela</string>
+  <string name="KEYBOARD_TABLE_LABEL_sun_type6">bližnjice za Sun Type 6 tipkovnice</string>
 </resources>

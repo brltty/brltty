@@ -142,7 +142,7 @@ BRLTTY_ARG_REQUIRED(
 BRLTTY_DEFINE_STRING([TEXT_TABLE_SUBDIRECTORY], [Text], [the subdirectory for text tables])
 BRLTTY_DEFINE_STRING([ATTRIBUTES_TABLE_SUBDIRECTORY], [Attributes], [the subdirectory for attributes tables])
 BRLTTY_DEFINE_STRING([CONTRACTION_TABLE_SUBDIRECTORY], [Contraction], [the subdirectory for contraction tables])
-BRLTTY_DEFINE_STRING([KEYBOARD_KEY_TABLE_SUBDIRECTORY], [Keyboard], [the subdirectory for keyboard key tables])
+BRLTTY_DEFINE_STRING([KEYBOARD_TABLE_SUBDIRECTORY], [Keyboard], [the subdirectory for keyboard key tables])
 BRLTTY_DEFINE_STRING([BRAILLE_KEY_TABLE_SUBDIRECTORY], [Braille], [the subdirectory for braille device key tables])
 
 BRLTTY_DEFINE_STRING([TEXT_TABLE_EXTENSION], [.ttb], [the extension for text tables])

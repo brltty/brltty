@@ -1549,8 +1549,8 @@ makeKeyTablePath (const char *directory, const char *name) {
 }
 
 char *
-makeKeyboardKeyTablePath (const char *directory, const char *name) {
-  char *subdirectory = makePath(directory, KEYBOARD_KEY_TABLE_SUBDIRECTORY);
+makeKeyboardTablePath (const char *directory, const char *name) {
+  char *subdirectory = makePath(directory, KEYBOARD_TABLE_SUBDIRECTORY);
 
   if (subdirectory) {
     char *file = makeKeyTablePath(subdirectory, name);

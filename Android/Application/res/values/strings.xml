@@ -24,7 +24,7 @@
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Text Table</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Attributes Table</string>
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Contraction Table</string>
-  <string name="SETTINGS_BUTTON_KEY_TABLE">Keyboard Key Table</string>
+  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Keyboard Table</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Log Level</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Log Categories</string>

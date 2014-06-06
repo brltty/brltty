@@ -188,8 +188,8 @@ char *opt_contractionTable;
 ContractionTable *contractionTable = NULL;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-static char *opt_keyTable;
-KeyTable *keyboardKeyTable = NULL;
+static char *opt_keyboardTable;
+KeyTable *keyboardTable = NULL;
 
 static char *opt_keyboardProperties;
 static KeyboardProperties keyboardProperties;
@@ -425,11 +425,11 @@ BEGIN_OPTION_TABLE(programOptions)
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   { .letter = 'k',
-    .word = "key-table",
+    .word = "keyboard-table",
     .flags = OPT_Config | OPT_Environ,
     .argument = strtext("file"),
-    .setting.string = &opt_keyTable,
-    .description = strtext("Name of or path to key table.")
+    .setting.string = &opt_keyboardTable,
+    .description = strtext("Name of or path to keyboard table.")
   },
 
   { .letter = 'K',
@@ -796,21 +796,21 @@ loadHelpFile (const char *file) {
 }
 
 static void
-exitKeyboardKeyTable (void *data) {
-  if (keyboardKeyTable) {
-    destroyKeyTable(keyboardKeyTable);
-    keyboardKeyTable = NULL;
+exitKeyboardTable (void *data) {
+  if (keyboardTable) {
+    destroyKeyTable(keyboardTable);
+    keyboardTable = NULL;
   }
 
   disableHelpPage(keyboardHelpPageNumber);
 }
 
 int
-changeKeyboardKeyTable (const char *name) {
+changeKeyboardTable (const char *name) {
   KeyTable *table = NULL;
 
   if (*name) {
-    char *path = makeKeyboardKeyTablePath(opt_tablesDirectory, name);
+    char *path = makeKeyboardTablePath(opt_tablesDirectory, name);
 
     if (path) {
       logMessage(LOG_DEBUG, "compiling key table: %s", path);
@@ -825,17 +825,17 @@ changeKeyboardKeyTable (const char *name) {
     if (!table) return 0;
   }
 
-  if (keyboardKeyTable) {
-    destroyKeyTable(keyboardKeyTable);
+  if (keyboardTable) {
+    destroyKeyTable(keyboardTable);
     disableHelpPage(keyboardHelpPageNumber);
   }
 
-  if ((keyboardKeyTable = table)) {
-    setKeyTableLogLabel(keyboardKeyTable, "kbd");
-    setLogKeyEventsFlag(keyboardKeyTable, &LOG_CATEGORY_FLAG(KEYBOARD_KEYS));
+  if ((keyboardTable = table)) {
+    setKeyTableLogLabel(keyboardTable, "kbd");
+    setLogKeyEventsFlag(keyboardTable, &LOG_CATEGORY_FLAG(KEYBOARD_KEYS));
 
     if (enableKeyboardHelpPage()) {
-      listKeyTable(keyboardKeyTable, handleWcharHelpLine, NULL);
+      listKeyTable(keyboardTable, handleWcharHelpLine, NULL);
     }
   }
 
@@ -843,13 +843,13 @@ changeKeyboardKeyTable (const char *name) {
 }
 
 static KeyTableState
-handleKeyboardKeyEvent (KeyGroup group, KeyNumber number, int press) {
-  if (keyboardKeyTable) {
+handleKeyboardEvent (KeyGroup group, KeyNumber number, int press) {
+  if (keyboardTable) {
     if (!scr.unreadable) {
-      return processKeyEvent(keyboardKeyTable, getCurrentCommandContext(), group, number, press);
+      return processKeyEvent(keyboardTable, getCurrentCommandContext(), group, number, press);
     }
 
-    resetKeyTable(keyboardKeyTable);
+    resetKeyTable(keyboardTable);
   }
 
   return KTS_UNBOUND;
@@ -859,7 +859,7 @@ static void scheduleKeyboardMonitor (int interval);
 
 ASYNC_ALARM_CALLBACK(retryKeyboardMonitor) {
   logMessage(LOG_DEBUG, "starting keyboard monitor");
-  if (!startKeyboardMonitor(&keyboardProperties, handleKeyboardKeyEvent)) {
+  if (!startKeyboardMonitor(&keyboardProperties, handleKeyboardEvent)) {
     logMessage(LOG_DEBUG, "keyboard monitor failed");
     scheduleKeyboardMonitor(KEYBOARD_MONITOR_START_RETRY_INTERVAL);
   }
@@ -2240,13 +2240,13 @@ brlttyStart (void) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   /* handle key table option */
-  onProgramExit("keyboard-key-table", exitKeyboardKeyTable, NULL);
-  changeKeyboardKeyTable(opt_keyTable);
-  logMessage(LOG_INFO, "%s: %s", gettext("Keyboard Key Table"),
-             *opt_keyTable? opt_keyTable: gettext("none"));
+  onProgramExit("keyboard-table", exitKeyboardTable, NULL);
+  changeKeyboardTable(opt_keyboardTable);
+  logMessage(LOG_INFO, "%s: %s", gettext("Keyboard Table"),
+             *opt_keyboardTable? opt_keyboardTable: gettext("none"));
 
   if (parseKeyboardProperties(&keyboardProperties, opt_keyboardProperties)) {
-    if (keyboardKeyTable) {
+    if (keyboardTable) {
       scheduleKeyboardMonitor(0);
     }
   }

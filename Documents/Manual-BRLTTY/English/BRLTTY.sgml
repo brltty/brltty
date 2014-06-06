@@ -2505,17 +2505,17 @@ The following directives are recognized:
     <ref id="options-contraction-table" name="-c"> command line option.
     It isn't available if the
     <ref id="build-contracted-braille" name="--disable-contracted-braille"> build option was specified.
-  <tag><tt/key-table/ <em/file/|<tt/auto/<label id="configure-key-table"></tag>
-    Specify the key table
+  <tag><tt/keyboard-table/ <em/file/|<tt/auto/<label id="configure-keyboard-table"></tag>
+    Specify the keyboard table
     (see section <ref id="table-key" name="Key Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
     (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
     The <tt/.ktb/ extension is optional.
-    The default is not to use a key table.
+    The default is not to use a keyboard table.
     This directive can be overridden with the
-    <ref id="options-key-table" name="-k"> command line option.
+    <ref id="options-keyboard-table" name="-k"> command line option.
   <tag><tt/keyboard-properties/ <em/name/<tt/=/<em/value/<tt/,/...<label id="configure-keyboard-properties"></tag>
     Specify the properties of the keyboard(s) to be monitored.
     If the same property is specified more than once,
@@ -2686,18 +2686,18 @@ The <tt/brltty/ command accepts the following options:
     configuration file directive for the default run-time setting.
     This option isn't available if the
     <ref id="build-speech-support" name="--disable-speech-support"> build option was specified.
-  <tag><tt/-k/<em/file/ <tt/--key-table=/<em/file/<label id="options-key-table"></tag>
-    Specify the key table
+  <tag><tt/-k/<em/file/ <tt/--keyboard-table=/<em/file/<label id="options-keyboard-table"></tag>
+    Specify the keyboard table
     (see section <ref id="table-key" name="Key Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
     (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
     The <tt/.ktb/ extension is optional.
-    See the <ref id="configure-key-table" name="key-table">
+    See the <ref id="configure-keyboard-table" name="keyboard-table">
     configureation file directive for the default run-time setting.
     This setting can be changed with the
-    <ref id="preference-key-table" name="Key Table"> preference.
+    <ref id="preference-keyboard-table" name="Keyboard Table"> preference.
   <tag><tt/-l/<em/level/ <tt/--log-level=/<em/level/<label id="options-log-level"></tag>
     Specify the severity threshold for diagnostic message generation.
     The following levels are recognized.
@@ -2846,9 +2846,9 @@ The <tt/brltty/ command accepts the following options:
       <tag><tt/BRLTTY_CONTRACTION_TABLE/</tag>
         The contraction table
         (see the <ref id="options-contraction-table" name="-c"> command line option).
-      <tag><tt/BRLTTY_KEY_TABLE/</tag>
-        The key table
-        (see the <ref id="options-key-table" name="-k"> command line option).
+      <tag><tt/BRLTTY_KEYBOARD_TABLE/</tag>
+        The keyboard table
+        (see the <ref id="options-keyboard-table" name="-k"> command line option).
       <tag><tt/BRLTTY_KEYBOARD_PROPERTIES/</tag>
         The keyboard properties
         (see the <ref id="options-keyboard-properties" name="-K"> command line option).
@@ -3891,10 +3891,10 @@ Notes:
     See section <ref id="table-contraction" name="Contraction Tables"> for details.
     See the <ref id="options-contraction-table" name="-c"> command line option for the initial setting.
     This preference isn't saved.
-  <tag>Key Table<label id="preference-key-table"></tag>
-    Select the key table.
+  <tag>Keyboard Table<label id="preference-keyboard-table"></tag>
+    Select the keyboard table.
     See section <ref id="table-key" name="Key Tables"> for details.
-    See the <ref id="options-key-table" name="-k"> command line option for the initial setting.
+    See the <ref id="options-keyboard-table" name="-k"> command line option for the initial setting.
     This preference isn't saved.
 </descrip>
 
@@ -4688,11 +4688,11 @@ where <em/xx/ is the two-letter
 The rest of the name identifies the model(s)
 for which the key table is used.
 
-The names of keyboard key table files begin with <tt/kbd-/.
+The names of keyboard table files begin with <tt/kbd-/.
 The rest of the name describes the kind of keyboard
-for which the key table has been designed.
+for which the keyboard table has been designed.
 
-The following keyboard key tables are provided:
+The following keyboard tables are provided:
 <descrip>
   <tag/braille/bindings for braille keyboards
   <tag/desktop/bindings for full keyboards
@@ -4700,9 +4700,9 @@ The following keyboard key tables are provided:
   <tag/laptop/bindings for keyboards without a keypad
   <tag/sun_type6/bindings for Sun Type 6 keyboards
 </descrip>
-See the <ref id="options-key-table" name="-k"> command line option,
-and the <ref id="configure-key-table" name="key-table"> configuration file directive
-for details regarding how to select a keyboard key table.
+See the <ref id="options-keyboard-table" name="-k"> command line option,
+and the <ref id="configure-keyboard-table" name="keyboard-table"> configuration file directive
+for details regarding how to select a keyboard table.
 
 <sect2>Key Table Directives<p>
 A key table consists of a sequence of directives, one per line,

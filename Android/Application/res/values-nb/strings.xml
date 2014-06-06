@@ -24,7 +24,7 @@
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Teksttabell</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Attributtabell</string>
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Kortskrifttabell</string>
-  <string name="SETTINGS_BUTTON_KEY_TABLE">Tastetabell for tastatur</string>
+  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tastetabell for tastatur</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Loggenivå</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Loggekategorier</string>
@@ -208,9 +208,9 @@
   <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">kinesisk (Taiwan, Unique Chinese Braille)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">zulu (kortskrift)</string>
 
-  <string name="KEY_TABLE_LABEL_braille">alternativ for punktskrifttastatur</string>
-  <string name="KEY_TABLE_LABEL_desktop">alternativ for fullt tastatur</string>
-  <string name="KEY_TABLE_LABEL_keypad">alternativ for talltastaturbasert navigasjon</string>
-  <string name="KEY_TABLE_LABEL_laptop">alternativ for tastatur uten talltastatur</string>
-  <string name="KEY_TABLE_LABEL_sun_type6">alternativ for Sun type 6 tastatur</string>
+  <string name="KEYBOARD_TABLE_LABEL_braille">alternativ for punktskrifttastatur</string>
+  <string name="KEYBOARD_TABLE_LABEL_desktop">alternativ for fullt tastatur</string>
+  <string name="KEYBOARD_TABLE_LABEL_keypad">alternativ for talltastaturbasert navigasjon</string>
+  <string name="KEYBOARD_TABLE_LABEL_laptop">alternativ for tastatur uten talltastatur</string>
+  <string name="KEYBOARD_TABLE_LABEL_sun_type6">alternativ for Sun type 6 tastatur</string>
 </resources>

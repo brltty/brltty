@@ -513,8 +513,8 @@ extern "C" {
 /* Define this to be a string containing the subdirectory for contraction tables. */
 #undef CONTRACTION_TABLE_SUBDIRECTORY
 
-/* Define this to be a string containing the subdirectory for keyboard key tables. */
-#undef KEYBOARD_KEY_TABLE_SUBDIRECTORY
+/* Define this to be a string containing the subdirectory for keyboard tables. */
+#undef KEYBOARD_TABLE_SUBDIRECTORY
 
 /* Define this to be a string containing the subdirectory for braille device key tables. */
 #undef BRAILLE_KEY_TABLE_SUBDIRECTORY

@@ -38,7 +38,7 @@ extern int listKeyNames (KEY_NAME_TABLES_REFERENCE keys, KeyTableListHandler *ha
 extern char *ensureKeyTableExtension (const char *path);
 extern char *makeKeyTablePath (const char *directory, const char *name);
 
-extern char *makeKeyboardKeyTablePath (const char *directory, const char *name);
+extern char *makeKeyboardTablePath (const char *directory, const char *name);
 extern char *makeBrailleKeyTablePath (const char *directory, const char *driver, const char *name);
 
 extern void resetKeyTable (KeyTable *table);
