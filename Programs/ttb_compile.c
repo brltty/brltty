@@ -274,7 +274,7 @@ ensureTextTableExtension (const char *path) {
 
 char *
 makeTextTablePath (const char *directory, const char *name) {
-  char *subdirectory = makePath(directory, TEXT_TABLE_SUBDIRECTORY);
+  char *subdirectory = makePath(directory, TEXT_TABLES_SUBDIRECTORY);
 
   if (subdirectory) {
     char *file = makeFilePath(subdirectory, name, TEXT_TABLE_EXTENSION);

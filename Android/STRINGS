@@ -21,7 +21,7 @@ SETTINGS_BUTTON_SPEECH_SUPPORT Speech Support
 SETTINGS_BUTTON_TEXT_TABLE Text Table
 SETTINGS_BUTTON_ATTRIBUTES_TABLE Attributes Table
 SETTINGS_BUTTON_CONTRACTION_TABLE Contraction Table
-SETTINGS_BUTTON_KEY_TABLE Keyboard Key Table
+SETTINGS_BUTTON_KEYBOARD_TABLE Keyboard Table
 
 SETTINGS_BUTTON_LOG_LEVEL Log Level
 SETTINGS_BUTTON_LOG_CATEGORIES Log Categories
@@ -205,8 +205,8 @@ CONTRACTION_TABLE_LABEL_zh_tw Chinese (Taiwan, uncontracted)
 CONTRACTION_TABLE_LABEL_zh_tw_ucb Chinese (Taiwan, Unique Chinese Braille)
 CONTRACTION_TABLE_LABEL_zu Zulu (contracted)
 
-KEY_TABLE_LABEL_braille bindings for braille keyboards
-KEY_TABLE_LABEL_desktop bindings for full keyboards
-KEY_TABLE_LABEL_keypad bindings for keypad-based navigation
-KEY_TABLE_LABEL_laptop bindings for keyboards without a keypad
-KEY_TABLE_LABEL_sun_type6 bindings for Sun Type 6 keyboards
+KEYBOARD_TABLE_LABEL_braille bindings for braille keyboards
+KEYBOARD_TABLE_LABEL_desktop bindings for full keyboards
+KEYBOARD_TABLE_LABEL_keypad bindings for keypad-based navigation
+KEYBOARD_TABLE_LABEL_laptop bindings for keyboards without a keypad
+KEYBOARD_TABLE_LABEL_sun_type6 bindings for Sun Type 6 keyboards

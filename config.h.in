@@ -505,19 +505,19 @@ extern "C" {
 #undef HAVE_ATSPI_GET_A11Y_BUS
 
 /* Define this to be a string containing the subdirectory for text tables. */
-#undef TEXT_TABLE_SUBDIRECTORY
+#undef TEXT_TABLES_SUBDIRECTORY
 
 /* Define this to be a string containing the subdirectory for attributes tables. */
-#undef ATTRIBUTES_TABLE_SUBDIRECTORY
+#undef ATTRIBUTES_TABLES_SUBDIRECTORY
 
 /* Define this to be a string containing the subdirectory for contraction tables. */
-#undef CONTRACTION_TABLE_SUBDIRECTORY
+#undef CONTRACTION_TABLES_SUBDIRECTORY
 
 /* Define this to be a string containing the subdirectory for keyboard tables. */
-#undef KEYBOARD_TABLE_SUBDIRECTORY
+#undef KEYBOARD_TABLES_SUBDIRECTORY
 
 /* Define this to be a string containing the subdirectory for braille device key tables. */
-#undef BRAILLE_KEY_TABLE_SUBDIRECTORY
+#undef BRAILLE_KEY_TABLES_SUBDIRECTORY
 
 /* Define this to be a string containing the extension for text tables. */
 #undef TEXT_TABLE_EXTENSION
