@@ -49,5 +49,5 @@ install: all mkindex
 uninstall:
 	-rm -f $(TCL_DESTDIR)$(TCL_PKG)/$(TCL_API)
 	-rm -f $(TCL_DESTDIR)$(TCL_PKG)/pkgIndex.tcl
-	-rmdir $(TCL_DESTDIR)$(TCL_PKG)
+	[ ! -d $(TCL_DESTDIR)$(TCL_PKG) ] || rmdir $(TCL_DESTDIR)$(TCL_PKG)
 
