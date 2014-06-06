@@ -340,7 +340,7 @@ static int isKeyCapable(const BrailleDriver *brl)
 {
   int ret;
   asyncLockMutex(&apiDriverMutex);
-  ret = ((brl->readKey!=NULL) && (brl->keyToCommand!=NULL)) || (disp && disp->keyNameTables!=NULL);
+  ret = ((brl->readKey!=NULL) && (brl->keyToCommand!=NULL)) || (disp && disp->keyNames!=NULL);
   asyncUnlockMutex(&apiDriverMutex);
   return ret;
 }

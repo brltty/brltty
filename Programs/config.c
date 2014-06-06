@@ -1143,8 +1143,8 @@ constructBrailleDriver (void) {
         logMessage(LOG_INFO, "%s: %s", gettext("Key Bindings"), brl.keyBindings);
 
         if (keyTablePath) {
-          if (brl.keyNameTables) {
-            if ((brl.keyTable = compileKeyTable(keyTablePath, brl.keyNameTables))) {
+          if (brl.keyNames) {
+            if ((brl.keyTable = compileKeyTable(keyTablePath, brl.keyNames))) {
               setKeyTableLogLabel(brl.keyTable, "brl");
               setLogKeyEventsFlag(brl.keyTable, &LOG_CATEGORY_FLAG(BRAILLE_KEYS));
               logMessage(LOG_INFO, "%s: %s", gettext("Key Table"), keyTablePath);

@@ -902,7 +902,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         brl->textRows = 1;
 
         brl->keyBindings = brl->data->keyTableDefinition->bindings;
-        brl->keyNameTables = brl->data->keyTableDefinition->names;
+        brl->keyNames = brl->data->keyTableDefinition->names;
 
         brl->setFirmness = setFirmness;
 

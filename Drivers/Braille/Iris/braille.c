@@ -1763,7 +1763,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
   makeOutputTable(dotsTable_ISO11548_1);
 
   brl->keyBindings = keyTableDefinition->bindings;
-  brl->keyNameTables = keyTableDefinition->names;
+  brl->keyNames = keyTableDefinition->names;
 
   previousBrailleWindow = malloc(brl->textColumns * brl->textRows);
   if (previousBrailleWindow==NULL) {

@@ -720,7 +720,7 @@ initializeDevice (BrailleDisplay *brl) {
         {
           const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(clio);
           brl->keyBindings = ktd->bindings;
-          brl->keyNameTables = ktd->names;
+          brl->keyNames = ktd->names;
         }
 
         logMessage(LOG_INFO, "Model Detected: %s (%u cells)",

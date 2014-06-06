@@ -295,7 +295,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           const KeyTableDefinition *ktd = brl->data->model->keyTableDefinition;
 
           brl->keyBindings = ktd->bindings;
-          brl->keyNameTables = ktd->names;
+          brl->keyNames = ktd->names;
         }
 
         brl->data->forceRewrite = 1;

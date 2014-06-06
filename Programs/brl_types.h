@@ -65,7 +65,7 @@ struct BrailleDisplayStruct {
   unsigned int statusColumns, statusRows;
 
   const char *keyBindings;
-  KEY_NAME_TABLES_REFERENCE keyNameTables;
+  KEY_NAME_TABLES_REFERENCE keyNames;
   KeyTable *keyTable;
 
   GioEndpoint *gioEndpoint;

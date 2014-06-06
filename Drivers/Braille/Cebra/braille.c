@@ -312,7 +312,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                               isIdentityResponse)) {
         if (setModel(brl, response[1])) {
           brl->keyBindings = brl->data->model->ktd->bindings;
-          brl->keyNameTables = brl->data->model->ktd->names;
+          brl->keyNames = brl->data->model->ktd->names;
 
           makeOutputTable(dotsTable_ISO11548_1);
           brl->data->forceRewrite = 1;

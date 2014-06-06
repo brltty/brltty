@@ -1886,7 +1886,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             const KeyTableDefinition *ktd = model->keyTableDefinition;
 
             brl->keyBindings = ktd->bindings;
-            brl->keyNameTables = ktd->names;
+            brl->keyNames = ktd->names;
           }
 
           makeOutputTable(dotsTable_ISO11548_1);

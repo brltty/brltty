@@ -38,7 +38,7 @@ initializeBrailleDisplay (BrailleDisplay *brl) {
   brl->statusRows = 0;
 
   brl->keyBindings = "all";
-  brl->keyNameTables = NULL;
+  brl->keyNames = NULL;
   brl->keyTable = NULL;
 
   brl->gioEndpoint = NULL;

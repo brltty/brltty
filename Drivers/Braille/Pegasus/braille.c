@@ -116,7 +116,7 @@ setCellCounts (BrailleDisplay *brl, int size) {
     const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
 
     brl->keyBindings = ktd->bindings;
-    brl->keyNameTables = ktd->names;
+    brl->keyNames = ktd->names;
   }
 }
 

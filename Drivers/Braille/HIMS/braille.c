@@ -479,7 +479,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       if (getCellCount(brl, &brl->textColumns)) {
         brl->textRows = 1;
         brl->keyBindings = brl->data->protocol->keyTableDefinition->bindings;
-        brl->keyNameTables = brl->data->protocol->keyTableDefinition->names;
+        brl->keyNames = brl->data->protocol->keyTableDefinition->names;
 
         makeOutputTable(dotsTable_ISO11548_1);
   

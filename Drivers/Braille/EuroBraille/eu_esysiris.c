@@ -814,7 +814,7 @@ initializeDevice (BrailleDisplay *brl) {
         {
           const KeyTableDefinition *ktd = model->keyTable;
           brl->keyBindings = ktd->bindings;
-          brl->keyNameTables = ktd->names;
+          brl->keyNames = ktd->names;
         }
 
         if (!maximumFrameLength) {
