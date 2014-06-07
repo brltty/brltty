@@ -14,7 +14,15 @@ tables-directory:
 	$(INSTALL_DIRECTORY) $(ANDROID_TABLES_DIRECTORY)
 
 tables: tables-directory
-	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.[tack]t[bi] $(ANDROID_TABLES_DIRECTORY)
+	install=`pwd`/$(ANDROID_TABLES_DIRECTORY) && \
+	cd $(SRC_TOP)$(TBL_DIR) && \
+	find . -type f -print | \
+	while read file; do \
+	source=`dirname $$file` && \
+	target=$$install/$$source && \
+	$(INSTALL_DIRECTORY) $$target && \
+	$(INSTALL_DATA) $$file $$target; \
+	done
 
 drivers-directory:
 	$(INSTALL_DIRECTORY) $(ANDROID_DRIVERS_DIRECTORY)

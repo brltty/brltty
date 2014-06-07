@@ -52,10 +52,21 @@ public class CoreThread extends Thread {
     return coreContext.getDir(type, DATA_MODE);
   }
 
-  private final void extractAsset (AssetManager assets, String type, File path) {
-    String asset = new File(type, path.getName()).getPath();
-    Log.d(LOG_TAG, "extracting asset: " + asset + " -> " + path);
+  private final void emptyDirectory (File directory) {
+    if (!directory.canWrite()) {
+      directory.setWritable(true, true);
+    }
 
+    for (File file : directory.listFiles()) {
+      if (file.isDirectory()) {
+        emptyDirectory(file);
+      }
+
+      file.delete();
+    }
+  }
+
+  private final void extractAsset (AssetManager assets, String asset, File path) {
     try {
       InputStream input = null;
       OutputStream output = null;
@@ -84,34 +95,41 @@ public class CoreThread extends Thread {
     }
   }
 
-  private final void extractAssets (AssetManager assets, String type, boolean executable) {
-    File directory = getDataDirectory(type);
-
-    if (!directory.canWrite()) {
-      directory.setWritable(true, true);
-    }
-
-    for (File file : directory.listFiles()) {
-      file.delete();
-    }
-
+  private final void extractAssets (AssetManager assets, String asset, File path, boolean executable) {
     try {
-      String[] files = assets.list(type);
+      String[] names = assets.list(asset);
 
-      for (String file : files) {
-        File path = new File(directory, file);
-        extractAsset(assets, type, path);
-        path.setReadOnly();
+      if (names.length == 0) {
+        Log.d(LOG_TAG, "extracting asset: " + asset + " -> " + path);
+        extractAsset(assets, asset, path);
 
         if (executable) {
           path.setExecutable(true, false);
         }
+      } else {
+        if (!path.exists()) {
+          Log.d(LOG_TAG, "creating directory: " + path);
+          path.mkdir();
+        } else if (!path.isDirectory()) {
+          Log.d(LOG_TAG, "not a directory: " + path);
+          return;
+        }
+
+        for (String name : names) {
+          extractAssets(assets, new File(asset, name).getPath(), new File(path, name), executable);
+        }
       }
 
-      directory.setReadOnly();
+      path.setReadOnly();
     } catch (IOException exception) {
-      Log.e(LOG_TAG, "cannot list assets directory: " + type, exception);
+      Log.e(LOG_TAG, "cannot list asset: " + asset, exception);
     }
+  }
+
+  private final void extractAssets (AssetManager assets, String type, boolean executable) {
+    File directory = getDataDirectory(type);
+    emptyDirectory(directory);
+    extractAssets(assets, type, directory, executable);
   }
 
   private final void extractAssets () {
