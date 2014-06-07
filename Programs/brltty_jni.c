@@ -392,3 +392,14 @@ JAVA_METHOD (
 ) {
   return changeStringValue(env, changeSpeechDriver_p, driver);
 }
+
+JNIEXPORT jint
+JNI_OnLoad (JavaVM *vm, void *reserved) {
+  JNIEnv *env;
+
+  if ((*vm)->GetEnv(vm, (void **)&env, JAVA_JNI_VERSION) == JNI_OK) {
+    loadCoreLibrary(env);
+  }
+
+  return JAVA_JNI_VERSION;
+}
