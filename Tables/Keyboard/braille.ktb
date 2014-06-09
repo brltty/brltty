@@ -55,7 +55,7 @@ map Dot8 DOT8
 map BRAILLE_Space SPACE
 
 assign chord BRAILLE_Space+
-include brl-chords.kti
+include ../Input/chords.kti
 bind BRAILLE_Space+RoutingKey KEY_FUNCTION
 
 context menu
