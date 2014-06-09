@@ -686,8 +686,23 @@ ktb_list.$O:
 ktb_keyboard.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ktb_keyboard.c
 
-check-key-tables: all-ktbtest
-	for file in $(SRC_TOP)$(TBL_DIR)/*.ktb; do ./ktbtest$X -L$(BLD_TOP)$(DRV_DIR) -T$(SRC_TOP)$(TBL_DIR) $$file; done
+check-keyboard-tables: all-ktbtest
+	set -- $(SRC_TOP)$(TBL_DIR)/$(KEYBOARD_TABLES_SUBDIRECTORY)/*$(KEY_TABLE_EXTENSION) && \
+	for file; do \
+	name=$${file##*/}; \
+	name=$${name%.*}; \
+	./ktbtest$X -D$(BLD_TOP)$(DRV_DIR) -T$(SRC_TOP)$(TBL_DIR) kbd-$$name; \
+	done
+
+check-input-tables: all-ktbtest
+	find $(SRC_TOP)$(TBL_DIR)/$(INPUT_TABLES_SUBDIRECTORY) -name '*$(KEY_TABLE_EXTENSION)' -print | \
+	while read file; do \
+	driver=$${file%/*}; \
+	driver=$${driver##*/}; \
+	name=$${file##*/}; \
+	name=$${name%.*}; \
+	./ktbtest$X -D$(BLD_TOP)$(DRV_DIR) -T$(SRC_TOP)$(TBL_DIR) brl-$$driver-$$name; \
+	done
 
 ###############################################################################
 
