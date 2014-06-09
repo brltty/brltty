@@ -1817,15 +1817,15 @@ contractText (
       size_t length;
 
       if (normalizeText(&bcd, bcd.input.begin, bcd.input.end, buffer, &length, map)) {
-        const wchar_t *origmin = bcd.input.begin;
-        const wchar_t *origmax = bcd.input.end;
+        const wchar_t *oldBegin = bcd.input.begin;
+        const wchar_t *oldEnd = bcd.input.end;
 
         bcd.input.begin = buffer;
-        bcd.input.current = bcd.input.begin + (bcd.input.current - origmin);
+        bcd.input.current = bcd.input.begin + (bcd.input.current - oldBegin);
         bcd.input.end = bcd.input.begin + length;
 
         if (bcd.input.cursor) {
-          ptrdiff_t offset = bcd.input.cursor - origmin;
+          ptrdiff_t offset = bcd.input.cursor - oldBegin;
           unsigned int mapIndex;
 
           bcd.input.cursor = NULL;
@@ -1842,10 +1842,10 @@ contractText (
 
         if (bcd.input.offsets) {
           size_t mapIndex = length;
-          size_t offsetsIndex = origmax - origmin;
+          size_t offsetsIndex = oldEnd - oldBegin;
 
           while (mapIndex > 0) {
-            size_t mappedIndex = map[--mapIndex];
+            unsigned int mappedIndex = map[--mapIndex];
             int offset = bcd.input.offsets[mapIndex];
 
             if (offset != CTB_NO_OFFSET) {
@@ -1857,9 +1857,9 @@ contractText (
           while (offsetsIndex > 0) bcd.input.offsets[--offsetsIndex] = CTB_NO_OFFSET;
         }
 
-        bcd.input.begin = origmin;
+        bcd.input.begin = oldBegin;
         bcd.input.current = bcd.input.begin + map[bcd.input.current - buffer];
-        bcd.input.end = origmax;
+        bcd.input.end = oldEnd;
       } else {
         contracted = contract(&bcd);
       }
