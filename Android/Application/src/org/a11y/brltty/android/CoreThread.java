@@ -100,7 +100,7 @@ public class CoreThread extends Thread {
       String[] names = assets.list(asset);
 
       if (names.length == 0) {
-        Log.d(LOG_TAG, "extracting asset: " + asset + " -> " + path);
+      //Log.d(LOG_TAG, "extracting asset: " + asset + " -> " + path);
         extractAsset(assets, asset, path);
 
         if (executable) {
@@ -108,7 +108,7 @@ public class CoreThread extends Thread {
         }
       } else {
         if (!path.exists()) {
-          Log.d(LOG_TAG, "creating directory: " + path);
+        //Log.d(LOG_TAG, "creating directory: " + path);
           path.mkdir();
         } else if (!path.isDirectory()) {
           Log.d(LOG_TAG, "not a directory: " + path);
@@ -133,9 +133,11 @@ public class CoreThread extends Thread {
   }
 
   private final void extractAssets () {
+    Log.d(LOG_TAG, "extracting assets");
     AssetManager assets = coreContext.getAssets();
     extractAssets(assets, DATA_TYPE_TABLES, false);
     extractAssets(assets, DATA_TYPE_DRIVERS, true);
+    Log.d(LOG_TAG, "assets extracted");
   }
 
   CoreThread () {
