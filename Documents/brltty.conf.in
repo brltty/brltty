@@ -193,7 +193,7 @@
 #text-table	nl_NL	# Dutch (Netherlands)
 #text-table	no	# Norwegian
 #text-table	no-generic	# Norwegian (with support for other languages)
-#text-table	no-oub	# Norwegian (Offentlig Utvalg for Blindeskrift)
+#text-table	no-oup	# Norwegian (Offentlig utvalg for punktskrift)
 #text-table	nwc	# Newari (old)
 #text-table	or	# Oriya
 #text-table	pa	# Panjabi
