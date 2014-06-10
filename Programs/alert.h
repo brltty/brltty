@@ -53,6 +53,8 @@ typedef enum {
 
 extern void alert (AlertIdentifier identifier);
 
+extern int showDotPattern (unsigned char dots, unsigned char duration);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

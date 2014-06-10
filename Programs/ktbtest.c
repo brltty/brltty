@@ -284,13 +284,6 @@ api_handleKeyEvent (KeyGroup group, KeyNumber number, int press) {
   return 0;
 }
 
-#include "message.h"
-
-int
-message (const char *mode, const char *text, MessageOptions options) {
-  return 1;
-}
-
 #include "scr.h"
 
 KeyTableCommandContext

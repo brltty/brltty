@@ -40,8 +40,6 @@ extern int setTuneDevice (TuneDevice device);
 extern void closeTuneDevice (void);
 extern int playTune (const TuneElement *tune);
 
-extern int showDotPattern (unsigned char dots, unsigned char duration);
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

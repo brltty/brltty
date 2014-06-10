@@ -33,8 +33,6 @@
 #include "parse.h"
 #include "defaults.h"
 #include "prefs.h"
-#include "message.h"
-#include "brl.h"
 
 static char *opt_tuneDevice;
 static char *opt_outputVolume;
@@ -261,14 +259,6 @@ main (int argc, char *argv[]) {
 
     free(elements);
   }
-  return PROG_EXIT_SUCCESS;
-}
 
-int
-message (const char *mode, const char *text, MessageOptions options) {
-  return 1;
-}
-int
-showDotPattern (unsigned char dots, unsigned char duration) {
-  return 1;
+  return PROG_EXIT_SUCCESS;
 }
