@@ -47,7 +47,8 @@
 #include "ktb.h"
 #include "ktb_keyboard.h"
 #include "keyboard.h"
-#include "tunes.h"
+#include "alert.h"
+#include "tune.h"
 #include "notes.h"
 #include "message.h"
 #include "log.h"
@@ -1381,7 +1382,7 @@ startBrailleDriver (void) {
     }
 
     ensureStatusFields();
-    playTune(&tune_braille_on);
+    alert(ALERT_BRAILLE_ON);
 
     ses->winx = 0;
     trackCursor(1);
@@ -1428,7 +1429,7 @@ tryBrailleDriver (void) {
 static void
 stopBrailleDriver (void) {
   deactivateBrailleDriver();
-  playTune(&tune_braille_off);
+  alert(ALERT_BRAILLE_OFF);
 }
 
 void

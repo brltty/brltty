@@ -30,7 +30,7 @@
 #include "ttb.h"
 #include "atb.h"
 #include "ctb.h"
-#include "tunes.h"
+#include "tune.h"
 #include "midi.h"
 
 #define NAME(name) static const MenuString itemName = {.label=name}

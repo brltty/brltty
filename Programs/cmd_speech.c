@@ -23,7 +23,7 @@
 #include "embed.h"
 #include "cmd_speech.h"
 #include "prefs.h"
-#include "tunes.h"
+#include "alert.h"
 #include "brl_cmds.h"
 #include "spk.h"
 #include "scr.h"
@@ -85,7 +85,7 @@ handleSpeechCommand (int command, void *data) {
       if (scr.number == spk.track.screenNumber) {
         trackSpeech();
       } else {
-        playTune(&tune_command_rejected);
+        alert(ALERT_COMMAND_REJECTED);
       }
       break;
     case BRL_CMD_AUTOSPEAK:
@@ -132,41 +132,41 @@ handleSpeechCommand (int command, void *data) {
 
     case BRL_CMD_SAY_SLOWER:
       if (!canSetSpeechRate()) {
-        playTune(&tune_command_rejected);
+        alert(ALERT_COMMAND_REJECTED);
       } else if (prefs.speechRate > 0) {
         setSpeechRate(--prefs.speechRate, 1);
       } else {
-        playTune(&tune_no_change);
+        alert(ALERT_NO_CHANGE);
       }
       break;
 
     case BRL_CMD_SAY_FASTER:
       if (!canSetSpeechRate()) {
-        playTune(&tune_command_rejected);
+        alert(ALERT_COMMAND_REJECTED);
       } else if (prefs.speechRate < SPK_RATE_MAXIMUM) {
         setSpeechRate(++prefs.speechRate, 1);
       } else {
-        playTune(&tune_no_change);
+        alert(ALERT_NO_CHANGE);
       }
       break;
 
     case BRL_CMD_SAY_SOFTER:
       if (!canSetSpeechVolume()) {
-        playTune(&tune_command_rejected);
+        alert(ALERT_COMMAND_REJECTED);
       } else if (prefs.speechVolume > 0) {
         setSpeechVolume(--prefs.speechVolume, 1);
       } else {
-        playTune(&tune_no_change);
+        alert(ALERT_NO_CHANGE);
       }
       break;
 
     case BRL_CMD_SAY_LOUDER:
       if (!canSetSpeechVolume()) {
-        playTune(&tune_command_rejected);
+        alert(ALERT_COMMAND_REJECTED);
       } else if (prefs.speechVolume < SPK_VOLUME_MAXIMUM) {
         setSpeechVolume(++prefs.speechVolume, 1);
       } else {
-        playTune(&tune_no_change);
+        alert(ALERT_NO_CHANGE);
       }
       break;
 
@@ -181,10 +181,10 @@ handleSpeechCommand (int command, void *data) {
       } else if (ses->spky > 0) {
         ses->spky -= 1;
         ses->spkx = scr.cols - 1;
-        playTune(&tune_wrap_up);
+        alert(ALERT_WRAP_UP);
         speakCurrentCharacter();
       } else {
-        playTune(&tune_bounce);
+        alert(ALERT_BOUNCE);
       }
       break;
 
@@ -195,10 +195,10 @@ handleSpeechCommand (int command, void *data) {
       } else if (ses->spky < (scr.rows - 1)) {
         ses->spky += 1;
         ses->spkx = 0;
-        playTune(&tune_wrap_down);
+        alert(ALERT_WRAP_DOWN);
         speakCurrentCharacter();
       } else {
-        playTune(&tune_bounce);
+        alert(ALERT_BOUNCE);
       }
       break;
 
@@ -211,7 +211,7 @@ handleSpeechCommand (int command, void *data) {
         ses->spkx = column;
         speakDone(characters, column, 1, 0);
       } else {
-        playTune(&tune_command_rejected);
+        alert(ALERT_COMMAND_REJECTED);
       }
 
       break;
@@ -226,7 +226,7 @@ handleSpeechCommand (int command, void *data) {
         ses->spkx = column;
         speakDone(characters, column, 1, 0);
       } else {
-        playTune(&tune_command_rejected);
+        alert(ALERT_COMMAND_REJECTED);
       }
 
       break;
@@ -283,7 +283,7 @@ handleSpeechCommand (int command, void *data) {
               }
 
               if (row == 0) goto noWord;
-              if (row-- == ses->spky) playTune(&tune_wrap_up);
+              if (row-- == ses->spky) alert(ALERT_WRAP_UP);
               column = scr.cols;
               goto findWord;
             }
@@ -316,7 +316,7 @@ handleSpeechCommand (int command, void *data) {
               }
 
               if (row == (scr.rows - 1)) goto noWord;
-              if (row++ == ses->spky) playTune(&tune_wrap_down);
+              if (row++ == ses->spky) alert(ALERT_WRAP_DOWN);
               column = -1;
               goto findWord;
             }
@@ -358,7 +358,7 @@ handleSpeechCommand (int command, void *data) {
       }
 
     noWord:
-      playTune(&tune_bounce);
+      alert(ALERT_BOUNCE);
       break;
     }
 
@@ -382,7 +382,7 @@ handleSpeechCommand (int command, void *data) {
 
     speakLine:
       if (ses->spky == limit) {
-        playTune(&tune_bounce);
+        alert(ALERT_BOUNCE);
       } else {
         if (prefs.skipIdenticalLines) {
           ScreenCharacter original[scr.cols];
@@ -396,11 +396,11 @@ handleSpeechCommand (int command, void *data) {
             if (!isSameRow(original, current, scr.cols, isSameText)) break;
 
             if (!count) {
-              playTune(&tune_skip_first);
+              alert(ALERT_SKIP_FIRST);
             } else if (count < 4) {
-              playTune(&tune_skip);
+              alert(ALERT_SKIP);
             } else if (!(count % 4)) {
-              playTune(&tune_skip_more);
+              alert(ALERT_SKIP_MORE);
             }
 
             count += 1;
@@ -430,7 +430,7 @@ handleSpeechCommand (int command, void *data) {
         ses->spkx = 0;
         speakCurrentLine();
       } else {
-        playTune(&tune_command_rejected);
+        alert(ALERT_COMMAND_REJECTED);
       }
 
       break;
@@ -451,7 +451,7 @@ handleSpeechCommand (int command, void *data) {
         ses->spkx = 0;
         speakCurrentLine();
       } else {
-        playTune(&tune_command_rejected);
+        alert(ALERT_COMMAND_REJECTED);
       }
 
       break;
@@ -466,9 +466,9 @@ handleSpeechCommand (int command, void *data) {
 
     case BRL_CMD_ROUTE_CURR_LOCN:
       if (routeCursor(ses->spkx, ses->spky, scr.number)) {
-        playTune(&tune_routing_started);
+        alert(ALERT_ROUTING_STARTED);
       } else {
-        playTune(&tune_command_rejected);
+        alert(ALERT_COMMAND_REJECTED);
       }
       break;
 

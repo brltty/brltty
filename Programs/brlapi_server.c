@@ -79,7 +79,6 @@
 #include "auth.h"
 #include "io_misc.h"
 #include "scr.h"
-#include "tunes.h"
 #include "charset.h"
 #include "async_event.h"
 #include "async_signal.h"

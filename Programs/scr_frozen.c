@@ -24,7 +24,7 @@
 #include "log.h"
 #include "parameters.h"
 #include "async_alarm.h"
-#include "tunes.h"
+#include "alert.h"
 #include "scr.h"
 #include "scr_frozen.h"
 
@@ -38,7 +38,7 @@ ASYNC_ALARM_CALLBACK(handleFreezeReminderAlarm) {
   asyncDiscardHandle(freezeReminderAlarm);
   freezeReminderAlarm = NULL;
 
-  playTune(&tune_freeze_reminder);
+  alert(ALERT_FREEZE_REMINDER);
   startFreezeReminderAlarm();
 }
 

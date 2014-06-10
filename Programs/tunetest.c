@@ -26,7 +26,7 @@
 #include <strings.h>
 
 #include "options.h"
-#include "tunes.h"
+#include "tune.h"
 #include "notes.h"
 #include "midi.h"
 #include "log.h"
@@ -138,9 +138,6 @@ main (int argc, char *argv[]) {
   }
 
   resetPreferences();
-  prefs.alertMessages = 0;
-  prefs.alertDots = 0;
-  prefs.alertTunes = 1;
 
   if (opt_tuneDevice && *opt_tuneDevice) {
     unsigned int device;
@@ -258,12 +255,8 @@ main (int argc, char *argv[]) {
     }
 
     {
-      const TuneDefinition tune = {
-        .elements = elements
-      };
-
-      playTune(&tune);
-      closeTunes();
+      playTune(elements);
+      closeTuneDevice();
     }
 
     free(elements);

@@ -26,7 +26,7 @@
 #include "cmd_learn.h"
 #include "parse.h"
 #include "prefs.h"
-#include "tunes.h"
+#include "alert.h"
 #include "routing.h"
 #include "clipboard.h"
 #include "message.h"
@@ -97,17 +97,17 @@ toDifferentLine (
 
       /* lines are identical */
       if (skipped == 0) {
-        playTune(&tune_skip_first);
+        alert(ALERT_SKIP_FIRST);
       } else if (skipped <= 4) {
-        playTune(&tune_skip);
+        alert(ALERT_SKIP);
       } else if (skipped % 4 == 0) {
-        playTune(&tune_skip_more);
+        alert(ALERT_SKIP_MORE);
       }
       skipped++;
     } while (canMoveWindow());
   }
 
-  playTune(&tune_bounce);
+  alert(ALERT_BOUNCE);
   return 0;
 }
 
@@ -136,7 +136,7 @@ upOneLine (void) {
   if (canMoveUp()) {
     ses->winy--;
   } else {
-    playTune(&tune_bounce);
+    alert(ALERT_BOUNCE);
   }
 }
 
@@ -145,7 +145,7 @@ downOneLine (void) {
   if (canMoveDown()) {
     ses->winy++;
   } else {
-    playTune(&tune_bounce);
+    alert(ALERT_BOUNCE);
   }
 }
 
@@ -179,7 +179,7 @@ findRow (int column, int increment, RowTester test, void *data) {
     }
     row += increment;
   }
-  playTune(&tune_bounce);
+  alert(ALERT_BOUNCE);
 }
 
 static int
@@ -395,7 +395,7 @@ switchVirtualTerminal (int vt) {
   if (switched) {
     updateSessionAttributes();
   } else {
-    playTune(&tune_command_rejected);
+    alert(ALERT_COMMAND_REJECTED);
   }
 
   return switched;
@@ -415,9 +415,9 @@ handleNavigationCommand (int command, void *data) {
   switch (command & BRL_MSK_CMD) {
     case BRL_CMD_NOOP:        /* do nothing but loop */
       if (command & BRL_FLG_TOGGLE_ON) {
-        playTune(&tune_toggle_on);
+        alert(ALERT_TOGGLE_ON);
       } else if (command & BRL_FLG_TOGGLE_OFF) {
-        playTune(&tune_toggle_off);
+        alert(ALERT_TOGGLE_OFF);
       }
       break;
 
@@ -436,14 +436,14 @@ handleNavigationCommand (int command, void *data) {
       if (canMoveUp()) {
         ses->winy -= MIN(verticalWindowShift, ses->winy);
       } else {
-        playTune(&tune_bounce);
+        alert(ALERT_BOUNCE);
       }
       break;
     case BRL_CMD_WINDN:
       if (canMoveDown()) {
         ses->winy += MIN(verticalWindowShift, (scr.rows - brl.textRows - ses->winy));
       } else {
-        playTune(&tune_bounce);
+        alert(ALERT_BOUNCE);
       }
       break;
 
@@ -499,7 +499,7 @@ handleNavigationCommand (int command, void *data) {
           }
           line += increment;
         }
-        if (!found) playTune(&tune_bounce);
+        if (!found) alert(ALERT_BOUNCE);
       }
       break;
     }
@@ -523,7 +523,7 @@ handleNavigationCommand (int command, void *data) {
         if (length < scr.cols) {
           findRow(length, increment, testPrompt, characters);
         } else {
-          playTune(&tune_command_rejected);
+          alert(ALERT_COMMAND_REJECTED);
         }
       }
       break;
@@ -593,9 +593,9 @@ handleNavigationCommand (int command, void *data) {
           }
         }
 
-        if (!found) playTune(&tune_bounce);
+        if (!found) alert(ALERT_BOUNCE);
       } else {
-        playTune(&tune_command_rejected);
+        alert(ALERT_COMMAND_REJECTED);
       }
 
       break;
@@ -605,7 +605,7 @@ handleNavigationCommand (int command, void *data) {
       if (ses->winx) {
         ses->winx = 0;
       } else {
-        playTune(&tune_bounce);
+        alert(ALERT_BOUNCE);
       }
       break;
 
@@ -615,23 +615,23 @@ handleNavigationCommand (int command, void *data) {
       if (ses->winx < end) {
         ses->winx = end;
       } else {
-        playTune(&tune_bounce);
+        alert(ALERT_BOUNCE);
       }
       break;
     }
 
     case BRL_CMD_CHRLT:
-      if (!moveWindowLeft(1)) playTune(&tune_bounce);
+      if (!moveWindowLeft(1)) alert(ALERT_BOUNCE);
       break;
     case BRL_CMD_CHRRT:
-      if (!moveWindowRight(1)) playTune(&tune_bounce);
+      if (!moveWindowRight(1)) alert(ALERT_BOUNCE);
       break;
 
     case BRL_CMD_HWINLT:
-      if (!shiftWindowLeft(halfWindowShift)) playTune(&tune_bounce);
+      if (!shiftWindowLeft(halfWindowShift)) alert(ALERT_BOUNCE);
       break;
     case BRL_CMD_HWINRT:
-      if (!shiftWindowRight(halfWindowShift)) playTune(&tune_bounce);
+      if (!shiftWindowRight(halfWindowShift)) alert(ALERT_BOUNCE);
       break;
 
     case BRL_CMD_FWINLTSKIP:
@@ -650,11 +650,11 @@ handleNavigationCommand (int command, void *data) {
               ses->winx = oldX;
               ses->winy = oldY;
 
-              playTune(&tune_bounce);
+              alert(ALERT_BOUNCE);
               break;
             }
 
-            if (tuneLimit-- > 0) playTune(&tune_wrap_up);
+            if (tuneLimit-- > 0) alert(ALERT_WRAP_UP);
             upLine(isSameText);
             placeWindowRight();
           }
@@ -728,11 +728,11 @@ handleNavigationCommand (int command, void *data) {
         if (ses->winy == 0) {
           ses->winx = oldX;
 
-          playTune(&tune_bounce);
+          alert(ALERT_BOUNCE);
           break;
         }
 
-        playTune(&tune_wrap_up);
+        alert(ALERT_WRAP_UP);
         upLine(isSameText);
         placeWindowRight();
 
@@ -776,11 +776,11 @@ handleNavigationCommand (int command, void *data) {
               ses->winx = oldX;
               ses->winy = oldY;
 
-              playTune(&tune_bounce);
+              alert(ALERT_BOUNCE);
               break;
             }
 
-            if (tuneLimit-- > 0) playTune(&tune_wrap_down);
+            if (tuneLimit-- > 0) alert(ALERT_WRAP_DOWN);
             downLine(isSameText);
             ses->winx = 0;
           }
@@ -850,11 +850,11 @@ handleNavigationCommand (int command, void *data) {
         if (ses->winy >= (scr.rows - brl.textRows)) {
           ses->winx = oldX;
 
-          playTune(&tune_bounce);
+          alert(ALERT_BOUNCE);
           break;
         }
 
-        playTune(&tune_wrap_down);
+        alert(ALERT_WRAP_DOWN);
         downLine(isSameText);
         ses->winx = 0;
       }
@@ -870,7 +870,7 @@ handleNavigationCommand (int command, void *data) {
         break;
       }
     case BRL_CMD_HOME:
-      if (!trackCursor(1)) playTune(&tune_command_rejected);
+      if (!trackCursor(1)) alert(ALERT_COMMAND_REJECTED);
       break;
 
     case BRL_CMD_RESTARTBRL:
@@ -881,21 +881,21 @@ handleNavigationCommand (int command, void *data) {
       if (isMainScreen() && !isRouting()) {
         if (cpbPaste()) break;
       }
-      playTune(&tune_command_rejected);
+      alert(ALERT_COMMAND_REJECTED);
       break;
 
     case BRL_CMD_CLIP_SAVE:
-      playTune(cpbSave()? &tune_command_done: &tune_command_rejected);
+      alert(cpbSave()? ALERT_COMMAND_DONE: ALERT_COMMAND_REJECTED);
       break;
 
     case BRL_CMD_CLIP_RESTORE:
-      playTune(cpbRestore()? &tune_command_done: &tune_command_rejected);
+      alert(cpbRestore()? ALERT_COMMAND_DONE: ALERT_COMMAND_REJECTED);
       break;
 
     case BRL_CMD_CSRJMP_VERT:
-      playTune(routeCursor(-1, ses->winy, scr.number)?
-               &tune_routing_started:
-               &tune_command_rejected);
+      alert(routeCursor(-1, ses->winy, scr.number)?
+               ALERT_ROUTING_STARTED:
+               ALERT_COMMAND_REJECTED);
       break;
 
     case BRL_CMD_CSRVIS:
@@ -911,7 +911,7 @@ handleNavigationCommand (int command, void *data) {
       toggleFeatureSetting(&prefs.cursorStyle, command);
       break;
     case BRL_CMD_CSRTRK:
-      toggleSetting(&ses->trackCursor, command, &tune_cursor_unlinked, &tune_cursor_linked);
+      toggleSetting(&ses->trackCursor, command, ALERT_CURSOR_UNLINKED, ALERT_CURSOR_LINKED);
 
       if (ses->trackCursor) {
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -977,17 +977,17 @@ handleNavigationCommand (int command, void *data) {
       } else if (isFrozenScreen()) {
         setting = 1;
       } else {
-        playTune(&tune_command_rejected);
+        alert(ALERT_COMMAND_REJECTED);
         break;
       }
 
-      switch (toggleSetting(&setting, command, &tune_screen_unfrozen, &tune_screen_frozen)) {
+      switch (toggleSetting(&setting, command, ALERT_SCREEN_UNFROZEN, ALERT_SCREEN_FROZEN)) {
         case TOGGLE_OFF:
           deactivateFrozenScreen();
           break;
 
         case TOGGLE_ON:
-          if (!activateFrozenScreen()) playTune(&tune_command_rejected);
+          if (!activateFrozenScreen()) alert(ALERT_COMMAND_REJECTED);
           break;
 
         default:
@@ -1017,7 +1017,7 @@ handleNavigationCommand (int command, void *data) {
       goto doModifier;
 
     doModifier:
-      toggleBit(&inputModifiers, modifier, command, &tune_toggle_off, &tune_toggle_on);
+      toggleBit(&inputModifiers, modifier, command, ALERT_TOGGLE_OFF, ALERT_TOGGLE_ON);
       break;
     }
 
@@ -1027,7 +1027,7 @@ handleNavigationCommand (int command, void *data) {
       if (isMenuScreen()) {
         if (prefs.saveOnExit)
           if (savePreferences())
-            playTune(&tune_command_done);
+            alert(ALERT_COMMAND_DONE);
 
         deactivateMenuScreen();
         ok = 1;
@@ -1041,7 +1041,7 @@ handleNavigationCommand (int command, void *data) {
       if (ok) {
         infoMode = 0;
       } else {
-        playTune(&tune_command_rejected);
+        alert(ALERT_COMMAND_REJECTED);
       }
 
       break;
@@ -1049,12 +1049,12 @@ handleNavigationCommand (int command, void *data) {
 
     case BRL_CMD_PREFSAVE:
       if (isMenuScreen()) {
-        if (savePreferences()) playTune(&tune_command_done);
+        if (savePreferences()) alert(ALERT_COMMAND_DONE);
         deactivateMenuScreen();
       } else if (savePreferences()) {
-        playTune(&tune_command_done);
+        alert(ALERT_COMMAND_DONE);
       } else {
-        playTune(&tune_command_rejected);
+        alert(ALERT_COMMAND_REJECTED);
       }
       break;
     case BRL_CMD_PREFLOAD:
@@ -1062,9 +1062,9 @@ handleNavigationCommand (int command, void *data) {
         setPreferences(&savedPreferences);
         message(modeString_preferences, gettext("changes discarded"), 0);
       } else if (loadPreferences()) {
-        playTune(&tune_command_done);
+        alert(ALERT_COMMAND_DONE);
       } else {
-        playTune(&tune_command_rejected);
+        alert(ALERT_COMMAND_REJECTED);
       }
       break;
 
@@ -1204,14 +1204,14 @@ handleNavigationCommand (int command, void *data) {
           applyInputModifiers(&flags);
           if (!insertKey(key, flags)) {
           badKey:
-            playTune(&tune_command_rejected);
+            alert(ALERT_COMMAND_REJECTED);
           }
           break;
         }
 
         case BRL_BLK_PASSCHAR: {
           applyInputModifiers(&flags);
-          if (!insertKey(BRL_ARG_GET(command), flags)) playTune(&tune_command_rejected);
+          if (!insertKey(BRL_ARG_GET(command), flags)) alert(ALERT_COMMAND_REJECTED);
           break;
         }
 
@@ -1233,7 +1233,7 @@ handleNavigationCommand (int command, void *data) {
           }
 
           applyInputModifiers(&flags);
-          if (!insertKey(character, flags)) playTune(&tune_command_rejected);
+          if (!insertKey(character, flags)) alert(ALERT_COMMAND_REJECTED);
           break;
         }
 
@@ -1252,7 +1252,7 @@ handleNavigationCommand (int command, void *data) {
 
         case BRL_BLK_PASSPS2:
           /* not implemented yet */
-          playTune(&tune_command_rejected);
+          alert(ALERT_COMMAND_REJECTED);
           break;
 
         case BRL_BLK_ROUTE: {
@@ -1260,11 +1260,11 @@ handleNavigationCommand (int command, void *data) {
 
           if (getCharacterCoordinates(arg, &column, &row, 0, 1)) {
             if (routeCursor(column, row, scr.number)) {
-              playTune(&tune_routing_started);
+              alert(ALERT_ROUTING_STARTED);
               break;
             }
           }
-          playTune(&tune_command_rejected);
+          alert(ALERT_COMMAND_REJECTED);
           break;
         }
 
@@ -1285,7 +1285,7 @@ handleNavigationCommand (int command, void *data) {
             if (clear) cpbClearContent();
             cpbBeginOperation(column, row);
           } else {
-            playTune(&tune_command_rejected);
+            alert(ALERT_COMMAND_REJECTED);
           }
 
           break;
@@ -1298,7 +1298,7 @@ handleNavigationCommand (int command, void *data) {
             if (cpbRectangularCopy(column, row))
               break;
 
-          playTune(&tune_command_rejected);
+          alert(ALERT_COMMAND_REJECTED);
           break;
         }
 
@@ -1309,7 +1309,7 @@ handleNavigationCommand (int command, void *data) {
             if (cpbLinearCopy(column, row))
               break;
 
-          playTune(&tune_command_rejected);
+          alert(ALERT_COMMAND_REJECTED);
           break;
         }
 
@@ -1339,7 +1339,7 @@ handleNavigationCommand (int command, void *data) {
             }
           }
 
-          playTune(&tune_command_rejected);
+          alert(ALERT_COMMAND_REJECTED);
           break;
         }
 
@@ -1351,7 +1351,7 @@ handleNavigationCommand (int command, void *data) {
             formatCharacterDescription(description, sizeof(description), column, row);
             message(NULL, description, 0);
           } else {
-            playTune(&tune_command_rejected);
+            alert(ALERT_COMMAND_REJECTED);
           }
           break;
         }
@@ -1363,7 +1363,7 @@ handleNavigationCommand (int command, void *data) {
             ses->winx = column;
             ses->winy = row;
           } else {
-            playTune(&tune_command_rejected);
+            alert(ALERT_COMMAND_REJECTED);
           }
           break;
         }
@@ -1375,7 +1375,7 @@ handleNavigationCommand (int command, void *data) {
             slideWindowVertically(arg);
             if (flags & BRL_FLG_LINE_TOLEFT) ses->winx = 0;
           } else {
-            playTune(&tune_command_rejected);
+            alert(ALERT_COMMAND_REJECTED);
           }
           break;
 
@@ -1383,7 +1383,7 @@ handleNavigationCommand (int command, void *data) {
           ScreenLocation *mark = &ses->marks[arg];
           mark->column = ses->winx;
           mark->row = ses->winy;
-          playTune(&tune_mark_set);
+          alert(ALERT_MARK_SET);
           break;
         }
         case BRL_BLK_GOTOMARK: {
@@ -1413,7 +1413,7 @@ handleNavigationCommand (int command, void *data) {
             ses->winy = row;
             findRow(column, increment, testIndent, NULL);
           } else {
-            playTune(&tune_command_rejected);
+            alert(ALERT_COMMAND_REJECTED);
           }
           break;
         }
@@ -1425,7 +1425,7 @@ handleNavigationCommand (int command, void *data) {
             ses->winy = row;
             upDifferentCharacter(isSameText, column);
           } else {
-            playTune(&tune_command_rejected);
+            alert(ALERT_COMMAND_REJECTED);
           }
           break;
         }
@@ -1437,7 +1437,7 @@ handleNavigationCommand (int command, void *data) {
             ses->winy = row;
             downDifferentCharacter(isSameText, column);
           } else {
-            playTune(&tune_command_rejected);
+            alert(ALERT_COMMAND_REJECTED);
           }
           break;
         }

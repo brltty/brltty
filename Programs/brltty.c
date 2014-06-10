@@ -48,7 +48,7 @@
 #include "async_wait.h"
 #include "async_event.h"
 #include "async_signal.h"
-#include "tunes.h"
+#include "alert.h"
 #include "ctb.h"
 #include "routing.h"
 #include "charset.h"
@@ -96,7 +96,7 @@ checkRoutingStatus (RoutingStatus ok, int wait) {
   RoutingStatus status = getRoutingStatus(wait);
 
   if (status != ROUTING_NONE) {
-    playTune((status > ok)? &tune_routing_failed: &tune_routing_succeeded);
+    alert((status > ok)? ALERT_ROUTING_FAILED: ALERT_ROUTING_SUCCEEDED);
 
     ses->spkx = scr.posx;
     ses->spky = scr.posy;
@@ -145,7 +145,7 @@ postprocessCommand (void *state, int command, int handled) {
 #ifdef ENABLE_SPEECH_SUPPORT
       if (ses->trackCursor && spk.track.isActive && (scr.number == spk.track.screenNumber)) {
         ses->trackCursor = 0;
-        playTune(&tune_cursor_unlinked);
+        alert(ALERT_CURSOR_UNLINKED);
       }
 #endif /* ENABLE_SPEECH_SUPPORT */
     }
@@ -163,7 +163,7 @@ postprocessCommand (void *state, int command, int handled) {
           if (routeCursor(MIN(MAX(scr.posx, left), right),
                           MIN(MAX(scr.posy, top), bottom),
                           scr.number)) {
-            playTune(&tune_routing_started);
+            alert(ALERT_ROUTING_STARTED);
             checkRoutingStatus(ROUTING_WRONG_COLUMN, 1);
 
             {
@@ -186,7 +186,7 @@ postprocessCommand (void *state, int command, int handled) {
 
 static int
 handleUnhandledCommand (int command, void *data) {
-  playTune(&tune_command_rejected);
+  alert(ALERT_COMMAND_REJECTED);
   return 0;
 }
 
@@ -949,8 +949,8 @@ getContractedLength (unsigned int outputLimit) {
 ToggleResult
 toggleBit (
   int *bits, int bit, int command,
-  const TuneDefinition *offTune,
-  const TuneDefinition *onTune
+  AlertIdentifier offAlert,
+  AlertIdentifier onAlert
 ) {
   int oldBits = *bits;
 
@@ -968,19 +968,19 @@ toggleBit (
       break;
 
     default:
-      playTune(&tune_command_rejected);
+      alert(ALERT_COMMAND_REJECTED);
       return TOGGLE_ERROR;
   }
 
   {
     int isOn = (*bits & bit) != 0;
-    const TuneDefinition *tune = isOn? onTune: offTune;
+    AlertIdentifier identifier = isOn? onAlert: offAlert;
 
-    playTune(tune);
+    alert(identifier);
     if (*bits != oldBits) return isOn? TOGGLE_ON: TOGGLE_OFF;
 
     asyncWait(TUNE_TOGGLE_REPEAT_DELAY);
-    playTune(tune);
+    alert(identifier);
     return TOGGLE_SAME;
   }
 }
@@ -988,25 +988,25 @@ toggleBit (
 ToggleResult
 toggleSetting (
   unsigned char *setting, int command,
-  const TuneDefinition *offTune,
-  const TuneDefinition *onTune
+  AlertIdentifier offAlert,
+  AlertIdentifier onAlert
 ) {
   const int bit = 1;
   int bits = *setting? bit: 0;
-  ToggleResult result = toggleBit(&bits, bit, command, offTune, onTune);
+  ToggleResult result = toggleBit(&bits, bit, command, offAlert, onAlert);
 
-  *setting = (bits & bit)? 1: 0;
+  *setting = (bits & bit)? bit: 0;
   return result;
 }
 
 ToggleResult
 toggleModeSetting (unsigned char *setting, int command) {
-  return toggleSetting(setting, command, NULL, NULL);
+  return toggleSetting(setting, command, ALERT_NONE, ALERT_NONE);
 }
 
 ToggleResult
 toggleFeatureSetting (unsigned char *setting, int command) {
-  return toggleSetting(setting, command, &tune_toggle_off, &tune_toggle_on);
+  return toggleSetting(setting, command, ALERT_TOGGLE_OFF, ALERT_TOGGLE_ON);
 }
 
 int
@@ -1169,9 +1169,9 @@ typedef void UnmonitoredConditionHandler (const void *data);
 
 static void
 handleRoutingDone (const void *data) {
-  const TuneDefinition *tune = data;
+  const RoutingStatus *status = data;
 
-  playTune(tune);
+  alert((*status > ROUTING_DONE)? ALERT_ROUTING_FAILED: ALERT_ROUTING_SUCCEEDED);
   ses->spkx = scr.posx;
   ses->spky = scr.posy;
 }
@@ -1205,11 +1205,11 @@ ASYNC_CONDITION_TESTER(checkUnmonitoredConditions) {
   }
 
   {
-    RoutingStatus status = getRoutingStatus(0);
+    static RoutingStatus status;
 
-    if (status != ROUTING_NONE) {
+    if ((status = getRoutingStatus(0)) != ROUTING_NONE) {
       ucd->handler = handleRoutingDone;
-      ucd->data = (status > ROUTING_DONE)? &tune_routing_failed: &tune_routing_succeeded;
+      ucd->data = &status;
       return 1;
     }
   }

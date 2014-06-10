@@ -22,7 +22,7 @@
 
 #include "brltty.h"
 #include "brl_cmds.h"
-#include "tunes.h"
+#include "alert.h"
 #include "charset.h"
 #include "scr.h"
 #include "scr_menu.h"
@@ -172,7 +172,7 @@ readCharacters_MenuScreen (const ScreenBox *box, ScreenCharacter *buffer) {
 
 static void
 commandRejected (void) {
-  playTune(&tune_command_rejected);
+  alert(ALERT_COMMAND_REJECTED);
 }
 
 static void

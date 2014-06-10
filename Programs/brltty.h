@@ -32,7 +32,7 @@
 #include "ktb.h"
 #include "menu.h"
 #include "prefs.h"
-#include "tunes.h"
+#include "alert.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -81,14 +81,14 @@ typedef enum {
 
 extern ToggleResult toggleBit (
   int *bits, int bit, int command,
-  const TuneDefinition *offTune,
-  const TuneDefinition *onTune
+  AlertIdentifier offAlert,
+  AlertIdentifier onAlert
 );
 
 extern ToggleResult toggleSetting (
   unsigned char *setting, int command,
-  const TuneDefinition *offTune,
-  const TuneDefinition *onTune
+  AlertIdentifier offAlert,
+  AlertIdentifier onAlert
 );
 
 extern ToggleResult toggleModeSetting (unsigned char *setting, int command);

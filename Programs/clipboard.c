@@ -24,7 +24,7 @@
 
 #include "log.h"
 #include "scr.h"
-#include "tunes.h"
+#include "alert.h"
 #include "clipboard.h"
 #include "queue.h"
 #include "file.h"
@@ -216,7 +216,7 @@ static int
 cpbEndOperation (const wchar_t *characters, size_t length) {
   cpbTruncateContent(beginOffset);
   if (!cpbAddContent(characters, length)) return 0;
-  playTune(&tune_clipboard_end);
+  alert(ALERT_CLIPBOARD_END);
   return 1;
 }
 
@@ -225,7 +225,7 @@ cpbBeginOperation (int column, int row) {
   beginColumn = column;
   beginRow = row;
   beginOffset = clipboardLength;
-  playTune(&tune_clipboard_begin);
+  alert(ALERT_CLIPBOARD_BEGIN);
 }
 
 int

@@ -369,8 +369,16 @@ routing.$O:
 
 ###############################################################################
 
-tunes.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/tunes.c
+ALERT_OBJECTS = alert.$O message.$O $(TUNE_OBJECTS)
+
+alert.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/alert.c
+
+message.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/message.c
+
+tune.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/tune.c
 
 notes.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/notes.c
@@ -458,7 +466,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O config.$O $(PREFS_OBJECTS) menu.$O ses.$O message.$O status.$O update.$O blink.$O clipboard.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_navigation.$O cmd_speech.$O cmd_touch.$O cmd_learn.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(TUNE_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) api_control.$O $(API_OBJECTS)
+CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O config.$O $(PREFS_OBJECTS) menu.$O ses.$O status.$O update.$O blink.$O clipboard.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_navigation.$O cmd_speech.$O cmd_touch.$O cmd_learn.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) api_control.$O $(API_OBJECTS)
 CORE_NAME = brltty
 
 brltty-core: $(CORE_OBJECTS)
@@ -474,9 +482,6 @@ menu.$O:
 
 ses.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ses.c
-
-message.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/message.c
 
 status.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/status.c
@@ -861,7 +866,7 @@ CORE_HEADERS = \
    $(SRC_DIR)/prefs.h $(SRC_DIR)/stat_types.h \
    $(SRC_DIR)/cmd.h $(SRC_DIR)/cmd_types.h $(SRC_DIR)/cmd_enqueue.h \
    $(SRC_DIR)/ttb.h $(SRC_DIR)/atb.h $(SRC_DIR)/ctb_types.h $(SRC_DIR)/ctb.h $(SRC_DIR)/ktb_types.h $(SRC_DIR)/ktb.h \
-   $(SRC_DIR)/tunes.h $(SRC_DIR)/tune_types.h \
+   $(SRC_DIR)/tune.h $(SRC_DIR)/tune_types.h \
    $(SRC_DIR)/notes.h $(SRC_DIR)/beep.h $(SRC_DIR)/pcm.h $(SRC_DIR)/midi.h $(SRC_DIR)/fm.h \
    $(SRC_DIR)/io_generic.h $(SRC_DIR)/gio_types.h \
    $(SRC_DIR)/io_serial.h $(SRC_DIR)/serial_types.h \
