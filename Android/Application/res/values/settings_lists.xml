@@ -16,6 +16,7 @@
   <string name="BRAILLE_DRIVER_LABEL_ec">EcoBraille</string>
   <string name="BRAILLE_DRIVER_LABEL_eu">EuroBraille</string>
   <string name="BRAILLE_DRIVER_LABEL_fs">FreedomScientific</string>
+  <string name="BRAILLE_DRIVER_LABEL_hd">Hedo</string>
   <string name="BRAILLE_DRIVER_LABEL_hm">HIMS</string>
   <string name="BRAILLE_DRIVER_LABEL_ht">HandyTech</string>
   <string name="BRAILLE_DRIVER_LABEL_hw">HumanWare</string>
@@ -56,6 +57,7 @@
     <item>@string/BRAILLE_DRIVER_LABEL_ec</item>
     <item>@string/BRAILLE_DRIVER_LABEL_eu</item>
     <item>@string/BRAILLE_DRIVER_LABEL_fs</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_hd</item>
     <item>@string/BRAILLE_DRIVER_LABEL_hm</item>
     <item>@string/BRAILLE_DRIVER_LABEL_ht</item>
     <item>@string/BRAILLE_DRIVER_LABEL_hw</item>
@@ -97,6 +99,7 @@
     <item>ec</item>
     <item>eu</item>
     <item>fs</item>
+    <item>hd</item>
     <item>hm</item>
     <item>ht</item>
     <item>hw</item>
@@ -187,7 +190,7 @@
   <string name="TEXT_TABLE_LABEL_nl_NL">Dutch (Netherlands)</string>
   <string name="TEXT_TABLE_LABEL_no">Norwegian</string>
   <string name="TEXT_TABLE_LABEL_no_generic">Norwegian (with support for other languages)</string>
-  <string name="TEXT_TABLE_LABEL_no_oub">Norwegian (Offentlig Utvalg for Blindeskrift)</string>
+  <string name="TEXT_TABLE_LABEL_no_oup">Norwegian (Offentlig utvalg for punktskrift)</string>
   <string name="TEXT_TABLE_LABEL_nwc">Newari (old)</string>
   <string name="TEXT_TABLE_LABEL_or">Oriya</string>
   <string name="TEXT_TABLE_LABEL_pa">Panjabi</string>
@@ -276,7 +279,7 @@
     <item>@string/TEXT_TABLE_LABEL_nl_NL</item>
     <item>@string/TEXT_TABLE_LABEL_no</item>
     <item>@string/TEXT_TABLE_LABEL_no_generic</item>
-    <item>@string/TEXT_TABLE_LABEL_no_oub</item>
+    <item>@string/TEXT_TABLE_LABEL_no_oup</item>
     <item>@string/TEXT_TABLE_LABEL_nwc</item>
     <item>@string/TEXT_TABLE_LABEL_or</item>
     <item>@string/TEXT_TABLE_LABEL_pa</item>
@@ -366,7 +369,7 @@
     <item>nl_NL</item>
     <item>no</item>
     <item>no-generic</item>
-    <item>no-oub</item>
+    <item>no-oup</item>
     <item>nwc</item>
     <item>or</item>
     <item>pa</item>
