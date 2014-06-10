@@ -248,16 +248,17 @@ static const TuneElement tuneFreezeReminder[] = {
 };
 
 typedef struct {
+  unsigned char duration;
+  BrlDots pattern;
+} TactileAlert;
+
+typedef struct {
   const TuneElement *tune;
   const char *message;
-
-  struct {
-    unsigned char pattern;
-    unsigned char duration;
-  } tactile;
+  TactileAlert tactile;
 } AlertEntry;
 
-#define ALERT_TACTILE(d,p) {.pattern=(p), .duration=(d)}
+#define ALERT_TACTILE(d,p) {.duration=(d), .pattern=(p)}
 
 static const AlertEntry alertTable[] = {
   [ALERT_BRAILLE_ON] = {
@@ -374,7 +375,7 @@ alert (AlertIdentifier identifier) {
     const AlertEntry *alert = &alertTable[identifier];
 
     if (!(prefs.alertTunes && alert->tune && playTune(alert->tune))) {
-      if (prefs.alertDots && alert->tactile.pattern) {
+      if (prefs.alertDots && alert->tactile.duration) {
         showDotPattern(alert->tactile.pattern, alert->tactile.duration);
       } else if (prefs.alertMessages && alert->message) {
         message(NULL, gettext(alert->message), 0);
