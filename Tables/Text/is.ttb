@@ -26,7 +26,7 @@
 
 # control characters
 char \x00       (  345 78)  # ⣜ 00 [NULL]
-include control-latin.tti
+include ctl-latin.tti
 char \x1B       (123 5678)  # ⣷ 1B [ESCAPE]
 char \x1C       (  34  78)  # ⣌ 1C [INFORMATION SEPARATOR FOUR]
 char \x1D       ( 2345678)  # ⣾ 1D [INFORMATION SEPARATOR THREE]

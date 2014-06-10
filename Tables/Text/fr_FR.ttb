@@ -25,7 +25,7 @@
 include let-latin.tti
 
 # the standard representations for the Latin control characters
-include control-latin.tti
+include ctl-latin.tti
 
 # the numbers 1-9 are represented by the letters a-i with dot 6 added
 # the number 0 is represented by dots 3456

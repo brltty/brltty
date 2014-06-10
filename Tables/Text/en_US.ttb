@@ -22,7 +22,7 @@
 include let-latin.tti
 
 # the standard representations for the Latin control characters
-include control-latin.tti
+include ctl-latin.tti
 
 # the numbers 0-9 are represented using the Nemeth (lower numbers) scheme
 include num-nemeth.tti
