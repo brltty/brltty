@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_PREFS_INERNAL
-#define BRLTTY_INCLUDED_PREFS_INERNAL
+#ifndef BRLTTY_INCLUDED_PREFS_TABLE
+#define BRLTTY_INCLUDED_PREFS_TABLE
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,4 +45,4 @@ extern const unsigned char preferenceCount;
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_PREFS_INERNAL */
+#endif /* BRLTTY_INCLUDED_PREFS_TABLE */

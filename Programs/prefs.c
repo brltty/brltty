@@ -23,7 +23,7 @@
 #include <errno.h>
 
 #include "prefs.h"
-#include "prefs_internal.h"
+#include "prefs_table.h"
 #include "stat_types.h"
 #include "defaults.h"
 #include "log.h"
