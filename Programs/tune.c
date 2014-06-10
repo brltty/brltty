@@ -25,10 +25,7 @@
 #include "async_alarm.h"
 #include "program.h"
 #include "tune.h"
-#include "prefs.h"
 #include "notes.h"
-#include "message.h"
-#include "brl_dots.h"
 
 static const NoteMethods *noteMethods = NULL;
 static NoteDevice *noteDevice = NULL;
