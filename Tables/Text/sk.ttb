@@ -28,7 +28,7 @@
 include num-dot8.tti
 
 # the standard representations for the letters of the Latin alphabet
-include let-latin.tti
+include ltr-latin.tti
 
 # Slovak letters with accents
 char \xE1	(1    6  )  # ⠡ á [LATIN SMALL LETTER A WITH ACUTE]

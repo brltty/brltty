@@ -25,7 +25,7 @@
 # esperanto-muzeo@wanadoo.fr
 
 # the standard representations for the letters of the Latin alphabet
-include let-latin.tti
+include ltr-latin.tti
 
 # w is non-standard because dots 2456 is j with circumflex
 char \x77	( 23456  )  # ⠾ w [LATIN SMALL LETTER W]

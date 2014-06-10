@@ -38,7 +38,7 @@
 include num-dot8.tti
 
 # the standard representations for the letters of the Latin alphabet
-include let-latin.tti
+include ltr-latin.tti
 
 char	\x22	( 23 56  )  # ⠶ " [QUOTATION MARK]
 char	\x24	(   4 6  )  # ⠨ $ [DOLLAR SIGN]

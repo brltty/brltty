@@ -20,7 +20,7 @@
 # by English-speaking North American users for the ASCII character set.
 
 # the standard representations for the letters of the Latin alphabet
-include let-latin.tti
+include ltr-latin.tti
 
 # the numbers 0-9 are represented using the Nemeth (lower numbers) scheme
 include num-nemeth.tti

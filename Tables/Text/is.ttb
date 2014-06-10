@@ -34,7 +34,7 @@ char \x1E       ( 234 678)  # ⣮ 1E [INFORMATION SEPARATOR TWO]
 char \x1F       (   45678)  # ⣸ 1F [INFORMATION SEPARATOR ONE]
 
 # the standard representations for the letters of the Latin alphabet
-include let-latin.tti
+include ltr-latin.tti
 
 # the numbers 0-9 are represented by the letters j,a-i with dot 8 added
 include num-dot8.tti

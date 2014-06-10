@@ -19,7 +19,7 @@
 # BRLTTY Text Table - French (Code Braille Informatique Français Standard)
 
 # the standard representations for the letters of the Latin alphabet
-include let-latin.tti
+include ltr-latin.tti
 
 # the standard representations for the Latin control characters
 include ctl-latin.tti

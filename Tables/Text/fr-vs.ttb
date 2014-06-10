@@ -25,7 +25,7 @@
 # comfortable than standard French braille tables.
 
 # the standard representations for the letters of the Latin alphabet
-include let-latin.tti
+include ltr-latin.tti
 
 # the numbers 1-9 are represented by the letters a-i with dot 6 added
 # the number 0 is represented by dots 3456

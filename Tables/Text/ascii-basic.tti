@@ -19,6 +19,6 @@
 # This BRLTTY text subtable defines a set of braille representations for the 
 # ASCII character set designed for languages which don't use them themselves.
 
-include let-latin.tti
+include ltr-latin.tti
 include num-dot8.tti
 include punc-basic.tti

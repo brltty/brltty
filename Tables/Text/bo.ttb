@@ -18,10 +18,10 @@
 
 # BRLTTY Text Table - Tibetan
 
-include let-tibetan.tti
+include ltr-tibetan.tti
 include punc-tibetan.tti
 
-include let-dot8.tti
+include ltr-dot8.tti
 include num-nemeth.tti
 include punc-alternate.tti
 

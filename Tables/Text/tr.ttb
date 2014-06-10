@@ -26,7 +26,7 @@
 # The document is dated 1954, so this table may be quite outdated.
 
 # the standard representations for the letters of the Latin alphabet
-include let-latin.tti
+include ltr-latin.tti
 char \u0131	(  3 5   )  # ⠔ ı [LATIN SMALL LETTER DOTLESS I]
 char \x49	(  3 5 7 )  # ⡔ I [LATIN CAPITAL LETTER I]
 char \x69	( 2 4    )  # ⠊ i [LATIN SMALL LETTER I]

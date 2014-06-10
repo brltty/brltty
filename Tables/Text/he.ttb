@@ -20,7 +20,7 @@
 #
 # Adi Kushnir <adikushnir@gmail.com>
 
-include let-latin.tti
+include ltr-latin.tti
 include num-nemeth.tti
 
 char	\x21	( 23 5  8)  # ⢖ ! [EXCLAMATION MARK]

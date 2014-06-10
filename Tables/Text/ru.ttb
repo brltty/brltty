@@ -53,8 +53,8 @@
 # Comments from Russians are very welcome as neither Hans Schou nor Dave Mielke
 # understand a single word in Russian.
 
-include let-cyrillic.tti
-include let-dot8.tti
+include ltr-cyrillic.tti
+include ltr-dot8.tti
 include num-nemeth.tti
 include punc-alternate.tti
 

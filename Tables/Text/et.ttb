@@ -26,7 +26,7 @@
 # The document is dated 1954, so this table may be quite outdated.
 
 # the standard representations for the letters of the Latin alphabet
-include let-latin.tti
+include ltr-latin.tti
 
 # lowercase accented letters
 char \xE4	(  345   )  # ⠜ ä [LATIN SMALL LETTER A WITH DIAERESIS]
