@@ -24,7 +24,7 @@
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Teksttabell</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Attributtabell</string>
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Kortskrifttabell</string>
-  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tastetabell for tastatur</string>
+  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tastaturtabell</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Loggenivå</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Loggekategorier</string>
@@ -54,8 +54,8 @@
   <string name="NAVIGATION_MODE_LABEL_List">Vertikal liste</string>
   <string name="NAVIGATION_MODE_LABEL_Grid">Todimensjonelt rutenett</string>
 
-  <string name="SPEECH_SUPPORT_LABEL_None">Ingen</string>
-  <string name="SPEECH_SUPPORT_LABEL_Native">Original</string>
+  <string name="SPEECH_SUPPORT_LABEL_None">ingen</string>
+  <string name="SPEECH_SUPPORT_LABEL_Native">original</string>
 
   <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
   <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>
@@ -152,7 +152,7 @@
   <string name="TEXT_TABLE_LABEL_nl_NL">nederlandsk</string>
   <string name="TEXT_TABLE_LABEL_no_generic">norsk (med støtte for andre språk)</string>
   <string name="TEXT_TABLE_LABEL_no">norsk</string>
-  <string name="TEXT_TABLE_LABEL_no_oub">norsk (Offentlig Utvalg for Blindeskrift)</string>
+  <string name="TEXT_TABLE_LABEL_no_oub">norsk (Offentlig utvalg for punktskrift)</string>
   <string name="TEXT_TABLE_LABEL_nwc">newari (gammelt)</string>
   <string name="TEXT_TABLE_LABEL_or">oriya</string>
   <string name="TEXT_TABLE_LABEL_pa">panjabi</string>
