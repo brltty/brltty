@@ -290,3 +290,10 @@ KeyTableCommandContext
 getScreenCommandContext (void) {
   return KTB_CTX_DEFAULT;
 }
+
+#include "message.h"
+
+int
+message (const char *mode, const char *text, MessageOptions options) {
+  return 1;
+}
