@@ -720,7 +720,7 @@ usbReapResponse (
 
       switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
         case UsbEndpointDirection_Input:
-          if (!usbApplyInputFilters(device, response->buffer, response->size, &response->count)) {
+          if (!usbApplyInputFilters(endpoint, response->buffer, response->size, &response->count)) {
             response->error = EIO;
             response->count = -1;
           }
@@ -856,7 +856,7 @@ usbReadEndpoint (
     }
 
     if (count != -1) {
-      if (!usbApplyInputFilters(device, buffer, length, &count)) {
+      if (!usbApplyInputFilters(endpoint, buffer, length, &count)) {
         errno = EIO;
         count = -1;
       }
@@ -876,10 +876,11 @@ usbWriteEndpoint (
 ) {
   UsbEndpoint *endpoint;
 
-  logBytes(LOG_CATEGORY(USB_IO), "endpoint output", buffer, length);
-
   if ((endpoint = usbGetOutputEndpoint(device, endpointNumber))) {
     UsbEndpointTransfer transfer = USB_ENDPOINT_TRANSFER(endpoint->descriptor);
+
+    usbLogEndpointData(endpoint, "output", buffer, length);
+
     switch (transfer) {
       case UsbEndpointTransfer_Interrupt:
       case UsbEndpointTransfer_Bulk:

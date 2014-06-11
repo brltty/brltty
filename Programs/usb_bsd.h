@@ -187,7 +187,7 @@ usbReadEndpoint (
     UsbEndpointExtension *eptx = endpoint->extension;
     if (usbSetTimeout(eptx->file, timeout, &eptx->timeout)) {
       if ((count = read(eptx->file, buffer, length)) != -1) {
-        if (!usbApplyInputFilters(device, buffer, length, &count)) {
+        if (!usbApplyInputFilters(endpoint, buffer, length, &count)) {
           errno = EIO;
           count = -1;
         }

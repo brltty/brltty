@@ -190,7 +190,7 @@ usbReadEndpoint (
     }
 
     if (result >= 0) {
-      if (!usbApplyInputFilters(device, buffer, length, &result)) {
+      if (!usbApplyInputFilters(endpoint, buffer, length, &result)) {
         result = -EIO;
       }
     }

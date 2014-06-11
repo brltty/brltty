@@ -512,7 +512,7 @@ usbReapResponse (
       response->error = 0;
       response->count = request->count;
 
-      if (!usbApplyInputFilters(device, response->buffer, response->size, &response->count)) {
+      if (!usbApplyInputFilters(endpoint, response->buffer, response->size, &response->count)) {
         response->error = EIO;
         response->count = -1;
       }
@@ -565,7 +565,7 @@ usbReadEndpoint (
         {
           ssize_t actual = count;
 
-          if (usbApplyInputFilters(device, buffer, length, &actual)) return actual;
+          if (usbApplyInputFilters(endpoint, buffer, length, &actual)) return actual;
         }
 
         errno = EIO;

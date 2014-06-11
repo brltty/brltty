@@ -214,15 +214,24 @@ usbLogSetupPacket (const UsbSetupPacket *setup) {
 }
 
 void
+usbLogEndpointData (
+  UsbEndpoint *endpoint, const char *label,
+  const void *data, size_t size
+) {
+  logBytes(LOG_CATEGORY(USB_IO), "endpoint %02X %s", data, size,
+           endpoint->descriptor->bEndpointAddress, label);
+}
+
+void
 usbLogString (
   UsbDevice *device,
   unsigned char number,
-  const char *description
+  const char *label
 ) {
   if (number) {
     char *string = usbGetString(device, number, 1000);
     if (string) {
-      logMessage(LOG_INFO, "USB: %s: %s", description, string);
+      logMessage(LOG_INFO, "USB: %s: %s", label, string);
       free(string);
     }
   }
@@ -792,22 +801,22 @@ usbApplyInputFilter (void *item, void *data) {
 }
 
 int
-usbApplyInputFilters (UsbDevice *device, void *buffer, size_t size, ssize_t *length) {
+usbApplyInputFilters (UsbEndpoint *endpoint, void *buffer, size_t size, ssize_t *length) {
   UsbInputFilterData data = {
     .buffer = buffer,
     .size = size,
     .length = *length
   };
 
-  logBytes(LOG_CATEGORY(USB_IO), "unfiltered input", buffer, *length);
+  usbLogEndpointData(endpoint, "unfiltered input", buffer, *length);
 
-  if (processQueue(device->inputFilters, usbApplyInputFilter, &data)) {
+  if (processQueue(endpoint->device->inputFilters, usbApplyInputFilter, &data)) {
     errno = EIO;
     return 0;
   }
 
   *length = data.length;
-  logBytes(LOG_CATEGORY(USB_IO), "filtered input", buffer, *length);
+  usbLogEndpointData(endpoint, "filtered input", buffer, *length);
   return 1;
 }
 

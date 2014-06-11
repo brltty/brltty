@@ -87,7 +87,7 @@ extern UsbDevice *usbTestDevice (
 extern UsbEndpoint *usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress);
 extern UsbEndpoint *usbGetInputEndpoint (UsbDevice *device, unsigned char endpointNumber);
 extern UsbEndpoint *usbGetOutputEndpoint (UsbDevice *device, unsigned char endpointNumber);
-extern int usbApplyInputFilters (UsbDevice *device, void *buffer, size_t size, ssize_t *length);
+extern int usbApplyInputFilters (UsbEndpoint *endpoint, void *buffer, size_t size, ssize_t *length);
 
 extern int usbSetSerialOperations (UsbDevice *device);
 
@@ -132,6 +132,11 @@ extern void usbDeallocateEndpointExtension (UsbEndpointExtension *eptx);
 extern void usbDeallocateDeviceExtension (UsbDeviceExtension *devx);
 
 extern void usbLogSetupPacket (const UsbSetupPacket *setup);
+
+extern void usbLogEndpointData (
+  UsbEndpoint *endpoint, const char *label,
+  const void *data, size_t size
+);
 
 #ifdef __cplusplus
 }

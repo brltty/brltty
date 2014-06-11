@@ -336,7 +336,7 @@ usbReapResponse (
     } else {
       switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
         case UsbEndpointDirection_Input:
-          if (!usbApplyInputFilters(device, response->buffer, response->size, &response->count)) {
+          if (!usbApplyInputFilters(endpoint, response->buffer, response->size, &response->count)) {
             response->error = EIO;
             response->count = -1;
           }
@@ -376,7 +376,7 @@ usbReadEndpoint (
     if ((count = read(eptx->data, buffer, length)) == -1) {
       if (errno == EINTR) goto doRead;
       logSystemError("USB endpoint read");
-    } else if (!usbApplyInputFilters(device, buffer, length, &count)) {
+    } else if (!usbApplyInputFilters(endpoint, buffer, length, &count)) {
       errno = EIO;
     } else if (!count) {
       errno = EAGAIN;
