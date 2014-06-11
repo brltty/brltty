@@ -237,7 +237,7 @@ addProgramOption() {
    local variable="${3}"
    local usage="${4}"
 
-   [ "$(expr "${letter}" : '^[[:alnum:]]*$')" -eq 1 ] || internalError "invalid program option: -${letter}"
+   [ "$(expr "${letter}" : '[[:alnum:]]*$')" -eq 1 ] || internalError "invalid program option: -${letter}"
    [ -z "$(getVariable "programOptionType_${letter}")" ] || internalError "duplicate program option definition: -${letter}"
 
    local operand
