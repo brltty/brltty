@@ -307,21 +307,31 @@ typedef enum {NAV20_40, NAV80, PB40, PB65_81} DisplayType;
 static DisplayType displayType;
 static const char *keyBindings[] = {"nav20_nav40", "nav80", "pb40", "pb65_pb81"};
 
-static int
-myread(void *buf, unsigned len)
-{
-  return serialReadData(serialDevice,buf,len,100,100);
+static ssize_t
+readBytes (void *buffer, size_t size, int wait) {
+  int timeout = 100;
+  ssize_t result = serialReadData(serialDevice, buffer, size,
+                                  (wait? timeout: 0), timeout);
+
+  if (result > 0) logInputPacket(buffer, result);
+  return result;
 }
 
+static ssize_t
+writeBytes (const void *data, size_t size) {
+  logOutputPacket(data, size);
+  return serialWriteData(serialDevice, data, size);
+}
 
 static int
 QueryDisplay(unsigned char *reply)
 /* For auto-detect: send query, read response and validate response header. */
 {
-  int count;
-  if ((count = serialWriteData(serialDevice, BRL_QUERY, DIM_BRL_QUERY)) == DIM_BRL_QUERY) {
+  ssize_t count;
+
+  if ((count = writeBytes(BRL_QUERY, DIM_BRL_QUERY)) == DIM_BRL_QUERY) {
     if (serialAwaitInput(serialDevice, 100)) {
-      if ((count = myread(reply, Q_REPLY_LENGTH)) != -1) {
+      if ((count = readBytes(reply, Q_REPLY_LENGTH, 1)) != -1) {
         if ((count == Q_REPLY_LENGTH) && (memcmp(reply, Q_HEADER, Q_HEADER_LENGTH) == 0)) {
           logBytes(LOG_DEBUG, "TSI Reply", reply, count);
           return 1;
@@ -329,14 +339,15 @@ QueryDisplay(unsigned char *reply)
           logUnexpectedPacket(reply, count);
         }
       } else {
-        logSystemError("Read");
+        logSystemError("read");
       }
     }
   } else if (count != -1) {
-    logMessage(LOG_ERR, "Short write: %d < %d", count, DIM_BRL_QUERY);
+    logMessage(LOG_ERR, "short write: %zd < %d", count, DIM_BRL_QUERY);
   } else {
-    logSystemError("Write");
+    logSystemError("write");
   }
+
   return 0;
 }
 
@@ -347,8 +358,8 @@ ResetTypematic (void)
 {
   static unsigned char params[2] =
     {BRL_TYPEMATIC_DELAY, BRL_TYPEMATIC_REPEAT};
-  serialWriteData (serialDevice, BRL_TYPEMATIC, DIM_BRL_TYPEMATIC);
-  serialWriteData (serialDevice, &params, 2);
+  writeBytes(BRL_TYPEMATIC, DIM_BRL_TYPEMATIC);
+  writeBytes(&params, 2);
 }
 
 
@@ -465,7 +476,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
   fullFreshenEvery = FULL_FRESHEN_EVERY;
 #ifdef HIGHBAUD
   if(speed == 2){ /* if supported (PB) go to 19.2Kbps */
-    serialWriteData (serialDevice, BRL_UART192, DIM_BRL_UART192);
+    writeBytes(BRL_UART192, DIM_BRL_UART192);
     serialAwaitOutput(serialDevice);
     asyncWait(BAUD_DELAY);
     if(!serialSetBaud(serialDevice, serialBaud=19200)) goto failure;
@@ -608,7 +619,7 @@ display (BrailleDisplay *brl,
 
   {
     int count = DIM_BRL_SEND + 2 * length;
-    serialWriteData (serialDevice, rawdata, count);
+    writeBytes(rawdata, count);
     brl->writeDelay += (count * 1000 / charactersPerSecond) + (slow_update * 24);
   }
 }
@@ -899,32 +910,36 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
  */
 
   /* Check for first byte */
-  if (serialReadData (serialDevice, buf, 1, 0, 0) != 1){
-    if((i = millisecondsBetween(&last_ping, &now) > PING_INTRVL)){
+  if (readBytes(buf, 1, 0) != 1) {
+    if ((i = millisecondsBetween(&last_ping, &now) > PING_INTRVL)) {
       int ping_due = (pings==0 || (millisecondsBetween(&last_ping_sent, &now)
 				   > PING_REPLY_DELAY));
-      if((pings>=PING_MAXNQUERY && ping_due))
+      if ((pings >= PING_MAXNQUERY) && ping_due) {
 	return BRL_CMD_RESTARTBRL;
-      else if(ping_due){
-	logMessage(LOG_DEBUG,"Display idle: sending query");
+      } else if (ping_due) {
+	logMessage(LOG_DEBUG, "display idle: sending query");
 	serialAwaitOutput(serialDevice);
 	asyncWait(2*SEND_DELAY);
-	serialWriteData (serialDevice, BRL_QUERY, DIM_BRL_QUERY);
-	if(slow_update == 1)
+	writeBytes(BRL_QUERY, DIM_BRL_QUERY);
+
+	if (slow_update == 1) {
 	  serialAwaitOutput(serialDevice);
-	else if(slow_update == 2){
+	} else if (slow_update == 2) {
 	  serialAwaitOutput(serialDevice);
 	  asyncWait(SEND_DELAY);
 	}
-	pings++;
+
+	pings += 1;
 	getMonotonicTime(&last_ping_sent);
       }
     }
+
     return (EOF);
   }
+
   /* there was some input, we heard something. */
   getMonotonicTime(&last_ping);
-  pings=0;
+  pings = 0;
 
 #ifdef RECV_DELAY
   accurateDelay(SEND_DELAY);
@@ -932,68 +947,82 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 
   /* read bytes */
   i=0;
-  while(1){
-    if(i==0){
-      if(buf[0] == BATTERY_H1)
+
+  while (1) {
+    if (i == 0) {
+      if (buf[0] == BATTERY_H1) {
 	 /* || buf[0] == KEY_SW_H1 || buf[0] == Q_HEADER[0] */
 	packtype = K_SPECIAL;
-      else if((buf[0]&KEY_SIGMASK) == nav_key_desc[0].sig) packtype = K_NAVKEY;
-      else if((buf[0]&KEY_SIGMASK) == pb_key_desc[0].sig) packtype = K_PBKEY;
-      else return(EOF);
+      } else if ((buf[0] & KEY_SIGMASK) == nav_key_desc[0].sig) {
+        packtype = K_NAVKEY;
+      } else if ((buf[0] & KEY_SIGMASK) == pb_key_desc[0].sig) {
+        packtype = K_PBKEY;
+      } else {
+        return EOF;
+      }
       /* unrecognized byte (garbage...?) */
-    }else{ /* i>0 */
-      if(packtype == K_SPECIAL){
-	if(buf[1] == BATTERY_H2) packtype = K_BATTERY;
-	else if(buf[1] == KEY_SW_H2) packtype = K_SW;
-	else if(buf[1] == Q_HEADER[1]) packtype = K_QUERYREP;
-	else return(EOF);
+    } else { /* i>0 */
+      if (packtype == K_SPECIAL) {
+	if (buf[1] == BATTERY_H2) {
+          packtype = K_BATTERY;
+	} else if (buf[1] == KEY_SW_H2) {
+          packtype = K_SW;
+	} else if (buf[1] == Q_HEADER[1]) {
+          packtype = K_QUERYREP;
+	} else {
+          return(EOF);
+        }
+
 	break;
-      }else if(packtype == K_NAVKEY){
-	if((buf[1]&KEY_SIGMASK) != nav_key_desc[1].sig)
-	  return(EOF);
+      } else if (packtype == K_NAVKEY) {
+	if ((buf[1] & KEY_SIGMASK) != nav_key_desc[1].sig) {
+	  return EOF;
+        }
+
 	break;
-      }else{ /* K_PBKEY */
-	if((buf[i]&KEY_SIGMASK) != pb_key_desc[i].sig)
-	  return(EOF);
-	if(i==PB_KEY_LEN-1) break;
+      } else { /* K_PBKEY */
+	if ((buf[i] & KEY_SIGMASK) != pb_key_desc[i].sig) return(EOF);
+	if (i == PB_KEY_LEN-1) break;
       }
     }
-    i++;
-    if (myread (buf+i, 1) != 1)
-      return (EOF);
+
+    i += 1;
+    if (readBytes(buf+i, 1, 1) != 1) return EOF;
   }/* while */
 
-  if(has_sw && must_init_oldstat){
+  if (has_sw && must_init_oldstat) {
     must_init_oldstat = 0;
     ignore_routing = 0;
     sw_howmany = 0;
-    for(i=0;i<SW_MAXHORIZ; i++)
-      sw_oldstat[i] = 0;
+    for (i=0; i<SW_MAXHORIZ; i+=1) sw_oldstat[i] = 0;
   }
 
-  if(packtype == K_BATTERY){
+  if (packtype == K_BATTERY) {
     message(NULL, gettext("battery low"), MSG_WAITKEY);
-    return (EOF);
-  }else if(packtype == K_QUERYREP){
+    return EOF;
+  } else if (packtype == K_QUERYREP) {
     /* flush the last 10bytes of the reply. */
-    logMessage(LOG_DEBUG,"Got reply to idle ping");
-    myread(buf, Q_REPLY_LENGTH - Q_HEADER_LENGTH);
-    return(EOF);
-  }else if(packtype == K_NAVKEY || packtype == K_PBKEY){
+    logMessage(LOG_DEBUG, "got reply to idle ping");
+    readBytes(buf, Q_REPLY_LENGTH - Q_HEADER_LENGTH, 1);
+    return EOF;
+  } else if ((packtype == K_NAVKEY) || (packtype == K_PBKEY)) {
     /* construct code */
     int n;
     struct inbytedesc *desc;
-    if(packtype == K_NAVKEY){
+
+    if (packtype == K_NAVKEY) {
       n = NAV_KEY_LEN;
       desc = nav_key_desc;
-    }else{
+    } else {
       n = PB_KEY_LEN;
       desc = pb_key_desc;
     }
+
     code = 0;
-    for(i=0; i<n; i++)
-      code |= (buf[i]&desc[i].mask) << desc[i].shift;
-  }else if(packtype == K_SW){
+    for (i=0; i<n; i+=1) {
+      code |= (buf[i] & desc[i].mask) << desc[i].shift;
+    }
+  } else if (packtype == K_SW) {
     /* read the rest of the sequence */
     unsigned char cnt;
     unsigned char buf[SW_NVERT];
@@ -1002,51 +1031,61 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 
     /* read next byte: it indicates length of sequence */
     /* still VMIN = 0, VTIME = 1 */
-    if (myread (&cnt, 1) != 1)
+    if (readBytes(&cnt, 1, 1) != 1) {
       return (EOF);
+    }
     
     /* if sw_bcnt and cnt disagree, then must be garbage??? */
     /* problematic for PB 65/80/81... not clear */
-    if (cnt != sw_bcnt)
-      return (EOF);
+    if (cnt != sw_bcnt) return EOF;
 
-    if (myread (buf, SW_NVERT) != SW_NVERT)
-      return (EOF);
+    if (readBytes(buf, SW_NVERT, 1) != SW_NVERT) {
+      return EOF;
+    }
+
     cnt -= SW_NVERT;
     /* cnt now gives the number of bytes describing horizontal
        routing keys only */
     
-    if (myread (sw_stat, cnt) != cnt)
-      return (EOF);
+    if (readBytes(sw_stat, cnt, 1) != cnt) {
+      return EOF;
+    }
 
     /* if key press is maintained, then packet is resent by display
        every 0.5secs. When the key is released, then display sends a packet
        with all info bits at 0. */
-    for(i=0; i<cnt; i++)
+    for (i=0; i<cnt; i+=1) {
       sw_oldstat[i] |= sw_stat[i];
+    }
 
-    for (sw_howmany = 0, i = 0; i < ncells; i++)
-      if (SW_CHK (i))
+    for (sw_howmany=0, i=0; i<ncells; i+=1) {
+      if (SW_CHK(i)) {
 	sw_which[sw_howmany++] = i;
+      }
+    }
+
     /* SW_CHK(i) tells if routing key i is pressed.
        sw_which[0] to sw_which[howmany-1] give the numbers of the keys
        that are pressed. */
 
-    for(i=0; i<cnt; i++)
-      if(sw_stat[i] != 0){
+    for (i=0; i<cnt; i+=1) {
+      if (sw_stat[i] != 0) {
 	return (EOF);
       }
+    }
+
     must_init_oldstat = 1;
-    if(ignore_routing) return(EOF);
+    if (ignore_routing) return EOF;
   }
 
   /* Now associate a command (in res) to the key(s) (in code and sw_...) */
 
-  if(has_sw && code && sw_howmany){
-    if(ignore_routing) return(EOF);
+  if (has_sw && code && sw_howmany) {
+    if (ignore_routing) return EOF;
     ignore_routing = 1;
-    if(sw_howmany == 1){
-      switch(code){
+
+    if (sw_howmany == 1) {
+      switch (code) {
 	KEYAND(KEY_BUT3) KEY(KEY_BRIGHT, BRL_BLK_CLIP_NEW + sw_which[0]);
 	KEYAND(KEY_BUT2) KEY(KEY_BLEFT, BRL_BLK_COPY_RECT + sw_which[0]);
 	KEYAND(KEY_R2DN) KEY (KEY_BDOWN, BRL_BLK_NXINDENT + sw_which[0]);
@@ -1058,31 +1097,31 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 	KEYAND(KEY_CDOWN | KEY_BUP) KEY(KEY_CUP | KEY_CDOWN,
 					BRL_BLK_DESCCHAR +sw_which[0]);
       }
-    }else if(sw_howmany == 2) {
-      if(sw_which[0]+1 == sw_which[1]
-	 && (code == KEY_BRIGHT || code == KEY_BUT3))
+    } else if (sw_howmany == 2) {
+      if (((sw_which[0] + 1) == sw_which[1]) &&
+          ((code == KEY_BRIGHT) || (code == KEY_BUT3))) {
 	res = BRL_BLK_CLIP_ADD + sw_which[0];
-      else if(sw_which[0]+1 == sw_which[1]
-	 && (code == KEY_BLEFT || code == KEY_BUT2))
+      } else if (((sw_which[0] + 1) == sw_which[1]) &&
+                 ((code == KEY_BLEFT) || (code == KEY_BUT2))) {
 	res = BRL_BLK_COPY_LINE + sw_which[1];
-      else if(sw_which[0]==0 && sw_which[1]==1){
-	switch(code){
+      } else if ((sw_which[0] == 0) && (sw_which[1] == 1)) {
+	switch (code) {
 	  KEYAND(KEY_R2DN) KEY (KEY_BDOWN, BRL_CMD_NXPGRPH);
 	  KEYAND(KEY_R2UP) KEY (KEY_BUP, BRL_CMD_PRPGRPH);
 	}
-      }else if(sw_which[0]==1 && sw_which[1]==2){
-	switch(code){
+      } else if ((sw_which[0] == 1) && (sw_which[1] == 2)) {
+	switch (code) {
 	  KEY (KEY_BDOWN, BRL_CMD_NXPROMPT);
 	  KEY (KEY_BUP, BRL_CMD_PRPROMPT);
 	}
-      }else if(sw_which[0]==0 && sw_which[1]==2){
-	switch(code){
+      } else if ((sw_which[0] == 0) && (sw_which[1] == 2)) {
+	switch (code) {
 	  KEYAND(KEY_R2DN) KEY (KEY_BDOWN, BRL_CMD_NXSEARCH);
 	  KEYAND(KEY_R2UP) KEY (KEY_BUP, BRL_CMD_PRSEARCH);
 	}
       }
     }
-  }else if (has_sw && sw_howmany)	/* routing key */
+  } else if (has_sw && sw_howmany)	/* routing key */
     {
       if (sw_howmany == 1)
 	res = BRL_BLK_ROUTE + sw_which[0];
