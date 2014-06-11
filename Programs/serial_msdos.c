@@ -58,9 +58,14 @@ BEGIN_SERIAL_BAUD_TABLE
   SERIAL_BAUD_ENTRY(115200),
 END_SERIAL_BAUD_TABLE
 
+static inline int
+serialGetPort (SerialDevice *serial) {
+  return serial->package.deviceIndex;
+}
+
 static unsigned short
 serialPortBase (SerialDevice *serial) {
-  return _farpeekw(_dos_ds, (0X0400 + (2 * serial->package.deviceIndex)));
+  return _farpeekw(_dos_ds, (0X0400 + (2 * serialGetPort(serial))));
 }
 
 static unsigned char
@@ -75,7 +80,7 @@ serialWritePort (SerialDevice *serial, unsigned char port, unsigned char value) 
 
 static unsigned int
 serialBiosCommand (SerialDevice *serial, int command, unsigned char data) {
-  return _bios_serialcom(command, serial->package.deviceIndex, data);
+  return _bios_serialcom(command, serialGetPort(serial), data);
 }
 
 static int
@@ -94,6 +99,9 @@ serialPutInitialAttributes (SerialAttributes *attributes) {
 
 int
 serialPutSpeed (SerialAttributes *attributes, SerialSpeed speed) {
+  logMessage(LOG_CATEGORY(SERIAL_IO), "put speed: bps=%u divisor=%u",
+             speed.bps, speed.divisor);
+
   attributes->speed = speed;
   attributes->bios.fields.bps = attributes->speed.bps;
   return 1;
@@ -186,7 +194,7 @@ serialGetAttributes (SerialDevice *serial, SerialAttributes *attributes) {
   int divisor;
 
   {
-    int interruptsWereEnabled = disable();
+    int wasEnabled = disable();
 
     lcr = serialReadPort(serial, UART_PORT_LCR);
     serialWritePort(serial, UART_PORT_LCR, (lcr | UART_FLAG_LCR_DLAB));
@@ -195,7 +203,7 @@ serialGetAttributes (SerialDevice *serial, SerialAttributes *attributes) {
                serialReadPort(serial, UART_PORT_DLL);
     serialWritePort(serial, UART_PORT_LCR, lcr);
 
-    if (interruptsWereEnabled) enable();
+    if (wasEnabled) enable();
   }
 
   attributes->bios.byte = lcr;
@@ -218,21 +226,27 @@ serialGetAttributes (SerialDevice *serial, SerialAttributes *attributes) {
 int
 serialPutAttributes (SerialDevice *serial, const SerialAttributes *attributes) {
   if (attributes->speed.bps < (0X1 << 3)) {
-    serialBiosCommand(serial, _COM_INIT, attributes->bios.byte);
+    unsigned char byte = attributes->bios.byte;
+
+    logMessage(LOG_CATEGORY(SERIAL_IO), "put attributes: port=%d byte=0X%02X",
+               serialGetPort(serial), byte);
+    serialBiosCommand(serial, _COM_INIT, byte);
   } else {
     SerialBiosConfiguration lcr = attributes->bios;
 
     lcr.fields.bps = 0;
+    logMessage(LOG_CATEGORY(SERIAL_IO), "put attributes: port=%d lcr=0X%02X divisor=%u",
+               serialGetPort(serial), lcr.byte, attributes->speed.divisor);
 
     {
-      int interruptsWereEnabled = disable();
+      int wasEnabled = disable();
 
       serialWritePort(serial, UART_PORT_LCR, (lcr.byte | UART_FLAG_LCR_DLAB));
       serialWritePort(serial, UART_PORT_DLL, (attributes->speed.divisor & 0XFF));
       serialWritePort(serial, UART_PORT_DLH, (attributes->speed.divisor >> 8));
       serialWritePort(serial, UART_PORT_LCR, lcr.byte);
 
-      if (interruptsWereEnabled) enable();
+      if (wasEnabled) enable();
     }
   }
 
@@ -317,12 +331,12 @@ serialGetLines (SerialDevice *serial) {
 
 int
 serialPutLines (SerialDevice *serial, SerialLines high, SerialLines low) {
-  int interruptsWereEnabled = disable();
+  int wasEnabled = disable();
   unsigned char oldMCR = serialReadPort(serial, UART_PORT_MCR);
 
   serialWritePort(serial, UART_PORT_MCR,
                   (oldMCR | high) & ~low);
-  if (interruptsWereEnabled) enable();
+  if (wasEnabled) enable();
   return 1;
 }
 

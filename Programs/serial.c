@@ -101,6 +101,8 @@ serialSetBaud (SerialDevice *serial, unsigned int baud) {
   const SerialBaudEntry *entry = serialGetBaudEntry(baud);
 
   if (entry) {
+    logMessage(LOG_CATEGORY(SERIAL_IO), "set baud: %u", baud);
+
     if (serialPutSpeed(&serial->pendingAttributes, entry->speed)) {
       return 1;
     } else {
@@ -139,6 +141,8 @@ serialValidateBaud (unsigned int *baud, const char *description, const char *wor
 
 int
 serialSetDataBits (SerialDevice *serial, unsigned int bits) {
+  logMessage(LOG_CATEGORY(SERIAL_IO), "set data bits: %u", bits);
+
   if (serialPutDataBits(&serial->pendingAttributes, bits)) return 1;
   logMessage(LOG_WARNING, "unsupported serial data bit count: %d", bits);
   return 0;
@@ -146,6 +150,8 @@ serialSetDataBits (SerialDevice *serial, unsigned int bits) {
 
 int
 serialSetStopBits (SerialDevice *serial, SerialStopBits bits) {
+  logMessage(LOG_CATEGORY(SERIAL_IO), "set stop bits: %u", bits);
+
   if (serialPutStopBits(&serial->pendingAttributes, bits)) return 1;
   logMessage(LOG_WARNING, "unsupported serial stop bit count: %d", bits);
   return 0;
@@ -153,6 +159,8 @@ serialSetStopBits (SerialDevice *serial, SerialStopBits bits) {
 
 int
 serialSetParity (SerialDevice *serial, SerialParity parity) {
+  logMessage(LOG_CATEGORY(SERIAL_IO), "set parity: %u", parity);
+
   if (serialPutParity(&serial->pendingAttributes, parity)) return 1;
   logMessage(LOG_WARNING, "unsupported serial parity: %d", parity);
   return 0;
@@ -210,6 +218,7 @@ serialStopFlowControlThread (SerialDevice *serial) {
 
 int
 serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
+  logMessage(LOG_CATEGORY(SERIAL_IO), "set flow control: 0X%02X", flow);
   flow = serialPutFlowControl(&serial->pendingAttributes, flow);
 
 #ifdef HAVE_POSIX_THREADS
