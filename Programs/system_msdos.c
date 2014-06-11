@@ -43,6 +43,8 @@ char **__crt0_glob_function(char *_arg) { return 0; }
 
 static void tsrExit (void) NORETURN;
 
+/* disable this bit of magic as it causes a page fault on exit */
+#if 0
 /* Start undocumented way to make exception handling disappear (v2.03) */
 short __djgpp_ds_alias;
 void __djgpp_exception_processor(void) { return; }
@@ -55,6 +57,7 @@ void _exit(int status) { tsrExit(); }
 int raise(int sig) { return 0; }
 void *signal(int signum, void*handler) { return NULL; }
 /* End undocumented way to make exception handling disappear */
+#endif
 
 #define TIMER_INTERRUPT 0X08
 #define DOS_INTERRUPT   0X21
@@ -263,6 +266,7 @@ tsrExit (void) {
 /* go to background: TSR */
 void
 msdosBackground (void) {
+  __djgpp_set_ctrl_c(0);
   saveState(&mainState);
 
   if (!setjmp(mainContext)) {
@@ -325,12 +329,12 @@ msdosUSleep (unsigned long microseconds) {
 
   /* we're starting in the middle of a timer period */
   {
-    int interruptsWereEnabled = disable();
+    int wasEnabled = disable();
 
     elapsedTickIncrement = getTicksTillNextTimerInterrupt();
     elapsedTickCount = 0;
 
-    if (interruptsWereEnabled) enable();
+    if (wasEnabled) enable();
   }
 
   while (elapsedTickCount < ticks) {
