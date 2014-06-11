@@ -477,7 +477,8 @@ logMessage (int level, const char *format, ...) {
 }
 
 typedef struct {
-  const char *description;
+  const char *label;
+  va_list *arguments;
   const void *data;
   size_t length;
 } LogBytesData;
@@ -488,9 +489,13 @@ formatLogBytesData (char *buffer, size_t size, const void *data) {
   const unsigned char *byte = bytes->data;
   const unsigned char *end = byte + bytes->length;
   size_t length;
-
   STR_BEGIN(buffer, size);
-  if (bytes->description) STR_PRINTF("%s: ", bytes->description);
+
+  if (bytes->label) {
+    length = formatLogArguments(STR_NEXT, STR_LEFT, bytes->label, bytes->arguments);
+    STR_ADJUST(length);
+    STR_PRINTF(": ");
+  }
 
   while (byte < end) {
     if (byte != bytes->data) STR_PRINTF(" ");
@@ -503,14 +508,22 @@ formatLogBytesData (char *buffer, size_t size, const void *data) {
 }
 
 void
-logBytes (int level, const char *description, const void *data, size_t length) {
-  const LogBytesData bytes = {
-    .description = description,
-    .data = data,
-    .length = length
-  };
+logBytes (int level, const char *label, const void *data, size_t length, ...) {
+  va_list arguments;
+  va_start(arguments, length);
 
-  logData(level, formatLogBytesData, &bytes);
+  {
+    const LogBytesData bytes = {
+      .label = label,
+      .arguments = &arguments,
+      .data = data,
+      .length = length
+    };
+
+    logData(level, formatLogBytesData, &bytes);
+  }
+
+  va_end(arguments);
 }
 
 typedef struct {

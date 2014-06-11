@@ -101,7 +101,7 @@ extern void logData (int level, LogDataFormatter *formatLogData, const void *dat
 extern void logMessage (int level, const char *format, ...) PRINTF(2, 3);
 extern void vlogMessage (int level, const char *format, va_list *arguments);
 
-extern void logBytes (int level, const char *description, const void *data, size_t length);
+extern void logBytes (int level, const char *label, const void *data, size_t length, ...) PRINTF(2, 5);
 extern void logSymbol (int level, void *address, const char *format, ...) PRINTF(3, 4);
 
 extern void logActionError (int error, const char *action);
