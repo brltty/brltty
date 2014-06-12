@@ -1,4 +1,4 @@
-#!/bin/bash -p
+#!/bin/sh
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -53,8 +53,8 @@ else
       [ -r "${outputFile}" ] || semanticError "file not readable: ${outputFile}"
 
       exec 3<"${outputFile}"
-      read -u3 && {
-         [ "${REPLY}" != "${revisionIdentifier}" ] || read -u3 || exit 0
+      read <&3 -r firstLine && {
+         [ "${firstLine}" != "${revisionIdentifier}" ] || read <&3 -r secondLine || exit 0
       }
       exec 3<&-
 
