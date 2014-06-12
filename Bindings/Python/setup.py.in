@@ -37,5 +37,5 @@ if __name__ == "__main__":
         author = "Alexis Robert",
         author_email = "alexissoft@free.fr",
         license = "LGPL license",
-        url = "http://mielke.cc/brltty/",
+        url = "@PACKAGE_URL@",
         ext_modules = [brlapi],)
