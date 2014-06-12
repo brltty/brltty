@@ -18,29 +18,10 @@
 ###############################################################################
 
 . "`dirname "${0}"`/prologue.sh"
-
-outputFile=""
-quoteIdentifier=false
-
-while getopts ":o:q" option
-do
-   case "${option}"
-   in
-      o) outputFile="${OPTARG}";;
-      q) quoteIdentifier=true;;
-
-      :) syntaxError "missing value: -${OPTARG}";;
-     \?) syntaxError "unknown option: -${OPTARG}";;
-      *) syntaxError "unimplemented option: -${option}";;
-   esac
-done
-shift $((OPTIND - 1))
-
-[ "${#}" -gt 0 ] || syntaxError "missing source root"
-sourceRoot="${1}"
-shift
-
-[ "${#}" -eq 0 ] || syntaxError "too many parameters"
+addProgramOption o string.file outputFile "file in which to write the identifier"
+addProgramOption s flag quoteIdentifier "write the identifier as a quoted string"
+addProgramParameter source sourceRoot "top-level directory of source tree"
+eval "${parseProgramOptions}"
 
 [ -e "${sourceRoot}" ] || semanticError "directory not found: ${sourceRoot}"
 [ -d "${sourceRoot}" ] || semanticError "not a directory: ${sourceRoot}"
