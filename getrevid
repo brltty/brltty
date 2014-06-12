@@ -21,7 +21,7 @@
 addProgramOption o string.file outputFile "file in which to write the identifier"
 addProgramOption s flag quoteIdentifier "write the identifier as a quoted string"
 addProgramParameter source sourceRoot "top-level directory of source tree"
-eval "${parseProgramArguments}"
+parseProgramArguments "${@}"
 
 [ -e "${sourceRoot}" ] || semanticError "directory not found: ${sourceRoot}"
 [ -d "${sourceRoot}" ] || semanticError "not a directory: ${sourceRoot}"

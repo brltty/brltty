@@ -405,7 +405,7 @@ parseProgramOptions() {
    done
 }
 
-readonly parseProgramArguments='
+parseProgramArguments() {
    parseProgramOptions "${@}"
    shift $((OPTIND - 1))
 
@@ -415,19 +415,19 @@ readonly parseProgramArguments='
       exit 0
    fi
 
-   programParameterIndex=0
+   local programParameterIndex=0
    while [ "${programParameterIndex}" -lt "${programParameterCount}" ]
    do
       [ "${#}" -gt 0 ] || syntaxError "$(getVariable "programParameterLabel_${programParameterIndex}") not specified"
       setVariable "$(getVariable "programParameterVariable_${programParameterIndex}")" "${1}"
       shift 1
+
       programParameterIndex=$((programParameterIndex + 1))
    done
-   unset programParameterIndex
 
    [ "${#}" -eq 0 ] || syntaxError "too many parameters"
    readonly programLogLevel=$((programLogLevel + programOption_verboseCount - programOption_quietCount))
-'
+}
 
 programDirectory="$(dirname "${0}")"
 readonly programDirectory="$(resolveDirectory "${programDirectory}")"
