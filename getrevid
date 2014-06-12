@@ -19,7 +19,7 @@
 
 . "`dirname "${0}"`/prologue.sh"
 addProgramOption d string.anything defaultIdentifier "specify a default identifier"
-addProgramOption f string.file outputFile "specify the file in which to write the identifier"
+addProgramOption f string.file outputFile "specify a file in which to write the identifier (default is standard output)"
 addProgramOption s flag quoteIdentifier "render the identifier as a quoted string"
 addProgramParameter source sourceRoot "top-level directory of source tree"
 parseProgramArguments "${@}"
