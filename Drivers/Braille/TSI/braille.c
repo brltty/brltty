@@ -331,7 +331,7 @@ QueryDisplay(unsigned char *reply)
 
   if ((count = writeBytes(BRL_QUERY, DIM_BRL_QUERY)) == DIM_BRL_QUERY) {
     if (serialAwaitInput(serialDevice, 100)) {
-      if ((count = readBytes(reply, Q_REPLY_LENGTH, 1)) != -1) {
+      if ((count = readBytes(reply, Q_REPLY_LENGTH, 0)) != -1) {
         if ((count == Q_REPLY_LENGTH) && (memcmp(reply, Q_HEADER, Q_HEADER_LENGTH) == 0)) {
           logBytes(LOG_DEBUG, "TSI Reply", reply, count);
           return 1;
@@ -341,6 +341,8 @@ QueryDisplay(unsigned char *reply)
       } else {
         logSystemError("read");
       }
+    } else {
+      logMessage(LOG_DEBUG, "no response");
     }
   } else if (count != -1) {
     logMessage(LOG_ERR, "short write: %zd < %d", count, DIM_BRL_QUERY);
@@ -389,6 +391,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     logMessage(LOG_DEBUG,"Sending query at 19200bps");
     if(!serialSetBaud(serialDevice, serialBaud=19200)) goto failure;
     if(!QueryDisplay(reply)) goto failure;
+#else /* HIGHBAUD */
+    goto failure;
 #endif /* HIGHBAUD */
   }
 
@@ -537,7 +541,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 
   return 1;
 
-failure:;
+failure:
   brl_destruct(brl);
   return 0;
 }
