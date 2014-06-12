@@ -33,7 +33,7 @@ REVISION_HEADER = revision_identifier.h
 .PHONY: $(REVISION_HEADER)
 
 $(REVISION_HEADER): $(SRC_TOP)getrevid
-	-$(SRC_TOP)getrevid -s -o $@ $(SRC_TOP)
+	-$(SRC_TOP)getrevid -s -f $@ -d unknown $(SRC_TOP)
 
 revision.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/revision.c

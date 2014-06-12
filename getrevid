@@ -18,8 +18,9 @@
 ###############################################################################
 
 . "`dirname "${0}"`/prologue.sh"
-addProgramOption o string.file outputFile "file in which to write the identifier"
-addProgramOption s flag quoteIdentifier "write the identifier as a quoted string"
+addProgramOption d string.anything defaultIdentifier "specify a default identifier"
+addProgramOption f string.file outputFile "specify the file in which to write the identifier"
+addProgramOption s flag quoteIdentifier "render the identifier as a quoted string"
 addProgramParameter source sourceRoot "top-level directory of source tree"
 parseProgramArguments "${@}"
 
@@ -40,7 +41,11 @@ else
    semanticError "unrecognized source repository type: ${sourceRoot}"
 fi
 
-[ -n "${revisionIdentifier}" ] || semanticError "revision identifier not known"
+[ -n "${revisionIdentifier}" ] || {
+  [ -n "${defaultIdentifier}" ] || semanticError "revision identifier not known"
+  revisionIdentifier="${defaultIdentifier}"
+}
+
 "${quoteIdentifier}" && revisionIdentifier='"'"${revisionIdentifier}"'"'
 
 if [ -z "${outputFile}" ]
