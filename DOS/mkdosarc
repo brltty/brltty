@@ -29,7 +29,7 @@ addProgramOption i string.directory installDirectory "specify installation direc
 addProgramOption o flag overwriteArchive "overwrite existing archive"
 addProgramOption s flag invokeShell "invoke interactive shell to inspect/modify result"
 addProgramParameter source sourceDirectory "top-level directory of source tree"
-eval "${parseProgramOptions}"
+eval "${parseProgramArguments}"
 
 [ -n "${archiveName}" ] || archiveName="${defaultArchiveName}"
 [ -n "${installDirectory}" ] || installDirectory="${defaultInstallDirectory}"

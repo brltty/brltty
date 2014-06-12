@@ -405,7 +405,7 @@ parseProgramOptions() {
    done
 }
 
-readonly parseProgramOptions='
+readonly parseProgramArguments='
    parseProgramOptions "${@}"
    shift $((OPTIND - 1))
 
