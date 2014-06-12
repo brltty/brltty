@@ -165,6 +165,8 @@ installManualFiles "${buildDirectory}"
 
 cd "${buildDirectory}"
 installFile "Documents/brltty.conf" "etc/brltty.cfg"
+installFile "Programs/revision_identifier.h" "REVISION.txt"
+sed -e 's/"//g' -i "${installDirectory}/REVISION.txt"
 
 cd "${installDirectory}"
 mv share/man .
