@@ -38,7 +38,8 @@ then
    revisionIdentifier="`svnversion -n "${sourceRoot}" 2>/dev/null`"
    [ "${revisionIdentifier}" != "exported" ] || revisionIdentifier=""
 else
-   semanticError "unrecognized source repository type: ${sourceRoot}"
+   logMessage warning "unrecognized source repository type: ${sourceRoot}"
+   revisionIdentifier=""
 fi
 
 [ -n "${revisionIdentifier}" ] || {
