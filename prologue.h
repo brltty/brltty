@@ -298,7 +298,7 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 #include <wctype.h>
 #endif /* HAVE_WCHAR_H */
 
-#if defined(WCHAR_MAX)
+#ifdef WCHAR_MAX
 #define WC_C(wc) L##wc
 #define WS_C(ws) L##ws
 #define PRIwc "lc"
