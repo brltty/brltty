@@ -213,10 +213,12 @@ addProgramParameter() {
    local label="${1}"
    local variable="${2}"
    local usage="${3}"
+   local default="${4}"
 
    setVariable "programParameterLabel_${programParameterCount}" "${label}"
    setVariable "programParameterVariable_${programParameterCount}" "${variable}"
    setVariable "programParameterUsage_${programParameterCount}" "${usage}"
+   setVariable "programParameterDefault_${programParameterCount}" "${default}"
 
    local length="${#label}"
    [ "${length}" -le "${programParameterLabelWidth}" ] || programParameterLabelWidth="${length}"
@@ -238,16 +240,17 @@ programOptionLetters=""
 programOptionString=""
 programOptionOperandWidth=0
 
-programOptionDefault_counter=0
-programOptionDefault_flag=false
-programOptionDefault_list=""
-programOptionDefault_string=""
+programOptionValue_counter=0
+programOptionValue_flag=false
+programOptionValue_list=""
+programOptionValue_string=""
 
 addProgramOption() {
    local letter="${1}"
    local type="${2}"
    local variable="${3}"
    local usage="${4}"
+   local default="${5}"
 
    [ "$(expr "${letter}" : '[[:alnum:]]*$')" -eq 1 ] || internalError "invalid program option: -${letter}"
    [ -z "$(getVariable "programOptionType_${letter}")" ] || internalError "duplicate program option definition: -${letter}"
@@ -272,9 +275,10 @@ addProgramOption() {
    setVariable "programOptionVariable_${letter}" "${variable}"
    setVariable "programOptionOperand_${letter}" "${operand}"
    setVariable "programOptionUsage_${letter}" "${usage}"
+   setVariable "programOptionDefault_${letter}" "${default}"
 
-   local default="$(getVariable "programOptionDefault_${type}")"
-   setVariable "${variable}" "${default}"
+   local value="$(getVariable "programOptionValue_${type}")"
+   setVariable "${variable}" "${value}"
 
    local length="${#operand}"
    [ "${length}" -le "${programOptionOperandWidth}" ] || programOptionOperandWidth="${length}"
@@ -365,7 +369,11 @@ showProgramUsageSummary() {
             line="${line} "
          done
 
-         addProgramUsageText "$(getVariable "programParameterUsage_${index}")" "${width}" "  ${line}"
+         local usage="$(getVariable "programParameterUsage_${index}")"
+         local default="$(getVariable "programParameterDefault_${index}")"
+         [ -z "${default}" ] || usage="${usage} (default is ${default})"
+         addProgramUsageText "${usage}" "${width}" "  ${line}"
+
          index=$((index + 1))
       done
    }
@@ -385,7 +393,10 @@ showProgramUsageSummary() {
             line="${line} "
          done
 
-         addProgramUsageText "$(getVariable "programOptionUsage_${letter}")" "${width}" "  ${line}"
+         usage="$(getVariable "programOptionUsage_${letter}")"
+         local default="$(getVariable "programOptionDefault_${letter}")"
+         [ -z "${default}" ] || usage="${usage} (default is ${default})"
+         addProgramUsageText "${usage}" "${width}" "  ${line}"
       done
    }
 

@@ -18,14 +18,14 @@
 ###############################################################################
 
 . "`dirname "${0}"`/prologue.sh"
-addProgramOption p string.name packageName "specify the package name (default is the name of the top-level directory of the source tree)"
-addProgramOption n string.version packageVersion "specify the package version (default is no version)"
-addProgramOption o string.file outputFile "specify the output file (default is <package-name>.pot in the current directory)"
-addProgramOption b string.email bugsAddress "specify the email address for bug reports (default is no address)"
-addProgramOption c string.name copyrightHolder "specify the name of the copyright holder (default is no copyright holder)"
+addProgramOption p string.name packageName "specify the package name" "the name of the top-level directory of the source tree"
+addProgramOption n string.version packageVersion "specify the package version" "no version"
+addProgramOption o string.file outputFile "specify the output file" "<package-name>.pot in the current directory"
+addProgramOption b string.email bugsAddress "specify the email address for bug reports" "no address"
+addProgramOption c string.name copyrightHolder "specify the name of the copyright holder" "no copyright holder"
 addProgramParameter source sourceRoot "top-level directory of source tree"
 optionalProgramParameters
-addProgramParameter build buildRoot "top-level directory of build tree (default is the source tree)"
+addProgramParameter build buildRoot "top-level directory of build tree" "the source tree"
 parseProgramArguments "${@}"
 
 [ -n "${sourceRoot}" ] || sourceRoot="."
