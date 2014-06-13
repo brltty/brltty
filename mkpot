@@ -18,45 +18,25 @@
 ###############################################################################
 
 . "`dirname "${0}"`/prologue.sh"
+addProgramOption p string.name packageName "specify the package name (default is the name of the top-level directory of the source tree)"
+addProgramOption n string.version packageVersion "specify the package version (default is no version)"
+addProgramOption o string.file outputFile "specify the output file (default is <package-name>.pot in the current directory)"
+addProgramOption b string.email bugsAddress "specify the email address for bug reports (default is no address)"
+addProgramOption c string.name copyrightHolder "specify the name of the copyright holder (default is no copyright holder)"
+addProgramParameter source sourceRoot "top-level directory of source tree"
+optionalProgramParameters
+addProgramParameter build buildRoot "top-level directory of build tree (default is the source tree)"
+parseProgramArguments "${@}"
 
-packageName=""
-packageVersion=""
-outputFile=""
-bugsAddress=""
-copyrightHolder=""
+[ -n "${sourceRoot}" ] || sourceRoot="."
+sourceRoot="$(resolveDirectory "${sourceRoot}")" || semanticError
 
-while getopts ":n:v:o:b:c:" option
-do
-   case "${option}"
-   in
-      n) packageName="${OPTARG}";;
-      v) packageVersion="${OPTARG}";;
-      o) outputFile="${OPTARG}";;
-      b) bugsAddress="${OPTARG}";;
-      c) copyrightHolder="${OPTARG}";;
-      :) syntaxError "missing operand: -${OPTARG}";;
-     \?) syntaxError "unknown option: -${OPTARG}";;
-      *) syntaxError "unimplemented option: -${option}";;
-   esac
-done
-shift `expr "${OPTIND}" - 1`
-
-[ "${#}" -gt 0 ] || syntaxError "missing source root."
-sourceRoot="${1}"
-shift 1
-
-if [ "${#}" -eq 0 ]
+if [ -n "${buildRoot}" ]
 then
-   buildRoot=""
+   buildRoot="$(resolveDirectory "${buildRoot}")" || semanticError
 else
-   buildRoot="${1}"
-   shift 1
+   buildRoot="${sourceRoot}"
 fi
-
-[ "${#}" -eq 0 ] || syntaxError "too many parameters."
-
-sourceRoot=`cd "${sourceRoot}" && pwd` || semanticError
-buildRoot=`cd "${buildRoot}" && pwd` || semanticError
 [ "${buildRoot}" != "${sourceRoot}" ] || buildRoot=""
 
 [ -n "${packageName}" ] || packageName=`basename "${sourceRoot}"`

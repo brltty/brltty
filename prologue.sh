@@ -36,7 +36,9 @@ defineEnumeration() {
    local prefix="${1}"
    shift 1
 
+   local name
    local value=1
+
    for name
    do
       local variable="${prefix}${name}"
@@ -204,6 +206,7 @@ needTemporaryDirectory() {
 }
 
 programParameterCount=0
+programParameterCountMinimum=-1
 programParameterLabelWidth=0
 
 addProgramParameter() {
@@ -220,6 +223,15 @@ addProgramParameter() {
 
    setVariable "${variable}" ""
    programParameterCount=$((programParameterCount + 1))
+}
+
+optionalProgramParameters() {
+   if [ "${programParameterCountMinimum}" -lt 0 ]
+   then
+      programParameterCountMinimum="${programParameterCount}"
+   else
+      logMessage warning "program parameters are already optional"
+   fi
 }
 
 programOptionLetters=""
@@ -318,13 +330,24 @@ showProgramUsageSummary() {
    local line="Usage: ${programName}"
    [ "${#}" -eq 0 ] || line="${line} [-option ...]"
 
+   [ "${programParameterCountMinimum}" -ge 0 ] || programParameterCountMinimum="${programParameterCount}"
    local index=0
+   local suffix=""
+
    while [ "${index}" -lt "${programParameterCount}" ]
    do
-      line="${line} $(getVariable "programParameterLabel_${index}")"
+      line="${line} "
+
+      [ "${index}" -lt "${programParameterCountMinimum}" ] || {
+         line="${line}["
+         suffix="${suffix}]"
+      }
+
+      line="${line}$(getVariable "programParameterLabel_${index}")"
       index=$((index + 1))
    done
 
+   line="${line}${suffix}"
    addProgramUsageLine "${line}"
 
    [ "${programParameterCount}" -eq 0 ] || {
@@ -416,16 +439,15 @@ parseProgramArguments() {
    fi
 
    local programParameterIndex=0
-   while [ "${programParameterIndex}" -lt "${programParameterCount}" ]
+   while [ "${#}" -gt 0 ]
    do
-      [ "${#}" -gt 0 ] || syntaxError "$(getVariable "programParameterLabel_${programParameterIndex}") not specified"
+      [ "${programParameterIndex}" -lt "${programParameterCount}" ] || syntaxError "too many parameters"
       setVariable "$(getVariable "programParameterVariable_${programParameterIndex}")" "${1}"
       shift 1
-
       programParameterIndex=$((programParameterIndex + 1))
    done
 
-   [ "${#}" -eq 0 ] || syntaxError "too many parameters"
+   [ "${programParameterIndex}" -ge "${programParameterCountMinimum}" ] || syntaxError "$(getVariable "programParameterLabel_${programParameterIndex}") not specified"
    readonly programLogLevel=$((programLogLevel + programOption_verboseCount - programOption_quietCount))
 }
 
