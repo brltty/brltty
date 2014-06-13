@@ -19,13 +19,13 @@
 #ifndef BRLTTY_INCLUDED_TTB_COMPILE
 #define BRLTTY_INCLUDED_TTB_COMPILE
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
 #include <stdio.h>
 
 #include "datafile.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 typedef struct TextTableDataStruct TextTableData;
 extern TextTableData *newTextTableData (void);

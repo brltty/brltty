@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRL_INCLUDED_BRL_DOTS
-#define BRL_INCLUDED_BRL_DOTS
+#ifndef BRLTTY_INCLUDED_BRL_DOTS
+#define BRLTTY_INCLUDED_BRL_DOTS
 
 #include <strings.h>
 
@@ -90,4 +90,4 @@ static inline unsigned int brlDotsToNumbers (BrlDots dots, BrlDotNumbersBuffer n
 }
 #endif /* __cplusplus */
 
-#endif /* BRL_INCLUDED_BRL_DOTS */
+#endif /* BRLTTY_INCLUDED_BRL_DOTS */

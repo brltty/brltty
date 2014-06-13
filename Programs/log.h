@@ -23,6 +23,10 @@
 
 #include <stdarg.h>
 
+#ifdef HAVE_SYSLOG_H
+#include <syslog.h>
+#endif /* HAVE_SYSLOG_H */
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -30,9 +34,7 @@ extern "C" {
 extern unsigned char systemLogLevel;
 extern unsigned char stderrLogLevel;
 
-#if defined(HAVE_SYSLOG_H)
-#include <syslog.h>
-#else /* no system log */
+#ifndef LOG_INFO
 typedef enum {
   LOG_EMERG,
   LOG_ALERT,
@@ -43,7 +45,7 @@ typedef enum {
   LOG_INFO,
   LOG_DEBUG
 } SyslogLevel;
-#endif /* system log external definitions */
+#endif /* log level definitions */
 
 extern const char *const logLevelNames[];
 extern const unsigned int logLevelCount;

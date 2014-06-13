@@ -19,11 +19,11 @@
 #ifndef BRLTTY_INCLUDED_DRIVERS
 #define BRLTTY_INCLUDED_DRIVERS
 
+#include "driver.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#include "driver.h"
 
 typedef struct {
   const void *address;

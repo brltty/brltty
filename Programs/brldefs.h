@@ -19,15 +19,7 @@
 #ifndef BRLAPI_INCLUDED_BRLTTY_BRLDEFS
 #define BRLAPI_INCLUDED_BRLTTY_BRLDEFS
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
 #warning include <brlapi_brldefs.h> instead of <brltty/brldefs.h> (see man brlapi_deprecated)
 #include <brlapi_brldefs.h>
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 
 #endif /* BRLAPI_INCLUDED_BRLTTY_BRLDEFS */

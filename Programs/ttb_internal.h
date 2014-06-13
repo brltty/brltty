@@ -19,12 +19,12 @@
 #ifndef BRLTTY_INCLUDED_TTB_INTERNAL
 #define BRLTTY_INCLUDED_TTB_INTERNAL
 
+#include "bitmask.h"
+#include "unicode.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#include "bitmask.h"
-#include "unicode.h"
 
 typedef uint32_t TextTableOffset;
 

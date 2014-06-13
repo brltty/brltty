@@ -19,11 +19,11 @@
 #ifndef BRLTTY_INCLUDED_BITFIELD
 #define BRLTTY_INCLUDED_BITFIELD
 
+#include "prologue.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#include "prologue.h"
 
 #define HIGH_NIBBLE(byte) ((byte) & 0XF0)
 #define LOW_NIBBLE(byte) ((byte) & 0XF)
