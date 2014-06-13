@@ -19,12 +19,12 @@
 #ifndef BRLTTY_INCLUDED_FILE
 #define BRLTTY_INCLUDED_FILE
 
+#include <stdio.h>
+#include <stdarg.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#include <stdio.h>
-#include <stdarg.h>
 
 extern int isPathDelimiter (const char character);
 extern int isAbsolutePath (const char *path);
@@ -67,7 +67,7 @@ extern int releaseFileLock (int file);
 extern void registerProgramStream (const char *name, FILE **stream);
 extern void flushStream (FILE *stream);
 
-#ifdef _POSIX_THREAD_SAFE_FUNCTIONS
+#if defined(_POSIX_THREAD_SAFE_FUNCTIONS) && !defined(__MINGW32__)
 #define lockStream(stream) flockfile((stream))
 #define unlockStream(stream) funlockfile((stream))
 #else /* _POSIX_THREAD_SAFE_FUNCTIONS */
