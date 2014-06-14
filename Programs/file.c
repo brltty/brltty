@@ -26,12 +26,6 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#ifndef SOL_SOCKET
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif /* HAVE_SYS_SOCKET_H */
-#endif /* SOL_SOCKET */
-
 #ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif /* HAVE_SYS_FILE_H */
@@ -43,6 +37,8 @@
 #include "async_wait.h"
 #include "charset.h"
 #include "program.h"
+#include "io_socket.h"
+
 
 int
 isPathDelimiter (const char character) {
@@ -961,7 +957,7 @@ createAnonymousPipe (FileDescriptor *pipeInput, FileDescriptor *pipeOutput) {
 }
 #endif /* basic file/socket descriptor operations */
 
-#ifdef HAVE_SYS_SOCKET_H
+#ifdef IO_HAVE_SOCKETS
 ssize_t
 readSocketDescriptor (SocketDescriptor socketDescriptor, void *buffer, size_t size) {
   return recv(socketDescriptor, buffer, size, 0);
@@ -971,4 +967,4 @@ ssize_t
 writeSocketDescriptor (SocketDescriptor socketDescriptor, const void *buffer, size_t size) {
   return send(socketDescriptor, buffer, size, 0);
 }
-#endif /* HAVE_SYS_SOCKET_H */
+#endif /* IO_HAVE_SOCKETS */

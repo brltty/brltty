@@ -19,23 +19,7 @@
 #ifndef BRLTTY_INCLUDED_IO_MISC
 #define BRLTTY_INCLUDED_IO_MISC
 
-#undef IO_HAVE_SOCKETS
-#if defined(HAVE_SYS_SOCKET_H)
-#define IO_HAVE_SOCKETS
-#include <sys/socket.h>
-
-#elif defined(__MINGW32__)
-#define IO_HAVE_SOCKETS
-
-typedef int socklen_t;
-
-#ifndef EINPROGRESS
-#ifdef WSAEINPROGRESS
-#define EINPROGRESS WSAEINPROGRESS
-#endif /* WSAEINPROGRESS */
-#endif /* EINPROGRESS */
-
-#endif /* have sockets */
+#include "io_socket.h"
 
 #ifdef __cplusplus
 extern "C" {
