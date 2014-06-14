@@ -25,11 +25,6 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#ifdef __MINGW32__
-/* MinGW defines localtime_r() in <pthread.h> */
-#include <pthread.h>
-#endif /* __MINGW32__ */
-
 #ifdef __ANDROID__
 #include <android/log.h>
 #endif /* __ANDROID__ */
