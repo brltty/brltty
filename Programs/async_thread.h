@@ -19,27 +19,14 @@
 #ifndef BRLTTY_INCLUDED_ASYNC_THREAD
 #define BRLTTY_INCLUDED_ASYNC_THREAD
 
-#include "prologue.h"
-
-#undef ASYNC_CAN_HANDLE_THREADS
-
-#if defined(__MINGW32__)
-#define ASYNC_CAN_HANDLE_THREADS
-#include "win_pthread.h"
-
-#elif defined(HAVE_POSIX_THREADS)
-#define ASYNC_CAN_HANDLE_THREADS
-#include <pthread.h>
-
-#endif /* posix thread definitions */
-
 #include "async.h"
+#include "get_pthreads.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-#ifdef ASYNC_CAN_HANDLE_THREADS
+#ifdef GOT_PTHREADS
 #define ASYNC_THREAD_FUNCTION(name) void *name (void *argument)
 typedef ASYNC_THREAD_FUNCTION(AsyncThreadFunction);
 
@@ -51,7 +38,7 @@ extern int asyncCreateThread (
 
 extern int asyncLockMutex (pthread_mutex_t *mutex);
 extern int asyncUnlockMutex (pthread_mutex_t *mutex);
-#endif /* ASYNC_CAN_HANDLE_THREADS */
+#endif /* GOT_PTHREADS */
 
 #ifdef __cplusplus
 }

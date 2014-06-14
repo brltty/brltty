@@ -80,11 +80,11 @@ struct SpeechDriverThreadStruct {
   volatile SpeechSynthesizer *speechSynthesizer;
   char **driverParameters;
 
-#ifdef ASYNC_CAN_HANDLE_THREADS
+#ifdef GOT_PTHREADS
   pthread_t threadIdentifier;
   AsyncEvent *requestEvent;
   AsyncEvent *messageEvent;
-#endif /* ASYNC_CAN_HANDLE_THREADS */
+#endif /* GOT_PTHREADS */
 
   struct {
     SpeechResponseType type;
@@ -228,12 +228,12 @@ handleSpeechMessage (volatile SpeechDriverThread *sdt, SpeechMessage *msg) {
 
 static int
 sendSpeechMessage (volatile SpeechDriverThread *sdt, SpeechMessage *msg) {
-#ifdef ASYNC_CAN_HANDLE_THREADS
+#ifdef GOT_PTHREADS
   return asyncSignalEvent(sdt->messageEvent, msg);
-#else /* ASYNC_CAN_HANDLE_THREADS */
+#else /* GOT_PTHREADS */
   handleSpeechMessage(sdt, msg);
   return 1;
-#endif /* ASYNC_CAN_HANDLE_THREADS */
+#endif /* GOT_PTHREADS */
 }
 
 static SpeechMessage *
@@ -398,12 +398,12 @@ sendSpeechRequest (volatile SpeechDriverThread *sdt, SpeechRequest *req) {
   if (!sdt) return 0;
   setResponsePending(sdt);
 
-#ifdef ASYNC_CAN_HANDLE_THREADS
+#ifdef GOT_PTHREADS
   return asyncSignalEvent(sdt->requestEvent, req);
-#else /* ASYNC_CAN_HANDLE_THREADS */
+#else /* GOT_PTHREADS */
   handleSpeechRequest(sdt, req);
   return 1;
-#endif /* ASYNC_CAN_HANDLE_THREADS */
+#endif /* GOT_PTHREADS */
 }
 
 static SpeechRequest *
@@ -550,7 +550,7 @@ stopSpeechDriver (volatile SpeechDriverThread *sdt) {
   speech->destruct(sdt->speechSynthesizer);
 }
 
-#ifdef ASYNC_CAN_HANDLE_THREADS
+#ifdef GOT_PTHREADS
 ASYNC_CONDITION_TESTER(testSpeechDriverThreadStopping) {
   volatile SpeechDriverThread *sdt = data;
 
@@ -617,7 +617,7 @@ ASYNC_THREAD_FUNCTION(runSpeechDriverThread) {
 
   return NULL;
 }
-#endif /* ASYNC_CAN_HANDLE_THREADS */
+#endif /* GOT_PTHREADS */
 
 volatile SpeechDriverThread *
 newSpeechDriverThread (
@@ -634,7 +634,7 @@ newSpeechDriverThread (
     sdt->speechSynthesizer = spk;
     sdt->driverParameters = parameters;
 
-#ifdef ASYNC_CAN_HANDLE_THREADS
+#ifdef GOT_PTHREADS
     if ((sdt->messageEvent = asyncNewEvent(handleSpeechMessageEvent, (void *)sdt))) {
       pthread_t threadIdentifier;
       int createError = asyncCreateThread("speech-driver",
@@ -665,12 +665,12 @@ newSpeechDriverThread (
     } else {
       logMessage(LOG_CATEGORY(SPEECH_EVENTS), "response event construction failure");
     }
-#else /* ASYNC_CAN_HANDLE_THREADS */
+#else /* GOT_PTHREADS */
     if (startSpeechDriver(sdt)) {
       setThreadReady(sdt);
       return sdt;
     }
-#endif /* ASYNC_CAN_HANDLE_THREADS */
+#endif /* GOT_PTHREADS */
 
     free((void *)sdt);
   } else {
@@ -684,17 +684,17 @@ void
 destroySpeechDriverThread (
   volatile SpeechDriverThread *sdt
 ) {
-#ifdef ASYNC_CAN_HANDLE_THREADS
+#ifdef GOT_PTHREADS
   if (sendSpeechRequest(sdt, NULL)) {
     asyncAwaitCondition(SPEECH_DRIVER_THREAD_STOP_TIMEOUT, testSpeechDriverThreadFinished, (void *)sdt);
     awaitSpeechDriverThreadTermination(sdt);
   }
 
   if (sdt->messageEvent) asyncDiscardEvent(sdt->messageEvent);
-#else /* ASYNC_CAN_HANDLE_THREADS */
+#else /* GOT_PTHREADS */
   stopSpeechDriver(sdt);
   setThreadState(sdt, THD_FINISHED);
-#endif /* ASYNC_CAN_HANDLE_THREADS */
+#endif /* GOT_PTHREADS */
 
   free((void *)sdt);
 }

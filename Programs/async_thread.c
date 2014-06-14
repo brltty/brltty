@@ -25,7 +25,7 @@
 #include "async_signal.h"
 #include "async_thread.h"
 
-#ifdef ASYNC_CAN_HANDLE_THREADS
+#ifdef GOT_PTHREADS
 typedef struct {
   AsyncThreadFunction *function;
   void *argument;
@@ -146,4 +146,4 @@ asyncUnlockMutex (pthread_mutex_t *mutex) {
   logSymbol(LOG_CATEGORY(ASYNC_EVENTS), mutex, "mutex unlock");
   return pthread_mutex_unlock(mutex);
 }
-#endif /* ASYNC_CAN_HANDLE_THREADS */
+#endif /* GOT_PTHREADS */
