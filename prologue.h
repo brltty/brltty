@@ -78,11 +78,9 @@ extern "C" {
 #if defined(__CYGWIN__) || defined(__MINGW32__)
 #define WINDOWS
 
-#include <w32api.h>
-
-#ifndef WINVER
-#define WINVER WindowsXP
-#endif /* WINVER */
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT _WIN32_WINNT_WINXP
+#endif /* _WIN32_WINNT */
 
 #ifdef __MINGW32__
 #ifndef __USE_W32_SOCKETS

@@ -22,9 +22,9 @@
 #include <errno.h>
 
 #ifdef __MINGW32__
-#if WINVER < WindowsVista
+#if _WIN32_WINNT < _WIN32_WINNT_VISTA
 #define CancelIoEx(handle, ol) CancelIo((handle))
-#endif /* WINVER < WindowsVista */
+#endif /* _WIN32_WINNT < _WIN32_WINNT_VISTA */
 #endif /* __MINGW32__ */
 
 #ifdef __MSDOS__

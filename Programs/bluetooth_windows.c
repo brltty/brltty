@@ -16,7 +16,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#define WINVER WindowsVista
+#define _WIN32_WINNT _WIN32_WINNT_VISTA
 #define __USE_W32_SOCKETS
 #include "prologue.h"
 
