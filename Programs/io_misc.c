@@ -311,7 +311,7 @@ writeFile (FileDescriptor fileDescriptor, const void *buffer, size_t size) {
   return writeData(&ioh, buffer, size);
 }
 
-#ifdef IO_HAVE_SOCKETS
+#ifdef GOT_SOCKETS
 static int
 monitorSocketInput (const InputOutputHandle *ioh, AsyncHandle *handle, InputOutputMonitor *iom) {
   return asyncMonitorSocketInput(handle, ioh->descriptor.socket, setInputOutputMonitor, iom);
@@ -435,7 +435,7 @@ connectSocket (
 
 #else /* have sockets */
 #warning sockets not supported on this platform
-#endif /* IO_HAVE_SOCKETS */
+#endif /* GOT_SOCKETS */
 
 int
 changeOpenFlags (int fileDescriptor, int flagsToClear, int flagsToSet) {

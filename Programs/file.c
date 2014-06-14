@@ -37,7 +37,6 @@
 #include "async_wait.h"
 #include "charset.h"
 #include "program.h"
-#include "io_socket.h"
 
 
 int
@@ -957,7 +956,7 @@ createAnonymousPipe (FileDescriptor *pipeInput, FileDescriptor *pipeOutput) {
 }
 #endif /* basic file/socket descriptor operations */
 
-#ifdef IO_HAVE_SOCKETS
+#ifdef GOT_SOCKETS
 ssize_t
 readSocketDescriptor (SocketDescriptor socketDescriptor, void *buffer, size_t size) {
   return recv(socketDescriptor, buffer, size, 0);
@@ -967,4 +966,4 @@ ssize_t
 writeSocketDescriptor (SocketDescriptor socketDescriptor, const void *buffer, size_t size) {
   return send(socketDescriptor, buffer, size, 0);
 }
-#endif /* IO_HAVE_SOCKETS */
+#endif /* GOT_SOCKETS */

@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_IO_MISC
 #define BRLTTY_INCLUDED_IO_MISC
 
-#include "io_socket.h"
+#include "get_sockets.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,7 +37,7 @@ extern ssize_t readFile (
 
 extern ssize_t writeFile (FileDescriptor fileDescriptor, const void *buffer, size_t size);
 
-#ifdef IO_HAVE_SOCKETS
+#ifdef GOT_SOCKETS
 extern void closeSocket (SocketDescriptor *socketDescriptor);
 extern int awaitSocketInput (SocketDescriptor socketDescriptor, int timeout);
 extern int awaitSocketOutput (SocketDescriptor socketDescriptor, int timeout);
@@ -65,7 +65,7 @@ getSocketOption (
 ) {
   return getsockopt(socketDescriptor, level, option, value, length);
 }
-#endif /* IO_HAVE_SOCKETS */
+#endif /* GOT_SOCKETS */
 
 #ifndef __MINGW32__
 extern int changeOpenFlags (int fileDescriptor, int flagsToClear, int flagsToSet);

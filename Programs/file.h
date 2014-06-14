@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#include "io_socket.h"
+#include "get_sockets.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -88,10 +88,10 @@ extern size_t formatInputError (char *buffer, size_t size, const char *file, con
 extern ssize_t readFileDescriptor (FileDescriptor fileDescriptor, void *buffer, size_t size);
 extern ssize_t writeFileDescriptor (FileDescriptor fileDescriptor, const void *buffer, size_t size);
 
-#ifdef IO_HAVE_SOCKETS
+#ifdef GOT_SOCKETS
 extern ssize_t readSocketDescriptor (SocketDescriptor socketDescriptor, void *buffer, size_t size);
 extern ssize_t writeSocketDescriptor (SocketDescriptor socketDescriptor, const void *buffer, size_t size);
-#endif /* IO_HAVE_SOCKETS */
+#endif /* GOT_SOCKETS */
 
 extern const char *getNamedPipeDirectory (void);
 extern int createAnonymousPipe (FileDescriptor *pipeInput, FileDescriptor *pipeOutput);

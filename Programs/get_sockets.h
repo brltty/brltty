@@ -16,18 +16,18 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_IO_SOCKET
-#define BRLTTY_INCLUDED_IO_SOCKET
+#ifndef BRLTTY_INCLUDED_GET_SOCKETS
+#define BRLTTY_INCLUDED_GET_SOCKETS
 
 #include "prologue.h"
-#undef IO_HAVE_SOCKETS
+#undef GOT_SOCKETS
 
 #if defined(HAVE_SYS_SOCKET_H)
-#define IO_HAVE_SOCKETS
+#define GOT_SOCKETS
 #include <sys/socket.h>
 
 #elif defined(__MINGW32__)
-#define IO_HAVE_SOCKETS
+#define GOT_SOCKETS
 
 typedef int socklen_t;
 
@@ -39,4 +39,4 @@ typedef int socklen_t;
 
 #endif /* have sockets */
 
-#endif /* BRLTTY_INCLUDED_IO_SOCKET */
+#endif /* BRLTTY_INCLUDED_GET_SOCKETS */
