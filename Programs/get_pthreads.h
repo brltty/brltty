@@ -16,28 +16,21 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_GET_SOCKETS
-#define BRLTTY_INCLUDED_GET_SOCKETS
+#ifndef BRLTTY_INCLUDED_GET_PTHREADS
+#define BRLTTY_INCLUDED_GET_PTHREADS
 
 #include "prologue.h"
-#undef GOT_SOCKETS
+#undef GOT_PTHREADS
 
-#if defined(HAVE_SYS_SOCKET_H)
-#define GOT_SOCKETS
-#include <sys/socket.h>
+#if defined(__MINGW32__)
+#define GOT_PTHREADS
+#include "win_pthread.h"
 
-#elif defined(__MINGW32__)
-#define GOT_SOCKETS
+#elif defined(HAVE_POSIX_THREADS)
+#define GOT_PTHREADS
+#include <pthread.h>
 
-typedef int socklen_t;
-
-#ifndef EINPROGRESS
-#ifdef WSAEINPROGRESS
-#define EINPROGRESS WSAEINPROGRESS
-#endif /* WSAEINPROGRESS */
-#endif /* EINPROGRESS */
-
-#endif /* have sockets */
+#endif /* posix thread definitions */
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,4 +40,4 @@ extern "C" {
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_GET_SOCKETS */
+#endif /* BRLTTY_INCLUDED_GET_PTHREADS */

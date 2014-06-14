@@ -24,10 +24,7 @@
 #include "async_event.h"
 #include "async_signal.h"
 #include "async_internal.h"
-
-#ifdef HAVE_POSIX_THREADS
-#include <pthread.h>
-#endif /* HAVE_POSIX_THREADS */
+#include "get_pthreads.h"
 
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
 struct AsyncSignalDataStruct {
@@ -142,15 +139,15 @@ ASYNC_SIGNAL_HANDLER(asyncEmptySignalHandler) {
 #ifdef ASYNC_CAN_BLOCK_SIGNALS
 static int
 setSignalMask (int how, const sigset_t *newMask, sigset_t *oldMask) {
-#ifdef HAVE_POSIX_THREADS
+#ifdef GOT_PTHREADS
   int error = pthread_sigmask(how, newMask, oldMask);
 
   if (!error) return 1;
   logActionError(error, "pthread_setmask");
-#else /* HAVE_POSIX_THREADS */
+#else /* GOT_PTHREADS */
   if (sigprocmask(how, newMask, oldMask) != -1) return 1;
   logSystemError("sigprocmask");
-#endif /* HAVE_POSIX_THREADS */
+#endif /* GOT_PTHREADS */
 
   return 0;
 }
