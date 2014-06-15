@@ -1691,7 +1691,6 @@ static int readPid(char *path)
   if (ptr != &pids[n]) return 0;
   return pid;
 }
-#endif /* __MINGW32__ */
 
 static int
 adjustPermissions (const char *path) {
@@ -1724,6 +1723,7 @@ adjustPermissions (const char *path) {
 
   return 1;
 }
+#endif /* __MINGW32__ */
 
 /* Function : createLocalSocket */
 /* Creates the listening socket for in-connections */
