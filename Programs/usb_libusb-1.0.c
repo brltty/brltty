@@ -253,7 +253,7 @@ usbReadEndpoint (
   UsbDeviceExtension *devx = device->extension;
 
   if (usbGetHandle(devx)) {
-    const UsbEndpoint *endpoint;
+    UsbEndpoint *endpoint;
 
     if ((endpoint = usbGetInputEndpoint(device, endpointNumber))) {
       const UsbEndpointDescriptor *descriptor = endpoint->descriptor;
@@ -304,7 +304,7 @@ usbWriteEndpoint (
   UsbDeviceExtension *devx = device->extension;
 
   if (usbGetHandle(devx)) {
-    const UsbEndpoint *endpoint;
+    UsbEndpoint *endpoint;
 
     if ((endpoint = usbGetOutputEndpoint(device, endpointNumber))) {
       const UsbEndpointDescriptor *descriptor = endpoint->descriptor;

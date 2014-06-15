@@ -165,7 +165,7 @@ usbReadEndpoint (
   int timeout
 ) {
   UsbDeviceExtension *devx = device->extension;
-  const UsbEndpoint *endpoint;
+  UsbEndpoint *endpoint;
 
   if ((endpoint = usbGetInputEndpoint(device, endpointNumber))) {
     const UsbEndpointDescriptor *descriptor = endpoint->descriptor;
@@ -220,7 +220,7 @@ usbWriteEndpoint (
   int timeout
 ) {
   UsbDeviceExtension *devx = device->extension;
-  const UsbEndpoint *endpoint;
+  UsbEndpoint *endpoint;
 
   if ((endpoint = usbGetOutputEndpoint(device, endpointNumber))) {
     const UsbEndpointDescriptor *descriptor = endpoint->descriptor;
