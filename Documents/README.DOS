@@ -313,9 +313,9 @@ BRLTTY to stop running, too, which isn't what you want.
 Using dosemu on Linux
 ---------------------
 
-If you are using dosemu on Linux, and the Linux kernel is 3.15 or later, then 
-you will need to explicitly enable 16-bit segment support. This can be done 
-with the following command:
+If you are using dosemu on Linux, and the Linux kernel is 3.15, then you will 
+need to explicitly enable 16-bit segment support. This can be done with the 
+following command:
 
    echo 1 >/proc/sys/abi/ldt16
 
