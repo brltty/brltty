@@ -18,12 +18,13 @@
 
 #define _WIN32_WINNT _WIN32_WINNT_VISTA
 #define __USE_W32_SOCKETS
-#include "prologue.h"
 
 #pragma pack(push,2)
 #include <winsock2.h>
 #include <ws2bth.h>
 #pragma pack(pop)
+
+#include "prologue.h"
 
 #include <string.h>
 #include <errno.h>
@@ -48,6 +49,12 @@
 #define NS_BTH 16
 #warning using hard-coded value for Bluetooth namespace constant
 #endif /* NS_BTH */
+
+#if defined(__CYGWIN__) && !defined(__CYGWIN32__)
+#define IOCTLSOCKET_ARGUMENT_TYPE unsigned int
+#else /* ioctlcontrol argument type */
+#define IOCTLSOCKET_ARGUMENT_TYPE u_long
+#endif /* ioctlcontrol argument type */
 
 #include "log.h"
 #include "timing.h"
@@ -137,7 +144,7 @@ bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout)
     if ((bcx->socket = socket(PF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM)) != INVALID_SOCKET) {
       if (bind(bcx->socket, (SOCKADDR *)&bcx->local, sizeof(bcx->local)) != SOCKET_ERROR) {
         if (connect(bcx->socket, (SOCKADDR *)&bcx->remote, sizeof(bcx->remote)) != SOCKET_ERROR) {
-          unsigned int nonblocking = 1;
+          IOCTLSOCKET_ARGUMENT_TYPE nonblocking = 1;
 
           if (ioctlsocket(bcx->socket, FIONBIO, &nonblocking) != SOCKET_ERROR) {
             return 1;
