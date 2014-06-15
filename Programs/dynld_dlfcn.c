@@ -110,8 +110,6 @@ getSharedSymbolName (void *address, ptrdiff_t *offset) {
     return info.dli_sname;
   }
 
-#else /* get symbol name */
-#warning symbol address to name lookup not supported on tghis platform
 #endif /* get symbol name */
 
   return NULL;
