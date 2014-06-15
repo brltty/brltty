@@ -300,6 +300,12 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 #define PRIssize "zd"
 #endif /* format for size_t and ssize_t */
 
+#if defined(__CYGWIN__)
+#define PRIkey "llX"
+#else /* format for key_t */
+#define PRIkey PRIX32
+#endif /* format for key_t */
+
 #ifdef HAVE_WCHAR_H 
 #include <wchar.h>
 #include <wctype.h>
@@ -475,12 +481,6 @@ mbsinit (const mbstate_t *ps) {
 #ifndef USE_PKG_FM_NONE
 #define HAVE_FM_SUPPORT
 #endif /* USE_PKG_FM_NONE */
-
-#if defined(_CYGWIN__)
-#define PRIkey "llX"
-#else /* */
-#define PRIkey PRIX32
-#endif /* SIZEOF_KEY_T */
 
 /* configure is still making a few mistakes with respect to the grub environment */
 #ifdef GRUB_RUNTIME
