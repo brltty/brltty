@@ -476,13 +476,11 @@ mbsinit (const mbstate_t *ps) {
 #define HAVE_FM_SUPPORT
 #endif /* USE_PKG_FM_NONE */
 
-#ifdef HAVE_SHMGET
-#if SIZEOF_KEY_T == 4
-#define PRIX_KEY_T PRIX32
-#elif SIZEOF_KEY_T == 8
-#define PRIX_KEY_T PRIX64
+#if defined(_CYGWIN__)
+#define PRIkey "llX"
+#else /* */
+#define PRIkey PRIX32
 #endif /* SIZEOF_KEY_T */
-#endif /* HAVE_SHMGET */
 
 /* configure is still making a few mistakes with respect to the grub environment */
 #ifdef GRUB_RUNTIME

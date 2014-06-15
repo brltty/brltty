@@ -75,17 +75,17 @@ construct_ScreenScreen (void) {
 
     while (keyCount > 0) {
       shmKey = keys[--keyCount];
-      logMessage(LOG_DEBUG, "Trying shared memory key: 0X%" PRIX_KEY_T, shmKey);
+      logMessage(LOG_DEBUG, "Trying shared memory key: 0X%" PRIkey, shmKey);
       if ((shmIdentifier = shmget(shmKey, shmSize, shmMode)) != -1) {
         if ((shmAddress = shmat(shmIdentifier, NULL, 0)) != (unsigned char *)-1) {
-          logMessage(LOG_INFO, "Screen image shared memory key: 0X%" PRIX_KEY_T, shmKey);
+          logMessage(LOG_INFO, "Screen image shared memory key: 0X%" PRIkey, shmKey);
           return 1;
         } else {
-          logMessage(LOG_WARNING, "Cannot attach shared memory segment 0X%" PRIX_KEY_T ": %s",
+          logMessage(LOG_WARNING, "Cannot attach shared memory segment 0X%" PRIkey ": %s",
                      shmKey, strerror(errno));
         }
       } else {
-        logMessage(LOG_WARNING, "Cannot access shared memory segment 0X%" PRIX_KEY_T ": %s",
+        logMessage(LOG_WARNING, "Cannot access shared memory segment 0X%" PRIkey ": %s",
                    shmKey, strerror(errno));
       }
     }
