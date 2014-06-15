@@ -255,7 +255,7 @@ getMonotonicTime (TimeValue *now) {
       return;
     }
 
-    logMessage(LOG_WARNING, "clock not available: %u", *clock);
+    logMessage(LOG_WARNING, "clock not available: %u", (unsigned int)*clock);
     clock += 1;
   }
 #endif /* get monotonic time */
