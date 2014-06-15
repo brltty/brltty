@@ -291,6 +291,15 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 #endif /* FOR_BUILD */
 #endif /* HAVE_CONFIG_H */
 
+#if defined(__MINGW32__)
+#define PRIsize "u"
+#define PRIssize "d"
+
+#else /* format for size_t and ssize_t */
+#define PRIsize "zu"
+#define PRIssize "zd"
+#endif /* format for size_t and ssize_t */
+
 #ifdef HAVE_WCHAR_H 
 #include <wchar.h>
 #include <wctype.h>

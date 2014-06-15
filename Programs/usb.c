@@ -118,7 +118,7 @@ usbGetLanguage (
       logMessage(LOG_CATEGORY(USB_IO), "USB language: %02X", *language);
       return 1;
     } else {
-      logMessage(LOG_ERR, "USB language code string too short: %zu", size);
+      logMessage(LOG_ERR, "USB language code string too short: %"PRIssize, size);
       errno = EIO;
     }
   } else {

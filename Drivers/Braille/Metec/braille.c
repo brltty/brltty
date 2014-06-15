@@ -324,7 +324,6 @@ getUsbDeviceIdentity (BrailleDisplay *brl) {
       unsigned char identity[MT_IDENTITY_PACKET_SIZE];
       ssize_t result = usbReadEndpoint(device, 1, identity, sizeof(identity), 1000);
 
-      logMessage(LOG_NOTICE, "epread: r=%zd e=%d", result, errno);
       if (result != -1) return 1;
     }
   } while (--counter);

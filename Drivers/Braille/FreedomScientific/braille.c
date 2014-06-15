@@ -1057,7 +1057,11 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t length) {
   if (count > sizeof(packet.header)) count -= 1;
 
   if (length < count) {
-    logMessage(LOG_WARNING, "Input packet buffer too small: %zu < %zu", length, count);
+    logMessage(LOG_WARNING,
+               "Input packet buffer too small:"
+               " %"PRIsize
+               " < %"PRIsize,
+               length, count);
     count = length;
   }
 
@@ -1080,7 +1084,10 @@ brl_writePacket (BrailleDisplay *brl, const void *packet, size_t length) {
 
     if (length >= size) {
       if (length > size) {
-        logMessage(LOG_WARNING, "output packet buffer larger than necessary: %zu > %zu",
+        logMessage(LOG_WARNING,
+                   "output packet buffer larger than necessary:"
+                   " %"PRIsize
+                   " > %"PRIsize,
                    length, size);
       }
 
@@ -1090,7 +1097,10 @@ brl_writePacket (BrailleDisplay *brl, const void *packet, size_t length) {
     }
   }
 
-  logMessage(LOG_WARNING, "output packet buffer too small: %zu < %zu",
+  logMessage(LOG_WARNING,
+             "output packet buffer too small:"
+             " %"PRIsize
+             " < %"PRIsize,
              length, size);
 
   errno = EIO;

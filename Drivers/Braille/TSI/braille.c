@@ -345,7 +345,11 @@ QueryDisplay(unsigned char *reply)
       logMessage(LOG_DEBUG, "no response");
     }
   } else if (count != -1) {
-    logMessage(LOG_ERR, "short write: %zd < %d", count, DIM_BRL_QUERY);
+    logMessage(LOG_ERR,
+               "short write:"
+               " %"PRIssize
+               " < %d",
+               count, DIM_BRL_QUERY);
   } else {
     logSystemError("write");
   }
