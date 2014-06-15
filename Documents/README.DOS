@@ -310,3 +310,19 @@ that the system is idle when BRLTTY has nothing to do, but that will cause
 BRLTTY to stop running, too, which isn't what you want.
 
 
+Using dosemu on Linux
+---------------------
+
+If you are using dosemu on Linux, and the Linux kernel is 3.15 or later, then 
+you will need to explicitly enable 16-bit segment support. This can be done 
+with the following command:
+
+   echo 1 >/proc/sys/abi/ldt16
+
+If you would like this setting to take effect automatically each time you 
+reboot, then create the file "ldt16.conf" in the directory "/etc/sysctl.d/", 
+and place the following line in it:
+   
+   abi.ldt16 = 1
+
+
