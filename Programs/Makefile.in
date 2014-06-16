@@ -820,7 +820,7 @@ install-xbrlapi: xbrlapi$X install-program-directory install-gdm-autostart-direc
 	$(INSTALL_PROGRAM) xbrlapi$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_DATA) $(SRC_TOP)$(PGM_DIR)/xbrlapi.desktop $(INSTALL_GDM_AUTOSTART_DIRECTORY)
 
-install-tables: $(INSTALL_TEXT_TABLES) $(INSTALL_ATTRIBUTES_TABLES) $(INSTALL_CONTRACTION_TABLES) install-keyboard-tables install-braille-key-tables
+install-tables: $(INSTALL_TEXT_TABLES) $(INSTALL_ATTRIBUTES_TABLES) $(INSTALL_CONTRACTION_TABLES) install-keyboard-tables install-input-tables
 
 install-text-tables: install-text-tables-directory
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(TEXT_TABLES_SUBDIRECTORY)/*$(TEXT_TABLE_EXTENSION) $(INSTALL_TEXT_TABLES_DIRECTORY)
@@ -838,7 +838,7 @@ install-keyboard-tables: install-keyboard-tables-directory
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(KEYBOARD_TABLES_SUBDIRECTORY)/*$(KEY_TABLE_EXTENSION) $(INSTALL_KEYBOARD_TABLES_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(KEYBOARD_TABLES_SUBDIRECTORY)/*$(KEY_SUBTABLE_EXTENSION) $(INSTALL_KEYBOARD_TABLES_DIRECTORY)
 
-install-braille-key-tables: install-braille-key-tables-directory
+install-input-tables: install-input-tables-directory
 	cd $(SRC_TOP)$(TBL_DIR)/$(INPUT_TABLES_SUBDIRECTORY) && \
 	set -- *$(KEY_SUBTABLE_EXTENSION) */*$(KEY_TABLE_EXTENSION) */*$(KEY_SUBTABLE_EXTENSION) */*$(KEY_HELP_EXTENSION) && \
 	for file; do \
@@ -865,7 +865,9 @@ CORE_HEADERS = \
    $(SRC_DIR)/clipboard.h $(SRC_DIR)/menu.h \
    $(SRC_DIR)/prefs.h $(SRC_DIR)/stat_types.h \
    $(SRC_DIR)/cmd.h $(SRC_DIR)/cmd_types.h $(SRC_DIR)/cmd_enqueue.h \
-   $(SRC_DIR)/ttb.h $(SRC_DIR)/atb.h $(SRC_DIR)/ctb_types.h $(SRC_DIR)/ctb.h $(SRC_DIR)/ktb_types.h $(SRC_DIR)/ktb.h \
+   $(SRC_DIR)/ttb.h $(SRC_DIR)/atb.h \
+   $(SRC_DIR)/ctb.h $(SRC_DIR)/ctb_types.h \
+   $(SRC_DIR)/ktb.h $(SRC_DIR)/ktb_types.h \
    $(SRC_DIR)/tune.h $(SRC_DIR)/tune_types.h \
    $(SRC_DIR)/notes.h $(SRC_DIR)/beep.h $(SRC_DIR)/pcm.h $(SRC_DIR)/midi.h $(SRC_DIR)/fm.h \
    $(SRC_DIR)/io_generic.h $(SRC_DIR)/gio_types.h \
@@ -875,10 +877,11 @@ CORE_HEADERS = \
    $(SRC_DIR)/io_misc.h $(SRC_DIR)/ports.h \
    $(SRC_DIR)/driver.h $(SRC_DIR)/drivers.h \
    $(SRC_DIR)/brl_driver.h $(SRC_DIR)/brl_types.h $(SRC_DIR)/brl_dots.h $(SRC_DIR)/brl_cmds.h $(SRC_DIR)/brl_utils.h $(SRC_DIR)/brl_base.h \
-   $(SRC_DIR)/spk_driver.h $(SRC_DIR)/spk.h $(SRC_DIR)/spk_types.h \
+   $(SRC_DIR)/spk_driver.h $(SRC_DIR)/spk.h $(SRC_DIR)/spk_types.h $(SRC_DIR)/spk_base.h \
    $(SRC_DIR)/scr_driver.h $(SRC_DIR)/scr_types.h $(SRC_DIR)/scr_utils.h $(SRC_DIR)/scr_base.h $(SRC_DIR)/scr_real.h $(SRC_DIR)/scr_main.h \
    $(SRC_DIR)/system.h $(SRC_DIR)/system_darwin.h $(SRC_DIR)/system_java.h $(SRC_DIR)/system_linux.h $(SRC_DIR)/system_msdos.h $(SRC_DIR)/system_windows.h \
    $(SRC_DIR)/win_errno.h $(SRC_DIR)/win_pthread.h \
+   $(SRC_DIR)/get_sockets.h $(SRC_DIR)/get_pthreads.h \
    $(SRC_TOP)prologue.h $(BLD_TOP)config.h $(BLD_TOP)forbuild.h
 
 install-core-headers: install-include-directory
