@@ -503,6 +503,9 @@ extern "C" {
 /* Define this if the function atspi_get_a11y_bus exists in atspi2. */
 #undef HAVE_ATSPI_GET_A11Y_BUS
 
+/* Define this if the header file sdkddkver.h exists. */
+#undef HAVE_SDKDDKVER_H
+
 /* Define this to be a string containing the subdirectory for text tables. */
 #undef TEXT_TABLES_SUBDIRECTORY
 

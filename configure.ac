@@ -472,6 +472,7 @@ AC_SUBST([CONFLIBDIR], ["${brltty_cv_prog_conflibdir}"])
 case "${host_os}"
 in
    mingw*)
+      AC_CHECK_HEADERS([sdkddkver.h])
       BRLTTY_HAVE_WINDOWS_LIBRARY([ws2_32])
       BRLTTY_HAVE_WINDOWS_LIBRARY([gdi32])
       BRLTTY_HAVE_WINDOWS_LIBRARY([winmm])

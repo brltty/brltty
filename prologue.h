@@ -75,8 +75,22 @@ extern "C" {
   STR_ADJUST(strLength); \
 }
 
+#ifdef HAVE_CONFIG_H
+#ifdef FOR_BUILD
+#include "forbuild.h"
+#else /* FOR_BUILD */
+#include "config.h"
+#endif /* FOR_BUILD */
+#endif /* HAVE_CONFIG_H */
+
 #if defined(__CYGWIN__) || defined(__MINGW32__)
 #define WINDOWS
+
+#ifndef HAVE_SDKDDKVER_H
+#include <w32api.h>
+#define _WIN32_WINNT_WINXP WindowsXP
+#define _WIN32_WINNT_VISTA WindowsVista
+#endif /* HAVE_SDKDDKVER_H */
 
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT _WIN32_WINNT_WINXP
@@ -282,14 +296,6 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 
 #define setSystemErrno() setErrno(getSystemError())
 #define setSocketErrno() setErrno(getSocketError())
-
-#ifdef HAVE_CONFIG_H
-#ifdef FOR_BUILD
-#include "forbuild.h"
-#else /* FOR_BUILD */
-#include "config.h"
-#endif /* FOR_BUILD */
-#endif /* HAVE_CONFIG_H */
 
 #if defined(__MINGW32__)
 #define PRIsize "u"
