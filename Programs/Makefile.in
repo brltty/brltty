@@ -251,6 +251,9 @@ file.$O:
 device.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/device.c
 
+pipe.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/pipe.c
+
 parse.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/parse.c
 
@@ -466,7 +469,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O config.$O $(PREFS_OBJECTS) menu.$O ses.$O status.$O update.$O blink.$O clipboard.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_navigation.$O cmd_speech.$O cmd_touch.$O cmd_learn.$O scancodes.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) api_control.$O $(API_OBJECTS)
+CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O config.$O $(PREFS_OBJECTS) menu.$O ses.$O status.$O update.$O blink.$O clipboard.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_navigation.$O cmd_speech.$O cmd_touch.$O cmd_learn.$O scancodes.$O pipe.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) api_control.$O $(API_OBJECTS)
 CORE_NAME = brltty
 
 brltty-core: $(CORE_OBJECTS)
