@@ -65,13 +65,13 @@ initializeHostPath (NamedPipeObject *obj) {
 
 static void
 deallocateHostPath (NamedPipeObject *obj) {
-  if (obj->host.path) free(obj->host.path);
+  free(obj->host.path);
   initializeHostPath(obj);
 }
 
 static void
 removePipe (NamedPipeObject *obj) {
-  if (obj->host.path) unlink(obj->host.path);
+  unlink(obj->host.path);
 }
 
 static void
@@ -81,7 +81,7 @@ initializeInputDescriptor (NamedPipeObject *obj) {
 
 static void
 closeInputDescriptor (NamedPipeObject *obj) {
-  if (obj->input.descriptor != INVALID_FILE_DESCRIPTOR) closeFileDescriptor(obj->input.descriptor);
+  closeFileDescriptor(obj->input.descriptor);
   initializeInputDescriptor(obj);
 }
 
@@ -92,7 +92,7 @@ initializeInputMonitor (NamedPipeObject *obj) {
 
 static void
 stopInputMonitor (NamedPipeObject *obj) {
-  if (obj->input.monitor) asyncCancelRequest(obj->input.monitor);
+  asyncCancelRequest(obj->input.monitor);
   initializeInputMonitor(obj);
 }
 
@@ -100,7 +100,10 @@ ASYNC_INPUT_CALLBACK(handleNamedPipeInput) {
   NamedPipeObject *obj = parameters->data;
 
   if (parameters->error) {
+    logMessage(LOG_WARNING, "named pipe input error: %s: %s",
+               obj->host.path, strerror(parameters->error));
   } else if (parameters->end) {
+    logMessage(LOG_WARNING, "named pipe end-of-file: %s", obj->host.path);
   } else {
     const NamedPipeInputCallbackParameters input = {
       .buffer = parameters->buffer,
@@ -250,7 +253,8 @@ createFifo (NamedPipeObject *obj) {
 
   if (result != -1) {
     if (chmod(obj->host.path, S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH) != -1) {
-      if ((obj->input.descriptor = open(obj->host.path, O_RDONLY|O_NONBLOCK)) != -1) {
+      // open read-write even though we only read to prevent an end-of-file condition
+      if ((obj->input.descriptor = open(obj->host.path, O_RDWR|O_NONBLOCK)) != -1) {
         logMessage(LOG_DEBUG, "FIFO created: %s: fd=%d",
                    obj->host.path, obj->input.descriptor);
 
@@ -333,6 +337,7 @@ newNamedPipeObject (const char *name, NamedPipeInputCallback *callback, void *da
 
 void
 destroyNamedPipeObject (NamedPipeObject *obj) {
+  logMessage(LOG_DEBUG, "destroying named pipe: %s", obj->host.path);
   if (obj->releaseResources) obj->releaseResources(obj);
   stopInputMonitor(obj);
   closeInputDescriptor(obj);
