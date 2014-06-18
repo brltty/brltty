@@ -214,6 +214,25 @@ usbLogSetupPacket (const UsbSetupPacket *setup) {
 }
 
 void
+usbMakeSetupPacket (
+  UsbSetupPacket *setup,
+  uint8_t direction,
+  uint8_t recipient,
+  uint8_t type,
+  uint8_t request,
+  uint16_t value,
+  uint16_t index,
+  uint16_t length
+) {
+  setup->bRequestType = direction | recipient | type;
+  setup->bRequest = request;
+  putLittleEndian16(&setup->wValue, value);
+  putLittleEndian16(&setup->wIndex, index);
+  putLittleEndian16(&setup->wLength, length);
+  usbLogSetupPacket(setup);
+}
+
+void
 usbLogEndpointData (
   UsbEndpoint *endpoint, const char *label,
   const void *data, size_t size

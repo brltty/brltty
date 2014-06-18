@@ -343,15 +343,11 @@ usbControlTransfer (
     } arg;
 
     memset(&arg, 0, sizeof(arg));
-    arg.setup.bRequestType = direction | recipient | type;
-    arg.setup.bRequest = request;
-    putLittleEndian16(&arg.setup.wValue, value);
-    putLittleEndian16(&arg.setup.wIndex, index);
-    putLittleEndian16(&arg.setup.wLength, length);
+    usbMakeSetupPacket(&arg.setup, direction, recipient, type,
+                       request, value, index, length);
     arg.transfer.data = buffer;
     arg.transfer.timeout = timeout;
 
-    usbLogSetupPacket(&arg.setup);
     if (direction == UsbControlDirection_Output) {
       if (length) logBytes(LOG_CATEGORY(USB_IO), "control output", buffer, length);
     }
