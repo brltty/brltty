@@ -40,7 +40,10 @@ usbDisableAutosuspend (UsbDevice *device) {
 int
 usbSetConfiguration (UsbDevice *device, unsigned char configuration) {
   UsbDeviceExtension *devx = device->extension;
-  int result = usb_set_configuration(devx->handle, configuration);
+  int result;
+
+  logMessage(LOG_CATEGORY(USB_IO), "setting configuration: %u", configuration);
+  result = usb_set_configuration(devx->handle, configuration);
   if (result >= 0) return 1;
 
   errno = -result;
@@ -51,7 +54,10 @@ usbSetConfiguration (UsbDevice *device, unsigned char configuration) {
 int
 usbClaimInterface (UsbDevice *device, unsigned char interface) {
   UsbDeviceExtension *devx = device->extension;
-  int result = usb_claim_interface(devx->handle, interface);
+  int result;
+
+  logMessage(LOG_CATEGORY(USB_IO), "claiming interface: %u", interface);
+  result = usb_claim_interface(devx->handle, interface);
   if (result >= 0) return 1;
 
   errno = -result;
@@ -62,7 +68,10 @@ usbClaimInterface (UsbDevice *device, unsigned char interface) {
 int
 usbReleaseInterface (UsbDevice *device, unsigned char interface) {
   UsbDeviceExtension *devx = device->extension;
-  int result = usb_release_interface(devx->handle, interface);
+  int result;
+
+  logMessage(LOG_CATEGORY(USB_IO), "releasing interface: %u", interface);
+  result = usb_release_interface(devx->handle, interface);
   if (result >= 0) return 1;
 
   errno = -result;
@@ -77,7 +86,10 @@ usbSetAlternative (
   unsigned char alternative
 ) {
   UsbDeviceExtension *devx = device->extension;
-  int result = usb_set_altinterface(devx->handle, alternative);
+  int result;
+
+  logMessage(LOG_CATEGORY(USB_IO), "setting alternative: %u[%u]", interface, alternative);
+  result = usb_set_altinterface(devx->handle, alternative);
   if (result >= 0) return 1;
 
   errno = -result;
@@ -88,7 +100,10 @@ usbSetAlternative (
 int
 usbClearEndpoint (UsbDevice *device, unsigned char endpointAddress) {
   UsbDeviceExtension *devx = device->extension;
-  int result = usb_clear_halt(devx->handle, endpointAddress);
+  int result;
+
+  logMessage(LOG_CATEGORY(USB_IO), "clearing endpoint: %02X", endpointAddress);
+  result = usb_clear_halt(devx->handle, endpointAddress);
   if (result >= 0) return 1;
 
   errno = -result;
@@ -110,9 +125,27 @@ usbControlTransfer (
   int timeout
 ) {
   UsbDeviceExtension *devx = device->extension;
-  int result = usb_control_msg(devx->handle, direction|recipient|type, request,
-                               value, index, buffer, length, timeout);
-  if (result >= 0) return result;
+  UsbSetupPacket setup;
+  int result;
+
+  usbMakeSetupPacket(&setup, direction, recipient, type, request, value, index, length);
+
+  if (direction == UsbControlDirection_Output) {
+    if (length) logBytes(LOG_CATEGORY(USB_IO), "control output", buffer, length);
+  }
+
+  result = usb_control_msg(devx->handle, setup.bRequestType, setup.bRequest,
+                           getLittleEndian16(setup.wValue),
+                           getLittleEndian16(setup.wIndex), buffer,
+                           getLittleEndian16(setup.wLength), timeout);
+
+  if (result >= 0) {
+    if (direction == UsbControlDirection_Input) {
+      logBytes(LOG_CATEGORY(USB_IO), "control input", buffer, result);
+    }
+
+    return result;
+  }
 
   errno = -result;
   logSystemError("USB control transfer");
@@ -226,6 +259,8 @@ usbWriteEndpoint (
     const UsbEndpointDescriptor *descriptor = endpoint->descriptor;
     UsbEndpointTransfer transfer = USB_ENDPOINT_TRANSFER(descriptor);
     int result = -1;
+
+    usbLogEndpointData(endpoint, "output", buffer, length);
 
     switch (transfer) {
       case UsbEndpointTransfer_Bulk:
