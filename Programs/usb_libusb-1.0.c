@@ -312,7 +312,7 @@ usbReadEndpoint (
       }
 
       if (result == LIBUSB_SUCCESS) {
-        ssize_t count = result;
+        ssize_t count = actual_length;
 
         if (usbApplyInputFilters(endpoint, buffer, length, &count)) return count;
         result = LIBUSB_ERROR_IO;
