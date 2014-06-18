@@ -102,6 +102,10 @@ extern "C" {
 #define _WIN32_WINNT _WIN32_WINNT_WINXP
 #endif /* _WIN32_WINNT */
 
+#ifndef WINVER
+#define WINVER _WIN32_WINNT
+#endif /* WINVER */
+
 #ifdef __MINGW32__
 #ifndef __USE_W32_SOCKETS
 #define __USE_W32_SOCKETS
