@@ -130,11 +130,31 @@ usbClaimInterface (UsbDevice *device, unsigned char interface) {
   UsbDeviceExtension *devx = device->extension;
 
   if (usbGetHandle(devx)) {
+    int detached = 0;
     int result;
 
     logMessage(LOG_CATEGORY(USB_IO), "claiming interface: %u", interface);
-    result = libusb_claim_interface(devx->handle, interface);
-    if (result == LIBUSB_SUCCESS) return 1;
+
+    while (1) {
+      result = libusb_claim_interface(devx->handle, interface);
+      if (result == LIBUSB_SUCCESS) return 1;
+
+      if (result != LIBUSB_ERROR_BUSY)  break;
+      if (detached) break;
+
+      logMessage(LOG_WARNING, "USB interface in use: %u", interface);
+      result = libusb_detach_kernel_driver(devx->handle, interface);
+
+      if (result == LIBUSB_SUCCESS) {
+        logMessage(LOG_WARNING, "USB interface detached: %u", interface);
+        detached = 1;
+        continue;
+      }
+
+      result = LIBUSB_ERROR_BUSY;
+      break;
+    }
+
     usbSetErrno(result, "libusb_claim_interface");
   }
 
