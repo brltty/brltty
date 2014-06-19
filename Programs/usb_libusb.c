@@ -27,6 +27,12 @@
 #include "io_usb.h"
 #include "usb_internal.h"
 
+#ifdef __MINGW32__
+#ifndef ETIMEDOUT
+#define ETIMEDOUT 116
+#endif /* ETIMEDOUT */
+#endif /* __MINGW32__ */
+
 struct UsbDeviceExtensionStruct {
   struct usb_dev_handle *handle;
 };
@@ -54,11 +60,56 @@ usbSetConfiguration (UsbDevice *device, unsigned char configuration) {
 int
 usbClaimInterface (UsbDevice *device, unsigned char interface) {
   UsbDeviceExtension *devx = device->extension;
+  int detached = 0;
   int result;
 
   logMessage(LOG_CATEGORY(USB_IO), "claiming interface: %u", interface);
-  result = usb_claim_interface(devx->handle, interface);
-  if (result >= 0) return 1;
+
+  while (1) {
+    char driver[0X100];
+
+    result = usb_claim_interface(devx->handle, interface);
+    if (result >= 0) return 1;
+
+    if (result != -EBUSY) break;
+    if (detached) break;
+
+#ifdef LIBUSB_HAS_GET_DRIVER_NP
+    result = usb_get_driver_np(devx->handle, interface, driver, sizeof(driver));
+
+    if (result < 0)
+#endif /* LIBUSB_HAS_GET_DRIVER_NP */
+
+    {
+      strcpy(driver, "unknown");
+    }
+
+    logMessage(LOG_WARNING, "USB interface in use: %u (%s)", interface, driver);
+
+    if (strcmp(driver, "usbfs") == 0) {
+      result = -EBUSY;
+      break;
+    }
+
+#ifdef LIBUSB_HAS_DETACH_KERNEL_DRIVER_NP
+    logMessage(LOG_CATEGORY(USB_IO), "detaching kernel driver: %u (%s)",
+               interface, driver);
+
+    result = usb_detach_kernel_driver_np(devx->handle, interface);
+
+    if (result >= 0) {
+      logMessage(LOG_CATEGORY(USB_IO), "detached kernel driver: %u (%s)",
+                 interface, driver);
+
+      detached = 1;
+      continue;
+    }
+
+    result = -EBUSY;
+#endif /* LIBUSB_HAS_DETACH_KERNEL_DRIVER_NP */
+
+    break;
+  }
 
   errno = -result;
   logSystemError("USB interface claim");
@@ -231,10 +282,6 @@ usbReadEndpoint (
     if (result >= 0) return result;
     errno = -result;
   }
-
-#if defined(__MINGW32__) && !defined(ETIMEDOUT)
-#  define ETIMEDOUT 116
-#endif /* __MINGW32__ && !ETIMEDOUT */
 
 #ifdef ETIMEDOUT
   if (errno == ETIMEDOUT) errno = EAGAIN;
