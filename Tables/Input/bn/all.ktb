@@ -29,6 +29,8 @@ bind Previous+Next BOT_LEFT
 bind Back+Advance BACK
 bind Back+Next CSRTRK
 
+bind RoutingKey ROUTE
+
 bind Dot1 CHRLT
 bind Dot1+Dot2 HWINLT
 bind Dot2 FWINLT
