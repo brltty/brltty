@@ -10,6 +10,7 @@ reldeps.mk
 /config.status
 /config.mk
 /config.h
+/config.sh
 
 /forbuild.log
 /forbuild.status
