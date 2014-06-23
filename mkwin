@@ -17,6 +17,22 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+. "`dirname "${0}"`/prologue.sh"
+addProgramParameter source sourceRoot "top-level dirfectgory of soruce tree"
+optionalProgramParameters
+addProgramParameter name archiveName "name of archive file"
+addProgramParameter file archiveFile "x"
+parseProgramArguments "${@}"
+
+cd "${sourceRoot}" || exit "${?}"
+sourceRoot="$(pwd)"
+
+[ -n "${archiveName}" ] || archiveName="$(basename "${sourceRoot}")"
+[ -n "${archiveFile}" ] || archiveFile="${archiveName}.zip"
+[ "${archiveFile#/}" != "${archiveFile}" ] || archiveFile="${initialDirectory}/${archiveFile}"
+
+[ "$MSYSTEM" = "MINGW32" ] || semanticError "this script is for MinGW32 only"
+
 version=5.0
 subversion=x
 apiversion=0.6.1
@@ -24,6 +40,7 @@ whole_version=$version-$subversion
 autohotkey="/c/Program Files/AutoHotkey"
 nsis="/c/Program Files/NSIS"
 configure_line="--quiet --prefix=/ --enable-relocatable-install --without-flite --without-mikropuhe --without-speechd --without-swift --without-theta --without-viavoice --disable-i18n"
+
 README_head="\
 This is an unofficial build of brltty $version + a few fixes for windows.
 
@@ -38,6 +55,7 @@ For a very quick startguide:
   lines from etc/brltty.conf.
 - For Python support (e.g. for NVDA), run Brlapi-$apiversion.win32.exe
 - for sighted users, use the xw braille driver to get a virtual braille box."
+
 README_foot="
 If you are getting troubles, please run run-debug.bat and send us the debug.log
 and brltty.conf files.
@@ -60,34 +78,6 @@ Technical notes on this build
   linking in e.g. Visual C.  Then you can just ship
   bin/brlapi${apiversion%.*}.dll along your .exe application.
 "
-. "`dirname "${0}"`/prologue.sh"
-
-[ "$MSYSTEM" = "MINGW32" ] || programError 1 "This script is for MinGW32 only"
-
-[ "${#}" -eq 0 ] && syntaxError "missing source root."
-sourceRoot="${1}"
-shift
-cd "${sourceRoot}" || exit "${?}"
-sourceRoot="`pwd`"
-
-if [ "${#}" -eq 0 ]
-then
-   archiveName="`basename "${sourceRoot}"`"
-else
-   archiveName="${1}"
-   shift
-fi
-
-if [ "${#}" -eq 0 ]
-then
-   archiveFile="${archiveName}.zip"
-else
-   archiveFile="${1}"
-   shift
-fi
-[ "${archiveFile#/}" = "${archiveFile}" ] && archiveFile="${initialDirectory}/${archiveFile}"
-
-[ "${#}" -eq 0 ] || syntaxError "too many parameters."
 
 temporaryDirectory=/tmp/brltty-mkwin
 rm -fr ${temporaryDirectory}
