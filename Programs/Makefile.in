@@ -816,8 +816,7 @@ install-programs: brltty$X brltty-trtxt$X brltty-ttb$X brltty-ctb$X install-prog
 	$(INSTALL_PROGRAM) brltty-trtxt$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-ttb$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-ctb$X $(INSTALL_PROGRAM_DIRECTORY) 
-	$(INSTALL_DATA) brltty-config $(INSTALL_PROGRAM_DIRECTORY) 
-	$(INSTALL_SCRIPT) $(SRC_DIR)/brltty-install $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_DATA) $(BLD_TOP)config.sh $(INSTALL_PROGRAM_DIRECTORY)/brltty-config
 
 install-xbrlapi: xbrlapi$X install-program-directory install-gdm-autostart-directory
 	$(INSTALL_PROGRAM) xbrlapi$X $(INSTALL_PROGRAM_DIRECTORY) 
@@ -1016,4 +1015,4 @@ clean::
 
 distclean::
 	-rm -f brlapi.h
-	-rm -f brltty-config
+	-rm -f $(BLD_TOP)config.sh

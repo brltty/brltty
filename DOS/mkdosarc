@@ -115,7 +115,6 @@ logMessage task "updating files"
 
 cd "${installDirectory}/bin"
 rm brltty-config
-rm brltty-install
 mv brltty-ttb.exe brlttb.exe
 mv brltty-ctb.exe brlctb.exe
 mv brltty-trtxt.exe brltrtxt.exe
