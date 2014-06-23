@@ -1015,4 +1015,3 @@ clean::
 
 distclean::
 	-rm -f brlapi.h
-	-rm -f $(BLD_TOP)config.sh

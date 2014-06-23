@@ -93,6 +93,6 @@ distclean:: clean
 	-rm -f brltty.spec
 	-rm -fr autom4te*.cache
 	-rm -f config.log config.cache config.status
-	-rm -f config.mk config.h
+	-rm -f config.mk config.h config.sh
 	-rm -f forbuild.log forbuild.cache forbuild.status
 	-rm -f forbuild.mk forbuild.h
