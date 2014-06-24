@@ -334,7 +334,6 @@ showProgramUsageSummary() {
    local line="Usage: ${programName}"
    [ "${#}" -eq 0 ] || line="${line} [-option ...]"
 
-   [ "${programParameterCountMinimum}" -ge 0 ] || programParameterCountMinimum="${programParameterCount}"
    local index=0
    local suffix=""
 
@@ -440,6 +439,8 @@ parseProgramOptions() {
 }
 
 parseProgramArguments() {
+   [ "${programParameterCountMinimum}" -ge 0 ] || programParameterCountMinimum="${programParameterCount}"
+
    parseProgramOptions "${@}"
    shift $((OPTIND - 1))
 
