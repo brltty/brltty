@@ -272,13 +272,14 @@ AC_PATH_TOOL([RANLIB], [ranlib])
 AC_PROG_AWK
 AC_PROG_LN_S
 
-AC_PATH_PROG([PKG_CONFIG], [pkg-config])
-AC_PATH_PROG([MSGMERGE], [msgmerge])
-AC_PATH_PROG([MSGFMT], [msgfmt])
+AC_PATH_PROG([PKG_CONFIG], [pkg-config], [false])
+AC_PATH_PROG([ICU_CONFIG], [icu-config], [false])
 
-install_messages=
-test -n "${MSGMERGE}" && install_messages=install-messages
-AC_SUBST([install_messages])
+AC_PATH_PROG([MSGMERGE], [msgmerge], [false])
+AC_PATH_PROG([MSGFMT], [msgfmt], [false])
+
+AC_PATH_PROG([LINUXDOC], [linuxdoc], [false])
+AC_PATH_PROG([DOXYGEN], [doxygen], [false])
 
 AC_CACHE_CHECK([for linkage editor program creation flags], [brltty_cv_prog_ld_flags], [dnl
 case "${host_os}"
@@ -361,8 +362,10 @@ LDFLAGS="${LDFLAGS} BRLTTY_OPTIONS_LD2CC([${brltty_link_flags}])"
 AC_PROG_INSTALL
 BRLTTY_EXECUTABLE_PATH([INSTALL])
 
-AC_PATH_PROG([DOXYGEN], [doxygen])
-test -n "${DOXYGEN}" && can_make_BrlAPIref=yes || can_make_BrlAPIref=no
+test "${LINUXDOC}" = "false" && can_make_manual=no || can_make_manual=yes
+AC_SUBST([can_make_manual])
+
+test "${DOXYGEN}" = "false" && can_make_BrlAPIref=no || can_make_BrlAPIref=yes
 AC_SUBST([can_make_BrlAPIref])
 
 AC_CACHE_CHECK([for make relocatable object command], [brltty_cv_prog_mkobj], [dnl
@@ -485,17 +488,23 @@ in
       ;;
 esac
 
+install_messages=
 BRLTTY_ARG_DISABLE(
    [i18n],
    [support for internationalization],
    [],
 [dnl
-   AC_CHECK_HEADER([libintl.h], [dnl
-      AC_HAVE_LIBRARY([intl])
-      AC_DEFINE([ENABLE_I18N_SUPPORT], [1],
-                [Define this if internationalization support is to be included.])
-   ])
+   test "${MSGMERGE}" = "false" || {
+      install_messages=install-messages
+
+      AC_CHECK_HEADER([libintl.h], [dnl
+         AC_HAVE_LIBRARY([intl])
+         AC_DEFINE([ENABLE_I18N_SUPPORT], [1],
+                   [Define this if internationalization support is to be included.])
+      ])
+   }
 ])
+AC_SUBST([install_messages])
 
 AC_CHECK_FUNC([wcslen], [AC_CHECK_HEADERS([wchar.h], [dnl
    AC_CHECK_FUNCS([wcwidth])
@@ -508,8 +517,7 @@ BRLTTY_ARG_DISABLE(
    [support for Unicode-based internationalization],
    [],
 [dnl
-   AC_PATH_PROG([ICU_CONFIG], [icu-config])
-   test -n "${ICU_CONFIG}" && ${ICU_CONFIG} --exists >/dev/null && {
+   ${ICU_CONFIG} --exists >/dev/null && {
       icu_includes="`${ICU_CONFIG} --cppflags-searchpath`"
       icu_libs="`${ICU_CONFIG} --ldflags`"
       AC_DEFINE_UNQUOTED([HAVE_ICU], [1],

@@ -16,10 +16,11 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-all clean distclean::
+clean distclean::
 	for directory in $(MANUAL_DIRECTORIES); do (cd $(BLD_TOP)$$directory && $(MAKE) $@) || exit 1; done
 
 all:: $(ALL_API)
+	for directory in $(MANUAL_DIRECTORIES); do (cd $(BLD_TOP)$$directory && $(MAKE) $@-@can_make_manual@) || exit 1; done
 
 all-api man3: BrlAPIref-@can_make_BrlAPIref@
 
