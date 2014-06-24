@@ -122,6 +122,11 @@ readPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
           case BN_RSP_ENTER:
           case BN_RSP_THUMB:
           case BN_RSP_ROUTE:
+          case BN_RSP_INPUT_CHAR:
+          case BN_RSP_INPUT_VKEY:
+          case BN_RSP_INPUT_RESET:
+          case BN_RSP_QWERTY_KEY:
+          case BN_RSP_QWERTY_MODS:
             length = 2;
             break;
 
