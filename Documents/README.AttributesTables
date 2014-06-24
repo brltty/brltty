@@ -26,7 +26,7 @@ is that all dots are down and not used to represent anything.
 
 The <dot> operand specifies the dot being defined. It is a single digit within 
 the range 1-8 as defined by the standard braille dot numbering convention (see 
-README-DOTS).
+README.BrailleDots).
 
 The <state> operand specifies what the dot represents. It may be:
 *  =attribute  The dot is raised if the named attribute is on.

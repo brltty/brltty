@@ -52,9 +52,10 @@ The <dots> operand specifies the braille representation of the Unicode
 character. It is a sequence of one to eight dot numbers. If the dot number 
 sequence is enclosed within parentheses then the dot numbers may be separated 
 from one another by white-space. A dot number is a digit within the range 1-8 
-as defined by the standard braille dot numbering convention (see README-DOTS). 
-The special dot number 0 is recognized when not enclosed within parentheses, 
-and means no dots; it may not be used in conjunction with any other dot number.
+as defined by the standard braille dot numbering convention (see
+README.BrailleDots). The special dot number 0 is recognized when not enclosed
+within parentheses, and means no dots; it may not be used in conjunction with
+any other dot number.
 
 Examples:
 

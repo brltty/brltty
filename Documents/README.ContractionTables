@@ -61,6 +61,6 @@ The second operand of those character sequence matching directives which have
 one is the braille representation of the sequence. Each braille cell is 
 specified as a sequence of one to eight dot numbers. A dot number is a digit 
 within the range 1-8 as defined by the standard braille dot numbering 
-convention (see README-DOTS). The special dot number 0, which may not be used 
-in conjunction with any other dot number, means no dots.
+convention (see README.BrailleDots). The special dot number 0, which may not be
+used in conjunction with any other dot number, means no dots.
 
