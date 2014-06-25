@@ -268,7 +268,7 @@ echo by using the alt-space menu) and see %CD%\debug.log
 END-OF-DEBUG
 
 cd "${installRoot}/lib"
-lib /def:brlapi.def /name:brlapi-${BRLAPI_VERSION}.dll /out:brlapi.lib /machine:x86
+lib //nologo /def:brlapi.def /name:brlapi-${BRLAPI_VERSION}.dll /out:brlapi.lib /machine:x86
 
 logMessage task "creating configurator"
 cd "${installRoot}"
@@ -327,6 +327,7 @@ zip -q -A -r "${archiveFile}" "${buildName}"
 
 logMessage task "creating installer"
 cd "${installRoot}/.."
+installerFile="${buildName}.exe"
 
 cat >"README.first.txt" <<END-OF-README
 ${readmeHeader}
@@ -335,9 +336,12 @@ END-OF-README
 
 cp "${programDirectory}/brltty.nsi" .
 cp "${programDirectory}/nsistrings.txt" "${installRoot}"
-"${nsisRoot}/makensis" -DVERSION="${buildVersion}" brltty.nsi
+"${nsisRoot}/makensis" -V2 \
+   -DVERSION="${buildVersion}" \
+   -DDISTDIR="${buildName}" \
+   -DOUTFILE="${installerFile}" \
+   brltty.nsi
 
-installerFile="${buildName}.exe"
 rm -f "${initialDirectory}/${installerFile}"
 cp "${installerFile}" "${initialDirectory}/${installerFile}"
 
