@@ -1,0 +1,351 @@
+#!/bin/sh
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2014 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any
+# later version. Please see the file LICENSE-GPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+set -e
+umask 022
+export MAKEFLAGS=
+
+defaultLibusb0Root="/c/Program Files/LibUSB-Win32"
+defaultAhkRoot="/c/Program Files (x86)/AutoHotkey"
+defaultNsisRoot="/c/Program Files (x86)/NSIS"
+
+. "`dirname "${0}"`/../prologue.sh"
+[ "${MSYSTEM}" = "MINGW32" ] || semanticError "this script is for MinGW32 only"
+addProgramOption s flag invokeShell "invoke interactive shell to inspect/modify result"
+addProgramOption U string.directory libusb0Root "where LibUSB-Win32 has been installed" "${defaultLibusb0Root}"
+addProgramOption A string.directory ahkRoot "where AutoHotkey has been installed" "${defaultAhkRoot}"
+addProgramOption N string.directory nsisRoot "where NSIS has been installed" "${defaultNsisRoot}"
+addProgramParameter source sourceRoot "top-level directory of source tree"
+addProgramParameter revision buildRevision "revision of the build"
+parseProgramArguments "${@}"
+
+sourceRoot="$(resolveDirectory "${sourceRoot}")"
+[ -f "${sourceRoot}/configure" ] || semanticError "not a source tree: ${sourceRoot}"
+
+verifyPackage() {
+   local variable="${1}"
+   local name="${2}"
+   local url="${3}"
+   local default="${4}"
+
+   local directory="$(getVariable "${variable}")"
+
+   [ -n "${directory}" ] || {
+      directory="${default}"
+      setVariable "${variable}" "${directory}"
+   }
+
+   [ -d "${directory}" ] || semanticError "package not installed: ${name} (download from ${url})"
+}
+
+verifyPackage libusb0Root LibUSB-Win32 "http://libusb-win32.sourceforge.net/" "${defaultLibusb0Root}"
+verifyPackage ahkRoot AutoHotkey "http://www.autohotkey.com/" "${defaultAhkRoot}"
+verifyPackage nsisRoot NSIS "http://nsis.sourceforge.net/" "${defaultNsisRoot}"
+
+for command in doxygen groff lib linuxdoc unix2dos zip
+do
+   command -v "${command}" >/dev/null 2>&1 || logMessage warning "host command not found: ${command}"
+done
+
+temporaryDirectory="${TMPDIR:-/tmp}/brltty-${programName}"
+rm -f -r "${temporaryDirectory}"
+mkdir -p "${temporaryDirectory}"
+
+buildRoot="${temporaryDirectory}/build"
+mkdir -p "${buildRoot}"
+cd "${buildRoot}"
+
+logMessage task "configuring build"
+configureOptions="--enable-relocatable-install --disable-i18n --without-params-package --without-mntpt-package --without-mntfs-package --without-libbraille --without-flite --without-mikropuhe --without-speechd --without-swift --without-theta --without-viavoice"
+"${sourceRoot}/configure" --quiet --prefix=/ ${configureOptions}
+
+. ./config.sh
+buildVersion="${BRLTTY_VERSION}-${buildRevision}"
+buildName="${BRLTTY_TARNAME}-win-${buildVersion}"
+
+readmeHeader="\
+This is an unofficial build of ${BRLTTY_NAME} ${BRLTTY_VERSION} which also includes a few fixes
+for Windows.
+
+You should probably read doc/BRLTTY.txt and doc/Windows.txt for information
+on BRLTTY.
+
+Here are some notes on how to get started:
+
+- BRLTTY only gives access to text consoles. For the rest of the Windows
+  environment, you need to also install and run NVDA.
+- Either use the BRLTTY configurator (brlttycnf.exe) or manually uncomment the
+  appropriate lines in etc/brltty.conf.
+- For Python support (e.g. for NVDA), run Brlapi-${BRLAPI_RELEASE}.win32.exe.
+- For sighted users, use the xw braille driver to get a virtual braille box."
+
+readmeFooter="
+If you are having problems, please run run-debug.bat and send us the debug.log
+and brltty.conf files.
+
+Documentation can be found in the doc/ subdirectory.
+
+==============================
+Technical notes on this build:
+
+- Version ${BRLTTY_VERSION} of BRLTTY was built.
+- Some MinGW-specific path and file name changes have been made.
+- The configure options were: ${configureOptions}
+- To make life easier for Windows users, the BrlAPI server was modified to:
+  * not use authentication by default (BRLAPI_DEFAUTH set to none)
+  * only use local sockets (:0+127.0.0.1:0 changed to :0)
+- *usb0* comes from libusb-win32 1.2.1.0, which is available at:
+  http://libusb-win32.sourceforge.net/
+- braille.dll comes from: http://libbraille.sourceforge.net/
+- Python bindings are provided by: Brlapi-${BRLAPI_RELEASE}.win32.exe
+- C bindings are provided in: include/, and lib/
+  A .lib file is provided for linking in (for example) Visual C. Then you can
+  just ship bin/brlapi${BRLAPI_RELEASE%.*}.dll alongside your .exe application.
+"
+
+logMessage task "building programs"
+make -s
+make -s -C Drivers/BrlAPI/WindowEyes we-dynamic-library-windows
+
+logMessage task "building documents"
+make -s -C Documents
+
+logMessage task "installing files"
+installRoot="${temporaryDirectory}/install/${buildName}"
+make -s install INSTALL_ROOT="${installRoot}" JAVA_JAR_DIR=/lib JAVA_JNI_DIR=/lib
+
+logMessage task "updating files"
+documentDirectory="doc"
+
+installFile() {
+   local source="${1}"
+   local target="${2}"
+
+   [ "${target%/}" = "${target}" ] || target="${target}${source##*/}"
+   local path="${installRoot}/${target}"
+   mkdir -p "${path%/*}"
+   cp "${source}" "${path}"
+}
+
+cd "${sourceRoot}"
+installFile "LICENSE-GPL" "LICENSE-GPL.txt"
+installFile "LICENSE-LGPL" "LICENSE-LGPL.txt"
+installFile "README" "${documentDirectory}/BRLTTY.txt"
+installFile "${buildRoot}/Documents/brltty.conf" "etc/brltty.conf"
+installFile "Drivers/BrlAPI/WindowEyes/README" "${documentDirectory}/WindowEyes.txt"
+
+for document in ChangeLog HISTORY TODO
+do
+   installFile "Documents/${document}" "${documentDirectory}/${document}.txt"
+done
+
+for document in Windows BrailleDots TextTables AttributesTables ContractionTables KeyTables
+do
+   installFile "Documents/README.${document}" "${documentDirectory}/${document}.txt"
+done
+
+for root in "${sourceRoot}" "${buildRoot}"
+do
+   cd "${root}/Documents"
+
+   for manual in Manual-BRLTTY Manual-BrlAPI BrlAPIref
+   do
+      [ -d "${manual}" ] || continue
+
+      for file in $(find "${manual}" -type f -print)
+      do
+         name="${file##*/}"
+         extension="${name##*.}"
+
+         case "${extension}"
+         in
+            txt | html | htm | doc | pdf)
+               installFile "${file}" "${documentDirectory}/${file}"
+               ;;
+
+            *);;
+         esac
+      done
+   done
+done
+
+cd "${sourceRoot}/Drivers"
+for document in $(find Braille Speech -type f -name "README*" -print)
+do
+   installFile "${document}" "${documentDirectory}/Drivers/${document}.txt"
+done
+
+installFile "${programDirectory}/msvcr90.dll" "bin/"
+installFile ${sourceRoot}/Autostart/Windows/brltty.inf "bin/"
+
+installFile "${libusb0Root}/bin/x86/libusb0.sys" "bin/libusb0.sys"
+installFile "${libusb0Root}/bin/x86/libusb0_x86.dll" "bin/libusb0.dll"
+
+installFile "${libusb0Root}/bin/amd64/libusb0.sys" "bin/libusb0_x64.sys"
+installFile "${libusb0Root}/bin/amd64/libusb0.dll" "bin/libusb0_x64.dll"
+
+for file in /mingw/bin/libgcc_s_dw2-1.dll /mingw/bin/libiconv-2.dll /mingw/bin/libpdcurses*.dll
+do
+   installFile "${file}" "bin/"
+done
+
+installFile "${buildRoot}/Drivers/BrlAPI/WindowEyes/webrloem109.dll" "/"
+
+cd "${installRoot}"
+rm -f "bin/brltty-config"
+rm -f "etc/brlapi.key"
+
+echo "not yet" >"bin/brltty.cat"
+echo "not yet" >"bin/brltty_x64.cat"
+
+for source in $(find "share/man" -type f -name "*.[1-9]" -print)
+do
+   target="${source%.*}.txt"
+
+   groff -T ascii -mandoc 2>/dev/null <"${source}" |
+   sed -e 's/'$'\033''\[[0-9]*m//g' >"${target}"
+
+   [ -s "${target}" ] || rm -f "${target}"
+   rm -f "${source}"
+done
+
+cat >"README.first.txt" <<END-OF-README
+${readmeHeader}
+- To register BRLTTY as a service so that it will get started automatically at
+  boot, run install.bat. To unregister it, run uninstall.bat.
+- If your braille device uses a USB connection,
+  * If you have installed its manufacturer's driver, then select its virtual
+    COM port if it provides one, otherwise select "USB:" to use libusb-win32's
+    filter.
+  * If you either cannot, or prefer not to, install your manufacturer's driver,
+    then you can select "USB:" here and install libusb-win32's driver.
+- The libusb-win32 filter is available at: http://libusb-win32.sourceforge.net/
+- To install the libusb-win32 driver, right-click on bin/brltty.inf and select
+  install.
+- If your braille device uses a serial connection, or if it is connected via a
+  serial to USB converter, just select the proper COM port. Make sure to select
+  the proper braille display as well, because serial autodetection may brick
+  some devices.
+- If your braille device uses a Bluetooth connection, you can either use the
+  Windows Bluetooth facilities to create a virtual COM port which you can then
+  select, or you can manually configure the braille-device line in brltty.conf.
+${readmeFooter}
+END-OF-README
+
+cat >"install.bat" <<END-OF-INSTALL
+@echo off
+.\bin\brltty -I
+net start BrlAPI
+END-OF-INSTALL
+
+cat >"uninstall.bat" <<END-OF-UNINSTALL
+@echo off
+net stop BrlAPI
+.\bin\brltty -R
+END-OF-UNINSTALL
+
+cat >"run-debug.bat" <<END-OF-DEBUG
+@echo off
+echo Running BRLTTY in debug mode. When done, close this window (for example,
+echo by using the alt-space menu) and see %CD%\debug.log
+.\bin\brltty -n -e -ldebug -Ldebug.log >stdout.log 2>stderr.log
+END-OF-DEBUG
+
+cd "${installRoot}/lib"
+lib /def:brlapi.def /name:brlapi-${BRLAPI_VERSION}.dll /out:brlapi.lib /machine:x86
+
+logMessage task "creating configurator"
+cd "${installRoot}"
+cp "${programDirectory}/brlttycnf.ahk" .
+"${ahkRoot}/Compiler/Ahk2Exe.exe" //in brlttycnf.ahk //out brlttycnf.exe
+rm brlttycnf.ahk
+
+logMessage task "converting text files"
+convertTextFile() {
+   local file="${1}"
+
+   unix2dos -q -o "${file}"
+}
+
+find . -print |
+   while read path
+   do
+      handle="${path#.}"
+      [ -n "${handle}" ] || continue
+
+      name="${path##*/}"
+      extension="${name##*.}"
+
+      if [ -f "${path}" ]
+      then
+         if [ "${extension}" != "${name}" ]
+         then
+            case "${extension}"
+            in
+               a | def | dll | doc | exe | exp | lib | pdf | sys);;
+               bat | cat | conf | h | htm | html | inf | txt | [tack]t[bi])
+                  convertTextFile "${path}"i
+                  ;;
+
+               *) logMessage warning "unexpected file extension: ${handle}";;
+            esac
+         fi
+      elif [ ! -d "${path}" ]
+      then
+         logMessage warning "unsupported special file: ${handle}"
+      fi
+   done
+
+if "${invokeShell}"
+then
+   logMessage task "invoking shell"
+   cd "${installRoot}"
+   "${SHELL:-/bin/sh}" || :
+fi
+
+logMessage task "creating archive"
+archiveFile="${initialDirectory}/${buildName}.zip"
+rm -f "${archiveFile}"
+cd "${installRoot}/.."
+zip -q -A -r "${archiveFile}" "${buildName}"
+
+logMessage task "creating installer"
+cd "${installRoot}/.."
+
+cat >"README.first.txt" <<END-OF-README
+${readmeHeader}
+${readmeFooter}
+END-OF-README
+
+cp "${programDirectory}/brltty.nsi" .
+cp "${programDirectory}/nsistrings.txt" "${installRoot}"
+"${nsisRoot}/makensis" -DVERSION="${buildVersion}" brltty.nsi
+
+installerFile="${buildName}.exe"
+rm -f "${initialDirectory}/${installerFile}"
+cp "${installerFile}" "${initialDirectory}/${installerFile}"
+
+logMessage task "cleaning up"
+cd "${initialDirectory}"
+rm -f -r "${temporaryDirectory}"
+
+logMessage task "done"
+exit 0
+
+cp Bindings/Python/dist/Brlapi-${BRLAPI_RELEASE}.win32.exe "${installRoot}"
