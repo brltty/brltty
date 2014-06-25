@@ -138,9 +138,15 @@ installFile() {
    local target="${2}"
 
    [ "${target%/}" = "${target}" ] || target="${target}${source##*/}"
-   local path="${installRoot}/${target}"
-   mkdir -p "${path%/*}"
-   cp "${source}" "${path}"
+
+   if [ -e "${source}" ]
+   then
+      local path="${installRoot}/${target}"
+      mkdir -p "${path%/*}"
+      cp "${source}" "${path}"
+   else
+      logMessage warning "file not installed: ${target}"
+   fi
 }
 
 cd "${sourceRoot}"
@@ -206,6 +212,7 @@ do
 done
 
 installFile "${buildRoot}/Drivers/BrlAPI/WindowEyes/webrloem109.dll" "/"
+installFile "${buildRoot}/Bindings/Python/dist/Brlapi-${BRLAPI_RELEASE}.win32.exe" "/"
 
 cd "${installRoot}"
 rm -f "bin/brltty-config"
@@ -351,5 +358,3 @@ rm -f -r "${temporaryDirectory}"
 
 logMessage task "done"
 exit 0
-
-cp Bindings/Python/dist/Brlapi-${BRLAPI_RELEASE}.win32.exe "${installRoot}"
