@@ -601,19 +601,21 @@ logUnsupportedOperation (const char *name) {
 void
 logWindowsError (DWORD error, const char *action) {
   char *message;
+  DWORD count = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+                              NULL, error,
+                              MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                              (char *)&message, 0, NULL);
 
-  FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-                NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                (char *)&message, 0, NULL);
-
-  {
+  if (count) {
     char *end = strpbrk(message, "\r\n");
 
     if (end) *end = 0;
+  } else {
+    message = "unknown";
   }
 
   logMessage(LOG_ERR, "%s error %d: %s", action, (int)error, message);
-  LocalFree(message);
+  if (count) LocalFree(message);
 }
 
 void
