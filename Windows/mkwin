@@ -58,7 +58,7 @@ verifyPackage libusb0Root LibUSB-Win32 "http://libusb-win32.sourceforge.net/" "$
 verifyPackage ahkRoot AutoHotkey "http://www.autohotkey.com/" "${defaultAhkRoot}"
 verifyPackage nsisRoot NSIS "http://nsis.sourceforge.net/" "${defaultNsisRoot}"
 
-for command in doxygen groff lib linuxdoc unix2dos zip
+for command in cython doxygen groff lib linuxdoc python unix2dos zip
 do
    command -v "${command}" >/dev/null 2>&1 || logMessage warning "host command not found: ${command}"
 done
@@ -149,11 +149,14 @@ installFile() {
    fi
 }
 
+cd "${buildRoot}"
+installFile "Documents/brltty.conf" "etc/brltty.conf"
+sed -e 's/"//g' <"Programs/revision_identifier.h" >"${installRoot}/REVISION.txt"
+
 cd "${sourceRoot}"
 installFile "LICENSE-GPL" "LICENSE-GPL.txt"
 installFile "LICENSE-LGPL" "LICENSE-LGPL.txt"
 installFile "README" "${documentDirectory}/BRLTTY.txt"
-installFile "${buildRoot}/Documents/brltty.conf" "etc/brltty.conf"
 installFile "Drivers/BrlAPI/WindowEyes/README" "${documentDirectory}/WindowEyes.txt"
 
 for document in ChangeLog HISTORY TODO
@@ -307,7 +310,7 @@ find . -print |
             in
                a | def | dll | doc | exe | exp | lib | pdf | sys);;
                bat | cat | conf | h | htm | html | inf | txt | [tack]t[bi])
-                  convertTextFile "${path}"i
+                  convertTextFile "${path}"
                   ;;
 
                *) logMessage warning "unexpected file extension: ${handle}";;
