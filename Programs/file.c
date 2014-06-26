@@ -242,7 +242,40 @@ int
 testProgramPath (const char *path) {
   if (!testFilePath(path)) return 0;
 
-#if defined(__MINGW32__) || defined(__MSDOS__)
+#if defined(__MINGW32__)
+  {
+    const char *extension = locatePathExtension(path);
+
+    if (extension) {
+      static char **extensions = NULL;
+
+      if (!extensions) {
+        const char *string = getenv("PATHEXT");
+
+        {
+          static char *noExtensions[] = {NULL};
+
+          extensions = noExtensions;
+        }
+
+        if (string) {
+          char **strings = splitString(string, ';', NULL);
+
+          if (strings) extensions = strings;
+        }
+      }
+
+      {
+        char **x = extensions;
+
+        while (*x) {
+          if (strcasecmp(*x, extension) == 0) return 1;
+          x += 1;
+        }
+      }
+    }
+  }
+
   return 0;
 
 #elif defined(X_OK)
