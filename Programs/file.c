@@ -242,8 +242,12 @@ int
 testProgramPath (const char *path) {
   if (!testFilePath(path)) return 0;
 
-#ifdef X_OK
+#if defined(__MINGW32__) || defined(__MSDOS__)
+  return 0;
+
+#elif defined(X_OK)
   return access(path, X_OK) != -1;
+
 #else /* X_OK */
   errno = ENOSYS;
   return 0;
