@@ -75,6 +75,7 @@ typedef union {
       unsigned char routingKey;
       unsigned char inputChar;
       unsigned char inputVKey;
+
       struct {
         unsigned char statusCells;
         unsigned char textCells;
@@ -376,7 +377,7 @@ virtualKeyToCommand (int vkey) {
     case 0X27: return BRL_BLK_PASSKEY | BRL_KEY_CURSOR_RIGHT;
     case 0X28: return BRL_BLK_PASSKEY | BRL_KEY_CURSOR_DOWN;
     case 0X2E: return BRL_BLK_PASSKEY | BRL_KEY_DELETE;
-    default: return BRL_CMD_NOOP;
+    default:   return BRL_CMD_NOOP;
   }
 }
 
@@ -479,16 +480,21 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
       case BN_RSP_INPUT_CHAR: {
         int command;
+
         switch (packet.data.values.inputChar) {
           case 0X08:
             command = BRL_BLK_PASSKEY | BRL_KEY_BACKSPACE;
             break;
+
           case 0X09:
             command = BRL_BLK_PASSKEY | BRL_KEY_TAB;
+            break;
+
           default:
             command = BRL_BLK_PASSCHAR | packet.data.values.inputChar;
             break;
         }
+
         enqueueCommand(command | inputFlags);
         inputFlags = 0;
         break;
@@ -496,15 +502,27 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
       case BN_RSP_INPUT_VKEY: {
         unsigned char vkey = packet.data.values.inputVKey;
+
         switch (vkey) {
-          case 0XA2: inputFlags |= BRL_FLG_CHAR_CONTROL; break;
-          case 0XA4: inputFlags |= BRL_FLG_CHAR_META; break;
-          case 0X91: inputFlags |= BRL_FLG_CHAR_SHIFT; break;
+          case 0XA2:
+            inputFlags |= BRL_FLG_CHAR_CONTROL;
+            break;
+
+          case 0XA4:
+            inputFlags |= BRL_FLG_CHAR_META;
+            break;
+
+          case 0X91:
+            inputFlags |= BRL_FLG_CHAR_SHIFT;
+            break;
+
           default: {
             int command = virtualKeyToCommand(vkey);
+
             if (command) {
               enqueueCommand(command | inputFlags);
             }
+
             inputFlags = 0;
             break;
           }
