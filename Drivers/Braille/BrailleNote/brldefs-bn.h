@@ -28,14 +28,19 @@ typedef enum {
 } BN_RequestType;
 
 typedef enum {
-  BN_RSP_CHARACTER = 0X80,
-  BN_RSP_SPACE     = 0X81,
-  BN_RSP_BACKSPACE = 0X82,
-  BN_RSP_ENTER     = 0X83,
-  BN_RSP_THUMB     = 0X84,
-  BN_RSP_ROUTE     = 0X85,
-  BN_RSP_DESCRIBE  = 0X86,
-  BN_RSP_DISPLAY   = ESC
+  BN_RSP_CHARACTER   = 0X80,
+  BN_RSP_SPACE       = 0X81,
+  BN_RSP_BACKSPACE   = 0X82,
+  BN_RSP_ENTER       = 0X83,
+  BN_RSP_THUMB       = 0X84,
+  BN_RSP_ROUTE       = 0X85,
+  BN_RSP_DESCRIBE    = 0X86,
+  BN_RSP_INPUT_CHAR  = 0X88,
+  BN_RSP_INPUT_VKEY  = 0X89,
+  BN_RSP_INPUT_RESET = 0X8A,
+  BN_RSP_QWERTY_KEY  = 0X8C,
+  BN_RSP_QWERTY_MODS = 0X8D,
+  BN_RSP_DISPLAY     = ESC
 } BN_ResponseType;
 
 typedef enum {
@@ -60,5 +65,12 @@ typedef enum {
   BN_GRP_NavigationKeys,
   BN_GRP_RoutingKeys
 } SK_KeyGroup;
+
+typedef enum {
+  BN_MOD_Func = 0X01,
+  BN_MOD_Shift = 0X02,
+  BN_MOD_Ctrl = 0X04,
+  BN_MOD_Read = 0X08
+} BN_QwertyModifier;
 
 #endif /* BRLTTY_INCLUDED_BN_BRLDEFS */ 

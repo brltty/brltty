@@ -73,6 +73,8 @@ typedef union {
       unsigned char dotKeys;
       unsigned char thumbKeys;
       unsigned char routingKey;
+      unsigned char inputChar;
+      unsigned char inputVKey;
       struct {
         unsigned char statusCells;
         unsigned char textCells;
@@ -95,6 +97,8 @@ static unsigned char *statusArea;
 static int statusCells;
 static unsigned char *dataArea;
 static int dataCells;
+
+static int inputFlags = 0;
 
 static int
 readPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
@@ -122,6 +126,11 @@ readPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
           case BN_RSP_ENTER:
           case BN_RSP_THUMB:
           case BN_RSP_ROUTE:
+          case BN_RSP_INPUT_CHAR:
+          case BN_RSP_INPUT_VKEY:
+          case BN_RSP_INPUT_RESET:
+          case BN_RSP_QWERTY_KEY:
+          case BN_RSP_QWERTY_MODS:
             length = 2;
             break;
 
@@ -358,6 +367,20 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 }
 
 static int
+virtualKeyToCommand (int vkey) {
+  switch (vkey) {
+    case 0X0D: return BRL_BLK_PASSKEY | BRL_KEY_ENTER;
+    case 0X1B: return BRL_BLK_PASSKEY | BRL_KEY_ESCAPE;
+    case 0X25: return BRL_BLK_PASSKEY | BRL_KEY_CURSOR_LEFT;
+    case 0X26: return BRL_BLK_PASSKEY | BRL_KEY_CURSOR_UP;
+    case 0X27: return BRL_BLK_PASSKEY | BRL_KEY_CURSOR_RIGHT;
+    case 0X28: return BRL_BLK_PASSKEY | BRL_KEY_CURSOR_DOWN;
+    case 0X2E: return BRL_BLK_PASSKEY | BRL_KEY_DELETE;
+    default: return BRL_CMD_NOOP;
+  }
+}
+
+static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if (connectResource(brl, device)) {
     ResponsePacket response;
@@ -452,6 +475,45 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
       case BN_RSP_DISPLAY:
         doVisualDisplay(brl);
+        break;
+
+      case BN_RSP_INPUT_CHAR: {
+        int command;
+        switch (packet.data.values.inputChar) {
+          case 0X08:
+            command = BRL_BLK_PASSKEY | BRL_KEY_BACKSPACE;
+            break;
+          case 0X09:
+            command = BRL_BLK_PASSKEY | BRL_KEY_TAB;
+          default:
+            command = BRL_BLK_PASSCHAR | packet.data.values.inputChar;
+            break;
+        }
+        enqueueCommand(command | inputFlags);
+        inputFlags = 0;
+        break;
+      }
+
+      case BN_RSP_INPUT_VKEY: {
+        unsigned char vkey = packet.data.values.inputVKey;
+        switch (vkey) {
+          case 0XA2: inputFlags |= BRL_FLG_CHAR_CONTROL; break;
+          case 0XA4: inputFlags |= BRL_FLG_CHAR_META; break;
+          case 0X91: inputFlags |= BRL_FLG_CHAR_SHIFT; break;
+          default: {
+            int command = virtualKeyToCommand(vkey);
+            if (command) {
+              enqueueCommand(command | inputFlags);
+            }
+            inputFlags = 0;
+            break;
+          }
+        }
+        break;
+      }
+
+      case BN_RSP_INPUT_RESET:
+        inputFlags = 0;
         break;
 
       default: {
