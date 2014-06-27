@@ -116,6 +116,7 @@ always b 12
 always B 12
 sufword bachelordom 12-1-16-15-123-135-1235-145-135-134
 always balone = abalone baloney
+begword barthole 12-345-1456-135-123-15 Bartholemy
 sufword bathorse =
 sufword battle = battleaxe
 word battled 12-1-2345-2345-123-1246
@@ -457,7 +458,6 @@ begword eru = erupt
 begword erudi 12456-136-145-24 erudite
 midendword onesque = Runyonesques
 word ethereally 15-2346-1235-15-6-13456
-always ethole 15-2345-125-135-123-15 bullethole
 always ever 5-15
 sufword eversion 15-1236-12456-46-1345 eversions
 sufword evert 15-1236-12456-2345 everted
@@ -1037,6 +1037,7 @@ word st =
 word st. 34-256 Saint Street
 always st 34
 always sth 234-1456
+midendword sthole 34-125-135-123-15 blasthole
 always sthe 234-2346
 midendword sthead 34-125-2-145 masthead
 midendword sthof 34-125-12356 Westhoff
@@ -1077,6 +1078,7 @@ always thill 2345-125-24-123-123 anthill
 before apostrophe word this 1456-24-234 this'll
 word this 1456
 midendword thof 2345-125-12356 Richthofen
+midendword thole = bolthole butthole cathole knothole
 word thyself 1456-13456-124
 word thyf =
 always tnam =
