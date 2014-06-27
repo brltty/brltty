@@ -67,10 +67,10 @@ typedef enum {
 } SK_KeyGroup;
 
 typedef enum {
-  BN_MOD_Func = 0X01,
-  BN_MOD_Shift = 0X02,
-  BN_MOD_Ctrl = 0X04,
-  BN_MOD_Read = 0X08
+  BN_MOD_FUNCTION = 0X01,
+  BN_MOD_SHIFT    = 0X02,
+  BN_MOD_cONTROL  = 0X04,
+  BN_MOD_rEAD     = 0X08
 } BN_QwertyModifier;
 
 #endif /* BRLTTY_INCLUDED_BN_BRLDEFS */ 
