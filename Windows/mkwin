@@ -21,16 +21,100 @@ set -e
 umask 022
 export MAKEFLAGS=
 
-defaultLibusb0Root="/c/Program Files/LibUSB-Win32"
-defaultAhkRoot="/c/Program Files (x86)/AutoHotkey"
-defaultNsisRoot="/c/Program Files (x86)/NSIS"
+windowsPackages="libusb0 ahk nsis"
+windowsCommands="lib python cython"
+mingwCommands="doxygen groff linuxdoc unix2dos zip"
+
+libusb0Name="LibUSB-Win32"
+libusb0Location="/c/Program Files/LibUSB-Win32"
+libusb0Download="http://libusb-win32.sourceforge.net/"
+
+ahkName="AutoHotkey"
+ahkLocation="/c/Program Files (x86)/AutoHotkey"
+ahkDownload="http://www.autohotkey.com/"
+
+nsisName="NSIS"
+nsisLocation="/c/Program Files (x86)/NSIS"
+nsisDownload="http://nsis.sourceforge.net/"
+
+addWindowsPackageOption() {
+   local letter="${1}"
+   local package="${2}"
+
+   local name="$(getVariable "${package}Name")"
+   local location="$(getVariable "${package}Location")"
+   addProgramOption "${letter}" string.directory "${package}Root" "where the ${name} package has been installed" "${location}"
+}
+
+verifyWindowsPackage() {
+   local package="${1}"
+
+   local root="$(getVariable "${package}Root")"
+
+   [ -n "${root}" ] || {
+      root="$(getVariable "${package}Location")"
+      setVariable "${package}Root" "${root}"
+   }
+
+   [ -d "${root}" ] || {
+     local message="package not installed:"
+
+     local name="$(getVariable "${package}Name")"
+     [ -z "${name}" ] || message="${message} ${name}"
+
+     local download="$(getVariable "${package}Download")"
+     [ -z "${download}" ] || message="${message} (download from ${download})"
+
+     programMessage "${message}"
+     return 1
+   }
+
+   return 0
+}
+
+verifyWindowsPackages() {
+   local result=0
+
+   [ -z "${windowsPackages}" ] || {
+      local package
+
+      for package in ${windowsPackages}
+      do
+         verifyWindowsPackage "${package}" || result=1
+      done
+   }
+
+   return "${result}"
+}
+
+convertTextFile() {
+   local file="${1}"
+
+   unix2dos -q -o "${file}"
+}
+
+installFile() {
+   local source="${1}"
+   local target="${2}"
+
+   [ "${target%/}" = "${target}" ] || target="${target}${source##*/}"
+
+   if [ -e "${source}" ]
+   then
+      local path="${installRoot}/${target}"
+      mkdir -p "${path%/*}"
+      cp "${source}" "${path}"
+   else
+      logMessage warning "file not installed: ${target}"
+   fi
+}
 
 . "`dirname "${0}"`/../prologue.sh"
 [ "${MSYSTEM}" = "MINGW32" ] || semanticError "this script is for MinGW32 only"
 addProgramOption s flag invokeShell "invoke interactive shell to inspect/modify result"
-addProgramOption U string.directory libusb0Root "where LibUSB-Win32 has been installed" "${defaultLibusb0Root}"
-addProgramOption A string.directory ahkRoot "where AutoHotkey has been installed" "${defaultAhkRoot}"
-addProgramOption N string.directory nsisRoot "where NSIS has been installed" "${defaultNsisRoot}"
+addWindowsPackageOption U libusb0
+addWindowsPackageOption A ahk
+addWindowsPackageOption N nsis
 addProgramParameter source sourceRoot "top-level directory of source tree"
 addProgramParameter revision buildRevision "revision of the build"
 parseProgramArguments "${@}"
@@ -38,27 +122,9 @@ parseProgramArguments "${@}"
 sourceRoot="$(resolveDirectory "${sourceRoot}")"
 [ -f "${sourceRoot}/configure" ] || semanticError "not a source tree: ${sourceRoot}"
 
-verifyPackage() {
-   local variable="${1}"
-   local name="${2}"
-   local url="${3}"
-   local default="${4}"
+verifyWindowsPackages || semanticError
 
-   local directory="$(getVariable "${variable}")"
-
-   [ -n "${directory}" ] || {
-      directory="${default}"
-      setVariable "${variable}" "${directory}"
-   }
-
-   [ -d "${directory}" ] || semanticError "package not installed: ${name} (download from ${url})"
-}
-
-verifyPackage libusb0Root LibUSB-Win32 "http://libusb-win32.sourceforge.net/" "${defaultLibusb0Root}"
-verifyPackage ahkRoot AutoHotkey "http://www.autohotkey.com/" "${defaultAhkRoot}"
-verifyPackage nsisRoot NSIS "http://nsis.sourceforge.net/" "${defaultNsisRoot}"
-
-for command in cython doxygen groff lib linuxdoc python unix2dos zip
+for command in ${windowsCommands} ${mingwCommands}
 do
    command -v "${command}" >/dev/null 2>&1 || logMessage warning "host command not found: ${command}"
 done
@@ -132,22 +198,6 @@ make -s install INSTALL_ROOT="${installRoot}" JAVA_JAR_DIR=/lib JAVA_JNI_DIR=/li
 
 logMessage task "updating files"
 documentDirectory="doc"
-
-installFile() {
-   local source="${1}"
-   local target="${2}"
-
-   [ "${target%/}" = "${target}" ] || target="${target}${source##*/}"
-
-   if [ -e "${source}" ]
-   then
-      local path="${installRoot}/${target}"
-      mkdir -p "${path%/*}"
-      cp "${source}" "${path}"
-   else
-      logMessage warning "file not installed: ${target}"
-   fi
-}
 
 cd "${buildRoot}"
 installFile "Documents/brltty.conf" "etc/brltty.conf"
@@ -287,12 +337,6 @@ cp "${programDirectory}/brlttycnf.ahk" .
 rm brlttycnf.ahk
 
 logMessage task "converting text files"
-convertTextFile() {
-   local file="${1}"
-
-   unix2dos -q -o "${file}"
-}
-
 find . -print |
    while read path
    do
