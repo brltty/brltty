@@ -396,6 +396,16 @@ else
    logMessage warning "import library not creatable"
 fi
 
+# for the installer but before text file conversion
+cd "${installRoot}/.."
+cp "${programDirectory}/brltty.nsi" .
+cp "${programDirectory}/nsistrings.txt" .
+
+cat >"README.first.txt" <<END-OF-README
+${readmeHeader}
+${readmeFooter}
+END-OF-README
+
 if [ -n "${ahkRoot}" ]
 then
    logMessage task "creating configurator"
@@ -410,7 +420,7 @@ fi
 if [ -n "${unix2dosPath}" ]
 then
    logMessage task "converting text files"
-   cd "${installRoot}"
+   cd "${installRoot}/.."
 
    find . -print |
       while read path
@@ -427,11 +437,11 @@ then
             then
                case "${extension}"
                in
-                  a | def | dll | doc | exe | exp | lib | pdf | sys);;
-                  bat | cat | conf | h | htm | html | inf | txt | [tack]t[bi])
+                  bat | cat | conf | h | htm | html | inf | nsi | txt | [tack]t[bi])
                      "${unix2dosPath}" -q -o "${path}"
                      ;;
 
+                  a | def | dll | doc | exe | exp | lib | pdf | sys);;
                   *) logMessage warning "unexpected file extension: ${handle}";;
                esac
             fi
@@ -466,15 +476,9 @@ if [ -n "${nsisRoot}" ]
 then
    logMessage task "creating installer"
    cd "${installRoot}/.."
+   mv nsistrings.txt "${buildName}"
    installerFile="${buildName}.exe"
 
-cat >"README.first.txt" <<END-OF-README
-${readmeHeader}
-${readmeFooter}
-END-OF-README
-
-   cp "${programDirectory}/brltty.nsi" .
-   cp "${programDirectory}/nsistrings.txt" "${installRoot}"
    "${nsisRoot}/makensis" -V2 \
       -DVERSION="${buildVersion}" \
       -DDISTDIR="${buildName}" \
