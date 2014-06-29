@@ -74,7 +74,7 @@
 	!insertmacro MUI_PAGE_STARTMENU Application $StartMenuFolder
 
 	!insertmacro MUI_PAGE_INSTFILES
-	!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\README.first.txt"
+	!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\README.txt"
 	!insertmacro MUI_PAGE_FINISH
 
 	!insertmacro MUI_UNPAGE_CONFIRM

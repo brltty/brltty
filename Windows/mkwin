@@ -38,7 +38,7 @@ nsisLocation="/c/Program Files (x86)/NSIS"
 nsisDownload="http://nsis.sourceforge.net/"
 
 zipPackage="msys-zip"
-unix2dosPackage="mingw32-dos2unix"
+unix2dosPackage="msys-dos2unix"
 groffPackage="msys-groff"
 
 addWindowsPackageOption() {
@@ -346,7 +346,7 @@ do
    rm -f "${source}"
 done
 
-cat >"README.first.txt" <<END-OF-README
+cat >"README.txt" <<END-OF-README
 ${readmeHeader}
 - To register BRLTTY as a service so that it will get started automatically at
   boot, run install.bat. To unregister it, run uninstall.bat.
@@ -401,7 +401,7 @@ cd "${installRoot}/.."
 cp "${programDirectory}/brltty.nsi" .
 cp "${programDirectory}/nsistrings.txt" .
 
-cat >"README.first.txt" <<END-OF-README
+cat >"README.txt" <<END-OF-README
 ${readmeHeader}
 ${readmeFooter}
 END-OF-README
