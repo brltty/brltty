@@ -21,9 +21,9 @@ set -e
 umask 022
 export MAKEFLAGS=
 
-windowsPackages="libusb0 ahk nsis"
+windowsPackages="ahk nsis libusb0"
 windowsCommands="lib python cython"
-mingwCommands="doxygen groff linuxdoc unix2dos zip"
+mingwCommands="zip unix2dos linuxdoc doxygen groff"
 
 libusb0Name="LibUSB-Win32"
 libusb0Location="/c/Program Files/LibUSB-Win32"
@@ -36,6 +36,10 @@ ahkDownload="http://www.autohotkey.com/"
 nsisName="NSIS"
 nsisLocation="/c/Program Files (x86)/NSIS"
 nsisDownload="http://nsis.sourceforge.net/"
+
+zipPackage="msys-zip"
+unix2dosPackage="mingw32-dos2unix"
+groffPackage="msys-groff"
 
 addWindowsPackageOption() {
    local letter="${1}"
@@ -50,11 +54,7 @@ verifyWindowsPackage() {
    local package="${1}"
 
    local root="$(getVariable "${package}Root")"
-
-   [ -n "${root}" ] || {
-      root="$(getVariable "${package}Location")"
-      setVariable "${package}Root" "${root}"
-   }
+   [ -n "${root}" ] || root="$(getVariable "${package}Location")"
 
    [ -d "${root}" ] || {
      local message="package not installed:"
@@ -65,32 +65,93 @@ verifyWindowsPackage() {
      local download="$(getVariable "${package}Download")"
      [ -z "${download}" ] || message="${message} (download from ${download})"
 
-     programMessage "${message}"
-     return 1
+     logMessage warning "${message}"
+     root=""
    }
 
+   setVariable "${package}Root" "${root}"
+   [ -n "${root}" ] || return 1
    return 0
 }
 
 verifyWindowsPackages() {
    local result=0
 
-   [ -z "${windowsPackages}" ] || {
-      local package
+   while [ "${#}" -gt 0 ]
+   do
+      local package="${1}"
+      shift 1
 
-      for package in ${windowsPackages}
-      do
-         verifyWindowsPackage "${package}" || result=1
-      done
-   }
+      verifyWindowsPackage "${package}" || result=1
+   done
 
    return "${result}"
 }
 
-convertTextFile() {
-   local file="${1}"
+findHostCommand() {
+   local command="${1}"
 
-   unix2dos -q -o "${file}"
+   local path="$(command -v "${command}" 2>/dev/null || :)"
+   setVariable "${command}Path" "${path}"
+   [ -n "${path}" ] || return 1
+   return 0
+}
+
+verifyWindowsCommand() {
+   local command="${1}"
+
+   findHostCommand "${command}" || {
+      local message="Windows command not found: ${command}"
+
+      logMessage warning "${message}"
+      return 1
+   }
+
+   return 0
+}
+
+verifyWindowsCommands() {
+   local result=0
+
+   while [ "${#}" -gt 0 ]
+   do
+      local command="${1}"
+      shift 1
+
+      verifyWindowsCommand "${command}" || result=1
+   done
+
+   return "${result}"
+}
+
+verifyMingwCommand() {
+   local command="${1}"
+
+   findHostCommand "${command}" || {
+      local message="MinGW command not found: ${command}"
+
+      local package="$(getVariable "${command}Package")"
+      [ -z "${package}" ] || message="${message} (install package ${package})"
+
+      logMessage warning "${message}"
+      return 1
+   }
+
+   return 0
+}
+
+verifyMingwCommands() {
+   local result=0
+
+   while [ "${#}" -gt 0 ]
+   do
+      local command="${1}"
+      shift 1
+
+      verifyMingwCommand "${command}" || result=1
+   done
+
+   return "${result}"
 }
 
 installFile() {
@@ -112,9 +173,9 @@ installFile() {
 . "`dirname "${0}"`/../prologue.sh"
 [ "${MSYSTEM}" = "MINGW32" ] || semanticError "this script is for MinGW32 only"
 addProgramOption s flag invokeShell "invoke interactive shell to inspect/modify result"
-addWindowsPackageOption U libusb0
 addWindowsPackageOption A ahk
 addWindowsPackageOption N nsis
+addWindowsPackageOption U libusb0
 addProgramParameter source sourceRoot "top-level directory of source tree"
 addProgramParameter revision buildRevision "revision of the build"
 parseProgramArguments "${@}"
@@ -122,12 +183,9 @@ parseProgramArguments "${@}"
 sourceRoot="$(resolveDirectory "${sourceRoot}")"
 [ -f "${sourceRoot}/configure" ] || semanticError "not a source tree: ${sourceRoot}"
 
-verifyWindowsPackages || semanticError
-
-for command in ${windowsCommands} ${mingwCommands}
-do
-   command -v "${command}" >/dev/null 2>&1 || logMessage warning "host command not found: ${command}"
-done
+verifyWindowsPackages ${windowsPackages} || :
+verifyWindowsCommands ${windowsCommands} || :
+verifyMingwCommands ${mingwCommands} || :
 
 temporaryDirectory="${TMPDIR:-/tmp}/brltty-${programName}"
 rm -f -r "${temporaryDirectory}"
@@ -276,12 +334,15 @@ echo "not yet" >"bin/brltty_x64.cat"
 
 for source in $(find "share/man" -type f -name "*.[1-9]" -print)
 do
-   target="${source%.*}.txt"
+   [ -z "${groffPath}" ] || {
+      target="${source%.*}.txt"
 
-   groff -T ascii -mandoc 2>/dev/null <"${source}" |
-   sed -e 's/'$'\033''\[[0-9]*m//g' >"${target}"
+      "${groffPath}" -T ascii -mandoc 2>/dev/null <"${source}" |
+      sed -e 's/'$'\033''\[[0-9]*m//g' >"${target}"
 
-   [ -s "${target}" ] || rm -f "${target}"
+      [ -s "${target}" ] || rm -f "${target}"
+   }
+
    rm -f "${source}"
 done
 
@@ -327,44 +388,61 @@ echo by using the alt-space menu) and see %CD%\debug.log
 .\bin\brltty -n -e -ldebug -Ldebug.log >stdout.log 2>stderr.log
 END-OF-DEBUG
 
-cd "${installRoot}/lib"
-lib //nologo /def:brlapi.def /name:brlapi-${BRLAPI_VERSION}.dll /out:brlapi.lib /machine:x86
+if [ -n "${libPath}" ]
+then
+   cd "${installRoot}/lib"
+   "${libPath}" //nologo /def:brlapi.def /name:brlapi-${BRLAPI_VERSION}.dll /out:brlapi.lib /machine:x86
+else
+   logMessage warning "import library not creatable"
+fi
 
-logMessage task "creating configurator"
-cd "${installRoot}"
-cp "${programDirectory}/brlttycnf.ahk" .
-"${ahkRoot}/Compiler/Ahk2Exe.exe" //in brlttycnf.ahk //out brlttycnf.exe
-rm brlttycnf.ahk
+if [ -n "${ahkRoot}" ]
+then
+   logMessage task "creating configurator"
+   cd "${installRoot}"
+   cp "${programDirectory}/brlttycnf.ahk" .
+   "${ahkRoot}/Compiler/Ahk2Exe.exe" //in brlttycnf.ahk //out brlttycnf.exe
+   rm brlttycnf.ahk
+else
+   logMessage warning "configurator not creatable"
+fi
 
-logMessage task "converting text files"
-find . -print |
-   while read path
-   do
-      handle="${path#.}"
-      [ -n "${handle}" ] || continue
+if [ -n "${unix2dosPath}" ]
+then
+   logMessage task "converting text files"
+   cd "${installRoot}"
 
-      name="${path##*/}"
-      extension="${name##*.}"
+   find . -print |
+      while read path
+      do
+         handle="${path#.}"
+         [ -n "${handle}" ] || continue
 
-      if [ -f "${path}" ]
-      then
-         if [ "${extension}" != "${name}" ]
+         name="${path##*/}"
+         extension="${name##*.}"
+
+         if [ -f "${path}" ]
          then
-            case "${extension}"
-            in
-               a | def | dll | doc | exe | exp | lib | pdf | sys);;
-               bat | cat | conf | h | htm | html | inf | txt | [tack]t[bi])
-                  convertTextFile "${path}"
-                  ;;
+            if [ "${extension}" != "${name}" ]
+            then
+               case "${extension}"
+               in
+                  a | def | dll | doc | exe | exp | lib | pdf | sys);;
+                  bat | cat | conf | h | htm | html | inf | txt | [tack]t[bi])
+                     "${unix2dosPath}" -q -o "${path}"
+                     ;;
 
-               *) logMessage warning "unexpected file extension: ${handle}";;
-            esac
+                  *) logMessage warning "unexpected file extension: ${handle}";;
+               esac
+            fi
+         elif [ ! -d "${path}" ]
+         then
+            logMessage warning "unsupported special file: ${handle}"
          fi
-      elif [ ! -d "${path}" ]
-      then
-         logMessage warning "unsupported special file: ${handle}"
-      fi
-   done
+      done
+else
+   logMessage warning "text files not convertable"
+fi
 
 if "${invokeShell}"
 then
@@ -373,31 +451,41 @@ then
    "${SHELL:-/bin/sh}" || :
 fi
 
-logMessage task "creating archive"
-archiveFile="${initialDirectory}/${buildName}.zip"
-rm -f "${archiveFile}"
-cd "${installRoot}/.."
-zip -q -A -r "${archiveFile}" "${buildName}"
+if [ -n "${zipPath}" ]
+then
+   logMessage task "creating archive"
+   archiveFile="${initialDirectory}/${buildName}.zip"
+   rm -f "${archiveFile}"
+   cd "${installRoot}/.."
+   "${zipPath}" -q -A -r "${archiveFile}" "${buildName}"
+else
+   logMessage warning "archive not creatable"
+fi
 
-logMessage task "creating installer"
-cd "${installRoot}/.."
-installerFile="${buildName}.exe"
+if [ -n "${nsisRoot}" ]
+then
+   logMessage task "creating installer"
+   cd "${installRoot}/.."
+   installerFile="${buildName}.exe"
 
 cat >"README.first.txt" <<END-OF-README
 ${readmeHeader}
 ${readmeFooter}
 END-OF-README
 
-cp "${programDirectory}/brltty.nsi" .
-cp "${programDirectory}/nsistrings.txt" "${installRoot}"
-"${nsisRoot}/makensis" -V2 \
-   -DVERSION="${buildVersion}" \
-   -DDISTDIR="${buildName}" \
-   -DOUTFILE="${installerFile}" \
-   brltty.nsi
+   cp "${programDirectory}/brltty.nsi" .
+   cp "${programDirectory}/nsistrings.txt" "${installRoot}"
+   "${nsisRoot}/makensis" -V2 \
+      -DVERSION="${buildVersion}" \
+      -DDISTDIR="${buildName}" \
+      -DOUTFILE="${installerFile}" \
+      brltty.nsi
 
-rm -f "${initialDirectory}/${installerFile}"
-cp "${installerFile}" "${initialDirectory}/${installerFile}"
+   rm -f "${initialDirectory}/${installerFile}"
+   cp "${installerFile}" "${initialDirectory}/${installerFile}"
+else
+   logMessage warning "installer not creatable"
+fi
 
 logMessage task "cleaning up"
 cd "${initialDirectory}"
