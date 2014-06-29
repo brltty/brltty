@@ -29,6 +29,14 @@ libusb0Name="LibUSB-Win32"
 libusb0Location="/c/Program Files/LibUSB-Win32"
 libusb0Download="http://libusb-win32.sourceforge.net/"
 
+pythonName="Python"
+pythonLocation=""
+pythonDownload="http://www.python.org/"
+
+cythonName="Cython"
+cythonLocation=""
+cythonDownload="http://www.cython.org/"
+
 ahkName="AutoHotkey"
 ahkLocation="/c/Program Files (x86)/AutoHotkey"
 ahkDownload="http://www.autohotkey.com/"
@@ -103,6 +111,14 @@ verifyWindowsCommand() {
    findHostCommand "${command}" || {
       local message="Windows command not found: ${command}"
 
+      local download="$(getVariable "${command}Download")"
+      [ -z "${download}" ] || {
+         message="${message} (install"
+         local name="$(getVariable "${command}Name")"
+         [ -z "${name}" ] || message="${message} ${name}"
+         message="${message} from ${download})"
+      }
+
       logMessage warning "${message}"
       return 1
    }
@@ -176,12 +192,17 @@ addProgramOption s flag invokeShell "invoke interactive shell to inspect/modify 
 addWindowsPackageOption A ahk
 addWindowsPackageOption N nsis
 addWindowsPackageOption U libusb0
+addWindowsPackageOption P python
 addProgramParameter source sourceRoot "top-level directory of source tree"
 addProgramParameter revision buildRevision "revision of the build"
 parseProgramArguments "${@}"
 
-sourceRoot="$(resolveDirectory "${sourceRoot}")"
+sourceRoot="$(cd "${sourceRoot}" && pwd -W)"
 [ -f "${sourceRoot}/configure" ] || semanticError "not a source tree: ${sourceRoot}"
+
+[ -z "${pythonRoot}" ] || {
+   export PATH="${pythonRoot}:${pythonRoot}/Scripts:${PATH}"
+}
 
 verifyWindowsPackages ${windowsPackages} || :
 verifyWindowsCommands ${windowsCommands} || :
