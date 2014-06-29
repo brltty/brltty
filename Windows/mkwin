@@ -23,7 +23,16 @@ export MAKEFLAGS=
 
 windowsPackages="ahk nsis libusb0"
 windowsCommands="lib python cython"
+mingwPackages="pthreads"
 mingwCommands="zip unix2dos linuxdoc doxygen groff"
+
+ahkName="AutoHotkey"
+ahkLocation="/c/Program Files (x86)/AutoHotkey"
+ahkDownload="http://www.autohotkey.com/"
+
+nsisName="NSIS"
+nsisLocation="/c/Program Files (x86)/NSIS"
+nsisDownload="http://nsis.sourceforge.net/"
 
 libusb0Name="LibUSB-Win32"
 libusb0Location="/c/Program Files/LibUSB-Win32"
@@ -37,13 +46,8 @@ cythonName="Cython"
 cythonLocation=""
 cythonDownload="http://www.cython.org/"
 
-ahkName="AutoHotkey"
-ahkLocation="/c/Program Files (x86)/AutoHotkey"
-ahkDownload="http://www.autohotkey.com/"
-
-nsisName="NSIS"
-nsisLocation="/c/Program Files (x86)/NSIS"
-nsisDownload="http://nsis.sourceforge.net/"
+pthreadsName="mingw32-pthreads-w32"
+pthreadsFiles="/mingw/include/pthread.h"
 
 zipPackage="msys-zip"
 unix2dosPackage="msys-dos2unix"
@@ -91,6 +95,43 @@ verifyWindowsPackages() {
       shift 1
 
       verifyWindowsPackage "${package}" || result=1
+   done
+
+   return "${result}"
+}
+
+verifyMingwPackage() {
+   local package="${1}"
+
+   set -- $(getVariable "${package}Files")
+   while [ "${#}" -gt 0 ]
+   do
+      local file="${1}"
+      shift 1
+
+      [ -f "${file}" ] || {
+         local message="MinGW package not installed:"
+
+         local name="$(getVariable "${package}Name")"
+         [ -z "${name}" ] || message="${message} ${name}"
+
+         logMessage warning "${message}"
+         return 1
+      }
+   done
+
+   return 0
+}
+
+verifyMingwPackages() {
+   local result=0
+
+   while [ "${#}" -gt 0 ]
+   do
+      local package="${1}"
+      shift 1
+
+      verifyMingwPackage "${package}" || result=1
    done
 
    return "${result}"
@@ -206,6 +247,7 @@ sourceRoot="$(cd "${sourceRoot}" && pwd -W)"
 
 verifyWindowsPackages ${windowsPackages} || :
 verifyWindowsCommands ${windowsCommands} || :
+verifyMingwPackages ${mingwPackages} || :
 verifyMingwCommands ${mingwCommands} || :
 
 temporaryDirectory="${TMPDIR:-/tmp}/brltty-${programName}"
@@ -217,12 +259,20 @@ mkdir -p "${buildRoot}"
 cd "${buildRoot}"
 
 logMessage task "configuring build"
-configureOptions="--enable-relocatable-install --disable-i18n --without-params-package --without-mntpt-package --without-mntfs-package --without-libbraille --without-flite --without-mikropuhe --without-speechd --without-swift --without-theta --without-viavoice"
+configureOptions="--enable-relocatable-install --disable-i18n --with-usb-package=libusb --without-params-package --without-mntpt-package --without-mntfs-package --without-libbraille --without-espeak --without-flite --without-mikropuhe --without-speechd --without-swift --without-theta --without-viavoice"
 "${sourceRoot}/configure" --quiet --prefix=/ ${configureOptions}
 
 . ./config.sh
 buildVersion="${BRLTTY_VERSION}-${buildRevision}"
 buildName="${BRLTTY_TARNAME}-win-${buildVersion}"
+
+configureLines=""
+eval set -- $(stringWrapped "${configureOptions}" 70)
+for line
+do
+   [ -z "${configureLines}" ] || configureLines="${configureLines}"$'\n'
+   configureLines="${configureLines}    ${line}"
+done
 
 readmeHeader="\
 This is an unofficial build of ${BRLTTY_NAME} ${BRLTTY_VERSION} which also includes a few fixes
@@ -251,7 +301,8 @@ Technical notes on this build:
 
 - Version ${BRLTTY_VERSION} of BRLTTY was built.
 - Some MinGW-specific path and file name changes have been made.
-- The configure options were: ${configureOptions}
+- The configure options were:
+${configureLines}
 - To make life easier for Windows users, the BrlAPI server was modified to:
   * not use authentication by default (BRLAPI_DEFAUTH set to none)
   * only use local sockets (:0+127.0.0.1:0 changed to :0)
