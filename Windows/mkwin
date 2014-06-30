@@ -266,6 +266,21 @@ configureOptions="--enable-relocatable-install --disable-i18n --with-usb-package
 buildVersion="${BRLTTY_VERSION}-${buildRevision}"
 buildName="${BRLTTY_TARNAME}-win-${buildVersion}"
 
+logMessage task "building programs"
+make -s
+make -s -C Drivers/BrlAPI/WindowEyes we-dynamic-library-windows
+revisionIdentifier="$(sed -e 's/"//g' <"Programs/revision_identifier.h")"
+
+logMessage task "building documents"
+make -s -C Documents
+
+logMessage task "installing files"
+installRoot="${temporaryDirectory}/install/${buildName}"
+make -s install INSTALL_ROOT="${installRoot}" JAVA_JAR_DIR=/lib JAVA_JNI_DIR=/lib
+
+logMessage task "updating files"
+documentDirectory="doc"
+
 configureLines=""
 eval set -- $(stringWrapped "${configureOptions}" 70)
 for line
@@ -300,6 +315,7 @@ Documentation can be found in the doc/ subdirectory.
 Technical notes on this build:
 
 - Version ${BRLTTY_VERSION} of BRLTTY was built.
+- Its source repository revision is ${revisionIdentifier}.
 - Some MinGW-specific path and file name changes have been made.
 - The configure options were:
 ${configureLines}
@@ -315,29 +331,17 @@ ${configureLines}
   just ship bin/brlapi${BRLAPI_RELEASE%.*}.dll alongside your .exe application.
 "
 
-logMessage task "building programs"
-make -s
-make -s -C Drivers/BrlAPI/WindowEyes we-dynamic-library-windows
-
-logMessage task "building documents"
-make -s -C Documents
-
-logMessage task "installing files"
-installRoot="${temporaryDirectory}/install/${buildName}"
-make -s install INSTALL_ROOT="${installRoot}" JAVA_JAR_DIR=/lib JAVA_JNI_DIR=/lib
-
-logMessage task "updating files"
-documentDirectory="doc"
-
 cd "${buildRoot}"
 installFile "Documents/brltty.conf" "etc/brltty.conf"
-sed -e 's/"//g' <"Programs/revision_identifier.h" >"${installRoot}/REVISION.txt"
+installFile "Drivers/BrlAPI/WindowEyes/webrloem109.dll" "/"
+installFile "Bindings/Python/dist/Brlapi-${BRLAPI_RELEASE}.win32.exe" "/"
 
 cd "${sourceRoot}"
 installFile "LICENSE-GPL" "LICENSE-GPL.txt"
 installFile "LICENSE-LGPL" "LICENSE-LGPL.txt"
 installFile "README" "${documentDirectory}/BRLTTY.txt"
 installFile "Drivers/BrlAPI/WindowEyes/README" "${documentDirectory}/WindowEyes.txt"
+installFile Autostart/Windows/brltty.inf "bin/"
 
 for document in ChangeLog HISTORY TODO
 do
@@ -380,27 +384,26 @@ do
    installFile "${document}" "${documentDirectory}/Drivers/${document}.txt"
 done
 
-installFile "${programDirectory}/msvcr90.dll" "bin/"
-installFile ${sourceRoot}/Autostart/Windows/brltty.inf "bin/"
+cd "${programDirectory}"
+installFile "msvcr90.dll" "bin/"
 
-installFile "${libusb0Root}/bin/x86/libusb0.sys" "bin/libusb0.sys"
-installFile "${libusb0Root}/bin/x86/libusb0_x86.dll" "bin/libusb0.dll"
+cd "${libusb0Root}/bin"
+installFile "x86/libusb0.sys" "bin/libusb0.sys"
+installFile "x86/libusb0_x86.dll" "bin/libusb0.dll"
+installFile "amd64/libusb0.sys" "bin/libusb0_x64.sys"
+installFile "amd64/libusb0.dll" "bin/libusb0_x64.dll"
 
-installFile "${libusb0Root}/bin/amd64/libusb0.sys" "bin/libusb0_x64.sys"
-installFile "${libusb0Root}/bin/amd64/libusb0.dll" "bin/libusb0_x64.dll"
-
-for file in /mingw/bin/libgcc_s_dw2-1.dll /mingw/bin/libiconv-2.dll /mingw/bin/libpdcurses*.dll
+cd /mingw/bin
+for file in libgcc_s_dw2-1.dll libiconv-2.dll libpdcurses*.dll
 do
    installFile "${file}" "bin/"
 done
-
-installFile "${buildRoot}/Drivers/BrlAPI/WindowEyes/webrloem109.dll" "/"
-installFile "${buildRoot}/Bindings/Python/dist/Brlapi-${BRLAPI_RELEASE}.win32.exe" "/"
 
 cd "${installRoot}"
 rm -f "bin/brltty-config"
 rm -f "etc/brlapi.key"
 
+echo "${revisionIdentifier}" >"REVISION.txt"
 echo "not yet" >"bin/brltty.cat"
 echo "not yet" >"bin/brltty_x64.cat"
 
