@@ -578,7 +578,7 @@ cdef class Connection:
 		cdef unsigned int c_n
 		c_type = key_type
 		c_n = len(set)
-		c_set = <c_brlapi.brlapi_keyCode_t*>c_brlapi.malloc(c_n * sizeof(c_set[0]))
+		c_set = <c_brlapi.brlapi_keyCode_t*>c_brlapi.malloc(c_n * sizeof(c_brlapi.brlapi_keyCode_t))
 		for i from 0 <= i < c_n:
 			c_set[i] = set[i]
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
@@ -603,7 +603,7 @@ cdef class Connection:
 		cdef unsigned int c_n
 		c_type = key_type
 		c_n = len(set)
-		c_set = <c_brlapi.brlapi_keyCode_t*>c_brlapi.malloc(c_n * sizeof(c_set[0]))
+		c_set = <c_brlapi.brlapi_keyCode_t*>c_brlapi.malloc(c_n * sizeof(c_brlapi.brlapi_keyCode_t))
 		for i from 0 <= i < c_n:
 			c_set[i] = set[i]
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
@@ -656,7 +656,7 @@ cdef class Connection:
 		cdef c_brlapi.brlapi_range_t *c_keys
 		cdef unsigned int c_n
 		c_n = len(keys)
-		c_keys = <c_brlapi.brlapi_range_t*>c_brlapi.malloc(c_n * sizeof(c_keys[0]))
+		c_keys = <c_brlapi.brlapi_range_t*>c_brlapi.malloc(c_n * sizeof(c_brlapi.brlapi_range_t))
 		for i from 0 <= i < c_n:
 			c_keys[i].first = keys[i][0]
 			c_keys[i].last = keys[i][1]
@@ -680,7 +680,7 @@ cdef class Connection:
 		cdef c_brlapi.brlapi_range_t *c_keys
 		cdef unsigned int c_n
 		c_n = len(keys)
-		c_keys = <c_brlapi.brlapi_range_t*>c_brlapi.malloc(c_n * sizeof(c_keys[0]))
+		c_keys = <c_brlapi.brlapi_range_t*>c_brlapi.malloc(c_n * sizeof(c_brlapi.brlapi_range_t))
 		for i from 0 <= i < c_n:
 			c_keys[i].first = keys[i][0]
 			c_keys[i].last = keys[i][1]
