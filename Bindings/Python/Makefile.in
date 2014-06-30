@@ -28,9 +28,12 @@ PYTHON_LIBS = @PYTHON_LIBS@
 PYTHON_EXTRA_LIBS = @PYTHON_EXTRA_LIBS@
 PYTHON_EXTRA_LDFLAGS = @PYTHON_EXTRA_LDFLAGS@
 PYTHON_SITE_PKG = @PYTHON_SITE_PKG@
+
 CYTHON = @CYTHON@
 CYTHON_CFLAGS = @CYTHON_CFLAGS@
+
 PYTHON_DESTDIR = $(INSTALL_ROOT)
+PYTHON_PREFIX =
 
 PYTHON_MODULE = $(API_NAME)
 PYTHON_API = $(PYTHON_MODULE).$(LIB_EXT)
@@ -57,6 +60,7 @@ INSTALLED_FILES = installed-files
 install: all
 	set -- --quiet install --skip-build --record "$(INSTALLED_FILES)"; \
 	[ -z "$(PYTHON_DESTDIR)" ] || set -- "$${@}" --root "$(PYTHON_DESTDIR)"; \
+	[ -z "$(PYTHON_PREFIX)" ] || set -- "$${@}" --prefix "$(PYTHON_PREFIX)"; \
 	$(PYTHON) ./setup.py "$${@}"
 
 uninstall:

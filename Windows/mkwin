@@ -276,7 +276,10 @@ make -s -C Documents
 
 logMessage task "installing files"
 installRoot="${temporaryDirectory}/install/${buildName}"
-make -s install INSTALL_ROOT="${installRoot}" JAVA_JAR_DIR=/lib JAVA_JNI_DIR=/lib
+make -s install \
+   JAVA_JAR_DIR=/lib JAVA_JNI_DIR=/lib \
+   PYTHON_PREFIX="Python" \
+   INSTALL_ROOT="${installRoot}"
 
 logMessage task "updating files"
 documentDirectory="doc"
@@ -314,8 +317,9 @@ Documentation can be found in the doc/ subdirectory.
 ==============================
 Technical notes on this build:
 
-- Version ${BRLTTY_VERSION} of BRLTTY was built.
-- Its source repository revision is ${revisionIdentifier}.
+- Source Revision: ${revisionIdentifier}
+- BRLTTY Version: ${BRLTTY_VERSION}
+- BrlAPI Version: ${BRLAPI_RELEASE}
 - Some MinGW-specific path and file name changes have been made.
 - The configure options were:
 ${configureLines}
@@ -333,8 +337,8 @@ ${configureLines}
 
 cd "${buildRoot}"
 installFile "Documents/brltty.conf" "etc/brltty.conf"
-installFile "Drivers/BrlAPI/WindowEyes/webrloem109.dll" "/"
-installFile "Bindings/Python/dist/Brlapi-${BRLAPI_RELEASE}.win32.exe" "/"
+installFile "Drivers/BrlAPI/WindowEyes/webrloem109.dll" "WindowEyes/"
+installFile "Bindings/Python/dist/Brlapi-${BRLAPI_RELEASE}.win32.exe" "Python/"
 
 cd "${sourceRoot}"
 installFile "LICENSE-GPL" "LICENSE-GPL.txt"
@@ -502,6 +506,7 @@ then
       do
          handle="${path#.}"
          [ -n "${handle}" ] || continue
+         handle="${handle#/}"
 
          name="${path##*/}"
          extension="${name##*.}"
@@ -516,7 +521,7 @@ then
                      "${unix2dosPath}" -q -o "${path}"
                      ;;
 
-                  a | def | dll | doc | exe | exp | lib | pdf | sys);;
+                  a | def | dll | doc | egg-info | exe | exp | lib | pdf | pyd | sys);;
                   *) logMessage warning "unexpected file extension: ${handle}";;
                esac
             fi
