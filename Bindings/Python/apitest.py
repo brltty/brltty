@@ -3,8 +3,6 @@
 import sys
 import sysconfig
 import os
-import errno
-import Xlib.keysymdef.miscellany
 
 def getProgramPath ():
   return os.path.realpath(os.path.dirname(sys.argv[0]))
@@ -22,6 +20,8 @@ sys.path.insert(0, getBuildPath("lib"))
 
 if __name__ == "__main__":
   import brlapi
+  import errno
+  import Xlib.keysymdef.miscellany
 
   try:
     brl = brlapi.Connection()
