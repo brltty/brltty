@@ -543,7 +543,7 @@ formatLogSymbolData (char *buffer, size_t size, const void *data) {
 
   if (name && *name) {
     STR_PRINTF("%s", name);
-    if (offset) STR_PRINTF("+%#tX", offset);
+    if (offset) STR_PRINTF("+%"PRIXPTR, (intptr_t)offset);
   } else {
     STR_PRINTF("%p", symbol->address);
   }
