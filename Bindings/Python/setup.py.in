@@ -33,9 +33,11 @@ if __name__ == "__main__":
     setup(
         name = "Brlapi",
         version = "@api_release@",
-        description = "Python BrlAPI",
+        description = "BrlAPI Client Bindings for Python",
         author = "Alexis Robert",
         author_email = "alexissoft@free.fr",
-        license = "LGPL license",
+        maintainer = "The BRLTTY Developers",
+        maintainer_email = "@PACKAGE_BUGREPORT@",
+        license = "LGPL 2.1",
         url = "@PACKAGE_URL@",
         ext_modules = [brlapi],)
