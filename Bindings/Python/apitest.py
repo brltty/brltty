@@ -63,48 +63,27 @@ brlapiHandle = loadLibrary(getLibraryDirectory(), "brlapi")
 
 if __name__ == "__main__":
   import brlapi
+  import time
   import errno
-  import Xlib.keysymdef.miscellany
 
   try:
     brl = brlapi.Connection()
 
     try:
       brl.enterTtyMode()
-      brl.ignoreKeys(brlapi.rangeType_all, [0])
+      brl.writeText("The Python bindings for BrlAPI seem to be working.")
 
-      # Accept the home, window up, and window down braille commands
-      brl.acceptKeys(brlapi.rangeType_command, [
-        brlapi.KEY_TYPE_CMD | brlapi.KEY_CMD_HOME,
-        brlapi.KEY_TYPE_CMD | brlapi.KEY_CMD_WINUP,
-        brlapi.KEY_TYPE_CMD | brlapi.KEY_CMD_WINDN
-      ])
-
-      # Accept the tab key
-      brl.acceptKeys(brlapi.rangeType_key, [
-        brlapi.KEY_TYPE_SYM | Xlib.keysymdef.miscellany.XK_Tab
-      ])
-
-      brl.writeText("Press home, winup/dn or tab to continue ...")
       key = brl.readKey()
+      properties = brl.expandKeyCode(key)
+      brl.writeText("Key:%ld (Typ:%x Cmd:%x Arg:%x Flg:%x)" % (
+        key,
+        properties["type"],
+        properties["command"],
+        properties["argument"],
+        properties["flags"]
+      ))
 
-      k = brl.expandKeyCode(key)
-      brl.writeText("Key %ld (%x %x %x %x) !" % (key, k["type"], k["command"], k["argument"], k["flags"]))
-      brl.writeText(None, 1)
-      brl.readKey()
-
-      underline = chr(brlapi.DOT7 + brlapi.DOT8)
-      # Note: center() can take two arguments only starting from python 2.4
-      brl.write(
-        regionBegin = 1,
-        regionSize = 40,
-        text = "Press any key to exit                   ",
-        orMask = "".center(21,underline) + "".center(19,chr(0))
-      )
-
-      brl.acceptKeys(brlapi.rangeType_all, [0])
-      brl.readKey()
-
+      time.sleep(10)
       brl.leaveTtyMode()
     finally:
       del brl
