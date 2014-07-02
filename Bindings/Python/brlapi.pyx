@@ -295,7 +295,7 @@ cdef class Connection:
 		self.h = <c_brlapi.brlapi_handle_t*> c_brlapi.malloc(c_brlapi.brlapi_getHandleSize())
 
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		self.fd = c_brlapi.brlapi__openConnection(self.h, &client, &self.settings)
+		self.fd = <int>c_brlapi.brlapi__openConnection(self.h, &client, &self.settings)
 		c_brlapi.Py_END_ALLOW_THREADS
 		c_brlapi.brlapi_protocolExceptionInit(self.h)
 		if self.fd == -1:
