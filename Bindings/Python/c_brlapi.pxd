@@ -20,7 +20,7 @@
 # File binding C functions
 
 cdef extern from "sys/types.h":
-	ctypedef int size_t
+	ctypedef Py_ssize_t size_t
 
 cdef extern from "Programs/brlapi.h":
 	ctypedef struct brlapi_connectionSettings_t:
