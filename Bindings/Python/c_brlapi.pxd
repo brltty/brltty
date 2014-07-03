@@ -58,19 +58,19 @@ cdef extern from "Programs/brlapi.h":
 
 	size_t brlapi_getHandleSize()
 	void brlapi__closeConnection(brlapi_handle_t *)
-	int brlapi__openConnection(brlapi_handle_t *, brlapi_connectionSettings_t*, brlapi_connectionSettings_t*)
+	int brlapi__openConnection(brlapi_handle_t *, brlapi_connectionSettings_t*, brlapi_connectionSettings_t*) nogil
 
-	int brlapi__getDisplaySize(brlapi_handle_t *, unsigned int*, unsigned int *y)
-	int brlapi__getDriverName(brlapi_handle_t *, char*, int)
+	int brlapi__getDisplaySize(brlapi_handle_t *, unsigned int*, unsigned int *y) nogil
+	int brlapi__getDriverName(brlapi_handle_t *, char*, int) nogil
 
-	int brlapi__enterTtyMode(brlapi_handle_t *, int, char*)
-	int brlapi__enterTtyModeWithPath(brlapi_handle_t *, int *, int, char*)
-	int brlapi__leaveTtyMode(brlapi_handle_t *)
-	int brlapi__setFocus(brlapi_handle_t *, int)
+	int brlapi__enterTtyMode(brlapi_handle_t *, int, char*) nogil
+	int brlapi__enterTtyModeWithPath(brlapi_handle_t *, int *, int, char*) nogil
+	int brlapi__leaveTtyMode(brlapi_handle_t *) nogil
+	int brlapi__setFocus(brlapi_handle_t *, int) nogil
 
-	int brlapi__write(brlapi_handle_t *, brlapi_writeArguments_t*)
-	int brlapi__writeDots(brlapi_handle_t *, unsigned char*)
-	int brlapi__writeText(brlapi_handle_t *, int, char*)
+	int brlapi__write(brlapi_handle_t *, brlapi_writeArguments_t*) nogil
+	int brlapi__writeDots(brlapi_handle_t *, unsigned char*) nogil
+	int brlapi__writeText(brlapi_handle_t *, int, char*) nogil
 
 	ctypedef enum brlapi_rangeType_t:
 		brlapi_rangeType_all
@@ -79,17 +79,17 @@ cdef extern from "Programs/brlapi.h":
 		brlapi_keyCode_t first
 		brlapi_keyCode_t last
 
-	int brlapi__ignoreKeys(brlapi_handle_t *, brlapi_rangeType_t, brlapi_keyCode_t *, unsigned int)
-	int brlapi__acceptKeys(brlapi_handle_t *, brlapi_rangeType_t, brlapi_keyCode_t *, unsigned int)
-	int brlapi__ignoreAllKeys(brlapi_handle_t *)
-	int brlapi__acceptAllKeys(brlapi_handle_t *)
-	int brlapi__ignoreKeyRanges(brlapi_handle_t *, brlapi_range_t *, unsigned int)
-	int brlapi__acceptKeyRanges(brlapi_handle_t *, brlapi_range_t *, unsigned int)
-	int brlapi__readKey(brlapi_handle_t *, int, brlapi_keyCode_t*)
+	int brlapi__ignoreKeys(brlapi_handle_t *, brlapi_rangeType_t, brlapi_keyCode_t *, unsigned int) nogil
+	int brlapi__acceptKeys(brlapi_handle_t *, brlapi_rangeType_t, brlapi_keyCode_t *, unsigned int) nogil
+	int brlapi__ignoreAllKeys(brlapi_handle_t *) nogil
+	int brlapi__acceptAllKeys(brlapi_handle_t *) nogil
+	int brlapi__ignoreKeyRanges(brlapi_handle_t *, brlapi_range_t *, unsigned int) nogil
+	int brlapi__acceptKeyRanges(brlapi_handle_t *, brlapi_range_t *, unsigned int) nogil
+	int brlapi__readKey(brlapi_handle_t *, int, brlapi_keyCode_t*) nogil
 	int brlapi_expandKeyCode(brlapi_keyCode_t, brlapi_expandedKeyCode_t *)
 
-	int brlapi__enterRawMode(brlapi_handle_t *, char*)
-	int brlapi__leaveRawMode(brlapi_handle_t *)
+	int brlapi__enterRawMode(brlapi_handle_t *, char*) nogil
+	int brlapi__leaveRawMode(brlapi_handle_t *) nogil
 	int brlapi__recvRaw(brlapi_handle_t *, void*, int)
 	int brlapi__sendRaw(brlapi_handle_t *, void*, int)
 
@@ -115,7 +115,3 @@ cdef extern from "stdlib.h":
 cdef extern from "string.h":
 	void *memcpy(void *, void *, size_t)
 
-cdef extern from "Python.h":
-	# these are macros, we just need to make Cython aware of them
-	int Py_BEGIN_ALLOW_THREADS
-	int Py_END_ALLOW_THREADS

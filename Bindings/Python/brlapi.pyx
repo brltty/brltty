@@ -294,9 +294,8 @@ cdef class Connection:
 
 		self.h = <c_brlapi.brlapi_handle_t*> c_brlapi.malloc(c_brlapi.brlapi_getHandleSize())
 
-		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		self.fd = <int>c_brlapi.brlapi__openConnection(self.h, &client, &self.settings)
-		c_brlapi.Py_END_ALLOW_THREADS
+		with nogil:
+			self.fd = <int>c_brlapi.brlapi__openConnection(self.h, &client, &self.settings)
 		c_brlapi.brlapi_protocolExceptionInit(self.h)
 		if self.fd == -1:
 			c_brlapi.free(self.h)
@@ -329,9 +328,8 @@ cdef class Connection:
 			cdef unsigned int x
 			cdef unsigned int y
 			cdef int retval
-			c_brlapi.Py_BEGIN_ALLOW_THREADS
-			retval = c_brlapi.brlapi__getDisplaySize(self.h, &x, &y)
-			c_brlapi.Py_END_ALLOW_THREADS
+			with nogil:
+				retval = c_brlapi.brlapi__getDisplaySize(self.h, &x, &y)
 			if retval == -1:
 				raise OperationError()
 			else:
@@ -343,9 +341,8 @@ cdef class Connection:
 		def __get__(self):
 			cdef char name[21]
 			cdef int retval
-			c_brlapi.Py_BEGIN_ALLOW_THREADS
-			retval = c_brlapi.brlapi__getDriverName(self.h, name, sizeof(name))
-			c_brlapi.Py_END_ALLOW_THREADS
+			with nogil:
+				retval = c_brlapi.brlapi__getDriverName(self.h, name, sizeof(name))
 			if retval == -1:
 				raise OperationError()
 			else:
@@ -369,9 +366,8 @@ cdef class Connection:
 			if (type(driver) == unicode):
 				driver = driver.encode('ASCII')
 			c_driver = driver
-		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__enterTtyMode(self.h, c_tty, c_driver)
-		c_brlapi.Py_END_ALLOW_THREADS
+		with nogil:
+			retval = c_brlapi.brlapi__enterTtyMode(self.h, c_tty, c_driver)
 		if retval == -1:
 			raise OperationError()
 		else:
@@ -404,9 +400,8 @@ cdef class Connection:
 			if (type(driver) == unicode):
 				driver = driver.encode('ASCII')
 			c_driver = driver
-		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__enterTtyModeWithPath(self.h, c_ttys, c_nttys, c_driver)
-		c_brlapi.Py_END_ALLOW_THREADS
+		with nogil:
+			retval = c_brlapi.brlapi__enterTtyModeWithPath(self.h, c_ttys, c_nttys, c_driver)
 		if (c_ttys):
 			c_brlapi.free(c_ttys)
 		if retval == -1:
@@ -418,9 +413,8 @@ cdef class Connection:
 		"""Stop controlling the tty
 		See brlapi_leaveTtyMode(3)."""
 		cdef int retval
-		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__leaveTtyMode(self.h)
-		c_brlapi.Py_END_ALLOW_THREADS
+		with nogil:
+			retval = c_brlapi.brlapi__leaveTtyMode(self.h)
 		if retval == -1:
 			raise OperationError()
 		else:
@@ -433,9 +427,8 @@ cdef class Connection:
 		cdef int retval
 		cdef int c_tty
 		c_tty = tty
-		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__setFocus(self.h, c_tty)
-		c_brlapi.Py_END_ALLOW_THREADS
+		with nogil:
+			retval = c_brlapi.brlapi__setFocus(self.h, c_tty)
 		if retval == -1:
 			raise OperationError()
 		else:
@@ -477,9 +470,8 @@ cdef class Connection:
 			writeArguments.cursor = cursor
 		if charset:
 			writeArguments.charset = charset
-		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__write(self.h, &writeArguments.props)
-		c_brlapi.Py_END_ALLOW_THREADS
+		with nogil:
+			retval = c_brlapi.brlapi__write(self.h, &writeArguments.props)
 		if retval == -1:
 			raise OperationError()
 		else:
@@ -500,9 +492,8 @@ cdef class Connection:
 			dots = dots + b"".center(dispSize - len(dots), '\0')
 		c_dots = dots
 		c_udots = <unsigned char *>c_dots
-		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__writeDots(self.h, c_udots)
-		c_brlapi.Py_END_ALLOW_THREADS
+		with nogil:
+			retval = c_brlapi.brlapi__writeDots(self.h, c_udots)
 		if retval == -1:
 			raise OperationError()
 		else:
@@ -544,9 +535,8 @@ cdef class Connection:
 		cdef int retval
 		cdef int c_wait
 		c_wait = wait
-		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__readKey(self.h, c_wait, <c_brlapi.brlapi_keyCode_t*>&code)
-		c_brlapi.Py_END_ALLOW_THREADS
+		with nogil:
+			retval = c_brlapi.brlapi__readKey(self.h, c_wait, <c_brlapi.brlapi_keyCode_t*>&code)
 		if retval == -1:
 			raise OperationError()
 		elif retval <= 0 and wait == False:
@@ -581,9 +571,8 @@ cdef class Connection:
 		c_set = <c_brlapi.brlapi_keyCode_t*>c_brlapi.malloc(c_n * sizeof(c_brlapi.brlapi_keyCode_t))
 		for i from 0 <= i < c_n:
 			c_set[i] = set[i]
-		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__ignoreKeys(self.h, c_type, c_set, c_n)
-		c_brlapi.Py_END_ALLOW_THREADS
+		with nogil:
+			retval = c_brlapi.brlapi__ignoreKeys(self.h, c_type, c_set, c_n)
 		c_brlapi.free(c_set)
 		if retval == -1:
 			raise OperationError()
@@ -606,9 +595,8 @@ cdef class Connection:
 		c_set = <c_brlapi.brlapi_keyCode_t*>c_brlapi.malloc(c_n * sizeof(c_brlapi.brlapi_keyCode_t))
 		for i from 0 <= i < c_n:
 			c_set[i] = set[i]
-		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__acceptKeys(self.h, c_type, c_set, c_n)
-		c_brlapi.Py_END_ALLOW_THREADS
+		with nogil:
+			retval = c_brlapi.brlapi__acceptKeys(self.h, c_type, c_set, c_n)
 		c_brlapi.free(c_set)
 		if retval == -1:
 			raise OperationError()
@@ -621,9 +609,8 @@ cdef class Connection:
 		
 		This function asks the server to give all keys to brltty, rather than returning them to the application via brlapi_readKey()."""
 		cdef int retval
-		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__ignoreAllKeys(self.h)
-		c_brlapi.Py_END_ALLOW_THREADS
+		with nogil:
+			retval = c_brlapi.brlapi__ignoreAllKeys(self.h)
 		if retval == -1:
 			raise OperationError()
 		else:
@@ -637,9 +624,8 @@ cdef class Connection:
 
 		Warning: after calling this function, make sure to call brlapi_ignoreKeys() for ignoring important keys like BRL_CMD_SWITCHVT_PREV/NEXT and such."""
 		cdef int retval
-		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__acceptAllKeys(self.h)
-		c_brlapi.Py_END_ALLOW_THREADS
+		with nogil:
+			retval = c_brlapi.brlapi__acceptAllKeys(self.h)
 		if retval == -1:
 			raise OperationError()
 		else:
@@ -660,9 +646,8 @@ cdef class Connection:
 		for i from 0 <= i < c_n:
 			c_keys[i].first = keys[i][0]
 			c_keys[i].last = keys[i][1]
-		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__ignoreKeyRanges(self.h, c_keys, c_n)
-		c_brlapi.Py_END_ALLOW_THREADS
+		with nogil:
+			retval = c_brlapi.brlapi__ignoreKeyRanges(self.h, c_keys, c_n)
 		c_brlapi.free(c_keys)
 		if retval == -1:
 			raise OperationError()
@@ -684,9 +669,8 @@ cdef class Connection:
 		for i from 0 <= i < c_n:
 			c_keys[i].first = keys[i][0]
 			c_keys[i].last = keys[i][1]
-		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__acceptKeyRanges(self.h, c_keys, c_n)
-		c_brlapi.Py_END_ALLOW_THREADS
+		with nogil:
+			retval = c_brlapi.brlapi__acceptKeyRanges(self.h, c_keys, c_n)
 		c_brlapi.free(c_keys)
 		if retval == -1:
 			raise OperationError()
@@ -703,9 +687,8 @@ cdef class Connection:
 		if (type(driver) == unicode):
 			driver = driver.encode('ASCII')
 		c_driver = driver
-		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__enterRawMode(self.h, c_driver)
-		c_brlapi.Py_END_ALLOW_THREADS
+		with nogil:
+			retval = c_brlapi.brlapi__enterRawMode(self.h, c_driver)
 		if retval == -1:
 			raise OperationError()
 		else:
@@ -715,9 +698,8 @@ cdef class Connection:
 		"""leave Raw mode
 		See brlapi_leaveRawMode(3)."""
 		cdef int retval
-		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__leaveRawMode(self.h)
-		c_brlapi.Py_END_ALLOW_THREADS
+		with nogil:
+			retval = c_brlapi.brlapi__leaveRawMode(self.h)
 		if retval == -1:
 			raise OperationError()
 		else:
