@@ -23,7 +23,7 @@ export MAKEFLAGS=
 
 windowsPackages="ahk nsis libusb0"
 windowsCommands="lib python cython"
-mingwPackages="pthreads"
+mingwPackages="pthreads curses"
 mingwCommands="zip unix2dos linuxdoc doxygen groff"
 
 ahkName="AutoHotkey"
@@ -37,6 +37,7 @@ nsisDownload="http://nsis.sourceforge.net/"
 libusb0Name="LibUSB-Win32"
 libusb0Location="/c/Program Files/LibUSB-Win32"
 libusb0Download="http://libusb-win32.sourceforge.net/"
+libusb0Version="1.2.6.0"
 
 pythonName="Python"
 pythonLocation=""
@@ -48,6 +49,9 @@ cythonDownload="http://www.cython.org/"
 
 pthreadsName="mingw32-pthreads-w32"
 pthreadsFiles="/mingw/include/pthread.h"
+
+cursesName="mingw32-pdcurses"
+cursesFiles="/mingw/include/curses.h"
 
 zipPackage="msys-zip"
 unix2dosPackage="msys-dos2unix"
@@ -238,6 +242,8 @@ addProgramParameter source sourceRoot "top-level directory of source tree"
 addProgramParameter revision buildRevision "revision of the build"
 parseProgramArguments "${@}"
 
+usbPackage="libusb"
+
 sourceRoot="$(cd "${sourceRoot}" && pwd -W)"
 [ -f "${sourceRoot}/configure" ] || semanticError "not a source tree: ${sourceRoot}"
 
@@ -259,7 +265,7 @@ mkdir -p "${buildRoot}"
 cd "${buildRoot}"
 
 logMessage task "configuring build"
-configureOptions="--enable-relocatable-install --disable-i18n --with-usb-package=libusb --without-params-package --without-mntpt-package --without-mntfs-package --without-libbraille --without-espeak --without-flite --without-mikropuhe --without-speechd --without-swift --without-theta --without-viavoice"
+configureOptions="--enable-relocatable-install --disable-i18n --with-usb-package="${usbPackage}" --without-params-package --without-mntpt-package --without-mntfs-package --without-libbraille --without-espeak --without-flite --without-mikropuhe --without-speechd --without-swift --without-theta --without-viavoice"
 "${sourceRoot}/configure" --quiet --prefix=/ ${configureOptions}
 
 . ./config.sh
@@ -326,9 +332,8 @@ ${configureLines}
 - To make life easier for Windows users, the BrlAPI server was modified to:
   * not use authentication by default (BRLAPI_DEFAUTH set to none)
   * only use local sockets (:0+127.0.0.1:0 changed to :0)
-- *usb0* comes from libusb-win32 1.2.1.0, which is available at:
-  http://libusb-win32.sourceforge.net/
-- braille.dll comes from: http://libbraille.sourceforge.net/
+- *usb0* comes from ${libusb0Name} ${libusb0Version}, which is available at:
+  ${libusb0Download}
 - Python bindings are provided by: Brlapi-${BRLAPI_RELEASE}.win32.exe
 - C bindings are provided in: include/, and lib/
   A .lib file is provided for linking in (for example) Visual C. Then you can
@@ -345,7 +350,7 @@ installFile "LICENSE-GPL" "LICENSE-GPL.txt"
 installFile "LICENSE-LGPL" "LICENSE-LGPL.txt"
 installFile "README" "${documentDirectory}/BRLTTY.txt"
 installFile "Drivers/BrlAPI/WindowEyes/README" "${documentDirectory}/WindowEyes.txt"
-installFile Autostart/Windows/brltty.inf "bin/"
+installFile "Autostart/Windows/brltty-${usbPackage}.inf" "bin/"
 
 for document in ChangeLog HISTORY TODO
 do
@@ -435,9 +440,9 @@ ${readmeHeader}
     filter.
   * If you either cannot, or prefer not to, install your manufacturer's driver,
     then you can select "USB:" here and install libusb-win32's driver.
-- The libusb-win32 filter is available at: http://libusb-win32.sourceforge.net/
-- To install the libusb-win32 driver, right-click on bin/brltty.inf and select
-  install.
+- The ${libusb0Name} filter is available at: ${libusb0Download}
+- To install the ${libusb0Name} driver, right-click on bin/brltty-libusb.inf
+  and select install.
 - If your braille device uses a serial connection, or if it is connected via a
   serial to USB converter, just select the proper COM port. Make sure to select
   the proper braille display as well, because serial autodetection may brick
@@ -477,7 +482,8 @@ fi
 
 # for the installer but before text file conversion
 cd "${installRoot}/.."
-cp "${programDirectory}/brltty.nsi" .
+nsisScript="${usbPackage}.nsi"
+cp "${programDirectory}/${usbPackage}.nsi" .
 cp "${programDirectory}/nsistrings.txt" .
 
 cat >"README.txt" <<END-OF-README
@@ -563,7 +569,7 @@ then
       -DVERSION="${buildVersion}" \
       -DDISTDIR="${buildName}" \
       -DOUTFILE="${installerFile}" \
-      brltty.nsi
+      "${nsisScript}"
 
    rm -f "${initialDirectory}/${installerFile}"
    cp "${installerFile}" "${initialDirectory}/${installerFile}"

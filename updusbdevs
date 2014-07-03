@@ -641,7 +641,7 @@ if {[llength $argv] == 0} {
    lappend argv "android:[file join $sourceDirectory Android Application res xml usb_devices.xml]"
    lappend argv "hotplug:[file join $sourceDirectory Autostart Hotplug brltty.usermap]"
    lappend argv "udev:[file join $sourceDirectory Autostart Udev udev.rules]"
-   lappend argv "windows:[file join $sourceDirectory Autostart Windows brltty.inf]"
+   lappend argv "windows:[file join $sourceDirectory Autostart Windows brltty-libusb.inf]"
    lappend argv "windows:[file join $sourceDirectory Autostart Windows brltty-libusb-1.0.inf]"
 }
 
