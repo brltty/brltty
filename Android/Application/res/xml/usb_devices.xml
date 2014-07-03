@@ -13,6 +13,14 @@
   <!-- HandyTech [FTDI chip] -->
   <usb-device vendor-id="1027" product-id="24577" />
 
+  <!-- Device: 0403:DE58 -->
+  <!-- Hedo [MobilLine] -->
+  <usb-device vendor-id="1027" product-id="56920" />
+
+  <!-- Device: 0403:DE59 -->
+  <!-- Hedo [ProfiLine] -->
+  <usb-device vendor-id="1027" product-id="56921" />
+
   <!-- Device: 0403:F208 -->
   <!-- Papenmeier [all models] -->
   <usb-device vendor-id="1027" product-id="61960" />
@@ -165,6 +173,10 @@
   <!-- Product: CP210x UART Bridge -->
   <!-- Seika [Note Taker] -->
   <usb-device vendor-id="4292" product-id="60032" />
+
+  <!-- Device: 1C71:C004 -->
+  <!-- BrailleNote [HumanWare APEX] -->
+  <usb-device vendor-id="7281" product-id="49156" />
 
   <!-- Device: 1C71:C005 -->
   <!-- HumanWare [all models] -->

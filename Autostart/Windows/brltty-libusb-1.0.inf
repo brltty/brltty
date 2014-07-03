@@ -48,6 +48,12 @@ HKR,,Icon,,-20
 ; Product: FT232 USB-Serial (UART) IC
 "LibUSB-1.0: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip]"=LIBUSB_DEV, USB\VID_0403&PID_6001
 
+; Device: 0403:DE58
+"LibUSB-1.0: Hedo [MobilLine]"=LIBUSB_DEV, USB\VID_0403&PID_DE58
+
+; Device: 0403:DE59
+"LibUSB-1.0: Hedo [ProfiLine]"=LIBUSB_DEV, USB\VID_0403&PID_DE59
+
 ; Device: 0403:F208
 "LibUSB-1.0: Papenmeier [all models]"=LIBUSB_DEV, USB\VID_0403&PID_F208
 
@@ -161,6 +167,9 @@ HKR,,Icon,,-20
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge
 "LibUSB-1.0: Seika [Note Taker]"=LIBUSB_DEV, USB\VID_10C4&PID_EA80
+
+; Device: 1C71:C004
+"LibUSB-1.0: BrailleNote [HumanWare APEX]"=LIBUSB_DEV, USB\VID_1C71&PID_C004
 
 ; Device: 1C71:C005
 "LibUSB-1.0: HumanWare [all models]"=LIBUSB_DEV, USB\VID_1C71&PID_C005
@@ -266,6 +275,12 @@ HKR,,Icon,,-20
 ; Product: FT232 USB-Serial (UART) IC
 "LibUSB-1.0: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip]"=LIBUSB_DEV, USB\VID_0403&PID_6001
 
+; Device: 0403:DE58
+"LibUSB-1.0: Hedo [MobilLine]"=LIBUSB_DEV, USB\VID_0403&PID_DE58
+
+; Device: 0403:DE59
+"LibUSB-1.0: Hedo [ProfiLine]"=LIBUSB_DEV, USB\VID_0403&PID_DE59
+
 ; Device: 0403:F208
 "LibUSB-1.0: Papenmeier [all models]"=LIBUSB_DEV, USB\VID_0403&PID_F208
 
@@ -379,6 +394,9 @@ HKR,,Icon,,-20
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge
 "LibUSB-1.0: Seika [Note Taker]"=LIBUSB_DEV, USB\VID_10C4&PID_EA80
+
+; Device: 1C71:C004
+"LibUSB-1.0: BrailleNote [HumanWare APEX]"=LIBUSB_DEV, USB\VID_1C71&PID_C004
 
 ; Device: 1C71:C005
 "LibUSB-1.0: HumanWare [all models]"=LIBUSB_DEV, USB\VID_1C71&PID_C005

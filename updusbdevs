@@ -173,7 +173,7 @@ proc parseSourceFile {channelsVariable file} {
             } else {
                lappend definitions $lineText
             }
-         } elseif {[regexp {\sconst\s+UsbChannelDefinition\s} $lineText]} {
+         } elseif {[regexp {\sconst\s+UsbChannelDefinition\s+usbChannelDefinitions\s*\[\s*\]} $lineText]} {
             set definitions [list]
             dict set location line [expr {$lineNumber + 1}]
          }

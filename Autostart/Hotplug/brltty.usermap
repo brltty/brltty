@@ -28,6 +28,14 @@
 # HandyTech [FTDI chip]
 brltty-at,ce,hm,ht 0x0003 0x0403 0x6001
 
+# Device: 0403:DE58
+# Hedo [MobilLine]
+brltty-hd 0x0003 0x0403 0xde58
+
+# Device: 0403:DE59
+# Hedo [ProfiLine]
+brltty-hd 0x0003 0x0403 0xde59
+
 # Device: 0403:F208
 # Papenmeier [all models]
 brltty-pm 0x0003 0x0403 0xf208
@@ -180,6 +188,10 @@ brltty-mm,sk 0x0003 0x10c4 0xea60
 # Product: CP210x UART Bridge
 # Seika [Note Taker]
 brltty-sk 0x0003 0x10c4 0xea80
+
+# Device: 1C71:C004
+# BrailleNote [HumanWare APEX]
+brltty-bn 0x0003 0x1c71 0xc004
 
 # Device: 1C71:C005
 # HumanWare [all models]

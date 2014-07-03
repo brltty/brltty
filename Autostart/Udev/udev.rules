@@ -36,6 +36,14 @@ LABEL="brltty_usb_begin"
 # HandyTech [FTDI chip]
 ENV{PRODUCT}=="403/6001/*", ENV{BRLTTY_BRAILLE_DRIVER}="at,ce,hm,ht", GOTO="brltty_usb_run"
 
+# Device: 0403:DE58
+# Hedo [MobilLine]
+ENV{PRODUCT}=="403/de58/*", ENV{BRLTTY_BRAILLE_DRIVER}="hd", GOTO="brltty_usb_run"
+
+# Device: 0403:DE59
+# Hedo [ProfiLine]
+ENV{PRODUCT}=="403/de59/*", ENV{BRLTTY_BRAILLE_DRIVER}="hd", GOTO="brltty_usb_run"
+
 # Device: 0403:F208
 # Papenmeier [all models]
 ENV{PRODUCT}=="403/f208/*", ENV{BRLTTY_BRAILLE_DRIVER}="pm", GOTO="brltty_usb_run"
@@ -188,6 +196,10 @@ ENV{PRODUCT}=="10c4/ea60/*", ENV{BRLTTY_BRAILLE_DRIVER}="mm,sk", GOTO="brltty_us
 # Product: CP210x UART Bridge
 # Seika [Note Taker]
 ENV{PRODUCT}=="10c4/ea80/*", ENV{BRLTTY_BRAILLE_DRIVER}="sk", GOTO="brltty_usb_run"
+
+# Device: 1C71:C004
+# BrailleNote [HumanWare APEX]
+ENV{PRODUCT}=="1c71/c004/*", ENV{BRLTTY_BRAILLE_DRIVER}="bn", GOTO="brltty_usb_run"
 
 # Device: 1C71:C005
 # HumanWare [all models]
