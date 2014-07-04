@@ -42,3 +42,5 @@ reldeps.mk
 *.xz
 
 /lib/
+
+/Programs/brltty-config
