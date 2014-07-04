@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash -p
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -38,6 +38,11 @@ libusb0Name="LibUSB-Win32"
 libusb0Location="/c/Program Files/LibUSB-Win32"
 libusb0Download="http://libusb-win32.sourceforge.net/"
 libusb0Version="1.2.6.0"
+
+libusb1Name="LibUSB-1.0"
+libusb1Location="/c/Program Files/WinUSB"
+libusb1Download="http://www.libusb.org/wiki/windows_backend"
+libusb1Version=""
 
 pythonName="Python"
 pythonLocation=""
@@ -231,12 +236,39 @@ installFile() {
    fi
 }
 
+installPackage_libusb() {
+   if [ -n "${libusb0Root}" ]
+   then
+      cd "${libusb0Root}/bin"
+      installFile "x86/libusb0.sys" "bin/libusb0.sys"
+      installFile "x86/libusb0_x86.dll" "bin/libusb0.dll"
+      installFile "amd64/libusb0.sys" "bin/libusb0_x64.sys"
+      installFile "amd64/libusb0.dll" "bin/libusb0_x64.dll"
+   else
+      logMessage warning "${libusb0Name} not installable"
+   fi
+}
+
+installPackage_libusb-1.0() {
+   if [ -n "${libusb1Root}" ]
+   then
+      cd "${libusb1Root}/bin"
+      installFile "x86/winusbcoinstaller2.dll" "bin/x86/"
+      installFile "amd64/winusbcoinstaller2.dll" "bin/amd64/"
+      installFile "x86/WdfCoInstaller01009.dll" "bin/x86/"
+      installFile "amd64/WdfCoInstaller01009.dll" "bin/amd64/"
+   else
+      logMessage warning "${libusb1Name} not installable"
+   fi
+}
+
 . "`dirname "${0}"`/../prologue.sh"
-[ "${MSYSTEM}" = "MINGW32" ] || semanticError "this script is for MinGW32 only"
+. "${programDirectory}/mingw.sh"
 addProgramOption s flag invokeShell "invoke interactive shell to inspect/modify result"
 addWindowsPackageOption A ahk
 addWindowsPackageOption N nsis
-addWindowsPackageOption U libusb0
+addWindowsPackageOption W libusb0
+addWindowsPackageOption U libusb1
 addWindowsPackageOption P python
 addProgramParameter source sourceRoot "top-level directory of source tree"
 addProgramParameter revision buildRevision "revision of the build"
@@ -270,7 +302,7 @@ configureOptions="--enable-relocatable-install --disable-i18n --with-usb-package
 
 . ./config.sh
 buildVersion="${BRLTTY_VERSION}-${buildRevision}"
-buildName="${BRLTTY_TARNAME}-win-${buildVersion}"
+buildName="${BRLTTY_TARNAME}-win-${buildVersion}-${usbPackage}"
 
 logMessage task "building programs"
 make -s
@@ -396,11 +428,7 @@ done
 cd "${programDirectory}"
 installFile "msvcr90.dll" "bin/"
 
-cd "${libusb0Root}/bin"
-installFile "x86/libusb0.sys" "bin/libusb0.sys"
-installFile "x86/libusb0_x86.dll" "bin/libusb0.dll"
-installFile "amd64/libusb0.sys" "bin/libusb0_x64.sys"
-installFile "amd64/libusb0.dll" "bin/libusb0_x64.dll"
+"installPackage_${usbPackage}"
 
 cd /mingw/bin
 for file in libgcc_s_dw2-1.dll libiconv-2.dll libpdcurses*.dll
