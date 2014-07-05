@@ -21,7 +21,7 @@ set -e
 umask 022
 export MAKEFLAGS=
 
-windowsPackages="ahk nsis libusb0"
+windowsPackages="ahk nsis"
 windowsCommands="lib python cython"
 mingwPackages="pthreads curses"
 mingwCommands="zip unix2dos linuxdoc doxygen groff"
@@ -36,16 +36,21 @@ nsisDownload="http://nsis.sourceforge.net/"
 
 libusb0Name="LibUSB-Win32"
 libusb0Location="/c/Program Files/LibUSB-Win32"
+libusb0Files="bin/libusb-win32-bin-README.txt"
 libusb0Download="http://libusb-win32.sourceforge.net/"
 libusb0Version="1.2.6.0"
+libusb0Pattern="usb0"
 
 libusb1Name="LibUSB-1.0"
 libusb1Location="/c/Program Files/WinUSB"
+libusb1Files="libusb_device.inf"
 libusb1Download="http://www.libusb.org/wiki/windows_backend"
 libusb1Version=""
+libusb1Pattern="usb-1.0"
 
 pythonName="Python"
 pythonLocation=""
+pythonFiles="Lib/site-packages Scripts"
 pythonDownload="http://www.python.org/"
 
 cythonName="Cython"
@@ -53,14 +58,58 @@ cythonLocation=""
 cythonDownload="http://www.cython.org/"
 
 pthreadsName="mingw32-pthreads-w32"
-pthreadsFiles="/mingw/include/pthread.h"
+pthreadsLocation="/"
+pthreadsFiles="mingw/include/pthread.h"
 
 cursesName="mingw32-pdcurses"
-cursesFiles="/mingw/include/curses.h"
+cursesLocation="/"
+cursesFiles="mingw/include/curses.h"
 
 zipPackage="msys-zip"
 unix2dosPackage="msys-dos2unix"
 groffPackage="msys-groff"
+
+defaultUsbPackage="libusb"
+
+verifyPackage() {
+   local package="${1}"
+   shift 1
+
+   local root="$(getVariable "${package}Root")"
+   [ -n "${root}" ] || root="$(getVariable "${package}Location")"
+
+   if [ -z "${root}" ]
+   then
+      logMessage warning "package location not defined: ${package}"
+      root=""
+   elif [ ! -e "${root}" ]
+   then
+      logMessage warning "directory not found: ${root}"
+      root=""
+   elif [ ! -d "${root}" ]
+   then
+      logMessage warning "not a directory: ${root}"
+      root=""
+   else
+      set -- $(getVariable "${package}Files")
+      local prefix="${root%/}"
+      local file
+
+      for file
+      do
+         local path="${prefix}/${file}"
+
+         [ -e "${path}" ] || {
+            logMessage warning "file not found: ${path}"
+            root=""
+         }
+      done
+   fi
+
+   setVariable "${package}Root" "${root}"
+   [ -n "${root}" ] || return 1
+   return 0
+}
 
 addWindowsPackageOption() {
    local letter="${1}"
@@ -74,24 +123,19 @@ addWindowsPackageOption() {
 verifyWindowsPackage() {
    local package="${1}"
 
-   local root="$(getVariable "${package}Root")"
-   [ -n "${root}" ] || root="$(getVariable "${package}Location")"
+   verifyPackage "${package}" || {
+      local message="Windows package not installed:"
 
-   [ -d "${root}" ] || {
-     local message="package not installed:"
+      local name="$(getVariable "${package}Name")"
+      [ -z "${name}" ] || message="${message} ${name}"
 
-     local name="$(getVariable "${package}Name")"
-     [ -z "${name}" ] || message="${message} ${name}"
+      local download="$(getVariable "${package}Download")"
+      [ -z "${download}" ] || message="${message} (download from ${download})"
 
-     local download="$(getVariable "${package}Download")"
-     [ -z "${download}" ] || message="${message} (download from ${download})"
-
-     logMessage warning "${message}"
-     root=""
+      logMessage warning "${message}"
+      return 1
    }
 
-   setVariable "${package}Root" "${root}"
-   [ -n "${root}" ] || return 1
    return 0
 }
 
@@ -112,22 +156,15 @@ verifyWindowsPackages() {
 verifyMingwPackage() {
    local package="${1}"
 
-   set -- $(getVariable "${package}Files")
-   while [ "${#}" -gt 0 ]
-   do
-      local file="${1}"
-      shift 1
+   verifyPackage "${package}" || {
+      local message="MinGW package not installed:"
 
-      [ -f "${file}" ] || {
-         local message="MinGW package not installed:"
+      local name="$(getVariable "${package}Name")"
+      [ -z "${name}" ] || message="${message} ${name}"
 
-         local name="$(getVariable "${package}Name")"
-         [ -z "${name}" ] || message="${message} ${name}"
-
-         logMessage warning "${message}"
-         return 1
-      }
-   done
+      logMessage warning "${message}"
+      return 1
+   }
 
    return 0
 }
@@ -220,6 +257,17 @@ verifyMingwCommands() {
    return "${result}"
 }
 
+copyProperties() {
+   local from="${1}"
+   local to="${2}"
+   shift 2
+
+   for suffix in ${*}
+   do
+      setVariable "${to}${suffix}" "$(getVariable "${from}${suffix}")"
+   done
+}
+
 installFile() {
    local source="${1}"
    local target="${2}"
@@ -252,7 +300,7 @@ installPackage_libusb() {
 installPackage_libusb-1.0() {
    if [ -n "${libusb1Root}" ]
    then
-      cd "${libusb1Root}/bin"
+      cd "${libusb1Root}"
       installFile "x86/winusbcoinstaller2.dll" "bin/x86/"
       installFile "amd64/winusbcoinstaller2.dll" "bin/amd64/"
       installFile "x86/WdfCoInstaller01009.dll" "bin/x86/"
@@ -267,6 +315,7 @@ installPackage_libusb-1.0() {
 addProgramOption s flag invokeShell "invoke interactive shell to inspect/modify result"
 addWindowsPackageOption A ahk
 addWindowsPackageOption N nsis
+addProgramOption u string.package usbPackage "which USB package to use" "${defaultUsbPackage}"
 addWindowsPackageOption W libusb0
 addWindowsPackageOption U libusb1
 addWindowsPackageOption P python
@@ -274,7 +323,17 @@ addProgramParameter source sourceRoot "top-level directory of source tree"
 addProgramParameter revision buildRevision "revision of the build"
 parseProgramArguments "${@}"
 
-usbPackage="libusb"
+[ -n "${usbPackage}" ] || usbPackage="${defaultUsbPackage}"
+
+case "${usbPackage}"
+in
+   libusb) usbWindowsPackages=libusb0;;
+   libusb-1.0) usbWindowsPackages=libusb1;;
+   *) syntaxError "unrecognized USB package: ${usbPackage}"
+esac
+
+set -- ${usbWindowsPackages}
+copyProperties "${1}" usb Name Location Download Version Pattern
 
 sourceRoot="$(cd "${sourceRoot}" && pwd -W)"
 [ -f "${sourceRoot}/configure" ] || semanticError "not a source tree: ${sourceRoot}"
@@ -283,7 +342,7 @@ sourceRoot="$(cd "${sourceRoot}" && pwd -W)"
    export PATH="${pythonRoot}:${pythonRoot}/Scripts:${PATH}"
 }
 
-verifyWindowsPackages ${windowsPackages} || :
+verifyWindowsPackages ${windowsPackages} "${usbWindowsPackages}" || :
 verifyWindowsCommands ${windowsCommands} || :
 verifyMingwPackages ${mingwPackages} || :
 verifyMingwCommands ${mingwCommands} || :
@@ -364,8 +423,8 @@ ${configureLines}
 - To make life easier for Windows users, the BrlAPI server was modified to:
   * not use authentication by default (BRLAPI_DEFAUTH set to none)
   * only use local sockets (:0+127.0.0.1:0 changed to :0)
-- *usb0* comes from ${libusb0Name} ${libusb0Version}, which is available at:
-  ${libusb0Download}
+- *${usbPattern}* files come from ${usbName} ${usbVersion}, which is available at:
+  ${usbDownload}
 - Python bindings are provided by: Brlapi-${BRLAPI_RELEASE}.win32.exe
 - C bindings are provided in: include/, and lib/
   A .lib file is provided for linking in (for example) Visual C. Then you can
@@ -467,9 +526,8 @@ ${readmeHeader}
     COM port if it provides one, otherwise select "USB:" to use libusb-win32's
     filter.
   * If you either cannot, or prefer not to, install your manufacturer's driver,
-    then you can select "USB:" here and install libusb-win32's driver.
-- The ${libusb0Name} filter is available at: ${libusb0Download}
-- To install the ${libusb0Name} driver, right-click on bin/brltty-libusb.inf
+    then you can select "USB:" here and install ${usbName}'s driver.
+- To install the ${usbName} driver, right-click on bin/brltty-${usbPackage}.inf
   and select install.
 - If your braille device uses a serial connection, or if it is connected via a
   serial to USB converter, just select the proper COM port. Make sure to select
