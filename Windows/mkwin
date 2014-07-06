@@ -50,7 +50,15 @@ installFile() {
    fi
 }
 
-installPackage_libusb() {
+installFiles() {
+   while [ "${#}" -gt 0 ]
+   do
+      "installFiles_${1}"
+      shift 1
+   done
+}
+
+installFiles_libusb0() {
    if [ -n "${libusb0Root}" ]
    then
       cd "${libusb0Root}/bin"
@@ -63,7 +71,7 @@ installPackage_libusb() {
    fi
 }
 
-installPackage_libusb-1.0() {
+installFiles_libusb1() {
    if [ -n "${libusb1Root}" ]
    then
       cd "${libusb1Root}"
@@ -71,11 +79,9 @@ installPackage_libusb-1.0() {
    else
       logMessage warning "${libusb1Name} not installable"
    fi
-
-   installPackage_winusb
 }
 
-installPackage_winusb() {
+installFiles_winusb() {
    if [ -n "${winusbRoot}" ]
    then
       cd "${winusbRoot}"
@@ -111,8 +117,18 @@ in
    *) syntaxError "unrecognized USB package: ${usbPackage}"
 esac
 
+libusb0Filter="\
+    select "USB:", and install ${libusb0Name}'s filter by doing one of the
+    following:
+    + run Install ${libusb0Name} Filter from the Start Menu
+    + answer yes to the setup prompt for installing the ${libusb0Name} filter"
+
+libusb1Filter="\
+    you will need to use ${libusb0Name} instead because
+    ${libusb1Name} does not support this requirement."
+
 set -- ${usbWindowsPackages}
-copyProperties "${1}" usb Name Location Download Version Pattern
+copyProperties "${1}" usb Name Location Download Version Pattern Filter
 
 sourceRoot="$(cd "${sourceRoot}" && pwd -W)"
 [ -f "${sourceRoot}/configure" ] || semanticError "not a source tree: ${sourceRoot}"
@@ -267,8 +283,7 @@ done
 
 cd "${programDirectory}"
 installFile "msvcr90.dll" "bin/"
-
-"installPackage_${usbPackage}"
+installFiles ${usbWindowsPackages}
 
 cd /mingw/bin
 for file in libgcc_s_dw2-1.dll libiconv-2.dll libpdcurses*.dll
@@ -304,14 +319,15 @@ ${readmeHeader}
   boot, run install.bat. To unregister it, run uninstall.bat.
 - If your braille device uses a USB connection:
   * If you either cannot, or would prefer not to, install its
-    manufacturer's driver, then you can select "USB:" here, and then
-    install ${usbName}'s driver by right-clicking on bin/brltty-${usbPackage}.inf
-    and selecting install.
+    manufacturer's driver, then you can select "USB:", and install
+    ${usbName}'s driver by doing one of the following:
+    + right-clicking on bin/brltty-${usbPackage}.inf and selecting install
+    + answering yes to the setup prompt for installing the ${usbName} driver
   * If you have installed its manufacturer's driver, and if that driver defines
     a virtual COM port, then select that virtual COM port.
-  * If you need to install its manufacturer's driver, but that driver does
-    not define a virtual COM port, then select "USB:" to use ${usbName}'s
-    filter.
+  * If you need to install its manufacturer's driver, but
+    that driver does not define a virtual COM port, then 
+${usbFilter}
 - If your braille device uses a serial connection, or if it is connected via a
   serial to USB converter, then select the correct COM port. Make sure to
   select the correct braille driver as well, because serial autodetection may
