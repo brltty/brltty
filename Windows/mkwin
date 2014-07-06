@@ -21,11 +21,6 @@ set -e
 umask 022
 export MAKEFLAGS=
 
-windowsPackages="ahk nsis"
-windowsCommands="lib python cython"
-mingwPackages="pthreads curses"
-mingwCommands="zip unix2dos linuxdoc doxygen groff"
-
 ahkName="AutoHotkey"
 ahkLocation="/c/Program Files (x86)/AutoHotkey"
 ahkDownload="http://www.autohotkey.com/"
@@ -35,18 +30,23 @@ nsisLocation="/c/Program Files (x86)/NSIS"
 nsisDownload="http://nsis.sourceforge.net/"
 
 libusb0Name="LibUSB-Win32"
+libusb0Version="1.2.6.0"
 libusb0Location="/c/Program Files/LibUSB-Win32"
 libusb0Files="bin/libusb-win32-bin-README.txt"
 libusb0Download="http://libusb-win32.sourceforge.net/"
-libusb0Version="1.2.6.0"
 libusb0Pattern="usb0"
 
 libusb1Name="LibUSB-1.0"
-libusb1Location="/c/Program Files/WinUSB"
-libusb1Files="libusb_device.inf"
+libusb1Version="1.0.18"
+libusb1Location="/c/Program Files/LibUSBx"
+libusb1Files="libusb-1.0.dll"
 libusb1Download="http://www.libusb.org/wiki/windows_backend"
-libusb1Version=""
 libusb1Pattern="usb-1.0"
+
+winusbName="WinUSB"
+winusbLocation="/c/Program Files/WinUSB"
+winusbFiles="libusb_device.inf"
+winusbDownload="http://www.libusb.org/wiki/windows_backend"
 
 pythonName="Python"
 pythonLocation=""
@@ -301,12 +301,24 @@ installPackage_libusb-1.0() {
    if [ -n "${libusb1Root}" ]
    then
       cd "${libusb1Root}"
+      installFile "libusb-1.0.dll" "bin/"
+   else
+      logMessage warning "${libusb1Name} not installable"
+   fi
+
+   installPackage_winusb
+}
+
+installPackage_winusb() {
+   if [ -n "${winusbRoot}" ]
+   then
+      cd "${winusbRoot}"
       installFile "x86/winusbcoinstaller2.dll" "bin/x86/"
       installFile "amd64/winusbcoinstaller2.dll" "bin/amd64/"
       installFile "x86/WdfCoInstaller01009.dll" "bin/x86/"
       installFile "amd64/WdfCoInstaller01009.dll" "bin/amd64/"
    else
-      logMessage warning "${libusb1Name} not installable"
+      logMessage warning "${winusbName} not installable"
    fi
 }
 
@@ -316,8 +328,9 @@ addProgramOption s flag invokeShell "invoke interactive shell to inspect/modify 
 addWindowsPackageOption A ahk
 addWindowsPackageOption N nsis
 addProgramOption u string.package usbPackage "which USB package to use" "${defaultUsbPackage}"
-addWindowsPackageOption W libusb0
-addWindowsPackageOption U libusb1
+addWindowsPackageOption U libusb0
+addWindowsPackageOption X libusb1
+addWindowsPackageOption W winusb
 addWindowsPackageOption P python
 addProgramParameter source sourceRoot "top-level directory of source tree"
 addProgramParameter revision buildRevision "revision of the build"
@@ -327,8 +340,8 @@ parseProgramArguments "${@}"
 
 case "${usbPackage}"
 in
-   libusb) usbWindowsPackages=libusb0;;
-   libusb-1.0) usbWindowsPackages=libusb1;;
+   libusb) usbWindowsPackages="libusb0";;
+   libusb-1.0) usbWindowsPackages="libusb1 winusb";;
    *) syntaxError "unrecognized USB package: ${usbPackage}"
 esac
 
@@ -342,10 +355,10 @@ sourceRoot="$(cd "${sourceRoot}" && pwd -W)"
    export PATH="${pythonRoot}:${pythonRoot}/Scripts:${PATH}"
 }
 
-verifyWindowsPackages ${windowsPackages} "${usbWindowsPackages}" || :
-verifyWindowsCommands ${windowsCommands} || :
-verifyMingwPackages ${mingwPackages} || :
-verifyMingwCommands ${mingwCommands} || :
+verifyWindowsPackages ahk nsis ${usbWindowsPackages} || :
+verifyWindowsCommands lib python cython || :
+verifyMingwPackages pthreads curses || :
+verifyMingwCommands zip unix2dos linuxdoc doxygen groff || :
 
 temporaryDirectory="${TMPDIR:-/tmp}/brltty-${programName}"
 rm -f -r "${temporaryDirectory}"
@@ -403,9 +416,11 @@ Here are some notes on how to get started:
 - Either use the BRLTTY configurator (brlttycnf.exe) or manually uncomment the
   appropriate lines in etc/brltty.conf.
 - For Python support (e.g. for NVDA), run Brlapi-${BRLAPI_RELEASE}.win32.exe.
-- For sighted users, use the xw braille driver to get a virtual braille box."
+- For sighted users, use the xw braille driver to get a virtual braille box.
+"
 
-readmeFooter="
+readmeFooter="\
+
 If you are having problems, please run run-debug.bat and send us the debug.log
 and brltty.conf files.
 
@@ -423,7 +438,7 @@ ${configureLines}
 - To make life easier for Windows users, the BrlAPI server was modified to:
   * not use authentication by default (BRLAPI_DEFAUTH set to none)
   * only use local sockets (:0+127.0.0.1:0 changed to :0)
-- *${usbPattern}* files come from ${usbName} ${usbVersion}, which is available at:
+- *${usbPattern}* files come from ${usbName} ${usbVersion}, which can be found at:
   ${usbDownload}
 - Python bindings are provided by: Brlapi-${BRLAPI_RELEASE}.win32.exe
 - C bindings are provided in: include/, and lib/
@@ -521,21 +536,23 @@ cat >"README.txt" <<END-OF-README
 ${readmeHeader}
 - To register BRLTTY as a service so that it will get started automatically at
   boot, run install.bat. To unregister it, run uninstall.bat.
-- If your braille device uses a USB connection,
-  * If you have installed its manufacturer's driver, then select its virtual
-    COM port if it provides one, otherwise select "USB:" to use libusb-win32's
+- If your braille device uses a USB connection:
+  * If you either cannot, or would prefer not to, install its
+    manufacturer's driver, then you can select "USB:" here, and then
+    install ${usbName}'s driver by right-clicking on bin/brltty-${usbPackage}.inf
+    and selecting install.
+  * If you have installed its manufacturer's driver, and if that driver defines
+    a virtual COM port, then select that virtual COM port.
+  * If you need to install its manufacturer's driver, but that driver does
+    not define a virtual COM port, then select "USB:" to use ${usbName}'s
     filter.
-  * If you either cannot, or prefer not to, install your manufacturer's driver,
-    then you can select "USB:" here and install ${usbName}'s driver.
-- To install the ${usbName} driver, right-click on bin/brltty-${usbPackage}.inf
-  and select install.
 - If your braille device uses a serial connection, or if it is connected via a
-  serial to USB converter, just select the proper COM port. Make sure to select
-  the proper braille display as well, because serial autodetection may brick
-  some devices.
+  serial to USB converter, then select the correct COM port. Make sure to
+  select the correct braille driver as well, because serial autodetection may
+  brick some devices.
 - If your braille device uses a Bluetooth connection, you can either use the
   Windows Bluetooth facilities to create a virtual COM port which you can then
-  select, or you can manually configure the braille-device line in brltty.conf.
+  select, or manually configure the braille-device line in brltty.conf.
 ${readmeFooter}
 END-OF-README
 
