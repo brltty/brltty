@@ -34,7 +34,7 @@ libusb0Pattern="usb0"
 libusb1Name="LibUSB-1.0"
 libusb1Version="1.0.18"
 libusb1Location="/c/Program Files/LibUSB-1.0"
-libusb1Files="libusb-1.0.dll"
+libusb1Files="libusb-1.0.def"
 libusb1Download="http://www.libusb.org/wiki/windows_backend"
 libusb1Pattern="usb-1.0"
 
