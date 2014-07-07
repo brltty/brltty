@@ -43,6 +43,11 @@ winusbLocation="/c/Program Files/WinUSB"
 winusbFiles="libusb_device.inf"
 winusbDownload="http://www.libusb.org/wiki/windows_backend"
 
+msvcName="MSVC"
+msvcLocation=""
+msvcFiles="lib.exe link.exe"
+msvcDownload=""
+
 pythonName="Python"
 pythonLocation=""
 pythonFiles="Lib/site-packages Scripts"

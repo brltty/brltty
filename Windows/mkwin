@@ -103,9 +103,10 @@ addProgramOption u string.package usbPackage "which USB package to use" "${defau
 addWindowsPackageOption U libusb0
 addWindowsPackageOption X libusb1
 addWindowsPackageOption W winusb
+addWindowsPackageOption M msvc
 addWindowsPackageOption P python
-addProgramParameter source sourceRoot "top-level directory of source tree"
-addProgramParameter revision buildRevision "revision of the build"
+addProgramParameter source sourceRoot "the top-level directory of the source tree"
+addProgramParameter revision buildRevision "the revision of the build"
 parseProgramArguments "${@}"
 
 [ -n "${usbPackage}" ] || usbPackage="${defaultUsbPackage}"
@@ -133,8 +134,18 @@ copyProperties "${1}" usb Name Location Download Version Pattern Filter
 sourceRoot="$(cd "${sourceRoot}" && pwd -W)"
 [ -f "${sourceRoot}/configure" ] || semanticError "not a source tree: ${sourceRoot}"
 
+[ -z "${msvcRoot}" ] || {
+   if verifyWindowsPackage msvc
+   then
+      export PATH="${msvcRoot}:${PATH}"
+   fi
+}
+
 [ -z "${pythonRoot}" ] || {
-   export PATH="${pythonRoot}:${pythonRoot}/Scripts:${PATH}"
+   if verifyWindowsPackage python
+   then
+      export PATH="${pythonRoot}:${pythonRoot}/Scripts:${PATH}"
+   fi
 }
 
 verifyWindowsPackages ahk nsis ${usbWindowsPackages} || :
