@@ -294,6 +294,12 @@ done
 
 cd "${programDirectory}"
 installFile "msvcr90.dll" "bin/"
+installFile "brltty.cat" "bin/"
+installFile "brltty_x64.cat" "bin/"
+installFile "install.bat" "/"
+installFile "uninstall.bat" "/"
+installFile "run-debug.bat" "/"
+
 installFiles ${usbWindowsPackages}
 
 cd /mingw/bin
@@ -307,8 +313,6 @@ rm -f "bin/brltty-config"
 rm -f "etc/brlapi.key"
 
 echo "${revisionIdentifier}" >"REVISION.txt"
-echo "not yet" >"bin/brltty.cat"
-echo "not yet" >"bin/brltty_x64.cat"
 
 for source in $(find "share/man" -type f -name "*.[1-9]" -print)
 do
@@ -348,25 +352,6 @@ ${usbFilter}
   select, or manually configure the braille-device line in brltty.conf.
 ${readmeFooter}
 END-OF-README
-
-cat >"install.bat" <<END-OF-INSTALL
-@echo off
-.\bin\brltty -I
-net start BrlAPI
-END-OF-INSTALL
-
-cat >"uninstall.bat" <<END-OF-UNINSTALL
-@echo off
-net stop BrlAPI
-.\bin\brltty -R
-END-OF-UNINSTALL
-
-cat >"run-debug.bat" <<END-OF-DEBUG
-@echo off
-echo Running BRLTTY in debug mode. When done, close this window (for example,
-echo by using the alt-space menu) and see %CD%\debug.log
-.\bin\brltty -n -e -ldebug -Ldebug.log >stdout.log 2>stderr.log
-END-OF-DEBUG
 
 if [ -n "${libPath}" ]
 then
