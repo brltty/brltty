@@ -365,53 +365,53 @@ going to Windows.
 ------------------------------------------------------------------------------
 
 
-Building the Windows Installer and Zip Image
-============================================
+Building the Installer and Zip Archive for Windows
+==================================================
 
 The mkwin script, which can be found in the Windows/ subdirectory of BRLTTY's 
-source tree, builds the BRLTTY Windows zip image, and installer. It assumes 
-that the following software components have already been installed:
+source tree, builds the BRLTTY installer and zip archive for Windows. It
+assumes that the following software components have already been installed:
 
 - MinGW [32-bit] (from http://mingw.org/). The following MinGW packages should
   be installed:
-  + mingw32-pdcurses
-  + mingw32-pthreads-w32
-  + msys-bison
-  + msys-dos2unix
-  + msys-groff
-  + msys-m4
-  + msys-zip
+  * mingw32-pdcurses
+  * mingw32-pthreads-w32
+  * msys-bison
+  * msys-dos2unix
+  * msys-groff
+  * msys-m4
+  * msys-zip
 - AutoHotkey (from http://www.autohotkey.com/). The mkwin script assumes that
-  it has been installed in C:\Program Files\AutoHotkey. Its -A (AutoHotkey)
+  it has been installed in C:\Program Files\AutoHotkey. The -A (AutoHotkey)
   option can be used to specify another location.
 - NSIS (from http://nsis.sourceforge.net/). The mkwin script assumes that it
-  has been installed in C:\Program Files\NSIS. Its -N (NSIS) option can be used
+  has been installed in C:\Program Files\NSIS. The -N (NSIS) option can be used
   to specify another location.
 - Python (from www.python.org). The 32-bit variants are required. Version 2 or
   3 may be used. If the python command is not in your command search path, or
-  if you would like to use a different version of Python, then use the mkwin
-  script's -P (Python) option to specify the top-level directory of the desired
-  Python version.
+  if you would like to use a different version of Python, then use the -P
+  (Python) option to specify the top-level directory of the desired Python
+  version.
 - Cython (from http://cython.org/). A corresponding version of Cython must be
   installed for each version of Python. If the cython command is not in your
   command search path, or if you would like to use a different version of
-  Cython, then use the mkwin script's -C (Cython) option to specify the
-  top-level directory of the desired Cython version.
+  Cython, then use the -C (Cython) option to specify the top-level directory of
+  the desired Cython version.
 - LibUSB-Win32 (from http://libusb-win32.sourceforge.net/). The mkwin script
-  assumes that it has been installed in C:\Program Files\LibUSB-Win32. Its -U
-  option can be used to specify another location.
+  assumes that it has been installed in C:\Program Files\LibUSB-Win32. The -U
+  (LibUSB-Win32) option can be used to specify another location.
 - LibUSB-1.0 (from http://www.libusb.org/wiki/windows_backend). The mkwin
-  script assumes that it has been installed in C:\Program Fils\LibUSB-1.0. Its
+  script assumes that it has been installed in C:\Program Fils\LibUSB-1.0. The
   -X (libusbx) option can be used to specify another location.
 - WinUSB (from http://www.libusb.org/wiki/windows_backend). The mkwin script
-  assumes that it has been installed in C:\Program Files\WinUSB. Its -W
+  assumes that it has been installed in C:\Program Files\WinUSB. The -W
   (WinUSB) option can be used to specify another location.
-- icu (from http://icu-project.org/).
-- pkg-config (from http://gtk.org/download/win32.php). Its zip image should be
+- ICU (from http://icu-project.org/).
+- pkg-config (from http://gtk.org/download/win32.php). Its zip archive should
+  be unpacked when in MinGW's /mingw directory.
+- Glib (from http://gtk.org/download/win32.php). Its zip archive should be
   unpacked when in MinGW's /mingw directory.
-- Glib (from http://gtk.org/download/win32.php). Its zip image should be
-  unpacked when in MinGW's /mingw directory.
-- gettext-runtime (from http://gtk.org/download/win32.php). Its zip image
+- gettext-runtime (from http://gtk.org/download/win32.php). Its zip archive
   should be unpacked when in MinGW's /mingw directory. Only install it if your
   MinGW installation does not already have it. Check for the presence of a
   libintl DLL in MinGW's /mingw/bin directory.
@@ -425,15 +425,15 @@ from someone who does:
 - mspdb100.dll
 - msvcr100.dll
 All of these files should be placed in the same directory. Either add this
-directory to your command search path or use the mkwin script's -M (MSVC)
-option to specify its location.
+directory to your command search path or use the -M (MSVC) option to specify
+its location.
 
 The mkwin script requires two parameters:
 1) The path to the top-level directory of BRLTTY's source tree. It may be
    either relative or absolute.
-2) The build revision. It may be any character sequence which doesn't include
-   white space. It is appended, with a prepended dash (-), to BRLTTY's version
-   number in order to construct the build version.
+2) The build revision. It may be any character sequence which does not include
+white space. It is appended, with a prepended dash (-), to BRLTTY's version
+number in order to construct the build version.
 
 For example: If your current working directory is the Windows/ subdirectory of 
 BRLTTY's source tree, and if the current BRLTTY version is 5.2, then invoking 
@@ -442,25 +442,24 @@ the following command:
    ./mkwin .. 4
 
 will create these files within the current working directory:
-- brltty-win-5.2-4.zip (the zip image)
+- brltty-win-5.2-4.zip (the zip archive)
 - brltty-win-5.2-4.exe (the Windows installer)
 
-Use the mkwin script's -u (USB) option to specify which USB package is to be
-used. These packages are supported:
+Use the -u (USB) option to specify which USB package is to be used. The
+following packages are supported:
 - libusb (for LibUSB-Win32). This is the default.
 - libusb-1.0 (for LibUSB-1.0 + WinUSB).
 
-Use the mkwin script's -s (shell) option if you would like an interactive shell
-to be invoked just before the zip image is created so that you can have a look
-at what it will contain.
+Use the -s (shell) option if you would like an interactive shell to be invoked
+just before the zip archive is created so that you can have a look at and/or
+modify what it will contain. If the SHELL environment variable is set then that
+shell is used. If not, /bin/sh is assumed.
 
-Use the mkwin script's -V (verbose) option to increase output verbosity, and/or 
-its -q (quiet) option to decrease output verbosity. These two options are 
-complementary, and both are cumulative - each may be specified any number of 
-times.
+Use the -v (verbose) option to increase output verbosity, and/or the -q (quiet)
+option to decrease output verbosity. These two options are complementary, and
+both are cumulative - each may be specified any number of times.
 
-Use the mkwin script's -h (help) option to view a brief command line usage 
-summary.
+Use the -h (help) option to view a brief command line usage summary.
 
 
 ------------------------------------------------------------------------------
