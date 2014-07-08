@@ -21,8 +21,6 @@ set -e
 umask 022
 export MAKEFLAGS=
 
-defaultUsbPackage="libusb"
-
 copyProperties() {
    local from="${1}"
    local to="${2}"
@@ -96,14 +94,20 @@ installFiles_winusb() {
 
 . "`dirname "${0}"`/../prologue.sh"
 . "${programDirectory}/mingw.sh"
+
+defaultUsbPackage="libusb"
+defaultTemporaryDirectory="${TMPDIR:-/tmp}/brltty-${programName}"
+
+addProgramOption u string.package usbPackage "which USB package to use" "${defaultUsbPackage}"
 addProgramOption s flag invokeShell "invoke interactive shell to inspect/modify result"
+addProgramOption t string.directory temporaryDirectory "the temporary directory to use for the build" "${defaultTemporaryDirectory}"
+addProgramOption k flag keepBuild "keep (do not remove) the temporary directory"
+addWindowsPackageOption M msvc
 addWindowsPackageOption A ahk
 addWindowsPackageOption N nsis
-addProgramOption u string.package usbPackage "which USB package to use" "${defaultUsbPackage}"
 addWindowsPackageOption U libusb0
 addWindowsPackageOption X libusb1
 addWindowsPackageOption W winusb
-addWindowsPackageOption M msvc
 addWindowsPackageOption P python
 addWindowsPackageOption I icu
 addProgramParameter source sourceRoot "the top-level directory of the source tree"
@@ -154,9 +158,18 @@ verifyWindowsCommands lib python cython || :
 verifyMingwPackages pthreads curses || :
 verifyMingwCommands zip unix2dos linuxdoc doxygen groff || :
 
-temporaryDirectory="${TMPDIR:-/tmp}/brltty-${programName}"
-rm -f -r "${temporaryDirectory}"
+if [ -z "${temporaryDirectory}" ]
+then
+   temporaryDirectory="${defaultTemporaryDirectory}"
+   rm -f -r "${temporaryDirectory}"
+elif [ -e "${temporaryDirectory}" ]
+then
+   semanticError "directory already exists: ${temporaryDirectory}"
+fi
+
 mkdir -p "${temporaryDirectory}"
+cd "${temporaryDirectory}"
+temporaryDirectory="$(pwd -W)"
 
 buildRoot="${temporaryDirectory}/build"
 mkdir -p "${buildRoot}"
@@ -459,9 +472,11 @@ else
    logMessage warning "installer not creatable"
 fi
 
-logMessage task "cleaning up"
-cd "${initialDirectory}"
-rm -f -r "${temporaryDirectory}"
+"${keepBuild}" || {
+   logMessage task "cleaning up"
+   cd "${initialDirectory}"
+   rm -f -r "${temporaryDirectory}"
+}
 
 logMessage task "done"
 exit 0

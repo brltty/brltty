@@ -459,6 +459,13 @@ Use the -v (verbose) option to increase output verbosity, and/or the -q (quiet)
 option to decrease output verbosity. These two options are complementary, and
 both are cumulative - each may be specified any number of times.
 
+Use the -t (temporary) option to explicitly specify the temporary directory 
+which is to be used for the build. It must not already exist. If you do not 
+specify it then an internally generated path is used.
+
+Use the -k (keep) option to prevent the temporary directory from being removed 
+at the end of a successful build.
+
 Use the -h (help) option to view a brief command line usage summary.
 
 
