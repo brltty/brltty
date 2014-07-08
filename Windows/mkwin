@@ -105,6 +105,7 @@ addWindowsPackageOption X libusb1
 addWindowsPackageOption W winusb
 addWindowsPackageOption M msvc
 addWindowsPackageOption P python
+addWindowsPackageOption I icu
 addProgramParameter source sourceRoot "the top-level directory of the source tree"
 addProgramParameter revision buildRevision "the revision of the build"
 parseProgramArguments "${@}"
@@ -148,7 +149,7 @@ sourceRoot="$(cd "${sourceRoot}" && pwd -W)"
    fi
 }
 
-verifyWindowsPackages ahk nsis ${usbWindowsPackages} || :
+verifyWindowsPackages ahk nsis icu ${usbWindowsPackages} || :
 verifyWindowsCommands lib python cython || :
 verifyMingwPackages pthreads curses || :
 verifyMingwCommands zip unix2dos linuxdoc doxygen groff || :

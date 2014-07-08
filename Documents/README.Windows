@@ -153,18 +153,9 @@ For MinGW:
        + ln -s "/path/to/Libusb-1.0/MinGW32/dll/libusb-1.0.dll.a" /mingw/lib/
        + ln -s "/path/to/Libusb-1.0/MinGW32/dll/libusb-1.0.dll" /mingw/bin/
 
-    2) Create a /mingw/lib/pkgconfig/libusb-1.0.pc file containing
-
-prefix=/mingw
-exec_prefix=${prefix}
-libdir=${prefix}/lib
-includedir=${prefix}/include
-
-Name: libusb-1.0
-Description: C API for USB device access from Windows userspace
-Version: 1.0
-Libs: -L${libdir} -lusb-1.0
-Cflags: -I${includedir}/libusb-1.0
+    2) Copy the file libusb-1.0.pc in the Windows/ subdirectory of BRLTTY's
+       source tree into MinGW's /mingw/lib/pkgconfig/ directory. If the
+       pkgconfig/ subdirectory doesn't already exist then create it.
 
     Then you can configure, compile, install, and run BRLTTY as usual.
 
@@ -393,10 +384,8 @@ assumes that the following software components have already been installed:
   (Python) option to specify the top-level directory of the desired Python
   version.
 - Cython (from http://cython.org/). A corresponding version of Cython must be
-  installed for each version of Python. If the cython command is not in your
-  command search path, or if you would like to use a different version of
-  Cython, then use the -C (Cython) option to specify the top-level directory of
-  the desired Cython version.
+  installed for each version of Python. Each Cython version is installed within
+  the corresponding Python version's hierarchy.
 - LibUSB-Win32 (from http://libusb-win32.sourceforge.net/). The mkwin script
   assumes that it has been installed in C:\Program Files\LibUSB-Win32. The -U
   (LibUSB-Win32) option can be used to specify another location.
@@ -406,7 +395,10 @@ assumes that the following software components have already been installed:
 - WinUSB (from http://www.libusb.org/wiki/windows_backend). The mkwin script
   assumes that it has been installed in C:\Program Files\WinUSB. The -W
   (WinUSB) option can be used to specify another location.
-- ICU (from http://icu-project.org/).
+- ICU (from http://icu-project.org/). The mkwin script assumes that it has been
+  installed in C:\Program Files\icu. The -I (ICU) option can be used to
+  specify another location. The zip archive's only top-level directory is
+  named icu, so unpack it when in MinGW's '/c/Program Files' directory.
 - pkg-config (from http://gtk.org/download/win32.php). Its zip archive should
   be unpacked when in MinGW's /mingw directory.
 - Glib (from http://gtk.org/download/win32.php). Its zip archive should be

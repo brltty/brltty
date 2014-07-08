@@ -57,6 +57,11 @@ cythonName="Cython"
 cythonLocation=""
 cythonDownload="http://www.cython.org/"
 
+icuName="ICU"
+icuLocation="/c/Program Files/icu"
+icuFiles="include/unicode"
+icuDownload="http://icu-project.org/"
+
 pthreadsName="mingw32-pthreads-w32"
 pthreadsLocation="/"
 pthreadsFiles="mingw/include/pthread.h"
@@ -73,12 +78,14 @@ verifyPackage() {
    local package="${1}"
    shift 1
 
+   local name="$(getVariable "${package}Name")"
+
    local root="$(getVariable "${package}Root")"
    [ -n "${root}" ] || root="$(getVariable "${package}Location")"
 
    if [ -z "${root}" ]
    then
-      logMessage warning "package location not defined: ${package}"
+      logMessage warning "package location not defined: ${name}"
       root=""
    elif [ ! -e "${root}" ]
    then
@@ -98,7 +105,7 @@ verifyPackage() {
          local path="${prefix}/${file}"
 
          [ -e "${path}" ] || {
-            logMessage warning "file not found: ${path}"
+            logMessage warning "${name} file not found: ${path}"
             root=""
          }
       done
