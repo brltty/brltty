@@ -2047,6 +2047,22 @@ brlttyStart (void) {
     return exitStatus;
   }
 
+  {
+    int stop = 0;
+
+    if (opt_removeService) {
+      removeService(SERVICE_NAME);
+      stop = 1;
+    }
+
+    if (opt_installService) {
+      installService(SERVICE_NAME, SERVICE_DESCRIPTION);
+      stop = 1;
+    }
+
+    if (stop) return PROG_EXIT_FORCE;
+  }
+
   if (!validateInterval(&messageHoldTimeout, opt_messageHoldTimeout)) {
     logMessage(LOG_ERR, "%s: %s", gettext("invalid message hold timeout"), opt_messageHoldTimeout);
   }
@@ -2077,22 +2093,6 @@ brlttyStart (void) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
     return PROG_EXIT_FORCE;
-  }
-
-  {
-    int stop = 0;
-
-    if (opt_removeService) {
-      removeService(SERVICE_NAME);
-      stop = 1;
-    }
-
-    if (opt_installService) {
-      installService(SERVICE_NAME, SERVICE_DESCRIPTION);
-      stop = 1;
-    }
-
-    if (stop) return PROG_EXIT_FORCE;
   }
 
   if (opt_verify) opt_noDaemon = 1;
