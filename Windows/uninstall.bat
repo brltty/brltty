@@ -1,3 +1,3 @@
 @echo off
 net stop BrlAPI
-.\bin\brltty -R
+"%~dp0bin\brltty" -R

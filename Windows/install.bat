@@ -1,3 +1,3 @@
 @echo off
-.\bin\brltty -I
+"%~dp0bin\brltty" -I
 net start BrlAPI
