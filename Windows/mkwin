@@ -73,7 +73,7 @@ installFiles_libusb1() {
    if [ -n "${libusb1Root}" ]
    then
       cd "${libusb1Root}"
-      installFile "libusb-1.0.dll" "bin/"
+      installFile "MinGW32/dll/libusb-1.0.dll" "bin/"
    else
       logMessage warning "${libusb1Name} not installable"
    fi
