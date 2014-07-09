@@ -25,8 +25,9 @@
 #include <signal.h>
 
 #include "embed.h"
-#include "brltty.h"
 #include "log.h"
+#include "api_control.h"
+#include "brltty.h"
 
 static ProgramExitStatus
 brlttyRun (void) {
@@ -89,13 +90,13 @@ serviceControlHandler (DWORD code) {
 
     case SERVICE_CONTROL_PAUSE:
       SET_SERVICE_STATE(SERVICE_PAUSE_PENDING, PROG_EXIT_SUCCESS);
-      suspendBrailleDriver();
+      apiSuspend();
       SET_SERVICE_STATE(SERVICE_PAUSED, PROG_EXIT_SUCCESS);
       break;
 
     case SERVICE_CONTROL_CONTINUE:
       SET_SERVICE_STATE(SERVICE_CONTINUE_PENDING, PROG_EXIT_SUCCESS);
-      if (resumeBrailleDriver()) {
+      if (apiResume()) {
         SET_SERVICE_STATE(SERVICE_RUNNING, PROG_EXIT_SUCCESS);
       } else {
         SET_SERVICE_STATE(SERVICE_PAUSED, PROG_EXIT_SUCCESS);

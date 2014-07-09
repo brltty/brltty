@@ -1223,28 +1223,6 @@ destructBrailleDriver (void) {
   }
 }
 
-void
-suspendBrailleDriver (void) {
-#ifdef ENABLE_API
-  if (apiStarted) {
-    api_suspend(&brl);
-  } else
-#endif /* ENABLE_API */
-
-  {
-    destructBrailleDriver();
-  }
-}
-
-int
-resumeBrailleDriver (void) {
-#ifdef ENABLE_API
-  if (apiStarted) return api_resume(&brl);
-#endif /* ENABLE_API */
-
-  return constructBrailleDriver();
-}
-
 static int
 initializeBrailleDriver (const char *code, int verify) {
   if ((braille = loadBrailleDriver(code, &brailleObject, opt_driversDirectory))) {

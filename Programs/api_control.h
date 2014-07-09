@@ -55,6 +55,9 @@ extern void apiStop (void);
 extern void apiLink (void);
 extern void apiUnlink (void);
 
+extern void apiSuspend (void);
+extern int apiResume (void);
+
 extern int apiClaimDriver (void);
 extern void apiReleaseDriver (void);
 

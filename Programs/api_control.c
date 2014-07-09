@@ -109,6 +109,28 @@ apiUnlink (void) {
   if (apiStarted) api_unlink(&brl);
 }
 
+void
+apiSuspend (void) {
+#ifdef ENABLE_API
+  if (apiStarted) {
+    api_suspend(&brl);
+  } else
+#endif /* ENABLE_API */
+
+  {
+    destructBrailleDriver();
+  }
+}
+
+int
+apiResume (void) {
+#ifdef ENABLE_API
+  if (apiStarted) return api_resume(&brl);
+#endif /* ENABLE_API */
+
+  return constructBrailleDriver();
+}
+
 int
 apiClaimDriver (void) {
   if (!driverClaimed && apiStarted) {
