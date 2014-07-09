@@ -45,7 +45,7 @@ setServiceState (DWORD state, ProgramExitStatus exitStatus, const char *name) {
     .dwServiceType = SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS,
     .dwCurrentState = state,
     .dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_PAUSE_CONTINUE,
-    .dwWin32ExitCode = (exitStatus == PROG_EXIT_SUCCESS)? ERROR_SERVICE_SPECIFIC_ERROR: NO_ERROR,
+    .dwWin32ExitCode = (exitStatus != PROG_EXIT_SUCCESS)? ERROR_SERVICE_SPECIFIC_ERROR: NO_ERROR,
     .dwServiceSpecificExitCode = exitStatus,
     .dwCheckPoint = 0,
     .dwWaitHint = 10000, /* milliseconds */
@@ -128,7 +128,7 @@ main (int argc, char *argv[]) {
 
     if (GetLastError() != ERROR_FAILED_SERVICE_CONTROLLER_CONNECT) {
       logWindowsSystemError("StartServiceCtrlDispatcher");
-      return 20;
+      return PROG_EXIT_FATAL;
     }
   }
 #endif /* __MINGW32__ */
