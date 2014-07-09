@@ -40,16 +40,36 @@ static DWORD serviceState;
 static ProgramExitStatus serviceExitStatus;
 
 static BOOL
-setServiceState (DWORD state, ProgramExitStatus exitStatus, const char *name) {
+setServiceState (DWORD state, DWORD exitStatus, const char *name) {
   SERVICE_STATUS status = {
     .dwServiceType = SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS,
     .dwCurrentState = state,
-    .dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_PAUSE_CONTINUE,
+
     .dwWin32ExitCode = (exitStatus != PROG_EXIT_SUCCESS)? ERROR_SERVICE_SPECIFIC_ERROR: NO_ERROR,
-    .dwServiceSpecificExitCode = exitStatus,
-    .dwCheckPoint = 0,
-    .dwWaitHint = 10000, /* milliseconds */
+    .dwServiceSpecificExitCode = exitStatus
   };
+
+  switch (status.dwCurrentState) {
+    default:
+      status.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_PAUSE_CONTINUE;
+
+    case SERVICE_START_PENDING:
+    case SERVICE_STOP_PENDING:
+    case SERVICE_STOPPED:
+      break;
+  }
+
+  switch (status.dwCurrentState) {
+    case SERVICE_START_PENDING:
+    case SERVICE_PAUSE_PENDING:
+    case SERVICE_CONTINUE_PENDING:
+    case SERVICE_STOP_PENDING:
+      status.dwWaitHint = 10000;
+      status.dwCheckPoint = 0;
+
+    default:
+      break;
+  }
 
   serviceState = state;
   if (SetServiceStatus(serviceStatusHandle, &status)) return 1;
