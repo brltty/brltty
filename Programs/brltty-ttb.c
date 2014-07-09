@@ -41,10 +41,7 @@ static char *opt_charset;
 static char *opt_inputFormat;
 static char *opt_outputFormat;
 static char *opt_tablesDirectory;
-
-#ifdef ENABLE_API
 static int opt_edit;
-#endif /* ENABLE_API */
 
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'T',
@@ -56,13 +53,11 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = "Path to directory containing text tables."
   },
 
-#ifdef ENABLE_API
   { .letter = 'e',
     .word = "edit",
     .setting.flag = &opt_edit,
     .description = "Edit table."
   },
-#endif /* ENABLE_API */
 
   { .letter = 'i',
     .word = "input-format",
@@ -676,10 +671,6 @@ convertTable (void) {
   return exitStatus;
 }
 
-#ifdef ENABLE_API
-#define BRLAPI_NO_DEPRECATED
-#include "brlapi.h"
-
 #include "get_curses.h"
 #ifndef GOT_CURSES
 #define refresh() fflush(stdout)
@@ -706,6 +697,11 @@ static struct termios inputTerminalAttributes;
 #endif /* input terminal definitions */
 #endif /* GOT_CURSES */
 
+#ifdef ENABLE_API
+#define BRLAPI_NO_DEPRECATED
+#include "brlapi.h"
+#endif /* ENABLE_API */
+
 typedef struct {
   TextTableData *ttd;
   unsigned updated:1;
@@ -716,13 +712,17 @@ typedef struct {
     unsigned char byte;
   } character;
 
+#ifdef ENABLE_API
   brlapi_fileDescriptor brlapiFileDescriptor;
-  unsigned int displayWidth;
-  unsigned int displayHeight;
   const char *brlapiErrorFunction;
   const char *brlapiErrorMessage;
+#endif /* ENABLE_API */
+
+  unsigned int displayWidth;
+  unsigned int displayHeight;
 } EditTableData;
 
+#ifdef ENABLE_API
 static int
 haveBrailleDisplay (EditTableData *etd) {
   return etd->brlapiFileDescriptor != (brlapi_fileDescriptor)-1;
@@ -765,6 +765,7 @@ claimBrailleDisplay (EditTableData *etd) {
 
   return 0;
 }
+#endif /* ENABLE_API */
 
 static int
 getCharacter (EditTableData *etd, wchar_t *character) {
@@ -808,7 +809,7 @@ makeCharacterDescription (TextTableData *ttd, wchar_t character, size_t *length,
   }
   if (!gotDots) dots = 0;
 
-#define DOT(n) ((dots & BRLAPI_DOT##n)? ((n) + '0'): ' ')
+#define DOT(n) ((dots & BRL_DOT_##n)? ((n) + '0'): ' ')
   {
     uint32_t value = character;
 
@@ -984,7 +985,7 @@ updateCharacterDescription (EditTableData *etd) {
     }
     printw("\n");
 
-#define DOT(n) printw("%s: %s dot %u    ", KEY_TOGGLE_DOT##n, ((dots & BRLAPI_DOT##n)? "lower": "raise"), n)
+#define DOT(n) printw("%s: %s dot %u    ", KEY_TOGGLE_DOT##n, ((dots & BRL_DOT_##n)? "lower": "raise"), n)
     DOT(1);
     DOT(4);
     printw("%s: %s", KEY_TOGGLE_CHARACTER,
@@ -1042,7 +1043,7 @@ updateCharacterDescription (EditTableData *etd) {
     printCharacterString(description);
     printw("\n");
 
-#define DOT(n) ((dots & BRLAPI_DOT##n)? '#': ' ')
+#define DOT(n) ((dots & BRL_DOT_##n)? '#': ' ')
     printw(" +---+ \n");
     printw("1|%c %c|4\n", DOT(1), DOT(4));
     printw("2|%c %c|5\n", DOT(2), DOT(5));
@@ -1051,14 +1052,17 @@ updateCharacterDescription (EditTableData *etd) {
     printw(" +---+ \n");
 #undef DOT
 
+#ifdef ENABLE_API
     if (etd->brlapiErrorFunction) {
       printw("BrlAPI error: %s: %s\n",
              etd->brlapiErrorFunction, etd->brlapiErrorMessage);
       setBrlapiError(etd, NULL);
     }
+#endif /* ENABLE_API */
 
     refresh();
 
+#ifdef ENABLE_API
     if (haveBrailleDisplay(etd)) {
       brlapi_writeArguments_t args = BRLAPI_WRITEARGUMENTS_INITIALIZER;
       wchar_t text[etd->displayWidth];
@@ -1080,6 +1084,7 @@ updateCharacterDescription (EditTableData *etd) {
         releaseBrailleDisplay(etd);
       }
     }
+#endif /* ENABLE_API */
 
     free(description);
   }
@@ -1396,35 +1401,35 @@ doKeyboardCommand (EditTableData *etd) {
         break;
 
       case KEY_F(1):
-        if (!toggleDot(etd, BRLAPI_DOT7)) beep();
+        if (!toggleDot(etd, BRL_DOT_7)) beep();
         break;
 
       case KEY_F(2):
-        if (!toggleDot(etd, BRLAPI_DOT3)) beep();
+        if (!toggleDot(etd, BRL_DOT_3)) beep();
         break;
 
       case KEY_F(3):
-        if (!toggleDot(etd, BRLAPI_DOT2)) beep();
+        if (!toggleDot(etd, BRL_DOT_2)) beep();
         break;
 
       case KEY_F(4):
-        if (!toggleDot(etd, BRLAPI_DOT1)) beep();
+        if (!toggleDot(etd, BRL_DOT_1)) beep();
         break;
 
       case KEY_F(5):
-        if (!toggleDot(etd, BRLAPI_DOT4)) beep();
+        if (!toggleDot(etd, BRL_DOT_4)) beep();
         break;
 
       case KEY_F(6):
-        if (!toggleDot(etd, BRLAPI_DOT5)) beep();
+        if (!toggleDot(etd, BRL_DOT_5)) beep();
         break;
 
       case KEY_F(7):
-        if (!toggleDot(etd, BRLAPI_DOT6)) beep();
+        if (!toggleDot(etd, BRL_DOT_6)) beep();
         break;
 
       case KEY_F(8):
-        if (!toggleDot(etd, BRLAPI_DOT8)) beep();
+        if (!toggleDot(etd, BRL_DOT_8)) beep();
         break;
 
       case KEY_F(9):
@@ -1462,19 +1467,19 @@ doKeyboardCommand (EditTableData *etd) {
       return 0;
 
     case 0X11: /* CTRL-Q */
-      if (!toggleDot(etd, BRLAPI_DOT7)) beep();
+      if (!toggleDot(etd, BRL_DOT_7)) beep();
       break;
 
     case 0X17: /* CTRL-W */
-      if (!toggleDot(etd, BRLAPI_DOT3)) beep();
+      if (!toggleDot(etd, BRL_DOT_3)) beep();
       break;
 
     case 0X05: /* CTRL-E */
-      if (!toggleDot(etd, BRLAPI_DOT2)) beep();
+      if (!toggleDot(etd, BRL_DOT_2)) beep();
       break;
 
     case 0X12: /* CTRL-R */
-      if (!toggleDot(etd, BRLAPI_DOT1)) beep();
+      if (!toggleDot(etd, BRL_DOT_1)) beep();
       break;
 
     case 0X14: /* CTRL-T */
@@ -1486,19 +1491,19 @@ doKeyboardCommand (EditTableData *etd) {
       break;
 
     case 0X15: /* CTRL-U */
-      if (!toggleDot(etd, BRLAPI_DOT4)) beep();
+      if (!toggleDot(etd, BRL_DOT_4)) beep();
       break;
 
     case 0X09: /* CTRL-I */
-      if (!toggleDot(etd, BRLAPI_DOT5)) beep();
+      if (!toggleDot(etd, BRL_DOT_5)) beep();
       break;
 
     case 0X0F: /* CTRL-O */
-      if (!toggleDot(etd, BRLAPI_DOT6)) beep();
+      if (!toggleDot(etd, BRL_DOT_6)) beep();
       break;
 
     case 0X10: /* CTRL-P */
-      if (!toggleDot(etd, BRLAPI_DOT8)) beep();
+      if (!toggleDot(etd, BRL_DOT_8)) beep();
       break;
 
     case 0X01: /* CTRL-A */
@@ -1611,6 +1616,7 @@ doKeyboardCommand (EditTableData *etd) {
 }
 
 #ifndef __MINGW32__
+#ifdef ENABLE_API
 static int
 doBrailleCommand (EditTableData *etd) {
   if (haveBrailleDisplay(etd)) {
@@ -1737,6 +1743,7 @@ doBrailleCommand (EditTableData *etd) {
 
   return 1;
 }
+#endif /* ENABLE_API */
 #endif /* __MINGW32__ */
 
 static ProgramExitStatus
@@ -1764,7 +1771,9 @@ editTable (void) {
   }
 
   if (exitStatus == PROG_EXIT_SUCCESS) {
+#ifdef ENABLE_API
     claimBrailleDisplay(&etd);
+#endif /* ENABLE_API */
 
 #if defined(GOT_CURSES)
     initscr();
@@ -1822,18 +1831,24 @@ editTable (void) {
         int maximumFileDescriptor = STDIN_FILENO;
         FD_SET(STDIN_FILENO, &set);
 
+#ifdef ENABLE_API
         if (haveBrailleDisplay(&etd)) {
           FD_SET(etd.brlapiFileDescriptor, &set);
-          if (etd.brlapiFileDescriptor > maximumFileDescriptor)
+
+          if (etd.brlapiFileDescriptor > maximumFileDescriptor) {
             maximumFileDescriptor = etd.brlapiFileDescriptor;
+          }
         }
+#endif /* ENABLE_API */
 
         select(maximumFileDescriptor+1, &set, NULL, NULL, NULL);
       }
 
+#ifdef ENABLE_API
       if (haveBrailleDisplay(&etd) && FD_ISSET(etd.brlapiFileDescriptor, &set)) {
         if (!doBrailleCommand(&etd)) break;
       }
+#endif /* ENABLE_API */
 
       if (FD_ISSET(STDIN_FILENO, &set))
 #endif /* __MINGW32__ */
@@ -1857,13 +1872,15 @@ editTable (void) {
     }
 #endif /* restore keyboard and screen */
 
+#ifdef ENABLE_API
     if (haveBrailleDisplay(&etd)) releaseBrailleDisplay(&etd);
+#endif /* ENABLE_API */
+
     if (etd.ttd) destroyTextTableData(etd.ttd);
   }
 
   return exitStatus;
 }
-#endif /* ENABLE_API */
 
 int
 main (int argc, char *argv[]) {
@@ -1925,13 +1942,9 @@ main (int argc, char *argv[]) {
     return PROG_EXIT_SEMANTIC;
   }
 
-#ifdef ENABLE_API
   if (opt_edit) {
     exitStatus = editTable();
-  } else
-#endif /* ENABLE_API */
-
-  {
+  } else {
     exitStatus = convertTable();
   }
 
