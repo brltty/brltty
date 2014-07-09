@@ -680,24 +680,8 @@ convertTable (void) {
 #define BRLAPI_NO_DEPRECATED
 #include "brlapi.h"
 
-#undef USE_CURSES
-#undef USE_FUNC_GET_WCH
-#if defined(HAVE_PKG_CURSES)
-#define USE_CURSES
-#include <curses.h>
-
-#elif defined(HAVE_PKG_NCURSES)
-#define USE_CURSES
-#include <ncurses.h>
-
-#elif defined(HAVE_PKG_NCURSESW)
-#define USE_CURSES
-#define USE_FUNC_GET_WCH
-#include <ncursesw/ncurses.h>
-
-#else /* standard input/output */
-#warning curses package either unspecified or unsupported
-
+#include "get_curses.h"
+#ifndef GOT_CURSES
 #define refresh() fflush(stdout)
 #define printw printf
 #define erase() printf("\r\n\v")
@@ -720,7 +704,7 @@ static struct termios inputTerminalAttributes;
 #define _POSIX_VDISABLE 0
 #endif /* _POSIX_VDISABLE */
 #endif /* input terminal definitions */
-#endif /* curses package */
+#endif /* GOT_CURSES */
 
 typedef struct {
   TextTableData *ttd;
@@ -926,7 +910,7 @@ updateCharacterDescription (EditTableData *etd) {
     ok = 1;
     erase();
 
-#if defined(USE_CURSES)
+#if defined(GOT_CURSES)
 #define KEY_FIRST_ACTUAL_CHARACTER ""
 #define KEY_LAST_ACTUAL_CHARACTER ""
 #define KEY_PREVIOUS_ACTUAL_CHARACTER "Left"
@@ -1373,18 +1357,18 @@ saveTable (EditTableData *etd) {
 static int
 doKeyboardCommand (EditTableData *etd) {
 #undef IS_UNICODE_CHARACTER
-#if defined(USE_CURSES)
-#ifdef USE_FUNC_GET_WCH
+#if defined(GOT_CURSES)
+#ifdef GOT_CURSES_GET_WCH
 #define IS_UNICODE_CHARACTER
   wint_t ch;
   int ret = get_wch(&ch);
 
   if (ret == KEY_CODE_YES)
-#else /* USE_FUNC_GET_WCH */
+#else /* GOT_CURSES_GET_WCH */
   int ch = getch();
 
   if (ch >= 0X100)
-#endif /* USE_FUNC_GET_WCH */
+#endif /* GOT_CURSES_GET_WCH */
   {
     switch (ch) {
       case KEY_LEFT:
@@ -1464,9 +1448,9 @@ doKeyboardCommand (EditTableData *etd) {
     }
   } else
 
-#ifdef USE_FUNC_GET_WCH
+#ifdef GOT_CURSES_GET_WCH
   if (ret == OK)
-#endif /* USE_FUNC_GET_WCH */
+#endif /* GOT_CURSES_GET_WCH */
 #else /* standard input/output */
 #define IS_UNICODE_CHARACTER
   int handled = 1;
@@ -1782,7 +1766,7 @@ editTable (void) {
   if (exitStatus == PROG_EXIT_SUCCESS) {
     claimBrailleDisplay(&etd);
 
-#if defined(USE_CURSES)
+#if defined(GOT_CURSES)
     initscr();
     cbreak();
     keypad(stdscr, TRUE);
@@ -1861,7 +1845,7 @@ editTable (void) {
     erase();
     refresh();
 
-#if defined(USE_CURSES)
+#if defined(GOT_CURSES)
     endwin();
 #else /* standard input/output */
     if (inputAttributesChanged) {

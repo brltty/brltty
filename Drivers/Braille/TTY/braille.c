@@ -33,32 +33,22 @@
 static iconv_t conversionDescriptor = NULL;
 #endif /* HAVE_ICONV_H */
 
-#if defined(HAVE_PKG_CURSES)
-#define USE_CURSES
-#include <stdarg.h>
-#include <curses.h>
-#elif defined(HAVE_PKG_NCURSES)
-#define USE_CURSES
-#include <ncurses.h>
-#elif defined(HAVE_PKG_NCURSESW)
-#define USE_CURSES
-#include <ncursesw/ncurses.h>
-#else /* HAVE_PKG_ */
-#warning curses package either unspecified or unsupported
-#define addstr(string) serialWriteData(ttyDevice, string, strlen(string))
-#define addch(character) do { unsigned char __c = (character); serialWriteData(ttyDevice, &__c, 1); } while(0)
-#define getch() my_getch()
-#endif /* HAVE_PKG_CURSES */
-
 #include "log.h"
 #include "parse.h"
 #include "charset.h"
+#include "get_curses.h"
 
-#ifdef USE_CURSES
+#ifndef GOT_CURSES
+#define addstr(string) serialWriteData(ttyDevice, string, strlen(string))
+#define addch(character) do { unsigned char __c = (character); serialWriteData(ttyDevice, &__c, 1); } while(0)
+#define getch() my_getch()
+#endif /* GOT_CURSES */
+
+#ifdef GOT_CURSES
 #define BRLPARM_TERM "term",
-#else /* USE_CURSES */
+#else /* GOT_CURSES */
 #define BRLPARM_TERM
-#endif /* USE_CURSES */
+#endif /* GOT_CURSES */
 
 #ifdef HAVE_ICONV_H
 #define BRLPARM_CHARSET "charset",
@@ -69,9 +59,9 @@ static iconv_t conversionDescriptor = NULL;
 typedef enum {
   PARM_BAUD,
 
-#ifdef USE_CURSES
+#ifdef GOT_CURSES
   PARM_TERM,
-#endif /* USE_CURSES */
+#endif /* GOT_CURSES */
 
   PARM_LINES,
   PARM_COLUMNS,
@@ -97,16 +87,16 @@ static SerialDevice *ttyDevice = NULL;
 static FILE *ttyStream = NULL;
 static char *classificationLocale = NULL;
 
-#ifdef USE_CURSES
+#ifdef GOT_CURSES
 static SCREEN *ttyScreen = NULL;
-#else /* USE_CURSES */
+#else /* GOT_CURSES */
 static inline int
 my_getch (void) {
   unsigned char c;
   if (serialReadData(ttyDevice, &c, 1, 0, 0) == 1) return c;
   return EOF;
 }
-#endif /* USE_CURSES */
+#endif /* GOT_CURSES */
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
@@ -130,10 +120,10 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       ttyBaud = baud;
   }
 
-#ifdef USE_CURSES
+#ifdef GOT_CURSES
   if (*parameters[PARM_TERM])
     ttyType = parameters[PARM_TERM];
-#endif /* USE_CURSES */
+#endif /* GOT_CURSES */
 
   {
     static const int minimum = 1;
@@ -170,7 +160,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 #endif /* HAVE_ICONV_H */
     if ((ttyDevice = serialOpenDevice(device))) {
       if (serialRestartDevice(ttyDevice, ttyBaud)) {
-#ifdef USE_CURSES
+#ifdef GOT_CURSES
         if ((ttyStream = serialGetStream(ttyDevice))) {
           if ((ttyScreen = newterm(ttyType, ttyStream, ttyStream))) {
             cbreak();
@@ -183,7 +173,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
             clear();
             refresh();
-#endif /* USE_CURSES */
+#endif /* GOT_CURSES */
 
             brl->textColumns = windowColumns;
             brl->textRows = windowLines; 
@@ -191,14 +181,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             logMessage(LOG_INFO, "TTY: type=%s baud=%u size=%dx%d",
                        ttyType, ttyBaud, windowColumns, windowLines);
             return 1;
-#ifdef USE_CURSES
+#ifdef GOT_CURSES
           } else {
             logSystemError("newterm");
           }
 
           ttyStream = NULL;
         }
-#endif /* USE_CURSES */
+#endif /* GOT_CURSES */
       }
 
       serialCloseDevice(ttyDevice);
@@ -218,7 +208,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-#ifdef USE_CURSES
+#ifdef GOT_CURSES
   if (ttyScreen) {
     endwin();
 #ifndef __MINGW32__
@@ -226,7 +216,7 @@ brl_destruct (BrailleDisplay *brl) {
 #endif /* __MINGW32__ */
     ttyScreen = NULL;
   }
-#endif /* USE_CURSES */
+#endif /* GOT_CURSES */
 
   if (ttyDevice) {
     ttyStream = NULL;
@@ -282,11 +272,11 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
     previousLocale = NULL;
   }
 
-#ifdef USE_CURSES
+#ifdef GOT_CURSES
   clear();
-#else /* USE_CURSES */
+#else /* GOT_CURSES */
   addstr("\r\n");
-#endif /* USE_CURSES */
+#endif /* GOT_CURSES */
 
   {
     int row;
@@ -297,20 +287,20 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
     }
   }
 
-#ifdef USE_CURSES
+#ifdef GOT_CURSES
   if ((brl->cursor >= 0) && (brl->cursor < (brl->textColumns * brl->textRows)))
     move(brl->cursor/brl->textColumns, brl->cursor%brl->textColumns);
   else
     move(brl->textRows, 0);
   refresh();
-#else /* USE_CURSES */
+#else /* GOT_CURSES */
   if ((brl->textRows == 1) && (brl->cursor >= 0) && (brl->cursor < brl->textColumns)) {
     addch('\r');
     writeText(text, brl->cursor);
   } else {
     addstr("\r\n");
   }
-#endif /* USE_CURSES */
+#endif /* GOT_CURSES */
 
   if (previousLocale) setlocale(LC_CTYPE, previousLocale);
   return 1;
@@ -326,7 +316,7 @@ brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key) 
       logMessage(LOG_WARNING, "Unknown key: %d", key);
       return BRL_CMD_NOOP;
 
-#ifdef USE_CURSES
+#ifdef GOT_CURSES
     KEY(KEY_LEFT, BRL_CMD_FWINLT);
     KEY(KEY_RIGHT, BRL_CMD_FWINRT);
     KEY(KEY_UP, BRL_CMD_LNUP);
@@ -365,7 +355,7 @@ brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key) 
     KEY(KEY_F(20), BRL_CMD_NXPGRPH);
 
     KEY(KEY_BACKSPACE, BRL_BLK_PASSKEY|BRL_KEY_BACKSPACE);
-#endif /* USE_CURSES */
+#endif /* GOT_CURSES */
   }
 #undef KEY
 }
@@ -374,9 +364,9 @@ static int
 brl_readKey (BrailleDisplay *brl) {
   int key = getch();
 
-#ifdef USE_CURSES
+#ifdef GOT_CURSES
   if (key == ERR) return EOF;
-#endif /* USE_CURSES */
+#endif /* GOT_CURSES */
 
   logMessage(LOG_DEBUG, "key %d", key);
   return key;

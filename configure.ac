@@ -621,8 +621,11 @@ BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHKEYFILE], ["${api_authkeyfile}"],
 brltty_curses_libs_save="${LIBS}"
 BRLTTY_PACKAGE_CHOOSE([curses],
    [ncursesw ncursesw/ncurses.h],
+   [pdcursesw curses.h],
    [ncurses ncurses.h],
-   [curses curses.h])
+   [curses curses.h],
+   [pdcurses curses.h],
+   [pdcursesu curses.h])
 curses_libs="${LIBS%${brltty_curses_libs_save}}"
 LIBS="${brltty_curses_libs_save}"
 AC_SUBST([curses_libs])

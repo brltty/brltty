@@ -408,6 +408,9 @@ extern "C" {
 #undef HAVE_PKG_CURSES
 #undef HAVE_PKG_NCURSES
 #undef HAVE_PKG_NCURSESW
+#undef HAVE_PKG_PDCURSES
+#undef HAVE_PKG_PDCURSESU
+#undef HAVE_PKG_PDCURSESW
 
 /* Define only one of the following Xaw packages. */
 #undef HAVE_PKG_XAW
