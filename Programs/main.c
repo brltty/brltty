@@ -77,44 +77,50 @@ setServiceState (DWORD state, DWORD exitStatus, const char *name) {
   logWindowsSystemError(name);
   return 0;
 }
+#define SET_SERVICE_STATE(state,code) setServiceState(state, code, #state)
 
 static void WINAPI
-serviceHandler (DWORD code) {
+serviceControlHandler (DWORD code) {
   switch (code) {
     case SERVICE_CONTROL_STOP:
-      setServiceState(SERVICE_STOP_PENDING, PROG_EXIT_SUCCESS, "SERVICE_STOP_PENDING");
+      SET_SERVICE_STATE(SERVICE_STOP_PENDING, PROG_EXIT_SUCCESS);
       raise(SIGTERM);
       break;
 
     case SERVICE_CONTROL_PAUSE:
-      setServiceState(SERVICE_PAUSE_PENDING, PROG_EXIT_SUCCESS, "SERVICE_PAUSE_PENDING");
-      /* TODO: suspend */
+      SET_SERVICE_STATE(SERVICE_PAUSE_PENDING, PROG_EXIT_SUCCESS);
+      suspendBrailleDriver();
+      SET_SERVICE_STATE(SERVICE_PAUSED, PROG_EXIT_SUCCESS);
       break;
 
     case SERVICE_CONTROL_CONTINUE:
-      setServiceState(SERVICE_CONTINUE_PENDING, PROG_EXIT_SUCCESS, "SERVICE_CONTINUE_PENDING");
-      /* TODO: resume */
+      SET_SERVICE_STATE(SERVICE_CONTINUE_PENDING, PROG_EXIT_SUCCESS);
+      if (resumeBrailleDriver()) {
+        SET_SERVICE_STATE(SERVICE_RUNNING, PROG_EXIT_SUCCESS);
+      } else {
+        SET_SERVICE_STATE(SERVICE_PAUSED, PROG_EXIT_SUCCESS);
+      }
       break;
 
     default:
-      setServiceState(serviceState, PROG_EXIT_SUCCESS, "SetServiceStatus");
+      logMessage(LOG_WARNING, "unexpected service control code: %lu", code);
       break;
   }
 }
 
 static void
 exitService (void) {
-  setServiceState(SERVICE_STOPPED, PROG_EXIT_SUCCESS, "SERVICE_STOPPED");
+  SET_SERVICE_STATE(SERVICE_STOPPED, PROG_EXIT_SUCCESS);
 }
 
 static void WINAPI
 serviceMain (DWORD argc, LPSTR *argv) {
   atexit(exitService);
 
-  if ((serviceStatusHandle = RegisterServiceCtrlHandler("", &serviceHandler))) {
-    if ((setServiceState(SERVICE_START_PENDING, PROG_EXIT_SUCCESS, "SERVICE_START_PENDING"))) {
+  if ((serviceStatusHandle = RegisterServiceCtrlHandler("", serviceControlHandler))) {
+    if ((SET_SERVICE_STATE(SERVICE_START_PENDING, PROG_EXIT_SUCCESS))) {
       if ((serviceExitStatus = brlttyConstruct(argc, argv)) == PROG_EXIT_SUCCESS) {
-        if ((setServiceState(SERVICE_RUNNING, PROG_EXIT_SUCCESS, "SERVICE_RUNNING"))) {
+        if ((SET_SERVICE_STATE(SERVICE_RUNNING, PROG_EXIT_SUCCESS))) {
           serviceExitStatus = brlttyRun();
         } else {
           serviceExitStatus = PROG_EXIT_FATAL;
@@ -125,7 +131,7 @@ serviceMain (DWORD argc, LPSTR *argv) {
         serviceExitStatus = PROG_EXIT_SUCCESS;
       }
 
-      setServiceState(SERVICE_STOPPED, serviceExitStatus, "SERVICE_STOPPED");
+      SET_SERVICE_STATE(SERVICE_STOPPED, serviceExitStatus);
     }
   } else {
     logWindowsSystemError("RegisterServiceCtrlHandler");
