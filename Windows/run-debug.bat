@@ -1,4 +1,9 @@
 @echo off
-echo Running BRLTTY in debug mode. When done, close this window (for example,
-echo by using the alt-space menu) and see %CD%\debug.log
-"%~dp0bin\brltty" -n -e -ldebug -Ldebug.log >stdout.log 2>stderr.log
+
+set programDirectory=%~dp0
+set logFile=%programDirectory%debug.log
+
+echo Running BRLTTY in debug mode. When done, close this window (for example, by
+echo using the alt-space menu) and see %logFile%
+
+"%programDirectory%bin\brltty" -n -ldebug "-L%logFile%" %*
