@@ -1,4 +1,5 @@
 @echo off
+setlocal
 
 set programDirectory=%~dp0
 set logFile=%programDirectory%debug.log
