@@ -21,6 +21,7 @@
 
 #include "prologue.h"
 #undef GOT_CURSES
+#undef GOT_CURSES_GET_WCH
 
 #if defined(HAVE_PKG_CURSES)
 #define GOT_CURSES
