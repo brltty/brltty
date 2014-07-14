@@ -424,17 +424,17 @@ removeSpeechRequests (volatile SpeechDriverThread *sdt, SpeechRequestType type) 
 
 static void
 sendSpeechRequest (volatile SpeechDriverThread *sdt) {
-  SpeechRequest *req;
+sendRequest:
+  if (getQueueSize(sdt->requestQueue) > 0) {
+    SpeechRequest *req = dequeueItem(sdt->requestQueue);
 
-next:
-  if ((req = dequeueItem(sdt->requestQueue))) {
     setResponsePending(sdt);
 
 #ifdef GOT_PTHREADS
     if (!asyncSignalEvent(sdt->requestEvent, req)) {
-      free(req);
+      if (req) free(req);
       setIntegerResponse(sdt, 0);
-      goto next;
+      goto sendRequest;
     }
 #else /* GOT_PTHREADS */
     handleSpeechRequest(sdt, req);
@@ -746,9 +746,10 @@ newSpeechDriverThread (
 }
 
 void
-destroySpeechDriverThread (
-  volatile SpeechDriverThread *sdt
-) {
+destroySpeechDriverThread (volatile SpeechDriverThread *sdt) {
+  awaitSpeechResponse(sdt, SPEECH_RESPONSE_WAIT_TIMEOUT);
+  deleteElements(sdt->requestQueue);
+
 #ifdef GOT_PTHREADS
   if (enqueueSpeechRequest(sdt, NULL)) {
     asyncAwaitCondition(SPEECH_DRIVER_THREAD_STOP_TIMEOUT, testSpeechDriverThreadFinished, (void *)sdt);
