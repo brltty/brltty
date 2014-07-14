@@ -67,10 +67,8 @@ startSpeechDriverThread (char **parameters) {
 void
 stopSpeechDriverThread (void) {
   if (spk.driver.thread) {
-    volatile SpeechDriverThread *sdt = spk.driver.thread;
-
+    destroySpeechDriverThread(spk.driver.thread);
     spk.driver.thread = NULL;
-    destroySpeechDriverThread(sdt);
   }
 }
 

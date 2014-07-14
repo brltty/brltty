@@ -148,6 +148,7 @@ typedef struct {
 #define END_SPEECH_DATA {.end=1} };
 
 typedef enum {
+  MSG_REQUEST_FINISHED,
   MSG_SPEECH_FINISHED,
   MSG_SPEECH_LOCATION
 } SpeechMessageType;
@@ -156,6 +157,10 @@ typedef struct {
   SpeechMessageType type;
 
   union {
+    struct {
+      int result;
+    } requestFinished;
+
     struct {
       int location;
     } speechLocation;
@@ -209,10 +214,28 @@ moveSpeechData (unsigned char *target, SpeechDatum *data) {
   }
 }
 
+static inline void
+setResponsePending (volatile SpeechDriverThread *sdt) {
+  sdt->response.type = RSP_PENDING;
+}
+
+static void
+setIntegerResponse (volatile SpeechDriverThread *sdt, int value) {
+  sdt->response.type = RSP_INTEGER;
+  sdt->response.value.INTEGER = value;
+}
+
 static void
 handleSpeechMessage (volatile SpeechDriverThread *sdt, SpeechMessage *msg) {
   if (msg) {
+    logMessage(LOG_CATEGORY(SPEECH_EVENTS), "handling message: %u", msg->type);
+
     switch (msg->type) {
+      case MSG_REQUEST_FINISHED:
+        setIntegerResponse(sdt, msg->arguments.requestFinished.result);
+        sendSpeechRequest(sdt);
+        break;
+
       case MSG_SPEECH_FINISHED:
         setSpeechFinished();
         break;
@@ -222,18 +245,18 @@ handleSpeechMessage (volatile SpeechDriverThread *sdt, SpeechMessage *msg) {
         break;
 
       default:
-        logMessage(LOG_CATEGORY(SPEECH_EVENTS), "unimplemented driver message type: %u", msg->type);
+        logMessage(LOG_CATEGORY(SPEECH_EVENTS), "unimplemented message: %u", msg->type);
         break;
     }
 
     free(msg);
-  } else {
-    sendSpeechRequest(sdt);
   }
 }
 
 static int
 sendSpeechMessage (volatile SpeechDriverThread *sdt, SpeechMessage *msg) {
+  logMessage(LOG_CATEGORY(SPEECH_EVENTS), "sending message: %u", msg->type);
+
 #ifdef GOT_PTHREADS
   return asyncSignalEvent(sdt->messageEvent, msg);
 #else /* GOT_PTHREADS */
@@ -257,6 +280,23 @@ newSpeechMessage (SpeechMessageType type, SpeechDatum *data) {
   }
 
   return NULL;
+}
+
+static int
+speechMessage_requestFinished (
+  volatile SpeechDriverThread *sdt,
+  int result
+) {
+  SpeechMessage *msg;
+
+  if ((msg = newSpeechMessage(MSG_REQUEST_FINISHED, NULL))) {
+    msg->arguments.requestFinished.result = result;
+    if (sendSpeechMessage(sdt, msg)) return 1;
+
+    free(msg);
+  }
+
+  return 0;
 }
 
 int
@@ -291,21 +331,9 @@ speechMessage_speechLocation (
   return 0;
 }
 
-static inline void
-setResponsePending (volatile SpeechDriverThread *sdt) {
-  sdt->response.type = RSP_PENDING;
-}
-
-static void
-setIntegerResponse (volatile SpeechDriverThread *sdt, int value) {
-  sdt->response.type = RSP_INTEGER;
-  sdt->response.value.INTEGER = value;
-}
-
 static int
-sendIntegerResponse (volatile SpeechDriverThread *sdt, int value) {
-  setIntegerResponse(sdt, value);
-  return sendSpeechMessage(sdt, NULL);
+sendIntegerResponse (volatile SpeechDriverThread *sdt, int result) {
+  return speechMessage_requestFinished(sdt, result);
 }
 
 ASYNC_CONDITION_TESTER(testSpeechResponseReceived) {
@@ -322,6 +350,8 @@ awaitSpeechResponse (volatile SpeechDriverThread *sdt, int timeout) {
 static void
 handleSpeechRequest (volatile SpeechDriverThread *sdt, SpeechRequest *req) {
   if (req) {
+    logMessage(LOG_CATEGORY(SPEECH_EVENTS), "handling request: %u", req->type);
+
     switch (req->type) {
       case REQ_SAY_TEXT: {
         speech->say(
@@ -382,14 +412,16 @@ handleSpeechRequest (volatile SpeechDriverThread *sdt, SpeechRequest *req) {
       }
 
       default:
-        logMessage(LOG_CATEGORY(SPEECH_EVENTS), "unimplemented speech request type: %u", req->type);
+        logMessage(LOG_CATEGORY(SPEECH_EVENTS), "unimplemented request: %u", req->type);
         sendIntegerResponse(sdt, 0);
         break;
     }
 
     free(req);
   } else {
+    logMessage(LOG_CATEGORY(SPEECH_EVENTS), "handling request: stop");
     setThreadState(sdt, THD_STOPPING);
+    sendIntegerResponse(sdt, 1);
   }
 }
 
@@ -428,6 +460,12 @@ sendRequest:
   if (getQueueSize(sdt->requestQueue) > 0) {
     SpeechRequest *req = dequeueItem(sdt->requestQueue);
 
+    if (req) {
+      logMessage(LOG_CATEGORY(SPEECH_EVENTS), "sending request: %u", req->type);
+    } else {
+      logMessage(LOG_CATEGORY(SPEECH_EVENTS), "sending request: stop");
+    }
+
     setResponsePending(sdt);
 
 #ifdef GOT_PTHREADS
@@ -445,6 +483,12 @@ sendRequest:
 static int
 enqueueSpeechRequest (volatile SpeechDriverThread *sdt, SpeechRequest *req) {
   if (sdt) {
+    if (req) {
+      logMessage(LOG_CATEGORY(SPEECH_EVENTS), "enqueuing request: %u", req->type);
+    } else {
+      logMessage(LOG_CATEGORY(SPEECH_EVENTS), "enqueuing request: stop");
+    }
+
     if (enqueueItem(sdt->requestQueue, req)) {
       if (sdt->response.type != RSP_PENDING) {
         if (getQueueSize(sdt->requestQueue) == 1) {
@@ -747,12 +791,11 @@ newSpeechDriverThread (
 
 void
 destroySpeechDriverThread (volatile SpeechDriverThread *sdt) {
-  awaitSpeechResponse(sdt, SPEECH_RESPONSE_WAIT_TIMEOUT);
   deleteElements(sdt->requestQueue);
 
 #ifdef GOT_PTHREADS
   if (enqueueSpeechRequest(sdt, NULL)) {
-    asyncAwaitCondition(SPEECH_DRIVER_THREAD_STOP_TIMEOUT, testSpeechDriverThreadFinished, (void *)sdt);
+    awaitSpeechResponse(sdt, SPEECH_DRIVER_THREAD_STOP_TIMEOUT);
     awaitSpeechDriverThreadTermination(sdt);
   }
 
