@@ -27,6 +27,7 @@
 #include "async_wait.h"
 #include "async_event.h"
 #include "async_thread.h"
+#include "queue.h"
 
 #ifdef ENABLE_SPEECH_SUPPORT
 typedef enum {
@@ -76,6 +77,7 @@ typedef enum {
 
 struct SpeechDriverThreadStruct {
   ThreadState threadState;
+  Queue *requestQueue;
 
   volatile SpeechSynthesizer *speechSynthesizer;
   char **driverParameters;
@@ -162,6 +164,8 @@ typedef struct {
   unsigned char data[0];
 } SpeechMessage;
 
+static void sendSpeechRequest (volatile SpeechDriverThread *sdt);
+
 static void
 setThreadState (volatile SpeechDriverThread *sdt, ThreadState state) {
   const ThreadStateEntry *entry = getThreadStateEntry(state);
@@ -223,6 +227,8 @@ handleSpeechMessage (volatile SpeechDriverThread *sdt, SpeechMessage *msg) {
     }
 
     free(msg);
+  } else {
+    sendSpeechRequest(sdt);
   }
 }
 
@@ -290,10 +296,15 @@ setResponsePending (volatile SpeechDriverThread *sdt) {
   sdt->response.type = RSP_PENDING;
 }
 
-static int
-sendIntegerResponse (volatile SpeechDriverThread *sdt, int value) {
+static void
+setIntegerResponse (volatile SpeechDriverThread *sdt, int value) {
   sdt->response.type = RSP_INTEGER;
   sdt->response.value.INTEGER = value;
+}
+
+static int
+sendIntegerResponse (volatile SpeechDriverThread *sdt, int value) {
+  setIntegerResponse(sdt, value);
   return sendSpeechMessage(sdt, NULL);
 }
 
@@ -306,17 +317,6 @@ ASYNC_CONDITION_TESTER(testSpeechResponseReceived) {
 static int
 awaitSpeechResponse (volatile SpeechDriverThread *sdt, int timeout) {
   return asyncAwaitCondition(timeout, testSpeechResponseReceived, (void *)sdt);
-}
-
-static inline int
-getIntegerResult (volatile SpeechDriverThread *sdt) {
-  if (awaitSpeechResponse(sdt, SPEECH_RESPONSE_WAIT_TIMEOUT)) {
-    if (sdt->response.type == RSP_INTEGER) {
-      return sdt->response.value.INTEGER;
-    }
-  }
-
-  return 0;
 }
 
 static void
@@ -393,17 +393,70 @@ handleSpeechRequest (volatile SpeechDriverThread *sdt, SpeechRequest *req) {
   }
 }
 
+typedef struct {
+  SpeechRequestType const type;
+} TestSpeechRequestData;
+
 static int
-sendSpeechRequest (volatile SpeechDriverThread *sdt, SpeechRequest *req) {
-  if (!sdt) return 0;
-  setResponsePending(sdt);
+testSpeechRequest (const void *item, void *data) {
+  const SpeechRequest *req = item;
+  const TestSpeechRequestData *tsr = data;
+
+  return req->type == tsr->type;
+}
+
+static Element *
+findSpeechRequestElement (volatile SpeechDriverThread *sdt, SpeechRequestType type) {
+  TestSpeechRequestData tsr = {
+    .type = type
+  };
+
+  if (!sdt) return NULL;
+  return findElement(sdt->requestQueue, testSpeechRequest, &tsr);
+}
+
+static void
+removeSpeechRequests (volatile SpeechDriverThread *sdt, SpeechRequestType type) {
+  Element *element;
+
+  while ((element = findSpeechRequestElement(sdt, type))) deleteElement(element);
+}
+
+static void
+sendSpeechRequest (volatile SpeechDriverThread *sdt) {
+  SpeechRequest *req;
+
+next:
+  if ((req = dequeueItem(sdt->requestQueue))) {
+    setResponsePending(sdt);
 
 #ifdef GOT_PTHREADS
-  return asyncSignalEvent(sdt->requestEvent, req);
+    if (!asyncSignalEvent(sdt->requestEvent, req)) {
+      free(req);
+      setIntegerResponse(sdt, 0);
+      goto next;
+    }
 #else /* GOT_PTHREADS */
-  handleSpeechRequest(sdt, req);
-  return 1;
+    handleSpeechRequest(sdt, req);
 #endif /* GOT_PTHREADS */
+  }
+}
+
+static int
+enqueueSpeechRequest (volatile SpeechDriverThread *sdt, SpeechRequest *req) {
+  if (sdt) {
+    if (enqueueItem(sdt->requestQueue, req)) {
+      if (sdt->response.type != RSP_PENDING) {
+        if (getQueueSize(sdt->requestQueue) == 1) {
+          sendSpeechRequest(sdt);
+        }
+      }
+
+      return 1;
+    }
+  }
+
+  return 0;
 }
 
 static SpeechRequest *
@@ -441,7 +494,7 @@ speechRequest_sayText (
     req->arguments.sayText.length = length;
     req->arguments.sayText.count = count;
     req->arguments.sayText.attributes = data[1].address;
-    if (sendSpeechRequest(sdt, req)) return getIntegerResult(sdt);
+    if (enqueueSpeechRequest(sdt, req)) return 1;
 
     free(req);
   }
@@ -456,7 +509,8 @@ speechRequest_muteSpeech (
   SpeechRequest *req;
 
   if ((req = newSpeechRequest(REQ_MUTE_SPEECH, NULL))) {
-    if (sendSpeechRequest(sdt, req)) return getIntegerResult(sdt);
+    removeSpeechRequests(sdt, REQ_SAY_TEXT);
+    if (enqueueSpeechRequest(sdt, req)) return 1;
 
     free(req);
   }
@@ -473,7 +527,7 @@ speechRequest_setVolume (
 
   if ((req = newSpeechRequest(REQ_SET_VOLUME, NULL))) {
     req->arguments.setVolume.setting = setting;
-    if (sendSpeechRequest(sdt, req)) return getIntegerResult(sdt);
+    if (enqueueSpeechRequest(sdt, req)) return 1;
 
     free(req);
   }
@@ -490,7 +544,7 @@ speechRequest_setRate (
 
   if ((req = newSpeechRequest(REQ_SET_RATE, NULL))) {
     req->arguments.setRate.setting = setting;
-    if (sendSpeechRequest(sdt, req)) return getIntegerResult(sdt);
+    if (enqueueSpeechRequest(sdt, req)) return 1;
 
     free(req);
   }
@@ -507,7 +561,7 @@ speechRequest_setPitch (
 
   if ((req = newSpeechRequest(REQ_SET_PITCH, NULL))) {
     req->arguments.setPitch.setting = setting;
-    if (sendSpeechRequest(sdt, req)) return getIntegerResult(sdt);
+    if (enqueueSpeechRequest(sdt, req)) return 1;
 
     free(req);
   }
@@ -524,7 +578,7 @@ speechRequest_setPunctuation (
 
   if ((req = newSpeechRequest(REQ_SET_PUNCTUATION, NULL))) {
     req->arguments.setPunctuation.setting = setting;
-    if (sendSpeechRequest(sdt, req)) return getIntegerResult(sdt);
+    if (enqueueSpeechRequest(sdt, req)) return 1;
 
     free(req);
   }
@@ -619,6 +673,13 @@ ASYNC_THREAD_FUNCTION(runSpeechDriverThread) {
 }
 #endif /* GOT_PTHREADS */
 
+static void
+deallocateSpeechRequest (void *item, void *data) {
+  SpeechRequest *req = item;
+
+  free(req);
+}
+
 volatile SpeechDriverThread *
 newSpeechDriverThread (
   volatile SpeechSynthesizer *spk,
@@ -634,43 +695,47 @@ newSpeechDriverThread (
     sdt->speechSynthesizer = spk;
     sdt->driverParameters = parameters;
 
+    if ((sdt->requestQueue = newQueue(deallocateSpeechRequest, NULL))) {
 #ifdef GOT_PTHREADS
-    if ((sdt->messageEvent = asyncNewEvent(handleSpeechMessageEvent, (void *)sdt))) {
-      pthread_t threadIdentifier;
-      int createError = asyncCreateThread("speech-driver",
-                                          &threadIdentifier, NULL,
-                                          runSpeechDriverThread, (void *)sdt);
+      if ((sdt->messageEvent = asyncNewEvent(handleSpeechMessageEvent, (void *)sdt))) {
+        pthread_t threadIdentifier;
+        int createError = asyncCreateThread("speech-driver",
+                                            &threadIdentifier, NULL,
+                                            runSpeechDriverThread, (void *)sdt);
 
-      if (!createError) {
-        sdt->threadIdentifier = threadIdentifier;
+        if (!createError) {
+          sdt->threadIdentifier = threadIdentifier;
 
-        if (awaitSpeechResponse(sdt, SPEECH_DRIVER_THREAD_START_TIMEOUT)) {
-          if (sdt->response.type == RSP_INTEGER) {
-            if (sdt->response.value.INTEGER) {
-              return sdt;
+          if (awaitSpeechResponse(sdt, SPEECH_DRIVER_THREAD_START_TIMEOUT)) {
+            if (sdt->response.type == RSP_INTEGER) {
+              if (sdt->response.value.INTEGER) {
+                return sdt;
+              }
             }
+
+            logMessage(LOG_CATEGORY(SPEECH_EVENTS), "driver thread initialization failure");
+            awaitSpeechDriverThreadTermination(sdt);
+          } else {
+            logMessage(LOG_CATEGORY(SPEECH_EVENTS), "driver thread initialization timeout");
           }
-
-          logMessage(LOG_CATEGORY(SPEECH_EVENTS), "driver thread initialization failure");
-          awaitSpeechDriverThreadTermination(sdt);
         } else {
-          logMessage(LOG_CATEGORY(SPEECH_EVENTS), "driver thread initialization timeout");
+          logMessage(LOG_CATEGORY(SPEECH_EVENTS), "driver thread creation failure: %s", strerror(createError));
         }
-      } else {
-        logMessage(LOG_CATEGORY(SPEECH_EVENTS), "driver thread creation failure: %s", strerror(createError));
-      }
 
-      asyncDiscardEvent(sdt->messageEvent);
-      sdt->messageEvent = NULL;
-    } else {
-      logMessage(LOG_CATEGORY(SPEECH_EVENTS), "response event construction failure");
-    }
+        asyncDiscardEvent(sdt->messageEvent);
+        sdt->messageEvent = NULL;
+      } else {
+        logMessage(LOG_CATEGORY(SPEECH_EVENTS), "response event construction failure");
+      }
 #else /* GOT_PTHREADS */
-    if (startSpeechDriver(sdt)) {
-      setThreadReady(sdt);
-      return sdt;
-    }
+      if (startSpeechDriver(sdt)) {
+        setThreadReady(sdt);
+        return sdt;
+      }
 #endif /* GOT_PTHREADS */
+
+      deallocateQueue(sdt->requestQueue);
+    }
 
     free((void *)sdt);
   } else {
@@ -685,7 +750,7 @@ destroySpeechDriverThread (
   volatile SpeechDriverThread *sdt
 ) {
 #ifdef GOT_PTHREADS
-  if (sendSpeechRequest(sdt, NULL)) {
+  if (enqueueSpeechRequest(sdt, NULL)) {
     asyncAwaitCondition(SPEECH_DRIVER_THREAD_STOP_TIMEOUT, testSpeechDriverThreadFinished, (void *)sdt);
     awaitSpeechDriverThreadTermination(sdt);
   }
@@ -696,6 +761,7 @@ destroySpeechDriverThread (
   setThreadState(sdt, THD_FINISHED);
 #endif /* GOT_PTHREADS */
 
+  deallocateQueue(sdt->requestQueue);
   free((void *)sdt);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
