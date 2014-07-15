@@ -883,7 +883,7 @@ CORE_HEADERS = \
    $(SRC_DIR)/scr_driver.h $(SRC_DIR)/scr_types.h $(SRC_DIR)/scr_utils.h $(SRC_DIR)/scr_base.h $(SRC_DIR)/scr_real.h $(SRC_DIR)/scr_main.h \
    $(SRC_DIR)/system.h $(SRC_DIR)/system_darwin.h $(SRC_DIR)/system_java.h $(SRC_DIR)/system_linux.h $(SRC_DIR)/system_msdos.h $(SRC_DIR)/system_windows.h \
    $(SRC_DIR)/win_errno.h $(SRC_DIR)/win_pthread.h \
-   $(SRC_DIR)/get_sockets.h $(SRC_DIR)/get_pthreads.h \
+   $(SRC_DIR)/get_curses.h $(SRC_DIR)/get_pthreads.h $(SRC_DIR)/get_sockets.h \
    $(SRC_TOP)prologue.h $(BLD_TOP)config.h $(BLD_TOP)forbuild.h
 
 install-core-headers: install-include-directory
