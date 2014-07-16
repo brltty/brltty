@@ -1,0 +1,3 @@
+include/lusb0_usb.h     /mingw/include/usb.h
+bin/x86/libusb0_x86.dll /mingw/bin/libusb0.dll
+lib/gcc/libusb.a        /mingw/lib/

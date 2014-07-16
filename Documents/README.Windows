@@ -387,18 +387,19 @@ the following software components have already been installed:
   installed for each version of Python. Each Cython version is installed within
   the corresponding Python version's hierarchy.
 - LibUSB-Win32 (from http://libusb-win32.sourceforge.net/). The mkwin script
-  assumes that it has been installed in C:\Program Files\LibUSB-Win32. The -U
-  (LibUSB-Win32) option can be used to specify another location.
+  assumes that it has been installed in C:\LibUSB-Win32. The -U (LibUSB-Win32)
+  option can be used to specify another location.
 - LibUSB-1.0 (from http://www.libusb.org/wiki/windows_backend). The mkwin
-  script assumes that it has been installed in C:\Program Fils\LibUSB-1.0. The
-  -X (libusbx) option can be used to specify another location.
+  script assumes that it has been installed in C:\LibUSB-1.0. The -X (libusbx)
+  option can be used to specify another location.
 - WinUSB (from http://www.libusb.org/wiki/windows_backend). The mkwin script
-  assumes that it has been installed in C:\Program Files\WinUSB. The -W
-  (WinUSB) option can be used to specify another location.
+  assumes that it has been installed in C:\WinUSB. The -W (WinUSB) option can
+  be used to specify another location.
 - ICU (from http://icu-project.org/). The mkwin script assumes that it has been
-  installed in C:\Program Files\icu. The -I (ICU) option can be used to
-  specify another location. The archive's only top-level directory is named
-  icu, so unpack it when in MinGW's '/c/Program Files' directory.
+  installed in C:\ICU. The -I (ICU) option can be used to specify another
+  location. The archive's only top-level directory is named icu, so unpack it
+  when in MinGW's /c directory. Since Windows file systems are not case
+  sensitive, renaming it from icu to ICU is optional.
 - pkg-config (from http://gtk.org/download/win32.php). Its archive should be
   unpacked when in MinGW's /mingw directory.
 - Glib (from http://gtk.org/download/win32.php). Its archive should be unpacked

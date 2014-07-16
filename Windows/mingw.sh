@@ -26,20 +26,20 @@ nsisDownload="http://nsis.sourceforge.net/"
 
 libusb0Name="LibUSB-Win32"
 libusb0Version="1.2.6.0"
-libusb0Location="/c/Program Files/LibUSB-Win32"
+libusb0Location="/c/LibUSB-Win32"
 libusb0Files="bin/libusb-win32-bin-README.txt"
 libusb0Download="http://libusb-win32.sourceforge.net/"
 libusb0Pattern="usb0"
 
 libusb1Name="LibUSB-1.0"
 libusb1Version="1.0.18"
-libusb1Location="/c/Program Files/LibUSB-1.0"
+libusb1Location="/c/LibUSB-1.0"
 libusb1Files="libusb-1.0.def"
 libusb1Download="http://www.libusb.org/wiki/windows_backend"
 libusb1Pattern="usb-1.0"
 
 winusbName="WinUSB"
-winusbLocation="/c/Program Files/WinUSB"
+winusbLocation="/c/WinUSB"
 winusbFiles="libusb_device.inf"
 winusbDownload="http://www.libusb.org/wiki/windows_backend"
 
@@ -58,7 +58,7 @@ cythonLocation=""
 cythonDownload="http://www.cython.org/"
 
 icuName="ICU"
-icuLocation="/c/Program Files/icu"
+icuLocation="/c/ICU"
 icuFiles="include/unicode"
 icuDownload="http://icu-project.org/"
 

@@ -1,3 +1,0 @@
-include/libusbx-1.0 /mingw/include/libusb-1.0
-MinGW32/dll/libusb-1.0.dll.a /mingw/lib/
-MinGW32/dll/libusb-1.0.dll /mingw/bin/
