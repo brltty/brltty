@@ -100,12 +100,12 @@
 /* Braille display parameters that do not change */
 #define BRLROWS 1		/* only one row on braille display */
 
-/* Type of delay the display requires after sending it commands.
+/* Type of delay the display requires after sending it a command.
    0 -> no delay, 1 -> drain only, 2 -> drain + wait for SEND_DELAY. */
-static int slow_update;
+static unsigned char slowUpdate;
 
 /* Whether multiple packets can be sent for a single update. */
-static int no_multiple_updates;
+static unsigned char noMultipleUpdates;
 
 /* We periodicaly refresh the display even if nothing has changed, will clear
    out any garble... */
@@ -267,29 +267,124 @@ static struct inbytedesc pb_key_desc[PB_KEY_LEN] =
 #define SW_NVERT 4 /* vertical switches. unused info. 4bytes to skip */
 #define SW_MAXHORIZ 11	/* bytes of horizontal info (81cells
 			   / 8bits per byte = 11bytes) */
-/* actual total number of switch informatio bytes depending on size
-   of display (40/65/81) including 4bytes of unused vertical switches */
-#define SW_CNT40 9
-#define SW_CNT80 14
-#define SW_CNT81 15
+/* actual total number of switch information bytes depending on size
+ * of display (40/65/81) including 4 bytes of unused vertical switches
+ */
+#define SWITCH_BYTES_40 9
+#define SWITCH_BYTES_80 14
+#define SWITCH_BYTES_81 15
 
 /* Global variables */
+
+typedef struct {
+  const char *modelName;
+  const char *keyBindings;
+
+  unsigned char switchBytes;
+  signed char lastRoutingKey;
+
+  unsigned hasRoutingKeys:1;
+  unsigned slowUpdate:2;
+  unsigned highBaud:1;
+  unsigned isPB40:1;
+} ModelEntry;
+
+static const ModelEntry modelNavigator20 = {
+  .modelName = "Navigator 20",
+
+  .switchBytes = SWITCH_BYTES_40,
+  .lastRoutingKey = 19,
+
+  .keyBindings = "nav20_nav40"
+};
+
+static const ModelEntry modelNavigator40 = {
+  .modelName = "Navigator 40",
+
+  .switchBytes = SWITCH_BYTES_40,
+  .lastRoutingKey = 39,
+
+  .slowUpdate = 1,
+
+  .keyBindings = "nav20_nav40"
+};
+
+static const ModelEntry modelNavigator80 = {
+  .modelName = "Navigator 80",
+
+  .switchBytes = SWITCH_BYTES_80,
+  .lastRoutingKey = 79,
+
+  .hasRoutingKeys = 1,
+  .slowUpdate = 2,
+
+  .keyBindings = "nav80"
+};
+
+static const ModelEntry modelPowerBraille40 = {
+  .modelName = "Power Braille 40",
+
+  .switchBytes = SWITCH_BYTES_40,
+  .lastRoutingKey = 39,
+
+  .hasRoutingKeys = 1,
+  .highBaud = 1,
+  .isPB40 = 1,
+
+  .keyBindings = "pb40"
+};
+
+static const ModelEntry modelPowerBraille65 = {
+  .modelName = "Power Braille 65",
+
+  .switchBytes = SWITCH_BYTES_81,
+  .lastRoutingKey = 64,
+
+  .hasRoutingKeys = 1,
+  .slowUpdate = 2,
+  .highBaud = 1,
+
+  .keyBindings = "pb65_pb81"
+};
+
+static const ModelEntry modelPowerBraille80 = {
+  .modelName = "Power Braille 80",
+
+  .switchBytes = SWITCH_BYTES_81,
+  .lastRoutingKey = 80,
+
+  .hasRoutingKeys = 1,
+  .slowUpdate = 2,
+  .highBaud = 1,
+
+  .keyBindings = "pb65_pb81"
+};
+
+typedef union {
+  unsigned char bytes[1];
+
+  struct {
+    char header[2];
+    unsigned char columns;
+    unsigned char dots;
+    char version[4];
+    char checksum[4];
+  } identity;
+} InputPacket;
+
+static const SerialParameters serialParameters = {
+  SERIAL_DEFAULT_PARAMETERS
+};
+
+static const ModelEntry *model;
 
 static unsigned char *rawdata,	/* translated data to send to display */
                      *prevdata, /* previous data sent */
                      *dispbuf;
-static int brl_cols;		/* Number of cells available for text */
+static unsigned char brl_cols;		/* Number of cells available for text */
 static int ncells;              /* Total number of cells on display: this is
 				   brl_cols cells + 1 status cell on PB80. */
-static unsigned char has_sw,    /* flag: has routing keys or not */
-                     sw_lastkey,/* index of the last routing key (first
-				   being 0). On PB80 this excludes the 81st. */
-                     sw_bcnt;   /* bytes of sensor switch information */
 static char disp_ver[Q_VER_LENGTH]; /* version of the hardware */
-
-typedef enum {NAV20_40, NAV80, PB40, PB65_81} DisplayType;
-static DisplayType displayType;
-static const char *keyBindings[] = {"nav20_nav40", "nav80", "pb40", "pb65_pb81"};
 
 static ssize_t
 readBytes (BrailleDisplay *brl, void *buffer, size_t size, int wait) {
@@ -301,12 +396,12 @@ readBytes (BrailleDisplay *brl, void *buffer, size_t size, int wait) {
 
 static ssize_t
 writeBytes (BrailleDisplay *brl, const void *data, size_t size) {
+  brl->writeDelay += slowUpdate * 24;
   return writeBraillePacket(brl, NULL, data, size);
 }
 
 static int
-queryDisplay (BrailleDisplay *brl, unsigned char *reply) {
-  /* For auto-detect: send query, read response and validate response header. */
+queryDisplay (BrailleDisplay *brl, InputPacket *reply) {
   static const unsigned char request[] = {0xFF, 0xFF, 0x0A};
 
   if (writeBytes(brl, request, sizeof(request))) {
@@ -314,13 +409,11 @@ queryDisplay (BrailleDisplay *brl, unsigned char *reply) {
       ssize_t count = readBytes(brl, reply, Q_REPLY_LENGTH, 0);
 
       if (count != -1) {
-        logInputPacket(reply, count);
+        const char *header = reply->identity.header;
 
-        if ((count == Q_REPLY_LENGTH) && (memcmp(reply, Q_HEADER, Q_HEADER_LENGTH) == 0)) {
-          return 1;
-        } else {
-          logUnexpectedPacket(reply, count);
-        }
+        logInputPacket(reply, count);
+        if ((count == sizeof(reply->identity)) && (header[0] == 0X00) && (header[1] == 0X05)) return 1;
+        logUnexpectedPacket(reply, count);
       } else {
         logSystemError("read");
       }
@@ -341,10 +434,6 @@ resetTypematic (BrailleDisplay *brl) {
   writeBytes(brl, BRL_TYPEMATIC, DIM_BRL_TYPEMATIC);
   writeBytes(brl, &params, 2);
 }
-
-static const SerialParameters serialParameters = {
-  SERIAL_DEFAULT_PARAMETERS
-};
 
 static int
 setBaud (BrailleDisplay *brl, int baud) {
@@ -373,111 +462,80 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   int i=0;
-  unsigned char reply[Q_REPLY_LENGTH];
-  int speed;
+  InputPacket reply;
 
   dispbuf = rawdata = prevdata = NULL;
 
   if (!connectResource(brl, device)) goto failure;
 
   if (!setBaud(brl, 9600)) goto failure;
-  if (!queryDisplay(brl, reply)) {
+  if (!queryDisplay(brl, &reply)) {
 #ifdef HIGHBAUD
     /* Then send the query at 19200bps, in case a PB was left ON
      * at that speed
      */
     if (!setBaud(brl, 19200)) goto failure;
-    if (!queryDisplay(brl, reply)) goto failure;
+    if (!queryDisplay(brl, &reply)) goto failure;
 #else /* HIGHBAUD */
     goto failure;
 #endif /* HIGHBAUD */
   }
 
-  memcpy(disp_ver, &reply[Q_OFFSET_VER], Q_VER_LENGTH);
-  ncells = reply[Q_OFFSET_COLS];
-  logMessage(LOG_INFO,"display replied: %d cells, version %c%c%c%c",
-             ncells,
-	     disp_ver[0], disp_ver[1], disp_ver[2], disp_ver[3]);
-
+  memcpy(disp_ver, reply.identity.version, sizeof(disp_ver));
+  ncells = reply.identity.columns;
   brl_cols = ncells;
-  sw_lastkey = brl_cols-1;
-  speed = 1;
-  slow_update = 0;
+  logMessage(LOG_INFO, "display replied: %d cells, version %.*s",
+             ncells, 3, &disp_ver[1]);
 
-  switch(brl_cols){
-  case 20:
-    /* nav 20 */
-    displayType = NAV20_40;
-    has_sw = 0;
-    logMessage(LOG_INFO, "detected Navigator 20");
-    break;
-  case 40:
-    if(disp_ver[1] > '3'){
-      /* pb 40 */
-      displayType = PB40;
-      has_sw = 1;
-      sw_bcnt = SW_CNT40;
-      sw_lastkey = 39;
-      speed = 2;
-      logMessage(LOG_INFO, "detected PowerBraille 40");
-    }else{
-      /* nav 40 */
-      has_sw = 0;
-      displayType = NAV20_40;
-      slow_update = 1;
-      logMessage(LOG_INFO, "detected Navigator 40");
-    }
-    break;
-  case 80:
-    /* nav 80 */
-    displayType = NAV80;
-    has_sw = 1;
-    sw_bcnt = SW_CNT80;
-    sw_lastkey = 79;
-    slow_update = 2;
-    logMessage(LOG_INFO, "detected Navigator 80");
-    break;
-  case 65:
-    /* pb65 */
-    displayType = PB65_81;
-    has_sw = 1;
-    sw_bcnt = SW_CNT81;
-    sw_lastkey = 64;
-    speed = 2;
-    slow_update = 2;
-    logMessage(LOG_INFO, "detected PowerBraille 65");
-    break;
-  case 81:
-    /* pb80 */
-    displayType = PB65_81;
-    has_sw = 1;
-    sw_bcnt = SW_CNT81;
-    sw_lastkey = 80;
-    speed = 2;
-    slow_update = 2;
-    logMessage(LOG_INFO, "detected PowerBraille 80");
-    break;
-  default:
-    logMessage(LOG_ERR,"Unrecognized braille display");
-    goto failure;
-  };
-  brl->keyBindings = keyBindings[displayType];
+  switch (brl_cols) {
+    case 20:
+      model = &modelNavigator20;
+      break;
 
-  no_multiple_updates = 0;
+    case 40:
+      model = (disp_ver[1] > '3')? &modelPowerBraille40: &modelNavigator40;
+      break;
+
+    case 80:
+      model = &modelNavigator80;
+      break;
+
+    case 65:
+      model = &modelPowerBraille65;
+      break;
+
+    case 81:
+      model = &modelPowerBraille80;
+      break;
+
+    default:
+      logMessage(LOG_ERR, "unrecognized braille display size: %u", brl_cols);
+      goto failure;
+  }
+
+  logMessage(LOG_INFO, "detected %s", model->modelName);
+  brl->keyBindings = model->keyBindings;
+
+  slowUpdate = model->slowUpdate;
+  noMultipleUpdates = 0;
+
 #ifdef FORCE_DRAIN_AFTER_SEND
-  slow_update = 1;
+  slowUpdate = 1;
 #endif /* FORCE_DRAIN_AFTER_SEND */
+
 #ifdef FORCE_FULL_SEND_DELAY
-  slow_update = 2;
+  slowUpdate = 2;
 #endif /* FORCE_FULL_SEND_DELAY */
+
 #ifdef NO_MULTIPLE_UPDATES
-  no_multiple_updates = 1;
+  noMultipleUpdates = 1;
 #endif /* NO_MULTIPLE_UPDATES */
-  if(slow_update == 2) no_multiple_updates = 1;
+
+  if (slowUpdate == 2) noMultipleUpdates = 1;
 
   fullFreshenEvery = FULL_FRESHEN_EVERY;
 #ifdef HIGHBAUD
-  if (speed == 2) {
+  if (model->highBaud) {
     /* if supported (PB) go to 19200 baud */
     writeBytes(brl, BRL_UART192, DIM_BRL_UART192);
   //serialAwaitOutput(brl->gioEndpoint);
@@ -485,7 +543,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (!setBaud(brl, 19200)) goto failure;
     logMessage(LOG_DEBUG, "switched to 19200 baud - checking if display followed");
 
-    if (queryDisplay(brl, reply)) {
+    if (queryDisplay(brl, &reply)) {
       logMessage(LOG_DEBUG, "display responded at 19200 baud");
     } else {
       logMessage(LOG_INFO,
@@ -495,7 +553,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     //serialAwaitOutput(brl->gioEndpoint);
       asyncWait(BAUD_DELAY); /* just to be safe */
 
-      if (queryDisplay(brl, reply)) {
+      if (queryDisplay(brl, &reply)) {
 	logMessage(LOG_INFO, "found display again at 9600 baud - must be a TSI emulator");
         fullFreshenEvery = 1;
       } else {
@@ -643,7 +701,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
     count = fullFreshenEvery;
     memcpy(prevdata, dispbuf, ncells);
     display_all (brl, dispbuf);
-  }else if(no_multiple_updates){
+  } else if (noMultipleUpdates) {
     unsigned int from, to;
     
     if (cellsHaveChanged(prevdata, dispbuf, ncells, &from, &to, NULL)) {
@@ -957,7 +1015,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
     if (readBytes(brl, buf+i, 1, 1) != 1) return EOF;
   }/* while */
 
-  if (has_sw && must_init_oldstat) {
+  if (model->hasRoutingKeys && must_init_oldstat) {
     must_init_oldstat = 0;
     ignore_routing = 0;
     sw_howmany = 0;
@@ -1002,9 +1060,9 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
       return (EOF);
     }
     
-    /* if sw_bcnt and cnt disagree, then must be garbage??? */
+    /* if model->switchBytes and cnt disagree, then must be garbage??? */
     /* problematic for PB 65/80/81... not clear */
-    if (cnt != sw_bcnt) return EOF;
+    if (cnt != model->switchBytes) return EOF;
 
     if (readBytes(brl, buf, SW_NVERT, 1) != SW_NVERT) {
       return EOF;
@@ -1047,7 +1105,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 
   /* Now associate a command (in res) to the key(s) (in code and sw_...) */
 
-  if (has_sw && code && sw_howmany) {
+  if (model->hasRoutingKeys && code && sw_howmany) {
     if (ignore_routing) return EOF;
     ignore_routing = 1;
 
@@ -1088,13 +1146,13 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 	}
       }
     }
-  } else if (has_sw && sw_howmany)	/* routing key */
+  } else if (model->hasRoutingKeys && sw_howmany)	/* routing key */
     {
       if (sw_howmany == 1)
 	res = BRL_BLK_ROUTE + sw_which[0];
 #if 0
-     else if (sw_howmany == 3 && sw_which[1] == sw_lastkey - 1
-	       && sw_which[2] == sw_lastkey)
+     else if (sw_howmany == 3 && sw_which[1] == model->lastRoutingKey - 1
+	       && sw_which[2] == model->lastRoutingKey)
 	res = BRL_BLK_CLIP_NEW + sw_which[0];
       else if (sw_howmany == 3 && sw_which[0] == 0 && sw_which[1] == 1)
  	res = BRL_BLK_COPY_RECT + sw_which[2];
@@ -1103,23 +1161,23 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
  	res = BRL_CMD_PASTE;
       else if (sw_howmany == 2 && sw_which[0] == 0 && sw_which[1] == 1)
 	res = BRL_CMD_CHRLT;
-      else if (sw_howmany == 2 && sw_which[0] == sw_lastkey - 1
-	       && sw_which[1] == sw_lastkey)
+      else if (sw_howmany == 2 && sw_which[0] == model->lastRoutingKey - 1
+	       && sw_which[1] == model->lastRoutingKey)
 	res = BRL_CMD_CHRRT;
       else if (sw_howmany == 2 && sw_which[0] == 0 && sw_which[1] == 2)
 	res = BRL_CMD_HWINLT;
-      else if (sw_howmany == 2 && sw_which[0] == sw_lastkey - 2
-	       && sw_which[1] == sw_lastkey)
+      else if (sw_howmany == 2 && sw_which[0] == model->lastRoutingKey - 2
+	       && sw_which[1] == model->lastRoutingKey)
 	res = BRL_CMD_HWINRT;
       else if (sw_howmany == 2 && sw_which[0] == 0
-	       && sw_which[1] == sw_lastkey)
+	       && sw_which[1] == model->lastRoutingKey)
 	res = BRL_CMD_HELP;
       else if (sw_howmany == 4 && sw_which[0] == 0 && sw_which[1] == 1
-	       && sw_which[2] == sw_lastkey-1 && sw_which[3] == sw_lastkey)
+	       && sw_which[2] == model->lastRoutingKey-1 && sw_which[3] == model->lastRoutingKey)
 	res = BRL_CMD_LEARN;
 #if 0
       else if (sw_howmany == 2 && sw_which[0] == 1
-	       && sw_which[1] == sw_lastkey - 1)
+	       && sw_which[1] == model->lastRoutingKey - 1)
 	{
 	  resetTypematic(brl);
 	  display_all (brl, prevdata);
@@ -1169,9 +1227,9 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
   /* keyboard cursor keys simulation */
     KEY (KEY_CLEFT, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT);
     KEY (KEY_CRIGHT, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT);
-    KEY (KEY_CUP, (context == KTB_CTX_MENU && displayType == PB40)
+    KEY (KEY_CUP, (context == KTB_CTX_MENU && model->isPB40)
 	 ? BRL_CMD_MENU_PREV_SETTING : BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP);
-    KEY (KEY_CDOWN, (context == KTB_CTX_MENU && displayType == PB40)
+    KEY (KEY_CDOWN, (context == KTB_CTX_MENU && model->isPB40)
 	 ? BRL_CMD_MENU_NEXT_SETTING : BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN);
 
   /* special modes */
