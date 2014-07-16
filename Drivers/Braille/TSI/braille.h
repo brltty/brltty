@@ -64,15 +64,6 @@
 /* The maximum time needed to realize that the display was turned off is
    approx PING_INTRVL +500 ms. */
 
-/* PB models communicate at 19200baud. Comment this out if you want to remain
-   at 9600baud for some reason. */
-#define HIGHBAUD 1
-/* At least two TSI emulators (BAUM Vario? and mdv mb408s) only run at
-   9600baud although they pretend to be PB40. However the driver will
-   autodetect this and fall back to 9600baud when it doesn't get any response
-   at 19200. So this option is only needed to force a 19200baud capable
-   device down to 9600baud. */
-
 /* Timing options: If you get a garbled display, you might try to uncomment
    one of the following defines. This attempts to avoid flow control problems
    by inserting various small delays. This is normally not needed and it will

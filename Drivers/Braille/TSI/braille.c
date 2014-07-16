@@ -83,19 +83,19 @@
 #include <string.h>
 
 #include "log.h"
-#include "timing.h"
+#include "parse.h"
+#include "io_generic.h"
 #include "async_wait.h"
+#include "timing.h"
 #include "message.h"
+
+typedef enum {
+  PARM_HIGHBAUD
+} DriverParameter;
+#define BRLPARMS "highbaud"
 
 #include "brl_driver.h"
 #include "braille.h"
-#include "io_generic.h"
-
-#ifdef __MSDOS__
-#ifdef HIGHBAUD
-#undef HIGHBAUD
-#endif /* HIGHBAUD */
-#endif /* __MSDOS__ */
 
 /* Braille display parameters that do not change */
 #define BRLROWS 1		/* only one row on braille display */
@@ -136,16 +136,7 @@ static int repeat_list[] =
 /* Communication codes */
 static unsigned char BRL_TYPEMATIC[] = {0xFF, 0xFF, 0x0D};
 #define DIM_BRL_TYPEMATIC 3
-#ifdef HIGHBAUD
-/* Command to put the PB at 19200baud */
-static unsigned char BRL_UART192[] = {0xFF, 0xFF, 0x05, 0x04};
-#define DIM_BRL_UART192 4
-#endif /* HIGHBAUD */
-#if 0
-/* Activate handshake ? */
-static unsigned char BRL_UART_HANDSHAK[] = {0xFF, 0xFF, 0x05, 0x01};
-#define DIM_BRL_UART_HANDSHAK 4
-#endif /* 0 */
+
 /* Normal header for sending dots, with cursor always off */
 static unsigned char BRL_SEND_HEAD[] = {0XFF, 0XFF, 0X04, 0X00, 0X99, 0X00};
 #define DIM_BRL_SEND_FIXED 6
@@ -285,7 +276,7 @@ typedef struct {
 
   unsigned hasRoutingKeys:1;
   unsigned slowUpdate:2;
-  unsigned highBaud:1;
+  unsigned highBaudSupported:1;
   unsigned isPB40:1;
 } ModelEntry;
 
@@ -328,7 +319,7 @@ static const ModelEntry modelPowerBraille40 = {
   .lastRoutingKey = 39,
 
   .hasRoutingKeys = 1,
-  .highBaud = 1,
+  .highBaudSupported = 1,
   .isPB40 = 1,
 
   .keyBindings = "pb40"
@@ -342,7 +333,7 @@ static const ModelEntry modelPowerBraille65 = {
 
   .hasRoutingKeys = 1,
   .slowUpdate = 2,
-  .highBaud = 1,
+  .highBaudSupported = 1,
 
   .keyBindings = "pb65_pb81"
 };
@@ -355,7 +346,7 @@ static const ModelEntry modelPowerBraille80 = {
 
   .hasRoutingKeys = 1,
   .slowUpdate = 2,
-  .highBaud = 1,
+  .highBaudSupported = 1,
 
   .keyBindings = "pb65_pb81"
 };
@@ -411,7 +402,6 @@ queryDisplay (BrailleDisplay *brl, InputPacket *reply) {
       if (count != -1) {
         const char *header = reply->identity.header;
 
-        logInputPacket(reply, count);
         if ((count == sizeof(reply->identity)) && (header[0] == 0X00) && (header[1] == 0X05)) return 1;
         logUnexpectedPacket(reply, count);
       } else {
@@ -445,6 +435,25 @@ setBaud (BrailleDisplay *brl, int baud) {
 }
 
 static int
+changeBaud (BrailleDisplay *brl, int baud) {
+  unsigned char request[] = {0xFF, 0xFF, 0x05, 0};
+  unsigned char *byte = &request[sizeof(request) - 1];
+
+  switch (baud) {
+    case  4800: *byte = 2; break;
+    case  9600: *byte = 3; break;
+    case 19200: *byte = 4; break;
+
+    default:
+      logMessage(LOG_WARNING, "display does not support %d baud", baud);
+      return 0;
+  }
+
+  logMessage(LOG_WARNING, "changing display to %d baud", baud);
+  return writeBraillePacket(brl, NULL, request, sizeof(request));
+}
+
+static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
   GioDescriptor descriptor;
   gioInitializeDescriptor(&descriptor);
@@ -463,6 +472,16 @@ static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   int i=0;
   InputPacket reply;
+  unsigned int allowHighBaud = 1;
+
+  {
+    const char *parameter = parameters[PARM_HIGHBAUD];
+
+    if (parameter && *parameter) {
+      if (!validateYesNo(&allowHighBaud, parameter)) {
+      }
+    }
+  }
 
   dispbuf = rawdata = prevdata = NULL;
 
@@ -470,15 +489,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   if (!setBaud(brl, 9600)) goto failure;
   if (!queryDisplay(brl, &reply)) {
-#ifdef HIGHBAUD
-    /* Then send the query at 19200bps, in case a PB was left ON
+    /* Then send the query at 19200 baud, in case a PB was left ON
      * at that speed
      */
+
+    if (!allowHighBaud) goto failure;
     if (!setBaud(brl, 19200)) goto failure;
     if (!queryDisplay(brl, &reply)) goto failure;
-#else /* HIGHBAUD */
-    goto failure;
-#endif /* HIGHBAUD */
   }
 
   memcpy(disp_ver, reply.identity.version, sizeof(disp_ver));
@@ -534,10 +551,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if (slowUpdate == 2) noMultipleUpdates = 1;
 
   fullFreshenEvery = FULL_FRESHEN_EVERY;
-#ifdef HIGHBAUD
-  if (model->highBaud) {
+  if (allowHighBaud && model->highBaudSupported) {
     /* if supported (PB) go to 19200 baud */
-    writeBytes(brl, BRL_UART192, DIM_BRL_UART192);
+    if (!changeBaud(brl, 19200)) goto failure;
   //serialAwaitOutput(brl->gioEndpoint);
     asyncWait(BAUD_DELAY);
     if (!setBaud(brl, 19200)) goto failure;
@@ -562,7 +578,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       }
     }
   }
-#endif /* HIGHBAUD */
 
   /* Mark time of last command to initialize typematic watch */
   getMonotonicTime(&last_readbrl_time);
@@ -1150,13 +1165,6 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
     {
       if (sw_howmany == 1)
 	res = BRL_BLK_ROUTE + sw_which[0];
-#if 0
-     else if (sw_howmany == 3 && sw_which[1] == model->lastRoutingKey - 1
-	       && sw_which[2] == model->lastRoutingKey)
-	res = BRL_BLK_CLIP_NEW + sw_which[0];
-      else if (sw_howmany == 3 && sw_which[0] == 0 && sw_which[1] == 1)
- 	res = BRL_BLK_COPY_RECT + sw_which[2];
-#endif /* 0 */
       else if(sw_howmany == 2 && sw_which[0] == 1 && sw_which[1] == 2)
  	res = BRL_CMD_PASTE;
       else if (sw_howmany == 2 && sw_which[0] == 0 && sw_which[1] == 1)
@@ -1175,15 +1183,6 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
       else if (sw_howmany == 4 && sw_which[0] == 0 && sw_which[1] == 1
 	       && sw_which[2] == model->lastRoutingKey-1 && sw_which[3] == model->lastRoutingKey)
 	res = BRL_CMD_LEARN;
-#if 0
-      else if (sw_howmany == 2 && sw_which[0] == 1
-	       && sw_which[1] == model->lastRoutingKey - 1)
-	{
-	  resetTypematic(brl);
-	  display_all (brl, prevdata);
-	  /* Special: No res code... */
-	}
-#endif /* 0 */
       else if(sw_howmany == 3 && sw_which[0]+2 == sw_which[1]){
 	  res = BRL_BLK_CLIP_COPY | BRL_ARG(sw_which[0]) | BRL_EXT(sw_which[2]);
 	}
@@ -1302,13 +1301,6 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
     KEYSW(KEY_S3UP, KEY_S3DN, BRL_CMD_SKPIDLNS);
     KEYSW(KEY_S3UP |KEY_BAR1, KEY_S3DN |KEY_BAR1, BRL_CMD_SKPIDLNS);
     KEYSW(KEY_S4UP, KEY_S4DN, BRL_CMD_DISPMD);
-
-#if 0
-  /* typematic reset */
-    KEYSPECIAL (KEY_CLEFT | KEY_BRIGHT, resetTypematic(brl);
-		display_all (brl, prevdata);
-    );
-#endif /* 0 */
   };
 
   /* If this is a typematic repetition of some key other than movement keys */

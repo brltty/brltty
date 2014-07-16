@@ -298,6 +298,9 @@
 #braille-parameters lb:Driver=auto # 
 #braille-parameters lb:Table=us.tbl # 
 
+# TSI Braille Driver Parameters
+#braille-parameters ts:HighBaud=yes # [no,yes]
+
 # TTY Braille Driver Parameters
 #braille-parameters tt:Baud=9600 # 
 #braille-parameters tt:CharSet=ISO8859-1 # 
