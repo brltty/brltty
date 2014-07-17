@@ -146,15 +146,8 @@ static unsigned char BRL_SEND_HEAD[] = {0XFF, 0XFF, 0X04, 0X00, 0X99, 0X00};
 #define BRL_SEND_OFFSET 7
 
 /* Description of reply to query */
-#define Q_REPLY_LENGTH 12
-static char Q_HEADER[] = {0x0, 0x05};
-#define Q_HEADER_LENGTH 2
-#define Q_OFFSET_COLS 2
-/*#define Q_OFFSET_DOTS 3 *//* not used */
-#define Q_OFFSET_VER 4 /* hardware version */
-#define Q_VER_LENGTH 4
-/*#define Q_OFFSET_CHKSUM 8 *//* not used */
-/*#define Q_CHKSUM_LENGTH 4 *//* not used */
+#define IDENTITY_H1 0X00
+#define IDENTITY_H2 0X05
 
 /* Bit definition of key codes returned by the display */
 /* Navigator and pb40 return 2bytes, pb65/80 returns 6. Each byte has a
@@ -163,32 +156,34 @@ static char Q_HEADER[] = {0x0, 0x05};
    See readbrl(). */
 
 /* Bits to take into account when checking each byte's signature */
-#define KEY_SIGMASK 0xE0
+#define KEYS_BYTE_SIGNATURE_MASK 0xE0
 
 /* How we describe each byte */
-struct inbytedesc {
-  unsigned char sig, /* it's signature */
-                mask, /* bits that do represent keys */
-                shift; /* where to shift them into "code" */
-};
+typedef struct {
+  unsigned char signature; /* it's signature */
+  unsigned char mask; /* bits that do represent keys */
+  unsigned char shift; /* where to shift them into "code" */
+} KeysByteDescriptor;
 /* We combine all key bits into one 32bit int. Each byte is masked by the
    corresponding "mask" to extract valid bits then those are shifted by
    "shift" and or'ed into the 32bits "code". */
 
 /* Description of bytes for navigator and pb40. */
 #define NAV_KEY_LEN 2
-static struct inbytedesc nav_key_desc[NAV_KEY_LEN] =
-  {{0x60, 0x1F, 0},
-   {0xE0, 0x1F, 5}};
+static const KeysByteDescriptor keysDescriptor_Navigator[NAV_KEY_LEN] = {
+  {0x60, 0x1F, 0},
+  {0xE0, 0x1F, 5}
+};
 /* Description of bytes for pb65/80 */
 #define PB_KEY_LEN 6
-static struct inbytedesc pb_key_desc[PB_KEY_LEN] =
-  {{0x40, 0x0F, 10},
-   {0xC0, 0x0F, 14},
-   {0x20, 0x05, 18},
-   {0xA0, 0x05, 21},
-   {0x60, 0x1F, 24},
-   {0xE0, 0x1F, 5}};
+static const KeysByteDescriptor keysDescriptor_PowerBraille[] = {
+  {0x40, 0x0F, 10},
+  {0xC0, 0x0F, 14},
+  {0x20, 0x05, 18},
+  {0xA0, 0x05, 21},
+  {0x60, 0x1F, 24},
+  {0xE0, 0x1F, 5}
+};
 
 /* Symbolic labels for keys
    Each key has it's own bit in "code". Key combinations are ORs. */
@@ -251,8 +246,8 @@ static struct inbytedesc pb_key_desc[PB_KEY_LEN] =
 #define BATTERY_H1 0x00
 #define BATTERY_H2 0x01
 /* Sensor switches/cursor routing keys information (2bytes header) */
-#define KEY_SW_H1 0x00
-#define KEY_SW_H2 0x08
+#define SWITCHES_H1 0x00
+#define SWITCHES_H2 0x08
 
 /* Definitions for sensor switches/cursor routing keys */
 #define SW_NVERT 4 /* vertical switches. unused info. 4bytes to skip */
@@ -351,21 +346,38 @@ static const ModelEntry modelPowerBraille80 = {
   .keyBindings = "pb65_pb81"
 };
 
-typedef union {
-  unsigned char bytes[1];
+typedef enum {
+  IPT_IDENTITY,
+  IPT_SWITCHES,
+  IPT_BATTERY,
 
-  struct {
-    char header[2];
-    unsigned char columns;
-    unsigned char dots;
-    char version[4];
-    char checksum[4];
-  } identity;
+  IPT_KEYS_NAVIGATOR,
+  IPT_KEYS_POWER_BRAILLE
+} InputPacketType;
+
+typedef struct {
+  union {
+    unsigned char bytes[1];
+
+    struct {
+      char header[2];
+      unsigned char columns;
+      unsigned char dots;
+      char version[4];
+      unsigned char checksum[4];
+    } identity;
+  } fields;
+
+  InputPacketType type;
 } InputPacket;
 
-static const SerialParameters serialParameters = {
+static SerialParameters serialParameters = {
   SERIAL_DEFAULT_PARAMETERS
 };
+
+#define LOW_BAUD     4800
+#define NORMAL_BAUD  9600
+#define HIGH_BAUD   19200
 
 static const ModelEntry *model;
 
@@ -375,7 +387,7 @@ static unsigned char *rawdata,	/* translated data to send to display */
 static unsigned char brl_cols;		/* Number of cells available for text */
 static int ncells;              /* Total number of cells on display: this is
 				   brl_cols cells + 1 status cell on PB80. */
-static char disp_ver[Q_VER_LENGTH]; /* version of the hardware */
+static char hardwareVersion[3]; /* version of the hardware */
 
 static ssize_t
 readBytes (BrailleDisplay *brl, void *buffer, size_t size, int wait) {
@@ -391,21 +403,99 @@ writeBytes (BrailleDisplay *brl, const void *data, size_t size) {
   return writeBraillePacket(brl, NULL, data, size);
 }
 
+static BraillePacketVerifierResult
+verifyPacket1 (
+  BrailleDisplay *brl,
+  const unsigned char *bytes, size_t size,
+  size_t *length, void *data
+) {
+  InputPacket *packet = data;
+  const off_t index = size - 1;
+  const unsigned char byte = bytes[index];
+
+  switch (size) {
+    case 1:
+      switch (byte) {
+        case IDENTITY_H1:
+          packet->type = IPT_IDENTITY;
+          *length = 2;
+          break;
+
+        default:
+          if ((byte & KEYS_BYTE_SIGNATURE_MASK) == keysDescriptor_Navigator[0].signature) {
+            packet->type = IPT_KEYS_NAVIGATOR;
+            *length = ARRAY_COUNT(keysDescriptor_Navigator);
+            break;
+          }
+
+          if ((byte & KEYS_BYTE_SIGNATURE_MASK) == keysDescriptor_PowerBraille[0].signature) {
+            packet->type = IPT_KEYS_POWER_BRAILLE;
+            *length = ARRAY_COUNT(keysDescriptor_PowerBraille);
+            break;
+          }
+
+          return BRL_PVR_INVALID;
+      }
+      break;
+
+    case 2:
+      if (packet->type == IPT_IDENTITY) {
+        switch (byte) {
+          case IDENTITY_H2:
+            *length = sizeof(packet->fields.identity);
+            break;
+
+          case SWITCHES_H2:
+            packet->type = IPT_SWITCHES;
+            break;
+
+          case BATTERY_H2:
+            packet->type = IPT_BATTERY;
+            break;
+
+          default:
+            return BRL_PVR_INVALID;
+        }
+
+        break;
+      }
+
+    default:
+      switch (packet->type) {
+        case IPT_KEYS_NAVIGATOR:
+          if ((byte & KEYS_BYTE_SIGNATURE_MASK) != keysDescriptor_Navigator[index].signature) return BRL_PVR_INVALID;
+          break;
+
+        case IPT_KEYS_POWER_BRAILLE:
+          if ((byte & KEYS_BYTE_SIGNATURE_MASK) != keysDescriptor_PowerBraille[index].signature) return BRL_PVR_INVALID;
+          break;
+
+        default:
+          break;
+      }
+
+      break;
+  }
+
+  return BRL_PVR_INCLUDE;
+}
+
+static size_t
+readPacket (BrailleDisplay *brl, InputPacket *packet) {
+  return readBraillePacket(brl, NULL, &packet->fields, sizeof(packet->fields), verifyPacket1, packet);
+}
+
 static int
 queryDisplay (BrailleDisplay *brl, InputPacket *reply) {
   static const unsigned char request[] = {0xFF, 0xFF, 0x0A};
 
   if (writeBytes(brl, request, sizeof(request))) {
     if (gioAwaitInput(brl->gioEndpoint, 100)) {
-      ssize_t count = readBytes(brl, reply, Q_REPLY_LENGTH, 0);
+      size_t count = readPacket(brl, reply);
 
-      if (count != -1) {
-        const char *header = reply->identity.header;
-
-        if ((count == sizeof(reply->identity)) && (header[0] == 0X00) && (header[1] == 0X05)) return 1;
-        logUnexpectedPacket(reply, count);
-      } else {
-        logSystemError("read");
+      if (count > 0) {
+        if (reply->type == IPT_IDENTITY) return 1;
+        logUnexpectedPacket(reply->fields.bytes, count);
       }
     } else {
       logMessage(LOG_DEBUG, "no response");
@@ -427,11 +517,9 @@ resetTypematic (BrailleDisplay *brl) {
 
 static int
 setBaud (BrailleDisplay *brl, int baud) {
-  SerialParameters parameters = serialParameters;
-
   logMessage(LOG_DEBUG, "trying with %d baud", baud);
-  parameters.baud = baud;
-  return gioReconfigureResource(brl->gioEndpoint, &parameters);
+  serialParameters.baud = baud;
+  return gioReconfigureResource(brl->gioEndpoint, &serialParameters);
 }
 
 static int
@@ -440,9 +528,17 @@ changeBaud (BrailleDisplay *brl, int baud) {
   unsigned char *byte = &request[sizeof(request) - 1];
 
   switch (baud) {
-    case  4800: *byte = 2; break;
-    case  9600: *byte = 3; break;
-    case 19200: *byte = 4; break;
+    case LOW_BAUD:
+      *byte = 2;
+      break;
+
+    case NORMAL_BAUD:
+      *byte = 3;
+      break;
+
+    case HIGH_BAUD:
+      *byte = 4;
+      break;
 
     default:
       logMessage(LOG_WARNING, "display does not support %d baud", baud);
@@ -479,6 +575,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
     if (parameter && *parameter) {
       if (!validateYesNo(&allowHighBaud, parameter)) {
+        logMessage(LOG_WARNING, "unsupported high baud setting: %s", parameter);
       }
     }
   }
@@ -486,23 +583,23 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   dispbuf = rawdata = prevdata = NULL;
 
   if (!connectResource(brl, device)) goto failure;
+  if (!setBaud(brl, NORMAL_BAUD)) goto failure;
 
-  if (!setBaud(brl, 9600)) goto failure;
   if (!queryDisplay(brl, &reply)) {
     /* Then send the query at 19200 baud, in case a PB was left ON
      * at that speed
      */
 
     if (!allowHighBaud) goto failure;
-    if (!setBaud(brl, 19200)) goto failure;
+    if (!setBaud(brl, HIGH_BAUD)) goto failure;
     if (!queryDisplay(brl, &reply)) goto failure;
   }
 
-  memcpy(disp_ver, reply.identity.version, sizeof(disp_ver));
-  ncells = reply.identity.columns;
+  memcpy(hardwareVersion, &reply.fields.identity.version[1], sizeof(hardwareVersion));
+  ncells = reply.fields.identity.columns;
   brl_cols = ncells;
   logMessage(LOG_INFO, "display replied: %d cells, version %.*s",
-             ncells, 3, &disp_ver[1]);
+             ncells, sizeof(hardwareVersion), hardwareVersion);
 
   switch (brl_cols) {
     case 20:
@@ -510,7 +607,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       break;
 
     case 40:
-      model = (disp_ver[1] > '3')? &modelPowerBraille40: &modelNavigator40;
+      model = (hardwareVersion[0] > '3')? &modelPowerBraille40: &modelNavigator40;
       break;
 
     case 80:
@@ -549,28 +646,34 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 #endif /* NO_MULTIPLE_UPDATES */
 
   if (slowUpdate == 2) noMultipleUpdates = 1;
-
   fullFreshenEvery = FULL_FRESHEN_EVERY;
-  if (allowHighBaud && model->highBaudSupported) {
+
+  if ((serialParameters.baud < HIGH_BAUD) && allowHighBaud && model->highBaudSupported) {
     /* if supported (PB) go to 19200 baud */
-    if (!changeBaud(brl, 19200)) goto failure;
+    if (!changeBaud(brl, HIGH_BAUD)) goto failure;
   //serialAwaitOutput(brl->gioEndpoint);
     asyncWait(BAUD_DELAY);
-    if (!setBaud(brl, 19200)) goto failure;
-    logMessage(LOG_DEBUG, "switched to 19200 baud - checking if display followed");
+    if (!setBaud(brl, HIGH_BAUD)) goto failure;
+    logMessage(LOG_DEBUG, "switched to %d baud - checking if display followed", HIGH_BAUD);
 
     if (queryDisplay(brl, &reply)) {
-      logMessage(LOG_DEBUG, "display responded at 19200 baud");
+      logMessage(LOG_DEBUG, "display responded at %d baud", HIGH_BAUD);
     } else {
       logMessage(LOG_INFO,
-                 "display did not respond at 19200 baud"
-	         " - falling back to 9600 baud");
-      if (!setBaud(brl, 9600)) goto failure;
+                 "display did not respond at %d baud"
+	         " - falling back to %d baud", NORMAL_BAUD,
+                 HIGH_BAUD);
+
+      if (!setBaud(brl, NORMAL_BAUD)) goto failure;
     //serialAwaitOutput(brl->gioEndpoint);
       asyncWait(BAUD_DELAY); /* just to be safe */
 
       if (queryDisplay(brl, &reply)) {
-	logMessage(LOG_INFO, "found display again at 9600 baud - must be a TSI emulator");
+	logMessage(LOG_INFO,
+                   "found display again at %d baud"
+                   " - must be a TSI emulator",
+                   NORMAL_BAUD);
+
         fullFreshenEvery = 1;
       } else {
 	logMessage(LOG_ERR, "display lost after baud switch");
@@ -934,8 +1037,7 @@ cut_cursor (BrailleDisplay *brl)
 #define MAXREAD 10
 
 static int 
-brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
-{
+brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   /* static bit vector recording currently pressed sensor switches (for
      repetition detection) */
   static unsigned char sw_oldstat[SW_MAXHORIZ];
@@ -990,12 +1092,12 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 
   while (1) {
     if (i == 0) {
-      if (buf[0] == BATTERY_H1) {
-	 /* || buf[0] == KEY_SW_H1 || buf[0] == Q_HEADER[0] */
+      if (buf[0] == IDENTITY_H1) {
+	 /* || buf[0] == SWITCHES_H1 || buf[0] == BATTERY_H1 */
 	packtype = K_SPECIAL;
-      } else if ((buf[0] & KEY_SIGMASK) == nav_key_desc[0].sig) {
+      } else if ((buf[0] & KEYS_BYTE_SIGNATURE_MASK) == keysDescriptor_Navigator[0].signature) {
         packtype = K_NAVKEY;
-      } else if ((buf[0] & KEY_SIGMASK) == pb_key_desc[0].sig) {
+      } else if ((buf[0] & KEYS_BYTE_SIGNATURE_MASK) == keysDescriptor_PowerBraille[0].signature) {
         packtype = K_PBKEY;
       } else {
         return EOF;
@@ -1005,9 +1107,9 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
       if (packtype == K_SPECIAL) {
 	if (buf[1] == BATTERY_H2) {
           packtype = K_BATTERY;
-	} else if (buf[1] == KEY_SW_H2) {
+	} else if (buf[1] == SWITCHES_H2) {
           packtype = K_SW;
-	} else if (buf[1] == Q_HEADER[1]) {
+	} else if (buf[1] == IDENTITY_H2) {
           packtype = K_QUERYREP;
 	} else {
           return(EOF);
@@ -1015,13 +1117,13 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 
 	break;
       } else if (packtype == K_NAVKEY) {
-	if ((buf[1] & KEY_SIGMASK) != nav_key_desc[1].sig) {
+	if ((buf[1] & KEYS_BYTE_SIGNATURE_MASK) != keysDescriptor_Navigator[1].signature) {
 	  return EOF;
         }
 
 	break;
       } else { /* K_PBKEY */
-	if ((buf[i] & KEY_SIGMASK) != pb_key_desc[i].sig) return(EOF);
+	if ((buf[i] & KEYS_BYTE_SIGNATURE_MASK) != keysDescriptor_PowerBraille[i].signature) return(EOF);
 	if (i == PB_KEY_LEN-1) break;
       }
     }
@@ -1043,19 +1145,19 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
   } else if (packtype == K_QUERYREP) {
     /* flush the last 10bytes of the reply. */
     logMessage(LOG_DEBUG, "got reply to idle ping");
-    readBytes(brl, buf, Q_REPLY_LENGTH - Q_HEADER_LENGTH, 1);
+    readBytes(brl, buf, 10, 1);
     return EOF;
   } else if ((packtype == K_NAVKEY) || (packtype == K_PBKEY)) {
     /* construct code */
     int n;
-    struct inbytedesc *desc;
+    const KeysByteDescriptor *desc;
 
     if (packtype == K_NAVKEY) {
       n = NAV_KEY_LEN;
-      desc = nav_key_desc;
+      desc = keysDescriptor_Navigator;
     } else {
       n = PB_KEY_LEN;
-      desc = pb_key_desc;
+      desc = keysDescriptor_PowerBraille;
     }
 
     code = 0;
