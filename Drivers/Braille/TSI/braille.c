@@ -350,9 +350,7 @@ typedef enum {
   IPT_IDENTITY,
   IPT_SWITCHES,
   IPT_BATTERY,
-
-  IPT_KEYS_NAVIGATOR,
-  IPT_KEYS_POWER_BRAILLE
+  IPT_KEYS
 } InputPacketType;
 
 typedef struct {
@@ -360,15 +358,34 @@ typedef struct {
     unsigned char bytes[1];
 
     struct {
-      char header[2];
+      unsigned char header[2];
       unsigned char columns;
       unsigned char dots;
       char version[4];
       unsigned char checksum[4];
     } identity;
+
+    struct {
+      unsigned char header[2];
+      unsigned char count;
+      unsigned char mask[0X100];
+    } switches;
+
+    unsigned char keys[6];
   } fields;
 
   InputPacketType type;
+
+  union {
+    struct {
+      unsigned char count;
+    } switches;
+
+    struct {
+      const KeysByteDescriptor *descriptor;
+      unsigned char count;
+    } keys;
+  } data;
 } InputPacket;
 
 static SerialParameters serialParameters = {
@@ -413,68 +430,71 @@ verifyPacket1 (
   const off_t index = size - 1;
   const unsigned char byte = bytes[index];
 
-  switch (size) {
-    case 1:
-      switch (byte) {
-        case IDENTITY_H1:
-          packet->type = IPT_IDENTITY;
-          *length = 2;
-          break;
+  if (size == 1) {
+    switch (byte) {
+      case IDENTITY_H1:
+        packet->type = IPT_IDENTITY;
+        *length = 2;
+        break;
 
-        default:
-          if ((byte & KEYS_BYTE_SIGNATURE_MASK) == keysDescriptor_Navigator[0].signature) {
-            packet->type = IPT_KEYS_NAVIGATOR;
-            *length = ARRAY_COUNT(keysDescriptor_Navigator);
-            break;
-          }
-
-          if ((byte & KEYS_BYTE_SIGNATURE_MASK) == keysDescriptor_PowerBraille[0].signature) {
-            packet->type = IPT_KEYS_POWER_BRAILLE;
-            *length = ARRAY_COUNT(keysDescriptor_PowerBraille);
-            break;
-          }
-
-          return BRL_PVR_INVALID;
-      }
-      break;
-
-    case 2:
-      if (packet->type == IPT_IDENTITY) {
-        switch (byte) {
-          case IDENTITY_H2:
-            *length = sizeof(packet->fields.identity);
-            break;
-
-          case SWITCHES_H2:
-            packet->type = IPT_SWITCHES;
-            break;
-
-          case BATTERY_H2:
-            packet->type = IPT_BATTERY;
-            break;
-
-          default:
-            return BRL_PVR_INVALID;
+      default:
+        if ((byte & KEYS_BYTE_SIGNATURE_MASK) == keysDescriptor_Navigator[0].signature) {
+          packet->data.keys.descriptor = keysDescriptor_Navigator;
+          packet->data.keys.count = ARRAY_COUNT(keysDescriptor_Navigator);
+          goto isKeys;
         }
 
+        if ((byte & KEYS_BYTE_SIGNATURE_MASK) == keysDescriptor_PowerBraille[0].signature) {
+          packet->data.keys.descriptor = keysDescriptor_PowerBraille;
+          packet->data.keys.count = ARRAY_COUNT(keysDescriptor_PowerBraille);
+          goto isKeys;
+        }
+
+        return BRL_PVR_INVALID;
+
+      isKeys:
+        packet->type = IPT_KEYS;
+        *length = packet->data.keys.count;
         break;
-      }
+    }
+  } else {
+    switch (packet->type) {
+      case IPT_IDENTITY:
+        if (size == 2) {
+          switch (byte) {
+            case IDENTITY_H2:
+              *length = sizeof(packet->fields.identity);
+              break;
 
-    default:
-      switch (packet->type) {
-        case IPT_KEYS_NAVIGATOR:
-          if ((byte & KEYS_BYTE_SIGNATURE_MASK) != keysDescriptor_Navigator[index].signature) return BRL_PVR_INVALID;
-          break;
+            case SWITCHES_H2:
+              packet->type = IPT_SWITCHES;
+              *length = 3;
+              break;
 
-        case IPT_KEYS_POWER_BRAILLE:
-          if ((byte & KEYS_BYTE_SIGNATURE_MASK) != keysDescriptor_PowerBraille[index].signature) return BRL_PVR_INVALID;
-          break;
+            case BATTERY_H2:
+              packet->type = IPT_BATTERY;
+              break;
 
-        default:
-          break;
-      }
+            default:
+              return BRL_PVR_INVALID;
+          }
+        }
+        break;
 
-      break;
+      case IPT_SWITCHES:
+        if (size == 3) {
+          packet->data.switches.count = byte;
+          *length += packet->data.switches.count;
+        }
+        break;
+
+      case IPT_KEYS:
+        if ((byte & KEYS_BYTE_SIGNATURE_MASK) != packet->data.keys.descriptor[index].signature) return BRL_PVR_INVALID;
+        break;
+
+      default:
+        break;
+    }
   }
 
   return BRL_PVR_INCLUDE;
