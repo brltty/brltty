@@ -133,10 +133,6 @@ static int repeat_list[] =
 /* Stabilization delay after changing baud rate */
 #define BAUD_DELAY (100)
 
-/* Communication codes */
-static unsigned char BRL_TYPEMATIC[] = {0xFF, 0xFF, 0x0D};
-#define DIM_BRL_TYPEMATIC 3
-
 /* Normal header for sending dots, with cursor always off */
 static unsigned char BRL_SEND_HEAD[] = {0XFF, 0XFF, 0X04, 0X00, 0X99, 0X00};
 #define DIM_BRL_SEND_FIXED 6
@@ -368,7 +364,8 @@ typedef struct {
     struct {
       unsigned char header[2];
       unsigned char count;
-      unsigned char mask[0X100];
+      unsigned char vertical[4];
+      unsigned char horizontal[0X100 - 4];
     } switches;
 
     unsigned char keys[6];
@@ -405,14 +402,6 @@ static unsigned char brl_cols;		/* Number of cells available for text */
 static int ncells;              /* Total number of cells on display: this is
 				   brl_cols cells + 1 status cell on PB80. */
 static char hardwareVersion[3]; /* version of the hardware */
-
-static ssize_t
-readBytes (BrailleDisplay *brl, void *buffer, size_t size, int wait) {
-  ssize_t result = gioReadData(brl->gioEndpoint, buffer, size, wait);
-
-  if (result > 0) logInputPacket(buffer, result);
-  return result;
-}
 
 static ssize_t
 writeBytes (BrailleDisplay *brl, const void *data, size_t size) {
@@ -526,13 +515,13 @@ queryDisplay (BrailleDisplay *brl, InputPacket *reply) {
 }
 
 
-static void 
+static int
 resetTypematic (BrailleDisplay *brl) {
-  /* Sends a command to the display to set the typematic parameters */
-  static unsigned char params[2] =
-    {BRL_TYPEMATIC_DELAY, BRL_TYPEMATIC_REPEAT};
-  writeBytes(brl, BRL_TYPEMATIC, DIM_BRL_TYPEMATIC);
-  writeBytes(brl, &params, 2);
+  static const unsigned char request[] = {
+    0XFF, 0XFF, 0X0D, BRL_TYPEMATIC_DELAY, BRL_TYPEMATIC_REPEAT
+  };
+
+  return writeBytes(brl, request, sizeof(request));
 }
 
 static int
@@ -1061,30 +1050,33 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   /* static bit vector recording currently pressed sensor switches (for
      repetition detection) */
   static unsigned char sw_oldstat[SW_MAXHORIZ];
-  unsigned char sw_stat[SW_MAXHORIZ]; /* received switch data */
   static unsigned char sw_which[SW_MAXHORIZ * 8], /* list of pressed keys */
                        sw_howmany = 0; /* length of that list */
   static unsigned char ignore_routing = 0;
      /* flag: after combo between routing and non-routing keys, don't act
 	on any key until routing resets (releases). */
-  unsigned int code = 0; /* 32bits code representing pressed keys once the
+  uint32_t code = 0; /* 32-bit code representing pressed keys once the
 			    input bytes are interpreted */
   int res = EOF; /* command code to return. code is mapped to res. */
-  char buf[MAXREAD], /* read buffer */
-       packtype = 0; /* type of packet being received (state) */
-  unsigned i;
-  TimeValue now;
+  InputPacket packet;
+  size_t size;
   int skip_this_cmd = 0;
 
-  getMonotonicTime(&now);
-  if (millisecondsBetween(&last_readbrl_time, &now) > READBRL_SKIP_TIME)
-    /* if the key we get this time is the same as the one we returned at last
-       call, and if it has been abnormally long since we were called
-       (presumably sound was being played or a message displayed) then
-       the bytes we will read can be old... so we forget this key, if it is
-       a repeat. */
-    skip_this_cmd = 1;
-  last_readbrl_time = now;
+  {
+    TimeValue now;
+    getMonotonicTime(&now);
+
+    if (millisecondsBetween(&last_readbrl_time, &now) > READBRL_SKIP_TIME) {
+      /* if the key we get this time is the same as the one we returned at last
+         call, and if it has been abnormally long since we were called
+         (presumably sound was being played or a message displayed) then
+         the bytes we will read can be old... so we forget this key, if it is
+         a repeat. */
+      skip_this_cmd = 1;
+    }
+
+    last_readbrl_time = now;
+  }
        
 /* Key press codes come in pairs of bytes for nav and pb40, in 6bytes
    for pb65/80. Each byte has bits representing individual keys + a special
@@ -1100,146 +1092,79 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
    any keys in a certain time. That a 2byte header + 10 more bytes ignored.
  */
 
-  /* Check for first byte */
-  if (readBytes(brl, buf, 1, 0) != 1) return EOF;
+  if (!(size = readPacket(brl, &packet))) return EOF;
 
 #ifdef RECV_DELAY
   accurateDelay(SEND_DELAY);
 #endif /* RECV_DELAY */
 
-  /* read bytes */
-  i=0;
-
-  while (1) {
-    if (i == 0) {
-      if (buf[0] == IDENTITY_H1) {
-	 /* || buf[0] == SWITCHES_H1 || buf[0] == BATTERY_H1 */
-	packtype = K_SPECIAL;
-      } else if ((buf[0] & KEYS_BYTE_SIGNATURE_MASK) == keysDescriptor_Navigator[0].signature) {
-        packtype = K_NAVKEY;
-      } else if ((buf[0] & KEYS_BYTE_SIGNATURE_MASK) == keysDescriptor_PowerBraille[0].signature) {
-        packtype = K_PBKEY;
-      } else {
-        return EOF;
-      }
-      /* unrecognized byte (garbage...?) */
-    } else { /* i>0 */
-      if (packtype == K_SPECIAL) {
-	if (buf[1] == BATTERY_H2) {
-          packtype = K_BATTERY;
-	} else if (buf[1] == SWITCHES_H2) {
-          packtype = K_SW;
-	} else if (buf[1] == IDENTITY_H2) {
-          packtype = K_QUERYREP;
-	} else {
-          return(EOF);
-        }
-
-	break;
-      } else if (packtype == K_NAVKEY) {
-	if ((buf[1] & KEYS_BYTE_SIGNATURE_MASK) != keysDescriptor_Navigator[1].signature) {
-	  return EOF;
-        }
-
-	break;
-      } else { /* K_PBKEY */
-	if ((buf[i] & KEYS_BYTE_SIGNATURE_MASK) != keysDescriptor_PowerBraille[i].signature) return(EOF);
-	if (i == PB_KEY_LEN-1) break;
-      }
-    }
-
-    i += 1;
-    if (readBytes(brl, buf+i, 1, 1) != 1) return EOF;
-  }/* while */
-
   if (model->hasRoutingKeys && must_init_oldstat) {
+    unsigned int i;
+
     must_init_oldstat = 0;
     ignore_routing = 0;
     sw_howmany = 0;
     for (i=0; i<SW_MAXHORIZ; i+=1) sw_oldstat[i] = 0;
   }
 
-  if (packtype == K_BATTERY) {
-    message(NULL, gettext("battery low"), MSG_WAITKEY);
-    return EOF;
-  } else if (packtype == K_QUERYREP) {
-    /* flush the last 10bytes of the reply. */
-    logMessage(LOG_DEBUG, "got reply to idle ping");
-    readBytes(brl, buf, 10, 1);
-    return EOF;
-  } else if ((packtype == K_NAVKEY) || (packtype == K_PBKEY)) {
-    /* construct code */
-    int n;
-    const KeysByteDescriptor *desc;
+  switch (packet.type) {
+    case IPT_KEYS: {
+      unsigned int i;
 
-    if (packtype == K_NAVKEY) {
-      n = NAV_KEY_LEN;
-      desc = keysDescriptor_Navigator;
-    } else {
-      n = PB_KEY_LEN;
-      desc = keysDescriptor_PowerBraille;
-    }
+      for (i=0; i<packet.data.keys.count; i+=1) {
+        const KeysByteDescriptor *kbd = &packet.data.keys.descriptor[i];
 
-    code = 0;
-    for (i=0; i<n; i+=1) {
-      code |= (buf[i] & desc[i].mask) << desc[i].shift;
-    }
-  } else if (packtype == K_SW) {
-    /* read the rest of the sequence */
-    unsigned char cnt;
-    unsigned char buf[SW_NVERT];
-
-    code = 0; /* no normal (non-sensor switch) keys are pressed */
-
-    /* read next byte: it indicates length of sequence */
-    /* still VMIN = 0, VTIME = 1 */
-    if (readBytes(brl, &cnt, 1, 1) != 1) {
-      return (EOF);
-    }
-    
-    /* if model->switchBytes and cnt disagree, then must be garbage??? */
-    /* problematic for PB 65/80/81... not clear */
-    if (cnt != model->switchBytes) return EOF;
-
-    if (readBytes(brl, buf, SW_NVERT, 1) != SW_NVERT) {
-      return EOF;
-    }
-
-    cnt -= SW_NVERT;
-    /* cnt now gives the number of bytes describing horizontal
-       routing keys only */
-    
-    if (readBytes(brl, sw_stat, cnt, 1) != cnt) {
-      return EOF;
-    }
-
-    /* if key press is maintained, then packet is resent by display
-       every 0.5secs. When the key is released, then display sends a packet
-       with all info bits at 0. */
-    for (i=0; i<cnt; i+=1) {
-      sw_oldstat[i] |= sw_stat[i];
-    }
-
-    for (sw_howmany=0, i=0; i<ncells; i+=1) {
-      if (SW_CHK(i)) {
-	sw_which[sw_howmany++] = i;
+        code |= (packet.fields.keys[i] & kbd->mask) << kbd->shift;
       }
+
+      break;
     }
 
-    /* SW_CHK(i) tells if routing key i is pressed.
-       sw_which[0] to sw_which[howmany-1] give the numbers of the keys
-       that are pressed. */
+    case IPT_SWITCHES: {
+      unsigned char count = packet.data.switches.count;
+      unsigned int i;
 
-    for (i=0; i<cnt; i+=1) {
-      if (sw_stat[i] != 0) {
-	return (EOF);
+      /* if model->switchBytes and packet.data.switches.count disagree, then must be garbage??? */
+      if (count != model->switchBytes) return EOF;
+      count -= sizeof(packet.fields.switches.vertical);
+
+      /* if key press is maintained, then packet is resent by display
+         every 0.5secs. When the key is released, then display sends a packet
+         with all info bits at 0. */
+      for (i=0; i<count; i+=1) {
+        sw_oldstat[i] |= packet.fields.switches.horizontal[i];
       }
+
+      sw_howmany = 0;
+      for (i=0; i<ncells; i+=1) {
+        if (SW_CHK(i)) {
+          sw_which[sw_howmany++] = i;
+        }
+      }
+
+      /* SW_CHK(i) tells if routing key i is pressed.
+         sw_which[0] to sw_which[howmany-1] give the numbers of the keys
+         that are pressed. */
+
+      for (i=0; i<count; i+=1) {
+        if (packet.fields.switches.horizontal[i] != 0) {
+          return EOF;
+        }
+      }
+
+      must_init_oldstat = 1;
+      if (ignore_routing) return EOF;
+      break;
     }
 
-    must_init_oldstat = 1;
-    if (ignore_routing) return EOF;
+    case IPT_BATTERY:
+      message(NULL, gettext("battery low"), MSG_WAITKEY);
+      return EOF;
+
+    default:
+      logUnexpectedPacket(packet.fields.bytes, size);
+      return EOF;
   }
-
   /* Now associate a command (in res) to the key(s) (in code and sw_...) */
 
   if (model->hasRoutingKeys && code && sw_howmany) {
@@ -1430,11 +1355,14 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
     if(skip_this_cmd){
       getMonotonicTime(&lastcmd_time);
       res = EOF;
-    }else{
-      /* if to short a time has elapsed since last command, ignore this one */
+    } else {
+      TimeValue now;
       getMonotonicTime(&now);
-      if (millisecondsBetween(&lastcmd_time, &now) < NONREPEAT_TIMEOUT)
+
+      /* if to short a time has elapsed since last command, ignore this one */
+      if (millisecondsBetween(&lastcmd_time, &now) < NONREPEAT_TIMEOUT) {
 	res = EOF;
+      }
     }
   }
   /* reset timer to avoid unwanted typematic */
