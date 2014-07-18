@@ -98,6 +98,65 @@ typedef enum {
 #include "braille.h"
 #include "brldefs-ts.h"
 
+BEGIN_KEY_NAME_TABLE(nav_small)
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(nav_large)
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(pb_small)
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(pb_large)
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(routing)
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLES(nav20)
+  KEY_NAME_TABLE(nav_small),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(nav40)
+  KEY_NAME_TABLE(nav_small),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(nav80)
+  KEY_NAME_TABLE(nav_large),
+  KEY_NAME_TABLE(routing),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(pb40)
+  KEY_NAME_TABLE(pb_small),
+  KEY_NAME_TABLE(routing),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(pb65)
+  KEY_NAME_TABLE(pb_large),
+  KEY_NAME_TABLE(routing),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(pb80)
+  KEY_NAME_TABLE(pb_large),
+  KEY_NAME_TABLE(routing),
+END_KEY_NAME_TABLES
+
+DEFINE_KEY_TABLE(nav20)
+DEFINE_KEY_TABLE(nav40)
+DEFINE_KEY_TABLE(nav80)
+DEFINE_KEY_TABLE(pb40)
+DEFINE_KEY_TABLE(pb65)
+DEFINE_KEY_TABLE(pb80)
+
+BEGIN_KEY_TABLE_LIST
+  &KEY_TABLE_DEFINITION(nav20),
+  &KEY_TABLE_DEFINITION(nav40),
+  &KEY_TABLE_DEFINITION(nav80),
+  &KEY_TABLE_DEFINITION(pb40),
+  &KEY_TABLE_DEFINITION(pb65),
+  &KEY_TABLE_DEFINITION(pb80),
+END_KEY_TABLE_LIST
+
 /* Braille display parameters that do not change */
 #define BRLROWS 1		/* only one row on braille display */
 
@@ -610,7 +669,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   ncells = reply.fields.identity.columns;
   brl_cols = ncells;
   logMessage(LOG_INFO, "display replied: %d cells, version %.*s",
-             ncells, sizeof(hardwareVersion), hardwareVersion);
+             ncells, (int)sizeof(hardwareVersion), hardwareVersion);
 
   switch (brl_cols) {
     case 20:

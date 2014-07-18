@@ -20,19 +20,27 @@
 #define BRLTTY_INCLUDED_TS_BRLDEFS
 
 typedef enum {
-  // Navigator - byte 1
+  /* Navigator - byte 1
+   * Nav20/40: right side
+   * Nav80:
+   * PB40: right rocker up/down, concave, forward/backward (on top)
+   */
   TS_KEY_ButtonLeft  = 0,
   TS_KEY_ButtonUp    = 1,
   TS_KEY_ButtonRight = 2,
   TS_KEY_ButtonDown  = 3,
-  TS_KEY_Round2      = 4,
+  TS_KEY_ThumbRight  = 4,
 
-  // Navigator - byte 2
+  /* Navigator - byte 2
+   * Nav20/40: left side
+   * nav80:
+   * PB40: left rocker up/down, convex
+   */
   TS_KEY_CursorLeft  = 5,
   TS_KEY_CursorUp    = 6,
   TS_KEY_CursorRight = 7,
   TS_KEY_CursorDown  = 8,
-  TS_KEY_Round1      = 9,
+  TS_KEY_ThumbLeft   = 9,
 
   // Power Braille - byte 6
   TS_KEY_Button1     = 5,
