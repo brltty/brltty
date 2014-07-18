@@ -98,46 +98,79 @@ typedef enum {
 #include "braille.h"
 #include "brldefs-ts.h"
 
-BEGIN_KEY_NAME_TABLE(nav_small)
-END_KEY_NAME_TABLE
-
-BEGIN_KEY_NAME_TABLE(nav_large)
-END_KEY_NAME_TABLE
-
-BEGIN_KEY_NAME_TABLE(pb_small)
-END_KEY_NAME_TABLE
-
-BEGIN_KEY_NAME_TABLE(pb_large)
-END_KEY_NAME_TABLE
-
 BEGIN_KEY_NAME_TABLE(routing)
+  KEY_GROUP_ENTRY(TS_GRP_RoutingKeys, "RoutingKey"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(nav)
+  KEY_NAME_ENTRY(TS_KEY_CursorLeft, "CursorLeft"),
+  KEY_NAME_ENTRY(TS_KEY_CursorRight, "CursorRight"),
+  KEY_NAME_ENTRY(TS_KEY_CursorUp, "CursorUp"),
+  KEY_NAME_ENTRY(TS_KEY_CursorDown, "CursorDown"),
+
+  KEY_NAME_ENTRY(TS_KEY_NavLeft, "NavLeft"),
+  KEY_NAME_ENTRY(TS_KEY_NavRight, "NavRight"),
+  KEY_NAME_ENTRY(TS_KEY_NavUp, "NavUp"),
+  KEY_NAME_ENTRY(TS_KEY_NavDown, "NavDown"),
+
+  KEY_NAME_ENTRY(TS_KEY_ThumbLeft, "ThumbLeft"),
+  KEY_NAME_ENTRY(TS_KEY_ThumbRight, "ThumbRight"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(pb)
+  KEY_NAME_ENTRY(TS_KEY_Button1, "Button1"),
+  KEY_NAME_ENTRY(TS_KEY_Button2, "Button2"),
+  KEY_NAME_ENTRY(TS_KEY_Button3, "Button3"),
+  KEY_NAME_ENTRY(TS_KEY_Button4, "Button4"),
+
+  KEY_NAME_ENTRY(TS_KEY_Bar1, "Bar1"),
+  KEY_NAME_ENTRY(TS_KEY_Bar2, "Bar2"),
+  KEY_NAME_ENTRY(TS_KEY_Bar3, "Bar3"),
+  KEY_NAME_ENTRY(TS_KEY_Bar4, "Bar4"),
+
+  KEY_NAME_ENTRY(TS_KEY_Switch1Up, "Switch1Up"),
+  KEY_NAME_ENTRY(TS_KEY_Switch1Down, "Switch1Down"),
+  KEY_NAME_ENTRY(TS_KEY_Switch2Up, "Switch2Up"),
+  KEY_NAME_ENTRY(TS_KEY_Switch2Down, "Switch2Down"),
+  KEY_NAME_ENTRY(TS_KEY_Switch3Up, "Switch3Up"),
+  KEY_NAME_ENTRY(TS_KEY_Switch3Down, "Switch3Down"),
+  KEY_NAME_ENTRY(TS_KEY_Switch4Up, "Switch4Up"),
+  KEY_NAME_ENTRY(TS_KEY_Switch4Down, "Switch4Down"),
+
+  KEY_NAME_ENTRY(TS_KEY_Rocker1Up, "Rocker1Up"),
+  KEY_NAME_ENTRY(TS_KEY_Rocker1Down, "Rocker1Down"),
+  KEY_NAME_ENTRY(TS_KEY_Rocker2Up, "Rocker2Up"),
+  KEY_NAME_ENTRY(TS_KEY_Rocker2Down, "Rocker2Down"),
+
+  KEY_NAME_ENTRY(TS_KEY_Convex, "Convex"),
+  KEY_NAME_ENTRY(TS_KEY_Concave, "Concave"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(nav20)
-  KEY_NAME_TABLE(nav_small),
+  KEY_NAME_TABLE(nav),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(nav40)
-  KEY_NAME_TABLE(nav_small),
+  KEY_NAME_TABLE(nav),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(nav80)
-  KEY_NAME_TABLE(nav_large),
+  KEY_NAME_TABLE(nav),
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(pb40)
-  KEY_NAME_TABLE(pb_small),
+  KEY_NAME_TABLE(nav),
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(pb65)
-  KEY_NAME_TABLE(pb_large),
+  KEY_NAME_TABLE(pb),
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(pb80)
-  KEY_NAME_TABLE(pb_large),
+  KEY_NAME_TABLE(pb),
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 

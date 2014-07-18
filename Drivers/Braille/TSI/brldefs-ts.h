@@ -22,18 +22,18 @@
 typedef enum {
   /* Navigator - byte 1
    * Nav20/40: right side
-   * Nav80:
+   * Nav80: navigation keys, right thumb key
    * PB40: right rocker up/down, concave, forward/backward (on top)
    */
-  TS_KEY_ButtonLeft  = 0,
-  TS_KEY_ButtonUp    = 1,
-  TS_KEY_ButtonRight = 2,
-  TS_KEY_ButtonDown  = 3,
-  TS_KEY_ThumbRight  = 4,
+  TS_KEY_NavLeft    = 0,
+  TS_KEY_NavUp      = 1,
+  TS_KEY_NavRight   = 2,
+  TS_KEY_NavDown    = 3,
+  TS_KEY_ThumbRight = 4,
 
   /* Navigator - byte 2
    * Nav20/40: left side
-   * nav80:
+   * nav80: cursor keys, left thumb key
    * PB40: left rocker up/down, convex
    */
   TS_KEY_CursorLeft  = 5,
@@ -78,7 +78,7 @@ typedef enum {
 } TS_NavigationKey;
 
 typedef enum {
-  TS_GRP_NavigationKeys,
+  TS_GRP_NavigationKeys = 0,
   TS_GRP_RoutingKeys
 } TS_KeyGroup;
 
