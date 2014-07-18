@@ -96,6 +96,7 @@ typedef enum {
 
 #include "brl_driver.h"
 #include "braille.h"
+#include "brldefs-ts.h"
 
 /* Braille display parameters that do not change */
 #define BRLROWS 1		/* only one row on braille display */
@@ -151,34 +152,35 @@ static unsigned char BRL_SEND_HEAD[] = {0XFF, 0XFF, 0X04, 0X00, 0X99, 0X00};
    Other bits indicate whether a specific key is pressed.
    See readbrl(). */
 
-/* Bits to take into account when checking each byte's signature */
-#define KEYS_BYTE_SIGNATURE_MASK 0xE0
+/* We combine all key bits into one 32bit int. Each byte is masked by the
+ * corresponding "mask" to extract valid bits then those are shifted by
+ * "shift" and or'ed into the 32bits "code".
+ */
 
-/* How we describe each byte */
+/* bits to take into account when checking each byte's signature */
+#define KEYS_BYTE_SIGNATURE_MASK 0XE0
+
+/* how we describe each byte */
 typedef struct {
   unsigned char signature; /* it's signature */
   unsigned char mask; /* bits that do represent keys */
   unsigned char shift; /* where to shift them into "code" */
 } KeysByteDescriptor;
-/* We combine all key bits into one 32bit int. Each byte is masked by the
-   corresponding "mask" to extract valid bits then those are shifted by
-   "shift" and or'ed into the 32bits "code". */
 
 /* Description of bytes for navigator and pb40. */
-#define NAV_KEY_LEN 2
-static const KeysByteDescriptor keysDescriptor_Navigator[NAV_KEY_LEN] = {
-  {0x60, 0x1F, 0},
-  {0xE0, 0x1F, 5}
+static const KeysByteDescriptor keysDescriptor_Navigator[] = {
+  {.signature=0X60, .mask=0X1F, .shift=0},
+  {.signature=0XE0, .mask=0X1F, .shift=5}
 };
+
 /* Description of bytes for pb65/80 */
-#define PB_KEY_LEN 6
 static const KeysByteDescriptor keysDescriptor_PowerBraille[] = {
-  {0x40, 0x0F, 10},
-  {0xC0, 0x0F, 14},
-  {0x20, 0x05, 18},
-  {0xA0, 0x05, 21},
-  {0x60, 0x1F, 24},
-  {0xE0, 0x1F, 5}
+  {.signature=0X40, .mask=0X0F, .shift=10},
+  {.signature=0XC0, .mask=0X0F, .shift=14},
+  {.signature=0X20, .mask=0X05, .shift=18},
+  {.signature=0XA0, .mask=0X05, .shift=21},
+  {.signature=0X60, .mask=0X1F, .shift=24},
+  {.signature=0XE0, .mask=0X1F, .shift=5}
 };
 
 /* Symbolic labels for keys
@@ -1028,7 +1030,7 @@ cut_cursor (BrailleDisplay *brl)
 /* For cursor routing */
 /* lookup so find out if a certain key is active */
 #define SW_CHK(swnum) \
-      ( sw_oldstat[swnum/8] & (1 << (swnum % 8)) )
+      ( routingKeyBits[swnum/8] & (1 << (swnum % 8)) )
 
 /* These are (sort of) states of the state machine parsing the bytes
    received form the display. These can be navigator|pb40 keys, pb80 keys,
@@ -1049,9 +1051,9 @@ static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   /* static bit vector recording currently pressed sensor switches (for
      repetition detection) */
-  static unsigned char sw_oldstat[SW_MAXHORIZ];
-  static unsigned char sw_which[SW_MAXHORIZ * 8], /* list of pressed keys */
-                       sw_howmany = 0; /* length of that list */
+  static unsigned char routingKeyBits[SW_MAXHORIZ];
+  static unsigned char routingKeyNumbers[SW_MAXHORIZ * 8], /* list of pressed keys */
+                       routingKeyCount = 0; /* length of that list */
   static unsigned char ignore_routing = 0;
      /* flag: after combo between routing and non-routing keys, don't act
 	on any key until routing resets (releases). */
@@ -1103,8 +1105,8 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
     must_init_oldstat = 0;
     ignore_routing = 0;
-    sw_howmany = 0;
-    for (i=0; i<SW_MAXHORIZ; i+=1) sw_oldstat[i] = 0;
+    routingKeyCount = 0;
+    for (i=0; i<SW_MAXHORIZ; i+=1) routingKeyBits[i] = 0;
   }
 
   switch (packet.type) {
@@ -1132,18 +1134,18 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
          every 0.5secs. When the key is released, then display sends a packet
          with all info bits at 0. */
       for (i=0; i<count; i+=1) {
-        sw_oldstat[i] |= packet.fields.switches.horizontal[i];
+        routingKeyBits[i] |= packet.fields.switches.horizontal[i];
       }
 
-      sw_howmany = 0;
+      routingKeyCount = 0;
       for (i=0; i<ncells; i+=1) {
         if (SW_CHK(i)) {
-          sw_which[sw_howmany++] = i;
+          routingKeyNumbers[routingKeyCount++] = i;
         }
       }
 
       /* SW_CHK(i) tells if routing key i is pressed.
-         sw_which[0] to sw_which[howmany-1] give the numbers of the keys
+         routingKeyNumbers[0] to routingKeyNumbers[howmany-1] give the numbers of the keys
          that are pressed. */
 
       for (i=0; i<count; i+=1) {
@@ -1167,71 +1169,71 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   }
   /* Now associate a command (in res) to the key(s) (in code and sw_...) */
 
-  if (model->hasRoutingKeys && code && sw_howmany) {
+  if (model->hasRoutingKeys && code && routingKeyCount) {
     if (ignore_routing) return EOF;
     ignore_routing = 1;
 
-    if (sw_howmany == 1) {
+    if (routingKeyCount == 1) {
       switch (code) {
-	KEYAND(KEY_BUT3) KEY(KEY_BRIGHT, BRL_BLK_CLIP_NEW + sw_which[0]);
-	KEYAND(KEY_BUT2) KEY(KEY_BLEFT, BRL_BLK_COPY_RECT + sw_which[0]);
-	KEYAND(KEY_R2DN) KEY (KEY_BDOWN, BRL_BLK_NXINDENT + sw_which[0]);
-	KEYAND(KEY_R2UP) KEY (KEY_BUP, BRL_BLK_PRINDENT + sw_which[0]);
-	KEY (KEY_CROUND, BRL_BLK_SETMARK + sw_which[0]);
-	KEYAND(KEY_CNCV) KEY (KEY_BROUND, BRL_BLK_GOTOMARK + sw_which[0]);
-	KEY (KEY_CUP, BRL_BLK_SETLEFT + sw_which[0]);
-	KEY (KEY_CDOWN, BRL_BLK_SWITCHVT + sw_which[0]);
+	KEYAND(KEY_BUT3) KEY(KEY_BRIGHT, BRL_BLK_CLIP_NEW + routingKeyNumbers[0]);
+	KEYAND(KEY_BUT2) KEY(KEY_BLEFT, BRL_BLK_COPY_RECT + routingKeyNumbers[0]);
+	KEYAND(KEY_R2DN) KEY (KEY_BDOWN, BRL_BLK_NXINDENT + routingKeyNumbers[0]);
+	KEYAND(KEY_R2UP) KEY (KEY_BUP, BRL_BLK_PRINDENT + routingKeyNumbers[0]);
+	KEY (KEY_CROUND, BRL_BLK_SETMARK + routingKeyNumbers[0]);
+	KEYAND(KEY_CNCV) KEY (KEY_BROUND, BRL_BLK_GOTOMARK + routingKeyNumbers[0]);
+	KEY (KEY_CUP, BRL_BLK_SETLEFT + routingKeyNumbers[0]);
+	KEY (KEY_CDOWN, BRL_BLK_SWITCHVT + routingKeyNumbers[0]);
 	KEYAND(KEY_CDOWN | KEY_BUP) KEY(KEY_CUP | KEY_CDOWN,
-					BRL_BLK_DESCCHAR +sw_which[0]);
+					BRL_BLK_DESCCHAR +routingKeyNumbers[0]);
       }
-    } else if (sw_howmany == 2) {
-      if (((sw_which[0] + 1) == sw_which[1]) &&
+    } else if (routingKeyCount == 2) {
+      if (((routingKeyNumbers[0] + 1) == routingKeyNumbers[1]) &&
           ((code == KEY_BRIGHT) || (code == KEY_BUT3))) {
-	res = BRL_BLK_CLIP_ADD + sw_which[0];
-      } else if (((sw_which[0] + 1) == sw_which[1]) &&
+	res = BRL_BLK_CLIP_ADD + routingKeyNumbers[0];
+      } else if (((routingKeyNumbers[0] + 1) == routingKeyNumbers[1]) &&
                  ((code == KEY_BLEFT) || (code == KEY_BUT2))) {
-	res = BRL_BLK_COPY_LINE + sw_which[1];
-      } else if ((sw_which[0] == 0) && (sw_which[1] == 1)) {
+	res = BRL_BLK_COPY_LINE + routingKeyNumbers[1];
+      } else if ((routingKeyNumbers[0] == 0) && (routingKeyNumbers[1] == 1)) {
 	switch (code) {
 	  KEYAND(KEY_R2DN) KEY (KEY_BDOWN, BRL_CMD_NXPGRPH);
 	  KEYAND(KEY_R2UP) KEY (KEY_BUP, BRL_CMD_PRPGRPH);
 	}
-      } else if ((sw_which[0] == 1) && (sw_which[1] == 2)) {
+      } else if ((routingKeyNumbers[0] == 1) && (routingKeyNumbers[1] == 2)) {
 	switch (code) {
 	  KEY (KEY_BDOWN, BRL_CMD_NXPROMPT);
 	  KEY (KEY_BUP, BRL_CMD_PRPROMPT);
 	}
-      } else if ((sw_which[0] == 0) && (sw_which[1] == 2)) {
+      } else if ((routingKeyNumbers[0] == 0) && (routingKeyNumbers[1] == 2)) {
 	switch (code) {
 	  KEYAND(KEY_R2DN) KEY (KEY_BDOWN, BRL_CMD_NXSEARCH);
 	  KEYAND(KEY_R2UP) KEY (KEY_BUP, BRL_CMD_PRSEARCH);
 	}
       }
     }
-  } else if (model->hasRoutingKeys && sw_howmany)	/* routing key */
+  } else if (model->hasRoutingKeys && routingKeyCount)	/* routing key */
     {
-      if (sw_howmany == 1)
-	res = BRL_BLK_ROUTE + sw_which[0];
-      else if(sw_howmany == 2 && sw_which[0] == 1 && sw_which[1] == 2)
+      if (routingKeyCount == 1)
+	res = BRL_BLK_ROUTE + routingKeyNumbers[0];
+      else if(routingKeyCount == 2 && routingKeyNumbers[0] == 1 && routingKeyNumbers[1] == 2)
  	res = BRL_CMD_PASTE;
-      else if (sw_howmany == 2 && sw_which[0] == 0 && sw_which[1] == 1)
+      else if (routingKeyCount == 2 && routingKeyNumbers[0] == 0 && routingKeyNumbers[1] == 1)
 	res = BRL_CMD_CHRLT;
-      else if (sw_howmany == 2 && sw_which[0] == model->lastRoutingKey - 1
-	       && sw_which[1] == model->lastRoutingKey)
+      else if (routingKeyCount == 2 && routingKeyNumbers[0] == model->lastRoutingKey - 1
+	       && routingKeyNumbers[1] == model->lastRoutingKey)
 	res = BRL_CMD_CHRRT;
-      else if (sw_howmany == 2 && sw_which[0] == 0 && sw_which[1] == 2)
+      else if (routingKeyCount == 2 && routingKeyNumbers[0] == 0 && routingKeyNumbers[1] == 2)
 	res = BRL_CMD_HWINLT;
-      else if (sw_howmany == 2 && sw_which[0] == model->lastRoutingKey - 2
-	       && sw_which[1] == model->lastRoutingKey)
+      else if (routingKeyCount == 2 && routingKeyNumbers[0] == model->lastRoutingKey - 2
+	       && routingKeyNumbers[1] == model->lastRoutingKey)
 	res = BRL_CMD_HWINRT;
-      else if (sw_howmany == 2 && sw_which[0] == 0
-	       && sw_which[1] == model->lastRoutingKey)
+      else if (routingKeyCount == 2 && routingKeyNumbers[0] == 0
+	       && routingKeyNumbers[1] == model->lastRoutingKey)
 	res = BRL_CMD_HELP;
-      else if (sw_howmany == 4 && sw_which[0] == 0 && sw_which[1] == 1
-	       && sw_which[2] == model->lastRoutingKey-1 && sw_which[3] == model->lastRoutingKey)
+      else if (routingKeyCount == 4 && routingKeyNumbers[0] == 0 && routingKeyNumbers[1] == 1
+	       && routingKeyNumbers[2] == model->lastRoutingKey-1 && routingKeyNumbers[3] == model->lastRoutingKey)
 	res = BRL_CMD_LEARN;
-      else if(sw_howmany == 3 && sw_which[0]+2 == sw_which[1]){
-	  res = BRL_BLK_CLIP_COPY | BRL_ARG(sw_which[0]) | BRL_EXT(sw_which[2]);
+      else if(routingKeyCount == 3 && routingKeyNumbers[0]+2 == routingKeyNumbers[1]){
+	  res = BRL_BLK_CLIP_COPY | BRL_ARG(routingKeyNumbers[0]) | BRL_EXT(routingKeyNumbers[2]);
 	}
     }
   else switch (code){
