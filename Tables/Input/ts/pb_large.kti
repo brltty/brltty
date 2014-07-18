@@ -16,6 +16,9 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Navigator 80
+note The keys on the top, from left to right, are named:
+note Button1, Button2, Bar1, Bar2, Bar3, Bar4, Button3, Button4.
+note The keys on the front, from left to right, are named:
+note Switch1, Switch2, LeftRocker, Convex, Concave, RightRocker, Switch3, Switch4.
 
-include nav_large.kti
+include pb.kti

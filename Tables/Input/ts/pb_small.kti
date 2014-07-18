@@ -16,6 +16,20 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Navigator 80
+assign keyCursorUp LeftRockerUp
+assign keyCursorDown LeftRockerDown
 
-include nav_large.kti
+assign keyNavLeft Backward
+assign keyNavRight Forward
+assign keyNavUp RightRockerUp
+assign keyNavDown RightRockerDown
+
+assign keyThumbLeft Convex
+assign keyThumbRight Concave
+
+note The positions of the left bar are named: \{keyCursorUp}, \{keyCursorDown}.
+note The positions of the right bar are named: \{keyNavUp}, \{keyNavDown}.
+note The keys in the middle are named: \{keyThumbLeft}, \{keyThumbRight}.
+note The keys on the top are named: \{keyNavLeft} (on the left), \{keyNavRight} (on the right).
+
+include nav.kti

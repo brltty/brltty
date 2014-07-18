@@ -102,7 +102,7 @@ BEGIN_KEY_NAME_TABLE(routing)
   KEY_GROUP_ENTRY(TS_GRP_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(nav)
+BEGIN_KEY_NAME_TABLE(nav_small)
   KEY_NAME_ENTRY(TS_KEY_CursorLeft, "CursorLeft"),
   KEY_NAME_ENTRY(TS_KEY_CursorRight, "CursorRight"),
   KEY_NAME_ENTRY(TS_KEY_CursorUp, "CursorUp"),
@@ -117,7 +117,37 @@ BEGIN_KEY_NAME_TABLE(nav)
   KEY_NAME_ENTRY(TS_KEY_ThumbRight, "ThumbRight"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(pb)
+BEGIN_KEY_NAME_TABLE(nav_large)
+  KEY_NAME_ENTRY(TS_KEY_CursorLeft, "CursorLeft"),
+  KEY_NAME_ENTRY(TS_KEY_CursorRight, "CursorRight"),
+  KEY_NAME_ENTRY(TS_KEY_CursorUp, "CursorUp"),
+  KEY_NAME_ENTRY(TS_KEY_CursorDown, "CursorDown"),
+
+  KEY_NAME_ENTRY(TS_KEY_NavLeft, "LeftOuter"),
+  KEY_NAME_ENTRY(TS_KEY_NavRight, "RightOuter"),
+  KEY_NAME_ENTRY(TS_KEY_NavUp, "LeftInner"),
+  KEY_NAME_ENTRY(TS_KEY_NavDown, "RightInner"),
+
+  KEY_NAME_ENTRY(TS_KEY_ThumbLeft, "LeftThumb"),
+  KEY_NAME_ENTRY(TS_KEY_ThumbRight, "RightThumb"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(pb_small)
+  KEY_NAME_ENTRY(TS_KEY_CursorLeft, "CursorLeft"),
+  KEY_NAME_ENTRY(TS_KEY_CursorRight, "CursorRight"),
+  KEY_NAME_ENTRY(TS_KEY_CursorUp, "CursorUp"),
+  KEY_NAME_ENTRY(TS_KEY_CursorDown, "CursorDown"),
+
+  KEY_NAME_ENTRY(TS_KEY_NavLeft, "NavLeft"),
+  KEY_NAME_ENTRY(TS_KEY_NavRight, "NavRight"),
+  KEY_NAME_ENTRY(TS_KEY_NavUp, "NavUp"),
+  KEY_NAME_ENTRY(TS_KEY_NavDown, "NavDown"),
+
+  KEY_NAME_ENTRY(TS_KEY_ThumbLeft, "ThumbLeft"),
+  KEY_NAME_ENTRY(TS_KEY_ThumbRight, "ThumbRight"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(pb_large)
   KEY_NAME_ENTRY(TS_KEY_Button1, "Button1"),
   KEY_NAME_ENTRY(TS_KEY_Button2, "Button2"),
   KEY_NAME_ENTRY(TS_KEY_Button3, "Button3"),
@@ -137,40 +167,40 @@ BEGIN_KEY_NAME_TABLE(pb)
   KEY_NAME_ENTRY(TS_KEY_Switch4Up, "Switch4Up"),
   KEY_NAME_ENTRY(TS_KEY_Switch4Down, "Switch4Down"),
 
-  KEY_NAME_ENTRY(TS_KEY_Rocker1Up, "Rocker1Up"),
-  KEY_NAME_ENTRY(TS_KEY_Rocker1Down, "Rocker1Down"),
-  KEY_NAME_ENTRY(TS_KEY_Rocker2Up, "Rocker2Up"),
-  KEY_NAME_ENTRY(TS_KEY_Rocker2Down, "Rocker2Down"),
+  KEY_NAME_ENTRY(TS_KEY_LeftRockerUp, "LeftRockerUp"),
+  KEY_NAME_ENTRY(TS_KEY_LeftRockerDown, "LeftRockerDown"),
+  KEY_NAME_ENTRY(TS_KEY_RightRockerUp, "RightRockerUp"),
+  KEY_NAME_ENTRY(TS_KEY_RightRockerDown, "RightRockerDown"),
 
   KEY_NAME_ENTRY(TS_KEY_Convex, "Convex"),
   KEY_NAME_ENTRY(TS_KEY_Concave, "Concave"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(nav20)
-  KEY_NAME_TABLE(nav),
+  KEY_NAME_TABLE(nav_small),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(nav40)
-  KEY_NAME_TABLE(nav),
+  KEY_NAME_TABLE(nav_small),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(nav80)
-  KEY_NAME_TABLE(nav),
+  KEY_NAME_TABLE(nav_large),
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(pb40)
-  KEY_NAME_TABLE(nav),
+  KEY_NAME_TABLE(pb_small),
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(pb65)
-  KEY_NAME_TABLE(pb),
+  KEY_NAME_TABLE(pb_large),
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(pb80)
-  KEY_NAME_TABLE(pb),
+  KEY_NAME_TABLE(pb_large),
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
@@ -336,8 +366,8 @@ static const KeysByteDescriptor keysDescriptor_PowerBraille[] = {
 #define BATTERY_H1 0x00
 #define BATTERY_H2 0x01
 /* Sensor switches/cursor routing keys information (2bytes header) */
-#define SWITCHES_H1 0x00
-#define SWITCHES_H2 0x08
+#define ROUTING_H1 0x00
+#define ROUTING_H2 0x08
 
 /* Definitions for sensor switches/cursor routing keys */
 #define SW_NVERT 4 /* vertical switches. unused info. 4bytes to skip */
@@ -356,7 +386,7 @@ typedef struct {
   const char *modelName;
   const char *keyBindings;
 
-  unsigned char switchBytes;
+  unsigned char routingBytes;
   signed char lastRoutingKey;
 
   unsigned hasRoutingKeys:1;
@@ -368,7 +398,7 @@ typedef struct {
 static const ModelEntry modelNavigator20 = {
   .modelName = "Navigator 20",
 
-  .switchBytes = SWITCH_BYTES_40,
+  .routingBytes = SWITCH_BYTES_40,
   .lastRoutingKey = 19,
 
   .keyBindings = "nav20_nav40"
@@ -377,7 +407,7 @@ static const ModelEntry modelNavigator20 = {
 static const ModelEntry modelNavigator40 = {
   .modelName = "Navigator 40",
 
-  .switchBytes = SWITCH_BYTES_40,
+  .routingBytes = SWITCH_BYTES_40,
   .lastRoutingKey = 39,
 
   .slowUpdate = 1,
@@ -388,7 +418,7 @@ static const ModelEntry modelNavigator40 = {
 static const ModelEntry modelNavigator80 = {
   .modelName = "Navigator 80",
 
-  .switchBytes = SWITCH_BYTES_80,
+  .routingBytes = SWITCH_BYTES_80,
   .lastRoutingKey = 79,
 
   .hasRoutingKeys = 1,
@@ -400,7 +430,7 @@ static const ModelEntry modelNavigator80 = {
 static const ModelEntry modelPowerBraille40 = {
   .modelName = "Power Braille 40",
 
-  .switchBytes = SWITCH_BYTES_40,
+  .routingBytes = SWITCH_BYTES_40,
   .lastRoutingKey = 39,
 
   .hasRoutingKeys = 1,
@@ -413,7 +443,7 @@ static const ModelEntry modelPowerBraille40 = {
 static const ModelEntry modelPowerBraille65 = {
   .modelName = "Power Braille 65",
 
-  .switchBytes = SWITCH_BYTES_81,
+  .routingBytes = SWITCH_BYTES_81,
   .lastRoutingKey = 64,
 
   .hasRoutingKeys = 1,
@@ -426,7 +456,7 @@ static const ModelEntry modelPowerBraille65 = {
 static const ModelEntry modelPowerBraille80 = {
   .modelName = "Power Braille 80",
 
-  .switchBytes = SWITCH_BYTES_81,
+  .routingBytes = SWITCH_BYTES_81,
   .lastRoutingKey = 80,
 
   .hasRoutingKeys = 1,
@@ -438,7 +468,7 @@ static const ModelEntry modelPowerBraille80 = {
 
 typedef enum {
   IPT_IDENTITY,
-  IPT_SWITCHES,
+  IPT_ROUTING,
   IPT_BATTERY,
   IPT_KEYS
 } InputPacketType;
@@ -460,7 +490,7 @@ typedef struct {
       unsigned char count;
       unsigned char vertical[4];
       unsigned char horizontal[0X100 - 4];
-    } switches;
+    } routing;
 
     unsigned char keys[6];
   } fields;
@@ -470,7 +500,7 @@ typedef struct {
   union {
     struct {
       unsigned char count;
-    } switches;
+    } routing;
 
     struct {
       const KeysByteDescriptor *descriptor;
@@ -549,8 +579,8 @@ verifyPacket1 (
               *length = sizeof(packet->fields.identity);
               break;
 
-            case SWITCHES_H2:
-              packet->type = IPT_SWITCHES;
+            case ROUTING_H2:
+              packet->type = IPT_ROUTING;
               *length = 3;
               break;
 
@@ -564,10 +594,10 @@ verifyPacket1 (
         }
         break;
 
-      case IPT_SWITCHES:
+      case IPT_ROUTING:
         if (size == 3) {
-          packet->data.switches.count = byte;
-          *length += packet->data.switches.count;
+          packet->data.routing.count = byte;
+          *length += packet->data.routing.count;
         }
         break;
 
@@ -1214,19 +1244,19 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       break;
     }
 
-    case IPT_SWITCHES: {
-      unsigned char count = packet.data.switches.count;
+    case IPT_ROUTING: {
+      unsigned char count = packet.data.routing.count;
       unsigned int i;
 
-      /* if model->switchBytes and packet.data.switches.count disagree, then must be garbage??? */
-      if (count != model->switchBytes) return EOF;
-      count -= sizeof(packet.fields.switches.vertical);
+      /* if model->routingBytes and packet.data.routing.count disagree, then must be garbage??? */
+      if (count != model->routingBytes) return EOF;
+      count -= sizeof(packet.fields.routing.vertical);
 
       /* if key press is maintained, then packet is resent by display
          every 0.5secs. When the key is released, then display sends a packet
          with all info bits at 0. */
       for (i=0; i<count; i+=1) {
-        routingKeyBits[i] |= packet.fields.switches.horizontal[i];
+        routingKeyBits[i] |= packet.fields.routing.horizontal[i];
       }
 
       routingKeyCount = 0;
@@ -1241,7 +1271,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
          that are pressed. */
 
       for (i=0; i<count; i+=1) {
-        if (packet.fields.switches.horizontal[i] != 0) {
+        if (packet.fields.routing.horizontal[i] != 0) {
           return EOF;
         }
       }

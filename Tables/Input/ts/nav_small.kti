@@ -16,6 +16,23 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Navigator 80
+assign keyCursorLeft CursorLeft
+assign keyCursorRight CursorRight
+assign keyCursorUp CursorUp
+assign keyCursorDown CursorDown
 
-include nav_large.kti
+assign keyNavLeft NavLeft
+assign keyNavRight NavRight
+assign keyNavUp NavUp
+assign keyNavDown NavDown
+
+assign keyThumbLeft ThumbLeft
+assign keyThumbRight ThumbRight
+
+note The keys of the four-key pad on the left are named:
+note \{keyCursorLeft}, \{keyCursorRight}, \{keyCursorUp}, \{keyCursorDown}.
+note The keys of the four-key pad on the right are named:
+note \{keyNavLeft}, \{keyNavRight}, \{keyNavUp}, \{keyNavDown}.
+note The keys in between the pads are named: \{keyThumbLeft}, \{keyThumbRight}.
+
+include nav.kti

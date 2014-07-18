@@ -43,11 +43,11 @@ typedef enum {
   TS_KEY_ThumbLeft   = 9,
 
   // Power Braille - byte 6
-  TS_KEY_Button1     = 5,
-  TS_KEY_Rocker1Up   = 6,
-  TS_KEY_Button2     = 7,
-  TS_KEY_Rocker1Down = 8,
-  TS_KEY_Convex      = 9,
+  TS_KEY_Button1        = 5,
+  TS_KEY_LeftRockerUp   = 6,
+  TS_KEY_Button2        = 7,
+  TS_KEY_LeftRockerDown = 8,
+  TS_KEY_Convex         = 9,
 
   // Power Braille - byte 1
   TS_KEY_Switch1Up   = 10,
@@ -70,11 +70,11 @@ typedef enum {
   TS_KEY_Button4 = 23,
 
   // Power Braille - byte 5
-  TS_KEY_Bar1        = 24,
-  TS_KEY_Rocker2Up   = 25,
-  TS_KEY_Bar2        = 26,
-  TS_KEY_Rocker2Down = 27,
-  TS_KEY_Concave     = 28
+  TS_KEY_Bar1            = 24,
+  TS_KEY_RightRockerUp   = 25,
+  TS_KEY_Bar2            = 26,
+  TS_KEY_RightRockerDown = 27,
+  TS_KEY_Concave         = 28
 } TS_NavigationKey;
 
 typedef enum {
