@@ -100,9 +100,6 @@ bind RoutingKey+Button4 COPY_LINE
 bind RoutingKey+LeftRockerUp SETLEFT
 bind RoutingKey+LeftRockerDown SWITCHVT
 
-bind RoutingKey+RightRockerUp PRINDENT
-bind RoutingKey+RightRockerDown NXINDENT
-
 bind RoutingKey+Convex SETMARK
 bind RoutingKey+Concave GOTOMARK
 

@@ -30,6 +30,9 @@ bind RoutingKey.\{routingRight3}+RoutingKey.\{routingRight1} HWINRT
 
 bind RoutingKey.2+RoutingKey.3 PASTE
 
+bind RoutingKey+\{keyRoutingUp} PRINDENT
+bind RoutingKey+\{keyRoutingDown} NXINDENT
+
 bind RoutingKey.1+RoutingKey.2+\{keyRoutingUp} PRPGRPH
 bind RoutingKey.1+RoutingKey.2+\{keyRoutingDown} NXPGRPH
 

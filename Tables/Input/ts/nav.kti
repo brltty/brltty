@@ -105,20 +105,15 @@ ifKey RoutingKey
   include routing.kti
 
   bind RoutingKey+\{keyNavLeft} CLIP_NEW
-  bind RoutingKey+RoutingKey.11+\{keyNavLeft} CLIP_ADD
+  ifVar keyCursorLeft  bind RoutingKey+\{keyCursorLeft} CLIP_ADD
   bind RoutingKey+\{keyNavRight} COPY_RECT
-  bind RoutingKey+RoutingKey.21+\{keyNavRight} COPY_LINE
+  ifVar keyCursorRight  bind RoutingKey+\{keyCursorRight} COPY_LINE
 
   bind RoutingKey+\{keyCursorUp} SETLEFT
-  bind RoutingKey+\{keyCursorDown} SWITCHVT
-
-  bind RoutingKey+\{keyNavUp} PRINDENT
-  bind RoutingKey+\{keyNavDown} NXINDENT
+  bind RoutingKey+\{keyCursorDown} DESCCHAR
 
   bind RoutingKey+\{keyThumbLeft} SETMARK
   bind RoutingKey+\{keyThumbRight} GOTOMARK
-
-  bind RoutingKey+\{keyCursorDown}+\{keyNavUp} DESCCHAR
 endIf
 
 context menu
