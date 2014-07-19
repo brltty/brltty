@@ -30,3 +30,12 @@ bind RoutingKey.\{routingRight3}+RoutingKey.\{routingRight1} HWINRT
 
 bind RoutingKey.2+RoutingKey.3 PASTE
 
+bind RoutingKey.1+RoutingKey.2+\{keyRoutingUp} PRPGRPH
+bind RoutingKey.1+RoutingKey.2+\{keyRoutingDown} NXPGRPH
+
+bind RoutingKey.1+RoutingKey.3+\{keyRoutingUp} PRSEARCH
+bind RoutingKey.1+RoutingKey.3+\{keyRoutingDown} NXSEARCH
+
+bind RoutingKey.2+RoutingKey.3+\{keyRoutingUp} PRPROMPT
+bind RoutingKey.2+RoutingKey.3+\{keyRoutingDown} NXPROMPT
+

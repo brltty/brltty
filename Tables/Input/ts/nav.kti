@@ -100,6 +100,8 @@ ifVar keyCursorRight
 endIf
 
 ifKey RoutingKey
+  assign keyRoutingUp \{keyNavUp}
+  assign keyRoutingDown \{keyNavDown}
   include routing.kti
 
   bind RoutingKey+\{keyNavLeft} CLIP_NEW
@@ -117,15 +119,6 @@ ifKey RoutingKey
   bind RoutingKey+\{keyThumbRight} GOTOMARK
 
   bind RoutingKey+\{keyCursorDown}+\{keyNavUp} DESCCHAR
-
-  bind RoutingKey.1+RoutingKey.2+\{keyNavUp} PRPGRPH
-  bind RoutingKey.1+RoutingKey.2+\{keyNavDown} NXPGRPH
-
-  bind RoutingKey.1+RoutingKey.3+\{keyNavUp} PRSEARCH
-  bind RoutingKey.1+RoutingKey.3+\{keyNavDown} NXSEARCH
-
-  bind RoutingKey.2+RoutingKey.3+\{keyNavUp} PRPROMPT
-  bind RoutingKey.2+RoutingKey.3+\{keyNavDown} NXPROMPT
 endIf
 
 context menu
