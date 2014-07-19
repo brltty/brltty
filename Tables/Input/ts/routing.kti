@@ -19,14 +19,14 @@
 bind RoutingKey ROUTE
 bind RoutingKey+RoutingKey CLIP_COPY
 
-bind RoutingKey.1+RoutingKey.30 HELP
-bind RoutingKey.1+RoutingKey.2+RoutingKey.30+RoutingKey.31 LEARN
+bind RoutingKey.1+RoutingKey.\{routingRight1} HELP
+bind RoutingKey.1+RoutingKey.2+RoutingKey.\{routingRight2}+RoutingKey.\{routingRight1} LEARN
 
 bind RoutingKey.1+RoutingKey.2 CHRLT
-bind RoutingKey.30+RoutingKey.31 CHRRT
+bind RoutingKey.\{routingRight2}+RoutingKey.\{routingRight1} CHRRT
 
 bind RoutingKey.1+RoutingKey.3 HWINLT
-bind RoutingKey.30+RoutingKey.32 HWINRT
+bind RoutingKey.\{routingRight3}+RoutingKey.\{routingRight1} HWINRT
 
 bind RoutingKey.2+RoutingKey.3 PASTE
 

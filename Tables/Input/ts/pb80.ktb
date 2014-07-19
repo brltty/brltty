@@ -18,4 +18,7 @@
 
 title Power Braille 80
 
+assign routingRight1 81
+assign routingRight2 80
+assign routingRight3 79
 include pb_large.kti
