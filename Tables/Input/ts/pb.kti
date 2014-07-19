@@ -88,6 +88,31 @@ bind Switch3Down SKPIDLNS+off
 bind Switch4Up DISPMD+on
 bind Switch4Down DISPMD+off
 
+include routing.kti
+
+bind RoutingKey+Button1 CLIP_NEW
+bind RoutingKey+Button2 CLIP_ADD
+bind RoutingKey+Button3 COPY_RECT
+bind RoutingKey+Button4 COPY_LINE
+
+bind RoutingKey+LeftRockerUp SETLEFT
+bind RoutingKey+LeftRockerDown SWITCHVT
+
+bind RoutingKey+RightRockerUp PRINDENT
+bind RoutingKey+RightRockerDown NXINDENT
+
+bind RoutingKey+Convex SETMARK
+bind RoutingKey+Concave GOTOMARK
+
+bind RoutingKey.1+RoutingKey.2+RightRockerUp PRPGRPH
+bind RoutingKey.1+RoutingKey.2+RightRockerDown NXPGRPH
+
+bind RoutingKey.1+RoutingKey.3+RightRockerUp PRSEARCH
+bind RoutingKey.1+RoutingKey.3+RightRockerDown NXSEARCH
+
+bind RoutingKey.2+RoutingKey.3+RightRockerUp PRPROMPT
+bind RoutingKey.2+RoutingKey.3+RightRockerDown NXPROMPT
+
 context menu
 bind Convex MENU_PREV_SETTING
 bind Concave MENU_NEXT_SETTING

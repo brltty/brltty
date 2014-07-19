@@ -30,8 +30,8 @@ bind \{keyThumbLeft} CSRTRK
 bind \{keyNavLeft}+\{keyNavUp} TOP_LEFT
 bind \{keyNavLeft}+\{keyNavDown} BOT_LEFT
 
-bind \{keyThumbRight}+\{keyCursorUp} PRDIFLN
-bind \{keyThumbRight}+\{keyCursorDown} NXDIFLN
+bind \{keyThumbRight}+\{keyNavUp} PRDIFLN
+bind \{keyThumbRight}+\{keyNavDown} NXDIFLN
 
 bind \{keyThumbLeft}+\{keyNavUp} ATTRUP
 bind \{keyThumbLeft}+\{keyNavDown} ATTRDN
@@ -97,6 +97,35 @@ endIf
 
 ifVar keyCursorRight
   bind \{keyNavLeft}+\{keyNavRight}+\{keyCursorRight}+\{keyThumbLeft} ATTRBLINK
+endIf
+
+ifKey RoutingKey
+  include routing.kti
+
+  bind RoutingKey+\{keyNavLeft} CLIP_NEW
+  bind RoutingKey+RoutingKey.11+\{keyNavLeft} CLIP_ADD
+  bind RoutingKey+\{keyNavRight} COPY_RECT
+  bind RoutingKey+RoutingKey.21+\{keyNavRight} COPY_LINE
+
+  bind RoutingKey+\{keyCursorUp} SETLEFT
+  bind RoutingKey+\{keyCursorDown} SWITCHVT
+
+  bind RoutingKey+\{keyNavUp} PRINDENT
+  bind RoutingKey+\{keyNavDown} NXINDENT
+
+  bind RoutingKey+\{keyThumbLeft} SETMARK
+  bind RoutingKey+\{keyThumbRight} GOTOMARK
+
+  bind RoutingKey+\{keyCursorDown}+\{keyNavUp} DESCCHAR
+
+  bind RoutingKey.1+RoutingKey.2+\{keyNavUp} PRPGRPH
+  bind RoutingKey.1+RoutingKey.2+\{keyNavDown} NXPGRPH
+
+  bind RoutingKey.1+RoutingKey.3+\{keyNavUp} PRSEARCH
+  bind RoutingKey.1+RoutingKey.3+\{keyNavDown} NXSEARCH
+
+  bind RoutingKey.2+RoutingKey.3+\{keyNavUp} PRPROMPT
+  bind RoutingKey.2+RoutingKey.3+\{keyNavDown} NXPROMPT
 endIf
 
 context menu
