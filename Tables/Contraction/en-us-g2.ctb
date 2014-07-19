@@ -463,6 +463,7 @@ always ever 5-15
 sufword eversion 15-1236-12456-46-1345 eversions
 sufword evert 15-1236-12456-2345 everted
 word every 15
+sufword eyedrop = eyedropper
 
 # the letter f
 always f 124
