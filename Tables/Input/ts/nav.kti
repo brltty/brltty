@@ -16,3 +16,92 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+bind \{keyNavUp} LNUP
+bind \{keyNavDown} LNDN
+
+bind \{keyNavLeft} FWINLT
+bind \{keyNavRight} FWINRT
+
+bind \{keyThumbRight} HOME
+bind \{keyThumbRight}+\{keyCursorUp} BACK
+
+bind \{keyThumbLeft} CSRTRK
+
+bind \{keyNavLeft}+\{keyNavUp} TOP_LEFT
+bind \{keyNavLeft}+\{keyNavDown} BOT_LEFT
+
+bind \{keyThumbRight}+\{keyCursorUp} PRDIFLN
+bind \{keyThumbRight}+\{keyCursorDown} NXDIFLN
+
+bind \{keyThumbLeft}+\{keyNavUp} ATTRUP
+bind \{keyThumbLeft}+\{keyNavDown} ATTRDN
+
+ifVar keyCursorLeft  bind \{keyThumbLeft}+\{keyCursorLeft} CHRLT
+ifVar keyCursorRight  bind \{keyThumbLeft}+\{keyCursorRight} CHRRT
+
+ifVar keyCursorLeft  bind \{keyCursorUp}+\{keyCursorLeft} HWINLT
+ifVar keyCursorRight  bind \{keyCursorUp}+\{keyCursorRight} HWINRT
+
+bind \{keyThumbLeft}+\{keyCursorUp} WINUP
+bind \{keyThumbLeft}+\{keyCursorDown} WINDN
+
+bind \{keyCursorUp}+\{keyNavLeft} LNBEG
+bind \{keyCursorUp}+\{keyNavRight} LNEND
+
+ifVar keyCursorLeft  bind \{keyCursorLeft} KEY_CURSOR_LEFT
+ifVar keyCursorRight  bind \{keyCursorRight} KEY_CURSOR_RIGHT
+bind \{keyCursorUp} KEY_CURSOR_UP
+bind \{keyCursorDown} KEY_CURSOR_DOWN
+
+ifVar keyCursorLeft
+  ifVar keyCursorRight
+    bind \{keyCursorLeft}+\{keyCursorRight} HELP
+    bind \{keyCursorLeft}+\{keyCursorRight}+\{keyCursorUp}+\{keyCursorDown} LEARN
+  endIf
+endIf
+
+bind \{keyThumbLeft}+\{keyThumbRight} FREEZE
+bind \{keyCursorUp}+\{keyNavDown} INFO
+bind \{keyCursorDown}+\{keyNavUp} ATTRVIS
+bind \{keyCursorDown}+\{keyNavUp}+\{keyThumbLeft} DISPMD
+
+bind \{keyCursorDown}+\{keyNavDown} CSRJMP_VERT
+
+bind \{keyNavRight}+\{keyNavDown} SAY_LINE
+bind \{keyNavLeft}+\{keyNavRight}+\{keyNavDown} SAY_BELOW
+bind \{keyThumbRight}+\{keyNavRight} SPKHOME
+bind \{keyNavRight}+\{keyNavUp} MUTE
+bind \{keyCursorUp}+\{keyNavUp}+\{keyNavLeft}+\{keyNavRight} RESTARTSPEECH
+
+ifVar keyCursorRight
+  bind \{keyCursorRight}+\{keyNavLeft} SAY_LINE
+  bind \{keyCursorRight}+\{keyCursorUp}+\{keyNavLeft}+\{keyNavUp} MUTE
+endIf
+
+bind \{keyNavLeft}+\{keyNavRight} PREFMENU
+bind \{keyNavLeft}+\{keyNavRight}+\{keyThumbRight} PREFSAVE
+bind \{keyNavLeft}+\{keyNavRight}+\{keyThumbLeft}+\{keyThumbRight} PREFLOAD
+
+bind \{keyNavLeft}+\{keyNavRight}+\{keyNavDown}+\{keyThumbLeft} SKPIDLNS
+bind \{keyNavLeft}+\{keyNavRight}+\{keyNavDown}+\{keyThumbRight} SKPIDLNS
+bind \{keyNavLeft}+\{keyNavRight}+\{keyCursorUp} CSRVIS
+bind \{keyNavLeft}+\{keyNavRight}+\{keyCursorUp}+\{keyThumbLeft} CSRBLINK
+bind \{keyNavLeft}+\{keyNavRight}+\{keyCursorDown} SIXDOTS
+bind \{keyNavLeft}+\{keyNavRight}+\{keyCursorDown}+\{keyThumbLeft} CAPBLINK
+bind \{keyNavLeft}+\{keyNavRight}+\{keyNavUp}+\{keyThumbLeft} ATTRBLINK
+
+ifVar keyCursorLeft
+  bind \{keyNavLeft}+\{keyNavRight}+\{keyCursorLeft} SLIDEWIN
+  bind \{keyNavLeft}+\{keyNavRight}+\{keyCursorLeft}+\{keyThumbLeft} TUNES
+endIf
+
+ifVar keyCursorRight
+  bind \{keyNavLeft}+\{keyNavRight}+\{keyCursorRight}+\{keyThumbLeft} ATTRBLINK
+endIf
+
+context menu
+bind \{keyThumbLeft} MENU_PREV_SETTING
+bind \{keyThumbRight} MENU_NEXT_SETTING
+bind \{keyCursorUp} MENU_PREV_SETTING
+bind \{keyCursorDown} MENU_NEXT_SETTING
+

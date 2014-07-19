@@ -16,3 +16,79 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+bind RightRockerUp LNUP
+bind RightRockerDown LNDN
+
+bind Bar1 LNUP
+bind Bar2 LNDN
+bind Bar3 LNDN
+bind Bar4 LNDN
+
+bind Button3 FWINLT
+bind Button4 FWINRT
+
+bind Concave HOME
+bind Concave+LeftRockerUp BACK
+
+bind Convex CSRTRK
+
+bind Button1+Bar1 TOP_LEFT
+bind Button1+Bar2 BOT_LEFT
+
+bind Button2+Bar1 PRDIFLN
+bind Button2+Bar2 NXDIFLN
+bind Button2+Bar3 NXDIFLN
+bind Button2+Bar4 NXDIFLN
+
+bind Button2+RightRockerUp ATTRUP
+bind Button2+RightRockerDown ATTRDN
+
+bind Button1+Button2+Bar1 WINUP
+bind Button1+Button2+Bar2 WINDN
+
+bind LeftRockerUp+Button3 LNBEG
+bind LeftRockerUp+Button4 LNEND
+
+bind LeftRockerUp KEY_CURSOR_UP
+bind LeftRockerDown KEY_CURSOR_DOWN
+
+bind Button1+Button2+Button3+Button4 LEARN
+bind Button3+Button4 INFO
+
+bind LeftRockerDown+RightRockerDown CSRJMP_VERT
+
+bind Bar2+RightRockerDown SAY_LINE
+bind Bar1+Bar2+RightRockerDown SAY_BELOW
+bind Concave+Bar2 SPKHOME
+bind Bar2+RightRockerUp MUTE
+bind Bar1+Bar2+LeftRockerUp+RightRockerUp RESTARTSPEECH
+
+bind Bar1+Bar2 PREFMENU
+bind Bar1+Bar2+Concave PREFSAVE
+bind Bar1+Bar2+Convex+Concave PREFLOAD
+
+bind Bar1+Bar2+Button1 CSRVIS
+bind Bar1+Bar2+Button1+Convex CSRBLINK
+bind Bar1+Bar2+Button2 TUNES
+bind Bar1+Bar2+Button2+Convex CAPBLINK
+bind Bar1+Bar2+LeftRockerDown SIXDOTS
+
+bind Switch1Up ATTRVIS+on
+bind Switch1Down ATTRVIS+off
+
+bind Switch1Up+Convex ATTRBLINK+on
+bind Switch1Down+Convex ATTRBLINK+off
+
+bind Switch2Up FREEZE+on
+bind Switch2Down FREEZE+off
+
+bind Switch3Up SKPIDLNS+on
+bind Switch3Down SKPIDLNS+off
+
+bind Switch4Up DISPMD+on
+bind Switch4Down DISPMD+off
+
+context menu
+bind Convex MENU_PREV_SETTING
+bind Concave MENU_NEXT_SETTING
+
