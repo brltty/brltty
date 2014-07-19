@@ -133,18 +133,16 @@ BEGIN_KEY_NAME_TABLE(nav_large)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(pb_small)
-  KEY_NAME_ENTRY(TS_KEY_CursorLeft, "CursorLeft"),
-  KEY_NAME_ENTRY(TS_KEY_CursorRight, "CursorRight"),
-  KEY_NAME_ENTRY(TS_KEY_CursorUp, "CursorUp"),
-  KEY_NAME_ENTRY(TS_KEY_CursorDown, "CursorDown"),
+  KEY_NAME_ENTRY(TS_KEY_CursorUp, "LeftRockerUp"),
+  KEY_NAME_ENTRY(TS_KEY_CursorDown, "LeftRockerDown"),
 
-  KEY_NAME_ENTRY(TS_KEY_NavLeft, "NavLeft"),
-  KEY_NAME_ENTRY(TS_KEY_NavRight, "NavRight"),
-  KEY_NAME_ENTRY(TS_KEY_NavUp, "NavUp"),
-  KEY_NAME_ENTRY(TS_KEY_NavDown, "NavDown"),
+  KEY_NAME_ENTRY(TS_KEY_NavLeft, "Backward"),
+  KEY_NAME_ENTRY(TS_KEY_NavRight, "Forward"),
+  KEY_NAME_ENTRY(TS_KEY_NavUp, "RightRockerUp"),
+  KEY_NAME_ENTRY(TS_KEY_NavDown, "RightRockerDown"),
 
-  KEY_NAME_ENTRY(TS_KEY_ThumbLeft, "ThumbLeft"),
-  KEY_NAME_ENTRY(TS_KEY_ThumbRight, "ThumbRight"),
+  KEY_NAME_ENTRY(TS_KEY_ThumbLeft, "Convex"),
+  KEY_NAME_ENTRY(TS_KEY_ThumbRight, "Concave"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(pb_large)
@@ -369,16 +367,12 @@ static const KeysByteDescriptor keysDescriptor_PowerBraille[] = {
 #define ROUTING_H1 0x00
 #define ROUTING_H2 0x08
 
-/* Definitions for sensor switches/cursor routing keys */
-#define SW_NVERT 4 /* vertical switches. unused info. 4bytes to skip */
-#define SW_MAXHORIZ 11	/* bytes of horizontal info (81cells
-			   / 8bits per byte = 11bytes) */
-/* actual total number of switch information bytes depending on size
- * of display (40/65/81) including 4 bytes of unused vertical switches
- */
-#define SWITCH_BYTES_40 9
-#define SWITCH_BYTES_80 14
-#define SWITCH_BYTES_81 15
+/* Definitions for cursor routing keys */
+#define ROUTING_BYTES_VERTICAL 4
+#define ROUTING_BYTES_HORIZONTAL_MAXIMUM 11
+#define ROUTING_BYTES_40 9
+#define ROUTING_BYTES_80 14
+#define ROUTING_BYTES_81 15
 
 /* Global variables */
 
@@ -398,7 +392,7 @@ typedef struct {
 static const ModelEntry modelNavigator20 = {
   .modelName = "Navigator 20",
 
-  .routingBytes = SWITCH_BYTES_40,
+  .routingBytes = ROUTING_BYTES_40,
   .lastRoutingKey = 19,
 
   .keyBindings = "nav20_nav40"
@@ -407,7 +401,7 @@ static const ModelEntry modelNavigator20 = {
 static const ModelEntry modelNavigator40 = {
   .modelName = "Navigator 40",
 
-  .routingBytes = SWITCH_BYTES_40,
+  .routingBytes = ROUTING_BYTES_40,
   .lastRoutingKey = 39,
 
   .slowUpdate = 1,
@@ -418,7 +412,7 @@ static const ModelEntry modelNavigator40 = {
 static const ModelEntry modelNavigator80 = {
   .modelName = "Navigator 80",
 
-  .routingBytes = SWITCH_BYTES_80,
+  .routingBytes = ROUTING_BYTES_80,
   .lastRoutingKey = 79,
 
   .hasRoutingKeys = 1,
@@ -430,7 +424,7 @@ static const ModelEntry modelNavigator80 = {
 static const ModelEntry modelPowerBraille40 = {
   .modelName = "Power Braille 40",
 
-  .routingBytes = SWITCH_BYTES_40,
+  .routingBytes = ROUTING_BYTES_40,
   .lastRoutingKey = 39,
 
   .hasRoutingKeys = 1,
@@ -443,7 +437,7 @@ static const ModelEntry modelPowerBraille40 = {
 static const ModelEntry modelPowerBraille65 = {
   .modelName = "Power Braille 65",
 
-  .routingBytes = SWITCH_BYTES_81,
+  .routingBytes = ROUTING_BYTES_81,
   .lastRoutingKey = 64,
 
   .hasRoutingKeys = 1,
@@ -456,7 +450,7 @@ static const ModelEntry modelPowerBraille65 = {
 static const ModelEntry modelPowerBraille80 = {
   .modelName = "Power Braille 80",
 
-  .routingBytes = SWITCH_BYTES_81,
+  .routingBytes = ROUTING_BYTES_81,
   .lastRoutingKey = 80,
 
   .hasRoutingKeys = 1,
@@ -488,7 +482,7 @@ typedef struct {
     struct {
       unsigned char header[2];
       unsigned char count;
-      unsigned char vertical[4];
+      unsigned char vertical[ROUTING_BYTES_VERTICAL];
       unsigned char horizontal[0X100 - 4];
     } routing;
 
@@ -1151,7 +1145,7 @@ cut_cursor (BrailleDisplay *brl)
 
 /* For cursor routing */
 /* lookup so find out if a certain key is active */
-#define SW_CHK(swnum) \
+#define RK_CHK(swnum) \
       ( routingKeyBits[swnum/8] & (1 << (swnum % 8)) )
 
 /* These are (sort of) states of the state machine parsing the bytes
@@ -1173,8 +1167,8 @@ static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   /* static bit vector recording currently pressed sensor switches (for
      repetition detection) */
-  static unsigned char routingKeyBits[SW_MAXHORIZ];
-  static unsigned char routingKeyNumbers[SW_MAXHORIZ * 8], /* list of pressed keys */
+  static unsigned char routingKeyBits[ROUTING_BYTES_HORIZONTAL_MAXIMUM];
+  static unsigned char routingKeyNumbers[ROUTING_BYTES_HORIZONTAL_MAXIMUM * 8], /* list of pressed keys */
                        routingKeyCount = 0; /* length of that list */
   static unsigned char ignore_routing = 0;
      /* flag: after combo between routing and non-routing keys, don't act
@@ -1228,7 +1222,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
     must_init_oldstat = 0;
     ignore_routing = 0;
     routingKeyCount = 0;
-    for (i=0; i<SW_MAXHORIZ; i+=1) routingKeyBits[i] = 0;
+    for (i=0; i<ROUTING_BYTES_HORIZONTAL_MAXIMUM; i+=1) routingKeyBits[i] = 0;
   }
 
   switch (packet.type) {
@@ -1261,12 +1255,12 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
       routingKeyCount = 0;
       for (i=0; i<ncells; i+=1) {
-        if (SW_CHK(i)) {
+        if (RK_CHK(i)) {
           routingKeyNumbers[routingKeyCount++] = i;
         }
       }
 
-      /* SW_CHK(i) tells if routing key i is pressed.
+      /* RK_CHK(i) tells if routing key i is pressed.
          routingKeyNumbers[0] to routingKeyNumbers[howmany-1] give the numbers of the keys
          that are pressed. */
 
@@ -1289,7 +1283,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       logUnexpectedPacket(packet.fields.bytes, size);
       return EOF;
   }
-  /* Now associate a command (in res) to the key(s) (in code and sw_...) */
+  /* Now associate a command (in res) to the key(s) (in code and routingKey...) */
 
   if (model->hasRoutingKeys && code && routingKeyCount) {
     if (ignore_routing) return EOF;
