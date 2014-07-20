@@ -87,7 +87,6 @@
 #include "parse.h"
 #include "io_generic.h"
 #include "async_wait.h"
-#include "timing.h"
 #include "message.h"
 
 typedef enum {
@@ -367,7 +366,7 @@ typedef struct {
   const KeyTableDefinition *keyTableDefinition;
 
   unsigned char routingBytes;
-  signed char lastRoutingKey;
+  signed char routingKeyCount;
 
   unsigned slowUpdate:2;
   unsigned highBaudSupported:1;
@@ -378,7 +377,7 @@ static const ModelEntry modelNavigator20 = {
   .modelName = "Navigator 20",
 
   .routingBytes = ROUTING_BYTES_40,
-  .lastRoutingKey = 19,
+  .routingKeyCount = 20,
 
   .keyTableDefinition = &KEY_TABLE_DEFINITION(nav20)
 };
@@ -387,7 +386,7 @@ static const ModelEntry modelNavigator40 = {
   .modelName = "Navigator 40",
 
   .routingBytes = ROUTING_BYTES_40,
-  .lastRoutingKey = 39,
+  .routingKeyCount = 40,
 
   .slowUpdate = 1,
 
@@ -398,7 +397,7 @@ static const ModelEntry modelNavigator80 = {
   .modelName = "Navigator 80",
 
   .routingBytes = ROUTING_BYTES_80,
-  .lastRoutingKey = 79,
+  .routingKeyCount = 80,
 
   .slowUpdate = 2,
 
@@ -409,7 +408,7 @@ static const ModelEntry modelPowerBraille40 = {
   .modelName = "Power Braille 40",
 
   .routingBytes = ROUTING_BYTES_40,
-  .lastRoutingKey = 39,
+  .routingKeyCount = 40,
 
   .highBaudSupported = 1,
   .isPB40 = 1,
@@ -421,7 +420,7 @@ static const ModelEntry modelPowerBraille65 = {
   .modelName = "Power Braille 65",
 
   .routingBytes = ROUTING_BYTES_81,
-  .lastRoutingKey = 64,
+  .routingKeyCount = 65,
 
   .slowUpdate = 2,
   .highBaudSupported = 1,
@@ -433,7 +432,7 @@ static const ModelEntry modelPowerBraille80 = {
   .modelName = "Power Braille 80",
 
   .routingBytes = ROUTING_BYTES_81,
-  .lastRoutingKey = 80,
+  .routingKeyCount = 81,
 
   .slowUpdate = 2,
   .highBaudSupported = 1,
@@ -984,14 +983,10 @@ handleInputPacket (BrailleDisplay *brl, const InputPacket *packet) {
     }
 
     case IPT_ROUTING: {
-      unsigned char count = packet->data.routing.count;
-
-      /* if model->routingBytes and packet->data.routing.count disagree, then must be garbage??? */
-      if (count != model->routingBytes) return 0;
-      count -= sizeof(packet->fields.routing.vertical);
-
-      enqueueUpdatedKeyGroup(brl, packet->fields.routing.horizontal,
-                             routingKeys, count, TS_GRP_RoutingKeys);
+      if (packet->data.routing.count != model->routingBytes) return 0;
+      enqueueUpdatedKeyGroup(brl,
+                             packet->fields.routing.horizontal, routingKeys,
+                             model->routingKeyCount, TS_GRP_RoutingKeys);
       break;
     }
 
