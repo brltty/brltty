@@ -81,6 +81,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #include "log.h"
 #include "parse.h"
@@ -235,21 +236,7 @@ static unsigned char noMultipleUpdates;
 static int fullFreshenEvery;
 
 /* for routing keys */
-static int must_init_oldstat = 1;
-
-/* Definitions to avoid typematic repetitions of function keys other
-   than movement keys */
-#define NONREPEAT_TIMEOUT 300
-#define READBRL_SKIP_TIME 300
-static int lastcmd = EOF;
-static TimeValue lastcmd_time, last_readbrl_time;
-/* Those functions it is OK to repeat */
-static int repeat_list[] =
-{BRL_CMD_FWINRT, BRL_CMD_FWINLT, BRL_CMD_LNUP, BRL_CMD_LNDN, BRL_CMD_WINUP, BRL_CMD_WINDN,
- BRL_CMD_CHRLT, BRL_CMD_CHRRT, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT,
- BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP,
- BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN,
- BRL_CMD_CSRTRK, 0};
+static int resetRoutingKeyData = 1;
 
 /* Stabilization delay after changing baud rate */
 #define BAUD_DELAY (100)
@@ -369,7 +356,7 @@ static const KeysByteDescriptor keysDescriptor_PowerBraille[] = {
 
 /* Definitions for cursor routing keys */
 #define ROUTING_BYTES_VERTICAL 4
-#define ROUTING_BYTES_HORIZONTAL_MAXIMUM 11
+#define ROUTING_BYTES_MAXIMUM 11
 #define ROUTING_BYTES_40 9
 #define ROUTING_BYTES_80 14
 #define ROUTING_BYTES_81 15
@@ -378,12 +365,11 @@ static const KeysByteDescriptor keysDescriptor_PowerBraille[] = {
 
 typedef struct {
   const char *modelName;
-  const char *keyBindings;
+  const KeyTableDefinition *keyTableDefinition;
 
   unsigned char routingBytes;
   signed char lastRoutingKey;
 
-  unsigned hasRoutingKeys:1;
   unsigned slowUpdate:2;
   unsigned highBaudSupported:1;
   unsigned isPB40:1;
@@ -395,7 +381,7 @@ static const ModelEntry modelNavigator20 = {
   .routingBytes = ROUTING_BYTES_40,
   .lastRoutingKey = 19,
 
-  .keyBindings = "nav20_nav40"
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(nav20)
 };
 
 static const ModelEntry modelNavigator40 = {
@@ -406,7 +392,7 @@ static const ModelEntry modelNavigator40 = {
 
   .slowUpdate = 1,
 
-  .keyBindings = "nav20_nav40"
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(nav40)
 };
 
 static const ModelEntry modelNavigator80 = {
@@ -415,10 +401,9 @@ static const ModelEntry modelNavigator80 = {
   .routingBytes = ROUTING_BYTES_80,
   .lastRoutingKey = 79,
 
-  .hasRoutingKeys = 1,
   .slowUpdate = 2,
 
-  .keyBindings = "nav80"
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(nav80)
 };
 
 static const ModelEntry modelPowerBraille40 = {
@@ -427,11 +412,10 @@ static const ModelEntry modelPowerBraille40 = {
   .routingBytes = ROUTING_BYTES_40,
   .lastRoutingKey = 39,
 
-  .hasRoutingKeys = 1,
   .highBaudSupported = 1,
   .isPB40 = 1,
 
-  .keyBindings = "pb40"
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(pb40)
 };
 
 static const ModelEntry modelPowerBraille65 = {
@@ -440,11 +424,10 @@ static const ModelEntry modelPowerBraille65 = {
   .routingBytes = ROUTING_BYTES_81,
   .lastRoutingKey = 64,
 
-  .hasRoutingKeys = 1,
   .slowUpdate = 2,
   .highBaudSupported = 1,
 
-  .keyBindings = "pb65_pb81"
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(pb65)
 };
 
 static const ModelEntry modelPowerBraille80 = {
@@ -453,11 +436,10 @@ static const ModelEntry modelPowerBraille80 = {
   .routingBytes = ROUTING_BYTES_81,
   .lastRoutingKey = 80,
 
-  .hasRoutingKeys = 1,
   .slowUpdate = 2,
   .highBaudSupported = 1,
 
-  .keyBindings = "pb65_pb81"
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(pb80)
 };
 
 typedef enum {
@@ -755,7 +737,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   }
 
   logMessage(LOG_INFO, "detected %s", model->modelName);
-  brl->keyBindings = model->keyBindings;
+
+  {
+    const KeyTableDefinition *ktd = model->keyTableDefinition;
+
+    brl->keyBindings = ktd->bindings;
+    brl->keyNames = ktd->names;
+  }
 
   slowUpdate = model->slowUpdate;
   noMultipleUpdates = 0;
@@ -809,12 +797,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     }
   }
 
-  /* Mark time of last command to initialize typematic watch */
-  getMonotonicTime(&last_readbrl_time);
-  lastcmd_time = last_readbrl_time;
-  lastcmd = EOF;
-  must_init_oldstat = 1;
-
+  resetRoutingKeyData = 1;
   resetTypematic(brl);
 
   brl->textColumns = brl_cols;		/* initialise size of display */
@@ -984,273 +967,62 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
 return 1;
 }
 
-
-static int 
-is_repeat_cmd (int cmd)
-{
-  int *c = repeat_list;
-  while (*c != 0)
-    if (*(c++) == cmd)
-      return (1);
-  return (0);
-}
-
-
-static void 
-flicker (BrailleDisplay *brl)
-{
-  unsigned char *buf;
-
-  /* Assumes BRLROWS == 1 */
-  buf = malloc(brl_cols);
-  if (buf)
-    {
-      memset (buf, FLICKER_CHAR, ncells);
-
-      display_all (brl, buf);
-      accurateDelay (FLICKER_DELAY);
-      display_all (brl, prevdata);
-      accurateDelay (FLICKER_DELAY);
-      display_all (brl, buf);
-      accurateDelay (FLICKER_DELAY);
-      /* Note that we don't put prevdata back on the display, since flicker()
-         normally preceeds the displaying of a special message. */
-
-      free (buf);
-    }
-}
-
-
-/* OK this one is pretty strange and ugly. readbrl() reads keys from
-   the display's key pads. It calls cut_cursor() if it gets a certain key
-   press. cut_cursor() is an elaborate function that allows selection of
-   portions of text for cut&paste (presenting a moving cursor to replace
-   the cursor routing keys that the Navigator 20/40 does not have). (This
-   function is not bound to PB keys). The strange part is that cut_cursor()
-   itself calls back to readbrl() to get keys from the user. It receives
-   and processes keys by calling readbrl again and again and eventually
-   returns a single code to the original readbrl() function that had 
-   called cut_cursor() in the first place. */
-
-/* If cut_cursor() returns the following special code to readbrl(), then
-   the cut_cursor() operation has been cancelled. */
-#define CMD_CUT_CURSOR 0xF0F0F0F0
-
-static int 
-cut_cursor (BrailleDisplay *brl)
-{
-  static int running = 0, pos = -1;
-  int res = 0, key;
-  unsigned char oldchar;
-
-  if (running)
-    return (CMD_CUT_CURSOR);
-  /* Special return code. We are sending this to ourself through readbrl.
-     That is: cut_cursor() was accepting input when it's activation keys
-     were pressed a second time. The second readbrl() therefore activates
-     a second cut_cursor(). It return CMD_CUT_CURSOR through readbrl() to
-     the first cut_cursor() which then cancels the whole operation. */
-  running = 1;
-
-  if (pos == -1)
-    {				/* initial cursor position */
-      if (CUT_CSR_INIT_POS == 0)
-	pos = 0;
-      else if (CUT_CSR_INIT_POS == 1)
-	pos = brl_cols / 2;
-      else if (CUT_CSR_INIT_POS == 2)
-	pos = brl_cols - 1;
-    }
-
-  flicker (brl);
-
-  while (res == 0)
-    {
-      /* the if must not go after the switch */
-      if (pos < 0)
-	pos = 0;
-      else if (pos >= brl_cols)
-	pos = brl_cols - 1;
-      oldchar = prevdata[pos];
-      prevdata[pos] |= CUT_CSR_CHAR;
-      display_all (brl, prevdata);
-      prevdata[pos] = oldchar;
-
-      while ((key = brl_readCommand (brl, KTB_CTX_DEFAULT)) == EOF) asyncWait(1); /* just yield */
-      if((key &BRL_MSK_BLK) == BRL_BLK_CLIP_NEW)
-	  res = BRL_BLK_CLIP_NEW + pos;
-      else if((key &BRL_MSK_BLK) == BRL_BLK_CLIP_ADD)
-	  res = BRL_BLK_CLIP_ADD + pos;
-      else if((key &BRL_MSK_BLK) == BRL_BLK_COPY_RECT) {
-	  res = BRL_BLK_COPY_RECT + pos;
-	  pos = -1;
-      }else if((key &BRL_MSK_BLK) == BRL_BLK_COPY_LINE) {
-	  res = BRL_BLK_COPY_LINE + pos;
-	  pos = -1;
-      }else switch (key)
-	{
-	case BRL_CMD_FWINRT:
-	  pos++;
-	  break;
-	case BRL_CMD_FWINLT:
-	  pos--;
-	  break;
-	case BRL_CMD_LNUP:
-	  pos += 5;
-	  break;
-	case BRL_CMD_LNDN:
-	  pos -= 5;
-	  break;
-	case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT:
-	  pos = brl_cols - 1;
-	  break;
-	case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT:
-	  pos = 0;
-	  break;
-	case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP:
-	  pos += 10;
-	  break;
-	case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN:
-	  pos -= 10;
-	  break;
-	case CMD_CUT_CURSOR:
-	  res = EOF;
-	  break;
-	  /* That's where we catch the special return code: user has typed
-	     cut_cursor() activation key again, so we cancel it. */
-	}
-    }
-
-  display_all (brl, prevdata);
-  running = 0;
-  return (res);
-}
-
-
-/* Now for readbrl().
-   Description of received bytes and key names are near the top of the file.
-
-   These macros, although unusual, make the key binding declarations look
-   much better */
-
-#define KEY(code,result) \
-    case code: res = result; break;
-#define KEYAND(code) \
-    case code:
-#define KEYSPECIAL(code,action) \
-    case code: { action }; break;
-#define KEYSW(codeon, codeoff, result) \
-    case codeon: res = result | BRL_FLG_TOGGLE_ON; break; \
-    case codeoff: res = result | BRL_FLG_TOGGLE_OFF; break;
-
 /* For cursor routing */
 /* lookup so find out if a certain key is active */
 #define RK_CHK(swnum) \
       ( routingKeyBits[swnum/8] & (1 << (swnum % 8)) )
 
-/* These are (sort of) states of the state machine parsing the bytes
-   received form the display. These can be navigator|pb40 keys, pb80 keys,
-   sensor switch info, low battery warning or query reply. The last three
-   cannot be distinguished until the second byte, so at first they both fall
-   under K_SPECIAL. */
-#define K_SPECIAL 1
-#define K_NAVKEY 2
-#define K_PBKEY 3
-#define K_BATTERY 4
-#define K_SW 5
-#define K_QUERYREP 6
+static int
+handleInputPacket (BrailleDisplay *brl, const InputPacket *packet) {
+  /* after combination involving routing and navigation keys, don't act
+   * on any key until routing keys are all released
+   */
+  static unsigned char ignoreRoutingKeys = 0;
+  static unsigned char routingKeyCount = 0; /* length of that list */
+  static unsigned char routingKeyBits[ROUTING_BYTES_MAXIMUM];
+  static unsigned char routingKeyNumbers[ROUTING_BYTES_MAXIMUM * 8]; /* list of pressed keys */
 
-/* read buffer size: maximum is query reply minus header */
-#define MAXREAD 10
+  /* mask representing pressed keys once the
+   * input bytes are interpreted
+   */
+  KeyNumberSet navigationKeys = 0;
 
-static int 
-brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  /* static bit vector recording currently pressed sensor switches (for
-     repetition detection) */
-  static unsigned char routingKeyBits[ROUTING_BYTES_HORIZONTAL_MAXIMUM];
-  static unsigned char routingKeyNumbers[ROUTING_BYTES_HORIZONTAL_MAXIMUM * 8], /* list of pressed keys */
-                       routingKeyCount = 0; /* length of that list */
-  static unsigned char ignore_routing = 0;
-     /* flag: after combo between routing and non-routing keys, don't act
-	on any key until routing resets (releases). */
-  uint32_t code = 0; /* 32-bit code representing pressed keys once the
-			    input bytes are interpreted */
-  int res = EOF; /* command code to return. code is mapped to res. */
-  InputPacket packet;
-  size_t size;
-  int skip_this_cmd = 0;
-
-  {
-    TimeValue now;
-    getMonotonicTime(&now);
-
-    if (millisecondsBetween(&last_readbrl_time, &now) > READBRL_SKIP_TIME) {
-      /* if the key we get this time is the same as the one we returned at last
-         call, and if it has been abnormally long since we were called
-         (presumably sound was being played or a message displayed) then
-         the bytes we will read can be old... so we forget this key, if it is
-         a repeat. */
-      skip_this_cmd = 1;
-    }
-
-    last_readbrl_time = now;
-  }
-       
-/* Key press codes come in pairs of bytes for nav and pb40, in 6bytes
-   for pb65/80. Each byte has bits representing individual keys + a special
-   mask/signature in the most significant 3bits.
-
-   The low battery warning from the display is a specific 2bytes code.
-
-   Finally, the routing keys have a special 2bytes header followed by 9, 14
-   or 15 bytes of info (1bit for each routing key). The first 4bytes describe
-   vertical routing keys and are ignored in this driver.
-
-   We might get a query reply, since we send queries when we don't get
-   any keys in a certain time. That a 2byte header + 10 more bytes ignored.
- */
-
-  if (!(size = readPacket(brl, &packet))) return EOF;
-
-#ifdef RECV_DELAY
-  accurateDelay(SEND_DELAY);
-#endif /* RECV_DELAY */
-
-  if (model->hasRoutingKeys && must_init_oldstat) {
+  if (resetRoutingKeyData) {
     unsigned int i;
 
-    must_init_oldstat = 0;
-    ignore_routing = 0;
+    ignoreRoutingKeys = 0;
     routingKeyCount = 0;
-    for (i=0; i<ROUTING_BYTES_HORIZONTAL_MAXIMUM; i+=1) routingKeyBits[i] = 0;
+    for (i=0; i<ROUTING_BYTES_MAXIMUM; i+=1) routingKeyBits[i] = 0;
+    resetRoutingKeyData = 0;
   }
 
-  switch (packet.type) {
+  switch (packet->type) {
     case IPT_KEYS: {
       unsigned int i;
 
-      for (i=0; i<packet.data.keys.count; i+=1) {
-        const KeysByteDescriptor *kbd = &packet.data.keys.descriptor[i];
+      for (i=0; i<packet->data.keys.count; i+=1) {
+        const KeysByteDescriptor *kbd = &packet->data.keys.descriptor[i];
 
-        code |= (packet.fields.keys[i] & kbd->mask) << kbd->shift;
+        navigationKeys |= (packet->fields.keys[i] & kbd->mask) << kbd->shift;
       }
 
       break;
     }
 
     case IPT_ROUTING: {
-      unsigned char count = packet.data.routing.count;
+      unsigned char count = packet->data.routing.count;
       unsigned int i;
 
-      /* if model->routingBytes and packet.data.routing.count disagree, then must be garbage??? */
-      if (count != model->routingBytes) return EOF;
-      count -= sizeof(packet.fields.routing.vertical);
+      /* if model->routingBytes and packet->data.routing.count disagree, then must be garbage??? */
+      if (count != model->routingBytes) return 0;
+      count -= sizeof(packet->fields.routing.vertical);
 
       /* if key press is maintained, then packet is resent by display
-         every 0.5secs. When the key is released, then display sends a packet
-         with all info bits at 0. */
+       * every 0.5secs. When the key is released, then display sends a packet
+       * with all info bits at 0.
+       */
       for (i=0; i<count; i+=1) {
-        routingKeyBits[i] |= packet.fields.routing.horizontal[i];
+        routingKeyBits[i] |= packet->fields.routing.horizontal[i];
       }
 
       routingKeyCount = 0;
@@ -1261,243 +1033,75 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       }
 
       /* RK_CHK(i) tells if routing key i is pressed.
-         routingKeyNumbers[0] to routingKeyNumbers[howmany-1] give the numbers of the keys
-         that are pressed. */
+       * routingKeyNumbers[0] to routingKeyNumbers[howmany-1] give the numbers of the keys
+       * that are pressed.
+       */
 
       for (i=0; i<count; i+=1) {
-        if (packet.fields.routing.horizontal[i] != 0) {
-          return EOF;
+        if (packet->fields.routing.horizontal[i] != 0) {
+          return 1;
         }
       }
 
-      must_init_oldstat = 1;
-      if (ignore_routing) return EOF;
+      resetRoutingKeyData = 1;
+      if (ignoreRoutingKeys) return 1;
       break;
     }
 
     case IPT_BATTERY:
       message(NULL, gettext("battery low"), MSG_WAITKEY);
-      return EOF;
+      return 1;
 
     default:
+      return 0;
+  }
+
+  if (navigationKeys && routingKeyCount) {
+    if (ignoreRoutingKeys) return 1;
+    ignoreRoutingKeys = 1;
+  }
+
+  {
+    unsigned int routingKeyIndex = 0;
+
+    while (routingKeyIndex < routingKeyCount) {
+      enqueueKeyEvent(brl, TS_GRP_RoutingKeys, routingKeyNumbers[routingKeyIndex++], 1);
+    }
+
+    enqueueKeys(brl, navigationKeys, TS_GRP_NavigationKeys, 0);
+
+    while (routingKeyIndex > 0) {
+      enqueueKeyEvent(brl, TS_GRP_RoutingKeys, routingKeyNumbers[--routingKeyIndex], 0);
+    }
+  }
+
+  return 1;
+}
+
+static int 
+brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
+  /* Key press codes come in pairs of bytes for nav and pb40, in 6bytes
+   * for pb65/80. Each byte has bits representing individual keys + a special
+   * mask/signature in the most significant 3bits.
+   *
+   * The low battery warning from the display is a specific 2bytes code.
+   *
+   * Finally, the routing keys have a special 2bytes header followed by 9, 14
+   * or 15 bytes of info (1bit for each routing key). The first 4bytes describe
+   * vertical routing keys and are ignored in this driver.
+   *
+   * We might get a query reply, since we send queries when we don't get
+   * any keys in a certain time. That a 2byte header + 10 more bytes ignored.
+   */
+
+  InputPacket packet;
+  size_t size;
+
+  while ((size = readPacket(brl, &packet))) {
+    if (!handleInputPacket(brl, &packet)) {
       logUnexpectedPacket(packet.fields.bytes, size);
-      return EOF;
-  }
-  /* Now associate a command (in res) to the key(s) (in code and routingKey...) */
-
-  if (model->hasRoutingKeys && code && routingKeyCount) {
-    if (ignore_routing) return EOF;
-    ignore_routing = 1;
-
-    if (routingKeyCount == 1) {
-      switch (code) {
-	KEYAND(KEY_BUT3) KEY(KEY_BRIGHT, BRL_BLK_CLIP_NEW + routingKeyNumbers[0]);
-	KEYAND(KEY_BUT2) KEY(KEY_BLEFT, BRL_BLK_COPY_RECT + routingKeyNumbers[0]);
-	KEYAND(KEY_R2DN) KEY (KEY_BDOWN, BRL_BLK_NXINDENT + routingKeyNumbers[0]);
-	KEYAND(KEY_R2UP) KEY (KEY_BUP, BRL_BLK_PRINDENT + routingKeyNumbers[0]);
-	KEY (KEY_CROUND, BRL_BLK_SETMARK + routingKeyNumbers[0]);
-	KEYAND(KEY_CNCV) KEY (KEY_BROUND, BRL_BLK_GOTOMARK + routingKeyNumbers[0]);
-	KEY (KEY_CUP, BRL_BLK_SETLEFT + routingKeyNumbers[0]);
-	KEY (KEY_CDOWN, BRL_BLK_SWITCHVT + routingKeyNumbers[0]);
-	KEYAND(KEY_CDOWN | KEY_BUP) KEY(KEY_CUP | KEY_CDOWN,
-					BRL_BLK_DESCCHAR +routingKeyNumbers[0]);
-      }
-    } else if (routingKeyCount == 2) {
-      if (((routingKeyNumbers[0] + 1) == routingKeyNumbers[1]) &&
-          ((code == KEY_BRIGHT) || (code == KEY_BUT3))) {
-	res = BRL_BLK_CLIP_ADD + routingKeyNumbers[0];
-      } else if (((routingKeyNumbers[0] + 1) == routingKeyNumbers[1]) &&
-                 ((code == KEY_BLEFT) || (code == KEY_BUT2))) {
-	res = BRL_BLK_COPY_LINE + routingKeyNumbers[1];
-      } else if ((routingKeyNumbers[0] == 0) && (routingKeyNumbers[1] == 1)) {
-	switch (code) {
-	  KEYAND(KEY_R2DN) KEY (KEY_BDOWN, BRL_CMD_NXPGRPH);
-	  KEYAND(KEY_R2UP) KEY (KEY_BUP, BRL_CMD_PRPGRPH);
-	}
-      } else if ((routingKeyNumbers[0] == 1) && (routingKeyNumbers[1] == 2)) {
-	switch (code) {
-	  KEY (KEY_BDOWN, BRL_CMD_NXPROMPT);
-	  KEY (KEY_BUP, BRL_CMD_PRPROMPT);
-	}
-      } else if ((routingKeyNumbers[0] == 0) && (routingKeyNumbers[1] == 2)) {
-	switch (code) {
-	  KEYAND(KEY_R2DN) KEY (KEY_BDOWN, BRL_CMD_NXSEARCH);
-	  KEYAND(KEY_R2UP) KEY (KEY_BUP, BRL_CMD_PRSEARCH);
-	}
-      }
-    }
-  } else if (model->hasRoutingKeys && routingKeyCount)	/* routing key */
-    {
-      if (routingKeyCount == 1)
-	res = BRL_BLK_ROUTE + routingKeyNumbers[0];
-      else if(routingKeyCount == 2 && routingKeyNumbers[0] == 1 && routingKeyNumbers[1] == 2)
- 	res = BRL_CMD_PASTE;
-      else if (routingKeyCount == 2 && routingKeyNumbers[0] == 0 && routingKeyNumbers[1] == 1)
-	res = BRL_CMD_CHRLT;
-      else if (routingKeyCount == 2 && routingKeyNumbers[0] == model->lastRoutingKey - 1
-	       && routingKeyNumbers[1] == model->lastRoutingKey)
-	res = BRL_CMD_CHRRT;
-      else if (routingKeyCount == 2 && routingKeyNumbers[0] == 0 && routingKeyNumbers[1] == 2)
-	res = BRL_CMD_HWINLT;
-      else if (routingKeyCount == 2 && routingKeyNumbers[0] == model->lastRoutingKey - 2
-	       && routingKeyNumbers[1] == model->lastRoutingKey)
-	res = BRL_CMD_HWINRT;
-      else if (routingKeyCount == 2 && routingKeyNumbers[0] == 0
-	       && routingKeyNumbers[1] == model->lastRoutingKey)
-	res = BRL_CMD_HELP;
-      else if (routingKeyCount == 4 && routingKeyNumbers[0] == 0 && routingKeyNumbers[1] == 1
-	       && routingKeyNumbers[2] == model->lastRoutingKey-1 && routingKeyNumbers[3] == model->lastRoutingKey)
-	res = BRL_CMD_LEARN;
-      else if(routingKeyCount == 3 && routingKeyNumbers[0]+2 == routingKeyNumbers[1]){
-	  res = BRL_BLK_CLIP_COPY | BRL_ARG(routingKeyNumbers[0]) | BRL_EXT(routingKeyNumbers[2]);
-	}
-    }
-  else switch (code){
-  /* renames: CLEFT=BUT1 CRIGHT=BUT2 CUP=R1UP CDOWN=R2DN CROUNT=CNVX */
-
-  /* movement */
-    KEYAND(KEY_BAR1) KEYAND(KEY_R2UP) KEY (KEY_BUP, BRL_CMD_LNUP);
-    KEYAND(KEY_BAR2) KEYAND(KEY_BAR3) KEYAND(KEY_BAR4)
-      KEYAND(KEY_R2DN) KEY (KEY_BDOWN, BRL_CMD_LNDN);
-    KEYAND(KEY_BUT3) KEY (KEY_BLEFT, BRL_CMD_FWINLT);
-    KEYAND(KEY_BUT4) KEY (KEY_BRIGHT, BRL_CMD_FWINRT);
-
-    KEYAND(KEY_CNCV) KEY (KEY_BROUND, BRL_CMD_HOME);
-    KEYAND(KEY_CNCV | KEY_CUP) KEY(KEY_BROUND | KEY_CUP, BRL_CMD_BACK);
-    KEY (KEY_CROUND, (context == KTB_CTX_MENU) ? BRL_CMD_MENU_PREV_SETTING
-	 : BRL_CMD_CSRTRK);
-
-    KEYAND(KEY_BUT1 | KEY_BAR1) KEY (KEY_BLEFT | KEY_BUP, BRL_CMD_TOP_LEFT);
-    KEYAND(KEY_BUT1 | KEY_BAR2) KEY (KEY_BLEFT | KEY_BDOWN, BRL_CMD_BOT_LEFT);
-
-    KEYAND(KEY_BUT2 | KEY_BAR1) KEY (KEY_BROUND | KEY_BUP, BRL_CMD_PRDIFLN);
-    KEYAND(KEY_BUT2 | KEY_BAR2) KEYAND(KEY_BUT2 | KEY_BAR3)
-      KEYAND(KEY_BUT2 | KEY_BAR4) KEY (KEY_BROUND | KEY_BDOWN, BRL_CMD_NXDIFLN);
-    KEYAND(KEY_BUT2 | KEY_R2UP) KEY(KEY_CROUND | KEY_BUP, BRL_CMD_ATTRUP);
-    KEYAND(KEY_BUT2 | KEY_R2DN) KEY(KEY_CROUND | KEY_BDOWN, BRL_CMD_ATTRDN);
-
-    KEY (KEY_CLEFT | KEY_CROUND, BRL_CMD_CHRLT);
-    KEY (KEY_CRIGHT | KEY_CROUND, BRL_CMD_CHRRT);
-
-    KEY (KEY_CLEFT | KEY_CUP, BRL_CMD_HWINLT);
-    KEY (KEY_CRIGHT | KEY_CUP, BRL_CMD_HWINRT);
-
-    KEYAND(KEY_BUT1|KEY_BUT2|KEY_BAR1)  KEY (KEY_CROUND | KEY_CUP, BRL_CMD_WINUP);
-    KEYAND(KEY_BUT1|KEY_BUT2|KEY_BAR2) KEY (KEY_CROUND | KEY_CDOWN, BRL_CMD_WINDN);
-
-    KEYAND(KEY_R1UP | KEY_BUT3) KEY(KEY_CUP | KEY_BLEFT, BRL_CMD_LNBEG);
-    KEYAND(KEY_R1UP | KEY_BUT4) KEY(KEY_CUP | KEY_BRIGHT, BRL_CMD_LNEND);
-
-  /* keyboard cursor keys simulation */
-    KEY (KEY_CLEFT, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT);
-    KEY (KEY_CRIGHT, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT);
-    KEY (KEY_CUP, (context == KTB_CTX_MENU && model->isPB40)
-	 ? BRL_CMD_MENU_PREV_SETTING : BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP);
-    KEY (KEY_CDOWN, (context == KTB_CTX_MENU && model->isPB40)
-	 ? BRL_CMD_MENU_NEXT_SETTING : BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN);
-
-  /* special modes */
-    KEY (KEY_CLEFT | KEY_CRIGHT, BRL_CMD_HELP);
-    KEYAND (KEY_BUT1 | KEY_BUT2 | KEY_BUT3 | KEY_BUT4)
-      KEY (KEY_CLEFT | KEY_CRIGHT | KEY_CUP | KEY_CDOWN, BRL_CMD_LEARN);
-    KEY (KEY_CROUND | KEY_BROUND, BRL_CMD_FREEZE);
-    KEYAND (KEY_CUP | KEY_BDOWN) KEYAND(KEY_BUT3 | KEY_BUT4)
-      KEY (KEY_BUP | KEY_BDOWN, BRL_CMD_INFO);
-    KEYAND (KEY_CDOWN | KEY_BUP)
-      KEY (KEY_CUP | KEY_CDOWN, BRL_CMD_ATTRVIS);
-    KEYAND (KEY_CDOWN | KEY_BUP | KEY_CROUND)
-      KEY (KEY_CUP | KEY_CDOWN | KEY_CROUND, BRL_CMD_DISPMD)
-
-  /* Emulation of cursor routing */
-    KEYAND(KEY_R1DN | KEY_R2DN) KEY (KEY_CDOWN | KEY_BDOWN, BRL_CMD_CSRJMP_VERT);
-    KEY (KEY_CDOWN | KEY_BDOWN | KEY_BLEFT, BRL_BLK_ROUTE +0);
-    KEY (KEY_CDOWN | KEY_BDOWN | KEY_BRIGHT, BRL_BLK_ROUTE + 3 * brl_cols / 4 - 1);
-
-  /* Emulation of routing keys for cut&paste */
-    KEY (KEY_CLEFT | KEY_BROUND, BRL_BLK_CLIP_NEW +0);
-    KEY (KEY_CLEFT | KEY_BROUND | KEY_BUP, BRL_BLK_CLIP_ADD +0);
-    KEY (KEY_CRIGHT | KEY_BROUND, BRL_BLK_COPY_RECT +brl_cols-1);
-    KEY (KEY_CRIGHT | KEY_BROUND | KEY_BUP, BRL_BLK_COPY_LINE +brl_cols-1);
-    KEY (KEY_CLEFT | KEY_CRIGHT | KEY_BROUND, CMD_CUT_CURSOR);  /* special: see
-	 				    at the end of this fn */
-  /* paste */
-    KEY (KEY_CDOWN | KEY_BROUND, BRL_CMD_PASTE);
-
-  /* speech */
-  /* experimental speech support */
-    KEYAND(KEY_CRIGHT | KEY_BLEFT) KEYAND(KEY_BAR2 | KEY_R2DN)
-      KEY (KEY_BRIGHT | KEY_BDOWN, BRL_CMD_SAY_LINE);
-    KEYAND(KEY_BAR1 | KEY_BAR2 | KEY_R2DN) 
-      KEY (KEY_BLEFT | KEY_BRIGHT | KEY_BDOWN, BRL_CMD_SAY_BELOW);
-    KEYAND(KEY_BROUND | KEY_BAR2) KEY (KEY_BROUND | KEY_BRIGHT, BRL_CMD_SPKHOME);
-    KEYAND(KEY_CRIGHT | KEY_CUP | KEY_BLEFT | KEY_BUP)
-      KEYAND(KEY_BAR2 | KEY_R2UP) KEY (KEY_BRIGHT | KEY_BUP, BRL_CMD_MUTE);
-    KEYAND(KEY_BAR1 | KEY_BAR2 | KEY_R1UP | KEY_R2UP)
-      KEY (KEY_BRIGHT | KEY_BUP | KEY_CUP | KEY_BLEFT, BRL_CMD_RESTARTSPEECH);
-    
-  /* preferences menu */
-    KEYAND(KEY_BAR1 | KEY_BAR2) KEY (KEY_BLEFT | KEY_BRIGHT, BRL_CMD_PREFMENU);
-    KEYAND(KEY_BAR1 | KEY_BAR2 | KEY_CNCV) 
-      KEY (KEY_BLEFT | KEY_BRIGHT | KEY_BROUND, BRL_CMD_PREFSAVE);
-    KEYAND(KEY_BAR1 | KEY_BAR2 | KEY_CNVX | KEY_CNCV) 
-      KEY (KEY_CROUND | KEY_BLEFT | KEY_BRIGHT | KEY_BROUND, BRL_CMD_PREFLOAD);
-    KEY (KEY_BLEFT | KEY_BRIGHT | KEY_BROUND | KEY_BDOWN, BRL_CMD_SKPIDLNS);
-    KEY (KEY_BLEFT | KEY_BRIGHT | KEY_CROUND | KEY_BDOWN, BRL_CMD_SKPIDLNS);
-    KEY (KEY_CLEFT | KEY_BLEFT | KEY_BRIGHT, BRL_CMD_SLIDEWIN);
-    KEYAND(KEY_BUT2 | KEY_BAR1 | KEY_BAR2)
-      KEY (KEY_CLEFT | KEY_CROUND | KEY_BLEFT | KEY_BRIGHT, BRL_CMD_TUNES);
-    KEYAND(KEY_BUT1 | KEY_BAR1 | KEY_BAR2)    
-      KEY (KEY_CUP | KEY_BLEFT | KEY_BRIGHT, BRL_CMD_CSRVIS);
-    KEYAND(KEY_R1DN | KEY_BAR1 | KEY_BAR2)    
-      KEY (KEY_CDOWN | KEY_BLEFT | KEY_BRIGHT, BRL_CMD_SIXDOTS);
-    KEYAND(KEY_BUT1 | KEY_BAR1 | KEY_BAR2 | KEY_CNVX)
-      KEY (KEY_CROUND | KEY_CUP | KEY_BLEFT | KEY_BRIGHT, BRL_CMD_CSRBLINK);
-    KEYAND(KEY_BUT2 | KEY_BAR1 | KEY_BAR2 | KEY_CNVX)
-      KEY (KEY_CROUND | KEY_CDOWN | KEY_BLEFT | KEY_BRIGHT, BRL_CMD_CAPBLINK);
-    KEYAND (KEY_CROUND | KEY_BUP | KEY_BLEFT | KEY_BRIGHT)
-      KEY (KEY_CROUND | KEY_CRIGHT | KEY_BLEFT | KEY_BRIGHT, BRL_CMD_ATTRBLINK);
-
-  /* PB80 switches */
-    KEYSW(KEY_S1UP, KEY_S1DN, BRL_CMD_ATTRVIS);
-    KEYSW(KEY_S1UP |KEY_BAR1|KEY_BAR2|KEY_CNVX,
-	  KEY_S1DN |KEY_BAR1|KEY_BAR2|KEY_CNVX, BRL_CMD_ATTRBLINK);
-    KEYSW(KEY_S1UP | KEY_CNVX, KEY_S1DN | KEY_CNVX, BRL_CMD_ATTRBLINK);
-    KEYSW(KEY_S2UP, KEY_S2DN, BRL_CMD_FREEZE);
-    KEYSW(KEY_S3UP, KEY_S3DN, BRL_CMD_SKPIDLNS);
-    KEYSW(KEY_S3UP |KEY_BAR1, KEY_S3DN |KEY_BAR1, BRL_CMD_SKPIDLNS);
-    KEYSW(KEY_S4UP, KEY_S4DN, BRL_CMD_DISPMD);
-  };
-
-  /* If this is a typematic repetition of some key other than movement keys */
-  if (lastcmd == res && !is_repeat_cmd (res)){
-    if(skip_this_cmd){
-      getMonotonicTime(&lastcmd_time);
-      res = EOF;
-    } else {
-      TimeValue now;
-      getMonotonicTime(&now);
-
-      /* if to short a time has elapsed since last command, ignore this one */
-      if (millisecondsBetween(&lastcmd_time, &now) < NONREPEAT_TIMEOUT) {
-	res = EOF;
-      }
     }
   }
-  /* reset timer to avoid unwanted typematic */
-  if (res != EOF){
-    lastcmd = res;
-    getMonotonicTime(&lastcmd_time);
-  }
 
-  /* Special: */
-  if (res == CMD_CUT_CURSOR)
-    res = cut_cursor (brl);
-  /* This activates cut_cursor(). Done here rather than with KEYSPECIAL macro
-     to allow clearing of l and r and adjustment of typematic variables.
-     Since cut_cursor() calls readbrl again to get key inputs, it is
-     possible that cut_cursor() is running (it called us) and we are calling
-     it a second time. cut_cursor() will handle this as a signal to
-     cancel it's operation. */
-
-  return (res);
+  return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
 }
