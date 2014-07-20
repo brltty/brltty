@@ -258,13 +258,22 @@ static unsigned char BRL_SEND_HEAD[] = {0XFF, 0XFF, 0X04, 0X00, 0X99, 0X00};
 #define IDENTITY_H1 0X00
 #define IDENTITY_H2 0X05
 
-/* Bit definition of key codes returned by the display */
-/* Navigator and pb40 return 2bytes, pb65/80 returns 6. Each byte has a
-   different specific mask/signature in the 3 most significant bits.
-   Other bits indicate whether a specific key is pressed.
-   See readbrl(). */
+/* Routing keys information (2 bytes header) */
+#define ROUTING_H1 0x00
+#define ROUTING_H2 0x08
 
-/* We combine all key bits into one 32bit int. Each byte is masked by the
+/* input codes signaling low battery power (2bytes) */
+#define BATTERY_H1 0x00
+#define BATTERY_H2 0x01
+
+/* Bit definition of key codes returned by the display.
+ * Navigator and pb40 return 2 bytes, pb65/80 returns 6. Each byte has a
+ * different specific mask/signature in the 3 most significant bits.
+ * Other bits indicate whether a specific key is pressed.
+ * See readbrl().
+ */
+
+/* We combine all key bits into one KeyNumberSet. Each byte is masked by the
  * corresponding "mask" to extract valid bits then those are shifted by
  * "shift" and or'ed into the 32bits "code".
  */
@@ -295,70 +304,7 @@ static const KeysByteDescriptor keysDescriptor_PowerBraille[] = {
   {.signature=0XE0, .mask=0X1F, .shift=5}
 };
 
-/* Symbolic labels for keys
-   Each key has it's own bit in "code". Key combinations are ORs. */
-
-/* For navigator and pb40 */
-/* bits from byte 1: navigator right pannel keys, pb right rocker +round button
-   + display forward/backward controls on the top of the display */
-#define KEY_BLEFT  (1<<0)
-#define KEY_BUP	   (1<<1)
-#define KEY_BRIGHT (1<<2)
-#define KEY_BDOWN  (1<<3)
-#define KEY_BROUND (1<<4)
-/* bits from byte 2: navigator's left pannel; pb's left rocker and round
-   button; pb cannot produce CLEFT and CRIGHT. */
-#define KEY_CLEFT  (1<<5)
-#define KEY_CUP	   (1<<6)
-#define KEY_CRIGHT (1<<7)
-#define KEY_CDOWN  (1<<8)
-#define KEY_CROUND (1<<9)
-
-/* For pb65/80 */
-/* Bits from byte 5, could be just renames of byte 1 from navigator, but
-   we want to distinguish BAR1-2 from BUP/BDOWN. */
-#define KEY_BAR1   (1<<24)
-#define KEY_R2UP   (1<<25)
-#define KEY_BAR2   (1<<26)
-#define KEY_R2DN   (1<<27)
-#define KEY_CNCV   (1<<28)
-/* Bits from byte 6, are just renames of byte 2 from navigator */
-#define KEY_BUT1   (1<<5)
-#define KEY_R1UP   (1<<6)
-#define KEY_BUT2   (1<<7)
-#define KEY_R1DN   (1<<8)
-#define KEY_CNVX   (1<<9)
-/* bits from byte 1: left rocker switches */
-#define KEY_S1UP   (1<<10)
-#define KEY_S1DN   (1<<11)
-#define KEY_S2UP   (1<<12)
-#define KEY_S2DN   (1<<13)
-/* bits from byte 2: right rocker switches */
-#define KEY_S3UP   (1<<14)
-#define KEY_S3DN   (1<<15)
-#define KEY_S4UP   (1<<16)
-#define KEY_S4DN   (1<<17)
-/* Special mask: switches are special keys to distinguish... */
-#define KEY_SWITCHMASK (KEY_S1UP|KEY_S1DN | KEY_S2UP|KEY_S2DN \
-			| KEY_S3UP|KEY_S3DN | KEY_S4UP|KEY_S4DN)
-/* bits from byte 3: rightmost forward bars from display top */
-#define KEY_BAR3   (1<<18)
-  /* one unused bit */
-#define KEY_BAR4   (1<<20)
-/* bits from byte 4: two buttons on the top, right side (left side buttons
-   are mapped in byte 6) */
-#define KEY_BUT3   (1<<21)
-  /* one unused bit */
-#define KEY_BUT4   (1<<23)
-
 /* Some special case input codes */
-/* input codes signaling low battery power (2bytes) */
-#define BATTERY_H1 0x00
-#define BATTERY_H2 0x01
-/* Sensor switches/cursor routing keys information (2bytes header) */
-#define ROUTING_H1 0x00
-#define ROUTING_H2 0x08
-
 /* Global variables */
 
 typedef struct {
@@ -984,9 +930,9 @@ handleInputPacket (BrailleDisplay *brl, const InputPacket *packet) {
 
     case IPT_ROUTING: {
       if (packet->data.routing.count != model->routingBytes) return 0;
-      enqueueUpdatedKeyGroup(brl,
+      enqueueUpdatedKeyGroup(brl, model->routingKeyCount,
                              packet->fields.routing.horizontal, routingKeys,
-                             model->routingKeyCount, TS_GRP_RoutingKeys);
+                             TS_GRP_RoutingKeys);
       break;
     }
 

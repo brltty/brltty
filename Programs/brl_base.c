@@ -566,9 +566,9 @@ enqueueUpdatedKeys (
 int
 enqueueUpdatedKeyGroup (
   BrailleDisplay *brl,
+  unsigned int count,
   const unsigned char *new,
   unsigned char *old,
-  unsigned int count,
   KeyGroup group
 ) {
   KeyNumber pressStack[count];
