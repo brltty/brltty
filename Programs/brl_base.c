@@ -575,7 +575,7 @@ enqueueUpdatedKeyGroup (
   unsigned char pressCount = 0;
   KeyNumber base = 0;
 
-  while (1) {
+  while (base < count) {
     KeyNumber number = base;
     unsigned char bit = 1;
 
@@ -591,7 +591,7 @@ enqueueUpdatedKeyGroup (
         enqueueKeyEvent(brl, group, number, 0);
       }
 
-      if (++number == count) goto done;
+      if (++number == count) break;
       bit <<= 1;
     }
 
@@ -600,7 +600,6 @@ enqueueUpdatedKeyGroup (
     base += 8;
   }
 
-done:
   while (pressCount > 0) {
     enqueueKeyEvent(brl, group, pressStack[--pressCount], 1);
   }
