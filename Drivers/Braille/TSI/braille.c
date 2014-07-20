@@ -244,13 +244,8 @@ static int fullFreshenEvery;
 
 static unsigned char routingKeys[ROUTING_BYTES_MAXIMUM];
 
-/* Normal header for sending dots, with cursor always off */
-static unsigned char BRL_SEND_HEAD[] = {0XFF, 0XFF, 0X04, 0X00, 0X99, 0X00};
-#define DIM_BRL_SEND_FIXED 6
+// for writeWindow()
 #define DIM_BRL_SEND 8
-/* Two extra bytes for lenght and offset */
-#define BRL_SEND_LENGTH 6
-#define BRL_SEND_OFFSET 7
 
 /* Description of reply to query */
 #define IDENTITY_H1 0X00
@@ -427,10 +422,6 @@ typedef struct {
   } data;
 } InputPacket;
 
-#define LOW_BAUD     4800
-#define NORMAL_BAUD  9600
-#define HIGH_BAUD   19200
-
 struct BrailleDataStruct {
   const ModelEntry *model;
 
@@ -439,9 +430,8 @@ struct BrailleDataStruct {
   } serial;
 };
 
-static unsigned char *rawdata,	/* translated data to send to display */
-                     *prevdata, /* previous data sent */
-                     *dispbuf;
+static unsigned char *prevdata; /* previous data sent */
+static unsigned char *dispbuf;
 static unsigned char brl_cols;		/* Number of cells available for text */
 static int ncells;              /* Total number of cells on display: this is
 				   brl_cols cells + 1 status cell on PB80. */
@@ -569,10 +559,10 @@ resetTypematic (BrailleDisplay *brl) {
 }
 
 static int
-setBaud (BrailleDisplay *brl, int baud) {
+setLocalBaud (BrailleDisplay *brl, int baud) {
   SerialParameters *parameters = &brl->data->serial.parameters;
 
-  logMessage(LOG_DEBUG, "trying with %d baud", baud);
+  logMessage(LOG_DEBUG, "trying at %d baud", baud);
   if (parameters->baud == baud) return 1;
 
   parameters->baud = baud;
@@ -580,20 +570,20 @@ setBaud (BrailleDisplay *brl, int baud) {
 }
 
 static int
-changeBaud (BrailleDisplay *brl, int baud) {
+setRemoteBaud (BrailleDisplay *brl, int baud) {
   unsigned char request[] = {0xFF, 0xFF, 0x05, 0};
   unsigned char *byte = &request[sizeof(request) - 1];
 
   switch (baud) {
-    case LOW_BAUD:
+    case TS_LOW_BAUD:
       *byte = 2;
       break;
 
-    case NORMAL_BAUD:
+    case TS_NORMAL_BAUD:
       *byte = 3;
       break;
 
-    case HIGH_BAUD:
+    case TS_HIGH_BAUD:
       *byte = 4;
       break;
 
@@ -632,7 +622,6 @@ disconnectResource (BrailleDisplay *brl) {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  int i=0;
   InputPacket reply;
   unsigned int allowHighBaud = 1;
 
@@ -646,13 +635,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     }
   }
 
-  dispbuf = rawdata = prevdata = NULL;
+  dispbuf = prevdata = NULL;
 
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
 
     if (connectResource(brl, device)) {
-      if (!setBaud(brl, NORMAL_BAUD)) goto failure;
+      if (!setLocalBaud(brl, TS_NORMAL_BAUD)) goto failure;
 
       if (!queryDisplay(brl, &reply)) {
         /* Then send the query at 19200 baud, in case a PB was left ON
@@ -660,7 +649,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
          */
 
         if (!allowHighBaud) goto failure;
-        if (!setBaud(brl, HIGH_BAUD)) goto failure;
+        if (!setLocalBaud(brl, TS_HIGH_BAUD)) goto failure;
         if (!queryDisplay(brl, &reply)) goto failure;
       }
 
@@ -723,23 +712,23 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       if (slowUpdate == 2) noMultipleUpdates = 1;
       fullFreshenEvery = FULL_FRESHEN_EVERY;
 
-      if ((brl->data->serial.parameters.baud < HIGH_BAUD) && allowHighBaud && brl->data->model->highBaudSupported) {
+      if ((brl->data->serial.parameters.baud < TS_HIGH_BAUD) && allowHighBaud && brl->data->model->highBaudSupported) {
         /* if supported (PB) go to 19200 baud */
-        if (!changeBaud(brl, HIGH_BAUD)) goto failure;
+        if (!setRemoteBaud(brl, TS_HIGH_BAUD)) goto failure;
       //serialAwaitOutput(brl->gioEndpoint);
         asyncWait(BAUD_DELAY);
-        if (!setBaud(brl, HIGH_BAUD)) goto failure;
-        logMessage(LOG_DEBUG, "switched to %d baud - checking if display followed", HIGH_BAUD);
+        if (!setLocalBaud(brl, TS_HIGH_BAUD)) goto failure;
+        logMessage(LOG_DEBUG, "switched to %d baud - checking if display followed", TS_HIGH_BAUD);
 
         if (queryDisplay(brl, &reply)) {
-          logMessage(LOG_DEBUG, "display responded at %d baud", HIGH_BAUD);
+          logMessage(LOG_DEBUG, "display responded at %d baud", TS_HIGH_BAUD);
         } else {
           logMessage(LOG_INFO,
                      "display did not respond at %d baud"
-                     " - falling back to %d baud", NORMAL_BAUD,
-                     HIGH_BAUD);
+                     " - falling back to %d baud", TS_NORMAL_BAUD,
+                     TS_HIGH_BAUD);
 
-          if (!setBaud(brl, NORMAL_BAUD)) goto failure;
+          if (!setLocalBaud(brl, TS_NORMAL_BAUD)) goto failure;
         //serialAwaitOutput(brl->gioEndpoint);
           asyncWait(BAUD_DELAY); /* just to be safe */
 
@@ -747,7 +736,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             logMessage(LOG_INFO,
                        "found display again at %d baud"
                        " - must be a TSI emulator",
-                       NORMAL_BAUD);
+                       TS_NORMAL_BAUD);
 
             fullFreshenEvery = 1;
           } else {
@@ -767,16 +756,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       /* Allocate space for buffers */
       dispbuf = malloc(ncells);
       prevdata = malloc(ncells);
-      rawdata = malloc(2 * ncells + DIM_BRL_SEND);
       /* 2* to insert 0s for attribute code when sending to the display */
-      if (!dispbuf || !prevdata || !rawdata)
+      if (!dispbuf || !prevdata)
         goto failure;
-
-      /* Initialize rawdata. It will be filled in and used directly to
-         write to the display in writebrl(). */
-      for (i = 0; i < DIM_BRL_SEND_FIXED; i++)
-        rawdata[i] = BRL_SEND_HEAD[i];
-      memset (rawdata + DIM_BRL_SEND, 0, 2 * ncells);
 
       /* Force rewrite of display on first writebrl */
       memset(prevdata, 0xFF, ncells);
@@ -810,72 +792,68 @@ brl_destruct (BrailleDisplay *brl) {
     dispbuf = NULL;
   }
 
-  if (rawdata) {
-    free(rawdata);
-    rawdata = NULL;
-  }
-
   if (prevdata) {
     free(prevdata);
     prevdata = NULL;
   }
 }
 
-static void 
+static int
 display (
-  BrailleDisplay *brl, const unsigned char *pattern,
+  BrailleDisplay *brl, const unsigned char *cells,
   unsigned int from, unsigned int to
 ) {
-  /* display a given dot pattern. We process only part of the pattern, from
-   * byte (cell) start to byte stop. That pattern should be shown at position 
-   * start on the display.
-   */
+  static const unsigned char header[] = {
+    0XFF, 0XFF, 0X04, 0X00, 0X99, 0X00
+  };
 
-  int i, length;
+  unsigned int length = to - from;
+  unsigned char packet[sizeof(header) + 2 + (length * 2)];
+  unsigned char *byte = packet;
+  unsigned int i;
 
-  length = to - from;
+  byte = mempcpy(byte, header, sizeof(header));
+  *byte++ = 2 * length;
+  *byte++ = from;
 
-  rawdata[BRL_SEND_LENGTH] = 2 * length;
-  rawdata[BRL_SEND_OFFSET] = from;
-
-  for (i = 0; i < length; i++)
-    rawdata[DIM_BRL_SEND + 2 * i + 1] = translateOutputCell(pattern[from + i]);
+  for (i=0; i<length; i+=1) {
+    *byte++ = 0;
+    *byte++ = translateOutputCell(cells[from + i]);
+  }
 
   /* Some displays apparently don't like rapid updating. Most or all apprently
-     don't do flow control. If we update the display too often and too fast,
-     then the packets queue up in the send queue, the info displayed is not up
-     to date, and the info displayed continues to change after we stop
-     updating while the queue empties (like when you release the arrow key and
-     the display continues changing for a second or two). We also risk
-     overflows which put garbage on the display, or often what happens is that
-     some cells from previously displayed lines will remain and not be cleared
-     or replaced; also the pinging fails and the display gets
-     reinitialized... To expose the problem skim/scroll through a long file
-     (with long lines) holding down the up/down arrow key on the PC keyboard.
+   * don't do flow control. If we update the display too often and too fast,
+   * then the packets queue up in the send queue, the info displayed is not up
+   * to date, and the info displayed continues to change after we stop
+   * updating while the queue empties (like when you release the arrow key and
+   * the display continues changing for a second or two). We also risk
+   * overflows which put garbage on the display, or often what happens is that
+   * some cells from previously displayed lines will remain and not be cleared
+   * or replaced; also the pinging fails and the display gets
+   * reinitialized... To expose the problem skim/scroll through a long file
+   * (with long lines) holding down the up/down arrow key on the PC keyboard.
+   *
+   * pb40 has no problems: it apparently can take whatever we throw at
+   * it. Nav40 is good but we drain just to be safe.
+   *
+   * pb80 (twice larger but twice as fast as nav40) cannot take a continuous
+   * full speed flow. There is no flow control: apparently not supported
+   * properly on at least pb80. My pb80 is recent yet the hardware version is
+   * v1.0a, so this may be a hardware problem that was fixed on pb40.  There's
+   * some UART handshake mode that might be relevant but only seems to break
+   * everything (on both pb40 and pb80)...
+   *
+   * Nav80 is untested but as it receives at 9600, we probably need to
+   * compensate there too.
+   *
+   * Finally, some TSI emulators (at least the mdv mb408s) may have timing
+   * limitations.
+   *
+   * I no longer have access to a Nav40 and PB80 for testing: I only have a
+   * PB40.
+   */
 
-     pb40 has no problems: it apparently can take whatever we throw at
-     it. Nav40 is good but we drain just to be safe.
-
-     pb80 (twice larger but twice as fast as nav40) cannot take a continuous
-     full speed flow. There is no flow control: apparently not supported
-     properly on at least pb80. My pb80 is recent yet the hardware version is
-     v1.0a, so this may be a hardware problem that was fixed on pb40.  There's
-     some UART handshake mode that might be relevant but only seems to break
-     everything (on both pb40 and pb80)...
-
-     Nav80 is untested but as it receives at 9600, we probably need to
-     compensate there too.
-
-     Finally, some TSI emulators (at least the mdv mb408s) may have timing
-     limitations.
-
-     I no longer have access to a Nav40 and PB80 for testing: I only have a
-     PB40.  */
-
-  {
-    int count = DIM_BRL_SEND + 2 * length;
-    writeBytes(brl, rawdata, count);
-  }
+  return writeBytes(brl, packet, (byte - packet));
 }
 
 static void 

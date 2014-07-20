@@ -40,23 +40,6 @@
    navigator and gateway's default.
 */
 
-/* Cut-and-paste cursor position
-   Initial position (cell) of the special cut-and-paste cursor
-   Set to 0 for leftmost, 1 for middle, 2 for rightmost */
-#define CUT_CSR_INIT_POS 0
-/* Cut-and-paste cursor shape
-   Defines the dots that form the cut-and-paste cursor
-   Possible values: 0xFF for all dots, 0xC0 for dots 7-8, ... */
-#define CUT_CSR_CHAR 0xFF
-
-/* Flicker: how to flicker the braille display to attract attention
-   Character to set the display to when flickering
-   Possible values: 0 for spaces, 0xFF for all dots */
-#define FLICKER_CHAR 0
-/* How long the flicker lasts in milliseconds
-   There is a minimum of a few milliseconds, so 0 means minimum delay */
-#define FLICKER_DELAY 0
-
 /* A query is sent if we don't get any keys in a certain time, to detect
    if the display was turned off. How soon do we get nervous and send
    the ping? (in miliseconds) */
