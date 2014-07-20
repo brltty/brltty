@@ -236,7 +236,13 @@ static unsigned char noMultipleUpdates;
 static int fullFreshenEvery;
 
 /* for routing keys */
-static int resetRoutingKeyData = 1;
+#define ROUTING_BYTES_VERTICAL 4
+#define ROUTING_BYTES_MAXIMUM 11
+#define ROUTING_BYTES_40 9
+#define ROUTING_BYTES_80 14
+#define ROUTING_BYTES_81 15
+
+static unsigned char routingKeys[ROUTING_BYTES_MAXIMUM];
 
 /* Stabilization delay after changing baud rate */
 #define BAUD_DELAY (100)
@@ -353,13 +359,6 @@ static const KeysByteDescriptor keysDescriptor_PowerBraille[] = {
 /* Sensor switches/cursor routing keys information (2bytes header) */
 #define ROUTING_H1 0x00
 #define ROUTING_H2 0x08
-
-/* Definitions for cursor routing keys */
-#define ROUTING_BYTES_VERTICAL 4
-#define ROUTING_BYTES_MAXIMUM 11
-#define ROUTING_BYTES_40 9
-#define ROUTING_BYTES_80 14
-#define ROUTING_BYTES_81 15
 
 /* Global variables */
 
@@ -797,7 +796,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     }
   }
 
-  resetRoutingKeyData = 1;
+  memset(routingKeys, 0, sizeof(routingKeys));
   resetTypematic(brl);
 
   brl->textColumns = brl_cols;		/* initialise size of display */
@@ -967,84 +966,32 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
 return 1;
 }
 
-/* For cursor routing */
-/* lookup so find out if a certain key is active */
-#define RK_CHK(swnum) \
-      ( routingKeyBits[swnum/8] & (1 << (swnum % 8)) )
-
 static int
 handleInputPacket (BrailleDisplay *brl, const InputPacket *packet) {
-  /* after combination involving routing and navigation keys, don't act
-   * on any key until routing keys are all released
-   */
-  static unsigned char ignoreRoutingKeys = 0;
-  static unsigned char routingKeyCount = 0; /* length of that list */
-  static unsigned char routingKeyBits[ROUTING_BYTES_MAXIMUM];
-  static unsigned char routingKeyNumbers[ROUTING_BYTES_MAXIMUM * 8]; /* list of pressed keys */
-
-  /* mask representing pressed keys once the
-   * input bytes are interpreted
-   */
-  KeyNumberSet navigationKeys = 0;
-
-  if (resetRoutingKeyData) {
-    unsigned int i;
-
-    ignoreRoutingKeys = 0;
-    routingKeyCount = 0;
-    for (i=0; i<ROUTING_BYTES_MAXIMUM; i+=1) routingKeyBits[i] = 0;
-    resetRoutingKeyData = 0;
-  }
-
   switch (packet->type) {
     case IPT_KEYS: {
+      KeyNumberSet keys = 0;
       unsigned int i;
 
       for (i=0; i<packet->data.keys.count; i+=1) {
         const KeysByteDescriptor *kbd = &packet->data.keys.descriptor[i];
 
-        navigationKeys |= (packet->fields.keys[i] & kbd->mask) << kbd->shift;
+        keys |= (packet->fields.keys[i] & kbd->mask) << kbd->shift;
       }
 
+      enqueueKeys(brl, keys, TS_GRP_NavigationKeys, 0);
       break;
     }
 
     case IPT_ROUTING: {
       unsigned char count = packet->data.routing.count;
-      unsigned int i;
 
       /* if model->routingBytes and packet->data.routing.count disagree, then must be garbage??? */
       if (count != model->routingBytes) return 0;
       count -= sizeof(packet->fields.routing.vertical);
 
-      /* if key press is maintained, then packet is resent by display
-       * every 0.5secs. When the key is released, then display sends a packet
-       * with all info bits at 0.
-       */
-      for (i=0; i<count; i+=1) {
-        routingKeyBits[i] |= packet->fields.routing.horizontal[i];
-      }
-
-      routingKeyCount = 0;
-      for (i=0; i<ncells; i+=1) {
-        if (RK_CHK(i)) {
-          routingKeyNumbers[routingKeyCount++] = i;
-        }
-      }
-
-      /* RK_CHK(i) tells if routing key i is pressed.
-       * routingKeyNumbers[0] to routingKeyNumbers[howmany-1] give the numbers of the keys
-       * that are pressed.
-       */
-
-      for (i=0; i<count; i+=1) {
-        if (packet->fields.routing.horizontal[i] != 0) {
-          return 1;
-        }
-      }
-
-      resetRoutingKeyData = 1;
-      if (ignoreRoutingKeys) return 1;
+      enqueueUpdatedKeyGroup(brl, packet->fields.routing.horizontal,
+                             routingKeys, count, TS_GRP_RoutingKeys);
       break;
     }
 
@@ -1054,25 +1001,6 @@ handleInputPacket (BrailleDisplay *brl, const InputPacket *packet) {
 
     default:
       return 0;
-  }
-
-  if (navigationKeys && routingKeyCount) {
-    if (ignoreRoutingKeys) return 1;
-    ignoreRoutingKeys = 1;
-  }
-
-  {
-    unsigned int routingKeyIndex = 0;
-
-    while (routingKeyIndex < routingKeyCount) {
-      enqueueKeyEvent(brl, TS_GRP_RoutingKeys, routingKeyNumbers[routingKeyIndex++], 1);
-    }
-
-    enqueueKeys(brl, navigationKeys, TS_GRP_NavigationKeys, 0);
-
-    while (routingKeyIndex > 0) {
-      enqueueKeyEvent(brl, TS_GRP_RoutingKeys, routingKeyNumbers[--routingKeyIndex], 0);
-    }
   }
 
   return 1;

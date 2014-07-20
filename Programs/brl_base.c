@@ -564,6 +564,51 @@ enqueueUpdatedKeys (
 }
 
 int
+enqueueUpdatedKeyGroup (
+  BrailleDisplay *brl,
+  const unsigned char *new,
+  unsigned char *old,
+  unsigned int count,
+  KeyGroup group
+) {
+  KeyNumber pressStack[count];
+  unsigned char pressCount = 0;
+  KeyNumber base = 0;
+
+  while (1) {
+    KeyNumber number = base;
+    unsigned char bit = 1;
+
+    while (*old != *new) {
+      unsigned char isPressed = *new & bit;
+      unsigned char wasPressed = *old & bit;
+
+      if (isPressed && !wasPressed) {
+        *old |= bit;
+        pressStack[pressCount++] = number;
+      } else if (wasPressed && !isPressed) {
+        *old &= ~bit;
+        enqueueKeyEvent(brl, group, number, 0);
+      }
+
+      if (++number == count) goto done;
+      bit <<= 1;
+    }
+
+    old += 1;
+    new += 1;
+    base += 8;
+  }
+
+done:
+  while (pressCount > 0) {
+    enqueueKeyEvent(brl, group, pressStack[--pressCount], 1);
+  }
+
+  return 1;
+}
+
+int
 enqueueXtScanCode (
   BrailleDisplay *brl,
   unsigned char key, unsigned char escape,

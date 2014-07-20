@@ -172,6 +172,14 @@ extern int enqueueUpdatedKeys (
   KeyNumberSet new, KeyNumberSet *old, KeyGroup group, KeyNumber number
 );
 
+extern int enqueueUpdatedKeyGroup (
+  BrailleDisplay *brl,
+  const unsigned char *new,
+  unsigned char *old,
+  unsigned int count,
+  KeyGroup group
+);
+
 extern int enqueueXtScanCode (
   BrailleDisplay *brl,
   unsigned char code, unsigned char escape,
