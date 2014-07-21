@@ -43,15 +43,27 @@ bind Button2+Bar4 NXDIFLN
 bind Button2+RightRockerUp ATTRUP
 bind Button2+RightRockerDown ATTRDN
 
+bind Convex+Button1 CHRLT
+bind Convex+Button2 CHRRT
+
+bind LeftRockerUp+Button1 HWINLT
+bind LeftRockerUp+Button2 HWINRT
+
+bind Convex+LeftRockerUp WINUP
+bind Convex+LeftRockerDown WINDN
+
 bind Button1+Button2+Bar1 WINUP
 bind Button1+Button2+Bar2 WINDN
 
 bind LeftRockerUp+Button3 LNBEG
 bind LeftRockerUp+Button4 LNEND
 
+bind Button1 KEY_CURSOR_LEFT
+bind Button2 KEY_CURSOR_RIGHT
 bind LeftRockerUp KEY_CURSOR_UP
 bind LeftRockerDown KEY_CURSOR_DOWN
 
+bind Button1+Button2 HELP
 bind Button1+Button2+Button3+Button4 LEARN
 bind Button3+Button4 INFO
 
