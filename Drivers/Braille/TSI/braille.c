@@ -219,7 +219,7 @@ BEGIN_KEY_TABLE_LIST
 END_KEY_TABLE_LIST
 
 /* Stabilization delay after changing baud rate */
-#define BAUD_DELAY (100)
+#define BAUD_DELAY 100
 
 /* for routing keys */
 #define ROUTING_BYTES_VERTICAL 4
@@ -277,9 +277,6 @@ static const KeysByteDescriptor keysDescriptor_PowerBraille[] = {
   {.signature=0X60, .mask=0X1F, .shift=24},
   {.signature=0XE0, .mask=0X1F, .shift=5}
 };
-
-/* Some special case input codes */
-/* Global variables */
 
 typedef struct {
   const char *modelName;
@@ -412,8 +409,10 @@ struct BrailleDataStruct {
   unsigned char cellCount;
   unsigned char cells[0XFF];
 
-  /* version of the hardware */
-  char hardwareVersion[3];
+  struct {
+    unsigned char major;
+    unsigned char minor;
+  } version;
 
   /* Type of delay the display requires after sending it a command.
    * 0 -> no delay, 1 -> drain only, 2 -> drain + wait for SEND_DELAY.
@@ -428,7 +427,7 @@ writeBytes (BrailleDisplay *brl, const void *data, size_t size) {
 }
 
 static BraillePacketVerifierResult
-verifyPacket1 (
+verifyPacket (
   BrailleDisplay *brl,
   const unsigned char *bytes, size_t size,
   size_t *length, void *data
@@ -509,7 +508,7 @@ verifyPacket1 (
 
 static size_t
 readPacket (BrailleDisplay *brl, InputPacket *packet) {
-  return readBraillePacket(brl, NULL, &packet->fields, sizeof(packet->fields), verifyPacket1, packet);
+  return readBraillePacket(brl, NULL, &packet->fields, sizeof(packet->fields), verifyPacket, packet);
 }
 
 static int
@@ -636,16 +635,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         if (!getIdentity(brl, &reply)) goto failure;
       }
 
-      memcpy(brl->data->hardwareVersion,
-             &reply.fields.identity.version[1],
-             sizeof(brl->data->hardwareVersion));
-
       brl->data->cellCount = reply.fields.identity.columns;
+      brl->data->version.major = reply.fields.identity.version[1] - '0';
+      brl->data->version.minor = reply.fields.identity.version[3] - '0';
 
-      logMessage(LOG_INFO, "display replied: %d cells, version %.*s",
+      logMessage(LOG_INFO, "display replied: %d cells, version %u.%u",
                  brl->data->cellCount,
-                 (int)sizeof(brl->data->hardwareVersion),
-                 brl->data->hardwareVersion);
+                 brl->data->version.major,
+                 brl->data->version.minor);
 
       switch (brl->data->cellCount) {
         case 20:
@@ -653,7 +650,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           break;
 
         case 40:
-          brl->data->model = (brl->data->hardwareVersion[0] > '3')?
+          brl->data->model = (brl->data->version.major > 3)?
                                &modelPowerBraille40:
                                &modelNavigator40;
           break;
