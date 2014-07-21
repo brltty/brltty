@@ -19,9 +19,9 @@
 #ifndef BRLTTY_INCLUDED_TS_BRLDEFS
 #define BRLTTY_INCLUDED_TS_BRLDEFS
 
-#define TS_LOW_BAUD     4800
-#define TS_NORMAL_BAUD  9600
-#define TS_HIGH_BAUD   19200
+#define TS_BAUD_LOW     4800
+#define TS_BAUD_NORMAL  9600
+#define TS_BAUD_HIGH   19200
 
 typedef enum {
   /* Navigator - byte 1
