@@ -80,6 +80,27 @@ testAutorepeat (void) {
 }
 
 static int
+changedAutorepeat (const MenuItem *item UNUSED, unsigned char setting) {
+  return setBrailleAutorepeat(&brl, setting,
+                              PREFERENCES_TIME(prefs.longPressTime),
+                              PREFERENCES_TIME(prefs.autorepeatInterval));
+}
+
+static int
+changedAutorepeatDelay (const MenuItem *item UNUSED, unsigned char setting) {
+  return setBrailleAutorepeat(&brl, prefs.autorepeat,
+                              setting,
+                              PREFERENCES_TIME(prefs.autorepeatInterval));
+}
+
+static int
+changedAutorepeatInterval (const MenuItem *item UNUSED, unsigned char setting) {
+  return setBrailleAutorepeat(&brl, prefs.autorepeat,
+                              PREFERENCES_TIME(prefs.longPressTime),
+                              setting);
+}
+
+static int
 testShowCursor (void) {
   return prefs.showCursor;
 }
@@ -631,11 +652,13 @@ makePreferencesMenu (void) {
     {
       NAME(strtext("Long Press Time"));
       ITEM(newTimeMenuItem(inputSubmenu, &prefs.longPressTime, &itemName));
+      CHANGED(AutorepeatDelay);
     }
 
     {
       NAME(strtext("Autorepeat"));
       ITEM(newBooleanMenuItem(inputSubmenu, &prefs.autorepeat, &itemName));
+      CHANGED(Autorepeat);
     }
 
     {
@@ -648,6 +671,7 @@ makePreferencesMenu (void) {
       NAME(strtext("Autorepeat Interval"));
       ITEM(newTimeMenuItem(inputSubmenu, &prefs.autorepeatInterval, &itemName));
       TEST(Autorepeat);
+      CHANGED(AutorepeatInterval);
     }
 
     {

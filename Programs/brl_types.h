@@ -58,6 +58,7 @@ typedef struct BrailleDataStruct BrailleData;
 
 typedef int BrailleFirmnessSetter (BrailleDisplay *brl, BrailleFirmness setting);
 typedef int BrailleSensitivitySetter (BrailleDisplay *brl, BrailleSensitivity setting);
+typedef int BrailleAutorepeatSetter (BrailleDisplay *brl, int on, int delay, int interval);
 typedef void BrailleInputRotator (BrailleDisplay *brl, KeyGroup *group, KeyNumber *number);
 
 struct BrailleDisplayStruct {
@@ -81,6 +82,7 @@ struct BrailleDisplayStruct {
 
   BrailleFirmnessSetter *setFirmness;
   BrailleSensitivitySetter *setSensitivity;
+  BrailleAutorepeatSetter *setAutorepeat;
   BrailleInputRotator *rotateInput;
 };
 

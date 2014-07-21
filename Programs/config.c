@@ -933,6 +933,9 @@ applyBraillePreferences (void) {
   reconfigureWindow();
   setBrailleFirmness(&brl, prefs.brailleFirmness);
   setBrailleSensitivity(&brl, prefs.brailleSensitivity);
+  setBrailleAutorepeat(&brl, prefs.autorepeat,
+                       PREFERENCES_TIME(prefs.longPressTime),
+                       PREFERENCES_TIME(prefs.autorepeatInterval));
 }
 
 #ifdef ENABLE_SPEECH_SUPPORT

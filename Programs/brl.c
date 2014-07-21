@@ -49,6 +49,7 @@ initializeBrailleDisplay (BrailleDisplay *brl) {
   brl->data = NULL;
   brl->setFirmness = NULL;
   brl->setSensitivity = NULL;
+  brl->setAutorepeat = NULL;
   brl->rotateInput = NULL;
 }
 
@@ -211,4 +212,12 @@ setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting) {
   if (!brl->setSensitivity) return 0;
   logMessage(LOG_DEBUG, "setting braille sensitivity: %d", setting);
   return brl->setSensitivity(brl, setting);
+}
+
+int
+setBrailleAutorepeat (BrailleDisplay *brl, int on, int delay, int interval) {
+  if (!brl->setAutorepeat) return 0;
+  logMessage(LOG_DEBUG, "setting braille autorepeat: %s Delay:%d Interval:%d", 
+             (on? "on": "off"), delay, interval);
+  return brl->setAutorepeat(brl, on, delay, interval);
 }
