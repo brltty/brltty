@@ -529,7 +529,7 @@ readPacket (BrailleDisplay *brl, InputPacket *packet) {
 }
 
 static int
-queryDisplay (BrailleDisplay *brl, InputPacket *reply) {
+getIdentity (BrailleDisplay *brl, InputPacket *reply) {
   static const unsigned char request[] = {0xFF, 0xFF, 0x0A};
 
   if (writeBytes(brl, request, sizeof(request))) {
@@ -548,11 +548,12 @@ queryDisplay (BrailleDisplay *brl, InputPacket *reply) {
   return 0;
 }
 
-
 static int
-resetTypematic (BrailleDisplay *brl) {
-  static const unsigned char request[] = {
-    0XFF, 0XFF, 0X0D, BRL_TYPEMATIC_DELAY, BRL_TYPEMATIC_REPEAT
+setAutorepeat (BrailleDisplay *brl, int on, int delay, int interval) {
+  const unsigned char request[] = {
+    0XFF, 0XFF, 0X0D,
+    on? ((delay + 9) / 10): 0XFF,
+    on? ((interval + 9) / 10): 0XFF
   };
 
   return writeBytes(brl, request, sizeof(request));
@@ -643,14 +644,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (connectResource(brl, device)) {
       if (!setLocalBaud(brl, TS_NORMAL_BAUD)) goto failure;
 
-      if (!queryDisplay(brl, &reply)) {
+      if (!getIdentity(brl, &reply)) {
         /* Then send the query at 19200 baud, in case a PB was left ON
          * at that speed
          */
 
         if (!allowHighBaud) goto failure;
         if (!setLocalBaud(brl, TS_HIGH_BAUD)) goto failure;
-        if (!queryDisplay(brl, &reply)) goto failure;
+        if (!getIdentity(brl, &reply)) goto failure;
       }
 
       memcpy(hardwareVersion, &reply.fields.identity.version[1], sizeof(hardwareVersion));
@@ -720,7 +721,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         if (!setLocalBaud(brl, TS_HIGH_BAUD)) goto failure;
         logMessage(LOG_DEBUG, "switched to %d baud - checking if display followed", TS_HIGH_BAUD);
 
-        if (queryDisplay(brl, &reply)) {
+        if (getIdentity(brl, &reply)) {
           logMessage(LOG_DEBUG, "display responded at %d baud", TS_HIGH_BAUD);
         } else {
           logMessage(LOG_INFO,
@@ -732,7 +733,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         //serialAwaitOutput(brl->gioEndpoint);
           asyncWait(BAUD_DELAY); /* just to be safe */
 
-          if (queryDisplay(brl, &reply)) {
+          if (getIdentity(brl, &reply)) {
             logMessage(LOG_INFO,
                        "found display again at %d baud"
                        " - must be a TSI emulator",
@@ -747,9 +748,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       }
 
       memset(routingKeys, 0, sizeof(routingKeys));
-      resetTypematic(brl);
 
       brl->textColumns = brl_cols;		/* initialise size of display */
+      brl->setAutorepeat = setAutorepeat;
 
       makeOutputTable(dotsTable_ISO11548_1);
 
@@ -799,7 +800,7 @@ brl_destruct (BrailleDisplay *brl) {
 }
 
 static int
-display (
+writeCells (
   BrailleDisplay *brl, const unsigned char *cells,
   unsigned int from, unsigned int to
 ) {
@@ -857,8 +858,8 @@ display (
 }
 
 static void 
-display_all (BrailleDisplay *brl, unsigned char *pattern) {
-  display (brl, pattern, 0, ncells);
+writeAllCells (BrailleDisplay *brl, const unsigned char *cells) {
+  writeCells(brl, cells, 0, ncells);
 }
 
 static int 
@@ -872,12 +873,12 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
        garble. */
     count = fullFreshenEvery;
     memcpy(prevdata, dispbuf, ncells);
-    display_all (brl, dispbuf);
+    writeAllCells(brl, dispbuf);
   } else if (noMultipleUpdates) {
     unsigned int from, to;
     
     if (cellsHaveChanged(prevdata, dispbuf, ncells, &from, &to, NULL)) {
-      display (brl, dispbuf, from, to);
+      writeCells(brl, dispbuf, from, to);
     }
   }else{
     int base = 0, i = 0, collecting = 0, simil = 0;
@@ -888,7 +889,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 	  simil++;
 	  if (collecting && 2 * simil > DIM_BRL_SEND)
 	    {
-	      display (brl, dispbuf, base, i - simil + 1);
+	      writeCells(brl, dispbuf, base, i - simil + 1);
 	      base = i;
 	      collecting = 0;
 	      simil = 0;
@@ -906,7 +907,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 	}
     
     if (collecting)
-      display (brl, dispbuf, base, i - simil );
+      writeCells(brl, dispbuf, base, i - simil );
   }
 return 1;
 }

@@ -27,19 +27,6 @@
  * Edit as needed...
  */
 
-/* Delay before typematic key repetitions
-   Time before a key you hold down will start being repeated */
-#define BRL_TYPEMATIC_DELAY 9
-/* Speed of typematic key repetitions
-   Delay between repetitions of a key when you hold it down */
-#define BRL_TYPEMATIC_REPEAT 9
-
-/* Note that these two previous options correspond to gateway's "/panelrep"
-   option, except the numbers here are the square of the values you'd use
-   with gateway. 9 and 9 is my favorite setting, which is quicker than
-   navigator and gateway's default.
-*/
-
 /* A query is sent if we don't get any keys in a certain time, to detect
    if the display was turned off. How soon do we get nervous and send
    the ping? (in miliseconds) */
