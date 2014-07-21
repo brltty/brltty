@@ -300,6 +300,7 @@
 
 # TSI Braille Driver Parameters
 #braille-parameters ts:HighBaud=yes # [no,yes]
+#braille-parameters ts:SetBaud=9600 # [4800,9600,19200]
 
 # TTY Braille Driver Parameters
 #braille-parameters tt:Baud=9600 # 

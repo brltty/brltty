@@ -90,9 +90,10 @@
 #include "message.h"
 
 typedef enum {
-  PARM_HIGHBAUD
+  PARM_HIGH_BAUD,
+  PARM_SET_BAUD
 } DriverParameter;
-#define BRLPARMS "highbaud"
+#define BRLPARMS "highbaud", "setbaud"
 
 #include "brl_driver.h"
 #include "braille.h"
@@ -287,7 +288,6 @@ typedef struct {
 
   unsigned slowUpdate:2;
   unsigned highBaudSupported:1;
-  unsigned isPB40:1;
 } ModelEntry;
 
 static const ModelEntry modelNavigator20 = {
@@ -328,7 +328,6 @@ static const ModelEntry modelPowerBraille40 = {
   .routingKeyCount = 40,
 
   .highBaudSupported = 1,
-  .isPB40 = 1,
 
   .keyTableDefinition = &KEY_TABLE_DEFINITION(pb40)
 };
@@ -535,8 +534,8 @@ static int
 setAutorepeat (BrailleDisplay *brl, int on, int delay, int interval) {
   const unsigned char request[] = {
     0XFF, 0XFF, 0X0D,
-    on? ((delay + 9) / 10): 0XFF,
-    on? ((interval + 9) / 10): 0XFF
+    on? ((delay + 9) / 10) /* 10ms */: 0XFF /* long delay */,
+    on? ((interval + 9) / 10) /* 10ms */: 0XFF /* long interval */
   };
 
   return writeBytes(brl, request, sizeof(request));
@@ -606,40 +605,52 @@ disconnectResource (BrailleDisplay *brl) {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  InputPacket reply;
-  unsigned int allowHighBaud = 1;
-
-  {
-    const char *parameter = parameters[PARM_HIGHBAUD];
-
-    if (parameter && *parameter) {
-      if (!validateYesNo(&allowHighBaud, parameter)) {
-        logMessage(LOG_WARNING, "unsupported high baud setting: %s", parameter);
-      }
-    }
-  }
-
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
 
     if (connectResource(brl, device)) {
-      if (!setLocalBaud(brl, TS_BAUD_NORMAL)) goto failure;
+      InputPacket reply;
 
-      if (!getIdentity(brl, &reply)) {
-        /* Then send the query at 19200 baud, in case a PB was left ON
-         * at that speed
-         */
+      unsigned int allowHighBaud = 1;
+      unsigned int oldBaud;
+      unsigned int newBaud;
 
-        if (!allowHighBaud) goto failure;
-        if (!setLocalBaud(brl, TS_BAUD_HIGH)) goto failure;
-        if (!getIdentity(brl, &reply)) goto failure;
+      {
+        const char *parameter = parameters[PARM_HIGH_BAUD];
+
+        if (parameter && *parameter) {
+          if (!validateYesNo(&allowHighBaud, parameter)) {
+            logMessage(LOG_WARNING, "unsupported high baud setting: %s", parameter);
+          }
+        }
+      }
+
+      {
+        static const unsigned int bauds[] = {
+          TS_BAUD_NORMAL, TS_BAUD_HIGH, 0
+        };
+
+        const unsigned int *baud = bauds;
+
+        while (1) {
+          if (!*baud) goto failure;
+          oldBaud = *baud++;
+
+          if (allowHighBaud || (oldBaud <= TS_BAUD_NORMAL)) {
+            if (setLocalBaud(brl, oldBaud)) {
+              if (getIdentity(brl, &reply)) {
+                break;
+              }
+            }
+          }
+        }
       }
 
       brl->data->cellCount = reply.fields.identity.columns;
       brl->data->version.major = reply.fields.identity.version[1] - '0';
       brl->data->version.minor = reply.fields.identity.version[3] - '0';
 
-      logMessage(LOG_INFO, "display replied: %d cells, version %u.%u",
+      logMessage(LOG_INFO, "display replied: %u cells, version %u.%u",
                  brl->data->cellCount,
                  brl->data->version.major,
                  brl->data->version.minor);
@@ -684,31 +695,43 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       brl->data->slowUpdate = 2;
 #endif /* FORCE_FULL_SEND_DELAY */
 
-      if ((brl->data->serialParameters.baud < TS_BAUD_HIGH) && allowHighBaud && brl->data->model->highBaudSupported) {
-        /* if supported (PB) go to 19200 baud */
-        if (!setRemoteBaud(brl, TS_BAUD_HIGH)) goto failure;
-      //serialAwaitOutput(brl->gioEndpoint);
+      newBaud = oldBaud;
+      if (allowHighBaud && brl->data->model->highBaudSupported) newBaud = TS_BAUD_HIGH;
+
+      {
+        const char *parameter = parameters[PARM_SET_BAUD];
+
+        if (parameter && *parameter) {
+          static const int minimum = 1;
+          int value;
+
+          if (validateInteger(&value, parameter, &minimum, NULL)) {
+            newBaud = value;
+          } else {
+            logMessage(LOG_WARNING, "unsupported set baud setting: %s", parameter);
+          }
+        }
+      }
+
+      if (newBaud != oldBaud) {
+        if (!setRemoteBaud(brl, newBaud)) goto failure;
         asyncWait(BAUD_DELAY);
-        if (!setLocalBaud(brl, TS_BAUD_HIGH)) goto failure;
-        logMessage(LOG_DEBUG, "switched to %d baud - checking if display followed", TS_BAUD_HIGH);
+        if (!setLocalBaud(brl, newBaud)) goto failure;
+        logMessage(LOG_DEBUG, "display switched to %u baud - checking if display followed", newBaud);
 
         if (getIdentity(brl, &reply)) {
-          logMessage(LOG_DEBUG, "display responded at %d baud", TS_BAUD_HIGH);
+          logMessage(LOG_DEBUG, "display responded at %u baud", newBaud);
         } else {
           logMessage(LOG_INFO,
-                     "display did not respond at %d baud"
-                     " - falling back to %d baud", TS_BAUD_NORMAL,
-                     TS_BAUD_HIGH);
+                     "display did not respond at %u baud"
+                     " - falling back to %u baud",
+                     newBaud, oldBaud);
 
-          if (!setLocalBaud(brl, TS_BAUD_NORMAL)) goto failure;
-        //serialAwaitOutput(brl->gioEndpoint);
-          asyncWait(BAUD_DELAY); /* just to be safe */
+          if (!setLocalBaud(brl, oldBaud)) goto failure;
+          asyncWait(BAUD_DELAY);
 
           if (getIdentity(brl, &reply)) {
-            logMessage(LOG_INFO,
-                       "found display again at %d baud"
-                       " - must be a TSI emulator",
-                       TS_BAUD_NORMAL);
+            logMessage(LOG_INFO, "found display again at %u baud", oldBaud);
           } else {
             logMessage(LOG_ERR, "display lost after baud switch");
             goto failure;
