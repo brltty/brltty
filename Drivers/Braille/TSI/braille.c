@@ -221,17 +221,12 @@ END_KEY_TABLE_LIST
 /* Stabilization delay after changing baud rate */
 #define BAUD_DELAY (100)
 
-#define FULL_FRESHEN_EVERY 12 /* do a full update every nth writeWindow(). This
-				 should be a little over every 0.5secs. */
 /* for routing keys */
 #define ROUTING_BYTES_VERTICAL 4
 #define ROUTING_BYTES_MAXIMUM 11
 #define ROUTING_BYTES_40 9
 #define ROUTING_BYTES_80 14
 #define ROUTING_BYTES_81 15
-
-// for writeWindow()
-#define DIM_BRL_SEND 8
 
 /* Description of reply to query */
 #define IDENTITY_H1 0X00
@@ -413,31 +408,18 @@ struct BrailleDataStruct {
   SerialParameters serialParameters;
   unsigned char routingKeys[ROUTING_BYTES_MAXIMUM];
 
+  int forceWrite;
+  unsigned char cellCount;
+  unsigned char cells[0XFF];
+
   /* version of the hardware */
   char hardwareVersion[3];
-
-  /* number of cells available for text */
-  unsigned char textCells;
-
-  /* total number of cells - text + status */
-  int totalCells;
 
   /* Type of delay the display requires after sending it a command.
    * 0 -> no delay, 1 -> drain only, 2 -> drain + wait for SEND_DELAY.
    */
   unsigned char slowUpdate;
-
-  /* Whether multiple packets can be sent for a single update. */
-  unsigned char noMultipleUpdates;
-
-   /* We periodicaly refresh the display even if nothing has changed, will clear
-    * out any garble...
-    */
-  unsigned char fullFreshenEvery;
 };
-
-static unsigned char *prevdata; /* previous data sent */
-static unsigned char *dispbuf;
 
 static ssize_t
 writeBytes (BrailleDisplay *brl, const void *data, size_t size) {
@@ -638,8 +620,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     }
   }
 
-  dispbuf = prevdata = NULL;
-
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
 
@@ -660,15 +640,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
              &reply.fields.identity.version[1],
              sizeof(brl->data->hardwareVersion));
 
-      brl->data->totalCells = reply.fields.identity.columns;
-      brl->data->textCells = brl->data->totalCells;
+      brl->data->cellCount = reply.fields.identity.columns;
 
       logMessage(LOG_INFO, "display replied: %d cells, version %.*s",
-                 brl->data->totalCells,
+                 brl->data->cellCount,
                  (int)sizeof(brl->data->hardwareVersion),
                  brl->data->hardwareVersion);
 
-      switch (brl->data->textCells) {
+      switch (brl->data->cellCount) {
         case 20:
           brl->data->model = &modelNavigator20;
           break;
@@ -692,14 +671,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           break;
 
         default:
-          logMessage(LOG_ERR, "unrecognized braille display size: %u", brl->data->textCells);
+          logMessage(LOG_ERR, "unrecognized braille display size: %u", brl->data->cellCount);
           goto failure;
       }
 
       logMessage(LOG_INFO, "detected %s", brl->data->model->modelName);
 
       brl->data->slowUpdate = brl->data->model->slowUpdate;
-      brl->data->noMultipleUpdates = 0;
 
 #ifdef FORCE_DRAIN_AFTER_SEND
       brl->data->slowUpdate = 1;
@@ -708,13 +686,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 #ifdef FORCE_FULL_SEND_DELAY
       brl->data->slowUpdate = 2;
 #endif /* FORCE_FULL_SEND_DELAY */
-
-#ifdef NO_MULTIPLE_UPDATES
-      brl->data->noMultipleUpdates = 1;
-#endif /* NO_MULTIPLE_UPDATES */
-
-      if (brl->data->slowUpdate == 2) brl->data->noMultipleUpdates = 1;
-      brl->data->fullFreshenEvery = FULL_FRESHEN_EVERY;
 
       if ((brl->data->serialParameters.baud < TS_BAUD_HIGH) && allowHighBaud && brl->data->model->highBaudSupported) {
         /* if supported (PB) go to 19200 baud */
@@ -741,8 +712,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                        "found display again at %d baud"
                        " - must be a TSI emulator",
                        TS_BAUD_NORMAL);
-
-            brl->data->fullFreshenEvery = 1;
           } else {
             logMessage(LOG_ERR, "display lost after baud switch");
             goto failure;
@@ -757,22 +726,12 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         brl->keyNames = ktd->names;
       }
 
-      brl->textColumns = brl->data->textCells;		/* initialise size of display */
+      brl->textColumns = brl->data->cellCount;		/* initialise size of display */
       brl->setAutorepeat = setAutorepeat;
 
       makeOutputTable(dotsTable_ISO11548_1);
       memset(brl->data->routingKeys, 0, sizeof(brl->data->routingKeys));
-
-      /* Allocate space for buffers */
-      dispbuf = malloc(brl->data->totalCells);
-      prevdata = malloc(brl->data->totalCells);
-      /* 2* to insert 0s for attribute code when sending to the display */
-      if (!dispbuf || !prevdata)
-        goto failure;
-
-      /* Force rewrite of display on first writebrl */
-      memset(prevdata, 0xFF, brl->data->totalCells);
-
+      brl->data->forceWrite = 1;
       return 1;
 
     failure:
@@ -795,23 +754,10 @@ brl_destruct (BrailleDisplay *brl) {
     free(brl->data);
     brl->data = NULL;
   }
-
-  if (dispbuf) {
-    free(dispbuf);
-    dispbuf = NULL;
-  }
-
-  if (prevdata) {
-    free(prevdata);
-    prevdata = NULL;
-  }
 }
 
 static int
-writeCells (
-  BrailleDisplay *brl, const unsigned char *cells,
-  unsigned int from, unsigned int to
-) {
+writeCells (BrailleDisplay *brl, unsigned int from, unsigned int to) {
   static const unsigned char header[] = {
     0XFF, 0XFF, 0X04, 0X00, 0X99, 0X00
   };
@@ -827,7 +773,7 @@ writeCells (
 
   for (i=0; i<length; i+=1) {
     *byte++ = 0;
-    *byte++ = translateOutputCell(cells[from + i]);
+    *byte++ = translateOutputCell(brl->data->cells[from + i]);
   }
 
   /* Some displays apparently don't like rapid updating. Most or all apprently
@@ -865,59 +811,16 @@ writeCells (
   return writeBytes(brl, packet, (byte - packet));
 }
 
-static void 
-writeAllCells (BrailleDisplay *brl, const unsigned char *cells) {
-  writeCells(brl, cells, 0, brl->data->totalCells);
-}
-
 static int 
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  static int count = 0;
-
-  memcpy(dispbuf, brl->buffer, brl->data->textCells);
-
-  if (--count<=0) {
-    /* Force an update of the whole display every now and then to clear any
-       garble. */
-    count = brl->data->fullFreshenEvery;
-    memcpy(prevdata, dispbuf, brl->data->totalCells);
-    writeAllCells(brl, dispbuf);
-  } else if (brl->data->noMultipleUpdates) {
-    unsigned int from, to;
+  unsigned int from, to;
     
-    if (cellsHaveChanged(prevdata, dispbuf, brl->data->totalCells, &from, &to, NULL)) {
-      writeCells(brl, dispbuf, from, to);
-    }
-  }else{
-    int base = 0, i = 0, collecting = 0, simil = 0;
-    
-    while (i < brl->data->totalCells)
-      if (dispbuf[i] == prevdata[i])
-	{
-	  simil++;
-	  if (collecting && 2 * simil > DIM_BRL_SEND)
-	    {
-	      writeCells(brl, dispbuf, base, i - simil + 1);
-	      base = i;
-	      collecting = 0;
-	      simil = 0;
-	    }
-	  if (!collecting)
-	    base++;
-	  i++;
-	}
-      else
-	{
-	  prevdata[i] = dispbuf[i];
-	  collecting = 1;
-	  simil = 0;
-	  i++;
-	}
-    
-    if (collecting)
-      writeCells(brl, dispbuf, base, i - simil );
+  if (cellsHaveChanged(brl->data->cells, brl->buffer, brl->data->cellCount,
+                       &from, &to, &brl->data->forceWrite)) {
+    if (!writeCells(brl, from, to)) return 0;
   }
-return 1;
+
+  return 1;
 }
 
 static int
@@ -934,16 +837,17 @@ handleInputPacket (BrailleDisplay *brl, const InputPacket *packet) {
       }
 
       enqueueKeys(brl, keys, TS_GRP_NavigationKeys, 0);
-      break;
+      return 1;
     }
 
     case IPT_ROUTING: {
       if (packet->data.routing.count != brl->data->model->routingBytes) return 0;
+
       enqueueUpdatedKeyGroup(brl, brl->data->model->routingKeyCount,
                              packet->fields.routing.horizontal,
                              brl->data->routingKeys,
                              TS_GRP_RoutingKeys);
-      break;
+      return 1;
     }
 
     case IPT_BATTERY:
@@ -953,8 +857,6 @@ handleInputPacket (BrailleDisplay *brl, const InputPacket *packet) {
     default:
       return 0;
   }
-
-  return 1;
 }
 
 static int 
