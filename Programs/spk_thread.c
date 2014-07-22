@@ -336,17 +336,6 @@ sendIntegerResponse (volatile SpeechDriverThread *sdt, int result) {
   return speechMessage_requestFinished(sdt, result);
 }
 
-ASYNC_CONDITION_TESTER(testSpeechResponseReceived) {
-  volatile SpeechDriverThread *sdt = data;
-
-  return sdt->response.type != RSP_PENDING;
-}
-
-static int
-awaitSpeechResponse (volatile SpeechDriverThread *sdt, int timeout) {
-  return asyncAwaitCondition(timeout, testSpeechResponseReceived, (void *)sdt);
-}
-
 static void
 handleSpeechRequest (volatile SpeechDriverThread *sdt, SpeechRequest *req) {
   if (req) {
@@ -456,8 +445,7 @@ removeSpeechRequests (volatile SpeechDriverThread *sdt, SpeechRequestType type) 
 
 static void
 sendSpeechRequest (volatile SpeechDriverThread *sdt) {
-sendRequest:
-  if (getQueueSize(sdt->requestQueue) > 0) {
+  while (getQueueSize(sdt->requestQueue) > 0) {
     SpeechRequest *req = dequeueItem(sdt->requestQueue);
 
     if (req) {
@@ -472,11 +460,12 @@ sendRequest:
     if (!asyncSignalEvent(sdt->requestEvent, req)) {
       if (req) free(req);
       setIntegerResponse(sdt, 0);
-      goto sendRequest;
+      continue;
     }
 #else /* GOT_PTHREADS */
     handleSpeechRequest(sdt, req);
 #endif /* GOT_PTHREADS */
+    return;
   }
 }
 
@@ -649,6 +638,17 @@ stopSpeechDriver (volatile SpeechDriverThread *sdt) {
 }
 
 #ifdef GOT_PTHREADS
+ASYNC_CONDITION_TESTER(testSpeechResponseReceived) {
+  volatile SpeechDriverThread *sdt = data;
+
+  return sdt->response.type != RSP_PENDING;
+}
+
+static int
+awaitSpeechResponse (volatile SpeechDriverThread *sdt, int timeout) {
+  return asyncAwaitCondition(timeout, testSpeechResponseReceived, (void *)sdt);
+}
+
 ASYNC_CONDITION_TESTER(testSpeechDriverThreadStopping) {
   volatile SpeechDriverThread *sdt = data;
 
