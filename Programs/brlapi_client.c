@@ -1033,8 +1033,8 @@ int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *tt
   /* OK, Now we know where we are, so get the effective control of the terminal! */
   *nbTtys = 0;
   ttytreepath = getenv("WINDOWPATH");
-  if (!ttytreepath)
-    /* Cope with newer X session conventions */
+  if (!ttytreepath && getenv("DISPLAY"))
+    /* Cope with some DMs which are not setting WINDOWPATH (e.g. gdm 3.12) */
     ttytreepath = getenv("XDG_VTNR");
   if (ttytreepath)
   for(; *ttytreepath && t-(nbTtys+1)<=BRLAPI_MAXPACKETSIZE/sizeof(uint32_t);
