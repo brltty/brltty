@@ -542,10 +542,10 @@ setAutorepeat (BrailleDisplay *brl, int on, int delay, int interval) {
 }
 
 static int
-setLocalBaud (BrailleDisplay *brl, int baud) {
+setLocalBaud (BrailleDisplay *brl, unsigned int baud) {
   SerialParameters *parameters = &brl->data->serialParameters;
 
-  logMessage(LOG_DEBUG, "trying at %d baud", baud);
+  logMessage(LOG_DEBUG, "trying at %u baud", baud);
   if (parameters->baud == baud) return 1;
 
   parameters->baud = baud;
@@ -553,7 +553,7 @@ setLocalBaud (BrailleDisplay *brl, int baud) {
 }
 
 static int
-setRemoteBaud (BrailleDisplay *brl, int baud) {
+setRemoteBaud (BrailleDisplay *brl, unsigned int baud) {
   unsigned char request[] = {0xFF, 0xFF, 0x05, 0};
   unsigned char *byte = &request[sizeof(request) - 1];
 
@@ -571,11 +571,11 @@ setRemoteBaud (BrailleDisplay *brl, int baud) {
       break;
 
     default:
-      logMessage(LOG_WARNING, "display does not support %d baud", baud);
+      logMessage(LOG_WARNING, "display does not support %u baud", baud);
       return 0;
   }
 
-  logMessage(LOG_WARNING, "changing display to %d baud", baud);
+  logMessage(LOG_WARNING, "switching display to %u baud", baud);
   return writeBraillePacket(brl, NULL, request, sizeof(request));
 }
 
@@ -717,14 +717,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         if (!setRemoteBaud(brl, newBaud)) goto failure;
         asyncWait(BAUD_DELAY);
         if (!setLocalBaud(brl, newBaud)) goto failure;
-        logMessage(LOG_DEBUG, "display switched to %u baud - checking if display followed", newBaud);
+        logMessage(LOG_DEBUG, "now using %u baud - checking if display followed", newBaud);
 
         if (getIdentity(brl, &reply)) {
           logMessage(LOG_DEBUG, "display responded at %u baud", newBaud);
         } else {
           logMessage(LOG_INFO,
                      "display did not respond at %u baud"
-                     " - falling back to %u baud",
+                     " - going back to %u baud",
                      newBaud, oldBaud);
 
           if (!setLocalBaud(brl, oldBaud)) goto failure;
