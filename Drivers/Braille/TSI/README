@@ -84,19 +84,38 @@ The file braille.h contains some few parameters specific to this driver
 which you can modify, but you really don't have to. No adjustments are
 necessary: everything will be autodetected by the driver when you start BRLTTY.
 
-The first two options are the only ones I would like to talk about here.
-These control the speed at which the keys of your braille display will be
-repeated if you hold them down. If you feel the display is too jumpy, that
-the braille window moves several steps when you intended to press only once
-on a movement key, then you should increase the first two values: try 49 for
-both of them. These two options are the equivalent of the "/panelrep"
-options of the good old "gateway" DOS driver for the Navigator: the only
-difference is that the values in braille.h are the square of the "/panelrep"
-values.
+PowerBraille displays can operate at 19200 baud. If you don't trust your serial 
+port to operate at that speed (for example, if you're using DOS), you can 
+disable this feature with the HighBaud=no driver parameter, and crawl at 9600 
+baud.
 
-Note that PowerBraille displays will operate at 19200baud. If you don't trust
-your COM port to operate at that speed, you can disable this feature in
-braille.h, and crawl at 9600baud.
+The HighBaud= driver parameter specifies whether or not the driver is permitted 
+to use 19200 baud. It can be set to either yes (the default) or no. Note that 
+if this parameter is set to no but the display has been configured to operate 
+at 19200 baud then it won't be autodetected.
+
+The SetBaud= driver parameter specifies which baud is to be used. It can be set 
+to 4800, 9600, or 19200. The default is to use 19200 baud if the display 
+supports it or to use the baud at which the display was autodetected if it 
+doesn't.
+
+You usually won't need to specify any of these driver parameters. A case where 
+you would, though, is if you're using a PowerBraille on DOS because DOS 
+doesn't support higher than 9600 baud. In this situation, you'll want to 
+specify the HighBaud=no driver parameter. You'll still have a problem, though, 
+if the PowerBraille is currently configured to use 19200 baud. If this is the 
+case, first connect it to a system that does support 19200 baud and specify the 
+SetBaud=9600 driver parameter. So, for example:
+
+   on Linux: -B SetBaud=9600
+   on DOS: -B HighBaud=no
+
+Note that braille driver parameters can be specified either via the -B 
+(uppercase) command line option or via the braille-parameters brltty.conf 
+directive. The format is name=value. So, for example:
+
+   on the command line: -B HighBaud=no
+   in brltty.conf: braille-parameters HighBaud=no
 
 Initialization and reset
 ========================
