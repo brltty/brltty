@@ -134,6 +134,7 @@ extern "C" {
 #include <stddef.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <inttypes.h>
 
 #ifdef __MINGW32__
 #if (__MINGW32_MAJOR_VERSION < 3) || ((__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION < 10))
@@ -172,88 +173,6 @@ extern int snprintf (char *str, size_t size, const char *format, ...);
 extern int vsnprintf (char *str, size_t size, const char *format, va_list ap);
 
 #define lstat(file_name, buf) stat(file_name, buf)
-
-typedef signed char		int8_t;
-typedef signed short		int16_t;
-typedef signed long		int32_t;
-typedef signed long long	int64_t;
-typedef int64_t	                intmax_t;
-
-typedef unsigned char		uint8_t;
-typedef unsigned short		uint16_t;
-typedef unsigned long		uint32_t;
-typedef unsigned long long	uint64_t;
-typedef uint64_t        	uintmax_t;
-
-#define INT8_C(c)	c
-#define INT16_C(c)	c
-#define INT32_C(c)	c ## L
-#define INT64_C(c)	c ## LL
-#define INTMAX_C(c)	INT64_C(c)
-
-#define UINT8_C(c)	c ## U
-#define UINT16_C(c)	c ## U
-#define UINT32_C(c)	c ## UL
-#define UINT64_C(c)	c ## ULL
-#define UINTMAX_C(c)	UINT64_C(c)
-
-#define INT8_MIN     INT8_C(0X80)
-#define INT16_MIN    INT16_C(0X8000)
-#define INT32_MIN    INT32_C(0X80000000)
-#define INT64_MIN    INT64_C(0X8000000000000000)
-
-#define INT8_MAX     INT8_C(0X7F)
-#define INT16_MAX    INT16_C(0X7FFF)
-#define INT32_MAX    INT32_C(0X7FFFFFFF)
-#define INT64_MAX    INT64_C(0X7FFFFFFFFFFFFFFF)
-
-#define UINT8_MIN     UINT8_C(0)
-#define UINT16_MIN    UINT16_C(0)
-#define UINT32_MIN    UINT32_C(0)
-#define UINT64_MIN    UINT64_C(0)
-
-#define UINT8_MAX     UINT8_C(0XFF)
-#define UINT16_MAX    UINT16_C(0XFFFF)
-#define UINT32_MAX    UINT32_C(0XFFFFFFFF)
-#define UINT64_MAX    UINT64_C(0XFFFFFFFFFFFFFFFF)
-
-#define PRId8 "d"
-#define PRIi8 "i"
-#define PRIu8 "u"
-#define PRIo8 "o"
-#define PRIx8 "x"
-#define PRIX8 "X"
-
-#define PRId16 "d"
-#define PRIi16 "i"
-#define PRIu16 "u"
-#define PRIo16 "o"
-#define PRIx16 "x"
-#define PRIX16 "X"
-
-#define PRId32 "ld"
-#define PRIi32 "li"
-#define PRIu32 "lu"
-#define PRIo32 "lo"
-#define PRIx32 "lx"
-#define PRIX32 "lX"
-
-#define PRId64 "lld"
-#define PRIi64 "lli"
-#define PRIu64 "llu"
-#define PRIo64 "llo"
-#define PRIx64 "llx"
-#define PRIX64 "llX"
-
-#define PRIdMAX PRId64
-#define PRIiMAX PRIi64
-#define PRIuMAX PRIu64
-#define PRIoMAX PRIo64
-#define PRIxMAX PRIx64
-#define PRIXMAX PRIX64
-
-#else /* __MSDOS__ */
-#include <inttypes.h>
 #endif /* __MSDOS__ */
 
 #ifdef __MINGW32__
@@ -322,9 +241,13 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 #define PRIkey PRIX32
 #endif /* format for key_t */
 
-#ifdef HAVE_WCHAR_H 
+#if defined(__MSDOS__)
+#undef WCHAR_MAX
+
+#elif defined(HAVE_WCHAR_H)
 #include <wchar.h>
 #include <wctype.h>
+
 #endif /* HAVE_WCHAR_H */
 
 #ifdef WCHAR_MAX
@@ -339,6 +262,7 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 
 #define wchar_t unsigned char
 #define wint_t int
+
 #define WEOF EOF
 #define WCHAR_MAX UINT8_MAX
 
