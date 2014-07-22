@@ -1458,10 +1458,16 @@ doKeyboardCommand (EditTableData *etd) {
   if (ret == OK)
 #endif /* GOT_CURSES_GET_WCH */
 #else /* standard input/output */
-#define IS_UNICODE_CHARACTER
   int handled = 1;
+
+#ifdef __MSDOS__
+  int ch = fgetc(stdin);
+  if (ch == EOF) return 0;
+#else /* __MSDOS__ */
+#define IS_UNICODE_CHARACTER
   wint_t ch = fgetwc(stdin);
   if (ch == WEOF) return 0;
+#endif /* __MSDOS__ */
 
   switch (ch) {
     case 0X1B: /* escape */
