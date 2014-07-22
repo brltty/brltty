@@ -21,6 +21,8 @@
 #include <string.h>
 #include <errno.h>
 
+#include "get_select.h"
+
 #ifdef __MINGW32__
 #if _WIN32_WINNT < _WIN32_WINNT_VISTA
 #define CancelIoEx(handle, ol) CancelIo((handle))
@@ -43,14 +45,8 @@ typedef HANDLE MonitorEntry;
 #include <sys/poll.h>
 typedef struct pollfd MonitorEntry;
 
-#elif defined(HAVE_SELECT)
+#elif defined(GOT_SELECT)
 #define ASYNC_CAN_MONITOR_IO
-
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#else /* HAVE_SYS_SELECT_H */
-#include <sys/time.h>
-#endif /* HAVE_SYS_SELECT_H */
 
 typedef struct {
   int size;

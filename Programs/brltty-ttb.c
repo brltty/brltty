@@ -31,6 +31,7 @@
 #include "options.h"
 #include "log.h"
 #include "file.h"
+#include "get_select.h"
 #include "brl_dots.h"
 #include "charset.h"
 #include "ttb.h"

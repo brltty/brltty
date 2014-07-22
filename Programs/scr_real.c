@@ -22,15 +22,10 @@
 #include <string.h>
 #include <errno.h>
 
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#else /* HAVE_SYS_SELECT_H */
-#include <sys/time.h>
-#endif /* HAVE_SYS_SELECT_H */
-
 #include "log.h"
 #include "parameters.h"
 #include "device.h"
+#include "get_select.h"
 #include "async_alarm.h"
 #include "scr.h"
 #include "scr_real.h"
