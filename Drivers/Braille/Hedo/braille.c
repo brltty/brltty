@@ -29,7 +29,7 @@
 #define PROBE_RETRY_LIMIT 2
 #define PROBE_INPUT_TIMEOUT 1000
 
-#define MAXIMUM_RESPONSE_SIZE 1
+#define MAXIMUM_RESPONSE_SIZE 3
 #define MAXIMUM_TEXT_CELL_COUNT 80
 #define MAXIMUM_STATUS_CELL_COUNT 4
 
@@ -84,14 +84,18 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(mbl),
 END_KEY_TABLE_LIST
 
-typedef int KeyCodeInterpreter (BrailleDisplay *brl, unsigned char code);
+typedef int KeysPacketInterpreter (BrailleDisplay *brl, const unsigned char *packet);
 
 typedef struct {
   const char *modelName;
   const KeyTableDefinition *keyTableDefinition;
-  KeyCodeInterpreter *interpretKeyCode;
+
+  BraillePacketVerifier *verifyPacket;
+  KeysPacketInterpreter *interpretKeysPacket;
+
   unsigned char textCellCount;
   unsigned char statusCellCount;
+
   unsigned char firstRoutingKey;
   unsigned char acknowledgementResponse;
 } ModelEntry;
@@ -103,84 +107,11 @@ struct BrailleDataStruct {
   unsigned char textCells[MAXIMUM_TEXT_CELL_COUNT];
   unsigned char statusCells[MAXIMUM_STATUS_CELL_COUNT];
 
-  KeyNumberSet pressedKeys;
+  KeyNumberSet navigationKeys;
 };
-
-static int
-interpretKeyCode_ProfiLine (BrailleDisplay *brl, unsigned char code) {
-  const unsigned char release = 0X80;
-  int press = !(code & release);
-  unsigned char key = code & ~release;
-  KeyGroup group;
-
-  if (key < brl->data->model->firstRoutingKey) {
-    group = HD_GRP_NavigationKeys;
-  } else if (key < (brl->data->model->firstRoutingKey + brl->textColumns)) {
-    group = HD_GRP_RoutingKeys;
-    key -= brl->data->model->firstRoutingKey;
-  } else {
-    return 0;
-  }
-
-  enqueueKeyEvent(brl, group, key, press);
-  return 1;
-}
-
-static int
-interpretKeyCode_MobilLine (BrailleDisplay *brl, unsigned char code) {
-  if ((code >= brl->data->model->firstRoutingKey) &&
-      (code < (brl->data->model->firstRoutingKey + brl->textColumns))) {
-    enqueueKey(brl, HD_GRP_RoutingKeys, (code - brl->data->model->firstRoutingKey));
-    return 1;
-  }
-
-  {
-    unsigned char group = (code & 0XF0) >> 4;
-
-    if (group <= 2) {
-      unsigned char shift = group * 4;
-      KeyNumberSet pressedKeys = (brl->data->pressedKeys & ~(0XF << shift)) | ((code & 0XF) << shift);
-
-      enqueueUpdatedKeys(brl, pressedKeys, &brl->data->pressedKeys,
-                         HD_GRP_NavigationKeys, 0);
-      return 1;
-    }
-  }
-
-  return 0;
-}
-
-static const ModelEntry modelEntry_ProfiLine = {
-  .modelName = "ProfiLine USB",
-  .textCellCount = 80,
-  .statusCellCount = 4,
-
-  .keyTableDefinition = &KEY_TABLE_DEFINITION(pfl),
-  .interpretKeyCode = interpretKeyCode_ProfiLine,
-  .firstRoutingKey = 0X20,
-
-  .acknowledgementResponse = 0X7E
-};
-
-static const ModelEntry modelEntry_MobilLine = {
-  .modelName = "MobilLine USB",
-  .textCellCount = 40,
-  .statusCellCount = 2,
-
-  .keyTableDefinition = &KEY_TABLE_DEFINITION(mbl),
-  .interpretKeyCode = interpretKeyCode_MobilLine,
-  .firstRoutingKey = 0X40,
-
-  .acknowledgementResponse = 0X30
-};
-
-static int
-writeBytes (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
-  return writeBraillePacket(brl, NULL, bytes, count);
-}
 
 static BraillePacketVerifierResult
-verifyPacket (
+verifyPacket_ProfiLine (
   BrailleDisplay *brl,
   const unsigned char *bytes, size_t size,
   size_t *length, void *data
@@ -197,9 +128,100 @@ verifyPacket (
   return BRL_PVR_INCLUDE;
 }
 
+static int
+interpretKeysPacket_ProfiLine (BrailleDisplay *brl, const unsigned char *packet) {
+  const unsigned char code = packet[0];
+  const unsigned char release = 0X80;
+  const int press = !(code & release);
+  unsigned char key = code & ~release;
+  KeyGroup group;
+
+  if (key < brl->data->model->firstRoutingKey) {
+    group = HD_GRP_NavigationKeys;
+  } else if (key < (brl->data->model->firstRoutingKey + brl->textColumns)) {
+    group = HD_GRP_RoutingKeys;
+    key -= brl->data->model->firstRoutingKey;
+  } else {
+    return 0;
+  }
+
+  enqueueKeyEvent(brl, group, key, press);
+  return 1;
+}
+
+static const ModelEntry modelEntry_ProfiLine = {
+  .modelName = "ProfiLine USB",
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(pfl),
+
+  .verifyPacket = verifyPacket_ProfiLine,
+  .interpretKeysPacket = interpretKeysPacket_ProfiLine,
+
+  .textCellCount = 80,
+  .statusCellCount = 4,
+
+  .firstRoutingKey = 0X20,
+  .acknowledgementResponse = 0X7E
+};
+
+static BraillePacketVerifierResult
+verifyPacket_MobilLine (
+  BrailleDisplay *brl,
+  const unsigned char *bytes, size_t size,
+  size_t *length, void *data
+) {
+  off_t index = size - 1;
+  unsigned char byte = bytes[index];
+
+  if ((byte >> 4) == index) {
+    if (index == 0) *length = 3;
+  } else if (index == 0) {
+    if (byte == brl->data->model->acknowledgementResponse) {
+      *length = 1;
+    } else {
+      return BRL_PVR_INVALID;
+    }
+  }
+
+  return BRL_PVR_INCLUDE;
+}
+
+static int
+interpretKeysPacket_MobilLine (BrailleDisplay *brl, const unsigned char *packet) {
+  KeyNumberSet keys = 0;
+  const unsigned char *byte = packet + 3;
+
+  while (byte > packet) {
+    keys <<= 4;
+    keys |= *--byte & 0XF;
+  }
+
+  enqueueUpdatedKeys(brl, keys, &brl->data->navigationKeys,
+-                    HD_GRP_NavigationKeys, 0);
+  return 1;
+}
+
+static const ModelEntry modelEntry_MobilLine = {
+  .modelName = "MobilLine USB",
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(mbl),
+
+  .verifyPacket = verifyPacket_MobilLine,
+  .interpretKeysPacket = interpretKeysPacket_MobilLine,
+
+  .textCellCount = 40,
+  .statusCellCount = 2,
+
+  .firstRoutingKey = 0X40,
+  .acknowledgementResponse = 0X30
+};
+
+static int
+writeBytes (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
+  return writeBraillePacket(brl, NULL, bytes, count);
+}
+
 static size_t
 readPacket (BrailleDisplay *brl, void *packet, size_t size) {
-  return readBraillePacket(brl, NULL, packet, size, verifyPacket, NULL);
+  return readBraillePacket(brl, NULL, packet, size, brl->data->model->verifyPacket, NULL);
 }
 
 static int
@@ -246,6 +268,11 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   }
 
   return 0;
+}
+
+static void
+disconnectResource (BrailleDisplay *brl) {
+  disconnectBrailleResource(brl, NULL);
 }
 
 static int
@@ -302,7 +329,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         return 1;
       }
 
-      disconnectBrailleResource(brl, NULL);
+      disconnectResource(brl);
     }
 
     free(brl->data);
@@ -315,7 +342,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  disconnectBrailleResource(brl, NULL);
+  disconnectResource(brl);
 
   if (brl->data) {
     free(brl->data);
@@ -338,10 +365,8 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   size_t size;
 
   while ((size = readPacket(brl, packet, sizeof(packet)))) {
-    unsigned char byte = packet[0];
-
-    if (byte == brl->data->model->acknowledgementResponse) continue;
-    if (brl->data->model->interpretKeyCode(brl, byte)) continue;
+    if (packet[0] == brl->data->model->acknowledgementResponse) continue;
+    if (brl->data->model->interpretKeysPacket(brl, packet)) continue;
     logUnexpectedPacket(packet, size);
   }
 
