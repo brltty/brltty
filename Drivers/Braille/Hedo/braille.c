@@ -174,12 +174,8 @@ verifyPacket_MobilLine (
 
   if ((byte >> 4) == index) {
     if (index == 0) *length = 3;
-  } else if (index == 0) {
-    if (byte == brl->data->model->acknowledgementResponse) {
-      *length = 1;
-    } else {
-      return BRL_PVR_INVALID;
-    }
+  } else if (size == 1) {
+    *length = 1;
   }
 
   return BRL_PVR_INCLUDE;
@@ -187,17 +183,33 @@ verifyPacket_MobilLine (
 
 static int
 interpretKeysPacket_MobilLine (BrailleDisplay *brl, const unsigned char *packet) {
-  KeyNumberSet keys = 0;
-  const unsigned char *byte = packet + 3;
+  const unsigned char *byte = packet;
 
-  while (byte > packet) {
-    keys <<= 4;
-    keys |= *--byte & 0XF;
+  if (!(*byte >> 4)) {
+    const unsigned char *end = packet + 3;
+    KeyNumberSet keys = 0;
+    unsigned char shift = 0;
+
+    while (byte < end) {
+      keys |= (*byte++ & 0XF) << shift;
+      shift += 4;
+    }
+
+    enqueueUpdatedKeys(brl, keys, &brl->data->navigationKeys,
+                       HD_GRP_NavigationKeys, 0);
+    return 1;
   }
 
-  enqueueUpdatedKeys(brl, keys, &brl->data->navigationKeys,
--                    HD_GRP_NavigationKeys, 0);
-  return 1;
+  if (*byte >= brl->data->model->firstRoutingKey) {
+    unsigned char key = *byte - brl->data->model->firstRoutingKey;
+
+    if (key < brl->textColumns) {
+      enqueueKey(brl, HD_GRP_RoutingKeys, key);
+      return 1;
+    }
+  }
+
+  return 0;
 }
 
 static const ModelEntry modelEntry_MobilLine = {
