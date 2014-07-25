@@ -86,7 +86,6 @@
 #include "log.h"
 #include "parse.h"
 #include "io_generic.h"
-#include "async_wait.h"
 #include "message.h"
 
 typedef enum {
@@ -715,7 +714,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
       if (newBaud != oldBaud) {
         if (!setRemoteBaud(brl, newBaud)) goto failure;
-        asyncWait(BAUD_DELAY);
+        drainBrailleOutput(brl, BAUD_DELAY);
         if (!setLocalBaud(brl, newBaud)) goto failure;
         logMessage(LOG_DEBUG, "now using %u baud - checking if display followed", newBaud);
 
@@ -728,7 +727,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                      newBaud, oldBaud);
 
           if (!setLocalBaud(brl, oldBaud)) goto failure;
-          asyncWait(BAUD_DELAY);
+          drainBrailleOutput(brl, BAUD_DELAY);
 
           if (getIdentity(brl, &reply)) {
             logMessage(LOG_INFO, "found display again at %u baud", oldBaud);
