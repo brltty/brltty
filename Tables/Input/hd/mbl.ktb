@@ -17,15 +17,99 @@
 ###############################################################################
 
 title Hedo MobilLine
+
 note The keys behind the text cells are named routing keys.
 note The rectangular navigation keys are named K1 through K3.
 note The square navigation keys are named B1 through B6.
 note From left to right, the navigation keys are: B3 B2 B1 K1 K2 K3 B4 B5 B6
 
+bind K2+K1 HELP
+bind K2+K3 LEARN
+
+bind K1+K3 PREFMENU
+bind K1+K3+B1 PREFLOAD
+bind K1+K3+B4 PREFSAVE
+
+bind K2 HOME
 bind K1 FWINLT
 bind K3 FWINRT
+
+bind B3 TOP
+bind B6 BOT
 
 bind B2 LNUP
 bind B5 LNDN
 
+bind B1 PRDIFLN
+bind B4 NXDIFLN
+
+bind B1+B3 ATTRUP
+bind B4+B6 ATTRDN
+
+bind B1+B2 PRPGRPH
+bind B4+B5 NXPGRPH
+
+bind B2+B3 PRPROMPT
+bind B5+B6 NXPROMPT
+
+bind B1+B2+B3 PRSEARCH
+bind B4+B5+B6 NXSEARCH
+
+bind B1+K1 CHRLT
+bind B1+K3 CHRRT
+
+bind B2+K1 FWINLTSKIP
+bind B2+K3 FWINRTSKIP
+
+bind B3+K1 LNBEG
+bind B3+K3 LNEND
+
+bind B4+K1 PASTE
+bind B4+K3 CSRJMP_VERT
+
+bind B5+K1 TIME
+bind B5+K3 INFO
+
+bind B6+K1 CLIP_RESTORE
+bind B6+K3 CLIP_SAVE
+
+assign toggleOff K1
+assign toggleOn K3
+
+assign toggleKeys B1+K2
+assign toggleCommand SIXDOTS
+include ../toggle.kti
+
+assign toggleKeys B2+K2
+assign toggleCommand CSRTRK
+include ../toggle.kti
+
+assign toggleKeys B3+K2
+assign toggleCommand DISPMD
+include ../toggle.kti
+
+assign toggleKeys B4+K2
+assign toggleCommand FREEZE
+include ../toggle.kti
+
+assign toggleKeys B5+K2
+assign toggleCommand CSRVIS
+include ../toggle.kti
+
+assign toggleKeys B6+K2
+assign toggleCommand ATTRVIS
+include ../toggle.kti
+
 bind RoutingKey ROUTE
+
+bind B3+RoutingKey CLIP_NEW
+bind B2+RoutingKey CLIP_ADD
+bind B5+RoutingKey COPY_RECT
+bind B6+RoutingKey COPY_LINE
+
+bind B1+RoutingKey PRINDENT
+bind B4+RoutingKey NXINDENT
+
+bind K1+RoutingKey SETLEFT
+bind K2+RoutingKey DESCCHAR
+
