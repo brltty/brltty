@@ -32,208 +32,82 @@ INTERNET
 ----------------------------------------------------------------------
 
 
-Preparing Your Host for Building Android Applications
-=====================================================
+Quick Start
+===========
 
-Install the Android SDK (Software Development Kit).
+If you'd just like to install BRLTTY onto your Android device and get going, 
+then here's what you need to do. These instructions are from the perspective of 
+a Firefox user on Windows, but the process should be much the same when using a 
+different web browser and/or operating system.
 
-Install the Android NDK (Native Development Kit).
+A: On your Computer:
 
-The SDK initially only includes support for the current Android API 
-level. Brltty, however, needs to support earlier API levels so that it 
-can run on older releases of Android. Support for any missing API levels 
-is added whenever the SDK is updated. To do this, use the following 
-command:
+   1) Go to the BRLTTY site at: http://www.brltty.com/
 
-  android update sdk -u
+   2) Find the Download link and press enter on it.
 
-The "-u" option, which is the short form of the "--no-ui" option, means
-to bypass the graphical interface. There may still be command-line
-password prompts for installing packages which are provided by various
-vendours. Any of these can be easily skipped.
+   3) Find the Android heading, down-arrow from there to the link that says 
+      Latest APK, and press enter on it.
 
-The 64-bit versions of the SDK and NDK depend on 32-bit system 
-libraries. If you're using a 64-bit version then you need to first 
-ensure that these are installed on your system. This at least includes:
+   4) You're prompted to open or save the file at this point. Save it.
 
-   libc6
-   libz
-   libstdc++6
-   libncurses
+   5) Go to your Downloads folder (or wherever you save downloads), and find
+      the brltty-latest.apk file.
 
-If you are using a modern Debian GNU/Linux system (wheezy or later), you 
-can install these packages from a foreign architecture (in this case, 
-i386) with the following commands (as root):
+   6) If the file has been saved on your computer as brltty-latest.zip, then
+      press the context key, arrow to and press enter on Rename, and change the
+      file extension from zip to apk. Don't worry if you get a warning about
+      rendering the file unusable. Go ahead with the rename.
 
-   dpkg --add-architecture i386
-   apt-get install libncurses5:i386 libstdc++6:i386 zlib1g:i386 libc6:i386
+B: On your Android Device:
 
-----------------------------------------------------------------------
+   1) Go into Settings -> Security, and tap to check Unknown Sources. This
+      option says something like "Allow the installation of apps from unknown 
+      sources." This is a one-time step - once the box has been checked, it
+      stays checked.
 
+   2) Copy the apk file to your device. There are a number of ways to do this.
 
-Installing and Preparing the BRLTTY Source Tree on Your Host
-============================================================
+      *  The easiest way may be to email it to yourself as a file attachment so
+         that it will go to the email on your Android device.
 
-Select the directory which should contain BRLTTY's source tree (which 
-needn't yet exist). Then extract the latest BRLTTY source into it with 
-the following command:
+      *  Another option is to save the file in Dropbox on your computer, and
+         then wait for it to show up in Dropbox on your Android device.
 
-   svn checkout svn://mielke.cc/main/brltty /path/to/brltty
+      *  Another option is to connect your Android device to your computer via
+         a USB cable, and then to copy the file to it in the same way that you
+         would copy a file to a thumb drive.
 
-The directory operand (of svn checkout) is optional. If you don't 
-specify it then it'll assume the directory named "brltty" within the 
-current working directory.
+   3) Tap the brltty-latest.apk file to start installation, and answer any 
+      prompts. If you use the Dropbox method, you may need to tap on the file
+      once to download it and a second time to start installation.
 
-Next, you need to prepare the source tree. This is done as follows:
+   4) Tap OK when installation is complete.
 
-   cd /path/to/brltty
-   ./autogen
+At this point, BRLTTY has been installed. Next, you'll need to go into Settings
+-> Accessibility -> BRLTTY in order to turn the BRLTTY Accessibility Service
+on, adjust its settings, and select your braille display.
 
-At this point, the source tree is essentially just like what you'd get 
-were you to unpack an officially released BRLTTY archive. It doesn't yet 
-know anything about the specifics of your system. It also doesn't yet 
-know anything about the platform you intend to build BRLTTY for.
+If you'll be connecting to your braille display via Bluetooth, then you'll need 
+to first pair your braille display with your Android device. Go into Settings 
+-> Bluetooth. If your braille display is already listed within the Paired 
+Devices section of that screen then it has already been paired. If you still 
+need to pair it then tap Search for Devices. This will create an Available 
+Devices section on the screen. If your braille display isn't listed then you 
+may need to perform some model-specific action on it in order to make it 
+visible (also known as discoverable) - see its manual for details. After doing 
+this, tap Search for Devices again. Tap on your braille display to begin a 
+Bluetooth Pairing Request, enter its PIN (see its manual for details), and tap 
+OK.
 
-Adding information to BRLTTY's source tree regarding the spefiics of 
-your system, as well as of your intent to build BRLTTY for Android, is 
-done as follows:
-
-   export ANDROID_NDK=/path/to/Android/NDK
-   ./cfg-android -q
-
-The "-q" option, which is the short form of the "configure" command's 
-"--quiet" option, means to not display any progress information (there's 
-usually quite a lot of it). Only warnings and errors are displayed.
-
-In fact, all of the options you give to the "cfg-android" command are 
-passed directly through to the "configure" command. So, while 
-"cfg-android" supplies a default set of options to "configure", it's 
-easy for you to do your own customization.
-
-----------------------------------------------------------------------
-
-
-Building BRLTTY for Android
-===========================
-
-In order to be able to build an Android application, a number of Android 
-build tools need to be added to the command search path. This is done 
-with the following command:
-
-   export PATH=/path/to/Android/SDK/tools:/path/to/Android/SDK/platform-tools:$PATH
-
-The final step is to build the BRLTTY service for Android. This is done 
-as follows:
-
-   cd /path/to/brltty/AndroidApplication
-   make -s
-
-The "-s" option of the make command, which is short for its "--silent" 
-option, means to not display any progress information (there's usually 
-quite a lot of it). Only warnings and errors are displayed.
-
-The result of the build is the file "BRLTTY_App-debug.apk".  It will
-be in the "bin" subdirectory of the Android Application subdirectory.
-
-   /path/to/brltty/Android/Application/bin/BRLTTY_App-debug.apk
-
-"apk" is the file extension used for an installable Android package.
-
-----------------------------------------------------------------------
-
-
-Preparing Your Android Device for Installing an Android Package File
-====================================================================
-
-What you need is for "USB Debugging" to be enabled. This is done from 
-the "Developer Options" screen, which you can get to from the "Settings" 
-screen.
-
-Launch the "Settings" aplication, and look, way down near the bottom, 
-for "Developer Options". If you can't find it, the most likely cause is 
-a new feature which was introduced in Android 4.2 (Jelly Bean). If you 
-need to enable it, click on "About Phone", which, again, can be found at 
-the bottom of the "Settings" screen. Then, on the "About Phone" screen, 
-look for the "Build Number" line. Tap on "Build Nubmer" seven times and 
-your device will officially declare you to be a developer. You should 
-then be able to find "Developer Options" on the "Settings" screen.
-
-There's a checkbox at the top-right of the "Developer Options" screen. 
-It needs to be checked so that all of the other controls on that screen 
-will be enabled. After doing that, check the "USB Debugging" checkebox 
-(which can be found within the "Debugging" section). This enables the 
-"adb" (Android Debug Bridge) tool to be used with your Android device.
-
-----------------------------------------------------------------------
-
-
-Installing BRLTTY on Your Android Device
-========================================
-
-In order to install BRLTTY onto your Android device, or to uninstall it 
-from your device, you need to be in BRLTTY's Android Application 
-subdirectory.
-
-   cd /path/to/brltty/Android/Application
-
-You also need to connect your device to your host via USB.
-
-You only need the Android SDK for installing or uninstalling an
-application from your device. You only need the Android NDK if you want
-to do your own builds.
-
-To install BRLTTY, use this command:
-
-   make -s install
-
-To uninstall BRLTTY, use this command:
-
-   make -s uninstall
-
-The "make install" command will fail if BRLTTY is already installed. If 
-you're wanting to upgrade BRLTTY, however, then uninstalling it first is 
-probably what you don't want to be doing. This is because uninstalling 
-BRLTTY also causes its settings to be lost. What you should do instead 
-is to reinstall it. You can do this with the following command:
-
-   make -s reinstall
-
-If you've obtained your Android package file (apk) from some other 
-source (than building it for yourself), then it may have a different 
-name than the make file is expecting. It's useful, therefore, to know 
-what the actual host commands are for installing and uninstalling BRLTTY 
-from your device.
-
-The host command for installing an Android application is:
-
-   adb install /path/to/file
-
-The host command for reinstalling an Android application is:
-
-   adb install -r /path/to/file
-
-The host command for uninstalling an Android appliation is:
-
-   adb uninstall appliation.package.name
-
-So, to uninstall BRLTTY, the host command is:
-
-   adb uninstall org.a11y.brltty.android
-
-If any of these "make" or "adb" commands fail with an error like "device 
-not found", it's probably because your host's USB device permissions are 
-requiring root access. The solution to this problem is to restart the 
-adb (Android Debug Bridge) server such that it is running as root. With 
-this done, you yourself will then be able to use adb as a regular user.
-
-The commands to restart the adb server such that it's running as root 
-are as follows:
-
-   su
-   cd /path/to/android/sdk/platform-tools
-   ./adb kill-server
-   ./adb start-server
-   exit
+If your braille display has a keyboard which you'd like to use for typing when 
+within a text or edit field, then you'll need to select BRLTTY as your input 
+method. Go into Settings -> Language and Input, and, in the Keyboard and Input 
+Methods section of that screen, tap the BRLTTY Input Service checkbox to enable 
+it. Then tap Default to open the list of enabled input services, and tap the 
+BRLTTY Input Service radio button to select it. Note that doing this will 
+disable Android's on-screen keyboard since only one input method may be active 
+at any given time.
 
 ----------------------------------------------------------------------
 
@@ -397,10 +271,10 @@ function key is the space bar.
 ----------------------------------------------------------------------
 
 
-Using a Braille Keyboard
-========================
+Using Your Braille Display's Keyboard
+=====================================
 
-Braille keyboard input is supported, but, like all Android input 
+Braille display keyboard input is supported, but, like all Android input 
 methods, it must be explicitly enabled, and then selected. BRLTTY cannot 
 do either of these automatically on your behalf. Although this may be 
 inconvenient, Android imposes this manual process so that you're very 
@@ -487,6 +361,214 @@ Serial devices aren't supported. Even though Android devices don't have
 serial ports, serial devices still can be connected via a USB to Serial 
 adapter. Users who have older, serial-only braille devices should still 
 be able to use them with their Android devices.
+
+----------------------------------------------------------------------
+
+
+Preparing Your Host for Building Android Applications
+=====================================================
+
+You need the Android SDK (Software Development Kit) for installing or
+uninstalling an application from your device. You can get it from:
+
+   http://developer.android.com/sdk/index.html
+
+You need the Android NDK (Native Development Kit) if you want to do your own
+builds. You can get it from:
+
+   https://developer.android.com/tools/sdk/ndk/index.html
+
+The SDK initially only includes support for the current Android API 
+level. Brltty, however, needs to support earlier API levels so that it 
+can run on older releases of Android. Support for any missing API levels 
+is added whenever the SDK is updated. To do this, use the following 
+command:
+
+  android update sdk -u
+
+The "-u" option, which is the short form of the "--no-ui" option, means
+to bypass the graphical interface. There may still be command-line
+password prompts for installing packages which are provided by various
+vendours. Any of these can be easily skipped.
+
+The 64-bit versions of the SDK and NDK depend on 32-bit system 
+libraries. If you're using a 64-bit version then you need to first 
+ensure that these are installed on your system. This at least includes:
+
+   libc6
+   libz
+   libstdc++6
+   libncurses
+
+If you are using a modern Debian GNU/Linux system (wheezy or later), you 
+can install these packages from a foreign architecture (in this case, 
+i386) with the following commands (as root):
+
+   dpkg --add-architecture i386
+   apt-get install libncurses5:i386 libstdc++6:i386 zlib1g:i386 libc6:i386
+
+----------------------------------------------------------------------
+
+
+Installing and Preparing the BRLTTY Source Tree on Your Host
+============================================================
+
+Select the directory which should contain BRLTTY's source tree (which 
+needn't yet exist). Then extract the latest BRLTTY source into it with 
+the following command:
+
+   git clone git://github.com/brltty/brltty.git /path/to/brltty
+
+The directory operand (of git clone) is optional. If you don't 
+specify it then it'll assume the directory named "brltty" within the 
+current working directory.
+
+Next, you need to prepare the source tree. This is done as follows:
+
+   cd /path/to/brltty
+   ./autogen
+
+At this point, the source tree is essentially just like what you'd get 
+were you to unpack an officially released BRLTTY archive. It doesn't yet 
+know anything about the specifics of your system. It also doesn't yet 
+know anything about the platform you intend to build BRLTTY for.
+
+Adding information to BRLTTY's source tree regarding the spefiics of 
+your system, as well as of your intent to build BRLTTY for Android, is 
+done as follows:
+
+   export ANDROID_NDK=/path/to/Android/NDK
+   ./cfg-android -q
+
+The "-q" option, which is the short form of the "configure" command's 
+"--quiet" option, means to not display any progress information (there's 
+usually quite a lot of it). Only warnings and errors are displayed.
+
+In fact, all of the options you give to the "cfg-android" command are 
+passed directly through to the "configure" command. So, while 
+"cfg-android" supplies a default set of options to "configure", it's 
+easy for you to do your own customization.
+
+----------------------------------------------------------------------
+
+
+Building BRLTTY for Android
+===========================
+
+In order to be able to build an Android application, a number of Android 
+build tools need to be added to the command search path. This is done 
+with the following command:
+
+   export PATH=/path/to/Android/SDK/tools:/path/to/Android/SDK/platform-tools:$PATH
+
+The final step is to build the BRLTTY service for Android. This is done 
+as follows:
+
+   cd /path/to/brltty/AndroidApplication
+   make -s
+
+The "-s" option of the make command, which is short for its "--silent" 
+option, means to not display any progress information (there's usually 
+quite a lot of it). Only warnings and errors are displayed.
+
+The result of the build is the file "BRLTTY_App-debug.apk".  It will
+be in the "bin" subdirectory of the Android Application subdirectory.
+
+   /path/to/brltty/Android/Application/bin/BRLTTY_App-debug.apk
+
+"apk" is the file extension used for an installable Android package.
+
+----------------------------------------------------------------------
+
+
+Preparing Your Android Device for Installing an Android Package File
+====================================================================
+
+What you need is for "USB Debugging" to be enabled. This is done from 
+the "Developer Options" screen, which you can get to from the "Settings" 
+screen.
+
+Launch the "Settings" aplication, and look, way down near the bottom, 
+for "Developer Options". If you can't find it, the most likely cause is 
+a new feature which was introduced in Android 4.2 (Jelly Bean). If you 
+need to enable it, click on "About Phone", which, again, can be found at 
+the bottom of the "Settings" screen. Then, on the "About Phone" screen, 
+look for the "Build Number" line. Tap on "Build Nubmer" seven times and 
+your device will officially declare you to be a developer. You should 
+then be able to find "Developer Options" on the "Settings" screen.
+
+There's a checkbox at the top-right of the "Developer Options" screen. 
+It needs to be checked so that all of the other controls on that screen 
+will be enabled. After doing that, check the "USB Debugging" checkebox 
+(which can be found within the "Debugging" section). This enables the 
+"adb" (Android Debug Bridge) tool to be used with your Android device.
+
+----------------------------------------------------------------------
+
+
+Installing BRLTTY on Your Android Device
+========================================
+
+In order to install BRLTTY onto your Android device, or to uninstall it 
+from your device, you need to be in BRLTTY's Android Application 
+subdirectory.
+
+   cd /path/to/brltty/Android/Application
+
+You also need to connect your device to your host via USB.
+
+To install BRLTTY, use this command:
+
+   make -s install
+
+To uninstall BRLTTY, use this command:
+
+   make -s uninstall
+
+The "make install" command will fail if BRLTTY is already installed. If 
+you're wanting to upgrade BRLTTY, however, then uninstalling it first is 
+probably what you don't want to be doing. This is because uninstalling 
+BRLTTY also causes its settings to be lost. What you should do instead 
+is to reinstall it. You can do this with the following command:
+
+   make -s reinstall
+
+If you've obtained your Android package file (apk) from some other 
+source (than building it for yourself), then it may have a different 
+name than the make file is expecting. It's useful, therefore, to know 
+what the actual host commands are for installing and uninstalling BRLTTY 
+from your device.
+
+The host command for installing an Android application is:
+
+   adb install /path/to/file
+
+The host command for reinstalling an Android application is:
+
+   adb install -r /path/to/file
+
+The host command for uninstalling an Android appliation is:
+
+   adb uninstall appliation.package.name
+
+So, to uninstall BRLTTY, the host command is:
+
+   adb uninstall org.a11y.brltty.android
+
+If any of these "make" or "adb" commands fail with an error like "device 
+not found", it's probably because your host's USB device permissions are 
+requiring root access. The solution to this problem is to restart the 
+adb (Android Debug Bridge) server such that it is running as root. With 
+this done, you yourself will then be able to use adb as a regular user.
+
+The commands to restart the adb server such that it's running as root 
+are as follows:
+
+   su
+   cd /path/to/android/sdk/platform-tools
+   ./adb kill-server
+   ./adb start-server
+   exit
 
 ----------------------------------------------------------------------
 
