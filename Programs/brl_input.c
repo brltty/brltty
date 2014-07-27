@@ -25,6 +25,7 @@
 #include "brl_input.h"
 #include "cmd_queue.h"
 #include "async_alarm.h"
+#include "update.h"
 #include "api_control.h"
 #include "brltty.h"
 
@@ -49,6 +50,7 @@ processInput (void) {
   if (isOffline) {
     logMessage(LOG_DEBUG, "braille display online");
     isOffline = 0;
+    scheduleUpdate("device online");
   }
 
   if (command == EOF) return 0;
