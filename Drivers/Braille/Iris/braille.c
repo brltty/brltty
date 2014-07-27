@@ -31,6 +31,7 @@
 #include "timing.h"
 #include "async_wait.h"
 #include "ports.h"
+#include "update.h"
 #include "message.h"
 
 
@@ -1563,10 +1564,12 @@ static int readCommand_nonembedded (BrailleDisplay *brl)
   size_t size;
 
   while ( (size = readNativePacket(brl, &internalPort, packet, sizeof(packet)) )) {
-    /* The test for Menu key should come first since this key toggles */
-    /* packet forward mode on/off */
+    /* The test for Menu key should come first since this key toggles
+     * packet forward mode on/off
+     */
     if (isMenuKey(packet, size)) {
       logMessage(LOG_DEBUG,DRIVER_LOG_PREFIX "Menu key pressed");
+
       if (deviceConnected) {
         deviceConnected = 0;
         return BRL_CMD_OFFLINE;
@@ -1576,6 +1579,7 @@ static int readCommand_nonembedded (BrailleDisplay *brl)
     if (!deviceConnected) {
       refreshBrailleWindow = 1;
       deviceConnected = 1;
+      scheduleUpdate("device online");
     }
     
     handleNativePacket(brl, NULL, &coreKeyHandlers, packet, size);
