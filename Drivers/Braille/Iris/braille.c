@@ -31,7 +31,6 @@
 #include "timing.h"
 #include "async_wait.h"
 #include "ports.h"
-#include "update.h"
 #include "message.h"
 
 
@@ -1577,7 +1576,6 @@ static int readCommand_nonembedded (BrailleDisplay *brl)
     if (!deviceConnected) {
       refreshBrailleWindow = 1;
       deviceConnected = 1;
-      scheduleUpdate("device online");
     }
     
     handleNativePacket(brl, NULL, &coreKeyHandlers, packet, size);
