@@ -51,34 +51,34 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = "directory",
     .setting.string = &opt_tablesDirectory,
     .defaultSetting = TABLES_DIRECTORY,
-    .description = "Path to directory containing text tables."
+    .description = strtext("Path to directory containing text tables.")
   },
 
   { .letter = 'e',
     .word = "edit",
     .setting.flag = &opt_edit,
-    .description = "Edit table."
+    .description = strtext("Edit table.")
   },
 
   { .letter = 'i',
     .word = "input-format",
     .argument = "format",
     .setting.string = &opt_inputFormat,
-    .description = "Format of input file."
+    .description = strtext("Format of input file.")
   },
 
   { .letter = 'o',
     .word = "output-format",
     .argument = "format",
     .setting.string = &opt_outputFormat,
-    .description = "Format of output file."
+    .description = strtext("Format of output file.")
   },
 
   { .letter = 'c',
     .word = "charset",
     .argument = "charset",
     .setting.string = &opt_charset,
-    .description = "8-bit character set to use."
+    .description = strtext("8-bit character set to use.")
   },
 END_OPTION_TABLE
 

@@ -62,27 +62,27 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = "file",
     .setting.string = &opt_contractionTable,
     .defaultSetting = "en-us-g2",
-    .description = "Contraction table."
+    .description = strtext("Contraction table.")
   },
 
   { .letter = 't',
     .word = "text-table",
     .argument = "file",
     .setting.string = &opt_textTable,
-    .description = "Text table."
+    .description = strtext("Text table.")
   },
 
   { .letter = 'v',
     .word = "verification-table",
     .argument = "file",
     .setting.string = &opt_verificationTable,
-    .description = "Contraction verification table."
+    .description = strtext("Contraction verification table.")
   },
 
   { .letter = 'r',
     .word = "reformat-text",
     .setting.flag = &opt_reformatText,
-    .description = "Reformat input."
+    .description = strtext("Reformat input.")
   },
 
   { .letter = 'w',
@@ -90,13 +90,13 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = "columns",
     .setting.string = &opt_outputWidth,
     .defaultSetting = "",
-    .description = "Maximum length of an output line."
+    .description = strtext("Maximum length of an output line.")
   },
 
   { .letter = 'f',
     .word = "force-output",
     .setting.flag = &opt_forceOutput,
-    .description = "Force immediate output."
+    .description = strtext("Force immediate output.")
   },
 END_OPTION_TABLE
 
