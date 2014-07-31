@@ -231,13 +231,20 @@ asyncResetAlarmEvery (AsyncHandle handle, int interval) {
   return 0;
 }
 
+static int
+testInactiveAlarm (void *item, void *data) {
+  const AlarmEntry *alarm = item;
+
+  return !alarm->active;
+}
+
 int
 asyncExecuteAlarmCallback (AsyncAlarmData *ad, long int *timeout) {
   if (ad) {
     Queue *alarms = ad->alarmQueue;
 
     if (alarms) {
-      Element *element = getQueueHead(alarms);
+      Element *element = processQueue(alarms, testInactiveAlarm, NULL);
 
       if (element) {
         AlarmEntry *alarm = getElementItem(element);
