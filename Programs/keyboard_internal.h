@@ -19,6 +19,7 @@
 #ifndef BRLTTY_INCLUDED_KEYBOARD_INTERNAL
 #define BRLTTY_INCLUDED_KEYBOARD_INTERNAL
 
+#include "queue.h"
 #include "ktb_keyboard.h"
 
 #ifdef __cplusplus
@@ -27,6 +28,8 @@ extern "C" {
 
 typedef struct {
   unsigned int referenceCount;
+  unsigned isActive:1;
+  Queue *instanceQueue;
   KeyEventHandler *handleKeyEvent;
   KeyboardProperties requiredProperties;
 } KeyboardCommonData;

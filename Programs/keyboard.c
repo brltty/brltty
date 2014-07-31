@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "program.h"
 #include "parse.h"
 #include "bitmask.h"
 
@@ -119,13 +120,42 @@ claimKeyboardCommonData (KeyboardCommonData *kcd) {
 void
 releaseKeyboardCommonData (KeyboardCommonData *kcd) {
   if (!(kcd->referenceCount -= 1)) {
+    if (kcd->instanceQueue) deallocateQueue(kcd->instanceQueue);
     free(kcd);
   }
 }
 
+static void
+flushKeyEvents (KeyboardInstanceData *kid) {
+  const KeyEventEntry *event = kid->keyEventBuffer;
+
+  while (kid->keyEventCount) {
+    forwardKeyEvent(event->code, event->press);
+    event += 1, kid->keyEventCount -= 1;
+  }
+
+  memset(kid->handledKeysMask, 0, kid->handledKeysSize);
+}
+
+static int
+flushKeyboardInstanceData (void *item, void *data) {
+  KeyboardInstanceData *kid = item;
+
+  flushKeyEvents(kid);
+  return 0;
+}
+
+static void
+exitKeyboardMonitor (void *data) {
+  KeyboardCommonData *kcd = data;
+
+  kcd->isActive = 0;
+  processQueue(kcd->instanceQueue, flushKeyboardInstanceData, NULL);
+  releaseKeyboardCommonData(kcd);
+}
+
 int
 startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent) {
-  int started = 0;
   KeyboardCommonData *kcd;
 
   if ((kcd = malloc(sizeof(*kcd)))) {
@@ -137,13 +167,22 @@ startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler hand
     kcd->handleKeyEvent = handleKeyEvent;
     kcd->requiredProperties = *properties;
 
-    if (monitorKeyboards(kcd))  started = 1;
+    if ((kcd->instanceQueue = newQueue(NULL, NULL))) {
+      if (monitorKeyboards(kcd)) {
+        kcd->isActive = 1;
+        onProgramExit("keyboard-monitor", exitKeyboardMonitor, kcd);
+        return 1;
+      }
+
+      deallocateQueue(kcd->instanceQueue);
+    }
+
     releaseKeyboardCommonData(kcd);
   } else {
     logMallocError();
   }
 
-  return started;
+  return 0;
 }
 
 KeyboardInstanceData *
@@ -155,9 +194,6 @@ newKeyboardInstanceData (KeyboardCommonData *kcd) {
   if ((kid = malloc(size))) {
     memset(kid, 0, size);
 
-    kid->kcd = kcd;
-    claimKeyboardCommonData(kcd);
-
     kid->actualProperties = anyKeyboard;
 
     kid->keyEventBuffer = NULL;
@@ -167,7 +203,14 @@ newKeyboardInstanceData (KeyboardCommonData *kcd) {
     kid->justModifiers = 0;
     kid->handledKeysSize = count;
 
-    return kid;
+    if (enqueueItem(kcd->instanceQueue, kid)) {
+      kid->kcd = kcd;
+      claimKeyboardCommonData(kcd);
+
+      return kid;
+    }
+
+    free(kid);
   } else {
     logMallocError();
   }
@@ -177,7 +220,9 @@ newKeyboardInstanceData (KeyboardCommonData *kcd) {
 
 void
 deallocateKeyboardInstanceData (KeyboardInstanceData *kid) {
+  flushKeyEvents(kid);
   if (kid->keyEventBuffer) free(kid->keyEventBuffer);
+  deleteItem(kid->kcd->instanceQueue, kid);
   releaseKeyboardCommonData(kid->kcd);
   free(kid);
 }
@@ -186,12 +231,14 @@ void
 handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
   KeyTableState state = KTS_UNBOUND;
 
-  if ((code >= 0) && (code < keyCodeLimit)) {
-    const KeyValue *kv = &keyCodeMap[code];
+  if (kid->kcd->isActive) {
+    if ((code >= 0) && (code < keyCodeLimit)) {
+      const KeyValue *kv = &keyCodeMap[code];
 
-    if ((kv->group != KBD_GROUP(SPECIAL)) || (kv->number != KBD_KEY(SPECIAL, Unmapped))) {
-      if ((kv->group == KBD_GROUP(SPECIAL)) && (kv->number == KBD_KEY(SPECIAL, Ignore))) return;
-      state = kid->kcd->handleKeyEvent(kv->group, kv->number, press);
+      if ((kv->group != KBD_GROUP(SPECIAL)) || (kv->number != KBD_KEY(SPECIAL, Unmapped))) {
+        if ((kv->group == KBD_GROUP(SPECIAL)) && (kv->number == KBD_KEY(SPECIAL, Ignore))) return;
+        state = kid->kcd->handleKeyEvent(kv->group, kv->number, press);
+      }
     }
   }
 
@@ -253,16 +300,8 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
     }
 
     switch (action) {
-      case WKA_ALL: {
-        const KeyEventEntry *event = kid->keyEventBuffer;
-
-        while (kid->keyEventCount) {
-          forwardKeyEvent(event->code, event->press);
-          event += 1, kid->keyEventCount -= 1;
-        }
-
-        memset(kid->handledKeysMask, 0, kid->handledKeysSize);
-      }
+      case WKA_ALL:
+        flushKeyEvents(kid);
 
       case WKA_CURRENT:
         forwardKeyEvent(code, press);
