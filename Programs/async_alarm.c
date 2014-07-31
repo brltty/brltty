@@ -27,8 +27,14 @@
 
 typedef struct {
   TimeValue time;
+  int interval;
+
   AsyncAlarmCallback *callback;
   void *data;
+
+  unsigned active:1;
+  unsigned cancel:1;
+  unsigned reschedule:1;
 } AlarmEntry;
 
 struct AsyncAlarmDataStruct {
@@ -65,6 +71,17 @@ getAlarmData (void) {
 }
 
 static void
+cancelAlarm (Element *element) {
+  AlarmEntry *alarm = getElementItem(element);
+
+  if (alarm->active) {
+    alarm->cancel = 1;
+  } else {
+    deleteElement(element);
+  }
+}
+
+static void
 deallocateAlarmEntry (void *item, void *data) {
   AlarmEntry *alarm = item;
 
@@ -84,7 +101,13 @@ getAlarmQueue (int create) {
   if (!ad) return NULL;
 
   if (!ad->alarmQueue && create) {
-    ad->alarmQueue = newQueue(deallocateAlarmEntry, compareAlarmEntries);
+    if ((ad->alarmQueue = newQueue(deallocateAlarmEntry, compareAlarmEntries))) {
+      static AsyncQueueMethods methods = {
+        .cancelRequest = cancelAlarm
+      };
+
+      setQueueData(ad->alarmQueue, &methods);
+    }
   }
 
   return ad->alarmQueue;
@@ -105,9 +128,16 @@ newAlarmElement (const void *parameters) {
     AlarmEntry *alarm;
 
     if ((alarm = malloc(sizeof(*alarm)))) {
+      memset(alarm, 0, sizeof(*alarm));
+
       alarm->time = *aep->time;
+
       alarm->callback = aep->callback;
       alarm->data = aep->data;
+
+      alarm->active = 0;
+      alarm->cancel = 0;
+      alarm->reschedule = 0;
 
       {
         Element *element = enqueueItem(alarms, alarm);
@@ -187,6 +217,21 @@ asyncResetAlarmIn (AsyncHandle handle, int interval) {
 }
 
 int
+asyncResetAlarmEvery (AsyncHandle handle, int interval) {
+  Element *element = getAlarmElement(handle);
+
+  if (element) {
+    AlarmEntry *alarm = getElementItem(element);
+
+    alarm->interval = interval;
+    alarm->reschedule = 1;
+    return 1;
+  }
+
+  return 0;
+}
+
+int
 asyncExecuteAlarmCallback (AsyncAlarmData *ad, long int *timeout) {
   if (ad) {
     Queue *alarms = ad->alarmQueue;
@@ -209,9 +254,19 @@ asyncExecuteAlarmCallback (AsyncAlarmData *ad, long int *timeout) {
             .data = alarm->data
           };
 
-          deleteElement(element);
           logSymbol(LOG_CATEGORY(ASYNC_EVENTS), callback, "alarm starting");
+          alarm->active = 1;
           if (callback) callback(&parameters);
+          alarm->active = 0;
+
+          if (alarm->reschedule) {
+            adjustTimeValue(&alarm->time, alarm->interval);
+            requeueElement(element);
+          } else {
+            alarm->cancel = 1;
+          }
+
+          if (alarm->cancel) deleteElement(element);
           return 1;
         }
 

@@ -50,6 +50,7 @@ extern int asyncSetAlarmIn (
 
 extern int asyncResetAlarmTo (AsyncHandle handle, const TimeValue *time);
 extern int asyncResetAlarmIn (AsyncHandle handle, int interval);
+extern int asyncResetAlarmEvery (AsyncHandle handle, int interval);
 
 #ifdef __cplusplus
 }
