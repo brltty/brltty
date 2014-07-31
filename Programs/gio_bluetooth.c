@@ -47,11 +47,6 @@ writeBluetoothData (GioHandle *handle, const void *data, size_t size, int timeou
 }
 
 static int
-monitorBluetoothInput (GioHandle *handle, AsyncMonitorCallback *callback, void *data) {
-  return bthMonitorInput(handle->connection, callback, data);
-}
-
-static int
 awaitBluetoothInput (GioHandle *handle, int timeout) {
   return bthAwaitInput(handle->connection, timeout);
 }
@@ -65,6 +60,11 @@ readBluetoothData (
                      initialTimeout, subsequentTimeout);
 }
 
+static int
+monitorBluetoothInput (GioHandle *handle, AsyncMonitorCallback *callback, void *data) {
+  return bthMonitorInput(handle->connection, callback, data);
+}
+
 static void *
 getBluetoothResourceObject (GioHandle *handle) {
   return handle->connection;
@@ -76,9 +76,10 @@ static const GioMethods gioBluetoothMethods = {
   .getResourceName = getBluetoothResourceName,
 
   .writeData = writeBluetoothData,
-  .monitorInput = monitorBluetoothInput,
   .awaitInput = awaitBluetoothInput,
   .readData = readBluetoothData,
+
+  .monitorInput = monitorBluetoothInput,
 
   .getResourceObject = getBluetoothResourceObject
 };

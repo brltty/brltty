@@ -43,11 +43,6 @@ writeSerialData (GioHandle *handle, const void *data, size_t size, int timeout) 
 }
 
 static int
-monitorSerialInput (GioHandle *handle, AsyncMonitorCallback *callback, void *data) {
-  return serialMonitorInput(handle->device, callback, data);
-}
-
-static int
 awaitSerialInput (GioHandle *handle, int timeout) {
   return serialAwaitInput(handle->device, timeout);
 }
@@ -69,6 +64,11 @@ reconfigureSerialResource (GioHandle *handle, const SerialParameters *parameters
   return ok;
 }
 
+static int
+monitorSerialInput (GioHandle *handle, AsyncMonitorCallback *callback, void *data) {
+  return serialMonitorInput(handle->device, callback, data);
+}
+
 static void *
 getSerialResourceObject (GioHandle *handle) {
   return handle->device;
@@ -78,11 +78,12 @@ static const GioMethods gioSerialMethods = {
   .disconnectResource = disconnectSerialResource,
 
   .writeData = writeSerialData,
-  .monitorInput = monitorSerialInput,
   .awaitInput = awaitSerialInput,
   .readData = readSerialData,
 
   .reconfigureResource = reconfigureSerialResource,
+
+  .monitorInput = monitorSerialInput,
 
   .getResourceObject = getSerialResourceObject
 };

@@ -395,8 +395,18 @@ serialCancelOutput (SerialDevice *serial) {
   return 0;
 }
 
+static void
+serialCancelInputMonitor (SerialDevice *serial) {
+  if (serial->package.inputMonitor) {
+    asyncCancelRequest(serial->package.inputMonitor);
+    serial->package.inputMonitor = NULL;
+  }
+}
+
 int
 serialMonitorInput (SerialDevice *serial, AsyncMonitorCallback *callback, void *data) {
+  serialCancelInputMonitor(serial);
+  if (!callback) return 1;
   return asyncMonitorFileInput(&serial->package.inputMonitor, serial->fileDescriptor, callback, data);
 }
 
@@ -515,10 +525,7 @@ serialConnectDevice (SerialDevice *serial, const char *device) {
 
 void
 serialDisconnectDevice (SerialDevice *serial) {
-  if (serial->package.inputMonitor) {
-    asyncCancelRequest(serial->package.inputMonitor);
-    serial->package.inputMonitor = NULL;
-  }
+  serialCancelInputMonitor(serial);
 }
 
 int

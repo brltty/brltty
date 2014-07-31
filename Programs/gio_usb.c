@@ -88,19 +88,6 @@ writeUsbData (GioHandle *handle, const void *data, size_t size, int timeout) {
 }
 
 static int
-monitorUsbInput (GioHandle *handle, AsyncMonitorCallback *callback, void *data) {
-  if (!GIO_USB_INPUT_MONITOR_DISABLE) {
-    UsbChannel *channel = handle->channel;
-    unsigned char endpoint = channel->definition.inputEndpoint;
-
-    if (!endpoint) return 1;
-    return usbMonitorInputEndpoint(channel->device, endpoint, callback, data);
-  }
-
-  return 0;
-}
-
-static int
 awaitUsbInput (GioHandle *handle, int timeout) {
   UsbChannel *channel = handle->channel;
 
@@ -249,6 +236,19 @@ getUsbHidFeature (
                           report, buffer, size, timeout);
 }
 
+static int
+monitorUsbInput (GioHandle *handle, AsyncMonitorCallback *callback, void *data) {
+  if (!GIO_USB_INPUT_MONITOR_DISABLE) {
+    UsbChannel *channel = handle->channel;
+    unsigned char endpoint = channel->definition.inputEndpoint;
+
+    if (!endpoint) return 1;
+    return usbMonitorInputEndpoint(channel->device, endpoint, callback, data);
+  }
+
+  return 0;
+}
+
 static void *
 getUsbResourceObject (GioHandle *handle) {
   return handle->channel;
@@ -260,7 +260,6 @@ static const GioMethods gioUsbMethods = {
   .getResourceName = getUsbResourceName,
 
   .writeData = writeUsbData,
-  .monitorInput = monitorUsbInput,
   .awaitInput = awaitUsbInput,
   .readData = readUsbData,
 
@@ -277,6 +276,8 @@ static const GioMethods gioUsbMethods = {
 
   .setHidFeature = setUsbHidFeature,
   .getHidFeature = getUsbHidFeature,
+
+  .monitorInput = monitorUsbInput,
 
   .getResourceObject = getUsbResourceObject
 };

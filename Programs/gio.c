@@ -23,6 +23,7 @@
 
 #include "log.h"
 #include "async_wait.h"
+#include "async_alarm.h"
 #include "io_generic.h"
 #include "gio_internal.h"
 #include "io_serial.h"
@@ -226,19 +227,6 @@ gioWriteData (GioEndpoint *endpoint, const void *data, size_t size) {
 
   return method(endpoint->handle, data, size,
                 endpoint->options.outputTimeout);
-}
-
-int
-gioMonitorInput (GioEndpoint *endpoint, AsyncMonitorCallback *callback, void *data) {
-  GioMonitorInputMethod *method = endpoint->methods->monitorInput;
-
-  if (method) {
-    if (method(endpoint->handle, callback, data)) {
-      return 1;
-    }
-  }
-
-  return 0;
 }
 
 int
@@ -502,6 +490,99 @@ gioGetHidFeature (
 
   return method(endpoint->handle, report,
                 buffer, size, endpoint->options.requestTimeout);
+}
+
+int
+gioMonitorInput (GioEndpoint *endpoint, AsyncMonitorCallback *callback, void *data) {
+  GioMonitorInputMethod *method = endpoint->methods->monitorInput;
+
+  if (method) {
+    if (method(endpoint->handle, callback, data)) {
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+struct GioHandleInputObjectStruct {
+  GioEndpoint *endpoint;
+  AsyncHandle pollAlarm;
+
+  GioInputHandler *handler;
+  void *data;
+};
+
+static int
+handleInput (GioHandleInputObject *hio) {
+  GioHandleInputParameters parameters = {
+    .data = hio->data
+  };
+
+  return hio->handler(&parameters);
+}
+
+ASYNC_MONITOR_CALLBACK(handleInputMonitor) {
+  GioHandleInputObject *hio = parameters->data;
+
+  handleInput(hio);
+  return 1;
+}
+
+ASYNC_ALARM_CALLBACK(handleInputAlarm) {
+  GioHandleInputObject *hio = parameters->data;
+
+  if (handleInput(hio)) asyncResetAlarmIn(hio->pollAlarm, 0);
+}
+
+GioHandleInputObject *
+gioNewHandleInputObject (
+  GioEndpoint *endpoint, int pollInterval,
+  GioInputHandler *handler, void *data
+) {
+  GioHandleInputObject *hio;
+
+  if ((hio = malloc(sizeof(*hio)))) {
+    memset(hio, 0, sizeof(*hio));
+
+    hio->endpoint = endpoint;
+    hio->pollAlarm = NULL;
+
+    hio->handler = handler;
+    hio->data = data;
+
+    if (endpoint) {
+      if (gioMonitorInput(endpoint, handleInputMonitor, hio)) {
+        handleInput(hio);
+        return hio;
+      }
+    }
+
+    if (asyncSetAlarmIn(&hio->pollAlarm, 0, handleInputAlarm, hio)) {
+      if (asyncResetAlarmEvery(hio->pollAlarm, pollInterval)) {
+        return hio;
+      }
+
+      asyncCancelRequest(hio->pollAlarm);
+    }
+
+    free(hio);
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
+
+void
+gioDestroyHandleInputObject (GioHandleInputObject *hio) {
+  if (hio->pollAlarm) {
+    asyncCancelRequest(hio->pollAlarm);
+  } else {
+    gioMonitorInput(hio->endpoint, NULL, NULL);
+  }
+
+  free(hio);
 }
 
 GioResourceType

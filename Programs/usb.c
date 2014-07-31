@@ -620,6 +620,9 @@ usbMonitorInputPipe (
 
   if (endpoint) {
     if (usbHaveInputPipe(endpoint)) {
+      usbCancelInputMonitor(endpoint);
+      if (!callback) return 1;
+
       if (asyncMonitorFileInput(&endpoint->direction.input.pipe.monitor,
                                 endpoint->direction.input.pipe.output,
                                 callback, data)) {

@@ -27,7 +27,6 @@
 #include "brl_cmds.h"
 #include "cmd_queue.h"
 #include "cmd_enqueue.h"
-#include "async_alarm.h"
 #include "update.h"
 #include "io_generic.h"
 #include "api_control.h"
@@ -62,8 +61,8 @@ processInput (void) {
   return 1;
 }
 
-static int
-handleInput (void) {
+static
+GIO_INPUT_HANDLER(handleBrailleInput) {
   int processed = 0;
 
   suspendCommandQueue();
@@ -93,44 +92,18 @@ handleInput (void) {
   return processed;
 }
 
-static void setBrailleInputAlarm (int delay, void *data);
-static AsyncHandle brailleInputAlarm = NULL;
+static GioHandleInputObject *handleBrailleInputObject = NULL;
 
-ASYNC_ALARM_CALLBACK(handleBrailleInputAlarm) {
-  asyncDiscardHandle(brailleInputAlarm);
-  brailleInputAlarm = NULL;
-
-  setBrailleInputAlarm((handleInput()? 0: BRAILLE_INPUT_POLL_INTERVAL), parameters->data);
-}
-
-static void
-setBrailleInputAlarm (int delay, void *data) {
-  if (!brailleInputAlarm) {
-    asyncSetAlarmIn(&brailleInputAlarm, delay, handleBrailleInputAlarm, data);
+void
+stopBrailleInput (void) {
+  if (handleBrailleInputObject) {
+    gioDestroyHandleInputObject(handleBrailleInputObject);
+    handleBrailleInputObject = NULL;
   }
-}
-
-ASYNC_MONITOR_CALLBACK(monitorBrailleInput) {
-  handleInput();
-  return !restartRequired;
 }
 
 void
 startBrailleInput (void) {
-  if (brl.gioEndpoint) {
-    if (gioMonitorInput(brl.gioEndpoint, monitorBrailleInput, NULL)) {
-      handleInput();
-      return;
-    }
-  }
-
-  setBrailleInputAlarm(0, NULL);
-}
-
-void
-stopBrailleInput (void) {
-  if (brailleInputAlarm) {
-    asyncCancelRequest(brailleInputAlarm);
-    brailleInputAlarm = NULL;
-  }
+  stopBrailleInput();
+  handleBrailleInputObject = gioNewHandleInputObject(brl.gioEndpoint, BRAILLE_INPUT_POLL_INTERVAL, handleBrailleInput, &brl);
 }

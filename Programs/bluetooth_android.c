@@ -83,12 +83,17 @@ bthNewConnectionExtension (uint64_t bda) {
   return NULL;
 }
 
-void
-bthReleaseConnectionExtension (BluetoothConnectionExtension *bcx) {
+static void
+bthCancelInputMonitor (BluetoothConnectionExtension *bcx) {
   if (bcx->inputMonitor) {
     asyncCancelRequest(bcx->inputMonitor);
     bcx->inputMonitor = NULL;
   }
+}
+
+void
+bthReleaseConnectionExtension (BluetoothConnectionExtension *bcx) {
+  bthCancelInputMonitor(bcx);
 
   if (bcx->connection) {
     if (findJavaInstanceMethod(bcx->env, &closeMethod, connectionClass, "close",
@@ -151,6 +156,8 @@ int
 bthMonitorInput (BluetoothConnection *connection, AsyncMonitorCallback *callback, void *data) {
   BluetoothConnectionExtension *bcx = connection->extension;
 
+  bthCancelInputMonitor(bcx);
+  if (!callback) return 1;
   return asyncMonitorFileInput(&bcx->inputMonitor, bcx->inputPipe[0], callback, data);
 }
 

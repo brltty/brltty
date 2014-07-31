@@ -40,7 +40,6 @@ extern const void *gioGetApplicationData (GioEndpoint *endpoint);
 extern char *gioGetResourceName (GioEndpoint *endpoint);
 
 extern ssize_t gioWriteData (GioEndpoint *endpoint, const void *data, size_t size);
-extern int gioMonitorInput (GioEndpoint *endpoint, AsyncMonitorCallback *callback, void *data);
 extern int gioAwaitInput (GioEndpoint *endpoint, int timeout);
 extern ssize_t gioReadData (GioEndpoint *endpoint, void *buffer, size_t size, int wait);
 extern int gioReadByte (GioEndpoint *endpoint, unsigned char *byte, int wait);
@@ -99,6 +98,23 @@ extern ssize_t gioGetHidFeature (
   GioEndpoint *endpoint, unsigned char report,
   void *buffer, uint16_t size
 );
+
+extern int gioMonitorInput (GioEndpoint *endpoint, AsyncMonitorCallback *callback, void *data);
+
+typedef struct {
+  void *const data;
+} GioHandleInputParameters;
+
+#define GIO_INPUT_HANDLER(name) int name (GioHandleInputParameters *parameters)
+typedef GIO_INPUT_HANDLER(GioInputHandler);
+typedef struct GioHandleInputObjectStruct GioHandleInputObject;
+
+extern GioHandleInputObject *gioNewHandleInputObject (
+  GioEndpoint *endpoint, int pollInterval,
+  GioInputHandler *handler, void *data
+);
+
+extern void gioDestroyHandleInputObject (GioHandleInputObject *hio);
 
 typedef enum {
   GIO_RESOURCE_UNTYPED = 0,
