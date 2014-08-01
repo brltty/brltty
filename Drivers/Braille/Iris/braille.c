@@ -167,37 +167,9 @@ static int refreshBrailleWindow = 0;
 /* static int debugMode = 0; */
 static KeyNumberSet linearKeys;
 
-/*
- * Function unused at the moment
-static void irDebug(const char *format, ...)
-{
-  if (debugMode) {
-    va_list argp;
-    char string[0X100];
-    va_start(argp, format);
-    vsnprintf(string, sizeof(string), format, argp);
-    va_end(argp);
-    logMessage(LOG_NOTICE, DRIVER_LOG_PREFIX "%s",string);
-  }
-}
-*/
-
-/*
- * The following debugging functions are unused at the moment.
-static void enterDebugMode(void)
-{
-  debugMode = 1;
-  irDebug("Entering debug mode");
-}
-
-static void leaveDebugMode(void)
-{
-  irDebug("Leaving debug mode");
-  debugMode = 0;
-}
-
- * End of unused debug functions.
-*/
+struct BrailleDataStruct {
+  int x;
+};
 
 static int openPort(Port *port)
 {
@@ -1083,13 +1055,6 @@ static int clearWindow(BrailleDisplay *brl, Port *port)
   return writeWindow(brl, port, window);
 }
 
-/*
-static void refreshWindow(BrailleDisplay *brl, Port *port)
-{
-  writeWindow(brl, &internalPort, brl->buffer);
-}
-*/
-
 static int suspendDevice(BrailleDisplay *brl)
 {
   if (!embeddedDriver) return 1;
@@ -1646,146 +1611,185 @@ static ssize_t askDevice(BrailleDisplay *brl, IrisOutputPacketType request, unsi
   return 0;
 }
 
-static int brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
-{
-  int latchDelayMin = 0, latchDelayMax = 10000;
-  unsigned char deviceResponse[MAXPACKETSIZE];
-  ssize_t size;
-  if (!validateYesNo(&embeddedDriver, parameters[PARM_EMBEDDED])) {
-    logMessage(LOG_ERR, DRIVER_LOG_PREFIX "Cannot determine whether driver should be run in embedded mode or not");
-    return 0;
-  }
-  logMessage(LOG_INFO, DRIVER_LOG_PREFIX "embeddedDriver=%d",embeddedDriver);
-  if (embeddedDriver) {
-    const char *protocolChoices[nb_protocols];
-    int i;
-    for (i=0; i<nb_protocols; i++) protocolChoices[i] = iris_protocols[i].name;
-    if (!validateChoice(&protocol, parameters[PARM_PROTOCOL], protocolChoices))
-    {
-      logMessage(LOG_WARNING, DRIVER_LOG_PREFIX "Invalid value %s of protocol parameter is ignored. Using eurobraille instead.", parameters[PARM_PROTOCOL]);
-      protocol = IR_PROTOCOL_DEFAULT;
+static int
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
+  if ((brl->data = malloc(sizeof(*brl->data)))) {
+    memset(brl->data, 0, sizeof(*brl->data));
+
+    if (validateYesNo(&embeddedDriver, parameters[PARM_EMBEDDED])) {
+      int internalPortOpened = 0;
+
+      logMessage(LOG_INFO, DRIVER_LOG_PREFIX "embeddedDriver=%d",embeddedDriver);
+
+      if (embeddedDriver) {
+        {
+          const char *protocolChoices[nb_protocols];
+          unsigned int i;
+
+          for (i=0; i<nb_protocols; i+=1) protocolChoices[i] = iris_protocols[i].name;
+
+          if (validateChoice(&protocol, parameters[PARM_PROTOCOL], protocolChoices)) {
+            logMessage(LOG_INFO, DRIVER_LOG_PREFIX "protocol=%s", iris_protocols[protocol].name);
+          } else {
+            logMessage(LOG_WARNING, DRIVER_LOG_PREFIX "invalid value %s of protocol parameter is ignored - using eurobraille instead", parameters[PARM_PROTOCOL]);
+            protocol = IR_PROTOCOL_DEFAULT;
+          }
+        }
+
+        {
+          static const int latchDelayMin = 0;
+          static const int latchDelayMax = 10000;
+
+          if (!validateInteger(&latchDelay, parameters[PARM_LATCHDELAY],
+                               &latchDelayMin, &latchDelayMax)) {
+            latchDelay = IR_DEFAULT_LATCH_DELAY;
+          }
+        }
+
+        if (enablePorts(LOG_ERR, IRIS_GIO_BASE, 3) != -1) {
+          if (openPort(&internalPort)) {
+            readCommand = &readCommand_embedded;
+            activateBraille();
+
+            externalPort.name = device;
+            externalPort.speed = iris_protocols[protocol].speed;
+
+            internalPortOpened = 1;
+          }
+        } else {
+          logSystemError("ioperm");
+        }
+      } else {
+        internalPort.name = device;
+        internalPort.speed = EXTERNALSPEED_NATIVE;
+
+        if (openPort(&internalPort)) {
+          readCommand = &readCommand_nonembedded;
+          deviceConnected = 1;
+
+          internalPortOpened = 1;
+        }
+      }
+
+      if (internalPortOpened) {
+        unsigned char deviceResponse[MAXPACKETSIZE];
+        ssize_t size;
+
+        if (!(size = askDevice(brl, IR_OPT_VersionRequest, deviceResponse, sizeof(deviceResponse)) )) {
+          logMessage(LOG_ERR, DRIVER_LOG_PREFIX "received no response to version request");
+        } else if (size < 3) {
+          logBytes(LOG_ERR, DRIVER_LOG_PREFIX "the device has sent a too small response to version request", deviceResponse, size);
+        }  else if (deviceResponse[0] != IR_IPT_VersionResponse) {
+          logBytes(LOG_ERR, DRIVER_LOG_PREFIX "the device has sent an unexpected response to version request", deviceResponse, size);
+        } else {
+          hasVisualDisplay = 0;
+
+          switch (deviceResponse[1]) {
+            case 'a':
+            case 'A':
+              deviceType = IR_DT_KB;
+              keyTableDefinition = &KEY_TABLE_DEFINITION(pc);
+              brl->textColumns = IR_MAXWINDOWSIZE;
+              break;
+
+            case 'l':
+            case 'L':
+              deviceType = IR_DT_LARGE;
+              keyTableDefinition = &KEY_TABLE_DEFINITION(brl);
+              brl->textColumns = IR_MAXWINDOWSIZE;
+              hasVisualDisplay = 1;
+              break;
+
+            case 's':
+            case 'S':
+              deviceType = IR_DT_SMALL;
+              keyTableDefinition = &KEY_TABLE_DEFINITION(brl);
+              brl->textColumns = IR_DT_SMALL_WINDOWSIZE;
+              break;
+
+            default:
+              logBytes(LOG_ERR, DRIVER_LOG_PREFIX "the device has sent an invalid device type in response to version request", deviceResponse, size);
+              keyTableDefinition = NULL;
+              break;
+          }
+
+          if (keyTableDefinition) {
+            brl->textRows = 1;
+
+            if ((firmwareVersion = malloc(size - 1))) {
+              memcpy(firmwareVersion, deviceResponse+2, size-2);
+              firmwareVersion[size-2] = 0;
+              logMessage(LOG_INFO, DRIVER_LOG_PREFIX "the device's firmware version is %s", firmwareVersion);
+
+              if (!(size = askDevice(brl, IR_OPT_SerialNumberRequest, deviceResponse, sizeof(deviceResponse)))) {
+                logMessage(LOG_ERR, DRIVER_LOG_PREFIX "Received no response to serial number request.");
+              } else if (size != IR_OPT_SERIALNUMBERRESPONSE_LENGTH) {
+                logBytes(LOG_ERR, DRIVER_LOG_PREFIX "the device has sent a response whose length is invalid to serial number request", deviceResponse, size);
+              } else if (deviceResponse[0] != IR_IPT_SerialNumberResponse) {
+                logBytes(LOG_ERR, DRIVER_LOG_PREFIX "the device has sent an unexpected response to serial number request", deviceResponse, size);
+              } else {
+                if (deviceResponse[1] != IR_OPT_SERIALNUMBERRESPONSE_NOWINDOWLENGTH) {
+                  brl->textColumns = deviceResponse[1];
+                }
+
+                memcpy(serialNumber, deviceResponse+2, 4);
+                logMessage(LOG_INFO, DRIVER_LOG_PREFIX "device's serial number is %s. It has a %s keyboard, a %d-cells braille display and %s visual dipslay.",
+                           serialNumber,
+                           keyTableDefinition->bindings,
+                           brl->textColumns,
+                           hasVisualDisplay ? "a" : "no" 
+                );
+
+                makeOutputTable(dotsTable_ISO11548_1);
+
+                brl->keyBindings = keyTableDefinition->bindings;
+                brl->keyNames = keyTableDefinition->names;
+
+                if ((previousBrailleWindow = malloc(brl->textColumns * brl->textRows))) {
+                  linearKeys = 0;
+                  return 1;
+                } else {
+                  logMallocError();
+                }
+              }
+
+              free(firmwareVersion);
+            } else {
+              logMallocError();
+            }
+          }
+        }
+
+        closePort(&internalPort);
+      }
     } else {
-      logMessage(LOG_INFO, DRIVER_LOG_PREFIX "protocol=%s", iris_protocols[protocol].name);
+      logMessage(LOG_ERR, DRIVER_LOG_PREFIX "cannot determine whether driver should be run in embedded mode or not");
     }
-    if (!validateInteger(&latchDelay, parameters[PARM_LATCHDELAY], &latchDelayMin, &latchDelayMax)) latchDelay = IR_DEFAULT_LATCH_DELAY;
-    externalPort.name = device;
-    if (enablePorts(LOG_ERR, IRIS_GIO_BASE, 3)==-1) {
-      logSystemError("ioperm");
-      return 0;
-    }
-    if (!openPort(&internalPort)) return 0;
-    activateBraille();
-    externalPort.speed = iris_protocols[protocol].speed;
-    readCommand = &readCommand_embedded;
+
+    free(brl->data);
   } else {
-    internalPort.name = device;
-    internalPort.speed = EXTERNALSPEED_NATIVE;
-    if (!openPort(&internalPort)) return 0;
-    deviceConnected = 1;
-    readCommand = &readCommand_nonembedded;
+    logMallocError();
   }
-  brl->textRows = 1;
-  if ( ! (size = askDevice(brl, IR_OPT_VersionRequest, deviceResponse, sizeof(deviceResponse)) )) {
-    logMessage(LOG_ERR, DRIVER_LOG_PREFIX "Received no response to version request.");
-    closePort(&internalPort);
-    return 0;
-  }
-  if (size < 3) {
-    logBytes(LOG_ERR, DRIVER_LOG_PREFIX "The device has sent a too small response to version request", deviceResponse, size);
-    closePort(&internalPort);
-    return 0;
-  } 
-  if (deviceResponse[0] != IR_IPT_VersionResponse) {
-    logBytes(LOG_ERR, DRIVER_LOG_PREFIX "The device has sent an unexpected response to version request", deviceResponse, size);
-    closePort(&internalPort);
-    return 0;
-  } 
-  hasVisualDisplay = 0;
-  switch (deviceResponse[1])
-  {
-    case 'a':
-    case 'A':
-      deviceType = IR_DT_KB;
-      keyTableDefinition = &KEY_TABLE_DEFINITION(pc);
-      brl->textColumns = IR_MAXWINDOWSIZE;
-      break;
-    case 'l':
-    case 'L':
-      deviceType = IR_DT_LARGE;
-      keyTableDefinition = &KEY_TABLE_DEFINITION(brl);
-      brl->textColumns = IR_MAXWINDOWSIZE;
-      hasVisualDisplay = 1;
-      break;
-    case 's':
-    case 'S':
-      deviceType = IR_DT_SMALL;
-      keyTableDefinition = &KEY_TABLE_DEFINITION(brl);
-      brl->textColumns = IR_DT_SMALL_WINDOWSIZE;
-      break;
-    default:
-      logBytes(LOG_ERR, DRIVER_LOG_PREFIX "The device has sent an invalid device type in response to version request", deviceResponse, size);
-      closePort(&internalPort);
-      return 0;
-  }
-  firmwareVersion = malloc(size -1 );
-  if (firmwareVersion == NULL)
-  {
-    logMessage(LOG_ERR, DRIVER_LOG_PREFIX "brl_construct: could not allocate memory for previous braille window");
-    closePort(&internalPort);
-    return 0;
-  }
-  memcpy(firmwareVersion, deviceResponse+2, size-2);
-  firmwareVersion[size-2] = 0;
-  logMessage(LOG_INFO, DRIVER_LOG_PREFIX "The device's firmware version is %s", firmwareVersion);
-  if ( ! ( size = askDevice(brl, IR_OPT_SerialNumberRequest, deviceResponse, sizeof(deviceResponse)) )) {
-    logMessage(LOG_ERR, DRIVER_LOG_PREFIX "Received no response to serial number request.");
-    closePort(&internalPort);
-    return 0;
-  }
-  if (size != IR_OPT_SERIALNUMBERRESPONSE_LENGTH) {
-    logBytes(LOG_ERR, DRIVER_LOG_PREFIX "The device has sent a response whose length is invalid to serial number request", deviceResponse, size);
-    closePort(&internalPort);
-    return 0;
-  } 
-  if (deviceResponse[0] != IR_IPT_SerialNumberResponse) {
-    logBytes(LOG_ERR, DRIVER_LOG_PREFIX "The device has sent an unexpected response to serial number request", deviceResponse, size);
-    closePort(&internalPort);
-    return 0;
-  } 
-  if (deviceResponse[1] != IR_OPT_SERIALNUMBERRESPONSE_NOWINDOWLENGTH) {
-    brl->textColumns = deviceResponse[1];
-  }
-  memcpy(serialNumber, deviceResponse+2, 4);
-  logMessage(LOG_INFO, DRIVER_LOG_PREFIX "Device's serial number is %s. It has a %s keyboard, a %d-cells braille display and %s visual dipslay.",
-             serialNumber,
-             keyTableDefinition->bindings,
-             brl->textColumns,
-             hasVisualDisplay ? "a" : "no" 
-  );
-  makeOutputTable(dotsTable_ISO11548_1);
 
-  brl->keyBindings = keyTableDefinition->bindings;
-  brl->keyNames = keyTableDefinition->names;
-
-  previousBrailleWindow = malloc(brl->textColumns * brl->textRows);
-  if (previousBrailleWindow==NULL) {
-    logMessage(LOG_ERR, DRIVER_LOG_PREFIX "brl_construct: could not allocate memory for previous braille window");
-    closePort(&internalPort);
-    return 0;
-  }
-  linearKeys = 0;
-  return 1;
+  return 0;
 }
 
-static void brl_destruct (BrailleDisplay *brl)
-{
+static void
+brl_destruct (BrailleDisplay *brl) {
   if (embeddedDriver) {
     brl_clearWindow(brl);
     deactivateBraille();
   }
+
   if (previousBrailleWindow!=NULL) {
     free(previousBrailleWindow);
     previousBrailleWindow = NULL;
   }
+
   closePort(&internalPort);
+
+  if (brl->data) {
+    free(brl->data);
+    brl->data = NULL;
+  }
 }
