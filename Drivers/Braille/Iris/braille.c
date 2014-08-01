@@ -55,8 +55,8 @@ typedef enum {
 
 typedef enum
 {
-  IR_PROTOCOL_EUROBRAILLE = 0,
-  IR_PROTOCOL_NATIVE = 1,
+  IR_PROTOCOL_EUROBRAILLE,
+  IR_PROTOCOL_NATIVE
 } Protocol;
 
 typedef struct {
@@ -66,8 +66,15 @@ typedef struct {
 } ProtocolEntry;
 
 static const ProtocolEntry protocolTable[] = {
-  { IR_PROTOCOL_EUROBRAILLE, strtext("eurobraille"), IR_EXTERNAL_SPEED_EUROBRAILLE },
-  { IR_PROTOCOL_NATIVE, strtext("native"), IR_EXTERNAL_SPEED_NATIVE }
+  { .id = IR_PROTOCOL_EUROBRAILLE,
+    .name = strtext("eurobraille"),
+    .speed = IR_EXTERNAL_SPEED_EUROBRAILLE 
+  },
+
+  { .id = IR_PROTOCOL_NATIVE,
+    .name = strtext("native"),
+    .speed = IR_EXTERNAL_SPEED_NATIVE 
+  },
 };
 
 static const unsigned char protocolCount = ARRAY_COUNT(protocolTable);
