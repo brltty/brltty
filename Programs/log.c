@@ -134,6 +134,24 @@ static const LogCategoryEntry logCategoryTable[LOG_CATEGORY_COUNT] = {
     .title = strtext("Bluetooth I/O"),
     .prefix = "Bluetooth"
   },
+
+  [LOG_CATEGORY_INDEX(BRAILLE_DRIVER)] = {
+    .name = "brldvr",
+    .title = strtext("Braille Driver Events"),
+    .prefix = "braille driver"
+  },
+
+  [LOG_CATEGORY_INDEX(SPEECH_DRIVER)] = {
+    .name = "spkdvr",
+    .title = strtext("Speech Driver Events"),
+    .prefix = "speech driver"
+  },
+
+  [LOG_CATEGORY_INDEX(SCREEN_DRIVER)] = {
+    .name = "scrdvr",
+    .title = strtext("Screen Driver Events"),
+    .prefix = "screen driver"
+  },
 };
 
 unsigned char categoryLogLevel = LOG_WARNING;
