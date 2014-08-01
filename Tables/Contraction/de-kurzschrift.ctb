@@ -35,6 +35,7 @@ class h h
 class m m
 class n n
 class r r
+class t t
 class st st
 class konsonant bcdfghjklmnpqrstvwxyz
 
@@ -466,6 +467,7 @@ endword bein 12-146-1345 shouldn't use the bei-contraction
 endword beine 12-146-1345-15 shouldn't use the bei-contraction
 endword beinen 12-146-1345-14 shouldn't use the bei-contraction
 endword beins 12-146-1345-234 shouldn't use the bei-contraction
+before t always beinhal 23-35-125-25 shouldn't use the bei-contraction
 
 word dem 12356
 always dem 2-12356
