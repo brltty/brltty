@@ -20,6 +20,7 @@
 #define BRLTTY_INCLUDED_IR_BRLDEFS
 
 #define IR_DEFAULT_LATCH_DELAY 1000
+#define IR_DEFAULT_LATCH_INTERVAL 100
 
 #define IR_WINDOW_SIZE_MAXIMUM 40 /* Maximum size for braille window and visual display */
 #define IR_WINDOW_SIZE_SMALL 32 /* Size of braille window on the Iris S */

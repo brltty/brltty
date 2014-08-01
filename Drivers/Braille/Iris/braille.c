@@ -186,6 +186,7 @@ struct BrailleDataStruct {
     AsyncHandle monitor;
 
     int delay;
+    int interval;
 
     TimeValue started;
     int elapsed;
@@ -1621,7 +1622,7 @@ startLatchMonitor (BrailleDisplay *brl) {
  if (brl->data->latch.monitor) return 1;
 
  if (asyncSetAlarmIn(&brl->data->latch.monitor, 0, irMonitorLatch, brl)) {
-   if (asyncResetAlarmEvery(brl->data->latch.monitor, 100)) {
+   if (asyncResetAlarmEvery(brl->data->latch.monitor, brl->data->latch.interval)) {
      brl->data->latch.pulled = 0;
      return 1;
    }
@@ -1660,6 +1661,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     brl->data->external.port.gioEndpoint = NULL;
 
     brl->data->latch.monitor = NULL;
+    brl->data->latch.delay = IR_DEFAULT_LATCH_DELAY;
+    brl->data->latch.interval = IR_DEFAULT_LATCH_INTERVAL;
 
     if (validateYesNo(&embedded, parameters[PARM_EMBEDDED])) {
       int internalPortOpened = 0;
@@ -1684,10 +1687,11 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         {
           static const int latchDelayMinimum = 0;
           static const int latchDelayMaximum = 10000;
+          const char *parameter = parameters[PARM_LATCH_DELAY];
 
-          if (!validateInteger(&brl->data->latch.delay, parameters[PARM_LATCH_DELAY],
+          if (!validateInteger(&brl->data->latch.delay, parameter,
                                &latchDelayMinimum, &latchDelayMaximum)) {
-            brl->data->latch.delay = IR_DEFAULT_LATCH_DELAY;
+            logMessage(LOG_WARNING, "invalid latch delay setting: %s", parameter);
           }
         }
 
