@@ -157,15 +157,17 @@ static unsigned char serialNumber[5] = { 0, 0, 0, 0, 0 };
 
 static unsigned char *previousBrailleWindow = NULL;
 static int refreshBrailleWindow = 0;
-/* static int debugMode = 0; */
 static KeyNumberSet linearKeys;
 
 struct BrailleDataStruct {
   unsigned failure:1;
+  unsigned connected:1;
+
   unsigned embedded:1;
   unsigned sleeping:1;
-  unsigned connected:1;
   unsigned forwarding:1;
+
+  int (*readCommand) (BrailleDisplay *brl);
 
   struct {
     Port internal;
@@ -175,6 +177,10 @@ struct BrailleDataStruct {
   struct {
     int delay;
     AsyncHandle monitor;
+
+    TimeValue started;
+    int elapsed;
+    unsigned pulled:1;
   } latch;
 };
 
@@ -1469,12 +1475,10 @@ static int readCommand_nonembedded (BrailleDisplay *brl)
   return EOF;
 }
 
-static int (*readCommand)(BrailleDisplay *brl) = NULL;
-
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   if (brl->data->failure) return BRL_CMD_RESTARTBRL;
-  return readCommand(brl);
+  return brl->data->readCommand(brl);
 }
 
 static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *characters)
@@ -1570,41 +1574,26 @@ resumeDevice (BrailleDisplay *brl) {
 
 static int
 checkLatchState (BrailleDisplay *brl) {
-  static TimeValue startTime;
-  static int latchPulled = 0;
-  static int elapsedTime = 0;
+  unsigned char pulled = !(readPort1(IRIS_GIO_INPUT) & 0x04);
 
-  unsigned char currentState = readPort1(IRIS_GIO_INPUT) & 0x04;
-
-  if (!latchPulled && !currentState) {
-    getMonotonicTime(&startTime);
-    latchPulled = 1;
-    logMessage(LOG_INFO, DRIVER_LOG_PREFIX "latch pulled");    
-    return 0;
-  }
-
-  if (latchPulled) {
-    int res;
-    int ms;
-
-    if (currentState) {
-      latchPulled = 0;
+  if (brl->data->latch.pulled) {
+    if (!pulled) {
+      brl->data->latch.pulled = 0;
       logMessage(LOG_INFO, DRIVER_LOG_PREFIX "latch released");
-      elapsedTime = 0;
-      return 0;
-    }
-
-    ms = getMonotonicElapsed(&startTime);
-    logMessage(LOG_DEBUG, DRIVER_LOG_PREFIX "latch pulled for %d milliseconds, elapsed=%d, delay=%d", ms, elapsedTime, brl->data->latch.delay);
-
-    if ((elapsedTime <= brl->data->latch.delay) && (ms > brl->data->latch.delay)) {
-      res = 1;
     } else {
-      res = 0;
-    }
+      int ms = getMonotonicElapsed(&brl->data->latch.started);
+      int res = (brl->data->latch.elapsed <= brl->data->latch.delay) &&
+                (ms > brl->data->latch.delay);
 
-    elapsedTime = ms;
-    return res;
+      logMessage(LOG_DEBUG, DRIVER_LOG_PREFIX "latch pulled for %dms, elapsed=%dms, delay=%dms", ms, brl->data->latch.elapsed, brl->data->latch.delay);
+      brl->data->latch.elapsed = ms;
+      return res;
+    }
+  } else if (pulled) {
+    getMonotonicTime(&brl->data->latch.started);
+    brl->data->latch.elapsed = 0;
+    brl->data->latch.pulled = 1;
+    logMessage(LOG_INFO, DRIVER_LOG_PREFIX "latch pulled");    
   }
 
   return 0;
@@ -1624,6 +1613,7 @@ startLatchMonitor (BrailleDisplay *brl) {
 
  if (asyncSetAlarmIn(&brl->data->latch.monitor, 0, irMonitorLatch, brl)) {
    if (asyncResetAlarmEvery(brl->data->latch.monitor, 100)) {
+     brl->data->latch.pulled = 0;
      return 1;
    }
 
@@ -1650,8 +1640,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     memset(brl->data, 0, sizeof(*brl->data));
 
     brl->data->failure = 0;
-    brl->data->sleeping = 0;
     brl->data->connected = 1;
+
+    brl->data->sleeping = 0;
     brl->data->forwarding = 0;
 
     brl->data->latch.monitor = NULL;
@@ -1695,7 +1686,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             brl->data->port.external.speed = iris_protocols[protocol].speed;
 
             if (openPort(&brl->data->port.internal)) {
-              readCommand = &readCommand_embedded;
+              brl->data->readCommand = readCommand_embedded;
               activateBraille();
 
               internalPortOpened = 1;
@@ -1711,7 +1702,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         brl->data->port.internal.speed = EXTERNALSPEED_NATIVE;
 
         if (openPort(&brl->data->port.internal)) {
-          readCommand = &readCommand_nonembedded;
+          brl->data->readCommand = readCommand_nonembedded;
           brl->data->connected = 1;
 
           internalPortOpened = 1;
