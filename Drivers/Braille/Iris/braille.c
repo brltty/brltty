@@ -78,7 +78,6 @@ static const ProtocolEntry protocolTable[] = {
 
 static const unsigned char protocolCount = ARRAY_COUNT(protocolTable);
 #define IR_PROTOCOL_DEFAULT IR_PROTOCOL_EUROBRAILLE
-static ProtocolIndex protocol = IR_PROTOCOL_DEFAULT;
 
 
 #define BRL_HAVE_PACKET_IO
@@ -171,6 +170,7 @@ struct BrailleDataStruct {
   unsigned isForwarding:1;
 
   unsigned haveVisualDisplay:1;
+  ProtocolIndex protocol;
 
   int (*readCommand) (BrailleDisplay *brl);
 
@@ -279,7 +279,7 @@ static size_t readNativePacket(BrailleDisplay *brl, Port *port, void *packet, si
       } else {
         if ((port->waitingForAck) && (ch==ACK)) {
           port->waitingForAck = 0;
-          if (brl->data->isForwarding && (protocol == IR_PROTOCOL_NATIVE) ) {
+          if (brl->data->isForwarding && (brl->data->protocol == IR_PROTOCOL_NATIVE) ) {
             static const unsigned char acknowledgement[] = {ACK};
             writeBraillePacket(brl, brl->data->external.port.gioEndpoint, acknowledgement, sizeof(acknowledgement));
           }
@@ -1060,19 +1060,23 @@ static int brl_reset (BrailleDisplay *brl)
 
 static int enterPacketForwardMode(BrailleDisplay *brl)
 {
-  logMessage(LOG_NOTICE, "Entering packet forward mode (port=%s, protocol=%s, speed=%d)", brl->data->external.port.name, protocolTable[protocol].name, brl->data->external.port.speed);
+  logMessage(LOG_NOTICE,
+             "entering packet forward mode (port=%s, protocol=%s, speed=%d)",
+             brl->data->external.port.name,
+             protocolTable[brl->data->protocol].name,
+             brl->data->external.port.speed);
 
-  brl->data->external.port.speed = protocolTable[protocol].speed;
+  brl->data->external.port.speed = protocolTable[brl->data->protocol].speed;
   if (!openPort(&brl->data->external.port)) return 0;
 
   {
     char msg[brl->textColumns+1];
 
-    snprintf(msg, sizeof(msg), "%s (%s)", gettext("PC mode"), gettext(protocolTable[protocol].name));
+    snprintf(msg, sizeof(msg), "%s (%s)", gettext("PC mode"), gettext(protocolTable[brl->data->protocol].name));
     message(NULL, msg, MSG_NODELAY);
   }
 
-  switch (protocol) {
+  switch (brl->data->protocol) {
     case IR_PROTOCOL_NATIVE: {
       static const unsigned char p[] = { IR_IPT_InteractiveKey, 'Q' };
 
@@ -1095,7 +1099,7 @@ static int leavePacketForwardMode(BrailleDisplay *brl)
 {
   static const unsigned char p[] = { IR_IPT_InteractiveKey, 'Q' };
   logMessage(LOG_NOTICE, "Leaving packet forward mode");
-  if (protocol==IR_PROTOCOL_NATIVE) {
+  if (brl->data->protocol == IR_PROTOCOL_NATIVE) {
     if (! writeNativePacket(brl, &brl->data->external.port, p, sizeof(p)) ) return 0;
   }
 
@@ -1117,8 +1121,8 @@ static int
 core_handleZKey(BrailleDisplay *brl, Port *port) {
   logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "Z key pressed");
   /* return enqueueKey(IR_GRP_NavigationKeys, IR_KEY_Z); */
-  protocol = (protocol == IR_PROTOCOL_EUROBRAILLE) ?
-    IR_PROTOCOL_NATIVE : IR_PROTOCOL_EUROBRAILLE;
+  brl->data->protocol = (brl->data->protocol == IR_PROTOCOL_EUROBRAILLE)?
+    IR_PROTOCOL_NATIVE: IR_PROTOCOL_EUROBRAILLE;
   return 1;
 }
 
@@ -1425,8 +1429,8 @@ static int readCommand_embedded (BrailleDisplay *brl)
 
     if (!brl->data->isForwarding) {
       handleNativePacket(brl, NULL, &coreKeyHandlers, packet, size);
-    } else if (protocol == IR_PROTOCOL_NATIVE) {
-      if (! writeNativePacket(brl, &brl->data->external.port, packet, size)) goto failure;
+    } else if (brl->data->protocol == IR_PROTOCOL_NATIVE) {
+      if (!writeNativePacket(brl, &brl->data->external.port, packet, size)) goto failure;
     } else {
       handleNativePacket(brl, &brl->data->external.port, &eurobrailleKeyHandlers, packet, size);
     }
@@ -1435,7 +1439,7 @@ static int readCommand_embedded (BrailleDisplay *brl)
   if ( errno != EAGAIN )  goto failure;
 
   if (brl->data->isForwarding) {
-    if (protocol == IR_PROTOCOL_NATIVE) {
+    if (brl->data->protocol == IR_PROTOCOL_NATIVE) {
       while ((size = readNativePacket(brl, &brl->data->external.port, packet, sizeof(packet)))) {
         if (! writeNativePacket(brl, &brl->data->internal.port, packet, size) ) goto failure;
       }
@@ -1656,6 +1660,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     brl->data->isForwarding = 0;
 
     brl->data->haveVisualDisplay = 0;
+    brl->data->protocol = IR_PROTOCOL_DEFAULT;
 
     brl->data->internal.port.gioEndpoint = NULL;
     brl->data->external.port.gioEndpoint = NULL;
@@ -1671,23 +1676,28 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
       if ((brl->data->isEmbedded = !!embedded)) {
         {
-          const char *protocolChoices[protocolCount];
-          unsigned int i;
+          const char *parameter = parameters[PARM_PROTOCOL];
+          const char *choices[protocolCount + 1];
+          unsigned int choice;
 
-          for (i=0; i<protocolCount; i+=1) protocolChoices[i] = protocolTable[i].name;
-
-          if (validateChoice(&protocol, parameters[PARM_PROTOCOL], protocolChoices)) {
-            logMessage(LOG_INFO, "protocol=%s", protocolTable[protocol].name);
-          } else {
-            logMessage(LOG_WARNING, "invalid value %s of protocol parameter is ignored - using eurobraille instead", parameters[PARM_PROTOCOL]);
-            protocol = IR_PROTOCOL_DEFAULT;
+          for (choice=0; choice<protocolCount; choice+=1) {
+            choices[choice] = protocolTable[choice].name;
           }
+          choices[protocolCount] = NULL;
+
+          if (validateChoice(&choice, parameter, choices)) {
+            brl->data->protocol = choice;
+          } else {
+            logMessage(LOG_WARNING, "invalid protocol setting: %s", parameter);
+          }
+
+          logMessage(LOG_INFO, "Protocol: %s", protocolTable[brl->data->protocol].name);
         }
 
         {
+          const char *parameter = parameters[PARM_LATCH_DELAY];
           static const int latchDelayMinimum = 0;
           static const int latchDelayMaximum = 10000;
-          const char *parameter = parameters[PARM_LATCH_DELAY];
 
           if (!validateInteger(&brl->data->latch.delay, parameter,
                                &latchDelayMinimum, &latchDelayMaximum)) {
@@ -1701,7 +1711,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             brl->data->internal.port.speed = IR_INTERNAL_SPEED;
 
             brl->data->external.port.name = device;
-            brl->data->external.port.speed = protocolTable[protocol].speed;
+            brl->data->external.port.speed = protocolTable[brl->data->protocol].speed;
 
             if (openPort(&brl->data->internal.port)) {
               brl->data->readCommand = readCommand_embedded;
@@ -1816,7 +1826,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         closePort(&brl->data->internal.port);
       }
     } else {
-      logMessage(LOG_ERR, "cannot determine whether driver should be run in embedded mode or not");
+      logMessage(LOG_ERR, "invalid embedded setting: %s", parameters[PARM_EMBEDDED]);
     }
 
     free(brl->data);
