@@ -57,21 +57,20 @@ typedef enum
 {
   IR_PROTOCOL_EUROBRAILLE,
   IR_PROTOCOL_NATIVE
-} Protocol;
+} ProtocolIndex;
 
 typedef struct {
-  Protocol id;
   const char *name;
   int speed;
 } ProtocolEntry;
 
 static const ProtocolEntry protocolTable[] = {
-  { .id = IR_PROTOCOL_EUROBRAILLE,
+  [IR_PROTOCOL_EUROBRAILLE] = {
     .name = strtext("eurobraille"),
     .speed = IR_EXTERNAL_SPEED_EUROBRAILLE 
   },
 
-  { .id = IR_PROTOCOL_NATIVE,
+  [IR_PROTOCOL_NATIVE] = {
     .name = strtext("native"),
     .speed = IR_EXTERNAL_SPEED_NATIVE 
   },
@@ -79,7 +78,7 @@ static const ProtocolEntry protocolTable[] = {
 
 static const unsigned char protocolCount = ARRAY_COUNT(protocolTable);
 #define IR_PROTOCOL_DEFAULT IR_PROTOCOL_EUROBRAILLE
-static Protocol protocol = IR_PROTOCOL_DEFAULT;
+static ProtocolIndex protocol = IR_PROTOCOL_DEFAULT;
 
 
 #define BRL_HAVE_PACKET_IO
@@ -156,9 +155,6 @@ typedef struct {
   TimePeriod acknowledgementPeriod;
 } Port;
 
-static IrisDeviceType deviceType;
-static const KeyTableDefinition *keyTableDefinition;
-static int hasVisualDisplay;
 static unsigned char *firmwareVersion = NULL;
 static unsigned char serialNumber[5] = { 0, 0, 0, 0, 0 };
 
@@ -167,12 +163,14 @@ static int refreshBrailleWindow = 0;
 static KeyNumberSet linearKeys;
 
 struct BrailleDataStruct {
-  unsigned failure:1;
-  unsigned connected:1;
+  unsigned hasFailed:1;
+  unsigned isConnected:1;
 
-  unsigned embedded:1;
-  unsigned sleeping:1;
-  unsigned forwarding:1;
+  unsigned isEmbedded:1;
+  unsigned isSleeping:1;
+  unsigned isForwarding:1;
+
+  unsigned haveVisualDisplay:1;
 
   int (*readCommand) (BrailleDisplay *brl);
 
@@ -280,7 +278,7 @@ static size_t readNativePacket(BrailleDisplay *brl, Port *port, void *packet, si
       } else {
         if ((port->waitingForAck) && (ch==ACK)) {
           port->waitingForAck = 0;
-          if (brl->data->forwarding && (protocol == IR_PROTOCOL_NATIVE) ) {
+          if (brl->data->isForwarding && (protocol == IR_PROTOCOL_NATIVE) ) {
             static const unsigned char acknowledgement[] = {ACK};
             writeBraillePacket(brl, brl->data->external.port.gioEndpoint, acknowledgement, sizeof(acknowledgement));
           }
@@ -1011,10 +1009,10 @@ writeEurobrailleStringPacket (BrailleDisplay *brl, Port *port, const char *strin
 static ssize_t writeDots (BrailleDisplay *brl, Port *port, const unsigned char *dots)
 {
   size_t size = brl->textColumns * brl->textRows;
-  unsigned char packet[IR_MAXWINDOWSIZE+1] = { IR_OPT_WriteBraille };
+  unsigned char packet[IR_WINDOW_SIZE_MAXIMUM+1] = { IR_OPT_WriteBraille };
   unsigned char *p = packet+1;
   int i;
-  for (i=0; i<IR_MAXWINDOWSIZE-size; i++) *(p++) = 0; 
+  for (i=0; i<IR_WINDOW_SIZE_MAXIMUM-size; i++) *(p++) = 0; 
   for (i=0; i<size; i++) *(p++) = dots[size-i-1];
   return writeNativePacket(brl, port, packet, sizeof(packet));
 }
@@ -1039,7 +1037,7 @@ static int clearWindow(BrailleDisplay *brl, Port *port)
 
 static ssize_t brl_readPacket (BrailleDisplay *brl, void *packet, size_t size)
 {
-  if (brl->data->embedded && (brl->data->sleeping || brl->data->forwarding)) return 0;
+  if (brl->data->isEmbedded && (brl->data->isSleeping || brl->data->isForwarding)) return 0;
   return readNativePacket(brl, &brl->data->internal.port, packet, size);
 }
 
@@ -1047,7 +1045,7 @@ static ssize_t brl_readPacket (BrailleDisplay *brl, void *packet, size_t size)
 /* Returns 1 if the packet is actually written, 0 if the packet is not written */
 static ssize_t brl_writePacket (BrailleDisplay *brl, const void *packet, size_t size)
 {
-  if (brl->data->sleeping || brl->data->forwarding) {
+  if (brl->data->isSleeping || brl->data->isForwarding) {
     errno = EAGAIN;
     return 0;
   }
@@ -1088,7 +1086,7 @@ static int enterPacketForwardMode(BrailleDisplay *brl)
       break;
   }
 
-  brl->data->forwarding = 1;
+  brl->data->isForwarding = 1;
   return 1;
 }
 
@@ -1100,7 +1098,7 @@ static int leavePacketForwardMode(BrailleDisplay *brl)
     if (! writeNativePacket(brl, &brl->data->external.port, p, sizeof(p)) ) return 0;
   }
 
-  brl->data->forwarding = 0;
+  brl->data->isForwarding = 0;
   closePort(&brl->data->external.port);
   refreshBrailleWindow = 1;
   return 1;
@@ -1408,14 +1406,14 @@ static int readCommand_embedded (BrailleDisplay *brl)
   unsigned char packet[IR_MAXIMUM_PACKET_SIZE];
   size_t size;
 
-  if (brl->data->sleeping) return BRL_CMD_OFFLINE;
+  if (brl->data->isSleeping) return BRL_CMD_OFFLINE;
 
   while ((size = readNativePacket(brl, &brl->data->internal.port, packet, sizeof(packet)))) {
     /* The test for Menu key should come first since this key toggles */
     /* packet forward mode on/off */
     if (isMenuKey(packet, size)) {
       logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "Menu key pressed");
-      if (brl->data->forwarding) {
+      if (brl->data->isForwarding) {
         if (! leavePacketForwardMode(brl) ) goto failure;
         continue;
       } else {
@@ -1424,7 +1422,7 @@ static int readCommand_embedded (BrailleDisplay *brl)
       }
     }
 
-    if (!brl->data->forwarding) {
+    if (!brl->data->isForwarding) {
       handleNativePacket(brl, NULL, &coreKeyHandlers, packet, size);
     } else if (protocol == IR_PROTOCOL_NATIVE) {
       if (! writeNativePacket(brl, &brl->data->external.port, packet, size)) goto failure;
@@ -1435,7 +1433,7 @@ static int readCommand_embedded (BrailleDisplay *brl)
 
   if ( errno != EAGAIN )  goto failure;
 
-  if (brl->data->forwarding) {
+  if (brl->data->isForwarding) {
     if (protocol == IR_PROTOCOL_NATIVE) {
       while ((size = readNativePacket(brl, &brl->data->external.port, packet, sizeof(packet)))) {
         if (! writeNativePacket(brl, &brl->data->internal.port, packet, size) ) goto failure;
@@ -1468,28 +1466,28 @@ static int readCommand_nonembedded (BrailleDisplay *brl)
     if (isMenuKey(packet, size)) {
       logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "Menu key pressed");
 
-      if (brl->data->connected) {
-        brl->data->connected = 0;
+      if (brl->data->isConnected) {
+        brl->data->isConnected = 0;
         return BRL_CMD_OFFLINE;
       }
     }
 
-    if (!brl->data->connected) {
+    if (!brl->data->isConnected) {
       refreshBrailleWindow = 1;
-      brl->data->connected = 1;
+      brl->data->isConnected = 1;
     }
     
     handleNativePacket(brl, NULL, &coreKeyHandlers, packet, size);
   }
 
   if (errno != EAGAIN) return BRL_CMD_RESTARTBRL;  
-  if (!brl->data->connected) return BRL_CMD_OFFLINE;
+  if (!brl->data->isConnected) return BRL_CMD_OFFLINE;
   return EOF;
 }
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  if (brl->data->failure) return BRL_CMD_RESTARTBRL;
+  if (brl->data->hasFailed) return BRL_CMD_RESTARTBRL;
   return brl->data->readCommand(brl);
 }
 
@@ -1546,9 +1544,9 @@ static ssize_t askDevice(BrailleDisplay *brl, IrisOutputPacketType request, unsi
 
 static int
 suspendDevice (BrailleDisplay *brl) {
-  if (!brl->data->embedded) return 1;
+  if (!brl->data->isEmbedded) return 1;
   logMessage(LOG_INFO, "Suspending device");
-  if (brl->data->forwarding) {
+  if (brl->data->isForwarding) {
     static const unsigned char keyPacket[] = { IR_IPT_InteractiveKey, 'Q' };
     if ( ! writeNativePacket(brl, &brl->data->external.port, keyPacket, sizeof(keyPacket)) ) return 0;
     closePort(&brl->data->external.port);
@@ -1561,22 +1559,22 @@ suspendDevice (BrailleDisplay *brl) {
   brl->data->internal.port.waitingForAck = 0;
 
   deactivateBraille();
-  brl->data->sleeping = 1;
+  brl->data->isSleeping = 1;
   return 1;
 }
 
 static int
 resumeDevice (BrailleDisplay *brl) {
-  if (!brl->data->embedded) return 1;
+  if (!brl->data->isEmbedded) return 1;
   logMessage(LOG_INFO, "resuming device");
-  brl->data->sleeping = 0;
+  brl->data->isSleeping = 0;
   if ( !openPort(&brl->data->internal.port) )
   {
     logMessage(LOG_WARNING, "openPort failed");
     return 0;
   }
   activateBraille();
-  if (brl->data->forwarding) {
+  if (brl->data->isForwarding) {
     static const unsigned char keyPacket[] = { IR_IPT_InteractiveKey, 'W' }; 
     if (! openPort(&brl->data->external.port) ) return 0;
     if (! writeNativePacket(brl, &brl->data->external.port, keyPacket, sizeof(keyPacket)) ) return 0;
@@ -1614,7 +1612,7 @@ ASYNC_ALARM_CALLBACK(irMonitorLatch) {
   BrailleDisplay *brl = parameters->data;
 
   if (checkLatchState(brl)) {
-    if (!(brl->data->sleeping? resumeDevice(brl): suspendDevice(brl))) brl->data->failure = 1;
+    if (!(brl->data->isSleeping? resumeDevice(brl): suspendDevice(brl))) brl->data->hasFailed = 1;
   }
 }
 
@@ -1650,11 +1648,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
     memset(brl->data, 0, sizeof(*brl->data));
 
-    brl->data->failure = 0;
-    brl->data->connected = 1;
+    brl->data->hasFailed = 0;
+    brl->data->isConnected = 1;
 
-    brl->data->sleeping = 0;
-    brl->data->forwarding = 0;
+    brl->data->isSleeping = 0;
+    brl->data->isForwarding = 0;
+
+    brl->data->haveVisualDisplay = 0;
 
     brl->data->internal.port.gioEndpoint = NULL;
     brl->data->external.port.gioEndpoint = NULL;
@@ -1664,9 +1664,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (validateYesNo(&embedded, parameters[PARM_EMBEDDED])) {
       int internalPortOpened = 0;
 
-      logMessage(LOG_INFO, "embedded=%u", brl->data->embedded);
+      logMessage(LOG_INFO, "embedded=%u", brl->data->isEmbedded);
 
-      if ((brl->data->embedded = !!embedded)) {
+      if ((brl->data->isEmbedded = !!embedded)) {
         {
           const char *protocolChoices[protocolCount];
           unsigned int i;
@@ -1717,7 +1717,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
         if (openPort(&brl->data->internal.port)) {
           brl->data->readCommand = readCommand_nonembedded;
-          brl->data->connected = 1;
+          brl->data->isConnected = 1;
 
           internalPortOpened = 1;
         }
@@ -1734,38 +1734,35 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         }  else if (deviceResponse[0] != IR_IPT_VersionResponse) {
           logBytes(LOG_WARNING, "unexpected firmware version response", deviceResponse, size);
         } else {
-          hasVisualDisplay = 0;
+          const KeyTableDefinition *ktd;
 
           switch (deviceResponse[1]) {
             case 'a':
             case 'A':
-              deviceType = IR_DT_KB;
-              keyTableDefinition = &KEY_TABLE_DEFINITION(pc);
-              brl->textColumns = IR_MAXWINDOWSIZE;
+              ktd = &KEY_TABLE_DEFINITION(pc);
+              brl->textColumns = IR_WINDOW_SIZE_MAXIMUM;
               break;
 
             case 'l':
             case 'L':
-              deviceType = IR_DT_LARGE;
-              keyTableDefinition = &KEY_TABLE_DEFINITION(brl);
-              brl->textColumns = IR_MAXWINDOWSIZE;
-              hasVisualDisplay = 1;
+              ktd = &KEY_TABLE_DEFINITION(brl);
+              brl->textColumns = IR_WINDOW_SIZE_MAXIMUM;
+              brl->data->haveVisualDisplay = 1;
               break;
 
             case 's':
             case 'S':
-              deviceType = IR_DT_SMALL;
-              keyTableDefinition = &KEY_TABLE_DEFINITION(brl);
-              brl->textColumns = IR_DT_SMALL_WINDOWSIZE;
+              ktd = &KEY_TABLE_DEFINITION(brl);
+              brl->textColumns = IR_WINDOW_SIZE_SMALL;
               break;
 
             default:
               logBytes(LOG_WARNING, "unrecognized device type in firmware version response", deviceResponse, size);
-              keyTableDefinition = NULL;
+              ktd = NULL;
               break;
           }
 
-          if (keyTableDefinition) {
+          if (ktd) {
             brl->textRows = 1;
 
             if ((firmwareVersion = malloc(size - 1))) {
@@ -1787,15 +1784,15 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                 memcpy(serialNumber, deviceResponse+2, 4);
                 logMessage(LOG_INFO, "device's serial number is %s. It has a %s keyboard, a %d-cells braille display and %s visual dipslay.",
                            serialNumber,
-                           keyTableDefinition->bindings,
+                           ktd->bindings,
                            brl->textColumns,
-                           hasVisualDisplay ? "a" : "no" 
+                           brl->data->haveVisualDisplay ? "a" : "no" 
                 );
 
                 makeOutputTable(dotsTable_ISO11548_1);
 
-                brl->keyBindings = keyTableDefinition->bindings;
-                brl->keyNames = keyTableDefinition->names;
+                brl->keyBindings = ktd->bindings;
+                brl->keyNames = ktd->names;
 
                 if ((previousBrailleWindow = malloc(brl->textColumns * brl->textRows))) {
                   linearKeys = 0;
@@ -1828,7 +1825,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  if (brl->data->embedded) {
+  if (brl->data->isEmbedded) {
     brl_clearWindow(brl);
     deactivateBraille();
   }

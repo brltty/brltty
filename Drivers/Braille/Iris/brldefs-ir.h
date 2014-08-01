@@ -21,16 +21,11 @@
 
 #define IR_DEFAULT_LATCH_DELAY 1000
 
-#define IR_MAXWINDOWSIZE 40 /* Maximum size for braille window and visual display */
-#define IR_DT_SMALL_WINDOWSIZE 32 /* Size of braille window on the Iris S */
+#define IR_WINDOW_SIZE_MAXIMUM 40 /* Maximum size for braille window and visual display */
+#define IR_WINDOW_SIZE_SMALL 32 /* Size of braille window on the Iris S */
+
 #define IR_OPT_SERIALNUMBERRESPONSE_LENGTH 6
 #define IR_OPT_SERIALNUMBERRESPONSE_NOWINDOWLENGTH 0xff
-
-typedef enum {
-  IR_DT_KB, /* Iris KB -> with PC-style keyboard */
-  IR_DT_LARGE, /* Iris Large model, simply called Iris with no suffix */
-  IR_DT_SMALL /* Iris S (for small) model */
-} IrisDeviceType;
 
 typedef enum {
   IR_IPT_BrailleKeys     = 'B',
