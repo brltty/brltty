@@ -46,8 +46,6 @@
 #define IR_PORT_OUTPUT  (IR_PORT_BASE + 1)
 #define IR_PORT_OUTPUT2 (IR_PORT_BASE + 2)
 
-#define DRIVER_LOG_PREFIX "[" STRINGIFY(DRIVER_CODE) "] "
-
 typedef enum {
   PARM_EMBEDDED,
   PARM_LATCH_DELAY,
@@ -253,7 +251,7 @@ static size_t readNativePacket(BrailleDisplay *brl, Port *port, void *packet, si
             port->reading = 0;
             size_ = port->position-port->packet;
             if (size_>size) {
-              logMessage(LOG_INFO,DRIVER_LOG_PREFIX "Discarding too large packet");
+              logMessage(LOG_INFO, "Discarding too large packet");
               return 0;
             } else {
               memcpy(packet, port->packet, size_);
@@ -294,7 +292,7 @@ static size_t readEurobraillePacket(Port *port, void *packet, size_t size)
   unsigned char ch;
   size_t size_;
   while (gioReadByte (port->gioEndpoint, &ch, port->reading)) {
-    logMessage(LOG_DEBUG, DRIVER_LOG_PREFIX "Got ch=%c(%02x) state=%d", ch, ch, port->reading);
+    logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "Got ch=%c(%02x) state=%d", ch, ch, port->reading);
     switch (port->reading)
     {
       case 0:
@@ -315,17 +313,17 @@ static size_t readEurobraillePacket(Port *port, void *packet, size_t size)
         port->declaredSize += ch;
         if (port->declaredSize < 3)
         {
-          logMessage(LOG_ERR, DRIVER_LOG_PREFIX "readEuroBraillePacket: invalid declared size %d", port->declaredSize);
+          logMessage(LOG_ERR, "readEuroBraillePacket: invalid declared size %d", port->declaredSize);
           port->reading = 0;
         } else {
           port->declaredSize -= 2;
           if (port->declaredSize > sizeof(port->packet) )
           {
-            logMessage(LOG_DEBUG, DRIVER_LOG_PREFIX "readEuroBraillePacket: rejecting packet whose declared size is too large");
+            logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "readEuroBraillePacket: rejecting packet whose declared size is too large");
             port->reading = 0;
             return 0;
           }
-          logMessage(LOG_DEBUG, DRIVER_LOG_PREFIX "readEuroBraillePacket: declared size = %d", port->declaredSize);
+          logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "readEuroBraillePacket: declared size = %d", port->declaredSize);
           port->reading = 3;
         };
         break;
@@ -338,19 +336,19 @@ static size_t readEurobraillePacket(Port *port, void *packet, size_t size)
         if (ch==ETX) {
           size_ = port->position-port->packet;
           if (size_>size) {
-            logMessage(LOG_INFO,DRIVER_LOG_PREFIX "readEurobraillePacket: Discarding too large packet");
+            logMessage(LOG_INFO, "readEurobraillePacket: Discarding too large packet");
             return 0;
           } else {
             memcpy(packet, port->packet, size_);
             return size_;
           }        
         } else {
-          logMessage(LOG_INFO,DRIVER_LOG_PREFIX "readEurobraillePacket: Discarding packet whose real size exceeds declared size");
+          logMessage(LOG_INFO, "readEurobraillePacket: Discarding packet whose real size exceeds declared size");
           return 0;
         };
         break;
       default:
-        logMessage(LOG_ERR, DRIVER_LOG_PREFIX "readEurobraillePacket: reached unknown state %d", port->reading);
+        logMessage(LOG_ERR, "readEurobraillePacket: reached unknown state %d", port->reading);
         port->reading = 0;
         break;
     }
@@ -389,7 +387,7 @@ static ssize_t writeNativePacket (BrailleDisplay *brl, Port *port, const void *p
       return 0;
     }
 
-    logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "Did not receive ACK on port %s",port->name);
+    logMessage(LOG_WARNING, "Did not receive ACK on port %s",port->name);
     port->waitingForAck = 0;
   }
 
@@ -402,7 +400,7 @@ static ssize_t writeNativePacket (BrailleDisplay *brl, Port *port, const void *p
 
   count = p - buf;
   if (!writeBraillePacket(brl, port->gioEndpoint, buf, count)) {
-    logMessage(LOG_WARNING,DRIVER_LOG_PREFIX "in writeNativePacket: gioWriteData failed");
+    logMessage(LOG_WARNING, "in writeNativePacket: gioWriteData failed");
     return 0;
   }
 
@@ -1056,7 +1054,7 @@ static int brl_reset (BrailleDisplay *brl)
 
 static int enterPacketForwardMode(BrailleDisplay *brl)
 {
-  logMessage(LOG_NOTICE, DRIVER_LOG_PREFIX "Entering packet forward mode (port=%s, protocol=%s, speed=%d)", brl->data->external.port.name, protocolTable[protocol].name, brl->data->external.port.speed);
+  logMessage(LOG_NOTICE, "Entering packet forward mode (port=%s, protocol=%s, speed=%d)", brl->data->external.port.name, protocolTable[protocol].name, brl->data->external.port.speed);
 
   brl->data->external.port.speed = protocolTable[protocol].speed;
   if (!openPort(&brl->data->external.port)) return 0;
@@ -1090,7 +1088,7 @@ static int enterPacketForwardMode(BrailleDisplay *brl)
 static int leavePacketForwardMode(BrailleDisplay *brl)
 {
   static const unsigned char p[] = { IR_IPT_InteractiveKey, 'Q' };
-  logMessage(LOG_NOTICE, DRIVER_LOG_PREFIX "Leaving packet forward mode");
+  logMessage(LOG_NOTICE, "Leaving packet forward mode");
   if (protocol==IR_PROTOCOL_NATIVE) {
     if (! writeNativePacket(brl, &brl->data->external.port, p, sizeof(p)) ) return 0;
   }
@@ -1111,7 +1109,7 @@ typedef struct {
 
 static int
 core_handleZKey(BrailleDisplay *brl, Port *port) {
-  logMessage(LOG_DEBUG, DRIVER_LOG_PREFIX "Z key pressed");
+  logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "Z key pressed");
   /* return enqueueKey(IR_GRP_NavigationKeys, IR_KEY_Z); */
   protocol = (protocol == IR_PROTOCOL_EUROBRAILLE) ?
     IR_PROTOCOL_NATIVE : IR_PROTOCOL_EUROBRAILLE;
@@ -1148,7 +1146,7 @@ static const KeyHandlers coreKeyHandlers = {
 
 static int
 eurobrl_handleZKey(BrailleDisplay *brl, Port *port) {
-  logMessage(LOG_DEBUG, DRIVER_LOG_PREFIX "eurobrl_handleZKey: discarding Z key");
+  logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "eurobrl_handleZKey: discarding Z key");
   return 1;
 }
 
@@ -1357,7 +1355,8 @@ handleNativePacket (BrailleDisplay *brl, Port *port, const KeyHandlers *keyHandl
       return keyHandlers->handleBrailleKeys(brl, port, keys);
     }
   }
-  logBytes(LOG_WARNING, "unhandled Iris packet", packet, size);
+
+  logUnexpectedPacket(packet, size);
   return 0;
 }
 
@@ -1408,7 +1407,7 @@ static int readCommand_embedded (BrailleDisplay *brl)
     /* The test for Menu key should come first since this key toggles */
     /* packet forward mode on/off */
     if (isMenuKey(packet, size)) {
-      logMessage(LOG_DEBUG, DRIVER_LOG_PREFIX "Menu key pressed");
+      logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "Menu key pressed");
       if (brl->data->forwarding) {
         if (! leavePacketForwardMode(brl) ) goto failure;
         continue;
@@ -1460,7 +1459,7 @@ static int readCommand_nonembedded (BrailleDisplay *brl)
      * packet forward mode on/off
      */
     if (isMenuKey(packet, size)) {
-      logMessage(LOG_DEBUG,DRIVER_LOG_PREFIX "Menu key pressed");
+      logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "Menu key pressed");
 
       if (brl->data->connected) {
         brl->data->connected = 0;
@@ -1516,7 +1515,7 @@ static void brl_writeVisual(BrailleDisplay *brl)
   if (memcmp(text, brl->buffer,40)==0) return;
   memcpy(text, brl->buffer, 40);
   text[40] = '\0';
-  logMessage(LOG_INFO, DRIVER_LOG_PREFIX "Sending text: %s", text);
+  logMessage(LOG_INFO, "Sending text: %s", text);
 }
 
 #endif /* BRL_HAVE_VISUAL_DISPLAY */
@@ -1541,7 +1540,7 @@ static ssize_t askDevice(BrailleDisplay *brl, IrisOutputPacketType request, unsi
 static int
 suspendDevice (BrailleDisplay *brl) {
   if (!brl->data->embedded) return 1;
-  logMessage(LOG_INFO, DRIVER_LOG_PREFIX "Suspending device");
+  logMessage(LOG_INFO, "Suspending device");
   if (brl->data->forwarding) {
     static const unsigned char keyPacket[] = { IR_IPT_InteractiveKey, 'Q' };
     if ( ! writeNativePacket(brl, &brl->data->external.port, keyPacket, sizeof(keyPacket)) ) return 0;
@@ -1562,11 +1561,11 @@ suspendDevice (BrailleDisplay *brl) {
 static int
 resumeDevice (BrailleDisplay *brl) {
   if (!brl->data->embedded) return 1;
-  logMessage(LOG_INFO, DRIVER_LOG_PREFIX "resuming device");
+  logMessage(LOG_INFO, "resuming device");
   brl->data->sleeping = 0;
   if ( !openPort(&brl->data->internal.port) )
   {
-    logMessage(LOG_WARNING, DRIVER_LOG_PREFIX "openPort failed");
+    logMessage(LOG_WARNING, "openPort failed");
     return 0;
   }
   activateBraille();
@@ -1593,12 +1592,12 @@ checkLatchState (BrailleDisplay *brl) {
     }
 
     brl->data->latch.pulled = 0;
-    logMessage(LOG_INFO, DRIVER_LOG_PREFIX "latch released");
+    logMessage(LOG_INFO, "latch released");
   } else if (pulled) {
     getMonotonicTime(&brl->data->latch.started);
     brl->data->latch.elapsed = 0;
     brl->data->latch.pulled = 1;
-    logMessage(LOG_INFO, DRIVER_LOG_PREFIX "latch pulled");    
+    logMessage(LOG_INFO, "latch pulled");    
   }
 
   return 0;
@@ -1658,7 +1657,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (validateYesNo(&embedded, parameters[PARM_EMBEDDED])) {
       int internalPortOpened = 0;
 
-      logMessage(LOG_INFO, DRIVER_LOG_PREFIX "embedded=%u", brl->data->embedded);
+      logMessage(LOG_INFO, "embedded=%u", brl->data->embedded);
 
       if ((brl->data->embedded = !!embedded)) {
         {
@@ -1668,9 +1667,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           for (i=0; i<protocolCount; i+=1) protocolChoices[i] = protocolTable[i].name;
 
           if (validateChoice(&protocol, parameters[PARM_PROTOCOL], protocolChoices)) {
-            logMessage(LOG_INFO, DRIVER_LOG_PREFIX "protocol=%s", protocolTable[protocol].name);
+            logMessage(LOG_INFO, "protocol=%s", protocolTable[protocol].name);
           } else {
-            logMessage(LOG_WARNING, DRIVER_LOG_PREFIX "invalid value %s of protocol parameter is ignored - using eurobraille instead", parameters[PARM_PROTOCOL]);
+            logMessage(LOG_WARNING, "invalid value %s of protocol parameter is ignored - using eurobraille instead", parameters[PARM_PROTOCOL]);
             protocol = IR_PROTOCOL_DEFAULT;
           }
         }
@@ -1722,11 +1721,11 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         ssize_t size;
 
         if (!(size = askDevice(brl, IR_OPT_VersionRequest, deviceResponse, sizeof(deviceResponse)) )) {
-          logMessage(LOG_ERR, DRIVER_LOG_PREFIX "received no response to version request");
+          logMessage(LOG_ERR, "received no response to version request");
         } else if (size < 3) {
-          logBytes(LOG_ERR, DRIVER_LOG_PREFIX "the device has sent a too small response to version request", deviceResponse, size);
+          logBytes(LOG_WARNING, "short firmware version response", deviceResponse, size);
         }  else if (deviceResponse[0] != IR_IPT_VersionResponse) {
-          logBytes(LOG_ERR, DRIVER_LOG_PREFIX "the device has sent an unexpected response to version request", deviceResponse, size);
+          logBytes(LOG_WARNING, "unexpected firmware version response", deviceResponse, size);
         } else {
           hasVisualDisplay = 0;
 
@@ -1754,7 +1753,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               break;
 
             default:
-              logBytes(LOG_ERR, DRIVER_LOG_PREFIX "the device has sent an invalid device type in response to version request", deviceResponse, size);
+              logBytes(LOG_WARNING, "unrecognized device type in firmware version response", deviceResponse, size);
               keyTableDefinition = NULL;
               break;
           }
@@ -1765,21 +1764,21 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             if ((firmwareVersion = malloc(size - 1))) {
               memcpy(firmwareVersion, deviceResponse+2, size-2);
               firmwareVersion[size-2] = 0;
-              logMessage(LOG_INFO, DRIVER_LOG_PREFIX "the device's firmware version is %s", firmwareVersion);
+              logMessage(LOG_INFO, "the device's firmware version is %s", firmwareVersion);
 
               if (!(size = askDevice(brl, IR_OPT_SerialNumberRequest, deviceResponse, sizeof(deviceResponse)))) {
-                logMessage(LOG_ERR, DRIVER_LOG_PREFIX "Received no response to serial number request.");
+                logMessage(LOG_ERR, "Received no response to serial number request.");
               } else if (size != IR_OPT_SERIALNUMBERRESPONSE_LENGTH) {
-                logBytes(LOG_ERR, DRIVER_LOG_PREFIX "the device has sent a response whose length is invalid to serial number request", deviceResponse, size);
+                logBytes(LOG_WARNING, "short serial number response", deviceResponse, size);
               } else if (deviceResponse[0] != IR_IPT_SerialNumberResponse) {
-                logBytes(LOG_ERR, DRIVER_LOG_PREFIX "the device has sent an unexpected response to serial number request", deviceResponse, size);
+                logBytes(LOG_WARNING, "unexpected serial number response", deviceResponse, size);
               } else {
                 if (deviceResponse[1] != IR_OPT_SERIALNUMBERRESPONSE_NOWINDOWLENGTH) {
                   brl->textColumns = deviceResponse[1];
                 }
 
                 memcpy(serialNumber, deviceResponse+2, 4);
-                logMessage(LOG_INFO, DRIVER_LOG_PREFIX "device's serial number is %s. It has a %s keyboard, a %d-cells braille display and %s visual dipslay.",
+                logMessage(LOG_INFO, "device's serial number is %s. It has a %s keyboard, a %d-cells braille display and %s visual dipslay.",
                            serialNumber,
                            keyTableDefinition->bindings,
                            brl->textColumns,
@@ -1809,7 +1808,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         closePort(&brl->data->internal.port);
       }
     } else {
-      logMessage(LOG_ERR, DRIVER_LOG_PREFIX "cannot determine whether driver should be run in embedded mode or not");
+      logMessage(LOG_ERR, "cannot determine whether driver should be run in embedded mode or not");
     }
 
     free(brl->data);
