@@ -30,6 +30,7 @@
 #include "parse.h"
 #include "timing.h"
 #include "async_wait.h"
+#include "async_alarm.h"
 #include "ports.h"
 #include "message.h"
 
@@ -154,8 +155,6 @@ static int hasVisualDisplay;
 static unsigned char *firmwareVersion = NULL;
 static unsigned char serialNumber[5] = { 0, 0, 0, 0, 0 };
 static int latchDelay;
-static unsigned int deviceSleeping = 0;
-static unsigned int deviceConnected = 1;
 static unsigned int embeddedDriver = 1;
 static unsigned int packetForwardMode = 0;
 static Port internalPort = {
@@ -168,7 +167,13 @@ static int refreshBrailleWindow = 0;
 static KeyNumberSet linearKeys;
 
 struct BrailleDataStruct {
-  int x;
+  unsigned failure:1;
+  unsigned sleeping:1;
+  unsigned connected:1;
+
+  struct {
+    AsyncHandle monitor;
+  } latch;
 };
 
 static int openPort(Port *port)
@@ -211,48 +216,6 @@ static void deactivateBraille(void)
   writePort1(IRIS_GIO_OUTPUT, 0x02);
   asyncWait(9);
   writePort1(IRIS_GIO_OUTPUT, 0);
-}
-
-static int checkLatchState()
-{
-  static TimeValue startTime;
-  static int latchPulled = 0;
-  static int elapsedTime = 0;
-
-  unsigned char currentState = readPort1(IRIS_GIO_INPUT) & 0x04;
-
-  if (!latchPulled && !currentState) {
-    getMonotonicTime(&startTime);
-    latchPulled = 1;
-    logMessage(LOG_INFO, DRIVER_LOG_PREFIX "latch pulled");    
-    return 0;
-  }
-
-  if (latchPulled) {
-    int res;
-    int ms;
-
-    if (currentState) {
-      latchPulled = 0;
-      logMessage(LOG_INFO, DRIVER_LOG_PREFIX "latch released");
-      elapsedTime = 0;
-      return 0;
-    }
-
-    ms = getMonotonicElapsed(&startTime);
-    logMessage(LOG_DEBUG, DRIVER_LOG_PREFIX "latch pulled for %d milliseconds, elapsedTime=%d, latchDelay=%d", ms, elapsedTime, latchDelay);
-
-    if ((elapsedTime <= latchDelay) && (ms > latchDelay)) {
-      res = 1;
-    } else {
-      res = 0;
-    }
-
-    elapsedTime = ms;
-    return res;
-  }
-
-  return 0;
 }
 
 /* Function readNativePacket */
@@ -1055,49 +1018,9 @@ static int clearWindow(BrailleDisplay *brl, Port *port)
   return writeWindow(brl, port, window);
 }
 
-static int suspendDevice(BrailleDisplay *brl)
-{
-  if (!embeddedDriver) return 1;
-  logMessage(LOG_INFO, DRIVER_LOG_PREFIX "Suspending device");
-  if (packetForwardMode) {
-    static const unsigned char keyPacket[] = { IR_IPT_InteractiveKey, 'Q' };
-    if ( ! writeNativePacket(brl, &externalPort, keyPacket, sizeof(keyPacket)) ) return 0;
-    closePort(&externalPort);
-  }
-  while (! clearWindow(brl, &internalPort)) {
-    if (errno != EAGAIN) return 0;
-  }
-  asyncWait(10);
-  closePort(&internalPort);
-  internalPort.waitingForAck = 0;
-
-  deactivateBraille();
-  deviceSleeping = 1;
-  return 1;
-}
-
-static int resumeDevice(BrailleDisplay *brl)
-{
-  if (!embeddedDriver) return 1;
-  logMessage(LOG_INFO, DRIVER_LOG_PREFIX "resuming device");
-  deviceSleeping = 0;
-  if ( !openPort(&internalPort) )
-  {
-    logMessage(LOG_WARNING, DRIVER_LOG_PREFIX "openPort failed");
-    return 0;
-  }
-  activateBraille();
-  if (packetForwardMode) {
-    static const unsigned char keyPacket[] = { IR_IPT_InteractiveKey, 'W' }; 
-    if (! openPort(&externalPort) ) return 0;
-    if (! writeNativePacket(brl, &externalPort, keyPacket, sizeof(keyPacket)) ) return 0;
-  } else refreshBrailleWindow = 1;
-  return 1;
-}
-
 static ssize_t brl_readPacket (BrailleDisplay *brl, void *packet, size_t size)
 {
-  if (embeddedDriver && (deviceSleeping || packetForwardMode)) return 0;
+  if (embeddedDriver && (brl->data->sleeping || packetForwardMode)) return 0;
   return readNativePacket(brl, &internalPort, packet, size);
 }
 
@@ -1105,7 +1028,7 @@ static ssize_t brl_readPacket (BrailleDisplay *brl, void *packet, size_t size)
 /* Returns 1 if the packet is actually written, 0 if the packet is not written */
 static ssize_t brl_writePacket (BrailleDisplay *brl, const void *packet, size_t size)
 {
-  if (deviceSleeping || packetForwardMode) {
+  if (brl->data->sleeping || packetForwardMode) {
     errno = EAGAIN;
     return 0;
   }
@@ -1465,16 +1388,7 @@ static int readCommand_embedded (BrailleDisplay *brl)
   unsigned char packet[MAXPACKETSIZE];
   size_t size;
 
-  if (checkLatchState()) {
-    if (deviceSleeping) {
-      if (! resumeDevice(brl) ) goto failure;
-      return EOF;
-    }
-
-    if (! suspendDevice(brl) ) goto failure;
-  }
-
-  if (deviceSleeping) return BRL_CMD_OFFLINE;
+  if (brl->data->sleeping) return BRL_CMD_OFFLINE;
 
   while ((size = readNativePacket(brl, &internalPort, packet, sizeof(packet)))) {
     /* The test for Menu key should come first since this key toggles */
@@ -1534,29 +1448,30 @@ static int readCommand_nonembedded (BrailleDisplay *brl)
     if (isMenuKey(packet, size)) {
       logMessage(LOG_DEBUG,DRIVER_LOG_PREFIX "Menu key pressed");
 
-      if (deviceConnected) {
-        deviceConnected = 0;
+      if (brl->data->connected) {
+        brl->data->connected = 0;
         return BRL_CMD_OFFLINE;
       }
     }
 
-    if (!deviceConnected) {
+    if (!brl->data->connected) {
       refreshBrailleWindow = 1;
-      deviceConnected = 1;
+      brl->data->connected = 1;
     }
     
     handleNativePacket(brl, NULL, &coreKeyHandlers, packet, size);
   }
 
   if (errno != EAGAIN) return BRL_CMD_RESTARTBRL;  
-  if (!deviceConnected) return BRL_CMD_OFFLINE;
+  if (!brl->data->connected) return BRL_CMD_OFFLINE;
   return EOF;
 }
 
 static int (*readCommand)(BrailleDisplay *brl) = NULL;
 
-static int brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
-{
+static int
+brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
+  if (brl->data->failure) return BRL_CMD_RESTARTBRL;
   return readCommand(brl);
 }
 
@@ -1612,9 +1527,129 @@ static ssize_t askDevice(BrailleDisplay *brl, IrisOutputPacketType request, unsi
 }
 
 static int
+suspendDevice (BrailleDisplay *brl) {
+  if (!embeddedDriver) return 1;
+  logMessage(LOG_INFO, DRIVER_LOG_PREFIX "Suspending device");
+  if (packetForwardMode) {
+    static const unsigned char keyPacket[] = { IR_IPT_InteractiveKey, 'Q' };
+    if ( ! writeNativePacket(brl, &externalPort, keyPacket, sizeof(keyPacket)) ) return 0;
+    closePort(&externalPort);
+  }
+  while (! clearWindow(brl, &internalPort)) {
+    if (errno != EAGAIN) return 0;
+  }
+  asyncWait(10);
+  closePort(&internalPort);
+  internalPort.waitingForAck = 0;
+
+  deactivateBraille();
+  brl->data->sleeping = 1;
+  return 1;
+}
+
+static int
+resumeDevice (BrailleDisplay *brl) {
+  if (!embeddedDriver) return 1;
+  logMessage(LOG_INFO, DRIVER_LOG_PREFIX "resuming device");
+  brl->data->sleeping = 0;
+  if ( !openPort(&internalPort) )
+  {
+    logMessage(LOG_WARNING, DRIVER_LOG_PREFIX "openPort failed");
+    return 0;
+  }
+  activateBraille();
+  if (packetForwardMode) {
+    static const unsigned char keyPacket[] = { IR_IPT_InteractiveKey, 'W' }; 
+    if (! openPort(&externalPort) ) return 0;
+    if (! writeNativePacket(brl, &externalPort, keyPacket, sizeof(keyPacket)) ) return 0;
+  } else refreshBrailleWindow = 1;
+  return 1;
+}
+
+static int
+checkLatchState (void) {
+  static TimeValue startTime;
+  static int latchPulled = 0;
+  static int elapsedTime = 0;
+
+  unsigned char currentState = readPort1(IRIS_GIO_INPUT) & 0x04;
+
+  if (!latchPulled && !currentState) {
+    getMonotonicTime(&startTime);
+    latchPulled = 1;
+    logMessage(LOG_INFO, DRIVER_LOG_PREFIX "latch pulled");    
+    return 0;
+  }
+
+  if (latchPulled) {
+    int res;
+    int ms;
+
+    if (currentState) {
+      latchPulled = 0;
+      logMessage(LOG_INFO, DRIVER_LOG_PREFIX "latch released");
+      elapsedTime = 0;
+      return 0;
+    }
+
+    ms = getMonotonicElapsed(&startTime);
+    logMessage(LOG_DEBUG, DRIVER_LOG_PREFIX "latch pulled for %d milliseconds, elapsedTime=%d, latchDelay=%d", ms, elapsedTime, latchDelay);
+
+    if ((elapsedTime <= latchDelay) && (ms > latchDelay)) {
+      res = 1;
+    } else {
+      res = 0;
+    }
+
+    elapsedTime = ms;
+    return res;
+  }
+
+  return 0;
+}
+
+ASYNC_ALARM_CALLBACK(irMonitorLatch) {
+  BrailleDisplay *brl = parameters->data;
+
+  if (checkLatchState()) {
+    if (!(brl->data->sleeping? resumeDevice(brl): suspendDevice(brl))) brl->data->failure = 1;
+  }
+}
+
+static int
+startLatchMonitor (BrailleDisplay *brl) {
+ if (brl->data->latch.monitor) return 1;
+
+ if (asyncSetAlarmIn(&brl->data->latch.monitor, 0, irMonitorLatch, brl)) {
+   if (asyncResetAlarmEvery(brl->data->latch.monitor, 100)) {
+     return 1;
+   }
+
+   asyncCancelRequest(brl->data->latch.monitor);
+   brl->data->latch.monitor = NULL;
+ }
+
+ return 0;
+}
+
+static void
+stopLatchMonitor (BrailleDisplay *brl) {
+  if (brl->data->latch.monitor) {
+    asyncCancelRequest(brl->data->latch.monitor);
+    brl->data->latch.monitor = NULL;
+  }
+}
+
+static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
+
+    brl->data->failure = 0;
+    brl->data->sleeping = 0;
+    brl->data->connected = 1;
+
+    brl->data->latch.monitor = NULL;
 
     if (validateYesNo(&embeddedDriver, parameters[PARM_EMBEDDED])) {
       int internalPortOpened = 0;
@@ -1646,18 +1681,22 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           }
         }
 
-        if (enablePorts(LOG_ERR, IRIS_GIO_BASE, 3) != -1) {
-          if (openPort(&internalPort)) {
-            readCommand = &readCommand_embedded;
-            activateBraille();
+        if (startLatchMonitor(brl)) {
+          if (enablePorts(LOG_ERR, IRIS_GIO_BASE, 3) != -1) {
+            if (openPort(&internalPort)) {
+              readCommand = &readCommand_embedded;
+              activateBraille();
 
-            externalPort.name = device;
-            externalPort.speed = iris_protocols[protocol].speed;
+              externalPort.name = device;
+              externalPort.speed = iris_protocols[protocol].speed;
 
-            internalPortOpened = 1;
+              internalPortOpened = 1;
+            }
+          } else {
+            logSystemError("ioperm");
           }
-        } else {
-          logSystemError("ioperm");
+
+          stopLatchMonitor(brl);
         }
       } else {
         internalPort.name = device;
@@ -1665,7 +1704,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
         if (openPort(&internalPort)) {
           readCommand = &readCommand_nonembedded;
-          deviceConnected = 1;
+          brl->data->connected = 1;
 
           internalPortOpened = 1;
         }
@@ -1789,6 +1828,7 @@ brl_destruct (BrailleDisplay *brl) {
   closePort(&internalPort);
 
   if (brl->data) {
+    stopLatchMonitor(brl);
     free(brl->data);
     brl->data = NULL;
   }
