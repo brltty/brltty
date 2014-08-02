@@ -281,68 +281,65 @@ AC_PATH_PROG([MSGFMT], [msgfmt], [false])
 AC_PATH_PROG([LINUXDOC], [linuxdoc], [false])
 AC_PATH_PROG([DOXYGEN], [doxygen], [false])
 
-AC_CACHE_CHECK([for linkage editor program creation flags], [brltty_cv_prog_ld_flags], [dnl
 case "${host_os}"
 in
    linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*)
-      brltty_cv_prog_ld_flags="-export-dynamic"
+      LDFLAGS_DYNAMIC="-export-dynamic"
       ;;
    solaris*)
-      brltty_cv_prog_ld_flags=""
+      LDFLAGS_DYNAMIC=""
       ;;
    hpux*)
-      brltty_cv_prog_ld_flags="-E +s"
+      LDFLAGS_DYNAMIC="-E +s"
       ;;
    osf*)
-      brltty_cv_prog_ld_flags=""
+      LDFLAGS_DYNAMIC=""
       ;;
    cygwin*|mingw*)
-      brltty_cv_prog_ld_flags="--export-all-symbols --enable-auto-import"
+      LDFLAGS_DYNAMIC="--export-all-symbols --enable-auto-import"
       ;;
    msdos*)
-      brltty_cv_prog_ld_flags=""
+      LDFLAGS_DYNAMIC=""
       ;;
    darwin*)
-      brltty_cv_prog_ld_flags=""
+      LDFLAGS_DYNAMIC=""
       ;;
    elf*)
-      brltty_cv_prog_ld_flags=""
+      LDFLAGS_DYNAMIC=""
       ;;
    *)
-      AC_MSG_ERROR([linkage editor program creation flags not configured for ${host_os}])
+      AC_MSG_ERROR([dynamic linkage not supported for ${host_os}])
       ;;
-esac])
-brltty_link_flags="${brltty_cv_prog_ld_flags}"
+esac
 
-AC_CACHE_CHECK([for static linkage flag], [brltty_cv_prog_ld_static], [dnl
 if test "${GCC}" = "yes"
 then
-   brltty_cv_prog_ld_static="-static"
+   LDFLAGS_STATIC="-static"
 else
    case "${host_os}"
    in
       linux*|gnu*|openbsd*|freebsd*|kfreebsd*|*qnx*|cygwin*|mingw*|elf*)
-         brltty_cv_prog_ld_static="-static"
+         LDFLAGS_STATIC="-static"
          ;;
       netbsd*)
-         brltty_cv_prog_ld_static="-Bstatic"
+         LDFLAGS_STATIC="-Bstatic"
          ;;
       solaris*)
-         brltty_cv_prog_ld_static="-dn"
+         LDFLAGS_STATIC="-dn"
          ;;
       hpux*)
-         brltty_cv_prog_ld_static="-Bstatic"
+         LDFLAGS_STATIC="-Bstatic"
          ;;
       osf*)
-         brltty_cv_prog_ld_static="-non_shared"
+         LDFLAGS_STATIC="-non_shared"
          ;;
       *)
-         AC_MSG_ERROR([static linkage not supported by ${host_os}])
+         AC_MSG_ERROR([static linkage not supported for ${host_os}])
          ;;
    esac
-   brltty_cv_prog_ld_static="BRLTTY_OPTIONS_LD2CC([${brltty_cv_prog_ld_static}])"
-fi])
-brltty_static_flag="${brltty_cv_prog_ld_static}"
+
+   LDFLAGS_STATIC="BRLTTY_OPTIONS_LD2CC([${LDFLAGS_STATIC}])"
+fi
 
 pkgconfig_flags_libs="--libs"
 BRLTTY_ARG_ENABLE(
@@ -350,14 +347,15 @@ BRLTTY_ARG_ENABLE(
    [statically linked executables],
    [],
 [dnl
+   LDFLAGS="${LDFLAGS} ${LDFLAGS_STATIC}"
    brltty_standalone_programs="yes"
    pkgconfig_flags_libs="${pkgconfig_flags_libs} --static"
-   LDFLAGS="${LDFLAGS} ${brltty_static_flag}"
 ], [dnl
+   LDFLAGS="${LDFLAGS} BRLTTY_OPTIONS_LD2CC([${LDFLAGS_DYNAMIC}])"
+
    AC_DEFINE([ENABLE_SHARED_OBJECTS], [1],
              [Define this if shared object support is to be included.])
 ])
-LDFLAGS="${LDFLAGS} BRLTTY_OPTIONS_LD2CC([${brltty_link_flags}])"
 
 AC_PROG_INSTALL
 BRLTTY_EXECUTABLE_PATH([INSTALL])
