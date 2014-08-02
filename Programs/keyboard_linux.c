@@ -517,8 +517,6 @@ ASYNC_INPUT_CALLBACK(handleLinuxKeyboardEvent) {
         int press   = event->value == 1;
 
         if (release || press) handleKeyEvent(kpd->kid, event->code, press);
-      } else {
-        writeInputEvent(event->type, event->code, event->value);
       }
 
       return sizeof(*event);
