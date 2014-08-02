@@ -136,19 +136,19 @@ static const LogCategoryEntry logCategoryTable[LOG_CATEGORY_COUNT] = {
   },
 
   [LOG_CATEGORY_INDEX(BRAILLE_DRIVER)] = {
-    .name = "brldvr",
+    .name = "brldrv",
     .title = strtext("Braille Driver Events"),
     .prefix = "braille driver"
   },
 
   [LOG_CATEGORY_INDEX(SPEECH_DRIVER)] = {
-    .name = "spkdvr",
+    .name = "spkdrv",
     .title = strtext("Speech Driver Events"),
     .prefix = "speech driver"
   },
 
   [LOG_CATEGORY_INDEX(SCREEN_DRIVER)] = {
-    .name = "scrdvr",
+    .name = "scrdrv",
     .title = strtext("Screen Driver Events"),
     .prefix = "screen driver"
   },
