@@ -1649,7 +1649,7 @@ stopLatchMonitor (BrailleDisplay *brl) {
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
-    unsigned int embedded = 1;
+    unsigned int embedded;
 
     memset(brl->data, 0, sizeof(*brl->data));
 
@@ -1672,9 +1672,10 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (validateYesNo(&embedded, parameters[PARM_EMBEDDED])) {
       int internalPortOpened = 0;
 
-      logMessage(LOG_INFO, "embedded=%u", brl->data->isEmbedded);
+      brl->data->isEmbedded = !!embedded;
+      logMessage(LOG_INFO, "Embedded: %s", (brl->data->isEmbedded? "yes": "no"));
 
-      if ((brl->data->isEmbedded = !!embedded)) {
+      if (brl->data->isEmbedded) {
         {
           const char *parameter = parameters[PARM_PROTOCOL];
           const char *choices[protocolCount + 1];
