@@ -126,10 +126,18 @@ releaseKeyboardCommonData (KeyboardCommonData *kcd) {
 }
 
 static void
+logKeyCode (const char *action, int code, int press) {
+  logMessage(LOG_CATEGORY(KEYBOARD_KEYS),
+             "%s %d: %s",
+             (press? "press": "release"), code, action);
+}
+
+static void
 flushKeyEvents (KeyboardInstanceData *kid) {
   const KeyEventEntry *event = kid->keyEventBuffer;
 
   while (kid->keyEventCount) {
+    logKeyCode("flushing", event->code, event->press);
     forwardKeyEvent(event->code, event->press);
     event += 1, kid->keyEventCount -= 1;
   }
@@ -231,6 +239,8 @@ void
 handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
   KeyTableState state = KTS_UNBOUND;
 
+  logKeyCode("received", code, press);
+
   if (kid->kcd->isActive) {
     if ((code >= 0) && (code < keyCodeLimit)) {
       const KeyValue *kv = &keyCodeMap[code];
@@ -242,7 +252,9 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
     }
   }
 
-  if (state != KTS_HOTKEY) {
+  if (state == KTS_HOTKEY) {
+    logKeyCode("ignoring", code, press);
+  } else {
     typedef enum {
       WKA_NONE,
       WKA_CURRENT,
@@ -273,8 +285,11 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
 
           event->code = code;
           event->press = press;
-
           BITMASK_SET(kid->handledKeysMask, code);
+
+          logKeyCode("deferring", code, press);
+        } else {
+          logKeyCode("discarding", code, press);
         }
       }
     } else if (kid->justModifiers) {
@@ -286,9 +301,13 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
       unsigned int count = kid->keyEventCount;
 
       while (count) {
-        if (from->code != code)
-          if (to != from)
-            *to++ = *from;
+        if (from->code == code) {
+          logKeyCode("dropping", from->code, from->press);
+        } else if (to != from) {
+          *to++ = *from;
+        } else {
+          to += 1;
+        }
 
         from += 1, count -= 1;
       }
@@ -304,6 +323,7 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
         flushKeyEvents(kid);
 
       case WKA_CURRENT:
+        logKeyCode("forwarding", code, press);
         forwardKeyEvent(code, press);
 
       case WKA_NONE:
