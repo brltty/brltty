@@ -539,29 +539,36 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
         kpd->fileDescriptor = device;
 
         if ((kpd->kid = newKeyboardInstanceData(kcd))) {
+          char description[0X100];
+
+          STR_BEGIN(description, sizeof(description));
+          STR_PRINTF("fd=%d:", device);
+
           {
             struct input_id identity;
+
             if (ioctl(device, EVIOCGID, &identity) != -1) {
-              logMessage(LOG_DEBUG, "input device identity: fd=%d: type=%04X vendor=%04X product=%04X version=%04X",
-                         device, identity.bustype, identity.vendor, identity.product, identity.version);
+              STR_PRINTF(" typ=%04X vnd=%04X prd=%04X ver=%04X",
+                         identity.bustype, identity.vendor, identity.product, identity.version);
 
               {
                 static const KeyboardType typeTable[] = {
-  #ifdef BUS_I8042
+#ifdef BUS_I8042
                   [BUS_I8042] = KBD_TYPE_PS2,
-  #endif /* BUS_I8042 */
+#endif /* BUS_I8042 */
 
-  #ifdef BUS_USB
+#ifdef BUS_USB
                   [BUS_USB] = KBD_TYPE_USB,
-  #endif /* BUS_USB */
+#endif /* BUS_USB */
 
-  #ifdef BUS_BLUETOOTH
+#ifdef BUS_BLUETOOTH
                   [BUS_BLUETOOTH] = KBD_TYPE_Bluetooth,
-  #endif /* BUS_BLUETOOTH */
+#endif /* BUS_BLUETOOTH */
                 };
 
-                if (identity.bustype < ARRAY_COUNT(typeTable))
+                if (identity.bustype < ARRAY_COUNT(typeTable)) {
                   kpd->kid->actualProperties.type = typeTable[identity.bustype];
+                }
               }
 
               kpd->kid->actualProperties.vendor = identity.vendor;
@@ -571,15 +578,48 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
                          device, strerror(errno));
             }
           }
+
+          {
+            char location[0X100];
+
+            if (ioctl(device, EVIOCGPHYS(sizeof(location)), location) != -1) {
+              if (*location) {
+                STR_PRINTF(" loc=%s", location);
+              }
+            }
+          }
+
+          {
+            char identifier[0X100];
+
+            if (ioctl(device, EVIOCGUNIQ(sizeof(identifier)), identifier) != -1) {
+              if (*identifier) {
+                STR_PRINTF(" id=%s", identifier);
+              }
+            }
+          }
+
+          {
+            char name[0X100];
+
+            if (ioctl(device, EVIOCGNAME(sizeof(name)), name) != -1) {
+              if (*name) {
+                STR_PRINTF(" nam=%s", name);
+              }
+            }
+          }
+
+          STR_END;
+          logMessage(LOG_DEBUG, "checking input device: %s", description);
         
           if (kpd->kid->actualProperties.type) {
             if (checkKeyboardProperties(&kpd->kid->actualProperties, &kcd->requiredProperties)) {
               if (hasInputEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
                 if (asyncReadFile(NULL, device, sizeof(struct input_event),
                                   handleLinuxKeyboardEvent, kpd)) {
-  #ifdef EVIOCGRAB
+#ifdef EVIOCGRAB
                   ioctl(device, EVIOCGRAB, 1);
-  #endif /* EVIOCGRAB */
+#endif /* EVIOCGRAB */
 
                   logMessage(LOG_DEBUG, "keyboard found: fd=%d", device);
                   return 1;
