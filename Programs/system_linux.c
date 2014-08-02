@@ -265,11 +265,16 @@ getUinputDevice (void) {
 int
 hasInputEvent (int device, uint16_t type, uint16_t code, uint16_t max) {
 #ifdef HAVE_LINUX_INPUT_H
-  BITMASK(mask, max+1, long);
+  BITMASK(mask, max+1, char);
+  int size = ioctl(device, EVIOCGBIT(type, sizeof(mask)), mask);
 
-  if (ioctl(device, EVIOCGBIT(type, sizeof(mask)), mask) != -1)
-    if (BITMASK_TEST(mask, code))
-      return 1;
+  if (size != -1) {
+    if (code < (size * 8)) {
+      if (BITMASK_TEST(mask, code)) {
+        return 1;
+      }
+    }
+  }
 #endif /* HAVE_LINUX_INPUT_H */
 
   return 0;
