@@ -300,6 +300,7 @@ in
    solaris* ) LDFLAGS_DYNAMIC="";;
    *) AC_MSG_ERROR([dynamic linkage not supported for ${host_os}]);;
 esac
+LDFLAGS_DYNAMIC="${LDFLAGS} BRLTTY_OPTIONS_LD2CC([${LDFLAGS_DYNAMIC}])"
 
 if test "${GCC}" = "yes"
 then
@@ -322,7 +323,6 @@ else
       solaris* ) LDFLAGS_STATIC="-dn";;
       *) AC_MSG_ERROR([static linkage not supported for ${host_os}]);;
    esac
-
    LDFLAGS_STATIC="BRLTTY_OPTIONS_LD2CC([${LDFLAGS_STATIC}])"
 fi
 
@@ -336,7 +336,7 @@ BRLTTY_ARG_ENABLE(
    brltty_standalone_programs="yes"
    pkgconfig_flags_libs="${pkgconfig_flags_libs} --static"
 ], [dnl
-   LDFLAGS="${LDFLAGS} BRLTTY_OPTIONS_LD2CC([${LDFLAGS_DYNAMIC}])"
+   LDFLAGS="${LDFLAGS} ${LDFLAGS_DYNAMIC}"
 
    AC_DEFINE([ENABLE_SHARED_OBJECTS], [1],
              [Define this if shared object support is to be included.])
