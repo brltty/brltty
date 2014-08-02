@@ -283,33 +283,22 @@ AC_PATH_PROG([DOXYGEN], [doxygen], [false])
 
 case "${host_os}"
 in
-   linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*)
-      LDFLAGS_DYNAMIC="-export-dynamic"
-      ;;
-   solaris*)
-      LDFLAGS_DYNAMIC=""
-      ;;
-   hpux*)
-      LDFLAGS_DYNAMIC="-E +s"
-      ;;
-   osf*)
-      LDFLAGS_DYNAMIC=""
-      ;;
-   cygwin*|mingw*)
-      LDFLAGS_DYNAMIC="--export-all-symbols --enable-auto-import"
-      ;;
-   msdos*)
-      LDFLAGS_DYNAMIC=""
-      ;;
-   darwin*)
-      LDFLAGS_DYNAMIC=""
-      ;;
-   elf*)
-      LDFLAGS_DYNAMIC=""
-      ;;
-   *)
-      AC_MSG_ERROR([dynamic linkage not supported for ${host_os}])
-      ;;
+   cygwin*  ) LDFLAGS_DYNAMIC="--export-all-symbols --enable-auto-import";;
+   darwin*  ) LDFLAGS_DYNAMIC="";;
+   elf*     ) LDFLAGS_DYNAMIC="";;
+   freebsd* ) LDFLAGS_DYNAMIC="-export-dynamic";;
+   gnu*     ) LDFLAGS_DYNAMIC="-export-dynamic";;
+   hpux*    ) LDFLAGS_DYNAMIC="-E +s";;
+   kfreebsd*) LDFLAGS_DYNAMIC="-export-dynamic";;
+   linux*   ) LDFLAGS_DYNAMIC="-export-dynamic";;
+   mingw*   ) LDFLAGS_DYNAMIC="--export-all-symbols --enable-auto-import";;
+   msdos*   ) LDFLAGS_DYNAMIC="";;
+   netbsd*  ) LDFLAGS_DYNAMIC="-export-dynamic";;
+   openbsd* ) LDFLAGS_DYNAMIC="-export-dynamic";;
+   osf*     ) LDFLAGS_DYNAMIC="";;
+   *qnx*    ) LDFLAGS_DYNAMIC="-export-dynamic";;
+   solaris* ) LDFLAGS_DYNAMIC="";;
+   *) AC_MSG_ERROR([dynamic linkage not supported for ${host_os}]);;
 esac
 
 if test "${GCC}" = "yes"
@@ -318,24 +307,20 @@ then
 else
    case "${host_os}"
    in
-      linux*|gnu*|openbsd*|freebsd*|kfreebsd*|*qnx*|cygwin*|mingw*|elf*)
-         LDFLAGS_STATIC="-static"
-         ;;
-      netbsd*)
-         LDFLAGS_STATIC="-Bstatic"
-         ;;
-      solaris*)
-         LDFLAGS_STATIC="-dn"
-         ;;
-      hpux*)
-         LDFLAGS_STATIC="-Bstatic"
-         ;;
-      osf*)
-         LDFLAGS_STATIC="-non_shared"
-         ;;
-      *)
-         AC_MSG_ERROR([static linkage not supported for ${host_os}])
-         ;;
+      cygwin*  ) LDFLAGS_STATIC="-static";;
+      elf*     ) LDFLAGS_STATIC="-static";;
+      freebsd* ) LDFLAGS_STATIC="-static";;
+      gnu*     ) LDFLAGS_STATIC="-static";;
+      hpux*    ) LDFLAGS_STATIC="-Bstatic";;
+      kfreebsd*) LDFLAGS_STATIC="-static";;
+      linux*   ) LDFLAGS_STATIC="-static";;
+      mingw*   ) LDFLAGS_STATIC="-static";;
+      netbsd*  ) LDFLAGS_STATIC="-Bstatic";;
+      openbsd* ) LDFLAGS_STATIC="-static";;
+      osf*     ) LDFLAGS_STATIC="-non_shared";;
+      *qnx*    ) LDFLAGS_STATIC="-static";;
+      solaris* ) LDFLAGS_STATIC="-dn";;
+      *) AC_MSG_ERROR([static linkage not supported for ${host_os}]);;
    esac
 
    LDFLAGS_STATIC="BRLTTY_OPTIONS_LD2CC([${LDFLAGS_STATIC}])"
