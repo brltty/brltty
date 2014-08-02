@@ -232,7 +232,7 @@ getUinputDevice (void) {
         logMessage(LOG_DEBUG, "uinput opened: %s fd=%d", name, device);
         
         memset(&description, 0, sizeof(description));
-        strcpy(description.name, "brltty");
+        strncpy(description.name, PACKAGE_TARNAME, sizeof(description.name));
 
         if (write(device, &description, sizeof(description)) != -1) {
           if (enableUinputKeyEvents(device)) {

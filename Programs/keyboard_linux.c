@@ -548,7 +548,7 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
             struct input_id identity;
 
             if (ioctl(device, EVIOCGID, &identity) != -1) {
-              STR_PRINTF(" typ=%04X vnd=%04X prd=%04X ver=%04X",
+              STR_PRINTF(" bus=%04X vnd=%04X prd=%04X ver=%04X",
                          identity.bustype, identity.vendor, identity.product, identity.version);
 
               {
@@ -580,11 +580,11 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
           }
 
           {
-            char location[0X100];
+            char topology[0X100];
 
-            if (ioctl(device, EVIOCGPHYS(sizeof(location)), location) != -1) {
-              if (*location) {
-                STR_PRINTF(" loc=%s", location);
+            if (ioctl(device, EVIOCGPHYS(sizeof(topology)), topology) != -1) {
+              if (*topology) {
+                STR_PRINTF(" top=%s", topology);
               }
             }
           }
