@@ -47,14 +47,18 @@ typedef struct {
 
   KeyboardProperties actualProperties;
 
-  KeyEventEntry *keyEventBuffer;
-  unsigned int keyEventLimit;
-  unsigned int keyEventCount;
+  struct {
+    KeyEventEntry *buffer;
+    unsigned int size;
+    unsigned int count;
+  } events;
 
   unsigned justModifiers:1;
 
-  unsigned int handledKeysSize;
-  unsigned char handledKeysMask[1];
+  struct {
+    unsigned int size;
+    unsigned char mask[0];
+  } deferred;
 } KeyboardInstanceData;
 
 extern void handleKeyEvent (KeyboardInstanceData *kid, int code, int press);

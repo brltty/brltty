@@ -134,22 +134,70 @@ logKeyCode (const char *action, int code, int press) {
 
 static void
 flushKeyEvents (KeyboardInstanceData *kid) {
-  const KeyEventEntry *event = kid->keyEventBuffer;
+  const KeyEventEntry *event = kid->events.buffer;
 
-  while (kid->keyEventCount) {
+  while (kid->events.count) {
     logKeyCode("flushing", event->code, event->press);
     forwardKeyEvent(event->code, event->press);
-    event += 1, kid->keyEventCount -= 1;
+    event += 1, kid->events.count -= 1;
   }
 
-  memset(kid->handledKeysMask, 0, kid->handledKeysSize);
+  memset(kid->deferred.mask, 0, kid->deferred.size);
+}
+
+KeyboardInstanceData *
+newKeyboardInstanceData (KeyboardCommonData *kcd) {
+  KeyboardInstanceData *kid;
+  unsigned int count = BITMASK_ELEMENT_COUNT(keyCodeLimit, BITMASK_ELEMENT_SIZE(unsigned char));
+  size_t size = sizeof(*kid) + count;
+
+  if ((kid = malloc(size))) {
+    memset(kid, 0, size);
+
+    kid->kcd = NULL;
+    kid->kpd = NULL;
+
+    kid->actualProperties = anyKeyboard;
+
+    kid->events.buffer = NULL;
+    kid->events.size = 0;
+    kid->events.count = 0;
+
+    kid->justModifiers = 0;
+    kid->deferred.size = count;
+
+    if (enqueueItem(kcd->instanceQueue, kid)) {
+      kid->kcd = kcd;
+      claimKeyboardCommonData(kcd);
+
+      return kid;
+    }
+
+    free(kid);
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
+
+void
+deallocateKeyboardInstanceData (KeyboardInstanceData *kid) {
+  flushKeyEvents(kid);
+  if (kid->events.buffer) free(kid->events.buffer);
+
+  deleteItem(kid->kcd->instanceQueue, kid);
+  releaseKeyboardCommonData(kid->kcd);
+
+  if (kid->kpd) deallocateKeyboardPlatformData(kid->kpd);
+  free(kid);
 }
 
 static int
-flushKeyboardInstanceData (void *item, void *data) {
+exitKeyboardInstanceData (void *item, void *data) {
   KeyboardInstanceData *kid = item;
 
-  flushKeyEvents(kid);
+  deallocateKeyboardInstanceData(kid);
   return 0;
 }
 
@@ -158,7 +206,7 @@ exitKeyboardMonitor (void *data) {
   KeyboardCommonData *kcd = data;
 
   kcd->isActive = 0;
-  processQueue(kcd->instanceQueue, flushKeyboardInstanceData, NULL);
+  processQueue(kcd->instanceQueue, exitKeyboardInstanceData, NULL);
   releaseKeyboardCommonData(kcd);
 }
 
@@ -191,52 +239,6 @@ startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler hand
   }
 
   return 0;
-}
-
-KeyboardInstanceData *
-newKeyboardInstanceData (KeyboardCommonData *kcd) {
-  KeyboardInstanceData *kid;
-  unsigned int count = BITMASK_ELEMENT_COUNT(keyCodeLimit, BITMASK_ELEMENT_SIZE(unsigned char));
-  size_t size = sizeof(*kid) + count;
-
-  if ((kid = malloc(size))) {
-    memset(kid, 0, size);
-
-    kid->kcd = NULL;
-    kid->kpd = NULL;
-
-    kid->actualProperties = anyKeyboard;
-
-    kid->keyEventBuffer = NULL;
-    kid->keyEventLimit = 0;
-    kid->keyEventCount = 0;
-
-    kid->justModifiers = 0;
-    kid->handledKeysSize = count;
-
-    if (enqueueItem(kcd->instanceQueue, kid)) {
-      kid->kcd = kcd;
-      claimKeyboardCommonData(kcd);
-
-      return kid;
-    }
-
-    free(kid);
-  } else {
-    logMallocError();
-  }
-
-  return NULL;
-}
-
-void
-deallocateKeyboardInstanceData (KeyboardInstanceData *kid) {
-  flushKeyEvents(kid);
-  if (kid->keyEventBuffer) free(kid->keyEventBuffer);
-  deleteItem(kid->kcd->instanceQueue, kid);
-  if (kid->kpd) deallocateKeyboardPlatformData(kid->kpd);
-  releaseKeyboardCommonData(kid->kcd);
-  free(kid);
 }
 
 void
@@ -272,24 +274,24 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
       if (state == KTS_UNBOUND) {
         action = WKA_ALL;
       } else {
-        if (kid->keyEventCount == kid->keyEventLimit) {
-          unsigned int newLimit = kid->keyEventLimit? kid->keyEventLimit<<1: 0X1;
-          KeyEventEntry *newBuffer = realloc(kid->keyEventBuffer, (newLimit * sizeof(*newBuffer)));
+        if (kid->events.count == kid->events.size) {
+          unsigned int newSize = kid->events.size? kid->events.size<<1: 0X1;
+          KeyEventEntry *newBuffer = realloc(kid->events.buffer, (newSize * sizeof(*newBuffer)));
 
           if (newBuffer) {
-            kid->keyEventBuffer = newBuffer;
-            kid->keyEventLimit = newLimit;
+            kid->events.buffer = newBuffer;
+            kid->events.size = newSize;
           } else {
             logMallocError();
           }
         }
 
-        if (kid->keyEventCount < kid->keyEventLimit) {
-          KeyEventEntry *event = &kid->keyEventBuffer[kid->keyEventCount++];
+        if (kid->events.count < kid->events.size) {
+          KeyEventEntry *event = &kid->events.buffer[kid->events.count++];
 
           event->code = code;
           event->press = press;
-          BITMASK_SET(kid->handledKeysMask, code);
+          BITMASK_SET(kid->deferred.mask, code);
 
           logKeyCode("deferring", code, press);
         } else {
@@ -299,10 +301,10 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
     } else if (kid->justModifiers) {
       kid->justModifiers = 0;
       action = WKA_ALL;
-    } else if (BITMASK_TEST(kid->handledKeysMask, code)) {
-      KeyEventEntry *to = kid->keyEventBuffer;
+    } else if (BITMASK_TEST(kid->deferred.mask, code)) {
+      KeyEventEntry *to = kid->events.buffer;
       const KeyEventEntry *from = to;
-      unsigned int count = kid->keyEventCount;
+      unsigned int count = kid->events.count;
 
       while (count) {
         if (from->code == code) {
@@ -316,8 +318,8 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
         from += 1, count -= 1;
       }
 
-      kid->keyEventCount = to - kid->keyEventBuffer;
-      BITMASK_CLEAR(kid->handledKeysMask, code);
+      kid->events.count = to - kid->events.buffer;
+      BITMASK_CLEAR(kid->deferred.mask, code);
     } else {
       action = WKA_CURRENT;
     }
