@@ -23,18 +23,28 @@ export CC="gcc -m32"
 
 "${programDirectory}/configure" \
    --enable-standalone-programs \
+   --without-dynld-package \
+   \
    --disable-api \
+   --disable-contracted-braille \
+   \
    --disable-gpm \
    --disable-icu \
    --disable-x \
-   --disable-contracted-braille \
+   \
    --with-braille-driver=ir,-all \
    --disable-speech-support \
    --with-screen-driver=lx,-all \
+   \
    --without-usb-package \
    --without-bluetooth-package \
+   \
    --without-pcm-package \
    --without-midi-package \
+   \
+   --without-service-package \
+   --without-mntpt-package \
+   \
    --quiet "${@}"
 
 exit 0
