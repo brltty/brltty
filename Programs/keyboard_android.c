@@ -333,23 +333,29 @@ BEGIN_KEY_CODE_MAP
   [B2G_KEY_FORWARD] = KBD_KEY_BRAILLE(Forward),
 END_KEY_CODE_MAP
 
-typedef struct {
-  KeyboardInstanceData *kid;
-
+struct KeyboardPlatformDataStruct {
   JNIEnv *env;
   jclass this;
 
   jclass inputService;
   jmethodID forwardKeyEvent;
-} KeyboardPlatformData;
+};
 
-static KeyboardPlatformData *keyboardPlatformData = NULL;
+static KeyboardInstanceData *keyboardInstanceData = NULL;
+
+void
+deallocateKeyboardPlatformData (KeyboardPlatformData *kpd) {
+  free(kpd);
+  keyboardInstanceData = NULL;
+}
 
 int
 forwardKeyEvent (int code, int press) {
-  KeyboardPlatformData *kpd = keyboardPlatformData;
+  KeyboardInstanceData *kid = keyboardInstanceData;
 
-  if (kpd) {
+  if (kid) {
+    KeyboardPlatformData *kpd = kid->kpd;
+
     if (findJavaClass(kpd->env, &kpd->inputService, "org/a11y/brltty/android/InputService")) {
       if (findJavaInstanceMethod(kpd->env, &kpd->forwardKeyEvent, kpd->inputService, "forwardKeyEvent",
                                  JAVA_SIG_METHOD(JAVA_SIG_VOID,
@@ -375,13 +381,15 @@ JAVA_METHOD (
   org_a11y_brltty_android_InputService, handleKeyEvent, jboolean,
   jint code, jboolean press
 ) {
-  KeyboardPlatformData *kpd = keyboardPlatformData;
+  KeyboardInstanceData *kid = keyboardInstanceData;
 
-  if (kpd) {
+  if (kid) {
+    KeyboardPlatformData *kpd = kid->kpd;
+
     kpd->env = env;
     kpd->this = this;
 
-    handleKeyEvent(kpd->kid, code, (press != JNI_FALSE));
+    handleKeyEvent(kid, code, (press != JNI_FALSE));
     return JNI_TRUE;
   }
 
@@ -390,9 +398,11 @@ JAVA_METHOD (
 
 int
 monitorKeyboards (KeyboardCommonData *kcd) {
-  KeyboardPlatformData *kpd = malloc(sizeof(*kpd));
+  KeyboardPlatformData *kpd;
 
-  if (kpd) {
+  if ((kpd = malloc(sizeof(*kpd)))) {
+    KeyboardInstanceData *kid;
+
     memset(kpd, 0, sizeof(*kpd));
 
     kpd->env = NULL;
@@ -401,8 +411,9 @@ monitorKeyboards (KeyboardCommonData *kcd) {
     kpd->inputService = NULL;
     kpd->forwardKeyEvent = 0;
 
-    if ((kpd->kid = newKeyboardInstanceData(kcd))) {
-      keyboardPlatformData = kpd;
+    if ((kid = newKeyboardInstanceData(kcd))) {
+      kid->kpd = kpd;
+      keyboardInstanceData = kid;
       return 1;
     }
 
@@ -411,6 +422,6 @@ monitorKeyboards (KeyboardCommonData *kcd) {
     logMallocError();
   }
 
-  keyboardPlatformData = NULL;
+  keyboardInstanceData = NULL;
   return 0;
 }

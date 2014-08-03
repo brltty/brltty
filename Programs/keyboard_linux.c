@@ -43,10 +43,10 @@
 #include "async_alarm.h"
 #include "async_io.h"
 
-typedef struct {
-  KeyboardInstanceData *kid;
+struct KeyboardPlatformDataStruct {
   int fileDescriptor;
-} KeyboardPlatformData;
+  AsyncHandle inputMonitor;
+};
 
 BEGIN_KEY_CODE_MAP
   [KEY_ESC] = KBD_KEY_ACTION(Escape),
@@ -486,10 +486,10 @@ BEGIN_KEY_CODE_MAP
   [KEY_MIN_INTERESTING] = KBD_KEY_UNMAPPED,
 END_KEY_CODE_MAP
 
-static void
-closeKeyboard (KeyboardPlatformData *kpd) {
+void
+deallocateKeyboardPlatformData (KeyboardPlatformData *kpd) {
+  asyncCancelRequest(kpd->inputMonitor);
   close(kpd->fileDescriptor);
-  deallocateKeyboardInstanceData(kpd->kid);
   free(kpd);
 }
 
@@ -499,15 +499,15 @@ forwardKeyEvent (int code, int press) {
 }
 
 ASYNC_INPUT_CALLBACK(handleLinuxKeyboardEvent) {
-  KeyboardPlatformData *kpd = parameters->data;
+  KeyboardInstanceData *kid = parameters->data;
 
   if (parameters->error) {
     logMessage(LOG_DEBUG, "keyboard read error: fd=%d: %s",
-               kpd->fileDescriptor, strerror(parameters->error));
-    closeKeyboard(kpd);
+               kid->kpd->fileDescriptor, strerror(parameters->error));
+    deallocateKeyboardInstanceData(kid);
   } else if (parameters->end) {
-    logMessage(LOG_DEBUG, "keyboard end-of-file: fd=%d", kpd->fileDescriptor);
-    closeKeyboard(kpd);
+    logMessage(LOG_DEBUG, "keyboard end-of-file: fd=%d", kid->kpd->fileDescriptor);
+    deallocateKeyboardInstanceData(kid);
   } else {
     const struct input_event *event = parameters->buffer;
 
@@ -516,7 +516,7 @@ ASYNC_INPUT_CALLBACK(handleLinuxKeyboardEvent) {
         int release = event->value == 0;
         int press   = event->value == 1;
 
-        if (release || press) handleKeyEvent(kpd->kid, event->code, press);
+        if (release || press) handleKeyEvent(kid, event->code, press);
       }
 
       return sizeof(*event);
@@ -535,10 +535,13 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
       KeyboardPlatformData *kpd;
 
       if ((kpd = malloc(sizeof(*kpd)))) {
+        KeyboardInstanceData *kid;
+
         memset(kpd, 0, sizeof(*kpd));
         kpd->fileDescriptor = device;
+        kpd->inputMonitor = NULL;
 
-        if ((kpd->kid = newKeyboardInstanceData(kcd))) {
+        if ((kid = newKeyboardInstanceData(kcd))) {
           char description[0X100];
 
           STR_BEGIN(description, sizeof(description));
@@ -567,12 +570,12 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
                 };
 
                 if (identity.bustype < ARRAY_COUNT(typeTable)) {
-                  kpd->kid->actualProperties.type = typeTable[identity.bustype];
+                  kid->actualProperties.type = typeTable[identity.bustype];
                 }
               }
 
-              kpd->kid->actualProperties.vendor = identity.vendor;
-              kpd->kid->actualProperties.product = identity.product;
+              kid->actualProperties.vendor = identity.vendor;
+              kid->actualProperties.product = identity.product;
             } else {
               logMessage(LOG_DEBUG, "cannot get input device identity: fd=%d: %s",
                          device, strerror(errno));
@@ -584,7 +587,7 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
 
             if (ioctl(device, EVIOCGPHYS(sizeof(topology)), topology) != -1) {
               if (*topology) {
-                STR_PRINTF(" top=%s", topology);
+                STR_PRINTF(" tpl=%s", topology);
               }
             }
           }
@@ -612,26 +615,30 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
           STR_END;
           logMessage(LOG_DEBUG, "checking input device: %s", description);
         
-          if (kpd->kid->actualProperties.type) {
-            if (checkKeyboardProperties(&kpd->kid->actualProperties, &kcd->requiredProperties)) {
+          if (kid->actualProperties.type) {
+            if (checkKeyboardProperties(&kid->actualProperties, &kcd->requiredProperties)) {
               if (hasInputEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
-                if (asyncReadFile(NULL, device, sizeof(struct input_event),
-                                  handleLinuxKeyboardEvent, kpd)) {
+                if (asyncReadFile(&kpd->inputMonitor,
+                                  device, sizeof(struct input_event),
+                                  handleLinuxKeyboardEvent, kid)) {
 #ifdef EVIOCGRAB
                   ioctl(device, EVIOCGRAB, 1);
 #endif /* EVIOCGRAB */
 
                   logMessage(LOG_DEBUG, "keyboard found: fd=%d", device);
+                  kid->kpd = kpd;
                   return 1;
                 }
               }
             }
           }
 
-          deallocateKeyboardInstanceData(kpd->kid);
+          deallocateKeyboardInstanceData(kid);
         }
 
         free(kpd);
+      } else {
+        logMallocError();
       }
     }
   } else {

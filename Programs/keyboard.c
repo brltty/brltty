@@ -202,6 +202,9 @@ newKeyboardInstanceData (KeyboardCommonData *kcd) {
   if ((kid = malloc(size))) {
     memset(kid, 0, size);
 
+    kid->kcd = NULL;
+    kid->kpd = NULL;
+
     kid->actualProperties = anyKeyboard;
 
     kid->keyEventBuffer = NULL;
@@ -231,6 +234,7 @@ deallocateKeyboardInstanceData (KeyboardInstanceData *kid) {
   flushKeyEvents(kid);
   if (kid->keyEventBuffer) free(kid->keyEventBuffer);
   deleteItem(kid->kcd->instanceQueue, kid);
+  if (kid->kpd) deallocateKeyboardPlatformData(kid->kpd);
   releaseKeyboardCommonData(kid->kcd);
   free(kid);
 }
