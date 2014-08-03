@@ -143,6 +143,7 @@ flushKeyEvents (KeyboardInstanceData *kid) {
   }
 
   memset(kid->deferred.mask, 0, kid->deferred.size);
+  kid->deferred.modifiersOnly = 0;
 }
 
 KeyboardInstanceData *
@@ -163,7 +164,7 @@ newKeyboardInstanceData (KeyboardCommonData *kcd) {
     kid->events.size = 0;
     kid->events.count = 0;
 
-    kid->justModifiers = 0;
+    kid->deferred.modifiersOnly = 0;
     kid->deferred.size = count;
 
     if (enqueueItem(kcd->instanceQueue, kid)) {
@@ -269,7 +270,7 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
     WriteKeysAction action = WKA_NONE;
 
     if (press) {
-      kid->justModifiers = state == KTS_MODIFIERS;
+      kid->deferred.modifiersOnly = state == KTS_MODIFIERS;
 
       if (state == KTS_UNBOUND) {
         action = WKA_ALL;
@@ -298,8 +299,8 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
           logKeyCode("discarding", code, press);
         }
       }
-    } else if (kid->justModifiers) {
-      kid->justModifiers = 0;
+    } else if (kid->deferred.modifiersOnly) {
+      kid->deferred.modifiersOnly = 0;
       action = WKA_ALL;
     } else if (BITMASK_TEST(kid->deferred.mask, code)) {
       KeyEventEntry *to = kid->events.buffer;

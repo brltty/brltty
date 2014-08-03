@@ -53,9 +53,8 @@ typedef struct {
     unsigned int count;
   } events;
 
-  unsigned justModifiers:1;
-
   struct {
+    unsigned modifiersOnly:1;
     unsigned int size;
     unsigned char mask[0];
   } deferred;
