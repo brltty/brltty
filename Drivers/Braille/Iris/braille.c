@@ -189,7 +189,7 @@ struct BrailleDataStruct {
     int interval;
 
     TimeValue started;
-    int elapsed;
+    long int elapsed;
     unsigned pulled:1;
   } latch;
 };
@@ -1593,7 +1593,7 @@ checkLatchState (BrailleDisplay *brl) {
 
   if (brl->data->latch.pulled) {
     if (pulled) {
-      int elapsed = getMonotonicElapsed(&brl->data->latch.started);
+      long int elapsed = getMonotonicElapsed(&brl->data->latch.started);
       int result = (brl->data->latch.elapsed <= brl->data->latch.delay) &&
                    (elapsed > brl->data->latch.delay);
 
@@ -1623,19 +1623,19 @@ ASYNC_ALARM_CALLBACK(irMonitorLatch) {
 
 static int
 startLatchMonitor (BrailleDisplay *brl) {
- if (brl->data->latch.monitor) return 1;
+  if (brl->data->latch.monitor) return 1;
 
- if (asyncSetAlarmIn(&brl->data->latch.monitor, 0, irMonitorLatch, brl)) {
-   if (asyncResetAlarmEvery(brl->data->latch.monitor, brl->data->latch.interval)) {
-     brl->data->latch.pulled = 0;
-     return 1;
-   }
+  if (asyncSetAlarmIn(&brl->data->latch.monitor, 0, irMonitorLatch, brl)) {
+    if (asyncResetAlarmEvery(brl->data->latch.monitor, brl->data->latch.interval)) {
+      brl->data->latch.pulled = 0;
+      return 1;
+    }
 
-   asyncCancelRequest(brl->data->latch.monitor);
-   brl->data->latch.monitor = NULL;
- }
+    asyncCancelRequest(brl->data->latch.monitor);
+    brl->data->latch.monitor = NULL;
+  }
 
- return 0;
+  return 0;
 }
 
 static void
@@ -1723,8 +1723,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           } else {
             logSystemError("ioperm");
           }
-
-          stopLatchMonitor(brl);
         }
       } else {
         brl->data->internal.port.name = device;
@@ -1830,6 +1828,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       logMessage(LOG_ERR, "invalid embedded setting: %s", parameters[PARM_EMBEDDED]);
     }
 
+    stopLatchMonitor(brl);
     free(brl->data);
   } else {
     logMallocError();
