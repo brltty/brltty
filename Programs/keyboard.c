@@ -123,7 +123,7 @@ flushKeyEvents (KeyboardInstanceData *kid) {
 
   while (kid->events.count) {
     logKeyEvent("flushing", event->code, event->press);
-    forwardKeyEvent(event->code, event->press);
+    forwardKeyEvent(kid, event->code, event->press);
 
     event += 1;
     kid->events.count -= 1;
@@ -314,7 +314,7 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
 
       case WKA_CURRENT:
         logKeyEvent("forwarding", code, press);
-        forwardKeyEvent(code, press);
+        forwardKeyEvent(kid, code, press);
 
       case WKA_NONE:
         break;

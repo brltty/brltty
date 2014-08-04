@@ -26,11 +26,29 @@ BEGIN_KEY_CODE_MAP
 END_KEY_CODE_MAP
 
 int
-forwardKeyEvent (int code, int press) {
+newKeyboardMonitorExtension (KeyboardMonitorExtension **kmx) {
+  return 1;
+}
+
+void
+destroyKeyboardMonitorExtension (KeyboardMonitorExtension *kmx) {
+}
+
+int
+newKeyboardInstanceExtension (KeyboardInstanceExtension **kix) {
+  return 1;
+}
+
+void
+destroyKeyboardInstanceExtension (KeyboardInstanceExtension *kix) {
+}
+
+int
+forwardKeyEvent (KeyboardInstanceData *kid, int code, int press) {
   return 0;
 }
 
 int
-monitorKeyboards (KeyboardCommonData *kcd) {
+monitorKeyboards (KeyboardMonitorData *kmd) {
   return 0;
 }

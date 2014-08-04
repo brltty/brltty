@@ -563,7 +563,7 @@ destroyKeyboardInstanceExtension (KeyboardInstanceExtension *kix) {
 }
 
 int
-forwardKeyEvent (int code, int press) {
+forwardKeyEvent (KeyboardInstanceData *kid, int code, int press) {
   return writeKeyEvent(code, (press? 1: 0));
 }
 

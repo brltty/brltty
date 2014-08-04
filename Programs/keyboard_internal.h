@@ -70,7 +70,7 @@ extern KeyboardInstanceData *newKeyboardInstance (KeyboardMonitorData *kmd);
 extern void destroyKeyboardInstance (KeyboardInstanceData *kid);
 
 extern int monitorKeyboards (KeyboardMonitorData *kmd);
-extern int forwardKeyEvent (int code, int press);
+extern int forwardKeyEvent (KeyboardInstanceData *kid, int code, int press);
 
 extern int newKeyboardMonitorExtension (KeyboardMonitorExtension **kmx);
 extern void destroyKeyboardMonitorExtension (KeyboardMonitorExtension *kmx);

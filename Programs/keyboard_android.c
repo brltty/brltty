@@ -333,6 +333,8 @@ BEGIN_KEY_CODE_MAP
   [B2G_KEY_FORWARD] = KBD_KEY_BRAILLE(Forward),
 END_KEY_CODE_MAP
 
+static KeyboardInstanceData *keyboardInstance = NULL;
+
 struct KeyboardInstanceExtensionStruct {
   JNIEnv *env;
   jclass this;
@@ -340,8 +342,6 @@ struct KeyboardInstanceExtensionStruct {
   jclass inputService;
   jmethodID forwardKeyEvent;
 };
-
-static KeyboardInstanceData *keyboardInstanceData = NULL;
 
 int
 newKeyboardMonitorExtension (KeyboardMonitorExtension **kmx) {
@@ -354,36 +354,46 @@ destroyKeyboardMonitorExtension (KeyboardMonitorExtension *kmx) {
 
 int
 newKeyboardInstanceExtension (KeyboardInstanceExtension **kix) {
-  return 1;
+  if ((*kix = malloc(sizeof(**kix)))) {
+    memset(*kix,  0, sizeof(**kix));
+
+    (*kix)->env = NULL;
+    (*kix)->this = NULL;
+
+    (*kix)->inputService = NULL;
+    (*kix)->forwardKeyEvent = 0;
+
+    return 1;
+  } else {
+    logMallocError();
+  }
+
+  return 0;
 }
 
 void
 destroyKeyboardInstanceExtension (KeyboardInstanceExtension *kix) {
+  keyboardInstance = NULL;
   free(kix);
-  keyboardInstanceData = NULL;
 }
 
 int
-forwardKeyEvent (int code, int press) {
-  KeyboardInstanceData *kid = keyboardInstanceData;
+forwardKeyEvent (KeyboardInstanceData *kid, int code, int press) {
+  KeyboardInstanceExtension *kix = kid->kix;
 
-  if (kid) {
-    KeyboardInstanceExtension *kix = kid->kix;
+  if (findJavaClass(kix->env, &kix->inputService, "org/a11y/brltty/android/InputService")) {
+    if (findJavaInstanceMethod(kix->env, &kix->forwardKeyEvent, kix->inputService, "forwardKeyEvent",
+                               JAVA_SIG_METHOD(JAVA_SIG_VOID,
+                                               JAVA_SIG_INT // code
+                                               JAVA_SIG_BOOLEAN // press
+                                              ))) {
+      (*kix->env)->CallVoidMethod(
+        kix->env, kix->this, kix->forwardKeyEvent,
+        code, (press? JNI_TRUE: JNI_FALSE)
+      );
 
-    if (findJavaClass(kix->env, &kix->inputService, "org/a11y/brltty/android/InputService")) {
-      if (findJavaInstanceMethod(kix->env, &kix->forwardKeyEvent, kix->inputService, "forwardKeyEvent",
-                                 JAVA_SIG_METHOD(JAVA_SIG_VOID,
-                                                 JAVA_SIG_INT // code
-                                                 JAVA_SIG_BOOLEAN // press
-                                                ))) {
-        (*kix->env)->CallVoidMethod(
-          kix->env, kix->this, kix->forwardKeyEvent,
-          code, (press? JNI_TRUE: JNI_FALSE)
-        );
-
-        if (!clearJavaException(kix->env, 1)) {
-          return 1;
-        }
+      if (!clearJavaException(kix->env, 1)) {
+        return 1;
       }
     }
   }
@@ -395,7 +405,7 @@ JAVA_METHOD (
   org_a11y_brltty_android_InputService, handleKeyEvent, jboolean,
   jint code, jboolean press
 ) {
-  KeyboardInstanceData *kid = keyboardInstanceData;
+  KeyboardInstanceData *kid = keyboardInstance;
 
   if (kid) {
     KeyboardInstanceExtension *kix = kid->kix;
@@ -412,30 +422,12 @@ JAVA_METHOD (
 
 int
 monitorKeyboards (KeyboardMonitorData *kmd) {
-  KeyboardInstanceExtension *kix;
+  KeyboardInstanceData *kid;
 
-  if ((kix = malloc(sizeof(*kix)))) {
-    KeyboardInstanceData *kid;
-
-    memset(kix, 0, sizeof(*kix));
-
-    kix->env = NULL;
-    kix->this = NULL;
-
-    kix->inputService = NULL;
-    kix->forwardKeyEvent = 0;
-
-    if ((kid = newKeyboardInstance(kmd))) {
-      kid->kix = kix;
-      keyboardInstanceData = kid;
-      return 1;
-    }
-
-    free(kix);
-  } else {
-    logMallocError();
+  if ((kid = newKeyboardInstance(kmd))) {
+    keyboardInstance = kid;
+    return 1;
   }
 
-  keyboardInstanceData = NULL;
   return 0;
 }
