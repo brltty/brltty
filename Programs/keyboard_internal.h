@@ -72,7 +72,10 @@ extern void destroyKeyboardInstance (KeyboardInstanceData *kid);
 extern int monitorKeyboards (KeyboardMonitorData *kmd);
 extern int forwardKeyEvent (int code, int press);
 
+extern int newKeyboardMonitorExtension (KeyboardMonitorExtension **kmx);
 extern void destroyKeyboardMonitorExtension (KeyboardMonitorExtension *kmx);
+
+extern int newKeyboardInstanceExtension (KeyboardInstanceExtension **kix);
 extern void destroyKeyboardInstanceExtension (KeyboardInstanceExtension *kix);
 
 extern const KeyValue keyCodeMap[];

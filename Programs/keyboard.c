@@ -141,9 +141,7 @@ newKeyboardInstance (KeyboardMonitorData *kmd) {
 
   if ((kid = malloc(size))) {
     memset(kid, 0, size);
-
     kid->kmd = kmd;
-    kid->kix = NULL;
 
     kid->actualProperties = anyKeyboard;
 
@@ -154,8 +152,12 @@ newKeyboardInstance (KeyboardMonitorData *kmd) {
     kid->deferred.modifiersOnly = 0;
     kid->deferred.size = count;
 
-    if (enqueueItem(kmd->instanceQueue, kid)) {
-      return kid;
+    if (newKeyboardInstanceExtension(&kid->kix)) {
+      if (enqueueItem(kmd->instanceQueue, kid)) {
+        return kid;
+      }
+
+      destroyKeyboardInstanceExtension(kid->kix);
     }
 
     free(kid);
@@ -198,18 +200,21 @@ newKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler handle
 
   if ((kmd = malloc(sizeof(*kmd)))) {
     memset(kmd, 0, sizeof(*kmd));
-    kmd->kmx = NULL;
 
     kmd->requiredProperties = *properties;
     kmd->handleKeyEvent = handleKeyEvent;
 
-    if ((kmd->instanceQueue = newQueue(NULL, NULL))) {
-      if (monitorKeyboards(kmd)) {
-        kmd->isActive = 1;
-        return kmd;
+    if (newKeyboardMonitorExtension(&kmd->kmx)) {
+      if ((kmd->instanceQueue = newQueue(NULL, NULL))) {
+        if (monitorKeyboards(kmd)) {
+          kmd->isActive = 1;
+          return kmd;
+        }
+
+        deallocateQueue(kmd->instanceQueue);
       }
 
-      deallocateQueue(kmd->instanceQueue);
+      destroyKeyboardMonitorExtension(kmd->kmx);
     }
 
     free(kmd);

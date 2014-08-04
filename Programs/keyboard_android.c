@@ -343,8 +343,18 @@ struct KeyboardInstanceExtensionStruct {
 
 static KeyboardInstanceData *keyboardInstanceData = NULL;
 
+int
+newKeyboardMonitorExtension (KeyboardMonitorExtension **kmx) {
+  return 1;
+}
+
 void
 destroyKeyboardMonitorExtension (KeyboardMonitorExtension *kmx) {
+}
+
+int
+newKeyboardInstanceExtension (KeyboardInstanceExtension **kix) {
+  return 1;
 }
 
 void
