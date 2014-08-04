@@ -24,8 +24,8 @@
 
 #include "log.h"
 #include "parameters.h"
+#include "file.h"
 #include "system_linux.h"
-
 #include "keyboard.h"
 #include "keyboard_internal.h"
 
@@ -550,15 +550,15 @@ newKeyboardInstanceExtension (KeyboardInstanceExtension **kix) {
 
 void
 destroyKeyboardInstanceExtension (KeyboardInstanceExtension *kix) {
-  if (kix->udevDelay) asyncCancelRequest(kix->udevDelay);
-  if (kix->file.monitor) asyncCancelRequest(kix->file.monitor);
-  if (kix->file.descriptor != -1) close(kix->file.descriptor);
-
-  if (kix->device.path) {
-    logMessage(LOG_DEBUG, "closing input device: %s", kix->device.path);
-    free(kix->device.path);
+  if (kix->file.monitor) {
+    asyncCancelRequest(kix->file.monitor);
+    logMessage(LOG_DEBUG, "closing keyboard: %s: fd=%d",
+               kix->device.path, kix->file.descriptor);
   }
 
+  if (kix->file.descriptor != -1) close(kix->file.descriptor);
+  if (kix->udevDelay) asyncCancelRequest(kix->udevDelay);
+  if (kix->device.path) free(kix->device.path);
   free(kix);
 }
 
@@ -597,17 +597,17 @@ ASYNC_INPUT_CALLBACK(handleLinuxKeyboardEvent) {
 
 static int
 monitorKeyboard (KeyboardInstanceData *kid) {
+  const char *deviceName = locatePathName(kid->kix->device.path);
+
   if ((kid->kix->file.descriptor = open(kid->kix->device.path, O_RDONLY)) != -1) {
     struct stat status;
-
-    logMessage(LOG_DEBUG, "input device opened: %s", kid->kix->device.path);
 
     if (fstat(kid->kix->file.descriptor, &status) != -1) {
       if (S_ISCHR(status.st_mode)) {
         char description[0X100];
 
         STR_BEGIN(description, sizeof(description));
-        STR_PRINTF("%s:", kid->kix->device.path);
+        STR_PRINTF("%s:", deviceName);
 
         {
           struct input_id identity;
@@ -638,9 +638,9 @@ monitorKeyboard (KeyboardInstanceData *kid) {
 
             kid->actualProperties.vendor = identity.vendor;
             kid->actualProperties.product = identity.product;
-          } else {
-            logMessage(LOG_DEBUG, "cannot get input device identity: %s: %s",
-                       kid->kix->device.path, strerror(errno));
+          } else if (errno != ENOTTY) {
+            logMessage(LOG_WARNING, "cannot get input device identity: %s: %s",
+                       deviceName, strerror(errno));
           }
         }
 
@@ -683,28 +683,25 @@ monitorKeyboard (KeyboardInstanceData *kid) {
               if (asyncReadFile(&kid->kix->file.monitor,
                                 kid->kix->file.descriptor, sizeof(struct input_event),
                                 handleLinuxKeyboardEvent, kid)) {
-  #ifdef EVIOCGRAB
+#ifdef EVIOCGRAB
                 ioctl(kid->kix->file.descriptor, EVIOCGRAB, 1);
-  #endif /* EVIOCGRAB */
+#endif /* EVIOCGRAB */
 
-                logMessage(LOG_DEBUG, "keyboard found: %s",
-                           kid->kix->device.path);
+                logMessage(LOG_DEBUG, "keyboard found: %s: fd=%d",
+                           kid->kix->device.path, kid->kix->file.descriptor);
                 return 1;
               }
             }
           }
         }
-      } else {
-        logMessage(LOG_DEBUG, "not a character special device: %s",
-                   kid->kix->device.path);
       }
     } else {
-      logMessage(LOG_DEBUG, "cannot stat input device: %s: %s",
-                 kid->kix->device.path, strerror(errno));
+      logMessage(LOG_WARNING, "cannot stat input device: %s: %s",
+                 deviceName, strerror(errno));
     }
   } else {
-    logMessage(LOG_DEBUG, "cannot open input device: %s: %s",
-               kid->kix->device.path, strerror(errno));
+    logMessage(LOG_WARNING, "cannot open input device: %s: %s",
+               deviceName, strerror(errno));
   }
 
   return 0;
