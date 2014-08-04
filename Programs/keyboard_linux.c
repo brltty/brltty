@@ -45,9 +45,9 @@
 
 struct KeyboardMonitorExtensionStruct {
   struct {
-    int descriptor;
+    int socket;
     AsyncHandle monitor;
-  } socket;
+  } uevent;
 };
 
 struct KeyboardInstanceExtensionStruct {
@@ -508,8 +508,8 @@ newKeyboardMonitorExtension (KeyboardMonitorExtension **kmx) {
   if ((*kmx = malloc(sizeof(**kmx)))) {
     memset(*kmx,  0, sizeof(**kmx));
 
-    (*kmx)->socket.descriptor = -1;
-    (*kmx)->socket.monitor = NULL;
+    (*kmx)->uevent.socket = -1;
+    (*kmx)->uevent.monitor = NULL;
 
     return 1;
   } else {
@@ -521,8 +521,8 @@ newKeyboardMonitorExtension (KeyboardMonitorExtension **kmx) {
 
 void
 destroyKeyboardMonitorExtension (KeyboardMonitorExtension *kmx) {
-  if (kmx->socket.monitor) asyncCancelRequest(kmx->socket.monitor);
-  if (kmx->socket.descriptor != -1) close(kmx->socket.descriptor);
+  if (kmx->uevent.monitor) asyncCancelRequest(kmx->uevent.monitor);
+  if (kmx->uevent.socket != -1) close(kmx->uevent.socket);
   free(kmx);
 }
 
@@ -618,17 +618,17 @@ monitorKeyboard (KeyboardInstanceData *kid) {
 
             {
               static const KeyboardType typeTable[] = {
-  #ifdef BUS_I8042
+#ifdef BUS_I8042
                 [BUS_I8042] = KBD_TYPE_PS2,
-  #endif /* BUS_I8042 */
+#endif /* BUS_I8042 */
 
-  #ifdef BUS_USB
+#ifdef BUS_USB
                 [BUS_USB] = KBD_TYPE_USB,
-  #endif /* BUS_USB */
+#endif /* BUS_USB */
 
-  #ifdef BUS_BLUETOOTH
+#ifdef BUS_BLUETOOTH
                 [BUS_BLUETOOTH] = KBD_TYPE_Bluetooth,
-  #endif /* BUS_BLUETOOTH */
+#endif /* BUS_BLUETOOTH */
               };
 
               if (identity.bustype < ARRAY_COUNT(typeTable)) {
@@ -755,23 +755,36 @@ ASYNC_ALARM_CALLBACK(openLinuxInputDevice) {
 
 ASYNC_INPUT_CALLBACK(handleKobjectUeventString) {
   KeyboardMonitorData *kmd = parameters->data;
+  static const char label[] = "kobject uevent";
 
   if (parameters->error) {
-    logMessage(LOG_DEBUG, "netlink read error: %s", strerror(parameters->error));
+    logMessage(LOG_DEBUG, "%s read error: %s", label, strerror(parameters->error));
   } else if (parameters->end) {
-    logMessage(LOG_DEBUG, "netlink end-of-file");
+    logMessage(LOG_DEBUG, "%s end-of-file", label);
   } else {
     const char *buffer = parameters->buffer;
     const char *end = memchr(buffer, 0, parameters->length);
 
     if (end) {
-      const char *path = strchr(buffer, '@');
+      size_t length = end - buffer;
 
-      if (path) {
+      static const char delimiters[] = {'@', '=', '\0'};
+      const char *delimiter = strpbrk(buffer, delimiters);
+
+      if (!delimiter) {
+        if (strcmp(buffer, "libudev") == 0) {
+          length += 32;
+        } else {
+          logMessage(LOG_WARNING, "unrecognized %s segment: %s", label, buffer);
+        }
+
+        if (parameters->length < length) return 0;
+      } else if (*delimiter == '@') {
         const char *action = buffer;
-        int actionLength = path++ - action;
+        const char *path = delimiter + 1;
+        int actionLength = delimiter - action;
 
-        logMessage(LOG_DEBUG, "OBJECT_UEVENT: %.*s %s", actionLength, action, path);
+        logMessage(LOG_DEBUG, "%s action: %.*s %s", label, actionLength, action, path);
 
         if (strncmp(action, "add", actionLength) == 0) {
           const char *suffix = path;
@@ -827,7 +840,7 @@ ASYNC_INPUT_CALLBACK(handleKobjectUeventString) {
         }
       }
 
-      return end - buffer + 1;
+      return length + 1;
     }
   }
 
@@ -836,42 +849,42 @@ ASYNC_INPUT_CALLBACK(handleKobjectUeventString) {
 
 static int
 getKobjectUeventSocket (void) {
-  static int netlinkSocket = -1;
+  static int socketDescriptor = -1;
 
-  if (netlinkSocket == -1) {
+  if (socketDescriptor == -1) {
     const struct sockaddr_nl socketAddress = {
       .nl_family = AF_NETLINK,
       .nl_pid = getpid(),
       .nl_groups = 0XFFFFFFFF
     };
 
-    if ((netlinkSocket = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_KOBJECT_UEVENT)) != -1) {
-      if (bind(netlinkSocket, (const struct sockaddr *)&socketAddress, sizeof(socketAddress)) == -1) {
+    if ((socketDescriptor = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_KOBJECT_UEVENT)) != -1) {
+      if (bind(socketDescriptor, (const struct sockaddr *)&socketAddress, sizeof(socketAddress)) == -1) {
         logSystemError("bind");
-        close(netlinkSocket);
-        netlinkSocket = -1;
+        close(socketDescriptor);
+        socketDescriptor = -1;
       }
     } else {
       logSystemError("socket");
     }
   }
 
-  return netlinkSocket;
+  return socketDescriptor;
 }
 #endif /* NETLINK_KOBJECT_UEVENT */
 
 static int
 monitorKeyboardAdditions (KeyboardMonitorData *kmd) {
 #ifdef NETLINK_KOBJECT_UEVENT
-  if ((kmd->kmx->socket.descriptor = getKobjectUeventSocket()) != -1) {
-    if (asyncReadSocket(&kmd->kmx->socket.monitor,
-                        kmd->kmx->socket.descriptor, 6+1+PATH_MAX+1,
+  if ((kmd->kmx->uevent.socket = getKobjectUeventSocket()) != -1) {
+    if (asyncReadSocket(&kmd->kmx->uevent.monitor,
+                        kmd->kmx->uevent.socket, 6+1+PATH_MAX+1,
                         handleKobjectUeventString, kmd)) {
       return 1;
     }
 
-    close(kmd->kmx->socket.descriptor);
-    kmd->kmx->socket.descriptor = -1;
+    close(kmd->kmx->uevent.socket);
+    kmd->kmx->uevent.socket = -1;
   }
 #endif /* NETLINK_KOBJECT_UEVENT */
 
