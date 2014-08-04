@@ -31,7 +31,9 @@ export CC="gcc -m32"
    --disable-gpm \
    --disable-icu \
    --disable-x \
+   --without-curses \
    \
+   --without-libbraille \
    --with-braille-driver=ir,-all \
    --disable-speech-support \
    --with-screen-driver=lx,-all \
