@@ -21,7 +21,6 @@
 #include <string.h>
 
 #include "log.h"
-#include "program.h"
 #include "parse.h"
 #include "bitmask.h"
 #include "keyboard.h"
@@ -193,13 +192,6 @@ destroyKeyboardMonitor (KeyboardMonitorData *kmd) {
   free(kmd);
 }
 
-static void
-exitKeyboardMonitor (void *data) {
-  KeyboardMonitorData *kmd = data;
-
-  destroyKeyboardMonitor(kmd);
-}
-
 KeyboardMonitorData *
 newKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent) {
   KeyboardMonitorData *kmd;
@@ -214,7 +206,6 @@ newKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler handle
     if ((kmd->instanceQueue = newQueue(NULL, NULL))) {
       if (monitorKeyboards(kmd)) {
         kmd->isActive = 1;
-        onProgramExit("keyboard-monitor", exitKeyboardMonitor, kmd);
         return kmd;
       }
 
