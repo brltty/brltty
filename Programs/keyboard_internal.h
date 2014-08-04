@@ -28,7 +28,7 @@ extern "C" {
 
 typedef struct KeyboardMonitorExtensionStruct KeyboardMonitorExtension;
 
-struct KeyboardMonitorDataStruct {
+struct KeyboardMonitorObjectStruct {
   KeyboardMonitorExtension *kmx;
   unsigned isActive:1;
 
@@ -46,7 +46,7 @@ typedef struct {
 typedef struct KeyboardInstanceExtensionStruct KeyboardInstanceExtension;
 
 typedef struct {
-  KeyboardMonitorData *kmd;
+  KeyboardMonitorObject *kmo;
   KeyboardInstanceExtension *kix;
 
   KeyboardProperties actualProperties;
@@ -62,15 +62,15 @@ typedef struct {
     unsigned int size;
     unsigned char mask[0];
   } deferred;
-} KeyboardInstanceData;
+} KeyboardInstanceObject;
 
-extern void handleKeyEvent (KeyboardInstanceData *kid, int code, int press);
+extern void handleKeyEvent (KeyboardInstanceObject *kio, int code, int press);
 
-extern KeyboardInstanceData *newKeyboardInstance (KeyboardMonitorData *kmd);
-extern void destroyKeyboardInstance (KeyboardInstanceData *kid);
+extern KeyboardInstanceObject *newKeyboardInstanceObject (KeyboardMonitorObject *kmo);
+extern void destroyKeyboardInstanceObject (KeyboardInstanceObject *kio);
 
-extern int monitorKeyboards (KeyboardMonitorData *kmd);
-extern int forwardKeyEvent (KeyboardInstanceData *kid, int code, int press);
+extern int monitorKeyboards (KeyboardMonitorObject *kmo);
+extern int forwardKeyEvent (KeyboardInstanceObject *kio, int code, int press);
 
 extern int newKeyboardMonitorExtension (KeyboardMonitorExtension **kmx);
 extern void destroyKeyboardMonitorExtension (KeyboardMonitorExtension *kmx);

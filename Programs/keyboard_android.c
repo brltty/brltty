@@ -333,7 +333,7 @@ BEGIN_KEY_CODE_MAP
   [B2G_KEY_FORWARD] = KBD_KEY_BRAILLE(Forward),
 END_KEY_CODE_MAP
 
-static KeyboardInstanceData *keyboardInstance = NULL;
+static KeyboardInstanceObject *keyboardInstance = NULL;
 
 struct KeyboardInstanceExtensionStruct {
   JNIEnv *env;
@@ -378,8 +378,8 @@ destroyKeyboardInstanceExtension (KeyboardInstanceExtension *kix) {
 }
 
 int
-forwardKeyEvent (KeyboardInstanceData *kid, int code, int press) {
-  KeyboardInstanceExtension *kix = kid->kix;
+forwardKeyEvent (KeyboardInstanceObject *kio, int code, int press) {
+  KeyboardInstanceExtension *kix = kio->kix;
 
   if (findJavaClass(kix->env, &kix->inputService, "org/a11y/brltty/android/InputService")) {
     if (findJavaInstanceMethod(kix->env, &kix->forwardKeyEvent, kix->inputService, "forwardKeyEvent",
@@ -405,15 +405,15 @@ JAVA_METHOD (
   org_a11y_brltty_android_InputService, handleKeyEvent, jboolean,
   jint code, jboolean press
 ) {
-  KeyboardInstanceData *kid = keyboardInstance;
+  KeyboardInstanceObject *kio = keyboardInstance;
 
-  if (kid) {
-    KeyboardInstanceExtension *kix = kid->kix;
+  if (kio) {
+    KeyboardInstanceExtension *kix = kio->kix;
 
     kix->env = env;
     kix->this = this;
 
-    handleKeyEvent(kid, code, (press != JNI_FALSE));
+    handleKeyEvent(kio, code, (press != JNI_FALSE));
     return JNI_TRUE;
   }
 
@@ -421,11 +421,11 @@ JAVA_METHOD (
 }
 
 int
-monitorKeyboards (KeyboardMonitorData *kmd) {
-  KeyboardInstanceData *kid;
+monitorKeyboards (KeyboardMonitorObject *kmo) {
+  KeyboardInstanceObject *kio;
 
-  if ((kid = newKeyboardInstance(kmd))) {
-    keyboardInstance = kid;
+  if ((kio = newKeyboardInstanceObject(kmo))) {
+    keyboardInstance = kio;
     return 1;
   }
 

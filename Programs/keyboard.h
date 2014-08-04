@@ -43,11 +43,11 @@ extern const KeyboardProperties anyKeyboard;
 extern int parseKeyboardProperties (KeyboardProperties *properties, const char *string);
 extern int checkKeyboardProperties (const KeyboardProperties *actual, const KeyboardProperties *required);
 
-typedef struct KeyboardMonitorDataStruct KeyboardMonitorData;
+typedef struct KeyboardMonitorObjectStruct KeyboardMonitorObject;
 typedef KeyTableState KeyEventHandler (KeyGroup group, KeyNumber number, int press);
 
-extern KeyboardMonitorData *newKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent);
-extern void destroyKeyboardMonitor (KeyboardMonitorData *kmd);
+extern KeyboardMonitorObject *newKeyboardMonitorObject (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent);
+extern void destroyKeyboardMonitorObject (KeyboardMonitorObject *kmo);
 
 #ifdef __cplusplus
 }

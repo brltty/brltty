@@ -44,11 +44,11 @@ destroyKeyboardInstanceExtension (KeyboardInstanceExtension *kix) {
 }
 
 int
-forwardKeyEvent (KeyboardInstanceData *kid, int code, int press) {
+forwardKeyEvent (KeyboardInstanceObject *kio, int code, int press) {
   return 0;
 }
 
 int
-monitorKeyboards (KeyboardMonitorData *kmd) {
+monitorKeyboards (KeyboardMonitorObject *kmo) {
   return 0;
 }

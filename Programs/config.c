@@ -191,7 +191,7 @@ ContractionTable *contractionTable = NULL;
 
 static char *opt_keyboardTable;
 KeyTable *keyboardTable = NULL;
-static KeyboardMonitorData *keyboardMonitor = NULL;
+static KeyboardMonitorObject *keyboardMonitor = NULL;
 
 static char *opt_keyboardProperties;
 static KeyboardProperties keyboardProperties;
@@ -862,14 +862,14 @@ static void scheduleKeyboardMonitor (int interval);
 static void
 exitKeyboardMonitor (void *data) {
   if (keyboardMonitor) {
-    destroyKeyboardMonitor(keyboardMonitor);
+    destroyKeyboardMonitorObject(keyboardMonitor);
     keyboardMonitor = NULL;
   }
 }
 
 ASYNC_ALARM_CALLBACK(retryKeyboardMonitor) {
   logMessage(LOG_DEBUG, "starting keyboard monitor");
-  if ((keyboardMonitor = newKeyboardMonitor(&keyboardProperties, handleKeyboardEvent))) {
+  if ((keyboardMonitor = newKeyboardMonitorObject(&keyboardProperties, handleKeyboardEvent))) {
     onProgramExit("keyboard-monitor", exitKeyboardMonitor, NULL);
   } else {
     logMessage(LOG_DEBUG, "keyboard monitor failed");

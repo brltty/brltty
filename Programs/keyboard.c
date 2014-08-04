@@ -118,49 +118,49 @@ logKeyEvent (const char *action, int code, int press) {
 }
 
 static void
-flushKeyEvents (KeyboardInstanceData *kid) {
-  const KeyEventEntry *event = kid->events.buffer;
+flushKeyEvents (KeyboardInstanceObject *kio) {
+  const KeyEventEntry *event = kio->events.buffer;
 
-  while (kid->events.count) {
+  while (kio->events.count) {
     logKeyEvent("flushing", event->code, event->press);
-    forwardKeyEvent(kid, event->code, event->press);
+    forwardKeyEvent(kio, event->code, event->press);
 
     event += 1;
-    kid->events.count -= 1;
+    kio->events.count -= 1;
   }
 
-  memset(kid->deferred.mask, 0, kid->deferred.size);
-  kid->deferred.modifiersOnly = 0;
+  memset(kio->deferred.mask, 0, kio->deferred.size);
+  kio->deferred.modifiersOnly = 0;
 }
 
-KeyboardInstanceData *
-newKeyboardInstance (KeyboardMonitorData *kmd) {
-  KeyboardInstanceData *kid;
+KeyboardInstanceObject *
+newKeyboardInstanceObject (KeyboardMonitorObject *kmo) {
+  KeyboardInstanceObject *kio;
   unsigned int count = BITMASK_ELEMENT_COUNT(keyCodeCount, BITMASK_ELEMENT_SIZE(unsigned char));
-  size_t size = sizeof(*kid) + count;
+  size_t size = sizeof(*kio) + count;
 
-  if ((kid = malloc(size))) {
-    memset(kid, 0, size);
-    kid->kmd = kmd;
+  if ((kio = malloc(size))) {
+    memset(kio, 0, size);
+    kio->kmo = kmo;
 
-    kid->actualProperties = anyKeyboard;
+    kio->actualProperties = anyKeyboard;
 
-    kid->events.buffer = NULL;
-    kid->events.size = 0;
-    kid->events.count = 0;
+    kio->events.buffer = NULL;
+    kio->events.size = 0;
+    kio->events.count = 0;
 
-    kid->deferred.modifiersOnly = 0;
-    kid->deferred.size = count;
+    kio->deferred.modifiersOnly = 0;
+    kio->deferred.size = count;
 
-    if (newKeyboardInstanceExtension(&kid->kix)) {
-      if (enqueueItem(kmd->instanceQueue, kid)) {
-        return kid;
+    if (newKeyboardInstanceExtension(&kio->kix)) {
+      if (enqueueItem(kmo->instanceQueue, kio)) {
+        return kio;
       }
 
-      destroyKeyboardInstanceExtension(kid->kix);
+      destroyKeyboardInstanceExtension(kio->kix);
     }
 
-    free(kid);
+    free(kio);
   } else {
     logMallocError();
   }
@@ -169,55 +169,55 @@ newKeyboardInstance (KeyboardMonitorData *kmd) {
 }
 
 void
-destroyKeyboardInstance (KeyboardInstanceData *kid) {
-  flushKeyEvents(kid);
-  if (kid->events.buffer) free(kid->events.buffer);
+destroyKeyboardInstanceObject (KeyboardInstanceObject *kio) {
+  flushKeyEvents(kio);
+  if (kio->events.buffer) free(kio->events.buffer);
 
-  deleteItem(kid->kmd->instanceQueue, kid);
-  if (kid->kix) destroyKeyboardInstanceExtension(kid->kix);
-  free(kid);
+  deleteItem(kio->kmo->instanceQueue, kio);
+  if (kio->kix) destroyKeyboardInstanceExtension(kio->kix);
+  free(kio);
 }
 
 void
-destroyKeyboardMonitor (KeyboardMonitorData *kmd) {
-  kmd->isActive = 0;
+destroyKeyboardMonitorObject (KeyboardMonitorObject *kmo) {
+  kmo->isActive = 0;
 
-  while (getQueueSize(kmd->instanceQueue) > 0) {
-    Element *element = getQueueHead(kmd->instanceQueue);
-    KeyboardInstanceData *kid = getElementItem(element);
+  while (getQueueSize(kmo->instanceQueue) > 0) {
+    Element *element = getQueueHead(kmo->instanceQueue);
+    KeyboardInstanceObject *kio = getElementItem(element);
 
-    destroyKeyboardInstance(kid);
+    destroyKeyboardInstanceObject(kio);
   }
 
-  if (kmd->instanceQueue) deallocateQueue(kmd->instanceQueue);
-  if (kmd->kmx) destroyKeyboardMonitorExtension(kmd->kmx);
-  free(kmd);
+  if (kmo->instanceQueue) deallocateQueue(kmo->instanceQueue);
+  if (kmo->kmx) destroyKeyboardMonitorExtension(kmo->kmx);
+  free(kmo);
 }
 
-KeyboardMonitorData *
-newKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent) {
-  KeyboardMonitorData *kmd;
+KeyboardMonitorObject *
+newKeyboardMonitorObject (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent) {
+  KeyboardMonitorObject *kmo;
 
-  if ((kmd = malloc(sizeof(*kmd)))) {
-    memset(kmd, 0, sizeof(*kmd));
+  if ((kmo = malloc(sizeof(*kmo)))) {
+    memset(kmo, 0, sizeof(*kmo));
 
-    kmd->requiredProperties = *properties;
-    kmd->handleKeyEvent = handleKeyEvent;
+    kmo->requiredProperties = *properties;
+    kmo->handleKeyEvent = handleKeyEvent;
 
-    if (newKeyboardMonitorExtension(&kmd->kmx)) {
-      if ((kmd->instanceQueue = newQueue(NULL, NULL))) {
-        if (monitorKeyboards(kmd)) {
-          kmd->isActive = 1;
-          return kmd;
+    if (newKeyboardMonitorExtension(&kmo->kmx)) {
+      if ((kmo->instanceQueue = newQueue(NULL, NULL))) {
+        if (monitorKeyboards(kmo)) {
+          kmo->isActive = 1;
+          return kmo;
         }
 
-        deallocateQueue(kmd->instanceQueue);
+        deallocateQueue(kmo->instanceQueue);
       }
 
-      destroyKeyboardMonitorExtension(kmd->kmx);
+      destroyKeyboardMonitorExtension(kmo->kmx);
     }
 
-    free(kmd);
+    free(kmo);
   } else {
     logMallocError();
   }
@@ -226,18 +226,18 @@ newKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler handle
 }
 
 void
-handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
+handleKeyEvent (KeyboardInstanceObject *kio, int code, int press) {
   KeyTableState state = KTS_UNBOUND;
 
   logKeyEvent("received", code, press);
 
-  if (kid->kmd->isActive) {
+  if (kio->kmo->isActive) {
     if ((code >= 0) && (code < keyCodeCount)) {
       const KeyValue *kv = &keyCodeMap[code];
 
       if ((kv->group != KBD_GROUP(SPECIAL)) || (kv->number != KBD_KEY(SPECIAL, Unmapped))) {
         if ((kv->group == KBD_GROUP(SPECIAL)) && (kv->number == KBD_KEY(SPECIAL, Ignore))) return;
-        state = kid->kmd->handleKeyEvent(kv->group, kv->number, press);
+        state = kio->kmo->handleKeyEvent(kv->group, kv->number, press);
       }
     }
   }
@@ -253,42 +253,42 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
     WriteKeysAction action = WKA_NONE;
 
     if (press) {
-      kid->deferred.modifiersOnly = state == KTS_MODIFIERS;
+      kio->deferred.modifiersOnly = state == KTS_MODIFIERS;
 
       if (state == KTS_UNBOUND) {
         action = WKA_ALL;
       } else {
-        if (kid->events.count == kid->events.size) {
-          unsigned int newSize = kid->events.size? kid->events.size<<1: 0X1;
-          KeyEventEntry *newBuffer = realloc(kid->events.buffer, (newSize * sizeof(*newBuffer)));
+        if (kio->events.count == kio->events.size) {
+          unsigned int newSize = kio->events.size? kio->events.size<<1: 0X1;
+          KeyEventEntry *newBuffer = realloc(kio->events.buffer, (newSize * sizeof(*newBuffer)));
 
           if (newBuffer) {
-            kid->events.buffer = newBuffer;
-            kid->events.size = newSize;
+            kio->events.buffer = newBuffer;
+            kio->events.size = newSize;
           } else {
             logMallocError();
           }
         }
 
-        if (kid->events.count < kid->events.size) {
-          KeyEventEntry *event = &kid->events.buffer[kid->events.count++];
+        if (kio->events.count < kio->events.size) {
+          KeyEventEntry *event = &kio->events.buffer[kio->events.count++];
 
           event->code = code;
           event->press = press;
-          BITMASK_SET(kid->deferred.mask, code);
+          BITMASK_SET(kio->deferred.mask, code);
 
           logKeyEvent("deferring", code, press);
         } else {
           logKeyEvent("discarding", code, press);
         }
       }
-    } else if (kid->deferred.modifiersOnly) {
-      kid->deferred.modifiersOnly = 0;
+    } else if (kio->deferred.modifiersOnly) {
+      kio->deferred.modifiersOnly = 0;
       action = WKA_ALL;
-    } else if (BITMASK_TEST(kid->deferred.mask, code)) {
-      KeyEventEntry *to = kid->events.buffer;
+    } else if (BITMASK_TEST(kio->deferred.mask, code)) {
+      KeyEventEntry *to = kio->events.buffer;
       const KeyEventEntry *from = to;
-      unsigned int count = kid->events.count;
+      unsigned int count = kio->events.count;
 
       while (count) {
         if (from->code == code) {
@@ -302,19 +302,19 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
         from += 1, count -= 1;
       }
 
-      kid->events.count = to - kid->events.buffer;
-      BITMASK_CLEAR(kid->deferred.mask, code);
+      kio->events.count = to - kio->events.buffer;
+      BITMASK_CLEAR(kio->deferred.mask, code);
     } else {
       action = WKA_CURRENT;
     }
 
     switch (action) {
       case WKA_ALL:
-        flushKeyEvents(kid);
+        flushKeyEvents(kio);
 
       case WKA_CURRENT:
         logKeyEvent("forwarding", code, press);
-        forwardKeyEvent(kid, code, press);
+        forwardKeyEvent(kio, code, press);
 
       case WKA_NONE:
         break;
