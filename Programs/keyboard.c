@@ -113,15 +113,15 @@ checkKeyboardProperties (const KeyboardProperties *actual, const KeyboardPropert
 }
 
 void
-claimKeyboardCommonData (KeyboardCommonData *kcd) {
-  kcd->referenceCount += 1;
+claimKeyboardMonitorData (KeyboardMonitorData *kmd) {
+  kmd->referenceCount += 1;
 }
 
 void
-releaseKeyboardCommonData (KeyboardCommonData *kcd) {
-  if (!(kcd->referenceCount -= 1)) {
-    if (kcd->instanceQueue) deallocateQueue(kcd->instanceQueue);
-    free(kcd);
+releaseKeyboardMonitorData (KeyboardMonitorData *kmd) {
+  if (!(kmd->referenceCount -= 1)) {
+    if (kmd->instanceQueue) deallocateQueue(kmd->instanceQueue);
+    free(kmd);
   }
 }
 
@@ -147,7 +147,7 @@ flushKeyEvents (KeyboardInstanceData *kid) {
 }
 
 KeyboardInstanceData *
-newKeyboardInstanceData (KeyboardCommonData *kcd) {
+newKeyboardInstanceData (KeyboardMonitorData *kmd) {
   KeyboardInstanceData *kid;
   unsigned int count = BITMASK_ELEMENT_COUNT(keyCodeLimit, BITMASK_ELEMENT_SIZE(unsigned char));
   size_t size = sizeof(*kid) + count;
@@ -155,8 +155,8 @@ newKeyboardInstanceData (KeyboardCommonData *kcd) {
   if ((kid = malloc(size))) {
     memset(kid, 0, size);
 
-    kid->kcd = NULL;
-    kid->kpd = NULL;
+    kid->kmd = NULL;
+    kid->kix = NULL;
 
     kid->actualProperties = anyKeyboard;
 
@@ -167,9 +167,9 @@ newKeyboardInstanceData (KeyboardCommonData *kcd) {
     kid->deferred.modifiersOnly = 0;
     kid->deferred.size = count;
 
-    if (enqueueItem(kcd->instanceQueue, kid)) {
-      kid->kcd = kcd;
-      claimKeyboardCommonData(kcd);
+    if (enqueueItem(kmd->instanceQueue, kid)) {
+      kid->kmd = kmd;
+      claimKeyboardMonitorData(kmd);
 
       return kid;
     }
@@ -187,10 +187,10 @@ deallocateKeyboardInstanceData (KeyboardInstanceData *kid) {
   flushKeyEvents(kid);
   if (kid->events.buffer) free(kid->events.buffer);
 
-  deleteItem(kid->kcd->instanceQueue, kid);
-  releaseKeyboardCommonData(kid->kcd);
+  deleteItem(kid->kmd->instanceQueue, kid);
+  releaseKeyboardMonitorData(kid->kmd);
 
-  if (kid->kpd) deallocateKeyboardPlatformData(kid->kpd);
+  if (kid->kix) deallocateKeyboardInstanceExtension(kid->kix);
   free(kid);
 }
 
@@ -204,37 +204,37 @@ exitKeyboardInstanceData (void *item, void *data) {
 
 static void
 exitKeyboardMonitor (void *data) {
-  KeyboardCommonData *kcd = data;
+  KeyboardMonitorData *kmd = data;
 
-  kcd->isActive = 0;
-  processQueue(kcd->instanceQueue, exitKeyboardInstanceData, NULL);
-  releaseKeyboardCommonData(kcd);
+  kmd->isActive = 0;
+  processQueue(kmd->instanceQueue, exitKeyboardInstanceData, NULL);
+  releaseKeyboardMonitorData(kmd);
 }
 
 int
 startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent) {
-  KeyboardCommonData *kcd;
+  KeyboardMonitorData *kmd;
 
-  if ((kcd = malloc(sizeof(*kcd)))) {
-    memset(kcd, 0, sizeof(*kcd));
+  if ((kmd = malloc(sizeof(*kmd)))) {
+    memset(kmd, 0, sizeof(*kmd));
 
-    kcd->referenceCount = 0;
-    claimKeyboardCommonData(kcd);
+    kmd->referenceCount = 0;
+    claimKeyboardMonitorData(kmd);
 
-    kcd->handleKeyEvent = handleKeyEvent;
-    kcd->requiredProperties = *properties;
+    kmd->handleKeyEvent = handleKeyEvent;
+    kmd->requiredProperties = *properties;
 
-    if ((kcd->instanceQueue = newQueue(NULL, NULL))) {
-      if (monitorKeyboards(kcd)) {
-        kcd->isActive = 1;
-        onProgramExit("keyboard-monitor", exitKeyboardMonitor, kcd);
+    if ((kmd->instanceQueue = newQueue(NULL, NULL))) {
+      if (monitorKeyboards(kmd)) {
+        kmd->isActive = 1;
+        onProgramExit("keyboard-monitor", exitKeyboardMonitor, kmd);
         return 1;
       }
 
-      deallocateQueue(kcd->instanceQueue);
+      deallocateQueue(kmd->instanceQueue);
     }
 
-    releaseKeyboardCommonData(kcd);
+    releaseKeyboardMonitorData(kmd);
   } else {
     logMallocError();
   }
@@ -248,13 +248,13 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
 
   logKeyCode("received", code, press);
 
-  if (kid->kcd->isActive) {
+  if (kid->kmd->isActive) {
     if ((code >= 0) && (code < keyCodeLimit)) {
       const KeyValue *kv = &keyCodeMap[code];
 
       if ((kv->group != KBD_GROUP(SPECIAL)) || (kv->number != KBD_KEY(SPECIAL, Unmapped))) {
         if ((kv->group == KBD_GROUP(SPECIAL)) && (kv->number == KBD_KEY(SPECIAL, Ignore))) return;
-        state = kid->kcd->handleKeyEvent(kv->group, kv->number, press);
+        state = kid->kmd->handleKeyEvent(kv->group, kv->number, press);
       }
     }
   }

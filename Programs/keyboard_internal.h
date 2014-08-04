@@ -32,18 +32,18 @@ typedef struct {
   Queue *instanceQueue;
   KeyEventHandler *handleKeyEvent;
   KeyboardProperties requiredProperties;
-} KeyboardCommonData;
+} KeyboardMonitorData;
 
 typedef struct {
   int code;
   int press;
 } KeyEventEntry;
 
-typedef struct KeyboardPlatformDataStruct KeyboardPlatformData;
+typedef struct KeyboardInstanceExtensionStruct KeyboardInstanceExtension;
 
 typedef struct {
-  KeyboardCommonData *kcd;
-  KeyboardPlatformData *kpd;
+  KeyboardMonitorData *kmd;
+  KeyboardInstanceExtension *kix;
 
   KeyboardProperties actualProperties;
 
@@ -61,14 +61,14 @@ typedef struct {
 } KeyboardInstanceData;
 
 extern void handleKeyEvent (KeyboardInstanceData *kid, int code, int press);
-extern void claimKeyboardCommonData (KeyboardCommonData *kcd);
-extern void releaseKeyboardCommonData (KeyboardCommonData *kcd);
-extern KeyboardInstanceData *newKeyboardInstanceData (KeyboardCommonData *kcd);
+extern void claimKeyboardMonitorData (KeyboardMonitorData *kmd);
+extern void releaseKeyboardMonitorData (KeyboardMonitorData *kmd);
+extern KeyboardInstanceData *newKeyboardInstanceData (KeyboardMonitorData *kmd);
 extern void deallocateKeyboardInstanceData (KeyboardInstanceData *kid);
 
-extern int monitorKeyboards (KeyboardCommonData *kcd);
+extern int monitorKeyboards (KeyboardMonitorData *kmd);
 extern int forwardKeyEvent (int code, int press);
-extern void deallocateKeyboardPlatformData (KeyboardPlatformData *kpd);
+extern void deallocateKeyboardInstanceExtension (KeyboardInstanceExtension *kix);
 
 extern const KeyValue keyCodeMap[];
 extern const int keyCodeLimit;

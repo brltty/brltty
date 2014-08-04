@@ -333,7 +333,7 @@ BEGIN_KEY_CODE_MAP
   [B2G_KEY_FORWARD] = KBD_KEY_BRAILLE(Forward),
 END_KEY_CODE_MAP
 
-struct KeyboardPlatformDataStruct {
+struct KeyboardInstanceExtensionStruct {
   JNIEnv *env;
   jclass this;
 
@@ -344,8 +344,8 @@ struct KeyboardPlatformDataStruct {
 static KeyboardInstanceData *keyboardInstanceData = NULL;
 
 void
-deallocateKeyboardPlatformData (KeyboardPlatformData *kpd) {
-  free(kpd);
+deallocateKeyboardInstanceExtension (KeyboardInstanceExtension *kix) {
+  free(kix);
   keyboardInstanceData = NULL;
 }
 
@@ -354,20 +354,20 @@ forwardKeyEvent (int code, int press) {
   KeyboardInstanceData *kid = keyboardInstanceData;
 
   if (kid) {
-    KeyboardPlatformData *kpd = kid->kpd;
+    KeyboardInstanceExtension *kix = kid->kix;
 
-    if (findJavaClass(kpd->env, &kpd->inputService, "org/a11y/brltty/android/InputService")) {
-      if (findJavaInstanceMethod(kpd->env, &kpd->forwardKeyEvent, kpd->inputService, "forwardKeyEvent",
+    if (findJavaClass(kix->env, &kix->inputService, "org/a11y/brltty/android/InputService")) {
+      if (findJavaInstanceMethod(kix->env, &kix->forwardKeyEvent, kix->inputService, "forwardKeyEvent",
                                  JAVA_SIG_METHOD(JAVA_SIG_VOID,
                                                  JAVA_SIG_INT // code
                                                  JAVA_SIG_BOOLEAN // press
                                                 ))) {
-        (*kpd->env)->CallVoidMethod(
-          kpd->env, kpd->this, kpd->forwardKeyEvent,
+        (*kix->env)->CallVoidMethod(
+          kix->env, kix->this, kix->forwardKeyEvent,
           code, (press? JNI_TRUE: JNI_FALSE)
         );
 
-        if (!clearJavaException(kpd->env, 1)) {
+        if (!clearJavaException(kix->env, 1)) {
           return 1;
         }
       }
@@ -384,10 +384,10 @@ JAVA_METHOD (
   KeyboardInstanceData *kid = keyboardInstanceData;
 
   if (kid) {
-    KeyboardPlatformData *kpd = kid->kpd;
+    KeyboardInstanceExtension *kix = kid->kix;
 
-    kpd->env = env;
-    kpd->this = this;
+    kix->env = env;
+    kix->this = this;
 
     handleKeyEvent(kid, code, (press != JNI_FALSE));
     return JNI_TRUE;
@@ -397,27 +397,27 @@ JAVA_METHOD (
 }
 
 int
-monitorKeyboards (KeyboardCommonData *kcd) {
-  KeyboardPlatformData *kpd;
+monitorKeyboards (KeyboardMonitorData *kmd) {
+  KeyboardInstanceExtension *kix;
 
-  if ((kpd = malloc(sizeof(*kpd)))) {
+  if ((kix = malloc(sizeof(*kix)))) {
     KeyboardInstanceData *kid;
 
-    memset(kpd, 0, sizeof(*kpd));
+    memset(kix, 0, sizeof(*kix));
 
-    kpd->env = NULL;
-    kpd->this = NULL;
+    kix->env = NULL;
+    kix->this = NULL;
 
-    kpd->inputService = NULL;
-    kpd->forwardKeyEvent = 0;
+    kix->inputService = NULL;
+    kix->forwardKeyEvent = 0;
 
-    if ((kid = newKeyboardInstanceData(kcd))) {
-      kid->kpd = kpd;
+    if ((kid = newKeyboardInstanceData(kmd))) {
+      kid->kix = kix;
       keyboardInstanceData = kid;
       return 1;
     }
 
-    free(kpd);
+    free(kix);
   } else {
     logMallocError();
   }
