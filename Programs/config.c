@@ -860,7 +860,7 @@ static void scheduleKeyboardMonitor (int interval);
 
 ASYNC_ALARM_CALLBACK(retryKeyboardMonitor) {
   logMessage(LOG_DEBUG, "starting keyboard monitor");
-  if (!startKeyboardMonitor(&keyboardProperties, handleKeyboardEvent)) {
+  if (!newKeyboardMonitor(&keyboardProperties, handleKeyboardEvent)) {
     logMessage(LOG_DEBUG, "keyboard monitor failed");
     scheduleKeyboardMonitor(KEYBOARD_MONITOR_START_RETRY_INTERVAL);
   }

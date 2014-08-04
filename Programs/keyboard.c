@@ -24,7 +24,6 @@
 #include "program.h"
 #include "parse.h"
 #include "bitmask.h"
-
 #include "keyboard.h"
 #include "keyboard_internal.h"
 
@@ -112,21 +111,8 @@ checkKeyboardProperties (const KeyboardProperties *actual, const KeyboardPropert
   return 1;
 }
 
-void
-claimKeyboardMonitorData (KeyboardMonitorData *kmd) {
-  kmd->referenceCount += 1;
-}
-
-void
-releaseKeyboardMonitorData (KeyboardMonitorData *kmd) {
-  if (!(kmd->referenceCount -= 1)) {
-    if (kmd->instanceQueue) deallocateQueue(kmd->instanceQueue);
-    free(kmd);
-  }
-}
-
 static void
-logKeyCode (const char *action, int code, int press) {
+logKeyEvent (const char *action, int code, int press) {
   logMessage(LOG_CATEGORY(KEYBOARD_KEYS),
              "%s %d: %s",
              (press? "press": "release"), code, action);
@@ -137,9 +123,11 @@ flushKeyEvents (KeyboardInstanceData *kid) {
   const KeyEventEntry *event = kid->events.buffer;
 
   while (kid->events.count) {
-    logKeyCode("flushing", event->code, event->press);
+    logKeyEvent("flushing", event->code, event->press);
     forwardKeyEvent(event->code, event->press);
-    event += 1, kid->events.count -= 1;
+
+    event += 1;
+    kid->events.count -= 1;
   }
 
   memset(kid->deferred.mask, 0, kid->deferred.size);
@@ -147,7 +135,7 @@ flushKeyEvents (KeyboardInstanceData *kid) {
 }
 
 KeyboardInstanceData *
-newKeyboardInstanceData (KeyboardMonitorData *kmd) {
+newKeyboardInstance (KeyboardMonitorData *kmd) {
   KeyboardInstanceData *kid;
   unsigned int count = BITMASK_ELEMENT_COUNT(keyCodeCount, BITMASK_ELEMENT_SIZE(unsigned char));
   size_t size = sizeof(*kid) + count;
@@ -155,7 +143,7 @@ newKeyboardInstanceData (KeyboardMonitorData *kmd) {
   if ((kid = malloc(size))) {
     memset(kid, 0, size);
 
-    kid->kmd = NULL;
+    kid->kmd = kmd;
     kid->kix = NULL;
 
     kid->actualProperties = anyKeyboard;
@@ -168,9 +156,6 @@ newKeyboardInstanceData (KeyboardMonitorData *kmd) {
     kid->deferred.size = count;
 
     if (enqueueItem(kmd->instanceQueue, kid)) {
-      kid->kmd = kmd;
-      claimKeyboardMonitorData(kmd);
-
       return kid;
     }
 
@@ -183,72 +168,72 @@ newKeyboardInstanceData (KeyboardMonitorData *kmd) {
 }
 
 void
-deallocateKeyboardInstanceData (KeyboardInstanceData *kid) {
+destroyKeyboardInstance (KeyboardInstanceData *kid) {
   flushKeyEvents(kid);
   if (kid->events.buffer) free(kid->events.buffer);
 
   deleteItem(kid->kmd->instanceQueue, kid);
-  releaseKeyboardMonitorData(kid->kmd);
-
-  if (kid->kix) deallocateKeyboardInstanceExtension(kid->kix);
+  if (kid->kix) destroyKeyboardInstanceExtension(kid->kix);
   free(kid);
 }
 
-static int
-exitKeyboardInstanceData (void *item, void *data) {
-  KeyboardInstanceData *kid = item;
+void
+destroyKeyboardMonitor (KeyboardMonitorData *kmd) {
+  kmd->isActive = 0;
 
-  deallocateKeyboardInstanceData(kid);
-  return 0;
+  while (getQueueSize(kmd->instanceQueue) > 0) {
+    Element *element = getQueueHead(kmd->instanceQueue);
+    KeyboardInstanceData *kid = getElementItem(element);
+
+    destroyKeyboardInstance(kid);
+  }
+
+  if (kmd->instanceQueue) deallocateQueue(kmd->instanceQueue);
+  if (kmd->kmx) destroyKeyboardMonitorExtension(kmd->kmx);
+  free(kmd);
 }
 
 static void
 exitKeyboardMonitor (void *data) {
   KeyboardMonitorData *kmd = data;
 
-  kmd->isActive = 0;
-  processQueue(kmd->instanceQueue, exitKeyboardInstanceData, NULL);
-  if (kmd->kmx) deallocateKeyboardMonitorExtension(kmd->kmx);
-  releaseKeyboardMonitorData(kmd);
+  destroyKeyboardMonitor(kmd);
 }
 
-int
-startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent) {
+KeyboardMonitorData *
+newKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent) {
   KeyboardMonitorData *kmd;
 
   if ((kmd = malloc(sizeof(*kmd)))) {
     memset(kmd, 0, sizeof(*kmd));
     kmd->kmx = NULL;
 
-    kmd->referenceCount = 0;
-    claimKeyboardMonitorData(kmd);
-
-    kmd->handleKeyEvent = handleKeyEvent;
     kmd->requiredProperties = *properties;
+    kmd->handleKeyEvent = handleKeyEvent;
 
     if ((kmd->instanceQueue = newQueue(NULL, NULL))) {
       if (monitorKeyboards(kmd)) {
         kmd->isActive = 1;
         onProgramExit("keyboard-monitor", exitKeyboardMonitor, kmd);
-        return 1;
+        return kmd;
       }
 
       deallocateQueue(kmd->instanceQueue);
     }
 
-    releaseKeyboardMonitorData(kmd);
+    free(kmd);
   } else {
     logMallocError();
   }
 
-  return 0;
+  return NULL;
 }
 
 void
 handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
   KeyTableState state = KTS_UNBOUND;
 
-  logKeyCode("received", code, press);
+  logKeyEvent("received", code, press);
 
   if (kid->kmd->isActive) {
     if ((code >= 0) && (code < keyCodeCount)) {
@@ -262,7 +247,7 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
   }
 
   if (state == KTS_HOTKEY) {
-    logKeyCode("ignoring", code, press);
+    logKeyEvent("ignoring", code, press);
   } else {
     typedef enum {
       WKA_NONE,
@@ -296,9 +281,9 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
           event->press = press;
           BITMASK_SET(kid->deferred.mask, code);
 
-          logKeyCode("deferring", code, press);
+          logKeyEvent("deferring", code, press);
         } else {
-          logKeyCode("discarding", code, press);
+          logKeyEvent("discarding", code, press);
         }
       }
     } else if (kid->deferred.modifiersOnly) {
@@ -311,7 +296,7 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
 
       while (count) {
         if (from->code == code) {
-          logKeyCode("dropping", from->code, from->press);
+          logKeyEvent("dropping", from->code, from->press);
         } else if (to != from) {
           *to++ = *from;
         } else {
@@ -332,7 +317,7 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
         flushKeyEvents(kid);
 
       case WKA_CURRENT:
-        logKeyCode("forwarding", code, press);
+        logKeyEvent("forwarding", code, press);
         forwardKeyEvent(code, press);
 
       case WKA_NONE:

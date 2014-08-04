@@ -44,13 +44,17 @@
 #include "async_io.h"
 
 struct KeyboardMonitorExtensionStruct {
-  int fileDescriptor;
-  AsyncHandle inputMonitor;
+  struct {
+    int descriptor;
+    AsyncHandle monitor;
+  } socket;
 };
 
 struct KeyboardInstanceExtensionStruct {
-  int fileDescriptor;
-  AsyncHandle inputMonitor;
+  struct {
+    int descriptor;
+    AsyncHandle monitor;
+  } file;
 };
 
 BEGIN_KEY_CODE_MAP
@@ -492,13 +496,19 @@ BEGIN_KEY_CODE_MAP
 END_KEY_CODE_MAP
 
 void
-deallocateKeyboardMonitorExtension (KeyboardMonitorExtension *kmx) {
+destroyKeyboardMonitorExtension (KeyboardMonitorExtension *kmx) {
+  if (kmx->socket.monitor) {
+    asyncCancelRequest(kmx->socket.monitor);
+    close(kmx->socket.descriptor);
+  }
+
+  free(kmx);
 }
 
 void
-deallocateKeyboardInstanceExtension (KeyboardInstanceExtension *kix) {
-  asyncCancelRequest(kix->inputMonitor);
-  close(kix->fileDescriptor);
+destroyKeyboardInstanceExtension (KeyboardInstanceExtension *kix) {
+  asyncCancelRequest(kix->file.monitor);
+  close(kix->file.descriptor);
   free(kix);
 }
 
@@ -512,11 +522,11 @@ ASYNC_INPUT_CALLBACK(handleLinuxKeyboardEvent) {
 
   if (parameters->error) {
     logMessage(LOG_DEBUG, "keyboard read error: fd=%d: %s",
-               kid->kix->fileDescriptor, strerror(parameters->error));
-    deallocateKeyboardInstanceData(kid);
+               kid->kix->file.descriptor, strerror(parameters->error));
+    destroyKeyboardInstance(kid);
   } else if (parameters->end) {
-    logMessage(LOG_DEBUG, "keyboard end-of-file: fd=%d", kid->kix->fileDescriptor);
-    deallocateKeyboardInstanceData(kid);
+    logMessage(LOG_DEBUG, "keyboard end-of-file: fd=%d", kid->kix->file.descriptor);
+    destroyKeyboardInstance(kid);
   } else {
     const struct input_event *event = parameters->buffer;
 
@@ -547,10 +557,10 @@ monitorKeyboard (int device, KeyboardMonitorData *kmd) {
         KeyboardInstanceData *kid;
 
         memset(kix, 0, sizeof(*kix));
-        kix->fileDescriptor = device;
-        kix->inputMonitor = NULL;
+        kix->file.descriptor = device;
+        kix->file.monitor = NULL;
 
-        if ((kid = newKeyboardInstanceData(kmd))) {
+        if ((kid = newKeyboardInstance(kmd))) {
           char description[0X100];
 
           STR_BEGIN(description, sizeof(description));
@@ -627,7 +637,7 @@ monitorKeyboard (int device, KeyboardMonitorData *kmd) {
           if (kid->actualProperties.type) {
             if (checkKeyboardProperties(&kid->actualProperties, &kmd->requiredProperties)) {
               if (hasInputEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
-                if (asyncReadFile(&kix->inputMonitor,
+                if (asyncReadFile(&kix->file.monitor,
                                   device, sizeof(struct input_event),
                                   handleLinuxKeyboardEvent, kid)) {
 #ifdef EVIOCGRAB
@@ -642,7 +652,7 @@ monitorKeyboard (int device, KeyboardMonitorData *kmd) {
             }
           }
 
-          deallocateKeyboardInstanceData(kid);
+          destroyKeyboardInstance(kid);
         }
 
         free(kix);
@@ -714,7 +724,6 @@ ASYNC_ALARM_CALLBACK(openLinuxInputDevice) {
   }
 
   free(idd->name);
-  releaseKeyboardMonitorData(idd->kmd);
   free(idd);
 }
 
@@ -723,7 +732,6 @@ ASYNC_INPUT_CALLBACK(handleKobjectUeventString) {
     logMessage(LOG_DEBUG, "netlink read error: %s", strerror(parameters->error));
   } else if (parameters->end) {
     logMessage(LOG_DEBUG, "netlink end-of-file");
-    releaseKeyboardMonitorData(parameters->data);
   } else {
     const char *buffer = parameters->buffer;
     const char *end = memchr(buffer, 0, parameters->length);
@@ -765,7 +773,6 @@ ASYNC_INPUT_CALLBACK(handleKobjectUeventString) {
                         idd->kmd = parameters->data;
 
                         if (asyncSetAlarmIn(NULL, LINUX_INPUT_DEVICE_OPEN_DELAY, openLinuxInputDevice, idd)) {
-                          claimKeyboardMonitorData(idd->kmd);
                           close(descriptor);
                           break;
                         }
@@ -828,9 +835,10 @@ monitorKeyboardAdditions (KeyboardMonitorData *kmd) {
   int kobjectUeventSocket = getKobjectUeventSocket();
 
   if (kobjectUeventSocket != -1) {
-    if (asyncReadFile(NULL, kobjectUeventSocket, 6+1+PATH_MAX+1,
+    if (asyncReadFile(&kmd->kmx->socket.monitor,
+                      kobjectUeventSocket, 6+1+PATH_MAX+1,
                       handleKobjectUeventString, kmd)) {
-      claimKeyboardMonitorData(kmd);
+      kmd->kmx->socket.descriptor = kobjectUeventSocket;
       return 1;
     }
 
@@ -846,9 +854,20 @@ int
 monitorKeyboards (KeyboardMonitorData *kmd) {
 #ifdef HAVE_LINUX_INPUT_H
   if (getUinputDevice() != -1) {
-    monitorCurrentKeyboards(kmd);
-    monitorKeyboardAdditions(kmd);
-    return 1;
+    KeyboardMonitorExtension *kmx;
+
+    if ((kmx = malloc(sizeof(*kmx)))) {
+      memset(kmx, 0, sizeof(*kmx));
+      kmx->socket.descriptor = -1;
+      kmx->socket.monitor = NULL;
+      kmd->kmx = kmx;
+
+      monitorCurrentKeyboards(kmd);
+      monitorKeyboardAdditions(kmd);
+      return 1;
+    } else {
+      logMallocError();
+    }
   }
 #endif /* HAVE_LINUX_INPUT_H */
 

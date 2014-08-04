@@ -45,7 +45,9 @@ extern int checkKeyboardProperties (const KeyboardProperties *actual, const Keyb
 
 typedef struct KeyboardMonitorDataStruct KeyboardMonitorData;
 typedef KeyTableState KeyEventHandler (KeyGroup group, KeyNumber number, int press);
-extern int startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent);
+
+extern KeyboardMonitorData *newKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent);
+extern void destroyKeyboardMonitor (KeyboardMonitorData *kmd);
 
 #ifdef __cplusplus
 }

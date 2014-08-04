@@ -344,11 +344,11 @@ struct KeyboardInstanceExtensionStruct {
 static KeyboardInstanceData *keyboardInstanceData = NULL;
 
 void
-deallocateKeyboardMonitorExtension (KeyboardMonitorExtension *kmx) {
+destroyKeyboardMonitorExtension (KeyboardMonitorExtension *kmx) {
 }
 
 void
-deallocateKeyboardInstanceExtension (KeyboardInstanceExtension *kix) {
+destroyKeyboardInstanceExtension (KeyboardInstanceExtension *kix) {
   free(kix);
   keyboardInstanceData = NULL;
 }
@@ -415,7 +415,7 @@ monitorKeyboards (KeyboardMonitorData *kmd) {
     kix->inputService = NULL;
     kix->forwardKeyEvent = 0;
 
-    if ((kid = newKeyboardInstanceData(kmd))) {
+    if ((kid = newKeyboardInstance(kmd))) {
       kid->kix = kix;
       keyboardInstanceData = kid;
       return 1;

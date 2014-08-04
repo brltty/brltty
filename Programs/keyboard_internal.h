@@ -29,12 +29,13 @@ extern "C" {
 typedef struct KeyboardMonitorExtensionStruct KeyboardMonitorExtension;
 
 struct KeyboardMonitorDataStruct {
-  unsigned int referenceCount;
   KeyboardMonitorExtension *kmx;
   unsigned isActive:1;
-  Queue *instanceQueue;
-  KeyEventHandler *handleKeyEvent;
+
   KeyboardProperties requiredProperties;
+  Queue *instanceQueue;
+
+  KeyEventHandler *handleKeyEvent;
 };
 
 typedef struct {
@@ -65,17 +66,14 @@ typedef struct {
 
 extern void handleKeyEvent (KeyboardInstanceData *kid, int code, int press);
 
-extern void claimKeyboardMonitorData (KeyboardMonitorData *kmd);
-extern void releaseKeyboardMonitorData (KeyboardMonitorData *kmd);
-
-extern KeyboardInstanceData *newKeyboardInstanceData (KeyboardMonitorData *kmd);
-extern void deallocateKeyboardInstanceData (KeyboardInstanceData *kid);
+extern KeyboardInstanceData *newKeyboardInstance (KeyboardMonitorData *kmd);
+extern void destroyKeyboardInstance (KeyboardInstanceData *kid);
 
 extern int monitorKeyboards (KeyboardMonitorData *kmd);
 extern int forwardKeyEvent (int code, int press);
 
-extern void deallocateKeyboardMonitorExtension (KeyboardMonitorExtension *kmx);
-extern void deallocateKeyboardInstanceExtension (KeyboardInstanceExtension *kix);
+extern void destroyKeyboardMonitorExtension (KeyboardMonitorExtension *kmx);
+extern void destroyKeyboardInstanceExtension (KeyboardInstanceExtension *kix);
 
 extern const KeyValue keyCodeMap[];
 extern const unsigned int keyCodeCount;
