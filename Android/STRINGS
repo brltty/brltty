@@ -81,6 +81,9 @@ LOG_CATEGORY_LABEL_server Server Events
 LOG_CATEGORY_LABEL_serial Serial I/O
 LOG_CATEGORY_LABEL_usb USB I/O
 LOG_CATEGORY_LABEL_bluetooth Bluetooth I/O
+LOG_CATEGORY_LABEL_brldrv Braille Driver Events
+LOG_CATEGORY_LABEL_spkdrv Speech Driver Events
+LOG_CATEGORY_LABEL_scrdrv Screen Driver Events
 
 BRAILLE_DRIVER_LABEL_auto autodetect
 
