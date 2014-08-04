@@ -26,13 +26,16 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct {
+typedef struct KeyboardMonitorExtensionStruct KeyboardMonitorExtension;
+
+struct KeyboardMonitorDataStruct {
   unsigned int referenceCount;
+  KeyboardMonitorExtension *kmx;
   unsigned isActive:1;
   Queue *instanceQueue;
   KeyEventHandler *handleKeyEvent;
   KeyboardProperties requiredProperties;
-} KeyboardMonitorData;
+};
 
 typedef struct {
   int code;
@@ -61,20 +64,24 @@ typedef struct {
 } KeyboardInstanceData;
 
 extern void handleKeyEvent (KeyboardInstanceData *kid, int code, int press);
+
 extern void claimKeyboardMonitorData (KeyboardMonitorData *kmd);
 extern void releaseKeyboardMonitorData (KeyboardMonitorData *kmd);
+
 extern KeyboardInstanceData *newKeyboardInstanceData (KeyboardMonitorData *kmd);
 extern void deallocateKeyboardInstanceData (KeyboardInstanceData *kid);
 
 extern int monitorKeyboards (KeyboardMonitorData *kmd);
 extern int forwardKeyEvent (int code, int press);
+
+extern void deallocateKeyboardMonitorExtension (KeyboardMonitorExtension *kmx);
 extern void deallocateKeyboardInstanceExtension (KeyboardInstanceExtension *kix);
 
 extern const KeyValue keyCodeMap[];
-extern const int keyCodeLimit;
+extern const unsigned int keyCodeCount;
 
 #define BEGIN_KEY_CODE_MAP const KeyValue keyCodeMap[] = {
-#define END_KEY_CODE_MAP }; const int keyCodeLimit = ARRAY_COUNT(keyCodeMap);
+#define END_KEY_CODE_MAP }; const unsigned int keyCodeCount = ARRAY_COUNT(keyCodeMap);
 
 #ifdef __cplusplus
 }

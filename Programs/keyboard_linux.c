@@ -43,6 +43,11 @@
 #include "async_alarm.h"
 #include "async_io.h"
 
+struct KeyboardMonitorExtensionStruct {
+  int fileDescriptor;
+  AsyncHandle inputMonitor;
+};
+
 struct KeyboardInstanceExtensionStruct {
   int fileDescriptor;
   AsyncHandle inputMonitor;
@@ -485,6 +490,10 @@ BEGIN_KEY_CODE_MAP
   [KEY_BRL_DOT10] = KBD_KEY_UNMAPPED,
   [KEY_MIN_INTERESTING] = KBD_KEY_UNMAPPED,
 END_KEY_CODE_MAP
+
+void
+deallocateKeyboardMonitorExtension (KeyboardMonitorExtension *kmx) {
+}
 
 void
 deallocateKeyboardInstanceExtension (KeyboardInstanceExtension *kix) {

@@ -149,7 +149,7 @@ flushKeyEvents (KeyboardInstanceData *kid) {
 KeyboardInstanceData *
 newKeyboardInstanceData (KeyboardMonitorData *kmd) {
   KeyboardInstanceData *kid;
-  unsigned int count = BITMASK_ELEMENT_COUNT(keyCodeLimit, BITMASK_ELEMENT_SIZE(unsigned char));
+  unsigned int count = BITMASK_ELEMENT_COUNT(keyCodeCount, BITMASK_ELEMENT_SIZE(unsigned char));
   size_t size = sizeof(*kid) + count;
 
   if ((kid = malloc(size))) {
@@ -208,6 +208,7 @@ exitKeyboardMonitor (void *data) {
 
   kmd->isActive = 0;
   processQueue(kmd->instanceQueue, exitKeyboardInstanceData, NULL);
+  if (kmd->kmx) deallocateKeyboardMonitorExtension(kmd->kmx);
   releaseKeyboardMonitorData(kmd);
 }
 
@@ -217,6 +218,7 @@ startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler hand
 
   if ((kmd = malloc(sizeof(*kmd)))) {
     memset(kmd, 0, sizeof(*kmd));
+    kmd->kmx = NULL;
 
     kmd->referenceCount = 0;
     claimKeyboardMonitorData(kmd);
@@ -249,7 +251,7 @@ handleKeyEvent (KeyboardInstanceData *kid, int code, int press) {
   logKeyCode("received", code, press);
 
   if (kid->kmd->isActive) {
-    if ((code >= 0) && (code < keyCodeLimit)) {
+    if ((code >= 0) && (code < keyCodeCount)) {
       const KeyValue *kv = &keyCodeMap[code];
 
       if ((kv->group != KBD_GROUP(SPECIAL)) || (kv->number != KBD_KEY(SPECIAL, Unmapped))) {

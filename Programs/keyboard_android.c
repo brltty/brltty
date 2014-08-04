@@ -344,6 +344,10 @@ struct KeyboardInstanceExtensionStruct {
 static KeyboardInstanceData *keyboardInstanceData = NULL;
 
 void
+deallocateKeyboardMonitorExtension (KeyboardMonitorExtension *kmx) {
+}
+
+void
 deallocateKeyboardInstanceExtension (KeyboardInstanceExtension *kix) {
   free(kix);
   keyboardInstanceData = NULL;
