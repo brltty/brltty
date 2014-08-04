@@ -552,13 +552,13 @@ void
 destroyKeyboardInstanceExtension (KeyboardInstanceExtension *kix) {
   if (kix->udevDelay) asyncCancelRequest(kix->udevDelay);
   if (kix->file.monitor) asyncCancelRequest(kix->file.monitor);
+  if (kix->file.descriptor != -1) close(kix->file.descriptor);
 
-  if (kix->file.descriptor != -1) {
-    logMessage(LOG_DEBUG, "closing keyboard: fd=%d", kix->file.descriptor);
-    close(kix->file.descriptor);
+  if (kix->device.path) {
+    logMessage(LOG_DEBUG, "closing input device: %s", kix->device.path);
+    free(kix->device.path);
   }
 
-  if (kix->device.path) free(kix->device.path);
   free(kix);
 }
 
@@ -600,15 +600,14 @@ monitorKeyboard (KeyboardInstanceData *kid) {
   if ((kid->kix->file.descriptor = open(kid->kix->device.path, O_RDONLY)) != -1) {
     struct stat status;
 
-    logMessage(LOG_DEBUG, "input device opened: %s: fd=%d",
-               kid->kix->device.path, kid->kix->file.descriptor);
+    logMessage(LOG_DEBUG, "input device opened: %s", kid->kix->device.path);
 
     if (fstat(kid->kix->file.descriptor, &status) != -1) {
       if (S_ISCHR(status.st_mode)) {
         char description[0X100];
 
         STR_BEGIN(description, sizeof(description));
-        STR_PRINTF("fd=%d:", kid->kix->file.descriptor);
+        STR_PRINTF("%s:", kid->kix->device.path);
 
         {
           struct input_id identity;
@@ -640,8 +639,8 @@ monitorKeyboard (KeyboardInstanceData *kid) {
             kid->actualProperties.vendor = identity.vendor;
             kid->actualProperties.product = identity.product;
           } else {
-            logMessage(LOG_DEBUG, "cannot get input device identity: fd=%d: %s",
-                       kid->kix->file.descriptor, strerror(errno));
+            logMessage(LOG_DEBUG, "cannot get input device identity: %s: %s",
+                       kid->kix->device.path, strerror(errno));
           }
         }
 
@@ -688,19 +687,20 @@ monitorKeyboard (KeyboardInstanceData *kid) {
                 ioctl(kid->kix->file.descriptor, EVIOCGRAB, 1);
   #endif /* EVIOCGRAB */
 
-                logMessage(LOG_DEBUG, "keyboard found: fd=%d", kid->kix->file.descriptor);
+                logMessage(LOG_DEBUG, "keyboard found: %s",
+                           kid->kix->device.path);
                 return 1;
               }
             }
           }
         }
       } else {
-        logMessage(LOG_DEBUG, "not a character special device: fd=%d",
-                   kid->kix->file.descriptor);
+        logMessage(LOG_DEBUG, "not a character special device: %s",
+                   kid->kix->device.path);
       }
     } else {
-      logMessage(LOG_DEBUG, "cannot stat input device: fd=%d: %s",
-                 kid->kix->file.descriptor, strerror(errno));
+      logMessage(LOG_DEBUG, "cannot stat input device: %s: %s",
+                 kid->kix->device.path, strerror(errno));
     }
   } else {
     logMessage(LOG_DEBUG, "cannot open input device: %s: %s",
@@ -867,9 +867,9 @@ static int
 monitorKeyboardAdditions (KeyboardMonitorData *kmd) {
 #ifdef NETLINK_KOBJECT_UEVENT
   if ((kmd->kmx->socket.descriptor = getKobjectUeventSocket()) != -1) {
-    if (asyncReadFile(&kmd->kmx->socket.monitor,
-                      kmd->kmx->socket.descriptor, 6+1+PATH_MAX+1,
-                      handleKobjectUeventString, kmd)) {
+    if (asyncReadSocket(&kmd->kmx->socket.monitor,
+                        kmd->kmx->socket.descriptor, 6+1+PATH_MAX+1,
+                        handleKobjectUeventString, kmd)) {
       return 1;
     }
 
