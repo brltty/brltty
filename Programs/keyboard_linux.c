@@ -687,7 +687,7 @@ monitorKeyboard (KeyboardInstanceData *kid) {
                 ioctl(kid->kix->file.descriptor, EVIOCGRAB, 1);
 #endif /* EVIOCGRAB */
 
-                logMessage(LOG_DEBUG, "keyboard found: %s: fd=%d",
+                logMessage(LOG_DEBUG, "keyboard opened: %s: fd=%d",
                            kid->kix->device.path, kid->kix->file.descriptor);
                 return 1;
               }
@@ -753,6 +753,35 @@ ASYNC_ALARM_CALLBACK(openLinuxInputDevice) {
   if (!monitorKeyboard(kid)) destroyKeyboardInstance(kid);
 }
 
+static int
+getDeviceNumbers (const char *device, int *major, int *minor) {
+  int ok = 0;
+  static const char prefix[] = "/sys";
+  static const char suffix[] = "/dev";
+  char path[strlen(prefix) + strlen(device) + sizeof(suffix)];
+  int descriptor;
+
+  snprintf(path, sizeof(path), "%s%s%s", prefix, device, suffix);
+
+  if ((descriptor = open(path, O_RDONLY)) != -1) {
+    char buffer[0X10];
+    ssize_t length;
+
+    if ((length = read(descriptor, buffer, sizeof(buffer))) > 0) {
+      if (sscanf(buffer, "%d:%d", major, minor) == 2) {
+        ok = 1;
+      }
+    }
+
+    close(descriptor);
+  } else {
+    logMessage(LOG_DEBUG, "cannot open sysfs dev file: %s: %s",
+               path, strerror(errno));
+  }
+
+  return ok;
+}
+
 ASYNC_INPUT_CALLBACK(handleKobjectUeventString) {
   KeyboardMonitorData *kmd = parameters->data;
   static const char label[] = "kobject uevent";
@@ -762,78 +791,58 @@ ASYNC_INPUT_CALLBACK(handleKobjectUeventString) {
   } else if (parameters->end) {
     logMessage(LOG_DEBUG, "%s end-of-file", label);
   } else {
-    const char *buffer = parameters->buffer;
-    const char *end = memchr(buffer, 0, parameters->length);
+    const char *string = parameters->buffer;
+    const char *end = memchr(string, 0, parameters->length);
 
     if (end) {
-      size_t length = end - buffer;
+      size_t length = end - string;
 
       static const char delimiters[] = {'@', '=', '\0'};
-      const char *delimiter = strpbrk(buffer, delimiters);
+      const char *delimiter = strpbrk(string, delimiters);
 
       if (!delimiter) {
-        if (strcmp(buffer, "libudev") == 0) {
+        if (strcmp(string, "libudev") == 0) {
           length += 32;
         } else {
-          logMessage(LOG_WARNING, "unrecognized %s segment: %s", label, buffer);
+          logMessage(LOG_WARNING, "unrecognized %s segment: %s", label, string);
         }
 
         if (parameters->length < length) return 0;
       } else if (*delimiter == '@') {
-        const char *action = buffer;
-        const char *path = delimiter + 1;
+        const char *action = string;
+        const char *device = delimiter + 1;
         int actionLength = delimiter - action;
 
-        logMessage(LOG_DEBUG, "%s action: %.*s %s", label, actionLength, action, path);
+        logMessage(LOG_DEBUG, "%s action: %.*s %s", label, actionLength, action, device);
 
         if (strncmp(action, "add", actionLength) == 0) {
-          const char *suffix = path;
+          const char *suffix = device;
 
           while ((suffix = strstr(suffix, "/input"))) {
-            int inputNumber;
-            int eventNumber;
+            int input;
+            int event;
 
-            if (sscanf(++suffix, "input%d/event%d", &inputNumber, &eventNumber) == 2) {
-              static const char sysfsRoot[] = "/sys";
-              static const char devName[] = "/dev";
-              char sysfsPath[strlen(sysfsRoot) + strlen(path) + sizeof(devName)];
-              int sysfsDescriptor;
+            if (sscanf(++suffix, "input%d/event%d", &input, &event) == 2) {
+              KeyboardInstanceData *kid;
 
-              snprintf(sysfsPath, sizeof(sysfsPath), "%s%s%s", sysfsRoot, path, devName);
+              if ((kid = newKeyboardInstance(kmd))) {
+                if (getDeviceNumbers(device, &kid->kix->device.major, &kid->kix->device.minor)) {
+                  char path[0X40];
 
-              if ((sysfsDescriptor = open(sysfsPath, O_RDONLY)) != -1) {
-                char stringBuffer[0X10];
-                ssize_t stringLength;
+                  snprintf(path, sizeof(path), "/dev/input/event%d", event);
 
-                if ((stringLength = read(sysfsDescriptor, stringBuffer, sizeof(stringBuffer))) > 0) {
-                  KeyboardInstanceData *kid;
-
-                  if ((kid = newKeyboardInstance(kmd))) {
-                    if (sscanf(stringBuffer, "%d:%d", &kid->kix->device.major, &kid->kix->device.minor) == 2) {
-                      char eventDevice[0X40];
-
-                      snprintf(eventDevice, sizeof(eventDevice), "/dev/input/event%d", eventNumber);
-
-                      if ((kid->kix->device.path = strdup(eventDevice))) {
-                        if (asyncSetAlarmIn(&kid->kix->udevDelay,
-                                            LINUX_INPUT_DEVICE_OPEN_DELAY,
-                                            openLinuxInputDevice, kid)) {
-                          close(sysfsDescriptor);
-                          break;
-                        }
-                      } else {
-                        logMallocError();
-                      }
+                  if ((kid->kix->device.path = strdup(path))) {
+                    if (asyncSetAlarmIn(&kid->kix->udevDelay,
+                                        LINUX_INPUT_DEVICE_OPEN_DELAY,
+                                        openLinuxInputDevice, kid)) {
+                      break;
                     }
-
-                    destroyKeyboardInstance(kid);
+                  } else {
+                    logMallocError();
                   }
                 }
 
-                close(sysfsDescriptor);
-              } else {
-                logMessage(LOG_DEBUG, "cannot open sysfs dev file: %s: %s",
-                           sysfsPath, strerror(errno));
+                destroyKeyboardInstance(kid);
               }
             }
           }
