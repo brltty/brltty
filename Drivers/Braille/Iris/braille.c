@@ -1550,7 +1550,9 @@ static ssize_t askDevice(BrailleDisplay *brl, IrisOutputPacketType request, unsi
 static int
 suspendDevice (BrailleDisplay *brl) {
   if (!brl->data->isEmbedded) return 1;
+  brl->data->isSleeping = 1;
   logMessage(LOG_INFO, "Suspending device");
+
   if (brl->data->isForwarding) {
     static const unsigned char keyPacket[] = { IR_IPT_InteractiveKey, 'Q' };
     if ( ! writeNativePacket(brl, &brl->data->external.port, keyPacket, sizeof(keyPacket)) ) return 0;
@@ -1564,7 +1566,6 @@ suspendDevice (BrailleDisplay *brl) {
   brl->data->internal.port.waitingForAck = 0;
 
   deactivateBraille();
-  brl->data->isSleeping = 1;
   return 1;
 }
 
