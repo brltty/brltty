@@ -166,7 +166,7 @@ struct BrailleDataStruct {
   unsigned isConnected:1;
 
   unsigned isEmbedded:1;
-  unsigned isSleeping:1;
+  unsigned isSuspended:1;
   unsigned isForwarding:1;
 
   unsigned haveVisualDisplay:1;
@@ -1038,7 +1038,7 @@ static int clearWindow(BrailleDisplay *brl, Port *port)
 
 static ssize_t brl_readPacket (BrailleDisplay *brl, void *packet, size_t size)
 {
-  if (brl->data->isEmbedded && (brl->data->isSleeping || brl->data->isForwarding)) return 0;
+  if (brl->data->isEmbedded && (brl->data->isSuspended || brl->data->isForwarding)) return 0;
   return readNativePacket(brl, &brl->data->internal.port, packet, size);
 }
 
@@ -1046,7 +1046,7 @@ static ssize_t brl_readPacket (BrailleDisplay *brl, void *packet, size_t size)
 /* Returns 1 if the packet is actually written, 0 if the packet is not written */
 static ssize_t brl_writePacket (BrailleDisplay *brl, const void *packet, size_t size)
 {
-  if (brl->data->isSleeping || brl->data->isForwarding) {
+  if (brl->data->isSuspended || brl->data->isForwarding) {
     errno = EAGAIN;
     return 0;
   }
@@ -1058,8 +1058,25 @@ static int brl_reset (BrailleDisplay *brl)
   return 0;
 }
 
-static int enterPacketForwardMode(BrailleDisplay *brl)
-{
+static int
+sendInteractiveKey (BrailleDisplay *brl, Port *port, unsigned char key) {
+  const unsigned char packet[] = {IR_IPT_InteractiveKey, key};
+
+  return writeNativePacket(brl, port, packet, sizeof(packet));
+}
+
+static int
+sendMenuKey (BrailleDisplay *brl, Port *port) {
+  return sendInteractiveKey(brl, port, 'Q');
+}
+
+static int
+sendZKey (BrailleDisplay *brl, Port *port) {
+  return sendInteractiveKey(brl, port, 'W');
+}
+
+static int
+enterPacketForwardMode (BrailleDisplay *brl) {
   logMessage(LOG_NOTICE,
              "entering packet forward mode (port=%s, protocol=%s, speed=%d)",
              brl->data->external.port.name,
@@ -1078,9 +1095,7 @@ static int enterPacketForwardMode(BrailleDisplay *brl)
 
   switch (brl->data->protocol) {
     case IR_PROTOCOL_NATIVE: {
-      static const unsigned char p[] = { IR_IPT_InteractiveKey, 'Q' };
-
-      if (! writeNativePacket(brl, &brl->data->external.port, p, sizeof(p))) return 0;
+      if (!sendMenuKey(brl, &brl->data->external.port)) return 0;
       break;
     }
 
@@ -1095,12 +1110,12 @@ static int enterPacketForwardMode(BrailleDisplay *brl)
   return 1;
 }
 
-static int leavePacketForwardMode(BrailleDisplay *brl)
-{
-  static const unsigned char p[] = { IR_IPT_InteractiveKey, 'Q' };
-  logMessage(LOG_NOTICE, "Leaving packet forward mode");
+static int
+leavePacketForwardMode (BrailleDisplay *brl) {
+  logMessage(LOG_NOTICE, "leaving packet forward mode");
+
   if (brl->data->protocol == IR_PROTOCOL_NATIVE) {
-    if (! writeNativePacket(brl, &brl->data->external.port, p, sizeof(p)) ) return 0;
+    if (!sendMenuKey(brl, &brl->data->external.port)) return 0;
   }
 
   brl->data->isForwarding = 0;
@@ -1411,7 +1426,7 @@ static int readCommand_embedded (BrailleDisplay *brl)
   unsigned char packet[IR_MAXIMUM_PACKET_SIZE];
   size_t size;
 
-  if (brl->data->isSleeping) return BRL_CMD_OFFLINE;
+  if (brl->data->isSuspended) return BRL_CMD_OFFLINE;
 
   while ((size = readNativePacket(brl, &brl->data->internal.port, packet, sizeof(packet)))) {
     /* The test for Menu key should come first since this key toggles */
@@ -1550,17 +1565,18 @@ static ssize_t askDevice(BrailleDisplay *brl, IrisOutputPacketType request, unsi
 static int
 suspendDevice (BrailleDisplay *brl) {
   if (!brl->data->isEmbedded) return 1;
-  brl->data->isSleeping = 1;
-  logMessage(LOG_INFO, "Suspending device");
+  logMessage(LOG_INFO, "suspending device");
+  brl->data->isSuspended = 1;
 
   if (brl->data->isForwarding) {
-    static const unsigned char keyPacket[] = { IR_IPT_InteractiveKey, 'Q' };
-    if ( ! writeNativePacket(brl, &brl->data->external.port, keyPacket, sizeof(keyPacket)) ) return 0;
+    if (!sendMenuKey(brl, &brl->data->external.port)) return 0;
     closePort(&brl->data->external.port);
   }
-  while (! clearWindow(brl, &brl->data->internal.port)) {
+
+  while (!clearWindow(brl, &brl->data->internal.port)) {
     if (errno != EAGAIN) return 0;
   }
+
   asyncWait(10);
   closePort(&brl->data->internal.port);
   brl->data->internal.port.waitingForAck = 0;
@@ -1573,18 +1589,22 @@ static int
 resumeDevice (BrailleDisplay *brl) {
   if (!brl->data->isEmbedded) return 1;
   logMessage(LOG_INFO, "resuming device");
-  brl->data->isSleeping = 0;
-  if ( !openPort(&brl->data->internal.port) )
-  {
+
+  if (!openPort(&brl->data->internal.port) ) {
     logMessage(LOG_WARNING, "openPort failed");
     return 0;
   }
+
   activateBraille();
+
   if (brl->data->isForwarding) {
-    static const unsigned char keyPacket[] = { IR_IPT_InteractiveKey, 'W' }; 
-    if (! openPort(&brl->data->external.port) ) return 0;
-    if (! writeNativePacket(brl, &brl->data->external.port, keyPacket, sizeof(keyPacket)) ) return 0;
-  } else refreshBrailleWindow = 1;
+    if (!openPort(&brl->data->external.port)) return 0;
+    if (!sendZKey(brl, &brl->data->external.port)) return 0;
+  } else {
+    refreshBrailleWindow = 1;
+  }
+
+  brl->data->isSuspended = 0;
   return 1;
 }
 
@@ -1618,7 +1638,7 @@ ASYNC_ALARM_CALLBACK(irMonitorLatch) {
   BrailleDisplay *brl = parameters->data;
 
   if (checkLatchState(brl)) {
-    if (!(brl->data->isSleeping? resumeDevice(brl): suspendDevice(brl))) brl->data->hasFailed = 1;
+    if (!(brl->data->isSuspended? resumeDevice(brl): suspendDevice(brl))) brl->data->hasFailed = 1;
   }
 }
 
@@ -1657,7 +1677,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     brl->data->hasFailed = 0;
     brl->data->isConnected = 1;
 
-    brl->data->isSleeping = 0;
+    brl->data->isSuspended = 0;
     brl->data->isForwarding = 0;
 
     brl->data->haveVisualDisplay = 0;
