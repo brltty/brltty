@@ -1348,27 +1348,26 @@ forwardEurobraillePacket (
   if (size==2 && packet[0]=='S' && packet[1]=='I')
   { /* Send system information */
     char str[256];
-    Port *port = &brl->data->external.port;
-    writeEurobrailleStringPacket(brl, port, "SNIRIS_KB_40");
-    writeEurobrailleStringPacket(brl, port, "SHIR4");
+    writeEurobrailleStringPacket(brl, inPort, "SNIRIS_KB_40");
+    writeEurobrailleStringPacket(brl, inPort, "SHIR4");
     snprintf(str, sizeof(str), "SS%s", serialNumber);
-    writeEurobrailleStringPacket(brl, port, str);
-    writeEurobrailleStringPacket(brl, port, "SLFR");
+    writeEurobrailleStringPacket(brl, inPort, str);
+    writeEurobrailleStringPacket(brl, inPort, "SLFR");
     str[0] = 'S'; str[1] = 'G'; str[2] = brl->textColumns;
-    writeEurobraillePacket(brl, port, str, 3);
+    writeEurobraillePacket(brl, inPort, str, 3);
     str[0] = 'S'; str[1] = 'T'; str[2] = 6;
-    writeEurobraillePacket(brl, port, str, 3);
+    writeEurobraillePacket(brl, inPort, str, 3);
     snprintf(str, sizeof(str), "So%d%da", 0xef, 0xf8);
-    writeEurobrailleStringPacket(brl, port, str);
-    writeEurobrailleStringPacket(brl, port, "SW1.92");
-    writeEurobrailleStringPacket(brl, port, "SP1.00 30-10-2006");
+    writeEurobrailleStringPacket(brl, inPort, str);
+    writeEurobrailleStringPacket(brl, inPort, "SW1.92");
+    writeEurobrailleStringPacket(brl, inPort, "SP1.00 30-10-2006");
     snprintf(str, sizeof(str), "SM%d", 0x08);
-    writeEurobrailleStringPacket(brl, port, str);
-    writeEurobrailleStringPacket(brl, port, "SI");
+    writeEurobrailleStringPacket(brl, inPort, str);
+    writeEurobrailleStringPacket(brl, inPort, "SI");
   } else if (size==brl->textColumns+2 && packet[0]=='B' && packet[1]=='S')
   { /* Write dots to braille display */
     const unsigned char *dots = packet+2;
-    writeDots(brl, &brl->data->internal.port, dots);
+    writeDots(brl, outPort, dots);
   } else {
     logBytes(LOG_WARNING, "forwardEurobraillePacket could not handle this packet: ", packet, size);
   }
