@@ -180,6 +180,7 @@ struct BrailleDataStruct {
 
   struct {
     Port port;
+    GioHandleInputObject *handleInputObject;
   } external;
 
   struct {
@@ -194,8 +195,16 @@ struct BrailleDataStruct {
   } latch;
 };
 
-static int openPort(Port *port)
-{
+static void
+closePort (Port *port) {
+  if (port->gioEndpoint) {
+    gioDisconnectResource(port->gioEndpoint);
+    port->gioEndpoint = NULL;
+  }
+}
+
+static int
+openPort (Port *port) {
   const SerialParameters serialParameters = {
     SERIAL_DEFAULT_PARAMETERS,
     .baud = port->speed,
@@ -207,6 +216,8 @@ static int openPort(Port *port)
 
   gioDescriptor.serial.parameters = &serialParameters;
 
+  closePort(port);
+
   if ((port->gioEndpoint = gioConnectResource(port->name, &gioDescriptor))) {
     return 1;
   }
@@ -214,12 +225,24 @@ static int openPort(Port *port)
   return 0;
 }
 
-static void closePort(Port *port)
-{
-  if (port->gioEndpoint) {
-    gioDisconnectResource (port->gioEndpoint);
-    port->gioEndpoint = NULL;
-  }
+static int
+openInternalPort (BrailleDisplay *brl) {
+  return openPort(&brl->data->internal.port);
+}
+
+static void
+closeInternalPort (BrailleDisplay *brl) {
+  closePort(&brl->data->internal.port);
+}
+
+static int
+openExternalPort (BrailleDisplay *brl) {
+  return openPort(&brl->data->external.port);
+}
+
+static void
+closeExternalPort (BrailleDisplay *brl) {
+  closePort(&brl->data->external.port);
 }
 
 static void activateBraille(void)
@@ -1084,7 +1107,7 @@ enterPacketForwardMode (BrailleDisplay *brl) {
              brl->data->external.port.speed);
 
   brl->data->external.port.speed = protocolTable[brl->data->protocol].speed;
-  if (!openPort(&brl->data->external.port)) return 0;
+  if (!openExternalPort(brl)) return 0;
 
   {
     char msg[brl->textColumns+1];
@@ -1119,7 +1142,7 @@ leavePacketForwardMode (BrailleDisplay *brl) {
   }
 
   brl->data->isForwarding = 0;
-  closePort(&brl->data->external.port);
+  closeExternalPort(brl);
   refreshBrailleWindow = 1;
   return 1;
 }
@@ -1570,7 +1593,7 @@ suspendDevice (BrailleDisplay *brl) {
 
   if (brl->data->isForwarding) {
     if (!sendMenuKey(brl, &brl->data->external.port)) return 0;
-    closePort(&brl->data->external.port);
+    closeExternalPort(brl);
   }
 
   while (!clearWindow(brl, &brl->data->internal.port)) {
@@ -1578,7 +1601,7 @@ suspendDevice (BrailleDisplay *brl) {
   }
 
   asyncWait(10);
-  closePort(&brl->data->internal.port);
+  closeInternalPort(brl);
   brl->data->internal.port.waitingForAck = 0;
 
   deactivateBraille();
@@ -1590,15 +1613,11 @@ resumeDevice (BrailleDisplay *brl) {
   if (!brl->data->isEmbedded) return 1;
   logMessage(LOG_INFO, "resuming device");
 
-  if (!openPort(&brl->data->internal.port) ) {
-    logMessage(LOG_WARNING, "openPort failed");
-    return 0;
-  }
-
+  if (!openInternalPort(brl)) return 0;
   activateBraille();
 
   if (brl->data->isForwarding) {
-    if (!openPort(&brl->data->external.port)) return 0;
+    if (!openExternalPort(brl)) return 0;
     if (!sendZKey(brl, &brl->data->external.port)) return 0;
   } else {
     refreshBrailleWindow = 1;
@@ -1685,6 +1704,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
     brl->data->internal.port.gioEndpoint = NULL;
     brl->data->external.port.gioEndpoint = NULL;
+    brl->data->external.handleInputObject = NULL;
 
     brl->data->latch.monitor = NULL;
     brl->data->latch.delay = IR_DEFAULT_LATCH_DELAY;
@@ -1735,7 +1755,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             brl->data->external.port.name = device;
             brl->data->external.port.speed = protocolTable[brl->data->protocol].speed;
 
-            if (openPort(&brl->data->internal.port)) {
+            if (openInternalPort(brl)) {
               brl->data->readCommand = readCommand_embedded;
               activateBraille();
 
@@ -1749,7 +1769,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         brl->data->internal.port.name = device;
         brl->data->internal.port.speed = IR_EXTERNAL_SPEED_NATIVE;
 
-        if (openPort(&brl->data->internal.port)) {
+        if (openInternalPort(brl)) {
           brl->data->readCommand = readCommand_nonembedded;
           brl->data->isConnected = 1;
 
@@ -1842,14 +1862,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             }
           }
         }
-
-        closePort(&brl->data->internal.port);
       }
     } else {
       logMessage(LOG_ERR, "invalid embedded setting: %s", parameters[PARM_EMBEDDED]);
     }
 
     stopLatchMonitor(brl);
+    closeExternalPort(brl);
+    closeInternalPort(brl);
     free(brl->data);
   } else {
     logMallocError();
@@ -1870,10 +1890,11 @@ brl_destruct (BrailleDisplay *brl) {
     previousBrailleWindow = NULL;
   }
 
-  closePort(&brl->data->internal.port);
-
   if (brl->data) {
     stopLatchMonitor(brl);
+    closeExternalPort(brl);
+    closeInternalPort(brl);
+
     free(brl->data);
     brl->data = NULL;
   }
