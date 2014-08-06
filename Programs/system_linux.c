@@ -31,6 +31,7 @@
 #endif /* HAVE_LINUX_INPUT_H */
 
 #include "log.h"
+#include "program.h"
 #include "file.h"
 #include "device.h"
 #include "async_wait.h"
@@ -205,64 +206,6 @@ openCharacterDevice (const char *name, int flags, int major, int minor) {
 }
 
 int
-getUinputDevice (void) {
-  static int uinputDevice = -1;
-
-#ifdef HAVE_LINUX_UINPUT_H
-  if (uinputDevice == -1) {
-    const char *name;
-
-    {
-      static int status = 0;
-      int wait = !status;
-      if (!installKernelModule("uinput", &status)) wait = 0;
-      if (wait) asyncWait(500);
-    }
-
-    {
-      static const char *const names[] = {"uinput", "input/uinput", NULL};
-      name = resolveDeviceName(names, "uinput");
-    }
-
-    if (name) {
-      int device = openCharacterDevice(name, O_WRONLY, 10, 223);
-
-      if (device != -1) {
-        struct uinput_user_dev description;
-        logMessage(LOG_DEBUG, "uinput opened: %s fd=%d", name, device);
-        
-        memset(&description, 0, sizeof(description));
-        strncpy(description.name, PACKAGE_TARNAME, sizeof(description.name));
-
-        if (write(device, &description, sizeof(description)) != -1) {
-          if (enableUinputKeyEvents(device)) {
-            if (enableUinputAutorepeat(device)) {
-              if (ioctl(device, UI_DEV_CREATE) != -1) {
-                uinputDevice = device;
-              } else {
-                logSystemError("ioctl[UI_DEV_CREATE]");
-              }
-            }
-          }
-        } else {
-          logSystemError("write(struct uinput_user_dev)");
-        }
-
-        if (device != uinputDevice) {
-          close(device);
-          logMessage(LOG_DEBUG, "uinput closed");
-        }
-      } else {
-        logMessage(LOG_DEBUG, "cannot open uinput");
-      }
-    }
-  }
-#endif /* HAVE_LINUX_UINPUT_H */
-
-  return uinputDevice;
-}
-
-int
 hasInputEvent (int device, uint16_t type, uint16_t code, uint16_t max) {
 #ifdef HAVE_LINUX_INPUT_H
   BITMASK(mask, max+1, char);
@@ -331,13 +274,83 @@ writeKeyEvent (int key, int press) {
 void
 releaseAllKeys (void) {
 #ifdef HAVE_LINUX_INPUT_H
-  int key;
-  for (key=0; key<=KEY_MAX; ++key) {
+  unsigned int key;
+
+  for (key=0; key<=KEY_MAX; key+=1) {
     if (BITMASK_TEST(pressedKeys, key)) {
       if (!writeKeyEvent(key, 0)) break;
     }
   }
 #endif /* HAVE_LINUX_INPUT_H */
+}
+
+static int uinputDevice = -1;
+
+static void
+exitUinputDevice (void *data) {
+  if (uinputDevice != -1) {
+    releaseAllKeys();
+    close(uinputDevice);
+    uinputDevice = -1;
+  }
+}
+
+int
+getUinputDevice (void) {
+
+#ifdef HAVE_LINUX_UINPUT_H
+  if (uinputDevice == -1) {
+    const char *name;
+
+    {
+      static int status = 0;
+      int wait = !status;
+      if (!installKernelModule("uinput", &status)) wait = 0;
+      if (wait) asyncWait(500);
+    }
+
+    {
+      static const char *const names[] = {"uinput", "input/uinput", NULL};
+      name = resolveDeviceName(names, "uinput");
+    }
+
+    if (name) {
+      int device = openCharacterDevice(name, O_WRONLY, 10, 223);
+
+      if (device != -1) {
+        struct uinput_user_dev description;
+        logMessage(LOG_DEBUG, "uinput opened: %s fd=%d", name, device);
+        
+        memset(&description, 0, sizeof(description));
+        strncpy(description.name, PACKAGE_TARNAME, sizeof(description.name));
+
+        if (write(device, &description, sizeof(description)) != -1) {
+          if (enableUinputKeyEvents(device)) {
+            if (enableUinputAutorepeat(device)) {
+              if (ioctl(device, UI_DEV_CREATE) != -1) {
+                uinputDevice = device;
+                onProgramExit("uinput-device", exitUinputDevice, NULL);
+              } else {
+                logSystemError("ioctl[UI_DEV_CREATE]");
+              }
+            }
+          }
+        } else {
+          logSystemError("write(struct uinput_user_dev)");
+        }
+
+        if (device != uinputDevice) {
+          close(device);
+          logMessage(LOG_DEBUG, "uinput closed");
+        }
+      } else {
+        logMessage(LOG_DEBUG, "cannot open uinput: %s: %s", name, strerror(errno));
+      }
+    }
+  }
+#endif /* HAVE_LINUX_UINPUT_H */
+
+  return uinputDevice;
 }
 
 void
