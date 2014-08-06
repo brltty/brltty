@@ -1988,12 +1988,6 @@ handleCommand_LinuxScreen (int command) {
   int cmd = blk | arg;
 
   switch (cmd) {
-    case BRL_CMD_RESTARTBRL:
-#ifdef HAVE_LINUX_INPUT_H
-      releaseAllKeys();
-#endif /* HAVE_LINUX_INPUT_H */
-      break;
-
     default:
 #ifdef HAVE_LINUX_INPUT_H
       switch (blk) {

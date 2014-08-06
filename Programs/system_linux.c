@@ -271,7 +271,7 @@ writeKeyEvent (int key, int press) {
   return 0;
 }
 
-void
+static void
 releaseAllKeys (void) {
 #ifdef HAVE_LINUX_INPUT_H
   unsigned int key;
