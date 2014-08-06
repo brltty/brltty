@@ -60,27 +60,6 @@ typedef enum
   IR_PROTOCOL_NATIVE
 } ProtocolIndex;
 
-typedef struct {
-  const char *name;
-  int speed;
-} ProtocolEntry;
-
-static const ProtocolEntry protocolTable[] = {
-  [IR_PROTOCOL_EUROBRAILLE] = {
-    .name = strtext("eurobraille"),
-    .speed = IR_EXTERNAL_SPEED_EUROBRAILLE 
-  },
-
-  [IR_PROTOCOL_NATIVE] = {
-    .name = strtext("native"),
-    .speed = IR_EXTERNAL_SPEED_NATIVE 
-  },
-};
-
-static const unsigned char protocolCount = ARRAY_COUNT(protocolTable);
-#define IR_PROTOCOL_DEFAULT IR_PROTOCOL_EUROBRAILLE
-
-
 #define BRL_HAVE_PACKET_IO
 /* #define BRL_HAVE_VISUAL_DISPLAY */
 
@@ -307,8 +286,8 @@ static size_t readNativePacket(BrailleDisplay *brl, Port *port, void *packet, si
   return 0;
 }
 
-static size_t readEurobraillePacket(Port *port, void *packet, size_t size)
-{
+static size_t
+readEurobraillePacket (BrailleDisplay *brl, Port *port, void *packet, size_t size) {
   unsigned char ch;
   size_t size_;
   while (gioReadByte (port->gioEndpoint, &ch, port->reading)) {
@@ -394,8 +373,11 @@ startAcknowledgementPeriod (Port *port) {
 /* Returns 1 if the packet is actually written, 0 if the packet is not written */
 /* A write can be ignored if the previous packet has not been */
 /* acknowledged so far */
-static ssize_t writeNativePacket (BrailleDisplay *brl, Port *port, const void *packet, size_t size)
-{
+static size_t
+writeNativePacket (
+  BrailleDisplay *brl, Port *port,
+  const unsigned char *packet, size_t size
+) {
   const unsigned char *data = packet;
   unsigned char	buf[2*(size + 1) +3];
   unsigned char *p = buf;
@@ -1089,51 +1071,6 @@ sendZKey (BrailleDisplay *brl, Port *port) {
   return sendInteractiveKey(brl, port, 'W');
 }
 
-static int
-enterPacketForwardMode (BrailleDisplay *brl) {
-  logMessage(LOG_NOTICE,
-             "entering packet forward mode (port=%s, protocol=%s, speed=%d)",
-             brl->data->external.port.name,
-             protocolTable[brl->data->protocol].name,
-             brl->data->external.port.speed);
-
-  {
-    char msg[brl->textColumns+1];
-
-    snprintf(msg, sizeof(msg), "%s (%s)", gettext("PC mode"), gettext(protocolTable[brl->data->protocol].name));
-    message(NULL, msg, MSG_NODELAY);
-  }
-
-  switch (brl->data->protocol) {
-    case IR_PROTOCOL_NATIVE: {
-      if (!sendMenuKey(brl, &brl->data->external.port)) return 0;
-      break;
-    }
-
-    case IR_PROTOCOL_EUROBRAILLE:
-      compositeCharacterTable = NULL;
-      xtCurrentKey = NULL;
-      xtState = 0;
-      break;
-  }
-
-  brl->data->isForwarding = 1;
-  return 1;
-}
-
-static int
-leavePacketForwardMode (BrailleDisplay *brl) {
-  logMessage(LOG_NOTICE, "leaving packet forward mode");
-
-  if (brl->data->protocol == IR_PROTOCOL_NATIVE) {
-    if (!sendMenuKey(brl, &brl->data->external.port)) return 0;
-  }
-
-  brl->data->isForwarding = 0;
-  refreshBrailleWindow = 1;
-  return 1;
-}
-
 typedef struct {
   int (*handleZKey) (BrailleDisplay *brl, Port *port);
   int (*handleRoutingKey) (BrailleDisplay *brl, Port *port, unsigned char key);
@@ -1395,8 +1332,19 @@ handleNativePacket (BrailleDisplay *brl, Port *port, const KeyHandlers *keyHandl
   return 0;
 }
 
-static void handleEurobraillePacket(BrailleDisplay *brl, const unsigned char *packet, size_t size)
-{
+static void
+forwardNativePacket (
+  BrailleDisplay *brl, Port *outPort, Port *inPort,
+  const unsigned char *packet, size_t size
+) {
+  writeNativePacket(brl, outPort, packet, size);
+}
+
+static void
+forwardEurobraillePacket (
+  BrailleDisplay *brl, Port *outPort, Port *inPort,
+  const unsigned char *packet, size_t size
+) {
   if (size==2 && packet[0]=='S' && packet[1]=='I')
   { /* Send system information */
     char str[256];
@@ -1422,28 +1370,99 @@ static void handleEurobraillePacket(BrailleDisplay *brl, const unsigned char *pa
     const unsigned char *dots = packet+2;
     writeDots(brl, &brl->data->internal.port, dots);
   } else {
-    logBytes(LOG_WARNING, "handleEurobraillePacket could not handle this packet: ", packet, size);
+    logBytes(LOG_WARNING, "forwardEurobraillePacket could not handle this packet: ", packet, size);
   }
+}
+
+typedef struct {
+  const char *name;
+  int speed;
+
+  size_t (*readPacket) (BrailleDisplay *brl, Port *port, void *packet, size_t size);
+  void (*forwardPacket) (BrailleDisplay *brl, Port *outPort, Port *inPort, const unsigned char *packet, size_t size);
+} ProtocolEntry;
+
+static const ProtocolEntry protocolTable[] = {
+  [IR_PROTOCOL_EUROBRAILLE] = {
+    .name = strtext("eurobraille"),
+    .speed = IR_EXTERNAL_SPEED_EUROBRAILLE,
+
+    .readPacket = readEurobraillePacket,
+    .forwardPacket = forwardEurobraillePacket
+  },
+
+  [IR_PROTOCOL_NATIVE] = {
+    .name = strtext("native"),
+    .speed = IR_EXTERNAL_SPEED_NATIVE,
+
+    .readPacket = readNativePacket,
+    .forwardPacket = forwardNativePacket
+  },
+};
+
+static const unsigned char protocolCount = ARRAY_COUNT(protocolTable);
+#define IR_PROTOCOL_DEFAULT IR_PROTOCOL_EUROBRAILLE
+
+static int
+enterPacketForwardMode (BrailleDisplay *brl) {
+  logMessage(LOG_NOTICE,
+             "entering packet forward mode (port=%s, protocol=%s, speed=%d)",
+             brl->data->external.port.name,
+             protocolTable[brl->data->protocol].name,
+             brl->data->external.port.speed);
+
+  {
+    char msg[brl->textColumns+1];
+
+    snprintf(msg, sizeof(msg), "%s (%s)", gettext("PC mode"), gettext(protocolTable[brl->data->protocol].name));
+    message(NULL, msg, MSG_NODELAY);
+  }
+
+  switch (brl->data->protocol) {
+    case IR_PROTOCOL_NATIVE: {
+      if (!sendMenuKey(brl, &brl->data->external.port)) return 0;
+      break;
+    }
+
+    case IR_PROTOCOL_EUROBRAILLE:
+      compositeCharacterTable = NULL;
+      xtCurrentKey = NULL;
+      xtState = 0;
+      break;
+  }
+
+  brl->data->isForwarding = 1;
+  return 1;
+}
+
+static int
+leavePacketForwardMode (BrailleDisplay *brl) {
+  logMessage(LOG_NOTICE, "leaving packet forward mode");
+
+  if (brl->data->protocol == IR_PROTOCOL_NATIVE) {
+    if (!sendMenuKey(brl, &brl->data->external.port)) return 0;
+  }
+
+  brl->data->isForwarding = 0;
+  refreshBrailleWindow = 1;
+  return 1;
 }
 
 static int
 forwardPackets (BrailleDisplay *brl) {
+  const ProtocolEntry *protocol = &protocolTable[brl->data->protocol];
+  Port *inPort = &brl->data->external.port;
+  Port *outPort = &brl->data->internal.port;
   unsigned char packet[IR_MAXIMUM_PACKET_SIZE];
   size_t size;
 
-  if (brl->data->isSuspended) return 1;
-
-  if (brl->data->protocol == IR_PROTOCOL_NATIVE) {
-    while ((size = readNativePacket(brl, &brl->data->external.port, packet, sizeof(packet)))) {
-      if (!writeNativePacket(brl, &brl->data->internal.port, packet, size)) return 0;
-    }
-  } else { /* Read Eurobraille packet from external port and handle it */
-    while ((size = readEurobraillePacket(&brl->data->external.port, packet, sizeof(packet)))) {
-      handleEurobraillePacket(brl, packet, size);
+  while ((size = protocol->readPacket(brl, inPort, packet, sizeof(packet)))) {
+    if (!brl->data->isSuspended) {
+      protocol->forwardPacket(brl, outPort, inPort, packet, size);
     }
   }
 
-  return 1;
+  return errno == EAGAIN;
 }
 
 GIO_INPUT_HANDLER(irHandleExternalInput) {
@@ -1517,10 +1536,8 @@ readCommand_embedded (BrailleDisplay *brl) {
   }
 
   if (errno != EAGAIN) goto failure;
-  if (!brl->data->isForwarding) return EOF;
-
-  if (!forwardPackets(brl)) goto failure;
-  return BRL_CMD_OFFLINE;
+  if (brl->data->isForwarding) return BRL_CMD_OFFLINE;
+  return EOF;
 
 failure:
   logSystemError("readCommand_embedded");
