@@ -1456,7 +1456,7 @@ forwardPackets (BrailleDisplay *brl) {
   size_t size;
 
   while ((size = protocol->readPacket(brl, inPort, packet, sizeof(packet)))) {
-    if (!brl->data->isSuspended) {
+    if (brl->data->isForwarding && !brl->data->isSuspended) {
       protocol->forwardPacket(brl, outPort, inPort, packet, size);
     }
   }
