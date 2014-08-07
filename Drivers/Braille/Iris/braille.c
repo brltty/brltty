@@ -35,17 +35,8 @@
 #include "ports.h"
 #include "message.h"
 
-#define IR_MAXIMUM_PACKET_SIZE 0X100
-
-#define IR_INTERNAL_SPEED 9600
-#define IR_EXTERNAL_SPEED_EUROBRAILLE 9600
-#define IR_EXTERNAL_SPEED_NATIVE 57600
-
-/* Input/output ports */
-#define IR_PORT_BASE 0x340
-#define IR_PORT_INPUT   (IR_PORT_BASE + 0)
-#define IR_PORT_OUTPUT  (IR_PORT_BASE + 1)
-#define IR_PORT_OUTPUT2 (IR_PORT_BASE + 2)
+#define BRL_HAVE_PACKET_IO
+/* #define BRL_HAVE_VISUAL_DISPLAY */
 
 typedef enum {
   PARM_EMBEDDED,
@@ -53,15 +44,6 @@ typedef enum {
   PARM_PROTOCOL
 } DriverParameter;
 #define BRLPARMS "embedded", "latchdelay", "protocol"
-
-typedef enum
-{
-  IR_PROTOCOL_EUROBRAILLE,
-  IR_PROTOCOL_NATIVE
-} ProtocolIndex;
-
-#define BRL_HAVE_PACKET_IO
-/* #define BRL_HAVE_VISUAL_DISPLAY */
 
 #include "brl_driver.h"
 #include "brldefs-ir.h"
@@ -119,6 +101,18 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(pc),
 END_KEY_TABLE_LIST
 
+#define IR_MAXIMUM_PACKET_SIZE 0X100
+
+#define IR_INTERNAL_SPEED 9600
+#define IR_EXTERNAL_SPEED_EUROBRAILLE 9600
+#define IR_EXTERNAL_SPEED_NATIVE 57600
+
+/* Input/output ports */
+#define IR_PORT_BASE 0x340
+#define IR_PORT_INPUT   (IR_PORT_BASE + 0)
+#define IR_PORT_OUTPUT  (IR_PORT_BASE + 1)
+#define IR_PORT_OUTPUT2 (IR_PORT_BASE + 2)
+
 typedef struct {
   GioEndpoint *gioEndpoint;
 
@@ -140,6 +134,11 @@ static unsigned char serialNumber[5] = { 0, 0, 0, 0, 0 };
 static unsigned char *previousBrailleWindow = NULL;
 static int refreshBrailleWindow = 0;
 static KeyNumberSet linearKeys;
+
+typedef enum {
+  IR_PROTOCOL_EUROBRAILLE,
+  IR_PROTOCOL_NATIVE
+} ProtocolIndex;
 
 struct BrailleDataStruct {
   unsigned hasFailed:1;
@@ -174,46 +173,6 @@ struct BrailleDataStruct {
     unsigned pulled:1;
   } latch;
 };
-
-static void
-closePort (Port *port) {
-  if (port->gioEndpoint) {
-    gioDisconnectResource(port->gioEndpoint);
-    port->gioEndpoint = NULL;
-  }
-}
-
-static int
-openPort (Port *port) {
-  const SerialParameters serialParameters = {
-    SERIAL_DEFAULT_PARAMETERS,
-    .baud = port->speed,
-    .parity = SERIAL_PARITY_EVEN
-  };
-
-  GioDescriptor gioDescriptor;
-  gioInitializeDescriptor(&gioDescriptor);
-
-  gioDescriptor.serial.parameters = &serialParameters;
-
-  closePort(port);
-
-  if ((port->gioEndpoint = gioConnectResource(port->name, &gioDescriptor))) {
-    return 1;
-  }
-
-  return 0;
-}
-
-static int
-openInternalPort (BrailleDisplay *brl) {
-  return openPort(&brl->data->internal.port);
-}
-
-static void
-closeInternalPort (BrailleDisplay *brl) {
-  closePort(&brl->data->internal.port);
-}
 
 static void activateBraille(void)
 {
@@ -1418,10 +1377,9 @@ enterPacketForwardMode (BrailleDisplay *brl) {
   }
 
   switch (brl->data->protocol) {
-    case IR_PROTOCOL_NATIVE: {
+    case IR_PROTOCOL_NATIVE:
       if (!sendMenuKey(brl, &brl->data->external.port)) return 0;
       break;
-    }
 
     case IR_PROTOCOL_EUROBRAILLE:
       compositeCharacterTable = NULL;
@@ -1469,36 +1427,6 @@ GIO_INPUT_HANDLER(irHandleExternalInput) {
 
   if (!forwardPackets(brl)) brl->data->hasFailed = 1;
   return 0;
-}
-
-static void
-stopExternalInputHandler (BrailleDisplay *brl) {
-  if (brl->data->external.handleInputObject) {
-    gioDestroyHandleInputObject(brl->data->external.handleInputObject);
-    brl->data->external.handleInputObject = NULL;
-  }
-}
-
-static int
-openExternalPort (BrailleDisplay *brl) {
-  stopExternalInputHandler(brl);
-
-  if (openPort(&brl->data->external.port)) {
-    brl->data->external.handleInputObject =
-      gioNewHandleInputObject(brl->data->external.port.gioEndpoint,
-                                BRAILLE_INPUT_POLL_INTERVAL,
-                                irHandleExternalInput, brl);
-
-    if (brl->data->external.handleInputObject) return 1;
-  }
-
-  return 0;
-}
-
-static void
-closeExternalPort (BrailleDisplay *brl) {
-  stopExternalInputHandler(brl);
-  closePort(&brl->data->external.port);
 }
 
 static inline int
@@ -1646,9 +1574,6 @@ suspendDevice (BrailleDisplay *brl) {
   }
 
   asyncWait(10);
-  closeInternalPort(brl);
-  brl->data->internal.port.waitingForAck = 0;
-
   deactivateBraille();
   return 1;
 }
@@ -1658,7 +1583,6 @@ resumeDevice (BrailleDisplay *brl) {
   if (!brl->data->isEmbedded) return 1;
   logMessage(LOG_INFO, "resuming device");
 
-  if (!openInternalPort(brl)) return 0;
   activateBraille();
 
   if (brl->data->isForwarding) {
@@ -1669,6 +1593,76 @@ resumeDevice (BrailleDisplay *brl) {
 
   brl->data->isSuspended = 0;
   return 1;
+}
+
+static void
+closePort (Port *port) {
+  if (port->gioEndpoint) {
+    gioDisconnectResource(port->gioEndpoint);
+    port->gioEndpoint = NULL;
+  }
+}
+
+static int
+openPort (Port *port) {
+  const SerialParameters serialParameters = {
+    SERIAL_DEFAULT_PARAMETERS,
+    .baud = port->speed,
+    .parity = SERIAL_PARITY_EVEN
+  };
+
+  GioDescriptor gioDescriptor;
+  gioInitializeDescriptor(&gioDescriptor);
+
+  gioDescriptor.serial.parameters = &serialParameters;
+
+  closePort(port);
+
+  if ((port->gioEndpoint = gioConnectResource(port->name, &gioDescriptor))) {
+    return 1;
+  }
+
+  return 0;
+}
+
+static int
+openInternalPort (BrailleDisplay *brl) {
+  return openPort(&brl->data->internal.port);
+}
+
+static void
+closeInternalPort (BrailleDisplay *brl) {
+  closePort(&brl->data->internal.port);
+}
+
+static void
+stopExternalInputHandler (BrailleDisplay *brl) {
+  if (brl->data->external.handleInputObject) {
+    gioDestroyHandleInputObject(brl->data->external.handleInputObject);
+    brl->data->external.handleInputObject = NULL;
+  }
+}
+
+static int
+openExternalPort (BrailleDisplay *brl) {
+  stopExternalInputHandler(brl);
+
+  if (openPort(&brl->data->external.port)) {
+    brl->data->external.handleInputObject =
+      gioNewHandleInputObject(brl->data->external.port.gioEndpoint,
+                                BRAILLE_INPUT_POLL_INTERVAL,
+                                irHandleExternalInput, brl);
+
+    if (brl->data->external.handleInputObject) return 1;
+  }
+
+  return 0;
+}
+
+static void
+closeExternalPort (BrailleDisplay *brl) {
+  stopExternalInputHandler(brl);
+  closePort(&brl->data->external.port);
 }
 
 static int
