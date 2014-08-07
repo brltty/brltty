@@ -43,17 +43,22 @@
 #ifdef HAVE_LINUX_UINPUT_H
 #include <linux/uinput.h>
 
+struct UinputObjectStruct {
+  int fileDescriptor;
+  BITMASK(pressedKeys, KEY_MAX+1, char);
+};
+
 static int
-enableUinputKeyEvents (int device) {
+enableUinputKeyEvents (UinputObject *uinput) {
   int key;
 
-  if (ioctl(device, UI_SET_EVBIT, EV_KEY) == -1) {
+  if (ioctl(uinput->fileDescriptor, UI_SET_EVBIT, EV_KEY) == -1) {
     logSystemError("ioctl[UI_SET_EVBIT,EV_KEY]");
     return 0;
   }
 
   for (key=0; key<=KEY_MAX; key+=1) {
-    if (ioctl(device, UI_SET_KEYBIT, key) == -1) {
+    if (ioctl(uinput->fileDescriptor, UI_SET_KEYBIT, key) == -1) {
       logMessage(LOG_WARNING, "ioctl[UI_SET_KEYBIT] failed for key 0X%X: %s",
                  key, strerror(errno));
     }
@@ -63,8 +68,8 @@ enableUinputKeyEvents (int device) {
 }
 
 static int
-enableUinputAutorepeat (int device) {
-  if (ioctl(device, UI_SET_EVBIT, EV_REP) == -1) {
+enableUinputAutorepeat (UinputObject *uinput) {
+  if (ioctl(uinput->fileDescriptor, UI_SET_EVBIT, EV_REP) == -1) {
     logSystemError("ioctl[UI_SET_EVBIT,EV_REP]");
     return 0;
   }
@@ -224,47 +229,39 @@ hasInputEvent (int device, uint16_t type, uint16_t code, uint16_t max) {
 }
 
 int
-writeInputEvent (uint16_t type, uint16_t code, int32_t value) {
+writeInputEvent (UinputObject *uinput, uint16_t type, uint16_t code, int32_t value) {
 #ifdef HAVE_LINUX_INPUT_H
-  int device = getUinputDevice();
+  struct input_event event;
 
-  if (device != -1) {
-    struct input_event event;
+  memset(&event, 0, sizeof(event));
+  gettimeofday(&event.time, NULL);
+  event.type = type;
+  event.code = code;
+  event.value = value;
 
-    memset(&event, 0, sizeof(event));
-    gettimeofday(&event.time, NULL);
-    event.type = type;
-    event.code = code;
-    event.value = value;
-
-    if (write(device, &event, sizeof(event)) != -1) {
-      return 1;
-    } else {
-      logSystemError("write(struct input_event)");
-    }
+  if (write(uinput->fileDescriptor, &event, sizeof(event)) != -1) {
+    return 1;
+  } else {
+    logSystemError("write(struct input_event)");
   }
 #endif /* HAVE_LINUX_INPUT_H */
 
   return 0;
 }
 
-#ifdef HAVE_LINUX_INPUT_H
-static BITMASK(pressedKeys, KEY_MAX+1, char);
-#endif /* HAVE_LINUX_INPUT_H */
-
 int
-writeKeyEvent (int key, int press) {
+writeKeyEvent (UinputObject *uinput, int key, int press) {
 #ifdef HAVE_LINUX_INPUT_H
-  if (writeInputEvent(EV_KEY, key, press)) {
+  if (writeInputEvent(uinput, EV_KEY, key, press)) {
     if (press) {
-      BITMASK_SET(pressedKeys, key);
+      BITMASK_SET(uinput->pressedKeys, key);
     } else {
-      BITMASK_CLEAR(pressedKeys, key);
+      BITMASK_CLEAR(uinput->pressedKeys, key);
     }
 
-    writeInputEvent(EV_SYN, SYN_REPORT, 0);
-
-    return 1;
+    if (writeInputEvent(uinput, EV_SYN, SYN_REPORT, 0)) {
+      return 1;
+    }
   }
 #endif /* HAVE_LINUX_INPUT_H */
 
@@ -272,64 +269,63 @@ writeKeyEvent (int key, int press) {
 }
 
 static void
-releaseAllKeys (void) {
+releaseAllKeys (UinputObject *uinput) {
 #ifdef HAVE_LINUX_INPUT_H
   unsigned int key;
 
   for (key=0; key<=KEY_MAX; key+=1) {
-    if (BITMASK_TEST(pressedKeys, key)) {
-      if (!writeKeyEvent(key, 0)) break;
+    if (BITMASK_TEST(uinput->pressedKeys, key)) {
+      if (!writeKeyEvent(uinput, key, 0)) break;
     }
   }
 #endif /* HAVE_LINUX_INPUT_H */
 }
 
-static int uinputDevice = -1;
-
-static void
-exitUinputDevice (void *data) {
-  if (uinputDevice != -1) {
-    releaseAllKeys();
-    close(uinputDevice);
-    uinputDevice = -1;
-  }
+void
+destroyUinputObject (UinputObject *uinput) {
+  releaseAllKeys(uinput);
+  close(uinput->fileDescriptor);
+  free(uinput);
 }
 
-int
-getUinputDevice (void) {
+UinputObject *
+newUinputObject (void) {
+  UinputObject *uinput = NULL;
 
 #ifdef HAVE_LINUX_UINPUT_H
-  if (uinputDevice == -1) {
-    const char *name;
+  if ((uinput = malloc(sizeof(*uinput)))) {
+    const char *device;
+
+    memset(uinput, 0, sizeof(*uinput));
 
     {
       static int status = 0;
       int wait = !status;
+
       if (!installKernelModule("uinput", &status)) wait = 0;
       if (wait) asyncWait(500);
     }
 
     {
       static const char *const names[] = {"uinput", "input/uinput", NULL};
-      name = resolveDeviceName(names, "uinput");
+
+      device = resolveDeviceName(names, "uinput");
     }
 
-    if (name) {
-      int device = openCharacterDevice(name, O_WRONLY, 10, 223);
-
-      if (device != -1) {
+    if (device) {
+      if ((uinput->fileDescriptor = openCharacterDevice(device, O_WRONLY, 10, 223)) != -1) {
         struct uinput_user_dev description;
-        logMessage(LOG_DEBUG, "uinput opened: %s fd=%d", name, device);
+        logMessage(LOG_DEBUG, "uinput opened: %s fd=%d",
+                   device, uinput->fileDescriptor);
         
         memset(&description, 0, sizeof(description));
         strncpy(description.name, PACKAGE_TARNAME, sizeof(description.name));
 
-        if (write(device, &description, sizeof(description)) != -1) {
-          if (enableUinputKeyEvents(device)) {
-            if (enableUinputAutorepeat(device)) {
-              if (ioctl(device, UI_DEV_CREATE) != -1) {
-                uinputDevice = device;
-                onProgramExit("uinput-device", exitUinputDevice, NULL);
+        if (write(uinput->fileDescriptor, &description, sizeof(description)) != -1) {
+          if (enableUinputKeyEvents(uinput)) {
+            if (enableUinputAutorepeat(uinput)) {
+              if (ioctl(uinput->fileDescriptor, UI_DEV_CREATE) != -1) {
+                return uinput;
               } else {
                 logSystemError("ioctl[UI_DEV_CREATE]");
               }
@@ -339,18 +335,15 @@ getUinputDevice (void) {
           logSystemError("write(struct uinput_user_dev)");
         }
 
-        if (device != uinputDevice) {
-          close(device);
-          logMessage(LOG_DEBUG, "uinput closed");
-        }
+        close(uinput->fileDescriptor);
       } else {
-        logMessage(LOG_DEBUG, "cannot open uinput: %s: %s", name, strerror(errno));
+        logMessage(LOG_DEBUG, "cannot open uinput: %s: %s", device, strerror(errno));
       }
     }
   }
 #endif /* HAVE_LINUX_UINPUT_H */
 
-  return uinputDevice;
+  return NULL;
 }
 
 void

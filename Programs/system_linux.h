@@ -29,9 +29,12 @@ extern int openCharacterDevice (const char *name, int flags, int major, int mino
 
 extern int hasInputEvent (int device, uint16_t type, uint16_t code, uint16_t max);
 
-extern int getUinputDevice (void);
-extern int writeInputEvent (uint16_t type, uint16_t code, int32_t value);
-extern int writeKeyEvent (int key, int press);
+typedef struct UinputObjectStruct UinputObject;
+extern UinputObject *newUinputObject (void);
+extern void destroyUinputObject (UinputObject *uinput);
+
+extern int writeInputEvent (UinputObject *uinput, uint16_t type, uint16_t code, int32_t value);
+extern int writeKeyEvent (UinputObject *uinput, int key, int press);
 
 #ifdef __cplusplus
 }

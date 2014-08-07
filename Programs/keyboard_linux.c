@@ -51,6 +51,9 @@ struct KeyboardMonitorExtensionStruct {
 };
 
 struct KeyboardInstanceExtensionStruct {
+  UinputObject *uinput;
+  AsyncHandle udevDelay;
+
   struct {
     int descriptor;
     AsyncHandle monitor;
@@ -61,8 +64,6 @@ struct KeyboardInstanceExtensionStruct {
     int major;
     int minor;
   } device;
-
-  AsyncHandle udevDelay;
 };
 
 BEGIN_KEY_CODE_MAP
@@ -531,20 +532,25 @@ newKeyboardInstanceExtension (KeyboardInstanceExtension **kix) {
   if ((*kix = malloc(sizeof(**kix)))) {
     memset(*kix,  0, sizeof(**kix));
 
-    (*kix)->file.descriptor = -1;
-    (*kix)->file.monitor = NULL;
+    if (((*kix)->uinput = newUinputObject())) {
+      (*kix)->udevDelay = NULL;
 
-    (*kix)->device.path = NULL;
-    (*kix)->device.major = 0;
-    (*kix)->device.minor = 0;
+      (*kix)->file.descriptor = -1;
+      (*kix)->file.monitor = NULL;
 
-    (*kix)->udevDelay = NULL;
+      (*kix)->device.path = NULL;
+      (*kix)->device.major = 0;
+      (*kix)->device.minor = 0;
 
-    return 1;
+      return 1;
+    }
+
+    free(*kix);
   } else {
     logMallocError();
   }
 
+  *kix = NULL;
   return 0;
 }
 
@@ -558,13 +564,14 @@ destroyKeyboardInstanceExtension (KeyboardInstanceExtension *kix) {
 
   if (kix->file.descriptor != -1) close(kix->file.descriptor);
   if (kix->udevDelay) asyncCancelRequest(kix->udevDelay);
+  if (kix->uinput) destroyUinputObject(kix->uinput);
   if (kix->device.path) free(kix->device.path);
   free(kix);
 }
 
 int
 forwardKeyEvent (KeyboardInstanceObject *kio, int code, int press) {
-  return writeKeyEvent(code, (press? 1: 0));
+  return writeKeyEvent(kio->kix->uinput, code, (press? 1: 0));
 }
 
 ASYNC_INPUT_CALLBACK(handleLinuxKeyboardEvent) {
@@ -905,13 +912,7 @@ monitorNewKeyboards (KeyboardMonitorObject *kmo) {
 
 int
 monitorKeyboards (KeyboardMonitorObject *kmo) {
-#ifdef HAVE_LINUX_INPUT_H
-  if (getUinputDevice() != -1) {
-    monitorCurrentKeyboards(kmo);
-    monitorNewKeyboards(kmo);
-    return 1;
-  }
-#endif /* HAVE_LINUX_INPUT_H */
-
-  return 0;
+  monitorCurrentKeyboards(kmo);
+  monitorNewKeyboards(kmo);
+  return 1;
 }
