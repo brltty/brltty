@@ -1436,6 +1436,8 @@ isMenuKey (const unsigned char *packet, size_t size) {
 
 static int
 handlePacket_embedded (BrailleDisplay *brl, const void *packet, size_t size) {
+  if (brl->data->isSuspended) return 1;
+
   /* The test for Menu key should come first since this key toggles
    * packet forward mode on/off
    */
@@ -1464,7 +1466,7 @@ handlePacket_embedded (BrailleDisplay *brl, const void *packet, size_t size) {
 
 static int
 isOffline_embedded (BrailleDisplay *brl) {
-  return brl->data->isForwarding;
+  return brl->data->isForwarding || brl->data->isSuspended;
 }
 
 static int
