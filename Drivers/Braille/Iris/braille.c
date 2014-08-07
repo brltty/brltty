@@ -1627,11 +1627,19 @@ openPort (Port *port) {
 
 static int
 openInternalPort (BrailleDisplay *brl) {
-  return openPort(&brl->data->internal.port);
+  Port *port = &brl->data->internal.port;
+
+  if (openPort(port)) {
+    brl->gioEndpoint = port->gioEndpoint;
+    return 1;
+  }
+
+  return 0;
 }
 
 static void
 closeInternalPort (BrailleDisplay *brl) {
+  brl->gioEndpoint = NULL;
   closePort(&brl->data->internal.port);
 }
 
