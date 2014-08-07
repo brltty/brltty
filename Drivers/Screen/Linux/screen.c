@@ -992,11 +992,16 @@ static int at2Pressed;
 #endif /* HAVE_LINUX_INPUT_H */
 
 static int currentConsoleNumber;
+static UinputObject *uinputObject;
+
 static int
 construct_LinuxScreen (void) {
   screenUpdated = 0;
   cacheBuffer = NULL;
   cacheSize = 0;
+
+  currentConsoleNumber = 0;
+  uinputObject = NULL;
 
 #ifdef HAVE_LINUX_INPUT_H
   at2Keys = at2KeysOriginal;
@@ -1009,7 +1014,7 @@ construct_LinuxScreen (void) {
     if (setConsoleName()) {
       consoleDescriptor = -1;
 
-      if (openScreen(currentConsoleNumber=0)) {
+      if (openScreen(currentConsoleNumber)) {
         if (setTranslationTable(1)) {
           return 1;
         }
@@ -1039,6 +1044,11 @@ destruct_LinuxScreen (void) {
     cacheBuffer = NULL;
   }
   cacheSize = 0;
+
+  if (uinputObject) {
+    destroyUinputObject(uinputObject);
+    uinputObject = NULL;
+  }
 }
 
 static int
@@ -1327,6 +1337,17 @@ getCapsLockState (void) {
 }
 
 static int
+injectKeyEvent (int key, int press) {
+  if (!uinputObject) {
+    if (!(uinputObject = newUinputObject())) {
+      return 0;
+    }
+  }
+
+  return writeKeyEvent(uinputObject, key, press);
+}
+
+static int
 insertUinput (ScreenKey key) {
 #ifdef HAVE_LINUX_INPUT_H
   int code;
@@ -1431,7 +1452,7 @@ insertUinput (ScreenKey key) {
   }
 
   if (code != KEY_RESERVED) {
-#define KEY_EVENT(k,p) { if (!writeKeyEvent((k), (p))) return 0; }
+#define KEY_EVENT(k,p) { if (!injectKeyEvent((k), (p))) return 0; }
     int modCaps = (key & SCR_KEY_UPPER) && !getCapsLockState();
     int modShift = !!(key & SCR_KEY_SHIFT);
     int modControl = !!(key & SCR_KEY_CONTROL);
@@ -2012,7 +2033,7 @@ handleCommand_LinuxScreen (int command) {
               arg = code;
 	    }
 
-            return writeKeyEvent(arg, press);
+            return injectKeyEvent(arg, press);
 	  }
 
 	case BRL_BLK_PASSAT:
@@ -2048,7 +2069,7 @@ handleCommand_LinuxScreen (int command) {
             at2Keys = at2KeysOriginal;
             at2Pressed = 1;
 
-            if (key) return writeKeyEvent(key, pressed);
+            if (key) return injectKeyEvent(key, pressed);
           }
           break;
       }
