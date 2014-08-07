@@ -151,10 +151,10 @@ struct BrailleDataStruct {
   unsigned haveVisualDisplay:1;
   ProtocolIndex protocol;
 
-  int (*readCommand) (BrailleDisplay *brl);
-
   struct {
     Port port;
+    int (*handlePacket) (BrailleDisplay *brl, const void *packet, size_t size);
+    int (*isOffline) (BrailleDisplay *brl);
   } internal;
 
   struct {
@@ -1258,7 +1258,7 @@ static const KeyHandlers eurobrailleKeyHandlers = {
 };
 
 static int
-handleNativePacket (BrailleDisplay *brl, Port *port, const KeyHandlers *keyHandlers, unsigned char *packet, size_t size) {
+handleNativePacket (BrailleDisplay *brl, Port *port, const KeyHandlers *keyHandlers, const unsigned char *packet, size_t size) {
   if (size == 2) {
     if (packet[0] == IR_IPT_InteractiveKey) {
       if (packet[1] == 'W') {
@@ -1435,77 +1435,84 @@ isMenuKey (const unsigned char *packet, size_t size) {
 }
 
 static int
-readCommand_embedded (BrailleDisplay *brl) {
-  unsigned char packet[IR_MAXIMUM_PACKET_SIZE];
-  size_t size;
+handlePacket_embedded (BrailleDisplay *brl, const void *packet, size_t size) {
+  /* The test for Menu key should come first since this key toggles
+   * packet forward mode on/off
+   */
+  if (isMenuKey(packet, size)) {
+    logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "menu key pressed");
 
-  while ((size = readNativePacket(brl, &brl->data->internal.port, packet, sizeof(packet)))) {
-    /* The test for Menu key should come first since this key toggles */
-    /* packet forward mode on/off */
-    if (isMenuKey(packet, size)) {
-      logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "Menu key pressed");
-      if (brl->data->isForwarding) {
-        if (!leavePacketForwardMode(brl)) goto failure;
-        continue;
-      } else {
-        if (!enterPacketForwardMode(brl)) goto failure;
-        break;
-      }
-    }
-
-    if (!brl->data->isForwarding) {
-      handleNativePacket(brl, NULL, &coreKeyHandlers, packet, size);
-    } else if (brl->data->protocol == IR_PROTOCOL_NATIVE) {
-      if (!writeNativePacket(brl, &brl->data->external.port, packet, size)) goto failure;
+    if (brl->data->isForwarding) {
+      if (!leavePacketForwardMode(brl)) return 0;
     } else {
-      handleNativePacket(brl, &brl->data->external.port, &eurobrailleKeyHandlers, packet, size);
+      if (!enterPacketForwardMode(brl)) return 0;
     }
+
+    return 1;
   }
 
-  if (errno != EAGAIN) goto failure;
-  if (brl->data->isForwarding) return BRL_CMD_OFFLINE;
-  return EOF;
+  if (!brl->data->isForwarding) {
+    handleNativePacket(brl, NULL, &coreKeyHandlers, packet, size);
+  } else if (brl->data->protocol == IR_PROTOCOL_NATIVE) {
+    if (!writeNativePacket(brl, &brl->data->external.port, packet, size)) return 0;
+  } else {
+    handleNativePacket(brl, &brl->data->external.port, &eurobrailleKeyHandlers, packet, size);
+  }
 
-failure:
-  logSystemError("readCommand_embedded");
-  return BRL_CMD_RESTARTBRL;
+  return 1;
 }
 
 static int
-readCommand_nonembedded (BrailleDisplay *brl) {
-  unsigned char packet[IR_MAXIMUM_PACKET_SIZE];
-  size_t size;
+isOffline_embedded (BrailleDisplay *brl) {
+  return brl->data->isForwarding;
+}
 
-  while ( (size = readNativePacket(brl, &brl->data->internal.port, packet, sizeof(packet)) )) {
-    /* The test for Menu key should come first since this key toggles
-     * packet forward mode on/off
-     */
-    if (isMenuKey(packet, size)) {
-      logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "Menu key pressed");
+static int
+handlePacket_nonembedded (BrailleDisplay *brl, const void *packet, size_t size) {
+  /* The test for Menu key should come first since this key toggles
+   * packet forward mode on/off
+   */
+  if (isMenuKey(packet, size)) {
+    logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "menu key pressed");
 
-      if (brl->data->isConnected) {
-        brl->data->isConnected = 0;
-        return BRL_CMD_OFFLINE;
-      }
+    if (brl->data->isConnected) {
+      brl->data->isConnected = 0;
+      return 1;
     }
-
-    if (!brl->data->isConnected) {
-      refreshBrailleWindow = 1;
-      brl->data->isConnected = 1;
-    }
-    
-    handleNativePacket(brl, NULL, &coreKeyHandlers, packet, size);
   }
 
-  if (errno != EAGAIN) return BRL_CMD_RESTARTBRL;  
-  if (!brl->data->isConnected) return BRL_CMD_OFFLINE;
-  return EOF;
+  if (!brl->data->isConnected) {
+    refreshBrailleWindow = 1;
+    brl->data->isConnected = 1;
+    if (isMenuKey(packet, size)) return 1;
+  }
+  
+  handleNativePacket(brl, NULL, &coreKeyHandlers, packet, size);
+  return 1;
+}
+
+static int
+isOffline_nonembedded (BrailleDisplay *brl) {
+  return !brl->data->isConnected;
 }
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  if (brl->data->hasFailed) return BRL_CMD_RESTARTBRL;
-  return brl->data->readCommand(brl);
+  unsigned char packet[IR_MAXIMUM_PACKET_SIZE];
+  size_t size;
+
+  if (brl->data->hasFailed) goto failure;
+
+  while ((size = readNativePacket(brl, &brl->data->internal.port, packet, sizeof(packet)))) {
+    if (!brl->data->internal.handlePacket(brl, packet, size)) goto failure;
+  }
+
+  if (errno != EAGAIN) goto failure;
+  if (brl->data->internal.isOffline(brl)) return BRL_CMD_OFFLINE;
+  return EOF;
+
+failure:
+  return BRL_CMD_RESTARTBRL;
 }
 
 static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *characters)
@@ -1803,9 +1810,10 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               brl->data->internal.port.speed = IR_INTERNAL_SPEED;
 
               if (openInternalPort(brl)) {
-                brl->data->readCommand = readCommand_embedded;
-                activateBraille();
+                brl->data->internal.handlePacket = handlePacket_embedded;
+                brl->data->internal.isOffline = isOffline_embedded;
 
+                activateBraille();
                 internalPortOpened = 1;
               }
             }
@@ -1818,9 +1826,10 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         brl->data->internal.port.speed = IR_EXTERNAL_SPEED_NATIVE;
 
         if (openInternalPort(brl)) {
-          brl->data->readCommand = readCommand_nonembedded;
-          brl->data->isConnected = 1;
+          brl->data->internal.handlePacket = handlePacket_nonembedded;
+          brl->data->internal.isOffline = isOffline_nonembedded;
 
+          brl->data->isConnected = 1;
           internalPortOpened = 1;
         }
       }
