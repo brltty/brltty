@@ -76,6 +76,17 @@ enableUinputAutorepeat (UinputObject *uinput) {
 
   return 1;
 }
+
+static void
+releasePressedKeys (UinputObject *uinput) {
+  unsigned int key;
+
+  for (key=0; key<=KEY_MAX; key+=1) {
+    if (BITMASK_TEST(uinput->pressedKeys, key)) {
+      if (!writeKeyEvent(uinput, key, 0)) break;
+    }
+  }
+}
 #endif /* HAVE_LINUX_UINPUT_H */
 
 int
@@ -230,7 +241,7 @@ hasInputEvent (int device, uint16_t type, uint16_t code, uint16_t max) {
 
 int
 writeInputEvent (UinputObject *uinput, uint16_t type, uint16_t code, int32_t value) {
-#ifdef HAVE_LINUX_INPUT_H
+#ifdef HAVE_LINUX_UINPUT_H
   struct input_event event;
 
   memset(&event, 0, sizeof(event));
@@ -244,14 +255,14 @@ writeInputEvent (UinputObject *uinput, uint16_t type, uint16_t code, int32_t val
   } else {
     logSystemError("write(struct input_event)");
   }
-#endif /* HAVE_LINUX_INPUT_H */
+#endif /* HAVE_LINUX_UINPUT_H */
 
   return 0;
 }
 
 int
 writeKeyEvent (UinputObject *uinput, int key, int press) {
-#ifdef HAVE_LINUX_INPUT_H
+#ifdef HAVE_LINUX_UINPUT_H
   if (writeInputEvent(uinput, EV_KEY, key, press)) {
     if (press) {
       BITMASK_SET(uinput->pressedKeys, key);
@@ -263,29 +274,18 @@ writeKeyEvent (UinputObject *uinput, int key, int press) {
       return 1;
     }
   }
-#endif /* HAVE_LINUX_INPUT_H */
+#endif /* HAVE_LINUX_UINPUT_H */
 
   return 0;
 }
 
-static void
-releaseAllKeys (UinputObject *uinput) {
-#ifdef HAVE_LINUX_INPUT_H
-  unsigned int key;
-
-  for (key=0; key<=KEY_MAX; key+=1) {
-    if (BITMASK_TEST(uinput->pressedKeys, key)) {
-      if (!writeKeyEvent(uinput, key, 0)) break;
-    }
-  }
-#endif /* HAVE_LINUX_INPUT_H */
-}
-
 void
 destroyUinputObject (UinputObject *uinput) {
-  releaseAllKeys(uinput);
+#ifdef HAVE_LINUX_UINPUT_H
+  releasePressedKeys(uinput);
   close(uinput->fileDescriptor);
   free(uinput);
+#endif /* HAVE_LINUX_UINPUT_H */
 }
 
 UinputObject *
@@ -315,8 +315,6 @@ newUinputObject (void) {
     if (device) {
       if ((uinput->fileDescriptor = openCharacterDevice(device, O_WRONLY, 10, 223)) != -1) {
         struct uinput_user_dev description;
-        logMessage(LOG_DEBUG, "uinput opened: %s fd=%d",
-                   device, uinput->fileDescriptor);
         
         memset(&description, 0, sizeof(description));
         strncpy(description.name, PACKAGE_TARNAME, sizeof(description.name));
@@ -325,6 +323,8 @@ newUinputObject (void) {
           if (enableUinputKeyEvents(uinput)) {
             if (enableUinputAutorepeat(uinput)) {
               if (ioctl(uinput->fileDescriptor, UI_DEV_CREATE) != -1) {
+                logMessage(LOG_DEBUG, "uinput opened: %s fd=%d",
+                           device, uinput->fileDescriptor);
                 return uinput;
               } else {
                 logSystemError("ioctl[UI_DEV_CREATE]");
@@ -337,13 +337,18 @@ newUinputObject (void) {
 
         close(uinput->fileDescriptor);
       } else {
-        logMessage(LOG_DEBUG, "cannot open uinput: %s: %s", device, strerror(errno));
+        logMessage(LOG_DEBUG, "cannot open uinput device: %s: %s", device, strerror(errno));
       }
     }
+
+    free(uinput);
+    uinput = NULL;
+  } else {
+    logMallocError();
   }
 #endif /* HAVE_LINUX_UINPUT_H */
 
-  return NULL;
+  return uinput;
 }
 
 void
