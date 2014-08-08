@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "hidkeys.h"
+#include "keycodes.h"
 #include "bitmask.h"
 #include "brl_cmds.h"
 #include "cmd_enqueue.h"
@@ -32,1014 +33,1012 @@ typedef struct {
 
 static const HidKeyEntry hidKeyTable[] = {
   /* aA */
-  [0X04] = {
-    .xtCode = 0X001E,
-    .atCode = 0X001C
-  }
-  ,
+  [HID_KEY_A] = {
+    .xtCode = XT_KEY(00, A),
+    .atCode = AT_KEY(00, A)
+  },
+
   /* bB */
-  [0X05] = {
-    .xtCode = 0X0030,
-    .atCode = 0X0032
-  }
-  ,
+  [HID_KEY_B] = {
+    .xtCode = XT_KEY(00, B),
+    .atCode = AT_KEY(00, B)
+  },
+
   /* cC */
-  [0X06] = {
-    .xtCode = 0X002E,
-    .atCode = 0X0021
-  }
-  ,
+  [HID_KEY_C] = {
+    .xtCode = XT_KEY(00, C),
+    .atCode = AT_KEY(00, C)
+  },
+
   /* dD */
-  [0X07] = {
-    .xtCode = 0X0020,
-    .atCode = 0X0023
-  }
-  ,
+  [HID_KEY_D] = {
+    .xtCode = XT_KEY(00, D),
+    .atCode = AT_KEY(00, D)
+  },
+
   /* eE */
-  [0X08] = {
-    .xtCode = 0X0012,
-    .atCode = 0X0024
-  }
-  ,
+  [HID_KEY_E] = {
+    .xtCode = XT_KEY(00, E),
+    .atCode = AT_KEY(00, E)
+  },
+
   /* fF */
-  [0X09] = {
-    .xtCode = 0X0021,
-    .atCode = 0X002B
-  }
-  ,
+  [HID_KEY_F] = {
+    .xtCode = XT_KEY(00, F),
+    .atCode = AT_KEY(00, F)
+  },
+
   /* gG */
-  [0X0A] = {
-    .xtCode = 0X0022,
-    .atCode = 0X0034
-  }
-  ,
+  [HID_KEY_G] = {
+    .xtCode = XT_KEY(00, G),
+    .atCode = AT_KEY(00, G)
+  },
+
   /* hH */
-  [0X0B] = {
-    .xtCode = 0X0023,
-    .atCode = 0X0033
-  }
-  ,
+  [HID_KEY_H] = {
+    .xtCode = XT_KEY(00, H),
+    .atCode = AT_KEY(00, H)
+  },
+
   /* iI */
-  [0X0C] = {
-    .xtCode = 0X0017,
-    .atCode = 0X0043
-  }
-  ,
+  [HID_KEY_I] = {
+    .xtCode = XT_KEY(00, I),
+    .atCode = AT_KEY(00, I)
+  },
+
   /* jJ */
-  [0X0D] = {
-    .xtCode = 0X0024,
-    .atCode = 0X003B
-  }
-  ,
+  [HID_KEY_J] = {
+    .xtCode = XT_KEY(00, J),
+    .atCode = AT_KEY(00, J)
+  },
+
   /* kK */
-  [0X0E] = {
-    .xtCode = 0X0025,
-    .atCode = 0X0042
-  }
-  ,
+  [HID_KEY_K] = {
+    .xtCode = XT_KEY(00, K),
+    .atCode = AT_KEY(00, K)
+  },
+
   /* lL */
-  [0X0F] = {
-    .xtCode = 0X0026,
-    .atCode = 0X004B
-  }
-  ,
+  [HID_KEY_L] = {
+    .xtCode = XT_KEY(00, L),
+    .atCode = AT_KEY(00, L)
+  },
+
   /* mM */
-  [0X10] = {
-    .xtCode = 0X0032,
-    .atCode = 0X003A
-  }
-  ,
+  [HID_KEY_M] = {
+    .xtCode = XT_KEY(00, M),
+    .atCode = AT_KEY(00, M)
+  },
+
   /* nN */
-  [0X11] = {
-    .xtCode = 0X0031,
-    .atCode = 0X0031
-  }
-  ,
+  [HID_KEY_N] = {
+    .xtCode = XT_KEY(00, N),
+    .atCode = AT_KEY(00, N)
+  },
+
   /* oO */
-  [0X12] = {
-    .xtCode = 0X0018,
-    .atCode = 0X0044
-  }
-  ,
+  [HID_KEY_O] = {
+    .xtCode = XT_KEY(00, O),
+    .atCode = AT_KEY(00, O)
+  },
+
   /* pP */
-  [0X13] = {
-    .xtCode = 0X0019,
-    .atCode = 0X004D
-  }
-  ,
+  [HID_KEY_P] = {
+    .xtCode = XT_KEY(00, P),
+    .atCode = AT_KEY(00, P)
+  },
+
   /* qQ */
-  [0X14] = {
-    .xtCode = 0X0010,
-    .atCode = 0X0015
-  }
-  ,
+  [HID_KEY_Q] = {
+    .xtCode = XT_KEY(00, Q),
+    .atCode = AT_KEY(00, Q)
+  },
+
   /* rR */
-  [0X15] = {
-    .xtCode = 0X0013,
-    .atCode = 0X002D
-  }
-  ,
+  [HID_KEY_R] = {
+    .xtCode = XT_KEY(00, R),
+    .atCode = AT_KEY(00, R)
+  },
+
   /* sS */
-  [0X16] = {
-    .xtCode = 0X001F,
-    .atCode = 0X001B
-  }
-  ,
+  [HID_KEY_S] = {
+    .xtCode = XT_KEY(00, S),
+    .atCode = AT_KEY(00, S)
+  },
+
   /* tT */
-  [0X17] = {
-    .xtCode = 0X0014,
-    .atCode = 0X002C
-  }
-  ,
+  [HID_KEY_T] = {
+    .xtCode = XT_KEY(00, T),
+    .atCode = AT_KEY(00, T)
+  },
+
   /* uU */
-  [0X18] = {
-    .xtCode = 0X0016,
-    .atCode = 0X003C
-  }
-  ,
+  [HID_KEY_U] = {
+    .xtCode = XT_KEY(00, U),
+    .atCode = AT_KEY(00, U)
+  },
+
   /* vV */
-  [0X19] = {
-    .xtCode = 0X002F,
-    .atCode = 0X002A
-  }
-  ,
+  [HID_KEY_V] = {
+    .xtCode = XT_KEY(00, V),
+    .atCode = AT_KEY(00, V)
+  },
+
   /* wW */
-  [0X1A] = {
-    .xtCode = 0X0011,
-    .atCode = 0X001D
-  }
-  ,
+  [HID_KEY_W] = {
+    .xtCode = XT_KEY(00, W),
+    .atCode = AT_KEY(00, W)
+  },
+
   /* xX */
-  [0X1B] = {
-    .xtCode = 0X002D,
-    .atCode = 0X0022
-  }
-  ,
+  [HID_KEY_X] = {
+    .xtCode = XT_KEY(00, X),
+    .atCode = AT_KEY(00, X)
+  },
+
   /* yY */
-  [0X1C] = {
-    .xtCode = 0X0015,
-    .atCode = 0X0035
-  }
-  ,
+  [HID_KEY_Y] = {
+    .xtCode = XT_KEY(00, Y),
+    .atCode = AT_KEY(00, Y)
+  },
+
   /* zZ */
-  [0X1D] = {
-    .xtCode = 0X002C,
-    .atCode = 0X001A
-  }
-  ,
+  [HID_KEY_Z] = {
+    .xtCode = XT_KEY(00, Z),
+    .atCode = AT_KEY(00, Z)
+  },
+
   /* 1! */
-  [0X1E] = {
-    .xtCode = 0X0002,
-    .atCode = 0X0016
-  }
-  ,
+  [HID_KEY_One] = {
+    .xtCode = XT_KEY(00, One),
+    .atCode = AT_KEY(00, One)
+  },
+
   /* 2@ */
-  [0X1F] = {
-    .xtCode = 0X0003,
-    .atCode = 0X001E
-  }
-  ,
+  [HID_KEY_Two] = {
+    .xtCode = XT_KEY(00, Two),
+    .atCode = AT_KEY(00, Two)
+  },
+
   /* 3# */
-  [0X20] = {
-    .xtCode = 0X0004,
-    .atCode = 0X0026
-  }
-  ,
+  [HID_KEY_Three] = {
+    .xtCode = XT_KEY(00, Three),
+    .atCode = AT_KEY(00, Three)
+  },
+
   /* 4$ */
-  [0X21] = {
-    .xtCode = 0X0005,
-    .atCode = 0X0025
-  }
-  ,
+  [HID_KEY_Four] = {
+    .xtCode = XT_KEY(00, Four),
+    .atCode = AT_KEY(00, Four)
+  },
+
   /* 5% */
-  [0X22] = {
-    .xtCode = 0X0006,
-    .atCode = 0X002E
-  }
-  ,
+  [HID_KEY_Five] = {
+    .xtCode = XT_KEY(00, Five),
+    .atCode = AT_KEY(00, Five)
+  },
+
   /* 6^ */
-  [0X23] = {
-    .xtCode = 0X0007,
-    .atCode = 0X0036
-  }
-  ,
+  [HID_KEY_Six] = {
+    .xtCode = XT_KEY(00, Six),
+    .atCode = AT_KEY(00, Six)
+  },
+
   /* 7& */
-  [0X24] = {
-    .xtCode = 0X0008,
-    .atCode = 0X003D
-  }
-  ,
+  [HID_KEY_Seven] = {
+    .xtCode = XT_KEY(00, Seven),
+    .atCode = AT_KEY(00, Seven)
+  },
+
   /* 8* */
-  [0X25] = {
-    .xtCode = 0X0009,
-    .atCode = 0X003E
-  }
-  ,
+  [HID_KEY_Eight] = {
+    .xtCode = XT_KEY(00, Eight),
+    .atCode = AT_KEY(00, Eight)
+  },
+
   /* 9( */
-  [0X26] = {
-    .xtCode = 0X000A,
-    .atCode = 0X0046
-  }
-  ,
+  [HID_KEY_Nine] = {
+    .xtCode = XT_KEY(00, Nine),
+    .atCode = AT_KEY(00, Nine)
+  },
+
   /* 0) */
-  [0X27] = {
-    .xtCode = 0X000B,
-    .atCode = 0X0045
-  }
-  ,
+  [HID_KEY_Zero] = {
+    .xtCode = XT_KEY(00, Zero),
+    .atCode = AT_KEY(00, Zero)
+  },
+
   /* Return */
-  [0X28] = {
-    .xtCode = 0X001C,
-    .atCode = 0X005A
-  }
-  ,
+  [HID_KEY_Return] = {
+    .xtCode = XT_KEY(00, Return),
+    .atCode = AT_KEY(00, Return)
+  },
+
   /* Escape */
-  [0X29] = {
-    .xtCode = 0X0001,
-    .atCode = 0X0076
-  }
-  ,
+  [HID_KEY_Escape] = {
+    .xtCode = XT_KEY(00, Escape),
+    .atCode = AT_KEY(00, Escape)
+  },
+
   /* Backspace */
-  [0X2A] = {
-    .xtCode = 0X000E,
-    .atCode = 0X0066
-  }
-  ,
+  [HID_KEY_Backspace] = {
+    .xtCode = XT_KEY(00, Backspace),
+    .atCode = AT_KEY(00, Backspace)
+  },
+
   /* Tab */
-  [0X2B] = {
-    .xtCode = 0X000F,
-    .atCode = 0X000D
-  }
-  ,
+  [HID_KEY_Tab] = {
+    .xtCode = XT_KEY(00, Tab),
+    .atCode = AT_KEY(00, Tab)
+  },
+
   /* Space */
-  [0X2C] = {
-    .xtCode = 0X0039,
-    .atCode = 0X0029
-  }
-  ,
+  [HID_KEY_Space] = {
+    .xtCode = XT_KEY(00, Space),
+    .atCode = AT_KEY(00, Space)
+  },
+
   /* -_ */
-  [0X2D] = {
-    .xtCode = 0X000C,
-    .atCode = 0X004E
-  }
-  ,
+  [HID_KEY_Minus] = {
+    .xtCode = XT_KEY(00, Minus),
+    .atCode = AT_KEY(00, Minus)
+  },
+
   /* =+ */
-  [0X2E] = {
-    .xtCode = 0X000D,
-    .atCode = 0X0055
-  }
-  ,
+  [HID_KEY_Equals] = {
+    .xtCode = XT_KEY(00, Equals),
+    .atCode = AT_KEY(00, Equals)
+  },
+
   /* [{ */
-  [0X2F] = {
-    .xtCode = 0X001A,
-    .atCode = 0X0054
-  }
-  ,
+  [HID_KEY_LeftBracket] = {
+    .xtCode = XT_KEY(00, LeftBracket),
+    .atCode = AT_KEY(00, LeftBracket)
+  },
+
   /* ]} */
-  [0X30] = {
-    .xtCode = 0X001B,
-    .atCode = 0X005B
-  }
-  ,
+  [HID_KEY_RightBracket] = {
+    .xtCode = XT_KEY(00, RightBracket),
+    .atCode = AT_KEY(00, RightBracket)
+  },
+
   /* \| */
-  [0X31] = {
-    .xtCode = 0X002B,
-    .atCode = 0X005D
-  }
-  ,
+  [HID_KEY_Backslash] = {
+    .xtCode = XT_KEY(00, Backslash),
+    .atCode = AT_KEY(00, Backslash)
+  },
+
   /* Europe 1 (Note 2) */
-  [0X32] = {
-    .xtCode = 0X002B,
-    .atCode = 0X005D
-  }
-  ,
+  [HID_KEY_Europe1] = {
+    .xtCode = XT_KEY(00, Backslash),
+    .atCode = AT_KEY(00, Backslash)
+  },
+
   /* ;: */
-  [0X33] = {
-    .xtCode = 0X0027,
-    .atCode = 0X004C
-  }
-  ,
+  [HID_KEY_Semicolon] = {
+    .xtCode = XT_KEY(00, Semicolon),
+    .atCode = AT_KEY(00, Semicolon)
+  },
+
   /* '" */
-  [0X34] = {
-    .xtCode = 0X0028,
-    .atCode = 0X0052
-  }
-  ,
+  [HID_KEY_Apostrophe] = {
+    .xtCode = XT_KEY(00, Apostrophe),
+    .atCode = AT_KEY(00, Apostrophe)
+  },
+
   /* `~ */
-  [0X35] = {
-    .xtCode = 0X0029,
-    .atCode = 0X000E
-  }
-  ,
+  [HID_KEY_Grave] = {
+    .xtCode = XT_KEY(00, Grave),
+    .atCode = AT_KEY(00, Grave)
+  },
+
   /* ,< */
-  [0X36] = {
-    .xtCode = 0X0033,
-    .atCode = 0X0041
-  }
-  ,
+  [HID_KEY_Comma] = {
+    .xtCode = XT_KEY(00, Comma),
+    .atCode = AT_KEY(00, Comma)
+  },
+
   /* .> */
-  [0X37] = {
-    .xtCode = 0X0034,
-    .atCode = 0X0049
-  }
-  ,
+  [HID_KEY_Period] = {
+    .xtCode = XT_KEY(00, Period),
+    .atCode = AT_KEY(00, Period)
+  },
+
   /* /? */
-  [0X38] = {
-    .xtCode = 0X0035,
-    .atCode = 0X004A
-  }
-  ,
+  [HID_KEY_Slash] = {
+    .xtCode = XT_KEY(00, Slash),
+    .atCode = AT_KEY(00, Slash)
+  },
+
   /* Caps Lock */
-  [0X39] = {
-    .xtCode = 0X003A,
-    .atCode = 0X0058
-  }
-  ,
+  [HID_KEY_CapsLock] = {
+    .xtCode = XT_KEY(00, CapsLock),
+    .atCode = AT_KEY(00, CapsLock)
+  },
+
   /* F1 */
-  [0X3A] = {
-    .xtCode = 0X003B,
-    .atCode = 0X0005
-  }
-  ,
+  [HID_KEY_F1] = {
+    .xtCode = XT_KEY(00, F1),
+    .atCode = AT_KEY(00, F1)
+  },
+
   /* F2 */
-  [0X3B] = {
-    .xtCode = 0X003C,
-    .atCode = 0X0006
-  }
-  ,
+  [HID_KEY_F2] = {
+    .xtCode = XT_KEY(00, F2),
+    .atCode = AT_KEY(00, F2)
+  },
+
   /* F3 */
-  [0X3C] = {
-    .xtCode = 0X003D,
-    .atCode = 0X0004
-  }
-  ,
+  [HID_KEY_F3] = {
+    .xtCode = XT_KEY(00, F3),
+    .atCode = AT_KEY(00, F3)
+  },
+
   /* F4 */
-  [0X3D] = {
-    .xtCode = 0X003E,
-    .atCode = 0X000C
-  }
-  ,
+  [HID_KEY_F4] = {
+    .xtCode = XT_KEY(00, F4),
+    .atCode = AT_KEY(00, F4)
+  },
+
   /* F5 */
-  [0X3E] = {
-    .xtCode = 0X003F,
-    .atCode = 0X0003
-  }
-  ,
+  [HID_KEY_F5] = {
+    .xtCode = XT_KEY(00, F5),
+    .atCode = AT_KEY(00, F5)
+  },
+
   /* F6 */
-  [0X3F] = {
-    .xtCode = 0X0040,
-    .atCode = 0X000B
-  }
-  ,
+  [HID_KEY_F6] = {
+    .xtCode = XT_KEY(00, F6),
+    .atCode = AT_KEY(00, F6)
+  },
+
   /* F7 */
-  [0X40] = {
-    .xtCode = 0X0041,
-    .atCode = 0X0083
-  }
-  ,
+  [HID_KEY_F7] = {
+    .xtCode = XT_KEY(00, F7),
+    .atCode = AT_KEY(00, F7)
+  },
+
   /* F8 */
-  [0X41] = {
-    .xtCode = 0X0042,
-    .atCode = 0X000A
-  }
-  ,
+  [HID_KEY_F8] = {
+    .xtCode = XT_KEY(00, F8),
+    .atCode = AT_KEY(00, F8)
+  },
+
   /* F9 */
-  [0X42] = {
-    .xtCode = 0X0043,
-    .atCode = 0X0001
-  }
-  ,
+  [HID_KEY_F9] = {
+    .xtCode = XT_KEY(00, F9),
+    .atCode = AT_KEY(00, F9)
+  },
+
   /* F10 */
-  [0X43] = {
-    .xtCode = 0X0044,
-    .atCode = 0X0009
-  }
-  ,
+  [HID_KEY_F10] = {
+    .xtCode = XT_KEY(00, F10),
+    .atCode = AT_KEY(00, F10)
+  },
+
   /* F11 */
-  [0X44] = {
-    .xtCode = 0X0057,
-    .atCode = 0X0078
-  }
-  ,
+  [HID_KEY_F11] = {
+    .xtCode = XT_KEY(00, F11),
+    .atCode = AT_KEY(00, F11)
+  },
+
   /* F12 */
-  [0X45] = {
-    .xtCode = 0X0058,
-    .atCode = 0X0007
-  }
-  ,
+  [HID_KEY_F12] = {
+    .xtCode = XT_KEY(00, F12),
+    .atCode = AT_KEY(00, F12)
+  },
+
   /* Print Screen (Note 1) */
-  [0X46] = {
-    .xtCode = 0XE037,
-    .atCode = 0XE07C
-  }
-  ,
+  [HID_KEY_PrintScreen] = {
+    .xtCode = XT_KEY(E0, PrintScreen),
+    .atCode = AT_KEY(E0, PrintScreen)
+  },
+
   /* Scroll Lock */
-  [0X47] = {
-    .xtCode = 0X0046,
-    .atCode = 0X007E
-  }
-  ,
+  [HID_KEY_ScrollLock] = {
+    .xtCode = XT_KEY(00, ScrollLock),
+    .atCode = AT_KEY(00, ScrollLock)
+  },
 
   /* Insert (Note 1) */
-  [0X49] = {
-    .xtCode = 0XE052,
-    .atCode = 0XE070
-  }
-  ,
+  [HID_KEY_Insert] = {
+    .xtCode = XT_KEY(E0, Insert),
+    .atCode = AT_KEY(E0, Insert)
+  },
+
   /* Home (Note 1) */
-  [0X4A] = {
-    .xtCode = 0XE047,
-    .atCode = 0XE06C
-  }
-  ,
+  [HID_KEY_Home] = {
+    .xtCode = XT_KEY(E0, Home),
+    .atCode = AT_KEY(E0, Home)
+  },
+
   /* Page Up (Note 1) */
-  [0X4B] = {
-    .xtCode = 0XE049,
-    .atCode = 0XE07D
-  }
-  ,
+  [HID_KEY_PageUp] = {
+    .xtCode = XT_KEY(E0, PageUp),
+    .atCode = AT_KEY(E0, PageUp)
+  },
+
   /* Delete (Note 1) */
-  [0X4C] = {
-    .xtCode = 0XE053,
-    .atCode = 0XE071
-  }
-  ,
+  [HID_KEY_Delete] = {
+    .xtCode = XT_KEY(E0, Delete),
+    .atCode = AT_KEY(E0, Delete)
+  },
+
   /* End (Note 1) */
-  [0X4D] = {
-    .xtCode = 0XE04F,
-    .atCode = 0XE069
-  }
-  ,
+  [HID_KEY_End] = {
+    .xtCode = XT_KEY(E0, End),
+    .atCode = AT_KEY(E0, End)
+  },
+
   /* Page Down (Note 1) */
-  [0X4E] = {
-    .xtCode = 0XE051,
-    .atCode = 0XE07A
-  }
-  ,
+  [HID_KEY_PageDown] = {
+    .xtCode = XT_KEY(E0, PageDown),
+    .atCode = AT_KEY(E0, PageDown)
+  },
+
   /* Right Arrow (Note 1) */
-  [0X4F] = {
-    .xtCode = 0XE04D,
-    .atCode = 0XE074
-  }
-  ,
+  [HID_KEY_ArrowRight] = {
+    .xtCode = XT_KEY(E0, ArrowRight),
+    .atCode = AT_KEY(E0, ArrowRight)
+  },
+
   /* Left Arrow (Note 1) */
-  [0X50] = {
-    .xtCode = 0XE04B,
-    .atCode = 0XE06B
-  }
-  ,
+  [HID_KEY_ArrowLeft] = {
+    .xtCode = XT_KEY(E0, ArrowLeft),
+    .atCode = AT_KEY(E0, ArrowLeft)
+  },
+
   /* Down Arrow (Note 1) */
-  [0X51] = {
-    .xtCode = 0XE050,
-    .atCode = 0XE072
-  }
-  ,
+  [HID_KEY_ArrowDown] = {
+    .xtCode = XT_KEY(E0, ArrowDown),
+    .atCode = AT_KEY(E0, ArrowDown)
+  },
+
   /* Up Arrow (Note 1) */
-  [0X52] = {
-    .xtCode = 0XE048,
-    .atCode = 0XE075
-  }
-  ,
+  [HID_KEY_ArrowUp] = {
+    .xtCode = XT_KEY(E0, ArrowUp),
+    .atCode = AT_KEY(E0, ArrowUp)
+  },
+
   /* Num Lock */
-  [0X53] = {
-    .xtCode = 0X0045,
-    .atCode = 0X0077
-  }
-  ,
+  [HID_KEY_NumLock] = {
+    .xtCode = XT_KEY(00, NumLock),
+    .atCode = AT_KEY(00, NumLock)
+  },
+
   /* Keypad / (Note 1) */
-  [0X54] = {
-    .xtCode = 0XE035,
-    .atCode = 0XE04A
-  }
-  ,
+  [HID_KEY_KeypadDivide] = {
+    .xtCode = XT_KEY(E0, KeypadDivide),
+    .atCode = AT_KEY(E0, KeypadDivide)
+  },
+
   /* Keypad * */
-  [0X55] = {
-    .xtCode = 0X0037,
-    .atCode = 0X007C
-  }
-  ,
+  [HID_KEY_KeypadTimes] = {
+    .xtCode = XT_KEY(00, KeypadTimes),
+    .atCode = AT_KEY(00, KeypadTimes)
+  },
+
   /* Keypad - */
-  [0X56] = {
-    .xtCode = 0X004A,
-    .atCode = 0X007B
-  }
-  ,
+  [HID_KEY_KeypadMinus] = {
+    .xtCode = XT_KEY(00, KeypadMinus),
+    .atCode = AT_KEY(00, KeypadMinus)
+  },
+
   /* Keypad + */
-  [0X57] = {
-    .xtCode = 0X004E,
-    .atCode = 0X0079
-  }
-  ,
+  [HID_KEY_KeypadPlus] = {
+    .xtCode = XT_KEY(00, KeypadPlus),
+    .atCode = AT_KEY(00, KeypadPlus)
+  },
+
   /* Keypad Enter */
-  [0X58] = {
-    .xtCode = 0XE01C,
-    .atCode = 0XE05A
-  }
-  ,
+  [HID_KEY_KeypadEnter] = {
+    .xtCode = XT_KEY(E0, KeypadEnter),
+    .atCode = AT_KEY(E0, KeypadEnter)
+  },
+
   /* Keypad 1 End */
-  [0X59] = {
-    .xtCode = 0X004F,
-    .atCode = 0X0069
-  }
-  ,
+  [HID_KEY_KeypadOne] = {
+    .xtCode = XT_KEY(00, KeypadOne),
+    .atCode = AT_KEY(00, KeypadOne)
+  },
+
   /* Keypad 2 Down */
-  [0X5A] = {
-    .xtCode = 0X0050,
-    .atCode = 0X0072
-  }
-  ,
+  [HID_KEY_KeypadTwo] = {
+    .xtCode = XT_KEY(00, KeypadTwo),
+    .atCode = AT_KEY(00, KeypadTwo)
+  },
+
   /* Keypad 3 PageDn */
-  [0X5B] = {
-    .xtCode = 0X0051,
-    .atCode = 0X007A
-  }
-  ,
+  [HID_KEY_KeypadThree] = {
+    .xtCode = XT_KEY(00, KeypadThree),
+    .atCode = AT_KEY(00, KeypadThree)
+  },
+
   /* Keypad 4 Left */
-  [0X5C] = {
-    .xtCode = 0X004B,
-    .atCode = 0X006B
-  }
-  ,
+  [HID_KEY_KeypadFour] = {
+    .xtCode = XT_KEY(00, KeypadFour),
+    .atCode = AT_KEY(00, KeypadFour)
+  },
+
   /* Keypad 5 */
-  [0X5D] = {
-    .xtCode = 0X004C,
-    .atCode = 0X0073
-  }
-  ,
+  [HID_KEY_KeypadFive] = {
+    .xtCode = XT_KEY(00, KeypadFive),
+    .atCode = AT_KEY(00, KeypadFive)
+  },
+
   /* Keypad 6 Right */
-  [0X5E] = {
-    .xtCode = 0X004D,
-    .atCode = 0X0074
-  }
-  ,
+  [HID_KEY_KeypadSix] = {
+    .xtCode = XT_KEY(00, KeypadSix),
+    .atCode = AT_KEY(00, KeypadSix)
+  },
+
   /* Keypad 7 Home */
-  [0X5F] = {
-    .xtCode = 0X0047,
-    .atCode = 0X006C
-  }
-  ,
+  [HID_KEY_KeypadSeven] = {
+    .xtCode = XT_KEY(00, KeypadSeven),
+    .atCode = AT_KEY(00, KeypadSeven)
+  },
+
   /* Keypad 8 Up */
-  [0X60] = {
-    .xtCode = 0X0048,
-    .atCode = 0X0075
-  }
-  ,
+  [HID_KEY_KeypadEight] = {
+    .xtCode = XT_KEY(00, KeypadEight),
+    .atCode = AT_KEY(00, KeypadEight)
+  },
+
   /* Keypad 9 PageUp */
-  [0X61] = {
-    .xtCode = 0X0049,
-    .atCode = 0X007D
-  }
-  ,
+  [HID_KEY_KeypadNine] = {
+    .xtCode = XT_KEY(00, KeypadNine),
+    .atCode = AT_KEY(00, KeypadNine)
+  },
+
   /* Keypad 0 Insert */
-  [0X62] = {
-    .xtCode = 0X0052,
-    .atCode = 0X0070
-  }
-  ,
+  [HID_KEY_KeypadZero] = {
+    .xtCode = XT_KEY(00, KeypadZero),
+    .atCode = AT_KEY(00, KeypadZero)
+  },
+
   /* Keypad . Delete */
-  [0X63] = {
-    .xtCode = 0X0053,
-    .atCode = 0X0071
-  }
-  ,
+  [HID_KEY_KeypadPeriod] = {
+    .xtCode = XT_KEY(00, KeypadPeriod),
+    .atCode = AT_KEY(00, KeypadPeriod)
+  },
+
   /* Europe 2 (Note 2) */
-  [0X64] = {
-    .xtCode = 0X0056,
-    .atCode = 0X0061
-  }
-  ,
+  [HID_KEY_Europe2] = {
+    .xtCode = XT_KEY(00, Europe2),
+    .atCode = AT_KEY(00, Europe2)
+  },
+
   /* App */
-  [0X65] = {
-    .xtCode = 0XE05D,
-    .atCode = 0XE02F
-  }
-  ,
+  [HID_KEY_App] = {
+    .xtCode = XT_KEY(E0, App),
+    .atCode = AT_KEY(E0, App)
+  },
+
   /* Keyboard Power */
-  [0X66] = {
-    .xtCode = 0XE05E,
-    .atCode = 0XE037
-  }
-  ,
+  [HID_KEY_Power] = {
+    .xtCode = XT_KEY(E0, Power),
+    .atCode = AT_KEY(E0, Power)
+  },
+
   /* Keypad = */
-  [0X67] = {
-    .xtCode = 0X0059,
-    .atCode = 0X000F
-  }
-  ,
+  [HID_KEY_KeypadEquals] = {
+    .xtCode = XT_KEY(00, KeypadEquals),
+    .atCode = AT_KEY(00, KeypadEquals)
+  },
+
   /* F13 */
-  [0X68] = {
-    .xtCode = 0X0064,
-    .atCode = 0X0008
-  }
-  ,
+  [HID_KEY_F13] = {
+    .xtCode = XT_KEY(00, F13),
+    .atCode = AT_KEY(00, F13)
+  },
+
   /* F14 */
-  [0X69] = {
-    .xtCode = 0X0065,
-    .atCode = 0X0010
-  }
-  ,
+  [HID_KEY_F14] = {
+    .xtCode = XT_KEY(00, F14),
+    .atCode = AT_KEY(00, F14)
+  },
+
   /* F15 */
-  [0X6A] = {
-    .xtCode = 0X0066,
-    .atCode = 0X0018
-  }
-  ,
+  [HID_KEY_F15] = {
+    .xtCode = XT_KEY(00, F15),
+    .atCode = AT_KEY(00, F15)
+  },
+
   /* F16 */
-  [0X6B] = {
-    .xtCode = 0X0067,
-    .atCode = 0X0020
-  }
-  ,
+  [HID_KEY_F16] = {
+    .xtCode = XT_KEY(00, F16),
+    .atCode = AT_KEY(00, F16)
+  },
+
   /* F17 */
-  [0X6C] = {
-    .xtCode = 0X0068,
-    .atCode = 0X0028
-  }
-  ,
+  [HID_KEY_F17] = {
+    .xtCode = XT_KEY(00, F17),
+    .atCode = AT_KEY(00, F17)
+  },
+
   /* F18 */
-  [0X6D] = {
-    .xtCode = 0X0069,
-    .atCode = 0X0030
-  }
-  ,
+  [HID_KEY_F18] = {
+    .xtCode = XT_KEY(00, F18),
+    .atCode = AT_KEY(00, F18)
+  },
+
   /* F19 */
-  [0X6E] = {
-    .xtCode = 0X006A,
-    .atCode = 0X0038
-  }
-  ,
+  [HID_KEY_F19] = {
+    .xtCode = XT_KEY(00, F19),
+    .atCode = AT_KEY(00, F19)
+  },
+
   /* F20 */
-  [0X6F] = {
-    .xtCode = 0X006B,
-    .atCode = 0X0040
-  }
-  ,
+  [HID_KEY_F20] = {
+    .xtCode = XT_KEY(00, F20),
+    .atCode = AT_KEY(00, F20)
+  },
+
   /* F21 */
-  [0X70] = {
-    .xtCode = 0X006C,
-    .atCode = 0X0048
-  }
-  ,
+  [HID_KEY_F21] = {
+    .xtCode = XT_KEY(00, F21),
+    .atCode = AT_KEY(00, F21)
+  },
+
   /* F22 */
-  [0X71] = {
-    .xtCode = 0X006D,
-    .atCode = 0X0050
-  }
-  ,
+  [HID_KEY_F22] = {
+    .xtCode = XT_KEY(00, F22),
+    .atCode = AT_KEY(00, F22)
+  },
+
   /* F23 */
-  [0X72] = {
-    .xtCode = 0X006E,
-    .atCode = 0X0057
-  }
-  ,
+  [HID_KEY_F23] = {
+    .xtCode = XT_KEY(00, F23),
+    .atCode = AT_KEY(00, F23)
+  },
+
   /* F24 */
-  [0X73] = {
-    .xtCode = 0X0076,
-    .atCode = 0X005F
-  }
-  ,
+  [HID_KEY_F24] = {
+    .xtCode = XT_KEY(00, F24),
+    .atCode = AT_KEY(00, F24)
+  },
+
   /* Keyboard Execute */
-  [0X74] = {
+  [HID_KEY_Execute] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Help */
-  [0X75] = {
+  [HID_KEY_Help] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Menu */
-  [0X76] = {
+  [HID_KEY_Menu] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Select */
-  [0X77] = {
+  [HID_KEY_Select] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Stop */
-  [0X78] = {
+  [HID_KEY_Stop] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Again */
-  [0X79] = {
+  [HID_KEY_Again] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Undo */
-  [0X7A] = {
+  [HID_KEY_Undo] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Cut */
-  [0X7B] = {
+  [HID_KEY_Cut] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Copy */
-  [0X7C] = {
+  [HID_KEY_Copy] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Paste */
-  [0X7D] = {
+  [HID_KEY_Paste] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Find */
-  [0X7E] = {
+  [HID_KEY_Find] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Mute */
-  [0X7F] = {
+  [HID_KEY_Mute] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Volume Up */
-  [0X80] = {
+  [HID_KEY_VolumeUp] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Volume Dn */
-  [0X81] = {
+  [HID_KEY_VolumeDown] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Caps Lock */
-  [0X82] = {
+  [HID_KEY_CapsLockXXX] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Num Lock */
-  [0X83] = {
+  [HID_KEY_NumLockXXX] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Scroll Lock */
-  [0X84] = {
+  [HID_KEY_ScrollLockXXX] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keypad , (Brazilian Keypad .) */
-  [0X85] = {
-    .xtCode = 0X007E,
-    .atCode = 0X006D
-  }
-  ,
+  [HID_KEY_KeypadComma] = {
+    .xtCode = XT_KEY(00, KeypadComma),
+    .atCode = AT_KEY(00, KeypadComma)
+  },
+
   /* Keyboard Equal Sign */
-  [0X86] = {
+  [HID_KEY_EqualsXXX] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Int'l 1 (Ro) */
-  [0X87] = {
-    .xtCode = 0X0073,
-    .atCode = 0X0051
-  }
-  ,
+  [HID_KEY_International1] = {
+    .xtCode = XT_KEY(00, International1),
+    .atCode = AT_KEY(00, International1)
+  },
+
   /* Keyboard Intl'2 (Katakana/Hiragana) */
-  [0X88] = {
-    .xtCode = 0X0070,
-    .atCode = 0X0013
-  }
-  ,
+  [HID_KEY_International2] = {
+    .xtCode = XT_KEY(00, International2),
+    .atCode = AT_KEY(00, International2)
+  },
+
   /* Keyboard Int'l 3 (Yen) */
-  [0X89] = {
-    .xtCode = 0X007D,
-    .atCode = 0X006A
-  }
-  ,
+  [HID_KEY_International3] = {
+    .xtCode = XT_KEY(00, International3),
+    .atCode = AT_KEY(00, International3)
+  },
+
   /* Keyboard Int'l 4 (Henkan) */
-  [0X8A] = {
-    .xtCode = 0X0079,
-    .atCode = 0X0064
-  }
-  ,
+  [HID_KEY_International4] = {
+    .xtCode = XT_KEY(00, International4),
+    .atCode = AT_KEY(00, International4)
+  },
+
   /* Keyboard Int'l 5 (Muhenkan) */
-  [0X8B] = {
-    .xtCode = 0X007B,
-    .atCode = 0X0067
-  }
-  ,
+  [HID_KEY_International5] = {
+    .xtCode = XT_KEY(00, International5),
+    .atCode = AT_KEY(00, International5)
+  },
+
   /* Keyboard Int'l 6 (PC9800 Keypad ,) */
-  [0X8C] = {
-    .xtCode = 0X005C,
-    .atCode = 0X0027
-  }
-  ,
+  [HID_KEY_International6] = {
+    .xtCode = XT_KEY(00, International6),
+    .atCode = AT_KEY(00, International6)
+  },
+
   /* Keyboard Int'l 7 */
-  [0X8D] = {
+  [HID_KEY_International7] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Int'l 8 */
-  [0X8E] = {
+  [HID_KEY_International8] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Int'l 9 */
-  [0X8F] = {
+  [HID_KEY_International9] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Lang 1 (Hanguel/English) */
-  [0X90] = {
-    .xtCode = 0X00F2,
-    .atCode = 0X00F2
-  }
-  ,
+  [HID_KEY_Language1] = {
+    .xtCode = XT_KEY(00, Language1),
+    .atCode = AT_KEY(00, Language1)
+  },
+
   /* Keyboard Lang 2 (Hanja) */
-  [0X91] = {
-    .xtCode = 0X00F1,
-    .atCode = 0X00F1
-  }
-  ,
+  [HID_KEY_Language2] = {
+    .xtCode = XT_KEY(00, Language2),
+    .atCode = AT_KEY(00, Language2)
+  },
+
   /* Keyboard Lang 3 (Katakana) */
-  [0X92] = {
-    .xtCode = 0X0078,
-    .atCode = 0X0063
-  }
-  ,
+  [HID_KEY_Language3] = {
+    .xtCode = XT_KEY(00, Language3),
+    .atCode = AT_KEY(00, Language3)
+  },
+
   /* Keyboard Lang 4 (Hiragana) */
-  [0X93] = {
-    .xtCode = 0X0077,
-    .atCode = 0X0062
-  }
-  ,
+  [HID_KEY_Language4] = {
+    .xtCode = XT_KEY(00, Language4),
+    .atCode = AT_KEY(00, Language4)
+  },
+
   /* Keyboard Lang 5 (Zenkaku/Hankaku) */
-  [0X94] = {
-    .xtCode = 0X0076,
-    .atCode = 0X005F
-  }
-  ,
+  [HID_KEY_Language5] = {
+    .xtCode = XT_KEY(00, F24),
+    .atCode = AT_KEY(00, F24)
+  },
+
   /* Keyboard Lang 6 */
-  [0X95] = {
+  [HID_KEY_Language6] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Lang 7 */
-  [0X96] = {
+  [HID_KEY_Language7] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Lang 8 */
-  [0X97] = {
+  [HID_KEY_Language8] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Lang 9 */
-  [0X98] = {
+  [HID_KEY_Language9] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Alternate Erase */
-  [0X99] = {
+  [HID_KEY_AlternateErase] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard SysReq/Attention */
-  [0X9A] = {
+  [HID_KEY_SystemReequest] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Cancel */
-  [0X9B] = {
+  [HID_KEY_Cancel] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Clear */
-  [0X9C] = {
+  [HID_KEY_Clear] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Prior */
-  [0X9D] = {
+  [HID_KEY_Prior] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Return */
-  [0X9E] = {
+  [HID_KEY_ReturnXXX] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Separator */
-  [0X9F] = {
+  [HID_KEY_Separator] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Out */
-  [0XA0] = {
+  [HID_KEY_Out] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Oper */
-  [0XA1] = {
+  [HID_KEY_Oper] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard Clear/Again */
-  [0XA2] = {
+  [HID_KEY_ClearXXX] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard CrSel/Props */
-  [0XA3] = {
+  [HID_KEY_CrSel] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
+
   /* Keyboard ExSel */
-  [0XA4] = {
+  [HID_KEY_ExSel] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
-  }
-  ,
+  },
 
   /* Left Control */
-  [0XE0] = {
-    .xtCode = 0X001D,
-    .atCode = 0X0014
-  }
-  ,
+  [HID_KEY_LeftControl] = {
+    .xtCode = XT_KEY(00, LeftControl),
+    .atCode = AT_KEY(00, LeftControl)
+  },
+
   /* Left Shift */
-  [0XE1] = {
-    .xtCode = 0X002A,
-    .atCode = 0X0012
-  }
-  ,
+  [HID_KEY_LeftShift] = {
+    .xtCode = XT_KEY(00, LeftShift),
+    .atCode = AT_KEY(00, LeftShift)
+  },
+
   /* Left Alt */
-  [0XE2] = {
-    .xtCode = 0X0038,
-    .atCode = 0X0011
-  }
-  ,
+  [HID_KEY_LeftAlt] = {
+    .xtCode = XT_KEY(00, LeftAlt),
+    .atCode = AT_KEY(00, LeftAlt)
+  },
+
   /* Left GUI */
-  [0XE3] = {
-    .xtCode = 0XE05B,
-    .atCode = 0XE01F
-  }
-  ,
+  [HID_KEY_LeftGUI] = {
+    .xtCode = XT_KEY(E0, LeftGUI),
+    .atCode = AT_KEY(E0, LeftGUI)
+  },
+
   /* Right Control */
-  [0XE4] = {
-    .xtCode = 0XE01D,
-    .atCode = 0XE014
-  }
-  ,
+  [HID_KEY_RightControl] = {
+    .xtCode = XT_KEY(E0, RightControl),
+    .atCode = AT_KEY(E0, RightControl)
+  },
+
   /* Right Shift */
-  [0XE5] = {
-    .xtCode = 0X0036,
-    .atCode = 0X0059
-  }
-  ,
+  [HID_KEY_RightShift] = {
+    .xtCode = XT_KEY(00, RightShift),
+    .atCode = AT_KEY(00, RightShift)
+  },
+
   /* Right Alt */
-  [0XE6] = {
-    .xtCode = 0XE038,
-    .atCode = 0XE011
-  }
-  ,
+  [HID_KEY_RightAlt] = {
+    .xtCode = XT_KEY(E0, RightAlt),
+    .atCode = AT_KEY(E0, RightAlt)
+  },
+
   /* Right GUI */
-  [0XE7] = {
-    .xtCode = 0XE05C,
-    .atCode = 0XE027
-  }
+  [HID_KEY_RightGUI] = {
+    .xtCode = XT_KEY(E0, RightGUI),
+    .atCode = AT_KEY(E0, RightGUI)
+  },
 };
 
 static int
