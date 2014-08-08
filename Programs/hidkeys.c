@@ -189,69 +189,69 @@ static const HidKeyEntry hidKeyTable[] = {
   },
 
   /* 1! */
-  [HID_KEY_One] = {
-    .xtCode = XT_KEY(00, One),
-    .atCode = AT_KEY(00, One)
+  [HID_KEY_1] = {
+    .xtCode = XT_KEY(00, 1),
+    .atCode = AT_KEY(00, 1)
   },
 
   /* 2@ */
-  [HID_KEY_Two] = {
-    .xtCode = XT_KEY(00, Two),
-    .atCode = AT_KEY(00, Two)
+  [HID_KEY_2] = {
+    .xtCode = XT_KEY(00, 2),
+    .atCode = AT_KEY(00, 2)
   },
 
   /* 3# */
-  [HID_KEY_Three] = {
-    .xtCode = XT_KEY(00, Three),
-    .atCode = AT_KEY(00, Three)
+  [HID_KEY_3] = {
+    .xtCode = XT_KEY(00, 3),
+    .atCode = AT_KEY(00, 3)
   },
 
   /* 4$ */
-  [HID_KEY_Four] = {
-    .xtCode = XT_KEY(00, Four),
-    .atCode = AT_KEY(00, Four)
+  [HID_KEY_4] = {
+    .xtCode = XT_KEY(00, 4),
+    .atCode = AT_KEY(00, 4)
   },
 
   /* 5% */
-  [HID_KEY_Five] = {
-    .xtCode = XT_KEY(00, Five),
-    .atCode = AT_KEY(00, Five)
+  [HID_KEY_5] = {
+    .xtCode = XT_KEY(00, 5),
+    .atCode = AT_KEY(00, 5)
   },
 
   /* 6^ */
-  [HID_KEY_Six] = {
-    .xtCode = XT_KEY(00, Six),
-    .atCode = AT_KEY(00, Six)
+  [HID_KEY_6] = {
+    .xtCode = XT_KEY(00, 6),
+    .atCode = AT_KEY(00, 6)
   },
 
   /* 7& */
-  [HID_KEY_Seven] = {
-    .xtCode = XT_KEY(00, Seven),
-    .atCode = AT_KEY(00, Seven)
+  [HID_KEY_7] = {
+    .xtCode = XT_KEY(00, 7),
+    .atCode = AT_KEY(00, 7)
   },
 
   /* 8* */
-  [HID_KEY_Eight] = {
-    .xtCode = XT_KEY(00, Eight),
-    .atCode = AT_KEY(00, Eight)
+  [HID_KEY_8] = {
+    .xtCode = XT_KEY(00, 8),
+    .atCode = AT_KEY(00, 8)
   },
 
   /* 9( */
-  [HID_KEY_Nine] = {
-    .xtCode = XT_KEY(00, Nine),
-    .atCode = AT_KEY(00, Nine)
+  [HID_KEY_9] = {
+    .xtCode = XT_KEY(00, 9),
+    .atCode = AT_KEY(00, 9)
   },
 
   /* 0) */
-  [HID_KEY_Zero] = {
-    .xtCode = XT_KEY(00, Zero),
-    .atCode = AT_KEY(00, Zero)
+  [HID_KEY_0] = {
+    .xtCode = XT_KEY(00, 0),
+    .atCode = AT_KEY(00, 0)
   },
 
   /* Return */
-  [HID_KEY_Return] = {
-    .xtCode = XT_KEY(00, Return),
-    .atCode = AT_KEY(00, Return)
+  [HID_KEY_Enter] = {
+    .xtCode = XT_KEY(00, Enter),
+    .atCode = AT_KEY(00, Enter)
   },
 
   /* Escape */
@@ -285,9 +285,9 @@ static const HidKeyEntry hidKeyTable[] = {
   },
 
   /* =+ */
-  [HID_KEY_Equals] = {
-    .xtCode = XT_KEY(00, Equals),
-    .atCode = AT_KEY(00, Equals)
+  [HID_KEY_Equal] = {
+    .xtCode = XT_KEY(00, Equal),
+    .atCode = AT_KEY(00, Equal)
   },
 
   /* [{ */
@@ -507,99 +507,99 @@ static const HidKeyEntry hidKeyTable[] = {
   },
 
   /* Keypad / (Note 1) */
-  [HID_KEY_KeypadDivide] = {
-    .xtCode = XT_KEY(E0, KeypadDivide),
-    .atCode = AT_KEY(E0, KeypadDivide)
+  [HID_KEY_KPDivide] = {
+    .xtCode = XT_KEY(E0, KPDivide),
+    .atCode = AT_KEY(E0, KPDivide)
   },
 
   /* Keypad * */
-  [HID_KEY_KeypadTimes] = {
-    .xtCode = XT_KEY(00, KeypadTimes),
-    .atCode = AT_KEY(00, KeypadTimes)
+  [HID_KEY_KPTimes] = {
+    .xtCode = XT_KEY(00, KPTimes),
+    .atCode = AT_KEY(00, KPTimes)
   },
 
   /* Keypad - */
-  [HID_KEY_KeypadMinus] = {
-    .xtCode = XT_KEY(00, KeypadMinus),
-    .atCode = AT_KEY(00, KeypadMinus)
+  [HID_KEY_KPMinus] = {
+    .xtCode = XT_KEY(00, KPMinus),
+    .atCode = AT_KEY(00, KPMinus)
   },
 
   /* Keypad + */
-  [HID_KEY_KeypadPlus] = {
-    .xtCode = XT_KEY(00, KeypadPlus),
-    .atCode = AT_KEY(00, KeypadPlus)
+  [HID_KEY_KPPlus] = {
+    .xtCode = XT_KEY(00, KPPlus),
+    .atCode = AT_KEY(00, KPPlus)
   },
 
   /* Keypad Enter */
-  [HID_KEY_KeypadEnter] = {
-    .xtCode = XT_KEY(E0, KeypadEnter),
-    .atCode = AT_KEY(E0, KeypadEnter)
+  [HID_KEY_KPEnter] = {
+    .xtCode = XT_KEY(E0, KPEnter),
+    .atCode = AT_KEY(E0, KPEnter)
   },
 
   /* Keypad 1 End */
-  [HID_KEY_KeypadOne] = {
-    .xtCode = XT_KEY(00, KeypadOne),
-    .atCode = AT_KEY(00, KeypadOne)
+  [HID_KEY_KP1] = {
+    .xtCode = XT_KEY(00, KP1),
+    .atCode = AT_KEY(00, KP1)
   },
 
   /* Keypad 2 Down */
-  [HID_KEY_KeypadTwo] = {
-    .xtCode = XT_KEY(00, KeypadTwo),
-    .atCode = AT_KEY(00, KeypadTwo)
+  [HID_KEY_KP2] = {
+    .xtCode = XT_KEY(00, KP2),
+    .atCode = AT_KEY(00, KP2)
   },
 
   /* Keypad 3 PageDn */
-  [HID_KEY_KeypadThree] = {
-    .xtCode = XT_KEY(00, KeypadThree),
-    .atCode = AT_KEY(00, KeypadThree)
+  [HID_KEY_KP3] = {
+    .xtCode = XT_KEY(00, KP3),
+    .atCode = AT_KEY(00, KP3)
   },
 
   /* Keypad 4 Left */
-  [HID_KEY_KeypadFour] = {
-    .xtCode = XT_KEY(00, KeypadFour),
-    .atCode = AT_KEY(00, KeypadFour)
+  [HID_KEY_KP4] = {
+    .xtCode = XT_KEY(00, KP4),
+    .atCode = AT_KEY(00, KP4)
   },
 
   /* Keypad 5 */
-  [HID_KEY_KeypadFive] = {
-    .xtCode = XT_KEY(00, KeypadFive),
-    .atCode = AT_KEY(00, KeypadFive)
+  [HID_KEY_KP5] = {
+    .xtCode = XT_KEY(00, KP5),
+    .atCode = AT_KEY(00, KP5)
   },
 
   /* Keypad 6 Right */
-  [HID_KEY_KeypadSix] = {
-    .xtCode = XT_KEY(00, KeypadSix),
-    .atCode = AT_KEY(00, KeypadSix)
+  [HID_KEY_KP6] = {
+    .xtCode = XT_KEY(00, KP6),
+    .atCode = AT_KEY(00, KP6)
   },
 
   /* Keypad 7 Home */
-  [HID_KEY_KeypadSeven] = {
-    .xtCode = XT_KEY(00, KeypadSeven),
-    .atCode = AT_KEY(00, KeypadSeven)
+  [HID_KEY_KP7] = {
+    .xtCode = XT_KEY(00, KP7),
+    .atCode = AT_KEY(00, KP7)
   },
 
   /* Keypad 8 Up */
-  [HID_KEY_KeypadEight] = {
-    .xtCode = XT_KEY(00, KeypadEight),
-    .atCode = AT_KEY(00, KeypadEight)
+  [HID_KEY_KP8] = {
+    .xtCode = XT_KEY(00, KP8),
+    .atCode = AT_KEY(00, KP8)
   },
 
   /* Keypad 9 PageUp */
-  [HID_KEY_KeypadNine] = {
-    .xtCode = XT_KEY(00, KeypadNine),
-    .atCode = AT_KEY(00, KeypadNine)
+  [HID_KEY_KP9] = {
+    .xtCode = XT_KEY(00, KP9),
+    .atCode = AT_KEY(00, KP9)
   },
 
   /* Keypad 0 Insert */
-  [HID_KEY_KeypadZero] = {
-    .xtCode = XT_KEY(00, KeypadZero),
-    .atCode = AT_KEY(00, KeypadZero)
+  [HID_KEY_KP0] = {
+    .xtCode = XT_KEY(00, KP0),
+    .atCode = AT_KEY(00, KP0)
   },
 
   /* Keypad . Delete */
-  [HID_KEY_KeypadPeriod] = {
-    .xtCode = XT_KEY(00, KeypadPeriod),
-    .atCode = AT_KEY(00, KeypadPeriod)
+  [HID_KEY_KPPeriod] = {
+    .xtCode = XT_KEY(00, KPPeriod),
+    .atCode = AT_KEY(00, KPPeriod)
   },
 
   /* Europe 2 (Note 2) */
@@ -621,9 +621,9 @@ static const HidKeyEntry hidKeyTable[] = {
   },
 
   /* Keypad = */
-  [HID_KEY_KeypadEquals] = {
-    .xtCode = XT_KEY(00, KeypadEquals),
-    .atCode = AT_KEY(00, KeypadEquals)
+  [HID_KEY_KPEqual] = {
+    .xtCode = XT_KEY(00, KPEqual),
+    .atCode = AT_KEY(00, KPEqual)
   },
 
   /* F13 */
@@ -801,13 +801,13 @@ static const HidKeyEntry hidKeyTable[] = {
   },
 
   /* Keypad , (Brazilian Keypad .) */
-  [HID_KEY_KeypadComma] = {
-    .xtCode = XT_KEY(00, KeypadComma),
-    .atCode = AT_KEY(00, KeypadComma)
+  [HID_KEY_KPComma] = {
+    .xtCode = XT_KEY(00, KPComma),
+    .atCode = AT_KEY(00, KPComma)
   },
 
   /* Keyboard Equal Sign */
-  [HID_KEY_EqualsXXX] = {
+  [HID_KEY_EqualXXX] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
   },
@@ -951,7 +951,7 @@ static const HidKeyEntry hidKeyTable[] = {
   },
 
   /* Keyboard Return */
-  [HID_KEY_ReturnXXX] = {
+  [HID_KEY_EnterXXX] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
   },
