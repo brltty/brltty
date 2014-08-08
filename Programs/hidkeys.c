@@ -951,7 +951,7 @@ static const HidKeyEntry hidKeyTable[] = {
   },
 
   /* Keyboard Return */
-  [HID_KEY_EnterXXX] = {
+  [HID_KEY_Return] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
   },
