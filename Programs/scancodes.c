@@ -77,7 +77,7 @@ const unsigned char at2Xt[0X80] = {
   [AT_KEY_00_Period] = XT_KEY_00_Period,
   [AT_KEY_00_Slash] = XT_KEY_00_Slash,
   [AT_KEY_00_RightShift] = XT_KEY_00_RightShift,
-  [AT_KEY_00_KPTimes] = XT_KEY_00_KPTimes,
+  [AT_KEY_00_KPAsterisk] = XT_KEY_00_KPAsterisk,
   [AT_KEY_00_LeftAlt] = XT_KEY_00_LeftAlt,
   [AT_KEY_00_Space] = XT_KEY_00_Space,
   [AT_KEY_00_CapsLock] = XT_KEY_00_CapsLock,
@@ -344,7 +344,7 @@ static const KeyEntry AT_basicScanCodes[] = {
   [AT_KEY_00_Space] = {CMD_CHAR(WC_C(' '))},
 
   [AT_KEY_00_NumLock] = {MOD_NUMBER_LOCK},
-  [AT_KEY_00_KPTimes] = {CMD_CHAR(WC_C('*'))},
+  [AT_KEY_00_KPAsterisk] = {CMD_CHAR(WC_C('*'))},
   [AT_KEY_00_KPMinus] = {CMD_CHAR(WC_C('-'))},
   [AT_KEY_00_KPPlus] = {CMD_CHAR(WC_C('+'))},
   [AT_KEY_00_KPPeriod] = {BRL_BLK_PASSKEY+BRL_KEY_DELETE, CMD_CHAR(WC_C('.'))},
@@ -376,7 +376,7 @@ static const KeyEntry AT_emul0ScanCodes[] = {
   [AT_KEY_E0_ArrowLeft] = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT},
   [AT_KEY_E0_ArrowDown] = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN},
   [AT_KEY_E0_ArrowRight] = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT},
-  [AT_KEY_E0_KPDivide] = {CMD_CHAR(WC_C('/'))},
+  [AT_KEY_E0_KPSlash] = {CMD_CHAR(WC_C('/'))},
   [AT_KEY_E0_KPEnter] = {BRL_BLK_PASSKEY+BRL_KEY_ENTER}
 };
 
@@ -465,7 +465,7 @@ static const KeyEntry XT_basicScanCodes[] = {
   [XT_KEY_00_Slash] = {CMD_CHAR(WC_C('/')), CMD_CHAR(WC_C('?'))},
   [XT_KEY_00_RightShift] = {MOD_SHIFT_RIGHT},
 
-  [XT_KEY_00_KPTimes] = {CMD_CHAR(WC_C('*'))},
+  [XT_KEY_00_KPAsterisk] = {CMD_CHAR(WC_C('*'))},
   [XT_KEY_00_LeftAlt] = {MOD_ALT_LEFT},
   [XT_KEY_00_Space] = {CMD_CHAR(WC_C(' '))},
   [XT_KEY_00_CapsLock] = {MOD_CAPS_LOCK},
@@ -505,7 +505,7 @@ static const KeyEntry XT_basicScanCodes[] = {
 static const KeyEntry XT_emul0ScanCodes[] = {
   [XT_KEY_E0_KPEnter] = {BRL_BLK_PASSKEY+BRL_KEY_ENTER},
   [XT_KEY_E0_RightControl] = {MOD_CONTROL_RIGHT},
-  [XT_KEY_E0_KPDivide] = {CMD_CHAR(WC_C('/'))},
+  [XT_KEY_E0_KPSlash] = {CMD_CHAR(WC_C('/'))},
   [XT_KEY_E0_RightAlt] = {MOD_ALT_RIGHT},
 
   [XT_KEY_E0_Home] = {BRL_BLK_PASSKEY+BRL_KEY_HOME},

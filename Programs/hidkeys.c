@@ -507,15 +507,15 @@ static const HidKeyEntry hidKeyTable[] = {
   },
 
   /* Keypad / (Note 1) */
-  [HID_KEY_KPDivide] = {
-    .xtCode = XT_KEY(E0, KPDivide),
-    .atCode = AT_KEY(E0, KPDivide)
+  [HID_KEY_KPSlash] = {
+    .xtCode = XT_KEY(E0, KPSlash),
+    .atCode = AT_KEY(E0, KPSlash)
   },
 
   /* Keypad * */
-  [HID_KEY_KPTimes] = {
-    .xtCode = XT_KEY(00, KPTimes),
-    .atCode = AT_KEY(00, KPTimes)
+  [HID_KEY_KPAsterisk] = {
+    .xtCode = XT_KEY(00, KPAsterisk),
+    .atCode = AT_KEY(00, KPAsterisk)
   },
 
   /* Keypad - */

@@ -896,7 +896,7 @@ static const At2KeyTable at2KeysOriginal = {
   [AT_KEY_00_Space] = KEY_SPACE,
 
   [AT_KEY_00_NumLock] = KEY_NUMLOCK,
-  [AT_KEY_00_KPTimes] = KEY_KPASTERISK,
+  [AT_KEY_00_KPAsterisk] = KEY_KPASTERISK,
   [AT_KEY_00_KPMinus] = KEY_KPMINUS,
   [AT_KEY_00_KPPlus] = KEY_KPPLUS,
   [AT_KEY_00_KPPeriod] = KEY_KPDOT,
@@ -959,7 +959,7 @@ static const At2KeyTable at2KeysE0 = {
 
   [0X40] = KEY_COMPUTER,
   [0X48] = KEY_MAIL,
-  [AT_KEY_E0_KPDivide] = KEY_KPSLASH,
+  [AT_KEY_E0_KPSlash] = KEY_KPSLASH,
   [0X4D] = KEY_NEXTSONG,
 
   [0X50] = KEY_MEDIA,
@@ -1539,7 +1539,7 @@ insertUnicode (wchar_t character) {
 static const unsigned char emul0XtScanCodeToLinuxKeyCode[0X80] = {
   [XT_KEY_E0_KPEnter] = KEY_KPENTER,
   [XT_KEY_E0_RightControl] = KEY_RIGHTCTRL,
-  [XT_KEY_E0_KPDivide] = KEY_KPSLASH,
+  [XT_KEY_E0_KPSlash] = KEY_KPSLASH,
   [XT_KEY_E0_PrintScreen] = KEY_SYSRQ,
   [XT_KEY_E0_RightAlt] = KEY_RIGHTALT,
   [XT_KEY_E0_Home] = KEY_HOME,
