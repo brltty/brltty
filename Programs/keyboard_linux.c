@@ -29,7 +29,7 @@
 #include "keyboard.h"
 #include "keyboard_internal.h"
 
-#ifdef HAVE_LINUX_INPUT_H
+#ifdef HAVE_LINUX_UINPUT_H
 #include <limits.h>
 #include <dirent.h>
 #include <fcntl.h>
@@ -39,7 +39,9 @@
 #include <linux/types.h>
 #include <linux/netlink.h>
 #include <linux/input.h>
+#include <linux/uinput.h>
 
+#include "bitmask.h"
 #include "async_alarm.h"
 #include "async_io.h"
 
@@ -629,18 +631,73 @@ ASYNC_INPUT_CALLBACK(handleLinuxKeyboardEvent) {
   return 0;
 }
 
-static void
-configureUinputObject (UinputObject *uinput, int keyboard) {
+static int
+prepareUinputObject (UinputObject *uinput, int keyboard) {
   {
-    int repeat[2];
+    int type = EV_KEY;
+    BITMASK(mask, KEY_MAX+1, char);
+    int size = ioctl(keyboard, EVIOCGBIT(type, sizeof(mask)), mask);
 
-    if (ioctl(keyboard, EVIOCGREP, repeat) != -1) {
-      if (writeRepeatDelay(uinput, repeat[0])) {
-        if (writeRepeatPeriod(uinput, repeat[1])) {
+    if (size == -1) {
+      logSystemError("ioctl[EVIOCGBIT]");
+      return 0;
+    }
+
+    {
+      int count = size * 8;
+
+      {
+        int key = KEY_ENTER;
+
+        if (key >= count) return 0;
+        if (!BITMASK_TEST(mask, key)) return 0;
+      }
+
+      if (!enableUinputEventType(uinput, type)) return 0;
+
+      {
+        int key;
+
+        for (key=0; key<count; key+=1) {
+          if (BITMASK_TEST(mask, key)) {
+            if (!enableUinputKey(uinput, key)) {
+              return 0;
+            }
+          }
         }
       }
     }
   }
+
+  if (!enableUinputEventType(uinput, EV_REP)) return 0;
+  if (!createUinputDevice(uinput)) return 0;
+
+  {
+    int properties[2];
+
+    if (ioctl(keyboard, EVIOCGREP, properties) != -1) {
+      if (!writeRepeatDelay(uinput, properties[0])) return 0;
+      if (!writeRepeatPeriod(uinput, properties[1])) return 0;
+    }
+  }
+
+  {
+    BITMASK(mask, KEY_MAX+1, char);
+    int size = ioctl(keyboard, EVIOCGKEY(sizeof(mask)), mask);
+
+    if (size != -1) {
+      int count = size * 8;
+      int key;
+
+      for (key=0; key<count; key+=1) {
+        if (BITMASK_TEST(mask, key)) {
+          logMessage(LOG_WARNING, "key already pressed: %d", key);
+        }
+      }
+    }
+  }
+
+  return 1;
 }
 
 static int
@@ -727,7 +784,7 @@ monitorKeyboard (KeyboardInstanceObject *kio) {
         
         if (kio->actualProperties.type) {
           if (checkKeyboardProperties(&kio->actualProperties, &kio->kmo->requiredProperties)) {
-            if (hasInputEvent(kio->kix->file.descriptor, EV_KEY, KEY_ENTER, KEY_MAX)) {
+            if (prepareUinputObject(kio->kix->uinput, kio->kix->file.descriptor)) {
               if (asyncReadFile(&kio->kix->file.monitor,
                                 kio->kix->file.descriptor, sizeof(struct input_event),
                                 handleLinuxKeyboardEvent, kio)) {
@@ -738,7 +795,6 @@ monitorKeyboard (KeyboardInstanceObject *kio) {
                 logMessage(LOG_DEBUG, "keyboard opened: %s: fd=%d",
                            kio->kix->device.path, kio->kix->file.descriptor);
 
-                configureUinputObject(kio->kix->uinput, kio->kix->file.descriptor);
                 return 1;
               }
             }
@@ -949,11 +1005,14 @@ monitorNewKeyboards (KeyboardMonitorObject *kmo) {
 
   return 0;
 }
-#endif /* HAVE_LINUX_INPUT_H */
+#endif /* HAVE_LINUX_UINPUT_H */
 
 int
 monitorKeyboards (KeyboardMonitorObject *kmo) {
+#ifdef HAVE_LINUX_UINPUT_H
   monitorCurrentKeyboards(kmo);
   monitorNewKeyboards(kmo);
+#endif /* HAVE_LINUX_UINPUT_H */
+
   return 1;
 }
