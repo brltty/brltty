@@ -32,9 +32,11 @@ extern int hasInputEvent (int device, uint16_t type, uint16_t code, uint16_t max
 typedef struct UinputObjectStruct UinputObject;
 extern UinputObject *newUinputObject (void);
 extern void destroyUinputObject (UinputObject *uinput);
-
 extern int writeInputEvent (UinputObject *uinput, uint16_t type, uint16_t code, int32_t value);
+
 extern int writeKeyEvent (UinputObject *uinput, int key, int press);
+extern int writeRepeatDelay (UinputObject *uinput, int delay);
+extern int writeRepeatPeriod (UinputObject *uinput, int period);
 
 #ifdef __cplusplus
 }

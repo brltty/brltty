@@ -24,14 +24,12 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
-#include <linux/kd.h>
 
 #ifdef HAVE_LINUX_INPUT_H
 #include <linux/input.h>
 #endif /* HAVE_LINUX_INPUT_H */
 
 #include "log.h"
-#include "program.h"
 #include "file.h"
 #include "device.h"
 #include "async_wait.h"
@@ -260,6 +258,11 @@ writeInputEvent (UinputObject *uinput, uint16_t type, uint16_t code, int32_t val
   return 0;
 }
 
+static int
+writeSynReport (UinputObject *uinput) {
+  return writeInputEvent(uinput, EV_SYN, SYN_REPORT, 0);
+}
+
 int
 writeKeyEvent (UinputObject *uinput, int key, int press) {
 #ifdef HAVE_LINUX_UINPUT_H
@@ -270,11 +273,33 @@ writeKeyEvent (UinputObject *uinput, int key, int press) {
       BITMASK_CLEAR(uinput->pressedKeys, key);
     }
 
-    if (writeInputEvent(uinput, EV_SYN, SYN_REPORT, 0)) {
+    if (writeSynReport(uinput)) {
       return 1;
     }
   }
 #endif /* HAVE_LINUX_UINPUT_H */
+
+  return 0;
+}
+
+int
+writeRepeatDelay (UinputObject *uinput, int delay) {
+  if (writeInputEvent(uinput, EV_REP, REP_DELAY, delay)) {
+    if (writeSynReport(uinput)) {
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+int
+writeRepeatPeriod (UinputObject *uinput, int period) {
+  if (writeInputEvent(uinput, EV_REP, REP_PERIOD, period)) {
+    if (writeSynReport(uinput)) {
+      return 1;
+    }
+  }
 
   return 0;
 }

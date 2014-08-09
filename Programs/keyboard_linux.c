@@ -590,11 +590,36 @@ ASYNC_INPUT_CALLBACK(handleLinuxKeyboardEvent) {
     const struct input_event *event = parameters->buffer;
 
     if (parameters->length >= sizeof(*event)) {
-      if (event->type == EV_KEY) {
-        int release = event->value == 0;
-        int press   = event->value == 1;
+      switch (event->type) {
+        case EV_KEY: {
+          int release = event->value == 0;
+          int press   = event->value == 1;
 
-        if (release || press) handleKeyEvent(kio, event->code, press);
+          if (release || press) handleKeyEvent(kio, event->code, press);
+          break;
+        }
+
+        case EV_REP: {
+          switch (event->code) {
+            case REP_DELAY: {
+              writeRepeatDelay(kio->kix->uinput, event->value);
+              break;
+            }
+
+            case REP_PERIOD: {
+              writeRepeatPeriod(kio->kix->uinput, event->value);
+              break;
+            }
+
+            default:
+              break;
+          }
+
+          break;
+        }
+
+        default:
+          break;
       }
 
       return sizeof(*event);
@@ -602,6 +627,20 @@ ASYNC_INPUT_CALLBACK(handleLinuxKeyboardEvent) {
   }
 
   return 0;
+}
+
+static void
+configureUinputObject (UinputObject *uinput, int keyboard) {
+  {
+    int repeat[2];
+
+    if (ioctl(keyboard, EVIOCGREP, repeat) != -1) {
+      if (writeRepeatDelay(uinput, repeat[0])) {
+        if (writeRepeatPeriod(uinput, repeat[1])) {
+        }
+      }
+    }
+  }
 }
 
 static int
@@ -698,6 +737,8 @@ monitorKeyboard (KeyboardInstanceObject *kio) {
 
                 logMessage(LOG_DEBUG, "keyboard opened: %s: fd=%d",
                            kio->kix->device.path, kio->kix->file.descriptor);
+
+                configureUinputObject(kio->kix->uinput, kio->kix->file.descriptor);
                 return 1;
               }
             }
