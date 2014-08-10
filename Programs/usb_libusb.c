@@ -149,7 +149,7 @@ usbSetAlternative (
 }
 
 int
-usbClearEndpoint (UsbDevice *device, unsigned char endpointAddress) {
+usbClearHalt (UsbDevice *device, unsigned char endpointAddress) {
   UsbDeviceExtension *devx = device->extension;
   int result;
 

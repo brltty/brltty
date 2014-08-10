@@ -499,7 +499,7 @@ usbSetAlternative (
 }
 
 int
-usbClearEndpoint (UsbDevice *device, unsigned char endpointAddress) {
+usbClearHalt (UsbDevice *device, unsigned char endpointAddress) {
   logUnsupportedFunction();
   return 0;
 }

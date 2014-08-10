@@ -741,7 +741,7 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
           if (device->disableEndpointReset) {
             logMessage(LOG_CATEGORY(USB_IO), "endpoint reset disabled");
           } else {
-            usbClearEndpoint(device, endpoint->descriptor->bEndpointAddress);
+            usbClearHalt(device, endpoint->descriptor->bEndpointAddress);
           }
 
           if (!endpoint->prepare || endpoint->prepare(endpoint)) return endpoint;

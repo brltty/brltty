@@ -306,7 +306,7 @@ usbSetAlternative (
 }
 
 int
-usbClearEndpoint (UsbDevice *device, unsigned char endpointAddress) {
+usbClearHalt (UsbDevice *device, unsigned char endpointAddress) {
   UsbDeviceExtension *devx = device->extension;
 
   logMessage(LOG_CATEGORY(USB_IO), "clearing endpoint: %02X", endpointAddress);
