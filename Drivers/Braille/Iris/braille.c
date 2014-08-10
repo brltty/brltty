@@ -129,7 +129,6 @@ typedef struct {
 } Port;
 
 static unsigned char *firmwareVersion = NULL;
-static unsigned char serialNumber[5] = { 0, 0, 0, 0, 0 };
 
 typedef enum {
   IR_PROTOCOL_EUROBRAILLE,
@@ -729,6 +728,10 @@ struct BrailleDataStruct {
     const XtKeyEntry *key;
     uint16_t state;
   } xt;
+
+  struct {
+    char serialNumber[5];
+  } identity;
 };
 
 static void activateBraille(void)
@@ -1313,7 +1316,7 @@ forwardEurobraillePacket (
     char str[256];
     writeEurobrailleStringPacket(brl, inPort, "SNIRIS_KB_40");
     writeEurobrailleStringPacket(brl, inPort, "SHIR4");
-    snprintf(str, sizeof(str), "SS%s", serialNumber);
+    snprintf(str, sizeof(str), "SS%s", brl->data->identity.serialNumber);
     writeEurobrailleStringPacket(brl, inPort, str);
     writeEurobrailleStringPacket(brl, inPort, "SLFR");
     str[0] = 'S'; str[1] = 'G'; str[2] = brl->textColumns;
@@ -1895,9 +1898,16 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                   brl->textColumns = deviceResponse[1];
                 }
 
-                memcpy(serialNumber, deviceResponse+2, 4);
+                {
+                  char *byte = brl->data->identity.serialNumber;
+
+                  byte = mempcpy(byte, deviceResponse+2,
+                                 (sizeof(brl->data->identity.serialNumber) - 1));
+                  *byte = 0;
+                }
+
                 logMessage(LOG_INFO, "device's serial number is %s. It has a %s keyboard, a %d-cells braille display and %s visual dipslay.",
-                           serialNumber,
+                           brl->data->identity.serialNumber,
                            ktd->bindings,
                            brl->textColumns,
                            brl->data->haveVisualDisplay ? "a" : "no" 
