@@ -210,14 +210,14 @@ closeUsbPort (void) {
 
 static int
 awaitUsbInput (int milliseconds) {
-  return usbAwaitInput(usbChannel->device, usbChannel->definition.inputEndpoint, milliseconds);
+  return usbAwaitInput(usbChannel->device, usbChannel->definition->inputEndpoint, milliseconds);
 }
 
 static int
 readUsbBytes (unsigned char *buffer, size_t size, int wait) {
   const int timeout = 100;
   int count = usbReadData(usbChannel->device,
-                          usbChannel->definition.inputEndpoint,
+                          usbChannel->definition->inputEndpoint,
                           buffer, size,
                           (wait? timeout: 0), timeout);
 
@@ -228,7 +228,7 @@ readUsbBytes (unsigned char *buffer, size_t size, int wait) {
 
 static int
 writeUsbBytes (const unsigned char *buffer, size_t size) {
-  return usbWriteEndpoint(usbChannel->device, usbChannel->definition.outputEndpoint, buffer, size, 1000);
+  return usbWriteEndpoint(usbChannel->device, usbChannel->definition->outputEndpoint, buffer, size, 1000);
 }
 
 static const InputOutputOperations usbOperations = {
