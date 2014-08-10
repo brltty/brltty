@@ -37,7 +37,6 @@
 #include "message.h"
 
 #define BRL_HAVE_PACKET_IO
-/* #define BRL_HAVE_VISUAL_DISPLAY */
 
 typedef enum {
   PARM_EMBEDDED,
@@ -132,279 +131,10 @@ typedef struct {
 static unsigned char *firmwareVersion = NULL;
 static unsigned char serialNumber[5] = { 0, 0, 0, 0, 0 };
 
-static KeyNumberSet linearKeys;
-
 typedef enum {
   IR_PROTOCOL_EUROBRAILLE,
   IR_PROTOCOL_NATIVE
 } ProtocolIndex;
-
-struct BrailleDataStruct {
-  unsigned hasFailed:1;
-  unsigned isConnected:1;
-
-  unsigned isEmbedded:1;
-  unsigned isSuspended:1;
-  unsigned isForwarding:1;
-
-  unsigned haveVisualDisplay:1;
-  ProtocolIndex protocol;
-
-  struct {
-    Port port;
-    int (*handlePacket) (BrailleDisplay *brl, const void *packet, size_t size);
-    int (*isOffline) (BrailleDisplay *brl);
-  } internal;
-
-  struct {
-    Port port;
-    GioHandleInputObject *handleInputObject;
-  } external;
-
-  struct {
-    AsyncHandle monitor;
-
-    int delay;
-    int interval;
-
-    TimeValue started;
-    long int elapsed;
-    unsigned pulled:1;
-  } latch;
-
-  struct {
-    int refresh;
-    unsigned char cells[IR_WINDOW_SIZE_MAXIMUM];
-  } window;
-};
-
-static void activateBraille(void)
-{
-  writePort1(IR_PORT_OUTPUT, 0x01);
-  asyncWait(9);
-  writePort1(IR_PORT_OUTPUT, 0);
-}
-
-static void deactivateBraille(void)
-{
-  writePort1(IR_PORT_OUTPUT, 0x02);
-  asyncWait(9);
-  writePort1(IR_PORT_OUTPUT, 0);
-}
-
-/* Function readNativePacket */
-/* Returns the size of the read packet. */
-/* 0 means no packet has been read and there is no error. */
-/* -1 means an error occurred */
-static size_t readNativePacket(BrailleDisplay *brl, Port *port, void *packet, size_t size)
-{
-  unsigned char ch;
-  size_t size_;
-  while ( gioReadByte (port->gioEndpoint, &ch, ( port->reading || port->waitingForAck ) ) ) {
-    if (port->reading) {
-      switch (ch) {
-        case DLE:
-          if (!port->prefix) {
-            port->prefix = 1;
-            continue;
-          }
-        case EOT:
-          if (!port->prefix) {
-            port->reading = 0;
-            size_ = port->position-port->packet;
-            if (size_>size) {
-              logMessage(LOG_INFO, "Discarding too large packet");
-              return 0;
-            } else {
-              memcpy(packet, port->packet, size_);
-              logInputPacket(packet, size_);
-              return size_;
-            }
-          }
-        default:
-          port->prefix = 0;
-          if (port->position-port->packet<IR_MAXIMUM_PACKET_SIZE) {
-            *(port->position) = ch; port->position++;
-          }
-      }
-    } else {
-      if (ch==SOH) {
-        port->reading = 1;
-        port->prefix = 0;
-        port->position = port->packet;
-      } else {
-        if ((port->waitingForAck) && (ch==ACK)) {
-          port->waitingForAck = 0;
-          if (brl->data->isForwarding && (brl->data->protocol == IR_PROTOCOL_NATIVE) ) {
-            static const unsigned char acknowledgement[] = {ACK};
-            writeBraillePacket(brl, brl->data->external.port.gioEndpoint, acknowledgement, sizeof(acknowledgement));
-          }
-        } else {
-          logIgnoredByte(ch);
-        }
-      }
-    }
-  }
-  if ( errno != EAGAIN )  logSystemError("readNativePacket");
-  return 0;
-}
-
-static size_t
-readEurobraillePacket (BrailleDisplay *brl, Port *port, void *packet, size_t size) {
-  unsigned char ch;
-  size_t size_;
-  while (gioReadByte (port->gioEndpoint, &ch, port->reading)) {
-    logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "Got ch=%c(%02x) state=%d", ch, ch, port->reading);
-    switch (port->reading)
-    {
-      case 0:
-        if (ch==STX)
-        {
-          port->reading = 1;
-          port->position = port->packet;
-          port->declaredSize = 0;
-        } else {
-          logIgnoredByte(ch);
-        };
-        break;
-      case 1:
-        port->declaredSize = ch << 8;
-        port->reading = 2;
-        break;
-      case 2:
-        port->declaredSize += ch;
-        if (port->declaredSize < 3)
-        {
-          logMessage(LOG_ERR, "readEuroBraillePacket: invalid declared size %d", port->declaredSize);
-          port->reading = 0;
-        } else {
-          port->declaredSize -= 2;
-          if (port->declaredSize > sizeof(port->packet) )
-          {
-            logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "readEuroBraillePacket: rejecting packet whose declared size is too large");
-            port->reading = 0;
-            return 0;
-          }
-          logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "readEuroBraillePacket: declared size = %d", port->declaredSize);
-          port->reading = 3;
-        };
-        break;
-      case 3:
-        *(port->position) = ch; port->position++;
-        if ( (port->position - port->packet) == port->declaredSize) port->reading = 4;
-        break;
-      case 4:
-        port->reading = 0;
-        if (ch==ETX) {
-          size_ = port->position-port->packet;
-          if (size_>size) {
-            logMessage(LOG_INFO, "readEurobraillePacket: Discarding too large packet");
-            return 0;
-          } else {
-            memcpy(packet, port->packet, size_);
-            return size_;
-          }        
-        } else {
-          logMessage(LOG_INFO, "readEurobraillePacket: Discarding packet whose real size exceeds declared size");
-          return 0;
-        };
-        break;
-      default:
-        logMessage(LOG_ERR, "readEurobraillePacket: reached unknown state %d", port->reading);
-        port->reading = 0;
-        break;
-    }
-  }
-  return 0;
-}
-
-static inline int needsEscape(unsigned char ch)
-{
-  static const unsigned char escapedChars[0X20] = {
-    [SOH] = 1, [EOT] = 1, [DLE] = 1, [ACK] = 1, [NAK] = 1
-  };
-  if (ch<sizeof(escapedChars)) return escapedChars[ch];
-  else return 0;
-}
-
-static inline void
-startAcknowledgementPeriod (Port *port) {
-  startTimePeriod(&port->acknowledgementPeriod, 1000);
-}
-
-/* Function writeNativePacket */
-/* Returns 1 if the packet is actually written, 0 if the packet is not written */
-/* A write can be ignored if the previous packet has not been */
-/* acknowledged so far */
-static size_t
-writeNativePacket (
-  BrailleDisplay *brl, Port *port,
-  const unsigned char *packet, size_t size
-) {
-  const unsigned char *data = packet;
-  unsigned char	buf[2*(size + 1) +3];
-  unsigned char *p = buf;
-  size_t count;
-
-  if (port->waitingForAck) {
-    if (!afterTimePeriod(&port->acknowledgementPeriod, NULL)) {
-      errno = EAGAIN;
-      return 0;
-    }
-
-    logMessage(LOG_WARNING, "Did not receive ACK on port %s",port->name);
-    port->waitingForAck = 0;
-  }
-
-  *p++ = SOH;
-  while (size--) {
-    if (needsEscape(*data)) *p++ = DLE;
-    *p++ = *data++;
-  }
-  *p++ = EOT;
-
-  count = p - buf;
-  if (!writeBraillePacket(brl, port->gioEndpoint, buf, count)) {
-    logMessage(LOG_WARNING, "in writeNativePacket: gioWriteData failed");
-    return 0;
-  }
-
-  startAcknowledgementPeriod(port);
-
-  if (port==&brl->data->internal.port) port->waitingForAck = 1;
-  return count;
-}
-
-/*
-static ssize_t
-tryWriteNativePacket (BrailleDisplay *brl, Port *port, const void *packet, size_t size) {
-  ssize_t res;
-  while ( ! (res = writeNativePacket(brl, port, packet, size)) ) {
-    if (errno != EAGAIN) return 0;
-  }
-  return res;
-}
-*/
-
-static int
-writeEurobraillePacket (BrailleDisplay *brl, Port *port, const void *data, size_t size) {
-  size_t count;
-  size_t packetSize = size + 2;
-  unsigned char	packet[packetSize + 2];
-  unsigned char *p = packet;
-
-  *p++ = STX;
-  *p++ = (packetSize >> 8) & 0x00FF;
-  *p++ = packetSize & 0x00FF;  
-  p = mempcpy(p, data, size);
-  *p++ = ETX;
-
-  count = p - packet;
-  if (!writeBraillePacket(brl, port->gioEndpoint, packet, count)) return 0;
-
-  startAcknowledgementPeriod(port);
-  return count;
-}
 
 typedef struct {
   unsigned char base;
@@ -448,8 +178,6 @@ static const CompositeCharacterEntry *compositeCharacterTables[] = {
   compositeCharacterTable_trema
 };
 
-static const CompositeCharacterEntry *compositeCharacterTable;
-
 typedef enum {
   xtsLeftShiftPressed,
   xtsRightShiftPressed,
@@ -468,9 +196,8 @@ typedef enum {
   xtsFnPressed
 } XtState;
 
-static uint16_t xtState;
 #define XTS_BIT(number) (1 << (number))
-#define XTS_TEST(bits) (xtState & (bits))
+#define XTS_TEST(bits) (brl->data->xt.state & (bits))
 #define XTS_SHIFT XTS_TEST(XTS_BIT(xtsLeftShiftPressed) | XTS_BIT(xtsRightShiftPressed) | XTS_BIT(xtsShiftLocked))
 #define XTS_CONTROL XTS_TEST(XTS_BIT(xtsLeftControlPressed) | XTS_BIT(xtsRightControlPressed))
 #define XTS_ALT XTS_TEST(XTS_BIT(xtsLeftAltPressed))
@@ -502,7 +229,6 @@ typedef enum {
   XT_KEYS_E1
 } XT_KEY_SET;
 
-static const XtKeyEntry *xtCurrentKey;
 #define XT_RELEASE 0X80
 #define XT_KEY(set,key) ((XT_KEYS_##set << 7) | (key))
 
@@ -959,6 +685,280 @@ static const XtKeyEntry xtKeyTable[] = {
   }
 };
 
+struct BrailleDataStruct {
+  unsigned hasFailed:1;
+  unsigned isConnected:1;
+
+  unsigned isEmbedded:1;
+  unsigned isSuspended:1;
+  unsigned isForwarding:1;
+
+  unsigned haveVisualDisplay:1;
+  ProtocolIndex protocol;
+
+  struct {
+    Port port;
+    int (*handlePacket) (BrailleDisplay *brl, const void *packet, size_t size);
+    int (*isOffline) (BrailleDisplay *brl);
+    KeyNumberSet linearKeys;
+  } internal;
+
+  struct {
+    Port port;
+    GioHandleInputObject *handleInputObject;
+  } external;
+
+  struct {
+    AsyncHandle monitor;
+
+    int delay;
+    int interval;
+
+    TimeValue started;
+    long int elapsed;
+    unsigned pulled:1;
+  } latch;
+
+  struct {
+    int refresh;
+    unsigned char cells[IR_WINDOW_SIZE_MAXIMUM];
+  } braille;
+
+  struct {
+    const CompositeCharacterEntry *composite;
+    const XtKeyEntry *key;
+    uint16_t state;
+  } xt;
+};
+
+static void activateBraille(void)
+{
+  writePort1(IR_PORT_OUTPUT, 0x01);
+  asyncWait(9);
+  writePort1(IR_PORT_OUTPUT, 0);
+}
+
+static void deactivateBraille(void)
+{
+  writePort1(IR_PORT_OUTPUT, 0x02);
+  asyncWait(9);
+  writePort1(IR_PORT_OUTPUT, 0);
+}
+
+/* Function readNativePacket */
+/* Returns the size of the read packet. */
+/* 0 means no packet has been read and there is no error. */
+/* -1 means an error occurred */
+static size_t readNativePacket(BrailleDisplay *brl, Port *port, void *packet, size_t size)
+{
+  unsigned char ch;
+  size_t size_;
+  while ( gioReadByte (port->gioEndpoint, &ch, ( port->reading || port->waitingForAck ) ) ) {
+    if (port->reading) {
+      switch (ch) {
+        case DLE:
+          if (!port->prefix) {
+            port->prefix = 1;
+            continue;
+          }
+        case EOT:
+          if (!port->prefix) {
+            port->reading = 0;
+            size_ = port->position-port->packet;
+            if (size_>size) {
+              logMessage(LOG_INFO, "Discarding too large packet");
+              return 0;
+            } else {
+              memcpy(packet, port->packet, size_);
+              logInputPacket(packet, size_);
+              return size_;
+            }
+          }
+        default:
+          port->prefix = 0;
+          if (port->position-port->packet<IR_MAXIMUM_PACKET_SIZE) {
+            *(port->position) = ch; port->position++;
+          }
+      }
+    } else {
+      if (ch==SOH) {
+        port->reading = 1;
+        port->prefix = 0;
+        port->position = port->packet;
+      } else {
+        if ((port->waitingForAck) && (ch==ACK)) {
+          port->waitingForAck = 0;
+          if (brl->data->isForwarding && (brl->data->protocol == IR_PROTOCOL_NATIVE) ) {
+            static const unsigned char acknowledgement[] = {ACK};
+            writeBraillePacket(brl, brl->data->external.port.gioEndpoint, acknowledgement, sizeof(acknowledgement));
+          }
+        } else {
+          logIgnoredByte(ch);
+        }
+      }
+    }
+  }
+  if ( errno != EAGAIN )  logSystemError("readNativePacket");
+  return 0;
+}
+
+static size_t
+readEurobraillePacket (BrailleDisplay *brl, Port *port, void *packet, size_t size) {
+  unsigned char ch;
+  size_t size_;
+  while (gioReadByte (port->gioEndpoint, &ch, port->reading)) {
+    logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "Got ch=%c(%02x) state=%d", ch, ch, port->reading);
+    switch (port->reading)
+    {
+      case 0:
+        if (ch==STX)
+        {
+          port->reading = 1;
+          port->position = port->packet;
+          port->declaredSize = 0;
+        } else {
+          logIgnoredByte(ch);
+        };
+        break;
+      case 1:
+        port->declaredSize = ch << 8;
+        port->reading = 2;
+        break;
+      case 2:
+        port->declaredSize += ch;
+        if (port->declaredSize < 3)
+        {
+          logMessage(LOG_ERR, "readEuroBraillePacket: invalid declared size %d", port->declaredSize);
+          port->reading = 0;
+        } else {
+          port->declaredSize -= 2;
+          if (port->declaredSize > sizeof(port->packet) )
+          {
+            logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "readEuroBraillePacket: rejecting packet whose declared size is too large");
+            port->reading = 0;
+            return 0;
+          }
+          logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "readEuroBraillePacket: declared size = %d", port->declaredSize);
+          port->reading = 3;
+        };
+        break;
+      case 3:
+        *(port->position) = ch; port->position++;
+        if ( (port->position - port->packet) == port->declaredSize) port->reading = 4;
+        break;
+      case 4:
+        port->reading = 0;
+        if (ch==ETX) {
+          size_ = port->position-port->packet;
+          if (size_>size) {
+            logMessage(LOG_INFO, "readEurobraillePacket: Discarding too large packet");
+            return 0;
+          } else {
+            memcpy(packet, port->packet, size_);
+            return size_;
+          }        
+        } else {
+          logMessage(LOG_INFO, "readEurobraillePacket: Discarding packet whose real size exceeds declared size");
+          return 0;
+        };
+        break;
+      default:
+        logMessage(LOG_ERR, "readEurobraillePacket: reached unknown state %d", port->reading);
+        port->reading = 0;
+        break;
+    }
+  }
+  return 0;
+}
+
+static inline int needsEscape(unsigned char ch)
+{
+  static const unsigned char escapedChars[0X20] = {
+    [SOH] = 1, [EOT] = 1, [DLE] = 1, [ACK] = 1, [NAK] = 1
+  };
+  if (ch<sizeof(escapedChars)) return escapedChars[ch];
+  else return 0;
+}
+
+static inline void
+startAcknowledgementPeriod (Port *port) {
+  startTimePeriod(&port->acknowledgementPeriod, 1000);
+}
+
+/* Function writeNativePacket */
+/* Returns 1 if the packet is actually written, 0 if the packet is not written */
+/* A write can be ignored if the previous packet has not been */
+/* acknowledged so far */
+static size_t
+writeNativePacket (
+  BrailleDisplay *brl, Port *port,
+  const unsigned char *packet, size_t size
+) {
+  const unsigned char *data = packet;
+  unsigned char	buf[2*(size + 1) +3];
+  unsigned char *p = buf;
+  size_t count;
+
+  if (port->waitingForAck) {
+    if (!afterTimePeriod(&port->acknowledgementPeriod, NULL)) {
+      errno = EAGAIN;
+      return 0;
+    }
+
+    logMessage(LOG_WARNING, "Did not receive ACK on port %s",port->name);
+    port->waitingForAck = 0;
+  }
+
+  *p++ = SOH;
+  while (size--) {
+    if (needsEscape(*data)) *p++ = DLE;
+    *p++ = *data++;
+  }
+  *p++ = EOT;
+
+  count = p - buf;
+  if (!writeBraillePacket(brl, port->gioEndpoint, buf, count)) {
+    logMessage(LOG_WARNING, "in writeNativePacket: gioWriteData failed");
+    return 0;
+  }
+
+  startAcknowledgementPeriod(port);
+
+  if (port==&brl->data->internal.port) port->waitingForAck = 1;
+  return count;
+}
+
+/*
+static ssize_t
+tryWriteNativePacket (BrailleDisplay *brl, Port *port, const void *packet, size_t size) {
+  ssize_t res;
+  while ( ! (res = writeNativePacket(brl, port, packet, size)) ) {
+    if (errno != EAGAIN) return 0;
+  }
+  return res;
+}
+*/
+
+static int
+writeEurobraillePacket (BrailleDisplay *brl, Port *port, const void *data, size_t size) {
+  size_t count;
+  size_t packetSize = size + 2;
+  unsigned char	packet[packetSize + 2];
+  unsigned char *p = packet;
+
+  *p++ = STX;
+  *p++ = (packetSize >> 8) & 0x00FF;
+  *p++ = packetSize & 0x00FF;  
+  p = mempcpy(p, data, size);
+  *p++ = ETX;
+
+  count = p - packet;
+  if (!writeBraillePacket(brl, port->gioEndpoint, packet, count)) return 0;
+
+  startAcknowledgementPeriod(port);
+  return count;
+}
+
 static int
 writeEurobrailleStringPacket (BrailleDisplay *brl, Port *port, const char *string) {
   return writeEurobraillePacket(brl, port, string, strlen(string) + 1);
@@ -1063,7 +1063,7 @@ core_handlePCKey(BrailleDisplay *brl, Port *port, int repeat, unsigned char esca
 
 static int
 core_handleFunctionKeys(BrailleDisplay *brl, Port *port, KeyNumberSet keys) {
-  return enqueueUpdatedKeys(brl, keys, &linearKeys, IR_GRP_NavigationKeys, IR_KEY_L1);
+  return enqueueUpdatedKeys(brl, keys, &brl->data->internal.linearKeys, IR_GRP_NavigationKeys, IR_KEY_L1);
 }
 
 static int
@@ -1122,16 +1122,16 @@ eurobrl_handlePCKey(BrailleDisplay *brl, Port *port, int repeat, unsigned char e
   }
 
   if (key & XT_RELEASE) {
-    int current = xke == xtCurrentKey;
-    xtCurrentKey = NULL;
+    int current = xke == brl->data->xt.key;
+    brl->data->xt.key = NULL;
 
     switch (xke->type) {
       case XtKeyType_modifier:
-        xtState &= ~XTS_BIT(xke->arg1);
+        brl->data->xt.state &= ~XTS_BIT(xke->arg1);
         return 1;
 
       case XtKeyType_complex:
-        xtState &= ~XTS_BIT(xke->arg3);
+        brl->data->xt.state &= ~XTS_BIT(xke->arg3);
         if (current) goto isFunction;
         return 1;
 
@@ -1139,20 +1139,20 @@ eurobrl_handlePCKey(BrailleDisplay *brl, Port *port, int repeat, unsigned char e
         return 1;
     }
   } else {
-    xtCurrentKey = xke;
+    brl->data->xt.key = xke;
 
     switch (xke->type) {
       case XtKeyType_modifier:
-        xtState |= XTS_BIT(xke->arg1);
-        xtState &= ~XTS_BIT(xke->arg2);
+        brl->data->xt.state |= XTS_BIT(xke->arg1);
+        brl->data->xt.state &= ~XTS_BIT(xke->arg2);
         return 1;
 
       case XtKeyType_complex:
-        xtState |= XTS_BIT(xke->arg3);
+        brl->data->xt.state |= XTS_BIT(xke->arg3);
         return 1;
 
       case XtKeyType_lock:
-        xtState |= XTS_BIT(xke->arg1);
+        brl->data->xt.state |= XTS_BIT(xke->arg1);
         return 1;
 
       case XtKeyType_character:
@@ -1180,7 +1180,7 @@ eurobrl_handlePCKey(BrailleDisplay *brl, Port *port, int repeat, unsigned char e
           index = xke->arg1;
         }
 
-        if (index) compositeCharacterTable = compositeCharacterTables[index - 1];
+        if (index) brl->data->xt.composite = compositeCharacterTables[index - 1];
         return 1;
       }
 
@@ -1197,11 +1197,11 @@ eurobrl_handlePCKey(BrailleDisplay *brl, Port *port, int repeat, unsigned char e
   if (XTS_ALTGR) data[4] |= 0X20;
   if (XTS_INSERT) data[4] |= 0X80;
 
-  if (compositeCharacterTable) {
+  if (brl->data->xt.composite) {
     unsigned char *byte = &data[5];
 
     if (*byte) {
-      const CompositeCharacterEntry *cce = compositeCharacterTable;
+      const CompositeCharacterEntry *cce = brl->data->xt.composite;
 
       while (cce->base) {
         if (cce->base == *byte) {
@@ -1220,7 +1220,7 @@ eurobrl_handlePCKey(BrailleDisplay *brl, Port *port, int repeat, unsigned char e
       }
     }
 
-    compositeCharacterTable = NULL;
+    brl->data->xt.composite = NULL;
   }
 
   return writeEurobraillePacket(brl, port, data, sizeof(data));
@@ -1386,9 +1386,9 @@ enterPacketForwardMode (BrailleDisplay *brl) {
       break;
 
     case IR_PROTOCOL_EUROBRAILLE:
-      compositeCharacterTable = NULL;
-      xtCurrentKey = NULL;
-      xtState = 0;
+      brl->data->xt.composite = NULL;
+      brl->data->xt.key = NULL;
+      brl->data->xt.state = 0;
       break;
   }
 
@@ -1405,7 +1405,7 @@ leavePacketForwardMode (BrailleDisplay *brl) {
     if (!sendMenuKey(brl, &brl->data->external.port)) return 0;
   }
 
-  brl->data->window.refresh = 1;
+  brl->data->braille.refresh = 1;
   scheduleUpdate("Iris not forwarding");
   return 1;
 }
@@ -1492,7 +1492,7 @@ handlePacket_nonembedded (BrailleDisplay *brl, const void *packet, size_t size) 
     logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "device reconnected");
     brl->data->isConnected = 1;
 
-    brl->data->window.refresh = 1;
+    brl->data->braille.refresh = 1;
     scheduleUpdate("Iris reconnected");
 
     if (menuKeyPressed) return 1;
@@ -1526,16 +1526,16 @@ failure:
   return BRL_CMD_RESTARTBRL;
 }
 
-static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *characters)
-{
+static int
+brl_writeWindow (BrailleDisplay *brl, const wchar_t *characters) {
   const size_t size = brl->textColumns * brl->textRows;
 
-  if (cellsHaveChanged(brl->data->window.cells, brl->buffer, size, NULL, NULL, &brl->data->window.refresh)) {
+  if (cellsHaveChanged(brl->data->braille.cells, brl->buffer, size, NULL, NULL, &brl->data->braille.refresh)) {
     ssize_t res = writeWindow(brl, &brl->data->internal.port, brl->buffer);
 
     if (!res) {
       if (errno != EAGAIN) return 0;
-      brl->data->window.refresh = 1;
+      brl->data->braille.refresh = 1;
     }
   }
 
@@ -1546,19 +1546,6 @@ static void brl_clearWindow(BrailleDisplay *brl)
 {
   clearWindow(brl, &brl->data->internal.port);
 }
-
-#ifdef BRL_HAVE_VISUAL_DISPLAY
-
-static void brl_writeVisual(BrailleDisplay *brl)
-{
-  static unsigned char text[41];
-  if (memcmp(text, brl->buffer,40)==0) return;
-  memcpy(text, brl->buffer, 40);
-  text[40] = '\0';
-  logMessage(LOG_INFO, "Sending text: %s", text);
-}
-
-#endif /* BRL_HAVE_VISUAL_DISPLAY */
 
 static ssize_t askDevice(BrailleDisplay *brl, IrisOutputPacketType request, unsigned char *response, size_t size)
 {
@@ -1606,7 +1593,7 @@ resumeDevice (BrailleDisplay *brl) {
   if (brl->data->isForwarding) {
     if (!sendZKey(brl, &brl->data->external.port)) return 0;
   } else {
-    brl->data->window.refresh = 1;
+    brl->data->braille.refresh = 1;
     scheduleUpdate("Iris resumed");
   }
 
@@ -1768,6 +1755,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     brl->data->protocol = IR_PROTOCOL_DEFAULT;
 
     brl->data->internal.port.gioEndpoint = NULL;
+    brl->data->internal.linearKeys = 0;
+
     brl->data->external.port.gioEndpoint = NULL;
     brl->data->external.handleInputObject = NULL;
 
@@ -1775,7 +1764,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     brl->data->latch.delay = IR_DEFAULT_LATCH_DELAY;
     brl->data->latch.interval = IR_DEFAULT_LATCH_INTERVAL;
 
-    brl->data->window.refresh = 1;
+    brl->data->braille.refresh = 1;
 
     if (validateYesNo(&embedded, parameters[PARM_EMBEDDED])) {
       int internalPortOpened = 0;
@@ -1919,7 +1908,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                 brl->keyBindings = ktd->bindings;
                 brl->keyNames = ktd->names;
 
-                linearKeys = 0;
                 return 1;
               }
 
