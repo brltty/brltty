@@ -84,6 +84,9 @@ usbOpenUsbfsFile (UsbDeviceExtension *devx) {
                  devx->host->usbfsPath, strerror(errno));
       return 0;
     }
+
+    logMessage(LOG_CATEGORY(USB_IO), "usbfs file opened: %s fd=%d",
+               devx->host->usbfsPath, devx->usbfsFile);
   }
 
   return 1;
