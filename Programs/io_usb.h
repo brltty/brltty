@@ -305,7 +305,7 @@ extern const UsbSerialOperations *usbGetSerialOperations (UsbDevice *device);
 extern int usbSetSerialParameters (UsbDevice *device, const SerialParameters *parameters);
 
 typedef struct {
-  UsbChannelDefinition definition;
+  const UsbChannelDefinition *definition;
   UsbDevice *device;
 } UsbChannel;
 

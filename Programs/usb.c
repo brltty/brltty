@@ -1220,8 +1220,8 @@ usbWriteData (
 
 static int
 usbPrepareChannel (UsbChannel *channel) {
+  const UsbChannelDefinition *definition = channel->definition;
   UsbDevice *device = channel->device;
-  UsbChannelDefinition *definition = &channel->definition;
 
   device->disableEndpointReset = definition->disableEndpointReset;
 
@@ -1346,7 +1346,7 @@ usbNewChannel (UsbChooseChannelData *data) {
     memset(channel, 0, sizeof(*channel));
 
     if ((channel->device = usbFindDevice(usbChooseChannel, data))) {
-      channel->definition = *data->definition;
+      channel->definition = data->definition;
       return channel;
     }
 

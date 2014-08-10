@@ -63,13 +63,13 @@ writeUsbData (GioHandle *handle, const void *data, size_t size, int timeout) {
     GioUsbWriteDataMethod *method = handle->properties.writeData;
 
     if (method) {
-      return method(channel->device, &channel->definition, data, size, timeout);
+      return method(channel->device, channel->definition, data, size, timeout);
     }
   }
 
-  if (channel->definition.outputEndpoint) {
+  if (channel->definition->outputEndpoint) {
     return usbWriteData(channel->device,
-                        channel->definition.outputEndpoint,
+                        channel->definition->outputEndpoint,
                         data, size, timeout);
   }
 
@@ -95,12 +95,12 @@ awaitUsbInput (GioHandle *handle, int timeout) {
     GioUsbAwaitInputMethod *method = handle->properties.awaitInput;
 
     if (method) {
-      return method(channel->device, &channel->definition, timeout);
+      return method(channel->device, channel->definition, timeout);
     }
   }
 
   {
-    unsigned char endpoint = channel->definition.inputEndpoint;
+    unsigned char endpoint = channel->definition->inputEndpoint;
 
     if (!endpoint) {
       asyncWait(timeout);
@@ -122,12 +122,12 @@ readUsbData (
     GioUsbReadDataMethod *method = handle->properties.readData;
 
     if (method) {
-      return method(channel->device, &channel->definition, buffer, size, initialTimeout, subsequentTimeout);
+      return method(channel->device, channel->definition, buffer, size, initialTimeout, subsequentTimeout);
     }
   }
 
   {
-    unsigned char endpoint = channel->definition.inputEndpoint;
+    unsigned char endpoint = channel->definition->inputEndpoint;
 
     if (!endpoint) {
       errno = EAGAIN;
@@ -175,7 +175,7 @@ getUsbHidReportItems (GioHandle *handle, GioHidReportItemsData *items, int timeo
   UsbChannel *channel = handle->channel;
   unsigned char *address;
   ssize_t result = usbHidGetItems(channel->device,
-                                  channel->definition.interface, 0,
+                                  channel->definition->interface, 0,
                                   &address, timeout);
 
   if (!address) return 0;
@@ -199,7 +199,7 @@ setUsbHidReport (
 ) {
   UsbChannel *channel = handle->channel;
 
-  return usbHidSetReport(channel->device, channel->definition.interface,
+  return usbHidSetReport(channel->device, channel->definition->interface,
                          report, data, size, timeout);
 }
 
@@ -210,7 +210,7 @@ getUsbHidReport (
 ) {
   UsbChannel *channel = handle->channel;
 
-  return usbHidGetReport(channel->device, channel->definition.interface,
+  return usbHidGetReport(channel->device, channel->definition->interface,
                          report, buffer, size, timeout);
 }
 
@@ -221,7 +221,7 @@ setUsbHidFeature (
 ) {
   UsbChannel *channel = handle->channel;
 
-  return usbHidSetFeature(channel->device, channel->definition.interface,
+  return usbHidSetFeature(channel->device, channel->definition->interface,
                           report, data, size, timeout);
 }
 
@@ -232,7 +232,7 @@ getUsbHidFeature (
 ) {
   UsbChannel *channel = handle->channel;
 
-  return usbHidGetFeature(channel->device, channel->definition.interface,
+  return usbHidGetFeature(channel->device, channel->definition->interface,
                           report, buffer, size, timeout);
 }
 
@@ -240,7 +240,7 @@ static int
 monitorUsbInput (GioHandle *handle, AsyncMonitorCallback *callback, void *data) {
   if (!GIO_USB_INPUT_MONITOR_DISABLE) {
     UsbChannel *channel = handle->channel;
-    unsigned char endpoint = channel->definition.inputEndpoint;
+    unsigned char endpoint = channel->definition->inputEndpoint;
 
     if (!endpoint) return 1;
     return usbMonitorInputEndpoint(channel->device, endpoint, callback, data);
@@ -314,7 +314,7 @@ connectUsbResource (
 
     if ((handle->channel = usbOpenChannel(descriptor->usb.channelDefinitions, identifier))) {
       const UsbChannel *channel = handle->channel;
-      const UsbChannelDefinition *definition = &channel->definition;
+      const UsbChannelDefinition *definition = channel->definition;
       GioUsbConnectionProperties *properties = &handle->properties;
 
       memset(properties, 0, sizeof(*properties));
@@ -356,7 +356,7 @@ prepareUsbEndpoint (GioEndpoint *endpoint) {
   }
 
   {
-    const SerialParameters *parameters = channel->definition.serial;
+    const SerialParameters *parameters = channel->definition->serial;
 
     if (parameters) {
       gioSetBytesPerSecond(endpoint, parameters);
