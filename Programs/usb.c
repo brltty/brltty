@@ -1258,7 +1258,11 @@ usbChooseChannel (UsbDevice *device, UsbChooseChannelData *data) {
         if (!usbVerifySerialNumber(device, data->serialNumber)) break;
 
         device->disableEndpointReset = definition->disableEndpointReset;
-        if (definition->disableAutosuspend) usbDisableAutosuspend(device);
+
+        if (definition->disableAutosuspend) {
+          logMessage(LOG_CATEGORY(USB_IO), "disabling autosuspend");
+          usbDisableAutosuspend(device);
+        }
 
         if (usbConfigureDevice(device, definition->configuration)) {
           if (usbOpenInterface(device, definition->interface, definition->alternative)) {
