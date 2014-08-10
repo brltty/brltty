@@ -77,6 +77,7 @@ struct UsbDeviceStruct {
   Queue *endpoints;
   Queue *inputFilters;
   uint16_t language;
+  unsigned disableEndpointReset:1;
 };
 
 extern UsbDevice *usbTestDevice (

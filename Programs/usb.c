@@ -738,7 +738,12 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
 
       if (usbAllocateEndpointExtension(endpoint)) {
         if (enqueueItem(device->endpoints, endpoint)) {
-          usbClearEndpoint(device, endpoint->descriptor->bEndpointAddress);
+          if (device->disableEndpointReset) {
+            logMessage(LOG_CATEGORY(USB_IO), "endpoint reset disabled");
+          } else {
+            usbClearEndpoint(device, endpoint->descriptor->bEndpointAddress);
+          }
+
           if (!endpoint->prepare || endpoint->prepare(endpoint)) return endpoint;
           deleteItem(device->endpoints, endpoint);
         }
@@ -924,6 +929,7 @@ usbOpenDevice (UsbDeviceExtension *extension) {
     device->extension = extension;
     device->serialOperations = NULL;
     device->serialData = NULL;
+    device->disableEndpointReset = 0;
 
     if ((device->endpoints = newQueue(usbDeallocateEndpoint, NULL))) {
       if ((device->inputFilters = newQueue(usbDeallocateInputFilter, NULL))) {
@@ -1251,6 +1257,7 @@ usbChooseChannel (UsbDevice *device, UsbChooseChannelData *data) {
         if (!usbVerifyProductIdentifier(descriptor, data->productIdentifier)) break;
         if (!usbVerifySerialNumber(device, data->serialNumber)) break;
 
+        device->disableEndpointReset = definition->disableEndpointReset;
         if (definition->disableAutosuspend) usbDisableAutosuspend(device);
 
         if (usbConfigureDevice(device, definition->configuration)) {

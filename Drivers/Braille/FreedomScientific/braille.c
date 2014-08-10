@@ -718,7 +718,8 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     { /* Focus Blue */
       .vendor=0X0F4E, .product=0X0114,
       .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=2, .outputEndpoint=1
+      .inputEndpoint=2, .outputEndpoint=1,
+      .disableEndpointReset = 1
     }
     ,
     { .vendor=0 }

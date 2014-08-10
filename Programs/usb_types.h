@@ -312,6 +312,7 @@ typedef struct {
   unsigned char outputEndpoint;
 
   unsigned disableAutosuspend:1;
+  unsigned disableEndpointReset:1;
   const SerialParameters *serial;
   const void *data;
 } UsbChannelDefinition;
