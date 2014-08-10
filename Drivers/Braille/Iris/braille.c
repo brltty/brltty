@@ -132,8 +132,6 @@ typedef struct {
 static unsigned char *firmwareVersion = NULL;
 static unsigned char serialNumber[5] = { 0, 0, 0, 0, 0 };
 
-static unsigned char *previousBrailleWindow = NULL;
-static int refreshBrailleWindow = 0;
 static KeyNumberSet linearKeys;
 
 typedef enum {
@@ -173,6 +171,11 @@ struct BrailleDataStruct {
     long int elapsed;
     unsigned pulled:1;
   } latch;
+
+  struct {
+    int refresh;
+    unsigned char cells[IR_WINDOW_SIZE_MAXIMUM];
+  } window;
 };
 
 static void activateBraille(void)
@@ -1396,13 +1399,14 @@ enterPacketForwardMode (BrailleDisplay *brl) {
 static int
 leavePacketForwardMode (BrailleDisplay *brl) {
   logMessage(LOG_NOTICE, "leaving packet forward mode");
+  brl->data->isForwarding = 0;
 
   if (brl->data->protocol == IR_PROTOCOL_NATIVE) {
     if (!sendMenuKey(brl, &brl->data->external.port)) return 0;
   }
 
-  brl->data->isForwarding = 0;
-  refreshBrailleWindow = 1;
+  brl->data->window.refresh = 1;
+  scheduleUpdate("Iris not forwarding");
   return 1;
 }
 
@@ -1431,7 +1435,7 @@ GIO_INPUT_HANDLER(irHandleExternalInput) {
 }
 
 static inline int
-isMenuKey (const unsigned char *packet, size_t size) {
+isMenuKeyPacket (const unsigned char *packet, size_t size) {
   return (size == 2) && (packet[0] == IR_IPT_InteractiveKey) && (packet[1] == 'Q');
 }
 
@@ -1442,7 +1446,7 @@ handlePacket_embedded (BrailleDisplay *brl, const void *packet, size_t size) {
   /* The test for Menu key should come first since this key toggles
    * packet forward mode on/off
    */
-  if (isMenuKey(packet, size)) {
+  if (isMenuKeyPacket(packet, size)) {
     logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "menu key pressed");
 
     if (brl->data->isForwarding) {
@@ -1472,22 +1476,26 @@ isOffline_embedded (BrailleDisplay *brl) {
 
 static int
 handlePacket_nonembedded (BrailleDisplay *brl, const void *packet, size_t size) {
-  /* The test for Menu key should come first since this key toggles
-   * packet forward mode on/off
-   */
-  if (isMenuKey(packet, size)) {
+  int menuKeyPressed = isMenuKeyPacket(packet, size);
+
+  if (menuKeyPressed) {
     logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "menu key pressed");
 
     if (brl->data->isConnected) {
+      logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "device disconnected");
       brl->data->isConnected = 0;
       return 1;
     }
   }
 
   if (!brl->data->isConnected) {
-    refreshBrailleWindow = 1;
+    logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "device reconnected");
     brl->data->isConnected = 1;
-    if (isMenuKey(packet, size)) return 1;
+
+    brl->data->window.refresh = 1;
+    scheduleUpdate("Iris reconnected");
+
+    if (menuKeyPressed) return 1;
   }
   
   handleNativePacket(brl, NULL, &coreKeyHandlers, packet, size);
@@ -1522,12 +1530,12 @@ static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *characters)
 {
   const size_t size = brl->textColumns * brl->textRows;
 
-  if (cellsHaveChanged(previousBrailleWindow, brl->buffer, size, NULL, NULL, &refreshBrailleWindow)) {
+  if (cellsHaveChanged(brl->data->window.cells, brl->buffer, size, NULL, NULL, &brl->data->window.refresh)) {
     ssize_t res = writeWindow(brl, &brl->data->internal.port, brl->buffer);
 
     if (!res) {
       if (errno != EAGAIN) return 0;
-      refreshBrailleWindow = 1;
+      brl->data->window.refresh = 1;
     }
   }
 
@@ -1572,7 +1580,7 @@ static ssize_t askDevice(BrailleDisplay *brl, IrisOutputPacketType request, unsi
 static int
 suspendDevice (BrailleDisplay *brl) {
   if (!brl->data->isEmbedded) return 1;
-  logMessage(LOG_INFO, "suspending device");
+  logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "suspending device");
   brl->data->isSuspended = 1;
 
   if (brl->data->isForwarding) {
@@ -1591,14 +1599,14 @@ suspendDevice (BrailleDisplay *brl) {
 static int
 resumeDevice (BrailleDisplay *brl) {
   if (!brl->data->isEmbedded) return 1;
-  logMessage(LOG_INFO, "resuming device");
+  logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "resuming device");
 
   activateBraille();
 
   if (brl->data->isForwarding) {
     if (!sendZKey(brl, &brl->data->external.port)) return 0;
   } else {
-    refreshBrailleWindow = 1;
+    brl->data->window.refresh = 1;
     scheduleUpdate("Iris resumed");
   }
 
@@ -1767,6 +1775,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     brl->data->latch.delay = IR_DEFAULT_LATCH_DELAY;
     brl->data->latch.interval = IR_DEFAULT_LATCH_INTERVAL;
 
+    brl->data->window.refresh = 1;
+
     if (validateYesNo(&embedded, parameters[PARM_EMBEDDED])) {
       int internalPortOpened = 0;
 
@@ -1909,12 +1919,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                 brl->keyBindings = ktd->bindings;
                 brl->keyNames = ktd->names;
 
-                if ((previousBrailleWindow = malloc(brl->textColumns * brl->textRows))) {
-                  linearKeys = 0;
-                  return 1;
-                } else {
-                  logMallocError();
-                }
+                linearKeys = 0;
+                return 1;
               }
 
               free(firmwareVersion);
@@ -1944,11 +1950,6 @@ brl_destruct (BrailleDisplay *brl) {
   if (brl->data->isEmbedded) {
     brl_clearWindow(brl);
     deactivateBraille();
-  }
-
-  if (previousBrailleWindow!=NULL) {
-    free(previousBrailleWindow);
-    previousBrailleWindow = NULL;
   }
 
   if (brl->data) {
