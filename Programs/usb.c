@@ -1218,6 +1218,76 @@ usbWriteData (
   return -1;
 }
 
+static int
+usbPrepareChannel (UsbChannel *channel) {
+  UsbDevice *device = channel->device;
+  UsbChannelDefinition *definition = &channel->definition;
+
+  device->disableEndpointReset = definition->disableEndpointReset;
+
+  if (definition->disableAutosuspend) {
+    logMessage(LOG_CATEGORY(USB_IO), "disabling autosuspend");
+    usbDisableAutosuspend(device);
+  }
+
+  if (usbConfigureDevice(device, definition->configuration)) {
+    if (usbOpenInterface(device, definition->interface, definition->alternative)) {
+      int ok = 1;
+
+      if (ok) {
+        if (!usbSetSerialOperations(device)) {
+          ok = 0;
+        } else if (device->serialOperations) {
+          logMessage(LOG_CATEGORY(USB_IO), "serial adapter: %s",
+                     device->serialOperations->name);
+        }
+      }
+
+      if (ok)
+        if (device->serialOperations)
+          if (device->serialOperations->enableAdapter)
+            if (!device->serialOperations->enableAdapter(device))
+              ok = 0;
+
+      if (ok)
+        if (definition->serial)
+          if (!usbSetSerialParameters(device, definition->serial))
+            ok = 0;
+
+      if (ok) {
+        if (definition->inputEndpoint) {
+          UsbEndpoint *endpoint = usbGetInputEndpoint(device, definition->inputEndpoint);
+
+          if (!endpoint) {
+            ok = 0;
+          } else {
+            if (endpoint->direction.input.asynchronous) {
+              usbBeginInput(device, definition->inputEndpoint, USB_INPUT_INTERRUPT_URB_COUNT);
+            }
+          }
+        }
+      }
+
+      if (ok) {
+        if (definition->outputEndpoint) {
+          UsbEndpoint *endpoint = usbGetOutputEndpoint(device, definition->outputEndpoint);
+
+          if (!endpoint) {
+            ok = 0;
+          }
+        }
+      }
+
+      if (ok) {
+        return 1;
+      }
+      usbCloseInterface(device);
+    }
+  }
+
+  return 0;
+}
+
 struct UsbChooseChannelDataStruct {
   const UsbChannelDefinition *definition;
 
@@ -1257,73 +1327,14 @@ usbChooseChannel (UsbDevice *device, UsbChooseChannelData *data) {
         if (!usbVerifyProductIdentifier(descriptor, data->productIdentifier)) break;
         if (!usbVerifySerialNumber(device, data->serialNumber)) break;
 
-        device->disableEndpointReset = definition->disableEndpointReset;
-
-        if (definition->disableAutosuspend) {
-          logMessage(LOG_CATEGORY(USB_IO), "disabling autosuspend");
-          usbDisableAutosuspend(device);
-        }
-
-        if (usbConfigureDevice(device, definition->configuration)) {
-          if (usbOpenInterface(device, definition->interface, definition->alternative)) {
-            int ok = 1;
-
-            if (ok) {
-              if (!usbSetSerialOperations(device)) {
-                ok = 0;
-              } else if (device->serialOperations) {
-                logMessage(LOG_CATEGORY(USB_IO), "serial adapter: %s",
-                           device->serialOperations->name);
-              }
-            }
-
-            if (ok)
-              if (device->serialOperations)
-                if (device->serialOperations->enableAdapter)
-                  if (!device->serialOperations->enableAdapter(device))
-                    ok = 0;
-
-            if (ok)
-              if (definition->serial)
-                if (!usbSetSerialParameters(device, definition->serial))
-                  ok = 0;
-
-            if (ok) {
-              if (definition->inputEndpoint) {
-                UsbEndpoint *endpoint = usbGetInputEndpoint(device, definition->inputEndpoint);
-
-                if (!endpoint) {
-                  ok = 0;
-                } else {
-                  if (endpoint->direction.input.asynchronous) {
-                    usbBeginInput(device, definition->inputEndpoint, USB_INPUT_INTERRUPT_URB_COUNT);
-                  }
-                }
-              }
-            }
-
-            if (ok) {
-              if (definition->outputEndpoint) {
-                UsbEndpoint *endpoint = usbGetOutputEndpoint(device, definition->outputEndpoint);
-
-                if (!endpoint) {
-                  ok = 0;
-                }
-              }
-            }
-
-            if (ok) {
-              data->definition = definition;
-              return 1;
-            }
-            usbCloseInterface(device);
-          }
-        }
+        data->definition = definition;
+        return 1;
       }
     }
 
     definition += 1;
   }
+
   return 0;
 }
 
@@ -1411,7 +1422,15 @@ usbOpenChannel (const UsbChannelDefinition *definitions, const char *identifier)
     deallocateStrings(parameters);
   }
 
-  return channel;
+  if (channel) {
+    if (usbPrepareChannel(channel)) {
+      return channel;
+    }
+
+    usbCloseChannel(channel);
+  }
+
+  return NULL;
 }
 
 void
