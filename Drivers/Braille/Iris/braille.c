@@ -26,6 +26,7 @@
 
 #include "log.h"
 #include "parameters.h"
+#include "update.h"
 #include "ascii.h"
 #include "cmd.h"
 #include "parse.h"
@@ -1598,6 +1599,7 @@ resumeDevice (BrailleDisplay *brl) {
     if (!sendZKey(brl, &brl->data->external.port)) return 0;
   } else {
     refreshBrailleWindow = 1;
+    scheduleUpdate("Iris resumed");
   }
 
   brl->data->isSuspended = 0;
