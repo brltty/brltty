@@ -286,11 +286,10 @@ writeInputEvent (UinputObject *uinput, uint16_t type, uint16_t code, int32_t val
   event.code = code;
   event.value = value;
 
-  if (write(uinput->fileDescriptor, &event, sizeof(event)) != -1) {
-    return 1;
-  } else {
-    logSystemError("write(struct input_event)");
-  }
+  if (write(uinput->fileDescriptor, &event, sizeof(event)) != -1) return 1;
+  logSystemError("write(struct input_event)");
+  logMessage(LOG_WARNING, "input event: type=%d code=%d value=%d",
+             event.type, event.code, event.value);
 #endif /* HAVE_LINUX_UINPUT_H */
 
   return 0;
