@@ -856,11 +856,11 @@ sufword predikant 1234-1235-1246-24-13-1-1345-2345
 begword predn 1234-1235-1246-1345 prednisone prednisolone
 sufword predsolan 1234-1235-1246-234-135-123-1-1345
 begword preer = preerect
+begword prefulg = prefulgence prefulgent
 word pren 1234-1235-26 a surname
 begword prend 1234-1235-26-145 prendergast
 sufword prensa 1234-1235-26-234-1
 sufword prent 1234-1235-26-2345
-sufword  prefulgent 1234-1235-15-124-136-123-1245-26-2345
 sufword prepsychedelic 1234-1235-15-1234-234-13456-16-15-145-15-123-24-14
 always prof =
 word prof 1234-1235-12356
@@ -946,7 +946,7 @@ begword redr = redress
 begword redro 1235-1246-1235-135 redroot redrock
 sufword redrove =
 begword redru 1235-1246-1235-136 redruthite
-sufword refulgent 1235-15-124-136-123-1245-26-2345
+begword refulg = refulgent refugence
 always rejoice 1235-245-14
 contraction rjc
 contraction rjcd
