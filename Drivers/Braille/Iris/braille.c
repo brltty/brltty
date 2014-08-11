@@ -119,13 +119,15 @@ typedef struct {
   const char *name;
   int speed;
 
-  int reading;
-  int declaredSize; /* useful when reading Eurobraille packets */
-  int prefix;
-  unsigned char packet[IR_MAXIMUM_PACKET_SIZE];
-  unsigned char *position;
+  unsigned int state;
+  unsigned int length; /* useful when reading Eurobraille packets */
+  unsigned int escape;
+
   int waitingForAck;
   TimePeriod acknowledgementPeriod;
+
+  unsigned char *position;
+  unsigned char packet[IR_MAXIMUM_PACKET_SIZE];
 } Port;
 
 typedef enum {
@@ -753,20 +755,20 @@ static size_t
 readNativePacket (BrailleDisplay *brl, Port *port, void *packet, size_t size) {
   unsigned char byte;
 
-  while (gioReadByte(port->gioEndpoint, &byte, (port->reading || port->waitingForAck))) {
+  while (gioReadByte(port->gioEndpoint, &byte, (port->state || port->waitingForAck))) {
     size_t length = port->position - port->packet;
 
-    if (port->reading) {
+    if (port->state) {
       switch (byte) {
         case DLE:
-          if (!port->prefix) {
-            port->prefix = 1;
+          if (!port->escape) {
+            port->escape = 1;
             continue;
           }
 
         case EOT:
-          if (!port->prefix) {
-            port->reading = 0;
+          if (!port->escape) {
+            port->state = 0;
 
             if (length <= size) {
               memcpy(packet, port->packet, length);
@@ -774,25 +776,25 @@ readNativePacket (BrailleDisplay *brl, Port *port, void *packet, size_t size) {
               return length;
             }
 
+            logInputProblem("packet buffer too small", port->packet, length);
             break;
           }
 
         default:
-          port->prefix = 0;
-
-          if (length < size) {
+          if (length < sizeof(port->packet)) {
             *port->position = byte;
           } else {
-            if (length == size) logTruncatedPacket(packet, length);
+            if (length == sizeof(port->packet)) logTruncatedPacket(port->packet, length);
             logDiscardedByte(byte);
           }
 
           port->position += 1;
+          port->escape = 0;
           break;
       }
     } else if (byte == SOH) {
-      port->reading = 1;
-      port->prefix = 0;
+      port->state = 1;
+      port->escape = 0;
       port->position = port->packet;
     } else if (port->waitingForAck && (byte == ACK)) {
       port->waitingForAck = 0;
@@ -813,72 +815,84 @@ readNativePacket (BrailleDisplay *brl, Port *port, void *packet, size_t size) {
 
 static size_t
 readEurobraillePacket (BrailleDisplay *brl, Port *port, void *packet, size_t size) {
-  unsigned char ch;
-  size_t size_;
-  while (gioReadByte (port->gioEndpoint, &ch, port->reading)) {
-    logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "Got ch=%c(%02x) state=%d", ch, ch, port->reading);
-    switch (port->reading)
-    {
+  unsigned char byte;
+
+  while (gioReadByte(port->gioEndpoint, &byte, port->state)) {
+    switch (port->state) {
       case 0:
-        if (ch==STX)
-        {
-          port->reading = 1;
+        if (byte == STX) {
+          port->state = 1;
           port->position = port->packet;
-          port->declaredSize = 0;
+          port->length = 0;
         } else {
-          logIgnoredByte(ch);
-        };
+          logIgnoredByte(byte);
+        }
         break;
+
       case 1:
-        port->declaredSize = ch << 8;
-        port->reading = 2;
+        port->length |= byte << 8;
+        port->state = 2;
         break;
+
       case 2:
-        port->declaredSize += ch;
-        if (port->declaredSize < 3)
-        {
-          logMessage(LOG_WARNING, "invalid Eurobraille packet declared size: %d", port->declaredSize);
-          port->reading = 0;
+        port->length |= byte;
+
+        if (port->length < 3) {
+          logMessage(LOG_WARNING, "invalid Eurobraille packet declared size: %d", port->length);
+          port->state = 0;
         } else {
-          port->declaredSize -= 2;
-          if (port->declaredSize > sizeof(port->packet) )
-          {
+          port->length -= 2;
+
+          if (port->length > sizeof(port->packet)) {
             logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "readEuroBraillePacket: rejecting packet whose declared size is too large");
-            port->reading = 0;
-            return 0;
+            port->state = 0;
+          } else {
+            port->state = 3;
           }
-          logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "readEuroBraillePacket: declared size = %d", port->declaredSize);
-          port->reading = 3;
-        };
+        }
         break;
+
       case 3:
-        *(port->position) = ch; port->position++;
-        if ( (port->position - port->packet) == port->declaredSize) port->reading = 4;
-        break;
-      case 4:
-        port->reading = 0;
-        if (ch == ETX) {
-          size_ = port->position - port->packet;
+        *port->position++ = byte;
 
-          if (size_ > size) {
-            logInputProblem("Eurobraille packet too large", port->packet, size_);
-            return 0;
+        if ((port->position - port->packet) == port->length) port->state = 4;
+        break;
+
+      case 4:
+        if (byte == ETX) {
+          size_t length = port->position - port->packet;
+
+          port->state = 0;
+
+          if (length <= size) {
+            memcpy(packet, port->packet, length);
+            logInputPacket(packet, length);
+            return length;
           }
 
-          memcpy(packet, port->packet, size_);
-          logInputPacket(packet, size_);
-          return size_;
+          logInputProblem("packet buffer too small", port->packet, length);
         } else {
           logMessage(LOG_WARNING, "Eurobraille packet with real size exceeding declared size");
-          return 0;
-        };
+          logDiscardedByte(byte);
+          port->state = 5;
+        }
         break;
+
+      case 5:
+        if (byte == ETX) {
+          port->state = 0;
+        } else {
+          logDiscardedByte(byte);
+        }
+        break;
+
       default:
-        logMessage(LOG_WARNING, "readEurobraillePacket: reached unknown state %d", port->reading);
-        port->reading = 0;
+        logMessage(LOG_WARNING, "readEurobraillePacket: reached unknown state %d", port->state);
+        port->state = 0;
         break;
     }
   }
+
   return 0;
 }
 
@@ -1648,6 +1662,7 @@ openPort (Port *port) {
   closePort(port);
 
   if ((port->gioEndpoint = gioConnectResource(port->name, &gioDescriptor))) {
+    port->state = 0;
     return 1;
   }
 
