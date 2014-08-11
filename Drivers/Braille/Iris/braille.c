@@ -749,13 +749,15 @@ static void deactivateBraille(void)
 /* Returns the size of the read packet. */
 /* 0 means no packet has been read and there is no error. */
 /* -1 means an error occurred */
-static size_t readNativePacket(BrailleDisplay *brl, Port *port, void *packet, size_t size)
-{
-  unsigned char ch;
-  size_t size_;
-  while ( gioReadByte (port->gioEndpoint, &ch, ( port->reading || port->waitingForAck ) ) ) {
+static size_t
+readNativePacket (BrailleDisplay *brl, Port *port, void *packet, size_t size) {
+  unsigned char byte;
+
+  while (gioReadByte(port->gioEndpoint, &byte, (port->reading || port->waitingForAck))) {
+    size_t length = port->position - port->packet;
+
     if (port->reading) {
-      switch (ch) {
+      switch (byte) {
         case DLE:
           if (!port->prefix) {
             port->prefix = 1;
@@ -765,44 +767,44 @@ static size_t readNativePacket(BrailleDisplay *brl, Port *port, void *packet, si
         case EOT:
           if (!port->prefix) {
             port->reading = 0;
-            size_ = port->position - port->packet;
+            if (length > size) return 0;
 
-            if (size_ > size) {
-              logInputProblem("native packet too large", port->packet, size_);
-              return 0;
-            }
-
-            memcpy(packet, port->packet, size_);
-            logInputPacket(packet, size_);
-            return size_;
+            memcpy(packet, port->packet, length);
+            logInputPacket(packet, length);
+            return length;
           }
 
         default:
           port->prefix = 0;
+          if (length < size) *port->position = byte;
+          port->position += 1;
 
-          if ((port->position - port->packet) < IR_MAXIMUM_PACKET_SIZE) {
-            *(port->position++) = ch;
+          if (length == size) {
+            logTruncatedPacket(port->packet, length);
+          } else if (length > size) {
+            logDiscardedByte(byte);
           }
+
+          break;
+      }
+    } else if (byte == SOH) {
+      port->reading = 1;
+      port->prefix = 0;
+      port->position = port->packet;
+    } else if (port->waitingForAck && (byte == ACK)) {
+      port->waitingForAck = 0;
+
+      if (brl->data->isForwarding && (brl->data->external.protocol == IR_PROTOCOL_NATIVE)) {
+        static const unsigned char acknowledgement[] = {ACK};
+
+        writeBraillePacket(brl, brl->data->external.port.gioEndpoint, acknowledgement, sizeof(acknowledgement));
       }
     } else {
-      if (ch==SOH) {
-        port->reading = 1;
-        port->prefix = 0;
-        port->position = port->packet;
-      } else {
-        if ((port->waitingForAck) && (ch==ACK)) {
-          port->waitingForAck = 0;
-          if (brl->data->isForwarding && (brl->data->external.protocol == IR_PROTOCOL_NATIVE) ) {
-            static const unsigned char acknowledgement[] = {ACK};
-            writeBraillePacket(brl, brl->data->external.port.gioEndpoint, acknowledgement, sizeof(acknowledgement));
-          }
-        } else {
-          logIgnoredByte(ch);
-        }
-      }
+      logIgnoredByte(byte);
     }
   }
-  if ( errno != EAGAIN )  logSystemError("readNativePacket");
+
+  if (errno != EAGAIN) logSystemError("readNativePacket");
   return 0;
 }
 
