@@ -128,8 +128,6 @@ typedef struct {
   TimePeriod acknowledgementPeriod;
 } Port;
 
-static unsigned char *firmwareVersion = NULL;
-
 typedef enum {
   IR_PROTOCOL_EUROBRAILLE,
   IR_PROTOCOL_NATIVE
@@ -720,7 +718,7 @@ struct BrailleDataStruct {
 
   struct {
     int refresh;
-    unsigned char cells[IR_WINDOW_SIZE_MAXIMUM];
+    unsigned char cells[0XFF];
   } braille;
 
   struct {
@@ -729,9 +727,8 @@ struct BrailleDataStruct {
     uint16_t state;
   } xt;
 
-  struct {
-    char serialNumber[5];
-  } identity;
+  unsigned char *firmwareVersion;
+  char serialNumber[5];
 };
 
 static void activateBraille(void)
@@ -1316,7 +1313,7 @@ forwardEurobraillePacket (
     char str[256];
     writeEurobrailleStringPacket(brl, inPort, "SNIRIS_KB_40");
     writeEurobrailleStringPacket(brl, inPort, "SHIR4");
-    snprintf(str, sizeof(str), "SS%s", brl->data->identity.serialNumber);
+    snprintf(str, sizeof(str), "SS%s", brl->data->serialNumber);
     writeEurobrailleStringPacket(brl, inPort, str);
     writeEurobrailleStringPacket(brl, inPort, "SLFR");
     str[0] = 'S'; str[1] = 'G'; str[2] = brl->textColumns;
@@ -1880,12 +1877,10 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           }
 
           if (ktd) {
-            brl->textRows = 1;
-
-            if ((firmwareVersion = malloc(size - 1))) {
-              memcpy(firmwareVersion, deviceResponse+2, size-2);
-              firmwareVersion[size-2] = 0;
-              logMessage(LOG_INFO, "the device's firmware version is %s", firmwareVersion);
+            if ((brl->data->firmwareVersion = malloc(size - 1))) {
+              memcpy(brl->data->firmwareVersion, deviceResponse+2, size-2);
+              brl->data->firmwareVersion[size-2] = 0;
+              logMessage(LOG_INFO, "the device's firmware version is %s", brl->data->firmwareVersion);
 
               if (!(size = askDevice(brl, IR_OPT_SerialNumberRequest, deviceResponse, sizeof(deviceResponse)))) {
                 logMessage(LOG_ERR, "Received no response to serial number request.");
@@ -1899,29 +1894,28 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                 }
 
                 {
-                  char *byte = brl->data->identity.serialNumber;
+                  char *byte = brl->data->serialNumber;
 
                   byte = mempcpy(byte, deviceResponse+2,
-                                 (sizeof(brl->data->identity.serialNumber) - 1));
+                                 (sizeof(brl->data->serialNumber) - 1));
                   *byte = 0;
                 }
 
                 logMessage(LOG_INFO, "device's serial number is %s. It has a %s keyboard, a %d-cells braille display and %s visual dipslay.",
-                           brl->data->identity.serialNumber,
+                           brl->data->serialNumber,
                            ktd->bindings,
                            brl->textColumns,
                            brl->data->haveVisualDisplay ? "a" : "no" 
                 );
 
-                makeOutputTable(dotsTable_ISO11548_1);
-
                 brl->keyBindings = ktd->bindings;
                 brl->keyNames = ktd->names;
 
+                makeOutputTable(dotsTable_ISO11548_1);
                 return 1;
               }
 
-              free(firmwareVersion);
+              free(brl->data->firmwareVersion);
             } else {
               logMallocError();
             }
@@ -1954,6 +1948,7 @@ brl_destruct (BrailleDisplay *brl) {
     stopLatchMonitor(brl);
     closeExternalPort(brl);
     closeInternalPort(brl);
+    free(brl->data->firmwareVersion);
 
     free(brl->data);
     brl->data = NULL;
