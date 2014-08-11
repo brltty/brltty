@@ -902,9 +902,7 @@ writeNativePacket (
   BrailleDisplay *brl, Port *port,
   const unsigned char *packet, size_t size
 ) {
-  const unsigned char *data = packet;
-  unsigned char	buf[2*(size + 1) +3];
-  unsigned char *p = buf;
+  unsigned char	buffer[(size * 2) + 2];
   size_t count;
 
   if (port->waitingForAck) {
@@ -917,22 +915,24 @@ writeNativePacket (
     port->waitingForAck = 0;
   }
 
-  *p++ = SOH;
-  while (size--) {
-    if (needsEscape(*data)) *p++ = DLE;
-    *p++ = *data++;
-  }
-  *p++ = EOT;
+  {
+    const unsigned char *source = packet;
+    unsigned char *target = buffer;
 
-  count = p - buf;
-  if (!writeBraillePacket(brl, port->gioEndpoint, buf, count)) {
-    logMessage(LOG_WARNING, "in writeNativePacket: gioWriteData failed");
-    return 0;
+    *target++ = SOH;
+
+    while (size--) {
+      if (needsEscape(*source)) *target++ = DLE;
+      *target++ = *source++;
+    }
+
+    *target++ = EOT;
+    count = target - buffer;
   }
 
+  if (!writeBraillePacket(brl, port->gioEndpoint, buffer, count)) return 0;
   startAcknowledgementPeriod(port);
-
-  if (port==&brl->data->internal.port) port->waitingForAck = 1;
+  if (port == &brl->data->internal.port) port->waitingForAck = 1;
   return count;
 }
 
@@ -974,31 +974,35 @@ writeEurobrailleStringPacket (BrailleDisplay *brl, Port *port, const char *strin
 
 /* Low-level write of dots to the braile display */
 /* No check is performed to avoid several consecutive identical writes at this level */
-static ssize_t writeDots (BrailleDisplay *brl, Port *port, const unsigned char *dots)
-{
+static size_t
+writeDots (BrailleDisplay *brl, Port *port, const unsigned char *dots) {
   size_t size = brl->textColumns * brl->textRows;
-  unsigned char packet[IR_WINDOW_SIZE_MAXIMUM+1] = { IR_OPT_WriteBraille };
-  unsigned char *p = packet+1;
+  unsigned char packet[IR_WINDOW_SIZE_MAXIMUM + 1];
+  unsigned char *p = packet;
   int i;
-  for (i=0; i<IR_WINDOW_SIZE_MAXIMUM-size; i++) *(p++) = 0; 
-  for (i=0; i<size; i++) *(p++) = dots[size-i-1];
+
+  *p++ = IR_OPT_WriteBraille;
+  for (i=0; i<IR_WINDOW_SIZE_MAXIMUM-size; i+=1) *p++ = 0; 
+  for (i=0; i<size; i+=1) *p++ = dots[size-i-1];
   return writeNativePacket(brl, port, packet, sizeof(packet));
 }
 
 /* Low-level write of text to the braile display */
 /* No check is performed to avoid several consecutive identical writes at this level */
-static ssize_t writeWindow (BrailleDisplay *brl, Port *port, const unsigned char *text)
-{
+static size_t
+writeWindow (BrailleDisplay *brl, Port *port, const unsigned char *text) {
   size_t size = brl->textColumns * brl->textRows;
   unsigned char dots[size];
+
   translateOutputCells(dots, text, size);
   return writeDots(brl, port, dots);
 }
 
-static int clearWindow(BrailleDisplay *brl, Port *port)
-{
-  int windowSize = brl->textColumns * brl->textRows;
-  unsigned char window[windowSize];
+static size_t
+clearWindow (BrailleDisplay *brl, Port *port) {
+  size_t size = brl->textColumns * brl->textRows;
+  unsigned char window[size];
+
   memset(window, 0, sizeof(window));
   return writeWindow(brl, port, window);
 }
