@@ -80,24 +80,30 @@ testAutorepeat (void) {
 }
 
 static int
+setAutorepeat (BrailleDisplay *brl, int on, int delay, int interval) {
+  if (!brl->setAutorepeat) return 1;
+  return setBrailleAutorepeat(brl, on, delay, interval);
+}
+
+static int
 changedAutorepeat (const MenuItem *item UNUSED, unsigned char setting) {
-  return setBrailleAutorepeat(&brl, setting,
-                              PREFERENCES_TIME(prefs.longPressTime),
-                              PREFERENCES_TIME(prefs.autorepeatInterval));
+  return setAutorepeat(&brl, setting,
+                       PREFERENCES_TIME(prefs.longPressTime),
+                       PREFERENCES_TIME(prefs.autorepeatInterval));
 }
 
 static int
 changedAutorepeatDelay (const MenuItem *item UNUSED, unsigned char setting) {
-  return setBrailleAutorepeat(&brl, prefs.autorepeat,
-                              setting,
-                              PREFERENCES_TIME(prefs.autorepeatInterval));
+  return setAutorepeat(&brl, prefs.autorepeat,
+                       setting,
+                       PREFERENCES_TIME(prefs.autorepeatInterval));
 }
 
 static int
 changedAutorepeatInterval (const MenuItem *item UNUSED, unsigned char setting) {
-  return setBrailleAutorepeat(&brl, prefs.autorepeat,
-                              PREFERENCES_TIME(prefs.longPressTime),
-                              setting);
+  return setAutorepeat(&brl, prefs.autorepeat,
+                       PREFERENCES_TIME(prefs.longPressTime),
+                       setting);
 }
 
 static int
