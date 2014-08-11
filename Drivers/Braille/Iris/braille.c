@@ -767,24 +767,27 @@ readNativePacket (BrailleDisplay *brl, Port *port, void *packet, size_t size) {
         case EOT:
           if (!port->prefix) {
             port->reading = 0;
-            if (length > size) return 0;
 
-            memcpy(packet, port->packet, length);
-            logInputPacket(packet, length);
-            return length;
+            if (length <= size) {
+              memcpy(packet, port->packet, length);
+              logInputPacket(packet, length);
+              return length;
+            }
+
+            break;
           }
 
         default:
           port->prefix = 0;
-          if (length < size) *port->position = byte;
-          port->position += 1;
 
-          if (length == size) {
-            logTruncatedPacket(port->packet, length);
-          } else if (length > size) {
+          if (length < size) {
+            *port->position = byte;
+          } else {
+            if (length == size) logTruncatedPacket(packet, length);
             logDiscardedByte(byte);
           }
 
+          port->position += 1;
           break;
       }
     } else if (byte == SOH) {
