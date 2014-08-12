@@ -36,7 +36,7 @@
 #include "brltty.h"
 
 void
-initializeSpeechSynthesizer (volatile SpeechSynthesizer *spk) {
+constructSpeechSynthesizer (volatile SpeechSynthesizer *spk) {
   spk->canAutospeak = 1;
 
   spk->track.isActive = 0;
@@ -51,6 +51,10 @@ initializeSpeechSynthesizer (volatile SpeechSynthesizer *spk) {
 
   spk->driver.thread = NULL;
   spk->driver.data = NULL;
+}
+
+void
+destructSpeechSynthesizer (volatile SpeechSynthesizer *spk) {
 }
 
 int

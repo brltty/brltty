@@ -1140,7 +1140,7 @@ makeProgramBanner (char *buffer, size_t size) {
 
 void
 initializeBraille (void) {
-  initializeBrailleDisplay(&brl);
+  constructBrailleDisplay(&brl);
   brl.bufferResized = &windowConfigurationChanged;
 }
 
@@ -1224,27 +1224,9 @@ destructBrailleDriver (void) {
 
   brailleConstructed = 0;
   braille->destruct(&brl);
+
   disableHelpPage(brailleHelpPageNumber);
-
-  if (brl.message.alarm) {
-    asyncCancelRequest(brl.message.alarm);
-    brl.message.alarm = NULL;
-  }
-
-  if (brl.message.queue) {
-    deallocateQueue(brl.message.queue);
-    brl.message.queue = NULL;
-  }
-
-  if (brl.keyTable) {
-    destroyKeyTable(brl.keyTable);
-    brl.keyTable = NULL;
-  }
-
-  if (brl.buffer) {
-    if (brl.isCoreBuffer) free(brl.buffer);
-    brl.buffer = NULL;
-  }
+  destructBrailleDisplay(&brl);
 }
 
 static int
@@ -1569,7 +1551,7 @@ beginAutospeakDelay (int duration) {
 
 void
 initializeSpeech (void) {
-  initializeSpeechSynthesizer(&spk);
+  constructSpeechSynthesizer(&spk);
 }
 
 int
@@ -1589,6 +1571,7 @@ constructSpeechDriver (void) {
 void
 destructSpeechDriver (void) {
   stopSpeechDriverThread();
+  destructSpeechSynthesizer(&spk);
 }
 
 static int

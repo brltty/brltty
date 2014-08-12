@@ -28,10 +28,11 @@
 #include "unicode.h"
 #include "brl.h"
 #include "ttb.h"
-#include "ktb_types.h"
+#include "ktb.h"
+#include "queue.h"
 
 void
-initializeBrailleDisplay (BrailleDisplay *brl) {
+constructBrailleDisplay (BrailleDisplay *brl) {
   brl->textColumns = 0;
   brl->textRows = 1;
   brl->statusColumns = 0;
@@ -56,6 +57,29 @@ initializeBrailleDisplay (BrailleDisplay *brl) {
   brl->message.timeout = 1000;
 
   brl->data = NULL;
+}
+
+void
+destructBrailleDisplay (BrailleDisplay *brl) {
+  if (brl->message.alarm) {
+    asyncCancelRequest(brl->message.alarm);
+    brl->message.alarm = NULL;
+  }
+
+  if (brl->message.queue) {
+    deallocateQueue(brl->message.queue);
+    brl->message.queue = NULL;
+  }
+
+  if (brl->keyTable) {
+    destroyKeyTable(brl->keyTable);
+    brl->keyTable = NULL;
+  }
+
+  if (brl->buffer) {
+    if (brl->isCoreBuffer) free(brl->buffer);
+    brl->buffer = NULL;
+  }
 }
 
 static void

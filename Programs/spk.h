@@ -25,7 +25,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern void initializeSpeechSynthesizer (volatile SpeechSynthesizer *spk);
+extern void constructSpeechSynthesizer (volatile SpeechSynthesizer *spk);
+extern void destructSpeechSynthesizer (volatile SpeechSynthesizer *spk);
 
 extern int startSpeechDriverThread (char **parameters);
 extern void stopSpeechDriverThread (void);

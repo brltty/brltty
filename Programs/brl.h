@@ -28,8 +28,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern void initializeBrailleDisplay (BrailleDisplay *brl);
+extern void constructBrailleDisplay (BrailleDisplay *brl);
 extern int ensureBrailleBuffer (BrailleDisplay *brl, int infoLevel);
+extern void destructBrailleDisplay (BrailleDisplay *brl);
 
 extern void fillTextRegion (
   wchar_t *text, unsigned char *dots,
