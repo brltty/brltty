@@ -35,12 +35,13 @@ extern int createUinputDevice (UinputObject *uinput);
 extern int enableUinputEventType (UinputObject *uinput, int type);
 extern int writeInputEvent (UinputObject *uinput, uint16_t type, uint16_t code, int32_t value);
 
-extern int enableUinputKeys (UinputObject *uinput);
 extern int enableUinputKey (UinputObject *uinput, int key);
 extern int writeKeyEvent (UinputObject *uinput, int key, int press);
 
 extern int writeRepeatDelay (UinputObject *uinput, int delay);
 extern int writeRepeatPeriod (UinputObject *uinput, int period);
+
+extern UinputObject *newUinputKeyboard (void);
 
 #ifdef __cplusplus
 }

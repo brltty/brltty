@@ -993,7 +993,7 @@ static int at2Pressed;
 #endif /* HAVE_LINUX_INPUT_H */
 
 static int currentConsoleNumber;
-static UinputObject *uinputObject;
+static UinputObject *uinputKeyboard;
 
 static int
 construct_LinuxScreen (void) {
@@ -1002,7 +1002,7 @@ construct_LinuxScreen (void) {
   cacheSize = 0;
 
   currentConsoleNumber = 0;
-  uinputObject = NULL;
+  uinputKeyboard = NULL;
 
 #ifdef HAVE_LINUX_INPUT_H
   at2Keys = at2KeysOriginal;
@@ -1046,9 +1046,9 @@ destruct_LinuxScreen (void) {
   }
   cacheSize = 0;
 
-  if (uinputObject) {
-    destroyUinputObject(uinputObject);
-    uinputObject = NULL;
+  if (uinputKeyboard) {
+    destroyUinputObject(uinputKeyboard);
+    uinputKeyboard = NULL;
   }
 }
 
@@ -1339,25 +1339,13 @@ getCapsLockState (void) {
 
 static int
 injectKeyEvent (int key, int press) {
-  if (!uinputObject) {
-    int ok = 0;
-
-    if ((uinputObject = newUinputObject())) {
-      if (enableUinputKeys(uinputObject)) {
-        if (createUinputDevice(uinputObject)) {
-          ok = 1;
-        }
-      }
-    }
-
-    if (!ok) {
-      destroyUinputObject(uinputObject);
-      uinputObject = NULL;
+  if (!uinputKeyboard) {
+    if (!(uinputKeyboard = newUinputKeyboard())) {
       return 0;
     }
   }
 
-  return writeKeyEvent(uinputObject, key, press);
+  return writeKeyEvent(uinputKeyboard, key, press);
 }
 
 static int

@@ -311,23 +311,6 @@ enableUinputKey (UinputObject *uinput, int key) {
 }
 
 int
-enableUinputKeys (UinputObject *uinput) {
-#ifdef HAVE_LINUX_INPUT_H
-  if (enableUinputEventType(uinput, EV_KEY)) {
-    unsigned int key;
-
-    for (key=0; key<=KEY_MAX; key+=1) {
-      if (!enableUinputKey(uinput, key)) return 0;
-    }
-
-    return 1;
-  }
-#endif /* HAVE_LINUX_INPUT_H */
-
-  return 0;
-}
-
-int
 writeKeyEvent (UinputObject *uinput, int key, int press) {
 #ifdef HAVE_LINUX_UINPUT_H
   if (writeInputEvent(uinput, EV_KEY, key, press)) {
@@ -366,6 +349,42 @@ writeRepeatPeriod (UinputObject *uinput, int period) {
   }
 
   return 0;
+}
+
+#ifdef HAVE_LINUX_INPUT_H
+static int
+enableAllKeys (UinputObject *uinput) {
+  unsigned int key;
+
+  if (!enableUinputEventType(uinput, EV_KEY)) return 0;
+
+  for (key=0; key<=KEY_MAX; key+=1) {
+    if (!enableUinputKey(uinput, key)) return 0;
+  }
+
+  return 1;
+}
+#endif /* HAVE_LINUX_INPUT_H */
+
+UinputObject *
+newUinputKeyboard (void) {
+#ifdef HAVE_LINUX_INPUT_H
+  UinputObject *uinput;
+
+  if ((uinput = newUinputObject())) {
+    if (enableAllKeys(uinput)) {
+      if (enableUinputEventType(uinput, EV_REP)) {
+        if (createUinputDevice(uinput)) {
+          return uinput;
+        }
+      }
+    }
+
+    destroyUinputObject(uinput);
+  }
+#endif /* HAVE_LINUX_INPUT_H */
+
+  return NULL;
 }
 
 void
