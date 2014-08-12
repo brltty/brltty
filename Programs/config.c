@@ -1226,6 +1226,16 @@ destructBrailleDriver (void) {
   braille->destruct(&brl);
   disableHelpPage(brailleHelpPageNumber);
 
+  if (brl.message.alarm) {
+    asyncCancelRequest(brl.message.alarm);
+    brl.message.alarm = NULL;
+  }
+
+  if (brl.message.queue) {
+    deallocateQueue(brl.message.queue);
+    brl.message.queue = NULL;
+  }
+
   if (brl.keyTable) {
     destroyKeyTable(brl.keyTable);
     brl.keyTable = NULL;

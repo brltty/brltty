@@ -295,17 +295,19 @@ static void setBrailleMessageAlarm (BrailleDisplay *brl);
 
 void
 acknowledgeBrailleMessage (BrailleDisplay *brl) {
-  BrailleMessage *msg = dequeueItem(brl->message.queue);
+  if (brl->message.queue) {
+    BrailleMessage *msg = dequeueItem(brl->message.queue);
 
-  if (msg) {
-    int written = writeBraillePacket(brl, msg->endpoint, msg->packet, msg->size);
+    if (msg) {
+      int written = writeBraillePacket(brl, msg->endpoint, msg->packet, msg->size);
 
-    deallocateBrailleMessage(msg);
-    msg = NULL;
+      deallocateBrailleMessage(msg);
+      msg = NULL;
 
-    if (written) {
-      setBrailleMessageAlarm(brl);
-      return;
+      if (written) {
+        setBrailleMessageAlarm(brl);
+        return;
+      }
     }
   }
 
