@@ -28,7 +28,7 @@ extern int installKernelModule (const char *name, int *status);
 extern int openCharacterDevice (const char *name, int flags, int major, int minor);
 
 typedef struct UinputObjectStruct UinputObject;
-extern UinputObject *newUinputObject (void);
+extern UinputObject *newUinputObject (const char *name);
 extern void destroyUinputObject (UinputObject *uinput);
 extern int createUinputDevice (UinputObject *uinput);
 
@@ -41,7 +41,7 @@ extern int writeKeyEvent (UinputObject *uinput, int key, int press);
 extern int writeRepeatDelay (UinputObject *uinput, int delay);
 extern int writeRepeatPeriod (UinputObject *uinput, int period);
 
-extern UinputObject *newUinputKeyboard (void);
+extern UinputObject *newUinputKeyboard (const char *name);
 
 #ifdef __cplusplus
 }

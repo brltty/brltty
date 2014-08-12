@@ -534,20 +534,17 @@ newKeyboardInstanceExtension (KeyboardInstanceExtension **kix) {
   if ((*kix = malloc(sizeof(**kix)))) {
     memset(*kix,  0, sizeof(**kix));
 
-    if (((*kix)->uinput = newUinputObject())) {
-      (*kix)->udevDelay = NULL;
+    (*kix)->uinput = NULL;
+    (*kix)->udevDelay = NULL;
 
-      (*kix)->file.descriptor = -1;
-      (*kix)->file.monitor = NULL;
+    (*kix)->file.descriptor = -1;
+    (*kix)->file.monitor = NULL;
 
-      (*kix)->device.path = NULL;
-      (*kix)->device.major = 0;
-      (*kix)->device.minor = 0;
+    (*kix)->device.path = NULL;
+    (*kix)->device.major = 0;
+    (*kix)->device.minor = 0;
 
-      return 1;
-    }
-
-    free(*kix);
+    return 1;
   } else {
     logMallocError();
   }
@@ -631,8 +628,16 @@ ASYNC_INPUT_CALLBACK(handleLinuxKeyboardEvent) {
   return 0;
 }
 
+static UinputObject *
+newUinputInstance (const char *device) {
+  char name[0X40];
+
+  snprintf(name, sizeof(name), "Keyboard Instance - %s", locatePathName(device));
+  return newUinputObject(name);
+}
+
 static int
-prepareUinputObject (UinputObject *uinput, int keyboard) {
+prepareUinputInstance (UinputObject *uinput, int keyboard) {
   {
     int type = EV_KEY;
     BITMASK(mask, KEY_MAX+1, char);
@@ -784,18 +789,20 @@ monitorKeyboard (KeyboardInstanceObject *kio) {
         
         if (kio->actualProperties.type) {
           if (checkKeyboardProperties(&kio->actualProperties, &kio->kmo->requiredProperties)) {
-            if (prepareUinputObject(kio->kix->uinput, kio->kix->file.descriptor)) {
-              if (asyncReadFile(&kio->kix->file.monitor,
-                                kio->kix->file.descriptor, sizeof(struct input_event),
-                                handleLinuxKeyboardEvent, kio)) {
+            if ((kio->kix->uinput = newUinputInstance(kio->kix->device.path))) {
+              if (prepareUinputInstance(kio->kix->uinput, kio->kix->file.descriptor)) {
+                if (asyncReadFile(&kio->kix->file.monitor,
+                                  kio->kix->file.descriptor, sizeof(struct input_event),
+                                  handleLinuxKeyboardEvent, kio)) {
 #ifdef EVIOCGRAB
-                ioctl(kio->kix->file.descriptor, EVIOCGRAB, 1);
+                  ioctl(kio->kix->file.descriptor, EVIOCGRAB, 1);
 #endif /* EVIOCGRAB */
 
-                logMessage(LOG_DEBUG, "keyboard opened: %s: fd=%d",
-                           kio->kix->device.path, kio->kix->file.descriptor);
+                  logMessage(LOG_DEBUG, "keyboard opened: %s: fd=%d",
+                             kio->kix->device.path, kio->kix->file.descriptor);
 
-                return 1;
+                  return 1;
+                }
               }
             }
           }

@@ -1340,7 +1340,7 @@ getCapsLockState (void) {
 static int
 injectKeyEvent (int key, int press) {
   if (!uinputKeyboard) {
-    if (!(uinputKeyboard = newUinputKeyboard())) {
+    if (!(uinputKeyboard = newUinputKeyboard("Linux Screen Driver Keyboard"))) {
       return 0;
     }
   }

@@ -191,7 +191,7 @@ openCharacterDevice (const char *name, int flags, int major, int minor) {
 }
 
 UinputObject *
-newUinputObject (void) {
+newUinputObject (const char *name) {
   UinputObject *uinput = NULL;
 
 #ifdef HAVE_LINUX_UINPUT_H
@@ -219,7 +219,9 @@ newUinputObject (void) {
         struct uinput_user_dev description;
         
         memset(&description, 0, sizeof(description));
-        strncpy(description.name, PACKAGE_TARNAME, sizeof(description.name));
+        snprintf(description.name, sizeof(description.name),
+                 "%s[%"PRIu32"] %s",
+                 PACKAGE_NAME, (uint32_t)getpid(), name);
 
         if (write(uinput->fileDescriptor, &description, sizeof(description)) != -1) {
           logMessage(LOG_DEBUG, "uinput opened: %s fd=%d",
@@ -288,8 +290,6 @@ writeInputEvent (UinputObject *uinput, uint16_t type, uint16_t code, int32_t val
 
   if (write(uinput->fileDescriptor, &event, sizeof(event)) != -1) return 1;
   logSystemError("write(struct input_event)");
-  logMessage(LOG_WARNING, "input event: type=%d code=%d value=%d",
-             event.type, event.code, event.value);
 #endif /* HAVE_LINUX_UINPUT_H */
 
   return 0;
@@ -367,11 +367,11 @@ enableAllKeys (UinputObject *uinput) {
 #endif /* HAVE_LINUX_INPUT_H */
 
 UinputObject *
-newUinputKeyboard (void) {
+newUinputKeyboard (const char *name) {
 #ifdef HAVE_LINUX_INPUT_H
   UinputObject *uinput;
 
-  if ((uinput = newUinputObject())) {
+  if ((uinput = newUinputObject(name))) {
     if (enableAllKeys(uinput)) {
       if (enableUinputEventType(uinput, EV_REP)) {
         if (createUinputDevice(uinput)) {
