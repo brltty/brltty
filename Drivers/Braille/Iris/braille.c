@@ -30,7 +30,6 @@
 #include "ascii.h"
 #include "cmd.h"
 #include "parse.h"
-#include "timing.h"
 #include "async_wait.h"
 #include "async_alarm.h"
 #include "ports.h"
@@ -122,9 +121,6 @@ typedef struct {
   unsigned int state;
   unsigned int length; /* useful when reading Eurobraille packets */
   unsigned int escape;
-
-  int waitingForAck;
-  TimePeriod acknowledgementPeriod;
 
   unsigned char *position;
   unsigned char packet[IR_MAXIMUM_PACKET_SIZE];
@@ -755,7 +751,7 @@ static size_t
 readNativePacket (BrailleDisplay *brl, Port *port, void *packet, size_t size) {
   unsigned char byte;
 
-  while (gioReadByte(port->gioEndpoint, &byte, (port->state || port->waitingForAck))) {
+  while (gioReadByte(port->gioEndpoint, &byte, port->state)) {
     size_t length = port->position - port->packet;
 
     if (port->state) {
@@ -796,8 +792,8 @@ readNativePacket (BrailleDisplay *brl, Port *port, void *packet, size_t size) {
       port->state = 1;
       port->escape = 0;
       port->position = port->packet;
-    } else if (port->waitingForAck && (byte == ACK)) {
-      port->waitingForAck = 0;
+    } else if (byte == ACK) {
+      acknowledgeBrailleMessage(brl);
 
       if (brl->data->isForwarding && (brl->data->external.protocol == IR_PROTOCOL_NATIVE)) {
         static const unsigned char acknowledgement[] = {ACK};
@@ -905,11 +901,6 @@ static inline int needsEscape(unsigned char ch)
   else return 0;
 }
 
-static inline void
-startAcknowledgementPeriod (Port *port) {
-  startTimePeriod(&port->acknowledgementPeriod, 1000);
-}
-
 /* Function writeNativePacket */
 /* Returns 1 if the packet is actually written, 0 if the packet is not written */
 /* A write can be ignored if the previous packet has not been */
@@ -921,16 +912,6 @@ writeNativePacket (
 ) {
   unsigned char	buffer[(size * 2) + 2];
   size_t count;
-
-  if (port->waitingForAck) {
-    if (!afterTimePeriod(&port->acknowledgementPeriod, NULL)) {
-      errno = EAGAIN;
-      return 0;
-    }
-
-    logMessage(LOG_WARNING, "Did not receive ACK on port %s",port->name);
-    port->waitingForAck = 0;
-  }
 
   {
     const unsigned char *source = packet;
@@ -947,9 +928,7 @@ writeNativePacket (
     count = target - buffer;
   }
 
-  if (!writeBraillePacket(brl, port->gioEndpoint, buffer, count)) return 0;
-  startAcknowledgementPeriod(port);
-  if (port == &brl->data->internal.port) port->waitingForAck = 1;
+  if (!writeBrailleMessage(brl, port->gioEndpoint, 0, buffer, count)) return 0;
   return count;
 }
 
@@ -979,8 +958,6 @@ writeEurobraillePacket (BrailleDisplay *brl, Port *port, const void *data, size_
 
   count = p - packet;
   if (!writeBraillePacket(brl, port->gioEndpoint, packet, count)) return 0;
-
-  startAcknowledgementPeriod(port);
   return count;
 }
 
