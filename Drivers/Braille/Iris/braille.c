@@ -142,7 +142,7 @@ typedef struct {
   ProtocolIndex next;
 } ProtocolEntry;
 
-static void setProtocolEntry (BrailleDisplay *brl);
+static void setExternalProtocol (BrailleDisplay *brl, ProtocolIndex index);
 #define IR_PROTOCOL_DEFAULT IR_PROTOCOL_EUROBRAILLE
 
 typedef struct {
@@ -768,9 +768,12 @@ deactivateBraille(void) {
 static size_t
 readNativePacket (BrailleDisplay *brl, Port *port, void *packet, size_t size) {
   unsigned char byte;
+  int wait = 0;
 
-  while (gioReadByte(port->gioEndpoint, &byte, port->state)) {
+  while (gioReadByte(port->gioEndpoint, &byte, (port->state && wait))) {
     size_t length = port->position - port->packet;
+
+    wait = 1;
 
     if (port->state) {
       switch (byte) {
@@ -830,8 +833,11 @@ readNativePacket (BrailleDisplay *brl, Port *port, void *packet, size_t size) {
 static size_t
 readEurobraillePacket (BrailleDisplay *brl, Port *port, void *packet, size_t size) {
   unsigned char byte;
+  int wait = 0;
 
-  while (gioReadByte(port->gioEndpoint, &byte, port->state)) {
+  while (gioReadByte(port->gioEndpoint, &byte, (port->state && wait))) {
+    wait = 1;
+
     switch (port->state) {
       case 0:
         if (byte == STX) {
@@ -1070,8 +1076,7 @@ typedef struct {
 static int
 core_handleZKey(BrailleDisplay *brl, Port *port) {
   logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "Z key pressed");
-  brl->data->external.protocol.index = brl->data->external.protocol.entry->next;
-  setProtocolEntry(brl);
+  setExternalProtocol(brl, brl->data->external.protocol.entry->next);
   return 1;
 }
 
@@ -1387,8 +1392,9 @@ static const ProtocolEntry protocolTable[] = {
 static const unsigned char protocolCount = ARRAY_COUNT(protocolTable);
 
 static void
-setProtocolEntry (BrailleDisplay *brl) {
-  brl->data->external.protocol.entry = &protocolTable[brl->data->external.protocol.index];
+setExternalProtocol (BrailleDisplay *brl, ProtocolIndex index) {
+  brl->data->external.protocol.index = index;
+  brl->data->external.protocol.entry = &protocolTable[index];
 }
 
 static int
@@ -1812,14 +1818,12 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           }
           choices[protocolCount] = NULL;
 
-          if (validateChoice(&choice, parameter, choices)) {
-            brl->data->external.protocol.index = choice;
-          } else {
-            brl->data->external.protocol.index = IR_PROTOCOL_DEFAULT;
+          if (!validateChoice(&choice, parameter, choices)) {
+            choice = IR_PROTOCOL_DEFAULT;
             logMessage(LOG_WARNING, "invalid protocol setting: %s", parameter);
           }
 
-          setProtocolEntry(brl);
+          setExternalProtocol(brl, choice);
           logMessage(LOG_INFO, "External Protocol: %s", brl->data->external.protocol.entry->name);
         }
 
