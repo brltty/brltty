@@ -139,6 +139,9 @@ typedef struct {
   void (*forwardPacket) (BrailleDisplay *brl, Port *outPort, Port *inPort, const unsigned char *packet, size_t size);
   unsigned forwardAcknowledgements:1;
 
+  int (*beginForwarding) (BrailleDisplay *brl);
+  int (*endForwarding) (BrailleDisplay *brl);
+
   ProtocolIndex next;
 } ProtocolEntry;
 
@@ -1365,6 +1368,30 @@ forwardEurobraillePacket (
   }
 }
 
+static int
+beginForwarding_native (BrailleDisplay *brl) {
+  return sendMenuKey(brl, &brl->data->external.port);
+}
+
+static int
+endForwarding_native (BrailleDisplay *brl) {
+  return sendMenuKey(brl, &brl->data->external.port);
+}
+
+static int
+beginForwarding_eurobraille (BrailleDisplay *brl) {
+  brl->data->xt.composite = NULL;
+  brl->data->xt.key = NULL;
+  brl->data->xt.state = 0;
+
+  return 1;
+}
+
+static int
+endForwarding_eurobraille (BrailleDisplay *brl) {
+  return 1;
+}
+
 static const ProtocolEntry protocolTable[] = {
   [IR_PROTOCOL_EUROBRAILLE] = {
     .name = strtext("eurobraille"),
@@ -1373,6 +1400,9 @@ static const ProtocolEntry protocolTable[] = {
     .readPacket = readEurobraillePacket,
     .forwardPacket = forwardEurobraillePacket,
     .forwardAcknowledgements = 0,
+
+    .beginForwarding = beginForwarding_eurobraille,
+    .endForwarding = endForwarding_eurobraille,
 
     .next = IR_PROTOCOL_NATIVE
   },
@@ -1384,6 +1414,9 @@ static const ProtocolEntry protocolTable[] = {
     .readPacket = readNativePacket,
     .forwardPacket = forwardNativePacket,
     .forwardAcknowledgements = 1,
+
+    .beginForwarding = beginForwarding_native,
+    .endForwarding = endForwarding_native,
 
     .next = IR_PROTOCOL_EUROBRAILLE
   },
@@ -1414,18 +1447,7 @@ enterPacketForwardMode (BrailleDisplay *brl) {
     message(NULL, msg, MSG_NODELAY);
   }
 
-  switch (brl->data->external.protocol.index) {
-    case IR_PROTOCOL_NATIVE:
-      if (!sendMenuKey(brl, &brl->data->external.port)) return 0;
-      break;
-
-    case IR_PROTOCOL_EUROBRAILLE:
-      brl->data->xt.composite = NULL;
-      brl->data->xt.key = NULL;
-      brl->data->xt.state = 0;
-      break;
-  }
-
+  if (!brl->data->external.protocol.entry->beginForwarding(brl)) return 0;
   brl->data->isForwarding = 1;
   return 1;
 }
@@ -1434,13 +1456,11 @@ static int
 leavePacketForwardMode (BrailleDisplay *brl) {
   logMessage(LOG_INFO, "leaving packet forward mode");
   brl->data->isForwarding = 0;
-
-  if (brl->data->external.protocol.index == IR_PROTOCOL_NATIVE) {
-    if (!sendMenuKey(brl, &brl->data->external.port)) return 0;
-  }
+  if (!brl->data->external.protocol.entry->endForwarding(brl)) return 0;
 
   brl->data->braille.refresh = 1;
   scheduleUpdate("Iris not forwarding");
+
   return 1;
 }
 
