@@ -135,9 +135,18 @@ typedef struct {
   const char *name;
   int speed;
 
-  size_t (*readPacket) (BrailleDisplay *brl, Port *port, void *packet, size_t size);
-  void (*forwardPacket) (BrailleDisplay *brl, Port *outPort, Port *inPort, const unsigned char *packet, size_t size);
+  size_t (*readExternalPacket) (BrailleDisplay *brl, Port *port, void *packet, size_t size);
   unsigned forwardAcknowledgements:1;
+
+  int (*forwardInternalPacket) (
+    BrailleDisplay *brl,
+    const unsigned char *packet, size_t size
+  );
+
+  void (*forwardExternalPacket) (
+    BrailleDisplay *brl, Port *outPort, Port *inPort,
+    const unsigned char *packet, size_t size
+  );
 
   int (*beginForwarding) (BrailleDisplay *brl);
   int (*endForwarding) (BrailleDisplay *brl);
@@ -717,11 +726,7 @@ struct BrailleDataStruct {
   struct {
     Port port;
     GioHandleInputObject *hio;
-
-    struct {
-      const ProtocolEntry *entry;
-      ProtocolIndex index;
-    } protocol;
+    const ProtocolEntry *protocol;
   } external;
 
   struct {
@@ -819,7 +824,7 @@ readNativePacket (BrailleDisplay *brl, Port *port, void *packet, size_t size) {
     } else if (byte == ACK) {
       acknowledgeBrailleMessage(brl);
 
-      if (brl->data->isForwarding && brl->data->external.protocol.entry->forwardAcknowledgements) {
+      if (brl->data->isForwarding && brl->data->external.protocol->forwardAcknowledgements) {
         static const unsigned char acknowledgement[] = {ACK};
 
         writeBraillePacket(brl, brl->data->external.port.gioEndpoint, acknowledgement, sizeof(acknowledgement));
@@ -1079,7 +1084,7 @@ typedef struct {
 static int
 core_handleZKey(BrailleDisplay *brl, Port *port) {
   logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "Z key pressed");
-  setExternalProtocol(brl, brl->data->external.protocol.entry->next);
+  setExternalProtocol(brl, brl->data->external.protocol->next);
   return 1;
 }
 
@@ -1327,8 +1332,25 @@ handleNativePacket (BrailleDisplay *brl, Port *port, const KeyHandlers *keyHandl
   return 0;
 }
 
+static int
+forwardInternalPacket_native (
+  BrailleDisplay *brl,
+  const unsigned char *packet, size_t size
+) {
+  return writeNativePacket(brl, &brl->data->external.port, packet, size);
+}
+
+static int
+forwardInternalPacket_eurobraille (
+  BrailleDisplay *brl,
+  const unsigned char *packet, size_t size
+) {
+  handleNativePacket(brl, &brl->data->external.port, &eurobrailleKeyHandlers, packet, size);
+  return 1;
+}
+
 static void
-forwardNativePacket (
+forwardExternalPacket_native (
   BrailleDisplay *brl, Port *outPort, Port *inPort,
   const unsigned char *packet, size_t size
 ) {
@@ -1336,7 +1358,7 @@ forwardNativePacket (
 }
 
 static void
-forwardEurobraillePacket (
+forwardExternalPacket_eurobraille (
   BrailleDisplay *brl, Port *outPort, Port *inPort,
   const unsigned char *packet, size_t size
 ) {
@@ -1397,9 +1419,11 @@ static const ProtocolEntry protocolTable[] = {
     .name = strtext("eurobraille"),
     .speed = IR_EXTERNAL_SPEED_EUROBRAILLE,
 
-    .readPacket = readEurobraillePacket,
-    .forwardPacket = forwardEurobraillePacket,
+    .readExternalPacket = readEurobraillePacket,
     .forwardAcknowledgements = 0,
+
+    .forwardInternalPacket = forwardInternalPacket_eurobraille,
+    .forwardExternalPacket = forwardExternalPacket_eurobraille,
 
     .beginForwarding = beginForwarding_eurobraille,
     .endForwarding = endForwarding_eurobraille,
@@ -1411,9 +1435,11 @@ static const ProtocolEntry protocolTable[] = {
     .name = strtext("native"),
     .speed = IR_EXTERNAL_SPEED_NATIVE,
 
-    .readPacket = readNativePacket,
-    .forwardPacket = forwardNativePacket,
+    .readExternalPacket = readNativePacket,
     .forwardAcknowledgements = 1,
+
+    .forwardInternalPacket = forwardInternalPacket_native,
+    .forwardExternalPacket = forwardExternalPacket_native,
 
     .beginForwarding = beginForwarding_native,
     .endForwarding = endForwarding_native,
@@ -1426,8 +1452,7 @@ static const unsigned char protocolCount = ARRAY_COUNT(protocolTable);
 
 static void
 setExternalProtocol (BrailleDisplay *brl, ProtocolIndex index) {
-  brl->data->external.protocol.index = index;
-  brl->data->external.protocol.entry = &protocolTable[index];
+  brl->data->external.protocol = &protocolTable[index];
 }
 
 static int
@@ -1435,7 +1460,7 @@ enterPacketForwardMode (BrailleDisplay *brl) {
   logMessage(LOG_INFO,
              "entering packet forward mode (port=%s, protocol=%s, speed=%d)",
              brl->data->external.port.name,
-             brl->data->external.protocol.entry->name,
+             brl->data->external.protocol->name,
              brl->data->external.port.speed);
 
   {
@@ -1443,11 +1468,11 @@ enterPacketForwardMode (BrailleDisplay *brl) {
 
     snprintf(msg, sizeof(msg), "%s (%s)",
              gettext("PC mode"),
-             gettext(brl->data->external.protocol.entry->name));
+             gettext(brl->data->external.protocol->name));
     message(NULL, msg, MSG_NODELAY);
   }
 
-  if (!brl->data->external.protocol.entry->beginForwarding(brl)) return 0;
+  if (!brl->data->external.protocol->beginForwarding(brl)) return 0;
   brl->data->isForwarding = 1;
   return 1;
 }
@@ -1456,7 +1481,7 @@ static int
 leavePacketForwardMode (BrailleDisplay *brl) {
   logMessage(LOG_INFO, "leaving packet forward mode");
   brl->data->isForwarding = 0;
-  if (!brl->data->external.protocol.entry->endForwarding(brl)) return 0;
+  if (!brl->data->external.protocol->endForwarding(brl)) return 0;
 
   brl->data->braille.refresh = 1;
   scheduleUpdate("Iris not forwarding");
@@ -1465,16 +1490,16 @@ leavePacketForwardMode (BrailleDisplay *brl) {
 }
 
 static int
-forwardPackets (BrailleDisplay *brl) {
-  const ProtocolEntry *protocol = brl->data->external.protocol.entry;
+forwardExternalPackets (BrailleDisplay *brl) {
+  const ProtocolEntry *protocol = brl->data->external.protocol;
   Port *inPort = &brl->data->external.port;
   Port *outPort = &brl->data->internal.port;
   unsigned char packet[IR_MAXIMUM_PACKET_SIZE];
   size_t size;
 
-  while ((size = protocol->readPacket(brl, inPort, packet, sizeof(packet)))) {
+  while ((size = protocol->readExternalPacket(brl, inPort, packet, sizeof(packet)))) {
     if (brl->data->isForwarding && !brl->data->isSuspended) {
-      protocol->forwardPacket(brl, outPort, inPort, packet, size);
+      protocol->forwardExternalPacket(brl, outPort, inPort, packet, size);
     }
   }
 
@@ -1484,7 +1509,7 @@ forwardPackets (BrailleDisplay *brl) {
 GIO_INPUT_HANDLER(irHandleExternalInput) {
   BrailleDisplay *brl = parameters->data;
 
-  if (!forwardPackets(brl)) brl->data->hasFailed = 1;
+  if (!forwardExternalPackets(brl)) brl->data->hasFailed = 1;
   return 0;
 }
 
@@ -1514,10 +1539,8 @@ handlePacket_embedded (BrailleDisplay *brl, const void *packet, size_t size) {
 
   if (!brl->data->isForwarding) {
     handleNativePacket(brl, NULL, &coreKeyHandlers, packet, size);
-  } else if (brl->data->external.protocol.index == IR_PROTOCOL_NATIVE) {
-    if (!writeNativePacket(brl, &brl->data->external.port, packet, size)) return 0;
   } else {
-    handleNativePacket(brl, &brl->data->external.port, &eurobrailleKeyHandlers, packet, size);
+    if (!brl->data->external.protocol->forwardInternalPacket(brl, packet, size)) return 0;
   }
 
   return 1;
@@ -1844,7 +1867,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           }
 
           setExternalProtocol(brl, choice);
-          logMessage(LOG_INFO, "External Protocol: %s", brl->data->external.protocol.entry->name);
+          logMessage(LOG_INFO, "External Protocol: %s", brl->data->external.protocol->name);
         }
 
         {
@@ -1861,7 +1884,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         if (startLatchMonitor(brl)) {
           if (enablePorts(LOG_ERR, IR_PORT_BASE, 3) != -1) {
             brl->data->external.port.name = device;
-            brl->data->external.port.speed = brl->data->external.protocol.entry->speed;
+            brl->data->external.port.speed = brl->data->external.protocol->speed;
 
             if (openExternalPort(brl)) {
               brl->data->internal.port.name = "serial:ttyS1";
