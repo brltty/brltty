@@ -35,8 +35,6 @@
 #include <gpm.h>
 extern int gpm_tried;
 
-#define GPM_LOG_LEVEL LOG_WARNING
-
 typedef enum {
   GCS_CLOSED,
   GCS_FAILED,
@@ -64,13 +62,13 @@ gpmOpenConnection (void) {
       gpm_zerobased = 1;
 
       if (Gpm_Open(&options, -1) == -1) {
-        logMessage(GPM_LOG_LEVEL, "GPM open error: %s", strerror(errno));
+        logMessage(LOG_DEBUG, "GPM open error: %s", strerror(errno));
         asyncSetAlarmIn(NULL, GPM_CONNECTION_RESET_DELAY, gpmResetConnection, NULL);
         gpmConnectionState = GCS_FAILED;
         return 0;
       }
 
-      logMessage(GPM_LOG_LEVEL, "GPM opened: fd=%d con=%d", gpm_fd, gpm_consolefd);
+      logMessage(LOG_DEBUG, "GPM opened: fd=%d con=%d", gpm_fd, gpm_consolefd);
       gpmConnectionState = GCS_OPENED;
     }
 
@@ -85,7 +83,7 @@ static void
 gpmCloseConnection (int alreadyClosed) {
   if (gpmConnectionState == GCS_OPENED) {
     if (!alreadyClosed) Gpm_Close();
-    logMessage(GPM_LOG_LEVEL, "GPM closed");
+    logMessage(LOG_DEBUG, "GPM closed");
   }
   gpmConnectionState = GCS_CLOSED;
 }
@@ -106,7 +104,7 @@ highlightRegion_RealScreen (int left, int right, int top, int bottom) {
       if (Gpm_DrawPointer(left, top, fileno(console)) != -1) return 1;
 
       if (errno != EINVAL) {
-        logMessage(GPM_LOG_LEVEL, "Gpm_DrawPointer error: %s", strerror(errno));
+        logMessage(LOG_DEBUG, "Gpm_DrawPointer error: %s", strerror(errno));
         gpmCloseConnection(0);
         return 0;
       }
@@ -146,7 +144,7 @@ getPointer_RealScreen (int *column, int *row) {
         }
 
         if (!FD_ISSET(gpm_fd, &mask)) {
-          logMessage(GPM_LOG_LEVEL, "GPM file descriptor not set: %d", gpm_fd);
+          logMessage(LOG_DEBUG, "GPM file descriptor not set: %d", gpm_fd);
           break;
         }
 
