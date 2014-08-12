@@ -293,8 +293,10 @@ deallocateBrailleMessage (BrailleMessage *msg) {
 
 static void setBrailleMessageAlarm (BrailleDisplay *brl);
 
-void
+int
 acknowledgeBrailleMessage (BrailleDisplay *brl) {
+  int ok = 1;
+
   if (brl->message.queue) {
     BrailleMessage *msg = dequeueItem(brl->message.queue);
 
@@ -306,8 +308,10 @@ acknowledgeBrailleMessage (BrailleDisplay *brl) {
 
       if (written) {
         setBrailleMessageAlarm(brl);
-        return;
+        return 1;
       }
+
+      ok = 0;
     }
   }
 
@@ -315,6 +319,8 @@ acknowledgeBrailleMessage (BrailleDisplay *brl) {
     asyncCancelRequest(brl->message.alarm);
     brl->message.alarm = NULL;
   }
+
+  return ok;
 }
 
 ASYNC_ALARM_CALLBACK(handleBrailleMessageTimeout) {

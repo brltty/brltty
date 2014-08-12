@@ -108,7 +108,7 @@ extern int writeBrailleMessage (
   const void *packet, size_t size
 );
 
-extern void acknowledgeBrailleMessage (BrailleDisplay *brl);
+extern int acknowledgeBrailleMessage (BrailleDisplay *brl);
 
 typedef int BrailleRequestWriter (BrailleDisplay *brl);
 
