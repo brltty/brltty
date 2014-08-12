@@ -789,21 +789,21 @@ monitorKeyboard (KeyboardInstanceObject *kio) {
         
         if (kio->actualProperties.type) {
           if (checkKeyboardProperties(&kio->actualProperties, &kio->kmo->requiredProperties)) {
-            if ((kio->kix->uinput = newUinputInstance(kio->kix->device.path))) {
-              if (prepareUinputInstance(kio->kix->uinput, kio->kix->file.descriptor)) {
-                if (asyncReadFile(&kio->kix->file.monitor,
-                                  kio->kix->file.descriptor, sizeof(struct input_event),
-                                  handleLinuxKeyboardEvent, kio)) {
-#ifdef EVIOCGRAB
-                  ioctl(kio->kix->file.descriptor, EVIOCGRAB, 1);
-#endif /* EVIOCGRAB */
+            if (ioctl(kio->kix->file.descriptor, EVIOCGRAB, 1) != -1) {
+              if ((kio->kix->uinput = newUinputInstance(kio->kix->device.path))) {
+                if (prepareUinputInstance(kio->kix->uinput, kio->kix->file.descriptor)) {
+                  if (asyncReadFile(&kio->kix->file.monitor,
+                                    kio->kix->file.descriptor, sizeof(struct input_event),
+                                    handleLinuxKeyboardEvent, kio)) {
+                    logMessage(LOG_DEBUG, "keyboard opened: %s: fd=%d",
+                               kio->kix->device.path, kio->kix->file.descriptor);
 
-                  logMessage(LOG_DEBUG, "keyboard opened: %s: fd=%d",
-                             kio->kix->device.path, kio->kix->file.descriptor);
-
-                  return 1;
+                    return 1;
+                  }
                 }
               }
+            } else {
+              logSystemError("ioctl[EVIOCGRAB]");
             }
           }
         }
