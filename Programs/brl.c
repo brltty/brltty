@@ -44,13 +44,18 @@ initializeBrailleDisplay (BrailleDisplay *brl) {
   brl->gioEndpoint = NULL;
   brl->buffer = NULL;
   brl->writeDelay = 0;
-
   brl->bufferResized = NULL;
-  brl->data = NULL;
+
   brl->setFirmness = NULL;
   brl->setSensitivity = NULL;
   brl->setAutorepeat = NULL;
   brl->rotateInput = NULL;
+
+  brl->message.queue = NULL;
+  brl->message.alarm = NULL;
+  brl->message.timeout = 1000;
+
+  brl->data = NULL;
 }
 
 static void

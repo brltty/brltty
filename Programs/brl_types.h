@@ -22,6 +22,8 @@
 #include "driver.h"
 #include "ktb_types.h"
 #include "gio_types.h"
+#include "queue.h"
+#include "async.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -78,12 +80,19 @@ struct BrailleDisplayStruct {
   unsigned resizeRequired:1;
   unsigned noDisplay:1;
   void (*bufferResized) (unsigned int rows, unsigned int columns);
-  BrailleData *data;
 
   BrailleFirmnessSetter *setFirmness;
   BrailleSensitivitySetter *setSensitivity;
   BrailleAutorepeatSetter *setAutorepeat;
   BrailleInputRotator *rotateInput;
+
+  struct {
+    Queue *queue;
+    AsyncHandle alarm;
+    int timeout;
+  } message;
+
+  BrailleData *data;
 };
 
 typedef struct {

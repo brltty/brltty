@@ -22,6 +22,8 @@
 #include <errno.h>
 
 #include "log.h"
+#include "queue.h"
+#include "async_alarm.h"
 #include "brl_base.h"
 #include "brl_utils.h"
 #include "brl_dots.h"
@@ -263,8 +265,7 @@ readBraillePacket (
 
 int
 writeBraillePacket (
-  BrailleDisplay *brl,
-  GioEndpoint *endpoint,
+  BrailleDisplay *brl, GioEndpoint *endpoint,
   const void *packet, size_t size
 ) {
   if (!endpoint) endpoint = brl->gioEndpoint;
@@ -276,6 +277,129 @@ writeBraillePacket (
   }
 
   return 1;
+}
+
+typedef struct {
+  GioEndpoint *endpoint;
+  int priority;
+  size_t size;
+  unsigned char packet[0];
+} BrailleMessage;
+
+static void
+deallocateBrailleMessage (BrailleMessage *msg) {
+  free(msg);
+}
+
+static void setBrailleMessageAlarm (BrailleDisplay *brl);
+
+void
+acknowledgeBrailleMessage (BrailleDisplay *brl) {
+  BrailleMessage *msg = dequeueItem(brl->message.queue);
+
+  if (msg) {
+    int written = writeBraillePacket(brl, msg->endpoint, msg->packet, msg->size);
+
+    deallocateBrailleMessage(msg);
+    msg = NULL;
+
+    if (written) {
+      setBrailleMessageAlarm(brl);
+      return;
+    }
+  }
+
+  if (brl->message.alarm) {
+    asyncCancelRequest(brl->message.alarm);
+    brl->message.alarm = NULL;
+  }
+}
+
+ASYNC_ALARM_CALLBACK(handleBrailleMessageTimeout) {
+  BrailleDisplay *brl = parameters->data;
+
+  asyncDiscardHandle(brl->message.alarm);
+  brl->message.alarm = NULL;
+
+  logMessage(LOG_WARNING, "missing braille message acknowledgement");
+  acknowledgeBrailleMessage(brl);
+}
+
+static void
+setBrailleMessageAlarm (BrailleDisplay *brl) {
+  if (brl->message.alarm) {
+    asyncResetAlarmIn(brl->message.alarm, brl->message.timeout);
+  } else {
+    asyncSetAlarmIn(&brl->message.alarm, brl->message.timeout,
+                    handleBrailleMessageTimeout, brl);
+  }
+}
+
+static int
+findOldBrailleMessage (const void *item, void *data) {
+  const BrailleMessage *old = item;
+  const BrailleMessage *new = data;
+
+  return old->priority == new->priority;
+}
+
+static int
+compareBrailleMessages (const void *item1, const void *item2, void *data) {
+  const BrailleMessage *new = item1;
+  const BrailleMessage *old = item2;
+
+  return new->priority < old->priority;
+}
+
+static void
+deallocateBrailleMessageItem (void *item, void *data) {
+  BrailleMessage *msg = item;
+
+  deallocateBrailleMessage(msg);
+}
+
+int
+writeBrailleMessage (
+  BrailleDisplay *brl, GioEndpoint *endpoint,
+  int priority,
+  const void *packet, size_t size
+) {
+  if (brl->message.alarm) {
+    BrailleMessage *msg;
+
+    if (!brl->message.queue) {
+      if (!(brl->message.queue = newQueue(deallocateBrailleMessageItem, compareBrailleMessages))) {
+        return 0;
+      }
+    }
+
+    if ((msg = malloc(sizeof(*msg) + size))) {
+      memset(msg, 0, sizeof(*msg));
+      msg->endpoint = endpoint;
+      msg->priority = priority;
+      msg->size = size;
+      memcpy(msg->packet, packet, size);
+
+      {
+        Element *element = findElement(brl->message.queue, findOldBrailleMessage, msg);
+
+        if (element) deleteElement(element);
+      }
+
+      if (enqueueItem(brl->message.queue, msg)) {
+        return 1;
+      }
+
+      free(msg);
+    } else {
+      logMallocError();
+    }
+  } else if (writeBraillePacket(brl, endpoint, packet, size)) {
+    setBrailleMessageAlarm(brl);
+    return 1;
+  }
+
+  return 0;
 }
 
 int

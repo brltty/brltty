@@ -98,10 +98,17 @@ extern size_t readBraillePacket (
 );
 
 extern int writeBraillePacket (
-  BrailleDisplay *brl,
-  GioEndpoint *endpoint,
+  BrailleDisplay *brl, GioEndpoint *endpoint,
   const void *packet, size_t size
 );
+
+extern int writeBrailleMessage (
+  BrailleDisplay *brl, GioEndpoint *endpoint,
+  int priority,
+  const void *packet, size_t size
+);
+
+extern void acknowledgeBrailleMessage (BrailleDisplay *brl);
 
 typedef int BrailleRequestWriter (BrailleDisplay *brl);
 
