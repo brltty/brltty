@@ -118,6 +118,13 @@ typedef struct {
   const char *name;
   int speed;
 
+  int (*writeNativePacket) (
+    BrailleDisplay *brl, GioEndpoint *endpoint,
+    const unsigned char *packet, size_t size
+  );
+
+  void (*handleNativeAcknowledgement) (BrailleDisplay *brl);
+
   unsigned int state;
   unsigned int length; /* useful when reading Eurobraille packets */
   unsigned int escape;
@@ -821,14 +828,8 @@ readNativePacket (BrailleDisplay *brl, Port *port, void *packet, size_t size) {
       port->state = 1;
       port->escape = 0;
       port->position = port->packet;
-    } else if (brl->data->isEmbedded && (byte == ACK)) {
-      acknowledgeBrailleMessage(brl);
-
-      if (brl->data->isForwarding && brl->data->external.protocol->forwardAcknowledgements) {
-        static const unsigned char acknowledgement[] = {ACK};
-
-        writeBraillePacket(brl, brl->data->external.port.gioEndpoint, acknowledgement, sizeof(acknowledgement));
-      }
+    } else if (byte == ACK) {
+      port->handleNativeAcknowledgement(brl);
     } else {
       logIgnoredByte(byte);
     }
@@ -934,10 +935,37 @@ needsEscape (unsigned char byte) {
   return 0;
 }
 
-/* Function writeNativePacket */
-/* Returns 1 if the packet is actually written, 0 if the packet is not written */
-/* A write can be ignored if the previous packet has not been */
-/* acknowledged so far */
+static int
+writeNativePacket_internal (
+  BrailleDisplay *brl, GioEndpoint *endpoint,
+  const unsigned char *packet, size_t size
+) {
+  return writeBrailleMessage(brl, endpoint, 0, packet, size);
+}
+
+static int
+writeNativePacket_external (
+  BrailleDisplay *brl, GioEndpoint *endpoint,
+  const unsigned char *packet, size_t size
+) {
+  return writeBraillePacket(brl, endpoint, packet, size);
+}
+
+static void
+handleNativeAcknowledgement_internal (BrailleDisplay *brl) {
+  acknowledgeBrailleMessage(brl);
+
+  if (brl->data->isForwarding && brl->data->external.protocol->forwardAcknowledgements) {
+    static const unsigned char acknowledgement[] = {ACK};
+
+    writeBraillePacket(brl, brl->data->external.port.gioEndpoint, acknowledgement, sizeof(acknowledgement));
+  }
+}
+
+static void
+handleNativeAcknowledgement_external (BrailleDisplay *brl) {
+}
+
 static size_t
 writeNativePacket (
   BrailleDisplay *brl, Port *port,
@@ -961,7 +989,7 @@ writeNativePacket (
     count = target - buffer;
   }
 
-  if (!writeBrailleMessage(brl, port->gioEndpoint, 0, buffer, count)) return 0;
+  if (!port->writeNativePacket(brl, port->gioEndpoint, buffer, count)) return 0;
   return count;
 }
 
@@ -1832,9 +1860,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     brl->data->haveVisualDisplay = 0;
 
     brl->data->internal.port.gioEndpoint = NULL;
+    brl->data->internal.port.writeNativePacket = writeNativePacket_internal;
+    brl->data->internal.port.handleNativeAcknowledgement = handleNativeAcknowledgement_internal;
     brl->data->internal.linearKeys = 0;
 
     brl->data->external.port.gioEndpoint = NULL;
+    brl->data->internal.port.writeNativePacket = writeNativePacket_external;
+    brl->data->internal.port.handleNativeAcknowledgement = handleNativeAcknowledgement_external;
     brl->data->external.hio = NULL;
 
     brl->data->latch.monitor = NULL;
