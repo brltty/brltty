@@ -821,7 +821,7 @@ readNativePacket (BrailleDisplay *brl, Port *port, void *packet, size_t size) {
       port->state = 1;
       port->escape = 0;
       port->position = port->packet;
-    } else if (byte == ACK) {
+    } else if (brl->data->isEmbedded && (byte == ACK)) {
       acknowledgeBrailleMessage(brl);
 
       if (brl->data->isForwarding && brl->data->external.protocol->forwardAcknowledgements) {
@@ -1537,10 +1537,10 @@ handlePacket_embedded (BrailleDisplay *brl, const void *packet, size_t size) {
     return 1;
   }
 
-  if (!brl->data->isForwarding) {
-    handleNativePacket(brl, NULL, &coreKeyHandlers, packet, size);
-  } else {
+  if (brl->data->isForwarding) {
     if (!brl->data->external.protocol->forwardInternalPacket(brl, packet, size)) return 0;
+  } else {
+    handleNativePacket(brl, NULL, &coreKeyHandlers, packet, size);
   }
 
   return 1;
