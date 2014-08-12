@@ -1340,7 +1340,19 @@ getCapsLockState (void) {
 static int
 injectKeyEvent (int key, int press) {
   if (!uinputObject) {
-    if (!(uinputObject = newUinputObject())) {
+    int ok = 0;
+
+    if ((uinputObject = newUinputObject())) {
+      if (enableUinputKeys(uinputObject)) {
+        if (createUinputDevice(uinputObject)) {
+          ok = 1;
+        }
+      }
+    }
+
+    if (!ok) {
+      destroyUinputObject(uinputObject);
+      uinputObject = NULL;
       return 0;
     }
   }
