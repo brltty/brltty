@@ -230,8 +230,8 @@ newUinputObject (const char *name) {
             char topology[0X40];
 
             snprintf(topology, sizeof(topology),
-                     "pid-%"PRIu32"/%s",
-                     (uint32_t)getpid(), __progname);
+                     "pid-%"PRIu32"/%s/%d",
+                     (uint32_t)getpid(), __progname, uinput->fileDescriptor);
 
             if (ioctl(uinput->fileDescriptor, UI_SET_PHYS, topology) == -1) {
               logSystemError("ioctl[UI_SET_PHYS]");
