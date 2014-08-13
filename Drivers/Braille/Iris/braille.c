@@ -1045,21 +1045,21 @@ writeDots (BrailleDisplay *brl, Port *port, const unsigned char *dots) {
 /* Low-level write of text to the braile display */
 /* No check is performed to avoid several consecutive identical writes at this level */
 static size_t
-writeWindow (BrailleDisplay *brl, Port *port, const unsigned char *text) {
+writeWindow (BrailleDisplay *brl, const unsigned char *text) {
   size_t size = brl->textColumns * brl->textRows;
   unsigned char dots[size];
 
   translateOutputCells(dots, text, size);
-  return writeDots(brl, port, dots);
+  return writeDots(brl, &brl->data->internal.port, dots);
 }
 
 static size_t
-clearWindow (BrailleDisplay *brl, Port *port) {
+clearWindow (BrailleDisplay *brl) {
   size_t size = brl->textColumns * brl->textRows;
   unsigned char window[size];
 
   memset(window, 0, sizeof(window));
-  return writeWindow(brl, port, window);
+  return writeWindow(brl, window);
 }
 
 static ssize_t brl_readPacket (BrailleDisplay *brl, void *packet, size_t size)
@@ -1547,7 +1547,7 @@ isMenuKeyPacket (const unsigned char *packet, size_t size) {
 }
 
 static int
-handlePacket_embedded (BrailleDisplay *brl, const void *packet, size_t size) {
+handleInternalPacket_embedded (BrailleDisplay *brl, const void *packet, size_t size) {
   if (brl->data->isSuspended) return 1;
 
   /* The test for Menu key should come first since this key toggles
@@ -1580,7 +1580,7 @@ isOffline_embedded (BrailleDisplay *brl) {
 }
 
 static int
-handlePacket_nonembedded (BrailleDisplay *brl, const void *packet, size_t size) {
+handleInternalPacket_nonembedded (BrailleDisplay *brl, const void *packet, size_t size) {
   int menuKeyPressed = isMenuKeyPacket(packet, size);
 
   if (menuKeyPressed) {
@@ -1636,20 +1636,12 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *characters) {
   const size_t size = brl->textColumns * brl->textRows;
 
   if (cellsHaveChanged(brl->data->braille.cells, brl->buffer, size, NULL, NULL, &brl->data->braille.refresh)) {
-    ssize_t res = writeWindow(brl, &brl->data->internal.port, brl->buffer);
+    size_t size = writeWindow(brl, brl->buffer);
 
-    if (!res) {
-      if (errno != EAGAIN) return 0;
-      brl->data->braille.refresh = 1;
-    }
+    if (!size) return 0;
   }
 
   return 1;
-}
-
-static void brl_clearWindow(BrailleDisplay *brl)
-{
-  clearWindow(brl, &brl->data->internal.port);
 }
 
 static ssize_t askDevice(BrailleDisplay *brl, IrisOutputPacketType request, unsigned char *response, size_t size)
@@ -1679,11 +1671,8 @@ suspendDevice (BrailleDisplay *brl) {
     if (!sendMenuKey(brl, &brl->data->external.port)) return 0;
   }
 
-  while (!clearWindow(brl, &brl->data->internal.port)) {
-    if (errno != EAGAIN) return 0;
-  }
-
-  asyncWait(10);
+  if (!clearWindow(brl)) return 0;
+  drainBrailleOutput(brl, 50);
   deactivateBraille();
   return 1;
 }
@@ -1923,7 +1912,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               brl->data->internal.port.speed = IR_INTERNAL_SPEED;
 
               if (openInternalPort(brl)) {
-                brl->data->internal.handlePacket = handlePacket_embedded;
+                brl->data->internal.handlePacket = handleInternalPacket_embedded;
                 brl->data->internal.isOffline = isOffline_embedded;
 
                 activateBraille();
@@ -1939,7 +1928,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         brl->data->internal.port.speed = IR_EXTERNAL_SPEED_NATIVE;
 
         if (openInternalPort(brl)) {
-          brl->data->internal.handlePacket = handlePacket_nonembedded;
+          brl->data->internal.handlePacket = handleInternalPacket_nonembedded;
           brl->data->internal.isOffline = isOffline_nonembedded;
 
           brl->data->isConnected = 1;
@@ -2048,7 +2037,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 static void
 brl_destruct (BrailleDisplay *brl) {
   if (brl->data->isEmbedded) {
-    brl_clearWindow(brl);
+    clearWindow(brl);
+    drainBrailleOutput(brl, 50);
     deactivateBraille();
   }
 
