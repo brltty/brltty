@@ -783,19 +783,19 @@ static const HidKeyEntry hidKeyTable[] = {
   },
 
   /* Caps Lock */
-  [HID_KEY_CapsLockXXX] = {
+  [HID_KEY_CapsLocking] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
   },
 
   /* Num Lock */
-  [HID_KEY_NumLockXXX] = {
+  [HID_KEY_NumLocking] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
   },
 
   /* Scroll Lock */
-  [HID_KEY_ScrollLockXXX] = {
+  [HID_KEY_ScrollLocking] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
   },
@@ -807,7 +807,7 @@ static const HidKeyEntry hidKeyTable[] = {
   },
 
   /* Keyboard Equal Sign */
-  [HID_KEY_EqualXXX] = {
+  [HID_KEY_Equal_X1] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
   },
@@ -975,7 +975,7 @@ static const HidKeyEntry hidKeyTable[] = {
   },
 
   /* Keyboard Clear/Again */
-  [HID_KEY_ClearXXX] = {
+  [HID_KEY_ClearAgain] = {
     .xtCode = 0X0000,
     .atCode = 0X0000
   },

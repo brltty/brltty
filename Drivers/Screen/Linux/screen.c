@@ -911,7 +911,7 @@ static const At2KeyTable at2KeysOriginal = {
   [AT_KEY_00_KP8] = KEY_KP8,
   [AT_KEY_00_KP9] = KEY_KP9,
 
-  [AT_KEY_00_F24] = KEY_ZENKAKUHANKAKU,
+  [AT_KEY_00_Language5] = KEY_ZENKAKUHANKAKU,
   [AT_KEY_00_International1] = KEY_RO,
   [AT_KEY_00_Language4] = KEY_HIRAGANA,
   [AT_KEY_00_Language3] = KEY_KATAKANA,
@@ -927,9 +927,18 @@ static const At2KeyTable at2KeysOriginal = {
   [AT_KEY_00_KPComma] = KEY_KPCOMMA,
   [AT_KEY_00_International3] = KEY_YEN,
 
-  [0X2F] = KEY_F13,
-  [0X37] = KEY_F14,
-  [0X3F] = KEY_F15
+  [AT_KEY_00_F13] = KEY_F13,
+  [AT_KEY_00_F14] = KEY_F14,
+  [AT_KEY_00_F15] = KEY_F15,
+  [AT_KEY_00_F16] = KEY_F16,
+  [AT_KEY_00_F17] = KEY_F17,
+  [AT_KEY_00_F18] = KEY_F18,
+  [AT_KEY_00_F19] = KEY_F19,
+  [AT_KEY_00_F20] = KEY_F20,
+  [AT_KEY_00_F21] = KEY_F21,
+  [AT_KEY_00_F22] = KEY_F22,
+  [AT_KEY_00_F23] = KEY_F23,
+  [AT_KEY_00_F24] = KEY_F24,
 };
 
 static const At2KeyTable at2KeysE0 = {
