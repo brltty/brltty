@@ -24,6 +24,7 @@
 #include <fcntl.h>
 
 #include "log.h"
+#include "parameters.h"
 #include "charset.h"
 #include "unicode.h"
 #include "brl.h"
@@ -54,7 +55,7 @@ constructBrailleDisplay (BrailleDisplay *brl) {
 
   brl->message.queue = NULL;
   brl->message.alarm = NULL;
-  brl->message.timeout = 1000;
+  brl->message.timeout = BRAILLE_MESSAGE_ACKNOWLEDGEMENT_TIMEOUT;
 
   brl->data = NULL;
 }
