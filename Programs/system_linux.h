@@ -23,7 +23,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int installKernelModule (const char *name, int *status);
+extern int installKernelModule (const char *name, unsigned char *status);
 
 extern int openCharacterDevice (const char *name, int flags, int major, int minor);
 

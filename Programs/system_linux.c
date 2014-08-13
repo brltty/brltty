@@ -59,7 +59,7 @@ releasePressedKeys (UinputObject *uinput) {
 #endif /* HAVE_LINUX_UINPUT_H */
 
 int
-installKernelModule (const char *name, int *status) {
+installKernelModule (const char *name, unsigned char *status) {
   if (status && *status) return *status == 2;
 
   {
@@ -201,7 +201,7 @@ newUinputObject (const char *name) {
     memset(uinput, 0, sizeof(*uinput));
 
     {
-      static int status = 0;
+      static unsigned char status = 0;
       int wait = !status;
 
       if (!installKernelModule("uinput", &status)) wait = 0;

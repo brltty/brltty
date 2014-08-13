@@ -30,7 +30,8 @@
 
 static void
 enableBeeps (void) {
-  static int status = 0;
+  static unsigned char status = 0;
+
   installKernelModule("pcspkr", &status);
 }
 
