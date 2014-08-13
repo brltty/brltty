@@ -226,10 +226,12 @@ newUinputObject (const char *name) {
         if (write(uinput->fileDescriptor, &description, sizeof(description)) != -1) {
 #ifdef UI_SET_PHYS
           {
+            extern const char *__progname;
             char topology[0X40];
 
             snprintf(topology, sizeof(topology),
-                     "pid-%"PRIu32, (uint32_t)getpid());
+                     "pid-%"PRIu32"/%s",
+                     (uint32_t)getpid(), __progname);
 
             if (ioctl(uinput->fileDescriptor, UI_SET_PHYS, topology) == -1) {
               logSystemError("ioctl[UI_SET_PHYS]");
