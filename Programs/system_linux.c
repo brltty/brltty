@@ -220,10 +220,23 @@ newUinputObject (const char *name) {
         
         memset(&description, 0, sizeof(description));
         snprintf(description.name, sizeof(description.name),
-                 "%s[%"PRIu32"] %s",
-                 PACKAGE_NAME, (uint32_t)getpid(), name);
+                 "%s %s %s",
+                 PACKAGE_NAME, PACKAGE_VERSION, name);
 
         if (write(uinput->fileDescriptor, &description, sizeof(description)) != -1) {
+#ifdef UI_SET_PHYS
+          {
+            char topology[0X40];
+
+            snprintf(topology, sizeof(topology),
+                     "pid-%"PRIu32, (uint32_t)getpid());
+
+            if (ioctl(uinput->fileDescriptor, UI_SET_PHYS, topology) == -1) {
+              logSystemError("ioctl[UI_SET_PHYS]");
+            }
+          }
+#endif /* UI_SET_PHYS */
+
           logMessage(LOG_DEBUG, "uinput opened: %s fd=%d",
                      device, uinput->fileDescriptor);
 
