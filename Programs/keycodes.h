@@ -184,6 +184,13 @@ typedef enum {
   XT_KEY_E0_Sleep             = 0X5F,
   XT_KEY_E0_Wake              = 0X63,
   XT_KEY_E0_MediaPictures     = 0X64,
+  XT_KEY_E0_WebSearch         = 0X65,
+  XT_KEY_E0_WebBookmarks      = 0X66,
+  XT_KEY_E0_WebRefresh        = 0X67,
+  XT_KEY_E0_WebStop           = 0X68,
+  XT_KEY_E0_WebForward        = 0X69,
+  XT_KEY_E0_WebBack           = 0X6A,
+  XT_KEY_E0_MyComputer        = 0X6B,
   XT_KEY_E0_Mail_X1           = 0X6C,
   XT_KEY_E0_MediaVideo        = 0X6D,
 } XtKeyE0;
