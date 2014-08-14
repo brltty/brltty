@@ -509,6 +509,13 @@ static const HidKeyEntry hidKeyTable[] = {
     .ps2Code = PS2_KEY_ScrollLock
   },
 
+  /* Pause */
+  [HID_KEY_Pause] = {
+    .xtCode = XT_KEY(E1, Pause),
+    .atCode = AT_KEY(E1, Pause),
+    .ps2Code = PS2_KEY_Pause
+  },
+
   /* Insert (Note 1) */
   [HID_KEY_Insert] = {
     .xtCode = XT_KEY(E0, Insert),
@@ -819,8 +826,8 @@ static const HidKeyEntry hidKeyTable[] = {
 
   /* Keyboard Help */
   [HID_KEY_Help] = {
-    .xtCode = 0X0000,
-    .atCode = 0X0000,
+    .xtCode = XT_KEY(E0, Help),
+    .atCode = AT_KEY(E0, Help),
     .ps2Code = 0X00
   },
 
@@ -854,29 +861,29 @@ static const HidKeyEntry hidKeyTable[] = {
 
   /* Keyboard Undo */
   [HID_KEY_Undo] = {
-    .xtCode = 0X0000,
-    .atCode = 0X0000,
+    .xtCode = XT_KEY(E0, Undo),
+    .atCode = AT_KEY(E0, Undo),
     .ps2Code = 0X00
   },
 
   /* Keyboard Cut */
   [HID_KEY_Cut] = {
-    .xtCode = 0X0000,
-    .atCode = 0X0000,
+    .xtCode = XT_KEY(E0, Cut),
+    .atCode = AT_KEY(E0, Cut),
     .ps2Code = 0X00
   },
 
   /* Keyboard Copy */
   [HID_KEY_Copy] = {
-    .xtCode = 0X0000,
-    .atCode = 0X0000,
+    .xtCode = XT_KEY(E0, Copy),
+    .atCode = AT_KEY(E0, Copy),
     .ps2Code = 0X00
   },
 
   /* Keyboard Paste */
   [HID_KEY_Paste] = {
-    .xtCode = 0X0000,
-    .atCode = 0X0000,
+    .xtCode = XT_KEY(E0, Paste),
+    .atCode = AT_KEY(E0, Paste),
     .ps2Code = 0X00
   },
 
@@ -889,22 +896,22 @@ static const HidKeyEntry hidKeyTable[] = {
 
   /* Keyboard Mute */
   [HID_KEY_Mute] = {
-    .xtCode = 0X0000,
-    .atCode = 0X0000,
+    .xtCode = XT_KEY(E0, Mute),
+    .atCode = AT_KEY(E0, Mute),
     .ps2Code = 0X00
   },
 
   /* Keyboard Volume Up */
   [HID_KEY_VolumeUp] = {
-    .xtCode = 0X0000,
-    .atCode = 0X0000,
+    .xtCode = XT_KEY(E0, VolumeUp),
+    .atCode = AT_KEY(E0, VolumeUp),
     .ps2Code = 0X00
   },
 
   /* Keyboard Volume Dn */
   [HID_KEY_VolumeDown] = {
-    .xtCode = 0X0000,
-    .atCode = 0X0000,
+    .xtCode = XT_KEY(E0, VolumeDown),
+    .atCode = AT_KEY(E0, VolumeDown),
     .ps2Code = 0X00
   },
 
@@ -938,9 +945,9 @@ static const HidKeyEntry hidKeyTable[] = {
 
   /* Keyboard Equal Sign */
   [HID_KEY_Equal_X1] = {
-    .xtCode = 0X0000,
-    .atCode = 0X0000,
-    .ps2Code = 0X00
+    .xtCode = XT_KEY(00, Equal),
+    .atCode = AT_KEY(00, Equal),
+    .ps2Code = PS2_KEY_Equal
   },
 
   /* Keyboard Int'l 1 (Ro) */
@@ -1034,6 +1041,13 @@ static const HidKeyEntry hidKeyTable[] = {
     .ps2Code = 0X00
   },
 
+  /* Keyboard Lang 5 (Hiragana) */
+  [HID_KEY_Language5] = {
+    .xtCode = XT_KEY(00, Language5),
+    .atCode = AT_KEY(00, Language5),
+    .ps2Code = 0X00
+  },
+
   /* Keyboard Lang 6 */
   [HID_KEY_Language6] = {
     .xtCode = 0X0000,
@@ -1071,8 +1085,8 @@ static const HidKeyEntry hidKeyTable[] = {
 
   /* Keyboard SysReq/Attention */
   [HID_KEY_SystemReequest] = {
-    .xtCode = 0X0000,
-    .atCode = 0X0000,
+    .xtCode = XT_KEY(00, SystemRequest),
+    .atCode = AT_KEY(00, SystemRequest),
     .ps2Code = 0X00
   },
 
@@ -1144,6 +1158,328 @@ static const HidKeyEntry hidKeyTable[] = {
     .xtCode = XT_KEY(00, ExSel),
     .atCode = AT_KEY(00, ExSel),
     .ps2Code = PS2_KEY_ExSel
+  },
+
+  /* xxx */
+  [HID_KEY_KP00] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KP000] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPThousandsSeparator] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPDecimalSeparator] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPCurrencyUnit] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPCurrencySubunit] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPLeftParenthesis] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPRightParenthesis] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPLeftBrace] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPRightBrace] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPTab] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPBackspace] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPA] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPB] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPC] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPD] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPE] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPF] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPBitwiseXor] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPExponentiate] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPmodulo] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPLess] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPGreater] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPBitwiseAnd] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPBooleanAnd] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPBitwiseOr] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPBooleanOr] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPColon] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPNumber] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPSpace] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPAt] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPBooleanNot] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPMemoryStore] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPMemoryRecall] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPMemoryClear] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPMemoryAdd] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPMemorySubtract] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPMemoryMultiply] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPMemoryDivide] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPPlusMinus] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPClear] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPClearEntry] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPBinary] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPOctal] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPDecimal] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
+  },
+
+  /* xxx */
+  [HID_KEY_KPHexadecimal] = {
+    .xtCode = 0X0000,
+    .atCode = 0X0000,
+    .ps2Code = 0X00
   },
 
   /* Left Control */
