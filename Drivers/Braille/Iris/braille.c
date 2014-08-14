@@ -107,7 +107,7 @@ END_KEY_TABLE_LIST
 #define IR_EXTERNAL_SPEED_NATIVE 57600
 
 /* Input/output ports */
-#define IR_PORT_BASE 0x340
+#define IR_PORT_BASE 0X340
 #define IR_PORT_INPUT   (IR_PORT_BASE + 0)
 #define IR_PORT_OUTPUT  (IR_PORT_BASE + 1)
 #define IR_PORT_OUTPUT2 (IR_PORT_BASE + 2)
@@ -762,20 +762,6 @@ struct BrailleDataStruct {
   char serialNumber[5];
 };
 
-static void
-activateBraille(void) {
-  writePort1(IR_PORT_OUTPUT, 0x01);
-  asyncWait(9);
-  writePort1(IR_PORT_OUTPUT, 0);
-}
-
-static void
-deactivateBraille(void) {
-  writePort1(IR_PORT_OUTPUT, 0x02);
-  asyncWait(9);
-  writePort1(IR_PORT_OUTPUT, 0);
-}
-
 /* Function readNativePacket */
 /* Returns the size of the read packet. */
 /* 0 means no packet has been read and there is no error. */
@@ -1012,8 +998,8 @@ writeEurobraillePacket (BrailleDisplay *brl, Port *port, const void *data, size_
   unsigned char *p = packet;
 
   *p++ = STX;
-  *p++ = (packetSize >> 8) & 0x00FF;
-  *p++ = packetSize & 0x00FF;  
+  *p++ = (packetSize >> 8) & 0X00FF;
+  *p++ = packetSize & 0X00FF;  
   p = mempcpy(p, data, size);
   *p++ = ETX;
 
@@ -1060,6 +1046,20 @@ clearWindow (BrailleDisplay *brl) {
 
   memset(window, 0, sizeof(window));
   return writeWindow(brl, window);
+}
+
+static void
+activateBraille(void) {
+  writePort1(IR_PORT_OUTPUT, 0X01);
+  asyncWait(9);
+  writePort1(IR_PORT_OUTPUT, 0X00);
+}
+
+static void
+deactivateBraille(void) {
+  writePort1(IR_PORT_OUTPUT, 0X02);
+  asyncWait(9);
+  writePort1(IR_PORT_OUTPUT, 0X00);
 }
 
 static ssize_t brl_readPacket (BrailleDisplay *brl, void *packet, size_t size)
@@ -1402,11 +1402,11 @@ forwardExternalPacket_eurobraille (
     writeEurobraillePacket(brl, inPort, str, 3);
     str[0] = 'S'; str[1] = 'T'; str[2] = 6;
     writeEurobraillePacket(brl, inPort, str, 3);
-    snprintf(str, sizeof(str), "So%d%da", 0xef, 0xf8);
+    snprintf(str, sizeof(str), "So%d%da", 0XEF, 0XF8);
     writeEurobrailleStringPacket(brl, inPort, str);
     writeEurobrailleStringPacket(brl, inPort, "SW1.92");
     writeEurobrailleStringPacket(brl, inPort, "SP1.00 30-10-2006");
-    snprintf(str, sizeof(str), "SM%d", 0x08);
+    snprintf(str, sizeof(str), "SM%d", 0X08);
     writeEurobrailleStringPacket(brl, inPort, str);
     writeEurobrailleStringPacket(brl, inPort, "SI");
   } else if (size==brl->textColumns+2 && packet[0]=='B' && packet[1]=='S')
@@ -1776,7 +1776,7 @@ closeExternalPort (BrailleDisplay *brl) {
 
 static int
 checkLatchState (BrailleDisplay *brl) {
-  unsigned char pulled = !(readPort1(IR_PORT_INPUT) & 0x04);
+  unsigned char pulled = !(readPort1(IR_PORT_INPUT) & 0X04);
 
   if (brl->data->latch.pulled) {
     if (pulled) {
@@ -1854,8 +1854,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     brl->data->internal.linearKeys = 0;
 
     brl->data->external.port.gioEndpoint = NULL;
-    brl->data->internal.port.writeNativePacket = writeNativePacket_external;
-    brl->data->internal.port.handleNativeAcknowledgement = handleNativeAcknowledgement_external;
+    brl->data->external.port.writeNativePacket = writeNativePacket_external;
+    brl->data->external.port.handleNativeAcknowledgement = handleNativeAcknowledgement_external;
     brl->data->external.hio = NULL;
 
     brl->data->latch.monitor = NULL;
