@@ -405,11 +405,11 @@ static unsigned int AT_scanCodeModifiers;
 
 int
 atInterpretScanCode (int *command, unsigned char byte) {
-  if (byte == 0XF0) {
+  if (byte == AT_MOD_RELEASE) {
     MOD_SET(MOD_RELEASE, AT_scanCodeModifiers);
-  } else if (byte == 0XE0) {
+  } else if (byte == AT_MOD_E0) {
     USE_SCAN_CODES(AT, emul0);
-  } else if (byte == 0XE1) {
+  } else if (byte == AT_MOD_E1) {
     USE_SCAN_CODES(AT, emul1);
   } else if (byte < AT_scanCodesSize) {
     const KeyEntry *key = &AT_scanCodes[byte];
@@ -562,13 +562,13 @@ static unsigned int XT_scanCodeModifiers;
 
 int
 xtInterpretScanCode (int *command, unsigned char byte) {
-  if (byte == 0XE0) {
+  if (byte == XT_MOD_E0) {
     USE_SCAN_CODES(XT, emul0);
-  } else if (byte == 0XE1) {
+  } else if (byte == XT_MOD_E1) {
     USE_SCAN_CODES(XT, emul1);
   } else if (byte < XT_scanCodesSize) {
     const KeyEntry *key = &XT_scanCodes[byte & 0X7F];
-    int release = (byte & 0X80) != 0;
+    int release = (byte & XT_BIT_RELEASE) != 0;
 
     USE_SCAN_CODES(XT, basic);
 

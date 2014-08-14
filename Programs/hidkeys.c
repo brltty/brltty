@@ -1577,7 +1577,17 @@ getPressedKeys (const HidKeyboardPacket *packet, unsigned char *keys) {
   unsigned char count = 0;
 
   {
-    static const unsigned char modifiers[] = {0XE0, 0XE1, 0XE2, 0XE3, 0XE4, 0XE5, 0XE6, 0XE7};
+    static const unsigned char modifiers[] = {
+      HID_KEY_LeftControl,
+      HID_KEY_LeftShift,
+      HID_KEY_LeftAlt,
+      HID_KEY_LeftGUI,
+      HID_KEY_RightControl,
+      HID_KEY_RightShift,
+      HID_KEY_RightAlt,
+      HID_KEY_RightGUI,
+    };
+
     const unsigned char *modifier = modifiers;
     uint8_t bit = 0X1;
 

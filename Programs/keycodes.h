@@ -199,6 +199,9 @@ typedef enum {
   XT_KEY_E1_Pause = 0X1D,
 } XtKeyE1;
 
+#define XT_BIT_RELEASE 0X80
+#define XT_MOD_E0      0XE0
+#define XT_MOD_E1      0XE1
 #define XT_KEY(group,name) (0X##group##00 | XT_KEY_##group##_##name)
 
 typedef enum {
@@ -377,6 +380,9 @@ typedef enum {
   AT_KEY_E1_Pause = 0X14,
 } AtKeyE1;
 
+#define AT_MOD_RELEASE 0XF0
+#define AT_MOD_E0      0XE0
+#define AT_MOD_E1      0XE1
 #define AT_KEY(group,name) (0X##group##00 | AT_KEY_##group##_##name)
 
 typedef enum {
