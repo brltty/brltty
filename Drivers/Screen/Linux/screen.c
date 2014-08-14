@@ -994,12 +994,6 @@ static const ScanCodeTable atKeysE0 = {
   [AT_KEY_E0_Power] = KEY_POWER,
   [AT_KEY_E0_Sleep] = KEY_SLEEP,
   [AT_KEY_E0_Wake] = KEY_WAKEUP,
-
-  [0X6F] = KEY_MACRO,
-  [0X73] = KEY_MACRO,
-  [0X77] = KEY_PAUSE,
-  [0X79] = KEY_KPPLUSMINUS,
-  [0X7E] = KEY_PAUSE,
 };
 
 static const ScanCodeTable atKeysE1 = {
