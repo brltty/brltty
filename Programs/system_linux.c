@@ -589,7 +589,6 @@ LINUX_KEY_TABLE(linuxKeyTable_xtE0) = {
 };
 
 LINUX_KEY_TABLE(linuxKeyTable_xtE1) = {
-  [0X01] = KEY_FN,
   [XT_KEY_E1_Pause] = KEY_PAUSE,
 };
 
@@ -823,6 +822,7 @@ LINUX_KEY_TABLE(linuxKeyTable_ps2) = {
   [PS2_KEY_LeftBracket] = KEY_LEFTBRACE,
   [PS2_KEY_RightBracket] = KEY_RIGHTBRACE,
   [PS2_KEY_Backslash] = KEY_BACKSLASH,
+  [PS2_KEY_Europe1] = KEY_BACKSLASH,
 
   [PS2_KEY_CapsLock] = KEY_CAPSLOCK,
   [PS2_KEY_A] = KEY_A,
@@ -958,6 +958,7 @@ LINUX_KEY_TABLE(linuxKeyTable_hid) = {
   [HID_KEY_LeftBracket] = KEY_LEFTBRACE,
   [HID_KEY_RightBracket] = KEY_RIGHTBRACE,
   [HID_KEY_Backslash] = KEY_BACKSLASH,
+  [HID_KEY_Europe1] = KEY_BACKSLASH,
 
   [HID_KEY_CapsLock] = KEY_CAPSLOCK,
   [HID_KEY_A] = KEY_A,

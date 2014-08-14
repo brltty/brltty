@@ -43,7 +43,7 @@ extern int writeRepeatPeriod (UinputObject *uinput, int period);
 
 extern UinputObject *newUinputKeyboard (const char *name);
 
-typedef uint16_t LinuxKeyCode;
+typedef uint8_t LinuxKeyCode;
 #define LINUX_KEY_TABLE(name) const LinuxKeyCode name[0X100]
 extern LINUX_KEY_TABLE(linuxKeyTable_xt00);
 extern LINUX_KEY_TABLE(linuxKeyTable_xtE0);
