@@ -814,9 +814,9 @@ setTranslationTable (int force) {
 #ifdef HAVE_LINUX_INPUT_H
 #include <linux/input.h>
 
-typedef unsigned char At2KeyTable[0X100];
+typedef unsigned char ScanCodeTable[0X100];
 
-static const At2KeyTable at2KeysOriginal = {
+static const ScanCodeTable atKeysOriginal = {
   [AT_KEY_00_Escape] = KEY_ESC,
   [AT_KEY_00_F1] = KEY_F1,
   [AT_KEY_00_F2] = KEY_F2,
@@ -824,14 +824,28 @@ static const At2KeyTable at2KeysOriginal = {
   [AT_KEY_00_F4] = KEY_F4,
   [AT_KEY_00_F5] = KEY_F5,
   [AT_KEY_00_F6] = KEY_F6,
-  [0X02] = KEY_F7,
   [AT_KEY_00_F7] = KEY_F7,
+  [AT_KEY_00_F7_X1] = KEY_F7,
   [AT_KEY_00_F8] = KEY_F8,
   [AT_KEY_00_F9] = KEY_F9,
   [AT_KEY_00_F10] = KEY_F10,
   [AT_KEY_00_F11] = KEY_F11,
   [AT_KEY_00_F12] = KEY_F12,
+  [AT_KEY_00_SystemRequest] = KEY_SYSRQ,
   [AT_KEY_00_ScrollLock] = KEY_SCROLLLOCK,
+
+  [AT_KEY_00_F13] = KEY_F13,
+  [AT_KEY_00_F14] = KEY_F14,
+  [AT_KEY_00_F15] = KEY_F15,
+  [AT_KEY_00_F16] = KEY_F16,
+  [AT_KEY_00_F17] = KEY_F17,
+  [AT_KEY_00_F18] = KEY_F18,
+  [AT_KEY_00_F19] = KEY_F19,
+  [AT_KEY_00_F20] = KEY_F20,
+  [AT_KEY_00_F21] = KEY_F21,
+  [AT_KEY_00_F22] = KEY_F22,
+  [AT_KEY_00_F23] = KEY_F23,
+  [AT_KEY_00_F24] = KEY_F24,
 
   [AT_KEY_00_Grave] = KEY_GRAVE,
   [AT_KEY_00_1] = KEY_1,
@@ -911,94 +925,82 @@ static const At2KeyTable at2KeysOriginal = {
   [AT_KEY_00_KP8] = KEY_KP8,
   [AT_KEY_00_KP9] = KEY_KP9,
 
-  [AT_KEY_00_Language5] = KEY_ZENKAKUHANKAKU,
+  [AT_KEY_00_KPComma] = KEY_KPCOMMA,
+  [AT_KEY_00_KPEqual] = KEY_KPEQUAL,
+
   [AT_KEY_00_International1] = KEY_RO,
-  [AT_KEY_00_Language4] = KEY_HIRAGANA,
-  [AT_KEY_00_Language3] = KEY_KATAKANA,
+  [AT_KEY_00_International2] = KEY_KATAKANAHIRAGANA,
+  [AT_KEY_00_International3] = KEY_YEN,
   [AT_KEY_00_International4] = KEY_HENKAN,
   [AT_KEY_00_International5] = KEY_MUHENKAN,
-
-  [AT_KEY_00_KPEqual] = KEY_KPEQUAL,
-  [AT_KEY_00_International2] = KEY_KATAKANAHIRAGANA,
   [AT_KEY_00_International6] = KEY_KPJPCOMMA,
-  [0X7F] = KEY_SYSRQ,
-  [0X84] = KEY_SYSRQ,
 
-  [AT_KEY_00_KPComma] = KEY_KPCOMMA,
-  [AT_KEY_00_International3] = KEY_YEN,
-
-  [AT_KEY_00_F13] = KEY_F13,
-  [AT_KEY_00_F14] = KEY_F14,
-  [AT_KEY_00_F15] = KEY_F15,
-  [AT_KEY_00_F16] = KEY_F16,
-  [AT_KEY_00_F17] = KEY_F17,
-  [AT_KEY_00_F18] = KEY_F18,
-  [AT_KEY_00_F19] = KEY_F19,
-  [AT_KEY_00_F20] = KEY_F20,
-  [AT_KEY_00_F21] = KEY_F21,
-  [AT_KEY_00_F22] = KEY_F22,
-  [AT_KEY_00_F23] = KEY_F23,
-  [AT_KEY_00_F24] = KEY_F24,
+  [AT_KEY_00_Language3] = KEY_KATAKANA,
+  [AT_KEY_00_Language4] = KEY_HIRAGANA,
+  [AT_KEY_00_Language5] = KEY_ZENKAKUHANKAKU,
 };
 
-static const At2KeyTable at2KeysE0 = {
-  [0X10] = KEY_SEARCH,
-  [AT_KEY_E0_RightAlt] = KEY_RIGHTALT,
-  [AT_KEY_E0_RightControl] = KEY_RIGHTCTRL,
-  [0X15] = KEY_PREVIOUSSONG,
-  [0X18] = KEY_BOOKMARKS,
+static const ScanCodeTable atKeysE0 = {
   [AT_KEY_E0_LeftGUI] = KEY_LEFTMETA,
-
-  [0X20] = KEY_REFRESH,
-  [0X21] = KEY_VOLUMEDOWN,
-  [0X23] = KEY_MUTE,
+  [AT_KEY_E0_RightAlt] = KEY_RIGHTALT,
   [AT_KEY_E0_RightGUI] = KEY_RIGHTMETA,
-  [0X28] = KEY_STOP,
-  [0X2B] = KEY_CALC,
   [AT_KEY_E0_App] = KEY_COMPOSE,
-
-  [0X30] = KEY_FORWARD,
-  [0X32] = KEY_VOLUMEUP,
-  [0X34] = KEY_PLAYPAUSE,
-  [AT_KEY_E0_Power] = KEY_POWER,
-  [0X38] = KEY_BACK,
-  [0X3A] = KEY_HOMEPAGE,
-  [0X3B] = KEY_STOPCD,
-  [0X3F] = KEY_SLEEP,
-
-  [0X40] = KEY_COMPUTER,
-  [0X48] = KEY_MAIL,
-  [AT_KEY_E0_KPSlash] = KEY_KPSLASH,
-  [0X4D] = KEY_NEXTSONG,
-
-  [0X50] = KEY_MEDIA,
-  [AT_KEY_E0_KPEnter] = KEY_KPENTER,
-  [0X5E] = KEY_WAKEUP,
-
-  [AT_KEY_E0_End] = KEY_END,
-  [AT_KEY_E0_ArrowLeft] = KEY_LEFT,
-  [AT_KEY_E0_Home] = KEY_HOME,
-  [0X6F] = KEY_MACRO,
+  [AT_KEY_E0_RightControl] = KEY_RIGHTCTRL,
 
   [AT_KEY_E0_Insert] = KEY_INSERT,
   [AT_KEY_E0_Delete] = KEY_DELETE,
-  [AT_KEY_E0_ArrowDown] = KEY_DOWN,
-  [0X73] = KEY_MACRO,
-  [AT_KEY_E0_ArrowRight] = KEY_RIGHT,
+  [AT_KEY_E0_Home] = KEY_HOME,
+  [AT_KEY_E0_End] = KEY_END,
+  [AT_KEY_E0_PageUp] = KEY_PAGEUP,
+  [AT_KEY_E0_PageDown] = KEY_PAGEDOWN,
+
   [AT_KEY_E0_ArrowUp] = KEY_UP,
+  [AT_KEY_E0_ArrowLeft] = KEY_LEFT,
+  [AT_KEY_E0_ArrowDown] = KEY_DOWN,
+  [AT_KEY_E0_ArrowRight] = KEY_RIGHT,
+
+  [AT_KEY_E0_KPEnter] = KEY_KPENTER,
+  [AT_KEY_E0_KPSlash] = KEY_KPSLASH,
+
+  [AT_KEY_E0_MyComputer] = KEY_COMPUTER,
+  [AT_KEY_E0_Calculator] = KEY_CALC,
+  [AT_KEY_E0_Mail] = KEY_MAIL,
+  [AT_KEY_E0_Mail_X1] = KEY_MAIL,
+
+  [AT_KEY_E0_WebHome] = KEY_HOMEPAGE,
+  [AT_KEY_E0_WebBookmarks] = KEY_BOOKMARKS,
+  [AT_KEY_E0_WebSearch] = KEY_SEARCH,
+  [AT_KEY_E0_WebBack] = KEY_BACK,
+  [AT_KEY_E0_WebForward] = KEY_FORWARD,
+  [AT_KEY_E0_WebRefresh] = KEY_REFRESH,
+  [AT_KEY_E0_WebStop] = KEY_STOP,
+
+  [AT_KEY_E0_Mute] = KEY_MUTE,
+  [AT_KEY_E0_VolumeDown] = KEY_VOLUMEDOWN,
+  [AT_KEY_E0_VolumeUp] = KEY_VOLUMEUP,
+
+  [AT_KEY_E0_MediaVideo] = KEY_MEDIA,
+  [AT_KEY_E0_MediaPlayPause] = KEY_PLAYPAUSE,
+  [AT_KEY_E0_MediaStop] = KEY_STOPCD,
+  [AT_KEY_E0_MediaPrevious] = KEY_PREVIOUSSONG,
+  [AT_KEY_E0_MediaNext] = KEY_NEXTSONG,
+
+  [AT_KEY_E0_Power] = KEY_POWER,
+  [AT_KEY_E0_Sleep] = KEY_SLEEP,
+  [AT_KEY_E0_Wake] = KEY_WAKEUP,
+
+  [0X6F] = KEY_MACRO,
+  [0X73] = KEY_MACRO,
   [0X77] = KEY_PAUSE,
   [0X79] = KEY_KPPLUSMINUS,
-  [AT_KEY_E0_PageDown] = KEY_PAGEDOWN,
-  [AT_KEY_E0_PrintScreen] = KEY_SYSRQ,
-  [AT_KEY_E0_PageUp] = KEY_PAGEUP,
-  [0X7E] = KEY_PAUSE
+  [0X7E] = KEY_PAUSE,
 };
 
-static const At2KeyTable at2KeysE1 = {
+static const ScanCodeTable atKeysE1 = {
 };
 
-static const unsigned char *at2Keys;
-static int at2Pressed;
+static const unsigned char *atKeys;
+static int atKeyPressed;
 #endif /* HAVE_LINUX_INPUT_H */
 
 static int currentConsoleNumber;
@@ -1014,8 +1016,8 @@ construct_LinuxScreen (void) {
   uinputKeyboard = NULL;
 
 #ifdef HAVE_LINUX_INPUT_H
-  at2Keys = at2KeysOriginal;
-  at2Pressed = 1;
+  atKeys = atKeysOriginal;
+  atKeyPressed = 1;
 #endif /* HAVE_LINUX_INPUT_H */
 
   if (setScreenName()) {
@@ -1545,25 +1547,54 @@ insertUnicode (wchar_t character) {
   return 0;
 }
 
-static const unsigned char emul0XtScanCodeToLinuxKeyCode[0X80] = {
-  [XT_KEY_E0_KPEnter] = KEY_KPENTER,
-  [XT_KEY_E0_RightControl] = KEY_RIGHTCTRL,
-  [XT_KEY_E0_KPSlash] = KEY_KPSLASH,
-  [XT_KEY_E0_PrintScreen] = KEY_SYSRQ,
-  [XT_KEY_E0_RightAlt] = KEY_RIGHTALT,
-  [XT_KEY_E0_Home] = KEY_HOME,
-  [XT_KEY_E0_ArrowUp] = KEY_UP,
-  [XT_KEY_E0_PageUp] = KEY_PAGEUP,
-  [XT_KEY_E0_ArrowLeft] = KEY_LEFT,
-  [XT_KEY_E0_ArrowRight] = KEY_RIGHT,
-  [XT_KEY_E0_End] = KEY_END,
-  [XT_KEY_E0_ArrowDown] = KEY_DOWN,
-  [XT_KEY_E0_PageDown] = KEY_PAGEDOWN,
-  [XT_KEY_E0_Insert] = KEY_INSERT,
-  [XT_KEY_E0_Delete] = KEY_DELETE,
+static const unsigned char xtKeysE0[0X80] = {
   [XT_KEY_E0_LeftGUI] = KEY_LEFTMETA,
+  [XT_KEY_E0_RightAlt] = KEY_RIGHTALT,
   [XT_KEY_E0_RightGUI] = KEY_RIGHTMETA,
   [XT_KEY_E0_App] = KEY_COMPOSE,
+  [XT_KEY_E0_RightControl] = KEY_RIGHTCTRL,
+
+  [XT_KEY_E0_Insert] = KEY_INSERT,
+  [XT_KEY_E0_Delete] = KEY_DELETE,
+  [XT_KEY_E0_Home] = KEY_HOME,
+  [XT_KEY_E0_End] = KEY_END,
+  [XT_KEY_E0_PageUp] = KEY_PAGEUP,
+  [XT_KEY_E0_PageDown] = KEY_PAGEDOWN,
+
+  [XT_KEY_E0_ArrowUp] = KEY_UP,
+  [XT_KEY_E0_ArrowLeft] = KEY_LEFT,
+  [XT_KEY_E0_ArrowDown] = KEY_DOWN,
+  [XT_KEY_E0_ArrowRight] = KEY_RIGHT,
+
+  [XT_KEY_E0_KPEnter] = KEY_KPENTER,
+  [XT_KEY_E0_KPSlash] = KEY_KPSLASH,
+
+//[XT_KEY_E0_MyComputer] = KEY_COMPUTER,
+  [XT_KEY_E0_Calculator] = KEY_CALC,
+  [XT_KEY_E0_Mail] = KEY_MAIL,
+  [XT_KEY_E0_Mail_X1] = KEY_MAIL,
+
+//[XT_KEY_E0_WebHome] = KEY_HOMEPAGE,
+//[XT_KEY_E0_WebBookmarks] = KEY_BOOKMARKS,
+//[XT_KEY_E0_WebSearch] = KEY_SEARCH,
+//[XT_KEY_E0_WebBack] = KEY_BACK,
+//[XT_KEY_E0_WebForward] = KEY_FORWARD,
+//[XT_KEY_E0_WebRefresh] = KEY_REFRESH,
+//[XT_KEY_E0_WebStop] = KEY_STOP,
+
+  [XT_KEY_E0_Mute] = KEY_MUTE,
+  [XT_KEY_E0_VolumeDown] = KEY_VOLUMEDOWN,
+  [XT_KEY_E0_VolumeUp] = KEY_VOLUMEUP,
+
+  [XT_KEY_E0_MediaVideo] = KEY_MEDIA,
+  [XT_KEY_E0_MediaPlayPause] = KEY_PLAYPAUSE,
+  [XT_KEY_E0_MediaStop] = KEY_STOPCD,
+  [XT_KEY_E0_MediaPrevious] = KEY_PREVIOUSSONG,
+  [XT_KEY_E0_MediaNext] = KEY_NEXTSONG,
+
+  [XT_KEY_E0_Power] = KEY_POWER,
+  [XT_KEY_E0_Sleep] = KEY_SLEEP,
+  [XT_KEY_E0_Wake] = KEY_WAKEUP,
 };
 
 static const unsigned int emul1XtScanCodeToLinuxKeyCode[0X80] = {
@@ -1663,7 +1694,7 @@ insertCode (ScreenKey key, int raw) {
 
       if (raw) {
         prefix = 0XE0;
-      } else if (!(code = emul0XtScanCodeToLinuxKeyCode[code])) {
+      } else if (!(code = xtKeysE0[code])) {
         logMessage(LOG_WARNING, "key %04X not suported in medium raw keycode mode.", key);
         return 0;
       }
@@ -1699,7 +1730,7 @@ insertCode (ScreenKey key, int raw) {
         codes[count++] = codeEmul0;
         codes[count++] = codeAlt;
       } else {
-        codes[count++] = emul0XtScanCodeToLinuxKeyCode[codeAlt & 0XFF];
+        codes[count++] = xtKeysE0[codeAlt & 0XFF];
       }
     }
     if (prefix) codes[count++] = prefix;
@@ -1712,7 +1743,7 @@ insertCode (ScreenKey key, int raw) {
         codes[count++] = codeEmul0;
         codes[count++] = codeAlt | bitRelease;
       } else {
-        codes[count++] = emul0XtScanCodeToLinuxKeyCode[codeAlt & 0XFF] | bitRelease;
+        codes[count++] = xtKeysE0[codeAlt & 0XFF] | bitRelease;
       }
     }
     if (modAltLeft) codes[count++] = codeAlt | bitRelease;
@@ -2028,7 +2059,7 @@ handleCommand_LinuxScreen (int command) {
             arg &= 0X7F;
 
             if (command & BRL_FLG_KBD_EMUL0) {
-              unsigned char code = emul0XtScanCodeToLinuxKeyCode[arg];
+              unsigned char code = xtKeysE0[arg];
               if (!code) {
 		logMessage(LOG_WARNING, "Xt emul0 scancode not supported: %02X", arg);
                 return 0;
@@ -2051,21 +2082,21 @@ handleCommand_LinuxScreen (int command) {
             int handled = 0;
 
             if (command & BRL_FLG_KBD_RELEASE) {
-              at2Pressed = 0;
+              atKeyPressed = 0;
             } else if (arg == 0XF0) {
-              at2Pressed = 0;
+              atKeyPressed = 0;
               handled = 1;
             }
 
             if (command & BRL_FLG_KBD_EMUL0) {
-              at2Keys = at2KeysE0;
+              atKeys = atKeysE0;
             } else if (arg == 0XE0) {
-              at2Keys = at2KeysE0;
+              atKeys = atKeysE0;
               handled = 1;
 	    } else if (command & BRL_FLG_KBD_EMUL1) {
-              at2Keys = at2KeysE1;
+              atKeys = atKeysE1;
             } else if (arg == 0XE1) {
-              at2Keys = at2KeysE1;
+              atKeys = atKeysE1;
               handled = 1;
             }
 
@@ -2073,11 +2104,11 @@ handleCommand_LinuxScreen (int command) {
           }
 
           {
-            unsigned char key = at2Keys[arg];
-            int pressed = at2Pressed;
+            unsigned char key = atKeys[arg];
+            int pressed = atKeyPressed;
 
-            at2Keys = at2KeysOriginal;
-            at2Pressed = 1;
+            atKeys = atKeysOriginal;
+            atKeyPressed = 1;
 
             if (key) return injectKeyEvent(key, pressed);
           }
