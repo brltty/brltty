@@ -507,7 +507,7 @@ typedef enum {
 
 typedef enum {
   HID_ERR_RollOver             = 0X01,
-  HID_ERR_Post                 = 0X02,
+  HID_ERR_PostFail             = 0X02,
   HID_ERR_Undefined            = 0X03,
   HID_KEY_A                    = 0X04,
   HID_KEY_B                    = 0X05,

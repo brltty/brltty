@@ -370,13 +370,35 @@ writeRepeatPeriod (UinputObject *uinput, int period) {
 
 #ifdef HAVE_LINUX_INPUT_H
 static int
-enableAllKeys (UinputObject *uinput) {
-  unsigned int key;
+enableKeyboardKeys (UinputObject *uinput) {
+  static const LinuxKeyCode *maps[] = {
+    linuxKeyTable_xt00, linuxKeyTable_xtE0, linuxKeyTable_xtE1,
+    linuxKeyTable_at00, linuxKeyTable_atE0, linuxKeyTable_atE1,
+    linuxKeyTable_ps2, linuxKeyTable_hid,
+    NULL
+  };
+
+  const LinuxKeyCode *const *map = maps;
+  BITMASK(enabledKeys, KEY_MAX+1, char);
 
   if (!enableUinputEventType(uinput, EV_KEY)) return 0;
+  memset(enabledKeys, 0, sizeof(enabledKeys));
 
-  for (key=0; key<=KEY_MAX; key+=1) {
-    if (!enableUinputKey(uinput, key)) return 0;
+  while (*map) {
+    unsigned int code;
+
+    for (code=0; code<=0XFF; code+=1) {
+      LinuxKeyCode key = (*map)[code];
+
+      if (key) {
+        if (!BITMASK_TEST(enabledKeys, key)) {
+          BITMASK_SET(enabledKeys, key);
+          if (!enableUinputKey(uinput, key)) return 0;
+        }
+      }
+    }
+
+    map += 1;
   }
 
   return 1;
@@ -389,7 +411,7 @@ newUinputKeyboard (const char *name) {
   UinputObject *uinput;
 
   if ((uinput = newUinputObject(name))) {
-    if (enableAllKeys(uinput)) {
+    if (enableKeyboardKeys(uinput)) {
       if (enableUinputEventType(uinput, EV_REP)) {
         if (createUinputDevice(uinput)) {
           return uinput;
