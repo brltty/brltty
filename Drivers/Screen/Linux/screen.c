@@ -1295,7 +1295,7 @@ insertCode (ScreenKey key, int raw) {
   unsigned char code;
   unsigned char escape;
 
-  setKeyModifiers(&key, SCR_KEY_SHIFT | SCR_KEY_CONTROL);
+  setScreenKeyModifiers(&key, SCR_KEY_SHIFT | SCR_KEY_CONTROL);
 
 #define KEY_TO_XT(KEY, ESCAPE, CODE) \
   case (KEY): \
@@ -1471,7 +1471,7 @@ insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
   const wchar_t *sequence;
   const wchar_t *end;
 
-  setKeyModifiers(&key, 0);
+  setScreenKeyModifiers(&key, 0);
 
   if (isSpecialKey(key)) {
     switch (key) {

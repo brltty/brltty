@@ -210,7 +210,7 @@ insertKey_ScreenScreen (ScreenKey key) {
   char *sequence;
 
   logMessage(LOG_DEBUG, "insert key: %04X", key);
-  setKeyModifiers(&key, 0);
+  setScreenKeyModifiers(&key, 0);
 
   if (isSpecialKey(key)) {
 #define KEY(key,string) case (key): sequence = (string); break

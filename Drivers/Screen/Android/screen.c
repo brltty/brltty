@@ -273,7 +273,7 @@ insertKey_AndroidScreen (ScreenKey key) {
     wchar_t character = key & SCR_KEY_CHAR_MASK;
 
     logMessage(LOG_DEBUG, "insert key: %04X", key);
-    setKeyModifiers(&key, 0);
+    setScreenKeyModifiers(&key, 0);
 
     if (!isSpecialKey(key)) {
       static jmethodID method = 0;

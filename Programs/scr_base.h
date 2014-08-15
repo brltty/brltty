@@ -27,7 +27,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern int isSpecialKey (ScreenKey key);
-extern void setKeyModifiers (ScreenKey *key, ScreenKey which);
+extern void setScreenKeyModifiers (ScreenKey *key, ScreenKey which);
 
 typedef struct {
   size_t (*formatTitle) (char *buffer, size_t size);

@@ -972,7 +972,7 @@ insertKey_AtSpi2Screen (ScreenKey key) {
   long keysym;
   int modMeta=0, modControl=0;
 
-  setKeyModifiers(&key, SCR_KEY_CONTROL);
+  setScreenKeyModifiers(&key, SCR_KEY_CONTROL);
 
   if (isSpecialKey(key)) {
     switch (key & SCR_KEY_CHAR_MASK) {

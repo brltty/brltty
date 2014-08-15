@@ -32,7 +32,7 @@ isSpecialKey (ScreenKey key) {
 }
 
 void
-setKeyModifiers (ScreenKey *key, ScreenKey which) {
+setScreenKeyModifiers (ScreenKey *key, ScreenKey which) {
   if (!isSpecialKey(*key)) {
     wchar_t character = *key & SCR_KEY_CHAR_MASK;
     ScreenKey modifiers = *key & ~SCR_KEY_CHAR_MASK;
