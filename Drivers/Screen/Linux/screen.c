@@ -814,6 +814,7 @@ setTranslationTable (int force) {
 #ifdef HAVE_LINUX_INPUT_H
 #include <linux/input.h>
 
+static const LinuxKeyCode *xtKeys;
 static const LinuxKeyCode *atKeys;
 static int atKeyPressed;
 #endif /* HAVE_LINUX_INPUT_H */
@@ -831,6 +832,7 @@ construct_LinuxScreen (void) {
   uinputKeyboard = NULL;
 
 #ifdef HAVE_LINUX_INPUT_H
+  xtKeys = linuxKeyTable_xt00;
   atKeys = linuxKeyTable_at00;
   atKeyPressed = 1;
 #endif /* HAVE_LINUX_INPUT_H */
@@ -1790,19 +1792,30 @@ handleCommand_LinuxScreen (int command) {
 #ifdef HAVE_LINUX_INPUT_H
       switch (blk) {
         case BRL_BLK_PASSXT:
-	  {
-            LinuxKeyCode code;
-
-            int press = !(arg & XT_BIT_RELEASE);
-            arg &= ~XT_BIT_RELEASE;
+          {
+            int handled = 0;
 
             if (command & BRL_FLG_KBD_EMUL0) {
-              code = linuxKeyTable_xtE0[arg];
+              xtKeys = linuxKeyTable_xtE0;
+            } else if (arg == XT_MOD_E0) {
+              xtKeys = linuxKeyTable_xtE0;
+              handled = 1;
 	    } else if (command & BRL_FLG_KBD_EMUL1) {
-              code = linuxKeyTable_xtE1[arg];
-            } else {
-              code = linuxKeyTable_xt00[arg];
-	    }
+              xtKeys = linuxKeyTable_xtE1;
+            } else if (arg == XT_MOD_E1) {
+              xtKeys = linuxKeyTable_xtE1;
+              handled = 1;
+            }
+
+            if (handled) return 1;
+          }
+
+	  {
+            LinuxKeyCode code = xtKeys[arg];
+            int press = !(arg & XT_BIT_RELEASE);
+
+            arg &= ~XT_BIT_RELEASE;
+            xtKeys = linuxKeyTable_xt00;
 
             if (code) return injectKeyEvent(code, press);
 	  }
@@ -1814,7 +1827,7 @@ handleCommand_LinuxScreen (int command) {
 
             if (command & BRL_FLG_KBD_RELEASE) {
               atKeyPressed = 0;
-            } else if (arg == 0XF0) {
+            } else if (arg == AT_MOD_RELEASE) {
               atKeyPressed = 0;
               handled = 1;
             }
