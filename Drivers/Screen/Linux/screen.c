@@ -814,8 +814,6 @@ setTranslationTable (int force) {
 #ifdef HAVE_LINUX_INPUT_H
 #include <linux/input.h>
 
-typedef unsigned char ScanCodeTable[0X100];
-
 static const LinuxKeyCode *atKeys;
 static int atKeyPressed;
 #endif /* HAVE_LINUX_INPUT_H */
@@ -1165,6 +1163,31 @@ getCapsLockState (void) {
   return 0;
 }
 
+static inline int
+hasModUpper (ScreenKey key) {
+  return (key & SCR_KEY_UPPER) && !getCapsLockState();
+}
+
+static inline int
+hasModShift (ScreenKey key) {
+  return !!(key & SCR_KEY_SHIFT);
+}
+
+static inline int
+hasModControl (ScreenKey key) {
+  return !!(key & SCR_KEY_CONTROL);
+}
+
+static inline int
+hasModAltLeft (ScreenKey key) {
+  return !!(key & SCR_KEY_ALT_LEFT);
+}
+
+static inline int
+hasModAltRight (ScreenKey key) {
+  return !!(key & SCR_KEY_ALT_RIGHT);
+}
+
 static int
 injectKeyEvent (int key, int press) {
   if (!uinputKeyboard) {
@@ -1177,121 +1200,19 @@ injectKeyEvent (int key, int press) {
 }
 
 static int
-insertUinput (ScreenKey key) {
+insertUinput (
+  LinuxKeyCode code,
+  int modUpper, int modShift, int modControl,
+  int modAltLeft, int modAltRight
+) {
 #ifdef HAVE_LINUX_INPUT_H
-  int code;
-
-  switch (key & SCR_KEY_CHAR_MASK) {
-    default:                    code = KEY_RESERVED;   break;
-    case SCR_KEY_ESCAPE:        code = KEY_ESC;        break;
-    case '1':                   code = KEY_1;          break;
-    case '2':                   code = KEY_2;          break;
-    case '3':                   code = KEY_3;          break;
-    case '4':                   code = KEY_4;          break;
-    case '5':                   code = KEY_5;          break;
-    case '6':                   code = KEY_6;          break;
-    case '7':                   code = KEY_7;          break;
-    case '8':                   code = KEY_8;          break;
-    case '9':                   code = KEY_9;          break;
-    case '0':                   code = KEY_0;          break;
-    case '-':                   code = KEY_MINUS;      break;
-    case '=':                   code = KEY_EQUAL;      break;
-    case SCR_KEY_BACKSPACE:     code = KEY_BACKSPACE;  break;
-    case SCR_KEY_TAB:           code = KEY_TAB;        break;
-    case 'q':                   code = KEY_Q;          break;
-    case 'w':                   code = KEY_W;          break;
-    case 'e':                   code = KEY_E;          break;
-    case 'r':                   code = KEY_R;          break;
-    case 't':                   code = KEY_T;          break;
-    case 'y':                   code = KEY_Y;          break;
-    case 'u':                   code = KEY_U;          break;
-    case 'i':                   code = KEY_I;          break;
-    case 'o':                   code = KEY_O;          break;
-    case 'p':                   code = KEY_P;          break;
-    case '[':                   code = KEY_LEFTBRACE;  break;
-    case ']':                   code = KEY_RIGHTBRACE; break;
-    case SCR_KEY_ENTER:         code = KEY_ENTER;      break;
-                                    /* KEY_LEFTCTRL */
-    case 'a':                   code = KEY_A;          break;
-    case 's':                   code = KEY_S;          break;
-    case 'd':                   code = KEY_D;          break;
-    case 'f':                   code = KEY_F;          break;
-    case 'g':                   code = KEY_G;          break;
-    case 'h':                   code = KEY_H;          break;
-    case 'j':                   code = KEY_J;          break;
-    case 'k':                   code = KEY_K;          break;
-    case 'l':                   code = KEY_L;          break;
-    case ';':                   code = KEY_SEMICOLON;  break;
-    case '\'':                  code = KEY_APOSTROPHE; break;
-    case '`':                   code = KEY_GRAVE;      break;
-                                    /* KEY_LEFTSHIFT */
-    case '\\':                  code = KEY_BACKSLASH;  break;
-    case 'z':                   code = KEY_Z;          break;
-    case 'x':                   code = KEY_X;          break;
-    case 'c':                   code = KEY_C;          break;
-    case 'v':                   code = KEY_V;          break;
-    case 'b':                   code = KEY_B;          break;
-    case 'n':                   code = KEY_N;          break;
-    case 'm':                   code = KEY_M;          break;
-    case ',':                   code = KEY_COMMA;      break;
-    case '.':                   code = KEY_DOT;        break;
-    case '/':                   code = KEY_SLASH;      break;
-                                    /* KEY_RIGHTSHIFT */
-                                    /* KEY_KPASTERISK */
-                                    /* KEY_LEFTALT */
-    case ' ':                   code = KEY_SPACE;      break;
-                                    /* KEY_CAPSLOCK */
-    case SCR_KEY_FUNCTION +  0: code = KEY_F1;         break;
-    case SCR_KEY_FUNCTION +  1: code = KEY_F2;         break;
-    case SCR_KEY_FUNCTION +  2: code = KEY_F3;         break;
-    case SCR_KEY_FUNCTION +  3: code = KEY_F4;         break;
-    case SCR_KEY_FUNCTION +  4: code = KEY_F5;         break;
-    case SCR_KEY_FUNCTION +  5: code = KEY_F6;         break;
-    case SCR_KEY_FUNCTION +  6: code = KEY_F7;         break;
-    case SCR_KEY_FUNCTION +  7: code = KEY_F8;         break;
-    case SCR_KEY_FUNCTION +  8: code = KEY_F9;         break;
-    case SCR_KEY_FUNCTION +  9: code = KEY_F10;        break;
-
-    case SCR_KEY_FUNCTION + 10: code = KEY_F11;        break;
-    case SCR_KEY_FUNCTION + 11: code = KEY_F12;        break;
-
-    case SCR_KEY_HOME:          code = KEY_HOME;       break;
-    case SCR_KEY_CURSOR_UP:     code = KEY_UP;         break;
-    case SCR_KEY_PAGE_UP:       code = KEY_PAGEUP;     break;
-    case SCR_KEY_CURSOR_LEFT:   code = KEY_LEFT;       break;
-    case SCR_KEY_CURSOR_RIGHT:  code = KEY_RIGHT;      break;
-    case SCR_KEY_END:           code = KEY_END;        break;
-    case SCR_KEY_CURSOR_DOWN:   code = KEY_DOWN;       break;
-    case SCR_KEY_PAGE_DOWN:     code = KEY_PAGEDOWN;   break;
-    case SCR_KEY_INSERT:        code = KEY_INSERT;     break;
-    case SCR_KEY_DELETE:        code = KEY_DELETE;     break;
-
-    case SCR_KEY_FUNCTION + 12: code = KEY_F13;        break;
-    case SCR_KEY_FUNCTION + 13: code = KEY_F14;        break;
-    case SCR_KEY_FUNCTION + 14: code = KEY_F15;        break;
-    case SCR_KEY_FUNCTION + 15: code = KEY_F16;        break;
-    case SCR_KEY_FUNCTION + 16: code = KEY_F17;        break;
-    case SCR_KEY_FUNCTION + 17: code = KEY_F18;        break;
-    case SCR_KEY_FUNCTION + 18: code = KEY_F19;        break;
-    case SCR_KEY_FUNCTION + 19: code = KEY_F20;        break;
-    case SCR_KEY_FUNCTION + 20: code = KEY_F21;        break;
-    case SCR_KEY_FUNCTION + 21: code = KEY_F22;        break;
-    case SCR_KEY_FUNCTION + 22: code = KEY_F23;        break;
-    case SCR_KEY_FUNCTION + 23: code = KEY_F24;        break;
-  }
-
-  if (code != KEY_RESERVED) {
-#define KEY_EVENT(k,p) { if (!injectKeyEvent((k), (p))) return 0; }
-    int modCaps = (key & SCR_KEY_UPPER) && !getCapsLockState();
-    int modShift = !!(key & SCR_KEY_SHIFT);
-    int modControl = !!(key & SCR_KEY_CONTROL);
-    int modAltLeft = !!(key & SCR_KEY_ALT_LEFT);
-    int modAltRight = !!(key & SCR_KEY_ALT_RIGHT);
-
-    if (modCaps) {
+  if (code) {
+#define KEY_EVENT(KEY, PRESS) { if (!injectKeyEvent((KEY), (PRESS))) return 0; }
+    if (modUpper) {
       KEY_EVENT(KEY_CAPSLOCK, 1);
       KEY_EVENT(KEY_CAPSLOCK, 0);
     }
+
     if (modShift) KEY_EVENT(KEY_LEFTSHIFT, 1);
     if (modControl) KEY_EVENT(KEY_LEFTCTRL, 1);
     if (modAltLeft) KEY_EVENT(KEY_LEFTALT, 1);
@@ -1304,7 +1225,8 @@ insertUinput (ScreenKey key) {
     if (modAltLeft) KEY_EVENT(KEY_LEFTALT, 0);
     if (modControl) KEY_EVENT(KEY_LEFTCTRL, 0);
     if (modShift) KEY_EVENT(KEY_LEFTSHIFT, 0);
-    if (modCaps) {
+
+    if (modUpper) {
       KEY_EVENT(KEY_CAPSLOCK, 1);
       KEY_EVENT(KEY_CAPSLOCK, 0);
     }
@@ -1320,7 +1242,7 @@ insertUinput (ScreenKey key) {
 static int
 insertByte (char byte) {
   if (controlConsole(TIOCSTI, &byte) != -1) return 1;
-  logSystemError("ioctl TIOCSTI");
+  logSystemError("ioctl[TIOCSTI]");
   return 0;
 }
 
@@ -1341,7 +1263,8 @@ insertXlate (wchar_t character) {
 
   if (result != CONV_OK) {
     uint32_t value = character;
-    logMessage(LOG_WARNING, "character 0X%02" PRIX32 " not insertable in xlate mode." , value);
+
+    logMessage(LOG_WARNING, "character not supported in xlate mode: 0X%02"PRIX32, value);
     return 0;
   }
 
@@ -1353,12 +1276,14 @@ insertUnicode (wchar_t character) {
   {
     Utf8Buffer utf8;
     size_t utfs = convertWcharToUtf8(character, utf8);
+
     if (utfs) return insertBytes(utf8, utfs);
   }
 
   {
     uint32_t value = character;
-    logMessage(LOG_WARNING, "character 0X%02" PRIX32 " not insertable in unicode mode." , value);
+
+    logMessage(LOG_WARNING, "character not supported in unicode keyboard mode: 0X%02"PRIX32, value);
   }
 
   return 0;
@@ -1366,157 +1291,177 @@ insertUnicode (wchar_t character) {
 
 static int
 insertCode (ScreenKey key, int raw) {
-  unsigned char prefix = 0X00;
-  LinuxKeyCode code;
+  const LinuxKeyCode *map;
+  unsigned char code;
+  unsigned char escape;
 
   setKeyModifiers(&key, SCR_KEY_SHIFT | SCR_KEY_CONTROL);
 
-  switch (key & SCR_KEY_CHAR_MASK) {
-    case SCR_KEY_ESCAPE:        code = 0X01; break;
-    case SCR_KEY_FUNCTION +  0: code = 0X3B; break;
-    case SCR_KEY_FUNCTION +  1: code = 0X3C; break;
-    case SCR_KEY_FUNCTION +  2: code = 0X3D; break;
-    case SCR_KEY_FUNCTION +  3: code = 0X3E; break;
-    case SCR_KEY_FUNCTION +  4: code = 0X3F; break;
-    case SCR_KEY_FUNCTION +  5: code = 0X40; break;
-    case SCR_KEY_FUNCTION +  6: code = 0X41; break;
-    case SCR_KEY_FUNCTION +  7: code = 0X42; break;
-    case SCR_KEY_FUNCTION +  8: code = 0X43; break;
-    case SCR_KEY_FUNCTION +  9: code = 0X44; break;
-    case SCR_KEY_FUNCTION + 10: code = 0X57; break;
-    case SCR_KEY_FUNCTION + 11: code = 0X58; break;
-    case '`':                   code = 0X29; break;
-    case '1':                   code = 0X02; break;
-    case '2':                   code = 0X03; break;
-    case '3':                   code = 0X04; break;
-    case '4':                   code = 0X05; break;
-    case '5':                   code = 0X06; break;
-    case '6':                   code = 0X07; break;
-    case '7':                   code = 0X08; break;
-    case '8':                   code = 0X09; break;
-    case '9':                   code = 0X0A; break;
-    case '0':                   code = 0X0B; break;
-    case '-':                   code = 0X0C; break;
-    case '=':                   code = 0X0D; break;
-    case SCR_KEY_BACKSPACE:     code = 0X0E; break;
-    case SCR_KEY_TAB:           code = 0X0F; break;
-    case 'q':                   code = 0X10; break;
-    case 'w':                   code = 0X11; break;
-    case 'e':                   code = 0X12; break;
-    case 'r':                   code = 0X13; break;
-    case 't':                   code = 0X14; break;
-    case 'y':                   code = 0X15; break;
-    case 'u':                   code = 0X16; break;
-    case 'i':                   code = 0X17; break;
-    case 'o':                   code = 0X18; break;
-    case 'p':                   code = 0X19; break;
-    case '[':                   code = 0X1A; break;
-    case ']':                   code = 0X1B; break;
-    case '\\':                  code = 0X2B; break;
-    case 'a':                   code = 0X1E; break;
-    case 's':                   code = 0X1F; break;
-    case 'd':                   code = 0X20; break;
-    case 'f':                   code = 0X21; break;
-    case 'g':                   code = 0X22; break;
-    case 'h':                   code = 0X23; break;
-    case 'j':                   code = 0X24; break;
-    case 'k':                   code = 0X25; break;
-    case 'l':                   code = 0X26; break;
-    case ';':                   code = 0X27; break;
-    case '\'':                  code = 0X28; break;
-    case SCR_KEY_ENTER:         code = 0X1C; break;
-    case 'z':                   code = 0X2C; break;
-    case 'x':                   code = 0X2D; break;
-    case 'c':                   code = 0X2E; break;
-    case 'v':                   code = 0X2F; break;
-    case 'b':                   code = 0X30; break;
-    case 'n':                   code = 0X31; break;
-    case 'm':                   code = 0X32; break;
-    case ',':                   code = 0X33; break;
-    case '.':                   code = 0X34; break;
-    case '/':                   code = 0X35; break;
-    case ' ':                   code = 0X39; break;
-    default:
-      switch (key & SCR_KEY_CHAR_MASK) {
-        case SCR_KEY_INSERT:       code = 0X52; break;
-        case SCR_KEY_HOME:         code = 0X47; break;
-        case SCR_KEY_PAGE_UP:      code = 0X49; break;
-        case SCR_KEY_DELETE:       code = 0X53; break;
-        case SCR_KEY_END:          code = 0X4F; break;
-        case SCR_KEY_PAGE_DOWN:    code = 0X51; break;
-        case SCR_KEY_CURSOR_UP:    code = 0X48; break;
-        case SCR_KEY_CURSOR_LEFT:  code = 0X4B; break;
-        case SCR_KEY_CURSOR_DOWN:  code = 0X50; break;
-        case SCR_KEY_CURSOR_RIGHT: code = 0X4D; break;
-        default:
-          if (insertUinput(key)) return 1;
-          logMessage(LOG_WARNING, "key %04X not suported in raw keycode mode.", key);
-          return 0;
-      }
+#define KEY_TO_XT(KEY, ESCAPE, CODE) \
+  case (KEY): \
+  map = linuxKeyTable_xt ## ESCAPE; \
+  code = XT_KEY_ ## ESCAPE ## _ ## CODE; \
+  escape = 0X ## ESCAPE; \
+  break;
 
-      if (raw) {
-        prefix = 0XE0;
-      } else if (!(code = linuxKeyTable_xtE0[code])) {
-        logMessage(LOG_WARNING, "key %04X not suported in medium raw keycode mode.", key);
-        return 0;
-      }
-      break;
+  switch (key & SCR_KEY_CHAR_MASK) {
+    KEY_TO_XT(SCR_KEY_ESCAPE, 00, Escape)
+    KEY_TO_XT(SCR_KEY_F1, 00, F1)
+    KEY_TO_XT(SCR_KEY_F2, 00, F2)
+    KEY_TO_XT(SCR_KEY_F3, 00, F3)
+    KEY_TO_XT(SCR_KEY_F4, 00, F4)
+    KEY_TO_XT(SCR_KEY_F5, 00, F5)
+    KEY_TO_XT(SCR_KEY_F6, 00, F6)
+    KEY_TO_XT(SCR_KEY_F7, 00, F7)
+    KEY_TO_XT(SCR_KEY_F8, 00, F8)
+    KEY_TO_XT(SCR_KEY_F9, 00, F9)
+    KEY_TO_XT(SCR_KEY_F10, 00, F10)
+    KEY_TO_XT(SCR_KEY_F11, 00, F11)
+    KEY_TO_XT(SCR_KEY_F12, 00, F12)
+
+    KEY_TO_XT(SCR_KEY_F13, 00, F13)
+    KEY_TO_XT(SCR_KEY_F14, 00, F14)
+    KEY_TO_XT(SCR_KEY_F15, 00, F15)
+    KEY_TO_XT(SCR_KEY_F16, 00, F16)
+    KEY_TO_XT(SCR_KEY_F17, 00, F17)
+    KEY_TO_XT(SCR_KEY_F18, 00, F18)
+    KEY_TO_XT(SCR_KEY_F19, 00, F19)
+    KEY_TO_XT(SCR_KEY_F20, 00, F20)
+    KEY_TO_XT(SCR_KEY_F21, 00, F21)
+    KEY_TO_XT(SCR_KEY_F22, 00, F22)
+    KEY_TO_XT(SCR_KEY_F23, 00, F23)
+    KEY_TO_XT(SCR_KEY_F24, 00, F24)
+
+    KEY_TO_XT('`', 00, Grave)
+    KEY_TO_XT('1', 00, 1)
+    KEY_TO_XT('2', 00, 2)
+    KEY_TO_XT('3', 00, 3)
+    KEY_TO_XT('4', 00, 4)
+    KEY_TO_XT('5', 00, 5)
+    KEY_TO_XT('6', 00, 6)
+    KEY_TO_XT('7', 00, 7)
+    KEY_TO_XT('8', 00, 8)
+    KEY_TO_XT('9', 00, 9)
+    KEY_TO_XT('0', 00, 0)
+    KEY_TO_XT('-', 00, Minus)
+    KEY_TO_XT('=', 00, Equal)
+    KEY_TO_XT(SCR_KEY_BACKSPACE, 00, Backspace)
+
+    KEY_TO_XT(SCR_KEY_TAB, 00, Tab)
+    KEY_TO_XT('q', 00, Q)
+    KEY_TO_XT('w', 00, W)
+    KEY_TO_XT('e', 00, E)
+    KEY_TO_XT('r', 00, R)
+    KEY_TO_XT('t', 00, T)
+    KEY_TO_XT('y', 00, Y)
+    KEY_TO_XT('u', 00, U)
+    KEY_TO_XT('i', 00, I)
+    KEY_TO_XT('o', 00, O)
+    KEY_TO_XT('p', 00, P)
+    KEY_TO_XT('[', 00, LeftBracket)
+    KEY_TO_XT(']', 00, RightBracket)
+    KEY_TO_XT('\\', 00, Backslash)
+
+    KEY_TO_XT('a', 00, A)
+    KEY_TO_XT('s', 00, S)
+    KEY_TO_XT('d', 00, D)
+    KEY_TO_XT('f', 00, F)
+    KEY_TO_XT('g', 00, G)
+    KEY_TO_XT('h', 00, H)
+    KEY_TO_XT('j', 00, J)
+    KEY_TO_XT('k', 00, K)
+    KEY_TO_XT('l', 00, L)
+    KEY_TO_XT(';', 00, Semicolon)
+    KEY_TO_XT('\'', 00, Apostrophe)
+    KEY_TO_XT(SCR_KEY_ENTER, 00, Enter)
+
+    KEY_TO_XT('z', 00, Z)
+    KEY_TO_XT('x', 00, X)
+    KEY_TO_XT('c', 00, C)
+    KEY_TO_XT('v', 00, V)
+    KEY_TO_XT('b', 00, B)
+    KEY_TO_XT('n', 00, N)
+    KEY_TO_XT('m', 00, M)
+    KEY_TO_XT(',', 00, Comma)
+    KEY_TO_XT('.', 00, Period)
+    KEY_TO_XT('/', 00, Slash)
+
+    KEY_TO_XT(' ', 00, Space)
+
+    KEY_TO_XT(SCR_KEY_INSERT, E0, Insert)
+    KEY_TO_XT(SCR_KEY_DELETE, E0, Delete)
+    KEY_TO_XT(SCR_KEY_HOME, E0, Home)
+    KEY_TO_XT(SCR_KEY_END, E0, End)
+    KEY_TO_XT(SCR_KEY_PAGE_UP, E0, PageUp)
+    KEY_TO_XT(SCR_KEY_PAGE_DOWN, E0, PageDown)
+
+    KEY_TO_XT(SCR_KEY_CURSOR_UP, E0, ArrowUp)
+    KEY_TO_XT(SCR_KEY_CURSOR_LEFT, E0, ArrowLeft)
+    KEY_TO_XT(SCR_KEY_CURSOR_DOWN, E0, ArrowDown)
+    KEY_TO_XT(SCR_KEY_CURSOR_RIGHT, E0, ArrowRight)
+
+    default:
+      logMessage(LOG_WARNING, "key not supported in raw keyboard mode: %04X", key);
+      return 0;
   }
+#undef KEY_TO_XT
 
   {
-    int modCaps = (key & SCR_KEY_UPPER) && !getCapsLockState();
-    int modShift = !!(key & SCR_KEY_SHIFT);
-    int modControl = !!(key & SCR_KEY_CONTROL);
-    int modAltLeft = !!(key & SCR_KEY_ALT_LEFT);
-    int modAltRight = !!(key & SCR_KEY_ALT_RIGHT);
+    const int modUpper = hasModUpper(key);
+    const int modShift = hasModShift(key);
+    const int modControl = hasModControl(key);
+    const int modAltLeft = hasModAltLeft(key);
+    const int modAltRight = hasModAltRight(key);
 
-    const char codeCapsLock = 0X3A;
-    const char codeShift = 0X2A;
-    const char codeControl = 0X1D;
-    const char codeAlt = 0X38;
-    const char codeEmul0 = 0XE0;
-    const char bitRelease = 0X80;
+    if (raw) {
+      char codes[18];
+      unsigned int count = 0;
 
-    char codes[18];
-    unsigned int count = 0;
-
-    if (modCaps) {
-      codes[count++] = codeCapsLock;
-      codes[count++] = codeCapsLock | bitRelease;
-    }
-    if (modShift) codes[count++] = codeShift;
-    if (modControl) codes[count++] = codeControl;
-    if (modAltLeft) codes[count++] = codeAlt;
-    if (modAltRight) {
-      if (raw) {
-        codes[count++] = codeEmul0;
-        codes[count++] = codeAlt;
-      } else {
-        codes[count++] = linuxKeyTable_xtE0[codeAlt & 0XFF];
+      if (modUpper) {
+        codes[count++] = XT_KEY_00_CapsLock;
+        codes[count++] = XT_KEY_00_CapsLock | XT_BIT_RELEASE;
       }
-    }
-    if (prefix) codes[count++] = prefix;
-    codes[count++] = code;
 
-    if (prefix) codes[count++] = prefix;
-    codes[count++] = code | bitRelease;
-    if (modAltRight) {
-      if (raw) {
-        codes[count++] = codeEmul0;
-        codes[count++] = codeAlt | bitRelease;
-      } else {
-        codes[count++] = linuxKeyTable_xtE0[codeAlt & 0XFF] | bitRelease;
+      if (modShift) codes[count++] = XT_KEY_00_LeftShift;
+      if (modControl) codes[count++] = XT_KEY_00_LeftControl;
+      if (modAltLeft) codes[count++] = XT_KEY_00_LeftAlt;
+
+      if (modAltRight) {
+        codes[count++] = XT_MOD_E0;
+        codes[count++] = XT_KEY_E0_RightAlt;
       }
-    }
-    if (modAltLeft) codes[count++] = codeAlt | bitRelease;
-    if (modControl) codes[count++] = codeControl | bitRelease;
-    if (modShift) codes[count++] = codeShift | bitRelease;
-    if (modCaps) {
-      codes[count++] = codeCapsLock;
-      codes[count++] = codeCapsLock | bitRelease;
-    }
 
-    return insertBytes(codes, count);
+      if (escape) codes[count++] = escape;
+      codes[count++] = code;
+
+      if (escape) codes[count++] = escape;
+      codes[count++] = code | XT_BIT_RELEASE;
+
+      if (modAltRight) {
+        codes[count++] = XT_MOD_E0;
+        codes[count++] = XT_KEY_E0_RightAlt | XT_BIT_RELEASE;
+      }
+
+      if (modAltLeft) codes[count++] = XT_KEY_00_LeftAlt | XT_BIT_RELEASE;
+      if (modControl) codes[count++] = XT_KEY_00_LeftControl | XT_BIT_RELEASE;
+      if (modShift) codes[count++] = XT_KEY_00_LeftShift | XT_BIT_RELEASE;
+
+      if (modUpper) {
+        codes[count++] = XT_KEY_00_CapsLock;
+        codes[count++] = XT_KEY_00_CapsLock | XT_BIT_RELEASE;
+      }
+
+      return insertBytes(codes, count);
+    } else {
+      LinuxKeyCode mapped = map[code];
+
+      if (!mapped) {
+        logMessage(LOG_WARNING, "key not supported in medium raw keyboard mode: %04X", key);
+        return 0;
+      }
+
+      return insertUinput(mapped, modUpper, modShift, modControl, modAltLeft, modAltRight);
+    }
   }
 }
 
@@ -1533,110 +1478,144 @@ insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
       case SCR_KEY_ENTER:
         sequence = WS_C("\r");
         break;
+
       case SCR_KEY_TAB:
         sequence = WS_C("\t");
         break;
+
       case SCR_KEY_BACKSPACE:
         sequence = WS_C("\x7f");
         break;
+
       case SCR_KEY_ESCAPE:
         sequence = WS_C("\x1b");
         break;
+
       case SCR_KEY_CURSOR_LEFT:
         sequence = WS_C("\x1b[D");
         break;
+
       case SCR_KEY_CURSOR_RIGHT:
         sequence = WS_C("\x1b[C");
         break;
+
       case SCR_KEY_CURSOR_UP:
         sequence = WS_C("\x1b[A");
         break;
+
       case SCR_KEY_CURSOR_DOWN:
         sequence = WS_C("\x1b[B");
         break;
+
       case SCR_KEY_PAGE_UP:
         sequence = WS_C("\x1b[5~");
         break;
+
       case SCR_KEY_PAGE_DOWN:
         sequence = WS_C("\x1b[6~");
         break;
+
       case SCR_KEY_HOME:
         sequence = WS_C("\x1b[1~");
         break;
+
       case SCR_KEY_END:
         sequence = WS_C("\x1b[4~");
         break;
+
       case SCR_KEY_INSERT:
         sequence = WS_C("\x1b[2~");
         break;
+
       case SCR_KEY_DELETE:
         sequence = WS_C("\x1b[3~");
         break;
-      case SCR_KEY_FUNCTION + 0:
+
+      case SCR_KEY_F1:
         sequence = WS_C("\x1b[[A");
         break;
-      case SCR_KEY_FUNCTION + 1:
+
+      case SCR_KEY_F2:
         sequence = WS_C("\x1b[[B");
         break;
-      case SCR_KEY_FUNCTION + 2:
+
+      case SCR_KEY_F3:
         sequence = WS_C("\x1b[[C");
         break;
-      case SCR_KEY_FUNCTION + 3:
+
+      case SCR_KEY_F4:
         sequence = WS_C("\x1b[[D");
         break;
-      case SCR_KEY_FUNCTION + 4:
+
+      case SCR_KEY_F5:
         sequence = WS_C("\x1b[[E");
         break;
-      case SCR_KEY_FUNCTION + 5:
+
+      case SCR_KEY_F6:
         sequence = WS_C("\x1b[17~");
         break;
-      case SCR_KEY_FUNCTION + 6:
+
+      case SCR_KEY_F7:
         sequence = WS_C("\x1b[18~");
         break;
-      case SCR_KEY_FUNCTION + 7:
+
+      case SCR_KEY_F8:
         sequence = WS_C("\x1b[19~");
         break;
-      case SCR_KEY_FUNCTION + 8:
+
+      case SCR_KEY_F9:
         sequence = WS_C("\x1b[20~");
         break;
-      case SCR_KEY_FUNCTION + 9:
+
+      case SCR_KEY_F10:
         sequence = WS_C("\x1b[21~");
         break;
-      case SCR_KEY_FUNCTION + 10:
+
+      case SCR_KEY_F11:
         sequence = WS_C("\x1b[23~");
         break;
-      case SCR_KEY_FUNCTION + 11:
+
+      case SCR_KEY_F12:
         sequence = WS_C("\x1b[24~");
         break;
-      case SCR_KEY_FUNCTION + 12:
+
+      case SCR_KEY_F13:
         sequence = WS_C("\x1b[25~");
         break;
-      case SCR_KEY_FUNCTION + 13:
+
+      case SCR_KEY_F14:
         sequence = WS_C("\x1b[26~");
         break;
-      case SCR_KEY_FUNCTION + 14:
+
+      case SCR_KEY_F15:
         sequence = WS_C("\x1b[28~");
         break;
-      case SCR_KEY_FUNCTION + 15:
+
+      case SCR_KEY_F16:
         sequence = WS_C("\x1b[29~");
         break;
-      case SCR_KEY_FUNCTION + 16:
+
+      case SCR_KEY_F17:
         sequence = WS_C("\x1b[31~");
         break;
-      case SCR_KEY_FUNCTION + 17:
+
+      case SCR_KEY_F18:
         sequence = WS_C("\x1b[32~");
         break;
-      case SCR_KEY_FUNCTION + 18:
+
+      case SCR_KEY_F19:
         sequence = WS_C("\x1b[33~");
         break;
-      case SCR_KEY_FUNCTION + 19:
+
+      case SCR_KEY_F20:
         sequence = WS_C("\x1b[34~");
         break;
+
       default:
-	if (insertUinput(key)) return 1;
-        logMessage(LOG_WARNING, "key %04X not supported in xlate mode.", key);
+        logMessage(LOG_WARNING, "key not supported in xlate keyboard mode: %04X", key);
         return 0;
     }
+
     end = sequence + wcslen(sequence);
   } else {
     wchar_t *character = buffer + ARRAY_COUNT(buffer);
@@ -1644,8 +1623,9 @@ insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
     end = character;
     *--character = key & SCR_KEY_CHAR_MASK;
 
-    if (key & SCR_KEY_ALT_LEFT) {
+    if (hasModAltLeft(key)) {
       int meta;
+
       if (controlConsole(KDGKBMETA, &meta) == -1) return 0;
 
       switch (meta) {
@@ -1668,39 +1648,32 @@ insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
     sequence = character;
   }
 
-  while (sequence != end)
-    if (!insertCharacter(*sequence++))
-      return 0;
+  while (sequence != end) {
+    if (!insertCharacter(*sequence)) return 0;
+    sequence += 1;
+  }
+
   return 1;
 }
 
 static int
 insertKey_LinuxScreen (ScreenKey key) {
   int ok = 0;
+
   logMessage(LOG_DEBUG, "insert key: %4.4X", key);
+
   if (rebindConsole()) {
     int mode;
+
     if (controlConsole(KDGKBMODE, &mode) != -1) {
       switch (mode) {
-        {
-          int raw;
-
         case K_RAW:
-          raw = 1;
-          goto doCode;
+          if (insertCode(key, 1)) ok = 1;
+          break;
 
         case K_MEDIUMRAW:
-          raw = 0;
-          goto doCode;
-
-        doCode:
-          if (insertUinput(key)) {
-            ok = 1;
-          } else if (insertCode(key, raw)) {
-            ok = 1;
-          }
+          if (insertCode(key, 0)) ok = 1;
           break;
-        }
 
         case K_XLATE:
           if (insertTranslated(key, insertXlate)) ok = 1;
@@ -1721,9 +1694,10 @@ insertKey_LinuxScreen (ScreenKey key) {
           break;
       }
     } else {
-      logSystemError("ioctl KDGKBMODE");
+      logSystemError("ioctl[KDGKBMODE]");
     }
   }
+
   return ok;
 }
 
@@ -1819,8 +1793,8 @@ handleCommand_LinuxScreen (int command) {
 	  {
             LinuxKeyCode code;
 
-            int press = !(arg & 0X80);
-            arg &= 0X7F;
+            int press = !(arg & XT_BIT_RELEASE);
+            arg &= ~XT_BIT_RELEASE;
 
             if (command & BRL_FLG_KBD_EMUL0) {
               code = linuxKeyTable_xtE0[arg];
@@ -1847,12 +1821,12 @@ handleCommand_LinuxScreen (int command) {
 
             if (command & BRL_FLG_KBD_EMUL0) {
               atKeys = linuxKeyTable_atE0;
-            } else if (arg == 0XE0) {
+            } else if (arg == AT_MOD_E0) {
               atKeys = linuxKeyTable_atE0;
               handled = 1;
 	    } else if (command & BRL_FLG_KBD_EMUL1) {
               atKeys = linuxKeyTable_atE1;
-            } else if (arg == 0XE1) {
+            } else if (arg == AT_MOD_E1) {
               atKeys = linuxKeyTable_atE1;
               handled = 1;
             }
