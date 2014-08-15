@@ -1614,6 +1614,7 @@ insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
         break;
 
       default:
+        if (insertCode(key, 0)) return 1;
         logMessage(LOG_WARNING, "key not supported in xlate keyboard mode: %04X", key);
         return 0;
     }
