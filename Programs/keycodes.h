@@ -200,9 +200,10 @@ typedef enum {
 } XtKeyE1;
 
 #define XT_BIT_RELEASE 0X80
+#define XT_MOD_00      0X00
 #define XT_MOD_E0      0XE0
 #define XT_MOD_E1      0XE1
-#define XT_KEY(group,name) (0X##group##00 | XT_KEY_##group##_##name)
+#define XT_KEY(group,name) ((XT_MOD_##group << 8) | XT_KEY_##group##_##name)
 
 typedef enum {
   AT_KEY_00_F9                = 0X01,
@@ -381,9 +382,10 @@ typedef enum {
 } AtKeyE1;
 
 #define AT_MOD_RELEASE 0XF0
+#define AT_MOD_00      0X00
 #define AT_MOD_E0      0XE0
 #define AT_MOD_E1      0XE1
-#define AT_KEY(group,name) (0X##group##00 | AT_KEY_##group##_##name)
+#define AT_KEY(group,name) ((AT_MOD_##group << 8) | AT_KEY_##group##_##name)
 
 typedef enum {
   PS2_KEY_EnlHelp        = 0X01,

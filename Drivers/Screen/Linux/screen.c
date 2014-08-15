@@ -1303,7 +1303,7 @@ insertCode (ScreenKey key, int raw) {
   case (KEY): \
   map = linuxKeyTable_xt ## ESCAPE; \
   code = XT_KEY_ ## ESCAPE ## _ ## CODE; \
-  escape = 0X ## ESCAPE; \
+  escape = XT_MOD_ ## ESCAPE; \
   break;
 
   switch (key & SCR_KEY_CHAR_MASK) {
