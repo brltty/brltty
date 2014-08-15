@@ -1811,10 +1811,9 @@ handleCommand_LinuxScreen (int command) {
           }
 
 	  {
-            LinuxKeyCode code = xtKeys[arg];
             int press = !(arg & XT_BIT_RELEASE);
+            LinuxKeyCode code = xtKeys[arg & ~XT_BIT_RELEASE];
 
-            arg &= ~XT_BIT_RELEASE;
             xtKeys = linuxKeyTable_xt00;
 
             if (code) return injectKeyEvent(code, press);
