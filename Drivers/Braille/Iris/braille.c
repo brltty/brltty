@@ -114,6 +114,7 @@ END_KEY_TABLE_LIST
 
 typedef struct {
   GioEndpoint *gioEndpoint;
+  SerialParameters serialParameters;
 
   const char *name;
   int speed;
@@ -139,8 +140,8 @@ typedef enum {
 } ProtocolIndex;
 
 typedef struct {
-  const char *name;
-  int speed;
+  const char *protocolName;
+  int externalSpeed;
 
   size_t (*readExternalPacket) (BrailleDisplay *brl, Port *port, void *packet, size_t size);
   unsigned forwardAcknowledgements:1;
@@ -1113,6 +1114,15 @@ static int
 core_handleZKey(BrailleDisplay *brl, Port *port) {
   logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "Z key pressed");
   setExternalProtocol(brl, brl->data->external.protocol->next);
+
+  {
+    Port *port = &brl->data->external.port;
+
+    port->speed = brl->data->external.protocol->externalSpeed;
+    port->serialParameters.baud = port->speed;
+    if (!gioReconfigureResource(port->gioEndpoint, &port->serialParameters)) return 0;
+  }
+
   return 1;
 }
 
@@ -1444,8 +1454,8 @@ endForwarding_eurobraille (BrailleDisplay *brl) {
 
 static const ProtocolEntry protocolTable[] = {
   [IR_PROTOCOL_EUROBRAILLE] = {
-    .name = strtext("eurobraille"),
-    .speed = IR_EXTERNAL_SPEED_EUROBRAILLE,
+    .protocolName = strtext("eurobraille"),
+    .externalSpeed = IR_EXTERNAL_SPEED_EUROBRAILLE,
 
     .readExternalPacket = readEurobraillePacket,
     .forwardAcknowledgements = 0,
@@ -1460,8 +1470,8 @@ static const ProtocolEntry protocolTable[] = {
   },
 
   [IR_PROTOCOL_NATIVE] = {
-    .name = strtext("native"),
-    .speed = IR_EXTERNAL_SPEED_NATIVE,
+    .protocolName = strtext("native"),
+    .externalSpeed = IR_EXTERNAL_SPEED_NATIVE,
 
     .readExternalPacket = readNativePacket,
     .forwardAcknowledgements = 1,
@@ -1488,7 +1498,7 @@ enterPacketForwardMode (BrailleDisplay *brl) {
   logMessage(LOG_INFO,
              "entering packet forward mode (port=%s, protocol=%s, speed=%d)",
              brl->data->external.port.name,
-             brl->data->external.protocol->name,
+             brl->data->external.protocol->protocolName,
              brl->data->external.port.speed);
 
   {
@@ -1496,7 +1506,7 @@ enterPacketForwardMode (BrailleDisplay *brl) {
 
     snprintf(msg, sizeof(msg), "%s (%s)",
              gettext("PC mode"),
-             gettext(brl->data->external.protocol->name));
+             gettext(brl->data->external.protocol->protocolName));
     message(NULL, msg, MSG_NODELAY);
   }
 
@@ -1705,16 +1715,17 @@ closePort (Port *port) {
 
 static int
 openPort (Port *port) {
-  const SerialParameters serialParameters = {
+  static const SerialParameters serialParameters = {
     SERIAL_DEFAULT_PARAMETERS,
-    .baud = port->speed,
     .parity = SERIAL_PARITY_EVEN
   };
 
   GioDescriptor gioDescriptor;
   gioInitializeDescriptor(&gioDescriptor);
 
-  gioDescriptor.serial.parameters = &serialParameters;
+  port->serialParameters = serialParameters;
+  port->serialParameters.baud = port->speed;
+  gioDescriptor.serial.parameters = &port->serialParameters;
 
   closePort(port);
 
@@ -1878,7 +1889,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           unsigned int choice;
 
           for (choice=0; choice<protocolCount; choice+=1) {
-            choices[choice] = protocolTable[choice].name;
+            choices[choice] = protocolTable[choice].protocolName;
           }
           choices[protocolCount] = NULL;
 
@@ -1888,7 +1899,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           }
 
           setExternalProtocol(brl, choice);
-          logMessage(LOG_INFO, "External Protocol: %s", brl->data->external.protocol->name);
+          logMessage(LOG_INFO, "External Protocol: %s", brl->data->external.protocol->protocolName);
         }
 
         {
@@ -1905,7 +1916,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         if (startLatchMonitor(brl)) {
           if (enablePorts(LOG_ERR, IR_PORT_BASE, 3) != -1) {
             brl->data->external.port.name = device;
-            brl->data->external.port.speed = brl->data->external.protocol->speed;
+            brl->data->external.port.speed = brl->data->external.protocol->externalSpeed;
 
             if (openExternalPort(brl)) {
               brl->data->internal.port.name = "serial:ttyS1";
