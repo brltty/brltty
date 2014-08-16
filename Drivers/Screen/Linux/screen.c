@@ -857,6 +857,14 @@ construct_LinuxScreen (void) {
 }
 
 static void
+closeKeyboard (void) {
+  if (uinputKeyboard) {
+    destroyUinputObject(uinputKeyboard);
+    uinputKeyboard = NULL;
+  }
+}
+
+static void
 destruct_LinuxScreen (void) {
   closeConsole();
   consoleName = NULL;
@@ -877,10 +885,7 @@ destruct_LinuxScreen (void) {
   }
   cacheSize = 0;
 
-  if (uinputKeyboard) {
-    destroyUinputObject(uinputKeyboard);
-    uinputKeyboard = NULL;
-  }
+  closeKeyboard();
 }
 
 static int
@@ -1792,6 +1797,10 @@ handleCommand_LinuxScreen (int command) {
   int cmd = blk | arg;
 
   switch (cmd) {
+    case BRL_CMD_OFFLINE:
+      closeKeyboard();
+      return 0;
+
     default:
 #ifdef HAVE_LINUX_INPUT_H
       switch (blk) {
