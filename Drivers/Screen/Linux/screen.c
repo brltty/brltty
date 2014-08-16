@@ -826,6 +826,25 @@ static int currentConsoleNumber;
 static UinputObject *uinputKeyboard;
 
 static int
+openKeyboard (void) {
+  if (!uinputKeyboard) {
+    if (!(uinputKeyboard = newUinputKeyboard("Linux Screen Driver Keyboard"))) {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+static void
+closeKeyboard (void) {
+  if (uinputKeyboard) {
+    destroyUinputObject(uinputKeyboard);
+    uinputKeyboard = NULL;
+  }
+}
+
+static int
 construct_LinuxScreen (void) {
   screenUpdated = 0;
   cacheBuffer = NULL;
@@ -848,6 +867,7 @@ construct_LinuxScreen (void) {
 
       if (openScreen(currentConsoleNumber)) {
         if (setTranslationTable(1)) {
+          openKeyboard();
           return 1;
         }
       }
@@ -884,10 +904,7 @@ destruct_LinuxScreen (void) {
   }
   cacheSize = 0;
 
-  if (uinputKeyboard) {
-    destroyUinputObject(uinputKeyboard);
-    uinputKeyboard = NULL;
-  }
+  closeKeyboard();
 }
 
 static int
@@ -1202,12 +1219,7 @@ hasModAltRight (ScreenKey key) {
 
 static int
 injectKeyEvent (int key, int press) {
-  if (!uinputKeyboard) {
-    if (!(uinputKeyboard = newUinputKeyboard("Linux Screen Driver Keyboard"))) {
-      return 0;
-    }
-  }
-
+  if (!openKeyboard()) return 0;
   return writeKeyEvent(uinputKeyboard, key, press);
 }
 
