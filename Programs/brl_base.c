@@ -28,6 +28,7 @@
 #include "brl_utils.h"
 #include "brl_dots.h"
 #include "prefs.h"
+#include "keycodes.h"
 #include "io_generic.h"
 #include "cmd_queue.h"
 #include "ktb.h"
@@ -748,9 +749,9 @@ enqueueXtScanCode (
   KeyGroup group;
 
   switch (escape) {
-    case 0X00: group = group00; break;
-    case 0XE0: group = groupE0; break;
-    case 0XE1: group = groupE1; break;
+    case XT_MOD_00: group = group00; break;
+    case XT_MOD_E0: group = groupE0; break;
+    case XT_MOD_E1: group = groupE1; break;
 
     default:
       logMessage(LOG_WARNING, "unsupported XT scan code: %02X %02X", escape, key);

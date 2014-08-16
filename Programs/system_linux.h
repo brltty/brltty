@@ -37,6 +37,7 @@ extern int writeInputEvent (UinputObject *uinput, uint16_t type, uint16_t code, 
 
 extern int enableUinputKey (UinputObject *uinput, int key);
 extern int writeKeyEvent (UinputObject *uinput, int key, int press);
+extern int releasePressedKeys (UinputObject *uinput);
 
 extern int writeRepeatDelay (UinputObject *uinput, int delay);
 extern int writeRepeatPeriod (UinputObject *uinput, int period);

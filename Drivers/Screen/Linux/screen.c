@@ -857,10 +857,9 @@ construct_LinuxScreen (void) {
 }
 
 static void
-closeKeyboard (void) {
+resetKeyboard (void) {
   if (uinputKeyboard) {
-    destroyUinputObject(uinputKeyboard);
-    uinputKeyboard = NULL;
+    releasePressedKeys(uinputKeyboard);
   }
 }
 
@@ -885,7 +884,10 @@ destruct_LinuxScreen (void) {
   }
   cacheSize = 0;
 
-  closeKeyboard();
+  if (uinputKeyboard) {
+    destroyUinputObject(uinputKeyboard);
+    uinputKeyboard = NULL;
+  }
 }
 
 static int
@@ -1799,7 +1801,7 @@ handleCommand_LinuxScreen (int command) {
   switch (cmd) {
     case BRL_CMD_RESTARTBRL:
     case BRL_CMD_OFFLINE:
-      closeKeyboard();
+      resetKeyboard();
       return 0;
 
     default:

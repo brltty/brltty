@@ -159,7 +159,6 @@ LINUX_KEY_TABLE(xt00) = {
 
   [XT_KEY_00_Language3] = KEY_KATAKANA,
   [XT_KEY_00_Language4] = KEY_HIRAGANA,
-  [XT_KEY_00_Language5] = KEY_ZENKAKUHANKAKU,
 };
 
 LINUX_KEY_TABLE(xtE0) = {
@@ -343,7 +342,6 @@ LINUX_KEY_TABLE(at00) = {
 
   [AT_KEY_00_Language3] = KEY_KATAKANA,
   [AT_KEY_00_Language4] = KEY_HIRAGANA,
-  [AT_KEY_00_Language5] = KEY_ZENKAKUHANKAKU,
 };
 
 LINUX_KEY_TABLE(atE0) = {
@@ -710,17 +708,6 @@ struct UinputObjectStruct {
   int fileDescriptor;
   BITMASK(pressedKeys, KEY_MAX+1, char);
 };
-
-static void
-releasePressedKeys (UinputObject *uinput) {
-  unsigned int key;
-
-  for (key=0; key<=KEY_MAX; key+=1) {
-    if (BITMASK_TEST(uinput->pressedKeys, key)) {
-      if (!writeKeyEvent(uinput, key, 0)) break;
-    }
-  }
-}
 #endif /* HAVE_LINUX_UINPUT_H */
 
 int
@@ -1007,6 +994,22 @@ writeKeyEvent (UinputObject *uinput, int key, int press) {
 #endif /* HAVE_LINUX_UINPUT_H */
 
   return 0;
+}
+
+int
+releasePressedKeys (UinputObject *uinput) {
+#ifdef HAVE_LINUX_UINPUT_H
+  unsigned int key;
+
+  for (key=0; key<=KEY_MAX; key+=1) {
+    if (BITMASK_TEST(uinput->pressedKeys, key)) {
+      if (!writeKeyEvent(uinput, key, 0)) return 0;
+      BITMASK_CLEAR(uinput->pressedKeys, key);
+    }
+  }
+#endif /* HAVE_LINUX_UINPUT_H */
+
+  return 1;
 }
 
 int
