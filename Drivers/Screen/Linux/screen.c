@@ -1797,6 +1797,7 @@ handleCommand_LinuxScreen (int command) {
   int cmd = blk | arg;
 
   switch (cmd) {
+    case BRL_CMD_RESTARTBRL:
     case BRL_CMD_OFFLINE:
       closeKeyboard();
       return 0;
