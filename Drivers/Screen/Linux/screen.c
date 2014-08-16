@@ -476,6 +476,9 @@ openScreen (unsigned char vt) {
         opened = 1;
 
         isMonitorable = canMonitorScreen();
+        logMessage(LOG_DEBUG, "screen is monitorable: %s",
+                   (isMonitorable? "yes": "no"));
+
         screenMonitor = NULL;
         screenUpdated = 1;
       } else {
@@ -1812,12 +1815,12 @@ handleCommand_LinuxScreen (int command) {
           }
 
 	  {
+            LinuxKeyCode key = xtKeys[arg & ~XT_BIT_RELEASE];
             int press = !(arg & XT_BIT_RELEASE);
-            LinuxKeyCode code = xtKeys[arg & ~XT_BIT_RELEASE];
 
             xtKeys = linuxKeyTable_xt00;
 
-            if (code) return injectKeyEvent(code, press);
+            if (key) return injectKeyEvent(key, press);
 	  }
           break;
 
@@ -1848,13 +1851,13 @@ handleCommand_LinuxScreen (int command) {
           }
 
           {
-            LinuxKeyCode code = atKeys[arg];
-            int pressed = atKeyPressed;
+            LinuxKeyCode key = atKeys[arg];
+            int press = atKeyPressed;
 
             atKeys = linuxKeyTable_at00;
             atKeyPressed = 1;
 
-            if (code) return injectKeyEvent(code, pressed);
+            if (key) return injectKeyEvent(key, press);
           }
           break;
       }
