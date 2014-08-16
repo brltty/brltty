@@ -49,6 +49,8 @@ processInput (void) {
 
             if (keyTable) releaseAllKeys(keyTable);
           }
+
+          enqueueCommand(command);
         }
         return 0;
 

@@ -186,6 +186,14 @@ postprocessCommand (void *state, int command, int handled) {
 
 static int
 handleUnhandledCommand (int command, void *data) {
+  switch (command) {
+    case BRL_CMD_OFFLINE:
+      return 1;
+
+    default:
+      break;
+  }
+
   alert(ALERT_COMMAND_REJECTED);
   return 0;
 }
