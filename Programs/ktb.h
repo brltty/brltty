@@ -42,6 +42,7 @@ extern char *makeKeyboardTablePath (const char *directory, const char *name);
 extern char *makeInputTablePath (const char *directory, const char *driver, const char *name);
 
 extern void resetKeyTable (KeyTable *table);
+extern void releaseAllKeys (KeyTable *table);
 
 extern KeyTableState processKeyEvent (
   KeyTable *table, unsigned char context,

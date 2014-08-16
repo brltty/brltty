@@ -23,6 +23,7 @@
 #include "log.h"
 #include "embed.h"
 #include "parameters.h"
+#include "ktb.h"
 #include "brl_input.h"
 #include "brl_cmds.h"
 #include "cmd_queue.h"
@@ -42,6 +43,12 @@ processInput (void) {
         if (!isOffline) {
           logMessage(LOG_DEBUG, "braille display offline");
           isOffline = 1;
+
+          {
+            KeyTable *keyTable = brl.keyTable;
+
+            if (keyTable) releaseAllKeys(keyTable);
+          }
         }
         return 0;
 
