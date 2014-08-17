@@ -234,13 +234,12 @@ int
 enableLogCategory (const char *name) {
   const LogCategoryEntry *ctg = logCategoryTable;
   const LogCategoryEntry *end = ctg + LOG_CATEGORY_COUNT;
+  int all = strcasecmp(name, "all") == 0;
 
   while (ctg < end) {
-    if (ctg->name) {
-      if (strcasecmp(name, ctg->name) == 0) {
-        setLogCategory(ctg, 1);
-        return 1;
-      }
+    if (all || (ctg->name && (strcasecmp(name, ctg->name) == 0))) {
+      setLogCategory(ctg, 1);
+      if (!all) return 1;
     }
 
     ctg += 1;
