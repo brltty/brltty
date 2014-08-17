@@ -1518,12 +1518,9 @@ enterPacketForwardMode (BrailleDisplay *brl) {
 static int
 leavePacketForwardMode (BrailleDisplay *brl) {
   logMessage(LOG_INFO, "leaving packet forward mode");
-  brl->data->isForwarding = 0;
   if (!brl->data->external.protocol->endForwarding(brl)) return 0;
-
-  brl->data->braille.refresh = 1;
-  scheduleUpdate("Iris not forwarding");
-
+  brl->data->isForwarding = 0;
+  scheduleUpdate("Iris local");
   return 1;
 }
 
@@ -1571,11 +1568,7 @@ handleInternalPacket_embedded (BrailleDisplay *brl, const void *packet, size_t s
     } else {
       if (!enterPacketForwardMode(brl)) return 0;
     }
-
-    return 1;
-  }
-
-  if (brl->data->isForwarding) {
+  } else if (brl->data->isForwarding) {
     if (!brl->data->external.protocol->forwardInternalPacket(brl, packet, size)) return 0;
   } else {
     handleNativePacket(brl, NULL, &coreKeyHandlers, packet, size);
