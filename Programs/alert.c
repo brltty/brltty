@@ -169,6 +169,13 @@ static const TuneElement tuneScreenUnfrozen[] = {
   TUNE_STOP()
 };
 
+static const TuneElement tuneFreezeReminder[] = {
+  TUNE_NOTE( 50,  60),
+  TUNE_REST( 30),
+  TUNE_NOTE( 50,  60),
+  TUNE_STOP()
+};
+
 static const TuneElement tuneWrapDown[] = {
   TUNE_NOTE(  6,  86),
   TUNE_NOTE(  6,  74),
@@ -237,13 +244,6 @@ static const TuneElement tuneRoutingFailed[] = {
   TUNE_NOTE(100,  77),
   TUNE_REST( 20),
   TUNE_NOTE(150,  77),
-  TUNE_STOP()
-};
-
-static const TuneElement tuneFreezeReminder[] = {
-  TUNE_NOTE( 50,  60),
-  TUNE_REST( 30),
-  TUNE_NOTE( 50,  60),
   TUNE_STOP()
 };
 
@@ -324,6 +324,10 @@ static const AlertEntry alertTable[] = {
     .tune = tuneScreenUnfrozen
   },
 
+  [ALERT_FREEZE_REMINDER] = {
+    .tune = tuneFreezeReminder
+  },
+
   [ALERT_WRAP_DOWN] = {
     .tactile = ALERT_TACTILE(20, BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_8),
     .tune = tuneWrapDown
@@ -362,10 +366,6 @@ static const AlertEntry alertTable[] = {
 
   [ALERT_ROUTING_FAILED] = {
     .tune = tuneRoutingFailed
-  },
-
-  [ALERT_FREEZE_REMINDER] = {
-    .tune = tuneFreezeReminder
   },
 };
 
