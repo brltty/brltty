@@ -587,9 +587,19 @@ changeLogLevel (const char *operand) {
 
       if (isLogLevel(&level, *string)) {
         systemLogLevel = level;
-      } else if (!enableLogCategory(*string)) {
-        logMessage(LOG_ERR, "%s: %s", gettext("unknown log level or category"), *string);
-        ok = 0;
+      } else {
+        const char *name = *string;
+        int on = 1;
+
+        if (*name == '-') {
+          on = 0;
+          name += 1;
+        }
+
+        if (!setLogCategory(name, on)) {
+          logMessage(LOG_ERR, "%s: %s", gettext("unknown log level or category"), *string);
+          ok = 0;
+        }
       }
 
       string += 1;

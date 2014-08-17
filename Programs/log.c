@@ -217,8 +217,8 @@ getLogCategoryTitle (LogCategoryIndex index) {
   return (ctg && ctg->title)? ctg->title: "";
 }
 
-static void
-setLogCategory (const LogCategoryEntry *ctg, int state) {
+static inline void
+setLogCategoryFlag (const LogCategoryEntry *ctg, unsigned char state) {
   logCategoryFlags[ctg - logCategoryTable] = state;
 }
 
@@ -227,25 +227,25 @@ disableAllLogCategories (void) {
   const LogCategoryEntry *ctg = logCategoryTable;
   const LogCategoryEntry *end = ctg + LOG_CATEGORY_COUNT;
 
-  while (ctg < end) setLogCategory(ctg++, 0);
+  while (ctg < end) setLogCategoryFlag(ctg++, 0);
 }
 
 int
-enableLogCategory (const char *name) {
+setLogCategory (const char *name, int on) {
   const LogCategoryEntry *ctg = logCategoryTable;
   const LogCategoryEntry *end = ctg + LOG_CATEGORY_COUNT;
   int all = strcasecmp(name, "all") == 0;
 
   while (ctg < end) {
     if (all || (ctg->name && (strcasecmp(name, ctg->name) == 0))) {
-      setLogCategory(ctg, 1);
+      setLogCategoryFlag(ctg, on);
       if (!all) return 1;
     }
 
     ctg += 1;
   }
 
-  return 0;
+  return all;
 }
 
 int

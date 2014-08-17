@@ -85,10 +85,11 @@ typedef enum {
 
 extern const char *getLogCategoryName (LogCategoryIndex index);
 extern const char *getLogCategoryTitle (LogCategoryIndex index);
-extern void disableAllLogCategories (void);
-extern int enableLogCategory (const char *name);
-extern unsigned char categoryLogLevel;
 
+extern void disableAllLogCategories (void);
+extern int setLogCategory (const char *name, int on);
+
+extern unsigned char categoryLogLevel;
 extern unsigned char logCategoryFlags[LOG_CATEGORY_COUNT];
 #define LOG_CATEGORY_FLAG(name) logCategoryFlags[LOG_CATEGORY_INDEX(name)]
 
