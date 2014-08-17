@@ -21,6 +21,7 @@
 #include <stdio.h>
 
 #include "log.h"
+#include "report.h"
 #include "embed.h"
 #include "parameters.h"
 #include "ktb.h"
@@ -50,7 +51,7 @@ processInput (void) {
             if (keyTable) releaseAllKeys(keyTable);
           }
 
-          enqueueCommand(command);
+          report(REPORT_BRAILLE_OFF, NULL);
         }
         return 0;
 

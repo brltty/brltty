@@ -30,6 +30,7 @@
 #include <linux/kd.h>
 
 #include "log.h"
+#include "report.h"
 #include "async_io.h"
 #include "device.h"
 #include "io_misc.h"
@@ -844,6 +845,17 @@ closeKeyboard (void) {
   }
 }
 
+static void
+resetKeyboard (void) {
+  if (uinputKeyboard) {
+    releasePressedKeys(uinputKeyboard);
+  }
+}
+
+REPORT_LISTENER(lxBrailleOffReportListener) {
+  resetKeyboard();
+}
+
 static int
 construct_LinuxScreen (void) {
   screenUpdated = 0;
@@ -868,19 +880,13 @@ construct_LinuxScreen (void) {
       if (openScreen(currentConsoleNumber)) {
         if (setTranslationTable(1)) {
           openKeyboard();
+          registerReportListener(REPORT_BRAILLE_OFF, lxBrailleOffReportListener);
           return 1;
         }
       }
     }
   }
   return 0;
-}
-
-static void
-resetKeyboard (void) {
-  if (uinputKeyboard) {
-    releasePressedKeys(uinputKeyboard);
-  }
 }
 
 static void
@@ -904,6 +910,7 @@ destruct_LinuxScreen (void) {
   }
   cacheSize = 0;
 
+  unregisterReportListener(REPORT_BRAILLE_OFF, lxBrailleOffReportListener);
   closeKeyboard();
 }
 
@@ -1811,11 +1818,6 @@ handleCommand_LinuxScreen (int command) {
   int cmd = blk | arg;
 
   switch (cmd) {
-    case BRL_CMD_RESTARTBRL:
-    case BRL_CMD_OFFLINE:
-      resetKeyboard();
-      return 0;
-
     default:
 #ifdef HAVE_LINUX_INPUT_H
       switch (blk) {
