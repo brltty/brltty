@@ -28,31 +28,31 @@
 typedef struct {
   ReportIdentifier identifier;
   Queue *listeners;
-} ReportDescriptor;
+} ReportEntry;
 
-static ReportDescriptor *reportDescriptors = NULL;
+static ReportEntry *reportTable = NULL;
 static unsigned int reportSize = 0;
 static unsigned int reportCount = 0;
 
 static void
 exitReport (void *data) {
-  if (reportDescriptors) {
-    free(reportDescriptors);
-    reportDescriptors = NULL;
+  if (reportTable) {
+    free(reportTable);
+    reportTable = NULL;
   }
 
   reportSize = 0;
   reportCount = 0;
 }
 
-static ReportDescriptor *
-getReportDescriptor (ReportIdentifier identifier) {
+static ReportEntry *
+getReportEntry (ReportIdentifier identifier) {
   int first = 0;
   int last = reportCount - 1;
 
   while (first <= last) {
     int current = (first + last) / 2;
-    ReportDescriptor *report = &reportDescriptors[current];
+    ReportEntry *report = &reportTable[current];
 
     if (report->identifier < identifier) {
       first = current + 1;
@@ -65,14 +65,14 @@ getReportDescriptor (ReportIdentifier identifier) {
 
   if (reportCount == reportSize) {
     unsigned int newSize = reportCount? (reportCount << 1): 1;
-    ReportDescriptor *newDescriptors = realloc(reportDescriptors, ARRAY_SIZE(reportDescriptors, newSize));
+    ReportEntry *newTable = realloc(reportTable, ARRAY_SIZE(reportTable, newSize));
 
-    if (!newDescriptors) {
+    if (!newTable) {
       logMallocError();
       return NULL;
     }
 
-    reportDescriptors = newDescriptors;
+    reportTable = newTable;
     reportSize = newSize;
 
     if (!reportCount) {
@@ -81,7 +81,7 @@ getReportDescriptor (ReportIdentifier identifier) {
   }
 
   {
-    ReportDescriptor *report = &reportDescriptors[first];
+    ReportEntry *report = &reportTable[first];
 
     memmove(report+1, report, ((reportCount++ - first) * sizeof(*report)));
     memset(report, 0, sizeof(*report));
@@ -104,7 +104,7 @@ tellListener (void *item, void *data) {
 
 void
 report (ReportIdentifier identifier, const void *data) {
-  ReportDescriptor *report = getReportDescriptor(identifier);
+  ReportEntry *report = getReportEntry(identifier);
 
   if (report) {
     if (report->listeners) {
@@ -120,7 +120,7 @@ report (ReportIdentifier identifier, const void *data) {
 
 int
 registerReportListener (ReportIdentifier identifier, ReportListener *listener) {
-  ReportDescriptor *report = getReportDescriptor(identifier);
+  ReportEntry *report = getReportEntry(identifier);
 
   if (report) {
     if (!report->listeners) {
@@ -142,7 +142,7 @@ registerReportListener (ReportIdentifier identifier, ReportListener *listener) {
 
 void
 unregisterReportListener (ReportIdentifier identifier, ReportListener *listener) {
-  ReportDescriptor *report = getReportDescriptor(identifier);
+  ReportEntry *report = getReportEntry(identifier);
 
   if (report) {
     if (report->listeners) {
