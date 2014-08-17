@@ -34,6 +34,17 @@ static ReportDescriptor *reportDescriptors = NULL;
 static unsigned int reportSize = 0;
 static unsigned int reportCount = 0;
 
+static void
+exitReport (void *data) {
+  if (reportDescriptors) {
+    free(reportDescriptors);
+    reportDescriptors = NULL;
+  }
+
+  reportSize = 0;
+  reportCount = 0;
+}
+
 static ReportDescriptor *
 getReportDescriptor (ReportIdentifier identifier) {
   int first = 0;
@@ -63,6 +74,10 @@ getReportDescriptor (ReportIdentifier identifier) {
 
     reportDescriptors = newDescriptors;
     reportSize = newSize;
+
+    if (!reportCount) {
+      onProgramExit("report", exitReport, NULL);
+    }
   }
 
   {
