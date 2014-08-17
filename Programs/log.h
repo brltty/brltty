@@ -87,8 +87,8 @@ extern const char *getLogCategoryName (LogCategoryIndex index);
 extern const char *getLogCategoryTitle (LogCategoryIndex index);
 
 extern void disableAllLogCategories (void);
-extern int setLogCategory (const char *name, int on);
-extern const char logCategoryKeyword_all[];
+extern int setLogCategory (const char *name);
+extern const char logCategoryName_all[];
 extern const char logCategoryPrefix_disable;
 
 extern unsigned char categoryLogLevel;
