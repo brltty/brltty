@@ -288,6 +288,13 @@ typedef struct {
 } BrailleMessage;
 
 static void
+logBrailleMessage (BrailleMessage *msg, const char *action) {
+  if (LOG_CATEGORY_FLAG(OUTPUT_PACKETS)) {
+    logBytes(categoryLogLevel, "message %s", msg->packet, msg->size, action);
+  }
+}
+
+static void
 deallocateBrailleMessage (BrailleMessage *msg) {
   free(msg);
 }
@@ -302,8 +309,10 @@ acknowledgeBrailleMessage (BrailleDisplay *brl) {
     BrailleMessage *msg = dequeueItem(brl->message.queue);
 
     if (msg) {
-      int written = writeBraillePacket(brl, msg->endpoint, msg->packet, msg->size);
+      int written;
 
+      logBrailleMessage(msg, "dequeued");
+      written = writeBraillePacket(brl, msg->endpoint, msg->packet, msg->size);
       deallocateBrailleMessage(msg);
       msg = NULL;
 
@@ -392,13 +401,18 @@ writeBrailleMessage (
       {
         Element *element = findElement(brl->message.queue, findOldBrailleMessage, msg);
 
-        if (element) deleteElement(element);
+        if (element) {
+          logBrailleMessage(getElementItem(element), "unqueued");
+          deleteElement(element);
+        }
       }
 
       if (enqueueItem(brl->message.queue, msg)) {
+        logBrailleMessage(msg, "enqueued");
         return 1;
       }
 
+      logBrailleMessage(msg, "discarded");
       free(msg);
     } else {
       logMallocError();
