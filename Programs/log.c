@@ -35,6 +35,9 @@
 #include "file.h"
 #include "get_pthreads.h"
 
+const char logCategoryKeyword_all[] = "all";
+const char logCategoryPrefix_disable = '-';
+
 const char *const logLevelNames[] = {
   "emergency", "alert", "critical", "error",
   "warning", "notice", "information", "debug"
@@ -234,7 +237,7 @@ int
 setLogCategory (const char *name, int on) {
   const LogCategoryEntry *ctg = logCategoryTable;
   const LogCategoryEntry *end = ctg + LOG_CATEGORY_COUNT;
-  int all = strcasecmp(name, "all") == 0;
+  int all = strcasecmp(name, logCategoryKeyword_all) == 0;
 
   while (ctg < end) {
     if (all || (ctg->name && (strcasecmp(name, ctg->name) == 0))) {

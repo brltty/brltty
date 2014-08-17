@@ -109,17 +109,22 @@ formatLogLevelString (unsigned int index, char *buffer, size_t size) {
     case 2: {
       LogCategoryIndex category;
 
+      STR_PRINTF("%s", "all");
+
       for (category=0; category<LOG_CATEGORY_COUNT; category+=1) {
         const char *name = getLogCategoryName(category);
 
         if (name && *name) {
-          if (category) STR_PRINTF(" ");
-          STR_PRINTF("%s", name);
+          STR_PRINTF(" %s", name);
         }
       }
 
       break;
     }
+
+    case 3:
+      STR_PRINTF("%c", logCategoryPrefix_disable);
+      break;
 
     default:
       break;
@@ -535,7 +540,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Hidden | OPT_Config | OPT_Environ | OPT_Format,
     .argument = strtext("lvl|cat,..."),
     .setting.string = &opt_logLevel,
-    .description = strtext("Logging level (%s or one of {%s}) and/or log categories to enable (any combination of {%s})"),
+    .description = strtext("Logging level (%s or one of {%s}) and/or log categories to enable (any combination of {%s}, optionally prefixed by %s to disable)"),
     .strings.format = formatLogLevelString
   },
 
@@ -591,13 +596,13 @@ changeLogLevel (const char *operand) {
         const char *name = *string;
         int on = 1;
 
-        if (*name == '-') {
+        if (*name == logCategoryPrefix_disable) {
           on = 0;
           name += 1;
         }
 
         if (!setLogCategory(name, on)) {
-          logMessage(LOG_ERR, "%s: %s", gettext("unknown log level or category"), *string);
+          logMessage(LOG_ERR, "%s: %s", gettext("unknown log level or category"), name);
           ok = 0;
         }
       }
