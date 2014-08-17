@@ -1521,7 +1521,10 @@ leavePacketForwardMode (BrailleDisplay *brl) {
   logMessage(LOG_INFO, "leaving packet forward mode");
   if (!brl->data->external.protocol->endForwarding(brl)) return 0;
   brl->data->isForwarding = 0;
+
+  brl->data->braille.refresh = 1;
   scheduleUpdate("Iris local");
+
   return 1;
 }
 
