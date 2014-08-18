@@ -16,19 +16,20 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_BRL_KEYCODES
-#define BRLTTY_INCLUDED_BRL_KEYCODES
+#ifndef BRLTTY_INCLUDED_CMD_KEYCODES
+#define BRLTTY_INCLUDED_CMD_KEYCODES
+
+#include "cmd_queue.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 extern void resetScanCodes (void);
-extern int xtInterpretScanCode (int *command, unsigned char byte);
-extern int atInterpretScanCode (int *command, unsigned char byte);
+extern CommandHandler handleKeyCodeCommand;
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_BRL_KEYCODES */
+#endif /* BRLTTY_INCLUDED_CMD_KEYCODES */

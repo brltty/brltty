@@ -18,9 +18,10 @@
 
 #include "prologue.h"
 
-#include "brl_keycodes.h"
+#include "cmd_keycodes.h"
 #include "kbd_keycodes.h"
 #include "brl_cmds.h"
+#include "alert.h"
 
 typedef enum {
   MOD_RELEASE = 0, /* must be first */
@@ -409,7 +410,7 @@ static const KeyEntry *const *XT_scanCodes;
 static size_t XT_scanCodesSize;
 static unsigned int XT_scanCodeModifiers;
 
-int
+static int
 xtInterpretScanCode (int *command, unsigned char byte) {
   if (byte == XT_MOD_E0) {
     USE_SCAN_CODES(XT, emul0);
@@ -564,7 +565,7 @@ static const KeyEntry *const *AT_scanCodes;
 static size_t AT_scanCodesSize;
 static unsigned int AT_scanCodeModifiers;
 
-int
+static int
 atInterpretScanCode (int *command, unsigned char byte) {
   if (byte == AT_MOD_RELEASE) {
     MOD_SET(MOD_RELEASE, AT_scanCodeModifiers);
@@ -583,6 +584,36 @@ atInterpretScanCode (int *command, unsigned char byte) {
   }
 
   return 0;
+}
+
+int
+handleKeyCodeCommand (int command, void *data) {
+  int arg = command & BRL_MSK_ARG;
+
+  switch (command & BRL_MSK_BLK) {
+    case BRL_BLK_PASSXT:
+      if (command & BRL_FLG_KBD_EMUL0) xtInterpretScanCode(&command, XT_MOD_E0);
+      if (command & BRL_FLG_KBD_EMUL1) xtInterpretScanCode(&command, XT_MOD_E1);
+      if (xtInterpretScanCode(&command, arg)) handleCommand(command);
+      break;
+
+    case BRL_BLK_PASSAT:
+      if (command & BRL_FLG_KBD_RELEASE) atInterpretScanCode(&command, AT_MOD_RELEASE);
+      if (command & BRL_FLG_KBD_EMUL0) atInterpretScanCode(&command, AT_MOD_E0);
+      if (command & BRL_FLG_KBD_EMUL1) atInterpretScanCode(&command, AT_MOD_E1);
+      if (atInterpretScanCode(&command, arg)) handleCommand(command);
+      break;
+
+    case BRL_BLK_PASSPS2:
+      /* not implemented yet */
+      alert(ALERT_COMMAND_REJECTED);
+      break;
+
+    default:
+      return 0;
+  }
+
+  return 1;
 }
 
 void

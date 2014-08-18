@@ -42,8 +42,9 @@
 #include "brl_cmds.h"
 #include "cmd_queue.h"
 #include "cmd_navigation.h"
-#include "cmd_speech.h"
+#include "cmd_keycodes.h"
 #include "cmd_touch.h"
+#include "cmd_speech.h"
 #include "timing.h"
 #include "async_wait.h"
 #include "async_event.h"
@@ -55,7 +56,6 @@
 #include "scr.h"
 #include "update.h"
 #include "ses.h"
-#include "brl_keycodes.h"
 #include "brl.h"
 #include "brl_utils.h"
 #include "prefs.h"
@@ -213,6 +213,7 @@ setSessionEntry (void) {
 #endif /*  ENABLE_SPEECH_SUPPORT */
 
         pushCommandHandler("touch", KTB_CTX_DEFAULT, handleTouchCommand, NULL);
+        pushCommandHandler("keycodes", KTB_CTX_DEFAULT, handleKeyCodeCommand, NULL);
         pushCommandHandler("navigation", KTB_CTX_DEFAULT, handleNavigationCommand, NULL);
         pushCommandHandler("screen", KTB_CTX_DEFAULT, handleScreenCommand, NULL);
       }
