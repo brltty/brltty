@@ -32,6 +32,7 @@
 #include "message.h"
 #include "brl_cmds.h"
 #include "brl_keycodes.h"
+#include "kbd_keycodes.h"
 #include "ttb.h"
 #include "scr.h"
 #include "unicode.h"
@@ -1237,17 +1238,17 @@ handleNavigationCommand (int command, void *data) {
           break;
         }
 
-        case BRL_BLK_PASSAT:
-          if (flags & BRL_FLG_KBD_RELEASE) atInterpretScanCode(&command, 0XF0);
-          if (flags & BRL_FLG_KBD_EMUL0) atInterpretScanCode(&command, 0XE0);
-          if (flags & BRL_FLG_KBD_EMUL1) atInterpretScanCode(&command, 0XE1);
-          if (atInterpretScanCode(&command, arg)) handleCommand(command);
+        case BRL_BLK_PASSXT:
+          if (flags & BRL_FLG_KBD_EMUL0) xtInterpretScanCode(&command, XT_MOD_E0);
+          if (flags & BRL_FLG_KBD_EMUL1) xtInterpretScanCode(&command, XT_MOD_E1);
+          if (xtInterpretScanCode(&command, arg)) handleCommand(command);
           break;
 
-        case BRL_BLK_PASSXT:
-          if (flags & BRL_FLG_KBD_EMUL0) xtInterpretScanCode(&command, 0XE0);
-          if (flags & BRL_FLG_KBD_EMUL1) xtInterpretScanCode(&command, 0XE1);
-          if (xtInterpretScanCode(&command, arg)) handleCommand(command);
+        case BRL_BLK_PASSAT:
+          if (flags & BRL_FLG_KBD_RELEASE) atInterpretScanCode(&command, AT_MOD_RELEASE);
+          if (flags & BRL_FLG_KBD_EMUL0) atInterpretScanCode(&command, AT_MOD_E0);
+          if (flags & BRL_FLG_KBD_EMUL1) atInterpretScanCode(&command, AT_MOD_E1);
+          if (atInterpretScanCode(&command, arg)) handleCommand(command);
           break;
 
         case BRL_BLK_PASSPS2:

@@ -24,16 +24,21 @@
 
 typedef enum {
   MOD_RELEASE = 0, /* must be first */
+
   MOD_WINDOWS_LEFT,
   MOD_WINDOWS_RIGHT,
   MOD_APP,
-  MOD_CAPS_LOCK,
-  MOD_SCROLL_LOCK,
-  MOD_NUMBER_LOCK,
+
+  MOD_LOCK_CAPS,
+  MOD_LOCK_SCROLL,
+  MOD_LOCK_NUMBER,
+
   MOD_SHIFT_LEFT,
   MOD_SHIFT_RIGHT,
+
   MOD_CONTROL_LEFT,
   MOD_CONTROL_RIGHT,
+
   MOD_ALT_LEFT,
   MOD_ALT_RIGHT
 } Modifier;
@@ -65,7 +70,7 @@ static const KeyEntry keyEntry_F9 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+8};
 static const KeyEntry keyEntry_F10 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+9};
 static const KeyEntry keyEntry_F11 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+10};
 static const KeyEntry keyEntry_F12 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+11};
-static const KeyEntry keyEntry_ScrollLock = {MOD_SCROLL_LOCK};
+static const KeyEntry keyEntry_ScrollLock = {MOD_LOCK_SCROLL};
 
 static const KeyEntry keyEntry_F13 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+12};
 static const KeyEntry keyEntry_F14 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+13};
@@ -110,7 +115,7 @@ static const KeyEntry keyEntry_LeftBracket = {CMD_CHAR(WC_C('[')), CMD_CHAR(WC_C
 static const KeyEntry keyEntry_RightBracket = {CMD_CHAR(WC_C(']')), CMD_CHAR(WC_C('}'))};
 static const KeyEntry keyEntry_Backslash = {CMD_CHAR('\\'), CMD_CHAR(WC_C('|'))};
 
-static const KeyEntry keyEntry_CapsLock = {MOD_CAPS_LOCK};
+static const KeyEntry keyEntry_CapsLock = {MOD_LOCK_CAPS};
 static const KeyEntry keyEntry_A = {CMD_CHAR(WC_C('a')), CMD_CHAR(WC_C('A'))};
 static const KeyEntry keyEntry_S = {CMD_CHAR(WC_C('s')), CMD_CHAR(WC_C('S'))};
 static const KeyEntry keyEntry_D = {CMD_CHAR(WC_C('d')), CMD_CHAR(WC_C('D'))};
@@ -159,7 +164,7 @@ static const KeyEntry keyEntry_ArrowLeft = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT}
 static const KeyEntry keyEntry_ArrowDown = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN};
 static const KeyEntry keyEntry_ArrowRight = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT};
 
-static const KeyEntry keyEntry_NumLock = {MOD_NUMBER_LOCK};
+static const KeyEntry keyEntry_NumLock = {MOD_LOCK_NUMBER};
 static const KeyEntry keyEntry_KPSlash = {CMD_CHAR(WC_C('/'))};
 static const KeyEntry keyEntry_KPAsterisk = {CMD_CHAR(WC_C('*'))};
 static const KeyEntry keyEntry_KPMinus = {CMD_CHAR(WC_C('-'))};
@@ -179,81 +184,87 @@ static const KeyEntry keyEntry_KP9 = {BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP, CMD_CHAR(
 
 static int
 interpretKey (int *command, const KeyEntry *key, int release, unsigned int *modifiers) {
-  int cmd = key->command;
-  int blk = cmd & BRL_MSK_BLK;
+  if (key) {
+    int cmd = key->command;
+    int blk = cmd & BRL_MSK_BLK;
 
-  if (key->alternate) {
-    int alternate = 0;
+    if (key->alternate) {
+      int alternate = 0;
 
-    if (blk == BRL_BLK_PASSCHAR) {
-      if (MOD_TST(MOD_SHIFT_LEFT, *modifiers) || MOD_TST(MOD_SHIFT_RIGHT, *modifiers)) alternate = 1;
-    } else {
-      if (MOD_TST(MOD_NUMBER_LOCK, *modifiers)) alternate = 1;
-    }
-
-    if (alternate) {
-      cmd = key->alternate;
-      blk = cmd & BRL_MSK_BLK;
-    }
-  }
-
-  if (cmd) {
-    if (blk) {
-      if (!release) {
-        if (blk == BRL_BLK_PASSCHAR) {
-          if (MOD_TST(MOD_CAPS_LOCK, *modifiers)) cmd |= BRL_FLG_CHAR_UPPER;
-          if (MOD_TST(MOD_ALT_LEFT, *modifiers)) cmd |= BRL_FLG_CHAR_META;
-          if (MOD_TST(MOD_CONTROL_LEFT, *modifiers) || MOD_TST(MOD_CONTROL_RIGHT, *modifiers)) cmd |= BRL_FLG_CHAR_CONTROL;
-        }
-
-        if ((blk == BRL_BLK_PASSKEY) && MOD_TST(MOD_ALT_LEFT, *modifiers)) {
-          int arg = cmd & BRL_MSK_ARG;
-          switch (arg) {
-            case BRL_KEY_CURSOR_LEFT:
-              cmd = BRL_CMD_SWITCHVT_PREV;
-              break;
-
-            case BRL_KEY_CURSOR_RIGHT:
-              cmd = BRL_CMD_SWITCHVT_NEXT;
-              break;
-
-            default:
-              if (arg >= BRL_KEY_FUNCTION) {
-                cmd = BRL_BLK_SWITCHVT + (arg - BRL_KEY_FUNCTION);
-              }
-              break;
-          }
-        }
-
-        *command = cmd;
-        return 1;
+      if (blk == BRL_BLK_PASSCHAR) {
+        if (MOD_TST(MOD_SHIFT_LEFT, *modifiers) || MOD_TST(MOD_SHIFT_RIGHT, *modifiers)) alternate = 1;
+      } else {
+        if (MOD_TST(MOD_LOCK_NUMBER, *modifiers)) alternate = 1;
       }
-    } else {
-      switch (cmd) {
-        case MOD_SCROLL_LOCK:
-        case MOD_NUMBER_LOCK:
-        case MOD_CAPS_LOCK:
-          if (!release) {
-            if (MOD_TST(cmd, *modifiers)) {
+
+      if (alternate) {
+        cmd = key->alternate;
+        blk = cmd & BRL_MSK_BLK;
+      }
+    }
+
+    if (cmd) {
+      if (blk) {
+        if (!release) {
+          if (blk == BRL_BLK_PASSCHAR) {
+            if (MOD_TST(MOD_LOCK_CAPS, *modifiers)) cmd |= BRL_FLG_CHAR_UPPER;
+            if (MOD_TST(MOD_ALT_LEFT, *modifiers)) cmd |= BRL_FLG_CHAR_META;
+            if (MOD_TST(MOD_CONTROL_LEFT, *modifiers) || MOD_TST(MOD_CONTROL_RIGHT, *modifiers)) cmd |= BRL_FLG_CHAR_CONTROL;
+          }
+
+          if ((blk == BRL_BLK_PASSKEY) && MOD_TST(MOD_ALT_LEFT, *modifiers)) {
+            int arg = cmd & BRL_MSK_ARG;
+
+            switch (arg) {
+              case BRL_KEY_CURSOR_LEFT:
+                cmd = BRL_CMD_SWITCHVT_PREV;
+                break;
+
+              case BRL_KEY_CURSOR_RIGHT:
+                cmd = BRL_CMD_SWITCHVT_NEXT;
+                break;
+
+              default:
+                if (arg >= BRL_KEY_FUNCTION) {
+                  cmd = BRL_BLK_SWITCHVT + (arg - BRL_KEY_FUNCTION);
+                }
+
+                break;
+            }
+          }
+
+          *command = cmd;
+          return 1;
+        }
+      } else {
+        switch (cmd) {
+          case MOD_LOCK_SCROLL:
+          case MOD_LOCK_NUMBER:
+          case MOD_LOCK_CAPS:
+            if (!release) {
+              if (MOD_TST(cmd, *modifiers)) {
+                MOD_CLR(cmd, *modifiers);
+              } else {
+                MOD_SET(cmd, *modifiers);
+              }
+            }
+
+            break;
+
+          case MOD_SHIFT_LEFT:
+          case MOD_SHIFT_RIGHT:
+          case MOD_CONTROL_LEFT:
+          case MOD_CONTROL_RIGHT:
+          case MOD_ALT_LEFT:
+          case MOD_ALT_RIGHT:
+            if (release) {
               MOD_CLR(cmd, *modifiers);
             } else {
               MOD_SET(cmd, *modifiers);
             }
-          }
-          break;
 
-        case MOD_SHIFT_LEFT:
-        case MOD_SHIFT_RIGHT:
-        case MOD_CONTROL_LEFT:
-        case MOD_CONTROL_RIGHT:
-        case MOD_ALT_LEFT:
-        case MOD_ALT_RIGHT:
-          if (release) {
-            MOD_CLR(cmd, *modifiers);
-          } else {
-            MOD_SET(cmd, *modifiers);
-          }
-          break;
+            break;
+        }
       }
     }
   }
@@ -412,6 +423,7 @@ xtInterpretScanCode (int *command, unsigned char byte) {
 
     return interpretKey(command, key, release, &XT_scanCodeModifiers);
   }
+
   return 0;
 }
 
@@ -569,6 +581,7 @@ atInterpretScanCode (int *command, unsigned char byte) {
 
     return interpretKey(command, key, release, &AT_scanCodeModifiers);
   }
+
   return 0;
 }
 
