@@ -186,6 +186,10 @@
   <!-- HandyTech [USB-HID adapter] -->
   <usb-device vendor-id="8164" product-id="3" />
 
+  <!-- Device: 1FE4:003A -->
+  <!-- HandyTech [Modular Connect 88] -->
+  <usb-device vendor-id="8164" product-id="58" />
+
   <!-- Device: 1FE4:0044 -->
   <!-- HandyTech [Easy Braille (HID)] -->
   <usb-device vendor-id="8164" product-id="68" />
@@ -193,6 +197,14 @@
   <!-- Device: 1FE4:0054 -->
   <!-- HandyTech [Active Braille] -->
   <usb-device vendor-id="8164" product-id="84" />
+
+  <!-- Device: 1FE4:0055 -->
+  <!-- HandyTech [Connect Braille 40] -->
+  <usb-device vendor-id="8164" product-id="85" />
+
+  <!-- Device: 1FE4:0064 -->
+  <!-- HandyTech [Active Star 40] -->
+  <usb-device vendor-id="8164" product-id="100" />
 
   <!-- Device: 1FE4:0074 -->
   <!-- HandyTech [Braille Star 40 (HID)] -->

@@ -201,6 +201,10 @@ brltty-hw 0x0003 0x1c71 0xc005
 # HandyTech [USB-HID adapter]
 brltty-ht 0x0003 0x1fe4 0x0003
 
+# Device: 1FE4:003A
+# HandyTech [Modular Connect 88]
+brltty-ht 0x0003 0x1fe4 0x003a
+
 # Device: 1FE4:0044
 # HandyTech [Easy Braille (HID)]
 brltty-ht 0x0003 0x1fe4 0x0044
@@ -208,6 +212,14 @@ brltty-ht 0x0003 0x1fe4 0x0044
 # Device: 1FE4:0054
 # HandyTech [Active Braille]
 brltty-ht 0x0003 0x1fe4 0x0054
+
+# Device: 1FE4:0055
+# HandyTech [Connect Braille 40]
+brltty-ht 0x0003 0x1fe4 0x0055
+
+# Device: 1FE4:0064
+# HandyTech [Active Star 40]
+brltty-ht 0x0003 0x1fe4 0x0064
 
 # Device: 1FE4:0074
 # HandyTech [Braille Star 40 (HID)]

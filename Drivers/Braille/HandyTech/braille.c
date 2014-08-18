@@ -124,6 +124,14 @@ BEGIN_KEY_NAME_TABLES(me88)
   KEY_NAME_TABLE(modularEvolution),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLES(mc88)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(rockers),
+  KEY_NAME_TABLE(keypad),
+  KEY_NAME_TABLE(modularEvolution),
+END_KEY_NAME_TABLES
+
 BEGIN_KEY_NAME_TABLE(brailleStar)
   KEY_NAME_ENTRY(HT_KEY_Space, "SpaceLeft"),
   KEY_NAME_ENTRY(HT_KEY_SpaceRight, "SpaceRight"),
@@ -144,7 +152,21 @@ BEGIN_KEY_NAME_TABLES(bs80)
   KEY_NAME_TABLE(brailleStar),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLES(as40)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(rockers),
+  KEY_NAME_TABLE(brailleStar),
+END_KEY_NAME_TABLES
+
 BEGIN_KEY_NAME_TABLES(ab40)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(rockers),
+  KEY_NAME_TABLE(brailleStar),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(cb40)
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(dots),
   KEY_NAME_TABLE(rockers),
@@ -410,6 +432,39 @@ static const ModelEntry modelTable[] = {
   HT_BASIC_BRAILLE(80),
   HT_BASIC_BRAILLE(160),
 #undef HT_BASIC_BRAILLE
+
+  { .identifier = HT_MODEL_ActiveStar40,
+    .name = "Active Star 40",
+    .textCells = 40,
+    .statusCells = 0,
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(as40),
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_Evolution,
+    .setFirmness = setFirmness,
+    .setSensitivity = setSensitivity_ActiveBraille,
+    .hasATC = 1,
+    .hasTime = 1
+  },
+
+  { .identifier = HT_MODEL_ModularConnect88,
+    .name = "Modular Connect 88",
+    .textCells = 88,
+    .statusCells = 0,
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(mc88),
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_Evolution,
+  },
+
+  { .identifier = HT_MODEL_ConnectBraille40,
+    .name = "Connect Braille 40",
+    .textCells = 40,
+    .statusCells = 0,
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(cb40),
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_Evolution,
+    .setFirmness = setFirmness,
+    .hasTime = 1
+  },
 
   { /* end of table */
     .name = NULL
@@ -1130,6 +1185,27 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
     { /* Basic Braille 160 */
       .vendor=0X1FE4, .product=0X008B,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    },
+
+    { /* Active Star 40 */
+      .vendor=0X1FE4, .product=0X0064,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    },
+
+    { /* Modular Connect 88 */
+      .vendor=0X1FE4, .product=0X003A,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    },
+
+    { /* Connect Braille 40 */
+      .vendor=0X1FE4, .product=0X0055,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .data=&usbOperations3
