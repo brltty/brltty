@@ -52,6 +52,7 @@
 #include "notes.h"
 #include "message.h"
 #include "log.h"
+#include "report.h"
 #include "file.h"
 #include "parse.h"
 #include "dynld.h"
@@ -1209,6 +1210,7 @@ constructBrailleDriver (void) {
 
       startBrailleInput();
       brailleConstructed = 1;
+      report(REPORT_BRAILLE_ON, NULL);
       return 1;
     }
 
@@ -1224,6 +1226,7 @@ constructBrailleDriver (void) {
 
 void
 destructBrailleDriver (void) {
+  report(REPORT_BRAILLE_OFF, NULL);
   stopBrailleInput();
   drainBrailleOutput(&brl, 0);
 

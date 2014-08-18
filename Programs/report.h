@@ -24,6 +24,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef enum {
+  REPORT_BRAILLE_ON,
   REPORT_BRAILLE_OFF,
 } ReportIdentifier;
 

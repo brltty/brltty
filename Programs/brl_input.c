@@ -42,7 +42,7 @@ processInput (void) {
     switch (command & BRL_MSK_CMD) {
       case BRL_CMD_OFFLINE:
         if (!isOffline) {
-          logMessage(LOG_DEBUG, "braille display offline");
+          logMessage(LOG_DEBUG, "braille offline");
           isOffline = 1;
 
           {
@@ -61,9 +61,10 @@ processInput (void) {
   }
 
   if (isOffline) {
-    logMessage(LOG_DEBUG, "braille display online");
+    logMessage(LOG_DEBUG, "braille online");
     isOffline = 0;
-    scheduleUpdate("device online");
+    report(REPORT_BRAILLE_ON, NULL);
+    scheduleUpdate("braille online");
   }
 
   if (command == EOF) return 0;
