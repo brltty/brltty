@@ -55,7 +55,7 @@
 #include "scr.h"
 #include "update.h"
 #include "ses.h"
-#include "scancodes.h"
+#include "brl_keycodes.h"
 #include "brl.h"
 #include "brl_utils.h"
 #include "prefs.h"

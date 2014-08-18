@@ -21,7 +21,7 @@
 #include <string.h>
 
 #include "hidkeys.h"
-#include "keycodes.h"
+#include "kbd_keycodes.h"
 #include "bitmask.h"
 #include "brl_cmds.h"
 #include "cmd_enqueue.h"

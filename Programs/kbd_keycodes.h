@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_KEYCODES
-#define BRLTTY_INCLUDED_KEYCODES
+#ifndef BRLTTY_INCLUDED_KBD_KEYCODES
+#define BRLTTY_INCLUDED_KBD_KEYCODES
 
 #ifdef __cplusplus
 extern "C" {
@@ -726,8 +726,10 @@ typedef enum {
   HID_KEY_RightGUI             = 0XE7,
 } HidKey;
 
+extern const unsigned char AT2XT[0X80];
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_KEYCODES */
+#endif /* BRLTTY_INCLUDED_KBD_KEYCODES */

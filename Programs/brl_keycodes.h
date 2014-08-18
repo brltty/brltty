@@ -16,14 +16,12 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_SCANCODES
-#define BRLTTY_INCLUDED_SCANCODES
+#ifndef BRLTTY_INCLUDED_BRL_KEYCODES
+#define BRLTTY_INCLUDED_BRL_KEYCODES
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-extern const unsigned char AT2XT[0X80];
 
 extern void resetScanCodes (void);
 extern int xtInterpretScanCode (int *command, unsigned char byte);
@@ -33,4 +31,4 @@ extern int atInterpretScanCode (int *command, unsigned char byte);
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_SCANCODES */
+#endif /* BRLTTY_INCLUDED_BRL_KEYCODES */

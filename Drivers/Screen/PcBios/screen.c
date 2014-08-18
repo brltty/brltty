@@ -29,7 +29,7 @@
 #include "log.h"
 #include "brl_cmds.h"
 #include "charset.h"
-#include "scancodes.h"
+#include "kbd_keycodes.h"
 
 #include "scr_driver.h"
 

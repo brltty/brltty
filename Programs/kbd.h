@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_KEYBOARD
-#define BRLTTY_INCLUDED_KEYBOARD
+#ifndef BRLTTY_INCLUDED_KBD
+#define BRLTTY_INCLUDED_KBD
 
 #include "ktb_types.h"
 
@@ -53,4 +53,4 @@ extern void destroyKeyboardMonitorObject (KeyboardMonitorObject *kmo);
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_KEYBOARD */
+#endif /* BRLTTY_INCLUDED_KBD */

@@ -26,8 +26,8 @@
 #include "parameters.h"
 #include "file.h"
 #include "system_linux.h"
-#include "keyboard.h"
-#include "keyboard_internal.h"
+#include "kbd.h"
+#include "kbd_internal.h"
 
 #ifdef HAVE_LINUX_UINPUT_H
 #include <limits.h>

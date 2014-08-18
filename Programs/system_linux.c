@@ -37,7 +37,7 @@
 #ifdef HAVE_LINUX_INPUT_H
 #include <linux/input.h>
 
-#include "keycodes.h"
+#include "kbd_keycodes.h"
 
 LINUX_KEY_TABLE(xt00) = {
   [XT_KEY_00_Escape] = KEY_ESC,

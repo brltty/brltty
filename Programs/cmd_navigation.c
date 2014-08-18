@@ -31,7 +31,7 @@
 #include "clipboard.h"
 #include "message.h"
 #include "brl_cmds.h"
-#include "scancodes.h"
+#include "brl_keycodes.h"
 #include "ttb.h"
 #include "scr.h"
 #include "unicode.h"

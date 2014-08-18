@@ -46,7 +46,7 @@
 #include "ctb.h"
 #include "ktb.h"
 #include "ktb_keyboard.h"
-#include "keyboard.h"
+#include "kbd.h"
 #include "alert.h"
 #include "tune.h"
 #include "notes.h"

@@ -1156,9 +1156,9 @@ BRLTTY_ARG_PACKAGE([mntfs], [mount file system], [], [dnl
       ;;
 ])
 
-BRLTTY_ARG_PACKAGE([keyboard], [keyboard], [], [dnl
-   *android*) keyboard_package="android";;
-   linux*) keyboard_package="linux";;
+BRLTTY_ARG_PACKAGE([kbd], [keyboard], [], [dnl
+   *android*) kbd_package="android";;
+   linux*) kbd_package="linux";;
 ])
 
 BRLTTY_ARG_PACKAGE([beep], [beeper], [], [dnl

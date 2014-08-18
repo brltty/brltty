@@ -18,8 +18,8 @@
 
 #include "prologue.h"
 
-#include "keyboard.h"
-#include "keyboard_internal.h"
+#include "kbd.h"
+#include "kbd_internal.h"
 
 BEGIN_KEY_CODE_MAP
   [0] = KBD_KEY_UNMAPPED

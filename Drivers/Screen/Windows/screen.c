@@ -22,7 +22,7 @@
 #include "parse.h"
 #include "brl_cmds.h"
 #include "system_windows.h"
-#include "scancodes.h"
+#include "kbd_keycodes.h"
 #include "unicode.h"
 
 typedef enum {

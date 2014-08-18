@@ -152,11 +152,11 @@ MNTFS_OBJECTS = $(MNTFS_OBJECT).$O
 MNTFS_INCLUDES = @mntfs_includes@
 MNTFS_LIBS = @mntfs_libs@
 
-KEYBOARD_PACKAGE = @keyboard_package@
-KEYBOARD_OBJECT = keyboard_$(KEYBOARD_PACKAGE)
-KEYBOARD_OBJECTS = keyboard.$O $(KEYBOARD_OBJECT).$O
-KEYBOARD_INCLUDES = @keyboard_includes@
-KEYBOARD_LIBS = @keyboard_libs@
+KBD_PACKAGE = @kbd_package@
+KBD_OBJECT = kbd_$(KBD_PACKAGE)
+KBD_OBJECTS = kbd.$O $(KBD_OBJECT).$O
+KBD_INCLUDES = @kbd_includes@
+KBD_LIBS = @kbd_libs@
 
 BEEP_PACKAGE = @beep_package@
 BEEP_OBJECT = beep_$(BEEP_PACKAGE)

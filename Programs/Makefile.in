@@ -95,11 +95,14 @@ $(MNTFS_OBJECT).$O:
 
 ###############################################################################
 
-keyboard.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/keyboard.c
+kbd.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/kbd.c
 
-$(KEYBOARD_OBJECT).$O:
-	$(CC) $(LIBCFLAGS) $(KEYBOARD_INCLUDES) -c $(SRC_DIR)/$(KEYBOARD_OBJECT).c
+$(KBD_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(KBD_INCLUDES) -c $(SRC_DIR)/$(KBD_OBJECT).c
+
+kbd_keycodes.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/kbd_keycodes.c
 
 ###############################################################################
 
@@ -472,7 +475,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O $(PREFS_OBJECTS) menu.$O ses.$O status.$O update.$O blink.$O clipboard.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_navigation.$O cmd_speech.$O cmd_touch.$O cmd_learn.$O scancodes.$O pipe.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KEYBOARD_OBJECTS) $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) api_control.$O $(API_OBJECTS)
+CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O $(PREFS_OBJECTS) menu.$O ses.$O status.$O update.$O blink.$O clipboard.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_navigation.$O cmd_speech.$O cmd_touch.$O cmd_learn.$O brl_keycodes.$O pipe.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) api_control.$O $(API_OBJECTS)
 CORE_NAME = brltty
 
 brltty-core: $(CORE_OBJECTS)
@@ -525,8 +528,8 @@ cmd_learn.$O:
 hidkeys.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hidkeys.c
 
-scancodes.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scancodes.c
+brl_keycodes.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brl_keycodes.c
 
 drivers.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/drivers.c
@@ -659,7 +662,7 @@ spktest.$O:
 
 ###############################################################################
 
-SCRTEST_OBJECTS = scrtest.$O $(PROGRAM_OBJECTS) drivers.$O driver.$O $(SCREEN_OBJECTS) scancodes.$O
+SCRTEST_OBJECTS = scrtest.$O $(PROGRAM_OBJECTS) drivers.$O driver.$O $(SCREEN_OBJECTS) brl_keycodes.$O
 
 scrtest$X: $(SCRTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(SCREEN_DRIVER_LIBRARIES) $(LDLIBS)

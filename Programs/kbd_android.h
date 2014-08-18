@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_KEYBOARD_ANDROID
-#define BRLTTY_INCLUDED_KEYBOARD_ANDROID
+#ifndef BRLTTY_INCLUDED_KBD_ANDROID
+#define BRLTTY_INCLUDED_KBD_ANDROID
 
 #ifdef __cplusplus
 extern "C" {
@@ -333,4 +333,4 @@ typedef enum {
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_KEYBOARD_ANDROID */
+#endif /* BRLTTY_INCLUDED_KBD_ANDROID */
