@@ -152,6 +152,13 @@ BEGIN_KEY_NAME_TABLES(bs80)
   KEY_NAME_TABLE(brailleStar),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLES(brln)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(rockers),
+  KEY_NAME_TABLE(brailleStar),
+END_KEY_NAME_TABLES
+
 BEGIN_KEY_NAME_TABLES(as40)
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(dots),
@@ -239,6 +246,7 @@ DEFINE_KEY_TABLE(me88)
 DEFINE_KEY_TABLE(mc88)
 DEFINE_KEY_TABLE(bs40)
 DEFINE_KEY_TABLE(bs80)
+DEFINE_KEY_TABLE(brln)
 DEFINE_KEY_TABLE(as40)
 DEFINE_KEY_TABLE(ab40)
 DEFINE_KEY_TABLE(cb40)
@@ -254,6 +262,7 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(mc88),
   &KEY_TABLE_DEFINITION(bs40),
   &KEY_TABLE_DEFINITION(bs80),
+  &KEY_TABLE_DEFINITION(brln),
   &KEY_TABLE_DEFINITION(as40),
   &KEY_TABLE_DEFINITION(ab40),
   &KEY_TABLE_DEFINITION(cb40),
@@ -375,7 +384,7 @@ static const ModelEntry modelTable[] = {
     .name = "Braillino",
     .textCells = 20,
     .statusCells = 0,
-    .keyTableDefinition = &KEY_TABLE_DEFINITION(bs40),
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(brln),
     .interpretByte = interpretByte_key,
     .writeCells = writeCells_statusAndText
   },
