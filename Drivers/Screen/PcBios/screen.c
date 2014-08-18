@@ -215,7 +215,7 @@ handleCommand_PcBiosScreen (int command) {
       }
 
       if (blk == BRL_BLK_PASSAT)
-	arg = at2Xt[arg];
+	arg = AT2XT[arg];
 
       if (!press)
 	arg |= 0x80;

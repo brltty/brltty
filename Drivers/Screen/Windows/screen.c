@@ -551,7 +551,7 @@ do_send:
 	return 0;
 
       if (blk == BRL_BLK_PASSAT)
-	arg = at2Xt[arg];
+	arg = AT2XT[arg];
 
       return doInsertSendInput (press, 0, 0, arg,
 	  command & BRL_FLG_KBD_EMUL0 ? KEYEVENTF_EXTENDEDKEY : 0);

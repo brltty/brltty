@@ -23,11 +23,11 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern const unsigned char at2Xt[0X80];
+extern const unsigned char AT2XT[0X80];
 
 extern void resetScanCodes (void);
-extern int atInterpretScanCode (int *command, unsigned char byte);
 extern int xtInterpretScanCode (int *command, unsigned char byte);
+extern int atInterpretScanCode (int *command, unsigned char byte);
 
 #ifdef __cplusplus
 }
