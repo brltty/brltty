@@ -24,6 +24,7 @@
 #include "unicode.h"
 #include "ttb.h"
 #include "scr.h"
+#include "brltty.h"
 
 static int inputModifiers;
 

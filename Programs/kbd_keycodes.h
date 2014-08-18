@@ -505,6 +505,8 @@ typedef enum {
   PS2_KEY_App            = 0X8D,
 } Ps2Key;
 
+#define PS2_MOD_RELEASE 0XF0
+
 typedef enum {
   HID_ERR_RollOver             = 0X01,
   HID_ERR_PostFail             = 0X02,

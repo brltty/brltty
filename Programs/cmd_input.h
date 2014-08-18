@@ -20,7 +20,6 @@
 #define BRLTTY_INCLUDED_CMD_INPUT
 
 #include "cmd_queue.h"
-#include "brltty.h"
 
 #ifdef __cplusplus
 extern "C" {

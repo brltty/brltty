@@ -589,6 +589,138 @@ atInterpretScanCode (int *command, unsigned char byte) {
   return 0;
 }
 
+static const KeyEntry *const PS2_scanCodes[] = {
+  [PS2_KEY_Escape] = &keyEntry_Escape,
+  [PS2_KEY_F1] = &keyEntry_F1,
+  [PS2_KEY_F2] = &keyEntry_F2,
+  [PS2_KEY_F3] = &keyEntry_F3,
+  [PS2_KEY_F4] = &keyEntry_F4,
+  [PS2_KEY_F5] = &keyEntry_F5,
+  [PS2_KEY_F6] = &keyEntry_F6,
+  [PS2_KEY_F7] = &keyEntry_F7,
+  [PS2_KEY_F8] = &keyEntry_F8,
+  [PS2_KEY_F9] = &keyEntry_F9,
+  [PS2_KEY_F10] = &keyEntry_F10,
+  [PS2_KEY_F11] = &keyEntry_F11,
+  [PS2_KEY_F12] = &keyEntry_F12,
+  [PS2_KEY_ScrollLock] = &keyEntry_ScrollLock,
+
+  [PS2_KEY_Grave] = &keyEntry_Grave,
+  [PS2_KEY_1] = &keyEntry_1,
+  [PS2_KEY_2] = &keyEntry_2,
+  [PS2_KEY_3] = &keyEntry_3,
+  [PS2_KEY_4] = &keyEntry_4,
+  [PS2_KEY_5] = &keyEntry_5,
+  [PS2_KEY_6] = &keyEntry_6,
+  [PS2_KEY_7] = &keyEntry_7,
+  [PS2_KEY_8] = &keyEntry_8,
+  [PS2_KEY_9] = &keyEntry_9,
+  [PS2_KEY_0] = &keyEntry_0,
+  [PS2_KEY_Minus] = &keyEntry_Minus,
+  [PS2_KEY_Equal] = &keyEntry_Equal,
+  [PS2_KEY_Backspace] = &keyEntry_Backspace,
+
+  [PS2_KEY_Tab] = &keyEntry_Tab,
+  [PS2_KEY_Q] = &keyEntry_Q,
+  [PS2_KEY_W] = &keyEntry_W,
+  [PS2_KEY_E] = &keyEntry_E,
+  [PS2_KEY_R] = &keyEntry_R,
+  [PS2_KEY_T] = &keyEntry_T,
+  [PS2_KEY_Y] = &keyEntry_Y,
+  [PS2_KEY_U] = &keyEntry_U,
+  [PS2_KEY_I] = &keyEntry_I,
+  [PS2_KEY_O] = &keyEntry_O,
+  [PS2_KEY_P] = &keyEntry_P,
+  [PS2_KEY_LeftBracket] = &keyEntry_LeftBracket,
+  [PS2_KEY_RightBracket] = &keyEntry_RightBracket,
+  [PS2_KEY_Backslash] = &keyEntry_Backslash,
+
+  [PS2_KEY_CapsLock] = &keyEntry_CapsLock,
+  [PS2_KEY_A] = &keyEntry_A,
+  [PS2_KEY_S] = &keyEntry_S,
+  [PS2_KEY_D] = &keyEntry_D,
+  [PS2_KEY_F] = &keyEntry_F,
+  [PS2_KEY_G] = &keyEntry_G,
+  [PS2_KEY_H] = &keyEntry_H,
+  [PS2_KEY_J] = &keyEntry_J,
+  [PS2_KEY_K] = &keyEntry_K,
+  [PS2_KEY_L] = &keyEntry_L,
+  [PS2_KEY_Semicolon] = &keyEntry_Semicolon,
+  [PS2_KEY_Apostrophe] = &keyEntry_Apostrophe,
+  [PS2_KEY_Enter] = &keyEntry_Enter,
+
+  [PS2_KEY_LeftShift] = &keyEntry_LeftShift,
+  [PS2_KEY_Europe2] = &keyEntry_Europe2,
+  [PS2_KEY_Z] = &keyEntry_Z,
+  [PS2_KEY_X] = &keyEntry_X,
+  [PS2_KEY_C] = &keyEntry_C,
+  [PS2_KEY_V] = &keyEntry_V,
+  [PS2_KEY_B] = &keyEntry_B,
+  [PS2_KEY_N] = &keyEntry_N,
+  [PS2_KEY_M] = &keyEntry_M,
+  [PS2_KEY_Comma] = &keyEntry_Comma,
+  [PS2_KEY_Period] = &keyEntry_Period,
+  [PS2_KEY_Slash] = &keyEntry_Slash,
+  [PS2_KEY_RightShift] = &keyEntry_RightShift,
+
+  [PS2_KEY_LeftControl] = &keyEntry_LeftControl,
+  [PS2_KEY_LeftGUI] = &keyEntry_LeftGUI,
+  [PS2_KEY_LeftAlt] = &keyEntry_LeftAlt,
+  [PS2_KEY_Space] = &keyEntry_Space,
+  [PS2_KEY_RightAlt] = &keyEntry_RightAlt,
+  [PS2_KEY_RightGUI] = &keyEntry_RightGUI,
+  [PS2_KEY_App] = &keyEntry_App,
+  [PS2_KEY_RightControl] = &keyEntry_RightControl,
+
+  [PS2_KEY_Insert] = &keyEntry_Insert,
+  [PS2_KEY_Delete] = &keyEntry_Delete,
+  [PS2_KEY_Home] = &keyEntry_Home,
+  [PS2_KEY_End] = &keyEntry_End,
+  [PS2_KEY_PageUp] = &keyEntry_PageUp,
+  [PS2_KEY_PageDown] = &keyEntry_PageDown,
+
+  [PS2_KEY_ArrowUp] = &keyEntry_ArrowUp,
+  [PS2_KEY_ArrowLeft] = &keyEntry_ArrowLeft,
+  [PS2_KEY_ArrowDown] = &keyEntry_ArrowDown,
+  [PS2_KEY_ArrowRight] = &keyEntry_ArrowRight,
+
+  [PS2_KEY_NumLock] = &keyEntry_NumLock,
+  [PS2_KEY_KPSlash] = &keyEntry_KPSlash,
+  [PS2_KEY_KPAsterisk] = &keyEntry_KPAsterisk,
+  [PS2_KEY_KPMinus] = &keyEntry_KPMinus,
+  [PS2_KEY_KPPlus] = &keyEntry_KPPlus,
+  [PS2_KEY_KPEnter] = &keyEntry_KPEnter,
+  [PS2_KEY_KPPeriod] = &keyEntry_KPPeriod,
+  [PS2_KEY_KP0] = &keyEntry_KP0,
+  [PS2_KEY_KP1] = &keyEntry_KP1,
+  [PS2_KEY_KP2] = &keyEntry_KP2,
+  [PS2_KEY_KP3] = &keyEntry_KP3,
+  [PS2_KEY_KP4] = &keyEntry_KP4,
+  [PS2_KEY_KP5] = &keyEntry_KP5,
+  [PS2_KEY_KP6] = &keyEntry_KP6,
+  [PS2_KEY_KP7] = &keyEntry_KP7,
+  [PS2_KEY_KP8] = &keyEntry_KP8,
+  [PS2_KEY_KP9] = &keyEntry_KP9,
+};
+
+static unsigned int PS2_scanCodeModifiers;
+
+static int
+ps2InterpretScanCode (int *command, unsigned char byte) {
+  if (byte == PS2_MOD_RELEASE) {
+    MOD_SET(MOD_RELEASE, PS2_scanCodeModifiers);
+  } else if (byte < ARRAY_COUNT(PS2_scanCodes)) {
+    const KeyEntry *key = PS2_scanCodes[byte];
+    int release = MOD_TST(MOD_RELEASE, PS2_scanCodeModifiers);
+
+    MOD_CLR(MOD_RELEASE, PS2_scanCodeModifiers);
+
+    return interpretKey(command, key, release, &PS2_scanCodeModifiers);
+  }
+
+  return 0;
+}
+
 int
 handleKeycodeCommand (int command, void *data) {
   int arg = command & BRL_MSK_ARG;
@@ -608,8 +740,8 @@ handleKeycodeCommand (int command, void *data) {
       break;
 
     case BRL_BLK_PASSPS2:
-      /* not implemented yet */
-      alert(ALERT_COMMAND_REJECTED);
+      if (command & BRL_FLG_KBD_RELEASE) ps2InterpretScanCode(&command, PS2_MOD_RELEASE);
+      if (ps2InterpretScanCode(&command, arg)) handleCommand(command);
       break;
 
     default:
@@ -626,6 +758,8 @@ resetKeycodeVariables (void) {
 
   USE_SCAN_CODES(AT, 00);
   AT_scanCodeModifiers = 0;
+
+  PS2_scanCodeModifiers = 0;
 }
 
 REPORT_LISTENER(keycodeCommandsResetListener) {
