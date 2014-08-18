@@ -25,7 +25,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern void resetScanCodes (void);
+extern void initializeKeyCodeCommands (void);
 extern CommandHandler handleKeyCodeCommand;
 
 #ifdef __cplusplus

@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include "report.h"
 #include "cmd_keycodes.h"
 #include "kbd_keycodes.h"
 #include "brl_cmds.h"
@@ -616,11 +617,20 @@ handleKeyCodeCommand (int command, void *data) {
   return 1;
 }
 
-void
+static void
 resetScanCodes (void) {
   USE_SCAN_CODES(XT, basic);
   XT_scanCodeModifiers = 0;
 
   USE_SCAN_CODES(AT, basic);
   AT_scanCodeModifiers = 0;
+}
+
+REPORT_LISTENER(keyCodeCommandsResetListener) {
+  resetScanCodes();
+}
+
+void
+initializeKeyCodeCommands (void) {
+  registerReportListener(REPORT_BRAILLE_ON, keyCodeCommandsResetListener);
 }

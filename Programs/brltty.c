@@ -1092,7 +1092,6 @@ int inputModifiers;
 
 void
 resetBrailleState (void) {
-  resetScanCodes();
   inputModifiers = 0;
 }
 
@@ -1327,6 +1326,7 @@ brlttyConstruct (int argc, char *argv[]) {
   interruptEvent = NULL;
   interruptPending = 0;
 
+  initializeKeyCodeCommands();
   beginCommandQueue();
   beginUpdates();
   suspendUpdates();
