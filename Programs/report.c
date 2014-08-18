@@ -30,19 +30,24 @@ typedef struct {
   Queue *listeners;
 } ReportEntry;
 
-static ReportEntry *reportTable = NULL;
+static ReportEntry **reportTable = NULL;
 static unsigned int reportSize = 0;
 static unsigned int reportCount = 0;
 
 static void
 exitReport (void *data) {
+  while (reportCount) {
+    ReportEntry *report = reportTable[--reportCount];
+
+    free(report);
+  }
+
   if (reportTable) {
     free(reportTable);
     reportTable = NULL;
   }
 
   reportSize = 0;
-  reportCount = 0;
 }
 
 static ReportEntry *
@@ -52,7 +57,7 @@ getReportEntry (ReportIdentifier identifier) {
 
   while (first <= last) {
     int current = (first + last) / 2;
-    ReportEntry *report = &reportTable[current];
+    ReportEntry *report = reportTable[current];
 
     if (report->identifier < identifier) {
       first = current + 1;
@@ -65,7 +70,7 @@ getReportEntry (ReportIdentifier identifier) {
 
   if (reportCount == reportSize) {
     unsigned int newSize = reportCount? (reportCount << 1): 1;
-    ReportEntry *newTable = realloc(reportTable, ARRAY_SIZE(reportTable, newSize));
+    ReportEntry **newTable = realloc(reportTable, ARRAY_SIZE(reportTable, newSize));
 
     if (!newTable) {
       logMallocError();
@@ -81,13 +86,20 @@ getReportEntry (ReportIdentifier identifier) {
   }
 
   {
-    ReportEntry *report = &reportTable[first];
+    ReportEntry **slot = &reportTable[first];
+    ReportEntry *report = malloc(sizeof(*report));
 
-    memmove(report+1, report, ((reportCount++ - first) * sizeof(*report)));
+    if (!report) {
+      logMallocError();
+      return NULL;
+    }
+
     memset(report, 0, sizeof(*report));
-
     report->identifier = identifier;
     report->listeners = NULL;
+
+    memmove(slot+1, slot, ((reportCount++ - first) * sizeof(*slot)));
+    *slot = report;
 
     return report;
   }
