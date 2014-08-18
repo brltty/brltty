@@ -22,7 +22,6 @@
 
 #include "log.h"
 #include "report.h"
-#include "program.h"
 #include "queue.h"
 
 typedef struct {
@@ -34,24 +33,9 @@ static ReportEntry **reportTable = NULL;
 static unsigned int reportSize = 0;
 static unsigned int reportCount = 0;
 
-static void
-exitReport (void *data) {
-  while (reportCount) {
-    ReportEntry *report = reportTable[--reportCount];
-
-    free(report);
-  }
-
-  if (reportTable) {
-    free(reportTable);
-    reportTable = NULL;
-  }
-
-  reportSize = 0;
-}
-
-static ReportEntry *
-getReportEntry (ReportIdentifier identifier) {
+static int
+findReportEntry (ReportIdentifier identifier, unsigned int *position) {
+  int found = 0;
   int first = 0;
   int last = reportCount - 1;
 
@@ -64,9 +48,22 @@ getReportEntry (ReportIdentifier identifier) {
     } else if (report->identifier > identifier) {
       last = current - 1;
     } else {
-      return report;
+      found = 1;
+      break;
     }
   }
+
+  *position = first;
+  return found;
+}
+
+static ReportEntry *
+getReportEntry (ReportIdentifier identifier, int add) {
+  unsigned int position;
+  int found = findReportEntry(identifier, &position);
+
+  if (found) return reportTable[position];
+  if (!add) return NULL;
 
   if (reportCount == reportSize) {
     unsigned int newSize = reportCount? (reportCount << 1): 1;
@@ -79,14 +76,10 @@ getReportEntry (ReportIdentifier identifier) {
 
     reportTable = newTable;
     reportSize = newSize;
-
-    if (!reportCount) {
-      onProgramExit("report", exitReport, NULL);
-    }
   }
 
   {
-    ReportEntry **slot = &reportTable[first];
+    ReportEntry **slot = &reportTable[position];
     ReportEntry *report = malloc(sizeof(*report));
 
     if (!report) {
@@ -98,7 +91,7 @@ getReportEntry (ReportIdentifier identifier) {
     report->identifier = identifier;
     report->listeners = NULL;
 
-    memmove(slot+1, slot, ((reportCount++ - first) * sizeof(*slot)));
+    memmove(slot+1, slot, ((reportCount++ - position) * sizeof(*slot)));
     *slot = report;
 
     return report;
@@ -110,13 +103,14 @@ tellListener (void *item, void *data) {
   ReportListener *listener = item;
   const ReportListenerParameters *parameters = data;
 
+  logSymbol(LOG_DEBUG, listener, "report: %u", parameters->identifier);
   listener(parameters);
   return 0;
 }
 
 void
 report (ReportIdentifier identifier, const void *data) {
-  ReportEntry *report = getReportEntry(identifier);
+  ReportEntry *report = getReportEntry(identifier, 0);
 
   if (report) {
     if (report->listeners) {
@@ -132,7 +126,7 @@ report (ReportIdentifier identifier, const void *data) {
 
 int
 registerReportListener (ReportIdentifier identifier, ReportListener *listener) {
-  ReportEntry *report = getReportEntry(identifier);
+  ReportEntry *report = getReportEntry(identifier, 1);
 
   if (report) {
     if (!report->listeners) {
@@ -154,7 +148,7 @@ registerReportListener (ReportIdentifier identifier, ReportListener *listener) {
 
 void
 unregisterReportListener (ReportIdentifier identifier, ReportListener *listener) {
-  ReportEntry *report = getReportEntry(identifier);
+  ReportEntry *report = getReportEntry(identifier, 0);
 
   if (report) {
     if (report->listeners) {
