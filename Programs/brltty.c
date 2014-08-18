@@ -42,6 +42,7 @@
 #include "brl_cmds.h"
 #include "cmd_queue.h"
 #include "cmd_navigation.h"
+#include "cmd_input.h"
 #include "cmd_keycodes.h"
 #include "cmd_touch.h"
 #include "cmd_speech.h"
@@ -213,7 +214,8 @@ setSessionEntry (void) {
 #endif /*  ENABLE_SPEECH_SUPPORT */
 
         pushCommandHandler("touch", KTB_CTX_DEFAULT, handleTouchCommand, NULL);
-        pushCommandHandler("keycodes", KTB_CTX_DEFAULT, handleKeyCodeCommand, NULL);
+        pushCommandHandler("keycodes", KTB_CTX_DEFAULT, handleKeycodeCommand, NULL);
+        pushCommandHandler("input", KTB_CTX_DEFAULT, handleInputCommand, NULL);
         pushCommandHandler("navigation", KTB_CTX_DEFAULT, handleNavigationCommand, NULL);
         pushCommandHandler("screen", KTB_CTX_DEFAULT, handleScreenCommand, NULL);
       }
@@ -1088,12 +1090,6 @@ isSameRow (
 int restartRequired;
 int isOffline;
 int isSuspended;
-int inputModifiers;
-
-void
-resetBrailleState (void) {
-  inputModifiers = 0;
-}
 
 int
 canBraille (void) {
@@ -1326,7 +1322,8 @@ brlttyConstruct (int argc, char *argv[]) {
   interruptEvent = NULL;
   interruptPending = 0;
 
-  initializeKeyCodeCommands();
+  initializeInputCommandHandling();
+  initializeKeycodeCommandHandling();
   beginCommandQueue();
   beginUpdates();
   suspendUpdates();
@@ -1348,7 +1345,6 @@ brlttyConstruct (int argc, char *argv[]) {
   restartRequired = 0;
   isOffline = 0;
   isSuspended = 0;
-  resetBrailleState();
 
   return PROG_EXIT_SUCCESS;
 }

@@ -140,7 +140,10 @@ registerReportListener (ReportIdentifier identifier, ReportListener *listener) {
       return 1;
     }
 
-    if (enqueueItem(report->listeners, listener)) return 1;
+    if (enqueueItem(report->listeners, listener)) {
+      logSymbol(LOG_DEBUG, listener, "report listener registered: %u", identifier);
+      return 1;
+    }
   }
 
   return 0;
@@ -153,6 +156,7 @@ unregisterReportListener (ReportIdentifier identifier, ReportListener *listener)
   if (report) {
     if (report->listeners) {
       if (deleteItem(report->listeners, listener)) {
+        logSymbol(LOG_DEBUG, listener, "report listener unregistered: %u", identifier);
         return;
       }
     }

@@ -1450,7 +1450,6 @@ stopBrailleDriver (void) {
 void
 restartBrailleDriver (void) {
   stopBrailleDriver();
-  resetBrailleState();
   restartRequired = 0;
 
   logMessage(LOG_INFO, gettext("reinitializing braille driver"));

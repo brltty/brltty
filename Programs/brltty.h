@@ -113,9 +113,6 @@ extern int opt_releaseDevice;
 extern int restartRequired;
 extern int isOffline;
 extern int isSuspended;
-extern int inputModifiers;
-
-extern void resetBrailleState (void);
 
 extern void placeRightEdge (int column);
 extern void placeWindowRight (void);

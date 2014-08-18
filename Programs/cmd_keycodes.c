@@ -50,7 +50,9 @@ typedef enum {
 #define MOD_CLR(number, bits) ((bits) &= ~MOD_BIT((number)))
 #define MOD_TST(number, bits) ((bits) & MOD_BIT((number)))
 
-#define USE_SCAN_CODES(mode,type) (mode##_scanCodesSize = (mode##_scanCodes = mode##_##type##ScanCodes)? (sizeof(mode##_##type##ScanCodes) / sizeof(*mode##_scanCodes)): 0)
+#define USE_SCAN_CODES(mode,type) \
+  (mode##_scanCodesSize = (mode##_scanCodes = mode##_scanCodes##type)? \
+  (sizeof(mode##_scanCodes##type) / sizeof(*mode##_scanCodes)): 0)
 
 typedef struct {
   int command;
@@ -274,7 +276,7 @@ interpretKey (int *command, const KeyEntry *key, int release, unsigned int *modi
   return 0;
 }
 
-static const KeyEntry *const XT_basicScanCodes[] = {
+static const KeyEntry *const XT_scanCodes00[] = {
   [XT_KEY_00_Escape] = &keyEntry_Escape,
   [XT_KEY_00_F1] = &keyEntry_F1,
   [XT_KEY_00_F2] = &keyEntry_F2,
@@ -382,7 +384,7 @@ static const KeyEntry *const XT_basicScanCodes[] = {
   [XT_KEY_00_KP9] = &keyEntry_KP9,
 };
 
-static const KeyEntry *const XT_emul0ScanCodes[] = {
+static const KeyEntry *const XT_scanCodesE0[] = {
   [XT_KEY_E0_LeftGUI] = &keyEntry_LeftGUI,
   [XT_KEY_E0_RightAlt] = &keyEntry_RightAlt,
   [XT_KEY_E0_RightGUI] = &keyEntry_RightGUI,
@@ -405,7 +407,7 @@ static const KeyEntry *const XT_emul0ScanCodes[] = {
   [XT_KEY_E0_KPEnter] = &keyEntry_KPEnter,
 };
 
-#define XT_emul1ScanCodes NULL
+#define XT_scanCodesE1 NULL
 
 static const KeyEntry *const *XT_scanCodes;
 static size_t XT_scanCodesSize;
@@ -414,14 +416,14 @@ static unsigned int XT_scanCodeModifiers;
 static int
 xtInterpretScanCode (int *command, unsigned char byte) {
   if (byte == XT_MOD_E0) {
-    USE_SCAN_CODES(XT, emul0);
+    USE_SCAN_CODES(XT, E0);
   } else if (byte == XT_MOD_E1) {
-    USE_SCAN_CODES(XT, emul1);
+    USE_SCAN_CODES(XT, E1);
   } else if (byte < XT_scanCodesSize) {
     const KeyEntry *key = XT_scanCodes[byte & 0X7F];
     int release = (byte & XT_BIT_RELEASE) != 0;
 
-    USE_SCAN_CODES(XT, basic);
+    USE_SCAN_CODES(XT, 00);
 
     return interpretKey(command, key, release, &XT_scanCodeModifiers);
   }
@@ -429,7 +431,7 @@ xtInterpretScanCode (int *command, unsigned char byte) {
   return 0;
 }
 
-static const KeyEntry *const AT_basicScanCodes[] = {
+static const KeyEntry *const AT_scanCodes00[] = {
   [AT_KEY_00_Escape] = &keyEntry_Escape,
   [AT_KEY_00_F1] = &keyEntry_F1,
   [AT_KEY_00_F2] = &keyEntry_F2,
@@ -537,7 +539,7 @@ static const KeyEntry *const AT_basicScanCodes[] = {
   [AT_KEY_00_KP9] = &keyEntry_KP9,
 };
 
-static const KeyEntry *const AT_emul0ScanCodes[] = {
+static const KeyEntry *const AT_scanCodesE0[] = {
   [AT_KEY_E0_LeftGUI] = &keyEntry_LeftGUI,
   [AT_KEY_E0_RightAlt] = &keyEntry_RightAlt,
   [AT_KEY_E0_RightGUI] = &keyEntry_RightGUI,
@@ -560,7 +562,7 @@ static const KeyEntry *const AT_emul0ScanCodes[] = {
   [AT_KEY_E0_KPEnter] = &keyEntry_KPEnter,
 };
 
-#define AT_emul1ScanCodes NULL
+#define AT_scanCodesE1 NULL
 
 static const KeyEntry *const *AT_scanCodes;
 static size_t AT_scanCodesSize;
@@ -571,15 +573,15 @@ atInterpretScanCode (int *command, unsigned char byte) {
   if (byte == AT_MOD_RELEASE) {
     MOD_SET(MOD_RELEASE, AT_scanCodeModifiers);
   } else if (byte == AT_MOD_E0) {
-    USE_SCAN_CODES(AT, emul0);
+    USE_SCAN_CODES(AT, E0);
   } else if (byte == AT_MOD_E1) {
-    USE_SCAN_CODES(AT, emul1);
+    USE_SCAN_CODES(AT, E1);
   } else if (byte < AT_scanCodesSize) {
     const KeyEntry *key = AT_scanCodes[byte];
     int release = MOD_TST(MOD_RELEASE, AT_scanCodeModifiers);
 
     MOD_CLR(MOD_RELEASE, AT_scanCodeModifiers);
-    USE_SCAN_CODES(AT, basic);
+    USE_SCAN_CODES(AT, 00);
 
     return interpretKey(command, key, release, &AT_scanCodeModifiers);
   }
@@ -588,7 +590,7 @@ atInterpretScanCode (int *command, unsigned char byte) {
 }
 
 int
-handleKeyCodeCommand (int command, void *data) {
+handleKeycodeCommand (int command, void *data) {
   int arg = command & BRL_MSK_ARG;
 
   switch (command & BRL_MSK_BLK) {
@@ -618,19 +620,20 @@ handleKeyCodeCommand (int command, void *data) {
 }
 
 static void
-resetScanCodes (void) {
-  USE_SCAN_CODES(XT, basic);
+resetKeycodeVariables (void) {
+  USE_SCAN_CODES(XT, 00);
   XT_scanCodeModifiers = 0;
 
-  USE_SCAN_CODES(AT, basic);
+  USE_SCAN_CODES(AT, 00);
   AT_scanCodeModifiers = 0;
 }
 
-REPORT_LISTENER(keyCodeCommandsResetListener) {
-  resetScanCodes();
+REPORT_LISTENER(keycodeCommandsResetListener) {
+  resetKeycodeVariables();
 }
 
 void
-initializeKeyCodeCommands (void) {
-  registerReportListener(REPORT_BRAILLE_ON, keyCodeCommandsResetListener);
+initializeKeycodeCommandHandling (void) {
+  resetKeycodeVariables();
+  registerReportListener(REPORT_BRAILLE_ON, keycodeCommandsResetListener);
 }

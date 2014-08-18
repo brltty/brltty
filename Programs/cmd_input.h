@@ -16,20 +16,21 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_CMD_KEYCODES
-#define BRLTTY_INCLUDED_CMD_KEYCODES
+#ifndef BRLTTY_INCLUDED_CMD_INPUT
+#define BRLTTY_INCLUDED_CMD_INPUT
 
 #include "cmd_queue.h"
+#include "brltty.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern void initializeKeycodeCommandHandling (void);
-extern CommandHandler handleKeycodeCommand;
+extern void initializeInputCommandHandling (void);
+extern CommandHandler handleInputCommand;
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_CMD_KEYCODES */
+#endif /* BRLTTY_INCLUDED_CMD_INPUT */

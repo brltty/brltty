@@ -475,7 +475,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O $(PREFS_OBJECTS) menu.$O ses.$O status.$O update.$O blink.$O clipboard.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_navigation.$O cmd_keycodes.$O cmd_touch.$O cmd_speech.$O cmd_learn.$O pipe.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) api_control.$O $(API_OBJECTS)
+CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O $(PREFS_OBJECTS) menu.$O ses.$O status.$O update.$O blink.$O clipboard.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_navigation.$O cmd_input.$O cmd_keycodes.$O cmd_touch.$O cmd_speech.$O cmd_learn.$O pipe.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) api_control.$O $(API_OBJECTS)
 CORE_NAME = brltty
 
 brltty-core: $(CORE_OBJECTS)
@@ -516,20 +516,23 @@ cmd_queue.$O:
 cmd_navigation.$O:
 	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/cmd_navigation.c
 
-cmd_speech.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_speech.c
+cmd_input.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_input.c
+
+cmd_keycodes.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_keycodes.c
 
 cmd_touch.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_touch.c
+
+cmd_speech.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_speech.c
 
 cmd_learn.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_learn.c
 
 hidkeys.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hidkeys.c
-
-cmd_keycodes.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_keycodes.c
 
 drivers.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/drivers.c
