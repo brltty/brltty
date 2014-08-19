@@ -381,14 +381,6 @@ handleNavigationCommand (int command, void *data) {
   static Preferences savedPreferences;
 
   switch (command & BRL_MSK_CMD) {
-    case BRL_CMD_NOOP:        /* do nothing but loop */
-      if (command & BRL_FLG_TOGGLE_ON) {
-        alert(ALERT_TOGGLE_ON);
-      } else if (command & BRL_FLG_TOGGLE_OFF) {
-        alert(ALERT_TOGGLE_OFF);
-      }
-      break;
-
     case BRL_CMD_TOP_LEFT:
       ses->winx = 0;
     case BRL_CMD_TOP:

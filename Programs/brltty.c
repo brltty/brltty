@@ -188,8 +188,16 @@ postprocessCommand (void *state, int command, int handled) {
 
 static int
 handleUnhandledCommand (int command, void *data) {
-  alert(ALERT_COMMAND_REJECTED);
-  return 0;
+  switch (command & BRL_MSK_CMD) {
+    case BRL_CMD_NOOP:        /* do nothing but loop */
+      break;
+
+    default:
+      alert(ALERT_COMMAND_REJECTED);
+      return 0;
+  }
+
+  return 1;
 }
 
 static void
