@@ -214,6 +214,7 @@ static const KeyEntry keyEntry_KP6 = {CMD_KEY(CURSOR_RIGHT), CMD_CHAR(WC_C('6'))
 static const KeyEntry keyEntry_KP7 = {CMD_KEY(HOME), CMD_CHAR(WC_C('7'))};
 static const KeyEntry keyEntry_KP8 = {CMD_KEY(CURSOR_UP), CMD_CHAR(WC_C('8'))};
 static const KeyEntry keyEntry_KP9 = {CMD_KEY(PAGE_UP), CMD_CHAR(WC_C('9'))};
+static const KeyEntry keyEntry_KPComma = {CMD_CHAR(WC_C(','))};
 
 static void
 handleKey (const KeyEntry *key, int release, unsigned int *modifiers) {
@@ -444,7 +445,7 @@ xtHandleScanCode (unsigned char code) {
   } else if (code == XT_MOD_E1) {
     USE_KEY_TABLE(xt, E1);
   } else if (code < xtKeyCount) {
-    const KeyEntry *key = xtKeyTable[code & 0X7F];
+    const KeyEntry *key = xtKeyTable[code & ~XT_BIT_RELEASE];
     int release = (code & XT_BIT_RELEASE) != 0;
 
     USE_KEY_TABLE(xt, 00);
@@ -721,6 +722,7 @@ static const KeyEntry *const ps2KeyTable[] = {
   [PS2_KEY_KP7] = &keyEntry_KP7,
   [PS2_KEY_KP8] = &keyEntry_KP8,
   [PS2_KEY_KP9] = &keyEntry_KP9,
+  [PS2_KEY_KPComma] = &keyEntry_KPComma,
 };
 
 static unsigned int ps2Modifiers;
