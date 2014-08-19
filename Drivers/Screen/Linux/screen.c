@@ -821,6 +821,7 @@ setTranslationTable (int force) {
 static const LinuxKeyCode *xtKeys;
 static const LinuxKeyCode *atKeys;
 static int atKeyPressed;
+static int ps2KeyPressed;
 #endif /* HAVE_LINUX_INPUT_H */
 
 static int currentConsoleNumber;
@@ -869,6 +870,7 @@ construct_LinuxScreen (void) {
   xtKeys = linuxKeyTable_xt00;
   atKeys = linuxKeyTable_at00;
   atKeyPressed = 1;
+  ps2KeyPressed = 1;
 #endif /* HAVE_LINUX_INPUT_H */
 
   if (setScreenName()) {
@@ -1885,6 +1887,33 @@ handleCommand_LinuxScreen (int command) {
 
             if (key) return injectKeyEvent(key, press);
           }
+          break;
+
+	case BRL_BLK_PASSPS2:
+          {
+            int handled = 0;
+
+            if (command & BRL_FLG_KBD_RELEASE) {
+              ps2KeyPressed = 0;
+            } else if (arg == PS2_MOD_RELEASE) {
+              ps2KeyPressed = 0;
+              handled = 1;
+            }
+
+            if (handled) return 1;
+          }
+
+          {
+            LinuxKeyCode key = linuxKeyTable_ps2[arg];
+            int press = ps2KeyPressed;
+
+            ps2KeyPressed = 1;
+
+            if (key) return injectKeyEvent(key, press);
+          }
+          break;
+
+        default:
           break;
       }
 #endif /* HAVE_LINUX_INPUT_H */

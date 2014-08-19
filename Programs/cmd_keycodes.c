@@ -50,9 +50,9 @@ typedef enum {
 #define MOD_CLR(number, bits) ((bits) &= ~MOD_BIT((number)))
 #define MOD_TST(number, bits) ((bits) & MOD_BIT((number)))
 
-#define USE_SCAN_CODES(mode,type) \
-  (mode##_scanCodesSize = (mode##_scanCodes = mode##_scanCodes##type)? \
-  (sizeof(mode##_scanCodes##type) / sizeof(*mode##_scanCodes)): 0)
+#define USE_KEY_TABLE(mode,type) \
+  (mode##KeyCount = (mode##KeyTable = mode##KeyTable##type)? \
+  ARRAY_COUNT(mode##KeyTable##type): 0)
 
 typedef struct {
   int command;
@@ -186,8 +186,8 @@ static const KeyEntry keyEntry_KP7 = {BRL_BLK_PASSKEY+BRL_KEY_HOME, CMD_CHAR(WC_
 static const KeyEntry keyEntry_KP8 = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP, CMD_CHAR(WC_C('8'))};
 static const KeyEntry keyEntry_KP9 = {BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP, CMD_CHAR(WC_C('9'))};
 
-static int
-interpretKey (int *command, const KeyEntry *key, int release, unsigned int *modifiers) {
+static void
+handleKey (const KeyEntry *key, int release, unsigned int *modifiers) {
   if (key) {
     int cmd = key->command;
     int blk = cmd & BRL_MSK_BLK;
@@ -214,9 +214,7 @@ interpretKey (int *command, const KeyEntry *key, int release, unsigned int *modi
             if (MOD_TST(MOD_LOCK_CAPS, *modifiers)) cmd |= BRL_FLG_CHAR_UPPER;
             if (MOD_TST(MOD_ALT_LEFT, *modifiers)) cmd |= BRL_FLG_CHAR_META;
             if (MOD_TST(MOD_CONTROL_LEFT, *modifiers) || MOD_TST(MOD_CONTROL_RIGHT, *modifiers)) cmd |= BRL_FLG_CHAR_CONTROL;
-          }
-
-          if ((blk == BRL_BLK_PASSKEY) && MOD_TST(MOD_ALT_LEFT, *modifiers)) {
+          } else if ((blk == BRL_BLK_PASSKEY) && MOD_TST(MOD_ALT_LEFT, *modifiers)) {
             int arg = cmd & BRL_MSK_ARG;
 
             switch (arg) {
@@ -237,8 +235,7 @@ interpretKey (int *command, const KeyEntry *key, int release, unsigned int *modi
             }
           }
 
-          *command = cmd;
-          return 1;
+          handleCommand(cmd);
         }
       } else {
         switch (cmd) {
@@ -272,11 +269,9 @@ interpretKey (int *command, const KeyEntry *key, int release, unsigned int *modi
       }
     }
   }
-
-  return 0;
 }
 
-static const KeyEntry *const XT_scanCodes00[] = {
+static const KeyEntry *const xtKeyTable00[] = {
   [XT_KEY_00_Escape] = &keyEntry_Escape,
   [XT_KEY_00_F1] = &keyEntry_F1,
   [XT_KEY_00_F2] = &keyEntry_F2,
@@ -384,7 +379,7 @@ static const KeyEntry *const XT_scanCodes00[] = {
   [XT_KEY_00_KP9] = &keyEntry_KP9,
 };
 
-static const KeyEntry *const XT_scanCodesE0[] = {
+static const KeyEntry *const xtKeyTableE0[] = {
   [XT_KEY_E0_LeftGUI] = &keyEntry_LeftGUI,
   [XT_KEY_E0_RightAlt] = &keyEntry_RightAlt,
   [XT_KEY_E0_RightGUI] = &keyEntry_RightGUI,
@@ -407,31 +402,29 @@ static const KeyEntry *const XT_scanCodesE0[] = {
   [XT_KEY_E0_KPEnter] = &keyEntry_KPEnter,
 };
 
-#define XT_scanCodesE1 NULL
+#define xtKeyTableE1 NULL
 
-static const KeyEntry *const *XT_scanCodes;
-static size_t XT_scanCodesSize;
-static unsigned int XT_scanCodeModifiers;
+static const KeyEntry *const *xtKeyTable;
+static size_t xtKeyCount;
+static unsigned int xtModifiers;
 
-static int
-xtInterpretScanCode (int *command, unsigned char byte) {
-  if (byte == XT_MOD_E0) {
-    USE_SCAN_CODES(XT, E0);
-  } else if (byte == XT_MOD_E1) {
-    USE_SCAN_CODES(XT, E1);
-  } else if (byte < XT_scanCodesSize) {
-    const KeyEntry *key = XT_scanCodes[byte & 0X7F];
-    int release = (byte & XT_BIT_RELEASE) != 0;
+static void
+xtHandleScanCode (unsigned char code) {
+  if (code == XT_MOD_E0) {
+    USE_KEY_TABLE(xt, E0);
+  } else if (code == XT_MOD_E1) {
+    USE_KEY_TABLE(xt, E1);
+  } else if (code < xtKeyCount) {
+    const KeyEntry *key = xtKeyTable[code & 0X7F];
+    int release = (code & XT_BIT_RELEASE) != 0;
 
-    USE_SCAN_CODES(XT, 00);
+    USE_KEY_TABLE(xt, 00);
 
-    return interpretKey(command, key, release, &XT_scanCodeModifiers);
+    handleKey(key, release, &xtModifiers);
   }
-
-  return 0;
 }
 
-static const KeyEntry *const AT_scanCodes00[] = {
+static const KeyEntry *const atKeyTable00[] = {
   [AT_KEY_00_Escape] = &keyEntry_Escape,
   [AT_KEY_00_F1] = &keyEntry_F1,
   [AT_KEY_00_F2] = &keyEntry_F2,
@@ -539,7 +532,7 @@ static const KeyEntry *const AT_scanCodes00[] = {
   [AT_KEY_00_KP9] = &keyEntry_KP9,
 };
 
-static const KeyEntry *const AT_scanCodesE0[] = {
+static const KeyEntry *const atKeyTableE0[] = {
   [AT_KEY_E0_LeftGUI] = &keyEntry_LeftGUI,
   [AT_KEY_E0_RightAlt] = &keyEntry_RightAlt,
   [AT_KEY_E0_RightGUI] = &keyEntry_RightGUI,
@@ -562,34 +555,32 @@ static const KeyEntry *const AT_scanCodesE0[] = {
   [AT_KEY_E0_KPEnter] = &keyEntry_KPEnter,
 };
 
-#define AT_scanCodesE1 NULL
+#define atKeyTableE1 NULL
 
-static const KeyEntry *const *AT_scanCodes;
-static size_t AT_scanCodesSize;
-static unsigned int AT_scanCodeModifiers;
+static const KeyEntry *const *atKeyTable;
+static size_t atKeyCount;
+static unsigned int atModifiers;
 
-static int
-atInterpretScanCode (int *command, unsigned char byte) {
-  if (byte == AT_MOD_RELEASE) {
-    MOD_SET(MOD_RELEASE, AT_scanCodeModifiers);
-  } else if (byte == AT_MOD_E0) {
-    USE_SCAN_CODES(AT, E0);
-  } else if (byte == AT_MOD_E1) {
-    USE_SCAN_CODES(AT, E1);
-  } else if (byte < AT_scanCodesSize) {
-    const KeyEntry *key = AT_scanCodes[byte];
-    int release = MOD_TST(MOD_RELEASE, AT_scanCodeModifiers);
+static void
+atHandleScanCode (unsigned char code) {
+  if (code == AT_MOD_RELEASE) {
+    MOD_SET(MOD_RELEASE, atModifiers);
+  } else if (code == AT_MOD_E0) {
+    USE_KEY_TABLE(at, E0);
+  } else if (code == AT_MOD_E1) {
+    USE_KEY_TABLE(at, E1);
+  } else if (code < atKeyCount) {
+    const KeyEntry *key = atKeyTable[code];
+    int release = MOD_TST(MOD_RELEASE, atModifiers);
 
-    MOD_CLR(MOD_RELEASE, AT_scanCodeModifiers);
-    USE_SCAN_CODES(AT, 00);
+    MOD_CLR(MOD_RELEASE, atModifiers);
+    USE_KEY_TABLE(at, 00);
 
-    return interpretKey(command, key, release, &AT_scanCodeModifiers);
+    handleKey(key, release, &atModifiers);
   }
-
-  return 0;
 }
 
-static const KeyEntry *const PS2_scanCodes[] = {
+static const KeyEntry *const ps2KeyTable[] = {
   [PS2_KEY_Escape] = &keyEntry_Escape,
   [PS2_KEY_F1] = &keyEntry_F1,
   [PS2_KEY_F2] = &keyEntry_F2,
@@ -703,22 +694,20 @@ static const KeyEntry *const PS2_scanCodes[] = {
   [PS2_KEY_KP9] = &keyEntry_KP9,
 };
 
-static unsigned int PS2_scanCodeModifiers;
+static unsigned int ps2Modifiers;
 
-static int
-ps2InterpretScanCode (int *command, unsigned char byte) {
-  if (byte == PS2_MOD_RELEASE) {
-    MOD_SET(MOD_RELEASE, PS2_scanCodeModifiers);
-  } else if (byte < ARRAY_COUNT(PS2_scanCodes)) {
-    const KeyEntry *key = PS2_scanCodes[byte];
-    int release = MOD_TST(MOD_RELEASE, PS2_scanCodeModifiers);
+static void
+ps2HandleScanCode (unsigned char code) {
+  if (code == PS2_MOD_RELEASE) {
+    MOD_SET(MOD_RELEASE, ps2Modifiers);
+  } else if (code < ARRAY_COUNT(ps2KeyTable)) {
+    const KeyEntry *key = ps2KeyTable[code];
+    int release = MOD_TST(MOD_RELEASE, ps2Modifiers);
 
-    MOD_CLR(MOD_RELEASE, PS2_scanCodeModifiers);
+    MOD_CLR(MOD_RELEASE, ps2Modifiers);
 
-    return interpretKey(command, key, release, &PS2_scanCodeModifiers);
+    handleKey(key, release, &ps2Modifiers);
   }
-
-  return 0;
 }
 
 int
@@ -727,21 +716,21 @@ handleKeycodeCommand (int command, void *data) {
 
   switch (command & BRL_MSK_BLK) {
     case BRL_BLK_PASSXT:
-      if (command & BRL_FLG_KBD_EMUL0) xtInterpretScanCode(&command, XT_MOD_E0);
-      if (command & BRL_FLG_KBD_EMUL1) xtInterpretScanCode(&command, XT_MOD_E1);
-      if (xtInterpretScanCode(&command, arg)) handleCommand(command);
+      if (command & BRL_FLG_KBD_EMUL0) xtHandleScanCode(XT_MOD_E0);
+      if (command & BRL_FLG_KBD_EMUL1) xtHandleScanCode(XT_MOD_E1);
+      xtHandleScanCode(arg);
       break;
 
     case BRL_BLK_PASSAT:
-      if (command & BRL_FLG_KBD_RELEASE) atInterpretScanCode(&command, AT_MOD_RELEASE);
-      if (command & BRL_FLG_KBD_EMUL0) atInterpretScanCode(&command, AT_MOD_E0);
-      if (command & BRL_FLG_KBD_EMUL1) atInterpretScanCode(&command, AT_MOD_E1);
-      if (atInterpretScanCode(&command, arg)) handleCommand(command);
+      if (command & BRL_FLG_KBD_RELEASE) atHandleScanCode(AT_MOD_RELEASE);
+      if (command & BRL_FLG_KBD_EMUL0) atHandleScanCode(AT_MOD_E0);
+      if (command & BRL_FLG_KBD_EMUL1) atHandleScanCode(AT_MOD_E1);
+      atHandleScanCode(arg);
       break;
 
     case BRL_BLK_PASSPS2:
-      if (command & BRL_FLG_KBD_RELEASE) ps2InterpretScanCode(&command, PS2_MOD_RELEASE);
-      if (ps2InterpretScanCode(&command, arg)) handleCommand(command);
+      if (command & BRL_FLG_KBD_RELEASE) ps2HandleScanCode(PS2_MOD_RELEASE);
+      ps2HandleScanCode(arg);
       break;
 
     default:
@@ -753,13 +742,13 @@ handleKeycodeCommand (int command, void *data) {
 
 static void
 resetKeycodeVariables (void) {
-  USE_SCAN_CODES(XT, 00);
-  XT_scanCodeModifiers = 0;
+  USE_KEY_TABLE(xt, 00);
+  xtModifiers = 0;
 
-  USE_SCAN_CODES(AT, 00);
-  AT_scanCodeModifiers = 0;
+  USE_KEY_TABLE(at, 00);
+  atModifiers = 0;
 
-  PS2_scanCodeModifiers = 0;
+  ps2Modifiers = 0;
 }
 
 REPORT_LISTENER(keycodeCommandsResetListener) {
