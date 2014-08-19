@@ -44,6 +44,19 @@ insertKey (ScreenKey key, int flags) {
   return insertScreenKey(key);
 }
 
+static int
+switchVirtualTerminal (int vt) {
+  int switched = switchScreenVirtualTerminal(vt);
+
+  if (switched) {
+    updateSessionAttributes();
+  } else {
+    alert(ALERT_COMMAND_REJECTED);
+  }
+
+  return switched;
+}
+
 int
 handleInputCommand (int command, void *data) {
   switch (command & BRL_MSK_CMD) {
@@ -70,6 +83,14 @@ handleInputCommand (int command, void *data) {
       toggleBit(&inputModifiers, modifier, command, ALERT_TOGGLE_OFF, ALERT_TOGGLE_ON);
       break;
     }
+
+    case BRL_CMD_SWITCHVT_PREV:
+      switchVirtualTerminal(scr.number-1);
+      break;
+
+    case BRL_CMD_SWITCHVT_NEXT:
+      switchVirtualTerminal(scr.number+1);
+      break;
 
     default: {
       int arg = command & BRL_MSK_ARG;
@@ -163,6 +184,10 @@ handleInputCommand (int command, void *data) {
           if (!insertKey(character, flags)) alert(ALERT_COMMAND_REJECTED);
           break;
         }
+
+        case BRL_BLK_SWITCHVT:
+          switchVirtualTerminal(arg+1);
+          break;
 
         default:
           return 0;

@@ -375,19 +375,6 @@ doBrailleTime (const TimeFormattingData *fmt) {
   message(NULL, buffer, MSG_SILENT);
 }
 
-static int
-switchVirtualTerminal (int vt) {
-  int switched = switchScreenVirtualTerminal(vt);
-
-  if (switched) {
-    updateSessionAttributes();
-  } else {
-    alert(ALERT_COMMAND_REJECTED);
-  }
-
-  return switched;
-}
-
 int
 handleNavigationCommand (int command, void *data) {
   static const char modeString_preferences[] = "prf";
@@ -971,13 +958,6 @@ handleNavigationCommand (int command, void *data) {
       if (!learnMode(LEARN_MODE_TIMEOUT)) restartRequired = 1;
       break;
 
-    case BRL_CMD_SWITCHVT_PREV:
-      switchVirtualTerminal(scr.number-1);
-      break;
-    case BRL_CMD_SWITCHVT_NEXT:
-      switchVirtualTerminal(scr.number+1);
-      break;
-
     case BRL_CMD_TIME: {
       TimeFormattingData fmt;
       getTimeFormattingData(&fmt);
@@ -1134,10 +1114,6 @@ handleNavigationCommand (int command, void *data) {
           ses->winy = mark->row;
           break;
         }
-
-        case BRL_BLK_SWITCHVT:
-          switchVirtualTerminal(arg+1);
-          break;
 
         {
           int column, row;
