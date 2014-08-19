@@ -25,6 +25,33 @@
 #include "alert.h"
 
 typedef enum {
+  BRL_KEY_F1 = BRL_KEY_FUNCTION,
+  BRL_KEY_F2,
+  BRL_KEY_F3,
+  BRL_KEY_F4,
+  BRL_KEY_F5,
+  BRL_KEY_F6,
+  BRL_KEY_F7,
+  BRL_KEY_F8,
+  BRL_KEY_F9,
+  BRL_KEY_F10,
+  BRL_KEY_F11,
+  BRL_KEY_F12,
+  BRL_KEY_F13,
+  BRL_KEY_F14,
+  BRL_KEY_F15,
+  BRL_KEY_F16,
+  BRL_KEY_F17,
+  BRL_KEY_F18,
+  BRL_KEY_F19,
+  BRL_KEY_F20,
+  BRL_KEY_F21,
+  BRL_KEY_F22,
+  BRL_KEY_F23,
+  BRL_KEY_F24
+} FunctionKeys;
+
+typedef enum {
   MOD_RELEASE = 0, /* must be first */
 
   MOD_WINDOWS_LEFT,
@@ -60,34 +87,35 @@ typedef struct {
 } KeyEntry;
 
 #define CMD_CHAR(wc) (BRL_BLK_PASSCHAR | BRL_ARG_SET((wc)))
+#define CMD_KEY(key) (BRL_BLK_PASSKEY | BRL_ARG_SET(BRL_KEY_##key))
 
-static const KeyEntry keyEntry_Escape = {BRL_BLK_PASSKEY+BRL_KEY_ESCAPE};
-static const KeyEntry keyEntry_F1 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+0};
-static const KeyEntry keyEntry_F2 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+1};
-static const KeyEntry keyEntry_F3 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+2};
-static const KeyEntry keyEntry_F4 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+3};
-static const KeyEntry keyEntry_F5 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+4};
-static const KeyEntry keyEntry_F6 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+5};
-static const KeyEntry keyEntry_F7 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+6};
-static const KeyEntry keyEntry_F8 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+7};
-static const KeyEntry keyEntry_F9 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+8};
-static const KeyEntry keyEntry_F10 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+9};
-static const KeyEntry keyEntry_F11 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+10};
-static const KeyEntry keyEntry_F12 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+11};
+static const KeyEntry keyEntry_Escape = {CMD_KEY(ESCAPE)};
+static const KeyEntry keyEntry_F1 = {CMD_KEY(F1)};
+static const KeyEntry keyEntry_F2 = {CMD_KEY(F2)};
+static const KeyEntry keyEntry_F3 = {CMD_KEY(F3)};
+static const KeyEntry keyEntry_F4 = {CMD_KEY(F4)};
+static const KeyEntry keyEntry_F5 = {CMD_KEY(F5)};
+static const KeyEntry keyEntry_F6 = {CMD_KEY(F6)};
+static const KeyEntry keyEntry_F7 = {CMD_KEY(F7)};
+static const KeyEntry keyEntry_F8 = {CMD_KEY(F8)};
+static const KeyEntry keyEntry_F9 = {CMD_KEY(F9)};
+static const KeyEntry keyEntry_F10 = {CMD_KEY(F10)};
+static const KeyEntry keyEntry_F11 = {CMD_KEY(F11)};
+static const KeyEntry keyEntry_F12 = {CMD_KEY(F12)};
 static const KeyEntry keyEntry_ScrollLock = {MOD_LOCK_SCROLL};
 
-static const KeyEntry keyEntry_F13 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+12};
-static const KeyEntry keyEntry_F14 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+13};
-static const KeyEntry keyEntry_F15 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+14};
-static const KeyEntry keyEntry_F16 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+15};
-static const KeyEntry keyEntry_F17 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+16};
-static const KeyEntry keyEntry_F18 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+17};
-static const KeyEntry keyEntry_F19 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+18};
-static const KeyEntry keyEntry_F20 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+19};
-static const KeyEntry keyEntry_F21 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+20};
-static const KeyEntry keyEntry_F22 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+21};
-static const KeyEntry keyEntry_F23 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+22};
-static const KeyEntry keyEntry_F24 = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+23};
+static const KeyEntry keyEntry_F13 = {CMD_KEY(F13)};
+static const KeyEntry keyEntry_F14 = {CMD_KEY(F14)};
+static const KeyEntry keyEntry_F15 = {CMD_KEY(F15)};
+static const KeyEntry keyEntry_F16 = {CMD_KEY(F16)};
+static const KeyEntry keyEntry_F17 = {CMD_KEY(F17)};
+static const KeyEntry keyEntry_F18 = {CMD_KEY(F18)};
+static const KeyEntry keyEntry_F19 = {CMD_KEY(F19)};
+static const KeyEntry keyEntry_F20 = {CMD_KEY(F20)};
+static const KeyEntry keyEntry_F21 = {CMD_KEY(F21)};
+static const KeyEntry keyEntry_F22 = {CMD_KEY(F22)};
+static const KeyEntry keyEntry_F23 = {CMD_KEY(F23)};
+static const KeyEntry keyEntry_F24 = {CMD_KEY(F24)};
 
 static const KeyEntry keyEntry_Grave = {CMD_CHAR(WC_C('`')), CMD_CHAR(WC_C('~'))};
 static const KeyEntry keyEntry_1 = {CMD_CHAR(WC_C('1')), CMD_CHAR(WC_C('!'))};
@@ -102,9 +130,9 @@ static const KeyEntry keyEntry_9 = {CMD_CHAR(WC_C('9')), CMD_CHAR(WC_C('('))};
 static const KeyEntry keyEntry_0 = {CMD_CHAR(WC_C('0')), CMD_CHAR(WC_C(')'))};
 static const KeyEntry keyEntry_Minus = {CMD_CHAR(WC_C('-')), CMD_CHAR(WC_C('_'))};
 static const KeyEntry keyEntry_Equal = {CMD_CHAR(WC_C('=')), CMD_CHAR(WC_C('+'))};
-static const KeyEntry keyEntry_Backspace = {BRL_BLK_PASSKEY+BRL_KEY_BACKSPACE};
+static const KeyEntry keyEntry_Backspace = {CMD_KEY(BACKSPACE)};
 
-static const KeyEntry keyEntry_Tab = {BRL_BLK_PASSKEY+BRL_KEY_TAB};
+static const KeyEntry keyEntry_Tab = {CMD_KEY(TAB)};
 static const KeyEntry keyEntry_Q = {CMD_CHAR(WC_C('q')), CMD_CHAR(WC_C('Q'))};
 static const KeyEntry keyEntry_W = {CMD_CHAR(WC_C('w')), CMD_CHAR(WC_C('W'))};
 static const KeyEntry keyEntry_E = {CMD_CHAR(WC_C('e')), CMD_CHAR(WC_C('E'))};
@@ -131,7 +159,7 @@ static const KeyEntry keyEntry_K = {CMD_CHAR(WC_C('k')), CMD_CHAR(WC_C('K'))};
 static const KeyEntry keyEntry_L = {CMD_CHAR(WC_C('l')), CMD_CHAR(WC_C('L'))};
 static const KeyEntry keyEntry_Semicolon = {CMD_CHAR(WC_C(';')), CMD_CHAR(WC_C(':'))};
 static const KeyEntry keyEntry_Apostrophe = {CMD_CHAR(WC_C('\'')), CMD_CHAR(WC_C('"'))};
-static const KeyEntry keyEntry_Enter = {BRL_BLK_PASSKEY+BRL_KEY_ENTER};
+static const KeyEntry keyEntry_Enter = {CMD_KEY(ENTER)};
 
 static const KeyEntry keyEntry_LeftShift = {MOD_SHIFT_LEFT};
 static const KeyEntry keyEntry_Europe2 = {CMD_CHAR(WC_C('<')), CMD_CHAR(WC_C('>'))};
@@ -156,35 +184,35 @@ static const KeyEntry keyEntry_RightGUI = {MOD_WINDOWS_RIGHT};
 static const KeyEntry keyEntry_App = {MOD_APP};
 static const KeyEntry keyEntry_RightControl = {MOD_CONTROL_RIGHT};
 
-static const KeyEntry keyEntry_Insert = {BRL_BLK_PASSKEY+BRL_KEY_INSERT};
-static const KeyEntry keyEntry_Delete = {BRL_BLK_PASSKEY+BRL_KEY_DELETE};
-static const KeyEntry keyEntry_Home = {BRL_BLK_PASSKEY+BRL_KEY_HOME};
-static const KeyEntry keyEntry_End = {BRL_BLK_PASSKEY+BRL_KEY_END};
-static const KeyEntry keyEntry_PageUp = {BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP};
-static const KeyEntry keyEntry_PageDown = {BRL_BLK_PASSKEY+BRL_KEY_PAGE_DOWN};
+static const KeyEntry keyEntry_Insert = {CMD_KEY(INSERT)};
+static const KeyEntry keyEntry_Delete = {CMD_KEY(DELETE)};
+static const KeyEntry keyEntry_Home = {CMD_KEY(HOME)};
+static const KeyEntry keyEntry_End = {CMD_KEY(END)};
+static const KeyEntry keyEntry_PageUp = {CMD_KEY(PAGE_UP)};
+static const KeyEntry keyEntry_PageDown = {CMD_KEY(PAGE_DOWN)};
 
-static const KeyEntry keyEntry_ArrowUp = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP};
-static const KeyEntry keyEntry_ArrowLeft = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT};
-static const KeyEntry keyEntry_ArrowDown = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN};
-static const KeyEntry keyEntry_ArrowRight = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT};
+static const KeyEntry keyEntry_ArrowUp = {CMD_KEY(CURSOR_UP)};
+static const KeyEntry keyEntry_ArrowLeft = {CMD_KEY(CURSOR_LEFT)};
+static const KeyEntry keyEntry_ArrowDown = {CMD_KEY(CURSOR_DOWN)};
+static const KeyEntry keyEntry_ArrowRight = {CMD_KEY(CURSOR_RIGHT)};
 
 static const KeyEntry keyEntry_NumLock = {MOD_LOCK_NUMBER};
 static const KeyEntry keyEntry_KPSlash = {CMD_CHAR(WC_C('/'))};
 static const KeyEntry keyEntry_KPAsterisk = {CMD_CHAR(WC_C('*'))};
 static const KeyEntry keyEntry_KPMinus = {CMD_CHAR(WC_C('-'))};
 static const KeyEntry keyEntry_KPPlus = {CMD_CHAR(WC_C('+'))};
-static const KeyEntry keyEntry_KPEnter = {BRL_BLK_PASSKEY+BRL_KEY_ENTER};
-static const KeyEntry keyEntry_KPPeriod = {BRL_BLK_PASSKEY+BRL_KEY_DELETE, CMD_CHAR(WC_C('.'))};
-static const KeyEntry keyEntry_KP0 = {BRL_BLK_PASSKEY+BRL_KEY_INSERT, CMD_CHAR(WC_C('0'))};
-static const KeyEntry keyEntry_KP1 = {BRL_BLK_PASSKEY+BRL_KEY_END, CMD_CHAR(WC_C('1'))};
-static const KeyEntry keyEntry_KP2 = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN, CMD_CHAR(WC_C('2'))};
-static const KeyEntry keyEntry_KP3 = {BRL_BLK_PASSKEY+BRL_KEY_PAGE_DOWN, CMD_CHAR(WC_C('3'))};
-static const KeyEntry keyEntry_KP4 = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT, CMD_CHAR(WC_C('4'))};
+static const KeyEntry keyEntry_KPEnter = {CMD_KEY(ENTER)};
+static const KeyEntry keyEntry_KPPeriod = {CMD_KEY(DELETE), CMD_CHAR(WC_C('.'))};
+static const KeyEntry keyEntry_KP0 = {CMD_KEY(INSERT), CMD_CHAR(WC_C('0'))};
+static const KeyEntry keyEntry_KP1 = {CMD_KEY(END), CMD_CHAR(WC_C('1'))};
+static const KeyEntry keyEntry_KP2 = {CMD_KEY(CURSOR_DOWN), CMD_CHAR(WC_C('2'))};
+static const KeyEntry keyEntry_KP3 = {CMD_KEY(PAGE_DOWN), CMD_CHAR(WC_C('3'))};
+static const KeyEntry keyEntry_KP4 = {CMD_KEY(CURSOR_LEFT), CMD_CHAR(WC_C('4'))};
 static const KeyEntry keyEntry_KP5 = {CMD_CHAR(WC_C('5'))};
-static const KeyEntry keyEntry_KP6 = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT, CMD_CHAR(WC_C('6'))};
-static const KeyEntry keyEntry_KP7 = {BRL_BLK_PASSKEY+BRL_KEY_HOME, CMD_CHAR(WC_C('7'))};
-static const KeyEntry keyEntry_KP8 = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP, CMD_CHAR(WC_C('8'))};
-static const KeyEntry keyEntry_KP9 = {BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP, CMD_CHAR(WC_C('9'))};
+static const KeyEntry keyEntry_KP6 = {CMD_KEY(CURSOR_RIGHT), CMD_CHAR(WC_C('6'))};
+static const KeyEntry keyEntry_KP7 = {CMD_KEY(HOME), CMD_CHAR(WC_C('7'))};
+static const KeyEntry keyEntry_KP8 = {CMD_KEY(CURSOR_UP), CMD_CHAR(WC_C('8'))};
+static const KeyEntry keyEntry_KP9 = {CMD_KEY(PAGE_UP), CMD_CHAR(WC_C('9'))};
 
 static void
 handleKey (const KeyEntry *key, int release, unsigned int *modifiers) {
