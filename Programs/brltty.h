@@ -85,15 +85,6 @@ extern ToggleResult toggleBit (
   AlertIdentifier onAlert
 );
 
-extern ToggleResult toggleSetting (
-  unsigned char *setting, int command,
-  AlertIdentifier offAlert,
-  AlertIdentifier onAlert
-);
-
-extern ToggleResult toggleModeSetting (unsigned char *setting, int command);
-extern ToggleResult toggleFeatureSetting (unsigned char *setting, int command);
-
 extern unsigned char infoMode;
 
 extern int canBraille (void);

@@ -879,105 +879,6 @@ handleNavigationCommand (int command, void *data) {
                ALERT_COMMAND_REJECTED);
       break;
 
-    case BRL_CMD_CSRVIS:
-      /* toggles the preferences option that decides whether cursor
-         is shown at all */
-      toggleFeatureSetting(&prefs.showCursor, command);
-      break;
-    case BRL_CMD_CSRHIDE:
-      /* This is for briefly hiding the cursor */
-      toggleModeSetting(&ses->hideCursor, command);
-      break;
-    case BRL_CMD_CSRSIZE:
-      toggleFeatureSetting(&prefs.cursorStyle, command);
-      break;
-    case BRL_CMD_CSRTRK:
-      toggleSetting(&ses->trackCursor, command, ALERT_CURSOR_UNLINKED, ALERT_CURSOR_LINKED);
-
-      if (ses->trackCursor) {
-#ifdef ENABLE_SPEECH_SUPPORT
-        if (spk.track.isActive && (scr.number == spk.track.screenNumber)) {
-          spk.track.speechLocation = SPK_LOC_NONE;
-        } else
-#endif /* ENABLE_SPEECH_SUPPORT */
-
-        {
-          trackCursor(1);
-        }
-      }
-      break;
-    case BRL_CMD_CSRBLINK:
-      toggleFeatureSetting(&prefs.blinkingCursor, command);
-      break;
-
-    case BRL_CMD_ATTRVIS:
-      toggleFeatureSetting(&prefs.showAttributes, command);
-      break;
-    case BRL_CMD_ATTRBLINK:
-      toggleFeatureSetting(&prefs.blinkingAttributes, command);
-      break;
-
-    case BRL_CMD_CAPBLINK:
-      toggleFeatureSetting(&prefs.blinkingCapitals, command);
-      break;
-
-    case BRL_CMD_SKPIDLNS:
-      toggleFeatureSetting(&prefs.skipIdenticalLines, command);
-      break;
-    case BRL_CMD_SKPBLNKWINS:
-      toggleFeatureSetting(&prefs.skipBlankWindows, command);
-      break;
-    case BRL_CMD_SLIDEWIN:
-      toggleFeatureSetting(&prefs.slidingWindow, command);
-      break;
-
-    case BRL_CMD_DISPMD:
-      toggleModeSetting(&ses->displayMode, command);
-      break;
-    case BRL_CMD_SIXDOTS:
-      toggleFeatureSetting(&prefs.textStyle, command);
-      break;
-
-    case BRL_CMD_AUTOREPEAT:
-      toggleFeatureSetting(&prefs.autorepeat, command);
-      break;
-
-    case BRL_CMD_BRLUCDOTS:
-      toggleFeatureSetting(&prefs.brailleInputMode, command);
-      break;
-
-    case BRL_CMD_TUNES:
-      toggleFeatureSetting(&prefs.alertTunes, command);        /* toggle sound on/off */
-      break;
-
-    case BRL_CMD_FREEZE: {
-      unsigned char setting;
-
-      if (isMainScreen()) {
-        setting = 0;
-      } else if (isFrozenScreen()) {
-        setting = 1;
-      } else {
-        alert(ALERT_COMMAND_REJECTED);
-        break;
-      }
-
-      switch (toggleSetting(&setting, command, ALERT_SCREEN_UNFROZEN, ALERT_SCREEN_FROZEN)) {
-        case TOGGLE_OFF:
-          deactivateFrozenScreen();
-          break;
-
-        case TOGGLE_ON:
-          if (!activateFrozenScreen()) alert(ALERT_COMMAND_REJECTED);
-          break;
-
-        default:
-          break;
-      }
-
-      break;
-    }
-
     case BRL_CMD_PREFMENU: {
       int ok = 0;
 
@@ -1065,16 +966,6 @@ handleNavigationCommand (int command, void *data) {
 
       break;
     }
-
-    case BRL_CMD_INFO:
-      if ((prefs.statusPosition == spNone) || haveStatusCells()) {
-        toggleModeSetting(&infoMode, command);
-      } else {
-        ToggleResult result = toggleModeSetting(&textMaximized, command);
-
-        if (result > TOGGLE_SAME) reconfigureWindow();
-      }
-      break;
 
     case BRL_CMD_LEARN:
       if (!learnMode(LEARN_MODE_TIMEOUT)) restartRequired = 1;

@@ -45,6 +45,7 @@
 #include "cmd_input.h"
 #include "cmd_keycodes.h"
 #include "cmd_touch.h"
+#include "cmd_toggle.h"
 #include "cmd_speech.h"
 #include "timing.h"
 #include "async_wait.h"
@@ -213,6 +214,7 @@ setSessionEntry (void) {
         pushCommandHandler("speech", KTB_CTX_DEFAULT, handleSpeechCommand, NULL);
 #endif /*  ENABLE_SPEECH_SUPPORT */
 
+        pushCommandHandler("toggle", KTB_CTX_DEFAULT, handleToggleCommand, NULL);
         pushCommandHandler("touch", KTB_CTX_DEFAULT, handleTouchCommand, NULL);
         pushCommandHandler("keycodes", KTB_CTX_DEFAULT, handleKeycodeCommand, NULL);
         pushCommandHandler("input", KTB_CTX_DEFAULT, handleInputCommand, NULL);
@@ -986,30 +988,6 @@ toggleBit (
     alert(identifier);
     return TOGGLE_SAME;
   }
-}
-
-ToggleResult
-toggleSetting (
-  unsigned char *setting, int command,
-  AlertIdentifier offAlert,
-  AlertIdentifier onAlert
-) {
-  const int bit = 1;
-  int bits = *setting? bit: 0;
-  ToggleResult result = toggleBit(&bits, bit, command, offAlert, onAlert);
-
-  *setting = (bits & bit)? bit: 0;
-  return result;
-}
-
-ToggleResult
-toggleModeSetting (unsigned char *setting, int command) {
-  return toggleSetting(setting, command, ALERT_NONE, ALERT_NONE);
-}
-
-ToggleResult
-toggleFeatureSetting (unsigned char *setting, int command) {
-  return toggleSetting(setting, command, ALERT_TOGGLE_OFF, ALERT_TOGGLE_ON);
 }
 
 int

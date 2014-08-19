@@ -88,33 +88,6 @@ handleSpeechCommand (int command, void *data) {
         alert(ALERT_COMMAND_REJECTED);
       }
       break;
-    case BRL_CMD_AUTOSPEAK:
-      toggleFeatureSetting(&prefs.autospeak, command);
-      break;
-
-    case BRL_CMD_ASPK_SEL_LINE:
-      toggleFeatureSetting(&prefs.autospeakSelectedLine, command);
-      break;
-
-    case BRL_CMD_ASPK_SEL_CHAR:
-      toggleFeatureSetting(&prefs.autospeakSelectedCharacter, command);
-      break;
-
-    case BRL_CMD_ASPK_INS_CHARS:
-      toggleFeatureSetting(&prefs.autospeakInsertedCharacters, command);
-      break;
-
-    case BRL_CMD_ASPK_DEL_CHARS:
-      toggleFeatureSetting(&prefs.autospeakDeletedCharacters, command);
-      break;
-
-    case BRL_CMD_ASPK_REP_CHARS:
-      toggleFeatureSetting(&prefs.autospeakReplacedCharacters, command);
-      break;
-
-    case BRL_CMD_ASPK_CMP_WORDS:
-      toggleFeatureSetting(&prefs.autospeakCompletedWords, command);
-      break;
 
     case BRL_CMD_MUTE:
       muteSpeech("command");
@@ -480,10 +453,6 @@ handleSpeechCommand (int command, void *data) {
       sayString(buffer, 1);
       break;
     }
-
-    case BRL_CMD_SHOW_CURR_LOCN:
-      toggleFeatureSetting(&prefs.showSpeechCursor, command);
-      break;
 
     default:
       return 0;
