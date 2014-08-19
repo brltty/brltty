@@ -86,8 +86,9 @@ typedef struct {
   int alternate;
 } KeyEntry;
 
-#define CMD_CHAR(wc) (BRL_BLK_PASSCHAR | BRL_ARG_SET((wc)))
-#define CMD_KEY(key) (BRL_BLK_PASSKEY | BRL_ARG_SET(BRL_KEY_##key))
+#define CMD(blk,arg) (BRL_BLK_##blk | BRL_ARG_SET((arg)))
+#define CMD_CHAR(wc) CMD(PASSCHAR, (wc))
+#define CMD_KEY(key) CMD(PASSKEY, BRL_KEY_##key)
 
 static const KeyEntry keyEntry_Escape = {CMD_KEY(ESCAPE)};
 static const KeyEntry keyEntry_F1 = {CMD_KEY(F1)};
