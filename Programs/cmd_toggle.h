@@ -20,12 +20,26 @@
 #define BRLTTY_INCLUDED_CMD_TOGGLE
 
 #include "cmd_queue.h"
+#include "alert.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 extern CommandHandler handleToggleCommand;
+
+typedef enum {
+  TOGGLE_ERROR,
+  TOGGLE_SAME,
+  TOGGLE_OFF,
+  TOGGLE_ON
+} ToggleResult;
+
+extern ToggleResult toggleBit (
+  int *bits, int bit, int command,
+  AlertIdentifier offAlert,
+  AlertIdentifier onAlert
+);
 
 #ifdef __cplusplus
 }

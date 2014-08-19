@@ -20,6 +20,7 @@
 
 #include "report.h"
 #include "cmd_input.h"
+#include "cmd_toggle.h"
 #include "brl_cmds.h"
 #include "unicode.h"
 #include "ttb.h"

@@ -32,7 +32,6 @@
 #include "ktb.h"
 #include "menu.h"
 #include "prefs.h"
-#include "alert.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -70,19 +69,6 @@ extern int isSameRow (
   const ScreenCharacter *characters2,
   int count,
   IsSameCharacter isSameCharacter
-);
-
-typedef enum {
-  TOGGLE_ERROR,
-  TOGGLE_SAME,
-  TOGGLE_OFF,
-  TOGGLE_ON
-} ToggleResult;
-
-extern ToggleResult toggleBit (
-  int *bits, int bit, int command,
-  AlertIdentifier offAlert,
-  AlertIdentifier onAlert
 );
 
 extern unsigned char infoMode;
