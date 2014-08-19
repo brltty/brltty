@@ -177,9 +177,6 @@ HKR,,Icon,,-20
 ; Device: 1FE4:0003
 "LibUSB-1.0: HandyTech [USB-HID adapter]"=LIBUSB_DEV, USB\VID_1FE4&PID_0003
 
-; Device: 1FE4:003A
-"LibUSB-1.0: HandyTech [Modular Connect 88]"=LIBUSB_DEV, USB\VID_1FE4&PID_003A
-
 ; Device: 1FE4:0044
 "LibUSB-1.0: HandyTech [Easy Braille (HID)]"=LIBUSB_DEV, USB\VID_1FE4&PID_0044
 
@@ -412,9 +409,6 @@ HKR,,Icon,,-20
 
 ; Device: 1FE4:0003
 "LibUSB-1.0: HandyTech [USB-HID adapter]"=LIBUSB_DEV, USB\VID_1FE4&PID_0003
-
-; Device: 1FE4:003A
-"LibUSB-1.0: HandyTech [Modular Connect 88]"=LIBUSB_DEV, USB\VID_1FE4&PID_003A
 
 ; Device: 1FE4:0044
 "LibUSB-1.0: HandyTech [Easy Braille (HID)]"=LIBUSB_DEV, USB\VID_1FE4&PID_0044

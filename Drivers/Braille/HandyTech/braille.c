@@ -1212,13 +1212,6 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .data=&usbOperations3
     },
 
-    { /* Modular Connect 88 */
-      .vendor=0X1FE4, .product=0X003A,
-      .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=1,
-      .data=&usbOperations3
-    },
-
     { /* Connect Braille 40 */
       .vendor=0X1FE4, .product=0X0055,
       .configuration=1, .interface=0, .alternative=0,

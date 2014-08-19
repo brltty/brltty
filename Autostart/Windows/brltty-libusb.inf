@@ -256,9 +256,6 @@ ServiceBinary  = %12%\libusb0.sys
 ; Device: 1FE4:0003
 "LibUSB-Win32: HandyTech [USB-HID adapter]"=LIBUSB_DEV, USB\VID_1FE4&PID_0003
 
-; Device: 1FE4:003A
-"LibUSB-Win32: HandyTech [Modular Connect 88]"=LIBUSB_DEV, USB\VID_1FE4&PID_003A
-
 ; Device: 1FE4:0044
 "LibUSB-Win32: HandyTech [Easy Braille (HID)]"=LIBUSB_DEV, USB\VID_1FE4&PID_0044
 
@@ -492,9 +489,6 @@ ServiceBinary  = %12%\libusb0.sys
 ; Device: 1FE4:0003
 "LibUSB-Win32: HandyTech [USB-HID adapter]"=LIBUSB_DEV, USB\VID_1FE4&PID_0003
 
-; Device: 1FE4:003A
-"LibUSB-Win32: HandyTech [Modular Connect 88]"=LIBUSB_DEV, USB\VID_1FE4&PID_003A
-
 ; Device: 1FE4:0044
 "LibUSB-Win32: HandyTech [Easy Braille (HID)]"=LIBUSB_DEV, USB\VID_1FE4&PID_0044
 
@@ -727,9 +721,6 @@ ServiceBinary  = %12%\libusb0.sys
 
 ; Device: 1FE4:0003
 "LibUSB-Win32: HandyTech [USB-HID adapter]"=LIBUSB_DEV, USB\VID_1FE4&PID_0003
-
-; Device: 1FE4:003A
-"LibUSB-Win32: HandyTech [Modular Connect 88]"=LIBUSB_DEV, USB\VID_1FE4&PID_003A
 
 ; Device: 1FE4:0044
 "LibUSB-Win32: HandyTech [Easy Braille (HID)]"=LIBUSB_DEV, USB\VID_1FE4&PID_0044

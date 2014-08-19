@@ -209,10 +209,6 @@ ENV{PRODUCT}=="1c71/c005/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_r
 # HandyTech [USB-HID adapter]
 ENV{PRODUCT}=="1fe4/3/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
 
-# Device: 1FE4:003A
-# HandyTech [Modular Connect 88]
-ENV{PRODUCT}=="1fe4/3a/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
-
 # Device: 1FE4:0044
 # HandyTech [Easy Braille (HID)]
 ENV{PRODUCT}=="1fe4/44/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
