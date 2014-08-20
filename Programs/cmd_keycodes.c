@@ -18,6 +18,9 @@
 
 #include "prologue.h"
 
+#include <string.h>
+
+#include "log.h"
 #include "report.h"
 #include "cmd_queue.h"
 #include "cmd_keycodes.h"
@@ -79,7 +82,7 @@ typedef enum {
 #define MOD_TST(number, bits) ((bits) & MOD_BIT((number)))
 
 #define USE_KEY_TABLE(mode,type) \
-  (mode##KeyCount = (mode##KeyTable = mode##KeyTable##type)? \
+  (kcd->mode.keyCount = (kcd->mode.keyTable = mode##KeyTable##type)? \
   ARRAY_COUNT(mode##KeyTable##type): 0)
 
 typedef struct {
@@ -216,6 +219,24 @@ static const KeyEntry keyEntry_KP7 = {CMD_KEY(HOME), CMD_CHAR(WC_C('7'))};
 static const KeyEntry keyEntry_KP8 = {CMD_KEY(CURSOR_UP), CMD_CHAR(WC_C('8'))};
 static const KeyEntry keyEntry_KP9 = {CMD_KEY(PAGE_UP), CMD_CHAR(WC_C('9'))};
 static const KeyEntry keyEntry_KPComma = {CMD_CHAR(WC_C(','))};
+
+typedef struct {
+  struct {
+    const KeyEntry *const *keyTable;
+    size_t keyCount;
+    unsigned int modifiers;
+  } xt;
+
+  struct {
+    const KeyEntry *const *keyTable;
+    size_t keyCount;
+    unsigned int modifiers;
+  } at;
+
+  struct {
+    unsigned int modifiers;
+  } ps2;
+} KeycodeCommandData;
 
 static void
 handleKey (const KeyEntry *key, int release, unsigned int *modifiers) {
@@ -435,23 +456,19 @@ static const KeyEntry *const xtKeyTableE0[] = {
 
 #define xtKeyTableE1 NULL
 
-static const KeyEntry *const *xtKeyTable;
-static size_t xtKeyCount;
-static unsigned int xtModifiers;
-
 static void
-xtHandleScanCode (unsigned char code) {
+xtHandleScanCode (KeycodeCommandData *kcd, unsigned char code) {
   if (code == XT_MOD_E0) {
     USE_KEY_TABLE(xt, E0);
   } else if (code == XT_MOD_E1) {
     USE_KEY_TABLE(xt, E1);
-  } else if (code < xtKeyCount) {
-    const KeyEntry *key = xtKeyTable[code & ~XT_BIT_RELEASE];
+  } else if (code < kcd->xt.keyCount) {
+    const KeyEntry *key = kcd->xt.keyTable[code & ~XT_BIT_RELEASE];
     int release = (code & XT_BIT_RELEASE) != 0;
 
     USE_KEY_TABLE(xt, 00);
 
-    handleKey(key, release, &xtModifiers);
+    handleKey(key, release, &kcd->xt.modifiers);
   }
 }
 
@@ -588,26 +605,22 @@ static const KeyEntry *const atKeyTableE0[] = {
 
 #define atKeyTableE1 NULL
 
-static const KeyEntry *const *atKeyTable;
-static size_t atKeyCount;
-static unsigned int atModifiers;
-
 static void
-atHandleScanCode (unsigned char code) {
+atHandleScanCode (KeycodeCommandData *kcd, unsigned char code) {
   if (code == AT_MOD_RELEASE) {
-    MOD_SET(MOD_RELEASE, atModifiers);
+    MOD_SET(MOD_RELEASE, kcd->at.modifiers);
   } else if (code == AT_MOD_E0) {
     USE_KEY_TABLE(at, E0);
   } else if (code == AT_MOD_E1) {
     USE_KEY_TABLE(at, E1);
-  } else if (code < atKeyCount) {
-    const KeyEntry *key = atKeyTable[code];
-    int release = MOD_TST(MOD_RELEASE, atModifiers);
+  } else if (code < kcd->at.keyCount) {
+    const KeyEntry *key = kcd->at.keyTable[code];
+    int release = MOD_TST(MOD_RELEASE, kcd->at.modifiers);
 
-    MOD_CLR(MOD_RELEASE, atModifiers);
+    MOD_CLR(MOD_RELEASE, kcd->at.modifiers);
     USE_KEY_TABLE(at, 00);
 
-    handleKey(key, release, &atModifiers);
+    handleKey(key, release, &kcd->at.modifiers);
   }
 }
 
@@ -726,43 +739,42 @@ static const KeyEntry *const ps2KeyTable[] = {
   [PS2_KEY_KPComma] = &keyEntry_KPComma,
 };
 
-static unsigned int ps2Modifiers;
-
 static void
-ps2HandleScanCode (unsigned char code) {
+ps2HandleScanCode (KeycodeCommandData *kcd, unsigned char code) {
   if (code == PS2_MOD_RELEASE) {
-    MOD_SET(MOD_RELEASE, ps2Modifiers);
+    MOD_SET(MOD_RELEASE, kcd->ps2.modifiers);
   } else if (code < ARRAY_COUNT(ps2KeyTable)) {
     const KeyEntry *key = ps2KeyTable[code];
-    int release = MOD_TST(MOD_RELEASE, ps2Modifiers);
+    int release = MOD_TST(MOD_RELEASE, kcd->ps2.modifiers);
 
-    MOD_CLR(MOD_RELEASE, ps2Modifiers);
+    MOD_CLR(MOD_RELEASE, kcd->ps2.modifiers);
 
-    handleKey(key, release, &ps2Modifiers);
+    handleKey(key, release, &kcd->ps2.modifiers);
   }
 }
 
 static int
 handleKeycodeCommands (int command, void *data) {
+  KeycodeCommandData *kcd = data;
   int arg = command & BRL_MSK_ARG;
 
   switch (command & BRL_MSK_BLK) {
     case BRL_BLK_PASSXT:
-      if (command & BRL_FLG_KBD_EMUL0) xtHandleScanCode(XT_MOD_E0);
-      if (command & BRL_FLG_KBD_EMUL1) xtHandleScanCode(XT_MOD_E1);
-      xtHandleScanCode(arg);
+      if (command & BRL_FLG_KBD_EMUL0) xtHandleScanCode(kcd, XT_MOD_E0);
+      if (command & BRL_FLG_KBD_EMUL1) xtHandleScanCode(kcd, XT_MOD_E1);
+      xtHandleScanCode(kcd, arg);
       break;
 
     case BRL_BLK_PASSAT:
-      if (command & BRL_FLG_KBD_RELEASE) atHandleScanCode(AT_MOD_RELEASE);
-      if (command & BRL_FLG_KBD_EMUL0) atHandleScanCode(AT_MOD_E0);
-      if (command & BRL_FLG_KBD_EMUL1) atHandleScanCode(AT_MOD_E1);
-      atHandleScanCode(arg);
+      if (command & BRL_FLG_KBD_RELEASE) atHandleScanCode(kcd, AT_MOD_RELEASE);
+      if (command & BRL_FLG_KBD_EMUL0) atHandleScanCode(kcd, AT_MOD_E0);
+      if (command & BRL_FLG_KBD_EMUL1) atHandleScanCode(kcd, AT_MOD_E1);
+      atHandleScanCode(kcd, arg);
       break;
 
     case BRL_BLK_PASSPS2:
-      if (command & BRL_FLG_KBD_RELEASE) ps2HandleScanCode(PS2_MOD_RELEASE);
-      ps2HandleScanCode(arg);
+      if (command & BRL_FLG_KBD_RELEASE) ps2HandleScanCode(kcd, PS2_MOD_RELEASE);
+      ps2HandleScanCode(kcd, arg);
       break;
 
     default:
@@ -773,24 +785,53 @@ handleKeycodeCommands (int command, void *data) {
 }
 
 static void
-resetKeycodeVariables (void) {
+resetKeycodeCommandData (void *data) {
+  KeycodeCommandData *kcd = data;
+
   USE_KEY_TABLE(xt, 00);
-  xtModifiers = 0;
+  kcd->xt.modifiers = 0;
 
   USE_KEY_TABLE(at, 00);
-  atModifiers = 0;
+  kcd->at.modifiers = 0;
 
-  ps2Modifiers = 0;
+  kcd->ps2.modifiers = 0;
 }
 
-REPORT_LISTENER(keycodeCommandsResetListener) {
-  resetKeycodeVariables();
+REPORT_LISTENER(keycodeCommandDataResetListener) {
+  KeycodeCommandData *kcd = parameters->listenerData;
+
+  resetKeycodeCommandData(kcd);
+}
+
+static void
+destroyKeycodeCommandData (void *data) {
+  KeycodeCommandData *kcd = data;
+
+  unregisterReportListener(REPORT_BRAILLE_ON, keycodeCommandDataResetListener);
+  free(kcd);
 }
 
 int
 addKeycodeCommands (void) {
-  resetKeycodeVariables();
-  registerReportListener(REPORT_BRAILLE_ON, keycodeCommandsResetListener, NULL);
-  return pushCommandHandler("keycodes", KTB_CTX_DEFAULT,
-                            handleKeycodeCommands, NULL, NULL);
+  KeycodeCommandData *kcd;
+
+  if ((kcd = malloc(sizeof(*kcd)))) {
+    memset(kcd, 0, sizeof(*kcd));
+    resetKeycodeCommandData(kcd);
+
+    if (registerReportListener(REPORT_BRAILLE_ON, keycodeCommandDataResetListener, kcd)) {
+      if (pushCommandHandler("keycodes", KTB_CTX_DEFAULT,
+                             handleKeycodeCommands, destroyKeycodeCommandData, kcd)) {
+        return 1;
+      }
+
+      unregisterReportListener(REPORT_BRAILLE_ON, keycodeCommandDataResetListener);
+    }
+
+    free(kcd);
+  } else {
+    logMallocError();
+  }
+
+  return 0;
 }

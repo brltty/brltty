@@ -36,9 +36,9 @@ typedef struct {
 } InputCommandData;
 
 static void
-applyModifiers (InputCommandData *input, int *modifiers) {
-  *modifiers |= input->modifiers;
-  input->modifiers = 0;
+applyModifiers (InputCommandData *icd, int *modifiers) {
+  *modifiers |= icd->modifiers;
+  icd->modifiers = 0;
 }
 
 static int
@@ -65,7 +65,7 @@ switchVirtualTerminal (int vt) {
 
 static int
 handleInputCommands (int command, void *data) {
-  InputCommandData *input = data;
+  InputCommandData *icd = data;
 
   switch (command & BRL_MSK_CMD) {
     {
@@ -88,7 +88,7 @@ handleInputCommands (int command, void *data) {
       goto doModifier;
 
     doModifier:
-      toggleBit(&input->modifiers, modifier, command, ALERT_TOGGLE_OFF, ALERT_TOGGLE_ON);
+      toggleBit(&icd->modifiers, modifier, command, ALERT_TOGGLE_OFF, ALERT_TOGGLE_ON);
       break;
     }
 
@@ -157,7 +157,7 @@ handleInputCommands (int command, void *data) {
               break;
           }
 
-          applyModifiers(input, &flags);
+          applyModifiers(icd, &flags);
           if (!insertKey(key, flags)) {
           badKey:
             alert(ALERT_COMMAND_REJECTED);
@@ -166,7 +166,7 @@ handleInputCommands (int command, void *data) {
         }
 
         case BRL_BLK_PASSCHAR: {
-          applyModifiers(input, &flags);
+          applyModifiers(icd, &flags);
           if (!insertKey(BRL_ARG_GET(command), flags)) alert(ALERT_COMMAND_REJECTED);
           break;
         }
@@ -188,7 +188,7 @@ handleInputCommands (int command, void *data) {
               break;
           }
 
-          applyModifiers(input, &flags);
+          applyModifiers(icd, &flags);
           if (!insertKey(character, flags)) alert(ALERT_COMMAND_REJECTED);
           break;
         }
@@ -209,42 +209,42 @@ handleInputCommands (int command, void *data) {
 }
 
 static void
-resetInputCommandData (InputCommandData *input) {
-  input->modifiers = 0;
+resetInputCommandData (InputCommandData *icd) {
+  icd->modifiers = 0;
 }
 
 REPORT_LISTENER(inputCommandDataResetListener) {
-  InputCommandData *input = parameters->listenerData;
+  InputCommandData *icd = parameters->listenerData;
 
-  resetInputCommandData(input);
+  resetInputCommandData(icd);
 }
 
 static void
 destroyInputCommandData (void *data) {
-  InputCommandData *input = data;
+  InputCommandData *icd = data;
 
   unregisterReportListener(REPORT_BRAILLE_ON, inputCommandDataResetListener);
-  free(input);
+  free(icd);
 }
 
 int
 addInputCommands (void) {
-  InputCommandData *input;
+  InputCommandData *icd;
 
-  if ((input = malloc(sizeof(*input)))) {
-    memset(input, 0, sizeof(*input));
-    resetInputCommandData(input);
+  if ((icd = malloc(sizeof(*icd)))) {
+    memset(icd, 0, sizeof(*icd));
+    resetInputCommandData(icd);
 
-    if (registerReportListener(REPORT_BRAILLE_ON, inputCommandDataResetListener, input)) {
+    if (registerReportListener(REPORT_BRAILLE_ON, inputCommandDataResetListener, icd)) {
       if (pushCommandHandler("input", KTB_CTX_DEFAULT,
-                             handleInputCommands, destroyInputCommandData, input)) {
+                             handleInputCommands, destroyInputCommandData, icd)) {
         return 1;
       }
 
       unregisterReportListener(REPORT_BRAILLE_ON, inputCommandDataResetListener);
     }
 
-    free(input);
+    free(icd);
   } else {
     logMallocError();
   }
