@@ -24,8 +24,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef enum {
-  REPORT_BRAILLE_ON,
-  REPORT_BRAILLE_OFF,
+  REPORT_BRAILLE_ONLINE,
+  REPORT_BRAILLE_OFFLINE,
 } ReportIdentifier;
 
 extern void report (ReportIdentifier identiier, const void *data);
@@ -38,9 +38,15 @@ typedef struct {
 
 #define REPORT_LISTENER(name) void name (const ReportListenerParameters *parameters)
 typedef REPORT_LISTENER(ReportListener);
+typedef struct ReportListenerInstanceStruct ReportListenerInstance;
 
-extern int registerReportListener (ReportIdentifier identifier, ReportListener *function, void *data);
-extern int unregisterReportListener (ReportIdentifier identifier, ReportListener *function);
+extern ReportListenerInstance *newReportListenerInstance (
+  ReportIdentifier identifier,
+  ReportListener *listener,
+  void *data
+);
+
+extern void destroyReportListenerInstance (ReportListenerInstance *rli);
 
 #ifdef __cplusplus
 }

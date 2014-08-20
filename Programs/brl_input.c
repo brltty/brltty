@@ -51,7 +51,7 @@ processInput (void) {
             if (keyTable) releaseAllKeys(keyTable);
           }
 
-          report(REPORT_BRAILLE_OFF, NULL);
+          report(REPORT_BRAILLE_OFFLINE, NULL);
         }
         return 0;
 
@@ -63,7 +63,7 @@ processInput (void) {
   if (isOffline) {
     logMessage(LOG_DEBUG, "braille online");
     isOffline = 0;
-    report(REPORT_BRAILLE_ON, NULL);
+    report(REPORT_BRAILLE_ONLINE, NULL);
     scheduleUpdate("braille online");
   }
 

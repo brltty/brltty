@@ -32,6 +32,8 @@
 #include "brltty.h"
 
 typedef struct {
+  ReportListenerInstance *resetListener;
+
   int modifiers;
 } InputCommandData;
 
@@ -223,7 +225,7 @@ static void
 destroyInputCommandData (void *data) {
   InputCommandData *icd = data;
 
-  unregisterReportListener(REPORT_BRAILLE_ON, inputCommandDataResetListener);
+  destroyReportListenerInstance(icd->resetListener);
   free(icd);
 }
 
@@ -235,13 +237,13 @@ addInputCommands (void) {
     memset(icd, 0, sizeof(*icd));
     resetInputCommandData(icd);
 
-    if (registerReportListener(REPORT_BRAILLE_ON, inputCommandDataResetListener, icd)) {
+    if ((icd->resetListener = newReportListenerInstance(REPORT_BRAILLE_ONLINE, inputCommandDataResetListener, icd))) {
       if (pushCommandHandler("input", KTB_CTX_DEFAULT,
                              handleInputCommands, destroyInputCommandData, icd)) {
         return 1;
       }
 
-      unregisterReportListener(REPORT_BRAILLE_ON, inputCommandDataResetListener);
+      destroyReportListenerInstance(icd->resetListener);
     }
 
     free(icd);

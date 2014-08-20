@@ -221,6 +221,8 @@ static const KeyEntry keyEntry_KP9 = {CMD_KEY(PAGE_UP), CMD_CHAR(WC_C('9'))};
 static const KeyEntry keyEntry_KPComma = {CMD_CHAR(WC_C(','))};
 
 typedef struct {
+  ReportListenerInstance *resetListener;
+
   struct {
     const KeyEntry *const *keyTable;
     size_t keyCount;
@@ -807,7 +809,7 @@ static void
 destroyKeycodeCommandData (void *data) {
   KeycodeCommandData *kcd = data;
 
-  unregisterReportListener(REPORT_BRAILLE_ON, keycodeCommandDataResetListener);
+  destroyReportListenerInstance(kcd->resetListener);
   free(kcd);
 }
 
@@ -819,13 +821,13 @@ addKeycodeCommands (void) {
     memset(kcd, 0, sizeof(*kcd));
     resetKeycodeCommandData(kcd);
 
-    if (registerReportListener(REPORT_BRAILLE_ON, keycodeCommandDataResetListener, kcd)) {
+    if ((kcd->resetListener = newReportListenerInstance(REPORT_BRAILLE_ONLINE, keycodeCommandDataResetListener, kcd))) {
       if (pushCommandHandler("keycodes", KTB_CTX_DEFAULT,
                              handleKeycodeCommands, destroyKeycodeCommandData, kcd)) {
         return 1;
       }
 
-      unregisterReportListener(REPORT_BRAILLE_ON, keycodeCommandDataResetListener);
+      destroyReportListenerInstance(kcd->resetListener);
     }
 
     free(kcd);

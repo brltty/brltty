@@ -24,10 +24,11 @@
 #include "report.h"
 #include "queue.h"
 
-typedef struct {
-  ReportListener *function;
+struct ReportListenerInstanceStruct {
+  Element *element;
+  ReportListener *listener;
   void *data;
-} ListenerEntry;
+};
 
 typedef struct {
   ReportIdentifier identifier;
@@ -39,8 +40,9 @@ static unsigned int reportSize = 0;
 static unsigned int reportCount = 0;
 
 static int
-findReportEntry (ReportIdentifier identifier, unsigned int *position) {
+findReportEntry (ReportIdentifier identifier, int *position) {
   int found = 0;
+
   int first = 0;
   int last = reportCount - 1;
 
@@ -64,7 +66,7 @@ findReportEntry (ReportIdentifier identifier, unsigned int *position) {
 
 static ReportEntry *
 getReportEntry (ReportIdentifier identifier, int add) {
-  unsigned int position;
+  int position;
   int found = findReportEntry(identifier, &position);
 
   if (found) return reportTable[position];
@@ -105,14 +107,14 @@ getReportEntry (ReportIdentifier identifier, int add) {
 
 static int
 tellListener (void *item, void *data) {
-  ListenerEntry *listener = item;
+  ReportListenerInstance *rli = item;
   ReportListenerParameters *parameters = data;
 
-  logSymbol(LOG_DEBUG, listener->function,
+  logSymbol(LOG_DEBUG, rli->listener,
             "report: %u", parameters->reportIdentifier);
 
-  parameters->listenerData = listener->data;
-  listener->function(parameters);
+  parameters->listenerData = rli->data;
+  rli->listener(parameters);
 
   return 0;
 }
@@ -136,79 +138,67 @@ report (ReportIdentifier identifier, const void *data) {
 
 static int
 testListener (void *item, void *data) {
-  ListenerEntry *listener = item;
-  ReportListener *function = data;
+  ReportListenerInstance *rli = item;
+  ReportListener *listener = data;
 
-  return listener->function == function;
+  return rli->listener == listener;
 }
 
 static Element *
-findListenerElement (ReportEntry *report, ReportListener *function) {
-  return processQueue(report->listeners, testListener, function);
+findListenerElement (ReportEntry *report, ReportListener *listener) {
+  return processQueue(report->listeners, testListener, listener);
 }
 
 static void
-deallocateListenerEntry (void *item, void *data) {
-  ListenerEntry *listener = item;
+deallocateReportListenerInstance (void *item, void *data) {
+  ReportListenerInstance *rli = item;
+  ReportEntry *report = data;
 
-  free(listener);
+  logSymbol(LOG_DEBUG, rli->listener,
+            "report listener unregistered: %u", report->identifier);
+
+  free(rli);
 }
 
-int
-registerReportListener (ReportIdentifier identifier, ReportListener *function, void *data) {
+ReportListenerInstance *
+newReportListenerInstance (ReportIdentifier identifier, ReportListener *listener, void *data) {
   ReportEntry *report = getReportEntry(identifier, 1);
 
   if (report) {
     if (!report->listeners) {
-      if (!(report->listeners = newQueue(deallocateListenerEntry, NULL))) {
-        return 0;
+      if (!(report->listeners = newQueue(deallocateReportListenerInstance, NULL))) {
+        return NULL;
       }
+
+      setQueueData(report->listeners, report);
     }
 
-    if (findListenerElement(report, function)) {
-      logSymbol(LOG_WARNING, function, "report listener already registered: %u", identifier);
-      return 1;
-    }
+    if (findListenerElement(report, listener)) {
+      logSymbol(LOG_WARNING, listener, "report listener already registered: %u", identifier);
+    } else {
+      ReportListenerInstance *rli;
 
-    {
-      ListenerEntry *listener;
+      if ((rli = malloc(sizeof(*rli)))) {
+        memset(rli, 0, sizeof(*rli));
+        rli->listener = listener;
+        rli->data = data;
 
-      if ((listener = malloc(sizeof(*listener)))) {
-        memset(listener, 0, sizeof(*listener));
-        listener->function = function;
-        listener->data = data;
-
-        if (enqueueItem(report->listeners, listener)) {
-          logSymbol(LOG_DEBUG, function, "report listener registered: %u", identifier);
-          return 1;
+        if ((rli->element = enqueueItem(report->listeners, rli))) {
+          logSymbol(LOG_DEBUG, listener, "report listener registered: %u", identifier);
+          return rli;
         }
 
-        free(listener);
+        free(rli);
       } else {
         logMallocError();
       }
     }
   }
 
-  return 0;
+  return NULL;
 }
 
-int
-unregisterReportListener (ReportIdentifier identifier, ReportListener *function) {
-  ReportEntry *report = getReportEntry(identifier, 0);
-
-  if (report) {
-    if (report->listeners) {
-      Element *element = findListenerElement(report, function);
-
-      if (element) {
-        deleteElement(element);
-        logSymbol(LOG_DEBUG, function, "report listener unregistered: %u", identifier);
-        return 1;
-      }
-    }
-  }
-
-  logSymbol(LOG_WARNING, function, "report listener not registered: %u", identifier);
-  return 0;
+void
+destroyReportListenerInstance (ReportListenerInstance *rli) {
+  deleteElement(rli->element);
 }

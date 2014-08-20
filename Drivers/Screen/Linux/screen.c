@@ -826,6 +826,7 @@ static int ps2KeyPressed;
 
 static int currentConsoleNumber;
 static UinputObject *uinputKeyboard;
+static ReportListenerInstance *brailleOfflineListener;
 
 static int
 openKeyboard (void) {
@@ -839,21 +840,13 @@ openKeyboard (void) {
 }
 
 static void
-closeKeyboard (void) {
-  if (uinputKeyboard) {
-    destroyUinputObject(uinputKeyboard);
-    uinputKeyboard = NULL;
-  }
-}
-
-static void
 resetKeyboard (void) {
   if (uinputKeyboard) {
     releasePressedKeys(uinputKeyboard);
   }
 }
 
-REPORT_LISTENER(lxBrailleOffReportListener) {
+REPORT_LISTENER(lxBrailleOfflineListener) {
   resetKeyboard();
 }
 
@@ -865,6 +858,7 @@ construct_LinuxScreen (void) {
 
   currentConsoleNumber = 0;
   uinputKeyboard = NULL;
+  brailleOfflineListener = NULL;
 
 #ifdef HAVE_LINUX_INPUT_H
   xtKeys = linuxKeyTable_xt00;
@@ -882,7 +876,7 @@ construct_LinuxScreen (void) {
       if (openScreen(currentConsoleNumber)) {
         if (setTranslationTable(1)) {
           openKeyboard();
-          registerReportListener(REPORT_BRAILLE_OFF, lxBrailleOffReportListener, NULL);
+          brailleOfflineListener = newReportListenerInstance(REPORT_BRAILLE_OFFLINE, lxBrailleOfflineListener, NULL);
           return 1;
         }
       }
@@ -912,8 +906,15 @@ destruct_LinuxScreen (void) {
   }
   cacheSize = 0;
 
-  unregisterReportListener(REPORT_BRAILLE_OFF, lxBrailleOffReportListener);
-  closeKeyboard();
+  if (brailleOfflineListener) {
+    destroyReportListenerInstance(brailleOfflineListener);
+    brailleOfflineListener = NULL;
+  }
+
+  if (uinputKeyboard) {
+    destroyUinputObject(uinputKeyboard);
+    uinputKeyboard = NULL;
+  }
 }
 
 static int
