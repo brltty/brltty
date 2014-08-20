@@ -186,9 +186,6 @@ doBrailleTime (const TimeFormattingData *fmt) {
 
 static int
 handleMiscellaneousCommands (int command, void *data) {
-  static const char modeString_preferences[] = "prf";
-  static Preferences savedPreferences;
-
   switch (command & BRL_MSK_CMD) {
     case BRL_CMD_RESTARTBRL:
       restartRequired = 1;
@@ -239,6 +236,10 @@ handleMiscellaneousCommands (int command, void *data) {
       break;
     }
 
+    {
+      static const char modeString_preferences[] = "prf";
+      static Preferences savedPreferences;
+
     case BRL_CMD_PREFMENU: {
       int ok = 0;
 
@@ -288,6 +289,7 @@ handleMiscellaneousCommands (int command, void *data) {
         alert(ALERT_COMMAND_REJECTED);
       }
       break;
+    }
 
     case BRL_CMD_TIME: {
       TimeFormattingData fmt;
