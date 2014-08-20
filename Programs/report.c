@@ -25,6 +25,11 @@
 #include "queue.h"
 
 typedef struct {
+  ReportListener *function;
+  void *data;
+} ListenerEntry;
+
+typedef struct {
   ReportIdentifier identifier;
   Queue *listeners;
 } ReportEntry;
@@ -100,11 +105,15 @@ getReportEntry (ReportIdentifier identifier, int add) {
 
 static int
 tellListener (void *item, void *data) {
-  ReportListener *listener = item;
-  const ReportListenerParameters *parameters = data;
+  ListenerEntry *listener = item;
+  ReportListenerParameters *parameters = data;
 
-  logSymbol(LOG_DEBUG, listener, "report: %u", parameters->identifier);
-  listener(parameters);
+  logSymbol(LOG_DEBUG, listener->function,
+            "report: %u", parameters->reportIdentifier);
+
+  parameters->listenerData = listener->data;
+  listener->function(parameters);
+
   return 0;
 }
 
@@ -115,8 +124,9 @@ report (ReportIdentifier identifier, const void *data) {
   if (report) {
     if (report->listeners) {
       ReportListenerParameters parameters = {
-        .identifier = identifier,
-        .data = data
+        .reportIdentifier = identifier,
+        .reportData = data,
+        .listenerData = NULL
       };
 
       processQueue(report->listeners, tellListener, &parameters);
@@ -124,43 +134,81 @@ report (ReportIdentifier identifier, const void *data) {
   }
 }
 
+static int
+testListener (void *item, void *data) {
+  ListenerEntry *listener = item;
+  ReportListener *function = data;
+
+  return listener->function == function;
+}
+
+static Element *
+findListenerElement (ReportEntry *report, ReportListener *function) {
+  return processQueue(report->listeners, testListener, function);
+}
+
+static void
+deallocateListenerEntry (void *item, void *data) {
+  ListenerEntry *listener = item;
+
+  free(listener);
+}
+
 int
-registerReportListener (ReportIdentifier identifier, ReportListener *listener) {
+registerReportListener (ReportIdentifier identifier, ReportListener *function, void *data) {
   ReportEntry *report = getReportEntry(identifier, 1);
 
   if (report) {
     if (!report->listeners) {
-      if (!(report->listeners = newQueue(NULL, NULL))) {
+      if (!(report->listeners = newQueue(deallocateListenerEntry, NULL))) {
         return 0;
       }
     }
 
-    if (findElementWithItem(report->listeners, listener)) {
-      logSymbol(LOG_WARNING, listener, "report listener already registered: %u", identifier);
+    if (findListenerElement(report, function)) {
+      logSymbol(LOG_WARNING, function, "report listener already registered: %u", identifier);
       return 1;
     }
 
-    if (enqueueItem(report->listeners, listener)) {
-      logSymbol(LOG_DEBUG, listener, "report listener registered: %u", identifier);
-      return 1;
+    {
+      ListenerEntry *listener;
+
+      if ((listener = malloc(sizeof(*listener)))) {
+        memset(listener, 0, sizeof(*listener));
+        listener->function = function;
+        listener->data = data;
+
+        if (enqueueItem(report->listeners, listener)) {
+          logSymbol(LOG_DEBUG, function, "report listener registered: %u", identifier);
+          return 1;
+        }
+
+        free(listener);
+      } else {
+        logMallocError();
+      }
     }
   }
 
   return 0;
 }
 
-void
-unregisterReportListener (ReportIdentifier identifier, ReportListener *listener) {
+int
+unregisterReportListener (ReportIdentifier identifier, ReportListener *function) {
   ReportEntry *report = getReportEntry(identifier, 0);
 
   if (report) {
     if (report->listeners) {
-      if (deleteItem(report->listeners, listener)) {
-        logSymbol(LOG_DEBUG, listener, "report listener unregistered: %u", identifier);
-        return;
+      Element *element = findListenerElement(report, function);
+
+      if (element) {
+        deleteElement(element);
+        logSymbol(LOG_DEBUG, function, "report listener unregistered: %u", identifier);
+        return 1;
       }
     }
   }
 
-  logSymbol(LOG_WARNING, listener, "report listener not registered: %u", identifier);
+  logSymbol(LOG_WARNING, function, "report listener not registered: %u", identifier);
+  return 0;
 }

@@ -790,7 +790,7 @@ REPORT_LISTENER(keycodeCommandsResetListener) {
 int
 addKeycodeCommands (void) {
   resetKeycodeVariables();
-  registerReportListener(REPORT_BRAILLE_ON, keycodeCommandsResetListener);
+  registerReportListener(REPORT_BRAILLE_ON, keycodeCommandsResetListener, NULL);
   return pushCommandHandler("keycodes", KTB_CTX_DEFAULT,
                             handleKeycodeCommands, NULL, NULL);
 }

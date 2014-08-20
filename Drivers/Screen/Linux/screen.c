@@ -882,7 +882,7 @@ construct_LinuxScreen (void) {
       if (openScreen(currentConsoleNumber)) {
         if (setTranslationTable(1)) {
           openKeyboard();
-          registerReportListener(REPORT_BRAILLE_OFF, lxBrailleOffReportListener);
+          registerReportListener(REPORT_BRAILLE_OFF, lxBrailleOffReportListener, NULL);
           return 1;
         }
       }

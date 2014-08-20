@@ -31,15 +31,16 @@ typedef enum {
 extern void report (ReportIdentifier identiier, const void *data);
 
 typedef struct {
-  ReportIdentifier identifier;
-  const void *data;
+  ReportIdentifier reportIdentifier;
+  const void *reportData;
+  void *listenerData;
 } ReportListenerParameters;
 
 #define REPORT_LISTENER(name) void name (const ReportListenerParameters *parameters)
 typedef REPORT_LISTENER(ReportListener);
 
-extern int registerReportListener (ReportIdentifier identifier, ReportListener *listener);
-extern void unregisterReportListener (ReportIdentifier identifier, ReportListener *listener);
+extern int registerReportListener (ReportIdentifier identifier, ReportListener *function, void *data);
+extern int unregisterReportListener (ReportIdentifier identifier, ReportListener *function);
 
 #ifdef __cplusplus
 }
