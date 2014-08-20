@@ -16,36 +16,17 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_CMD_UTILS
-#define BRLTTY_INCLUDED_CMD_UTILS
-
-#include "alert.h"
+#ifndef BRLTTY_INCLUDED_CMD_MISCELLANEOUS
+#define BRLTTY_INCLUDED_CMD_MISCELLANEOUS
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef enum {
-  TOGGLE_ERROR,
-  TOGGLE_SAME,
-  TOGGLE_OFF,
-  TOGGLE_ON
-} ToggleResult;
-
-extern ToggleResult toggleBit (
-  int *bits, int bit, int command,
-  AlertIdentifier offAlert,
-  AlertIdentifier onAlert
-);
-
-extern int isTextOffset (int *arg, int end, int relaxed);
-
-extern int getCharacterCoordinates (int arg, int *column, int *row, int end, int relaxed);
-
-extern size_t formatCharacterDescription (char *buffer, size_t size, int column, int row);
+extern int addMiscellaneousCommands (void);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_CMD_UTILS */
+#endif /* BRLTTY_INCLUDED_CMD_MISCELLANEOUS */

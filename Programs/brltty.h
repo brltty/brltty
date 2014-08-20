@@ -115,8 +115,6 @@ typedef struct {
 extern void getTimeFormattingData (TimeFormattingData *fmt);
 extern size_t formatBrailleTime (char *buffer, size_t size, const TimeFormattingData *fmt);
 
-extern size_t formatCharacterDescription (char *buffer, size_t size, int column, int row);
-
 #ifdef ENABLE_CONTRACTED_BRAILLE
 extern int isContracted;
 extern int contractedLength;
