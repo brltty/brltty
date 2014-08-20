@@ -25,9 +25,6 @@ extern "C" {
 
 extern int addClipboardCommands (void);
 
-extern const wchar_t *cpbGetContent (size_t *length);
-extern int cpbSetContent (const wchar_t *characters, size_t length);
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

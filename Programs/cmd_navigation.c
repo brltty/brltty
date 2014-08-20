@@ -25,7 +25,6 @@
 #include "cmd_queue.h"
 #include "cmd_navigation.h"
 #include "cmd_utils.h"
-#include "cmd_clipboard.h"
 #include "parse.h"
 #include "prefs.h"
 #include "alert.h"
@@ -185,28 +184,6 @@ testPrompt (int column, int row, void *data) {
   ScreenCharacter characters[count];
   readScreen(0, row, count, 1, characters);
   return isSameRow(characters, prompt, count, isSameText);
-}
-
-static int
-findCharacters (const wchar_t **address, size_t *length, const wchar_t *characters, size_t count) {
-  const wchar_t *ptr = *address;
-  size_t len = *length;
-
-  while (count <= len) {
-    const wchar_t *next = wmemchr(ptr, *characters, len);
-    if (!next) break;
-
-    len -= next - ptr;
-    if (wmemcmp((ptr = next), characters, count) == 0) {
-      *address = ptr;
-      *length = len;
-      return 1;
-    }
-
-    ++ptr, --len;
-  }
-
-  return 0;
 }
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -473,78 +450,6 @@ handleNavigationCommands (int command, void *data) {
           alert(ALERT_COMMAND_REJECTED);
         }
       }
-      break;
-    }
-
-    {
-      int increment;
-
-      const wchar_t *cpbBuffer;
-      size_t cpbLength;
-
-    case BRL_CMD_PRSEARCH:
-      increment = -1;
-      goto doSearch;
-
-    case BRL_CMD_NXSEARCH:
-      increment = 1;
-      goto doSearch;
-
-    doSearch:
-      if ((cpbBuffer = cpbGetContent(&cpbLength))) {
-        int found = 0;
-        size_t count = cpbLength;
-
-        if (count <= scr.cols) {
-          int line = ses->winy;
-          wchar_t buffer[scr.cols];
-          wchar_t characters[count];
-
-          {
-            unsigned int i;
-            for (i=0; i<count; i+=1) characters[i] = towlower(cpbBuffer[i]);
-          }
-
-          while ((line >= 0) && (line <= (int)(scr.rows - brl.textRows))) {
-            const wchar_t *address = buffer;
-            size_t length = scr.cols;
-            readScreenText(0, line, length, 1, buffer);
-
-            {
-              size_t i;
-              for (i=0; i<length; i++) buffer[i] = towlower(buffer[i]);
-            }
-
-            if (line == ses->winy) {
-              if (increment < 0) {
-                int end = ses->winx + count - 1;
-                if (end < length) length = end;
-              } else {
-                int start = ses->winx + textCount;
-                if (start > length) start = length;
-                address += start;
-                length -= start;
-              }
-            }
-            if (findCharacters(&address, &length, characters, count)) {
-              if (increment < 0)
-                while (findCharacters(&address, &length, characters, count))
-                  ++address, --length;
-
-              ses->winy = line;
-              ses->winx = (address - buffer) / textCount * textCount;
-              found = 1;
-              break;
-            }
-            line += increment;
-          }
-        }
-
-        if (!found) alert(ALERT_BOUNCE);
-      } else {
-        alert(ALERT_COMMAND_REJECTED);
-      }
-
       break;
     }
 

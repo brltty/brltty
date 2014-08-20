@@ -34,14 +34,25 @@
 #include "file.h"
 #include "datafile.h"
 #include "charset.h"
+#include "brltty.h"
 
-static wchar_t *clipboardCharacters;
-static size_t clipboardSize;
-static size_t clipboardLength;
+typedef struct {
+  struct {
+    wchar_t *characters;
+    size_t size;
+    size_t length;
+  } buffer;
 
-static int beginColumn;
-static int beginRow;
-static int beginOffset;
+  struct {
+    int column;
+    int row;
+    int offset;
+  } begin;
+
+  struct {
+    Queue *queue;
+  } history;
+} ClipboardCommandData;
 
 typedef struct {
   wchar_t *characters;
@@ -60,95 +71,71 @@ cpbAllocateCharacters (size_t count) {
 }
 
 static void
-cpbDeallocateHistoryEntry (void *item, void *data) {
-  HistoryEntry *entry = item;
-
-  if (entry->characters) free(entry->characters);
-  free(entry);
-}
-
-static Queue *
-cpbCreateHistoryQueue (void *data) {
-  return newQueue(cpbDeallocateHistoryEntry, NULL);
-}
-
-static Queue *
-cpbGetHistoryQueue (int create) {
-  static Queue *queue = NULL;
-
-  return getProgramQueue(&queue, "clipboard-history-queue", create,
-                         cpbCreateHistoryQueue, NULL);
-}
-
-static void
-cpbPushContent (const wchar_t *characters, size_t length) {
+cpbPushContent (ClipboardCommandData *ccd, const wchar_t *characters, size_t length) {
   if (length > 0) {
-    Queue *queue = cpbGetHistoryQueue(1);
+    Queue *queue = ccd->history.queue;
+    Element *element = getQueueTail(queue);
 
-    if (queue) {
-      Element *element = getQueueTail(queue);
+    if (element) {
+      const HistoryEntry *entry = getElementItem(element);
 
-      if (element) {
-        const HistoryEntry *entry = getElementItem(element);
-
-        if (length == entry->length) {
-          if (wmemcmp(characters, entry->characters, length) == 0) {
-            return;
-          }
+      if (length == entry->length) {
+        if (wmemcmp(characters, entry->characters, length) == 0) {
+          return;
         }
       }
+    }
 
-      {
-        HistoryEntry *entry;
+    {
+      HistoryEntry *entry;
 
-        if ((entry = malloc(sizeof(*entry)))) {
-          if ((entry->characters = cpbAllocateCharacters(length))) {
-            wmemcpy(entry->characters, characters, length);
-            entry->length = length;
+      if ((entry = malloc(sizeof(*entry)))) {
+        if ((entry->characters = cpbAllocateCharacters(length))) {
+          wmemcpy(entry->characters, characters, length);
+          entry->length = length;
 
-            if (enqueueItem(queue, entry)) {
-              return;
-            }
-
-            free(entry->characters);
-          } else {
-            logMallocError();
+          if (enqueueItem(queue, entry)) {
+            return;
           }
 
-          free(entry);
+          free(entry->characters);
         } else {
           logMallocError();
         }
+
+        free(entry);
+      } else {
+        logMallocError();
       }
     }
   }
 }
 
-const wchar_t *
-cpbGetContent (size_t *length) {
-  *length = clipboardLength;
-  return clipboardCharacters;
+static const wchar_t *
+cpbGetContent (ClipboardCommandData *ccd, size_t *length) {
+  *length = ccd->buffer.length;
+  return ccd->buffer.characters;
 }
 
 static void
-cpbTruncateContent (size_t length) {
-  if (length < clipboardLength) clipboardLength = length;
+cpbTruncateContent (ClipboardCommandData *ccd, size_t length) {
+  if (length < ccd->buffer.length) ccd->buffer.length = length;
 }
 
 static void
-cpbClearContent (void) {
+cpbClearContent (ClipboardCommandData *ccd) {
   size_t length;
-  const wchar_t *characters = cpbGetContent(&length);
+  const wchar_t *characters = cpbGetContent(ccd, &length);
 
-  cpbPushContent(characters, length);
-  cpbTruncateContent(0);
+  cpbPushContent(ccd, characters, length);
+  cpbTruncateContent(ccd, 0);
 }
 
 static int
-cpbAddContent (const wchar_t *characters, size_t length) {
-  size_t newLength = clipboardLength + length;
+cpbAddContent (ClipboardCommandData *ccd, const wchar_t *characters, size_t length) {
+  size_t newLength = ccd->buffer.length + length;
 
-  if (newLength > clipboardSize) {
+  if (newLength > ccd->buffer.size) {
     size_t newSize = newLength | 0XFF;
     wchar_t *newCharacters = cpbAllocateCharacters(newSize);
 
@@ -157,30 +144,24 @@ cpbAddContent (const wchar_t *characters, size_t length) {
       return 0;
     }
 
-    wmemcpy(newCharacters, clipboardCharacters, clipboardLength);
-    if (clipboardCharacters) free(clipboardCharacters);
-    clipboardCharacters = newCharacters;
-    clipboardSize = newSize;
+    wmemcpy(newCharacters, ccd->buffer.characters, ccd->buffer.length);
+    if (ccd->buffer.characters) free(ccd->buffer.characters);
+    ccd->buffer.characters = newCharacters;
+    ccd->buffer.size = newSize;
   }
 
-  wmemcpy(&clipboardCharacters[clipboardLength], characters, length);
-  clipboardLength += length;
+  wmemcpy(&ccd->buffer.characters[ccd->buffer.length], characters, length);
+  ccd->buffer.length += length;
   return 1;
 }
 
-int
-cpbSetContent (const wchar_t *characters, size_t length) {
-  cpbClearContent();
-  return cpbAddContent(characters, length);
-}
-
 static wchar_t *
-cpbReadScreen (size_t *length, int fromColumn, int fromRow, int toColumn, int toRow) {
+cpbReadScreen (ClipboardCommandData *ccd, size_t *length, int fromColumn, int fromRow, int toColumn, int toRow) {
   wchar_t *newBuffer = NULL;
   int columns = toColumn - fromColumn + 1;
   int rows = toRow - fromRow + 1;
 
-  if ((columns >= 1) && (rows >= 1) && (beginOffset >= 0)) {
+  if ((columns >= 1) && (rows >= 1) && (ccd->begin.offset >= 0)) {
     wchar_t fromBuffer[rows * columns];
 
     if (readScreenText(fromColumn, fromRow, columns, rows, fromBuffer)) {
@@ -217,26 +198,26 @@ cpbReadScreen (size_t *length, int fromColumn, int fromRow, int toColumn, int to
 }
 
 static int
-cpbEndOperation (const wchar_t *characters, size_t length) {
-  cpbTruncateContent(beginOffset);
-  if (!cpbAddContent(characters, length)) return 0;
+cpbEndOperation (ClipboardCommandData *ccd, const wchar_t *characters, size_t length) {
+  cpbTruncateContent(ccd, ccd->begin.offset);
+  if (!cpbAddContent(ccd, characters, length)) return 0;
   alert(ALERT_CLIPBOARD_END);
   return 1;
 }
 
 static void
-cpbBeginOperation (int column, int row) {
-  beginColumn = column;
-  beginRow = row;
-  beginOffset = clipboardLength;
+cpbBeginOperation (ClipboardCommandData *ccd, int column, int row) {
+  ccd->begin.column = column;
+  ccd->begin.row = row;
+  ccd->begin.offset = ccd->buffer.length;
   alert(ALERT_CLIPBOARD_BEGIN);
 }
 
 static int
-cpbRectangularCopy (int column, int row) {
+cpbRectangularCopy (ClipboardCommandData *ccd, int column, int row) {
   int copied = 0;
   size_t length;
-  wchar_t *buffer = cpbReadScreen(&length, beginColumn, beginRow, column, row);
+  wchar_t *buffer = cpbReadScreen(ccd, &length, ccd->begin.column, ccd->begin.row, column, row);
 
   if (buffer) {
     {
@@ -271,7 +252,7 @@ cpbRectangularCopy (int column, int row) {
       length = to - buffer;
     }
 
-    if (cpbEndOperation(buffer, length)) copied = 1;
+    if (cpbEndOperation(ccd, buffer, length)) copied = 1;
     free(buffer);
   }
 
@@ -279,7 +260,7 @@ cpbRectangularCopy (int column, int row) {
 }
 
 static int
-cpbLinearCopy (int column, int row) {
+cpbLinearCopy (ClipboardCommandData *ccd, int column, int row) {
   int copied = 0;
   ScreenDescription screen;
   describeScreen(&screen);
@@ -287,7 +268,7 @@ cpbLinearCopy (int column, int row) {
   {
     int rightColumn = screen.cols - 1;
     size_t length;
-    wchar_t *buffer = cpbReadScreen(&length, 0, beginRow, rightColumn, row);
+    wchar_t *buffer = cpbReadScreen(ccd, &length, 0, ccd->begin.row, rightColumn, row);
 
     if (buffer) {
       if (column < rightColumn) {
@@ -305,10 +286,10 @@ cpbLinearCopy (int column, int row) {
         }
       }
 
-      if (beginColumn) {
+      if (ccd->begin.column) {
         wchar_t *start = wmemchr(buffer, WC_C('\r'), length);
         if (!start) start = buffer + length;
-        if ((start - buffer) > beginColumn) start = buffer + beginColumn;
+        if ((start - buffer) > ccd->begin.column) start = buffer + ccd->begin.column;
         if (start != buffer) wmemmove(buffer, start, (length -= start - buffer));
       }
 
@@ -351,7 +332,7 @@ cpbLinearCopy (int column, int row) {
         length = to - buffer;
       }
 
-      if (cpbEndOperation(buffer, length)) copied = 1;
+      if (cpbEndOperation(ccd, buffer, length)) copied = 1;
       free(buffer);
     }
   }
@@ -360,9 +341,9 @@ cpbLinearCopy (int column, int row) {
 }
 
 static int
-cpbPaste (void) {
+cpbPaste (ClipboardCommandData *ccd) {
   size_t length;
-  const wchar_t *characters = cpbGetContent(&length);
+  const wchar_t *characters = cpbGetContent(ccd, &length);
 
   if (!length) return 0;
 
@@ -399,10 +380,10 @@ cpbOpenFile (const char *mode) {
 }
 
 static int
-cpbSave (void) {
+cpbSave (ClipboardCommandData *ccd) {
   int ok = 0;
   size_t length;
-  const wchar_t *characters = cpbGetContent(&length);
+  const wchar_t *characters = cpbGetContent(ccd, &length);
 
   if (length > 0) {
     FILE *stream = cpbOpenFile("w");
@@ -423,7 +404,7 @@ cpbSave (void) {
 }
 
 static int
-cpbRestore (void) {
+cpbRestore (ClipboardCommandData *ccd) {
   int ok = 0;
   FILE *stream = cpbOpenFile("r");
 
@@ -432,7 +413,7 @@ cpbRestore (void) {
     char buffer[size];
     size_t length = 0;
 
-    cpbClearContent();
+    cpbClearContent(ccd);
     ok = 1;
 
     do {
@@ -463,7 +444,7 @@ cpbRestore (void) {
           } else {
             wchar_t wc = wi;
 
-            if (!cpbAddContent(&wc, 1)) {
+            if (!cpbAddContent(ccd, &wc, 1)) {
               ok = 0;
               break;
             }
@@ -484,23 +465,119 @@ cpbRestore (void) {
 }
 
 static int
+findCharacters (const wchar_t **address, size_t *length, const wchar_t *characters, size_t count) {
+  const wchar_t *ptr = *address;
+  size_t len = *length;
+
+  while (count <= len) {
+    const wchar_t *next = wmemchr(ptr, *characters, len);
+    if (!next) break;
+
+    len -= next - ptr;
+    if (wmemcmp((ptr = next), characters, count) == 0) {
+      *address = ptr;
+      *length = len;
+      return 1;
+    }
+
+    ++ptr, --len;
+  }
+
+  return 0;
+}
+
+static int
 handleClipboardCommands (int command, void *data) {
+  ClipboardCommandData *ccd = data;
+
   switch (command & BRL_MSK_CMD) {
     case BRL_CMD_PASTE:
       if (isMainScreen() && !isRouting()) {
-        if (cpbPaste()) break;
+        if (cpbPaste(ccd)) break;
       }
 
       alert(ALERT_COMMAND_REJECTED);
       break;
 
     case BRL_CMD_CLIP_SAVE:
-      alert(cpbSave()? ALERT_COMMAND_DONE: ALERT_COMMAND_REJECTED);
+      alert(cpbSave(ccd)? ALERT_COMMAND_DONE: ALERT_COMMAND_REJECTED);
       break;
 
     case BRL_CMD_CLIP_RESTORE:
-      alert(cpbRestore()? ALERT_COMMAND_DONE: ALERT_COMMAND_REJECTED);
+      alert(cpbRestore(ccd)? ALERT_COMMAND_DONE: ALERT_COMMAND_REJECTED);
       break;
+
+    {
+      int increment;
+
+      const wchar_t *cpbBuffer;
+      size_t cpbLength;
+
+    case BRL_CMD_PRSEARCH:
+      increment = -1;
+      goto doSearch;
+
+    case BRL_CMD_NXSEARCH:
+      increment = 1;
+      goto doSearch;
+
+    doSearch:
+      if ((cpbBuffer = cpbGetContent(ccd, &cpbLength))) {
+        int found = 0;
+        size_t count = cpbLength;
+
+        if (count <= scr.cols) {
+          int line = ses->winy;
+          wchar_t buffer[scr.cols];
+          wchar_t characters[count];
+
+          {
+            unsigned int i;
+            for (i=0; i<count; i+=1) characters[i] = towlower(cpbBuffer[i]);
+          }
+
+          while ((line >= 0) && (line <= (int)(scr.rows - brl.textRows))) {
+            const wchar_t *address = buffer;
+            size_t length = scr.cols;
+            readScreenText(0, line, length, 1, buffer);
+
+            {
+              size_t i;
+              for (i=0; i<length; i++) buffer[i] = towlower(buffer[i]);
+            }
+
+            if (line == ses->winy) {
+              if (increment < 0) {
+                int end = ses->winx + count - 1;
+                if (end < length) length = end;
+              } else {
+                int start = ses->winx + textCount;
+                if (start > length) start = length;
+                address += start;
+                length -= start;
+              }
+            }
+            if (findCharacters(&address, &length, characters, count)) {
+              if (increment < 0)
+                while (findCharacters(&address, &length, characters, count))
+                  ++address, --length;
+
+              ses->winy = line;
+              ses->winx = (address - buffer) / textCount * textCount;
+              found = 1;
+              break;
+            }
+            line += increment;
+          }
+        }
+
+        if (!found) alert(ALERT_BOUNCE);
+      } else {
+        alert(ALERT_COMMAND_REJECTED);
+      }
+
+      break;
+    }
 
     default: {
       int arg = command & BRL_MSK_ARG;
@@ -521,8 +598,8 @@ handleClipboardCommands (int command, void *data) {
 
         doClipBegin:
           if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
-            if (clear) cpbClearContent();
-            cpbBeginOperation(column, row);
+            if (clear) cpbClearContent(ccd);
+            cpbBeginOperation(ccd, column, row);
           } else {
             alert(ALERT_COMMAND_REJECTED);
           }
@@ -534,7 +611,7 @@ handleClipboardCommands (int command, void *data) {
           int column, row;
 
           if (getCharacterCoordinates(arg, &column, &row, 1, 1))
-            if (cpbRectangularCopy(column, row))
+            if (cpbRectangularCopy(ccd, column, row))
               break;
 
           alert(ALERT_COMMAND_REJECTED);
@@ -545,7 +622,7 @@ handleClipboardCommands (int command, void *data) {
           int column, row;
 
           if (getCharacterCoordinates(arg, &column, &row, 1, 1))
-            if (cpbLinearCopy(column, row))
+            if (cpbLinearCopy(ccd, column, row))
               break;
 
           alert(ALERT_COMMAND_REJECTED);
@@ -571,9 +648,9 @@ handleClipboardCommands (int command, void *data) {
               int column2, row2;
 
               if (getCharacterCoordinates(ext, &column2, &row2, 1, 1)) {
-                if (clear) cpbClearContent();
-                cpbBeginOperation(column1, row1);
-                if (cpbLinearCopy(column2, row2)) break;
+                if (clear) cpbClearContent(ccd);
+                cpbBeginOperation(ccd, column1, row1);
+                if (cpbLinearCopy(ccd, column2, row2)) break;
               }
             }
           }
@@ -592,16 +669,50 @@ handleClipboardCommands (int command, void *data) {
   return 1;
 }
 
+static void
+cpbDeallocateHistoryEntry (void *item, void *data) {
+  HistoryEntry *entry = item;
+
+  if (entry->characters) free(entry->characters);
+  free(entry);
+}
+
+static void
+destroyClipboardCommandData (void *data) {
+  ClipboardCommandData *ccd = data;
+
+  deallocateQueue(ccd->history.queue);
+  free(ccd);
+}
+
 int
 addClipboardCommands (void) {
-  clipboardCharacters = NULL;
-  clipboardSize = 0;
-  clipboardLength = 0;
+  ClipboardCommandData *ccd;
 
-  beginColumn = 0;
-  beginRow = 0;
-  beginOffset = -1;
+  if ((ccd = malloc(sizeof(*ccd)))) {
+    memset(ccd, 0, sizeof(*ccd));
 
-  return pushCommandHandler("clipboard", KTB_CTX_DEFAULT,
-                            handleClipboardCommands, NULL, NULL);
+    ccd->buffer.characters = NULL;
+    ccd->buffer.size = 0;
+    ccd->buffer.length = 0;
+
+    ccd->begin.column = 0;
+    ccd->begin.row = 0;
+    ccd->begin.offset = -1;
+
+    if ((ccd->history.queue = newQueue(cpbDeallocateHistoryEntry, NULL))) {
+      if (pushCommandHandler("clipboard", KTB_CTX_DEFAULT,
+                             handleClipboardCommands, destroyClipboardCommandData, ccd)) {
+        return 1;
+      }
+
+      deallocateQueue(ccd->history.queue);
+    }
+
+    free(ccd);
+  } else {
+    logMallocError();
+  }
+
+  return 0;
 }
