@@ -225,7 +225,7 @@ static void
 destroyInputCommandData (void *data) {
   InputCommandData *icd = data;
 
-  destroyReportListenerInstance(icd->resetListener);
+  unregisterReportListener(icd->resetListener);
   free(icd);
 }
 
@@ -237,13 +237,13 @@ addInputCommands (void) {
     memset(icd, 0, sizeof(*icd));
     resetInputCommandData(icd);
 
-    if ((icd->resetListener = newReportListenerInstance(REPORT_BRAILLE_ONLINE, inputCommandDataResetListener, icd))) {
+    if ((icd->resetListener = registerReportListener(REPORT_BRAILLE_ONLINE, inputCommandDataResetListener, icd))) {
       if (pushCommandHandler("input", KTB_CTX_DEFAULT,
                              handleInputCommands, destroyInputCommandData, icd)) {
         return 1;
       }
 
-      destroyReportListenerInstance(icd->resetListener);
+      unregisterReportListener(icd->resetListener);
     }
 
     free(icd);

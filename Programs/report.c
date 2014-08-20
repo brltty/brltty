@@ -161,7 +161,7 @@ deallocateReportListenerInstance (void *item, void *data) {
 }
 
 ReportListenerInstance *
-newReportListenerInstance (ReportIdentifier identifier, ReportListener *listener, void *data) {
+registerReportListener (ReportIdentifier identifier, ReportListener *listener, void *data) {
   ReportEntry *report = getReportEntry(identifier, 1);
 
   if (report) {
@@ -199,6 +199,6 @@ newReportListenerInstance (ReportIdentifier identifier, ReportListener *listener
 }
 
 void
-destroyReportListenerInstance (ReportListenerInstance *rli) {
+unregisterReportListener (ReportListenerInstance *rli) {
   deleteElement(rli->element);
 }

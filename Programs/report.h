@@ -40,13 +40,13 @@ typedef struct {
 typedef REPORT_LISTENER(ReportListener);
 typedef struct ReportListenerInstanceStruct ReportListenerInstance;
 
-extern ReportListenerInstance *newReportListenerInstance (
+extern ReportListenerInstance *registerReportListener (
   ReportIdentifier identifier,
   ReportListener *listener,
   void *data
 );
 
-extern void destroyReportListenerInstance (ReportListenerInstance *rli);
+extern void unregisterReportListener (ReportListenerInstance *rli);
 
 #ifdef __cplusplus
 }

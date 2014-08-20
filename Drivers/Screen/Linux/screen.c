@@ -876,7 +876,7 @@ construct_LinuxScreen (void) {
       if (openScreen(currentConsoleNumber)) {
         if (setTranslationTable(1)) {
           openKeyboard();
-          brailleOfflineListener = newReportListenerInstance(REPORT_BRAILLE_OFFLINE, lxBrailleOfflineListener, NULL);
+          brailleOfflineListener = registerReportListener(REPORT_BRAILLE_OFFLINE, lxBrailleOfflineListener, NULL);
           return 1;
         }
       }
@@ -907,7 +907,7 @@ destruct_LinuxScreen (void) {
   cacheSize = 0;
 
   if (brailleOfflineListener) {
-    destroyReportListenerInstance(brailleOfflineListener);
+    unregisterReportListener(brailleOfflineListener);
     brailleOfflineListener = NULL;
   }
 

@@ -809,7 +809,7 @@ static void
 destroyKeycodeCommandData (void *data) {
   KeycodeCommandData *kcd = data;
 
-  destroyReportListenerInstance(kcd->resetListener);
+  unregisterReportListener(kcd->resetListener);
   free(kcd);
 }
 
@@ -821,13 +821,13 @@ addKeycodeCommands (void) {
     memset(kcd, 0, sizeof(*kcd));
     resetKeycodeCommandData(kcd);
 
-    if ((kcd->resetListener = newReportListenerInstance(REPORT_BRAILLE_ONLINE, keycodeCommandDataResetListener, kcd))) {
+    if ((kcd->resetListener = registerReportListener(REPORT_BRAILLE_ONLINE, keycodeCommandDataResetListener, kcd))) {
       if (pushCommandHandler("keycodes", KTB_CTX_DEFAULT,
                              handleKeycodeCommands, destroyKeycodeCommandData, kcd)) {
         return 1;
       }
 
-      destroyReportListenerInstance(kcd->resetListener);
+      unregisterReportListener(kcd->resetListener);
     }
 
     free(kcd);
