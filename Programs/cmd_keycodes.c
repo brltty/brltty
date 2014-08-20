@@ -81,10 +81,6 @@ typedef enum {
 #define MOD_CLR(number, bits) ((bits) &= ~MOD_BIT((number)))
 #define MOD_TST(number, bits) ((bits) & MOD_BIT((number)))
 
-#define USE_KEY_TABLE(mode,type) \
-  (kcd->mode.keyCount = (kcd->mode.keyTable = mode##KeyTable##type)? \
-  ARRAY_COUNT(mode##KeyTable##type): 0)
-
 typedef struct {
   int command;
   int alternate;
@@ -239,6 +235,10 @@ typedef struct {
     unsigned int modifiers;
   } ps2;
 } KeycodeCommandData;
+
+#define USE_KEY_TABLE(set,escape) \
+  (kcd->set.keyCount = (kcd->set.keyTable = set##KeyTable##escape)? \
+  ARRAY_COUNT(set##KeyTable##escape): 0)
 
 static void
 handleKey (const KeyEntry *key, int release, unsigned int *modifiers) {

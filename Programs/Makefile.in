@@ -475,7 +475,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O $(PREFS_OBJECTS) menu.$O ses.$O status.$O update.$O blink.$O clipboard.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_navigation.$O cmd_input.$O cmd_keycodes.$O cmd_touch.$O cmd_toggle.$O cmd_speech.$O cmd_learn.$O pipe.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) api_control.$O $(API_OBJECTS)
+CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O $(PREFS_OBJECTS) menu.$O ses.$O status.$O update.$O blink.$O clipboard.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_utils.$O cmd_navigation.$O cmd_input.$O cmd_keycodes.$O cmd_touch.$O cmd_toggle.$O cmd_speech.$O cmd_learn.$O pipe.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) api_control.$O $(API_OBJECTS)
 CORE_NAME = brltty
 
 brltty-core: $(CORE_OBJECTS)
@@ -512,6 +512,9 @@ cmd_brlapi.$O:
 
 cmd_queue.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_queue.c
+
+cmd_utils.$O:
+	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/cmd_utils.c
 
 cmd_navigation.$O:
 	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/cmd_navigation.c

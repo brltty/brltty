@@ -24,7 +24,7 @@
 #include "report.h"
 #include "cmd_queue.h"
 #include "cmd_input.h"
-#include "cmd_toggle.h"
+#include "cmd_utils.h"
 #include "brl_cmds.h"
 #include "unicode.h"
 #include "ttb.h"

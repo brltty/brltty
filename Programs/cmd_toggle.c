@@ -18,54 +18,14 @@
 
 #include "prologue.h"
 
-#include "parameters.h"
 #include "cmd_queue.h"
 #include "cmd_toggle.h"
+#include "cmd_utils.h"
 #include "brl_cmds.h"
 #include "prefs.h"
 #include "scr.h"
 #include "alert.h"
-#include "async_wait.h"
 #include "brltty.h"
-
-ToggleResult
-toggleBit (
-  int *bits, int bit, int command,
-  AlertIdentifier offAlert,
-  AlertIdentifier onAlert
-) {
-  int oldBits = *bits;
-
-  switch (command & BRL_FLG_TOGGLE_MASK) {
-    case 0:
-      *bits ^= bit;
-      break;
-
-    case BRL_FLG_TOGGLE_ON:
-      *bits |= bit;
-      break;
-
-    case BRL_FLG_TOGGLE_OFF:
-      *bits &= ~bit;
-      break;
-
-    default:
-      alert(ALERT_COMMAND_REJECTED);
-      return TOGGLE_ERROR;
-  }
-
-  {
-    int isOn = (*bits & bit) != 0;
-    AlertIdentifier identifier = isOn? onAlert: offAlert;
-
-    alert(identifier);
-    if (*bits != oldBits) return isOn? TOGGLE_ON: TOGGLE_OFF;
-
-    asyncWait(TUNE_TOGGLE_REPEAT_DELAY);
-    alert(identifier);
-    return TOGGLE_SAME;
-  }
-}
 
 static ToggleResult
 toggleSetting (
