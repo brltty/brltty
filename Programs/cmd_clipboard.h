@@ -16,29 +16,20 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_CLIPBOARD
-#define BRLTTY_INCLUDED_CLIPBOARD
+#ifndef BRLTTY_INCLUDED_CMD_CLIPBOARD
+#define BRLTTY_INCLUDED_CMD_CLIPBOARD
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
+extern int addClipboardCommands (void);
+
 extern const wchar_t *cpbGetContent (size_t *length);
 extern int cpbSetContent (const wchar_t *characters, size_t length);
-extern int cpbAddContent (const wchar_t *characters, size_t length);
-extern void cpbClearContent (void);
-extern void cpbTruncateContent (size_t length);
-
-extern void cpbBeginOperation (int column, int row);
-extern int cpbRectangularCopy (int column, int row);
-extern int cpbLinearCopy (int column, int row);
-extern int cpbPaste (void);
-
-extern int cpbSave (void);
-extern int cpbRestore (void);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_CLIPBOARD */
+#endif /* BRLTTY_INCLUDED_CMD_CLIPBOARD */

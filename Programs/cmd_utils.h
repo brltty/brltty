@@ -38,6 +38,10 @@ extern ToggleResult toggleBit (
   AlertIdentifier onAlert
 );
 
+extern int isTextOffset (int *arg, int end, int relaxed);
+
+extern int getCharacterCoordinates (int arg, int *column, int *row, int end, int relaxed);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

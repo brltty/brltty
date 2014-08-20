@@ -24,11 +24,12 @@
 #include "parameters.h"
 #include "cmd_queue.h"
 #include "cmd_navigation.h"
+#include "cmd_utils.h"
+#include "cmd_clipboard.h"
 #include "parse.h"
 #include "prefs.h"
 #include "alert.h"
 #include "routing.h"
-#include "clipboard.h"
 #include "message.h"
 #include "brl_cmds.h"
 #include "scr.h"
@@ -41,20 +42,6 @@ getWindowLength (void) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   return textCount;
-}
-
-static int
-getCharacterCoordinates (int arg, int *column, int *row, int end, int relaxed) {
-  if (arg == BRL_MSK_ARG) {
-    if (!SCR_CURSOR_OK()) return 0;
-    *column = scr.posx;
-    *row = scr.posy;
-  } else {
-    if (!isTextOffset(&arg, end, relaxed)) return 0;
-    *column = ses->winx + arg;
-    *row = ses->winy;
-  }
-  return 1;
 }
 
 typedef int (*CanMoveWindow) (void);
@@ -837,21 +824,6 @@ handleNavigationCommands (int command, void *data) {
       restartRequired = 1;
       break;
 
-    case BRL_CMD_PASTE:
-      if (isMainScreen() && !isRouting()) {
-        if (cpbPaste()) break;
-      }
-      alert(ALERT_COMMAND_REJECTED);
-      break;
-
-    case BRL_CMD_CLIP_SAVE:
-      alert(cpbSave()? ALERT_COMMAND_DONE: ALERT_COMMAND_REJECTED);
-      break;
-
-    case BRL_CMD_CLIP_RESTORE:
-      alert(cpbRestore()? ALERT_COMMAND_DONE: ALERT_COMMAND_REJECTED);
-      break;
-
     case BRL_CMD_CSRJMP_VERT:
       alert(routeCursor(-1, ses->winy, scr.number)?
                ALERT_ROUTING_STARTED:
@@ -961,7 +933,6 @@ handleNavigationCommands (int command, void *data) {
     default: {
       int blk = command & BRL_MSK_BLK;
       int arg = command & BRL_MSK_ARG;
-      int ext = BRL_CODE_GET(EXT, command);
       int flags = command & BRL_MSK_FLG;
 
       switch (blk) {
@@ -974,81 +945,6 @@ handleNavigationCommands (int command, void *data) {
               break;
             }
           }
-          alert(ALERT_COMMAND_REJECTED);
-          break;
-        }
-
-        {
-          int clear;
-          int column, row;
-
-        case BRL_BLK_CLIP_NEW:
-          clear = 1;
-          goto doClipBegin;
-
-        case BRL_BLK_CLIP_ADD:
-          clear = 0;
-          goto doClipBegin;
-
-        doClipBegin:
-          if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
-            if (clear) cpbClearContent();
-            cpbBeginOperation(column, row);
-          } else {
-            alert(ALERT_COMMAND_REJECTED);
-          }
-
-          break;
-        }
-
-        case BRL_BLK_COPY_RECT: {
-          int column, row;
-
-          if (getCharacterCoordinates(arg, &column, &row, 1, 1))
-            if (cpbRectangularCopy(column, row))
-              break;
-
-          alert(ALERT_COMMAND_REJECTED);
-          break;
-        }
-
-        case BRL_BLK_COPY_LINE: {
-          int column, row;
-
-          if (getCharacterCoordinates(arg, &column, &row, 1, 1))
-            if (cpbLinearCopy(column, row))
-              break;
-
-          alert(ALERT_COMMAND_REJECTED);
-          break;
-        }
-
-        {
-          int clear;
-
-        case BRL_BLK_CLIP_COPY:
-          clear = 1;
-          goto doCopy;
-
-        case BRL_BLK_CLIP_APPEND:
-          clear = 0;
-          goto doCopy;
-
-        doCopy:
-          if (ext > arg) {
-            int column1, row1;
-
-            if (getCharacterCoordinates(arg, &column1, &row1, 0, 0)) {
-              int column2, row2;
-
-              if (getCharacterCoordinates(ext, &column2, &row2, 1, 1)) {
-                if (clear) cpbClearContent();
-                cpbBeginOperation(column1, row1);
-                if (cpbLinearCopy(column2, row2)) break;
-              }
-            }
-          }
-
           alert(ALERT_COMMAND_REJECTED);
           break;
         }

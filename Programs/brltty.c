@@ -46,6 +46,7 @@
 #include "cmd_keycodes.h"
 #include "cmd_touch.h"
 #include "cmd_toggle.h"
+#include "cmd_clipboard.h"
 #include "cmd_speech.h"
 #include "cmd_learn.h"
 #include "timing.h"
@@ -222,6 +223,7 @@ setSessionEntry (void) {
 
         addLearnCommands();
         addSpeechCommands();
+        addClipboardCommands();
         addToggleCommands();
         addTouchCommands();
         addKeycodeCommands();
@@ -962,45 +964,6 @@ getContractedLength (unsigned int outputLimit) {
 int
 showCursor (void) {
   return scr.cursor && prefs.showCursor && !ses->hideCursor;
-}
-
-int
-isTextOffset (int *arg, int end, int relaxed) {
-  int value = *arg;
-
-  if (value < textStart) return 0;
-  if ((value -= textStart) >= textCount) return 0;
-
-  if ((ses->winx + value) >= scr.cols) {
-    if (!relaxed) return 0;
-    value = scr.cols - 1 - ses->winx;
-  }
-
-#ifdef ENABLE_CONTRACTED_BRAILLE
-  if (isContracted) {
-    int result = 0;
-    int index;
-
-    for (index=0; index<contractedLength; index+=1) {
-      int offset = contractedOffsets[index];
-
-      if (offset != CTB_NO_OFFSET) {
-        if (offset > value) {
-          if (end) result = index - 1;
-          break;
-        }
-
-        result = index;
-      }
-    }
-    if (end && (index == contractedLength)) result = contractedLength - 1;
-
-    value = result;
-  }
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-
-  *arg = value;
-  return 1;
 }
 
 int

@@ -23,21 +23,25 @@
 #include <ctype.h>
 
 #include "log.h"
+#include "cmd_queue.h"
+#include "cmd_clipboard.h"
+#include "cmd_utils.h"
+#include "brl_cmds.h"
 #include "scr.h"
+#include "routing.h"
 #include "alert.h"
-#include "clipboard.h"
 #include "queue.h"
 #include "file.h"
 #include "datafile.h"
 #include "charset.h"
 
-static wchar_t *clipboardCharacters = NULL;
-static size_t clipboardSize = 0;
-static size_t clipboardLength = 0;
+static wchar_t *clipboardCharacters;
+static size_t clipboardSize;
+static size_t clipboardLength;
 
-static int beginColumn = 0;
-static int beginRow = 0;
-static int beginOffset = -1;
+static int beginColumn;
+static int beginRow;
+static int beginOffset;
 
 typedef struct {
   wchar_t *characters;
@@ -126,12 +130,12 @@ cpbGetContent (size_t *length) {
   return clipboardCharacters;
 }
 
-void
+static void
 cpbTruncateContent (size_t length) {
   if (length < clipboardLength) clipboardLength = length;
 }
 
-void
+static void
 cpbClearContent (void) {
   size_t length;
   const wchar_t *characters = cpbGetContent(&length);
@@ -140,7 +144,7 @@ cpbClearContent (void) {
   cpbTruncateContent(0);
 }
 
-int
+static int
 cpbAddContent (const wchar_t *characters, size_t length) {
   size_t newLength = clipboardLength + length;
 
@@ -220,7 +224,7 @@ cpbEndOperation (const wchar_t *characters, size_t length) {
   return 1;
 }
 
-void
+static void
 cpbBeginOperation (int column, int row) {
   beginColumn = column;
   beginRow = row;
@@ -228,7 +232,7 @@ cpbBeginOperation (int column, int row) {
   alert(ALERT_CLIPBOARD_BEGIN);
 }
 
-int
+static int
 cpbRectangularCopy (int column, int row) {
   int copied = 0;
   size_t length;
@@ -274,7 +278,7 @@ cpbRectangularCopy (int column, int row) {
   return copied;
 }
 
-int
+static int
 cpbLinearCopy (int column, int row) {
   int copied = 0;
   ScreenDescription screen;
@@ -355,7 +359,7 @@ cpbLinearCopy (int column, int row) {
   return copied;
 }
 
-int
+static int
 cpbPaste (void) {
   size_t length;
   const wchar_t *characters = cpbGetContent(&length);
@@ -394,7 +398,7 @@ cpbOpenFile (const char *mode) {
   return NULL;
 }
 
-int
+static int
 cpbSave (void) {
   int ok = 0;
   size_t length;
@@ -418,7 +422,7 @@ cpbSave (void) {
   return ok;
 }
 
-int
+static int
 cpbRestore (void) {
   int ok = 0;
   FILE *stream = cpbOpenFile("r");
@@ -477,4 +481,127 @@ cpbRestore (void) {
   }
 
   return ok;
+}
+
+static int
+handleClipboardCommands (int command, void *data) {
+  switch (command & BRL_MSK_CMD) {
+    case BRL_CMD_PASTE:
+      if (isMainScreen() && !isRouting()) {
+        if (cpbPaste()) break;
+      }
+
+      alert(ALERT_COMMAND_REJECTED);
+      break;
+
+    case BRL_CMD_CLIP_SAVE:
+      alert(cpbSave()? ALERT_COMMAND_DONE: ALERT_COMMAND_REJECTED);
+      break;
+
+    case BRL_CMD_CLIP_RESTORE:
+      alert(cpbRestore()? ALERT_COMMAND_DONE: ALERT_COMMAND_REJECTED);
+      break;
+
+    default: {
+      int arg = command & BRL_MSK_ARG;
+      int ext = BRL_CODE_GET(EXT, command);
+
+      switch (command & BRL_MSK_BLK) {
+        {
+          int clear;
+          int column, row;
+
+        case BRL_BLK_CLIP_NEW:
+          clear = 1;
+          goto doClipBegin;
+
+        case BRL_BLK_CLIP_ADD:
+          clear = 0;
+          goto doClipBegin;
+
+        doClipBegin:
+          if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
+            if (clear) cpbClearContent();
+            cpbBeginOperation(column, row);
+          } else {
+            alert(ALERT_COMMAND_REJECTED);
+          }
+
+          break;
+        }
+
+        case BRL_BLK_COPY_RECT: {
+          int column, row;
+
+          if (getCharacterCoordinates(arg, &column, &row, 1, 1))
+            if (cpbRectangularCopy(column, row))
+              break;
+
+          alert(ALERT_COMMAND_REJECTED);
+          break;
+        }
+
+        case BRL_BLK_COPY_LINE: {
+          int column, row;
+
+          if (getCharacterCoordinates(arg, &column, &row, 1, 1))
+            if (cpbLinearCopy(column, row))
+              break;
+
+          alert(ALERT_COMMAND_REJECTED);
+          break;
+        }
+
+        {
+          int clear;
+
+        case BRL_BLK_CLIP_COPY:
+          clear = 1;
+          goto doCopy;
+
+        case BRL_BLK_CLIP_APPEND:
+          clear = 0;
+          goto doCopy;
+
+        doCopy:
+          if (ext > arg) {
+            int column1, row1;
+
+            if (getCharacterCoordinates(arg, &column1, &row1, 0, 0)) {
+              int column2, row2;
+
+              if (getCharacterCoordinates(ext, &column2, &row2, 1, 1)) {
+                if (clear) cpbClearContent();
+                cpbBeginOperation(column1, row1);
+                if (cpbLinearCopy(column2, row2)) break;
+              }
+            }
+          }
+
+          alert(ALERT_COMMAND_REJECTED);
+          break;
+        }
+
+        default:
+          return 0;
+      }
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+int
+addClipboardCommands (void) {
+  clipboardCharacters = NULL;
+  clipboardSize = 0;
+  clipboardLength = 0;
+
+  beginColumn = 0;
+  beginRow = 0;
+  beginOffset = -1;
+
+  return pushCommandHandler("clipboard", KTB_CTX_DEFAULT,
+                            handleClipboardCommands, NULL, NULL);
 }

@@ -22,6 +22,8 @@
 #include "cmd_utils.h"
 #include "brl_cmds.h"
 #include "async_wait.h"
+//#include "scr.h"
+#include "brltty.h"
 
 ToggleResult
 toggleBit (
@@ -60,4 +62,57 @@ toggleBit (
     alert(identifier);
     return TOGGLE_SAME;
   }
+}
+
+int
+isTextOffset (int *arg, int end, int relaxed) {
+  int value = *arg;
+
+  if (value < textStart) return 0;
+  if ((value -= textStart) >= textCount) return 0;
+
+  if ((ses->winx + value) >= scr.cols) {
+    if (!relaxed) return 0;
+    value = scr.cols - 1 - ses->winx;
+  }
+
+#ifdef ENABLE_CONTRACTED_BRAILLE
+  if (isContracted) {
+    int result = 0;
+    int index;
+
+    for (index=0; index<contractedLength; index+=1) {
+      int offset = contractedOffsets[index];
+
+      if (offset != CTB_NO_OFFSET) {
+        if (offset > value) {
+          if (end) result = index - 1;
+          break;
+        }
+
+        result = index;
+      }
+    }
+    if (end && (index == contractedLength)) result = contractedLength - 1;
+
+    value = result;
+  }
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+
+  *arg = value;
+  return 1;
+}
+
+int
+getCharacterCoordinates (int arg, int *column, int *row, int end, int relaxed) {
+  if (arg == BRL_MSK_ARG) {
+    if (!SCR_CURSOR_OK()) return 0;
+    *column = scr.posx;
+    *row = scr.posy;
+  } else {
+    if (!isTextOffset(&arg, end, relaxed)) return 0;
+    *column = ses->winx + arg;
+    *row = ses->winy;
+  }
+  return 1;
 }

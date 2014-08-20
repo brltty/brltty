@@ -106,8 +106,6 @@ extern void slideWindowVertically (int y);
 extern int showCursor (void);
 extern int trackCursor (int place);
 
-extern int isTextOffset (int *arg, int end, int relaxed);
-
 typedef struct {
   TimeValue value;
   TimeComponents components;
