@@ -19,13 +19,11 @@
 #ifndef BRLTTY_INCLUDED_CMD_NAVIGATION
 #define BRLTTY_INCLUDED_CMD_NAVIGATION
 
-#include "cmd_queue.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern CommandHandler handleNavigationCommand;
+extern int addNavigationCommands (void);
 
 #ifdef __cplusplus
 }

@@ -19,13 +19,11 @@
 #ifndef BRLTTY_INCLUDED_CMD_TOUCH
 #define BRLTTY_INCLUDED_CMD_TOUCH
 
-#include "cmd_queue.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern CommandHandler handleTouchCommand;
+extern int addTouchCommands (void);
 
 #ifdef __cplusplus
 }

@@ -20,12 +20,13 @@
 
 #include <stdio.h>
 
-#include "brltty.h"
-#include "brl_cmds.h"
-#include "alert.h"
-#include "charset.h"
 #include "scr.h"
 #include "scr_menu.h"
+#include "brl_cmds.h"
+#include "cmd_queue.h"
+#include "alert.h"
+#include "charset.h"
+#include "brltty.h"
 
 static Menu *rootMenu = NULL;
 static unsigned int screenWidth;

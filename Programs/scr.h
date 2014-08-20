@@ -22,7 +22,6 @@
 #include "scr_types.h"
 #include "ktb_types.h"
 #include "driver.h"
-#include "cmd_queue.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -65,7 +64,7 @@ extern int selectScreenVirtualTerminal (int vt);
 extern int switchScreenVirtualTerminal (int vt);
 extern int currentVirtualTerminal (void);
 extern int userVirtualTerminal (int number);
-extern CommandHandler handleScreenCommand;
+extern int addScreenCommands (void);
 extern KeyTableCommandContext getScreenCommandContext (void);
 
 /* Routines which apply to the routing screen.

@@ -19,17 +19,11 @@
 #ifndef BRLTTY_INCLUDED_CMD_SPEECH
 #define BRLTTY_INCLUDED_CMD_SPEECH
 
-#include "prologue.h"
-
-#include "cmd_queue.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-#ifdef ENABLE_SPEECH_SUPPORT
-extern CommandHandler handleSpeechCommand;
-#endif /* ENABLE_SPEECH_SUPPORT */
+extern int addSpeechCommands (void);
 
 #ifdef __cplusplus
 }

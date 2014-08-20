@@ -19,14 +19,11 @@
 #ifndef BRLTTY_INCLUDED_CMD_KEYCODES
 #define BRLTTY_INCLUDED_CMD_KEYCODES
 
-#include "cmd_queue.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern void initializeKeycodeCommandHandling (void);
-extern CommandHandler handleKeycodeCommand;
+extern int addKeycodeCommands (void);
 
 #ifdef __cplusplus
 }

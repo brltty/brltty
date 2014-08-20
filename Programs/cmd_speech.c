@@ -21,6 +21,7 @@
 #include <stdio.h>
 
 #include "embed.h"
+#include "cmd_queue.h"
 #include "cmd_speech.h"
 #include "prefs.h"
 #include "alert.h"
@@ -75,7 +76,7 @@ speakCurrentLine (void) {
   speakDone(NULL, 0, scr.cols, 0);
 }
 
-int
+static int
 handleSpeechCommand (int command, void *data) {
   switch (command & BRL_MSK_CMD) {
     case BRL_CMD_RESTARTSPEECH:
@@ -461,3 +462,12 @@ handleSpeechCommand (int command, void *data) {
   return 1;
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
+
+int
+addSpeechCommands (void) {
+#ifdef ENABLE_SPEECH_SUPPORT
+  return pushCommandHandler("speech", KTB_CTX_DEFAULT, handleSpeechCommand, NULL);
+#else /* ENABLE_SPEECH_SUPPORT */
+  return 0;
+#endif /* ENABLE_SPEECH_SUPPORT */
+}

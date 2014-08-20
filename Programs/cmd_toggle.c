@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include "parameters.h"
+#include "cmd_queue.h"
 #include "cmd_toggle.h"
 #include "brl_cmds.h"
 #include "prefs.h"
@@ -90,7 +91,7 @@ toggleModeSetting (unsigned char *setting, int command) {
   return toggleSetting(setting, command, ALERT_NONE, ALERT_NONE);
 }
 
-int
+static int
 handleToggleCommand (int command, void *data) {
   switch (command & BRL_MSK_CMD) {
     case BRL_CMD_SKPIDLNS:
@@ -244,4 +245,9 @@ handleToggleCommand (int command, void *data) {
   }
 
   return 1;
+}
+
+int
+addToggleCommands (void) {
+  return pushCommandHandler("toggle", KTB_CTX_DEFAULT, handleToggleCommand, NULL);
 }

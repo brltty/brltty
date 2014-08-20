@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include "report.h"
+#include "cmd_queue.h"
 #include "cmd_input.h"
 #include "cmd_toggle.h"
 #include "brl_cmds.h"
@@ -57,7 +58,7 @@ switchVirtualTerminal (int vt) {
   return switched;
 }
 
-int
+static int
 handleInputCommand (int command, void *data) {
   switch (command & BRL_MSK_CMD) {
     {
@@ -209,8 +210,9 @@ REPORT_LISTENER(inputCommandsResetListener) {
   resetInputVariables();
 }
 
-void
-initializeInputCommandHandling (void) {
+int
+addInputCommands (void) {
   resetInputVariables();
   registerReportListener(REPORT_BRAILLE_ON, inputCommandsResetListener);
+  return pushCommandHandler("input", KTB_CTX_DEFAULT, handleInputCommand, NULL);
 }

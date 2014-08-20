@@ -18,10 +18,11 @@
 
 #include "prologue.h"
 
+#include "cmd_queue.h"
 #include "cmd_touch.h"
 #include "brl_cmds.h"
 
-int
+static int
 handleTouchCommand (int command, void *data) {
   switch (command & BRL_MSK_BLK) {
     case BRL_BLK_TOUCH: {
@@ -33,4 +34,9 @@ handleTouchCommand (int command, void *data) {
   }
 
   return 0;
+}
+
+int
+addTouchCommands (void) {
+  return pushCommandHandler("touch", KTB_CTX_DEFAULT, handleTouchCommand, NULL);
 }

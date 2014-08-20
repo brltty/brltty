@@ -22,6 +22,7 @@
 
 #include "log.h"
 #include "parameters.h"
+#include "cmd_queue.h"
 #include "cmd_navigation.h"
 #include "cmd_learn.h"
 #include "parse.h"
@@ -375,7 +376,7 @@ doBrailleTime (const TimeFormattingData *fmt) {
   message(NULL, buffer, MSG_SILENT);
 }
 
-int
+static int
 handleNavigationCommand (int command, void *data) {
   static const char modeString_preferences[] = "prf";
   static Preferences savedPreferences;
@@ -1160,4 +1161,9 @@ handleNavigationCommand (int command, void *data) {
   }
 
   return 1;
+}
+
+int
+addNavigationCommands (void) {
+  return pushCommandHandler("navigation", KTB_CTX_DEFAULT, handleNavigationCommand, NULL);
 }

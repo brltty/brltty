@@ -19,14 +19,13 @@
 #ifndef BRLTTY_INCLUDED_CMD_TOGGLE
 #define BRLTTY_INCLUDED_CMD_TOGGLE
 
-#include "cmd_queue.h"
 #include "alert.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern CommandHandler handleToggleCommand;
+extern int addToggleCommands (void);
 
 typedef enum {
   TOGGLE_ERROR,

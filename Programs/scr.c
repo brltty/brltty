@@ -39,6 +39,7 @@
 #include "scr_frozen.h"
 #include "scr_real.h"
 #include "driver.h"
+#include "cmd_queue.h"
 
 static HelpScreen helpScreen;
 static MenuScreen menuScreen;
@@ -257,9 +258,14 @@ userVirtualTerminal (int number) {
   return mainScreen.userVirtualTerminal(number);
 }
 
-int
+static int
 handleScreenCommand (int command, void *data) {
   return currentScreen->handleCommand(command);
+}
+
+int
+addScreenCommands (void) {
+  return pushCommandHandler("screen", KTB_CTX_DEFAULT, handleScreenCommand, NULL);
 }
 
 KeyTableCommandContext

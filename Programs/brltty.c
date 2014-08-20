@@ -217,17 +217,13 @@ setSessionEntry (void) {
       if (state == FIRST) {
         pushCommandEnvironment("main", preprocessCommand, postprocessCommand);
         pushCommandHandler("unhandled", KTB_CTX_DEFAULT, handleUnhandledCommand, NULL);
-
-#ifdef ENABLE_SPEECH_SUPPORT
-        pushCommandHandler("speech", KTB_CTX_DEFAULT, handleSpeechCommand, NULL);
-#endif /*  ENABLE_SPEECH_SUPPORT */
-
-        pushCommandHandler("toggle", KTB_CTX_DEFAULT, handleToggleCommand, NULL);
-        pushCommandHandler("touch", KTB_CTX_DEFAULT, handleTouchCommand, NULL);
-        pushCommandHandler("keycodes", KTB_CTX_DEFAULT, handleKeycodeCommand, NULL);
-        pushCommandHandler("input", KTB_CTX_DEFAULT, handleInputCommand, NULL);
-        pushCommandHandler("navigation", KTB_CTX_DEFAULT, handleNavigationCommand, NULL);
-        pushCommandHandler("screen", KTB_CTX_DEFAULT, handleScreenCommand, NULL);
+        addSpeechCommands();
+        addToggleCommands();
+        addTouchCommands();
+        addKeycodeCommands();
+        addInputCommands();
+        addNavigationCommands();
+        addScreenCommands();
       }
     }
   }
@@ -1269,8 +1265,6 @@ brlttyConstruct (int argc, char *argv[]) {
   interruptEvent = NULL;
   interruptPending = 0;
 
-  initializeInputCommandHandling();
-  initializeKeycodeCommandHandling();
   beginCommandQueue();
   beginUpdates();
   suspendUpdates();

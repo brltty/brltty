@@ -19,14 +19,11 @@
 #ifndef BRLTTY_INCLUDED_CMD_INPUT
 #define BRLTTY_INCLUDED_CMD_INPUT
 
-#include "cmd_queue.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern void initializeInputCommandHandling (void);
-extern CommandHandler handleInputCommand;
+extern int addInputCommands (void);
 
 #ifdef __cplusplus
 }

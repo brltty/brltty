@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include "report.h"
+#include "cmd_queue.h"
 #include "cmd_keycodes.h"
 #include "kbd_keycodes.h"
 #include "brl_cmds.h"
@@ -741,7 +742,7 @@ ps2HandleScanCode (unsigned char code) {
   }
 }
 
-int
+static int
 handleKeycodeCommand (int command, void *data) {
   int arg = command & BRL_MSK_ARG;
 
@@ -786,8 +787,9 @@ REPORT_LISTENER(keycodeCommandsResetListener) {
   resetKeycodeVariables();
 }
 
-void
-initializeKeycodeCommandHandling (void) {
+int
+addKeycodeCommands (void) {
   resetKeycodeVariables();
   registerReportListener(REPORT_BRAILLE_ON, keycodeCommandsResetListener);
+  return pushCommandHandler("keycodes", KTB_CTX_DEFAULT, handleKeycodeCommand, NULL);
 }
