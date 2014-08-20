@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "parameters.h"
 #include "message.h"
 #include "async_wait.h"
 #include "async_task.h"
@@ -51,7 +52,7 @@ ASYNC_CONDITION_TESTER(testEndLearnWait) {
 }
 
 static int
-handleLearnCommand (int command, void *data) {
+handleLearnModeCommand (int command, void *data) {
   LearnModeData *lmd = data;
   logMessage(LOG_DEBUG, "learn: command=%06X", command);
 
@@ -94,8 +95,8 @@ ASYNC_TASK_CALLBACK(presentLearnMode) {
   };
 
   suspendUpdates();
-  pushCommandEnvironment("learn", NULL, NULL);
-  pushCommandHandler("learn", KTB_CTX_DEFAULT, handleLearnCommand, &lmd);
+  pushCommandEnvironment("learnMode", NULL, NULL);
+  pushCommandHandler("learnMode", KTB_CTX_DEFAULT, handleLearnModeCommand, &lmd);
 
   if (setStatusText(&brl, lmd.mode)) {
     if (message(lmd.mode, gettext("Learn Mode"), MSG_SYNC|MSG_NODELAY)) {
@@ -117,7 +118,7 @@ ASYNC_TASK_CALLBACK(presentLearnMode) {
   free(lmp);
 }
 
-int
+static int
 learnMode (int timeout) {
   LearnModeParameters *lmp;
 
@@ -135,4 +136,23 @@ learnMode (int timeout) {
   }
 
   return 0;
+}
+
+static int
+handleLearnCommand (int command, void *data) {
+  switch (command & BRL_MSK_CMD) {
+    case BRL_CMD_LEARN:
+      if (!learnMode(LEARN_MODE_TIMEOUT)) restartRequired = 1;
+      break;
+
+    default:
+      return 0;
+  }
+
+  return 1;
+}
+
+int
+addLearnCommands (void) {
+  return pushCommandHandler("learn", KTB_CTX_DEFAULT, handleLearnCommand, NULL);
 }

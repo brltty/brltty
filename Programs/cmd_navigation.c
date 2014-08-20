@@ -24,7 +24,6 @@
 #include "parameters.h"
 #include "cmd_queue.h"
 #include "cmd_navigation.h"
-#include "cmd_learn.h"
 #include "parse.h"
 #include "prefs.h"
 #include "alert.h"
@@ -946,10 +945,6 @@ handleNavigationCommand (int command, void *data) {
 
       break;
     }
-
-    case BRL_CMD_LEARN:
-      if (!learnMode(LEARN_MODE_TIMEOUT)) restartRequired = 1;
-      break;
 
     case BRL_CMD_TIME: {
       TimeFormattingData fmt;

@@ -47,6 +47,7 @@
 #include "cmd_touch.h"
 #include "cmd_toggle.h"
 #include "cmd_speech.h"
+#include "cmd_learn.h"
 #include "timing.h"
 #include "async_wait.h"
 #include "async_event.h"
@@ -217,6 +218,7 @@ setSessionEntry (void) {
       if (state == FIRST) {
         pushCommandEnvironment("main", preprocessCommand, postprocessCommand);
         pushCommandHandler("unhandled", KTB_CTX_DEFAULT, handleUnhandledCommand, NULL);
+        addLearnCommands();
         addSpeechCommands();
         addToggleCommands();
         addTouchCommands();
