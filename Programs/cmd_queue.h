@@ -43,11 +43,14 @@ extern int pushCommandEnvironment (
 extern int popCommandEnvironment (void);
 
 typedef int CommandHandler (int command, void *data);
+typedef void CommandDataDestructor (void *data);
 
 extern int pushCommandHandler (
   const char *name,
   KeyTableCommandContext context,
-  CommandHandler *handler, void *data
+  CommandHandler *handler,
+  CommandDataDestructor *destructor,
+  void *data
 );
 
 extern int popCommandHandler (void);

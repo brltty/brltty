@@ -92,7 +92,7 @@ toggleModeSetting (unsigned char *setting, int command) {
 }
 
 static int
-handleToggleCommand (int command, void *data) {
+handleToggleCommands (int command, void *data) {
   switch (command & BRL_MSK_CMD) {
     case BRL_CMD_SKPIDLNS:
       toggleFeatureSetting(&prefs.skipIdenticalLines, command);
@@ -249,5 +249,6 @@ handleToggleCommand (int command, void *data) {
 
 int
 addToggleCommands (void) {
-  return pushCommandHandler("toggle", KTB_CTX_DEFAULT, handleToggleCommand, NULL);
+  return pushCommandHandler("toggle", KTB_CTX_DEFAULT,
+                            handleToggleCommands, NULL, NULL);
 }

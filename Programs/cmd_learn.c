@@ -52,7 +52,7 @@ ASYNC_CONDITION_TESTER(testEndLearnWait) {
 }
 
 static int
-handleLearnModeCommand (int command, void *data) {
+handleLearnModeCommands (int command, void *data) {
   LearnModeData *lmd = data;
   logMessage(LOG_DEBUG, "learn: command=%06X", command);
 
@@ -96,7 +96,8 @@ ASYNC_TASK_CALLBACK(presentLearnMode) {
 
   suspendUpdates();
   pushCommandEnvironment("learnMode", NULL, NULL);
-  pushCommandHandler("learnMode", KTB_CTX_DEFAULT, handleLearnModeCommand, &lmd);
+  pushCommandHandler("learnMode", KTB_CTX_DEFAULT,
+                     handleLearnModeCommands, NULL, &lmd);
 
   if (setStatusText(&brl, lmd.mode)) {
     if (message(lmd.mode, gettext("Learn Mode"), MSG_SYNC|MSG_NODELAY)) {
@@ -139,7 +140,7 @@ learnMode (int timeout) {
 }
 
 static int
-handleLearnCommand (int command, void *data) {
+handleLearnCommands (int command, void *data) {
   switch (command & BRL_MSK_CMD) {
     case BRL_CMD_LEARN:
       if (!learnMode(LEARN_MODE_TIMEOUT)) restartRequired = 1;
@@ -154,5 +155,6 @@ handleLearnCommand (int command, void *data) {
 
 int
 addLearnCommands (void) {
-  return pushCommandHandler("learn", KTB_CTX_DEFAULT, handleLearnCommand, NULL);
+  return pushCommandHandler("learn", KTB_CTX_DEFAULT,
+                            handleLearnCommands, NULL, NULL);
 }

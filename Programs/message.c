@@ -46,7 +46,7 @@ ASYNC_CONDITION_TESTER(testEndMessageWait) {
 }
 
 static int
-handleMessageCommand (int command, void *data) {
+handleMessageCommands (int command, void *data) {
   MessageData *mgd = data;
 
   mgd->endWait = 1;
@@ -89,7 +89,8 @@ ASYNC_TASK_CALLBACK(presentMessage) {
     convertTextToWchars(characters, mgp->text, ARRAY_COUNT(characters));
     suspendUpdates();
     pushCommandEnvironment("message", NULL, NULL);
-    pushCommandHandler("message", KTB_CTX_WAITING, handleMessageCommand, &mgd);
+    pushCommandHandler("message", KTB_CTX_WAITING,
+                       handleMessageCommands, NULL, &mgd);
 
     while (length) {
       size_t count;

@@ -23,7 +23,7 @@
 #include "brl_cmds.h"
 
 static int
-handleTouchCommand (int command, void *data) {
+handleTouchCommands (int command, void *data) {
   switch (command & BRL_MSK_BLK) {
     case BRL_BLK_TOUCH:
       break;
@@ -37,5 +37,6 @@ handleTouchCommand (int command, void *data) {
 
 int
 addTouchCommands (void) {
-  return pushCommandHandler("touch", KTB_CTX_DEFAULT, handleTouchCommand, NULL);
+  return pushCommandHandler("touch", KTB_CTX_DEFAULT,
+                            handleTouchCommands, NULL, NULL);
 }

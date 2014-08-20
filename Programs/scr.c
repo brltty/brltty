@@ -259,13 +259,14 @@ userVirtualTerminal (int number) {
 }
 
 static int
-handleScreenCommand (int command, void *data) {
+handleScreenCommands (int command, void *data) {
   return currentScreen->handleCommand(command);
 }
 
 int
 addScreenCommands (void) {
-  return pushCommandHandler("screen", KTB_CTX_DEFAULT, handleScreenCommand, NULL);
+  return pushCommandHandler("screen", KTB_CTX_DEFAULT,
+                            handleScreenCommands, NULL, NULL);
 }
 
 KeyTableCommandContext

@@ -376,7 +376,7 @@ doBrailleTime (const TimeFormattingData *fmt) {
 }
 
 static int
-handleNavigationCommand (int command, void *data) {
+handleNavigationCommands (int command, void *data) {
   static const char modeString_preferences[] = "prf";
   static Preferences savedPreferences;
 
@@ -1160,5 +1160,6 @@ handleNavigationCommand (int command, void *data) {
 
 int
 addNavigationCommands (void) {
-  return pushCommandHandler("navigation", KTB_CTX_DEFAULT, handleNavigationCommand, NULL);
+  return pushCommandHandler("navigation", KTB_CTX_DEFAULT,
+                            handleNavigationCommands, NULL, NULL);
 }

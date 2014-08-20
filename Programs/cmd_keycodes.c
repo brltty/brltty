@@ -743,7 +743,7 @@ ps2HandleScanCode (unsigned char code) {
 }
 
 static int
-handleKeycodeCommand (int command, void *data) {
+handleKeycodeCommands (int command, void *data) {
   int arg = command & BRL_MSK_ARG;
 
   switch (command & BRL_MSK_BLK) {
@@ -791,5 +791,6 @@ int
 addKeycodeCommands (void) {
   resetKeycodeVariables();
   registerReportListener(REPORT_BRAILLE_ON, keycodeCommandsResetListener);
-  return pushCommandHandler("keycodes", KTB_CTX_DEFAULT, handleKeycodeCommand, NULL);
+  return pushCommandHandler("keycodes", KTB_CTX_DEFAULT,
+                            handleKeycodeCommands, NULL, NULL);
 }

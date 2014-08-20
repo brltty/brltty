@@ -59,7 +59,7 @@ switchVirtualTerminal (int vt) {
 }
 
 static int
-handleInputCommand (int command, void *data) {
+handleInputCommands (int command, void *data) {
   switch (command & BRL_MSK_CMD) {
     {
       int modifier;
@@ -214,5 +214,6 @@ int
 addInputCommands (void) {
   resetInputVariables();
   registerReportListener(REPORT_BRAILLE_ON, inputCommandsResetListener);
-  return pushCommandHandler("input", KTB_CTX_DEFAULT, handleInputCommand, NULL);
+  return pushCommandHandler("input", KTB_CTX_DEFAULT,
+                            handleInputCommands, NULL, NULL);
 }

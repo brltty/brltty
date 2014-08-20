@@ -77,7 +77,7 @@ speakCurrentLine (void) {
 }
 
 static int
-handleSpeechCommand (int command, void *data) {
+handleSpeechCommands (int command, void *data) {
   switch (command & BRL_MSK_CMD) {
     case BRL_CMD_RESTARTSPEECH:
       restartSpeechDriver();
@@ -466,7 +466,8 @@ handleSpeechCommand (int command, void *data) {
 int
 addSpeechCommands (void) {
 #ifdef ENABLE_SPEECH_SUPPORT
-  return pushCommandHandler("speech", KTB_CTX_DEFAULT, handleSpeechCommand, NULL);
+  return pushCommandHandler("speech", KTB_CTX_DEFAULT,
+                            handleSpeechCommands, NULL, NULL);
 #else /* ENABLE_SPEECH_SUPPORT */
   return 0;
 #endif /* ENABLE_SPEECH_SUPPORT */

@@ -43,6 +43,7 @@ struct CommandHandlerLevelStruct {
   const char *levelName;
 
   CommandHandler *handleCommand;
+  CommandDataDestructor *destroyData;
   void *handlerData;
   KeyTableCommandContext commandContext;
 };
@@ -279,7 +280,9 @@ int
 pushCommandHandler (
   const char *name,
   KeyTableCommandContext context,
-  CommandHandler *handler, void *data
+  CommandHandler *handler,
+  CommandDataDestructor *destructor,
+  void *data
 ) {
   CommandHandlerLevel *chl;
 
@@ -287,6 +290,7 @@ pushCommandHandler (
     memset(chl, 0, sizeof(*chl));
     chl->levelName = name;
     chl->handleCommand = handler;
+    chl->destroyData = destructor;
     chl->handlerData = data;
     chl->commandContext = context;
 
@@ -315,6 +319,7 @@ popCommandHandler (void) {
   *top = chl->previousLevel;
 
   logMessage(LOG_LEVEL, "popped command handler: %s", chl->levelName);
+  if (chl->destroyData) chl->destroyData(chl->handlerData);
   free(chl);
   return 1;
 }

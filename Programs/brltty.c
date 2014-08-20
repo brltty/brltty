@@ -188,7 +188,7 @@ postprocessCommand (void *state, int command, int handled) {
 }
 
 static int
-handleUnhandledCommand (int command, void *data) {
+handleUnhandledCommands (int command, void *data) {
   switch (command & BRL_MSK_CMD) {
     case BRL_CMD_NOOP:        /* do nothing but loop */
       break;
@@ -217,7 +217,9 @@ setSessionEntry (void) {
 
       if (state == FIRST) {
         pushCommandEnvironment("main", preprocessCommand, postprocessCommand);
-        pushCommandHandler("unhandled", KTB_CTX_DEFAULT, handleUnhandledCommand, NULL);
+        pushCommandHandler("unhandled", KTB_CTX_DEFAULT,
+                           handleUnhandledCommands, NULL, NULL);
+
         addLearnCommands();
         addSpeechCommands();
         addToggleCommands();
