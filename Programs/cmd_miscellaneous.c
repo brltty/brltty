@@ -20,7 +20,6 @@
 
 #include <stdio.h>
 
-#include "embed.h"
 #include "cmd_queue.h"
 #include "cmd_miscellaneous.h"
 #include "cmd_utils.h"
@@ -189,12 +188,6 @@ handleMiscellaneousCommands (int command, void *data) {
   switch (command & BRL_MSK_CMD) {
     case BRL_CMD_RESTARTBRL:
       restartRequired = 1;
-      break;
-
-    case BRL_CMD_RESTARTSPEECH:
-#ifdef ENABLE_SPEECH_SUPPORT
-      restartSpeechDriver();
-#endif /* ENABLE_SPEECH_SUPPORT */
       break;
 
     case BRL_CMD_HELP: {

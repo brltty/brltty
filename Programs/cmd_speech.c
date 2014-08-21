@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 
+#include "embed.h"
 #include "cmd_queue.h"
 #include "cmd_speech.h"
 #include "cmd_utils.h"
@@ -79,6 +80,10 @@ speakCurrentLine (void) {
 static int
 handleSpeechCommands (int command, void *data) {
   switch (command & BRL_MSK_CMD) {
+    case BRL_CMD_RESTARTSPEECH:
+      restartSpeechDriver();
+      break;
+
     case BRL_CMD_SPKHOME:
       if (scr.number == spk.track.screenNumber) {
         trackSpeech();
