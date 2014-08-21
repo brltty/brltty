@@ -176,6 +176,8 @@ verifyPacket_MobilLine (
     if (index == 0) *length = 3;
   } else if (size == 1) {
     *length = 1;
+  } else {
+    return BRL_PVR_INVALID;
   }
 
   return BRL_PVR_INCLUDE;
@@ -225,11 +227,6 @@ static const ModelEntry modelEntry_MobilLine = {
   .firstRoutingKey = 0X40,
   .acknowledgementResponse = 0X30
 };
-
-static int
-writeBytes (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
-  return writeBraillePacket(brl, NULL, bytes, count);
-}
 
 static size_t
 readPacket (BrailleDisplay *brl, void *packet, size_t size) {
@@ -288,7 +285,7 @@ disconnectResource (BrailleDisplay *brl) {
 }
 
 static int
-writeCells (BrailleDisplay *brl) {
+writeCells (BrailleDisplay *brl, int wait) {
   unsigned char packet[1 + brl->statusColumns + brl->textColumns];
   unsigned char *byte = packet;
 
@@ -296,14 +293,19 @@ writeCells (BrailleDisplay *brl) {
   byte = mempcpy(byte, brl->data->statusCells, brl->statusColumns);
   byte = translateOutputCells(byte, brl->data->textCells, brl->textColumns);
 
-  return writeBytes(brl, packet, (byte - packet));
+  {
+    size_t count = byte - packet;
+
+    if (wait) return writeBrailleMessage(brl, NULL, 0, packet, count);
+    return writeBraillePacket(brl, NULL, packet, count);
+  }
 }
 
 static int
 writeIdentityRequest (BrailleDisplay *brl) {
   memset(brl->data->textCells, 0, sizeof(brl->data->textCells));
   memset(brl->data->statusCells, 0, sizeof(brl->data->statusCells));
-  return writeCells(brl);
+  return writeCells(brl, 0);
 }
 
 static BrailleResponseResult
@@ -365,7 +367,7 @@ brl_destruct (BrailleDisplay *brl) {
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   if (cellsHaveChanged(brl->data->textCells, brl->buffer, brl->textColumns, NULL, NULL, &brl->data->forceRewrite)) {
-    if (!writeCells(brl)) return 0;
+    if (!writeCells(brl, 1)) return 0;
   }
 
   return 1;
@@ -377,9 +379,11 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   size_t size;
 
   while ((size = readPacket(brl, packet, sizeof(packet)))) {
-    if (packet[0] == brl->data->model->acknowledgementResponse) continue;
-    if (brl->data->model->interpretKeysPacket(brl, packet)) continue;
-    logUnexpectedPacket(packet, size);
+    if (packet[0] == brl->data->model->acknowledgementResponse) {
+      acknowledgeBrailleMessage(brl);
+    } else if (!brl->data->model->interpretKeysPacket(brl, packet)) {
+      logUnexpectedPacket(packet, size);
+    }
   }
 
   return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
