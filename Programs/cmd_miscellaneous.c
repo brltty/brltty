@@ -192,7 +192,9 @@ handleMiscellaneousCommands (int command, void *data) {
       break;
 
     case BRL_CMD_RESTARTSPEECH:
+#ifdef ENABLE_SPEECH_SUPPORT
       restartSpeechDriver();
+#endif /* ENABLE_SPEECH_SUPPORT */
       break;
 
     case BRL_CMD_HELP: {
