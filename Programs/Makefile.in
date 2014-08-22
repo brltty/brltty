@@ -882,7 +882,7 @@ CORE_HEADERS = \
    $(SRC_DIR)/hostcmd.h $(SRC_DIR)/dynld.h \
    $(SRC_DIR)/unicode.h $(SRC_DIR)/ascii.h $(SRC_DIR)/charset.h \
    $(SRC_DIR)/bitfield.h $(SRC_DIR)/bitmask.h \
-   $(SRC_DIR)/clipboard.h $(SRC_DIR)/menu.h \
+   $(SRC_DIR)/menu.h \
    $(SRC_DIR)/prefs.h $(SRC_DIR)/stat_types.h \
    $(SRC_DIR)/cmd.h $(SRC_DIR)/cmd_types.h $(SRC_DIR)/cmd_enqueue.h \
    $(SRC_DIR)/ttb.h $(SRC_DIR)/atb.h \
