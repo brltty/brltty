@@ -26,19 +26,14 @@ unsupportedDevice (const char *identifier) {
   logMessage(LOG_WARNING, "unsupported device: %s", identifier);
 }
 
-static void
-logPacket (const char *description, const void *packet, size_t size) {
-  logBytes(categoryLogLevel, description, packet, size);
-}
-
 void
 logOutputPacket (const void *packet, size_t size) {
-  if (LOG_CATEGORY_FLAG(OUTPUT_PACKETS)) logPacket("Output Packet", packet, size);
+  logBytes(LOG_CATEGORY(OUTPUT_PACKETS), "sent", packet, size);
 }
 
 void
 logInputPacket (const void *packet, size_t size) {
-  if (LOG_CATEGORY_FLAG(INPUT_PACKETS)) logPacket("Input Packet", packet, size);
+  logBytes(LOG_CATEGORY(INPUT_PACKETS), NULL, packet, size);
 }
 
 void

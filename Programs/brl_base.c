@@ -289,9 +289,7 @@ typedef struct {
 
 static void
 logBrailleMessage (BrailleMessage *msg, const char *action) {
-  if (LOG_CATEGORY_FLAG(OUTPUT_PACKETS)) {
-    logBytes(categoryLogLevel, "message %s", msg->packet, msg->size, action);
-  }
+  logBytes(LOG_CATEGORY(OUTPUT_PACKETS), "%s", msg->packet, msg->size, action);
 }
 
 static void
@@ -305,6 +303,8 @@ int
 acknowledgeBrailleMessage (BrailleDisplay *brl) {
   int ok = 1;
 
+  logMessage(LOG_CATEGORY(OUTPUT_PACKETS), "acknowledgement received");
+
   if (brl->message.queue) {
     BrailleMessage *msg = dequeueItem(brl->message.queue);
 
@@ -313,6 +313,7 @@ acknowledgeBrailleMessage (BrailleDisplay *brl) {
 
       logBrailleMessage(msg, "dequeued");
       written = writeBraillePacket(brl, msg->endpoint, msg->packet, msg->size);
+
       deallocateBrailleMessage(msg);
       msg = NULL;
 
