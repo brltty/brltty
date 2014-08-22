@@ -286,12 +286,12 @@ disconnectResource (BrailleDisplay *brl) {
 
 static int
 writeCells (BrailleDisplay *brl, int wait) {
-  unsigned char packet[1 + brl->statusColumns + brl->textColumns];
+  unsigned char packet[1 + brl->data->model->statusCellCount + brl->data->model->textCellCount];
   unsigned char *byte = packet;
 
   *byte++ = HD_REQ_WRITE_CELLS;
-  byte = mempcpy(byte, brl->data->statusCells, brl->statusColumns);
-  byte = translateOutputCells(byte, brl->data->textCells, brl->textColumns);
+  byte = mempcpy(byte, brl->data->statusCells, brl->data->model->statusCellCount);
+  byte = translateOutputCells(byte, brl->data->textCells, brl->data->model->textCellCount);
 
   {
     size_t count = byte - packet;
@@ -325,7 +325,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
       brl->data->model = gioGetApplicationData(brl->gioEndpoint);
       brl->textColumns = brl->data->model->textCellCount;
-      brl->statusColumns = brl->data->model->statusCellCount;
       makeOutputTable(dotsTable_ISO11548_1);
 
       if (probeBrailleDisplay(brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT,
