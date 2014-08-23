@@ -303,7 +303,7 @@ int
 acknowledgeBrailleMessage (BrailleDisplay *brl) {
   int ok = 1;
 
-  logMessage(LOG_CATEGORY(OUTPUT_PACKETS), "acknowledgement received");
+  logMessage(LOG_CATEGORY(OUTPUT_PACKETS), "acknowledged");
 
   if (brl->message.queue) {
     BrailleMessage *msg = dequeueItem(brl->message.queue);
