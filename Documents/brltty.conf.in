@@ -290,7 +290,7 @@
 
 # Iris Braille Driver Parameters
 #braille-parameters ir:Embedded= # [no,yes]
-#braille-parameters ir:LatchDelay= # [0-10000]
+#braille-parameters ir:LatchDelay=10 # [0-100] (tenths of a second)
 #braille-parameters ir:Protocol= # [eurobraille,native]
 
 # Libbraille Braille Driver Parameters

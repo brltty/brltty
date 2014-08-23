@@ -1902,12 +1902,17 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
         {
           const char *parameter = parameters[PARM_LATCH_DELAY];
-          static const int latchDelayMinimum = 0;
-          static const int latchDelayMaximum = 10000;
 
-          if (!validateInteger(&brl->data->latch.delay, parameter,
-                               &latchDelayMinimum, &latchDelayMaximum)) {
-            logMessage(LOG_WARNING, "invalid latch delay setting: %s", parameter);
+          if (*parameter) {
+            static const int minimum = 0;
+            static const int maximum = 100;
+            int value;
+
+            if (validateInteger(&value, parameter, &minimum, &maximum)) {
+              brl->data->latch.delay = value * 100;
+            } else {
+              logMessage(LOG_WARNING, "invalid latch delay setting: %s", parameter);
+            }
           }
         }
 
