@@ -340,16 +340,20 @@ usbControlTransfer (
   UsbDeviceExtension *devx = device->extension;
 
   if (usbOpenUsbfsFile(devx)) {
-    union {
-      struct usbdevfs_ctrltransfer transfer;
-      UsbSetupPacket setup;
-    } arg;
+    UsbSetupPacket setup;
+    struct usbdevfs_ctrltransfer arg;
+
+    usbMakeSetupPacket(&setup, direction, recipient, type,
+                       request, value, index, length);
 
     memset(&arg, 0, sizeof(arg));
-    usbMakeSetupPacket(&arg.setup, direction, recipient, type,
-                       request, value, index, length);
-    arg.transfer.data = buffer;
-    arg.transfer.timeout = timeout;
+    arg.bRequestType = setup.bRequestType;
+    arg.bRequest = setup.bRequest;
+    arg.wValue = getLittleEndian16(setup.wValue);
+    arg.wIndex = getLittleEndian16(setup.wIndex);
+    arg.wLength = getLittleEndian16(setup.wLength);
+    arg.data = buffer;
+    arg.timeout = timeout;
 
     if (direction == UsbControlDirection_Output) {
       if (length) logBytes(LOG_CATEGORY(USB_IO), "control output", buffer, length);
