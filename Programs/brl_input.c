@@ -64,6 +64,8 @@ processInput (void) {
     logMessage(LOG_DEBUG, "braille online");
     isOffline = 0;
     report(REPORT_BRAILLE_ONLINE, NULL);
+
+    brl.writeDelay = 0;
     scheduleUpdate("braille online");
   }
 
