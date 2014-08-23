@@ -21,15 +21,13 @@
 #include <stdio.h>
 
 #include "log.h"
-#include "report.h"
 #include "embed.h"
 #include "parameters.h"
-#include "ktb.h"
 #include "brl_input.h"
+#include "brl_utils.h"
 #include "brl_cmds.h"
 #include "cmd_queue.h"
 #include "cmd_enqueue.h"
-#include "update.h"
 #include "io_generic.h"
 #include "api_control.h"
 #include "brltty.h"
@@ -41,18 +39,7 @@ processInput (void) {
   if (command != EOF) {
     switch (command & BRL_MSK_CMD) {
       case BRL_CMD_OFFLINE:
-        if (!isOffline) {
-          logMessage(LOG_DEBUG, "braille offline");
-          isOffline = 1;
-
-          {
-            KeyTable *keyTable = brl.keyTable;
-
-            if (keyTable) releaseAllKeys(keyTable);
-          }
-
-          report(REPORT_BRAILLE_OFFLINE, NULL);
-        }
+        setBrailleOffline(&brl);
         return 0;
 
       default:
@@ -60,15 +47,7 @@ processInput (void) {
     }
   }
 
-  if (isOffline) {
-    logMessage(LOG_DEBUG, "braille online");
-    isOffline = 0;
-    report(REPORT_BRAILLE_ONLINE, NULL);
-
-    brl.writeDelay = 0;
-    scheduleUpdate("braille online");
-  }
-
+  setBrailleOnline(&brl);
   if (command == EOF) return 0;
   enqueueCommand(command);
   return 1;

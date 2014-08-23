@@ -26,6 +26,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern void drainBrailleOutput (BrailleDisplay *brl, int minimumDelay);
+extern void setBrailleOffline (BrailleDisplay *brl);
+extern void setBrailleOnline (BrailleDisplay *brl);
 
 /* Formatting of status cells. */
 extern unsigned char lowerDigit (unsigned char upper);

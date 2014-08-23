@@ -79,8 +79,10 @@ struct BrailleDisplayStruct {
   unsigned isCoreBuffer:1;
   unsigned resizeRequired:1;
   unsigned noDisplay:1;
-  void (*bufferResized) (unsigned int rows, unsigned int columns);
 
+  unsigned isOffline:1;
+
+  void (*bufferResized) (unsigned int rows, unsigned int columns);
   BrailleFirmnessSetter *setFirmness;
   BrailleSensitivitySetter *setSensitivity;
   BrailleAutorepeatSetter *setAutorepeat;

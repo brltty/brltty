@@ -646,7 +646,7 @@ doUpdate (void) {
     oldwiny = ses->winy;
   }
 
-  if (!isOffline && canBraille()) {
+  if (!brl.isOffline && canBraille()) {
     apiClaimDriver();
 
     if (infoMode) {

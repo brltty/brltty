@@ -939,7 +939,6 @@ isSameRow (
 }
 
 int restartRequired;
-int isOffline;
 int isSuspended;
 
 int
@@ -1192,7 +1191,6 @@ brlttyConstruct (int argc, char *argv[]) {
   resumeUpdates(1);
 
   restartRequired = 0;
-  isOffline = 0;
   isSuspended = 0;
 
   return PROG_EXIT_SUCCESS;

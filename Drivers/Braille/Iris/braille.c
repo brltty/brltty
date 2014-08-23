@@ -1681,6 +1681,7 @@ suspendDevice (BrailleDisplay *brl) {
   if (!clearWindow(brl)) return 0;
   drainBrailleOutput(brl, 50);
   deactivateBraille();
+  setBrailleOffline(brl);
   return 1;
 }
 
@@ -1688,14 +1689,13 @@ static int
 resumeDevice (BrailleDisplay *brl) {
   if (!brl->data->isEmbedded) return 1;
   logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "resuming device");
-
   activateBraille();
 
   if (brl->data->isForwarding) {
     if (!sendZKey(brl, &brl->data->external.port)) return 0;
   } else {
     brl->data->braille.refresh = 1;
-    scheduleUpdate("Iris resumed");
+    setBrailleOnline(brl);
   }
 
   brl->data->isSuspended = 0;

@@ -18,9 +18,13 @@
 
 #include "prologue.h"
 
+#include "log.h"
+#include "report.h"
 #include "brl_utils.h"
 #include "brl_dots.h"
 #include "async_wait.h"
+#include "ktb.h"
+#include "update.h"
 
 void
 drainBrailleOutput (BrailleDisplay *brl, int minimumDelay) {
@@ -29,6 +33,34 @@ drainBrailleOutput (BrailleDisplay *brl, int minimumDelay) {
   brl->writeDelay = 0;
   if (duration < minimumDelay) duration = minimumDelay;
   asyncWait(duration);
+}
+
+void
+setBrailleOffline (BrailleDisplay *brl) {
+  if (!brl->isOffline) {
+    brl->isOffline = 1;
+    logMessage(LOG_DEBUG, "braille offline");
+
+    {
+      KeyTable *keyTable = brl->keyTable;
+
+      if (keyTable) releaseAllKeys(keyTable);
+    }
+
+    report(REPORT_BRAILLE_OFFLINE, NULL);
+  }
+}
+
+void
+setBrailleOnline (BrailleDisplay *brl) {
+  if (brl->isOffline) {
+    brl->isOffline = 0;
+    logMessage(LOG_DEBUG, "braille online");
+    report(REPORT_BRAILLE_ONLINE, NULL);
+
+    brl->writeDelay = 0;
+    scheduleUpdate("braille online");
+  }
 }
 
 /* Functions which support vertical and horizontal status cells. */

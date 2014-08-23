@@ -46,8 +46,10 @@ constructBrailleDisplay (BrailleDisplay *brl) {
   brl->gioEndpoint = NULL;
   brl->buffer = NULL;
   brl->writeDelay = 0;
-  brl->bufferResized = NULL;
 
+  brl->isOffline = 0;
+
+  brl->bufferResized = NULL;
   brl->setFirmness = NULL;
   brl->setSensitivity = NULL;
   brl->setAutorepeat = NULL;
