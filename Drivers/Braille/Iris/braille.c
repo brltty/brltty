@@ -26,7 +26,6 @@
 
 #include "log.h"
 #include "parameters.h"
-#include "update.h"
 #include "ascii.h"
 #include "cmd.h"
 #include "parse.h"
@@ -1521,10 +1520,7 @@ leavePacketForwardMode (BrailleDisplay *brl) {
   logMessage(LOG_INFO, "leaving packet forward mode");
   if (!brl->data->external.protocol->endForwarding(brl)) return 0;
   brl->data->isForwarding = 0;
-
   brl->data->braille.refresh = 1;
-  scheduleUpdate("Iris local");
-
   return 1;
 }
 
@@ -1603,10 +1599,7 @@ handleInternalPacket_nonembedded (BrailleDisplay *brl, const void *packet, size_
   if (!brl->data->isConnected) {
     logMessage(LOG_INFO, "device reconnected");
     brl->data->isConnected = 1;
-
     brl->data->braille.refresh = 1;
-    scheduleUpdate("Iris reconnected");
-
     if (menuKeyPressed) return 1;
   }
   
