@@ -1819,6 +1819,7 @@ ASYNC_ALARM_CALLBACK(irMonitorLatch) {
 static int
 startLatchMonitor (BrailleDisplay *brl) {
   if (brl->data->latch.monitor) return 1;
+  if (!brl->data->latch.delay) return 1;
 
   if (asyncSetAlarmIn(&brl->data->latch.monitor, 0, irMonitorLatch, brl)) {
     if (asyncResetAlarmEvery(brl->data->latch.monitor, brl->data->latch.interval)) {
