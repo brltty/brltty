@@ -19,7 +19,7 @@
 
 package org.a11y.BrlAPI;
 
-public class Test {
+public class Test implements Constants {
   public static void main(String argv[]) {
     ConnectionSettings settings = new ConnectionSettings();
 
@@ -81,6 +81,32 @@ public class Test {
         args.andMask = "????????????????????".getBytes();
         args.cursor = 3;
         brlapi.write(args);
+      }
+
+      printKey(new Key(brlapi.readKey(true)));
+
+      {
+        byte[] dots = new byte[] {
+          /* o */ DOT1 | DOT3 | DOT5,
+          /* t */ DOT2 | DOT3 | DOT4 | DOT5,
+          /* h */ DOT1 | DOT2 | DOT5,
+          /* e */ DOT1 | DOT5,
+          /* r */ DOT1 | DOT2 | DOT3 | DOT5,
+          /*   */ 0,
+          /* k */ DOT1 | DOT3,
+          /* e */ DOT1 | DOT5,
+          /* y */ DOT1 | DOT3 | DOT4 | DOT5 | DOT6,
+          /*   */ 0,
+          /* p */ DOT1 | DOT2 | DOT3 | DOT4,
+          /* r */ DOT1 | DOT2 | DOT3 | DOT5,
+          /* e */ DOT1 | DOT5,
+          /* s */ DOT2 | DOT3 | DOT4,
+          /* s */ DOT2 | DOT3 | DOT4,
+          /* e */ DOT1 | DOT5,
+          /* d */ DOT1 | DOT4 | DOT5
+        };
+
+        brlapi.writeDots(dots);
       }
 
       printKey(new Key(brlapi.readKey(true)));
