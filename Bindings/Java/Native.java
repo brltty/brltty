@@ -36,28 +36,28 @@ public class Native {
   public native DisplaySize getDisplaySize () throws Error;
   
   public native int enterTtyMode (int tty, String driver) throws Error;
-  public native void enterTtyModeWithPath (int ttys[], String driver) throws Error;
+  public native void enterTtyModeWithPath (int[] ttys, String driver) throws Error;
   public native void leaveTtyMode () throws Error;
   public native void setFocus (int tty) throws Error;
 
-  protected native void writeTextNative (int cursor, String text) throws Error;
-  public native void writeDots (byte dots[]) throws Error;
+  protected native void writeText (int cursor, String text) throws Error;
+  public native void writeDots (byte[] dots) throws Error;
   public native void write (WriteArguments arguments) throws Error;
 
   public native long readKey (boolean wait) throws Error;
-  public native void ignoreKeys (long type, long keys[]) throws Error;
-  public native void acceptKeys (long type, long keys[]) throws Error;
+  public native void ignoreKeys (long type, long[] keys) throws Error;
+  public native void acceptKeys (long type, long[] keys) throws Error;
 
   public native void ignoreAllKeys () throws Error;
   public native void acceptAllKeys () throws Error;
 
-  public native void ignoreKeyRanges (long ranges[][]) throws Error;
-  public native void acceptKeyRanges (long ranges[][]) throws Error;
+  public native void ignoreKeyRanges (long[][] ranges) throws Error;
+  public native void acceptKeyRanges (long[][] ranges) throws Error;
 
   public native void enterRawMode (String driver) throws Error;
   public native void leaveRawMode () throws Error;
-  public native int sendRaw (byte buffer[]) throws Error;
-  public native int recvRaw (byte buffer[]) throws Error;
+  public native int sendRaw (byte[] buffer) throws Error;
+  public native int recvRaw (byte[] buffer) throws Error;
 
   public static native String getPacketTypeName (long type);
 }

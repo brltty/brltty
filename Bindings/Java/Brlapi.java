@@ -56,8 +56,22 @@ public class Brlapi extends Native implements Constants {
     return enterTtyMode(null);
   }
 
-  public void enterTtyModeWithPath (int ttys[]) throws Error {
+  public void enterTtyModeWithPath (int[] ttys) throws Error {
     enterTtyModeWithPath(ttys, null);
+  }
+
+  public void writeDots (byte[] dots) throws Error {
+    DisplaySize size = getDisplaySize();
+    int count = size.getWidth() * size.getHeight();
+
+    if (dots.length != count) {
+      byte[] d = new byte[count];
+      while (count > dots.length) d[--count] = 0;
+      System.arraycopy(dots, 0, d, 0, count);
+      dots = d;
+    }
+
+    super.writeDots(dots);
   }
 
   public void writeText (int cursor) throws Error {
@@ -85,6 +99,7 @@ public class Brlapi extends Native implements Constants {
 
       text = text.substring(0, count);
     }
-    writeTextNative(cursor, text);
+
+    super.writeText(cursor, text);
   }
 }

@@ -362,7 +362,7 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_setFocus(JNIEnv *jenv, jobjec
   }
 }
 
-JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_writeTextNative(JNIEnv *jenv, jobject jobj, jint jarg1, jstring jarg2) {
+JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_writeText(JNIEnv *jenv, jobject jobj, jint jarg1, jstring jarg2) {
   brlapi_writeArguments_t s = BRLAPI_WRITEARGUMENTS_INITIALIZER;
   int result;
   GET_HANDLE(jenv, jobj, );
