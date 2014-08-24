@@ -1635,6 +1635,8 @@ static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *characters) {
   const size_t size = brl->textColumns * brl->textRows;
 
+  if (brl->data->isForwarding) return 1;
+
   if (cellsHaveChanged(brl->data->braille.cells, brl->buffer, size, NULL, NULL, &brl->data->braille.refresh)) {
     size_t size = writeWindow(brl, brl->buffer);
 
