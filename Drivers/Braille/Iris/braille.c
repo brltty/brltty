@@ -1106,6 +1106,12 @@ typedef struct {
 } KeyHandlers;
 
 static int
+null_handleZKey(BrailleDisplay *brl, Port *port) {
+  logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "ignoring Z key");
+  return 1;
+}
+
+static int
 core_handleZKey(BrailleDisplay *brl, Port *port) {
   logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "Z key pressed");
   setExternalProtocol(brl, brl->data->external.protocol->next);
@@ -1141,7 +1147,7 @@ core_handleBrailleKeys(BrailleDisplay *brl, Port *port, KeyNumberSet keys) {
   return enqueueKeys(brl, keys, IR_GRP_NavigationKeys, IR_KEY_Dot1);
 }
 
-static const KeyHandlers coreKeyHandlers = {
+static const KeyHandlers keyHandlers_embedded = {
   .handleZKey = core_handleZKey,
   .handleRoutingKey = core_handleRoutingKey,
   .handlePCKey = core_handlePCKey,
@@ -1149,11 +1155,13 @@ static const KeyHandlers coreKeyHandlers = {
   .handleBrailleKeys = core_handleBrailleKeys
 };
 
-static int
-eurobrl_handleZKey(BrailleDisplay *brl, Port *port) {
-  logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "eurobrl_handleZKey: discarding Z key");
-  return 1;
-}
+static const KeyHandlers keyHandlers_nonembedded = {
+  .handleZKey = null_handleZKey,
+  .handleRoutingKey = core_handleRoutingKey,
+  .handlePCKey = core_handlePCKey,
+  .handleFunctionKeys = core_handleFunctionKeys,
+  .handleBrailleKeys = core_handleBrailleKeys
+};
 
 static int
 eurobrl_handleRoutingKey(BrailleDisplay *brl, Port *port, unsigned char key) {
@@ -1323,8 +1331,8 @@ eurobrl_handleBrailleKeys(BrailleDisplay *brl, Port *port, KeyNumberSet keys) {
   return writeEurobraillePacket(brl, port, data, sizeof(data));
 }
 
-static const KeyHandlers eurobrailleKeyHandlers = {
-  .handleZKey = eurobrl_handleZKey,
+static const KeyHandlers keyHandlers_eurobraille = {
+  .handleZKey = null_handleZKey,
   .handleRoutingKey = eurobrl_handleRoutingKey,
   .handlePCKey = eurobrl_handlePCKey,
   .handleFunctionKeys = eurobrl_handleFunctionKeys,
@@ -1378,7 +1386,7 @@ forwardInternalPacket_eurobraille (
   BrailleDisplay *brl,
   const unsigned char *packet, size_t size
 ) {
-  handleNativePacket(brl, &brl->data->external.port, &eurobrailleKeyHandlers, packet, size);
+  handleNativePacket(brl, &brl->data->external.port, &keyHandlers_eurobraille, packet, size);
   return 1;
 }
 
@@ -1566,7 +1574,7 @@ handleInternalPacket_embedded (BrailleDisplay *brl, const void *packet, size_t s
   } else if (brl->data->isForwarding) {
     if (!brl->data->external.protocol->forwardInternalPacket(brl, packet, size)) return 0;
   } else {
-    handleNativePacket(brl, NULL, &coreKeyHandlers, packet, size);
+    handleNativePacket(brl, NULL, &keyHandlers_embedded, packet, size);
   }
 
   return 1;
@@ -1598,7 +1606,7 @@ handleInternalPacket_nonembedded (BrailleDisplay *brl, const void *packet, size_
     if (menuKeyPressed) return 1;
   }
   
-  handleNativePacket(brl, NULL, &coreKeyHandlers, packet, size);
+  handleNativePacket(brl, NULL, &keyHandlers_nonembedded, packet, size);
   return 1;
 }
 
