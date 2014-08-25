@@ -574,7 +574,6 @@ void
 usbSetInputError (UsbEndpoint *endpoint, int error) {
   if (!usbHaveInputError(endpoint)) {
     endpoint->direction.input.pipe.error = error;
-    usbCancelInputMonitor(endpoint);
     closeFile(&endpoint->direction.input.pipe.input);
   }
 }
