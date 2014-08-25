@@ -1097,11 +1097,6 @@ sendMenuKey (BrailleDisplay *brl, Port *port) {
   return sendInteractiveKey(brl, port, 'Q');
 }
 
-static int
-sendZKey (BrailleDisplay *brl, Port *port) {
-  return sendInteractiveKey(brl, port, 'W');
-}
-
 typedef struct {
   int (*handleZKey) (BrailleDisplay *brl, Port *port);
   int (*handleRoutingKey) (BrailleDisplay *brl, Port *port, unsigned char key);
@@ -1687,7 +1682,7 @@ resumeDevice (BrailleDisplay *brl) {
   activateBraille();
 
   if (brl->data->isForwarding) {
-    if (!sendZKey(brl, &brl->data->external.port)) return 0;
+    if (!sendMenuKey(brl, &brl->data->external.port)) return 0;
   } else {
     brl->data->braille.refresh = 1;
     setBrailleOnline(brl);
