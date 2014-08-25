@@ -1353,6 +1353,7 @@ handleNativePacket (BrailleDisplay *brl, Port *port, const KeyHandlers *keyHandl
     }
   } else if (size == 3) {
     int repeat = (packet[0] == IR_IPT_XtKeyCodeRepeat);
+
     if ((packet[0] == IR_IPT_XtKeyCode) || repeat) {
       return keyHandlers->handlePCKey(brl, port, repeat, packet[1], packet[2]);
     }
@@ -1364,7 +1365,8 @@ handleNativePacket (BrailleDisplay *brl, Port *port, const KeyHandlers *keyHandl
     }
 
     if (packet[0] == IR_IPT_BrailleKeys) {
-      unsigned int keys = (packet[1] << 8) | packet[2];
+      KeyNumberSet keys = (packet[1] << 8) | packet[2];
+
       return keyHandlers->handleBrailleKeys(brl, port, keys);
     }
   }
