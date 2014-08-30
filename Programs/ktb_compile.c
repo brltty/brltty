@@ -1132,6 +1132,15 @@ processKeyTableLine (DataFile *file, void *data) {
 }
 
 void
+releaseAllKeys (KeyTable *table) {
+  while (table->pressedKeys.count) {
+    const KeyValue *kv = &table->pressedKeys.table[0];
+
+    processKeyEvent(table, KTB_CTX_DEFAULT, kv->group, kv->number, 0);
+  }
+}
+
+void
 resetLongPressData (KeyTable *table) {
   table->release.command = BRL_CMD_NOOP;
 

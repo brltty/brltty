@@ -297,3 +297,9 @@ int
 message (const char *mode, const char *text, MessageOptions options) {
   return 1;
 }
+
+#include "update.h"
+
+void
+scheduleUpdate (const char *reason) {
+}

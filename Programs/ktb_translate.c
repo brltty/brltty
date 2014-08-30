@@ -527,15 +527,6 @@ processKeyEvent (
 }
 
 void
-releaseAllKeys (KeyTable *table) {
-  while (table->pressedKeys.count) {
-    const KeyValue *kv = &table->pressedKeys.table[0];
-
-    processKeyEvent(table, KTB_CTX_DEFAULT, kv->group, kv->number, 0);
-  }
-}
-
-void
 setKeyTableLogLabel (KeyTable *table, const char *label) {
   table->log.label = label;
 }
