@@ -914,13 +914,19 @@ ASYNC_INPUT_CALLBACK(handleKobjectUeventString) {
       const char *delimiter = strpbrk(string, delimiters);
 
       if (!delimiter) {
+        const char *data = end + 1;
+        size_t size;
+
         if (strcmp(string, "libudev") == 0) {
-          length += 32;
+          size = 32;
         } else {
           logMessage(LOG_WARNING, "unrecognized %s segment: %s", label, string);
+          size = 0;
         }
 
+        length += size;
         if (parameters->length < length) return 0;
+        logBytes(LOG_DEBUG, "%s data: %s", data, size, label, string);
       } else if (*delimiter == '@') {
         const char *action = string;
         const char *device = delimiter + 1;
@@ -960,6 +966,12 @@ ASYNC_INPUT_CALLBACK(handleKobjectUeventString) {
             }
           }
         }
+      } else if (*delimiter == '=') {
+        const char *name = string;
+        const char *value = delimiter + 1;
+        int nameLength = delimiter - name;
+
+        logMessage(LOG_DEBUG, "%s property: %.*s %s", label, nameLength, name, value);
       }
 
       return length + 1;
