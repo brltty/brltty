@@ -383,6 +383,9 @@ static int screenUpdated;
 static unsigned char *cacheBuffer;
 static size_t cacheSize;
 
+static int currentConsoleNumber;
+static int inTextMode;
+
 typedef struct {
   unsigned char rows;
   unsigned char columns;
@@ -392,6 +395,11 @@ typedef struct {
   unsigned char column;
   unsigned char row;
 } ScreenLocation;
+
+typedef struct {
+  ScreenSize size;
+  ScreenLocation location;
+} ScreenHeader;
 
 #ifdef HAVE_SYS_POLL_H
 #include <poll.h>
@@ -417,10 +425,10 @@ static size_t
 readScreenDevice (off_t offset, void *buffer, size_t size) {
   const ssize_t count = pread(screenDescriptor, buffer, size, offset);
 
-  if (count != -1) {
-    return count;
-  } else {
+  if (count == -1) {
     logSystemError("screen read");
+  } else {
+    return count;
   }
 
   return 0;
@@ -514,9 +522,15 @@ readScreenData (off_t offset, void *buffer, size_t size) {
   size_t count = (cacheBuffer? readScreenCache: readScreenDevice)(offset, buffer, size);
   if (count == size) return 1;
 
-  logMessage(LOG_ERR, "truncated screen data: expected %u bytes but read %d",
-             (unsigned int)size, (int)count);
+  logMessage(LOG_ERR,
+             "truncated screen data: expected %zu bytes but read %zu",
+             size, count);
   return 0;
+}
+
+static int
+readScreenHeader (ScreenHeader *header) {
+  return readScreenData(0, header, sizeof(*header));
 }
 
 static int
@@ -525,15 +539,10 @@ readScreenSize (ScreenSize *size) {
 }
 
 static int
-readCursorLocation (ScreenLocation *location) {
-  return readScreenData(2, location, sizeof(*location));
-}
-
-static int
 readScreenContent (off_t offset, uint16_t *buffer, size_t count) {
   count *= sizeof(*buffer);
   offset *= sizeof(*buffer);
-  offset += 4;
+  offset += sizeof(ScreenHeader);
   return readScreenData(offset, buffer, count);
 }
 
@@ -641,7 +650,7 @@ setVgaCharacterCount (int force) {
       vgaCharacterCount = 0;
 
       if (errno != EINVAL) {
-        logMessage(LOG_WARNING, "ioctl KDFONTOP[GET]: %s", strerror(errno));
+        logMessage(LOG_WARNING, "ioctl[KDFONTOP[GET]]: %s", strerror(errno));
       }
     }
   }
@@ -824,7 +833,6 @@ static int atKeyPressed;
 static int ps2KeyPressed;
 #endif /* HAVE_LINUX_INPUT_H */
 
-static int currentConsoleNumber;
 static UinputObject *uinputKeyboard;
 static ReportListenerInstance *brailleOfflineListener;
 
@@ -857,6 +865,8 @@ construct_LinuxScreen (void) {
   cacheSize = 0;
 
   currentConsoleNumber = 0;
+  inTextMode = 1;
+
   uinputKeyboard = NULL;
   brailleOfflineListener = NULL;
 
@@ -873,7 +883,7 @@ construct_LinuxScreen (void) {
     if (setConsoleName()) {
       consoleDescriptor = -1;
 
-      if (openScreen(currentConsoleNumber)) {
+      if (openScreen(0)) {
         if (setTranslationTable(1)) {
           openKeyboard();
           brailleOfflineListener = registerReportListener(REPORT_BRAILLE_OFFLINE, lxBrailleOfflineListener, NULL);
@@ -882,6 +892,7 @@ construct_LinuxScreen (void) {
       }
     }
   }
+
   return 0;
 }
 
@@ -981,21 +992,76 @@ poll_LinuxScreen (void) {
   return poll;
 }
 
-static size_t
-toScreenCacheSize (const ScreenSize *screenSize) {
-  return (screenSize->columns * screenSize->rows * 2) + 4;
+static int
+getConsoleNumber (void) {
+  int number;
+
+  if (virtualTerminal) {
+    number = virtualTerminal;
+  } else {
+    {
+      struct vt_stat state;
+
+      if (controlConsole(VT_GETSTATE, &state) == -1) {
+        logSystemError("ioctl[VT_GETSTATE]");
+        problemText = "can't get console number";
+        return 0;
+      }
+
+      number = state.v_active;
+    }
+
+    if (number != currentConsoleNumber) {
+      if (currentConsoleNumber && !rebindConsole()) {
+        problemText = "can't access console";
+        return 0;
+      }
+
+      setTranslationTable(1);
+    }
+  }
+
+  return number;
 }
 
 static int
-refresh_LinuxScreen (void) {
-  if (!screenUpdated) return 1;
+testTextMode (void) {
+  int mode;
 
+  if (controlConsole(KDGETMODE, &mode) == -1) {
+    logSystemError("ioctl[KDGETMODE]");
+  } else if (mode == KD_TEXT) {
+    return 1;
+  }
+
+  problemText = gettext("screen not in text mode");
+  return 0;
+}
+
+static size_t
+toScreenCacheSize (const ScreenSize *screenSize) {
+  return (screenSize->columns * screenSize->rows * 2) + sizeof(ScreenHeader);
+}
+
+static int
+refreshCacheBuffer (void) {
   if (!cacheBuffer) {
-    ScreenSize screenSize;
-    if (!readScreenDevice(0, &screenSize, sizeof(screenSize))) return 0;
+    ScreenHeader header;
 
     {
-      size_t size = toScreenCacheSize(&screenSize);
+      size_t size = sizeof(header);
+      size_t count = readScreenDevice(0, &header, size);
+
+      if (!count) return 0;
+
+      if (count < size) {
+        logBytes(LOG_ERR, "truncated screen header", &header, count);
+        return 0;
+      }
+    }
+
+    {
+      size_t size = toScreenCacheSize(&header.size);
       unsigned char *buffer = malloc(size);
 
       if (!buffer) {
@@ -1011,19 +1077,18 @@ refresh_LinuxScreen (void) {
   while (1) {
     size_t count = readScreenDevice(0, cacheBuffer, cacheSize);
 
-    if (count < 4) {
-      logMessage(LOG_ERR, "truncated screen header");
+    if (!count) return 0;
+
+    if (count < sizeof(ScreenHeader)) {
+      logBytes(LOG_ERR, "truncated screen header", cacheBuffer, count);
       return 0;
     }
 
     {
-      ScreenSize *screenSize = (void *)cacheBuffer;
-      size_t size = toScreenCacheSize(screenSize);
+      ScreenHeader *header = (void *)cacheBuffer;
+      size_t size = toScreenCacheSize(&header->size);
 
-      if (count >= size) {
-        screenUpdated = 0;
-        return 1;
-      }
+      if (count >= size) return 1;
 
       {
         unsigned char *buffer = realloc(cacheBuffer, size);
@@ -1041,124 +1106,103 @@ refresh_LinuxScreen (void) {
 }
 
 static int
-getCursorCoordinates (short *column, short *row, short columns) {
-  ScreenLocation location;
+refresh_LinuxScreen (void) {
+  if (screenUpdated) {
+    while (1) {
+      problemText = NULL;
 
-  if (readCursorLocation(&location)) {
-    const CharsetEntry *charset = getCharsetEntry();
+      if (!refreshCacheBuffer()) {
+        problemText = "cannot read screen content";
+        return 0;
+      }
 
-    *row = location.row;
+      inTextMode = testTextMode();
 
-    if (!charset->isMultiByte) {
-      *column = location.column;
-      return 1;
-    }
+      {
+        int consoleNumber = getConsoleNumber();
 
-    {
-      int offsets[columns];
+        if (consoleNumber == currentConsoleNumber) break;
+        logMessage(LOG_DEBUG,
+                   "console number changed: %u -> %u",
+                   currentConsoleNumber, consoleNumber);
 
-      if (readScreenRow(location.row, columns, NULL, offsets)) {
-        int first = 0;
-        int last = columns - 1;
-
-        while (first <= last) {
-          int current = (first + last) / 2;
-
-          if (offsets[current] < location.column) {
-            first = current + 1;
-          } else {
-            last = current - 1;
-          }
-        }
-
-        if (first == columns) first -= 1;
-        *column = first;
-        return 1;
+        currentConsoleNumber = consoleNumber;
       }
     }
+
+    screenUpdated = 0;
   }
 
-  return 0;
+  return 1;
+}
+
+static void
+adjustCursorColumn (short *column, short row, short columns) {
+  const CharsetEntry *charset = getCharsetEntry();
+
+  if (charset->isMultiByte) {
+    int offsets[columns];
+
+    if (readScreenRow(row, columns, NULL, offsets)) {
+      int first = 0;
+      int last = columns - 1;
+
+      while (first <= last) {
+        int current = (first + last) / 2;
+
+        if (offsets[current] < *column) {
+          first = current + 1;
+        } else {
+          last = current - 1;
+        }
+      }
+
+      if (first == columns) first -= 1;
+      *column = first;
+    }
+  }
 }
 
 static int
 getScreenDescription (ScreenDescription *description) {
-  if (!problemText) {
-    ScreenSize size;
+  ScreenHeader header;
 
-    if (readScreenSize(&size)) {
-      description->cols = size.columns;
-      description->rows = size.rows;
+  if (readScreenHeader(&header)) {
+    description->cols = header.size.columns;
+    description->rows = header.size.rows;
 
-      if (getCursorCoordinates(&description->posx, &description->posy, description->cols)) {
-        return 1;
-      }
-    }
+    description->posx = header.location.column;
+    description->posy = header.location.row;
 
-    problemText = "screen header read error";
+    adjustCursorColumn(&description->posx, description->posy, description->cols);
+    return 1;
   }
 
-  description->rows = 1;
-  description->cols = strlen(problemText);
-  description->posx = 0;
-  description->posy = 0;
+  problemText = "screen header read error";
   return 0;
-}
-
-static int
-getConsoleDescription (ScreenDescription *description) {
-  if (virtualTerminal) {
-    description->number = virtualTerminal;
-  } else {
-    struct vt_stat state;
-    if (controlConsole(VT_GETSTATE, &state) == -1) {
-      logSystemError("ioctl VT_GETSTATE");
-      description->number = 0;
-      problemText = "can't get virtual terminal number";
-      return 0;
-    }
-    description->number = state.v_active;
-
-    if (currentConsoleNumber && (description->number != currentConsoleNumber) && !rebindConsole()) {
-      problemText = "can't access console";
-      return 0;
-    }
-  }
-
-  if (currentConsoleNumber != description->number) {
-    currentConsoleNumber = description->number;
-    setTranslationTable(1);
-  }
-
-  {
-    int mode;
-    if (controlConsole(KDGETMODE, &mode) == -1) {
-      logSystemError("ioctl KDGETMODE");
-    } else if (mode == KD_TEXT) {
-      problemText = NULL;
-      return 1;
-    }
-    problemText = gettext("screen not in text mode");
-    return 0;
-  }
 }
 
 static void
 describe_LinuxScreen (ScreenDescription *description) {
-  getConsoleDescription(description);
-  getScreenDescription(description);
-  description->unreadable = problemText;
+  if (!cacheBuffer) {
+    problemText = NULL;
+    inTextMode = testTextMode();
+    currentConsoleNumber = getConsoleNumber();
+  }
 
-  /* Periodically recalculate font mapping. I don't know any way to be
-   * notified when it changes, and the recalculation is not too
-   * long/difficult.
-   */
-  {
-    static int timer = 0;
-    if (++timer > 100) {
-      setTranslationTable(0);
-      timer = 0;
+  if ((description->number = currentConsoleNumber)) {
+    if (inTextMode) {
+      if (getScreenDescription(description)) {
+      }
     }
+  }
+
+  if ((description->unreadable = problemText)) {
+    description->cols = strlen(problemText);
+    description->rows = 1;
+
+    description->posx = 0;
+    description->posy = 0;
   }
 }
 
@@ -1800,7 +1844,7 @@ switchVirtualTerminal_LinuxScreen (int vt) {
         logMessage(LOG_DEBUG, "switched to virtual tertminal %d.", vt);
         return 1;
       } else {
-        logSystemError("ioctl VT_ACTIVATE");
+        logSystemError("ioctl[VT_ACTIVATE]");
       }
     }
   }
@@ -1809,9 +1853,7 @@ switchVirtualTerminal_LinuxScreen (int vt) {
 
 static int
 currentVirtualTerminal_LinuxScreen (void) {
-  ScreenDescription description;
-  getConsoleDescription(&description);
-  return description.number;
+  return currentConsoleNumber;
 }
 
 static int
