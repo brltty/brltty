@@ -1713,9 +1713,7 @@ BRLTTY_HAVE_PACKAGE([dbus], ["dbus-1 >= 1.0"], [dnl
 ])
 
 BRLTTY_ARG_DRIVER([screen], [Screen])
-AC_DEFINE_UNQUOTED([SCREEN_DRIVER], ["${brltty_default_code_screen}"],
-                   [Define this to be a string containing the default screen driver code.])
-BRLTTY_SUMMARY_ITEM([screen-driver], [brltty_default_code_screen])
+BRLTTY_SUMMARY_ITEM([screen-driver], [default_screen_driver])
 
 BRLTTY_ARG_ENABLE(
    [relocatable-install],

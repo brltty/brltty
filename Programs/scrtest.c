@@ -54,7 +54,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .word = "screen-driver",
     .argument = "driver",
     .setting.string = &opt_screenDriver,
-    .defaultSetting = SCREEN_DRIVER,
+    .defaultSetting = DEFAULT_SCREEN_DRIVER,
     .description = "Screen driver: one of {" SCREEN_DRIVER_CODES "}"
   },
 

@@ -374,9 +374,12 @@ AC_SUBST([brltty_internal_codes_$1])
 AC_SUBST([brltty_internal_names_$1])
 
 set -- ${brltty_internal_codes_$1} ${brltty_external_codes_$1}
-brltty_default_code_$1="${1}"
 AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE_TRANSLATE([$1_$2_codes]), ["${*}"], 
                    [Define this to be a string containing a list of the $1 $2 codes.])
+
+AC_SUBST([default_$1_$2], ["${1}"])
+AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE_TRANSLATE([default_$1_$2]), ["${1}"], 
+                   [Define this to be a string containing the default $1 $2 code.])
 
 $1_driver_libraries=""
 if test -n "${brltty_internal_codes_$1}"

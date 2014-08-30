@@ -488,7 +488,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Config | OPT_Environ,
     .argument = strtext("driver,..."),
     .setting.string = &opt_screenDriver,
-    .defaultSetting = SCREEN_DRIVER,
+    .defaultSetting = DEFAULT_SCREEN_DRIVER,
     .description = strtext("Screen driver code (%s, %s, or one of {%s})."),
     .strings.array = optionStrings_ScreenDriver
   },
