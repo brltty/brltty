@@ -220,7 +220,7 @@ initializeMonitor (MonitorEntry *monitor, const FunctionEntry *function, const O
 }
 
 static int
-testMonitor (const MonitorEntry *monitor, OperationEntry *operation) {
+testMonitor (const MonitorEntry *monitor, int *error) {
   DWORD result = WaitForSingleObject(*monitor, 0);
   if (result == WAIT_OBJECT_0) return 1;
 
@@ -375,11 +375,11 @@ initializeMonitor (MonitorEntry *monitor, const FunctionEntry *function, const O
 }
 
 static int
-testMonitor (const MonitorEntry *monitor, OperationEntry *operation) {
+testMonitor (const MonitorEntry *monitor, int *error) {
   if (monitor->revents & POLLERR) {
-    operation->error = EIO;
+    *error = EIO;
   } else if (monitor->revents & POLLHUP) {
-    operation->error = ENODEV;
+    *error = ENODEV;
   }
 
   return monitor->revents != 0;
@@ -489,7 +489,7 @@ initializeMonitor (MonitorEntry *monitor, const FunctionEntry *function, const O
 }
 
 static int
-testMonitor (const MonitorEntry *monitor, OperationEntry *operation) {
+testMonitor (const MonitorEntry *monitor, int *error) {
   return FD_ISSET(monitor->fileDescriptor, monitor->selectSet);
 }
 
@@ -709,8 +709,10 @@ testFunctionMonitor (void *item, void *data) {
   OperationEntry *operation = getActiveOperation(function);
 
   if (operation && operation->monitor) {
-    operation->error = 0;
-    if (testMonitor(operation->monitor, operation)) return 1;
+    int *error = &operation->error;
+
+    *error = 0;
+    if (testMonitor(operation->monitor, error)) return 1;
   }
 
   return 0;
