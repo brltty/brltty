@@ -37,6 +37,7 @@
 #include "parameters.h"
 #include "brl_cmds.h"
 #include "cmd_queue.h"
+#include "cmd_custom.h"
 #include "cmd_navigation.h"
 #include "cmd_input.h"
 #include "cmd_keycodes.h"
@@ -228,6 +229,7 @@ setSessionEntry (void) {
         addInputCommands();
         addNavigationCommands();
         addScreenCommands();
+        addCustomCommands();
       }
     }
   }
