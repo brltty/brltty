@@ -75,7 +75,7 @@ export LDFLAGS=""
    --without-hostcmd-package \
    --without-mntpt-package \
    --without-mntfs-package \
-   --without-keyboard-package \
+   --without-kbd-package \
    \
    --without-usb-package \
    --without-bluetooth-package \

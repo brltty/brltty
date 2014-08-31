@@ -36,7 +36,7 @@
    --without-params-package \
    --without-mntpt-package \
    --without-mntfs-package \
-   --without-keyboard-package \
+   --without-kbd-package \
    --without-beep-package \
    --without-pcm-package \
    --without-fm-package \
