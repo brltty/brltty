@@ -25,7 +25,7 @@
 static int
 handleTouchCommands (int command, void *data) {
   switch (command & BRL_MSK_BLK) {
-    case BRL_BLK_TOUCH:
+    case BRL_BLK_CMD(TOUCH):
       break;
 
     default:

@@ -1546,7 +1546,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
                   case HT_EXTPKT_Scancode: {
                     while (length--)
-                      enqueueCommand(BRL_BLK_PASSAT | BRL_ARG(*bytes++));
+                      enqueueCommand(BRL_BLK_CMD(PASSAT) | BRL_ARG(*bytes++));
                     break;
                   }
 
@@ -1599,7 +1599,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                       if (readingPosition >= cellCount) readingPosition = BRL_MSK_ARG;
                     }
 
-                    enqueueCommand(BRL_BLK_TOUCH | readingPosition);
+                    enqueueCommand(BRL_BLK_CMD(TOUCH) | readingPosition);
                     continue;
                   }
 
@@ -1611,7 +1611,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                       readingPosition = BRL_MSK_ARG;
                     }
 
-                    enqueueCommand(BRL_BLK_TOUCH | readingPosition);
+                    enqueueCommand(BRL_BLK_CMD(TOUCH) | readingPosition);
                     continue;
                   }
 

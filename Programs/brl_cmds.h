@@ -210,8 +210,8 @@ typedef enum {
 
   BRL_CMD_BRLUCDOTS /* set braille input mode dots/text */,
 
-  BRL_driverCommandCount /* must be last */
-} BRL_DriverCommand;
+  BRL_basicCommandCount /* must be last */
+} BRL_BasicCommand;
 
 /* For explicitly setting toggles on/off. */
 #define BRL_FLG_TOGGLE_ON   0X010000 /* enable feature */
@@ -221,55 +221,48 @@ typedef enum {
 /* For automatic cursor routing. */
 #define BRL_FLG_MOTION_ROUTE 0X040000 /* bring cursor into window after function */
 
-/* cursor routing keys block offset values */
 /*
  * Please comment all BRL_BLK_* definitions. They are
  * used during automatic help file generation.
  */
-#define BRL_BLK_ROUTE     0X0100 /* bring cursor to character */
-#define BRL_BLK_CLIP_NEW  0X0200 /* start new clipboard at character */
-#define BRL_BLK_CLIP_ADD  0X0300 /* append to clipboard from character */
-#define BRL_BLK_COPY_RECT 0X0400 /* rectangular copy to character */
-#define BRL_BLK_COPY_LINE 0X0500 /* linear copy to character */
-#define BRL_BLK_SWITCHVT  0X0600 /* switch to virtual terminal */
-#define BRL_BLK_PRINDENT  0X0700 /* go up to nearest line with less indent than character */
-#define BRL_BLK_NXINDENT  0X0800 /* go down to nearest line with less indent than character */
-#define BRL_BLK_DESCCHAR  0X0900 /* describe character */
-#define BRL_BLK_SETLEFT   0X0A00 /* place left end of window at character */
-#define BRL_BLK_SETMARK   0X0B00 /* remember current window position */
-#define BRL_BLK_GOTOMARK  0X0C00 /* go to remembered window position */
-
-#define BRL_BLK_GOTOLINE    0X0D00 /* go to selected line */
-#define BRL_FLG_LINE_SCALED 0X010000 /* scale arg=0X00-0XFF to screen height */
-#define BRL_FLG_LINE_TOLEFT 0X020000 /* go to beginning of line */
-
-#define BRL_BLK_PRDIFCHAR   0X0E00 /* go up to nearest line with different character */
-#define BRL_BLK_NXDIFCHAR   0X0F00 /* go down to nearest line with different character */
-#define BRL_BLK_CLIP_COPY   0X1000 /* copy characters to clipboard */
-#define BRL_BLK_CLIP_APPEND 0X1100 /* append characters to clipboard */
-
-/* For entering a special key. */
-#define BRL_BLK_PASSKEY 0X2000 /* emulate special key */
 typedef enum {
-  BRL_KEY_ENTER,
-  BRL_KEY_TAB,
-  BRL_KEY_BACKSPACE,
-  BRL_KEY_ESCAPE,
-  BRL_KEY_CURSOR_LEFT,
-  BRL_KEY_CURSOR_RIGHT,
-  BRL_KEY_CURSOR_UP,
-  BRL_KEY_CURSOR_DOWN,
-  BRL_KEY_PAGE_UP,
-  BRL_KEY_PAGE_DOWN,
-  BRL_KEY_HOME,
-  BRL_KEY_END,
-  BRL_KEY_INSERT,
-  BRL_KEY_DELETE,
-  BRL_KEY_FUNCTION
-} BRL_Key;
+  BRL_BLK_BASIC = 0 /* (must be first) */,
 
-#define BRL_BLK_PASSCHAR 0X2100 /* type unicode character */
-#define BRL_BLK_PASSDOTS 0X2200 /* type braille character */
+  BRL_BLK_ROUTE /* bring cursor to character */,
+  BRL_BLK_CLIP_NEW /* start new clipboard at character */,
+  BRL_BLK_CLIP_ADD /* append to clipboard from character */,
+  BRL_BLK_COPY_RECT /* rectangular copy to character */,
+  BRL_BLK_COPY_LINE /* linear copy to character */,
+  BRL_BLK_SWITCHVT /* switch to virtual terminal */,
+  BRL_BLK_PRINDENT /* go up to nearest line with less indent than character */,
+  BRL_BLK_NXINDENT /* go down to nearest line with less indent than character */,
+  BRL_BLK_DESCCHAR /* describe character */,
+  BRL_BLK_SETLEFT /* place left end of window at character */,
+  BRL_BLK_SETMARK /* remember current window position */,
+  BRL_BLK_GOTOMARK /* go to remembered window position */,
+  BRL_BLK_GOTOLINE /* go to selected line */,
+  BRL_BLK_PRDIFCHAR /* go up to nearest line with different character */,
+  BRL_BLK_NXDIFCHAR /* go down to nearest line with different character */,
+  BRL_BLK_CLIP_COPY /* copy characters to clipboard */,
+  BRL_BLK_CLIP_APPEND /* append characters to clipboard */,
+  BRL_BLK_12 /* (reserved) */,
+  BRL_BLK_13 /* (reserved) */,
+  BRL_BLK_14 /* (reserved) */,
+  BRL_BLK_15 /* (reserved) */,
+  BRL_BLK_16 /* (reserved) */,
+  BRL_BLK_17 /* (reserved) */,
+  BRL_BLK_18 /* (reserved) */,
+  BRL_BLK_19 /* (reserved) */,
+  BRL_BLK_1A /* (reserved) */,
+  BRL_BLK_1B /* (reserved) */,
+  BRL_BLK_1C /* (reserved) */,
+  BRL_BLK_1D /* (reserved) */,
+  BRL_BLK_1E /* (reserved) */,
+  BRL_BLK_1F /* (reserved) */,
+
+  BRL_BLK_PASSKEY /* (emulate special key) */,
+  BRL_BLK_PASSCHAR /* type unicode character */,
+  BRL_BLK_PASSDOTS /* type braille character */,
 #define BRL_FLG_CHAR_SHIFT   0X010000 /* shift key pressed */
 #define BRL_FLG_CHAR_UPPER   0X020000 /* convert to uppercase */
 #define BRL_FLG_CHAR_CONTROL 0X040000 /* control key pressed */
@@ -305,15 +298,41 @@ typedef enum {
 #define BRL_DOT8 BRL_ARG_SET(BRL_DOT(8)) /* lower-right dot of computer braille cell */
 #define BRL_DOTC BRL_ARG_SET(BRL_DOT(9)) /* space key pressed */
 
-#define BRL_BLK_PASSAT 0X2300 /* AT (set 2) keyboard scan code */
-#define BRL_BLK_PASSXT 0X2400 /* XT (set 1) keyboard scan code */
-#define BRL_BLK_PASSPS2 0X2500 /* PS/2 (set 3) keyboard scan code */
+  BRL_BLK_PASSAT /* AT (set 2) keyboard scan code */,
+  BRL_BLK_PASSXT /* XT (set 1) keyboard scan code */,
+  BRL_BLK_PASSPS2 /* PS/2 (set 3) keyboard scan code */,
 #define BRL_FLG_KBD_RELEASE 0X010000 /* it is a release scan code */
 #define BRL_FLG_KBD_EMUL0 0X020000 /* it is an emulation 0 scan code */
 #define BRL_FLG_KBD_EMUL1 0X040000 /* it is an emulation 1 scan code */
 
-#define BRL_BLK_CONTEXT   0X2600 /* switch to command context */
-#define BRL_BLK_TOUCH 0X2700 /* current reading location */
+  BRL_BLK_CONTEXT /* switch to command context */,
+  BRL_BLK_TOUCH /* current reading location */,
+
+  BRL_blockCommandCount /* must be last */
+} BRL_BlockCommand;
+
+#define BRL_BLK_CMD(cmd) (BRL_BLK_##cmd << BRL_SHIFT_BLK)
+
+#define BRL_FLG_LINE_SCALED 0X010000 /* scale arg=0X00-0XFF to screen height */
+#define BRL_FLG_LINE_TOLEFT 0X020000 /* go to beginning of line */
+
+typedef enum {
+  BRL_KEY_ENTER,
+  BRL_KEY_TAB,
+  BRL_KEY_BACKSPACE,
+  BRL_KEY_ESCAPE,
+  BRL_KEY_CURSOR_LEFT,
+  BRL_KEY_CURSOR_RIGHT,
+  BRL_KEY_CURSOR_UP,
+  BRL_KEY_CURSOR_DOWN,
+  BRL_KEY_PAGE_UP,
+  BRL_KEY_PAGE_DOWN,
+  BRL_KEY_HOME,
+  BRL_KEY_END,
+  BRL_KEY_INSERT,
+  BRL_KEY_DELETE,
+  BRL_KEY_FUNCTION
+} BRL_Key;
 
 #ifdef __cplusplus
 }

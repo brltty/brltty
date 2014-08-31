@@ -150,7 +150,7 @@ makeKeyboardCommand (KeyTable *table, unsigned char context) {
   const KeyContext *ctx;
 
   if ((ctx = getKeyContext(table, context))) {
-    int keyboardCommand = BRL_BLK_PASSDOTS;
+    int keyboardCommand = BRL_BLK_CMD(PASSDOTS);
 
     {
       unsigned int pressedIndex;
@@ -247,7 +247,7 @@ processCommand (KeyTable *table, int command) {
   int arg = command & BRL_MSK_ARG;
 
   switch (blk) {
-    case BRL_BLK_CONTEXT: {
+    case BRL_BLK_CMD(CONTEXT): {
       unsigned char context = KTB_CTX_DEFAULT + arg;
       const KeyContext *ctx = getKeyContext(table, context);
 
@@ -336,8 +336,8 @@ static int
 isRepeatableCommand (int command) {
   if (prefs.autorepeat) {
     switch (command & BRL_MSK_BLK) {
-      case BRL_BLK_PASSCHAR:
-      case BRL_BLK_PASSDOTS:
+      case BRL_BLK_CMD(PASSCHAR):
+      case BRL_BLK_CMD(PASSDOTS):
         return 1;
 
       default:
@@ -354,14 +354,14 @@ isRepeatableCommand (int command) {
           case BRL_CMD_MENU_PREV_SETTING:
           case BRL_CMD_MENU_NEXT_SETTING:
 
-          case BRL_BLK_PASSKEY + BRL_KEY_BACKSPACE:
-          case BRL_BLK_PASSKEY + BRL_KEY_DELETE:
-          case BRL_BLK_PASSKEY + BRL_KEY_PAGE_UP:
-          case BRL_BLK_PASSKEY + BRL_KEY_PAGE_DOWN:
-          case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP:
-          case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN:
-          case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT:
-          case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT:
+          case BRL_BLK_CMD(PASSKEY) + BRL_KEY_BACKSPACE:
+          case BRL_BLK_CMD(PASSKEY) + BRL_KEY_DELETE:
+          case BRL_BLK_CMD(PASSKEY) + BRL_KEY_PAGE_UP:
+          case BRL_BLK_CMD(PASSKEY) + BRL_KEY_PAGE_DOWN:
+          case BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_UP:
+          case BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_DOWN:
+          case BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_LEFT:
+          case BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_RIGHT:
 
           case BRL_CMD_SPEAK_PREV_CHAR:
           case BRL_CMD_SPEAK_NEXT_CHAR:

@@ -42,17 +42,17 @@ cmdBrlttyToBrlapi (int command, int retainDots) {
   int arg = BRL_ARG_GET(command);
   int blk = command & BRL_MSK_BLK;
   switch (blk) {
-  case BRL_BLK_PASSCHAR:
+  case BRL_BLK_CMD(PASSCHAR):
     code = cmdWCharToBrlapi(arg);
     break;
-  case BRL_BLK_PASSDOTS:
+  case BRL_BLK_CMD(PASSDOTS):
     if (retainDots) {
       if (arg == (BRLAPI_DOTC >> BRLAPI_KEY_CMD_ARG_SHIFT)) arg = 0;
       goto doDefault;
     }
     code = cmdWCharToBrlapi(convertDotsToCharacter(textTable, arg));
     break;
-  case BRL_BLK_PASSKEY:
+  case BRL_BLK_CMD(PASSKEY):
     switch (arg) {
     case BRL_KEY_ENTER:		code = BRLAPI_KEY_SYM_LINEFEED;	 break;
     case BRL_KEY_TAB:		code = BRLAPI_KEY_SYM_TAB;	 break;
@@ -79,14 +79,14 @@ cmdBrlttyToBrlapi (int command, int retainDots) {
          ;
     break;
   }
-  if (blk == BRL_BLK_GOTOLINE)
+  if (blk == BRL_BLK_CMD(GOTOLINE))
     code = code
     | (command & BRL_FLG_LINE_SCALED	? BRLAPI_KEY_FLG_LINE_SCALED	: 0)
     | (command & BRL_FLG_LINE_TOLEFT	? BRLAPI_KEY_FLG_LINE_TOLEFT	: 0)
       ;
-  if (blk == BRL_BLK_PASSCHAR
-   || blk == BRL_BLK_PASSKEY
-   || blk == BRL_BLK_PASSDOTS)
+  if (blk == BRL_BLK_CMD(PASSCHAR)
+   || blk == BRL_BLK_CMD(PASSKEY)
+   || blk == BRL_BLK_CMD(PASSDOTS))
     code = code
     | (command & BRL_FLG_CHAR_CONTROL	? BRLAPI_KEY_FLG_CONTROL	: 0)
     | (command & BRL_FLG_CHAR_META	? BRLAPI_KEY_FLG_META		: 0)
@@ -115,26 +115,26 @@ cmdBrlapiToBrltty (brlapi_keyCode_t code) {
       unsigned long keysym;
       keysym = code & BRLAPI_KEY_CODE_MASK;
       switch (keysym) {
-      case BRLAPI_KEY_SYM_BACKSPACE:	cmd = BRL_BLK_PASSKEY|BRL_KEY_BACKSPACE;	break;
-      case BRLAPI_KEY_SYM_TAB:		cmd = BRL_BLK_PASSKEY|BRL_KEY_TAB;	break;
-      case BRLAPI_KEY_SYM_LINEFEED:	cmd = BRL_BLK_PASSKEY|BRL_KEY_ENTER;	break;
-      case BRLAPI_KEY_SYM_ESCAPE:	cmd = BRL_BLK_PASSKEY|BRL_KEY_ESCAPE;	break;
-      case BRLAPI_KEY_SYM_HOME:		cmd = BRL_BLK_PASSKEY|BRL_KEY_HOME;	break;
-      case BRLAPI_KEY_SYM_LEFT:		cmd = BRL_BLK_PASSKEY|BRL_KEY_CURSOR_LEFT;	break;
-      case BRLAPI_KEY_SYM_UP:		cmd = BRL_BLK_PASSKEY|BRL_KEY_CURSOR_UP;	break;
-      case BRLAPI_KEY_SYM_RIGHT:	cmd = BRL_BLK_PASSKEY|BRL_KEY_CURSOR_RIGHT;	break;
-      case BRLAPI_KEY_SYM_DOWN:		cmd = BRL_BLK_PASSKEY|BRL_KEY_CURSOR_DOWN;	break;
-      case BRLAPI_KEY_SYM_PAGE_UP:	cmd = BRL_BLK_PASSKEY|BRL_KEY_PAGE_UP;	break;
-      case BRLAPI_KEY_SYM_PAGE_DOWN:	cmd = BRL_BLK_PASSKEY|BRL_KEY_PAGE_DOWN;	break;
-      case BRLAPI_KEY_SYM_END:		cmd = BRL_BLK_PASSKEY|BRL_KEY_END;	break;
-      case BRLAPI_KEY_SYM_INSERT:	cmd = BRL_BLK_PASSKEY|BRL_KEY_INSERT;	break;
-      case BRLAPI_KEY_SYM_DELETE:	cmd = BRL_BLK_PASSKEY|BRL_KEY_DELETE;	break;
+      case BRLAPI_KEY_SYM_BACKSPACE:	cmd = BRL_BLK_CMD(PASSKEY)|BRL_KEY_BACKSPACE;	break;
+      case BRLAPI_KEY_SYM_TAB:		cmd = BRL_BLK_CMD(PASSKEY)|BRL_KEY_TAB;	break;
+      case BRLAPI_KEY_SYM_LINEFEED:	cmd = BRL_BLK_CMD(PASSKEY)|BRL_KEY_ENTER;	break;
+      case BRLAPI_KEY_SYM_ESCAPE:	cmd = BRL_BLK_CMD(PASSKEY)|BRL_KEY_ESCAPE;	break;
+      case BRLAPI_KEY_SYM_HOME:		cmd = BRL_BLK_CMD(PASSKEY)|BRL_KEY_HOME;	break;
+      case BRLAPI_KEY_SYM_LEFT:		cmd = BRL_BLK_CMD(PASSKEY)|BRL_KEY_CURSOR_LEFT;	break;
+      case BRLAPI_KEY_SYM_UP:		cmd = BRL_BLK_CMD(PASSKEY)|BRL_KEY_CURSOR_UP;	break;
+      case BRLAPI_KEY_SYM_RIGHT:	cmd = BRL_BLK_CMD(PASSKEY)|BRL_KEY_CURSOR_RIGHT;	break;
+      case BRLAPI_KEY_SYM_DOWN:		cmd = BRL_BLK_CMD(PASSKEY)|BRL_KEY_CURSOR_DOWN;	break;
+      case BRLAPI_KEY_SYM_PAGE_UP:	cmd = BRL_BLK_CMD(PASSKEY)|BRL_KEY_PAGE_UP;	break;
+      case BRLAPI_KEY_SYM_PAGE_DOWN:	cmd = BRL_BLK_CMD(PASSKEY)|BRL_KEY_PAGE_DOWN;	break;
+      case BRLAPI_KEY_SYM_END:		cmd = BRL_BLK_CMD(PASSKEY)|BRL_KEY_END;	break;
+      case BRLAPI_KEY_SYM_INSERT:	cmd = BRL_BLK_CMD(PASSKEY)|BRL_KEY_INSERT;	break;
+      case BRLAPI_KEY_SYM_DELETE:	cmd = BRL_BLK_CMD(PASSKEY)|BRL_KEY_DELETE;	break;
       default:
 	if (keysym >= BRLAPI_KEY_SYM_FUNCTION && keysym <= BRLAPI_KEY_SYM_FUNCTION + 34)
-	  cmd = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + keysym - BRLAPI_KEY_SYM_FUNCTION);
+	  cmd = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + keysym - BRLAPI_KEY_SYM_FUNCTION);
 	else if (keysym < 0x100 || (keysym & 0x1F000000) == BRLAPI_KEY_SYM_UNICODE) {
 	  wchar_t c = keysym & 0xFFFFFF;
-	  cmd = BRL_BLK_PASSCHAR | BRL_ARG_SET(c);
+	  cmd = BRL_BLK_CMD(PASSCHAR) | BRL_ARG_SET(c);
 	} else return EOF;
 	break;
       }

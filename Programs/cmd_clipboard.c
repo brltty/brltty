@@ -588,11 +588,11 @@ handleClipboardCommands (int command, void *data) {
           int clear;
           int column, row;
 
-        case BRL_BLK_CLIP_NEW:
+        case BRL_BLK_CMD(CLIP_NEW):
           clear = 1;
           goto doClipBegin;
 
-        case BRL_BLK_CLIP_ADD:
+        case BRL_BLK_CMD(CLIP_ADD):
           clear = 0;
           goto doClipBegin;
 
@@ -607,7 +607,7 @@ handleClipboardCommands (int command, void *data) {
           break;
         }
 
-        case BRL_BLK_COPY_RECT: {
+        case BRL_BLK_CMD(COPY_RECT): {
           int column, row;
 
           if (getCharacterCoordinates(arg, &column, &row, 1, 1))
@@ -618,7 +618,7 @@ handleClipboardCommands (int command, void *data) {
           break;
         }
 
-        case BRL_BLK_COPY_LINE: {
+        case BRL_BLK_CMD(COPY_LINE): {
           int column, row;
 
           if (getCharacterCoordinates(arg, &column, &row, 1, 1))
@@ -632,11 +632,11 @@ handleClipboardCommands (int command, void *data) {
         {
           int clear;
 
-        case BRL_BLK_CLIP_COPY:
+        case BRL_BLK_CMD(CLIP_COPY):
           clear = 1;
           goto doCopy;
 
-        case BRL_BLK_CLIP_APPEND:
+        case BRL_BLK_CMD(CLIP_APPEND):
           clear = 0;
           goto doCopy;
 

@@ -162,37 +162,37 @@ brl_readCommand(BrailleDisplay *brl, KeyTableCommandContext context)
 	case BRL_NONE:
 	  break;
 	case BRL_CURSOR:
-	  res = BRL_BLK_ROUTE + key.code;
+	  res = BRL_BLK_CMD(ROUTE) + key.code;
 	  break;
 	case BRL_CMD:
 	  switch(key.code)
 	    {
 	    case BRLK_UP:
-	      res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP;
+	      res = BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_UP;
 	      break;
 	    case BRLK_DOWN:
-	      res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN;
+	      res = BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_DOWN;
 	      break;
 	    case BRLK_RIGHT:
-	      res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT;
+	      res = BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_RIGHT;
 	      break;
 	    case BRLK_LEFT:
-	      res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT;
+	      res = BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_LEFT;
 	      break;
 	    case BRLK_INSERT:
-	      res = BRL_BLK_PASSKEY + BRL_KEY_INSERT;
+	      res = BRL_BLK_CMD(PASSKEY) + BRL_KEY_INSERT;
 	      break;
 	    case BRLK_HOME:
-	      res = BRL_BLK_PASSKEY + BRL_KEY_HOME;
+	      res = BRL_BLK_CMD(PASSKEY) + BRL_KEY_HOME;
 	      break;
 	    case BRLK_END:
-	      res = BRL_BLK_PASSKEY + BRL_KEY_END;
+	      res = BRL_BLK_CMD(PASSKEY) + BRL_KEY_END;
 	      break;
 	    case BRLK_PAGEUP:
-	      res = BRL_BLK_PASSKEY + BRL_KEY_PAGE_UP;
+	      res = BRL_BLK_CMD(PASSKEY) + BRL_KEY_PAGE_UP;
 	      break;
 	    case BRLK_PAGEDOWN:
-	      res = BRL_BLK_PASSKEY + BRL_KEY_PAGE_DOWN;
+	      res = BRL_BLK_CMD(PASSKEY) + BRL_KEY_PAGE_DOWN;
 	      break;
 	    case BRLK_BACKWARD:
 	      res = BRL_CMD_FWINLT;
@@ -211,7 +211,7 @@ brl_readCommand(BrailleDisplay *brl, KeyTableCommandContext context)
 	    }
 	  break;
 	case BRL_KEY:
-	  res = BRL_BLK_PASSDOTS | translateInputCell(key.braille);
+	  res = BRL_BLK_CMD(PASSDOTS) | translateInputCell(key.braille);
 	  break;
 	default:
           break;

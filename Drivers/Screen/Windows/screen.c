@@ -535,12 +535,12 @@ handleCommand_WindowsScreen (int command) {
   int press = 0;
 
   switch (blk) {
-    case BRL_BLK_PASSXT:
+    case BRL_BLK_CMD(PASSXT):
       press = !(arg & 0X80);
       arg &= 0X7F;
       /* fallthrough */
       goto do_send;
-    case BRL_BLK_PASSAT: {
+    case BRL_BLK_CMD(PASSAT): {
       press |= !(command & BRL_FLG_KBD_RELEASE);
 
 do_send:
@@ -550,7 +550,7 @@ do_send:
       if (command & BRL_FLG_KBD_EMUL1)
 	return 0;
 
-      if (blk == BRL_BLK_PASSAT)
+      if (blk == BRL_BLK_CMD(PASSAT))
 	arg = AT2XT[arg];
 
       return doInsertSendInput (press, 0, 0, arg,

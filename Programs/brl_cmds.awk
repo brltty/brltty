@@ -18,6 +18,7 @@
 
 BEGIN {
   brlCommandValue = 0
+  brlBlockValue = 0
   brlKeyValue = 0
 
   brlBlockDeprecations["CLIP_NEW"] = "CUTBEGIN"
@@ -33,16 +34,19 @@ BEGIN {
   next
 }
 
-/#define[ \t]*BRL_BLK_/ {
-  prefix = substr($2, 1, 8)
-  name = substr($2, 9)
-  value = getDefineValue()
+/^ *BRL_BLK_/ {
+  prefix = substr($1, 1, 8)
+  name = substr($1, 9)
+  value = brlBlockValue++
   help = getComment($0)
-  brlBlock(name, $2, value, help)
 
-  if (name in brlBlockDeprecations) {
-    alias = brlBlockDeprecations[name]
-    brlBlock(alias, prefix alias, value, "deprecated definition of " name " - " help)
+  if (help !~ /^\(/) {
+    brlBlock(name, $1, value, help)
+
+    if (name in brlBlockDeprecations) {
+      alias = brlBlockDeprecations[name]
+      brlBlock(alias, prefix alias, value, "deprecated definition of " name " - " help)
+    }
   }
 
   next

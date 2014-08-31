@@ -27,9 +27,7 @@ function brlCommand(name, symbol, value, help) {
 }
 
 function brlBlock(name, symbol, value, help) {
-  if (value ~ /^0[xX][0-9a-fA-F]+00$/) {
-    writeCommandDefinition("blk_" name, "Int32.of_int " hexadecimalValue(value) "00", help)
-  }
+  writeCommandDefinition("blk_" name, "Int32.of_int (" value " lsl key_cmd_blk_shift)", help)
 }
 
 function brlKey(name, symbol, value, help) {
@@ -104,9 +102,8 @@ function writeCamlConstant(type, name, value, help) {
 }
 
 function camldocComment(text) {
-  if (length(text) > 0) value = "(** " text " *)";
-  else value = "";
-  return value;
+  if (length(text) > 0) text = "(** " text " *)";
+  return text;
 }
 
 function hexadecimalValue(value) {

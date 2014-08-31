@@ -282,14 +282,14 @@ static void keypress(Widget w, XEvent *event, String *params, Cardinal *num_para
   if ((keysym & 0x1f000000) == 0x1000000) {
     /* unicode */
     if ((keysym & ~UNICODE_CELL_MASK) == UNICODE_BRAILLE_ROW)
-      keypressed = BRL_BLK_PASSDOTS | (keysym & 0xff);
+      keypressed = BRL_BLK_CMD(PASSDOTS) | (keysym & 0xff);
     else {
       int c = convertWcharToChar(keysym & 0xffffff);
       if (c == EOF) {
 	logMessage(LOG_DEBUG, "non translatable unicode U+%lx", keysym & 0xffffff);
 	return;
       }
-      keypressed = BRL_BLK_PASSCHAR | c;
+      keypressed = BRL_BLK_CMD(PASSCHAR) | c;
     }
   }
   else switch(keysym) {
@@ -302,88 +302,88 @@ static void keypress(Widget w, XEvent *event, String *params, Cardinal *num_para
     case XK_Meta_L:
     case XK_Meta_R:    modifier = Mod1Mask;    goto modif;
     case XK_KP_Enter:
-    case XK_Return:       keypressed = BRL_BLK_PASSKEY | BRL_KEY_ENTER;           break;
+    case XK_Return:       keypressed = BRL_BLK_CMD(PASSKEY) | BRL_KEY_ENTER;           break;
     case XK_KP_Tab:
-    case XK_Tab:          keypressed = BRL_BLK_PASSKEY | BRL_KEY_TAB;             break;
-    case XK_BackSpace:    keypressed = BRL_BLK_PASSKEY | BRL_KEY_BACKSPACE;       break;
-    case XK_Escape:       keypressed = BRL_BLK_PASSKEY | BRL_KEY_ESCAPE;          break;
+    case XK_Tab:          keypressed = BRL_BLK_CMD(PASSKEY) | BRL_KEY_TAB;             break;
+    case XK_BackSpace:    keypressed = BRL_BLK_CMD(PASSKEY) | BRL_KEY_BACKSPACE;       break;
+    case XK_Escape:       keypressed = BRL_BLK_CMD(PASSKEY) | BRL_KEY_ESCAPE;          break;
     case XK_KP_Left:
-    case XK_Left:         keypressed = BRL_BLK_PASSKEY | BRL_KEY_CURSOR_LEFT;     break;
+    case XK_Left:         keypressed = BRL_BLK_CMD(PASSKEY) | BRL_KEY_CURSOR_LEFT;     break;
     case XK_KP_Right:
-    case XK_Right:        keypressed = BRL_BLK_PASSKEY | BRL_KEY_CURSOR_RIGHT;    break;
+    case XK_Right:        keypressed = BRL_BLK_CMD(PASSKEY) | BRL_KEY_CURSOR_RIGHT;    break;
     case XK_KP_Up:
-    case XK_Up:           keypressed = BRL_BLK_PASSKEY | BRL_KEY_CURSOR_UP;       break;
+    case XK_Up:           keypressed = BRL_BLK_CMD(PASSKEY) | BRL_KEY_CURSOR_UP;       break;
     case XK_KP_Down:
-    case XK_Down:         keypressed = BRL_BLK_PASSKEY | BRL_KEY_CURSOR_DOWN;     break;
+    case XK_Down:         keypressed = BRL_BLK_CMD(PASSKEY) | BRL_KEY_CURSOR_DOWN;     break;
     case XK_KP_Page_Up:
-    case XK_Page_Up:      keypressed = BRL_BLK_PASSKEY | BRL_KEY_PAGE_UP;         break;
+    case XK_Page_Up:      keypressed = BRL_BLK_CMD(PASSKEY) | BRL_KEY_PAGE_UP;         break;
     case XK_KP_Page_Down:
-    case XK_Page_Down:    keypressed = BRL_BLK_PASSKEY | BRL_KEY_PAGE_DOWN;       break;
+    case XK_Page_Down:    keypressed = BRL_BLK_CMD(PASSKEY) | BRL_KEY_PAGE_DOWN;       break;
     case XK_KP_Home:
-    case XK_Home:         keypressed = BRL_BLK_PASSKEY | BRL_KEY_HOME;            break;
+    case XK_Home:         keypressed = BRL_BLK_CMD(PASSKEY) | BRL_KEY_HOME;            break;
     case XK_KP_End:
-    case XK_End:          keypressed = BRL_BLK_PASSKEY | BRL_KEY_END;             break;
+    case XK_End:          keypressed = BRL_BLK_CMD(PASSKEY) | BRL_KEY_END;             break;
     case XK_KP_Insert:
-    case XK_Insert:       keypressed = BRL_BLK_PASSKEY | BRL_KEY_INSERT;          break;
+    case XK_Insert:       keypressed = BRL_BLK_CMD(PASSKEY) | BRL_KEY_INSERT;          break;
     case XK_KP_Delete:
-    case XK_Delete:       keypressed = BRL_BLK_PASSKEY | BRL_KEY_DELETE;          break;
+    case XK_Delete:       keypressed = BRL_BLK_CMD(PASSKEY) | BRL_KEY_DELETE;          break;
     case XK_KP_F1:
-    case XK_F1:           keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION +  0); break;
+    case XK_F1:           keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION +  0); break;
     case XK_KP_F2:
-    case XK_F2:           keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION +  1); break;
+    case XK_F2:           keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION +  1); break;
     case XK_KP_F3:
-    case XK_F3:           keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION +  2); break;
+    case XK_F3:           keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION +  2); break;
     case XK_KP_F4:
-    case XK_F4:           keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION +  3); break;
-    case XK_F5:           keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION +  4); break;
-    case XK_F6:           keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION +  5); break;
-    case XK_F7:           keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION +  6); break;
-    case XK_F8:           keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION +  7); break;
-    case XK_F9:           keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION +  8); break;
-    case XK_F10:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION +  9); break;
-    case XK_F11:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 10); break;
-    case XK_F12:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 11); break;
-    case XK_F13:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 12); break;
-    case XK_F14:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 13); break;
-    case XK_F15:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 14); break;
-    case XK_F16:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 15); break;
-    case XK_F17:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 16); break;
-    case XK_F18:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 17); break;
-    case XK_F19:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 18); break;
-    case XK_F20:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 19); break;
-    case XK_F21:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 20); break;
-    case XK_F22:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 21); break;
-    case XK_F23:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 22); break;
-    case XK_F24:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 23); break;
-    case XK_F25:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 24); break;
-    case XK_F26:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 25); break;
-    case XK_F27:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 26); break;
-    case XK_F28:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 27); break;
-    case XK_F29:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 28); break;
-    case XK_F30:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 29); break;
-    case XK_F31:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 30); break;
-    case XK_F32:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 31); break;
-    case XK_F33:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 32); break;
-    case XK_F34:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 33); break;
-    case XK_F35:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 34); break;
-    case XK_KP_Space:     keypressed = BRL_BLK_PASSCHAR | ' '; break;
-    case XK_KP_Equal:     keypressed = BRL_BLK_PASSCHAR | '='; break;
-    case XK_KP_Multiply:  keypressed = BRL_BLK_PASSCHAR | '*'; break;
-    case XK_KP_Add:       keypressed = BRL_BLK_PASSCHAR | '+'; break;
-    case XK_KP_Separator: keypressed = BRL_BLK_PASSCHAR | ','; break;
-    case XK_KP_Subtract:  keypressed = BRL_BLK_PASSCHAR | '-'; break;
-    case XK_KP_Decimal:   keypressed = BRL_BLK_PASSCHAR | '.'; break;
-    case XK_KP_Divide:    keypressed = BRL_BLK_PASSCHAR | '/'; break;
-    case XK_KP_0:         keypressed = BRL_BLK_PASSCHAR | '0'; break;
-    case XK_KP_1:         keypressed = BRL_BLK_PASSCHAR | '1'; break;
-    case XK_KP_2:         keypressed = BRL_BLK_PASSCHAR | '2'; break;
-    case XK_KP_3:         keypressed = BRL_BLK_PASSCHAR | '3'; break;
-    case XK_KP_4:         keypressed = BRL_BLK_PASSCHAR | '4'; break;
-    case XK_KP_5:         keypressed = BRL_BLK_PASSCHAR | '5'; break;
-    case XK_KP_6:         keypressed = BRL_BLK_PASSCHAR | '6'; break;
-    case XK_KP_7:         keypressed = BRL_BLK_PASSCHAR | '7'; break;
-    case XK_KP_8:         keypressed = BRL_BLK_PASSCHAR | '8'; break;
-    case XK_KP_9:         keypressed = BRL_BLK_PASSCHAR | '9'; break;
+    case XK_F4:           keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION +  3); break;
+    case XK_F5:           keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION +  4); break;
+    case XK_F6:           keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION +  5); break;
+    case XK_F7:           keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION +  6); break;
+    case XK_F8:           keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION +  7); break;
+    case XK_F9:           keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION +  8); break;
+    case XK_F10:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION +  9); break;
+    case XK_F11:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 10); break;
+    case XK_F12:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 11); break;
+    case XK_F13:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 12); break;
+    case XK_F14:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 13); break;
+    case XK_F15:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 14); break;
+    case XK_F16:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 15); break;
+    case XK_F17:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 16); break;
+    case XK_F18:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 17); break;
+    case XK_F19:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 18); break;
+    case XK_F20:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 19); break;
+    case XK_F21:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 20); break;
+    case XK_F22:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 21); break;
+    case XK_F23:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 22); break;
+    case XK_F24:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 23); break;
+    case XK_F25:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 24); break;
+    case XK_F26:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 25); break;
+    case XK_F27:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 26); break;
+    case XK_F28:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 27); break;
+    case XK_F29:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 28); break;
+    case XK_F30:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 29); break;
+    case XK_F31:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 30); break;
+    case XK_F32:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 31); break;
+    case XK_F33:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 32); break;
+    case XK_F34:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 33); break;
+    case XK_F35:          keypressed = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + 34); break;
+    case XK_KP_Space:     keypressed = BRL_BLK_CMD(PASSCHAR) | ' '; break;
+    case XK_KP_Equal:     keypressed = BRL_BLK_CMD(PASSCHAR) | '='; break;
+    case XK_KP_Multiply:  keypressed = BRL_BLK_CMD(PASSCHAR) | '*'; break;
+    case XK_KP_Add:       keypressed = BRL_BLK_CMD(PASSCHAR) | '+'; break;
+    case XK_KP_Separator: keypressed = BRL_BLK_CMD(PASSCHAR) | ','; break;
+    case XK_KP_Subtract:  keypressed = BRL_BLK_CMD(PASSCHAR) | '-'; break;
+    case XK_KP_Decimal:   keypressed = BRL_BLK_CMD(PASSCHAR) | '.'; break;
+    case XK_KP_Divide:    keypressed = BRL_BLK_CMD(PASSCHAR) | '/'; break;
+    case XK_KP_0:         keypressed = BRL_BLK_CMD(PASSCHAR) | '0'; break;
+    case XK_KP_1:         keypressed = BRL_BLK_CMD(PASSCHAR) | '1'; break;
+    case XK_KP_2:         keypressed = BRL_BLK_CMD(PASSCHAR) | '2'; break;
+    case XK_KP_3:         keypressed = BRL_BLK_CMD(PASSCHAR) | '3'; break;
+    case XK_KP_4:         keypressed = BRL_BLK_CMD(PASSCHAR) | '4'; break;
+    case XK_KP_5:         keypressed = BRL_BLK_CMD(PASSCHAR) | '5'; break;
+    case XK_KP_6:         keypressed = BRL_BLK_CMD(PASSCHAR) | '6'; break;
+    case XK_KP_7:         keypressed = BRL_BLK_CMD(PASSCHAR) | '7'; break;
+    case XK_KP_8:         keypressed = BRL_BLK_CMD(PASSCHAR) | '8'; break;
+    case XK_KP_9:         keypressed = BRL_BLK_CMD(PASSCHAR) | '9'; break;
     default: logMessage(LOG_DEBUG,"unsupported keysym %lx",keysym); return;
   }
 
@@ -409,7 +409,7 @@ static void route(Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
   int index = atoi(params[0]);
   logMessage(LOG_DEBUG,"route(%u)", index);
-  enqueueCommand(BRL_BLK_ROUTE | (index&BRL_MSK_ARG));
+  enqueueCommand(BRL_BLK_CMD(ROUTE) | (index&BRL_MSK_ARG));
 }
 
 static void quit(Widget w, XEvent *event, String *params, Cardinal *num_params)
@@ -462,14 +462,14 @@ struct model {
 static struct model *keyModel;
 
 static struct button buttons_simple[] = {
-  { "Dot1",   BRL_BLK_PASSDOTS  | BRL_DOT1  , 0, 0, 0 },
-  { "Dot2",   BRL_BLK_PASSDOTS  | BRL_DOT2  , 0, 0, 1 },
-  { "Dot3",   BRL_BLK_PASSDOTS  | BRL_DOT3  , 0, 0, 2 },
-  { "Dot4",   BRL_BLK_PASSDOTS  | BRL_DOT4  , 0, 1, 0 },
-  { "Dot5",   BRL_BLK_PASSDOTS  | BRL_DOT5  , 0, 1, 1 },
-  { "Dot6",   BRL_BLK_PASSDOTS  | BRL_DOT6  , 0, 1, 2 },
-  { "Dot7",   BRL_BLK_PASSDOTS  | BRL_DOT7  , 0, 0, 3 },
-  { "Dot8",   BRL_BLK_PASSDOTS  | BRL_DOT8  , 0, 1, 3 },
+  { "Dot1",   BRL_BLK_CMD(PASSDOTS)  | BRL_DOT1  , 0, 0, 0 },
+  { "Dot2",   BRL_BLK_CMD(PASSDOTS)  | BRL_DOT2  , 0, 0, 1 },
+  { "Dot3",   BRL_BLK_CMD(PASSDOTS)  | BRL_DOT3  , 0, 0, 2 },
+  { "Dot4",   BRL_BLK_CMD(PASSDOTS)  | BRL_DOT4  , 0, 1, 0 },
+  { "Dot5",   BRL_BLK_CMD(PASSDOTS)  | BRL_DOT5  , 0, 1, 1 },
+  { "Dot6",   BRL_BLK_CMD(PASSDOTS)  | BRL_DOT6  , 0, 1, 2 },
+  { "Dot7",   BRL_BLK_CMD(PASSDOTS)  | BRL_DOT7  , 0, 0, 3 },
+  { "Dot8",   BRL_BLK_CMD(PASSDOTS)  | BRL_DOT8  , 0, 1, 3 },
   { "`",      BRL_CMD_TOP_LEFT, 0, 3, 0 },
   { "^",      BRL_CMD_LNUP,   1, 4, 0 },
   { "<",      BRL_CMD_FWINLT, 1, 3, 1 },
@@ -478,11 +478,11 @@ static struct button buttons_simple[] = {
   { "<=",     BRL_CMD_FWINLTSKIP, 0, 3, 2 },
   { "v",      BRL_CMD_LNDN,   1, 4, 2 },
   { "=>",     BRL_CMD_FWINRTSKIP, 0, 5, 2 },
-  { "alt-c",  BRL_FLG_CHAR_META    | BRL_BLK_PASSCHAR | 'c', 0, 3, 3 },
-  { "ctrl-c", BRL_FLG_CHAR_CONTROL | BRL_BLK_PASSCHAR | 'c', 0, 4, 3 },
-  { "a",      BRL_BLK_PASSCHAR                        | 'a', 0, 5, 3 },
-  { "A",      BRL_BLK_PASSCHAR                        | 'A', 0, 6, 3 },
-  { "Alt-F1", BRL_FLG_CHAR_META | BRL_KEY_FUNCTION | BRL_BLK_PASSKEY , 0, 7, 3 },
+  { "alt-c",  BRL_FLG_CHAR_META    | BRL_BLK_CMD(PASSCHAR) | 'c', 0, 3, 3 },
+  { "ctrl-c", BRL_FLG_CHAR_CONTROL | BRL_BLK_CMD(PASSCHAR) | 'c', 0, 4, 3 },
+  { "a",      BRL_BLK_CMD(PASSCHAR)                        | 'a', 0, 5, 3 },
+  { "A",      BRL_BLK_CMD(PASSCHAR)                        | 'A', 0, 6, 3 },
+  { "Alt-F1", BRL_FLG_CHAR_META | BRL_KEY_FUNCTION | BRL_BLK_CMD(PASSKEY) , 0, 7, 3 },
   { "Frez",   BRL_CMD_FREEZE,   0, 6, 0 },
   { "Help",   BRL_CMD_HELP,     0, 7, 0 },
   { "Pref",   BRL_CMD_PREFMENU, 0, 6, 1 },
@@ -493,12 +493,12 @@ static struct button buttons_simple[] = {
 
 static struct button buttons_vs[] = {
 	/*
-  { "VT1",  BRL_BLK_SWITCHVT,   1, 0, 1 },
-  { "VT2",  BRL_BLK_SWITCHVT+1, 1, 1, 1 },
-  { "VT3",  BRL_BLK_SWITCHVT+2, 1, 2, 1 },
-  { "VT4",  BRL_BLK_SWITCHVT+3, 1, 6, 1 },
-  { "VT5",  BRL_BLK_SWITCHVT+4, 1, 7, 1 },
-  { "VT6",  BRL_BLK_SWITCHVT+5, 1, 8, 1 },
+  { "VT1",  BRL_BLK_CMD(SWITCHVT)+0,   1, 0, 1 },
+  { "VT2",  BRL_BLK_CMD(SWITCHVT)+1, 1, 1, 1 },
+  { "VT3",  BRL_BLK_CMD(SWITCHVT)+2, 1, 2, 1 },
+  { "VT4",  BRL_BLK_CMD(SWITCHVT)+3, 1, 6, 1 },
+  { "VT5",  BRL_BLK_CMD(SWITCHVT)+4, 1, 7, 1 },
+  { "VT6",  BRL_BLK_CMD(SWITCHVT)+5, 1, 8, 1 },
 	*/
   //{ "B5", EOF, /* cut */      1, 5, 2 },
   { "TOP",  BRL_CMD_TOP_LEFT,   1, 6, 2 },
@@ -512,13 +512,13 @@ static struct button buttons_vs[] = {
   { "->",   BRL_CMD_FWINRT,     1, 8, 3 },
   { "<-",   BRL_CMD_FWINLT,     1, 6, 3 },
   { "HOME", BRL_CMD_HOME,       1, 7, 3 },
-  { "^",    BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP,    1, 1, 2 },
-  { "v",    BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN,  1, 1, 4 },
-  { ">",    BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT, 1, 2, 3 },
-  { "<",    BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT,  1, 0, 3 },
+  { "^",    BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_UP,    1, 1, 2 },
+  { "v",    BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_DOWN,  1, 1, 4 },
+  { ">",    BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_RIGHT, 1, 2, 3 },
+  { "<",    BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_LEFT,  1, 0, 3 },
   //{ "B3",   BRL_CMD_CSRVIS,     1, 2, 2 },
-  { "DEL",  BRL_BLK_PASSKEY + BRL_KEY_DELETE,       1, 0, 4 },
-  { "INS",  BRL_BLK_PASSKEY + BRL_KEY_INSERT,       1, 2, 4 },
+  { "DEL",  BRL_BLK_CMD(PASSKEY) + BRL_KEY_DELETE,       1, 0, 4 },
+  { "INS",  BRL_BLK_CMD(PASSKEY) + BRL_KEY_INSERT,       1, 2, 4 },
   //{ "C5",   BRL_CMD_PASTE,      1, 5, 3 },
   //{ "D5",   EOF,                1, 5, 4 },
   //{ "B4",   EOF,                1, 3, 2 },
@@ -966,10 +966,10 @@ static int generateToplevel(void)
 #endif /* USE_XAW */
 #elif defined(USE_WINDOWS)
       display[y*cols+x] = CreateWindow(WC_BUTTON, " ", WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_PUSHLIKE, x*CHRX, y*CHRY, CHRX, CHRY, toplevel, NULL, NULL, NULL);
-      SetWindowLongPtr(display[y*cols+x], GWLP_USERDATA, (LONG_PTR) (BRL_BLK_ROUTE | ((y*cols+x)&BRL_MSK_ARG)));
+      SetWindowLongPtr(display[y*cols+x], GWLP_USERDATA, (LONG_PTR) (BRL_BLK_CMD(ROUTE) | ((y*cols+x)&BRL_MSK_ARG)));
       if (font) {
         displayb[y*cols+x] = CreateWindowW(WC_BUTTONW, WS_C(" "), WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_PUSHLIKE, x*CHRX, (lines+y)*CHRY, CHRX, CHRY, toplevel, NULL, NULL, NULL);
-        SetWindowLongPtr(displayb[y*cols+x], GWLP_USERDATA, (LONG_PTR) (BRL_BLK_ROUTE | ((y*cols+x)&BRL_MSK_ARG)));
+        SetWindowLongPtr(displayb[y*cols+x], GWLP_USERDATA, (LONG_PTR) (BRL_BLK_CMD(ROUTE) | ((y*cols+x)&BRL_MSK_ARG)));
 	SendMessage(displayb[y*cols+x], WM_SETFONT, (WPARAM) font, TRUE);
       }
 #else /* USE_ */

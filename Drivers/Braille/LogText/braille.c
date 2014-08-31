@@ -508,43 +508,43 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
    if (key != EOF) {
       switch (key) {
          case KEY_FUNCTION_ENTER:
-            return BRL_BLK_PASSKEY + BRL_KEY_ENTER;
+            return BRL_BLK_CMD(PASSKEY) + BRL_KEY_ENTER;
          case KEY_FUNCTION_TAB:
-            return BRL_BLK_PASSKEY + BRL_KEY_TAB;
+            return BRL_BLK_CMD(PASSKEY) + BRL_KEY_TAB;
          case KEY_FUNCTION_CURSOR_UP:
-            return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP;
+            return BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_UP;
          case KEY_FUNCTION_CURSOR_DOWN:
-            return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN;
+            return BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_DOWN;
          case KEY_FUNCTION_CURSOR_LEFT:
-            return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT;
+            return BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_LEFT;
          case KEY_FUNCTION_CURSOR_RIGHT:
-            return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT;
+            return BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_RIGHT;
          case KEY_FUNCTION_CURSOR_UP_JUMP:
-            return BRL_BLK_PASSKEY + BRL_KEY_HOME;
+            return BRL_BLK_CMD(PASSKEY) + BRL_KEY_HOME;
          case KEY_FUNCTION_CURSOR_DOWN_JUMP:
-            return BRL_BLK_PASSKEY + BRL_KEY_END;
+            return BRL_BLK_CMD(PASSKEY) + BRL_KEY_END;
          case KEY_FUNCTION_CURSOR_LEFT_JUMP:
-            return BRL_BLK_PASSKEY + BRL_KEY_PAGE_UP;
+            return BRL_BLK_CMD(PASSKEY) + BRL_KEY_PAGE_UP;
          case KEY_FUNCTION_CURSOR_RIGHT_JUMP:
-            return BRL_BLK_PASSKEY + BRL_KEY_PAGE_DOWN;
+            return BRL_BLK_CMD(PASSKEY) + BRL_KEY_PAGE_DOWN;
          case KEY_FUNCTION_F1:
-            return BRL_BLK_PASSKEY + BRL_KEY_FUNCTION + 0;
+            return BRL_BLK_CMD(PASSKEY) + BRL_KEY_FUNCTION + 0;
          case KEY_FUNCTION_F2:
-            return BRL_BLK_PASSKEY + BRL_KEY_FUNCTION + 1;
+            return BRL_BLK_CMD(PASSKEY) + BRL_KEY_FUNCTION + 1;
          case KEY_FUNCTION_F3:
-            return BRL_BLK_PASSKEY + BRL_KEY_FUNCTION + 2;
+            return BRL_BLK_CMD(PASSKEY) + BRL_KEY_FUNCTION + 2;
          case KEY_FUNCTION_F4:
-            return BRL_BLK_PASSKEY + BRL_KEY_FUNCTION + 3;
+            return BRL_BLK_CMD(PASSKEY) + BRL_KEY_FUNCTION + 3;
          case KEY_FUNCTION_F5:
-            return BRL_BLK_PASSKEY + BRL_KEY_FUNCTION + 4;
+            return BRL_BLK_CMD(PASSKEY) + BRL_KEY_FUNCTION + 4;
          case KEY_FUNCTION_F6:
-            return BRL_BLK_PASSKEY + BRL_KEY_FUNCTION + 5;
+            return BRL_BLK_CMD(PASSKEY) + BRL_KEY_FUNCTION + 5;
          case KEY_FUNCTION_F7:
-            return BRL_BLK_PASSKEY + BRL_KEY_FUNCTION + 6;
+            return BRL_BLK_CMD(PASSKEY) + BRL_KEY_FUNCTION + 6;
          case KEY_FUNCTION_F9:
-            return BRL_BLK_PASSKEY + BRL_KEY_FUNCTION + 8;
+            return BRL_BLK_CMD(PASSKEY) + BRL_KEY_FUNCTION + 8;
          case KEY_FUNCTION_F10:
-            return BRL_BLK_PASSKEY + BRL_KEY_FUNCTION + 9;
+            return BRL_BLK_CMD(PASSKEY) + BRL_KEY_FUNCTION + 9;
          case KEY_COMMAND: {
             int command;
             while ((command = readKey()) == EOF) asyncWait(1);
@@ -552,35 +552,35 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
             switch (command) {
                case KEY_COMMAND:
                   /* pressing the escape command twice will pass it through */
-                  return BRL_BLK_PASSDOTS + translateInputCell(KEY_COMMAND);
+                  return BRL_BLK_CMD(PASSDOTS) + translateInputCell(KEY_COMMAND);
                case KEY_COMMAND_SWITCHVT_PREV:
                   return BRL_CMD_SWITCHVT_PREV;
                case KEY_COMMAND_SWITCHVT_NEXT:
                   return BRL_CMD_SWITCHVT_NEXT;
                case KEY_COMMAND_SWITCHVT_1:
-                  return BRL_BLK_SWITCHVT + 0;
+                  return BRL_BLK_CMD(SWITCHVT) + 0;
                case KEY_COMMAND_SWITCHVT_2:
-                  return BRL_BLK_SWITCHVT + 1;
+                  return BRL_BLK_CMD(SWITCHVT) + 1;
                case KEY_COMMAND_SWITCHVT_3:
-                  return BRL_BLK_SWITCHVT + 2;
+                  return BRL_BLK_CMD(SWITCHVT) + 2;
                case KEY_COMMAND_SWITCHVT_4:
-                  return BRL_BLK_SWITCHVT + 3;
+                  return BRL_BLK_CMD(SWITCHVT) + 3;
                case KEY_COMMAND_SWITCHVT_5:
-                  return BRL_BLK_SWITCHVT + 4;
+                  return BRL_BLK_CMD(SWITCHVT) + 4;
                case KEY_COMMAND_SWITCHVT_6:
-                  return BRL_BLK_SWITCHVT + 5;
+                  return BRL_BLK_CMD(SWITCHVT) + 5;
                case KEY_COMMAND_SWITCHVT_7:
-                  return BRL_BLK_SWITCHVT + 6;
+                  return BRL_BLK_CMD(SWITCHVT) + 6;
                case KEY_COMMAND_SWITCHVT_8:
-                  return BRL_BLK_SWITCHVT + 7;
+                  return BRL_BLK_CMD(SWITCHVT) + 7;
                case KEY_COMMAND_SWITCHVT_9:
-                  return BRL_BLK_SWITCHVT + 8;
+                  return BRL_BLK_CMD(SWITCHVT) + 8;
                case KEY_COMMAND_SWITCHVT_10:
-                  return BRL_BLK_SWITCHVT + 9;
+                  return BRL_BLK_CMD(SWITCHVT) + 9;
                case KEY_COMMAND_PAGE_UP:
-                  return BRL_BLK_PASSKEY + BRL_KEY_PAGE_UP;
+                  return BRL_BLK_CMD(PASSKEY) + BRL_KEY_PAGE_UP;
                case KEY_COMMAND_PAGE_DOWN:
-                  return BRL_BLK_PASSKEY + BRL_KEY_PAGE_DOWN;
+                  return BRL_BLK_CMD(PASSKEY) + BRL_KEY_PAGE_DOWN;
                case KEY_COMMAND_PREFMENU:
                   currentLine = 0;
                   cursorRow = 0;
@@ -617,7 +617,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                default: {
                   unsigned char dots = translateInputCell(key);
                   logMessage(LOG_DEBUG, "Received character: 0X%2.2X dec=%d dots=%2.2X", key, key, dots);
-                  return BRL_BLK_PASSDOTS + dots;
+                  return BRL_BLK_CMD(PASSDOTS) + dots;
                }
             }
             break;

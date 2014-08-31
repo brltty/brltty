@@ -1541,7 +1541,7 @@ static const HidKeyEntry hidKeyTable[] = {
 
 static int
 enqueueXtCode (uint8_t code) {
-  return enqueueCommand(BRL_BLK_PASSXT | code);
+  return enqueueCommand(BRL_BLK_CMD(PASSXT) | code);
 }
 
 static int

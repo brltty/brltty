@@ -542,10 +542,10 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 	  /* I thought I was smart when I suggested to remove CMD_CUT_END.
 	     Well now there's this nasty exception: the command offset
 	     depends on the display size! */
-	  if(key.cmd == BRL_BLK_COPY_RECT || key.cmd == BRL_BLK_COPY_LINE)
+	  if(key.cmd == BRL_BLK_CMD(COPY_RECT) || key.cmd == BRL_BLK_CMD(COPY_LINE))
 	    key.cmd += blitesz-1;
 
-	  if(key.spcbar && (key.cmd &BRL_MSK_BLK) == BRL_BLK_PASSKEY) {
+	  if(key.spcbar && (key.cmd &BRL_MSK_BLK) == BRL_BLK_CMD(PASSKEY)) {
           /*
 	    if(!kbemu)
 	      return EOF;
@@ -617,7 +617,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 
       /* check for routing keys */
       if (key.routing)
-	return (BRL_BLK_ROUTE + key.routing - 1);
+	return (BRL_BLK_CMD(ROUTE) + key.routing - 1);
 
       if (!kbemu)
 	return BRL_CMD_NOOP;
@@ -679,16 +679,16 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 #ifndef USE_TEXTTRANS
       if (ctrl && key.asc >= 96)
 	/* old code was (key.asc & 0x1f) */
-	temp = BRL_BLK_PASSCHAR | key.asc | BRL_FLG_CHAR_CONTROL;
+	temp = BRL_BLK_CMD(PASSCHAR) | key.asc | BRL_FLG_CHAR_CONTROL;
       else if (meta && key.asc >= 96)
-	temp = BRL_BLK_PASSCHAR | key.asc | BRL_FLG_CHAR_META;
+	temp = BRL_BLK_CMD(PASSCHAR) | key.asc | BRL_FLG_CHAR_META;
       else if (shift && (key.asc & 0x40))
 	/* old code was (key.asc & 0xdf) */
-	temp = BRL_BLK_PASSCHAR | key.asc | BRL_FLG_CHAR_SHIFT;
+	temp = BRL_BLK_CMD(PASSCHAR) | key.asc | BRL_FLG_CHAR_SHIFT;
       else
-	temp = BRL_BLK_PASSCHAR | key.asc;
+	temp = BRL_BLK_CMD(PASSCHAR) | key.asc;
 #else /* USE_TEXTTRANS */
-      temp = BRL_BLK_PASSDOTS |
+      temp = BRL_BLK_CMD(PASSDOTS) |
 	(keys_to_dots[key.raw &0x3F]
 	 | ((meta) ? BRL_FLG_CHAR_META : 0)
 	 | ((ctrl) ? (BRL_DOT7 | BRL_DOT8) : 
@@ -730,16 +730,16 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 	  if (int_cursor < blitesz)
 	    int_cursor++;
 	  break;
-	case BRL_BLK_ROUTE:	/* route cursor */
+	case BRL_BLK_CMD(ROUTE):	/* route cursor */
 	  if (key.spcbar)
 	    {
-	      temp = BRL_BLK_ROUTE + int_cursor - 1;
+	      temp = BRL_BLK_CMD(ROUTE) + int_cursor - 1;
 	      int_cursor = 0;
 	      state = ST_NORMAL;
 	    }
 	  return temp;
-	case BRL_BLK_CLIP_NEW:	/* begin copy */
-	case BRL_BLK_CLIP_ADD:
+	case BRL_BLK_CMD(CLIP_NEW):	/* begin copy */
+	case BRL_BLK_CMD(CLIP_ADD):
 	  if (key.spcbar)
 	    {
 	      temp = key.cmd + int_cursor - 1;
@@ -747,8 +747,8 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 	      state = ST_NORMAL;
 	    }
 	  return temp;
-	case BRL_BLK_COPY_RECT:	/* end copy */
-	case BRL_BLK_COPY_LINE:
+	case BRL_BLK_CMD(COPY_RECT):	/* end copy */
+	case BRL_BLK_CMD(COPY_LINE):
 	  if (key.spcbar)
 	    {
 	      temp = key.cmd + int_cursor - 1;
@@ -757,7 +757,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 	    }
 	  return temp;
 	case BRL_CMD_DISPMD: /* attribute info */
-	  temp = BRL_BLK_DESCCHAR + int_cursor - 1;
+	  temp = BRL_BLK_CMD(DESCCHAR) + int_cursor - 1;
 	  int_cursor = 0;
 	  state = ST_NORMAL;
 	  return temp;
@@ -800,11 +800,11 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 	if (hold > 0) {
 	  if (key.asc == SWITCHVT_NEXT || key.asc == SWITCHVT_PREV)
 	    /* That's chorded or not... */
-	    return BRL_BLK_SWITCHVT + (hold-1);
+	    return BRL_BLK_CMD(SWITCHVT) + (hold-1);
 	  else if (key.asc == O_SETMARK)
-	    return BRL_BLK_SETMARK + (hold-1);
+	    return BRL_BLK_CMD(SETMARK) + (hold-1);
 	  else if (key.asc == O_GOTOMARK)
-	    return BRL_BLK_GOTOMARK + (hold-1);
+	    return BRL_BLK_CMD(GOTOMARK) + (hold-1);
 	  else if (key.spcbar)		/* chorded */
 	    switch (key.asc)
 	      {

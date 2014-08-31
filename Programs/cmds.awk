@@ -16,12 +16,12 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-function writeCommandEntry(name, symbol, help) {
+function writeCommandEntry(name, symbol, value, help) {
   if (help ~ /^deprecated /) return
 
-  print "{"
+  print "{ // " symbol
   print "  .name = \"" name "\","
-  print "  .code = " symbol ","
+  print "  .code = " value ","
 
   if (help ~ /^set .*\//) print "  .isToggle = 1,"
   if (help ~ /^go /) print "  .isMotion = 1,"
@@ -41,10 +41,6 @@ function writeCommandEntry(name, symbol, help) {
         print "  .isBraille = 1,"
       }
 
-      if (symbol ~ /PASSKEY.*KEY_FUNCTION/) {
-        print "  .isOffset = 1,"
-      }
-
       if (symbol ~ /PASS(XT|AT|PS2)/) {
         print "  .isKeyboard = 1,"
       }
@@ -57,23 +53,29 @@ function writeCommandEntry(name, symbol, help) {
     } else {
       print "  .isOffset = 1,"
     }
+  } else if (symbol ~ /^BRL_KEY_/) {
+    print "  .isInput = 1,"
+
+    if (symbol ~ /_FUNCTION/) {
+      print "  .isOffset = 1,"
+    }
   }
 
   print "  .description = strtext(\"" help "\")"
-  print "}"
-  print ","
+  print "},"
+  print ""
 }
 
 function brlCommand(name, symbol, value, help) {
-  writeCommandEntry(name, symbol, help)
+  writeCommandEntry(name, symbol, symbol, help)
 }
 
 function brlBlock(name, symbol, value, help) {
-  writeCommandEntry(name, symbol, help)
+  writeCommandEntry(name, symbol, "BRL_BLK_CMD(" name ")", help)
 }
 
 function brlKey(name, symbol, value, help) {
-  writeCommandEntry("KEY_" name, "BRL_BLK_PASSKEY+" symbol, help)
+  writeCommandEntry("KEY_" name, symbol, "BRL_BLK_CMD(PASSKEY)+" symbol, help)
 }
 
 function brlFlag(name, symbol, value, help) {

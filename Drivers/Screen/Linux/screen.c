@@ -1866,7 +1866,7 @@ handleCommand_LinuxScreen (int command) {
     default:
 #ifdef HAVE_LINUX_INPUT_H
       switch (blk) {
-        case BRL_BLK_PASSXT:
+        case BRL_BLK_CMD(PASSXT):
           {
             int handled = 0;
 
@@ -1895,7 +1895,7 @@ handleCommand_LinuxScreen (int command) {
 	  }
           break;
 
-	case BRL_BLK_PASSAT:
+	case BRL_BLK_CMD(PASSAT):
           {
             int handled = 0;
 
@@ -1932,7 +1932,7 @@ handleCommand_LinuxScreen (int command) {
           }
           break;
 
-	case BRL_BLK_PASSPS2:
+	case BRL_BLK_CMD(PASSPS2):
           {
             int handled = 0;
 

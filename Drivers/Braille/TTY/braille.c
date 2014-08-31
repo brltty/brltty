@@ -312,7 +312,7 @@ brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key) 
   switch (key) {
     KEY(EOF, EOF);
     default:
-      if (key <= 0XFF) return BRL_BLK_PASSCHAR|key;
+      if (key <= 0XFF) return BRL_BLK_CMD(PASSCHAR)|key;
       logMessage(LOG_WARNING, "Unknown key: %d", key);
       return BRL_CMD_NOOP;
 
@@ -354,7 +354,7 @@ brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key) 
     KEY(KEY_F(19), BRL_CMD_PRPGRPH);
     KEY(KEY_F(20), BRL_CMD_NXPGRPH);
 
-    KEY(KEY_BACKSPACE, BRL_BLK_PASSKEY|BRL_KEY_BACKSPACE);
+    KEY(KEY_BACKSPACE, BRL_BLK_CMD(PASSKEY)|BRL_KEY_BACKSPACE);
 #endif /* GOT_CURSES */
   }
 #undef KEY

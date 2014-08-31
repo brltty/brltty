@@ -196,11 +196,11 @@ handleCommand_PcBiosScreen (int command) {
   int press = 0;
 
   switch (blk) {
-    case BRL_BLK_PASSXT:
+    case BRL_BLK_CMD(PASSXT):
       press = !(arg & 0X80);
       arg &= 0X7F;
       /* fallthrough */
-    case BRL_BLK_PASSAT: {
+    case BRL_BLK_CMD(PASSAT): {
       press |= !(command & BRL_FLG_KBD_RELEASE);
 
       if (arg >= 0X80)
@@ -214,7 +214,7 @@ handleCommand_PcBiosScreen (int command) {
 	  return 0;
       }
 
-      if (blk == BRL_BLK_PASSAT)
+      if (blk == BRL_BLK_CMD(PASSAT))
 	arg = AT2XT[arg];
 
       if (!press)

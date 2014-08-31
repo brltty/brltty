@@ -405,7 +405,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
             break;
 
           case CE_PKT_RSP_KeyboardKey:
-            while (count--) enqueueCommand(BRL_BLK_PASSAT | BRL_ARG(*bytes++));
+            while (count--) enqueueCommand(BRL_BLK_CMD(PASSAT) | BRL_ARG(*bytes++));
             continue;
 
           default:

@@ -25,9 +25,7 @@ function brlBlock(name, symbol, value, help) {
   if (name == "PASSCHAR") return
   if (name == "PASSKEY") return
 
-  if (value ~ /^0[xX][0-9a-fA-F]+00$/) {
-    writeCommandDefinition(name, tolower(value) "00", help)
-  }
+  writeCommandDefinition(name, "(" value" << KEY_CMD_BLK_SHIFT)", help)
 }
 
 function brlKey(name, symbol, value, help) {

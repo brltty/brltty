@@ -39,9 +39,7 @@ function brlBlock(name, symbol, value, help) {
   if (name == "PASSCHAR") return
   if (name == "PASSKEY") return
 
-  if (value ~ /^0[xX][0-9a-fA-F]+00$/) {
-    writeMacroDefinition("BRLAPI_KEY_CMD_" name, "BRLAPI_KEY_CMD(" substr(value, 1, length(value)-2) ")", help)
-  }
+  writeMacroDefinition("BRLAPI_KEY_CMD_" name, "BRLAPI_KEY_CMD(" value ")", help)
 }
 
 function brlKey(name, symbol, value, help) {
