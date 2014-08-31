@@ -96,10 +96,10 @@ routeCursor_RealScreen (int column, int row, int screen) {
 
 static int
 highlightRegion_RealScreen (int left, int right, int top, int bottom) {
+#ifdef HAVE_LIBGPM
   FILE *console = getConsole();
 
   if (console) {
-#ifdef HAVE_LIBGPM
     if (gpmOpenConnection() && (gpm_fd >= 0)) {
       if (Gpm_DrawPointer(left, top, fileno(console)) != -1) return 1;
 
@@ -109,8 +109,8 @@ highlightRegion_RealScreen (int left, int right, int top, int bottom) {
         return 0;
       }
     }
-#endif /* HAVE_LIBGPM */
   }
+#endif /* HAVE_LIBGPM */
 
   return 0;
 }
