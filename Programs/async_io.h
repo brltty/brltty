@@ -27,6 +27,7 @@ extern "C" {
 
 typedef struct {
   void *data;
+  int error;
 } AsyncMonitorCallbackParameters;
 
 #define ASYNC_MONITOR_CALLBACK(name) int name (const AsyncMonitorCallbackParameters *parameters)

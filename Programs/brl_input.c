@@ -57,6 +57,16 @@ static
 GIO_INPUT_HANDLER(handleBrailleInput) {
   int processed = 0;
 
+  {
+    int error = parameters->error;
+
+    if (error) {
+      logActionError(error, "braille input monitor");
+      restartRequired = 1;
+      return 0;
+    }
+  }
+
   suspendCommandQueue();
 
   if (!isSuspended) {

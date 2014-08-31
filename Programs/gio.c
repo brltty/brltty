@@ -514,8 +514,9 @@ struct GioHandleInputObjectStruct {
 };
 
 static int
-handleInput (GioHandleInputObject *hio) {
+handleInput (GioHandleInputObject *hio, int error) {
   GioHandleInputParameters parameters = {
+    .error = error,
     .data = hio->data
   };
 
@@ -525,14 +526,14 @@ handleInput (GioHandleInputObject *hio) {
 ASYNC_MONITOR_CALLBACK(handleInputMonitor) {
   GioHandleInputObject *hio = parameters->data;
 
-  handleInput(hio);
+  handleInput(hio, parameters->error);
   return 1;
 }
 
 ASYNC_ALARM_CALLBACK(handleInputAlarm) {
   GioHandleInputObject *hio = parameters->data;
 
-  if (handleInput(hio)) asyncResetAlarmIn(hio->pollAlarm, 0);
+  if (handleInput(hio, 0)) asyncResetAlarmIn(hio->pollAlarm, 0);
 }
 
 GioHandleInputObject *
@@ -553,7 +554,7 @@ gioNewHandleInputObject (
 
     if (endpoint) {
       if (gioMonitorInput(endpoint, handleInputMonitor, hio)) {
-        handleInput(hio);
+        handleInput(hio, 0);
         return hio;
       }
     }

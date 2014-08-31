@@ -103,6 +103,7 @@ extern int gioMonitorInput (GioEndpoint *endpoint, AsyncMonitorCallback *callbac
 
 typedef struct {
   void *const data;
+  int error;
 } GioHandleInputParameters;
 
 #define GIO_INPUT_HANDLER(name) int name (GioHandleInputParameters *parameters)

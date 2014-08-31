@@ -220,7 +220,7 @@ initializeMonitor (MonitorEntry *monitor, const FunctionEntry *function, const O
 }
 
 static int
-testMonitor (const MonitorEntry *monitor, const FunctionEntry *function) {
+testMonitor (const MonitorEntry *monitor, OperationEntry *operation) {
   DWORD result = WaitForSingleObject(*monitor, 0);
   if (result == WAIT_OBJECT_0) return 1;
 
@@ -375,7 +375,13 @@ initializeMonitor (MonitorEntry *monitor, const FunctionEntry *function, const O
 }
 
 static int
-testMonitor (const MonitorEntry *monitor, const FunctionEntry *function) {
+testMonitor (const MonitorEntry *monitor, OperationEntry *operation) {
+  if (monitor->revents & POLLERR) {
+    operation->error = EIO;
+  } else if (monitor->revents & POLLHUP) {
+    operation->error = ENODEV;
+  }
+
   return monitor->revents != 0;
 }
 
@@ -483,7 +489,7 @@ initializeMonitor (MonitorEntry *monitor, const FunctionEntry *function, const O
 }
 
 static int
-testMonitor (const MonitorEntry *monitor, const FunctionEntry *function) {
+testMonitor (const MonitorEntry *monitor, OperationEntry *operation) {
   return FD_ISSET(monitor->fileDescriptor, monitor->selectSet);
 }
 
@@ -506,15 +512,15 @@ beginUnixAlertFunction (FunctionEntry *function) {
 
 #ifdef ASYNC_CAN_MONITOR_IO
 static void
-setUnixTransferResult (OperationEntry *operation, ssize_t count) {
+setUnixTransferResult (OperationEntry *operation, ssize_t result) {
   TransferExtension *extension = operation->extension;
 
-  if (count == -1) {
+  if (result == -1) {
     operation->error = errno;
-  } else if (count == 0) {
+  } else if (result == 0) {
     extension->direction.input.end = 1;
   } else {
-    extension->length += count;
+    extension->length += result;
   }
 
   operation->finished = 1;
@@ -524,9 +530,9 @@ static void
 finishUnixRead (OperationEntry *operation) {
   FunctionEntry *function = operation->function;
   TransferExtension *extension = operation->extension;
-  int result = read(function->fileDescriptor,
-                    &extension->buffer[extension->length],
-                    extension->size - extension->length);
+  ssize_t result = read(function->fileDescriptor,
+                        &extension->buffer[extension->length],
+                        extension->size - extension->length);
 
   setUnixTransferResult(operation, result);
 }
@@ -535,9 +541,9 @@ static void
 finishUnixWrite (OperationEntry *operation) {
   FunctionEntry *function = operation->function;
   TransferExtension *extension = operation->extension;
-  int result = write(function->fileDescriptor,
-                     &extension->buffer[extension->length],
-                     extension->size - extension->length);
+  ssize_t result = write(function->fileDescriptor,
+                         &extension->buffer[extension->length],
+                         extension->size - extension->length);
 
   setUnixTransferResult(operation, result);
 }
@@ -575,6 +581,7 @@ invokeMonitorCallback (OperationEntry *operation) {
 
   if (callback) {
     const AsyncMonitorCallbackParameters parameters = {
+      .error = operation->error,
       .data = operation->data
     };
 
@@ -702,7 +709,8 @@ testFunctionMonitor (void *item, void *data) {
   OperationEntry *operation = getActiveOperation(function);
 
   if (operation && operation->monitor) {
-    if (testMonitor(operation->monitor, function)) return 1;
+    operation->error = 0;
+    if (testMonitor(operation->monitor, operation)) return 1;
   }
 
   return 0;
