@@ -29,7 +29,7 @@
 #include "prologue.h"
 
 #include "log.h"
-#include "timing.h"
+#include "async_wait.h"
 #include "ports.h"
 #include "fm.h"
 #include "fm_adlib.h"
@@ -179,6 +179,6 @@ fmPlayTone (int channel, unsigned int pitch, unsigned long int duration, unsigne
                     (AL_RELEASE_FAST << AL_RELEASE_SHIFT)));
       
   fmStartTone(channel, pitch);
-  accurateDelay(duration);
+  asyncWait(duration);
   fmStopTone(channel);
 }

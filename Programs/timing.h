@@ -86,7 +86,6 @@ extern void restartTimePeriod (TimePeriod *period);
 extern int afterTimePeriod (const TimePeriod *period, long int *elapsed);
 
 extern void approximateDelay (int milliseconds);		/* sleep for `msec' milliseconds */
-extern void accurateDelay (int milliseconds);
 
 #ifdef __cplusplus
 }

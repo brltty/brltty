@@ -26,7 +26,6 @@
 #include <string.h>
 
 #include "log.h"
-#include "timing.h"
 #include "ports.h"
 
 #include "brl_driver.h"
@@ -139,7 +138,7 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text) {
     translateOutputCells(outbuff, brl->buffer, cells);
     vbdisplay(outbuff);
     vbdisplay(outbuff);
-    accurateDelay(VBREFRESHDELAY);
+    brl->writeDelay += VBREFRESHDELAY;
   }
   return 1;
 }

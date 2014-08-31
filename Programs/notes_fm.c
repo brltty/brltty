@@ -20,7 +20,7 @@
 
 #include "prefs.h"
 #include "log.h"
-#include "timing.h"
+#include "async_wait.h"
 #include "notes.h"
 #include "fm.h"
 
@@ -68,7 +68,7 @@ fmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
   if (note) {
     fmPlayTone(device->channelNumber, getIntegerNoteFrequency(note), duration, prefs.fmVolume);
   } else {
-    accurateDelay(duration);
+    asyncWait(duration);
   }
 
   return 1;
