@@ -258,11 +258,24 @@ typedef enum {
   BRL_BLK_1C /* (reserved) */,
   BRL_BLK_1D /* (reserved) */,
   BRL_BLK_1E /* (reserved) */,
-  BRL_BLK_1F /* (reserved) */,
-
+  BRL_BLK_ALERT /* (raise an alert) */,
   BRL_BLK_PASSKEY /* (emulate special key) */,
   BRL_BLK_PASSCHAR /* type unicode character */,
   BRL_BLK_PASSDOTS /* type braille character */,
+  BRL_BLK_PASSAT /* AT (set 2) keyboard scan code */,
+  BRL_BLK_PASSXT /* XT (set 1) keyboard scan code */,
+  BRL_BLK_PASSPS2 /* PS/2 (set 3) keyboard scan code */,
+  BRL_BLK_CONTEXT /* switch to command context */,
+  BRL_BLK_TOUCH /* current reading location */,
+
+  BRL_blockCommandCount /* must be last */
+} BRL_BlockCommand;
+
+#define BRL_BLK_CMD(cmd) (BRL_BLK_##cmd << BRL_SHIFT_BLK)
+
+#define BRL_FLG_LINE_SCALED 0X010000 /* scale arg=0X00-0XFF to screen height */
+#define BRL_FLG_LINE_TOLEFT 0X020000 /* go to beginning of line */
+
 #define BRL_FLG_CHAR_SHIFT   0X010000 /* shift key pressed */
 #define BRL_FLG_CHAR_UPPER   0X020000 /* convert to uppercase */
 #define BRL_FLG_CHAR_CONTROL 0X040000 /* control key pressed */
@@ -298,23 +311,9 @@ typedef enum {
 #define BRL_DOT8 BRL_ARG_SET(BRL_DOT(8)) /* lower-right dot of computer braille cell */
 #define BRL_DOTC BRL_ARG_SET(BRL_DOT(9)) /* space key pressed */
 
-  BRL_BLK_PASSAT /* AT (set 2) keyboard scan code */,
-  BRL_BLK_PASSXT /* XT (set 1) keyboard scan code */,
-  BRL_BLK_PASSPS2 /* PS/2 (set 3) keyboard scan code */,
 #define BRL_FLG_KBD_RELEASE 0X010000 /* it is a release scan code */
 #define BRL_FLG_KBD_EMUL0 0X020000 /* it is an emulation 0 scan code */
 #define BRL_FLG_KBD_EMUL1 0X040000 /* it is an emulation 1 scan code */
-
-  BRL_BLK_CONTEXT /* switch to command context */,
-  BRL_BLK_TOUCH /* current reading location */,
-
-  BRL_blockCommandCount /* must be last */
-} BRL_BlockCommand;
-
-#define BRL_BLK_CMD(cmd) (BRL_BLK_##cmd << BRL_SHIFT_BLK)
-
-#define BRL_FLG_LINE_SCALED 0X010000 /* scale arg=0X00-0XFF to screen height */
-#define BRL_FLG_LINE_TOLEFT 0X020000 /* go to beginning of line */
 
 typedef enum {
   BRL_KEY_ENTER,

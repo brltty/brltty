@@ -22,12 +22,13 @@
 #include <string.h>
 
 #include "log.h"
+#include "alert.h"
 #include "prefs.h"
 #include "ktb.h"
 #include "ktb_internal.h"
 #include "ktb_inspect.h"
-#include "cmd.h"
 #include "brl_cmds.h"
+#include "cmd.h"
 #include "cmd_enqueue.h"
 #include "async_alarm.h"
 
@@ -256,12 +257,13 @@ processCommand (KeyTable *table, int command) {
         table->context.next = context;
 
         if (isTemporaryKeyContext(table, ctx)) {
-          command |= BRL_FLG_TOGGLE_ON;
+          if (!enqueueCommand(BRL_BLK_CMD(ALERT) + ALERT_TOGGLE_ON)) return 0;
         } else {
           table->context.persistent = context;
-          command |= BRL_FLG_TOGGLE_OFF;
+          if (!enqueueCommand(BRL_BLK_CMD(ALERT) + ALERT_TOGGLE_OFF)) return 0;
         }
       }
+
       break;
     }
 

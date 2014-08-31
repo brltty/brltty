@@ -316,6 +316,10 @@ handleMiscellaneousCommands (int command, void *data) {
           break;
         }
 
+        case BRL_BLK_CMD(ALERT):
+          alert(arg);
+          break;
+
         default:
           return 0;
       }
