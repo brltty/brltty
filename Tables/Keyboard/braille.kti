@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-context \{brailleContext} Braille Input Mode
+context braille Braille Input Mode
 
 hotkey Grave NOOP NOOP
 hotkey Minus NOOP NOOP
@@ -67,5 +67,5 @@ map ControlRight CONTROL
 map AltLeft META
 
 context default
-bind \{brailleOn} CONTEXT+\{brailleContext}
+bind \{brailleOn} CONTEXT+braille
 bind \{brailleOff} CONTEXT+default

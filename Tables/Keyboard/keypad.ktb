@@ -127,7 +127,6 @@ bind KP0+!KPMinus PREFLOAD
 # Braille Input #
 #################
 
-assign brailleContext 1
 assign brailleOff KPEnter+!KPMinus
 assign brailleOn KPEnter+!KPPlus
 include braille.kti
