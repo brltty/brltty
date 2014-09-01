@@ -85,6 +85,7 @@ typedef struct {
   wchar_t *name;
   wchar_t *title;
 
+  unsigned isSpecial:1;
   unsigned isDefined:1;
   unsigned isReferenced:1;
 

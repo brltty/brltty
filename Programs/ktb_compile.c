@@ -48,6 +48,7 @@ const KeyboardFunction keyboardFunctionTable[] = {
 unsigned char keyboardFunctionCount = ARRAY_COUNT(keyboardFunctionTable);
 
 typedef struct {
+  const char *file;
   KeyTable *table;
 
   const CommandEntry **commandTable;
@@ -58,7 +59,7 @@ typedef struct {
   unsigned char context;
 
   unsigned hideRequested:1;
-  unsigned hideImposed:1;
+  unsigned hideInherited:1;
 } KeyTableData;
 
 void
@@ -157,7 +158,7 @@ deleteKeyValue (KeyValue *values, unsigned int *count, const KeyValue *value) {
 
 static inline int
 hideBindings (const KeyTableData *ktd) {
-  return ktd->hideRequested || ktd->hideImposed;
+  return ktd->hideRequested || ktd->hideInherited;
 }
 
 static KeyContext *
@@ -179,6 +180,7 @@ getKeyContext (KeyTableData *ktd, unsigned char context) {
       ctx->name = NULL;
       ctx->title = NULL;
 
+      ctx->isSpecial = 0;
       ctx->isDefined = 0;
       ctx->isReferenced = 0;
 
@@ -385,7 +387,7 @@ parseKeyName (DataFile *file, KeyValue *value, const wchar_t *characters, int le
 
   if (suffix) {
     if (!(prefixLength = suffix - characters)) {
-      reportDataError(file, "missing key set name: %.*" PRIws, length, characters);
+      reportDataError(file, "missing key group name: %.*" PRIws, length, characters);
       return 0;
     }
 
@@ -424,7 +426,7 @@ parseKeyName (DataFile *file, KeyValue *value, const wchar_t *characters, int le
     }
 
     if (value->number != KTB_KEY_ANY) {
-      reportDataError(file, "not a key set: %.*" PRIws, prefixLength, characters);
+      reportDataError(file, "not a key group: %.*" PRIws, prefixLength, characters);
       return 0;
     }
 
@@ -772,11 +774,11 @@ parseCommandOperand (DataFile *file, BoundCommand *cmd, const wchar_t *character
         if (findKeyContext(&context, modifier.characters, modifier.length, ktd)) {
           KeyContext *ctx = getKeyContext(ktd, context);
 
-          if (context >= KTB_CTX_DEFAULT) {
+          if (ctx->isSpecial) {
+            reportDataError(file, "invalid target context: %"PRIws, ctx->name);
+          } else {
             ctx->isReferenced = 1;
             cmd->value += context - KTB_CTX_DEFAULT;
-          } else {
-            reportDataError(file, "invalid target context: %"PRIws, ctx->name);
           }
 
           offsetDone = 1;
@@ -1007,41 +1009,45 @@ static DATA_OPERANDS_PROCESSOR(processIncludeWrapper) {
   int result;
 
   unsigned int hideRequested = ktd->hideRequested;
-  unsigned int hideImposed = ktd->hideImposed;
+  unsigned int hideInherited = ktd->hideInherited;
 
-  if (ktd->hideRequested) ktd->hideImposed = 1;
+  if (ktd->hideRequested) ktd->hideInherited = 1;
   result = processIncludeOperands(file, data);
 
   ktd->hideRequested = hideRequested;
-  ktd->hideImposed = hideImposed;
+  ktd->hideInherited = hideInherited;
   return result;
 }
 
 static DATA_OPERANDS_PROCESSOR(processMapOperands) {
   KeyTableData *ktd = data;
-  KeyContext *ctx = getCurrentKeyContext(ktd);
   MappedKeyEntry map;
 
-  if (!ctx) return 0;
   memset(&map, 0, sizeof(map));
 
   if (getKeyOperand(file, &map.keyValue, ktd)) {
     if (map.keyValue.number != KTB_KEY_ANY) {
       if (getKeyboardFunctionOperand(file, &map.keyboardFunction, ktd)) {
-        unsigned int newCount = ctx->mappedKeys.count + 1;
-        MappedKeyEntry *newTable = realloc(ctx->mappedKeys.table, ARRAY_SIZE(newTable, newCount));
+        KeyContext *ctx = getCurrentKeyContext(ktd);
 
-        if (!newTable) {
-          logMallocError();
-          return 0;
+        if (ctx) {
+          unsigned int newCount = ctx->mappedKeys.count + 1;
+          MappedKeyEntry *newTable = realloc(ctx->mappedKeys.table, ARRAY_SIZE(newTable, newCount));
+
+          if (!newTable) {
+            logMallocError();
+            return 0;
+          }
+
+          ctx->mappedKeys.table = newTable;
+          ctx->mappedKeys.table[ctx->mappedKeys.count++] = map;
+          return 1;
         }
 
-        ctx->mappedKeys.table = newTable;
-        ctx->mappedKeys.table[ctx->mappedKeys.count++] = map;
-        return 1;
+        return 0;
       }
     } else {
-      reportDataError(file, "cannot map key set");
+      reportDataError(file, "cannot map a key group");
     }
   }
 
@@ -1089,15 +1095,19 @@ static DATA_OPERANDS_PROCESSOR(processNoteOperands) {
 
 static DATA_OPERANDS_PROCESSOR(processSuperimposeOperands) {
   KeyTableData *ktd = data;
-  KeyContext *ctx = getCurrentKeyContext(ktd);
-  if (!ctx) return 0;
 
   {
     const KeyboardFunction *kbf;
 
     if (getKeyboardFunctionOperand(file, &kbf, ktd)) {
-      ctx->mappedKeys.superimpose |= kbf->bit;
-      return 1;
+      KeyContext *ctx = getCurrentKeyContext(ktd);
+
+      if (ctx) {
+        ctx->mappedKeys.superimpose |= kbf->bit;
+        return 1;
+      }
+
+      return 0;
     }
   }
 
@@ -1467,13 +1477,22 @@ finishKeyTable (KeyTableData *ktd) {
     for (context=0; context<ktd->table->keyContexts.count; context+=1) {
       KeyContext *ctx = &ktd->table->keyContexts.table[context];
 
-      if (ctx->name) {
+      if (ctx->name && !ctx->isSpecial) {
+        const char *problem = NULL;
+
         if (!ctx->isDefined) {
-          reportDataError(NULL, "context not defined: %"PRIws, ctx->name);
+          problem = "undefined context";
+        } else if (!ctx->isReferenced) {
+          problem = "unreferenced context";
+        } else if (!(ctx->keyBindings.count ||
+                     ctx->mappedKeys.count ||
+                     ctx->mappedKeys.superimpose ||
+                     ctx->hotkeys.count)) {
+          problem = "empty context";
         }
 
-        if (!ctx->isReferenced) {
-          reportDataError(NULL, "context not referenced: %"PRIws, ctx->name);
+        if (problem) {
+          reportDataError(NULL, "%s: %s: %"PRIws, ktd->file, problem, ctx->name);
         }
       }
 
@@ -1515,6 +1534,8 @@ defineInitialKeyContexts (KeyTableData *ktd) {
     KeyContext *ctx = getKeyContext(ktd, properties->context);
 
     if (!ctx) return 0;
+    if (properties->context != KTB_CTX_DEFAULT) ctx->isSpecial = 1;
+
     ctx->isDefined = 1;
     ctx->isReferenced = 1;
 
@@ -1544,6 +1565,7 @@ compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
     KeyTableData ktd;
 
     memset(&ktd, 0, sizeof(ktd));
+    ktd.file = name;
     ktd.context = KTB_CTX_DEFAULT;
 
     {
