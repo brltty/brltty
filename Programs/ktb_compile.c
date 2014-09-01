@@ -178,7 +178,9 @@ getKeyContext (KeyTableData *ktd, unsigned char context) {
 
       ctx->name = NULL;
       ctx->title = NULL;
+
       ctx->isDefined = 0;
+      ctx->isReferenced = 0;
 
       ctx->keyBindings.table = NULL;
       ctx->keyBindings.size = 0;
@@ -768,11 +770,12 @@ parseCommandOperand (DataFile *file, BoundCommand *cmd, const wchar_t *character
         unsigned char context;
 
         if (findKeyContext(&context, modifier.characters, modifier.length, ktd)) {
+          KeyContext *ctx = getKeyContext(ktd, context);
+
           if (context >= KTB_CTX_DEFAULT) {
+            ctx->isReferenced = 1;
             cmd->value += context - KTB_CTX_DEFAULT;
           } else {
-            KeyContext *ctx = getKeyContext(ktd, context);
-
             reportDataError(file, "invalid target context: %"PRIws, ctx->name);
           }
 
@@ -1464,9 +1467,13 @@ finishKeyTable (KeyTableData *ktd) {
     for (context=0; context<ktd->table->keyContexts.count; context+=1) {
       KeyContext *ctx = &ktd->table->keyContexts.table[context];
 
-      if (!ctx->isDefined) {
-        if (ctx->name) {
+      if (ctx->name) {
+        if (!ctx->isDefined) {
           reportDataError(NULL, "context not defined: %"PRIws, ctx->name);
+        }
+
+        if (!ctx->isReferenced) {
+          reportDataError(NULL, "context not referenced: %"PRIws, ctx->name);
         }
       }
 
@@ -1509,6 +1516,7 @@ defineInitialKeyContexts (KeyTableData *ktd) {
 
     if (!ctx) return 0;
     ctx->isDefined = 1;
+    ctx->isReferenced = 1;
 
     if (properties->name) {
       if (!setKeyContextName(ctx, properties->name, wcslen(properties->name))) {

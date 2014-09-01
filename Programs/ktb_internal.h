@@ -84,7 +84,9 @@ typedef struct {
 typedef struct {
   wchar_t *name;
   wchar_t *title;
+
   unsigned isDefined:1;
+  unsigned isReferenced:1;
 
   struct {
     KeyBinding *table;
