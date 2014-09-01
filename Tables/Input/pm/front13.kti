@@ -106,18 +106,16 @@ assign toggleOn Dot8
 include status\{statusKeys}.kti
 
 
-assign chordContext 1
-assign brailleContext 2
 bind Dot2+Dot3+!Shift CONTEXT+default
-bind Dot2+Dot3+!Home context+\{chordContext}
-bind Dot2+Dot3+!End context+\{brailleContext}
+bind Dot2+Dot3+!Home CONTEXT+chords
+bind Dot2+Dot3+!End CONTEXT+braille
 
 
 ####################
 # Chord Input Mode #
 ####################
 
-context \{chordContext} Chorded Commands Mode
+context chords Chorded Commands Mode
 
 assign chord
 include ../chords.kti
@@ -127,7 +125,7 @@ include ../chords.kti
 # Braille Input Mode #
 ######################
 
-context \{brailleContext} Braille Input Mode
+context braille Braille Input Mode
 
 map Dot1 DOT1
 map Dot2 DOT2

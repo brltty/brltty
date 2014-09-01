@@ -19,19 +19,19 @@
 # This key subtable is for Papenmeier displays which have switches.
 
 hide on
-hotkey LeftSwitchRear CONTEXT+1 NOOP
-hotkey LeftSwitchFront CONTEXT+2 NOOP
-hotkey RightSwitchRear CONTEXT+3 NOOP
-hotkey RightSwitchFront CONTEXT+4 NOOP
+hotkey LeftSwitchRear CONTEXT+switchesRearCenter NOOP
+hotkey LeftSwitchFront CONTEXT+switchesFrontCenter NOOP
+hotkey RightSwitchRear CONTEXT+switchesCenterRear NOOP
+hotkey RightSwitchFront CONTEXT+switchesCenterFront NOOP
 hide off
 
 
-context 1 LeftSwitchRear - Advanced Vertical Navigation
+context switchesRearCenter LeftSwitchRear - Advanced Vertical Navigation
 
 hide on
 hotkey LeftSwitchRear NOOP CONTEXT+default
-hotkey RightSwitchRear CONTEXT+5 NOOP
-hotkey RightSwitchFront CONTEXT+6 NOOP
+hotkey RightSwitchRear CONTEXT+switchesRearRear NOOP
+hotkey RightSwitchFront CONTEXT+switchesRearFront NOOP
 hide off
 
 bind BarUp1 PRDIFLN
@@ -51,12 +51,12 @@ bind BarRight1+BarRight2 NXPGRPH
 hide off
 
 
-context 2 LeftSwitchFront - Specialized Navigation
+context switchesFrontCenter LeftSwitchFront - Specialized Navigation
 
 hide on
 hotkey LeftSwitchFront NOOP CONTEXT+default
-hotkey RightSwitchRear CONTEXT+7 NOOP
-hotkey RightSwitchFront CONTEXT+8 NOOP
+hotkey RightSwitchRear CONTEXT+switchesFrontRear NOOP
+hotkey RightSwitchFront CONTEXT+switchesFrontFront NOOP
 hide off
 
 bind BarUp1 PRSEARCH
@@ -76,12 +76,12 @@ bind BarRight1+BarRight2 HWINRT
 hide off
 
 
-context 3 RightSwitchRear - Content-based Navigation
+context switchesCenterRear RightSwitchRear - Content-based Navigation
 
 hide on
 hotkey RightSwitchRear NOOP CONTEXT+default
-hotkey LeftSwitchRear CONTEXT+5 NOOP
-hotkey LeftSwitchFront CONTEXT+7 NOOP
+hotkey LeftSwitchRear CONTEXT+switchesRearRear NOOP
+hotkey LeftSwitchFront CONTEXT+switchesFrontRear NOOP
 hide off
 
 bind BarUp1 KEY_CURSOR_UP
@@ -101,12 +101,12 @@ bind BarRight1+BarRight2 LNEND+route
 hide off
 
 
-context 4 RightSwitchFront - Function Key Emulation
+context switchesCenterFront RightSwitchFront - Function Key Emulation
 
 hide on
 hotkey RightSwitchFront NOOP CONTEXT+default
-hotkey LeftSwitchRear CONTEXT+6 NOOP
-hotkey LeftSwitchFront CONTEXT+8 NOOP
+hotkey LeftSwitchRear CONTEXT+switchesRearFront NOOP
+hotkey LeftSwitchFront CONTEXT+switchesFrontFront NOOP
 hide off
 
 bind BarUp1 KEY_CURSOR_UP
@@ -126,35 +126,35 @@ bind BarRight1+BarRight2 KEY_END
 hide off
 
 
-context 5 LeftSwitchRear+RightSwitchRear - Unused
+context switchesRearRear LeftSwitchRear+RightSwitchRear - Unused
 
 hide on
-hotkey LeftSwitchRear NOOP CONTEXT+3
-hotkey RightSwitchRear NOOP CONTEXT+1
+hotkey LeftSwitchRear NOOP CONTEXT+switchesCenterRear
+hotkey RightSwitchRear NOOP CONTEXT+switchesRearCenter
 hide off
 
 
-context 6 LeftSwitchRear+RightSwitchFront - Unused
+context switchesRearFront LeftSwitchRear+RightSwitchFront - Unused
 
 hide on
-hotkey LeftSwitchRear NOOP CONTEXT+4
-hotkey RightSwitchFront NOOP CONTEXT+1
+hotkey LeftSwitchRear NOOP CONTEXT+switchesCenterFront
+hotkey RightSwitchFront NOOP CONTEXT+switchesRearCenter
 hide off
 
 
-context 7 LeftSwitchFront+RightSwitchRear - Unused
+context switchesFrontRear LeftSwitchFront+RightSwitchRear - Unused
 
 hide on
-hotkey LeftSwitchFront NOOP CONTEXT+3
-hotkey RightSwitchRear NOOP CONTEXT+2
+hotkey LeftSwitchFront NOOP CONTEXT+switchesCenterRear
+hotkey RightSwitchRear NOOP CONTEXT+switchesFrontCenter
 hide off
 
 
-context 8 LeftSwitchFront+RightSwitchFront - Unused
+context switchesFrontFront LeftSwitchFront+RightSwitchFront - Unused
 
 hide on
-hotkey LeftSwitchFront NOOP CONTEXT+4
-hotkey RightSwitchRear NOOP CONTEXT+2
+hotkey LeftSwitchFront NOOP CONTEXT+switchesCenterFront
+hotkey RightSwitchFront NOOP CONTEXT+switchesFrontCenter
 hide off
 
 
