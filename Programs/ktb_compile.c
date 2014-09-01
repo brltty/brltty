@@ -768,7 +768,14 @@ parseCommandOperand (DataFile *file, BoundCommand *cmd, const wchar_t *character
         unsigned char context;
 
         if (findKeyContext(&context, modifier.characters, modifier.length, ktd)) {
-          cmd->value += context;
+          if (context >= KTB_CTX_DEFAULT) {
+            cmd->value += context - KTB_CTX_DEFAULT;
+          } else {
+            KeyContext *ctx = getKeyContext(ktd, context);
+
+            reportDataError(file, "invalid target context: %"PRIws, ctx->name);
+          }
+
           offsetDone = 1;
           continue;
         }
