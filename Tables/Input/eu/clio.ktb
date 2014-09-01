@@ -20,8 +20,8 @@ title EuroBraille AzerBraille, Clio, NoteBraille, PupiBraille, Scriba
 
 include braille.kti
 
-bind !Star CONTEXT+1
-bind !Sharp CONTEXT+2
+bind !Star CONTEXT+alt1
+bind !Sharp CONTEXT+alt2
 bind !RoutingKey ROUTE
 
 bind !Up KEY_CURSOR_UP
@@ -48,21 +48,21 @@ bind !L LNDN
 bind !M FWINRT
 
 
-context 1
+context alt1
 bind !Star CONTEXT+default
 
 bind !Down CSRTRK
 bind !Right TUNES
 
-bind !E CONTEXT+3
-bind !F CONTEXT+4
+bind !E CONTEXT+CLIP_NEW
+bind !F CONTEXT+CLIP_ADD
 bind !G CSRVIS
-bind !K CONTEXT+5
+bind !K CONTEXT+COPY_RECT
 bind !L PASTE
-bind !M CONTEXT+6
+bind !M CONTEXT+COPY_LINE
 
 
-context 2
+context alt2
 bind !Sharp CONTEXT+default
 
 bind !Left LNBEG
@@ -84,19 +84,19 @@ bind !L LEARN
 bind !M BOT_LEFT
 
 
-context 3
+context CLIP_NEW
 bind !RoutingKey CLIP_NEW
 
 
-context 4
+context CLIP_ADD
 bind !RoutingKey CLIP_ADD
 
 
-context 5
+context COPY_RECT
 bind !RoutingKey COPY_RECT
 
 
-context 6
+context COPY_LINE
 bind !RoutingKey COPY_LINE
 
 

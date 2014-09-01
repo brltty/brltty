@@ -29,10 +29,10 @@ bind LeftJoystickRight NXPROMPT
 bind LeftJoystickUp TOP_LEFT
 bind LeftJoystickDown BOT_LEFT
 
-bind LeftJoystickDown+RightJoystickLeft CONTEXT+1
-bind LeftJoystickDown+RightJoystickUp CONTEXT+2
-bind LeftJoystickDown+RightJoystickDown CONTEXT+3
-bind LeftJoystickDown+RightJoystickRight CONTEXT+4
+bind LeftJoystickDown+RightJoystickLeft CONTEXT+CLIP_NEW
+bind LeftJoystickDown+RightJoystickUp CONTEXT+CLIP_ADD
+bind LeftJoystickDown+RightJoystickDown CONTEXT+COPY_RECT
+bind LeftJoystickDown+RightJoystickRight CONTEXT+COPY_LINE
 bind LeftJoystickDown+RightJoystickPress PASTE
 
 bind LeftJoystickLeft+RightJoystickPress SAY_LINE
@@ -45,19 +45,19 @@ bind LeftJoystickRight+RightJoystickUp LEARN
 bind LeftJoystickRight+RightJoystickDown HELP
 
 
-context 1
+context CLIP_NEW
 bind RoutingKey1 CLIP_NEW
 
 
-context 2
+context CLIP_ADD
 bind RoutingKey1 CLIP_ADD
 
 
-context 3
+context COPY_RECT
 bind RoutingKey1 COPY_RECT
 
 
-context 4
+context COPY_LINE
 bind RoutingKey1 COPY_LINE
 
 

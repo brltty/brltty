@@ -56,14 +56,14 @@ bind LeftShift+!Enter NXPROMPT
 bind LeftShift+!End PRPGRPH
 bind LeftShift+!Escape NXPGRPH
 
-bind RightShift+!Left CONTEXT+5 # RoutingKey -> SETLEFT
+bind RightShift+!Left CONTEXT+SETLEFT
 bind RightShift+!Right PASTE
-bind RightShift+!Down CONTEXT+6 # RoutingKey -> DESCCHAR
+bind RightShift+!Down CONTEXT+DESCCHAR
 
-bind RightShift+!Home CONTEXT+1 # RoutingKey -> CLIP_NEW
-bind RightShift+!Enter CONTEXT+2 # RoutingKey -> CLIP_ADD
-bind RightShift+!End CONTEXT+3 # RoutingKey -> COPY_LINE
-bind RightShift+!Escape CONTEXT+4 # RoutingKey -> COPY_RECT
+bind RightShift+!Home CONTEXT+CLIP_NEW
+bind RightShift+!Enter CONTEXT+CLIP_ADD
+bind RightShift+!End CONTEXT+COPY_LINE
+bind RightShift+!Escape CONTEXT+COPY_RECT
 
 
 #################
@@ -87,21 +87,21 @@ bind Escape MENU_NEXT_SETTING
 # Routing Key Alternatives #
 ############################
 
-context 1
+context CLIP_NEW
 bind !RoutingKey CLIP_NEW
 
-context 2
+context CLIP_ADD
 bind !RoutingKey CLIP_ADD
 
-context 3
+context COPY_LINE
 bind !RoutingKey COPY_LINE
 
-context 4
+context COPY_RECT
 bind !RoutingKey COPY_RECT
 
-context 5
+context SETLEFT
 bind !RoutingKey SETLEFT
 
-context 6
+context DESCCHAR
 bind !RoutingKey DESCCHAR
 

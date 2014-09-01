@@ -57,14 +57,14 @@ bind F1+F2+Forward BOT_LEFT
 bind F3+F4+Backward CHRLT
 bind F3+F4+Forward CHRRT
 
-bind F1+F3+F4 CONTEXT+1 # RoutingKey -> CLIP_NEW
-bind F2+F3+F4 CONTEXT+2 # RoutingKey -> CLIP_ADD
-bind F1+F2+F3 CONTEXT+3 # RoutingKey -> COPY_LINE
-bind F1+F2+F4 CONTEXT+4 # RoutingKey -> COPY_RECT
+bind F1+F3+F4 CONTEXT+CLIP_NEW
+bind F2+F3+F4 CONTEXT+CLIP_ADD
+bind F1+F2+F3 CONTEXT+COPY_LINE
+bind F1+F2+F4 CONTEXT+COPY_RECT
 bind F1+F2+F3+F4 PASTE
 
-bind F1+F3 CONTEXT+5 # RoutingKey -> SETLEFT
-bind F2+F4 CONTEXT+6 # RoutingKey -> DESCCHAR
+bind F1+F3 CONTEXT+SETLEFT
+bind F2+F4 CONTEXT+DESCCHAR
 
 include dots.kti
 map F2 META
@@ -91,27 +91,21 @@ bind F3+F4 MENU_LAST_ITEM
 # Routing Key Alternatives #
 ############################
 
-context 1
+context CLIP_NEW
 bind !RoutingKey CLIP_NEW
 
-context 2
+context CLIP_ADD
 bind !RoutingKey CLIP_ADD
 
-context 3
+context COPY_LINE
 bind !RoutingKey COPY_LINE
 
-context 4
+context COPY_RECT
 bind !RoutingKey COPY_RECT
 
-context 5
+context SETLEFT
 bind !RoutingKey SETLEFT
 
-context 6
+context DESCCHAR
 bind !RoutingKey DESCCHAR
-
-context 7
-bind !RoutingKey SWITCHVT
-
-context 8
-bind !RoutingKey KEY_FUNCTION
 

@@ -81,10 +81,10 @@ bind Dot1+Dot2+Dot3+Dot4 PASTE
 bind Dot1+Dot6 MUTE
 bind Dot1+Dot5+Dot6 SAY_LINE
 
-bind Status1 CONTEXT+1
-bind Status2 CONTEXT+2
-bind Status3 CONTEXT+3
-bind Status4 CONTEXT+4
+bind Status1 CONTEXT+CLIP_NEW
+bind Status2 CONTEXT+CLIP_ADD
+bind Status3 CONTEXT+COPY_LINE
+bind Status4 CONTEXT+COPY_RECT
 bind Status5 LEARN
 bind Status6 HELP
 
@@ -95,14 +95,14 @@ bind RoutingKey ROUTE
 # Routing Key Alternatives #
 ############################
 
-context 1
+context CLIP_NEW
 bind !RoutingKey CLIP_NEW
 
-context 2
+context CLIP_ADD
 bind !RoutingKey CLIP_ADD
 
-context 3
+context COPY_LINE
 bind !RoutingKey COPY_LINE
 
-context 4
+context COPY_RECT
 bind !RoutingKey COPY_RECT

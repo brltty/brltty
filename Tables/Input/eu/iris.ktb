@@ -22,8 +22,8 @@ include common.kti
 note The Menu key is the small, round button to the left of the cursor routing keys.
 note The Z key is the small, round button to the right of the cursor routing keys.
 
-bind Down+Left CONTEXT+1
-bind Down+Right CONTEXT+2
+bind Down+Left CONTEXT+alt1
+bind Down+Right CONTEXT+alt2
 
 bind L1 FWINLT
 bind L2 LNUP
@@ -45,7 +45,7 @@ bind L1+L2+L3+L4 RESTARTBRL
 bind L5+L6+L7+L8 RESTARTSPEECH
 
 
-context 1
+context alt1
 bind L1 TOP_LEFT
 bind L3 PRSEARCH
 bind L4 HELP
@@ -58,31 +58,31 @@ bind Up HOME
 bind Down BACK
 
 
-context 2
-bind L1 CONTEXT+3
-bind L2 CONTEXT+4
+context alt2
+bind L1 CONTEXT+CLIP_NEW
+bind L2 CONTEXT+CLIP_ADD
 bind L3 CSRVIS
-bind L6 CONTEXT+5
+bind L6 CONTEXT+COPY_RECT
 bind L7 PASTE
-bind L8 CONTEXT+6
+bind L8 CONTEXT+COPY_LINE
 bind Up PREFMENU
 bind Down CSRTRK
 bind Right TUNES
 
 
-context 3
+context CLIP_NEW
 bind RoutingKey1 CLIP_NEW
 
 
-context 4
+context CLIP_ADD
 bind RoutingKey1 CLIP_ADD
 
 
-context 5
+context COPY_RECT
 bind RoutingKey1 COPY_RECT
 
 
-context 6
+context COPY_LINE
 bind RoutingKey1 COPY_LINE
 
 

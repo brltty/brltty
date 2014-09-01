@@ -58,17 +58,17 @@ bind K4+K7 NXPROMPT
 bind K5+K6 PRPGRPH
 bind K5+K7 NXPGRPH
 
-bind K1+K8+K2 CONTEXT+7 # RoutingKey -> PRINDENT
-bind K1+K8+K3 CONTEXT+8 # RoutingKey -> NXINDENT
-bind K1+K8+K4 CONTEXT+5 # RoutingKey -> SETLEFT
-bind K1+K8+K5 CONTEXT+6 # RoutingKey -> DESCCHAR
-bind K1+K8+K6 CONTEXT+9 # RoutingKey -> PRDIFCHAR
-bind K1+K8+K7 CONTEXT+10 # RoutingKey -> NXDIFCHAR
+bind K1+K8+K2 CONTEXT+PRINDENT
+bind K1+K8+K3 CONTEXT+NXINDENT
+bind K1+K8+K4 CONTEXT+SETLEFT
+bind K1+K8+K5 CONTEXT+DESCCHAR
+bind K1+K8+K6 CONTEXT+PRDIFCHAR
+bind K1+K8+K7 CONTEXT+NXDIFCHAR
 
-bind K1+K8+K2+K6 CONTEXT+1 # RoutingKey -> CLIP_NEW
-bind K1+K8+K2+K7 CONTEXT+2 # RoutingKey -> CLIP_ADD
-bind K1+K8+K3+K6 CONTEXT+3 # RoutingKey -> COPY_LINE
-bind K1+K8+K3+K7 CONTEXT+4 # RoutingKey -> COPY_RECT
+bind K1+K8+K2+K6 CONTEXT+CLIP_NEW
+bind K1+K8+K2+K7 CONTEXT+CLIP_ADD
+bind K1+K8+K3+K6 CONTEXT+COPY_LINE
+bind K1+K8+K3+K7 CONTEXT+COPY_RECT
 
 bind K1+K2 HELP
 bind K1+K3 LEARN
@@ -106,33 +106,33 @@ bind K5 MENU_LAST_ITEM
 # Routing Key Alternatives #
 ############################
 
-context 1
+context CLIP_NEW
 bind !RoutingKey CLIP_NEW
 
-context 2
+context CLIP_ADD
 bind !RoutingKey CLIP_ADD
 
-context 3
+context COPY_LINE
 bind !RoutingKey COPY_LINE
 
-context 4
+context COPY_RECT
 bind !RoutingKey COPY_RECT
 
-context 5
+context SETLEFT
 bind !RoutingKey SETLEFT
 
-context 6
+context DESCCHAR
 bind !RoutingKey DESCCHAR
 
-context 7
+context PRINDENT
 bind !RoutingKey PRINDENT
 
-context 8
+context NXINDENT
 bind !RoutingKey NXINDENT
 
-context 9
+context PRDIFCHAR
 bind !RoutingKey PRDIFCHar
 
-context 10
+context NXDIFCHAR
 bind !RoutingKey NXDIFCHar
 

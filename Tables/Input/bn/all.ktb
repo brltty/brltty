@@ -54,8 +54,8 @@ bind Dot1+Dot2+Dot4 PRSEARCH
 bind Dot2+Dot3+Dot5 NXSEARCH
 bind Dot1+Dot2+Dot5 ATTRUP
 bind Dot2+Dot3+Dot6 ATTRDN
-bind Dot2+Dot4 CONTEXT+17 # PRINDENT
-bind Dot3+Dot5 CONTEXT+18 # NXINDENT
+bind Dot2+Dot4 CONTEXT+PRINDENT
+bind Dot3+Dot5 CONTEXT+NXINDENT
 bind Dot2+Dot4+Dot5 WINUP
 bind Dot3+Dot5+Dot6 WINDN
 
@@ -67,7 +67,7 @@ bind Space+Dot1+Dot4 PREFMENU
 bind Space+Dot1+Dot4+Dot5 PREFLOAD
 bind Space+Dot1+Dot5 NOOP # exit current operation
 bind Space+Dot1+Dot2+Dot5 NOOP # help for current operation
-bind Space+Dot1+Dot2+Dot3 CONTEXT+10 # SETLEFT
+bind Space+Dot1+Dot2+Dot3 CONTEXT+SETLEFT
 bind Space+Dot1+Dot3+Dot4 MUTE
 bind Space+Dot1+Dot3+Dot4+Dot5 CONTEXT+default # navigation mode
 bind Space+Dot1+Dot3+Dot5 NOOP # go to options menu
@@ -77,10 +77,10 @@ bind Space+Dot2+Dot3+Dot4 SAY_LINE
 bind Space+Dot1+Dot3+Dot6 NOOP # uppercase for computer braille
 bind Space+Dot2+Dot4+Dot5+Dot6 PREFSAVE
 bind Space+Dot1+Dot3+Dot5+Dot6 NOOP # exit current operation
-bind Space+Dot1+Dot2+Dot3+Dot5+Dot6 CONTEXT+11 # CLIP_NEW
-bind Space+Dot2+Dot4+Dot6 CONTEXT+12 # CLIP_ADD
-bind Space+Dot2+Dot3+Dot4+Dot5+Dot6 CONTEXT+13 # COPY_RECT
-bind Space+Dot1+Dot2+Dot4+Dot5+Dot6 CONTEXT+14 # COPY_LINE
+bind Space+Dot1+Dot2+Dot3+Dot5+Dot6 CONTEXT+CLIP_NEW
+bind Space+Dot2+Dot4+Dot6 CONTEXT+CLIP_ADD
+bind Space+Dot2+Dot3+Dot4+Dot5+Dot6 CONTEXT+COPY_RECT
+bind Space+Dot1+Dot2+Dot4+Dot5+Dot6 CONTEXT+COPY_LINE
 bind Space+Dot1+Dot2+Dot5+Dot6 CSRJMP_VERT
 bind Space+Dot1+Dot4+Dot5+Dot6 LEARN
 bind Space+Dot2+Dot3+Dot5+Dot6 KEY_TAB
@@ -99,10 +99,10 @@ bind Space+Dot2+Dot6 KEY_ESCAPE
 bind Backspace KEY_BACKSPACE
 bind Backspace+Dot1 DISPMD+on
 bind Backspace+Dot1+Dot2 SKPBLNKWINS+off
-bind Backspace+Dot1+Dot4+Dot5 CONTEXT+9 # DESCCHAR
+bind Backspace+Dot1+Dot4+Dot5 CONTEXT+DESCCHAR
 bind Backspace+Dot1+Dot2+Dot5 HELP
 bind Backspace+Dot2+Dot4 SKPIDLNS+off
-bind Backspace+Dot1+Dot3+Dot4 CONTEXT+15 # SETMARK
+bind Backspace+Dot1+Dot3+Dot4 CONTEXT+SETMARK
 bind Backspace+Dot2+Dot3+Dot4 INFO
 bind Backspace+Dot2+Dot3+Dot4+Dot5 DISPMD+off
 bind Backspace+Dot1+Dot2+Dot3+Dot6 SWITCHVT_PREV
@@ -123,7 +123,7 @@ bind Enter+Dot1+Dot4+Dot5 NOOP # display the date
 bind Enter+Dot1+Dot2+Dot4 FREEZE
 bind Enter+Dot1+Dot2+Dot5 NOOP # hear punctuation in current prompt
 bind Enter+Dot2+Dot4 SKPIDLNS+on
-bind Enter+Dot1+Dot3+Dot4 CONTEXT+16 # GOTOMARK
+bind Enter+Dot1+Dot3+Dot4 CONTEXT+GOTOMARK
 bind Enter+Dot2+Dot3+Dot4 NOOP # spell name in current prompt
 bind Enter+Dot2+Dot3+Dot4+Dot5 NOOP # display the time
 bind Enter+Dot1+Dot2+Dot3+Dot6 SWITCHVT_NEXT
@@ -138,75 +138,75 @@ note To turn on dot 7, add [3].  To turn on dot 8, add [6].
 note To switch back to (n)avigation mode, use space+[1345].
 
 hide on
-bind Space+Dot4 CONTEXT+1
-bind Space+Dot4+Dot5 CONTEXT+2
-bind Space+Dot4+Dot3 CONTEXT+3
-bind Space+Dot4+Dot5+Dot3 CONTEXT+4
-bind Space+Dot4+Dot6 CONTEXT+5
-bind Space+Dot4+Dot5+Dot6 CONTEXT+6
-bind Space+Dot4+Dot3+Dot6 CONTEXT+7
-bind Space+Dot4+Dot5+Dot3+Dot6 CONTEXT+8
+bind Space+Dot4 CONTEXT+temporaryInput
+bind Space+Dot4+Dot5 CONTEXT+persistentInput
+bind Space+Dot4+Dot3 CONTEXT+temporaryInput7
+bind Space+Dot4+Dot5+Dot3 CONTEXT+persistentInput7
+bind Space+Dot4+Dot6 CONTEXT+temporaryInput8
+bind Space+Dot4+Dot5+Dot6 CONTEXT+persistentInput8
+bind Space+Dot4+Dot3+Dot6 CONTEXT+temporaryInput78
+bind Space+Dot4+Dot5+Dot3+Dot6 CONTEXT+persistentInput78
 
-context 1
+context temporaryInput
 include input.kti
 
-context 2 Input Mode
+context persistentInput Input Mode
 include input.kti
 
-context 3
-include input.kti
-superimpose DOT7
-
-context 4 Input Mode (dot 7)
+context temporaryInput7
 include input.kti
 superimpose DOT7
 
-context 5
+context persistentInput7 Input Mode (dot 7)
+include input.kti
+superimpose DOT7
+
+context temporaryInput8
 include input.kti
 superimpose DOT8
 
-context 6 Input Mode (dot 8)
+context persistentInput8 Input Mode (dot 8)
 include input.kti
 superimpose DOT8
 
-context 7
+context temporaryInput78
 include input.kti
 superimpose DOT7
 superimpose DOT8
 
-context 8 Input Mode (dots 7 and 8)
+context persistentInput78 Input Mode (dots 7 and 8)
 include input.kti
 superimpose DOT7
 superimpose DOT8
 hide off
 
-context 9
+context DESCCHAR
 bind RoutingKey DESCCHAR
 
-context 10
+context SETLEFT
 bind RoutingKey SETLEFT
 
-context 11
+context CLIP_NEW
 bind RoutingKey CLIP_NEW
 
-context 12
+context CLIP_ADD
 bind RoutingKey CLIP_ADD
 
-context 13
+context COPY_RECT
 bind RoutingKey COPY_RECT
 
-context 14
+context COPY_LINE
 bind RoutingKey COPY_LINE
 
-context 15
+context SETMARK
 bind RoutingKey SETMARK
 
-context 16
+context GOTOMARK
 bind RoutingKey GOTOMARK
 
-context 17
+context PRINDENT
 bind RoutingKey PRINDENT
 
-context 18
+context NXINDENT
 bind RoutingKey NXINDENT
 

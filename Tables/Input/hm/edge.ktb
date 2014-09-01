@@ -67,21 +67,21 @@ bind RightPadDown NXDIFLN
 bind RightPadLeft FWINLTSKIP
 bind RightPadRight FWINRTSKIP
 
-bind LeftPadLeft+LeftPadUp CONTEXT+5 # PRDIFCHAR
-bind LeftPadLeft+LeftPadDown CONTEXT+6 # NXDIFCHAR
+bind LeftPadLeft+LeftPadUp CONTEXT+PRDIFCHAR
+bind LeftPadLeft+LeftPadDown CONTEXT+NXDIFCHAR
 
-bind LeftPadRight+LeftPadUp CONTEXT+7 # PRINDENT
-bind LeftPadRight+LeftPadDown CONTEXT+8 # NXINDENT
+bind LeftPadRight+LeftPadUp CONTEXT+PRINDENT
+bind LeftPadRight+LeftPadDown CONTEXT+NXINDENT
 
-bind RightPadLeft+RightPadUp CONTEXT+1 # CLIP_NEW
-bind RightPadLeft+RightPadDown CONTEXT+2 # CLIP_APPEND
+bind RightPadLeft+RightPadUp CONTEXT+CLIP_NEW
+bind RightPadLeft+RightPadDown CONTEXT+CLIP_ADD
 
-bind RightPadRight+RightPadUp CONTEXT+3 # COPY_LINE
-bind RightPadRight+RightPadDown CONTEXT+4 # COPY_RECT
+bind RightPadRight+RightPadUp CONTEXT+COPY_LINE
+bind RightPadRight+RightPadDown CONTEXT+COPY_RECT
 bind RightPadLeft+RightPadRight PASTE
 
-bind LeftPadUp+LeftPadDown CONTEXT+9 # SETLEFT
-bind RightPadUp+RightPadDown CONTEXT+10 # DESCCHAR
+bind LeftPadUp+LeftPadDown CONTEXT+SETLEFT
+bind RightPadUp+RightPadDown CONTEXT+DESCCHAR
 
 include dots.kti
 map F4 META
@@ -106,33 +106,33 @@ bind LeftScrollUp+RightScrollUp MENU_FIRST_ITEM
 bind LeftScrollDown+RightScrollDown MENU_LAST_ITEM
 
 
-context 1
+context CLIP_NEW
 bind RoutingKey CLIP_NEW
 
-context 2
-bind RoutingKey CLIP_APPEND
+context CLIP_ADD
+bind RoutingKey CLIP_ADD
 
-context 3
+context COPY_LINE
 bind RoutingKey COPY_LINE
 
-context 4
+context COPY_RECT
 bind RoutingKey COPY_RECT
 
-context 5
+context PRDIFCHAR
 bind RoutingKey PRDIFCHAR
 
-context 6
+context NXDIFCHAR
 bind RoutingKey NXDIFCHAR
 
-context 7
+context PRINDENT
 bind RoutingKey PRINDENT
 
-context 8
+context NXINDENT
 bind RoutingKey NXINDENT
 
-context 9
+context SETLEFT
 bind RoutingKey SETLEFT
 
-context 10
+context DESCCHAR
 bind RoutingKey DESCCHAR
 

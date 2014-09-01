@@ -33,7 +33,6 @@ include dots.kti
 
 bind Escape+Space+Return INFO
 
-assign brailleContext 1
 assign brailleOn B1+B8+Right
 assign brailleOff B1+B8+Left
 assign space Space

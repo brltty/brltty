@@ -42,7 +42,6 @@ bind B2+B3+SpaceRight SAY_LINE
 include dots.kti
 include rockers.kti
 
-assign brailleContext 1
 assign brailleOn B1+B8+SpaceRight
 assign brailleOff B1+B8+SpaceLeft
 assign space SpaceLeft
