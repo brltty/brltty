@@ -69,7 +69,7 @@ bind Space+Dot1+Dot5 NOOP # exit current operation
 bind Space+Dot1+Dot2+Dot5 NOOP # help for current operation
 bind Space+Dot1+Dot2+Dot3 CONTEXT+10 # SETLEFT
 bind Space+Dot1+Dot3+Dot4 MUTE
-bind Space+Dot1+Dot3+Dot4+Dot5 CONTEXT+0 # navigation mode
+bind Space+Dot1+Dot3+Dot4+Dot5 CONTEXT+default # navigation mode
 bind Space+Dot1+Dot3+Dot5 NOOP # go to options menu
 bind Space+Dot1+Dot2+Dot3+Dot4 PASTE
 bind Space+Dot1+Dot2+Dot3+Dot5 NOOP # repeat current prompt

@@ -108,7 +108,7 @@ include status\{statusKeys}.kti
 
 assign chordContext 1
 assign brailleContext 2
-bind Dot2+Dot3+!Shift context+0
+bind Dot2+Dot3+!Shift CONTEXT+default
 bind Dot2+Dot3+!Home context+\{chordContext}
 bind Dot2+Dot3+!End context+\{brailleContext}
 

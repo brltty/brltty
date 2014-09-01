@@ -176,7 +176,9 @@ getKeyContext (KeyTableData *ktd, unsigned char context) {
       KeyContext *ctx = &ktd->table->keyContexts.table[ktd->table->keyContexts.count++];
       memset(ctx, 0, sizeof(*ctx));
 
+      ctx->name = NULL;
       ctx->title = NULL;
+      ctx->isDefined = 0;
 
       ctx->keyBindings.table = NULL;
       ctx->keyBindings.size = 0;
@@ -203,51 +205,56 @@ getCurrentKeyContext (KeyTableData *ktd) {
 }
 
 static int
-setKeyContextTitle (KeyContext *ctx, const wchar_t *title, size_t length) {
-  if (ctx->title) free(ctx->title);
+setString (wchar_t **string, const wchar_t *characters, size_t length) {
+  if (*string) free(*string);
 
-  if (!(ctx->title = malloc(ARRAY_SIZE(ctx->title, length+1)))) {
+  if (!(*string = malloc(ARRAY_SIZE(*string, length+1)))) {
     logMallocError();
     return 0;
   }
 
-  wmemcpy(ctx->title, title, length);
-  ctx->title[length] = 0;
+  wmemcpy(*string, characters, length);
+  (*string)[length] = 0;
   return 1;
 }
 
 static int
-setDefaultKeyContextProperties (KeyTableData *ktd) {
-  typedef struct {
-    unsigned char context;
-    const wchar_t *title;
-  } PropertiesEntry;
+setKeyContextName (KeyContext *ctx, const wchar_t *name, size_t length) {
+  return setString(&ctx->name, name, length);
+}
 
-  static const PropertiesEntry propertiesTable[] = {
-    { .context = KTB_CTX_DEFAULT,
-      .title = WS_C("Default Bindings")
+static int
+setKeyContextTitle (KeyContext *ctx, const wchar_t *title, size_t length) {
+  return setString(&ctx->title, title, length);
+}
+
+static int
+findKeyContext (unsigned char *context, const wchar_t *name, int length, KeyTableData *ktd) {
+  for (*context=0; *context<ktd->table->keyContexts.count; *context+=1) {
+    KeyContext *ctx = &ktd->table->keyContexts.table[*context];
+
+    if (ctx->name) {
+      if (wcslen(ctx->name) == length) {
+        if (wmemcmp(ctx->name, name, length) == 0) {
+          return 1;
+        }
+      }
     }
-    ,
-    { .context = KTB_CTX_MENU,
-      .title = WS_C("Menu Bindings")
-    }
-    ,
-    { .title = NULL }
-  };
-  const PropertiesEntry *properties = propertiesTable;
-
-  while (properties->title) {
-    KeyContext *ctx = getKeyContext(ktd, properties->context);
-    if (!ctx) return 0;
-
-    if (!ctx->title)
-      if (!setKeyContextTitle(ctx, properties->title, wcslen(properties->title)))
-        return 0;
-
-    properties += 1;
   }
 
-  return 1;
+  {
+    KeyContext *ctx = getKeyContext(ktd, *context);
+
+    if (ctx) {
+      if (setKeyContextName(ctx, name, length)) {
+        return 1;
+      }
+
+      ktd->table->keyContexts.count -= 1;
+    }
+  }
+
+  return 0;
 }
 
 static int
@@ -756,15 +763,25 @@ parseCommandOperand (DataFile *file, BoundCommand *cmd, const wchar_t *character
       if (applyCommandModifier(&cmd->value, commandModifierTable_keyboard, &modifier)) continue;
     }
 
-    if (((*command)->isOffset || (*command)->isColumn) && !offsetDone) {
-      int maximum = BRL_MSK_ARG - ((*command)->code & BRL_MSK_ARG);
-      int offset;
+    if (!offsetDone) {
+      if ((*command)->code == BRL_BLK_CMD(CONTEXT)) {
+        unsigned char context;
 
-      if (isNumber(&offset, modifier.characters, modifier.length)) {
-        if ((offset >= 0) && (offset <= maximum)) {
-          cmd->value += offset;
+        if (findKeyContext(&context, modifier.characters, modifier.length, ktd)) {
+          cmd->value += context;
           offsetDone = 1;
           continue;
+        }
+      } else if (((*command)->isOffset || (*command)->isColumn)) {
+        int maximum = BRL_MSK_ARG - ((*command)->code & BRL_MSK_ARG);
+        int offset;
+
+        if (isNumber(&offset, modifier.characters, modifier.length)) {
+          if ((offset >= 0) && (offset <= maximum)) {
+            cmd->value += offset;
+            offsetDone = 1;
+            continue;
+          }
         }
       }
     }
@@ -850,10 +867,7 @@ static int processKeyTableLine (DataFile *file, void *data);
 
 static DATA_OPERANDS_PROCESSOR(processBindOperands) {
   KeyTableData *ktd = data;
-  KeyContext *ctx = getCurrentKeyContext(ktd);
   KeyBinding binding;
-
-  if (!ctx) return 0;
 
   memset(&binding, 0, sizeof(binding));
   if (hideBindings(ktd)) binding.flags |= KBF_HIDDEN;
@@ -866,7 +880,15 @@ static DATA_OPERANDS_PROCESSOR(processBindOperands) {
     };
 
     if (getCommandsOperand(file, cmds, ktd)) {
-      if (!addKeyBinding(ctx, &binding)) return 0;
+      KeyContext *ctx = getCurrentKeyContext(ktd);
+
+      if (ctx) {
+        if (addKeyBinding(ctx, &binding)) {
+          return 1;
+        }
+      }
+
+      return 0;
     }
   }
 
@@ -875,42 +897,22 @@ static DATA_OPERANDS_PROCESSOR(processBindOperands) {
 
 static DATA_OPERANDS_PROCESSOR(processContextOperands) {
   KeyTableData *ktd = data;
-  DataString context;
+  DataString name;
 
-  if (getDataString(file, &context, 1, "context name or number")) {
-    int ok = 0;
-
-    if (isKeyword(WS_C("default"), context.characters, context.length)) {
-      ktd->context = KTB_CTX_DEFAULT;
-      ok = 1;
-    } else if (isKeyword(WS_C("menu"), context.characters, context.length)) {
-      ktd->context = KTB_CTX_MENU;
-      ok = 1;
-    } else {
-      int number;
-
-      if (!isNumber(&number, context.characters, context.length)) {
-        reportDataError(file, "unknown context name: %.*" PRIws, context.length, context.characters);
-      } else if ((number < 0) || (number > (BRL_MSK_ARG - KTB_CTX_DEFAULT))) {
-        reportDataError(file, "invalid context number: %.*" PRIws, context.length, context.characters);
-      } else {
-        ktd->context = KTB_CTX_DEFAULT + number;
-        ok = 1;
-      }
-    }
-
-    if (ok) {
+  if (getDataString(file, &name, 1, "context name")) {
+    if (findKeyContext(&ktd->context, name.characters, name.length, ktd)) {
       KeyContext *ctx = getCurrentKeyContext(ktd);
 
       if (ctx) {
         DataOperand title;
+
+        ctx->isDefined = 1;
 
         if (getDataText(file, &title, NULL)) {
           if (ctx->title) {
             if ((title.length != wcslen(ctx->title)) ||
                 (wmemcmp(title.characters, ctx->title, title.length) != 0)) {
               reportDataError(file, "context title redefined");
-              return 0;
             }
           } else if (!setKeyContextTitle(ctx, title.characters, title.length)) {
             return 0;
@@ -942,27 +944,30 @@ static DATA_OPERANDS_PROCESSOR(processHideOperands) {
 
 static DATA_OPERANDS_PROCESSOR(processHotkeyOperands) {
   KeyTableData *ktd = data;
-  KeyContext *ctx = getCurrentKeyContext(ktd);
   HotkeyEntry hotkey;
 
-  if (!ctx) return 0;
   memset(&hotkey, 0, sizeof(hotkey));
   if (hideBindings(ktd)) hotkey.flags |= HKF_HIDDEN;
 
   if (getKeyOperand(file, &hotkey.keyValue, ktd)) {
     if (getCommandOperand(file, &hotkey.pressCommand, ktd)) {
       if (getCommandOperand(file, &hotkey.releaseCommand, ktd)) {
-        unsigned int newCount = ctx->hotkeys.count + 1;
-        HotkeyEntry *newTable = realloc(ctx->hotkeys.table, ARRAY_SIZE(newTable, newCount));
+        KeyContext *ctx = getCurrentKeyContext(ktd);
 
-        if (!newTable) {
-          logMallocError();
-          return 0;
+        if (ctx) {
+          unsigned int newCount = ctx->hotkeys.count + 1;
+          HotkeyEntry *newTable = realloc(ctx->hotkeys.table, ARRAY_SIZE(newTable, newCount));
+
+          if (newTable) {
+            ctx->hotkeys.table = newTable;
+            ctx->hotkeys.table[ctx->hotkeys.count++] = hotkey;
+            return 1;
+          } else {
+            logMallocError();
+          }
         }
 
-        ctx->hotkeys.table = newTable;
-        ctx->hotkeys.table[ctx->hotkeys.count++] = hotkey;
-        return 1;
+        return 0;
       }
     }
   }
@@ -1452,15 +1457,67 @@ finishKeyTable (KeyTableData *ktd) {
     for (context=0; context<ktd->table->keyContexts.count; context+=1) {
       KeyContext *ctx = &ktd->table->keyContexts.table[context];
 
+      if (!ctx->isDefined) {
+        if (ctx->name) {
+          reportDataError(NULL, "context not defined: %"PRIws, ctx->name);
+        }
+      }
+
       if (!prepareKeyBindings(ctx)) return 0;
       if (!prepareHotkeyEntries(ctx)) return 0;
       if (!prepareMappedKeyEntries(ctx)) return 0;
     }
   }
 
-  if (!setDefaultKeyContextProperties(ktd)) return 0;
   qsort(ktd->table->keyNames.table, ktd->table->keyNames.count, sizeof(*ktd->table->keyNames.table), sortKeyValues);
   resetKeyTable(ktd->table);
+  return 1;
+}
+
+static int
+defineInitialKeyContexts (KeyTableData *ktd) {
+  typedef struct {
+    unsigned char context;
+    const wchar_t *name;
+    const wchar_t *title;
+  } PropertiesEntry;
+
+  static const PropertiesEntry propertiesTable[] = {
+    { .context = KTB_CTX_DEFAULT,
+      .title = WS_C("Default Bindings"),
+      .name = WS_C("default")
+    },
+
+    { .context = KTB_CTX_MENU,
+      .title = WS_C("Menu Bindings"),
+      .name = WS_C("menu")
+    },
+
+    { .name = NULL }
+  };
+  const PropertiesEntry *properties = propertiesTable;
+
+  while (properties->name) {
+    KeyContext *ctx = getKeyContext(ktd, properties->context);
+
+    if (!ctx) return 0;
+    ctx->isDefined = 1;
+
+    if (properties->name) {
+      if (!setKeyContextName(ctx, properties->name, wcslen(properties->name))) {
+        return 0;
+      }
+    }
+
+    if (properties->title) {
+      if (!setKeyContextTitle(ctx, properties->title, wcslen(properties->title))) {
+        return 0;
+      }
+    }
+
+    properties += 1;
+  }
+
   return 1;
 }
 
@@ -1470,6 +1527,7 @@ compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
 
   if (setGlobalTableVariables(KEY_TABLE_EXTENSION, KEY_SUBTABLE_EXTENSION)) {
     KeyTableData ktd;
+
     memset(&ktd, 0, sizeof(ktd));
     ktd.context = KTB_CTX_DEFAULT;
 
@@ -1497,16 +1555,18 @@ compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
 
       ktd.table->longPress.alarm = NULL;
 
-      if (allocateKeyNameTable(&ktd, keys)) {
-        if (allocateCommandTable(&ktd)) {
-          if (processDataFile(name, processKeyTableLine, &ktd)) {
-            if (finishKeyTable(&ktd)) {
-              table = ktd.table;
-              ktd.table = NULL;
+      if (defineInitialKeyContexts(&ktd)) {
+        if (allocateKeyNameTable(&ktd, keys)) {
+          if (allocateCommandTable(&ktd)) {
+            if (processDataFile(name, processKeyTableLine, &ktd)) {
+              if (finishKeyTable(&ktd)) {
+                table = ktd.table;
+                ktd.table = NULL;
+              }
             }
-          }
 
-          if (ktd.commandTable) free(ktd.commandTable);
+            if (ktd.commandTable) free(ktd.commandTable);
+          }
         }
       }
 
@@ -1528,6 +1588,7 @@ destroyKeyTable (KeyTable *table) {
   while (table->keyContexts.count) {
     KeyContext *ctx = &table->keyContexts.table[--table->keyContexts.count];
 
+    if (ctx->name) free(ctx->name);
     if (ctx->title) free(ctx->title);
 
     if (ctx->keyBindings.table) free(ctx->keyBindings.table);

@@ -29,7 +29,7 @@ hide off
 context 1 LeftSwitchRear - Advanced Vertical Navigation
 
 hide on
-hotkey LeftSwitchRear NOOP CONTEXT+0
+hotkey LeftSwitchRear NOOP CONTEXT+default
 hotkey RightSwitchRear CONTEXT+5 NOOP
 hotkey RightSwitchFront CONTEXT+6 NOOP
 hide off
@@ -54,7 +54,7 @@ hide off
 context 2 LeftSwitchFront - Specialized Navigation
 
 hide on
-hotkey LeftSwitchFront NOOP CONTEXT+0
+hotkey LeftSwitchFront NOOP CONTEXT+default
 hotkey RightSwitchRear CONTEXT+7 NOOP
 hotkey RightSwitchFront CONTEXT+8 NOOP
 hide off
@@ -79,7 +79,7 @@ hide off
 context 3 RightSwitchRear - Content-based Navigation
 
 hide on
-hotkey RightSwitchRear NOOP CONTEXT+0
+hotkey RightSwitchRear NOOP CONTEXT+default
 hotkey LeftSwitchRear CONTEXT+5 NOOP
 hotkey LeftSwitchFront CONTEXT+7 NOOP
 hide off
@@ -104,7 +104,7 @@ hide off
 context 4 RightSwitchFront - Function Key Emulation
 
 hide on
-hotkey RightSwitchFront NOOP CONTEXT+0
+hotkey RightSwitchFront NOOP CONTEXT+default
 hotkey LeftSwitchRear CONTEXT+6 NOOP
 hotkey LeftSwitchFront CONTEXT+8 NOOP
 hide off

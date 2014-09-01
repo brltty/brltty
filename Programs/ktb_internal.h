@@ -82,7 +82,9 @@ typedef struct {
 } MappedKeyEntry;
 
 typedef struct {
+  wchar_t *name;
   wchar_t *title;
+  unsigned isDefined:1;
 
   struct {
     KeyBinding *table;

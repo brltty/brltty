@@ -49,7 +49,7 @@ bind !M FWINRT
 
 
 context 1
-bind !Star CONTEXT+0
+bind !Star CONTEXT+default
 
 bind !Down CSRTRK
 bind !Right TUNES
@@ -63,7 +63,7 @@ bind !M CONTEXT+6
 
 
 context 2
-bind !Sharp CONTEXT+0
+bind !Sharp CONTEXT+default
 
 bind !Left LNBEG
 bind !Right LNEND
