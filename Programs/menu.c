@@ -731,20 +731,25 @@ newSubmenuMenuItem (
 
 int
 setMenuPreviousItem (Menu *menu) {
+  unsigned int index = menu->items.index;
+  if (index >= menu->items.count) return 0;
+
   do {
     if (!menu->items.index) menu->items.index = menu->items.count;
-    if (!menu->items.index) return 0;
-  } while (!testMenuItemVisible(menu, --menu->items.index));
+    if (--menu->items.index == index) return 0;
+  } while (!testMenuItemVisible(menu, menu->items.index));
 
   return 1;
 }
 
 int
 setMenuNextItem (Menu *menu) {
-  if (menu->items.index >= menu->items.count) return 0;
+  unsigned int index = menu->items.index;
+  if (index >= menu->items.count) return 0;
 
   do {
     if (++menu->items.index == menu->items.count) menu->items.index = 0;
+    if (menu->items.index == index) return 0;
   } while (!testMenuItemVisible(menu, menu->items.index));
 
   return 1;

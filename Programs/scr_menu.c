@@ -341,27 +341,28 @@ handleCommand_MenuScreen (int command) {
       return handled;
     }
 
+    case BRL_BLK_CMD(PASSKEY)+BRL_KEY_BACKSPACE:
+    case BRL_CMD_MENU_PREV_LEVEL: {
+      Menu *menu = screenMenu;
+
+      if (menu != rootMenu) {
+        if (changeMenuItemNext(getMenuItem(menu, 0))) {
+          getFocusedItem();
+          settingChanged();
+        } else {
+          commandRejected();
+        }
+
+        return 1;
+      }
+    }
+
     case BRL_BLK_CMD(PASSKEY)+BRL_KEY_ESCAPE:
     case BRL_BLK_CMD(PASSKEY)+BRL_KEY_ENTER: {
       int handled = handleCommand(BRL_CMD_PREFMENU);
 
       if (handled) getFocusedItem();
       return handled;
-    }
-
-    case BRL_CMD_MENU_PREV_LEVEL: {
-      Menu *menu = screenMenu;
-
-      if (menu == rootMenu) {
-        commandRejected();
-      } else if (!changeMenuItemNext(getMenuItem(menu, 0))) {
-        commandRejected();
-      } else {
-        getFocusedItem();
-        settingChanged();
-      }
-
-      return 1;
     }
 
     case BRL_BLK_CMD(PASSKEY)+BRL_KEY_PAGE_UP:
