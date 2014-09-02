@@ -76,18 +76,18 @@ extern const MenuString *getMenuItemName (const MenuItem *item);
 extern const char *getMenuItemValue (const MenuItem *item);
 extern const char *getMenuItemComment (const MenuItem *item);
 
-extern int setMenuPreviousItem (Menu *menu);
-extern int setMenuNextItem (Menu *menu);
-extern int setMenuFirstItem (Menu *menu);
-extern int setMenuLastItem (Menu *menu);
-extern int setMenuSpecificItem (Menu *menu, unsigned int index);
+extern void setMenuItem (MenuItem *item);
+extern int setMenuItemPrevious (Menu *menu, int wrap);
+extern int setMenuItemNext (Menu *menu, int wrap);
+extern int setMenuItemFirst (Menu *menu);
+extern int setMenuItemLast (Menu *menu);
+extern int setMenuItemIndex (Menu *menu, unsigned int index);
 
-extern int changeMenuItemPrevious (MenuItem *item);
-extern int changeMenuItemNext (MenuItem *item);
-extern int changeMenuItemScaled (MenuItem *item, unsigned int index, unsigned int count);
+extern int changeMenuSettingPrevious (Menu *menu, int wrap);
+extern int changeMenuSettingNext (Menu *menu, int wrap);
+extern int changeMenuSettingScaled (Menu *menu, unsigned int index, unsigned int count);
 
 extern MenuItem *getCurrentMenuItem (Menu *menu);
-extern MenuItem *setCurrentMenuItem (MenuItem *item);
 extern Menu *getCurrentSubmenu (Menu *menu);
 
 #ifdef __cplusplus

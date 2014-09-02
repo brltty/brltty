@@ -729,13 +729,28 @@ newSubmenuMenuItem (
   return NULL;
 }
 
+void
+setMenuItem (MenuItem *item) {
+  Menu *menu = item->menu;
+
+  menu->items.index = getMenuItemIndex(item);
+}
+
 int
-setMenuPreviousItem (Menu *menu) {
+setMenuItemPrevious (Menu *menu, int wrap) {
   unsigned int index = menu->items.index;
   if (index >= menu->items.count) return 0;
 
   do {
-    if (!menu->items.index) menu->items.index = menu->items.count;
+    if (!menu->items.index) {
+      if (!wrap) {
+        menu->items.index = index;
+        return 0;
+      }
+
+      menu->items.index = menu->items.count;
+    }
+
     if (--menu->items.index == index) return 0;
   } while (!testMenuItemVisible(menu, menu->items.index));
 
@@ -743,12 +758,20 @@ setMenuPreviousItem (Menu *menu) {
 }
 
 int
-setMenuNextItem (Menu *menu) {
+setMenuItemNext (Menu *menu, int wrap) {
   unsigned int index = menu->items.index;
   if (index >= menu->items.count) return 0;
 
   do {
-    if (++menu->items.index == menu->items.count) menu->items.index = 0;
+    if (++menu->items.index == menu->items.count) {
+      if (!wrap) {
+        menu->items.index = index;
+        return 0;
+      }
+
+      menu->items.index = 0;
+    }
+
     if (menu->items.index == index) return 0;
   } while (!testMenuItemVisible(menu, menu->items.index));
 
@@ -756,21 +779,21 @@ setMenuNextItem (Menu *menu) {
 }
 
 int
-setMenuFirstItem (Menu *menu) {
+setMenuItemFirst (Menu *menu) {
   if (!menu->items.count) return 0;
   menu->items.index = 0;
-  return testMenuItemVisible(menu, menu->items.index) || setMenuNextItem(menu);
+  return testMenuItemVisible(menu, menu->items.index) || setMenuItemNext(menu, 0);
 }
 
 int
-setMenuLastItem (Menu *menu) {
+setMenuItemLast (Menu *menu) {
   if (!menu->items.count) return 0;
   menu->items.index = menu->items.count - 1;
-  return testMenuItemVisible(menu, menu->items.index) || setMenuPreviousItem(menu);
+  return testMenuItemVisible(menu, menu->items.index) || setMenuItemPrevious(menu, 0);
 }
 
 int
-setMenuSpecificItem (Menu *menu, unsigned int index) {
+setMenuItemIndex (Menu *menu, unsigned int index) {
   if (index >= menu->items.count) return 0;
   menu->items.index = index;
   return 1;
@@ -801,7 +824,9 @@ decrementMenuItem (const MenuItem *item) {
 }
 
 int
-changeMenuItemPrevious (MenuItem *item) {
+changeMenuSettingPrevious (Menu *menu, int wrap) {
+  MenuItem *item = getCurrentMenuItem(menu);
+
   if (activateMenuItem(item)) return 1;
   if (!item->setting) return 0;
   return adjustMenuItem(item, decrementMenuItem);
@@ -813,14 +838,18 @@ incrementMenuItem (const MenuItem *item) {
 }
 
 int
-changeMenuItemNext (MenuItem *item) {
+changeMenuSettingNext (Menu *menu, int wrap) {
+  MenuItem *item = getCurrentMenuItem(menu);
+
   if (activateMenuItem(item)) return 1;
   if (!item->setting) return 0;
   return adjustMenuItem(item, incrementMenuItem);
 }
 
 int
-changeMenuItemScaled (MenuItem *item, unsigned int index, unsigned int count) {
+changeMenuSettingScaled (Menu *menu, unsigned int index, unsigned int count) {
+  MenuItem *item = getCurrentMenuItem(menu);
+
   if (activateMenuItem(item)) return 1;
 
   if (item->setting) {
@@ -850,14 +879,6 @@ getCurrentMenuItem (Menu *menu) {
   }
 
   return newItem;
-}
-
-MenuItem *
-setCurrentMenuItem (MenuItem *item) {
-  Menu *menu = item->menu;
-
-  menu->items.index = getMenuItemIndex(item);
-  return getCurrentMenuItem(menu);
 }
 
 Menu *
