@@ -807,20 +807,36 @@ activateMenuItem (MenuItem *item) {
 }
 
 static int
-adjustMenuItem (const MenuItem *item, void (*adjust) (const MenuItem *item)) {
+adjustMenuSetting (const MenuItem *item, int (*adjust) (const MenuItem *item, int wrap), int wrap) {
+  unsigned char setting = *item->setting;
   int count = item->maximum - item->minimum + 1;
 
   do {
-    adjust(item);
-    if (!--count) break;
+    int ok = 0;
+
+    if (--count) {
+      if (adjust(item, wrap)) {
+        ok = 1;
+      }
+    }
+
+    if (!ok) {
+      *item->setting = setting;
+      return 0;
+    }
   } while ((*item->setting % item->divisor) || (item->changed && !item->changed(item, *item->setting)));
 
-  return !!count;
+  return 1;
 }
 
-static void
-decrementMenuItem (const MenuItem *item) {
-  if ((*item->setting)-- <= item->minimum) *item->setting = item->maximum;
+static int
+decrementMenuSetting (const MenuItem *item, int wrap) {
+  if ((*item->setting)-- <= item->minimum) {
+    if (!wrap) return 0;
+    *item->setting = item->maximum;
+  }
+
+  return 1;
 }
 
 int
@@ -829,12 +845,17 @@ changeMenuSettingPrevious (Menu *menu, int wrap) {
 
   if (activateMenuItem(item)) return 1;
   if (!item->setting) return 0;
-  return adjustMenuItem(item, decrementMenuItem);
+  return adjustMenuSetting(item, decrementMenuSetting, wrap);
 }
 
-static void
-incrementMenuItem (const MenuItem *item) {
-  if ((*item->setting)++ >= item->maximum) *item->setting = item->minimum;
+static int
+incrementMenuSetting (const MenuItem *item, int wrap) {
+  if ((*item->setting)++ >= item->maximum) {
+    if (!wrap) return 0;
+    *item->setting = item->minimum;
+  }
+
+  return 1;
 }
 
 int
@@ -843,7 +864,7 @@ changeMenuSettingNext (Menu *menu, int wrap) {
 
   if (activateMenuItem(item)) return 1;
   if (!item->setting) return 0;
-  return adjustMenuItem(item, incrementMenuItem);
+  return adjustMenuSetting(item, incrementMenuSetting, wrap);
 }
 
 int
