@@ -249,7 +249,6 @@ handleMiscellaneousCommands (int command, void *data) {
         ok = 1;
       } else if (activateMenuScreen()) {
         updateSessionAttributes();
-        ses->hideCursor = 1;
         savedPreferences = prefs;
         ok = 1;
       }

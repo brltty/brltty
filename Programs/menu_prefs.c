@@ -1141,7 +1141,7 @@ makePreferencesMenu (void) {
   return rootMenu;
 
 noItem:
-  deallocateMenu(rootMenu);
+  destroyMenu(rootMenu);
 noMenu:
   return NULL;
 }

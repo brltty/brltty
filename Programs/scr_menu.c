@@ -19,7 +19,9 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <string.h>
 
+#include "log.h"
 #include "scr.h"
 #include "scr_menu.h"
 #include "brl_cmds.h"
@@ -28,24 +30,40 @@
 #include "charset.h"
 #include "brltty.h"
 
+typedef struct {
+  MenuItem *item;
+  size_t length;
+  size_t settingIndent;
+  wchar_t text[0];
+} RenderedMenuItem;
+
 static Menu *rootMenu = NULL;
+
+static int screenUpdated;
+static RenderedMenuItem **screenLines;
+static unsigned int lineCount;
+static unsigned int screenHeight;
+
+static Menu *screenMenu;
+static unsigned int screenColumn;
+static unsigned int screenRow;
 static unsigned int screenWidth;
 
-static unsigned int lineLength;
-static unsigned int settingIndent;
+static inline const MenuItem *
+getCurrentItem (void) {
+  Menu *menu = screenMenu;
 
-static inline Menu *
-getSubmenu (void) {
-  return getCurrentSubmenu(rootMenu);
+  return getMenuItem(menu, getMenuIndex(menu));
 }
 
 static inline MenuItem *
-getItem (void) {
-  return getCurrentMenuItem(getSubmenu());
+getFocusedItem (void) {
+  return setCurrentMenuItem(screenLines[ses->winy]->item);
 }
 
-static void
-formatMenuItem (const MenuItem *item, wchar_t *buffer, size_t size) {
+static RenderedMenuItem *
+newRenderedMenuItem (Menu *menu) {
+  MenuItem *item = getCurrentMenuItem(menu);
   char labelString[0X100];
   size_t labelLength;
 
@@ -58,7 +76,7 @@ formatMenuItem (const MenuItem *item, wchar_t *buffer, size_t size) {
     STR_BEGIN(labelString, ARRAY_COUNT(labelString));
     STR_PRINTF("%s", name->label);
     if (*name->comment) STR_PRINTF(" %s", name->comment);
-    if (isSettableMenuItem(item)) STR_PRINTF(":");
+    if (isMenuItemSettable(item)) STR_PRINTF(":");
     STR_PRINTF(" ");
     labelLength = STR_LENGTH;
     STR_END;
@@ -79,39 +97,162 @@ formatMenuItem (const MenuItem *item, wchar_t *buffer, size_t size) {
   {
     size_t maximumLength = labelLength + settingLength;
     wchar_t characters[maximumLength];
-    size_t currentLength = 0;
 
-    currentLength += convertTextToWchars(&characters[currentLength], labelString, maximumLength-currentLength);
-    settingIndent = MIN(currentLength, size);
+    size_t settingIndent;
+    size_t actualLength;
 
-    currentLength += convertTextToWchars(&characters[currentLength], settingString, maximumLength-currentLength);
-    lineLength = MIN(currentLength, size);
+    {
+      size_t currentLength = 0;
+       
+      currentLength += convertTextToWchars(&characters[currentLength], labelString, maximumLength-currentLength);
+      settingIndent = currentLength;
 
-    if (screenWidth < currentLength) screenWidth = currentLength;
-    if (currentLength > size) currentLength = size;
-    wmemcpy(buffer, characters, currentLength);
-    wmemset(&buffer[currentLength], WC_C(' '), size-currentLength);
+      currentLength += convertTextToWchars(&characters[currentLength], settingString, maximumLength-currentLength);
+      actualLength = currentLength;
+    }
+
+    {
+      RenderedMenuItem *rmi;
+      size_t size = sizeof(*rmi) + (actualLength * sizeof(rmi->text[0]));
+
+      if ((rmi = malloc(size))) {
+        memset(rmi, 0, sizeof(*rmi));
+        wmemcpy(rmi->text, characters, actualLength);
+
+        rmi->item = item;
+        rmi->length = actualLength;
+        rmi->settingIndent = settingIndent;
+
+        return rmi;
+      } else {
+        logMallocError();
+      }
+    }
   }
+
+  return NULL;
 }
 
 static void
-checkScreenWidth (void) {
-  wchar_t line[screenWidth];
+destroyRenderedMenuItem (RenderedMenuItem *rmi) {
+  free(rmi);
+}
 
-  formatMenuItem(getItem(), line, ARRAY_COUNT(line));
+static void
+removeLines (void) {
+  while (screenHeight > 0) {
+    destroyRenderedMenuItem(screenLines[--screenHeight]);
+  }
+}
+
+static int
+setScreenRow (void) {
+  const MenuItem *item = getCurrentItem();
+  unsigned int row;
+
+  for (row=0; row<screenHeight; row+=1) {
+    const RenderedMenuItem *rmi = screenLines[row];
+
+    if (rmi->item == item) {
+      screenRow = row;
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+static int
+reloadScreen (int constructing) {
+  Menu *menu = getCurrentSubmenu(rootMenu);
+  unsigned int index = getMenuIndex(menu);
+
+  screenMenu = menu;
+  screenWidth = 0;
+  removeLines();
+
+  if (setMenuFirstItem(menu)) {
+    unsigned int current = getMenuIndex(menu);
+
+    {
+      unsigned int count = getMenuSize(menu);
+
+      if (count > lineCount) {
+        RenderedMenuItem **lines = realloc(screenLines, ARRAY_SIZE(screenLines, count));
+
+        if (!lines) {
+          logMallocError();
+          return 0;
+        }
+
+        screenLines = lines;
+        lineCount = count;
+      }
+    }
+
+    while (1) {
+      RenderedMenuItem *rmi = newRenderedMenuItem(menu);
+
+      if (!rmi) return 0;
+      screenLines[screenHeight++] = rmi;
+      if (screenWidth < rmi->length) screenWidth = rmi->length;
+
+      if (!setMenuNextItem(menu)) return 0;
+
+      {
+        unsigned int next = getMenuIndex(menu);
+
+        if (next <= current) break;
+        current = next;
+      }
+    }
+
+    if (setMenuSpecificItem(menu, index)) {
+      if (constructing) {
+        screenRow = 0;
+        screenColumn = 0;
+      } else {
+        if (!setScreenRow()) return 0;
+        screenColumn = screenLines[screenRow]->settingIndent;
+      }
+
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+static int
+refresh_MenuScreen (void) {
+  if (screenUpdated) {
+    if (!reloadScreen(0)) return 0;
+    screenUpdated = 0;
+  }
+
+  return 1;
 }
 
 static int
 construct_MenuScreen (Menu *menu) {
   rootMenu = menu;
-  screenWidth = 1;
 
-  checkScreenWidth();
-  return 1;
+  screenUpdated = 0;
+  screenLines = NULL;
+  lineCount = 0;
+  screenHeight = 0;
+
+  return reloadScreen(1);
 }
 
 static void
 destruct_MenuScreen (void) {
+  if (screenLines) {
+    removeLines();
+    free(screenLines);
+    screenLines = NULL;
+  }
+
   rootMenu = NULL;
 }
 
@@ -127,41 +268,37 @@ formatTitle_MenuScreen (char *buffer, size_t size) {
   STR_BEGIN(buffer, size);
   STR_PRINTF("%s", gettext("Preferences Menu"));
   length = STR_LENGTH;
-  STR_END
+  STR_END;
   return length;
 }
 
 static void
 describe_MenuScreen (ScreenDescription *description) {
-  Menu *submenu = getSubmenu();
+  description->cols = MAX(screenWidth, 1);
+  description->rows = MAX(screenHeight, 1);
 
-  description->posx = 0;
-  description->posy = getMenuIndex(submenu);
-  description->cols = screenWidth;
-  description->rows = getMenuSize(submenu);
+  description->posx = screenColumn;
+  description->posy = screenRow;
+
   description->number = currentVirtualTerminal_MenuScreen();
 }
 
 static int
 readCharacters_MenuScreen (const ScreenBox *box, ScreenCharacter *buffer) {
-  Menu *submenu = getSubmenu();
+  if (validateScreenBox(box, screenWidth, screenHeight)) {
+    ScreenCharacter *character = buffer;
+    unsigned int row;
 
-  if (validateScreenBox(box, screenWidth, getMenuSize(submenu))) {
-    wchar_t line[screenWidth];
-    unsigned int row = box->height;
-
-    while (row > 0) {
+    for (row=0; row<box->height; row+=1) {
+      const RenderedMenuItem *rmi = screenLines[row + box->top];
       unsigned int column;
 
-      formatMenuItem(getMenuItem(submenu, box->top+--row),
-                     line, ARRAY_COUNT(line));
-
       for (column=0; column<box->width; column+=1) {
-        int index = box->left + column;
-        ScreenCharacter *character = buffer++;
+        unsigned int index = column + box->left;
 
-        character->text = (index < lineLength)? line[index]: WC_C(' ');
+        character->text = (index < rmi->length)? rmi->text[index]: WC_C(' ');
         character->attributes = SCR_COLOUR_DEFAULT;
+        character += 1;
       }
     }
 
@@ -178,19 +315,13 @@ commandRejected (void) {
 
 static void
 itemChanged (void) {
-  ses->winx = 0;
-  checkScreenWidth();
+  setScreenRow();
+  screenColumn = 0;
 }
 
 static void
 settingChanged (void) {
-  unsigned int textLength = textCount * brl.textRows;
-
-  if (((lineLength - ses->winx) > textLength) && (ses->winx < settingIndent)) {
-    ses->winx = settingIndent;
-  }
-
-  checkScreenWidth();
+  screenUpdated = 1;
 }
 
 static int
@@ -209,12 +340,15 @@ handleCommand_MenuScreen (int command) {
     case BRL_CMD_TOP_LEFT:
     case BRL_CMD_BOT_LEFT:
     case BRL_CMD_MENU_PREV_LEVEL: {
-      Menu *menu = getSubmenu();
+      Menu *menu = screenMenu;
 
       if (menu == rootMenu) {
         commandRejected();
       } else if (!changeMenuItemNext(getMenuItem(menu, 0))) {
         commandRejected();
+      } else {
+        getFocusedItem();
+        settingChanged();
       }
 
       return 1;
@@ -223,7 +357,7 @@ handleCommand_MenuScreen (int command) {
     case BRL_CMD_TOP:
     case BRL_BLK_CMD(PASSKEY)+BRL_KEY_PAGE_UP:
     case BRL_CMD_MENU_FIRST_ITEM:
-      if (setMenuFirstItem(getSubmenu())) {
+      if (setMenuFirstItem(screenMenu)) {
         itemChanged();
       } else {
         commandRejected();
@@ -233,29 +367,25 @@ handleCommand_MenuScreen (int command) {
     case BRL_CMD_BOT:
     case BRL_BLK_CMD(PASSKEY)+BRL_KEY_PAGE_DOWN:
     case BRL_CMD_MENU_LAST_ITEM:
-      if (setMenuLastItem(getSubmenu())) {
+      if (setMenuLastItem(screenMenu)) {
         itemChanged();
       } else {
         commandRejected();
       }
       return 1;
 
-    case BRL_CMD_LNUP:
-    case BRL_CMD_PRDIFLN:
     case BRL_BLK_CMD(PASSKEY)+BRL_KEY_CURSOR_UP:
     case BRL_CMD_MENU_PREV_ITEM:
-      if (setMenuPreviousItem(getSubmenu())) {
+      if (setMenuPreviousItem(screenMenu)) {
         itemChanged();
       } else {
         commandRejected();
       }
       return 1;
 
-    case BRL_CMD_LNDN:
-    case BRL_CMD_NXDIFLN:
     case BRL_BLK_CMD(PASSKEY)+BRL_KEY_CURSOR_DOWN:
     case BRL_CMD_MENU_NEXT_ITEM:
-      if (setMenuNextItem(getSubmenu())) {
+      if (setMenuNextItem(screenMenu)) {
         itemChanged();
       } else {
         commandRejected();
@@ -266,7 +396,7 @@ handleCommand_MenuScreen (int command) {
     case BRL_BLK_CMD(PASSKEY)+BRL_KEY_CURSOR_LEFT:
     case BRL_CMD_BACK:
     case BRL_CMD_MENU_PREV_SETTING:
-      if (changeMenuItemPrevious(getItem())) {
+      if (changeMenuItemPrevious(getFocusedItem())) {
         settingChanged();
       } else {
         commandRejected();
@@ -278,7 +408,7 @@ handleCommand_MenuScreen (int command) {
     case BRL_CMD_HOME:
     case BRL_CMD_RETURN:
     case BRL_CMD_MENU_NEXT_SETTING:
-      if (changeMenuItemNext(getItem())) {
+      if (changeMenuItemNext(getFocusedItem())) {
         settingChanged();
       } else {
         commandRejected();
@@ -290,7 +420,7 @@ handleCommand_MenuScreen (int command) {
         int key = command & BRL_MSK_ARG;
 
         if ((key >= textStart) && (key < (textStart + textCount))) {
-          if (changeMenuItemScaled(getItem(), key-textStart, textCount)) {
+          if (changeMenuItemScaled(getFocusedItem(), key-textStart, textCount)) {
             settingChanged();
           } else {
             commandRejected();
@@ -322,12 +452,17 @@ getCommandContext_MenuScreen (void) {
 void
 initializeMenuScreen (MenuScreen *menu) {
   initializeBaseScreen(&menu->base);
+
   menu->base.currentVirtualTerminal = currentVirtualTerminal_MenuScreen;
   menu->base.formatTitle = formatTitle_MenuScreen;
+
+  menu->base.refresh = refresh_MenuScreen;
   menu->base.describe = describe_MenuScreen;
   menu->base.readCharacters = readCharacters_MenuScreen;
+
   menu->base.handleCommand = handleCommand_MenuScreen;
   menu->base.getCommandContext = getCommandContext_MenuScreen;
+
   menu->construct = construct_MenuScreen;
   menu->destruct = destruct_MenuScreen;
 }

@@ -160,7 +160,7 @@ endMenuItem (MenuItem *item, int deallocating) {
 }
 
 void
-deallocateMenu (Menu *menu) {
+destroyMenu (Menu *menu) {
   if (menu) {
     if (menu->items.array) {
       MenuItem *item = menu->items.array;
@@ -200,28 +200,36 @@ getSelectedMenuItem (Menu *menu) {
 }
 
 static int
-testMenuItem (Menu *menu, unsigned int index, int all) {
-  MenuItem *item = getMenuItem(menu, index);
-
+testMenuItem (const MenuItem *item, int all) {
   if (!item) return 0;
   if (all) return 1;
   if (!item->test) return 1;
   return item->test();
 }
 
+int
+isMenuItemSettable (const MenuItem *item) {
+  return !!item->setting;
+}
+
+int
+isMenuItemVisible (const MenuItem *item) {
+  return testMenuItem(item, 0);
+}
+
 static inline int
 testMenuItemActive (Menu *menu, unsigned int index) {
-  return testMenuItem(menu, index, 0);
+  return testMenuItem(getMenuItem(menu, index), 0);
 }
 
 static inline int
 testMenuItemVisible (Menu *menu, unsigned int index) {
-  return testMenuItem(menu, index, prefs.showAllItems);
+  return testMenuItem(getMenuItem(menu, index), prefs.showAllItems);
 }
 
-int
-isSettableMenuItem (const MenuItem *item) {
-  return !!item->setting;
+unsigned int
+getMenuItemIndex (const MenuItem *item) {
+  return item - item->menu->items.array;
 }
 
 const MenuString *
@@ -608,9 +616,11 @@ beginItem_submenu (MenuItem *item) {
     unsigned int size = getMenuSize(menu);
     unsigned int index;
 
-    for (index=1; index<size; index+=1)
-      if (testMenuItemActive(menu, index))
+    for (index=1; index<size; index+=1) {
+      if (testMenuItemActive(menu, index)) {
         item->data.submenu->visible += 1;
+      }
+    }
 
     item->data.submenu->total = size - 1;
   }
@@ -623,7 +633,7 @@ endItem_submenu (MenuItem *item, int deallocating) {
   if (deallocating) {
     SubmenuData *submenu = item->data.submenu;
 
-    deallocateMenu(submenu->menu);
+    destroyMenu(submenu->menu);
     free(submenu);
   }
 }
@@ -708,7 +718,7 @@ newSubmenuMenuItem (
         }
       }
 
-      deallocateMenu(submenu->menu);
+      destroyMenu(submenu->menu);
     }
 
     free(submenu);
@@ -752,6 +762,13 @@ setMenuLastItem (Menu *menu) {
   if (!menu->items.count) return 0;
   menu->items.index = menu->items.count - 1;
   return testMenuItemVisible(menu, menu->items.index) || setMenuPreviousItem(menu);
+}
+
+int
+setMenuSpecificItem (Menu *menu, unsigned int index) {
+  if (index >= menu->items.count) return 0;
+  menu->items.index = index;
+  return 1;
 }
 
 static int
@@ -828,6 +845,14 @@ getCurrentMenuItem (Menu *menu) {
   }
 
   return newItem;
+}
+
+MenuItem *
+setCurrentMenuItem (MenuItem *item) {
+  Menu *menu = item->menu;
+
+  menu->items.index = getMenuItemIndex(item);
+  return getCurrentMenuItem(menu);
 }
 
 Menu *

@@ -32,7 +32,7 @@ typedef struct {
 } MenuString;
 
 extern Menu *newMenu (void);
-extern void deallocateMenu (Menu *menu);
+extern void destroyMenu (Menu *menu);
 
 extern MenuItem *newNumericMenuItem (
   Menu *menu, unsigned char *setting, const MenuString *name,
@@ -68,7 +68,10 @@ extern unsigned int getMenuSize (const Menu *menu);
 extern unsigned int getMenuIndex (const Menu *menu);
 extern MenuItem *getMenuItem (Menu *menu, unsigned int index);
 
-extern int isSettableMenuItem (const MenuItem *item);
+extern int isMenuItemSettable (const MenuItem *item);
+extern int isMenuItemVisible (const MenuItem *item);
+
+extern unsigned int getMenuItemIndex (const MenuItem *item);
 extern const MenuString *getMenuItemName (const MenuItem *item);
 extern const char *getMenuItemValue (const MenuItem *item);
 extern const char *getMenuItemComment (const MenuItem *item);
@@ -77,12 +80,14 @@ extern int setMenuPreviousItem (Menu *menu);
 extern int setMenuNextItem (Menu *menu);
 extern int setMenuFirstItem (Menu *menu);
 extern int setMenuLastItem (Menu *menu);
+extern int setMenuSpecificItem (Menu *menu, unsigned int index);
 
 extern int changeMenuItemPrevious (MenuItem *item);
 extern int changeMenuItemNext (MenuItem *item);
 extern int changeMenuItemScaled (MenuItem *item, unsigned int index, unsigned int count);
 
 extern MenuItem *getCurrentMenuItem (Menu *menu);
+extern MenuItem *setCurrentMenuItem (MenuItem *item);
 extern Menu *getCurrentSubmenu (Menu *menu);
 
 #ifdef __cplusplus
