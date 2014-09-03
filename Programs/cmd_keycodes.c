@@ -29,33 +29,6 @@
 #include "alert.h"
 
 typedef enum {
-  BRL_KEY_F1 = BRL_KEY_FUNCTION,
-  BRL_KEY_F2,
-  BRL_KEY_F3,
-  BRL_KEY_F4,
-  BRL_KEY_F5,
-  BRL_KEY_F6,
-  BRL_KEY_F7,
-  BRL_KEY_F8,
-  BRL_KEY_F9,
-  BRL_KEY_F10,
-  BRL_KEY_F11,
-  BRL_KEY_F12,
-  BRL_KEY_F13,
-  BRL_KEY_F14,
-  BRL_KEY_F15,
-  BRL_KEY_F16,
-  BRL_KEY_F17,
-  BRL_KEY_F18,
-  BRL_KEY_F19,
-  BRL_KEY_F20,
-  BRL_KEY_F21,
-  BRL_KEY_F22,
-  BRL_KEY_F23,
-  BRL_KEY_F24
-} FunctionKeys;
-
-typedef enum {
   MOD_RELEASE = 0, /* must be first */
 
   MOD_WINDOWS_LEFT,
@@ -87,32 +60,32 @@ typedef struct {
 } KeyEntry;
 
 static const KeyEntry keyEntry_Escape = {BRL_CMD_KEY(ESCAPE)};
-static const KeyEntry keyEntry_F1 = {BRL_CMD_KEY(F1)};
-static const KeyEntry keyEntry_F2 = {BRL_CMD_KEY(F2)};
-static const KeyEntry keyEntry_F3 = {BRL_CMD_KEY(F3)};
-static const KeyEntry keyEntry_F4 = {BRL_CMD_KEY(F4)};
-static const KeyEntry keyEntry_F5 = {BRL_CMD_KEY(F5)};
-static const KeyEntry keyEntry_F6 = {BRL_CMD_KEY(F6)};
-static const KeyEntry keyEntry_F7 = {BRL_CMD_KEY(F7)};
-static const KeyEntry keyEntry_F8 = {BRL_CMD_KEY(F8)};
-static const KeyEntry keyEntry_F9 = {BRL_CMD_KEY(F9)};
-static const KeyEntry keyEntry_F10 = {BRL_CMD_KEY(F10)};
-static const KeyEntry keyEntry_F11 = {BRL_CMD_KEY(F11)};
-static const KeyEntry keyEntry_F12 = {BRL_CMD_KEY(F12)};
+static const KeyEntry keyEntry_F1 = {BRL_CMD_KFN(1)};
+static const KeyEntry keyEntry_F2 = {BRL_CMD_KFN(2)};
+static const KeyEntry keyEntry_F3 = {BRL_CMD_KFN(3)};
+static const KeyEntry keyEntry_F4 = {BRL_CMD_KFN(4)};
+static const KeyEntry keyEntry_F5 = {BRL_CMD_KFN(5)};
+static const KeyEntry keyEntry_F6 = {BRL_CMD_KFN(6)};
+static const KeyEntry keyEntry_F7 = {BRL_CMD_KFN(7)};
+static const KeyEntry keyEntry_F8 = {BRL_CMD_KFN(8)};
+static const KeyEntry keyEntry_F9 = {BRL_CMD_KFN(9)};
+static const KeyEntry keyEntry_F10 = {BRL_CMD_KFN(10)};
+static const KeyEntry keyEntry_F11 = {BRL_CMD_KFN(11)};
+static const KeyEntry keyEntry_F12 = {BRL_CMD_KFN(12)};
 static const KeyEntry keyEntry_ScrollLock = {MOD_LOCK_SCROLL};
 
-static const KeyEntry keyEntry_F13 = {BRL_CMD_KEY(F13)};
-static const KeyEntry keyEntry_F14 = {BRL_CMD_KEY(F14)};
-static const KeyEntry keyEntry_F15 = {BRL_CMD_KEY(F15)};
-static const KeyEntry keyEntry_F16 = {BRL_CMD_KEY(F16)};
-static const KeyEntry keyEntry_F17 = {BRL_CMD_KEY(F17)};
-static const KeyEntry keyEntry_F18 = {BRL_CMD_KEY(F18)};
-static const KeyEntry keyEntry_F19 = {BRL_CMD_KEY(F19)};
-static const KeyEntry keyEntry_F20 = {BRL_CMD_KEY(F20)};
-static const KeyEntry keyEntry_F21 = {BRL_CMD_KEY(F21)};
-static const KeyEntry keyEntry_F22 = {BRL_CMD_KEY(F22)};
-static const KeyEntry keyEntry_F23 = {BRL_CMD_KEY(F23)};
-static const KeyEntry keyEntry_F24 = {BRL_CMD_KEY(F24)};
+static const KeyEntry keyEntry_F13 = {BRL_CMD_KFN(13)};
+static const KeyEntry keyEntry_F14 = {BRL_CMD_KFN(14)};
+static const KeyEntry keyEntry_F15 = {BRL_CMD_KFN(15)};
+static const KeyEntry keyEntry_F16 = {BRL_CMD_KFN(16)};
+static const KeyEntry keyEntry_F17 = {BRL_CMD_KFN(17)};
+static const KeyEntry keyEntry_F18 = {BRL_CMD_KFN(18)};
+static const KeyEntry keyEntry_F19 = {BRL_CMD_KFN(19)};
+static const KeyEntry keyEntry_F20 = {BRL_CMD_KFN(20)};
+static const KeyEntry keyEntry_F21 = {BRL_CMD_KFN(21)};
+static const KeyEntry keyEntry_F22 = {BRL_CMD_KFN(22)};
+static const KeyEntry keyEntry_F23 = {BRL_CMD_KFN(23)};
+static const KeyEntry keyEntry_F24 = {BRL_CMD_KFN(24)};
 
 static const KeyEntry keyEntry_Grave = {BRL_CMD_CHAR(WC_C('`')), BRL_CMD_CHAR(WC_C('~'))};
 static const KeyEntry keyEntry_1 = {BRL_CMD_CHAR(WC_C('1')), BRL_CMD_CHAR(WC_C('!'))};
