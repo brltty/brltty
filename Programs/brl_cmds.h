@@ -292,6 +292,7 @@ typedef enum {
 #define BRL_CMD_BLK(cmd) (BRL_BLK_##cmd << BRL_SHIFT_BLK)
 #define BRL_CMD_KEY(key) (BRL_CMD_BLK(PASSKEY) + BRL_KEY_##key)
 #define BRL_CMD_KFN(n) (BRL_CMD_KEY(FUNCTION) + ((n) - 1))
+#define BRL_CMD_CHAR(wc) (BRL_CMD_BLK(PASSCHAR) | BRL_ARG_SET((wc)))
 
 #define BRL_FLG_LINE_SCALED 0X010000 /* scale arg=0X00-0XFF to screen height */
 #define BRL_FLG_LINE_TOLEFT 0X020000 /* go to beginning of line */
