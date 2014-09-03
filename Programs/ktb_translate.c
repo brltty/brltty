@@ -356,14 +356,14 @@ isRepeatableCommand (int command) {
           case BRL_CMD_MENU_PREV_SETTING:
           case BRL_CMD_MENU_NEXT_SETTING:
 
-          case BRL_BLK_CMD(PASSKEY) + BRL_KEY_BACKSPACE:
-          case BRL_BLK_CMD(PASSKEY) + BRL_KEY_DELETE:
-          case BRL_BLK_CMD(PASSKEY) + BRL_KEY_PAGE_UP:
-          case BRL_BLK_CMD(PASSKEY) + BRL_KEY_PAGE_DOWN:
-          case BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_UP:
-          case BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_DOWN:
-          case BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_LEFT:
-          case BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_RIGHT:
+          case BRL_KEY_CMD(BACKSPACE):
+          case BRL_KEY_CMD(DELETE):
+          case BRL_KEY_CMD(PAGE_UP):
+          case BRL_KEY_CMD(PAGE_DOWN):
+          case BRL_KEY_CMD(CURSOR_UP):
+          case BRL_KEY_CMD(CURSOR_DOWN):
+          case BRL_KEY_CMD(CURSOR_LEFT):
+          case BRL_KEY_CMD(CURSOR_RIGHT):
 
           case BRL_CMD_SPEAK_PREV_CHAR:
           case BRL_CMD_SPEAK_NEXT_CHAR:

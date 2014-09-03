@@ -335,13 +335,13 @@ int brl_keyToCommand(BrailleDisplay *brl, KeyTableCommandContext context, int co
       case BRL_VSKEY_C8: return BRL_CMD_FWINRT;
       case BRL_VSKEY_C6: return BRL_CMD_FWINLT;
       case BRL_VSKEY_C7: return BRL_CMD_HOME;
-      case BRL_VSKEY_B2: return BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_UP;
-      case BRL_VSKEY_D2: return BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_DOWN;
-      case BRL_VSKEY_C3: return BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_RIGHT;
-      case BRL_VSKEY_C1: return BRL_BLK_CMD(PASSKEY) + BRL_KEY_CURSOR_LEFT;
+      case BRL_VSKEY_B2: return BRL_KEY_CMD(CURSOR_UP);
+      case BRL_VSKEY_D2: return BRL_KEY_CMD(CURSOR_DOWN);
+      case BRL_VSKEY_C3: return BRL_KEY_CMD(CURSOR_RIGHT);
+      case BRL_VSKEY_C1: return BRL_KEY_CMD(CURSOR_LEFT);
       case BRL_VSKEY_B3: return BRL_CMD_CSRVIS;
-      case BRL_VSKEY_D1: return BRL_BLK_CMD(PASSKEY) + BRL_KEY_DELETE;  
-      case BRL_VSKEY_D3: return BRL_BLK_CMD(PASSKEY) + BRL_KEY_INSERT;
+      case BRL_VSKEY_D1: return BRL_KEY_CMD(DELETE);  
+      case BRL_VSKEY_D3: return BRL_KEY_CMD(INSERT);
       case BRL_VSKEY_C5: return BRL_CMD_PASTE;
       case BRL_VSKEY_D5: descchar = 1; return EOF;
       case BRL_VSKEY_B4: printcode = 1; return EOF;
@@ -358,25 +358,25 @@ int brl_keyToCommand(BrailleDisplay *brl, KeyTableCommandContext context, int co
     /* altpressed = 0; */
     switch (code) {
       case BRL_VSKEY_PLOC_LT: return BRL_CMD_SIXDOTS;
-      case BRL_VSKEY_BACKSPACE: return BRL_BLK_CMD(PASSKEY) + BRL_KEY_BACKSPACE;
-      case BRL_VSKEY_TAB: return BRL_BLK_CMD(PASSKEY) + BRL_KEY_TAB;
-      case BRL_VSKEY_RETURN: return BRL_BLK_CMD(PASSKEY) + BRL_KEY_ENTER;
+      case BRL_VSKEY_BACKSPACE: return BRL_KEY_CMD(BACKSPACE);
+      case BRL_VSKEY_TAB: return BRL_KEY_CMD(TAB);
+      case BRL_VSKEY_RETURN: return BRL_KEY_CMD(ENTER);
       case BRL_VSKEY_PLOC_PLOC_A: return BRL_CMD_HELP;
       case BRL_VSKEY_PLOC_PLOC_B: return BRL_CMD_TUNES; 
       case BRL_VSKEY_PLOC_PLOC_C: return BRL_CMD_PREFMENU;
-      case BRL_VSKEY_PLOC_PLOC_D: return BRL_BLK_CMD(PASSKEY) + BRL_KEY_PAGE_DOWN;
-      case BRL_VSKEY_PLOC_PLOC_E: return BRL_BLK_CMD(PASSKEY) + BRL_KEY_END;
+      case BRL_VSKEY_PLOC_PLOC_D: return BRL_KEY_CMD(PAGE_DOWN);
+      case BRL_VSKEY_PLOC_PLOC_E: return BRL_KEY_CMD(END);
       case BRL_VSKEY_PLOC_PLOC_F: return BRL_CMD_FREEZE;
-      case BRL_VSKEY_PLOC_PLOC_H: return BRL_BLK_CMD(PASSKEY) + BRL_KEY_HOME;
+      case BRL_VSKEY_PLOC_PLOC_H: return BRL_KEY_CMD(HOME);
       case BRL_VSKEY_PLOC_PLOC_I: return BRL_CMD_INFO;
       case BRL_VSKEY_PLOC_PLOC_L: return BRL_CMD_LEARN;
       case BRL_VSKEY_PLOC_PLOC_R: return BRL_CMD_PREFLOAD;
       case BRL_VSKEY_PLOC_PLOC_S: return BRL_CMD_PREFSAVE;
       case BRL_VSKEY_PLOC_PLOC_T: return BRL_CMD_CSRTRK;
-      case BRL_VSKEY_PLOC_PLOC_U: return BRL_BLK_CMD(PASSKEY) + BRL_KEY_PAGE_UP;
+      case BRL_VSKEY_PLOC_PLOC_U: return BRL_KEY_CMD(PAGE_UP);
       case BRL_VSKEY_CONTROL: ctrlpressed = BRL_FLG_CHAR_CONTROL; return BRL_CMD_NOOP;
       case BRL_VSKEY_ALT: altpressed = BRL_FLG_CHAR_META; return BRL_CMD_NOOP;   
-      case BRL_VSKEY_ESCAPE: return BRL_BLK_CMD(PASSKEY) + BRL_KEY_ESCAPE;
+      case BRL_VSKEY_ESCAPE: return BRL_KEY_CMD(ESCAPE);
       default: return EOF;
     }
   }
