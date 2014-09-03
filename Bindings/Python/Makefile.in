@@ -49,8 +49,8 @@ $(PYTHON_API): brlapi.auto.c $(API_HDRS) brlapi
 brlapi.auto.c: $(SRC_DIR)/brlapi.pyx $(SRC_DIR)/c_brlapi.pxd constants.auto.pyx
 	$(CYTHON) -I. -o $@ $(SRC_DIR)/brlapi.pyx
 
-constants.auto.pyx: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
-	$(AWK) $(CONSTANTS_OPTIONS) $(CONSTANTS_SOURCES) >$@
+constants.auto.pyx: $(CONSTANTS_DEPENDENCIES)
+	$(AWK) $(CONSTANTS_ARGUMENTS) >$@
 
 doc: $(PYTHON_API)
 	LD_PRELOAD=$(API_LIB) $(PYTHON) $(SRC_DIR)/mkdoc.py $(PYTHON_MODULE)

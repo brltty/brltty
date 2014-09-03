@@ -446,14 +446,14 @@ $(API_ARC): $(API_OBJS)
 brlapi_client.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brlapi_client.c
 
-brlapi_constants.h: $(SRC_DIR)/brl_cmds.h $(SRC_DIR)/brl_cmds.awk $(SRC_DIR)/brlapi_constants.awk
-	$(AWK) -f $(SRC_DIR)/brl_cmds.awk -f $(SRC_DIR)/brlapi_constants.awk $(SRC_DIR)/brl_cmds.h >$@
+brlapi_constants.h: $(SRC_DIR)/brlapi_constants.awk $(COMMANDS_DEPENDENCIES)
+	$(AWK) -f $(SRC_DIR)/brlapi_constants.awk $(COMMANDS_ARGUMENTS) >$@
 
-brlapi_keytab.auto.h: $(SRC_DIR)/brl_cmds.h $(SRC_DIR)/brl_cmds.awk $(SRC_DIR)/brlapi_keytab.awk
-	$(AWK) -f $(SRC_DIR)/brl_cmds.awk -f $(SRC_DIR)/brlapi_keytab.awk $(SRC_DIR)/brl_cmds.h >$@
+brlapi_keytab.auto.h: $(SRC_DIR)/brlapi_keytab.awk $(COMMANDS_DEPENDENCIES)
+	$(AWK) -f $(SRC_DIR)/brlapi_keytab.awk $(COMMANDS_ARGUMENTS) >$@
 
-brlapi_brldefs.auto.h: $(SRC_DIR)/brl_cmds.h $(SRC_DIR)/brl_cmds.awk $(SRC_DIR)/brlapi_brldefs.awk
-	$(AWK) -f $(SRC_DIR)/brl_cmds.awk -f $(SRC_DIR)/brlapi_brldefs.awk $(SRC_DIR)/brl_cmds.h >$@
+brlapi_brldefs.auto.h: $(SRC_DIR)/brlapi_brldefs.awk $(COMMANDS_DEPENDENCIES)
+	$(AWK) -f $(SRC_DIR)/brlapi_brldefs.awk $(COMMANDS_ARGUMENTS) >$@
 
 all-api-bindings: api
 	set -- $(API_BINDINGS); \
@@ -784,8 +784,8 @@ ATTRIBUTES_TABLE_FILE = $(SRC_TOP)$(TBL_DIR)/$(ATTRIBUTES_TABLES_SUBDIRECTORY)/$
 attr.auto.h: $(ATTRIBUTES_TABLE_FILE) tbl2hex$(X_FOR_BUILD)
 	./tbl2hex$(X_FOR_BUILD) -- $(ATTRIBUTES_TABLE_FILE) >$@
 
-cmds.auto.h: $(SRC_DIR)/brl_cmds.h $(SRC_DIR)/brl_cmds.awk $(SRC_DIR)/cmds.awk
-	$(AWK) -f $(SRC_DIR)/brl_cmds.awk -f $(SRC_DIR)/cmds.awk $(SRC_DIR)/brl_cmds.h >$@
+cmds.auto.h: $(SRC_DIR)/cmds.awk $(COMMANDS_DEPENDENCIES)
+	$(AWK) -f $(SRC_DIR)/cmds.awk $(COMMANDS_ARGUMENTS) >$@
 
 brl.auto.h: $(SRC_DIR)/mkdrvtab
 	$(SRC_DIR)/mkdrvtab BrailleDriver brl_driver_ $(BRAILLE_INTERNAL_DRIVER_CODES) >$@

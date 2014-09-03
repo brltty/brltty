@@ -68,8 +68,8 @@ classes.made: $(JAVA_SOURCES)
 	$(JAVAC) -d classes -classpath . $(JAVA_SOURCES)
 	touch $@
 
-Constants.java: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
-	$(AWK) $(CONSTANTS_OPTIONS) $(CONSTANTS_SOURCES) >$@
+Constants.java: $(CONSTANTS_DEPENDENCIES)
+	$(AWK) $(CONSTANTS_ARGUMENTS) >$@
 
 doc: doc.made
 

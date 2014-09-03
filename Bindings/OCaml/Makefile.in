@@ -84,8 +84,8 @@ brlapi.ml : $(SRC_DIR)/main.ml constants.ml
 constants.mli : constants.ml
 	$(OCAMLC) -o /dev/null -c -i constants.ml > $@
 
-constants.ml: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
-	$(AWK) $(CONSTANTS_OPTIONS) $(CONSTANTS_SOURCES) >$@
+constants.ml: $(CONSTANTS_DEPENDENCIES)
+	$(AWK) $(CONSTANTS_ARGUMENTS) >$@
 
 clean::
 	rm -f *.cm* *.a *.so constants.ml* brlapi.ml*
