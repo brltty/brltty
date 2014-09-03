@@ -528,23 +528,23 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
          case KEY_FUNCTION_CURSOR_RIGHT_JUMP:
             return BRL_CMD_KEY(PAGE_DOWN);
          case KEY_FUNCTION_F1:
-            return BRL_CMD_KEY(FUNCTION) + 0;
+            return BRL_CMD_KFN(1);
          case KEY_FUNCTION_F2:
-            return BRL_CMD_KEY(FUNCTION) + 1;
+            return BRL_CMD_KFN(2);
          case KEY_FUNCTION_F3:
-            return BRL_CMD_KEY(FUNCTION) + 2;
+            return BRL_CMD_KFN(3);
          case KEY_FUNCTION_F4:
-            return BRL_CMD_KEY(FUNCTION) + 3;
+            return BRL_CMD_KFN(4);
          case KEY_FUNCTION_F5:
-            return BRL_CMD_KEY(FUNCTION) + 4;
+            return BRL_CMD_KFN(5);
          case KEY_FUNCTION_F6:
-            return BRL_CMD_KEY(FUNCTION) + 5;
+            return BRL_CMD_KFN(6);
          case KEY_FUNCTION_F7:
-            return BRL_CMD_KEY(FUNCTION) + 6;
+            return BRL_CMD_KFN(7);
          case KEY_FUNCTION_F9:
-            return BRL_CMD_KEY(FUNCTION) + 8;
+            return BRL_CMD_KFN(9);
          case KEY_FUNCTION_F10:
-            return BRL_CMD_KEY(FUNCTION) + 9;
+            return BRL_CMD_KFN(10);
          case KEY_COMMAND: {
             int command;
             while ((command = readKey()) == EOF) asyncWait(1);
