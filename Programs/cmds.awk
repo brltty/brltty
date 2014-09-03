@@ -71,11 +71,11 @@ function brlCommand(name, symbol, value, help) {
 }
 
 function brlBlock(name, symbol, value, help) {
-  writeCommandEntry(name, symbol, "BRL_BLK_CMD(" name ")", help)
+  writeCommandEntry(name, symbol, "BRL_CMD_BLK(" name ")", help)
 }
 
 function brlKey(name, symbol, value, help) {
-  writeCommandEntry("KEY_" name, symbol, "BRL_KEY_CMD(" name ")", help)
+  writeCommandEntry("KEY_" name, symbol, "BRL_CMD_KEY(" name ")", help)
 }
 
 function brlFlag(name, symbol, value, help) {

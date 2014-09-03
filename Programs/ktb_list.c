@@ -244,7 +244,7 @@ listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
 static int
 listHotkeyEvent (ListGenerationData *lgd, const KeyValue *keyValue, const char *event, const BoundCommand *cmd) {
   if (cmd->value != BRL_CMD_NOOP) {
-    if ((cmd->value & BRL_MSK_BLK) == BRL_BLK_CMD(CONTEXT)) {
+    if ((cmd->value & BRL_MSK_BLK) == BRL_CMD_BLK(CONTEXT)) {
       const KeyContext *c = getKeyContext(lgd->keyTable, (KTB_CTX_DEFAULT + (cmd->value & BRL_MSK_ARG)));
       if (!c) return 0;
       if (!putUtf8String(lgd, "switch to ")) return 0;
@@ -287,7 +287,7 @@ listKeyBinding (ListGenerationData *lgd, const KeyBinding *binding, int longPres
 
   if (!putKeyCombination(lgd, &binding->keyCombination)) return 0;
 
-  if ((cmd->value & BRL_MSK_BLK) == BRL_BLK_CMD(CONTEXT)) {
+  if ((cmd->value & BRL_MSK_BLK) == BRL_CMD_BLK(CONTEXT)) {
     const KeyContext *c = getKeyContext(lgd->keyTable, (KTB_CTX_DEFAULT + (cmd->value & BRL_MSK_ARG)));
     if (!c) return 0;
 

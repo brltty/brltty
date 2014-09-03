@@ -768,7 +768,7 @@ parseCommandOperand (DataFile *file, BoundCommand *cmd, const wchar_t *character
     }
 
     if (!offsetDone) {
-      if ((*command)->code == BRL_BLK_CMD(CONTEXT)) {
+      if ((*command)->code == BRL_CMD_BLK(CONTEXT)) {
         unsigned char context;
 
         if (findKeyContext(&context, modifier.characters, modifier.length, ktd)) {

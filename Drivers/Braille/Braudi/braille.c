@@ -278,7 +278,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
           if (interpretNumber(&key, &bytes, &count)) {
             if (!count) {
-              if ((key > 0) && (key <= brl->textColumns)) return BRL_BLK_CMD(ROUTE) + (key - 1);
+              if ((key > 0) && (key <= brl->textColumns)) return BRL_CMD_BLK(ROUTE) + (key - 1);
             }
           }
 

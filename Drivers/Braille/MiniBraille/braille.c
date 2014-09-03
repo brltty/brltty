@@ -179,7 +179,7 @@ struct InputModeStruct {
 
 #define BIND(k,t,v) .key##k = {.type = IBT_##t, .value.t = (v)}
 #define BIND_COMMAND(k,c) BIND(k, command, BRL_CMD_##c)
-#define BIND_BLOCK(k,b) BIND(k, block, BRL_BLK_CMD(b))
+#define BIND_BLOCK(k,b) BIND(k, block, BRL_CMD_BLK(b))
 #define BIND_FUNCTION(k,f) BIND(k, function, inputFunction_##f)
 #define BIND_SUBMODE(k,m) BIND(k, submode, &inputMode_##m)
 

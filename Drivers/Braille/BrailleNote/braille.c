@@ -370,13 +370,13 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 static int
 virtualKeyToCommand (int vkey) {
   switch (vkey) {
-    case 0X0D: return BRL_BLK_CMD(PASSKEY) | BRL_KEY_ENTER;
-    case 0X1B: return BRL_BLK_CMD(PASSKEY) | BRL_KEY_ESCAPE;
-    case 0X25: return BRL_BLK_CMD(PASSKEY) | BRL_KEY_CURSOR_LEFT;
-    case 0X26: return BRL_BLK_CMD(PASSKEY) | BRL_KEY_CURSOR_UP;
-    case 0X27: return BRL_BLK_CMD(PASSKEY) | BRL_KEY_CURSOR_RIGHT;
-    case 0X28: return BRL_BLK_CMD(PASSKEY) | BRL_KEY_CURSOR_DOWN;
-    case 0X2E: return BRL_BLK_CMD(PASSKEY) | BRL_KEY_DELETE;
+    case 0X0D: return BRL_CMD_BLK(PASSKEY) | BRL_KEY_ENTER;
+    case 0X1B: return BRL_CMD_BLK(PASSKEY) | BRL_KEY_ESCAPE;
+    case 0X25: return BRL_CMD_BLK(PASSKEY) | BRL_KEY_CURSOR_LEFT;
+    case 0X26: return BRL_CMD_BLK(PASSKEY) | BRL_KEY_CURSOR_UP;
+    case 0X27: return BRL_CMD_BLK(PASSKEY) | BRL_KEY_CURSOR_RIGHT;
+    case 0X28: return BRL_CMD_BLK(PASSKEY) | BRL_KEY_CURSOR_DOWN;
+    case 0X2E: return BRL_CMD_BLK(PASSKEY) | BRL_KEY_DELETE;
     default:   return BRL_CMD_NOOP;
   }
 }
@@ -483,15 +483,15 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
         switch (packet.data.values.inputChar) {
           case 0X08:
-            command = BRL_BLK_CMD(PASSKEY) | BRL_KEY_BACKSPACE;
+            command = BRL_CMD_BLK(PASSKEY) | BRL_KEY_BACKSPACE;
             break;
 
           case 0X09:
-            command = BRL_BLK_CMD(PASSKEY) | BRL_KEY_TAB;
+            command = BRL_CMD_BLK(PASSKEY) | BRL_KEY_TAB;
             break;
 
           default:
-            command = BRL_BLK_CMD(PASSCHAR) | packet.data.values.inputChar;
+            command = BRL_CMD_BLK(PASSCHAR) | packet.data.values.inputChar;
             break;
         }
 

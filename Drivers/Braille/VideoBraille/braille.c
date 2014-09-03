@@ -165,12 +165,12 @@ static int brl_readCommand(BrailleDisplay *brl, KeyTableCommandContext context) 
     else if (buttons.bigbuttons==KEY_HOME) {
       /* If a routing key has been pressed, then mark the beginning of a block;
          go to cursor position otherwise */
-      return (buttons.routingkey>0) ? BRL_BLK_CMD(CLIP_NEW)+buttons.routingkey-1 : BRL_CMD_HOME;
+      return (buttons.routingkey>0) ? BRL_CMD_BLK(CLIP_NEW)+buttons.routingkey-1 : BRL_CMD_HOME;
     }
     else if (buttons.bigbuttons==KEY_MENU) {
       /* If a routing key has been pressed, then mark the end of a block;
          go to preferences menu otherwise */
-      return (buttons.routingkey>0) ? BRL_BLK_CMD(COPY_RECT)+buttons.routingkey-1 : BRL_CMD_PREFMENU;
+      return (buttons.routingkey>0) ? BRL_CMD_BLK(COPY_RECT)+buttons.routingkey-1 : BRL_CMD_PREFMENU;
     }
     else if (buttons.bigbuttons==(KEY_ATTRIBUTES | KEY_MENU)) return BRL_CMD_PASTE;
     else if (buttons.bigbuttons==(KEY_CURSOR | KEY_LEFT)) return BRL_CMD_CHRLT;
@@ -183,7 +183,7 @@ static int brl_readCommand(BrailleDisplay *brl, KeyTableCommandContext context) 
       /* A cursor routing key has been pressed */
       if (buttons.routingkey>0) {
         usleep(5);
-        return BRL_BLK_CMD(ROUTE)+buttons.routingkey-1;
+        return BRL_CMD_BLK(ROUTE)+buttons.routingkey-1;
       }
       else return EOF;
     } else

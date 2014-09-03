@@ -316,7 +316,7 @@ settingChanged (void) {
 static int
 handleCommand_MenuScreen (int command) {
   switch (command) {
-    case BRL_KEY_CMD(BACKSPACE):
+    case BRL_CMD_KEY(BACKSPACE):
     case BRL_CMD_MENU_PREV_LEVEL: {
       Menu *menu = screenMenu;
 
@@ -334,29 +334,29 @@ handleCommand_MenuScreen (int command) {
       }
     }
 
-    case BRL_KEY_CMD(ESCAPE):
-    case BRL_KEY_CMD(ENTER): {
+    case BRL_CMD_KEY(ESCAPE):
+    case BRL_CMD_KEY(ENTER): {
       int handled = handleCommand(BRL_CMD_PREFMENU);
 
       if (handled) setFocusedItem();
       return handled;
     }
 
-    case BRL_KEY_CMD(HOME): {
+    case BRL_CMD_KEY(HOME): {
       int handled = handleCommand(BRL_CMD_PREFLOAD);
 
       if (handled) settingChanged();
       return handled;
     }
 
-    case BRL_KEY_CMD(END): {
+    case BRL_CMD_KEY(END): {
       int handled = handleCommand(BRL_CMD_PREFSAVE);
 
       if (handled) setFocusedItem();
       return handled;
     }
 
-    case BRL_KEY_CMD(PAGE_UP):
+    case BRL_CMD_KEY(PAGE_UP):
     case BRL_CMD_MENU_FIRST_ITEM:
       if (changeMenuItemFirst(screenMenu)) {
         itemChanged();
@@ -365,7 +365,7 @@ handleCommand_MenuScreen (int command) {
       }
       return 1;
 
-    case BRL_KEY_CMD(PAGE_DOWN):
+    case BRL_CMD_KEY(PAGE_DOWN):
     case BRL_CMD_MENU_LAST_ITEM:
       if (changeMenuItemLast(screenMenu)) {
         itemChanged();
@@ -374,7 +374,7 @@ handleCommand_MenuScreen (int command) {
       }
       return 1;
 
-    case BRL_KEY_CMD(CURSOR_UP):
+    case BRL_CMD_KEY(CURSOR_UP):
     case BRL_CMD_MENU_PREV_ITEM:
       if (changeMenuItemPrevious(screenMenu, 1)) {
         itemChanged();
@@ -383,7 +383,7 @@ handleCommand_MenuScreen (int command) {
       }
       return 1;
 
-    case BRL_KEY_CMD(CURSOR_DOWN):
+    case BRL_CMD_KEY(CURSOR_DOWN):
     case BRL_CMD_MENU_NEXT_ITEM:
       if (changeMenuItemNext(screenMenu, 1)) {
         itemChanged();
@@ -392,7 +392,7 @@ handleCommand_MenuScreen (int command) {
       }
       return 1;
 
-    case BRL_KEY_CMD(CURSOR_LEFT):
+    case BRL_CMD_KEY(CURSOR_LEFT):
     case BRL_CMD_BACK:
     case BRL_CMD_MENU_PREV_SETTING:
       setFocusedItem();
@@ -403,7 +403,7 @@ handleCommand_MenuScreen (int command) {
       }
       return 1;
 
-    case BRL_KEY_CMD(CURSOR_RIGHT):
+    case BRL_CMD_KEY(CURSOR_RIGHT):
     case BRL_CMD_HOME:
     case BRL_CMD_RETURN:
     case BRL_CMD_MENU_NEXT_SETTING:
@@ -416,7 +416,7 @@ handleCommand_MenuScreen (int command) {
       return 1;
 
     default:
-      if ((command & BRL_MSK_BLK) == BRL_BLK_CMD(ROUTE)) {
+      if ((command & BRL_MSK_BLK) == BRL_CMD_BLK(ROUTE)) {
         int key = command & BRL_MSK_ARG;
 
         if ((key >= textStart) && (key < (textStart + textCount))) {

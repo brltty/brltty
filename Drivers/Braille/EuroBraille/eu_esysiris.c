@@ -590,32 +590,32 @@ makeKeyboardCommand (BrailleDisplay *brl, const unsigned char *packet) {
     case 0:
       switch (b) {
         case 0:
-          command = BRL_BLK_CMD(PASSCHAR) | d;
+          command = BRL_CMD_BLK(PASSCHAR) | d;
           break;
 
         case BS:
-          command = BRL_BLK_CMD(PASSKEY) | BRL_KEY_BACKSPACE;
+          command = BRL_CMD_BLK(PASSKEY) | BRL_KEY_BACKSPACE;
           break;
 
         case HT:
-          command = BRL_BLK_CMD(PASSKEY) | BRL_KEY_TAB;
+          command = BRL_CMD_BLK(PASSKEY) | BRL_KEY_TAB;
           break;
 
         case CR:
-          command = BRL_BLK_CMD(PASSKEY) | BRL_KEY_ENTER;
+          command = BRL_CMD_BLK(PASSKEY) | BRL_KEY_ENTER;
           break;
 
         case ESC:
-          command = BRL_BLK_CMD(PASSKEY) | BRL_KEY_ESCAPE;
+          command = BRL_CMD_BLK(PASSKEY) | BRL_KEY_ESCAPE;
           break;
 
         case 0X20: // space
-          command = BRL_BLK_CMD(PASSCHAR) | b;
+          command = BRL_CMD_BLK(PASSCHAR) | b;
           break;
 
         default:
           if ((b >= 0X70) && (b <= 0X7B)) {
-            command = BRL_BLK_CMD(PASSKEY) | (BRL_KEY_FUNCTION + (b - 0X70));
+            command = BRL_CMD_BLK(PASSKEY) | (BRL_KEY_FUNCTION + (b - 0X70));
           }
           break;
       }
@@ -624,43 +624,43 @@ makeKeyboardCommand (BrailleDisplay *brl, const unsigned char *packet) {
     case 1:
       switch (b) {
         case 0X07:
-          command = BRL_BLK_CMD(PASSKEY) | BRL_KEY_HOME;
+          command = BRL_CMD_BLK(PASSKEY) | BRL_KEY_HOME;
           break;
 
         case 0X08:
-          command = BRL_BLK_CMD(PASSKEY) | BRL_KEY_END;
+          command = BRL_CMD_BLK(PASSKEY) | BRL_KEY_END;
           break;
 
         case 0X09:
-          command = BRL_BLK_CMD(PASSKEY) | BRL_KEY_PAGE_UP;
+          command = BRL_CMD_BLK(PASSKEY) | BRL_KEY_PAGE_UP;
           break;
 
         case 0X0A:
-          command = BRL_BLK_CMD(PASSKEY) | BRL_KEY_PAGE_DOWN;
+          command = BRL_CMD_BLK(PASSKEY) | BRL_KEY_PAGE_DOWN;
           break;
 
         case 0X0B:
-          command = BRL_BLK_CMD(PASSKEY) | BRL_KEY_CURSOR_LEFT;
+          command = BRL_CMD_BLK(PASSKEY) | BRL_KEY_CURSOR_LEFT;
           break;
 
         case 0X0C:
-          command = BRL_BLK_CMD(PASSKEY) | BRL_KEY_CURSOR_RIGHT;
+          command = BRL_CMD_BLK(PASSKEY) | BRL_KEY_CURSOR_RIGHT;
           break;
 
         case 0X0D:
-          command = BRL_BLK_CMD(PASSKEY) | BRL_KEY_CURSOR_UP;
+          command = BRL_CMD_BLK(PASSKEY) | BRL_KEY_CURSOR_UP;
           break;
 
         case 0X0E:
-          command = BRL_BLK_CMD(PASSKEY) | BRL_KEY_CURSOR_DOWN;
+          command = BRL_CMD_BLK(PASSKEY) | BRL_KEY_CURSOR_DOWN;
           break;
 
         case 0X0F:
-          command = BRL_BLK_CMD(PASSKEY) | BRL_KEY_INSERT;
+          command = BRL_CMD_BLK(PASSKEY) | BRL_KEY_INSERT;
           break;
 
         case 0X10:
-          command = BRL_BLK_CMD(PASSKEY) | BRL_KEY_DELETE;
+          command = BRL_CMD_BLK(PASSKEY) | BRL_KEY_DELETE;
           break;
 
         default:

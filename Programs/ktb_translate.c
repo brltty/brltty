@@ -151,7 +151,7 @@ makeKeyboardCommand (KeyTable *table, unsigned char context) {
   const KeyContext *ctx;
 
   if ((ctx = getKeyContext(table, context))) {
-    int keyboardCommand = BRL_BLK_CMD(PASSDOTS);
+    int keyboardCommand = BRL_CMD_BLK(PASSDOTS);
 
     {
       unsigned int pressedIndex;
@@ -248,7 +248,7 @@ processCommand (KeyTable *table, int command) {
   int arg = command & BRL_MSK_ARG;
 
   switch (blk) {
-    case BRL_BLK_CMD(CONTEXT): {
+    case BRL_CMD_BLK(CONTEXT): {
       unsigned char context = KTB_CTX_DEFAULT + arg;
       const KeyContext *ctx = getKeyContext(table, context);
 
@@ -257,10 +257,10 @@ processCommand (KeyTable *table, int command) {
         table->context.next = context;
 
         if (isTemporaryKeyContext(table, ctx)) {
-          if (!enqueueCommand(BRL_BLK_CMD(ALERT) + ALERT_TOGGLE_ON)) return 0;
+          if (!enqueueCommand(BRL_CMD_BLK(ALERT) + ALERT_TOGGLE_ON)) return 0;
         } else {
           table->context.persistent = context;
-          if (!enqueueCommand(BRL_BLK_CMD(ALERT) + ALERT_TOGGLE_OFF)) return 0;
+          if (!enqueueCommand(BRL_CMD_BLK(ALERT) + ALERT_TOGGLE_OFF)) return 0;
         }
       }
 
@@ -338,8 +338,8 @@ static int
 isRepeatableCommand (int command) {
   if (prefs.autorepeat) {
     switch (command & BRL_MSK_BLK) {
-      case BRL_BLK_CMD(PASSCHAR):
-      case BRL_BLK_CMD(PASSDOTS):
+      case BRL_CMD_BLK(PASSCHAR):
+      case BRL_CMD_BLK(PASSDOTS):
         return 1;
 
       default:
@@ -356,14 +356,14 @@ isRepeatableCommand (int command) {
           case BRL_CMD_MENU_PREV_SETTING:
           case BRL_CMD_MENU_NEXT_SETTING:
 
-          case BRL_KEY_CMD(BACKSPACE):
-          case BRL_KEY_CMD(DELETE):
-          case BRL_KEY_CMD(PAGE_UP):
-          case BRL_KEY_CMD(PAGE_DOWN):
-          case BRL_KEY_CMD(CURSOR_UP):
-          case BRL_KEY_CMD(CURSOR_DOWN):
-          case BRL_KEY_CMD(CURSOR_LEFT):
-          case BRL_KEY_CMD(CURSOR_RIGHT):
+          case BRL_CMD_KEY(BACKSPACE):
+          case BRL_CMD_KEY(DELETE):
+          case BRL_CMD_KEY(PAGE_UP):
+          case BRL_CMD_KEY(PAGE_DOWN):
+          case BRL_CMD_KEY(CURSOR_UP):
+          case BRL_CMD_KEY(CURSOR_DOWN):
+          case BRL_CMD_KEY(CURSOR_LEFT):
+          case BRL_CMD_KEY(CURSOR_RIGHT):
 
           case BRL_CMD_SPEAK_PREV_CHAR:
           case BRL_CMD_SPEAK_NEXT_CHAR:

@@ -217,11 +217,11 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         break;
 
       case 1:
-        return BRL_BLK_CMD(PASSDOTS) | translateInputCell(packet[2]);
+        return BRL_CMD_BLK(PASSDOTS) | translateInputCell(packet[2]);
 
       case 2: {
         unsigned char column = packet[2];
-        if (column && (column <= brl->textColumns)) return BRL_BLK_CMD(ROUTE) + (column - 1);
+        if (column && (column <= brl->textColumns)) return BRL_CMD_BLK(ROUTE) + (column - 1);
         break;
       }
 
@@ -261,16 +261,16 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
             return BRL_CMD_CHRRT;
 
           case 0x0E: // left thumb
-            return BRL_KEY_CMD(BACKSPACE);
+            return BRL_CMD_KEY(BACKSPACE);
           case 0x0F: // right thumb
-            return BRL_BLK_CMD(PASSDOTS);
+            return BRL_CMD_BLK(PASSDOTS);
           case 0x3F: // both thumbs
-            return BRL_KEY_CMD(ENTER);
+            return BRL_CMD_KEY(ENTER);
 
           case 0X29: // key under dot 7
-            return BRL_KEY_CMD(ESCAPE);
+            return BRL_CMD_KEY(ESCAPE);
           case 0X2A: // key under dot 8
-            return BRL_KEY_CMD(TAB);
+            return BRL_CMD_KEY(TAB);
 
           // right rear: one column, one row
           case 0X19: // extra 3 (40s only)
@@ -294,35 +294,35 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
           // first (top) row of numeric pad
           case 0X37: // seven (40s only)
-            return BRL_KEY_CMD(HOME);
+            return BRL_CMD_KEY(HOME);
           case 0X38: // eight (40s only)
-            return BRL_KEY_CMD(CURSOR_UP);
+            return BRL_CMD_KEY(CURSOR_UP);
           case 0X39: // nine (40s only)
-            return BRL_KEY_CMD(PAGE_UP);
+            return BRL_CMD_KEY(PAGE_UP);
 
           // second row of numeric pad
           case 0X34: // four (40s only)
-            return BRL_KEY_CMD(CURSOR_LEFT);
+            return BRL_CMD_KEY(CURSOR_LEFT);
           case 0X35: // five (40s only)
             return BRL_CMD_CSRJMP_VERT;
           case 0X36: // six (40s only)
-            return BRL_KEY_CMD(CURSOR_RIGHT);
+            return BRL_CMD_KEY(CURSOR_RIGHT);
 
           // third row of numeric pad
           case 0X31: // one (40s only)
-            return BRL_KEY_CMD(END);
+            return BRL_CMD_KEY(END);
           case 0X32: // two (40s only)
-            return BRL_KEY_CMD(CURSOR_DOWN);
+            return BRL_CMD_KEY(CURSOR_DOWN);
           case 0X33: // three (40s only)
-            return BRL_KEY_CMD(PAGE_DOWN);
+            return BRL_CMD_KEY(PAGE_DOWN);
 
           // fourth (bottom) row of numeric pad
           case 0X28: // verr num (40s only)
             return BRL_CMD_SIXDOTS;
           case 0X30: // zero (40s only)
-            return BRL_KEY_CMD(INSERT);
+            return BRL_CMD_KEY(INSERT);
           case 0X2F: // supp (40s only)
-            return BRL_KEY_CMD(DELETE);
+            return BRL_CMD_KEY(DELETE);
         }
         break;
 

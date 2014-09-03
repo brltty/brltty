@@ -580,7 +580,7 @@ handleNavigationCommands (int command, void *data) {
       int flags = command & BRL_MSK_FLG;
 
       switch (blk) {
-        case BRL_BLK_CMD(ROUTE): {
+        case BRL_CMD_BLK(ROUTE): {
           int column, row;
 
           if (getCharacterCoordinates(arg, &column, &row, 0, 1)) {
@@ -593,7 +593,7 @@ handleNavigationCommands (int command, void *data) {
           break;
         }
 
-        case BRL_BLK_CMD(SETLEFT): {
+        case BRL_CMD_BLK(SETLEFT): {
           int column, row;
 
           if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
@@ -605,7 +605,7 @@ handleNavigationCommands (int command, void *data) {
           break;
         }
 
-        case BRL_BLK_CMD(GOTOLINE):
+        case BRL_CMD_BLK(GOTOLINE):
           if (flags & BRL_FLG_LINE_SCALED)
             arg = rescaleInteger(arg, BRL_MSK_ARG, scr.rows-1);
           if (arg < scr.rows) {
@@ -616,14 +616,14 @@ handleNavigationCommands (int command, void *data) {
           }
           break;
 
-        case BRL_BLK_CMD(SETMARK): {
+        case BRL_CMD_BLK(SETMARK): {
           ScreenLocation *mark = &ses->marks[arg];
           mark->column = ses->winx;
           mark->row = ses->winy;
           alert(ALERT_MARK_SET);
           break;
         }
-        case BRL_BLK_CMD(GOTOMARK): {
+        case BRL_CMD_BLK(GOTOMARK): {
           ScreenLocation *mark = &ses->marks[arg];
           ses->winx = mark->column;
           ses->winy = mark->row;
@@ -634,11 +634,11 @@ handleNavigationCommands (int command, void *data) {
           int column, row;
           int increment;
 
-        case BRL_BLK_CMD(PRINDENT):
+        case BRL_CMD_BLK(PRINDENT):
           increment = -1;
           goto findIndent;
 
-        case BRL_BLK_CMD(NXINDENT):
+        case BRL_CMD_BLK(NXINDENT):
           increment = 1;
 
         findIndent:
@@ -651,7 +651,7 @@ handleNavigationCommands (int command, void *data) {
           break;
         }
 
-        case BRL_BLK_CMD(PRDIFCHAR): {
+        case BRL_CMD_BLK(PRDIFCHAR): {
           int column, row;
 
           if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
@@ -663,7 +663,7 @@ handleNavigationCommands (int command, void *data) {
           break;
         }
 
-        case BRL_BLK_CMD(NXDIFCHAR): {
+        case BRL_CMD_BLK(NXDIFCHAR): {
           int column, row;
 
           if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {

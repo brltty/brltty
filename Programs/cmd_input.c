@@ -107,7 +107,7 @@ handleInputCommands (int command, void *data) {
       int flags = command & BRL_MSK_FLG;
 
       switch (command & BRL_MSK_BLK) {
-        case BRL_BLK_CMD(PASSKEY): {
+        case BRL_CMD_BLK(PASSKEY): {
           ScreenKey key;
 
           switch (arg) {
@@ -167,13 +167,13 @@ handleInputCommands (int command, void *data) {
           break;
         }
 
-        case BRL_BLK_CMD(PASSCHAR): {
+        case BRL_CMD_BLK(PASSCHAR): {
           applyModifiers(icd, &flags);
           if (!insertKey(BRL_ARG_GET(command), flags)) alert(ALERT_COMMAND_REJECTED);
           break;
         }
 
-        case BRL_BLK_CMD(PASSDOTS): {
+        case BRL_CMD_BLK(PASSDOTS): {
           wchar_t character;
 
           switch (prefs.brailleInputMode) {
@@ -195,7 +195,7 @@ handleInputCommands (int command, void *data) {
           break;
         }
 
-        case BRL_BLK_CMD(SWITCHVT):
+        case BRL_CMD_BLK(SWITCHVT):
           switchVirtualTerminal(arg+1);
           break;
 

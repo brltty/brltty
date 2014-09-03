@@ -86,7 +86,7 @@ typedef struct {
   int alternate;
 } KeyEntry;
 
-#define CMD(blk,arg) (BRL_BLK_CMD(blk) | BRL_ARG_SET((arg)))
+#define CMD(blk,arg) (BRL_CMD_BLK(blk) | BRL_ARG_SET((arg)))
 #define CMD_CHAR(wc) CMD(PASSCHAR, (wc))
 #define CMD_KEY(key) CMD(PASSKEY, BRL_KEY_##key)
 
@@ -249,7 +249,7 @@ handleKey (const KeyEntry *key, int release, unsigned int *modifiers) {
     if (key->alternate) {
       int alternate = 0;
 
-      if (blk == BRL_BLK_CMD(PASSCHAR)) {
+      if (blk == BRL_CMD_BLK(PASSCHAR)) {
         if (MOD_TST(MOD_SHIFT_LEFT, *modifiers) || MOD_TST(MOD_SHIFT_RIGHT, *modifiers)) alternate = 1;
       } else {
         if (MOD_TST(MOD_LOCK_NUMBER, *modifiers)) alternate = 1;
@@ -264,11 +264,11 @@ handleKey (const KeyEntry *key, int release, unsigned int *modifiers) {
     if (cmd) {
       if (blk) {
         if (!release) {
-          if (blk == BRL_BLK_CMD(PASSCHAR)) {
+          if (blk == BRL_CMD_BLK(PASSCHAR)) {
             if (MOD_TST(MOD_LOCK_CAPS, *modifiers)) cmd |= BRL_FLG_CHAR_UPPER;
             if (MOD_TST(MOD_ALT_LEFT, *modifiers)) cmd |= BRL_FLG_CHAR_META;
             if (MOD_TST(MOD_CONTROL_LEFT, *modifiers) || MOD_TST(MOD_CONTROL_RIGHT, *modifiers)) cmd |= BRL_FLG_CHAR_CONTROL;
-          } else if ((blk == BRL_BLK_CMD(PASSKEY)) && MOD_TST(MOD_ALT_LEFT, *modifiers)) {
+          } else if ((blk == BRL_CMD_BLK(PASSKEY)) && MOD_TST(MOD_ALT_LEFT, *modifiers)) {
             int arg = cmd & BRL_MSK_ARG;
 
             switch (arg) {
@@ -282,7 +282,7 @@ handleKey (const KeyEntry *key, int release, unsigned int *modifiers) {
 
               default:
                 if (arg >= BRL_KEY_FUNCTION) {
-                  cmd = BRL_BLK_CMD(SWITCHVT) + (arg - BRL_KEY_FUNCTION);
+                  cmd = BRL_CMD_BLK(SWITCHVT) + (arg - BRL_KEY_FUNCTION);
                 }
 
                 break;
@@ -761,20 +761,20 @@ handleKeycodeCommands (int command, void *data) {
   int arg = command & BRL_MSK_ARG;
 
   switch (command & BRL_MSK_BLK) {
-    case BRL_BLK_CMD(PASSXT):
+    case BRL_CMD_BLK(PASSXT):
       if (command & BRL_FLG_KBD_EMUL0) xtHandleScanCode(kcd, XT_MOD_E0);
       if (command & BRL_FLG_KBD_EMUL1) xtHandleScanCode(kcd, XT_MOD_E1);
       xtHandleScanCode(kcd, arg);
       break;
 
-    case BRL_BLK_CMD(PASSAT):
+    case BRL_CMD_BLK(PASSAT):
       if (command & BRL_FLG_KBD_RELEASE) atHandleScanCode(kcd, AT_MOD_RELEASE);
       if (command & BRL_FLG_KBD_EMUL0) atHandleScanCode(kcd, AT_MOD_E0);
       if (command & BRL_FLG_KBD_EMUL1) atHandleScanCode(kcd, AT_MOD_E1);
       atHandleScanCode(kcd, arg);
       break;
 
-    case BRL_BLK_CMD(PASSPS2):
+    case BRL_CMD_BLK(PASSPS2):
       if (command & BRL_FLG_KBD_RELEASE) ps2HandleScanCode(kcd, PS2_MOD_RELEASE);
       ps2HandleScanCode(kcd, arg);
       break;

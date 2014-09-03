@@ -301,7 +301,7 @@ handleMiscellaneousCommands (int command, void *data) {
       int arg = command & BRL_MSK_ARG;
 
       switch (command & BRL_MSK_BLK) {
-        case BRL_BLK_CMD(DESCCHAR): {
+        case BRL_CMD_BLK(DESCCHAR): {
           int column, row;
 
           if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
@@ -315,7 +315,7 @@ handleMiscellaneousCommands (int command, void *data) {
           break;
         }
 
-        case BRL_BLK_CMD(ALERT):
+        case BRL_CMD_BLK(ALERT):
           alert(arg);
           break;
 

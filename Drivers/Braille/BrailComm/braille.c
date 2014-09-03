@@ -277,7 +277,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   while ((length = readPacket(brl, &packet))) {
     if ((packet.data.type >= IPT_MINIMUM_LINE) &&
         (packet.data.type <= IPT_MAXIMUM_LINE)) {
-      enqueueCommand(BRL_BLK_CMD(GOTOLINE) | BRL_FLG_LINE_TOLEFT | (packet.data.type - IPT_MINIMUM_LINE));
+      enqueueCommand(BRL_CMD_BLK(GOTOLINE) | BRL_FLG_LINE_TOLEFT | (packet.data.type - IPT_MINIMUM_LINE));
       writeFunction = writeLine;
       return EOF;
     }
