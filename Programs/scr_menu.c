@@ -58,7 +58,7 @@ getCurrentItem (void) {
 
 static inline void
 setFocusedItem (void) {
-  setMenuItem(screenLines[ses->winy]->item);
+  changeMenuItem(screenLines[ses->winy]->item);
 }
 
 static RenderedMenuItem *
@@ -171,7 +171,7 @@ reloadScreen (int constructing) {
   screenWidth = 0;
   removeLines();
 
-  if (setMenuItemFirst(menu)) {
+  if (changeMenuItemFirst(menu)) {
     {
       unsigned int count = getMenuSize(menu);
 
@@ -194,9 +194,9 @@ reloadScreen (int constructing) {
       if (!rmi) return 0;
       screenLines[screenHeight++] = rmi;
       if (screenWidth < rmi->length) screenWidth = rmi->length;
-    } while (setMenuItemNext(menu, 0));
+    } while (changeMenuItemNext(menu, 0));
 
-    if (setMenuItemIndex(menu, index)) {
+    if (changeMenuItemIndex(menu, index)) {
       if (constructing) {
         screenRow = 0;
         screenColumn = 0;
@@ -321,7 +321,7 @@ handleCommand_MenuScreen (int command) {
       Menu *menu = screenMenu;
 
       if (menu != rootMenu) {
-        if (!setMenuItemIndex(screenMenu, 0)) {
+        if (!changeMenuItemIndex(screenMenu, 0)) {
           commandRejected();
         } else if (!changeMenuSettingNext(menu, 0)) {
           commandRejected();
@@ -358,7 +358,7 @@ handleCommand_MenuScreen (int command) {
 
     case BRL_BLK_CMD(PASSKEY)+BRL_KEY_PAGE_UP:
     case BRL_CMD_MENU_FIRST_ITEM:
-      if (setMenuItemFirst(screenMenu)) {
+      if (changeMenuItemFirst(screenMenu)) {
         itemChanged();
       } else {
         commandRejected();
@@ -367,7 +367,7 @@ handleCommand_MenuScreen (int command) {
 
     case BRL_BLK_CMD(PASSKEY)+BRL_KEY_PAGE_DOWN:
     case BRL_CMD_MENU_LAST_ITEM:
-      if (setMenuItemLast(screenMenu)) {
+      if (changeMenuItemLast(screenMenu)) {
         itemChanged();
       } else {
         commandRejected();
@@ -376,7 +376,7 @@ handleCommand_MenuScreen (int command) {
 
     case BRL_BLK_CMD(PASSKEY)+BRL_KEY_CURSOR_UP:
     case BRL_CMD_MENU_PREV_ITEM:
-      if (setMenuItemPrevious(screenMenu, 1)) {
+      if (changeMenuItemPrevious(screenMenu, 1)) {
         itemChanged();
       } else {
         commandRejected();
@@ -385,7 +385,7 @@ handleCommand_MenuScreen (int command) {
 
     case BRL_BLK_CMD(PASSKEY)+BRL_KEY_CURSOR_DOWN:
     case BRL_CMD_MENU_NEXT_ITEM:
-      if (setMenuItemNext(screenMenu, 1)) {
+      if (changeMenuItemNext(screenMenu, 1)) {
         itemChanged();
       } else {
         commandRejected();

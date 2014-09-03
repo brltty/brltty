@@ -76,12 +76,12 @@ extern const MenuString *getMenuItemName (const MenuItem *item);
 extern const char *getMenuItemValue (const MenuItem *item);
 extern const char *getMenuItemComment (const MenuItem *item);
 
-extern void setMenuItem (MenuItem *item);
-extern int setMenuItemPrevious (Menu *menu, int wrap);
-extern int setMenuItemNext (Menu *menu, int wrap);
-extern int setMenuItemFirst (Menu *menu);
-extern int setMenuItemLast (Menu *menu);
-extern int setMenuItemIndex (Menu *menu, unsigned int index);
+extern void changeMenuItem (MenuItem *item);
+extern int changeMenuItemPrevious (Menu *menu, int wrap);
+extern int changeMenuItemNext (Menu *menu, int wrap);
+extern int changeMenuItemFirst (Menu *menu);
+extern int changeMenuItemLast (Menu *menu);
+extern int changeMenuItemIndex (Menu *menu, unsigned int index);
 
 extern int changeMenuSettingPrevious (Menu *menu, int wrap);
 extern int changeMenuSettingNext (Menu *menu, int wrap);
