@@ -271,7 +271,26 @@ typedef enum {
   BRL_blockCommandCount /* must be last */
 } BRL_BlockCommand;
 
+typedef enum {
+  BRL_KEY_ENTER,
+  BRL_KEY_TAB,
+  BRL_KEY_BACKSPACE,
+  BRL_KEY_ESCAPE,
+  BRL_KEY_CURSOR_LEFT,
+  BRL_KEY_CURSOR_RIGHT,
+  BRL_KEY_CURSOR_UP,
+  BRL_KEY_CURSOR_DOWN,
+  BRL_KEY_PAGE_UP,
+  BRL_KEY_PAGE_DOWN,
+  BRL_KEY_HOME,
+  BRL_KEY_END,
+  BRL_KEY_INSERT,
+  BRL_KEY_DELETE,
+  BRL_KEY_FUNCTION
+} BRL_Key;
+
 #define BRL_BLK_CMD(cmd) (BRL_BLK_##cmd << BRL_SHIFT_BLK)
+#define BRL_KEY_CMD(key) (BRL_BLK_CMD(PASSKEY) + BRL_KEY_##key)
 
 #define BRL_FLG_LINE_SCALED 0X010000 /* scale arg=0X00-0XFF to screen height */
 #define BRL_FLG_LINE_TOLEFT 0X020000 /* go to beginning of line */
@@ -280,6 +299,10 @@ typedef enum {
 #define BRL_FLG_CHAR_UPPER   0X020000 /* convert to uppercase */
 #define BRL_FLG_CHAR_CONTROL 0X040000 /* control key pressed */
 #define BRL_FLG_CHAR_META    0X080000 /* meta key pressed */
+
+#define BRL_FLG_KBD_RELEASE 0X010000 /* it is a release scan code */
+#define BRL_FLG_KBD_EMUL0 0X020000 /* it is an emulation 0 scan code */
+#define BRL_FLG_KBD_EMUL1 0X040000 /* it is an emulation 1 scan code */
 
 /* The bits for each braille dot.
  *
@@ -310,28 +333,6 @@ typedef enum {
 #define BRL_DOT7 BRL_ARG_SET(BRL_DOT(7)) /* lower-left dot of computer braille cell */
 #define BRL_DOT8 BRL_ARG_SET(BRL_DOT(8)) /* lower-right dot of computer braille cell */
 #define BRL_DOTC BRL_ARG_SET(BRL_DOT(9)) /* space key pressed */
-
-#define BRL_FLG_KBD_RELEASE 0X010000 /* it is a release scan code */
-#define BRL_FLG_KBD_EMUL0 0X020000 /* it is an emulation 0 scan code */
-#define BRL_FLG_KBD_EMUL1 0X040000 /* it is an emulation 1 scan code */
-
-typedef enum {
-  BRL_KEY_ENTER,
-  BRL_KEY_TAB,
-  BRL_KEY_BACKSPACE,
-  BRL_KEY_ESCAPE,
-  BRL_KEY_CURSOR_LEFT,
-  BRL_KEY_CURSOR_RIGHT,
-  BRL_KEY_CURSOR_UP,
-  BRL_KEY_CURSOR_DOWN,
-  BRL_KEY_PAGE_UP,
-  BRL_KEY_PAGE_DOWN,
-  BRL_KEY_HOME,
-  BRL_KEY_END,
-  BRL_KEY_INSERT,
-  BRL_KEY_DELETE,
-  BRL_KEY_FUNCTION
-} BRL_Key;
 
 #ifdef __cplusplus
 }
