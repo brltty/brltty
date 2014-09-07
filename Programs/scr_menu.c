@@ -247,7 +247,7 @@ destruct_MenuScreen (void) {
 
 static int
 currentVirtualTerminal_MenuScreen (void) {
-  return userVirtualTerminal(2);
+  return userVirtualTerminal(2 + getMenuNumber(screenMenu));
 }
 
 static size_t

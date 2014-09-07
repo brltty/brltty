@@ -49,7 +49,7 @@ destruct_MainScreen (void) {
 
 static int
 userVirtualTerminal_MainScreen (int number) {
-  return 0 + number;
+  return 1 + number;
 }
 
 void

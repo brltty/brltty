@@ -98,7 +98,7 @@ switchVirtualTerminal_BaseScreen (int vt) {
 
 static int
 currentVirtualTerminal_BaseScreen (void) {
-  return -1;
+  return 0;
 }
 
 static size_t

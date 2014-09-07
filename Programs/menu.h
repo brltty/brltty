@@ -63,6 +63,7 @@ extern void setMenuItemTester (MenuItem *item, MenuItemTester *handler);
 typedef int MenuItemChanged (const MenuItem *item, unsigned char setting);
 extern void setMenuItemChanged (MenuItem *item, MenuItemChanged *handler);
 
+extern unsigned int getMenuNumber (const Menu *menu);
 extern Menu *getMenuParent (const Menu *menu);
 extern unsigned int getMenuSize (const Menu *menu);
 extern unsigned int getMenuIndex (const Menu *menu);

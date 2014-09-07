@@ -83,7 +83,10 @@ struct MenuStruct {
     unsigned int index;
   } items;
 
+  unsigned int menuNumber;
+  unsigned int submenuCount;
   MenuItem *activeItem;
+
   char valueBuffer[0X10];
 };
 
@@ -135,18 +138,27 @@ formatValue (Menu *menu, const char *format, ...) {
 
 Menu *
 newMenu (void) {
-  Menu *menu = malloc(sizeof(*menu));
+  Menu *menu;
 
-  if (menu) {
+  if ((menu = malloc(sizeof(*menu)))) {
+    memset(menu, 0, sizeof(*menu));
     menu->parent = NULL;
+
     menu->items.array = NULL;
     menu->items.size = 0;
     menu->items.count = 0;
     menu->items.index = 0;
+
+    menu->menuNumber = 0;
+    menu->submenuCount = 0;
     menu->activeItem = NULL;
+
+    return menu;
+  } else {
+    logMallocError();
   }
 
-  return menu;
+  return NULL;
 }
 
 static int
@@ -172,6 +184,11 @@ destroyMenu (Menu *menu) {
 
     free(menu);
   }
+}
+
+unsigned int
+getMenuNumber (const Menu *menu) {
+  return menu->menuNumber;
 }
 
 Menu *
@@ -700,6 +717,8 @@ newSubmenuMenuItem (
   SubmenuData *submenu;
 
   if ((submenu = malloc(sizeof(*submenu)))) {
+    memset(submenu, 0, sizeof(*submenu));
+
     if ((submenu->menu = newMenu())) {
       static const MenuString closeName = {.label="<---"};
       MenuItem *close;
@@ -714,6 +733,14 @@ newSubmenuMenuItem (
 
           item->methods = &menuItemMethods_submenu;
           item->data.submenu = submenu;
+
+          while (1) {
+            menu->submenuCount += 1;
+            if (!menu->parent) break;
+            menu = menu->parent;
+          }
+
+          submenu->menu->menuNumber = menu->submenuCount;
           return submenu->menu;
         }
       }

@@ -206,7 +206,7 @@ getLineCount_HelpScreen (void) {
 
 static int
 currentVirtualTerminal_HelpScreen (void) {
-  return userVirtualTerminal(1);
+  return userVirtualTerminal(pageIndex);
 }
 
 static size_t
