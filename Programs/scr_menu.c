@@ -357,70 +357,90 @@ handleCommand_MenuScreen (int command) {
     }
 
     case BRL_CMD_KEY(PAGE_UP):
-    case BRL_CMD_MENU_FIRST_ITEM:
+    case BRL_CMD_MENU_FIRST_ITEM: {
       if (changeMenuItemFirst(screenMenu)) {
         itemChanged();
       } else {
         commandRejected();
       }
+
       return 1;
+    }
 
     case BRL_CMD_KEY(PAGE_DOWN):
-    case BRL_CMD_MENU_LAST_ITEM:
+    case BRL_CMD_MENU_LAST_ITEM: {
       if (changeMenuItemLast(screenMenu)) {
         itemChanged();
       } else {
         commandRejected();
       }
+
       return 1;
+    }
 
     case BRL_CMD_KEY(CURSOR_UP):
-    case BRL_CMD_MENU_PREV_ITEM:
+    case BRL_CMD_MENU_PREV_ITEM: {
       if (changeMenuItemPrevious(screenMenu, 1)) {
         itemChanged();
       } else {
         commandRejected();
       }
+
       return 1;
+    }
 
     case BRL_CMD_KEY(CURSOR_DOWN):
-    case BRL_CMD_MENU_NEXT_ITEM:
+    case BRL_CMD_MENU_NEXT_ITEM: {
       if (changeMenuItemNext(screenMenu, 1)) {
         itemChanged();
       } else {
         commandRejected();
       }
+
       return 1;
+    }
 
     case BRL_CMD_KEY(CURSOR_LEFT):
     case BRL_CMD_BACK:
-    case BRL_CMD_MENU_PREV_SETTING:
+    case BRL_CMD_MENU_PREV_SETTING: {
       setFocusedItem();
+
       if (changeMenuSettingPrevious(screenMenu, 1)) {
         settingChanged();
       } else {
         commandRejected();
       }
+
       return 1;
+    }
 
     case BRL_CMD_KEY(CURSOR_RIGHT):
     case BRL_CMD_HOME:
     case BRL_CMD_RETURN:
-    case BRL_CMD_MENU_NEXT_SETTING:
+    case BRL_CMD_MENU_NEXT_SETTING: {
       setFocusedItem();
+
       if (changeMenuSettingNext(screenMenu, 1)) {
         settingChanged();
       } else {
         commandRejected();
       }
-      return 1;
 
-    default:
+      return 1;
+    }
+
+    case BRL_CMD_CSRJMP_VERT: {
+      setFocusedItem();
+      return 1;
+    }
+
+    default: {
       if ((command & BRL_MSK_BLK) == BRL_CMD_BLK(ROUTE)) {
         int key = command & BRL_MSK_ARG;
 
         if ((key >= textStart) && (key < (textStart + textCount))) {
           setFocusedItem();
+
           if (changeMenuSettingScaled(screenMenu, key-textStart, textCount)) {
             settingChanged();
           } else {
@@ -440,6 +460,7 @@ handleCommand_MenuScreen (int command) {
       }
 
       break;
+    }
   }
 
   return 0;
