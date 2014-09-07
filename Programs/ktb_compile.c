@@ -57,7 +57,6 @@ typedef struct {
   BoundCommand nullBoundCommand;
 
   unsigned char context;
-
   unsigned hideRequested:1;
   unsigned hideInherited:1;
 } KeyTableData;
@@ -1008,12 +1007,14 @@ static DATA_OPERANDS_PROCESSOR(processIncludeWrapper) {
   KeyTableData *ktd = data;
   int result;
 
+  unsigned char context = ktd->context;
   unsigned int hideRequested = ktd->hideRequested;
   unsigned int hideInherited = ktd->hideInherited;
 
   if (ktd->hideRequested) ktd->hideInherited = 1;
   result = processIncludeOperands(file, data);
 
+  ktd->context = context;
   ktd->hideRequested = hideRequested;
   ktd->hideInherited = hideInherited;
   return result;
