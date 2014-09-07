@@ -4865,31 +4865,21 @@ and
 <ref id="key-table-superimpose" name="superimpose">
 directives.
 
-<tt/context/ <em/identifier/ [<em/title/]
+<tt/context/ <em/name/ [<em/title/]
 <descrip>
-  <tag><em/identifier/</tag>
+  <tag><em/name/</tag>
     Which context subsequent definitions are to be created within.
-    It may be:
-    <itemize>
-      <item>
-        One of these special names:
-        <descrip>
-          <tag/default/
-            The default context.
-            If a key combination hasn't been defined within the current context
-            then its definition within the default context is used.
-            This only applies to definitions created by
-            the <ref id="key-table-bind" name="bind"> directive.
-          <tag/menu/
-            This context is used when within BRLTTY's preferences menu.
-        </descrip>
-      <item>
-        An integer within the range <tt/0/ through <tt/252/.
-        Context <tt/0/ is an alternate way to refer to the default context.
-        Higher context numbers should be avoided because
-        the highest allowable number is subject to change without notice
-        if, for example, more named contexts are added.
-    </itemize>
+    These special contexts are predefined:
+    <descrip>
+      <tag/default/
+        The default context.
+        If a key combination hasn't been defined within the current context
+        then its definition within the default context is used.
+        This only applies to definitions created by
+        the <ref id="key-table-bind" name="bind"> directive.
+      <tag/menu/
+        This context is used when within BRLTTY's preferences menu.
+    </descrip>
   <tag><em/title/</tag>
     A person-readable description of the context.
     It may contain spaces,
@@ -4897,8 +4887,7 @@ directives.
     This operand is optional.
     If supplied when selecting a context which already has a title
     then the two must match.
-    Named contexts already have internally-assigned titles.
-    Numeric contexts are initially created without titles.
+    Special contexts already have internally-assigned titles.
 </descrip>
 
 A context is created the first time it's selected.
@@ -4915,15 +4904,12 @@ Context changes within included key subtables
 don't affect the context of the including key table or subtable.
 
 If a context has a title
-(all named contexts
-and those numeric contexts for which the <em/title/ operand has been supplied)
 then it is persistent.
 When a key event causes a persistent context to be activated,
 that context remains current until a subsequent key event
 causes a different persistent context to be activated.
 
 If a context doesn't have a title
-(those numeric contexts for which the <em/title/ operand hasn't been supplied)
 then it is temporary.
 When a key event causes a temporary context to be activated,
 that context is only used to interpret the very next key event.
@@ -4931,8 +4917,8 @@ that context is only used to interpret the very next key event.
 Examples:
 <itemize>
   <item><tt/context menu/
-  <item><tt/context 1 Braille Input/
-  <item><tt/context 2/
+  <item><tt/context braille Braille Input/
+  <item><tt/context DESCCHAR/
 </itemize>
 
 <sect3>The Hide Directive<label id="key-table-hide"><p>

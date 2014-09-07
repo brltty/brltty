@@ -157,7 +157,7 @@ Examples:
    bind Key4 TOP
    bind Key5 TOP+route
    bind VerticalSensor GOTOLINE+toleft+scaled
-   bind Key6 CONTEXT+1
+   bind Key6 CONTEXT+context1
 
 ===============================================================================
 
@@ -168,26 +168,20 @@ Use the "context" directive to define alternate ways to interpret certain key
 events and/or combinations. A context contains definitions created by the
 "bind", "hotkey", "map", and "superimpose" directives.
 
-   context <identifier> [<title>]
+   context <name> [<title>]
 
-The <identifier> operand specifies which context subsequent definitions are to 
-be created within. It may be:
-*  One of these special names:
-   +  default: The default context. If a key combination hasn't been defined 
-      within the current context then its definition within the default context
-      is used. This only applies to definitions created by the "bind" directive.
-   +  menu: This context is used when within BRLTTY's preferences menu.
-*  An integer within the range 0 through 252. Context 0 is an alternate way to
-   refer to the default context. Higher context numbers should be avoided
-   because the highest allowable number is subject to change without notice if,
-   for example, more named contexts are added.
+The <name> operand specifies which context subsequent definitions are to be
+created within. These special contexts are predefined:
+*  default: The default context. If a key combination hasn't been defined 
+   within the current context then its definition within the default context
+   is used. This only applies to definitions created by the "bind" directive.
+*  menu: This context is used when within BRLTTY's preferences menu.
 
 The <title> operand specifies a person-readable description of the context. It 
 may contain spaces, and standard capitalization conventions should be used. 
 This operand is optional. If supplied when selecting a context which already 
-has a title then the two must match. Named contexts already have 
-internally-assigned titles. Numeric contexts are initially created without 
-titles.
+has a title then the two must match. Special contexts already have 
+internally-assigned titles.
 
 A context is created the first time it's selected. It may be reselected any
 number of times thereafter.
@@ -199,22 +193,19 @@ an included key subtable is the context which was selected when it was
 included. Context changes within included key subtables don't affect the 
 context of the including key table or subtable.
 
-If a context has a title (all named contexts and those numeric contexts for 
-which the <title> operand has been supplied) then it is persisten. When a key 
-event causes a persistent context to be activated, that context remains current 
-until a subsequent key event causes a different persistent context to be 
-activated.
+If a context has a title then it is persisten. When a key event causes a
+persistent context to be activated, that context remains current until a
+subsequent key event causes a different persistent context to be activated.
 
-If a context doesn't have a title (those numeric contexts for which the <title> 
-operand hasn't been supplied) then it is temporary. When a key event causes a 
-temporary context to be activated, that context is only used to interpret the 
+If a context doesn't have a title then it is temporary. When a key event causes
+a temporary context to be activated, that context is only used to interpret the 
 very next key event.
 
 Examples:
 
    context menu
-   context 1 Braille Input
-   context 2
+   context braille Braille Input
+   context DESCCHAR
 
 ===============================================================================
 
