@@ -652,6 +652,7 @@ ctb_translate.$O:
 check-contraction-tables: brltty-ctb$X
 	set -- $(SRC_TOP)$(TBL_DIR)/$(CONTRACTION_TABLES_SUBDIRECTORY)/*$(CONTRACTION_TABLE_EXTENSION) && \
 	for file; do \
+	test -x $${file} || \
 	./brltty-ctb$X -T$(SRC_TOP)$(TBL_DIR) -c$${file##*/} </dev/null; \
 	done
 
