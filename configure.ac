@@ -535,7 +535,7 @@ BRLTTY_ARG_DISABLE(
                 [Define this if the application programming interface is to be included.])
       BRLTTY_ARG_PARAMETERS([api], [application programming interface])
 
-      api_objects='brlapi_server.$O brlapi_keyranges.$O auth.$O'
+      api_server_objects='brlapi_server.$O brlapi_keyranges.$O auth.$O'
       api_libraries="${LIBS}"
 
       all_api="all-api"
@@ -583,7 +583,7 @@ BRLTTY_ARG_DISABLE(
       }
    ])
 ])
-AC_SUBST([api_objects])
+AC_SUBST([api_server_objects])
 AC_SUBST([api_libraries])
 AC_SUBST([api_bindings])
 AC_SUBST([all_api_bindings])
@@ -1362,7 +1362,7 @@ BRLTTY_ARG_PACKAGE([ports], [I/O ports], [], [dnl
 
 BRLTTY_BRAILLE_DRIVER([al], [Alva])
 BRLTTY_BRAILLE_DRIVER([at], [Albatross])
-test -n "${api_objects}" && {
+test -n "${api_server_objects}" && {
    BRLTTY_BRAILLE_DRIVER([ba], [BrlAPI], [$(API_LIBS)])
 }
 BRLTTY_BRAILLE_DRIVER([bc], [BrailComm])

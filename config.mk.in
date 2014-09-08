@@ -372,7 +372,7 @@ SPEECH_OBJECT = @speech_support_object@
 
 API_VERSION = @api_version@
 API_RELEASE = @api_release@
-API_OBJECTS = @api_objects@
+API_SERVER_OBJECTS = @api_server_objects@
 API_LIBRARIES = @api_libraries@
 ALL_API = @all_api@
 BUILD_API = @build_api@

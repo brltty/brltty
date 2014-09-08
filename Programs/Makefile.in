@@ -417,30 +417,27 @@ brlapi_keyranges.$O:
 
 ###############################################################################
 
-API_OBJS = brlapi_client.$O
-API_NAME = brlapi
-API_ARC = $(ARC_PFX)$(API_NAME).$(ARC_EXT)
-API_LIB = $(LIB_PFX)$(API_NAME).$(LIB_EXT)
-API_DLL = $(LIB_PFX)$(API_NAME)-$(API_VERSION).$(LIB_EXT)
-API_IMPLIB = $(ARC_PFX)$(API_NAME).$(LIB_EXT).$(ARC_EXT)
-API_IMPLIB_VERSIONED = $(ARC_PFX)$(API_NAME)-$(API_RELEASE).$(LIB_EXT).$(ARC_EXT)
-API_DEF = $(API_NAME).def
+API_CLIENT_OBJECTS = brlapi_client.$O
 
 api: $(API_DYNAMIC_LIBRARY) $(API_ARC)
 
+api-dynamic-library-versioned: $(API_LIB_VERSIONED)
+$(API_LIB_VERSIONED): $(API_LIB)
+	$(SYMLINK) $(API_LIB) $(API_LIB_VERSIONED)
+
 api-dynamic-library: $(API_LIB)
-$(API_LIB): $(API_OBJS)
-	$(MKLIB:<name>=${API_LIB}.${API_VERSION}) $@ $(API_OBJS) $(API_LIBRARIES)
+$(API_LIB): $(API_CLIENT_OBJECTS)
+	$(MKLIB:<name>=${API_LIB_VERSIONED}) $@ $(API_CLIENT_OBJECTS) $(API_LIBRARIES)
 
 api-dynamic-library-windows: $(API_DLL)
-$(API_DLL): $(API_OBJS)
+$(API_DLL): $(API_CLIENT_OBJECTS)
 	-rm -f implib.a lib.def
-	$(MKLIB:<name>=${API_LIB}.${API_VERSION}) $@ $(API_OBJS) $(API_LIBRARIES)
+	$(MKLIB:<name>=${API_LIB_VERSIONED}) $@ $(API_CLIENT_OBJECTS) $(API_LIBRARIES)
 	[ ! -f implib.a ] || mv implib.a $(API_IMPLIB)
 	[ ! -f lib.def ] || mv lib.def $(API_DEF)
 
-$(API_ARC): $(API_OBJS)
-	ar rc $@ $(API_OBJS)
+$(API_ARC): $(API_CLIENT_OBJECTS)
+	ar rc $@ $(API_CLIENT_OBJECTS)
 	$(RANLIB) $@
 
 brlapi_client.$O:
@@ -475,7 +472,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O $(PREFS_OBJECTS) menu.$O ses.$O status.$O update.$O blink.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_utils.$O cmd_custom.$O cmd_navigation.$O cmd_input.$O cmd_keycodes.$O cmd_touch.$O cmd_toggle.$O cmd_clipboard.$O cmd_speech.$O cmd_learn.$O cmd_miscellaneous.$O pipe.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) api_control.$O $(API_OBJECTS)
+CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O $(PREFS_OBJECTS) menu.$O ses.$O status.$O update.$O blink.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_utils.$O cmd_custom.$O cmd_navigation.$O cmd_input.$O cmd_keycodes.$O cmd_touch.$O cmd_toggle.$O cmd_clipboard.$O cmd_speech.$O cmd_learn.$O cmd_miscellaneous.$O pipe.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) api_control.$O $(API_SERVER_OBJECTS)
 CORE_NAME = brltty
 
 brltty-core: $(CORE_OBJECTS)
@@ -626,11 +623,10 @@ ttb_louis.$O:
 ttb_translate.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ttb_translate.c
 
-check-text-tables: brltty-ttb$X
-	LD_LIBRARY_PATH=$(BLD_DIR) && \
+check-text-tables: brltty-ttb$X $(API_LIB_VERSIONED)
 	set -- $(SRC_TOP)$(TBL_DIR)/$(TEXT_TABLES_SUBDIRECTORY)/*$(TEXT_TABLE_EXTENSION) && \
 	for file; do \
-	./brltty-ttb$X -T$(SRC_TOP)$(TBL_DIR) $${file##*/}; \
+	LD_LIBRARY_PATH=$(BLD_DIR) ./brltty-ttb$X -T$(SRC_TOP)$(TBL_DIR) $${file##*/}; \
 	done
 
 ###############################################################################
@@ -1032,7 +1028,7 @@ distclean clean::
 clean::
 	-rm -f brltty$X brltty-ctb$X brltty-ttb$X brltty-trtxt$X xbrlapi$X
 	-rm -f tbl2hex$(X_FOR_BUILD) *test$X *-static$X
-	-rm -f brlapi_constants.h *.$(LIB_EXT) *.$(ARC_EXT) *.def *.class *.jar
+	-rm -f brlapi_constants.h *.$(LIB_EXT) *.$(LIB_EXT).* *.$(ARC_EXT) *.def *.class *.jar
 	-rm -f $(BLD_TOP)$(DRV_DIR)/*
 
 distclean::
