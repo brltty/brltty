@@ -367,15 +367,14 @@ newProfileMenuItem (Menu *menu, const ProfileDescriptor *profile) {
 static int
 changedProfile (const ProfileDescriptor *profile, const MenuItem *item) {
   const char *value = getMenuItemValue(item);
-  int ok;
 
   if (*value) {
-    ok = activateProfile(profile, opt_tablesDirectory, value);
+    activateProfile(profile, opt_tablesDirectory, value);
   } else {
-    ok = deactivateProfile(profile);
+    deactivateProfile(profile);
   }
 
-  return ok;
+  return 1;
 }
 
 static int
