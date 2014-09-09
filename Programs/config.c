@@ -1421,30 +1421,38 @@ startBrailleDriver (void) {
   return 0;
 }
 
-static int tryBrailleDriver (void);
-
-ASYNC_ALARM_CALLBACK(retryBrailleDriver) {
-  tryBrailleDriver();
-}
+static AsyncHandle brailleDriverStartAlarm = NULL;
 
 static void
-scheduleBrailleDriver (int delay) {
-  if (!brailleDriver) {
-    asyncSetAlarmIn(NULL, delay, retryBrailleDriver, NULL);
-    initializeBraille();
-    ensureBrailleBuffer(&brl, LOG_DEBUG);
+cancelBrailleDriverStartAlarm (void) {
+  if (brailleDriverStartAlarm) {
+    asyncCancelRequest(brailleDriverStartAlarm);
+    brailleDriverStartAlarm = NULL;
   }
 }
 
-static int
-tryBrailleDriver (void) {
-  if (startBrailleDriver()) return 1;
-  scheduleBrailleDriver(BRAILLE_DRIVER_START_RETRY_INTERVAL);
-  return 0;
+ASYNC_ALARM_CALLBACK(tryBrailleDriver) {
+  if (startBrailleDriver()) cancelBrailleDriverStartAlarm();
+}
+
+static void
+scheduleBrailleDriver (void) {
+  if (!brailleDriver) {
+    if (!brailleDriverStartAlarm) {
+      initializeBraille();
+      ensureBrailleBuffer(&brl, LOG_DEBUG);
+
+      if (asyncSetAlarmIn(&brailleDriverStartAlarm, 0, tryBrailleDriver, NULL)) {
+        asyncResetAlarmEvery(brailleDriverStartAlarm, BRAILLE_DRIVER_START_RETRY_INTERVAL);
+      }
+    }
+  }
 }
 
 static void
 stopBrailleDriver (void) {
+  cancelBrailleDriverStartAlarm();
+
   deactivateBrailleDriver();
   alert(ALERT_BRAILLE_OFF);
 }
@@ -1455,7 +1463,7 @@ restartBrailleDriver (void) {
   restartRequired = 0;
 
   logMessage(LOG_INFO, gettext("reinitializing braille driver"));
-  tryBrailleDriver();
+  scheduleBrailleDriver();
 }
 
 static void
@@ -1524,6 +1532,7 @@ exitApiServer (void *data) {
 #endif /* ENABLE_API */
 
 #ifdef ENABLE_SPEECH_SUPPORT
+static AsyncHandle speechDriverStartAlarm = NULL;
 static AsyncHandle autospeakDelayAlarm = NULL;
 
 static void
@@ -1678,38 +1687,43 @@ startSpeechDriver (void) {
   return 1;
 }
 
-static int trySpeechDriver (void);
-
-ASYNC_ALARM_CALLBACK(retrySpeechDriver) {
-  trySpeechDriver();
-}
-
 static void
-scheduleSpeechDriver (int delay) {
-  if (!speechDriver) {
-    asyncSetAlarmIn(NULL, delay, retrySpeechDriver, NULL);
+cancelSpeechDriverStartAlarm (void) {
+  if (speechDriverStartAlarm) {
+    asyncCancelRequest(speechDriverStartAlarm);
+    speechDriverStartAlarm = NULL;
   }
 }
 
-static int
-trySpeechDriver (void) {
-  if (startSpeechDriver()) return 1;
-  scheduleSpeechDriver(SPEECH_DRIVER_START_RETRY_INTERVAL);
-  return 0;
+ASYNC_ALARM_CALLBACK(trySpeechDriver) {
+  if (startSpeechDriver()) cancelSpeechDriverStartAlarm();
+}
+
+static void
+scheduleSpeechDriver (void) {
+  if (!speechDriver) {
+    if (!speechDriverStartAlarm) {
+      if (asyncSetAlarmIn(&speechDriverStartAlarm, 0, trySpeechDriver, NULL)) {
+        asyncResetAlarmEvery(speechDriverStartAlarm, SPEECH_DRIVER_START_RETRY_INTERVAL);
+      }
+    }
+  }
 }
 
 static void
 stopSpeechDriver (void) {
+  cancelSpeechDriverStartAlarm();
+  cancelAutospeakDelayAlarm();
+
   muteSpeech("driver stop");
   deactivateSpeechDriver();
-  cancelAutospeakDelayAlarm();
 }
 
 void
 restartSpeechDriver (void) {
   stopSpeechDriver();
   logMessage(LOG_INFO, gettext("reinitializing speech driver"));
-  trySpeechDriver();
+  scheduleSpeechDriver();
 }
 
 static void
@@ -2329,8 +2343,8 @@ brlttyStart (void) {
   if (opt_verify) {
     if (activateBrailleDriver(1)) deactivateBrailleDriver();
   } else {
+    scheduleBrailleDriver();
     onProgramExit("braille-driver", exitBrailleDriver, NULL);
-    scheduleBrailleDriver(0);
   }
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -2340,8 +2354,8 @@ brlttyStart (void) {
   if (opt_verify) {
     if (activateSpeechDriver(1)) deactivateSpeechDriver();
   } else {
+    scheduleSpeechDriver();
     onProgramExit("speech-driver", exitSpeechDriver, NULL);
-    scheduleSpeechDriver(0);
   }
 
   /* Create the file system object for speech input. */
@@ -2406,7 +2420,7 @@ beginLanguageProfile (void) {
 
 static int
 endLanguageProfile (void) {
-  trySpeechDriver();
+  scheduleSpeechDriver();
   return 1;
 }
 
