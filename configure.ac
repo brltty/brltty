@@ -158,6 +158,9 @@ BRLTTY_DEFINE_STRING([KEY_TABLE_EXTENSION], [.ktb], [the extension for key table
 BRLTTY_DEFINE_STRING([KEY_SUBTABLE_EXTENSION], [.kti], [the extension for key subtables])
 BRLTTY_DEFINE_STRING([KEY_HELP_EXTENSION], [.txt], [the extension for key help files])
 
+BRLTTY_DEFINE_STRING([PROFILES_SUBDIRECTORY], [Profiles], [the subdirectory for profiles])
+BRLTTY_DEFINE_STRING([LANGUAGE_PROFILE_EXTENSION], [.lpf], [the extension for language profiles])
+
 BRLTTY_ARG_REQUIRED(
    [manpage-directory], [DIRECTORY],
    [path to directory containing manual pages],

@@ -24,7 +24,7 @@
 
 #include "prefs.h"
 #include "prefs_table.h"
-#include "stat_types.h"
+#include "status_types.h"
 #include "defaults.h"
 #include "log.h"
 #include "file.h"

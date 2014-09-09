@@ -16,20 +16,21 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_STATUS
-#define BRLTTY_INCLUDED_STATUS
+#ifndef BRLTTY_INCLUDED_PROFILE
+#define BRLTTY_INCLUDED_PROFILE
 
-#include "status_types.h"
+#include "profile_types.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern unsigned int getStatusFieldsLength (const unsigned char *fields);
-extern void renderStatusFields (const unsigned char *fields, unsigned char *cells);
+extern char *makeProfilePath (const ProfileDescriptor *profile, const char *directory, const char *name);
+extern int activateProfile (const ProfileDescriptor *profile, const char *directory, const char *name);
+extern int deactivateProfile (const ProfileDescriptor *profile);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_STATUS */
+#endif /* BRLTTY_INCLUDED_PROFILE */

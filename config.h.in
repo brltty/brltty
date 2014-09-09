@@ -551,6 +551,12 @@ extern "C" {
 /* Define this to be a string containing the extension for key help files. */
 #undef KEY_HELP_EXTENSION
 
+/* Define this to be a string containing the subdirectory for profiles. */
+#undef PROFILES_SUBDIRECTORY
+
+/* Define this to be a string containing the extension for language profiles. */
+#undef LANGUAGE_PROFILE_EXTENSION
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

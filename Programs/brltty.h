@@ -32,6 +32,7 @@
 #include "ktb.h"
 #include "menu.h"
 #include "prefs.h"
+#include "profile_types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -185,6 +186,8 @@ extern void destructSpeechDriver (void);
 #ifdef __MINGW32__
 extern int isWindowsService;
 #endif /* __MINGW32__ */
+
+extern const ProfileDescriptor languageProfile;
 
 #ifdef __cplusplus
 }

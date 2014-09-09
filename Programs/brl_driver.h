@@ -25,7 +25,7 @@
 #include "brl_cmds.h"
 #include "brl_utils.h"
 #include "brl_base.h"
-#include "stat_types.h"
+#include "status_types.h"
 #include "io_generic.h"
 #include "cmd_enqueue.h"
 

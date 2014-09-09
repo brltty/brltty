@@ -341,7 +341,7 @@ spk_base.$O:
 
 ###############################################################################
 
-SCREEN_OBJECTS = scr.$O scr_utils.$O scr_base.$O scr_help.$O scr_frozen.$O scr_menu.$O menu_prefs.$O scr_main.$O scr_real.$O scr_driver.$O routing.$O $(SCREEN_DRIVER_OBJECTS)
+SCREEN_OBJECTS = scr.$O scr_utils.$O scr_base.$O scr_help.$O scr_frozen.$O scr_menu.$O scr_main.$O scr_real.$O scr_driver.$O routing.$O $(SCREEN_DRIVER_OBJECTS)
 
 scr.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr.c
@@ -360,9 +360,6 @@ scr_frozen.$O:
 
 scr_menu.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr_menu.c
-
-menu_prefs.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/menu_prefs.c
 
 scr_main.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr_main.c
@@ -472,7 +469,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O $(PREFS_OBJECTS) menu.$O ses.$O status.$O update.$O blink.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_utils.$O cmd_custom.$O cmd_navigation.$O cmd_input.$O cmd_keycodes.$O cmd_touch.$O cmd_toggle.$O cmd_clipboard.$O cmd_speech.$O cmd_learn.$O cmd_miscellaneous.$O pipe.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) api_control.$O $(API_SERVER_OBJECTS)
+CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O $(PREFS_OBJECTS) profile.$O menu.$O menu_prefs.$O ses.$O status.$O update.$O blink.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_utils.$O cmd_custom.$O cmd_navigation.$O cmd_input.$O cmd_keycodes.$O cmd_touch.$O cmd_toggle.$O cmd_clipboard.$O cmd_speech.$O cmd_learn.$O cmd_miscellaneous.$O pipe.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) api_control.$O $(API_SERVER_OBJECTS)
 CORE_NAME = brltty
 
 brltty-core: $(CORE_OBJECTS)
@@ -483,8 +480,14 @@ brltty.$O:
 config.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/config.c
 
+profile.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/profile.c
+
 menu.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/menu.c
+
+menu_prefs.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/menu_prefs.c
 
 ses.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ses.c
@@ -626,7 +629,8 @@ ttb_translate.$O:
 check-text-tables: brltty-ttb$X $(API_LIB_VERSIONED)
 	set -- $(SRC_TOP)$(TBL_DIR)/$(TEXT_TABLES_SUBDIRECTORY)/*$(TEXT_TABLE_EXTENSION) && \
 	for file; do \
-	LD_LIBRARY_PATH=$(BLD_DIR) ./brltty-ttb$X -T$(SRC_TOP)$(TBL_DIR) $${file##*/}; \
+	LD_LIBRARY_PATH=$(BLD_DIR) \
+	./brltty-ttb$X -T$(SRC_TOP)$(TBL_DIR) $${file##*/}; \
 	done
 
 ###############################################################################
@@ -883,7 +887,7 @@ CORE_HEADERS = \
    $(SRC_DIR)/unicode.h $(SRC_DIR)/ascii.h $(SRC_DIR)/charset.h \
    $(SRC_DIR)/bitfield.h $(SRC_DIR)/bitmask.h \
    $(SRC_DIR)/menu.h \
-   $(SRC_DIR)/prefs.h $(SRC_DIR)/stat_types.h \
+   $(SRC_DIR)/prefs.h $(SRC_DIR)/status_types.h \
    $(SRC_DIR)/cmd.h $(SRC_DIR)/cmd_types.h $(SRC_DIR)/cmd_enqueue.h \
    $(SRC_DIR)/ttb.h $(SRC_DIR)/atb.h \
    $(SRC_DIR)/ctb.h $(SRC_DIR)/ctb_types.h \

@@ -39,10 +39,10 @@
 #endif /* glob: paradigm-specific global definitions */
 
 #include "log.h"
-#include "file.h"
 #include "menu.h"
 #include "prefs.h"
 #include "parse.h"
+#include "file.h"
 
 typedef struct {
   char *directory;

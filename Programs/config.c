@@ -61,6 +61,7 @@
 #include "revision.h"
 #include "service.h"
 #include "options.h"
+#include "profile_types.h"
 #include "brl_input.h"
 #include "cmd_queue.h"
 #include "brltty.h"
@@ -215,6 +216,7 @@ static const SpeechDriver *speechDriver = NULL;
 static void *speechObject = NULL;
 
 static char *opt_speechParameters;
+static char *speechParameterString = NULL;
 static char **speechParameters = NULL;
 
 static char *opt_speechInput;
@@ -1587,7 +1589,7 @@ initializeSpeechDriver (const char *code, int verify) {
   if ((speech = loadSpeechDriver(code, &speechObject, opt_driversDirectory))) {
     speechParameters = getParameters(speech->parameters,
                                      speech->definition.code,
-                                     opt_speechParameters);
+                                     speechParameterString);
 
     if (speechParameters) {
       int constructed = verify;
@@ -1738,6 +1740,25 @@ changeSpeechDriver (const char *driver) {
     speechDrivers = newDrivers;
     if (oldDrivers) deallocateStrings(oldDrivers);
     return 1;
+  }
+
+  return 0;
+}
+
+int
+changeSpeechParameters (const char *parameters) {
+  char *newParameters;
+
+  if (!parameters) parameters = "";
+
+  if ((newParameters = strdup(parameters))) {
+    char *oldParameters = speechParameterString;
+
+    speechParameterString = newParameters;
+    if (oldParameters) free(oldParameters);
+    return 1;
+  } else {
+    logMallocError();
   }
 
   return 0;
@@ -2315,6 +2336,7 @@ brlttyStart (void) {
 #ifdef ENABLE_SPEECH_SUPPORT
   /* Activate the speech synthesizer. */
   changeSpeechDriver(opt_speechDriver? opt_speechDriver: "");
+  changeSpeechParameters(opt_speechParameters? opt_speechParameters: "");
   if (opt_verify) {
     if (activateSpeechDriver(1)) deactivateSpeechDriver();
   } else {
@@ -2335,3 +2357,54 @@ brlttyStart (void) {
 
   return opt_verify? PROG_EXIT_FORCE: PROG_EXIT_SUCCESS;
 }
+
+static const ProfileProperty languageProfileProperties[] = {
+#ifdef ENABLE_SPEECH_SUPPORT
+  { .name = WS_C("speech-driver"),
+    .defaultValue = &opt_speechDriver,
+    .change = changeSpeechDriver
+  },
+
+  { .name = WS_C("speech-parameters"),
+    .defaultValue = &opt_speechParameters,
+    .change = changeSpeechParameters
+  },
+#endif /* ENABLE_SPEECH_SUPPORT */
+
+  { .name = WS_C("text-table"),
+    .defaultValue = &opt_textTable,
+    .change = changeTextTable
+  },
+
+#ifdef ENABLE_CONTRACTED_BRAILLE
+  { .name = WS_C("contraction-table"),
+    .defaultValue = &opt_contractionTable,
+    .change = changeContractionTable
+  },
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+};
+
+static int
+beginLanguageProfile (void) {
+  stopSpeechDriver();
+  return 1;
+}
+
+static int
+endLanguageProfile (void) {
+  trySpeechDriver();
+  return 1;
+}
+
+const ProfileDescriptor languageProfile = {
+  .category = "language",
+  .extension = LANGUAGE_PROFILE_EXTENSION,
+
+  .begin = beginLanguageProfile,
+  .end = endLanguageProfile,
+
+  .properties = {
+    .array = languageProfileProperties,
+    .count = ARRAY_COUNT(languageProfileProperties)
+  }
+};

@@ -16,20 +16,34 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_STATUS
-#define BRLTTY_INCLUDED_STATUS
-
-#include "status_types.h"
+#ifndef BRLTTY_INCLUDED_PROFILE_TYPES
+#define BRLTTY_INCLUDED_PROFILE_TYPES
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern unsigned int getStatusFieldsLength (const unsigned char *fields);
-extern void renderStatusFields (const unsigned char *fields, unsigned char *cells);
+typedef struct {
+  const wchar_t *name;
+  char **defaultValue;
+  int (*change) (const char *value);
+} ProfileProperty;
+
+typedef struct {
+  const char *category;
+  const char *extension;
+
+  int (*begin) (void);
+  int (*end) (void);
+
+  struct {
+    const ProfileProperty *array;
+    unsigned int count;
+  } properties;
+} ProfileDescriptor;
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_STATUS */
+#endif /* BRLTTY_INCLUDED_PROFILE_TYPES */

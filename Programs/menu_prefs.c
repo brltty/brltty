@@ -25,13 +25,14 @@
 #include "embed.h"
 #include "menu.h"
 #include "prefs.h"
-#include "stat_types.h"
-#include "brltty.h"
+#include "profile.h"
+#include "status_types.h"
 #include "ttb.h"
 #include "atb.h"
 #include "ctb.h"
 #include "tune.h"
 #include "midi.h"
+#include "brltty.h"
 
 #define NAME(name) static const MenuString itemName = {.label=name}
 #define ITEM(new) MenuItem *item = (new); if (!item) goto noItem
@@ -354,6 +355,30 @@ testInputTable (void) {
 static int
 testKeyboardTable (void) {
   return !!keyboardTable;
+}
+
+static MenuItem *
+newProfileMenuItem (Menu *menu, const MenuString *name, const ProfileDescriptor *profile) {
+  return newFilesMenuItem(menu, name, opt_tablesDirectory, PROFILES_SUBDIRECTORY, profile->extension, "", 1);
+}
+
+static int
+changedProfile (const ProfileDescriptor *profile, const MenuItem *item) {
+  const char *value = getMenuItemValue(item);
+  int ok;
+
+  if (*value) {
+    ok = activateProfile(profile, opt_tablesDirectory, value);
+  } else {
+    ok = deactivateProfile(profile);
+  }
+
+  return ok;
+}
+
+static int
+changedLanguageProfile (const MenuItem *item, unsigned char setting UNUSED) {
+  return changedProfile(&languageProfile, item);
 }
 
 static MenuItem *
@@ -1067,6 +1092,16 @@ makePreferencesMenu (void) {
       CHANGED(ContractionTable);
     }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
+  }
+
+  {
+    SUBMENU(profilesSubmenu, rootMenu, strtext("Profiles"));
+
+    {
+      NAME(strtext("Language"));
+      ITEM(newProfileMenuItem(profilesSubmenu, &itemName, &languageProfile));
+      CHANGED(LanguageProfile);
+    }
   }
 
   {
