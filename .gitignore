@@ -20,6 +20,7 @@ reldeps.mk
 *.o
 *.a
 *.so
+*.so.*
 *.dylib
 
 *.dll
