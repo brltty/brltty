@@ -101,7 +101,9 @@ typedef struct {
 struct MenuItemStruct {
   Menu *menu;
   unsigned char *setting;                 /* pointer to current value */
-  MenuString name;                      /* item name for presentation */
+
+  const char *title;                      /* item name for presentation */
+  const char *subtitle;                      /* item name for presentation */
 
   const MenuItemMethods *methods;
   MenuItemTester *test;                     /* returns true if item should be presented */
@@ -119,7 +121,7 @@ struct MenuItemStruct {
 };
 
 static inline const char *
-getLocalText (const char *string) {
+getLocalizedText (const char *string) {
   return (string && *string)? gettext(string): "";
 }
 
@@ -249,9 +251,14 @@ getMenuItemIndex (const MenuItem *item) {
   return item - item->menu->items.array;
 }
 
-const MenuString *
-getMenuItemName (const MenuItem *item) {
-  return &item->name;
+const char *
+getMenuItemTitle (const MenuItem *item) {
+  return getLocalizedText(item->title);
+}
+
+const char *
+getMenuItemSubtitle (const MenuItem *item) {
+  return getLocalizedText(item->subtitle);
 }
 
 const char *
@@ -285,8 +292,8 @@ newMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
     item->menu = menu;
     item->setting = setting;
 
-    item->name.label = getLocalText(name->label);
-    item->name.comment = getLocalText(name->comment);
+    item->title = name->label;
+    item->subtitle = name->comment;
 
     item->methods = NULL;
     item->test = NULL;
@@ -339,13 +346,13 @@ newNumericMenuItem (
 static const char *
 getValue_strings (const MenuItem *item) {
   const MenuString *strings = item->data.strings;
-  return getLocalText(strings[*item->setting - item->minimum].label);
+  return getLocalizedText(strings[*item->setting - item->minimum].label);
 }
 
 static const char *
 getComment_strings (const MenuItem *item) {
   const MenuString *strings = item->data.strings;
-  return getLocalText(strings[*item->setting - item->minimum].comment);
+  return getLocalizedText(strings[*item->setting - item->minimum].comment);
 }
 
 static const MenuItemMethods menuItemMethods_strings = {
@@ -696,12 +703,12 @@ activateItem_close (MenuItem *item) {
 
 static const char *
 getValue_close (const MenuItem *item) {
-  return getLocalText(strtext("Close"));
+  return getLocalizedText(strtext("Close"));
 }
 
 static const char *
 getComment_close (const MenuItem *item) {
-  return getLocalText(getMenuItemName(getParentMenuItem(item))->label);
+  return getMenuItemTitle(getParentMenuItem(item));
 }
 
 static const MenuItemMethods menuItemMethods_close = {

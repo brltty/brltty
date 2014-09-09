@@ -73,7 +73,8 @@ extern int isMenuItemSettable (const MenuItem *item);
 extern int isMenuItemVisible (const MenuItem *item);
 
 extern unsigned int getMenuItemIndex (const MenuItem *item);
-extern const MenuString *getMenuItemName (const MenuItem *item);
+extern const char *getMenuItemTitle (const MenuItem *item);
+extern const char *getMenuItemSubtitle (const MenuItem *item);
 extern const char *getMenuItemValue (const MenuItem *item);
 extern const char *getMenuItemComment (const MenuItem *item);
 

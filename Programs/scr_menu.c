@@ -71,11 +71,12 @@ newRenderedMenuItem (Menu *menu) {
   size_t settingLength;
 
   {
-    const MenuString *name = getMenuItemName(item);
+    const char *title = getMenuItemTitle(item);
+    const char *subtitle = getMenuItemSubtitle(item);
 
     STR_BEGIN(labelString, ARRAY_COUNT(labelString));
-    STR_PRINTF("%s", name->label);
-    if (*name->comment) STR_PRINTF(" %s", name->comment);
+    STR_PRINTF("%s", title);
+    if (*subtitle) STR_PRINTF(" %s", subtitle);
     if (isMenuItemSettable(item)) STR_PRINTF(":");
     STR_PRINTF(" ");
     labelLength = STR_LENGTH;
