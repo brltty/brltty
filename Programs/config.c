@@ -744,6 +744,59 @@ changeContractionTable (const char *name) {
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
+static KeyTableState
+handleKeyboardEvent (KeyGroup group, KeyNumber number, int press) {
+  if (keyboardTable) {
+    if (!scr.unreadable) {
+      return processKeyEvent(keyboardTable, getCurrentCommandContext(), group, number, press);
+    }
+
+    resetKeyTable(keyboardTable);
+  }
+
+  return KTS_UNBOUND;
+}
+
+static void
+cancelKeyboardMonitorStartAlarm (void) {
+  if (keyboardMonitorStartAlarm) {
+    asyncCancelRequest(keyboardMonitorStartAlarm);
+    keyboardMonitorStartAlarm = NULL;
+  }
+}
+
+ASYNC_ALARM_CALLBACK(tryKeyboardMonitor) {
+  if ((keyboardMonitor = newKeyboardMonitorObject(&keyboardProperties, handleKeyboardEvent))) {
+    cancelKeyboardMonitorStartAlarm();
+  }
+}
+
+static void
+scheduleKeyboardMonitor (void) {
+  if (!keyboardMonitor) {
+    if (!keyboardMonitorStartAlarm) {
+      if (asyncSetAlarmIn(&keyboardMonitorStartAlarm, 0, tryKeyboardMonitor, NULL)) {
+        asyncResetAlarmEvery(keyboardMonitorStartAlarm, KEYBOARD_MONITOR_START_RETRY_INTERVAL);
+      }
+    }
+  }
+}
+
+static void
+stopKeyboardMonitor (void) {
+  cancelKeyboardMonitorStartAlarm();
+
+  if (keyboardMonitor) {
+    destroyKeyboardMonitorObject(keyboardMonitor);
+    keyboardMonitor = NULL;
+  }
+}
+
+static void
+exitKeyboardMonitor (void *data) {
+  stopKeyboardMonitor();
+}
+
 static unsigned int brailleHelpPageNumber = 0;
 static unsigned int keyboardHelpPageNumber = 0;
 
@@ -842,6 +895,8 @@ changeKeyboardTable (const char *name) {
   }
 
   if ((keyboardTable = table)) {
+    scheduleKeyboardMonitor();
+
     setKeyTableLogLabel(keyboardTable, "kbd");
     setLogKeyEventsFlag(keyboardTable, &LOG_CATEGORY_FLAG(KEYBOARD_KEYS));
 
@@ -851,59 +906,6 @@ changeKeyboardTable (const char *name) {
   }
 
   return 1;
-}
-
-static KeyTableState
-handleKeyboardEvent (KeyGroup group, KeyNumber number, int press) {
-  if (keyboardTable) {
-    if (!scr.unreadable) {
-      return processKeyEvent(keyboardTable, getCurrentCommandContext(), group, number, press);
-    }
-
-    resetKeyTable(keyboardTable);
-  }
-
-  return KTS_UNBOUND;
-}
-
-static void
-cancelKeyboardMonitorStartAlarm (void) {
-  if (keyboardMonitorStartAlarm) {
-    asyncCancelRequest(keyboardMonitorStartAlarm);
-    keyboardMonitorStartAlarm = NULL;
-  }
-}
-
-ASYNC_ALARM_CALLBACK(tryKeyboardMonitor) {
-  if ((keyboardMonitor = newKeyboardMonitorObject(&keyboardProperties, handleKeyboardEvent))) {
-    cancelKeyboardMonitorStartAlarm();
-  }
-}
-
-static void
-scheduleKeyboardMonitor (void) {
-  if (!keyboardMonitor) {
-    if (!keyboardMonitorStartAlarm) {
-      if (asyncSetAlarmIn(&keyboardMonitorStartAlarm, 0, tryKeyboardMonitor, NULL)) {
-        asyncResetAlarmEvery(keyboardMonitorStartAlarm, KEYBOARD_MONITOR_START_RETRY_INTERVAL);
-      }
-    }
-  }
-}
-
-static void
-stopKeyboardMonitor (void) {
-  cancelKeyboardMonitorStartAlarm();
-
-  if (keyboardMonitor) {
-    destroyKeyboardMonitorObject(keyboardMonitor);
-    keyboardMonitor = NULL;
-  }
-}
-
-static void
-exitKeyboardMonitor (void *data) {
-  stopKeyboardMonitor();
 }
 
 int
