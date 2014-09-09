@@ -2358,7 +2358,21 @@ brlttyStart (void) {
   return opt_verify? PROG_EXIT_FORCE: PROG_EXIT_SUCCESS;
 }
 
+static int
+changeLocale (const char *locale) {
+  if (setlocale(LC_ALL, locale)) return 1;
+  logSystemError("setlocale");
+  return 0;
+}
+
+static char *configuredLocale = "";
+
 static const ProfileProperty languageProfileProperties[] = {
+  { .name = WS_C("locale"),
+    .defaultValue = &configuredLocale,
+    .change = changeLocale
+  },
+
 #ifdef ENABLE_SPEECH_SUPPORT
   { .name = WS_C("speech-driver"),
     .defaultValue = &opt_speechDriver,
