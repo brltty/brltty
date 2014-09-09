@@ -199,6 +199,7 @@ ContractionTable *contractionTable = NULL;
 static char *opt_keyboardTable;
 KeyTable *keyboardTable = NULL;
 static KeyboardMonitorObject *keyboardMonitor = NULL;
+static AsyncHandle keyboardMonitorStartAlarm = NULL;
 
 static char *opt_keyboardProperties;
 static KeyboardProperties keyboardProperties;
@@ -865,29 +866,45 @@ handleKeyboardEvent (KeyGroup group, KeyNumber number, int press) {
   return KTS_UNBOUND;
 }
 
-static void scheduleKeyboardMonitor (int interval);
+static void
+cancelKeyboardMonitorStartAlarm (void) {
+  if (keyboardMonitorStartAlarm) {
+    asyncCancelRequest(keyboardMonitorStartAlarm);
+    keyboardMonitorStartAlarm = NULL;
+  }
+}
 
 static void
-exitKeyboardMonitor (void *data) {
+stopKeyboardMonitor (void) {
+  cancelKeyboardMonitorStartAlarm();
+
   if (keyboardMonitor) {
     destroyKeyboardMonitorObject(keyboardMonitor);
     keyboardMonitor = NULL;
   }
 }
 
-ASYNC_ALARM_CALLBACK(retryKeyboardMonitor) {
-  logMessage(LOG_DEBUG, "starting keyboard monitor");
+static void
+exitKeyboardMonitor (void *data) {
+  stopKeyboardMonitor();
+}
+
+ASYNC_ALARM_CALLBACK(tryKeyboardMonitor) {
   if ((keyboardMonitor = newKeyboardMonitorObject(&keyboardProperties, handleKeyboardEvent))) {
+    cancelKeyboardMonitorStartAlarm();
     onProgramExit("keyboard-monitor", exitKeyboardMonitor, NULL);
-  } else {
-    logMessage(LOG_DEBUG, "keyboard monitor failed");
-    scheduleKeyboardMonitor(KEYBOARD_MONITOR_START_RETRY_INTERVAL);
   }
 }
 
 static void
-scheduleKeyboardMonitor (int interval) {
-  asyncSetAlarmIn(NULL, interval, retryKeyboardMonitor, NULL);
+scheduleKeyboardMonitor (void) {
+  if (!keyboardMonitor) {
+    if (!keyboardMonitorStartAlarm) {
+      if (asyncSetAlarmIn(&keyboardMonitorStartAlarm, 0, tryKeyboardMonitor, NULL)) {
+        asyncResetAlarmEvery(keyboardMonitorStartAlarm, KEYBOARD_MONITOR_START_RETRY_INTERVAL);
+      }
+    }
+  }
 }
 
 int
@@ -1704,6 +1721,8 @@ static void
 scheduleSpeechDriver (void) {
   if (!speechDriver) {
     if (!speechDriverStartAlarm) {
+      initializeSpeech();
+
       if (asyncSetAlarmIn(&speechDriverStartAlarm, 0, trySpeechDriver, NULL)) {
         asyncResetAlarmEvery(speechDriverStartAlarm, SPEECH_DRIVER_START_RETRY_INTERVAL);
       }
@@ -2308,7 +2327,7 @@ brlttyStart (void) {
 
   if (parseKeyboardProperties(&keyboardProperties, opt_keyboardProperties)) {
     if (keyboardTable) {
-      scheduleKeyboardMonitor(0);
+      scheduleKeyboardMonitor();
     }
   }
 
