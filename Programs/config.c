@@ -874,6 +874,23 @@ cancelKeyboardMonitorStartAlarm (void) {
   }
 }
 
+ASYNC_ALARM_CALLBACK(tryKeyboardMonitor) {
+  if ((keyboardMonitor = newKeyboardMonitorObject(&keyboardProperties, handleKeyboardEvent))) {
+    cancelKeyboardMonitorStartAlarm();
+  }
+}
+
+static void
+scheduleKeyboardMonitor (void) {
+  if (!keyboardMonitor) {
+    if (!keyboardMonitorStartAlarm) {
+      if (asyncSetAlarmIn(&keyboardMonitorStartAlarm, 0, tryKeyboardMonitor, NULL)) {
+        asyncResetAlarmEvery(keyboardMonitorStartAlarm, KEYBOARD_MONITOR_START_RETRY_INTERVAL);
+      }
+    }
+  }
+}
+
 static void
 stopKeyboardMonitor (void) {
   cancelKeyboardMonitorStartAlarm();
@@ -887,24 +904,6 @@ stopKeyboardMonitor (void) {
 static void
 exitKeyboardMonitor (void *data) {
   stopKeyboardMonitor();
-}
-
-ASYNC_ALARM_CALLBACK(tryKeyboardMonitor) {
-  if ((keyboardMonitor = newKeyboardMonitorObject(&keyboardProperties, handleKeyboardEvent))) {
-    cancelKeyboardMonitorStartAlarm();
-    onProgramExit("keyboard-monitor", exitKeyboardMonitor, NULL);
-  }
-}
-
-static void
-scheduleKeyboardMonitor (void) {
-  if (!keyboardMonitor) {
-    if (!keyboardMonitorStartAlarm) {
-      if (asyncSetAlarmIn(&keyboardMonitorStartAlarm, 0, tryKeyboardMonitor, NULL)) {
-        asyncResetAlarmEvery(keyboardMonitorStartAlarm, KEYBOARD_MONITOR_START_RETRY_INTERVAL);
-      }
-    }
-  }
 }
 
 int
@@ -2328,6 +2327,7 @@ brlttyStart (void) {
   if (parseKeyboardProperties(&keyboardProperties, opt_keyboardProperties)) {
     if (keyboardTable) {
       scheduleKeyboardMonitor();
+      onProgramExit("keyboard-monitor", exitKeyboardMonitor, NULL);
     }
   }
 
