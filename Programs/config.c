@@ -1532,7 +1532,6 @@ exitApiServer (void *data) {
 #endif /* ENABLE_API */
 
 #ifdef ENABLE_SPEECH_SUPPORT
-static AsyncHandle speechDriverStartAlarm = NULL;
 static AsyncHandle autospeakDelayAlarm = NULL;
 
 static void
@@ -1686,6 +1685,8 @@ startSpeechDriver (void) {
 
   return 1;
 }
+
+static AsyncHandle speechDriverStartAlarm = NULL;
 
 static void
 cancelSpeechDriverStartAlarm (void) {
@@ -1867,27 +1868,37 @@ startScreenDriver (void) {
   return 1;
 }
 
-static int tryScreenDriver (void);
+static AsyncHandle screenDriverStartAlarm = NULL;
 
-ASYNC_ALARM_CALLBACK(retryScreenDriver) {
-  if (!screenDriver) tryScreenDriver();
+static void
+cancelScreenDriverStartAlarm (void) {
+  if (screenDriverStartAlarm) {
+    asyncCancelRequest(screenDriverStartAlarm);
+    screenDriverStartAlarm = NULL;
+  }
+}
+
+ASYNC_ALARM_CALLBACK(tryScreenDriver) {
+  if (startScreenDriver()) cancelScreenDriverStartAlarm();
 }
 
 static void
-scheduleScreenDriver (int delay) {
-  asyncSetAlarmIn(NULL, delay, retryScreenDriver, NULL);
-}
+scheduleScreenDriver (void) {
+  if (!screenDriver) {
+    if (!screenDriverStartAlarm) {
+      initializeScreen();
 
-static int
-tryScreenDriver (void) {
-  if (startScreenDriver()) return 1;
-  scheduleScreenDriver(SCREEN_DRIVER_START_RETRY_INTERVAL);
-  initializeScreen();
-  return 0;
+      if (asyncSetAlarmIn(&screenDriverStartAlarm, 0, tryScreenDriver, NULL)) {
+        asyncResetAlarmEvery(screenDriverStartAlarm, SCREEN_DRIVER_START_RETRY_INTERVAL);
+      }
+    }
+  }
 }
 
 static void
 stopScreenDriver (void) {
+  cancelScreenDriverStartAlarm();
+
   deactivateScreenDriver();
 }
 
@@ -2305,7 +2316,7 @@ brlttyStart (void) {
   if (opt_verify) {
     if (activateScreenDriver(1)) deactivateScreenDriver();
   } else {
-    tryScreenDriver();
+    scheduleScreenDriver();
   }
   
 #ifdef ENABLE_API
