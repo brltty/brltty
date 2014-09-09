@@ -2411,7 +2411,7 @@ endLanguageProfile (void) {
 }
 
 const ProfileDescriptor languageProfile = {
-  .category = "language",
+  .category = strtext("Language"),
   .extension = LANGUAGE_PROFILE_EXTENSION,
 
   .begin = beginLanguageProfile,

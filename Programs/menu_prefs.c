@@ -358,8 +358,10 @@ testKeyboardTable (void) {
 }
 
 static MenuItem *
-newProfileMenuItem (Menu *menu, const MenuString *name, const ProfileDescriptor *profile) {
-  return newFilesMenuItem(menu, name, opt_tablesDirectory, PROFILES_SUBDIRECTORY, profile->extension, "", 1);
+newProfileMenuItem (Menu *menu, const ProfileDescriptor *profile) {
+  MenuString name = {.label = profile->category};
+  ;
+  return newFilesMenuItem(menu, &name, opt_tablesDirectory, PROFILES_SUBDIRECTORY, profile->extension, "", 1);
 }
 
 static int
@@ -1098,8 +1100,7 @@ makePreferencesMenu (void) {
     SUBMENU(profilesSubmenu, rootMenu, strtext("Profiles"));
 
     {
-      NAME(strtext("Language"));
-      ITEM(newProfileMenuItem(profilesSubmenu, &itemName, &languageProfile));
+      ITEM(newProfileMenuItem(profilesSubmenu, &languageProfile));
       CHANGED(LanguageProfile);
     }
   }
