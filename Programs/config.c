@@ -2400,14 +2400,15 @@ brlttyStart (void) {
   return opt_verify? PROG_EXIT_FORCE: PROG_EXIT_SUCCESS;
 }
 
+static char *configuredLocale = "";
+
 static int
 changeLocale (const char *locale) {
   if (setlocale(LC_ALL, locale)) return 1;
   logSystemError("setlocale");
+  setlocale(LC_ALL, configuredLocale);
   return 0;
 }
-
-static char *configuredLocale = "";
 
 static const ProfileProperty languageProfileProperties[] = {
   { .name = WS_C("locale"),
