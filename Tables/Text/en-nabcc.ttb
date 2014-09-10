@@ -18,7 +18,7 @@
 
 # BRLTTY Text Table - English (North American Braille Computer Code)
 
-# This is a description of the default text table used by BRLTTY.  
+# This is a description of the default text table used by BRLTTY.
 # It's based on the North American Braille Computer Code, but defines the full
 # Latin1 (ISO-8859-1) character set.
 
@@ -36,7 +36,7 @@
 # reason couldn't be found, have a very close logical relationship within the
 # US-ASCII code. Dot 8 isn't used at all.
 
-# The space and the 26 lowercase letters (a-z) are the same as in literary 
+# The space and the 26 lowercase letters (a-z) are the same as in literary
 # braille:
 
      #Hex    Dots       Dec Char Description
@@ -68,7 +68,7 @@ char \X78 (1 34 6  )  # 120   x  latin small letter x
 char \X79 (1 3456  )  # 121   y  latin small letter y
 char \X7A (1 3 56  )  # 122   z  latin small letter z
 
-# The 26 uppercase letters (A-Z) are the same as their lowercase counterparts 
+# The 26 uppercase letters (A-Z) are the same as their lowercase counterparts
 # except that dot 7 is added:
 
      #Hex    Dots       Dec Char Description
@@ -125,15 +125,15 @@ char \X2F (  34    )  #  47   /  solidus
 char \X28 (123 56  )  #  40   (  left parenthesis
 char \X29 ( 23456  )  #  41   )  right parenthesis
 
-# With all of these major considerations having been taken into account, 
-# convenient representations were still available, and are used, for some of 
+# With all of these major considerations having been taken into account,
+# convenient representations were still available, and are used, for some of
 # the remaining characters:
 
      #Hex    Dots       Dec Char Description
 char \X26 (1234 6  )  #  38   &  ampersand
 char \X23 (  3456  )  #  35   #  number sign
 
-# The remaining characters are what they are. Dot 7 isn't used either within 
+# The remaining characters are what they are. Dot 7 isn't used either within
 # the number block (32-63) or, with the exception of the DEL control character
 # (127), within the lowercase block (96-127). With the exception of the
 # underscore (95), dot 7 is used for every character within the uppercase block
@@ -204,7 +204,7 @@ char \X1D (12 45678)  #  29  ^]  group separator
 char \X1E (   45 78)  #  30  ^^  record separator
 char \X1F (   45678)  #  31  ^_  unit separator
 
-# Each of the characters within the extended control character block (128-159)  
+# Each of the characters within the extended control character block (128-159)
 # is the same as its corresponding character within the basic control character
 # block (0-31) except that only dot 8 is used.
 

@@ -602,7 +602,7 @@ putCharacter (BrailleContractionData *bcd, wchar_t character) {
   }
 
   {
-#ifdef HAVE_WCHAR_H 
+#ifdef HAVE_WCHAR_H
     const wchar_t replacementCharacter = UNICODE_REPLACEMENT_CHARACTER;
     if (getCharacterWidth(character) == 0) return 1;
 #else /* HAVE_WCHAR_H */

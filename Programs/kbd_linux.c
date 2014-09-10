@@ -582,7 +582,7 @@ ASYNC_INPUT_CALLBACK(handleLinuxKeyboardEvent) {
                label, kio->kix->file.descriptor, strerror(parameters->error));
     destroyKeyboardInstanceObject(kio);
   } else if (parameters->end) {
-    logMessage(LOG_DEBUG, "%s end-of-file: fd=%d", 
+    logMessage(LOG_DEBUG, "%s end-of-file: fd=%d",
                label, kio->kix->file.descriptor);
     destroyKeyboardInstanceObject(kio);
   } else {
@@ -786,7 +786,7 @@ monitorKeyboard (KeyboardInstanceObject *kio) {
 
         STR_END;
         logMessage(LOG_DEBUG, "checking input device: %s", description);
-        
+
         if (kio->actualProperties.type) {
           if (checkKeyboardProperties(&kio->actualProperties, &kio->kmo->requiredProperties)) {
             if (ioctl(kio->kix->file.descriptor, EVIOCGRAB, 1) != -1) {

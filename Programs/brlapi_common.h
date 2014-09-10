@@ -176,7 +176,7 @@ ssize_t BRLAPI(readPacketHeader)(brlapi_fileDescriptor fd, brlapi_packetType_t *
     if (res<0) {
       /* reports EINTR too */
       LibcError("read in brlapi_readPacketHeader");
-      return -1;    
+      return -1;
     } else return -2;
   }
   *packetType = ntohl(header[1]);
@@ -242,7 +242,7 @@ static int BRLAPI(loadAuthKey)(const char *filename, size_t *authlength, void *a
     LibcError("stat in loadAuthKey");
     return -1;
   }
-  
+
   if (statbuf.st_size==0) {
     brlapi_errno = BRLAPI_ERROR_EMPTYKEY;
     brlapi_errfun = "brlapi_laudAuthKey";

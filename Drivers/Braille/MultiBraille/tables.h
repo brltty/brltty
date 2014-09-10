@@ -78,13 +78,13 @@
 
 
 
-/* 
- Command translation table for 'T' events (front/thumb keys, block with keys '0-9', '*', '#'): 
+/*
+ Command translation table for 'T' events (front/thumb keys, block with keys '0-9', '*', '#'):
  key numbers for front keys are: (keys in brackets are not available for all braille lines!
    13 - 14 - (15) - 16 - (17) - (18) - 19 - 20 - (21) - (22)
  key numbers for block keys ( '0' - '9', '*', '#'; MB185CR only):
    1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 9 - 10 - 11 - 12
-	 
+
  So if you have for example a MB185CR and you want to react front key with number 15
  for example to jump to the beginning of the line, you have to do the following:
  * Search in table cmd_T_trans the element with index 0x0f (== decimal 15)
@@ -92,11 +92,11 @@
  * instead of the default entry '0x00' enter BRL_CMD_LNBEG (all commands are explained above)
  * rebuild brltty and the next time you are pressing front key 15 the cursor will
    jump to the beginning of the line
- 
+
 */
 static int cmd_T_trans[23] = {
-/* 0x00 */ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-/* 0x08 */ 0x00, 0x00, 0x00, 0x00, 0x00, BRL_CMD_FWINLT, BRL_CMD_LNUP, 0x00, 
+/* 0x00 */ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+/* 0x08 */ 0x00, 0x00, 0x00, 0x00, 0x00, BRL_CMD_FWINLT, BRL_CMD_LNUP, 0x00,
 /* 0x10 */ BRL_CMD_CSRTRK, 0x00, 0x00, BRL_CMD_LNDN, BRL_CMD_FWINRT, 0x00, 0x00
 };
 
@@ -105,22 +105,22 @@ static int cmd_T_trans[23] = {
 /* 63 customizable key-bindings! (index 0 can't be customized ..) */
 /* combinations returning 0x00 are ignored */
 static int cmd_S_trans[0x40] = {
-/* 0x00 */  0x00,         BRL_CMD_FWINLT,   BRL_CMD_CSRBLINK, BRL_CMD_LNBEG,   
+/* 0x00 */  0x00,         BRL_CMD_FWINLT,   BRL_CMD_CSRBLINK, BRL_CMD_LNBEG,
 /* 0x04 */  BRL_CMD_LNUP,     BRL_CMD_CHRLT,    BRL_CMD_NXDIFLN,  BRL_CMD_TOP,
-/* 0x08 */  BRL_CMD_LNDN,     BRL_CMD_INFO,     0x00,         BRL_CMD_TUNES,      
-/* 0x0c */  BRL_CMD_CSRTRK,   BRL_CMD_DISPMD,   BRL_CMD_FREEZE,   BRL_CMD_PASTE, 
-/* 0x10 */  BRL_CMD_CSRVIS,   0x00,         BRL_CMD_ATTRVIS,  BRL_CMD_SIXDOTS,        
-/* 0x14 */  0x00,         BRL_CMD_HWINRT,   BRL_CMD_HELP,     BRL_CMD_PREFLOAD, 
-/* 0x18 */  BRL_CMD_PRDIFLN,  0x00,         BRL_CMD_SKPIDLNS, 0x00,        
-/* 0x1c */  0x00,         0x00,         BRL_CMD_HOME,     0x00, 
-/* 0x20 */  BRL_CMD_FWINRT,   BRL_CMD_BLK(ROUTE),     0x00,         BRL_CMD_BLK(CLIP_NEW), 
-/* 0x24 */  BRL_CMD_MUTE,     0x00,         0x00,         0x00, 
-/* 0x28 */  BRL_CMD_CHRRT,    0x00,         BRL_CMD_HWINLT,   0x00,        
-/* 0x2c */  BRL_CMD_CAPBLINK, BRL_CMD_PREFMENU, 0x00,         0x00, 
-/* 0x30 */  BRL_CMD_LNEND,    BRL_CMD_BLK(COPY_RECT), 0x00,         0x00,        
-/* 0x34 */  BRL_CMD_SAY_LINE, 0x00,         0x00,         0x00, 
-/* 0x38 */  BRL_CMD_BOT,      0x00,         BRL_CMD_SLIDEWIN, 0x00,        
-/* 0x3c */  0x00,         0x00,         0x00,         BRL_CMD_PREFSAVE, 
+/* 0x08 */  BRL_CMD_LNDN,     BRL_CMD_INFO,     0x00,         BRL_CMD_TUNES,
+/* 0x0c */  BRL_CMD_CSRTRK,   BRL_CMD_DISPMD,   BRL_CMD_FREEZE,   BRL_CMD_PASTE,
+/* 0x10 */  BRL_CMD_CSRVIS,   0x00,         BRL_CMD_ATTRVIS,  BRL_CMD_SIXDOTS,
+/* 0x14 */  0x00,         BRL_CMD_HWINRT,   BRL_CMD_HELP,     BRL_CMD_PREFLOAD,
+/* 0x18 */  BRL_CMD_PRDIFLN,  0x00,         BRL_CMD_SKPIDLNS, 0x00,
+/* 0x1c */  0x00,         0x00,         BRL_CMD_HOME,     0x00,
+/* 0x20 */  BRL_CMD_FWINRT,   BRL_CMD_BLK(ROUTE),     0x00,         BRL_CMD_BLK(CLIP_NEW),
+/* 0x24 */  BRL_CMD_MUTE,     0x00,         0x00,         0x00,
+/* 0x28 */  BRL_CMD_CHRRT,    0x00,         BRL_CMD_HWINLT,   0x00,
+/* 0x2c */  BRL_CMD_CAPBLINK, BRL_CMD_PREFMENU, 0x00,         0x00,
+/* 0x30 */  BRL_CMD_LNEND,    BRL_CMD_BLK(COPY_RECT), 0x00,         0x00,
+/* 0x34 */  BRL_CMD_SAY_LINE, 0x00,         0x00,         0x00,
+/* 0x38 */  BRL_CMD_BOT,      0x00,         BRL_CMD_SLIDEWIN, 0x00,
+/* 0x3c */  0x00,         0x00,         0x00,         BRL_CMD_PREFSAVE,
 };
 
 

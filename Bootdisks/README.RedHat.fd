@@ -37,7 +37,7 @@ BRLTTY driver, so you must choose wich. Do:
 
 make distclean
 ./configure --enable-standalone-programs --with-init-path
-            --with-braille-driver=<driver> --with-text-table=<table> 
+            --with-braille-driver=<driver> --with-text-table=<table>
 make
 where <driver> is the driver to build into BRLTTY (one of the possible values
 listed under --with-braille-driver in the output from ./configure --help) and
@@ -156,7 +156,7 @@ dd if=myroot.img of=/dev/fd0 bs=512
 That's it!
 
 So now boot the boot floppy on the machine you want to install. At the
-prompt you can press ENTER to choose the brltty entry. 
+prompt you can press ENTER to choose the brltty entry.
 
 If you want to specify boot parameters, remember to use the label
 "brltty" instead of "linux".

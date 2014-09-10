@@ -23,7 +23,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/* 
+/*
  * Structure definition for volatile screen state variables.
  */
 

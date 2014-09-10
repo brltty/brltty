@@ -442,66 +442,66 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
   if ((eptx = malloc(sizeof(*eptx)))) {
     if ((eptx->requests = newQueue(NULL, NULL))) {
       int flags;
-  
+
       {
         char name[0X80];
         int length = 0;
-  
+
         if (devx->configuration != 1) {
           int count;
           sprintf(&name[length], "cfg%d%n", devx->configuration, &count);
           length += count;
         }
-  
+
         {
           int count;
           sprintf(&name[length], "if%d%n", devx->interface, &count);
           length += count;
         }
-  
+
         if (devx->alternative != 0) {
           int count;
           sprintf(&name[length], ".%d%n", devx->alternative, &count);
           length += count;
         }
-  
+
         {
           const UsbEndpointDescriptor *descriptor = endpoint->descriptor;
           UsbEndpointDirection direction = USB_ENDPOINT_DIRECTION(descriptor);
           const char *prefix;
-  
+
           switch (direction) {
             case UsbEndpointDirection_Input:
               prefix = "in";
               flags = O_RDONLY;
               break;
-  
+
             case UsbEndpointDirection_Output:
               prefix = "out";
               flags = O_WRONLY;
               break;
-  
+
             default:
               logMessage(LOG_ERR, "USB unsupported endpoint direction: %02X", direction);
               goto nameError;
           }
-  
+
           {
             int count;
             sprintf(&name[length], "%s%d%n", prefix, USB_ENDPOINT_NUMBER(descriptor), &count);
             length += count;
           }
         }
-  
+
         eptx->name = strdup(name);
       }
-  
+
       if (eptx->name) {
         if (usbOpenEndpointFiles(devx->path, eptx->name, &eptx->data, &eptx->status,  flags)) {
           endpoint->extension = eptx;
           return 1;
         }
-  
+
         free(eptx->name);
       }
     nameError:

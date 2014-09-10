@@ -73,4 +73,4 @@ typedef enum {
   BN_MOD_rEAD     = 0X08
 } BN_QwertyModifier;
 
-#endif /* BRLTTY_INCLUDED_BN_BRLDEFS */ 
+#endif /* BRLTTY_INCLUDED_BN_BRLDEFS */

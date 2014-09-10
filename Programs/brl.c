@@ -249,7 +249,7 @@ setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting) {
 int
 setBrailleAutorepeat (BrailleDisplay *brl, int on, int delay, int interval) {
   if (!brl->setAutorepeat) return 0;
-  logMessage(LOG_DEBUG, "setting braille autorepeat: %s Delay:%d Interval:%d", 
+  logMessage(LOG_DEBUG, "setting braille autorepeat: %s Delay:%d Interval:%d",
              (on? "on": "off"), delay, interval);
   return brl->setAutorepeat(brl, on, delay, interval);
 }

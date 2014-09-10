@@ -218,4 +218,4 @@ typedef enum {
   EU_GRP_RoutingKeys2
 } EU_KeyGroup;
 
-#endif /* BRLTTY_INCLUDED_EU_BRLDEFS */ 
+#endif /* BRLTTY_INCLUDED_EU_BRLDEFS */

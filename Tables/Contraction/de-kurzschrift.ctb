@@ -201,7 +201,7 @@ endword tem 2345-12356
 endword tene 2345-14-15
 always tten 2345-2345-14 shouldn't use the te-contraction
 always tter 2345-2345-12456 shouldn't use the te-contraction
-always daten 145-1-2345-14 
+always daten 145-1-2345-14
 always karten 13-356-2345-14
 endword tenem 2345-14-12356
 endword tenen 2345-14-14
@@ -1334,7 +1334,7 @@ before g begword eherin 15-125-15-1235-35 Ehering(e) shouldn't use the er-contra
 midword ehilfs = Analysehilfsmittel shouldn't use the eh-contraction
 always einter 15-35-2345-12456 shouldn't use the ein-contraction
 midendword emethod = Analysemethode shouldn't use the eh-contraction
-midendword enorm 15-1345-26-134 Aussprachenorm shouldn't use the en-contraction 
+midendword enorm 15-1345-26-134 Aussprachenorm shouldn't use the en-contraction
 always emuskel 15-134-136-234-13-13456 shouldn't use the em-contraction
 always eschatolog 123456-1456-1-2345-135-123-135-1245 shouldn't use the sch-contraction
 always esther 123456-2345-125-12456 shouldn't use the st-contraction

@@ -95,7 +95,7 @@ serialPutParity (SerialAttributes *attributes, SerialParity parity) {
       attributes->parity = GRUB_SERIAL_PARITY_EVEN;
       break;
 
-    default: 
+    default:
       return 0;
   }
 

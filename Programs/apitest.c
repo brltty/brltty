@@ -17,7 +17,7 @@
  */
 
 /* apitest provides a small test utility for BRLTTY's API */
- 
+
 #include "prologue.h"
 
 #include <stdio.h>
@@ -306,7 +306,7 @@ main (int argc, char *argv[]) {
     }
 
     brlapi_closeConnection();
-    fprintf(stderr, "Disconnected\n"); 
+    fprintf(stderr, "Disconnected\n");
   } else {
     fprintf(stderr, "failed to connect to %s using auth %s",settings.host, settings.auth);
     brlapi_perror("");

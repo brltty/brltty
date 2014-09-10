@@ -68,4 +68,4 @@ typedef enum {
   VO_GRP_RoutingKeys
 } VO_KeyGroup;
 
-#endif /* BRLTTY_INCLUDED_VO_BRLDEFS */ 
+#endif /* BRLTTY_INCLUDED_VO_BRLDEFS */

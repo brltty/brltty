@@ -45,4 +45,4 @@ typedef enum {
   MT_GRP_StatusKeys2
 } MT_KeyGroup;
 
-#endif /* BRLTTY_INCLUDED_MT_BRLDEFS */ 
+#endif /* BRLTTY_INCLUDED_MT_BRLDEFS */

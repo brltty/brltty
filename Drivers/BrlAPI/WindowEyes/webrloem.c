@@ -113,7 +113,7 @@ bool WEBrailleOpen(int portType, int portNumber, DWORD *handle)
     goto error;
 
   raw = portNumber == 2;
-  
+
   if (raw) {
     char name[BRLAPI_MAXNAMELENGTH+1];
     if (brlapi__getDriverName(brl_handle, name, sizeof(name)) == -1)
@@ -159,7 +159,7 @@ bool WEGetBrailleDisplayInfo(DWORD handle, int *numberOfCells, int *numberOfStat
 {
   brlapi_handle_t *brl_handle = (void*) handle;
   unsigned int x, y;
-  
+
   if (brlapi__getDisplaySize(brl_handle, &x, &y) == -1)
     return FALSE;
 

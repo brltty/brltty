@@ -301,7 +301,7 @@ sufword coney =
 word conies =
 sufword conk =
 word cons 14-135-1345-234
-sufword conundrum = 
+sufword conundrum =
 word cony =
 sufword coronel =
 always could 14-145
@@ -449,7 +449,7 @@ begword equino = equinox
 always er 12456
 begword era =
 word eras 12456-1-234
-begword erec = erect 
+begword erec = erect
 begword ero 15-1235-135
 begword erog 12456-135-1245 erogenous
 word eros 12456-135-234 Down Eros, up Mars!
@@ -539,7 +539,7 @@ always had 456-125
 begword hadd 125-1-256 haddock
 sufword hade = hadean
 sufword handsome 125-12346-5-234 handsomer
-sufword hadr = hadrian 
+sufword hadr = hadrian
 word have 125
 always headd 125-2-145-145 headdress
 sufword headmistress 125-2-145-134-24-34-1235-15-234-234 headmistressship
@@ -655,7 +655,7 @@ sufword lucknow 123-136-14-13-1345-246
 always m 134
 always M 134
 begword maha = maharaja, maharani
-sufword mahoney = 
+sufword mahoney =
 sufword mailorder 134-1-24-123-135-1235-145-12456
 begword maneat 134-1-1345-15-1-2345 maneater, maneating
 always many 456-134
@@ -910,7 +910,7 @@ begword reaff 1235-15-1-235
 always reagent 1235-15-1-1245-26-2345
 begword reagg 1235-15-1-2356 reaggregated
 begword realig = realign
-begword reallo = reallocate 
+begword reallo = reallocate
 sufword realter 1235-15-1-123-2345-12456 realteration
 begword rean = reanalyze, reanimate
 begword reapp = reappear
@@ -927,7 +927,7 @@ begword redi =
 word redo =
 begword redol 1235-1246-135-123 redolent
 word redone 1235-15-145-5-135
-begword redou 1235-15-145-1256 redouble redoubt 
+begword redou 1235-15-145-1256 redouble redoubt
 sufword redound 1235-15-145-46-145
 always redu = reduce redundant reduplicate
 always redul 1235-1246-136-123 incredulous
@@ -1024,8 +1024,8 @@ word so 234
 begword solo = soloensis (anthropology)
 always some 5-234
 midendword somed 234-135-134-1246 ransomed
-always somer 234-135-134-12456 somersault 
-always someter 234-135-134-15-2345-12456 gasometer 
+always somer 234-135-134-12456 somersault
+always someter 234-135-134-15-2345-12456 gasometer
 always somever 234-135-134-5-15
 sufword sparerib 234-1234-345-15-1235-24-12
 begword speakeas 234-1234-2-13-15-1-234 speakeasy
@@ -1033,7 +1033,7 @@ sufword speed 234-1234-15-1246 speedometer
 always spirit 456-234
 begword spreadeagl 234-1234-1235-2-145-15-1-1245-123 spreadeagled
 sufword squall = squally
-midendword ssword 234-234-45-2456 crossword 
+midendword ssword 234-234-45-2456 crossword
 endnum st 34 (first)
 word st =
 word st. 34-256 Saint Street
@@ -1112,7 +1112,7 @@ midendword thereal 2346-1235-2-123 ethereal
 word thereupon 5-2346-45-136
 always thered 2346-1235-1246
 always therer 2346-1235-12456
-begword theres 2346-1235-15-234 theresa therese 
+begword theres 2346-1235-15-234 theresa therese
 always thood =
 midendword tion 56-1345
 always time 5-2345
@@ -1295,7 +1295,7 @@ always " 5
 postpunc '' 356
 postpunc ''' 3-356
 always ' 3
-word 'em = 
+word 'em =
 word 'tis =
 word 'twas =
 word 'twill =
@@ -1511,11 +1511,11 @@ literal .zip
 # When an upper-case letter occurs inside a contraction, following a lower-case
 # letter, the contraction should not be used. Example McCan
 
-# Windows mail programs use all sorts of weird characters for apostrophes. 
-# I would prefer to have all characters above 126 just show up as a 
+# Windows mail programs use all sorts of weird characters for apostrophes.
+# I would prefer to have all characters above 126 just show up as a
 # backslash and two hex digits.
 
 # problems with quotation marks before and after dashes: "division"--a
 
-# when a decimal begins with a period, it should be translated with a 
+# when a decimal begins with a period, it should be translated with a
 # number sign followed by a decimal point, followed by the number.

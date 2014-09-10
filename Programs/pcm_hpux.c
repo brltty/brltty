@@ -58,7 +58,7 @@ openPcmDevice (int errorLevel, const char *device) {
     AudioAttrMask mask = 0;
     AudioAttributes attributes;
     SSPlayParams parameters;
-  
+
     if (!audioServer) {
       char *server = "";
       audioServer = AOpenAudio(server, &status);
@@ -68,20 +68,20 @@ openPcmDevice (int errorLevel, const char *device) {
         goto noServer;
       }
       logMessage(LOG_DEBUG, "connected to audio server: %s", AAudioString(audioServer));
-  
+
       ASetCloseDownMode(audioServer, AKeepTransactions, &status);
       if (status != AENoError) {
         logAudioError(errorLevel, status, "ASetCloseDownMode");
       }
     }
-  
+
     memset(&attributes, 0, sizeof(attributes));
-  
+
     parameters.gain_matrix = *ASimplePlayer(audioServer);
     parameters.play_volume = AUnityGain;
     parameters.priority = APriorityUrgent;
     parameters.event_mask = 0;
-  
+
     pcm->transaction = APlaySStream(audioServer, mask, &attributes, &parameters, &pcm->stream, &status);
     if (status == AENoError) {
       if ((pcm->socket = socket(AF_INET, SOCK_STREAM, 0)) != -1) {

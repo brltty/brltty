@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/** EuroBraille/eu_esysiris.c 
- ** Implements the ESYS and IRIS rev >=1.71 protocol 
+/** EuroBraille/eu_esysiris.c
+ ** Implements the ESYS and IRIS rev >=1.71 protocol
  ** Made by Yannick PLASSIARD <yan@mistigri.org>
  */
 
@@ -454,16 +454,16 @@ handleSystemInformation (BrailleDisplay *brl, unsigned char *packet) {
   enum {Unknown, End, String, Dec8, Dec16, Hex32} infoType;
 
   switch(packet[0]) {
-    case 'H': 
+    case 'H':
       infoType = String;
       infoDescription = "Short Name";
       break;
 
-    case 'I': 
+    case 'I':
       infoType = End;
       break;
 
-    case 'G': 
+    case 'G':
       if (haveSystemInformation) brl->resizeRequired = 1;
       brl->textColumns = packet[1];
 
@@ -471,12 +471,12 @@ handleSystemInformation (BrailleDisplay *brl, unsigned char *packet) {
       infoDescription = "Cell Count";
       break;
 
-    case 'L': 
+    case 'L':
       infoType = String;
       infoDescription = "Country Code";
       break;
 
-    case 'M': 
+    case 'M':
       maximumFrameLength = (packet[1] << 8)
                          | (packet[2] << 0)
                          ;
@@ -485,12 +485,12 @@ handleSystemInformation (BrailleDisplay *brl, unsigned char *packet) {
       infoDescription = "Maximum Frame Length";
       break;
 
-    case 'N': 
+    case 'N':
       infoType = String;
       infoDescription = "Long Name";
       break;
 
-    case 'O': 
+    case 'O':
       deviceOptions = (packet[1] << 24)
                     | (packet[2] << 16)
                     | (packet[3] <<  8)
@@ -501,7 +501,7 @@ handleSystemInformation (BrailleDisplay *brl, unsigned char *packet) {
       infoDescription = "Device Options";
       break;
 
-    case 'P': 
+    case 'P':
       protocolVersion = ((packet[1] - '0') << 16)
                       | ((packet[3] - '0') <<  8)
                       | ((packet[4] - '0') <<  0)
@@ -511,7 +511,7 @@ handleSystemInformation (BrailleDisplay *brl, unsigned char *packet) {
       infoDescription = "Protocol Version";
       break;
 
-    case 'S': 
+    case 'S':
       infoType = String;
       infoDescription = "Serial Number";
       break;
@@ -529,7 +529,7 @@ handleSystemInformation (BrailleDisplay *brl, unsigned char *packet) {
       infoDescription = "Model Identifier";
       break;
 
-    case 'W': 
+    case 'W':
       firmwareVersion = ((packet[1] - '0') << 16)
                       | ((packet[3] - '0') <<  8)
                       | ((packet[4] - '0') <<  0)
@@ -785,7 +785,7 @@ readCommand (BrailleDisplay *brl, KeyTableCommandContext ctx) {
 static int
 initializeDevice (BrailleDisplay *brl) {
   int retriesLeft = 2;
-      
+
   haveSystemInformation = 0;
   model = NULL;
   firmwareVersion = 0;
@@ -842,7 +842,7 @@ static int
 writeWindow (BrailleDisplay *brl) {
   static unsigned char previousCells[MAXIMUM_DISPLAY_SIZE];
   unsigned int size = brl->textColumns * brl->textRows;
-  
+
   if (cellsHaveChanged(previousCells, brl->buffer, size, NULL, NULL, &forceWindowRewrite)) {
     unsigned char data[size + 2];
     unsigned char *byte = data;
@@ -868,7 +868,7 @@ writeVisual (BrailleDisplay *brl, const wchar_t *text) {
     {
       static wchar_t previousText[MAXIMUM_DISPLAY_SIZE];
       unsigned int size = brl->textColumns * brl->textRows;
-      
+
       if (textHasChanged(previousText, text, size, NULL, NULL, &forceVisualRewrite)) {
         unsigned char data[size + 2];
         unsigned char *byte = data;

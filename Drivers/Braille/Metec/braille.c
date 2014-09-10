@@ -438,7 +438,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   } else {
     logMallocError();
   }
-  
+
   return 0;
 }
 

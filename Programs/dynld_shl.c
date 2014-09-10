@@ -38,7 +38,7 @@ loadSharedObject (const char *path) {
   return NULL;
 }
 
-void 
+void
 unloadSharedObject (void *object) {
 #ifdef HAVE_SHL_LOAD
   if (shl_unload(object) == -1)
@@ -47,7 +47,7 @@ unloadSharedObject (void *object) {
 #endif /* HAVE_SHL_LOAD */
 }
 
-int 
+int
 findSharedSymbol (void *object, const char *symbol, const void **address) {
 #ifdef HAVE_SHL_LOAD
   shl_t handle = object;

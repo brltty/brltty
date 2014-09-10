@@ -37,7 +37,7 @@
  * Version 2.61: Adjusted key bindings for preferences menu.
  * Version 2.60: Use TCSADRAIN when closing serial port. Slight API and
  *   name changes for BRLTTY 3.0. Argument to readbrl now ignore, instead
- *   of being validated. 
+ *   of being validated.
  * Version 2.59: Added bindings for CMD_LNBEG/LNEND.
  * Version 2.58: Added bindings for CMD_BACK and CR_MSGATTRIB.
  * Version 2.57: Fixed help screen/file for Nav80. We finally have a
@@ -69,7 +69,7 @@
  * Version 2.0: Tested with Nav40 PB40 PB80. Support for functions added
  *   in BRLTTY 2.0: added key bindings for new fonctions (attributes and
  *   routing). Support for PB at 19200baud. Live detection of display, checks
- *   both at 9600 and 19200baud. RS232 wire monitoring. Ping when idle to 
+ *   both at 9600 and 19200baud. RS232 wire monitoring. Ping when idle to
  *   detect when display turned off and issue a CMD_RESTARTBRL.
  * Version 1.2 (not released) introduces support for PB65/80. Rework of key
  *   binding mechanism and readbrl(). Slight modifications to routing keys
@@ -765,7 +765,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   return 0;
 }
 
-static void 
+static void
 brl_destruct (BrailleDisplay *brl) {
   disconnectResource(brl);
 
@@ -830,10 +830,10 @@ writeCells (BrailleDisplay *brl, unsigned int from, unsigned int to) {
   return writeBytes(brl, packet, (byte - packet));
 }
 
-static int 
+static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   unsigned int from, to;
-    
+
   if (cellsHaveChanged(brl->data->cells, brl->buffer, brl->data->cellCount,
                        &from, &to, &brl->data->forceWrite)) {
     if (!writeCells(brl, from, to)) return 0;
@@ -878,7 +878,7 @@ handleInputPacket (BrailleDisplay *brl, const InputPacket *packet) {
   }
 }
 
-static int 
+static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   /* Key press codes come in pairs of bytes for nav and pb40, in 6bytes
    * for pb65/80. Each byte has bits representing individual keys + a special

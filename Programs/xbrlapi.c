@@ -289,7 +289,7 @@ static struct window *window_of_Window(Window win) {
 static int del_window(Window win) {
   struct window **pred;
   struct window *cur;
-  
+
   for (pred=&WINHASH(win); cur = *pred, cur && cur->win!=win; pred=&cur->next);
 
   if (cur) {
@@ -780,7 +780,7 @@ void toX_f(const char *display) {
 }
 
 /******************************************************************************
- * main 
+ * main
  */
 
 int

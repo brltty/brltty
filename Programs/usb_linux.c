@@ -658,7 +658,7 @@ usbCancelRequest (UsbDevice *device, void *request) {
         logSystemError("USB URB discard");
       }
     }
-    
+
     {
       struct usbdevfs_urb *urb = request;
       UsbEndpoint *endpoint;

@@ -122,7 +122,7 @@ flushMidiDevice (MidiDevice *midi) {
   if (midi->count > 0) {
     MMRESULT error;
     MIDIHDR header;
-    
+
     header.lpData = midi->buffer;
     header.dwBufferLength = midi->count;
     header.dwFlags = 0;

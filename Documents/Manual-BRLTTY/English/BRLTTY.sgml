@@ -228,7 +228,7 @@ we do welcome any interest in such projects.
 On Linux, BRLTTY can inspect the content of the screen
 completely independently of any logged in user.
 It does this by using a special device
-which provides easy access to the contents of the current virtual console.  
+which provides easy access to the contents of the current virtual console.
 This device was introduced in version 1.1.92 of the Linux kernel,
 and is normally called either <tt>/dev/vcsa</> or <tt>/dev/vcsa0</>
 (on systems with <tt/devfs/ it's called <tt>/dev/vcc/a</>).
@@ -249,7 +249,7 @@ A patch for the <tt/screen/ program is provided
 It allows BRLTTY to access <tt/screen/'s screen image via shared memory,
 and, therefore, allows BRLTTY to be used quite effectively on platforms
 which don't have their own screen content inspection facility.
-The main weakness of the <tt/screen/ approach is that 
+The main weakness of the <tt/screen/ approach is that
 BRLTTY can't be started until the user has logged in.
 
 BRLTTY only works with text-based consoles and applications.
@@ -1852,7 +1852,7 @@ The text table is used:
 </itemize>
 
 The <tt/brf.ttb/ text table is provided for use with this utility.
-It defines the format used within <tt/.brf/ files. 
+It defines the format used within <tt/.brf/ files.
 This is also the preferred format used
 by most braille printers
 and within electronically distributed braille documents.
@@ -1952,11 +1952,11 @@ By default, the cursor is represented as
 dots 7 and 8 superimposed on the character it is on.
 
 Any screen activity will be reflected on the braille display.
-The display will also follow the progress of the cursor on the screen.  
+The display will also follow the progress of the cursor on the screen.
 This feature is known as <bf/cursor tracking/.
 
 Just typing on the keyboard and reading the display, however, isn't enough.
-Try entering a command which will cause an error, and pressing <bf/enter/.  
+Try entering a command which will cause an error, and pressing <bf/enter/.
 The error appears on the screen, but, unless you have a multi-line display,
 the chances are that it isn't visible on the braille display.
 All you see thereon is another shell prompt.
@@ -2811,16 +2811,16 @@ The <tt/brltty/ command accepts the following options:
     Recognize environment variables when determining
     the default settings for unspecified command line options
     (see section <ref id="options" name="Command Line Options">).
-    If this option is specified, 
+    If this option is specified,
     and if the environment variable associated with an unspecified option is defined,
     then the value of that environment variable is used.
     The names of these environment variables are based on
     the long names of the options they correspond to:
-    <itemize>   
+    <itemize>
       <item>All letters are in upper case.
       <item>Underscores (<tt/_/) are used instead of minus signs (<tt/-/).
       <item>The prefix <tt/BRLTTY_/ is added.
-    </itemize>   
+    </itemize>
     This option is particularly useful on the Linux operating system
     as it allows default settings to be passed to BRLTTY via boot parameters.
     The following environment variables are supported:
@@ -3026,7 +3026,7 @@ It's especially useful in conjunction with applications (like <tt/lynx/)
 wherein horizontal cursor motion must never be attempted.
 
 <sect1>Cut and Paste<label id="cut"><p>
-This feature enables you to grab some text which is already on the screen 
+This feature enables you to grab some text which is already on the screen
 and re-enter it at the current cursor position.
 Using it saves time and avoids errors
 when a long and/or complicated piece of text needs to be copied,
@@ -4129,7 +4129,7 @@ for details regarding how to use an alternate text table.
 A text table consists of a sequence of directives, one per line,
 which define how each character is to be represented in braille.
 <tt/UTF-8/ character encoding must be used.
-White-space (blanks, tabs) at the beginning of a line, 
+White-space (blanks, tabs) at the beginning of a line,
 as well as before and/or after any operand of any directive,
 is ignored.
 Lines containing only white-space are ignored.
@@ -4207,13 +4207,13 @@ The following directives are provided:
   <tag><tt/glyph/ <em/character/ <em/dots/ &num; <em/comment/</tag>
     Use the <tt/glyph/ directive to specify
     how a Unicode character is to be represented in braille.
-    Characters defined with this directive are output-only. 
+    Characters defined with this directive are output-only.
     They cannot be entered from a braille keyboard.
 
     See the <tt/char/ directive for syntax details and for examples.
   <tag><tt/byte/ <em/byte/ <em/dots/ &num; <em/comment/</tag>
     Use the <tt/byte/ directive to specify how
-    a character in the local character set 
+    a character in the local character set
     is to be represented in braille.
     It has been retained for backward compatibility but should not be used.
     Unicode characters should be defined
@@ -4225,7 +4225,7 @@ The following directives are provided:
       <tag><em/byte/</tag>
         The local character being defined.
         It may be specified in the same ways
-        as the <em/character/ operand of the <tt/char/ directive 
+        as the <em/character/ operand of the <tt/char/ directive
         except that the Unicode-specific forms
         (\u, \U, \&lt;)
         may not be used.
@@ -4324,7 +4324,7 @@ for details regarding how to use an alternate attributes table.
 <sect2>Attributes Table Format<p>
 An attributes table consists of a sequence of directives, one per line,
 which define how combinations of <tt/VGA/ attributes
-are to be represented in braille. 
+are to be represented in braille.
 <tt/UTF-8/ character encoding must be used.
 White-space (blanks, tabs) at the beginning of a line,
 as well as before and/or after any operand of any directive,
@@ -4858,7 +4858,7 @@ Examples:
 <sect3>The Context Directive<label id="key-table-context"><p>
 Define alternate ways to interpret certain key events and/or combinations.
 A context contains definitions created by the
-<ref id="key-table-bind" name="bind">, 
+<ref id="key-table-bind" name="bind">,
 <ref id="key-table-hotkey" name="hotkey">,
 <ref id="key-table-map" name="map">,
 and
@@ -4883,7 +4883,7 @@ directives.
   <tag><em/title/</tag>
     A person-readable description of the context.
     It may contain spaces,
-    and standard capitalization conventions should be used. 
+    and standard capitalization conventions should be used.
     This operand is optional.
     If supplied when selecting a context which already has a title
     then the two must match.
@@ -4922,13 +4922,13 @@ Examples:
 </itemize>
 
 <sect3>The Hide Directive<label id="key-table-hide"><p>
-Specify whether or not certain definitions (see the 
+Specify whether or not certain definitions (see the
 <ref id="key-table-bind" name="bind">,
 <ref id="key-table-hotkey" name="hotkey">,
 <ref id="key-table-map" name="map">,
 and
 <ref id="key-table-superimpose" name="superimpose">
-directives) and notes (see the 
+directives) and notes (see the
 <ref id="key-table-note" name="note">
 directive) are included within the key table's help text.
 
@@ -4947,7 +4947,7 @@ until either the next <tt/hide/ directive
 or the end of the current include level.
 The initial state of the top-level key table is <tt/off/.
 The initial state of an included key subtable
-is the state which was selected when it was included. 
+is the state which was selected when it was included.
 State changes within included key subtables
 don't affect the state of the including key table or subtable.
 

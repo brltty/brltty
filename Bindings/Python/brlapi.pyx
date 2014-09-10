@@ -5,7 +5,7 @@ The reference C API documentation is available online http://mielke.cc/brltty/do
 
 This documentation is only a python helper, you should also read C manual pages.
 
-Example : 
+Example :
 import brlapi
 import errno
 import Xlib.keysymdef.miscellany

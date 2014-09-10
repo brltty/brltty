@@ -25,11 +25,11 @@ loadSharedObject (const char *path) {
   return NULL;
 }
 
-void 
+void
 unloadSharedObject (void *object) {
 }
 
-int 
+int
 findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
   return 0;
 }

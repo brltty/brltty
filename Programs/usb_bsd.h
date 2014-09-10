@@ -250,7 +250,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
     }
 
     if ((eptx->file = open(path, flags)) != -1) {
-      if (((flags & O_ACCMODE) != O_RDONLY) || 
+      if (((flags & O_ACCMODE) != O_RDONLY) ||
           usbSetShortTransfers(eptx->file, 1)) {
         eptx->timeout = -1;
 

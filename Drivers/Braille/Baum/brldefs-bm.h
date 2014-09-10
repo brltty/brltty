@@ -51,4 +51,4 @@ typedef enum {
   BM_GRP_ScaledRightSensors
 } BM_KeyGroup;
 
-#endif /* BRLTTY_INCLUDED_BM_BRLDEFS */ 
+#endif /* BRLTTY_INCLUDED_BM_BRLDEFS */

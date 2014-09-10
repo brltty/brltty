@@ -113,9 +113,9 @@ fmTestCard (int errorLevel) {
     AL_writeRegister(ALR_TCTL, AL_TCTL_T1START|AL_TCTL_T2MASK);
     usleep(80);
     status = AL_readStatus();
-    AL_resetTimers(); 
+    AL_resetTimers();
 
-    if ((status & mask) == (AL_STAT_EXP | AL_STAT_EXP1)) return 1; 
+    if ((status & mask) == (AL_STAT_EXP | AL_STAT_EXP1)) return 1;
   }
 
   logMessage(errorLevel, "FM synthesizer initialization failure");
@@ -177,7 +177,7 @@ fmPlayTone (int channel, unsigned int pitch, unsigned long int duration, unsigne
   AL_writeRegister(ALR_CARRIER(ALG_SUSREL, channel),
                    ((AL_SUSTAIN_SOFT << AL_SUSTAIN_SHIFT) |
                     (AL_RELEASE_FAST << AL_RELEASE_SHIFT)));
-      
+
   fmStartTone(channel, pitch);
   asyncWait(duration);
   fmStopTone(channel);

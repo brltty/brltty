@@ -93,7 +93,7 @@ const unsigned char landscapeDigits[11] = {
 /* Format landscape representation of numbers 0 through 99. */
 int
 landscapeNumber (int x) {
-  return landscapeDigits[(x / 10) % 10] | lowerDigit(landscapeDigits[x % 10]);  
+  return landscapeDigits[(x / 10) % 10] | lowerDigit(landscapeDigits[x % 10]);
 }
 
 /* Format landscape flag state indicator. */
@@ -122,7 +122,7 @@ const unsigned char seascapeDigits[11] = {
 /* Format seascape representation of numbers 0 through 99. */
 int
 seascapeNumber (int x) {
-  return lowerDigit(seascapeDigits[(x / 10) % 10]) | seascapeDigits[x % 10];  
+  return lowerDigit(seascapeDigits[(x / 10) % 10]) | seascapeDigits[x % 10];
 }
 
 /* Format seascape flag state indicator. */
@@ -151,7 +151,7 @@ const unsigned char portraitDigits[11] = {
 /* Format portrait representation of numbers 0 through 99. */
 int
 portraitNumber (int x) {
-  return portraitDigits[(x / 10) % 10] | lowerDigit(portraitDigits[x % 10]);  
+  return portraitDigits[(x / 10) % 10] | lowerDigit(portraitDigits[x % 10]);
 }
 
 /* Format portrait flag state indicator. */

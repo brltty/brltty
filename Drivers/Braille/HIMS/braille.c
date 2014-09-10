@@ -482,7 +482,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         brl->keyNames = brl->data->protocol->keyTableDefinition->names;
 
         makeOutputTable(dotsTable_ISO11548_1);
-  
+
         if (clearCells(brl)) return 1;
       }
 

@@ -33,7 +33,6 @@ typedef uint64_t KeyrangeElem;
 #define KeyrangeVal(v) ((v) & 0xffffffffull)
 
 #define KeyrangeElem(flags,val) (((KeyrangeElem)(flags) << 32) | (val))
-	
 
 typedef struct KeyrangeList {
   uint32_t minFlags, maxFlags;

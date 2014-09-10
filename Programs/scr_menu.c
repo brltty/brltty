@@ -104,7 +104,7 @@ newRenderedMenuItem (Menu *menu) {
 
     {
       size_t currentLength = 0;
-       
+
       currentLength += convertTextToWchars(&characters[currentLength], labelString, maximumLength-currentLength);
       settingIndent = currentLength;
 

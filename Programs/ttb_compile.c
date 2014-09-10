@@ -49,7 +49,7 @@ getUnicodeGroupOffset (TextTableData *ttd, wchar_t character, int allocate) {
   DataOffset groupOffset = getTextTableHeader(ttd)->unicodeGroups[groupNumber];
 
   if (!groupOffset && allocate) {
-    if (!allocateDataItem(ttd->area, &groupOffset, 
+    if (!allocateDataItem(ttd->area, &groupOffset,
                           sizeof(UnicodeGroupEntry),
                           __alignof__(UnicodeGroupEntry)))
       return 0;
@@ -71,7 +71,7 @@ getUnicodePlaneOffset (TextTableData *ttd, wchar_t character, int allocate) {
     DataOffset planeOffset = group->planes[planeNumber];
 
     if (!planeOffset && allocate) {
-      if (!allocateDataItem(ttd->area, &planeOffset, 
+      if (!allocateDataItem(ttd->area, &planeOffset,
                             sizeof(UnicodePlaneEntry),
                             __alignof__(UnicodePlaneEntry)))
         return 0;
@@ -95,7 +95,7 @@ getUnicodeRowOffset (TextTableData *ttd, wchar_t character, int allocate) {
     DataOffset rowOffset = plane->rows[rowNumber];
 
     if (!rowOffset && allocate) {
-      if (!allocateDataItem(ttd->area, &rowOffset, 
+      if (!allocateDataItem(ttd->area, &rowOffset,
                             sizeof(UnicodeRowEntry),
                             __alignof__(UnicodeRowEntry)))
         return 0;

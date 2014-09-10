@@ -581,7 +581,7 @@ newFilesMenuItem (
     }
 
     if (pattern) {
-      files->pattern = pattern; 
+      files->pattern = pattern;
 
       if ((files->initial = *initial? ensureFileExtension(initial, extension): strdup(""))) {
         if ((files->current = strdup(files->initial))) {

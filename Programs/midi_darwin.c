@@ -31,7 +31,7 @@ struct MidiDeviceStruct {
   /* Note that is currently playing. */
   int note;
 };
-  
+
 MidiDevice *
 openMidiDevice (int errorLevel, const char *device) {
   MidiDevice *midi;

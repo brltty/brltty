@@ -39,11 +39,11 @@
 #if !defined(AF_LOCAL) && defined(AF_UNIX)
 #define AF_LOCAL AF_UNIX
 #endif /* !defined(AF_LOCAL) && defined(AF_UNIX) */
- 
+
 #if !defined(PF_LOCAL) && defined(PF_UNIX)
 #define PF_LOCAL PF_UNIX
 #endif /* !defined(PF_LOCAL) && defined(PF_UNIX) */
- 
+
 #ifdef WINDOWS
 #undef AF_LOCAL
 #endif /* WINDOWS */
@@ -403,7 +403,7 @@ acceptNamedPipeConnection (const char *path) {
   DWORD res;
   int attempts = 0;
 
-  if ((h = CreateNamedPipe(path, 
+  if ((h = CreateNamedPipe(path,
                                 PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
                                 PIPE_TYPE_BYTE | PIPE_READMODE_BYTE,
                                 1, 0, 0, 0, NULL)) == INVALID_HANDLE_VALUE) {

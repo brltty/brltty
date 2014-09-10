@@ -691,8 +691,8 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
       temp = BRL_CMD_BLK(PASSDOTS) |
 	(keys_to_dots[key.raw &0x3F]
 	 | ((meta) ? BRL_FLG_CHAR_META : 0)
-	 | ((ctrl) ? (BRL_DOT7 | BRL_DOT8) : 
-	    (shift) ? BRL_DOT7 : 
+	 | ((ctrl) ? (BRL_DOT7 | BRL_DOT8) :
+	    (shift) ? BRL_DOT7 :
 	    (dot8shift) ? BRL_DOT8 : 0));
 #endif /* USE_TEXTTRANS */
       if (!shiftlck)

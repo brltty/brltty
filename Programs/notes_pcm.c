@@ -142,7 +142,7 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
      * relying too much on floating-point performance and/or on
      * expensive math functions like sin(). Considerations like
      * these are especially important on PDAs without any FPU.
-     */ 
+     */
 
     int32_t positiveShiftsPerQuarterWave = INT32_MAX / 8;
     int32_t negativeShiftsPerQuarterWave = -positiveShiftsPerQuarterWave;
@@ -153,7 +153,7 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
     int32_t positiveShiftsPerFullWave = 2 * positiveShiftsPerHalfWave;
     int32_t currentShift = 0;
 
-    int32_t shiftsPerSample = (NOTE_FREQUENCY_TYPE)positiveShiftsPerFullWave 
+    int32_t shiftsPerSample = (NOTE_FREQUENCY_TYPE)positiveShiftsPerFullWave
                             / (NOTE_FREQUENCY_TYPE)device->sampleRate
                             * GET_NOTE_FREQUENCY(note);
 

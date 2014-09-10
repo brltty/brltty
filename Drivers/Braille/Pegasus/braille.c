@@ -492,7 +492,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if (io->openPort(device)) {
     if (io->methods->identifyModel(brl)) {
       makeOutputTable(dotsTable_ISO11548_1);
-  
+
       rewriteRequired = 1;
       memset(textCells, 0, sizeof(textCells));
       memset(statusCells, 0, sizeof(statusCells));

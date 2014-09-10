@@ -264,7 +264,7 @@ showInfo (void) {
   STR_PRINTF("%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
              SCR_COLUMN_NUMBER(ses->winx), SCR_ROW_NUMBER(ses->winy),
              SCR_COLUMN_NUMBER(scr.posx), SCR_ROW_NUMBER(scr.posy),
-             scr.number, 
+             scr.number,
              ses->trackCursor? 't': ' ',
              prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
                                (prefs.blinkingCursor? 'b': ' '),

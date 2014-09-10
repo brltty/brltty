@@ -46,4 +46,4 @@ typedef enum {
   BG_GRP_RoutingKeys = 5
 } BG_KeyGroup;
 
-#endif /* BRLTTY_INCLUDED_BG_BRLDEFS */ 
+#endif /* BRLTTY_INCLUDED_BG_BRLDEFS */

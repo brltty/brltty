@@ -135,4 +135,4 @@ typedef enum {
   MM_GRP_DISPLAY = 6
 } MM_KeyGroup;
 
-#endif /* BRLTTY_INCLUDED_MM_BRLDEFS */ 
+#endif /* BRLTTY_INCLUDED_MM_BRLDEFS */

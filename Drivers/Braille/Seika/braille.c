@@ -737,7 +737,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         routingCount = response.fields.identity.routingCount;
 
         makeOutputTable(dotsTable_ISO11548_1);
-  
+
         {
           const KeyTableDefinition *ktd = protocol->keyTableDefinition;
           brl->keyBindings = ktd->bindings;

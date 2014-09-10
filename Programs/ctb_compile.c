@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
- 
+
 #include "log.h"
 #include "file.h"
 #include "ctb.h"

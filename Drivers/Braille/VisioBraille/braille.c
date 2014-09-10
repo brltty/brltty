@@ -45,7 +45,7 @@ typedef enum {
 static SerialDevice *serialDevice;
 #ifdef SendIdReq
 static struct TermInfo {
-  unsigned char code; 
+  unsigned char code;
   unsigned char version[3];
   unsigned char f1;
   unsigned char size[2];
@@ -61,7 +61,7 @@ static struct TermInfo {
 
 static int printcode = 0;
 
-/* Function : brl_writePacket */ 
+/* Function : brl_writePacket */
 /* Sends a packet of size bytes, stored at address p to the braille terminal */
 /* Returns 0 if everything is right, -1 if an error occured while sending */
 static ssize_t brl_writePacket(BrailleDisplay *brl, const void *packet, size_t size)
@@ -79,17 +79,17 @@ static ssize_t brl_writePacket(BrailleDisplay *brl, const void *packet, size_t s
     chksum ^= *x;
     if ((*x) <= 5) {
       *y = 01;
-      y++; lgtho++; 
+      y++; lgtho++;
       *y = ( *x ) | 0x40;
     } else *y = *x;
-    y++; lgtho++; 
+    y++; lgtho++;
   }
   if (chksum<=5) {
-    *y = 1; y++; lgtho++;  
+    *y = 1; y++; lgtho++;
     chksum |= 0x40;
   }
-  *y = chksum; y++; lgtho++; 
-  *y = 3; y++; lgtho++; 
+  *y = chksum; y++; lgtho++;
+  *y = 3; y++; lgtho++;
   for (i=1; i<=5; i++) {
     if (serialWriteData(serialDevice,obuf,lgtho) != lgtho) continue; /* write failed, retry */
     serialAwaitOutput(serialDevice);
@@ -108,7 +108,7 @@ static ssize_t brl_writePacket(BrailleDisplay *brl, const void *packet, size_t s
 /* The size of the packet is returned */
 /* If a packet is too long, it is discarded and a message sent to the syslog */
 /* "+" packets are silently discarded, since they are only disturbing us */
-static ssize_t brl_readPacket(BrailleDisplay *brl, void *p, size_t size) 
+static ssize_t brl_readPacket(BrailleDisplay *brl, void *p, size_t size)
 {
   size_t offset = 0;
   static unsigned char ack = 04;
@@ -116,25 +116,25 @@ static ssize_t brl_readPacket(BrailleDisplay *brl, void *p, size_t size)
   static int apacket = 0;
   static unsigned char prefix, checksum;
   unsigned char ch;
-  static unsigned char buf[MAXPACKETSIZE]; 
+  static unsigned char buf[MAXPACKETSIZE];
   static unsigned char *q;
-  if ((p==NULL) || (size<2) || (size>MAXPACKETSIZE)) return 0; 
+  if ((p==NULL) || (size<2) || (size>MAXPACKETSIZE)) return 0;
   while (serialReadChunk(serialDevice,&ch,&offset,1,0,1000)) {
     if (ch==0x02) {
       apacket = 1;
-      prefix = 0xff; 
+      prefix = 0xff;
       checksum = 0;
       q = &buf[0];
     } else if (apacket) {
       if (ch==0x01) {
-        prefix &= ~(0x40); 
+        prefix &= ~(0x40);
       } else if (ch==0x03) {
         if (checksum==0) {
-          serialWriteData(serialDevice,&ack,1); 
+          serialWriteData(serialDevice,&ack,1);
           apacket = 0; q--;
           if (buf[0]!='+') {
             memcpy(p,buf,(q-buf));
-            return q-&buf[0]; 
+            return q-&buf[0];
           }
         } else {
           serialWriteData(serialDevice,&nack,1);
@@ -149,11 +149,11 @@ static ssize_t brl_readPacket(BrailleDisplay *brl, void *p, size_t size)
         }
         ch &= prefix; prefix |= 0x40;
         checksum ^= ch;
-        (*q) = ch; q++;   
+        (*q) = ch; q++;
       }
     }
     offset = 0;
-  } 
+  }
   return 0;
 }
 
@@ -163,7 +163,7 @@ static ssize_t brl_readPacket(BrailleDisplay *brl, void *p, size_t size)
 /* restoring a normal communication mode */
 static int brl_reset(BrailleDisplay *brl)
 {
-  static unsigned char RescuePacket[] = {'#'}; 
+  static unsigned char RescuePacket[] = {'#'};
   brl_writePacket(brl,RescuePacket,sizeof(RescuePacket));
   return 1;
 }
@@ -174,7 +174,7 @@ static int brl_reset(BrailleDisplay *brl)
 /* either with the BRAILLEDISPLAYSIZE constant, defined in braille.h */
 /* or with the size got through identification request if it succeeds */
 /* Else, brl->textColumns is left unmodified by brl_construct, so that */
-/* the braille display can be resized without reloading the driver */ 
+/* the braille display can be resized without reloading the driver */
 static int brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
 {
 #ifdef SendIdReq
@@ -208,11 +208,11 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   if (!(serialDevice = serialOpenDevice(device))) return 0;
   serialSetParity(serialDevice, SERIAL_PARITY_ODD);
   if (promVersion<4) serialSetFlowControl(serialDevice, SERIAL_FLOW_INPUT_CTS);
-  serialRestartDevice(serialDevice,ttyBaud); 
+  serialRestartDevice(serialDevice,ttyBaud);
 #ifdef SendIdReq
   {
-    brl_writePacket(brl,(unsigned char *) &ch,1); 
-    i=5; 
+    brl_writePacket(brl,(unsigned char *) &ch,1);
+    i=5;
     while (i>0) {
       if (brl_readPacket(brl,(unsigned char *) &terminfo,sizeof(terminfo))!=0) {
         if (terminfo.code=='?') {
@@ -223,8 +223,8 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
       i--;
     }
     if (i==0) {
-      logMessage(LOG_WARNING,"Unable to identify terminal properly");  
-      if (!brl->textColumns) brl->textColumns = BRAILLEDISPLAYSIZE;  
+      logMessage(LOG_WARNING,"Unable to identify terminal properly");
+      if (!brl->textColumns) brl->textColumns = BRAILLEDISPLAYSIZE;
     } else {
       logMessage(LOG_INFO,"Braille terminal description:");
       logMessage(LOG_INFO,"   version=%c%c%c",terminfo.version[0],terminfo.version[1],terminfo.version[2]);
@@ -236,7 +236,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
       logMessage(LOG_INFO,"   flash=%c",terminfo.flash);
       logMessage(LOG_INFO,"   prog=%c",terminfo.prog);
       logMessage(LOG_INFO,"   lcd=%c",terminfo.lcd);
-      logMessage(LOG_INFO,"   f2=%s",terminfo.f2);  
+      logMessage(LOG_INFO,"   f2=%s",terminfo.f2);
       if (brl->textColumns<=0)
         brl->textColumns = (terminfo.size[0]-'0')*10 + (terminfo.size[1]-'0');
     }
@@ -244,13 +244,13 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
 #else /* SendIdReq */
   brl->textColumns = ds;
 #endif /* SendIdReq */
-  brl->textRows=1; 
+  brl->textRows=1;
 
   {
     /* The following table defines how internal brltty format is converted to */
     /* VisioBraille format. */
     /* The table is declared static so that it is in data segment and not */
-    /* in the stack */ 
+    /* in the stack */
     static const TranslationTable outputTable = {
 #include "brl-out.h"
     };
@@ -289,7 +289,7 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 /* Converts a key code to a brltty command according to the context */
 int brl_keyToCommand(BrailleDisplay *brl, KeyTableCommandContext context, int code)
 {
-  static int ctrlpressed = 0; 
+  static int ctrlpressed = 0;
   static int altpressed = 0;
   static int cut = 0;
   static int descchar = 0;
@@ -324,7 +324,7 @@ int brl_keyToCommand(BrailleDisplay *brl, KeyTableCommandContext context, int co
       case BRL_VSKEY_A7: return BRL_CMD_BLK(SWITCHVT)+4;
       case BRL_VSKEY_A8: return BRL_CMD_BLK(SWITCHVT)+5;
       case BRL_VSKEY_B5: cut = 1; return EOF;
-      case BRL_VSKEY_B6: return BRL_CMD_TOP_LEFT; 
+      case BRL_VSKEY_B6: return BRL_CMD_TOP_LEFT;
       case BRL_VSKEY_D6: return BRL_CMD_BOT_LEFT;
       case BRL_VSKEY_A4: return BRL_CMD_FWINLTSKIP;
       case BRL_VSKEY_B8: return BRL_CMD_FWINLTSKIP;
@@ -340,7 +340,7 @@ int brl_keyToCommand(BrailleDisplay *brl, KeyTableCommandContext context, int co
       case BRL_VSKEY_C3: return BRL_CMD_KEY(CURSOR_RIGHT);
       case BRL_VSKEY_C1: return BRL_CMD_KEY(CURSOR_LEFT);
       case BRL_VSKEY_B3: return BRL_CMD_CSRVIS;
-      case BRL_VSKEY_D1: return BRL_CMD_KEY(DELETE);  
+      case BRL_VSKEY_D1: return BRL_CMD_KEY(DELETE);
       case BRL_VSKEY_D3: return BRL_CMD_KEY(INSERT);
       case BRL_VSKEY_C5: return BRL_CMD_PASTE;
       case BRL_VSKEY_D5: descchar = 1; return EOF;
@@ -353,7 +353,7 @@ int brl_keyToCommand(BrailleDisplay *brl, KeyTableCommandContext context, int co
       int flags = altpressed;
       ch-=0xe1;
       altpressed = 0;
-      return flags | BRL_CMD_BLK(PASSKEY) | ( BRL_KEY_FUNCTION + ch); 
+      return flags | BRL_CMD_BLK(PASSKEY) | ( BRL_KEY_FUNCTION + ch);
     }
     /* altpressed = 0; */
     switch (code) {
@@ -362,7 +362,7 @@ int brl_keyToCommand(BrailleDisplay *brl, KeyTableCommandContext context, int co
       case BRL_VSKEY_TAB: return BRL_CMD_KEY(TAB);
       case BRL_VSKEY_RETURN: return BRL_CMD_KEY(ENTER);
       case BRL_VSKEY_PLOC_PLOC_A: return BRL_CMD_HELP;
-      case BRL_VSKEY_PLOC_PLOC_B: return BRL_CMD_TUNES; 
+      case BRL_VSKEY_PLOC_PLOC_B: return BRL_CMD_TUNES;
       case BRL_VSKEY_PLOC_PLOC_C: return BRL_CMD_PREFMENU;
       case BRL_VSKEY_PLOC_PLOC_D: return BRL_CMD_KEY(PAGE_DOWN);
       case BRL_VSKEY_PLOC_PLOC_E: return BRL_CMD_KEY(END);
@@ -375,12 +375,12 @@ int brl_keyToCommand(BrailleDisplay *brl, KeyTableCommandContext context, int co
       case BRL_VSKEY_PLOC_PLOC_T: return BRL_CMD_CSRTRK;
       case BRL_VSKEY_PLOC_PLOC_U: return BRL_CMD_KEY(PAGE_UP);
       case BRL_VSKEY_CONTROL: ctrlpressed = BRL_FLG_CHAR_CONTROL; return BRL_CMD_NOOP;
-      case BRL_VSKEY_ALT: altpressed = BRL_FLG_CHAR_META; return BRL_CMD_NOOP;   
+      case BRL_VSKEY_ALT: altpressed = BRL_FLG_CHAR_META; return BRL_CMD_NOOP;
       case BRL_VSKEY_ESCAPE: return BRL_CMD_KEY(ESCAPE);
       default: return EOF;
     }
   }
-  return EOF; 
+  return EOF;
 }
 
 /* Function : brl_readKey */
@@ -419,7 +419,7 @@ static int brl_readKey(BrailleDisplay *brl)
   if (ch==0x91) {
     routing = 1;
     return BRL_CMD_NOOP;
-  } 
+  }
   if ((ch>=0x20) && (ch<=0x9e)) {
     switch (ch) {
       case 0x80: ch = 0xc7; break;
@@ -431,13 +431,13 @@ static int brl_readKey(BrailleDisplay *brl)
       case 0x87: ch = 0xe7; break;
       case 0x88: ch = 0xea; break;
       case 0x89: ch = 0xeb; break;
-      case 0x8a: ch = 0xe8; break; 
+      case 0x8a: ch = 0xe8; break;
       case 0x8b: ch = 0xef; break;
       case 0x8c: ch = 0xee; break;
       case 0x8f: ch = 0xc0; break;
       case 0x93: ch = 0xf4; break;
       case 0x94: ch = 0xf6; break;
-      case 0x96: ch = 0xfb; break; 
+      case 0x96: ch = 0xfb; break;
       case 0x97: ch = 0xf9; break;
       case 0x9e: ch = 0x60; break;
     }

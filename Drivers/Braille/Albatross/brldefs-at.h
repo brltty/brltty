@@ -85,4 +85,4 @@ typedef enum {
   AT_GRP_RoutingKeys2
 } AT_KeyGroup;
 
-#endif /* BRLTTY_INCLUDED_AT_BRLDEFS */ 
+#endif /* BRLTTY_INCLUDED_AT_BRLDEFS */

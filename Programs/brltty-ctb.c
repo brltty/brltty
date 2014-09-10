@@ -384,7 +384,7 @@ static DATA_OPERANDS_PROCESSOR(processContractsOperands) {
            if ((actual = makeUtf8FromCells(outputBuffer, outputCount))) {
               reportDataError(file,
                               "%" PRIws ": expected %s, got %s",
-                              text.characters, expected, actual); 
+                              text.characters, expected, actual);
               free(actual);
            }
 

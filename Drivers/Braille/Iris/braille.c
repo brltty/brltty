@@ -1000,7 +1000,7 @@ writeEurobraillePacket (BrailleDisplay *brl, Port *port, const void *data, size_
 
   *p++ = STX;
   *p++ = (packetSize >> 8) & 0X00FF;
-  *p++ = packetSize & 0X00FF;  
+  *p++ = packetSize & 0X00FF;
   p = mempcpy(p, data, size);
   *p++ = ETX;
 
@@ -1024,7 +1024,7 @@ writeDots (BrailleDisplay *brl, Port *port, const unsigned char *dots) {
   int i;
 
   *p++ = IR_OPT_WriteBraille;
-  for (i=0; i<IR_WINDOW_SIZE_MAXIMUM-size; i+=1) *p++ = 0; 
+  for (i=0; i<IR_WINDOW_SIZE_MAXIMUM-size; i+=1) *p++ = 0;
   for (i=0; i<size; i+=1) *p++ = dots[size-i-1];
   return writeNativePacket(brl, port, packet, sizeof(packet));
 }
@@ -1607,7 +1607,7 @@ handleInternalPacket_nonembedded (BrailleDisplay *brl, const void *packet, size_
     brl->data->braille.refresh = 1;
     if (menuKeyPressed) return 1;
   }
-  
+
   handleNativePacket(brl, NULL, &keyHandlers_nonembedded, packet, size);
   return 1;
 }
@@ -1802,7 +1802,7 @@ checkLatchState (BrailleDisplay *brl) {
     getMonotonicTime(&brl->data->latch.started);
     brl->data->latch.elapsed = 0;
     brl->data->latch.pulled = 1;
-    logMessage(LOG_INFO, "latch pulled");    
+    logMessage(LOG_INFO, "latch pulled");
   }
 
   return 0;

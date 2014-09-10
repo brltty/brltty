@@ -1762,7 +1762,7 @@ static const HandyTechModelEntry handyTechModelTable[] = {
     0X89, 40, 4
   }
   ,
-  {NULL}        
+  {NULL}
 };
 static const HandyTechModelEntry *ht;
 

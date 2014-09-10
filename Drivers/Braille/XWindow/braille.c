@@ -615,7 +615,7 @@ static actionfun_t actionfun[] = {
 #else /* USE_ */
 #error Toolkit callback recording unspecified
 #endif /* USE_ */
-  
+
 #ifdef USE_WINDOWS
 static LRESULT CALLBACK wndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   if (uMsg == WM_COMMAND) {
@@ -864,7 +864,7 @@ static int generateToplevel(void)
     XFreeStringList(missing_charset_list_return);
   }
 #endif /* USE_XAW */
-  
+
 #ifdef USE_XT
   /* horizontal separation */
   hbox = XtVaCreateManagedWidget("hbox",panedWidgetClass,vbox,
@@ -1156,7 +1156,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
 #if defined(USE_XT)
   XtToolkitThreadInitialize();
   XtSetLanguageProc(NULL, NULL, NULL);
-#endif /* USE_XT */ 
+#endif /* USE_XT */
 
   brl->textColumns=cols;
   brl->textRows=lines;

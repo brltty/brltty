@@ -241,7 +241,7 @@ static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 			memcpy (rawdata + rawlen, pre_data + 1, pre_data[0]);
 			rawlen += pre_data[0];
 		}
-		
+
 		/* HACK - ALERT ;-)
 		 * 6th module is a dummy-modul and not wired!
 		 * but I need to but a dummy char at the beginning, else the stati are shifted ...
@@ -252,18 +252,17 @@ static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 		for (i = 0; i < 5; i++) {
 			rawdata[rawlen++] = status[i];
 		}
-		
-		
+
 		/* write braille message itself */
 		for (i = 0; i < brl->textColumns * brl->textRows; i++) {
 			rawdata[rawlen++] = brl->buffer[i];
 		}
-      
+
 		if (post_data[0]) {
 			memcpy (rawdata + rawlen, post_data + 1, post_data[0]);
 			rawlen += post_data[0];
 		}
-    
+
 		serialWriteData (MB_serialDevice, rawdata, rawlen);
 	}
 	return 1;
@@ -272,13 +271,13 @@ static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 	static short status = 0;	/* cursor routing keys mode */
-	
+
 	KeyStroke keystroke;
 
 	keystroke = getbrlkey ();
 	if (keystroke.block == EOF)
 		return EOF;
-		
+
 	if (keystroke.block != 'R') {
 		/* translate only 'T' and 'S' events
 		 * I kicked argtrans[] (never ever needed) --> simply return 0x00
@@ -327,7 +326,7 @@ static int brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 static struct KeyStroke getbrlkey (void) {
 	unsigned char c, c_temp;		/* character buffer */
 	KeyStroke keystroke;
-		
+
 	while (serialReadData (MB_serialDevice, &c, 1, 0, 0) == 1) {
 		if (c != ESC) continue;	/* advance to next ESC-sequence */
 

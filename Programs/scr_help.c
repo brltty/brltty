@@ -197,7 +197,7 @@ addLine_HelpScreen (const wchar_t *characters) {
   return addLine(page, characters);
 }
 
-static unsigned int 
+static unsigned int
 getLineCount_HelpScreen (void) {
   HelpPageEntry *page = getPage();
 

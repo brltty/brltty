@@ -166,16 +166,16 @@ static int
 writeIdentityRequest (BrailleDisplay *brl) {
   return 1;
 }
-  
+
 static BrailleResponseResult
 isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
   const unsigned char *bytes = packet;
-    
+
   return ((size == 3) && (bytes[0] == 0XFD) && (bytes[1] == 0X2F))?
          BRL_RSP_DONE:
          BRL_RSP_UNEXPECTED;
 }
-                        
+
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {

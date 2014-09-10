@@ -177,7 +177,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     serialCloseDevice(serialDevice);
     serialDevice = NULL;
   }
-  
+
   return 0;
 }
 

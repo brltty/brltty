@@ -35,7 +35,7 @@ static unsigned char lastbuff[40];
 
 #define LPTSTATUSPORT LPTPORT+1
 #define LPTCONTROLPORT LPTPORT+2
-  
+
 static void vbclockpause() {
   int i;
   for (i = 0; i<=VBCLOCK*100; i++) ;
@@ -113,9 +113,9 @@ static void BrButtons(vbButtons *dest) {
 }
 
 static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev) {
-  /*	Seems to signal en error */ 
+  /*	Seems to signal en error */
   if (!vbinit()) {
-    /* Theese are pretty static */ 
+    /* Theese are pretty static */
     brl->textColumns=40;
     brl->textRows=1;
     return 1;
@@ -130,10 +130,10 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text) {
   const size_t cells = 40;
   unsigned char outbuff[cells];
 
-  /* Only display something if the data actually differs, this 
+  /* Only display something if the data actually differs, this
   *  could most likely cause some problems in redraw situations etc
-  *  but since the darn thing wants to redraw quite frequently otherwise 
-  *  this still makes a better lookin result */ 
+  *  but since the darn thing wants to redraw quite frequently otherwise
+  *  this still makes a better lookin result */
   if (cellsHaveChanged(lastbuff, brl->buffer, cells, NULL, NULL, NULL)) {
     translateOutputCells(outbuff, brl->buffer, cells);
     vbdisplay(outbuff);

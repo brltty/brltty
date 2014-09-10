@@ -75,7 +75,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   restart = 0;
   logMessage(LOG_DEBUG, "Memory allocated, returning 1");
   return 1;
-  
+
 out2:
   free(prevData);
 out1:

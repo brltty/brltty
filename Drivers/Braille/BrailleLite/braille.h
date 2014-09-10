@@ -31,7 +31,7 @@ extern SerialDevice *BL_serialDevice;
 #define BAUDRATE 9600
 //#define BAUDRATE 38400
 
-/* Define the following for dots to character mapping for input to use 
+/* Define the following for dots to character mapping for input to use
    the same (user-defined) table as is used for output, instead of the
    hard-coded US table. */
 #define USE_TEXTTRANS

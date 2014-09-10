@@ -129,7 +129,7 @@ CAMLprim value brlapiml_errorCode_of_error(value camlError)
     case BRLAPI_ERROR_UNKNOWNTTY: result = Val_int(9); break;
     case BRLAPI_ERROR_PROTOCOL_VERSION: result = Val_int(10); break;
     case BRLAPI_ERROR_EOF: result = Val_int(11); break;
-    case BRLAPI_ERROR_EMPTYKEY: result = Val_int(12); break; 
+    case BRLAPI_ERROR_EMPTYKEY: result = Val_int(12); break;
     case BRLAPI_ERROR_DRIVERERROR: result = Val_int(13); break;
     case BRLAPI_ERROR_AUTHENTICATION: result = Val_int(14); break;
     default: {
@@ -350,7 +350,7 @@ CAMLprim value brlapiml_ignoreKeys(value handle, value rt, value camlKeys)
   CAMLparam3(handle, rt, camlKeys);
   unsigned int i, size = Wosize_val(camlKeys);
   brlapi_keyCode_t keys[size];
-  for (i=0; i<size; i++) keys[i] = Int64_val(Field(camlKeys, i)); 
+  for (i=0; i<size; i++) keys[i] = Int64_val(Field(camlKeys, i));
   brlapiCheckError(ignoreKeys, Int_val(rt), keys, size);
   CAMLreturn(Val_unit);
 }
@@ -360,7 +360,7 @@ CAMLprim value brlapiml_acceptKeys(value handle, value rt, value camlKeys)
   CAMLparam3(handle, rt, camlKeys);
   unsigned int i, size = Wosize_val(camlKeys);
   brlapi_keyCode_t keys[size];
-  for (i=0; i<size; i++) keys[i] = Int64_val(Field(camlKeys, i)); 
+  for (i=0; i<size; i++) keys[i] = Int64_val(Field(camlKeys, i));
   brlapiCheckError(acceptKeys, Int_val(rt), keys, size);
   CAMLreturn(Val_unit);
 }

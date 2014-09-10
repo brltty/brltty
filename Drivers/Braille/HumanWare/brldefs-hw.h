@@ -91,4 +91,4 @@ typedef enum {
   HW_GRP_RoutingKeys
 } HW_KeyGroup;
 
-#endif /* BRLTTY_INCLUDED_HW_BRLDEFS */ 
+#endif /* BRLTTY_INCLUDED_HW_BRLDEFS */

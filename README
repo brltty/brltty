@@ -10,19 +10,19 @@ Web Page: http://mielke.cc/brltty/
 
 BRLTTY is free software. It comes with ABSOLUTELY NO WARRANTY.
 
-BRLTTY is placed under the terms of the GNU General Public License [GPL] as 
-published by the Free Software Foundation; see the file LICENSE-GPL for 
-details. Version 2 (or any later version) of the GPL may be used when 
-redistributing and/or modifying this software. This statement applies to all 
-the files contained within this directory structure except for those which are 
+BRLTTY is placed under the terms of the GNU General Public License [GPL] as
+published by the Free Software Foundation; see the file LICENSE-GPL for
+details. Version 2 (or any later version) of the GPL may be used when
+redistributing and/or modifying this software. This statement applies to all
+the files contained within this directory structure except for those which are
 explicitly listed as exceptions within the following paragraphs.
 
-A special exception has been made for all of the text, attributes, and 
-contraction tables and subtables (which reside within the Tables/ 
-subdirectory). They are placed under the terms of the GNU Lesser General Public 
-License [LGPL] as published by the Free Software Foundation; see the file 
-LICENSE-LGPL for details. Version 2.1 (or any later version) of the LGPL may be 
-used when redistributing and/or modifying these files. The files covered by 
+A special exception has been made for all of the text, attributes, and
+contraction tables and subtables (which reside within the Tables/
+subdirectory). They are placed under the terms of the GNU Lesser General Public
+License [LGPL] as published by the Free Software Foundation; see the file
+LICENSE-LGPL for details. Version 2.1 (or any later version) of the LGPL may be
+used when redistributing and/or modifying these files. The files covered by
 this special exception are:
 
    *.ttb
@@ -32,11 +32,11 @@ this special exception are:
    *.ctb
    *.cti
 
-A special exception has been made for those files which are part of the client 
-side of BrlAPI (BRLTTY's Application Programming Interface). They are placed 
-under the terms of the GNU Lesser General Public License [LGPL] as published by 
-the Free Software Foundation; see the file LICENSE-LGPL for details. Version 
-2.1 (or any later version) of the LGPL may be used when redistributing and/or 
+A special exception has been made for those files which are part of the client
+side of BrlAPI (BRLTTY's Application Programming Interface). They are placed
+under the terms of the GNU Lesser General Public License [LGPL] as published by
+the Free Software Foundation; see the file LICENSE-LGPL for details. Version
+2.1 (or any later version) of the LGPL may be used when redistributing and/or
 modifying these files. The files covered by this special exception are:
 
    brlapi.h.in
@@ -84,7 +84,7 @@ send e-mail to any member(s) of The BRLTTY Team (see above).
 Introduction for Those New to Refreshable Braille
 =================================================
 
-There are two common ways in which blind people access computers. 
+There are two common ways in which blind people access computers.
 
 The first, and more widely known, is synthesized speech. While having many
 advantages, e.g. speed for reading plain text, speech does have its drawbacks.
@@ -163,7 +163,7 @@ Currently Supported Hardware
 
 BRLTTY has been tested on:
 
-*  a variety of Intel-based PCs (desktops, servers, laptops, PDAs) 
+*  a variety of Intel-based PCs (desktops, servers, laptops, PDAs)
 *  an Alpha workstation
 *  a StrongARM based Netwinder
 *  several Linux kernels (1.2.13 and beyond)
@@ -300,7 +300,7 @@ for the manual as well as a few other interesting literary creations.
 RedHat Package Manager
 ======================
 
-BRLTTY is also distributed in the RPM (RedHat Package Manager) format. The 
+BRLTTY is also distributed in the RPM (RedHat Package Manager) format. The
 following files are available:
 
     brltty-<release>-<version>.src.rpm

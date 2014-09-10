@@ -116,7 +116,7 @@ size_t BRLAPI_STDCALL brlapi_getHandleSize(void);
  * @{ */
 
 /** Default port number on which connections to \e BrlAPI can be established */
-#define BRLAPI_SOCKETPORTNUM 4101 
+#define BRLAPI_SOCKETPORTNUM 4101
 #define BRLAPI_SOCKETPORT "4101"
 
 /** Default unix path on which connections to \e BrlAPI can be established */
@@ -307,7 +307,7 @@ int BRLAPI_STDCALL brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int 
  * \brief How to take control of ttys for direct braille display / read
  *
  * Before being able to write on the braille display, the application must tell
- * the server which tty it will handle. 
+ * the server which tty it will handle.
  *
  * The application must also specify how braille keys will be delivered to it.
  * Two ways are possible: key codes and commands:

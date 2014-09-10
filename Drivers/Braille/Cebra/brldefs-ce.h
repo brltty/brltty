@@ -67,4 +67,4 @@ typedef enum {
   CE_GRP_RoutingKey
 } CE_KeyGroup;
 
-#endif /* BRLTTY_INCLUDED_CE_BRLDEFS */ 
+#endif /* BRLTTY_INCLUDED_CE_BRLDEFS */

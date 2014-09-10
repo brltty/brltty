@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# This BRLTTY text subtable defines a set of braille representations for the 
+# This BRLTTY text subtable defines a set of braille representations for the
 # ASCII character set designed for languages which don't use them themselves.
 
 include ltr-latin.tti

@@ -132,7 +132,7 @@ formatLogLevelString (unsigned int index, char *buffer, size_t size) {
       break;
   }
 
-  length = STR_LENGTH;  
+  length = STR_LENGTH;
   STR_END;
   return length;
 }
@@ -1075,7 +1075,7 @@ loadPreferences (void) {
   return ok;
 }
 
-int 
+int
 savePreferences (void) {
   int ok = 0;
   char *path = makePreferencesFilePath(opt_preferencesFile);
@@ -1997,7 +1997,7 @@ background (void) {
     LPTSTR commandLine = GetCommandLine();
     STARTUPINFO startupInfo;
     PROCESS_INFORMATION processInfo;
-    
+
     memset(&startupInfo, 0, sizeof(startupInfo));
     startupInfo.cb = sizeof(startupInfo);
 
@@ -2092,7 +2092,7 @@ background (void) {
     if (close(fds[0]) == -1) logSystemError("close");
   }
 
-  if (setsid() == -1) {                        
+  if (setsid() == -1) {
     logSystemError("setsid");
     exit(PROG_EXIT_FATAL);
   }
@@ -2240,7 +2240,7 @@ brlttyStart (void) {
 
   /*
    * From this point, all IO functions as printf, puts, perror, etc. can't be
-   * used anymore since we are a daemon.  The logMessage() facility should 
+   * used anymore since we are a daemon.  The logMessage() facility should
    * be used instead.
    */
 
@@ -2335,7 +2335,7 @@ brlttyStart (void) {
   } else {
     scheduleScreenDriver();
   }
-  
+
 #ifdef ENABLE_API
   apiStarted = 0;
 

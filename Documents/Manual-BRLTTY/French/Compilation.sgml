@@ -95,7 +95,7 @@ fichiers suivants:
      du pilote">). Les en-têtes brldefs.h et api.h sont fournies pour une
      compatibilité avec des version précédentes et ne devraient pas être
      utilisées.
-     
+
   <tag>/lib/</tag>
     <descrip>
       <tag>libbrlapi.a</tag>
@@ -276,7 +276,7 @@ instructions supplémentaires spécifiques.
     (voir la section <ref id="operand-braille-device"
     name="Spécification du port braille">). Si vous ne spécifiez pas
     cette option, usb: est assumé si le support USB est disponible, et un
-    chemin approprié pour le port série Com1 correspondant au système 
+    chemin approprié pour le port série Com1 correspondant au système
     d'exploitation est assumé. Voir la ligne
     <ref id="configure-braille-device" name="braille-device"> du
     fichier de configuration et l'option <ref
@@ -294,9 +294,9 @@ instructions supplémentaires spécifiques.
       <tag>no</tag>
         Ne compile pas le pilote. Cela revient à spécifier
         <tt>--without-libbraille</tt>.
-        
+
       <tag>yes</tag>
-        Compile le pilote si le paquet est présent dans <tt>/usr</tt>, 
+        Compile le pilote si le paquet est présent dans <tt>/usr</tt>,
         <tt>/usr/local</tt>, <tt>/usr/local/Libbraille</tt>,
         <tt>/usr/local/libbraille</tt>, <tt>/opt/Libbraille</tt>, ou
         <tt>/opt/libbraille</tt>. Cela revient à à spécifier <tt>--with-libbraille</tt>.
@@ -311,7 +311,7 @@ instructions supplémentaires spécifiques.
     l'arborescence source. L'extension <tt/.ttb/ est facultative. Pour un
     nom de fichier simple, le préfixe <tt>text.</tt> est facultatif. Si
     vous ne spécifiez pas cette option, <tt/en-nabcc/, une table commune (en
-    Amérique du Nord) utilisant la variante 8 points du 
+    Amérique du Nord) utilisant la variante 8 points du
     <ref id="nabcc" name="North American Braille Computer Code">, est
     utilisée. Voir la ligne <ref id="configure-text-table"
     name="text-table"> du fichier de configuration et l'option <ref
@@ -417,16 +417,16 @@ instructions supplémentaires spécifiques.
         Ne compile pas le pilote.
         Cela revient à spécifier <tt>--without-mikropuhe</tt>.
       <tag>yes</tag>
-        Compile le pilote si le paquet existe dans <tt>/usr</tt>, 
+        Compile le pilote si le paquet existe dans <tt>/usr</tt>,
         <tt>/usr/local</tt>, <tt>/usr/local</tt>, <tt>/usr/local/Mikropuhe</tt>,
-        <tt>/usr/local/mikropuhe</tt>, <tt>/opt/Mikropuhe</tt> 
-        ou <tt>/opt/mikropuhe</tt>. Cela revient à spécifier 
+        <tt>/usr/local/mikropuhe</tt>, <tt>/opt/Mikropuhe</tt>
+        ou <tt>/opt/mikropuhe</tt>. Cela revient à spécifier
         <tt>--with-mikropuhe</tt>.
     </descrip>
   <tag><tt>--with-speechd=</tt><em>repertoire</em><label id="build-theta"></tag>
     Spécifie l'endroit où est installé le paquet de la synthèse vocale speech-dispatcher
     (multiplexeur de synthèse vocale) et compile le pilote pour speech-dispatcher.
-    L'un des mots suivants peut aussi être utilisé comme opérateur de cette 
+    L'un des mots suivants peut aussi être utilisé comme opérateur de cette
     option:
     <descrip>
       <tag>no</tag>
@@ -437,11 +437,11 @@ instructions supplémentaires spécifiques.
         <tt>/usr/local/speech-dispatcher</tt>, <tt>/usr/local/speechd</tt>,
         <tt>/opt/speech-dispatcher</tt>, ou <tt>/opt/speechd</tt>. Cela revient
         à spécifier <tt>--with-speechd</tt>.
-    </descrip>    
+    </descrip>
   <tag><tt>--with-swift=</tt><em>repertoire</em><label id="build-theta"></tag>
     Spécifie l'endroit où est installé le paquet de la synthèse vocale, et
     compile le pilote pour la synthèse vocale Swift.
-    L'un des mots suivants peut aussi être utilisé comme opérateur de cette 
+    L'un des mots suivants peut aussi être utilisé comme opérateur de cette
     option:
     <descrip>
       <tag>no</tag>
@@ -452,7 +452,7 @@ instructions supplémentaires spécifiques.
         <tt>/usr/local/Swift</tt>, <tt>/usr/local/swift</tt>,
         <tt>/opt/Swift</tt>, ou <tt>/opt/swift</tt>. Cela revient
         à spécifier <tt>--with-swift</tt>.
-    </descrip>    
+    </descrip>
   <tag><tt>--with-theta=</tt><em>repertoire</em><label id="build-theta"></tag>
     Spécifie l'emplacement d'installation du paquet Theta
     et compile le pilote pour la synthèse vocale Theta
@@ -485,7 +485,7 @@ instructions supplémentaires spécifiques.
         Cela revient à spécifier <tt>--with-viavoice</tt>.
     </descrip>
   <tag><tt>--with-screen-driver=</tt><em>pilote</em><label id="build-screen-driver"></tag>
-    Spécifie les pilotes pour l'écran qui seront liés à l'exécutable BRLTTY. 
+    Spécifie les pilotes pour l'écran qui seront liés à l'exécutable BRLTTY.
     Ceux qui ne sont pas mentionnés dans cette option sont compilés en tant
     qu'objets dynamiques et peuvent être choisis lors de
     l'exécution. Chaque pilote doit être identifié soit par les deux lettres de
@@ -516,12 +516,12 @@ instructions supplémentaires spécifiques.
         <tt>--with-braille-driver</tt>.
     </descrip>
 
-    Le premier pilote non exclu devient celui par défaut. 
+    Le premier pilote non exclu devient celui par défaut.
     Si cette option n'est pas spécifiée, une sélection adaptée au
     système d'exploitation est faite. Si un pilote spécifique au
     système d'exploitation en cours est fiable, il est utilisé. Sinon,
     <tt>sc</tt> est utilisé.
-    
+
     Voir la ligne <ref id="configure-screen-driver" name="screen-driver"> du fichier de configuration
     et l'option <ref id="options-screen-driver" name="-x"> de la ligne de commande pour une sélection à l'exécution.
   <tag><tt>--with-screen-parameters=</tt><em>name</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="build-screen-parameters"></tag>
@@ -644,7 +644,7 @@ instructions supplémentaires spécifiques.
     Si vous ne spécifiez pas cette option, le sous-répertoire autorisé en rw
     (lecture/écriture) dans le dossier spécifié par l'option --with-library-directory
     est supposé. Le répertoire est créé s'il n'existe pas.
-    
+
   <tag><tt>--exec-prefix=</tt><em>répertoire</em><label id="build-architecture-root"></tag>
     Spécifie le répertoire de la <ref id="hierarchy" name="hiérarchie des fichiers installés">
     où les répertoires par défaut pour les
@@ -747,7 +747,7 @@ les fonctions inutiles.
   <tag><tt/--disable-stripping/<label id="build-stripping"></tag>
     Ne supprime pas les symboles des tables des exécutables et des objets
     partagés lors de leur installation.
-    
+
   <tag><tt>--enable-relocatable-install</tt><label id="build-table-selection"></tag>
     Si cette fonctionnalité est activée, tous les chemins internes sont
     recalculés afin d'englober le répertoire du programme. Si elle n'est pas
@@ -773,7 +773,7 @@ les fonctions inutiles.
     Réduit la taille du programme en excluant le support pour la conversion
     des codages.
   <tag><tt/--disable-icu/<label id="build-icu"></tag>
-    Réduit la taille du programme en excluant le support pour 
+    Réduit la taille du programme en excluant le support pour
     l'internationalisation basée sur l'Unicode.
   <tag><tt/--disable-x/<label id="build-x"></tag>
     Réduit la taille du programme en excluant le support pour X11.
@@ -798,7 +798,7 @@ les fonctions inutiles.
     Réduit la taille du programme en excluant le support pour
     l'interface numérique d'instruments de musique sur la carte son.
   <tag><tt>--enable-midi-support=</tt><em>interface</em></tag>
-    Si une plateforme propose plus d'une interface numérique d'instrument de 
+    Si une plateforme propose plus d'une interface numérique d'instrument de
     musique, vous pouvez spécifier celle qui sera utilisée.
     <table loc="h">
       <tabular ca="lll">
@@ -844,9 +844,9 @@ les fonctions inutiles.
   <tag><tt>--disable-tcl-bindings=</tt><em>nom</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="build-api-parameters"></tag>
     Ne compile pas les bindings Tcl (interfaces de programmation) pour l'interface de programmation de l'application.
   <tag><tt>--with-tcl-config=</tt><em>chemin</em>
-    Spécifie l'endroit où se trouve le script de configuration Tcl 
+    Spécifie l'endroit où se trouve le script de configuration Tcl
     (tclConfig.sh). Vous pouvez fournir le chemin, soit vers le script lui-même,
-    soit vers le répertoire où il se trouve. Un des mots suivants peut être 
+    soit vers le répertoire où il se trouve. Un des mots suivants peut être
     aussi utilisé comme opérateur pour l'option:
 
 (<tt>-</tt>),
@@ -856,11 +856,11 @@ les fonctions inutiles.
         l'est, où il a été installé. Cela revient à spécifier
         <tt>--without-tcl-config.</tt>.
       <tag>yes</tag>
-        Cherche le script dans quelques répertoires couramment utilisés. 
+        Cherche le script dans quelques répertoires couramment utilisés.
         Cela revient à spécifier
         <tt>--with-tcl-config</tt>.
     </descrip>
-    
+
 </descrip>
 
 <sect3>Options diverses<label id="build-miscellaneous"><p>
@@ -1039,7 +1039,7 @@ fi
 </verb></tscreen>
 Normalement, cela peut s'abréger en une forme un peu moins
 lisible du type:
-<tscreen><verb> 
+<tscreen><verb>
 [ -x /bin/brltty -a -f /etc/brltty.conf ] && /bin/brltty
 </verb></tscreen>
 N'ajoutez pas ces lignes avant la première ligne (qui ressemble
@@ -1065,8 +1065,8 @@ dépend de la distribution. Voici les emplacements que nous connaissons:
     besoin pour l'utilisateur de fournir quoique ce soit, s'il est
     installé. Si vous avez besoin que le démon se lance avec des options en ligne
     de commande, vous pouvez modifier le contenu entre guillemets du fichier
-    <tt>/etc/default/brltty</>. Si vous avez besoin que le démon se lance avec 
-    des options en ligne de commande, vous pouvez modifier le contenu entre 
+    <tt>/etc/default/brltty</>. Si vous avez besoin que le démon se lance avec
+    des options en ligne de commande, vous pouvez modifier le contenu entre
     guillemets de la ligne <tt/ARGUMENTS/ du fichier <tt>/etc/default/brltty</>.
   <tag>RedHat</tag>
     <tt>/etc/rc.d/rc.sysinit</tt>
@@ -1192,8 +1192,8 @@ root.
     exécution contiennent des éléments conflictuels.
   <tag>Pilote pour l'afficheur braille Libbraille</tag><label id="restrictions-mikropuhe">
     Le pilote pour le paquet libbraille n'est compilé que si le paquet a
-    été installé.   
-  
+    été installé.
+
   <tag>Pilote pour la synthèse Mikropuhe</tag><label id="restrictions-mikropuhe">
     Le pilote pour le moteur Mikropuhe n'est compilé
     que si ce paquet a été installé.
@@ -1280,7 +1280,7 @@ Les variables d'environnement suivantes sont affectées:
     exécutables). Configuré par l'option de compilation <ref id="build-program-directory" name="--with-program-directory">.
   <tag>BRLTTY_LIBRARY_DIRECTORY</tag>
     Répertoire des pilotes. Configuré par l'option de compilation <ref id="build-library-directory" name="--with-library-directory">.
-  <tag>BRLTTY_WRITABLE_DIRECTORY</tag>    
+  <tag>BRLTTY_WRITABLE_DIRECTORY</tag>
     Répertoire dans lequel il est possible d'écrire. Configuré par l'option
     de compilation <ref id="build-program-directory" name="--with-writable-directory">.
   <tag>BRLTTY_DATA_DIRECTORY</tag>
@@ -1503,8 +1503,8 @@ texte">).
     Le chemin du fichier vers la table de texte en entrée du test. S'il
     est relatif, il est ancré au répertoire configuré avec l'option de
     compilation --with-data-directory.
-    
-  <tag><em>table-en-sortie</em></tag>  
+
+  <tag><em>table-en-sortie</em></tag>
     Le chemin du fichier vers la table de texte en sortie du test. S'il
     est relatif, il est ancré au répertoire de travail  courant. Si vous ne
     fournissez pas ce paramètre, aucune table en sortie ne  sera écrite.
@@ -1517,7 +1517,7 @@ texte">).
     option, le  format de la table en entrée est déduit de l'extension de son
     fichier.
   <tag><tt/-c/<em/charset/ <tt/--charset=/<em/charset/</tag>
-    Spécifie le nom de l'encodage 8-bit à utiliser lors de l'interprétation des 
+    Spécifie le nom de l'encodage 8-bit à utiliser lors de l'interprétation des
     tables. Si vous ne fournissez pas cette option, le codage de l'hôte est
     utilisé.
   <tag><tt/-e/ <tt/--edit/</tag>
@@ -1527,7 +1527,7 @@ texte">).
     Affiche un résumé des options en ligne de commande, et quitte.
 </descrip>
 
-Si vous ne demandez aucune action en particulier, la table de sortie est 
+Si vous ne demandez aucune action en particulier, la table de sortie est
 facultative. Si vous ne la spécifiez pas, la table d'entrée est vérifiée.
 Si vous la spécifiez, la table d'entrée est convertie.
 Les formats de table suivants sont supportés:
@@ -1565,7 +1565,7 @@ la sortie standard (stdout) en braille abrégé.
     L'extension <tt/.ttb/ est facultative.
     Voir la ligne <ref id="configure-text-table" name="text-table">
     du fichier de configuration pour le paramétrage par défaut au moment de l'exécution. Vous pouvez modifier
-    ce paramètre avec la préférence 
+    ce paramètre avec la préférence
     <ref id="preference-text-table" name="Text Table">.
   <tag><tt>-w</tt><em>colonnes</em> <tt>--output-width==</tt><em>colonnes</em></tag>
     La longueur  maximale d'une ligne en sortie. Chaque ligne d'entrée en
@@ -1635,7 +1635,7 @@ soyez obligés de l'exécuter en tant que root.
   <tag><tt>-p</tt><em>device</em> <tt>--pcm-device=</tt><em>device</em></tag>
     Spécifie le périphérique à utiliser pour le son (voir la
     section <ref id="operand-pcm-device" name="spécification du périphérique PCM">). Cette option ne
-    fonctionne pas si vous avez spécifié l'option de compilation 
+    fonctionne pas si vous avez spécifié l'option de compilation
     <ref id="build-pcm-support" name="--disable-pcm-support">.
   <tag><tt/preferences-file/ <em/file/<label id="configure-preferences-file"></tag>
     Spécifie l'emplacement du fichier qui doit être utilisé pour sauvegarder

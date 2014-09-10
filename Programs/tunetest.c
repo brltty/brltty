@@ -102,7 +102,7 @@ validateInstrument (unsigned char *value, const char *string) {
     }
     while (1) {
       while (*component == ' ') component++, componentLeft--;
-      if ((componentLeft == 0) != (wordLeft == 0)) break; 
+      if ((componentLeft == 0) != (wordLeft == 0)) break;
       if (!componentLeft) {
         *value = instrument;
         return 1;

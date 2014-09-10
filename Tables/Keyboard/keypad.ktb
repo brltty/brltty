@@ -66,7 +66,7 @@ bind KPMinus+!KP7 HELP
 bind KPMinus+!KP9 LEARN
 bind KPMinus+!KP2 CSRJMP_VERT
 bind KPMinus+!KP1 TIME
-bind KPMinus+!KP3 FREEZE        
+bind KPMinus+!KP3 FREEZE
 bind KPMinus+!KPDivide RESTARTBRL
 bind KPMinus+!KPMultiply RESTARTSPEECH
 

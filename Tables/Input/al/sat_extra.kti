@@ -21,6 +21,6 @@ note The two three-position, sliding keys are named LeftTumbler and RightTumbler
 
 bind LeftTumblerLeft CHRLT
 bind LeftTumblerRight CHRRT
-bind RightTumblerLeft LNBEG     
+bind RightTumblerLeft LNBEG
 bind RightTumblerRight LNEND
 

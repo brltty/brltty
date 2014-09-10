@@ -71,13 +71,13 @@ loadSharedObject (const char *path) {
   return NULL;
 }
 
-void 
+void
 unloadSharedObject (void *object) {
   NSModule module = object;
   NSUnLinkModule(module, NSUNLINKMODULE_OPTION_NONE);
 }
 
-int 
+int
 findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
   NSModule module = object;
   char name[strlen(symbol) + 2];

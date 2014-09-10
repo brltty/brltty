@@ -43,7 +43,7 @@
 
 static HelpScreen helpScreen;
 static MenuScreen menuScreen;
-static FrozenScreen frozenScreen;                
+static FrozenScreen frozenScreen;
 static MainScreen mainScreen;
 
 typedef enum {

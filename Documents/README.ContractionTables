@@ -1,39 +1,39 @@
 Contraction Tables
 ------------------
 
-Files with names of the form *.ctb are contraction tables, and with names of 
-the form *.cti are contraction subtables. They are used by BRLTTY to translate 
-character sequences on the screen into their corresponding contracted braille 
+Files with names of the form *.ctb are contraction tables, and with names of
+the form *.cti are contraction subtables. They are used by BRLTTY to translate
+character sequences on the screen into their corresponding contracted braille
 representations.
 
-A contraction table consists of a sequence of entries, one per line, which 
-define how character sequences are to be represented in braille. UTF-8 
-character encoding must be used. White-space (blanks, tabs) at the beginning of 
-a line, as well as before and/or after any operand, is ignored. Lines 
-containing only white-space are ignored. If the first non-white-space character 
+A contraction table consists of a sequence of entries, one per line, which
+define how character sequences are to be represented in braille. UTF-8
+character encoding must be used. White-space (blanks, tabs) at the beginning of
+a line, as well as before and/or after any operand, is ignored. Lines
+containing only white-space are ignored. If the first non-white-space character
 of a line is "#" then that line is a comment and is ignored.
 
 The format of a contraction table entry is:
 
    directive operand ... [comment]
 
-Each directive has a specific number of operands. Any text beyond the last 
-operand of a directive is interpreted as a comment. The order of the entries 
-within a contraction table is, in general, anything that is convenient for its 
-maintainer(s). An entry which defines an entity, e.g. class, must precede all 
+Each directive has a specific number of operands. Any text beyond the last
+operand of a directive is interpreted as a comment. The order of the entries
+within a contraction table is, in general, anything that is convenient for its
+maintainer(s). An entry which defines an entity, e.g. class, must precede all
 references to that entity.
 
-Entries which match character sequences are automatically rearranged from 
-longest to shortest so that longer matches are always preferred. If more than 
-one entry matches the same character sequence then their original table 
-ordering is maintained. Thus, the same sequence may be translated differently 
+Entries which match character sequences are automatically rearranged from
+longest to shortest so that longer matches are always preferred. If more than
+one entry matches the same character sequence then their original table
+ordering is maintained. Thus, the same sequence may be translated differently
 under different circumstances.
 
 
 The Characters Operand
 ----------------------
 
-The first operand of a character sequence matching directive is the character 
+The first operand of a character sequence matching directive is the character
 sequence to be matched. Each character within the sequence may be:
 *  Any single character other than a backslash or a white-space character.
 *  A backslash-prefixed special character. These are:
@@ -57,10 +57,10 @@ sequence to be matched. Each character within the sequence may be:
 The Representation Operand
 --------------------------
 
-The second operand of those character sequence matching directives which have 
-one is the braille representation of the sequence. Each braille cell is 
-specified as a sequence of one to eight dot numbers. A dot number is a digit 
-within the range 1-8 as defined by the standard braille dot numbering 
+The second operand of those character sequence matching directives which have
+one is the braille representation of the sequence. Each braille cell is
+specified as a sequence of one to eight dot numbers. A dot number is a digit
+within the range 1-8 as defined by the standard braille dot numbering
 convention (see README.BrailleDots). The special dot number 0, which may not be
 used in conjunction with any other dot number, means no dots.
 

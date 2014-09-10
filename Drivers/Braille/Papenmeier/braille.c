@@ -53,7 +53,7 @@
 #include "braille.h"
 
 static const ModelEntry *model = NULL;
- 
+
 /*--- Input/Output Operations ---*/
 
 typedef struct {
@@ -370,19 +370,19 @@ static int
 handleKey1 (BrailleDisplay *brl, uint16_t code, int press, uint16_t time) {
   int key;
 
-  if (rcvFrontFirst <= code && 
+  if (rcvFrontFirst <= code &&
       code <= rcvFrontLast) { /* front key */
     key = (code - rcvFrontFirst) / 3;
     return enqueueKeyEvent(brl, PM_GRP_NavigationKeys, PM_KEY_FRONT+key, press);
   }
 
-  if (rcvStatusFirst <= code && 
+  if (rcvStatusFirst <= code &&
       code <= rcvStatusLast) { /* status key */
     key = (code - rcvStatusFirst) / 3;
     return enqueueKeyEvent(brl, PM_GRP_NavigationKeys, PM_KEY_STATUS+key, press);
   }
 
-  if (rcvBarFirst <= code && 
+  if (rcvBarFirst <= code &&
       code <= rcvBarLast) { /* easy access bar */
     if (!handleSwitches1(brl, time)) return 0;
 
@@ -390,15 +390,15 @@ handleKey1 (BrailleDisplay *brl, uint16_t code, int press, uint16_t time) {
     return enqueueKeyEvent(brl, PM_GRP_NavigationKeys, PM_KEY_BAR+key, press);
   }
 
-  if (rcvSwitchFirst <= code && 
+  if (rcvSwitchFirst <= code &&
       code <= rcvSwitchLast) { /* easy access bar */
     return handleSwitches1(brl, time);
   //key = (code - rcvSwitchFirst) / 3;
   //return enqueueKeyEvent(brl, PM_GRP_NavigationKeys, PM_KEY_SWITCH+key, press);
   }
 
-  if (rcvCursorFirst <= code && 
-      code <= rcvCursorLast) { /* Routing Keys */ 
+  if (rcvCursorFirst <= code &&
+      code <= rcvCursorLast) { /* Routing Keys */
     key = (code - rcvCursorFirst) / 3;
     return enqueueKeyEvent(brl, PM_GRP_RoutingKeys1, key, press);
   }
@@ -637,18 +637,18 @@ readPacket2 (BrailleDisplay *brl, void *packet, size_t size) {
               logIgnoredByte(packet2->bytes[0]);
               offset = 0;
               continue;
-    
+
             case 2:
               if (type != 0X40) break;
               packet2->type = value;
               identity = value == 0X0A;
               continue;
-    
+
             case 3:
               if (type != 0X50) break;
               packet2->length = value << 4;
               continue;
-    
+
             case 4:
               if (type != 0X50) break;
               packet2->length |= value;
@@ -657,7 +657,7 @@ readPacket2 (BrailleDisplay *brl, void *packet, size_t size) {
               if (!identity) length *= 2;
               length += 5;
               continue;
-    
+
             default:
               if (type != 0X30) break;
 
@@ -803,7 +803,7 @@ initializeTerminal2 (BrailleDisplay *brl) {
   }
 }
 
-static int 
+static int
 readCommand2 (BrailleDisplay *brl, KeyTableCommandContext context) {
   Packet2 packet;
 
@@ -1235,7 +1235,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char* s) {
   return 1;
 }
 
-static int 
+static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   return protocol->readCommand(brl, context);
 }

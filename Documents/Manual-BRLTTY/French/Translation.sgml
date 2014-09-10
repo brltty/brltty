@@ -26,9 +26,9 @@ concernant la façon d'utiliser et de changer de table de texte.
 
 <sect2>Format des tables de texte<p>
 Une table de texte consiste en une séquence d'instructions, une par ligne,
-qui définit comment chaque caractère doit être représenté en braille 
+qui définit comment chaque caractère doit être représenté en braille
 Vous devez utiliser l'encodage <tt/UTF-8/.
-Un blanc (espaces, tabs) tant au début de la ligne qu'aavant et/ou après 
+Un blanc (espaces, tabs) tant au début de la ligne qu'aavant et/ou après
 l'opérateur d'une instruction, est ignoré.
 
 Les lignes ne contenant que des blancs sont ignorées.
@@ -39,7 +39,7 @@ un commentaire et est ignorée.
 Les instructions suivantes sont fournies:
 <descrip>
   <tag><tt/char/ <em/caractère/ <em/points/ &num; <em/commentaire/</tag>
-    Utilise l'instruction <tt/char/ pour spécifier la façon dont un caractère 
+    Utilise l'instruction <tt/char/ pour spécifier la façon dont un caractère
     Unicode sera représenté en braille. Les caractères définis par cette
     instruction peuvent également être saisies au clavier braille. Si plusieurs
     caractères ont la même représentation braille, vous ne devriez en définir
@@ -47,7 +47,7 @@ Les instructions suivantes sont fournies:
     <tt/glyph/ (dont la syntaxe est identique). Si plus d'un caractère ayant la
     même représentation braille est défini avec l'instruction <tt/char/
     (ce qui est actuellement possible pour des questions de rétrocompatibilité),
-    c'est la première qui est sélectionnée. 
+    c'est la première qui est sélectionnée.
 
     <descrip>
       <tag><em/caractère/</tag>
@@ -80,7 +80,7 @@ Les instructions suivantes sont fournies:
         La représentation braille du caractère Unicode. C'est une séquence d'un
         à huit nombres de points. Si la séquence du nombre de points est entourée
         de parenthèses, vous pouvez séparer les numéros des points l'un de l'autre
-        par des blancs. Un numéro de point est un chiffre compris entre <tt/1/-<tt/8/ 
+        par des blancs. Un numéro de point est un chiffre compris entre <tt/1/-<tt/8/
         tels que définis par la
         <ref id="dots" name="Standard Braille Dot Numbering Convention"> (convention
         standard de numérotation de points brailles). Le numéro de point spécial <tt/0/
@@ -167,7 +167,7 @@ Les tables d'attributs suivantes sont fournies:
     distinguer la différence entre la vidéo normale (noir sur blanc) et inversée
     (blanc sur noir).
   <tag/invleft_right/
-    La colonne à gauche représente les couleurs de premier plan: 
+    La colonne à gauche représente les couleurs de premier plan:
     <descrip>
       <tag/Point 1/Bleu
       <tag/Point 2/Vert
@@ -224,12 +224,12 @@ commentaire et est ignorée.
 Les lignes de commande suivantes sont fournies:
 <descrip>
   <tag><tt>dot</tt> <em>point</em> <em>etat</em> &num; <em>commentaire</em></tag>
-    Utilisez l'instruction <tt>dot</tt> pour spécifier ce que représente un point 
+    Utilisez l'instruction <tt>dot</tt> pour spécifier ce que représente un point
     particulier.
 
     <descrip>
       <tag><em>point</em></tag>
-        Le point qui est défini. C'est une seule case allant de 
+        Le point qui est défini. C'est une seule case allant de
         <tt>1</tt> à <tt>8</tt> comme défini par la
 	<ref id="dots" name="Convention standard du nombre de points brailles">.
       <tag><em>état</em></tag>
@@ -259,7 +259,7 @@ Les lignes de commande suivantes sont fournies:
     </itemize>
 
   <tag><tt/include/ <em/fichier/ &num; <em/commentaire/</tag>
-    Utilisez la ligne  <tt/include/ pour inclure le contenu d'une sous-table d'attributs. 
+    Utilisez la ligne  <tt/include/ pour inclure le contenu d'une sous-table d'attributs.
     Il est récursif, ce qui signifie que toute sous-table d'attributs peut
     inclure elle-même une autre sous-table d'attributs. Prenez soin de vous
     assurer de ne pas créer une "inclusion en boucle".
@@ -272,10 +272,10 @@ Les lignes de commande suivantes sont fournies:
 </descrip>
 
 <sect1>Tables de braille abrégé<label id="table-contraction"><p>
-Les fichiers aux noms sous la forme <tt/*.ctb/ sont des tables de braille abrégé 
-et ceux aux noms sous la forme <tt/*.cti/ sont des sous-tables de braille abrégé. 
-Ils sont utilisés par BRLTTY pour traduire des séquences de caractères à l'écran 
-en leurs représentations correspondantes en braille abrégé. 
+Les fichiers aux noms sous la forme <tt/*.ctb/ sont des tables de braille abrégé
+et ceux aux noms sous la forme <tt/*.cti/ sont des sous-tables de braille abrégé.
+Ils sont utilisés par BRLTTY pour traduire des séquences de caractères à l'écran
+en leurs représentations correspondantes en braille abrégé.
 
 BRLTTY présente du braille abrégé si:
 <itemize>
@@ -303,7 +303,7 @@ Les tables d'abrégé suivantes sont fournies:
  </tabular>
 </table>
 Voir l'option <ref id="options-contraction-table" name="-c"> en ligne de commande
-et la ligne <ref id="configure-contraction-table" name="contraction-table"> du fichier de 
+et la ligne <ref id="configure-contraction-table" name="contraction-table"> du fichier de
 configuration pour des détails sur la façon d'utiliser une table d'abrégé.
 
 <sect2>Format des tables de braille abrégé<p>
@@ -327,13 +327,13 @@ convenance de son/ses mainteneur(s).
 Une entrée qui définit une entité, comme <tt/class/,
 doit précéder toutes les références de cette entité.
 
-Les entrées qui correspondent à des séquences de caractères 
+Les entrées qui correspondent à des séquences de caractères
 sont automatiquement réorganisées de la plus longue à la plus courte
 afin que des correspondances plus longues soient toujours préférées.
-Si plus d'une entrée correspond à la même séquence de caractères, 
-leur organisation d'origine dans la table est maintenue. 
+Si plus d'une entrée correspond à la même séquence de caractères,
+leur organisation d'origine dans la table est maintenue.
 Ainsi, la même séquence peut être traduite différemment dans des circonstances
-différentes. 
+différentes.
 
 <sect2>Opérateurs des tables de braille abrégé<p>
 <descrip>
@@ -369,7 +369,7 @@ différentes.
     Le second opérateur de ces lignes correspondant à la séquence de caractères
     qui en a une est la représentation braille de la séquence.
     Chaque cellule braille est spécifiée comme une séquence d'un à huit numéros
-    de points. Un numéro de point est un chiffre compris entre <tt/1/-<tt/8/ 
+    de points. Un numéro de point est un chiffre compris entre <tt/1/-<tt/8/
     tels que définis par la
     <ref id="dots" name="Standard Braille Dot Numbering Convention"> (convention standard
     de numérotation de points brailles). Le numéro de point spécial <tt/0/
@@ -423,8 +423,8 @@ le texte braille afin de le rendre plus clair.
     d'un mot.
   <tag><tt>letsign</tt> <em>points</em><label id="contraction-opcode-letsign"></tag>
     Le symbole qui désigne une lettre ne faisant pas partie du mot.
-  
-  <tag><tt/numsign/ <em/points/<label id="contraction-opcode-numsign"></tag>  
+
+  <tag><tt/numsign/ <em/points/<label id="contraction-opcode-numsign"></tag>
     Le symbole marquant le début d'un nombre.
   <tag><tt>lastlargesign</tt> <em>points</em><label id="contraction-opcode-numsign"></tag>
     Traduit les caractères quel que soit l'endroit où ils apparaissent.
@@ -496,7 +496,7 @@ Enfin, voici maintenant la description des opcodes eux-mêmes:
     Traduit les caractères s'ils forment un mot. Supprime l'espace suivant si
     le premier caractère qui le suit est une lettre.
   <tag><tt>lowword</tt> <em>caractères</em> <em>points</em><label id="contraction-opcode-lowword"></tag>
-    Traduit les caractères s'ils forment un mot lié à un espace. 
+    Traduit les caractères s'ils forment un mot lié à un espace.
   <tag><tt>contraction</tt> <em>caractères</em><label id="contraction-opcode-contraction"></tag>
     Fait précéder les caractères d'un signe-lettre (voir
     <ref id="contraction-opcode-letsign" name="letsign">) s'ils forment un mot.
@@ -602,11 +602,11 @@ Les tables de touches suivantes sont fournies:
   <tag/sun_type6/associations pour les claviers Sun Type 6
 </descrip>
       Voir l'option <ref id="options-key-table" name="-k"> en ligne de commande
-      et la ligne 
+      et la ligne
       <ref id="configure-key-table" name="key-table"> du fichier de
       configuration pour plus de détails concernant la manière de sélectionner
       une table de touches de clavier.
-      
+
       <sect2>Format des tables de touches<p>
 Une table de touches consiste en une séquence d'instructions, une par ligne,
 qui définit comment les touches et les combinaisons de touches seront interprétées.
@@ -623,7 +623,7 @@ est le suivant:
 <enum>
   <item>
     Un appui sur une touche de raccourci ou une action définie dans le contexte actuel.
-    Voir la ligne 
+    Voir la ligne
     <ref id="key-table-hotkey" name="hotkey">
     pour des détails.
   <item>
@@ -663,7 +663,7 @@ niveaux include supérieurs.
 </descrip>
 
 La séquence d'échappement \{variable} est remplacée par la valeur de la
-variable nommée dans les accolades. La variable doit être définie au niveau 
+variable nommée dans les accolades. La variable doit être définie au niveau
 include actuel ou supérieur.
 
 Exemples:
@@ -682,7 +682,7 @@ L'association est définie dans le contexte actuel.
             <descrip>
               <tag><em/touches/</tag>
                 La combinaison de touches à associer.
-               C'est une séquence d'un ou plusieurs noms de touches séparés par 
+               C'est une séquence d'un ou plusieurs noms de touches séparés par
                des signes plus (<tt/+/). Le nom de touche à la fin (ou seulement)
                peut être éventuellement précédé d'un point d'exclamation
                (<tt/!/). Vous pouvez appuyer sur les touches dans
@@ -695,7 +695,7 @@ L'association est définie dans le contexte actuel.
                une des touches.
               <tag><em/commande/</tag>
                 Le nom d'une commande BRLTTY. Un ou plusieurs modificateurs
-                peuvent éventuellement être associé au nom de la commande en 
+                peuvent éventuellement être associé au nom de la commande en
                 utilisant un signe plus (<tt/+/) comme séparateur.
                 <itemize>
       <item>
@@ -757,8 +757,8 @@ Exemples:
 <sect3>La ligne Context<label id="key-table-context"><p>
 Définit des façons alternatives d'interpréter certains événements et/ou
 combinaisons de touches. Un contexte contient des définitions créées avec les
-lignes 
-<ref id="key-table-bind" name="bind">, 
+lignes
+<ref id="key-table-bind" name="bind">,
 <ref id="key-table-hotkey" name="hotkey">,
 <ref id="key-table-map" name="map">,
 et
@@ -787,7 +787,7 @@ et
       <item>
         Un entier compris entre <tt/0/ et <tt/252/.
         Le contexte <tt/0/ est une façon alternative de se référer au contexte
-        par défaut. Vous devriez éviter les numéros de contexte supérieurs car 
+        par défaut. Vous devriez éviter les numéros de contexte supérieurs car
         le numéro le plus élevé autorisé est susceptible de changer sans signalement,
         si, par exemple, on ajoute davantage de contextes nommés.
 
@@ -796,11 +796,11 @@ et
   <tag><em/titre/</tag>
     Une description lisible par un humain du  contexte.
     Il peut contenir des espaces et vous devriez utiliser les conventions de
-    mise en majuscules standards. 
+    mise en majuscules standards.
     Cet opérande est facultatif. Si on le fournit lors de la sélection d'un
     contexte ayant déjà un titre, les deux doivent correspondre.
     Les contextes nommés ont déjà des titres internes attribués.
-    
+
     Les contextes numériques sont créés au départ sans titres.
 </descrip>
 
@@ -819,12 +819,12 @@ a été sélectionné lorsqu'il a été inclu.
 Les changements de contexte dans les sous-tables de touches incluses n'affectent
 pas le contexte de la table de touches qui inclut ou de la sous-table.
 
-Si un contexte a un titre (tous les contextes nommés et les contextes numériques 
+Si un contexte a un titre (tous les contextes nommés et les contextes numériques
 pour lesquels on a fourni l'opérande <em/title/), il demeure en place.
 
 Quand un événement de touches entraîne l'activation d'un contexte permanent,
 ce contexte reste actuel jusqu'à ce qu'un événement de touches subséquent
-entraîne l'activation d'un contexte permanent différent. 
+entraîne l'activation d'un contexte permanent différent.
 
 Si un contexte n'a pas de titre (les contextes numériques pour lesquels on n'a
 pas fourni l'opérande <em/title/), il est temporaire.
@@ -847,9 +847,9 @@ Spécifie si des définitions (voir les lignes
 <ref id="key-table-map" name="map">,
 et
 <ref id="key-table-superimpose" name="superimpose">) et les remarques (voir
-la ligne <ref id="key-table-note" name="note">) sont incluses ou pas 
+la ligne <ref id="key-table-note" name="note">) sont incluses ou pas
 dans le texte d'aide de la table de touches.
- 
+
 <tt/hide/ <em/state/
 <descrip>
   <tag><em/state/</tag>
@@ -864,7 +864,7 @@ L'état spécifié s'applique à toutes les définitions et les notes qui en découlen
 jusqu'à la prochaine ligne <tt/hide/ ou jusqu'à la fin du niveau include actuel.
 L'état initial du premier niveau de la table de touches est <tt/off/.
 L'état initial d'une sous-table de touches incluse est l'état qui a été
-sélectionné quand elle a été incluse. 
+sélectionné quand elle a été incluse.
 
 Les changements d'état à l'intérieur des sous-tables de touches incluses
 n'affectent pas l'état de la table de touche ou de la sous-table qui inclut.
@@ -886,16 +886,16 @@ Les associations sont définies dans le contexte actuel.
     Le nom de la touche qui sera associée.
   <tag><em/appui/</tag>
     Le nom de la commande BRLTTY qui sera exécutée à chaque fois qu'on appuiera
-    sur la touche. 
+    sur la touche.
 
   <tag><em/Effectuer/</tag>
     Le nom de la commande BRLTTY qui sera exécutée à chaque fois qu'on effectuera
-    la touche. 
+    la touche.
 </descrip>
 
 On peut coller des modificateurs aux noms de commande.
 
-Voir l'opérande <em/command/ de la ligne 
+Voir l'opérande <em/command/ de la ligne
 <ref id="key-table-bind" name="bind"> pour des
 détails.
 
@@ -999,7 +999,7 @@ Exemples:
 <sect3>La ligne Note<label id="key-table-note"><p>
 
 Ajoute une explication lisible par un humain au texte d'aide de la table de
-touches. 
+touches.
 
 Les remarques sont utilisées en général, par exemple, pour décrire la place,
 les tailles et les formes des touches d'un périphérique.
@@ -1049,7 +1049,7 @@ Fournit un résumé lisible par un humain de l'objectif de la table de touches.
 <tt/title/ <em/texte/
 <descrip>
   <tag><em/texte/</tag>
-   Un résumé d'une ligne de la raison pour laquelle est utilisée la table de 
+   Un résumé d'une ligne de la raison pour laquelle est utilisée la table de
    touches. Il peut contenir des espaces et vous devriez utiliser les
    conventions de mise en majuscules standards.
 
@@ -1063,7 +1063,7 @@ Exemples:
 </itemize>
 
 <sect2>Propriétés du clavier<label id="keyboard-properties"><p>
-Par défaut, tous les claviers sont pris en charge. 
+Par défaut, tous les claviers sont pris en charge.
 Un sous-paramètre des claviers peut être sélectionné en spécifiant une ou plusieurs des
 propriétés suivantes (voir l'option <ref id="options-keyboard-properties" name="-K">
 en ligne de commande et la ligne <ref id="configure-keyboard-properties" name="keyboard-properties"> du fichier de configuration):

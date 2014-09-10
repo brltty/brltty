@@ -25,7 +25,7 @@ public class DisplaySize {
 
   public DisplaySize (int width, int height) {
     this.width = width;
-    this.height = height; 
+    this.height = height;
   }
 
   public int getWidth () {

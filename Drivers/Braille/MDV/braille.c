@@ -94,7 +94,7 @@ static unsigned short
 calc_cksum(unsigned char *buf)
 /* Calculate two bytes checksum: buf is a packet containing the header and
    the data (with valid length). */
-{  
+{
   int i;
   unsigned short cksum = 0;
   int len = buf[OFF_LEN];
@@ -244,7 +244,7 @@ receive_rest(unsigned char *packet)
   }
   return 1;
 }
-  
+
 static int
 expect_receive_packet(unsigned char *packet)
 /* Assuming a response packet is expected, wait 0.2sec for a SOH and
@@ -301,7 +301,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
   if (!(serialDevice = serialOpenDevice(device))) goto failure;
 
   if(!serialRestartDevice(serialDevice, 19200)) goto failure;
- 
+
 /* Allocate and init static packet buffers */
   if((sendpacket = malloc(MAXTOTALPACKETLEN)) == NULL
       || (recvpacket = malloc(MAXTOTALPACKETLEN)) == NULL
@@ -404,7 +404,7 @@ failure:;
 }
 
 
-static void 
+static void
 brl_destruct (BrailleDisplay *brl)
 {
   if (serialDevice)
@@ -432,7 +432,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
 }
 
 
-static int 
+static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
 {
   unsigned int textChanged = cellsHaveChanged(prevdata, brl->buffer, brl_cols, NULL, NULL, NULL);
@@ -469,14 +469,14 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
 }
 
 
-static int 
+static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 {
   static char
     ignore_next_release = 0; /* when a command is triggered by combining
 				routing keys with ordinary keys, it is
 				triggered by the press of the ordinary key,
-				and then the release of the routing key has to 
+				and then the release of the routing key has to
 				be ignored. This is the flag for it. */
   static int
     nr_routing_cur_pressed = 0, /* number of routing keys currently pressed */
@@ -594,7 +594,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 	/* special handling for routing keys over status cells: currently
 	   only key 1 is mapped. */
 	if(whichkey == 1)
-	  return BRL_CMD_CSRHIDE 
+	  return BRL_CMD_CSRHIDE
 	    | ((code == REPORTROUTINGKEYPRESS) ? BRL_FLG_TOGGLE_OFF : BRL_FLG_TOGGLE_ON);
 	else return EOF;
       }

@@ -93,7 +93,7 @@ typedef enum {
   BRL_CMD_NXPROMPT /* go down to next command prompt */,
   BRL_CMD_PRSEARCH /* search backward for clipboard text */,
   BRL_CMD_NXSEARCH /* search forward for clipboard text */,
-  
+
   /* horizontal motion */
   BRL_CMD_CHRLT /* go left one character */,
   BRL_CMD_CHRRT /* go right one character */,
@@ -105,12 +105,12 @@ typedef enum {
   BRL_CMD_FWINRTSKIP /* go right to nearest non-blank window */,
   BRL_CMD_LNBEG /* go to beginning of line */,
   BRL_CMD_LNEND /* go to end of line */,
-  
+
   /* implicit motion */
   BRL_CMD_HOME /* go to cursor */,
   BRL_CMD_BACK /* go back after cursor tracking */,
   BRL_CMD_RETURN /* go to cursor or go back after cursor tracking */,
-  
+
   /* feature activation and deactivation */
   BRL_CMD_FREEZE /* set screen image frozen/unfrozen */,
   BRL_CMD_DISPMD /* set display mode attributes/text */,
@@ -129,17 +129,17 @@ typedef enum {
   BRL_CMD_TUNES /* set alert tunes on/off */,
   BRL_CMD_AUTOREPEAT /* set autorepeat on/off */,
   BRL_CMD_AUTOSPEAK /* set autospeak on/off */,
- 
+
   /* mode selection */
   BRL_CMD_HELP /* enter/leave help display */,
   BRL_CMD_INFO /* enter/leave status display */,
   BRL_CMD_LEARN /* enter/leave command learn mode */,
-  
+
   /* preference setting */
   BRL_CMD_PREFMENU /* enter/leave preferences menu */,
   BRL_CMD_PREFSAVE /* save preferences to disk */,
   BRL_CMD_PREFLOAD /* restore preferences from disk */,
-  
+
   /* menu navigation */
   BRL_CMD_MENU_FIRST_ITEM /* go to first item */,
   BRL_CMD_MENU_LAST_ITEM /* go to last item */,
@@ -147,7 +147,7 @@ typedef enum {
   BRL_CMD_MENU_NEXT_ITEM /* go to next item */,
   BRL_CMD_MENU_PREV_SETTING /* select previous choice */,
   BRL_CMD_MENU_NEXT_SETTING /* select next choice */,
- 
+
   /* speech controls */
   BRL_CMD_MUTE /* stop speaking */,
   BRL_CMD_SPKHOME /* go to current speech position */,
@@ -158,11 +158,11 @@ typedef enum {
   BRL_CMD_SAY_FASTER /* increase speech rate */,
   BRL_CMD_SAY_SOFTER /* decrease speech volume */,
   BRL_CMD_SAY_LOUDER /* increase speech volume */,
-  
+
   /* virtual terminal switching */
   BRL_CMD_SWITCHVT_PREV /* switch to previous virtual terminal */,
   BRL_CMD_SWITCHVT_NEXT /* switch to next virtual terminal */,
-  
+
   /* miscellaneous */
   BRL_CMD_CSRJMP_VERT /* bring cursor to line */,
   BRL_CMD_PASTE /* insert clipboard text at cursor */,

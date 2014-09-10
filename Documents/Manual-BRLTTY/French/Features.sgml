@@ -1,13 +1,13 @@
 <sect>Description des possibilités<p>
 
 <sect1>Routine curseur<label id="routing"><p>
-Lorsque vous déplacez la plage braille sur l'écran en examinant le texte dans 
-un éditeur, vous avez souvent besoin d'amener le curseur à un caractère en 
+Lorsque vous déplacez la plage braille sur l'écran en examinant le texte dans
+un éditeur, vous avez souvent besoin d'amener le curseur à un caractère en
 particulier à l'intérieur de la plage braille.
 Vous trouverez que c'est une tâche plutôt difficile pour un certain nombre de
 raisons. L'une d'entre elles est qu'il se peut que vous ne sachiez pas où se
 trouve le curseur, et vous avez peut-être perdu votre position en essayant de le
-trouver. 
+trouver.
 Une autre est que le curseur peut se déplacer de façon imprévisible lorsque
 vous appuyez sur les flèches de direction (certains éditeurs, par exemple,
 n'autorisent pas le curseur à aller plus à droite que la fin de la ligne où il
@@ -19,7 +19,7 @@ déplace.
 
 Certains afficheurs braille ont un bouton, appelé routine-curseur, au-dessus de
 chaque cellule. Ces touches utilisent la commande
-<ref id="command-ROUTE" name="ROUTE"> pour amener le curseur précisément à 
+<ref id="command-ROUTE" name="ROUTE"> pour amener le curseur précisément à
 l'emplacement désiré.
 
 La routine-curseur, bien que très pratique et très efficace, n'est pas,
@@ -48,7 +48,7 @@ ainsi car tous les tests qui doivent être faits pendant le processus de façon à
 traiter les mouvements imprévisibles du curseur et afin de s'assurer
 qu'une erreur a au moins une chance d'être corrigée.
 Bien que BRLTTY s'efforce d'être assez intelligent, il doit attendre encore
-de voir ce qu'il se passe après chaque appui simulé sur une flèche de direction. 
+de voir ce qu'il se passe après chaque appui simulé sur une flèche de direction.
 
 Une fois qu'une demande de routine-curseur a été faite, BRLTTY essaie d'amener
 le curseur à la position désirée durant un certain délai avant
@@ -58,9 +58,9 @@ En premier, un effort est fait pour utiliser le déplacement vertical pour
 amener le curseur à la bonne ligne, puis, uniquement si cela réussit, un effort
 est fait pour utiliser le déplacement horizontal pour amener le curseur à la
 bonne colonne. Si vous faites une autre demande alors qu'une routine est en train de
-s'effectuer, la première est annulée et la deuxième est démarrée. 
+s'effectuer, la première est annulée et la deuxième est démarrée.
 
-Une commande de routine curseur plus sûre mais moins puissante, 
+Une commande de routine curseur plus sûre mais moins puissante,
 <ref id="command-CSRJMP_VERT" name="CSRJMP_VERT">, utilise le déplacement
 vertical pour amener le curseur n'importe où sur la première ligne de la
 plage braille. Elle est surtout utile, jointe à certaines applications
@@ -143,7 +143,7 @@ trouve la plage braille et donc, de savoir ce que l'utilisateur brailliste
 est en train de lire. Cela récupère aussi le pointeur dans la plage
 braille de sorte que vous pouvez le
 trouver facilement et que le périphérique du pointeur peut toujours être
-utilisé comme un autre moyen de déplacer la plage braille. 
+utilisé comme un autre moyen de déplacer la plage braille.
 
 Le déplacement du pointeur emmène la plage braille (voir la préférence
 <ref id="preference-window-follows-pointer" name="La fenêtre suit le pointeur">).
@@ -158,7 +158,7 @@ l'utilisateur brailliste lise.
 
 <tt>gpm</tt> utilise la vidéo inversée pour montrer où se trouve le pointeur.
 Le soulignement des caractères en surbrillance devrait donc être activé (voir
-la commande <ref id="command-ATTRVIS" name="ATTRVIS"> pour des  détails) que 
+la commande <ref id="command-ATTRVIS" name="ATTRVIS"> pour des  détails) que
 quand l'utilisateur brailliste veut utiliser le pointeur.
 
 Cette fonctionnalité donne aussi à l'utilisateur brailliste accès à la
@@ -289,7 +289,7 @@ de déplacement dans la fenêtre, qui ont changé de sens dans ce contexte,
 peuvent être aussi utilisées.
 <descrip>
   <tag><tt>Début</tt>/<tt>Fin</tt>, <tt>Haut-Gauche</tt>/<tt>Bas-Gauche</tt>, <tt>PAGE_PRECEDENTE</tt>/<tt>PAGE_SUIVANTE</tt></tag>
-    Va au premier/dernier élément du menu (comme 
+    Va au premier/dernier élément du menu (comme
     <ref id="command-MENU_FIRST_ITEM-MENU_LAST_ITEM" name="MENU_FIRST_ITEM/MENU_LAST_ITEM">).
   <tag><tt>FH</tt>/<tt>FB</tt>, <tt>LIGNPRECEDENTE</tt>/<tt>LNSUIV</tt>, <tt>CURSEUR_HAUT</tt>/<tt>CURSEUR_BAS</tt></tag>
     Va à l'élément précédent/suivant du menu (comme
@@ -347,7 +347,7 @@ Remarques:
   <tag>Passer les lignes identiques<label id="preference-skip-identical-lines"></tag>
     Quand vous vous déplacez de ligne en ligne en haut ou en bas avec les
     commandes <ref id="command-LNUP-LNDN" name="LNUP/LNDN">,
-    et lors de la fonction de défilement de lignes des commandes 
+    et lors de la fonction de défilement de lignes des commandes
     <ref id="command-FWINLT-FWINRT" name="FWINLT/FWINRT"> et
     <ref id="command-FWINLTSKIP-FWINRTSKIP" name="FWINLTSKIP/FWINRTSKIP">:
     <descrip>
@@ -451,16 +451,16 @@ Remarques:
     Le paramètre initial est <tt>oui</tt>.
   <tag>Répétition automatique du défilement<label id="preference-autorepeat-delay"></tag>
     Quand la préférence "Répétition automatique" est activée:
-    
+
     <descrip>
       <tag>Non</tag>
         Ne répète pas automatiquement les opérations de défilement  de la
         plage braille.
       <tag>Oui</tag>
-        Répète automatiquement les opérations de défilement de la plage 
+        Répète automatiquement les opérations de défilement de la plage
         braille.
     </descrip>
-    
+
     Ce paramètre modifie le comportement des commandes "FWINLT/FWINRT". Le
     paramètre initial est <tt>non</tt>.
 
@@ -542,13 +542,13 @@ Remarques:
   <tag>Durée de visibilité des attributs<label id="preference-attributes-visible-time"></tag>
     Quand le soulignement des caractères en surbrillance doit clignoter,
     ce paramètre spécifie la durée (voir la remarque à propos des
-    <ref id="time-settings" name="paramètres de temps"> ci-dessous) pendant 
+    <ref id="time-settings" name="paramètres de temps"> ci-dessous) pendant
     laquelle il est visibile pendant chaque cycle.
     La valeur initiale est <tt>20</tt>.
   <tag>Durée d'invisibilité des attributs<label id="preference-attributes-invisible-time"></tag>
     Quand le soulignement des caractères en surbrillance doit clignoter,
     ce paramètre spécifie la durée (voir la remarque à propos des
-    <ref id="time-settings" name="paramètres de temps"> ci-dessous) pendant 
+    <ref id="time-settings" name="paramètres de temps"> ci-dessous) pendant
     laquelle il est invisibile pendant chaque cycle.
     La valeur initiale est <tt>60</tt>.
   <tag>Clignottement des majuscules<label id="preference-blinking-capitals"></tag>
@@ -566,13 +566,13 @@ Remarques:
   <tag>Durée de visibilité des majuscules<label id="preference-capitals-visible-time"></tag>
     Lorsque les lettres en majuscule doivent clignoter, ce paramètre
     spécifie la durée (voir la remarque à propos des
-    <ref id="time-settings" name="paramètres de temps"> ci-dessous) pendant 
+    <ref id="time-settings" name="paramètres de temps"> ci-dessous) pendant
     laquelle elles sont visibile pendant chaque cycle.
     La valeur par défaut est <tt>60</tt>.
   <tag>Durée d'invisibilité des majuscules<label id="preference-capitals-invisible-time"></tag>
     Lorsque les lettres en majuscule doivent clignoter, ce paramètre
-    spécifie la durée (voir la remarque à propos des 
-    <ref id="time-settings" name="paramètres de temps"> ci-dessous) pendant 
+    spécifie la durée (voir la remarque à propos des
+    <ref id="time-settings" name="paramètres de temps"> ci-dessous) pendant
     laquelle elles sont invisibiles pendant chaque cycle.
     La valeur par défaut est <tt>20</tt>.
   <tag>Rugosité du braille<label id="preference-braille-firmness"></tag>
@@ -620,7 +620,7 @@ Remarques:
         plage braille, et, par conséquent, permettant de savoir ce que
         l'utilisateur brailliste est en train de lire. Tout mouvement de la
         plage braille (manuel, poursuite du curseur, etc.) autre que ceux
-        répondant au mouvement du pointeur (voir la préférence 
+        répondant au mouvement du pointeur (voir la préférence
         <ref id="preference-window-follows-pointer" name="La fenêtre suit le pointeur">)
         a pour conséquence que la zone de l'écran correspondant
         au nouvel endroit où se trouve la  plage braille est mise en
@@ -628,7 +628,7 @@ Remarques:
         caractère correspondant au coin en haut à gauche de la plage braille
         est mis en surbrillance.
     </descrip>
-    Cette préférence n'est présentée que si l'option de compilation 
+    Cette préférence n'est présentée que si l'option de compilation
     <ref id="gpm" name="--enable-gpm"> a été spécifiée.
   <tag>Sons d'avertissement<label id="preference-alert-tunes"></tag>
     Chaque fois qu'un événement significatif avec un son associé se produit,
@@ -686,17 +686,17 @@ Remarques:
     pourcentage du maximum) auquel ils sont joués.
   <tag>Volume MIDI<label id="preference-pcm-instrument"></tag>
     Si vous utilisez la Musical Instrument Digital Interface (MIDI, interface
-    numérique d'instruments de musique) de votre carte son 
+    numérique d'instruments de musique) de votre carte son
     pour jouer les sons d'avertissement, ce paramètre spécifie le volume (sous la
     forme d'un pourcentage du maximum) auquel ils sont joués.
     Le paramètre initial est 70.
   <tag>Instrument MIDI<label id="preference-midi-instrument"></tag>
     Si l'interface MIDI de la carte son est
-    utilisée pour jouer les sons d'avertissement, ce paramètre spécifie l'instrument 
+    utilisée pour jouer les sons d'avertissement, ce paramètre spécifie l'instrument
     qui doit être utilisé (voir <ref id="operand-midi-device" name="Table d'instruments MIDI">).
     La valeur initiale est <tt>Grand piano acoustique</tt>.
   <tag>Volume FM<label id="preference-alert-dots"></tag>
-    Si vous utilisez le synthétiseur FM de votre carte son 
+    Si vous utilisez le synthétiseur FM de votre carte son
     pour jouer les sons d'avertissement, ce paramètre spécifie le volume (sous la
     forme d'un pourcentage du maximum) auquel ils sont joués.
   <tag>Points d'avertissement<label id="preference-alert-dots"></tag>
@@ -731,7 +731,7 @@ Remarques:
     été associés à l'événement, sans se soucier de la valeur de cette préférence,
     le message n'est pas affiché.
   <tag>Mode Dire la ligne<label id="preference-sayline-mode"></tag>
-    Lors de l'utilisation de la commande 
+    Lors de l'utilisation de la commande
     <ref id="command-SAY_LINE" name="SAY_LINE">:
     <descrip>
       <tag>Immédiat</tag>
@@ -781,7 +781,7 @@ Remarques:
       <item>Quelques
       <item>Toutes
     </itemize>
-    
+
     Cette préférence n'est disponible que si vous utilisez
     un pilote qui la supporte. Le réglage initial est <tt/Quelques/.
   <tag>Apparence de l'état<label id="preference-status-style"></tag>
@@ -935,7 +935,7 @@ Remarques:
   <tag> Tabe de touches<label id="preference-key-table"></tag>
     Sélection de la table de touches.
     Voir la section <ref id="table-key" name="Tables de touches"> pour plus de détails.
-    Voir l'option <ref id="options-key-table" name="-k"> en ligne de commande 
+    Voir l'option <ref id="options-key-table" name="-k"> en ligne de commande
     pour le réglage initial.
     Cette préférence n'est pas sauvegardée.
 </descrip>

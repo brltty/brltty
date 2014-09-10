@@ -137,11 +137,11 @@ static int WriteToBrlDisplay(unsigned char *Data)
   unsigned int size = DIM_BRL_WRITE_PREFIX + BrailleSize + DIM_BRL_WRITE_SUFIX;
   unsigned char buffer[size];
   unsigned char *byte = buffer;
-  
+
   byte = mempcpy(byte, BRL_WRITE_PREFIX, DIM_BRL_WRITE_PREFIX);
   byte = mempcpy(byte, Data, BrailleSize);
   byte = mempcpy(byte, BRL_WRITE_SUFIX, DIM_BRL_WRITE_SUFIX);
- 
+
   serialWriteData(serialDevice, buffer, byte-buffer);
   return 0;
 }
@@ -160,7 +160,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
 
   /* Open the Braille display device */
   if (!(serialDevice = serialOpenDevice(device))) goto failure;
-  
+
 #ifdef DEBUG
   brl_log = open("/tmp/brllog", O_CREAT | O_WRONLY);
   if(brl_log < 0){
@@ -172,15 +172,15 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   do{
       /* DTR back on */
       serialRestartDevice(serialDevice, BAUDRATE);	/* activate new settings */
-      
+
       /* The 2 next lines can be commented out to try autodetect once anyway */
       if(ModelID != ECO_AUTO){
 	break;
       }
-      	
+
       if(serialReadData(serialDevice, &buffer, DIM_BRL_ID + 6, 600, 100) == DIM_BRL_ID + 6){
 	  if(memcmp (buffer, BRL_ID, DIM_BRL_ID) == 0){
-	  
+
 	    /* Possible values; 0x20, 0x40, 0x80 */
 	    int tmpModel=buffer[DIM_BRL_ID] / 0x20;
 
@@ -196,24 +196,24 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
 	  }
       }
   }while(ModelID == ECO_AUTO);
-  
+
   if(ModelID >= NB_MODEL || ModelID < 0){
     goto failure;		/* unknown model */
   }
-    
+
   /* Need answer to BR */
   /*do{*/
       serialWriteData(serialDevice, SYS_READY, DIM_SYS_READY);
       serialReadData(serialDevice, &buffer, DIM_BRL_READY + 6, 100, 100);
       /*}while(strncmp (buffer, BRL_READY, DIM_BRL_READY));*/
-      
+
       logMessage(LOG_DEBUG, "buffer is: %s",buffer);
-  
+
   /* Set model params */
   model = &Models[ModelID];
   brl->textColumns = model->Cols;		/* initialise size of main display */
   brl->textRows = BRLROWS;		/* ever is 1 in this type of braille lines */
-  
+
   {
     static const DotsTable dots = {
       0X10, 0X20, 0X40, 0X01, 0X02, 0X04, 0X80, 0X08
@@ -228,7 +228,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   rawdata = malloc(BrailleSize); /* Phisical size */
   if(!rawdata){
      goto failure;
-  }    
+  }
 
   /* Empty buffers */
   memset(rawdata, 0, BrailleSize);
@@ -240,7 +240,7 @@ failure:;
   if(rawdata){
      free(rawdata);
   }
-       
+
 return 0;
 }
 
@@ -250,7 +250,7 @@ static void brl_destruct(BrailleDisplay *brl)
   free(rawdata);
   serialCloseDevice(serialDevice);
 
-#ifdef DEBUG  
+#ifdef DEBUG
   close(brl_log);
 #endif /* DEBUG */
 }
@@ -260,16 +260,16 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 {
   unsigned char *byte = rawdata;
   /* This Braille Line need to display all information, include status */
-  
+
   /* Make status info to rawdata */
   byte = translateOutputCells(byte, Status, model->NbStCells);
 
   /* step a physical space with main cells */
   *byte++ = 0;
-  
+
   /* Make main info to rawdata */
   byte = translateOutputCells(byte, brl->buffer, brl->textColumns);
-     
+
   /* Write to Braille Display */
   WriteToBrlDisplay(rawdata);
   return 1;
@@ -290,7 +290,7 @@ static int brl_readCommand(BrailleDisplay *brl, KeyTableCommandContext context)
   long bytes = 0;
   unsigned char *pBuff;
   unsigned char buff[18 + 1];
-  
+
 #ifdef DEBUG
   char tmp[80];
 #endif /* DEBUG */
@@ -301,12 +301,12 @@ static int brl_readCommand(BrailleDisplay *brl, KeyTableCommandContext context)
 #ifdef DEBUG
      sprintf(tmp, "Type %d, Bytes read: %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x\n",
         type, buff[0], buff[1], buff[2], buff[3], buff[4], buff[5], buff[6], buff[7], buff[8], buff[9]);
-     write(brl_log, tmp, strlen(tmp)); 
+     write(brl_log, tmp, strlen(tmp));
 #endif /* DEBUG */
-  
+
      /* Is a Key? */
-     if((pBuff=(unsigned char *)strstr((char *)buff, BRL_KEY))){  
-    
+     if((pBuff=(unsigned char *)strstr((char *)buff, BRL_KEY))){
+
         /* Byte A. Check Status sensors */
 	switch(*(pBuff+3)){
 	   case KEY_ST_SENSOR1:
@@ -328,10 +328,9 @@ static int brl_readCommand(BrailleDisplay *brl, KeyTableCommandContext context)
 
 	/* Check Main Sensors */
 	if(*(pBuff+3) >= KEY_MAIN_MIN && *(pBuff+3) <= KEY_MAIN_MAX){
-	
 	   /* Nothing */
 	}
-	
+
 	/* Byte B. Check Front Keys */
 	switch(*(pBuff+4)){
 	   case KEY_DOWN: /* Down */
@@ -343,7 +342,7 @@ static int brl_readCommand(BrailleDisplay *brl, KeyTableCommandContext context)
 	        break;
 
 	   case KEY_CLICK: /* Eco20 Go to cursor */
-	   
+
 	        /* Only for ECO20, haven't function keys */
 		if(model->Cols==20){
 	           res = BRL_CMD_HOME;
@@ -395,7 +394,6 @@ static int brl_readCommand(BrailleDisplay *brl, KeyTableCommandContext context)
 		}
 	        break;
         }
-	
 
 	/* Byte D. Rest of Function Keys */
 	switch(*(pBuff+6)){
@@ -433,6 +431,6 @@ static int brl_readCommand(BrailleDisplay *brl, KeyTableCommandContext context)
         }
      }
   }
-  
+
 return(res);
 }

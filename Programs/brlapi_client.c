@@ -137,7 +137,7 @@ static WIN_PROC_STUB(freeaddrinfo);
 #endif /* __MINGW32__ */
 #endif /* WINDOWS */
 
-/* We need to declare these as weak external references to determine at runtime 
+/* We need to declare these as weak external references to determine at runtime
  * whether libpthread is used or not. We also can't rely on the functions prototypes.
  */
 #if defined(WINDOWS)
@@ -545,7 +545,7 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
       addr.sin_port = htons(strtol(port, &c, 0));
       if (*c) {
 	struct servent *se;
-	
+
 	if (!(se = getservbyname(port,"tcp"))) {
 	  brlapi_gaierrno = h_errno;
           brlapi_errno=BRLAPI_ERROR_GAIERR;
@@ -579,7 +579,7 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
       }
       memcpy(&addr.sin_addr,he->h_addr,he->h_length);
     }
-    
+
     sockfd = socket(addr.sin_family, SOCK_STREAM, 0);
     if (sockfd<0) {
       brlapi_errfun = "socket";
@@ -993,7 +993,7 @@ int BRLAPI_STDCALL brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const 
   /* 0 can be a valid screen WINDOW
   0xffffffff can not be a valid WINDOWID (top 3 bits guaranteed to be zero) */
   if (tty<0) { brlapi_errno=BRLAPI_ERROR_UNKNOWNTTY; return -1; }
-  
+
   if (brlapi__enterTtyModeWithPath(handle, &tty, 1, driverName)) return -1;
 
   return tty;
@@ -1024,7 +1024,7 @@ int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *tt
   }
 
   if (brlapi__getDisplaySize(handle, &handle->brlx, &handle->brly)<0) return -1;
-  
+
   /* Clear key buffer before taking the tty, just in case... */
   pthread_mutex_lock(&handle->read_mutex);
   handle->keybuf_next = handle->keybuf_nb = 0;
@@ -1387,7 +1387,7 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeArguments_t *s)
     p += sizeof(uint32_t);
   } else if (s->cursor!=-1) {
     brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
-    return -1;    
+    return -1;
   }
   if (s->charset) {
     if (!*s->charset) {

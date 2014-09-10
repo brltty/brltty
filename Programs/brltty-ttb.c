@@ -801,7 +801,7 @@ makeCharacterDescription (TextTableData *ttd, wchar_t character, size_t *length,
       printableCharacter |= 0X40;
       if (printableCharacter & 0X80) printablePrefix = '~';
     } else if (printableCharacter == 0X7F) {
-      printableCharacter ^= 0X40;       
+      printableCharacter ^= 0X40;
     } else if (printableCharacter != printablePrefix) {
       printablePrefix = ' ';
     }
@@ -1152,7 +1152,7 @@ findCharacter (EditTableData *etd, int backward) {
             etd->character.byte = byte;
             return 1;
           }
-        }       
+        }
       }
     } while ((counter -= 1) >= 0);
   } else {

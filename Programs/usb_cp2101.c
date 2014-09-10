@@ -395,7 +395,7 @@ usbEnableAdapter_CP2101 (UsbDevice *device) {
 }
 
 const UsbSerialOperations usbSerialOperations_CP2101 = {
-  .name = "CP2101",     
+  .name = "CP2101",
   .setBaud = usbSetBaud_CP2101,
   .setDataFormat = usbSetDataFormat_CP2101,
   .setFlowControl = usbSetFlowControl_CP2101,

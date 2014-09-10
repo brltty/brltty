@@ -173,7 +173,7 @@ updateKeys (BrailleDisplay *brl, const unsigned char *packet) {
       key += 1;
     }
   }
-  
+
   {
     int i;
 
@@ -426,7 +426,7 @@ logSerialHardwareVersion (BrailleDisplay *brl) {
 
     if (!writeSerialPacket(brl, code, &device, 1)) return 0;
     if (!nextSerialPacket(brl, code, buffer, sizeof(buffer), 1)) return 0;
-    logMessage(LOG_INFO, "%s Hardware Version: %c.%c.%c", 
+    logMessage(LOG_INFO, "%s Hardware Version: %c.%c.%c",
                serialDeviceNames[buffer[1]],
                buffer[2], buffer[3], buffer[4]);
   }
@@ -444,7 +444,7 @@ logSerialFirmwareVersion (BrailleDisplay *brl) {
 
     if (!writeSerialPacket(brl, code, &device, 1)) return 0;
     if (!nextSerialPacket(brl, code, buffer, sizeof(buffer), 1)) return 0;
-    logMessage(LOG_INFO, "%s Firmware Version: %c.%c.%c", 
+    logMessage(LOG_INFO, "%s Firmware Version: %c.%c.%c",
                serialDeviceNames[buffer[1]],
                buffer[2], buffer[3], buffer[4]);
   }
@@ -691,7 +691,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
   static const UsbChannelDefinition usbChannelDefinitions[] = {
     { /* all models */
-      .vendor=0X0798, .product=0X0001, 
+      .vendor=0X0798, .product=0X0001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1
     }

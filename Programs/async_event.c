@@ -90,7 +90,7 @@ asyncSignalEvent (AsyncEvent *event, void *data) {
   if (result == -1) {
     logSystemError("write");
   } else {
-    logMessage(LOG_ERR, "short write"); 
+    logMessage(LOG_ERR, "short write");
   }
 
   return 0;

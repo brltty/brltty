@@ -195,9 +195,9 @@ JNIEXPORT jint JNICALL Java_org_a11y_BrlAPI_Native_openConnection(JNIEnv *jenv, 
 
   if (JclientSettings) {
     if (clientSettings.auth)
-      (*jenv)->ReleaseStringUTFChars(jenv, auth,  clientSettings.auth); 
+      (*jenv)->ReleaseStringUTFChars(jenv, auth,  clientSettings.auth);
     if (clientSettings.host)
-      (*jenv)->ReleaseStringUTFChars(jenv, host, clientSettings.host); 
+      (*jenv)->ReleaseStringUTFChars(jenv, host, clientSettings.host);
   }
 
   if (PusedSettings) {
@@ -286,10 +286,10 @@ JNIEXPORT jint JNICALL Java_org_a11y_BrlAPI_Native_enterTtyMode(JNIEnv *jenv, jo
   char *driver;
   int result;
   GET_HANDLE(jenv, jobj, -1);
-  
+
   env = jenv;
 
-  tty = (int)jtty; 
+  tty = (int)jtty;
   if (!jdriver)
     driver = NULL;
   else
@@ -312,7 +312,7 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_enterTtyModeWithPath(JNIEnv *
   char *driver;
   int result;
   GET_HANDLE(jenv, jobj, );
-  
+
   env = jenv;
 
   if (!jttys) {
@@ -352,10 +352,10 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_leaveTtyMode(JNIEnv *jenv, jo
 JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_setFocus(JNIEnv *jenv, jobject jobj, jint jarg1) {
   int arg1 ;
   GET_HANDLE(jenv, jobj, );
-  
+
   env = jenv;
 
-  arg1 = (int)jarg1; 
+  arg1 = (int)jarg1;
   if (brlapi__setFocus(handle, arg1) < 0) {
     ThrowError(jenv, __func__);
     return;
@@ -366,10 +366,10 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_writeText(JNIEnv *jenv, jobje
   brlapi_writeArguments_t s = BRLAPI_WRITEARGUMENTS_INITIALIZER;
   int result;
   GET_HANDLE(jenv, jobj, );
-  
+
   env = jenv;
 
-  s.cursor = (int)jarg1; 
+  s.cursor = (int)jarg1;
 
   if (jarg2) {
     s.regionBegin = 1;
@@ -384,7 +384,7 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_writeText(JNIEnv *jenv, jobje
 
   result = brlapi__write(handle, &s);
   if (jarg2)
-    (*jenv)->ReleaseStringUTFChars(jenv, jarg2, s.text); 
+    (*jenv)->ReleaseStringUTFChars(jenv, jarg2, s.text);
 
   if (result < 0) {
     ThrowError(jenv, __func__);
@@ -396,7 +396,7 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_writeDots(JNIEnv *jenv, jobje
   jbyte *arg1;
   int result;
   GET_HANDLE(jenv, jobj, );
-  
+
   env = jenv;
 
   if (!jarg1) {
@@ -410,8 +410,8 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_writeDots(JNIEnv *jenv, jobje
   }
 
   result = brlapi__writeDots(handle, (const unsigned char *)arg1);
-  (*jenv)->ReleaseByteArrayElements(jenv, jarg1, arg1, JNI_ABORT); 
-  
+  (*jenv)->ReleaseByteArrayElements(jenv, jarg1, arg1, JNI_ABORT);
+
   if (result < 0) {
     ThrowError(jenv, __func__);
     return;
@@ -424,7 +424,7 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_write(JNIEnv *jenv, jobject j
   jstring text, andMask, orMask;
   jclass jcwriteArguments;
   jfieldID displayNumberID, regionBeginID, regionSizeID,
-	   textID, andMaskID, orMaskID, cursorID; 
+	   textID, andMaskID, orMaskID, cursorID;
   GET_HANDLE(jenv, jobj, );
 
   env = jenv;
@@ -449,7 +449,7 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_write(JNIEnv *jenv, jobject j
   arguments.regionSize    = (*jenv)->GetIntField(jenv, jarguments, regionSizeID);
   if ((text  = (*jenv)->GetObjectField(jenv, jarguments, textID)))
     arguments.text   = (char *)(*jenv)->GetStringUTFChars(jenv, text, NULL);
-  else 
+  else
     arguments.text  = NULL;
   if ((andMask = (*jenv)->GetObjectField(jenv, jarguments, andMaskID)))
     arguments.andMask  = (unsigned char *)(*jenv)->GetByteArrayElements(jenv, andMask, NULL);
@@ -465,11 +465,11 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_write(JNIEnv *jenv, jobject j
   result = brlapi__write(handle, &arguments);
 
   if (text)
-    (*jenv)->ReleaseStringUTFChars(jenv, text, arguments.text); 
+    (*jenv)->ReleaseStringUTFChars(jenv, text, arguments.text);
   if (andMask)
-    (*jenv)->ReleaseByteArrayElements(jenv, andMask, (jbyte*) arguments.andMask, JNI_ABORT); 
+    (*jenv)->ReleaseByteArrayElements(jenv, andMask, (jbyte*) arguments.andMask, JNI_ABORT);
   if (orMask)
-    (*jenv)->ReleaseByteArrayElements(jenv, orMask,  (jbyte*) arguments.orMask,  JNI_ABORT); 
+    (*jenv)->ReleaseByteArrayElements(jenv, orMask,  (jbyte*) arguments.orMask,  JNI_ABORT);
 
   if (result < 0) {
     ThrowError(jenv, __func__);
@@ -514,7 +514,7 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_ignoreKeys(JNIEnv *jenv, jobj
   // XXX jlong != brlapi_keyCode_t probably
   result = brlapi__ignoreKeys(handle, jrange, (const brlapi_keyCode_t *)s, n);
   (*jenv)->ReleaseLongArrayElements(jenv, js, s, JNI_ABORT);
-  
+
   if (result < 0) {
     ThrowError(jenv, __func__);
     return;
@@ -782,7 +782,7 @@ JNIEXPORT jstring JNICALL Java_org_a11y_BrlAPI_Exception_toString (JNIEnv *jenv,
   size  = (*jenv)->GetArrayLength(jenv, jbuf);
   buf = (*jenv)->GetByteArrayElements(jenv, jbuf, NULL);
 
-  brlapi__strexception(handle, errmsg, sizeof(errmsg), errno, type, buf, size); 
+  brlapi__strexception(handle, errmsg, sizeof(errmsg), errno, type, buf, size);
 
   return (*jenv)->NewStringUTF(jenv, errmsg);
 }

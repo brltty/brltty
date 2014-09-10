@@ -105,4 +105,4 @@ typedef enum {
   AL_GRP_RoutingKeys2
 } AL_KeyGroup;
 
-#endif /* BRLTTY_INCLUDED_AL_BRLDEFS */ 
+#endif /* BRLTTY_INCLUDED_AL_BRLDEFS */

@@ -34,7 +34,7 @@ Fifth: Run the "rhmkiso" script with no options or parameters.
 
    rhmkiso
 
-Sixth: You should now have a new file, "brltty.iso", in the current directory. 
+Sixth: You should now have a new file, "brltty.iso", in the current directory.
 Write this modified image to a CD.
 
    cdrecord -v dev=0,0,0 -data brltty.iso
@@ -55,7 +55,7 @@ to present its initial prompt. Then enter:
 e.g.
    text brltty=ht,ttyS1,de
 
-You can omit any operand, allowing it to default, simply by not specifying it. 
+You can omit any operand, allowing it to default, simply by not specifying it.
 You also needn't specify any trailing commas resulting from omitted operands.
 
    text brltty=ht,ttyS1,
@@ -69,7 +69,7 @@ The <driver> operand is the two-letter identifier of the driver for your
 braille display. It's the only required operand. See the -b option (below) for
 further details.
 
-The <device> operand is the device to which your braille display is connected. 
+The <device> operand is the device to which your braille display is connected.
 It's optional, and defaults to the primary serial port ("/dev/ttyS0"). If your
 display is connected to a serial port then specify either the name (e.g.
 "ttyS1") of or the path (e.g. "/dev/ttyS1") to the corresponding device. If
@@ -85,7 +85,7 @@ tree for alternatives. See the -t option (below) for further details.
 The Details
 -----------
 
-The "rhmkiso" script can add BRLTTY to either a RedHat or a Fedora install CD. 
+The "rhmkiso" script can add BRLTTY to either a RedHat or a Fedora install CD.
 It can be applied either to the basic installer CD or to the first CD of the
 full installation set, and makes the following modifications to the image:
 *  BRLTTY is added (all drivers, all tables).
@@ -147,7 +147,7 @@ The -s option causes an interactive shell to be invoked after all of the
 modifications to the files within the image have been made but before the CD
 image is created. This gives you an opportunity to inspect what the script has
 done. Your login shell, i.e. the one pointed to by the $SHELL environment
-variable, is used; if it's not set then "/bin/sh" is assumed. 
+variable, is used; if it's not set then "/bin/sh" is assumed.
 
 The script uses a lot of temporary file space to do its job, especially if the
 first CD of the full installation set is being used. This is because it needs

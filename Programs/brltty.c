@@ -268,7 +268,7 @@ fillStatusSeparator (wchar_t *text, unsigned char *dots) {
     unsigned int column = (onRight? statusStart: textStart) - 1;
 
     wchar_t textSeparator;
-#ifdef HAVE_WCHAR_H 
+#ifdef HAVE_WCHAR_H
     const wchar_t textSeparator_left  = 0X23B8; /* LEFT VERTICAL BOX LINE */
     const wchar_t textSeparator_right = 0X23B9; /* RIGHT VERTICAL BOX LINE */
     const wchar_t textSeparator_block = 0X2503; /* BOX DRAWINGS HEAVY VERTICAL */
@@ -532,7 +532,7 @@ getTimeFormattingData (TimeFormattingData *fmt) {
   fmt->meridian = getMeridianString(&fmt->components.hour);
 }
 
-void 
+void
 slideWindowVertically (int y) {
   if (y < ses->winy)
     ses->winy = y;
@@ -540,7 +540,7 @@ slideWindowVertically (int y) {
     ses->winy = y - (brl.textRows - 1);
 }
 
-void 
+void
 placeWindowHorizontally (int x) {
   if (prefs.slidingWindow) {
     ses->winx = MAX(0, (x - (int)(textCount / 2)));

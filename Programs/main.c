@@ -193,7 +193,7 @@ main (int argc, char *argv[]) {
       }
     }
   } else if (!strstr(argv[0], "brltty")) {
-    /* 
+    /*
      * If we are substituting the real init binary, then we may consider
      * when someone might want to call that binary even when pid != 1.
      * One example is /sbin/telinit which is a symlink to /sbin/init.

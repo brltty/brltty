@@ -176,7 +176,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 #endif /* GOT_CURSES */
 
             brl->textColumns = windowColumns;
-            brl->textRows = windowLines; 
+            brl->textRows = windowLines;
 
             logMessage(LOG_INFO, "TTY: type=%s baud=%u size=%dx%d",
                        ttyType, ttyBaud, windowColumns, windowLines);

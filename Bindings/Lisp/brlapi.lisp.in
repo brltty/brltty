@@ -184,7 +184,7 @@ The first value represents the x dimension and the second the y dimension."
   (let ((size (or size (min (display-size obj)
                             (max (length text)
                                  (length attr-and)
-                                 (length attr-or))))))    
+                                 (length attr-or))))))
     (with-foreign-objects ((ws 'write-struct)
                            (txt :string (1+ size))
                            (attra 'dots size)

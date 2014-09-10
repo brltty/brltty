@@ -682,7 +682,7 @@ formatAddress (
 
         if (err != EAI_FAMILY) {
 #ifdef HAVE_GAI_STRERROR
-          snprintf(buffer, bufferSize, "reverse lookup error for address family %d: %s", 
+          snprintf(buffer, bufferSize, "reverse lookup error for address family %d: %s",
                    sa->sa_family,
 #ifdef EAI_SYSTEM
                    (err == EAI_SYSTEM)? strerror(errno):

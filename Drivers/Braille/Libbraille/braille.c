@@ -97,7 +97,7 @@ brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
         makeOutputTable(dots);
         makeInputTable();
       }
-  
+
       braille_timeout(100);
 
       return 1;
@@ -106,7 +106,7 @@ brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
     {
       logMessage(LOG_DEBUG, "Libbraille initialization erorr: %s", braille_geterror());
     }
-  
+
   return 0;
 }
 

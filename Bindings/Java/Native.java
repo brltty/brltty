@@ -34,7 +34,7 @@ public class Native {
 
   public native String getDriverName () throws Error;
   public native DisplaySize getDisplaySize () throws Error;
-  
+
   public native int enterTtyMode (int tty, String driver) throws Error;
   public native void enterTtyModeWithPath (int[] ttys, String driver) throws Error;
   public native void leaveTtyMode () throws Error;

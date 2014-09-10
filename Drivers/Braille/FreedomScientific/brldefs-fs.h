@@ -62,4 +62,4 @@ typedef enum {
   FS_GRP_NavrowKeys
 } FS_KeyGroup;
 
-#endif /* BRLTTY_INCLUDED_FS_BRLDEFS */ 
+#endif /* BRLTTY_INCLUDED_FS_BRLDEFS */

@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/** EuroBraille/eu_clio.c 
- ** Implements the NoteBraille/Clio/Scriba/Iris <= 1.70 protocol 
+/** EuroBraille/eu_clio.c
+ ** Implements the NoteBraille/Clio/Scriba/Iris <= 1.70 protocol
  ** Made by Olivier BER` <obert01@mistigri.org>
  */
 
@@ -449,7 +449,7 @@ writePacket (BrailleDisplay *brl, const void *packet, size_t size) {
   parity ^= (byte);
 
   /* limit case, every char is escaped */
-  unsigned char	buffer[(size + 4) * 2]; 
+  unsigned char	buffer[(size + 4) * 2];
   unsigned char	*target = buffer;
   const unsigned char *source = packet;
   unsigned char	parity = 0;
@@ -627,7 +627,7 @@ handleKeyEvent (BrailleDisplay *brl, const unsigned char *packet) {
       return 1;
     }
 
-    case 'T': 
+    case 'T':
       enqueueKey(brl, EU_GRP_NavigationKeys, packet[1]);
       return 1;
 
@@ -645,20 +645,20 @@ readCommand (BrailleDisplay *brl, KeyTableCommandContext ctx) {
 
   while ((length = readPacket(brl, packet, sizeof(packet))) > 0) {
     switch (packet[1]) {
-      case 'S': 
+      case 'S':
         handleSystemInformation(brl, packet);
         haveSystemInformation = 1;
         continue;
 
-      case 'R': 
+      case 'R':
         if (handleMode(brl, packet+2)) continue;
         break;
 
-      case 'K': 
+      case 'K':
         if (handleKeyEvent(brl, packet+2)) continue;
         break;
 
-      default: 
+      default:
         break;
     }
 

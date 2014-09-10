@@ -1,11 +1,11 @@
 Android Platform Considerations
 ===============================
 
-BRLTTY has been designed to run on at least Android 4.1 (Jelly Bean). 
-While it does run on Android 4.0 (Ice Cream Sandwich), many of its 
+BRLTTY has been designed to run on at least Android 4.1 (Jelly Bean).
+While it does run on Android 4.0 (Ice Cream Sandwich), many of its
 highly desirable features won't work.
 
-BRLTTY requires access to a number of privileged Android operating 
+BRLTTY requires access to a number of privileged Android operating
 system capabilities. The required permissions are as follows:
 
 BIND_ACCESSIBILITY_SERVICE
@@ -35,9 +35,9 @@ INTERNET
 Quick Start
 ===========
 
-If you'd just like to install BRLTTY onto your Android device and get going, 
-then here's what you need to do. These instructions are from the perspective of 
-a Firefox user on Windows, but the process should be much the same when using a 
+If you'd just like to install BRLTTY onto your Android device and get going,
+then here's what you need to do. These instructions are from the perspective of
+a Firefox user on Windows, but the process should be much the same when using a
 different web browser and/or operating system.
 
 A: On your Computer:
@@ -46,7 +46,7 @@ A: On your Computer:
 
    2) Find the Download link and press enter on it.
 
-   3) Find the Android heading, down-arrow from there to the link that says 
+   3) Find the Android heading, down-arrow from there to the link that says
       Latest APK, and press enter on it.
 
    4) You're prompted to open or save the file at this point. Save it.
@@ -62,7 +62,7 @@ A: On your Computer:
 B: On your Android Device:
 
    1) Go into Settings -> Security, and tap to check Unknown Sources. This
-      option says something like "Allow the installation of apps from unknown 
+      option says something like "Allow the installation of apps from unknown
       sources." This is a one-time step - once the box has been checked, it
       stays checked.
 
@@ -78,7 +78,7 @@ B: On your Android Device:
          a USB cable, and then to copy the file to it in the same way that you
          would copy a file to a thumb drive.
 
-   3) Tap the brltty-latest.apk file to start installation, and answer any 
+   3) Tap the brltty-latest.apk file to start installation, and answer any
       prompts. If you use the Dropbox method, you may need to tap on the file
       once to download it and a second time to start installation.
 
@@ -88,25 +88,25 @@ At this point, BRLTTY has been installed. Next, you'll need to go into Settings
 -> Accessibility -> BRLTTY in order to turn the BRLTTY Accessibility Service
 on, adjust its settings, and select your braille display.
 
-If you'll be connecting to your braille display via Bluetooth, then you'll need 
-to first pair your braille display with your Android device. Go into Settings 
--> Bluetooth. If your braille display is already listed within the Paired 
-Devices section of that screen then it has already been paired. If you still 
-need to pair it then tap Search for Devices. This will create an Available 
-Devices section on the screen. If your braille display isn't listed then you 
-may need to perform some model-specific action on it in order to make it 
-visible (also known as discoverable) - see its manual for details. After doing 
-this, tap Search for Devices again. Tap on your braille display to begin a 
-Bluetooth Pairing Request, enter its PIN (see its manual for details), and tap 
+If you'll be connecting to your braille display via Bluetooth, then you'll need
+to first pair your braille display with your Android device. Go into Settings
+-> Bluetooth. If your braille display is already listed within the Paired
+Devices section of that screen then it has already been paired. If you still
+need to pair it then tap Search for Devices. This will create an Available
+Devices section on the screen. If your braille display isn't listed then you
+may need to perform some model-specific action on it in order to make it
+visible (also known as discoverable) - see its manual for details. After doing
+this, tap Search for Devices again. Tap on your braille display to begin a
+Bluetooth Pairing Request, enter its PIN (see its manual for details), and tap
 OK.
 
-If your braille display has a keyboard which you'd like to use for typing when 
-within a text or edit field, then you'll need to select BRLTTY as your input 
-method. Go into Settings -> Language and Input, and, in the Keyboard and Input 
-Methods section of that screen, tap the BRLTTY Input Service checkbox to enable 
-it. Then tap Default to open the list of enabled input services, and tap the 
-BRLTTY Input Service radio button to select it. Note that doing this will 
-disable Android's on-screen keyboard since only one input method may be active 
+If your braille display has a keyboard which you'd like to use for typing when
+within a text or edit field, then you'll need to select BRLTTY as your input
+method. Go into Settings -> Language and Input, and, in the Keyboard and Input
+Methods section of that screen, tap the BRLTTY Input Service checkbox to enable
+it. Then tap Default to open the list of enabled input services, and tap the
+BRLTTY Input Service radio button to select it. Note that doing this will
+disable Android's on-screen keyboard since only one input method may be active
 at any given time.
 
 ----------------------------------------------------------------------
@@ -115,24 +115,24 @@ at any given time.
 Starting and Stopping BRLTTY
 ============================
 
-BRLTTY isn't a regular Android application - it's an accessibility 
+BRLTTY isn't a regular Android application - it's an accessibility
 service. As such, it can't be started and stopped in the usual way - 
-from the launcher. In fact, it can't even be found within the 
+from the launcher. In fact, it can't even be found within the
 applications list.
 
-BRLTTY can be started and stopped from within the accessibility 
-settings. To get there, launch the "Settings" application, and then 
-click on "Accessibility" (way down near the bottom). This window 
-contains a "Services" section, which lists all of the accessibility 
-services that are currently installed on the device. For each installed 
-accessibility service, there's an associated indicator which says "On" 
+BRLTTY can be started and stopped from within the accessibility
+settings. To get there, launch the "Settings" application, and then
+click on "Accessibility" (way down near the bottom). This window
+contains a "Services" section, which lists all of the accessibility
+services that are currently installed on the device. For each installed
+accessibility service, there's an associated indicator which says "On"
 if that service is currently running, and "Off" if it isn't.
 
-Find "BRLTTY" and click on it. This brings up a window with two items in 
-it. One is a "switch" (which accessibility services present as a 
-"checkbox") for turning BRLTTY on and off. The other is a button which 
-takes you to BRLTTY's "Settings" window. You should go through BRLTTY's 
-settings, making changes as desired, as well as define your braille 
+Find "BRLTTY" and click on it. This brings up a window with two items in
+it. One is a "switch" (which accessibility services present as a
+"checkbox") for turning BRLTTY on and off. The other is a button which
+takes you to BRLTTY's "Settings" window. You should go through BRLTTY's
+settings, making changes as desired, as well as define your braille
 device(s), before starting BRLTTY.
 
 ----------------------------------------------------------------------
@@ -141,40 +141,40 @@ device(s), before starting BRLTTY.
 Connecting and Defining Your Braille Device
 ===========================================
 
-In order to use a Bluetooth braille device, it must first be paired with 
-your Android device. To do this, launch Android's "Settings" app, click 
-on "Bluetooth", and then click on "Search for Devices". For Android to 
-be able to find your braille device, you may need to do something on it 
-in order to make it discoverable (visible). The instructions for your 
+In order to use a Bluetooth braille device, it must first be paired with
+your Android device. To do this, launch Android's "Settings" app, click
+on "Bluetooth", and then click on "Search for Devices". For Android to
+be able to find your braille device, you may need to do something on it
+in order to make it discoverable (visible). The instructions for your
 braille deivce should tell you how to do this.
 
-In order to use a USB braille device, you'll need a special cable known 
-as a "Micro USB Host Adapter". The reason for this is that the USB port 
-on an Android device usually acts as a device (rather than as a host) 
-port. This is so that, for example, you can control your Android device 
-from your computer. The Micro USB Host Adapter has a special plug, known 
-as an OTG (on-the-go) connector, which, when inserted into the Android 
+In order to use a USB braille device, you'll need a special cable known
+as a "Micro USB Host Adapter". The reason for this is that the USB port
+on an Android device usually acts as a device (rather than as a host)
+port. This is so that, for example, you can control your Android device
+from your computer. The Micro USB Host Adapter has a special plug, known
+as an OTG (on-the-go) connector, which, when inserted into the Android
 device's USB port, instructs Android to act as a USB host.
 
-The Micro USB Host Adapter also allows you to connect any other USB 
-device (keyboard, mouse, printer, hub, etc) to your Android device. Be 
-aware, though, that if any such device, including your braille device, 
-draws power via its USB port then your Android device's battery will 
-become the source of that power. If portability isn't an issue, you may 
-wish to consider using your Micro USB Host Adapter to connect your 
-Android device to a powered hub so that your devices will draw power 
-from the hub rather than from your Android device's battery. You may 
-also wish to consider disabling USB charging on any devices which offer 
+The Micro USB Host Adapter also allows you to connect any other USB
+device (keyboard, mouse, printer, hub, etc) to your Android device. Be
+aware, though, that if any such device, including your braille device,
+draws power via its USB port then your Android device's battery will
+become the source of that power. If portability isn't an issue, you may
+wish to consider using your Micro USB Host Adapter to connect your
+Android device to a powered hub so that your devices will draw power
+from the hub rather than from your Android device's battery. You may
+also wish to consider disabling USB charging on any devices which offer
 this capability.
 
-After you've connected your braille deivce to your Android device, 
-you'll need to tell BRLTTY about it. Go to BRLTTY's "Settings" window, 
-and click on "Manage Devices". From there, find your braille device, and 
-then click "Add". To find your device, select its communication method, 
-then select the device from the list that's presented, and then select 
+After you've connected your braille deivce to your Android device,
+you'll need to tell BRLTTY about it. Go to BRLTTY's "Settings" window,
+and click on "Manage Devices". From there, find your braille device, and
+then click "Add". To find your device, select its communication method,
+then select the device from the list that's presented, and then select
 the correct braille driver.
 
-After you've added your braille device to BRLTTY, click on "Selected 
+After you've added your braille device to BRLTTY, click on "Selected
 Device" and select it from the list of devices that BRLTTY knows about.
 
 ----------------------------------------------------------------------
@@ -183,43 +183,43 @@ Device" and select it from the list of devices that BRLTTY knows about.
 Navigating the Screen
 =====================
 
-BRLTTY only remains connected to your braille device while your Android 
-device is unlocked or while its screen is on. If your Android device is 
-locked and its screen is off then BRLTTY automatically disconnects from 
-your braille device. This is so that you can easily share your braille 
+BRLTTY only remains connected to your braille device while your Android
+device is unlocked or while its screen is on. If your Android device is
+locked and its screen is off then BRLTTY automatically disconnects from
+your braille device. This is so that you can easily share your braille
 device amongst multiple host systems.
 
-Pressing your Android device's power button (or similar action) to wake 
-it up, even though it may still be locked, is sufficient to cause BRLTTY 
-to automatically reconnect to your braille device. This allows you to 
+Pressing your Android device's power button (or similar action) to wake
+it up, even though it may still be locked, is sufficient to cause BRLTTY
+to automatically reconnect to your braille device. This allows you to
 enter your password or PIN via your braille keyboard.
 
-You can continue using your braille device even though your Android 
-device's screen may have turned off, as long as its lock timer hasn't 
-yet expired. Pressing keys on your braille device resets your Android 
-device's lock timer in the same way that pressing its keys, touching its 
-screen, etc does. This means that your Android device will stay awake 
-and unlocked even though you're only controlling it from your braille 
-device, and that it'll also still automatically lock once you're no 
+You can continue using your braille device even though your Android
+device's screen may have turned off, as long as its lock timer hasn't
+yet expired. Pressing keys on your braille device resets your Android
+device's lock timer in the same way that pressing its keys, touching its
+screen, etc does. This means that your Android device will stay awake
+and unlocked even though you're only controlling it from your braille
+device, and that it'll also still automatically lock once you're no
 longer using it.
 
-The "accessibility focus" feature of Android is used for cursor tracking 
-and routing. It's a soft cursor, not visible on the screen, which can be 
-programmatically associated with any screen element. All screen readers 
-which use it to define the current element for actions (like clicking) 
+The "accessibility focus" feature of Android is used for cursor tracking
+and routing. It's a soft cursor, not visible on the screen, which can be
+programmatically associated with any screen element. All screen readers
+which use it to define the current element for actions (like clicking)
 will implicitly cooperate reasonably seamlessly with one another.
 
-The cursor is usually placed on the first character of the screen 
-element which currently has accessibility focus. The one exception to 
-this is within an editable input area. If that area has input focus then 
-the cursor is placed at the location within it where input will be 
+The cursor is usually placed on the first character of the screen
+element which currently has accessibility focus. The one exception to
+this is within an editable input area. If that area has input focus then
+the cursor is placed at the location within it where input will be
 inserted.
 
-The cursor routing keys of the braille device perform their usual 
-function when within an editable input area if it has input focus - the 
-key above a given character brings the cursor to that character. In any 
-other context, however, a cursor routing key performs an action on the 
-screen element under it. Starting with the leftmost routing key over a 
+The cursor routing keys of the braille device perform their usual
+function when within an editable input area if it has input focus - the
+key above a given character brings the cursor to that character. In any
+other context, however, a cursor routing key performs an action on the
+screen element under it. Starting with the leftmost routing key over a
 screen element, which we'll call key #0, the actions are as follows:
 
    0  Set Accessibility Focus (used for cursor tracking and routing)
@@ -228,30 +228,30 @@ screen element, which we'll call key #0, the actions are as follows:
    3  Scroll Backward
    4  Scroll Forward
 
-When an editable input area has input focus, BRLTTY's attribute 
+When an editable input area has input focus, BRLTTY's attribute
 underlining feature is used to highlight the selected text region.
 
-When a home screen folder is opened, BRLTTY automatically sets 
-accessibility focus to that folder's first entry. This eliminates the 
+When a home screen folder is opened, BRLTTY automatically sets
+accessibility focus to that folder's first entry. This eliminates the
 need to search for it.
 
-A checkbox is rendered as a pair of square [brackets]. A space between 
-them means that the box isn't checked, and an X between them means that 
+A checkbox is rendered as a pair of square [brackets]. A space between
+them means that the box isn't checked, and an X between them means that
 it is checked.
 
-A two-position switch is rendered as though it were a checkbox. The box 
-isn't checked if the switch is in its "off" position, and is checked if 
-the switch is in its "on" position. The label associated with the 
+A two-position switch is rendered as though it were a checkbox. The box
+isn't checked if the switch is in its "off" position, and is checked if
+the switch is in its "on" position. The label associated with the
 switch's position appears just after the square [brackets].
 
-Android supports a number of global actions which can be performed by 
-pressing special hardware buttons and/or by touching reserved areas on 
-the screen. BRLTTY also offers a way to perform these actions from your 
-braille device. While a better way may be developed in the future, this 
+Android supports a number of global actions which can be performed by
+pressing special hardware buttons and/or by touching reserved areas on
+the screen. BRLTTY also offers a way to perform these actions from your
+braille device. While a better way may be developed in the future, this
 is how it can be done right now.
 
-Since Android doesn't use the keyboard function keys (commonly named F1 
-through F12), BRLTTY uses them to perform global Android actions 
+Since Android doesn't use the keyboard function keys (commonly named F1
+through F12), BRLTTY uses them to perform global Android actions
 according to the following table:
 
   F1  Home
@@ -260,12 +260,12 @@ according to the following table:
   F4  Recent Apps
   F5  BRLTTY Settings
 
-The way a braille device emulates keyboard function keys differs from 
-model to model, so you should check the BRLTTY documentation for your 
-braille device. The most common way is to press the corresponding cursor 
-routing key along with some other key or key combination. For braille 
-devices which have a braille keyboard, the most common key to be used in 
-conjunction with a cursor routing key in order to emulate a keyboard 
+The way a braille device emulates keyboard function keys differs from
+model to model, so you should check the BRLTTY documentation for your
+braille device. The most common way is to press the corresponding cursor
+routing key along with some other key or key combination. For braille
+devices which have a braille keyboard, the most common key to be used in
+conjunction with a cursor routing key in order to emulate a keyboard
 function key is the space bar.
 
 ----------------------------------------------------------------------
@@ -274,43 +274,43 @@ function key is the space bar.
 Using Your Braille Display's Keyboard
 =====================================
 
-Braille display keyboard input is supported, but, like all Android input 
-methods, it must be explicitly enabled, and then selected. BRLTTY cannot 
-do either of these automatically on your behalf. Although this may be 
-inconvenient, Android imposes this manual process so that you're very 
-consciously aware of which input methods can process, and which input 
-method is currently processing, whatever you're typing. Such 
-applications, after all, handle extremely sensitive personal data (such 
-as passwords, credit card numbers, etc), so it's crucial that you make 
+Braille display keyboard input is supported, but, like all Android input
+methods, it must be explicitly enabled, and then selected. BRLTTY cannot
+do either of these automatically on your behalf. Although this may be
+inconvenient, Android imposes this manual process so that you're very
+consciously aware of which input methods can process, and which input
+method is currently processing, whatever you're typing. Such
+applications, after all, handle extremely sensitive personal data (such
+as passwords, credit card numbers, etc), so it's crucial that you make
 your own decisions regarding which of them you trust.
 
-You can enable BRLTTY's braille keyboard support ahead of time by 
-launching the "Settings" application, and then clicking on "Language and 
-Input". The "Keyboard and Input Methods" section of this screen contains 
-a selector labeled "Default" which is used to select the current input 
-Method, as well as a checkbox for each installed input method. An input 
-method is enabled if its checkbox is checked, and can only be selected 
+You can enable BRLTTY's braille keyboard support ahead of time by
+launching the "Settings" application, and then clicking on "Language and
+Input". The "Keyboard and Input Methods" section of this screen contains
+a selector labeled "Default" which is used to select the current input
+Method, as well as a checkbox for each installed input method. An input
+method is enabled if its checkbox is checked, and can only be selected
 if it has been enabled.
 
-BRLTTY's input method is called "BRLTTY Input Service. While you may 
-wish to enable it ahead of time, you probably don't want to select it 
-ahead of time. The reason for this is that Android only allows exactly 
-one input method to be in use at a time. When you explicitly select 
-BRLTTY's input method, therefore, you're also implicitly deselecting the 
+BRLTTY's input method is called "BRLTTY Input Service. While you may
+wish to enable it ahead of time, you probably don't want to select it
+ahead of time. The reason for this is that Android only allows exactly
+one input method to be in use at a time. When you explicitly select
+BRLTTY's input method, therefore, you're also implicitly deselecting the
 system keyboard.
 
-If you use a braille keyboard when BRLTTY's input method is either 
-disabled or enabled but not selected, the Android "input method picker" 
-will be automatically displayed. This dialog asks you to select an input 
-method, and presents a set of radio buttons - one for each currently 
-enabled input method. If there's no radio button for BRLTTY's input 
+If you use a braille keyboard when BRLTTY's input method is either
+disabled or enabled but not selected, the Android "input method picker"
+will be automatically displayed. This dialog asks you to select an input
+method, and presents a set of radio buttons - one for each currently
+enabled input method. If there's no radio button for BRLTTY's input
 method then it hasn't been enabled yet.
 
-To enable it, click the button within the dialog labeled "Set up input 
-methods". This screen contains a checkbox for each installed input 
-method. Check the checkbox for BRLTTY's input method to enable it. Then, 
-click the "Back" button to get to the "Language and Input" screen, find 
-the "Keyboard and Input Methods" section of that screen, and set the 
+To enable it, click the button within the dialog labeled "Set up input
+methods". This screen contains a checkbox for each installed input
+method. Check the checkbox for BRLTTY's input method to enable it. Then,
+click the "Back" button to get to the "Language and Input" screen, find
+the "Keyboard and Input Methods" section of that screen, and set the
 "Default" input method to BRLTTY's input method.
 
 ----------------------------------------------------------------------
@@ -319,36 +319,36 @@ the "Keyboard and Input Methods" section of that screen, and set the
 When BRLTTY Crashes
 ===================
 
-We hope, of course, that BRLTTY won't crash. If it does, though, we want 
+We hope, of course, that BRLTTY won't crash. If it does, though, we want
 to know about it.
 
 If BRLTTY does crash, you'll get a dialog with a message like this:
 
    Unfortunately, BRLTTY has stopped.
 
-This dialog will stay on the screen until you dismiss it by clicking its 
-"OK" button. Android will then try to automatically restart BRLTTY, so 
-don't be overly concerned if this dialog comeds up again. Android will 
-eventually give up if, after a few automatic restart attempts, it 
+This dialog will stay on the screen until you dismiss it by clicking its
+"OK" button. Android will then try to automatically restart BRLTTY, so
+don't be overly concerned if this dialog comeds up again. Android will
+eventually give up if, after a few automatic restart attempts, it
 detects that BRLTTY simply won't stay running.
 
-If this ever happens, then, if you can, connect your device to your host 
-via SUB as soon as possible in order to capture a debug log. To capture 
+If this ever happens, then, if you can, connect your device to your host
+via SUB as soon as possible in order to capture a debug log. To capture
 the debug log, use this command:
 
    adb logcat -v time -d >/path/to/logfile
 
-The "-v time" option means to add a timestamp to each log record. The 
-"-d" option means to dump the current Android system log. The "adb 
-logcat" command writes the log to its standard output, so you need to 
-redirect its standard output to whichever file you'd like the log to be 
+The "-v time" option means to add a timestamp to each log record. The
+"-d" option means to dump the current Android system log. The "adb
+logcat" command writes the log to its standard output, so you need to
+redirect its standard output to whichever file you'd like the log to be
 dumped into.
 
-The reason for capturing the log as soon as possible after a problem is 
-that Android imposes limits on its log storage so that the log can't 
-consume too much of your device's resources. If the log becomes too 
-large, Android automatically removes older entries from it. If you wait 
-too long, therefore, the part of it that shows how BRLTTY crashed may 
+The reason for capturing the log as soon as possible after a problem is
+that Android imposes limits on its log storage so that the log can't
+consume too much of your device's resources. If the log becomes too
+large, Android automatically removes older entries from it. If you wait
+too long, therefore, the part of it that shows how BRLTTY crashed may
 already have been automatically removed.
 
 ----------------------------------------------------------------------
@@ -357,9 +357,9 @@ already have been automatically removed.
 Known Issues
 ============
 
-Serial devices aren't supported. Even though Android devices don't have 
-serial ports, serial devices still can be connected via a USB to Serial 
-adapter. Users who have older, serial-only braille devices should still 
+Serial devices aren't supported. Even though Android devices don't have
+serial ports, serial devices still can be connected via a USB to Serial
+adapter. Users who have older, serial-only braille devices should still
 be able to use them with their Android devices.
 
 ----------------------------------------------------------------------
@@ -378,10 +378,10 @@ builds. You can get it from:
 
    https://developer.android.com/tools/sdk/ndk/index.html
 
-The SDK initially only includes support for the current Android API 
-level. Brltty, however, needs to support earlier API levels so that it 
-can run on older releases of Android. Support for any missing API levels 
-is added whenever the SDK is updated. To do this, use the following 
+The SDK initially only includes support for the current Android API
+level. Brltty, however, needs to support earlier API levels so that it
+can run on older releases of Android. Support for any missing API levels
+is added whenever the SDK is updated. To do this, use the following
 command:
 
   android update sdk -u
@@ -391,8 +391,8 @@ to bypass the graphical interface. There may still be command-line
 password prompts for installing packages which are provided by various
 vendours. Any of these can be easily skipped.
 
-The 64-bit versions of the SDK and NDK depend on 32-bit system 
-libraries. If you're using a 64-bit version then you need to first 
+The 64-bit versions of the SDK and NDK depend on 32-bit system
+libraries. If you're using a 64-bit version then you need to first
 ensure that these are installed on your system. This at least includes:
 
    libc6
@@ -400,8 +400,8 @@ ensure that these are installed on your system. This at least includes:
    libstdc++6
    libncurses
 
-If you are using a modern Debian GNU/Linux system (wheezy or later), you 
-can install these packages from a foreign architecture (in this case, 
+If you are using a modern Debian GNU/Linux system (wheezy or later), you
+can install these packages from a foreign architecture (in this case,
 i386) with the following commands (as root):
 
    dpkg --add-architecture i386
@@ -413,14 +413,14 @@ i386) with the following commands (as root):
 Installing and Preparing the BRLTTY Source Tree on Your Host
 ============================================================
 
-Select the directory which should contain BRLTTY's source tree (which 
-needn't yet exist). Then extract the latest BRLTTY source into it with 
+Select the directory which should contain BRLTTY's source tree (which
+needn't yet exist). Then extract the latest BRLTTY source into it with
 the following command:
 
    git clone git://github.com/brltty/brltty.git /path/to/brltty
 
-The directory operand (of git clone) is optional. If you don't 
-specify it then it'll assume the directory named "brltty" within the 
+The directory operand (of git clone) is optional. If you don't
+specify it then it'll assume the directory named "brltty" within the
 current working directory.
 
 Next, you need to prepare the source tree. This is done as follows:
@@ -428,25 +428,25 @@ Next, you need to prepare the source tree. This is done as follows:
    cd /path/to/brltty
    ./autogen
 
-At this point, the source tree is essentially just like what you'd get 
-were you to unpack an officially released BRLTTY archive. It doesn't yet 
-know anything about the specifics of your system. It also doesn't yet 
+At this point, the source tree is essentially just like what you'd get
+were you to unpack an officially released BRLTTY archive. It doesn't yet
+know anything about the specifics of your system. It also doesn't yet
 know anything about the platform you intend to build BRLTTY for.
 
-Adding information to BRLTTY's source tree regarding the spefiics of 
-your system, as well as of your intent to build BRLTTY for Android, is 
+Adding information to BRLTTY's source tree regarding the spefiics of
+your system, as well as of your intent to build BRLTTY for Android, is
 done as follows:
 
    export ANDROID_NDK=/path/to/Android/NDK
    ./cfg-android -q
 
-The "-q" option, which is the short form of the "configure" command's 
-"--quiet" option, means to not display any progress information (there's 
+The "-q" option, which is the short form of the "configure" command's
+"--quiet" option, means to not display any progress information (there's
 usually quite a lot of it). Only warnings and errors are displayed.
 
-In fact, all of the options you give to the "cfg-android" command are 
-passed directly through to the "configure" command. So, while 
-"cfg-android" supplies a default set of options to "configure", it's 
+In fact, all of the options you give to the "cfg-android" command are
+passed directly through to the "configure" command. So, while
+"cfg-android" supplies a default set of options to "configure", it's
 easy for you to do your own customization.
 
 ----------------------------------------------------------------------
@@ -455,20 +455,20 @@ easy for you to do your own customization.
 Building BRLTTY for Android
 ===========================
 
-In order to be able to build an Android application, a number of Android 
-build tools need to be added to the command search path. This is done 
+In order to be able to build an Android application, a number of Android
+build tools need to be added to the command search path. This is done
 with the following command:
 
    export PATH=/path/to/Android/SDK/tools:/path/to/Android/SDK/platform-tools:$PATH
 
-The final step is to build the BRLTTY service for Android. This is done 
+The final step is to build the BRLTTY service for Android. This is done
 as follows:
 
    cd /path/to/brltty/AndroidApplication
    make -s
 
-The "-s" option of the make command, which is short for its "--silent" 
-option, means to not display any progress information (there's usually 
+The "-s" option of the make command, which is short for its "--silent"
+option, means to not display any progress information (there's usually
 quite a lot of it). Only warnings and errors are displayed.
 
 The result of the build is the file "BRLTTY_App-debug.apk".  It will
@@ -484,23 +484,23 @@ be in the "bin" subdirectory of the Android Application subdirectory.
 Preparing Your Android Device for Installing an Android Package File
 ====================================================================
 
-What you need is for "USB Debugging" to be enabled. This is done from 
-the "Developer Options" screen, which you can get to from the "Settings" 
+What you need is for "USB Debugging" to be enabled. This is done from
+the "Developer Options" screen, which you can get to from the "Settings"
 screen.
 
-Launch the "Settings" aplication, and look, way down near the bottom, 
-for "Developer Options". If you can't find it, the most likely cause is 
-a new feature which was introduced in Android 4.2 (Jelly Bean). If you 
-need to enable it, click on "About Phone", which, again, can be found at 
-the bottom of the "Settings" screen. Then, on the "About Phone" screen, 
-look for the "Build Number" line. Tap on "Build Nubmer" seven times and 
-your device will officially declare you to be a developer. You should 
+Launch the "Settings" aplication, and look, way down near the bottom,
+for "Developer Options". If you can't find it, the most likely cause is
+a new feature which was introduced in Android 4.2 (Jelly Bean). If you
+need to enable it, click on "About Phone", which, again, can be found at
+the bottom of the "Settings" screen. Then, on the "About Phone" screen,
+look for the "Build Number" line. Tap on "Build Nubmer" seven times and
+your device will officially declare you to be a developer. You should
 then be able to find "Developer Options" on the "Settings" screen.
 
-There's a checkbox at the top-right of the "Developer Options" screen. 
-It needs to be checked so that all of the other controls on that screen 
-will be enabled. After doing that, check the "USB Debugging" checkebox 
-(which can be found within the "Debugging" section). This enables the 
+There's a checkbox at the top-right of the "Developer Options" screen.
+It needs to be checked so that all of the other controls on that screen
+will be enabled. After doing that, check the "USB Debugging" checkebox
+(which can be found within the "Debugging" section). This enables the
 "adb" (Android Debug Bridge) tool to be used with your Android device.
 
 ----------------------------------------------------------------------
@@ -509,8 +509,8 @@ will be enabled. After doing that, check the "USB Debugging" checkebox
 Installing BRLTTY on Your Android Device
 ========================================
 
-In order to install BRLTTY onto your Android device, or to uninstall it 
-from your device, you need to be in BRLTTY's Android Application 
+In order to install BRLTTY onto your Android device, or to uninstall it
+from your device, you need to be in BRLTTY's Android Application
 subdirectory.
 
    cd /path/to/brltty/Android/Application
@@ -525,18 +525,18 @@ To uninstall BRLTTY, use this command:
 
    make -s uninstall
 
-The "make install" command will fail if BRLTTY is already installed. If 
-you're wanting to upgrade BRLTTY, however, then uninstalling it first is 
-probably what you don't want to be doing. This is because uninstalling 
-BRLTTY also causes its settings to be lost. What you should do instead 
+The "make install" command will fail if BRLTTY is already installed. If
+you're wanting to upgrade BRLTTY, however, then uninstalling it first is
+probably what you don't want to be doing. This is because uninstalling
+BRLTTY also causes its settings to be lost. What you should do instead
 is to reinstall it. You can do this with the following command:
 
    make -s reinstall
 
-If you've obtained your Android package file (apk) from some other 
-source (than building it for yourself), then it may have a different 
-name than the make file is expecting. It's useful, therefore, to know 
-what the actual host commands are for installing and uninstalling BRLTTY 
+If you've obtained your Android package file (apk) from some other
+source (than building it for yourself), then it may have a different
+name than the make file is expecting. It's useful, therefore, to know
+what the actual host commands are for installing and uninstalling BRLTTY
 from your device.
 
 The host command for installing an Android application is:
@@ -555,13 +555,13 @@ So, to uninstall BRLTTY, the host command is:
 
    adb uninstall org.a11y.brltty.android
 
-If any of these "make" or "adb" commands fail with an error like "device 
-not found", it's probably because your host's USB device permissions are 
-requiring root access. The solution to this problem is to restart the 
-adb (Android Debug Bridge) server such that it is running as root. With 
+If any of these "make" or "adb" commands fail with an error like "device
+not found", it's probably because your host's USB device permissions are
+requiring root access. The solution to this problem is to restart the
+adb (Android Debug Bridge) server such that it is running as root. With
 this done, you yourself will then be able to use adb as a regular user.
 
-The commands to restart the adb server such that it's running as root 
+The commands to restart the adb server such that it's running as root
 are as follows:
 
    su

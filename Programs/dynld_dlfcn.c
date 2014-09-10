@@ -65,13 +65,13 @@ loadSharedObject (const char *path) {
   return object;
 }
 
-void 
+void
 unloadSharedObject (void *object) {
   clearError();
   if (dlclose(object)) logError();
 }
 
-int 
+int
 findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
   void **address = pointerAddress;
 

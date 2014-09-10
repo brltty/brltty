@@ -122,7 +122,7 @@ extern "C" {
 #undef HAVE_SIGACTION
 
 /* Define this if the header file sys/wait.h exists,
- * but not for DOS since it wouldn't make sense. 
+ * but not for DOS since it wouldn't make sense.
  */
 #ifndef __MSDOS__
 #undef HAVE_SYS_WAIT_H

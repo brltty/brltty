@@ -113,7 +113,7 @@ typedef struct {
   ssize_t (*readPacket) (BrailleDisplay *brl, void *buffer, size_t size);
   ssize_t (*writePacket) (BrailleDisplay *brl, const void *packet, size_t size);
   int (*reset) (BrailleDisplay *brl);
-  
+
   int (*readKey) (BrailleDisplay *brl);
   int (*keyToCommand) (BrailleDisplay *brl, KeyTableCommandContext context, int key);
 } BrailleDriver;

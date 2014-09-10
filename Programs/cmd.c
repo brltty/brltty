@@ -339,7 +339,7 @@ formatCommand (char *buffer, size_t size, int command) {
   STR_PRINTF("%06X (", command);
 
   {
-    size_t length = describeCommand(command, STR_NEXT, STR_LEFT, 
+    size_t length = describeCommand(command, STR_NEXT, STR_LEFT,
                                     CDO_IncludeName | CDO_IncludeOperand);
     STR_ADJUST(length);
   }

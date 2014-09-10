@@ -106,7 +106,7 @@ install-with-findlib:
 	$(OCAMLFIND) remove -destdir "$(OCAML_DESTDIR)" $(OCAML_LIB)
 	set -- -destdir "$(OCAML_DESTDIR)"; \
 	[ -f "$(OCAML_LDCONF)" ] && set -- "$${@}" -ldconf "$(OCAML_LDCONF)" || set -- "$${@}" -ldconf ignore; \
-	$(OCAMLFIND) install "$${@}" $(OCAML_LIB) $(OCAML_FILES) 
+	$(OCAMLFIND) install "$${@}" $(OCAML_LIB) $(OCAML_FILES)
 
 uninstall: $(OCAML_UNINSTALL_TARGET)
 

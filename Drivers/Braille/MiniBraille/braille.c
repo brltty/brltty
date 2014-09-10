@@ -348,7 +348,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (serialRestartDevice(serialDevice, serialBaud)) {
       serialCharactersPerSecond = serialBaud / serialGetCharacterBits(serialDevice);
 
-      /* hm, how to switch to 38400 ? 
+      /* hm, how to switch to 38400 ?
       static const unsigned char sequence[] = {ESC, 'V', CR};
       writeData(brl, sequence, sizeof(sequence));
       serialDiscardInput(serialDevice);

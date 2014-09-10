@@ -178,7 +178,7 @@ int main(int argc, char *argv[]) {
  int stilloptions=1;
  char *home;
  brlapi_settings_t brlapi_settings;
- 
+
  transfer=CheckSendOrRecv(argv[0]);
 
 /* first use options file */
@@ -194,7 +194,7 @@ int main(int argc, char *argv[]) {
 
 /* ok, one can try to open the socket */
  brlapi_settings.host = socketport;
- brlapi_settings.auth = keyname; 
+ brlapi_settings.auth = keyname;
  if (brlapi_initializeConnection(&brlapi_settings,NULL)<0)
  {
   brlapi_perror("Couldn't initialize connection with BrlAPI");
@@ -210,9 +210,9 @@ int main(int argc, char *argv[]) {
  {
   fprintf(stderr,"braille driver is not VisioBraille\n");
   brlapi_closeConnection();
-  exit(RET_ECONN);  
+  exit(RET_ECONN);
  }
- 
+
  if (brlapi_enterRawMode("VisioBraille")<0) {
   fprintf(stderr,"Couldn't get raw mode\n");
   brlapi_closeConnection();
@@ -264,7 +264,7 @@ int main(int argc, char *argv[]) {
 	       continue;
    }
   }
-  
+
 /* no, a file name, let's try to transfer it */
   transfer(argv[0]);
  }

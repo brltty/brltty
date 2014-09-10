@@ -29,13 +29,13 @@ loadSharedObject (const char *path) {
   return library;
 }
 
-void 
+void
 unloadSharedObject (void *object) {
   if (!(FreeLibrary((HMODULE) object)))
     logWindowsSystemError("unloading library");
 }
 
-int 
+int
 findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
   void **address = pointerAddress;
   if ((*address = GetProcAddress((HMODULE) object, symbol)))

@@ -187,7 +187,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           };
           makeOutputTable(dots);
         }
-  
+
         if ((outputBuffer = malloc(brl->textColumns))) {
           if (setTable(brl, 0)) {
             memset(outputBuffer, 0, brl->textColumns);

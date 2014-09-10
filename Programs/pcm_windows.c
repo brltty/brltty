@@ -73,7 +73,7 @@ openPcmDevice (int errorLevel, const char *device) {
   else {
     logMessage(errorLevel, "PCM device %d is %s", pcm->deviceID, caps.szPname);
     pcm->format.wFormatTag = WAVE_FORMAT_PCM;
-    if (caps.dwFormats & 
+    if (caps.dwFormats &
 	(WAVE_FORMAT_1S08
 	|WAVE_FORMAT_1S16
 	|WAVE_FORMAT_2S08

@@ -46,4 +46,4 @@ typedef enum {
   CB_GRP_RoutingKeys
 } CB_KeyGroup;
 
-#endif /* BRLTTY_INCLUDED_CB_BRLDEFS */ 
+#endif /* BRLTTY_INCLUDED_CB_BRLDEFS */

@@ -558,7 +558,7 @@ public class SettingsActivity extends PreferenceActivity {
 
       setListElements(
         deviceIdentifierList,
-        deviceCollection.getIdentifierValues(), 
+        deviceCollection.getIdentifierValues(),
         deviceCollection.getIdentifierLabels()
       );
 

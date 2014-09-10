@@ -507,23 +507,23 @@ HKR,,Icon,,-20
 
 ; ==================== Installation ===================
 
-; The Include and Needs directives in the LIBUSB_DEV section are required for 
-; installing WinUSB on Windows Vista systems. Windows XP systems ignore these 
+; The Include and Needs directives in the LIBUSB_DEV section are required for
+; installing WinUSB on Windows Vista systems. Windows XP systems ignore these
 ; directives. These directives should not be modified.
 [LIBUSB_DEV]
 Include=winusb.inf
 Needs=WINUSB.NT
 
 ; The Include directive in the LIBUSB_DEV.Services section includes the system-
-; supplied INF for WinUSB. This INF is installed by the WinUSB co-installer if 
-; it is not already on the target system. The AddService directive specifies 
-; WinUsb.sys as the device�s function driver. These directives should not be 
+; supplied INF for WinUSB. This INF is installed by the WinUSB co-installer if
+; it is not already on the target system. The AddService directive specifies
+; WinUsb.sys as the device�s function driver. These directives should not be
 ; modified.
 [LIBUSB_DEV.Services]
 Include=winusb.inf
 AddService=WinUSB,0x00000002,WinUSB_ServiceInstall
 
-; The WinUSB_ServiceInstall section contains the data for installing WinUsb.sys 
+; The WinUSB_ServiceInstall section contains the data for installing WinUsb.sys
 ; as a service. This section should not be modified.
 [WinUSB_ServiceInstall]
 DisplayName     = %WinUSB_SvcDesc%
@@ -532,9 +532,9 @@ StartType       = 3
 ErrorControl    = 1
 ServiceBinary   = %12%\WinUSB.sys
 
-; The KmdfService directive installs WinUsb.sys as a kernel-mode service. The 
-; referenced WinLIBUSB_DEV section specifies the KMDF library version. 
-; Usually, the version can be derived from the WdfCoInstallerxxyyy.dll with 
+; The KmdfService directive installs WinUsb.sys as a kernel-mode service. The
+; referenced WinLIBUSB_DEV section specifies the KMDF library version.
+; Usually, the version can be derived from the WdfCoInstallerxxyyy.dll with
 ; xx = major, yyy = minor
 [LIBUSB_DEV.Wdf]
 KmdfService=WINUSB, WinLIBUSB_DEV
@@ -542,11 +542,11 @@ KmdfService=WINUSB, WinLIBUSB_DEV
 [WinLIBUSB_DEV]
 KmdfLibraryVersion=1.9
 
-; LIBUSB_DEV.HW is the key section in the INF. It specifies the device 
-; interface globally unique identifier (GUID) for your device. The AddReg 
-; directive puts the interface GUID in a standard registry value. When 
+; LIBUSB_DEV.HW is the key section in the INF. It specifies the device
+; interface globally unique identifier (GUID) for your device. The AddReg
+; directive puts the interface GUID in a standard registry value. When
 ; WinUsb.sys is loaded as the device�s function driver, it reads the registry
-; value and uses the specified GUID to represent the device interface. You 
+; value and uses the specified GUID to represent the device interface. You
 ; should replace the GUID in this example with one that you create specifically
 ; for your device. If the protocols for the device change, you should create a
 ; new device interface GUID.
@@ -556,9 +556,9 @@ AddReg=Dev_AddReg
 [Dev_AddReg]
 HKR,,DeviceInterfaceGUIDs,0x10000,%DeviceGUID%
 
-; The LIBUSB_DEV.CoInstallers section, including the referenced AddReg and 
-; CopyFiles sections, contains data and instructions to install the WinUSB and 
-; KMDF co installers and associate them with the device. Most USB devices can 
+; The LIBUSB_DEV.CoInstallers section, including the referenced AddReg and
+; CopyFiles sections, contains data and instructions to install the WinUSB and
+; KMDF co installers and associate them with the device. Most USB devices can
 ; use these sections and directives without modification.
 [LIBUSB_DEV.CoInstallers]
 AddReg=CoInstallers_AddReg
@@ -575,8 +575,8 @@ WdfCoInstaller01009.dll
 CoInstallers_CopyFiles=11
 
 ; =============== Source Media Section ================
- 
-; The x86 and x64 versions of Windows have separate co installers. This example 
+
+; The x86 and x64 versions of Windows have separate co installers. This example
 ; stores them on the installation disk in folders that are named x86 and amd64
 [SourceDisksNames]
 1 = %DiskName%,,,\x86

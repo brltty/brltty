@@ -869,7 +869,7 @@ newUinputObject (const char *name) {
     if (device) {
       if ((uinput->fileDescriptor = openCharacterDevice(device, O_WRONLY, 10, 223)) != -1) {
         struct uinput_user_dev description;
-        
+
         memset(&description, 0, sizeof(description));
         snprintf(description.name, sizeof(description.name),
                  "%s %s %s",

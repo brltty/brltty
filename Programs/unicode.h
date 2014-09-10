@@ -23,7 +23,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#ifdef HAVE_WCHAR_H 
+#ifdef HAVE_WCHAR_H
 #define UNICODE_REPLACEMENT_CHARACTER 0XFFFD
 #else /* HAVE_WCHAR_H */
 #define UNICODE_REPLACEMENT_CHARACTER '?'

@@ -45,25 +45,25 @@
  *		  J. Lemmens didn't respond to my query yet... and since
  *		  the F***ing library isn't Open Source, I can't fix it.
  *    feb 05, 1999:
- *		- Added Alva Delphi support  (thanks to Terry Barnaby 
+ *		- Added Alva Delphi support  (thanks to Terry Barnaby
  *		  <terry@beam.demon.co.uk>).
  *		- Renamed Alva_ABT3 to Alva.
  *		- Some improvements to the autodetection stuff.
  *    dec 06, 1998:
  *		- added parallel port communication support using
  *		  J. lemmens <jlemmens@inter.nl.net> 's library.
- *		  This required brl.o to be sourced with C++ for the parallel 
- *		  stuff to link.  Now brl.o is a partial link of brlmain.o 
+ *		  This required brl.o to be sourced with C++ for the parallel
+ *		  stuff to link.  Now brl.o is a partial link of brlmain.o
  *		  and the above library.
  *    jun 21, 1998:
  *		- replaced CMD_WINUP/DN with CMD_ATTRUP/DN wich seems
- *		  to be a more useful binding.  Modified help files 
+ *		  to be a more useful binding.  Modified help files
  *		  acordingly.
  *    apr 23, 1998:
  *		- I finally had the chance to test with an ABT380... and
  *		  corrected the ABT380 model ID for autodetection.
  *		- Added a refresh delay to force redrawing the whole display
- *		  in order to minimize garbage due to noise on the 
+ *		  in order to minimize garbage due to noise on the
  *		  serial line
  *    oct 02, 1996:
  *		- bound CMD_SAY_LINE and CMD_MUTE
@@ -72,7 +72,7 @@
  *    aug 15, 1996:
  *              - adeded automatic model detection for new firmware.
  *              - support for selectable help screen.
- *    feb 19, 1996: 
+ *    feb 19, 1996:
  *              - added small hack for automatic rewrite of display when
  *                the terminal is turned off and back on, replugged, etc.
  *      feb 15, 1996:
@@ -1311,7 +1311,7 @@ interpretKeyEvent2 (BrailleDisplay *brl, unsigned char group, unsigned char key)
       unsigned char secondary = key & 0X80;
       key &= ~secondary;
 
-      /* 
+      /*
        * The 6xx series don't have a second row of routing keys but
        * emulate them (in order to aid compatibility with the 5xx series)
        * using an annoying press delay.  It is adviseable to turn this

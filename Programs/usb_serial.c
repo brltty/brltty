@@ -157,7 +157,7 @@ usbSetSerialOperations (UsbDevice *device) {
 
       if (operations) {
         UsbInputFilter *filter = operations->inputFilter;
-       
+
         if (filter && !usbAddInputFilter(device, filter)) return 0;
       }
 

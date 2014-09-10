@@ -148,7 +148,7 @@ ASYNC_TASK_CALLBACK(presentMessage) {
   if (mgp->deallocate) free(mgp);
 }
 
-int 
+int
 message (const char *mode, const char *text, MessageOptions options) {
   int presented = 0;
   MessageParameters *mgp;

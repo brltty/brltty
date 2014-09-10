@@ -834,14 +834,14 @@ check-speech: brltty speech-drivers
 install:: install-programs install-tables $(INSTALL_DRIVERS) install-core-headers $(INSTALL_MESSAGES) install-manpages $(INSTALL_API)
 
 install-programs: brltty$X brltty-trtxt$X brltty-ttb$X brltty-ctb$X install-program-directory install-writable-directory
-	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY) 
-	$(INSTALL_PROGRAM) brltty-trtxt$X $(INSTALL_PROGRAM_DIRECTORY) 
-	$(INSTALL_PROGRAM) brltty-ttb$X $(INSTALL_PROGRAM_DIRECTORY) 
-	$(INSTALL_PROGRAM) brltty-ctb$X $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY)
+	$(INSTALL_PROGRAM) brltty-trtxt$X $(INSTALL_PROGRAM_DIRECTORY)
+	$(INSTALL_PROGRAM) brltty-ttb$X $(INSTALL_PROGRAM_DIRECTORY)
+	$(INSTALL_PROGRAM) brltty-ctb$X $(INSTALL_PROGRAM_DIRECTORY)
 	$(INSTALL_DATA) $(BLD_TOP)config.sh $(INSTALL_PROGRAM_DIRECTORY)/brltty-config
 
 install-xbrlapi: xbrlapi$X install-program-directory install-gdm-autostart-directory
-	$(INSTALL_PROGRAM) xbrlapi$X $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_PROGRAM) xbrlapi$X $(INSTALL_PROGRAM_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_TOP)$(PGM_DIR)/xbrlapi.desktop $(INSTALL_GDM_AUTOSTART_DIRECTORY)
 
 install-tables: $(INSTALL_TEXT_TABLES) $(INSTALL_ATTRIBUTES_TABLES) $(INSTALL_CONTRACTION_TABLES) install-keyboard-tables install-input-tables

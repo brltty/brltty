@@ -1,17 +1,17 @@
-A Systemd unit for brltty can be found within the "Autostart/Systemd/" 
-subdirectory of BRLTTY's source tree. It's called "brltty.service". You need to 
-copy this file into Systemd's unit directory. You can locate Systemd's unit 
+A Systemd unit for brltty can be found within the "Autostart/Systemd/"
+subdirectory of BRLTTY's source tree. It's called "brltty.service". You need to
+copy this file into Systemd's unit directory. You can locate Systemd's unit
 directory with this command:
 
    pkg-config systemd --variable=systemduserunitdir
 
-Assuming that Systemd's unit directory is "/usr/lib/systemd/user" (please 
-ensure to use whatever it really is on your system), define the Systemd unit 
+Assuming that Systemd's unit directory is "/usr/lib/systemd/user" (please
+ensure to use whatever it really is on your system), define the Systemd unit
 for brltty as follows:
 
    cp brltty.service /usr/lib/systemd/user/brltty.service
 
-Once the unit file is in the right place, you'll be able to use standard 
+Once the unit file is in the right place, you'll be able to use standard
 Systemd commands to manage the brltty service. The most common ones are:
 
    systemctl status brltty
@@ -20,6 +20,6 @@ Systemd commands to manage the brltty service. The most common ones are:
    systemctl enable brltty
    systemctl disable brltty
 
-Nothing is automatic. If you'd like to start the brltty service right away then 
-use the "start" function. If you'd like the brltty service to be automatically 
+Nothing is automatic. If you'd like to start the brltty service right away then
+use the "start" function. If you'd like the brltty service to be automatically
 started when the system is booted then use the "enable" function.

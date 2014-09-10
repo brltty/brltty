@@ -147,7 +147,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               if (id == model->identifier) break;
               model += 1;
             }
-              
+
             if (model->textColumns) {
               if ((prevdata = malloc(brl->textColumns))) {
                 brl->textColumns = model->textColumns;
