@@ -2321,17 +2321,13 @@ brlttyStart (void) {
              *opt_contractionTable? opt_contractionTable: gettext("none"));
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
+  parseKeyboardProperties(&keyboardProperties, opt_keyboardProperties);
+  onProgramExit("keyboard-monitor", exitKeyboardMonitor, NULL);
+
   onProgramExit("keyboard-table", exitKeyboardTable, NULL);
   changeKeyboardTable(opt_keyboardTable);
   logMessage(LOG_INFO, "%s: %s", gettext("Keyboard Table"),
              *opt_keyboardTable? opt_keyboardTable: gettext("none"));
-
-  if (parseKeyboardProperties(&keyboardProperties, opt_keyboardProperties)) {
-    if (keyboardTable) {
-      scheduleKeyboardMonitor();
-      onProgramExit("keyboard-monitor", exitKeyboardMonitor, NULL);
-    }
-  }
 
   /* initialize screen driver */
   if (opt_verify) {
