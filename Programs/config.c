@@ -200,7 +200,6 @@ ContractionTable *contractionTable = NULL;
 static char *opt_keyboardTable;
 KeyTable *keyboardTable = NULL;
 static KeyboardMonitorObject *keyboardMonitor = NULL;
-static AsyncHandle keyboardMonitorStartAlarm = NULL;
 
 static char *opt_keyboardProperties;
 static KeyboardProperties keyboardProperties;
@@ -758,45 +757,81 @@ handleKeyboardEvent (KeyGroup group, KeyNumber number, int press) {
   return KTS_UNBOUND;
 }
 
-static void
-cancelKeyboardMonitorStartAlarm (void) {
-  if (keyboardMonitorStartAlarm) {
-    asyncCancelRequest(keyboardMonitorStartAlarm);
-    keyboardMonitorStartAlarm = NULL;
-  }
-}
-
-ASYNC_ALARM_CALLBACK(tryKeyboardMonitor) {
-  if ((keyboardMonitor = newKeyboardMonitorObject(&keyboardProperties, handleKeyboardEvent))) {
-    cancelKeyboardMonitorStartAlarm();
-  }
-}
-
-static void
-scheduleKeyboardMonitor (void) {
-  if (!keyboardMonitor) {
-    if (!keyboardMonitorStartAlarm) {
-      if (asyncSetAlarmIn(&keyboardMonitorStartAlarm, 0, tryKeyboardMonitor, NULL)) {
-        asyncResetAlarmEvery(keyboardMonitorStartAlarm, KEYBOARD_MONITOR_START_RETRY_INTERVAL);
-      }
-    }
-  }
+static int
+startKeyboardMonitor (void) {
+  return !!(keyboardMonitor = newKeyboardMonitorObject(&keyboardProperties, handleKeyboardEvent));
 }
 
 static void
 stopKeyboardMonitor (void) {
-  cancelKeyboardMonitorStartAlarm();
-
   if (keyboardMonitor) {
     destroyKeyboardMonitorObject(keyboardMonitor);
     keyboardMonitor = NULL;
   }
 }
 
+static int
+prepareKeyboardMonitorActivity (void *datga) {
+  return 1;
+}
+
+static int
+startKeyboardMonitorActivity (void *datga) {
+  return startKeyboardMonitor();
+}
+
 static void
-exitKeyboardMonitor (void *data) {
+stopKeyboardMonitorActivity (void *datga) {
   stopKeyboardMonitor();
 }
+
+static const ActivityMethods keyboardMonitorActivityMethods = {
+  .name = "keyboard-monitor",
+  .interval = KEYBOARD_MONITOR_START_RETRY_INTERVAL,
+
+  .prepare = prepareKeyboardMonitorActivity,
+  .start = startKeyboardMonitorActivity,
+  .stop = stopKeyboardMonitorActivity
+};
+
+static ActivityObject *keyboardMonitorActivity = NULL;
+
+static void
+exitKeyboardMonitor (void *data) {
+  if (keyboardMonitorActivity) {
+    destroyActivity(keyboardMonitorActivity);
+    keyboardMonitorActivity = NULL;
+  }
+}
+
+static ActivityObject *
+getKeyboardMonitorActivity (void) {
+  if (!keyboardMonitorActivity) {
+    if (!(keyboardMonitorActivity = newActivity(&keyboardMonitorActivityMethods, NULL))) {
+      return NULL;
+    }
+
+    onProgramExit("keyboard-monitor", exitKeyboardMonitor, NULL);
+  }
+
+  return keyboardMonitorActivity;
+}
+
+static void
+enableKeyboardMonitor (void) {
+  ActivityObject *activity = getKeyboardMonitorActivity();
+
+  if (activity) startActivity(activity);
+}
+
+/*
+static void
+disableKeyboardMonitor (void) {
+  ActivityObject *activity = getKeyboardMonitorActivity();
+
+  if (activity) stopActivity(activity);
+}
+*/
 
 static unsigned int brailleHelpPageNumber = 0;
 static unsigned int keyboardHelpPageNumber = 0;
@@ -896,7 +931,7 @@ changeKeyboardTable (const char *name) {
   }
 
   if ((keyboardTable = table)) {
-    scheduleKeyboardMonitor();
+    enableKeyboardMonitor();
 
     setKeyTableLogLabel(keyboardTable, "kbd");
     setLogKeyEventsFlag(keyboardTable, &LOG_CATEGORY_FLAG(KEYBOARD_KEYS));
@@ -1446,8 +1481,6 @@ stopBrailleDriver (void) {
   alert(ALERT_BRAILLE_OFF);
 }
 
-static ActivityObject *brailleDriverActivity = NULL;
-
 static int
 prepareBrailleDriverActivity (void *datga) {
   initializeBrailleDisplay();
@@ -1474,24 +1507,7 @@ static const ActivityMethods brailleDriverActivityMethods = {
   .stop = stopBrailleDriverActivity
 };
 
-static void
-enableBrailleDriver (void) {
-  startActivity(brailleDriverActivity);
-}
-
-static void
-disableBrailleDriver (void) {
-  stopActivity(brailleDriverActivity);
-}
-
-void
-restartBrailleDriver (void) {
-  disableBrailleDriver();
-  restartRequired = 0;
-
-  logMessage(LOG_INFO, gettext("reinitializing braille driver"));
-  enableBrailleDriver();
-}
+static ActivityObject *brailleDriverActivity = NULL;
 
 static void
 exitBrailleDriver (void *data) {
@@ -1517,6 +1533,42 @@ exitBrailleDriver (void *data) {
   }
 
   forgetDevices();
+}
+
+static ActivityObject *
+getBrailleDriverActivity (void) {
+  if (!brailleDriverActivity) {
+    if (!(brailleDriverActivity = newActivity(&brailleDriverActivityMethods, NULL))) {
+      return NULL;
+    }
+
+    onProgramExit("braille-driver", exitBrailleDriver, NULL);
+  }
+
+  return brailleDriverActivity;
+}
+
+static void
+enableBrailleDriver (void) {
+  ActivityObject *activity = getBrailleDriverActivity();
+
+  if (activity) startActivity(activity);
+}
+
+static void
+disableBrailleDriver (void) {
+  ActivityObject *activity = getBrailleDriverActivity();
+
+  if (activity) stopActivity(activity);
+}
+
+void
+restartBrailleDriver (void) {
+  disableBrailleDriver();
+  restartRequired = 0;
+
+  logMessage(LOG_INFO, gettext("reinitializing braille driver"));
+  enableBrailleDriver();
 }
 
 int
@@ -1724,8 +1776,6 @@ stopSpeechDriver (void) {
   deactivateSpeechDriver();
 }
 
-static ActivityObject *speechDriverActivity = NULL;
-
 static int
 prepareSpeechDriverActivity (void *datga) {
   initializeSpeechSynthesizer();
@@ -1751,22 +1801,7 @@ static const ActivityMethods speechDriverActivityMethods = {
   .stop = stopSpeechDriverActivity
 };
 
-static void
-enableSpeechDriver (void) {
-  startActivity(speechDriverActivity);
-}
-
-static void
-disableSpeechDriver (void) {
-  stopActivity(speechDriverActivity);
-}
-
-void
-restartSpeechDriver (void) {
-  disableSpeechDriver();
-  logMessage(LOG_INFO, gettext("reinitializing speech driver"));
-  enableSpeechDriver();
-}
+static ActivityObject *speechDriverActivity = NULL;
 
 static void
 exitSpeechDriver (void *data) {
@@ -1779,6 +1814,40 @@ exitSpeechDriver (void *data) {
     deallocateStrings(speechDrivers);
     speechDrivers = NULL;
   }
+}
+
+static ActivityObject *
+getSpeechDriverActivity (void) {
+  if (!speechDriverActivity) {
+    if (!(speechDriverActivity = newActivity(&speechDriverActivityMethods, NULL))) {
+      return NULL;
+    }
+
+    onProgramExit("speech-driver", exitSpeechDriver, NULL);
+  }
+
+  return speechDriverActivity;
+}
+
+static void
+enableSpeechDriver (void) {
+  ActivityObject *activity = getSpeechDriverActivity();
+
+  if (activity) startActivity(activity);
+}
+
+static void
+disableSpeechDriver (void) {
+  ActivityObject *activity = getSpeechDriverActivity();
+
+  if (activity) stopActivity(activity);
+}
+
+void
+restartSpeechDriver (void) {
+  disableSpeechDriver();
+  logMessage(LOG_INFO, gettext("reinitializing speech driver"));
+  enableSpeechDriver();
 }
 
 static void
@@ -1917,8 +1986,6 @@ stopScreenDriver (void) {
   deactivateScreenDriver();
 }
 
-static ActivityObject *screenDriverActivity = NULL;
-
 static int
 prepareScreenDriverActivity (void *datga) {
   initializeScreen();
@@ -1944,25 +2011,47 @@ static const ActivityMethods screenDriverActivityMethods = {
   .stop = stopScreenDriverActivity
 };
 
+static ActivityObject *screenDriverActivity = NULL;
+
+static void
+exitScreenDriver (void *data) {
+  if (screenDriverActivity) {
+    destroyActivity(screenDriverActivity);
+    screenDriverActivity = NULL;
+  }
+}
+
+static ActivityObject *
+getScreenDriverActivity (void) {
+  if (!screenDriverActivity) {
+    if (!(screenDriverActivity = newActivity(&screenDriverActivityMethods, NULL))) {
+      return NULL;
+    }
+
+    onProgramExit("screen-driver", exitScreenDriver, NULL);
+  }
+
+  return screenDriverActivity;
+}
+
 static void
 enableScreenDriver (void) {
-  startActivity(screenDriverActivity);
+  ActivityObject *activity = getScreenDriverActivity();
+
+  if (activity) startActivity(activity);
 }
 
 /*
 static void
 disableScreenDriver (void) {
-  stopActivity(screenDriverActivity);
+  ActivityObject *activity = getScreenDriverActivity();
+
+  if (activity) stopActivity(activity);
 }
 */
 
 static void
 exitScreens (void *data) {
-  if (screenDriverActivity) {
-    destroyActivity(screenDriverActivity);
-    screenDriverActivity = NULL;
-  }
-
   destructSpecialScreens();
 
   if (screenDrivers) {
@@ -2360,7 +2449,6 @@ brlttyStart (void) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   parseKeyboardProperties(&keyboardProperties, opt_keyboardProperties);
-  onProgramExit("keyboard-monitor", exitKeyboardMonitor, NULL);
 
   onProgramExit("keyboard-table", exitKeyboardTable, NULL);
   changeKeyboardTable(opt_keyboardTable);
@@ -2370,7 +2458,7 @@ brlttyStart (void) {
   /* initialize screen driver */
   if (opt_verify) {
     if (activateScreenDriver(1)) deactivateScreenDriver();
-  } else if ((screenDriverActivity = newActivity(&screenDriverActivityMethods, NULL))) {
+  } else {
     enableScreenDriver();
   }
   
@@ -2408,9 +2496,8 @@ brlttyStart (void) {
   brailleConstructed = 0;
   if (opt_verify) {
     if (activateBrailleDriver(1)) deactivateBrailleDriver();
-  } else if ((brailleDriverActivity = newActivity(&brailleDriverActivityMethods, NULL))) {
+  } else {
     enableBrailleDriver();
-    onProgramExit("braille-driver", exitBrailleDriver, NULL);
   }
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -2419,9 +2506,8 @@ brlttyStart (void) {
   changeSpeechParameters(opt_speechParameters? opt_speechParameters: "");
   if (opt_verify) {
     if (activateSpeechDriver(1)) deactivateSpeechDriver();
-  } else if ((speechDriverActivity = newActivity(&speechDriverActivityMethods, NULL))) {
+  } else {
     enableSpeechDriver();
-    onProgramExit("speech-driver", exitSpeechDriver, NULL);
   }
 
   /* Create the file system object for speech input. */
