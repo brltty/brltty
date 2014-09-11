@@ -27,6 +27,7 @@ map B1 DOT7
 map B8 DOT8
 bind \{space} PASSDOTS
 bind \{enter} KEY_ENTER
+bind \{space}+Dot7 KEY_BACKSPACE
 map \{space} CONTROL
 map \{enter} META
 bind \{brailleOff} CONTEXT+default
