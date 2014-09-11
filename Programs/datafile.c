@@ -864,10 +864,9 @@ writeUtf8Cells (FILE *stream, const unsigned char *cells, size_t count) {
 }
 
 typedef struct {
-  DataConditionTester *test;
-  int negate;
-  int inElse;
-  DataString name;
+  unsigned inElse:1;
+  unsigned includeLine:1;
+  unsigned includeInherited:1;
 } DataCondition;
 
 static void
@@ -910,10 +909,29 @@ pushDataCondition (
 
   if ((condition = malloc(sizeof(*condition)))) {
     memset(condition, 0, sizeof(*condition));
-    condition->test = testCondition;
-    condition->negate = negateCondition;
     condition->inElse = 0;
-    condition->name = *name;
+
+    {
+      const DataOperand item = {
+        .characters = name->characters,
+        .length = name->length
+      };
+
+      condition->includeLine = testCondition(file, &item, file->data);
+      if (negateCondition) condition->includeLine = !condition->includeLine;
+    }
+
+    {
+      Element *element = getInnermostDataCondition(file);
+
+      if (element) {
+        const DataCondition *parent = getElementItem(element);
+
+        condition->includeInherited = parent->includeLine;
+      } else {
+        condition->includeInherited = 1;
+      }
+    }
 
     {
       Element *element = enqueueItem(file->conditions, condition);
@@ -930,25 +948,16 @@ pushDataCondition (
 }
 
 static int
-testDataCondition (const void *item, void *data) {
-  const DataCondition *condition = item;
-  DataFile *file = data;
+testDataCondition (DataFile *file) {
+  Element *element = getInnermostDataCondition(file);
 
-  const DataOperand name = {
-    .characters = condition->name.characters,
-    .length = condition->name.length
-  };
+  if (element) {
+    const DataCondition *condition = getElementItem(element);
 
-  int yes = condition->test(file, &name, file->data);
-  if (condition->negate) yes = !yes;
-  return !yes;
-}
+    if (!(condition->includeInherited && condition->includeLine)) return 0;
+  }
 
-static int
-testDataConditions (DataFile *file) {
-  DataCondition *condition = findItem(file->conditions, testDataCondition, file);
-
-  return !condition;
+  return 1;
 }
 
 int
@@ -964,7 +973,7 @@ processDirectiveOperand (DataFile *file, const DataDirective *directives, const 
     }
 
     if (!directive->name) ungetDataCharacters(file, name.length);
-    if (!(directive->unconditional || testDataConditions(file))) return 1;
+    if (!(directive->unconditional || testDataCondition(file))) return 1;
     if (directive->processor) return directive->processor(file, data);
     reportDataError(file, "unknown %s: %.*" PRIws,
                     description, name.length, name.characters);
@@ -1063,7 +1072,7 @@ DATA_OPERANDS_PROCESSOR(processElseOperands) {
       reportDataError(file, "already in else");
     } else {
       condition->inElse = 1;
-      condition->negate = !condition->negate;
+      condition->includeLine = !condition->includeLine;
       if (!processConditionSubdirective(file, element)) return 0;
     }
   }
