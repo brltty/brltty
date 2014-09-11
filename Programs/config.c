@@ -31,6 +31,7 @@
 
 #include "embed.h"
 #include "parameters.h"
+#include "activity.h"
 #include "update.h"
 #include "cmd.h"
 #include "brl.h"
@@ -1704,40 +1705,44 @@ startSpeechDriver (void) {
   return 1;
 }
 
-static AsyncHandle speechDriverStartAlarm = NULL;
+static ActivityObject *speechDriverActivity = NULL;
 
-static void
-cancelSpeechDriverStartAlarm (void) {
-  if (speechDriverStartAlarm) {
-    asyncCancelRequest(speechDriverStartAlarm);
-    speechDriverStartAlarm = NULL;
-  }
+static int
+prepareSpeechDriverActivity (void *datga) {
+  initializeSpeech();
+  return 1;
 }
 
-ASYNC_ALARM_CALLBACK(trySpeechDriver) {
-  if (startSpeechDriver()) cancelSpeechDriverStartAlarm();
-}
-
-static void
-scheduleSpeechDriver (void) {
-  if (!speechDriver) {
-    if (!speechDriverStartAlarm) {
-      initializeSpeech();
-
-      if (asyncSetAlarmIn(&speechDriverStartAlarm, 0, trySpeechDriver, NULL)) {
-        asyncResetAlarmEvery(speechDriverStartAlarm, SPEECH_DRIVER_START_RETRY_INTERVAL);
-      }
-    }
-  }
+static int
+startSpeechDriverActivity (void *datga) {
+  return startSpeechDriver();
 }
 
 static void
-stopSpeechDriver (void) {
-  cancelSpeechDriverStartAlarm();
+stopSpeechDriverActivity (void *datga) {
   cancelAutospeakDelayAlarm();
 
   muteSpeech("driver stop");
   deactivateSpeechDriver();
+}
+
+static const ActivityMethods speechDriverActivityMethods = {
+  .name = "speech-driver",
+  .interval = SPEECH_DRIVER_START_RETRY_INTERVAL,
+
+  .prepare = prepareSpeechDriverActivity,
+  .start = startSpeechDriverActivity,
+  .stop = stopSpeechDriverActivity
+};
+
+static void
+scheduleSpeechDriver (void) {
+  startActivity(speechDriverActivity);
+}
+
+static void
+stopSpeechDriver (void) {
+  stopActivity(speechDriverActivity);
 }
 
 void
@@ -1749,7 +1754,10 @@ restartSpeechDriver (void) {
 
 static void
 exitSpeechDriver (void *data) {
-  stopSpeechDriver();
+  if (speechDriverActivity) {
+    destroyActivity(speechDriverActivity);
+    speechDriverActivity = NULL;
+  }
 
   if (speechDrivers) {
     deallocateStrings(speechDrivers);
@@ -2381,7 +2389,7 @@ brlttyStart (void) {
   changeSpeechParameters(opt_speechParameters? opt_speechParameters: "");
   if (opt_verify) {
     if (activateSpeechDriver(1)) deactivateSpeechDriver();
-  } else {
+  } else if ((speechDriverActivity = newActivity(&speechDriverActivityMethods, NULL))) {
     scheduleSpeechDriver();
     onProgramExit("speech-driver", exitSpeechDriver, NULL);
   }

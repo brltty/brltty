@@ -1,0 +1,52 @@
+/*
+ * BRLTTY - A background process providing access to the console screen (when in
+ *          text mode) for a blind person using a refreshable braille display.
+ *
+ * Copyright (C) 1995-2014 by The BRLTTY Developers.
+ *
+ * BRLTTY comes with ABSOLUTELY NO WARRANTY.
+ *
+ * This is free software, placed under the terms of the
+ * GNU General Public License, as published by the Free Software
+ * Foundation; either version 2 of the License, or (at your option) any
+ * later version. Please see the file LICENSE-GPL for details.
+ *
+ * Web Page: http://mielke.cc/brltty/
+ *
+ * This software is maintained by Dave Mielke <dave@mielke.cc>.
+ */
+
+#ifndef BRLTTY_INCLUDED_ACTIVITY
+#define BRLTTY_INCLUDED_ACTIVITY
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+typedef int ActivityPrepareMethod (void *data);
+typedef int ActivityStartMethod (void *data);
+typedef void ActivityStopMethod (void *data);
+
+typedef struct {
+  const char *name;
+  int interval;
+
+  ActivityPrepareMethod *prepare;
+  ActivityStartMethod *start;
+  ActivityStopMethod *stop;
+} ActivityMethods;
+
+typedef struct ActivityObjectStruct ActivityObject;
+
+extern ActivityObject *newActivity (const ActivityMethods *methods, void *data);
+extern void destroyActivity (ActivityObject *activity);
+
+extern void startActivity (ActivityObject *activity);
+extern void stopActivity (ActivityObject *activity);
+extern int haveActivity (ActivityObject *activity);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* BRLTTY_INCLUDED_ACTIVITY */
