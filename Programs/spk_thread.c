@@ -77,6 +77,7 @@ typedef enum {
 
 struct SpeechDriverThreadStruct {
   ThreadState threadState;
+  unsigned stopping:1;
   Queue *requestQueue;
 
   volatile SpeechSynthesizer *speechSynthesizer;
@@ -170,6 +171,23 @@ typedef struct {
 } SpeechMessage;
 
 static void sendSpeechRequest (volatile SpeechDriverThread *sdt);
+
+static int
+testThreadValidity (volatile SpeechDriverThread *sdt) {
+  if (sdt) {
+    volatile SpeechSynthesizer *spk = sdt->speechSynthesizer;
+
+    if (spk) {
+      if (sdt == spk->driver.thread) {
+        if (!sdt->stopping) {
+          return 1;
+        }
+      }
+    }
+  }
+
+  return 0;
+}
 
 static void
 setThreadState (volatile SpeechDriverThread *sdt, ThreadState state) {
@@ -432,7 +450,7 @@ findSpeechRequestElement (volatile SpeechDriverThread *sdt, SpeechRequestType ty
     .type = type
   };
 
-  if (!sdt) return NULL;
+  if (!testThreadValidity(sdt)) return NULL;
   return findElement(sdt->requestQueue, testSpeechRequest, &tsr);
 }
 
@@ -471,7 +489,7 @@ sendSpeechRequest (volatile SpeechDriverThread *sdt) {
 
 static int
 enqueueSpeechRequest (volatile SpeechDriverThread *sdt, SpeechRequest *req) {
-  if (sdt) {
+  if (testThreadValidity(sdt)) {
     if (req) {
       logMessage(LOG_CATEGORY(SPEECH_EVENTS), "enqueuing request: %u", req->type);
     } else {
@@ -721,6 +739,7 @@ static void
 deallocateSpeechRequest (void *item, void *data) {
   SpeechRequest *req = item;
 
+  logMessage(LOG_CATEGORY(SPEECH_EVENTS), "unqueuing request: %u", req->type);
   free(req);
 }
 
@@ -733,6 +752,7 @@ newSpeechDriverThread (
 
   if ((sdt = malloc(sizeof(*sdt)))) {
     memset((void *)sdt, 0, sizeof(*sdt));
+    sdt->stopping = 0;
     setThreadState(sdt, THD_CONSTRUCTING);
     setResponsePending(sdt);
 
@@ -740,6 +760,8 @@ newSpeechDriverThread (
     sdt->driverParameters = parameters;
 
     if ((sdt->requestQueue = newQueue(deallocateSpeechRequest, NULL))) {
+      spk->driver.thread = sdt;
+
 #ifdef GOT_PTHREADS
       if ((sdt->messageEvent = asyncNewEvent(handleSpeechMessageEvent, (void *)sdt))) {
         pthread_t threadIdentifier;
@@ -778,6 +800,7 @@ newSpeechDriverThread (
       }
 #endif /* GOT_PTHREADS */
 
+      spk->driver.thread = NULL;
       deallocateQueue(sdt->requestQueue);
     }
 
@@ -805,6 +828,7 @@ destroySpeechDriverThread (volatile SpeechDriverThread *sdt) {
   setThreadState(sdt, THD_FINISHED);
 #endif /* GOT_PTHREADS */
 
+  sdt->speechSynthesizer->driver.thread = NULL;
   deallocateQueue(sdt->requestQueue);
   free((void *)sdt);
 }

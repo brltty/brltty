@@ -57,10 +57,12 @@ void
 destructSpeechSynthesizer (volatile SpeechSynthesizer *spk) {
 }
 
+static volatile SpeechDriverThread *speechDriverThread = NULL;
+
 int
 startSpeechDriverThread (char **parameters) {
-  if (!spk.driver.thread) {
-    if (!(spk.driver.thread = newSpeechDriverThread(&spk, parameters))) {
+  if (!speechDriverThread) {
+    if (!(speechDriverThread = newSpeechDriverThread(&spk, parameters))) {
       return 0;
     }
   }
@@ -70,9 +72,11 @@ startSpeechDriverThread (char **parameters) {
 
 void
 stopSpeechDriverThread (void) {
-  if (spk.driver.thread) {
-    destroySpeechDriverThread(spk.driver.thread);
-    spk.driver.thread = NULL;
+  if (speechDriverThread) {
+    volatile SpeechDriverThread *sdt = speechDriverThread;
+
+    speechDriverThread = NULL;
+    destroySpeechDriverThread(sdt);
   }
 }
 
@@ -105,7 +109,7 @@ muteSpeech (const char *reason) {
   int result;
 
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "mute: %s", reason);
-  result = speechRequest_muteSpeech(spk.driver.thread);
+  result = speechRequest_muteSpeech(speechDriverThread);
 
   setSpeechFinished();
   return result;
@@ -125,7 +129,7 @@ sayUtf8Characters (
     }
 
     logMessage(LOG_CATEGORY(SPEECH_EVENTS), "say: %s", text);
-    if (!speechRequest_sayText(spk.driver.thread, text, length, count, attributes)) return 0;
+    if (!speechRequest_sayText(speechDriverThread, text, length, count, attributes)) return 0;
   }
 
   return 1;
@@ -159,7 +163,7 @@ int
 setSpeechVolume (int setting, int say) {
   if (!canSetSpeechVolume()) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set volume: %d", setting);
-  speechRequest_setVolume(spk.driver.thread, setting);
+  speechRequest_setVolume(speechDriverThread, setting);
   if (say) sayIntegerSetting(gettext("volume"), setting);
   return 1;
 }
@@ -173,7 +177,7 @@ int
 setSpeechRate (int setting, int say) {
   if (!canSetSpeechRate()) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set rate: %d", setting);
-  speechRequest_setRate(spk.driver.thread, setting);
+  speechRequest_setRate(speechDriverThread, setting);
   if (say) sayIntegerSetting(gettext("rate"), setting);
   return 1;
 }
@@ -187,7 +191,7 @@ int
 setSpeechPitch (int setting, int say) {
   if (!canSetSpeechPitch()) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set pitch: %d", setting);
-  speechRequest_setPitch(spk.driver.thread, setting);
+  speechRequest_setPitch(speechDriverThread, setting);
   if (say) sayIntegerSetting(gettext("pitch"), setting);
   return 1;
 }
@@ -201,6 +205,6 @@ int
 setSpeechPunctuation (SpeechPunctuation setting, int say) {
   if (!canSetSpeechPunctuation()) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set punctuation: %d", setting);
-  speechRequest_setPunctuation(spk.driver.thread, setting);
+  speechRequest_setPunctuation(speechDriverThread, setting);
   return 1;
 }
