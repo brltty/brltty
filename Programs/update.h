@@ -30,6 +30,10 @@ extern void beginUpdates (void);
 extern void suspendUpdates (void);
 extern void resumeUpdates (int refresh);
 
+#ifdef ENABLE_SPEECH_SUPPORT
+extern void doAutospeak (int force);
+#endif /* ENABLE_SPEECH_SUPPORT */
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

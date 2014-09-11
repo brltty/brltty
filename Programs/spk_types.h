@@ -53,6 +53,7 @@ typedef void SpeechPitchSetter (volatile SpeechSynthesizer *spk, unsigned char s
 typedef void SpeechPunctuationSetter (volatile SpeechSynthesizer *spk, SpeechPunctuation setting);
 
 struct SpeechSynthesizerStruct {
+  unsigned sayBanner:1;
   unsigned canAutospeak:1;
 
   struct {

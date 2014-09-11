@@ -293,7 +293,7 @@ showInfo (void) {
 #ifdef ENABLE_SPEECH_SUPPORT
 static int wasAutospeaking;
 
-static void
+void
 doAutospeak (int force) {
   static int oldScreen = -1;
   static int oldX = -1;

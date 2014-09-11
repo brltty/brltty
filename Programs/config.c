@@ -1760,12 +1760,14 @@ startSpeechDriver (void) {
   if (!activateSpeechDriver(0)) return 0;
   applySpeechPreferences();
 
-  if (!opt_quiet) {
+  if (!opt_quiet && spk.sayBanner) {
     char banner[0X100];
 
     makeProgramBanner(banner, sizeof(banner));
     sayString(banner, 1);
     beginAutospeakDelay(SPEECH_DRIVER_START_AUTOSPEAK_DELAY);
+  } else if (autospeak()) {
+    doAutospeak(1);
   }
 
   return 1;
@@ -1828,9 +1830,10 @@ getSpeechDriverActivity (void) {
 }
 
 static void
-enableSpeechDriver (void) {
+enableSpeechDriver (int sayBanner) {
   ActivityObject *activity = getSpeechDriverActivity();
 
+  spk.sayBanner = sayBanner;
   if (activity) startActivity(activity);
 }
 
@@ -1845,7 +1848,7 @@ void
 restartSpeechDriver (void) {
   disableSpeechDriver();
   logMessage(LOG_INFO, gettext("reinitializing speech driver"));
-  enableSpeechDriver();
+  enableSpeechDriver(1);
 }
 
 static void
@@ -2514,7 +2517,7 @@ brlttyStart (void) {
   if (opt_verify) {
     if (activateSpeechDriver(1)) deactivateSpeechDriver();
   } else {
-    enableSpeechDriver();
+    enableSpeechDriver(1);
   }
 
   /* Create the file system object for speech input. */
@@ -2580,7 +2583,7 @@ beginLanguageProfile (void) {
 
 static int
 endLanguageProfile (void) {
-  enableSpeechDriver();
+  enableSpeechDriver(0);
   return 1;
 }
 
