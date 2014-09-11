@@ -1522,16 +1522,6 @@ exitBrailleDriver (void *data) {
     brailleDriverActivity = NULL;
   }
 
-  if (brailleDrivers) {
-    deallocateStrings(brailleDrivers);
-    brailleDrivers = NULL;
-  }
-
-  if (brailleDevices) {
-    deallocateStrings(brailleDevices);
-    brailleDevices = NULL;
-  }
-
   forgetDevices();
 }
 
@@ -1569,6 +1559,19 @@ restartBrailleDriver (void) {
 
   logMessage(LOG_INFO, gettext("reinitializing braille driver"));
   enableBrailleDriver();
+}
+
+static void
+exitBrailleData (void *data) {
+  if (brailleDrivers) {
+    deallocateStrings(brailleDrivers);
+    brailleDrivers = NULL;
+  }
+
+  if (brailleDevices) {
+    deallocateStrings(brailleDevices);
+    brailleDevices = NULL;
+  }
 }
 
 int
@@ -1809,11 +1812,6 @@ exitSpeechDriver (void *data) {
     destroyActivity(speechDriverActivity);
     speechDriverActivity = NULL;
   }
-
-  if (speechDrivers) {
-    deallocateStrings(speechDrivers);
-    speechDrivers = NULL;
-  }
 }
 
 static ActivityObject *
@@ -1848,6 +1846,14 @@ restartSpeechDriver (void) {
   disableSpeechDriver();
   logMessage(LOG_INFO, gettext("reinitializing speech driver"));
   enableSpeechDriver();
+}
+
+static void
+exitSpeechData (void *data) {
+  if (speechDrivers) {
+    deallocateStrings(speechDrivers);
+    speechDrivers = NULL;
+  }
 }
 
 static void
@@ -2051,7 +2057,7 @@ disableScreenDriver (void) {
 */
 
 static void
-exitScreens (void *data) {
+exitScreenData (void *data) {
   destructSpecialScreens();
 
   if (screenDrivers) {
@@ -2371,10 +2377,9 @@ brlttyStart (void) {
    * be used instead.
    */
 
-  onProgramExit("screens", exitScreens, NULL);
+  onProgramExit("screen-data", exitScreenData, NULL);
   screenDrivers = splitString(opt_screenDriver? opt_screenDriver: "", ',', NULL);
   constructSpecialScreens();
-  enableBrailleHelpPage(); /* ensure that it's first */
 
   suppressTuneDeviceOpenErrors();
 
@@ -2489,11 +2494,12 @@ brlttyStart (void) {
     logMessage(LOG_ERR, gettext("braille device not specified"));
     return PROG_EXIT_SYNTAX;
   }
-  changeBrailleDevice(opt_brailleDevice);
 
-  /* Activate the braille display. */
+  changeBrailleDevice(opt_brailleDevice);
   changeBrailleDriver(opt_brailleDriver? opt_brailleDriver: "");
   brailleConstructed = 0;
+  onProgramExit("braille-data", exitBrailleData, NULL);
+
   if (opt_verify) {
     if (activateBrailleDriver(1)) deactivateBrailleDriver();
   } else {
@@ -2501,9 +2507,10 @@ brlttyStart (void) {
   }
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  /* Activate the speech synthesizer. */
   changeSpeechDriver(opt_speechDriver? opt_speechDriver: "");
   changeSpeechParameters(opt_speechParameters? opt_speechParameters: "");
+  onProgramExit("speech-data", exitSpeechData, NULL);
+
   if (opt_verify) {
     if (activateSpeechDriver(1)) deactivateSpeechDriver();
   } else {
