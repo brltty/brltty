@@ -1166,14 +1166,14 @@ makeProgramBanner (char *buffer, size_t size) {
 }
 
 void
-initializeBraille (void) {
+initializeBrailleDisplay (void) {
   constructBrailleDisplay(&brl);
   brl.bufferResized = &windowConfigurationChanged;
 }
 
 int
 constructBrailleDriver (void) {
-  initializeBraille();
+  initializeBrailleDisplay();
 
   if (braille->construct(&brl, brailleParameters, brailleDevice)) {
     if (ensureBrailleBuffer(&brl, LOG_INFO)) {
@@ -1440,49 +1440,57 @@ startBrailleDriver (void) {
   return 0;
 }
 
-static AsyncHandle brailleDriverStartAlarm = NULL;
-
-static void
-cancelBrailleDriverStartAlarm (void) {
-  if (brailleDriverStartAlarm) {
-    asyncCancelRequest(brailleDriverStartAlarm);
-    brailleDriverStartAlarm = NULL;
-  }
-}
-
-ASYNC_ALARM_CALLBACK(tryBrailleDriver) {
-  if (startBrailleDriver()) cancelBrailleDriverStartAlarm();
-}
-
-static void
-scheduleBrailleDriver (void) {
-  if (!brailleDriver) {
-    if (!brailleDriverStartAlarm) {
-      initializeBraille();
-      ensureBrailleBuffer(&brl, LOG_DEBUG);
-
-      if (asyncSetAlarmIn(&brailleDriverStartAlarm, 0, tryBrailleDriver, NULL)) {
-        asyncResetAlarmEvery(brailleDriverStartAlarm, BRAILLE_DRIVER_START_RETRY_INTERVAL);
-      }
-    }
-  }
-}
-
 static void
 stopBrailleDriver (void) {
-  cancelBrailleDriverStartAlarm();
-
   deactivateBrailleDriver();
   alert(ALERT_BRAILLE_OFF);
 }
 
+static ActivityObject *brailleDriverActivity = NULL;
+
+static int
+prepareBrailleDriverActivity (void *datga) {
+  initializeBrailleDisplay();
+  ensureBrailleBuffer(&brl, LOG_DEBUG);
+  return 1;
+}
+
+static int
+startBrailleDriverActivity (void *datga) {
+  return startBrailleDriver();
+}
+
+static void
+stopBrailleDriverActivity (void *datga) {
+  stopBrailleDriver();
+}
+
+static const ActivityMethods brailleDriverActivityMethods = {
+  .name = "braille-driver",
+  .interval = BRAILLE_DRIVER_START_RETRY_INTERVAL,
+
+  .prepare = prepareBrailleDriverActivity,
+  .start = startBrailleDriverActivity,
+  .stop = stopBrailleDriverActivity
+};
+
+static void
+enableBrailleDriver (void) {
+  startActivity(brailleDriverActivity);
+}
+
+static void
+disableBrailleDriver (void) {
+  stopActivity(brailleDriverActivity);
+}
+
 void
 restartBrailleDriver (void) {
-  stopBrailleDriver();
+  disableBrailleDriver();
   restartRequired = 0;
 
   logMessage(LOG_INFO, gettext("reinitializing braille driver"));
-  scheduleBrailleDriver();
+  enableBrailleDriver();
 }
 
 static void
@@ -1493,7 +1501,10 @@ exitBrailleDriver (void *data) {
     brl.noDisplay = 1;
   }
 
-  stopBrailleDriver();
+  if (brailleDriverActivity) {
+    destroyActivity(brailleDriverActivity);
+    brailleDriverActivity = NULL;
+  }
 
   if (brailleDrivers) {
     deallocateStrings(brailleDrivers);
@@ -1587,13 +1598,13 @@ beginAutospeakDelay (int duration) {
 }
 
 void
-initializeSpeech (void) {
+initializeSpeechSynthesizer (void) {
   constructSpeechSynthesizer(&spk);
 }
 
 int
 constructSpeechDriver (void) {
-  initializeSpeech();
+  initializeSpeechSynthesizer();
 
   if (startSpeechDriverThread(speechParameters)) {
     return 1;
@@ -1705,11 +1716,19 @@ startSpeechDriver (void) {
   return 1;
 }
 
+static void
+stopSpeechDriver (void) {
+  cancelAutospeakDelayAlarm();
+
+  muteSpeech("driver stop");
+  deactivateSpeechDriver();
+}
+
 static ActivityObject *speechDriverActivity = NULL;
 
 static int
 prepareSpeechDriverActivity (void *datga) {
-  initializeSpeech();
+  initializeSpeechSynthesizer();
   return 1;
 }
 
@@ -1720,10 +1739,7 @@ startSpeechDriverActivity (void *datga) {
 
 static void
 stopSpeechDriverActivity (void *datga) {
-  cancelAutospeakDelayAlarm();
-
-  muteSpeech("driver stop");
-  deactivateSpeechDriver();
+  stopSpeechDriver();
 }
 
 static const ActivityMethods speechDriverActivityMethods = {
@@ -1736,20 +1752,20 @@ static const ActivityMethods speechDriverActivityMethods = {
 };
 
 static void
-scheduleSpeechDriver (void) {
+enableSpeechDriver (void) {
   startActivity(speechDriverActivity);
 }
 
 static void
-stopSpeechDriver (void) {
+disableSpeechDriver (void) {
   stopActivity(speechDriverActivity);
 }
 
 void
 restartSpeechDriver (void) {
-  stopSpeechDriver();
+  disableSpeechDriver();
   logMessage(LOG_INFO, gettext("reinitializing speech driver"));
-  scheduleSpeechDriver();
+  enableSpeechDriver();
 }
 
 static void
@@ -1896,43 +1912,57 @@ startScreenDriver (void) {
   return 1;
 }
 
-static AsyncHandle screenDriverStartAlarm = NULL;
-
-static void
-cancelScreenDriverStartAlarm (void) {
-  if (screenDriverStartAlarm) {
-    asyncCancelRequest(screenDriverStartAlarm);
-    screenDriverStartAlarm = NULL;
-  }
-}
-
-ASYNC_ALARM_CALLBACK(tryScreenDriver) {
-  if (startScreenDriver()) cancelScreenDriverStartAlarm();
-}
-
-static void
-scheduleScreenDriver (void) {
-  if (!screenDriver) {
-    if (!screenDriverStartAlarm) {
-      initializeScreen();
-
-      if (asyncSetAlarmIn(&screenDriverStartAlarm, 0, tryScreenDriver, NULL)) {
-        asyncResetAlarmEvery(screenDriverStartAlarm, SCREEN_DRIVER_START_RETRY_INTERVAL);
-      }
-    }
-  }
-}
-
 static void
 stopScreenDriver (void) {
-  cancelScreenDriverStartAlarm();
-
   deactivateScreenDriver();
 }
 
+static ActivityObject *screenDriverActivity = NULL;
+
+static int
+prepareScreenDriverActivity (void *datga) {
+  initializeScreen();
+  return 1;
+}
+
+static int
+startScreenDriverActivity (void *datga) {
+  return startScreenDriver();
+}
+
+static void
+stopScreenDriverActivity (void *datga) {
+  stopScreenDriver();
+}
+
+static const ActivityMethods screenDriverActivityMethods = {
+  .name = "screen-driver",
+  .interval = SCREEN_DRIVER_START_RETRY_INTERVAL,
+
+  .prepare = prepareScreenDriverActivity,
+  .start = startScreenDriverActivity,
+  .stop = stopScreenDriverActivity
+};
+
+static void
+enableScreenDriver (void) {
+  startActivity(screenDriverActivity);
+}
+
+/*
+static void
+disableScreenDriver (void) {
+  stopActivity(screenDriverActivity);
+}
+*/
+
 static void
 exitScreens (void *data) {
-  stopScreenDriver();
+  if (screenDriverActivity) {
+    destroyActivity(screenDriverActivity);
+    screenDriverActivity = NULL;
+  }
+
   destructSpecialScreens();
 
   if (screenDrivers) {
@@ -2340,8 +2370,8 @@ brlttyStart (void) {
   /* initialize screen driver */
   if (opt_verify) {
     if (activateScreenDriver(1)) deactivateScreenDriver();
-  } else {
-    scheduleScreenDriver();
+  } else if ((screenDriverActivity = newActivity(&screenDriverActivityMethods, NULL))) {
+    enableScreenDriver();
   }
   
 #ifdef ENABLE_API
@@ -2378,8 +2408,8 @@ brlttyStart (void) {
   brailleConstructed = 0;
   if (opt_verify) {
     if (activateBrailleDriver(1)) deactivateBrailleDriver();
-  } else {
-    scheduleBrailleDriver();
+  } else if ((brailleDriverActivity = newActivity(&brailleDriverActivityMethods, NULL))) {
+    enableBrailleDriver();
     onProgramExit("braille-driver", exitBrailleDriver, NULL);
   }
 
@@ -2390,7 +2420,7 @@ brlttyStart (void) {
   if (opt_verify) {
     if (activateSpeechDriver(1)) deactivateSpeechDriver();
   } else if ((speechDriverActivity = newActivity(&speechDriverActivityMethods, NULL))) {
-    scheduleSpeechDriver();
+    enableSpeechDriver();
     onProgramExit("speech-driver", exitSpeechDriver, NULL);
   }
 
@@ -2451,13 +2481,13 @@ static const ProfileProperty languageProfileProperties[] = {
 
 static int
 beginLanguageProfile (void) {
-  stopSpeechDriver();
+  disableSpeechDriver();
   return 1;
 }
 
 static int
 endLanguageProfile (void) {
-  scheduleSpeechDriver();
+  enableSpeechDriver();
   return 1;
 }
 
