@@ -371,7 +371,7 @@ static const AlertEntry alertTable[] = {
 
 void
 alert (AlertIdentifier identifier) {
-  if ((identifier >= 0) || (identifier < ARRAY_COUNT(alertTable))) {
+  if (identifier < ARRAY_COUNT(alertTable)) {
     const AlertEntry *alert = &alertTable[identifier];
 
     if (!(prefs.alertTunes && alert->tune && playTune(alert->tune))) {

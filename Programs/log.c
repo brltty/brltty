@@ -203,7 +203,7 @@ struct LogPrefixEntryStruct {
 
 static inline const LogCategoryEntry *
 getLogCategoryEntry (LogCategoryIndex index) {
-  return ((index >= 0) && (index < LOG_CATEGORY_COUNT))? &logCategoryTable[index]: NULL;
+  return (index < LOG_CATEGORY_COUNT)? &logCategoryTable[index]: NULL;
 }
 
 const char *
