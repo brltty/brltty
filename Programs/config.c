@@ -217,7 +217,7 @@ static const SpeechDriver *speechDriver = NULL;
 static void *speechObject = NULL;
 
 static char *opt_speechParameters;
-static char *speechParameterString = NULL;
+static char *currentSpeechParameters = NULL;
 static char **speechParameters = NULL;
 
 static char *opt_speechInput;
@@ -1682,7 +1682,7 @@ initializeSpeechDriver (const char *code, int verify) {
   if ((speech = loadSpeechDriver(code, &speechObject, opt_driversDirectory))) {
     speechParameters = getParameters(speech->parameters,
                                      speech->definition.code,
-                                     speechParameterString);
+                                     currentSpeechParameters);
 
     if (speechParameters) {
       int constructed = verify;
@@ -1857,6 +1857,11 @@ exitSpeechData (void *data) {
     deallocateStrings(speechDrivers);
     speechDrivers = NULL;
   }
+
+  if (currentSpeechParameters) {
+    free(currentSpeechParameters);
+    currentSpeechParameters = NULL;
+  }
 }
 
 static void
@@ -1889,9 +1894,9 @@ changeSpeechParameters (const char *parameters) {
   if (!parameters) parameters = "";
 
   if ((newParameters = strdup(parameters))) {
-    char *oldParameters = speechParameterString;
+    char *oldParameters = currentSpeechParameters;
 
-    speechParameterString = newParameters;
+    currentSpeechParameters = newParameters;
     if (oldParameters) free(oldParameters);
     return 1;
   } else {
