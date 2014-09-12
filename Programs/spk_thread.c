@@ -59,7 +59,7 @@ static const ThreadStateEntry threadStateTable[] = {
     .name = "stopping"
   },
 
-  [THD_FINISHED] {
+  [THD_FINISHED] = {
     .name = "finished"
   },
 };
