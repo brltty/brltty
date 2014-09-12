@@ -496,6 +496,12 @@ removeSpeechRequests (volatile SpeechDriverThread *sdt, SpeechRequestType type) 
 }
 
 static void
+muteSpeechRequestQueue (volatile SpeechDriverThread *sdt) {
+  removeSpeechRequests(sdt, REQ_SAY_TEXT);
+  removeSpeechRequests(sdt, REQ_MUTE_SPEECH);
+}
+
+static void
 sendSpeechRequest (volatile SpeechDriverThread *sdt) {
   while (getQueueSize(sdt->requestQueue) > 0) {
     SpeechRequest *req = dequeueItem(sdt->requestQueue);
@@ -582,11 +588,7 @@ speechRequest_sayText (
     req->arguments.sayText.attributes = data[1].address;
     req->arguments.sayText.options = options;
 
-    if (options & SAY_OPT_MUTE_FIRST) {
-      removeSpeechRequests(sdt, REQ_SAY_TEXT);
-      removeSpeechRequests(sdt, REQ_MUTE_SPEECH);
-    }
-
+    if (options & SAY_OPT_MUTE_FIRST) muteSpeechRequestQueue(sdt);
     if (enqueueSpeechRequest(sdt, req)) return 1;
 
     free(req);
@@ -602,8 +604,7 @@ speechRequest_muteSpeech (
   SpeechRequest *req;
 
   if ((req = newSpeechRequest(REQ_MUTE_SPEECH, NULL))) {
-    removeSpeechRequests(sdt, REQ_SAY_TEXT);
-    removeSpeechRequests(sdt, REQ_MUTE_SPEECH);
+    muteSpeechRequestQueue(sdt);
     if (enqueueSpeechRequest(sdt, req)) return 1;
 
     free(req);
