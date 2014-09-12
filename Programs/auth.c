@@ -289,7 +289,7 @@ authKeyfile_initialize (const char *parameter) {
       keyfile->path = parameter;
       return keyfile;
     } else {
-      logMessage(LOG_ERR, "path to key file not specified");
+      logMessage(LOG_ERR, gettext("path to key file not specified"));
     }
 
     free(keyfile);
@@ -359,7 +359,7 @@ authUser_initialize (const char *parameter) {
       }
     }
 
-    logMessage(LOG_ERR, "unknown user: %s", parameter);
+    logMessage(LOG_ERR, gettext("unknown user: %s"), parameter);
     free(user);
 #endif /* __MINGW32__ */
   } else {
@@ -414,7 +414,7 @@ authGroup_initialize (const char *parameter) {
       }
     }
 
-    logMessage(LOG_ERR, "unknown group: %s", parameter);
+    logMessage(LOG_ERR, gettext("unknown group: %s"), parameter);
     free(group);
 #endif /* __MINGW32__ */
   } else {
@@ -602,7 +602,7 @@ authPerformServer (AuthDescriptor *auth, FileDescriptor fd) {
 #ifdef CAN_CHECK_CREDENTIALS
   if (auth->peerCredentialsState != PCS_NEED) {
     if (auth->peerCredentialsState == PCS_HAVE) releasePeerCredentials(&auth->peerCredentials);
-    if (!ok) logMessage(LOG_ERR, "no matching user or group");
+    if (!ok) logMessage(LOG_ERR, gettext("no matching user or group"));
   }
 #endif /* CAN_CHECK_CREDENTIALS */
 

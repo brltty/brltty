@@ -248,7 +248,7 @@ bthParseAddress (uint64_t *address, const char *string) {
     character += 1;
   }
 
-  logMessage(LOG_ERR, "invalid Bluetooth device address: %s", string);
+  logMessage(LOG_ERR, gettext("invalid Bluetooth device address: %s"), string);
   errno = EINVAL;
   return 0;
 }
@@ -284,7 +284,8 @@ bthProcessTimeoutParameter (BluetoothConnectionRequest *request, const char *par
     }
   }
 
-  logMessage(LOG_ERR, "invalid Bluetooth connection timeout: %s", parameter);
+  logMessage(LOG_ERR, gettext("invalid Bluetooth connection timeout: %s"),
+             parameter);
   return 0;
 }
 
@@ -316,7 +317,7 @@ bthProcessDiscoverParameter (BluetoothConnectionRequest *request, const char *pa
     return 1;
   }
 
-  logMessage(LOG_ERR, "invalid discover option: %s", parameter);
+  logMessage(LOG_ERR, gettext("invalid discover option: %s"), parameter);
   return 0;
 }
 

@@ -354,7 +354,7 @@ writeVerificationTableLine (const wchar_t *characters, size_t length, void *data
   return 1;
 
 outputError:
-  logMessage(LOG_ERR, "output error: %s", strerror(errno));
+  logMessage(LOG_ERR, gettext("output error: %s"), strerror(errno));
   return 0;
 }
 
@@ -491,7 +491,7 @@ main (int argc, char *argv[]) {
     static const int minimum = 1;
 
     if (!validateInteger(&outputWidth, opt_outputWidth, &minimum, NULL)) {
-      logMessage(LOG_ERR, "%s: %s", "invalid output width", opt_outputWidth);
+      logMessage(LOG_ERR, "%s: %s", gettext("invalid output width"), opt_outputWidth);
       return PROG_EXIT_SYNTAX;
     }
   }
@@ -545,7 +545,7 @@ main (int argc, char *argv[]) {
                   exitStatus = processInputStream(stream);
                   fclose(stream);
                 } else {
-                  logMessage(LOG_ERR, "cannot open input file: %s: %s",
+                  logMessage(LOG_ERR, gettext("cannot open input file: %s: %s"),
                              path, strerror(errno));
                   exitStatus = PROG_EXIT_FATAL;
                 }

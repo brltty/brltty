@@ -1585,7 +1585,7 @@ static FileDescriptor createTcpSocket(struct socketInfo *info)
     } else if ((port > 0) && (port <= UINT16_MAX)) {
       addr.sin_port = htons(port);
     } else {
-      logMessage(LOG_ERR, "invalid TCP port: %s", info->port);
+      logMessage(LOG_ERR, gettext("invalid TCP port: %s"), info->port);
       return INVALID_FILE_DESCRIPTOR;
     }
   }
@@ -1619,13 +1619,13 @@ static FileDescriptor createTcpSocket(struct socketInfo *info)
       errno = EINVAL;
 #endif /* EAFNOSUPPORT */
 
-      logMessage(LOG_ERR, "unknown address type %d", he->h_addrtype);
+      logMessage(LOG_ERR, gettext("unknown address type %d"), he->h_addrtype);
       return INVALID_FILE_DESCRIPTOR;
     }
 
     if (he->h_length > sizeof(addr.sin_addr)) {
       errno = EINVAL;
-      logMessage(LOG_ERR, "address too big: %d", he->h_length);
+      logMessage(LOG_ERR, gettext("address too big: %d"), he->h_length);
       return INVALID_FILE_DESCRIPTOR;
     }
 
@@ -1785,7 +1785,7 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
   sa.sun_family = AF_LOCAL;
 
   if (lpath+lport+1>sizeof(sa.sun_path)) {
-    logMessage(LOG_ERR, "Unix path too long");
+    logMessage(LOG_ERR, gettext("Unix path too long"));
     goto outfd;
   }
 
@@ -1831,7 +1831,8 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
 
     if ((pid = readPid(tmppath)) && pid != getpid()
 	&& (kill(pid, 0) != -1 || errno != ESRCH)) {
-      logMessage(LOG_ERR,"another BrlAPI server is already listening on %s (file %s exists)",info->port, tmppath);
+      logMessage(LOG_ERR, gettext("another BrlAPI server is already listening on %s (file %s exists)"),
+                 info->port, tmppath);
       goto outfd;
     }
 
@@ -1882,7 +1883,8 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
     /* failed to link */
     if ((pid = readPid(lockpath)) && pid != getpid()
 	&& (kill(pid, 0) != -1 || errno != ESRCH)) {
-      logMessage(LOG_ERR,"another BrlAPI server is already listening on %s (file %s exists)",info->port, lockpath);
+      logMessage(LOG_ERR, gettext("another BrlAPI server is already listening on %s (file %s exists)"),
+                 info->port, lockpath);
       goto outtmp;
     }
 
@@ -2158,7 +2160,8 @@ ASYNC_THREAD_FUNCTION(runServer) {
 
   socketHosts = splitString(hosts,'+',&numSockets);
   if (numSockets>MAXSOCKETS) {
-    logMessage(LOG_ERR,"too many hosts specified (%d, max %d)",numSockets,MAXSOCKETS);
+    logMessage(LOG_ERR, gettext("too many hosts specified (%d, max %d)"),
+               numSockets,MAXSOCKETS);
     goto finished;
   }
   if (numSockets == 0) {

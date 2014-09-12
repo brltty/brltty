@@ -293,9 +293,10 @@ readTable_binary (const char *path, FILE *file, void *data) {
 
       if (dots == EOF) {
         if (ferror(file)) {
-          logMessage(LOG_ERR, "input error: %s: %s", path, strerror(errno));
+          logMessage(LOG_ERR, gettext("input error: %s: %s"),
+                     path, strerror(errno));
         } else {
-          logMessage(LOG_ERR, "table too short: %s", path);
+          logMessage(LOG_ERR, gettext("table too short: %s"), path);
         }
 
         break;
@@ -329,7 +330,8 @@ writeTable_binary (const char *path, FILE *file, TextTableData *ttd, void *data)
 
     if (data) dots = mapDots(dots, dotsInternal, data);
     if (fputc(dots, file) == EOF) {
-      logMessage(LOG_ERR, "output error: %s: %s", path, strerror(errno));
+      logMessage(LOG_ERR, gettext("output error: %s: %s"),
+                 path, strerror(errno));
       return 0;
     }
   }
@@ -467,7 +469,7 @@ error:
 
 static TextTableData *
 readTable_XCompose (const char *path, FILE *file, void *data) {
-  logMessage(LOG_ERR, "Reading XCompose format not supported");
+  logMessage(LOG_ERR, gettext("Reading XCompose format not supported"));
   return NULL;
 }
 
@@ -525,7 +527,7 @@ error:
 
 static TextTableData *
 readTable_JAWS (const char *path, FILE *file, void *data) {
-  logMessage(LOG_ERR, "Reading JAWS format not supported");
+  logMessage(LOG_ERR, gettext("Reading JAWS format not supported"));
   return NULL;
 }
 
@@ -589,7 +591,7 @@ getFormatEntry (const char *name, const char *path, const char *description) {
     name = locatePathExtension(path);
 
     if (!(name && *++name)) {
-      logMessage(LOG_ERR, "unspecified %s format.", description);
+      logMessage(LOG_ERR, gettext("unspecified %s format."), description);
       exit(PROG_EXIT_SYNTAX);
     }
   }
@@ -599,7 +601,7 @@ getFormatEntry (const char *name, const char *path, const char *description) {
     if (format) return format;
   }
 
-  logMessage(LOG_ERR, "unknown %s format: %s", description, name);
+  logMessage(LOG_ERR, gettext("unknown %s format: %s"), description, name);
   exit(PROG_EXIT_SYNTAX);
 }
 
@@ -627,7 +629,7 @@ openTable (const char **file, const char *mode, const char *directory, FILE *std
   {
     FILE *stream = fopen(*file, mode);
 
-    if (!stream) logMessage(LOG_ERR, "table open error: %s: %s", *file, strerror(errno));
+    if (!stream) logMessage(LOG_ERR, gettext("table open error: %s: %s"), *file, strerror(errno));
     return stream;
   }
 }
@@ -1911,7 +1913,7 @@ main (int argc, char *argv[]) {
   }
 
   if (argc == 0) {
-    logMessage(LOG_ERR, "missing input table.");
+    logMessage(LOG_ERR, gettext("missing input table."));
     return PROG_EXIT_SYNTAX;
   }
   inputPath = *argv++, argc--;
@@ -1933,7 +1935,7 @@ main (int argc, char *argv[]) {
   }
 
   if (argc > 0) {
-    logMessage(LOG_ERR, "too many parameters.");
+    logMessage(LOG_ERR, gettext("too many parameters."));
     return PROG_EXIT_SYNTAX;
   }
 
@@ -1945,7 +1947,8 @@ main (int argc, char *argv[]) {
   }
 
   if (*opt_charset && !setCharset(opt_charset)) {
-    logMessage(LOG_ERR, "can't establish character set: %s", opt_charset);
+    logMessage(LOG_ERR, gettext("can't establish character set: %s"),
+               opt_charset);
     return PROG_EXIT_SEMANTIC;
   }
 

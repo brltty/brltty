@@ -180,11 +180,13 @@ processStream (FILE *inputStream, const char *inputName) {
   return 1;
 
 inputError:
-  logMessage(LOG_ERR, "input error: %s: %s", inputName, strerror(errno));
+  logMessage(LOG_ERR, gettext("input error: %s: %s"),
+             inputName, strerror(errno));
   return 0;
 
 outputError:
-  logMessage(LOG_ERR, "output error: %s: %s", outputName, strerror(errno));
+  logMessage(LOG_ERR, gettext("output error: %s: %s"),
+             outputName, strerror(errno));
   return 0;
 }
 
@@ -197,7 +199,7 @@ getTable (TextTable **table, const char *directory, const char *name) {
 
     if (strcmp(name, tableName_autoselect) == 0) {
       if (!(name = allocated = selectTextTable(directory))) {
-        logMessage(LOG_ERR, "cannot find text table for current locale");
+        logMessage(LOG_ERR, gettext("cannot find text table for current locale"));
       }
     }
 
@@ -258,7 +260,8 @@ main (int argc, char *argv[]) {
             fclose(stream);
             if (!ok) break;
           } else {
-            logMessage(LOG_ERR, "cannot open file: %s: %s", file, strerror(errno));
+            logMessage(LOG_ERR, gettext("cannot open file: %s: %s"),
+                       file, strerror(errno));
             exitStatus = PROG_EXIT_SEMANTIC;
             break;
           }

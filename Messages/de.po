@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 4.5\n"
 "Report-Msgid-Bugs-To: brltty@mielke.cc\n"
-"POT-Creation-Date: 2014-09-12 09:53+0200\n"
+"POT-Creation-Date: 2014-09-12 11:07+0200\n"
 "PO-Revision-Date: 2014-07-29 10:40+0200\n"
 "Last-Translator: Angela Engel <angela.engel@gmx.at>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -73,7 +73,7 @@ msgstr "<aus>"
 msgid "API Parameter"
 msgstr "API Parameter"
 
-#: Programs/cmds.auto.h:996
+#: Programs/cmds.auto.h:883
 msgid "AT (set 2) keyboard scan code"
 msgstr "AT (set 2) Tastatur-Scancode"
 
@@ -509,9 +509,8 @@ msgid "Dot"
 msgstr "Punkt"
 
 #: Programs/menu_prefs.c:727
-#, fuzzy
 msgid "Dots via Unicode Braille"
-msgstr "Braille-Kurzschrift"
+msgstr "Punkte als Unicode-Braille"
 
 #. Organ
 #: Programs/midi.c:62
@@ -1081,7 +1080,7 @@ msgstr "Digital Audio Soundkarte"
 msgid "PCM Volume"
 msgstr "PCM Lautstärke"
 
-#: Programs/cmds.auto.h:1010
+#: Programs/cmds.auto.h:897
 msgid "PS/2 (set 3) keyboard scan code"
 msgstr "PS/2 (set 3) Tastatur-Scancode"
 
@@ -1240,9 +1239,19 @@ msgstr "Eigenschaften von geeigneten Tastaturen."
 msgid "Raise Pitch"
 msgstr "Erhöhe Tonhöhe"
 
+#: Programs/brltty-ttb.c:530
+#, c-format
+msgid "Reading JAWS format not supported"
+msgstr "Lesen des JAWS-Formats wird nicht unterstützt"
+
+#: Programs/brltty-ttb.c:472
+#, c-format
+msgid "Reading XCompose format not supported"
+msgstr "Lesen des XCompose-Formats wird nicht unterstützt"
+
 #: Programs/config.c:339
 msgid "Recognize environment variables."
-msgstr "Verwende Umgebungsvariablen."
+msgstr "Honoriere Umgebungsvariablen."
 
 #: Programs/midi.c:127
 msgid "Recorder"
@@ -1746,6 +1755,11 @@ msgstr "Unterlegung"
 msgid "Unfrozen"
 msgstr "Aufgetaut"
 
+#: Programs/brlapi_server.c:1788
+#, c-format
+msgid "Unix path too long"
+msgstr "UNIX Pfad zu lang"
+
 #: Programs/log.c:101
 msgid "Update Events"
 msgstr "Update Ereignisse"
@@ -1840,7 +1854,7 @@ msgstr "X Display mit dem Verbindung aufgenommen werden soll"
 msgid "XFree(wm_name) for change"
 msgstr ""
 
-#: Programs/cmds.auto.h:1003
+#: Programs/cmds.auto.h:890
 msgid "XT (set 1) keyboard scan code"
 msgstr "XT (set 1) Tastatur-Scancode"
 
@@ -1860,6 +1874,11 @@ msgstr "Ja"
 msgid "[host][:port]"
 msgstr "[Host][:Port]"
 
+#: Programs/brlapi_server.c:1628
+#, c-format
+msgid "address too big: %d"
+msgstr "Adresse zu groß: %d"
+
 #: Programs/menu_prefs.c:472
 msgid "all dots"
 msgstr "Alle Punkte"
@@ -1867,6 +1886,11 @@ msgstr "Alle Punkte"
 #: Programs/cmd_miscellaneous.c:132
 msgid "and"
 msgstr "und"
+
+#: Programs/brlapi_server.c:1834 Programs/brlapi_server.c:1886
+#, c-format
+msgid "another BrlAPI server is already listening on %s (file %s exists)"
+msgstr ""
 
 #: Programs/cmds.auto.h:860
 msgid "append characters to clipboard"
@@ -1880,7 +1904,7 @@ msgstr "hänge ab Zeichen an die Zwischenablage an"
 msgid "at cursor"
 msgstr "beim Cursor"
 
-#: Programs/cmds.auto.h:888
+#: Programs/cmds.auto.h:932
 msgid "backspace key"
 msgstr "Rücktaste"
 
@@ -1943,6 +1967,16 @@ msgstr "bewege Cursor zur Sprachposition"
 msgid "brown"
 msgstr "Braun"
 
+#: Programs/brltty-ttb.c:1950
+#, fuzzy, c-format
+msgid "can't establish character set: %s"
+msgstr "Zeichensatz kann nicht aktiviert werden: %s"
+
+#: Programs/file.c:332
+#, c-format
+msgid "cannot access directory: %s: %s"
+msgstr "kann auf Verzeichnis nicht zugreifen: %s: %s"
+
 #: Programs/atb_translate.c:53
 msgid "cannot compile attributes table"
 msgstr "kann Attributtabelle nicht kompilieren"
@@ -1983,12 +2017,18 @@ msgid "cannot determine program directory"
 msgstr "kann Programmverzeichnis nicht bestimmen"
 
 #: Programs/config.c:2471 /tmp/src/brltty/Programs/menu.c:484
+#, c-format
 msgid "cannot determine working directory"
 msgstr "kann Arbeitsverzeichnis nicht bestimmen"
 
 #: Programs/system_windows.c:60
 msgid "cannot find procedure"
 msgstr "kann Prozedur nicht finden"
+
+#: Programs/brltty-trtxt.c:202
+#, fuzzy, c-format
+msgid "cannot find text table for current locale"
+msgstr "kann keine Texttabelle für aktuelle Ländereinstellung finden"
 
 #: Programs/program.c:173
 msgid "cannot fix install path"
@@ -2010,7 +2050,7 @@ msgstr ""
 
 #: Programs/file.c:404
 msgid "cannot get working directory"
-msgstr "kann Arbeitsverzeichnis nicht erfragen"
+msgstr "kann Arbeitsverzeichnis nicht ermitteln"
 
 #: Programs/xbrlapi.c:567
 #, c-format
@@ -2033,6 +2073,16 @@ msgstr "kann Programmbibliothek nicht laden"
 msgid "cannot load text table"
 msgstr "kann Texttabelle nicht laden"
 
+#: Programs/brltty-trtxt.c:263 Programs/file.c:812
+#, c-format
+msgid "cannot open file: %s: %s"
+msgstr "kann Datei nicht öffnen: %s: %s"
+
+#: Programs/brltty-ctb.c:548
+#, c-format
+msgid "cannot open input file: %s: %s"
+msgstr "Eingabedatei kann nicht geöffnet werden: %s: %s"
+
 #: Programs/config.c:1254
 msgid "cannot open key help"
 msgstr "kann Tastenhilfe nicht öffnen"
@@ -2041,9 +2091,10 @@ msgstr "kann Tastenhilfe nicht öffnen"
 msgid "cannot open process identifier file"
 msgstr "kann Prozessidentifikationsdatei nicht öffnen"
 
-#: Programs/menu.c:482
-msgid "cannot open working directory"
-msgstr "kann Arbeitsverzeichnis nicht öffnen"
+#: Programs/menu.c:481
+#, c-format
+msgid "cannot open working directory: %s"
+msgstr "Arbeitsverzeichnis kann nicht geöffnet werden: %s"
 
 #: Programs/prefs.c:259
 msgid "cannot read preferences file"
@@ -2054,9 +2105,14 @@ msgstr "kann Einstellungsdatei nicht lesen"
 msgid "cannot set focus to %#010x\n"
 msgstr "kann Fokus nicht auf %#010x setzen\n"
 
-#: Programs/file.c:418 /tmp/src/brltty/Programs/menu.c:471
+#: Programs/file.c:418
 msgid "cannot set working directory"
 msgstr "kann Arbeitsverzeichnis nicht wechseln"
+
+#: Programs/menu.c:470
+#, c-format
+msgid "cannot set working directory: %s: %s"
+msgstr "kann Arbeitsverzeichnis nicht wechseln: %s: %s"
 
 #: Programs/prefs.c:434
 msgid "cannot write to preferences file"
@@ -2102,23 +2158,23 @@ msgstr "kopiere Zeichenkette in die Zwischenablage"
 msgid "csecs"
 msgstr ""
 
-#: Programs/cmds.auto.h:1024
+#: Programs/cmds.auto.h:911
 msgid "current reading location"
 msgstr "aktuelle Leseposition"
 
-#: Programs/cmds.auto.h:923
+#: Programs/cmds.auto.h:967
 msgid "cursor-down key"
 msgstr "Pfeil-Runter-Taste"
 
-#: Programs/cmds.auto.h:902
+#: Programs/cmds.auto.h:946
 msgid "cursor-left key"
 msgstr "Pfeil-Links-Taste"
 
-#: Programs/cmds.auto.h:909
+#: Programs/cmds.auto.h:953
 msgid "cursor-right key"
 msgstr "Pfeil-Rechts-Taste"
 
-#: Programs/cmds.auto.h:916
+#: Programs/cmds.auto.h:960
 msgid "cursor-up key"
 msgstr "Pfeil-Rauf-Taste"
 
@@ -2138,7 +2194,7 @@ msgstr "langsamer sprechen"
 msgid "decrease speech volume"
 msgstr "leiser sprechen"
 
-#: Programs/cmds.auto.h:965
+#: Programs/cmds.auto.h:1009
 msgid "delete key"
 msgstr "Entfernen-Taste"
 
@@ -2213,15 +2269,11 @@ msgstr "Treiberanfrage"
 msgid "driver,..."
 msgstr "Treiber,..."
 
-#: Programs/cmds.auto.h:867
-msgid "emulate special key"
-msgstr "emuliere spezielle Taste"
-
-#: Programs/cmds.auto.h:951
+#: Programs/cmds.auto.h:995
 msgid "end key"
 msgstr "Ende-Taste"
 
-#: Programs/cmds.auto.h:874
+#: Programs/cmds.auto.h:918
 msgid "enter key"
 msgstr "Eingabetaste"
 
@@ -2241,7 +2293,7 @@ msgstr "Aufrufen/Verlassen des Einstellungsmenüs"
 msgid "enter/leave status display"
 msgstr "Aufrufen/Verlassen der Statusanzeige"
 
-#: Programs/cmds.auto.h:895
+#: Programs/cmds.auto.h:939
 msgid "escape key"
 msgstr "Escape-Taste"
 
@@ -2293,7 +2345,7 @@ msgstr "Verarbeitungsfehler in Datei '%s'."
 msgid "fork of \"%s\" failed: %s\n"
 msgstr ""
 
-#: Programs/cmds.auto.h:973
+#: Programs/cmds.auto.h:1017
 msgid "function key"
 msgstr "Funktionstaste"
 
@@ -2513,7 +2565,7 @@ msgstr "Hilfe nicht verfügbar"
 msgid "help screen not readable"
 msgstr "Hilfe nicht lesbar"
 
-#: Programs/cmds.auto.h:944
+#: Programs/cmds.auto.h:988
 msgid "home key"
 msgstr "Pos1-Taste"
 
@@ -2533,11 +2585,16 @@ msgstr "schneller sprechen"
 msgid "increase speech volume"
 msgstr "lauter sprechen"
 
+#: Programs/brltty-trtxt.c:183 Programs/brltty-ttb.c:296
+#, c-format
+msgid "input error: %s: %s"
+msgstr "Eingabefehler: %s: %s"
+
 #: Programs/cmds.auto.h:494
 msgid "insert clipboard text at cursor"
 msgstr "Text der Zwischenablage an Cursorposition einfügen"
 
-#: Programs/cmds.auto.h:958
+#: Programs/cmds.auto.h:1002
 msgid "insert key"
 msgstr "Einfüge-Taste"
 
@@ -2545,8 +2602,28 @@ msgstr "Einfüge-Taste"
 msgid "install path not absolute"
 msgstr "Installationspfad ist nicht absolut"
 
+#: Programs/bluetooth.c:287
+#, c-format
+msgid "invalid Bluetooth connection timeout: %s"
+msgstr "ungültige Angabe der Zeitüberschreibung für Bluetooth-Verbindungsaufbau: %s"
+
+#: Programs/bluetooth.c:251
+#, c-format
+msgid "invalid Bluetooth device address: %s"
+msgstr "ungültige Bluetooth-Geräteadresse: %s"
+
+#: Programs/brlapi_server.c:1588
+#, c-format
+msgid "invalid TCP port: %s"
+msgstr "ungültiger TCP-Port: %s"
+
 #: Programs/options.c:99
 msgid "invalid counter setting"
+msgstr "ungültige Zähler-Einstellung"
+
+#: Programs/bluetooth.c:320
+#, fuzzy, c-format
+msgid "invalid discover option: %s"
 msgstr "ungültige Zähler-Einstellung"
 
 #: Programs/datafile.c:432
@@ -2561,7 +2638,11 @@ msgstr "ungültige Schalter-Einstellung"
 msgid "invalid message hold timeout"
 msgstr "ungültige Meldungsanzeigedauer"
 
-#: Programs/brlapi_server.c:2970
+#: Programs/brltty-ctb.c:494
+msgid "invalid output width"
+msgstr "ungültige Ausgabebreite"
+
+#: Programs/brlapi_server.c:2973
 msgid "invalid thread stack size"
 msgstr "ungültige Threadstapelgröße"
 
@@ -2618,6 +2699,11 @@ msgstr "lvl|kat,..."
 msgid "magenta"
 msgstr "Magenta"
 
+#: Programs/brltty-ttb.c:1916
+#, c-format
+msgid "missing input table."
+msgstr "fehlende Eingabetabelle."
+
 #. An invalid option has been specified.
 #: Programs/options.c:533
 msgid "missing operand"
@@ -2660,6 +2746,11 @@ msgstr ""
 msgid "no items for VT number\n"
 msgstr ""
 
+#: Programs/auth.c:605
+#, c-format
+msgid "no matching user or group"
+msgstr "keine passenden Benutzer oder Gruppen"
+
 #: Programs/scr_driver.c:41
 msgid "no screen"
 msgstr "Kein Bildschirm"
@@ -2672,6 +2763,11 @@ msgstr "keine"
 msgid "normalized position"
 msgstr "normalisierte Position"
 
+#: Programs/file.c:330
+#, c-format
+msgid "not a directory: %s"
+msgstr "kein Verzeichnis: %s"
+
 #: Programs/config.c:1130
 msgid "not saved"
 msgstr "nicht gespeichert"
@@ -2680,13 +2776,28 @@ msgstr "nicht gespeichert"
 msgid "option"
 msgstr "Option"
 
-#: Programs/cmds.auto.h:937
+#: Programs/brltty-ctb.c:357
+#, c-format
+msgid "output error: %s"
+msgstr "Ausgabefehler: %s"
+
+#: Programs/brltty-trtxt.c:188 Programs/brltty-ttb.c:333
+#, c-format
+msgid "output error: %s: %s"
+msgstr "Ausgabefehler: %s: %s"
+
+#: Programs/cmds.auto.h:981
 msgid "page-down key"
 msgstr "Seite-Runter Taste"
 
-#: Programs/cmds.auto.h:930
+#: Programs/cmds.auto.h:974
 msgid "page-up key"
 msgstr "Seite-Rauf Taste"
+
+#: Programs/auth.c:292
+#, c-format
+msgid "path to key file not specified"
+msgstr "Pfad zur Schlüsseldatei nicht angegeben"
 
 #: Programs/config.c:2331
 msgid "pid file not specified"
@@ -2706,7 +2817,7 @@ msgstr "positioniere linken Rand der Braillezeile bei Zeichen"
 
 #: Drivers/Braille/Baum/braille.c:889
 msgid "power switch"
-msgstr ""
+msgstr "Netzschalter"
 
 #: Programs/spk.c:181
 msgid "rate"
@@ -2981,7 +3092,7 @@ msgstr "Sprechen stoppen"
 msgid "strange old error handler\n"
 msgstr "befremdlicher alter Fehlerbehandler\n"
 
-#: Programs/cmds.auto.h:1017
+#: Programs/cmds.auto.h:904
 msgid "switch to command context"
 msgstr "wechsle in den Kommandokontext"
 
@@ -2997,15 +3108,35 @@ msgstr "wechsle zum vorherigen virtuellen Terminal"
 msgid "switch to virtual terminal"
 msgstr "wechsle zu virtuellem Terminal"
 
-#: Programs/cmds.auto.h:881
+#: Programs/cmds.auto.h:925
 msgid "tab key"
 msgstr "Tabulator-Taste"
 
-#: Programs/cmds.auto.h:989
+#: Programs/brltty-ttb.c:632
+#, c-format
+msgid "table open error: %s: %s"
+msgstr "Fehler beim öffnen der Tabelle: %s: %s"
+
+#: Programs/brltty-ttb.c:299
+#, c-format
+msgid "table too short: %s"
+msgstr "Tabelle zu kurz: %s"
+
+#: Programs/brlapi_server.c:2163
+#, c-format
+msgid "too many hosts specified (%d, max %d)"
+msgstr ""
+
+#: Programs/brltty-ttb.c:1938
+#, c-format
+msgid "too many parameters."
+msgstr "zu viele Parameter."
+
+#: Programs/cmds.auto.h:876
 msgid "type braille character"
 msgstr "Braillezeichen eingeben"
 
-#: Programs/cmds.auto.h:981
+#: Programs/cmds.auto.h:868
 msgid "type unicode character"
 msgstr "Unicode-Zeichen eingeben"
 
@@ -3027,6 +3158,16 @@ msgstr "nicht erkanntes Kommando"
 msgid "unhandled event type: %d\n"
 msgstr "unbehandelter Ereignistyp: %d\n"
 
+#: Programs/brltty-ttb.c:604
+#, c-format
+msgid "unknown %s format: %s"
+msgstr "unbekanntes %s-Format: %s"
+
+#: Programs/brlapi_server.c:1622
+#, c-format
+msgid "unknown address type %d"
+msgstr "unbekannter Adresstyp %d"
+
 #: Programs/cmd.c:197
 msgid "unknown command"
 msgstr "unbekanntes Kommando"
@@ -3035,6 +3176,11 @@ msgstr "unbekanntes Kommando"
 msgid "unknown configuration directive"
 msgstr "unbekannte Konfigurationsdirektive"
 
+#: Programs/auth.c:417
+#, c-format
+msgid "unknown group: %s"
+msgstr "unbekannte Gruppe: %s"
+
 #: Programs/config.c:602
 msgid "unknown log level or category"
 msgstr "unbekannte Protokollierungsausführlichkeit oder Kategorie"
@@ -3042,6 +3188,16 @@ msgstr "unbekannte Protokollierungsausführlichkeit oder Kategorie"
 #: Programs/options.c:528
 msgid "unknown option"
 msgstr "unbekannte Option"
+
+#: Programs/auth.c:362
+#, c-format
+msgid "unknown user: %s"
+msgstr "unbekannter Benutzer: %s"
+
+#: Programs/brltty-ttb.c:594
+#, c-format
+msgid "unspecified %s format."
+msgstr "Unspezifiziertes %s-Format."
 
 #: Programs/parse.c:394
 msgid "unsupported parameter"
@@ -3064,8 +3220,3 @@ msgstr ""
 msgid "yellow"
 msgstr "Gelb"
 
-#~ msgid "Help Path"
-#~ msgstr "Hilfe-Pfad"
-
-#~ msgid "cannot open help file"
-#~ msgstr "kann Hilfedatei nicht öffnen"

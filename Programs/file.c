@@ -327,9 +327,9 @@ ensureDirectory (const char *path) {
   if (testDirectoryPath(path)) return 1;
 
   if (errno == EEXIST) {
-    logMessage(LOG_ERR, "not a directory: %s", path);
+    logMessage(LOG_ERR, gettext("not a directory: %s"), path);
   } else if (errno != ENOENT) {
-    logMessage(LOG_ERR, "cannot access directory: %s: %s", path, strerror(errno));
+    logMessage(LOG_ERR, gettext("cannot access directory: %s: %s"), path, strerror(errno));
   } else {
     {
       char *directory = getPathDirectory(path);
@@ -809,7 +809,7 @@ openFile (const char *path, const char *mode, int optional) {
     logMessage(LOG_DEBUG, "file opened: %s fd=%d", path, fileno(file));
   } else {
     logMessage((optional && (errno == ENOENT))? LOG_DEBUG: LOG_ERR,
-               "cannot open file: %s: %s", path, strerror(errno));
+               gettext("cannot open file: %s: %s"), path, strerror(errno));
   }
 
   return file;

@@ -467,8 +467,8 @@ beginItem_files (MenuItem *item) {
         if (chdir(originalDirectory) == -1) logSystemError("chdir");
 #endif /* HAVE_FCHDIR */
       } else {
-        logMessage(LOG_ERR, "%s: %s: %s",
-                   gettext("cannot set working directory"), files->directory, strerror(errno));
+        logMessage(LOG_ERR, gettext("cannot set working directory: %s: %s"),
+                   files->directory, strerror(errno));
       }
 
 #ifdef HAVE_FCHDIR
@@ -478,10 +478,10 @@ beginItem_files (MenuItem *item) {
 #endif /* HAVE_FCHDIR */
     } else {
 #ifdef HAVE_FCHDIR
-      logMessage(LOG_ERR, "%s: %s",
-                 gettext("cannot open working directory"), strerror(errno));
+      logMessage(LOG_ERR, gettext("cannot open working directory: %s"),
+                 strerror(errno));
 #else /* HAVE_FCHDIR */
-      logMessage(LOG_ERR, "%s", gettext("cannot determine working directory"));
+      logMessage(LOG_ERR, gettext("cannot determine working directory"));
 #endif /* HAVE_FCHDIR */
     }
   }
