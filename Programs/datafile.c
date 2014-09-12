@@ -864,10 +864,15 @@ writeUtf8Cells (FILE *stream, const unsigned char *cells, size_t count) {
 }
 
 typedef struct {
+  unsigned canInclude:1;
+  unsigned isIncluding:1;
   unsigned inElse:1;
-  unsigned includeLine:1;
-  unsigned includeInherited:1;
 } DataCondition;
+
+static inline int
+shallInclude (const DataCondition *condition) {
+  return condition->canInclude && condition->isIncluding;
+}
 
 static void
 deallocateDataCondition (void *item, void *data UNUSED) {
@@ -912,13 +917,13 @@ pushDataCondition (
     condition->inElse = 0;
 
     {
-      const DataOperand item = {
+      const DataOperand identifier = {
         .characters = name->characters,
         .length = name->length
       };
 
-      condition->includeLine = testCondition(file, &item, file->data);
-      if (negateCondition) condition->includeLine = !condition->includeLine;
+      condition->isIncluding = testCondition(file, &identifier, file->data);
+      if (negateCondition) condition->isIncluding = !condition->isIncluding;
     }
 
     {
@@ -927,9 +932,9 @@ pushDataCondition (
       if (element) {
         const DataCondition *parent = getElementItem(element);
 
-        condition->includeInherited = parent->includeLine;
+        condition->canInclude = shallInclude(parent);
       } else {
-        condition->includeInherited = 1;
+        condition->canInclude = 1;
       }
     }
 
@@ -954,7 +959,7 @@ testDataCondition (DataFile *file) {
   if (element) {
     const DataCondition *condition = getElementItem(element);
 
-    if (!(condition->includeInherited && condition->includeLine)) return 0;
+    if (!shallInclude(condition)) return 0;
   }
 
   return 1;
@@ -1072,7 +1077,7 @@ DATA_OPERANDS_PROCESSOR(processElseOperands) {
       reportDataError(file, "already in else");
     } else {
       condition->inElse = 1;
-      condition->includeLine = !condition->includeLine;
+      condition->isIncluding = !condition->isIncluding;
       if (!processConditionSubdirective(file, element)) return 0;
     }
   }
