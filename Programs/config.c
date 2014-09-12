@@ -184,7 +184,8 @@ static char **brailleDrivers = NULL;
 static const BrailleDriver *brailleDriver = NULL;
 static void *brailleObject = NULL;
 static char *opt_brailleParameters;
-static char **brailleParameters = NULL;
+static char *brailleParameters = NULL;
+static char **brailleDriverParameters = NULL;
 static char *oldPreferencesFile = NULL;
 static int oldPreferencesEnabled = 1;
 
@@ -217,8 +218,8 @@ static const SpeechDriver *speechDriver = NULL;
 static void *speechObject = NULL;
 
 static char *opt_speechParameters;
-static char *currentSpeechParameters = NULL;
-static char **speechParameters = NULL;
+static char *speechParameters = NULL;
+static char **speechDriverParameters = NULL;
 
 static char *opt_speechInput;
 static SpeechInputObject *speechInputObject;
@@ -231,7 +232,8 @@ static char **screenDrivers = NULL;
 static const ScreenDriver *screenDriver = NULL;
 static void *screenObject = NULL;
 static char *opt_screenParameters;
-static char **screenParameters = NULL;
+static char *screenParameters = NULL;
+static char **screenDriverParameters = NULL;
 
 static const char *const optionStrings_TextTable[] = {
   optionOperand_autodetect,
@@ -1210,7 +1212,7 @@ int
 constructBrailleDriver (void) {
   initializeBrailleDisplay();
 
-  if (braille->construct(&brl, brailleParameters, brailleDevice)) {
+  if (braille->construct(&brl, brailleDriverParameters, brailleDevice)) {
     if (ensureBrailleBuffer(&brl, LOG_INFO)) {
       if (brl.keyBindings) {
         char *keyTablePath = makeInputTablePath(opt_tablesDirectory,
@@ -1297,11 +1299,11 @@ destructBrailleDriver (void) {
 static int
 initializeBrailleDriver (const char *code, int verify) {
   if ((braille = loadBrailleDriver(code, &brailleObject, opt_driversDirectory))) {
-    brailleParameters = getParameters(braille->parameters,
-                                      braille->definition.code,
-                                      opt_brailleParameters);
+    brailleDriverParameters = getParameters(braille->parameters,
+                                            braille->definition.code,
+                                            brailleParameters);
 
-    if (brailleParameters) {
+    if (brailleDriverParameters) {
       int constructed = verify;
 
       if (!constructed) {
@@ -1319,7 +1321,7 @@ initializeBrailleDriver (const char *code, int verify) {
         logMessage(LOG_INFO, "%s: %s [%s]",
                    gettext("Braille Driver"), braille->definition.code, braille->definition.name);
         identifyBrailleDriver(braille, 0);
-        logParameters(braille->parameters, brailleParameters,
+        logParameters(braille->parameters, brailleDriverParameters,
                       gettext("Braille Parameter"));
         logMessage(LOG_INFO, "%s: %s", gettext("Braille Device"), brailleDevice);
 
@@ -1342,8 +1344,8 @@ initializeBrailleDriver (const char *code, int verify) {
         }
       }
 
-      deallocateStrings(brailleParameters);
-      brailleParameters = NULL;
+      deallocateStrings(brailleDriverParameters);
+      brailleDriverParameters = NULL;
     }
 
     unloadDriverObject(&brailleObject);
@@ -1429,9 +1431,9 @@ deactivateBrailleDriver (void) {
   unloadDriverObject(&brailleObject);
   stopAllBlinkDescriptors();
 
-  if (brailleParameters) {
-    deallocateStrings(brailleParameters);
-    brailleParameters = NULL;
+  if (brailleDriverParameters) {
+    deallocateStrings(brailleDriverParameters);
+    brailleDriverParameters = NULL;
   }
 
   if (oldPreferencesFile) {
@@ -1568,6 +1570,11 @@ exitBrailleData (void *data) {
     brailleDrivers = NULL;
   }
 
+  if (brailleParameters) {
+    free(brailleParameters);
+    brailleParameters = NULL;
+  }
+
   if (brailleDevices) {
     deallocateStrings(brailleDevices);
     brailleDevices = NULL;
@@ -1589,6 +1596,24 @@ changeBrailleDriver (const char *driver) {
   return 0;
 }
 
+int
+changeBrailleParameters (const char *parameters) {
+  char *newParameters;
+
+  if (!parameters) parameters = "";
+
+  if ((newParameters = strdup(parameters))) {
+    char *oldParameters = brailleParameters;
+
+    brailleParameters = newParameters;
+    if (oldParameters) free(oldParameters);
+    return 1;
+  } else {
+    logMallocError();
+  }
+
+  return 0;
+}
 int
 changeBrailleDevice (const char *device) {
   char **newDevices = splitString(device, ',', NULL);
@@ -1661,7 +1686,7 @@ int
 constructSpeechDriver (void) {
   initializeSpeechSynthesizer();
 
-  if (startSpeechDriverThread(speechParameters)) {
+  if (startSpeechDriverThread(speechDriverParameters)) {
     return 1;
   } else {
     logMessage(LOG_DEBUG, "speech driver initialization failed: %s",
@@ -1680,11 +1705,11 @@ destructSpeechDriver (void) {
 static int
 initializeSpeechDriver (const char *code, int verify) {
   if ((speech = loadSpeechDriver(code, &speechObject, opt_driversDirectory))) {
-    speechParameters = getParameters(speech->parameters,
-                                     speech->definition.code,
-                                     currentSpeechParameters);
+    speechDriverParameters = getParameters(speech->parameters,
+                                           speech->definition.code,
+                                           speechParameters);
 
-    if (speechParameters) {
+    if (speechDriverParameters) {
       int constructed = verify;
 
       if (!constructed) {
@@ -1701,14 +1726,14 @@ initializeSpeechDriver (const char *code, int verify) {
         logMessage(LOG_INFO, "%s: %s [%s]",
                    gettext("Speech Driver"), speech->definition.code, speech->definition.name);
         identifySpeechDriver(speech, 0);
-        logParameters(speech->parameters, speechParameters,
+        logParameters(speech->parameters, speechDriverParameters,
                       gettext("Speech Parameter"));
 
         return 1;
       }
 
-      deallocateStrings(speechParameters);
-      speechParameters = NULL;
+      deallocateStrings(speechDriverParameters);
+      speechDriverParameters = NULL;
     }
 
     unloadDriverObject(&speechObject);
@@ -1749,9 +1774,9 @@ deactivateSpeechDriver (void) {
 
   unloadDriverObject(&speechObject);
 
-  if (speechParameters) {
-    deallocateStrings(speechParameters);
-    speechParameters = NULL;
+  if (speechDriverParameters) {
+    deallocateStrings(speechDriverParameters);
+    speechDriverParameters = NULL;
   }
 }
 
@@ -1858,9 +1883,9 @@ exitSpeechData (void *data) {
     speechDrivers = NULL;
   }
 
-  if (currentSpeechParameters) {
-    free(currentSpeechParameters);
-    currentSpeechParameters = NULL;
+  if (speechParameters) {
+    free(speechParameters);
+    speechParameters = NULL;
   }
 }
 
@@ -1894,9 +1919,9 @@ changeSpeechParameters (const char *parameters) {
   if (!parameters) parameters = "";
 
   if ((newParameters = strdup(parameters))) {
-    char *oldParameters = currentSpeechParameters;
+    char *oldParameters = speechParameters;
 
-    currentSpeechParameters = newParameters;
+    speechParameters = newParameters;
     if (oldParameters) free(oldParameters);
     return 1;
   } else {
@@ -1910,18 +1935,18 @@ changeSpeechParameters (const char *parameters) {
 static int
 initializeScreenDriver (const char *code, int verify) {
   if ((screen = loadScreenDriver(code, &screenObject, opt_driversDirectory))) {
-    screenParameters = getParameters(getScreenParameters(screen),
-                                     getScreenDriverDefinition(screen)->code,
-                                     opt_screenParameters);
+    screenDriverParameters = getParameters(getScreenParameters(screen),
+                                           getScreenDriverDefinition(screen)->code,
+                                           screenParameters);
 
-    if (screenParameters) {
+    if (screenDriverParameters) {
       int constructed = verify;
 
       if (!constructed) {
         logMessage(LOG_DEBUG, "initializing screen driver: %s",
                    getScreenDriverDefinition(screen)->code);
 
-        if (constructScreenDriver(screenParameters)) {
+        if (constructScreenDriver(screenDriverParameters)) {
           constructed = 1;
           screenDriver = screen;
         }
@@ -1934,14 +1959,14 @@ initializeScreenDriver (const char *code, int verify) {
                    getScreenDriverDefinition(screen)->name);
         identifyScreenDriver(screen, 0);
         logParameters(getScreenParameters(screen),
-                      screenParameters,
+                      screenDriverParameters,
                       gettext("Screen Parameter"));
 
         return 1;
       }
 
-      deallocateStrings(screenParameters);
-      screenParameters = NULL;
+      deallocateStrings(screenDriverParameters);
+      screenDriverParameters = NULL;
     }
 
     unloadDriverObject(&screenObject);
@@ -1982,9 +2007,9 @@ deactivateScreenDriver (void) {
 
   unloadDriverObject(&screenObject);
 
-  if (screenParameters) {
-    deallocateStrings(screenParameters);
-    screenParameters = NULL;
+  if (screenDriverParameters) {
+    deallocateStrings(screenDriverParameters);
+    screenDriverParameters = NULL;
   }
 }
 
@@ -2055,14 +2080,19 @@ enableScreenDriver (void) {
   if (activity) startActivity(activity);
 }
 
-/*
 static void
 disableScreenDriver (void) {
   ActivityObject *activity = getScreenDriverActivity();
 
   if (activity) stopActivity(activity);
 }
-*/
+
+void
+restartScreenDriver (void) {
+  disableScreenDriver();
+  logMessage(LOG_INFO, gettext("reinitializing screen driver"));
+  enableScreenDriver();
+}
 
 static void
 exitScreenData (void *data) {
@@ -2072,6 +2102,45 @@ exitScreenData (void *data) {
     deallocateStrings(screenDrivers);
     screenDrivers = NULL;
   }
+
+  if (screenParameters) {
+    free(screenParameters);
+    screenParameters = NULL;
+  }
+}
+
+int
+changeScreenDriver (const char *driver) {
+  char **newDrivers = splitString(driver, ',', NULL);
+
+  if (newDrivers) {
+    char **oldDrivers = screenDrivers;
+
+    screenDrivers = newDrivers;
+    if (oldDrivers) deallocateStrings(oldDrivers);
+    return 1;
+  }
+
+  return 0;
+}
+
+int
+changeScreenParameters (const char *parameters) {
+  char *newParameters;
+
+  if (!parameters) parameters = "";
+
+  if ((newParameters = strdup(parameters))) {
+    char *oldParameters = screenParameters;
+
+    screenParameters = newParameters;
+    if (oldParameters) free(oldParameters);
+    return 1;
+  } else {
+    logMallocError();
+  }
+
+  return 0;
 }
 
 static void
@@ -2385,9 +2454,10 @@ brlttyStart (void) {
    * be used instead.
    */
 
-  onProgramExit("screen-data", exitScreenData, NULL);
-  screenDrivers = splitString(opt_screenDriver? opt_screenDriver: "", ',', NULL);
+  changeScreenDriver(opt_screenDriver? opt_screenDriver: "");
+  changeScreenParameters(opt_screenParameters);
   constructSpecialScreens();
+  onProgramExit("screen-data", exitScreenData, NULL);
 
   suppressTuneDeviceOpenErrors();
 
@@ -2503,8 +2573,9 @@ brlttyStart (void) {
     return PROG_EXIT_SYNTAX;
   }
 
-  changeBrailleDevice(opt_brailleDevice);
   changeBrailleDriver(opt_brailleDriver? opt_brailleDriver: "");
+  changeBrailleParameters(opt_brailleParameters);
+  changeBrailleDevice(opt_brailleDevice);
   brailleConstructed = 0;
   onProgramExit("braille-data", exitBrailleData, NULL);
 
@@ -2516,7 +2587,7 @@ brlttyStart (void) {
 
 #ifdef ENABLE_SPEECH_SUPPORT
   changeSpeechDriver(opt_speechDriver? opt_speechDriver: "");
-  changeSpeechParameters(opt_speechParameters? opt_speechParameters: "");
+  changeSpeechParameters(opt_speechParameters);
   onProgramExit("speech-data", exitSpeechData, NULL);
 
   if (opt_verify) {

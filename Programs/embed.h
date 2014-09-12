@@ -49,10 +49,16 @@ FUNCTION_DECLARE(changeKeyboardTable, int, (const char *name));
 
 FUNCTION_DECLARE(restartBrailleDriver, void, (void));
 FUNCTION_DECLARE(changeBrailleDriver, int, (const char *driver));
+FUNCTION_DECLARE(changeBrailleParameters, int, (const char *parameters));
 FUNCTION_DECLARE(changeBrailleDevice, int, (const char *device));
 
 FUNCTION_DECLARE(restartSpeechDriver, void, (void));
 FUNCTION_DECLARE(changeSpeechDriver, int, (const char *driver));
+FUNCTION_DECLARE(changeSpeechParameters, int, (const char *parameters));
+
+FUNCTION_DECLARE(restartScreenDriver, void, (void));
+FUNCTION_DECLARE(changeScreenDriver, int, (const char *driver));
+FUNCTION_DECLARE(changeScreenParameters, int, (const char *parameters));
 
 #ifdef __cplusplus
 }
