@@ -561,6 +561,7 @@ speechRequest_muteSpeech (
 
   if ((req = newSpeechRequest(REQ_MUTE_SPEECH, NULL))) {
     removeSpeechRequests(sdt, REQ_SAY_TEXT);
+    removeSpeechRequests(sdt, REQ_MUTE_SPEECH);
     if (enqueueSpeechRequest(sdt, req)) return 1;
 
     free(req);
