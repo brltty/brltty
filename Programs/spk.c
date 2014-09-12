@@ -119,32 +119,26 @@ int
 sayUtf8Characters (
   const char *text, const unsigned char *attributes,
   size_t length, size_t count,
-  int immediate
+  SayOptions options
 ) {
   if (count) {
-    if (immediate) {
-      if (!muteSpeech(__func__)) {
-        return 0;
-      }
-    }
-
     logMessage(LOG_CATEGORY(SPEECH_EVENTS), "say: %s", text);
-    if (!speechRequest_sayText(speechDriverThread, text, length, count, attributes)) return 0;
+    if (!speechRequest_sayText(speechDriverThread, text, length, count, attributes, options)) return 0;
   }
 
   return 1;
 }
 
 void
-sayString (const char *string, int immediate) {
-  sayUtf8Characters(string, NULL, strlen(string), getTextLength(string), immediate);
+sayString (const char *string, SayOptions options) {
+  sayUtf8Characters(string, NULL, strlen(string), getTextLength(string), options);
 }
 
 static void
 sayStringSetting (const char *name, const char *string) {
   char statement[0X40];
   snprintf(statement, sizeof(statement), "%s %s", name, string);
-  sayString(statement, 1);
+  sayString(statement, SAY_OPT_MUTE_FIRST);
 }
 
 static void

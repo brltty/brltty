@@ -436,7 +436,7 @@ handleSpeechCommands (int command, void *data) {
     case BRL_CMD_DESC_CURR_CHAR: {
       char description[0X50];
       formatCharacterDescription(description, sizeof(description), ses->spkx, ses->spky);
-      sayString(description, 1);
+      sayString(description, SAY_OPT_MUTE_FIRST);
       break;
     }
 
@@ -453,7 +453,7 @@ handleSpeechCommands (int command, void *data) {
       snprintf(buffer, sizeof(buffer), "%s %d, %s %d",
                gettext("line"), ses->spky+1,
                gettext("column"), ses->spkx+1);
-      sayString(buffer, 1);
+      sayString(buffer, SAY_OPT_MUTE_FIRST);
       break;
     }
 

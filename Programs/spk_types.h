@@ -25,6 +25,12 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef enum {
+  SAY_OPT_MUTE_FIRST      = 0X01,
+  SAY_OPT_HIGHER_PITCH    = 0X02,
+  SAY_OPT_ALL_PUNCTUATION = 0X04,
+} SayOptions;
+
 #define SPK_VOLUME_DEFAULT 10
 #define SPK_VOLUME_MAXIMUM (SPK_VOLUME_DEFAULT * 2)
 

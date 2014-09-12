@@ -1789,7 +1789,7 @@ startSpeechDriver (void) {
     char banner[0X100];
 
     makeProgramBanner(banner, sizeof(banner));
-    sayString(banner, 1);
+    sayString(banner, SAY_OPT_MUTE_FIRST);
     beginAutospeakDelay(SPEECH_DRIVER_START_AUTOSPEAK_DELAY);
   } else if (autospeak()) {
     doAutospeak(1);

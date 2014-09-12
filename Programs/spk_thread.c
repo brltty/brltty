@@ -22,6 +22,7 @@
 
 #include "log.h"
 #include "parameters.h"
+#include "prefs.h"
 #include "spk_thread.h"
 #include "spk.h"
 #include "async_wait.h"
@@ -117,6 +118,7 @@ typedef struct {
       size_t length;
       size_t count;
       const unsigned char *attributes;
+      SayOptions options;
     } sayText;
 
     struct {
@@ -361,11 +363,43 @@ handleSpeechRequest (volatile SpeechDriverThread *sdt, SpeechRequest *req) {
 
     switch (req->type) {
       case REQ_SAY_TEXT: {
+        volatile SpeechSynthesizer *spk = sdt->speechSynthesizer;
+        SayOptions options = req->arguments.sayText.options;
+        int restorePitch = 0;
+        int restorePunctuation = 0;
+
+        if (options & SAY_OPT_MUTE_FIRST) {
+          speech->mute(spk);
+        }
+
+        if (options & SAY_OPT_HIGHER_PITCH) {
+          unsigned char pitch = prefs.speechPitch + 7;
+
+          if (pitch > SPK_PITCH_MAXIMUM) pitch = SPK_PITCH_MAXIMUM;
+
+          if (pitch != prefs.speechPitch) {
+            spk->setPitch(spk, pitch);
+            restorePitch = 1;
+          }
+        }
+
+        if (options && SAY_OPT_ALL_PUNCTUATION) {
+          unsigned char punctuation = SPK_PUNCTUATION_ALL;
+
+          if (punctuation != prefs.speechPunctuation) {
+            spk->setPunctuation(spk, punctuation);
+            restorePunctuation = 1;
+          }
+        }
+
         speech->say(
-          sdt->speechSynthesizer,
+          spk,
           req->arguments.sayText.text, req->arguments.sayText.length,
           req->arguments.sayText.count, req->arguments.sayText.attributes
         );
+
+        if (restorePunctuation) spk->setPunctuation(spk, prefs.speechPunctuation);
+        if (restorePitch) spk->setPitch(spk, prefs.speechPitch);
 
         sendIntegerResponse(sdt, 1);
         break;
@@ -531,7 +565,8 @@ int
 speechRequest_sayText (
   volatile SpeechDriverThread *sdt,
   const char *text, size_t length,
-  size_t count, const unsigned char *attributes
+  size_t count, const unsigned char *attributes,
+  SayOptions options
 ) {
   SpeechRequest *req;
 
@@ -545,6 +580,13 @@ speechRequest_sayText (
     req->arguments.sayText.length = length;
     req->arguments.sayText.count = count;
     req->arguments.sayText.attributes = data[1].address;
+    req->arguments.sayText.options = options;
+
+    if (options & SAY_OPT_MUTE_FIRST) {
+      removeSpeechRequests(sdt, REQ_SAY_TEXT);
+      removeSpeechRequests(sdt, REQ_MUTE_SPEECH);
+    }
+
     if (enqueueSpeechRequest(sdt, req)) return 1;
 
     free(req);

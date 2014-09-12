@@ -175,7 +175,7 @@ extern int opt_quietIfNoBraille;
 extern int autospeak (void);
 extern void endAutospeakDelay (void);
 
-extern void sayScreenCharacters (const ScreenCharacter *characters, size_t count, int immediate);
+extern void sayScreenCharacters (const ScreenCharacter *characters, size_t count, SayOptions options);
 extern void speakCharacters (const ScreenCharacter *characters, size_t count, int spell);
 extern void trackSpeech (void);
 

@@ -39,10 +39,10 @@ extern int muteSpeech (const char *reason);
 extern int sayUtf8Characters (
   const char *text, const unsigned char *attributes,
   size_t length, size_t count,
-  int immediate
+  SayOptions options
 );
 
-extern void sayString (const char *string, int immediate);
+extern void sayString (const char *string, SayOptions);
 
 extern int canSetSpeechVolume (void);
 extern int setSpeechVolume (int setting, int say);

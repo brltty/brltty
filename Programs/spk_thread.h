@@ -38,7 +38,8 @@ extern void destroySpeechDriverThread (
 extern int speechRequest_sayText (
   volatile SpeechDriverThread *sdt,
   const char *text, size_t length,
-  size_t count, const unsigned char *attributes
+  size_t count, const unsigned char *attributes,
+  SayOptions options
 );
 
 extern int speechRequest_muteSpeech (
