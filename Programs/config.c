@@ -773,17 +773,17 @@ stopKeyboardMonitor (void) {
 }
 
 static int
-prepareKeyboardMonitorActivity (void *datga) {
+prepareKeyboardMonitorActivity (void *data) {
   return 1;
 }
 
 static int
-startKeyboardMonitorActivity (void *datga) {
+startKeyboardMonitorActivity (void *data) {
   return startKeyboardMonitor();
 }
 
 static void
-stopKeyboardMonitorActivity (void *datga) {
+stopKeyboardMonitorActivity (void *data) {
   stopKeyboardMonitor();
 }
 
@@ -1484,19 +1484,19 @@ stopBrailleDriver (void) {
 }
 
 static int
-prepareBrailleDriverActivity (void *datga) {
+prepareBrailleDriverActivity (void *data) {
   initializeBrailleDisplay();
   ensureBrailleBuffer(&brl, LOG_DEBUG);
   return 1;
 }
 
 static int
-startBrailleDriverActivity (void *datga) {
+startBrailleDriverActivity (void *data) {
   return startBrailleDriver();
 }
 
 static void
-stopBrailleDriverActivity (void *datga) {
+stopBrailleDriverActivity (void *data) {
   stopBrailleDriver();
 }
 
@@ -1807,18 +1807,18 @@ stopSpeechDriver (void) {
 }
 
 static int
-prepareSpeechDriverActivity (void *datga) {
+prepareSpeechDriverActivity (void *data) {
   initializeSpeechSynthesizer();
   return 1;
 }
 
 static int
-startSpeechDriverActivity (void *datga) {
+startSpeechDriverActivity (void *data) {
   return startSpeechDriver();
 }
 
 static void
-stopSpeechDriverActivity (void *datga) {
+stopSpeechDriverActivity (void *data) {
   stopSpeechDriver();
 }
 
@@ -2026,18 +2026,18 @@ stopScreenDriver (void) {
 }
 
 static int
-prepareScreenDriverActivity (void *datga) {
+prepareScreenDriverActivity (void *data) {
   initializeScreen();
   return 1;
 }
 
 static int
-startScreenDriverActivity (void *datga) {
+startScreenDriverActivity (void *data) {
   return startScreenDriver();
 }
 
 static void
-stopScreenDriverActivity (void *datga) {
+stopScreenDriverActivity (void *data) {
   stopScreenDriver();
 }
 
