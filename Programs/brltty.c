@@ -815,14 +815,12 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
           break;
 
         case ucRaisePitch:
-          if (canSetSpeechPitch()) sayOptions |= SAY_OPT_HIGHER_PITCH;
+          sayOptions |= SAY_OPT_HIGHER_PITCH;
           break;
       }
     }
 
-    if (canSetSpeechPunctuation()) {
-      sayOptions |= SAY_OPT_ALL_PUNCTUATION;
-    }
+    sayOptions |= SAY_OPT_ALL_PUNCTUATION;
 
     if (prefix) {
       wchar_t buffer[0X100];

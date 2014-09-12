@@ -368,27 +368,29 @@ handleSpeechRequest (volatile SpeechDriverThread *sdt, SpeechRequest *req) {
         int restorePitch = 0;
         int restorePunctuation = 0;
 
-        if (options & SAY_OPT_MUTE_FIRST) {
-          speech->mute(spk);
-        }
+        if (options & SAY_OPT_MUTE_FIRST) speech->mute(spk);
 
         if (options & SAY_OPT_HIGHER_PITCH) {
-          unsigned char pitch = prefs.speechPitch + 7;
+          if (spk->setPitch) {
+            unsigned char pitch = prefs.speechPitch + 7;
 
-          if (pitch > SPK_PITCH_MAXIMUM) pitch = SPK_PITCH_MAXIMUM;
+            if (pitch > SPK_PITCH_MAXIMUM) pitch = SPK_PITCH_MAXIMUM;
 
-          if (pitch != prefs.speechPitch) {
-            spk->setPitch(spk, pitch);
-            restorePitch = 1;
+            if (pitch != prefs.speechPitch) {
+              spk->setPitch(spk, pitch);
+              restorePitch = 1;
+            }
           }
         }
 
-        if (options && SAY_OPT_ALL_PUNCTUATION) {
-          unsigned char punctuation = SPK_PUNCTUATION_ALL;
+        if (options & SAY_OPT_ALL_PUNCTUATION) {
+          if (spk->setPunctuation) {
+            unsigned char punctuation = SPK_PUNCTUATION_ALL;
 
-          if (punctuation != prefs.speechPunctuation) {
-            spk->setPunctuation(spk, punctuation);
-            restorePunctuation = 1;
+            if (punctuation != prefs.speechPunctuation) {
+              spk->setPunctuation(spk, punctuation);
+              restorePunctuation = 1;
+            }
           }
         }
 
