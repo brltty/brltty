@@ -55,10 +55,16 @@ SYMBOL_POINTER(changeKeyboardTable);
 
 SYMBOL_POINTER(restartBrailleDriver);
 SYMBOL_POINTER(changeBrailleDriver);
+SYMBOL_POINTER(changeBrailleParameters);
 SYMBOL_POINTER(changeBrailleDevice);
 
 SYMBOL_POINTER(restartSpeechDriver);
 SYMBOL_POINTER(changeSpeechDriver);
+SYMBOL_POINTER(changeSpeechParameters);
+
+SYMBOL_POINTER(restartScreenDriver);
+SYMBOL_POINTER(changeScreenDriver);
+SYMBOL_POINTER(changeScreenParameters);
 
 typedef struct {
   const char *name;
@@ -90,10 +96,16 @@ BEGIN_SYMBOL_TABLE
 
   SYMBOL_ENTRY(restartBrailleDriver),
   SYMBOL_ENTRY(changeBrailleDriver),
+  SYMBOL_ENTRY(changeBrailleParameters),
   SYMBOL_ENTRY(changeBrailleDevice),
 
   SYMBOL_ENTRY(restartSpeechDriver),
   SYMBOL_ENTRY(changeSpeechDriver),
+  SYMBOL_ENTRY(changeSpeechParameters),
+
+  SYMBOL_ENTRY(restartScreenDriver),
+  SYMBOL_ENTRY(changeScreenDriver),
+  SYMBOL_ENTRY(changeScreenParameters),
 END_SYMBOL_TABLE
 
 static void *coreHandle = NULL;
@@ -373,6 +385,13 @@ JAVA_METHOD (
 }
 
 JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, changeBrailleParameters, jboolean,
+  jstring parameters
+) {
+  return changeStringValue(env, changeBrailleParameters_p, parameters);
+}
+
+JAVA_METHOD (
   org_a11y_brltty_core_CoreWrapper, changeBrailleDevice, jboolean,
   jstring device
 ) {
@@ -391,6 +410,34 @@ JAVA_METHOD (
   jstring driver
 ) {
   return changeStringValue(env, changeSpeechDriver_p, driver);
+}
+
+JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, changeSpeechParameters, jboolean,
+  jstring parameters
+) {
+  return changeStringValue(env, changeSpeechParameters_p, parameters);
+}
+
+JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, restartScreenDriver, jboolean
+) {
+  restartScreenDriver_p();
+  return JNI_TRUE;
+}
+
+JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, changeScreenDriver, jboolean,
+  jstring driver
+) {
+  return changeStringValue(env, changeScreenDriver_p, driver);
+}
+
+JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, changeScreenParameters, jboolean,
+  jstring parameters
+) {
+  return changeStringValue(env, changeScreenParameters_p, parameters);
 }
 
 JNIEXPORT jint
