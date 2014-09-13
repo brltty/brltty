@@ -129,6 +129,25 @@ sayUtf8Characters (
   return 1;
 }
 
+int
+sayWideCharacters (
+  const wchar_t *characters, const unsigned char *attributes,
+  size_t count, SayOptions options
+) {
+  int ok = 0;
+  size_t length;
+  void *text = makeUtf8FromWchars(characters, count, &length);
+
+  if (text) {
+    if (sayUtf8Characters(text, attributes, length, count, options)) ok = 1;
+    free(text);
+  } else {
+    logMallocError();
+  }
+
+  return ok;
+}
+
 void
 sayString (const char *string, SayOptions options) {
   sayUtf8Characters(string, NULL, strlen(string), getTextLength(string), options);

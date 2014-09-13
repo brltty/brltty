@@ -746,19 +746,6 @@ autospeak (void) {
   return braille->definition.code == noBraille.definition.code;
 }
 
-static void
-sayWideCharacters (const wchar_t *characters, const unsigned char *attributes, size_t count, SayOptions options) {
-  size_t length;
-  void *text = makeUtf8FromWchars(characters, count, &length);
-
-  if (text) {
-    sayUtf8Characters(text, attributes, length, count, options);
-    free(text);
-  } else {
-    logMallocError();
-  }
-}
-
 void
 sayScreenCharacters (const ScreenCharacter *characters, size_t count, SayOptions options) {
   wchar_t text[count];

@@ -42,6 +42,10 @@ extern int sayUtf8Characters (
   SayOptions options
 );
 
+extern int sayWideCharacters (
+  const wchar_t *characters, const unsigned char *attributes,
+  size_t count, SayOptions options
+);
 extern void sayString (const char *string, SayOptions);
 
 extern int canSetSpeechVolume (void);
