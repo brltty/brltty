@@ -836,12 +836,22 @@ static int ps2KeyPressed;
 static UinputObject *uinputKeyboard;
 static ReportListenerInstance *brailleOfflineListener;
 
+static void
+closeKeyboard (void) {
+  if (uinputKeyboard) {
+    destroyUinputObject(uinputKeyboard);
+    uinputKeyboard = NULL;
+  }
+}
+
 static int
 openKeyboard (void) {
   if (!uinputKeyboard) {
     if (!(uinputKeyboard = newUinputKeyboard("Linux Screen Driver Keyboard"))) {
       return 0;
     }
+
+    atexit(closeKeyboard);
   }
 
   return 1;
@@ -920,11 +930,6 @@ destruct_LinuxScreen (void) {
   if (brailleOfflineListener) {
     unregisterReportListener(brailleOfflineListener);
     brailleOfflineListener = NULL;
-  }
-
-  if (uinputKeyboard) {
-    destroyUinputObject(uinputKeyboard);
-    uinputKeyboard = NULL;
   }
 }
 
