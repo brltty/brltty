@@ -2455,7 +2455,7 @@ brlttyStart (void) {
    * be used instead.
    */
 
-  changeScreenDriver(opt_screenDriver? opt_screenDriver: "");
+  changeScreenDriver(opt_screenDriver);
   changeScreenParameters(opt_screenParameters);
   constructSpecialScreens();
   onProgramExit("screen-data", exitScreenData, NULL);
@@ -2574,7 +2574,7 @@ brlttyStart (void) {
     return PROG_EXIT_SYNTAX;
   }
 
-  changeBrailleDriver(opt_brailleDriver? opt_brailleDriver: "");
+  changeBrailleDriver(opt_brailleDriver);
   changeBrailleParameters(opt_brailleParameters);
   changeBrailleDevice(opt_brailleDevice);
   brailleConstructed = 0;
@@ -2587,7 +2587,7 @@ brlttyStart (void) {
   }
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  changeSpeechDriver(opt_speechDriver? opt_speechDriver: "");
+  changeSpeechDriver(opt_speechDriver);
   changeSpeechParameters(opt_speechParameters);
   onProgramExit("speech-data", exitSpeechData, NULL);
 

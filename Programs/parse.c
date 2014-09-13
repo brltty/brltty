@@ -99,6 +99,8 @@ char **
 splitString (const char *string, char delimiter, int *count) {
   char **array = NULL;
 
+  if (!string) string = "";
+
   if (string) {
     while (1) {
       const char *start = string;
