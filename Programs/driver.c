@@ -38,7 +38,7 @@ logInputPacket (const void *packet, size_t size) {
 
 void
 logInputProblem (const char *problem, const unsigned char *bytes, size_t count) {
-  logBytes(LOG_WARNING, problem, bytes, count);
+  logBytes(LOG_WARNING, "%s", bytes, count, problem);
 }
 
 void
