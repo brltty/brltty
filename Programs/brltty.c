@@ -820,8 +820,6 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
       }
     }
 
-    sayOptions |= SAY_OPT_ALL_PUNCTUATION;
-
     if (prefix) {
       wchar_t buffer[0X100];
       size_t length = convertTextToWchars(buffer, prefix, ARRAY_COUNT(buffer));
@@ -830,6 +828,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
       buffer[length++] = character;
       sayWideCharacters(buffer, NULL, length, sayOptions);
     } else {
+      if (iswpunct(character)) sayOptions |= SAY_OPT_ALL_PUNCTUATION;
       sayWideCharacters(&character, NULL, 1, sayOptions);
     }
   } else if (spell) {
