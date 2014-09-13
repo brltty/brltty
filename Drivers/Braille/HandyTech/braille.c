@@ -275,7 +275,7 @@ END_KEY_TABLE_LIST
 static int
 endSession_Bookworm (BrailleDisplay *brl) {
   static const unsigned char sessionEnd[] = {0X05, 0X07};
-  return writeBraillePacket(brl, NULL, sessionEnd, sizeof(sessionEnd));
+  return writeBrailleMessage(brl, NULL, 0, sessionEnd, sizeof(sessionEnd));
 }
 
 typedef int ByteInterpreter (BrailleDisplay *brl, unsigned char byte);
@@ -491,8 +491,7 @@ static const ModelEntry modelTable[] = {
 
 typedef enum {
   BDS_OFF,
-  BDS_READY,
-  BDS_WRITING
+  BDS_READY
 } BrailleDisplayState;
 
 struct BrailleDataStruct {
@@ -890,7 +889,7 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
 
 static ssize_t
 brl_writePacket (BrailleDisplay *brl, const void *packet, size_t length) {
-  return writeBraillePacket(brl, NULL, packet, length)? length: -1;
+  return writeBrailleMessage(brl, NULL, 0, packet, length)? length: -1;
 }
 
 static void
@@ -966,7 +965,7 @@ writeExtendedPacket (
   memcpy(packet.fields.data.extended.data.bytes, data, size);
   packet.fields.data.extended.data.bytes[size] = SYN;
   size += 5; /* EXT, ID, LEN, TYPE, ..., SYN */
-  return writeBraillePacket(brl, NULL, &packet, size);
+  return writeBrailleMessage(brl, NULL, type, &packet, size);
 }
 
 static int
@@ -1316,9 +1315,7 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 writeCells (BrailleDisplay *brl) {
-  if (!brl->data->model->writeCells(brl)) return 0;
-  setState(brl, BDS_WRITING);
-  return 1;
+  return brl->data->model->writeCells(brl);
 }
 
 static int
@@ -1326,11 +1323,11 @@ writeCells_statusAndText (BrailleDisplay *brl) {
   unsigned char buffer[1 + brl->data->model->statusCells + brl->data->model->textCells];
   unsigned char *byte = buffer;
 
-  *byte++ = 0X01;
+  *byte++ = HT_PKT_Braille;
   byte = mempcpy(byte, brl->data->rawStatus, brl->data->model->statusCells);
   byte = mempcpy(byte, brl->data->rawData, brl->data->model->textCells);
 
-  return writeBraillePacket(brl, NULL, buffer, byte-buffer);
+  return writeBrailleMessage(brl, NULL, HT_PKT_Braille, buffer, byte-buffer);
 }
 
 static int
@@ -1340,7 +1337,7 @@ writeCells_Bookworm (BrailleDisplay *brl) {
   buffer[0] = 0X01;
   memcpy(buffer+1, brl->data->rawData, brl->data->model->textCells);
   buffer[sizeof(buffer)-1] = SYN;
-  return writeBraillePacket(brl, NULL, buffer, sizeof(buffer));
+  return writeBrailleMessage(brl, NULL, 0X01, buffer, sizeof(buffer));
 }
 
 static int
@@ -1483,7 +1480,6 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
     switch (packet.fields.type) {
       case HT_PKT_OK:
         if (packet.fields.data.ok.model == brl->data->model->identifier) {
-          setState(brl, BDS_READY);
           brl->data->updateRequired = 1;
           continue;
         }
@@ -1494,16 +1490,16 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
           case BDS_OFF:
             continue;
 
-          case BDS_WRITING:
+          case BDS_READY:
             switch (packet.fields.type) {
               case HT_PKT_NAK:
                 brl->data->updateRequired = 1;
               case HT_PKT_ACK:
-                setState(brl, BDS_READY);
+                acknowledgeBrailleMessage(brl);
                 continue;
 
               case HT_PKT_Extended: {
-                unsigned char length UNUSED = packet.fields.data.extended.length - 1;
+                unsigned char length = packet.fields.data.extended.length - 1;
                 const unsigned char *bytes = &packet.fields.data.extended.data.bytes[0];
 
                 switch (packet.fields.data.extended.type) {
@@ -1512,7 +1508,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                       case HT_PKT_NAK:
                         brl->data->updateRequired = 1;
                       case HT_PKT_ACK:
-                        setState(brl, BDS_READY);
+                        acknowledgeBrailleMessage(brl);
                         continue;
 
                       default:
@@ -1520,23 +1516,6 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                     }
                     break;
 
-                  default:
-                    break;
-                }
-                break;
-              }
-
-              default:
-                break;
-            }
-
-          case BDS_READY:
-            switch (packet.fields.type) {
-              case HT_PKT_Extended: {
-                unsigned char length = packet.fields.data.extended.length - 1;
-                const unsigned char *bytes = &packet.fields.data.extended.data.bytes[0];
-
-                switch (packet.fields.data.extended.type) {
                   case HT_EXTPKT_Key:
                     if (brl->data->model->interpretByte(brl, bytes[0])) {
                       updateCells(brl);
@@ -1637,22 +1616,6 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
     logMessage(LOG_WARNING, "state %d", brl->data->currentState);
   }
 
-  if (noInput) {
-    switch (brl->data->currentState) {
-      case BDS_OFF:
-        break;
-
-      case BDS_READY:
-        break;
-
-      case BDS_WRITING:
-        if (afterTimePeriod(&brl->data->statePeriod, NULL)) {
-          if (brl->data->retryCount > 3) return BRL_CMD_RESTARTBRL;
-          if (!writeCells(brl)) return BRL_CMD_RESTARTBRL;
-        }
-        break;
-    }
-  }
   updateCells(brl);
 
   return EOF;

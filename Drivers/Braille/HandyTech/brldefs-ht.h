@@ -50,6 +50,7 @@ typedef enum {
 
 /* Packet definition */
 typedef enum {
+  HT_PKT_Braille  = 0X01,
   HT_PKT_Extended = 0X79,
   HT_PKT_NAK      = 0X7D,
   HT_PKT_ACK      = 0X7E,
@@ -58,7 +59,7 @@ typedef enum {
 } HT_PacketType;
 
 typedef enum {
-  HT_EXTPKT_Braille               = 0X01,
+  HT_EXTPKT_Braille               = HT_PKT_Braille,
   HT_EXTPKT_Key                   = 0X04,
   HT_EXTPKT_Confirmation          = 0X07,
   HT_EXTPKT_Scancode              = 0X09,
