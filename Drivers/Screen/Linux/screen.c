@@ -833,7 +833,7 @@ static int atKeyPressed;
 static int ps2KeyPressed;
 #endif /* HAVE_LINUX_INPUT_H */
 
-static UinputObject *uinputKeyboard;
+static UinputObject *uinputKeyboard = NULL;
 static ReportListenerInstance *brailleOfflineListener;
 
 static void
@@ -877,7 +877,6 @@ construct_LinuxScreen (void) {
   currentConsoleNumber = 0;
   inTextMode = 1;
 
-  uinputKeyboard = NULL;
   brailleOfflineListener = NULL;
 
 #ifdef HAVE_LINUX_INPUT_H
