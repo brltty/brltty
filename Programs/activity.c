@@ -23,6 +23,7 @@
 #include "log.h"
 #include "activity.h"
 #include "async_alarm.h"
+#include "async_wait.h"
 
 typedef enum {
   ACT_STOPPED,
@@ -340,6 +341,33 @@ destroyActivity (ActivityObject *activity) {
 }
 
 int
-haveActivity (ActivityObject *activity) {
+isActivityStarted (const ActivityObject *activity) {
   return activity->state == ACT_STARTED;
+}
+
+int
+isActivityStopped (const ActivityObject *activity) {
+  return activity->state == ACT_STOPPED;
+}
+
+ASYNC_CONDITION_TESTER(testActivityStarted) {
+  const ActivityObject *activity = data;
+
+  return isActivityStarted(activity);
+}
+
+int
+awaitActivityStart (ActivityObject *activity, int timeout) {
+  return asyncAwaitCondition(timeout, testActivityStarted, activity);
+}
+
+ASYNC_CONDITION_TESTER(testActivityStopped) {
+  const ActivityObject *activity = data;
+
+  return isActivityStopped(activity);
+}
+
+int
+awaitActivityStop (ActivityObject *activity, int timeout) {
+  return asyncAwaitCondition(timeout, testActivityStopped, activity);
 }

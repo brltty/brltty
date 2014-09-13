@@ -43,7 +43,12 @@ extern void destroyActivity (ActivityObject *activity);
 
 extern void startActivity (ActivityObject *activity);
 extern void stopActivity (ActivityObject *activity);
-extern int haveActivity (ActivityObject *activity);
+
+extern int isActivityStarted (const ActivityObject *activity);
+extern int isActivityStopped (const ActivityObject *activity);
+
+extern int awaitActivityStart (ActivityObject *activity, int timeout);
+extern int awaitActivityStop (ActivityObject *activity, int timeout);
 
 #ifdef __cplusplus
 }
