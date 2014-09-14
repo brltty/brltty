@@ -90,6 +90,7 @@ struct BrailleDisplayStruct {
 
   struct {
     Queue *queue;
+    ItemComparator *compareItems;
     AsyncHandle alarm;
     int timeout;
   } message;

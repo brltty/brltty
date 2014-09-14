@@ -102,6 +102,8 @@ extern int writeBraillePacket (
   const void *packet, size_t size
 );
 
+extern int compareBrailleMessages (const void *item1, const void *item2, void *data);
+
 extern int writeBrailleMessage (
   BrailleDisplay *brl, GioEndpoint *endpoint,
   int priority,

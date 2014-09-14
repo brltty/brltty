@@ -362,7 +362,7 @@ findOldBrailleMessage (const void *item, void *data) {
   return old->priority == new->priority;
 }
 
-static int
+int
 compareBrailleMessages (const void *item1, const void *item2, void *data) {
   const BrailleMessage *new = item1;
   const BrailleMessage *old = item2;
@@ -387,7 +387,7 @@ writeBrailleMessage (
     BrailleMessage *msg;
 
     if (!brl->message.queue) {
-      if (!(brl->message.queue = newQueue(deallocateBrailleMessageItem, compareBrailleMessages))) {
+      if (!(brl->message.queue = newQueue(deallocateBrailleMessageItem, brl->message.compareItems))) {
         return 0;
       }
     }
