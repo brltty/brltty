@@ -152,7 +152,6 @@ static const int32_t noteFrequencies[] = {
   /* 126 +5F# */ 11839822,
   /* 127 +5G  */ 12543854
 };
-static const unsigned char noteCount = ARRAY_COUNT(noteFrequencies);
 
 int32_t
 getIntegerNoteFrequency (unsigned char note) {
