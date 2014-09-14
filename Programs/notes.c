@@ -153,15 +153,22 @@ static const int32_t noteFrequencies[] = {
   /* 127 +5G  */ 12543854
 };
 
+static inline int32_t
+getNoteFrequency (unsigned char note) {
+  size_t count = ARRAY_COUNT(noteFrequencies);
+
+  if (note >= count) note = count - 1;
+  return noteFrequencies[note];
+}
+
 int32_t
 getIntegerNoteFrequency (unsigned char note) {
-  int32_t frequency = noteFrequencies[note] / NOTE_FREQUENCY_FACTOR;
-  return frequency;
+  return getNoteFrequency(note) / NOTE_FREQUENCY_FACTOR;
 }
 
 #ifndef NO_FLOAT
 float
 getRealNoteFrequency (unsigned char note) {
-  return (float)noteFrequencies[note] / (float)NOTE_FREQUENCY_FACTOR;
+  return (float)getNoteFrequency(note) / (float)NOTE_FREQUENCY_FACTOR;
 }
 #endif /* NO_FLOAT */
