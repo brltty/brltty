@@ -115,6 +115,7 @@ struct MenuItemStruct {
   unsigned char divisor;                  /* present only multiples of this value */
 
   union {
+    const char *text;
     const MenuString *strings;
     FileData *files;
     SubmenuData *submenu;
@@ -322,6 +323,28 @@ setMenuItemTester (MenuItem *item, MenuItemTester *handler) {
 void
 setMenuItemChanged (MenuItem *item, MenuItemChanged *handler) {
   item->changed = handler;
+}
+
+static const char *
+getValue_text (const MenuItem *item) {
+  return item->data.text;
+}
+
+static const MenuItemMethods menuItemMethods_text = {
+  .getValue = getValue_text
+};
+
+MenuItem *
+newTextMenuItem (Menu *menu, const MenuString *name, const char *text) {
+  MenuItem *item = newMenuItem(menu, NULL, name);
+
+  if (item) {
+    item->methods = &menuItemMethods_text;
+    item->data.text = text;
+  }
+
+  return item;
+  return NULL;
 }
 
 static const char *

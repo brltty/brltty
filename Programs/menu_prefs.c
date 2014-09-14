@@ -23,6 +23,7 @@
 
 #include "log.h"
 #include "embed.h"
+#include "revision.h"
 #include "menu.h"
 #include "prefs.h"
 #include "profile.h"
@@ -1101,6 +1102,61 @@ makePreferencesMenu (void) {
     {
       ITEM(newProfileMenuItem(profilesSubmenu, &languageProfile));
       CHANGED(LanguageProfile);
+    }
+  }
+
+  {
+    SUBMENU(buildSubmenu, rootMenu, strtext("Build Information"));
+    setAdvancedSubmenu(buildSubmenu);
+
+    {
+      NAME(strtext("Package Version"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, PACKAGE_VERSION));
+    }
+
+    {
+      NAME(strtext("Package Revision"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, getRevisionIdentifier()));
+    }
+
+    {
+      NAME(strtext("Web Site"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, PACKAGE_URL));
+    }
+
+    {
+      NAME(strtext("Configuration Directory"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, CONFIGURATION_DIRECTORY));
+    }
+
+    {
+      NAME(strtext("Configuration File"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, CONFIGURATION_FILE));
+    }
+
+    {
+      NAME(strtext("Tables Directory"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, TABLES_DIRECTORY));
+    }
+
+    {
+      NAME(strtext("Dirvers Directory"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, DRIVERS_DIRECTORY));
+    }
+
+    {
+      NAME(strtext("State Directory"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, STATE_DIRECTORY));
+    }
+
+    {
+      NAME(strtext("Preferences File"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, PREFERENCES_FILE));
+    }
+
+    {
+      NAME(strtext("Writable Directory"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, WRITABLE_DIRECTORY));
     }
   }
 

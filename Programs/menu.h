@@ -34,6 +34,8 @@ typedef struct {
 extern Menu *newMenu (void);
 extern void destroyMenu (Menu *menu);
 
+extern MenuItem *newTextMenuItem (Menu *menu, const MenuString *name, const char *text);
+
 extern MenuItem *newNumericMenuItem (
   Menu *menu, unsigned char *setting, const MenuString *name,
   unsigned char minimum, unsigned char maximum, unsigned char divisor
