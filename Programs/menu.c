@@ -118,6 +118,7 @@ struct MenuItemStruct {
     const char *text;
     const MenuString *strings;
     FileData *files;
+    MenuToolFunction *tool;
     SubmenuData *submenu;
   } data;
 };
@@ -265,13 +266,12 @@ getMenuItemSubtitle (const MenuItem *item) {
 
 const char *
 getMenuItemValue (const MenuItem *item) {
-  return item->methods->getValue(item);
+  return item->methods->getValue? item->methods->getValue(item): "";
 }
 
 const char *
 getMenuItemText (const MenuItem *item) {
-  if (item->methods->getText) return item->methods->getText(item);
-  return getMenuItemValue(item);
+  return item->methods->getText? item->methods->getText(item): getMenuItemValue(item);
 }
 
 const char *
@@ -344,7 +344,6 @@ newTextMenuItem (Menu *menu, const MenuString *name, const char *text) {
   }
 
   return item;
-  return NULL;
 }
 
 static const char *
@@ -678,6 +677,33 @@ newFilesMenuItem (
   }
 
   return NULL;
+}
+
+static void
+activateItem_tool (MenuItem *item) {
+  item->data.tool();
+}
+
+static const char *
+getValue_tool (const MenuItem *item) {
+  return NULL;
+}
+
+static const MenuItemMethods menuItemMethods_tool = {
+  .activateItem = activateItem_tool,
+  .getValue = getValue_tool
+};
+
+MenuItem *
+newToolMenuItem (Menu *menu, const MenuString *name, MenuToolFunction *function) {
+  MenuItem *item = newMenuItem(menu, NULL, name);
+
+  if (item) {
+    item->methods = &menuItemMethods_tool;
+    item->data.tool = function;
+  }
+
+  return item;
 }
 
 static MenuItem *

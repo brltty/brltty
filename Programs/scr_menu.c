@@ -86,7 +86,12 @@ newRenderedMenuItem (Menu *menu) {
   {
     const char *text = getMenuItemText(item);
     const char *comment = getMenuItemComment(item);
-    if (!*text) text = gettext("<off>");
+
+    if (!text) {
+      text = "";
+    } else if (!*text) {
+      text = gettext("<off>");
+    }
 
     STR_BEGIN(settingString, ARRAY_COUNT(settingString));
     STR_PRINTF("%s", text);

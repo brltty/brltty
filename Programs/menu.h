@@ -55,6 +55,9 @@ extern MenuItem *newFilesMenuItem (
   const char *initial, int none
 );
 
+typedef void MenuToolFunction (void);
+extern MenuItem *newToolMenuItem (Menu *menu, const MenuString *name, MenuToolFunction *function);
+
 extern Menu *newSubmenuMenuItem (
   Menu *menu, const MenuString *name
 );

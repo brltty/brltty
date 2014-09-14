@@ -1125,6 +1125,11 @@ makePreferencesMenu (void) {
     }
 
     {
+      NAME(strtext("Bug Reports"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, PACKAGE_BUGREPORT));
+    }
+
+    {
       NAME(strtext("Configuration Directory"));
       ITEM(newTextMenuItem(buildSubmenu, &itemName, CONFIGURATION_DIRECTORY));
     }
@@ -1157,6 +1162,31 @@ makePreferencesMenu (void) {
     {
       NAME(strtext("Writable Directory"));
       ITEM(newTextMenuItem(buildSubmenu, &itemName, WRITABLE_DIRECTORY));
+    }
+
+    {
+      NAME(strtext("Locale Directory"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, LOCALE_DIRECTORY));
+    }
+  }
+
+  {
+    SUBMENU(toolsSubmenu, rootMenu, strtext("Tools"));
+    setAdvancedSubmenu(toolsSubmenu);
+
+    {
+      NAME(strtext("Restart Braille Driver"));
+      ITEM(newToolMenuItem(toolsSubmenu, &itemName, restartBrailleDriver));
+    }
+
+    {
+      NAME(strtext("Restart Speech Driver"));
+      ITEM(newToolMenuItem(toolsSubmenu, &itemName, restartSpeechDriver));
+    }
+
+    {
+      NAME(strtext("Restart Screen Driver"));
+      ITEM(newToolMenuItem(toolsSubmenu, &itemName, restartScreenDriver));
     }
   }
 
