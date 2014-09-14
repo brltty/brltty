@@ -95,6 +95,7 @@ typedef struct {
   void (*endItem) (MenuItem *item, int deallocating);
   void (*activateItem) (MenuItem *item);
   const char * (*getValue) (const MenuItem *item);
+  const char * (*getText) (const MenuItem *item);
   const char * (*getComment) (const MenuItem *item);
 } MenuItemMethods;
 
@@ -264,6 +265,12 @@ getMenuItemSubtitle (const MenuItem *item) {
 const char *
 getMenuItemValue (const MenuItem *item) {
   return item->methods->getValue(item);
+}
+
+const char *
+getMenuItemText (const MenuItem *item) {
+  if (item->methods->getText) return item->methods->getText(item);
+  return getMenuItemValue(item);
 }
 
 const char *
@@ -554,10 +561,34 @@ getValue_files (const MenuItem *item) {
   return path;
 }
 
+static const char *
+getText_files (const MenuItem *item) {
+  const FileData *files = item->data.files;
+  const char *path = getMenuItemValue(item);
+  const char *name = locatePathName(path);
+
+  if (name == path) {
+    const char *extension = files->extension;
+
+    if (hasFileExtension(name, extension)) {
+      int length = strlen(path) - strlen(extension);
+      Menu *menu = item->menu;
+
+      snprintf(menu->valueBuffer, sizeof(menu->valueBuffer),
+               "%.*s", length, name);
+
+      return menu->valueBuffer;
+    }
+  }
+
+  return path;
+}
+
 static const MenuItemMethods menuItemMethods_files = {
   .beginItem = beginItem_files,
   .endItem = endItem_files,
-  .getValue = getValue_files
+  .getValue = getValue_files,
+  .getText = getText_files
 };
 
 MenuItem *
