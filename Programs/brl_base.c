@@ -282,7 +282,7 @@ writeBraillePacket (
 
 typedef struct {
   GioEndpoint *endpoint;
-  int priority;
+  int type;
   size_t size;
   unsigned char packet[0];
 } BrailleMessage;
@@ -359,15 +359,7 @@ findOldBrailleMessage (const void *item, void *data) {
   const BrailleMessage *old = item;
   const BrailleMessage *new = data;
 
-  return old->priority == new->priority;
-}
-
-static int
-compareBrailleMessages (const void *item1, const void *item2, void *data) {
-  const BrailleMessage *new = item1;
-  const BrailleMessage *old = item2;
-
-  return new->priority < old->priority;
+  return old->type == new->type;
 }
 
 static void
@@ -380,14 +372,14 @@ deallocateBrailleMessageItem (void *item, void *data) {
 int
 writeBrailleMessage (
   BrailleDisplay *brl, GioEndpoint *endpoint,
-  int priority,
+  int type,
   const void *packet, size_t size
 ) {
   if (brl->message.alarm) {
     BrailleMessage *msg;
 
     if (!brl->message.queue) {
-      if (!(brl->message.queue = newQueue(deallocateBrailleMessageItem, compareBrailleMessages))) {
+      if (!(brl->message.queue = newQueue(deallocateBrailleMessageItem, NULL))) {
         return 0;
       }
     }
@@ -395,7 +387,7 @@ writeBrailleMessage (
     if ((msg = malloc(sizeof(*msg) + size))) {
       memset(msg, 0, sizeof(*msg));
       msg->endpoint = endpoint;
-      msg->priority = priority;
+      msg->type = type;
       msg->size = size;
       memcpy(msg->packet, packet, size);
 
