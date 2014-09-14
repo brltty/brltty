@@ -28,8 +28,10 @@ typedef int ActivityStartMethod (void *data);
 typedef void ActivityStopMethod (void *data);
 
 typedef struct {
-  const char *name;
-  int interval;
+  const char *activityName;
+  int retryInterval;
+  int startTimeout;
+  int stopTimeout;
 
   ActivityPrepareMethod *prepare;
   ActivityStartMethod *start;
@@ -47,8 +49,8 @@ extern void stopActivity (ActivityObject *activity);
 extern int isActivityStarted (const ActivityObject *activity);
 extern int isActivityStopped (const ActivityObject *activity);
 
-extern int awaitActivityStart (ActivityObject *activity, int timeout);
-extern int awaitActivityStop (ActivityObject *activity, int timeout);
+extern int awaitActivityStarted (ActivityObject *activity);
+extern int awaitActivityStopped (ActivityObject *activity);
 
 #ifdef __cplusplus
 }

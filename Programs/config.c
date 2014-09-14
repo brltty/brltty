@@ -789,8 +789,8 @@ stopKeyboardMonitorActivity (void *data) {
 }
 
 static const ActivityMethods keyboardMonitorActivityMethods = {
-  .name = "keyboard-monitor",
-  .interval = KEYBOARD_MONITOR_START_RETRY_INTERVAL,
+  .activityName = "keyboard-monitor",
+  .retryInterval = KEYBOARD_MONITOR_START_RETRY_INTERVAL,
 
   .prepare = prepareKeyboardMonitorActivity,
   .start = startKeyboardMonitorActivity,
@@ -1502,8 +1502,8 @@ stopBrailleDriverActivity (void *data) {
 }
 
 static const ActivityMethods brailleDriverActivityMethods = {
-  .name = "braille-driver",
-  .interval = BRAILLE_DRIVER_START_RETRY_INTERVAL,
+  .activityName = "braille-driver",
+  .retryInterval = BRAILLE_DRIVER_START_RETRY_INTERVAL,
 
   .prepare = prepareBrailleDriverActivity,
   .start = startBrailleDriverActivity,
@@ -1824,8 +1824,8 @@ stopSpeechDriverActivity (void *data) {
 }
 
 static const ActivityMethods speechDriverActivityMethods = {
-  .name = "speech-driver",
-  .interval = SPEECH_DRIVER_START_RETRY_INTERVAL,
+  .activityName = "speech-driver",
+  .retryInterval = SPEECH_DRIVER_START_RETRY_INTERVAL,
 
   .prepare = prepareSpeechDriverActivity,
   .start = startSpeechDriverActivity,
@@ -2043,8 +2043,8 @@ stopScreenDriverActivity (void *data) {
 }
 
 static const ActivityMethods screenDriverActivityMethods = {
-  .name = "screen-driver",
-  .interval = SCREEN_DRIVER_START_RETRY_INTERVAL,
+  .activityName = "screen-driver",
+  .retryInterval = SCREEN_DRIVER_START_RETRY_INTERVAL,
 
   .prepare = prepareScreenDriverActivity,
   .start = startScreenDriverActivity,
@@ -2655,6 +2655,7 @@ static const ProfileProperty languageProfileProperties[] = {
 static int
 beginLanguageProfile (void) {
   disableSpeechDriver();
+  awaitActivityStopped(speechDriverActivity);
   return 1;
 }
 

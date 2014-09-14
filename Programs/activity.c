@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "parameters.h"
 #include "activity.h"
 #include "async_alarm.h"
 #include "async_wait.h"
@@ -116,13 +117,13 @@ logUnexpectedActivityState (ActivityObject *activity, const char *action) {
   ActivityState state = activity->state;
 
   logMessage(LOG_WARNING, "unexpected activity state: %s: %s: %u[%s]",
-             activity->methods->name, action, state, getActivityStateName(state));
+             activity->methods->activityName, action, state, getActivityStateName(state));
 }
 
 static void
 setActivityState (ActivityObject *activity, ActivityState state) {
   logMessage(LOG_DEBUG, "activity state change: %s: %u[%s]",
-             activity->methods->name, state, getActivityStateName(state));
+             activity->methods->activityName, state, getActivityStateName(state));
 
   activity->state = state;
 }
@@ -130,7 +131,7 @@ setActivityState (ActivityObject *activity, ActivityState state) {
 static void
 logActivityActionRequest (ActivityObject *activity, const char *action) {
   logMessage(LOG_DEBUG, "activity action request: %s: %s",
-             activity->methods->name, action);
+             activity->methods->activityName, action);
 }
 
 static void
@@ -196,7 +197,7 @@ prepareActivity (ActivityObject *activity) {
 static int
 scheduleActivity (ActivityObject *activity) {
   if (asyncSetAlarmIn(&activity->startAlarm, 0, handleActivityStartAlarm, activity)) {
-    if (asyncResetAlarmEvery(activity->startAlarm, activity->methods->interval)) {
+    if (asyncResetAlarmEvery(activity->startAlarm, activity->methods->retryInterval)) {
       setActivityState(activity, ACT_SCHEDULED);
       return 1;
     }
@@ -337,6 +338,7 @@ newActivity (const ActivityMethods *methods, void *data) {
 void
 destroyActivity (ActivityObject *activity) {
   stopActivity(activity);
+  awaitActivityStopped(activity);
   free(activity);
 }
 
@@ -357,7 +359,10 @@ ASYNC_CONDITION_TESTER(testActivityStarted) {
 }
 
 int
-awaitActivityStart (ActivityObject *activity, int timeout) {
+awaitActivityStarted (ActivityObject *activity) {
+  int timeout = activity->methods->startTimeout;
+
+  if (!timeout) timeout = DEFAULT_ACTIVITY_START_TIMEOUT;
   return asyncAwaitCondition(timeout, testActivityStarted, activity);
 }
 
@@ -368,6 +373,9 @@ ASYNC_CONDITION_TESTER(testActivityStopped) {
 }
 
 int
-awaitActivityStop (ActivityObject *activity, int timeout) {
+awaitActivityStopped (ActivityObject *activity) {
+  int timeout = activity->methods->stopTimeout;
+
+  if (!timeout) timeout = DEFAULT_ACTIVITY_STOP_TIMEOUT;
   return asyncAwaitCondition(timeout, testActivityStopped, activity);
 }
