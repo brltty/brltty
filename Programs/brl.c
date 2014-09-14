@@ -28,6 +28,7 @@
 #include "charset.h"
 #include "unicode.h"
 #include "brl.h"
+#include "brl_base.h"
 #include "ttb.h"
 #include "ktb.h"
 #include "queue.h"
@@ -56,6 +57,7 @@ constructBrailleDisplay (BrailleDisplay *brl) {
   brl->rotateInput = NULL;
 
   brl->message.queue = NULL;
+  brl->message.compareItems = compareBrailleMessages;
   brl->message.alarm = NULL;
   brl->message.timeout = BRAILLE_MESSAGE_ACKNOWLEDGEMENT_TIMEOUT;
 

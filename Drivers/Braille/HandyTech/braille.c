@@ -1263,6 +1263,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
       setTime = !!setTime;
 
+      brl->message.compareItems = NULL;
+
       if (probeBrailleDisplay(brl, 3, NULL, 100,
                               brl_reset,
                               readPacket, &response, sizeof(response),
