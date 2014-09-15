@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 5.2dev\n"
 "Report-Msgid-Bugs-To: brltty@mielke.cc\n"
-"POT-Creation-Date: 2014-09-14 19:32-0400\n"
+"POT-Creation-Date: 2014-09-15 10:52+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -106,7 +106,7 @@ msgstr ""
 msgid "Agogo"
 msgstr ""
 
-#: Programs/menu_prefs.c:1196
+#: Programs/menu_prefs.c:1176
 msgid "Alert"
 msgstr ""
 
@@ -342,7 +342,7 @@ msgstr ""
 msgid "Capitals Visible Time"
 msgstr ""
 
-#: Programs/menu_prefs.c:1219
+#: Programs/menu_prefs.c:1199
 msgid "Category Log Level"
 msgstr ""
 
@@ -375,7 +375,7 @@ msgstr ""
 msgid "Clavi"
 msgstr ""
 
-#: Programs/menu.c:786
+#: Programs/menu.c:801
 msgid "Close"
 msgstr ""
 
@@ -423,7 +423,7 @@ msgstr ""
 msgid "Couldn't translate keysym %08X to keycode.\n"
 msgstr ""
 
-#: Programs/menu_prefs.c:1197
+#: Programs/menu_prefs.c:1177
 msgid "Critical"
 msgstr ""
 
@@ -487,7 +487,7 @@ msgstr ""
 msgid "Day Month Year"
 msgstr ""
 
-#: Programs/menu_prefs.c:1202
+#: Programs/menu_prefs.c:1182
 msgid "Debug"
 msgstr ""
 
@@ -497,10 +497,6 @@ msgstr ""
 
 #: Programs/config.c:388
 msgid "Device for accessing braille display."
-msgstr ""
-
-#: Programs/menu_prefs.c:1148
-msgid "Dirvers Directory"
 msgstr ""
 
 #: Programs/config.c:357
@@ -538,6 +534,7 @@ msgid "Drawbar Organ"
 msgstr ""
 
 #: Programs/config.c:2482
+#: Programs/menu_prefs.c:1148
 msgid "Drivers Directory"
 msgstr ""
 
@@ -585,7 +582,7 @@ msgstr ""
 msgid "Electric Piano 2"
 msgstr ""
 
-#: Programs/menu_prefs.c:1195
+#: Programs/menu_prefs.c:1175
 msgid "Emergency"
 msgstr ""
 
@@ -609,7 +606,7 @@ msgstr ""
 msgid "Ensemble"
 msgstr ""
 
-#: Programs/menu_prefs.c:1198
+#: Programs/menu_prefs.c:1178
 msgid "Error"
 msgstr ""
 
@@ -776,7 +773,7 @@ msgstr ""
 msgid "Incompatible XKB server support\n"
 msgstr ""
 
-#: Programs/menu_prefs.c:1201
+#: Programs/menu_prefs.c:1181
 msgid "Information"
 msgstr ""
 
@@ -793,7 +790,7 @@ msgstr ""
 msgid "Install the %s service, and then exit."
 msgstr ""
 
-#: Programs/menu_prefs.c:1205
+#: Programs/menu_prefs.c:1185
 msgid "Internal Parameters"
 msgstr ""
 
@@ -891,7 +888,7 @@ msgstr ""
 msgid "Locale Directory"
 msgstr ""
 
-#: Programs/menu_prefs.c:1224
+#: Programs/menu_prefs.c:1204
 msgid "Log Categories"
 msgstr ""
 
@@ -1029,7 +1026,7 @@ msgstr ""
 msgid "Navigation Options"
 msgstr ""
 
-#: Programs/menu.c:418
+#: Programs/menu.c:433
 msgid "No"
 msgstr ""
 
@@ -1050,7 +1047,7 @@ msgstr ""
 msgid "Normal"
 msgstr ""
 
-#: Programs/menu_prefs.c:1200
+#: Programs/menu_prefs.c:1180
 msgid "Notice"
 msgstr ""
 
@@ -1184,8 +1181,7 @@ msgid "Path to directory containing drivers."
 msgstr ""
 
 #: Programs/brltty-ctb.c:57
-#: Programs/config.c:409
-#: Programs/ktbtest.c:69
+#: Programs/config.c:409 Programs/ktbtest.c:69
 msgid "Path to directory containing tables."
 msgstr ""
 
@@ -1201,8 +1197,7 @@ msgstr ""
 msgid "Path to directory for text tables."
 msgstr ""
 
-#: Programs/brltest.c:67
-#: Programs/config.c:315
+#: Programs/brltest.c:67 Programs/config.c:315
 msgid "Path to directory which can be written to."
 msgstr ""
 
@@ -1321,15 +1316,15 @@ msgstr ""
 msgid "Rest of Line"
 msgstr ""
 
-#: Programs/menu_prefs.c:1178
+#: Programs/menu_prefs.c:1247
 msgid "Restart Braille Driver"
 msgstr ""
 
-#: Programs/menu_prefs.c:1188
+#: Programs/menu_prefs.c:1257
 msgid "Restart Screen Driver"
 msgstr ""
 
-#: Programs/menu_prefs.c:1183
+#: Programs/menu_prefs.c:1252
 msgid "Restart Speech Driver"
 msgstr ""
 
@@ -1576,7 +1571,7 @@ msgstr ""
 msgid "Speech driver code (%s, %s, or one of {%s})."
 msgstr ""
 
-#: Programs/menu_prefs.c:1214
+#: Programs/menu_prefs.c:1194
 msgid "Standard Error Log Level"
 msgstr ""
 
@@ -1690,7 +1685,7 @@ msgstr ""
 msgid "SynthStrings 2"
 msgstr ""
 
-#: Programs/menu_prefs.c:1209
+#: Programs/menu_prefs.c:1189
 msgid "System Log Level"
 msgstr ""
 
@@ -1761,7 +1756,7 @@ msgstr ""
 msgid "Tinkle Bell"
 msgstr ""
 
-#: Programs/menu_prefs.c:1174
+#: Programs/menu_prefs.c:1243
 msgid "Tools"
 msgstr ""
 
@@ -1839,7 +1834,7 @@ msgstr ""
 msgid "Voice Oohs"
 msgstr ""
 
-#: Programs/menu_prefs.c:1199
+#: Programs/menu_prefs.c:1179
 msgid "Warning"
 msgstr ""
 
@@ -1917,7 +1912,7 @@ msgstr ""
 msgid "Year Month Day"
 msgstr ""
 
-#: Programs/menu.c:419
+#: Programs/menu.c:434
 msgid "Yes"
 msgstr ""
 
@@ -2048,8 +2043,7 @@ msgstr ""
 msgid "cannot determine program directory"
 msgstr ""
 
-#: Programs/config.c:2472
-#: Programs/menu.c:513
+#: Programs/config.c:2472 Programs/menu.c:528
 msgid "cannot determine working directory"
 msgstr ""
 
@@ -2108,7 +2102,7 @@ msgstr ""
 msgid "cannot open process identifier file"
 msgstr ""
 
-#: Programs/menu.c:511
+#: Programs/menu.c:526
 msgid "cannot open working directory"
 msgstr ""
 
@@ -2121,8 +2115,7 @@ msgstr ""
 msgid "cannot set focus to %#010x\n"
 msgstr ""
 
-#: Programs/file.c:418
-#: Programs/menu.c:500
+#: Programs/file.c:418 Programs/menu.c:515
 msgid "cannot set working directory"
 msgstr ""
 
@@ -2139,6 +2132,11 @@ msgstr ""
 #. It is spoken just before an uppercase letter, e.g. "cap A".
 #: Programs/brltty.c:801
 msgid "cap"
+msgstr ""
+
+#: Programs/menu_prefs.c:665
+#: Programs/menu_prefs.c:1040
+msgid "cells"
 msgstr ""
 
 #: Programs/cmd_miscellaneous.c:279
@@ -2167,6 +2165,7 @@ msgid "copy characters to clipboard"
 msgstr ""
 
 #: Programs/config.c:534
+#: Programs/menu_prefs.c:440
 msgid "csecs"
 msgstr ""
 
@@ -2218,8 +2217,7 @@ msgstr ""
 msgid "describe current character"
 msgstr ""
 
-#: Programs/config.c:515
-#: Programs/config.c:525
+#: Programs/config.c:515 Programs/config.c:525
 msgid "device"
 msgstr ""
 
@@ -2241,10 +2239,8 @@ msgstr ""
 #: Programs/brltest.c:64
 #: Programs/brltty-ctb.c:54
 #: Programs/brltty-trtxt.c:46
-#: Programs/config.c:303
-#: Programs/config.c:312
-#: Programs/config.c:406
-#: Programs/ktbtest.c:57
+#: Programs/config.c:303 Programs/config.c:312
+#: Programs/config.c:406 Programs/ktbtest.c:57
 #: Programs/ktbtest.c:66
 msgid "directory"
 msgstr ""
@@ -2281,8 +2277,7 @@ msgstr ""
 msgid "driver request"
 msgstr ""
 
-#: Programs/config.c:365
-#: Programs/config.c:461
+#: Programs/config.c:365 Programs/config.c:461
 #: Programs/config.c:495
 msgid "driver,..."
 msgstr ""
@@ -2345,16 +2340,11 @@ msgstr ""
 
 #: Programs/brltty-trtxt.c:55
 #: Programs/brltty-trtxt.c:64
-#: Programs/config.c:295
-#: Programs/config.c:321
-#: Programs/config.c:330
-#: Programs/config.c:416
-#: Programs/config.c:426
-#: Programs/config.c:435
-#: Programs/config.c:444
-#: Programs/config.c:480
-#: Programs/config.c:557
-#: Programs/xbrlapi.c:88
+#: Programs/config.c:295 Programs/config.c:321
+#: Programs/config.c:330 Programs/config.c:416
+#: Programs/config.c:426 Programs/config.c:435
+#: Programs/config.c:444 Programs/config.c:480
+#: Programs/config.c:557 Programs/xbrlapi.c:88
 msgid "file"
 msgstr ""
 
@@ -2716,10 +2706,8 @@ msgstr ""
 msgid "more than one item for VT number\n"
 msgstr ""
 
-#: Programs/config.c:347
-#: Programs/config.c:375
-#: Programs/config.c:452
-#: Programs/config.c:471
+#: Programs/config.c:347 Programs/config.c:375
+#: Programs/config.c:452 Programs/config.c:471
 #: Programs/config.c:505
 msgid "name=value,..."
 msgstr ""
@@ -2766,6 +2754,10 @@ msgstr ""
 
 #: Programs/cmds.auto.h:974
 msgid "page-up key"
+msgstr ""
+
+#: Programs/menu_prefs.c:446
+msgid "percentage"
 msgstr ""
 
 #: Programs/config.c:2332
@@ -3013,8 +3005,7 @@ msgstr ""
 msgid "soundcard synthesizer"
 msgstr ""
 
-#: Programs/brltty.c:782
-#: Programs/cmd.c:276
+#: Programs/brltty.c:782 Programs/cmd.c:276
 msgid "space"
 msgstr ""
 

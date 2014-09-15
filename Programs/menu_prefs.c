@@ -1145,7 +1145,7 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Dirvers Directory"));
+      NAME(strtext("Drivers Directory"));
       ITEM(newTextMenuItem(buildSubmenu, &itemName, DRIVERS_DIRECTORY));
     }
 
