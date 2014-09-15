@@ -118,8 +118,15 @@ struct MenuItemStruct {
     const char *text;
     const MenuString *strings;
     FileData *files;
-    MenuToolFunction *tool;
     SubmenuData *submenu;
+
+    struct {
+      const char *unit;
+    } numeric;
+
+    struct {
+      MenuToolFunction *function;
+    }tool;
   } data;
 };
 
@@ -351,14 +358,21 @@ getValue_numeric (const MenuItem *item) {
   return formatValue(item->menu, "%u", *item->setting);
 }
 
+static const char *
+getComment_numeric (const MenuItem *item) {
+  return getLocalizedText(item->data.numeric.unit);
+}
+
 static const MenuItemMethods menuItemMethods_numeric = {
-  .getValue = getValue_numeric
+  .getValue = getValue_numeric,
+  .getComment = getComment_numeric
 };
 
 MenuItem *
 newNumericMenuItem (
   Menu *menu, unsigned char *setting, const MenuString *name,
-  unsigned char minimum, unsigned char maximum, unsigned char divisor
+  unsigned char minimum, unsigned char maximum, unsigned char divisor,
+  const char *unit
 ) {
   MenuItem *item = newMenuItem(menu, setting, name);
 
@@ -367,6 +381,7 @@ newNumericMenuItem (
     item->minimum = minimum;
     item->maximum = maximum;
     item->divisor = divisor;
+    item->data.numeric.unit = unit;
   }
 
   return item;
@@ -681,7 +696,7 @@ newFilesMenuItem (
 
 static void
 activateItem_tool (MenuItem *item) {
-  item->data.tool();
+  item->data.tool.function();
 }
 
 static const char *
@@ -700,7 +715,7 @@ newToolMenuItem (Menu *menu, const MenuString *name, MenuToolFunction *function)
 
   if (item) {
     item->methods = &menuItemMethods_tool;
-    item->data.tool = function;
+    item->data.tool.function = function;
   }
 
   return item;

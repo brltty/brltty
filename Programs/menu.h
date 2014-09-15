@@ -38,7 +38,8 @@ extern MenuItem *newTextMenuItem (Menu *menu, const MenuString *name, const char
 
 extern MenuItem *newNumericMenuItem (
   Menu *menu, unsigned char *setting, const MenuString *name,
-  unsigned char minimum, unsigned char maximum, unsigned char divisor
+  unsigned char minimum, unsigned char maximum, unsigned char divisor,
+  const char *unit
 );
 
 extern MenuItem *newStringsMenuItem (

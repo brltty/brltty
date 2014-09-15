@@ -437,13 +437,13 @@ newStatusFieldMenuItem (
 
 static MenuItem *
 newTimeMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
-  return newNumericMenuItem(menu, setting, name, 1, 100, 4);
+  return newNumericMenuItem(menu, setting, name, 1, 100, 4, strtext("csecs"));
 }
 
 #if defined(HAVE_PCM_SUPPORT) || defined(HAVE_MIDI_SUPPORT) || defined(HAVE_FM_SUPPORT)
 static MenuItem *
 newVolumeMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
-  return newNumericMenuItem(menu, setting, name, 0, 100, 5);
+  return newNumericMenuItem(menu, setting, name, 0, 100, 5, strtext("percentage"));
 }
 #endif /* defined(HAVE_PCM_SUPPORT) || defined(HAVE_MIDI_SUPPORT) || defined(HAVE_FM_SUPPORT) */
 
@@ -662,7 +662,7 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Window Overlap"));
-      ITEM(newNumericMenuItem(navigationSubmenu, &prefs.windowOverlap, &itemName, 0, 20, 1));
+      ITEM(newNumericMenuItem(navigationSubmenu, &prefs.windowOverlap, &itemName, 0, 20, 1, strtext("cells")));
       CHANGED(WindowOverlap);
     }
 
@@ -818,21 +818,21 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Speech Volume"));
-      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechVolume, &itemName, 0, SPK_VOLUME_MAXIMUM, 1));
+      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechVolume, &itemName, 0, SPK_VOLUME_MAXIMUM, 1, NULL));
       TEST(SpeechVolume);
       CHANGED(SpeechVolume);
     }
 
     {
       NAME(strtext("Speech Rate"));
-      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechRate, &itemName, 0, SPK_RATE_MAXIMUM, 1));
+      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechRate, &itemName, 0, SPK_RATE_MAXIMUM, 1, NULL));
       TEST(SpeechRate);
       CHANGED(SpeechRate);
     }
 
     {
       NAME(strtext("Speech Pitch"));
-      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechPitch, &itemName, 0, SPK_PITCH_MAXIMUM, 1));
+      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechPitch, &itemName, 0, SPK_PITCH_MAXIMUM, 1, NULL));
       TEST(SpeechPitch);
       CHANGED(SpeechPitch);
     }
@@ -1037,7 +1037,7 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Status Count"));
-      ITEM(newNumericMenuItem(statusSubmenu, &prefs.statusCount, &itemName, 0, MAX((int)brl.textColumns/2-1, 0), 1));
+      ITEM(newNumericMenuItem(statusSubmenu, &prefs.statusCount, &itemName, 0, MAX((int)brl.textColumns/2-1, 0), 1, strtext("cells")));
       TEST(StatusCount);
       CHANGED(StatusCount);
     }
@@ -1171,26 +1171,6 @@ makePreferencesMenu (void) {
   }
 
   {
-    SUBMENU(toolsSubmenu, rootMenu, strtext("Tools"));
-    setAdvancedSubmenu(toolsSubmenu);
-
-    {
-      NAME(strtext("Restart Braille Driver"));
-      ITEM(newToolMenuItem(toolsSubmenu, &itemName, restartBrailleDriver));
-    }
-
-    {
-      NAME(strtext("Restart Speech Driver"));
-      ITEM(newToolMenuItem(toolsSubmenu, &itemName, restartSpeechDriver));
-    }
-
-    {
-      NAME(strtext("Restart Screen Driver"));
-      ITEM(newToolMenuItem(toolsSubmenu, &itemName, restartScreenDriver));
-    }
-  }
-
-  {
     static const MenuString logLevels[] = {
       {.label=strtext("Emergency")},
       {.label=strtext("Alert")},
@@ -1256,6 +1236,26 @@ makePreferencesMenu (void) {
           }
         }
       }
+    }
+  }
+
+  {
+    SUBMENU(toolsSubmenu, rootMenu, strtext("Tools"));
+    setAdvancedSubmenu(toolsSubmenu);
+
+    {
+      NAME(strtext("Restart Braille Driver"));
+      ITEM(newToolMenuItem(toolsSubmenu, &itemName, restartBrailleDriver));
+    }
+
+    {
+      NAME(strtext("Restart Speech Driver"));
+      ITEM(newToolMenuItem(toolsSubmenu, &itemName, restartSpeechDriver));
+    }
+
+    {
+      NAME(strtext("Restart Screen Driver"));
+      ITEM(newToolMenuItem(toolsSubmenu, &itemName, restartScreenDriver));
     }
   }
 
