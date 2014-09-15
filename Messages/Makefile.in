@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-all:: languages sources
+all:: objects languages
 
 COPYRIGHT_HOLDER = The BRLTTY Developers
 LANGUAGE_CODES = de fr zh
@@ -28,20 +28,23 @@ OBJECT_EXTENSION = mo
 LANGUAGES_FILE = LINGUAS
 languages: $(LANGUAGES_FILE)
 
-$(LANGUAGES_FILE): sources
-	ls -1 *.$(SOURCE_EXTENSION) | sed -e 's/\..*//' | sort >$@
+$(LANGUAGES_FILE): FORCE
+	: >$@; \
+	for language in $(LANGUAGE_CODES); do \
+	echo $$language >>$@; \
+	done
 
-TEMPLATE_FILE = $(PACKAGE_TARNAME).$(TEMPLATE_EXTENSION)
+TEMPLATE_FILE = $(SRC_DIR)/$(PACKAGE_TARNAME).$(TEMPLATE_EXTENSION)
 template $(TEMPLATE_EXTENSION): $(TEMPLATE_FILE)
 
-$(TEMPLATE_FILE): $(BLD_TOP)$(PGM_DIR)/cmds.auto.h
+$(TEMPLATE_FILE): $(BLD_TOP)$(PGM_DIR)/cmds.auto.h FORCE
 	$(SRC_TOP)mkpot -p "$(PACKAGE_TARNAME)" -n "$(PACKAGE_VERSION)" -o $@ -b "$(PACKAGE_BUGREPORT)" -c "$(COPYRIGHT_HOLDER)" $(SRC_TOP) $(BLD_TOP)
 
 SOURCE_FILES = $(LANGUAGE_CODES:=.$(SOURCE_EXTENSION))
 sources: $(SOURCE_FILES)
 
-%.$(SOURCE_EXTENSION): $(TEMPLATE_FILE)
-	$(MSGMERGE) --quiet --force-po --no-wrap --sort-output --update -- $@ $(TEMPLATE_FILE)
+%.$(SOURCE_EXTENSION): FORCE
+	$(MSGMERGE) --quiet --force-po --no-wrap --update -- $(SRC_DIR)/$@ $(TEMPLATE_FILE)
 
 OBJECT_FILES = $(LANGUAGE_CODES:=.$(OBJECT_EXTENSION))
 objects: $(OBJECT_FILES)
@@ -53,11 +56,10 @@ clean::
 	-rm -f -- *.$(OBJECT_EXTENSION) *~
 
 install:: objects install-locale-directory
-	for language in $(LANGUAGE_CODES); \
-	do \
-	   directory="$(INSTALL_LOCALE_DIRECTORY)/$${language}/LC_MESSAGES"; \
-           $(INSTALL_DIRECTORY) "$${directory}"; \
-	   $(INSTALL_DATA) "$${language}.$(OBJECT_EXTENSION)" "$${directory}/$(PACKAGE_TARNAME).$(OBJECT_EXTENSION)"; \
+	for language in $(LANGUAGE_CODES); do \
+	directory="$(INSTALL_LOCALE_DIRECTORY)/$${language}/LC_MESSAGES"; \
+        $(INSTALL_DIRECTORY) "$${directory}"; \
+	$(INSTALL_DATA) "$${language}.$(OBJECT_EXTENSION)" "$${directory}/$(PACKAGE_TARNAME).$(OBJECT_EXTENSION)"; \
 	done
 
 uninstall::
