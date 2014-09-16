@@ -266,7 +266,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       "auto",
       "azerbraille", "clio", "eurobraille",
       "notebraille", "pupibraille", "scriba",
-      "esys", "esytime", "iris",
+      "esys", "esytime", "iris", "esysiris",
       NULL
     };
 
@@ -282,7 +282,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
       &esysirisProtocolOperations, // esys
       &esysirisProtocolOperations, // esytime
-      &esysirisProtocolOperations  // iris
+      &esysirisProtocolOperations, // iris
+      &esysirisProtocolOperations  // esysiris
     };
 
     unsigned int choice;
