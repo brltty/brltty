@@ -506,6 +506,7 @@ BRLTTY_ARG_DISABLE(
    ${ICU_CONFIG} --exists >/dev/null && {
       icu_includes="`${ICU_CONFIG} --cppflags-searchpath`"
       icu_libs="`${ICU_CONFIG} --ldflags`"
+      icu_libs=`echo " ${icu_libs}" | sed -e ['s/ -[^lL][^ ]*//g']`
       AC_DEFINE_UNQUOTED([HAVE_ICU], [1],
                          [Define this if Unicode-based internationalization support is to be included.])
 
