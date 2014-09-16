@@ -1,0 +1,290 @@
+--- extern.h.org	2014-09-15 21:02:12.000000000 +0200
++++ extern.h	2014-09-15 21:11:27.000000000 +0200
+@@ -33,12 +33,19 @@
+ #endif
+ 
+ /* screen.c */
++
++extern void SetWinImage __P((const char *, unsigned char *));
++extern void CopyWinImage __P((struct win *, unsigned char *));
++extern int IsInputLayer __P((struct layer *));
++extern int GetInputPosition __P((struct layer *));
++extern void CopyInputLine __P((struct layer *, char *, int));
+ extern int   main __P((int, char **));
+ extern sigret_t SigHup __P(SIGPROTOARG);
+ extern void  eexit __P((int)) __attribute__((__noreturn__));
+ extern void  Detach __P((int));
+ extern void  Hangup __P((void));
+ extern void  Kill __P((int, int));
++
+ #ifdef USEVARARGS
+ extern void  Msg __P((int, const char *, ...)) __attribute__((format(printf, 2, 3)));
+ extern void  Panic __P((int, const char *, ...)) __attribute__((format(printf, 2, 3))) __attribute__((__noreturn__));
+--- screen.c.org	2014-09-15 21:04:33.000000000 +0200
++++ screen.c	2014-09-15 22:20:51.000000000 +0200
+@@ -52,6 +52,11 @@
+ # include <sys/ioctl.h>
+ #endif
+ 
++/* export ipc image */
++#include <sys/ipc.h>
++#include <sys/shm.h>
++unsigned char *shm;
++/* end export ipc image */
+ #ifndef SIGINT
+ # include <signal.h>
+ #endif
+@@ -489,6 +494,40 @@
+ #ifdef HAVE_BRAILLE
+   InitBraille();
+ #endif
++
++/* export ipc image */
++  {
++    const char *path;
++    key_t key;
++    int shmid;
++
++    /* allow for the header, text, attributes, and auxiliary data
++     * (assuming no screen will be bigger than 132x66)
++     */
++    size_t size = 18000; /*  */
++
++    path = getenv("HOME");
++    if (!path || !*path) path = "/";
++    if ((key = ftok(path, 'b')) == -1) key = 0XBACD072F;
++
++    shmid = shmget( key, size, IPC_CREAT | S_IRWXU );
++    if( shmid < 0 )
++      {
++        Panic( errno, "shmget" );
++        /* NOTREACHED */
++      }
++
++    shm = shmat( shmid, 0, 0);
++    if ( shm == (void*)-1 )
++      {
++        Panic( errno, "shmat" );
++        /* NOTREACHED */
++      }
++
++    /* put valid data into the image */
++    SetWinImage( "screen is initializing...", shm );
++  }
++/* end export ipc image */
+ #ifdef ZMODEM
+   zmodem_sendcmd = SaveStr("!!! sz -vv -b ");
+   zmodem_recvcmd = SaveStr("!!! rz -vv -b -E");
+--- sched.c.org	2014-09-15 21:04:07.000000000 +0200
++++ sched.c	2014-09-15 22:54:07.000000000 +0200
+@@ -115,6 +115,12 @@
+   return min;
+ }
+ 
++/* export ipc image */
++#include <sys/shm.h>
++unsigned char *shm;
++extern struct win *windows;
++/* end export ipc image */
++
+ void
+ sched()
+ {
+@@ -126,6 +132,9 @@
+ 
+   for (;;)
+     {
++/* export image from last used window which is on top of the list */
++      CopyWinImage( windows, shm );
++/* end export ipc image */
+       if (calctimeout)
+ 	timeoutev = calctimo();
+       if (timeoutev)
+--- window.c.org	2014-09-15 21:05:18.000000000 +0200
++++ window.c	2014-09-15 22:33:15.000000000 +0200
+@@ -2082,6 +2082,134 @@
+     }
+ }
+ 
++/* export ipc image */
++void
++SetWinImage( msg, dest )
++const char *msg;
++unsigned char *dest;
++{
++  unsigned char *d = dest;
++
++  *d++ = 80;   /* screen width */
++  *d++ = 1;    /* screen height */
++  *d++ = 0;    /* cursor column */
++  *d++ = 0;    /* cursor row */
++
++  {
++    size_t count = dest[0] * dest[1];
++
++    memset( d, ' ', count );
++    strcpy( d, msg );
++    d[strlen(d)] = ' ';
++    d += count;
++
++    memset( d, 0X07, count );
++    d += count;
++  }
++
++  *d++ = 0;    /* window number */
++  *d++ = 0;    /* flags */
++}
++
++
++void
++CopyWinImage( p, dest )
++struct win *p;
++unsigned char *dest;
++{
++  register unsigned char *s, *d = dest, *m;
++  register int x, y;
++  struct display *display = p->w_lastdisp;
++  int st = (display && D_status) ? 1 : 0;
++  int in = IsInputLayer(p->w_savelayer) ? 1 : 0;
++
++  if( p && p->w_mlines )
++    {
++      *d++ = p->w_width;                        /* screen width */
++      *d++ = p->w_height + (st | in);                  /* screen height */
++      *d++ = st? D_status_len:                  /* cursor column */
++             in? GetInputPosition(p->w_savelayer):
++                 p->w_x;
++      *d++ = (st || in)? p->w_height: p->w_y;       /* cursor row */
++
++      /* copy window image to buffer */
++      for( y = 0; y < p->w_height; y++ )
++        {
++          s = p->w_mlines[y].image;
++          x = p->w_width;
++          for( ; x; *d++ = *s++, x-- );
++        }
++
++      /* copy status line to buffer */
++      if( st )
++        {
++          s = D_status_lastmsg;
++          x = p->w_width;
++          for( ; *s && x; *d++ = *s++, x-- );
++          for( ; x; *d++ = ' ', x-- );
++        }
++      else if (in)
++        {
++          CopyInputLine(p->w_savelayer, d, p->w_width);
++          d += p->w_width;
++        }
++
++      /* copy attributes from window image to buffer */
++#ifdef COLOR
++      for( y = 0; y < p->w_height; y++ )
++        {
++          struct mline *ml = &p->w_mlines[y];
++          x = 0;
++          for( ; x<p->w_width; x++ )
++            {
++              static const unsigned char tr[] =
++                {
++                  0X0, 0X4, 0X2, 0X6, 0X1, 0X5, 0X3, 0X7,
++                  0X8, 0XC, 0XA, 0XE, 0X9, 0XD, 0XB, 0XF
++                };
++
++              struct mchar mc;
++              int fg;
++              int bg;
++
++              copy_mline2mchar( &mc, ml, x );
++              fg = rend_getfg(&mc);
++              bg = rend_getbg(&mc);
++
++              fg = fg? tr[coli2e(fg) & 0XF]: 0X7;
++              bg = bg? tr[coli2e(bg) & 0XF]: 0X0;
++              *d++ = fg | (bg << 4);
++            }
++        }
++
++      if( st || in )
++        {
++          memset(d, (st ? 0X70 : 0X07), p->w_width);
++          d += p->w_width;
++        }
++#else /* COLOR */
++      {
++        int count = dest[0] * dest[1];
++        memset(d, 0X07, count);
++        d += count;
++      }
++#endif /* COLOR */
++
++      *d++ = p->w_number;  /* window number */
++
++      *d = 0;  /* flags */
++      if (p->w_cursorkeys) *d |= 0X01; /* cursor keys are in application mode */
++      if (p->w_keypad) *d |= 0X02; /* keypad is in application mode */
++      d++;
++    }
++  else
++    {
++      /* no window pointer */
++      SetWinImage( "no active scren", dest );
++    }
++}
++/* end export ipc image */
++
+ static void
+ win_destroyev_fn(ev, data)
+ struct event *ev;
+--- input.c.org	2014-09-15 21:03:06.000000000 +0200
++++ input.c	2014-09-15 23:09:43.000000000 +0200
+@@ -525,4 +525,49 @@
+       q += l;
+     }
+ }
++/* add export ipc shared image */
++int
++IsInputLayer(l)
++struct layer *l;
++{
++  return l->l_layfn == &InpLf;
++}
++
++int
++GetInputPosition(l)
++struct layer *l;
++{
++  struct inpdata *inpdata = (struct inpdata *)l->l_data;
++  return inpdata->inpstringlen + inpdata->inp.pos;
++}
++
++void
++CopyInputLine(l, dest, width)
++struct layer *l;
++char *dest;
++int width;
++{
++  struct inpdata *inpdata = (struct inpdata *)l->l_data;
++  char *src;
++  int len;
++
++  for
++  ( 
++    src = inpdata->inpstring, len = inpdata->inpstringlen;
++    width && len;
++    *dest++ = *src++, len--, width--
++  );
++
++  if( !(inpdata->inpmode & INP_NOECHO) )
++    {
++      for
++      ( 
++        src = inpdata->inp.buf, len = inpdata->inp.len;
++        width && len;
++        *dest++ = *src++, len--, width--
++      );
++    }
++
++  while( width ) *dest++ = ' ', width--;
++}
