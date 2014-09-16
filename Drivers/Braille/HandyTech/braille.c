@@ -1444,8 +1444,6 @@ interpretByte_Bookworm (BrailleDisplay *brl, unsigned char byte) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  int noInput = 1;
-
   while (1) {
     HT_Packet packet;
     size_t size = readPacket(brl, &packet, sizeof(packet));
@@ -1454,8 +1452,6 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       if (errno != EAGAIN) return BRL_CMD_RESTARTBRL;
       break;
     }
-
-    noInput = 0;
 
     /* a kludge to handle the Bookworm going offline */
     if (brl->data->model->identifier == HT_MODEL_Bookworm) {
