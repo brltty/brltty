@@ -93,23 +93,23 @@ handlePreferencesCommands (int command, void *data) {
         {
           MenuItem *item;
 
-        case BRL_CMD_BLK(SET_TTB):
+        case BRL_CMD_BLK(SET_TEXT_TABLE):
           item = getPreferencesMenuItem_textTable();
           goto doSetMenuItem;
 
-        case BRL_CMD_BLK(SET_ATB):
+        case BRL_CMD_BLK(SET_ATTRIBUTES_TABLE):
           item = getPreferencesMenuItem_attributesTable();
           goto doSetMenuItem;
 
-        case BRL_CMD_BLK(SET_CTB):
+        case BRL_CMD_BLK(SET_CONTRACTION_TABLE):
           item = getPreferencesMenuItem_contractionTable();
           goto doSetMenuItem;
 
-        case BRL_CMD_BLK(SET_KTB):
+        case BRL_CMD_BLK(SET_KEYBOARD_TABLE):
           item = getPreferencesMenuItem_keyboardTable();
           goto doSetMenuItem;
 
-        case BRL_CMD_BLK(SET_LPF):
+        case BRL_CMD_BLK(SET_LANGUAGE_PROFILE):
           item = getPreferencesMenuItem_languageProfile();
           goto doSetMenuItem;
 
