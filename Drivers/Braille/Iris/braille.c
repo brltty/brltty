@@ -714,7 +714,6 @@ static const XtKeyEntry xtKeyTable[] = {
 };
 
 struct BrailleDataStruct {
-  unsigned hasFailed:1;
   unsigned isConnected:1;
 
   unsigned isEmbedded:1;
@@ -1549,7 +1548,7 @@ forwardExternalPackets (BrailleDisplay *brl) {
 GIO_INPUT_HANDLER(irHandleExternalInput) {
   BrailleDisplay *brl = parameters->data;
 
-  if (!forwardExternalPackets(brl)) brl->data->hasFailed = 1;
+  if (!forwardExternalPackets(brl)) brl->hasFailed = 1;
   return 0;
 }
 
@@ -1621,8 +1620,6 @@ static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   unsigned char packet[IR_MAXIMUM_PACKET_SIZE];
   size_t size;
-
-  if (brl->data->hasFailed) goto failure;
 
   while ((size = readNativePacket(brl, &brl->data->internal.port, packet, sizeof(packet)))) {
     if (!brl->data->internal.handlePacket(brl, packet, size)) goto failure;
@@ -1767,7 +1764,7 @@ openExternalPort (BrailleDisplay *brl) {
   if (openPort(&brl->data->external.port)) {
     brl->data->external.hio =
       gioNewHandleInputObject(brl->data->external.port.gioEndpoint,
-                                BRAILLE_INPUT_POLL_INTERVAL,
+                                BRAILLE_DRIVER_INPUT_POLL_INTERVAL,
                                 irHandleExternalInput, brl);
 
     if (brl->data->external.hio) return 1;
@@ -1812,7 +1809,7 @@ ASYNC_ALARM_CALLBACK(irMonitorLatch) {
   BrailleDisplay *brl = parameters->data;
 
   if (checkLatchState(brl)) {
-    if (!(brl->data->isSuspended? resumeDevice(brl): suspendDevice(brl))) brl->data->hasFailed = 1;
+    if (!(brl->data->isSuspended? resumeDevice(brl): suspendDevice(brl))) brl->hasFailed = 1;
   }
 }
 
@@ -1849,7 +1846,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
     memset(brl->data, 0, sizeof(*brl->data));
 
-    brl->data->hasFailed = 0;
     brl->data->isConnected = 1;
 
     brl->data->isSuspended = 0;
