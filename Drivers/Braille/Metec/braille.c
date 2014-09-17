@@ -281,7 +281,7 @@ ASYNC_ALARM_CALLBACK(handleUsbStatusAlarm) {
 static int
 setUsbStatusAlarm (BrailleDisplay *brl) {
   return asyncSetAlarmIn(&brl->data->proto.usb.statusAlarm,
-                         BRAILLE_INPUT_POLL_INTERVAL,
+                         BRAILLE_DRIVER_INPUT_POLL_INTERVAL,
                          handleUsbStatusAlarm, brl);
 }
 
