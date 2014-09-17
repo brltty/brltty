@@ -69,7 +69,7 @@ GIO_INPUT_HANDLER(handleBrailleInput) {
 
   suspendCommandQueue();
 
-  if (!isSuspended) {
+  if (!brl.isSuspended) {
     apiClaimDriver();
     if (processInput()) processed = 1;
     apiReleaseDriver();

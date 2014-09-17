@@ -49,6 +49,7 @@ constructBrailleDisplay (BrailleDisplay *brl) {
 
   brl->hasFailed = 0;
   brl->isOffline = 0;
+  brl->isSuspended = 0;
 
   brl->bufferResized = NULL;
   brl->setFirmness = NULL;

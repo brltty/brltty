@@ -908,11 +908,9 @@ isSameRow (
   return 1;
 }
 
-int isSuspended;
-
 int
 canBraille (void) {
-  return braille && brl.buffer && !brl.noDisplay && !isSuspended;
+  return braille && brl.buffer && !brl.noDisplay && !brl.isSuspended;
 }
 
 static unsigned int interruptEnabledCount;
@@ -1158,8 +1156,6 @@ brlttyConstruct (int argc, char *argv[]) {
   ses->motx = ses->winx; ses->moty = ses->winy;
   ses->spkx = ses->winx; ses->spky = ses->winy;
   resumeUpdates(1);
-
-  isSuspended = 0;
 
   return PROG_EXIT_SUCCESS;
 }

@@ -82,6 +82,7 @@ struct BrailleDisplayStruct {
 
   unsigned hasFailed:1;
   unsigned isOffline:1;
+  unsigned isSuspended:1;
 
   void (*bufferResized) (unsigned int rows, unsigned int columns);
   BrailleFirmnessSetter *setFirmness;

@@ -557,16 +557,16 @@ doUpdate (void) {
         writeStatusCells();
         writeBrailleText("wrn", scr.unreadable);
         apiSuspend();
-        isSuspended = 1;
+        brl.isSuspended = 1;
         logMessage(LOG_DEBUG, "braille driver suspended");
       }
     } else {
-      if (isSuspended) {
+      if (brl.isSuspended) {
         logMessage(LOG_DEBUG, "resuming braille driver");
 
         if (apiResume()) {
           logMessage(LOG_DEBUG, "braille driver resumed");
-          isSuspended = 0;
+          brl.isSuspended = 0;
         } else {
           logMessage(LOG_DEBUG, "braille driver not resumed");
         }

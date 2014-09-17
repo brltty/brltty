@@ -87,8 +87,6 @@ extern char *opt_contractionTable;
 
 extern int opt_releaseDevice;
 
-extern int isSuspended;
-
 extern void placeRightEdge (int column);
 extern void placeWindowRight (void);
 extern void placeWindowHorizontally (int x);
