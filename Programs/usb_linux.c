@@ -969,7 +969,7 @@ ASYNC_SIGNAL_CALLBACK(usbHandleInputSignal) {
       if (response.count == 0) {
         written = 1;
         *delay = *delay? (*delay << 1): 1;
-        *delay = MIN(*delay, BRAILLE_INPUT_POLL_INTERVAL);
+        *delay = MIN(*delay, BRAILLE_DRIVER_INPUT_POLL_INTERVAL);
       } else if (response.count > 0) {
         if (usbEnqueueInput(endpoint, response.buffer, response.count)) {
           written = 1;

@@ -107,5 +107,5 @@ stopBrailleInput (void) {
 void
 startBrailleInput (void) {
   stopBrailleInput();
-  handleBrailleInputObject = gioNewHandleInputObject(brl.gioEndpoint, BRAILLE_INPUT_POLL_INTERVAL, handleBrailleInput, &brl);
+  handleBrailleInputObject = gioNewHandleInputObject(brl.gioEndpoint, BRAILLE_DRIVER_INPUT_POLL_INTERVAL, handleBrailleInput, &brl);
 }
