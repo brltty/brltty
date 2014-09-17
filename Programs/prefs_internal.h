@@ -16,30 +16,33 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_MENU_PREFS
-#define BRLTTY_INCLUDED_MENU_PREFS
-
-#include "menu.h"
+#ifndef BRLTTY_INCLUDED_PREFS_INTERNAL
+#define BRLTTY_INCLUDED_PREFS_INTERNAL
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern Menu *getPreferencesMenu (void);
+typedef struct {
+  const char *const *table;
+  unsigned char count;
+} PreferenceStringTable;
 
-#define PREFS_MENU_ITEM_APPLY(apply) \
-apply(textTable) \
-apply(attributesTable) \
-apply(contractionTable) \
-apply(keyboardTable) \
-apply(languageProfile)
+struct PreferenceEntryStruct {
+  const char *name;
+  unsigned char *encountered;
+  const PreferenceStringTable *settingNames;
+  unsigned char defaultValue;
+  unsigned char settingCount;
+  unsigned char *setting;
+};
 
-#define PREFS_MENU_ITEM_GETTER_PROTOTYPE(name) MenuItem *getPreferencesMenuItem_##name (void)
-#define PREFS_MENU_ITEM_GETTER_DEFINE(name) extern PREFS_MENU_ITEM_GETTER_PROTOTYPE(name);
-PREFS_MENU_ITEM_APPLY(PREFS_MENU_ITEM_GETTER_DEFINE)
+extern unsigned char statusFieldsSet;
+extern const PreferenceEntry preferenceTable[];
+extern const unsigned char preferenceCount;
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_MENU */
+#endif /* BRLTTY_INCLUDED_PREFS_INTERNAL */

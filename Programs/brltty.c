@@ -43,6 +43,7 @@
 #include "cmd_keycodes.h"
 #include "cmd_touch.h"
 #include "cmd_toggle.h"
+#include "cmd_preferences.h"
 #include "cmd_clipboard.h"
 #include "cmd_speech.h"
 #include "cmd_learn.h"
@@ -223,6 +224,7 @@ setSessionEntry (void) {
         addLearnCommands();
         addSpeechCommands();
         addClipboardCommands();
+        addPreferencesCommands();
         addToggleCommands();
         addTouchCommands();
         addKeycodeCommands();

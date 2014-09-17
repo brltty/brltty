@@ -19,7 +19,7 @@
 #include "prologue.h"
 
 #include "prefs.h"
-#include "prefs_table.h"
+#include "prefs_internal.h"
 #include "status_types.h"
 #include "defaults.h"
 

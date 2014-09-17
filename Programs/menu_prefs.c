@@ -25,6 +25,7 @@
 #include "embed.h"
 #include "revision.h"
 #include "menu.h"
+#include "menu_prefs.h"
 #include "prefs.h"
 #include "profile.h"
 #include "status_types.h"
@@ -35,10 +36,21 @@
 #include "midi.h"
 #include "brltty.h"
 
+#define PREFS_MENU_ITEM_VARIABLE(name) prefsMenuItemVariable_##name
+#define PREFS_MENU_ITEM_GETTER_DECLARE(name) \
+static MenuItem *PREFS_MENU_ITEM_VARIABLE(name) = NULL; \
+PREFS_MENU_ITEM_GETTER_PROTOTYPE(name) { \
+  return getPreferencesMenu()? PREFS_MENU_ITEM_VARIABLE(name): NULL; \
+}
+
+PREFS_MENU_ITEM_APPLY(PREFS_MENU_ITEM_GETTER_DECLARE)
+
 #define NAME(name) static const MenuString itemName = {.label=name}
 #define ITEM(new) MenuItem *item = (new); if (!item) goto noItem
 #define TEST(property) setMenuItemTester(item, test##property)
 #define CHANGED(setting) setMenuItemChanged(item, changed##setting)
+#define SET(name) PREFS_MENU_ITEM_VARIABLE(name) = item
+
 #define SUBMENU(variable, parent, name) \
   NAME(name); \
   Menu *variable = newSubmenuMenuItem(parent, &itemName); \
@@ -1079,12 +1091,14 @@ makePreferencesMenu (void) {
       NAME(strtext("Text Table"));
       ITEM(newFilesMenuItem(tablesSubmenu, &itemName, opt_tablesDirectory, TEXT_TABLES_SUBDIRECTORY, TEXT_TABLE_EXTENSION, opt_textTable, 0));
       CHANGED(TextTable);
+      SET(textTable);
     }
 
     {
       NAME(strtext("Attributes Table"));
       ITEM(newFilesMenuItem(tablesSubmenu, &itemName, opt_tablesDirectory, ATTRIBUTES_TABLES_SUBDIRECTORY, ATTRIBUTES_TABLE_EXTENSION, opt_attributesTable, 0));
       CHANGED(AttributesTable);
+      SET(attributesTable);
     }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
@@ -1092,6 +1106,7 @@ makePreferencesMenu (void) {
       NAME(strtext("Contraction Table"));
       ITEM(newFilesMenuItem(tablesSubmenu, &itemName, opt_tablesDirectory, CONTRACTION_TABLES_SUBDIRECTORY, CONTRACTION_TABLE_EXTENSION, opt_contractionTable, 1));
       CHANGED(ContractionTable);
+      SET(contractionTable);
     }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
   }
@@ -1102,6 +1117,7 @@ makePreferencesMenu (void) {
     {
       ITEM(newProfileMenuItem(profilesSubmenu, &languageProfile));
       CHANGED(LanguageProfile);
+      SET(languageProfile);
     }
   }
 

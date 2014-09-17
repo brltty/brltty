@@ -231,60 +231,6 @@ handleMiscellaneousCommands (int command, void *data) {
       break;
     }
 
-    {
-      static const char modeString_preferences[] = "prf";
-      static Preferences savedPreferences;
-
-    case BRL_CMD_PREFMENU: {
-      int ok = 0;
-
-      if (isMenuScreen()) {
-        if (prefs.saveOnExit) {
-          if (savePreferences()) {
-            alert(ALERT_COMMAND_DONE);
-          }
-        }
-
-        deactivateMenuScreen();
-        ok = 1;
-      } else if (activateMenuScreen()) {
-        updateSessionAttributes();
-        savedPreferences = prefs;
-        ok = 1;
-      }
-
-      if (ok) {
-        infoMode = 0;
-      } else {
-        alert(ALERT_COMMAND_REJECTED);
-      }
-
-      break;
-    }
-
-    case BRL_CMD_PREFSAVE:
-      if (isMenuScreen()) {
-        if (savePreferences()) alert(ALERT_COMMAND_DONE);
-        deactivateMenuScreen();
-      } else if (savePreferences()) {
-        alert(ALERT_COMMAND_DONE);
-      } else {
-        alert(ALERT_COMMAND_REJECTED);
-      }
-      break;
-
-    case BRL_CMD_PREFLOAD:
-      if (isMenuScreen()) {
-        setPreferences(&savedPreferences);
-        message(modeString_preferences, gettext("changes discarded"), 0);
-      } else if (loadPreferences()) {
-        alert(ALERT_COMMAND_DONE);
-      } else {
-        alert(ALERT_COMMAND_REJECTED);
-      }
-      break;
-    }
-
     case BRL_CMD_TIME: {
       TimeFormattingData fmt;
       getTimeFormattingData(&fmt);

@@ -23,7 +23,7 @@
 #include <errno.h>
 
 #include "prefs.h"
-#include "prefs_table.h"
+#include "prefs_internal.h"
 #include "status_types.h"
 #include "defaults.h"
 #include "log.h"
@@ -106,7 +106,7 @@ searchPreferenceByName (const void *target, const void *element) {
   return comparePreferenceNames(name, (*pref)->name);
 }
 
-static const PreferenceEntry *
+const PreferenceEntry *
 findPreferenceEntry (const char *name) {
   static const PreferenceEntry **sortedEntries = NULL;
 

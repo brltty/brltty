@@ -30,7 +30,6 @@
 #include "ses.h"
 #include "ctb.h"
 #include "ktb.h"
-#include "menu.h"
 #include "prefs.h"
 #include "profile_types.h"
 

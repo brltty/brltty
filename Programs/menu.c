@@ -256,6 +256,11 @@ testMenuItemVisible (Menu *menu, unsigned int index) {
   return testMenuItem(getMenuItem(menu, index), prefs.showAllItems);
 }
 
+Menu *
+getMenuItemMenu (const MenuItem *item) {
+  return item->menu;
+}
+
 unsigned int
 getMenuItemIndex (const MenuItem *item) {
   return item - item->menu->items.array;

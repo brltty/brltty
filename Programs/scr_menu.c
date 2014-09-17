@@ -442,12 +442,13 @@ handleCommand_MenuScreen (int command) {
 
     default: {
       if ((command & BRL_MSK_BLK) == BRL_CMD_BLK(ROUTE)) {
-        int key = command & BRL_MSK_ARG;
+        unsigned int key = command & BRL_MSK_ARG;
+        unsigned int count = brl.textColumns;
 
-        if ((key >= textStart) && (key < (textStart + textCount))) {
+        if (key < count) {
           setFocusedItem();
 
-          if (changeMenuSettingScaled(screenMenu, key-textStart, textCount)) {
+          if (changeMenuSettingScaled(screenMenu, key, count)) {
             settingChanged();
           } else {
             commandRejected();
