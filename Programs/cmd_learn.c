@@ -143,7 +143,7 @@ static int
 handleLearnCommands (int command, void *data) {
   switch (command & BRL_MSK_CMD) {
     case BRL_CMD_LEARN:
-      if (!learnMode(LEARN_MODE_TIMEOUT)) restartRequired = 1;
+      if (!learnMode(LEARN_MODE_TIMEOUT)) brl.hasFailed = 1;
       break;
 
     default:

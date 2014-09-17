@@ -187,7 +187,7 @@ static int
 handleMiscellaneousCommands (int command, void *data) {
   switch (command & BRL_MSK_CMD) {
     case BRL_CMD_RESTARTBRL:
-      restartRequired = 1;
+      brl.hasFailed = 1;
       break;
 
     case BRL_CMD_HELP: {

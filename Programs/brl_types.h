@@ -80,6 +80,7 @@ struct BrailleDisplayStruct {
   unsigned resizeRequired:1;
   unsigned noDisplay:1;
 
+  unsigned hasFailed:1;
   unsigned isOffline:1;
 
   void (*bufferResized) (unsigned int rows, unsigned int columns);
@@ -89,10 +90,15 @@ struct BrailleDisplayStruct {
   BrailleInputRotator *rotateInput;
 
   struct {
-    Queue *queue;
+    Queue *messages;
     AsyncHandle alarm;
-    int timeout;
-  } message;
+
+    struct {
+      int timeout;
+      unsigned int count;
+      unsigned int limit;
+    } missing;
+  } acknowledgements;
 
   BrailleData *data;
 };

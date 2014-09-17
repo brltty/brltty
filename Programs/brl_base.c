@@ -299,14 +299,12 @@ deallocateBrailleMessage (BrailleMessage *msg) {
 
 static void setBrailleMessageAlarm (BrailleDisplay *brl);
 
-int
-acknowledgeBrailleMessage (BrailleDisplay *brl) {
+static int
+writeNextBrailleMessage (BrailleDisplay *brl) {
   int ok = 1;
 
-  logMessage(LOG_CATEGORY(OUTPUT_PACKETS), "acknowledged");
-
-  if (brl->message.queue) {
-    BrailleMessage *msg = dequeueItem(brl->message.queue);
+  if (brl->acknowledgements.messages) {
+    BrailleMessage *msg = dequeueItem(brl->acknowledgements.messages);
 
     if (msg) {
       int written;
@@ -326,30 +324,42 @@ acknowledgeBrailleMessage (BrailleDisplay *brl) {
     }
   }
 
-  if (brl->message.alarm) {
-    asyncCancelRequest(brl->message.alarm);
-    brl->message.alarm = NULL;
+  if (brl->acknowledgements.alarm) {
+    asyncCancelRequest(brl->acknowledgements.alarm);
+    brl->acknowledgements.alarm = NULL;
   }
 
   return ok;
 }
 
+int
+acknowledgeBrailleMessage (BrailleDisplay *brl) {
+  logMessage(LOG_CATEGORY(OUTPUT_PACKETS), "acknowledged");
+  brl->acknowledgements.missing.count = 0;
+  return writeNextBrailleMessage(brl);
+}
+
 ASYNC_ALARM_CALLBACK(handleBrailleMessageTimeout) {
   BrailleDisplay *brl = parameters->data;
 
-  asyncDiscardHandle(brl->message.alarm);
-  brl->message.alarm = NULL;
+  asyncDiscardHandle(brl->acknowledgements.alarm);
+  brl->acknowledgements.alarm = NULL;
 
-  logMessage(LOG_WARNING, "missing braille message acknowledgement");
-  acknowledgeBrailleMessage(brl);
+  if ((brl->acknowledgements.missing.count += 1) < brl->acknowledgements.missing.limit) {
+    logMessage(LOG_WARNING, "missing braille message acknowledgement");
+    writeNextBrailleMessage(brl);
+  } else {
+    logMessage(LOG_WARNING, "too many missing braille message acknowledgements");
+    brl->hasFailed = 1;
+  }
 }
 
 static void
 setBrailleMessageAlarm (BrailleDisplay *brl) {
-  if (brl->message.alarm) {
-    asyncResetAlarmIn(brl->message.alarm, brl->message.timeout);
+  if (brl->acknowledgements.alarm) {
+    asyncResetAlarmIn(brl->acknowledgements.alarm, brl->acknowledgements.missing.timeout);
   } else {
-    asyncSetAlarmIn(&brl->message.alarm, brl->message.timeout,
+    asyncSetAlarmIn(&brl->acknowledgements.alarm, brl->acknowledgements.missing.timeout,
                     handleBrailleMessageTimeout, brl);
   }
 }
@@ -375,11 +385,11 @@ writeBrailleMessage (
   int type,
   const void *packet, size_t size
 ) {
-  if (brl->message.alarm) {
+  if (brl->acknowledgements.alarm) {
     BrailleMessage *msg;
 
-    if (!brl->message.queue) {
-      if (!(brl->message.queue = newQueue(deallocateBrailleMessageItem, NULL))) {
+    if (!brl->acknowledgements.messages) {
+      if (!(brl->acknowledgements.messages = newQueue(deallocateBrailleMessageItem, NULL))) {
         return 0;
       }
     }
@@ -392,7 +402,7 @@ writeBrailleMessage (
       memcpy(msg->packet, packet, size);
 
       {
-        Element *element = findElement(brl->message.queue, findOldBrailleMessage, msg);
+        Element *element = findElement(brl->acknowledgements.messages, findOldBrailleMessage, msg);
 
         if (element) {
           logBrailleMessage(getElementItem(element), "unqueued");
@@ -400,7 +410,7 @@ writeBrailleMessage (
         }
       }
 
-      if (enqueueItem(brl->message.queue, msg)) {
+      if (enqueueItem(brl->acknowledgements.messages, msg)) {
         logBrailleMessage(msg, "enqueued");
         return 1;
       }

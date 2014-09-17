@@ -908,7 +908,6 @@ isSameRow (
   return 1;
 }
 
-int restartRequired;
 int isSuspended;
 
 int
@@ -993,7 +992,7 @@ handleRoutingDone (const void *data) {
 }
 
 static void
-handleRestartRequired (const void *data) {
+handleBrailleDriverFailed (const void *data) {
   restartBrailleDriver();
 }
 
@@ -1030,8 +1029,8 @@ ASYNC_CONDITION_TESTER(checkUnmonitoredConditions) {
     }
   }
 
-  if (restartRequired) {
-    ucd->handler = handleRestartRequired;
+  if (brl.hasFailed) {
+    ucd->handler = handleBrailleDriverFailed;
     return 1;
   }
 
@@ -1160,7 +1159,6 @@ brlttyConstruct (int argc, char *argv[]) {
   ses->spkx = ses->winx; ses->spky = ses->winy;
   resumeUpdates(1);
 
-  restartRequired = 0;
   isSuspended = 0;
 
   return PROG_EXIT_SUCCESS;

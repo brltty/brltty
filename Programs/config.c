@@ -1558,7 +1558,8 @@ disableBrailleDriver (void) {
 void
 restartBrailleDriver (void) {
   disableBrailleDriver();
-  restartRequired = 0;
+  awaitActivityStopped(brailleDriverActivity);
+  brl.hasFailed = 0;
 
   logMessage(LOG_INFO, gettext("reinitializing braille driver"));
   enableBrailleDriver();

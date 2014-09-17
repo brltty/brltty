@@ -62,7 +62,7 @@ GIO_INPUT_HANDLER(handleBrailleInput) {
 
     if (error) {
       logActionError(error, "braille input monitor");
-      restartRequired = 1;
+      brl.hasFailed = 1;
       return 0;
     }
   }

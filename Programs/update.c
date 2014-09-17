@@ -650,7 +650,7 @@ doUpdate (void) {
     apiClaimDriver();
 
     if (infoMode) {
-      if (!showInfo()) restartRequired = 1;
+      if (!showInfo()) brl.hasFailed = 1;
     } else {
       const unsigned int windowLength = brl.textColumns * brl.textRows;
       const unsigned int textLength = textCount * brl.textRows;
@@ -879,7 +879,7 @@ doUpdate (void) {
         fillStatusSeparator(textBuffer, brl.buffer);
       }
 
-      if (!(writeStatusCells() && braille->writeWindow(&brl, textBuffer))) restartRequired = 1;
+      if (!(writeStatusCells() && braille->writeWindow(&brl, textBuffer))) brl.hasFailed = 1;
     }
 
     apiReleaseDriver();

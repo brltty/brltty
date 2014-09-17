@@ -47,6 +47,7 @@ constructBrailleDisplay (BrailleDisplay *brl) {
   brl->buffer = NULL;
   brl->writeDelay = 0;
 
+  brl->hasFailed = 0;
   brl->isOffline = 0;
 
   brl->bufferResized = NULL;
@@ -55,23 +56,25 @@ constructBrailleDisplay (BrailleDisplay *brl) {
   brl->setAutorepeat = NULL;
   brl->rotateInput = NULL;
 
-  brl->message.queue = NULL;
-  brl->message.alarm = NULL;
-  brl->message.timeout = BRAILLE_MESSAGE_ACKNOWLEDGEMENT_TIMEOUT;
+  brl->acknowledgements.messages = NULL;
+  brl->acknowledgements.alarm = NULL;
+  brl->acknowledgements.missing.timeout = BRAILLE_MESSAGE_ACKNOWLEDGEMENT_TIMEOUT;
+  brl->acknowledgements.missing.count = 0;
+  brl->acknowledgements.missing.limit = BRAILLE_MESSAGE_UNACKNOWLEDGEED_LIMIT;
 
   brl->data = NULL;
 }
 
 void
 destructBrailleDisplay (BrailleDisplay *brl) {
-  if (brl->message.alarm) {
-    asyncCancelRequest(brl->message.alarm);
-    brl->message.alarm = NULL;
+  if (brl->acknowledgements.alarm) {
+    asyncCancelRequest(brl->acknowledgements.alarm);
+    brl->acknowledgements.alarm = NULL;
   }
 
-  if (brl->message.queue) {
-    deallocateQueue(brl->message.queue);
-    brl->message.queue = NULL;
+  if (brl->acknowledgements.messages) {
+    deallocateQueue(brl->acknowledgements.messages);
+    brl->acknowledgements.messages = NULL;
   }
 
   if (brl->keyTable) {
