@@ -276,7 +276,6 @@ AC_PROG_AWK
 AC_PROG_LN_S
 
 AC_PATH_PROG([PKG_CONFIG], [pkg-config], [false])
-AC_PATH_PROG([ICU_CONFIG], [icu-config], [false])
 
 AC_PATH_PROG([MSGMERGE], [msgmerge], [false])
 AC_PATH_PROG([MSGFMT], [msgfmt], [false])
@@ -503,10 +502,7 @@ BRLTTY_ARG_DISABLE(
    [support for Unicode-based internationalization],
    [],
 [dnl
-   ${ICU_CONFIG} --exists >/dev/null && {
-      icu_includes="`${ICU_CONFIG} --cppflags-searchpath`"
-      icu_libs="`${ICU_CONFIG} --ldflags`"
-      icu_libs=`echo " ${icu_libs}" | sed -e ['s/ -[^lL][^ ]*//g']`
+   BRLTTY_HAVE_PACKAGE([icu], [icu-uc], [dnl
       AC_DEFINE_UNQUOTED([HAVE_ICU], [1],
                          [Define this if Unicode-based internationalization support is to be included.])
 
@@ -514,7 +510,7 @@ BRLTTY_ARG_DISABLE(
       then
          icu_libs="`echo ${icu_libs} | sed -e 's/\(-l\)\(icu\)/\1s\2/g'`"
       fi
-   }
+   ])
 ])
 AC_SUBST([icu_includes])
 AC_SUBST([icu_libs])
