@@ -33,17 +33,14 @@
 
 #endif /* posix thread definitions */
 
-#ifdef GOT_PTHREADS
-#ifdef HAVE_PTHREAD_GETNAME_NP
-#define GOT_PTHREADS_NAME
-#endif /* HAVE_PTHREAD_GETNAME_NP */
-#endif /* GOT_PTHREADS */
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-#ifdef GOT_PTHREADS_NAME
+#ifdef GOT_PTHREADS
+#if defined(HAVE_PTHREAD_GETNAME_NP) && defined(__GLIBC__)
+#define GOT_PTHREADS_NAME
+
 static inline size_t formatThreadName (char *buffer, size_t size) {
   int error = pthread_getname_np(pthread_self(), buffer, size);
 
@@ -61,7 +58,8 @@ static inline size_t formatThreadName (char *buffer, size_t size) {
 
 static inline void setThreadName (const char *name) {
 }
-#endif /* get/set thread name */
+#endif /* format/set thread name */
+#endif /* GOT_PTHREADS */
 
 #ifdef __cplusplus
 }
