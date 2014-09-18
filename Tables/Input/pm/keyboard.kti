@@ -29,8 +29,8 @@ map Dot8 DOT8
 
 map LeftSpace SPACE
 map RightSpace SPACE
-map LeftThumb UPPERCASE
-map RightThumb CONTROL
+map LeftThumb CONTROL
+map RightThumb META
 
 assign chord Space+
 include ../chords.kti
