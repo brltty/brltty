@@ -1874,6 +1874,8 @@ disableSpeechDriver (void) {
 void
 restartSpeechDriver (void) {
   disableSpeechDriver();
+  awaitActivityStopped(speechDriverActivity);
+
   logMessage(LOG_INFO, gettext("reinitializing speech driver"));
   enableSpeechDriver(1);
 }
@@ -2092,6 +2094,8 @@ disableScreenDriver (void) {
 void
 restartScreenDriver (void) {
   disableScreenDriver();
+  awaitActivityStopped(screenDriverActivity);
+
   logMessage(LOG_INFO, gettext("reinitializing screen driver"));
   enableScreenDriver();
 }
