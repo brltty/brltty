@@ -268,6 +268,70 @@ test "${GXX}" = "yes" && {
    CXXFLAGS="${CXXFLAGS} ${brltty_gcc_cflags}"
 }
 
+case "${host_os}"
+in
+   linux*|gnu*|kfreebsd*)
+      brltty_prog_cc_sysflags="-D_POSIX_C_SOURCE=2 -D_BSD_SOURCE -D_XOPEN_SOURCE=500 -D_XOPEN_SOURCE_EXTENDED -D_GNU_SOURCE"
+      ;;
+   solaris*)
+      brltty_prog_cc_sysflags="-D_XOPEN_SOURCE=500 -D__EXTENSIONS__"
+      ;;
+   hpux*)
+      brltty_prog_cc_sysflags="-D_XOPEN_SOURCE_EXTENDED -D_HPUX_SOURCE"
+      ;;
+   osf*)
+      brltty_prog_cc_sysflags="-D_XOPEN_SOURCE=500 -D_POSIX_C_SOURCE -D_OSF_SOURCE"
+      ;;
+   cygwin*)
+      brltty_prog_cc_sysflags="-D_XOPEN_SOURCE_EXTENDED"
+      ;;
+   *)
+      brltty_prog_cc_sysflags=""
+      ;;
+esac
+CPPFLAGS="${CPPFLAGS} ${brltty_prog_cc_sysflags}"
+
+if test "${GCC}" = "yes"
+then
+   case "${host_os}"
+   in
+      cygwin*|mingw*)
+         LIBCFLAGS=""
+         ;;
+      msdos*)
+         LIBCFLAGS=""
+         ;;
+      darwin*)
+         LIBCFLAGS=""
+         ;;
+      *)
+         LIBCFLAGS="-fPIC"
+         ;;
+   esac
+else
+   case "${host_os}"
+   in
+      *)
+         LIBCFLAGS=""
+         AC_MSG_WARN([library flags not configured for ${host_os}])
+         ;;
+   esac
+fi
+AC_SUBST([LIBCFLAGS])
+
+if test "$GXX" = "yes"
+then
+   LIBCXXFLAGS="-fPIC"
+else
+   case "${host_os}"
+   in
+      *)
+         LIBCXXFLAGS=""
+         ;;
+   esac
+fi
+AC_SUBST([LIBCXXFLAGS])
+
 AC_PATH_TOOL([LD], [ld])
 AC_PATH_TOOL([STRIP], [strip])
 AC_PATH_TOOL([RANLIB], [ranlib])
@@ -679,6 +743,7 @@ test -z "$gui_toolkit_package" && {
 AC_CHECK_FUNCS([time gettimeofday nanosleep])
 
 BRLTTY_CHECK_FUNCTION([clock_gettime], [time.h], [rt])
+BRLTTY_CHECK_FUNCTION([pthread_getname_np], [pthread.h], [pthread])
 
 AC_CHECK_DECLS([localtime_r], [], [], [dnl
 #include <time.h>
@@ -827,74 +892,6 @@ then
    AC_DEFINE([HAVE_ATTRIBUTE_UNUSED], [1],
              [Define this if the unused attribute is supported.])
 fi
-
-AC_CACHE_CHECK([for system-dependent compilation flags], [brltty_cv_prog_cc_sysflags], [dnl
-case "${host_os}"
-in
-   linux*|gnu*|kfreebsd*)
-      brltty_cv_prog_cc_sysflags="-D_POSIX_C_SOURCE=2 -D_BSD_SOURCE -D_XOPEN_SOURCE=500 -D_XOPEN_SOURCE_EXTENDED -D_GNU_SOURCE"
-      ;;
-   solaris*)
-      brltty_cv_prog_cc_sysflags="-D_XOPEN_SOURCE=500 -D__EXTENSIONS__"
-      ;;
-   hpux*)
-      brltty_cv_prog_cc_sysflags="-D_XOPEN_SOURCE_EXTENDED -D_HPUX_SOURCE"
-      ;;
-   osf*)
-      brltty_cv_prog_cc_sysflags="-D_XOPEN_SOURCE=500 -D_POSIX_C_SOURCE -D_OSF_SOURCE"
-      ;;
-   cygwin*)
-      brltty_cv_prog_cc_sysflags="-D_XOPEN_SOURCE_EXTENDED"
-      ;;
-   *)
-      brltty_cv_prog_cc_sysflags=""
-      ;;
-esac])
-CPPFLAGS="${CPPFLAGS} ${brltty_cv_prog_cc_sysflags}"
-
-AC_CACHE_CHECK([for c compiler shared object flags], [brltty_cv_prog_cc_libflags], [dnl
-if test "${GCC}" = "yes"
-then
-   case "${host_os}"
-   in
-      cygwin*|mingw*)
-         brltty_cv_prog_cc_libflags=""
-         ;;
-      msdos*)
-         brltty_cv_prog_cc_libflags=""
-         ;;
-      darwin*)
-         brltty_cv_prog_cc_libflags=""
-         ;;
-      *)
-         brltty_cv_prog_cc_libflags="-fPIC"
-         ;;
-   esac
-else
-   case "${host_os}"
-   in
-      *)
-         brltty_cv_prog_cc_libflags=""
-         AC_MSG_WARN([library flags not configured for ${host_os}])
-         ;;
-   esac
-fi])
-AC_SUBST([LIBCFLAGS], ["${brltty_cv_prog_cc_libflags}"])
-
-AC_CACHE_CHECK([for c++ compiler shared object flags], [brltty_cv_prog_cxx_libflags], [dnl
-if test "$GXX" = "yes"
-then
-   brltty_cv_prog_cxx_libflags="-fPIC"
-else
-   case "${host_os}"
-   in
-      *)
-         brltty_cv_prog_cxx_libflags=""
-         ;;
-   esac
-fi])
-LIBCXXFLAGS="${brltty_cv_prog_cxx_libflags}"
-AC_SUBST([LIBCXXFLAGS])
 
 AC_SUBST([archive_prefix], [lib])
 AC_SUBST([archive_extension], [a])

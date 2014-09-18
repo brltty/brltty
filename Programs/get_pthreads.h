@@ -34,9 +34,9 @@
 #endif /* posix thread definitions */
 
 #ifdef GOT_PTHREADS
-#ifdef __USE_GNU
+#ifdef HAVE_PTHREAD_GETNAME_NP
 #define GOT_PTHREADS_NAME
-#endif /* __USE_GNU */
+#endif /* HAVE_PTHREAD_GETNAME_NP */
 #endif /* GOT_PTHREADS */
 
 #ifdef __cplusplus

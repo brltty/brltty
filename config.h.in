@@ -98,6 +98,9 @@ extern "C" {
 /* Define this if the function clock_gettime exists. */
 #undef HAVE_CLOCK_GETTIME
 
+/* Define this if the function pthread_getname_np exists. */
+#undef HAVE_PTHREAD_GETNAME_NP
+
 /* Define this if the function nanosleep exists. */
 #undef HAVE_NANOSLEEP
 
