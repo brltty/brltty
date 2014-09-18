@@ -31,3 +31,14 @@ map LeftSpace SPACE
 map RightSpace SPACE
 map LeftThumb UPPERCASE
 map RightThumb CONTROL
+
+assign chord Space+
+include ../chords.kti
+
+hide on
+assign chord LeftSpace+
+include ../chords.kti
+
+assign chord RightSpace+
+include ../chords.kti
+hide off

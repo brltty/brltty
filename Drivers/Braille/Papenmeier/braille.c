@@ -863,27 +863,28 @@ readCommand2 (BrailleDisplay *brl, KeyTableCommandContext context) {
       }
 
       case 0X0C: {
-        unsigned char modifierKeys = packet.data.bytes[0];
-        unsigned char dotKeys = packet.data.bytes[1];
-        uint16_t allKeys = (modifierKeys << 8) | dotKeys;
-        KeyNumber pressedKeys[0X10];
-        unsigned char pressedCount = 0;
-        const KeyGroup group = PM_GRP_NavigationKeys;
-        KeyNumber keyOffset;
+        unsigned char modifiers = packet.data.bytes[0];
+        unsigned char code = packet.data.bytes[1];
+
+        if (modifiers & 0X80) {
+          int command = BRL_CMD_BLK(PASSXT);
+
+          if (modifiers & 0X01) command |= BRL_FLG_KBD_RELEASE;
+          if (modifiers & 0X02) command |= BRL_FLG_KBD_EMUL0;
+          if (modifiers & 0X04) command |= BRL_FLG_KBD_EMUL1;
+          enqueueCommand(command);
+        } else {
+          KeyNumberSet keys = (modifiers << 8) | code;
 
 #define BIT(key) (1 << ((key) - PM_KEY_KEYBOARD))
-        if (allKeys & (BIT(PM_KEY_LeftSpace) | BIT(PM_KEY_RightSpace))) allKeys &= ~BIT(PM_KEY_Space);
+          if (keys & (BIT(PM_KEY_LeftSpace) | BIT(PM_KEY_RightSpace))) {
+            keys &= ~BIT(PM_KEY_Space);
+          }
 #undef BIT
 
-        for (keyOffset=0; keyOffset<13; keyOffset+=1) {
-          if (allKeys & (1 << keyOffset)) {
-            PM_NavigationKey key = PM_KEY_KEYBOARD + keyOffset;
-            enqueueKeyEvent(brl, group, key, 1);
-            pressedKeys[pressedCount++] = key;
-          }
+          enqueueKeys(brl, keys, PM_GRP_NavigationKeys, PM_KEY_KEYBOARD);
         }
 
-        while (pressedCount) enqueueKeyEvent(brl, group, pressedKeys[--pressedCount], 0);
         continue;
       }
     }
