@@ -662,7 +662,8 @@ handleClipboardCommands (int command, void *data) {
         default:
           return 0;
       }
-      return 0;
+
+      break;
     }
   }
 
