@@ -42,6 +42,7 @@ bind L2+L3 CSRVIS
 bind L6+L7 TUNES
 bind L6+L8 RESTARTSPEECH
 bind L5+L7 PASTE
+bind L5+L7+!RoutingKey PASTE_HISTORY
 
 assign Dot1 L4
 assign Dot2 L3

@@ -24,6 +24,7 @@ note * The four at the right, from bottom to top, are named L5 through L8.
 
 bind L1 FWINLTSKIP
 bind L2+L3 PASTE
+bind L2+L3+!RoutingKey PASTE_HISTORY
 bind L4 CSRVIS
 bind L8 FWINRTSKIP
 bind L7 TOP_LEFT
