@@ -37,11 +37,13 @@ extern Queue *getProgramQueue (
   QueueCreator *createQueue, void *data
 );
 
-extern Element *getQueueHead (const Queue *queue);
-extern Element *getQueueTail (const Queue *queue);
 extern int getQueueSize (const Queue *queue);
 extern void *getQueueData (const Queue *queue);
 extern void *setQueueData (Queue *queue, void *data);
+
+extern Element *getQueueHead (const Queue *queue);
+extern Element *getQueueTail (const Queue *queue);
+extern Element *getQueueElement (const Queue *queue, unsigned int index);
 
 extern Element *enqueueItem (Queue *queue, void *item);
 extern void *dequeueItem (Queue *queue);

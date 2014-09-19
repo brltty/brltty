@@ -227,7 +227,6 @@ typedef enum {
  */
 typedef enum {
   BRL_BLK_BASIC = 0 /* (must be first) */,
-
   BRL_BLK_ROUTE /* bring cursor to character */,
   BRL_BLK_CLIP_NEW /* start new clipboard at character */,
   BRL_BLK_CLIP_ADD /* append to clipboard from character */,
@@ -245,12 +244,12 @@ typedef enum {
   BRL_BLK_NXDIFCHAR /* go down to nearest line with different character */,
   BRL_BLK_CLIP_COPY /* copy characters to clipboard */,
   BRL_BLK_CLIP_APPEND /* append characters to clipboard */,
+  BRL_BLK_PASTE_HISTORY /* insert clipboard history entry at cursor */,
   BRL_BLK_SET_TEXT_TABLE /* set the text table */,
   BRL_BLK_SET_ATTRIBUTES_TABLE /* set the attributes table */,
   BRL_BLK_SET_CONTRACTION_TABLE /* set the contraction table */,
   BRL_BLK_SET_KEYBOARD_TABLE /* set the keyboard table */,
   BRL_BLK_SET_LANGUAGE_PROFILE /* set the language profile */,
-  BRL_BLK_17 /* (reserved) */,
   BRL_BLK_18 /* (reserved) */,
   BRL_BLK_19 /* (reserved) */,
   BRL_BLK_1A /* (reserved) */,

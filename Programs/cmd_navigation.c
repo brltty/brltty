@@ -678,6 +678,7 @@ handleNavigationCommands (int command, void *data) {
         default:
           return 0;
       }
+
       break;
     }
   }

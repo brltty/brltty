@@ -302,17 +302,6 @@ getProgramQueue (
   return *queue;
 }
 
-Element *
-getQueueHead (const Queue *queue) {
-  return queue->head;
-}
-
-Element *
-getQueueTail (const Queue *queue) {
-  Element *head = queue->head;
-  return head? head->previous: NULL;
-}
-
 int
 getQueueSize (const Queue *queue) {
   return queue->size;
@@ -328,6 +317,39 @@ setQueueData (Queue *queue, void *data) {
   void *previous = queue->data;
   queue->data = data;
   return previous;
+}
+
+Element *
+getQueueHead (const Queue *queue) {
+  return queue->head;
+}
+
+Element *
+getQueueTail (const Queue *queue) {
+  Element *head = queue->head;
+  return head? head->previous: NULL;
+}
+
+typedef struct {
+  unsigned int index;
+} GetQueueElementData;
+
+static int
+testElementIndex (const void *item, void *data) {
+  GetQueueElementData *gqe = data;
+
+  if (!gqe->index) return 1;
+  gqe->index -= 1;
+  return 0;
+}
+
+Element *
+getQueueElement (const Queue *queue, unsigned int index) {
+  GetQueueElementData gqe = {
+    .index = index
+  };
+
+  return findElement(queue, testElementIndex, &gqe);
 }
 
 Element *

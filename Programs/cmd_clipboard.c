@@ -70,8 +70,16 @@ cpbAllocateCharacters (size_t count) {
   return NULL;
 }
 
+static const HistoryEntry *
+cpbGetHistory (ClipboardCommandData *ccd, unsigned int index) {
+  Element *element = getQueueElement(ccd->history.queue, index);
+
+  if (!element) return NULL;
+  return getElementItem(element);
+}
+
 static void
-cpbPushContent (ClipboardCommandData *ccd, const wchar_t *characters, size_t length) {
+cpbPushHistory (ClipboardCommandData *ccd, const wchar_t *characters, size_t length) {
   if (length > 0) {
     Queue *queue = ccd->history.queue;
     Element *element = getQueueTail(queue);
@@ -127,7 +135,7 @@ cpbClearContent (ClipboardCommandData *ccd) {
   size_t length;
   const wchar_t *characters = cpbGetContent(ccd, &length);
 
-  cpbPushContent(ccd, characters, length);
+  cpbPushHistory(ccd, characters, length);
   cpbTruncateContent(ccd, 0);
 }
 
@@ -341,10 +349,9 @@ cpbLinearCopy (ClipboardCommandData *ccd, int column, int row) {
 }
 
 static int
-cpbPaste (ClipboardCommandData *ccd) {
-  size_t length;
-  const wchar_t *characters = cpbGetContent(ccd, &length);
-
+cpbPaste (ClipboardCommandData *ccd, const wchar_t *characters, size_t length) {
+  if (!isMainScreen()) return 0;
+  if (isRouting()) return 0;
   if (!length) return 0;
 
   {
@@ -491,13 +498,13 @@ handleClipboardCommands (int command, void *data) {
   ClipboardCommandData *ccd = data;
 
   switch (command & BRL_MSK_CMD) {
-    case BRL_CMD_PASTE:
-      if (isMainScreen() && !isRouting()) {
-        if (cpbPaste(ccd)) break;
-      }
+    case BRL_CMD_PASTE: {
+      size_t length;
+      const wchar_t *characters = cpbGetContent(ccd, &length);
 
-      alert(ALERT_COMMAND_REJECTED);
+      if (!cpbPaste(ccd, characters, length)) alert(ALERT_COMMAND_REJECTED);
       break;
+    }
 
     case BRL_CMD_CLIP_SAVE:
       alert(cpbSave(ccd)? ALERT_COMMAND_DONE: ALERT_COMMAND_REJECTED);
@@ -656,6 +663,13 @@ handleClipboardCommands (int command, void *data) {
           }
 
           alert(ALERT_COMMAND_REJECTED);
+          break;
+        }
+
+        case BRL_CMD_BLK(PASTE_HISTORY): {
+          const HistoryEntry *entry = cpbGetHistory(ccd, arg);
+
+          if (!(entry && cpbPaste(ccd, entry->characters, entry->length))) alert(ALERT_COMMAND_REJECTED);
           break;
         }
 
