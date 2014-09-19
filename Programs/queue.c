@@ -330,7 +330,7 @@ getStackHead (const Queue *queue) {
   return head? head->previous: NULL;
 }
 
-Element *
+static Element *
 getElementByIndex (const Queue *queue, unsigned int index, int fromTail) {
   if (index < queue->size) {
     Element *element = queue->head;
