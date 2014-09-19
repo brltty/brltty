@@ -335,6 +335,15 @@ getElementByIndex (const Queue *queue, unsigned int index, int fromTail) {
   if (index < queue->size) {
     Element *element = queue->head;
 
+    {
+      int i = queue->size - 1 - index;
+
+      if (i < index) {
+        index = i;
+        fromTail = !fromTail;
+      }
+    }
+
     if (fromTail) element = element->previous;
 
     while (index > 0) {
