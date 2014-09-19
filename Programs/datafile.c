@@ -883,7 +883,7 @@ deallocateDataCondition (void *item, void *data UNUSED) {
 
 static Element *
 getInnermostDataCondition (DataFile *file) {
-  return getQueueTail(file->conditions);
+  return getStackHead(file->conditions);
 }
 
 static Element *

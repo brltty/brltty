@@ -657,7 +657,7 @@ static Element *
 getActiveOperationElement (const FunctionEntry *function) {
   Queue *queue = function->operations;
 
-  if (function->methods->invokeCallback == invokeMonitorCallback) return getQueueTail(queue);
+  if (function->methods->invokeCallback == invokeMonitorCallback) return getStackHead(queue);
   return getQueueHead(queue);
 }
 

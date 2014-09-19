@@ -325,31 +325,37 @@ getQueueHead (const Queue *queue) {
 }
 
 Element *
-getQueueTail (const Queue *queue) {
+getStackHead (const Queue *queue) {
   Element *head = queue->head;
   return head? head->previous: NULL;
 }
 
-typedef struct {
-  unsigned int index;
-} GetQueueElementData;
+Element *
+getElementByIndex (const Queue *queue, unsigned int index, int fromTail) {
+  if (index < queue->size) {
+    Element *element = queue->head;
 
-static int
-testElementIndex (const void *item, void *data) {
-  GetQueueElementData *gqe = data;
+    if (fromTail) element = element->previous;
 
-  if (!gqe->index) return 1;
-  gqe->index -= 1;
+    while (index > 0) {
+      element = fromTail? element->previous: element->next;
+      index -= 1;
+    }
+
+    return element;
+  }
+
   return 0;
 }
 
 Element *
 getQueueElement (const Queue *queue, unsigned int index) {
-  GetQueueElementData gqe = {
-    .index = index
-  };
+  return getElementByIndex(queue, index, 0);
+}
 
-  return findElement(queue, testElementIndex, &gqe);
+Element *
+getStackElement (const Queue *queue, unsigned int index) {
+  return getElementByIndex(queue, index, 1);
 }
 
 Element *
@@ -377,7 +383,7 @@ testElementHasItem (const void *item, void *data) {
 }
 
 Element *
-findElementWithItem (Queue *queue, void *item) {
+findElementWithItem (const Queue *queue, void *item) {
   return findElement(queue, testElementHasItem, item);
 }
 

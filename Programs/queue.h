@@ -42,8 +42,10 @@ extern void *getQueueData (const Queue *queue);
 extern void *setQueueData (Queue *queue, void *data);
 
 extern Element *getQueueHead (const Queue *queue);
-extern Element *getQueueTail (const Queue *queue);
 extern Element *getQueueElement (const Queue *queue, unsigned int index);
+
+extern Element *getStackHead (const Queue *queue);
+extern Element *getStackElement (const Queue *queue, unsigned int index);
 
 extern Element *enqueueItem (Queue *queue, void *item);
 extern void *dequeueItem (Queue *queue);
@@ -61,7 +63,7 @@ extern void moveElement (Element *element, Queue *queue);
 typedef int ItemTester (const void *item, void *data);
 extern Element *findElement (const Queue *queue, ItemTester *testItem, void *data);
 extern void *findItem (const Queue *queue, ItemTester *testItem, void *data);
-extern Element *findElementWithItem (Queue *queue, void *item);
+extern Element *findElementWithItem (const Queue *queue, void *item);
 
 typedef int ItemProcessor (void *item, void *data);
 extern Element *processQueue (Queue *queue, ItemProcessor *processItem, void *data);

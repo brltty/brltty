@@ -72,17 +72,17 @@ cpbAllocateCharacters (size_t count) {
 
 static const HistoryEntry *
 cpbGetHistory (ClipboardCommandData *ccd, unsigned int index) {
-  Element *element = getQueueElement(ccd->history.queue, index);
+  Element *element = getStackElement(ccd->history.queue, index);
 
   if (!element) return NULL;
   return getElementItem(element);
 }
 
 static void
-cpbPushHistory (ClipboardCommandData *ccd, const wchar_t *characters, size_t length) {
+cpbAddHistory (ClipboardCommandData *ccd, const wchar_t *characters, size_t length) {
   if (length > 0) {
     Queue *queue = ccd->history.queue;
-    Element *element = getQueueTail(queue);
+    Element *element = getStackHead(queue);
 
     if (element) {
       const HistoryEntry *entry = getElementItem(element);
@@ -135,7 +135,7 @@ cpbClearContent (ClipboardCommandData *ccd) {
   size_t length;
   const wchar_t *characters = cpbGetContent(ccd, &length);
 
-  cpbPushHistory(ccd, characters, length);
+  cpbAddHistory(ccd, characters, length);
   cpbTruncateContent(ccd, 0);
 }
 
