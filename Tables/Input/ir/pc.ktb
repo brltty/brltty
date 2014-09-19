@@ -22,9 +22,19 @@ note The eight extra keys at the ends of the keyboard are known as linear keys:
 note * The four at the left, from top to bottom, are named L1 through L4.
 note * The four at the right, from bottom to top, are named L5 through L8.
 
+assign Dot1 L1
+assign Dot2 L2
+assign Dot3 L3
+assign Dot4 L8
+assign Dot5 L7
+assign Dot6 L6
+assign Dot7 L4
+assign Dot8 L5
+include all.kti
+
 bind L1 FWINLTSKIP
 bind L2+L3 PASTE
-bind L2+L3+!RoutingKey PASTE_HISTORY
+bind L2+L3+L4 CONTEXT+PASTE_HISTORY
 bind L4 CSRVIS
 bind L8 FWINRTSKIP
 bind L7 TOP_LEFT
@@ -42,13 +52,3 @@ bind L5+!XtE0.0X4C FWINLT
 bind L5+!XtE0.0X4E FWINRT
 bind L5+!XtE0.0X49 LNUP
 bind L5+!XtE0.0X51 LNDN
-
-assign Dot1 L1
-assign Dot2 L2
-assign Dot3 L3
-assign Dot4 L8
-assign Dot5 L7
-assign Dot6 L6
-assign Dot7 L4
-assign Dot8 L5
-include all.kti
