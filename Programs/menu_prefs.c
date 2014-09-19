@@ -348,6 +348,11 @@ changedAttributesTable (const MenuItem *item, unsigned char setting UNUSED) {
   return changeAttributesTable(getMenuItemValue(item));
 }
 
+static int
+changedKeyboardTable (const MenuItem *item, unsigned char setting UNUSED) {
+  return changeKeyboardTable(getMenuItemValue(item));
+}
+
 #ifdef ENABLE_CONTRACTED_BRAILLE
 static int
 testContractedBraille (void) {
@@ -1109,6 +1114,13 @@ makePreferencesMenu (void) {
       SET(contractionTable);
     }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
+
+    {
+      NAME(strtext("Keyboard Table"));
+      ITEM(newFilesMenuItem(tablesSubmenu, &itemName, opt_tablesDirectory, KEYBOARD_TABLES_SUBDIRECTORY, KEY_TABLE_EXTENSION, opt_keyboardTable, 1));
+      CHANGED(KeyboardTable);
+      SET(keyboardTable);
+    }
   }
 
   {

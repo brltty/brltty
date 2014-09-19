@@ -199,7 +199,7 @@ char *opt_contractionTable;
 ContractionTable *contractionTable = NULL;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-static char *opt_keyboardTable;
+char *opt_keyboardTable;
 KeyTable *keyboardTable = NULL;
 static KeyboardMonitorObject *keyboardMonitor = NULL;
 

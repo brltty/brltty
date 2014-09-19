@@ -84,6 +84,7 @@ extern char *opt_tablesDirectory;
 extern char *opt_textTable;
 extern char *opt_attributesTable;
 extern char *opt_contractionTable;
+extern char *opt_keyboardTable;
 
 extern int opt_releaseDevice;
 
