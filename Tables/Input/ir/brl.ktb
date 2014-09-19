@@ -23,6 +23,15 @@ note the left one is named Backspace, and the right one is named Space.
 note The eight keys behind the braille keyboard are known as linear keys, and,
 note from left to right, are named L1 through L8.
 
+assign Dot1 L4
+assign Dot2 L3
+assign Dot3 L2
+assign Dot4 L5
+assign Dot5 L6
+assign Dot6 L7
+assign Dot7 L1
+assign Dot8 L8
+include all.kti
 
 ####################
 # Default Bindings #
@@ -42,17 +51,8 @@ bind L2+L3 CSRVIS
 bind L6+L7 TUNES
 bind L6+L8 RESTARTSPEECH
 bind L5+L7 PASTE
-bind L5+L7+!RoutingKey PASTE_HISTORY
+bind L5+L6+L7 CONTEXT+PASTE_HISTORY
 
-assign Dot1 L4
-assign Dot2 L3
-assign Dot3 L2
-assign Dot4 L5
-assign Dot5 L6
-assign Dot6 L7
-assign Dot7 L1
-assign Dot8 L8
-include all.kti
 
 map Dot1 DOT1
 map Dot2 DOT2

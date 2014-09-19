@@ -35,3 +35,5 @@ bind L7+!RoutingKey COPY_RECT
 bind L3+!RoutingKey SETLEFT
 bind L6+!RoutingKey DESCCHAR
 
+context PASTE_HISTORY
+bind RoutingKey PASTE_HISTORY
