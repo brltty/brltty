@@ -214,6 +214,7 @@ usbDisconnectInterface (UsbDevice *device, unsigned char interface) {
     free(driver);
 
     if (isUsbfs) {
+      logMessage(LOG_WARNING, "probable cause: another " PACKAGE_TARNAME " process is accessing the same device");
       errno = EBUSY;
     } else if (usbDisconnectDriver(device, interface)) {
       return 1;
