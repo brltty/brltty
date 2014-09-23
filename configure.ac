@@ -1790,5 +1790,6 @@ AC_OUTPUT([
    Documents/BrlAPIref.doxy
    Bindings/Lisp/brlapi.lisp
    Bindings/Python/setup.py
+   Android/Application/res/values/configured.xml:Android/Application/res.strings.in
    ${brltty_make_files}
 ])
