@@ -635,6 +635,11 @@ logUnsupportedOperation (const char *name) {
   logSystemError(name);
 }
 
+void
+logPossibleCause (const char *cause) {
+  logMessage(LOG_WARNING, "possible cause: %s", cause);
+}
+
 #ifdef WINDOWS
 void
 logWindowsError (DWORD error, const char *action) {

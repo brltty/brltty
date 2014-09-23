@@ -120,6 +120,7 @@ extern void logMallocError (void);
 extern void logUnsupportedFeature (const char *name);
 extern void logUnsupportedOperation (const char *name);
 #define logUnsupportedFunction() logUnsupportedOperation(__func__)
+extern void logPossibleCause (const char *cause);
 
 #ifdef WINDOWS
 extern void logWindowsError (DWORD code, const char *action);
