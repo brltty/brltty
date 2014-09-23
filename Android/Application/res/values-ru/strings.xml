@@ -24,7 +24,7 @@
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Текстовая таблица</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Таблица атрибутов</string>
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Таблица краткописи</string>
-  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Таблица клавиатурных клавиш</string>
+  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Клавиатурная таблица</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Уровень журнала</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Категории журнала</string>
@@ -84,6 +84,9 @@
   <string name="LOG_CATEGORY_LABEL_serial">Последовательный I/O</string>
   <string name="LOG_CATEGORY_LABEL_usb">USB I/O</string>
   <string name="LOG_CATEGORY_LABEL_bluetooth">Bluetooth I/O</string>
+  <string name="LOG_CATEGORY_LABEL_brldrv">События брайлевского драйвера</string>
+  <string name="LOG_CATEGORY_LABEL_spkdrv">События речевого драйвера</string>
+  <string name="LOG_CATEGORY_LABEL_scrdrv">События драйвера программы экранного доступа</string>
 
   <string name="BRAILLE_DRIVER_LABEL_auto">автоопределение</string>
 
