@@ -84,6 +84,9 @@
   <string name="LOG_CATEGORY_LABEL_serial">序列輸入輸出</string>
   <string name="LOG_CATEGORY_LABEL_usb">USB 輸入輸出</string>
   <string name="LOG_CATEGORY_LABEL_bluetooth">藍牙輸入輸出</string>
+  <string name="LOG_CATEGORY_LABEL_brldrv">點字驅動事件</string>
+  <string name="LOG_CATEGORY_LABEL_spkdrv">語音驅動事件</string>
+  <string name="LOG_CATEGORY_LABEL_scrdrv">螢幕驅動事件</string>
 
   <string name="BRAILLE_DRIVER_LABEL_auto">自動偵測</string>
 
