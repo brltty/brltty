@@ -151,6 +151,7 @@
   <string name="TEXT_TABLE_LABEL_nl_NL">Голландский (Нидерланды)</string>
   <string name="TEXT_TABLE_LABEL_nl">Голландский</string>
   <string name="TEXT_TABLE_LABEL_no_generic">Норвежский (с поддержкой других языков)</string>
+  <string name="TEXT_TABLE_LABEL_no_oup">Норвежский (Offentlig utvalg for punktskrift)</string>
   <string name="TEXT_TABLE_LABEL_no">Норвежский</string>
   <string name="TEXT_TABLE_LABEL_nwc">Невари (старый)</string>
   <string name="TEXT_TABLE_LABEL_or">Ория</string>

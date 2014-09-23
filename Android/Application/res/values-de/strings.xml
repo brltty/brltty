@@ -152,6 +152,7 @@
   <string name="TEXT_TABLE_LABEL_nl_NL">Niederländisch (Niederlande)</string>
   <string name="TEXT_TABLE_LABEL_no_generic">Norwegisch (mit Support für andere Sprachen)</string>
   <string name="TEXT_TABLE_LABEL_no">Norwegisch</string>
+  <string name="TEXT_TABLE_LABEL_no_oup">Norwegisch (Offentlig utvalg for punktskrift)</string>
   <string name="TEXT_TABLE_LABEL_nwc">Newari (alt)</string>
   <string name="TEXT_TABLE_LABEL_or">Oriya</string>
   <string name="TEXT_TABLE_LABEL_pa">Panjabi</string>
