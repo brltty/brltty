@@ -24,7 +24,7 @@
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Tabella di Traduzione</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Tabella Attributi</string>
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Tabella Braille Contratto</string>
-  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tabella Tasti</string>
+  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tabella Tastiera</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Livello di Log</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Categorie Log</string>
@@ -84,6 +84,9 @@
   <string name="LOG_CATEGORY_LABEL_serial">I/O Seriale</string>
   <string name="LOG_CATEGORY_LABEL_usb">I/O USB</string>
   <string name="LOG_CATEGORY_LABEL_bluetooth">I/O Bluetooth</string>
+  <string name="LOG_CATEGORY_LABEL_brldrv">Eventi Driver Braille</string>
+  <string name="LOG_CATEGORY_LABEL_spkdrv">Eventi Driver Voce</string>
+  <string name="LOG_CATEGORY_LABEL_scrdrv">Eventi Driver Schermo</string>
 
   <string name="BRAILLE_DRIVER_LABEL_auto">Rilevamento Automatico</string>
 
