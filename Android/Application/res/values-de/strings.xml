@@ -24,7 +24,7 @@
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Texttabelle</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Attributtabelle</string>
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Kurzschrifttabelle</string>
-  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tastatur Tastentabelle</string>
+  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tastaturtabelle</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Protokollstufe</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Protokollkategorien</string>
@@ -84,6 +84,9 @@
   <string name="LOG_CATEGORY_LABEL_serial">Serielle E/A</string>
   <string name="LOG_CATEGORY_LABEL_usb">USB E/A</string>
   <string name="LOG_CATEGORY_LABEL_bluetooth">Bluetooth E/A</string>
+  <string name="LOG_CATEGORY_LABEL_brldrv">Brailletreiberereignisse</string>
+  <string name="LOG_CATEGORY_LABEL_spkdrv">Sprachausgabentreiber</string>
+  <string name="LOG_CATEGORY_LABEL_scrdrv">Bildschirmtreiberereignisse</string>
 
   <string name="BRAILLE_DRIVER_LABEL_auto">Automatische Erkennung</string>
 
