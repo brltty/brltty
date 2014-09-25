@@ -24,7 +24,7 @@
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Tabela Besedila</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Attributes Table Tabela Prilastkov</string>
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Tabela Krajšav</string>
-  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Razporeditev Tipk na Tipkovnici</string>
+  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tabela Tipk</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Nivo Dnevnika</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Kategorije Dnevnikov</string>
@@ -84,6 +84,9 @@
   <string name="LOG_CATEGORY_LABEL_serial">Serijski V/I</string>
   <string name="LOG_CATEGORY_LABEL_usb">USB V/I</string>
   <string name="LOG_CATEGORY_LABEL_bluetooth">Bluetooth V/I</string>
+  <string name="LOG_CATEGORY_LABEL_brldrv">Dogodki Gonilnika za Brajico</string>
+  <string name="LOG_CATEGORY_LABEL_spkdrv">Dogodki Gonilnika Govora</string>
+  <string name="LOG_CATEGORY_LABEL_scrdrv">Dogodki Zaslonskega Gonilnika</string>
 
   <string name="BRAILLE_DRIVER_LABEL_auto">samodejna prepoznava</string>
 
