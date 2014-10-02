@@ -26,7 +26,7 @@ extern "C" {
 typedef struct QueueStruct Queue;
 typedef struct ElementStruct Element;
 typedef void ItemDeallocator (void *item, void *data);
-typedef int ItemComparator (const void *item1, const void *item2, void *data);
+typedef int ItemComparator (const void *newItem, const void *existingItem, void *queueData);
 
 extern Queue *newQueue (ItemDeallocator *deallocateItem, ItemComparator *compareItems);
 extern void deallocateQueue (Queue *queue);

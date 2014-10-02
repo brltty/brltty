@@ -89,10 +89,11 @@ deallocateAlarmEntry (void *item, void *data) {
 }
 
 static int
-compareAlarmEntries (const void *item1, const void *item2, void *data) {
-  const AlarmEntry *alarm1 = item1;
-  const AlarmEntry *alarm2 = item2;
-  return compareTimeValues(&alarm1->time, &alarm2->time) < 0;
+compareAlarmEntries (const void *newItem, const void *existingItem, void *queueData) {
+  const AlarmEntry *newAlarm = newItem;
+  const AlarmEntry *existingAlarm = existingItem;
+
+  return compareTimeValues(&newAlarm->time, &existingAlarm->time) < 0;
 }
 
 static Queue *
