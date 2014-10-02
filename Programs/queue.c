@@ -153,12 +153,12 @@ findReferenceElement (const void *item, void *data) {
 }
 
 static void
-enqueueElement (Element *element) {
+linkElement (Element *element) {
   Queue *queue = element->queue;
 
   if (queue->head) {
     Element *reference;
-    int newHead = 0;
+    int isNewHead = 0;
 
     if (queue->compareItems) {
       FindReferenceElementData fre = {
@@ -169,14 +169,14 @@ enqueueElement (Element *element) {
       if (!(reference = findElement(queue, findReferenceElement, &fre))) {
         reference = queue->head;
       } else if (reference == queue->head) {
-        newHead = 1;
+        isNewHead = 1;
       }
     } else {
       reference = queue->head;
     }
 
     linkAdditionalElement(reference, element);
-    if (newHead) queue->head = element;
+    if (isNewHead) queue->head = element;
   } else {
     linkFirstElement(element);
   }
@@ -185,14 +185,15 @@ enqueueElement (Element *element) {
 Element *
 enqueueItem (Queue *queue, void *item) {
   Element *element = newElement(queue, item);
-  if (element) enqueueElement(element);
+
+  if (element) linkElement(element);
   return element;
 }
 
 void
 requeueElement (Element *element) {
   unlinkElement(element);
-  enqueueElement(element);
+  linkElement(element);
 }
 
 void
@@ -200,7 +201,7 @@ moveElement (Element *element, Queue *queue) {
   unlinkElement(element);
   removeElement(element);
   addElement(queue, element);
-  enqueueElement(element);
+  linkElement(element);
 }
 
 void *
