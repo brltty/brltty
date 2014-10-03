@@ -159,7 +159,7 @@ public class BluetoothConnection {
     } catch (IllegalAccessException exception) {
       Log.w(LOG_TAG, "cannot access method: " + reference);
     } catch (InvocationTargetException exception) {
-      Log.w(LOG_TAG, "cannot call method: " + reference, exception.getCause());
+      Log.w(LOG_TAG, reference + " failed", exception.getCause());
     }
 
     return null;
@@ -194,16 +194,17 @@ public class BluetoothConnection {
       } catch (IOException openException) {
         Log.e(LOG_TAG, "Bluetooth connect failed: " + bluetoothAddress + ": " + openException.getMessage());
 
-        try {
-          bluetoothSocket.close();
-        } catch (IOException closeException) {
-          Log.e(LOG_TAG, "Bluetooth socket close error: " + bluetoothAddress, closeException);
-        }
-
         inputStream = null;
         outputStream = null;
-        bluetoothSocket = null;
       }
+
+      try {
+        bluetoothSocket.close();
+      } catch (IOException closeException) {
+        Log.e(LOG_TAG, "Bluetooth socket close error: " + bluetoothAddress, closeException);
+      }
+
+      bluetoothSocket = null;
     }
 
     return false;
