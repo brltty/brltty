@@ -269,6 +269,8 @@ asyncExecuteAlarmCallback (AsyncAlarmData *ad, long int *timeout) {
 
           if (alarm->reschedule) {
             adjustTimeValue(&alarm->time, alarm->interval);
+            getMonotonicTime(&now);
+            if (compareTimeValues(&alarm->time, &now) < 0) alarm->time = now;
             requeueElement(element);
           } else {
             alarm->cancel = 1;
