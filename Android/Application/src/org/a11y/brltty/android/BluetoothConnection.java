@@ -18,6 +18,8 @@
 
 package org.a11y.brltty.android;
 
+import java.lang.reflect.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -143,36 +145,68 @@ public class BluetoothConnection {
     }
   }
 
-  public boolean open (int inputPipe, boolean secure) {
+  public static BluetoothSocket createRfcommSocket (BluetoothDevice device, int channel) {
+    String className = device.getClass().getName();
+    String methodName = "createRfcommSocket";
+    String reference = className + "." + methodName;
+
+    try {
+      Class[] arguments = new Class[] {int.class};
+      Method method = device.getClass().getMethod(methodName, arguments);
+      return (BluetoothSocket)method.invoke(device, channel);
+    } catch (NoSuchMethodException exception) {
+      Log.w(LOG_TAG, "cannot find method: " + reference);
+    } catch (IllegalAccessException exception) {
+      Log.w(LOG_TAG, "cannot access method: " + reference);
+    } catch (InvocationTargetException exception) {
+      Log.w(LOG_TAG, "cannot call method: " + reference, exception.getCause());
+    }
+
+    return null;
+  }
+
+  public boolean open (int inputPipe, int channel, boolean secure) {
     InputStream inputStream;
 
     try {
       bluetoothSocket = secure? bluetoothDevice.createRfcommSocketToServiceRecord(SERIAL_PROFILE_UUID):
                                 bluetoothDevice.createInsecureRfcommSocketToServiceRecord(SERIAL_PROFILE_UUID);
-      bluetoothSocket.connect();
+    } catch (IOException exception) {
+      Log.w(LOG_TAG, "Bluetooth UUID resolution failed: " + bluetoothAddress + ": " + exception.getMessage());
 
-      inputStream = bluetoothSocket.getInputStream();
-      outputStream = bluetoothSocket.getOutputStream();
-    } catch (IOException openException) {
-      Log.e(LOG_TAG, "Bluetooth connect failed: " + bluetoothAddress + ": " + openException.getMessage());
+      if (channel > 0) {
+        bluetoothSocket = createRfcommSocket(bluetoothDevice, channel);
+      } else {
+        bluetoothSocket = null;
+      }
+    }
 
-      if (bluetoothSocket != null) {
+    if (bluetoothSocket != null) {
+      try {
+        bluetoothSocket.connect();
+
+        inputStream = bluetoothSocket.getInputStream();
+        outputStream = bluetoothSocket.getOutputStream();
+
+        inputThread = new InputThread(inputStream, inputPipe);
+        inputThread.start();
+        return true;
+      } catch (IOException openException) {
+        Log.e(LOG_TAG, "Bluetooth connect failed: " + bluetoothAddress + ": " + openException.getMessage());
+
         try {
           bluetoothSocket.close();
         } catch (IOException closeException) {
           Log.e(LOG_TAG, "Bluetooth socket close error: " + bluetoothAddress, closeException);
         }
 
-        bluetoothSocket = null;
+        inputStream = null;
         outputStream = null;
+        bluetoothSocket = null;
       }
-
-      return false;
     }
 
-    inputThread = new InputThread(inputStream, inputPipe);
-    inputThread.start();
-    return true;
+    return false;
   }
 
   public boolean write (byte[] bytes) {

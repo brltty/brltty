@@ -118,10 +118,11 @@ bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout)
       if (findJavaInstanceMethod(bcx->env, &openMethod, connectionClass, "open",
                                  JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                                  JAVA_SIG_INT // inputPipe
+                                                 JAVA_SIG_INT // channel
                                                  JAVA_SIG_BOOLEAN // secure
                                                 ))) {
         jboolean result = (*bcx->env)->CallBooleanMethod(bcx->env, bcx->connection, openMethod,
-                                                         bcx->inputPipe[1], JNI_FALSE);
+                                                         bcx->inputPipe[1], channel, JNI_FALSE);
 
         if (!clearJavaException(bcx->env, 1)) {
           if (result == JNI_TRUE) {
