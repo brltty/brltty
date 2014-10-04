@@ -24,7 +24,7 @@
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Tables de texte</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Table d\'attributs</string>
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Table d\'abrégé</string>
-  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tableades touches du clavier</string>
+  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tables des touches du clavier</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Niveau de journalisation</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Catégorie de journal</string>
@@ -84,6 +84,9 @@
   <string name="LOG_CATEGORY_LABEL_serial">E/S série</string>
   <string name="LOG_CATEGORY_LABEL_usb">E/S USB</string>
   <string name="LOG_CATEGORY_LABEL_bluetooth">E/S Bluetooth</string>
+  <string name="LOG_CATEGORY_LABEL_brldrv">Pilote braille</string>
+  <string name="LOG_CATEGORY_LABEL_spkdrv">Pilote de synthèse vocale</string>
+  <string name="LOG_CATEGORY_LABEL_scrdrv">Pilote de l'écran</string>
 
   <string name="BRAILLE_DRIVER_LABEL_auto">Détection automatique</string>
 
