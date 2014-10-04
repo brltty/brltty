@@ -45,26 +45,26 @@ extern int writeRepeatPeriod (UinputObject *uinput, int period);
 extern UinputObject *newUinputKeyboard (const char *name);
 
 typedef uint8_t LinuxKeyCode;
-#define LINUX_KEY_TABLE_NAME(type) linuxKeyTable_ ## type
-#define LINUX_KEY_TABLE(type) const LinuxKeyCode LINUX_KEY_TABLE_NAME(type)[0X100]
+#define LINUX_KEY_MAP_NAME(type) linuxKeyMap_ ## type
+#define LINUX_KEY_MAP(type) const LinuxKeyCode LINUX_KEY_MAP_NAME(type)[0X100]
 
-extern LINUX_KEY_TABLE(xt00);
-extern LINUX_KEY_TABLE(xtE0);
-extern LINUX_KEY_TABLE(xtE1);
-extern LINUX_KEY_TABLE(at00);
-extern LINUX_KEY_TABLE(atE0);
-extern LINUX_KEY_TABLE(atE1);
-extern LINUX_KEY_TABLE(ps2);
-extern LINUX_KEY_TABLE(hid);
+extern LINUX_KEY_MAP(xt00);
+extern LINUX_KEY_MAP(xtE0);
+extern LINUX_KEY_MAP(xtE1);
+extern LINUX_KEY_MAP(at00);
+extern LINUX_KEY_MAP(atE0);
+extern LINUX_KEY_MAP(atE1);
+extern LINUX_KEY_MAP(ps2);
+extern LINUX_KEY_MAP(hid);
 
 typedef struct {
   const char *name;
   const LinuxKeyCode *keys;
   unsigned int count;
-} LinuxKeyTableDescriptor;
+} LinuxKeyMapDescriptor;
 
-extern const LinuxKeyTableDescriptor linuxKeyTableDescriptors[];
-extern const unsigned char linuxKeyTableCount;
+extern const LinuxKeyMapDescriptor linuxKeyMapDescriptors[];
+extern const unsigned char linuxKeyMapCount;
 
 #ifdef __cplusplus
 }

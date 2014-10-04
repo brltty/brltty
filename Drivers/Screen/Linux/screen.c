@@ -880,8 +880,8 @@ construct_LinuxScreen (void) {
   brailleOfflineListener = NULL;
 
 #ifdef HAVE_LINUX_INPUT_H
-  xtKeys = linuxKeyTable_xt00;
-  atKeys = linuxKeyTable_at00;
+  xtKeys = linuxKeyMap_xt00;
+  atKeys = linuxKeyMap_at00;
   atKeyPressed = 1;
   ps2KeyPressed = 1;
 #endif /* HAVE_LINUX_INPUT_H */
@@ -1381,7 +1381,7 @@ insertCode (ScreenKey key, int raw) {
 
 #define KEY_TO_XT(KEY, ESCAPE, CODE) \
   case (KEY): \
-  map = linuxKeyTable_xt ## ESCAPE; \
+  map = linuxKeyMap_xt ## ESCAPE; \
   code = XT_KEY_ ## ESCAPE ## _ ## CODE; \
   escape = XT_MOD_ ## ESCAPE; \
   break;
@@ -1875,14 +1875,14 @@ handleCommand_LinuxScreen (int command) {
             int handled = 0;
 
             if (command & BRL_FLG_KBD_EMUL0) {
-              xtKeys = linuxKeyTable_xtE0;
+              xtKeys = linuxKeyMap_xtE0;
             } else if (arg == XT_MOD_E0) {
-              xtKeys = linuxKeyTable_xtE0;
+              xtKeys = linuxKeyMap_xtE0;
               handled = 1;
 	    } else if (command & BRL_FLG_KBD_EMUL1) {
-              xtKeys = linuxKeyTable_xtE1;
+              xtKeys = linuxKeyMap_xtE1;
             } else if (arg == XT_MOD_E1) {
-              xtKeys = linuxKeyTable_xtE1;
+              xtKeys = linuxKeyMap_xtE1;
               handled = 1;
             }
 
@@ -1893,7 +1893,7 @@ handleCommand_LinuxScreen (int command) {
             LinuxKeyCode key = xtKeys[arg & ~XT_BIT_RELEASE];
             int press = !(arg & XT_BIT_RELEASE);
 
-            xtKeys = linuxKeyTable_xt00;
+            xtKeys = linuxKeyMap_xt00;
 
             if (key) return injectKeyEvent(key, press);
 	  }
@@ -1911,14 +1911,14 @@ handleCommand_LinuxScreen (int command) {
             }
 
             if (command & BRL_FLG_KBD_EMUL0) {
-              atKeys = linuxKeyTable_atE0;
+              atKeys = linuxKeyMap_atE0;
             } else if (arg == AT_MOD_E0) {
-              atKeys = linuxKeyTable_atE0;
+              atKeys = linuxKeyMap_atE0;
               handled = 1;
 	    } else if (command & BRL_FLG_KBD_EMUL1) {
-              atKeys = linuxKeyTable_atE1;
+              atKeys = linuxKeyMap_atE1;
             } else if (arg == AT_MOD_E1) {
-              atKeys = linuxKeyTable_atE1;
+              atKeys = linuxKeyMap_atE1;
               handled = 1;
             }
 
@@ -1929,7 +1929,7 @@ handleCommand_LinuxScreen (int command) {
             LinuxKeyCode key = atKeys[arg];
             int press = atKeyPressed;
 
-            atKeys = linuxKeyTable_at00;
+            atKeys = linuxKeyMap_at00;
             atKeyPressed = 1;
 
             if (key) return injectKeyEvent(key, press);
@@ -1951,7 +1951,7 @@ handleCommand_LinuxScreen (int command) {
           }
 
           {
-            LinuxKeyCode key = linuxKeyTable_ps2[arg];
+            LinuxKeyCode key = linuxKeyMap_ps2[arg];
             int press = ps2KeyPressed;
 
             ps2KeyPressed = 1;

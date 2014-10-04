@@ -39,7 +39,7 @@
 
 #include "kbd_keycodes.h"
 
-LINUX_KEY_TABLE(xt00) = {
+LINUX_KEY_MAP(xt00) = {
   [XT_KEY_00_Escape] = KEY_ESC,
   [XT_KEY_00_F1] = KEY_F1,
   [XT_KEY_00_F2] = KEY_F2,
@@ -161,7 +161,7 @@ LINUX_KEY_TABLE(xt00) = {
   [XT_KEY_00_Language4] = KEY_HIRAGANA,
 };
 
-LINUX_KEY_TABLE(xtE0) = {
+LINUX_KEY_MAP(xtE0) = {
   [XT_KEY_E0_LeftGUI] = KEY_LEFTMETA,
   [XT_KEY_E0_RightAlt] = KEY_RIGHTALT,
   [XT_KEY_E0_RightGUI] = KEY_RIGHTMETA,
@@ -217,11 +217,11 @@ LINUX_KEY_TABLE(xtE0) = {
   [XT_KEY_E0_Wake] = KEY_WAKEUP,
 };
 
-LINUX_KEY_TABLE(xtE1) = {
+LINUX_KEY_MAP(xtE1) = {
   [XT_KEY_E1_Pause] = KEY_PAUSE,
 };
 
-LINUX_KEY_TABLE(at00) = {
+LINUX_KEY_MAP(at00) = {
   [AT_KEY_00_Escape] = KEY_ESC,
   [AT_KEY_00_F1] = KEY_F1,
   [AT_KEY_00_F2] = KEY_F2,
@@ -344,7 +344,7 @@ LINUX_KEY_TABLE(at00) = {
   [AT_KEY_00_Language4] = KEY_HIRAGANA,
 };
 
-LINUX_KEY_TABLE(atE0) = {
+LINUX_KEY_MAP(atE0) = {
   [AT_KEY_E0_LeftGUI] = KEY_LEFTMETA,
   [AT_KEY_E0_RightAlt] = KEY_RIGHTALT,
   [AT_KEY_E0_RightGUI] = KEY_RIGHTMETA,
@@ -400,11 +400,11 @@ LINUX_KEY_TABLE(atE0) = {
   [AT_KEY_E0_Wake] = KEY_WAKEUP,
 };
 
-LINUX_KEY_TABLE(atE1) = {
+LINUX_KEY_MAP(atE1) = {
   [AT_KEY_E1_Pause] = KEY_PAUSE,
 };
 
-LINUX_KEY_TABLE(ps2) = {
+LINUX_KEY_MAP(ps2) = {
   [PS2_KEY_Escape] = KEY_ESC,
   [PS2_KEY_F1] = KEY_F1,
   [PS2_KEY_F2] = KEY_F2,
@@ -527,7 +527,7 @@ LINUX_KEY_TABLE(ps2) = {
   [PS2_KEY_International5] = KEY_MUHENKAN,
 };
 
-LINUX_KEY_TABLE(hid) = {
+LINUX_KEY_MAP(hid) = {
   [HID_KEY_Escape] = KEY_ESC,
   [HID_KEY_F1] = KEY_F1,
   [HID_KEY_F2] = KEY_F2,
@@ -681,24 +681,24 @@ LINUX_KEY_TABLE(hid) = {
   [HID_KEY_Power] = KEY_POWER,
 };
 
-#define LINUX_KEY_TABLE_DESCRIPTOR(type) { \
+#define LINUX_KEY_MAP_DESCRIPTOR(type) { \
   .name = #type, \
-  .keys = LINUX_KEY_TABLE_NAME(type), \
-  .count = ARRAY_COUNT(LINUX_KEY_TABLE_NAME(type)) \
+  .keys = LINUX_KEY_MAP_NAME(type), \
+  .count = ARRAY_COUNT(LINUX_KEY_MAP_NAME(type)) \
 }
 
-const LinuxKeyTableDescriptor linuxKeyTableDescriptors[] = {
-  LINUX_KEY_TABLE_DESCRIPTOR(xt00),
-  LINUX_KEY_TABLE_DESCRIPTOR(xtE0),
-  LINUX_KEY_TABLE_DESCRIPTOR(xtE1),
-  LINUX_KEY_TABLE_DESCRIPTOR(at00),
-  LINUX_KEY_TABLE_DESCRIPTOR(atE0),
-  LINUX_KEY_TABLE_DESCRIPTOR(atE1),
-  LINUX_KEY_TABLE_DESCRIPTOR(ps2),
-  LINUX_KEY_TABLE_DESCRIPTOR(hid)
+const LinuxKeyMapDescriptor linuxKeyMapDescriptors[] = {
+  LINUX_KEY_MAP_DESCRIPTOR(xt00),
+  LINUX_KEY_MAP_DESCRIPTOR(xtE0),
+  LINUX_KEY_MAP_DESCRIPTOR(xtE1),
+  LINUX_KEY_MAP_DESCRIPTOR(at00),
+  LINUX_KEY_MAP_DESCRIPTOR(atE0),
+  LINUX_KEY_MAP_DESCRIPTOR(atE1),
+  LINUX_KEY_MAP_DESCRIPTOR(ps2),
+  LINUX_KEY_MAP_DESCRIPTOR(hid)
 };
 
-const unsigned char linuxKeyTableCount = ARRAY_COUNT(linuxKeyTableDescriptors);
+const unsigned char linuxKeyMapCount = ARRAY_COUNT(linuxKeyMapDescriptors);
 #endif /* HAVE_LINUX_INPUT_H */
 
 #ifdef HAVE_LINUX_UINPUT_H
@@ -1037,18 +1037,18 @@ writeRepeatPeriod (UinputObject *uinput, int period) {
 #ifdef HAVE_LINUX_INPUT_H
 static int
 enableKeyboardKeys (UinputObject *uinput) {
-  const LinuxKeyTableDescriptor *lkt = linuxKeyTableDescriptors;
-  const LinuxKeyTableDescriptor *end = lkt + linuxKeyTableCount;
+  const LinuxKeyMapDescriptor *map = linuxKeyMapDescriptors;
+  const LinuxKeyMapDescriptor *end = map + linuxKeyMapCount;
   BITMASK(enabledKeys, KEY_MAX+1, char);
 
   if (!enableUinputEventType(uinput, EV_KEY)) return 0;
   memset(enabledKeys, 0, sizeof(enabledKeys));
 
-  while (lkt < end) {
+  while (map < end) {
     unsigned int code;
 
-    for (code=0; code<lkt->count; code+=1) {
-      LinuxKeyCode key = lkt->keys[code];
+    for (code=0; code<map->count; code+=1) {
+      LinuxKeyCode key = map->keys[code];
 
       if (key) {
         if (!BITMASK_TEST(enabledKeys, key)) {
@@ -1058,7 +1058,7 @@ enableKeyboardKeys (UinputObject *uinput) {
       }
     }
 
-    lkt += 1;
+    map += 1;
   }
 
   return 1;
