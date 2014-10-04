@@ -189,13 +189,13 @@ typedef struct {
   ReportListenerInstance *resetListener;
 
   struct {
-    const KeyEntry *const *keyTable;
+    const KeyEntry *const *keyMap;
     size_t keyCount;
     unsigned int modifiers;
   } xt;
 
   struct {
-    const KeyEntry *const *keyTable;
+    const KeyEntry *const *keyMap;
     size_t keyCount;
     unsigned int modifiers;
   } at;
@@ -205,9 +205,9 @@ typedef struct {
   } ps2;
 } KeycodeCommandData;
 
-#define USE_KEY_TABLE(set,escape) \
-  (kcd->set.keyCount = (kcd->set.keyTable = set##KeyTable##escape)? \
-  (sizeof(set##KeyTable##escape) / sizeof(*kcd->set.keyTable)): 0)
+#define USE_KEY_MAP(set,escape) \
+  (kcd->set.keyCount = (kcd->set.keyMap = set##KeyMap##escape)? \
+  (sizeof(set##KeyMap##escape) / sizeof(*kcd->set.keyMap)): 0)
 
 static void
 handleKey (const KeyEntry *key, int release, unsigned int *modifiers) {
@@ -294,7 +294,7 @@ handleKey (const KeyEntry *key, int release, unsigned int *modifiers) {
   }
 }
 
-static const KeyEntry *const xtKeyTable00[] = {
+static const KeyEntry *const xtKeyMap00[] = {
   [XT_KEY_00_Escape] = &keyEntry_Escape,
   [XT_KEY_00_F1] = &keyEntry_F1,
   [XT_KEY_00_F2] = &keyEntry_F2,
@@ -402,7 +402,7 @@ static const KeyEntry *const xtKeyTable00[] = {
   [XT_KEY_00_KP9] = &keyEntry_KP9,
 };
 
-static const KeyEntry *const xtKeyTableE0[] = {
+static const KeyEntry *const xtKeyMapE0[] = {
   [XT_KEY_E0_LeftGUI] = &keyEntry_LeftGUI,
   [XT_KEY_E0_RightAlt] = &keyEntry_RightAlt,
   [XT_KEY_E0_RightGUI] = &keyEntry_RightGUI,
@@ -425,25 +425,25 @@ static const KeyEntry *const xtKeyTableE0[] = {
   [XT_KEY_E0_KPEnter] = &keyEntry_KPEnter,
 };
 
-#define xtKeyTableE1 NULL
+#define xtKeyMapE1 NULL
 
 static void
 xtHandleScanCode (KeycodeCommandData *kcd, unsigned char code) {
   if (code == XT_MOD_E0) {
-    USE_KEY_TABLE(xt, E0);
+    USE_KEY_MAP(xt, E0);
   } else if (code == XT_MOD_E1) {
-    USE_KEY_TABLE(xt, E1);
+    USE_KEY_MAP(xt, E1);
   } else if (code < kcd->xt.keyCount) {
-    const KeyEntry *key = kcd->xt.keyTable[code & ~XT_BIT_RELEASE];
+    const KeyEntry *key = kcd->xt.keyMap[code & ~XT_BIT_RELEASE];
     int release = (code & XT_BIT_RELEASE) != 0;
 
-    USE_KEY_TABLE(xt, 00);
+    USE_KEY_MAP(xt, 00);
 
     handleKey(key, release, &kcd->xt.modifiers);
   }
 }
 
-static const KeyEntry *const atKeyTable00[] = {
+static const KeyEntry *const atKeyMap00[] = {
   [AT_KEY_00_Escape] = &keyEntry_Escape,
   [AT_KEY_00_F1] = &keyEntry_F1,
   [AT_KEY_00_F2] = &keyEntry_F2,
@@ -551,7 +551,7 @@ static const KeyEntry *const atKeyTable00[] = {
   [AT_KEY_00_KP9] = &keyEntry_KP9,
 };
 
-static const KeyEntry *const atKeyTableE0[] = {
+static const KeyEntry *const atKeyMapE0[] = {
   [AT_KEY_E0_LeftGUI] = &keyEntry_LeftGUI,
   [AT_KEY_E0_RightAlt] = &keyEntry_RightAlt,
   [AT_KEY_E0_RightGUI] = &keyEntry_RightGUI,
@@ -574,28 +574,28 @@ static const KeyEntry *const atKeyTableE0[] = {
   [AT_KEY_E0_KPEnter] = &keyEntry_KPEnter,
 };
 
-#define atKeyTableE1 NULL
+#define atKeyMapE1 NULL
 
 static void
 atHandleScanCode (KeycodeCommandData *kcd, unsigned char code) {
   if (code == AT_MOD_RELEASE) {
     MOD_SET(MOD_RELEASE, kcd->at.modifiers);
   } else if (code == AT_MOD_E0) {
-    USE_KEY_TABLE(at, E0);
+    USE_KEY_MAP(at, E0);
   } else if (code == AT_MOD_E1) {
-    USE_KEY_TABLE(at, E1);
+    USE_KEY_MAP(at, E1);
   } else if (code < kcd->at.keyCount) {
-    const KeyEntry *key = kcd->at.keyTable[code];
+    const KeyEntry *key = kcd->at.keyMap[code];
     int release = MOD_TST(MOD_RELEASE, kcd->at.modifiers);
 
     MOD_CLR(MOD_RELEASE, kcd->at.modifiers);
-    USE_KEY_TABLE(at, 00);
+    USE_KEY_MAP(at, 00);
 
     handleKey(key, release, &kcd->at.modifiers);
   }
 }
 
-static const KeyEntry *const ps2KeyTable[] = {
+static const KeyEntry *const ps2KeyMap[] = {
   [PS2_KEY_Escape] = &keyEntry_Escape,
   [PS2_KEY_F1] = &keyEntry_F1,
   [PS2_KEY_F2] = &keyEntry_F2,
@@ -714,8 +714,8 @@ static void
 ps2HandleScanCode (KeycodeCommandData *kcd, unsigned char code) {
   if (code == PS2_MOD_RELEASE) {
     MOD_SET(MOD_RELEASE, kcd->ps2.modifiers);
-  } else if (code < ARRAY_COUNT(ps2KeyTable)) {
-    const KeyEntry *key = ps2KeyTable[code];
+  } else if (code < ARRAY_COUNT(ps2KeyMap)) {
+    const KeyEntry *key = ps2KeyMap[code];
     int release = MOD_TST(MOD_RELEASE, kcd->ps2.modifiers);
 
     MOD_CLR(MOD_RELEASE, kcd->ps2.modifiers);
@@ -759,10 +759,10 @@ static void
 resetKeycodeCommandData (void *data) {
   KeycodeCommandData *kcd = data;
 
-  USE_KEY_TABLE(xt, 00);
+  USE_KEY_MAP(xt, 00);
   kcd->xt.modifiers = 0;
 
-  USE_KEY_TABLE(at, 00);
+  USE_KEY_MAP(at, 00);
   kcd->at.modifiers = 0;
 
   kcd->ps2.modifiers = 0;
