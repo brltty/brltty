@@ -49,16 +49,16 @@ sources: $(SOURCE_FILES)
 OBJECT_FILES = $(LANGUAGE_CODES:=.$(OBJECT_EXTENSION))
 objects: $(OBJECT_FILES)
 
-%.$(OBJECT_EXTENSION): $(SRC_DIR)/%.$(SOURCE_EXTENSION)
-	$(MSGFMT) --output-file $@ $<
+%.$(OBJECT_EXTENSION):
+	$(MSGFMT) --output-file $@ $(SRC_DIR)/$(@F:.$(OBJECT_EXTENSION)=.$(SOURCE_EXTENSION))
 
 clean::
 	-rm -f -- *.$(OBJECT_EXTENSION) *~
 
 install:: objects install-locale-directory
 	for language in $(LANGUAGE_CODES); do \
-	directory="$(INSTALL_LOCALE_DIRECTORY)/$${language}/LC_MESSAGES"; \
-        $(INSTALL_DIRECTORY) "$${directory}"; \
+	directory="$(INSTALL_LOCALE_DIRECTORY)/$${language}/LC_MESSAGES" && \
+        $(INSTALL_DIRECTORY) "$${directory}" && \
 	$(INSTALL_DATA) "$${language}.$(OBJECT_EXTENSION)" "$${directory}/$(PACKAGE_TARNAME).$(OBJECT_EXTENSION)"; \
 	done
 
