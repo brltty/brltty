@@ -207,7 +207,7 @@ typedef struct {
 
 #define USE_KEY_TABLE(set,escape) \
   (kcd->set.keyCount = (kcd->set.keyTable = set##KeyTable##escape)? \
-  ARRAY_COUNT(set##KeyTable##escape): 0)
+  (sizeof(set##KeyTable##escape) / sizeof(*kcd->set.keyTable)): 0)
 
 static void
 handleKey (const KeyEntry *key, int release, unsigned int *modifiers) {
