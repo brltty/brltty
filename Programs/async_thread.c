@@ -37,7 +37,10 @@ runThread (void *argument) {
   RunThreadArgument *run = argument;
   void *result;
 
+#ifdef GOT_PTHREADS_NAME
   setThreadName(run->name);
+#endif /* GOT_PTHREADS_NAME */
+
   logMessage(LOG_CATEGORY(ASYNC_EVENTS), "thread starting: %s", run->name);
   result = run->function(run->argument);
   logMessage(LOG_CATEGORY(ASYNC_EVENTS), "thread finished: %s", run->name);
