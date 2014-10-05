@@ -97,8 +97,10 @@ extern int constructScreenDriver (char **parameters);
 extern void destructScreenDriver (void);
 extern void identifyScreenDriver (const ScreenDriver *driver, int full);
 extern void identifyScreenDrivers (int full);
+
 extern const ScreenDriver *screen;
 extern const ScreenDriver noScreen;
+extern void setNoScreen (void);
 
 #ifdef __cplusplus
 }

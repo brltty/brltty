@@ -1978,7 +1978,7 @@ initializeScreenDriver (const char *code, int verify) {
     logMessage(LOG_ERR, "%s: %s", gettext("screen driver not loadable"), code);
   }
 
-  screen = &noScreen;
+  setNoScreen();
   return 0;
 }
 
@@ -2005,7 +2005,7 @@ deactivateScreenDriver (void) {
   if (screenDriver) {
     destructScreenDriver();
 
-    screen = &noScreen;
+    setNoScreen();
     screenDriver = NULL;
   }
 
@@ -2031,7 +2031,6 @@ stopScreenDriver (void) {
 
 static int
 prepareScreenDriverActivity (void *data) {
-  initializeScreen();
   return 1;
 }
 
@@ -2548,6 +2547,7 @@ brlttyStart (void) {
   if (opt_verify) {
     if (activateScreenDriver(1)) deactivateScreenDriver();
   } else {
+    setNoScreen();
     enableScreenDriver();
   }
   

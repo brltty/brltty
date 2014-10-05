@@ -130,6 +130,12 @@ initializeScreen (void) {
   screen->initialize(&mainScreen);
 }
 
+void
+setNoScreen (void) {
+  screen = &noScreen;
+  initializeScreen();
+}
+
 int
 constructScreenDriver (char **parameters) {
   initializeScreen();
