@@ -25,6 +25,8 @@
 #include "thread.h"
 #include "async_signal.h"
 
+#undef HAVE_THREAD_NAMES
+
 #ifdef GOT_PTHREADS
 typedef struct {
   ThreadFunction *function;
@@ -148,7 +150,6 @@ unlockMutex (pthread_mutex_t *mutex) {
   return pthread_mutex_unlock(mutex);
 }
 
-#undef HAVE_THREAD_NAMES
 #if defined(HAVE_PTHREAD_GETNAME_NP) && defined(__GLIBC__)
 #define HAVE_THREAD_NAMES
 
@@ -196,6 +197,7 @@ setThreadName (const char *name) {
 }
 
 #endif /* thread names */
+#endif /* GOT_PTHREADS */
 
 #ifndef HAVE_THREAD_NAMES
 size_t
@@ -207,5 +209,3 @@ void
 setThreadName (const char *name) {
 }
 #endif /* HAVE_THREAD_NAMES */
-
-#endif /* GOT_PTHREADS */
