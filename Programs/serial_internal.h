@@ -24,7 +24,7 @@
 #include <stdio.h>
 
 #include "io_serial.h"
-#include "async_thread.h"
+#include "thread.h"
 
 #ifdef __cplusplus
 extern "C" {

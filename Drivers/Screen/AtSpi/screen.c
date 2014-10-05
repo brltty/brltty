@@ -41,7 +41,7 @@
 
 #include "log.h"
 #include "parse.h"
-#include "async_thread.h"
+#include "thread.h"
 #include "brl_cmds.h"
 #include "charset.h"
 
@@ -509,7 +509,7 @@ static void evListenerCB(const AccessibleEvent *event, void *user_data) {
   running = 0;
 }
 
-ASYNC_THREAD_FUNCTION(asOpenScreenThread) {
+THREAD_FUNCTION(asOpenScreenThread) {
   AccessibleEventListener *evListener;
   sem_t *SPI_init_sem = argument;
   int res;
@@ -546,7 +546,7 @@ construct_AtSpiScreen (void) {
   sem_t SPI_init_sem;
   sem_init(&SPI_init_sem,0,0);
   XInitThreads();
-  if (asyncCreateThread("driver-screen-AtSpi",
+  if (createThread("driver-screen-AtSpi",
                         &SPI_main_thread, NULL,
                         asOpenScreenThread, (void *)&SPI_init_sem)) {
     logMessage(LOG_ERR,"main SPI thread failed to be launched");

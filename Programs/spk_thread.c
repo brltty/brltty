@@ -27,7 +27,7 @@
 #include "spk.h"
 #include "async_wait.h"
 #include "async_event.h"
-#include "async_thread.h"
+#include "thread.h"
 #include "queue.h"
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -746,7 +746,7 @@ awaitSpeechDriverThreadTermination (volatile SpeechDriverThread *sdt) {
   pthread_join(sdt->threadIdentifier, &result);
 }
 
-ASYNC_THREAD_FUNCTION(runSpeechDriverThread) {
+THREAD_FUNCTION(runSpeechDriverThread) {
   volatile SpeechDriverThread *sdt = argument;
 
   setThreadState(sdt, THD_STARTING);
@@ -811,8 +811,8 @@ newSpeechDriverThread (
 #ifdef GOT_PTHREADS
       if ((sdt->messageEvent = asyncNewEvent(handleSpeechMessageEvent, (void *)sdt))) {
         pthread_t threadIdentifier;
-        int createError = asyncCreateThread("speech-driver",
-                                            &threadIdentifier, NULL,
+        int createError = createThread("speech-driver",
+                                       &threadIdentifier, NULL,
                                             runSpeechDriverThread, (void *)sdt);
 
         if (!createError) {

@@ -16,10 +16,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_ASYNC_THREAD
-#define BRLTTY_INCLUDED_ASYNC_THREAD
+#ifndef BRLTTY_INCLUDED_THREAD
+#define BRLTTY_INCLUDED_THREAD
 
-#include "async.h"
 #include "get_pthreads.h"
 
 #ifdef __cplusplus
@@ -27,21 +26,21 @@ extern "C" {
 #endif /* __cplusplus */
 
 #ifdef GOT_PTHREADS
-#define ASYNC_THREAD_FUNCTION(name) void *name (void *argument)
-typedef ASYNC_THREAD_FUNCTION(AsyncThreadFunction);
+#define THREAD_FUNCTION(name) void *name (void *argument)
+typedef THREAD_FUNCTION(ThreadFunction);
 
-extern int asyncCreateThread (
+extern int createThread (
   const char *name,
   pthread_t *thread, const pthread_attr_t *attributes,
-  AsyncThreadFunction *function, void *argument
+  ThreadFunction *function, void *argument
 );
 
-extern int asyncLockMutex (pthread_mutex_t *mutex);
-extern int asyncUnlockMutex (pthread_mutex_t *mutex);
+extern int lockMutex (pthread_mutex_t *mutex);
+extern int unlockMutex (pthread_mutex_t *mutex);
 #endif /* GOT_PTHREADS */
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_ASYNC_THREAD */
+#endif /* BRLTTY_INCLUDED_THREAD */

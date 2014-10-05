@@ -177,7 +177,7 @@ serialFlowControlProc_inputCTS (SerialDevice *serial) {
   }
 }
 
-ASYNC_THREAD_FUNCTION(serialFlowControlThread) {
+THREAD_FUNCTION(serialFlowControlThread) {
   SerialDevice *serial = argument;
 
   serial->currentFlowControlProc(serial);
@@ -194,8 +194,8 @@ serialStartFlowControlThread (SerialDevice *serial) {
     pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_DETACHED);
 
     serial->flowControlStop = 0;
-    if (asyncCreateThread("serial-input-cts", &thread, &attributes,
-                          serialFlowControlThread, serial)) {
+    if (createThread("serial-input-cts", &thread, &attributes,
+                     serialFlowControlThread, serial)) {
       logSystemError("pthread_create");
       return 0;
     }

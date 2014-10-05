@@ -32,7 +32,7 @@
 #include "log.h"
 #include "file.h"
 #include "parse.h"
-#include "async_thread.h"
+#include "thread.h"
 #include "queue.h"
 #include "notes.h"
 #include "pcm.h"
@@ -269,7 +269,7 @@ awaitSpeechSegment (void) {
   return 0;
 }
 
-ASYNC_THREAD_FUNCTION(mpSpeechSynthesisThread) {
+THREAD_FUNCTION(mpSpeechSynthesisThread) {
   pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
   pthread_mutex_lock(&speechMutex);
 
@@ -293,7 +293,7 @@ startSynthesisThread (void) {
       pthread_attr_t attributes;
       if (!(error = pthread_attr_init(&attributes))) {
         pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_JOINABLE);
-        error = asyncCreateThread("driver-speech-Mikropuhe",
+        error = createThread("driver-speech-Mikropuhe",
                                   &synthesisThread, &attributes,
                                   mpSpeechSynthesisThread, NULL);
         pthread_attr_destroy(&attributes);

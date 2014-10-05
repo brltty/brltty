@@ -237,8 +237,8 @@ async_event.$O:
 async_signal.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async_signal.c
 
-async_thread.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/async_thread.c
+thread.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/thread.c
 
 ###############################################################################
 
@@ -885,7 +885,7 @@ CORE_HEADERS = \
    $(SRC_DIR)/program.h $(SRC_DIR)/revision.h $(SRC_DIR)/service.h \
    $(SRC_DIR)/embed.h $(SRC_DIR)/options.h \
    $(SRC_DIR)/log.h $(SRC_DIR)/addresses.h $(SRC_DIR)/pid.h \
-   $(SRC_DIR)/async.h $(SRC_DIR)/async_wait.h $(SRC_DIR)/async_alarm.h $(SRC_DIR)/async_task.h $(SRC_DIR)/async_io.h $(SRC_DIR)/async_event.h $(SRC_DIR)/async_signal.h $(SRC_DIR)/async_thread.h \
+   $(SRC_DIR)/async.h $(SRC_DIR)/async_wait.h $(SRC_DIR)/async_alarm.h $(SRC_DIR)/async_task.h $(SRC_DIR)/async_io.h $(SRC_DIR)/async_event.h $(SRC_DIR)/async_signal.h $(SRC_DIR)/thread.h \
    $(SRC_DIR)/parse.h $(SRC_DIR)/file.h $(SRC_DIR)/device.h \
    $(SRC_DIR)/datafile.h $(SRC_DIR)/dataarea.h \
    $(SRC_DIR)/queue.h $(SRC_DIR)/lock.h $(SRC_DIR)/timing.h $(SRC_DIR)/auth.h \

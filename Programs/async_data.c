@@ -21,7 +21,6 @@
 #include <string.h>
 
 #include "log.h"
-#include "async_thread.h"
 #include "async_internal.h"
 
 static AsyncThreadSpecificData *

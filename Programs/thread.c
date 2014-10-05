@@ -23,11 +23,11 @@
 
 #include "log.h"
 #include "async_signal.h"
-#include "async_thread.h"
+#include "thread.h"
 
 #ifdef GOT_PTHREADS
 typedef struct {
-  AsyncThreadFunction *function;
+  ThreadFunction *function;
   void *argument;
   char name[0];
 } RunThreadArgument;
@@ -53,14 +53,14 @@ typedef struct {
   const char *const name;
   pthread_t *const thread;
   const pthread_attr_t *const attributes;
-  AsyncThreadFunction *const function;
+  ThreadFunction *const function;
   void *const argument;
 
   int error;
 } CreateThreadParameters;
 
 static int
-createThread (void *parameters) {
+createActualThread (void *parameters) {
   CreateThreadParameters *create = parameters;
   RunThreadArgument *run;
 
@@ -85,7 +85,7 @@ createThread (void *parameters) {
 }
 
 #ifdef ASYNC_CAN_BLOCK_SIGNALS
-ASYNC_WITH_SIGNALS_BLOCKED_FUNCTION(asyncCreateSignalSafeThread) {
+ASYNC_WITH_SIGNALS_BLOCKED_FUNCTION(createSignalSafeThread) {
   static const int signals[] = {
 #ifdef SIGINT
     SIGINT,
@@ -110,15 +110,15 @@ ASYNC_WITH_SIGNALS_BLOCKED_FUNCTION(asyncCreateSignalSafeThread) {
     signal += 1;
   }
 
-  createThread(create);
+  createActualThread(create);
 }
 #endif /* ASYNC_CAN_BLOCK_SIGNALS */
 
 int
-asyncCreateThread (
+createThread (
   const char *name,
   pthread_t *thread, const pthread_attr_t *attributes,
-  AsyncThreadFunction *function, void *argument
+  ThreadFunction *function, void *argument
 ) {
   CreateThreadParameters create = {
     .name = name,
@@ -129,16 +129,16 @@ asyncCreateThread (
   };
 
 #ifdef ASYNC_CAN_BLOCK_SIGNALS
-  asyncCallWithObtainableSignalsBlocked(asyncCreateSignalSafeThread, &create);
+  asyncCallWithObtainableSignalsBlocked(createSignalSafeThread, &create);
 #else /* ASYNC_CAN_BLOCK_SIGNALS */
-  createThread(&create);
+  createActualThread(&create);
 #endif /* ASYNC_CAN_BLOCK_SIGNALS */
 
   return create.error;
 }
 
 int
-asyncLockMutex (pthread_mutex_t *mutex) {
+lockMutex (pthread_mutex_t *mutex) {
   int result = pthread_mutex_lock(mutex);
 
   logSymbol(LOG_CATEGORY(ASYNC_EVENTS), mutex, "mutex lock");
@@ -146,7 +146,7 @@ asyncLockMutex (pthread_mutex_t *mutex) {
 }
 
 int
-asyncUnlockMutex (pthread_mutex_t *mutex) {
+unlockMutex (pthread_mutex_t *mutex) {
   logSymbol(LOG_CATEGORY(ASYNC_EVENTS), mutex, "mutex unlock");
   return pthread_mutex_unlock(mutex);
 }

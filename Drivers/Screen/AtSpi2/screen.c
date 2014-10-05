@@ -58,7 +58,7 @@
 
 #include "log.h"
 #include "parse.h"
-#include "async_thread.h"
+#include "thread.h"
 #include "brl_cmds.h"
 #include "charset.h"
 
@@ -784,7 +784,7 @@ static int watch(const char *message, const char *event) {
   return 1;
 }
 
-ASYNC_THREAD_FUNCTION(a2OpenScreenThread) {
+THREAD_FUNCTION(a2OpenScreenThread) {
   DBusError error;
 
   sem_t *SPI2_init_sem = argument;
@@ -843,7 +843,7 @@ construct_AtSpi2Screen (void) {
   sem_t SPI2_init_sem;
   sem_init(&SPI2_init_sem,0,0);
   finished = 0;
-  if (asyncCreateThread("driver-screen-AtSpi2",
+  if (createThread("driver-screen-AtSpi2",
                         &SPI2_main_thread, NULL,
                         a2OpenScreenThread, (void *)&SPI2_init_sem)) {
     logMessage(LOG_ERR,"main SPI2 thread failed to be launched");
