@@ -33,7 +33,7 @@
 #include "timing.h"
 #include "addresses.h"
 #include "file.h"
-#include "get_pthreads.h"
+#include "thread.h"
 
 const char logCategoryName_all[] = "all";
 const char logCategoryPrefix_disable = '-';
@@ -328,14 +328,12 @@ writeLogRecord (const char *record) {
       fprintf(logFile, "%.*s.%03u ", (int)length, buffer, milliseconds);
     }
 
-#ifdef GOT_PTHREADS_NAME
     {
       char name[0X40];
       size_t length = formatThreadName(name, sizeof(name));
 
       if (length) fprintf(logFile, "[%s] ", name);
     }
-#endif /* GOT_PTHREADS_NAME */
 
     fputs(record, logFile);
     fputc('\n', logFile);

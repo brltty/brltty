@@ -22,8 +22,8 @@
 #include <errno.h>
 
 #include "log.h"
-#include "async_signal.h"
 #include "thread.h"
+#include "async_signal.h"
 
 #ifdef GOT_PTHREADS
 typedef struct {
@@ -37,10 +37,7 @@ runThread (void *argument) {
   RunThreadArgument *run = argument;
   void *result;
 
-#ifdef GOT_PTHREADS_NAME
   setThreadName(run->name);
-#endif /* GOT_PTHREADS_NAME */
-
   logMessage(LOG_CATEGORY(ASYNC_EVENTS), "thread starting: %s", run->name);
   result = run->function(run->argument);
   logMessage(LOG_CATEGORY(ASYNC_EVENTS), "thread finished: %s", run->name);
@@ -150,4 +147,65 @@ unlockMutex (pthread_mutex_t *mutex) {
   logSymbol(LOG_CATEGORY(ASYNC_EVENTS), mutex, "mutex unlock");
   return pthread_mutex_unlock(mutex);
 }
+
+#undef HAVE_THREAD_NAMES
+#if defined(HAVE_PTHREAD_GETNAME_NP) && defined(__GLIBC__)
+#define HAVE_THREAD_NAMES
+
+size_t
+formatThreadName (char *buffer, size_t size) {
+  int error = pthread_getname_np(pthread_self(), buffer, size);
+
+  return error? 0: strlen(buffer);
+}
+
+void
+setThreadName (const char *name) {
+  pthread_setname_np(pthread_self(), name);
+}
+
+#elif defined(HAVE_PTHREAD_GETNAME_NP) && defined(__APPLE__)
+#define HAVE_THREAD_NAMES
+
+size_t
+formatThreadName (char *buffer, size_t size) {
+  {
+    int error = pthread_getname_np(pthread_self(), buffer, size);
+
+    if (error) return 0;
+    if (*buffer) return strlen(buffer);
+  }
+
+  if (pthread_main_np()) {
+    size_t length;
+
+    STR_BEGIN(buffer, size);
+    STR_PRINTF("main");
+    length = STR_LENGTH;
+    STR_END;
+
+    return length;
+  }
+
+  return 0;
+}
+
+void
+setThreadName (const char *name) {
+  pthread_setname_np(name);
+}
+
+#endif /* thread names */
+
+#ifndef HAVE_THREAD_NAMES
+size_t
+formatThreadName (char *buffer, size_t size) {
+  return 0;
+}
+
+void
+setThreadName (const char *name) {
+}
+#endif /* HAVE_THREAD_NAMES */
+
 #endif /* GOT_PTHREADS */

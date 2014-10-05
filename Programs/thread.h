@@ -37,6 +37,9 @@ extern int createThread (
 
 extern int lockMutex (pthread_mutex_t *mutex);
 extern int unlockMutex (pthread_mutex_t *mutex);
+
+extern size_t formatThreadName (char *buffer, size_t size);
+extern void setThreadName (const char *name);
 #endif /* GOT_PTHREADS */
 
 #ifdef __cplusplus

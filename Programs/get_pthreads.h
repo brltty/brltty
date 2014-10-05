@@ -21,7 +21,6 @@
 
 #include "prologue.h"
 #undef GOT_PTHREADS
-#undef GOT_PTHREADS_NAME
 
 #if defined(__MINGW32__)
 #define GOT_PTHREADS
@@ -36,59 +35,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#ifdef GOT_PTHREADS
-#if defined(HAVE_PTHREAD_GETNAME_NP) && defined(__GLIBC__)
-#define GOT_PTHREADS_NAME
-
-static inline size_t formatThreadName (char *buffer, size_t size) {
-  int error = pthread_getname_np(pthread_self(), buffer, size);
-
-  return error? 0: strlen(buffer);
-}
-
-static inline void setThreadName (const char *name) {
-  pthread_setname_np(pthread_self(), name);
-}
-
-#elif defined(HAVE_PTHREAD_GETNAME_NP) && defined(__APPLE__)
-#define GOT_PTHREADS_NAME
-
-static inline size_t formatThreadName (char *buffer, size_t size) {
-  {
-    int error = pthread_getname_np(pthread_self(), buffer, size);
-
-    if (error) return 0;
-    if (*buffer) return strlen(buffer);
-  }
-
-  if (pthread_main_np()) {
-    size_t length;
-
-    STR_BEGIN(buffer, size);
-    STR_PRINTF("main");
-    length = STR_LENGTH;
-    STR_END;
-
-    return length;
-  }
-
-  return 0;
-}
-
-static inline void setThreadName (const char *name) {
-  pthread_setname_np(name);
-}
-
-#else /* get/set thread name */
-static inline size_t formatThreadName (char *buffer, size_t size) {
-  return 0;
-}
-
-static inline void setThreadName (const char *name) {
-}
-#endif /* format/set thread name */
-#endif /* GOT_PTHREADS */
 
 #ifdef __cplusplus
 }
