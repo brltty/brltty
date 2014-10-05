@@ -125,7 +125,7 @@ getScreenDriverDefinition (const ScreenDriver *driver) {
   return &driver->definition;
 }
 
-void
+static void
 initializeScreen (void) {
   screen->initialize(&mainScreen);
 }

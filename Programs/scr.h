@@ -86,21 +86,22 @@ extern int clearHelpPage (void);
 extern int addHelpLine (const wchar_t *characters);
 extern unsigned int getHelpLineCount (void);
 
+extern const ScreenDriver *screen;
+extern const ScreenDriver noScreen;
+extern void setNoScreen (void);
+
 extern const char *const *getScreenParameters (const ScreenDriver *driver);
 extern const DriverDefinition *getScreenDriverDefinition (const ScreenDriver *driver);
 
 extern int haveScreenDriver (const char *code);
 extern const char *getDefaultScreenDriver (void);
+
 extern const ScreenDriver *loadScreenDriver (const char *code, void **driverObject, const char *driverDirectory);
-extern void initializeScreen (void);
 extern int constructScreenDriver (char **parameters);
 extern void destructScreenDriver (void);
+
 extern void identifyScreenDriver (const ScreenDriver *driver, int full);
 extern void identifyScreenDrivers (int full);
-
-extern const ScreenDriver *screen;
-extern const ScreenDriver noScreen;
-extern void setNoScreen (void);
 
 #ifdef __cplusplus
 }
