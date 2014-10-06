@@ -323,14 +323,15 @@ gioReconfigureResource (
   GioEndpoint *endpoint,
   const SerialParameters *parameters
 ) {
-  int ok = 0;
+  int ok = 1;
   GioReconfigureResourceMethod *method = endpoint->methods->reconfigureResource;
 
   if (!method) {
     logUnsupportedOperation("reconfigureResource");
   } else if (method(endpoint->handle, parameters)) {
     gioSetBytesPerSecond(endpoint, parameters);
-    ok = 1;
+  } else {
+    ok = 0;
   }
 
   return ok;
