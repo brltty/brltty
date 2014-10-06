@@ -168,17 +168,16 @@ public class BluetoothConnection {
   public boolean open (int inputPipe, int channel, boolean secure) {
     InputStream inputStream;
 
-    try {
-      bluetoothSocket = secure? bluetoothDevice.createRfcommSocketToServiceRecord(SERIAL_PROFILE_UUID):
-                                bluetoothDevice.createInsecureRfcommSocketToServiceRecord(SERIAL_PROFILE_UUID);
-    } catch (IOException exception) {
-      Log.w(LOG_TAG, "Bluetooth UUID resolution failed: " + bluetoothAddress + ": " + exception.getMessage());
-
-      if (channel > 0) {
-        bluetoothSocket = createRfcommSocket(bluetoothDevice, channel);
-      } else {
+    if (channel == 0) {
+      try {
+        bluetoothSocket = secure? bluetoothDevice.createRfcommSocketToServiceRecord(SERIAL_PROFILE_UUID):
+                                  bluetoothDevice.createInsecureRfcommSocketToServiceRecord(SERIAL_PROFILE_UUID);
+      } catch (IOException exception) {
+        Log.e(LOG_TAG, "Bluetooth UUID resolution failed: " + bluetoothAddress + ": " + exception.getMessage());
         bluetoothSocket = null;
       }
+    } else {
+      bluetoothSocket = createRfcommSocket(bluetoothDevice, channel);
     }
 
     if (bluetoothSocket != null) {
