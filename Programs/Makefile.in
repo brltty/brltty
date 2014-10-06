@@ -633,6 +633,7 @@ ttb_translate.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ttb_translate.c
 
 check-text-tables: brltty-ttb$X $(API_LIB_VERSIONED)
+	@echo checking text tables
 	set -- $(SRC_TOP)$(TBL_DIR)/$(TEXT_TABLES_SUBDIRECTORY)/*$(TEXT_TABLE_EXTENSION) && \
 	for file; do \
 	LD_LIBRARY_PATH=$(BLD_DIR) \
@@ -656,6 +657,7 @@ ctb_translate.$O:
 	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ctb_translate.c
 
 check-contraction-tables: brltty-ctb$X
+	@echo checking contraction tables
 	set -- $(SRC_TOP)$(TBL_DIR)/$(CONTRACTION_TABLES_SUBDIRECTORY)/*$(CONTRACTION_TABLE_EXTENSION) && \
 	for file; do \
 	test -x $${file} || \
@@ -723,6 +725,7 @@ ktb_keyboard.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ktb_keyboard.c
 
 check-keyboard-tables: all-ktbtest
+	@echo checking keyboard tables
 	set -- $(SRC_TOP)$(TBL_DIR)/$(KEYBOARD_TABLES_SUBDIRECTORY)/*$(KEY_TABLE_EXTENSION) && \
 	for file; do \
 	name=$${file##*/}; \
@@ -731,6 +734,7 @@ check-keyboard-tables: all-ktbtest
 	done
 
 check-input-tables: all-ktbtest
+	@echo checking input tables
 	find $(SRC_TOP)$(TBL_DIR)/$(INPUT_TABLES_SUBDIRECTORY) -name '*$(KEY_TABLE_EXTENSION)' -print | \
 	while read file; do \
 	driver=$${file%/*}; \
@@ -823,17 +827,24 @@ tbl2hex$(X_FOR_BUILD): $(TBL2HEX_OBJECTS)
 
 ###############################################################################
 
-check-braille: brltty$X braille-drivers
-	for code in $(BRAILLE_DRIVER_CODES); \
-	do ls -l $(BLD_TOP)$(DRV_DIR)/libbrlttyb$$code.$(MOD_EXT) || exit 10; \
-	   ./brltty -v -q -N -e -f /dev/null -b $$code -s no -D "$(BLD_TOP)$(DRV_DIR)" -T "$(BLD_TOP)$(TBL_DIR)" 2>&1 || exit 11; \
+check-braille-drivers: brltty$X braille-drivers $(API_LIB_VERSIONED)
+	@echo checking braille drivers
+	set -- $(BRAILLE_DRIVER_CODES) && \
+	for code; do \
+	LD_LIBRARY_PATH=$(BLD_DIR) \
+	./brltty -v -lwarning -N -e -f /dev/null -b $$code -s no -D "$(BLD_TOP)$(DRV_DIR)" -T "$(BLD_TOP)$(TBL_DIR)" 2>&1 || exit 11; \
 	done
 
-check-speech: brltty speech-drivers
-	for code in $(SPEECH_DRIVER_CODES); \
-	do ls -l $(BLD_TOP)$(DRV_DIR)/libbrlttys$$code.$(MOD_EXT) || exit 10; \
-	   ./brltty -v -q -N -e -f /dev/null -b no -s $$code -D "$(BLD_TOP)$(DRV_DIR)" -T "$(BLD_TOP)$(TBL_DIR)" 2>&1 || exit 11; \
+check-speech-drivers: brltty speech-drivers
+	@echo checking speech drivers
+	set -- $(SPEECH_DRIVER_CODES) && \
+	for code; do \
+	./brltty -v -lwarning -N -e -f /dev/null -b no -s $$code -D "$(BLD_TOP)$(DRV_DIR)" -T "$(BLD_TOP)$(TBL_DIR)" 2>&1 || exit 11; \
 	done
+
+###############################################################################
+
+check-all: check-text-tables check-contraction-tables check-keyboard-tables check-input-tables check-braille-drivers check-speech-drivers
 
 ###############################################################################
 
