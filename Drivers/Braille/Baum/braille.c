@@ -271,13 +271,6 @@ logTextField (const char *name, const char *address, int length) {
 }
 
 static int
-flushInput (BrailleDisplay *brl) {
-  unsigned char byte;
-  while (gioReadByte(brl->gioEndpoint, &byte, 0));
-  return errno == EAGAIN;
-}
-
-static int
 setGroupedKey (unsigned char *set, KeyNumber number, int press) {
   unsigned char *byte = &set[number / 8];
   unsigned char bit = 1 << (number % 8);
@@ -2476,7 +2469,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           if (!gioReconfigureResource(brl->gioEndpoint, &parameters)) goto failed;
         }
 
-        if (!flushInput(brl)) goto failed;
+        if (!gioDiscardInput(brl->gioEndpoint)) goto failed;
 
         memset(&keysState, 0, sizeof(keysState));
         switchSettings = 0;
