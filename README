@@ -185,7 +185,7 @@ The following braille displays are supported:
          EcoVario, VarioConnect/BrailleConnect, Refreshabraille]
 -  BrailComm [III]
 -  BrailleLite [18/40/M20/M40]
--  BrailleMemo [Pocket (16), 32, 40]
+-  BrailleMemo [Pocket (16), Smart (16), 32, 40]
 -  BrailleNote [18/32]
 -  BrlAPI
 -  B2G [20]

@@ -250,10 +250,17 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   };
 
   static const UsbChannelDefinition usbChannelDefinitions[] = {
-    { /* all models */
+    { /* Pocket */
       .vendor=0X10C4, .product=0XEA60,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
+      .serial=&serialParameters
+    },
+
+    { /* Smart */
+      .vendor=0X1148, .product=0X0301,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=3, .outputEndpoint=2,
       .serial=&serialParameters
     },
 

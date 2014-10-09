@@ -160,13 +160,16 @@ HKR,,Icon,,-20
 ; Generic Identifier
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge / myAVR mySmartUSB light
-"LibUSB-1.0: BrailleMemo [all models], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
+"LibUSB-1.0: BrailleMemo [Pocket], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
 
 ; Device: 10C4:EA80
 ; Generic Identifier
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge
 "LibUSB-1.0: Seika [Note Taker]"=LIBUSB_DEV, USB\VID_10C4&PID_EA80
+
+; Device: 1148:0301
+"LibUSB-1.0: BrailleMemo [Smart]"=LIBUSB_DEV, USB\VID_1148&PID_0301
 
 ; Device: 1C71:C004
 "LibUSB-1.0: BrailleNote [HumanWare APEX]"=LIBUSB_DEV, USB\VID_1C71&PID_C004
@@ -393,13 +396,16 @@ HKR,,Icon,,-20
 ; Generic Identifier
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge / myAVR mySmartUSB light
-"LibUSB-1.0: BrailleMemo [all models], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
+"LibUSB-1.0: BrailleMemo [Pocket], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
 
 ; Device: 10C4:EA80
 ; Generic Identifier
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge
 "LibUSB-1.0: Seika [Note Taker]"=LIBUSB_DEV, USB\VID_10C4&PID_EA80
+
+; Device: 1148:0301
+"LibUSB-1.0: BrailleMemo [Smart]"=LIBUSB_DEV, USB\VID_1148&PID_0301
 
 ; Device: 1C71:C004
 "LibUSB-1.0: BrailleNote [HumanWare APEX]"=LIBUSB_DEV, USB\VID_1C71&PID_C004

@@ -239,13 +239,16 @@ ServiceBinary  = %12%\libusb0.sys
 ; Generic Identifier
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge / myAVR mySmartUSB light
-"LibUSB-Win32: BrailleMemo [all models], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
+"LibUSB-Win32: BrailleMemo [Pocket], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
 
 ; Device: 10C4:EA80
 ; Generic Identifier
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge
 "LibUSB-Win32: Seika [Note Taker]"=LIBUSB_DEV, USB\VID_10C4&PID_EA80
+
+; Device: 1148:0301
+"LibUSB-Win32: BrailleMemo [Smart]"=LIBUSB_DEV, USB\VID_1148&PID_0301
 
 ; Device: 1C71:C004
 "LibUSB-Win32: BrailleNote [HumanWare APEX]"=LIBUSB_DEV, USB\VID_1C71&PID_C004
@@ -472,13 +475,16 @@ ServiceBinary  = %12%\libusb0.sys
 ; Generic Identifier
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge / myAVR mySmartUSB light
-"LibUSB-Win32: BrailleMemo [all models], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
+"LibUSB-Win32: BrailleMemo [Pocket], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
 
 ; Device: 10C4:EA80
 ; Generic Identifier
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge
 "LibUSB-Win32: Seika [Note Taker]"=LIBUSB_DEV, USB\VID_10C4&PID_EA80
+
+; Device: 1148:0301
+"LibUSB-Win32: BrailleMemo [Smart]"=LIBUSB_DEV, USB\VID_1148&PID_0301
 
 ; Device: 1C71:C004
 "LibUSB-Win32: BrailleNote [HumanWare APEX]"=LIBUSB_DEV, USB\VID_1C71&PID_C004
@@ -705,13 +711,16 @@ ServiceBinary  = %12%\libusb0.sys
 ; Generic Identifier
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge / myAVR mySmartUSB light
-"LibUSB-Win32: BrailleMemo [all models], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
+"LibUSB-Win32: BrailleMemo [Pocket], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
 
 ; Device: 10C4:EA80
 ; Generic Identifier
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge
 "LibUSB-Win32: Seika [Note Taker]"=LIBUSB_DEV, USB\VID_10C4&PID_EA80
+
+; Device: 1148:0301
+"LibUSB-Win32: BrailleMemo [Smart]"=LIBUSB_DEV, USB\VID_1148&PID_0301
 
 ; Device: 1C71:C004
 "LibUSB-Win32: BrailleNote [HumanWare APEX]"=LIBUSB_DEV, USB\VID_1C71&PID_C004
