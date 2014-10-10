@@ -57,4 +57,7 @@ bind ArrowUp+ArrowRight FWINRTSKIP
 bind ArrowDown+ArrowLeft CHRLT
 bind ArrowDown+ArrowRight CHRRT
 
+bind Extension KEY_TAB
+bind Extension+RoutingKey KEY_FUNCTION
+
 include common.kti

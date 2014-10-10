@@ -39,6 +39,8 @@ note * ArrowLeft: Extension + Dot3
 note * ArrowRight: Extension + Dot6
 note * OK: Extension + Dot7
 note * Set: Extension + Dot8
+note * Select+Info (Shift+Tab): Extension + Dot1 + Dot2
+note * Info (Tab): Extension + Dot4 + Dot5
 note * Escape: 
 note * Backward: Extension + ArrowUp
 note * Forward: Extension + ArrowDown
@@ -46,6 +48,11 @@ note * ScrollLeft: Extension + ArrowLeft
 note * ScrollRight: Extension + ArrowRight
 note * Insert: 
 note * Change: 
+
+hide on
+bind Info KEY_TAB
+bind Select+Info KEY_TAB+shift
+hide off
 
 bind Select BACK
 bind Read HOME
@@ -57,7 +64,7 @@ bind Control+ArrowRight CHRRT
 bind Alt+ArrowLeft FWINLTSKIP
 bind Alt+ArrowRight FWINRTSKIP
 
-bind PanLeft+RoutingKey SETMARK
-bind PanRight+RoutingKey GOTOMARK
+bind PanLeft+RoutingKey SWITCHVT
+bind PanRight+RoutingKey KEY_FUNCTION
 
 include common.kti
