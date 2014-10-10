@@ -18,20 +18,16 @@
 
 title Braille Memo Smart
 
-note The six slightly angled keys along the top are a braille keyboard.
-note * From left to right, they are named: Dot3, Dot2, Dot1, Dot4, Dot5, Dot6.
-note To the left of the Dot3 key are two vertically-aligned keys.
-note * From top to bottom, they are named: Control, Alt.
-note To the right of the Dot6 key are two vertically-aligned keys.
-note * From top to bottom, they are named: Select, Read.
-note Immediately below the Dot2 key is the Backspace key.
-note Immediately below the Dot5 key is the Delete key.
-note Below the Dot1 and Dot4 keys are three horizontally-aligned keys.
-note * From left to right, they are named: Dot7, Extension, Dot8.
-note On the front at the left are two horizontally-aligned keys.
-note * From left to right, they are named: ArrowUp, ArrowDown.
-note On the front at the right are two horizontally-aligned keys.
-note * From left to right, they are named: ArrowLeft, ArrowRight.
+note The six slightly angled keys along the top are a braille keyboard;
+note * from left to right, their names are: Dot3, Dot2, Dot1, Dot4, Dot5, Dot6.
+note The two keys to the left of Dot3, from top to bottom, are named: Control, Alt.
+note The two keys to the right of Dot6, from top to bottom, are named: Select, Read.
+note The key immediately below Dot2 is named: Backspace.
+note The key immediately below Dot5 is named: Delete.
+note The three keys below Dot1 and Dot4, from left to right, are named: Dot7, Extension, Dot8.
+note The keys to the left and right of the braille cells are named: PanLeft, PanRight.
+note The two keys on the front at the left are named: ArrowUp, ArrowDown.
+note The two keys on the front at the right are named: ArrowLeft, ArrowRight.
 note Some keys are entered by pressing a set of keys simultaneously:
 note * Return: Dot7
 note * Space: Dot8
@@ -50,5 +46,18 @@ note * ScrollLeft: Extension + ArrowLeft
 note * ScrollRight: Extension + ArrowRight
 note * Insert: 
 note * Change: 
+
+bind Select BACK
+bind Read HOME
+bind Select+Read CSRJMP_VERT
+
+bind Control+ArrowLeft CHRLT
+bind Control+ArrowRight CHRRT
+
+bind Alt+ArrowLeft FWINLTSKIP
+bind Alt+ArrowRight FWINRTSKIP
+
+bind PanLeft+RoutingKey SETMARK
+bind PanRight+RoutingKey GOTOMARK
 
 include common.kti

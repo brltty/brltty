@@ -20,9 +20,9 @@
 # Default Bindings #
 ####################
 
+context default
+
 bind RoutingKey ROUTE
-bind ArrowUp+ArrowDown CSRJMP_VERT
-bind PanLeft+PanRight RETURN
 
 bind PanLeft FWINLT
 bind PanRight FWINRT
@@ -53,12 +53,6 @@ bind Select+Read+ArrowUp PRSEARCH
 bind Select+Read+ArrowDown NXSEARCH
 bind Select+Read+PanLeft DISPMD
 bind Select+Read+PanRight FREEZE
-
-bind ArrowUp+ArrowLeft FWINLTSKIP
-bind ArrowUp+ArrowRight FWINRTSKIP
-
-bind ArrowDown+ArrowLeft CHRLT
-bind ArrowDown+ArrowRight CHRRT
 
 bind Control TIME
 bind Alt INFO
@@ -112,13 +106,15 @@ include ../chords.kti
 
 context menu
 
-bind ArrowUp MENU_PREV_ITEM
-bind ArrowDown MENU_NEXT_ITEM
+bind Dot1 MENU_PREV_ITEM
+bind Dot4 MENU_NEXT_ITEM
 
-bind Control MENU_PREV_SETTING
-bind Alt MENU_NEXT_SETTING
-bind Control+Alt MENU_PREV_LEVEL
+bind Dot2 MENU_FIRST_ITEM
+bind Dot5 MENU_LAST_ITEM
 
-bind Dot7 PREFLOAD
-bind Dot8 PREFSAVE
+bind Dot3 MENU_PREV_SETTING
+bind Dot6 MENU_NEXT_SETTING
+
+bind Dot7 MENU_PREV_LEVEL
+bind Dot8 PREFMENU
 
