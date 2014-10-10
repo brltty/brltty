@@ -38,17 +38,17 @@ note * ArrowUp: Extension + Dot1
 note * ArrowDown: Extension + Dot4
 note * ArrowLeft: Extension + Dot2
 note * ArrowRight: Extension + Dot5
+note * Insert: Extension + Dot3
+note * Change: Extension + Dot6
 note * Backspace: Extension + Dot7
 note * Delete: Extension + Dot8
-note * Escape: Extension + ArrowUp (or: Extension + Dot7 + Dot8)
-note * Info: Extension + ArrowDown (or: ArrowRight + Extension + Dot7 + Dot8)
-note * Backward: ArrowRight + Extension + Dot1
-note * Forward: ArrowRight + Extension + Dot4
-note * ScrollLeft: ArrowRight + Extension + Dot2
-note * ScrollRight: ArrowRight + Extension + Dot5
-note * Insert: ArrowRight + Extension + Dot3
-note * Change: ArrowRight + Extension + Dot6
-note * OK: ArrowRight + Extension + Dot7
-note * Set: ArrowRight + Extension + Dot8
+note * Escape: Extension + ArrowUp
+note * Info: Extension + ArrowDown
+note * Backward: Extension + ArrowRight + Dot1
+note * Forward: Extension + ArrowRight + Dot4
+note * ScrollLeft: Extension + ArrowRight + Dot2
+note * ScrollRight: Extension + ArrowRight + Dot5
+note * OK: Extension + ArrowRight + Dot7
+note * Set: Extension + ArrowRight + Dot8
 
 include common.kti
