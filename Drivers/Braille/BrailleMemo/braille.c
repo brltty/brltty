@@ -98,7 +98,7 @@ BEGIN_KEY_NAME_TABLE(display)
   MM_DISPLAY_KEY_ENTRY(RSCROLL, "ScrollRight"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLES(all)
+BEGIN_KEY_NAME_TABLES(pocket)
   KEY_NAME_TABLE(shift),
   KEY_NAME_TABLE(dot),
   KEY_NAME_TABLE(edit),
@@ -107,13 +107,50 @@ BEGIN_KEY_NAME_TABLES(all)
   KEY_NAME_TABLE(display),
 END_KEY_NAME_TABLES
 
-DEFINE_KEY_TABLE(all)
+BEGIN_KEY_NAME_TABLES(smart)
+  KEY_NAME_TABLE(shift),
+  KEY_NAME_TABLE(dot),
+  KEY_NAME_TABLE(edit),
+  KEY_NAME_TABLE(arrow),
+  KEY_NAME_TABLE(route),
+  KEY_NAME_TABLE(display),
+END_KEY_NAME_TABLES
+
+DEFINE_KEY_TABLE(pocket)
+DEFINE_KEY_TABLE(smart)
 
 BEGIN_KEY_TABLE_LIST
-  &KEY_TABLE_DEFINITION(all),
+  &KEY_TABLE_DEFINITION(pocket),
+  &KEY_TABLE_DEFINITION(smart),
 END_KEY_TABLE_LIST
 
+typedef struct {
+  const char *identityPrefix;
+  const char *modelName;
+  const KeyTableDefinition *keyTableDefinition;
+} ModelEntry;
+
+static const ModelEntry modelEntry_pocket = {
+  .identityPrefix = "BMpk",
+  .modelName = "Braille Memo Pocket",
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(pocket)
+};
+
+static const ModelEntry modelEntry_smart = {
+  .identityPrefix = "BMsmart",
+  .modelName = "Braille Memo Smart",
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(smart)
+};
+
+static const ModelEntry *const modelEntries[] = {
+  &modelEntry_pocket,
+  &modelEntry_smart,
+  NULL
+};
+
 struct BrailleDataStruct {
+  const ModelEntry *model;
+
   int forceRewrite;
   unsigned char textCells[MM_MAXIMUM_CELL_COUNT];
 };
@@ -284,6 +321,41 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 }
 
 static int
+detectModel (BrailleDisplay *brl) {
+  if (writePacket(brl, MM_CMD_QueryIdentity, 0, NULL, 0)) {
+    struct {
+      unsigned char header[8];
+      char name[24];
+    } identity;
+
+    ssize_t result = gioReadData(brl->gioEndpoint, &identity, sizeof(identity), 1);
+
+    if (result == sizeof(identity)) {
+      const ModelEntry *const *model = modelEntries;
+
+      logBytes(LOG_DEBUG, "Braille Memo Identity", &identity, sizeof(identity));
+
+      while (*model) {
+        const char *prefix = (*model)->identityPrefix;
+
+        if (strncmp(identity.name, prefix, strlen(prefix)) == 0) {
+          brl->data->model = *model;
+          logMessage(LOG_INFO, "detected model: %s", brl->data->model->modelName);
+          return 1;
+        }
+
+        model += 1;
+      }
+
+      logMessage(LOG_WARNING, "unrecognized model: %s", identity.name);
+    }
+  }
+
+  brl->data->model = &modelEntry_pocket;
+  return 0;
+}
+
+static int
 writeIdentityRequest (BrailleDisplay *brl) {
   return writePacket(brl, MM_CMD_QueryLineSize, 0, NULL, 0);
 }
@@ -310,9 +382,11 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                               writeIdentityRequest,
                               readBytes, &response, sizeof(response),
                               isIdentityResponse)) {
+        detectModel(brl);
+
         if (startDisplayMode(brl)) {
           {
-            const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+            const KeyTableDefinition *ktd = brl->data->model->keyTableDefinition;
 
             brl->keyBindings = ktd->bindings;
             brl->keyNames = ktd->names;
