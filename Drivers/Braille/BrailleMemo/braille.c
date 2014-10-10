@@ -41,7 +41,7 @@
 
 BEGIN_KEY_NAME_TABLE(shift)
   MM_SHIFT_KEY_ENTRY(F1, "PanLeft"),
-  MM_SHIFT_KEY_ENTRY(F3, "Chord"),
+  MM_SHIFT_KEY_ENTRY(F3, "Extension"),
   MM_SHIFT_KEY_ENTRY(F4, "PanRight"),
 
   MM_SHIFT_KEY_ENTRY(F1, "F1"),
@@ -330,10 +330,11 @@ detectModel (BrailleDisplay *brl) {
 
     ssize_t result = gioReadData(brl->gioEndpoint, &identity, sizeof(identity), 1);
 
-    if (result == sizeof(identity)) {
+    if (result == -1) {
+    } else if (result == sizeof(identity)) {
       const ModelEntry *const *model = modelEntries;
 
-      logBytes(LOG_DEBUG, "Braille Memo Identity", &identity, sizeof(identity));
+      logInputPacket(&identity, result);
 
       while (*model) {
         const char *prefix = (*model)->identityPrefix;
@@ -348,10 +349,13 @@ detectModel (BrailleDisplay *brl) {
       }
 
       logMessage(LOG_WARNING, "unrecognized model: %s", identity.name);
+    } else {
+      logShortPacket(&identity, result);
     }
   }
 
   brl->data->model = &modelEntry_pocket;
+  logMessage(LOG_INFO, "assumed model: %s", brl->data->model->modelName);
   return 0;
 }
 

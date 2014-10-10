@@ -86,7 +86,6 @@ map Alt META
 
 bind Dot7 KEY_ENTER
 bind Dot8 PASSDOTS+space
-bind Chord KEY_TAB
 
 bind Insert KEY_INSERT
 bind Delete KEY_DELETE
@@ -102,7 +101,6 @@ bind ArrowLeft KEY_CURSOR_LEFT
 bind ArrowRight KEY_CURSOR_RIGHT
 
 bind Escape KEY_ESCAPE
-bind Chord+RoutingKey KEY_FUNCTION
 
 assign chord Read+
 include ../chords.kti
@@ -121,7 +119,6 @@ bind Control MENU_PREV_SETTING
 bind Alt MENU_NEXT_SETTING
 bind Control+Alt MENU_PREV_LEVEL
 
-bind Chord PREFMENU
 bind Dot7 PREFLOAD
 bind Dot8 PREFSAVE
 

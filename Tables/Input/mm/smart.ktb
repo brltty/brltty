@@ -25,7 +25,7 @@ note * From top to bottom, they are named: Control, Alt.
 note To the right of the Dot6 key are two vertically-aligned quarter-circle keys.
 note * From top to bottom, they are named: Select, Read.
 note Below the Dot1 and Dot4 keys are three horizontally-aligned round keys.
-note * From left to right, they are named: Dot7, Chord, Dot8.
+note * From left to right, they are named: Dot7, Extension, Dot8.
 note At the bottom left is a group of four keys arranged in a cross.
 note * Starting with the leftmost key and moving clockwise, they are named:
 note * ArrowLeft, ArrowUp, ArrowRight, ArrowDown.
@@ -34,21 +34,21 @@ note * refer to the ArrowLeft and ArrowRight keys as PanLeft and PanRight.
 note Some keys are entered by pressing a set of keys simultaneously:
 note * Return: Dot7
 note * Space: Dot8
-note * ArrowUp: Chord + Dot1
-note * ArrowDown: Chord + Dot4
-note * ArrowLeft: Chord + Dot2
-note * ArrowRight: Chord + Dot5
-note * Backspace: Chord + Dot7
-note * Delete: Chord + Dot8
-note * Escape: Chord + ArrowUp (or: Chord + Dot7 + Dot8)
-note * Info: Chord + ArrowDown (or: ArrowRight + Chord + Dot7 + Dot8)
-note * Backward: ArrowRight + Chord + Dot1
-note * Forward: ArrowRight + Chord + Dot4
-note * ScrollLeft: ArrowRight + Chord + Dot2
-note * ScrollRight: ArrowRight + Chord + Dot5
-note * Insert: ArrowRight + Chord + Dot3
-note * Change: ArrowRight + Chord + Dot6
-note * OK: ArrowRight + Chord + Dot7
-note * Set: ArrowRight + Chord + Dot8
+note * ArrowUp: Extension + Dot1
+note * ArrowDown: Extension + Dot4
+note * ArrowLeft: Extension + Dot2
+note * ArrowRight: Extension + Dot5
+note * Backspace: Extension + Dot7
+note * Delete: Extension + Dot8
+note * Escape: Extension + ArrowUp (or: Extension + Dot7 + Dot8)
+note * Info: Extension + ArrowDown (or: ArrowRight + Extension + Dot7 + Dot8)
+note * Backward: ArrowRight + Extension + Dot1
+note * Forward: ArrowRight + Extension + Dot4
+note * ScrollLeft: ArrowRight + Extension + Dot2
+note * ScrollRight: ArrowRight + Extension + Dot5
+note * Insert: ArrowRight + Extension + Dot3
+note * Change: ArrowRight + Extension + Dot6
+note * OK: ArrowRight + Extension + Dot7
+note * Set: ArrowRight + Extension + Dot8
 
 include common.kti
