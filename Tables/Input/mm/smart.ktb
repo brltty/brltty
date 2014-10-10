@@ -58,11 +58,11 @@ bind Select BACK
 bind Read HOME
 bind Select+Read CSRJMP_VERT
 
-bind Control+ArrowLeft CHRLT
-bind Control+ArrowRight CHRRT
+bind Control+ArrowLeft CSRVIS
+bind Control+ArrowRight ATTRVIS
 
-bind Alt+ArrowLeft FWINLTSKIP
-bind Alt+ArrowRight FWINRTSKIP
+bind Alt+ArrowLeft CSRTRK
+bind Alt+ArrowRight SIXDOTS
 
 bind PanLeft+RoutingKey SWITCHVT
 bind PanRight+RoutingKey KEY_FUNCTION

@@ -51,11 +51,11 @@ note * Set: Extension + ArrowRight + Dot8
 bind ArrowUp+ArrowDown CSRJMP_VERT
 bind PanLeft+PanRight RETURN
 
-bind ArrowUp+ArrowLeft FWINLTSKIP
-bind ArrowUp+ArrowRight FWINRTSKIP
+bind ArrowUp+ArrowLeft CSRVIS
+bind ArrowUp+ArrowRight ATTRVIS
 
-bind ArrowDown+ArrowLeft CHRLT
-bind ArrowDown+ArrowRight CHRRT
+bind ArrowDown+ArrowLeft CSRTRK
+bind ArrowDown+ArrowRight SIXDOTS
 
 bind Extension KEY_TAB
 bind Extension+RoutingKey KEY_FUNCTION

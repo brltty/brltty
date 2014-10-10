@@ -29,25 +29,25 @@ bind PanRight FWINRT
 bind ArrowUp LNUP
 bind ArrowDown LNDN
 
-bind Control+PanLeft ATTRVIS
-bind Control+PanRight CSRVIS
-bind Control+ArrowUp CSRTRK
-bind Control+ArrowDown SIXDOTS
+bind Control+ArrowUp PRPROMPT
+bind Control+ArrowDown NXPROMPT
+bind Control+PanLeft PRPGRPH
+bind Control+PanRight NXPGRPH
 
-bind Alt+PanLeft LNBEG
-bind Alt+PanRight LNEND
-bind Alt+ArrowUp TOP
-bind Alt+ArrowDown BOT
+bind Alt+ArrowUp PRDIFLN
+bind Alt+ArrowDown NXDIFLN
+bind Alt+PanLeft FWINLTSKIP
+bind Alt+PanRight FWINRTSKIP
 
-bind Select+ArrowUp PRPROMPT
-bind Select+ArrowDown NXPROMPT
-bind Select+PanLeft PRPGRPH
-bind Select+PanRight NXPGRPH
+bind Select+ArrowUp ATTRUP
+bind Select+ArrowDown ATTRDN
+bind Select+PanLeft CHRLT
+bind Select+PanRight CHRRT
 
-bind Read+ArrowUp PRDIFLN
-bind Read+ArrowDown NXDIFLN
-bind Read+PanLeft ATTRUP
-bind Read+PanRight ATTRDN
+bind Read+ArrowUp TOP
+bind Read+ArrowDown BOT
+bind Read+PanLeft LNBEG
+bind Read+PanRight LNEND
 
 bind Select+Read+ArrowUp PRSEARCH
 bind Select+Read+ArrowDown NXSEARCH
