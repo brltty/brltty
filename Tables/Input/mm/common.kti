@@ -29,10 +29,10 @@ bind ArrowDown LNDN
 bind PanLeft FWINLT
 bind PanRight FWINRT
 
-bind Control+ArrowUp PRPROMPT
-bind Control+ArrowDown NXPROMPT
-bind Control+PanLeft PRPGRPH
-bind Control+PanRight NXPGRPH
+bind Control+ArrowUp TOP_LEFT
+bind Control+ArrowDown BOT_LEFT
+bind Control+PanLeft PRSEARCH
+bind Control+PanRight NXSEARCH
 
 bind Alt+ArrowUp ATTRUP
 bind Alt+ArrowDown ATTRDN
@@ -49,8 +49,11 @@ bind Read+ArrowDown NXDIFLN
 bind Read+PanLeft FWINLTSKIP
 bind Read+PanRight FWINRTSKIP
 
-bind Select+Read+ArrowUp PRSEARCH
-bind Select+Read+ArrowDown NXSEARCH
+bind Control+Alt+ArrowUp PRPGRPH
+bind Control+Alt+ArrowDown NXPGRPH
+
+bind Select+Read+ArrowUp PRPROMPT
+bind Select+Read+ArrowDown NXPROMPT
 
 bind Control TIME
 bind Alt INFO

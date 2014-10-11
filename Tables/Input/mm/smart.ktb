@@ -54,9 +54,12 @@ bind Info KEY_TAB
 bind Select+Info KEY_TAB+shift
 hide off
 
-bind Select BACK
 bind Read HOME
+bind Select BACK
 bind Select+Read CSRJMP_VERT
+
+include common.kti
+context default
 
 bind Control+ArrowLeft CSRVIS
 bind Control+ArrowRight ATTRVIS
@@ -66,5 +69,3 @@ bind Alt+ArrowRight SIXDOTS
 
 bind PanLeft+RoutingKey SWITCHVT
 bind PanRight+RoutingKey KEY_FUNCTION
-
-include common.kti
