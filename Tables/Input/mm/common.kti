@@ -24,35 +24,33 @@ context default
 
 bind RoutingKey ROUTE
 
-bind PanLeft FWINLT
-bind PanRight FWINRT
 bind ArrowUp LNUP
 bind ArrowDown LNDN
+bind PanLeft FWINLT
+bind PanRight FWINRT
 
 bind Control+ArrowUp PRPROMPT
 bind Control+ArrowDown NXPROMPT
 bind Control+PanLeft PRPGRPH
 bind Control+PanRight NXPGRPH
 
-bind Alt+ArrowUp PRDIFLN
-bind Alt+ArrowDown NXDIFLN
-bind Alt+PanLeft FWINLTSKIP
-bind Alt+PanRight FWINRTSKIP
+bind Alt+ArrowUp ATTRUP
+bind Alt+ArrowDown ATTRDN
+bind Alt+PanLeft CHRLT
+bind Alt+PanRight CHRRT
 
-bind Select+ArrowUp ATTRUP
-bind Select+ArrowDown ATTRDN
-bind Select+PanLeft CHRLT
-bind Select+PanRight CHRRT
+bind Select+ArrowUp TOP
+bind Select+ArrowDown BOT
+bind Select+PanLeft LNBEG
+bind Select+PanRight LNEND
 
-bind Read+ArrowUp TOP
-bind Read+ArrowDown BOT
-bind Read+PanLeft LNBEG
-bind Read+PanRight LNEND
+bind Read+ArrowUp PRDIFLN
+bind Read+ArrowDown NXDIFLN
+bind Read+PanLeft FWINLTSKIP
+bind Read+PanRight FWINRTSKIP
 
 bind Select+Read+ArrowUp PRSEARCH
 bind Select+Read+ArrowDown NXSEARCH
-bind Select+Read+PanLeft DISPMD
-bind Select+Read+PanRight FREEZE
 
 bind Control TIME
 bind Alt INFO
