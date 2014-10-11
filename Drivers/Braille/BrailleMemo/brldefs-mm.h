@@ -19,6 +19,18 @@
 #ifndef BRLTTY_INCLUDED_MM_BRLDEFS
 #define BRLTTY_INCLUDED_MM_BRLDEFS
 
+typedef struct {
+  unsigned char packetType;
+  unsigned char deviceIdentifier;
+  unsigned char majorVersion;
+  unsigned char minorVersion;
+  unsigned char lineCount;
+  unsigned char lineLength;
+  unsigned char reserved;
+  unsigned char portIdentifier;
+  char hardwareName[24];
+} MM_IdentityPacket;
+
 #define MM_MAXIMUM_CELL_COUNT 0XFF
 
 #define MM_HEADER_ID1 0XFF

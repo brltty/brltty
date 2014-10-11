@@ -155,7 +155,7 @@ struct BrailleDataStruct {
   unsigned char textCells[MM_MAXIMUM_CELL_COUNT];
 };
 
-static const unsigned char sizeTable[] = {16, 32, 40};
+static const unsigned char sizeTable[] = {16, 24, 32, 40, 46};
 static const unsigned char sizeCount = ARRAY_COUNT(sizeTable);
 
 static int
@@ -323,11 +323,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 static int
 detectModel (BrailleDisplay *brl) {
   if (writePacket(brl, MM_CMD_QueryIdentity, 0, NULL, 0)) {
-    struct {
-      unsigned char header[8];
-      char name[24];
-    } identity;
-
+    MM_IdentityPacket identity;
     ssize_t result = gioReadData(brl->gioEndpoint, &identity, sizeof(identity), 1);
 
     if (result == -1) {
@@ -339,7 +335,7 @@ detectModel (BrailleDisplay *brl) {
       while (*model) {
         const char *prefix = (*model)->identityPrefix;
 
-        if (strncmp(identity.name, prefix, strlen(prefix)) == 0) {
+        if (strncmp(identity.hardwareName, prefix, strlen(prefix)) == 0) {
           brl->data->model = *model;
           logMessage(LOG_INFO, "detected model: %s", brl->data->model->modelName);
           return 1;
@@ -348,7 +344,7 @@ detectModel (BrailleDisplay *brl) {
         model += 1;
       }
 
-      logMessage(LOG_WARNING, "unrecognized model: %s", identity.name);
+      logMessage(LOG_WARNING, "unrecognized model: %s", identity.hardwareName);
     } else {
       logShortPacket(&identity, result);
     }
