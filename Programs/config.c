@@ -2659,14 +2659,20 @@ static const ProfileProperty languageProfileProperties[] = {
 
 static int
 beginLanguageProfile (void) {
+#ifdef ENABLE_SPEECH_SUPPORT
   disableSpeechDriver();
   awaitActivityStopped(speechDriverActivity);
+#endif /* ENABLE_SPEECH_SUPPORT */
+
   return 1;
 }
 
 static int
 endLanguageProfile (void) {
+#ifdef ENABLE_SPEECH_SUPPORT
   enableSpeechDriver(0);
+#endif /* ENABLE_SPEECH_SUPPORT */
+
   return 1;
 }
 
