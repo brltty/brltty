@@ -171,6 +171,18 @@ mkdir -p "${temporaryDirectory}"
 cd "${temporaryDirectory}"
 temporaryDirectory="$(pwd -W)"
 
+logMessage task "copying source tree"
+newSourceRoot="${temporaryDirectory}/source"
+cp -a "${sourceRoot}" "${newSourceRoot}"
+cd "${newSourceRoot}"
+sourceRoot="${newSourceRoot}"
+
+logMessage task "applying patches"
+for patch in defauth affinity
+do
+   patch -p0 <"Windows/${patch}.patch"
+done
+
 buildRoot="${temporaryDirectory}/build"
 mkdir -p "${buildRoot}"
 cd "${buildRoot}"
