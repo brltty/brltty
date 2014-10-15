@@ -1,0 +1,49 @@
+Index: Programs/usb_libusb-1.0.c
+===================================================================
+--- Programs/usb_libusb-1.0.c.orig
++++ Programs/usb_libusb-1.0.c
+@@ -93,6 +93,19 @@ static int
+ usbGetHandle (UsbDeviceExtension *devx) {
+   if (!devx->handle) {
+     int result;
++    DWORD mask, dummy;
++
++    if (GetProcessAffinityMask(GetCurrentProcess(), &mask, &dummy)) {
++      int i;
++      DWORD newmask = 0;
++      for (i = 0; i < sizeof(DWORD)*8; i++)
++        if (mask & (1<<i)) {
++	  newmask = 1<<i;
++	  break;
++	}
++      if (newmask)
++	SetProcessAffinityMask(GetCurrentProcess(), newmask);
++    }
+ 
+     if ((result = libusb_open(devx->device, &devx->handle)) != LIBUSB_SUCCESS) {
+       usbSetErrno(result, "libusb_open");
+Index: Programs/usb_libusb.c
+===================================================================
+--- Programs/usb_libusb.c.orig
++++ Programs/usb_libusb.c
+@@ -304,6 +304,20 @@ usbFindDevice (UsbDeviceChooser chooser,
+   UsbDevice *device = NULL;
+   int result;
+ 
++    DWORD mask, dummy;
++
++    if (GetProcessAffinityMask(GetCurrentProcess(), &mask, &dummy)) {
++      int i;
++      DWORD newmask = 0;
++      for (i = 0; i < sizeof(DWORD)*8; i++)
++        if (mask & (1<<i)) {
++	  newmask = 1<<i;
++	  break;
++	}
++      if (newmask)
++	SetProcessAffinityMask(GetCurrentProcess(), newmask);
++    }
++
+   {
+     static int initialized = 0;
+     if (!initialized) {

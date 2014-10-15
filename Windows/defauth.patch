@@ -1,0 +1,12 @@
+index 229d931..c316791 100644
+--- Programs/brlapi.h.in
++++ Programs/brlapi.h.in
+@@ -134,7 +134,7 @@ size_t BRLAPI_STDCALL brlapi_getHandleSize(void);
+ #undef BRLAPI_AUTHKEYFILE
+ 
+ /** Default authorization setting */
+-#define BRLAPI_DEFAUTH BRLAPI_ETCDIR "/" BRLAPI_AUTHKEYFILE
++#define BRLAPI_DEFAUTH "none"
+ 
+ #ifdef __MINGW32__
+ typedef HANDLE brlapi_fileDescriptor;
