@@ -1276,10 +1276,12 @@ makePreferencesMenu (void) {
       ITEM(newToolMenuItem(toolsSubmenu, &itemName, restartBrailleDriver));
     }
 
+#ifdef ENABLE_SPEECH_SUPPORT
     {
       NAME(strtext("Restart Speech Driver"));
       ITEM(newToolMenuItem(toolsSubmenu, &itemName, restartSpeechDriver));
     }
+#endif /* ENABLE_SPEECH_SUPPORT */
 
     {
       NAME(strtext("Restart Screen Driver"));
