@@ -52,13 +52,18 @@ processParameters_NoScreen (char **parameters) {
   return 1;
 }
 
+static int
+currentVirtualTerminal_NoScreen (void) {
+  return -1;
+}
+
 static void
 describe_NoScreen (ScreenDescription *description) {
   description->rows = 1;
   description->cols = strlen(screenMessage);
   description->posx = 0;
   description->posy = 0;
-  description->number = 1;
+  description->number = currentVirtualTerminal_NoScreen();
 }
 
 static int
@@ -82,6 +87,7 @@ scr_initialize (MainScreen *main) {
   main->base.poll = poll_NoScreen;
   main->base.describe = describe_NoScreen;
   main->base.readCharacters = readCharacters_NoScreen;
+  main->base.currentVirtualTerminal = currentVirtualTerminal_NoScreen;
 
   main->processParameters = processParameters_NoScreen;
 }
