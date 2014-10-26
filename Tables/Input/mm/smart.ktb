@@ -39,15 +39,14 @@ note * ArrowLeft: Extension + Dot3
 note * ArrowRight: Extension + Dot6
 note * OK: Extension + Dot7
 note * Set: Extension + Dot8
-note * Select+Info (Shift+Tab): Extension + Dot1 + Dot2
 note * Info (Tab): Extension + Dot4 + Dot5
-note * Escape: 
+note * Select+Info (Shift+Tab): Extension + Dot1 + Dot2
+note * Escape: Extension + Dot1 + Dot5
+note * Insert: Extension + Dot2 + Dot4
 note * Backward: Extension + ArrowUp
 note * Forward: Extension + ArrowDown
 note * ScrollLeft: Extension + ArrowLeft
 note * ScrollRight: Extension + ArrowRight
-note * Insert: 
-note * Change: 
 
 hide on
 bind Info KEY_TAB
