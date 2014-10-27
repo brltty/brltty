@@ -257,6 +257,7 @@ sufword bysshe 12-13456-234-146-15 Percy Bysshe Shelley
 # the letter c
 always c 14
 always C 14
+sufword cajones =
 begword calcedon 14-1-123-14-1246-135-1345 calcedony calcedonies
 begword cart 14-345-2345 carthorse
 word carthage 14-345-1456-1-1245-15
@@ -273,6 +274,7 @@ sufword coed 14-135-1246
 begword coen 14-135-26 coenzyme (Bana)
 begword cofac = cofactor
 always cofound 14-135-124-46-145
+word cojones =
 sufword colonel =
 begword com 36
 sufword comedic 36-1246-24-14 comedically
@@ -618,6 +620,7 @@ midendword ity 56-13456
 always j 245
 always J 245
 sufword jihad = jihadis
+always jone 245-5-135 jonesing Jonette
 word just 245
 begword jungleri 245-136-1345-1245-123-15-1235-24 jungleridden
 
@@ -956,6 +959,7 @@ word rjcst =
 word rjcth =
 always rejoicing 1235-245-14-1245
 contraction rjcg
+sufword rejone = rejoneador
 sufword renaming 1235-15-1345-1-134-346 renamings
 begword renational 1235-15-1345-6-1345-1-123 renationalise renationalization
 begword rene = renegotiate
