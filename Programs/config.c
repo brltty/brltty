@@ -1261,7 +1261,7 @@ constructBrailleDriver (void) {
 
           if (!getHelpLineCount()) {
             addHelpLine(WS_C("help not available"));
-            message(NULL, "no key bindings", 0);
+            message(NULL, gettext("no key bindings"), 0);
           }
 
           free(keyTablePath);
