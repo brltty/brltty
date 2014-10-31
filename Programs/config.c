@@ -1217,8 +1217,8 @@ constructBrailleDriver (void) {
     if (ensureBrailleBuffer(&brl, LOG_INFO)) {
       if (brl.keyBindings) {
         char *keyTablePath = makeInputTablePath(opt_tablesDirectory,
-                                             braille->definition.code,
-                                             brl.keyBindings);
+                                                braille->definition.code,
+                                                brl.keyBindings);
 
         logMessage(LOG_INFO, "%s: %s", gettext("Key Bindings"), brl.keyBindings);
 
@@ -1261,6 +1261,7 @@ constructBrailleDriver (void) {
 
           if (!getHelpLineCount()) {
             addHelpLine(WS_C("help not available"));
+            message(NULL, "no key bindings", 0);
           }
 
           free(keyTablePath);
