@@ -102,6 +102,10 @@ handleToggleCommands (int command, void *data) {
       toggleFeatureSetting(&prefs.brailleInputMode, command);
       break;
 
+    case BRL_CMD_BRLKBD:
+      toggleFeatureSetting(&prefs.brailleKeyboardEnabled, command);
+      break;
+
     case BRL_CMD_TUNES:
       toggleFeatureSetting(&prefs.alertTunes, command);        /* toggle sound on/off */
       break;

@@ -38,6 +38,10 @@ bind \{chord}Dot2+Dot4 SKPIDLNS
 bind \{chord}Dot2+Dot4+Dot7 SKPIDLNS+off
 bind \{chord}Dot2+Dot4+Dot8 SKPIDLNS+on
 
+bind \{chord}Dot1+Dot3 BRLKBD
+bind \{chord}Dot1+Dot3+Dot7 BRLKBD+off
+bind \{chord}Dot1+Dot3+Dot8 BRLKBD+on
+
 bind \{chord}Dot1+Dot2+Dot3 LEARN
 
 bind \{chord}Dot1+Dot2+Dot3+Dot4 PREFMENU
