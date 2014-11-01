@@ -160,6 +160,7 @@ typedef struct {
   /* Fields below this point may be modified as needed.                        */
   /*****************************************************************************/
 
+  unsigned char brailleKeyboardEnabled;
   unsigned char brailleInputMode;
   unsigned char brailleDisplayOrientation;
 

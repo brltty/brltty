@@ -174,6 +174,10 @@ makeKeyboardCommand (KeyTable *table, unsigned char context) {
       keyboardCommand &= ~BRL_DOTC;
     }
 
+    if (table->options.keyboardEnabledFlag && !*table->options.keyboardEnabledFlag) {
+      keyboardCommand = BRL_CMD_BLK(ALERT) + ALERT_COMMAND_REJECTED;
+    }
+
     return keyboardCommand;
   }
 
@@ -279,11 +283,11 @@ logKeyEvent (
   KeyTable *table, const char *action,
   unsigned char context, const KeyValue *keyValue, int command
 ) {
-  if (table->log.keyEventsFlag && *table->log.keyEventsFlag) {
+  if (table->options.logKeyEventsFlag && *table->options.logKeyEventsFlag) {
     char buffer[0X100];
 
     STR_BEGIN(buffer, sizeof(buffer));
-    if (table->log.label) STR_PRINTF("%s ", table->log.label);
+    if (table->options.logLabel) STR_PRINTF("%s ", table->options.logLabel);
     STR_PRINTF("key %s: ", action);
 
     {
@@ -530,10 +534,15 @@ processKeyEvent (
 
 void
 setKeyTableLogLabel (KeyTable *table, const char *label) {
-  table->log.label = label;
+  table->options.logLabel = label;
 }
 
 void
 setLogKeyEventsFlag (KeyTable *table, const unsigned char *flag) {
-  table->log.keyEventsFlag = flag;
+  table->options.logKeyEventsFlag = flag;
+}
+
+void
+setKeyboardEnabledFlag (KeyTable *table, const unsigned char *flag) {
+  table->options.keyboardEnabledFlag = flag;
 }

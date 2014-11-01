@@ -740,6 +740,11 @@ makePreferencesMenu (void) {
     }
 
     {
+      NAME(strtext("Braille Keyboard Enabled"));
+      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.brailleKeyboardEnabled, &itemName));
+    }
+
+    {
       static const MenuString strings[] = {
         {.label=strtext("Translated via Text Table")},
         {.label=strtext("Dots via Unicode Braille")}

@@ -1225,9 +1225,11 @@ constructBrailleDriver (void) {
         if (keyTablePath) {
           if (brl.keyNames) {
             if ((brl.keyTable = compileKeyTable(keyTablePath, brl.keyNames))) {
+              logMessage(LOG_INFO, "%s: %s", gettext("Key Table"), keyTablePath);
+
               setKeyTableLogLabel(brl.keyTable, "brl");
               setLogKeyEventsFlag(brl.keyTable, &LOG_CATEGORY_FLAG(BRAILLE_KEYS));
-              logMessage(LOG_INFO, "%s: %s", gettext("Key Table"), keyTablePath);
+              setKeyboardEnabledFlag(brl.keyTable, &prefs.brailleKeyboardEnabled);
 
               if (enableBrailleHelpPage()) {
                 listKeyTable(brl.keyTable, handleWcharHelpLine, NULL);

@@ -316,6 +316,12 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.brailleSensitivity
   },
 
+  { .name = "braille-keyboard-enabled",
+    .defaultValue = DEFAULT_BRAILLE_KEYBOARD_ENABLED,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.brailleKeyboardEnabled
+  },
+
   { .name = "braille-input-mode",
     .defaultValue = DEFAULT_BRAILLE_INPUT_MODE,
     .settingNames = &preferenceStringTable_brailleInputMode,

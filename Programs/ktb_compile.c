@@ -1593,6 +1593,10 @@ compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
 
       ktd.table->longPress.alarm = NULL;
 
+      ktd.table->options.logLabel = NULL;
+      ktd.table->options.logKeyEventsFlag = NULL;
+      ktd.table->options.keyboardEnabledFlag = NULL;
+
       if (defineInitialKeyContexts(&ktd)) {
         if (allocateKeyNameTable(&ktd, keys)) {
           if (allocateCommandTable(&ktd)) {

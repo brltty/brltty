@@ -155,9 +155,10 @@ struct KeyTableStruct {
   } longPress;
 
   struct {
-    const char *label;
-    const unsigned char *keyEventsFlag;
-  } log;
+    const char *logLabel;
+    const unsigned char *logKeyEventsFlag;
+    const unsigned char *keyboardEnabledFlag;
+  } options;
 };
 
 extern void copyKeyValues (KeyValue *target, const KeyValue *source, unsigned int count);
