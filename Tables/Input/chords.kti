@@ -16,63 +16,66 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-bind \{chord}Dot1+Dot2 SKPBLNKWINS
-bind \{chord}Dot1+Dot2+Dot7 SKPBLNKWINS+off
-bind \{chord}Dot1+Dot2+Dot8 SKPBLNKWINS+on
+assign toggleOff Dot7
+assign toggleOn Dot8
 
-bind \{chord}Dot1+Dot4 CSRVIS
-bind \{chord}Dot1+Dot4+Dot7 CSRVIS+off
-bind \{chord}Dot1+Dot4+Dot8 CSRVIS+on
+assign toggleKeys \{chord}Dot1+Dot2
+assign toggleCommand SKPBLNKWINS
+include toggle.kti
 
-bind \{chord}Dot1+Dot4+Dot5 DISPMD
-bind \{chord}Dot1+Dot4+Dot5+Dot7 DISPMD+off
-bind \{chord}Dot1+Dot4+Dot5+Dot8 DISPMD+on
+assign toggleKeys \{chord}Dot1+Dot4
+assign toggleCommand CSRVIS
+include toggle.kti
 
-bind \{chord}Dot1+Dot2+Dot4 FREEZE
-bind \{chord}Dot1+Dot2+Dot4+dot7 FREEZE+off
-bind \{chord}Dot1+Dot2+Dot4+dot8 FREEZE+on
+assign toggleKeys \{chord}Dot1+Dot4+Dot5
+assign toggleCommand DISPMD
+include toggle.kti
+
+assign toggleKeys \{chord}Dot1+Dot2+Dot4
+assign toggleCommand FREEZE
+include toggle.kti
 
 bind \{chord}Dot1+Dot2+Dot5 HELP
 
-bind \{chord}Dot2+Dot4 SKPIDLNS
-bind \{chord}Dot2+Dot4+Dot7 SKPIDLNS+off
-bind \{chord}Dot2+Dot4+Dot8 SKPIDLNS+on
+assign toggleKeys \{chord}Dot2+Dot4
+assign toggleCommand SKPIDLNS
+include toggle.kti
 
-bind \{chord}Dot1+Dot3 BRLKBD
-bind \{chord}Dot1+Dot3+Dot7 BRLKBD+off
-bind \{chord}Dot1+Dot3+Dot8 BRLKBD+on
+assign toggleKeys \{chord}Dot1+Dot3
+assign toggleCommand BRLKBD
+include toggle.kti
 
 bind \{chord}Dot1+Dot2+Dot3 LEARN
 
 bind \{chord}Dot1+Dot2+Dot3+Dot4 PREFMENU
-bind \{chord}Dot1+Dot2+Dot3+Dot4+Dot7 PREFLOAD
-bind \{chord}Dot1+Dot2+Dot3+Dot4+Dot8 PREFSAVE
+bind \{chord}Dot1+Dot2+Dot3+Dot4+\{toggleOff} PREFLOAD
+bind \{chord}Dot1+Dot2+Dot3+Dot4+\{toggleOn} PREFSAVE
 
-bind \{chord}Dot1+Dot2+Dot3+Dot5 AUTOREPEAT
-bind \{chord}Dot1+Dot2+Dot3+Dot5+Dot7 AUTOREPEAT+off
-bind \{chord}Dot1+Dot2+Dot3+Dot5+Dot8 AUTOREPEAT+on
+assign toggleKeys \{chord}Dot1+Dot2+Dot3+Dot5
+assign toggleCommand AUTOREPEAT
+include toggle.kti
 
 bind \{chord}Dot2+Dot3+Dot4 INFO
 
-bind \{chord}Dot2+Dot3+Dot4+Dot5 CSRTRK
-bind \{chord}Dot2+Dot3+Dot4+Dot5+Dot7 CSRTRK+off
-bind \{chord}Dot2+Dot3+Dot4+Dot5+Dot8 CSRTRK+on
+assign toggleKeys \{chord}Dot2+Dot3+Dot4+Dot5
+assign toggleCommand CSRTRK
+include toggle.kti
 
-bind \{chord}Dot1+Dot3+Dot6 ATTRVIS
-bind \{chord}Dot1+Dot3+Dot6+Dot7 ATTRVIS+off
-bind \{chord}Dot1+Dot3+Dot6+Dot8 ATTRVIS+on
+assign toggleKeys \{chord}Dot1+Dot3+Dot6
+assign toggleCommand ATTRVIS
+include toggle.kti
 
 bind \{chord}Dot1+Dot2+Dot3+Dot6 CSRJMP_VERT
-bind \{chord}Dot1+Dot2+Dot3+Dot6+Dot7 SWITCHVT_PREV
-bind \{chord}Dot1+Dot2+Dot3+Dot6+Dot8 SWITCHVT_NEXT
+bind \{chord}Dot1+Dot2+Dot3+Dot6+\{toggleOff} SWITCHVT_PREV
+bind \{chord}Dot1+Dot2+Dot3+Dot6+\{toggleOn} SWITCHVT_NEXT
 
-bind \{chord}Dot2+Dot4+Dot5+Dot6 SLIDEWIN
-bind \{chord}Dot2+Dot4+Dot5+Dot6+Dot7 SLIDEWIN+off
-bind \{chord}Dot2+Dot4+Dot5+Dot6+Dot8 SLIDEWIN+on
+assign toggleKeys \{chord}Dot2+Dot4+Dot5+Dot6
+assign toggleCommand SLIDEWIN
+include toggle.kti
 
 bind \{chord}Dot1+Dot3+Dot4+Dot6 PASTE
-bind \{chord}Dot1+Dot3+Dot4+Dot6+Dot7 CLIP_RESTORE
-bind \{chord}Dot1+Dot3+Dot4+Dot6+Dot8 CLIP_SAVE
+bind \{chord}Dot1+Dot3+Dot4+Dot6+\{toggleOff} CLIP_RESTORE
+bind \{chord}Dot1+Dot3+Dot4+Dot6+\{toggleOn} CLIP_SAVE
 
 bind \{chord}Dot2+Dot3+Dot5 SIXDOTS+on
 bind \{chord}Dot2+Dot3+Dot6 SIXDOTS+off
