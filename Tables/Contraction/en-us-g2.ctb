@@ -246,6 +246,8 @@ contraction bl
 begword bluenos = bluenosed
 sufword boende 12-135-26-145-15 town (Republic of Congo)
 sufword boer = boerhaave
+begword bonedr 12-5-135-145-1235 bonedry
+sufword boneset 12-5-135-234-15-2345
 begword bottlenos = bottlenose dolphin
 always braille 12-1235-123
 contraction brl
@@ -266,6 +268,7 @@ sufword chalcedon 16-1-123-14-1246-135-1345 chalcedony chalcedonies
 sufword cheat 16-2-2345 Cheatham
 always chlor 16-123-135-1235 dichlordiphenylethylene, chloroform
 sufword christmas 16-1235-24-34-134-1-234 Christmastide
+sufword ciboneyes =
 sufword citron = citronella
 sufword clemenceau 14-123-15-134-26-14-2-136
 sufword clothes 14-123-135-2346-234 clotheshorse
