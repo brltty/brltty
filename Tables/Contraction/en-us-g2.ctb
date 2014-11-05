@@ -524,9 +524,8 @@ begword goath = goatherd
 sufword goddess 1245-135-256-15-234-234 goddessship
 sufword good 1245-145
 contraction gd
-begword gos = goshawk gosherd
-word gosh 1245-135-146
-word goshen 1245-135-146-26
+sufword goshawk =
+sufword gosherd =
 midendword ingrad 35-1245-1235-1-145 Leningrad, Stalingrad
 begword grapea = grapeade
 begword gravedi = gravedigger
