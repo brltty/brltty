@@ -125,7 +125,7 @@ translateKeyTable() {
    local prefix="${1}"
 
    local program="${buildRoot}/Programs/ktbtest"
-   [ -x "${program}" ] || make -C "${program%/*}" -s "${program##*/}"
+   make -C "${program%/*}" -s "${program##*/}"
    "${program}" -D"${buildRoot}/lib" -T"${sourceRoot}/${tablesSubdirectory}" -l "${prefix}-${inputFile##*/}" >"${outputFile}"
 }
 
