@@ -31,7 +31,8 @@ typedef struct {
   char hardwareName[24];
 } MM_IdentityPacket;
 
-#define MM_MAXIMUM_CELL_COUNT 0XFF
+#define MM_MAXIMUM_LINE_LENGTH 80
+#define MM_MAXIMUM_LINE_COUNT 1
 
 #define MM_HEADER_ID1 0XFF
 #define MM_HEADER_ID2 0XFF
@@ -79,7 +80,7 @@ typedef union {
       } start;
 
       struct {
-        unsigned char cells[MM_MAXIMUM_CELL_COUNT * 2];
+        unsigned char cells[MM_MAXIMUM_LINE_LENGTH * 2];
       } send;
 
       struct {

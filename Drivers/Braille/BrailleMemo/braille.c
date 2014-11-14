@@ -152,7 +152,7 @@ struct BrailleDataStruct {
   const ModelEntry *model;
 
   int forceRewrite;
-  unsigned char textCells[MM_MAXIMUM_CELL_COUNT];
+  unsigned char textCells[MM_MAXIMUM_LINE_LENGTH];
 };
 
 static const unsigned char sizeTable[] = {16, 24, 32, 40, 46};
@@ -321,35 +321,22 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 }
 
 static int
-detectModel (BrailleDisplay *brl) {
-  if (writePacket(brl, MM_CMD_QueryIdentity, 0, NULL, 0)) {
-    MM_IdentityPacket identity;
-    ssize_t result = gioReadData(brl->gioEndpoint, &identity, sizeof(identity), 1);
+detectModel (BrailleDisplay *brl, const MM_IdentityPacket *identity) {
+  const ModelEntry *const *model = modelEntries;
 
-    if (result == -1) {
-    } else if (result == sizeof(identity)) {
-      const ModelEntry *const *model = modelEntries;
+  while (*model) {
+    const char *prefix = (*model)->identityPrefix;
 
-      logInputPacket(&identity, result);
-
-      while (*model) {
-        const char *prefix = (*model)->identityPrefix;
-
-        if (strncmp(identity.hardwareName, prefix, strlen(prefix)) == 0) {
-          brl->data->model = *model;
-          logMessage(LOG_INFO, "detected model: %s", brl->data->model->modelName);
-          return 1;
-        }
-
-        model += 1;
-      }
-
-      logMessage(LOG_WARNING, "unrecognized model: %s", identity.hardwareName);
-    } else {
-      logShortPacket(&identity, result);
+    if (strncmp(identity->hardwareName, prefix, strlen(prefix)) == 0) {
+      brl->data->model = *model;
+      logMessage(LOG_INFO, "detected model: %s", brl->data->model->modelName);
+      return 1;
     }
+
+    model += 1;
   }
 
+  logMessage(LOG_WARNING, "unrecognized model: %s", identity->hardwareName);
   brl->data->model = &modelEntry_pocket;
   logMessage(LOG_INFO, "assumed model: %s", brl->data->model->modelName);
   return 0;
@@ -357,16 +344,59 @@ detectModel (BrailleDisplay *brl) {
 
 static int
 writeIdentityRequest (BrailleDisplay *brl) {
-  return writePacket(brl, MM_CMD_QueryLineSize, 0, NULL, 0);
+  return writePacket(brl, MM_CMD_QueryIdentity, 0, NULL, 0);
+}
+
+static BraillePacketVerifierResult
+verifyIdentityResponse (
+  BrailleDisplay *brl,
+  const unsigned char *bytes, size_t size,
+  size_t *length, void *data
+) {
+  unsigned char byte = bytes[size-1];
+
+  switch (size) {
+    case 1:
+      switch (byte) {
+        case 0X01:
+          *length = sizeof(MM_IdentityPacket);
+          break;
+
+        default:
+          return BRL_PVR_INVALID;
+      }
+      break;
+
+    default:
+      break;
+  }
+
+  return BRL_PVR_INCLUDE;
+}
+
+static size_t
+readIdentityResponse (BrailleDisplay *brl, void *packet, size_t size) {
+  return readBraillePacket(brl, NULL, packet, size, verifyIdentityResponse, NULL);
 }
 
 static BrailleResponseResult
 isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
-  const MM_CommandPacket *cmd = packet;
-  unsigned char byte = cmd->bytes[0];
+  const MM_IdentityPacket *identity = packet;
 
-  if (!isValidSize(byte)) return BRL_RSP_UNEXPECTED;
-  brl->textColumns = byte;
+  if ((identity->lineLength == 0) || (identity->lineLength > MM_MAXIMUM_LINE_LENGTH)) return BRL_RSP_UNEXPECTED;
+  if ((identity->lineCount == 0) || (identity->lineCount > MM_MAXIMUM_LINE_COUNT)) return BRL_RSP_UNEXPECTED;
+
+  {
+    const char *byte = identity->hardwareName;
+    const char *end = byte + sizeof(identity->hardwareName);
+
+    while (byte < end) {
+      if (!*byte) break;
+      if (!iswprint(*byte)) return BRL_RSP_UNEXPECTED;
+      byte += 1;
+    }
+  }
+
   return BRL_RSP_DONE;
 }
 
@@ -376,13 +406,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     memset(brl->data, 0, sizeof(*brl->data));
 
     if (connectResource(brl, device)) {
-      MM_CommandPacket response;
+      MM_IdentityPacket identity;
 
       if (probeBrailleDisplay(brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT,
                               writeIdentityRequest,
-                              readBytes, &response, sizeof(response),
+                              readIdentityResponse, &identity, sizeof(identity),
                               isIdentityResponse)) {
-        detectModel(brl);
+        detectModel(brl, &identity);
+        brl->textColumns = identity.lineLength;
 
         if (startDisplayMode(brl)) {
           {
