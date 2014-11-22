@@ -151,8 +151,9 @@ typedef struct {
   );
 
   void (*forwardExternalPacket) (
-    BrailleDisplay *brl, Port *outPort, Port *inPort,
-    const unsigned char *packet, size_t size
+    BrailleDisplay *brl,
+    const unsigned char *packet, size_t size,
+    int forward
   );
 
   int (*beginForwarding) (BrailleDisplay *brl);
@@ -733,6 +734,7 @@ struct BrailleDataStruct {
     Port port;
     GioHandleInputObject *hio;
     const ProtocolEntry *protocol;
+    unsigned char cells[0XFF];
   } external;
 
   struct {
@@ -1339,6 +1341,16 @@ static const KeyHandlers keyHandlers_eurobraille = {
 };
 
 static int
+writeExternalCells (BrailleDisplay *brl) {
+  return writeDots(brl, &brl->data->internal.port, brl->data->external.cells);
+}
+
+static void
+saveExternalCells (BrailleDisplay *brl, const unsigned char *cells) {
+  memcpy(brl->data->external.cells, cells, brl->textColumns);
+}
+
+static int
 handleNativePacket (BrailleDisplay *brl, Port *port, const KeyHandlers *keyHandlers, const unsigned char *packet, size_t size) {
   if (size == 2) {
     if (packet[0] == IR_IPT_InteractiveKey) {
@@ -1393,40 +1405,65 @@ forwardInternalPacket_eurobraille (
 
 static void
 forwardExternalPacket_native (
-  BrailleDisplay *brl, Port *outPort, Port *inPort,
-  const unsigned char *packet, size_t size
+  BrailleDisplay *brl,
+  const unsigned char *packet, size_t size,
+  int forward
 ) {
-  writeNativePacket(brl, outPort, packet, size);
+  if (forward) {
+    writeNativePacket(brl, &brl->data->internal.port, packet, size);
+  }
 }
 
 static void
 forwardExternalPacket_eurobraille (
-  BrailleDisplay *brl, Port *outPort, Port *inPort,
-  const unsigned char *packet, size_t size
+  BrailleDisplay *brl,
+  const unsigned char *packet, size_t size,
+  int forward
 ) {
-  if (size==2 && packet[0]=='S' && packet[1]=='I')
-  { /* Send system information */
+  if (size==2 && packet[0]=='S' && packet[1]=='I') {
+    /* Send system information */
+    Port *port = &brl->data->external.port;
     char str[256];
-    writeEurobrailleStringPacket(brl, inPort, "SNIRIS_KB_40");
-    writeEurobrailleStringPacket(brl, inPort, "SHIR4");
+
+    writeEurobrailleStringPacket(brl, port, "SNIRIS_KB_40");
+
+    writeEurobrailleStringPacket(brl, port, "SHIR4");
+
     snprintf(str, sizeof(str), "SS%s", brl->data->serialNumber);
-    writeEurobrailleStringPacket(brl, inPort, str);
-    writeEurobrailleStringPacket(brl, inPort, "SLFR");
-    str[0] = 'S'; str[1] = 'G'; str[2] = brl->textColumns;
-    writeEurobraillePacket(brl, inPort, str, 3);
-    str[0] = 'S'; str[1] = 'T'; str[2] = 6;
-    writeEurobraillePacket(brl, inPort, str, 3);
+    writeEurobrailleStringPacket(brl, port, str);
+
+    writeEurobrailleStringPacket(brl, port, "SLFR");
+
+    str[0] = 'S';
+    str[1] = 'G';
+    str[2] = brl->textColumns;
+    writeEurobraillePacket(brl, port, str, 3);
+
+    str[0] = 'S';
+    str[1] = 'T';
+    str[2] = 6;
+    writeEurobraillePacket(brl, port, str, 3);
+
     snprintf(str, sizeof(str), "So%d%da", 0XEF, 0XF8);
-    writeEurobrailleStringPacket(brl, inPort, str);
-    writeEurobrailleStringPacket(brl, inPort, "SW1.92");
-    writeEurobrailleStringPacket(brl, inPort, "SP1.00 30-10-2006");
+    writeEurobrailleStringPacket(brl, port, str);
+
+    writeEurobrailleStringPacket(brl, port, "SW1.92");
+
+    writeEurobrailleStringPacket(brl, port, "SP1.00 30-10-2006");
+
     snprintf(str, sizeof(str), "SM%d", 0X08);
-    writeEurobrailleStringPacket(brl, inPort, str);
-    writeEurobrailleStringPacket(brl, inPort, "SI");
-  } else if (size==brl->textColumns+2 && packet[0]=='B' && packet[1]=='S')
-  { /* Write dots to braille display */
+    writeEurobrailleStringPacket(brl, port, str);
+
+    writeEurobrailleStringPacket(brl, port, "SI");
+  } else if (size==brl->textColumns+2 && packet[0]=='B' && packet[1]=='S') {
+    /* Write dots to braille display */
     const unsigned char *dots = packet+2;
-    writeDots(brl, outPort, dots);
+
+    if (forward) {
+      writeDots(brl, &brl->data->internal.port, dots);
+    } else {
+      saveExternalCells(brl, dots);
+    }
   } else {
     logBytes(LOG_WARNING, "forwardEurobraillePacket could not handle this packet: ", packet, size);
   }
@@ -1448,11 +1485,13 @@ beginForwarding_eurobraille (BrailleDisplay *brl) {
   brl->data->xt.key = NULL;
   brl->data->xt.state = 0;
 
+  writeExternalCells(brl);
   return 1;
 }
 
 static int
 endForwarding_eurobraille (BrailleDisplay *brl) {
+  saveExternalCells(brl, brl->data->braille.cells);
   return 1;
 }
 
@@ -1531,15 +1570,12 @@ leavePacketForwardMode (BrailleDisplay *brl) {
 static int
 forwardExternalPackets (BrailleDisplay *brl) {
   const ProtocolEntry *protocol = brl->data->external.protocol;
-  Port *inPort = &brl->data->external.port;
-  Port *outPort = &brl->data->internal.port;
   unsigned char packet[IR_MAXIMUM_PACKET_SIZE];
   size_t size;
 
-  while ((size = protocol->readExternalPacket(brl, inPort, packet, sizeof(packet)))) {
-    if (brl->data->isForwarding && !brl->data->isSuspended) {
-      protocol->forwardExternalPacket(brl, outPort, inPort, packet, size);
-    }
+  while ((size = protocol->readExternalPacket(brl, &brl->data->external.port, packet, sizeof(packet)))) {
+    protocol->forwardExternalPacket(brl, packet, size,
+                                    (brl->data->isForwarding && !brl->data->isSuspended));
   }
 
   return errno == EAGAIN;
@@ -1862,6 +1898,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     brl->data->external.port.writeNativePacket = writeNativePacket_external;
     brl->data->external.port.handleNativeAcknowledgement = handleNativeAcknowledgement_external;
     brl->data->external.hio = NULL;
+    memset(brl->data->external.cells, 0, sizeof(brl->data->external.cells));
 
     brl->data->latch.monitor = NULL;
     brl->data->latch.delay = IR_DEFAULT_LATCH_DELAY;
