@@ -868,6 +868,16 @@ disableHelpPage (unsigned int pageNumber) {
   }
 }
 
+static void
+disableBrailleHelpPage (void) {
+  disableHelpPage(brailleHelpPageNumber);
+}
+
+static void
+disableKeyboardHelpPage (void) {
+  disableHelpPage(keyboardHelpPageNumber);
+}
+
 static int
 handleWcharHelpLine (const wchar_t *line, void *data UNUSED) {
   return addHelpLine(line);
@@ -898,6 +908,43 @@ loadHelpFile (const char *file) {
   return loaded;
 }
 
+static char *
+makeBrailleKeyTablePath (void) {
+  return makeInputTablePath(opt_tablesDirectory, braille->definition.code, brl.keyBindings);
+}
+
+static void
+makeBrailleHelpPage (const char *keyTablePath) {
+  if (!brl.keyTable) {
+    char *keyHelpPath = replaceFileExtension(keyTablePath, KEY_HELP_EXTENSION);
+
+    if (keyHelpPath) {
+      int loaded = 0;
+
+      if (enableBrailleHelpPage()) {
+        if (loadHelpFile(keyHelpPath)) {
+          loaded = 1;
+        }
+      }
+
+      if (loaded) {
+        logMessage(LOG_INFO, "%s: %s", gettext("Key Help"), keyHelpPath);
+      } else {
+        logMessage(LOG_WARNING, "%s: %s", gettext("cannot open key help"), keyHelpPath);
+      }
+
+      free(keyHelpPath);
+    }
+  } else if (enableBrailleHelpPage()) {
+    listKeyTable(brl.keyTable, handleWcharHelpLine, NULL);
+  }
+
+  if (!getHelpLineCount()) {
+    addHelpLine(WS_C("help not available"));
+    message(NULL, gettext("no key bindings"), 0);
+  }
+}
+
 static void
 exitKeyboardTable (void *data) {
   if (keyboardTable) {
@@ -905,7 +952,7 @@ exitKeyboardTable (void *data) {
     keyboardTable = NULL;
   }
 
-  disableHelpPage(keyboardHelpPageNumber);
+  disableKeyboardHelpPage();
 }
 
 int
@@ -930,7 +977,7 @@ changeKeyboardTable (const char *name) {
 
   if (keyboardTable) {
     destroyKeyTable(keyboardTable);
-    disableHelpPage(keyboardHelpPageNumber);
+    disableKeyboardHelpPage();
   }
 
   if ((keyboardTable = table)) {
@@ -1216,9 +1263,7 @@ constructBrailleDriver (void) {
   if (braille->construct(&brl, brailleDriverParameters, brailleDevice)) {
     if (ensureBrailleBuffer(&brl, LOG_INFO)) {
       if (brl.keyBindings) {
-        char *keyTablePath = makeInputTablePath(opt_tablesDirectory,
-                                                braille->definition.code,
-                                                brl.keyBindings);
+        char *keyTablePath = makeBrailleKeyTablePath();
 
         logMessage(LOG_INFO, "%s: %s", gettext("Key Bindings"), brl.keyBindings);
 
@@ -1230,42 +1275,12 @@ constructBrailleDriver (void) {
               setKeyTableLogLabel(brl.keyTable, "brl");
               setLogKeyEventsFlag(brl.keyTable, &LOG_CATEGORY_FLAG(BRAILLE_KEYS));
               setKeyboardEnabledFlag(brl.keyTable, &prefs.brailleKeyboardEnabled);
-
-              if (enableBrailleHelpPage()) {
-                listKeyTable(brl.keyTable, handleWcharHelpLine, NULL);
-              }
             } else {
               logMessage(LOG_WARNING, "%s: %s", gettext("cannot compile key table"), keyTablePath);
             }
           }
 
-          if (!brl.keyTable) {
-            char *keyHelpPath = replaceFileExtension(keyTablePath, KEY_HELP_EXTENSION);
-
-            if (keyHelpPath) {
-              int loaded = 0;
-
-              if (enableBrailleHelpPage()) {
-                if (loadHelpFile(keyHelpPath)) {
-                  loaded = 1;
-                }
-              }
-
-              if (loaded) {
-                logMessage(LOG_INFO, "%s: %s", gettext("Help Help"), keyHelpPath);
-              } else {
-                logMessage(LOG_WARNING, "%s: %s", gettext("cannot open key help"), keyHelpPath);
-              }
-
-              free(keyHelpPath);
-            }
-          }
-
-          if (!getHelpLineCount()) {
-            addHelpLine(WS_C("help not available"));
-            message(NULL, gettext("no key bindings"), 0);
-          }
-
+          makeBrailleHelpPage(keyTablePath);
           free(keyTablePath);
         }
       }
@@ -1296,7 +1311,7 @@ destructBrailleDriver (void) {
   brailleConstructed = 0;
   braille->destruct(&brl);
 
-  disableHelpPage(brailleHelpPageNumber);
+  disableBrailleHelpPage();
   destructBrailleDisplay(&brl);
 }
 
@@ -2675,6 +2690,17 @@ endLanguageProfile (void) {
 #ifdef ENABLE_SPEECH_SUPPORT
   enableSpeechDriver(0);
 #endif /* ENABLE_SPEECH_SUPPORT */
+
+  if (brl.keyTable) {
+    char *path = makeBrailleKeyTablePath();
+
+    if (path) {
+logMessage(LOG_NOTICE, "path=%s", path);
+      disableBrailleHelpPage();
+      makeBrailleHelpPage(path);
+      free(path);
+    }
+  }
 
   return 1;
 }
