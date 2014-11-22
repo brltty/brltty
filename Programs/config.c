@@ -946,6 +946,13 @@ makeBrailleHelpPage (const char *keyTablePath) {
 }
 
 static void
+makeKeyboardHelpPage (void) {
+  if (enableKeyboardHelpPage()) {
+    listKeyTable(keyboardTable, handleWcharHelpLine, NULL);
+  }
+}
+
+static void
 exitKeyboardTable (void *data) {
   if (keyboardTable) {
     destroyKeyTable(keyboardTable);
@@ -986,9 +993,7 @@ changeKeyboardTable (const char *name) {
     setKeyTableLogLabel(keyboardTable, "kbd");
     setLogKeyEventsFlag(keyboardTable, &LOG_CATEGORY_FLAG(KEYBOARD_KEYS));
 
-    if (enableKeyboardHelpPage()) {
-      listKeyTable(keyboardTable, handleWcharHelpLine, NULL);
-    }
+    makeKeyboardHelpPage();
   }
 
   return 1;
@@ -2695,11 +2700,15 @@ endLanguageProfile (void) {
     char *path = makeBrailleKeyTablePath();
 
     if (path) {
-logMessage(LOG_NOTICE, "path=%s", path);
       disableBrailleHelpPage();
       makeBrailleHelpPage(path);
       free(path);
     }
+  }
+
+  if (keyboardTable) {
+    disableKeyboardHelpPage();
+    makeKeyboardHelpPage();
   }
 
   return 1;
