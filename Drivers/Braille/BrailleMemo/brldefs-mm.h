@@ -19,6 +19,12 @@
 #ifndef BRLTTY_INCLUDED_MM_BRLDEFS
 #define BRLTTY_INCLUDED_MM_BRLDEFS
 
+typedef enum {
+  MM_DEV_Pocket  = 0X02,
+  MM_DEV_Smart16 = 0X11,
+  MM_DEV_Smart40 = 0X12,
+} MM_DeviceIdentifier;
+
 typedef struct {
   unsigned char packetType;
   unsigned char deviceIdentifier;
