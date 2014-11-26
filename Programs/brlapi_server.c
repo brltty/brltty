@@ -72,6 +72,7 @@
 #include "brltty.h"
 #include "api_control.h"
 #include "log.h"
+#include "report.h"
 #include "addresses.h"
 #include "file.h"
 #include "parse.h"
@@ -2878,6 +2879,16 @@ static void brlResize(BrailleDisplay *brl)
   disp = brl;
 }
 
+REPORT_LISTENER(brlapi_handleReports)
+{
+  if (parameters->reportIdentifier == REPORT_BRAILLE_ONLINE) {
+    BrailleDisplay *brl = parameters->listenerData;
+    api_flush(brl);
+  }
+}
+
+static ReportListenerInstance *api_reportListener;
+
 /* Function : api_link */
 /* Does all the link stuff to let api get events from the driver and */
 /* writes from brltty */
@@ -2900,6 +2911,7 @@ void api_link(BrailleDisplay *brl)
   lockMutex(&apiConnectionsMutex);
   broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP, BRL_COMMANDS);
   unlockMutex(&apiConnectionsMutex);
+  api_reportListener = registerReportListener(REPORT_BRAILLE_ONLINE, brlapi_handleReports, brl);
 }
 
 /* Function : api_unlink */
@@ -2907,6 +2919,7 @@ void api_link(BrailleDisplay *brl)
 void api_unlink(BrailleDisplay *brl)
 {
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "api unlink");
+  unregisterReportListener(api_reportListener);
   lockMutex(&apiConnectionsMutex);
   broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_OFFLINE, BRL_COMMANDS);
   unlockMutex(&apiConnectionsMutex);
