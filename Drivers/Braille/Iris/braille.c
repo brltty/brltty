@@ -1457,13 +1457,8 @@ forwardExternalPacket_eurobraille (
     writeEurobrailleStringPacket(brl, port, "SI");
   } else if (size==brl->textColumns+2 && packet[0]=='B' && packet[1]=='S') {
     /* Write dots to braille display */
-    const unsigned char *dots = packet+2;
-
-    if (forward) {
-      writeDots(brl, &brl->data->internal.port, dots);
-    } else {
-      saveExternalCells(brl, dots);
-    }
+    saveExternalCells(brl, packet+2);
+    if (forward) writeExternalCells(brl);
   } else {
     logBytes(LOG_WARNING, "forwardEurobraillePacket could not handle this packet: ", packet, size);
   }
@@ -1491,7 +1486,6 @@ beginForwarding_eurobraille (BrailleDisplay *brl) {
 
 static int
 endForwarding_eurobraille (BrailleDisplay *brl) {
-  saveExternalCells(brl, brl->data->braille.cells);
   return 1;
 }
 
