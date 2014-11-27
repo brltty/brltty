@@ -23,6 +23,10 @@ RestartSec=30
 Nice=-10
 OOMScoreAdjust=-900
 
+ProtectHome=read-only
+ProtectSystem=full
+SystemCallArchitectures=native
+
 
 [Install]
 WantedBy=sysinit.target
