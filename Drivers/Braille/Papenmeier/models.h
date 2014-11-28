@@ -598,12 +598,12 @@ static const ModelEntry modelTable[] = {
     PM_BAR(0, 0, 1, 1)
   },
 
-  { PM_MODEL_IDENTITY(98, trio, "BrailleX Trio 40", 2),
+  { PM_MODEL_IDENTITY(98, trio, "BrailleX Live 40", 2),
     PM_CELL_COUNTS(40, 0),
     PM_BAR(0, 0, 1, 1)
   },
 
-  { PM_MODEL_IDENTITY(99, trio, "BrailleX Trio 20", 2),
+  { PM_MODEL_IDENTITY(99, trio, "BrailleX Live 20", 2),
     PM_CELL_COUNTS(20, 0),
     PM_BAR(0, 0, 1, 1)
   }
