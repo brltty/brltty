@@ -1290,7 +1290,7 @@ constructBrailleDriver (void) {
         }
       }
 
-      report(REPORT_BRAILLE_ONLINE, NULL);
+      report(REPORT_BRAILLE_ONLINE, &brl);
       startBrailleInput();
 
       brailleConstructed = 1;
@@ -1311,7 +1311,7 @@ void
 destructBrailleDriver (void) {
   stopBrailleInput();
   drainBrailleOutput(&brl, 0);
-  report(REPORT_BRAILLE_OFFLINE, NULL);
+  report(REPORT_BRAILLE_OFFLINE, &brl);
 
   brailleConstructed = 0;
   braille->destruct(&brl);
@@ -1485,7 +1485,10 @@ startBrailleDriver (void) {
     trackCursor(1);
 
     if (clearStatusCells(&brl)) {
-      if (opt_quiet) return 1;
+      if (opt_quiet) {
+        scheduleUpdate("braille driver start");
+        return 1;
+      }
 
       {
         char banner[0X100];
