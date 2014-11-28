@@ -1290,7 +1290,7 @@ constructBrailleDriver (void) {
         }
       }
 
-      report(REPORT_BRAILLE_ONLINE, &brl);
+      report(REPORT_BRAILLE_ONLINE, NULL);
       startBrailleInput();
 
       brailleConstructed = 1;
@@ -1311,7 +1311,7 @@ void
 destructBrailleDriver (void) {
   stopBrailleInput();
   drainBrailleOutput(&brl, 0);
-  report(REPORT_BRAILLE_OFFLINE, &brl);
+  report(REPORT_BRAILLE_OFFLINE, NULL);
 
   brailleConstructed = 0;
   braille->destruct(&brl);
