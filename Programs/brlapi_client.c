@@ -1056,8 +1056,7 @@ int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *tt
   }
   *p = n;
   p++;
-  memcpy(p, driverName, n);
-  p += n;
+  if (n) p = mempcpy(p, driverName, n);
   if ((res=brlapi__writePacketWaitForAck(handle,BRLAPI_PACKET_ENTERTTYMODE,&packet,(p-(unsigned char *)&packet))) == 0)
     handle->state |= STCONTROLLINGTTY;
   pthread_mutex_unlock(&handle->state_mutex);
