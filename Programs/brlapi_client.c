@@ -1333,7 +1333,7 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeArguments_t *s)
     *((uint32_t *) p) = htonl(rsiz); p += sizeof(uint32_t);
   } else {
     /* DEPRECATED */
-    rbeg = 1; rsiz = dispSize;
+    rsiz = dispSize;
   }
   if (s->text) {
     if (s->textSize != -1)
