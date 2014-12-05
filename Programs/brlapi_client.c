@@ -1056,8 +1056,7 @@ int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *tt
   }
   *p = n;
   p++;
-  memcpy(p, driverName, n);
-  p += n;
+  if (n) p = mempcpy(p, driverName, n);
   if ((res=brlapi__writePacketWaitForAck(handle,BRLAPI_PACKET_ENTERTTYMODE,&packet,(p-(unsigned char *)&packet))) == 0)
     handle->state |= STCONTROLLINGTTY;
   pthread_mutex_unlock(&handle->state_mutex);
@@ -1334,7 +1333,7 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeArguments_t *s)
     *((uint32_t *) p) = htonl(rsiz); p += sizeof(uint32_t);
   } else {
     /* DEPRECATED */
-    rbeg = 1; rsiz = dispSize;
+    rsiz = dispSize;
   }
   if (s->text) {
     if (s->textSize != -1)
