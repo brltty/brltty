@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <string name="app_name">BRLTTY</string>
+  <string name="app_description">BRLTTY tukee pistenäyttöjä.</string>
+
+  <string name="input_service_name">BRLTTY:n syötepalvelu</string>
+  <string name="input_service_type">Pistenäyttöjen näppäimistöt</string>
+
+  <string name="VIRTUAL_BUTTON_NOTIFICATIONS">Ilmoitukset</string>
+  <string name="VIRTUAL_BUTTON_QUICK_SETTINGS">Pika-asetukset</string>
+  <string name="VIRTUAL_BUTTON_BACK">Takaisin</string>
+  <string name="VIRTUAL_BUTTON_HOME">Koti</string>
+  <string name="VIRTUAL_BUTTON_RECENT_APPS">Viimeisimmät sovellukset</string>
+
+  <string name="SETTINGS_SCREEN_MAIN">BRLTTY:n asetukset</string>
+  <string name="SETTINGS_SCREEN_GENERAL">Yleiset</string>
+  <string name="SETTINGS_SCREEN_DEVICES">Laitteiden hallinta</string>
+  <string name="SETTINGS_SCREEN_ADVANCED">Lisäasetukset</string>
+
+  <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Navigaatiotila</string>
+  <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Puhetuki</string>
+
+  <string name="SETTINGS_BUTTON_TEXT_TABLE">Tekstitaulukko</string>
+  <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Määretaulukko</string>
+  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Lyhennetaulukko</string>
+  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Näppäintaulukko</string>
+
+  <string name="SETTINGS_BUTTON_LOG_LEVEL">Lokitaso</string>
+  <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Lokikategoriat</string>
+
+  <string name="DEVICES_BUTTON_SELECTED">Valittu laite</string>
+  <string name="DEVICES_BUTTON_ADD">Lisää laite</string>
+  <string name="DEVICES_BUTTON_REMOVE">Poista laite</string>
+
+  <string name="SELECTED_DEVICE_NONE">ei laitteita</string>
+  <string name="SELECTED_DEVICE_UNSELECTED">laitetta ei ole valittu</string>
+
+  <string name="ADD_DEVICE_NAME">Laitteen nimi</string>
+  <string name="ADD_DEVICE_METHOD">Yhteysmenetelmä</string>
+  <string name="ADD_DEVICE_SELECT">Valitse laite</string>
+  <string name="ADD_DEVICE_DRIVER">Pistenäyttöajuri</string>
+  <string name="ADD_DEVICE_DONE">Valmis</string>
+  <string name="ADD_DEVICE_UNSELECTED_METHOD">yhteysmenetelmää ei ole valittu</string>
+  <string name="ADD_DEVICE_UNSELECTED_DEVICE">laitetta ei ole valittu</string>
+  <string name="ADD_DEVICE_UNSELECTED_DRIVER">pistenäyttöajuria ei ole valittu</string>
+  <string name="ADD_DEVICE_NO_DEVICES">ei laitteita</string>
+  <string name="ADD_DEVICE_DUPLICATE_NAME">laitenimi on jo käytössä</string>
+
+  <string name="REMOVE_DEVICE_ASK">Haluatko varmasti poistaa tämän laitteen?</string>
+
+  <string name="SET_SELECTION_NONE">ei valintaa</string>
+
+  <string name="NAVIGATION_MODE_LABEL_List">Pystysuuntainen lista</string>
+  <string name="NAVIGATION_MODE_LABEL_Grid">Kaksiulotteinen ruudukko</string>
+
+  <string name="SPEECH_SUPPORT_LABEL_None">Ei mitään</string>
+  <string name="SPEECH_SUPPORT_LABEL_Native">Alkuperäinen</string>
+
+  <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
+  <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>
+  <string name="COMMUNICATION_METHOD_LABEL_Serial">Sarjaportti</string>
+
+  <string name="LOG_LEVEL_LABEL_debug">Virheenkorjaus</string>
+  <string name="LOG_LEVEL_LABEL_information">Tiedot</string>
+  <string name="LOG_LEVEL_LABEL_notice">Huomautus</string>
+  <string name="LOG_LEVEL_LABEL_warning">Varoitus</string>
+  <string name="LOG_LEVEL_LABEL_error">Virhe</string>
+  <string name="LOG_LEVEL_LABEL_critical">Kriittinen</string>
+  <string name="LOG_LEVEL_LABEL_alert">Hälytys</string>
+  <string name="LOG_LEVEL_LABEL_emergency">Hätätilanne</string>
+
+  <string name="LOG_CATEGORY_LABEL_ingio">Yleinen syöte</string>
+  <string name="LOG_CATEGORY_LABEL_inpkts">Syötepaketit</string>
+  <string name="LOG_CATEGORY_LABEL_outpkts">Tulostuspaketit</string>
+  <string name="LOG_CATEGORY_LABEL_brlkeys">Pistenäytön näppäintapahtumat</string>
+  <string name="LOG_CATEGORY_LABEL_kbdkeys">Näppäimistön näppäintapahtumat</string>
+  <string name="LOG_CATEGORY_LABEL_csrtrk">Kohdistimen seuranta</string>
+  <string name="LOG_CATEGORY_LABEL_csrrtg">Kohdistimen siirtäminen</string>
+  <string name="LOG_CATEGORY_LABEL_update">Päivitystapahtumat</string>
+  <string name="LOG_CATEGORY_LABEL_speech">Puhetapahtumat</string>
+  <string name="LOG_CATEGORY_LABEL_async">Asynkroniset tapahtumat</string>
+  <string name="LOG_CATEGORY_LABEL_server">Palvelintapahtumat</string>
+  <string name="LOG_CATEGORY_LABEL_serial">Sarjaportin syöttö/tulostus</string>
+  <string name="LOG_CATEGORY_LABEL_usb">USB:n syöttö/tulostus</string>
+  <string name="LOG_CATEGORY_LABEL_bluetooth">Bluetoothin syöttö/tulostus</string>
+  <string name="LOG_CATEGORY_LABEL_brldrv">Pistenäyttöajurin tapahtumat</string>
+  <string name="LOG_CATEGORY_LABEL_spkdrv">Puheajurin tapahtumat</string>
+  <string name="LOG_CATEGORY_LABEL_scrdrv">Näyttöajurin tapahtumat</string>
+
+  <string name="BRAILLE_DRIVER_LABEL_auto">tunnista automaattisesti</string>
+
+  <string name="TEXT_TABLE_LABEL_auto">automaattinen valinta kieliasetusten mukaan</string>
+  <string name="TEXT_TABLE_LABEL_ar">Arabia (yleinen)</string>
+  <string name="TEXT_TABLE_LABEL_as">Assami</string>
+  <string name="TEXT_TABLE_LABEL_awa">Awadhi</string>
+  <string name="TEXT_TABLE_LABEL_bg">Bulgaria</string>
+  <string name="TEXT_TABLE_LABEL_bh">Bihari</string>
+  <string name="TEXT_TABLE_LABEL_bn">Bengali</string>
+  <string name="TEXT_TABLE_LABEL_bo">Tiibet</string>
+  <string name="TEXT_TABLE_LABEL_bra">Braj</string>
+  <string name="TEXT_TABLE_LABEL_brf">Braille Ready Format (.brf-tiedostojen katselemiseen muokkain- tai katselusovelluksessa)</string>
+  <string name="TEXT_TABLE_LABEL_cs">Tshekki</string>
+  <string name="TEXT_TABLE_LABEL_cy">Wales</string>
+  <string name="TEXT_TABLE_LABEL_da_1252">Tanska (Svend Thougaard, 2002-11-18)</string>
+  <string name="TEXT_TABLE_LABEL_da">Tanska</string>
+  <string name="TEXT_TABLE_LABEL_da_lt">Tanska (LogText)</string>
+  <string name="TEXT_TABLE_LABEL_de">Saksa</string>
+  <string name="TEXT_TABLE_LABEL_dra">Dravidia</string>
+  <string name="TEXT_TABLE_LABEL_el">Kreikka</string>
+  <string name="TEXT_TABLE_LABEL_en_CA">Englanti (Kanada)</string>
+  <string name="TEXT_TABLE_LABEL_en">Englanti</string>
+  <string name="TEXT_TABLE_LABEL_en_GB">Englanti (Iso-Britannia)</string>
+  <string name="TEXT_TABLE_LABEL_en_nabcc">Englanti (pohjoisamerikkalainen tietokonemerkistö)</string>
+  <string name="TEXT_TABLE_LABEL_en_US">Englanti (Yhdysvallat)</string>
+  <string name="TEXT_TABLE_LABEL_eo">Esperanto</string>
+  <string name="TEXT_TABLE_LABEL_es">Espanja</string>
+  <string name="TEXT_TABLE_LABEL_et">Viro</string>
+  <string name="TEXT_TABLE_LABEL_fi">Suomi</string>
+  <string name="TEXT_TABLE_LABEL_fr_2007">Ranska (yhdenmukaistettu 2007)</string>
+  <string name="TEXT_TABLE_LABEL_fr_CA">Ranska (Kanada)</string>
+  <string name="TEXT_TABLE_LABEL_fr_cbifs">Ranska (Code Braille Informatique Français Standard)</string>
+  <string name="TEXT_TABLE_LABEL_fr">Ranska</string>
+  <string name="TEXT_TABLE_LABEL_fr_FR">Ranska (Ranska)</string>
+  <string name="TEXT_TABLE_LABEL_fr_vs">Ranska (VisioBraille)</string>
+  <string name="TEXT_TABLE_LABEL_ga">Iiri</string>
+  <string name="TEXT_TABLE_LABEL_gd">Gael</string>
+  <string name="TEXT_TABLE_LABEL_gon">Gondi</string>
+  <string name="TEXT_TABLE_LABEL_gu">Gujarati</string>
+  <string name="TEXT_TABLE_LABEL_he">Heprea</string>
+  <string name="TEXT_TABLE_LABEL_hi">Hindi</string>
+  <string name="TEXT_TABLE_LABEL_hr">Kroatia</string>
+  <string name="TEXT_TABLE_LABEL_hu">Unkari</string>
+  <string name="TEXT_TABLE_LABEL_hy">Armenia</string>
+  <string name="TEXT_TABLE_LABEL_is">Islanti</string>
+  <string name="TEXT_TABLE_LABEL_it">Italia</string>
+  <string name="TEXT_TABLE_LABEL_kha">Khasi</string>
+  <string name="TEXT_TABLE_LABEL_kn">Kannada</string>
+  <string name="TEXT_TABLE_LABEL_kok">Konkani</string>
+  <string name="TEXT_TABLE_LABEL_kru">Kurukh</string>
+  <string name="TEXT_TABLE_LABEL_lt">liettua</string>
+  <string name="TEXT_TABLE_LABEL_lv">latvia</string>
+  <string name="TEXT_TABLE_LABEL_mg">malagassi</string>
+  <string name="TEXT_TABLE_LABEL_mi">maori</string>
+  <string name="TEXT_TABLE_LABEL_ml">malajalam</string>
+  <string name="TEXT_TABLE_LABEL_mni">manipuri</string>
+  <string name="TEXT_TABLE_LABEL_mr">marathi</string>
+  <string name="TEXT_TABLE_LABEL_mt">malta</string>
+  <string name="TEXT_TABLE_LABEL_mun">munda</string>
+  <string name="TEXT_TABLE_LABEL_mwr">marwari</string>
+  <string name="TEXT_TABLE_LABEL_ne">nepali</string>
+  <string name="TEXT_TABLE_LABEL_new">newari</string>
+  <string name="TEXT_TABLE_LABEL_nl_BE">hollanti (Belgia)</string>
+  <string name="TEXT_TABLE_LABEL_nl">hollanti</string>
+  <string name="TEXT_TABLE_LABEL_nl_NL">hollanti (Hollanti)</string>
+  <string name="TEXT_TABLE_LABEL_no_generic">norja (tuki muille kielille)</string>
+  <string name="TEXT_TABLE_LABEL_no">norja</string>
+  <string name="TEXT_TABLE_LABEL_no_oub">norja (Offentlig Utvalg for Blindeskrift)</string>
+  <string name="TEXT_TABLE_LABEL_nwc">newari (vanha)</string>
+  <string name="TEXT_TABLE_LABEL_or">orija</string>
+  <string name="TEXT_TABLE_LABEL_pa">punjabi</string>
+  <string name="TEXT_TABLE_LABEL_pi">pali</string>
+  <string name="TEXT_TABLE_LABEL_pl">puola</string>
+  <string name="TEXT_TABLE_LABEL_pt">portugali</string>
+  <string name="TEXT_TABLE_LABEL_ro">romania</string>
+  <string name="TEXT_TABLE_LABEL_ru">venäjä</string>
+  <string name="TEXT_TABLE_LABEL_sa">sanskrit</string>
+  <string name="TEXT_TABLE_LABEL_sat">santali</string>
+  <string name="TEXT_TABLE_LABEL_sd">sindhi</string>
+  <string name="TEXT_TABLE_LABEL_sk">slovakki</string>
+  <string name="TEXT_TABLE_LABEL_sl">slovenia</string>
+  <string name="TEXT_TABLE_LABEL_sv_1989">ruotsi (1989 standardi)</string>
+  <string name="TEXT_TABLE_LABEL_sv_1996">ruotsi (1996 standardi)</string>
+  <string name="TEXT_TABLE_LABEL_sv">ruotsi</string>
+  <string name="TEXT_TABLE_LABEL_sw">swahili</string>
+  <string name="TEXT_TABLE_LABEL_ta">tamili</string>
+  <string name="TEXT_TABLE_LABEL_te">telugu</string>
+  <string name="TEXT_TABLE_LABEL_tr">turkki</string>
+  <string name="TEXT_TABLE_LABEL_vi">vietnam</string>
+
+  <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">käänteinen edustan väri vasemmassa sarakkeessa ja taustaväri oikeassa sarakkeessa</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_left_right">edustan väri vasemmassa sarakkeessa ja taustaväri oikeassa sarakkeessa</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">edustan väri yläosassa ja taustaväri alaosassa</string>
+
+  <string name="CONTRACTION_TABLE_LABEL_af">afrikaans (lyhennekirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_am">amhara (tavallinen kirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_basis">saksa (tavallinen kirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift">saksa (lyhennekirjoitus - 1998 standardi)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">saksa (peruslyhenteet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">englanti (Unified English Braille, taso 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_us_g2">englanti (Yhdysvallat, taso 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_es">espanja (taso 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_abrege">ranska (lyhennekirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_integral">ranska (tavallinen kirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ha">hausa (lyhennekirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_id">indonesia (lyhennekirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ipa">Kansainvälinen foneettinen aakkosto</string>
+  <string name="CONTRACTION_TABLE_LABEL_ja">japani (tavallinen kirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g1">korea (taso 1)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g2">korea (taso 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko">korea (tavallinen kirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_mg">malagassi (lyhennekirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_mun">munda (lyhennekirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_nl">hollanti (lyhennekirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ny">chichewa (lyhennekirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_pt">portugali (taso 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_si">singaleesi (tavallinen kirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_sw">swahili (lyhennekirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_th">thai (lyhennekirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_tw">kiina (Taiwan, tavallinen kirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">kiina (Taiwan, Unique Chinese Braille)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (lyhennekirjoitus)</string>
+
+  <string name="KEYBOARD_TABLE_LABEL_braille">pistenäppäimistöjen näppäinmääritykset</string>
+  <string name="KEYBOARD_TABLE_LABEL_desktop">täysikokoisten näppäimistöjen näppäinmääritykset</string>
+  <string name="KEYBOARD_TABLE_LABEL_keypad">Numeronäppäimistönavigoinnin näppäinmääritykset</string>
+  <string name="KEYBOARD_TABLE_LABEL_laptop">Numeronäppäimistöttömien näppäimistöjen näppäinmääritykset</string>
+  <string name="KEYBOARD_TABLE_LABEL_sun_type6">Sun Type 6 -näppäimistöjen näppäinmääritykset</string>
+</resources>
