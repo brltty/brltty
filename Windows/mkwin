@@ -274,6 +274,7 @@ cd "${sourceRoot}"
 installFile "LICENSE-GPL" "LICENSE-GPL.txt"
 installFile "LICENSE-LGPL" "LICENSE-LGPL.txt"
 installFile "README" "${documentDirectory}/BRLTTY.txt"
+installFile "Drivers/Braille/XWindow/UBraille.ttf" "Fonts/"
 installFile "Drivers/BrlAPI/WindowEyes/README" "${documentDirectory}/WindowEyes.txt"
 installFile "Autostart/Windows/brltty-${usbPackage}.inf" "bin/"
 
@@ -434,7 +435,7 @@ then
                      "${unix2dosPath}" -q -o "${path}"
                      ;;
 
-                  a | def | dll | doc | egg-info | exe | exp | lib | pdf | pyd | sys);;
+                  a | def | dll | doc | egg-info | exe | exp | lib | pdf | pyd | sys | ttf);;
                   *) logMessage warning "unexpected file extension: ${handle}";;
                esac
             fi
