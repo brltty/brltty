@@ -18,7 +18,7 @@
   <string name="SETTINGS_SCREEN_DEVICES">Laitteiden hallinta</string>
   <string name="SETTINGS_SCREEN_ADVANCED">Lisäasetukset</string>
 
-  <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Navigaatiotila</string>
+  <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Navigointitila</string>
   <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Puhetuki</string>
 
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Tekstitaulukko</string>
