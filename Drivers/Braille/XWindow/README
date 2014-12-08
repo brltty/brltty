@@ -33,3 +33,7 @@ characters: if your usual locale is en_US, launch brltty with a
 prepended LC_CTYPE:
 
 LC_CTYPE=en_US.UTF-8 brltty ...
+
+In order to use this driver on Windows, you need to copy the file UBraille.ttf 
+into the C:\Windows\Fonts\ folder. It can be found in this directory as well as 
+in the Fonts\ top-level folder of the BRLTTY Windows archive.
