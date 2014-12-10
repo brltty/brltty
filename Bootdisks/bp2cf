@@ -118,7 +118,8 @@ ${1}"
             exec <"${configurationFile}" >"${outputFile}"
          fi
          sedScript=""
-         putSedCommand "1i\\
+         putSedCommand "\$a\\
+\\
 `makeHeaderLine Updated`\\
 `makeParameterLine`\\
 "
