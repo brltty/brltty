@@ -126,8 +126,8 @@ ${1}"
       putConfigurationDirective()
       {
          value="`echo "${2}" | sed -e 's%\\([/\\]\\)%\\\\\\1%g'`"
-         putSedCommand "/^ *#\\(${1} .*\\)/s//\\1/"
-         putSedCommand "/^ *\\(${1}\\) .*/s//\\1 ${value}/"
+         putSedCommand "/^[[:space:]]*${1}[[:space:]]/s/^/#/"
+         putSedCommand "\$a${1} ${value}"
       }
       finalizeConfigurationFile()
       {
