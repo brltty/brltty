@@ -253,7 +253,7 @@ readBraillePacket (
         }
       }
 
-      if (count == length) {
+      if (count >= length) {
         logInputPacket(bytes, length);
         return length;
       }
