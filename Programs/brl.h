@@ -38,6 +38,7 @@ struct BrailleDisplayStruct {
   unsigned int textColumns, textRows;
   unsigned int statusColumns, statusRows;
 
+  GioEndpoint *gioEndpoint;
   const char *keyBindings;
   KEY_NAME_TABLES_REFERENCE keyNameTables;
   KeyTable *keyTable;
@@ -77,6 +78,9 @@ extern void fillDotsRegion (
 extern int clearStatusCells (BrailleDisplay *brl);
 extern int setStatusText (BrailleDisplay *brl, const char *text);
 
+typedef uint32_t KeyNumberSet;
+#define KEY_NUMBER_BIT(number) (UINT32_C(1) << (number))
+
 extern int enqueueCommand (int command);
 extern int enqueueKeyEvent (unsigned char set, unsigned char key, int press);
 
@@ -91,6 +95,41 @@ extern int enqueueXtScanCode (
 
 extern int readBrailleCommand (BrailleDisplay *, KeyTableCommandContext);
 extern KeyTableCommandContext getCurrentCommandContext (void);
+
+typedef int BrailleSessionInitializer (BrailleDisplay *brl);
+
+extern int connectBrailleResource (
+  BrailleDisplay *brl,
+  const char *identifier,
+  const GioDescriptor *descriptor,
+  BrailleSessionInitializer *initializeSession
+);
+
+typedef int BrailleSessionEnder (BrailleDisplay *brl);
+
+extern void disconnectBrailleResource (
+  BrailleDisplay *brl,
+  BrailleSessionEnder *endSession
+);
+
+typedef enum {
+  BRL_PVR_INVALID,
+  BRL_PVR_INCLUDE,
+  BRL_PVR_EXCLUDE
+} BraillePacketVerifierResult;
+
+typedef BraillePacketVerifierResult BraillePacketVerifier (
+  BrailleDisplay *brl,
+  const unsigned char *bytes, size_t size,
+  size_t *length, void *data
+);
+
+extern size_t readBraillePacket (
+  BrailleDisplay *brl,
+  GioEndpoint *endpoint,
+  void *packet, size_t size,
+  BraillePacketVerifier *verifyPacket, void *data
+);
 
 extern int writeBraillePacket (
   BrailleDisplay *brl, GioEndpoint *endpoint,
@@ -159,6 +198,12 @@ extern void identifyBrailleDriver (const BrailleDriver *driver, int full);
 extern void identifyBrailleDrivers (int full);
 extern const BrailleDriver *braille;
 extern const BrailleDriver noBraille;
+
+#define BRL_KEY_GROUP(drv,grp) drv ## _GRP_ ## grp
+#define BRL_KEY_NAME(drv,grp,key) drv ## _ ## grp ## _ ## key
+
+#define BRL_KEY_GROUP_ENTRY(drv,grp,nam) KEY_SET_ENTRY(BRL_KEY_GROUP(drv, grp), nam)
+#define BRL_KEY_NAME_ENTRY(d,g,k,n) {.value={.set=BRL_KEY_GROUP(d, g), .key=BRL_KEY_NAME(d, g, k)}, .name=n}
 
 extern int cellsHaveChanged (
   unsigned char *cells, const unsigned char *new, unsigned int count,

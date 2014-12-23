@@ -112,6 +112,7 @@ initializeBrailleDisplay (BrailleDisplay *brl) {
   brl->statusColumns = 0;
   brl->statusRows = 0;
 
+  brl->gioEndpoint = NULL;
   brl->keyBindings = "all";
   brl->keyNameTables = NULL;
   brl->keyTable = NULL;
@@ -532,10 +533,109 @@ readBrailleCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 }
 
 int
+connectBrailleResource (
+  BrailleDisplay *brl,
+  const char *identifier,
+  const GioDescriptor *descriptor,
+  BrailleSessionInitializer *initializeSession
+) {
+  if ((brl->gioEndpoint = gioConnectResource(identifier, descriptor))) {
+    if (!initializeSession || initializeSession(brl)) {
+      if (gioDiscardInput(brl->gioEndpoint)) {
+        return 1;
+      }
+    }
+
+    gioDisconnectResource(brl->gioEndpoint);
+    brl->gioEndpoint = NULL;
+  }
+
+  return 0;
+}
+
+void
+disconnectBrailleResource (
+  BrailleDisplay *brl,
+  BrailleSessionEnder *endSession
+) {
+  if (brl->gioEndpoint) {
+    if (endSession) endSession(brl);
+    drainBrailleOutput(brl, 0);
+    gioDisconnectResource(brl->gioEndpoint);
+    brl->gioEndpoint = NULL;
+  }
+}
+
+size_t
+readBraillePacket (
+  BrailleDisplay *brl,
+  GioEndpoint *endpoint,
+  void *packet, size_t size,
+  BraillePacketVerifier *verifyPacket, void *data
+) {
+  unsigned char *bytes = packet;
+  size_t count = 0;
+  size_t length = 1;
+
+  if (!endpoint) endpoint = brl->gioEndpoint;
+
+  while (1) {
+    unsigned char byte;
+
+    {
+      int started = count > 0;
+
+      if (!gioReadByte(endpoint, &byte, started)) {
+        if (started) logPartialPacket(bytes, count);
+        return 0;
+      }
+    }
+
+  gotByte:
+    if (count < size) {
+      bytes[count++] = byte;
+
+      {
+        BraillePacketVerifierResult result = verifyPacket(brl, bytes, count, &length, data);
+
+        switch (result) {
+          case BRL_PVR_EXCLUDE:
+            count -= 1;
+          case BRL_PVR_INCLUDE:
+            break;
+
+          default:
+            logMessage(LOG_WARNING, "unimplemented braille packet verifier result: %u", result);
+          case BRL_PVR_INVALID:
+            if (--count) {
+              logShortPacket(bytes, count);
+              count = 0;
+              length = 1;
+              goto gotByte;
+            }
+
+            logIgnoredByte(byte);
+            continue;
+        }
+      }
+
+      if (count >= length) {
+        logInputPacket(bytes, length);
+        return length;
+      }
+    } else {
+      if (count++ == size) logTruncatedPacket(bytes, size);
+      logDiscardedByte(byte);
+    }
+  }
+}
+
+int
 writeBraillePacket (
   BrailleDisplay *brl, GioEndpoint *endpoint,
   const void *packet, size_t size
 ) {
+  if (!endpoint) endpoint = brl->gioEndpoint;
   logOutputPacket(packet, size);
   if (gioWriteData(endpoint, packet, size) == -1) return 0;
   brl->writeDelay += gioGetMillisecondsToTransfer(endpoint, size);
@@ -551,6 +651,8 @@ probeBrailleDisplay (
   BrailleResponseHandler *handleResponse
 ) {
   unsigned int retryCount = 0;
+
+  if (!endpoint) endpoint = brl->gioEndpoint;
 
   while (writeRequest(brl)) {
     drainBrailleOutput(brl, 0);
