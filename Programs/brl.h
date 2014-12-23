@@ -96,6 +96,8 @@ extern int enqueueXtScanCode (
 extern int readBrailleCommand (BrailleDisplay *, KeyTableCommandContext);
 extern KeyTableCommandContext getCurrentCommandContext (void);
 
+extern int awaitBrailleInput (BrailleDisplay *brl, int timeout);
+
 typedef int BrailleSessionInitializer (BrailleDisplay *brl);
 
 extern int connectBrailleResource (

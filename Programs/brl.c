@@ -533,6 +533,11 @@ readBrailleCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 }
 
 int
+awaitBrailleInput (BrailleDisplay *brl, int timeout) {
+  return gioAwaitInput(brl->gioEndpoint, timeout);
+}
+
+int
 connectBrailleResource (
   BrailleDisplay *brl,
   const char *identifier,
