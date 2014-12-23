@@ -1409,7 +1409,7 @@ probeBaumDisplay (BrailleDisplay *brl) {
     /* the modular models need to be probed with a general call */
     if (!writeBaumModuleRegistrationCommand(brl, 0, 0, BAUM_MRC_Query)) break;
 
-    while (gioAwaitInput(brl->gioEndpoint, probeTimeout)) {
+    while (awaitBrailleInput(brl, probeTimeout)) {
       BaumResponsePacket response;
       int size = getBaumPacket(brl, &response);
 
@@ -1855,7 +1855,7 @@ probeHandyTechDisplay (BrailleDisplay *brl) {
   int probes = 0;
   static const unsigned char request[] = {HT_REQ_RESET};
   while (writeHandyTechPacket(brl, request, sizeof(request))) {
-    while (gioAwaitInput(brl->gioEndpoint, probeTimeout)) {
+    while (awaitBrailleInput(brl, probeTimeout)) {
       HandyTechResponsePacket response;
       if (getHandyTechPacket(brl, &response)) {
         if (response.data.code == HT_RSP_IDENTITY) {
@@ -2108,7 +2108,7 @@ probePowerBrailleDisplay (BrailleDisplay *brl) {
   int probes = 0;
   static const unsigned char request[] = {PB_REQ_RESET};
   while (writePowerBraillePacket(brl, request, sizeof(request))) {
-    while (gioAwaitInput(brl->gioEndpoint, probeTimeout)) {
+    while (awaitBrailleInput(brl, probeTimeout)) {
       PowerBrailleResponsePacket response;
       if (getPowerBraillePacket(brl, &response)) {
         if (response.data.code == PB_RSP_IDENTITY) {

@@ -514,7 +514,7 @@ getIdentity (BrailleDisplay *brl, InputPacket *reply) {
   static const unsigned char request[] = {0xFF, 0xFF, 0x0A};
 
   if (writeBytes(brl, request, sizeof(request))) {
-    if (gioAwaitInput(brl->gioEndpoint, 100)) {
+    if (awaitBrailleInput(brl, 100)) {
       size_t count = readPacket(brl, reply);
 
       if (count > 0) {

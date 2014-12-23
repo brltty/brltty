@@ -255,7 +255,7 @@ startDisplayMode (BrailleDisplay *brl) {
   static const unsigned char data[] = {MM_BLINK_NO, 0};
 
   if (writePacket(brl, MM_CMD_StartDisplayMode, 0, data, sizeof(data))) {
-    if (gioAwaitInput(brl->gioEndpoint, START_INPUT_TIMEOUT)) {
+    if (awaitBrailleInput(brl, START_INPUT_TIMEOUT)) {
       MM_CommandPacket response;
       size_t size = readPacket(brl, &response);
 

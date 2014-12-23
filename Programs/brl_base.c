@@ -167,6 +167,11 @@ applyBrailleDisplayOrientation (unsigned char *cells, size_t count) {
 }
 
 int
+awaitBrailleInput (BrailleDisplay *brl, int timeout) {
+  return gioAwaitInput(brl->gioEndpoint, timeout);
+}
+
+int
 connectBrailleResource (
   BrailleDisplay *brl,
   const char *identifier,

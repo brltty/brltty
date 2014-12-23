@@ -63,7 +63,7 @@ updateWriteDelay (BrailleDisplay *brl, size_t count) {
 
 static int
 awaitInput_generic (BrailleDisplay *brl, int timeout) {
-  return gioAwaitInput(brl->gioEndpoint, timeout);
+  return awaitBrailleInput(brl, timeout);
 }
 
 static int

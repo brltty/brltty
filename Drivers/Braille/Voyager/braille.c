@@ -373,7 +373,7 @@ nextSerialPacket (BrailleDisplay *brl, unsigned char code, unsigned char *buffer
   int length;
 
   if (wait)
-    if (!gioAwaitInput(brl->gioEndpoint, SERIAL_WAIT_TIMEOUT))
+    if (!awaitBrailleInput(brl, SERIAL_WAIT_TIMEOUT))
       return 0;
 
   while ((length = readSerialPacket(brl, buffer, size))) {

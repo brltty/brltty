@@ -1460,7 +1460,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
           /* if we get another byte right away then the device
            * has gone offline and is echoing its display
            */
-          if (gioAwaitInput(brl->gioEndpoint, 10)) {
+          if (awaitBrailleInput(brl, 10)) {
             setState(brl, BDS_OFF);
             continue;
           }

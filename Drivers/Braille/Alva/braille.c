@@ -850,7 +850,7 @@ identifyModel1 (BrailleDisplay *brl, unsigned char identifier) {
 
         if (!writeFunction1(brl, 0X07)) return 0;
 
-        while (gioAwaitInput(brl->gioEndpoint, 200)) {
+        while (awaitBrailleInput(brl, 200)) {
           unsigned char packet[MAXIMUM_PACKET_SIZE];
           int count = protocol->readPacket(brl, packet, sizeof(packet));
 
@@ -958,7 +958,7 @@ detectModel1 (BrailleDisplay *brl) {
   int probes = 0;
 
   while (writeFunction1(brl, 0X06)) {
-    while (gioAwaitInput(brl->gioEndpoint, 200)) {
+    while (awaitBrailleInput(brl, 200)) {
       unsigned char packet[MAXIMUM_PACKET_SIZE];
 
       if (protocol->readPacket(brl, packet, sizeof(packet)) > 0) {
@@ -1401,7 +1401,7 @@ getFeature2s (BrailleDisplay *brl, unsigned char feature, unsigned char *respons
   const unsigned char request[] = {ESC, feature, 0X3F};
 
   if (protocol->setFeature(brl, request, sizeof(request))) {
-    while (gioAwaitInput(brl->gioEndpoint, 1000)) {
+    while (awaitBrailleInput(brl, 1000)) {
       int length = protocol->readPacket(brl, response, size);
 
       if (length <= 0) break;

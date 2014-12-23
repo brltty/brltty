@@ -200,7 +200,7 @@ refreshCells (BrailleDisplay *brl) {
 static unsigned char
 getByte (BrailleDisplay *brl) {
   unsigned char byte;
-  while (!gioAwaitInput(brl->gioEndpoint, 1000000000));
+  while (!awaitBrailleInput(brl, 1000000000));
   gioReadByte(brl->gioEndpoint, &byte, 0);
   return byte;
 }
