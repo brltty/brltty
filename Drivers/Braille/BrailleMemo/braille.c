@@ -420,7 +420,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             const KeyTableDefinition *ktd = brl->data->model->keyTableDefinition;
 
             brl->keyBindings = ktd->bindings;
-            brl->keyNames = ktd->names;
+            brl->keyNameTables = ktd->names;
           }
 
           {
@@ -483,7 +483,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
           switch (packet.fields.data.keys.group) {
             case MM_GRP_SHIFT:
               if (!packet.fields.data.keys.value) {
-                enqueueKeys(brl, packet.fields.data.keys.shift, MM_GRP_SHIFT, 0);
+                enqueueKeys(packet.fields.data.keys.shift, MM_GRP_SHIFT, 0);
                 continue;
               }
               break;
@@ -495,9 +495,9 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
             {
               KeyNumberSet shift = 0;
 
-              enqueueUpdatedKeys(brl, packet.fields.data.keys.shift, &shift, MM_GRP_SHIFT, 0);
-              enqueueKeys(brl, packet.fields.data.keys.value, packet.fields.data.keys.group, 0);
-              enqueueUpdatedKeys(brl, 0, &shift, MM_GRP_SHIFT, 0);
+              enqueueUpdatedKeys(packet.fields.data.keys.shift, &shift, MM_GRP_SHIFT, 0);
+              enqueueKeys(packet.fields.data.keys.value, packet.fields.data.keys.group, 0);
+              enqueueUpdatedKeys(0, &shift, MM_GRP_SHIFT, 0);
               continue;
             }
 
@@ -508,9 +508,9 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
               if ((key > 0) && (key <= brl->textColumns)) {
                 KeyNumberSet shift = 0;
 
-                enqueueUpdatedKeys(brl, packet.fields.data.keys.shift, &shift, MM_GRP_SHIFT, 0);
-                enqueueKey(brl, packet.fields.data.keys.group, key-1);
-                enqueueUpdatedKeys(brl, 0, &shift, MM_GRP_SHIFT, 0);
+                enqueueUpdatedKeys(packet.fields.data.keys.shift, &shift, MM_GRP_SHIFT, 0);
+                enqueueKey(packet.fields.data.keys.group, key-1);
+                enqueueUpdatedKeys(0, &shift, MM_GRP_SHIFT, 0);
                 continue;
               }
 
