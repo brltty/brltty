@@ -260,6 +260,7 @@ static int
 readByte (unsigned char *byte) {
   int received = io->readBytes(byte, 1, 0);
   if (received == -1) logSystemError("Albatross read");
+  if (!received) errno = EAGAIN;
   return received == 1;
 }
 
@@ -445,11 +446,12 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       int count = 0;
       unsigned char byte;
 
-      startTimePeriod(&period, 5);
+      startTimePeriod(&period, 1000);
       charactersPerSecond = *baud / 10;
       controlKey = NO_CONTROL_KEY;
 
-      logMessage(LOG_DEBUG, "trying Albatross at %u baud.", *baud);
+      logMessage(LOG_DEBUG, "trying Albatross at %u baud", *baud);
+
       while (awaitByte(&byte)) {
         if (byte == 0XFF) {
           if (!acknowledgeDisplay(brl)) break;
@@ -458,6 +460,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             static const DotsTable dots = {
               0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01
             };
+
             makeOutputTable(dots);
           }
 
@@ -467,6 +470,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
           {
             const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+
             brl->keyBindings = ktd->bindings;
             brl->keyNames = ktd->names;
           }
