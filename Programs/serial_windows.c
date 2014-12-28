@@ -334,13 +334,13 @@ serialGetData (
       return -1;
     }
 
-    if (!bytesRead)
-      return 0;
+    if (!bytesRead) return 0;
   }
 
   size -= bytesRead;
   length += bytesRead;
   timeouts.ReadTotalTimeoutConstant = subsequentTimeout;
+
   if (!(SetCommTimeouts(serial->package.fileHandle, &timeouts))) {
     logWindowsSystemError("SetCommTimeouts serialReadChunk2");
     setSystemErrno();
@@ -348,9 +348,7 @@ serialGetData (
   }
 
   while (size && ReadFile(serial->package.fileHandle, buffer + length, size, &bytesRead, NULL)) {
-    if (!bytesRead)
-      return length;
-
+    if (!bytesRead) return length;
     size -= bytesRead;
     length += bytesRead;
   }
