@@ -53,6 +53,7 @@ serialGetBaudEntry (unsigned int baud) {
     entry += 1;
   }
 
+  logMessage(LOG_WARNING, "undefined serial baud: %u", baud);
   return NULL;
 }
 
@@ -64,10 +65,10 @@ serialInitializeAttributes (SerialAttributes *attributes) {
   {
     const SerialBaudEntry *entry = serialGetBaudEntry(SERIAL_DEFAULT_BAUD);
 
-    if (!entry) {
-      logMessage(LOG_WARNING, "default serial baud not defined: %u", SERIAL_DEFAULT_BAUD);
-    } else if (!serialPutSpeed(attributes, entry->speed)) {
-      logMessage(LOG_WARNING, "default serial baud not supported: %u", SERIAL_DEFAULT_BAUD);
+    if (entry) {
+      if (!serialPutSpeed(attributes, entry->speed)) {
+        logMessage(LOG_WARNING, "default serial baud not supported: %u", SERIAL_DEFAULT_BAUD);
+      }
     }
   }
 
@@ -102,14 +103,8 @@ serialSetBaud (SerialDevice *serial, unsigned int baud) {
 
   if (entry) {
     logMessage(LOG_CATEGORY(SERIAL_IO), "set baud: %u", baud);
-
-    if (serialPutSpeed(&serial->pendingAttributes, entry->speed)) {
-      return 1;
-    } else {
-      logMessage(LOG_WARNING, "unsupported serial baud: %d", baud);
-    }
-  } else {
-    logMessage(LOG_WARNING, "undefined serial baud: %d", baud);
+    if (serialPutSpeed(&serial->pendingAttributes, entry->speed)) return 1;
+    logMessage(LOG_WARNING, "unsupported serial baud: %u", baud);
   }
 
   return 0;
@@ -142,27 +137,27 @@ serialValidateBaud (unsigned int *baud, const char *description, const char *wor
 int
 serialSetDataBits (SerialDevice *serial, unsigned int bits) {
   logMessage(LOG_CATEGORY(SERIAL_IO), "set data bits: %u", bits);
-
   if (serialPutDataBits(&serial->pendingAttributes, bits)) return 1;
-  logMessage(LOG_WARNING, "unsupported serial data bit count: %d", bits);
+
+  logMessage(LOG_WARNING, "unsupported serial data bit count: %u", bits);
   return 0;
 }
 
 int
 serialSetStopBits (SerialDevice *serial, SerialStopBits bits) {
   logMessage(LOG_CATEGORY(SERIAL_IO), "set stop bits: %u", bits);
-
   if (serialPutStopBits(&serial->pendingAttributes, bits)) return 1;
-  logMessage(LOG_WARNING, "unsupported serial stop bit count: %d", bits);
+
+  logMessage(LOG_WARNING, "unsupported serial stop bit count: %u", bits);
   return 0;
 }
 
 int
 serialSetParity (SerialDevice *serial, SerialParity parity) {
   logMessage(LOG_CATEGORY(SERIAL_IO), "set parity: %u", parity);
-
   if (serialPutParity(&serial->pendingAttributes, parity)) return 1;
-  logMessage(LOG_WARNING, "unsupported serial parity: %d", parity);
+
+  logMessage(LOG_WARNING, "unsupported serial parity: %u", parity);
   return 0;
 }
 
@@ -358,7 +353,16 @@ serialReadData (
   int initialTimeout, int subsequentTimeout
 ) {
   if (!serialFlushAttributes(serial)) return -1;
-  return serialGetData(serial, buffer, size, initialTimeout, subsequentTimeout);
+
+  {
+    ssize_t result = serialGetData(serial, buffer, size, initialTimeout, subsequentTimeout);
+
+    if (result > 0) {
+      logBytes(LOG_CATEGORY(SERIAL_IO), "input", buffer, result);
+    }
+
+    return result;
+  }
 }
 
 int
@@ -393,6 +397,10 @@ serialReadChunk (
     timeout = subsequentTimeout;
   }
 
+  if (byte > first) {
+    logBytes(LOG_CATEGORY(SERIAL_IO), "input", first, (byte - first));
+  }
+
   return 1;
 }
 
@@ -402,6 +410,7 @@ serialWriteData (
   const void *data, size_t size
 ) {
   if (!serialFlushAttributes(serial)) return -1;
+  if (size > 0) logBytes(LOG_CATEGORY(SERIAL_IO), "output", data, size);
   return serialPutData(serial, data, size);
 }
 
