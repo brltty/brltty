@@ -122,14 +122,14 @@ fmTestCard (int errorLevel) {
   return 0;
 }
 
-void
+static void
 AL_evaluatePitch (int pitch, int *exponent, int *mantissa) {
   int shift = 21;
   while ((*mantissa = (int)((float)pitch * (1 << --shift) / 50000.0)) > 0X3FF);
   *exponent = 20 - shift;
 }
 
-void
+static void
 AL_initiateTone (int channel, int exponent, int mantissa) {
   /* logMessage(LOG_DEBUG, "AL_initiateTone: %1.1X[%3.3X]", exponent, mantissa); */
   AL_writeRegister(ALR_FREQUENCY_LSB(channel),

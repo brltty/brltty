@@ -465,7 +465,7 @@ newVolumeMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
 #endif /* defined(HAVE_PCM_SUPPORT) || defined(HAVE_MIDI_SUPPORT) || defined(HAVE_FM_SUPPORT) */
 
 #ifdef HAVE_MIDI_SUPPORT
-MenuString *
+static MenuString *
 makeMidiInstrumentMenuStrings (void) {
   MenuString *strings = malloc(midiInstrumentCount * sizeof(*strings));
 

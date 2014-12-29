@@ -1255,7 +1255,7 @@ makeProgramBanner (char *buffer, size_t size) {
            (*revision? " rev ": ""), revision);
 }
 
-void
+static void
 initializeBrailleDisplay (void) {
   constructBrailleDisplay(&brl);
   brl.bufferResized = &windowConfigurationChanged;
@@ -1705,7 +1705,7 @@ beginAutospeakDelay (int duration) {
   }
 }
 
-void
+static void
 initializeSpeechSynthesizer (void) {
   constructSpeechSynthesizer(&spk);
 }

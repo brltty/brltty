@@ -134,7 +134,7 @@ translateInputCell (unsigned char cell) {
   return translateCell(inputTable, cell);
 }
 
-void
+static void
 applyBrailleDisplayOrientation (unsigned char *cells, size_t count) {
   switch (prefs.brailleDisplayOrientation) {
     case BRL_ORIENTATION_ROTATED: {

@@ -108,7 +108,7 @@ END_OPTION_TABLE
  * error handling
  */
 
-void fatal_brlapi_errno(const char *msg, const char *fmt, ...) {
+static void fatal_brlapi_errno(const char *msg, const char *fmt, ...) {
   brlapi_perror(msg);
   if (fmt) {
     va_list va;
@@ -119,7 +119,7 @@ void fatal_brlapi_errno(const char *msg, const char *fmt, ...) {
   exit(PROG_EXIT_FATAL);
 }
 
-void fatal_errno(const char *msg, const char *fmt, ...) {
+static void fatal_errno(const char *msg, const char *fmt, ...) {
   perror(msg);
   if (fmt) {
     va_list va;
@@ -130,7 +130,7 @@ void fatal_errno(const char *msg, const char *fmt, ...) {
   exit(PROG_EXIT_FATAL);
 }
 
-void fatal(const char *fmt, ...) {
+static void fatal(const char *fmt, ...) {
   if (fmt) {
     va_list va;
     va_start(va,fmt);
@@ -151,12 +151,12 @@ void fatal(const char *fmt, ...) {
 
 static int brlapi_fd;
 
-void api_cleanExit(int foo) {
+static void api_cleanExit(int foo) {
   close(brlapi_fd);
   exit(PROG_EXIT_SUCCESS);
 }
 
-void tobrltty_init(char *auth, char *host) {
+static void tobrltty_init(char *auth, char *host) {
   brlapi_connectionSettings_t settings;
   unsigned int x,y;
   settings.host=host;
@@ -183,7 +183,7 @@ void tobrltty_init(char *auth, char *host) {
 
 static int getXVTnb(void);
 
-void getVT(void) {
+static void getVT(void) {
   char *path = getenv("WINDOWPATH");
   int vtno = -1;
   if (!path)
@@ -220,7 +220,7 @@ void getVT(void) {
 #endif /* CAN_SIMULATE_KEY_PRESSES */
 }
 
-void api_setName(const char *wm_name) {
+static void api_setName(const char *wm_name) {
   static char *last_name;
 
   debugf("%s got focus\n",wm_name);
@@ -236,7 +236,7 @@ void api_setName(const char *wm_name) {
   }
 }
 
-void api_setFocus(int win) {
+static void api_setFocus(int win) {
   debugf("%#010x (%d) got focus\n",win,win);
   if (brlapi_setFocus(win)<0)
     fatal_brlapi_errno("setFocus",gettext("cannot set focus to %#010x\n"),win);
@@ -503,7 +503,7 @@ static void ignoreServerKeys(void) {
 }
 #endif /* CAN_SIMULATE_KEY_PRESSES */
 
-void toX_f(const char *display) {
+static void toX_f(const char *display) {
   Window root;
   XEvent ev;
   int i;

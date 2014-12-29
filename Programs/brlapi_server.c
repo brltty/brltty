@@ -416,7 +416,7 @@ static void writeKey(FileDescriptor fd, brlapi_keyCode_t key) {
 
 /* Function: resetPacket */
 /* Resets a Packet structure */
-void resetPacket(Packet *packet)
+static void resetPacket(Packet *packet)
 {
 #ifdef __MINGW32__
   packet->state = READY;
@@ -434,7 +434,7 @@ void resetPacket(Packet *packet)
 /* Function: initializePacket */
 /* Prepares a Packet structure */
 /* returns 0 on success, -1 on failure */
-int initializePacket(Packet *packet)
+static int initializePacket(Packet *packet)
 {
 #ifdef __MINGW32__
   memset(&packet->overl,0,sizeof(packet->overl));
@@ -451,7 +451,7 @@ int initializePacket(Packet *packet)
 /* Reads a packet for the given connection */
 /* Returns -2 on EOF, -1 on error, 0 if the reading is not complete, */
 /* 1 if the packet has been read. */
-int readPacket(Connection *c)
+static int readPacket(Connection *c)
 {
   Packet *packet = &c->packet;
 #ifdef __MINGW32__
@@ -548,7 +548,7 @@ typedef struct { /* packet handlers */
 /* Allocates and initializes the members of a BrailleWindow structure */
 /* Uses displaySize to determine size of allocated buffers */
 /* Returns to report success, -1 on errors */
-int allocBrailleWindow(BrailleWindow *brailleWindow)
+static int allocBrailleWindow(BrailleWindow *brailleWindow)
 {
   if (!(brailleWindow->text = malloc(displaySize*sizeof(wchar_t)))) goto out;
   if (!(brailleWindow->andAttr = malloc(displaySize))) goto outText;
@@ -572,7 +572,7 @@ out:
 
 /* Function: freeBrailleWindow */
 /* Frees the fields of a BrailleWindow structure */
-void freeBrailleWindow(BrailleWindow *brailleWindow)
+static void freeBrailleWindow(BrailleWindow *brailleWindow)
 {
   free(brailleWindow->text); brailleWindow->text = NULL;
   free(brailleWindow->andAttr); brailleWindow->andAttr = NULL;
@@ -582,7 +582,7 @@ void freeBrailleWindow(BrailleWindow *brailleWindow)
 /* Function: copyBrailleWindow */
 /* Copies a BrailleWindow structure in another one */
 /* No allocation is performed */
-void copyBrailleWindow(BrailleWindow *dest, const BrailleWindow *src)
+static void copyBrailleWindow(BrailleWindow *dest, const BrailleWindow *src)
 {
   dest->cursor = src->cursor;
   memcpy(dest->text, src->text, displaySize*sizeof(wchar_t));
@@ -593,7 +593,7 @@ void copyBrailleWindow(BrailleWindow *dest, const BrailleWindow *src)
 /* Function: getDots */
 /* Returns the braille dots corresponding to a BrailleWindow structure */
 /* No allocation of buf is performed */
-void getDots(const BrailleWindow *brailleWindow, unsigned char *buf)
+static void getDots(const BrailleWindow *brailleWindow, unsigned char *buf)
 {
   int i;
   unsigned char c;
