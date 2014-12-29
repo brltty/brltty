@@ -45,9 +45,11 @@ extern "C" {
  *     7  8     6  7    100  200
  */
 
+typedef unsigned char BrlDots;
+
 #define BRL_DOT_COUNT 8
 
-#define BRL_DOT(number) (1 << ((number) - 1))
+#define BRL_DOT(number) (BrlDots)(1 << ((number) - 1))
 #define BRL_DOT_1 BRL_DOT(1) /* upper-left dot of standard braille cell */
 #define BRL_DOT_2 BRL_DOT(2) /* middle-left dot of standard braille cell */
 #define BRL_DOT_3 BRL_DOT(3) /* lower-left dot of standard braille cell */
@@ -57,15 +59,13 @@ extern "C" {
 #define BRL_DOT_7 BRL_DOT(7) /* lower-left dot of computer braille cell */
 #define BRL_DOT_8 BRL_DOT(8) /* lower-right dot of computer braille cell */
 
-typedef unsigned char BrlDots;
-
 static inline BrlDots brlNumberToDot (char number) {
   return ((number >= '1') && (number <= '8'))? BRL_DOT(number - '0'): 0;
 }
 
 static inline char brlDotToNumber (BrlDots dot) {
   int shift = ffs(dot);
-  return shift? (shift + '0'): 0;
+  return shift? ((char)shift + '0'): 0;
 }
 
 typedef BrlDots BrlDotTable[BRL_DOT_COUNT];
@@ -77,10 +77,10 @@ static inline unsigned int brlDotsToNumbers (BrlDots dots, BrlDotNumbersBuffer n
   while (dots) {
     int shift = ffs(dots) - 1;
     dots -= 1 << shift;
-    *number++ = shift + '1';
+    *number++ = (char)shift + '1';
   }
   *number = 0;
-  return number - numbers;
+  return (unsigned int)(number - numbers);
 }
 
 /* The Unicode row used for literal braille dot representations. */
