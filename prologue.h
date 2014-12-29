@@ -25,11 +25,11 @@ extern "C" {
 
 #define PACKAGE_COPYRIGHT "Copyright (C) 1995-2014 by The BRLTTY Developers."
 
-#define _CONCATENATE(a,b) a##b
-#define CONCATENATE(a,b) _CONCATENATE(a,b)
+#define CONCATENATE_1(a,b) a##b
+#define CONCATENATE(a,b) CONCATENATE_1(a,b)
 
-#define _STRINGIFY(a) #a
-#define STRINGIFY(a) _STRINGIFY(a)
+#define STRINGIFY_1(a) #a
+#define STRINGIFY(a) STRINGIFY_1(a)
 
 #define MIN(a, b)  (((a) < (b))? (a): (b)) 
 #define MAX(a, b)  (((a) > (b))? (a): (b)) 
