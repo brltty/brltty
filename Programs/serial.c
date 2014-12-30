@@ -268,16 +268,20 @@ serialGetCharacterBits (SerialDevice *serial) {
 
 int
 serialDiscardInput (SerialDevice *serial) {
+  logMessage(LOG_CATEGORY(SERIAL_IO), "discard input");
   return serialCancelInput(serial);
 }
 
 int
 serialDiscardOutput (SerialDevice *serial) {
+  logMessage(LOG_CATEGORY(SERIAL_IO), "discard output");
   return serialCancelOutput(serial);
 }
 
 int
 serialFlushOutput (SerialDevice *serial) {
+  logMessage(LOG_CATEGORY(SERIAL_IO), "flush output");
+
   if (serial->stream) {
     if (fflush(serial->stream) == EOF) {
       logSystemError("fflush");
@@ -313,6 +317,7 @@ static int
 serialWriteAttributes (SerialDevice *serial, const SerialAttributes *attributes) {
   if (!serialCompareAttributes(attributes, &serial->currentAttributes)) {
     if (!serialAwaitOutput(serial)) return 0;
+    logBytes(LOG_CATEGORY(SERIAL_IO), "attributes", attributes, sizeof(*attributes));
     if (!serialPutAttributes(serial, attributes)) return 0;
     serialCopyAttributes(&serial->currentAttributes, attributes);
   }
