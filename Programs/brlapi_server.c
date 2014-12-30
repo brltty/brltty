@@ -579,17 +579,6 @@ static void freeBrailleWindow(BrailleWindow *brailleWindow)
   free(brailleWindow->orAttr); brailleWindow->orAttr = NULL;
 }
 
-/* Function: copyBrailleWindow */
-/* Copies a BrailleWindow structure in another one */
-/* No allocation is performed */
-static void copyBrailleWindow(BrailleWindow *dest, const BrailleWindow *src)
-{
-  dest->cursor = src->cursor;
-  memcpy(dest->text, src->text, displaySize*sizeof(wchar_t));
-  memcpy(dest->andAttr, src->andAttr, displaySize);
-  memcpy(dest->orAttr, src->orAttr, displaySize);
-}
-
 /* Function: getDots */
 /* Returns the braille dots corresponding to a BrailleWindow structure */
 /* No allocation of buf is performed */
