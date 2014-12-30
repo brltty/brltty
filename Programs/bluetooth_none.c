@@ -72,7 +72,7 @@ bthAwaitInput (BluetoothConnection *connection, int milliseconds) {
 }
 
 ssize_t
-bthReadData (
+bthGetData (
   BluetoothConnection *connection, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
@@ -81,7 +81,7 @@ bthReadData (
 }
 
 ssize_t
-bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) {
+bthPutData (BluetoothConnection *connection, const void *buffer, size_t size) {
   logUnsupportedFunction();
   return -1;
 }

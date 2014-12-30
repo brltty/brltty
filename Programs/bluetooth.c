@@ -371,6 +371,23 @@ bthCloseConnection (BluetoothConnection *connection) {
   free(connection);
 }
 
+ssize_t
+bthReadData (
+  BluetoothConnection *connection, void *buffer, size_t size,
+  int initialTimeout, int subsequentTimeout
+) {
+  ssize_t result = bthGetData(connection, buffer, size, initialTimeout, subsequentTimeout);
+
+  if (result > 0) logBytes(LOG_CATEGORY(BLUETOOTH_IO), "input", buffer, result);
+  return result;
+}
+
+ssize_t
+bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) {
+  if (size > 0) logBytes(LOG_CATEGORY(BLUETOOTH_IO), "output", buffer, size);
+  return bthPutData(connection, buffer, size);
+}
+
 static char *
 bthGetDeviceName (uint64_t bda, int timeout) {
   BluetoothDeviceEntry *entry = bthGetDeviceEntry(bda, 1);

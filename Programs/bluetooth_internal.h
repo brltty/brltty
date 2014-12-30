@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_BLUETOOTH_INTERNAL
 #define BRLTTY_INCLUDED_BLUETOOTH_INTERNAL
 
+#include "io_bluetooth.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -31,6 +33,13 @@ typedef struct BluetoothConnectionExtensionStruct BluetoothConnectionExtension;
 
 extern BluetoothConnectionExtension *bthNewConnectionExtension (uint64_t bda);
 extern void bthReleaseConnectionExtension (BluetoothConnectionExtension *bcx);
+
+extern ssize_t bthGetData (
+  BluetoothConnection *connection, void *buffer, size_t size,
+  int initialTimeout, int subsequentTimeout
+);
+
+extern ssize_t bthPutData (BluetoothConnection *connection, const void *buffer, size_t size);
 
 extern int bthDiscoverChannel (
   uint8_t *channel, BluetoothConnectionExtension *bcx,

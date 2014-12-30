@@ -49,12 +49,13 @@ extern void bthCloseConnection (BluetoothConnection *connection);
 
 extern int bthMonitorInput (BluetoothConnection *connection, AsyncMonitorCallback *callback, void *data);
 extern int bthAwaitInput (BluetoothConnection *connection, int milliseconds);
+
 extern ssize_t bthReadData (
   BluetoothConnection *connection, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 );
 
-extern ssize_t bthWriteData (BluetoothConnection *conection, const void *buffer, size_t size);
+extern ssize_t bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size);
 
 extern int isBluetoothDevice (const char **identifier);
 
