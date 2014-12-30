@@ -295,19 +295,18 @@ bthMonitorInput (BluetoothConnection *connection, AsyncMonitorCallback *callback
 }
 
 int
-bthAwaitInput (BluetoothConnection *connection, int milliseconds) {
-  BluetoothConnectionExtension *bcx = connection->extension;
+bthPollInput (BluetoothConnectionExtension *bcx, int timeout) {
   fd_set input;
-  TIMEVAL timeout;
+  TIMEVAL time;
 
   FD_ZERO(&input);
   FD_SET(bcx->socket, &input);
 
-  memset(&timeout, 0, sizeof(timeout));
-  timeout.tv_sec = milliseconds / MSECS_PER_SEC;
-  timeout.tv_usec = (milliseconds % MSECS_PER_SEC) * USECS_PER_MSEC;
+  memset(&time, 0, sizeof(time));
+  time.tv_sec = timeout / MSECS_PER_SEC;
+  time.tv_usec = (timeout % MSECS_PER_SEC) * USECS_PER_MSEC;
 
-  switch (select(bcx->socket+1, &input, NULL, NULL, &timeout)) {
+  switch (select(bcx->socket+1, &input, NULL, NULL, &time)) {
     case SOCKET_ERROR:
       bthSocketError("RFCOMM wait", NULL);
       break;
@@ -325,10 +324,9 @@ bthAwaitInput (BluetoothConnection *connection, int milliseconds) {
 
 ssize_t
 bthGetData (
-  BluetoothConnection *connection, void *buffer, size_t size,
+  BluetoothConnectionExtension *bcx, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  BluetoothConnectionExtension *bcx = connection->extension;
   size_t count = size;
 
   if (count) {
@@ -354,7 +352,7 @@ bthGetData (
         int timeout = (to == buffer)? initialTimeout: subsequentTimeout;
 
         if (!timeout) break;
-        if (!bthAwaitInput(connection, timeout)) return -1;
+        if (!bthPollInput(bcx, timeout)) return -1;
       }
     }
   }
@@ -364,8 +362,7 @@ bthGetData (
 }
 
 ssize_t
-bthPutData (BluetoothConnection *connection, const void *buffer, size_t size) {
-  BluetoothConnectionExtension *bcx = connection->extension;
+bthPutData (BluetoothConnectionExtension *bcx, const void *buffer, size_t size) {
   const char *from = buffer;
   size_t count = size;
 

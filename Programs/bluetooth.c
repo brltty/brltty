@@ -371,12 +371,17 @@ bthCloseConnection (BluetoothConnection *connection) {
   free(connection);
 }
 
+int
+bthAwaitInput (BluetoothConnection *connection, int timeout) {
+  return bthPollInput(connection->extension, timeout);
+}
+
 ssize_t
 bthReadData (
   BluetoothConnection *connection, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  ssize_t result = bthGetData(connection, buffer, size, initialTimeout, subsequentTimeout);
+  ssize_t result = bthGetData(connection->extension, buffer, size, initialTimeout, subsequentTimeout);
 
   if (result > 0) logBytes(LOG_CATEGORY(BLUETOOTH_IO), "input", buffer, result);
   return result;
@@ -385,7 +390,7 @@ bthReadData (
 ssize_t
 bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) {
   if (size > 0) logBytes(LOG_CATEGORY(BLUETOOTH_IO), "output", buffer, size);
-  return bthPutData(connection, buffer, size);
+  return bthPutData(connection->extension, buffer, size);
 }
 
 static char *

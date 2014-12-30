@@ -66,14 +66,14 @@ bthMonitorInput (BluetoothConnection *connection, AsyncMonitorCallback *callback
 }
 
 int
-bthAwaitInput (BluetoothConnection *connection, int milliseconds) {
+bthPollInput (BluetoothConnectionExtension *bcx, int timeout) {
   logUnsupportedFunction();
   return 0;
 }
 
 ssize_t
 bthGetData (
-  BluetoothConnection *connection, void *buffer, size_t size,
+  BluetoothConnectionExtension *bcx, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
   logUnsupportedFunction();
@@ -81,7 +81,7 @@ bthGetData (
 }
 
 ssize_t
-bthPutData (BluetoothConnection *connection, const void *buffer, size_t size) {
+bthPutData (BluetoothConnectionExtension *bcx, const void *buffer, size_t size) {
   logUnsupportedFunction();
   return -1;
 }

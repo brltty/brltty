@@ -48,7 +48,7 @@ extern BluetoothConnection *bthOpenConnection (const BluetoothConnectionRequest 
 extern void bthCloseConnection (BluetoothConnection *connection);
 
 extern int bthMonitorInput (BluetoothConnection *connection, AsyncMonitorCallback *callback, void *data);
-extern int bthAwaitInput (BluetoothConnection *connection, int milliseconds);
+extern int bthAwaitInput (BluetoothConnection *connection, int timeout);
 
 extern ssize_t bthReadData (
   BluetoothConnection *connection, void *buffer, size_t size,

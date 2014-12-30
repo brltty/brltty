@@ -427,26 +427,20 @@ bthMonitorInput (BluetoothConnection *connection, AsyncMonitorCallback *callback
 }
 
 int
-bthAwaitInput (BluetoothConnection *connection, int milliseconds) {
-  BluetoothConnectionExtension *bcx = connection->extension;
-
-  return awaitSocketInput(bcx->socketDescriptor, milliseconds);
+bthPollInput (BluetoothConnectionExtension *bcx, int timeout) {
+  return awaitSocketInput(bcx->socketDescriptor, timeout);
 }
 
 ssize_t
 bthGetData (
-  BluetoothConnection *connection, void *buffer, size_t size,
+  BluetoothConnectionExtension *bcx, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  BluetoothConnectionExtension *bcx = connection->extension;
-
   return readSocket(bcx->socketDescriptor, buffer, size, initialTimeout, subsequentTimeout);
 }
 
 ssize_t
-bthPutData (BluetoothConnection *connection, const void *buffer, size_t size) {
-  BluetoothConnectionExtension *bcx = connection->extension;
-
+bthPutData (BluetoothConnectionExtension *bcx, const void *buffer, size_t size) {
   return writeSocket(bcx->socketDescriptor, buffer, size);
 }
 

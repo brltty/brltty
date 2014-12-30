@@ -260,25 +260,20 @@ bthMonitorInput (BluetoothConnection *connection, AsyncMonitorCallback *callback
 }
 
 int
-bthAwaitInput (BluetoothConnection *connection, int milliseconds) {
-  BluetoothConnectionExtension *bcx = connection->extension;
-
-  return awaitFileInput(bcx->inputPipe[0], milliseconds);
+bthPollInput (BluetoothConnectionExtension *bcx, int timeout) {
+  return awaitFileInput(bcx->inputPipe[0], timeout);
 }
 
 ssize_t
 bthGetData (
-  BluetoothConnection *connection, void *buffer, size_t size,
+  BluetoothConnectionExtension *bcx, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  BluetoothConnectionExtension *bcx = connection->extension;
-
   return readFile(bcx->inputPipe[0], buffer, size, initialTimeout, subsequentTimeout);
 }
 
 ssize_t
-bthPutData (BluetoothConnection *connection, const void *buffer, size_t size) {
-  BluetoothConnectionExtension *bcx = connection->extension;
+bthPutData (BluetoothConnectionExtension *bcx, const void *buffer, size_t size) {
   IOReturn result = [bcx->rfcommChannel writeSync:(void *)buffer length:size];
 
   if (result == kIOReturnSuccess) return size;
