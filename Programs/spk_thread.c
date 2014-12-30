@@ -719,12 +719,6 @@ ASYNC_CONDITION_TESTER(testSpeechDriverThreadStopping) {
   return sdt->threadState == THD_STOPPING;
 }
 
-ASYNC_CONDITION_TESTER(testSpeechDriverThreadFinished) {
-  volatile SpeechDriverThread *sdt = data;
-
-  return sdt->threadState == THD_FINISHED;
-}
-
 ASYNC_EVENT_CALLBACK(handleSpeechMessageEvent) {
   volatile SpeechDriverThread *sdt = parameters->eventData;
   SpeechMessage *msg = parameters->signalData;
