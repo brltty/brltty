@@ -777,6 +777,8 @@ serialRestartDevice (SerialDevice *serial, unsigned int baud) {
   SerialFlowControlProc *flowControlProc = serial->pendingFlowControlProc;
 #endif /* HAVE_POSIX_THREADS */
 
+  logMessage(LOG_CATEGORY(SERIAL_IO), "restarting");
+
   if (serial->stream) {
 #if defined(GRUB_RUNTIME)
 #else /* clearerr() */
@@ -838,6 +840,8 @@ serialRestartDevice (SerialDevice *serial, unsigned int baud) {
 
   if (!serialSetBaud(serial, baud)) return 0;
   if (!serialFlushAttributes(serial)) return 0;
+
+  logMessage(LOG_CATEGORY(SERIAL_IO), "restarted");
   return 1;
 }
 
