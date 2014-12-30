@@ -258,10 +258,17 @@ static int statusStart;
 
 static int
 readByte (unsigned char *byte) {
-  int received = io->readBytes(byte, 1, 0);
-  if (received == -1) logSystemError("Albatross read");
-  if (!received) errno = EAGAIN;
-  return received == 1;
+  int result = io->readBytes(byte, 1, 0);
+
+  if (result > 0) {
+    logInputPacket(byte, result);
+  } else if (result == -1) {
+    logSystemError("Albatross read");
+  } else if (!result) {
+    errno = EAGAIN;
+  }
+
+  return result == 1;
 }
 
 static void
@@ -284,6 +291,7 @@ awaitByte (unsigned char *byte) {
 static int
 writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
   brl->writeDelay += (count * 1000 / charactersPerSecond) + 1;
+  logOutputPacket(bytes, count);
   if (io->writeBytes(bytes, count) != -1) return 1;
   logSystemError("Albatross write");
   return 0;
