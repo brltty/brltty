@@ -39,9 +39,14 @@
 BEGIN_KEY_NAME_TABLE(common)
   KEY_NAME_ENTRY(FS_KEY_LeftAdvance, "LeftAdvance"),
   KEY_NAME_ENTRY(FS_KEY_RightAdvance, "RightAdvance"),
-  KEY_NAME_ENTRY(FS_KEY_LeftGdf, "LeftGdf"),
-  KEY_NAME_ENTRY(FS_KEY_RightGdf, "RightGdf"),
+  KEY_NAME_ENTRY(FS_KEY_LeftGdf, "LeftSelector"),
+  KEY_NAME_ENTRY(FS_KEY_RightGdf, "RightSelector"),
 
+  KEY_GROUP_ENTRY(FS_GRP_RoutingKeys, "RoutingKey"),
+  KEY_GROUP_ENTRY(FS_GRP_NavrowKeys, "NavrowKey"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(wheel)
   KEY_NAME_ENTRY(FS_KEY_LeftWheel, "LeftWheelPress"),
   KEY_NAME_ENTRY(FS_KEY_RightWheel, "RightWheelPress"),
 
@@ -49,9 +54,16 @@ BEGIN_KEY_NAME_TABLE(common)
   KEY_NAME_ENTRY(FS_KEY_WHEEL+1, "LeftWheelDown"),
   KEY_NAME_ENTRY(FS_KEY_WHEEL+2, "RightWheelDown"),
   KEY_NAME_ENTRY(FS_KEY_WHEEL+3, "RightWheelUp"),
+END_KEY_NAME_TABLE
 
-  KEY_GROUP_ENTRY(FS_GRP_RoutingKeys, "RoutingKey"),
-  KEY_GROUP_ENTRY(FS_GRP_NavrowKeys, "NavrowKey"),
+BEGIN_KEY_NAME_TABLE(nav)
+  KEY_NAME_ENTRY(FS_KEY_LeftWheel, "LeftNavPress"),
+  KEY_NAME_ENTRY(FS_KEY_RightWheel, "RightNavPress"),
+
+  KEY_NAME_ENTRY(FS_KEY_WHEEL+0, "LeftNavUp"),
+  KEY_NAME_ENTRY(FS_KEY_WHEEL+1, "LeftNavDown"),
+  KEY_NAME_ENTRY(FS_KEY_WHEEL+2, "RightNavDown"),
+  KEY_NAME_ENTRY(FS_KEY_WHEEL+3, "RightNavUp"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(focus)
@@ -96,11 +108,13 @@ END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(focus_basic)
   KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(nav),
   KEY_NAME_TABLE(focus),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(focus_large)
   KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(nav),
   KEY_NAME_TABLE(focus),
   KEY_NAME_TABLE(bumpers),
   KEY_NAME_TABLE(rockers),
@@ -108,12 +122,14 @@ END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(focus_small)
   KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(nav),
   KEY_NAME_TABLE(focus),
   KEY_NAME_TABLE(rockers),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(pacmate)
   KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(wheel),
   KEY_NAME_TABLE(pacmate),
 END_KEY_NAME_TABLES
 
@@ -216,8 +232,8 @@ static const ModelTypeEntry modelTypeTable[] = {
   [MOD_TYPE_Focus] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(focus_basic),
     .hotkeysRow = -1
-  }
-  ,
+  },
+
   [MOD_TYPE_PacMate] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(pacmate),
     .hotkeysRow = 1
@@ -231,57 +247,59 @@ typedef struct {
   unsigned char type;
 } ModelEntry;
 
-static const DotsTable dotsTable_Focus1 = {0X01, 0X02, 0X04, 0X10, 0X20, 0X40, 0X08, 0X80};
+static const DotsTable dotsTable_Focus1 = {
+  0X01, 0X02, 0X04, 0X10, 0X20, 0X40, 0X08, 0X80
+};
 
 static const ModelEntry modelTable[] = {
   { .identifier = "Focus 14",
     .dotsTable = &dotsTable_ISO11548_1,
     .cellCount = 14,
     .type = MOD_TYPE_Focus
-  }
-  ,
+  },
+
   { .identifier = "Focus 40",
     .dotsTable = &dotsTable_ISO11548_1,
     .cellCount = 40,
     .type = MOD_TYPE_Focus
-  }
-  ,
+  },
+
   { .identifier = "Focus 44",
     .dotsTable = &dotsTable_Focus1,
     .cellCount = 44,
     .type = MOD_TYPE_Focus
-  }
-  ,
+  },
+
   { .identifier = "Focus 70",
     .dotsTable = &dotsTable_Focus1,
     .cellCount = 70,
     .type = MOD_TYPE_Focus
-  }
-  ,
+  },
+
   { .identifier = "Focus 80",
     .dotsTable = &dotsTable_ISO11548_1,
     .cellCount = 80,
     .type = MOD_TYPE_Focus
-  }
-  ,
+  },
+
   { .identifier = "Focus 84",
     .dotsTable = &dotsTable_Focus1,
     .cellCount = 84,
     .type = MOD_TYPE_Focus
-  }
-  ,
+  },
+
   { .identifier = "pm display 20",
     .dotsTable = &dotsTable_ISO11548_1,
     .cellCount = 20,
     .type = MOD_TYPE_PacMate
-  }
-  ,
+  },
+
   { .identifier = "pm display 40",
     .dotsTable = &dotsTable_ISO11548_1,
     .cellCount = 40,
     .type = MOD_TYPE_PacMate
-  }
-  ,
+  },
+
   { .identifier = NULL }
 };
 
@@ -701,27 +719,27 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .vendor=0X0F4E, .product=0X0100,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=2, .outputEndpoint=1
-    }
-    ,
+    },
+
     { /* PAC Mate */
       .vendor=0X0F4E, .product=0X0111,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=2, .outputEndpoint=1
-    }
-    ,
+    },
+
     { /* Focus 2 */
       .vendor=0X0F4E, .product=0X0112,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=2, .outputEndpoint=1
-    }
-    ,
+    },
+
     { /* Focus Blue */
       .vendor=0X0F4E, .product=0X0114,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=2, .outputEndpoint=1,
       .disableEndpointReset = 1
-    }
-    ,
+    },
+
     { .vendor=0 }
   };
 

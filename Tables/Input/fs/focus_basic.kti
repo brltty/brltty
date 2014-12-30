@@ -18,6 +18,13 @@
 
 # This key subtable is for all FreedomScientific Focus displays.
 
+note There are two Nav keys - one at each side of the top.
+note * Each has three actions: Up, Down, and Press.
+note * On some models, a Nav key is a wheel which can be both rolled and pressed.
+note * On others, it's an up/down rocker along with a pressable button.
+note On older models, the Selector keys are known as GDF (General Display Function) keys.
+
+assign navKeyType Nav
 include common.kti
 
 assign chord Space+
@@ -45,4 +52,4 @@ bind RightShift+!RoutingKey SWITCHVT
 bind !NavrowKey DESCCHAR
 bind LeftAdvance+!NavrowKey PRINDENT
 bind RightAdvance+!NavrowKey NXINDENT
-bind LeftGdf+!NavrowKey SETLEFT
+bind LeftSelector+!NavrowKey SETLEFT

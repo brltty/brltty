@@ -16,52 +16,52 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-bind LeftWheelPress LNBEG
-bind RightWheelPress LNEND
+bind Left\{navKeyType}Press LNBEG
+bind Right\{navKeyType}Press LNEND
 
-bind LeftGdf BACK
-bind RightGdf HOME
-bind LeftGdf+RightGdf PASTE
+bind LeftSelector BACK
+bind RightSelector HOME
+bind LeftSelector+RightSelector PASTE
 
 bind LeftAdvance FWINLT
 bind RightAdvance FWINRT
 
-bind LeftGdf+LeftAdvance TOP_LEFT
-bind LeftGdf+RightAdvance BOT_LEFT
+bind LeftSelector+LeftAdvance TOP_LEFT
+bind LeftSelector+RightAdvance BOT_LEFT
 
-bind RightGdf+LeftAdvance TOP
-bind RightGdf+RightAdvance BOT
+bind RightSelector+LeftAdvance TOP
+bind RightSelector+RightAdvance BOT
 
-bind !LeftWheelUp LNUP
-bind !LeftWheelDown LNDN
+bind !Left\{navKeyType}Up LNUP
+bind !Left\{navKeyType}Down LNDN
 
-bind !RightWheelUp FWINLT
-bind !RightWheelDown FWINRT
+bind !Right\{navKeyType}Up FWINLT
+bind !Right\{navKeyType}Down FWINRT
 
-bind LeftWheelPress+!LeftWheelUp PRDIFLN
-bind LeftWheelPress+!LeftWheelDown NXDIFLN
+bind Left\{navKeyType}Press+!Left\{navKeyType}Up PRDIFLN
+bind Left\{navKeyType}Press+!Left\{navKeyType}Down NXDIFLN
 
-bind RightWheelPress+!RightWheelUp CHRLT
-bind RightWheelPress+!RightWheelDown CHRRT
+bind Right\{navKeyType}Press+!Right\{navKeyType}Up CHRLT
+bind Right\{navKeyType}Press+!Right\{navKeyType}Down CHRRT
 
-bind LeftAdvance+!LeftWheelUp PRPROMPT
-bind LeftAdvance+!LeftWheelDown NXPROMPT
+bind LeftAdvance+!Left\{navKeyType}Up PRPROMPT
+bind LeftAdvance+!Left\{navKeyType}Down NXPROMPT
 
-bind RightAdvance+!LeftWheelUp PRPGRPH
-bind RightAdvance+!LeftWheelDown NXPGRPH
+bind RightAdvance+!Left\{navKeyType}Up PRPGRPH
+bind RightAdvance+!Left\{navKeyType}Down NXPGRPH
 
-bind LeftGdf+!LeftWheelUp ATTRUP
-bind LeftGdf+!LeftWheelDown ATTRDN
+bind LeftSelector+!Left\{navKeyType}Up ATTRUP
+bind LeftSelector+!Left\{navKeyType}Down ATTRDN
 
-bind RightGdf+!LeftWheelUp PRSEARCH
-bind RightGdf+!LeftWheelDown NXSEARCH
+bind RightSelector+!Left\{navKeyType}Up PRSEARCH
+bind RightSelector+!Left\{navKeyType}Down NXSEARCH
 
 bind RoutingKey ROUTE
-bind LeftWheelPress+!RoutingKey SETLEFT
-bind RightWheelPress+!RoutingKey DESCCHAR
+bind Left\{navKeyType}Press+!RoutingKey SETLEFT
+bind Right\{navKeyType}Press+!RoutingKey DESCCHAR
 
 bind RoutingKey+!RoutingKey CLIP_COPY
 bind LeftAdvance+!RoutingKey CLIP_NEW
 bind RightAdvance+!RoutingKey COPY_RECT
-bind LeftGdf+!RoutingKey CLIP_ADD
-bind RightGdf+!RoutingKey COPY_LINE
+bind LeftSelector+!RoutingKey CLIP_ADD
+bind RightSelector+!RoutingKey COPY_LINE
