@@ -326,15 +326,16 @@ typedef enum {
  *     3  6     2  5    004  040
  *     7  8     6  7    100  200
  */
-#define BRL_DOT1 BRL_ARG_SET(BRL_DOT(1)) /* upper-left dot of standard braille cell */
-#define BRL_DOT2 BRL_ARG_SET(BRL_DOT(2)) /* middle-left dot of standard braille cell */
-#define BRL_DOT3 BRL_ARG_SET(BRL_DOT(3)) /* lower-left dot of standard braille cell */
-#define BRL_DOT4 BRL_ARG_SET(BRL_DOT(4)) /* upper-right dot of standard braille cell */
-#define BRL_DOT5 BRL_ARG_SET(BRL_DOT(5)) /* middle-right dot of standard braille cell */
-#define BRL_DOT6 BRL_ARG_SET(BRL_DOT(6)) /* lower-right dot of standard braille cell */
-#define BRL_DOT7 BRL_ARG_SET(BRL_DOT(7)) /* lower-left dot of computer braille cell */
-#define BRL_DOT8 BRL_ARG_SET(BRL_DOT(8)) /* lower-right dot of computer braille cell */
-#define BRL_DOTC BRL_ARG_SET(BRL_DOT(9)) /* space key pressed */
+#define BRL_ARG_DOT(n) BRL_ARG_SET(1 << ((n) - 1))
+#define BRL_DOT1 BRL_ARG_DOT(1) /* upper-left dot of standard braille cell */
+#define BRL_DOT2 BRL_ARG_DOT(2) /* middle-left dot of standard braille cell */
+#define BRL_DOT3 BRL_ARG_DOT(3) /* lower-left dot of standard braille cell */
+#define BRL_DOT4 BRL_ARG_DOT(4) /* upper-right dot of standard braille cell */
+#define BRL_DOT5 BRL_ARG_DOT(5) /* middle-right dot of standard braille cell */
+#define BRL_DOT6 BRL_ARG_DOT(6) /* lower-right dot of standard braille cell */
+#define BRL_DOT7 BRL_ARG_DOT(7) /* lower-left dot of computer braille cell */
+#define BRL_DOT8 BRL_ARG_DOT(8) /* lower-right dot of computer braille cell */
+#define BRL_DOTC BRL_ARG_DOT(9) /* space key pressed */
 
 #ifdef __cplusplus
 }
