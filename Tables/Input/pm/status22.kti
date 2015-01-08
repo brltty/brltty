@@ -25,52 +25,52 @@ bind !Status.3 CSRJMP_VERT
 bind !Status.4 INFO
 bind !Status.5 BACK
 
-bind !Status.6 CSRTRK
-bind \{toggleOff}+!Status.6 CSRTRK+off
-bind \{toggleOn}+!Status.6 CSRTRK+on
+assign toggleKeys Status.6
+assign toggleCommand CSRTRK
+include ../toggle.kti
 
-bind !Status.7 DISPMD
-bind \{toggleOff}+!Status.7 DISPMD+off
-bind \{toggleOn}+!Status.7 DISPMD+on
+assign toggleKeys Status.7
+assign toggleCommand DISPMD
+include ../toggle.kti
 
-bind !Status.8 FREEZE
-bind \{toggleOff}+!Status.8 FREEZE+off
-bind \{toggleOn}+!Status.8 FREEZE+on
+assign toggleKeys Status.8
+assign toggleCommand FREEZE
+include ../toggle.kti
 
 bind !Status.9 PREFLOAD
 bind !Status.10 PREFMENU
 bind !Status.11 PREFSAVE
 
-bind !Status.12 CSRVIS
-bind \{toggleOff}+!Status.12 CSRVIS+off
-bind \{toggleOn}+!Status.12 CSRVIS+on
+assign toggleKeys Status.12
+assign toggleCommand CSRVIS
+include ../toggle.kti
 
-bind !Status.13 ATTRVIS
-bind \{toggleOff}+!Status.13 ATTRVIS+off
-bind \{toggleOn}+!Status.13 ATTRVIS+on
+assign toggleKeys Status.13
+assign toggleCommand ATTRVIS
+include ../toggle.kti
 
-bind !Status.14 SKPIDLNS
-bind \{toggleOff}+!Status.14 SKPIDLNS+off
-bind \{toggleOn}+!Status.14 SKPIDLNS+on
+assign toggleKeys Status.14
+assign toggleCommand SKPIDLNS
+include ../toggle.kti
 
-bind !Status.15 SIXDOTS
-bind \{toggleOff}+!Status.15 SIXDOTS+off
-bind \{toggleOn}+!Status.15 SIXDOTS+on
+assign toggleKeys Status.15
+assign toggleCommand SIXDOTS
+include ../toggle.kti
 
 bind !Status.16 RESTARTBRL
 bind !Status.17 RESTARTSPEECH
 
-bind !Status.18 AUTOSPEAK
-bind \{toggleOff}+!Status.18 AUTOSPEAK+off
-bind \{toggleOn}+!Status.18 AUTOSPEAK+on
+assign toggleKeys Status.18
+assign toggleCommand AUTOSPEAK
+include ../toggle.kti
 
-bind !Status.19 AUTOREPEAT
-bind \{toggleOff}+!Status.19 AUTOREPEAT+off
-bind \{toggleOn}+!Status.19 AUTOREPEAT+on
+assign toggleKeys Status.19
+assign toggleCommand AUTOREPEAT
+include ../toggle.kti
 
-bind !Status.20 BRLUCDOTS
-bind \{toggleOff}+!Status.20 BRLUCDOTS+off
-bind \{toggleOn}+!Status.20 BRLUCDOTS+on
+assign toggleKeys Status.20
+assign toggleCommand BRLUCDOTS
+include ../toggle.kti
 
 bind !Status.21 TIME
 bind !Status.22 PASTE

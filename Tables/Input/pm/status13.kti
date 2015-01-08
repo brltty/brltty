@@ -24,21 +24,28 @@ bind !Status.2 LEARN
 bind !Status.3 CSRJMP_VERT
 bind !Status.4 BACK
 bind !Status.5 INFO
-bind !Status.6 CSRTRK
-bind \{toggleOff}+!Status.6 CSRTRK+off
-bind \{toggleOn}+!Status.6 CSRTRK+on
-bind !Status.7 DISPMD
-bind \{toggleOff}+!Status.7 DISPMD+off
-bind \{toggleOn}+!Status.7 DISPMD+on
-bind !Status.8 FREEZE
-bind \{toggleOff}+!Status.8 FREEZE+off
-bind \{toggleOn}+!Status.8 FREEZE+on
-bind !Status.9 PREFMENU
-bind !Status.10 PREFLOAD
-bind !Status.11 CSRVIS
-bind \{toggleOff}+!Status.11 CSRVIS+off
-bind \{toggleOn}+!Status.11 CSRVIS+on
-bind !Status.12 ATTRVIS
-bind \{toggleOff}+!Status.12 ATTRVIS+off
-bind \{toggleOn}+!Status.12 ATTRVIS+on
+
+assign toggleKeys Status.6
+assign toggleCommand CSRTRK
+include ../toggle.kti
+
+assign toggleKeys Status.7
+assign toggleCommand DISPMD
+include ../toggle.kti
+
+assign toggleKeys Status.8
+assign toggleCommand FREEZE
+include ../toggle.kti
+
+bind !Status.9 PREFLOAD
+bind !Status.10 PREFMENU
+
+assign toggleKeys Status.11
+assign toggleCommand CSRVIS
+include ../toggle.kti
+
+assign toggleKeys Status.12
+assign toggleCommand ATTRVIS
+include ../toggle.kti
+
 bind !Status.13 PASTE
