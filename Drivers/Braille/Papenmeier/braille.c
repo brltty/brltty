@@ -379,7 +379,7 @@ handleKey1 (BrailleDisplay *brl, uint16_t code, int press, uint16_t time) {
   if (rcvStatusFirst <= code && 
       code <= rcvStatusLast) { /* status key */
     key = (code - rcvStatusFirst) / 3;
-    return enqueueKeyEvent(brl, PM_GRP_NavigationKeys, PM_KEY_STATUS+key, press);
+    return enqueueKeyEvent(brl, PM_GRP_StatusKeys1, key, press);
   }
 
   if (rcvBarFirst <= code && 
@@ -998,7 +998,7 @@ mapInputModules2 (void) {
       addInputMapping2(&module, 0, PM_GRP_StatusKeys2, cell-1);
 
       nextInputModule2(&module, 1);
-      addInputMapping2(&module, 0, PM_GRP_NavigationKeys, PM_KEY_STATUS+cell--);
+      addInputMapping2(&module, 0, PM_GRP_StatusKeys1, cell--);
     }
   }
 

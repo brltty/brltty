@@ -19,58 +19,58 @@
 # This key subtable is for Papenmeier displays which have 22 status keys.
 note The keys to the left of the status cells are named Status1 through Status22.
 
-bind !Status1 HELP
-bind !Status2 LEARN
-bind !Status3 CSRJMP_VERT
-bind !Status4 INFO
-bind !Status5 BACK
+bind !Status.1 HELP
+bind !Status.2 LEARN
+bind !Status.3 CSRJMP_VERT
+bind !Status.4 INFO
+bind !Status.5 BACK
 
-bind !Status6 CSRTRK
-bind \{toggleOff}+!Status6 CSRTRK+off
-bind \{toggleOn}+!Status6 CSRTRK+on
+bind !Status.6 CSRTRK
+bind \{toggleOff}+!Status.6 CSRTRK+off
+bind \{toggleOn}+!Status.6 CSRTRK+on
 
-bind !Status7 DISPMD
-bind \{toggleOff}+!Status7 DISPMD+off
-bind \{toggleOn}+!Status7 DISPMD+on
+bind !Status.7 DISPMD
+bind \{toggleOff}+!Status.7 DISPMD+off
+bind \{toggleOn}+!Status.7 DISPMD+on
 
-bind !Status8 FREEZE
-bind \{toggleOff}+!Status8 FREEZE+off
-bind \{toggleOn}+!Status8 FREEZE+on
+bind !Status.8 FREEZE
+bind \{toggleOff}+!Status.8 FREEZE+off
+bind \{toggleOn}+!Status.8 FREEZE+on
 
-bind !Status9 PREFLOAD
-bind !Status10 PREFMENU
-bind !Status11 PREFSAVE
+bind !Status.9 PREFLOAD
+bind !Status.10 PREFMENU
+bind !Status.11 PREFSAVE
 
-bind !Status12 CSRVIS
-bind \{toggleOff}+!Status12 CSRVIS+off
-bind \{toggleOn}+!Status12 CSRVIS+on
+bind !Status.12 CSRVIS
+bind \{toggleOff}+!Status.12 CSRVIS+off
+bind \{toggleOn}+!Status.12 CSRVIS+on
 
-bind !Status13 ATTRVIS
-bind \{toggleOff}+!Status13 ATTRVIS+off
-bind \{toggleOn}+!Status13 ATTRVIS+on
+bind !Status.13 ATTRVIS
+bind \{toggleOff}+!Status.13 ATTRVIS+off
+bind \{toggleOn}+!Status.13 ATTRVIS+on
 
-bind !Status14 SKPIDLNS
-bind \{toggleOff}+!Status14 SKPIDLNS+off
-bind \{toggleOn}+!Status14 SKPIDLNS+on
+bind !Status.14 SKPIDLNS
+bind \{toggleOff}+!Status.14 SKPIDLNS+off
+bind \{toggleOn}+!Status.14 SKPIDLNS+on
 
-bind !Status15 SIXDOTS
-bind \{toggleOff}+!Status15 SIXDOTS+off
-bind \{toggleOn}+!Status15 SIXDOTS+on
+bind !Status.15 SIXDOTS
+bind \{toggleOff}+!Status.15 SIXDOTS+off
+bind \{toggleOn}+!Status.15 SIXDOTS+on
 
-bind !Status16 RESTARTBRL
-bind !Status17 RESTARTSPEECH
+bind !Status.16 RESTARTBRL
+bind !Status.17 RESTARTSPEECH
 
-bind !Status18 AUTOSPEAK
-bind \{toggleOff}+!Status18 AUTOSPEAK+off
-bind \{toggleOn}+!Status18 AUTOSPEAK+on
+bind !Status.18 AUTOSPEAK
+bind \{toggleOff}+!Status.18 AUTOSPEAK+off
+bind \{toggleOn}+!Status.18 AUTOSPEAK+on
 
-bind !Status19 AUTOREPEAT
-bind \{toggleOff}+!Status19 AUTOREPEAT+off
-bind \{toggleOn}+!Status19 AUTOREPEAT+on
+bind !Status.19 AUTOREPEAT
+bind \{toggleOff}+!Status.19 AUTOREPEAT+off
+bind \{toggleOn}+!Status.19 AUTOREPEAT+on
 
-bind !Status20 BRLUCDOTS
-bind \{toggleOff}+!Status20 BRLUCDOTS+off
-bind \{toggleOn}+!Status20 BRLUCDOTS+on
+bind !Status.20 BRLUCDOTS
+bind \{toggleOff}+!Status.20 BRLUCDOTS+off
+bind \{toggleOn}+!Status.20 BRLUCDOTS+on
 
-bind !Status21 TIME
-bind !Status22 PASTE
+bind !Status.21 TIME
+bind !Status.22 PASTE

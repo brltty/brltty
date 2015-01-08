@@ -63,6 +63,7 @@ typedef enum {
   PM_GRP_NavigationKeys = 0,
   PM_GRP_RoutingKeys1,
   PM_GRP_RoutingKeys2,
+  PM_GRP_StatusKeys1,
   PM_GRP_StatusKeys2
 } PM_KeyGroup;
 
