@@ -22,8 +22,8 @@ note The keys to the left of the status cells are named Status1 through Status20
 bind !Status.1 HELP
 bind !Status.2 LEARN
 bind !Status.3 CSRJMP_VERT
-bind !Status.4 BACK
-bind !Status.5 INFO
+bind !Status.4 INFO
+bind !Status.5 BACK
 
 assign toggleKeys Status.6
 assign toggleCommand CSRTRK
@@ -50,27 +50,22 @@ assign toggleCommand ATTRVIS
 include ../toggle.kti
 
 assign toggleKeys Status.14
-assign toggleCommand CAPBLINK
+assign toggleCommand SKPIDLNS
 include ../toggle.kti
 
 assign toggleKeys Status.15
 assign toggleCommand SIXDOTS
 include ../toggle.kti
 
-assign toggleKeys Status.16
-assign toggleCommand SKPIDLNS
-include ../toggle.kti
+bind Status.16 RESTARTBRL
 
 assign toggleKeys Status.17
-assign toggleCommand TUNES
-include ../toggle.kti
-
-assign toggleKeys Status.18
 assign toggleCommand AUTOSPEAK
 include ../toggle.kti
 
-assign toggleKeys Status.19
+assign toggleKeys Status.18
 assign toggleCommand AUTOREPEAT
 include ../toggle.kti
 
+bind Status.19 TIME
 bind !Status.20 PASTE
