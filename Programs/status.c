@@ -35,7 +35,7 @@ renderDigitUpper (unsigned char *cell, int digit) {
 
 static void
 renderDigitLower (unsigned char *cell, int digit) {
-  *cell |= lowerDigit(portraitDigits[digit]);
+  *cell |= toLowerDigit(portraitDigits[digit]);
 }
 
 static void

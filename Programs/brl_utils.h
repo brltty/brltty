@@ -30,19 +30,19 @@ extern void setBrailleOffline (BrailleDisplay *brl);
 extern void setBrailleOnline (BrailleDisplay *brl);
 
 /* Formatting of status cells. */
-extern unsigned char lowerDigit (unsigned char upper);
+extern unsigned char toLowerDigit (unsigned char upper);
 
 extern const unsigned char landscapeDigits[11];
-extern unsigned char landscapeNumber (int x);
-extern unsigned char landscapeFlag (int number, int on);
+extern unsigned char makeLandscapeNumber (int x);
+extern unsigned char makeLandscapeFlag (int number, int on);
 
 extern const unsigned char seascapeDigits[11];
-extern unsigned char seascapeNumber (int x);
-extern unsigned char seascapeFlag (int number, int on);
+extern unsigned char makeSeascapeNumber (int x);
+extern unsigned char makeSeascapeFlag (int number, int on);
 
 extern const unsigned char portraitDigits[11];
-extern unsigned char portraitNumber (int x);
-extern unsigned char portraitFlag (int number, int on);
+extern unsigned char makePortraitNumber (int x);
+extern unsigned char makePortraitFlag (int number, int on);
 
 #ifdef __cplusplus
 }

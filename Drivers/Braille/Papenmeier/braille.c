@@ -1280,11 +1280,11 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
 
       if (!brl->data->gsc.initialized) {
         if (model->statusCount < 13) {
-          brl->data->gsc.makeNumber = portraitNumber;
-          brl->data->gsc.makeFlag = portraitFlag;
+          brl->data->gsc.makeNumber = makePortraitNumber;
+          brl->data->gsc.makeFlag = makePortraitFlag;
         } else {
-          brl->data->gsc.makeNumber = seascapeNumber;
-          brl->data->gsc.makeFlag = seascapeFlag;
+          brl->data->gsc.makeNumber = makeSeascapeNumber;
+          brl->data->gsc.makeFlag = makeSeascapeFlag;
         }
 
         initializeGenericStatusCodes(brl);
