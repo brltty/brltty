@@ -546,3 +546,42 @@ void
 setKeyboardEnabledFlag (KeyTable *table, const unsigned char *flag) {
   table->options.keyboardEnabledFlag = flag;
 }
+
+void
+getKeyGroupCommands (KeyTable *table, KeyGroup group, int *commands, unsigned int size) {
+  const KeyContext *ctx = getKeyContext(table, KTB_CTX_DEFAULT);
+
+  if (ctx) {
+    unsigned int i;
+
+    for (i=0; i<size; i+=1) {
+      commands[i] = BRL_CMD_NOOP;
+    }
+
+    for (i=0; i<ctx->keyBindings.count; i+=1) {
+      const KeyBinding *binding = &ctx->keyBindings.table[i];
+      const KeyCombination *combination = &binding->keyCombination;
+      const KeyValue *key;
+
+      if (combination->flags & KCF_IMMEDIATE_KEY) {
+        if (combination->modifierCount != 0) continue;
+        key = &combination->immediateKey;
+      } else {
+        if (combination->modifierCount != 1) continue;
+        key = &combination->modifierKeys[0];
+      }
+
+      if (key->group == group) {
+        if (key->number != KTB_KEY_ANY) {
+          if (key->number < size) {
+            int command = binding->primaryCommand.value;
+
+            if (command != BRL_CMD_NOOP) {
+              commands[key->number] = command;
+            }
+          }
+        }
+      }
+    }
+  }
+}

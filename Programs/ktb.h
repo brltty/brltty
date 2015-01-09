@@ -53,6 +53,8 @@ extern void setKeyTableLogLabel (KeyTable *table, const char *label);
 extern void setLogKeyEventsFlag (KeyTable *table, const unsigned char *flag);
 extern void setKeyboardEnabledFlag (KeyTable *table, const unsigned char *flag);
 
+extern void getKeyGroupCommands (KeyTable *table, KeyGroup group, int *commands, unsigned int size);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
