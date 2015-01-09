@@ -154,7 +154,7 @@ struct BrailleDataStruct {
 
     PM_GenericStatusCode codes[22];
     unsigned char initialized;
-  } generic;
+  } gsc;
 };
 
 /*--- Protocol 1 Operations ---*/
@@ -1156,7 +1156,7 @@ static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
-    brl->data->generic.initialized = 0;
+    brl->data->gsc.initialized = 0;
 
     if (connectResource(brl, device)) {
       const unsigned int *baud = io->baudList;
@@ -1222,15 +1222,16 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static void
 initializeGenericStatusCodes (BrailleDisplay *brl) {
-  int commands[brl->statusColumns];
+  const size_t count = ARRAY_COUNT(brl->data->gsc.codes);
+  int commands[count];
 
-  getKeyGroupCommands(brl->keyTable, PM_GRP_StatusKeys1, commands, ARRAY_COUNT(commands));
+  getKeyGroupCommands(brl->keyTable, PM_GRP_StatusKeys1, commands, count);
 
   {
     unsigned int i;
 
-    for (i=0; i<ARRAY_COUNT(commands); i+=1) {
-      PM_GenericStatusCode *code = &brl->data->generic.codes[i];
+    for (i=0; i<count; i+=1) {
+      PM_GenericStatusCode *code = &brl->data->gsc.codes[i];
 
 #define SET(CMD,CODE) case (CMD): *code = (CODE); break;
       switch (commands[i] & BRL_MSK_CMD) {
@@ -1270,43 +1271,44 @@ initializeGenericStatusCodes (BrailleDisplay *brl) {
 }
 
 static int
-brl_writeStatus (BrailleDisplay *brl, const unsigned char* s) {
+brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
   if (model->statusCount) {
     unsigned char cells[model->statusCount];
+
     if (s[GSC_FIRST] == GSC_MARKER) {
-      int i;
+      unsigned int i;
 
-      unsigned char values[GSC_COUNT];
-      memcpy(values, s, GSC_COUNT);
-
-      if (!brl->data->generic.initialized) {
-        if (brl->statusColumns < 13) {
-          brl->data->generic.makeNumber = portraitNumber;
-          brl->data->generic.makeFlag = portraitFlag;
+      if (!brl->data->gsc.initialized) {
+        if (model->statusCount < 13) {
+          brl->data->gsc.makeNumber = portraitNumber;
+          brl->data->gsc.makeFlag = portraitFlag;
         } else {
-          brl->data->generic.makeNumber = seascapeNumber;
-          brl->data->generic.makeFlag = seascapeFlag;
+          brl->data->gsc.makeNumber = seascapeNumber;
+          brl->data->gsc.makeFlag = seascapeFlag;
         }
 
         initializeGenericStatusCodes(brl);
-        brl->data->generic.initialized = 1;
+        brl->data->gsc.initialized = 1;
       }
 
-      for (i=0; i<model->statusCount; i++) {
-        PM_GenericStatusCode code = brl->data->generic.codes[i];
+      for (i=0; i<model->statusCount; i+=1) {
+        unsigned char *cell = &cells[i];
+        PM_GenericStatusCode code = (i < ARRAY_COUNT(brl->data->gsc.codes))? brl->data->gsc.codes[i]: PM_GSC_EMPTY;
 
         if (code == PM_GSC_EMPTY) {
-          cells[i] = 0;
+          *cell = 0;
         } else if (code >= PM_GSC_NUMBER) {
-          cells[i] = brl->data->generic.makeNumber(values[code-PM_GSC_NUMBER]);
+          *cell = brl->data->gsc.makeNumber(s[code-PM_GSC_NUMBER]);
         } else if (code >= PM_GSC_FLAG) {
-          cells[i] = brl->data->generic.makeFlag(i+1, values[code-PM_GSC_FLAG]);
+          *cell = brl->data->gsc.makeFlag(i+1, s[code-PM_GSC_FLAG]);
+        } else if (code < model->statusCount) {
+          *cell = s[code];
         } else {
-          cells[i] = values[code];
+          *cell = 0;
         }
       }
     } else {
-      int i = 0;
+      unsigned int i = 0;
 
       while (i < model->statusCount) {
         unsigned char dots = s[i];
@@ -1317,8 +1319,10 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char* s) {
 
       while (i < model->statusCount) cells[i++] = 0;
     }
+
     updateCells(brl, model->statusCount, cells, currentStatus, protocol->writeStatus);
   }
+
   return 1;
 }
 
