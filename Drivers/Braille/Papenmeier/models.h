@@ -16,93 +16,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#define OFFS_EMPTY       0
-#define OFFS_HORIZ    1000	/* added to status show */
-#define OFFS_FLAG     2000
-#define OFFS_NUMBER   3000
-
-#define PM_BEGIN_STATUS(count) static const uint16_t pmStatus_##count[] = {
-#define PM_END_STATUS };
-
-#define pmStatus_0 NULL
-
-PM_BEGIN_STATUS(2)
-  OFFS_NUMBER + gscWindowRow,
-  OFFS_NUMBER + gscCursorRow
-PM_END_STATUS
-
-PM_BEGIN_STATUS(4)
-  OFFS_NUMBER + gscWindowRow,
-  OFFS_NUMBER + gscCursorRow,
-  OFFS_NUMBER + gscCursorColumn,
-  OFFS_FLAG   + gscDisplayMode
-PM_END_STATUS
-
-PM_BEGIN_STATUS(13)
-  OFFS_HORIZ + gscWindowRow,
-  OFFS_EMPTY,
-  OFFS_HORIZ + gscCursorRow,
-  OFFS_HORIZ + gscCursorColumn,
-  OFFS_EMPTY,
-  OFFS_FLAG  + gscTrackCursor,
-  OFFS_FLAG  + gscDisplayMode,
-  OFFS_FLAG  + gscFrozenScreen,
-  OFFS_EMPTY,
-  OFFS_FLAG  + gscShowCursor,
-  OFFS_FLAG  + gscShowAttributes,
-  OFFS_EMPTY,
-  OFFS_EMPTY
-PM_END_STATUS
-
-PM_BEGIN_STATUS(20)
-  OFFS_HORIZ + gscWindowRow,
-  OFFS_EMPTY,
-  OFFS_HORIZ + gscCursorRow,
-  OFFS_HORIZ + gscCursorColumn,
-  OFFS_EMPTY,
-  OFFS_FLAG  + gscTrackCursor,
-  OFFS_FLAG  + gscDisplayMode,
-  OFFS_FLAG  + gscFrozenScreen,
-  OFFS_EMPTY,
-  OFFS_HORIZ + gscScreenNumber,
-  OFFS_EMPTY,
-  OFFS_FLAG  + gscShowCursor,
-  OFFS_FLAG  + gscShowAttributes,
-  OFFS_FLAG  + gscSkipIdenticalLines,
-  OFFS_FLAG  + gscTextStyle,
-  OFFS_EMPTY,
-  OFFS_FLAG  + gscAutospeak,
-  OFFS_FLAG  + gscAutorepeat,
-  OFFS_EMPTY,
-  OFFS_EMPTY
-PM_END_STATUS
-
-PM_BEGIN_STATUS(22)
-  OFFS_HORIZ + gscWindowRow,
-  OFFS_EMPTY,
-  OFFS_HORIZ + gscCursorRow,
-  OFFS_HORIZ + gscCursorColumn,
-  OFFS_EMPTY,
-  OFFS_FLAG  + gscTrackCursor,
-  OFFS_FLAG  + gscDisplayMode,
-  OFFS_FLAG  + gscFrozenScreen,
-  OFFS_EMPTY,
-  OFFS_HORIZ + gscScreenNumber,
-  OFFS_EMPTY,
-  OFFS_FLAG  + gscShowCursor,
-  OFFS_FLAG  + gscShowAttributes,
-  OFFS_FLAG  + gscSkipIdenticalLines,
-  OFFS_FLAG  + gscTextStyle,
-  OFFS_EMPTY,
-  OFFS_EMPTY,
-  OFFS_FLAG  + gscAutospeak,
-  OFFS_FLAG  + gscAutorepeat,
-  OFFS_FLAG  + gscBrailleInputMode,
-  OFFS_EMPTY,
-  OFFS_EMPTY
-PM_END_STATUS
-
-
 typedef struct {
   unsigned char modelIdentifier;
   unsigned char protocolRevision;
@@ -117,8 +30,6 @@ typedef struct {
   uint8_t leftKeys;
   uint8_t rightKeys;
   uint8_t statusCount;
-
-  const uint16_t *statusCells;
 } ModelEntry; 
 
 #define PM_MODEL_IDENTITY(identifier, model, name, protocol)	\
@@ -129,7 +40,6 @@ typedef struct {
 
 #define PM_CELL_COUNTS(columns, status) \
   .textColumns = columns, \
-  .statusCells = pmStatus_##status, \
   .statusCount = status
 
 #define PM_FRONT_KEYS(front) \

@@ -44,6 +44,7 @@
 #include "bitfield.h"
 #include "async_wait.h"
 #include "ascii.h"
+#include "ktb.h"
 
 #define BRL_STATUS_FIELDS sfGeneric
 #define BRL_HAVE_STATUS_CELLS
@@ -140,6 +141,21 @@ interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) 
   logMessage(LOG_WARNING, "Unknown Papenmeier ID: %d", id);
   return 0;
 }
+
+typedef uint16_t PM_GenericStatusCode;
+#define PM_GSC_EMPTY     0
+#define PM_GSC_FLAG   1000
+#define PM_GSC_NUMBER 2000
+
+struct BrailleDataStruct {
+  struct {
+    unsigned char (*makeNumber) (int x);
+    unsigned char (*makeFlag) (int number, int on);
+
+    PM_GenericStatusCode codes[22];
+    unsigned char initialized;
+  } generic;
+};
 
 /*--- Protocol 1 Operations ---*/
 
@@ -1138,31 +1154,40 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  if (connectResource(brl, device)) {
-    const unsigned int *baud = io->baudList;
+  if ((brl->data = malloc(sizeof(*brl->data)))) {
+    memset(brl->data, 0, sizeof(*brl->data));
+    brl->data->generic.initialized = 0;
 
-    if (baud) {
-      while (*baud) {
-        SerialParameters serialParameters;
+    if (connectResource(brl, device)) {
+      const unsigned int *baud = io->baudList;
 
-        gioInitializeSerialParameters(&serialParameters);
-        serialParameters.baud = *baud;
-        serialParameters.flowControl = io->flowControl;
-        logMessage(LOG_DEBUG, "probing Papenmeier display at %u baud", *baud);
+      if (baud) {
+        while (*baud) {
+          SerialParameters serialParameters;
 
-        if (gioReconfigureResource(brl->gioEndpoint, &serialParameters)) {
-          if (startTerminal(brl)) {
-             return 1;
+          gioInitializeSerialParameters(&serialParameters);
+          serialParameters.baud = *baud;
+          serialParameters.flowControl = io->flowControl;
+          logMessage(LOG_DEBUG, "probing Papenmeier display at %u baud", *baud);
+
+          if (gioReconfigureResource(brl->gioEndpoint, &serialParameters)) {
+            if (startTerminal(brl)) {
+               return 1;
+            }
           }
-        }
 
-        baud += 1;
+          baud += 1;
+        }
+      } else if (startTerminal(brl)) {
+        return 1;
       }
-    } else if (startTerminal(brl)) {
-      return 1;
+
+      disconnectBrailleResource(brl, NULL);
     }
 
-    disconnectBrailleResource(brl, NULL);
+    free(brl->data);
+  } else {
+    logMallocError();
   }
 
   return 0;
@@ -1172,6 +1197,7 @@ static void
 brl_destruct (BrailleDisplay *brl) {
   disconnectBrailleResource(brl, NULL);
   protocol->releaseResources();
+  free(brl->data);
 }
 
 static void
@@ -1194,6 +1220,55 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   return 1;
 }
 
+static void
+initializeGenericStatusCodes (BrailleDisplay *brl) {
+  int commands[brl->statusColumns];
+
+  getKeyGroupCommands(brl->keyTable, PM_GRP_StatusKeys1, commands, ARRAY_COUNT(commands));
+
+  {
+    unsigned int i;
+
+    for (i=0; i<ARRAY_COUNT(commands); i+=1) {
+      PM_GenericStatusCode *code = &brl->data->generic.codes[i];
+
+#define SET(CMD,CODE) case (CMD): *code = (CODE); break;
+      switch (commands[i] & BRL_MSK_CMD) {
+        default:
+        SET(BRL_CMD_NOOP, PM_GSC_EMPTY);
+
+        SET(BRL_CMD_HELP, PM_GSC_NUMBER+gscWindowRow);
+        SET(BRL_CMD_LEARN, PM_GSC_NUMBER+gscWindowColumn);
+
+        SET(BRL_CMD_CSRJMP_VERT, PM_GSC_NUMBER+gscCursorRow);
+        SET(BRL_CMD_INFO, PM_GSC_NUMBER+gscCursorColumn);
+
+        SET(BRL_CMD_PREFMENU, PM_GSC_NUMBER+gscScreenNumber);
+
+        SET(BRL_CMD_FREEZE, PM_GSC_FLAG+gscFrozenScreen);
+        SET(BRL_CMD_DISPMD, PM_GSC_FLAG+gscDisplayMode);
+        SET(BRL_CMD_SIXDOTS, PM_GSC_FLAG+gscTextStyle);
+        SET(BRL_CMD_SLIDEWIN, PM_GSC_FLAG+gscSlidingWindow);
+        SET(BRL_CMD_SKPIDLNS, PM_GSC_FLAG+gscSkipIdenticalLines);
+        SET(BRL_CMD_SKPBLNKWINS, PM_GSC_FLAG+gscSkipBlankWindows);
+        SET(BRL_CMD_CSRVIS, PM_GSC_FLAG+gscShowCursor);
+        SET(BRL_CMD_CSRHIDE, PM_GSC_FLAG+gscHideCursor);
+        SET(BRL_CMD_CSRTRK, PM_GSC_FLAG+gscTrackCursor);
+        SET(BRL_CMD_CSRSIZE, PM_GSC_FLAG+gscCursorStyle);
+        SET(BRL_CMD_CSRBLINK, PM_GSC_FLAG+gscBlinkingCursor);
+        SET(BRL_CMD_ATTRVIS, PM_GSC_FLAG+gscShowAttributes);
+        SET(BRL_CMD_ATTRBLINK, PM_GSC_FLAG+gscBlinkingAttributes);
+        SET(BRL_CMD_CAPBLINK, PM_GSC_FLAG+gscBlinkingCapitals);
+        SET(BRL_CMD_TUNES, PM_GSC_FLAG+gscAlertTunes);
+        SET(BRL_CMD_AUTOREPEAT, PM_GSC_FLAG+gscAutorepeat);
+        SET(BRL_CMD_AUTOSPEAK, PM_GSC_FLAG+gscAutospeak);
+        SET(BRL_CMD_BRLUCDOTS, PM_GSC_FLAG+gscBrailleInputMode);
+      }
+#undef SET
+    }
+  }
+}
+
 static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char* s) {
   if (model->statusCount) {
@@ -1204,17 +1279,28 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char* s) {
       unsigned char values[GSC_COUNT];
       memcpy(values, s, GSC_COUNT);
 
-      for (i=0; i<model->statusCount; i++) {
-        int code = model->statusCells[i];
+      if (!brl->data->generic.initialized) {
+        if (brl->statusColumns < 13) {
+          brl->data->generic.makeNumber = portraitNumber;
+          brl->data->generic.makeFlag = portraitFlag;
+        } else {
+          brl->data->generic.makeNumber = seascapeNumber;
+          brl->data->generic.makeFlag = seascapeFlag;
+        }
 
-        if (code == OFFS_EMPTY) {
+        initializeGenericStatusCodes(brl);
+        brl->data->generic.initialized = 1;
+      }
+
+      for (i=0; i<model->statusCount; i++) {
+        PM_GenericStatusCode code = brl->data->generic.codes[i];
+
+        if (code == PM_GSC_EMPTY) {
           cells[i] = 0;
-        } else if (code >= OFFS_NUMBER) {
-          cells[i] = portraitNumber(values[code-OFFS_NUMBER]);
-        } else if (code >= OFFS_FLAG) {
-          cells[i] = seascapeFlag(i+1, values[code-OFFS_FLAG]);
-        } else if (code >= OFFS_HORIZ) {
-          cells[i] = seascapeNumber(values[code-OFFS_HORIZ]);
+        } else if (code >= PM_GSC_NUMBER) {
+          cells[i] = brl->data->generic.makeNumber(values[code-PM_GSC_NUMBER]);
+        } else if (code >= PM_GSC_FLAG) {
+          cells[i] = brl->data->generic.makeFlag(i+1, values[code-PM_GSC_FLAG]);
         } else {
           cells[i] = values[code];
         }
