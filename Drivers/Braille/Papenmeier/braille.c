@@ -51,7 +51,6 @@
 #include "brl_driver.h"
 #include "brldefs-pm.h"
 #include "models.h"
-#include "braille.h"
 
 static const ModelEntry *model = NULL;
  
@@ -108,8 +107,6 @@ typedef struct {
 } ProtocolOperations;
 
 static const ProtocolOperations *protocol;
-static unsigned char currentStatus[PMSC];
-static unsigned char currentText[BRLCOLSMAX];
 
 
 static int
@@ -153,11 +150,14 @@ typedef struct {
 } PM_KeyRange;
 
 struct BrailleDataStruct {
+  unsigned char textCells[PM_MAXIMUM_TEXT_CELLS];
+  unsigned char statusCells[PM_MAXIMUM_STATUS_CELLS];
+
   struct {
     unsigned char (*makeNumber) (int x);
     unsigned char (*makeFlag) (int number, int on);
 
-    PM_GenericStatusCode codes[22];
+    PM_GenericStatusCode codes[PM_MAXIMUM_STATUS_CELLS];
     unsigned char initialized;
   } gsc;
 
@@ -447,14 +447,14 @@ initializeTable1 (BrailleDisplay *brl) {
 static void
 writeText1 (BrailleDisplay *brl, unsigned int start, unsigned int count) {
   unsigned char buffer[count];
-  translateOutputCells(buffer, currentText+start, count);
+  translateOutputCells(buffer, brl->data->textCells+start, count);
   writePacket1(brl, XMT_BRLDATA+brl->data->protocol.p1.xmt.textOffset+start, count, buffer);
 }
 
 static void
 writeStatus1 (BrailleDisplay *brl, unsigned int start, unsigned int count) {
   unsigned char buffer[count];
-  translateOutputCells(buffer, currentStatus+start, count);
+  translateOutputCells(buffer, brl->data->statusCells+start, count);
   writePacket1(brl, XMT_BRLDATA+brl->data->protocol.p1.xmt.statusOffset+start, count, buffer);
 }
 
@@ -759,7 +759,7 @@ flushCells2 (BrailleDisplay *brl) {
     unsigned char *byte = buffer;
 
     /* The status cells. */
-    byte = translateOutputCells(byte, currentStatus, model->statusCount);
+    byte = translateOutputCells(byte, brl->data->statusCells, model->statusCount);
 
     /* Two dummy cells for each key on the left side. */
     if (model->protocolRevision < 2) {
@@ -771,7 +771,7 @@ flushCells2 (BrailleDisplay *brl) {
     }
 
     /* The text cells. */
-    byte = translateOutputCells(byte, currentText, model->textColumns);
+    byte = translateOutputCells(byte, brl->data->textCells, model->textColumns);
 
     /* Two dummy cells for each key on the right side. */
     if (model->protocolRevision < 2) {
@@ -1111,8 +1111,8 @@ startTerminal (BrailleDisplay *brl) {
     if (identifyTerminal(brl)) {
       brl->setFirmness = protocol->setFirmness;
 
-      memset(currentText, 0, model->textColumns);
-      memset(currentStatus, 0, model->statusCount);
+      memset(brl->data->textCells, 0, model->textColumns);
+      memset(brl->data->statusCells, 0, model->statusCount);
 
       protocol->initializeTerminal(brl);
       return 1;
@@ -1222,7 +1222,7 @@ updateCells (
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  updateCells(brl, model->textColumns, brl->buffer, currentText, protocol->writeText);
+  updateCells(brl, model->textColumns, brl->buffer, brl->data->textCells, protocol->writeText);
   protocol->flushCells(brl);
   return 1;
 }
@@ -1327,7 +1327,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
       while (i < model->statusCount) cells[i++] = 0;
     }
 
-    updateCells(brl, model->statusCount, cells, currentStatus, protocol->writeStatus);
+    updateCells(brl, model->statusCount, cells, brl->data->statusCells, protocol->writeStatus);
   }
 
   return 1;
