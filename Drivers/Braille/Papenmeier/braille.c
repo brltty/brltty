@@ -147,6 +147,11 @@ typedef uint16_t PM_GenericStatusCode;
 #define PM_GSC_FLAG   1000
 #define PM_GSC_NUMBER 2000
 
+typedef struct {
+  int first;
+  int last;
+} PM_KeyRange;
+
 struct BrailleDataStruct {
   struct {
     unsigned char (*makeNumber) (int x);
@@ -155,6 +160,24 @@ struct BrailleDataStruct {
     PM_GenericStatusCode codes[22];
     unsigned char initialized;
   } gsc;
+
+  union {
+    struct {
+      struct {
+        PM_KeyRange front;
+        PM_KeyRange bar;
+        PM_KeyRange switches;
+        PM_KeyRange status;
+        PM_KeyRange cursor;
+        unsigned char switchState;
+      } rcv;
+
+      struct {
+        unsigned char textOffset;
+        unsigned char statusOffset;
+      } xmt;
+    } p1;
+  } protocol;
 };
 
 /*--- Protocol 1 Operations ---*/
@@ -198,22 +221,6 @@ struct BrailleDataStruct {
 #define XMT_TIMEK7K8 0X0608 /* key code suppression time for moving from K7 to K8 (down) */
 #define XMT_TIMEROUT 0X0609 /* routing time interval */
 #define XMT_TIMEOPPO 0X060A /* key code suppression time for opposite movements */
-
-static int rcvStatusFirst;
-static int rcvStatusLast;
-static int rcvCursorFirst;
-static int rcvCursorLast;
-static int rcvFrontFirst;
-static int rcvFrontLast;
-static int rcvBarFirst;
-static int rcvBarLast;
-static int rcvSwitchFirst;
-static int rcvSwitchLast;
-
-static unsigned char xmtStatusOffset;
-static unsigned char xmtTextOffset;
-
-static unsigned char switchState1;
 
 static BraillePacketVerifierResult
 verifyPacket1 (
@@ -322,31 +329,31 @@ interpretIdentity1 (BrailleDisplay *brl, const unsigned char *identity) {
   }
 
   /* routing key codes: 0X300 -> status -> cursor */
-  rcvStatusFirst = RCV_KEYROUTE;
-  rcvStatusLast  = rcvStatusFirst + 3 * (model->statusCount - 1);
-  rcvCursorFirst = rcvStatusLast + 3;
-  rcvCursorLast  = rcvCursorFirst + 3 * (model->textColumns - 1);
+  brl->data->protocol.p1.rcv.status.first = RCV_KEYROUTE;
+  brl->data->protocol.p1.rcv.status.last  = brl->data->protocol.p1.rcv.status.first + 3 * (model->statusCount - 1);
+  brl->data->protocol.p1.rcv.cursor.first = brl->data->protocol.p1.rcv.status.last + 3;
+  brl->data->protocol.p1.rcv.cursor.last  = brl->data->protocol.p1.rcv.cursor.first + 3 * (model->textColumns - 1);
   logMessage(LOG_DEBUG, "Routing Keys: status=%03X-%03X cursor=%03X-%03X",
-             rcvStatusFirst, rcvStatusLast,
-             rcvCursorFirst, rcvCursorLast);
+             brl->data->protocol.p1.rcv.status.first, brl->data->protocol.p1.rcv.status.last,
+             brl->data->protocol.p1.rcv.cursor.first, brl->data->protocol.p1.rcv.cursor.last);
 
   /* function key codes: 0X000 -> front -> bar -> switches */
-  rcvFrontFirst = RCV_KEYFUNC + 3;
-  rcvFrontLast  = rcvFrontFirst + 3 * (model->frontKeys - 1);
-  rcvBarFirst = rcvFrontLast + 3;
-  rcvBarLast  = rcvBarFirst + 3 * ((model->hasBar? 8: 0) - 1);
-  rcvSwitchFirst = rcvBarLast + 3;
-  rcvSwitchLast  = rcvSwitchFirst + 3 * ((model->hasBar? 8: 0) - 1);
+  brl->data->protocol.p1.rcv.front.first = RCV_KEYFUNC + 3;
+  brl->data->protocol.p1.rcv.front.last  = brl->data->protocol.p1.rcv.front.first + 3 * (model->frontKeys - 1);
+  brl->data->protocol.p1.rcv.bar.first = brl->data->protocol.p1.rcv.front.last + 3;
+  brl->data->protocol.p1.rcv.bar.last  = brl->data->protocol.p1.rcv.bar.first + 3 * ((model->hasBar? 8: 0) - 1);
+  brl->data->protocol.p1.rcv.switches.first = brl->data->protocol.p1.rcv.bar.last + 3;
+  brl->data->protocol.p1.rcv.switches.last  = brl->data->protocol.p1.rcv.switches.first + 3 * ((model->hasBar? 8: 0) - 1);
   logMessage(LOG_DEBUG, "Function Keys: front=%03X-%03X bar=%03X-%03X switches=%03X-%03X",
-             rcvFrontFirst, rcvFrontLast,
-             rcvBarFirst, rcvBarLast,
-             rcvSwitchFirst, rcvSwitchLast);
+             brl->data->protocol.p1.rcv.front.first, brl->data->protocol.p1.rcv.front.last,
+             brl->data->protocol.p1.rcv.bar.first, brl->data->protocol.p1.rcv.bar.last,
+             brl->data->protocol.p1.rcv.switches.first, brl->data->protocol.p1.rcv.switches.last);
 
   /* cell offsets: 0X00 -> status -> text */
-  xmtStatusOffset = 0;
-  xmtTextOffset = xmtStatusOffset + model->statusCount;
+  brl->data->protocol.p1.xmt.statusOffset = 0;
+  brl->data->protocol.p1.xmt.textOffset = brl->data->protocol.p1.xmt.statusOffset + model->statusCount;
   logMessage(LOG_DEBUG, "Cell Offsets: status=%02X text=%02X",
-             xmtStatusOffset, xmtTextOffset);
+             brl->data->protocol.p1.xmt.statusOffset, brl->data->protocol.p1.xmt.textOffset);
 
   return 1;
 }
@@ -360,13 +367,13 @@ handleSwitches1 (BrailleDisplay *brl, uint16_t time) {
   KeyNumber number = PM_KEY_SWITCH;
   unsigned char bit = 0X1;
 
-  while (switchState1 != state) {
-    if ((state & bit) && !(switchState1 & bit)) {
+  while (brl->data->protocol.p1.rcv.switchState != state) {
+    if ((state & bit) && !(brl->data->protocol.p1.rcv.switchState & bit)) {
       pressStack[pressCount++] = number;
-      switchState1 |= bit;
-    } else if (!(state & bit) && (switchState1 & bit)) {
+      brl->data->protocol.p1.rcv.switchState |= bit;
+    } else if (!(state & bit) && (brl->data->protocol.p1.rcv.switchState & bit)) {
       if (!enqueueKeyEvent(brl, group, number, 0)) return 0;
-      switchState1 &= ~bit;
+      brl->data->protocol.p1.rcv.switchState &= ~bit;
     }
 
     number += 1;
@@ -386,36 +393,36 @@ static int
 handleKey1 (BrailleDisplay *brl, uint16_t code, int press, uint16_t time) {
   int key;
 
-  if (rcvFrontFirst <= code && 
-      code <= rcvFrontLast) { /* front key */
-    key = (code - rcvFrontFirst) / 3;
+  if (brl->data->protocol.p1.rcv.front.first <= code && 
+      code <= brl->data->protocol.p1.rcv.front.last) { /* front key */
+    key = (code - brl->data->protocol.p1.rcv.front.first) / 3;
     return enqueueKeyEvent(brl, PM_GRP_NavigationKeys, PM_KEY_FRONT+key, press);
   }
 
-  if (rcvStatusFirst <= code && 
-      code <= rcvStatusLast) { /* status key */
-    key = (code - rcvStatusFirst) / 3;
+  if (brl->data->protocol.p1.rcv.status.first <= code && 
+      code <= brl->data->protocol.p1.rcv.status.last) { /* status key */
+    key = (code - brl->data->protocol.p1.rcv.status.first) / 3;
     return enqueueKeyEvent(brl, PM_GRP_StatusKeys1, key, press);
   }
 
-  if (rcvBarFirst <= code && 
-      code <= rcvBarLast) { /* easy access bar */
+  if (brl->data->protocol.p1.rcv.bar.first <= code && 
+      code <= brl->data->protocol.p1.rcv.bar.last) { /* easy access bar */
     if (!handleSwitches1(brl, time)) return 0;
 
-    key = (code - rcvBarFirst) / 3;
+    key = (code - brl->data->protocol.p1.rcv.bar.first) / 3;
     return enqueueKeyEvent(brl, PM_GRP_NavigationKeys, PM_KEY_BAR+key, press);
   }
 
-  if (rcvSwitchFirst <= code && 
-      code <= rcvSwitchLast) { /* easy access bar */
+  if (brl->data->protocol.p1.rcv.switches.first <= code && 
+      code <= brl->data->protocol.p1.rcv.switches.last) { /* easy access bar */
     return handleSwitches1(brl, time);
-  //key = (code - rcvSwitchFirst) / 3;
+  //key = (code - brl->data->protocol.p1.rcv.switches.first) / 3;
   //return enqueueKeyEvent(brl, PM_GRP_NavigationKeys, PM_KEY_SWITCH+key, press);
   }
 
-  if (rcvCursorFirst <= code && 
-      code <= rcvCursorLast) { /* Routing Keys */ 
-    key = (code - rcvCursorFirst) / 3;
+  if (brl->data->protocol.p1.rcv.cursor.first <= code && 
+      code <= brl->data->protocol.p1.rcv.cursor.last) { /* Routing Keys */ 
+    key = (code - brl->data->protocol.p1.rcv.cursor.first) / 3;
     return enqueueKeyEvent(brl, PM_GRP_RoutingKeys1, key, press);
   }
 
@@ -433,22 +440,22 @@ disableOutputTranslation1 (BrailleDisplay *brl, unsigned char xmtOffset, int cou
 
 static void
 initializeTable1 (BrailleDisplay *brl) {
-  disableOutputTranslation1(brl, xmtStatusOffset, model->statusCount);
-  disableOutputTranslation1(brl, xmtTextOffset, model->textColumns);
+  disableOutputTranslation1(brl, brl->data->protocol.p1.xmt.statusOffset, model->statusCount);
+  disableOutputTranslation1(brl, brl->data->protocol.p1.xmt.textOffset, model->textColumns);
 }
 
 static void
 writeText1 (BrailleDisplay *brl, unsigned int start, unsigned int count) {
   unsigned char buffer[count];
   translateOutputCells(buffer, currentText+start, count);
-  writePacket1(brl, XMT_BRLDATA+xmtTextOffset+start, count, buffer);
+  writePacket1(brl, XMT_BRLDATA+brl->data->protocol.p1.xmt.textOffset+start, count, buffer);
 }
 
 static void
 writeStatus1 (BrailleDisplay *brl, unsigned int start, unsigned int count) {
   unsigned char buffer[count];
   translateOutputCells(buffer, currentStatus+start, count);
-  writePacket1(brl, XMT_BRLDATA+xmtStatusOffset+start, count, buffer);
+  writePacket1(brl, XMT_BRLDATA+brl->data->protocol.p1.xmt.statusOffset+start, count, buffer);
 }
 
 static void
@@ -566,7 +573,7 @@ identifyTerminal1 (BrailleDisplay *brl) {
   if (detected) {
     if (interpretIdentity1(brl, response)) {
       protocol = &protocolOperations1;
-      switchState1 = 0;
+      brl->data->protocol.p1.rcv.switchState = 0;
 
       makeOutputTable(dotsTable_ISO11548_1);
       return 1;
