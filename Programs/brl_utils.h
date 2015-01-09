@@ -31,15 +31,18 @@ extern void setBrailleOnline (BrailleDisplay *brl);
 
 /* Formatting of status cells. */
 extern unsigned char lowerDigit (unsigned char upper);
+
 extern const unsigned char landscapeDigits[11];
-extern int landscapeNumber (int x);
-extern int landscapeFlag (int number, int on);
+extern unsigned char landscapeNumber (int x);
+extern unsigned char landscapeFlag (int number, int on);
+
 extern const unsigned char seascapeDigits[11];
-extern int seascapeNumber (int x);
-extern int seascapeFlag (int number, int on);
+extern unsigned char seascapeNumber (int x);
+extern unsigned char seascapeFlag (int number, int on);
+
 extern const unsigned char portraitDigits[11];
-extern int portraitNumber (int x);
-extern int portraitFlag (int number, int on);
+extern unsigned char portraitNumber (int x);
+extern unsigned char portraitFlag (int number, int on);
 
 #ifdef __cplusplus
 }

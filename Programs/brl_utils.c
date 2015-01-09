@@ -91,15 +91,15 @@ const unsigned char landscapeDigits[11] = {
 };
 
 /* Format landscape representation of numbers 0 through 99. */
-int
+unsigned char
 landscapeNumber (int x) {
   return landscapeDigits[(x / 10) % 10] | lowerDigit(landscapeDigits[x % 10]);  
 }
 
 /* Format landscape flag state indicator. */
-int
+unsigned char
 landscapeFlag (int number, int on) {
-  int dots = landscapeDigits[number % 10];
+  unsigned char dots = landscapeDigits[number % 10];
   if (on) dots |= lowerDigit(landscapeDigits[10]);
   return dots;
 }
@@ -120,15 +120,15 @@ const unsigned char seascapeDigits[11] = {
 };
 
 /* Format seascape representation of numbers 0 through 99. */
-int
+unsigned char
 seascapeNumber (int x) {
   return lowerDigit(seascapeDigits[(x / 10) % 10]) | seascapeDigits[x % 10];  
 }
 
 /* Format seascape flag state indicator. */
-int
+unsigned char
 seascapeFlag (int number, int on) {
-  int dots = lowerDigit(seascapeDigits[number % 10]);
+  unsigned char dots = lowerDigit(seascapeDigits[number % 10]);
   if (on) dots |= seascapeDigits[10];
   return dots;
 }
@@ -149,15 +149,15 @@ const unsigned char portraitDigits[11] = {
 };
 
 /* Format portrait representation of numbers 0 through 99. */
-int
+unsigned char
 portraitNumber (int x) {
   return portraitDigits[(x / 10) % 10] | lowerDigit(portraitDigits[x % 10]);  
 }
 
 /* Format portrait flag state indicator. */
-int
+unsigned char
 portraitFlag (int number, int on) {
-  int dots = lowerDigit(portraitDigits[number % 10]);
+  unsigned char dots = lowerDigit(portraitDigits[number % 10]);
   if (on) dots |= portraitDigits[10];
   return dots;
 }
