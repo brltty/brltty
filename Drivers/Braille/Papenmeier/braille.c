@@ -51,8 +51,6 @@
 #include "brl_driver.h"
 #include "brldefs-pm.h"
 #include "models.h"
-
-static const ModelEntry *model = NULL;
  
 /*--- Input/Output Operations ---*/
 
@@ -62,8 +60,6 @@ typedef struct {
   unsigned char protocol1;
   unsigned char protocol2;
 } InputOutputOperations;
-
-static const InputOutputOperations *io;
 
 /*--- Serial Operations ---*/
 
@@ -106,39 +102,6 @@ typedef struct {
   int (*setFirmness) (BrailleDisplay *brl, BrailleFirmness setting);
 } ProtocolOperations;
 
-static const ProtocolOperations *protocol;
-
-
-static int
-writePacket (BrailleDisplay *brl, const void *packet, size_t size) {
-  return writeBraillePacket(brl, NULL, packet, size);
-}
-
-static int
-interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) {
-  int modelIndex;
-  logMessage(LOG_INFO, "Papenmeier ID: %d  Version: %d.%02d", id, major, minor);
-
-  for (modelIndex=0; modelIndex<modelCount; modelIndex++) {
-    if (modelTable[modelIndex].modelIdentifier == id) {
-      model = &modelTable[modelIndex];
-      logMessage(LOG_INFO, "%s  Size: %d", model->modelName, model->textColumns);
-
-      brl->textColumns = model->textColumns;
-      brl->textRows = 1;
-      brl->statusRows = (brl->statusColumns = model->statusCount)? 1: 0;
-
-      brl->keyBindings = model->keyTableDefinition->bindings;
-      brl->keyNames = model->keyTableDefinition->names;
-
-      return 1;
-    }
-  }
-
-  logMessage(LOG_WARNING, "Unknown Papenmeier ID: %d", id);
-  return 0;
-}
-
 typedef uint16_t PM_GenericStatusCode;
 #define PM_GSC_EMPTY     0
 #define PM_GSC_FLAG   1000
@@ -150,6 +113,10 @@ typedef struct {
 } PM_KeyRange;
 
 struct BrailleDataStruct {
+  const ProtocolOperations *protocol;
+  const InputOutputOperations *io;
+  const ModelEntry *model;
+
   unsigned char textCells[PM_MAXIMUM_TEXT_CELLS];
   unsigned char statusCells[PM_MAXIMUM_STATUS_CELLS];
 
@@ -177,50 +144,44 @@ struct BrailleDataStruct {
         unsigned char statusOffset;
       } xmt;
     } p1;
-  } protocol;
+  } prot;
 };
 
+static int
+writePacket (BrailleDisplay *brl, const void *packet, size_t size) {
+  return writeBraillePacket(brl, NULL, packet, size);
+}
+
+static int
+interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) {
+  unsigned int modelIndex;
+
+  logMessage(LOG_INFO, "Papenmeier ID: %d  Version: %d.%02d", id, major, minor);
+
+  for (modelIndex=0; modelIndex<modelCount; modelIndex+=1) {
+    if (modelTable[modelIndex].modelIdentifier == id) {
+      brl->data->model = &modelTable[modelIndex];
+      logMessage(LOG_INFO, "%s  Size: %d",
+                 brl->data->model->modelName,
+                 brl->data->model->textColumns);
+
+      brl->textColumns = brl->data->model->textColumns;
+      brl->textRows = 1;
+      brl->statusRows = (brl->statusColumns = brl->data->model->statusCount)? 1: 0;
+
+      brl->keyBindings = brl->data->model->keyTableDefinition->bindings;
+      brl->keyNames = brl->data->model->keyTableDefinition->names;
+
+      return 1;
+    }
+  }
+
+  logMessage(LOG_WARNING, "unknown Papenmeier ID: %d", id);
+  brl->data->model = NULL;
+  return 0;
+}
+
 /*--- Protocol 1 Operations ---*/
-
-#define PM1_MAX_PACKET_SIZE 100
-#define PM1_PKT_SEND 'S'
-#define PM1_PKT_RECEIVE 'K'
-#define PM1_PKT_IDENTITY 'I'
-#define PRESSED 1
-
-/* offsets within input data structure */
-#define RCV_KEYFUNC  0X0000 /* physical and logical function keys */
-#define RCV_KEYROUTE 0X0300 /* routing keys */
-#define RCV_SENSOR   0X0600 /* sensors or secondary routing keys */
-
-/* offsets within output data structure */
-#define XMT_BRLDATA  0X0000 /* data for braille display */
-#define XMT_LCDDATA  0X0100 /* data for LCD */
-#define XMT_BRLWRITE 0X0200 /* how to write each braille cell:
-                             * 0 = convert data according to braille table (default)
-                             * 1 = write directly
-                             * 2 = mark end of braille display
-                             */
-#define XMT_BRLCELL  0X0300 /* description of eadch braille cell:
-                             * 0 = has cursor routing key
-                             * 1 = has cursor routing key and sensor
-                             */
-#define XMT_ASC2BRL  0X0400 /* ASCII to braille translation table */
-#define XMT_LCDUSAGE 0X0500 /* source of LCD data:
-                             * 0 = same as braille display
-                             * 1 = not same as braille display
-                             */
-#define XMT_CSRPOSN  0X0501 /* cursor position (0 for no cursor) */
-#define XMT_CSRDOTS  0X0502 /* cursor represenation in braille dots */
-#define XMT_BRL2ASC  0X0503 /* braille to ASCII translation table */
-#define XMT_LENFBSEQ 0X0603 /* length of feedback sequence for speech synthesizer */
-#define XMT_LENKPSEQ 0X0604 /* length of keypad sequence */
-#define XMT_TIMEK1K2 0X0605 /* key code suppression time for moving from K1 to K2 (left) */
-#define XMT_TIMEK3K4 0X0606 /* key code suppression time for moving from K3 to K4 (up) */
-#define XMT_TIMEK5K6 0X0607 /* key code suppression time for moving from K5 to K6 (right) */
-#define XMT_TIMEK7K8 0X0608 /* key code suppression time for moving from K7 to K8 (down) */
-#define XMT_TIMEROUT 0X0609 /* routing time interval */
-#define XMT_TIMEOPPO 0X060A /* key code suppression time for opposite movements */
 
 static BraillePacketVerifierResult
 verifyPacket1 (
@@ -238,11 +199,11 @@ verifyPacket1 (
 
     case 2:
       switch (byte) {
-        case PM1_PKT_IDENTITY:
+        case PM_P1_PKT_IDENTITY:
           *length = 10;
           break;
 
-        case PM1_PKT_RECEIVE:
+        case PM_P1_PKT_RECEIVE:
           *length = 6;
           break;
 
@@ -261,7 +222,7 @@ verifyPacket1 (
 
     case 6:
       switch (bytes[1]) {
-        case PM1_PKT_RECEIVE:
+        case PM_P1_PKT_RECEIVE:
           *length = (bytes[4] << 8) | byte;
           if (*length != 10) return BRL_PVR_INVALID;
           break;
@@ -294,7 +255,7 @@ writePacket1 (BrailleDisplay *brl, unsigned int xmtAddress, unsigned int count, 
   if (count) {
     unsigned char header[] = {
       STX,
-      PM1_PKT_SEND,
+      PM_P1_PKT_SEND,
       0, 0, /* big endian data offset */
       0, 0  /* big endian packet length */
     };
@@ -329,31 +290,31 @@ interpretIdentity1 (BrailleDisplay *brl, const unsigned char *identity) {
   }
 
   /* routing key codes: 0X300 -> status -> cursor */
-  brl->data->protocol.p1.rcv.status.first = RCV_KEYROUTE;
-  brl->data->protocol.p1.rcv.status.last  = brl->data->protocol.p1.rcv.status.first + 3 * (model->statusCount - 1);
-  brl->data->protocol.p1.rcv.cursor.first = brl->data->protocol.p1.rcv.status.last + 3;
-  brl->data->protocol.p1.rcv.cursor.last  = brl->data->protocol.p1.rcv.cursor.first + 3 * (model->textColumns - 1);
+  brl->data->prot.p1.rcv.status.first = PM_P1_RCV_KEYROUTE;
+  brl->data->prot.p1.rcv.status.last  = brl->data->prot.p1.rcv.status.first + 3 * (brl->data->model->statusCount - 1);
+  brl->data->prot.p1.rcv.cursor.first = brl->data->prot.p1.rcv.status.last + 3;
+  brl->data->prot.p1.rcv.cursor.last  = brl->data->prot.p1.rcv.cursor.first + 3 * (brl->data->model->textColumns - 1);
   logMessage(LOG_DEBUG, "Routing Keys: status=%03X-%03X cursor=%03X-%03X",
-             brl->data->protocol.p1.rcv.status.first, brl->data->protocol.p1.rcv.status.last,
-             brl->data->protocol.p1.rcv.cursor.first, brl->data->protocol.p1.rcv.cursor.last);
+             brl->data->prot.p1.rcv.status.first, brl->data->prot.p1.rcv.status.last,
+             brl->data->prot.p1.rcv.cursor.first, brl->data->prot.p1.rcv.cursor.last);
 
   /* function key codes: 0X000 -> front -> bar -> switches */
-  brl->data->protocol.p1.rcv.front.first = RCV_KEYFUNC + 3;
-  brl->data->protocol.p1.rcv.front.last  = brl->data->protocol.p1.rcv.front.first + 3 * (model->frontKeys - 1);
-  brl->data->protocol.p1.rcv.bar.first = brl->data->protocol.p1.rcv.front.last + 3;
-  brl->data->protocol.p1.rcv.bar.last  = brl->data->protocol.p1.rcv.bar.first + 3 * ((model->hasBar? 8: 0) - 1);
-  brl->data->protocol.p1.rcv.switches.first = brl->data->protocol.p1.rcv.bar.last + 3;
-  brl->data->protocol.p1.rcv.switches.last  = brl->data->protocol.p1.rcv.switches.first + 3 * ((model->hasBar? 8: 0) - 1);
+  brl->data->prot.p1.rcv.front.first = PM_P1_RCV_KEYFUNC + 3;
+  brl->data->prot.p1.rcv.front.last  = brl->data->prot.p1.rcv.front.first + 3 * (brl->data->model->frontKeys - 1);
+  brl->data->prot.p1.rcv.bar.first = brl->data->prot.p1.rcv.front.last + 3;
+  brl->data->prot.p1.rcv.bar.last  = brl->data->prot.p1.rcv.bar.first + 3 * ((brl->data->model->hasBar? 8: 0) - 1);
+  brl->data->prot.p1.rcv.switches.first = brl->data->prot.p1.rcv.bar.last + 3;
+  brl->data->prot.p1.rcv.switches.last  = brl->data->prot.p1.rcv.switches.first + 3 * ((brl->data->model->hasBar? 8: 0) - 1);
   logMessage(LOG_DEBUG, "Function Keys: front=%03X-%03X bar=%03X-%03X switches=%03X-%03X",
-             brl->data->protocol.p1.rcv.front.first, brl->data->protocol.p1.rcv.front.last,
-             brl->data->protocol.p1.rcv.bar.first, brl->data->protocol.p1.rcv.bar.last,
-             brl->data->protocol.p1.rcv.switches.first, brl->data->protocol.p1.rcv.switches.last);
+             brl->data->prot.p1.rcv.front.first, brl->data->prot.p1.rcv.front.last,
+             brl->data->prot.p1.rcv.bar.first, brl->data->prot.p1.rcv.bar.last,
+             brl->data->prot.p1.rcv.switches.first, brl->data->prot.p1.rcv.switches.last);
 
   /* cell offsets: 0X00 -> status -> text */
-  brl->data->protocol.p1.xmt.statusOffset = 0;
-  brl->data->protocol.p1.xmt.textOffset = brl->data->protocol.p1.xmt.statusOffset + model->statusCount;
+  brl->data->prot.p1.xmt.statusOffset = 0;
+  brl->data->prot.p1.xmt.textOffset = brl->data->prot.p1.xmt.statusOffset + brl->data->model->statusCount;
   logMessage(LOG_DEBUG, "Cell Offsets: status=%02X text=%02X",
-             brl->data->protocol.p1.xmt.statusOffset, brl->data->protocol.p1.xmt.textOffset);
+             brl->data->prot.p1.xmt.statusOffset, brl->data->prot.p1.xmt.textOffset);
 
   return 1;
 }
@@ -367,13 +328,13 @@ handleSwitches1 (BrailleDisplay *brl, uint16_t time) {
   KeyNumber number = PM_KEY_SWITCH;
   unsigned char bit = 0X1;
 
-  while (brl->data->protocol.p1.rcv.switchState != state) {
-    if ((state & bit) && !(brl->data->protocol.p1.rcv.switchState & bit)) {
+  while (brl->data->prot.p1.rcv.switchState != state) {
+    if ((state & bit) && !(brl->data->prot.p1.rcv.switchState & bit)) {
       pressStack[pressCount++] = number;
-      brl->data->protocol.p1.rcv.switchState |= bit;
-    } else if (!(state & bit) && (brl->data->protocol.p1.rcv.switchState & bit)) {
+      brl->data->prot.p1.rcv.switchState |= bit;
+    } else if (!(state & bit) && (brl->data->prot.p1.rcv.switchState & bit)) {
       if (!enqueueKeyEvent(brl, group, number, 0)) return 0;
-      brl->data->protocol.p1.rcv.switchState &= ~bit;
+      brl->data->prot.p1.rcv.switchState &= ~bit;
     }
 
     number += 1;
@@ -393,36 +354,36 @@ static int
 handleKey1 (BrailleDisplay *brl, uint16_t code, int press, uint16_t time) {
   int key;
 
-  if (brl->data->protocol.p1.rcv.front.first <= code && 
-      code <= brl->data->protocol.p1.rcv.front.last) { /* front key */
-    key = (code - brl->data->protocol.p1.rcv.front.first) / 3;
+  if (brl->data->prot.p1.rcv.front.first <= code && 
+      code <= brl->data->prot.p1.rcv.front.last) { /* front key */
+    key = (code - brl->data->prot.p1.rcv.front.first) / 3;
     return enqueueKeyEvent(brl, PM_GRP_NavigationKeys, PM_KEY_FRONT+key, press);
   }
 
-  if (brl->data->protocol.p1.rcv.status.first <= code && 
-      code <= brl->data->protocol.p1.rcv.status.last) { /* status key */
-    key = (code - brl->data->protocol.p1.rcv.status.first) / 3;
+  if (brl->data->prot.p1.rcv.status.first <= code && 
+      code <= brl->data->prot.p1.rcv.status.last) { /* status key */
+    key = (code - brl->data->prot.p1.rcv.status.first) / 3;
     return enqueueKeyEvent(brl, PM_GRP_StatusKeys1, key, press);
   }
 
-  if (brl->data->protocol.p1.rcv.bar.first <= code && 
-      code <= brl->data->protocol.p1.rcv.bar.last) { /* easy access bar */
+  if (brl->data->prot.p1.rcv.bar.first <= code && 
+      code <= brl->data->prot.p1.rcv.bar.last) { /* easy access bar */
     if (!handleSwitches1(brl, time)) return 0;
 
-    key = (code - brl->data->protocol.p1.rcv.bar.first) / 3;
+    key = (code - brl->data->prot.p1.rcv.bar.first) / 3;
     return enqueueKeyEvent(brl, PM_GRP_NavigationKeys, PM_KEY_BAR+key, press);
   }
 
-  if (brl->data->protocol.p1.rcv.switches.first <= code && 
-      code <= brl->data->protocol.p1.rcv.switches.last) { /* easy access bar */
+  if (brl->data->prot.p1.rcv.switches.first <= code && 
+      code <= brl->data->prot.p1.rcv.switches.last) { /* easy access bar */
     return handleSwitches1(brl, time);
-  //key = (code - brl->data->protocol.p1.rcv.switches.first) / 3;
+  //key = (code - brl->data->prot.p1.rcv.switches.first) / 3;
   //return enqueueKeyEvent(brl, PM_GRP_NavigationKeys, PM_KEY_SWITCH+key, press);
   }
 
-  if (brl->data->protocol.p1.rcv.cursor.first <= code && 
-      code <= brl->data->protocol.p1.rcv.cursor.last) { /* Routing Keys */ 
-    key = (code - brl->data->protocol.p1.rcv.cursor.first) / 3;
+  if (brl->data->prot.p1.rcv.cursor.first <= code && 
+      code <= brl->data->prot.p1.rcv.cursor.last) { /* Routing Keys */ 
+    key = (code - brl->data->prot.p1.rcv.cursor.first) / 3;
     return enqueueKeyEvent(brl, PM_GRP_RoutingKeys1, key, press);
   }
 
@@ -434,28 +395,28 @@ static int
 disableOutputTranslation1 (BrailleDisplay *brl, unsigned char xmtOffset, int count) {
   unsigned char buffer[count];
   memset(buffer, 1, sizeof(buffer));
-  return writePacket1(brl, XMT_BRLWRITE+xmtOffset,
+  return writePacket1(brl, PM_P1_XMT_BRLWRITE+xmtOffset,
                       sizeof(buffer), buffer);
 }
 
 static void
 initializeTable1 (BrailleDisplay *brl) {
-  disableOutputTranslation1(brl, brl->data->protocol.p1.xmt.statusOffset, model->statusCount);
-  disableOutputTranslation1(brl, brl->data->protocol.p1.xmt.textOffset, model->textColumns);
+  disableOutputTranslation1(brl, brl->data->prot.p1.xmt.statusOffset, brl->data->model->statusCount);
+  disableOutputTranslation1(brl, brl->data->prot.p1.xmt.textOffset, brl->data->model->textColumns);
 }
 
 static void
 writeText1 (BrailleDisplay *brl, unsigned int start, unsigned int count) {
   unsigned char buffer[count];
   translateOutputCells(buffer, brl->data->textCells+start, count);
-  writePacket1(brl, XMT_BRLDATA+brl->data->protocol.p1.xmt.textOffset+start, count, buffer);
+  writePacket1(brl, PM_P1_XMT_BRLDATA+brl->data->prot.p1.xmt.textOffset+start, count, buffer);
 }
 
 static void
 writeStatus1 (BrailleDisplay *brl, unsigned int start, unsigned int count) {
   unsigned char buffer[count];
   translateOutputCells(buffer, brl->data->statusCells+start, count);
-  writePacket1(brl, XMT_BRLDATA+brl->data->protocol.p1.xmt.statusOffset+start, count, buffer);
+  writePacket1(brl, PM_P1_XMT_BRLDATA+brl->data->prot.p1.xmt.statusOffset+start, count, buffer);
 }
 
 static void
@@ -467,29 +428,29 @@ initializeTerminal1 (BrailleDisplay *brl) {
   initializeTable1(brl);
   drainBrailleOutput(brl, 0);
 
-  writeStatus1(brl, 0, model->statusCount);
+  writeStatus1(brl, 0, brl->data->model->statusCount);
   drainBrailleOutput(brl, 0);
 
-  writeText1(brl, 0, model->textColumns);
+  writeText1(brl, 0, brl->data->model->textColumns);
   drainBrailleOutput(brl, 0);
 }
 
 static int
 readCommand1 (BrailleDisplay *brl, KeyTableCommandContext context) {
-  unsigned char packet[PM1_MAX_PACKET_SIZE];
+  unsigned char packet[PM_P1_MAXIMUM_PACKET_SIZE];
   size_t length;
 
   while ((length = readPacket1(brl, packet, sizeof(packet)))) {
     switch (packet[1]) {
-      case PM1_PKT_IDENTITY:
+      case PM_P1_PKT_IDENTITY:
         if (interpretIdentity1(brl, packet)) brl->resizeRequired = 1;
         asyncWait(200);
         initializeTerminal1(brl);
         break;
 
-      case PM1_PKT_RECEIVE:
+      case PM_P1_PKT_RECEIVE:
         handleKey1(brl, ((packet[2] << 8) | packet[3]),
-                   (packet[6] == PRESSED),
+                   (packet[6] == PM_P1_KEY_PRESSED),
                    ((packet[7] << 8) | packet[8]));
         continue;
 
@@ -546,7 +507,7 @@ static int
 writeIdentifyRequest1 (BrailleDisplay *brl) {
   static const unsigned char badPacket[] = {
     STX,
-    PM1_PKT_SEND,
+    PM_P1_PKT_SEND,
     0, 0,			/* position */
     0, 0,			/* wrong number of bytes */
     ETX
@@ -559,12 +520,12 @@ static BrailleResponseResult
 isIdentityResponse1 (BrailleDisplay *brl, const void *packet, size_t size) {
   const unsigned char *packet1 = packet;
 
-  return (packet1[1] == PM1_PKT_IDENTITY)? BRL_RSP_DONE: BRL_RSP_UNEXPECTED;
+  return (packet1[1] == PM_P1_PKT_IDENTITY)? BRL_RSP_DONE: BRL_RSP_UNEXPECTED;
 }
 
 static int
 identifyTerminal1 (BrailleDisplay *brl) {
-  unsigned char response[PM1_MAX_PACKET_SIZE];			/* answer has 10 chars */
+  unsigned char response[PM_P1_MAXIMUM_PACKET_SIZE];			/* answer has 10 chars */
   int detected = probeBrailleDisplay(brl, 0, NULL, 1000,
                                      writeIdentifyRequest1,
                                      readPacket1, response, sizeof(response),
@@ -572,8 +533,8 @@ identifyTerminal1 (BrailleDisplay *brl) {
 
   if (detected) {
     if (interpretIdentity1(brl, response)) {
-      protocol = &protocolOperations1;
-      brl->data->protocol.p1.rcv.switchState = 0;
+      brl->data->protocol = &protocolOperations1;
+      brl->data->prot.p1.rcv.switchState = 0;
 
       makeOutputTable(dotsTable_ISO11548_1);
       return 1;
@@ -759,11 +720,11 @@ flushCells2 (BrailleDisplay *brl) {
     unsigned char *byte = buffer;
 
     /* The status cells. */
-    byte = translateOutputCells(byte, brl->data->statusCells, model->statusCount);
+    byte = translateOutputCells(byte, brl->data->statusCells, brl->data->model->statusCount);
 
     /* Two dummy cells for each key on the left side. */
-    if (model->protocolRevision < 2) {
-      int count = model->leftKeys;
+    if (brl->data->model->protocolRevision < 2) {
+      int count = brl->data->model->leftKeys;
       while (count-- > 0) {
         *byte++ = 0;
         *byte++ = 0;
@@ -771,11 +732,11 @@ flushCells2 (BrailleDisplay *brl) {
     }
 
     /* The text cells. */
-    byte = translateOutputCells(byte, brl->data->textCells, model->textColumns);
+    byte = translateOutputCells(byte, brl->data->textCells, brl->data->model->textColumns);
 
     /* Two dummy cells for each key on the right side. */
-    if (model->protocolRevision < 2) {
-      int count = model->rightKeys;
+    if (brl->data->model->protocolRevision < 2) {
+      int count = brl->data->model->rightKeys;
       while (count-- > 0) {
         *byte++ = 0;
         *byte++ = 0;
@@ -801,7 +762,7 @@ initializeTerminal2 (BrailleDisplay *brl) {
     unsigned char data[13];
     unsigned char size = 0;
 
-    data[size++] = model->modelIdentifier; /* device identification code */
+    data[size++] = brl->data->model->modelIdentifier; /* device identification code */
 
     /* serial baud (bcd-encoded, six digits, one per nibble) */
     /* set to zero for default (57,600) */
@@ -809,10 +770,10 @@ initializeTerminal2 (BrailleDisplay *brl) {
     data[size++] = 0;
     data[size++] = 0;
 
-    data[size++] = model->statusCount; /* number of vertical braille cells */
-    data[size++] = model->leftKeys; /* number of left keys and switches */
-    data[size++] = model->textColumns; /* number of horizontal braille cells */
-    data[size++] = model->rightKeys; /* number of right keys and switches */
+    data[size++] = brl->data->model->statusCount; /* number of vertical braille cells */
+    data[size++] = brl->data->model->leftKeys; /* number of left keys and switches */
+    data[size++] = brl->data->model->textColumns; /* number of horizontal braille cells */
+    data[size++] = brl->data->model->rightKeys; /* number of right keys and switches */
 
     data[size++] = 2; /* number of routing keys per braille cell */
     data[size++] = 0; /* size of LCD */
@@ -950,8 +911,8 @@ typedef struct {
 } InputModule2;
 
 static void
-addInputMapping2 (const InputModule2 *module, unsigned char bit, KeyGroup group, KeyNumber number) {
-  if (model->protocolRevision < 2) {
+addInputMapping2 (BrailleDisplay *brl, const InputModule2 *module, unsigned char bit, KeyGroup group, KeyNumber number) {
+  if (brl->data->model->protocolRevision < 2) {
     bit += module->bit;
   } else {
     bit += 8 - module->bit - module->size;
@@ -976,16 +937,16 @@ nextInputModule2 (InputModule2 *module, unsigned char size) {
 }
 
 static void
-mapInputKey2 (int count, InputModule2 *module, int rear, int front) {
+mapInputKey2 (BrailleDisplay *brl, int count, InputModule2 *module, int rear, int front) {
   while (count--) {
     nextInputModule2(module, inputKeySize2);
-    addInputMapping2(module, 0, PM_GRP_NavigationKeys, rear);
-    addInputMapping2(module, 1, PM_GRP_NavigationKeys, front);
+    addInputMapping2(brl, module, 0, PM_GRP_NavigationKeys, rear);
+    addInputMapping2(brl, module, 1, PM_GRP_NavigationKeys, front);
   }
 }
 
 static void
-mapInputModules2 (void) {
+mapInputModules2 (BrailleDisplay *brl) {
   InputModule2 module;
   module.byte = inputBytes2;
   module.bit = 0;
@@ -999,42 +960,42 @@ mapInputModules2 (void) {
     }
   }
 
-  mapInputKey2(model->rightKeys, &module, PM_KEY_RightKeyRear, PM_KEY_RightKeyFront);
+  mapInputKey2(brl, brl->data->model->rightKeys, &module, PM_KEY_RightKeyRear, PM_KEY_RightKeyFront);
 
   {
-    unsigned char column = model->textColumns;
+    unsigned char column = brl->data->model->textColumns;
     while (column) {
       nextInputModule2(&module, 1);
-      addInputMapping2(&module, 0, PM_GRP_RoutingKeys2, --column);
+      addInputMapping2(brl, &module, 0, PM_GRP_RoutingKeys2, --column);
 
       nextInputModule2(&module, 1);
-      addInputMapping2(&module, 0, PM_GRP_RoutingKeys1, column);
+      addInputMapping2(brl, &module, 0, PM_GRP_RoutingKeys1, column);
     }
   }
 
-  mapInputKey2(model->leftKeys, &module, PM_KEY_LeftKeyRear, PM_KEY_LeftKeyFront);
+  mapInputKey2(brl, brl->data->model->leftKeys, &module, PM_KEY_LeftKeyRear, PM_KEY_LeftKeyFront);
 
   {
-    unsigned char cell = model->statusCount;
+    unsigned char cell = brl->data->model->statusCount;
     while (cell) {
       nextInputModule2(&module, 1);
-      addInputMapping2(&module, 0, PM_GRP_StatusKeys2, cell-1);
+      addInputMapping2(brl, &module, 0, PM_GRP_StatusKeys2, cell-1);
 
       nextInputModule2(&module, 1);
-      addInputMapping2(&module, 0, PM_GRP_StatusKeys1, cell--);
+      addInputMapping2(brl, &module, 0, PM_GRP_StatusKeys1, cell--);
     }
   }
 
   module.bit = 0;
   nextInputModule2(&module, 8);
-  addInputMapping2(&module, 0, PM_GRP_NavigationKeys, PM_KEY_BarUp2);
-  addInputMapping2(&module, 1, PM_GRP_NavigationKeys, PM_KEY_BarUp1);
-  addInputMapping2(&module, 2, PM_GRP_NavigationKeys, PM_KEY_BarDown1);
-  addInputMapping2(&module, 3, PM_GRP_NavigationKeys, PM_KEY_BarDown2);
-  addInputMapping2(&module, 4, PM_GRP_NavigationKeys, PM_KEY_BarRight1);
-  addInputMapping2(&module, 5, PM_GRP_NavigationKeys, PM_KEY_BarLeft1);
-  addInputMapping2(&module, 6, PM_GRP_NavigationKeys, PM_KEY_BarRight2);
-  addInputMapping2(&module, 7, PM_GRP_NavigationKeys, PM_KEY_BarLeft2);
+  addInputMapping2(brl, &module, 0, PM_GRP_NavigationKeys, PM_KEY_BarUp2);
+  addInputMapping2(brl, &module, 1, PM_GRP_NavigationKeys, PM_KEY_BarUp1);
+  addInputMapping2(brl, &module, 2, PM_GRP_NavigationKeys, PM_KEY_BarDown1);
+  addInputMapping2(brl, &module, 3, PM_GRP_NavigationKeys, PM_KEY_BarDown2);
+  addInputMapping2(brl, &module, 4, PM_GRP_NavigationKeys, PM_KEY_BarRight1);
+  addInputMapping2(brl, &module, 5, PM_GRP_NavigationKeys, PM_KEY_BarLeft1);
+  addInputMapping2(brl, &module, 6, PM_GRP_NavigationKeys, PM_KEY_BarRight2);
+  addInputMapping2(brl, &module, 7, PM_GRP_NavigationKeys, PM_KEY_BarLeft2);
 }
 
 static int
@@ -1054,14 +1015,14 @@ isIdentityResponse2 (BrailleDisplay *brl, const void *packet, size_t size) {
 static int
 identifyTerminal2 (BrailleDisplay *brl) {
   Packet2 packet;			/* answer has 10 chars */
-  int detected = probeBrailleDisplay(brl, io->protocol2-1, NULL, 100,
+  int detected = probeBrailleDisplay(brl, brl->data->io->protocol2-1, NULL, 100,
                                      writeIdentifyRequest2,
                                      readPacket2, &packet, PM2_MAX_PACKET_SIZE,
                                      isIdentityResponse2);
 
   if (detected) {
     if (interpretIdentity2(brl, packet.data.bytes)) {
-      protocol = &protocolOperations2;
+      brl->data->protocol = &protocolOperations2;
 
       {
         static const DotsTable dots = {
@@ -1070,18 +1031,18 @@ identifyTerminal2 (BrailleDisplay *brl) {
         makeOutputTable(dots);
       }
 
-      inputKeySize2 = (model->protocolRevision < 2)? 4: 8;
+      inputKeySize2 = (brl->data->model->protocolRevision < 2)? 4: 8;
       {
-        int keyCount = model->leftKeys + model->rightKeys;
+        int keyCount = brl->data->model->leftKeys + brl->data->model->rightKeys;
         inputBytes2 = keyCount + 1 +
                       ((((keyCount * inputKeySize2) +
-                         ((model->textColumns + model->statusCount) * 2)
+                         ((brl->data->model->textColumns + brl->data->model->statusCount) * 2)
                         ) + 7) / 8);
       }
       inputBits2 = inputBytes2 * 8;
 
       if ((inputMap2 = malloc(inputBits2 * sizeof(*inputMap2)))) {
-        mapInputModules2();
+        mapInputModules2(brl);
 
         if ((inputState2 = malloc(inputBytes2))) {
           return 1;
@@ -1100,8 +1061,8 @@ identifyTerminal2 (BrailleDisplay *brl) {
 
 static int
 identifyTerminal (BrailleDisplay *brl) {
-  if (io->protocol1 && identifyTerminal1(brl)) return 1;
-  if (io->protocol2 && identifyTerminal2(brl)) return 1;
+  if (brl->data->io->protocol1 && identifyTerminal1(brl)) return 1;
+  if (brl->data->io->protocol2 && identifyTerminal2(brl)) return 1;
   return 0;
 }
 
@@ -1109,12 +1070,12 @@ static int
 startTerminal (BrailleDisplay *brl) {
   if (gioDiscardInput(brl->gioEndpoint)) {
     if (identifyTerminal(brl)) {
-      brl->setFirmness = protocol->setFirmness;
+      brl->setFirmness = brl->data->protocol->setFirmness;
 
-      memset(brl->data->textCells, 0, model->textColumns);
-      memset(brl->data->statusCells, 0, model->statusCount);
+      memset(brl->data->textCells, 0, brl->data->model->textColumns);
+      memset(brl->data->statusCells, 0, brl->data->model->statusCount);
 
-      protocol->initializeTerminal(brl);
+      brl->data->protocol->initializeTerminal(brl);
       return 1;
     }
   }
@@ -1152,7 +1113,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   descriptor.bluetooth.options.applicationData = &bluetoothOperations;
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
-    io = gioGetApplicationData(brl->gioEndpoint);
+    brl->data->io = gioGetApplicationData(brl->gioEndpoint);
     return 1;
   }
 
@@ -1166,7 +1127,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     brl->data->gsc.initialized = 0;
 
     if (connectResource(brl, device)) {
-      const unsigned int *baud = io->baudList;
+      const unsigned int *baud = brl->data->io->baudList;
 
       if (baud) {
         while (*baud) {
@@ -1174,7 +1135,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
           gioInitializeSerialParameters(&serialParameters);
           serialParameters.baud = *baud;
-          serialParameters.flowControl = io->flowControl;
+          serialParameters.flowControl = brl->data->io->flowControl;
           logMessage(LOG_DEBUG, "probing Papenmeier display at %u baud", *baud);
 
           if (gioReconfigureResource(brl->gioEndpoint, &serialParameters)) {
@@ -1203,7 +1164,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 static void
 brl_destruct (BrailleDisplay *brl) {
   disconnectBrailleResource(brl, NULL);
-  protocol->releaseResources();
+  brl->data->protocol->releaseResources();
   free(brl->data);
 }
 
@@ -1222,8 +1183,8 @@ updateCells (
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  updateCells(brl, model->textColumns, brl->buffer, brl->data->textCells, protocol->writeText);
-  protocol->flushCells(brl);
+  updateCells(brl, brl->data->model->textColumns, brl->buffer, brl->data->textCells, brl->data->protocol->writeText);
+  brl->data->protocol->flushCells(brl);
   return 1;
 }
 
@@ -1279,14 +1240,14 @@ initializeGenericStatusCodes (BrailleDisplay *brl) {
 
 static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
-  if (model->statusCount) {
-    unsigned char cells[model->statusCount];
+  if (brl->data->model->statusCount) {
+    unsigned char cells[brl->data->model->statusCount];
 
     if (s[GSC_FIRST] == GSC_MARKER) {
       unsigned int i;
 
       if (!brl->data->gsc.initialized) {
-        if (model->statusCount < 13) {
+        if (brl->data->model->statusCount < 13) {
           brl->data->gsc.makeNumber = makePortraitNumber;
           brl->data->gsc.makeFlag = makePortraitFlag;
         } else {
@@ -1298,7 +1259,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
         brl->data->gsc.initialized = 1;
       }
 
-      for (i=0; i<model->statusCount; i+=1) {
+      for (i=0; i<brl->data->model->statusCount; i+=1) {
         unsigned char *cell = &cells[i];
         PM_GenericStatusCode code = (i < ARRAY_COUNT(brl->data->gsc.codes))? brl->data->gsc.codes[i]: PM_GSC_EMPTY;
 
@@ -1308,7 +1269,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
           *cell = brl->data->gsc.makeNumber(s[code-PM_GSC_NUMBER]);
         } else if (code >= PM_GSC_FLAG) {
           *cell = brl->data->gsc.makeFlag(i+1, s[code-PM_GSC_FLAG]);
-        } else if (code < model->statusCount) {
+        } else if (code < brl->data->model->statusCount) {
           *cell = s[code];
         } else {
           *cell = 0;
@@ -1317,17 +1278,17 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
     } else {
       unsigned int i = 0;
 
-      while (i < model->statusCount) {
+      while (i < brl->data->model->statusCount) {
         unsigned char dots = s[i];
 
         if (!dots) break;
         cells[i++] = dots;
       }
 
-      while (i < model->statusCount) cells[i++] = 0;
+      while (i < brl->data->model->statusCount) cells[i++] = 0;
     }
 
-    updateCells(brl, model->statusCount, cells, brl->data->statusCells, protocol->writeStatus);
+    updateCells(brl, brl->data->model->statusCount, cells, brl->data->statusCells, brl->data->protocol->writeStatus);
   }
 
   return 1;
@@ -1335,5 +1296,5 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
 
 static int 
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  return protocol->readCommand(brl, context);
+  return brl->data->protocol->readCommand(brl, context);
 }
