@@ -17,12 +17,9 @@
 ###############################################################################
 
 # This key subtable is for Papenmeier displays which have 4 status keys.
-note The keys behind the status cells are named Status1 through Status4.
+note The keys behind the status cells are named Status.1 through Status.4.
 
 bind !Status.1 HELP
 bind !Status.2 LEARN
 bind !Status.3 CSRJMP_VERT
-
-assign toggleKeys Status.4
-assign toggleCommand DISPMD
-include ../toggle.kti
+bind !Status.4 INFO
