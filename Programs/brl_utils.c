@@ -76,18 +76,18 @@ toLowerDigit (unsigned char upper) {
 }
 
 /* Dots for landscape (counterclockwise-rotated) digits. */
-const unsigned char landscapeDigits[11] = {
-  BRL_DOT_1 | BRL_DOT_5 | BRL_DOT_2,
-  BRL_DOT_4,
-  BRL_DOT_4 | BRL_DOT_1,
-  BRL_DOT_4 | BRL_DOT_5,
-  BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_2,
-  BRL_DOT_4 | BRL_DOT_2,
-  BRL_DOT_4 | BRL_DOT_1 | BRL_DOT_5,
-  BRL_DOT_4 | BRL_DOT_1 | BRL_DOT_5 | BRL_DOT_2,
-  BRL_DOT_4 | BRL_DOT_1 | BRL_DOT_2,
-  BRL_DOT_1 | BRL_DOT_5,
-  BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5
+const DigitsTable landscapeDigits = {
+  [ 0] = BRL_DOT_1 | BRL_DOT_5 | BRL_DOT_2,
+  [ 1] = BRL_DOT_4,
+  [ 2] = BRL_DOT_4 | BRL_DOT_1,
+  [ 3] = BRL_DOT_4 | BRL_DOT_5,
+  [ 4] = BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_2,
+  [ 5] = BRL_DOT_4 | BRL_DOT_2,
+  [ 6] = BRL_DOT_4 | BRL_DOT_1 | BRL_DOT_5,
+  [ 7] = BRL_DOT_4 | BRL_DOT_1 | BRL_DOT_5 | BRL_DOT_2,
+  [ 8] = BRL_DOT_4 | BRL_DOT_1 | BRL_DOT_2,
+  [ 9] = BRL_DOT_1 | BRL_DOT_5,
+  [10] = BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5
 };
 
 /* Format landscape representation of numbers 0 through 99. */
@@ -105,18 +105,18 @@ makeLandscapeFlag (int number, int on) {
 }
 
 /* Dots for seascape (clockwise-rotated) digits. */
-const unsigned char seascapeDigits[11] = {
-  BRL_DOT_5 | BRL_DOT_1 | BRL_DOT_4,
-  BRL_DOT_2,
-  BRL_DOT_2 | BRL_DOT_5,
-  BRL_DOT_2 | BRL_DOT_1,
-  BRL_DOT_2 | BRL_DOT_1 | BRL_DOT_4,
-  BRL_DOT_2 | BRL_DOT_4,
-  BRL_DOT_2 | BRL_DOT_5 | BRL_DOT_1,
-  BRL_DOT_2 | BRL_DOT_5 | BRL_DOT_1 | BRL_DOT_4,
-  BRL_DOT_2 | BRL_DOT_5 | BRL_DOT_4,
-  BRL_DOT_5 | BRL_DOT_1,
-  BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5
+const DigitsTable seascapeDigits = {
+  [ 0] = BRL_DOT_5 | BRL_DOT_1 | BRL_DOT_4,
+  [ 1] = BRL_DOT_2,
+  [ 2] = BRL_DOT_2 | BRL_DOT_5,
+  [ 3] = BRL_DOT_2 | BRL_DOT_1,
+  [ 4] = BRL_DOT_2 | BRL_DOT_1 | BRL_DOT_4,
+  [ 5] = BRL_DOT_2 | BRL_DOT_4,
+  [ 6] = BRL_DOT_2 | BRL_DOT_5 | BRL_DOT_1,
+  [ 7] = BRL_DOT_2 | BRL_DOT_5 | BRL_DOT_1 | BRL_DOT_4,
+  [ 8] = BRL_DOT_2 | BRL_DOT_5 | BRL_DOT_4,
+  [ 9] = BRL_DOT_5 | BRL_DOT_1,
+  [10] = BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5
 };
 
 /* Format seascape representation of numbers 0 through 99. */
@@ -134,18 +134,18 @@ makeSeascapeFlag (int number, int on) {
 }
 
 /* Dots for portrait digits - 2 numbers in one cells */
-const unsigned char portraitDigits[11] = {
-  BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5,
-  BRL_DOT_1,
-  BRL_DOT_1 | BRL_DOT_2,
-  BRL_DOT_1 | BRL_DOT_4,
-  BRL_DOT_1 | BRL_DOT_4 | BRL_DOT_5,
-  BRL_DOT_1 | BRL_DOT_5,
-  BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4,
-  BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5,
-  BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_5,
-  BRL_DOT_2 | BRL_DOT_4,
-  BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5
+const DigitsTable portraitDigits = {
+  [ 0] = BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5,
+  [ 1] = BRL_DOT_1,
+  [ 2] = BRL_DOT_1 | BRL_DOT_2,
+  [ 3] = BRL_DOT_1 | BRL_DOT_4,
+  [ 4] = BRL_DOT_1 | BRL_DOT_4 | BRL_DOT_5,
+  [ 5] = BRL_DOT_1 | BRL_DOT_5,
+  [ 6] = BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4,
+  [ 7] = BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5,
+  [ 8] = BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_5,
+  [ 9] = BRL_DOT_2 | BRL_DOT_4,
+  [10] = BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5
 };
 
 /* Format portrait representation of numbers 0 through 99. */

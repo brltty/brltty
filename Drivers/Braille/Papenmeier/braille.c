@@ -133,8 +133,8 @@ struct BrailleDataStruct {
   unsigned char statusCells[PM_MAXIMUM_STATUS_CELLS];
 
   struct {
-    unsigned char (*makeNumber) (int x);
-    unsigned char (*makeFlag) (int number, int on);
+    MakeNumberFunction *makeNumber;
+    MakeFlagFunction *makeFlag;
 
     PM_GenericStatusCode codes[PM_MAXIMUM_STATUS_CELLS];
     unsigned char initialized;
