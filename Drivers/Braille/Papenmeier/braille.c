@@ -102,10 +102,17 @@ typedef struct {
   int (*setFirmness) (BrailleDisplay *brl, BrailleFirmness setting);
 } ProtocolOperations;
 
-typedef uint16_t PM_GenericStatusCode;
-#define PM_GSC_EMPTY     0
-#define PM_GSC_FLAG   1000
-#define PM_GSC_NUMBER 2000
+typedef enum {
+  PM_GSC_DOTS = 0,
+  PM_GSC_FLAG,
+  PM_GSC_NUMBER,
+  PM_GSC_POSITION
+} PM_GenericStatusFormat;
+
+typedef struct {
+  unsigned char format;
+  unsigned char value;
+} PM_GenericStatusCode;
 
 typedef struct {
   int first;
@@ -118,9 +125,9 @@ typedef struct {
 } PM_InputMapping2;
 
 struct BrailleDataStruct {
-  const ProtocolOperations *protocol;
   const InputOutputOperations *io;
   const ModelEntry *model;
+  const ProtocolOperations *protocol;
 
   unsigned char textCells[PM_MAXIMUM_TEXT_CELLS];
   unsigned char statusCells[PM_MAXIMUM_STATUS_CELLS];
@@ -154,9 +161,10 @@ struct BrailleDataStruct {
       PM_InputMapping2 *inputMap;
       unsigned char *inputState;
 
+      int inputKeySize;
       int inputBytes;
       int inputBits;
-      int inputKeySize;
+
       int refreshRequired;
     } p2;
   } prot;
@@ -1030,12 +1038,14 @@ identifyTerminal2 (BrailleDisplay *brl) {
         static const DotsTable dots = {
           0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01
         };
+
         makeOutputTable(dots);
       }
 
       brl->data->prot.p2.inputKeySize = (brl->data->model->protocolRevision < 2)? 4: 8;
       {
         int keyCount = brl->data->model->leftKeys + brl->data->model->rightKeys;
+
         brl->data->prot.p2.inputBytes = keyCount + 1 +
                                         ((((keyCount * brl->data->prot.p2.inputKeySize) +
                                            ((brl->data->model->textColumns + brl->data->model->statusCount) * 2)
@@ -1126,9 +1136,9 @@ static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
-    brl->data->protocol = NULL;
     brl->data->io = NULL;
     brl->data->model = NULL;
+    brl->data->protocol = NULL;
     brl->data->gsc.initialized = 0;
 
     if (connectResource(brl, device)) {
@@ -1206,37 +1216,35 @@ initializeGenericStatusCodes (BrailleDisplay *brl) {
     for (i=0; i<count; i+=1) {
       PM_GenericStatusCode *code = &brl->data->gsc.codes[i];
 
-#define SET(CMD,CODE) case (CMD): *code = (CODE); break;
+#define SET(COMMAND,FORMAT,VALUE) case (COMMAND): code->format = (FORMAT); code->value = (VALUE); break;
       switch (commands[i] & BRL_MSK_CMD) {
         default:
-        SET(BRL_CMD_NOOP, PM_GSC_EMPTY);
+        SET(BRL_CMD_NOOP, PM_GSC_DOTS, 0);
 
-        SET(BRL_CMD_HELP, PM_GSC_NUMBER+gscWindowRow);
-        SET(BRL_CMD_LEARN, PM_GSC_NUMBER+gscWindowColumn);
+        SET(BRL_CMD_HELP, PM_GSC_NUMBER, gscWindowRow);
+        SET(BRL_CMD_LEARN, PM_GSC_POSITION, gscWindowColumn);
+        SET(BRL_CMD_CSRJMP_VERT, PM_GSC_NUMBER, gscCursorRow);
+        SET(BRL_CMD_INFO, PM_GSC_NUMBER, gscCursorColumn);
+        SET(BRL_CMD_PREFMENU, PM_GSC_NUMBER, gscScreenNumber);
 
-        SET(BRL_CMD_CSRJMP_VERT, PM_GSC_NUMBER+gscCursorRow);
-        SET(BRL_CMD_INFO, PM_GSC_NUMBER+gscCursorColumn);
-
-        SET(BRL_CMD_PREFMENU, PM_GSC_NUMBER+gscScreenNumber);
-
-        SET(BRL_CMD_FREEZE, PM_GSC_FLAG+gscFrozenScreen);
-        SET(BRL_CMD_DISPMD, PM_GSC_FLAG+gscDisplayMode);
-        SET(BRL_CMD_SIXDOTS, PM_GSC_FLAG+gscTextStyle);
-        SET(BRL_CMD_SLIDEWIN, PM_GSC_FLAG+gscSlidingWindow);
-        SET(BRL_CMD_SKPIDLNS, PM_GSC_FLAG+gscSkipIdenticalLines);
-        SET(BRL_CMD_SKPBLNKWINS, PM_GSC_FLAG+gscSkipBlankWindows);
-        SET(BRL_CMD_CSRVIS, PM_GSC_FLAG+gscShowCursor);
-        SET(BRL_CMD_CSRHIDE, PM_GSC_FLAG+gscHideCursor);
-        SET(BRL_CMD_CSRTRK, PM_GSC_FLAG+gscTrackCursor);
-        SET(BRL_CMD_CSRSIZE, PM_GSC_FLAG+gscCursorStyle);
-        SET(BRL_CMD_CSRBLINK, PM_GSC_FLAG+gscBlinkingCursor);
-        SET(BRL_CMD_ATTRVIS, PM_GSC_FLAG+gscShowAttributes);
-        SET(BRL_CMD_ATTRBLINK, PM_GSC_FLAG+gscBlinkingAttributes);
-        SET(BRL_CMD_CAPBLINK, PM_GSC_FLAG+gscBlinkingCapitals);
-        SET(BRL_CMD_TUNES, PM_GSC_FLAG+gscAlertTunes);
-        SET(BRL_CMD_AUTOREPEAT, PM_GSC_FLAG+gscAutorepeat);
-        SET(BRL_CMD_AUTOSPEAK, PM_GSC_FLAG+gscAutospeak);
-        SET(BRL_CMD_BRLUCDOTS, PM_GSC_FLAG+gscBrailleInputMode);
+        SET(BRL_CMD_FREEZE, PM_GSC_FLAG, gscFrozenScreen);
+        SET(BRL_CMD_DISPMD, PM_GSC_FLAG, gscDisplayMode);
+        SET(BRL_CMD_SIXDOTS, PM_GSC_FLAG, gscTextStyle);
+        SET(BRL_CMD_SLIDEWIN, PM_GSC_FLAG, gscSlidingWindow);
+        SET(BRL_CMD_SKPIDLNS, PM_GSC_FLAG, gscSkipIdenticalLines);
+        SET(BRL_CMD_SKPBLNKWINS, PM_GSC_FLAG, gscSkipBlankWindows);
+        SET(BRL_CMD_CSRVIS, PM_GSC_FLAG, gscShowCursor);
+        SET(BRL_CMD_CSRHIDE, PM_GSC_FLAG, gscHideCursor);
+        SET(BRL_CMD_CSRTRK, PM_GSC_FLAG, gscTrackCursor);
+        SET(BRL_CMD_CSRSIZE, PM_GSC_FLAG, gscCursorStyle);
+        SET(BRL_CMD_CSRBLINK, PM_GSC_FLAG, gscBlinkingCursor);
+        SET(BRL_CMD_ATTRVIS, PM_GSC_FLAG, gscShowAttributes);
+        SET(BRL_CMD_ATTRBLINK, PM_GSC_FLAG, gscBlinkingAttributes);
+        SET(BRL_CMD_CAPBLINK, PM_GSC_FLAG, gscBlinkingCapitals);
+        SET(BRL_CMD_TUNES, PM_GSC_FLAG, gscAlertTunes);
+        SET(BRL_CMD_AUTOREPEAT, PM_GSC_FLAG, gscAutorepeat);
+        SET(BRL_CMD_AUTOSPEAK, PM_GSC_FLAG, gscAutospeak);
+        SET(BRL_CMD_BRLUCDOTS, PM_GSC_FLAG, gscBrailleInputMode);
       }
 #undef SET
     }
@@ -1266,19 +1274,31 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
 
       for (i=0; i<brl->data->model->statusCount; i+=1) {
         unsigned char *cell = &cells[i];
-        PM_GenericStatusCode code = (i < ARRAY_COUNT(brl->data->gsc.codes))? brl->data->gsc.codes[i]: PM_GSC_EMPTY;
 
-        if (code == PM_GSC_EMPTY) {
-          *cell = 0;
-        } else if (code >= PM_GSC_NUMBER) {
-          *cell = brl->data->gsc.makeNumber(s[code-PM_GSC_NUMBER]);
-        } else if (code >= PM_GSC_FLAG) {
-          *cell = brl->data->gsc.makeFlag(i+1, s[code-PM_GSC_FLAG]);
-        } else if (code < brl->data->model->statusCount) {
-          *cell = s[code];
-        } else {
-          *cell = 0;
+        if (i < ARRAY_COUNT(brl->data->gsc.codes)) {
+          const PM_GenericStatusCode *code = &brl->data->gsc.codes[i];
+
+          switch (code->format) {
+            case PM_GSC_DOTS:
+              *cell = code->value;
+              continue;
+
+            case PM_GSC_FLAG:
+              *cell = brl->data->gsc.makeFlag(i+1, s[code->value]);
+              continue;
+
+            case PM_GSC_POSITION:
+              if (s[code->value] == 1) break;
+            case PM_GSC_NUMBER:
+              *cell = brl->data->gsc.makeNumber(s[code->value]);
+              continue;
+
+            default:
+              break;
+          }
         }
+
+        *cell = 0;
       }
     } else {
       unsigned int i = 0;
