@@ -94,7 +94,7 @@ static const InputOutputOperations bluetoothOperations = {
 
 typedef struct {
   void (*initializeTerminal) (BrailleDisplay *brl);
-  void (*releaseResources) (void);
+  void (*releaseResources) (BrailleDisplay *brl);
   int (*readCommand) (BrailleDisplay *brl, KeyTableCommandContext context);
   void (*writeText) (BrailleDisplay *brl, unsigned int start, unsigned int count);
   void (*writeStatus) (BrailleDisplay *brl, unsigned int start, unsigned int count);
@@ -110,7 +110,12 @@ typedef uint16_t PM_GenericStatusCode;
 typedef struct {
   int first;
   int last;
-} PM_KeyRange;
+} PM_KeyRange1;
+
+typedef struct {
+  KeyGroup group;
+  KeyNumber number;
+} PM_InputMapping2;
 
 struct BrailleDataStruct {
   const ProtocolOperations *protocol;
@@ -131,11 +136,11 @@ struct BrailleDataStruct {
   union {
     struct {
       struct {
-        PM_KeyRange front;
-        PM_KeyRange bar;
-        PM_KeyRange switches;
-        PM_KeyRange status;
-        PM_KeyRange cursor;
+        PM_KeyRange1 front;
+        PM_KeyRange1 bar;
+        PM_KeyRange1 switches;
+        PM_KeyRange1 status;
+        PM_KeyRange1 cursor;
         unsigned char switchState;
       } rcv;
 
@@ -144,6 +149,16 @@ struct BrailleDataStruct {
         unsigned char statusOffset;
       } xmt;
     } p1;
+
+    struct {
+      PM_InputMapping2 *inputMap;
+      unsigned char *inputState;
+
+      int inputBytes;
+      int inputBits;
+      int inputKeySize;
+      int refreshRequired;
+    } p2;
   } prot;
 };
 
@@ -177,7 +192,6 @@ interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) 
   }
 
   logMessage(LOG_WARNING, "unknown Papenmeier ID: %d", id);
-  brl->data->model = NULL;
   return 0;
 }
 
@@ -493,7 +507,7 @@ readCommand1 (BrailleDisplay *brl, KeyTableCommandContext context) {
 }
 
 static void
-releaseResources1 (void) {
+releaseResources1 (BrailleDisplay *brl) {
 }
 
 static const ProtocolOperations protocolOperations1 = {
@@ -559,18 +573,6 @@ typedef struct {
     unsigned char bytes[0XFF];
   } data;
 } Packet2;
-
-typedef struct {
-  KeyGroup group;
-  KeyNumber number;
-} InputMapping2;
-static InputMapping2 *inputMap2 = NULL;
-static int inputBytes2;
-static int inputBits2;
-static int inputKeySize2;
-
-static unsigned char *inputState2 = NULL;
-static int refreshRequired2;
 
 static size_t
 readPacket2 (BrailleDisplay *brl, void *packet, size_t size) {
@@ -710,12 +712,12 @@ interpretIdentity2 (BrailleDisplay *brl, const unsigned char *identity) {
 
 static void
 writeCells2 (BrailleDisplay *brl, unsigned int start, unsigned int count) {
-  refreshRequired2 = 1;
+  brl->data->prot.p2.refreshRequired = 1;
 }
 
 static void
 flushCells2 (BrailleDisplay *brl) {
-  if (refreshRequired2) {
+  if (brl->data->prot.p2.refreshRequired) {
     unsigned char buffer[0XFF];
     unsigned char *byte = buffer;
 
@@ -744,14 +746,14 @@ flushCells2 (BrailleDisplay *brl) {
     }
 
     writePacket2(brl, 3, byte-buffer, buffer);
-    refreshRequired2 = 0;
+    brl->data->prot.p2.refreshRequired = 0;
   }
 }
 
 static void
 initializeTerminal2 (BrailleDisplay *brl) {
-  memset(inputState2, 0, inputBytes2);
-  refreshRequired2 = 1;
+  memset(brl->data->prot.p2.inputState, 0, brl->data->prot.p2.inputBytes);
+  brl->data->prot.p2.refreshRequired = 1;
 
   /* Don't send the init packet by default as that was done at the factory
    * and shouldn't need to be done again. We'll keep the code, though,
@@ -798,22 +800,22 @@ readCommand2 (BrailleDisplay *brl, KeyTableCommandContext context) {
         break;
 
       case 0X0B: {
-        int bytes = MIN(packet.length, inputBytes2);
+        int bytes = MIN(packet.length, brl->data->prot.p2.inputBytes);
         int byte;
 
         /* Find out which keys have been released. */
         for (byte=0; byte<bytes; byte+=1) {
-          unsigned char old = inputState2[byte];
+          unsigned char old = brl->data->prot.p2.inputState[byte];
           unsigned char new = packet.data.bytes[byte];
 
           if (new != old) {
-            InputMapping2 *mapping = &inputMap2[byte * 8];
+            PM_InputMapping2 *mapping = &brl->data->prot.p2.inputMap[byte * 8];
             unsigned char bit = 0X01;
 
             while (bit) {
               if (!(new & bit) && (old & bit)) {
                 enqueueKeyEvent(brl, mapping->group, mapping->number, 0);
-                if ((inputState2[byte] &= ~bit) == new) break;
+                if ((brl->data->prot.p2.inputState[byte] &= ~bit) == new) break;
               }
 
               mapping += 1;
@@ -824,17 +826,17 @@ readCommand2 (BrailleDisplay *brl, KeyTableCommandContext context) {
 
         /* Find out which keys have been pressed. */
         for (byte=0; byte<bytes; byte+=1) {
-          unsigned char old = inputState2[byte];
+          unsigned char old = brl->data->prot.p2.inputState[byte];
           unsigned char new = packet.data.bytes[byte];
 
           if (new != old) {
-            InputMapping2 *mapping = &inputMap2[byte * 8];
+            PM_InputMapping2 *mapping = &brl->data->prot.p2.inputMap[byte * 8];
             unsigned char bit = 0X01;
 
             while (bit) {
               if ((new & bit) && !(old & bit)) {
                 enqueueKeyEvent(brl, mapping->group, mapping->number, 1);
-                if ((inputState2[byte] |= bit) == new) break;
+                if ((brl->data->prot.p2.inputState[byte] |= bit) == new) break;
               }
 
               mapping += 1;
@@ -879,15 +881,15 @@ readCommand2 (BrailleDisplay *brl, KeyTableCommandContext context) {
 }
 
 static void
-releaseResources2 (void) {
-  if (inputState2) {
-    free(inputState2);
-    inputState2 = NULL;
+releaseResources2 (BrailleDisplay *brl) {
+  if (brl->data->prot.p2.inputState) {
+    free(brl->data->prot.p2.inputState);
+    brl->data->prot.p2.inputState = NULL;
   }
 
-  if (inputMap2) {
-    free(inputMap2);
-    inputMap2 = NULL;
+  if (brl->data->prot.p2.inputMap) {
+    free(brl->data->prot.p2.inputMap);
+    brl->data->prot.p2.inputMap = NULL;
   }
 }
 
@@ -919,7 +921,7 @@ addInputMapping2 (BrailleDisplay *brl, const InputModule2 *module, unsigned char
   }
 
   {
-    InputMapping2 *mapping = &inputMap2[(module->byte * 8) + bit];
+    PM_InputMapping2 *mapping = &brl->data->prot.p2.inputMap[(module->byte * 8) + bit];
     mapping->group = group;
     mapping->number = number;
   }
@@ -939,7 +941,7 @@ nextInputModule2 (InputModule2 *module, unsigned char size) {
 static void
 mapInputKey2 (BrailleDisplay *brl, int count, InputModule2 *module, int rear, int front) {
   while (count--) {
-    nextInputModule2(module, inputKeySize2);
+    nextInputModule2(module, brl->data->prot.p2.inputKeySize);
     addInputMapping2(brl, module, 0, PM_GRP_NavigationKeys, rear);
     addInputMapping2(brl, module, 1, PM_GRP_NavigationKeys, front);
   }
@@ -948,13 +950,13 @@ mapInputKey2 (BrailleDisplay *brl, int count, InputModule2 *module, int rear, in
 static void
 mapInputModules2 (BrailleDisplay *brl) {
   InputModule2 module;
-  module.byte = inputBytes2;
+  module.byte = brl->data->prot.p2.inputBytes;
   module.bit = 0;
 
   {
     int i;
-    for (i=0; i<inputBits2; ++i) {
-      InputMapping2 *mapping = &inputMap2[i];
+    for (i=0; i<brl->data->prot.p2.inputBits; ++i) {
+      PM_InputMapping2 *mapping = &brl->data->prot.p2.inputMap[i];
       mapping->group = 0;
       mapping->number = 0;
     }
@@ -1031,25 +1033,25 @@ identifyTerminal2 (BrailleDisplay *brl) {
         makeOutputTable(dots);
       }
 
-      inputKeySize2 = (brl->data->model->protocolRevision < 2)? 4: 8;
+      brl->data->prot.p2.inputKeySize = (brl->data->model->protocolRevision < 2)? 4: 8;
       {
         int keyCount = brl->data->model->leftKeys + brl->data->model->rightKeys;
-        inputBytes2 = keyCount + 1 +
-                      ((((keyCount * inputKeySize2) +
-                         ((brl->data->model->textColumns + brl->data->model->statusCount) * 2)
-                        ) + 7) / 8);
+        brl->data->prot.p2.inputBytes = keyCount + 1 +
+                                        ((((keyCount * brl->data->prot.p2.inputKeySize) +
+                                           ((brl->data->model->textColumns + brl->data->model->statusCount) * 2)
+                                          ) + 7) / 8);
       }
-      inputBits2 = inputBytes2 * 8;
+      brl->data->prot.p2.inputBits = brl->data->prot.p2.inputBytes * 8;
 
-      if ((inputMap2 = malloc(inputBits2 * sizeof(*inputMap2)))) {
+      if ((brl->data->prot.p2.inputMap = malloc(brl->data->prot.p2.inputBits * sizeof(*brl->data->prot.p2.inputMap)))) {
         mapInputModules2(brl);
 
-        if ((inputState2 = malloc(inputBytes2))) {
+        if ((brl->data->prot.p2.inputState = malloc(brl->data->prot.p2.inputBytes))) {
           return 1;
         }
 
-        free(inputMap2);
-        inputMap2 = NULL;
+        free(brl->data->prot.p2.inputMap);
+        brl->data->prot.p2.inputMap = NULL;
       }
     }
   }
@@ -1124,6 +1126,9 @@ static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
+    brl->data->protocol = NULL;
+    brl->data->io = NULL;
+    brl->data->model = NULL;
     brl->data->gsc.initialized = 0;
 
     if (connectResource(brl, device)) {
@@ -1164,7 +1169,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 static void
 brl_destruct (BrailleDisplay *brl) {
   disconnectBrailleResource(brl, NULL);
-  brl->data->protocol->releaseResources();
+  brl->data->protocol->releaseResources(brl);
   free(brl->data);
 }
 
