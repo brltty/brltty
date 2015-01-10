@@ -208,8 +208,6 @@ renderStatusField_generic (unsigned char *cells) {
   cells[gscBlinkingAttributes] = prefs.blinkingAttributes;
   cells[gscBlinkingCapitals] = prefs.blinkingCapitals;
   cells[gscAlertTunes] = prefs.alertTunes;
-  cells[gscHelpScreen] = isHelpScreen();
-  cells[gscInfoMode] = infoMode;
   cells[gscAutorepeat] = prefs.autorepeat;
   cells[gscAutospeak] = prefs.autospeak;
   cells[gscBrailleInputMode] = prefs.brailleInputMode;

@@ -69,8 +69,6 @@ typedef enum {
   gscBlinkingAttributes /* blinking attributes underline */,
   gscBlinkingCapitals /* blinking capital letters */,
   gscAlertTunes /* alert tunes */,
-  gscHelpScreen /* help mode */,
-  gscInfoMode /* info mode */,
   gscAutorepeat /* autorepeat */,
   gscAutospeak /* autospeak */,
   gscBrailleInputMode /* braille input mode */,
