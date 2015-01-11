@@ -469,7 +469,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O activity.$O $(PREFS_OBJECTS) profile.$O menu.$O menu_prefs.$O ses.$O status.$O update.$O blink.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_utils.$O cmd_custom.$O cmd_navigation.$O cmd_input.$O cmd_keycodes.$O cmd_touch.$O cmd_toggle.$O cmd_preferences.$O cmd_clipboard.$O cmd_speech.$O cmd_learn.$O cmd_miscellaneous.$O pipe.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) api_control.$O $(API_SERVER_OBJECTS)
+CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O activity.$O $(PREFS_OBJECTS) profile.$O menu.$O menu_prefs.$O ses.$O status.$O update.$O blink.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_utils.$O cmd_custom.$O cmd_navigation.$O cmd_input.$O cmd_keycodes.$O cmd_touch.$O cmd_toggle.$O cmd_preferences.$O cmd_clipboard.$O cmd_speech.$O cmd_learn.$O cmd_miscellaneous.$O pipe.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_cmds.$O ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) api_control.$O $(API_SERVER_OBJECTS)
 CORE_NAME = brltty
 
 brltty-core: $(CORE_OBJECTS)
@@ -704,7 +704,7 @@ atb_translate.$O:
 
 ###############################################################################
 
-KTBTEST_OBJECTS = ktbtest.$O $(PROGRAM_OBJECTS) ktb_compile.$O ktb_list.$O ktb_keyboard.$O ttb_translate.$O ttb_compile.$O ttb_native.$O dataarea.$O drivers.$O driver.$O brl_utils.$O brl_driver.$O brl_base.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) $(PREFS_OBJECTS) cmd.$O cmd_queue.$O hidkeys.$O report.$O
+KTBTEST_OBJECTS = ktbtest.$O $(PROGRAM_OBJECTS) ktb_compile.$O ktb_list.$O ktb_cmds.$O ktb_keyboard.$O ttb_translate.$O ttb_compile.$O ttb_native.$O dataarea.$O drivers.$O driver.$O brl_utils.$O brl_driver.$O brl_base.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) $(PREFS_OBJECTS) cmd.$O cmd_queue.$O hidkeys.$O report.$O
 
 ktbtest$X: $(KTBTEST_OBJECTS) $(BRAILLE_DRIVERS)
 	$(CC) $(LDFLAGS) -o $@ $(KTBTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LDLIBS)
@@ -720,6 +720,9 @@ ktb_translate.$O:
 
 ktb_list.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ktb_list.c
+
+ktb_cmds.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ktb_cmds.c
 
 ktb_keyboard.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ktb_keyboard.c
