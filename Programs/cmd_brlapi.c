@@ -108,7 +108,7 @@ cmdBrlapiToBrltty (brlapi_keyCode_t code) {
   int cmd;
   switch (code & BRLAPI_KEY_TYPE_MASK) {
   case BRLAPI_KEY_TYPE_CMD:
-    cmd = BRL_BLK((code&BRLAPI_KEY_CMD_BLK_MASK)>>BRLAPI_KEY_CMD_BLK_SHIFT)
+    cmd = BRL_BLK_PUT((code&BRLAPI_KEY_CMD_BLK_MASK)>>BRLAPI_KEY_CMD_BLK_SHIFT)
 	| BRL_ARG_SET((code&BRLAPI_KEY_CMD_ARG_MASK)>>BRLAPI_KEY_CMD_ARG_SHIFT);
     break;
   case BRLAPI_KEY_TYPE_SYM: {

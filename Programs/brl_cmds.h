@@ -40,10 +40,10 @@ extern "C" {
 #define BRL_CODE_PUT(name,value) ((value) << BRL_SHIFT_##name)
 #define BRL_CODE_SET(name,value) BRL_CODE_PUT(name, ((value) & BRL_CODE_MASK(name)))
 
-#define BRL_ARG(arg) BRL_CODE_PUT(ARG, (arg))
-#define BRL_BLK(blk) BRL_CODE_PUT(BLK, (blk))
-#define BRL_FLG(fLG) BRL_CODE_PUT(FLG, (flg))
-#define BRL_EXT(ext) BRL_CODE_PUT(EXT, (ext))
+#define BRL_ARG_PUT(arg) BRL_CODE_PUT(ARG, (arg))
+#define BRL_BLK_PUT(blk) BRL_CODE_PUT(BLK, (blk))
+#define BRL_FLG_PUT(fLG) BRL_CODE_PUT(FLG, (flg))
+#define BRL_EXT_PUT(ext) BRL_CODE_PUT(EXT, (ext))
 
 #define BRL_MSK(name) BRL_CODE_PUT(name, BRL_CODE_MASK(name))
 #define BRL_MSK_ARG BRL_MSK(ARG)

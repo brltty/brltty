@@ -236,7 +236,7 @@ addCommandArguments (KeyTable *table, int *command, const CommandEntry *entry, c
     if (keyCount > 0) {
       if (keyCount > 1) {
         qsort(keyValues, keyCount, sizeof(*keyValues), sortKeyOffsets);
-        if (entry->isRange) *command |= BRL_EXT(keyValues[1].number);
+        if (entry->isRange) *command |= BRL_EXT_PUT(keyValues[1].number);
       }
 
       *command += keyValues[0].number;
