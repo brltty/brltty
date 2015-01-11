@@ -1170,10 +1170,9 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
             [gscBlinkingAttributes] = "ATTRBLINK",
             [gscBlinkingCapitals] = "CAPBLINK",
             [gscAlertTunes] = "TUNES",
-            [gscHelpScreen] = "HELP",
-            [gscInfoMode] = "INFO",
             [gscAutorepeat] = "AUTOREPEAT",
-            [gscAutospeak] = "AUTOSPEAK"
+            [gscAutospeak] = "AUTOSPEAK",
+            [gscBrailleInputMode] = "BRLUCDOTS"
           };
           const int nameCount = ARRAY_COUNT(names);
 
