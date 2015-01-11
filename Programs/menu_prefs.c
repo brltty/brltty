@@ -407,20 +407,20 @@ newStatusFieldMenuItem (
 ) {
   static const MenuString strings[] = {
     {.label=strtext("End")},
-    {.label=strtext("Window Coordinates"), .comment=strtext("2 cells")},
-    {.label=strtext("Window Column"), .comment=strtext("1 cell")},
-    {.label=strtext("Window Row"), .comment=strtext("1 cell")},
-    {.label=strtext("Cursor Coordinates"), .comment=strtext("2 cells")},
-    {.label=strtext("Cursor Column"), .comment=strtext("1 cell")},
-    {.label=strtext("Cursor Row"), .comment=strtext("1 cell")},
-    {.label=strtext("Cursor and Window Column"), .comment=strtext("2 cells")},
-    {.label=strtext("Cursor and Window Row"), .comment=strtext("2 cells")},
+    {.label=strtext("Braille Window Coordinates"), .comment=strtext("2 cells")},
+    {.label=strtext("Braille Window Column"), .comment=strtext("1 cell")},
+    {.label=strtext("Braille Window Row"), .comment=strtext("1 cell")},
+    {.label=strtext("System Cursor Coordinates"), .comment=strtext("2 cells")},
+    {.label=strtext("System Cursor Column"), .comment=strtext("1 cell")},
+    {.label=strtext("System Cursor Row"), .comment=strtext("1 cell")},
+    {.label=strtext("System Cursor and Braille Window Column"), .comment=strtext("2 cells")},
+    {.label=strtext("System Cursor and Braille Window Row"), .comment=strtext("2 cells")},
     {.label=strtext("Screen Number"), .comment=strtext("1 cell")},
     {.label=strtext("State Dots"), .comment=strtext("1 cell")},
     {.label=strtext("State Letter"), .comment=strtext("1 cell")},
     {.label=strtext("Time"), .comment=strtext("2 cells")},
-    {.label=strtext("Alphabetic Window Coordinates"), .comment=strtext("1 cell")},
-    {.label=strtext("Alphabetic Cursor Coordinates"), .comment=strtext("1 cell")},
+    {.label=strtext("Alphabetic Braille Window Coordinates"), .comment=strtext("1 cell")},
+    {.label=strtext("Alphabetic System Cursor Coordinates"), .comment=strtext("1 cell")},
     {.label=strtext("Generic")}
   };
 
@@ -573,30 +573,30 @@ makePreferencesMenu (void) {
     SUBMENU(indicatorsSubmenu, rootMenu, strtext("Text Indicators"));
 
     {
-      NAME(strtext("Show Cursor"));
+      NAME(strtext("Show System Cursor"));
       ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.showCursor, &itemName));
     }
 
     {
-      NAME(strtext("Cursor Style"));
+      NAME(strtext("System Cursor Style"));
       ITEM(newEnumeratedMenuItem(indicatorsSubmenu, &prefs.cursorStyle, &itemName, cursorStyles));
       TEST(ShowCursor);
     }
 
     {
-      NAME(strtext("Blinking Cursor"));
+      NAME(strtext("Blinking System Cursor"));
       ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.blinkingCursor, &itemName));
       TEST(ShowCursor);
     }
 
     {
-      NAME(strtext("Cursor Visible Time"));
+      NAME(strtext("System Cursor Visible Time"));
       ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.cursorVisibleTime, &itemName));
       TEST(BlinkingCursor);
     }
 
     {
-      NAME(strtext("Cursor Invisible Time"));
+      NAME(strtext("System Cursor Invisible Time"));
       ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.cursorInvisibleTime, &itemName));
       TEST(BlinkingCursor);
     }
@@ -651,7 +651,7 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Skip Blank Windows"));
+      NAME(strtext("Skip Blank Braille Windows"));
       ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.skipBlankWindows, &itemName));
     }
 
@@ -662,36 +662,36 @@ makePreferencesMenu (void) {
         {.label=strtext("Rest of Line")}
       };
 
-      NAME(strtext("Skip Which Blank Windows"));
+      NAME(strtext("Skip Which Blank Braille Windows"));
       ITEM(newEnumeratedMenuItem(navigationSubmenu, &prefs.skipBlankWindowsMode, &itemName, strings));
     }
 
     {
-      NAME(strtext("Sliding Window"));
+      NAME(strtext("Sliding Braille Window"));
       ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.slidingWindow, &itemName));
     }
 
     {
-      NAME(strtext("Eager Sliding Window"));
+      NAME(strtext("Eager Sliding Braille Window"));
       ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.eagerSlidingWindow, &itemName));
       TEST(SlidingWindow);
     }
 
     {
-      NAME(strtext("Window Overlap"));
+      NAME(strtext("Braille Window Overlap"));
       ITEM(newNumericMenuItem(navigationSubmenu, &prefs.windowOverlap, &itemName, 0, 20, 1, strtext("cells")));
       CHANGED(WindowOverlap);
     }
 
 #ifdef HAVE_LIBGPM
     {
-      NAME(strtext("Window Follows Pointer"));
+      NAME(strtext("Braille Window Follows System Pointer"));
       ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.windowFollowsPointer, &itemName));
     }
 #endif /* HAVE_LIBGPM */
 
     {
-      NAME(strtext("Highlight Window"));
+      NAME(strtext("Highlight Braille Window Location"));
       ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.highlightWindow, &itemName));
     }
   }
@@ -839,21 +839,21 @@ makePreferencesMenu (void) {
     SUBMENU(speechSubmenu, rootMenu, strtext("Speech Options"));
 
     {
-      NAME(strtext("Speech Volume"));
+      NAME(strtext("Speaking Volume"));
       ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechVolume, &itemName, 0, SPK_VOLUME_MAXIMUM, 1, NULL));
       TEST(SpeechVolume);
       CHANGED(SpeechVolume);
     }
 
     {
-      NAME(strtext("Speech Rate"));
+      NAME(strtext("Speaking Rate"));
       ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechRate, &itemName, 0, SPK_RATE_MAXIMUM, 1, NULL));
       TEST(SpeechRate);
       CHANGED(SpeechRate);
     }
 
     {
-      NAME(strtext("Speech Pitch"));
+      NAME(strtext("Speaking Pitch"));
       ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechPitch, &itemName, 0, SPK_PITCH_MAXIMUM, 1, NULL));
       TEST(SpeechPitch);
       CHANGED(SpeechPitch);
@@ -866,7 +866,7 @@ makePreferencesMenu (void) {
         {.label=strtext("All")}
       };
 
-      NAME(strtext("Speech Punctuation"));
+      NAME(strtext("Punctuation Verbosity"));
       ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.speechPunctuation, &itemName, strings));
       TEST(SpeechPunctuation);
       CHANGED(SpeechPunctuation);

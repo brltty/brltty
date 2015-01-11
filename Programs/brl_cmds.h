@@ -97,32 +97,32 @@ typedef enum {
   /* horizontal motion */
   BRL_CMD_CHRLT /* go left one character */,
   BRL_CMD_CHRRT /* go right one character */,
-  BRL_CMD_HWINLT /* go left half a window */,
-  BRL_CMD_HWINRT /* go right half a window */,
-  BRL_CMD_FWINLT /* go left one window */,
-  BRL_CMD_FWINRT /* go right one window */,
-  BRL_CMD_FWINLTSKIP /* go left to nearest non-blank window */,
-  BRL_CMD_FWINRTSKIP /* go right to nearest non-blank window */,
+  BRL_CMD_HWINLT /* go left half a braille window */,
+  BRL_CMD_HWINRT /* go right half a braille window */,
+  BRL_CMD_FWINLT /* go left one braille window */,
+  BRL_CMD_FWINRT /* go right one braille window */,
+  BRL_CMD_FWINLTSKIP /* go left to nearest non-blank braille window */,
+  BRL_CMD_FWINRTSKIP /* go right to nearest non-blank braille window */,
   BRL_CMD_LNBEG /* go to beginning of line */,
   BRL_CMD_LNEND /* go to end of line */,
   
   /* implicit motion */
-  BRL_CMD_HOME /* go to cursor */,
+  BRL_CMD_HOME /* go to system cursor */,
   BRL_CMD_BACK /* go back after cursor tracking */,
-  BRL_CMD_RETURN /* go to cursor or go back after cursor tracking */,
+  BRL_CMD_RETURN /* go to system cursor or go back after cursor tracking */,
   
   /* feature activation and deactivation */
   BRL_CMD_FREEZE /* set screen image frozen/unfrozen */,
   BRL_CMD_DISPMD /* set display mode attributes/text */,
   BRL_CMD_SIXDOTS /* set text style 6-dot/8-dot */,
-  BRL_CMD_SLIDEWIN /* set sliding window on/off */,
+  BRL_CMD_SLIDEWIN /* set sliding braille window on/off */,
   BRL_CMD_SKPIDLNS /* set skipping of lines with identical content on/off */,
-  BRL_CMD_SKPBLNKWINS /* set skipping of blank windows on/off */,
-  BRL_CMD_CSRVIS /* set cursor visibility on/off */,
-  BRL_CMD_CSRHIDE /* set hidden cursor on/off */,
-  BRL_CMD_CSRTRK /* set cursor tracking on/off */,
-  BRL_CMD_CSRSIZE /* set cursor style block/underline */,
-  BRL_CMD_CSRBLINK /* set cursor blinking on/off */,
+  BRL_CMD_SKPBLNKWINS /* set skipping of blank braille windows on/off */,
+  BRL_CMD_CSRVIS /* set system cursor visibility on/off */,
+  BRL_CMD_CSRHIDE /* set hidden system cursor on/off */,
+  BRL_CMD_CSRTRK /* set track system cursor on/off */,
+  BRL_CMD_CSRSIZE /* set system cursor style block/underline */,
+  BRL_CMD_CSRBLINK /* set system cursor blinking on/off */,
   BRL_CMD_ATTRVIS /* set attribute underlining on/off */,
   BRL_CMD_ATTRBLINK /* set attribute blinking on/off */,
   BRL_CMD_CAPBLINK /* set capital letter blinking on/off */,
@@ -150,22 +150,22 @@ typedef enum {
  
   /* speech controls */
   BRL_CMD_MUTE /* stop speaking */,
-  BRL_CMD_SPKHOME /* go to current speech position */,
+  BRL_CMD_SPKHOME /* go to current speaking position */,
   BRL_CMD_SAY_LINE /* speak current line */,
   BRL_CMD_SAY_ABOVE /* speak from top of screen through current line */,
   BRL_CMD_SAY_BELOW /* speak from current line through bottom of screen */,
-  BRL_CMD_SAY_SLOWER /* decrease speech rate */,
-  BRL_CMD_SAY_FASTER /* increase speech rate */,
-  BRL_CMD_SAY_SOFTER /* decrease speech volume */,
-  BRL_CMD_SAY_LOUDER /* increase speech volume */,
+  BRL_CMD_SAY_SLOWER /* decrease speaking rate */,
+  BRL_CMD_SAY_FASTER /* increase speaking rate */,
+  BRL_CMD_SAY_SOFTER /* decrease speaking volume */,
+  BRL_CMD_SAY_LOUDER /* increase speaking volume */,
   
   /* virtual terminal switching */
   BRL_CMD_SWITCHVT_PREV /* switch to previous virtual terminal */,
   BRL_CMD_SWITCHVT_NEXT /* switch to next virtual terminal */,
   
   /* miscellaneous */
-  BRL_CMD_CSRJMP_VERT /* bring cursor to line */,
-  BRL_CMD_PASTE /* insert clipboard text at cursor */,
+  BRL_CMD_CSRJMP_VERT /* bring system cursor to current line */,
+  BRL_CMD_PASTE /* insert clipboard text after system cursor */,
   BRL_CMD_RESTARTBRL /* restart braille driver */,
   BRL_CMD_RESTARTSPEECH /* restart speech driver */,
 
@@ -201,9 +201,9 @@ typedef enum {
   BRL_CMD_SPEAK_LAST_LINE /* go to and speak last non-blank line on screen */,
   BRL_CMD_DESC_CURR_CHAR /* describe current character */,
   BRL_CMD_SPELL_CURR_WORD /* spell current word */,
-  BRL_CMD_ROUTE_CURR_LOCN /* bring cursor to speech location */,
-  BRL_CMD_SPEAK_CURR_LOCN /* speak speech location */,
-  BRL_CMD_SHOW_CURR_LOCN /* set speech location visibility on/off */,
+  BRL_CMD_ROUTE_CURR_LOCN /* bring system cursor to speech cursor */,
+  BRL_CMD_SPEAK_CURR_LOCN /* speak speech cursor location */,
+  BRL_CMD_SHOW_CURR_LOCN /* set speech cursor visibility on/off */,
 
   BRL_CMD_CLIP_SAVE /* save clipboard to disk */,
   BRL_CMD_CLIP_RESTORE /* restore clipboard from disk */,
@@ -220,7 +220,7 @@ typedef enum {
 #define BRL_FLG_TOGGLE_MASK (BRL_FLG_TOGGLE_ON | BRL_FLG_TOGGLE_OFF) /* mask for all toggle flags */
 
 /* For automatic cursor routing. */
-#define BRL_FLG_MOTION_ROUTE 0X040000 /* bring cursor into window after function */
+#define BRL_FLG_MOTION_ROUTE 0X040000 /* bring system cursor into braille window after function */
 
 /*
  * Please comment all BRL_BLK_* definitions. They are
@@ -228,7 +228,7 @@ typedef enum {
  */
 typedef enum {
   BRL_BLK_BASIC = 0 /* (must be first) */,
-  BRL_BLK_ROUTE /* bring cursor to character */,
+  BRL_BLK_ROUTE /* bring system cursor to character */,
   BRL_BLK_CLIP_NEW /* start new clipboard at character */,
   BRL_BLK_CLIP_ADD /* append to clipboard from character */,
   BRL_BLK_COPY_RECT /* rectangular copy to character */,
@@ -237,15 +237,15 @@ typedef enum {
   BRL_BLK_PRINDENT /* go up to nearest line with less indent than character */,
   BRL_BLK_NXINDENT /* go down to nearest line with less indent than character */,
   BRL_BLK_DESCCHAR /* describe character */,
-  BRL_BLK_SETLEFT /* place left end of window at character */,
-  BRL_BLK_SETMARK /* remember current window position */,
-  BRL_BLK_GOTOMARK /* go to remembered window position */,
+  BRL_BLK_SETLEFT /* place left end of braille window at character */,
+  BRL_BLK_SETMARK /* remember current braille window position */,
+  BRL_BLK_GOTOMARK /* go to remembered braille window position */,
   BRL_BLK_GOTOLINE /* go to selected line */,
   BRL_BLK_PRDIFCHAR /* go up to nearest line with different character */,
   BRL_BLK_NXDIFCHAR /* go down to nearest line with different character */,
   BRL_BLK_CLIP_COPY /* copy characters to clipboard */,
   BRL_BLK_CLIP_APPEND /* append characters to clipboard */,
-  BRL_BLK_PASTE_HISTORY /* insert clipboard history entry at cursor */,
+  BRL_BLK_PASTE_HISTORY /* insert clipboard history entry after system cursor */,
   BRL_BLK_SET_TEXT_TABLE /* set the text table */,
   BRL_BLK_SET_ATTRIBUTES_TABLE /* set the attributes table */,
   BRL_BLK_SET_CONTRACTION_TABLE /* set the contraction table */,
