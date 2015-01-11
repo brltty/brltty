@@ -89,8 +89,8 @@ extern char *opt_keyboardTable;
 extern int opt_releaseDevice;
 
 extern void placeRightEdge (int column);
-extern void placeWindowRight (void);
-extern void placeWindowHorizontally (int x);
+extern void placeBrailleWindowRight (void);
+extern void placeBrailleWindowHorizontally (int x);
 
 extern int moveWindowLeft (unsigned int amount);
 extern int moveWindowRight (unsigned int amount);
@@ -100,8 +100,8 @@ extern int shiftWindowRight (unsigned int amount);
 
 extern void slideWindowVertically (int y);
 
-extern int showCursor (void);
-extern int trackCursor (int place);
+extern int showSystemCursor (void);
+extern int trackSystemCursor (int place);
 
 typedef struct {
   TimeValue value;

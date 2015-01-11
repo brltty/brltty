@@ -59,11 +59,11 @@ handleToggleCommands (int command, void *data) {
       break;
 
     case BRL_CMD_SKPBLNKWINS:
-      toggleFeatureSetting(&prefs.skipBlankWindows, command);
+      toggleFeatureSetting(&prefs.skipBlankBrailleWindows, command);
       break;
 
     case BRL_CMD_SLIDEWIN:
-      toggleFeatureSetting(&prefs.slidingWindow, command);
+      toggleFeatureSetting(&prefs.slidingBrailleWindow, command);
       break;
 
     case BRL_CMD_SIXDOTS:
@@ -71,15 +71,15 @@ handleToggleCommands (int command, void *data) {
       break;
 
     case BRL_CMD_CSRSIZE:
-      toggleFeatureSetting(&prefs.cursorStyle, command);
+      toggleFeatureSetting(&prefs.systemCursorStyle, command);
       break;
 
     case BRL_CMD_CSRVIS:
-      toggleFeatureSetting(&prefs.showCursor, command);
+      toggleFeatureSetting(&prefs.showSystemCursor, command);
       break;
 
     case BRL_CMD_CSRBLINK:
-      toggleFeatureSetting(&prefs.blinkingCursor, command);
+      toggleFeatureSetting(&prefs.blinkingSystemCursor, command);
       break;
 
     case BRL_CMD_ATTRVIS:
@@ -157,13 +157,13 @@ handleToggleCommands (int command, void *data) {
       break;
 
     case BRL_CMD_CSRHIDE:
-      toggleModeSetting(&ses->hideCursor, command);
+      toggleModeSetting(&ses->hideSystemCursor, command);
       break;
 
     case BRL_CMD_CSRTRK:
-      toggleSetting(&ses->trackCursor, command, ALERT_CURSOR_UNLINKED, ALERT_CURSOR_LINKED);
+      toggleSetting(&ses->trackSystemCursor, command, ALERT_CURSOR_UNLINKED, ALERT_CURSOR_LINKED);
 
-      if (ses->trackCursor) {
+      if (ses->trackSystemCursor) {
 #ifdef ENABLE_SPEECH_SUPPORT
         if (spk.track.isActive && (scr.number == spk.track.screenNumber)) {
           spk.track.speechLocation = SPK_LOC_NONE;
@@ -171,7 +171,7 @@ handleToggleCommands (int command, void *data) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
         {
-          trackCursor(1);
+          trackSystemCursor(1);
         }
       }
       break;

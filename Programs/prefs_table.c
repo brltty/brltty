@@ -176,31 +176,31 @@ const PreferenceEntry preferenceTable[] = {
   },
 
   { .name = "show-cursor",
-    .defaultValue = DEFAULT_SHOW_CURSOR,
+    .defaultValue = DEFAULT_SHOW_SYSTEM_CURSOR,
     .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.showCursor
+    .setting = &prefs.showSystemCursor
   },
 
   { .name = "cursor-style",
-    .defaultValue = DEFAULT_CURSOR_STYLE,
+    .defaultValue = DEFAULT_SYSTEM_CURSOR_STYLE,
     .settingNames = &preferenceStringTable_cursorStyle,
-    .setting = &prefs.cursorStyle
+    .setting = &prefs.systemCursorStyle
   },
 
   { .name = "blinking-cursor",
-    .defaultValue = DEFAULT_BLINKING_CURSOR,
+    .defaultValue = DEFAULT_BLINKING_SYSTEM_CURSOR,
     .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.blinkingCursor
+    .setting = &prefs.blinkingSystemCursor
   },
 
   { .name = "cursor-visible-time",
-    .defaultValue = DEFAULT_CURSOR_VISIBLE_TIME,
-    .setting = &prefs.cursorVisibleTime
+    .defaultValue = DEFAULT_SYSTEM_CURSOR_VISIBLE_TIME,
+    .setting = &prefs.systemCursorVisibleTime
   },
 
   { .name = "cursor-invisible-time",
-    .defaultValue = DEFAULT_CURSOR_INVISIBLE_TIME,
-    .setting = &prefs.cursorInvisibleTime
+    .defaultValue = DEFAULT_SYSTEM_CURSOR_INVISIBLE_TIME,
+    .setting = &prefs.systemCursorInvisibleTime
   },
 
   { .name = "show-attributes",
@@ -248,44 +248,44 @@ const PreferenceEntry preferenceTable[] = {
   },
 
   { .name = "skip-blank-windows",
-    .defaultValue = DEFAULT_SKIP_BLANK_WINDOWS,
+    .defaultValue = DEFAULT_SKIP_BLANK_BRAILLE_WINDOWS,
     .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.skipBlankWindows
+    .setting = &prefs.skipBlankBrailleWindows
   },
 
   { .name = "skip-blank-windows-mode",
-    .defaultValue = DEFAULT_SKIP_BLANK_WINDOWS_MODE,
+    .defaultValue = DEFAULT_SKIP_BLANK_BRAILLE_WINDOWS_MODE,
     .settingNames = &preferenceStringTable_skipBlankWindowsMode,
-    .setting = &prefs.skipBlankWindowsMode
+    .setting = &prefs.skipBlankBrailleWindowsMode
   },
 
   { .name = "sliding-window",
-    .defaultValue = DEFAULT_SLIDING_WINDOW,
+    .defaultValue = DEFAULT_SLIDING_BRAILLE_WINDOW,
     .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.slidingWindow
+    .setting = &prefs.slidingBrailleWindow
   },
 
   { .name = "eager-sliding-window",
-    .defaultValue = DEFAULT_EAGER_SLIDING_WINDOW,
+    .defaultValue = DEFAULT_EAGER_SLIDING_BRAILLE_WINDOW,
     .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.eagerSlidingWindow
+    .setting = &prefs.eagerSlidingBrailleWindow
   },
 
   { .name = "window-overlap",
-    .defaultValue = DEFAULT_WINDOW_OVERLAP,
-    .setting = &prefs.windowOverlap
+    .defaultValue = DEFAULT_BRAILLE_WINDOW_OVERLAP,
+    .setting = &prefs.brailleWindowOverlap
   },
 
   { .name = "window-follows-pointer",
-    .defaultValue = DEFAULT_WINDOW_FOLLOWS_POINTER,
+    .defaultValue = DEFAULT_BRAILLE_WINDOW_FOLLOWS_SYSTEM_POINTER,
     .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.windowFollowsPointer
+    .setting = &prefs.brailleWindowFollowsSystemPointer
   },
 
   { .name = "highlight-window",
-    .defaultValue = DEFAULT_HIGHLIGHT_WINDOW,
+    .defaultValue = DEFAULT_HIGHLIGHT_BRAILLE_WINDOW_LOCATION,
     .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.highlightWindow
+    .setting = &prefs.highlightBrailleWindowLocation
   },
 
   { .name = "long-press-time",

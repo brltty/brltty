@@ -103,7 +103,7 @@ handleCommand (int command) {
       }
     }
 
-    if (prefs.skipBlankWindows) {
+    if (prefs.skipBlankBrailleWindows) {
       switch (command & BRL_MSK_CMD) {
         case BRL_CMD_FWINLT:
           real = BRL_CMD_FWINLTSKIP;

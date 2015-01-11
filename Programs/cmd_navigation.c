@@ -72,7 +72,7 @@ toDifferentLine (
       readScreen(from, ses->winy+=amount, width, 1, characters2);
 
       if (!isSameRow(characters1, characters2, width, isSameCharacter) ||
-          (showCursor() && (scr.posy == ses->winy) &&
+          (showSystemCursor() && (scr.posy == ses->winy) &&
            (scr.posx >= from) && (scr.posx < (from + width))))
         return 1;
 
@@ -330,7 +330,7 @@ handleNavigationCommands (int command, void *data) {
       break;
 
     case BRL_CMD_FWINLTSKIP:
-      if (prefs.skipBlankWindowsMode == sbwAll) {
+      if (prefs.skipBlankBrailleWindowsMode == sbwAll) {
         int oldX = ses->winx;
         int oldY = ses->winy;
         int tuneLimit = 3;
@@ -351,7 +351,7 @@ handleNavigationCommands (int command, void *data) {
 
             if (tuneLimit-- > 0) alert(ALERT_WRAP_UP);
             upLine(isSameText);
-            placeWindowRight();
+            placeBrailleWindowRight();
           }
 
           charCount = getWindowLength();
@@ -364,7 +364,7 @@ handleNavigationCommands (int command, void *data) {
             if (text != WC_C(' ')) break;
           }
 
-          if (showCursor() &&
+          if (showSystemCursor() &&
               (scr.posy == ses->winy) &&
               (scr.posx >= 0) &&
               (scr.posx < (ses->winx + charCount))) {
@@ -378,13 +378,13 @@ handleNavigationCommands (int command, void *data) {
       }
 
     {
-      int skipBlankWindows;
+      int skipBlankBrailleWindows;
 
-      skipBlankWindows = 1;
+      skipBlankBrailleWindows = 1;
       goto moveLeft;
 
     case BRL_CMD_FWINLT:
-      skipBlankWindows = 0;
+      skipBlankBrailleWindows = 0;
       goto moveLeft;
 
     moveLeft:
@@ -392,12 +392,12 @@ handleNavigationCommands (int command, void *data) {
         int oldX = ses->winx;
 
         if (shiftWindowLeft(fullWindowShift)) {
-          if (skipBlankWindows) {
+          if (skipBlankBrailleWindows) {
             int charCount;
 
-            if (prefs.skipBlankWindowsMode == sbwEndOfLine) goto skipEndOfLine;
+            if (prefs.skipBlankBrailleWindowsMode == sbwEndOfLine) goto skipEndOfLine;
             charCount = MIN(scr.cols, ses->winx+textCount);
-            if (!showCursor() ||
+            if (!showSystemCursor() ||
                 (scr.posy != ses->winy) ||
                 (scr.posx < 0) ||
                 (scr.posx >= charCount)) {
@@ -429,10 +429,10 @@ handleNavigationCommands (int command, void *data) {
 
         alert(ALERT_WRAP_UP);
         upLine(isSameText);
-        placeWindowRight();
+        placeBrailleWindowRight();
 
       skipEndOfLine:
-        if (skipBlankWindows && (prefs.skipBlankWindowsMode == sbwEndOfLine)) {
+        if (skipBlankBrailleWindows && (prefs.skipBlankBrailleWindowsMode == sbwEndOfLine)) {
           int charIndex;
           ScreenCharacter characters[scr.cols];
 
@@ -444,7 +444,7 @@ handleNavigationCommands (int command, void *data) {
             if (text != WC_C(' ')) break;
           }
 
-          if (showCursor() && (scr.posy == ses->winy) && SCR_COLUMN_OK(scr.posx)) {
+          if (showSystemCursor() && (scr.posy == ses->winy) && SCR_COLUMN_OK(scr.posx)) {
             charIndex = MAX(charIndex, scr.posx);
           }
 
@@ -456,7 +456,7 @@ handleNavigationCommands (int command, void *data) {
     }
 
     case BRL_CMD_FWINRTSKIP:
-      if (prefs.skipBlankWindowsMode == sbwAll) {
+      if (prefs.skipBlankBrailleWindowsMode == sbwAll) {
         int oldX = ses->winx;
         int oldY = ses->winy;
         int tuneLimit = 3;
@@ -490,7 +490,7 @@ handleNavigationCommands (int command, void *data) {
             if (text != WC_C(' ')) break;
           }
 
-          if (showCursor() &&
+          if (showSystemCursor() &&
               (scr.posy == ses->winy) &&
               (scr.posx < scr.cols) &&
               (scr.posx >= ses->winx)) {
@@ -504,13 +504,13 @@ handleNavigationCommands (int command, void *data) {
       }
 
     {
-      int skipBlankWindows;
+      int skipBlankBrailleWindows;
 
-      skipBlankWindows = 1;
+      skipBlankBrailleWindows = 1;
       goto moveRight;
 
     case BRL_CMD_FWINRT:
-      skipBlankWindows = 0;
+      skipBlankBrailleWindows = 0;
       goto moveRight;
 
     moveRight:
@@ -518,8 +518,8 @@ handleNavigationCommands (int command, void *data) {
         int oldX = ses->winx;
 
         if (shiftWindowRight(fullWindowShift)) {
-          if (skipBlankWindows) {
-            if (!showCursor() ||
+          if (skipBlankBrailleWindows) {
+            if (!showSystemCursor() ||
                 (scr.posy != ses->winy) ||
                 (scr.posx < ses->winx)) {
               int charCount = scr.cols - ses->winx;
@@ -565,7 +565,7 @@ handleNavigationCommands (int command, void *data) {
         break;
       }
     case BRL_CMD_HOME:
-      if (!trackCursor(1)) alert(ALERT_COMMAND_REJECTED);
+      if (!trackSystemCursor(1)) alert(ALERT_COMMAND_REJECTED);
       break;
 
     case BRL_CMD_CSRJMP_VERT:

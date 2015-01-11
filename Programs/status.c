@@ -141,25 +141,25 @@ renderStatusField_screenNumber (unsigned char *cells) {
 
 static void
 renderStatusField_stateDots (unsigned char *cells) {
-  *cells = (isFrozenScreen()    ? BRL_DOT_1: 0) |
-           (prefs.showCursor    ? BRL_DOT_4: 0) |
-           (ses->displayMode    ? BRL_DOT_2: 0) |
-           (prefs.cursorStyle   ? BRL_DOT_5: 0) |
-           (prefs.alertTunes    ? BRL_DOT_3: 0) |
-           (prefs.blinkingCursor? BRL_DOT_6: 0) |
-           (ses->trackCursor      ? BRL_DOT_7: 0) |
-           (prefs.slidingWindow ? BRL_DOT_8: 0);
+  *cells = (isFrozenScreen()           ? BRL_DOT_1: 0) |
+           (prefs.showSystemCursor     ? BRL_DOT_4: 0) |
+           (ses->displayMode           ? BRL_DOT_2: 0) |
+           (prefs.systemCursorStyle    ? BRL_DOT_5: 0) |
+           (prefs.alertTunes           ? BRL_DOT_3: 0) |
+           (prefs.blinkingSystemCursor ? BRL_DOT_6: 0) |
+           (ses->trackSystemCursor     ? BRL_DOT_7: 0) |
+           (prefs.slidingBrailleWindow ? BRL_DOT_8: 0);
 }
 
 static void
 renderStatusField_stateLetter (unsigned char *cells) {
   *cells = convertCharacterToDots(textTable,
-                                  ses->displayMode? WC_C('a'):
-                                  isHelpScreen()  ? WC_C('h'):
-                                  isMenuScreen()  ? WC_C('m'):
-                                  isFrozenScreen()? WC_C('f'):
-                                  ses->trackCursor? WC_C('t'):
-                                                    WC_C(' '));
+                                  ses->displayMode      ? WC_C('a'):
+                                  isHelpScreen()        ? WC_C('h'):
+                                  isMenuScreen()        ? WC_C('m'):
+                                  isFrozenScreen()      ? WC_C('f'):
+                                  ses->trackSystemCursor? WC_C('t'):
+                                                          WC_C(' '));
 }
 
 static void
@@ -196,14 +196,14 @@ renderStatusField_generic (unsigned char *cells) {
   cells[gscFrozenScreen] = isFrozenScreen();
   cells[gscDisplayMode] = ses->displayMode;
   cells[gscTextStyle] = prefs.textStyle;
-  cells[gscSlidingWindow] = prefs.slidingWindow;
+  cells[gscSlidingWindow] = prefs.slidingBrailleWindow;
   cells[gscSkipIdenticalLines] = prefs.skipIdenticalLines;
-  cells[gscSkipBlankWindows] = prefs.skipBlankWindows;
-  cells[gscShowCursor] = prefs.showCursor;
-  cells[gscHideCursor] = ses->hideCursor;
-  cells[gscTrackCursor] = ses->trackCursor;
-  cells[gscCursorStyle] = prefs.cursorStyle;
-  cells[gscBlinkingCursor] = prefs.blinkingCursor;
+  cells[gscSkipBlankWindows] = prefs.skipBlankBrailleWindows;
+  cells[gscShowCursor] = prefs.showSystemCursor;
+  cells[gscHideCursor] = ses->hideSystemCursor;
+  cells[gscTrackCursor] = ses->trackSystemCursor;
+  cells[gscCursorStyle] = prefs.systemCursorStyle;
+  cells[gscBlinkingCursor] = prefs.blinkingSystemCursor;
   cells[gscShowAttributes] = prefs.showAttributes;
   cells[gscBlinkingAttributes] = prefs.blinkingAttributes;
   cells[gscBlinkingCapitals] = prefs.blinkingCapitals;

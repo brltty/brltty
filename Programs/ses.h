@@ -35,8 +35,8 @@ typedef struct {
 typedef struct {
   int number;
 
-  unsigned char trackCursor;		/* cursor tracking mode */
-  unsigned char hideCursor;		/* for temporarily hiding the cursor */
+  unsigned char trackSystemCursor;		/* cursor tracking mode */
+  unsigned char hideSystemCursor;		/* for temporarily hiding the cursor */
   unsigned char displayMode;		/* text or attributes display */
 
   int winx, winy;	/* upper-left corner of braille window */

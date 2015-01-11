@@ -77,12 +77,12 @@ setAdvancedSubmenu (Menu *submenu) {
 }
 
 static int
-testSlidingWindow (void) {
-  return prefs.slidingWindow;
+testSlidingBrailleWindow (void) {
+  return prefs.slidingBrailleWindow;
 }
 
 static int
-changedWindowOverlap (const MenuItem *item UNUSED, unsigned char setting) {
+changedBrailleWindowOverlap (const MenuItem *item UNUSED, unsigned char setting) {
   if (setting >= textCount) return 0;
   reconfigureWindow();
   return 1;
@@ -121,13 +121,13 @@ changedAutorepeatInterval (const MenuItem *item UNUSED, unsigned char setting) {
 }
 
 static int
-testShowCursor (void) {
-  return prefs.showCursor;
+testShowSystemCursor (void) {
+  return prefs.showSystemCursor;
 }
 
 static int
-testBlinkingCursor (void) {
-  return testShowCursor() && prefs.blinkingCursor;
+testBlinkingSystemCursor (void) {
+  return testShowSystemCursor() && prefs.blinkingSystemCursor;
 }
 
 static int
@@ -574,31 +574,31 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Show System Cursor"));
-      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.showCursor, &itemName));
+      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.showSystemCursor, &itemName));
     }
 
     {
       NAME(strtext("System Cursor Style"));
-      ITEM(newEnumeratedMenuItem(indicatorsSubmenu, &prefs.cursorStyle, &itemName, cursorStyles));
-      TEST(ShowCursor);
+      ITEM(newEnumeratedMenuItem(indicatorsSubmenu, &prefs.systemCursorStyle, &itemName, cursorStyles));
+      TEST(ShowSystemCursor);
     }
 
     {
       NAME(strtext("Blinking System Cursor"));
-      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.blinkingCursor, &itemName));
-      TEST(ShowCursor);
+      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.blinkingSystemCursor, &itemName));
+      TEST(ShowSystemCursor);
     }
 
     {
       NAME(strtext("System Cursor Visible Time"));
-      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.cursorVisibleTime, &itemName));
-      TEST(BlinkingCursor);
+      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.systemCursorVisibleTime, &itemName));
+      TEST(BlinkingSystemCursor);
     }
 
     {
       NAME(strtext("System Cursor Invisible Time"));
-      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.cursorInvisibleTime, &itemName));
-      TEST(BlinkingCursor);
+      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.systemCursorInvisibleTime, &itemName));
+      TEST(BlinkingSystemCursor);
     }
 
     {
@@ -652,7 +652,7 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Skip Blank Braille Windows"));
-      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.skipBlankWindows, &itemName));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.skipBlankBrailleWindows, &itemName));
     }
 
     {
@@ -663,36 +663,36 @@ makePreferencesMenu (void) {
       };
 
       NAME(strtext("Skip Which Blank Braille Windows"));
-      ITEM(newEnumeratedMenuItem(navigationSubmenu, &prefs.skipBlankWindowsMode, &itemName, strings));
+      ITEM(newEnumeratedMenuItem(navigationSubmenu, &prefs.skipBlankBrailleWindowsMode, &itemName, strings));
     }
 
     {
       NAME(strtext("Sliding Braille Window"));
-      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.slidingWindow, &itemName));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.slidingBrailleWindow, &itemName));
     }
 
     {
       NAME(strtext("Eager Sliding Braille Window"));
-      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.eagerSlidingWindow, &itemName));
-      TEST(SlidingWindow);
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.eagerSlidingBrailleWindow, &itemName));
+      TEST(SlidingBrailleWindow);
     }
 
     {
       NAME(strtext("Braille Window Overlap"));
-      ITEM(newNumericMenuItem(navigationSubmenu, &prefs.windowOverlap, &itemName, 0, 20, 1, strtext("cells")));
-      CHANGED(WindowOverlap);
+      ITEM(newNumericMenuItem(navigationSubmenu, &prefs.brailleWindowOverlap, &itemName, 0, 20, 1, strtext("cells")));
+      CHANGED(BrailleWindowOverlap);
     }
 
 #ifdef HAVE_LIBGPM
     {
       NAME(strtext("Braille Window Follows System Pointer"));
-      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.windowFollowsPointer, &itemName));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.brailleWindowFollowsSystemPointer, &itemName));
     }
 #endif /* HAVE_LIBGPM */
 
     {
       NAME(strtext("Highlight Braille Window Location"));
-      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.highlightWindow, &itemName));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.highlightBrailleWindowLocation, &itemName));
     }
   }
 

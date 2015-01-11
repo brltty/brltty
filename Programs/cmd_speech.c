@@ -63,7 +63,7 @@ speakDone (const ScreenCharacter *line, int column, int count, int spell) {
   }
 
   speakCharacters(line, count, spell);
-  placeWindowHorizontally(ses->spkx);
+  placeBrailleWindowHorizontally(ses->spkx);
   slideWindowVertically(ses->spky);
 }
 

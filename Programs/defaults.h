@@ -37,8 +37,8 @@ extern "C" {
  * on the display.
  */
 
-#define DEFAULT_TRACK_CURSOR 1		/* 1 for on, 0 for off */
-#define DEFAULT_HIDE_CURSOR 0		/* 1 for yes, 0 for no */
+#define DEFAULT_TRACK_SYSTEM_CURSOR 1		/* 1 for on, 0 for off */
+#define DEFAULT_HIDE_SYSTEM_CURSOR 0		/* 1 for yes, 0 for no */
 
 #define DEFAULT_SAVE_ON_EXIT 0
 #define DEFAULT_SHOW_SUBMENU_SIZES 0
@@ -50,11 +50,11 @@ extern "C" {
 #define DEFAULT_CAPITALIZATION_MODE CTB_CAP_SIGN
 #define DEFAULT_BRAILLE_FIRMNESS BRL_FIRMNESS_MEDIUM
 
-#define DEFAULT_SHOW_CURSOR 1		/* 1 for yes, 0 for no */
-#define DEFAULT_CURSOR_STYLE csUnderline
-#define DEFAULT_BLINKING_CURSOR 0		/* 1 for on, 0 for off */
-#define DEFAULT_CURSOR_VISIBLE_TIME 40	/* for blinking cursor */
-#define DEFAULT_CURSOR_INVISIBLE_TIME 40
+#define DEFAULT_SHOW_SYSTEM_CURSOR 1		/* 1 for yes, 0 for no */
+#define DEFAULT_SYSTEM_CURSOR_STYLE csUnderline
+#define DEFAULT_BLINKING_SYSTEM_CURSOR 0		/* 1 for on, 0 for off */
+#define DEFAULT_SYSTEM_CURSOR_VISIBLE_TIME 40
+#define DEFAULT_SYSTEM_CURSOR_INVISIBLE_TIME 40
 
 #define DEFAULT_SHOW_ATTRIBUTES 0          /* 1 for on, 0 for off */
 #define DEFAULT_BLINKING_ATTRIBUTES 1        /* 1 for on, 0 for off */
@@ -66,14 +66,14 @@ extern "C" {
 #define DEFAULT_CAPITALS_INVISIBLE_TIME 20
 
 #define DEFAULT_SKIP_IDENTICAL_LINES 0		/* 1 = skip all identical lines after first */
-#define DEFAULT_SKIP_BLANK_WINDOWS 0       /* 1 = skip blank windows */
-#define DEFAULT_SKIP_BLANK_WINDOWS_MODE sbwEndOfLine
-#define DEFAULT_SLIDING_WINDOW 0		/* 1 for on, 0 for off */
-#define DEFAULT_EAGER_SLIDING_WINDOW 0
-#define DEFAULT_WINDOW_OVERLAP 0
+#define DEFAULT_SKIP_BLANK_BRAILLE_WINDOWS 0       /* 1 = skip blank windows */
+#define DEFAULT_SKIP_BLANK_BRAILLE_WINDOWS_MODE sbwEndOfLine
+#define DEFAULT_SLIDING_BRAILLE_WINDOW 0		/* 1 for on, 0 for off */
+#define DEFAULT_EAGER_SLIDING_BRAILLE_WINDOW 0
+#define DEFAULT_BRAILLE_WINDOW_OVERLAP 0
 
-#define DEFAULT_WINDOW_FOLLOWS_POINTER 0		/* 1 for on, 0 for off */
-#define DEFAULT_HIGHLIGHT_WINDOW 0		/* 1 for on, 0 for off */
+#define DEFAULT_BRAILLE_WINDOW_FOLLOWS_SYSTEM_POINTER 0		/* 1 for on, 0 for off */
+#define DEFAULT_HIGHLIGHT_BRAILLE_WINDOW_LOCATION 0		/* 1 for on, 0 for off */
 
 #define DEFAULT_LONG_PRESS_TIME 50	/* hundredths of a second */
 #define DEFAULT_AUTOREPEAT 1		/* 1 for on, 0 for off */

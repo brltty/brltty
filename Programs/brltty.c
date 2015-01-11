@@ -146,8 +146,8 @@ postprocessCommand (void *state, int command, int handled) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
 #ifdef ENABLE_SPEECH_SUPPORT
-      if (ses->trackCursor && spk.track.isActive && (scr.number == spk.track.screenNumber)) {
-        ses->trackCursor = 0;
+      if (ses->trackSystemCursor && spk.track.isActive && (scr.number == spk.track.screenNumber)) {
+        ses->trackSystemCursor = 0;
         alert(ALERT_CURSOR_UNLINKED);
       }
 #endif /* ENABLE_SPEECH_SUPPORT */
@@ -175,7 +175,7 @@ postprocessCommand (void *state, int command, int handled) {
 
               if (description.number == scr.number) {
                 slideWindowVertically(description.posy);
-                placeWindowHorizontally(description.posx);
+                placeBrailleWindowHorizontally(description.posx);
               }
             }
           }
@@ -543,8 +543,8 @@ slideWindowVertically (int y) {
 }
 
 void 
-placeWindowHorizontally (int x) {
-  if (prefs.slidingWindow) {
+placeBrailleWindowHorizontally (int x) {
+  if (prefs.slidingBrailleWindow) {
     ses->winx = MAX(0, (x - (int)(textCount / 2)));
   } else {
     ses->winx = x / textCount * textCount;
@@ -573,7 +573,7 @@ placeRightEdge (int column) {
 }
 
 void
-placeWindowRight (void) {
+placeBrailleWindowRight (void) {
   placeRightEdge(scr.cols-1);
 }
 
@@ -639,7 +639,7 @@ shiftWindowRight (unsigned int amount) {
 }
 
 int
-trackCursor (int place) {
+trackSystemCursor (int place) {
   if (!SCR_CURSOR_OK()) return 0;
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
@@ -670,13 +670,13 @@ trackCursor (int place) {
   if (place) {
     if ((scr.posx < ses->winx) || (scr.posx >= (int)(ses->winx + textCount)) ||
         (scr.posy < ses->winy) || (scr.posy >= (int)(ses->winy + brl.textRows))) {
-      placeWindowHorizontally(scr.posx);
+      placeBrailleWindowHorizontally(scr.posx);
     }
   }
 
-  if (prefs.slidingWindow) {
+  if (prefs.slidingBrailleWindow) {
     int reset = textCount * 3 / 10;
-    int trigger = prefs.eagerSlidingWindow? textCount*3/20: 0;
+    int trigger = prefs.eagerSlidingBrailleWindow? textCount*3/20: 0;
 
     if (scr.posx < (ses->winx + trigger)) {
       ses->winx = MAX(scr.posx-reset, 0);
@@ -735,7 +735,7 @@ volatile SpeechSynthesizer spk;
 
 void
 trackSpeech (void) {
-  placeWindowHorizontally(spk.track.speechLocation % scr.cols);
+  placeBrailleWindowHorizontally(spk.track.speechLocation % scr.cols);
   slideWindowVertically(spk.track.firstLine + (spk.track.speechLocation / scr.cols));
   scheduleUpdate("speech tracked");
 }
@@ -852,7 +852,7 @@ getUncontractedCursorOffset (int x, int y) {
 int
 getContractedCursor (void) {
   int offset = getUncontractedCursorOffset(scr.posx, scr.posy);
-  return ((offset >= 0) && !ses->hideCursor)? offset: CTB_NO_CURSOR;
+  return ((offset >= 0) && !ses->hideSystemCursor)? offset: CTB_NO_CURSOR;
 }
 
 int
@@ -873,8 +873,8 @@ getContractedLength (unsigned int outputLimit) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
 int
-showCursor (void) {
-  return scr.cursor && prefs.showCursor && !ses->hideCursor;
+showSystemCursor (void) {
+  return scr.cursor && prefs.showSystemCursor && !ses->hideSystemCursor;
 }
 
 int
@@ -1152,7 +1152,7 @@ brlttyConstruct (int argc, char *argv[]) {
   onProgramExit("sessions", exitSessions, NULL);
   setSessionEntry();
   ses->trkx = scr.posx; ses->trky = scr.posy;
-  if (!trackCursor(1)) ses->winx = ses->winy = 0;
+  if (!trackSystemCursor(1)) ses->winx = ses->winy = 0;
   ses->motx = ses->winx; ses->moty = ses->winy;
   ses->spkx = ses->winx; ses->spky = ses->winy;
   resumeUpdates(1);
