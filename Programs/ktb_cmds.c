@@ -215,57 +215,57 @@ static const CommandListEntry commandList_internal[] = {
   { .command = BRL_CMD_BLK(TOUCH) },
 };
 
-#define COMMAND_GROUP_TABLE(name) .commands = { \
+#define COMMAND_LIST(name) .commands = { \
   .table = commandList_##name, \
   .count = ARRAY_COUNT(commandList_##name), \
 }
 
 const CommandGroupEntry commandGroupTable[] = {
-  { COMMAND_GROUP_TABLE(modes),
+  { COMMAND_LIST(modes),
     .name = strtext("Special Modes")
   },
 
-  { COMMAND_GROUP_TABLE(cursor),
+  { COMMAND_LIST(cursor),
     .name = strtext("Cursor Functions")
   },
 
-  { COMMAND_GROUP_TABLE(vertical),
+  { COMMAND_LIST(vertical),
     .name = strtext("Vertical Navigation")
   },
 
-  { COMMAND_GROUP_TABLE(horizontal),
+  { COMMAND_LIST(horizontal),
     .name = strtext("Horizontal Navigation")
   },
 
-  { COMMAND_GROUP_TABLE(clipboard),
+  { COMMAND_LIST(clipboard),
     .name = strtext("Clipboard Functions")
   },
 
-  { COMMAND_GROUP_TABLE(feature),
-    .name = strtext("Feature Enabling")
+  { COMMAND_LIST(feature),
+    .name = strtext("Configuration Functions")
   },
 
-  { COMMAND_GROUP_TABLE(menu),
-    .name = strtext("Menu Functions")
+  { COMMAND_LIST(menu),
+    .name = strtext("Menu Operations")
   },
 
-  { COMMAND_GROUP_TABLE(say),
+  { COMMAND_LIST(say),
     .name = strtext("Speech Functions")
   },
 
-  { COMMAND_GROUP_TABLE(speak),
+  { COMMAND_LIST(speak),
     .name = strtext("Speech Navigation")
   },
 
-  { COMMAND_GROUP_TABLE(input),
-    .name = strtext("Input Functions")
+  { COMMAND_LIST(input),
+    .name = strtext("Input Operations")
   },
 
-  { COMMAND_GROUP_TABLE(special),
+  { COMMAND_LIST(special),
     .name = strtext("Special Functions")
   },
 
-  { COMMAND_GROUP_TABLE(internal),
+  { COMMAND_LIST(internal),
     .name = strtext("Internal Functions")
   },
 };
