@@ -129,17 +129,23 @@ static const CommandListEntry commandList_menu[] = {
 };
 
 static const CommandListEntry commandList_say[] = {
-  { .command = BRL_CMD_AUTOSPEAK },
   { .command = BRL_CMD_MUTE },
   { .command = BRL_CMD_BLK(DESCCHAR) },
   { .command = BRL_CMD_SAY_LINE },
   { .command = BRL_CMD_SAY_ABOVE },
   { .command = BRL_CMD_SAY_BELOW },
+  { .command = BRL_CMD_SPKHOME },
   { .command = BRL_CMD_SAY_SOFTER },
   { .command = BRL_CMD_SAY_LOUDER },
   { .command = BRL_CMD_SAY_SLOWER },
   { .command = BRL_CMD_SAY_FASTER },
-  { .command = BRL_CMD_SPKHOME },
+  { .command = BRL_CMD_AUTOSPEAK },
+  { .command = BRL_CMD_ASPK_SEL_LINE },
+  { .command = BRL_CMD_ASPK_SEL_CHAR },
+  { .command = BRL_CMD_ASPK_INS_CHARS },
+  { .command = BRL_CMD_ASPK_DEL_CHARS },
+  { .command = BRL_CMD_ASPK_REP_CHARS },
+  { .command = BRL_CMD_ASPK_CMP_WORDS },
 };
 
 static const CommandListEntry commandList_speak[] = {
@@ -160,12 +166,6 @@ static const CommandListEntry commandList_speak[] = {
   { .command = BRL_CMD_SPEAK_LAST_LINE },
   { .command = BRL_CMD_SPEAK_CURR_LOCN },
   { .command = BRL_CMD_SHOW_CURR_LOCN },
-  { .command = BRL_CMD_ASPK_SEL_LINE },
-  { .command = BRL_CMD_ASPK_SEL_CHAR },
-  { .command = BRL_CMD_ASPK_INS_CHARS },
-  { .command = BRL_CMD_ASPK_DEL_CHARS },
-  { .command = BRL_CMD_ASPK_REP_CHARS },
-  { .command = BRL_CMD_ASPK_CMP_WORDS },
 };
 
 static const CommandListEntry commandList_input[] = {
