@@ -74,11 +74,11 @@ PREFERENCE_STRING_TABLE(speechPunctuation,
   "none", "some", "all"
 )
 
-PREFERENCE_STRING_TABLE(uppercaseIndicator,
+PREFERENCE_STRING_TABLE(speechUppercaseIndicator,
   "none", "cap", "higher"
 )
 
-PREFERENCE_STRING_TABLE(whitespaceIndicator,
+PREFERENCE_STRING_TABLE(speechWhitespaceIndicator,
   "none", "space"
 )
 
@@ -400,15 +400,15 @@ const PreferenceEntry preferenceTable[] = {
   },
 
   { .name = "speech-uppercase-indicator",
-    .defaultValue = DEFAULT_UPPERCASE_INDICATOR,
-    .settingNames = &preferenceStringTable_uppercaseIndicator,
-    .setting = &prefs.uppercaseIndicator
+    .defaultValue = DEFAULT_SPEECH_UPPERCASE_INDICATOR,
+    .settingNames = &preferenceStringTable_speechUppercaseIndicator,
+    .setting = &prefs.speechUppercaseIndicator
   },
 
   { .name = "speech-whitespace-indicator",
-    .defaultValue = DEFAULT_WHITESPACE_INDICATOR,
-    .settingNames = &preferenceStringTable_whitespaceIndicator,
-    .setting = &prefs.whitespaceIndicator
+    .defaultValue = DEFAULT_SPEECH_WHITESPACE_INDICATOR,
+    .settingNames = &preferenceStringTable_speechWhitespaceIndicator,
+    .setting = &prefs.speechWhitespaceIndicator
   },
 
   { .name = "say-line-mode",
@@ -552,21 +552,21 @@ const PreferenceEntry preferenceTable[] = {
 const unsigned char preferenceCount = ARRAY_COUNT(preferenceTable);
 
 const PreferenceAliasEntry preferenceAliasTable[] = {
-  {.old="autorepeat-delay", .new="long-press-time"},
-  {.old="show-cursor", .new="show-screen-cursor"},
-  {.old="cursor-style", .new="screen-cursor-style"},
-  {.old="blinking-cursor", .new="blinking-screen-cursor"},
-  {.old="cursor-visible-time", .new="screen-cursor-visible-time"},
-  {.old="cursor-invisible-time", .new="screen-cursor-invisible-time"},
-  {.old="skip-blank-windows", .new="skip-blank-braille-windows"},
-  {.old="skip-blank-windows-mode", .new="skip-blank-braille-windows-mode"},
-  {.old="sliding-window", .new="sliding-braille-window"},
-  {.old="eager-sliding-window", .new="eager-sliding-braille-window"},
-  {.old="window-overlap", .new="braille-window-overlap"},
-  {.old="window-follows-pointer", .new="track-screen-pointer"},
-  {.old="highlight-window", .new="highlight-braille-window-location"},
-  {.old="uppercase-indicator", .new="speech-uppercase-indicator"},
-  {.old="whitespace-indicator", .new="speech-whitespace-indicator"},
+  {.oldName="autorepeat-delay", .newName="long-press-time"},
+  {.oldName="show-cursor", .newName="show-screen-cursor"},
+  {.oldName="cursor-style", .newName="screen-cursor-style"},
+  {.oldName="blinking-cursor", .newName="blinking-screen-cursor"},
+  {.oldName="cursor-visible-time", .newName="screen-cursor-visible-time"},
+  {.oldName="cursor-invisible-time", .newName="screen-cursor-invisible-time"},
+  {.oldName="skip-blank-windows", .newName="skip-blank-braille-windows"},
+  {.oldName="skip-blank-windows-mode", .newName="skip-blank-braille-windows-mode"},
+  {.oldName="sliding-window", .newName="sliding-braille-window"},
+  {.oldName="eager-sliding-window", .newName="eager-sliding-braille-window"},
+  {.oldName="window-overlap", .newName="braille-window-overlap"},
+  {.oldName="window-follows-pointer", .newName="track-screen-pointer"},
+  {.oldName="highlight-window", .newName="highlight-braille-window-location"},
+  {.oldName="uppercase-indicator", .newName="speech-uppercase-indicator"},
+  {.oldName="whitespace-indicator", .newName="speech-whitespace-indicator"},
 };
 
 const unsigned char preferenceAliasCount = ARRAY_COUNT(preferenceAliasTable);

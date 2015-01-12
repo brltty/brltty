@@ -42,8 +42,8 @@ extern const PreferenceEntry preferenceTable[];
 extern const unsigned char preferenceCount;
 
 typedef struct {
-  const char *old;
-  const char *new;
+  const char *oldName;
+  const char *newName;
 } PreferenceAliasEntry;
 
 extern const PreferenceAliasEntry preferenceAliasTable[];

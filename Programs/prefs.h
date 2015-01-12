@@ -48,15 +48,15 @@ typedef enum {
 } SayMode;
 
 typedef enum {
-  ucNone,
-  ucSayCap,
-  ucRaisePitch
-} UppercaseIndicator;
+  sucNone,
+  sucSayCap,
+  sucRaisePitch
+} SpeechUppercaseIndicator;
 
 typedef enum {
-  wsNone,
-  wsSaySpace
-} WhitespaceIndicator;
+  swsNone,
+  swsSaySpace
+} SpeechWhitespaceIndicator;
 
 typedef enum {
   tf24Hour,
@@ -165,8 +165,8 @@ typedef struct {
   unsigned char brailleDisplayOrientation;
 
   unsigned char capitalizationMode;
-  unsigned char uppercaseIndicator;
-  unsigned char whitespaceIndicator;
+  unsigned char speechUppercaseIndicator;
+  unsigned char speechWhitespaceIndicator;
 
   unsigned char autospeakSelectedLine;
   unsigned char autospeakSelectedCharacter;

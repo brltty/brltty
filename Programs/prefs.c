@@ -112,7 +112,7 @@ sortAliasesByOldName (const void *element1, const void *element2) {
   const PreferenceAliasEntry *const *alias1 = element1;
   const PreferenceAliasEntry *const *alias2 = element2;
 
-  return strcasecmp((*alias1)->old, (*alias2)->old);
+  return strcasecmp((*alias1)->oldName, (*alias2)->oldName);
 }
 
 static int
@@ -120,7 +120,7 @@ searchAliasByOldName (const void *target, const void *element) {
   const char *name = target;
   const PreferenceAliasEntry *const *alias = element;
 
-  return strcasecmp(name, (*alias)->old);
+  return strcasecmp(name, (*alias)->oldName);
 }
 
 const PreferenceEntry *
@@ -165,7 +165,7 @@ findPreferenceEntry (const char *name) {
   {
     const PreferenceAliasEntry *const *alias = bsearch(name, sortedAliases, preferenceAliasCount, sizeof(*sortedAliases), searchAliasByOldName);
 
-    if (alias) name = (*alias)->new;
+    if (alias) name = (*alias)->newName;
   }
 
   {

@@ -881,8 +881,8 @@ makePreferencesMenu (void) {
         {.label=strtext("Raise Pitch")}
       };
 
-      NAME(strtext("Uppercase Indicator"));
-      ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.uppercaseIndicator, &itemName, strings));
+      NAME(strtext("Speech Uppercase Indicator"));
+      ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.speechUppercaseIndicator, &itemName, strings));
     }
 
     {
@@ -891,8 +891,8 @@ makePreferencesMenu (void) {
         {.label=strtext("Say Space")},
       };
 
-      NAME(strtext("Whitespace Indicator"));
-      ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.whitespaceIndicator, &itemName, strings));
+      NAME(strtext("Speech Whitespace Indicator"));
+      ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.speechWhitespaceIndicator, &itemName, strings));
     }
 
     {

@@ -774,12 +774,12 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
   SayOptions sayOptions = SAY_OPT_MUTE_FIRST;
 
   if (isAllSpaceCharacters(characters, count)) {
-    switch (prefs.whitespaceIndicator) {
+    switch (prefs.speechWhitespaceIndicator) {
       default:
-      case wsNone:
+      case swsNone:
         break;
 
-      case wsSaySpace: {
+      case swsSaySpace: {
         wchar_t buffer[0X100];
         size_t length = convertTextToWchars(buffer, gettext("space"), ARRAY_COUNT(buffer));
 
@@ -792,18 +792,18 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
     const char *prefix = NULL;
 
     if (iswupper(character)) {
-      switch (prefs.uppercaseIndicator) {
+      switch (prefs.speechUppercaseIndicator) {
         default:
-        case ucNone:
+        case sucNone:
           break;
 
-        case ucSayCap:
+        case sucSayCap:
           // "cap" here, used during speech output, is short for "capital".
           // It is spoken just before an uppercase letter, e.g. "cap A".
           prefix = gettext("cap");
           break;
 
-        case ucRaisePitch:
+        case sucRaisePitch:
           sayOptions |= SAY_OPT_HIGHER_PITCH;
           break;
       }
