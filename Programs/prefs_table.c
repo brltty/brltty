@@ -175,30 +175,30 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.brailleFirmness
   },
 
-  { .name = "show-cursor",
+  { .name = "show-screen-cursor",
     .defaultValue = DEFAULT_SHOW_SCREEN_CURSOR,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.showScreenCursor
   },
 
-  { .name = "cursor-style",
+  { .name = "screen-cursor-style",
     .defaultValue = DEFAULT_SCREEN_CURSOR_STYLE,
     .settingNames = &preferenceStringTable_cursorStyle,
     .setting = &prefs.screenCursorStyle
   },
 
-  { .name = "blinking-cursor",
+  { .name = "blinking-screen-cursor",
     .defaultValue = DEFAULT_BLINKING_SCREEN_CURSOR,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.blinkingScreenCursor
   },
 
-  { .name = "cursor-visible-time",
+  { .name = "screen-cursor-visible-time",
     .defaultValue = DEFAULT_SCREEN_CURSOR_VISIBLE_TIME,
     .setting = &prefs.screenCursorVisibleTime
   },
 
-  { .name = "cursor-invisible-time",
+  { .name = "screen-cursor-invisible-time",
     .defaultValue = DEFAULT_SCREEN_CURSOR_INVISIBLE_TIME,
     .setting = &prefs.screenCursorInvisibleTime
   },
@@ -247,42 +247,42 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.skipIdenticalLines
   },
 
-  { .name = "skip-blank-windows",
+  { .name = "skip-blank-braille-windows",
     .defaultValue = DEFAULT_SKIP_BLANK_BRAILLE_WINDOWS,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.skipBlankBrailleWindows
   },
 
-  { .name = "skip-blank-windows-mode",
+  { .name = "skip-blank-braille-windows-mode",
     .defaultValue = DEFAULT_SKIP_BLANK_BRAILLE_WINDOWS_MODE,
     .settingNames = &preferenceStringTable_skipBlankWindowsMode,
     .setting = &prefs.skipBlankBrailleWindowsMode
   },
 
-  { .name = "sliding-window",
+  { .name = "sliding-braille-window",
     .defaultValue = DEFAULT_SLIDING_BRAILLE_WINDOW,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.slidingBrailleWindow
   },
 
-  { .name = "eager-sliding-window",
+  { .name = "eager-sliding-braille-window",
     .defaultValue = DEFAULT_EAGER_SLIDING_BRAILLE_WINDOW,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.eagerSlidingBrailleWindow
   },
 
-  { .name = "window-overlap",
+  { .name = "braille-window-overlap",
     .defaultValue = DEFAULT_BRAILLE_WINDOW_OVERLAP,
     .setting = &prefs.brailleWindowOverlap
   },
 
-  { .name = "window-follows-pointer",
+  { .name = "track-screen-pointer",
     .defaultValue = DEFAULT_TRACK_SCREEN_POINTER,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.trackScreenPointer
   },
 
-  { .name = "highlight-window",
+  { .name = "highlight-braille-window-location",
     .defaultValue = DEFAULT_HIGHLIGHT_BRAILLE_WINDOW_LOCATION,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.highlightBrailleWindowLocation
@@ -399,13 +399,13 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.speechPunctuation
   },
 
-  { .name = "uppercase-indicator",
+  { .name = "speech-uppercase-indicator",
     .defaultValue = DEFAULT_UPPERCASE_INDICATOR,
     .settingNames = &preferenceStringTable_uppercaseIndicator,
     .setting = &prefs.uppercaseIndicator
   },
 
-  { .name = "whitespace-indicator",
+  { .name = "speech-whitespace-indicator",
     .defaultValue = DEFAULT_WHITESPACE_INDICATOR,
     .settingNames = &preferenceStringTable_whitespaceIndicator,
     .setting = &prefs.whitespaceIndicator
@@ -550,3 +550,23 @@ const PreferenceEntry preferenceTable[] = {
 };
 
 const unsigned char preferenceCount = ARRAY_COUNT(preferenceTable);
+
+const PreferenceAliasEntry preferenceAliasTable[] = {
+  {.old="autorepeat-delay", .new="long-press-time"},
+  {.old="show-cursor", .new="show-screen-cursor"},
+  {.old="cursor-style", .new="screen-cursor-style"},
+  {.old="blinking-cursor", .new="blinking-screen-cursor"},
+  {.old="cursor-visible-time", .new="screen-cursor-visible-time"},
+  {.old="cursor-invisible-time", .new="screen-cursor-invisible-time"},
+  {.old="skip-blank-windows", .new="skip-blank-braille-windows"},
+  {.old="skip-blank-windows-mode", .new="skip-blank-braille-windows-mode"},
+  {.old="sliding-window", .new="sliding-braille-window"},
+  {.old="eager-sliding-window", .new="eager-sliding-braille-window"},
+  {.old="window-overlap", .new="braille-window-overlap"},
+  {.old="window-follows-pointer", .new="track-screen-pointer"},
+  {.old="highlight-window", .new="highlight-braille-window-location"},
+  {.old="uppercase-indicator", .new="speech-uppercase-indicator"},
+  {.old="whitespace-indicator", .new="speech-whitespace-indicator"},
+};
+
+const unsigned char preferenceAliasCount = ARRAY_COUNT(preferenceAliasTable);

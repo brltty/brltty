@@ -96,6 +96,7 @@ static int
 sortPreferencesByName (const void *element1, const void *element2) {
   const PreferenceEntry *const *pref1 = element1;
   const PreferenceEntry *const *pref2 = element2;
+
   return comparePreferenceNames((*pref1)->name, (*pref2)->name);
 }
 
@@ -106,12 +107,29 @@ searchPreferenceByName (const void *target, const void *element) {
   return comparePreferenceNames(name, (*pref)->name);
 }
 
+static int
+sortAliasesByOldName (const void *element1, const void *element2) {
+  const PreferenceAliasEntry *const *alias1 = element1;
+  const PreferenceAliasEntry *const *alias2 = element2;
+
+  return strcasecmp((*alias1)->old, (*alias2)->old);
+}
+
+static int
+searchAliasByOldName (const void *target, const void *element) {
+  const char *name = target;
+  const PreferenceAliasEntry *const *alias = element;
+
+  return strcasecmp(name, (*alias)->old);
+}
+
 const PreferenceEntry *
 findPreferenceEntry (const char *name) {
   static const PreferenceEntry **sortedEntries = NULL;
+  static const PreferenceAliasEntry **sortedAliases = NULL;
 
   if (!sortedEntries) {
-    if (!(sortedEntries = malloc(preferenceCount * sizeof(*sortedEntries)))) {
+    if (!(sortedEntries = malloc(ARRAY_SIZE(sortedEntries, preferenceCount)))) {
       logMallocError();
       return NULL;
     }
@@ -125,6 +143,29 @@ findPreferenceEntry (const char *name) {
     }
 
     qsort(sortedEntries, preferenceCount, sizeof(*sortedEntries), sortPreferencesByName);
+  }
+
+  if (!sortedAliases) {
+    if (!(sortedAliases = malloc(ARRAY_SIZE(sortedAliases, preferenceAliasCount)))) {
+      logMallocError();
+      return NULL;
+    }
+
+    {
+      unsigned int index;
+
+      for (index=0; index<preferenceAliasCount; index+=1) {
+        sortedAliases[index] = &preferenceAliasTable[index];
+      }
+    }
+
+    qsort(sortedAliases, preferenceAliasCount, sizeof(*sortedAliases), sortAliasesByOldName);
+  }
+
+  {
+    const PreferenceAliasEntry *const *alias = bsearch(name, sortedAliases, preferenceAliasCount, sizeof(*sortedAliases), searchAliasByOldName);
+
+    if (alias) name = (*alias)->new;
   }
 
   {

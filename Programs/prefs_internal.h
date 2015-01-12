@@ -41,6 +41,14 @@ extern unsigned char statusFieldsSet;
 extern const PreferenceEntry preferenceTable[];
 extern const unsigned char preferenceCount;
 
+typedef struct {
+  const char *old;
+  const char *new;
+} PreferenceAliasEntry;
+
+extern const PreferenceAliasEntry preferenceAliasTable[];
+extern const unsigned char preferenceAliasCount;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
