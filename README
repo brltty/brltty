@@ -4,7 +4,7 @@ display.
 
 Version 5.2, Nov 2014
 
-Copyright (C) 1995-2014 by The BRLTTY Developers.
+Copyright (C) 1995-2015 by The BRLTTY Developers.
 
 Web Page: http://mielke.cc/brltty/
 
