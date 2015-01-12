@@ -142,12 +142,12 @@ renderStatusField_screenNumber (unsigned char *cells) {
 static void
 renderStatusField_stateDots (unsigned char *cells) {
   *cells = (isFrozenScreen()           ? BRL_DOT_1: 0) |
-           (prefs.showSystemCursor     ? BRL_DOT_4: 0) |
+           (prefs.showScreenCursor     ? BRL_DOT_4: 0) |
            (ses->displayMode           ? BRL_DOT_2: 0) |
-           (prefs.systemCursorStyle    ? BRL_DOT_5: 0) |
+           (prefs.screenCursorStyle    ? BRL_DOT_5: 0) |
            (prefs.alertTunes           ? BRL_DOT_3: 0) |
-           (prefs.blinkingSystemCursor ? BRL_DOT_6: 0) |
-           (ses->trackSystemCursor     ? BRL_DOT_7: 0) |
+           (prefs.blinkingScreenCursor ? BRL_DOT_6: 0) |
+           (ses->trackScreenCursor     ? BRL_DOT_7: 0) |
            (prefs.slidingBrailleWindow ? BRL_DOT_8: 0);
 }
 
@@ -158,7 +158,7 @@ renderStatusField_stateLetter (unsigned char *cells) {
                                   isHelpScreen()        ? WC_C('h'):
                                   isMenuScreen()        ? WC_C('m'):
                                   isFrozenScreen()      ? WC_C('f'):
-                                  ses->trackSystemCursor? WC_C('t'):
+                                  ses->trackScreenCursor? WC_C('t'):
                                                           WC_C(' '));
 }
 
@@ -199,11 +199,11 @@ renderStatusField_generic (unsigned char *cells) {
   cells[gscSlidingWindow] = prefs.slidingBrailleWindow;
   cells[gscSkipIdenticalLines] = prefs.skipIdenticalLines;
   cells[gscSkipBlankWindows] = prefs.skipBlankBrailleWindows;
-  cells[gscShowCursor] = prefs.showSystemCursor;
-  cells[gscHideCursor] = ses->hideSystemCursor;
-  cells[gscTrackCursor] = ses->trackSystemCursor;
-  cells[gscCursorStyle] = prefs.systemCursorStyle;
-  cells[gscBlinkingCursor] = prefs.blinkingSystemCursor;
+  cells[gscShowCursor] = prefs.showScreenCursor;
+  cells[gscHideCursor] = ses->hideScreenCursor;
+  cells[gscTrackCursor] = ses->trackScreenCursor;
+  cells[gscCursorStyle] = prefs.screenCursorStyle;
+  cells[gscBlinkingCursor] = prefs.blinkingScreenCursor;
   cells[gscShowAttributes] = prefs.showAttributes;
   cells[gscBlinkingAttributes] = prefs.blinkingAttributes;
   cells[gscBlinkingCapitals] = prefs.blinkingCapitals;

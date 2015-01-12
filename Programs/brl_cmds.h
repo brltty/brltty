@@ -107,9 +107,9 @@ typedef enum {
   BRL_CMD_LNEND /* go to end of line */,
   
   /* implicit motion */
-  BRL_CMD_HOME /* go to system cursor */,
+  BRL_CMD_HOME /* go to screen cursor */,
   BRL_CMD_BACK /* go back after cursor tracking */,
-  BRL_CMD_RETURN /* go to system cursor or go back after cursor tracking */,
+  BRL_CMD_RETURN /* go to screen cursor or go back after cursor tracking */,
   
   /* feature activation and deactivation */
   BRL_CMD_FREEZE /* set screen image frozen/unfrozen */,
@@ -118,11 +118,11 @@ typedef enum {
   BRL_CMD_SLIDEWIN /* set sliding braille window on/off */,
   BRL_CMD_SKPIDLNS /* set skipping of lines with identical content on/off */,
   BRL_CMD_SKPBLNKWINS /* set skipping of blank braille windows on/off */,
-  BRL_CMD_CSRVIS /* set system cursor visibility on/off */,
-  BRL_CMD_CSRHIDE /* set hidden system cursor on/off */,
-  BRL_CMD_CSRTRK /* set track system cursor on/off */,
-  BRL_CMD_CSRSIZE /* set system cursor style block/underline */,
-  BRL_CMD_CSRBLINK /* set system cursor blinking on/off */,
+  BRL_CMD_CSRVIS /* set screen cursor visibility on/off */,
+  BRL_CMD_CSRHIDE /* set hidden screen cursor on/off */,
+  BRL_CMD_CSRTRK /* set track screen cursor on/off */,
+  BRL_CMD_CSRSIZE /* set screen cursor style block/underline */,
+  BRL_CMD_CSRBLINK /* set screen cursor blinking on/off */,
   BRL_CMD_ATTRVIS /* set attribute underlining on/off */,
   BRL_CMD_ATTRBLINK /* set attribute blinking on/off */,
   BRL_CMD_CAPBLINK /* set capital letter blinking on/off */,
@@ -164,8 +164,8 @@ typedef enum {
   BRL_CMD_SWITCHVT_NEXT /* switch to next virtual terminal */,
   
   /* miscellaneous */
-  BRL_CMD_CSRJMP_VERT /* bring system cursor to current line */,
-  BRL_CMD_PASTE /* insert clipboard text after system cursor */,
+  BRL_CMD_CSRJMP_VERT /* bring screen cursor to current line */,
+  BRL_CMD_PASTE /* insert clipboard text after screen cursor */,
   BRL_CMD_RESTARTBRL /* restart braille driver */,
   BRL_CMD_RESTARTSPEECH /* restart speech driver */,
 
@@ -201,7 +201,7 @@ typedef enum {
   BRL_CMD_SPEAK_LAST_LINE /* go to and speak last non-blank line on screen */,
   BRL_CMD_DESC_CURR_CHAR /* describe current character */,
   BRL_CMD_SPELL_CURR_WORD /* spell current word */,
-  BRL_CMD_ROUTE_CURR_LOCN /* bring system cursor to speech cursor */,
+  BRL_CMD_ROUTE_CURR_LOCN /* bring screen cursor to speech cursor */,
   BRL_CMD_SPEAK_CURR_LOCN /* speak speech cursor location */,
   BRL_CMD_SHOW_CURR_LOCN /* set speech cursor visibility on/off */,
 
@@ -220,7 +220,7 @@ typedef enum {
 #define BRL_FLG_TOGGLE_MASK (BRL_FLG_TOGGLE_ON | BRL_FLG_TOGGLE_OFF) /* mask for all toggle flags */
 
 /* For automatic cursor routing. */
-#define BRL_FLG_MOTION_ROUTE 0X040000 /* bring system cursor into braille window after function */
+#define BRL_FLG_MOTION_ROUTE 0X040000 /* bring screen cursor into braille window after function */
 
 /*
  * Please comment all BRL_BLK_* definitions. They are
@@ -228,7 +228,7 @@ typedef enum {
  */
 typedef enum {
   BRL_BLK_BASIC = 0 /* (must be first) */,
-  BRL_BLK_ROUTE /* bring system cursor to character */,
+  BRL_BLK_ROUTE /* bring screen cursor to character */,
   BRL_BLK_CLIP_NEW /* start new clipboard at character */,
   BRL_BLK_CLIP_ADD /* append to clipboard from character */,
   BRL_BLK_COPY_RECT /* rectangular copy to character */,
@@ -245,7 +245,7 @@ typedef enum {
   BRL_BLK_NXDIFCHAR /* go down to nearest line with different character */,
   BRL_BLK_CLIP_COPY /* copy characters to clipboard */,
   BRL_BLK_CLIP_APPEND /* append characters to clipboard */,
-  BRL_BLK_PASTE_HISTORY /* insert clipboard history entry after system cursor */,
+  BRL_BLK_PASTE_HISTORY /* insert clipboard history entry after screen cursor */,
   BRL_BLK_SET_TEXT_TABLE /* set the text table */,
   BRL_BLK_SET_ATTRIBUTES_TABLE /* set the attributes table */,
   BRL_BLK_SET_CONTRACTION_TABLE /* set the contraction table */,

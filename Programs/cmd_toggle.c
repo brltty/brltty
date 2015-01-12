@@ -71,15 +71,15 @@ handleToggleCommands (int command, void *data) {
       break;
 
     case BRL_CMD_CSRSIZE:
-      toggleFeatureSetting(&prefs.systemCursorStyle, command);
+      toggleFeatureSetting(&prefs.screenCursorStyle, command);
       break;
 
     case BRL_CMD_CSRVIS:
-      toggleFeatureSetting(&prefs.showSystemCursor, command);
+      toggleFeatureSetting(&prefs.showScreenCursor, command);
       break;
 
     case BRL_CMD_CSRBLINK:
-      toggleFeatureSetting(&prefs.blinkingSystemCursor, command);
+      toggleFeatureSetting(&prefs.blinkingScreenCursor, command);
       break;
 
     case BRL_CMD_ATTRVIS:
@@ -157,13 +157,13 @@ handleToggleCommands (int command, void *data) {
       break;
 
     case BRL_CMD_CSRHIDE:
-      toggleModeSetting(&ses->hideSystemCursor, command);
+      toggleModeSetting(&ses->hideScreenCursor, command);
       break;
 
     case BRL_CMD_CSRTRK:
-      toggleSetting(&ses->trackSystemCursor, command, ALERT_CURSOR_UNLINKED, ALERT_CURSOR_LINKED);
+      toggleSetting(&ses->trackScreenCursor, command, ALERT_CURSOR_UNLINKED, ALERT_CURSOR_LINKED);
 
-      if (ses->trackSystemCursor) {
+      if (ses->trackScreenCursor) {
 #ifdef ENABLE_SPEECH_SUPPORT
         if (spk.track.isActive && (scr.number == spk.track.screenNumber)) {
           spk.track.speechLocation = SPK_LOC_NONE;
@@ -171,7 +171,7 @@ handleToggleCommands (int command, void *data) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
         {
-          trackSystemCursor(1);
+          trackScreenCursor(1);
         }
       }
       break;

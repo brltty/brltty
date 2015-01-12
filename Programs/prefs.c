@@ -313,8 +313,8 @@ loadPreferencesFile (const char *path) {
         prefs.autorepeat = DEFAULT_AUTOREPEAT;
         prefs.longPressTime = DEFAULT_LONG_PRESS_TIME;
         prefs.autorepeatInterval = DEFAULT_AUTOREPEAT_INTERVAL;
-        prefs.systemCursorVisibleTime *= 4;
-        prefs.systemCursorInvisibleTime *= 4;
+        prefs.screenCursorVisibleTime *= 4;
+        prefs.screenCursorInvisibleTime *= 4;
         prefs.attributesVisibleTime *= 4;
         prefs.attributesInvisibleTime *= 4;
         prefs.capitalsVisibleTime *= 4;

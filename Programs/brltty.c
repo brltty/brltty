@@ -146,8 +146,8 @@ postprocessCommand (void *state, int command, int handled) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
 #ifdef ENABLE_SPEECH_SUPPORT
-      if (ses->trackSystemCursor && spk.track.isActive && (scr.number == spk.track.screenNumber)) {
-        ses->trackSystemCursor = 0;
+      if (ses->trackScreenCursor && spk.track.isActive && (scr.number == spk.track.screenNumber)) {
+        ses->trackScreenCursor = 0;
         alert(ALERT_CURSOR_UNLINKED);
       }
 #endif /* ENABLE_SPEECH_SUPPORT */
@@ -639,7 +639,7 @@ shiftWindowRight (unsigned int amount) {
 }
 
 int
-trackSystemCursor (int place) {
+trackScreenCursor (int place) {
   if (!SCR_CURSOR_OK()) return 0;
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
@@ -852,7 +852,7 @@ getUncontractedCursorOffset (int x, int y) {
 int
 getContractedCursor (void) {
   int offset = getUncontractedCursorOffset(scr.posx, scr.posy);
-  return ((offset >= 0) && !ses->hideSystemCursor)? offset: CTB_NO_CURSOR;
+  return ((offset >= 0) && !ses->hideScreenCursor)? offset: CTB_NO_CURSOR;
 }
 
 int
@@ -873,8 +873,8 @@ getContractedLength (unsigned int outputLimit) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
 int
-showSystemCursor (void) {
-  return scr.cursor && prefs.showSystemCursor && !ses->hideSystemCursor;
+showScreenCursor (void) {
+  return scr.cursor && prefs.showScreenCursor && !ses->hideScreenCursor;
 }
 
 int
@@ -1152,7 +1152,7 @@ brlttyConstruct (int argc, char *argv[]) {
   onProgramExit("sessions", exitSessions, NULL);
   setSessionEntry();
   ses->trkx = scr.posx; ses->trky = scr.posy;
-  if (!trackSystemCursor(1)) ses->winx = ses->winy = 0;
+  if (!trackScreenCursor(1)) ses->winx = ses->winy = 0;
   ses->motx = ses->winx; ses->moty = ses->winy;
   ses->spkx = ses->winx; ses->spky = ses->winy;
   resumeUpdates(1);

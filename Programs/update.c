@@ -49,7 +49,7 @@ checkPointer (void) {
   int moved = 0;
   int column, row;
 
-  if (prefs.brailleWindowFollowsSystemPointer && getScreenPointer(&column, &row)) {
+  if (prefs.trackScreenPointer && getScreenPointer(&column, &row)) {
     if (column != ses->ptrx) {
       if (ses->ptrx >= 0) moved = 1;
       ses->ptrx = column;
@@ -108,12 +108,12 @@ static const unsigned char cursorStyles[] = {
 };
 
 unsigned char
-getCursorDots (void) {
-  return cursorStyles[prefs.systemCursorStyle];
+getScreenCursorDots (void) {
+  return cursorStyles[prefs.screenCursorStyle];
 }
 
 static int
-getSystemCursorPosition (int x, int y) {
+getScreenCursorPosition (int x, int y) {
   int position = -1;
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
@@ -234,9 +234,9 @@ showInfo (void) {
     length = snprintf(text, sizeof(text), "%.*s %02d %c%c%c%c%c%c",
                       cellCount, prefix,
                       scr.number,
-                      ses->trackSystemCursor? 't': ' ',
-                      prefs.showSystemCursor? (prefs.blinkingSystemCursor? 'B': 'v'):
-                                              (prefs.blinkingSystemCursor? 'b': ' '),
+                      ses->trackScreenCursor? 't': ' ',
+                      prefs.showScreenCursor? (prefs.blinkingScreenCursor? 'B': 'v'):
+                                              (prefs.blinkingScreenCursor? 'b': ' '),
                       ses->displayMode? 'a': 't',
                       isFrozenScreen()? 'f': ' ',
                       prefs.textStyle? '6': '8',
@@ -265,9 +265,9 @@ showInfo (void) {
              SCR_COLUMN_NUMBER(ses->winx), SCR_ROW_NUMBER(ses->winy),
              SCR_COLUMN_NUMBER(scr.posx), SCR_ROW_NUMBER(scr.posy),
              scr.number, 
-             ses->trackSystemCursor? 't': ' ',
-             prefs.showSystemCursor? (prefs.blinkingSystemCursor? 'B': 'v'):
-                                     (prefs.blinkingSystemCursor? 'b': ' '),
+             ses->trackScreenCursor? 't': ' ',
+             prefs.showScreenCursor? (prefs.blinkingScreenCursor? 'B': 'v'):
+                                     (prefs.blinkingScreenCursor? 'b': ' '),
              ses->displayMode? 'a': 't',
              isFrozenScreen()? 'f': ' ',
              prefs.textStyle? '6': '8',
@@ -574,13 +574,13 @@ doUpdate (void) {
     }
   }
 
-  if (ses->trackSystemCursor) {
+  if (ses->trackScreenCursor) {
 #ifdef ENABLE_SPEECH_SUPPORT
     if (!spk.track.isActive)
 #endif /* ENABLE_SPEECH_SUPPORT */
     {
-      /* If system cursor moves while blinking is on */
-      if (prefs.blinkingSystemCursor) {
+      /* If screen cursor moves while blinking is on */
+      if (prefs.blinkingScreenCursor) {
         if (scr.posy != ses->trky) {
           /* turn off cursor to see what's under it while changing lines */
           setBlinkState(&screenCursorBlinkDescriptor, 0);
@@ -595,7 +595,7 @@ doUpdate (void) {
         int oldx = ses->winx;
         int oldy = ses->winy;
 
-        trackSystemCursor(0);
+        trackScreenCursor(0);
         logMessage(LOG_CATEGORY(CURSOR_TRACKING),
                    "scr=%u csr=[%u,%u]->[%u,%u] win=[%u,%u]->[%u,%u]",
                    scr.number,
@@ -841,17 +841,17 @@ doUpdate (void) {
         }
       }
 
-      if ((brl.cursor = getSystemCursorPosition(scr.posx, scr.posy)) >= 0) {
-        if (showSystemCursor()) {
+      if ((brl.cursor = getScreenCursorPosition(scr.posx, scr.posy)) >= 0) {
+        if (showScreenCursor()) {
           BlinkDescriptor *blink = &screenCursorBlinkDescriptor;
 
           requireBlinkDescriptor(blink);
-          if (isBlinkVisible(blink)) brl.buffer[brl.cursor] |= getCursorDots();
+          if (isBlinkVisible(blink)) brl.buffer[brl.cursor] |= getScreenCursorDots();
         }
       }
 
       if (prefs.showSpeechCursor) {
-        int position = getSystemCursorPosition(ses->spkx, ses->spky);
+        int position = getScreenCursorPosition(ses->spkx, ses->spky);
 
         if (position >= 0) {
           if (position != brl.cursor) {

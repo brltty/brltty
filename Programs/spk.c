@@ -94,7 +94,7 @@ setSpeechLocation (int location) {
     if (scr.number == spk.track.screenNumber) {
       if (location != spk.track.speechLocation) {
         spk.track.speechLocation = location;
-        if (ses->trackSystemCursor) trackSpeech();
+        if (ses->trackScreenCursor) trackSpeech();
       }
 
       return;

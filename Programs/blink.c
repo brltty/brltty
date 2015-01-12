@@ -37,9 +37,9 @@ struct BlinkDescriptorStruct {
 
 BlinkDescriptor screenCursorBlinkDescriptor = {
   .name = "screen cursor",
-  .isEnabled = &prefs.blinkingSystemCursor,
-  .visibleTime = &prefs.systemCursorVisibleTime,
-  .invisibleTime = &prefs.systemCursorInvisibleTime
+  .isEnabled = &prefs.blinkingScreenCursor,
+  .visibleTime = &prefs.screenCursorVisibleTime,
+  .invisibleTime = &prefs.screenCursorInvisibleTime
 };
 
 BlinkDescriptor attributesUnderlineBlinkDescriptor = {

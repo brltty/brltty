@@ -2771,7 +2771,7 @@ int api_flush(BrailleDisplay *brl) {
 	goto out;
       }
     }
-    newCursorShape = getCursorDots();
+    newCursorShape = getScreenCursorDots();
     if (newCursorShape!=cursorShape) {
       cursorShape = newCursorShape;
     }

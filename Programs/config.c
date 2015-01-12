@@ -1482,7 +1482,7 @@ startBrailleDriver (void) {
     alert(ALERT_BRAILLE_ON);
 
     ses->winx = 0;
-    trackSystemCursor(1);
+    trackScreenCursor(1);
 
     if (clearStatusCells(&brl)) {
       if (opt_quiet) {

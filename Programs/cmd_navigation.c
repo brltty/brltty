@@ -72,7 +72,7 @@ toDifferentLine (
       readScreen(from, ses->winy+=amount, width, 1, characters2);
 
       if (!isSameRow(characters1, characters2, width, isSameCharacter) ||
-          (showSystemCursor() && (scr.posy == ses->winy) &&
+          (showScreenCursor() && (scr.posy == ses->winy) &&
            (scr.posx >= from) && (scr.posx < (from + width))))
         return 1;
 
@@ -364,7 +364,7 @@ handleNavigationCommands (int command, void *data) {
             if (text != WC_C(' ')) break;
           }
 
-          if (showSystemCursor() &&
+          if (showScreenCursor() &&
               (scr.posy == ses->winy) &&
               (scr.posx >= 0) &&
               (scr.posx < (ses->winx + charCount))) {
@@ -397,7 +397,7 @@ handleNavigationCommands (int command, void *data) {
 
             if (prefs.skipBlankBrailleWindowsMode == sbwEndOfLine) goto skipEndOfLine;
             charCount = MIN(scr.cols, ses->winx+textCount);
-            if (!showSystemCursor() ||
+            if (!showScreenCursor() ||
                 (scr.posy != ses->winy) ||
                 (scr.posx < 0) ||
                 (scr.posx >= charCount)) {
@@ -444,7 +444,7 @@ handleNavigationCommands (int command, void *data) {
             if (text != WC_C(' ')) break;
           }
 
-          if (showSystemCursor() && (scr.posy == ses->winy) && SCR_COLUMN_OK(scr.posx)) {
+          if (showScreenCursor() && (scr.posy == ses->winy) && SCR_COLUMN_OK(scr.posx)) {
             charIndex = MAX(charIndex, scr.posx);
           }
 
@@ -490,7 +490,7 @@ handleNavigationCommands (int command, void *data) {
             if (text != WC_C(' ')) break;
           }
 
-          if (showSystemCursor() &&
+          if (showScreenCursor() &&
               (scr.posy == ses->winy) &&
               (scr.posx < scr.cols) &&
               (scr.posx >= ses->winx)) {
@@ -519,7 +519,7 @@ handleNavigationCommands (int command, void *data) {
 
         if (shiftWindowRight(fullWindowShift)) {
           if (skipBlankBrailleWindows) {
-            if (!showSystemCursor() ||
+            if (!showScreenCursor() ||
                 (scr.posy != ses->winy) ||
                 (scr.posx < ses->winx)) {
               int charCount = scr.cols - ses->winx;
@@ -565,7 +565,7 @@ handleNavigationCommands (int command, void *data) {
         break;
       }
     case BRL_CMD_HOME:
-      if (!trackSystemCursor(1)) alert(ALERT_COMMAND_REJECTED);
+      if (!trackScreenCursor(1)) alert(ALERT_COMMAND_REJECTED);
       break;
 
     case BRL_CMD_CSRJMP_VERT:

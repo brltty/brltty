@@ -176,31 +176,31 @@ const PreferenceEntry preferenceTable[] = {
   },
 
   { .name = "show-cursor",
-    .defaultValue = DEFAULT_SHOW_SYSTEM_CURSOR,
+    .defaultValue = DEFAULT_SHOW_SCREEN_CURSOR,
     .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.showSystemCursor
+    .setting = &prefs.showScreenCursor
   },
 
   { .name = "cursor-style",
-    .defaultValue = DEFAULT_SYSTEM_CURSOR_STYLE,
+    .defaultValue = DEFAULT_SCREEN_CURSOR_STYLE,
     .settingNames = &preferenceStringTable_cursorStyle,
-    .setting = &prefs.systemCursorStyle
+    .setting = &prefs.screenCursorStyle
   },
 
   { .name = "blinking-cursor",
-    .defaultValue = DEFAULT_BLINKING_SYSTEM_CURSOR,
+    .defaultValue = DEFAULT_BLINKING_SCREEN_CURSOR,
     .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.blinkingSystemCursor
+    .setting = &prefs.blinkingScreenCursor
   },
 
   { .name = "cursor-visible-time",
-    .defaultValue = DEFAULT_SYSTEM_CURSOR_VISIBLE_TIME,
-    .setting = &prefs.systemCursorVisibleTime
+    .defaultValue = DEFAULT_SCREEN_CURSOR_VISIBLE_TIME,
+    .setting = &prefs.screenCursorVisibleTime
   },
 
   { .name = "cursor-invisible-time",
-    .defaultValue = DEFAULT_SYSTEM_CURSOR_INVISIBLE_TIME,
-    .setting = &prefs.systemCursorInvisibleTime
+    .defaultValue = DEFAULT_SCREEN_CURSOR_INVISIBLE_TIME,
+    .setting = &prefs.screenCursorInvisibleTime
   },
 
   { .name = "show-attributes",
@@ -277,9 +277,9 @@ const PreferenceEntry preferenceTable[] = {
   },
 
   { .name = "window-follows-pointer",
-    .defaultValue = DEFAULT_BRAILLE_WINDOW_FOLLOWS_SYSTEM_POINTER,
+    .defaultValue = DEFAULT_TRACK_SCREEN_POINTER,
     .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.brailleWindowFollowsSystemPointer
+    .setting = &prefs.trackScreenPointer
   },
 
   { .name = "highlight-window",

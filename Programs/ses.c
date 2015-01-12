@@ -27,8 +27,8 @@
 static const SessionEntry initialSessionEntry = {
   .number = 0,
 
-  .trackSystemCursor = DEFAULT_TRACK_SYSTEM_CURSOR,
-  .hideSystemCursor = DEFAULT_HIDE_SYSTEM_CURSOR,
+  .trackScreenCursor = DEFAULT_TRACK_SCREEN_CURSOR,
+  .hideScreenCursor = DEFAULT_HIDE_SCREEN_CURSOR,
 
   .ptrx = -1,
   .ptry = -1

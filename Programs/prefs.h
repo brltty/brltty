@@ -105,21 +105,21 @@ typedef enum {
  */
 typedef struct {
   unsigned char magic[2];
-  unsigned char showSystemCursor;
+  unsigned char showScreenCursor;
   unsigned char version;
   unsigned char showAttributes;
   unsigned char brailleSensitivity;
-  unsigned char blinkingSystemCursor;
+  unsigned char blinkingScreenCursor;
   unsigned char autorepeat;
   unsigned char blinkingCapitals;
   unsigned char longPressTime;
   unsigned char blinkingAttributes;
   unsigned char autorepeatInterval;
-  unsigned char systemCursorStyle;
+  unsigned char screenCursorStyle;
   unsigned char sayLineMode;
-  unsigned char systemCursorVisibleTime;
+  unsigned char screenCursorVisibleTime;
   unsigned char autospeak;
-  unsigned char systemCursorInvisibleTime;
+  unsigned char screenCursorInvisibleTime;
   unsigned char pcmVolume;
   unsigned char capitalsVisibleTime;
   unsigned char midiVolume;
@@ -128,7 +128,7 @@ typedef struct {
   unsigned char attributesVisibleTime;
   unsigned char highlightBrailleWindowLocation;
   unsigned char attributesInvisibleTime;
-  unsigned char brailleWindowFollowsSystemPointer;
+  unsigned char trackScreenPointer;
   unsigned char textStyle;
   unsigned char autorepeatPanning;
   unsigned char slidingBrailleWindow;

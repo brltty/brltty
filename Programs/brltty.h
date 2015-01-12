@@ -100,8 +100,8 @@ extern int shiftWindowRight (unsigned int amount);
 
 extern void slideWindowVertically (int y);
 
-extern int showSystemCursor (void);
-extern int trackSystemCursor (int place);
+extern int showScreenCursor (void);
+extern int trackScreenCursor (int place);
 
 typedef struct {
   TimeValue value;
@@ -136,7 +136,7 @@ extern void setPreferences (const Preferences *newPreferences);
 extern int loadPreferences (void);
 extern int savePreferences (void);
 
-extern unsigned char getCursorDots (void);
+extern unsigned char getScreenCursorDots (void);
 
 extern BrailleDisplay brl;			/* braille driver reference */
 extern unsigned int textStart;

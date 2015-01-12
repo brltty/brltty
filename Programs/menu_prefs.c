@@ -121,13 +121,13 @@ changedAutorepeatInterval (const MenuItem *item UNUSED, unsigned char setting) {
 }
 
 static int
-testShowSystemCursor (void) {
-  return prefs.showSystemCursor;
+testShowScreenCursor (void) {
+  return prefs.showScreenCursor;
 }
 
 static int
-testBlinkingSystemCursor (void) {
-  return testShowSystemCursor() && prefs.blinkingSystemCursor;
+testBlinkingScreenCursor (void) {
+  return testShowScreenCursor() && prefs.blinkingScreenCursor;
 }
 
 static int
@@ -410,17 +410,17 @@ newStatusFieldMenuItem (
     {.label=strtext("Braille Window Coordinates"), .comment=strtext("2 cells")},
     {.label=strtext("Braille Window Column"), .comment=strtext("1 cell")},
     {.label=strtext("Braille Window Row"), .comment=strtext("1 cell")},
-    {.label=strtext("System Cursor Coordinates"), .comment=strtext("2 cells")},
-    {.label=strtext("System Cursor Column"), .comment=strtext("1 cell")},
-    {.label=strtext("System Cursor Row"), .comment=strtext("1 cell")},
-    {.label=strtext("System Cursor and Braille Window Column"), .comment=strtext("2 cells")},
-    {.label=strtext("System Cursor and Braille Window Row"), .comment=strtext("2 cells")},
+    {.label=strtext("Screen Cursor Coordinates"), .comment=strtext("2 cells")},
+    {.label=strtext("Screen Cursor Column"), .comment=strtext("1 cell")},
+    {.label=strtext("Screen Cursor Row"), .comment=strtext("1 cell")},
+    {.label=strtext("Screen Cursor and Braille Window Column"), .comment=strtext("2 cells")},
+    {.label=strtext("Screen Cursor and Braille Window Row"), .comment=strtext("2 cells")},
     {.label=strtext("Screen Number"), .comment=strtext("1 cell")},
     {.label=strtext("State Dots"), .comment=strtext("1 cell")},
     {.label=strtext("State Letter"), .comment=strtext("1 cell")},
     {.label=strtext("Time"), .comment=strtext("2 cells")},
     {.label=strtext("Alphabetic Braille Window Coordinates"), .comment=strtext("1 cell")},
-    {.label=strtext("Alphabetic System Cursor Coordinates"), .comment=strtext("1 cell")},
+    {.label=strtext("Alphabetic Screen Cursor Coordinates"), .comment=strtext("1 cell")},
     {.label=strtext("Generic")}
   };
 
@@ -573,32 +573,32 @@ makePreferencesMenu (void) {
     SUBMENU(indicatorsSubmenu, rootMenu, strtext("Text Indicators"));
 
     {
-      NAME(strtext("Show System Cursor"));
-      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.showSystemCursor, &itemName));
+      NAME(strtext("Show Screen Cursor"));
+      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.showScreenCursor, &itemName));
     }
 
     {
-      NAME(strtext("System Cursor Style"));
-      ITEM(newEnumeratedMenuItem(indicatorsSubmenu, &prefs.systemCursorStyle, &itemName, cursorStyles));
-      TEST(ShowSystemCursor);
+      NAME(strtext("Screen Cursor Style"));
+      ITEM(newEnumeratedMenuItem(indicatorsSubmenu, &prefs.screenCursorStyle, &itemName, cursorStyles));
+      TEST(ShowScreenCursor);
     }
 
     {
-      NAME(strtext("Blinking System Cursor"));
-      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.blinkingSystemCursor, &itemName));
-      TEST(ShowSystemCursor);
+      NAME(strtext("Blinking Screen Cursor"));
+      ITEM(newBooleanMenuItem(indicatorsSubmenu, &prefs.blinkingScreenCursor, &itemName));
+      TEST(ShowScreenCursor);
     }
 
     {
-      NAME(strtext("System Cursor Visible Time"));
-      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.systemCursorVisibleTime, &itemName));
-      TEST(BlinkingSystemCursor);
+      NAME(strtext("Screen Cursor Visible Time"));
+      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.screenCursorVisibleTime, &itemName));
+      TEST(BlinkingScreenCursor);
     }
 
     {
-      NAME(strtext("System Cursor Invisible Time"));
-      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.systemCursorInvisibleTime, &itemName));
-      TEST(BlinkingSystemCursor);
+      NAME(strtext("Screen Cursor Invisible Time"));
+      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.screenCursorInvisibleTime, &itemName));
+      TEST(BlinkingScreenCursor);
     }
 
     {
@@ -685,8 +685,8 @@ makePreferencesMenu (void) {
 
 #ifdef HAVE_LIBGPM
     {
-      NAME(strtext("Braille Window Follows System Pointer"));
-      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.brailleWindowFollowsSystemPointer, &itemName));
+      NAME(strtext("Track Screen Pointer"));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.trackScreenPointer, &itemName));
     }
 #endif /* HAVE_LIBGPM */
 

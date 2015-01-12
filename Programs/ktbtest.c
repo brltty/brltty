@@ -270,7 +270,7 @@ unsigned int textCount;
 int apiStarted = 0;
 
 unsigned char
-getCursorDots (void) {
+getScreenCursorDots (void) {
   return 0;
 }
 
