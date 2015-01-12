@@ -84,7 +84,7 @@ testSlidingBrailleWindow (void) {
 static int
 changedBrailleWindowOverlap (const MenuItem *item UNUSED, unsigned char setting) {
   if (setting >= textCount) return 0;
-  reconfigureWindow();
+  reconfigureBrailleWindow();
   return 1;
 }
 
@@ -270,7 +270,7 @@ testStatusPosition (void) {
 
 static int
 changedStatusPosition (const MenuItem *item UNUSED, unsigned char setting UNUSED) {
-  reconfigureWindow();
+  reconfigureBrailleWindow();
   return 1;
 }
 
@@ -281,7 +281,7 @@ testStatusCount (void) {
 
 static int
 changedStatusCount (const MenuItem *item UNUSED, unsigned char setting UNUSED) {
-  reconfigureWindow();
+  reconfigureBrailleWindow();
   return 1;
 }
 
@@ -292,7 +292,7 @@ testStatusSeparator (void) {
 
 static int
 changedStatusSeparator (const MenuItem *item UNUSED, unsigned char setting UNUSED) {
-  reconfigureWindow();
+  reconfigureBrailleWindow();
   return 1;
 }
 
@@ -320,7 +320,7 @@ changedStatusField (unsigned char index, unsigned char setting) {
       break;
   }
 
-  reconfigureWindow();
+  reconfigureBrailleWindow();
   return 1;
 }
 

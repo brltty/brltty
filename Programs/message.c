@@ -104,7 +104,7 @@ ASYNC_TASK_CALLBACK(presentMessage) {
       if (length <= size) {
         count = length; /* the whole message fits in the braille window */
       } else {
-        /* split the message across multiple windows on space characters */
+        /* split the message across multiple braille windows on space characters */
         for (count=size-2; count>0 && iswspace(characters[count]); count-=1);
         count = count? count+1: size-1;
       }

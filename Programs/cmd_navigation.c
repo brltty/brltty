@@ -323,10 +323,10 @@ handleNavigationCommands (int command, void *data) {
       break;
 
     case BRL_CMD_HWINLT:
-      if (!shiftWindowLeft(halfWindowShift)) alert(ALERT_BOUNCE);
+      if (!shiftBrailleWindowLeft(halfWindowShift)) alert(ALERT_BOUNCE);
       break;
     case BRL_CMD_HWINRT:
-      if (!shiftWindowRight(halfWindowShift)) alert(ALERT_BOUNCE);
+      if (!shiftBrailleWindowRight(halfWindowShift)) alert(ALERT_BOUNCE);
       break;
 
     case BRL_CMD_FWINLTSKIP:
@@ -340,7 +340,7 @@ handleNavigationCommands (int command, void *data) {
           int charCount;
           int charIndex;
 
-          if (!shiftWindowLeft(fullWindowShift)) {
+          if (!shiftBrailleWindowLeft(fullWindowShift)) {
             if (ses->winy == 0) {
               ses->winx = oldX;
               ses->winy = oldY;
@@ -391,7 +391,7 @@ handleNavigationCommands (int command, void *data) {
       {
         int oldX = ses->winx;
 
-        if (shiftWindowLeft(fullWindowShift)) {
+        if (shiftBrailleWindowLeft(fullWindowShift)) {
           if (skipBlankBrailleWindows) {
             int charCount;
 
@@ -466,7 +466,7 @@ handleNavigationCommands (int command, void *data) {
           int charCount;
           int charIndex;
 
-          if (!shiftWindowRight(fullWindowShift)) {
+          if (!shiftBrailleWindowRight(fullWindowShift)) {
             if (ses->winy >= (scr.rows - brl.textRows)) {
               ses->winx = oldX;
               ses->winy = oldY;
@@ -517,7 +517,7 @@ handleNavigationCommands (int command, void *data) {
       {
         int oldX = ses->winx;
 
-        if (shiftWindowRight(fullWindowShift)) {
+        if (shiftBrailleWindowRight(fullWindowShift)) {
           if (skipBlankBrailleWindows) {
             if (!showScreenCursor() ||
                 (scr.posy != ses->winy) ||

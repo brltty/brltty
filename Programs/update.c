@@ -45,7 +45,7 @@ static int oldwinx;
 static int oldwiny;
 
 static int
-checkPointer (void) {
+checkScreenPointer (void) {
   int moved = 0;
   int column, row;
 
@@ -530,7 +530,7 @@ doAutospeak (int force) {
 
 static void
 doUpdate (void) {
-  int pointerMoved = 0;
+  int screenPointerMoved = 0;
 
   logMessage(LOG_CATEGORY(UPDATE_EVENTS), "starting");
   unrequireAllBlinkDescriptors();
@@ -604,8 +604,8 @@ doUpdate (void) {
 
         ses->spkx = ses->trkx = scr.posx;
         ses->spky = ses->trky = scr.posy;
-      } else if (checkPointer()) {
-        pointerMoved = 1;
+      } else if (checkScreenPointer()) {
+        screenPointerMoved = 1;
       }
     }
   }
@@ -626,7 +626,7 @@ doUpdate (void) {
 
   /* There are a few things to take care of if the display has moved. */
   if ((ses->winx != oldwinx) || (ses->winy != oldwiny)) {
-    if (!pointerMoved) highlightBrailleWindowLocation();
+    if (!screenPointerMoved) highlightBrailleWindowLocation();
 
     /* Attributes are blinking.
      * We could check to see if we changed screen, but that doesn't

@@ -148,7 +148,7 @@ handleToggleCommands (int command, void *data) {
       } else {
         ToggleResult result = toggleModeSetting(&textMaximized, command);
 
-        if (result > TOGGLE_SAME) reconfigureWindow();
+        if (result > TOGGLE_SAME) reconfigureBrailleWindow();
       }
       break;
 

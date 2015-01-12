@@ -137,7 +137,7 @@ postprocessCommand (void *state, int command, int handled) {
     if (handled) scheduleUpdate("command executed");
 
     if ((ses->winx != pre->motionColumn) || (ses->winy != pre->motionRow)) {
-      /* The window has been manually moved. */
+      /* The braille window has been manually moved. */
       ses->motx = ses->winx;
       ses->moty = ses->winy;
 
@@ -599,7 +599,7 @@ moveWindowRight (unsigned int amount) {
 }
 
 int
-shiftWindowLeft (unsigned int amount) {
+shiftBrailleWindowLeft (unsigned int amount) {
 #ifdef ENABLE_CONTRACTED_BRAILLE
   if (isContracting()) {
     int reference = ses->winx;
@@ -630,7 +630,7 @@ shiftWindowLeft (unsigned int amount) {
 }
 
 int
-shiftWindowRight (unsigned int amount) {
+shiftBrailleWindowRight (unsigned int amount) {
 #ifdef ENABLE_CONTRACTED_BRAILLE
   if (isContracting()) amount = getContractedLength(amount);
 #endif /* ENABLE_CONTRACTED_BRAILLE */

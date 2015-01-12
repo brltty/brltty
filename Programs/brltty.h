@@ -95,8 +95,8 @@ extern void placeBrailleWindowHorizontally (int x);
 extern int moveWindowLeft (unsigned int amount);
 extern int moveWindowRight (unsigned int amount);
 
-extern int shiftWindowLeft (unsigned int amount);
-extern int shiftWindowRight (unsigned int amount);
+extern int shiftBrailleWindowLeft (unsigned int amount);
+extern int shiftBrailleWindowRight (unsigned int amount);
 
 extern void slideWindowVertically (int y);
 
@@ -151,7 +151,7 @@ extern unsigned int verticalWindowShift;			/* Window vertical distance */
 extern int constructBrailleDriver (void);
 extern void destructBrailleDriver (void);
 
-extern void reconfigureWindow (void);
+extern void reconfigureBrailleWindow (void);
 extern int haveStatusCells (void);
 
 typedef enum {

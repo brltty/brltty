@@ -1005,7 +1005,7 @@ haveStatusCells (void) {
 }
 
 static void
-windowConfigurationChanged (unsigned int rows, unsigned int columns) {
+brailleWindowReconfigured (unsigned int rows, unsigned int columns) {
   textStart = 0;
   textCount = columns;
   statusStart = 0;
@@ -1052,13 +1052,13 @@ windowConfigurationChanged (unsigned int rows, unsigned int columns) {
 }
 
 void
-reconfigureWindow (void) {
-  windowConfigurationChanged(brl.textRows, brl.textColumns);
+reconfigureBrailleWindow (void) {
+  brailleWindowReconfigured(brl.textRows, brl.textColumns);
 }
 
 static void
 applyBraillePreferences (void) {
-  reconfigureWindow();
+  reconfigureBrailleWindow();
   setBrailleFirmness(&brl, prefs.brailleFirmness);
   setBrailleSensitivity(&brl, prefs.brailleSensitivity);
   setBrailleAutorepeat(&brl, prefs.autorepeat,
@@ -1258,7 +1258,7 @@ makeProgramBanner (char *buffer, size_t size) {
 static void
 initializeBrailleDisplay (void) {
   constructBrailleDisplay(&brl);
-  brl.bufferResized = &windowConfigurationChanged;
+  brl.bufferResized = &brailleWindowReconfigured;
 }
 
 int
