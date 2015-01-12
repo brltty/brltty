@@ -1221,23 +1221,23 @@ initializeGenericStatusCodes (BrailleDisplay *brl) {
         default:
         SET(BRL_CMD_NOOP, PM_GSC_DOTS, 0);
 
-        SET(BRL_CMD_HELP, PM_GSC_NUMBER, gscWindowRow);
-        SET(BRL_CMD_LEARN, PM_GSC_POSITION, gscWindowColumn);
-        SET(BRL_CMD_CSRJMP_VERT, PM_GSC_NUMBER, gscCursorRow);
-        SET(BRL_CMD_INFO, PM_GSC_NUMBER, gscCursorColumn);
+        SET(BRL_CMD_HELP, PM_GSC_NUMBER, gscBrailleWindowRow);
+        SET(BRL_CMD_LEARN, PM_GSC_POSITION, gscBrailleWindowColumn);
+        SET(BRL_CMD_CSRJMP_VERT, PM_GSC_NUMBER, gscScreenCursorRow);
+        SET(BRL_CMD_INFO, PM_GSC_NUMBER, gscScreenCursorColumn);
         SET(BRL_CMD_PREFMENU, PM_GSC_NUMBER, gscScreenNumber);
 
         SET(BRL_CMD_FREEZE, PM_GSC_FLAG, gscFrozenScreen);
         SET(BRL_CMD_DISPMD, PM_GSC_FLAG, gscDisplayMode);
         SET(BRL_CMD_SIXDOTS, PM_GSC_FLAG, gscTextStyle);
-        SET(BRL_CMD_SLIDEWIN, PM_GSC_FLAG, gscSlidingWindow);
+        SET(BRL_CMD_SLIDEWIN, PM_GSC_FLAG, gscSlidingBrailleWindow);
         SET(BRL_CMD_SKPIDLNS, PM_GSC_FLAG, gscSkipIdenticalLines);
-        SET(BRL_CMD_SKPBLNKWINS, PM_GSC_FLAG, gscSkipBlankWindows);
-        SET(BRL_CMD_CSRVIS, PM_GSC_FLAG, gscShowCursor);
-        SET(BRL_CMD_CSRHIDE, PM_GSC_FLAG, gscHideCursor);
-        SET(BRL_CMD_CSRTRK, PM_GSC_FLAG, gscTrackCursor);
-        SET(BRL_CMD_CSRSIZE, PM_GSC_FLAG, gscCursorStyle);
-        SET(BRL_CMD_CSRBLINK, PM_GSC_FLAG, gscBlinkingCursor);
+        SET(BRL_CMD_SKPBLNKWINS, PM_GSC_FLAG, gscSkipBlankBrailleWindows);
+        SET(BRL_CMD_CSRVIS, PM_GSC_FLAG, gscShowScreenCursor);
+        SET(BRL_CMD_CSRHIDE, PM_GSC_FLAG, gscHideScreenCursor);
+        SET(BRL_CMD_CSRTRK, PM_GSC_FLAG, gscTrackScreenCursor);
+        SET(BRL_CMD_CSRSIZE, PM_GSC_FLAG, gscScreenCursorStyle);
+        SET(BRL_CMD_CSRBLINK, PM_GSC_FLAG, gscBlinkingScreenCursor);
         SET(BRL_CMD_ATTRVIS, PM_GSC_FLAG, gscShowAttributes);
         SET(BRL_CMD_ATTRBLINK, PM_GSC_FLAG, gscBlinkingAttributes);
         SET(BRL_CMD_CAPBLINK, PM_GSC_FLAG, gscBlinkingCapitals);

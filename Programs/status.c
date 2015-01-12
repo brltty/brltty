@@ -188,22 +188,22 @@ renderStatusField_alphabeticCursorCoordinates (unsigned char *cells) {
 static void
 renderStatusField_generic (unsigned char *cells) {
   cells[GSC_FIRST] = GSC_MARKER;
-  cells[gscWindowColumn] = SCR_COLUMN_NUMBER(ses->winx);
-  cells[gscWindowRow] = SCR_ROW_NUMBER(ses->winy);
-  cells[gscCursorColumn] = SCR_COLUMN_NUMBER(scr.posx);
-  cells[gscCursorRow] = SCR_ROW_NUMBER(scr.posy);
+  cells[gscBrailleWindowColumn] = SCR_COLUMN_NUMBER(ses->winx);
+  cells[gscBrailleWindowRow] = SCR_ROW_NUMBER(ses->winy);
+  cells[gscScreenCursorColumn] = SCR_COLUMN_NUMBER(scr.posx);
+  cells[gscScreenCursorRow] = SCR_ROW_NUMBER(scr.posy);
   cells[gscScreenNumber] = scr.number;
   cells[gscFrozenScreen] = isFrozenScreen();
   cells[gscDisplayMode] = ses->displayMode;
   cells[gscTextStyle] = prefs.textStyle;
-  cells[gscSlidingWindow] = prefs.slidingBrailleWindow;
+  cells[gscSlidingBrailleWindow] = prefs.slidingBrailleWindow;
   cells[gscSkipIdenticalLines] = prefs.skipIdenticalLines;
-  cells[gscSkipBlankWindows] = prefs.skipBlankBrailleWindows;
-  cells[gscShowCursor] = prefs.showScreenCursor;
-  cells[gscHideCursor] = ses->hideScreenCursor;
-  cells[gscTrackCursor] = ses->trackScreenCursor;
-  cells[gscCursorStyle] = prefs.screenCursorStyle;
-  cells[gscBlinkingCursor] = prefs.blinkingScreenCursor;
+  cells[gscSkipBlankBrailleWindows] = prefs.skipBlankBrailleWindows;
+  cells[gscShowScreenCursor] = prefs.showScreenCursor;
+  cells[gscHideScreenCursor] = ses->hideScreenCursor;
+  cells[gscTrackScreenCursor] = ses->trackScreenCursor;
+  cells[gscScreenCursorStyle] = prefs.screenCursorStyle;
+  cells[gscBlinkingScreenCursor] = prefs.blinkingScreenCursor;
   cells[gscShowAttributes] = prefs.showAttributes;
   cells[gscBlinkingAttributes] = prefs.blinkingAttributes;
   cells[gscBlinkingCapitals] = prefs.blinkingCapitals;

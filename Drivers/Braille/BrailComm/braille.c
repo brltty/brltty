@@ -141,8 +141,8 @@ writeLine (BrailleDisplay *brl) {
   unsigned char packet[2 + (brl->textColumns * 2)];
   unsigned char *byte = packet;
 
-  *byte++ = statusCells[gscCursorRow];
-  *byte++ = statusCells[gscCursorColumn];
+  *byte++ = statusCells[gscScreenCursorRow];
+  *byte++ = statusCells[gscScreenCursorColumn];
 
   {
     int i;
@@ -154,7 +154,7 @@ writeLine (BrailleDisplay *brl) {
   }
 
   if (showOutputMapping) {
-    int row = statusCells[gscWindowRow];
+    int row = statusCells[gscBrailleWindowRow];
 
     if (--row < 0X10) {
       int column;
@@ -184,8 +184,8 @@ writeLocation (BrailleDisplay *brl) {
   unsigned char packet[2];
   unsigned char *byte = packet;
 
-  *byte++ = statusCells[gscCursorRow];
-  *byte++ = statusCells[gscCursorColumn];
+  *byte++ = statusCells[gscScreenCursorRow];
+  *byte++ = statusCells[gscScreenCursorColumn];
 
   return writePacket(brl, packet, byte-packet);
 }
