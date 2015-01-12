@@ -126,11 +126,13 @@ extern int processEndIfOperands (DataFile *file, void *data);
 
 extern int processIfVarOperands (DataFile *file, void *data);
 extern int processIfNotVarOperands (DataFile *file, void *data);
+extern int processAssignDefaultOperands (DataFile *file, void *data);
 extern int processAssignOperands (DataFile *file, void *data);
 
 #define DATA_VARIABLE_DIRECTIVES \
   {.name=WS_C("ifvar"), .processor=processIfVarOperands, .unconditional=1}, \
   {.name=WS_C("ifnotvar"), .processor=processIfNotVarOperands, .unconditional=1}, \
+  {.name=WS_C("assignDefault"), .processor=processAssignDefaultOperands}, \
   {.name=WS_C("assign"), .processor=processAssignOperands}
 
 #define BRL_DOT_COUNT 8

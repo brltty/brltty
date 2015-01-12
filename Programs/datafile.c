@@ -210,9 +210,11 @@ testDataVariableName (const void *item, void *data) {
   const DataVariable *variable = item;
   DataOperand *name = data;
 
-  if (variable->name.length == name->length)
-    if (wmemcmp(variable->name.characters, name->characters, name->length) == 0)
+  if (variable->name.length == name->length) {
+    if (wmemcmp(variable->name.characters, name->characters, name->length) == 0) {
       return 1;
+    }
+  }
 
   return 0;
 }
@@ -1045,7 +1047,8 @@ DATA_OPERANDS_PROCESSOR(processIfNotVarOperands) {
   return processVariableTestOperands(file, 0, data);
 }
 
-DATA_OPERANDS_PROCESSOR(processAssignOperands) {
+static int
+processVariableAssignmentOperands (DataFile *file, int ifNotSet, void *data) {
   DataOperand name;
 
   if (getDataOperand(file, &name, "variable name")) {
@@ -1053,6 +1056,12 @@ DATA_OPERANDS_PROCESSOR(processAssignOperands) {
 
     if (!getDataString(file, &value, 0, NULL)) {
       value.length = 0;
+    }
+
+    if (ifNotSet) {
+      const DataVariable *variable = getReadableDataVariable(file, &name);
+
+      if (variable) return 1;
     }
 
     {
@@ -1065,6 +1074,14 @@ DATA_OPERANDS_PROCESSOR(processAssignOperands) {
   }
 
   return 1;
+}
+
+DATA_OPERANDS_PROCESSOR(processAssignDefaultOperands) {
+  return processVariableAssignmentOperands(file, 1, data);
+}
+
+DATA_OPERANDS_PROCESSOR(processAssignOperands) {
+  return processVariableAssignmentOperands(file, 0, data);
 }
 
 DATA_OPERANDS_PROCESSOR(processElseOperands) {
