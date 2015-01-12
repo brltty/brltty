@@ -109,10 +109,10 @@ searchPreferenceByName (const void *target, const void *element) {
 
 const PreferenceEntry *
 findPreferenceByName (const char *name) {
-  static const PreferenceEntry **sortedEntries = NULL;
+  static const PreferenceEntry **sortedPreferences = NULL;
 
-  if (!sortedEntries) {
-    if (!(sortedEntries = malloc(ARRAY_SIZE(sortedEntries, preferenceCount)))) {
+  if (!sortedPreferences) {
+    if (!(sortedPreferences = malloc(ARRAY_SIZE(sortedPreferences, preferenceCount)))) {
       logMallocError();
       return NULL;
     }
@@ -121,17 +121,17 @@ findPreferenceByName (const char *name) {
       unsigned int index;
 
       for (index=0; index<preferenceCount; index+=1) {
-        sortedEntries[index] = &preferenceTable[index];
+        sortedPreferences[index] = &preferenceTable[index];
       }
     }
 
-    qsort(sortedEntries, preferenceCount, sizeof(*sortedEntries), sortPreferencesByName);
+    qsort(sortedPreferences, preferenceCount, sizeof(*sortedPreferences), sortPreferencesByName);
   }
 
   {
     const PreferenceEntry *const *pref = bsearch(
-      name, sortedEntries,
-      preferenceCount, sizeof(*sortedEntries),
+      name, sortedPreferences,
+      preferenceCount, sizeof(*sortedPreferences),
       searchPreferenceByName
     );
 
@@ -146,7 +146,7 @@ sortAliasesByOldName (const void *element1, const void *element2) {
   const PreferenceAliasEntry *const *alias1 = element1;
   const PreferenceAliasEntry *const *alias2 = element2;
 
-  return strcasecmp((*alias1)->oldName, (*alias2)->oldName);
+  return comparePreferenceNames((*alias1)->oldName, (*alias2)->oldName);
 }
 
 static int
@@ -154,7 +154,7 @@ searchAliasByOldName (const void *target, const void *element) {
   const char *name = target;
   const PreferenceAliasEntry *const *alias = element;
 
-  return strcasecmp(name, (*alias)->oldName);
+  return comparePreferenceNames(name, (*alias)->oldName);
 }
 
 const PreferenceEntry *
