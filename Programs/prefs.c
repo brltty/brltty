@@ -107,26 +107,9 @@ searchPreferenceByName (const void *target, const void *element) {
   return comparePreferenceNames(name, (*pref)->name);
 }
 
-static int
-sortAliasesByOldName (const void *element1, const void *element2) {
-  const PreferenceAliasEntry *const *alias1 = element1;
-  const PreferenceAliasEntry *const *alias2 = element2;
-
-  return strcasecmp((*alias1)->oldName, (*alias2)->oldName);
-}
-
-static int
-searchAliasByOldName (const void *target, const void *element) {
-  const char *name = target;
-  const PreferenceAliasEntry *const *alias = element;
-
-  return strcasecmp(name, (*alias)->oldName);
-}
-
 const PreferenceEntry *
-findPreferenceEntry (const char *name) {
+findPreferenceByName (const char *name) {
   static const PreferenceEntry **sortedEntries = NULL;
-  static const PreferenceAliasEntry **sortedAliases = NULL;
 
   if (!sortedEntries) {
     if (!(sortedEntries = malloc(ARRAY_SIZE(sortedEntries, preferenceCount)))) {
@@ -144,6 +127,39 @@ findPreferenceEntry (const char *name) {
 
     qsort(sortedEntries, preferenceCount, sizeof(*sortedEntries), sortPreferencesByName);
   }
+
+  {
+    const PreferenceEntry *const *pref = bsearch(
+      name, sortedEntries,
+      preferenceCount, sizeof(*sortedEntries),
+      searchPreferenceByName
+    );
+
+    if (pref) return *pref;
+  }
+
+  return NULL;
+}
+
+static int
+sortAliasesByOldName (const void *element1, const void *element2) {
+  const PreferenceAliasEntry *const *alias1 = element1;
+  const PreferenceAliasEntry *const *alias2 = element2;
+
+  return strcasecmp((*alias1)->oldName, (*alias2)->oldName);
+}
+
+static int
+searchAliasByOldName (const void *target, const void *element) {
+  const char *name = target;
+  const PreferenceAliasEntry *const *alias = element;
+
+  return strcasecmp(name, (*alias)->oldName);
+}
+
+const PreferenceEntry *
+findPreferenceByAlias (const char *name) {
+  static const PreferenceAliasEntry **sortedAliases = NULL;
 
   if (!sortedAliases) {
     if (!(sortedAliases = malloc(ARRAY_SIZE(sortedAliases, preferenceAliasCount)))) {
@@ -163,15 +179,25 @@ findPreferenceEntry (const char *name) {
   }
 
   {
-    const PreferenceAliasEntry *const *alias = bsearch(name, sortedAliases, preferenceAliasCount, sizeof(*sortedAliases), searchAliasByOldName);
+    const PreferenceAliasEntry *const *alias = bsearch(
+      name, sortedAliases,
+      preferenceAliasCount, sizeof(*sortedAliases),
+      searchAliasByOldName
+    );
 
-    if (alias) name = (*alias)->newName;
+    if (alias) return findPreferenceByName((*alias)->newName);
   }
 
-  {
-    const PreferenceEntry *const *pref = bsearch(name, sortedEntries, preferenceCount, sizeof(*sortedEntries), searchPreferenceByName);
-    return pref? *pref: NULL;
-  }
+  return NULL;
+}
+
+const PreferenceEntry *
+findPreference (const char *name) {
+  const PreferenceEntry *pref;
+
+  if ((pref = findPreferenceByName(name))) return pref;
+  if ((pref = findPreferenceByAlias(name))) return pref;
+  return NULL;
 }
 
 static int
@@ -205,7 +231,7 @@ processPreferenceLine (char *line, void *data) {
   const char *name = strtok(line, delimiters);
 
   if (name && (*name != PREFS_COMMENT_CHARACTER)) {
-    const PreferenceEntry *pref = findPreferenceEntry(name);
+    const PreferenceEntry *pref = findPreference(name);
 
     if (pref) {
       const char *operand;

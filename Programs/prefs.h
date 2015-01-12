@@ -205,7 +205,7 @@ extern int loadPreferencesFile (const char *path);
 extern int savePreferencesFile (const char *path);
 
 typedef struct PreferenceEntryStruct PreferenceEntry;
-extern const PreferenceEntry *findPreferenceEntry (const char *name);
+extern const PreferenceEntry *findPreference (const char *name);
 
 #ifdef __cplusplus
 }
