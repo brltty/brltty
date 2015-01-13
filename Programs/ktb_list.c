@@ -318,7 +318,7 @@ listHotkeyEvent (
     if (!*started) {
       *started = 1;
 
-      if (!putCharacterString(lgd, WS_C("Hot Keys"))) return 0;
+      if (!putCharacterString(lgd, WS_C("Special Actions"))) return 0;
       if (!endLine(lgd)) return 0;
     }
 
@@ -596,9 +596,9 @@ listKeyBindings (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *
 
 static int
 listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *keysPrefix) {
-  if (!listHotkeys(lgd, ctx)) return 0;
   if (!listKeyBindings(lgd, ctx, keysPrefix)) return 0;
   if (!listKeyboardFunctions(lgd, ctx)) return 0;
+  if (!listHotkeys(lgd, ctx)) return 0;
   return 1;
 }
 
@@ -687,6 +687,7 @@ listKeyTable (KeyTable *table, KeyTableListHandler *handleLine, void *data) {
   int result = doListKeyTable(&lgd);
 
   if (lgd.binding.lines) {
+    while (lgd.binding.count > 0) removeBindingLine(&lgd, 0);
     free(lgd.binding.lines);
   }
 
