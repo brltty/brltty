@@ -183,22 +183,6 @@ extern size_t formatKeyName (KeyTable *table, char *buffer, size_t size, const K
 
 extern void resetLongPressData (KeyTable *table);
 
-typedef struct {
-  int command;
-} CommandListEntry;
-
-typedef struct {
-  struct {
-    const CommandListEntry *table;
-    unsigned int count;
-  } commands;
-
-  const char *name;
-} CommandGroupEntry;
-
-extern const CommandGroupEntry commandGroupTable[];
-extern const unsigned char commandGroupCount;
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -19,7 +19,7 @@
 #include "prologue.h"
 
 #include "ktb.h"
-#include "ktb_internal.h"
+#include "ktb_list.h"
 #include "brl_cmds.h"
 
 static const CommandListEntry commandList_modes[] = {
@@ -222,51 +222,52 @@ static const CommandListEntry commandList_internal[] = {
 
 const CommandGroupEntry commandGroupTable[] = {
   { COMMAND_LIST(modes),
-    .name = strtext("Special Modes")
+    .name = WS_C("Special Modes")
   },
 
   { COMMAND_LIST(cursor),
-    .name = strtext("Cursor Functions")
+    .name = WS_C("Cursor Functions")
   },
 
   { COMMAND_LIST(vertical),
-    .name = strtext("Vertical Navigation")
+    .name = WS_C("Vertical Navigation")
   },
 
   { COMMAND_LIST(horizontal),
-    .name = strtext("Horizontal Navigation")
+    .name = WS_C("Horizontal Navigation")
   },
 
   { COMMAND_LIST(clipboard),
-    .name = strtext("Clipboard Functions")
+    .name = WS_C("Clipboard Functions")
   },
 
   { COMMAND_LIST(feature),
-    .name = strtext("Configuration Functions")
+    .name = WS_C("Configuration Functions")
   },
 
   { COMMAND_LIST(menu),
-    .name = strtext("Menu Operations")
+    .name = WS_C("Menu Operations")
   },
 
   { COMMAND_LIST(say),
-    .name = strtext("Speech Functions")
+    .name = WS_C("Speech Functions")
   },
 
   { COMMAND_LIST(speak),
-    .name = strtext("Speech Navigation")
+    .name = WS_C("Speech Navigation")
   },
 
   { COMMAND_LIST(input),
-    .name = strtext("Input Operations")
+    .listBefore = listKeyboardFunctions,
+    .name = WS_C("Keyboard Input")
   },
 
   { COMMAND_LIST(special),
-    .name = strtext("Special Functions")
+    .name = WS_C("Special Functions")
   },
 
   { COMMAND_LIST(internal),
-    .name = strtext("Internal Functions")
+    .name = WS_C("Internal Functions")
   },
 };
 
