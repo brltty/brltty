@@ -491,15 +491,14 @@ listBindingLines (ListGenerationData *lgd, const KeyContext *ctx) {
         grp += 1;
       }
 
-      if (lgd->binding.count > 0) {
-        if (!putUtf8String(lgd, strtext("Uncategorized Bindigns"))) return 0;
-        if (!endLine(lgd)) return 0;
+      {
+        if (!beginGroup(lgd, WS_C("Uncategorized Bindings"))) return 0;
 
-        do {
+        while (lgd->binding.count > 0) {
           if (!listBindingLine(lgd, 0)) return 0;
-        } while (lgd->binding.count > 0);
+        }
 
-        if (!endLine(lgd)) return 0;
+        if (!endGroup(lgd)) return 0;
       }
     }
   }
