@@ -18,7 +18,7 @@
 
 # This key subtable is for Papenmeier displays which have switches.
 
-context switchesRearCenter LeftSwitchRear - Advanced Vertical Navigation
+context switchesRearCenter Advanced Vertical Navigation (left switch rear)
 
 bind BarUp1 PRDIFLN
 bind BarDown1 NXDIFLN
@@ -37,7 +37,7 @@ bind BarRight1+BarRight2 NXPGRPH
 hide off
 
 
-context switchesFrontCenter LeftSwitchFront - Specialized Navigation
+context switchesFrontCenter Specialized Navigation (left switch front)
 
 bind BarUp1 PRSEARCH
 bind BarDown1 NXSEARCH
@@ -56,7 +56,7 @@ bind BarRight1+BarRight2 HWINRT
 hide off
 
 
-context switchesCenterRear RightSwitchRear - Content-based Navigation
+context switchesCenterRear Content-based Navigation (right switch rear)
 
 bind BarUp1 KEY_CURSOR_UP
 bind BarDown1 KEY_CURSOR_DOWN
@@ -75,7 +75,7 @@ bind BarRight1+BarRight2 LNEND+route
 hide off
 
 
-context switchesCenterFront RightSwitchFront - Function Key Emulation
+context switchesCenterFront Function Key Emulation (right switch front)
 
 bind BarUp1 KEY_CURSOR_UP
 bind BarDown1 KEY_CURSOR_DOWN
@@ -94,16 +94,16 @@ bind BarRight1+BarRight2 KEY_END
 hide off
 
 
-context switchesRearRear LeftSwitchRear+RightSwitchRear - Unused
+context switchesRearRear Unused (left switch rear, right switch rear)
 
 
-context switchesRearFront LeftSwitchRear+RightSwitchFront - Unused
+context switchesRearFront Unused (left switch rear, right switch front)
 
 
-context switchesFrontRear LeftSwitchFront+RightSwitchRear - Unused
+context switchesFrontRear Unused (left switch front, right switch rear)
 
 
-context switchesFrontFront LeftSwitchFront+RightSwitchFront - Unused
+context switchesFrontFront Unused (left switch front, right switch front)
 
 
 context menu
@@ -125,7 +125,6 @@ bind BarRight1+BarRight2 PREFSAVE
 hide off
 
 
-hide on
 context switchesRearCenter
 hotkey LeftSwitchRear NOOP CONTEXT+default
 hotkey RightSwitchRear CONTEXT+switchesRearRear NOOP
@@ -167,4 +166,3 @@ hotkey LeftSwitchRear CONTEXT+switchesRearCenter NOOP
 hotkey LeftSwitchFront CONTEXT+switchesFrontCenter NOOP
 hotkey RightSwitchRear CONTEXT+switchesCenterRear NOOP
 hotkey RightSwitchFront CONTEXT+switchesCenterFront NOOP
-hide off
