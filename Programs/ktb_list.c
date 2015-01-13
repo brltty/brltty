@@ -30,8 +30,15 @@
 #include "ktb_inspect.h"
 
 typedef struct {
+  const BoundCommand *command;
+  size_t order;
+  size_t length;
+  wchar_t text[0];
+} BindingLine;
+
+typedef struct {
   KeyTable *const keyTable;
-  const wchar_t *sectionTitle;
+  const wchar_t *sectionHeader;
 
   struct {
     wchar_t *characters;
@@ -43,6 +50,12 @@ typedef struct {
     KeyTableListHandler *const handler;
     void *const data;
   } list;
+
+  struct {
+    BindingLine **lines;
+    size_t size;
+    size_t count;
+  } binding;
 } ListGenerationData;
 
 static int
@@ -50,14 +63,17 @@ listLine (ListGenerationData *lgd, const wchar_t *line) {
   return lgd->list.handler(line, lgd->list.data);
 }
 
+static int listSectionHeader (ListGenerationData *lgd, const wchar_t *header);
+
 static int
 putCharacters (ListGenerationData *lgd, const wchar_t *characters, size_t count) {
   size_t newLength = lgd->line.length + count;
 
-  if (lgd->sectionTitle) {
-    if (!listLine(lgd, WS_C(""))) return 0;
-    if (!listLine(lgd, lgd->sectionTitle)) return 0;
-    lgd->sectionTitle = NULL;
+  if (lgd->sectionHeader) {
+    const wchar_t *header = lgd->sectionHeader;
+
+    lgd->sectionHeader = NULL;
+    if (!listSectionHeader(lgd, header)) return 0;
   }
 
   if (newLength > lgd->line.size) {
@@ -96,6 +112,57 @@ putUtf8String (ListGenerationData *lgd, const char *string) {
 
   convertUtf8ToWchars(&string, &character, size);
   return putCharacters(lgd, characters, character-characters);
+}
+
+static void
+clearLine (ListGenerationData *lgd) {
+  lgd->line.length = 0;
+}
+
+static int
+finishLine (ListGenerationData *lgd) {
+  if (!putCharacter(lgd, 0)) return 0;
+  return 1;
+}
+
+static int
+endLine (ListGenerationData *lgd) {
+  if (!finishLine(lgd)) return 0;
+  if (!listLine(lgd, lgd->line.characters)) return 0;
+  clearLine(lgd);
+  return 1;
+}
+
+static int
+endHeader (ListGenerationData *lgd, wchar_t underline) {
+  size_t length = lgd->line.length;
+  if (!endLine(lgd)) return 0;
+
+  while (length > 0) {
+    if (!putCharacter(lgd, underline)) return 0;
+    length -= 1;
+  }
+
+  if (!endLine(lgd)) return 0;
+  if (!endLine(lgd)) return 0;
+  return 1;
+}
+
+static int
+listHeader (ListGenerationData *lgd, const wchar_t *header, wchar_t underline) {
+  if (!putCharacterString(lgd, header)) return 0;
+  if (!endHeader(lgd, underline)) return 0;
+  return 1;
+}
+
+static int
+listSectionHeader (ListGenerationData *lgd, const wchar_t *header) {
+  return listHeader(lgd, header, WC_C('-'));
+}
+
+static int
+putListMarker (ListGenerationData *lgd) {
+  return putCharacterString(lgd, WS_C("* "));
 }
 
 static int
@@ -195,31 +262,28 @@ putCommandDescription (ListGenerationData *lgd, const BoundCommand *cmd, int det
 }
 
 static int
-endLine (ListGenerationData *lgd) {
-  if (!putCharacter(lgd, 0)) return 0;
-  if (!listLine(lgd, lgd->line.characters)) return 0;
-
-  lgd->line.length = 0;
-  return 1;
-}
-
-static int
 listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
   const char *prefix = "braille keyboard ";
 
-  {
+  if (ctx->mappedKeys.count > 0) {
     unsigned int index;
+
+    if (!putCharacterString(lgd, WS_C("Braille Keyboard"))) return 0;
+    if (!endLine(lgd)) return 0;
 
     for (index=0; index<ctx->mappedKeys.count; index+=1) {
       const MappedKeyEntry *map = &ctx->mappedKeys.table[index];
       const KeyboardFunction *kbf = map->keyboardFunction;
 
+      if (!putListMarker(lgd)) return 0;
       if (!putUtf8String(lgd, prefix)) return 0;
       if (!putUtf8String(lgd, kbf->name)) return 0;
       if (!putCharacterString(lgd, WS_C(": "))) return 0;
       if (!putKeyName(lgd, &map->keyValue)) return 0;
       if (!endLine(lgd)) return 0;
     }
+
+    if (!endLine(lgd)) return 0;
   }
 
   {
@@ -228,6 +292,7 @@ listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
 
     while (kbf < end) {
       if (ctx->mappedKeys.superimpose & kbf->bit) {
+        if (!putListMarker(lgd)) return 0;
         if (!putUtf8String(lgd, prefix)) return 0;
         if (!putUtf8String(lgd, kbf->name)) return 0;
         if (!putCharacterString(lgd, WS_C(": superimposed"))) return 0;
@@ -242,8 +307,21 @@ listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
 }
 
 static int
-listHotkeyEvent (ListGenerationData *lgd, const KeyValue *keyValue, const char *event, const BoundCommand *cmd) {
+listHotkeyEvent (
+  ListGenerationData *lgd, int *started,
+  const KeyValue *keyValue, const char *event,
+  const BoundCommand *cmd
+) {
   if (cmd->value != BRL_CMD_NOOP) {
+    if (!*started) {
+      *started = 1;
+
+      if (!putCharacterString(lgd, WS_C("Hot Keys"))) return 0;
+      if (!endLine(lgd)) return 0;
+    }
+
+    if (!putListMarker(lgd)) return 0;
+
     if ((cmd->value & BRL_MSK_BLK) == BRL_CMD_BLK(CONTEXT)) {
       const KeyContext *c = getKeyContext(lgd->keyTable, (KTB_CTX_DEFAULT + (cmd->value & BRL_MSK_ARG)));
       if (!c) return 0;
@@ -258,6 +336,187 @@ listHotkeyEvent (ListGenerationData *lgd, const KeyValue *keyValue, const char *
     if (!putCharacter(lgd, WC_C(' '))) return 0;
     if (!putKeyName(lgd, keyValue)) return 0;
     if (!endLine(lgd)) return 0;
+  }
+
+  return 1;
+}
+
+static int
+listHotkeys (ListGenerationData *lgd, const KeyContext *ctx) {
+  const HotkeyEntry *hotkey = ctx->hotkeys.table;
+  unsigned int count = ctx->hotkeys.count;
+  int started = 0;
+
+  while (count) {
+    if (!(hotkey->flags & HKF_HIDDEN)) {
+      if (!listHotkeyEvent(lgd, &started, &hotkey->keyValue, "press", &hotkey->pressCommand)) return 0;
+      if (!listHotkeyEvent(lgd, &started, &hotkey->keyValue, "release", &hotkey->releaseCommand)) return 0;
+    }
+
+    hotkey += 1, count -= 1;
+  }
+
+  if (started) {
+    if (!endLine(lgd)) return 0;
+  }
+
+  return 1;
+}
+
+static int
+saveBindingLine (ListGenerationData *lgd, const BoundCommand *command) {
+  if (lgd->binding.count == lgd->binding.size) {
+    size_t newSize = lgd->binding.size? (lgd->binding.size << 1): 0X10;
+    BindingLine **newLines;
+
+    if (!(newLines = realloc(lgd->binding.lines, ARRAY_SIZE(newLines, newSize)))) {
+      logMallocError();
+      return 0;
+    }
+
+    lgd->binding.lines = newLines;
+    while (lgd->binding.size < newSize) {
+      lgd->binding.lines[lgd->binding.size++] = NULL;
+    }
+  }
+
+  {
+    BindingLine *line;
+    size_t size = sizeof(*line) + (sizeof(line->text[0]) * lgd->line.length);
+
+    if (!(line = malloc(size))) {
+      logMallocError();
+      return 0;
+    }
+
+    line->command = command;
+    line->order = lgd->binding.count;
+    wmemcpy(line->text, lgd->line.characters, (line->length = lgd->line.length));
+    lgd->binding.lines[lgd->binding.count++] = line;
+  }
+
+  clearLine(lgd);
+  return 1;
+}
+
+static void
+removeBindingLine (ListGenerationData *lgd, int index) {
+  {
+    BindingLine *bl = lgd->binding.lines[index];
+
+    free(bl);
+  }
+
+  if (--lgd->binding.count > index) {
+    memmove(&lgd->binding.lines[index], &lgd->binding.lines[index+1],
+            ((lgd->binding.count - index) * sizeof(*lgd->binding.lines)));
+  }
+}
+
+static int
+sortBindingLines (const void *element1, const void *element2) {
+  const BindingLine *const *line1 = element1;
+  const BindingLine *const *line2 = element2;
+
+  int command1 = (*line1)->command->value;
+  int command2 = (*line2)->command->value;
+
+  {
+    int cmd1 = command1 & BRL_MSK_CMD;
+    int cmd2 = command2 & BRL_MSK_CMD;
+
+    if (cmd1 < cmd2) return -1;
+    if (cmd1 > cmd2) return 1;
+  }
+
+  if (command1 < command2) return -1;
+  if (command1 > command2) return 1;
+
+  if ((*line1)->order < (*line2)->order) return -1;
+  if ((*line1)->order > (*line2)->order) return 1;
+  return 0;
+}
+
+static int
+listBindingLine (ListGenerationData *lgd, int index) {
+  const BindingLine *bl = lgd->binding.lines[index];
+
+  if (!putListMarker(lgd)) return 0;
+  if (!putCharacters(lgd, bl->text, bl->length)) return 0;
+  if (!endLine(lgd)) return 0;
+  removeBindingLine(lgd, index);
+  return 1;
+}
+
+static int
+listBindingLines (ListGenerationData *lgd) {
+  if (lgd->binding.count > 0) {
+    qsort(lgd->binding.lines, lgd->binding.count,
+          sizeof(*lgd->binding.lines), sortBindingLines);
+
+    {
+      const CommandGroupEntry *grp = commandGroupTable;
+      const CommandGroupEntry *grpEnd = grp + commandGroupCount;
+
+      while (grp < grpEnd) {
+        const CommandListEntry *cmd = grp->commands.table;
+        const CommandListEntry *cmdEnd = cmd + grp->commands.count;
+        int found = 0;
+
+        while (cmd < cmdEnd) {
+          int first = 0;
+          int last = lgd->binding.count - 1;
+
+          while (first <= last) {
+            int current = (first + last) / 2;
+            const BindingLine *bl = lgd->binding.lines[current];
+            int command = bl->command->value & BRL_MSK_CMD;
+
+            if (cmd->command > command) {
+              first = current + 1;
+            } else {
+              last = current - 1;
+            }
+          }
+
+          while (first < lgd->binding.count) {
+            {
+              const BindingLine *bl = lgd->binding.lines[first];
+
+              if ((bl->command->value & BRL_MSK_CMD) != cmd->command) break;
+            }
+
+            if (!found) {
+              found = 1;
+
+              if (!putUtf8String(lgd, grp->name)) return 0;
+              if (!endLine(lgd)) return 0;
+            }
+
+            if (!listBindingLine(lgd, first)) return 0;
+          }
+
+          cmd += 1;
+        }
+
+        if (found) {
+          if (!endLine(lgd)) return 0;
+        }
+
+        grp += 1;
+      }
+
+      if (lgd->binding.count > 0) {
+        if (!putUtf8String(lgd, strtext("Uncategorized Bindigns"))) return 0;
+        if (!endLine(lgd)) return 0;
+
+        do {
+          if (!listBindingLine(lgd, 0)) return 0;
+        } while (lgd->binding.count > 0);
+
+        if (!endLine(lgd)) return 0;
+      }
+    }
   }
 
   return 1;
@@ -297,7 +556,7 @@ listKeyBinding (ListGenerationData *lgd, const KeyBinding *binding, int longPres
 
       wmemcpy(keys, &lgd->line.characters[keysOffset], length);
       keys[length] = 0;
-      lgd->line.length = 0;
+      clearLine(lgd);
 
       if (isTemporaryKeyContext(lgd->keyTable, c)) {
         if (!listKeyContext(lgd, c, keys)) return 0;
@@ -306,46 +565,37 @@ listKeyBinding (ListGenerationData *lgd, const KeyBinding *binding, int longPres
         if (!putCharacterString(lgd, c->title)) return 0;
         if (!putCharacterString(lgd, WS_C(": "))) return 0;
         if (!putCharacterString(lgd, keys)) return 0;
-        if (!endLine(lgd)) return 0;
+        if (!saveBindingLine(lgd, cmd)) return 0;
       }
     }
   } else {
-    if (!endLine(lgd)) return 0;
+    if (!saveBindingLine(lgd, cmd)) return 0;
   }
 
   return 1;
 }
 
 static int
+listKeyBindings (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *keysPrefix) {
+  const KeyBinding *binding = ctx->keyBindings.table;
+  unsigned int count = ctx->keyBindings.count;
+
+  while (count) {
+    if (!(binding->flags & KBF_HIDDEN)) {
+      if (!listKeyBinding(lgd, binding, 0, keysPrefix)) return 0;
+      if (!listKeyBinding(lgd, binding, 1, keysPrefix)) return 0;
+    }
+
+    binding += 1, count -= 1;
+  }
+
+  return listBindingLines(lgd);
+}
+
+static int
 listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *keysPrefix) {
-  {
-    const HotkeyEntry *hotkey = ctx->hotkeys.table;
-    unsigned int count = ctx->hotkeys.count;
-
-    while (count) {
-      if (!(hotkey->flags & HKF_HIDDEN)) {
-        if (!listHotkeyEvent(lgd, &hotkey->keyValue, "press", &hotkey->pressCommand)) return 0;
-        if (!listHotkeyEvent(lgd, &hotkey->keyValue, "release", &hotkey->releaseCommand)) return 0;
-      }
-
-      hotkey += 1, count -= 1;
-    }
-  }
-
-  {
-    const KeyBinding *binding = ctx->keyBindings.table;
-    unsigned int count = ctx->keyBindings.count;
-
-    while (count) {
-      if (!(binding->flags & KBF_HIDDEN)) {
-        if (!listKeyBinding(lgd, binding, 0, keysPrefix)) return 0;
-        if (!listKeyBinding(lgd, binding, 1, keysPrefix)) return 0;
-      }
-
-      binding += 1, count -= 1;
-    }
-  }
-
+  if (!listHotkeys(lgd, ctx)) return 0;
+  if (!listKeyBindings(lgd, ctx, keysPrefix)) return 0;
   if (!listKeyboardFunctions(lgd, ctx)) return 0;
   return 1;
 }
@@ -353,21 +603,22 @@ listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *k
 static int
 doListKeyTable (ListGenerationData *lgd) {
   if (!putUtf8String(lgd, gettext("Key Table"))) return 0;
+
   if (lgd->keyTable->title) {
     if (!putCharacterString(lgd, WS_C(": "))) return 0;
     if (!putCharacterString(lgd, lgd->keyTable->title)) return 0;
-    if (!endLine(lgd)) return 0;
+    if (!endHeader(lgd, WC_C('='))) return 0;
   }
 
   if (lgd->keyTable->notes.count) {
     unsigned int noteIndex;
 
-    if (!endLine(lgd)) return 0;
-
     for (noteIndex=0; noteIndex<lgd->keyTable->notes.count; noteIndex+=1) {
       if (!putCharacterString(lgd, lgd->keyTable->notes.table[noteIndex])) return 0;
       if (!endLine(lgd)) return 0;
     }
+
+    if (!endLine(lgd)) return 0;
   }
 
   {
@@ -383,7 +634,7 @@ doListKeyTable (ListGenerationData *lgd) {
       const KeyContext *ctx = getKeyContext(lgd->keyTable, *context);
 
       if (ctx) {
-        lgd->sectionTitle = ctx->title;
+        lgd->sectionHeader = ctx->title;
         if (!listKeyContext(lgd, ctx, NULL)) return 0;
       }
 
@@ -398,7 +649,7 @@ doListKeyTable (ListGenerationData *lgd) {
       const KeyContext *ctx = getKeyContext(lgd->keyTable, context);
 
       if (ctx && !isTemporaryKeyContext(lgd->keyTable, ctx)) {
-        lgd->sectionTitle = ctx->title;
+        lgd->sectionHeader = ctx->title;
         if (!listKeyContext(lgd, ctx, NULL)) return 0;
       }
     }
@@ -411,7 +662,7 @@ int
 listKeyTable (KeyTable *table, KeyTableListHandler *handleLine, void *data) {
   ListGenerationData lgd = {
     .keyTable = table,
-    .sectionTitle = NULL,
+    .sectionHeader = NULL,
 
     .line = {
       .characters = NULL,
@@ -422,10 +673,21 @@ listKeyTable (KeyTable *table, KeyTableListHandler *handleLine, void *data) {
     .list = {
       .handler = handleLine,
       .data = data
+    },
+
+    .binding = {
+      .lines = NULL,
+      .size = 0,
+      .count = 0
     }
   };
 
   int result = doListKeyTable(&lgd);
+
+  if (lgd.binding.lines) {
+    free(lgd.binding.lines);
+  }
+
   if (lgd.line.characters) free(lgd.line.characters);
   return result;
 }
