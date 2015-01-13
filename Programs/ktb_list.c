@@ -262,9 +262,16 @@ putCommandDescription (ListGenerationData *lgd, const BoundCommand *cmd, int det
 }
 
 static int
-listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
-  const char *prefix = "braille keyboard ";
+putKeyboardFunction (ListGenerationData *lgd, const KeyboardFunction *kbf) {
+  if (!putListMarker(lgd)) return 0;
+  if (!putCharacterString(lgd, WS_C("braille keyboard "))) return 0;
+  if (!putUtf8String(lgd, kbf->name)) return 0;
+  if (!putCharacterString(lgd, WS_C(": "))) return 0;
+  return 1;
+}
 
+static int
+listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
   if (ctx->mappedKeys.count > 0) {
     unsigned int index;
 
@@ -275,32 +282,27 @@ listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
       const MappedKeyEntry *map = &ctx->mappedKeys.table[index];
       const KeyboardFunction *kbf = map->keyboardFunction;
 
-      if (!putListMarker(lgd)) return 0;
-      if (!putUtf8String(lgd, prefix)) return 0;
-      if (!putUtf8String(lgd, kbf->name)) return 0;
-      if (!putCharacterString(lgd, WS_C(": "))) return 0;
+      if (!putKeyboardFunction(lgd, kbf)) return 0;
       if (!putKeyName(lgd, &map->keyValue)) return 0;
       if (!endLine(lgd)) return 0;
     }
 
-    if (!endLine(lgd)) return 0;
-  }
+    {
+      const KeyboardFunction *kbf = keyboardFunctionTable;
+      const KeyboardFunction *end = kbf + keyboardFunctionCount;
 
-  {
-    const KeyboardFunction *kbf = keyboardFunctionTable;
-    const KeyboardFunction *end = kbf + keyboardFunctionCount;
+      while (kbf < end) {
+        if (ctx->mappedKeys.superimpose & kbf->bit) {
+          if (!putKeyboardFunction(lgd, kbf)) return 0;
+          if (!putCharacterString(lgd, WS_C("superimposed"))) return 0;
+          if (!endLine(lgd)) return 0;
+        }
 
-    while (kbf < end) {
-      if (ctx->mappedKeys.superimpose & kbf->bit) {
-        if (!putListMarker(lgd)) return 0;
-        if (!putUtf8String(lgd, prefix)) return 0;
-        if (!putUtf8String(lgd, kbf->name)) return 0;
-        if (!putCharacterString(lgd, WS_C(": superimposed"))) return 0;
-        if (!endLine(lgd)) return 0;
+        kbf += 1;
       }
-
-      kbf += 1;
     }
+
+    if (!endLine(lgd)) return 0;
   }
 
   return 1;

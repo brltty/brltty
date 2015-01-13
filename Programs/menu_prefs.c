@@ -839,21 +839,21 @@ makePreferencesMenu (void) {
     SUBMENU(speechSubmenu, rootMenu, strtext("Speech Options"));
 
     {
-      NAME(strtext("Speaking Volume"));
+      NAME(strtext("Speech Volume"));
       ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechVolume, &itemName, 0, SPK_VOLUME_MAXIMUM, 1, NULL));
       TEST(SpeechVolume);
       CHANGED(SpeechVolume);
     }
 
     {
-      NAME(strtext("Speaking Rate"));
+      NAME(strtext("Speech Rate"));
       ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechRate, &itemName, 0, SPK_RATE_MAXIMUM, 1, NULL));
       TEST(SpeechRate);
       CHANGED(SpeechRate);
     }
 
     {
-      NAME(strtext("Speaking Pitch"));
+      NAME(strtext("Speech Pitch"));
       ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechPitch, &itemName, 0, SPK_PITCH_MAXIMUM, 1, NULL));
       TEST(SpeechPitch);
       CHANGED(SpeechPitch);
@@ -866,7 +866,7 @@ makePreferencesMenu (void) {
         {.label=strtext("All")}
       };
 
-      NAME(strtext("Punctuation Verbosity"));
+      NAME(strtext("Speech Punctuation"));
       ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.speechPunctuation, &itemName, strings));
       TEST(SpeechPunctuation);
       CHANGED(SpeechPunctuation);
