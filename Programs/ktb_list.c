@@ -97,8 +97,19 @@ clearLine (ListGenerationData *lgd) {
   lgd->line.length = 0;
 }
 
+static void
+trimLine (ListGenerationData *lgd) {
+  while (lgd->line.length > 0) {
+    size_t last = lgd->line.length - 1;
+
+    if (lgd->line.characters[last] != WC_C(' ')) break;
+    lgd->line.length = last;
+  }
+}
+
 static int
 finishLine (ListGenerationData *lgd) {
+  trimLine(lgd);
   if (!putCharacter(lgd, 0)) return 0;
   return 1;
 }
@@ -350,7 +361,7 @@ listHotkeys (ListGenerationData *lgd, const KeyContext *ctx) {
 }
 
 static int
-saveBindingLine (ListGenerationData *lgd, const BoundCommand *command) {
+saveBindingLine (ListGenerationData *lgd, const BoundCommand *command, size_t keysOffset) {
   if (lgd->binding.count == lgd->binding.size) {
     size_t newSize = lgd->binding.size? (lgd->binding.size << 1): 0X10;
     BindingLine **newLines;
@@ -377,6 +388,7 @@ saveBindingLine (ListGenerationData *lgd, const BoundCommand *command) {
 
     line->command = command;
     line->order = lgd->binding.count;
+    line->keysOffset = keysOffset;
     wmemcpy(line->text, lgd->line.characters, (line->length = lgd->line.length));
     lgd->binding.lines[lgd->binding.count++] = line;
   }
@@ -424,12 +436,39 @@ sortBindingLines (const void *element1, const void *element2) {
 }
 
 static int
-listBindingLine (ListGenerationData *lgd, int index) {
+listBindingLine (ListGenerationData *lgd, int index, int *isSame) {
   const BindingLine *bl = lgd->binding.lines[index];
+  int asList = *isSame;
 
-  if (!putListMarker(lgd)) return 0;
-  if (!putCharacters(lgd, bl->text, bl->length)) return 0;
+  if (*isSame) {
+    *isSame = 0;
+  } else {
+    if (!putListMarker(lgd)) return 0;
+    if (!putCharacters(lgd, bl->text, bl->keysOffset)) return 0;
+  }
+
+  {
+    int next = index + 1;
+
+    if (next < lgd->binding.count) {
+      if (bl->command->value == lgd->binding.lines[next]->command->value) {
+        if (!asList) {
+          if (!endLine(lgd)) return 0;
+        }
+
+        asList = 1;
+        *isSame = 1;
+      }
+    }
+  }
+
+  if (asList) {
+    if (!putCharacterString(lgd, WS_C("  + "))) return 0;
+  }
+
+  if (!putCharacters(lgd, &bl->text[bl->keysOffset], (bl->length - bl->keysOffset))) return 0;
   if (!endLine(lgd)) return 0;
+
   removeBindingLine(lgd, index);
   return 1;
 }
@@ -474,14 +513,18 @@ listBindingLines (ListGenerationData *lgd, const KeyContext *ctx) {
             }
           }
 
-          while (first < lgd->binding.count) {
-            {
-              const BindingLine *bl = lgd->binding.lines[first];
+          {
+            int isSame = 0;
 
-              if ((bl->command->value & BRL_MSK_CMD) != cmd->command) break;
+            while (first < lgd->binding.count) {
+              {
+                const BindingLine *bl = lgd->binding.lines[first];
+
+                if ((bl->command->value & BRL_MSK_CMD) != cmd->command) break;
+              }
+
+              if (!listBindingLine(lgd, first, &isSame)) return 0;
             }
-
-            if (!listBindingLine(lgd, first)) return 0;
           }
 
           cmd += 1;
@@ -492,10 +535,12 @@ listBindingLines (ListGenerationData *lgd, const KeyContext *ctx) {
       }
 
       {
+        int isSame = 0;
+
         if (!beginGroup(lgd, WS_C("Uncategorized Bindings"))) return 0;
 
         while (lgd->binding.count > 0) {
-          if (!listBindingLine(lgd, 0)) return 0;
+          if (!listBindingLine(lgd, 0, &isSame)) return 0;
         }
 
         if (!endGroup(lgd)) return 0;
@@ -549,11 +594,11 @@ listKeyBinding (ListGenerationData *lgd, const KeyBinding *binding, int longPres
         if (!putCharacterString(lgd, c->title)) return 0;
         if (!putCharacterString(lgd, WS_C(": "))) return 0;
         if (!putCharacterString(lgd, keys)) return 0;
-        if (!saveBindingLine(lgd, cmd)) return 0;
+        if (!saveBindingLine(lgd, cmd, keysOffset)) return 0;
       }
     }
   } else {
-    if (!saveBindingLine(lgd, cmd)) return 0;
+    if (!saveBindingLine(lgd, cmd, keysOffset)) return 0;
   }
 
   return 1;
