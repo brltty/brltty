@@ -174,8 +174,23 @@ endGroup (ListGenerationData *lgd) {
 }
 
 static int
-putListMarker (ListGenerationData *lgd) {
-  return putCharacterString(lgd, WS_C("* "));
+putListBullet (ListGenerationData *lgd, unsigned int level) {
+  static const wchar_t bullets[] = {
+    WC_C('*'),
+    WC_C('+'),
+    WC_C('-')
+  };
+
+  unsigned int index;
+
+  for (index=0; index<=level; index+=1) {
+    wchar_t bullet = (index == level)? bullets[level]: WC_C(' ');
+
+    if (!putCharacter(lgd, bullet)) return 0;
+    if (!putCharacter(lgd, WC_C(' '))) return 0;
+  }
+
+  return 1;
 }
 
 static int
@@ -276,7 +291,7 @@ putCommandDescription (ListGenerationData *lgd, const BoundCommand *cmd, int det
 
 static int
 putKeyboardFunction (ListGenerationData *lgd, const KeyboardFunction *kbf) {
-  if (!putListMarker(lgd)) return 0;
+  if (!putListBullet(lgd, 0)) return 0;
   if (!putCharacterString(lgd, WS_C("braille keyboard "))) return 0;
   if (!putUtf8String(lgd, kbf->name)) return 0;
   if (!putCharacterString(lgd, WS_C(": "))) return 0;
@@ -319,7 +334,7 @@ listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
 static int
 listHotkeyEvent (ListGenerationData *lgd, const KeyValue *keyValue, const char *event, const BoundCommand *cmd) {
   if (cmd->value != BRL_CMD_NOOP) {
-    if (!putListMarker(lgd)) return 0;
+    if (!putListBullet(lgd, 0)) return 0;
 
     if ((cmd->value & BRL_MSK_BLK) == BRL_CMD_BLK(CONTEXT)) {
       const KeyContext *c = getKeyContext(lgd->keyTable, (KTB_CTX_DEFAULT + (cmd->value & BRL_MSK_ARG)));
@@ -443,7 +458,7 @@ listBindingLine (ListGenerationData *lgd, int index, int *isSame) {
   if (*isSame) {
     *isSame = 0;
   } else {
-    if (!putListMarker(lgd)) return 0;
+    if (!putListBullet(lgd, 0)) return 0;
     if (!putCharacters(lgd, bl->text, bl->keysOffset)) return 0;
   }
 
@@ -463,7 +478,7 @@ listBindingLine (ListGenerationData *lgd, int index, int *isSame) {
   }
 
   if (asList) {
-    if (!putCharacterString(lgd, WS_C("  + "))) return 0;
+    if (!putListBullet(lgd, 1)) return 0;
   }
 
   if (!putCharacters(lgd, &bl->text[bl->keysOffset], (bl->length - bl->keysOffset))) return 0;
