@@ -235,39 +235,82 @@ handleNavigationCommands (int command, void *data) {
       downDifferentLine(isSameAttributes);
       break;
 
-    {
-      int increment;
-    case BRL_CMD_PRPGRPH:
-      increment = -1;
-      goto findParagraph;
-    case BRL_CMD_NXPGRPH:
-      increment = 1;
-    findParagraph:
-      {
-        int found = 0;
-        ScreenCharacter characters[scr.cols];
-        int findBlank = 1;
-        int line = ses->winy;
-        int i;
-        while ((line >= 0) && (line <= (int)(scr.rows - brl.textRows))) {
-          readScreen(0, line, scr.cols, 1, characters);
-          for (i=0; i<scr.cols; i++) {
-            wchar_t text = characters[i].text;
-            if (text != WC_C(' ')) break;
-          }
-          if ((i == scr.cols) == findBlank) {
-            if (!findBlank) {
-              found = 1;
-              ses->winy = line;
-              ses->winx = 0;
-              break;
-            }
-            findBlank = 0;
-          }
-          line += increment;
+    case BRL_CMD_PRPGRPH: {
+      typedef enum {
+        STARTING,
+        START_LINE_NOT_BLANK,
+        FINDING_LAST_LINE,
+        FINDING_FIRST_LINE
+      } State;
+
+      State state = STARTING;
+      ScreenCharacter characters[scr.cols];
+      int line = ses->winy;
+
+      while (1) {
+        int isBlankLine;
+
+        readScreen(0, line, scr.cols, 1, characters);
+        isBlankLine = isAllSpaceCharacters(characters, scr.cols);
+
+        switch (state) {
+          case STARTING:
+            state = isBlankLine? FINDING_LAST_LINE: START_LINE_NOT_BLANK;
+            break;
+
+          case START_LINE_NOT_BLANK:
+            state = isBlankLine? FINDING_LAST_LINE: FINDING_FIRST_LINE;
+            break;
+
+          case FINDING_LAST_LINE:
+            if (!isBlankLine) state = FINDING_FIRST_LINE;
+            break;
+
+          case FINDING_FIRST_LINE:
+            if (!isBlankLine) break;
+            line += 1;
+            goto foundFirstLine;
         }
-        if (!found) alert(ALERT_BOUNCE);
+
+        if (!line) break;
+        line -= 1;
       }
+
+      if (state == FINDING_FIRST_LINE) {
+      foundFirstLine:
+        ses->winy = line;
+        ses->winx = 0;
+      } else {
+        alert(ALERT_BOUNCE);
+      }
+
+      break;
+    }
+
+    case BRL_CMD_NXPGRPH: {
+      int found = 0;
+      ScreenCharacter characters[scr.cols];
+      int findBlankLine = 1;
+      int line = ses->winy;
+
+      while (line <= (int)(scr.rows - brl.textRows)) {
+        readScreen(0, line, scr.cols, 1, characters);
+
+        if (isAllSpaceCharacters(characters, scr.cols) == findBlankLine) {
+          if (!findBlankLine) {
+            found = 1;
+            ses->winy = line;
+            ses->winx = 0;
+            break;
+          }
+
+          findBlankLine = 0;
+        }
+
+        line += 1;
+      }
+
+      if (!found) alert(ALERT_BOUNCE);
       break;
     }
 
