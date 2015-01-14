@@ -426,6 +426,13 @@ removeBindingLine (ListGenerationData *lgd, int index) {
   }
 }
 
+static void
+removeBindingLines (ListGenerationData *lgd) {
+  size_t *count = &lgd->binding.count;
+
+  while (*count > 0) removeBindingLine(lgd, (*count - 1));
+}
+
 static int
 sortBindingLines (const void *element1, const void *element2) {
   const BindingLine *const *line1 = element1;
@@ -736,7 +743,7 @@ listKeyTable (KeyTable *table, KeyTableListHandler *handleLine, void *data) {
   int result = doListKeyTable(&lgd);
 
   if (lgd.binding.lines) {
-    while (lgd.binding.count > 0) removeBindingLine(&lgd, 0);
+    removeBindingLines(&lgd);
     free(lgd.binding.lines);
   }
 
