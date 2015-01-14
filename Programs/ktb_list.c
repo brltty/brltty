@@ -529,13 +529,19 @@ listBindingLines (ListGenerationData *lgd, const KeyContext *ctx) {
           }
 
           {
+            int currentCommand = cmd->command;
             int isSame = 0;
 
             while (first < lgd->binding.count) {
               {
                 const BindingLine *bl = lgd->binding.lines[first];
+                int nextCommand = bl->command->value;
 
-                if ((bl->command->value & BRL_MSK_CMD) != cmd->command) break;
+                if ((nextCommand & BRL_MSK_CMD) != currentCommand) {
+                  int blk = nextCommand & BRL_MSK_BLK;
+
+                  if (!blk || (blk != (currentCommand & BRL_MSK_BLK))) break;
+                }
               }
 
               if (!listBindingLine(lgd, first, &isSame)) return 0;

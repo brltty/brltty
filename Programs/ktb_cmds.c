@@ -30,6 +30,7 @@ static const CommandListEntry commandList_modes[] = {
   { .command = BRL_CMD_INFO },
   { .command = BRL_CMD_FREEZE },
   { .command = BRL_CMD_DISPMD },
+  { .command = BRL_CMD_BLK(CONTEXT) },
 };
 
 static const CommandListEntry commandList_cursor[] = {
@@ -208,7 +209,6 @@ static const CommandListEntry commandList_internal[] = {
   { .command = BRL_CMD_NOOP },
   { .command = BRL_CMD_OFFLINE },
   { .command = BRL_CMD_BLK(ALERT) },
-  { .command = BRL_CMD_BLK(CONTEXT) },
   { .command = BRL_CMD_BLK(PASSXT) },
   { .command = BRL_CMD_BLK(PASSAT) },
   { .command = BRL_CMD_BLK(PASSPS2) },

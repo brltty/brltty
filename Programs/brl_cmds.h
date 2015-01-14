@@ -176,7 +176,7 @@ typedef enum {
   BRL_CMD_CONTROL /* set control modifier of next typed character or emulated key on/off */,
   BRL_CMD_META /* set meta modifier of next typed character or emulated key on/off */,
 
-  BRL_CMD_TIME /* show the current date and time */,
+  BRL_CMD_TIME /* show current date and time */,
   BRL_CMD_MENU_PREV_LEVEL /* go to previous menu level */,
 
   BRL_CMD_ASPK_SEL_LINE /* set autospeak selected line on/off */,
