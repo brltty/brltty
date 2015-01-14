@@ -118,10 +118,10 @@ static const CommandListEntry commandList_feature[] = {
 };
 
 static const CommandListEntry commandList_menu[] = {
-  { .command = BRL_CMD_MENU_FIRST_ITEM },
-  { .command = BRL_CMD_MENU_LAST_ITEM },
   { .command = BRL_CMD_MENU_PREV_ITEM },
   { .command = BRL_CMD_MENU_NEXT_ITEM },
+  { .command = BRL_CMD_MENU_FIRST_ITEM },
+  { .command = BRL_CMD_MENU_LAST_ITEM },
   { .command = BRL_CMD_MENU_PREV_SETTING },
   { .command = BRL_CMD_MENU_NEXT_SETTING },
   { .command = BRL_CMD_MENU_PREV_LEVEL },
