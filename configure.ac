@@ -17,7 +17,7 @@ dnl Process this file with autoconf 2.53 to produce a configure script.
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-AC_PREREQ([2.53])
+AC_PREREQ([2.64])
 AC_INIT([BRLTTY], [5.2], [brltty@mielke.cc], [brltty], [http://brltty.com])
 AC_CONFIG_SRCDIR([Programs/brltty.h])
 BRLTTY_SUMMARY_BEGIN
