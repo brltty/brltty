@@ -172,9 +172,15 @@ endGroup (ListGenerationData *lgd) {
 
   return 1;
 }
+static int
+putListBullet (ListGenerationData *lgd, wchar_t bullet) {
+  if (!putCharacter(lgd, bullet)) return 0;
+  if (!putCharacter(lgd, WC_C(' '))) return 0;
+  return 1;
+}
 
 static int
-putListBullet (ListGenerationData *lgd, unsigned int level) {
+beginListElement (ListGenerationData *lgd, unsigned int level) {
   static const wchar_t bullets[] = {
     WC_C('*'),
     WC_C('+'),
@@ -186,8 +192,7 @@ putListBullet (ListGenerationData *lgd, unsigned int level) {
   for (index=0; index<=level; index+=1) {
     wchar_t bullet = (index == level)? bullets[level]: WC_C(' ');
 
-    if (!putCharacter(lgd, bullet)) return 0;
-    if (!putCharacter(lgd, WC_C(' '))) return 0;
+    if (!putListBullet(lgd, bullet)) return 0;
   }
 
   return 1;
@@ -297,7 +302,7 @@ listContextFunction (ListGenerationData *lgd, const KeyContext *ctx, ListContext
 
 static int
 putKeyboardFunction (ListGenerationData *lgd, const KeyboardFunction *kbf) {
-  if (!putListBullet(lgd, 0)) return 0;
+  if (!beginListElement(lgd, 0)) return 0;
   if (!putCharacterString(lgd, WS_C("braille keyboard "))) return 0;
   if (!putUtf8String(lgd, kbf->name)) return 0;
   if (!putCharacterString(lgd, WS_C(": "))) return 0;
@@ -340,7 +345,7 @@ listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
 static int
 listHotkeyEvent (ListGenerationData *lgd, const KeyValue *keyValue, const char *event, const BoundCommand *cmd) {
   if (cmd->value != BRL_CMD_NOOP) {
-    if (!putListBullet(lgd, 0)) return 0;
+    if (!beginListElement(lgd, 0)) return 0;
 
     if ((cmd->value & BRL_MSK_BLK) == BRL_CMD_BLK(CONTEXT)) {
       const KeyContext *c = getKeyContext(lgd->keyTable, (KTB_CTX_DEFAULT + (cmd->value & BRL_MSK_ARG)));
@@ -468,7 +473,7 @@ listBindingLine (ListGenerationData *lgd, int index, int *isSame) {
   if (*isSame) {
     *isSame = 0;
   } else {
-    if (!putListBullet(lgd, 0)) return 0;
+    if (!beginListElement(lgd, 0)) return 0;
     if (!putCharacters(lgd, bl->text, bl->keysOffset)) return 0;
   }
 
@@ -488,7 +493,7 @@ listBindingLine (ListGenerationData *lgd, int index, int *isSame) {
   }
 
   if (asList) {
-    if (!putListBullet(lgd, 1)) return 0;
+    if (!beginListElement(lgd, 1)) return 0;
   }
 
   if (!putCharacters(lgd, &bl->text[bl->keysOffset], (bl->length - bl->keysOffset))) return 0;
@@ -653,6 +658,31 @@ listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *k
 }
 
 static int
+listNotes (ListGenerationData *lgd) {
+  unsigned int noteIndex;
+
+  if (!beginGroup(lgd, WS_C("Notes"))) return 0;
+
+  for (noteIndex=0; noteIndex<lgd->keyTable->notes.count; noteIndex+=1) {
+    const wchar_t *line = lgd->keyTable->notes.table[noteIndex];
+
+    if (*line == WC_C('*')) {
+      if (!putListBullet(lgd, WC_C(' '))) return 0;
+      line += 1;
+      while (iswspace(*line)) line += 1;
+    } else {
+      if (!beginListElement(lgd, 0)) return 0;
+    }
+
+    if (!putCharacterString(lgd, line)) return 0;
+    if (!endLine(lgd)) return 0;
+  }
+
+  if (!endGroup(lgd)) return 0;
+  return 1;
+}
+
+static int
 doListKeyTable (ListGenerationData *lgd) {
   if (!putUtf8String(lgd, gettext("Key Table"))) return 0;
 
@@ -662,16 +692,7 @@ doListKeyTable (ListGenerationData *lgd) {
     if (!endHeader(lgd, WC_C('='))) return 0;
   }
 
-  if (lgd->keyTable->notes.count) {
-    unsigned int noteIndex;
-
-    for (noteIndex=0; noteIndex<lgd->keyTable->notes.count; noteIndex+=1) {
-      if (!putCharacterString(lgd, lgd->keyTable->notes.table[noteIndex])) return 0;
-      if (!endLine(lgd)) return 0;
-    }
-
-    if (!endLine(lgd)) return 0;
-  }
+  if (!listNotes(lgd)) return 0;
 
   {
     static const unsigned char contexts[] = {
