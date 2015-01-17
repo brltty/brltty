@@ -33,7 +33,7 @@ listLine (ListGenerationData *lgd, const wchar_t *line) {
   return lgd->list.handler(line, lgd->list.data);
 }
 
-static int listContextHeader (ListGenerationData *lgd, const wchar_t *header);
+static int listTopicHeader (ListGenerationData *lgd, const wchar_t *header);
 static int listGroupHeader (ListGenerationData *lgd, const wchar_t *header);
 
 static int
@@ -47,11 +47,11 @@ putCharacters (ListGenerationData *lgd, const wchar_t *characters, size_t count)
     if (!listGroupHeader(lgd, header)) return 0;
   }
 
-  if (lgd->contextHeader) {
-    const wchar_t *header = lgd->contextHeader;
+  if (lgd->topicHeader) {
+    const wchar_t *header = lgd->topicHeader;
 
-    lgd->contextHeader = NULL;
-    if (!listContextHeader(lgd, header)) return 0;
+    lgd->topicHeader = NULL;
+    if (!listTopicHeader(lgd, header)) return 0;
   }
 
   if (newLength > lgd->line.size) {
@@ -145,7 +145,7 @@ listHeader (ListGenerationData *lgd, const wchar_t *header, wchar_t underline) {
 }
 
 static int
-listContextHeader (ListGenerationData *lgd, const wchar_t *header) {
+listTopicHeader (ListGenerationData *lgd, const wchar_t *header) {
   return listHeader(lgd, header, WC_C('-'));
 }
 
@@ -173,29 +173,30 @@ endGroup (ListGenerationData *lgd) {
   return 1;
 }
 static int
-putListBullet (ListGenerationData *lgd, wchar_t bullet) {
-  if (!putCharacter(lgd, bullet)) return 0;
-  if (!putCharacter(lgd, WC_C(' '))) return 0;
-  return 1;
+putElementPrefix (ListGenerationData *lgd, unsigned int level, wchar_t bullet) {
+  const unsigned int indent = 2;
+  const unsigned int count = indent * (level + 1);
+  wchar_t characters[count];
+
+  wmemset(characters, WC_C(' '), count);
+  characters[count - indent] = bullet;
+  return putCharacters(lgd, characters, count);
 }
 
 static int
-beginListElement (ListGenerationData *lgd, unsigned int level) {
+putElementBegin (ListGenerationData *lgd, unsigned int level) {
   static const wchar_t bullets[] = {
     WC_C('*'),
     WC_C('+'),
     WC_C('-')
   };
 
-  unsigned int index;
+  return putElementPrefix(lgd, level, bullets[level]);
+}
 
-  for (index=0; index<=level; index+=1) {
-    wchar_t bullet = (index == level)? bullets[level]: WC_C(' ');
-
-    if (!putListBullet(lgd, bullet)) return 0;
-  }
-
-  return 1;
+static int
+putElementContinue (ListGenerationData *lgd, unsigned int level) {
+  return putElementPrefix(lgd, level, WC_C(' '));
 }
 
 static int
@@ -295,14 +296,14 @@ putCommandDescription (ListGenerationData *lgd, const BoundCommand *cmd, int det
 }
 
 static int
-listContextFunction (ListGenerationData *lgd, const KeyContext *ctx, ListContextFunction *function) {
-  if (!function) return 1;
-  return function(lgd, ctx);
+listCommandSubgroup (ListGenerationData *lgd, const KeyContext *ctx, CommandSubgroupLister *list) {
+  if (!list) return 1;
+  return list(lgd, ctx);
 }
 
 static int
 putKeyboardFunction (ListGenerationData *lgd, const KeyboardFunction *kbf) {
-  if (!beginListElement(lgd, 0)) return 0;
+  if (!putElementBegin(lgd, 0)) return 0;
   if (!putCharacterString(lgd, WS_C("braille keyboard "))) return 0;
   if (!putUtf8String(lgd, kbf->name)) return 0;
   if (!putCharacterString(lgd, WS_C(": "))) return 0;
@@ -345,7 +346,7 @@ listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
 static int
 listHotkeyEvent (ListGenerationData *lgd, const KeyValue *keyValue, const char *event, const BoundCommand *cmd) {
   if (cmd->value != BRL_CMD_NOOP) {
-    if (!beginListElement(lgd, 0)) return 0;
+    if (!putElementBegin(lgd, 0)) return 0;
 
     if ((cmd->value & BRL_MSK_BLK) == BRL_CMD_BLK(CONTEXT)) {
       const KeyContext *c = getKeyContext(lgd->keyTable, (KTB_CTX_DEFAULT + (cmd->value & BRL_MSK_ARG)));
@@ -473,7 +474,7 @@ listBindingLine (ListGenerationData *lgd, int index, int *isSame) {
   if (*isSame) {
     *isSame = 0;
   } else {
-    if (!beginListElement(lgd, 0)) return 0;
+    if (!putElementBegin(lgd, 0)) return 0;
     if (!putCharacters(lgd, bl->text, bl->keysOffset)) return 0;
   }
 
@@ -493,7 +494,7 @@ listBindingLine (ListGenerationData *lgd, int index, int *isSame) {
   }
 
   if (asList) {
-    if (!beginListElement(lgd, 1)) return 0;
+    if (!putElementBegin(lgd, 1)) return 0;
   }
 
   if (!putCharacters(lgd, &bl->text[bl->keysOffset], (bl->length - bl->keysOffset))) return 0;
@@ -518,7 +519,7 @@ listBindingLines (ListGenerationData *lgd, const KeyContext *ctx) {
         const CommandListEntry *cmdEnd = cmd + grp->commands.count;
 
         if (!beginGroup(lgd, grp->name)) return 0;
-        if (!listContextFunction(lgd, ctx, grp->listBefore)) return 0;
+        if (!listCommandSubgroup(lgd, ctx, grp->listBefore)) return 0;
 
         while (cmd < cmdEnd) {
           int first = 0;
@@ -559,7 +560,7 @@ listBindingLines (ListGenerationData *lgd, const KeyContext *ctx) {
           cmd += 1;
         }
 
-        if (!listContextFunction(lgd, ctx, grp->listAfter)) return 0;
+        if (!listCommandSubgroup(lgd, ctx, grp->listAfter)) return 0;
         if (!endGroup(lgd)) return 0;
         grp += 1;
       }
@@ -653,7 +654,7 @@ listKeyBindings (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *
 
 static int
 listKeyContext (ListGenerationData *lgd, const KeyContext *ctx) {
-  lgd->contextHeader = ctx->title;
+  lgd->topicHeader = ctx->title;
   if (!listKeyBindings(lgd, ctx, NULL)) return 0;
   return 1;
 }
@@ -697,7 +698,7 @@ listPersistentKeyContexts (ListGenerationData *lgd) {
 }
 
 static int
-listTitle (ListGenerationData *lgd) {
+listKeyTableTitle (ListGenerationData *lgd) {
   if (!putUtf8String(lgd, gettext("Key Table"))) return 0;
 
   if (lgd->keyTable->title) {
@@ -710,20 +711,21 @@ listTitle (ListGenerationData *lgd) {
 }
 
 static int
-listNotes (ListGenerationData *lgd) {
+listKeyTableNotes (ListGenerationData *lgd) {
   unsigned int noteIndex;
 
   if (!beginGroup(lgd, WS_C("Notes"))) return 0;
 
   for (noteIndex=0; noteIndex<lgd->keyTable->notes.count; noteIndex+=1) {
     const wchar_t *line = lgd->keyTable->notes.table[noteIndex];
+    const unsigned int level = 0;
 
     if (*line == WC_C('*')) {
-      if (!putListBullet(lgd, WC_C(' '))) return 0;
       line += 1;
       while (iswspace(*line)) line += 1;
+      if (!putElementContinue(lgd, level)) return 0;
     } else {
-      if (!beginListElement(lgd, 0)) return 0;
+      if (!putElementBegin(lgd, level)) return 0;
     }
 
     if (!putCharacterString(lgd, line)) return 0;
@@ -735,11 +737,24 @@ listNotes (ListGenerationData *lgd) {
 }
 
 static int
-doListKeyTable (ListGenerationData *lgd) {
-  if (!listTitle(lgd)) return 0;
-  if (!listNotes(lgd)) return 0;
-  if (!listSpecialKeyContexts(lgd)) return 0;
-  if (!listPersistentKeyContexts(lgd)) return 0;
+listKeyTableSections (ListGenerationData *lgd) {
+  typedef int Lister (ListGenerationData *lgd);
+
+  static Lister *const listerTable[] = {
+    listKeyTableTitle,
+    listKeyTableNotes,
+    listSpecialKeyContexts,
+    listPersistentKeyContexts
+  };
+
+  Lister *const *lister = listerTable;
+  Lister *const *end = lister + ARRAY_COUNT(listerTable);
+
+  while (lister < end) {
+    if (!(*lister)(lgd)) return 0;
+    lister += 1;
+  }
+
   return 1;
 }
 
@@ -748,7 +763,7 @@ listKeyTable (KeyTable *table, KeyTableListHandler *handleLine, void *data) {
   ListGenerationData lgd = {
     .keyTable = table,
 
-    .contextHeader = NULL,
+    .topicHeader = NULL,
     .groupHeader = NULL,
 
     .line = {
@@ -769,7 +784,7 @@ listKeyTable (KeyTable *table, KeyTableListHandler *handleLine, void *data) {
     }
   };
 
-  int result = doListKeyTable(&lgd);
+  int result = listKeyTableSections(&lgd);
 
   if (lgd.binding.lines) {
     removeBindingLines(&lgd);

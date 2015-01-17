@@ -37,7 +37,7 @@ typedef struct {
 typedef struct {
   KeyTable *const keyTable;
 
-  const wchar_t *contextHeader;
+  const wchar_t *topicHeader;
   const wchar_t *groupHeader;
 
   struct {
@@ -58,9 +58,9 @@ typedef struct {
   } binding;
 } ListGenerationData;
 
-typedef int ListContextFunction (ListGenerationData *lgd, const KeyContext *ctx);
-extern ListContextFunction listKeyboardFunctions;
-extern ListContextFunction listHotkeys;
+typedef int CommandSubgroupLister (ListGenerationData *lgd, const KeyContext *ctx);
+extern CommandSubgroupLister listKeyboardFunctions;
+extern CommandSubgroupLister listHotkeys;
 
 typedef struct {
   int command;
@@ -73,8 +73,8 @@ typedef struct {
   } commands;
 
   const wchar_t *name;
-  ListContextFunction *listBefore;
-  ListContextFunction *listAfter;
+  CommandSubgroupLister *listBefore;
+  CommandSubgroupLister *listAfter;
 } CommandGroupEntry;
 
 extern const CommandGroupEntry commandGroupTable[];

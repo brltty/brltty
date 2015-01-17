@@ -1066,9 +1066,9 @@ static DATA_OPERANDS_PROCESSOR(processNoteOperands) {
       if (parseDataString(file, &string, operand.characters, operand.length, 0)) {
         if (ktd->table->notes.count == ktd->table->notes.size) {
           unsigned int newSize = (ktd->table->notes.size == 0)? 8: (ktd->table->notes.size << 1);
-          wchar_t **newTable;
+          wchar_t **newTable = realloc(ktd->table->notes.table, ARRAY_SIZE(newTable, newSize));
 
-          if (!(newTable = realloc(ktd->table->notes.table, ARRAY_SIZE(newTable, newSize)))) {
+          if (!newTable) {
             logMallocError();
             return 0;
           }
@@ -1078,7 +1078,7 @@ static DATA_OPERANDS_PROCESSOR(processNoteOperands) {
         }
 
         {
-          wchar_t *noteString = malloc(ARRAY_SIZE(*ktd->table->notes.table, string.length+1));
+          wchar_t *noteString = malloc(ARRAY_SIZE(noteString, string.length+1));
 
           if (!noteString) {
             logMallocError();
