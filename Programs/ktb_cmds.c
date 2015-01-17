@@ -222,6 +222,7 @@ static const CommandListEntry commandList_internal[] = {
 
 const CommandGroupEntry commandGroupTable[] = {
   { COMMAND_LIST(modes),
+    .listAfter = listHotkeys,
     .name = WS_C("Special Modes")
   },
 

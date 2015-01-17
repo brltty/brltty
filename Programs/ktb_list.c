@@ -290,6 +290,12 @@ putCommandDescription (ListGenerationData *lgd, const BoundCommand *cmd, int det
 }
 
 static int
+listContextFunction (ListGenerationData *lgd, const KeyContext *ctx, ListContextFunction *function) {
+  if (!function) return 1;
+  return function(lgd, ctx);
+}
+
+static int
 putKeyboardFunction (ListGenerationData *lgd, const KeyboardFunction *kbf) {
   if (!putListBullet(lgd, 0)) return 0;
   if (!putCharacterString(lgd, WS_C("braille keyboard "))) return 0;
@@ -355,12 +361,10 @@ listHotkeyEvent (ListGenerationData *lgd, const KeyValue *keyValue, const char *
   return 1;
 }
 
-static int
+int
 listHotkeys (ListGenerationData *lgd, const KeyContext *ctx) {
   const HotkeyEntry *hotkey = ctx->hotkeys.table;
   unsigned int count = ctx->hotkeys.count;
-
-  if (!beginGroup(lgd, WS_C("Special Actions"))) return 0;
 
   while (count) {
     if (!(hotkey->flags & HKF_HIDDEN)) {
@@ -371,7 +375,6 @@ listHotkeys (ListGenerationData *lgd, const KeyContext *ctx) {
     hotkey += 1, count -= 1;
   }
 
-  if (!endGroup(lgd)) return 0;
   return 1;
 }
 
@@ -510,14 +513,7 @@ listBindingLines (ListGenerationData *lgd, const KeyContext *ctx) {
         const CommandListEntry *cmdEnd = cmd + grp->commands.count;
 
         if (!beginGroup(lgd, grp->name)) return 0;
-
-        {
-          ListFunction *list = grp->listBefore;
-
-          if (list) {
-            if (!list(lgd, ctx)) return 0;
-          }
-        }
+        if (!listContextFunction(lgd, ctx, grp->listBefore)) return 0;
 
         while (cmd < cmdEnd) {
           int first = 0;
@@ -558,6 +554,7 @@ listBindingLines (ListGenerationData *lgd, const KeyContext *ctx) {
           cmd += 1;
         }
 
+        if (!listContextFunction(lgd, ctx, grp->listAfter)) return 0;
         if (!endGroup(lgd)) return 0;
         grp += 1;
       }
@@ -652,7 +649,6 @@ listKeyBindings (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *
 static int
 listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *keysPrefix) {
   if (!listKeyBindings(lgd, ctx, keysPrefix)) return 0;
-  if (!listHotkeys(lgd, ctx)) return 0;
   return 1;
 }
 

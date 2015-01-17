@@ -58,8 +58,9 @@ typedef struct {
   } binding;
 } ListGenerationData;
 
-typedef int ListFunction (ListGenerationData *lgd, const KeyContext *ctx);
-extern ListFunction listKeyboardFunctions;
+typedef int ListContextFunction (ListGenerationData *lgd, const KeyContext *ctx);
+extern ListContextFunction listKeyboardFunctions;
+extern ListContextFunction listHotkeys;
 
 typedef struct {
   int command;
@@ -72,7 +73,8 @@ typedef struct {
   } commands;
 
   const wchar_t *name;
-  ListFunction *listBefore;
+  ListContextFunction *listBefore;
+  ListContextFunction *listAfter;
 } CommandGroupEntry;
 
 extern const CommandGroupEntry commandGroupTable[];
