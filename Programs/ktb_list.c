@@ -172,6 +172,7 @@ endGroup (ListGenerationData *lgd) {
 
   return 1;
 }
+
 static int
 putElementPrefix (ListGenerationData *lgd, unsigned int level, wchar_t bullet) {
   const unsigned int indent = 2;
