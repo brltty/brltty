@@ -1650,6 +1650,7 @@ destroyKeyTable (KeyTable *table) {
 
   if (table->keyContexts.table) free(table->keyContexts.table);
   if (table->keyNames.table) free(table->keyNames.table);
+  if (table->notes.table) free(table->notes.table);
   if (table->title) free(table->title);
   if (table->pressedKeys.table) free(table->pressedKeys.table);
   free(table);
