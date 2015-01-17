@@ -28,7 +28,7 @@ note The round scroll keys at either end of the braille display are named: Left,
 # Default Bindings #
 ####################
 
-ifkey RoutingKey bind RoutingKey ROUTE
+ifKey RoutingKey bind RoutingKey ROUTE
 
 bind ScrollLeft+ScrollRight HOME
 bind ScrollLeft FWINLT

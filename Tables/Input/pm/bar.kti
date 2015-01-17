@@ -56,5 +56,5 @@ assign toggleOn BarRight1
 include status\{statusKeys}.kti
 
 include keys.kti
-ifkey RoutingKey2 bind !RoutingKey2 DESCCHAR
-ifkey StatusKey2 bind !StatusKey2 GOTOLINE
+ifKey RoutingKey2 bind !RoutingKey2 DESCCHAR
+ifKey StatusKey2 bind !StatusKey2 GOTOLINE
