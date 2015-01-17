@@ -1064,15 +1064,18 @@ static DATA_OPERANDS_PROCESSOR(processNoteOperands) {
       DataString string;
 
       if (parseDataString(file, &string, operand.characters, operand.length, 0)) {
-        unsigned int newCount = ktd->table->notes.count + 1;
-        wchar_t **newTable = realloc(ktd->table->notes.table, ARRAY_SIZE(newTable, newCount));
+        if (ktd->table->notes.count == ktd->table->notes.size) {
+          unsigned int newSize = (ktd->table->notes.size == 0)? 8: (ktd->table->notes.size << 1);
+          wchar_t **newTable;
 
-        if (!newTable) {
-          logMallocError();
-          return 0;
+          if (!(newTable = realloc(ktd->table->notes.table, ARRAY_SIZE(newTable, newSize)))) {
+            logMallocError();
+            return 0;
+          }
+
+          ktd->table->notes.table = newTable;
+          ktd->table->notes.size = newSize;
         }
-
-        ktd->table->notes.table = newTable;
 
         {
           wchar_t *noteString = malloc(ARRAY_SIZE(*ktd->table->notes.table, string.length+1));
@@ -1084,6 +1087,7 @@ static DATA_OPERANDS_PROCESSOR(processNoteOperands) {
 
           wmemcpy(noteString, string.characters, string.length);
           noteString[string.length] = 0;
+
           ktd->table->notes.table[ktd->table->notes.count++] = noteString;
           return 1;
         }
@@ -1579,6 +1583,7 @@ compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
       ktd.table->title = NULL;
 
       ktd.table->notes.table = NULL;
+      ktd.table->notes.size = 0;
       ktd.table->notes.count = 0;
 
       ktd.table->keyNames.table = NULL;

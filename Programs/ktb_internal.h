@@ -115,6 +115,7 @@ struct KeyTableStruct {
 
   struct {
     wchar_t **table;
+    unsigned int size;
     unsigned int count;
   } notes;
 
