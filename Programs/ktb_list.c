@@ -581,7 +581,7 @@ listBindingLines (ListGenerationData *lgd, const KeyContext *ctx) {
   return 1;
 }
 
-static int listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *keysPrefix);
+static int listKeyBindings (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *keysPrefix);
 
 static int
 listKeyBinding (ListGenerationData *lgd, const KeyBinding *binding, int longPress, const wchar_t *keysPrefix) {
@@ -618,7 +618,7 @@ listKeyBinding (ListGenerationData *lgd, const KeyBinding *binding, int longPres
       clearLine(lgd);
 
       if (isTemporaryKeyContext(lgd->keyTable, c)) {
-        if (!listKeyContext(lgd, c, keys)) return 0;
+        if (!listKeyBindings(lgd, c, keys)) return 0;
       } else {
         if (!putCharacterString(lgd, WS_C("switch to "))) return 0;
         if (!putCharacterString(lgd, c->title)) return 0;
@@ -652,8 +652,60 @@ listKeyBindings (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *
 }
 
 static int
-listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *keysPrefix) {
-  if (!listKeyBindings(lgd, ctx, keysPrefix)) return 0;
+listKeyContext (ListGenerationData *lgd, const KeyContext *ctx) {
+  lgd->contextHeader = ctx->title;
+  if (!listKeyBindings(lgd, ctx, NULL)) return 0;
+  return 1;
+}
+
+static int
+listSpecialKeyContexts (ListGenerationData *lgd) {
+  static const unsigned char contexts[] = {
+    KTB_CTX_DEFAULT,
+    KTB_CTX_MENU
+  };
+
+  const unsigned char *context = contexts;
+  unsigned int count = ARRAY_COUNT(contexts);
+
+  while (count) {
+    const KeyContext *ctx = getKeyContext(lgd->keyTable, *context);
+
+    if (ctx) {
+      if (!listKeyContext(lgd, ctx)) return 0;
+    }
+
+    context += 1, count -= 1;
+  }
+
+  return 1;
+}
+
+static int
+listPersistentKeyContexts (ListGenerationData *lgd) {
+  unsigned int context;
+
+  for (context=KTB_CTX_DEFAULT+1; context<lgd->keyTable->keyContexts.count; context+=1) {
+    const KeyContext *ctx = getKeyContext(lgd->keyTable, context);
+
+    if (ctx && !isTemporaryKeyContext(lgd->keyTable, ctx)) {
+      if (!listKeyContext(lgd, ctx)) return 0;
+    }
+  }
+
+  return 1;
+}
+
+static int
+listTitle (ListGenerationData *lgd) {
+  if (!putUtf8String(lgd, gettext("Key Table"))) return 0;
+
+  if (lgd->keyTable->title) {
+    if (!putCharacterString(lgd, WS_C(": "))) return 0;
+    if (!putCharacterString(lgd, lgd->keyTable->title)) return 0;
+  }
+
+  if (!endHeader(lgd, WC_C('='))) return 0;
   return 1;
 }
 
@@ -684,50 +736,10 @@ listNotes (ListGenerationData *lgd) {
 
 static int
 doListKeyTable (ListGenerationData *lgd) {
-  if (!putUtf8String(lgd, gettext("Key Table"))) return 0;
-
-  if (lgd->keyTable->title) {
-    if (!putCharacterString(lgd, WS_C(": "))) return 0;
-    if (!putCharacterString(lgd, lgd->keyTable->title)) return 0;
-    if (!endHeader(lgd, WC_C('='))) return 0;
-  }
-
+  if (!listTitle(lgd)) return 0;
   if (!listNotes(lgd)) return 0;
-
-  {
-    static const unsigned char contexts[] = {
-      KTB_CTX_DEFAULT,
-      KTB_CTX_MENU
-    };
-
-    const unsigned char *context = contexts;
-    unsigned int count = ARRAY_COUNT(contexts);
-
-    while (count) {
-      const KeyContext *ctx = getKeyContext(lgd->keyTable, *context);
-
-      if (ctx) {
-        lgd->contextHeader = ctx->title;
-        if (!listKeyContext(lgd, ctx, NULL)) return 0;
-      }
-
-      context += 1, count -= 1;
-    }
-  }
-
-  {
-    unsigned int context;
-
-    for (context=KTB_CTX_DEFAULT+1; context<lgd->keyTable->keyContexts.count; context+=1) {
-      const KeyContext *ctx = getKeyContext(lgd->keyTable, context);
-
-      if (ctx && !isTemporaryKeyContext(lgd->keyTable, ctx)) {
-        lgd->contextHeader = ctx->title;
-        if (!listKeyContext(lgd, ctx, NULL)) return 0;
-      }
-    }
-  }
-
+  if (!listSpecialKeyContexts(lgd)) return 0;
+  if (!listPersistentKeyContexts(lgd)) return 0;
   return 1;
 }
 
