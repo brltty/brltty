@@ -124,9 +124,7 @@ endLayoutEntry() {
 translateKeyTable() {
    local prefix="${1}"
 
-   local program="${buildRoot}/Programs/ktbtest"
-   make -C "${program%/*}" -s "${program##*/}"
-   "${program}" -D"${buildRoot}/lib" -T"${sourceRoot}/${tablesSubdirectory}" -l "${prefix}-${inputFile##*/}" >"${outputFile}"
+   "${keyTableLister}" -D"${buildRoot}/lib" -T"${sourceRoot}/${tablesSubdirectory}" -l "${prefix}-${inputFile##*/}" >"${outputFile}"
 }
 
 sourceRoot="$(dirname "${0}")"
@@ -170,6 +168,9 @@ keyboardPrefix="kbd"
 plainTextExtension="txt"
 hypertextExtension="html"
 keyTableExtension="ktb"
+
+keyTableLister="${buildRoot}/Programs/ktbtest"
+make -C "${keyTableLister%/*}" -s "${keyTableLister##*/}"
 
 documentTitle="Key Tables"
 beginDocument "${documentTitle}"
