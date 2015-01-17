@@ -18,10 +18,10 @@
 
 title Iris with Braille Keyboard
 
-Note The braille keyboard has two thumb keys rather than a single space bar;
-note the left one is named Backspace, and the right one is named Space.
+note The braille keyboard has two thumb keys rather than a single space bar;
+note * the left one is named Backspace, and the right one is named Space.
 note The eight keys behind the braille keyboard are known as linear keys, and,
-note from left to right, are named L1 through L8.
+note * from left to right, are named L1 through L8.
 
 assign Dot1 L4
 assign Dot2 L3
