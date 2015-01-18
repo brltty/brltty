@@ -164,15 +164,13 @@ static DATA_OPERANDS_PROCESSOR(processUnicodeCharOperands) {
 
 static int
 processGnomeBrailleLine (DataFile *file, void *data) {
-  DataDirectives *d;
-
   if (inUcsBlock) {
     BEGIN_DATA_DIRECTIVE_TABLE
       {.name=WS_C("UCS-BLOCK"), .processor=processUcsBlockOperands},
       {.name=NULL, .processor=processUcsCharOperands},
     END_DATA_DIRECTIVE_TABLE
 
-    d = &directives;
+    return processDirectiveOperand(file, &directives, "gnome braille UCS block directive", data);
   } else {
     BEGIN_DATA_DIRECTIVE_TABLE
       {.name=WS_C("ENCODING"), .processor=processEncodingOperands},
@@ -187,10 +185,8 @@ processGnomeBrailleLine (DataFile *file, void *data) {
   //  {.name=WS_C("UNKNOWN-CHAR"), .processor=processUnknownCharOperands},
     END_DATA_DIRECTIVE_TABLE
 
-    d = &directives;
+    return processDirectiveOperand(file, &directives, "gnome braille main directive", data);
   }
-
-  return processDirectiveOperand(file, d, "gnome braille directive", data);
 }
 
 TextTableData *
