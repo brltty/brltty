@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-all: all-brltty brltty-trtxt$X brltty-ttb$X brltty-ctb$X $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
+all: all-brltty brltty-trtxt$X brltty-ttb$X brltty-atb$X brltty-ctb$X $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
 everything: all all-brltest all-scrtest all-spktest all-brltty-ktb tunetest$X $(ALL_API)
 all-brltty: brltty$X $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
@@ -868,10 +868,11 @@ check-all: check-text-tables check-attributes-tables check-contraction-tables ch
 
 install:: install-programs install-tables $(INSTALL_DRIVERS) install-core-headers $(INSTALL_MESSAGES) install-manpages $(INSTALL_API)
 
-install-programs: brltty$X brltty-trtxt$X brltty-ttb$X brltty-ctb$X install-program-directory install-writable-directory
+install-programs: brltty$X brltty-trtxt$X brltty-ttb$X brltty-atb$X brltty-ctb$X install-program-directory install-writable-directory
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-trtxt$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-ttb$X $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_PROGRAM) brltty-atb$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-ctb$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_DATA) $(BLD_TOP)config.sh $(INSTALL_PROGRAM_DIRECTORY)/brltty-config
 
@@ -1065,7 +1066,7 @@ distclean clean::
 	for language do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) $@); done
 
 clean::
-	-rm -f brltty$X brltty-ctb$X brltty-ttb$X brltty-trtxt$X xbrlapi$X
+	-rm -f brltty$X brltty-trtxt$X brltty-ttb$X brltty-atb$X brltty-ctb$X xbrlapi$X
 	-rm -f tbl2hex$(X_FOR_BUILD) *test$X *-static$X
 	-rm -f brlapi_constants.h *.$(LIB_EXT) *.$(LIB_EXT).* *.$(ARC_EXT) *.def *.class *.jar
 	-rm -f $(BLD_TOP)$(DRV_DIR)/*
