@@ -127,12 +127,14 @@ endHeader (ListGenerationData *lgd, wchar_t underline) {
   size_t length = lgd->line.length;
   if (!endLine(lgd)) return 0;
 
-  while (length > 0) {
-    if (!putCharacter(lgd, underline)) return 0;
-    length -= 1;
+  {
+    wchar_t characters[length];
+
+    wmemset(characters, underline, length);
+    if (!putCharacters(lgd, characters, length)) return 0;
+    if (!endLine(lgd)) return 0;
   }
 
-  if (!endLine(lgd)) return 0;
   if (!endLine(lgd)) return 0;
   return 1;
 }
