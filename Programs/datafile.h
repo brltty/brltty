@@ -101,9 +101,17 @@ typedef struct {
 } DataDirective;
 
 typedef struct {
-  const DataDirective *const unsorted;
-  const DataDirective **sorted;
-  const size_t count;
+  struct {
+    const DataDirective *table;
+    size_t count;
+  } const unsorted;
+
+  struct {
+    const DataDirective **table;
+    size_t count;
+  } sorted;
+
+  const DataDirective *unnamed;
 } DataDirectives;
 
 #define BEGIN_DATA_DIRECTIVE_TABLE \
@@ -111,9 +119,17 @@ typedef struct {
 
 #define END_DATA_DIRECTIVE_TABLE }; \
   static DataDirectives directives = { \
-    .unsorted = unsortedDirectives, \
-    .count = ARRAY_COUNT(unsortedDirectives), \
-    .sorted = NULL \
+    .unsorted = { \
+      .table = unsortedDirectives, \
+      .count = ARRAY_COUNT(unsortedDirectives) \
+    }, \
+    \
+    .sorted = { \
+      .table = NULL, \
+      .count = 0 \
+    }, \
+    \
+    .unnamed = NULL \
   };
 
 extern int processDirectiveOperand (DataFile *file, DataDirectives *directives, const char *description, void *data);

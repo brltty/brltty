@@ -969,8 +969,6 @@ testDataCondition (DataFile *file) {
 
 static int
 compareDataDirectiveNames (const wchar_t *name1, const wchar_t *name2) {
-  if (!name1) return name2? -1: 0;
-  if (!name2) return 1;
   return wcscasecmp(name1, name2);
 }
 
@@ -993,8 +991,8 @@ searchDataDirectiveByName (const void *target, const void *element) {
 static const DataDirective *
 findDataDirectiveByName (const DataDirectives *directives, const wchar_t *name) {
   DataDirective **directive = bsearch(
-    name, directives->sorted, directives->count,
-    sizeof(*directives->sorted), searchDataDirectiveByName
+    name, directives->sorted.table, directives->sorted.count,
+    sizeof(*directives->sorted.table), searchDataDirectiveByName
   );
 
   return directive? *directive: NULL;
@@ -1007,22 +1005,32 @@ processDirectiveOperand (DataFile *file, DataDirectives *directives, const char 
   if (getDataOperand(file, &name, description)) {
     const DataDirective *directive;
 
-    if (!directives->sorted) {
-      if (!(directives->sorted = malloc(ARRAY_SIZE(directives->sorted, directives->count)))) {
+    if (!directives->sorted.table) {
+      if (!(directives->sorted.table = malloc(ARRAY_SIZE(directives->sorted.table, directives->unsorted.count)))) {
         logMallocError();
         return 0;
       }
 
-      {
-        size_t index;
+      directives->sorted.count = 0;
+      directives->unnamed = NULL;
+      directive = directives->unsorted.table;
 
-        for (index=0; index<directives->count; index+=1) {
-          directives->sorted[index] = &directives->unsorted[index];
+      {
+        const DataDirective *end = directive + directives->unsorted.count;
+
+        while (directive < end) {
+          if (directive->name) {
+            directives->sorted.table[directives->sorted.count++] = directive;
+          } else {
+            directives->unnamed = directive;
+          }
+
+          directive += 1;
         }
       }
 
-      qsort(directives->sorted, directives->count,
-            sizeof(*directives->sorted), sortDataDirectivesByName);
+      qsort(directives->sorted.table, directives->sorted.count,
+            sizeof(*directives->sorted.table), sortDataDirectivesByName);
     }
 
     {
@@ -1034,7 +1042,7 @@ processDirectiveOperand (DataFile *file, DataDirectives *directives, const char 
     }
 
     if (!directive) {
-      if ((directive = findDataDirectiveByName(directives, NULL))) {
+      if ((directive = directives->unnamed)) {
         ungetDataCharacters(file, name.length);
       }
     }
