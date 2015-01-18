@@ -174,13 +174,13 @@ endGroup (ListGenerationData *lgd) {
 }
 
 static int
-putElementPrefix (ListGenerationData *lgd, unsigned int level, wchar_t bullet) {
+putElementPrefix (ListGenerationData *lgd, unsigned int level, const wchar_t *bullet) {
   const unsigned int indent = 2;
   const unsigned int count = indent * (level + 1);
   wchar_t characters[count];
 
   wmemset(characters, WC_C(' '), count);
-  characters[count - indent] = bullet;
+  if (bullet) characters[count - indent] = *bullet;
   return putCharacters(lgd, characters, count);
 }
 
@@ -192,12 +192,12 @@ putElementBegin (ListGenerationData *lgd, unsigned int level) {
     WC_C('-')
   };
 
-  return putElementPrefix(lgd, level, bullets[level]);
+  return putElementPrefix(lgd, level, &bullets[level]);
 }
 
 static int
 putElementContinue (ListGenerationData *lgd, unsigned int level) {
-  return putElementPrefix(lgd, level, WC_C(' '));
+  return putElementPrefix(lgd, level, NULL);
 }
 
 static int
