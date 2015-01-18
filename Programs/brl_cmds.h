@@ -87,7 +87,7 @@ typedef enum {
   BRL_CMD_BOT /* go to bottom line */,
   BRL_CMD_TOP_LEFT /* go to beginning of top line */,
   BRL_CMD_BOT_LEFT /* go to beginning of bottom line */,
-  BRL_CMD_PRPGRPH /* go up to nearest first line of paragraph */,
+  BRL_CMD_PRPGRPH /* go up to first line of paragraph */,
   BRL_CMD_NXPGRPH /* go down to first line of next paragraph */,
   BRL_CMD_PRPROMPT /* go up to previous command prompt */,
   BRL_CMD_NXPROMPT /* go down to next command prompt */,
