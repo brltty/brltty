@@ -172,7 +172,7 @@ plainTextExtension="txt"
 hypertextExtension="html"
 keyTableExtension="ktb"
 
-keyTableLister="${buildRoot}/Programs/ktbtest"
+keyTableLister="${buildRoot}/Programs/brltty-ktb"
 make -C "${keyTableLister%/*}" -s "${keyTableLister##*/}"
 
 documentTitle="Key Tables"

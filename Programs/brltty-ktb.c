@@ -188,7 +188,7 @@ main (int argc, char *argv[]) {
   {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
-      .applicationName = "ktbtest",
+      .applicationName = "brltty-ktb",
       .argumentsSummary = "key-table"
     };
     PROCESS_OPTIONS(descriptor, argc, argv);

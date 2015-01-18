@@ -17,12 +17,12 @@
 ###############################################################################
 
 all: all-brltty brltty-trtxt$X brltty-ttb$X brltty-ctb$X $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
-everything: all all-brltest all-scrtest all-spktest all-ktbtest tunetest$X $(ALL_API)
+everything: all all-brltest all-scrtest all-spktest all-brltty-ktb tunetest$X $(ALL_API)
 all-brltty: brltty$X $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
 all-spktest: spktest$X $(SPEECH_DRIVERS)
 all-scrtest: scrtest$X $(SCREEN_DRIVERS)
-all-ktbtest: ktbtest$X $(BRAILLE_DRIVERS)
+all-brltty-ktb: brltty-ktb$X $(BRAILLE_DRIVERS)
 all-api: apitest$X $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
 all-xbrlapi: xbrlapi$X
 
@@ -704,13 +704,13 @@ atb_translate.$O:
 
 ###############################################################################
 
-KTBTEST_OBJECTS = ktbtest.$O $(PROGRAM_OBJECTS) ktb_compile.$O ktb_list.$O ktb_cmds.$O ktb_keyboard.$O ttb_translate.$O ttb_compile.$O ttb_native.$O dataarea.$O drivers.$O driver.$O brl_utils.$O brl_driver.$O brl_base.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) $(PREFS_OBJECTS) cmd.$O cmd_queue.$O hidkeys.$O report.$O
+BRLTTY_KTB_OBJECTS = brltty-ktb.$O $(PROGRAM_OBJECTS) ktb_compile.$O ktb_list.$O ktb_cmds.$O ktb_keyboard.$O ttb_translate.$O ttb_compile.$O ttb_native.$O dataarea.$O drivers.$O driver.$O brl_utils.$O brl_driver.$O brl_base.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) $(PREFS_OBJECTS) cmd.$O cmd_queue.$O hidkeys.$O report.$O
 
-ktbtest$X: $(KTBTEST_OBJECTS) $(BRAILLE_DRIVERS)
-	$(CC) $(LDFLAGS) -o $@ $(KTBTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LDLIBS)
+brltty-ktb$X: $(BRLTTY_KTB_OBJECTS) $(BRAILLE_DRIVERS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_KTB_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LDLIBS)
 
-ktbtest.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/ktbtest.c
+brltty-ktb.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-ktb.c
 
 ktb_compile.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ktb_compile.c
@@ -727,16 +727,16 @@ ktb_cmds.$O:
 ktb_keyboard.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ktb_keyboard.c
 
-check-keyboard-tables: all-ktbtest
+check-keyboard-tables: all-brltty-ktb
 	@echo checking keyboard tables
 	set -- $(SRC_TOP)$(TBL_DIR)/$(KEYBOARD_TABLES_SUBDIRECTORY)/*$(KEY_TABLE_EXTENSION) && \
 	for file; do \
 	name=$${file##*/}; \
 	name=$${name%.*}; \
-	./ktbtest$X -D$(BLD_TOP)$(DRV_DIR) -T$(SRC_TOP)$(TBL_DIR) kbd-$$name; \
+	./brltty-ktb$X -D$(BLD_TOP)$(DRV_DIR) -T$(SRC_TOP)$(TBL_DIR) kbd-$$name; \
 	done
 
-check-input-tables: all-ktbtest
+check-input-tables: all-brltty-ktb
 	@echo checking input tables
 	find $(SRC_TOP)$(TBL_DIR)/$(INPUT_TABLES_SUBDIRECTORY) -name '*$(KEY_TABLE_EXTENSION)' -print | \
 	while read file; do \
@@ -744,7 +744,7 @@ check-input-tables: all-ktbtest
 	driver=$${driver##*/}; \
 	name=$${file##*/}; \
 	name=$${name%.*}; \
-	./ktbtest$X -D$(BLD_TOP)$(DRV_DIR) -T$(SRC_TOP)$(TBL_DIR) brl-$$driver-$$name; \
+	./brltty-ktb$X -D$(BLD_TOP)$(DRV_DIR) -T$(SRC_TOP)$(TBL_DIR) brl-$$driver-$$name; \
 	done
 
 ###############################################################################
@@ -937,7 +937,7 @@ install-messages:
 install-manpages: install-man1-directory
 	$(INSTALL_DATA) $(BLD_TOP)$(DOC_DIR)/*.1 $(INSTALL_MAN1_DIRECTORY)
 
-install-documents: install-document-directory ktbtest$X $(BRAILLE_DRIVERS)
+install-documents: install-document-directory brltty-ktb$X $(BRAILLE_DRIVERS)
 	cd $(BLD_TOP)$(DOC_DIR) && $(MAKE) all
 	$(SRC_TOP)mkdocs -o $(INSTALL_DOCUMENT_DIRECTORY) -s $(SRC_TOP) -b $(BLD_TOP) -d $(DOC_DIR) -t $(TBL_DIR)
 

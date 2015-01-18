@@ -106,7 +106,7 @@ logMessage task "configuring build"
 "${sourceDirectory}/cfg-dos" --prefix="${installDirectory}"
 logMessage task "building programs"
 make -s all
-make -s -C Programs ktbtest.exe tunetest.exe
+make -s -C Programs brltty-ktb.exe tunetest.exe
 logMessage task "building documentation"
 make -s -C Documents
 logMessage task "installing files"
@@ -120,7 +120,7 @@ mv brltty-ctb.exe brlctb.exe
 mv brltty-trtxt.exe brltrtxt.exe
 
 cd "${buildDirectory}/Programs"
-installFile ktbtest.exe bin/brlktb.exe
+installFile brltty-ktb.exe bin/brlktb.exe
 installFile tunetest.exe bin/brltune.exe
 
 cd "${sourceDirectory}/DOS"
