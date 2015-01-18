@@ -100,7 +100,23 @@ typedef struct {
   unsigned unconditional:1;
 } DataDirective;
 
-extern int processDirectiveOperand (DataFile *file, const DataDirective *directives, const char *description, void *data);
+typedef struct {
+  const DataDirective *const unsorted;
+  const DataDirective **sorted;
+  const size_t count;
+} DataDirectives;
+
+#define BEGIN_DATA_DIRECTIVE_TABLE \
+  static const DataDirective unsortedDirectives[] = {
+
+#define END_DATA_DIRECTIVE_TABLE }; \
+  static DataDirectives directives = { \
+    .unsorted = unsortedDirectives, \
+    .count = ARRAY_COUNT(unsortedDirectives), \
+    .sorted = NULL \
+  };
+
+extern int processDirectiveOperand (DataFile *file, DataDirectives *directives, const char *description, void *data);
 
 #define DATA_CONDITION_TESTER(name) int name (DataFile *file, const DataOperand *identifier, void *data)
 typedef DATA_CONDITION_TESTER(DataConditionTester);

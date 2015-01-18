@@ -818,16 +818,16 @@ static DATA_OPERANDS_PROCESSOR(processIfNotSetOperands) {
 
 static int
 processConfigurationLine (DataFile *file, void *data) {
-  static const DataDirective directives[] = {
+  BEGIN_DATA_DIRECTIVE_TABLE
     DATA_NESTING_DIRECTIVES,
     DATA_CONDITION_DIRECTIVES,
     DATA_VARIABLE_DIRECTIVES,
     {.name=WS_C("ifset"), .processor=processIfSetOperands},
     {.name=WS_C("ifnotset"), .processor=processIfNotSetOperands},
-    {.name=NULL, .processor=processConfigurationOperands}
-  };
+    {.name=NULL, .processor=processConfigurationOperands},
+  END_DATA_DIRECTIVE_TABLE
 
-  return processDirectiveOperand(file, directives, "configuration file directive", data);
+  return processDirectiveOperand(file, &directives, "configuration file directive", data);
 }
 
 static void

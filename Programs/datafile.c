@@ -967,21 +967,83 @@ testDataCondition (DataFile *file) {
   return 1;
 }
 
+static int
+compareDataDirectiveNames (const wchar_t *name1, const wchar_t *name2) {
+  if (!name1) return name2? -1: 0;
+  if (!name2) return 1;
+  return wcscasecmp(name1, name2);
+}
+
+static int
+sortDataDirectivesByName (const void *element1, const void *element2) {
+  const DataDirective *const *directive1 = element1;
+  const DataDirective *const *directive2 = element2;
+
+  return compareDataDirectiveNames((*directive1)->name, (*directive2)->name);
+}
+
+static int
+searchDataDirectiveByName (const void *target, const void *element) {
+  const wchar_t *name = target;
+  const DataDirective *const *directive = element;
+
+  return compareDataDirectiveNames(name, (*directive)->name);
+}
+
+static const DataDirective *
+findDataDirectiveByName (const DataDirectives *directives, const wchar_t *name) {
+  DataDirective **directive = bsearch(
+    name, directives->sorted, directives->count,
+    sizeof(*directives->sorted), searchDataDirectiveByName
+  );
+
+  return directive? *directive: NULL;
+}
+
 int
-processDirectiveOperand (DataFile *file, const DataDirective *directives, const char *description, void *data) {
+processDirectiveOperand (DataFile *file, DataDirectives *directives, const char *description, void *data) {
   DataOperand name;
 
   if (getDataOperand(file, &name, description)) {
-    const DataDirective *directive = directives;
+    const DataDirective *directive;
 
-    while (directive->name) {
-      if (isKeyword(directive->name, name.characters, name.length)) break;
-      directive += 1;
+    if (!directives->sorted) {
+      if (!(directives->sorted = malloc(ARRAY_SIZE(directives->sorted, directives->count)))) {
+        logMallocError();
+        return 0;
+      }
+
+      {
+        size_t index;
+
+        for (index=0; index<directives->count; index+=1) {
+          directives->sorted[index] = &directives->unsorted[index];
+        }
+      }
+
+      qsort(directives->sorted, directives->count,
+            sizeof(*directives->sorted), sortDataDirectivesByName);
     }
 
-    if (!directive->name) ungetDataCharacters(file, name.length);
-    if (!(directive->unconditional || testDataCondition(file))) return 1;
-    if (directive->processor) return directive->processor(file, data);
+    {
+      wchar_t string[name.length + 1];
+
+      wmemcpy(string, name.characters, name.length);
+      string[name.length] = 0;
+      directive = findDataDirectiveByName(directives, string);
+    }
+
+    if (!directive) {
+      if ((directive = findDataDirectiveByName(directives, NULL))) {
+        ungetDataCharacters(file, name.length);
+      }
+    }
+
+    if (directive) {
+      if (!(directive->unconditional || testDataCondition(file))) return 1;
+      if (directive->processor) return directive->processor(file, data);
+    }
+
     reportDataError(file, "unknown %s: %.*" PRIws,
                     description, name.length, name.characters);
   }

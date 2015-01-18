@@ -401,12 +401,11 @@ static DATA_OPERANDS_PROCESSOR(processContractsOperands) {
 
 static int
 processVerificationLine (DataFile *file, void *data) {
-  static const DataDirective directives[] = {
+  BEGIN_DATA_DIRECTIVE_TABLE
     {.name=WS_C("contracts"), .processor=processContractsOperands},
-    {.name=NULL, .processor=NULL}
-  };
+  END_DATA_DIRECTIVE_TABLE
 
-  return processDirectiveOperand(file, directives, "contraction verification directive", data);
+  return processDirectiveOperand(file, &directives, "contraction verification directive", data);
 }
 
 static ProgramExitStatus

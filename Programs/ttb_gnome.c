@@ -164,17 +164,17 @@ static DATA_OPERANDS_PROCESSOR(processUnicodeCharOperands) {
 
 static int
 processGnomeBrailleLine (DataFile *file, void *data) {
-  const DataDirective *directives;
+  DataDirectives *d;
 
   if (inUcsBlock) {
-    static const DataDirective directiveTable[] = {
+    BEGIN_DATA_DIRECTIVE_TABLE
       {.name=WS_C("UCS-BLOCK"), .processor=processUcsBlockOperands},
-      {.name=NULL, .processor=processUcsCharOperands}
-    };
+      {.name=NULL, .processor=processUcsCharOperands},
+    END_DATA_DIRECTIVE_TABLE
 
-    directives = directiveTable;
+    d = &directives;
   } else {
-    static const DataDirective directiveTable[] = {
+    BEGIN_DATA_DIRECTIVE_TABLE
       {.name=WS_C("ENCODING"), .processor=processEncodingOperands},
   //  {.name=WS_C("NAME"), .processor=processNameOperands},
   //  {.name=WS_C("LOCALES"), .processor=processLocalesOperands},
@@ -185,13 +185,12 @@ processGnomeBrailleLine (DataFile *file, void *data) {
       {.name=WS_C("UCS-CHAR"), .processor=processUcsCharOperands},
       {.name=WS_C("UNICODE-CHAR"), .processor=processUnicodeCharOperands},
   //  {.name=WS_C("UNKNOWN-CHAR"), .processor=processUnknownCharOperands},
-      {.name=NULL, .processor=NULL}
-    };
+    END_DATA_DIRECTIVE_TABLE
 
-    directives = directiveTable;
+    d = &directives;
   }
 
-  return processDirectiveOperand(file, directives, "gnome braille directive", data);
+  return processDirectiveOperand(file, d, "gnome braille directive", data);
 }
 
 TextTableData *

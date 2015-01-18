@@ -134,7 +134,7 @@ static DATA_OPERANDS_PROCESSOR(processInclude) {
 
 static int
 processLibLouisLine (DataFile *file, void *data) {
-  static const DataDirective properties[] = {
+  BEGIN_DATA_DIRECTIVE_TABLE
     {.name=WS_C("space"), .processor=processChar},
     {.name=WS_C("punctuation"), .processor=processChar},
     {.name=WS_C("digit"), .processor=processChar},
@@ -148,10 +148,9 @@ processLibLouisLine (DataFile *file, void *data) {
     {.name=WS_C("decpoint"), .processor=processChar},
     {.name=WS_C("hyphen"), .processor=processChar},
     {.name=WS_C("include"), .processor=processInclude},
-    {.name=NULL, .processor=NULL}
-  };
+  END_DATA_DIRECTIVE_TABLE
 
-  return processDirectiveOperand(file, properties, "lib louis directive", data);
+  return processDirectiveOperand(file, &directives, "lib louis directive", data);
 }
 
 TextTableData *

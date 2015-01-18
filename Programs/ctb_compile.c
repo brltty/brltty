@@ -522,12 +522,12 @@ static DATA_OPERANDS_PROCESSOR(processContractionTableDirective) {
 
 static int
 processContractionTableLine (DataFile *file, void *data) {
-  static const DataDirective directives[] = {
+  BEGIN_DATA_DIRECTIVE_TABLE
     DATA_NESTING_DIRECTIVES,
-    {.name=NULL, .processor=processContractionTableDirective}
-  };
+    {.name=NULL, .processor=processContractionTableDirective},
+  END_DATA_DIRECTIVE_TABLE
 
-  return processDirectiveOperand(file, directives, "contraction table directive", data);
+  return processDirectiveOperand(file, &directives, "contraction table directive", data);
 }
 
 int

@@ -84,14 +84,14 @@ static DATA_OPERANDS_PROCESSOR(processPropertyOperands) {
 
 static int
 processProfileLine (DataFile *file, void *data) {
-  static const DataDirective directives[] = {
+  BEGIN_DATA_DIRECTIVE_TABLE
     DATA_NESTING_DIRECTIVES,
     DATA_CONDITION_DIRECTIVES,
     DATA_VARIABLE_DIRECTIVES,
-    {.name=NULL, .processor=processPropertyOperands}
-  };
+    {.name=NULL, .processor=processPropertyOperands},
+  END_DATA_DIRECTIVE_TABLE
 
-  return processDirectiveOperand(file, directives, "profile directive", data);
+  return processDirectiveOperand(file, &directives, "profile directive", data);
 }
 
 char *
