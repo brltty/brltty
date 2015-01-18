@@ -696,11 +696,26 @@ scrtest.$O:
 
 ###############################################################################
 
+BRLTTY_ATB_OBJECTS = brltty-atb.$O $(PROGRAM_OBJECTS) atb_compile.$O atb_translate.$O dataarea.$O
+
+brltty-atb$X: $(BRLTTY_ATB_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_ATB_OBJECTS) $(LDLIBS)
+
+brltty-atb.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-atb.c
+
 atb_compile.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/atb_compile.c
 
 atb_translate.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/atb_translate.c
+
+check-attributes-tables: brltty-atb$X
+	@echo checking attributes tables
+	set -- $(SRC_TOP)$(TBL_DIR)/$(ATTRIBUTES_TABLES_SUBDIRECTORY)/*$(ATTRIBUTES_TABLE_EXTENSION) && \
+	for file; do \
+	./brltty-atb$X -T$(SRC_TOP)$(TBL_DIR) $${file##*/}; \
+	done
 
 ###############################################################################
 
@@ -847,7 +862,7 @@ check-speech-drivers: brltty speech-drivers
 
 ###############################################################################
 
-check-all: check-text-tables check-contraction-tables check-keyboard-tables check-input-tables check-braille-drivers check-speech-drivers
+check-all: check-text-tables check-attributes-tables check-contraction-tables check-keyboard-tables check-input-tables check-braille-drivers check-speech-drivers
 
 ###############################################################################
 
