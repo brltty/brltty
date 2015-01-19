@@ -83,20 +83,21 @@ checkScreenPointer (void) {
 static void
 highlightBrailleWindowLocation (void) {
   if (prefs.highlightBrailleWindowLocation) {
-    int left = 0;
-    int right;
-    int top = 0;
-    int bottom;
+    int left = ses->winx;
+    int right = left;
 
-    if (prefs.showAttributes) {
-      right = left;
-      bottom = top;
-    } else {
-      right = textCount - 1;
-      bottom = brl.textRows - 1;
+    int top = ses->winy;
+    int bottom = top;
+
+    if (!prefs.showAttributes) {
+      if ((right += textCount) > scr.cols) right = scr.cols;
+      right -= 1;
+
+      if ((bottom += brl.textRows) > scr.rows) bottom = scr.rows;
+      bottom -= 1;
     }
 
-    highlightScreenRegion(ses->winx+left, ses->winx+right, ses->winy+top, ses->winy+bottom);
+    highlightScreenRegion(left, right, top, bottom);
   }
 }
 
