@@ -764,6 +764,13 @@ makePreferencesMenu (void) {
       ITEM(newEnumeratedMenuItem(inputSubmenu, &prefs.brailleDisplayOrientation, &itemName, strings));
       TEST(BrailleDisplayOrientation);
     }
+
+    {
+      NAME(strtext("Keyboard Table"));
+      ITEM(newFilesMenuItem(inputSubmenu, &itemName, opt_tablesDirectory, KEYBOARD_TABLES_SUBDIRECTORY, KEY_TABLE_EXTENSION, opt_keyboardTable, 1));
+      CHANGED(KeyboardTable);
+      SET(keyboardTable);
+    }
   }
 
   {
@@ -1119,13 +1126,6 @@ makePreferencesMenu (void) {
       SET(contractionTable);
     }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
-
-    {
-      NAME(strtext("Keyboard Table"));
-      ITEM(newFilesMenuItem(tablesSubmenu, &itemName, opt_tablesDirectory, KEYBOARD_TABLES_SUBDIRECTORY, KEY_TABLE_EXTENSION, opt_keyboardTable, 1));
-      CHANGED(KeyboardTable);
-      SET(keyboardTable);
-    }
   }
 
   {
