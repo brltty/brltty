@@ -1788,10 +1788,10 @@ insertKey_LinuxScreen (ScreenKey key) {
 typedef struct {
   char subcode;
   struct tiocl_selection selection;
-} PACKED CharacterSelectionArgument;
+} PACKED RegionSelectionArgument;
 
 static int
-selectCharacters (CharacterSelectionArgument *argument) {
+selectRegion (RegionSelectionArgument *argument) {
   if (controlConsole(TIOCLINUX, argument) != -1) return 1;
   if (errno != EINVAL) logSystemError("ioctl[TIOCLINUX]");
   return 0;
@@ -1799,7 +1799,7 @@ selectCharacters (CharacterSelectionArgument *argument) {
 
 static int
 highlightRegion_LinuxScreen (int left, int right, int top, int bottom) {
-  CharacterSelectionArgument argument = {
+  RegionSelectionArgument argument = {
     .subcode = TIOCL_SETSEL,
 
     .selection = {
@@ -1811,12 +1811,12 @@ highlightRegion_LinuxScreen (int left, int right, int top, int bottom) {
     }
   };
 
-  return selectCharacters(&argument);
+  return selectRegion(&argument);
 }
 
 static int
 unhighlightRegion_LinuxScreen (void) {
-  CharacterSelectionArgument argument = {
+  RegionSelectionArgument argument = {
     .subcode = TIOCL_SETSEL,
 
     .selection = {
@@ -1828,7 +1828,7 @@ unhighlightRegion_LinuxScreen (void) {
     }
   };
 
-  return selectCharacters(&argument);
+  return selectRegion(&argument);
 }
 
 static int
