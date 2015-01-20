@@ -28,6 +28,7 @@
 #include <linux/tty.h>
 #include <linux/vt.h>
 #include <linux/kd.h>
+#include <linux/tiocl.h>
 
 #include "log.h"
 #include "report.h"
@@ -1786,44 +1787,48 @@ insertKey_LinuxScreen (ScreenKey key) {
 
 typedef struct {
   char subcode;
-  short xs;
-  short ys;
-  short xe;
-  short ye;
-  short mode;
-} PACKED CharacterSelectionArguments;
+  struct tiocl_selection selection;
+} PACKED CharacterSelectionArgument;
 
 static int
-selectCharacters (CharacterSelectionArguments *arguments) {
-  if (controlConsole(TIOCLINUX, arguments) != -1) return 1;
+selectCharacters (CharacterSelectionArgument *argument) {
+  if (controlConsole(TIOCLINUX, argument) != -1) return 1;
   if (errno != EINVAL) logSystemError("ioctl[TIOCLINUX]");
   return 0;
 }
 
 static int
 highlightRegion_LinuxScreen (int left, int right, int top, int bottom) {
-  CharacterSelectionArguments arguments = {
-    .subcode = 2,
-    .xs = left + 1,
-    .ys = top + 1,
-    .xe = right + 1,
-    .ye = bottom + 1,
-    .mode = 0
+  CharacterSelectionArgument argument = {
+    .subcode = TIOCL_SETSEL,
+
+    .selection = {
+      .xs = left + 1,
+      .ys = top + 1,
+      .xe = right + 1,
+      .ye = bottom + 1,
+      .sel_mode = TIOCL_SELCHAR
+    }
   };
-  return selectCharacters(&arguments);
+
+  return selectCharacters(&argument);
 }
 
 static int
 unhighlightRegion_LinuxScreen (void) {
-  CharacterSelectionArguments arguments = {
-    .subcode = 2,
-    .xs = 0,
-    .ys = 0,
-    .xe = 0,
-    .ye = 0,
-    .mode = 4
+  CharacterSelectionArgument argument = {
+    .subcode = TIOCL_SETSEL,
+
+    .selection = {
+      .xs = 0,
+      .ys = 0,
+      .xe = 0,
+      .ye = 0,
+      .sel_mode = TIOCL_SELCLEAR
+    }
   };
-  return selectCharacters(&arguments);
+
+  return selectCharacters(&argument);
 }
 
 static int
