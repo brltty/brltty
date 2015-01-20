@@ -998,6 +998,44 @@ findDataDirectiveByName (const DataDirectives *directives, const wchar_t *name) 
   return directive? *directive: NULL;
 }
 
+static int
+prepareDataDirectives (DataDirectives *directives) {
+  if (!directives->sorted.table) {
+    static const DataDirective unnamed = {
+      .name = NULL,
+      .processor = NULL
+    };
+
+    directives->unnamed = &unnamed;
+    directives->sorted.count = 0;
+
+    if (!(directives->sorted.table = malloc(ARRAY_SIZE(directives->sorted.table, directives->unsorted.count)))) {
+      logMallocError();
+      return 0;
+    }
+
+    {
+      const DataDirective *directive = directives->unsorted.table;
+      const DataDirective *end = directive + directives->unsorted.count;
+
+      while (directive < end) {
+        if (directive->name) {
+          directives->sorted.table[directives->sorted.count++] = directive;
+        } else {
+          directives->unnamed = directive;
+        }
+
+        directive += 1;
+      }
+    }
+
+    qsort(directives->sorted.table, directives->sorted.count,
+          sizeof(*directives->sorted.table), sortDataDirectivesByName);
+  }
+
+  return 1;
+}
+
 int
 processDirectiveOperand (DataFile *file, DataDirectives *directives, const char *description, void *data) {
   DataOperand name;
@@ -1005,52 +1043,22 @@ processDirectiveOperand (DataFile *file, DataDirectives *directives, const char 
   if (getDataOperand(file, &name, description)) {
     const DataDirective *directive;
 
-    if (!directives->sorted.table) {
-      if (!(directives->sorted.table = malloc(ARRAY_SIZE(directives->sorted.table, directives->unsorted.count)))) {
-        logMallocError();
-        return 0;
-      }
-
-      directives->sorted.count = 0;
-      directives->unnamed = NULL;
-      directive = directives->unsorted.table;
-
-      {
-        const DataDirective *end = directive + directives->unsorted.count;
-
-        while (directive < end) {
-          if (directive->name) {
-            directives->sorted.table[directives->sorted.count++] = directive;
-          } else {
-            directives->unnamed = directive;
-          }
-
-          directive += 1;
-        }
-      }
-
-      qsort(directives->sorted.table, directives->sorted.count,
-            sizeof(*directives->sorted.table), sortDataDirectivesByName);
-    }
+    if (!prepareDataDirectives(directives)) return 0;
 
     {
       wchar_t string[name.length + 1];
 
       wmemcpy(string, name.characters, name.length);
       string[name.length] = 0;
-      directive = findDataDirectiveByName(directives, string);
-    }
 
-    if (!directive) {
-      if ((directive = directives->unnamed)) {
+      if (!(directive = findDataDirectiveByName(directives, string))) {
+        directive = directives->unnamed;
         ungetDataCharacters(file, name.length);
       }
     }
 
-    if (directive) {
-      if (!(directive->unconditional || testDataCondition(file))) return 1;
-      if (directive->processor) return directive->processor(file, data);
-    }
+    if (!(directive->unconditional || testDataCondition(file))) return 1;
+    if (directive->processor) return directive->processor(file, data);
 
     reportDataError(file, "unknown %s: %.*" PRIws,
                     description, name.length, name.characters);
