@@ -271,7 +271,7 @@ test "${GXX}" = "yes" && {
 case "${host_os}"
 in
    linux*|gnu*|kfreebsd*)
-      brltty_prog_cc_sysflags="-D_POSIX_C_SOURCE=2 -D_BSD_SOURCE -D_XOPEN_SOURCE=500 -D_XOPEN_SOURCE_EXTENDED -D_GNU_SOURCE"
+      brltty_prog_cc_sysflags="-D_POSIX_C_SOURCE=2 -D_XOPEN_SOURCE=500 -D_XOPEN_SOURCE_EXTENDED -D_GNU_SOURCE"
       ;;
    solaris*)
       brltty_prog_cc_sysflags="-D_XOPEN_SOURCE=500 -D__EXTENSIONS__"
