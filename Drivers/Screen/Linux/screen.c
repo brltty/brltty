@@ -35,6 +35,7 @@
 #include "async_io.h"
 #include "device.h"
 #include "io_misc.h"
+#include "timing.h"
 #include "parse.h"
 #include "brl_cmds.h"
 #include "kbd_keycodes.h"
@@ -386,6 +387,7 @@ static size_t cacheSize;
 
 static int currentConsoleNumber;
 static int inTextMode;
+static TimePeriod mappingRecalculationTimer;
 
 typedef struct {
   unsigned char rows;
@@ -791,6 +793,7 @@ releaseParameters_LinuxScreen (void) {
 static wchar_t translationTable[0X200];
 static int
 setTranslationTable (int force) {
+  int mappingChanged = 0;
   int sfmChanged = setScreenFontMap(force);
   int vccChanged = (sfmChanged || force)? setVgaCharacterCount(force): 0;
 
@@ -819,10 +822,15 @@ setTranslationTable (int force) {
       }
     }
 
-    return 1;
+    mappingChanged = 1;
   }
 
-  return 0;
+  if (mappingChanged) {
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER), "character mapping changed");
+  }
+
+  restartTimePeriod(&mappingRecalculationTimer);
+  return mappingChanged;
 }
 
 #ifdef HAVE_LINUX_INPUT_H
@@ -877,6 +885,7 @@ construct_LinuxScreen (void) {
 
   currentConsoleNumber = 0;
   inTextMode = 1;
+  startTimePeriod(&mappingRecalculationTimer, 4000);
 
   brailleOfflineListener = NULL;
 
@@ -1036,6 +1045,7 @@ testTextMode (void) {
   if (controlConsole(KDGETMODE, &mode) == -1) {
     logSystemError("ioctl[KDGETMODE]");
   } else if (mode == KD_TEXT) {
+    if (afterTimePeriod(&mappingRecalculationTimer, NULL)) setTranslationTable(0);
     return 1;
   }
 
