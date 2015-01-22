@@ -41,35 +41,30 @@ public class SpeechDriver {
     TextToSpeech.OnInitListener listener = new TextToSpeech.OnInitListener() {
       @Override
       public void onInit (int status) {
-        switch (status) {
-          case TextToSpeech.SUCCESS:
-            Log.d(LOG_TAG, "text to speech engine started");
-            state = State.STARTED;
-            break;
-
-          default:
-            Log.d(LOG_TAG, "unknown text to speech engine startup status: " + status);
-          case TextToSpeech.ERROR:
-            Log.w(LOG_TAG, "text to speech engine failed");
-            state = State.FAILED;
-            break;
-        }
-
         synchronized (this) {
+          switch (status) {
+            case TextToSpeech.SUCCESS:
+              state = state.STARTED;
+              break;
+
+            default:
+              Log.w(LOG_TAG, "unknown text to speech engine startup status: " + status);
+            case TextToSpeech.ERROR:
+              state = state.FAILED;
+              break;
+          }
+
           notify();
         }
       }
     };
 
-    Log.d(LOG_TAG, "starting text to speech engine");
-    state = State.STOPPED;
-
     synchronized (listener) {
-      if (tts == null) {
-        tts = new TextToSpeech(BrailleService.getBrailleService(), listener);
-      }
+      Log.d(LOG_TAG, "starting text to speech engine");
+      state = state.STOPPED;
+      tts = new TextToSpeech(BrailleService.getBrailleService(), listener);
 
-      while (state == State.STOPPED) {
+      while (state == state.STOPPED) {
         try {
           listener.wait();
         } catch (InterruptedException exception) {
@@ -77,11 +72,13 @@ public class SpeechDriver {
       }
     }
 
-    if (state == State.STARTED) {
+    if (state == state.STARTED) {
       parameters.clear();
+      Log.d(LOG_TAG, "text to speech engine started");
       return true;
     }
 
+    Log.w(LOG_TAG, "text to speech engine failed");
     tts = null;
     return false;
   }
@@ -90,7 +87,7 @@ public class SpeechDriver {
     if (tts != null) {
       tts.shutdown();
       tts = null;
-      state = State.STOPPED;
+      state = state.STOPPED;
     }
   }
 
