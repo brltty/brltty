@@ -237,8 +237,13 @@ testMenuItem (const MenuItem *item, int all) {
 }
 
 int
+isMenuItemSettable (const MenuItem *item) {
+  return !!item->setting;
+}
+
+int
 isMenuItemAction (const MenuItem *item) {
-  return !item->setting && item->methods->activateItem;
+  return !!item->methods->activateItem;
 }
 
 int
