@@ -231,7 +231,7 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 #define PRIssize "d"
 
 #elif defined(__ANDROID__)
-#define PRIsize "lu"
+#define PRIsize "u"
 #define PRIssize "ld"
 
 #else /* format for size_t and ssize_t */
