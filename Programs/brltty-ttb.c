@@ -572,6 +572,19 @@ writeCharacter_CPreprocessor (
     return 0;
   if (fprintf(file, "0X%02" PRIX8 ", ", dots) == EOF) return 0;
   if (fprintf(file, "%" PRIX8 ")", isPrimary) == EOF) return 0;
+
+#ifdef HAVE_ICU
+  {
+    char name[0X40];
+    UErrorCode error = U_ZERO_ERROR;
+
+    u_charName(character, U_EXTENDED_CHAR_NAME, name, sizeof(name), &error);
+    if (U_SUCCESS(error)) {
+      if (fprintf(file, " /* %s */", name) == EOF) return 0;
+    }
+  }
+#endif /* HAVE_ICU */
+
   if (fprintf(file, "\n") == EOF) return 0;
   return 1;
 }
