@@ -24,12 +24,16 @@ import android.util.Log;
 
 import android.os.Build;
 import android.view.ViewConfiguration;
+
 import android.accessibilityservice.AccessibilityService;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import android.inputmethodservice.InputMethodService;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.EditorInfo;
+
+import android.view.View;
 import android.view.KeyEvent;
 
 public class InputService extends InputMethodService {
@@ -162,23 +166,202 @@ public class InputService extends InputMethodService {
     return true;
   }
 
+  public static boolean isSystemKeyCode (int code) {
+    switch (code) {
+      case KeyEvent.KEYCODE_HOME:
+      case KeyEvent.KEYCODE_BACK:
+        return true;
+
+      default:
+        return false;
+    }
+  }
+
   @Override
   public boolean onKeyDown (int code, KeyEvent event) {
     logKeyEventReceived(code, true);
-    if (acceptKeyEvent(code, true)) return true;
+
+    if (!isSystemKeyCode(code)) {
+      if (acceptKeyEvent(code, true)) {
+        return true;
+      }
+    }
+
     return super.onKeyDown(code, event);
   }
 
   @Override
   public boolean onKeyUp (int code, KeyEvent event) {
     logKeyEventReceived(code, false);
-    if (acceptKeyEvent(code, false)) return true;
+
+    if (!isSystemKeyCode(code)) {
+      if (acceptKeyEvent(code, false)) {
+        return true;
+      }
+    }
+
     return super.onKeyUp(code, event);
   }
+
+  interface Action {
+    public boolean performAction ();
+  }
+
+  private final static Action settingsAction = new Action() {
+    @Override
+    public boolean performAction () {
+      return BrailleService.getBrailleService().launchSettingsActivity();
+    }
+  };
 
   private static boolean performGlobalAction (int action) {
     return BrailleService.getBrailleService().performGlobalAction(action);
   }
+
+  private final static Action backAction = new Action() {
+    @Override
+    public boolean performAction () {
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+        return performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
+      }
+
+      return false;
+    }
+  };
+
+  private final static Action homeAction = new Action() {
+    @Override
+    public boolean performAction () {
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+        return performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME);
+      }
+
+      return false;
+    }
+  };
+
+  private final static Action notificationsAction = new Action() {
+    @Override
+    public boolean performAction () {
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+        return performGlobalAction(AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS);
+      }
+
+      return false;
+    }
+  };
+
+  private final static Action powerAction = new Action() {
+    @Override
+    public boolean performAction () {
+    /*
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+        return performGlobalAction(AccessibilityService.GLOBAL_ACTION_POWER_DIALOG);
+      }
+    */
+
+      return false;
+    }
+  };
+
+  private final static Action quickAction = new Action() {
+    @Override
+    public boolean performAction () {
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR1)) {
+        return performGlobalAction(AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS);
+      }
+
+      return false;
+    }
+  };
+
+  private final static Action recentAction = new Action() {
+    @Override
+    public boolean performAction () {
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+        return performGlobalAction(AccessibilityService.GLOBAL_ACTION_RECENTS);
+      }
+
+      return false;
+    }
+  };
+
+  private static boolean changeFocus (int direction) {
+Log.d("chg-foc", "check sdk");
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+Log.d("chg-foc", "get root");
+      AccessibilityNodeInfo root = BrailleService.getBrailleService().getRootInActiveWindow();
+
+      if (root != null) {
+Log.d("chg-foc", "get current");
+        AccessibilityNodeInfo current = root.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
+
+        root.recycle();
+        root = null;
+
+        if (current != null) {
+Log.d("chg-foc", "get next");
+          AccessibilityNodeInfo next = current.focusSearch(direction);
+
+          current.recycle();
+          current = null;
+
+          if (next != null) {
+Log.d("chg-foc", "ok");
+            next.recycle();
+            next = null;
+
+            return true;
+          }
+        }
+      }
+    }
+
+Log.d("chg-foc", "failed");
+    return false;
+  }
+
+  private final static Action upAction = new Action() {
+    @Override
+    public boolean performAction () {
+      return changeFocus(View.FOCUS_UP);
+    }
+  };
+
+  private final static Action downAction = new Action() {
+    @Override
+    public boolean performAction () {
+      return changeFocus(View.FOCUS_DOWN);
+    }
+  };
+
+  private final static Action leftAction = new Action() {
+    @Override
+    public boolean performAction () {
+      return changeFocus(View.FOCUS_LEFT);
+    }
+  };
+
+  private final static Action rightAction = new Action() {
+    @Override
+    public boolean performAction () {
+      return changeFocus(View.FOCUS_RIGHT);
+    }
+  };
+
+  private final static Action backwardAction = new Action() {
+    @Override
+    public boolean performAction () {
+      return changeFocus(View.FOCUS_BACKWARD);
+    }
+  };
+
+  private final static Action forwardAction = new Action() {
+    @Override
+    public boolean performAction () {
+      return changeFocus(View.FOCUS_FORWARD);
+    }
+  };
 
   public static InputMethodInfo getInputMethodInfo (Class classObject) {
     String className = classObject.getName();
@@ -384,53 +567,26 @@ public class InputService extends InputMethodService {
     return false;
   }
 
-  private static final int[] functionKeyMap = new int[] {
-    KeyEvent.KEYCODE_HOME,
-    KeyEvent.KEYCODE_BACK,
-    KeyEvent.KEYCODE_NOTIFICATION,
-    KeyEvent.KEYCODE_APP_SWITCH,
-    KeyEvent.KEYCODE_SETTINGS
+  private final static Action[] functionKeyActions = new Action[] {
+    homeAction,
+    backAction,
+    notificationsAction,
+    recentAction,
+    settingsAction,
+    backwardAction,
+    forwardAction,
+    leftAction,
+    rightAction,
+    upAction,
+    downAction
   };
 
   public static boolean inputKeyFunction (int key) {
     if (key < 0) return false;
-    if (key >= functionKeyMap.length) return false;
+    if (key >= functionKeyActions.length) return false;
 
-    int code = functionKeyMap[key];
-    if (code == KeyEvent.KEYCODE_UNKNOWN) return false;
-
-    switch (code) {
-      case KeyEvent.KEYCODE_HOME:
-        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-          return performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME);
-        }
-        break;
-
-      case KeyEvent.KEYCODE_BACK:
-        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-          return performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
-        }
-        break;
-
-      case KeyEvent.KEYCODE_NOTIFICATION:
-        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-          return performGlobalAction(AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS);
-        }
-        break;
-
-      case KeyEvent.KEYCODE_APP_SWITCH:
-        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-          return performGlobalAction(AccessibilityService.GLOBAL_ACTION_RECENTS);
-        }
-        break;
-
-      case KeyEvent.KEYCODE_SETTINGS:
-        return BrailleService.getBrailleService().launchSettingsActivity();
-
-      default:
-        break;
-    }
-
-    return inputKey(code);
+    Action action = functionKeyActions[key];
+    if (action == null) return false;
+    return action.performAction();
   }
 }
