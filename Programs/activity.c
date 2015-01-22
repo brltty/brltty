@@ -135,6 +135,18 @@ logActivityActionRequest (ActivityObject *activity, const char *action) {
 }
 
 static void
+logActivityActionFailed (ActivityObject *activity, const char *action) {
+  logMessage(LOG_WARNING, "activity action failed: %s: %s",
+             activity->methods->activityName, action);
+}
+
+static void
+logActivityActionTimeout (ActivityObject *activity, const char *action) {
+  logMessage(LOG_WARNING, "activity action timeout: %s: %s",
+             activity->methods->activityName, action);
+}
+
+static void
 cancelActivityStartAlarm (ActivityObject *activity) {
   asyncCancelRequest(activity->startAlarm);
   activity->startAlarm = NULL;
@@ -149,7 +161,13 @@ ASYNC_ALARM_CALLBACK(handleActivityStartAlarm) {
 
   setActivityState(activity, ACT_STARTING);
   started = !start || start(activity->data);
-  if (started) cancelActivityStartAlarm(activity);
+
+  if (started) {
+    cancelActivityStartAlarm(activity);
+  } else {
+    logActivityActionFailed(activity, "start");
+  }
+
   newState = activity->state;
   setActivityState(activity, (started? ACT_STARTED: oldState));
 
@@ -363,7 +381,10 @@ awaitActivityStarted (ActivityObject *activity) {
   int timeout = activity->methods->startTimeout;
 
   if (!timeout) timeout = DEFAULT_ACTIVITY_START_TIMEOUT;
-  return asyncAwaitCondition(timeout, testActivityStarted, activity);
+  if (asyncAwaitCondition(timeout, testActivityStarted, activity)) return 1;
+
+  logActivityActionTimeout(activity, "start");
+  return 0;
 }
 
 ASYNC_CONDITION_TESTER(testActivityStopped) {
@@ -377,5 +398,8 @@ awaitActivityStopped (ActivityObject *activity) {
   int timeout = activity->methods->stopTimeout;
 
   if (!timeout) timeout = DEFAULT_ACTIVITY_STOP_TIMEOUT;
-  return asyncAwaitCondition(timeout, testActivityStopped, activity);
+  if (asyncAwaitCondition(timeout, testActivityStopped, activity)) return 1;
+
+  logActivityActionTimeout(activity, "stop");
+  return 0;
 }
