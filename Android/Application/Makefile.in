@@ -16,7 +16,7 @@ tables-directory:
 tables: tables-directory
 	install=`pwd`/$(ANDROID_TABLES_DIRECTORY) && \
 	cd $(SRC_TOP)$(TBL_DIR) && \
-	find . -type f -print | \
+	find . -type f -name '?*.?*' -print | \
 	while read file; do \
 	source=`dirname $$file` && \
 	target=$$install/$$source && \
