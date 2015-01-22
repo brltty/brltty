@@ -969,7 +969,7 @@ testDataCondition (DataFile *file) {
 
 static int
 compareDataDirectiveNames (const wchar_t *name1, const wchar_t *name2) {
-  return wcscasecmp(name1, name2);
+  return compareKeywords(name1, name2);
 }
 
 static int
