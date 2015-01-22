@@ -77,7 +77,7 @@ newRenderedMenuItem (Menu *menu) {
     STR_BEGIN(labelString, ARRAY_COUNT(labelString));
     STR_PRINTF("%s", title);
     if (*subtitle) STR_PRINTF(" %s", subtitle);
-    if (isMenuItemSettable(item)) STR_PRINTF(":");
+    if (!isMenuItemAction(item)) STR_PRINTF(":");
     STR_PRINTF(" ");
     labelLength = STR_LENGTH;
     STR_END;
