@@ -25,37 +25,44 @@
 #include "spk_driver.h"
 #include "system_java.h"
 
-static JNIEnv *env = NULL;
-static jclass speechDriverClass = NULL;
+struct SpeechDataStruct {
+  JNIEnv *env;
+  jclass speechDriverClass;
+  jmethodID startMethod;
+  jmethodID stopMethod;
+  jmethodID sayMethod;
+  jmethodID muteMethod;
+  jmethodID setVolumeMethod;
+  jmethodID setRateMethod;
+  jmethodID setPitchMethod;
+};
 
 static int
-findSpeechDriverClass (void) {
-  return findJavaClass(env, &speechDriverClass, "org/a11y/brltty/android/SpeechDriver");
+findSpeechDriverClass (volatile SpeechSynthesizer *spk) {
+  return findJavaClass(spk->driver.data->env, &spk->driver.data->speechDriverClass, "org/a11y/brltty/android/SpeechDriver");
 }
 
 static void
 spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
-  if (findSpeechDriverClass()) {
-    static jmethodID method = 0;
-
-    if (findJavaStaticMethod(env, &method, speechDriverClass, "say",
+  if (findSpeechDriverClass(spk)) {
+    if (findJavaStaticMethod(spk->driver.data->env, &spk->driver.data->sayMethod, spk->driver.data->speechDriverClass, "say",
                              JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                              JAVA_SIG_OBJECT(java/lang/String) // text
                                             ))) {
-      jstring string = (*env)->NewStringUTF(env, (const char *)buffer);
+      jstring string = (*spk->driver.data->env)->NewStringUTF(spk->driver.data->env, (const char *)buffer);
       if (string) {
-        jboolean result = (*env)->CallStaticBooleanMethod(env, speechDriverClass, method, string);
+        jboolean result = (*spk->driver.data->env)->CallStaticBooleanMethod(spk->driver.data->env, spk->driver.data->speechDriverClass, spk->driver.data->sayMethod, string);
 
-        (*env)->DeleteLocalRef(env, string);
+        (*spk->driver.data->env)->DeleteLocalRef(spk->driver.data->env, string);
         string = NULL;
 
-        if (!clearJavaException(env, 1)) {
+        if (!clearJavaException(spk->driver.data->env, 1)) {
           if (result == JNI_TRUE) {
           }
         }
       } else {
         logMallocError();
-        clearJavaException(env, 0);
+        clearJavaException(spk->driver.data->env, 0);
       }
     }
   }
@@ -63,15 +70,13 @@ spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t le
 
 static void
 spk_mute (volatile SpeechSynthesizer *spk) {
-  if (findSpeechDriverClass()) {
-    static jmethodID method = 0;
-
-    if (findJavaStaticMethod(env, &method, speechDriverClass, "mute",
+  if (findSpeechDriverClass(spk)) {
+    if (findJavaStaticMethod(spk->driver.data->env, &spk->driver.data->muteMethod, spk->driver.data->speechDriverClass, "mute",
                              JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                             ))) {
-      jboolean result = (*env)->CallStaticBooleanMethod(env, speechDriverClass, method);
+      jboolean result = (*spk->driver.data->env)->CallStaticBooleanMethod(spk->driver.data->env, spk->driver.data->speechDriverClass, spk->driver.data->muteMethod);
 
-      if (!clearJavaException(env, 1)) {
+      if (!clearJavaException(spk->driver.data->env, 1)) {
         if (result == JNI_TRUE) {
         }
       }
@@ -81,16 +86,14 @@ spk_mute (volatile SpeechSynthesizer *spk) {
 
 static void
 spk_setVolume (volatile SpeechSynthesizer *spk, unsigned char setting) {
-  if (findSpeechDriverClass()) {
-    static jmethodID method = 0;
-
-    if (findJavaStaticMethod(env, &method, speechDriverClass, "setVolume",
+  if (findSpeechDriverClass(spk)) {
+    if (findJavaStaticMethod(spk->driver.data->env, &spk->driver.data->setVolumeMethod, spk->driver.data->speechDriverClass, "setVolume",
                              JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                              JAVA_SIG_FLOAT // volume
                                             ))) {
-      jboolean result = (*env)->CallStaticBooleanMethod(env, speechDriverClass, method, getFloatSpeechVolume(setting));
+      jboolean result = (*spk->driver.data->env)->CallStaticBooleanMethod(spk->driver.data->env, spk->driver.data->speechDriverClass, spk->driver.data->setVolumeMethod, getFloatSpeechVolume(setting));
 
-      if (!clearJavaException(env, 1)) {
+      if (!clearJavaException(spk->driver.data->env, 1)) {
         if (result == JNI_TRUE) {
         }
       }
@@ -100,16 +103,14 @@ spk_setVolume (volatile SpeechSynthesizer *spk, unsigned char setting) {
 
 static void
 spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting) {
-  if (findSpeechDriverClass()) {
-    static jmethodID method = 0;
-
-    if (findJavaStaticMethod(env, &method, speechDriverClass, "setRate",
+  if (findSpeechDriverClass(spk)) {
+    if (findJavaStaticMethod(spk->driver.data->env, &spk->driver.data->setRateMethod, spk->driver.data->speechDriverClass, "setRate",
                              JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                              JAVA_SIG_FLOAT // rate
                                             ))) {
-      jboolean result = (*env)->CallStaticBooleanMethod(env, speechDriverClass, method, getFloatSpeechRate(setting));
+      jboolean result = (*spk->driver.data->env)->CallStaticBooleanMethod(spk->driver.data->env, spk->driver.data->speechDriverClass, spk->driver.data->setRateMethod, getFloatSpeechRate(setting));
 
-      if (!clearJavaException(env, 1)) {
+      if (!clearJavaException(spk->driver.data->env, 1)) {
         if (result == JNI_TRUE) {
         }
       }
@@ -119,16 +120,14 @@ spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting) {
 
 static void
 spk_setPitch (volatile SpeechSynthesizer *spk, unsigned char setting) {
-  if (findSpeechDriverClass()) {
-    static jmethodID method = 0;
-
-    if (findJavaStaticMethod(env, &method, speechDriverClass, "setPitch",
+  if (findSpeechDriverClass(spk)) {
+    if (findJavaStaticMethod(spk->driver.data->env, &spk->driver.data->setPitchMethod, spk->driver.data->speechDriverClass, "setPitch",
                              JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                              JAVA_SIG_FLOAT // pitch
                                             ))) {
-      jboolean result = (*env)->CallStaticBooleanMethod(env, speechDriverClass, method, getFloatSpeechPitch(setting));
+      jboolean result = (*spk->driver.data->env)->CallStaticBooleanMethod(spk->driver.data->env, spk->driver.data->speechDriverClass, spk->driver.data->setPitchMethod, getFloatSpeechPitch(setting));
 
-      if (!clearJavaException(env, 1)) {
+      if (!clearJavaException(spk->driver.data->env, 1)) {
         if (result == JNI_TRUE) {
         }
       }
@@ -138,26 +137,39 @@ spk_setPitch (volatile SpeechSynthesizer *spk, unsigned char setting) {
 
 static int
 spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
-  env = getJavaNativeInterface();
+  if ((spk->driver.data = malloc(sizeof(*spk->driver.data)))) {
+    memset(spk->driver.data, 0, sizeof(*spk->driver.data));
+    spk->driver.data->env = getJavaNativeInterface();
+    spk->driver.data->speechDriverClass = NULL;
+    spk->driver.data->startMethod = 0;
+    spk->driver.data->stopMethod = 0;
+    spk->driver.data->sayMethod = 0;
+    spk->driver.data->muteMethod = 0;
+    spk->driver.data->setVolumeMethod = 0;
+    spk->driver.data->setRateMethod = 0;
+    spk->driver.data->setPitchMethod = 0;
 
-  spk->setVolume = spk_setVolume;;
-  spk->setRate = spk_setRate;;
-  spk->setPitch = spk_setPitch;;
+    spk->setVolume = spk_setVolume;
+    spk->setRate = spk_setRate;
+    spk->setPitch = spk_setPitch;
 
-  if (findSpeechDriverClass()) {
-    static jmethodID method = 0;
+    if (findSpeechDriverClass(spk)) {
+      if (findJavaStaticMethod(spk->driver.data->env, &spk->driver.data->startMethod, spk->driver.data->speechDriverClass, "start",
+                               JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                                              ))) {
+        jboolean result = (*spk->driver.data->env)->CallStaticBooleanMethod(spk->driver.data->env, spk->driver.data->speechDriverClass, spk->driver.data->startMethod);
 
-    if (findJavaStaticMethod(env, &method, speechDriverClass, "start",
-                             JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
-                                            ))) {
-      jboolean result = (*env)->CallStaticBooleanMethod(env, speechDriverClass, method);
-
-      if (!clearJavaException(env, 1)) {
-        if (result == JNI_TRUE) {
-          return 1;
+        if (!clearJavaException(spk->driver.data->env, 1)) {
+          if (result == JNI_TRUE) {
+            return 1;
+          }
         }
       }
     }
+
+    free(spk->driver.data);
+  } else {
+    logMallocError();
   }
 
   return 0;
@@ -165,14 +177,15 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
 
 static void
 spk_destruct (volatile SpeechSynthesizer *spk) {
-  if (findSpeechDriverClass()) {
-    static jmethodID method = 0;
-
-    if (findJavaStaticMethod(env, &method, speechDriverClass, "stop",
+  if (findSpeechDriverClass(spk)) {
+    if (findJavaStaticMethod(spk->driver.data->env, &spk->driver.data->stopMethod, spk->driver.data->speechDriverClass, "stop",
                              JAVA_SIG_METHOD(JAVA_SIG_VOID,
                                             ))) {
-      (*env)->CallStaticVoidMethod(env, speechDriverClass, method);
-      clearJavaException(env, 1);
+      (*spk->driver.data->env)->CallStaticVoidMethod(spk->driver.data->env, spk->driver.data->speechDriverClass, spk->driver.data->stopMethod);
+      clearJavaException(spk->driver.data->env, 1);
     }
   }
+
+  free(spk->driver.data);
+  spk->driver.data = NULL;
 }
