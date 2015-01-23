@@ -24,6 +24,8 @@
 #include "log.h"
 #include "thread.h"
 #include "async_signal.h"
+#include "async_event.h"
+#include "async_wait.h"
 
 #undef HAVE_THREAD_NAMES
 
@@ -134,6 +136,73 @@ createThread (
 #endif /* ASYNC_CAN_BLOCK_SIGNALS */
 
   return create.error;
+}
+
+typedef struct {
+  ThreadFunction *const function;
+  void *const argument;
+
+  AsyncEvent *event;
+  unsigned returned:1;
+} CallThreadFunctionData;
+
+THREAD_FUNCTION(runThreadFunction) {
+  CallThreadFunctionData *ctf = argument;
+  void *result = ctf->function? ctf->function(ctf->argument): NULL;
+
+  asyncSignalEvent(ctf->event, NULL);
+  return result;
+}
+
+ASYNC_EVENT_CALLBACK(handleThreadFunctionReturned) {
+  CallThreadFunctionData *ctf = parameters->eventData;
+
+  ctf->returned = 1;
+}
+
+ASYNC_CONDITION_TESTER(testThreadFunctionReturned) {
+  CallThreadFunctionData *ctf = data;
+
+  return ctf->returned;
+}
+
+int
+callThreadFunction (
+  const char *name, ThreadFunction *function,
+  void *argument, void **result
+) {
+  int called = 0;
+
+  CallThreadFunctionData ctf = {
+    .function = function,
+    .argument = argument,
+
+    .returned = 0
+  };
+
+  if ((ctf.event = asyncNewEvent(handleThreadFunctionReturned, &ctf))) {
+    pthread_t thread;
+    int error = createThread(name, &thread, NULL, runThreadFunction, &ctf);
+
+    if (!error) {
+      asyncWaitFor(testThreadFunctionReturned, &ctf);
+
+      {
+        void *r;
+
+        if (!result) result = &r;
+        pthread_join(thread, result);
+      }
+
+      called = 1;
+    } else {
+      errno = error;
+    }
+
+    asyncDiscardEvent(ctf.event);
+  }
+
+  return called;
 }
 
 int

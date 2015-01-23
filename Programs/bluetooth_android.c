@@ -25,8 +25,6 @@
 #include "log.h"
 #include "io_misc.h"
 #include "thread.h"
-#include "async_wait.h"
-#include "async_event.h"
 #include "system_java.h"
 
 struct BluetoothConnectionExtensionStruct {
@@ -121,19 +119,12 @@ bthReleaseConnectionExtension (BluetoothConnectionExtension *bcx) {
   free(bcx);
 }
 
-typedef enum {
-  OBC_WAITING,
-  OBC_SUCCESS,
-  OBC_FAILURE
-} OpenBluetoothConnectionState;
-
 typedef struct {
   BluetoothConnectionExtension *const bcx;
   uint8_t const channel;
   int const timeout;
 
-  AsyncEvent *event;
-  OpenBluetoothConnectionState state;
+  int error;
 } OpenBluetoothConnectionData;
 
 THREAD_FUNCTION(runOpenBluetoothConnection) {
@@ -154,10 +145,12 @@ THREAD_FUNCTION(runOpenBluetoothConnection) {
 
           if (!clearJavaException(env, 1)) {
             if (result == JNI_TRUE) {
-              obc->state = OBC_SUCCESS;
+              obc->error = 0;
               goto done;
             }
           }
+
+          errno = EIO;
         }
       }
 
@@ -168,63 +161,27 @@ THREAD_FUNCTION(runOpenBluetoothConnection) {
     }
   }
 
-  obc->state = OBC_FAILURE;
+  obc->error = errno;
 done:
-  asyncSignalEvent(obc->event, NULL);
   return NULL;
-}
-
-ASYNC_EVENT_CALLBACK(handleOpenBluetoothConnectionEvent) {
-}
-
-ASYNC_CONDITION_TESTER(testOpenBluetoothConnection) {
-  const OpenBluetoothConnectionData *obc = data;
-
-  return obc->state != OBC_WAITING;
 }
 
 int
 bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout) {
-  int opened = 0;
-
   OpenBluetoothConnectionData obc = {
     .bcx = bcx,
     .channel = channel,
     .timeout = timeout,
 
-    .event = NULL,
-    .state = OBC_WAITING
+    .error = EIO
   };
 
-  if ((obc.event = asyncNewEvent(handleOpenBluetoothConnectionEvent, &obc))) {
-    pthread_t threadIdentifier;
-    int openError = createThread("bluetooth-open",
-                                 &threadIdentifier, NULL,
-                                 runOpenBluetoothConnection, &obc);
-
-    if (!openError) {
-      asyncWaitFor(testOpenBluetoothConnection, &obc);
-
-      {
-        void *result;
-
-        pthread_join(threadIdentifier, &result);
-      }
-
-      if (obc.state == OBC_SUCCESS) {
-        opened = 1;
-      } else {
-        errno = EIO;
-      }
-    } else {
-      logMessage(LOG_CATEGORY(BLUETOOTH_IO), "Bluetooth connect thread creation error: %s", strerror(openError));
-      errno = openError;
-    }
-
-    asyncDiscardEvent(obc.event);
+  if (callThreadFunction("bluetooth-open", runOpenBluetoothConnection, &obc, NULL)) {
+    if (!obc.error) return 1;
+    errno = obc.error;
   }
 
-  return opened;
+  return 0;
 }
 
 int

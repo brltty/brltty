@@ -35,6 +35,11 @@ extern int createThread (
   ThreadFunction *function, void *argument
 );
 
+extern int callThreadFunction (
+  const char *name, ThreadFunction *function,
+  void *argument, void **result
+);
+
 extern int lockMutex (pthread_mutex_t *mutex);
 extern int unlockMutex (pthread_mutex_t *mutex);
 #endif /* GOT_PTHREADS */
