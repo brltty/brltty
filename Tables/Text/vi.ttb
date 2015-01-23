@@ -46,7 +46,7 @@ char \x2D	(  3  6  )  # 2D ⠤ - [HYPHEN-MINUS]
 char \x2E	( 2  56  )  # 2E ⠲ . [FULL STOP]
 char \x2F	(  34    )  # 2F ⠌ / [SOLIDUS]
 
-include num-nemeth-dot8.tti
+include num-nemd8.tti
 
 char \x3A	( 2  5   )  # 3A ⠒ : [COLON]
 char \x3B	( 23     )  # 3B ⠆ ; [SEMICOLON]
