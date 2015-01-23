@@ -190,7 +190,7 @@ ensureFileExtension (const char *path, const char *extension) {
   int count = 0;
 
   strings[count++] = path;
-  if (!hasFileExtension(path, extension)) strings[count++] = extension;
+  if (!locatePathExtension(path)) strings[count++] = extension;
   return joinStrings(strings, count);
 }
 
