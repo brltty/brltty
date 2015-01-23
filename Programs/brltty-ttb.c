@@ -482,12 +482,6 @@ error:
   return 0;
 }
 
-static TextTableData *
-readTable_XCompose (const char *path, FILE *file, const void *data) {
-  logMessage(LOG_ERR, "reading XCompose format not supported");
-  return NULL;
-}
-
 static int
 writeCharacter_XCompose (
   FILE *file, wchar_t character, unsigned char dots,
@@ -545,12 +539,6 @@ error:
   return 0;
 }
 
-static TextTableData *
-readTable_JAWS (const char *path, FILE *file, const void *data) {
-  logMessage(LOG_ERR, "reading JAWS format not supported");
-  return NULL;
-}
-
 static int
 writeCharacter_JAWS (
   FILE *file, wchar_t character, unsigned char dots,
@@ -575,12 +563,6 @@ writeTable_JAWS (
   }
 
   return 0;
-}
-
-static TextTableData *
-readTable_CPreprocessor (const char *path, FILE *file, const void *data) {
-  logMessage(LOG_ERR, "reading C Preprocessor format not supported");
-  return NULL;
 }
 
 static int
@@ -628,20 +610,48 @@ typedef struct {
 } FormatEntry;
 
 static const FormatEntry formatEntries[] = {
-  {"ttb", readTable_native, writeTable_native, NULL},
-  {"a2b", readTable_binary, writeTable_binary, &dots12345678},
-  {"sbl", readTable_binary, writeTable_binary, &dots14253678},
+  { .name = "ttb",
+    .read = readTable_native,
+    .write = writeTable_native,
+  },
+
+  { .name = "a2b",
+    .read = readTable_binary,
+    .write = writeTable_binary,
+    .data = &dots12345678,
+  },
+
+  { .name = "sbl",
+    .read = readTable_binary,
+    .write = writeTable_binary,
+    .data = &dots14253678,
+  },
 
 #ifdef HAVE_ICONV_H
-  {"gnb", readTable_gnome, writeTable_gnome, NULL},
+  { .name = "gnb",
+    .read = readTable_gnome,
+    .write = writeTable_gnome,
+  },
 #endif /* HAVE_ICONV_H */
 
-  {"ctb", readTable_libLouis, writeTable_libLouis, NULL},
-  {"XCompose", readTable_XCompose, writeTable_XCompose, NULL},
-  {"jbt", readTable_JAWS, writeTable_JAWS, NULL},
-  {"cpp", readTable_CPreprocessor, writeTable_CPreprocessor, NULL},
+  { .name = "ctb",
+    .read = readTable_libLouis,
+    .write = writeTable_libLouis,
+  },
 
-  {NULL}
+  { .name = "XCompose",
+    .write = writeTable_XCompose,
+  },
+
+  { .name = "jbt",
+    .write = writeTable_JAWS,
+  },
+
+  { .name = "cpp",
+    .write = writeTable_CPreprocessor,
+  },
+
+  { .name = NULL }
 };
 
 static const FormatEntry *
@@ -703,6 +713,13 @@ openTable (const char **file, const char *mode, const char *directory, FILE *std
   }
 }
 
+static TextTableData *
+readTable (const char *path, FILE *file, const FormatEntry *fmt) {
+  if (fmt->read) return fmt->read(path, file, fmt->data);
+  logMessage(LOG_ERR, "reading not supported: %s", fmt->name);
+  return NULL;
+}
+
 static ProgramExitStatus
 convertTable (void) {
   ProgramExitStatus exitStatus;
@@ -711,7 +728,7 @@ convertTable (void) {
   if (inputFile) {
     TextTableData *ttd;
 
-    if ((ttd = inputFormat->read(inputPath, inputFile, inputFormat->data))) {
+    if ((ttd = readTable(inputPath, inputFile, inputFormat))) {
       if (outputPath) {
         FILE *outputFile = openTable(&outputPath, "w", NULL, stdout, standardOutputName);
 
@@ -1836,7 +1853,7 @@ editTable (void) {
     FILE *inputFile = openTable(&inputPath, "r", opt_tablesDirectory, NULL, NULL);
 
     if (inputFile) {
-      if ((etd.ttd = inputFormat->read(inputPath, inputFile, inputFormat->data))) {
+      if ((etd.ttd = readTable(inputPath, inputFile, inputFormat))) {
         exitStatus = PROG_EXIT_SUCCESS;
       } else {
         exitStatus = PROG_EXIT_FATAL;
