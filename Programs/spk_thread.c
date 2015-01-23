@@ -807,7 +807,7 @@ newSpeechDriverThread (
         pthread_t threadIdentifier;
         int createError = createThread("speech-driver",
                                        &threadIdentifier, NULL,
-                                            runSpeechDriverThread, (void *)sdt);
+                                       runSpeechDriverThread, (void *)sdt);
 
         if (!createError) {
           sdt->threadIdentifier = threadIdentifier;
