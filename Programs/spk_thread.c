@@ -748,11 +748,7 @@ THREAD_FUNCTION(runSpeechDriverThread) {
   if ((sdt->requestEvent = asyncNewEvent(handleSpeechRequestEvent, (void *)sdt))) {
     if (startSpeechDriver(sdt)) {
       setThreadReady(sdt);
-
-      while (!asyncAwaitCondition(SPEECH_REQUEST_WAIT_DURATION,
-                                  testSpeechDriverThreadStopping, (void *)sdt)) {
-      }
-
+      asyncWaitFor(testSpeechDriverThreadStopping, (void *)sdt);
       stopSpeechDriver(sdt);
     } else {
       logMessage(LOG_CATEGORY(SPEECH_EVENTS), "driver construction failure");

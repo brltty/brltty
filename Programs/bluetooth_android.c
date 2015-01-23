@@ -203,7 +203,7 @@ bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout)
                                  runOpenBluetoothConnection, &obc);
 
     if (!openError) {
-      asyncAwaitCondition(1000000, testOpenBluetoothConnection, &obc);
+      asyncWaitFor(testOpenBluetoothConnection, &obc);
 
       {
         void *result;

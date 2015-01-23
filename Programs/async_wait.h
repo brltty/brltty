@@ -30,6 +30,7 @@ typedef ASYNC_CONDITION_TESTER(AsyncConditionTester);
 
 extern int asyncAwaitCondition (int timeout, AsyncConditionTester *testCondition, void *data);
 extern void asyncWait (int duration);
+extern void asyncWaitFor (AsyncConditionTester *testCondition, void *data);
 
 #ifdef __cplusplus
 }

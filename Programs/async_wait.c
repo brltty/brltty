@@ -159,3 +159,8 @@ void
 asyncWait (int duration) {
   asyncAwaitCondition(duration, NULL, NULL);
 }
+
+void
+asyncWaitFor (AsyncConditionTester *testCondition, void *data) {
+  while (!asyncAwaitCondition(1000000, testCondition, data));
+}
