@@ -140,6 +140,7 @@ static int
 spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
   if ((spk->driver.data = malloc(sizeof(*spk->driver.data)))) {
     memset(spk->driver.data, 0, sizeof(*spk->driver.data));
+
     spk->driver.data->env = getJavaNativeInterface();
     spk->driver.data->driverClass = NULL;
     spk->driver.data->startMethod = 0;
@@ -154,14 +155,16 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
     spk->setRate = spk_setRate;
     spk->setPitch = spk_setPitch;
 
-    if (findDriverMethod(spk, &spk->driver.data->startMethod, "start",
-                         JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
-                                        ))) {
-      jboolean result = (*spk->driver.data->env)->CallStaticBooleanMethod(spk->driver.data->env, spk->driver.data->driverClass, spk->driver.data->startMethod);
+    if (spk->driver.data->env) {
+      if (findDriverMethod(spk, &spk->driver.data->startMethod, "start",
+                           JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                                          ))) {
+        jboolean result = (*spk->driver.data->env)->CallStaticBooleanMethod(spk->driver.data->env, spk->driver.data->driverClass, spk->driver.data->startMethod);
 
-      if (!clearJavaException(spk->driver.data->env, 1)) {
-        if (result == JNI_TRUE) {
-          return 1;
+        if (!clearJavaException(spk->driver.data->env, 1)) {
+          if (result == JNI_TRUE) {
+            return 1;
+          }
         }
       }
     }

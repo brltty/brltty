@@ -135,32 +135,34 @@ typedef struct {
 
 THREAD_FUNCTION(runOpenBluetoothConnection) {
   OpenBluetoothConnectionData *obc = argument;
-  JNIEnv *env = getJavaNativeInterface();
+  JNIEnv *env;
 
-  if (pipe(obc->bcx->inputPipe) != -1) {
-    if (setBlockingIo(obc->bcx->inputPipe[0], 0)) {
-      if (findJavaInstanceMethod(env, &obc->bcx->openMethod, obc->bcx->connectionClass, "open",
-                                 JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
-                                                 JAVA_SIG_INT // inputPipe
-                                                 JAVA_SIG_INT // channel
-                                                 JAVA_SIG_BOOLEAN // secure
-                                                ))) {
-        jboolean result = (*env)->CallBooleanMethod(env, obc->bcx->connection, obc->bcx->openMethod,
-                                                    obc->bcx->inputPipe[1], obc->channel, JNI_FALSE);
+  if ((env = getJavaNativeInterface())) {
+    if (pipe(obc->bcx->inputPipe) != -1) {
+      if (setBlockingIo(obc->bcx->inputPipe[0], 0)) {
+        if (findJavaInstanceMethod(env, &obc->bcx->openMethod, obc->bcx->connectionClass, "open",
+                                   JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                                                   JAVA_SIG_INT // inputPipe
+                                                   JAVA_SIG_INT // channel
+                                                   JAVA_SIG_BOOLEAN // secure
+                                                  ))) {
+          jboolean result = (*env)->CallBooleanMethod(env, obc->bcx->connection, obc->bcx->openMethod,
+                                                      obc->bcx->inputPipe[1], obc->channel, JNI_FALSE);
 
-        if (!clearJavaException(env, 1)) {
-          if (result == JNI_TRUE) {
-            obc->state = OBC_SUCCESS;
-            goto done;
+          if (!clearJavaException(env, 1)) {
+            if (result == JNI_TRUE) {
+              obc->state = OBC_SUCCESS;
+              goto done;
+            }
           }
         }
       }
-    }
 
-    close(obc->bcx->inputPipe[0]);
-    close(obc->bcx->inputPipe[1]);
-  } else {
-    logSystemError("pipe");
+      close(obc->bcx->inputPipe[0]);
+      close(obc->bcx->inputPipe[1]);
+    } else {
+      logSystemError("pipe");
+    }
   }
 
   obc->state = OBC_FAILURE;
