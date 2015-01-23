@@ -111,7 +111,19 @@ locatePathName (const char *path) {
 const char *
 locatePathExtension (const char *path) {
   const char *name = locatePathName(path);
-  return strrchr(name, '.');
+  const char *extension = strrchr(name, '.');
+
+  if (extension && extension[1]) {
+    const char *c = extension;
+
+    while (c > name) {
+      if (*--c != '.') {
+        return extension;
+      }
+    }
+  }
+
+  return NULL;
 }
 
 int
