@@ -41,11 +41,11 @@ getJavaInvocationInterface (void) {
   return javaVirtualMachine;
 }
 
-THREAD_SPECIFIC_DATA_NEW(tsdJava) {
+static THREAD_SPECIFIC_DATA_NEW(tsdJava) {
   return getJavaInvocationInterface();
 }
 
-THREAD_SPECIFIC_DATA_DESTROY(tsdJava) {
+static THREAD_SPECIFIC_DATA_DESTROY(tsdJava) {
   JavaVM *vm = data;
 
   (*vm)->DetachCurrentThread(vm);
