@@ -279,7 +279,7 @@ setThreadName (const char *name) {
 }
 #endif /* HAVE_THREAD_NAMES */
 
-#ifdef PTHREAD_MUTEX_INITIALIZER
+#if defined(PTHREAD_MUTEX_INITIALIZER)
 void *
 getThreadSpecificData (ThreadSpecificDataControl *ctl) {
   int error;
@@ -314,7 +314,7 @@ getThreadSpecificData (ThreadSpecificDataControl *ctl) {
   return NULL;
 }
 
-#else /* PTHREAD_MUTEX_INITIALIZER */
+#else /* thread specific data */
 #include "program.h"
 
 static void
@@ -337,4 +337,4 @@ getThreadSpecificData (ThreadSpecificDataControl *ctl) {
 
   return ctl->data;
 }
-#endif /* PTHREAD_MUTEX_INITIALIZER */
+#endif /* thread specific data */

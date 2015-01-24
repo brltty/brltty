@@ -57,22 +57,23 @@ typedef struct {
   ThreadSpecificData_new *new;
   ThreadSpecificData_destroy *destroy;
 
-#ifdef PTHREAD_MUTEX_INITIALIZER
+#if defined(PTHREAD_MUTEX_INITIALIZER)
+  pthread_mutex_t mutex;
+
   struct {
     pthread_key_t value;
     unsigned created;
   } key;
 
-  pthread_mutex_t mutex;
-
 #define THREAD_SPECIFIC_DATA_INITIALIZER() \
-  .key = { .created = 0 }, .mutex = PTHREAD_MUTEX_INITIALIZER
-#else /* PTHREAD_MUTEX_INITIALIZER */
+  .mutex = PTHREAD_MUTEX_INITIALIZER, .key = { .created = 0 }
+
+#else /* thread specific data */
   void *data;
 
 #define THREAD_SPECIFIC_DATA_INITIALIZER() \
   .data = NULL
-#endif /* PTHREAD_MUTEX_INITIALIZER */
+#endif /* thread specific data */
 } ThreadSpecificDataControl;
 
 #define THREAD_SPECIFIC_DATA_CONTROL(name) \
