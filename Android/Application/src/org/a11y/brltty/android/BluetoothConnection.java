@@ -46,29 +46,26 @@ public class BluetoothConnection {
   protected final String bluetoothAddress;
 
   protected BluetoothSocket bluetoothSocket = null;
+  protected InputStream inputStream = null;
   protected OutputStream outputStream = null;
+  protected OutputStream pipeStream = null;
   protected InputThread inputThread = null;
 
   private class InputThread extends Thread {
     volatile boolean stop = false;
-    InputStream inputStream;
-    int pipeDescriptor;
 
-    InputThread (InputStream inputStream, int pipeDescriptor) {
+    InputThread () {
       super("bluetooth-input-" + bluetoothAddress);
-      this.inputStream = inputStream;
-      this.pipeDescriptor = pipeDescriptor;
     }
 
     @Override
     public void run () {
       try {
-        File pipeFile = new File("/proc/self/fd/" + pipeDescriptor);
-        OutputStream pipeStream = new FileOutputStream(pipeFile);
         byte[] buffer = new byte[0X80];
 
         while (!stop) {
           int byteCount;
+
           try {
             byteCount = inputStream.read(buffer);
           } catch (IOException exception) {
@@ -84,12 +81,11 @@ public class BluetoothConnection {
             break;
           }
         }
-
-        pipeStream.close();
-        inputStream.close();
       } catch (Throwable cause) {
         Log.e(LOG_TAG, "Bluetooth input failed: " + bluetoothAddress, cause);
       }
+
+      closePipeStream();
     }
   }
 
@@ -128,21 +124,67 @@ public class BluetoothConnection {
     bluetoothAddress = bluetoothDevice.getAddress();
   }
 
-  public void close () {
-    if (inputThread != null) {
-      inputThread.stop = true;
-      inputThread = null;
-    }
-
+  private void closeBluetoothSocket () {
     if (bluetoothSocket != null) {
       try {
         bluetoothSocket.close();
       } catch (IOException exception) {
-        Log.w(LOG_TAG, "Bluetooth close failed: " + bluetoothAddress, exception);
+        Log.w(LOG_TAG, "Bluetooth socket close failure: " + bluetoothAddress, exception);
       }
 
       bluetoothSocket = null;
     }
+  }
+
+  private void closeInputStream () {
+    if (inputStream != null) {
+      try {
+        inputStream.close();
+      } catch (IOException exception) {
+        Log.w(LOG_TAG, "Bluetooth input stream close failure: " + bluetoothAddress, exception);
+      }
+
+      inputStream = null;
+    }
+  }
+
+  private void closeOutputStream () {
+    if (outputStream != null) {
+      try {
+        outputStream.close();
+      } catch (IOException exception) {
+        Log.w(LOG_TAG, "Bluetooth output stream close failure: " + bluetoothAddress, exception);
+      }
+
+      outputStream = null;
+    }
+  }
+
+  private void closePipeStream () {
+    if (pipeStream != null) {
+      try {
+        pipeStream.close();
+      } catch (IOException exception) {
+        Log.w(LOG_TAG, "Bluetooth pipe stream close failure: " + bluetoothAddress, exception);
+      }
+
+      pipeStream = null;
+    }
+  }
+
+  private void stopInputThread () {
+    if (inputThread != null) {
+      inputThread.stop = true;
+      inputThread = null;
+    }
+  }
+
+  public void close () {
+    stopInputThread();
+    closePipeStream();
+    closeInputStream();
+    closeOutputStream();
+    closeBluetoothSocket();
   }
 
   public static BluetoothSocket createRfcommSocket (BluetoothDevice device, int channel) {
@@ -166,8 +208,6 @@ public class BluetoothConnection {
   }
 
   public boolean open (int inputPipe, int channel, boolean secure) {
-    InputStream inputStream;
-
     if (channel == 0) {
       try {
         bluetoothSocket = secure? bluetoothDevice.createRfcommSocketToServiceRecord(SERIAL_PROFILE_UUID):
@@ -187,25 +227,21 @@ public class BluetoothConnection {
         inputStream = bluetoothSocket.getInputStream();
         outputStream = bluetoothSocket.getOutputStream();
 
-        inputThread = new InputThread(inputStream, inputPipe);
+        {
+          File pipeFile = new File("/proc/self/fd/" + inputPipe);
+          pipeStream = new FileOutputStream(pipeFile);
+        }
+
+        inputThread = new InputThread();
         inputThread.start();
+
         return true;
       } catch (IOException openException) {
         Log.e(LOG_TAG, "Bluetooth connect failed: " + bluetoothAddress + ": " + openException.getMessage());
-
-        inputStream = null;
-        outputStream = null;
       }
-
-      try {
-        bluetoothSocket.close();
-      } catch (IOException closeException) {
-        Log.e(LOG_TAG, "Bluetooth socket close error: " + bluetoothAddress, closeException);
-      }
-
-      bluetoothSocket = null;
     }
 
+    close();
     return false;
   }
 

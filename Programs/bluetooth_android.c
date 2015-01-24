@@ -145,6 +145,7 @@ THREAD_FUNCTION(runOpenBluetoothConnection) {
 
           if (!clearJavaException(env, 1)) {
             if (result == JNI_TRUE) {
+              closeFile(&obc->bcx->inputPipe[1]);
               obc->error = 0;
               goto done;
             }
@@ -154,8 +155,8 @@ THREAD_FUNCTION(runOpenBluetoothConnection) {
         }
       }
 
-      close(obc->bcx->inputPipe[0]);
-      close(obc->bcx->inputPipe[1]);
+      closeFile(&obc->bcx->inputPipe[0]);
+      closeFile(&obc->bcx->inputPipe[1]);
     } else {
       logSystemError("pipe");
     }
