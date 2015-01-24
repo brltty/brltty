@@ -984,7 +984,6 @@ processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char **
 
     setDefaultOptions(&info, 0);
     if (descriptor->configurationFile && *descriptor->configurationFile) {
-      fixInstallPath(descriptor->configurationFile);
       processConfigurationFile(&info, *descriptor->configurationFile, !configurationFileSpecified);
     }
     setDefaultOptions(&info, 1);

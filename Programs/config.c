@@ -317,7 +317,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'f',
     .word = "configuration-file",
-    .flags = OPT_Environ,
+    .flags = OPT_Environ | OPT_PgmPath,
     .argument = strtext("file"),
     .setting.string = &opt_configurationFile,
     .defaultSetting = CONFIGURATION_DIRECTORY "/" CONFIGURATION_FILE,
