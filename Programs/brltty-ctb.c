@@ -50,7 +50,7 @@ static int opt_forceOutput;
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'T',
     .word = "tables-directory",
-    .flags = OPT_Hidden,
+    .flags = OPT_Hidden | OPT_PgmPath,
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
     .defaultSetting = TABLES_DIRECTORY,
@@ -467,14 +467,6 @@ main (int argc, char *argv[]) {
       .argumentsSummary = "[{input-file | -} ...]"
     };
     PROCESS_OPTIONS(descriptor, argc, argv);
-  }
-
-  {
-    char **const paths[] = {
-      &opt_tablesDirectory,
-      NULL
-    };
-    fixInstallPaths(paths);
   }
 
   inputBuffer = NULL;

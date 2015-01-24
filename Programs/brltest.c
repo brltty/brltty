@@ -46,12 +46,11 @@ static BrailleDisplay brl;
 static char *opt_brailleDevice;
 static char *opt_driversDirectory;
 static char *opt_writableDirectory;
-static char *opt_dataDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'D',
     .word = "drivers-directory",
-    .flags = OPT_Hidden,
+    .flags = OPT_Hidden | OPT_PgmPath,
     .argument = "directory",
     .setting.string = &opt_driversDirectory,
     .defaultSetting = DRIVERS_DIRECTORY,
@@ -60,7 +59,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'W',
     .word = "writable-directory",
-    .flags = OPT_Hidden,
+    .flags = OPT_Hidden | OPT_PgmPath,
     .argument = strtext("directory"),
     .setting.string = &opt_writableDirectory,
     .defaultSetting = WRITABLE_DIRECTORY,
@@ -130,16 +129,6 @@ main (int argc, char *argv[]) {
       .argumentsSummary = "[driver [parameter=value ...]]"
     };
     PROCESS_OPTIONS(descriptor, argc, argv);
-  }
-
-  {
-    char **const paths[] = {
-      &opt_driversDirectory,
-      &opt_writableDirectory,
-      &opt_dataDirectory,
-      NULL
-    };
-    fixInstallPaths(paths);
   }
 
   writableDirectory = opt_writableDirectory;

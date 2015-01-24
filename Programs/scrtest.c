@@ -43,7 +43,7 @@ static char *opt_driversDirectory;
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'D',
     .word = "drivers-directory",
-    .flags = OPT_Hidden,
+    .flags = OPT_Hidden | OPT_PgmPath,
     .argument = "directory",
     .setting.string = &opt_driversDirectory,
     .defaultSetting = DRIVERS_DIRECTORY,
@@ -139,14 +139,6 @@ main (int argc, char *argv[]) {
       .argumentsSummary = "[parameter=value ...]"
     };
     PROCESS_OPTIONS(descriptor, argc, argv);
-  }
-
-  {
-    char **const paths[] = {
-      &opt_driversDirectory,
-      NULL
-    };
-    fixInstallPaths(paths);
   }
 
   if ((screen = loadScreenDriver(opt_screenDriver, &driverObject, opt_driversDirectory))) {

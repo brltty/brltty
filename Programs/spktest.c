@@ -35,17 +35,16 @@
 
 volatile SpeechSynthesizer spk;
 
-char *opt_pcmDevice;
-static char *opt_speechRate;
 static char *opt_textString;
 static char *opt_speechVolume;
+static char *opt_speechRate;
+char *opt_pcmDevice;
 static char *opt_driversDirectory;
-static char *opt_dataDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'D',
     .word = "drivers-directory",
-    .flags = OPT_Hidden,
+    .flags = OPT_Hidden | OPT_PgmPath,
     .argument = "directory",
     .setting.string = &opt_driversDirectory,
     .defaultSetting = DRIVERS_DIRECTORY,
@@ -102,15 +101,6 @@ main (int argc, char *argv[]) {
       .argumentsSummary = "[driver [parameter=value ...]]"
     };
     PROCESS_OPTIONS(descriptor, argc, argv);
-  }
-
-  {
-    char **const paths[] = {
-      &opt_driversDirectory,
-      &opt_dataDirectory,
-      NULL
-    };
-    fixInstallPaths(paths);
   }
 
   speechRate = 1.0;

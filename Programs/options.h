@@ -30,7 +30,8 @@ typedef enum {
   OPT_Extend	= 0X02,
   OPT_Config	= 0X04,
   OPT_Environ	= 0X08,
-  OPT_Format  	= 0X10
+  OPT_Format  	= 0X10,
+  OPT_PgmPath   = 0X20
 } OptionFlag;
 
 #define FLAG_TRUE_WORD "on"

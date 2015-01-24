@@ -154,7 +154,7 @@ beginProgram (int argumentCount, char **argumentVector) {
 }
 
 void
-fixInstallPaths (char **const *paths) {
+fixInstallPath (char **path) {
   static const char *programDirectory = NULL;
 
   if (!programDirectory) {
@@ -168,36 +168,26 @@ fixInstallPaths (char **const *paths) {
     logMessage(LOG_DEBUG, "program directory: %s", programDirectory);
   }
 
-  while (*paths) {
-    if (**paths && ***paths) {
-      const char *problem = strtext("cannot fix install path");
-      char *newPath = makePath(programDirectory, **paths);
+  {
+    const char *problem = strtext("cannot fix install path");
+    char *newPath = makePath(programDirectory, *path);
 
-      if (newPath) {
-        if (changeStringSetting(*paths, newPath)) {
-          if (isAbsolutePath(**paths)) {
-            problem = NULL;
-          } else {
-            problem = strtext("install path not absolute");
-          }
+    if (newPath) {
+      if (changeStringSetting(path, newPath)) {
+        if (isAbsolutePath(*path)) {
+          problem = NULL;
+        } else {
+          problem = strtext("install path not absolute");
         }
-
-        free(newPath);
       }
 
-      if (problem) {
-        logMessage(LOG_WARNING, "%s: %s", gettext(problem), **paths);
-      }
+      free(newPath);
     }
 
-    paths += 1;
+    if (problem) {
+      logMessage(LOG_WARNING, "%s: %s", gettext(problem), *path);
+    }
   }
-}
-
-void
-fixInstallPath (char **path) {
-  char **const paths[] = {path, NULL};
-  fixInstallPaths(paths);
 }
 
 int

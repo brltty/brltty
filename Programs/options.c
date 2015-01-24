@@ -676,6 +676,7 @@ setDefaultOptions (
 
       if (!setting) setting = option->argument? "": FLAG_FALSE_WORD;
       ensureSetting(info, option, setting);
+      if (option->flags & OPT_PgmPath) fixInstallPath(option->setting.string);
     }
   }
 }

@@ -47,7 +47,7 @@ static int opt_edit;
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'T',
     .word = "tables-directory",
-    .flags = OPT_Hidden,
+    .flags = OPT_Hidden | OPT_PgmPath,
     .argument = "directory",
     .setting.string = &opt_tablesDirectory,
     .defaultSetting = TABLES_DIRECTORY,
@@ -1988,14 +1988,6 @@ main (int argc, char *argv[]) {
       .argumentsSummary = "input-table [output-table]"
     };
     PROCESS_OPTIONS(descriptor, argc, argv);
-  }
-
-  {
-    char **const paths[] = {
-      &opt_tablesDirectory,
-      NULL
-    };
-    fixInstallPaths(paths);
   }
 
   if (argc == 0) {

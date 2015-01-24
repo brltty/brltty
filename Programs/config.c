@@ -291,7 +291,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'P',
     .word = "pid-file",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ | OPT_PgmPath,
     .argument = strtext("file"),
     .setting.string = &opt_pidFile,
     .description = strtext("Path to process identifier file.")
@@ -299,7 +299,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'D',
     .word = "drivers-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ | OPT_PgmPath,
     .argument = strtext("directory"),
     .setting.string = &opt_driversDirectory,
     .defaultSetting = DRIVERS_DIRECTORY,
@@ -308,7 +308,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'W',
     .word = "writable-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ | OPT_PgmPath,
     .argument = strtext("directory"),
     .setting.string = &opt_writableDirectory,
     .defaultSetting = WRITABLE_DIRECTORY,
@@ -402,7 +402,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'T',
     .word = "tables-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ | OPT_PgmPath,
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
     .defaultSetting = TABLES_DIRECTORY,
@@ -651,18 +651,7 @@ brlttyPrepare (int argc, char *argv[]) {
     logMessage(LOG_ERR, "%s: %s", gettext("excess argument"), argv[0]);
   }
 
-  {
-    char **const paths[] = {
-      &opt_driversDirectory,
-      &opt_writableDirectory,
-      &opt_tablesDirectory,
-      &opt_pidFile,
-      NULL
-    };
-
-    fixInstallPaths(paths);
-    writableDirectory = opt_writableDirectory;
-  }
+  writableDirectory = opt_writableDirectory;
 
   systemLogLevel = LOG_NOTICE;
   disableAllLogCategories();

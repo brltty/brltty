@@ -42,7 +42,7 @@ static const char tableName_unicode[] = "unicode";
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'T',
     .word = "tables-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ | OPT_PgmPath,
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
     .defaultSetting = TABLES_DIRECTORY,
@@ -228,14 +228,6 @@ main (int argc, char *argv[]) {
       .argumentsSummary = "[{input-file | -} ...]"
     };
     PROCESS_OPTIONS(descriptor, argc, argv);
-  }
-
-  {
-    char **const paths[] = {
-      &opt_tablesDirectory,
-      NULL
-    };
-    fixInstallPaths(paths);
   }
 
   if (getTable(&inputTable, opt_tablesDirectory, opt_inputTable)) {

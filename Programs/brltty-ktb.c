@@ -53,7 +53,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'D',
     .word = "drivers-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ | OPT_PgmPath,
     .argument = strtext("directory"),
     .setting.string = &opt_driversDirectory,
     .defaultSetting = DRIVERS_DIRECTORY,
@@ -62,7 +62,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'T',
     .word = "tables-directory",
-    .flags = OPT_Hidden,
+    .flags = OPT_Hidden | OPT_PgmPath,
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
     .defaultSetting = TABLES_DIRECTORY,
@@ -192,15 +192,6 @@ main (int argc, char *argv[]) {
       .argumentsSummary = "key-table"
     };
     PROCESS_OPTIONS(descriptor, argc, argv);
-  }
-
-  {
-    char **const paths[] = {
-      &opt_driversDirectory,
-      &opt_tablesDirectory,
-      NULL
-    };
-    fixInstallPaths(paths);
   }
 
   driverObject = NULL;
