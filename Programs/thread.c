@@ -278,3 +278,63 @@ void
 setThreadName (const char *name) {
 }
 #endif /* HAVE_THREAD_NAMES */
+
+#ifdef PTHREAD_MUTEX_INITIALIZER
+void *
+getThreadSpecificData (ThreadSpecificDataControl *ctl) {
+  int error;
+
+  pthread_mutex_lock(&ctl->mutex);
+    if (!ctl->key.created) {
+      error = pthread_key_create(&ctl->key.value, ctl->destroy);
+
+      if (!error) {
+        ctl->key.created = 1;
+      } else {
+        logActionError(error, "pthread_key_create");
+      }
+    }
+  pthread_mutex_unlock(&ctl->mutex);
+
+  if (ctl->key.created) {
+    void *tsd = pthread_getspecific(ctl->key.value);
+    if (tsd) return tsd;
+
+    if ((tsd = ctl->new())) {
+      if (!(error = pthread_setspecific(ctl->key.value, tsd))) {
+        return tsd;
+      } else {
+        logActionError(error, "pthread_setspecific");
+      }
+
+      ctl->destroy(tsd);
+    }
+  }
+
+  return NULL;
+}
+
+#else /* PTHREAD_MUTEX_INITIALIZER */
+#include "program.h"
+
+static void
+exitThreadSpecificData (void *data) {
+  ThreadSpecificDataControl *ctl = data;
+
+  if (ctl->data) {
+    ctl->destroy(ctl->data);
+    ctl->data = NULL;
+  }
+}
+
+void *
+getThreadSpecificData (ThreadSpecificDataControl *ctl) {
+  if (!ctl->data) {
+    if ((ctl->data = ctl->new())) {
+      onProgramExit("thread-specific-data", exitThreadSpecificData, ctl);
+    }
+  }
+
+  return ctl->data;
+}
+#endif /* PTHREAD_MUTEX_INITIALIZER */
