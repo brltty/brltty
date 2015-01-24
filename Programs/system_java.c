@@ -18,11 +18,10 @@
 
 #include "prologue.h"
 
-#include <pthread.h>
-
 #include "log.h"
 #include "system.h"
 #include "system_java.h"
+#include "thread.h"
 
 static JavaVM *javaVirtualMachine = NULL;
 
@@ -37,24 +36,23 @@ JNI_OnUnload (JavaVM *vm, void *reserved) {
   javaVirtualMachine = NULL;
 }
 
-static pthread_once_t threadDetachHandlerOnce = PTHREAD_ONCE_INIT;
-static pthread_key_t threadDetachHandlerKey;
-
-static void
-threadDetachHandler (void *arg) {
-  JavaVM *vm = arg;
-  (*vm)->DetachCurrentThread(vm);
-}
-
-static void
-createThreadDetachHandlerKey (void) {
-  pthread_key_create(&threadDetachHandlerKey, threadDetachHandler);
-}
-
 JavaVM *
 getJavaInvocationInterface (void) {
   return javaVirtualMachine;
 }
+
+THREAD_SPECIFIC_DATA_NEW(tsdJava) {
+  return getJavaInvocationInterface();
+}
+
+THREAD_SPECIFIC_DATA_DESTROY(tsdJava) {
+  JavaVM *vm = data;
+
+  (*vm)->DetachCurrentThread(vm);
+  logMessage(LOG_DEBUG, "thread detached from Java VM");
+}
+
+THREAD_SPECIFIC_DATA_CONTROL(tsdJava);
 
 JNIEnv *
 getJavaNativeInterface (void) {
@@ -73,11 +71,13 @@ getJavaNativeInterface (void) {
         };
 
         if ((result = (*vm)->AttachCurrentThread(vm, &env, &args)) < 0) {
+          logMessage(LOG_WARNING, "Java AttachCurrentThread error: %d", result);
         } else {
-          pthread_once(&threadDetachHandlerOnce, createThreadDetachHandlerKey);
-          pthread_setspecific(threadDetachHandlerKey, vm);
+          logMessage(LOG_DEBUG, "thread attached to Java VM");
+          getThreadSpecificData(&tsdJava);
         }
       } else {
+        logMessage(LOG_WARNING, "Java GetEnv error: %d", result);
       }
     }
   }
