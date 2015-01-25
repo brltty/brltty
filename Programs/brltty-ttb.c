@@ -714,6 +714,27 @@ openTable (const char **file, const char *mode, const char *directory, FILE *std
   }
 }
 
+static FILE *
+openInputTable (const char **path, int allowStandardInput) {
+  FILE *stdinStream;
+  const char *stdinName;
+
+  if (allowStandardInput) {
+    stdinStream = stdin;
+    stdinName = standardInputName;
+  } else {
+    stdinStream = NULL;
+    stdinName = NULL;
+  }
+
+  return openTable(path, "r", opt_tablesDirectory, stdinStream, stdinName);
+}
+
+static FILE *
+openOutputTable (const char **path) {
+  return openTable(path, "w", NULL, stdout, standardOutputName);
+}
+
 static TextTableData *
 readTable (const char *path, FILE *file, const FormatEntry *fmt) {
   if (fmt->read) return fmt->read(path, file, fmt->data);
@@ -724,14 +745,14 @@ readTable (const char *path, FILE *file, const FormatEntry *fmt) {
 static ProgramExitStatus
 convertTable (void) {
   ProgramExitStatus exitStatus;
-  FILE *inputFile = openTable(&inputPath, "r", opt_tablesDirectory, stdin, standardInputName);
+  FILE *inputFile = openInputTable(&inputPath, 1);
 
   if (inputFile) {
     TextTableData *ttd;
 
     if ((ttd = readTable(inputPath, inputFile, inputFormat))) {
       if (outputPath) {
-        FILE *outputFile = openTable(&outputPath, "w", NULL, stdout, standardOutputName);
+        FILE *outputFile = openOutputTable(&outputPath);
 
         if (outputFile) {
           if (outputFormat->write(outputPath, outputFile, ttd, outputFormat->data)) {
@@ -1437,7 +1458,7 @@ saveTable (EditTableData *etd) {
   if (!outputPath) outputPath = inputPath;
   if (!outputFormat) outputFormat = inputFormat;
 
-  if ((outputFile = openTable(&outputPath, "w", NULL, stdout, standardOutputName))) {
+  if ((outputFile = openOutputTable(&outputPath))) {
     if (outputFormat->write(outputPath, outputFile, etd->ttd, outputFormat->data)) {
       ok = 1;
       etd->updated = 0;
@@ -1851,7 +1872,7 @@ editTable (void) {
   etd.updated = 0;
 
   {
-    FILE *inputFile = openTable(&inputPath, "r", opt_tablesDirectory, NULL, NULL);
+    FILE *inputFile = openInputTable(&inputPath, 0);
 
     if (inputFile) {
       if ((etd.ttd = readTable(inputPath, inputFile, inputFormat))) {
