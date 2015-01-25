@@ -102,7 +102,7 @@ getSharedSymbolName (void *address, ptrdiff_t *offset) {
     }
   }
 
-#elif defined(__USE_GNU)
+#elif defined(__linux__) || defined(__ANDROID__)
   Dl_info info;
 
   if (dladdr(address, &info)) {
