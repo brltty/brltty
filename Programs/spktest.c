@@ -44,10 +44,11 @@ static char *opt_driversDirectory;
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'D',
     .word = "drivers-directory",
-    .flags = OPT_Hidden | OPT_PgmPath,
+    .flags = OPT_Hidden,
     .argument = "directory",
     .setting.string = &opt_driversDirectory,
-    .defaultSetting = DRIVERS_DIRECTORY,
+    .internal.setting = DRIVERS_DIRECTORY,
+    .internal.adjust = fixInstallPath,
     .description = "Path to directory for loading drivers."
   },
 

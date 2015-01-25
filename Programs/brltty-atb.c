@@ -28,10 +28,11 @@ static char *opt_tablesDirectory;
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'T',
     .word = "tables-directory",
-    .flags = OPT_Hidden | OPT_PgmPath,
+    .flags = OPT_Hidden,
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
-    .defaultSetting = TABLES_DIRECTORY,
+    .internal.setting = TABLES_DIRECTORY,
+    .internal.adjust = fixInstallPath,
     .description = strtext("Path to directory containing tables.")
   },
 END_OPTION_TABLE

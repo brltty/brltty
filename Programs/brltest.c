@@ -50,19 +50,21 @@ static char *opt_writableDirectory;
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'D',
     .word = "drivers-directory",
-    .flags = OPT_Hidden | OPT_PgmPath,
+    .flags = OPT_Hidden,
     .argument = "directory",
     .setting.string = &opt_driversDirectory,
-    .defaultSetting = DRIVERS_DIRECTORY,
+    .internal.setting = DRIVERS_DIRECTORY,
+    .internal.adjust = fixInstallPath,
     .description = "Path to directory for loading drivers."
   },
 
   { .letter = 'W',
     .word = "writable-directory",
-    .flags = OPT_Hidden | OPT_PgmPath,
+    .flags = OPT_Hidden,
     .argument = strtext("directory"),
     .setting.string = &opt_writableDirectory,
-    .defaultSetting = WRITABLE_DIRECTORY,
+    .internal.setting = WRITABLE_DIRECTORY,
+    .internal.adjust = fixInstallPath,
     .description = strtext("Path to directory which can be written to.")
   },
 
@@ -70,7 +72,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .word = "device",
     .argument = "device",
     .setting.string = &opt_brailleDevice,
-    .defaultSetting = BRAILLE_DEVICE,
+    .internal.setting = BRAILLE_DEVICE,
     .description = "Path to device for accessing braille display."
   },
 END_OPTION_TABLE

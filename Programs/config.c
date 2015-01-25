@@ -291,36 +291,40 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'P',
     .word = "pid-file",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ | OPT_PgmPath,
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("file"),
     .setting.string = &opt_pidFile,
+    .internal.adjust = fixInstallPath,
     .description = strtext("Path to process identifier file.")
   },
 
   { .letter = 'D',
     .word = "drivers-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ | OPT_PgmPath,
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("directory"),
     .setting.string = &opt_driversDirectory,
-    .defaultSetting = DRIVERS_DIRECTORY,
+    .internal.setting = DRIVERS_DIRECTORY,
+    .internal.adjust = fixInstallPath,
     .description = strtext("Path to directory containing drivers.")
   },
 
   { .letter = 'W',
     .word = "writable-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ | OPT_PgmPath,
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("directory"),
     .setting.string = &opt_writableDirectory,
-    .defaultSetting = WRITABLE_DIRECTORY,
+    .internal.setting = WRITABLE_DIRECTORY,
+    .internal.adjust = fixInstallPath,
     .description = strtext("Path to directory which can be written to.")
   },
 
   { .letter = 'f',
     .word = "configuration-file",
-    .flags = OPT_Environ | OPT_PgmPath,
+    .flags = OPT_Environ,
     .argument = strtext("file"),
     .setting.string = &opt_configurationFile,
-    .defaultSetting = CONFIGURATION_DIRECTORY "/" CONFIGURATION_FILE,
+    .internal.setting = CONFIGURATION_DIRECTORY "/" CONFIGURATION_FILE,
+    .internal.adjust = fixInstallPath,
     .description = strtext("Path to default settings file.")
   },
 
@@ -329,7 +333,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("file"),
     .setting.string = &opt_preferencesFile,
-    .defaultSetting = PREFERENCES_FILE,
+    .internal.setting = PREFERENCES_FILE,
     .description = strtext("Name of or path to default preferences file.")
   },
 
@@ -346,7 +350,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Extend | OPT_Config | OPT_Environ,
     .argument = strtext("name=value,..."),
     .setting.string = &opt_apiParameters,
-    .defaultSetting = API_PARAMETERS,
+    .internal.setting = API_PARAMETERS,
     .description = strtext("Parameters for the application programming interface.")
   },
 
@@ -364,7 +368,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Config | OPT_Environ,
     .argument = strtext("driver,..."),
     .setting.string = &opt_brailleDriver,
-    .defaultSetting = optionOperand_autodetect,
+    .internal.setting = optionOperand_autodetect,
     .description = strtext("Braille driver code (%s, %s, or one of {%s})."),
     .strings.array = optionStrings_BrailleDriver
   },
@@ -374,7 +378,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Extend | OPT_Config | OPT_Environ,
     .argument = strtext("name=value,..."),
     .setting.string = &opt_brailleParameters,
-    .defaultSetting = BRAILLE_PARAMETERS,
+    .internal.setting = BRAILLE_PARAMETERS,
     .description = strtext("Parameters for the braille driver.")
   },
 
@@ -384,7 +388,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Config | OPT_Environ,
     .argument = strtext("identifier,..."),
     .setting.string = &opt_brailleDevice,
-    .defaultSetting = BRAILLE_DEVICE,
+    .internal.setting = BRAILLE_DEVICE,
     .description = strtext("Device for accessing braille display.")
   },
 
@@ -393,19 +397,20 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .setting.flag = &opt_releaseDevice,
 #ifdef WINDOWS
-    .defaultSetting = FLAG_TRUE_WORD,
+    .internal.setting = FLAG_TRUE_WORD,
 #else /* WINDOWS */
-    .defaultSetting = FLAG_FALSE_WORD,
+    .internal.setting = FLAG_FALSE_WORD,
 #endif /* WINDOWS */
     .description = strtext("Release braille device when screen or window is unreadable.")
   },
 
   { .letter = 'T',
     .word = "tables-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ | OPT_PgmPath,
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
-    .defaultSetting = TABLES_DIRECTORY,
+    .internal.setting = TABLES_DIRECTORY,
+    .internal.adjust = fixInstallPath,
     .description = strtext("Path to directory containing tables.")
   },
 
@@ -415,7 +420,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Config | OPT_Environ,
     .argument = strtext("file"),
     .setting.string = &opt_textTable,
-    .defaultSetting = optionOperand_autodetect,
+    .internal.setting = optionOperand_autodetect,
     .description = strtext("Name of or path to text table (or %s)."),
     .strings.array = optionStrings_TextTable
   },
@@ -460,7 +465,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Config | OPT_Environ,
     .argument = strtext("driver,..."),
     .setting.string = &opt_speechDriver,
-    .defaultSetting = optionOperand_autodetect,
+    .internal.setting = optionOperand_autodetect,
     .description = strtext("Speech driver code (%s, %s, or one of {%s})."),
     .strings.array = optionStrings_SpeechDriver
   },
@@ -470,7 +475,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Extend | OPT_Config | OPT_Environ,
     .argument = strtext("name=value,..."),
     .setting.string = &opt_speechParameters,
-    .defaultSetting = SPEECH_PARAMETERS,
+    .internal.setting = SPEECH_PARAMETERS,
     .description = strtext("Parameters for the speech driver.")
   },
 
@@ -494,7 +499,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Config | OPT_Environ,
     .argument = strtext("driver,..."),
     .setting.string = &opt_screenDriver,
-    .defaultSetting = DEFAULT_SCREEN_DRIVER,
+    .internal.setting = DEFAULT_SCREEN_DRIVER,
     .description = strtext("Screen driver code (%s, %s, or one of {%s})."),
     .strings.array = optionStrings_ScreenDriver
   },
@@ -504,7 +509,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Extend | OPT_Config | OPT_Environ,
     .argument = strtext("name=value,..."),
     .setting.string = &opt_screenParameters,
-    .defaultSetting = SCREEN_PARAMETERS,
+    .internal.setting = SCREEN_PARAMETERS,
     .description = strtext("Parameters for the screen driver.")
   },
 

@@ -662,7 +662,7 @@ processEnvironmentVariables (
 }
 
 static void
-setDefaultOptions (
+processInternalSettings (
   OptionProcessingInformation *info,
   int config
 ) {
@@ -672,28 +672,25 @@ setDefaultOptions (
     const OptionEntry *option = &info->optionTable[optionIndex];
 
     if (!(option->flags & OPT_Config) == !config) {
-      const char *setting = option->defaultSetting;
-      char *path = NULL;
+      const char *setting = option->internal.setting;
+      char *newSetting = NULL;
 
-      if (option->argument) {
-        if (!setting) setting = "";
+      if (!setting) setting = option->argument? "": FLAG_FALSE_WORD;
 
-        if (option->flags & OPT_PgmPath) {
-          if (*setting) {
-            if ((path = strdup(setting))) {
-              fixInstallPath(&path);
-              setting = path;
-            } else {
-              logMallocError();
+      if (option->internal.adjust) {
+        if (*setting) {
+          if ((newSetting = strdup(setting))) {
+            if (option->internal.adjust(&newSetting)) {
+              setting = newSetting;
             }
+          } else {
+            logMallocError();
           }
         }
-      } else {
-        if (!setting) setting = FLAG_FALSE_WORD;
       }
 
       ensureSetting(info, option, setting);
-      if (path) free(path);
+      if (newSetting) free(newSetting);
     }
   }
 }
@@ -999,11 +996,11 @@ processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char **
     if (descriptor->doEnvironmentVariables && *descriptor->doEnvironmentVariables)
       processEnvironmentVariables(&info, descriptor->applicationName);
 
-    setDefaultOptions(&info, 0);
+    processInternalSettings(&info, 0);
     if (descriptor->configurationFile && *descriptor->configurationFile) {
       processConfigurationFile(&info, *descriptor->configurationFile, !configurationFileSpecified);
     }
-    setDefaultOptions(&info, 1);
+    processInternalSettings(&info, 1);
   }
 
   if (info.exitImmediately) return PROG_EXIT_FORCE;

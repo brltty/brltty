@@ -30,8 +30,7 @@ typedef enum {
   OPT_Extend	= 0X02,
   OPT_Config	= 0X04,
   OPT_Environ	= 0X08,
-  OPT_Format  	= 0X10,
-  OPT_PgmPath   = 0X20
+  OPT_Format  	= 0X10
 } OptionFlag;
 
 #define FLAG_TRUE_WORD "on"
@@ -40,11 +39,16 @@ typedef enum {
 typedef struct {
   const char *word;
   const char *argument;
+  const char *description;
+
+  struct {
+    const char *setting;
+    int (*adjust) (char **setting);
+  } internal;
+
   unsigned char letter;
   unsigned char bootParameter;
   unsigned char flags;
-  const char *defaultSetting;
-  const char *description;
 
   union {
     int *flag;

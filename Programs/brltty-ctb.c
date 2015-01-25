@@ -50,10 +50,11 @@ static int opt_forceOutput;
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'T',
     .word = "tables-directory",
-    .flags = OPT_Hidden | OPT_PgmPath,
+    .flags = OPT_Hidden,
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
-    .defaultSetting = TABLES_DIRECTORY,
+    .internal.setting = TABLES_DIRECTORY,
+    .internal.adjust = fixInstallPath,
     .description = strtext("Path to directory containing tables.")
   },
 
@@ -61,7 +62,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .word = "contraction-table",
     .argument = "file",
     .setting.string = &opt_contractionTable,
-    .defaultSetting = "en-us-g2",
+    .internal.setting = "en-us-g2",
     .description = strtext("Contraction table.")
   },
 
@@ -89,7 +90,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .word = "output-width",
     .argument = "columns",
     .setting.string = &opt_outputWidth,
-    .defaultSetting = "",
+    .internal.setting = "",
     .description = strtext("Maximum length of an output line.")
   },
 

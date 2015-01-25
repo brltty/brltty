@@ -53,19 +53,21 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'D',
     .word = "drivers-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ | OPT_PgmPath,
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("directory"),
     .setting.string = &opt_driversDirectory,
-    .defaultSetting = DRIVERS_DIRECTORY,
+    .internal.setting = DRIVERS_DIRECTORY,
+    .internal.adjust = fixInstallPath,
     .description = strtext("Path to directory for loading drivers.")
   },
 
   { .letter = 'T',
     .word = "tables-directory",
-    .flags = OPT_Hidden | OPT_PgmPath,
+    .flags = OPT_Hidden,
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
-    .defaultSetting = TABLES_DIRECTORY,
+    .internal.setting = TABLES_DIRECTORY,
+    .internal.adjust = fixInstallPath,
     .description = strtext("Path to directory containing tables.")
   },
 END_OPTION_TABLE

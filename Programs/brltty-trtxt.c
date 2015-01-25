@@ -42,10 +42,11 @@ static const char tableName_unicode[] = "unicode";
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'T',
     .word = "tables-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ | OPT_PgmPath,
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
-    .defaultSetting = TABLES_DIRECTORY,
+    .internal.setting = TABLES_DIRECTORY,
+    .internal.adjust = fixInstallPath,
     .description = strtext("Path to directory for text tables.")
   },
 
@@ -54,7 +55,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Config | OPT_Environ,
     .argument = strtext("file"),
     .setting.string = &opt_inputTable,
-    .defaultSetting = tableName_autoselect,
+    .internal.setting = tableName_autoselect,
     .description = strtext("Path to input text table.")
   },
 
@@ -63,7 +64,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Config | OPT_Environ,
     .argument = strtext("file"),
     .setting.string = &opt_outputTable,
-    .defaultSetting = tableName_unicode,
+    .internal.setting = tableName_unicode,
     .description = strtext("Path to output text table.")
   },
 
