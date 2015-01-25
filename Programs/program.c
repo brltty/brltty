@@ -153,7 +153,7 @@ beginProgram (int argumentCount, char **argumentVector) {
   pushLogPrefix(programName);
 }
 
-void
+int
 fixInstallPath (char **path) {
   static const char *programDirectory = NULL;
 
@@ -186,8 +186,11 @@ fixInstallPath (char **path) {
 
     if (problem) {
       logMessage(LOG_WARNING, "%s: %s", gettext(problem), *path);
+      return 0;
     }
   }
+
+  return 1;
 }
 
 int
