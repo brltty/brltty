@@ -734,10 +734,17 @@ ASYNC_EVENT_CALLBACK(handleSpeechRequestEvent) {
   handleSpeechRequest(sdt, req);
 }
 
+ASYNC_CONDITION_TESTER(testSpeechDriverThreadFinished) {
+  volatile SpeechDriverThread *sdt = data;
+
+  return sdt->threadState == THD_FINISHED;
+}
+
 static void
 awaitSpeechDriverThreadTermination (volatile SpeechDriverThread *sdt) {
   void *result;
 
+  asyncWaitFor(testSpeechDriverThreadFinished, (void *)sdt);
   pthread_join(sdt->threadIdentifier, &result);
 }
 
