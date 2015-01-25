@@ -675,15 +675,21 @@ setDefaultOptions (
       const char *setting = option->defaultSetting;
       char *path = NULL;
 
-      if (!setting) setting = option->argument? "": FLAG_FALSE_WORD;
+      if (option->argument) {
+        if (!setting) setting = "";
 
-      if (option->flags & OPT_PgmPath) {
-        if ((path = strdup(setting))) {
-          fixInstallPath(&path);
-          setting = path;
-        } else {
-          logMallocError();
+        if (option->flags & OPT_PgmPath) {
+          if (*setting) {
+            if ((path = strdup(setting))) {
+              fixInstallPath(&path);
+              setting = path;
+            } else {
+              logMallocError();
+            }
+          }
         }
+      } else {
+        if (!setting) setting = FLAG_FALSE_WORD;
       }
 
       ensureSetting(info, option, setting);
