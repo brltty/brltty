@@ -41,18 +41,18 @@ getJavaInvocationInterface (void) {
   return javaVirtualMachine;
 }
 
-static THREAD_SPECIFIC_DATA_NEW(tsdJava) {
+static THREAD_SPECIFIC_DATA_NEW(tsdJavaNativeThread) {
   return getJavaInvocationInterface();
 }
 
-static THREAD_SPECIFIC_DATA_DESTROY(tsdJava) {
+static THREAD_SPECIFIC_DATA_DESTROY(tsdJavaNativeThread) {
   JavaVM *vm = data;
 
   (*vm)->DetachCurrentThread(vm);
   logMessage(LOG_DEBUG, "thread detached from Java VM");
 }
 
-THREAD_SPECIFIC_DATA_CONTROL(tsdJava);
+THREAD_SPECIFIC_DATA_CONTROL(tsdJavaNativeThread);
 
 JNIEnv *
 getJavaNativeInterface (void) {
@@ -74,7 +74,7 @@ getJavaNativeInterface (void) {
           logMessage(LOG_WARNING, "Java AttachCurrentThread error: %d", result);
         } else {
           logMessage(LOG_DEBUG, "thread attached to Java VM");
-          getThreadSpecificData(&tsdJava);
+          getThreadSpecificData(&tsdJavaNativeThread);
         }
       } else {
         logMessage(LOG_WARNING, "Java GetEnv error: %d", result);
