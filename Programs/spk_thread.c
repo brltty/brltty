@@ -525,7 +525,8 @@ sendSpeechRequest (volatile SpeechDriverThread *sdt) {
 #else /* GOT_PTHREADS */
     handleSpeechRequest(sdt, req);
 #endif /* GOT_PTHREADS */
-    return;
+
+    break;
   }
 }
 
@@ -855,6 +856,10 @@ destroySpeechDriverThread (volatile SpeechDriverThread *sdt) {
 #ifdef GOT_PTHREADS
   if (enqueueSpeechRequest(sdt, NULL)) {
     awaitSpeechResponse(sdt, SPEECH_DRIVER_THREAD_STOP_TIMEOUT);
+
+    setResponsePending(sdt);
+    awaitSpeechResponse(sdt, SPEECH_DRIVER_THREAD_STOP_TIMEOUT);
+
     awaitSpeechDriverThreadTermination(sdt);
   }
 
