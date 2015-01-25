@@ -734,17 +734,10 @@ ASYNC_EVENT_CALLBACK(handleSpeechRequestEvent) {
   handleSpeechRequest(sdt, req);
 }
 
-ASYNC_CONDITION_TESTER(testSpeechDriverThreadFinished) {
-  volatile SpeechDriverThread *sdt = data;
-
-  return sdt->threadState == THD_FINISHED;
-}
-
 static void
 awaitSpeechDriverThreadTermination (volatile SpeechDriverThread *sdt) {
   void *result;
 
-  asyncWaitFor(testSpeechDriverThreadFinished, (void *)sdt);
   pthread_join(sdt->threadIdentifier, &result);
 }
 
@@ -771,10 +764,10 @@ THREAD_FUNCTION(runSpeechDriverThread) {
   {
     int ok = sdt->threadState == THD_STOPPING;
 
-    setThreadState(sdt, THD_FINISHED);
     sendIntegerResponse(sdt, ok);
   }
 
+  setThreadState(sdt, THD_FINISHED);
   return NULL;
 }
 #endif /* GOT_PTHREADS */
