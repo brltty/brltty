@@ -212,6 +212,7 @@ makeFilePath (const char *directory, const char *name, const char *extension) {
   char *file = ensureFileExtension(name, extension);
 
   if (file) {
+    if (isExplicitPath(file)) return file;
     path = makePath(directory, file);
     free(file);
   }
