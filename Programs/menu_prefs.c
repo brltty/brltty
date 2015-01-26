@@ -378,7 +378,7 @@ testKeyboardTable (void) {
 static MenuItem *
 newProfileMenuItem (Menu *menu, const ProfileDescriptor *profile) {
   MenuString name = {.label = profile->category};
-  ;
+
   return newFilesMenuItem(menu, &name, opt_tablesDirectory, PROFILES_SUBDIRECTORY, profile->extension, "", 1);
 }
 
