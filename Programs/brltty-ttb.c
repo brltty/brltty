@@ -581,20 +581,21 @@ writeCharacter_CPreprocessor (
 ) {
   uint32_t value = character;
 
-  if (fprintf(file, "BRLTTY_TEXT_TABLE_ENTRY(0X%08" PRIX32 ", ", value) == EOF) return 0;
-  if (fprintf(file, "0X%02" PRIX8 ", ", dots) == EOF) return 0;
-  if (fprintf(file, "%d)", isPrimary) == EOF) return 0;
+  if (fprintf(file, "BRLTTY_TEXT_TABLE_ENTRY(0X%08" PRIX32, value) == EOF) return 0;
+  if (fprintf(file, ", 0X%02" PRIX8, dots) == EOF) return 0;
+  if (fprintf(file, ", %d", isPrimary) == EOF) return 0;
 
   {
     char name[0X40];
 
-    ;
     if (getCharacterName(character, name, sizeof(name))) {
-      if (fprintf(file, " /* %s */", name) == EOF) return 0;
+      if (fprintf(file, ", \"%s\"", name) == EOF) return 0;
+    } else {
+      if (fprintf(file, ", NULL") == EOF) return 0;
     }
   }
 
-  if (fprintf(file, "\n") == EOF) return 0;
+  if (fprintf(file, ")\n") == EOF) return 0;
   return 1;
 }
 
@@ -603,7 +604,7 @@ writeTable_CPreprocessor (
   const char *path, FILE *file, TextTableData *ttd, const void *data
 ) {
   if (!writeHeaderComment(file, writeCComment)) return 0;
-  if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_ENTRY(unicode, braille, isPrimary)")) return 0;
+  if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_ENTRY(unicode, braille, isPrimary, name)")) return 0;
   if (!writeCharacters(file, ttd, writeCharacter_CPreprocessor, NULL)) return 0;
   return 1;
 }
