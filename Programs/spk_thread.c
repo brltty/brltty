@@ -256,13 +256,19 @@ handleSpeechMessage (volatile SpeechDriverThread *sdt, SpeechMessage *msg) {
         sendSpeechRequest(sdt);
         break;
 
-      case MSG_SPEECH_FINISHED:
-        setSpeechFinished();
-        break;
+      case MSG_SPEECH_FINISHED: {
+        SetSpeechFinishedMethod *setFinished = sdt->speechSynthesizer->setFinished;
 
-      case MSG_SPEECH_LOCATION:
-        setSpeechLocation(msg->arguments.speechLocation.location);
+        if (setFinished) setFinished();
         break;
+      }
+
+      case MSG_SPEECH_LOCATION: {
+        SetSpeechLocationMethod *setLocation = sdt->speechSynthesizer->setLocation;
+
+        if (setLocation) setLocation(msg->arguments.speechLocation.location);
+        break;
+      }
 
       default:
         logMessage(LOG_CATEGORY(SPEECH_EVENTS), "unimplemented message: %u", msg->type);

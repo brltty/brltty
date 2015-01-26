@@ -53,10 +53,13 @@ typedef struct SpeechDataStruct SpeechData;
 #define SPK_SCR_NONE -1
 #define SPK_LOC_NONE -1
 
-typedef void SpeechVolumeSetter (volatile SpeechSynthesizer *spk, unsigned char setting);
-typedef void SpeechRateSetter (volatile SpeechSynthesizer *spk, unsigned char setting);
-typedef void SpeechPitchSetter (volatile SpeechSynthesizer *spk, unsigned char setting);
-typedef void SpeechPunctuationSetter (volatile SpeechSynthesizer *spk, SpeechPunctuation setting);
+typedef void SetSpeechVolumeMethod (volatile SpeechSynthesizer *spk, unsigned char setting);
+typedef void SetSpeechRateMethod (volatile SpeechSynthesizer *spk, unsigned char setting);
+typedef void SetSpeechPitchMethod (volatile SpeechSynthesizer *spk, unsigned char setting);
+typedef void SetSpeechPunctuationMethod (volatile SpeechSynthesizer *spk, SpeechPunctuation setting);
+
+typedef void SetSpeechFinishedMethod (void);
+typedef void SetSpeechLocationMethod (int location);
 
 struct SpeechSynthesizerStruct {
   unsigned sayBanner:1;
@@ -69,10 +72,13 @@ struct SpeechSynthesizerStruct {
     int speechLocation;
   } track;
 
-  SpeechVolumeSetter *setVolume;
-  SpeechRateSetter *setRate;
-  SpeechPitchSetter *setPitch;
-  SpeechPunctuationSetter *setPunctuation;
+  SetSpeechVolumeMethod *setVolume;
+  SetSpeechRateMethod *setRate;
+  SetSpeechPitchMethod *setPitch;
+  SetSpeechPunctuationMethod *setPunctuation;
+
+  SetSpeechFinishedMethod *setFinished;
+  SetSpeechLocationMethod *setLocation;
 
   struct {
     volatile SpeechDriverThread *thread;

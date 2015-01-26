@@ -1700,8 +1700,34 @@ beginAutospeakDelay (int duration) {
 }
 
 static void
+setSpeechFinished (void) {
+  spk.track.isActive = 0;
+  spk.track.speechLocation = SPK_LOC_NONE;
+
+  endAutospeakDelay();
+}
+
+static void
+setSpeechLocation (int location) {
+  if (spk.track.isActive) {
+    if (scr.number == spk.track.screenNumber) {
+      if (location != spk.track.speechLocation) {
+        spk.track.speechLocation = location;
+        if (ses->trackScreenCursor) trackSpeech();
+      }
+
+      return;
+    }
+
+    setSpeechFinished();
+  }
+}
+
+static void
 initializeSpeechSynthesizer (void) {
   constructSpeechSynthesizer(&spk);
+  spk.setFinished = setSpeechFinished;
+  spk.setLocation = setSpeechLocation;
 }
 
 int

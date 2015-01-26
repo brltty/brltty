@@ -31,9 +31,6 @@ extern void destructSpeechSynthesizer (volatile SpeechSynthesizer *spk);
 extern int startSpeechDriverThread (char **parameters);
 extern void stopSpeechDriverThread (void);
 
-extern void setSpeechFinished (void);
-extern void setSpeechLocation (int location);
-
 extern int muteSpeech (const char *reason);
 
 extern int sayUtf8Characters (

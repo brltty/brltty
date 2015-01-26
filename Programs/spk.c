@@ -49,6 +49,9 @@ constructSpeechSynthesizer (volatile SpeechSynthesizer *spk) {
   spk->setPitch = NULL;
   spk->setPunctuation = NULL;
 
+  spk->setFinished = NULL;
+  spk->setLocation = NULL;
+
   spk->driver.thread = NULL;
   spk->driver.data = NULL;
 }
@@ -80,30 +83,6 @@ stopSpeechDriverThread (void) {
   }
 }
 
-void
-setSpeechFinished (void) {
-  spk.track.isActive = 0;
-  spk.track.speechLocation = SPK_LOC_NONE;
-
-  endAutospeakDelay();
-}
-
-void
-setSpeechLocation (int location) {
-  if (spk.track.isActive) {
-    if (scr.number == spk.track.screenNumber) {
-      if (location != spk.track.speechLocation) {
-        spk.track.speechLocation = location;
-        if (ses->trackScreenCursor) trackSpeech();
-      }
-
-      return;
-    }
-
-    setSpeechFinished();
-  }
-}
-
 int
 muteSpeech (const char *reason) {
   int result;
@@ -111,7 +90,7 @@ muteSpeech (const char *reason) {
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "mute: %s", reason);
   result = speechRequest_muteSpeech(speechDriverThread);
 
-  setSpeechFinished();
+  if (spk.setFinished) spk.setFinished();
   return result;
 }
 
