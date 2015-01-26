@@ -44,14 +44,21 @@ getByteOperand (DataFile *file, unsigned char *byte) {
 static int
 getCharacterOperand (DataFile *file, wchar_t *character) {
   DataString string;
-  const char *description = "unicode character";
+  const char *description = "Unicode character";
 
   if (getDataString(file, &string, 0, description)) {
-    if (!(string.characters[0] & ~UNICODE_CHARACTER_MASK)) {
-      *character = string.characters[0];
-      return 1;
+    if (string.length == 1) {
+      wchar_t wc = string.characters[0];
+
+      if (!(wc & ~UNICODE_CHARACTER_MASK)) {
+        *character = wc;
+        return 1;
+      } else {
+        reportDataError(file, "%s out of range: %.*" PRIws,
+                        description, string.length, string.characters);
+      }
     } else {
-      reportDataError(file, "invalid %s: %.*" PRIws,
+      reportDataError(file, "not a single %s: %.*" PRIws,
                       description, string.length, string.characters);
     }
   }
@@ -137,7 +144,7 @@ static DATA_OPERANDS_PROCESSOR(processAliasOperands) {
       const unsigned char *cell = getUnicodeCellEntry(ttd, oldCharacter);
 
       if (!cell) {
-        reportDataError(file, "character not defined");
+        reportDataError(file, "base character not defined");
       } else if (!setTextTableGlyph(ttd, newCharacter, *cell)) {
         return 0;
       }
@@ -195,10 +202,10 @@ static DATA_OPERANDS_PROCESSOR(processGlyphOperands) {
 static int
 processTextTableLine (DataFile *file, void *data) {
   BEGIN_DATA_DIRECTIVE_TABLE
-    {.name=WS_C("char"), .processor=processCharOperands},
-    {.name=WS_C("glyph"), .processor=processGlyphOperands},
     {.name=WS_C("alias"), .processor=processAliasOperands},
     {.name=WS_C("byte"), .processor=processByteOperands},
+    {.name=WS_C("char"), .processor=processCharOperands},
+    {.name=WS_C("glyph"), .processor=processGlyphOperands},
     DATA_NESTING_DIRECTIVES,
   END_DATA_DIRECTIVE_TABLE
 
