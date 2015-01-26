@@ -39,7 +39,6 @@
 #include "cmd_learn.h"
 #include "charset.h"
 #include "message.h"
-#include "defaults.h"
 
 static BrailleDisplay brl;
 
@@ -121,6 +120,7 @@ message (const char *mode, const char *text, MessageOptions options) {
 int
 main (int argc, char *argv[]) {
   ProgramExitStatus exitStatus;
+
   const char *driver = NULL;
   void *object;
 
@@ -130,14 +130,14 @@ main (int argc, char *argv[]) {
       .applicationName = "brltest",
       .argumentsSummary = "[driver [parameter=value ...]]"
     };
+
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
 
   writableDirectory = opt_writableDirectory;
 
   if (argc) {
-    driver = *argv++;
-    --argc;
+    driver = *argv++, --argc;
   }
 
   if (!*opt_brailleDevice) {
@@ -147,28 +147,36 @@ main (int argc, char *argv[]) {
   if ((braille = loadBrailleDriver(driver, &object, opt_driversDirectory))) {
     const char *const *parameterNames = braille->parameters;
     char **parameterSettings;
+
     if (!parameterNames) {
       static const char *const noNames[] = {NULL};
+
       parameterNames = noNames;
     }
+
     {
       const char *const *name = parameterNames;
       unsigned int count;
       char **setting;
-      while (*name) ++name;
+
+      while (*name) name += 1;
       count = name - parameterNames;
+
       if (!(parameterSettings = malloc((count + 1) * sizeof(*parameterSettings)))) {
         logMallocError();
         return PROG_EXIT_FATAL;
       }
+
       setting = parameterSettings;
       while (count--) *setting++ = "";
       *setting = NULL;
     }
+
     while (argc) {
       char *assignment = *argv++;
       int ok = 0;
       char *delimiter = strchr(assignment, '=');
+
       if (!delimiter) {
         logMessage(LOG_ERR, "missing braille driver parameter value: %s", assignment);
       } else if (delimiter == assignment) {
@@ -176,39 +184,45 @@ main (int argc, char *argv[]) {
       } else {
         size_t nameLength = delimiter - assignment;
         const char *const *name = parameterNames;
+
         while (*name) {
           if (strncasecmp(assignment, *name, nameLength) == 0) {
             parameterSettings[name - parameterNames] = delimiter + 1;
             ok = 1;
             break;
           }
-          ++name;
+
+          name += 1;
         }
+
         if (!ok) logMessage(LOG_ERR, "invalid braille driver parameter: %s", assignment);
       }
+
       if (!ok) return PROG_EXIT_SYNTAX;
-      --argc;
+      argc -= 1;
     }
 
-    initializeBrailleDisplay(&brl);
+    constructBrailleDisplay(&brl);
     identifyBrailleDriver(braille, 0);		/* start-up messages */
+
     if (braille->construct(&brl, parameterSettings, opt_brailleDevice)) {
       if (ensureBrailleBuffer(&brl, LOG_INFO)) {
         learnMode(10000);
         braille->destruct(&brl);		/* finish with the display */
         exitStatus = PROG_EXIT_SUCCESS;
       } else {
-        logMessage(LOG_ERR, "can't allocate braille buffer.");
+        logMessage(LOG_ERR, "can't allocate braille buffer");
         exitStatus = PROG_EXIT_FATAL;
       }
     } else {
-      logMessage(LOG_ERR, "can't initialize braille driver.");
+      logMessage(LOG_ERR, "can't initialize braille driver");
       exitStatus = PROG_EXIT_FATAL;
     }
   } else {
-    logMessage(LOG_ERR, "can't load braille driver.");
+    logMessage(LOG_ERR, "can't load braille driver");
     exitStatus = PROG_EXIT_FATAL;
   }
+
   return exitStatus;
 }
 

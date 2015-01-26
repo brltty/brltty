@@ -119,7 +119,7 @@ ASYNC_TASK_CALLBACK(presentLearnMode) {
   free(lmp);
 }
 
-static int
+int
 learnMode (int timeout) {
   LearnModeParameters *lmp;
 

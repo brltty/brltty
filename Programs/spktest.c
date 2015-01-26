@@ -205,7 +205,7 @@ main (int argc, char *argv[]) {
       stopSpeechDriverThread();		/* finish with the display */
       exitStatus = PROG_EXIT_SUCCESS;
     } else {
-      logMessage(LOG_ERR, "can't initialize speech driver.");
+      logMessage(LOG_ERR, "can't initialize speech driver");
       exitStatus = PROG_EXIT_FATAL;
     }
   } else {

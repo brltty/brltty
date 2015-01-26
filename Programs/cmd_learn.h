@@ -25,6 +25,8 @@ extern "C" {
 
 extern int addLearnCommands (void);
 
+extern int learnMode (int timeout);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
