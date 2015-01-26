@@ -90,10 +90,12 @@ sayLine (char *line, void *data) {
 int
 main (int argc, char *argv[]) {
   ProgramExitStatus exitStatus;
+
   const char *driver = NULL;
   void *object;
-  float speechRate;
-  float speechVolume;
+
+  float speechVolume = 1.0;
+  float speechRate = 1.0;
 
   {
     static const OptionsDescriptor descriptor = {
@@ -101,59 +103,67 @@ main (int argc, char *argv[]) {
       .applicationName = "spktest",
       .argumentsSummary = "[driver [parameter=value ...]]"
     };
+
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
 
-  speechRate = 1.0;
-  if (opt_speechRate && *opt_speechRate) {
-    static const float minimum = 0.1;
-    static const float maximum = 10.0;
-    if (!validateFloat(&speechRate, opt_speechRate, &minimum, &maximum)) {
-      logMessage(LOG_ERR, "%s: %s", "invalid rate multiplier", opt_speechRate);
-      return PROG_EXIT_SYNTAX;
-    }
-  }
-
-  speechVolume = 1.0;
   if (opt_speechVolume && *opt_speechVolume) {
     static const float minimum = 0.0;
     static const float maximum = 2.0;
+
     if (!validateFloat(&speechVolume, opt_speechVolume, &minimum, &maximum)) {
       logMessage(LOG_ERR, "%s: %s", "invalid volume multiplier", opt_speechVolume);
       return PROG_EXIT_SYNTAX;
     }
   }
 
+  if (opt_speechRate && *opt_speechRate) {
+    static const float minimum = 0.1;
+    static const float maximum = 10.0;
+
+    if (!validateFloat(&speechRate, opt_speechRate, &minimum, &maximum)) {
+      logMessage(LOG_ERR, "%s: %s", "invalid rate multiplier", opt_speechRate);
+      return PROG_EXIT_SYNTAX;
+    }
+  }
+
   if (argc) {
-    driver = *argv++;
-    --argc;
+    driver = *argv++, --argc;
   }
 
   if ((speech = loadSpeechDriver(driver, &object, opt_driversDirectory))) {
     const char *const *parameterNames = speech->parameters;
     char **parameterSettings;
+
     if (!parameterNames) {
       static const char *const noNames[] = {NULL};
+
       parameterNames = noNames;
     }
+
     {
       const char *const *name = parameterNames;
       unsigned int count;
       char **setting;
-      while (*name) ++name;
+
+      while (*name) name += 1;
       count = name - parameterNames;
+
       if (!(parameterSettings = malloc((count + 1) * sizeof(*parameterSettings)))) {
         logMallocError();
         return PROG_EXIT_FATAL;
       }
+
       setting = parameterSettings;
       while (count--) *setting++ = "";
       *setting = NULL;
     }
+
     while (argc) {
       char *assignment = *argv++;
       int ok = 0;
       char *delimiter = strchr(assignment, '=');
+
       if (!delimiter) {
         logMessage(LOG_ERR, "missing speech driver parameter value: %s", assignment);
       } else if (delimiter == assignment) {
@@ -161,25 +171,30 @@ main (int argc, char *argv[]) {
       } else {
         size_t nameLength = delimiter - assignment;
         const char *const *name = parameterNames;
+
         while (*name) {
           if (strncasecmp(assignment, *name, nameLength) == 0) {
             parameterSettings[name - parameterNames] = delimiter + 1;
             ok = 1;
             break;
           }
-          ++name;
+
+          name += 1;
         }
+
         if (!ok) logMessage(LOG_ERR, "invalid speech driver parameter: %s", assignment);
       }
+
       if (!ok) return PROG_EXIT_SYNTAX;
-      --argc;
+      argc -= 1;
     }
 
-    initializeSpeechSynthesizer(&spk);
+    constructSpeechSynthesizer(&spk);
     identifySpeechDriver(speech, 0);		/* start-up messages */
-    if (startSpeechDriverThread(&spk, parameterSettings)) {
-      if (speech->setVolume) setSpeechVolume(speechVolume, 0);
-      if (speech->setRate) setSpeechRate(speechRate, 0);
+
+    if (startSpeechDriverThread(parameterSettings)) {
+      if (canSetSpeechVolume()) setSpeechVolume(speechVolume, 0);
+      if (canSetSpeechRate()) setSpeechRate(speechRate, 0);
 
       if (opt_textString && *opt_textString) {
         sayString(opt_textString, 0);
@@ -194,8 +209,9 @@ main (int argc, char *argv[]) {
       exitStatus = PROG_EXIT_FATAL;
     }
   } else {
-    logMessage(LOG_ERR, "can't load speech driver.");
+    logMessage(LOG_ERR, "can't load speech driver");
     exitStatus = PROG_EXIT_FATAL;
   }
+
   return exitStatus;
 }
