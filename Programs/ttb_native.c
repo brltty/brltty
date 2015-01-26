@@ -126,6 +126,27 @@ getDotsOperand (DataFile *file, unsigned char *dots) {
   return 0;
 }
 
+static DATA_OPERANDS_PROCESSOR(processAliasOperands) {
+  TextTableData *ttd = data;
+  wchar_t newCharacter;
+
+  if (getCharacterOperand(file, &newCharacter)) {
+    wchar_t oldCharacter;
+
+    if (getCharacterOperand(file, &oldCharacter)) {
+      const unsigned char *cell = getUnicodeCellEntry(ttd, oldCharacter);
+
+      if (!cell) {
+        reportDataError(file, "character not defined");
+      } else if (!setTextTableGlyph(ttd, newCharacter, *cell)) {
+        return 0;
+      }
+    }
+  }
+
+  return 1;
+}
+
 static DATA_OPERANDS_PROCESSOR(processByteOperands) {
   TextTableData *ttd = data;
   unsigned char byte;
@@ -176,6 +197,7 @@ processTextTableLine (DataFile *file, void *data) {
   BEGIN_DATA_DIRECTIVE_TABLE
     {.name=WS_C("char"), .processor=processCharOperands},
     {.name=WS_C("glyph"), .processor=processGlyphOperands},
+    {.name=WS_C("alias"), .processor=processAliasOperands},
     {.name=WS_C("byte"), .processor=processByteOperands},
     DATA_NESTING_DIRECTIVES,
   END_DATA_DIRECTIVE_TABLE
