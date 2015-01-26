@@ -23,10 +23,6 @@
 #include <ctype.h>
 #include <errno.h>
 
-#ifdef HAVE_ICU
-#include <unicode/uchar.h>
-#endif /* HAVE_ICU */
-
 #include "program.h"
 #include "options.h"
 #include "log.h"
@@ -250,17 +246,13 @@ writeCharacter_native (
   if (fprintf(file, " ") == EOF) goto error;
   if (!writeUtf8Character(file, ((iswprint(character) && !iswspace(character))? character: WC_C(' ')))) goto error;
 
-#ifdef HAVE_ICU
   {
     char name[0X40];
-    UErrorCode error = U_ZERO_ERROR;
 
-    u_charName(character, U_EXTENDED_CHAR_NAME, name, sizeof(name), &error);
-    if (U_SUCCESS(error)) {
+    if (getCharacterName(character, name, sizeof(name))) {
       if (fprintf(file, " [%s]", name) == EOF) return 0;
     }
   }
-#endif /* HAVE_ICU */
 
   if (fprintf(file, "\n") == EOF) goto error;
   return 1;
@@ -455,17 +447,13 @@ writeCharacter_libLouis (
     if (!writeDots(file, dots)) return 0;
   }
 
-#ifdef HAVE_ICU
   {
     char name[0X40];
-    UErrorCode error = U_ZERO_ERROR;
 
-    u_charName(character, U_EXTENDED_CHAR_NAME, name, sizeof(name), &error);
-    if (U_SUCCESS(error)) {
+    if (getCharacterName(character, name, sizeof(name))) {
       if (fprintf(file, "\t%s", name) == EOF) return 0;
     }
   }
-#endif /* HAVE_ICU */
 
   if (fprintf(file, "\n") == EOF) return 0;
   return 1;
@@ -577,17 +565,14 @@ writeCharacter_CPreprocessor (
   if (fprintf(file, "0X%02" PRIX8 ", ", dots) == EOF) return 0;
   if (fprintf(file, "%d)", isPrimary) == EOF) return 0;
 
-#ifdef HAVE_ICU
   {
     char name[0X40];
-    UErrorCode error = U_ZERO_ERROR;
 
-    u_charName(character, U_EXTENDED_CHAR_NAME, name, sizeof(name), &error);
-    if (U_SUCCESS(error)) {
+    ;
+    if (getCharacterName(character, name, sizeof(name))) {
       if (fprintf(file, " /* %s */", name) == EOF) return 0;
     }
   }
-#endif /* HAVE_ICU */
 
   if (fprintf(file, "\n") == EOF) return 0;
   return 1;
@@ -938,19 +923,15 @@ makeCharacterDescription (TextTableData *ttd, wchar_t character, size_t *length,
   }
 #undef DOT
 
-#ifdef HAVE_ICU
   {
     char *name = buffer + descriptionLength + 1;
     int size = buffer + sizeof(buffer) - name;
-    UErrorCode error = U_ZERO_ERROR;
 
-    u_charName(character, U_EXTENDED_CHAR_NAME, name, size, &error);
-    if (U_SUCCESS(error)) {
+    if (getCharacterName(character, name, size)) {
       descriptionLength += strlen(name) + 1;
       *--name = ' ';
     }
   }
-#endif /* HAVE_ICU */
 
   {
     wchar_t *description = calloc(descriptionLength+1, sizeof(*description));

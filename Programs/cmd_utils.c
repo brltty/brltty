@@ -20,13 +20,10 @@
 
 #include <stdio.h>
 
-#ifdef HAVE_ICU
-#include <unicode/uchar.h>
-#endif /* HAVE_ICU */
-
 #include "parameters.h"
 #include "cmd_utils.h"
 #include "brl_cmds.h"
+#include "unicode.h"
 #include "async_wait.h"
 #include "scr.h"
 #include "brltty.h"
@@ -163,17 +160,13 @@ formatCharacterDescription (char *buffer, size_t size, int column, int row) {
     STR_PRINTF(" %s", gettext("blink"));
   }
 
-#ifdef HAVE_ICU
   {
     char name[0X40];
-    UErrorCode error = U_ZERO_ERROR;
 
-    u_charName(character.text, U_EXTENDED_CHAR_NAME, name, sizeof(name), &error);
-    if (U_SUCCESS(error)) {
+    if (getCharacterName(character.text, name, sizeof(name))) {
       STR_PRINTF(" [%s]", name);
     }
   }
-#endif /* HAVE_ICU */
 
   length = STR_LENGTH;
   STR_END;

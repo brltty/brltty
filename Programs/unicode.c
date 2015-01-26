@@ -31,6 +31,18 @@
 #include "ascii.h"
 
 int
+getCharacterName (wchar_t character, char *buffer, size_t size) {
+#ifdef HAVE_ICU
+  UErrorCode error = U_ZERO_ERROR;
+
+  u_charName(character, U_EXTENDED_CHAR_NAME, buffer, size, &error);
+  if (U_SUCCESS(error)) return 1;
+#endif /* HAVE_ICU */
+
+  return 0;
+}
+
+int
 getCharacterByName (wchar_t *character, const char *name) {
 #ifdef HAVE_ICU
   UErrorCode error = U_ZERO_ERROR;
