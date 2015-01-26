@@ -588,10 +588,12 @@ writeCharacter_CPreprocessor (
   {
     char name[0X40];
 
+    if (fprintf(file, ", ") == EOF) return 0;
+
     if (getCharacterName(character, name, sizeof(name))) {
-      if (fprintf(file, ", \"%s\"", name) == EOF) return 0;
+      if (fprintf(file, "\"%s\"", name) == EOF) return 0;
     } else {
-      if (fprintf(file, ", NULL") == EOF) return 0;
+      if (fprintf(file, "NULL") == EOF) return 0;
     }
   }
 
