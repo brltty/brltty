@@ -417,4 +417,6 @@ char \XA0 (      78)  # 160  ~   no-break space
      #Hex    Dots       Dec Char Description
 char \X7F (   4567 )  # 127  ^?  delete
 
+include ltr-alias.tti
+include num-alias.tti
 include common.tti
