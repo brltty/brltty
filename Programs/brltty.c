@@ -201,6 +201,45 @@ handleUnhandledCommands (int command, void *data) {
   return 1;
 }
 
+static int
+handleApiCommands (int command, void *data) {
+#ifdef ENABLE_API
+  if (apiStarted) {
+    if (api_handleCommand(command)) {
+      return 1;
+    }
+  }
+#endif /* ENABLE_API */
+
+  return 0;
+}
+
+static int
+addCommands (void) {
+  if (!pushCommandEnvironment("main", preprocessCommand, postprocessCommand)) return 0;
+
+  pushCommandHandler("unhandled", KTB_CTX_DEFAULT,
+                     handleUnhandledCommands, NULL, NULL);
+
+  addMiscellaneousCommands();
+  addLearnCommands();
+  addSpeechCommands();
+  addClipboardCommands();
+  addPreferencesCommands();
+  addToggleCommands();
+  addTouchCommands();
+  addKeycodeCommands();
+  addInputCommands();
+  addNavigationCommands();
+  addScreenCommands();
+  addCustomCommands();
+
+  pushCommandHandler("API", KTB_CTX_DEFAULT,
+                     handleApiCommands, NULL, NULL);
+
+  return 1;
+}
+
 static void
 setSessionEntry (void) {
   describeScreen(&scr);
@@ -216,22 +255,7 @@ setSessionEntry (void) {
       ses = getSessionEntry(scr.number);
 
       if (state == FIRST) {
-        pushCommandEnvironment("main", preprocessCommand, postprocessCommand);
-        pushCommandHandler("unhandled", KTB_CTX_DEFAULT,
-                           handleUnhandledCommands, NULL, NULL);
-
-        addMiscellaneousCommands();
-        addLearnCommands();
-        addSpeechCommands();
-        addClipboardCommands();
-        addPreferencesCommands();
-        addToggleCommands();
-        addTouchCommands();
-        addKeycodeCommands();
-        addInputCommands();
-        addNavigationCommands();
-        addScreenCommands();
-        addCustomCommands();
+        addCommands();
       }
     }
   }

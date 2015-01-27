@@ -28,7 +28,6 @@
 #include "queue.h"
 #include "async_alarm.h"
 #include "prefs.h"
-#include "api_control.h"
 #include "ktb_types.h"
 #include "scr.h"
 #include "brltty.h"
@@ -243,14 +242,6 @@ cancelCommandAlarm (void) {
 int
 enqueueCommand (int command) {
   if (command == EOF) return 1;
-
-#ifdef ENABLE_API
-  if (apiStarted) {
-    if (api_handleCommand(command)) {
-      return 1;
-    }
-  }
-#endif /* ENABLE_API */
 
   {
     Queue *queue = getCommandQueue(1);
