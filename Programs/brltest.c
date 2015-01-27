@@ -29,12 +29,19 @@
 
 #include "program.h"
 #include "options.h"
+#include "parameters.h"
 #include "log.h"
 #include "parse.h"
 #include "file.h"
+#include "cmd_queue.h"
 #include "brl.h"
 #include "brl_input.h"
+#include "brl_utils.h"
+#include "ttb.h"
 #include "ktb.h"
+#include "message.h"
+#include "charset.h"
+#include "async_wait.h"
 
 BrailleDisplay brl;
 
@@ -183,7 +190,9 @@ main (int argc, char *argv[]) {
           }
         }
 
+        beginCommandQueue();
         startBrailleInput();
+        message(NULL, programName, 0);
         stopBrailleInput();
 
         if (brl.keyTable) {
@@ -211,7 +220,76 @@ main (int argc, char *argv[]) {
   return exitStatus;
 }
 
-#include "ktb_types.h"
+typedef struct {
+  unsigned endWait:1;
+} MessageData;
+
+static int
+handleMessageCommands (int command, void *data) {
+  MessageData *mgd = data;
+
+  mgd->endWait = 1;
+  return 1;
+}
+
+ASYNC_CONDITION_TESTER(testEndMessageWait) {
+  const MessageData *mgd = data;
+
+  return mgd->endWait;
+}
+
+int
+message (const char *mode, const char *text, MessageOptions options) {
+  MessageData mgd;
+
+  size_t size = brl.textColumns * brl.textRows;
+  wchar_t buffer[size];
+
+  size_t length = getTextLength(text);
+  wchar_t characters[length + 1];
+  const wchar_t *character = characters;
+
+  clearStatusCells(&brl);
+  convertTextToWchars(characters, text, ARRAY_COUNT(characters));
+
+  pushCommandEnvironment("message", NULL, NULL);
+  pushCommandHandler("message", KTB_CTX_WAITING,
+                     handleMessageCommands, NULL, &mgd);
+
+  while (length) {
+    size_t count = (length <= size)? length: (size - 1);
+
+    wmemcpy(buffer, character, count);
+    character += count;
+    length -= count;
+
+    if (length) {
+      buffer[(count = size) - 1] = WC_C('-');
+    }
+    wmemset(&buffer[count], WC_C(' '), (size - count));
+
+    {
+      unsigned int i;
+
+      for (i=0; i<size; i+=1) {
+        brl.buffer[i] = convertCharacterToDots(textTable, buffer[i]);
+      }
+    }
+
+    if (!braille->writeWindow(&brl, buffer)) return 0;
+
+    {
+      int delay = MESSAGE_HOLD_TIMEOUT - brl.writeDelay;
+
+      mgd.endWait = 0;
+      drainBrailleOutput(&brl, 0);
+      asyncAwaitCondition(delay, testEndMessageWait, &mgd);
+    }
+  }
+
+  popCommandEnvironment();
+  return 1;
+}
 
 KeyTableCommandContext
 getScreenCommandContext (void) {
