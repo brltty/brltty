@@ -740,7 +740,7 @@ brltty-trtxt.$O:
 
 ###############################################################################
 
-BRLTEST_OBJECTS = brltest.$O $(PROGRAM_OBJECTS) report.$O $(TTB_OBJECTS) $(KTB_OBJECTS) dataarea.$O cmd.$O cmd_queue.$O drivers.$O driver.$O $(BRAILLE_OBJECTS) $(PREFS_OBJECTS)
+BRLTEST_OBJECTS = brltest.$O $(PROGRAM_OBJECTS) report.$O $(TTB_OBJECTS) $(KTB_OBJECTS) dataarea.$O cmd.$O cmd_queue.$O drivers.$O driver.$O $(BRAILLE_OBJECTS) $(PREFS_OBJECTS) hidkeys.$O
 
 brltest$X: $(BRLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LDLIBS)
