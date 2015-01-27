@@ -178,3 +178,10 @@ main (int argc, char *argv[]) {
 
   return exitStatus;
 }
+
+#include "ktb_types.h"
+
+KeyTableCommandContext
+getScreenCommandContext (void) {
+  return KTB_CTX_DEFAULT;
+}
