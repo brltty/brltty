@@ -62,13 +62,14 @@ static unsigned int commandQueueSuspendCount = 0;
 
 static CommandHandlerLevel **
 getCommandHandlerTop (void) {
+  if (!commandEnvironmentStack) return NULL;
   return &commandEnvironmentStack->handlerStack;
 }
 
 KeyTableCommandContext
 getCurrentCommandContext (void) {
-  const CommandHandlerLevel *chl = *getCommandHandlerTop();
-  KeyTableCommandContext context = chl? chl->commandContext: KTB_CTX_DEFAULT;
+  CommandHandlerLevel **top = getCommandHandlerTop();
+  KeyTableCommandContext context = top? (*top)->commandContext: KTB_CTX_DEFAULT;
 
   if (context == KTB_CTX_DEFAULT) context = getScreenCommandContext();
   return context;
