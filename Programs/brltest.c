@@ -29,18 +29,12 @@
 
 #include "program.h"
 #include "options.h"
-#include "parameters.h"
 #include "log.h"
 #include "parse.h"
-#include "brl.h"
-#include "brl_dots.h"
 #include "file.h"
-#include "async_wait.h"
-#include "cmd_learn.h"
-#include "charset.h"
-#include "message.h"
+#include "brl.h"
 
-static BrailleDisplay brl;
+BrailleDisplay brl;
 
 static char *opt_brailleDevice;
 static char *opt_driversDirectory;
@@ -75,47 +69,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = "Path to device for accessing braille display."
   },
 END_OPTION_TABLE
-
-int
-message (const char *mode, const char *text, MessageOptions options) {
-  size_t size = brl.textColumns * brl.textRows;
-  wchar_t buffer[size];
-
-  size_t length = getTextLength(text);
-  wchar_t characters[length + 1];
-  const wchar_t *character = characters;
-
-  clearStatusCells(&brl);
-  convertTextToWchars(characters, text, ARRAY_COUNT(characters));
-
-  while (length) {
-    int count = (length <= size)? length: (size - 1);
-
-    wmemcpy(buffer, character, count);
-    character += count;
-    length -= count;
-
-    if (length) {
-      buffer[(count = size) - 1] = WC_C('-');
-    }
-
-    {
-      wmemset(&buffer[count], WC_C(' '), (size - count));
-      if (!braille->writeWindow(&brl, buffer)) return 0;
-    }
-
-    if (length) {
-      int timer = 0;
-      while (braille->readCommand(&brl, KTB_CTX_WAITING) == EOF) {
-        if (timer > 4000) break;
-        asyncWait(SCREEN_UPDATE_POLL_INTERVAL);
-        timer += SCREEN_UPDATE_POLL_INTERVAL;
-      }
-    }
-  }
-
-  return 1;
-}
 
 int
 main (int argc, char *argv[]) {
@@ -207,7 +160,7 @@ main (int argc, char *argv[]) {
 
     if (braille->construct(&brl, parameterSettings, opt_brailleDevice)) {
       if (ensureBrailleBuffer(&brl, LOG_INFO)) {
-        learnMode(10000);
+      //learnMode(10000);
         braille->destruct(&brl);		/* finish with the display */
         exitStatus = PROG_EXIT_SUCCESS;
       } else {
@@ -224,15 +177,4 @@ main (int argc, char *argv[]) {
   }
 
   return exitStatus;
-}
-
-/* dummy functions to allow drivers to link... */
-unsigned char
-getScreenCursorDots (void) {
-  return (BRL_DOT_7 | BRL_DOT_8);
-}
-
-int
-currentVirtualTerminal (void) {
-  return 0;
 }

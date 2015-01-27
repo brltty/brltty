@@ -403,6 +403,137 @@ notes_fm.$O:
 
 ###############################################################################
 
+TTB_OBJECTS = ttb_translate.$O ttb_compile.$O ttb_native.$O
+
+ttb_translate.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ttb_translate.c
+
+ttb_compile.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ttb_compile.c
+
+ttb_native.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ttb_native.c
+
+ttb_gnome.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ttb_gnome.c
+
+ttb_louis.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ttb_louis.c
+
+BRLTTY_TTB_OBJECTS = brltty-ttb.$O $(PROGRAM_OBJECTS) dataarea.$O ttb_compile.$O ttb_native.$O ttb_gnome.$O ttb_louis.$O
+
+brltty-ttb$X: $(BRLTTY_TTB_OBJECTS) $(BUILD_API)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_TTB_OBJECTS) $(API_REF) $(CURSES_LIBS) $(LDLIBS)
+
+brltty-ttb.$O:
+	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/brltty-ttb.c
+
+check-text-tables: brltty-ttb$X $(API_LIB_VERSIONED)
+	@echo checking text tables
+	set -- $(SRC_TOP)$(TBL_DIR)/$(TEXT_TABLES_SUBDIRECTORY)/*$(TEXT_TABLE_EXTENSION) && \
+	for file; do \
+	LD_LIBRARY_PATH=$(BLD_DIR) \
+	./brltty-ttb$X -T$(SRC_TOP)$(TBL_DIR) $${file##*/}; \
+	done
+
+###############################################################################
+
+ATB_OBJECTS = atb_translate.$O atb_compile.$O
+
+atb_translate.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/atb_translate.c
+
+atb_compile.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/atb_compile.c
+
+BRLTTY_ATB_OBJECTS = brltty-atb.$O $(PROGRAM_OBJECTS) $(ATB_OBJECTS) dataarea.$O
+
+brltty-atb$X: $(BRLTTY_ATB_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_ATB_OBJECTS) $(LDLIBS)
+
+brltty-atb.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-atb.c
+
+check-attributes-tables: brltty-atb$X
+	@echo checking attributes tables
+	set -- $(SRC_TOP)$(TBL_DIR)/$(ATTRIBUTES_TABLES_SUBDIRECTORY)/*$(ATTRIBUTES_TABLE_EXTENSION) && \
+	for file; do \
+	./brltty-atb$X -T$(SRC_TOP)$(TBL_DIR) $${file##*/}; \
+	done
+
+###############################################################################
+
+ctb_translate.$O:
+	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ctb_translate.c
+
+ctb_compile.$O:
+	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ctb_compile.c
+
+BRLTTY_CTB_OBJECTS = brltty-ctb.$O $(PROGRAM_OBJECTS) $(PREFS_OBJECTS) dataarea.$O $(TTB_OBJECTS) ctb_compile.$O ctb_translate.$O
+
+brltty-ctb$X: $(BRLTTY_CTB_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_CTB_OBJECTS) $(LDLIBS)
+
+brltty-ctb.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-ctb.c
+
+check-contraction-tables: brltty-ctb$X
+	@echo checking contraction tables
+	set -- $(SRC_TOP)$(TBL_DIR)/$(CONTRACTION_TABLES_SUBDIRECTORY)/*$(CONTRACTION_TABLE_EXTENSION) && \
+	for file; do \
+	test -x $${file} || \
+	./brltty-ctb$X -T$(SRC_TOP)$(TBL_DIR) -c$${file##*/} </dev/null; \
+	done
+
+###############################################################################
+
+KTB_OBJECTS = ktb_translate.$O ktb_compile.$O ktb_list.$O ktb_cmds.$O
+
+ktb_translate.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ktb_translate.c
+
+ktb_compile.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ktb_compile.c
+
+ktb_list.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ktb_list.c
+
+ktb_cmds.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ktb_cmds.c
+
+ktb_keyboard.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ktb_keyboard.c
+
+BRLTTY_KTB_OBJECTS = brltty-ktb.$O $(PROGRAM_OBJECTS) ktb_compile.$O ktb_list.$O ktb_cmds.$O ktb_keyboard.$O $(TTB_OBJECTS) dataarea.$O drivers.$O driver.$O brl_utils.$O brl_driver.$O brl_base.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) $(PREFS_OBJECTS) cmd.$O cmd_queue.$O hidkeys.$O report.$O
+
+brltty-ktb$X: $(BRLTTY_KTB_OBJECTS) $(BRAILLE_DRIVERS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_KTB_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LDLIBS)
+
+brltty-ktb.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-ktb.c
+
+check-keyboard-tables: all-brltty-ktb
+	@echo checking keyboard tables
+	set -- $(SRC_TOP)$(TBL_DIR)/$(KEYBOARD_TABLES_SUBDIRECTORY)/*$(KEY_TABLE_EXTENSION) && \
+	for file; do \
+	name=$${file##*/}; \
+	name=$${name%.*}; \
+	./brltty-ktb$X -D$(BLD_TOP)$(DRV_DIR) -T$(SRC_TOP)$(TBL_DIR) kbd-$$name; \
+	done
+
+check-input-tables: all-brltty-ktb
+	@echo checking input tables
+	find $(SRC_TOP)$(TBL_DIR)/$(INPUT_TABLES_SUBDIRECTORY) -name '*$(KEY_TABLE_EXTENSION)' -print | \
+	while read file; do \
+	driver=$${file%/*}; \
+	driver=$${driver##*/}; \
+	name=$${file##*/}; \
+	name=$${name%.*}; \
+	./brltty-ktb$X -D$(BLD_TOP)$(DRV_DIR) -T$(SRC_TOP)$(TBL_DIR) brl-$$driver-$$name; \
+	done
+
+###############################################################################
+
 api_control.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/api_control.c
 
@@ -469,7 +600,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O activity.$O $(PREFS_OBJECTS) profile.$O menu.$O menu_prefs.$O ses.$O status.$O update.$O blink.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_utils.$O cmd_custom.$O cmd_navigation.$O cmd_input.$O cmd_keycodes.$O cmd_touch.$O cmd_toggle.$O cmd_preferences.$O cmd_clipboard.$O cmd_speech.$O cmd_learn.$O cmd_miscellaneous.$O pipe.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O ktb_list.$O ktb_cmds.$O ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) spk_input.$O api_control.$O $(API_SERVER_OBJECTS)
+CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O activity.$O $(PREFS_OBJECTS) profile.$O menu.$O menu_prefs.$O ses.$O status.$O update.$O blink.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_utils.$O cmd_custom.$O cmd_navigation.$O cmd_input.$O cmd_keycodes.$O cmd_touch.$O cmd_toggle.$O cmd_preferences.$O cmd_clipboard.$O cmd_speech.$O cmd_learn.$O cmd_miscellaneous.$O pipe.$O $(TTB_OBJECTS) $(ATB_OBJECTS) $(CTB_OBJECTS) $(KTB_OBJECTS) ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) spk_input.$O api_control.$O $(API_SERVER_OBJECTS)
 CORE_NAME = brltty
 
 brltty-core: $(CORE_OBJECTS)
@@ -599,7 +730,7 @@ brltty_jni.$O:
 
 ###############################################################################
 
-BRLTTY_TRTXT_OBJECTS = brltty-trtxt.$O $(PROGRAM_OBJECTS) ttb_translate.$O ttb_compile.$O ttb_native.$O dataarea.$O
+BRLTTY_TRTXT_OBJECTS = brltty-trtxt.$O $(PROGRAM_OBJECTS) $(TTB_OBJECTS) dataarea.$O
 
 brltty-trtxt$X: $(BRLTTY_TRTXT_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_TRTXT_OBJECTS) $(LDLIBS)
@@ -609,64 +740,7 @@ brltty-trtxt.$O:
 
 ###############################################################################
 
-BRLTTY_TTB_OBJECTS = brltty-ttb.$O $(PROGRAM_OBJECTS) dataarea.$O ttb_compile.$O ttb_native.$O ttb_gnome.$O ttb_louis.$O
-
-brltty-ttb$X: $(BRLTTY_TTB_OBJECTS) $(BUILD_API)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_TTB_OBJECTS) $(API_REF) $(CURSES_LIBS) $(LDLIBS)
-
-brltty-ttb.$O:
-	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/brltty-ttb.c
-
-ttb_compile.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ttb_compile.c
-
-ttb_native.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ttb_native.c
-
-ttb_gnome.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ttb_gnome.c
-
-ttb_louis.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ttb_louis.c
-
-ttb_translate.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ttb_translate.c
-
-check-text-tables: brltty-ttb$X $(API_LIB_VERSIONED)
-	@echo checking text tables
-	set -- $(SRC_TOP)$(TBL_DIR)/$(TEXT_TABLES_SUBDIRECTORY)/*$(TEXT_TABLE_EXTENSION) && \
-	for file; do \
-	LD_LIBRARY_PATH=$(BLD_DIR) \
-	./brltty-ttb$X -T$(SRC_TOP)$(TBL_DIR) $${file##*/}; \
-	done
-
-###############################################################################
-
-BRLTTY_CTB_OBJECTS = brltty-ctb.$O $(PROGRAM_OBJECTS) $(PREFS_OBJECTS) dataarea.$O ttb_compile.$O ttb_native.$O ttb_translate.$O ctb_compile.$O ctb_translate.$O
-
-brltty-ctb$X: $(BRLTTY_CTB_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_CTB_OBJECTS) $(LDLIBS)
-
-brltty-ctb.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-ctb.c
-
-ctb_compile.$O:
-	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ctb_compile.c
-
-ctb_translate.$O:
-	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ctb_translate.c
-
-check-contraction-tables: brltty-ctb$X
-	@echo checking contraction tables
-	set -- $(SRC_TOP)$(TBL_DIR)/$(CONTRACTION_TABLES_SUBDIRECTORY)/*$(CONTRACTION_TABLE_EXTENSION) && \
-	for file; do \
-	test -x $${file} || \
-	./brltty-ctb$X -T$(SRC_TOP)$(TBL_DIR) -c$${file##*/} </dev/null; \
-	done
-
-###############################################################################
-
-BRLTEST_OBJECTS = brltest.$O $(PROGRAM_OBJECTS) ttb_translate.$O cmd.$O hidkeys.$O drivers.$O driver.$O $(BRAILLE_OBJECTS)
+BRLTEST_OBJECTS = brltest.$O $(PROGRAM_OBJECTS) report.$O $(TTB_OBJECTS) $(KTB_OBJECTS) dataarea.$O cmd.$O cmd_queue.$O drivers.$O driver.$O $(BRAILLE_OBJECTS) $(PREFS_OBJECTS)
 
 brltest$X: $(BRLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LDLIBS)
@@ -696,74 +770,6 @@ scrtest.$O:
 
 ###############################################################################
 
-BRLTTY_ATB_OBJECTS = brltty-atb.$O $(PROGRAM_OBJECTS) atb_compile.$O atb_translate.$O dataarea.$O
-
-brltty-atb$X: $(BRLTTY_ATB_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_ATB_OBJECTS) $(LDLIBS)
-
-brltty-atb.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-atb.c
-
-atb_compile.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/atb_compile.c
-
-atb_translate.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/atb_translate.c
-
-check-attributes-tables: brltty-atb$X
-	@echo checking attributes tables
-	set -- $(SRC_TOP)$(TBL_DIR)/$(ATTRIBUTES_TABLES_SUBDIRECTORY)/*$(ATTRIBUTES_TABLE_EXTENSION) && \
-	for file; do \
-	./brltty-atb$X -T$(SRC_TOP)$(TBL_DIR) $${file##*/}; \
-	done
-
-###############################################################################
-
-BRLTTY_KTB_OBJECTS = brltty-ktb.$O $(PROGRAM_OBJECTS) ktb_compile.$O ktb_list.$O ktb_cmds.$O ktb_keyboard.$O ttb_translate.$O ttb_compile.$O ttb_native.$O dataarea.$O drivers.$O driver.$O brl_utils.$O brl_driver.$O brl_base.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) $(PREFS_OBJECTS) cmd.$O cmd_queue.$O hidkeys.$O report.$O
-
-brltty-ktb$X: $(BRLTTY_KTB_OBJECTS) $(BRAILLE_DRIVERS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_KTB_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LDLIBS)
-
-brltty-ktb.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-ktb.c
-
-ktb_compile.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ktb_compile.c
-
-ktb_translate.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ktb_translate.c
-
-ktb_list.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ktb_list.c
-
-ktb_cmds.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ktb_cmds.c
-
-ktb_keyboard.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ktb_keyboard.c
-
-check-keyboard-tables: all-brltty-ktb
-	@echo checking keyboard tables
-	set -- $(SRC_TOP)$(TBL_DIR)/$(KEYBOARD_TABLES_SUBDIRECTORY)/*$(KEY_TABLE_EXTENSION) && \
-	for file; do \
-	name=$${file##*/}; \
-	name=$${name%.*}; \
-	./brltty-ktb$X -D$(BLD_TOP)$(DRV_DIR) -T$(SRC_TOP)$(TBL_DIR) kbd-$$name; \
-	done
-
-check-input-tables: all-brltty-ktb
-	@echo checking input tables
-	find $(SRC_TOP)$(TBL_DIR)/$(INPUT_TABLES_SUBDIRECTORY) -name '*$(KEY_TABLE_EXTENSION)' -print | \
-	while read file; do \
-	driver=$${file%/*}; \
-	driver=$${driver##*/}; \
-	name=$${file##*/}; \
-	name=$${name%.*}; \
-	./brltty-ktb$X -D$(BLD_TOP)$(DRV_DIR) -T$(SRC_TOP)$(TBL_DIR) brl-$$driver-$$name; \
-	done
-
-###############################################################################
-
 TUNETEST_OBJECTS = tunetest.$O $(PROGRAM_OBJECTS) $(PREFS_OBJECTS) $(TUNE_OBJECTS)
 
 tunetest$X: $(TUNETEST_OBJECTS)
@@ -774,7 +780,7 @@ tunetest.$O:
 
 ###############################################################################
 
-APITEST_OBJECTS = apitest.$O $(PROGRAM_OBJECTS) cmd.$O cmd_brlapi.$O ttb_translate.$O ttb_compile.$O ttb_native.$O dataarea.$O
+APITEST_OBJECTS = apitest.$O $(PROGRAM_OBJECTS) cmd.$O cmd_brlapi.$O $(TTB_OBJECTS) dataarea.$O
 
 apitest$X: $(APITEST_OBJECTS) api
 	$(CC) $(LDFLAGS) -o $@ $(APITEST_OBJECTS) $(API_LIBS) $(LDLIBS)
