@@ -51,11 +51,13 @@ constructBrailleDisplay (BrailleDisplay *brl) {
   brl->isOffline = 0;
   brl->isSuspended = 0;
 
-  brl->bufferResized = NULL;
   brl->setFirmness = NULL;
   brl->setSensitivity = NULL;
   brl->setAutorepeat = NULL;
+
+  brl->bufferResized = NULL;
   brl->rotateInput = NULL;
+  brl->handleKeyEvent = NULL;
 
   brl->acknowledgements.messages = NULL;
   brl->acknowledgements.alarm = NULL;

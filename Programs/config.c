@@ -1253,6 +1253,7 @@ static void
 initializeBrailleDisplay (void) {
   constructBrailleDisplay(&brl);
   brl.bufferResized = &brailleWindowReconfigured;
+  brl.handleKeyEvent = apiHandleKeyEvent;
 }
 
 int

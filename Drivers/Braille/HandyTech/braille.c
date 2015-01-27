@@ -287,10 +287,10 @@ static CellWriter writeCells_statusAndText;
 static CellWriter writeCells_Bookworm;
 static CellWriter writeCells_Evolution;
 
-static BrailleFirmnessSetter setFirmness;
+static SetBrailleFirmnessMethod setFirmness;
 
-static BrailleSensitivitySetter setSensitivity_Evolution;
-static BrailleSensitivitySetter setSensitivity_ActiveBraille;
+static SetBrailleSensitivityMethod setSensitivity_Evolution;
+static SetBrailleSensitivityMethod setSensitivity_ActiveBraille;
 
 typedef struct {
   const char *name;
@@ -298,8 +298,8 @@ typedef struct {
 
   ByteInterpreter *interpretByte;
   CellWriter *writeCells;
-  BrailleFirmnessSetter *setFirmness;
-  BrailleSensitivitySetter *setSensitivity;
+  SetBrailleFirmnessMethod *setFirmness;
+  SetBrailleSensitivityMethod *setSensitivity;
 
   BrailleSessionEnder *sessionEnder;
 

@@ -32,7 +32,6 @@
 #include "io_generic.h"
 #include "cmd_queue.h"
 #include "ktb.h"
-#include "api_control.h"
 
 const DotsTable dotsTable_ISO11548_1 = {
   BRL_DOT_1, BRL_DOT_2, BRL_DOT_3, BRL_DOT_4,
@@ -601,13 +600,11 @@ enqueueKeyEvent (
   BrailleDisplay *brl,
   KeyGroup group, KeyNumber number, int press
 ) {
-#ifdef ENABLE_API
-  if (apiStarted) {
-    if (api_handleKeyEvent(group, number, press)) {
+  if (brl->handleKeyEvent) {
+    if (brl->handleKeyEvent(group, number, press)) {
       return 1;
     }
   }
-#endif /* ENABLE_API */
 
   if (brl->keyTable) {
     switch (prefs.brailleDisplayOrientation) {

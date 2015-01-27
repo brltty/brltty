@@ -61,6 +61,9 @@ extern int apiResume (void);
 extern int apiClaimDriver (void);
 extern void apiReleaseDriver (void);
 
+extern int apiHandleCommand (int command);
+extern int apiHandleKeyEvent (KeyGroup group, KeyNumber number, int press);
+
 extern int apiFlush (void);
 
 #ifdef __cplusplus

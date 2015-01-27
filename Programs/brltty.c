@@ -203,15 +203,7 @@ handleUnhandledCommands (int command, void *data) {
 
 static int
 handleApiCommands (int command, void *data) {
-#ifdef ENABLE_API
-  if (apiStarted) {
-    if (api_handleCommand(command)) {
-      return 1;
-    }
-  }
-#endif /* ENABLE_API */
-
-  return 0;
+  return apiHandleCommand(command);
 }
 
 static int

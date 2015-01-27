@@ -58,10 +58,12 @@ typedef enum {
 typedef struct BrailleDisplayStruct BrailleDisplay;
 typedef struct BrailleDataStruct BrailleData;
 
-typedef int BrailleFirmnessSetter (BrailleDisplay *brl, BrailleFirmness setting);
-typedef int BrailleSensitivitySetter (BrailleDisplay *brl, BrailleSensitivity setting);
-typedef int BrailleAutorepeatSetter (BrailleDisplay *brl, int on, int delay, int interval);
-typedef void BrailleInputRotator (BrailleDisplay *brl, KeyGroup *group, KeyNumber *number);
+typedef int SetBrailleFirmnessMethod (BrailleDisplay *brl, BrailleFirmness setting);
+typedef int SetBrailleSensitivityMethod (BrailleDisplay *brl, BrailleSensitivity setting);
+typedef int SetBrailleAutorepeatMethod (BrailleDisplay *brl, int on, int delay, int interval);
+
+typedef void SetRotateInputMethod (BrailleDisplay *brl, KeyGroup *group, KeyNumber *number);
+typedef int HandleKeyEventMethod (KeyGroup group, KeyNumber number, int press);
 
 struct BrailleDisplayStruct {
   unsigned int textColumns, textRows;
@@ -84,11 +86,13 @@ struct BrailleDisplayStruct {
   unsigned isOffline:1;
   unsigned isSuspended:1;
 
+  SetBrailleFirmnessMethod *setFirmness;
+  SetBrailleSensitivityMethod *setSensitivity;
+  SetBrailleAutorepeatMethod *setAutorepeat;
+
   void (*bufferResized) (unsigned int rows, unsigned int columns);
-  BrailleFirmnessSetter *setFirmness;
-  BrailleSensitivitySetter *setSensitivity;
-  BrailleAutorepeatSetter *setAutorepeat;
-  BrailleInputRotator *rotateInput;
+  SetRotateInputMethod *rotateInput;
+  HandleKeyEventMethod *handleKeyEvent;
 
   struct {
     Queue *messages;

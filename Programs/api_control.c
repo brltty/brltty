@@ -150,6 +150,18 @@ apiReleaseDriver (void) {
 }
 
 int
+apiHandleCommand (int command) {
+  if (!apiStarted) return 0;
+  return api_handleCommand(command);
+}
+
+int
+apiHandleKeyEvent (KeyGroup group, KeyNumber number, int press) {
+  if (!apiStarted) return 0;
+  return api_handleKeyEvent(group, number, press);
+}
+
+int
 apiFlush (void) {
   if (!apiStarted) return 1;
   return api_flush(&brl);
