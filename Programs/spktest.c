@@ -94,8 +94,8 @@ main (int argc, char *argv[]) {
   const char *driver = NULL;
   void *object;
 
-  float speechVolume = 1.0;
-  float speechRate = 1.0;
+  int speechVolume = SPK_VOLUME_DEFAULT;
+  int speechRate = SPK_RATE_DEFAULT;
 
   {
     static const OptionsDescriptor descriptor = {
@@ -108,20 +108,20 @@ main (int argc, char *argv[]) {
   }
 
   if (opt_speechVolume && *opt_speechVolume) {
-    static const float minimum = 0.0;
-    static const float maximum = 2.0;
+    static const int minimum = 0;
+    static const int maximum = SPK_VOLUME_MAXIMUM;
 
-    if (!validateFloat(&speechVolume, opt_speechVolume, &minimum, &maximum)) {
+    if (!validateInteger(&speechVolume, opt_speechVolume, &minimum, &maximum)) {
       logMessage(LOG_ERR, "%s: %s", "invalid volume multiplier", opt_speechVolume);
       return PROG_EXIT_SYNTAX;
     }
   }
 
   if (opt_speechRate && *opt_speechRate) {
-    static const float minimum = 0.1;
-    static const float maximum = 10.0;
+    static const int minimum = 0;
+    static const int maximum = SPK_RATE_MAXIMUM;
 
-    if (!validateFloat(&speechRate, opt_speechRate, &minimum, &maximum)) {
+    if (!validateInteger(&speechRate, opt_speechRate, &minimum, &maximum)) {
       logMessage(LOG_ERR, "%s: %s", "invalid rate multiplier", opt_speechRate);
       return PROG_EXIT_SYNTAX;
     }
