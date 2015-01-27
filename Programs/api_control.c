@@ -81,8 +81,8 @@ api_flush (BrailleDisplay *brl) {
 }
 #endif /* ENABLE_API */
 
-static int apiStarted;
-static int driverClaimed;
+static int apiStarted = 0;
+static int driverClaimed = 0;
 
 static void
 apiIdentify (int full) {
