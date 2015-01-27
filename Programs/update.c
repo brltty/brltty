@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "report.h"
 #include "parameters.h"
 #include "update.h"
 #include "async_alarm.h"
@@ -963,12 +964,19 @@ setUpdateAlarm (void) {
   }
 }
 
+static ReportListenerInstance *updateBrailleOnlineListener = NULL;
+
+REPORT_LISTENER(handleUpdateBrailleOnline) {
+  scheduleUpdate("braille online");
+}
+
 void
 beginUpdates (void) {
   logMessage(LOG_CATEGORY(UPDATE_EVENTS), "begin");
 
   setUpdateDelay(0);
   setUpdateTime(0, NULL, 0);
+
   updateAlarm = NULL;
   updateSuspendCount = 0;
 
@@ -978,6 +986,8 @@ beginUpdates (void) {
 #ifdef ENABLE_SPEECH_SUPPORT
   wasAutospeaking = 0;
 #endif /* ENABLE_SPEECH_SUPPORT */
+
+  updateBrailleOnlineListener = registerReportListener(REPORT_BRAILLE_ONLINE, handleUpdateBrailleOnline, NULL);
 }
 
 void

@@ -24,7 +24,6 @@
 #include "brl_dots.h"
 #include "async_wait.h"
 #include "ktb.h"
-#include "update.h"
 
 void
 drainBrailleOutput (BrailleDisplay *brl, int minimumDelay) {
@@ -55,11 +54,10 @@ void
 setBrailleOnline (BrailleDisplay *brl) {
   if (brl->isOffline) {
     brl->isOffline = 0;
+    brl->writeDelay = 0;
+
     logMessage(LOG_DEBUG, "braille online");
     report(REPORT_BRAILLE_ONLINE, NULL);
-
-    brl->writeDelay = 0;
-    scheduleUpdate("braille online");
   }
 }
 
