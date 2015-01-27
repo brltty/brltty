@@ -69,7 +69,7 @@ getCommandHandlerTop (void) {
 KeyTableCommandContext
 getCurrentCommandContext (void) {
   CommandHandlerLevel **top = getCommandHandlerTop();
-  KeyTableCommandContext context = top? (*top)->commandContext: KTB_CTX_DEFAULT;
+  KeyTableCommandContext context = top && *top? (*top)->commandContext: KTB_CTX_DEFAULT;
 
   if (context == KTB_CTX_DEFAULT) context = getScreenCommandContext();
   return context;
