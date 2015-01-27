@@ -251,11 +251,6 @@ main (int argc, char *argv[]) {
   return exitStatus;
 }
 
-KeyTableState
-processKeyEvent (KeyTable *table, unsigned char context, KeyGroup group, KeyNumber number, int press) {
-  return KTS_UNBOUND;
-}
-
 #include "brltty.h"
 
 unsigned int textStart;
