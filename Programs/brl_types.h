@@ -21,6 +21,7 @@
 
 #include "driver.h"
 #include "ktb_types.h"
+#include "api_types.h"
 #include "gio_types.h"
 #include "queue.h"
 #include "async.h"
@@ -63,7 +64,6 @@ typedef int SetBrailleSensitivityMethod (BrailleDisplay *brl, BrailleSensitivity
 typedef int SetBrailleAutorepeatMethod (BrailleDisplay *brl, int on, int delay, int interval);
 
 typedef void SetRotateInputMethod (BrailleDisplay *brl, KeyGroup *group, KeyNumber *number);
-typedef int HandleKeyEventMethod (KeyGroup group, KeyNumber number, int press);
 
 struct BrailleDisplayStruct {
   unsigned int textColumns, textRows;
@@ -92,7 +92,7 @@ struct BrailleDisplayStruct {
 
   void (*bufferResized) (unsigned int rows, unsigned int columns);
   SetRotateInputMethod *rotateInput;
-  HandleKeyEventMethod *handleKeyEvent;
+  const ApiMethods *api;
 
   struct {
     Queue *messages;

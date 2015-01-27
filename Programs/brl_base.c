@@ -600,8 +600,8 @@ enqueueKeyEvent (
   BrailleDisplay *brl,
   KeyGroup group, KeyNumber number, int press
 ) {
-  if (brl->handleKeyEvent) {
-    if (brl->handleKeyEvent(group, number, press)) {
+  if (brl->api) {
+    if (brl->api->handleKeyEvent(group, number, press)) {
       return 1;
     }
   }

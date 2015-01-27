@@ -81,11 +81,8 @@ ASYNC_TASK_CALLBACK(presentMessage) {
     size_t length = getTextLength(mgp->text);
     wchar_t characters[length + 1];
     const wchar_t *character = characters;
-    int apiWasStarted = apiStarted;
 
-    apiUnlink();
-    apiStarted = 0;
-
+    api.unlink();
     convertTextToWchars(characters, mgp->text, ARRAY_COUNT(characters));
     suspendUpdates();
     pushCommandEnvironment("message", NULL, NULL);
@@ -140,9 +137,7 @@ ASYNC_TASK_CALLBACK(presentMessage) {
 
     popCommandEnvironment();
     resumeUpdates(1);
-
-    apiStarted = apiWasStarted;
-    apiLink();
+    api.link();
   }
 
   if (mgp->deallocate) free(mgp);

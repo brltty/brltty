@@ -70,7 +70,7 @@
 #include "embed.h"
 #include "ttb.h"
 #include "brltty.h"
-#include "api_control.h"
+#include "api_server.h"
 #include "log.h"
 #include "report.h"
 #include "addresses.h"

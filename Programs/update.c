@@ -542,7 +542,7 @@ doUpdate (void) {
     const SessionEntry *previousSession = ses;
 
     updateSessionAttributes();
-    if (ses != previousSession) apiFlush();
+    if (ses != previousSession) api.flush();
   }
 
   if (scr.unreadable) {
@@ -558,7 +558,7 @@ doUpdate (void) {
         logMessage(LOG_DEBUG, "suspending braille driver");
         writeStatusCells();
         writeBrailleText("wrn", scr.unreadable);
-        apiSuspend();
+        api.suspend();
         brl.isSuspended = 1;
         logMessage(LOG_DEBUG, "braille driver suspended");
       }
@@ -566,7 +566,7 @@ doUpdate (void) {
       if (brl.isSuspended) {
         logMessage(LOG_DEBUG, "resuming braille driver");
 
-        if (apiResume()) {
+        if (api.resume()) {
           logMessage(LOG_DEBUG, "braille driver resumed");
           brl.isSuspended = 0;
         } else {
@@ -649,7 +649,7 @@ doUpdate (void) {
   }
 
   if (!brl.isOffline && canBraille()) {
-    apiClaimDriver();
+    api.claimDriver();
 
     if (infoMode) {
       if (!showInfo()) brl.hasFailed = 1;
@@ -884,7 +884,7 @@ doUpdate (void) {
       if (!(writeStatusCells() && braille->writeWindow(&brl, textBuffer))) brl.hasFailed = 1;
     }
 
-    apiReleaseDriver();
+    api.releaseDriver();
   }
 
   resetAllBlinkDescriptors();

@@ -1253,7 +1253,7 @@ static void
 initializeBrailleDisplay (void) {
   constructBrailleDisplay(&brl);
   brl.bufferResized = &brailleWindowReconfigured;
-  brl.handleKeyEvent = apiHandleKeyEvent;
+  brl.api = &api;
 }
 
 int
@@ -1330,7 +1330,7 @@ initializeBrailleDriver (const char *code, int verify) {
                    braille->definition.code, brailleDevice);
 
         if (constructBrailleDriver()) {
-          apiLink();
+          api.link();
           brailleDriver = braille;
           constructed = 1;
         }
@@ -1440,7 +1440,7 @@ activateBrailleDriver (int verify) {
 static void
 deactivateBrailleDriver (void) {
   if (brailleDriver) {
-    apiUnlink();
+    api.unlink();
     if (brailleConstructed) destructBrailleDriver();
     braille = &noBraille;
     brailleDevice = NULL;
@@ -1655,7 +1655,7 @@ changeBrailleDevice (const char *device) {
 #ifdef ENABLE_API
 static void
 exitApiServer (void *data) {
-  apiStop();
+  api.stop();
 
   if (apiParameters) {
     deallocateStrings(apiParameters);
@@ -2426,7 +2426,7 @@ brlttyStart (void) {
     identifyScreenDrivers(1);
 
 #ifdef ENABLE_API
-    api_identify(1);
+    api.identify(1);
 #endif /* ENABLE_API */
 
     identifyBrailleDrivers(1);
@@ -2598,27 +2598,25 @@ brlttyStart (void) {
     enableScreenDriver();
   }
   
-#ifdef ENABLE_API
-  apiStarted = 0;
-
   if (!opt_noApi) {
-    apiParameters = getParameters(api_parameters,
+    const char *const *parameters = api.getParameters();
+
+    apiParameters = getParameters(parameters,
                                   NULL,
                                   opt_apiParameters);
 
     if (apiParameters) {
-      api_identify(0);
-      logParameters(api_parameters, apiParameters,
+      api.identify(0);
+      logParameters(parameters, apiParameters,
                     gettext("API Parameter"));
 
       if (!opt_verify) {
-        if (apiStart(apiParameters)) {
+        if (api.start(apiParameters)) {
           onProgramExit("api-server", exitApiServer, NULL);
         }
       }
     }
   }
-#endif /* ENABLE_API */
 
   /* The device(s) the braille display might be connected to. */
   if (!*opt_brailleDevice) {

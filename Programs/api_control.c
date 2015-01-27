@@ -20,14 +20,15 @@
 
 #include "log.h"
 #include "api_control.h"
+#include "api_server.h"
 #include "brltty.h"
 
 #ifndef ENABLE_API
+const char *const api_parameters[] = {NULL};
+
 void
 api_identify (int full) {
 }
-
-const char *const api_parameters[] = {NULL};
 
 int
 api_start (BrailleDisplay *brl, char **parameters) {
@@ -80,10 +81,20 @@ api_flush (BrailleDisplay *brl) {
 }
 #endif /* ENABLE_API */
 
-int apiStarted;
+static int apiStarted;
 static int driverClaimed;
 
-int
+static void
+apiIdentify (int full) {
+  api_identify(full);
+}
+
+static const char *const *
+apiGetParameters (void) {
+  return api_parameters;
+}
+
+static int
 apiStart (char **parameters) {
   if (api_start(&brl, parameters)) {
     apiStarted = 1;
@@ -93,23 +104,28 @@ apiStart (char **parameters) {
   return 0;
 }
 
-void
+static void
 apiStop (void) {
   api_stop(&brl);
   apiStarted = 0;
 }
 
-void
+static int
+apiIsStarted (void) {
+  return apiStarted;
+}
+
+static void
 apiLink (void) {
   if (apiStarted) api_link(&brl);
 }
 
-void
+static void
 apiUnlink (void) {
   if (apiStarted) api_unlink(&brl);
 }
 
-void
+static void
 apiSuspend (void) {
 #ifdef ENABLE_API
   if (apiStarted) {
@@ -122,7 +138,7 @@ apiSuspend (void) {
   }
 }
 
-int
+static int
 apiResume (void) {
 #ifdef ENABLE_API
   if (apiStarted) return api_resume(&brl);
@@ -131,7 +147,7 @@ apiResume (void) {
   return constructBrailleDriver();
 }
 
-int
+static int
 apiClaimDriver (void) {
   if (!driverClaimed && apiStarted) {
     if (!api_claimDriver(&brl)) return 0;
@@ -141,7 +157,7 @@ apiClaimDriver (void) {
   return 1;
 }
 
-void
+static void
 apiReleaseDriver (void) {
   if (driverClaimed) {
     api_releaseDriver(&brl);
@@ -149,20 +165,43 @@ apiReleaseDriver (void) {
   }
 }
 
-int
+static int
 apiHandleCommand (int command) {
   if (!apiStarted) return 0;
   return api_handleCommand(command);
 }
 
-int
+static int
 apiHandleKeyEvent (KeyGroup group, KeyNumber number, int press) {
   if (!apiStarted) return 0;
   return api_handleKeyEvent(group, number, press);
 }
 
-int
+static int
 apiFlush (void) {
   if (!apiStarted) return 1;
   return api_flush(&brl);
 }
+
+const ApiMethods api = {
+  .identify = apiIdentify,
+  .getParameters = apiGetParameters,
+
+  .start = apiStart,
+  .stop = apiStop,
+  .isStarted = apiIsStarted,
+
+  .link = apiLink,
+  .unlink = apiUnlink,
+
+  .suspend = apiSuspend,
+  .resume = apiResume,
+
+  .claimDriver = apiClaimDriver,
+  .releaseDriver = apiReleaseDriver,
+
+  .handleCommand = apiHandleCommand,
+  .handleKeyEvent = apiHandleKeyEvent,
+
+  .flush = apiFlush
+};

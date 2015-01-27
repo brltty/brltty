@@ -260,7 +260,6 @@ processKeyEvent (KeyTable *table, unsigned char context, KeyGroup group, KeyNumb
 
 unsigned int textStart;
 unsigned int textCount;
-int apiStarted = 0;
 
 unsigned char
 getScreenCursorDots (void) {

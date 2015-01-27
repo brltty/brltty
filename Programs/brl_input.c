@@ -29,7 +29,6 @@
 #include "cmd_queue.h"
 #include "cmd_enqueue.h"
 #include "io_generic.h"
-#include "api_control.h"
 #include "brltty.h"
 
 static int
@@ -70,16 +69,16 @@ GIO_INPUT_HANDLER(handleBrailleInput) {
   suspendCommandQueue();
 
   if (!brl.isSuspended) {
-    apiClaimDriver();
+    if (brl.api) brl.api->claimDriver();
     if (processInput()) processed = 1;
-    apiReleaseDriver();
+    if (brl.api) brl.api->releaseDriver();
   }
 
 #ifdef ENABLE_API
-  else if (apiStarted) {
+  else if (brl.api && brl.api->isStarted()) {
     switch (readBrailleCommand(&brl, KTB_CTX_DEFAULT)) {
       case BRL_CMD_RESTARTBRL:
-        restartBrailleDriver();
+        brl.hasFailed = 1;
         break;
 
       default:

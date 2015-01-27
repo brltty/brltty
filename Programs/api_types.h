@@ -16,19 +16,40 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_API_CONTROL
-#define BRLTTY_INCLUDED_API_CONTROL
+#ifndef BRLTTY_INCLUDED_API_TYPES
+#define BRLTTY_INCLUDED_API_TYPES
 
-#include "api_types.h"
+#include "ktb_types.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern const ApiMethods api;
+typedef struct {
+  void (*identify) (int full);
+  const char *const * (*getParameters) (void);
+
+  int (*start) (char **parameters);
+  void (*stop) (void);
+  int (*isStarted) (void);
+
+  void (*link) (void);
+  void (*unlink) (void);
+
+  void (*suspend) (void);
+  int (*resume) (void);
+
+  int (*claimDriver) (void);
+  void (*releaseDriver) (void);
+
+  int (*handleCommand) (int command);
+  int (*handleKeyEvent) (KeyGroup group, KeyNumber number, int press);
+
+  int (*flush) (void);
+} ApiMethods;
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_API_CONTROL */
+#endif /* BRLTTY_INCLUDED_API_TYPES */

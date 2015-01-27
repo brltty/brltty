@@ -203,7 +203,7 @@ handleUnhandledCommands (int command, void *data) {
 
 static int
 handleApiCommands (int command, void *data) {
-  return apiHandleCommand(command);
+  return api.handleCommand(command);
 }
 
 static int
