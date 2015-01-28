@@ -21,9 +21,9 @@
 #include <string.h>
 
 #include "log.h"
+#include "learn.h"
 #include "message.h"
 #include "async_wait.h"
-#include "learn.h"
 #include "cmd.h"
 #include "cmd_queue.h"
 #include "brl.h"

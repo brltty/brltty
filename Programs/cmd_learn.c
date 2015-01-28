@@ -22,16 +22,14 @@
 
 #include "log.h"
 #include "parameters.h"
-#include "message.h"
-#include "async_wait.h"
-#include "async_task.h"
+#include "brl_cmds.h"
 #include "ktb_types.h"
-#include "update.h"
 #include "cmd_queue.h"
 #include "cmd_learn.h"
-#include "cmd.h"
-#include "brl_cmds.h"
 #include "learn.h"
+#include "async_task.h"
+#include "update.h"
+#include "message.h"
 #include "brltty.h"
 
 typedef struct {
