@@ -37,7 +37,7 @@ sayScreenRegion (int left, int top, int width, int height, int track, SayMode mo
   size_t count = width * height;
   ScreenCharacter characters[count];
 
-  if (mode == sayImmediate) muteSpeech(__func__);
+  if (mode == sayImmediate) muteSpeech(&spk, __func__);
   readScreen(left, top, width, height, characters);
   spk.track.isActive = track;
   spk.track.screenNumber = scr.number;
@@ -93,7 +93,7 @@ handleSpeechCommands (int command, void *data) {
       break;
 
     case BRL_CMD_MUTE:
-      muteSpeech("command");
+      muteSpeech(&spk, "command");
       break;
 
     case BRL_CMD_SAY_LINE:
@@ -107,40 +107,40 @@ handleSpeechCommands (int command, void *data) {
       break;
 
     case BRL_CMD_SAY_SLOWER:
-      if (!canSetSpeechRate()) {
+      if (!canSetSpeechRate(&spk)) {
         alert(ALERT_COMMAND_REJECTED);
       } else if (prefs.speechRate > 0) {
-        setSpeechRate(--prefs.speechRate, 1);
+        setSpeechRate(&spk, --prefs.speechRate, 1);
       } else {
         alert(ALERT_NO_CHANGE);
       }
       break;
 
     case BRL_CMD_SAY_FASTER:
-      if (!canSetSpeechRate()) {
+      if (!canSetSpeechRate(&spk)) {
         alert(ALERT_COMMAND_REJECTED);
       } else if (prefs.speechRate < SPK_RATE_MAXIMUM) {
-        setSpeechRate(++prefs.speechRate, 1);
+        setSpeechRate(&spk, ++prefs.speechRate, 1);
       } else {
         alert(ALERT_NO_CHANGE);
       }
       break;
 
     case BRL_CMD_SAY_SOFTER:
-      if (!canSetSpeechVolume()) {
+      if (!canSetSpeechVolume(&spk)) {
         alert(ALERT_COMMAND_REJECTED);
       } else if (prefs.speechVolume > 0) {
-        setSpeechVolume(--prefs.speechVolume, 1);
+        setSpeechVolume(&spk, --prefs.speechVolume, 1);
       } else {
         alert(ALERT_NO_CHANGE);
       }
       break;
 
     case BRL_CMD_SAY_LOUDER:
-      if (!canSetSpeechVolume()) {
+      if (!canSetSpeechVolume(&spk)) {
         alert(ALERT_COMMAND_REJECTED);
       } else if (prefs.speechVolume < SPK_VOLUME_MAXIMUM) {
-        setSpeechVolume(++prefs.speechVolume, 1);
+        setSpeechVolume(&spk, ++prefs.speechVolume, 1);
       } else {
         alert(ALERT_NO_CHANGE);
       }
@@ -436,7 +436,7 @@ handleSpeechCommands (int command, void *data) {
     case BRL_CMD_DESC_CURR_CHAR: {
       char description[0X50];
       formatCharacterDescription(description, sizeof(description), ses->spkx, ses->spky);
-      sayString(description, SAY_OPT_MUTE_FIRST);
+      sayString(&spk, description, SAY_OPT_MUTE_FIRST);
       break;
     }
 
@@ -453,7 +453,7 @@ handleSpeechCommands (int command, void *data) {
       snprintf(buffer, sizeof(buffer), "%s %d, %s %d",
                gettext("line"), ses->spky+1,
                gettext("column"), ses->spkx+1);
-      sayString(buffer, SAY_OPT_MUTE_FIRST);
+      sayString(&spk, buffer, SAY_OPT_MUTE_FIRST);
       break;
     }
 

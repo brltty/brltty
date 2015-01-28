@@ -619,7 +619,7 @@ doUpdate (void) {
     if (isAutospeaking) {
       doAutospeak(!wasAutospeaking);
     } else if (wasAutospeaking) {
-      muteSpeech("autospeak disabled");
+      muteSpeech(&spk, "autospeak disabled");
     }
 
     wasAutospeaking = isAutospeaking;

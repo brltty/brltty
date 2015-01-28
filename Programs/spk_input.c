@@ -24,6 +24,7 @@
 #include "spk_input.h"
 #include "spk.h"
 #include "pipe.h"
+#include "brltty.h"
 
 #ifdef ENABLE_SPEECH_SUPPORT
 struct SpeechInputObjectStruct {
@@ -40,7 +41,7 @@ NAMED_PIPE_INPUT_CALLBACK(handleSpeechInput) {
 
   memcpy(string, buffer, length);
   string[length] = 0;
-  sayString(string, 0);
+  sayString(&spk, string, 0);
 
   return length;
 }

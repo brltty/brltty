@@ -782,7 +782,7 @@ sayScreenCharacters (const ScreenCharacter *characters, size_t count, SayOptions
     }
   }
 
-  sayWideCharacters(text, attributes, count, options);
+  sayWideCharacters(&spk, text, attributes, count, options);
 }
 
 void
@@ -799,7 +799,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
         wchar_t buffer[0X100];
         size_t length = convertTextToWchars(buffer, gettext("space"), ARRAY_COUNT(buffer));
 
-        sayWideCharacters(buffer, NULL, length, sayOptions);
+        sayWideCharacters(&spk, buffer, NULL, length, sayOptions);
         break;
       }
     }
@@ -831,10 +831,10 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
 
       buffer[length++] = WC_C(' ');
       buffer[length++] = character;
-      sayWideCharacters(buffer, NULL, length, sayOptions);
+      sayWideCharacters(&spk, buffer, NULL, length, sayOptions);
     } else {
       if (iswpunct(character)) sayOptions |= SAY_OPT_ALL_PUNCTUATION;
-      sayWideCharacters(&character, NULL, 1, sayOptions);
+      sayWideCharacters(&spk, &character, NULL, 1, sayOptions);
     }
   } else if (spell) {
     wchar_t string[count * 2];
@@ -847,7 +847,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
     }
 
     string[length] = WC_C('\0');
-    sayWideCharacters(string, NULL, length, sayOptions);
+    sayWideCharacters(&spk, string, NULL, length, sayOptions);
   } else {
     sayScreenCharacters(characters, count, sayOptions);
   }

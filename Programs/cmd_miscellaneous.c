@@ -171,7 +171,7 @@ doSpeechTime (const TimeFormattingData *fmt) {
 
   STR_PRINTF(".");
   STR_END
-  sayString(announcement, SAY_OPT_MUTE_FIRST);
+  sayString(&spk, announcement, SAY_OPT_MUTE_FIRST);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 

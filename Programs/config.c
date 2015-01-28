@@ -1063,10 +1063,10 @@ applyBraillePreferences (void) {
 #ifdef ENABLE_SPEECH_SUPPORT
 static void
 applySpeechPreferences (void) {
-  setSpeechVolume(prefs.speechVolume, 0);
-  setSpeechRate(prefs.speechRate, 0);
-  setSpeechPitch(prefs.speechPitch, 0);
-  setSpeechPunctuation(prefs.speechPunctuation, 0);
+  setSpeechVolume(&spk, prefs.speechVolume, 0);
+  setSpeechRate(&spk, prefs.speechRate, 0);
+  setSpeechPitch(&spk, prefs.speechPitch, 0);
+  setSpeechPunctuation(&spk, prefs.speechPunctuation, 0);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
@@ -1675,12 +1675,12 @@ cancelAutospeakDelayAlarm (void) {
   }
 }
 
-void
-endAutospeakDelay (void) {
+static void
+endAutospeakDelay (volatile SpeechSynthesizer *spk) {
   cancelAutospeakDelayAlarm();
 
-  if (!spk.canAutospeak) {
-    spk.canAutospeak = 1;
+  if (!spk->canAutospeak) {
+    spk->canAutospeak = 1;
     scheduleUpdate("banner spoken");
   }
 }
@@ -1689,7 +1689,7 @@ ASYNC_ALARM_CALLBACK(handleAutospeakDelayAlarm) {
   asyncDiscardHandle(autospeakDelayAlarm);
   autospeakDelayAlarm = NULL;
 
-  endAutospeakDelay();
+  endAutospeakDelay(&spk);
 }
 
 static void
@@ -1701,26 +1701,26 @@ beginAutospeakDelay (int duration) {
 }
 
 static void
-setSpeechFinished (void) {
-  spk.track.isActive = 0;
-  spk.track.speechLocation = SPK_LOC_NONE;
+setSpeechFinished (volatile SpeechSynthesizer *spk) {
+  spk->track.isActive = 0;
+  spk->track.speechLocation = SPK_LOC_NONE;
 
-  endAutospeakDelay();
+  endAutospeakDelay(spk);
 }
 
 static void
-setSpeechLocation (int location) {
-  if (spk.track.isActive) {
-    if (scr.number == spk.track.screenNumber) {
-      if (location != spk.track.speechLocation) {
-        spk.track.speechLocation = location;
+setSpeechLocation (volatile SpeechSynthesizer *spk, int location) {
+  if (spk->track.isActive) {
+    if (scr.number == spk->track.screenNumber) {
+      if (location != spk->track.speechLocation) {
+        spk->track.speechLocation = location;
         if (ses->trackScreenCursor) trackSpeech();
       }
 
       return;
     }
 
-    setSpeechFinished();
+    setSpeechFinished(spk);
   }
 }
 
@@ -1735,7 +1735,7 @@ int
 constructSpeechDriver (void) {
   initializeSpeechSynthesizer();
 
-  if (startSpeechDriverThread(speechDriverParameters)) {
+  if (startSpeechDriverThread(&spk, speechDriverParameters)) {
     return 1;
   } else {
     logMessage(LOG_DEBUG, "speech driver initialization failed: %s",
@@ -1747,7 +1747,7 @@ constructSpeechDriver (void) {
 
 void
 destructSpeechDriver (void) {
-  stopSpeechDriverThread();
+  stopSpeechDriverThread(&spk);
   destructSpeechSynthesizer(&spk);
 }
 
@@ -1838,7 +1838,7 @@ startSpeechDriver (void) {
     char banner[0X100];
 
     makeProgramBanner(banner, sizeof(banner));
-    sayString(banner, SAY_OPT_MUTE_FIRST);
+    sayString(&spk, banner, SAY_OPT_MUTE_FIRST);
     beginAutospeakDelay(SPEECH_DRIVER_START_AUTOSPEAK_DELAY);
   } else if (autospeak()) {
     doAutospeak(1);
@@ -1851,7 +1851,7 @@ static void
 stopSpeechDriver (void) {
   cancelAutospeakDelayAlarm();
 
-  muteSpeech("driver stop");
+  muteSpeech(&spk, "driver stop");
   deactivateSpeechDriver();
 }
 

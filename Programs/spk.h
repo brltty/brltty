@@ -28,34 +28,40 @@ extern "C" {
 extern void constructSpeechSynthesizer (volatile SpeechSynthesizer *spk);
 extern void destructSpeechSynthesizer (volatile SpeechSynthesizer *spk);
 
-extern int startSpeechDriverThread (char **parameters);
-extern void stopSpeechDriverThread (void);
+extern int startSpeechDriverThread (volatile SpeechSynthesizer *spk, char **parameters);
+extern void stopSpeechDriverThread (volatile SpeechSynthesizer *spk);
 
-extern int muteSpeech (const char *reason);
+extern int muteSpeech (volatile SpeechSynthesizer *spk, const char *reason);
 
 extern int sayUtf8Characters (
+  volatile SpeechSynthesizer *spk,
   const char *text, const unsigned char *attributes,
   size_t length, size_t count,
   SayOptions options
 );
 
 extern int sayWideCharacters (
+  volatile SpeechSynthesizer *spk,
   const wchar_t *characters, const unsigned char *attributes,
   size_t count, SayOptions options
 );
-extern void sayString (const char *string, SayOptions);
 
-extern int canSetSpeechVolume (void);
-extern int setSpeechVolume (int setting, int say);
+extern int sayString (
+  volatile SpeechSynthesizer *spk,
+  const char *string, SayOptions
+);
 
-extern int canSetSpeechRate (void);
-extern int setSpeechRate (int setting, int say);
+extern int canSetSpeechVolume (volatile SpeechSynthesizer *spk);
+extern int setSpeechVolume (volatile SpeechSynthesizer *spk, int setting, int say);
 
-extern int canSetSpeechPitch (void);
-extern int setSpeechPitch (int setting, int say);
+extern int canSetSpeechRate (volatile SpeechSynthesizer *spk);
+extern int setSpeechRate (volatile SpeechSynthesizer *spk, int setting, int say);
 
-extern int canSetSpeechPunctuation (void);
-extern int setSpeechPunctuation (SpeechPunctuation setting, int say);
+extern int canSetSpeechPitch (volatile SpeechSynthesizer *spk);
+extern int setSpeechPitch (volatile SpeechSynthesizer *spk, int setting, int say);
+
+extern int canSetSpeechPunctuation (volatile SpeechSynthesizer *spk);
+extern int setSpeechPunctuation (volatile SpeechSynthesizer *spk, SpeechPunctuation setting, int say);
 
 extern int haveSpeechDriver (const char *code);
 extern const char *getDefaultSpeechDriver (void);

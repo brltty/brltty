@@ -204,42 +204,42 @@ testTunesFm (void) {
 #ifdef ENABLE_SPEECH_SUPPORT
 static int
 testSpeechVolume (void) {
-  return canSetSpeechVolume();
+  return canSetSpeechVolume(&spk);
 }
 
 static int
 changedSpeechVolume (const MenuItem *item UNUSED, unsigned char setting) {
-  return setSpeechVolume(setting, !prefs.autospeak);
+  return setSpeechVolume(&spk, setting, !prefs.autospeak);
 }
 
 static int
 testSpeechRate (void) {
-  return canSetSpeechRate();
+  return canSetSpeechRate(&spk);
 }
 
 static int
 changedSpeechRate (const MenuItem *item UNUSED, unsigned char setting) {
-  return setSpeechRate(setting, !prefs.autospeak);
+  return setSpeechRate(&spk, setting, !prefs.autospeak);
 }
 
 static int
 testSpeechPitch (void) {
-  return canSetSpeechPitch();
+  return canSetSpeechPitch(&spk);
 }
 
 static int
 changedSpeechPitch (const MenuItem *item UNUSED, unsigned char setting) {
-  return setSpeechPitch(setting, !prefs.autospeak);
+  return setSpeechPitch(&spk, setting, !prefs.autospeak);
 }
 
 static int
 testSpeechPunctuation (void) {
-  return canSetSpeechPunctuation();
+  return canSetSpeechPunctuation(&spk);
 }
 
 static int
 changedSpeechPunctuation (const MenuItem *item UNUSED, unsigned char setting) {
-  return setSpeechPunctuation(setting, !prefs.autospeak);
+  return setSpeechPunctuation(&spk, setting, !prefs.autospeak);
 }
 
 static int

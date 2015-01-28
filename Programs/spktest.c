@@ -82,10 +82,11 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 END_OPTION_TABLE
 
-static void
+static int
 say (const char *string) {
-  sayString(string, 0);
+  if (!sayString(&spk, string, 0)) return 0;
   asyncWait(250);
+  return 1;
 }
 
 static int
@@ -199,9 +200,9 @@ main (int argc, char *argv[]) {
     constructSpeechSynthesizer(&spk);
     identifySpeechDriver(speech, 0);		/* start-up messages */
 
-    if (startSpeechDriverThread(parameterSettings)) {
-      if (canSetSpeechVolume()) setSpeechVolume(speechVolume, 0);
-      if (canSetSpeechRate()) setSpeechRate(speechRate, 0);
+    if (startSpeechDriverThread(&spk, parameterSettings)) {
+      setSpeechVolume(&spk, speechVolume, 0);
+      setSpeechRate(&spk, speechRate, 0);
 
       if (opt_textString && *opt_textString) {
         say(opt_textString);
@@ -209,7 +210,7 @@ main (int argc, char *argv[]) {
         processLines(stdin, sayLine, NULL);
       }
 
-      stopSpeechDriverThread();		/* finish with the display */
+      stopSpeechDriverThread(&spk);
       exitStatus = PROG_EXIT_SUCCESS;
     } else {
       logMessage(LOG_ERR, "can't initialize speech driver");

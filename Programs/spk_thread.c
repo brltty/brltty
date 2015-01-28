@@ -257,16 +257,18 @@ handleSpeechMessage (volatile SpeechDriverThread *sdt, SpeechMessage *msg) {
         break;
 
       case MSG_SPEECH_FINISHED: {
-        SetSpeechFinishedMethod *setFinished = sdt->speechSynthesizer->setFinished;
+        volatile SpeechSynthesizer *spk = sdt->speechSynthesizer;
+        SetSpeechFinishedMethod *setFinished = spk->setFinished;
 
-        if (setFinished) setFinished();
+        if (setFinished) setFinished(spk);
         break;
       }
 
       case MSG_SPEECH_LOCATION: {
-        SetSpeechLocationMethod *setLocation = sdt->speechSynthesizer->setLocation;
+        volatile SpeechSynthesizer *spk = sdt->speechSynthesizer;
+        SetSpeechLocationMethod *setLocation = spk->setLocation;
 
-        if (setLocation) setLocation(msg->arguments.speechLocation.location);
+        if (setLocation) setLocation(spk, msg->arguments.speechLocation.location);
         break;
       }
 
