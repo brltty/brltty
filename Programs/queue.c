@@ -23,6 +23,33 @@
 #include "thread.h"
 #include "program.h"
 
+static Element *discardedElementsList = NULL;
+
+#if defined(PTHREAD_MUTEX_INITIALIZER)
+static pthread_mutex_t discardedElementsListLock = PTHREAD_MUTEX_INITIALIZER;
+
+static void
+lockDiscardedElementsList (void) {
+  pthread_mutex_lock(&discardedElementsListLock);
+}
+
+static void
+unlockDiscardedElementsList (void) {
+  pthread_mutex_unlock(&discardedElementsListLock);
+}
+
+#else /* thread-safe queue management */
+#warning queues are not thread-safe on this platform
+
+static void
+lockDiscardedElementsList (void) {
+}
+
+static void
+unlockDiscardedElementsList (void) {
+}
+#endif /* thread-safe queue management */
+
 struct QueueStruct {
   Element *head;
   unsigned int size;
@@ -67,24 +94,6 @@ removeItem (Element *element) {
     element->item = NULL;
   }
 }
-
-static Element *discardedElementsList = NULL;
-
-#if defined(PTHREAD_MUTEX_INITIALIZER)
-static pthread_mutex_t discardedElementsListLock = PTHREAD_MUTEX_INITIALIZER;
-
-static void
-lockDiscardedElementsList (void) {
-  pthread_mutex_lock(&discardedElementsListLock);
-}
-
-static void
-unlockDiscardedElementsList (void) {
-  pthread_mutex_unlock(&discardedElementsListLock);
-}
-
-#else /* discarded elements list management */
-#endif /* discarded elements list management */
 
 static void
 discardElement (Element *element) {
