@@ -400,6 +400,8 @@ BEGIN_KEY_NAME_TABLE(keyboard)
 
   KBD_KEY_NAME(MODIFIER, AltRight, "AltRight"),
   KBD_KEY_NAME(MODIFIER, AltRight, "MODIFIER_AltRight"),
+  KBD_KEY_NAME(MODIFIER, AltRight, "AltGr"),
+  KBD_KEY_NAME(MODIFIER, AltRight, "MODIFIER_AltGr"),
 
   KBD_KEY_NAME(LOCK, Capitals, "CapsLock"),
   KBD_KEY_NAME(LOCK, Capitals, "LOCK_Capitals"),
