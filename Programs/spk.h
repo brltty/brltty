@@ -29,7 +29,7 @@ extern void constructSpeechSynthesizer (volatile SpeechSynthesizer *spk);
 extern void destructSpeechSynthesizer (volatile SpeechSynthesizer *spk);
 
 extern int startSpeechDriverThread (volatile SpeechSynthesizer *spk, char **parameters);
-extern void stopSpeechDriverThread (volatile SpeechSynthesizer *spk);
+extern void stopSpeechDriverThread (volatile SpeechSynthesizer *spk, int drain);
 
 extern int muteSpeech (volatile SpeechSynthesizer *spk, const char *reason);
 

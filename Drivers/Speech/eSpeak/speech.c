@@ -77,6 +77,12 @@ static int SynthCallback(short *audio, int numsamples, espeak_EVENT *events)
 }
 
 static void
+spk_drain(volatile SpeechSynthesizer *spk)
+{
+	espeak_Synchronize();
+}
+
+static void
 spk_setVolume(volatile SpeechSynthesizer *spk, unsigned char setting)
 {
 	int volume = getIntegerSpeechVolume(setting, 50);
@@ -116,10 +122,11 @@ static int spk_construct(volatile SpeechSynthesizer *spk, char **parameters)
 	char *data_path, *voicename, *punctlist;
 	int result;
 
-	spk->setVolume = spk_setVolume;;
-	spk->setRate = spk_setRate;;
-	spk->setPitch = spk_setPitch;;
-	spk->setPunctuation = spk_setPunctuation;;
+	spk->setVolume = spk_setVolume;
+	spk->setRate = spk_setRate;
+	spk->setPitch = spk_setPitch;
+	spk->setPunctuation = spk_setPunctuation;
+	spk->drain = spk_drain;
 
 	logMessage(LOG_INFO, "eSpeak version %s", espeak_Info(NULL));
 

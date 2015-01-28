@@ -57,6 +57,7 @@ typedef void SetSpeechVolumeMethod (volatile SpeechSynthesizer *spk, unsigned ch
 typedef void SetSpeechRateMethod (volatile SpeechSynthesizer *spk, unsigned char setting);
 typedef void SetSpeechPitchMethod (volatile SpeechSynthesizer *spk, unsigned char setting);
 typedef void SetSpeechPunctuationMethod (volatile SpeechSynthesizer *spk, SpeechPunctuation setting);
+typedef void DrainSpeechMethod (volatile SpeechSynthesizer *spk);
 
 typedef void SetSpeechFinishedMethod (volatile SpeechSynthesizer *spk);
 typedef void SetSpeechLocationMethod (volatile SpeechSynthesizer *spk, int location);
@@ -76,6 +77,7 @@ struct SpeechSynthesizerStruct {
   SetSpeechRateMethod *setRate;
   SetSpeechPitchMethod *setPitch;
   SetSpeechPunctuationMethod *setPunctuation;
+  DrainSpeechMethod *drain;
 
   SetSpeechFinishedMethod *setFinished;
   SetSpeechLocationMethod *setLocation;

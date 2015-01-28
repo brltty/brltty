@@ -47,6 +47,7 @@ constructSpeechSynthesizer (volatile SpeechSynthesizer *spk) {
   spk->setRate = NULL;
   spk->setPitch = NULL;
   spk->setPunctuation = NULL;
+  spk->drain = NULL;
 
   spk->setFinished = NULL;
   spk->setLocation = NULL;
@@ -61,23 +62,12 @@ destructSpeechSynthesizer (volatile SpeechSynthesizer *spk) {
 
 int
 startSpeechDriverThread (volatile SpeechSynthesizer *spk, char **parameters) {
-  if (!spk->driver.thread) {
-    if (!(spk->driver.thread = newSpeechDriverThread(spk, parameters))) {
-      return 0;
-    }
-  }
-
-  return 1;
+  return constructSpeechDriverThread(spk, parameters);
 }
 
 void
-stopSpeechDriverThread (volatile SpeechSynthesizer *spk) {
-  if (spk->driver.thread) {
-    volatile SpeechDriverThread *sdt = spk->driver.thread;
-
-    spk->driver.thread = NULL;
-    destroySpeechDriverThread(sdt);
-  }
+stopSpeechDriverThread (volatile SpeechSynthesizer *spk, int drain) {
+  destroySpeechDriverThread(spk, drain);
 }
 
 int

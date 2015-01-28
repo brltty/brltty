@@ -26,13 +26,14 @@ extern "C" {
 #endif /* __cplusplus */
 
 #ifdef ENABLE_SPEECH_SUPPORT
-extern volatile SpeechDriverThread *newSpeechDriverThread (
+extern int constructSpeechDriverThread (
   volatile SpeechSynthesizer *spk,
   char **parameters
 );
 
 extern void destroySpeechDriverThread (
-  volatile SpeechDriverThread *sdt
+  volatile SpeechSynthesizer *spk,
+  int drain
 );
 
 extern int speechRequest_sayText (
