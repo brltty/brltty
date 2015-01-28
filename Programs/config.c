@@ -1747,7 +1747,7 @@ constructSpeechDriver (void) {
 
 void
 destructSpeechDriver (void) {
-  stopSpeechDriverThread(&spk, 0);
+  stopSpeechDriverThread(&spk);
   destructSpeechSynthesizer(&spk);
 }
 

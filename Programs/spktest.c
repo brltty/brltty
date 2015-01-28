@@ -212,7 +212,8 @@ main (int argc, char *argv[]) {
         processLines(stdin, sayLine, (void *)&spk);
       }
 
-      stopSpeechDriverThread(&spk, 1);
+      drainSpeech(&spk);
+      stopSpeechDriverThread(&spk);
       exitStatus = PROG_EXIT_SUCCESS;
     } else {
       logMessage(LOG_ERR, "can't initialize speech driver");

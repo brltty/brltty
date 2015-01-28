@@ -32,8 +32,7 @@ extern int constructSpeechDriverThread (
 );
 
 extern void destroySpeechDriverThread (
-  volatile SpeechSynthesizer *spk,
-  int drain
+  volatile SpeechSynthesizer *spk
 );
 
 extern int speechRequest_sayText (
@@ -44,6 +43,10 @@ extern int speechRequest_sayText (
 );
 
 extern int speechRequest_muteSpeech (
+  volatile SpeechDriverThread *sdt
+);
+
+extern int speechRequest_drainSpeech (
   volatile SpeechDriverThread *sdt
 );
 

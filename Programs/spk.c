@@ -66,8 +66,8 @@ startSpeechDriverThread (volatile SpeechSynthesizer *spk, char **parameters) {
 }
 
 void
-stopSpeechDriverThread (volatile SpeechSynthesizer *spk, int drain) {
-  destroySpeechDriverThread(spk, drain);
+stopSpeechDriverThread (volatile SpeechSynthesizer *spk) {
+  destroySpeechDriverThread(spk);
 }
 
 int
@@ -144,6 +144,19 @@ sayIntegerSetting (
 
   snprintf(string, sizeof(string), "%d", integer);
   return sayStringSetting(spk, name, string);
+}
+
+int
+canDrainSpeech (volatile SpeechSynthesizer *spk) {
+  return spk->drain != NULL;
+}
+
+int
+drainSpeech (volatile SpeechSynthesizer *spk) {
+  if (!canDrainSpeech(spk)) return 0;
+  logMessage(LOG_CATEGORY(SPEECH_EVENTS), "drain speech");
+  speechRequest_drainSpeech(spk->driver.thread);
+  return 1;
 }
 
 int

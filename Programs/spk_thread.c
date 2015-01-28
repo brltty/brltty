@@ -103,25 +103,23 @@ struct SpeechDriverThreadStruct {
 typedef enum {
   REQ_SAY_TEXT,
   REQ_MUTE_SPEECH,
+  REQ_DRAIN_SPEECH,
 
   REQ_SET_VOLUME,
   REQ_SET_RATE,
   REQ_SET_PITCH,
-  REQ_SET_PUNCTUATION,
-
-  REQ_DRAIN_SPEECH
+  REQ_SET_PUNCTUATION
 } SpeechRequestType;
 
 static const char *const speechRequestNames[] = {
   [REQ_SAY_TEXT] = "say text",
   [REQ_MUTE_SPEECH] = "mute speech",
+  [REQ_DRAIN_SPEECH] = "drain speech",
 
   [REQ_SET_VOLUME] = "set volume",
   [REQ_SET_RATE] = "set rate",
   [REQ_SET_PITCH] = "set pitch",
-  [REQ_SET_PUNCTUATION] = "set punctuation",
-
-  [REQ_DRAIN_SPEECH] = "drain speech"
+  [REQ_SET_PUNCTUATION] = "set punctuation"
 };
 
 typedef struct {
@@ -310,6 +308,17 @@ setIntegerResponse (volatile SpeechDriverThread *sdt, int value) {
   sdt->response.value.INTEGER = value;
 }
 
+ASYNC_CONDITION_TESTER(testSpeechResponseReceived) {
+  volatile SpeechDriverThread *sdt = data;
+
+  return sdt->response.type != RSP_PENDING;
+}
+
+static int
+awaitSpeechResponse (volatile SpeechDriverThread *sdt, int timeout) {
+  return asyncAwaitCondition(timeout, testSpeechResponseReceived, (void *)sdt);
+}
+
 static void sendSpeechRequest (volatile SpeechDriverThread *sdt);
 
 static void
@@ -489,6 +498,13 @@ handleSpeechRequest (volatile SpeechDriverThread *sdt, SpeechRequest *req) {
         break;
       }
 
+      case REQ_DRAIN_SPEECH: {
+        spk->drain(spk);
+
+        sendIntegerResponse(sdt, 1);
+        break;
+      }
+
       case REQ_SET_VOLUME: {
         spk->setVolume(spk, req->arguments.setVolume.setting);
 
@@ -512,13 +528,6 @@ handleSpeechRequest (volatile SpeechDriverThread *sdt, SpeechRequest *req) {
 
       case REQ_SET_PUNCTUATION: {
         spk->setPunctuation(spk, req->arguments.setPunctuation.setting);
-
-        sendIntegerResponse(sdt, 1);
-        break;
-      }
-
-      case REQ_DRAIN_SPEECH: {
-        spk->drain(spk);
 
         sendIntegerResponse(sdt, 1);
         break;
@@ -677,6 +686,24 @@ speechRequest_muteSpeech (
 }
 
 int
+speechRequest_drainSpeech (
+  volatile SpeechDriverThread *sdt
+) {
+  SpeechRequest *req;
+
+  if ((req = newSpeechRequest(REQ_DRAIN_SPEECH, NULL))) {
+    if (enqueueSpeechRequest(sdt, req)) {
+      awaitSpeechResponse(sdt, SPEECH_RESPONSE_WAIT_TIMEOUT);
+      return 1;
+    }
+
+    free(req);
+  }
+
+  return 0;
+}
+
+int
 speechRequest_setVolume (
   volatile SpeechDriverThread *sdt,
   unsigned char setting
@@ -744,21 +771,6 @@ speechRequest_setPunctuation (
   return 0;
 }
 
-static int
-speechRequest_drainSpeech (
-  volatile SpeechDriverThread *sdt
-) {
-  SpeechRequest *req;
-
-  if ((req = newSpeechRequest(REQ_DRAIN_SPEECH, NULL))) {
-    if (enqueueSpeechRequest(sdt, req)) return 1;
-
-    free(req);
-  }
-
-  return 0;
-}
-
 static void
 setThreadReady (volatile SpeechDriverThread *sdt) {
   setThreadState(sdt, THD_READY);
@@ -778,17 +790,6 @@ stopSpeechDriver (volatile SpeechDriverThread *sdt) {
 }
 
 #ifdef GOT_PTHREADS
-ASYNC_CONDITION_TESTER(testSpeechResponseReceived) {
-  volatile SpeechDriverThread *sdt = data;
-
-  return sdt->response.type != RSP_PENDING;
-}
-
-static int
-awaitSpeechResponse (volatile SpeechDriverThread *sdt, int timeout) {
-  return asyncAwaitCondition(timeout, testSpeechResponseReceived, (void *)sdt);
-}
-
 ASYNC_CONDITION_TESTER(testSpeechDriverThreadStopping) {
   volatile SpeechDriverThread *sdt = data;
 
@@ -926,15 +927,10 @@ constructSpeechDriverThread (
 }
 
 void
-destroySpeechDriverThread (volatile SpeechSynthesizer *spk, int drain) {
+destroySpeechDriverThread (volatile SpeechSynthesizer *spk) {
   volatile SpeechDriverThread *sdt = spk->driver.thread;
 
-  if (drain) {
-    if (spk->drain) speechRequest_drainSpeech(sdt);
-    awaitSpeechResponse(sdt, SPEECH_DRIVER_THREAD_STOP_TIMEOUT);
-  } else {
-    deleteElements(sdt->requestQueue);
-  }
+  deleteElements(sdt->requestQueue);
 
 #ifdef GOT_PTHREADS
   if (enqueueSpeechRequest(sdt, NULL)) {
