@@ -16,17 +16,17 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_CMD_LEARN
-#define BRLTTY_INCLUDED_CMD_LEARN
+#ifndef BRLTTY_INCLUDED_LEARN
+#define BRLTTY_INCLUDED_LEARN
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern int addLearnCommands (void);
+extern int learnMode (int timeout);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_CMD_LEARN */
+#endif /* BRLTTY_INCLUDED_LEARN */

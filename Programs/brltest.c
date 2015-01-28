@@ -42,6 +42,7 @@
 #include "message.h"
 #include "charset.h"
 #include "async_wait.h"
+#include "learn.h"
 
 BrailleDisplay brl;
 
@@ -192,7 +193,7 @@ main (int argc, char *argv[]) {
 
         beginCommandQueue();
         startBrailleInput();
-        message(NULL, programName, 0);
+        learnMode(10000);
         stopBrailleInput();
 
         if (brl.keyTable) {
@@ -278,7 +279,7 @@ message (const char *mode, const char *text, MessageOptions options) {
 
     if (!braille->writeWindow(&brl, buffer)) return 0;
 
-    {
+    if (length) {
       int delay = MESSAGE_HOLD_TIMEOUT - brl.writeDelay;
 
       mgd.endWait = 0;
