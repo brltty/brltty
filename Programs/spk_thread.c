@@ -196,45 +196,59 @@ getActionName (unsigned int action, const char *const *names, size_t count) {
   return (action < count)? names[action]: NULL;
 }
 
+typedef struct {
+  const char *action;
+  const char *type;
+  const char *name;
+  unsigned int value;
+} LogSpeechActionData;
+
+static size_t
+formatLogSpeechActionData (char *buffer, size_t size, const void *data) {
+  const LogSpeechActionData *lsa = data;
+  size_t length;
+
+  STR_BEGIN(buffer, size);
+  STR_PRINTF("%s speech %s: ", lsa->action, lsa->type);
+
+  if (lsa->name) {
+    STR_PRINTF("%s", lsa->name);
+  } else {
+    STR_PRINTF("%u", lsa->value);
+  }
+
+  length = STR_LENGTH;
+  STR_END;
+  return length;
+}
+
 static void
-logSpeechEvent (const char *event) {
-  logMessage(LOG_CATEGORY(SPEECH_EVENTS), "%s", event);
+logSpeechAction (const LogSpeechActionData *lsa) {
+  logData(LOG_CATEGORY(SPEECH_EVENTS), formatLogSpeechActionData, lsa);
 }
 
 static void
 logSpeechRequest (SpeechRequest *req, const char *action) {
-  const char *name = req? getActionName(req->type, speechRequestNames, ARRAY_COUNT(speechRequestNames)): "stop";
-  char buffer[0X80];
+  const LogSpeechActionData lsa = {
+    .action = action,
+    .type = "request",
+    .name = req? getActionName(req->type, speechRequestNames, ARRAY_COUNT(speechRequestNames)): "stop",
+    .value = req? req->type: 0
+  };
 
-  STR_BEGIN(buffer, sizeof(buffer));
-  STR_PRINTF("%s speech request: ", action);
-
-  if (name) {
-    STR_PRINTF("%s", name);
-  } else {
-    STR_PRINTF("%u", req->type);
-  }
-
-  STR_END;
-  logSpeechEvent(buffer);
+  logSpeechAction(&lsa);
 }
 
 static void
 logSpeechMessage (SpeechMessage *msg, const char *action) {
-  const char *name = getActionName(msg->type, speechMessageNames, ARRAY_COUNT(speechMessageNames));
-  char buffer[0X80];
+  const LogSpeechActionData lsa = {
+    .action = action,
+    .type = "message",
+    .name = getActionName(msg->type, speechMessageNames, ARRAY_COUNT(speechMessageNames)),
+    .value = msg->type
+  };
 
-  STR_BEGIN(buffer, sizeof(buffer));
-  STR_PRINTF("%s speech message: ", action);
-
-  if (name) {
-    STR_PRINTF("%s", name);
-  } else {
-    STR_PRINTF("%u", msg->type);
-  }
-
-  STR_END;
-  logSpeechEvent(buffer);
+  logSpeechAction(&lsa);
 }
 
 static int
