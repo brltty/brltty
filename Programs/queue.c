@@ -23,32 +23,44 @@
 #include "thread.h"
 #include "program.h"
 
-static Element *discardedElementsList = NULL;
-
 #if defined(PTHREAD_MUTEX_INITIALIZER)
-static pthread_mutex_t discardedElementsListLock = PTHREAD_MUTEX_INITIALIZER;
+typedef pthread_mutex_t LockType;
+#define LOCK_INITIALIZER PTHREAD_MUTEX_INITIALIZER
 
 static void
-lockDiscardedElementsList (void) {
-  pthread_mutex_lock(&discardedElementsListLock);
+acquireExclusiveLock (LockType *lock) {
+  pthread_mutex_lock(lock);
 }
 
 static void
-unlockDiscardedElementsList (void) {
-  pthread_mutex_unlock(&discardedElementsListLock);
+releaseLock (LockType *lock) {
+  pthread_mutex_unlock(lock);
 }
 
 #else /* thread-safe queue management */
 #warning queues are not thread-safe on this platform
 
 static void
+acquireExclusiveLock (LockType *lock) {
+}
+
+static void
+releaseLock (LockType *lock) {
+}
+#endif /* thread-safe queue management */
+
+static Element *discardedElementsList = NULL;
+static LockType discardedElementsListLock = LOCK_INITIALIZER;
+
+static void
 lockDiscardedElementsList (void) {
+  acquireExclusiveLock(&discardedElementsListLock);
 }
 
 static void
 unlockDiscardedElementsList (void) {
+  releaseLock(&discardedElementsListLock);
 }
-#endif /* thread-safe queue management */
 
 struct QueueStruct {
   Element *head;
