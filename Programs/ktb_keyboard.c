@@ -397,6 +397,8 @@ BEGIN_KEY_NAME_TABLE(keyboard)
 
   KBD_KEY_NAME(MODIFIER, AltLeft, "AltLeft"),
   KBD_KEY_NAME(MODIFIER, AltLeft, "MODIFIER_AltLeft"),
+  KBD_KEY_NAME(MODIFIER, AltLeft, "Alt"),
+  KBD_KEY_NAME(MODIFIER, AltLeft, "MODIFIER_Alt"),
 
   KBD_KEY_NAME(MODIFIER, AltRight, "AltRight"),
   KBD_KEY_NAME(MODIFIER, AltRight, "MODIFIER_AltRight"),
