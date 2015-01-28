@@ -51,8 +51,13 @@ extern int setStatusText (BrailleDisplay *brl, const char *text);
 
 extern int readBrailleCommand (BrailleDisplay *, KeyTableCommandContext);
 
+extern int canSetBrailleFirmness (BrailleDisplay *brl);
 extern int setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting);
+
+extern int canSetBrailleSensitivity (BrailleDisplay *brl);
 extern int setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting);
+
+extern int canSetBrailleAutorepeat (BrailleDisplay *brl);
 extern int setBrailleAutorepeat (BrailleDisplay *brl, int on, int delay, int interval);
 
 extern int haveBrailleDriver (const char *code);

@@ -239,22 +239,37 @@ readBrailleCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 }
 
 int
+canSetBrailleFirmness (BrailleDisplay *brl) {
+  return brl->setFirmness != NULL;
+}
+
+int
 setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
-  if (!brl->setFirmness) return 0;
+  if (!canSetBrailleFirmness(brl)) return 0;
   logMessage(LOG_DEBUG, "setting braille firmness: %d", setting);
   return brl->setFirmness(brl, setting);
 }
 
 int
+canSetBrailleSensitivity (BrailleDisplay *brl) {
+  return brl->setSensitivity != NULL;
+}
+
+int
 setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting) {
-  if (!brl->setSensitivity) return 0;
+  if (!canSetBrailleSensitivity(brl)) return 0;
   logMessage(LOG_DEBUG, "setting braille sensitivity: %d", setting);
   return brl->setSensitivity(brl, setting);
 }
 
 int
+canSetBrailleAutorepeat (BrailleDisplay *brl) {
+  return brl->setAutorepeat != NULL;
+}
+
+int
 setBrailleAutorepeat (BrailleDisplay *brl, int on, int delay, int interval) {
-  if (!brl->setAutorepeat) return 0;
+  if (!canSetBrailleAutorepeat(brl)) return 0;
   logMessage(LOG_DEBUG, "setting braille autorepeat: %s Delay:%d Interval:%d", 
              (on? "on": "off"), delay, interval);
   return brl->setAutorepeat(brl, on, delay, interval);
