@@ -20,6 +20,7 @@
 
 #include "log.h"
 #include "queue.h"
+#include "thread.h"
 #include "program.h"
 
 struct QueueStruct {
@@ -67,27 +68,47 @@ removeItem (Element *element) {
   }
 }
 
-static Element *discardedElements = NULL;
+static Element *discardedElementsList = NULL;
+
+#if defined(PTHREAD_MUTEX_INITIALIZER)
+static pthread_mutex_t discardedElementsListLock = PTHREAD_MUTEX_INITIALIZER;
+
+static void
+lockDiscardedElementsList (void) {
+  pthread_mutex_lock(&discardedElementsListLock);
+}
+
+static void
+unlockDiscardedElementsList (void) {
+  pthread_mutex_unlock(&discardedElementsListLock);
+}
+
+#else /* discarded elements list management */
+#endif /* discarded elements list management */
 
 static void
 discardElement (Element *element) {
   removeItem(element);
   removeElement(element);
 
-  element->next = discardedElements;
-  discardedElements = element;
+  lockDiscardedElementsList();
+    element->next = discardedElementsList;
+    discardedElementsList = element;
+  unlockDiscardedElementsList();
 }
 
 static Element *
 retrieveElement (void) {
-  if (discardedElements) {
-    Element *element = discardedElements;
-    discardedElements = element->next;
-    element->next = NULL;
-    return element;
-  }
+  Element *element;
 
-  return NULL;
+  lockDiscardedElementsList();
+    if ((element = discardedElementsList)) {
+      discardedElementsList = element->next;
+      element->next = NULL;
+    }
+  unlockDiscardedElementsList();
+
+  return element;
 }
 
 static Element *
@@ -236,11 +257,13 @@ static int queueInitialized = 0;
 
 static void
 exitQueue (void *data) {
-  while (discardedElements) {
-    Element *element = discardedElements;
-    discardedElements = element->next;
-    free(element);
-  }
+  lockDiscardedElementsList();
+    while (discardedElementsList) {
+      Element *element = discardedElementsList;
+      discardedElementsList = element->next;
+      free(element);
+    }
+  unlockDiscardedElementsList();
 
   queueInitialized = 0;
 }
