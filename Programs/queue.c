@@ -38,7 +38,8 @@ releaseLock (LockType *lock) {
 }
 
 #else /* thread-safe queue management */
-#warning queues are not thread-safe on this platform
+typedef unsigned char LockType;
+#define LOCK_INITIALIZER 0
 
 static void
 acquireExclusiveLock (LockType *lock) {
@@ -47,6 +48,8 @@ acquireExclusiveLock (LockType *lock) {
 static void
 releaseLock (LockType *lock) {
 }
+
+#warning queues are not thread-safe on this platform
 #endif /* thread-safe queue management */
 
 static Element *discardedElementsList = NULL;
