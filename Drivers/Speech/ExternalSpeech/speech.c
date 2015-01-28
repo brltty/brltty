@@ -162,6 +162,8 @@ static void spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting)
 }
 
 ASYNC_INPUT_CALLBACK(xsHandleSpeechTrackingInput) {
+  volatile SpeechSynthesizer *spk = parameters->data;
+
   if (parameters->error) {
     logMessage(LOG_WARNING, "speech tracking input error: %s", strerror(parameters->error));
   } else if (parameters->end) {
@@ -171,9 +173,9 @@ ASYNC_INPUT_CALLBACK(xsHandleSpeechTrackingInput) {
     uint16_t location = (buffer[0] << 8) | buffer[1];
 
     if (location < totalCharacterCount) {
-      tellSpeechLocation(location);
+      tellSpeechLocation(spk, location);
     } else {
-      tellSpeechFinished();
+      tellSpeechFinished(spk);
     }
 
     return TRACK_DATA_SIZE;
@@ -321,7 +323,7 @@ static int spk_construct (volatile SpeechSynthesizer *spk, char **parameters)
   logMessage(LOG_INFO,"Opened pipe to external speech program '%s'",
 	     extProgPath);
 
-  asyncReadFile(&trackHandle, helper_fd_in, TRACK_DATA_SIZE*10, xsHandleSpeechTrackingInput, NULL);
+  asyncReadFile(&trackHandle, helper_fd_in, TRACK_DATA_SIZE*10, xsHandleSpeechTrackingInput, (void *)spk);
   return 1;
 }
 

@@ -23,18 +23,17 @@
 #include "spk_base.h"
 #include "spk_thread.h"
 #include "parse.h"
-#include "brltty.h"
 
 #ifdef ENABLE_SPEECH_SUPPORT
 int
-tellSpeechFinished (void) {
-  return speechMessage_speechFinished(spk.driver.thread);
+tellSpeechFinished (volatile SpeechSynthesizer *spk) {
+  return speechMessage_speechFinished(spk->driver.thread);
 }
 
 int
-tellSpeechLocation (int index) {
-  if (!spk.track.isActive) return 1;
-  return speechMessage_speechLocation(spk.driver.thread, index);
+tellSpeechLocation (volatile SpeechSynthesizer *spk, int index) {
+  if (!spk->track.isActive) return 1;
+  return speechMessage_speechLocation(spk->driver.thread, index);
 }
 
 static unsigned int

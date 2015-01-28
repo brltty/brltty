@@ -51,7 +51,7 @@ spk_say(volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t len
 
 	/* add 1 to the length in order to pass along the trailing zero */
 	result = espeak_Synth(buffer, length+1, 0, POS_CHARACTER, 0,
-			espeakCHARS_UTF8, NULL, NULL);
+			espeakCHARS_UTF8, NULL, (void *)spk);
 	if (result != EE_OK)
 		logMessage(LOG_ERR, "eSpeak: Synth() returned error %d", result);
 }
@@ -64,11 +64,13 @@ spk_mute(volatile SpeechSynthesizer *spk)
 
 static int SynthCallback(short *audio, int numsamples, espeak_EVENT *events)
 {
+	volatile SpeechSynthesizer *spk = events->user_data;
+
 	while (events->type != espeakEVENT_LIST_TERMINATED) {
 		if (events->type == espeakEVENT_WORD)
-			tellSpeechLocation(events->text_position - 1);
+			tellSpeechLocation(spk, events->text_position - 1);
 		if (events->type == espeakEVENT_MSG_TERMINATED)
-			tellSpeechFinished();
+			tellSpeechFinished(spk);
 		events++;
 	}
 	return 0;

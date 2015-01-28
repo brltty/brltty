@@ -28,10 +28,11 @@
 
 #include "program.h"
 #include "options.h"
-#include "spk.h"
 #include "log.h"
+#include "spk.h"
 #include "file.h"
 #include "parse.h"
+#include "async_wait.h"
 
 volatile SpeechSynthesizer spk;
 
@@ -81,9 +82,15 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 END_OPTION_TABLE
 
+static void
+say (const char *string) {
+  sayString(string, 0);
+  asyncWait(250);
+}
+
 static int
 sayLine (char *line, void *data) {
-  sayString(line, 0);
+  say(line);
   return 1;
 }
 
@@ -197,7 +204,7 @@ main (int argc, char *argv[]) {
       if (canSetSpeechRate()) setSpeechRate(speechRate, 0);
 
       if (opt_textString && *opt_textString) {
-        sayString(opt_textString, 0);
+        say(opt_textString);
       } else {
         processLines(stdin, sayLine, NULL);
       }
