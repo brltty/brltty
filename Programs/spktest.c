@@ -34,8 +34,6 @@
 #include "parse.h"
 #include "async_wait.h"
 
-volatile SpeechSynthesizer spk;
-
 static char *opt_textString;
 static char *opt_speechVolume;
 static char *opt_speechRate;
@@ -83,21 +81,25 @@ BEGIN_OPTION_TABLE(programOptions)
 END_OPTION_TABLE
 
 static int
-say (const char *string) {
-  if (!sayString(&spk, string, 0)) return 0;
+say (volatile SpeechSynthesizer *spk, const char *string) {
+  if (!sayString(spk, string, 0)) return 0;
   asyncWait(250);
   return 1;
 }
 
 static int
 sayLine (char *line, void *data) {
-  say(line);
+  volatile SpeechSynthesizer *spk = data;
+
+  say(spk, line);
   return 1;
 }
 
 int
 main (int argc, char *argv[]) {
   ProgramExitStatus exitStatus;
+  volatile SpeechSynthesizer spk;
+
 
   const char *driver = NULL;
   void *object;
@@ -205,9 +207,9 @@ main (int argc, char *argv[]) {
       setSpeechRate(&spk, speechRate, 0);
 
       if (opt_textString && *opt_textString) {
-        say(opt_textString);
+        say(&spk, opt_textString);
       } else {
-        processLines(stdin, sayLine, NULL);
+        processLines(stdin, sayLine, (void *)&spk);
       }
 
       stopSpeechDriverThread(&spk);
