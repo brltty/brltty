@@ -34,11 +34,104 @@
 #include "ttb_internal.h"
 #include "ttb_compile.h"
 
+#undef HAVE_UNDEFINED_CHARACTERS_SUPPORT
+#if defined(__linux__)
+#define HAVE_UNDEFINED_CHARACTERS_SUPPORT
+
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/ioctl.h>
+#include <linux/kd.h>
+
+static void
+showUndefinedCharacters (TextTableData *ttd) {
+  const char *path = "/dev/tty0";
+  int console;
+
+  if ((console = open(path, O_RDONLY)) != -1) {
+    struct unimapdesc sfm;
+    unsigned short size = 0X100;
+
+    while (1) {
+      sfm.entry_ct = size;
+
+      if (!(sfm.entries = malloc(ARRAY_SIZE(sfm.entries, sfm.entry_ct)))) {
+        logMallocError();
+        break;
+      }
+
+      if (ioctl(console, GIO_UNIMAP, &sfm) != -1) break;
+      free(sfm.entries);
+      sfm.entries = NULL;
+
+      if (errno != ENOMEM) {
+        logSystemError("ioctl[GIO_UNIMAP]");
+        break;
+      }
+
+      if (!(size <<= 1)) {
+        logMessage(LOG_ERR, "screen font map too big");
+        break;
+      }
+    }
+
+    if (sfm.entries) {
+      const struct unipair *entry = sfm.entries;
+      const struct unipair *end = entry + sfm.entry_ct;
+
+      while (entry < end) {
+        wchar_t character = entry++->unicode;
+
+        if (character == UNICODE_REPLACEMENT_CHARACTER) continue;
+        if ((character & ~UNICODE_CELL_MASK) == UNICODE_BRAILLE_ROW) continue;
+
+        if (!getUnicodeCellEntry(ttd, character)) {
+          const TextTableHeader *header = getTextTableHeader(ttd);
+
+          const TextTableAliasEntry *alias = locateTextTableAlias(
+            character, getTextTableItem(ttd, header->aliasArray), header->aliasCount
+          );
+
+          if (!alias) {
+            char buffer[0X80];
+
+            STR_BEGIN(buffer, sizeof(buffer));
+            STR_PRINTF("undefined character: \\U%08X", (uint32_t)character);
+
+            {
+              char name[0X40];
+
+              if (getCharacterName(character, name, sizeof(name))) {
+                STR_PRINTF(" [%s]", name);
+              }
+            }
+
+            STR_END;
+            logMessage(LOG_WARNING, buffer);
+          }
+        }
+      }
+
+      free(sfm.entries);
+    }
+
+    close(console);
+  } else {
+    logMessage(LOG_ERR, "cannot open console: %s: %s", path, strerror(errno));
+  }
+}
+
+#endif /* undefined characters support */
+
 static char *opt_charset;
 static char *opt_inputFormat;
 static char *opt_outputFormat;
 static char *opt_tablesDirectory;
 static int opt_edit;
+
+#ifdef HAVE_UNDEFINED_CHARACTERS_SUPPORT
+static int opt_undefined;
+#endif /* HAVE_UNDEFINED_CHARACTERS_SUPPORT */
 
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'T',
@@ -77,6 +170,14 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_charset,
     .description = strtext("8-bit character set to use.")
   },
+
+#ifdef HAVE_UNDEFINED_CHARACTERS_SUPPORT
+  { .letter = 'u',
+    .word = "undefined",
+    .setting.flag = &opt_undefined,
+    .description = strtext("Check for undefined characters.")
+  },
+#endif /* HAVE_UNDEFINED_CHARACTERS_SUPPORT */
 END_OPTION_TABLE
 
 static const BrlDotTable dotsInternal = {
@@ -791,6 +892,12 @@ convertTable (void) {
     TextTableData *ttd;
 
     if ((ttd = readTable(inputPath, inputFile, inputFormat))) {
+#ifdef HAVE_UNDEFINED_CHARACTERS_SUPPORT
+      if (opt_undefined) {
+        showUndefinedCharacters(ttd);
+      }
+#endif /* HAVE_UNDEFINED_CHARACTERS_SUPPORT */
+
       if (outputPath) {
         FILE *outputFile = openOutputTable(&outputPath);
 
@@ -2045,11 +2152,12 @@ main (int argc, char *argv[]) {
       .applicationName = "brltty-ttb",
       .argumentsSummary = "input-table [output-table]"
     };
+
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
 
   if (argc == 0) {
-    logMessage(LOG_ERR, "missing input table.");
+    logMessage(LOG_ERR, "missing input table");
     return PROG_EXIT_SYNTAX;
   }
   inputPath = *argv++, argc--;
@@ -2060,6 +2168,7 @@ main (int argc, char *argv[]) {
     const char *extension = locatePathExtension(inputPath);
     int prefix = extension? (extension - inputPath): strlen(inputPath);
     char buffer[prefix + 1 + strlen(opt_outputFormat) + 1];
+
     snprintf(buffer, sizeof(buffer), "%.*s.%s", prefix, inputPath, opt_outputFormat);
 
     if (!(outputPath = strdup(buffer))) {
@@ -2071,11 +2180,12 @@ main (int argc, char *argv[]) {
   }
 
   if (argc > 0) {
-    logMessage(LOG_ERR, "too many parameters.");
+    logMessage(LOG_ERR, "too many parameters");
     return PROG_EXIT_SYNTAX;
   }
 
   inputFormat = getFormatEntry(opt_inputFormat, inputPath, "input");
+
   if (outputPath) {
     outputFormat = getFormatEntry(opt_outputFormat, outputPath, "output");
   } else {
@@ -2083,7 +2193,7 @@ main (int argc, char *argv[]) {
   }
 
   if (*opt_charset && !setCharset(opt_charset)) {
-    logMessage(LOG_ERR, "can't establish character set: %s", opt_charset);
+    logMessage(LOG_ERR, "cannot establish character set: %s", opt_charset);
     return PROG_EXIT_SEMANTIC;
   }
 

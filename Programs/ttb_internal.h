@@ -68,6 +68,10 @@ struct TextTableStruct {
   size_t size;
 };
 
+extern const TextTableAliasEntry *locateTextTableAlias (
+  wchar_t character, const TextTableAliasEntry *array, size_t count
+);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

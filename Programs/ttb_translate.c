@@ -96,17 +96,21 @@ searchTextTableAlias (const void *target, const void *element) {
   return 0;
 }
 
-static const TextTableAliasEntry *
-findTextTableAlias (TextTable *table, wchar_t character) {
-  const TextTableHeader *header = table->header.fields;
-  const TextTableAliasEntry *array = getTextTableItem(table, header->aliasArray);
-
+const TextTableAliasEntry *
+locateTextTableAlias (wchar_t character, const TextTableAliasEntry *array, size_t count) {
   const TextTableAliasEntry *alias = bsearch(
-    &character, array, header->aliasCount, sizeof(*array), searchTextTableAlias
+    &character, array, count, sizeof(*array), searchTextTableAlias
   );
 
   if (alias) return alias;
   return NULL;
+}
+
+static const TextTableAliasEntry *
+findTextTableAlias (TextTable *table, wchar_t character) {
+  const TextTableHeader *header = table->header.fields;
+
+  return locateTextTableAlias(character, getTextTableItem(table, header->aliasArray), header->aliasCount);
 }
 
 typedef struct {

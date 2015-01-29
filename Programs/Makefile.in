@@ -420,7 +420,7 @@ ttb_gnome.$O:
 ttb_louis.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ttb_louis.c
 
-BRLTTY_TTB_OBJECTS = brltty-ttb.$O $(PROGRAM_OBJECTS) dataarea.$O ttb_compile.$O ttb_native.$O ttb_gnome.$O ttb_louis.$O
+BRLTTY_TTB_OBJECTS = brltty-ttb.$O $(PROGRAM_OBJECTS) dataarea.$O $(TTB_OBJECTS) ttb_gnome.$O ttb_louis.$O
 
 brltty-ttb$X: $(BRLTTY_TTB_OBJECTS) $(BUILD_API)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_TTB_OBJECTS) $(API_REF) $(CURSES_LIBS) $(LDLIBS)
