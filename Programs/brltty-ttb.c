@@ -96,7 +96,7 @@ showUndefinedCharacters (TextTableData *ttd) {
             char buffer[0X80];
 
             STR_BEGIN(buffer, sizeof(buffer));
-            STR_PRINTF("undefined character: \\U%08X", (uint32_t)character);
+            STR_PRINTF("undefined character: U+%04"PRIX32, (uint32_t)character);
 
             {
               char name[0X40];
