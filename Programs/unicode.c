@@ -18,29 +18,25 @@
 
 #include "prologue.h"
 
+#include "log.h"
+#include "unicode.h"
+#include "ascii.h"
+
 #ifdef HAVE_ICU
 #include <unicode/uchar.h>
 #include <unicode/unorm.h>
+
+static int
+isHandlableCharacter (wchar_t character) {
+  UChar uc = character;
+
+  return uc == character;
+}
 #endif /* HAVE_ICU */
 
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
 #endif /* HAVE_ICONV_H */
-
-#include "log.h"
-#include "unicode.h"
-#include "ascii.h"
-
-static int
-isHandlableCharacter (wchar_t character) {
-#ifdef HAVE_ICU
-  UChar uc = character;
-
-  if (uc == character) return 1;
-#endif /* HAVE_ICU */
-
-  return 0;
-}
 
 int
 getCharacterName (wchar_t character, char *buffer, size_t size) {
@@ -126,18 +122,20 @@ getCharacterWidth (wchar_t character) {
 wchar_t
 getBaseCharacter (wchar_t character) {
 #ifdef HAVE_ICU
-  UChar source[] = {character};
-  const unsigned int resultLength = 0X10;
-  UChar resultBuffer[resultLength];
-  UErrorCode error = U_ZERO_ERROR;
+  if (isHandlableCharacter(character)) {
+    UChar source[] = {character};
+    const unsigned int resultLength = 0X10;
+    UChar resultBuffer[resultLength];
+    UErrorCode error = U_ZERO_ERROR;
 
-  unorm_normalize(source, ARRAY_COUNT(source),
-                  UNORM_NFD, 0,
-                  resultBuffer, resultLength,
-                  &error);
+    unorm_normalize(source, ARRAY_COUNT(source),
+                    UNORM_NFD, 0,
+                    resultBuffer, resultLength,
+                    &error);
 
-  if (U_SUCCESS(error)) {
-    return resultBuffer[0];
+    if (U_SUCCESS(error)) {
+      return resultBuffer[0];
+    }
   }
 #endif /* HAVE_ICU */
 
@@ -179,8 +177,6 @@ handleBestCharacter (wchar_t character, CharacterHandler handleCharacter, void *
   };
 
   CharacterTranslator *const *translateCharacter = characterTranslators;
-
-  if (!isHandlableCharacter(character)) return 0;
 
   while (!handleCharacter(character, data)) {
     if (!*translateCharacter) return 0;
