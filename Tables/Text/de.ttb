@@ -204,4 +204,16 @@ char \xFD	( 23 5678)  # FD ⣶ ý [LATIN SMALL LETTER Y WITH ACUTE]
 char \xFE	(1234567 )  # FE ⡿ þ [LATIN SMALL LETTER THORN]
 char \xFF	(123456 8)  # FF ⢿ ÿ [LATIN SMALL LETTER Y WITH DIAERESIS]
 
+alias	\u2010	\x2D	# ‐ [HYPHEN]
+alias	\u2011	\x2D	# ‑ [NON-BREAKING HYPHEN]
+alias	\u2012	\x2D	# ‒ [FIGURE DASH]
+alias	\u2013	\x2D	# – [EN DASH]
+alias	\u2014	\x2D	# — [EM DASH]
+alias	\u2212	\x2D	# − [MINUS SIGN]
+alias	\u2295	\x2B	# ⊕ [CIRCLED PLUS]
+alias	\u2296	\x2D	# ⊖ [CIRCLED MINUS]
+alias	\u2298	\x2F	# ⊘ [CIRCLED DIVISION SLASH]
+alias	\u229B	\x2A	# ⊛ [CIRCLED ASTERISK OPERATOR]
+alias	\u229C	\x3D	# ⊜ [CIRCLED EQUALS]
+
 include common.tti
