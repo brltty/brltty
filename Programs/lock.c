@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include <string.h>
 #include <errno.h>
 
 #undef CAN_LOCK
@@ -31,7 +32,7 @@
 
 #else /* posix thread definitions */
 #define CAN_LOCK
-#include <pthread.h>
+#include "thread.h"
 
 #endif /* posix thread definitions */
 
@@ -39,32 +40,27 @@
 #include "log.h"
 
 #ifdef CAN_LOCK
-#ifdef PTHREAD_RWLOCK_INITIALIZER
+#if defined(PTHREAD_RWLOCK_INITIALIZER)
 struct LockDescriptorStruct {
   pthread_rwlock_t lock;
 };
 
-LockDescriptor *
-newLockDescriptor (void) {
-  LockDescriptor *lock;
+static int
+constructLockDescriptor (LockDescriptor *lock) {
+  int error;
 
-  if ((lock = malloc(sizeof(*lock)))) {
-    if (pthread_rwlock_init(&lock->lock, NULL) == 0) {
-      return lock;
-    }
-
-    free(lock);
+  if (!(error = pthread_rwlock_init(&lock->lock, NULL))) {
+    return 1;
   } else {
-    logMallocError();
+    logActionError(error, "pthread_rwlock_init");
   }
 
-  return NULL;
+  return 0;
 }
 
-void
-freeLockDescriptor (LockDescriptor *lock) {
+static void
+destructLockDescriptor (LockDescriptor *lock) {
   pthread_rwlock_destroy(&lock->lock);
-  free(lock);
 }
 
 int
@@ -84,7 +80,8 @@ void
 releaseLock (LockDescriptor *lock) {
   pthread_rwlock_unlock(&lock->lock);
 }
-#else /* PTHREAD_RWLOCK_INITIALIZER */
+
+#elif defined(PTHREAD_MUTEX_INITIALIZER)
 struct LockDescriptorStruct {
   pthread_mutex_t mutex;
   pthread_cond_t read;
@@ -93,46 +90,38 @@ struct LockDescriptorStruct {
   unsigned int writers;
 };
 
-LockDescriptor *
-newLockDescriptor (void) {
-  LockDescriptor *lock;
-  int result;
+static int
+constructLockDescriptor (LockDescriptor *lock) {
+  int error;
 
-  if ((lock = malloc(sizeof(*lock)))) {
-    if (!(result = pthread_cond_init(&lock->read, NULL))) {
-      if (!(result = pthread_cond_init(&lock->write, NULL))) {
-        if (!(result = pthread_mutex_init(&lock->mutex, NULL))) {
-          lock->count = 0;
-          lock->writers = 0;
-          return lock;
-        } else {
-          logActionError(result, "pthread_mutex_init");
-        }
-
-        pthread_cond_destroy(&lock->write);
+  if (!(error = pthread_cond_init(&lock->read, NULL))) {
+    if (!(error = pthread_cond_init(&lock->write, NULL))) {
+      if (!(error = pthread_mutex_init(&lock->mutex, NULL))) {
+        lock->count = 0;
+        lock->writers = 0;
+        return 1;
       } else {
-        logActionError(result, "pthread_cond_init");
+        logActionError(error, "pthread_mutex_init");
       }
 
-      pthread_cond_destroy(&lock->read);
+      pthread_cond_destroy(&lock->write);
     } else {
-      logActionError(result, "pthread_cond_init");
+      logActionError(error, "pthread_cond_init");
     }
 
-    free(lock);
+    pthread_cond_destroy(&lock->read);
   } else {
-    logMallocError();
+    logActionError(error, "pthread_cond_init");
   }
 
-  return NULL;
+  return 0;
 }
 
-void
-freeLockDescriptor (LockDescriptor *lock) {
+static void
+destructLockDescriptor (LockDescriptor *lock) {
   pthread_mutex_destroy(&lock->mutex);
   pthread_cond_destroy(&lock->read);
   pthread_cond_destroy(&lock->write);
-  free(lock);
 }
 
 int
@@ -184,7 +173,33 @@ releaseLock (LockDescriptor *lock) {
 done:
   pthread_mutex_unlock(&lock->mutex);
 }
-#endif /* PTHREAD_RWLOCK_INITIALIZER */
+
+#else /* lock paradigm */
+#undef CAN_LOCK
+#endif /* lock paradigm */
+#endif /* CAN_LOCK */
+
+#ifdef CAN_LOCK
+LockDescriptor *
+newLockDescriptor (void) {
+  LockDescriptor *lock;
+
+  if ((lock = malloc(sizeof(*lock)))) {
+    memset(lock, 0, sizeof(*lock));
+    if (constructLockDescriptor(lock)) return lock;
+    free(lock);
+  } else {
+    logMallocError();
+  }
+
+  return lock;
+}
+
+void
+freeLockDescriptor (LockDescriptor *lock) {
+  destructLockDescriptor(lock);
+  free(lock);
+}
 
 LockDescriptor *
 getLockDescriptor (LockDescriptor **lock) {
@@ -201,6 +216,15 @@ getLockDescriptor (LockDescriptor **lock) {
 #else /* CAN_LOCK */
 #warning thread lock support not available on this platform
 
+int
+obtainLock (LockDescriptor *lock, LockOptions options) {
+  return 1;
+}
+
+void
+releaseLock (LockDescriptor *lock) {
+}
+
 LockDescriptor *
 newLockDescriptor (void) {
   errno = ENOSYS;
@@ -209,15 +233,6 @@ newLockDescriptor (void) {
 
 void
 freeLockDescriptor (LockDescriptor *lock) {
-}
-
-int
-obtainLock (LockDescriptor *lock, LockOptions options) {
-  return 1;
-}
-
-void
-releaseLock (LockDescriptor *lock) {
 }
 
 LockDescriptor *
