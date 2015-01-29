@@ -107,6 +107,7 @@ mapDots (unsigned char input, const BrlDotTable from, const BrlDotTable to) {
 typedef TextTableData *TableReader (const char *path, FILE *file, const void *data);
 typedef int TableWriter (const char *path, FILE *file, TextTableData *ttd, const void *data);
 typedef int CharacterWriter (FILE *file, wchar_t character, unsigned char dots, const unsigned char *byte, int isPrimary, const void *data);
+typedef int AliasWriter (FILE *file, const TextTableAliasEntry *alias, const void *data);
 
 static int
 getDots (TextTableData *ttd, wchar_t character, unsigned char *dots) {
@@ -157,6 +158,22 @@ isPrimaryCharacter (TextTableData *ttd, wchar_t character, unsigned char dots) {
 }
 
 static int
+writeCharacterDescription (FILE *file, wchar_t character) {
+  if (fprintf(file, " ") == EOF) return 0;
+  if (!writeUtf8Character(file, ((iswprint(character) && !iswspace(character))? character: WC_C(' ')))) return 0;
+
+  {
+    char name[0X40];
+
+    if (getCharacterName(character, name, sizeof(name))) {
+      if (fprintf(file, " [%s]", name) == EOF) return 0;
+    }
+  }
+
+  return 1;
+}
+
+static int
 writeCharacters (FILE *file, TextTableData *ttd, CharacterWriter writer, const void *data) {
   if (*opt_charset) {
     unsigned char byte = 0;
@@ -169,6 +186,7 @@ writeCharacters (FILE *file, TextTableData *ttd, CharacterWriter writer, const v
 
         if (cell) {
           int isPrimary = isPrimaryCharacter(ttd, character, *cell);
+
           if (!writer(file, character, *cell, &byte, isPrimary, data)) return 0;
         }
       }
@@ -204,13 +222,16 @@ writeCharacters (FILE *file, TextTableData *ttd, CharacterWriter writer, const v
                   if (BITMASK_TEST(row->defined, cellNumber)) {
                     wchar_t character = UNICODE_CHARACTER(groupNumber, planeNumber, rowNumber, cellNumber);
 
-                    if (*opt_charset)
-                      if (convertWcharToChar(character) != EOF)
+                    if (*opt_charset) {
+                      if (convertWcharToChar(character) != EOF) {
                         continue;
+                      }
+                    }
 
                     {
                       const unsigned char *cell = &row->cells[cellNumber];
                       int isPrimary = isPrimaryCharacter(ttd, character, *cell);
+
                       if (!writer(file, character, *cell, NULL, isPrimary, data)) return 0;
                     }
                   }
@@ -221,6 +242,20 @@ writeCharacters (FILE *file, TextTableData *ttd, CharacterWriter writer, const v
         }
       }
     }
+  }
+
+  return 1;
+}
+
+static int
+writeAliases (FILE *file, TextTableData *ttd, AliasWriter writer, const void *data) {
+  const TextTableHeader *header = getTextTableHeader(ttd);
+  const TextTableAliasEntry *alias = getTextTableItem(ttd, header->aliasArray);
+  const TextTableAliasEntry *end = alias + header->aliasCount;
+
+  while (alias < end) {
+    if (!writer(file, alias, data)) return 0;
+    alias += 1;
   }
 
   return 1;
@@ -250,11 +285,11 @@ writeCharacter_native (
   FILE *file, wchar_t character, unsigned char dots,
   const unsigned char *byte, int isPrimary, const void *data
 ) {
-  if (fprintf(file, "%s\t", (isPrimary? "char": "glyph")) == EOF) goto error;
-  if (!writeHexadecimalCharacter(file, character)) goto error;
-  if (fprintf(file, "\t") == EOF) goto error;
-  if (!writeDots_native(file, dots)) goto error;
-  if (fprintf(file, "  #") == EOF) goto error;
+  if (fprintf(file, "%s\t", (isPrimary? "char": "glyph")) == EOF) return 0;
+  if (!writeHexadecimalCharacter(file, character)) return 0;
+  if (fprintf(file, "\t") == EOF) return 0;
+  if (!writeDots_native(file, dots)) return 0;
+  if (fprintf(file, "\t#") == EOF) return 0;
 
   if (*opt_charset) {
     const int width = 2;
@@ -266,40 +301,37 @@ writeCharacter_native (
       snprintf(buffer, sizeof(buffer), "%*s", width, "");
     }
 
-    if (fprintf(file, " %s", buffer) == EOF) goto error;
+    if (fprintf(file, " %s", buffer) == EOF) return 0;
   }
 
-  if (fprintf(file, " ") == EOF) goto error;
-  if (!writeUtf8Cell(file, dots)) goto error;
+  if (fprintf(file, " ") == EOF) return 0;
+  if (!writeUtf8Cell(file, dots)) return 0;
 
-  if (fprintf(file, " ") == EOF) goto error;
-  if (!writeUtf8Character(file, ((iswprint(character) && !iswspace(character))? character: WC_C(' ')))) goto error;
-
-  {
-    char name[0X40];
-
-    if (getCharacterName(character, name, sizeof(name))) {
-      if (fprintf(file, " [%s]", name) == EOF) return 0;
-    }
-  }
-
-  if (fprintf(file, "\n") == EOF) goto error;
+  if (!writeCharacterDescription(file, character)) return 0;
+  if (fprintf(file, "\n") == EOF) return 0;
   return 1;
+}
 
-error:
-  return 0;
+static int
+writeAlias_native (FILE *file, const TextTableAliasEntry *alias, const void *data) {
+  if (fprintf(file, "alias\t") == EOF) return 0;
+  if (!writeHexadecimalCharacter(file, alias->aliased)) return 0;
+  if (fprintf(file, "\t") == EOF) return 0;
+  if (!writeHexadecimalCharacter(file, alias->actual)) return 0;
+  if (fprintf(file, "\t#") == EOF) return 0;
+  if (!writeCharacterDescription(file, alias->aliased)) return 0;
+  if (fprintf(file, "\n") == EOF) return 0;
+  return 1;
 }
 
 static int
 writeTable_native (
   const char *path, FILE *file, TextTableData *ttd, const void *data
 ) {
-  if (!writeHeaderComment(file, writeHashComment)) goto error;
-  if (!writeCharacters(file, ttd, writeCharacter_native, data)) goto error;
+  if (!writeHeaderComment(file, writeHashComment)) return 0;
+  if (!writeCharacters(file, ttd, writeCharacter_native, data)) return 0;
+  if (!writeAliases(file, ttd, writeAlias_native, data)) return 0;
   return 1;
-
-error:
-  return 0;
 }
 
 static TextTableData *

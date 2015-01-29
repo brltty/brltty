@@ -86,6 +86,29 @@ getUnicodeCellEntry (TextTable *table, wchar_t character) {
   return NULL;
 }
 
+static int
+searchTextTableAlias (const void *target, const void *element) {
+  const wchar_t *reference = target;
+  const TextTableAliasEntry *alias = element;
+
+  if (*reference < alias->aliased) return -1;
+  if (*reference > alias->aliased) return 1;
+  return 0;
+}
+
+static const TextTableAliasEntry *
+findTextTableAlias (TextTable *table, wchar_t character) {
+  const TextTableHeader *header = table->header.fields;
+  const TextTableAliasEntry *array = getTextTableItem(table, header->aliasArray);
+
+  const TextTableAliasEntry *alias = bsearch(
+    &character, array, header->aliasCount, sizeof(*array), searchTextTableAlias
+  );
+
+  if (alias) return alias;
+  return NULL;
+}
+
 typedef struct {
   TextTable *const table;
   unsigned char dots;
@@ -112,33 +135,43 @@ convertCharacterToDots (TextTable *table, wchar_t character) {
 
     case 0XF000: {
       wint_t wc = convertCharToWchar(character & UNICODE_CELL_MASK);
-      if (wc == WEOF) goto unknownCharacter;
+
+      if (wc == WEOF) break;
       character = wc;
     }
 
     default: {
-      {
-        SetBrailleRepresentationData sbr = {
-          .table = table,
-          .dots = 0
-        };
+      SetBrailleRepresentationData sbr = {
+        .table = table,
+        .dots = 0
+      };
 
-        if (handleBestCharacter(character, setBrailleRepresentation, &sbr)) {
-          return sbr.dots;
+      if (handleBestCharacter(character, setBrailleRepresentation, &sbr)) {
+        return sbr.dots;
+      }
+
+      {
+        const TextTableAliasEntry *alias = findTextTableAlias(table, character);
+
+        if (alias) {
+          if (handleBestCharacter(alias->actual, setBrailleRepresentation, &sbr)) {
+            return sbr.dots;
+          }
         }
       }
 
-    unknownCharacter:
-      {
-        const unsigned char *cell;
-
-        if ((cell = getUnicodeCellEntry(table, UNICODE_REPLACEMENT_CHARACTER))) return *cell;
-        if ((cell = getUnicodeCellEntry(table, WC_C('?')))) return *cell;
-      }
-
-      return BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_7 | BRL_DOT_8;
+      break;
     }
   }
+
+  {
+    const unsigned char *cell;
+
+    if ((cell = getUnicodeCellEntry(table, UNICODE_REPLACEMENT_CHARACTER))) return *cell;
+    if ((cell = getUnicodeCellEntry(table, WC_C('?')))) return *cell;
+  }
+
+  return BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_7 | BRL_DOT_8;
 }
 
 wchar_t

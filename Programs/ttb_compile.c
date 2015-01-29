@@ -31,6 +31,12 @@
 
 struct TextTableDataStruct {
   DataArea *area;
+
+  struct {
+    TextTableAliasEntry *array;
+    size_t size;
+    size_t count;
+  } alias;
 };
 
 void *
@@ -205,12 +211,42 @@ setTextTableByte (TextTableData *ttd, unsigned char byte, unsigned char dots) {
   return 1;
 }
 
+int
+addTextTableAlias (TextTableData *ttd, wchar_t aliased, wchar_t actual) {
+  if (ttd->alias.count == ttd->alias.size) {
+    size_t newSize = ttd->alias.size? (ttd->alias.size << 1): 0X10;
+    TextTableAliasEntry *newArray;
+
+    if (!(newArray = realloc(ttd->alias.array, ARRAY_SIZE(newArray, newSize)))) {
+      logMallocError();
+      return 0;
+    }
+
+    ttd->alias.array = newArray;
+    ttd->alias.size = newSize;
+  }
+
+  {
+    TextTableAliasEntry *alias = &ttd->alias.array[ttd->alias.count++];
+
+    memset(alias, 0, sizeof(*alias));
+    alias->aliased = aliased;
+    alias->actual = actual;
+  }
+
+  return 1;
+}
+
 TextTableData *
 newTextTableData (void) {
   TextTableData *ttd;
 
   if ((ttd = malloc(sizeof(*ttd)))) {
     memset(ttd, 0, sizeof(*ttd));
+
+    ttd->alias.array = NULL;
+    ttd->alias.size = 0;
+    ttd->alias.count = 0;
 
     if ((ttd->area = newDataArea())) {
       if (allocateDataItem(ttd->area, NULL, sizeof(TextTableHeader), __alignof__(TextTableHeader))) {
@@ -228,8 +264,38 @@ newTextTableData (void) {
 
 void
 destroyTextTableData (TextTableData *ttd) {
+  if (ttd->alias.array) free(ttd->alias.array);
   destroyDataArea(ttd->area);
   free(ttd);
+}
+
+static int
+sortTextTableAliasArray (const void *element1, const void *element2) {
+  const TextTableAliasEntry *alias1 = element1;
+  const TextTableAliasEntry *alias2 = element2;
+
+  wchar_t wc1 = alias1->aliased;
+  wchar_t wc2 = alias2->aliased;
+
+  if (wc1 < wc2) return -1;
+  if (wc1 > wc2) return 1;
+  return 0;
+}
+
+static int
+finishTextTableData (TextTableData *ttd) {
+  TextTableHeader *header = getTextTableHeader(ttd);
+
+  qsort(ttd->alias.array, ttd->alias.count, sizeof(*ttd->alias.array), sortTextTableAliasArray);
+  header->aliasCount = ttd->alias.count;
+
+  if (saveDataItem(ttd->area, &header->aliasArray, ttd->alias.array,
+                   ARRAY_SIZE(ttd->alias.array, ttd->alias.count),
+                   __alignof__(*ttd->alias.array))) {
+    return 1;
+  }
+
+  return 0;
 }
 
 TextTableData *
@@ -238,7 +304,12 @@ processTextTableLines (FILE *stream, const char *name, DataOperandsProcessor *pr
     TextTableData *ttd;
 
     if ((ttd = newTextTableData())) {
-      if (processDataStream(NULL, stream, name, processor, ttd)) return ttd;
+      if (processDataStream(NULL, stream, name, processor, ttd)) {
+        if (finishTextTableData(ttd)) {
+          return ttd;
+        }
+      }
+
       destroyTextTableData(ttd);
     }
   }

@@ -141,13 +141,7 @@ static DATA_OPERANDS_PROCESSOR(processAliasOperands) {
     wchar_t oldCharacter;
 
     if (getCharacterOperand(file, &oldCharacter)) {
-      const unsigned char *cell = getUnicodeCellEntry(ttd, oldCharacter);
-
-      if (!cell) {
-        reportDataError(file, "base character not defined");
-      } else if (!setTextTableGlyph(ttd, newCharacter, *cell)) {
-        return 0;
-      }
+      if (!addTextTableAlias(ttd, newCharacter, oldCharacter)) return 0;
     }
   }
 

@@ -27,8 +27,16 @@
 #include <iconv.h>
 #endif /* HAVE_ICONV_H */
 
+#include "log.h"
 #include "unicode.h"
 #include "ascii.h"
+
+static int
+isHandlableCharacter (wchar_t character) {
+  UChar uc = character;
+
+  return uc == character;
+}
 
 int
 getCharacterName (wchar_t character, char *buffer, size_t size) {
@@ -124,7 +132,9 @@ getBaseCharacter (wchar_t character) {
                   resultBuffer, resultLength,
                   &error);
 
-  if (U_SUCCESS(error)) return resultBuffer[0];
+  if (U_SUCCESS(error)) {
+    return resultBuffer[0];
+  }
 #endif /* HAVE_ICU */
 
   return 0;
@@ -143,9 +153,11 @@ getTransliteratedCharacter (wchar_t character) {
     char outputBuffer[outputSize];
     char *outputAddress = outputBuffer;
 
-    if (iconv(handle, &inputAddress, &inputSize, &outputAddress, &outputSize) != (size_t)-1)
-      if ((outputAddress - outputBuffer) == 1)
+    if (iconv(handle, &inputAddress, &inputSize, &outputAddress, &outputSize) != (size_t)-1) {
+      if ((outputAddress - outputBuffer) == 1) {
         return outputBuffer[0] & 0XFF;
+      }
+    }
   }
 #endif /* HAVE_ICONV_H */
 
@@ -155,18 +167,23 @@ getTransliteratedCharacter (wchar_t character) {
 int
 handleBestCharacter (wchar_t character, CharacterHandler handleCharacter, void *data) {
   typedef wchar_t CharacterTranslator (wchar_t character);
+
   static CharacterTranslator *const characterTranslators[] = {
     getBaseCharacter,
     getTransliteratedCharacter,
     NULL
   };
+
   CharacterTranslator *const *translateCharacter = characterTranslators;
+
+  if (!isHandlableCharacter(character)) return 0;
 
   while (!handleCharacter(character, data)) {
     if (!*translateCharacter) return 0;
 
     {
       wchar_t alternate = (*translateCharacter++)(character);
+
       if (alternate) character = alternate;
     }
   }

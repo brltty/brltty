@@ -21,6 +21,7 @@
 
 #include "bitmask.h"
 #include "unicode.h"
+#include "dataarea.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,9 +47,16 @@ typedef struct {
 } UnicodeGroupEntry;
 
 typedef struct {
+  wchar_t aliased;
+  wchar_t actual;
+} TextTableAliasEntry;
+
+typedef struct {
   TextTableOffset unicodeGroups[UNICODE_GROUP_COUNT];
   wchar_t dotsToCharacter[0X100];
   BITMASK(dotsCharacterDefined, 0X100, char);
+  DataOffset aliasArray;
+  uint32_t aliasCount;
 } TextTableHeader;
 
 struct TextTableStruct {

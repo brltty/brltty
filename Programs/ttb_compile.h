@@ -47,6 +47,7 @@ extern int setTextTableGlyph (TextTableData *ttd, wchar_t character, unsigned ch
 extern int setTextTableCharacter (TextTableData *ttd, wchar_t character, unsigned char dots);
 extern void unsetTextTableCharacter (TextTableData *ttd, wchar_t character);
 extern int setTextTableByte (TextTableData *ttd, unsigned char byte, unsigned char dots);
+extern int addTextTableAlias (TextTableData *ttd, wchar_t aliased, wchar_t actual);
 
 #ifdef __cplusplus
 }
