@@ -27,7 +27,7 @@
 #include <unicode/unorm.h>
 
 static int
-isHandlableCharacter (wchar_t character) {
+isUcharCompatible (wchar_t character) {
   UChar uc = character;
 
   return uc == character;
@@ -122,7 +122,7 @@ getCharacterWidth (wchar_t character) {
 wchar_t
 getBaseCharacter (wchar_t character) {
 #ifdef HAVE_ICU
-  if (isHandlableCharacter(character)) {
+  if (isUcharCompatible(character)) {
     UChar source[] = {character};
     const unsigned int resultLength = 0X10;
     UChar resultBuffer[resultLength];
