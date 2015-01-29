@@ -33,9 +33,13 @@
 
 static int
 isHandlableCharacter (wchar_t character) {
+#ifdef HAVE_ICU
   UChar uc = character;
 
-  return uc == character;
+  if (uc == character) return 1;
+#endif /* HAVE_ICU */
+
+  return 0;
 }
 
 int
