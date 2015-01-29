@@ -190,9 +190,11 @@ LockDescriptor *
 getLockDescriptor (LockDescriptor **lock) {
   static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-  pthread_mutex_lock(&mutex);
-  if (!*lock) *lock = newLockDescriptor();
-  pthread_mutex_unlock(&mutex);
+  if (!*lock) {
+    pthread_mutex_lock(&mutex);
+    if (!*lock) *lock = newLockDescriptor();
+    pthread_mutex_unlock(&mutex);
+  }
 
   return *lock;
 }
