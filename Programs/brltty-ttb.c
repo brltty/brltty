@@ -45,8 +45,15 @@
 
 static void
 showUndefinedCharacters (TextTableData *ttd) {
-  const char *path = "/dev/tty0";
+  char path[0X40];
   int console;
+
+  {
+    const char *vt = getenv("XDG_VTNR");
+
+    if (!(vt && *vt)) vt = "0";
+    snprintf(path, sizeof(path), "/dev/tty%s", vt);
+  }
 
   if ((console = open(path, O_RDONLY)) != -1) {
     struct unimapdesc sfm;
