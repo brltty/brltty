@@ -29,7 +29,7 @@ static LockDescriptor *
 getDiscardedElementsLock (void) {
   static LockDescriptor *lock = NULL;
 
-  return getLockDescriptor(&lock);
+  return getLockDescriptor(&lock, "queue-discarded-elements");
 }
 
 static void

@@ -189,12 +189,21 @@ freeLockDescriptor (LockDescriptor *lock) {
 }
 
 LockDescriptor *
-getLockDescriptor (LockDescriptor **lock) {
+getLockDescriptor (LockDescriptor **lock, const char *name) {
   static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+  int isNew = 0;
 
   pthread_mutex_lock(&mutex);
-  if (!*lock) *lock = newLockDescriptor();
+    if (!*lock) {
+      if ((*lock = newLockDescriptor())) {
+        isNew = 1;
+      }
+    }
   pthread_mutex_unlock(&mutex);
+
+  if (isNew) {
+    logMessage(LOG_DEBUG, "lock descriptor allocated: %s", name);
+  }
 
   return *lock;
 }
@@ -221,7 +230,7 @@ freeLockDescriptor (LockDescriptor *lock) {
 }
 
 LockDescriptor *
-getLockDescriptor (LockDescriptor **lock) {
+getLockDescriptor (LockDescriptor **lock, const char *name) {
   return *lock;
 }
 #endif /* CAN_LOCK */

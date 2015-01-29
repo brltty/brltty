@@ -31,7 +31,7 @@ typedef enum {
 } LockOptions;
 
 extern LockDescriptor *newLockDescriptor (void);
-extern LockDescriptor *getLockDescriptor (LockDescriptor **lock);
+extern LockDescriptor *getLockDescriptor (LockDescriptor **lock, const char *name);
 extern void freeLockDescriptor (LockDescriptor *lock);
 
 extern int obtainLock (LockDescriptor *lock, LockOptions options);

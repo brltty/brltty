@@ -347,7 +347,8 @@ getCharset (void) {
 static LockDescriptor *
 getCharsetLock (void) {
   static LockDescriptor *lock = NULL;
-  return getLockDescriptor(&lock);
+
+  return getLockDescriptor(&lock, "charset");
 }
 
 int
