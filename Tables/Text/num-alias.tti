@@ -18,6 +18,17 @@
 
 # This BRLTTY text subtable defines aliases for additional dedimal digit styles.
 
+alias	\u2460	\x31	# ① [CIRCLED DIGIT ONE]
+alias	\u2461	\x32	# ② [CIRCLED DIGIT TWO]
+alias	\u2462	\x33	# ③ [CIRCLED DIGIT THREE]
+alias	\u2463	\x34	# ④ [CIRCLED DIGIT FOUR]
+alias	\u2464	\x35	# ⑤ [CIRCLED DIGIT FIVE]
+alias	\u2465	\x36	# ⑥ [CIRCLED DIGIT SIX]
+alias	\u2466	\x37	# ⑦ [CIRCLED DIGIT SEVEN]
+alias	\u2467	\x38	# ⑧ [CIRCLED DIGIT EIGHT]
+alias	\u2468	\x39	# ⑨ [CIRCLED DIGIT NINE]
+alias	\u24EA	\x30	# ⓪ [CIRCLED DIGIT ZERO]
+
 alias	\uFF10	\x30	# ０ [FULLWIDTH DIGIT ZERO]
 alias	\uFF11	\x31	# １ [FULLWIDTH DIGIT ONE]
 alias	\uFF12	\x32	# ２ [FULLWIDTH DIGIT TWO]
