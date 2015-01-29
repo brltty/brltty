@@ -31,7 +31,14 @@ extern void suspendUpdates (void);
 extern void resumeUpdates (int refresh);
 
 #ifdef ENABLE_SPEECH_SUPPORT
-extern void doAutospeak (int force);
+typedef enum {
+  AUTOSPEAK_SILENT,
+  AUTOSPEAK_CHANGES,
+  AUTOSPEAK_FORCE
+} AutospeakMode;
+
+extern void autospeak (AutospeakMode mode);
+extern void suppressAutospeak (void);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 #ifdef __cplusplus

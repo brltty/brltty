@@ -29,6 +29,7 @@
 #include "alert.h"
 #include "spk.h"
 #include "scr.h"
+#include "update.h"
 #include "brltty.h"
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -65,6 +66,7 @@ speakDone (const ScreenCharacter *line, int column, int count, int spell) {
   speakCharacters(line, count, spell);
   placeBrailleWindowHorizontally(ses->spkx);
   slideWindowVertically(ses->spky);
+  suppressAutospeak();
 }
 
 static void

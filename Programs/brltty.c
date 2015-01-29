@@ -757,7 +757,7 @@ trackSpeech (void) {
 }
 
 int
-autospeak (void) {
+isAutospeakEnabled (void) {
   if (speech->definition.code == noSpeech.definition.code) return 0;
   if (prefs.autospeak) return 1;
   if (opt_quietIfNoBraille) return 0;

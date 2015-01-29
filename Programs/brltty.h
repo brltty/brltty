@@ -169,7 +169,7 @@ extern int isAllSpaceCharacters (const ScreenCharacter *characters, int count);
 extern volatile SpeechSynthesizer spk;
 extern int opt_quietIfNoBraille;
 
-extern int autospeak (void);
+extern int isAutospeakEnabled (void);
 
 extern void sayScreenCharacters (const ScreenCharacter *characters, size_t count, SayOptions options);
 extern void speakCharacters (const ScreenCharacter *characters, size_t count, int spell);

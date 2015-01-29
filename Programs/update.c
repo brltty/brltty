@@ -296,7 +296,7 @@ showInfo (void) {
 static int wasAutospeaking;
 
 void
-doAutospeak (int force) {
+autospeak (AutospeakMode mode) {
   static int oldScreen = -1;
   static int oldX = -1;
   static int oldY = -1;
@@ -319,7 +319,7 @@ doAutospeak (int force) {
     int count = newWidth;
     const char *reason = NULL;
 
-    if (force) {
+    if (mode == AUTOSPEAK_FORCE) {
       reason = "current line";
     } else if (!oldCharacters) {
       reason = "initial line";
@@ -490,6 +490,8 @@ doAutospeak (int force) {
     }
 
   autospeak:
+    if (mode == AUTOSPEAK_SILENT) count = 0;
+
     if (count) {
       characters += column;
 
@@ -527,6 +529,13 @@ doAutospeak (int force) {
   oldY = newY;
   oldWidth = newWidth;
   cursorAssumedStable = 0;
+}
+
+void
+suppressAutospeak (void) {
+  autospeak(AUTOSPEAK_SILENT);
+  oldwinx = ses->winx;
+  oldwiny = ses->winy;
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
@@ -614,10 +623,10 @@ doUpdate (void) {
 
 #ifdef ENABLE_SPEECH_SUPPORT
   if (spk.canAutospeak) {
-    int isAutospeaking = autospeak();
+    int isAutospeaking = isAutospeakEnabled();
 
     if (isAutospeaking) {
-      doAutospeak(!wasAutospeaking);
+      autospeak(wasAutospeaking? AUTOSPEAK_CHANGES: AUTOSPEAK_FORCE);
     } else if (wasAutospeaking) {
       muteSpeech(&spk, "autospeak disabled");
     }

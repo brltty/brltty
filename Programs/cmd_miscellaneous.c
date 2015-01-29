@@ -236,7 +236,7 @@ handleMiscellaneousCommands (int command, void *data) {
       getTimeFormattingData(&fmt);
 
 #ifdef ENABLE_SPEECH_SUPPORT
-      if (autospeak()) doSpeechTime(&fmt);
+      if (isAutospeakEnabled()) doSpeechTime(&fmt);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
       doBrailleTime(&fmt);
