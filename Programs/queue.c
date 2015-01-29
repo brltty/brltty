@@ -20,49 +20,26 @@
 
 #include "log.h"
 #include "queue.h"
-#include "thread.h"
+#include "lock.h"
 #include "program.h"
 
-#if defined(PTHREAD_MUTEX_INITIALIZER)
-typedef pthread_mutex_t LockType;
-#define LOCK_INITIALIZER PTHREAD_MUTEX_INITIALIZER
+static Element *discardedElements = NULL;
 
-static void
-acquireExclusiveLock (LockType *lock) {
-  pthread_mutex_lock(lock);
+static LockDescriptor *
+getDiscardedElementsLock (void) {
+  static LockDescriptor *lock = NULL;
+
+  return getLockDescriptor(&lock);
 }
 
 static void
-releaseLock (LockType *lock) {
-  pthread_mutex_unlock(lock);
-}
-
-#else /* thread-safe queue management */
-typedef unsigned char LockType;
-#define LOCK_INITIALIZER 0
-
-static void
-acquireExclusiveLock (LockType *lock) {
+lockDiscardedElements (void) {
+  obtainExclusiveLock(getDiscardedElementsLock());
 }
 
 static void
-releaseLock (LockType *lock) {
-}
-
-#warning queues are not thread-safe on this platform
-#endif /* thread-safe queue management */
-
-static Element *discardedElementsList = NULL;
-static LockType discardedElementsListLock = LOCK_INITIALIZER;
-
-static void
-lockDiscardedElementsList (void) {
-  acquireExclusiveLock(&discardedElementsListLock);
-}
-
-static void
-unlockDiscardedElementsList (void) {
-  releaseLock(&discardedElementsListLock);
+unlockDiscardedElements (void) {
+  releaseLock(getDiscardedElementsLock());
 }
 
 struct QueueStruct {
@@ -115,22 +92,22 @@ discardElement (Element *element) {
   removeItem(element);
   removeElement(element);
 
-  lockDiscardedElementsList();
-    element->next = discardedElementsList;
-    discardedElementsList = element;
-  unlockDiscardedElementsList();
+  lockDiscardedElements();
+    element->next = discardedElements;
+    discardedElements = element;
+  unlockDiscardedElements();
 }
 
 static Element *
 retrieveElement (void) {
   Element *element;
 
-  lockDiscardedElementsList();
-    if ((element = discardedElementsList)) {
-      discardedElementsList = element->next;
+  lockDiscardedElements();
+    if ((element = discardedElements)) {
+      discardedElements = element->next;
       element->next = NULL;
     }
-  unlockDiscardedElementsList();
+  unlockDiscardedElements();
 
   return element;
 }
@@ -281,13 +258,13 @@ static int queueInitialized = 0;
 
 static void
 exitQueue (void *data) {
-  lockDiscardedElementsList();
-    while (discardedElementsList) {
-      Element *element = discardedElementsList;
-      discardedElementsList = element->next;
+  lockDiscardedElements();
+    while (discardedElements) {
+      Element *element = discardedElements;
+      discardedElements = element->next;
       free(element);
     }
-  unlockDiscardedElementsList();
+  unlockDiscardedElements();
 
   queueInitialized = 0;
 }
