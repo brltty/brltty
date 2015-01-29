@@ -496,7 +496,9 @@ autospeak (AutospeakMode mode) {
       characters += column;
 
       if (!reason) reason = "unknown reason";
-      logMessage(LOG_CATEGORY(SPEECH_EVENTS), "autospeak: %s: %d", reason, count);
+      logMessage(LOG_CATEGORY(SPEECH_EVENTS),
+                 "autospeak: %s: [%d,%d] %d.%d",
+                 reason, ses->winx, ses->winy, column, count);
 
       speakCharacters(characters, count, 0);
     }
@@ -533,9 +535,11 @@ autospeak (AutospeakMode mode) {
 
 void
 suppressAutospeak (void) {
-  autospeak(AUTOSPEAK_SILENT);
-  oldwinx = ses->winx;
-  oldwiny = ses->winy;
+  if (isAutospeakActive()) {
+    autospeak(AUTOSPEAK_SILENT);
+    oldwinx = ses->winx;
+    oldwiny = ses->winy;
+  }
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
@@ -623,7 +627,7 @@ doUpdate (void) {
 
 #ifdef ENABLE_SPEECH_SUPPORT
   if (spk.canAutospeak) {
-    int isAutospeaking = isAutospeakEnabled();
+    int isAutospeaking = isAutospeakActive();
 
     if (isAutospeaking) {
       autospeak(wasAutospeaking? AUTOSPEAK_CHANGES: AUTOSPEAK_FORCE);

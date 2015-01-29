@@ -1840,7 +1840,7 @@ startSpeechDriver (void) {
     makeProgramBanner(banner, sizeof(banner));
     sayString(&spk, banner, SAY_OPT_MUTE_FIRST);
     beginAutospeakDelay(SPEECH_DRIVER_START_AUTOSPEAK_DELAY);
-  } else if (isAutospeakEnabled()) {
+  } else if (isAutospeakActive()) {
     autospeak(AUTOSPEAK_FORCE);
   }
 

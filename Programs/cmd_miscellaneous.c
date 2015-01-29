@@ -141,7 +141,7 @@ formatSpeechTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
 }
 
 static void
-doSpeechTime (const TimeFormattingData *fmt) {
+speakTime (const TimeFormattingData *fmt) {
   char announcement[0X100];
   char time[0X80];
 
@@ -176,7 +176,7 @@ doSpeechTime (const TimeFormattingData *fmt) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 static void
-doBrailleTime (const TimeFormattingData *fmt) {
+showTime (const TimeFormattingData *fmt) {
   char buffer[0X80];
 
   formatBrailleTime(buffer, sizeof(buffer), fmt);
@@ -236,10 +236,10 @@ handleMiscellaneousCommands (int command, void *data) {
       getTimeFormattingData(&fmt);
 
 #ifdef ENABLE_SPEECH_SUPPORT
-      if (isAutospeakEnabled()) doSpeechTime(&fmt);
+      if (isAutospeakActive()) speakTime(&fmt);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-      doBrailleTime(&fmt);
+      showTime(&fmt);
       break;
     }
 
