@@ -190,7 +190,9 @@ outputError:
 }
 
 static int
-getTable (TextTable **table, const char *directory, const char *name) {
+getTable (TextTable **table, const char *name) {
+  const char *directory = opt_tablesDirectory;
+
   *table = NULL;
 
   if (strcmp(name, tableName_unicode) != 0) {
@@ -228,11 +230,12 @@ main (int argc, char *argv[]) {
       .applicationName = "brltty-trtxt",
       .argumentsSummary = "[{input-file | -} ...]"
     };
+
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
 
-  if (getTable(&inputTable, opt_tablesDirectory, opt_inputTable)) {
-    if (getTable(&outputTable, opt_tablesDirectory, opt_outputTable)) {
+  if (getTable(&inputTable, opt_inputTable)) {
+    if (getTable(&outputTable, opt_outputTable)) {
       outputStream = stdout;
       outputName = standardOutputName;
 
