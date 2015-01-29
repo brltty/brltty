@@ -21,26 +21,14 @@
 #include <string.h>
 #include <errno.h>
 
-#undef CAN_LOCK
-#if defined(__MINGW32__)
-#define CAN_LOCK
-#include "win_pthread.h"
-
-#elif defined(__MSDOS__)
-
-#elif defined(GRUB_RUNTIME)
-
-#else /* posix thread definitions */
-#define CAN_LOCK
-#include "thread.h"
-
-#endif /* posix thread definitions */
-
 #include "lock.h"
 #include "log.h"
-
-#ifdef CAN_LOCK
+#include "get_pthreads.h"
+ 
+#undef CAN_LOCK
 #if defined(PTHREAD_RWLOCK_INITIALIZER)
+#define CAN_LOCK
+
 struct LockDescriptorStruct {
   pthread_rwlock_t lock;
 };
@@ -82,6 +70,8 @@ releaseLock (LockDescriptor *lock) {
 }
 
 #elif defined(PTHREAD_MUTEX_INITIALIZER)
+#define CAN_LOCK
+
 struct LockDescriptorStruct {
   pthread_mutex_t mutex;
   pthread_cond_t read;
@@ -174,10 +164,7 @@ done:
   pthread_mutex_unlock(&lock->mutex);
 }
 
-#else /* lock paradigm */
-#undef CAN_LOCK
 #endif /* lock paradigm */
-#endif /* CAN_LOCK */
 
 #ifdef CAN_LOCK
 LockDescriptor *
