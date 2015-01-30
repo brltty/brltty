@@ -332,7 +332,7 @@ writeCharacters (FILE *file, TextTableData *ttd, CharacterWriter writer, const v
                 unsigned int cellNumber;
 
                 for (cellNumber=0; cellNumber<UNICODE_CELLS_PER_ROW; cellNumber+=1) {
-                  if (BITMASK_TEST(row->defined, cellNumber)) {
+                  if (BITMASK_TEST(row->cellDefined, cellNumber)) {
                     wchar_t character = UNICODE_CHARACTER(groupNumber, planeNumber, rowNumber, cellNumber);
 
                     if (*opt_charset) {
@@ -1522,7 +1522,7 @@ findCharacter (EditTableData *etd, int backward) {
                 while (cellNumber != cellLimit) {
                   cellNumber += increment;
 
-                  if (BITMASK_TEST(row->defined, cellNumber)) {
+                  if (BITMASK_TEST(row->cellDefined, cellNumber)) {
                     etd->character.unicode = UNICODE_CHARACTER(groupNumber, planeNumber, rowNumber, cellNumber);
                     return 1;
                   }

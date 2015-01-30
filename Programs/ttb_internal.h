@@ -35,7 +35,8 @@ typedef uint32_t TextTableOffset;
 
 typedef struct {
   unsigned char cells[UNICODE_CELLS_PER_ROW];
-  BITMASK(defined, UNICODE_CELLS_PER_ROW, char);
+  BITMASK(cellDefined, UNICODE_CELLS_PER_ROW, char);
+  BITMASK(cellAliased, UNICODE_CELLS_PER_ROW, char);
 } UnicodeRowEntry;
 
 typedef struct {

@@ -127,7 +127,7 @@ getUnicodeCellEntry (TextTableData *ttd, wchar_t character) {
 
   if (row) {
     unsigned int cellNumber = UNICODE_CELL_NUMBER(character);
-    if (BITMASK_TEST(row->defined, cellNumber)) return &row->cells[cellNumber];
+    if (BITMASK_TEST(row->cellDefined, cellNumber)) return &row->cells[cellNumber];
   }
 
   return NULL;
@@ -163,8 +163,8 @@ setTextTableGlyph (TextTableData *ttd, wchar_t character, unsigned char dots) {
     unsigned int cellNumber = UNICODE_CELL_NUMBER(character);
     unsigned char *cell = &row->cells[cellNumber];
 
-    if (!BITMASK_TEST(row->defined, cellNumber)) {
-      BITMASK_SET(row->defined, cellNumber);
+    if (!BITMASK_TEST(row->cellDefined, cellNumber)) {
+      BITMASK_SET(row->cellDefined, cellNumber);
     } else if (*cell != dots) {
       resetTextTableDots(ttd, *cell, character);
     }
@@ -190,12 +190,12 @@ unsetTextTableCharacter (TextTableData *ttd, wchar_t character) {
   if (row) {
     unsigned int cellNumber = UNICODE_CELL_NUMBER(character);
 
-    if (BITMASK_TEST(row->defined, cellNumber)) {
+    if (BITMASK_TEST(row->cellDefined, cellNumber)) {
       unsigned char *cell = &row->cells[cellNumber];
 
       resetTextTableDots(ttd, *cell, character);
       *cell = 0;
-      BITMASK_CLEAR(row->defined, cellNumber);
+      BITMASK_CLEAR(row->cellDefined, cellNumber);
     }
   }
 }
@@ -224,6 +224,14 @@ addTextTableAlias (TextTableData *ttd, wchar_t from, wchar_t to) {
 
     ttd->alias.array = newArray;
     ttd->alias.size = newSize;
+  }
+
+  {
+    unsigned int cellNumber = UNICODE_CELL_NUMBER(from);
+    UnicodeRowEntry *row = getUnicodeRowEntry(ttd, from, 1);
+
+    if (!row) return 0;
+    BITMASK_SET(row->cellAliased, cellNumber);
   }
 
   {
