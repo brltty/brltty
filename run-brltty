@@ -19,9 +19,10 @@
 
 set -e
 cd "`dirname "${0}"`"
+currentDirectory=`pwd`
 
-BRLTTY_DRIVERS_DIRECTORY="../lib"
-BRLTTY_TABLES_DIRECTORY="../Tables"
+BRLTTY_DRIVERS_DIRECTORY="${currentDirectory}/lib"
+BRLTTY_TABLES_DIRECTORY="${currentDirectory}/Tables"
 export BRLTTY_DRIVERS_DIRECTORY BRLTTY_TABLES_DIRECTORY
 
 exec "Programs/brltty" -E "$@"
