@@ -582,108 +582,91 @@ typedef struct {
   } data;
 } Packet2;
 
-static size_t
-readPacket2 (BrailleDisplay *brl, void *packet, size_t size) {
-  Packet2 *packet2 = packet;
-  size_t offset = 0;
+static BraillePacketVerifierResult
+verifyPacket2 (
+  BrailleDisplay *brl,
+  const unsigned char *bytes, size_t size,
+  size_t *length, void *data
+) {
+  Packet2 *packet = data;
+  unsigned char byte = bytes[size-1];
 
-  volatile size_t length;
-  volatile int identity;
+  switch (byte) {
+    case STX:
+      if (size != 1) break;
+      *length = 5;
+      return BRL_PVR_INCLUDE;
 
-  while (1) {
-    {
-      int started = offset > 0;
+    case ETX:
+      if (size != *length) break;
+      return BRL_PVR_INCLUDE;
 
-      if (!gioReadByte(brl->gioEndpoint, &packet2->bytes[offset], started)) {
-        if (started) logPartialPacket(packet2->bytes, offset);
-        return 0;
-      }
-
-      offset += 1;
-    }
-
-    {
-      unsigned char byte = packet2->bytes[offset-1];
+    default: {
       unsigned char type = HIGH_NIBBLE(byte);
       unsigned char value = LOW_NIBBLE(byte);
+      int isIdentityPacket = packet->type == 0X0A;
 
-      switch (byte) {
-        case STX:
-          if (offset > 1) {
-            logDiscardedBytes(packet2->bytes, offset-1);
-            offset = 1;
-          }
-          continue;
-
-        case ETX:
-          if ((offset >= 5) && (offset == length)) {
-            logInputPacket(packet2->bytes, offset);
-            return offset;
-          }
-
-          logShortPacket(packet2->bytes, offset);
-          offset = 0;
-          continue;
-
-        default:
-          switch (offset) {
-            case 1:
-              logIgnoredByte(packet2->bytes[0]);
-              offset = 0;
-              continue;
-    
-            case 2:
-              if (type != 0X40) break;
-              packet2->type = value;
-              identity = value == 0X0A;
-              continue;
-    
-            case 3:
-              if (type != 0X50) break;
-              packet2->length = value << 4;
-              continue;
-    
-            case 4:
-              if (type != 0X50) break;
-              packet2->length |= value;
-
-              length = packet2->length;
-              if (!identity) length *= 2;
-              length += 5;
-              continue;
-    
-            default:
-              if (type != 0X30) break;
-
-              if (offset == length) {
-                logCorruptPacket(packet2->bytes, offset);
-                offset = 0;
-                continue;
-              }
-
-              {
-                size_t index = offset - 5;
-                if (identity) {
-                  packet2->data.bytes[index] = byte;
-                } else {
-                  int high = !(index % 2);
-                  index /= 2;
-                  if (high) {
-                    packet2->data.bytes[index] = value << 4;
-                  } else {
-                    packet2->data.bytes[index] |= value;
-                  }
-                }
-              }
-              continue;
-          }
+      switch (size) {
+        case 1:
           break;
-      }
-    }
 
-    logCorruptPacket(packet2->bytes, offset);
-    offset = 0;
+        case 2:
+          if (type != 0X40) break;
+          packet->type = value;
+          return BRL_PVR_INCLUDE;
+
+        case 3:
+          if (type != 0X50) break;
+          packet->length = value << 4;
+          return BRL_PVR_INCLUDE;
+
+        case 4:
+          if (type != 0X50) break;
+          packet->length |= value;
+
+          {
+            size_t increment = packet->length;
+
+            if (!isIdentityPacket) increment *= 2;
+            *length += increment;
+
+            return BRL_PVR_INCLUDE;
+          }
+
+        default: {
+          size_t index;
+
+          if (type != 0X30) break;
+          if (size == *length) break;
+          index = size - 5;
+
+          if (isIdentityPacket) {
+            packet->data.bytes[index] = byte;
+          } else {
+            int high = !(index % 2);
+            index /= 2;
+
+            if (high) {
+              packet->data.bytes[index] = value << 4;
+            } else {
+              packet->data.bytes[index] |= value;
+            }
+          }
+
+          return BRL_PVR_INCLUDE;
+        }
+      }
+
+      break;
+    }
   }
+
+  return BRL_PVR_INVALID;
+}
+
+static size_t
+readPacket2 (BrailleDisplay *brl, void *packet, size_t size) {
+  return readBraillePacket(brl, NULL, packet, size, verifyPacket2, packet);
 }
 
 static int
