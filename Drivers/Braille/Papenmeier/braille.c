@@ -666,7 +666,9 @@ verifyPacket2 (
 
 static size_t
 readPacket2 (BrailleDisplay *brl, void *packet, size_t size) {
-  return readBraillePacket(brl, NULL, packet, size, verifyPacket2, packet);
+  Packet2 *packet2 = packet;
+
+  return readBraillePacket(brl, NULL, packet2->bytes, size, verifyPacket2, packet);
 }
 
 static int
@@ -849,6 +851,7 @@ readCommand2 (BrailleDisplay *brl, KeyTableCommandContext context) {
           if (modifiers & 0X01) command |= BRL_FLG_KBD_RELEASE;
           if (modifiers & 0X02) command |= BRL_FLG_KBD_EMUL0;
           if (modifiers & 0X04) command |= BRL_FLG_KBD_EMUL1;
+
           enqueueCommand(command);
         } else {
           KeyNumberSet keys = (modifiers << 8) | code;
