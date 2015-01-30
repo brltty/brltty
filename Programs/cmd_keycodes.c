@@ -731,6 +731,7 @@ handleKeycodeCommands (int command, void *data) {
 
   switch (command & BRL_MSK_BLK) {
     case BRL_CMD_BLK(PASSXT):
+      if (command & BRL_FLG_KBD_RELEASE) arg |= XT_BIT_RELEASE;
       if (command & BRL_FLG_KBD_EMUL0) xtHandleScanCode(kcd, XT_MOD_E0);
       if (command & BRL_FLG_KBD_EMUL1) xtHandleScanCode(kcd, XT_MOD_E1);
       xtHandleScanCode(kcd, arg);
