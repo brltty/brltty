@@ -557,10 +557,15 @@ rebindConsole (void) {
 static int
 controlConsole (int operation, void *argument) {
   int result = ioctl(consoleDescriptor, operation, argument);
-  if (result == -1)
-    if (errno == EIO)
-      if (openConsole(virtualTerminal))
+
+  if (result == -1) {
+    if (errno == EIO) {
+      if (openConsole(virtualTerminal)) {
         result = ioctl(consoleDescriptor, operation, argument);
+      }
+    }
+  }
+
   return result;
 }
 
@@ -1886,6 +1891,8 @@ handleCommand_LinuxScreen (int command) {
 #ifdef HAVE_LINUX_INPUT_H
       switch (blk) {
         case BRL_CMD_BLK(PASSXT):
+          if (command & BRL_FLG_KBD_RELEASE) arg |= XT_BIT_RELEASE;
+
           {
             int handled = 0;
 
