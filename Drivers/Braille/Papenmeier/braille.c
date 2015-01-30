@@ -861,7 +861,7 @@ readCommand2 (BrailleDisplay *brl, KeyTableCommandContext context) {
         unsigned char code = packet.data.bytes[1];
 
         if (modifiers & 0X80) {
-          int command = BRL_CMD_BLK(PASSXT);
+          int command = BRL_CMD_BLK(PASSXT) | code;
 
           if (modifiers & 0X01) command |= BRL_FLG_KBD_RELEASE;
           if (modifiers & 0X02) command |= BRL_FLG_KBD_EMUL0;
