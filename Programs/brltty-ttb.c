@@ -225,7 +225,12 @@ getDots (TextTableData *ttd, wchar_t character, unsigned char *dots) {
   return 1;
 }
 
-typedef int TextWriter (FILE *file, const char *text);
+static int
+writeBlankLine (FILE *file) {
+  return fprintf(file, "\n") != EOF;
+}
+
+typedef int CommentWriter (FILE *file, const char *text);
 
 static int
 writeHashComment (FILE *file, const char *text) {
@@ -243,7 +248,7 @@ writeCComment (FILE *file, const char *text) {
 }
 
 static int
-writeHeaderComment (FILE *file, TextWriter *writeComment) {
+writeHeaderComment (FILE *file, CommentWriter *writeComment) {
   char buffer[0X80];
 
   STR_BEGIN(buffer, sizeof(buffer));
@@ -715,29 +720,71 @@ writeTable_JAWS (
 }
 
 static int
+writeMacroStart_CPreprocessor (FILE *file, const char *name) {
+  return fprintf(file, "%s(", name) != EOF;
+}
+
+static int
+writeMacroEnd_CPreprocessor (FILE *file) {
+  return fprintf(file, ")\n") != EOF;
+}
+
+static int
+writeArgumentDelimiter_CPreprocessor (FILE *file) {
+  return fprintf(file, ", ") != EOF;
+}
+
+static int
+writeCharacterValue_CPreprocessor (FILE *file, wchar_t character) {
+  return fprintf(file, "0X%08" PRIX32, (uint32_t)character) != EOF;
+}
+
+static int
+writeCharacterName_CPreprocessor (FILE *file, wchar_t character) {
+  char name[0X40];
+
+  if (getCharacterName(character, name, sizeof(name))) {
+    if (fprintf(file, "\"%s\"", name) == EOF) return 0;
+  } else {
+    if (fprintf(file, "NULL") == EOF) return 0;
+  }
+
+  return 1;
+}
+
+static int
 writeCharacter_CPreprocessor (
   FILE *file, wchar_t character, unsigned char dots,
   const unsigned char *byte, int isPrimary, const void *data
 ) {
-  uint32_t value = character;
+  if (!writeMacroStart_CPreprocessor(file, "BRLTTY_TEXT_TABLE_CHARACTER")) return 0;
+  if (!writeCharacterValue_CPreprocessor(file, character)) return 0;
 
-  if (fprintf(file, "BRLTTY_TEXT_TABLE_ENTRY(0X%08" PRIX32, value) == EOF) return 0;
-  if (fprintf(file, ", 0X%02" PRIX8, dots) == EOF) return 0;
-  if (fprintf(file, ", %d", isPrimary) == EOF) return 0;
+  if (!writeArgumentDelimiter_CPreprocessor(file)) return 0;
+  if (fprintf(file, "0X%02" PRIX8, dots) == EOF) return 0;
 
-  {
-    char name[0X40];
+  if (!writeArgumentDelimiter_CPreprocessor(file)) return 0;
+  if (fprintf(file, "%d", isPrimary) == EOF) return 0;
 
-    if (fprintf(file, ", ") == EOF) return 0;
+  if (!writeArgumentDelimiter_CPreprocessor(file)) return 0;
+  if (!writeCharacterName_CPreprocessor(file, character)) return 0;
 
-    if (getCharacterName(character, name, sizeof(name))) {
-      if (fprintf(file, "\"%s\"", name) == EOF) return 0;
-    } else {
-      if (fprintf(file, "NULL") == EOF) return 0;
-    }
-  }
+  if (!writeMacroEnd_CPreprocessor(file)) return 0;
+  return 1;
+}
 
-  if (fprintf(file, ")\n") == EOF) return 0;
+static int
+writeAlias_CPreprocessor (FILE *file, const TextTableAliasEntry *alias, const void *data) {
+  if (!writeMacroStart_CPreprocessor(file, "BRLTTY_TEXT_TABL_ALIAS")) return 0;
+  if (!writeCharacterValue_CPreprocessor(file, alias->aliased) == EOF) return 0;
+
+  if (!writeArgumentDelimiter_CPreprocessor(file)) return 0;
+  if (!writeCharacterValue_CPreprocessor(file, alias->actual) == EOF) return 0;
+
+  if (!writeArgumentDelimiter_CPreprocessor(file)) return 0;
+  if (!writeCharacterName_CPreprocessor(file, alias->aliased)) return 0;
+
+  if (!writeMacroEnd_CPreprocessor(file)) return 0;
   return 1;
 }
 
@@ -746,8 +793,28 @@ writeTable_CPreprocessor (
   const char *path, FILE *file, TextTableData *ttd, const void *data
 ) {
   if (!writeHeaderComment(file, writeCComment)) return 0;
-  if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_ENTRY(unicode, braille, isPrimary, name)")) return 0;
+  if (!writeBlankLine(file)) return 0;
+
+  if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_BEGIN_CHARACTERS")) return 0;
+  if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_CHARACTER(unicode, braille, isPrimary, name)")) return 0;
+  if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_END_CHARACTERS")) return 0;
+  if (!writeBlankLine(file)) return 0;
+
+  if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_BEGIN_ALIASES")) return 0;
+  if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_ALIAS(from, to, name)")) return 0;
+  if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_END_ALIASES")) return 0;
+  if (!writeBlankLine(file)) return 0;
+
+  if (fprintf(file, "BRLTTY_TEXT_TABLE_BEGIN_CHARACTERS\n") == EOF) return 0;
   if (!writeCharacters(file, ttd, writeCharacter_CPreprocessor, NULL)) return 0;
+  if (fprintf(file, "BRLTTY_TEXT_TABLE_END_CHARACTERS\n") == EOF) return 0;
+  if (!writeBlankLine(file)) return 0;
+
+  if (fprintf(file, "BRLTTY_TEXT_TABLE_BEGIN_ALIASES\n") == EOF) return 0;
+  if (!writeAliases(file, ttd, writeAlias_CPreprocessor, data)) return 0;
+  if (fprintf(file, "BRLTTY_TEXT_TABLE_END_ALIASES\n") == EOF) return 0;
+  if (!writeBlankLine(file)) return 0;
+
   return 1;
 }
 
