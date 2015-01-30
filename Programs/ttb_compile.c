@@ -226,6 +226,7 @@ addTextTableAlias (TextTableData *ttd, wchar_t from, wchar_t to) {
     ttd->alias.size = newSize;
   }
 
+/*
   {
     unsigned int cellNumber = UNICODE_CELL_NUMBER(from);
     UnicodeRowEntry *row = getUnicodeRowEntry(ttd, from, 1);
@@ -233,6 +234,7 @@ addTextTableAlias (TextTableData *ttd, wchar_t from, wchar_t to) {
     if (!row) return 0;
     BITMASK_SET(row->cellAliased, cellNumber);
   }
+*/
 
   {
     TextTableAliasEntry *alias = &ttd->alias.array[ttd->alias.count++];
