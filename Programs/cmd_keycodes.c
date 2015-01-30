@@ -433,13 +433,16 @@ xtHandleScanCode (KeycodeCommandData *kcd, unsigned char code) {
     USE_KEY_MAP(xt, E0);
   } else if (code == XT_MOD_E1) {
     USE_KEY_MAP(xt, E1);
-  } else if (code < kcd->xt.keyCount) {
-    const KeyEntry *key = kcd->xt.keyMap[code & ~XT_BIT_RELEASE];
+  } else {
     int release = (code & XT_BIT_RELEASE) != 0;
+    code &= ~XT_BIT_RELEASE;
 
-    USE_KEY_MAP(xt, 00);
+    if (code < kcd->xt.keyCount) {
+      const KeyEntry *key = kcd->xt.keyMap[code];
 
-    handleKey(key, release, &kcd->xt.modifiers);
+      USE_KEY_MAP(xt, 00);
+      handleKey(key, release, &kcd->xt.modifiers);
+    }
   }
 }
 
