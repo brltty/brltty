@@ -212,7 +212,7 @@ setTextTableByte (TextTableData *ttd, unsigned char byte, unsigned char dots) {
 }
 
 int
-addTextTableAlias (TextTableData *ttd, wchar_t aliased, wchar_t actual) {
+addTextTableAlias (TextTableData *ttd, wchar_t from, wchar_t to) {
   if (ttd->alias.count == ttd->alias.size) {
     size_t newSize = ttd->alias.size? (ttd->alias.size << 1): 0X10;
     TextTableAliasEntry *newArray;
@@ -230,8 +230,8 @@ addTextTableAlias (TextTableData *ttd, wchar_t aliased, wchar_t actual) {
     TextTableAliasEntry *alias = &ttd->alias.array[ttd->alias.count++];
 
     memset(alias, 0, sizeof(*alias));
-    alias->aliased = aliased;
-    alias->actual = actual;
+    alias->from = from;
+    alias->to = to;
   }
 
   return 1;
@@ -274,8 +274,8 @@ sortTextTableAliasArray (const void *element1, const void *element2) {
   const TextTableAliasEntry *alias1 = element1;
   const TextTableAliasEntry *alias2 = element2;
 
-  wchar_t wc1 = alias1->aliased;
-  wchar_t wc2 = alias2->aliased;
+  wchar_t wc1 = alias1->from;
+  wchar_t wc2 = alias2->from;
 
   if (wc1 < wc2) return -1;
   if (wc1 > wc2) return 1;

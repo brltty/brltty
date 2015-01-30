@@ -47,8 +47,8 @@ typedef struct {
 } UnicodeGroupEntry;
 
 typedef struct {
-  wchar_t aliased;
-  wchar_t actual;
+  wchar_t from;
+  wchar_t to;
 } TextTableAliasEntry;
 
 typedef struct {

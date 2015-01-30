@@ -135,13 +135,13 @@ getDotsOperand (DataFile *file, unsigned char *dots) {
 
 static DATA_OPERANDS_PROCESSOR(processAliasOperands) {
   TextTableData *ttd = data;
-  wchar_t newCharacter;
+  wchar_t from;
 
-  if (getCharacterOperand(file, &newCharacter)) {
-    wchar_t oldCharacter;
+  if (getCharacterOperand(file, &from)) {
+    wchar_t to;
 
-    if (getCharacterOperand(file, &oldCharacter)) {
-      if (!addTextTableAlias(ttd, newCharacter, oldCharacter)) return 0;
+    if (getCharacterOperand(file, &to)) {
+      if (!addTextTableAlias(ttd, from, to)) return 0;
     }
   }
 

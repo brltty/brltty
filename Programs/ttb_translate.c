@@ -91,8 +91,8 @@ searchTextTableAlias (const void *target, const void *element) {
   const wchar_t *reference = target;
   const TextTableAliasEntry *alias = element;
 
-  if (*reference < alias->aliased) return -1;
-  if (*reference > alias->aliased) return 1;
+  if (*reference < alias->from) return -1;
+  if (*reference > alias->from) return 1;
   return 0;
 }
 
@@ -158,7 +158,7 @@ convertCharacterToDots (TextTable *table, wchar_t character) {
         const TextTableAliasEntry *alias = findTextTableAlias(table, character);
 
         if (alias) {
-          if (handleBestCharacter(alias->actual, setBrailleRepresentation, &sbr)) {
+          if (handleBestCharacter(alias->to, setBrailleRepresentation, &sbr)) {
             return sbr.dots;
           }
         }

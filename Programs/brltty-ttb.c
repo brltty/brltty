@@ -428,11 +428,11 @@ writeCharacter_native (
 static int
 writeAlias_native (FILE *file, const TextTableAliasEntry *alias, const void *data) {
   if (fprintf(file, "alias\t") == EOF) return 0;
-  if (!writeHexadecimalCharacter(file, alias->aliased)) return 0;
+  if (!writeHexadecimalCharacter(file, alias->from)) return 0;
   if (fprintf(file, "\t") == EOF) return 0;
-  if (!writeHexadecimalCharacter(file, alias->actual)) return 0;
+  if (!writeHexadecimalCharacter(file, alias->to)) return 0;
   if (fprintf(file, "\t#") == EOF) return 0;
-  if (!writeCharacterDescription(file, alias->aliased)) return 0;
+  if (!writeCharacterDescription(file, alias->from)) return 0;
   if (fprintf(file, "\n") == EOF) return 0;
   return 1;
 }
@@ -776,13 +776,13 @@ writeCharacter_CPreprocessor (
 static int
 writeAlias_CPreprocessor (FILE *file, const TextTableAliasEntry *alias, const void *data) {
   if (!writeMacroStart_CPreprocessor(file, "BRLTTY_TEXT_TABL_ALIAS")) return 0;
-  if (!writeCharacterValue_CPreprocessor(file, alias->aliased) == EOF) return 0;
+  if (!writeCharacterValue_CPreprocessor(file, alias->from) == EOF) return 0;
 
   if (!writeArgumentDelimiter_CPreprocessor(file)) return 0;
-  if (!writeCharacterValue_CPreprocessor(file, alias->actual) == EOF) return 0;
+  if (!writeCharacterValue_CPreprocessor(file, alias->to) == EOF) return 0;
 
   if (!writeArgumentDelimiter_CPreprocessor(file)) return 0;
-  if (!writeCharacterName_CPreprocessor(file, alias->aliased)) return 0;
+  if (!writeCharacterName_CPreprocessor(file, alias->from)) return 0;
 
   if (!writeMacroEnd_CPreprocessor(file)) return 0;
   return 1;
