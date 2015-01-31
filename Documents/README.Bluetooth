@@ -9,7 +9,11 @@ Pairing a Bluetooth device on Linux is relatively easy if you're comfortable
 working within the graphical (X) environment. All you need to do is to run 
 "bluetooth-applet" and follow the steps it presents to you. It's a little 
 trickier to pair a Bluetooth device via the command line, but it can be done.
-One way to do it is as follows:
+It depends on the version of the bluetooth software stack you are using
+which method needs to be applied.
+
+For bluetooth version 4
+-----------------------
 
 You need to find out your host's Bluetooth Device Address (referred to later in 
 this document as <host-address>). To do this, run the command "hciconfig hci0". 
@@ -49,6 +53,89 @@ Bluetooth Device Address must be in uppercase. For example:
 
    cat /var/lib/bluetooth/01:23:45:67:89:AB/pincodes
    12:34:56:78:9A:BC 1234
+
+For bluetooth version 5
+-----------------------
+
+Since bluetooth version 5, all necessary actions for pairing
+a device via the command-line can be performed with a single tool called
+bluetoothctl.
+
+First, in case you have several bluetooth controllers in use (uncommon, but
+possible) you need to make sure the correct one is currently
+selected.  Use the "list" command to show all available
+controllers, and the "select <ctrl>" command to select one:
+
+.. code-block:: console
+
+   # bluetoothctl
+   [bluetooth]# list
+   Controller 00:0A:3A:55:22:8B fzidpc73
+   [bluetooth]# select 00:0A:3A:55:22:8B
+
+It can happen that the selected controller is not power on at the moment.
+Make sure it is, and if not, use the "power on" command to enable
+the controller:
+
+.. code-block:: console
+
+   [bluetooth]# show
+   Controller 00:0A:3A:55:22:8B
+           Name: fzidpc73
+           Alias: fzidpc73-0
+           Class: 0x000000
+           Powered: no
+           Discoverable: no
+           Pairable: yes
+           UUID: PnP Information           (00001200-0000-1000-8000-00805f9b34fb)
+           UUID: Generic Access Profile    (00001800-0000-1000-8000-00805f9b34fb)
+           UUID: Generic Attribute Profile (00001801-0000-1000-8000-00805f9b34fb)
+           UUID: A/V Remote Control        (0000110e-0000-1000-8000-00805f9b34fb)
+           UUID: A/V Remote Control Target (0000110c-0000-1000-8000-00805f9b34fb)
+           Modalias: usb:v1D6Bp0246d0517
+           Discovering: no
+   [bluetooth]# power on
+   [CHG] Controller 00:0A:3A:55:22:8B Class: 0x000104
+   Changing power on succeeded
+   [CHG] Controller 00:0A:3A:55:22:8B Powered: yes
+
+To obtain the bluetooth device address of the device you
+want to pair with, enable scan mode:
+
+.. code-block:: console
+
+   [bluetooth]# scan on
+   Discovery started
+   [CHG] Controller 00:0A:3A:55:22:8B Discovering: yes
+   [NEW] Device 00:18:DA:02:48:88 braillex live 0139
+   [bluetooth]# scan off
+   Discovery stopped
+   [CHG] Controller 00:0A:3A:55:22:8B Discovering: no
+
+To be able to receive pin code requests directly on the console,
+you need to enable the agent, and select the default-agent:
+
+.. code-block:: console
+
+   [bluetooth]# agent on
+   Agent registered
+   [bluetooth]# default-agent
+   Default agent request successful
+
+Now you are finally ready to initiate the pairing:
+
+.. code-block:: console
+
+   [bluetooth]# pair 00:18:DA:02:48:88
+   Attempting to pair with 00:18:DA:02:48:88
+   [CHG] Device 00:18:DA:02:48:88 Connected: yes
+   Request PIN code
+   [agent] Enter PIN code: 0000
+   [CHG] Device 00:18:DA:02:48:88 UUIDs:
+           00001101-0000-1000-8000-00805f9b34fb
+   [CHG] Device 00:18:DA:02:48:88 Paired: yes
+   Pairing successful
+   [CHG] Device 00:18:DA:02:48:88 Connected: no
 
 
 Using a Bluetooth Device with BRLTTY
