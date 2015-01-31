@@ -55,10 +55,11 @@ getUnicodeGroupOffset (TextTableData *ttd, wchar_t character, int allocate) {
   DataOffset groupOffset = getTextTableHeader(ttd)->unicodeGroups[groupNumber];
 
   if (!groupOffset && allocate) {
-    if (!allocateDataItem(ttd->area, &groupOffset, 
+    if (!allocateDataItem(ttd->area, &groupOffset,
                           sizeof(UnicodeGroupEntry),
-                          __alignof__(UnicodeGroupEntry)))
+                          __alignof__(UnicodeGroupEntry))) {
       return 0;
+    }
 
     getTextTableHeader(ttd)->unicodeGroups[groupNumber] = groupOffset;
   }
@@ -77,10 +78,11 @@ getUnicodePlaneOffset (TextTableData *ttd, wchar_t character, int allocate) {
     DataOffset planeOffset = group->planes[planeNumber];
 
     if (!planeOffset && allocate) {
-      if (!allocateDataItem(ttd->area, &planeOffset, 
+      if (!allocateDataItem(ttd->area, &planeOffset,
                             sizeof(UnicodePlaneEntry),
-                            __alignof__(UnicodePlaneEntry)))
+                            __alignof__(UnicodePlaneEntry))) {
         return 0;
+      }
 
       group = getDataItem(ttd->area, groupOffset);
       group->planes[planeNumber] = planeOffset;
@@ -101,10 +103,11 @@ getUnicodeRowOffset (TextTableData *ttd, wchar_t character, int allocate) {
     DataOffset rowOffset = plane->rows[rowNumber];
 
     if (!rowOffset && allocate) {
-      if (!allocateDataItem(ttd->area, &rowOffset, 
+      if (!allocateDataItem(ttd->area, &rowOffset,
                             sizeof(UnicodeRowEntry),
-                            __alignof__(UnicodeRowEntry)))
+                            __alignof__(UnicodeRowEntry))) {
         return 0;
+      }
 
       plane = getDataItem(ttd->area, planeOffset);
       plane->rows[rowNumber] = rowOffset;
@@ -226,7 +229,6 @@ addTextTableAlias (TextTableData *ttd, wchar_t from, wchar_t to) {
     ttd->alias.size = newSize;
   }
 
-/*
   {
     unsigned int cellNumber = UNICODE_CELL_NUMBER(from);
     UnicodeRowEntry *row = getUnicodeRowEntry(ttd, from, 1);
@@ -234,7 +236,6 @@ addTextTableAlias (TextTableData *ttd, wchar_t from, wchar_t to) {
     if (!row) return 0;
     BITMASK_SET(row->cellAliased, cellNumber);
   }
-*/
 
   {
     TextTableAliasEntry *alias = &ttd->alias.array[ttd->alias.count++];
@@ -294,18 +295,26 @@ sortTextTableAliasArray (const void *element1, const void *element2) {
 
 static int
 finishTextTableData (TextTableData *ttd) {
-  TextTableHeader *header = getTextTableHeader(ttd);
-
   qsort(ttd->alias.array, ttd->alias.count, sizeof(*ttd->alias.array), sortTextTableAliasArray);
-  header->aliasCount = ttd->alias.count;
 
-  if (saveDataItem(ttd->area, &header->aliasArray, ttd->alias.array,
-                   ARRAY_SIZE(ttd->alias.array, ttd->alias.count),
-                   __alignof__(*ttd->alias.array))) {
-    return 1;
+  {
+    DataOffset offset;
+
+    if (!saveDataItem(ttd->area, &offset, ttd->alias.array,
+                      ARRAY_SIZE(ttd->alias.array, ttd->alias.count),
+                      __alignof__(*ttd->alias.array))) {
+      return 0;
+    }
+
+    {
+      TextTableHeader *header = getTextTableHeader(ttd);
+
+      header->aliasArray = offset;
+      header->aliasCount = ttd->alias.count;
+    }
   }
 
-  return 0;
+  return 1;
 }
 
 TextTableData *
