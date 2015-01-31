@@ -54,14 +54,14 @@ typedef struct {
 
 
 BEGIN_KEY_NAME_TABLE(bar)
-  KEY_NAME_ENTRY(PM_KEY_BarLeft1, "BarLeft1"),
-  KEY_NAME_ENTRY(PM_KEY_BarLeft2, "BarLeft2"),
-  KEY_NAME_ENTRY(PM_KEY_BarRight1, "BarRight1"),
-  KEY_NAME_ENTRY(PM_KEY_BarRight2, "BarRight2"),
-  KEY_NAME_ENTRY(PM_KEY_BarUp1, "BarUp1"),
-  KEY_NAME_ENTRY(PM_KEY_BarUp2, "BarUp2"),
-  KEY_NAME_ENTRY(PM_KEY_BarDown1, "BarDown1"),
-  KEY_NAME_ENTRY(PM_KEY_BarDown2, "BarDown2"),
+  BRL_KEY_NAME_ENTRY(PM, BAR, Left1, "BarLeft1"),
+  BRL_KEY_NAME_ENTRY(PM, BAR, Left2, "BarLeft2"),
+  BRL_KEY_NAME_ENTRY(PM, BAR, Right1, "BarRight1"),
+  BRL_KEY_NAME_ENTRY(PM, BAR, Right2, "BarRight2"),
+  BRL_KEY_NAME_ENTRY(PM, BAR, Up1, "BarUp1"),
+  BRL_KEY_NAME_ENTRY(PM, BAR, Up2, "BarUp2"),
+  BRL_KEY_NAME_ENTRY(PM, BAR, Down1, "BarDown1"),
+  BRL_KEY_NAME_ENTRY(PM, BAR, Down2, "BarDown2"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(switches)

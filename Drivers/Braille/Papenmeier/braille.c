@@ -393,7 +393,7 @@ handleKey1 (BrailleDisplay *brl, uint16_t code, int press, uint16_t time) {
     if (!handleSwitches1(brl, time)) return 0;
 
     key = (code - brl->data->prot.p1.rcv.bar.first) / 3;
-    return enqueueKeyEvent(brl, PM_GRP_NAV, PM_KEY_BAR+key, press);
+    return enqueueKeyEvent(brl, PM_GRP_BAR, key, press);
   }
 
   if (brl->data->prot.p1.rcv.switches.first <= code && 
@@ -984,14 +984,14 @@ mapInputModules2 (BrailleDisplay *brl) {
 
   module.bit = 0;
   nextInputModule2(&module, 8);
-  addInputMapping2(brl, &module, 0, PM_GRP_NAV, PM_KEY_BarUp2);
-  addInputMapping2(brl, &module, 1, PM_GRP_NAV, PM_KEY_BarUp1);
-  addInputMapping2(brl, &module, 2, PM_GRP_NAV, PM_KEY_BarDown1);
-  addInputMapping2(brl, &module, 3, PM_GRP_NAV, PM_KEY_BarDown2);
-  addInputMapping2(brl, &module, 4, PM_GRP_NAV, PM_KEY_BarRight1);
-  addInputMapping2(brl, &module, 5, PM_GRP_NAV, PM_KEY_BarLeft1);
-  addInputMapping2(brl, &module, 6, PM_GRP_NAV, PM_KEY_BarRight2);
-  addInputMapping2(brl, &module, 7, PM_GRP_NAV, PM_KEY_BarLeft2);
+  addInputMapping2(brl, &module, 0, PM_GRP_BAR, PM_BAR_Up2);
+  addInputMapping2(brl, &module, 1, PM_GRP_BAR, PM_BAR_Up1);
+  addInputMapping2(brl, &module, 2, PM_GRP_BAR, PM_BAR_Down1);
+  addInputMapping2(brl, &module, 3, PM_GRP_BAR, PM_BAR_Down2);
+  addInputMapping2(brl, &module, 4, PM_GRP_BAR, PM_BAR_Right1);
+  addInputMapping2(brl, &module, 5, PM_GRP_BAR, PM_BAR_Left1);
+  addInputMapping2(brl, &module, 6, PM_GRP_BAR, PM_BAR_Right2);
+  addInputMapping2(brl, &module, 7, PM_GRP_BAR, PM_BAR_Left2);
 }
 
 static int

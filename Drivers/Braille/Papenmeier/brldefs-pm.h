@@ -63,17 +63,15 @@
 #define PM_P1_XMT_TIMEOPPO 0X060A /* key code suppression time for opposite movements */
 
 typedef enum {
-  PM_KEY_BAR = 1,
-
-  PM_KEY_BarLeft1 = PM_KEY_BAR,
-  PM_KEY_BarLeft2,
-  PM_KEY_BarUp1,
-  PM_KEY_BarUp2,
-  PM_KEY_BarRight1,
-  PM_KEY_BarRight2,
-  PM_KEY_BarDown1,
-  PM_KEY_BarDown2,
-} PM_NavigationKey;
+  PM_BAR_Left1 = 0,
+  PM_BAR_Left2,
+  PM_BAR_Up1,
+  PM_BAR_Up2,
+  PM_BAR_Right1,
+  PM_BAR_Right2,
+  PM_BAR_Down1,
+  PM_BAR_Down2,
+} PM_BarKey;
 
 typedef enum {
   PM_SWT_LeftSwitchRear = 0,
@@ -104,7 +102,7 @@ typedef enum {
 } PM_KeyboardKey;
 
 typedef enum {
-  PM_GRP_NAV = 0,
+  PM_GRP_BAR,
   PM_GRP_SWT,
   PM_GRP_KBD,
   PM_GRP_FK1,
