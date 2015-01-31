@@ -51,24 +51,25 @@ destroyDataArea (DataArea *area) {
 
 int
 allocateDataItem (DataArea *area, DataOffset *offset, size_t size, unsigned int alignment) {
-  size_t newUsed = (area->used = (area->used + (alignment - 1)) / alignment * alignment) + size;
+  size_t newOffset = (area->used + (alignment - 1)) / alignment * alignment;
+  size_t newUsed = newOffset + size;
 
   if (newUsed > area->size) {
-    size_t newSize = newUsed | 0XFFF;
-    unsigned char *newAddress = realloc(area->address, newSize);
+    size_t newSize = (newUsed | 0XFFF) + 1;
+    unsigned char *newAddress;
 
-    if (!newAddress) {
-      logMessage(LOG_ERR, "insufficient memory for data area");
+    if (!(newAddress = realloc(area->address, newSize))) {
+      logMallocError();
       return 0;
     }
 
-    memset(newAddress+area->size, 0, newSize-area->size);
+    memset(newAddress+area->size, 0, (newSize - area->size));
     area->address = newAddress;
     area->size = newSize;
   }
 
-  if (offset) *offset = area->used;
   area->used = newUsed;
+  if (offset) *offset = newOffset;
   return 1;
 }
 
