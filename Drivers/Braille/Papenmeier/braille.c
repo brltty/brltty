@@ -346,7 +346,7 @@ handleSwitches1 (BrailleDisplay *brl, uint16_t time) {
   unsigned char state = time & 0XFF;
   KeyNumber pressStack[8];
   unsigned char pressCount = 0;
-  const KeyGroup group = PM_GRP_NavigationKeys;
+  const KeyGroup group = PM_GRP_NAV;
   KeyNumber number = PM_KEY_SWITCH;
   unsigned char bit = 0X1;
 
@@ -379,13 +379,13 @@ handleKey1 (BrailleDisplay *brl, uint16_t code, int press, uint16_t time) {
   if (brl->data->prot.p1.rcv.front.first <= code && 
       code <= brl->data->prot.p1.rcv.front.last) { /* front key */
     key = (code - brl->data->prot.p1.rcv.front.first) / 3;
-    return enqueueKeyEvent(brl, PM_GRP_NavigationKeys, PM_KEY_FRONT+key, press);
+    return enqueueKeyEvent(brl, PM_GRP_NAV, PM_KEY_FRONT+key, press);
   }
 
   if (brl->data->prot.p1.rcv.status.first <= code && 
       code <= brl->data->prot.p1.rcv.status.last) { /* status key */
     key = (code - brl->data->prot.p1.rcv.status.first) / 3;
-    return enqueueKeyEvent(brl, PM_GRP_StatusKeys1, key, press);
+    return enqueueKeyEvent(brl, PM_GRP_SK1, key, press);
   }
 
   if (brl->data->prot.p1.rcv.bar.first <= code && 
@@ -393,20 +393,20 @@ handleKey1 (BrailleDisplay *brl, uint16_t code, int press, uint16_t time) {
     if (!handleSwitches1(brl, time)) return 0;
 
     key = (code - brl->data->prot.p1.rcv.bar.first) / 3;
-    return enqueueKeyEvent(brl, PM_GRP_NavigationKeys, PM_KEY_BAR+key, press);
+    return enqueueKeyEvent(brl, PM_GRP_NAV, PM_KEY_BAR+key, press);
   }
 
   if (brl->data->prot.p1.rcv.switches.first <= code && 
       code <= brl->data->prot.p1.rcv.switches.last) { /* easy access bar */
     return handleSwitches1(brl, time);
   //key = (code - brl->data->prot.p1.rcv.switches.first) / 3;
-  //return enqueueKeyEvent(brl, PM_GRP_NavigationKeys, PM_KEY_SWITCH+key, press);
+  //return enqueueKeyEvent(brl, PM_GRP_NAV, PM_KEY_SWITCH+key, press);
   }
 
   if (brl->data->prot.p1.rcv.cursor.first <= code && 
       code <= brl->data->prot.p1.rcv.cursor.last) { /* Routing Keys */ 
     key = (code - brl->data->prot.p1.rcv.cursor.first) / 3;
-    return enqueueKeyEvent(brl, PM_GRP_RoutingKeys1, key, press);
+    return enqueueKeyEvent(brl, PM_GRP_RK1, key, press);
   }
 
   logMessage(LOG_WARNING, "unexpected key: %04X", code);
@@ -856,13 +856,13 @@ readCommand2 (BrailleDisplay *brl, KeyTableCommandContext context) {
         } else {
           KeyNumberSet keys = (modifiers << 8) | code;
 
-#define BIT(key) (1 << ((key) - PM_KEY_KEYBOARD))
-          if (keys & (BIT(PM_KEY_LeftSpace) | BIT(PM_KEY_RightSpace))) {
-            keys &= ~BIT(PM_KEY_Space);
+#define BIT(key) (1 << (key))
+          if (keys & (BIT(PM_KBD_LeftSpace) | BIT(PM_KBD_RightSpace))) {
+            keys &= ~BIT(PM_KBD_Space);
           }
 #undef BIT
 
-          enqueueKeys(brl, keys, PM_GRP_NavigationKeys, PM_KEY_KEYBOARD);
+          enqueueKeys(brl, keys, PM_GRP_KBD, 0);
         }
 
         continue;
@@ -936,8 +936,8 @@ static void
 mapInputKey2 (BrailleDisplay *brl, int count, InputModule2 *module, int rear, int front) {
   while (count--) {
     nextInputModule2(module, brl->data->prot.p2.inputKeySize);
-    addInputMapping2(brl, module, 0, PM_GRP_NavigationKeys, rear);
-    addInputMapping2(brl, module, 1, PM_GRP_NavigationKeys, front);
+    addInputMapping2(brl, module, 0, PM_GRP_NAV, rear);
+    addInputMapping2(brl, module, 1, PM_GRP_NAV, front);
   }
 }
 
@@ -962,10 +962,10 @@ mapInputModules2 (BrailleDisplay *brl) {
     unsigned char column = brl->data->model->textColumns;
     while (column) {
       nextInputModule2(&module, 1);
-      addInputMapping2(brl, &module, 0, PM_GRP_RoutingKeys2, --column);
+      addInputMapping2(brl, &module, 0, PM_GRP_RK2, --column);
 
       nextInputModule2(&module, 1);
-      addInputMapping2(brl, &module, 0, PM_GRP_RoutingKeys1, column);
+      addInputMapping2(brl, &module, 0, PM_GRP_RK1, column);
     }
   }
 
@@ -975,23 +975,23 @@ mapInputModules2 (BrailleDisplay *brl) {
     unsigned char cell = brl->data->model->statusCount;
     while (cell) {
       nextInputModule2(&module, 1);
-      addInputMapping2(brl, &module, 0, PM_GRP_StatusKeys2, cell-1);
+      addInputMapping2(brl, &module, 0, PM_GRP_SK2, cell-1);
 
       nextInputModule2(&module, 1);
-      addInputMapping2(brl, &module, 0, PM_GRP_StatusKeys1, cell--);
+      addInputMapping2(brl, &module, 0, PM_GRP_SK1, cell--);
     }
   }
 
   module.bit = 0;
   nextInputModule2(&module, 8);
-  addInputMapping2(brl, &module, 0, PM_GRP_NavigationKeys, PM_KEY_BarUp2);
-  addInputMapping2(brl, &module, 1, PM_GRP_NavigationKeys, PM_KEY_BarUp1);
-  addInputMapping2(brl, &module, 2, PM_GRP_NavigationKeys, PM_KEY_BarDown1);
-  addInputMapping2(brl, &module, 3, PM_GRP_NavigationKeys, PM_KEY_BarDown2);
-  addInputMapping2(brl, &module, 4, PM_GRP_NavigationKeys, PM_KEY_BarRight1);
-  addInputMapping2(brl, &module, 5, PM_GRP_NavigationKeys, PM_KEY_BarLeft1);
-  addInputMapping2(brl, &module, 6, PM_GRP_NavigationKeys, PM_KEY_BarRight2);
-  addInputMapping2(brl, &module, 7, PM_GRP_NavigationKeys, PM_KEY_BarLeft2);
+  addInputMapping2(brl, &module, 0, PM_GRP_NAV, PM_KEY_BarUp2);
+  addInputMapping2(brl, &module, 1, PM_GRP_NAV, PM_KEY_BarUp1);
+  addInputMapping2(brl, &module, 2, PM_GRP_NAV, PM_KEY_BarDown1);
+  addInputMapping2(brl, &module, 3, PM_GRP_NAV, PM_KEY_BarDown2);
+  addInputMapping2(brl, &module, 4, PM_GRP_NAV, PM_KEY_BarRight1);
+  addInputMapping2(brl, &module, 5, PM_GRP_NAV, PM_KEY_BarLeft1);
+  addInputMapping2(brl, &module, 6, PM_GRP_NAV, PM_KEY_BarRight2);
+  addInputMapping2(brl, &module, 7, PM_GRP_NAV, PM_KEY_BarLeft2);
 }
 
 static int
@@ -1194,7 +1194,7 @@ initializeGenericStatusCodes (BrailleDisplay *brl) {
   const size_t count = ARRAY_COUNT(brl->data->gsc.codes);
   int commands[count];
 
-  getKeyGroupCommands(brl->keyTable, PM_GRP_StatusKeys1, commands, count);
+  getKeyGroupCommands(brl->keyTable, PM_GRP_SK1, commands, count);
 
   {
     unsigned int i;

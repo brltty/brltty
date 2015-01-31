@@ -226,25 +226,42 @@ getDots (TextTableData *ttd, wchar_t character, unsigned char *dots) {
 }
 
 static int
-writeBlankLine (FILE *file) {
-  return fprintf(file, "\n") != EOF;
+writeString (FILE *file, const char *string) {
+  if (fputs(string, file) != EOF) return 1;
+  logSystemError("output");
+  return 0;
+}
+
+static int
+endLine (FILE *file) {
+  return writeString(file, "\n");
 }
 
 typedef int CommentWriter (FILE *file, const char *text);
 
 static int
 writeHashComment (FILE *file, const char *text) {
-  return fprintf(file, "# %s\n", text) != EOF;
+  if (!writeString(file, "# ")) return 0;
+  if (!writeString(file, text)) return 0;
+  if (!endLine(file)) return 0;
+  return 1;
 }
 
 static int
 writeSemicolonComment (FILE *file, const char *text) {
-  return fprintf(file, "; %s\n", text) != EOF;
+  if (!writeString(file, "; ")) return 0;
+  if (!writeString(file, text)) return 0;
+  if (!endLine(file)) return 0;
+  return 1;
 }
 
 static int
 writeCComment (FILE *file, const char *text) {
-  return fprintf(file, "/* %s */\n", text) != EOF;
+  if (!writeString(file, "/* ")) return 0;
+  if (!writeString(file, text)) return 0;
+  if (!writeString(file, " */")) return 0;
+  if (!endLine(file)) return 0;
+  return 1;
 }
 
 static int
@@ -721,12 +738,16 @@ writeTable_JAWS (
 
 static int
 writeMacroStart_CPreprocessor (FILE *file, const char *name) {
-  return fprintf(file, "%s(", name) != EOF;
+  if (!writeString(file, name)) return 0;
+  if (!writeString(file, "(")) return 0;
+  return 1;
 }
 
 static int
 writeMacroEnd_CPreprocessor (FILE *file) {
-  return fprintf(file, ")\n") != EOF;
+  if (!writeString(file, ")")) return 0;
+  if (!endLine(file)) return 0;
+  return 1;
 }
 
 static int
@@ -793,27 +814,27 @@ writeTable_CPreprocessor (
   const char *path, FILE *file, TextTableData *ttd, const void *data
 ) {
   if (!writeHeaderComment(file, writeCComment)) return 0;
-  if (!writeBlankLine(file)) return 0;
+  if (!endLine(file)) return 0;
 
   if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_BEGIN_CHARACTERS")) return 0;
   if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_CHARACTER(unicode, braille, isPrimary, name)")) return 0;
   if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_END_CHARACTERS")) return 0;
-  if (!writeBlankLine(file)) return 0;
+  if (!endLine(file)) return 0;
 
   if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_BEGIN_ALIASES")) return 0;
   if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_ALIAS(from, to, name)")) return 0;
   if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_END_ALIASES")) return 0;
-  if (!writeBlankLine(file)) return 0;
+  if (!endLine(file)) return 0;
 
   if (fprintf(file, "BRLTTY_TEXT_TABLE_BEGIN_CHARACTERS\n") == EOF) return 0;
   if (!writeCharacters(file, ttd, writeCharacter_CPreprocessor, NULL)) return 0;
   if (fprintf(file, "BRLTTY_TEXT_TABLE_END_CHARACTERS\n") == EOF) return 0;
-  if (!writeBlankLine(file)) return 0;
+  if (!endLine(file)) return 0;
 
   if (fprintf(file, "BRLTTY_TEXT_TABLE_BEGIN_ALIASES\n") == EOF) return 0;
   if (!writeAliases(file, ttd, writeAlias_CPreprocessor, data)) return 0;
   if (fprintf(file, "BRLTTY_TEXT_TABLE_END_ALIASES\n") == EOF) return 0;
-  if (!writeBlankLine(file)) return 0;
+  if (!endLine(file)) return 0;
 
   return 1;
 }

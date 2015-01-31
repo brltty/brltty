@@ -107,36 +107,36 @@ BEGIN_KEY_NAME_TABLE(front13)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(keyboard)
-  KEY_NAME_ENTRY(PM_KEY_Dot1, "Dot1"),
-  KEY_NAME_ENTRY(PM_KEY_Dot2, "Dot2"),
-  KEY_NAME_ENTRY(PM_KEY_Dot3, "Dot3"),
-  KEY_NAME_ENTRY(PM_KEY_Dot4, "Dot4"),
-  KEY_NAME_ENTRY(PM_KEY_Dot5, "Dot5"),
-  KEY_NAME_ENTRY(PM_KEY_Dot6, "Dot6"),
-  KEY_NAME_ENTRY(PM_KEY_Dot7, "Dot7"),
-  KEY_NAME_ENTRY(PM_KEY_Dot8, "Dot8"),
+  BRL_KEY_NAME_ENTRY(PM, KBD, Dot1, "Dot1"),
+  BRL_KEY_NAME_ENTRY(PM, KBD, Dot2, "Dot2"),
+  BRL_KEY_NAME_ENTRY(PM, KBD, Dot3, "Dot3"),
+  BRL_KEY_NAME_ENTRY(PM, KBD, Dot4, "Dot4"),
+  BRL_KEY_NAME_ENTRY(PM, KBD, Dot5, "Dot5"),
+  BRL_KEY_NAME_ENTRY(PM, KBD, Dot6, "Dot6"),
+  BRL_KEY_NAME_ENTRY(PM, KBD, Dot7, "Dot7"),
+  BRL_KEY_NAME_ENTRY(PM, KBD, Dot8, "Dot8"),
 
-  KEY_NAME_ENTRY(PM_KEY_Space, "Space"),
-  KEY_NAME_ENTRY(PM_KEY_LeftSpace, "LeftSpace"),
-  KEY_NAME_ENTRY(PM_KEY_RightSpace, "RightSpace"),
-  KEY_NAME_ENTRY(PM_KEY_LeftThumb, "LeftThumb"),
-  KEY_NAME_ENTRY(PM_KEY_RightThumb, "RightThumb"),
+  BRL_KEY_NAME_ENTRY(PM, KBD, Space, "Space"),
+  BRL_KEY_NAME_ENTRY(PM, KBD, LeftSpace, "LeftSpace"),
+  BRL_KEY_NAME_ENTRY(PM, KBD, RightSpace, "RightSpace"),
+  BRL_KEY_NAME_ENTRY(PM, KBD, LeftThumb, "LeftThumb"),
+  BRL_KEY_NAME_ENTRY(PM, KBD, RightThumb, "RightThumb"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(routingKeys1)
-  KEY_GROUP_ENTRY(PM_GRP_RoutingKeys1, "RoutingKey1"),
+  BRL_KEY_GROUP_ENTRY(PM, RK1, "RoutingKey1"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(routingKeys2)
-  KEY_GROUP_ENTRY(PM_GRP_RoutingKeys2, "RoutingKey2"),
+  BRL_KEY_GROUP_ENTRY(PM, RK2, "RoutingKey2"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(statusKeys1)
-  KEY_GROUP_ENTRY(PM_GRP_StatusKeys1, "Status"),
+  BRL_KEY_GROUP_ENTRY(PM, SK1, "Status"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(statusKeys2)
-  KEY_GROUP_ENTRY(PM_GRP_StatusKeys2, "StatusKey2"),
+  BRL_KEY_GROUP_ENTRY(PM, SK2, "StatusKey2"),
 END_KEY_NAME_TABLE
 
 

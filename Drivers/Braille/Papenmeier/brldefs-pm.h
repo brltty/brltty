@@ -66,7 +66,6 @@ typedef enum {
   PM_KEY_BAR = 1,
   PM_KEY_SWITCH = PM_KEY_BAR + 8,
   PM_KEY_FRONT = PM_KEY_SWITCH + 8,
-  PM_KEY_KEYBOARD = PM_KEY_FRONT + 13,
 
   PM_KEY_BarLeft1 = PM_KEY_BAR,
   PM_KEY_BarLeft2,
@@ -84,29 +83,33 @@ typedef enum {
   PM_KEY_RightKeyRear,
   PM_KEY_RightKeyFront,
   PM_KEY_RightSwitchRear,
-  PM_KEY_RightSwitchFront,
-
-  PM_KEY_Dot1 = PM_KEY_KEYBOARD,
-  PM_KEY_Dot2,
-  PM_KEY_Dot3,
-  PM_KEY_Dot4,
-  PM_KEY_Dot5,
-  PM_KEY_Dot6,
-  PM_KEY_Dot7,
-  PM_KEY_Dot8,
-  PM_KEY_RightThumb,
-  PM_KEY_Space,
-  PM_KEY_LeftThumb,
-  PM_KEY_RightSpace,
-  PM_KEY_LeftSpace
+  PM_KEY_RightSwitchFront
 } PM_NavigationKey;
 
 typedef enum {
-  PM_GRP_NavigationKeys = 0,
-  PM_GRP_RoutingKeys1,
-  PM_GRP_RoutingKeys2,
-  PM_GRP_StatusKeys1,
-  PM_GRP_StatusKeys2
+  PM_KBD_Dot1 = 0,
+  PM_KBD_Dot2,
+  PM_KBD_Dot3,
+  PM_KBD_Dot4,
+  PM_KBD_Dot5,
+  PM_KBD_Dot6,
+  PM_KBD_Dot7,
+  PM_KBD_Dot8,
+
+  PM_KBD_RightThumb,
+  PM_KBD_Space,
+  PM_KBD_LeftThumb,
+  PM_KBD_RightSpace,
+  PM_KBD_LeftSpace
+} PM_KeyboardKey;
+
+typedef enum {
+  PM_GRP_NAV = 0,
+  PM_GRP_KBD,
+  PM_GRP_RK1,
+  PM_GRP_RK2,
+  PM_GRP_SK1,
+  PM_GRP_SK2
 } PM_KeyGroup;
 
 #endif /* BRLTTY_INCLUDED_PM_BRLDEFS */ 
