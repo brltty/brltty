@@ -201,6 +201,8 @@ processTextTableLine (DataFile *file, void *data) {
     {.name=WS_C("char"), .processor=processCharOperands},
     {.name=WS_C("glyph"), .processor=processGlyphOperands},
     DATA_NESTING_DIRECTIVES,
+    DATA_CONDITION_DIRECTIVES,
+    DATA_VARIABLE_DIRECTIVES,
   END_DATA_DIRECTIVE_TABLE
 
   return processDirectiveOperand(file, &directives, "text table directive", data);
