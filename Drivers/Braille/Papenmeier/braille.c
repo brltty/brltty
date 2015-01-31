@@ -379,7 +379,7 @@ handleKey1 (BrailleDisplay *brl, uint16_t code, int press, uint16_t time) {
   if (brl->data->prot.p1.rcv.front.first <= code && 
       code <= brl->data->prot.p1.rcv.front.last) { /* front key */
     key = (code - brl->data->prot.p1.rcv.front.first) / 3;
-    return enqueueKeyEvent(brl, PM_GRP_NAV, PM_KEY_FRONT+key, press);
+    return enqueueKeyEvent(brl, PM_GRP_FK1, key, press);
   }
 
   if (brl->data->prot.p1.rcv.status.first <= code && 

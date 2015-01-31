@@ -65,7 +65,6 @@
 typedef enum {
   PM_KEY_BAR = 1,
   PM_KEY_SWITCH = PM_KEY_BAR + 8,
-  PM_KEY_FRONT = PM_KEY_SWITCH + 8,
 
   PM_KEY_BarLeft1 = PM_KEY_BAR,
   PM_KEY_BarLeft2,
@@ -106,6 +105,7 @@ typedef enum {
 typedef enum {
   PM_GRP_NAV = 0,
   PM_GRP_KBD,
+  PM_GRP_FK1,
   PM_GRP_RK1,
   PM_GRP_RK2,
   PM_GRP_SK1,
