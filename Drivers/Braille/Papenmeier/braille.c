@@ -346,8 +346,8 @@ handleSwitches1 (BrailleDisplay *brl, uint16_t time) {
   unsigned char state = time & 0XFF;
   KeyNumber pressStack[8];
   unsigned char pressCount = 0;
-  const KeyGroup group = PM_GRP_NAV;
-  KeyNumber number = PM_KEY_SWITCH;
+  const KeyGroup group = PM_GRP_SWT;
+  KeyNumber number = 0;
   unsigned char bit = 0X1;
 
   while (brl->data->prot.p1.rcv.switchState != state) {
@@ -400,7 +400,7 @@ handleKey1 (BrailleDisplay *brl, uint16_t code, int press, uint16_t time) {
       code <= brl->data->prot.p1.rcv.switches.last) { /* easy access bar */
     return handleSwitches1(brl, time);
   //key = (code - brl->data->prot.p1.rcv.switches.first) / 3;
-  //return enqueueKeyEvent(brl, PM_GRP_NAV, PM_KEY_SWITCH+key, press);
+  //return enqueueKeyEvent(brl, PM_GRP_SWT, key, press);
   }
 
   if (brl->data->prot.p1.rcv.cursor.first <= code && 
@@ -933,11 +933,11 @@ nextInputModule2 (InputModule2 *module, unsigned char size) {
 }
 
 static void
-mapInputKey2 (BrailleDisplay *brl, int count, InputModule2 *module, int rear, int front) {
+mapInputKey2 (BrailleDisplay *brl, int count, InputModule2 *module, KeyGroup group, KeyNumber rear, KeyNumber front) {
   while (count--) {
     nextInputModule2(module, brl->data->prot.p2.inputKeySize);
-    addInputMapping2(brl, module, 0, PM_GRP_NAV, rear);
-    addInputMapping2(brl, module, 1, PM_GRP_NAV, front);
+    addInputMapping2(brl, module, 0, group, rear);
+    addInputMapping2(brl, module, 1, group, front);
   }
 }
 
@@ -956,7 +956,7 @@ mapInputModules2 (BrailleDisplay *brl) {
     }
   }
 
-  mapInputKey2(brl, brl->data->model->rightKeys, &module, PM_KEY_RightKeyRear, PM_KEY_RightKeyFront);
+  mapInputKey2(brl, brl->data->model->rightKeys, &module, PM_GRP_SWT, PM_SWT_RightKeyRear, PM_SWT_RightKeyFront);
 
   {
     unsigned char column = brl->data->model->textColumns;
@@ -969,7 +969,7 @@ mapInputModules2 (BrailleDisplay *brl) {
     }
   }
 
-  mapInputKey2(brl, brl->data->model->leftKeys, &module, PM_KEY_LeftKeyRear, PM_KEY_LeftKeyFront);
+  mapInputKey2(brl, brl->data->model->leftKeys, &module, PM_GRP_SWT, PM_SWT_LeftKeyRear, PM_SWT_LeftKeyFront);
 
   {
     unsigned char cell = brl->data->model->statusCount;

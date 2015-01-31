@@ -65,17 +65,17 @@ BEGIN_KEY_NAME_TABLE(bar)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(switches)
-  KEY_NAME_ENTRY(PM_KEY_LeftSwitchRear, "LeftSwitchRear"),
-  KEY_NAME_ENTRY(PM_KEY_LeftSwitchFront, "LeftSwitchFront"),
-  KEY_NAME_ENTRY(PM_KEY_RightSwitchRear, "RightSwitchRear"),
-  KEY_NAME_ENTRY(PM_KEY_RightSwitchFront, "RightSwitchFront"),
+  BRL_KEY_NAME_ENTRY(PM, SWT, LeftSwitchRear, "LeftSwitchRear"),
+  BRL_KEY_NAME_ENTRY(PM, SWT, LeftSwitchFront, "LeftSwitchFront"),
+  BRL_KEY_NAME_ENTRY(PM, SWT, RightSwitchRear, "RightSwitchRear"),
+  BRL_KEY_NAME_ENTRY(PM, SWT, RightSwitchFront, "RightSwitchFront"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(keys)
-  KEY_NAME_ENTRY(PM_KEY_LeftKeyRear, "LeftKeyRear"),
-  KEY_NAME_ENTRY(PM_KEY_LeftKeyFront, "LeftKeyFront"),
-  KEY_NAME_ENTRY(PM_KEY_RightKeyRear, "RightKeyRear"),
-  KEY_NAME_ENTRY(PM_KEY_RightKeyFront, "RightKeyFront"),
+  BRL_KEY_NAME_ENTRY(PM, SWT, LeftKeyRear, "LeftKeyRear"),
+  BRL_KEY_NAME_ENTRY(PM, SWT, LeftKeyFront, "LeftKeyFront"),
+  BRL_KEY_NAME_ENTRY(PM, SWT, RightKeyRear, "RightKeyRear"),
+  BRL_KEY_NAME_ENTRY(PM, SWT, RightKeyFront, "RightKeyFront"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(front9)
