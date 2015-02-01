@@ -289,14 +289,16 @@ isPrimaryCharacter (TextTableData *ttd, wchar_t character, unsigned char dots) {
 
 static int
 writeCharacterDescription (FILE *file, wchar_t character) {
-  if (fprintf(file, " ") == EOF) return 0;
+  if (!writeString(file, " ")) return 0;
   if (!writeUtf8Character(file, ((iswprint(character) && !iswspace(character))? character: WC_C(' ')))) return 0;
 
   {
     char name[0X40];
 
     if (getCharacterName(character, name, sizeof(name))) {
-      if (fprintf(file, " [%s]", name) == EOF) return 0;
+      if (!writeString(file, " [")) return 0;
+      if (!writeString(file, name)) return 0;
+      if (!writeString(file, "]")) return 0;
     }
   }
 
@@ -746,7 +748,6 @@ writeMacroStart_CPreprocessor (FILE *file, const char *name) {
 static int
 writeMacroEnd_CPreprocessor (FILE *file) {
   if (!writeString(file, ")")) return 0;
-  if (!endLine(file)) return 0;
   return 1;
 }
 
@@ -765,9 +766,13 @@ writeCharacterName_CPreprocessor (FILE *file, wchar_t character) {
   char name[0X40];
 
   if (getCharacterName(character, name, sizeof(name))) {
-    if (fprintf(file, "\"%s\"", name) == EOF) return 0;
+    if (!writeString(file, "\"")) return 0;
+    if (!writeString(file, name)) return 0;
+    if (!writeString(file, "\"")) return 0;
   } else {
-    if (fprintf(file, "BRLTTY_TEXT_TABLE_NO_NAME") == EOF) return 0;
+    if (!writeMacroStart_CPreprocessor(file, "BRLTTY_TEXT_TABLE_NO_NAME")) return 0;
+    if (!writeCharacterValue_CPreprocessor(file, character)) return 0;
+    if (!writeMacroEnd_CPreprocessor(file)) return 0;
   }
 
   return 1;
@@ -791,6 +796,7 @@ writeCharacter_CPreprocessor (
   if (!writeCharacterName_CPreprocessor(file, character)) return 0;
 
   if (!writeMacroEnd_CPreprocessor(file)) return 0;
+  if (!endLine(file)) return 0;
   return 1;
 }
 
@@ -806,6 +812,7 @@ writeAlias_CPreprocessor (FILE *file, const TextTableAliasEntry *alias, const vo
   if (!writeCharacterName_CPreprocessor(file, alias->from)) return 0;
 
   if (!writeMacroEnd_CPreprocessor(file)) return 0;
+  if (!endLine(file)) return 0;
   return 1;
 }
 
@@ -826,7 +833,7 @@ writeTable_CPreprocessor (
   if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_END_ALIASES")) return 0;
   if (!endLine(file)) return 0;
 
-  if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_NO_NAME")) return 0;
+  if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_NO_NAME(character)")) return 0;
   if (!endLine(file)) return 0;
 
   if (fprintf(file, "BRLTTY_TEXT_TABLE_BEGIN_CHARACTERS\n") == EOF) return 0;
