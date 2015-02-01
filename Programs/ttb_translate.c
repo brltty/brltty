@@ -150,23 +150,27 @@ convertCharacterToDots (TextTable *table, wchar_t character) {
         .dots = 0
       };
 
-      while (1) {
-        const UnicodeRowEntry *row = getUnicodeRowEntry(table, character);
+      {
+        unsigned int counter = 0;
 
-        if (row) {
-          unsigned int cellNumber = UNICODE_CELL_NUMBER(character);
+        while (++counter < 0X10) {
+          const UnicodeRowEntry *row = getUnicodeRowEntry(table, character);
 
-          if (BITMASK_TEST(row->cellAliased, cellNumber)) {
-            const TextTableAliasEntry *alias = findTextTableAlias(table, character);
+          if (row) {
+            unsigned int cellNumber = UNICODE_CELL_NUMBER(character);
 
-            if (alias) {
-              character = alias->to;
-              continue;
+            if (BITMASK_TEST(row->cellAliased, cellNumber)) {
+              const TextTableAliasEntry *alias = findTextTableAlias(table, character);
+
+              if (alias) {
+                character = alias->to;
+                continue;
+              }
             }
           }
-        }
 
-        break;
+          break;
+        }
       }
 
       if (handleBestCharacter(character, setBrailleRepresentation, &sbr)) {
