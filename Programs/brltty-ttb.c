@@ -767,7 +767,7 @@ writeCharacterName_CPreprocessor (FILE *file, wchar_t character) {
   if (getCharacterName(character, name, sizeof(name))) {
     if (fprintf(file, "\"%s\"", name) == EOF) return 0;
   } else {
-    if (fprintf(file, "NULL") == EOF) return 0;
+    if (fprintf(file, "BRLTTY_TEXT_TABLE_NO_NAME") == EOF) return 0;
   }
 
   return 1;
@@ -824,6 +824,9 @@ writeTable_CPreprocessor (
   if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_BEGIN_ALIASES")) return 0;
   if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_ALIAS(from, to, name)")) return 0;
   if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_END_ALIASES")) return 0;
+  if (!endLine(file)) return 0;
+
+  if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_NO_NAME")) return 0;
   if (!endLine(file)) return 0;
 
   if (fprintf(file, "BRLTTY_TEXT_TABLE_BEGIN_CHARACTERS\n") == EOF) return 0;
