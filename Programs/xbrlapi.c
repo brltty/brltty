@@ -185,12 +185,13 @@ static int getXVTnb(void);
 
 static void getVT(void) {
   char *path = getenv("WINDOWPATH");
+  char *vtnr = getenv("XDG_VTNR");
   int vtno = -1;
-  if (!path)
+  if (!path && !vtnr)
     /* Workaround for old xinit/xdm/gdm/kdm */
     vtno = getXVTnb();
 
-  if (path || vtno == -1) {
+  if (path || vtnr || vtno == -1) {
     if (brlapi_enterTtyModeWithPath(NULL,0,NULL)<0)
       fatal_brlapi_errno("geTtyPath",gettext("cannot get tty\n"));
   } else {
