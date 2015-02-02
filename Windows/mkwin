@@ -188,7 +188,7 @@ mkdir -p "${buildRoot}"
 cd "${buildRoot}"
 
 logMessage task "configuring build"
-configureOptions="--enable-relocatable-install --disable-i18n --with-usb-package="${usbPackage}" --without-params-package --without-mntpt-package --without-mntfs-package --without-libbraille --without-espeak --without-flite --without-mikropuhe --without-speechd --without-swift --without-theta --without-viavoice"
+configureOptions="--enable-relocatable-install --with-usb-package="${usbPackage}" --disable-i18n --without-params-package --without-mntpt-package --without-mntfs-package --without-kbd-package --without-libbraille --without-espeak --without-flite --without-mikropuhe --without-speechd --without-swift --without-theta --without-viavoice"
 "${sourceRoot}/configure" --quiet --prefix=/ ${configureOptions}
 
 . ./config.sh
