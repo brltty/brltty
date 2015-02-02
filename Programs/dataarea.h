@@ -29,10 +29,10 @@ extern void destroyDataArea (DataArea *area);
 extern void resetDataArea (DataArea *area);
 
 typedef unsigned long int DataOffset;
-extern int allocateDataItem (DataArea *area, DataOffset *offset, size_t size, unsigned int alignment);
+extern int allocateDataItem (DataArea *area, DataOffset *offset, size_t size, size_t alignment);
 extern void *getDataItem (DataArea *area, DataOffset offset);
 extern size_t getDataSize (DataArea *area);
-extern int saveDataItem (DataArea *area, DataOffset *offset, const void *item, size_t size, int alignment);
+extern int saveDataItem (DataArea *area, DataOffset *offset, const void *item, size_t size, size_t alignment);
 
 #ifdef __cplusplus
 }

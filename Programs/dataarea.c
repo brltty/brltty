@@ -50,7 +50,7 @@ destroyDataArea (DataArea *area) {
 }
 
 int
-allocateDataItem (DataArea *area, DataOffset *offset, size_t size, unsigned int alignment) {
+allocateDataItem (DataArea *area, DataOffset *offset, size_t size, size_t alignment) {
   size_t newOffset = (area->used + (alignment - 1)) / alignment * alignment;
   size_t newUsed = newOffset + size;
 
@@ -84,7 +84,7 @@ getDataSize (DataArea *area) {
 }
 
 int
-saveDataItem (DataArea *area, DataOffset *offset, const void *item, size_t size, int alignment) {
+saveDataItem (DataArea *area, DataOffset *offset, const void *item, size_t size, size_t alignment) {
   if (!allocateDataItem(area, offset, size, alignment)) return 0;
   memcpy(getDataItem(area, *offset), item, size);
   return 1;
