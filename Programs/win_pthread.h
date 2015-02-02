@@ -271,12 +271,12 @@ typedef struct {
 } pthread_cond_t;
 #define PTHREAD_COND_INITIALIZER { NULL, 0}
 
-#ifndef TIME_UTC
+#ifndef __struct_timespec_defined
 struct timespec {
   time_t  tv_sec;  /* Seconds */
   long    tv_nsec; /* Nanoseconds */
 };
-#endif /* TIME_UTC */
+#endif /* __struct_timespec_defined */
 
 typedef unsigned pthread_condattr_t;
 
