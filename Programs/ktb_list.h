@@ -51,6 +51,9 @@ typedef struct {
     KeyTableWriteLineMethod *const writeLine;
     void *const data;
     const unsigned internal:1;
+
+    unsigned int elementLevel;
+    wchar_t elementBullet;
   } list;
 
   struct {

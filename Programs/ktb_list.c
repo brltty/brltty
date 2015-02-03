@@ -54,7 +54,7 @@ listLine (ListGenerationData *lgd, const wchar_t *line) {
 }
 
 static int
-putCharacters (ListGenerationData *lgd, const wchar_t *characters, size_t count) {
+addCharacters (ListGenerationData *lgd, const wchar_t *characters, size_t count) {
   size_t newLength = lgd->line.length + count;
 
   if (newLength > lgd->line.size) {
@@ -73,6 +73,25 @@ putCharacters (ListGenerationData *lgd, const wchar_t *characters, size_t count)
   wmemcpy(&lgd->line.characters[lgd->line.length], characters, count);
   lgd->line.length = newLength;
   return 1;
+}
+
+static int
+putCharacters (ListGenerationData *lgd, const wchar_t *characters, size_t count) {
+  if (lgd->line.length == 0) {
+    if (lgd->list.elementLevel > 0) {
+      const unsigned int indent = 2;
+      const unsigned int count = indent * lgd->list.elementLevel;
+      wchar_t characters[count];
+
+      wmemset(characters, WC_C(' '), count);
+      characters[count - indent] = lgd->list.elementBullet;
+      lgd->list.elementBullet = WC_C(' ');
+
+      if (!addCharacters(lgd, characters, count)) return 0;
+    }
+  }
+
+  return addCharacters(lgd, characters, count);
 }
 
 static int
@@ -137,8 +156,8 @@ endGroup (ListGenerationData *lgd) {
 }
 
 static int
-beginElement (ListGenerationData *lgd, unsigned int level, int continuation) {
-  return lgd->list.methods->beginElement(level, continuation, lgd->list.writeLine, getMethodData(lgd));
+beginElement (ListGenerationData *lgd, unsigned int level) {
+  return lgd->list.methods->beginElement(level, lgd->list.writeLine, getMethodData(lgd));
 }
 
 static int
@@ -245,7 +264,7 @@ listCommandSubgroup (ListGenerationData *lgd, const KeyContext *ctx, CommandSubg
 
 static int
 putKeyboardFunction (ListGenerationData *lgd, const KeyboardFunction *kbf) {
-  if (!beginElement(lgd, 0, 0)) return 0;
+  if (!beginElement(lgd, 1)) return 0;
   if (!putCharacterString(lgd, WS_C("braille keyboard "))) return 0;
   if (!putUtf8String(lgd, kbf->name)) return 0;
   if (!putCharacterString(lgd, WS_C(": "))) return 0;
@@ -288,7 +307,7 @@ listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
 static int
 listHotkeyEvent (ListGenerationData *lgd, const KeyValue *keyValue, const char *event, const BoundCommand *cmd) {
   if (cmd->value != BRL_CMD_NOOP) {
-    if (!beginElement(lgd, 0, 0)) return 0;
+    if (!beginElement(lgd, 1)) return 0;
 
     if ((cmd->value & BRL_MSK_BLK) == BRL_CMD_BLK(CONTEXT)) {
       const KeyContext *c = getKeyContext(lgd->keyTable, (KTB_CTX_DEFAULT + (cmd->value & BRL_MSK_ARG)));
@@ -416,7 +435,7 @@ listBindingLine (ListGenerationData *lgd, int index, int *isSame) {
   if (*isSame) {
     *isSame = 0;
   } else {
-    if (!beginElement(lgd, 0, 0)) return 0;
+    if (!beginElement(lgd, 1)) return 0;
     if (!putCharacters(lgd, bl->text, bl->keysOffset)) return 0;
   }
 
@@ -436,7 +455,7 @@ listBindingLine (ListGenerationData *lgd, int index, int *isSame) {
   }
 
   if (asList) {
-    if (!beginElement(lgd, 1, 0)) return 0;
+    if (!beginElement(lgd, 2)) return 0;
   }
 
   if (!putCharacters(lgd, &bl->text[bl->keysOffset], (bl->length - bl->keysOffset))) return 0;
@@ -663,14 +682,12 @@ listKeyTableNotes (ListGenerationData *lgd) {
 
   for (noteIndex=0; noteIndex<lgd->keyTable->notes.count; noteIndex+=1) {
     const wchar_t *line = lgd->keyTable->notes.table[noteIndex];
-    const unsigned int level = 0;
 
     if (*line == WC_C('*')) {
       line += 1;
       while (iswspace(*line)) line += 1;
-      if (!beginElement(lgd, level, 1)) return 0;
-    } else {
-      if (!beginElement(lgd, level, 0)) return 0;
+    } else if (!beginElement(lgd, 1)) {
+      return 0;
     }
 
     if (!putCharacterString(lgd, line)) return 0;
@@ -725,36 +742,28 @@ internalWriteHeader (const wchar_t *text, unsigned int level, KeyTableWriteLineM
 }
 
 static int
-internalBeginElement (unsigned int level, int continuation, KeyTableWriteLineMethod *writeLine, void *data) {
+internalBeginElement (unsigned int level, KeyTableWriteLineMethod *writeLine, void *data) {
   ListGenerationData *lgd = data;
 
-  const unsigned int indent = 2;
-  const unsigned int count = indent * (level + 1);
-  wchar_t characters[count];
+  static const wchar_t bullets[] = {
+    WC_C('*'),
+    WC_C('+'),
+    WC_C('-')
+  };
 
-  wmemset(characters, WC_C(' '), count);
-
-  if (!continuation) {
-    static const wchar_t bullets[] = {
-      WC_C('*'),
-      WC_C('+'),
-      WC_C('-')
-    };
-
-    characters[count - indent] = bullets[level];
-  }
-
-  return putCharacters(lgd, characters, count);
+  lgd->list.elementLevel = level;
+  lgd->list.elementBullet = bullets[level - 1];
+  return 1;
 }
 
 static int
 internalEndElements (KeyTableWriteLineMethod *writeLine, void *data) {
   ListGenerationData *lgd = data;
 
-  if (lgd->groupHeader) {
+  if (lgd->list.elementLevel > 0) {
+    lgd->list.elementLevel = 0;
     lgd->groupHeader = NULL;
-  } else if (!endLine(lgd)) {
-    return 0;
+    if (!endLine(lgd)) return 0;
   }
 
   return 1;
@@ -784,7 +793,9 @@ listKeyTable (KeyTable *table, const KeyTableListMethods *methods, KeyTableWrite
       .methods = methods? methods: &internalMethods,
       .writeLine = writeLine,
       .data = data,
-      .internal = !methods
+      .internal = !methods,
+
+      .elementLevel = 0
     },
 
     .binding = {
