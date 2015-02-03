@@ -227,7 +227,7 @@ main (int argc, char *argv[]) {
 
         if (keyTable) {
           if (opt_listKeyTable) {
-            if (!listKeyTable(keyTable, listLine, NULL)) {
+            if (!listKeyTable(keyTable, NULL, listLine, NULL)) {
               exitStatus = PROG_EXIT_FATAL;
             }
           }

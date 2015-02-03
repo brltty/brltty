@@ -930,7 +930,7 @@ makeBrailleHelpPage (const char *keyTablePath) {
       free(keyHelpPath);
     }
   } else if (enableBrailleHelpPage()) {
-    listKeyTable(brl.keyTable, handleWcharHelpLine, NULL);
+    listKeyTable(brl.keyTable, NULL, handleWcharHelpLine, NULL);
   }
 
   if (!getHelpLineCount()) {
@@ -942,7 +942,7 @@ makeBrailleHelpPage (const char *keyTablePath) {
 static void
 makeKeyboardHelpPage (void) {
   if (enableKeyboardHelpPage()) {
-    listKeyTable(keyboardTable, handleWcharHelpLine, NULL);
+    listKeyTable(keyboardTable, NULL, handleWcharHelpLine, NULL);
   }
 }
 

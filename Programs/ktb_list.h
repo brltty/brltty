@@ -47,8 +47,10 @@ typedef struct {
   } line;
 
   struct {
-    KeyTableListHandler *const handler;
+    const KeyTableListMethods *const methods;
+    KeyTableWriteLineMethod *const writeLine;
     void *const data;
+    const unsigned internal:1;
   } list;
 
   struct {

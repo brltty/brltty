@@ -31,9 +31,19 @@ extern void destroyKeyTable (KeyTable *table);
 typedef int KeyNameEntryHandler (const KeyNameEntry *kne, void *data);
 extern int forEachKeyName (KEY_NAME_TABLES_REFERENCE keys, KeyNameEntryHandler *handleKeyNameEntry, void *data);
 
-typedef int KeyTableListHandler (const wchar_t *line, void *data);
-extern int listKeyTable (KeyTable *table, KeyTableListHandler *handleLine, void *data);
-extern int listKeyNames (KEY_NAME_TABLES_REFERENCE keys, KeyTableListHandler *handleLine, void *data);
+typedef int KeyTableWriteLineMethod (const wchar_t *line, void *data);
+typedef int KeyTableWriteHeaderMethod (const wchar_t *text, unsigned int level, KeyTableWriteLineMethod *writeLine, void *data);
+typedef int KeyTableBeginElementMethod (unsigned int level, int continuation, KeyTableWriteLineMethod *writeLine, void *data);
+typedef int KeyTableEndElementsMethod (KeyTableWriteLineMethod *writeLine, void *data);
+
+typedef struct {
+  KeyTableWriteHeaderMethod *writeHeader;
+  KeyTableBeginElementMethod *beginElement;
+  KeyTableEndElementsMethod *endElements;
+} KeyTableListMethods;
+
+extern int listKeyTable (KeyTable *table, const KeyTableListMethods *methods, KeyTableWriteLineMethod *writeLine, void *data);
+extern int listKeyNames (KEY_NAME_TABLES_REFERENCE keys, KeyTableWriteLineMethod *writeLine, void *data);
 
 extern char *ensureKeyTableExtension (const char *path);
 extern char *makeKeyTablePath (const char *directory, const char *name);
