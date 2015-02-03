@@ -200,7 +200,7 @@ asyncIsSignalBlocked (int signalNumber) {
 }
 
 int
-asyncCallWithSignalsBlocked (
+asyncWithSignalsBlocked (
   const sigset_t *mask,
   AsyncWithSignalsBlockedFunction *function,
   void *data
@@ -217,7 +217,7 @@ asyncCallWithSignalsBlocked (
 }
 
 int
-asyncCallWithSignalBlocked (
+asyncWithSignalBlocked (
   int number,
   AsyncWithSignalsBlockedFunction *function,
   void *data
@@ -225,7 +225,7 @@ asyncCallWithSignalBlocked (
   sigset_t mask;
 
   if (makeSignalMask(&mask, number)) {
-    if (asyncCallWithSignalsBlocked(&mask, function, data)) {
+    if (asyncWithSignalsBlocked(&mask, function, data)) {
       return 1;
     }
   }
@@ -234,14 +234,14 @@ asyncCallWithSignalBlocked (
 }
 
 int
-asyncCallWithAllSignalsBlocked (
+asyncWithAllSignalsBlocked (
   AsyncWithSignalsBlockedFunction *function,
   void *data
 ) {
   sigset_t mask;
 
   if (sigfillset(&mask) != -1) {
-    if (asyncCallWithSignalsBlocked(&mask, function, data)) {
+    if (asyncWithSignalsBlocked(&mask, function, data)) {
       return 1;
     }
   } else {
@@ -252,14 +252,14 @@ asyncCallWithAllSignalsBlocked (
 }
 
 int
-asyncCallWithObtainableSignalsBlocked (
+asyncWithObtainableSignalsBlocked (
   AsyncWithSignalsBlockedFunction *function,
   void *data
 ) {
   AsyncSignalData *sd = getSignalData();
 
   if (sd) {
-    if (asyncCallWithSignalsBlocked(&sd->obtainableSignals, function, data)) {
+    if (asyncWithSignalsBlocked(&sd->obtainableSignals, function, data)) {
       return 1;
     }
   }
@@ -343,7 +343,7 @@ deleteMonitor (Element *monitorElement) {
         .signalEntry = sig
       };
 
-      asyncCallWithAllSignalsBlocked(asyncDeleteSignalEntry, &parameters);
+      asyncWithAllSignalsBlocked(asyncDeleteSignalEntry, &parameters);
     }
   }
 }
@@ -447,7 +447,7 @@ getSignalElement (int signalNumber, int create) {
                 .signalElement = NULL
               };
 
-              asyncCallWithAllSignalsBlocked(asyncAddSignalEntry, &parameters);
+              asyncWithAllSignalsBlocked(asyncAddSignalEntry, &parameters);
               if (parameters.signalElement) return parameters.signalElement;
             }
 

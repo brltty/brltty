@@ -130,7 +130,7 @@ createThread (
   };
 
 #ifdef ASYNC_CAN_BLOCK_SIGNALS
-  asyncCallWithObtainableSignalsBlocked(createSignalSafeThread, &create);
+  asyncWithObtainableSignalsBlocked(createSignalSafeThread, &create);
 #else /* ASYNC_CAN_BLOCK_SIGNALS */
   createActualThread(&create);
 #endif /* ASYNC_CAN_BLOCK_SIGNALS */
@@ -302,7 +302,7 @@ getThreadSpecificData (ThreadSpecificDataControl *ctl) {
   int error;
 
   if (!ctl->key.created) {
-    asyncCallWithAllSignalsBlocked(createThreadSpecificDataKey, ctl);
+    asyncWithAllSignalsBlocked(createThreadSpecificDataKey, ctl);
   }
 
   if (ctl->key.created) {
