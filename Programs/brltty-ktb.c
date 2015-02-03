@@ -271,7 +271,7 @@ rstPutHeader (const wchar_t *text, RestructuredTextData *rst) {
 }
 
 static int
-rstWriteHeader (const wchar_t *text, unsigned int level, KeyTableWriteLineMethod *writeLine, void *data) {
+rstWriteHeader (const wchar_t *text, unsigned int level, void *data) {
   RestructuredTextData *rst = data;
 
   if (rst->headerLevel < level) {
@@ -286,7 +286,7 @@ rstWriteHeader (const wchar_t *text, unsigned int level, KeyTableWriteLineMethod
 }
 
 static int
-rstBeginElement (unsigned int level, KeyTableWriteLineMethod *writeLine, void *data) {
+rstBeginElement (unsigned int level, void *data) {
   RestructuredTextData *rst = data;
 
   static const wchar_t bullets[] = {
@@ -301,7 +301,7 @@ rstBeginElement (unsigned int level, KeyTableWriteLineMethod *writeLine, void *d
 }
 
 static int
-rstEndElements (KeyTableWriteLineMethod *writeLine, void *data) {
+rstEndElements (void *data) {
   RestructuredTextData *rst = data;
 
   rst->elementLevel = 0;

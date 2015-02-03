@@ -32,9 +32,9 @@ typedef int KeyNameEntryHandler (const KeyNameEntry *kne, void *data);
 extern int forEachKeyName (KEY_NAME_TABLES_REFERENCE keys, KeyNameEntryHandler *handleKeyNameEntry, void *data);
 
 typedef int KeyTableWriteLineMethod (const wchar_t *line, void *data);
-typedef int KeyTableWriteHeaderMethod (const wchar_t *text, unsigned int level, KeyTableWriteLineMethod *writeLine, void *data);
-typedef int KeyTableBeginElementMethod (unsigned int level, KeyTableWriteLineMethod *writeLine, void *data);
-typedef int KeyTableEndElementsMethod (KeyTableWriteLineMethod *writeLine, void *data);
+typedef int KeyTableWriteHeaderMethod (const wchar_t *text, unsigned int level, void *data);
+typedef int KeyTableBeginElementMethod (unsigned int level, void *data);
+typedef int KeyTableEndElementsMethod (void *data);
 
 typedef struct {
   KeyTableWriteHeaderMethod *writeHeader;

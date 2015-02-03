@@ -35,7 +35,17 @@ getMethodData (ListGenerationData *lgd) {
 
 static int
 listHeader (ListGenerationData *lgd, const wchar_t *text, int level) {
-  return lgd->list.methods->writeHeader(text, level, lgd->list.writeLine, getMethodData(lgd));
+  return lgd->list.methods->writeHeader(text, level, getMethodData(lgd));
+}
+
+static int
+writeLine (ListGenerationData *lgd, const wchar_t *line) {
+  return lgd->list.writeLine(line, lgd->list.data);
+}
+
+static int
+writeBlankLine (ListGenerationData *lgd) {
+  return writeLine(lgd, WS_C(""));
 }
 
 static int
@@ -50,7 +60,7 @@ listLine (ListGenerationData *lgd, const wchar_t *line) {
     lgd->groupHeader = NULL;
   }
 
-  return lgd->list.writeLine(line, lgd->list.data);
+  return writeLine(lgd, line);
 }
 
 static int
@@ -152,12 +162,12 @@ beginGroup (ListGenerationData *lgd, const wchar_t *header) {
 
 static int
 endGroup (ListGenerationData *lgd) {
-  return lgd->list.methods->endElements(lgd->list.writeLine, getMethodData(lgd));
+  return lgd->list.methods->endElements(getMethodData(lgd));
 }
 
 static int
 beginElement (ListGenerationData *lgd, unsigned int level) {
-  return lgd->list.methods->beginElement(level, lgd->list.writeLine, getMethodData(lgd));
+  return lgd->list.methods->beginElement(level, getMethodData(lgd));
 }
 
 static int
@@ -721,11 +731,11 @@ listKeyTableSections (ListGenerationData *lgd) {
 }
 
 static int
-internalWriteHeader (const wchar_t *text, unsigned int level, KeyTableWriteLineMethod *writeLine, void *data) {
+internalWriteHeader (const wchar_t *text, unsigned int level, void *data) {
   static const wchar_t characters[] = {WC_C('='), WC_C('-')};
   ListGenerationData *lgd = data;
 
-  if (!writeLine(text, lgd->list.data)) return 0;
+  if (!writeLine(lgd, text)) return 0;
 
   if (level < ARRAY_COUNT(characters)) {
     size_t length = wcslen(text);
@@ -734,15 +744,15 @@ internalWriteHeader (const wchar_t *text, unsigned int level, KeyTableWriteLineM
     wmemset(underline, characters[level], length);
     underline[length] = 0;
 
-    if (!writeLine(underline, lgd->list.data)) return 0;
-    if (!writeLine(WS_C(""), lgd->list.data)) return 0;
+    if (!writeLine(lgd, underline)) return 0;
+    if (!writeBlankLine(lgd)) return 0;
   }
 
   return 1;
 }
 
 static int
-internalBeginElement (unsigned int level, KeyTableWriteLineMethod *writeLine, void *data) {
+internalBeginElement (unsigned int level, void *data) {
   ListGenerationData *lgd = data;
 
   static const wchar_t bullets[] = {
@@ -757,13 +767,13 @@ internalBeginElement (unsigned int level, KeyTableWriteLineMethod *writeLine, vo
 }
 
 static int
-internalEndElements (KeyTableWriteLineMethod *writeLine, void *data) {
+internalEndElements (void *data) {
   ListGenerationData *lgd = data;
 
   if (lgd->list.elementLevel > 0) {
     lgd->list.elementLevel = 0;
     lgd->groupHeader = NULL;
-    if (!endLine(lgd)) return 0;
+    if (!writeBlankLine(lgd)) return 0;
   }
 
   return 1;
