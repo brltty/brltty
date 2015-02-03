@@ -34,21 +34,29 @@
 static char *opt_driversDirectory;
 static char *opt_tablesDirectory;
 static int opt_listKeyNames;
-static int opt_listKeyTable;
+static int opt_listInternalFormat;
+static int opt_listRestructuredText;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'k',
     .word = "keys",
     .flags = OPT_Config | OPT_Environ,
     .setting.flag = &opt_listKeyNames,
-    .description = strtext("List key names on standard output.")
+    .description = strtext("List key names.")
   },
 
   { .letter = 'l',
     .word = "list",
     .flags = OPT_Config | OPT_Environ,
-    .setting.flag = &opt_listKeyTable,
-    .description = strtext("List key table on standard output.")
+    .setting.flag = &opt_listInternalFormat,
+    .description = strtext("List key table in internal format.")
+  },
+
+  { .letter = 'r',
+    .word = "reStructuredText",
+    .flags = OPT_Config | OPT_Environ,
+    .setting.flag = &opt_listRestructuredText,
+    .description = strtext("List key table in reStructuredText format.")
   },
 
   { .letter = 'D',
@@ -80,6 +88,11 @@ listLine (const wchar_t *line, void *data) {
 
   fprintf(stream, "%" PRIws "\n", line);
   return !ferror(stream);
+}
+
+static int
+listBlankLine (void) {
+  return listLine(WS_C(""), NULL);
 }
 
 typedef struct {
@@ -183,6 +196,109 @@ getKeyTableDescriptor (KeyTableDescriptor *ktd, const char *name) {
   return 0;
 }
 
+typedef struct {
+  unsigned int headerLevel;
+  unsigned int elementLevel;
+  wchar_t elementBullet;
+} RestructuredTextData;
+
+static int
+rstWriteLine (const wchar_t *line, void *data) {
+  RestructuredTextData *rst = data;
+
+  const unsigned int indent = 2;
+  const unsigned int count = indent * rst->elementLevel;
+  size_t length = wcslen(line);
+  wchar_t buffer[count + length + 1];
+
+  if (rst->elementLevel > 0) {
+    wmemset(buffer, WC_C(' '), count);
+    buffer[count - indent] = rst->elementBullet;
+    rst->elementBullet = WC_C(' ');
+
+    wmemcpy(&buffer[count], line, (length + 1));
+    line = buffer;
+  }
+
+  return listLine(line, NULL);
+}
+
+static int
+rstListHeader (const wchar_t *text, RestructuredTextData *rst) {
+  static const wchar_t characters[] = {
+    WC_C('~'), WC_C('='), WC_C('-'), WC_C('~')
+  };
+
+  int isTitle = rst->headerLevel == 0;
+  size_t length = wcslen(text);
+  wchar_t underline[length + 1];
+
+  wmemset(underline, characters[rst->headerLevel], length);
+  underline[length] = 0;
+
+  if (isTitle) {
+    if (!listLine(underline, NULL)) return 0;
+  }
+
+  if (!listLine(text, NULL)) return 0;
+  if (!listLine(underline, NULL)) return 0;
+
+  if (isTitle) {
+    if (!listLine(WS_C(".. contents::"), NULL)) return 0;
+  }
+
+  if (!listBlankLine()) return 0;
+  return 1;
+}
+
+static int
+rstWriteHeader (const wchar_t *text, unsigned int level, KeyTableWriteLineMethod *writeLine, void *data) {
+  RestructuredTextData *rst = data;
+
+  if (rst->headerLevel < level) {
+    while (++rst->headerLevel < level) {
+      if (!rstListHeader(WS_C("\\ "), rst)) return 0;
+    }
+  } else if (rst->headerLevel > level) {
+    rst->headerLevel = level;
+  }
+
+  return rstListHeader(text, rst);
+}
+
+static int
+rstBeginElement (unsigned int level, KeyTableWriteLineMethod *writeLine, void *data) {
+  RestructuredTextData *rst = data;
+
+  static const wchar_t bullets[] = {
+    WC_C('*'), WC_C('+'), WC_C('o')
+  };
+
+  rst->elementLevel = level;
+  rst->elementBullet = bullets[level - 1];
+
+  if (!listBlankLine()) return 0;
+  return 1;
+}
+
+static int
+rstEndElements (KeyTableWriteLineMethod *writeLine, void *data) {
+  RestructuredTextData *rst = data;
+
+  if (rst->elementLevel > 0) {
+    rst->elementLevel = 0;
+    if (!listBlankLine()) return 0;
+  }
+
+  return 1;
+}
+
+static const KeyTableListMethods rstMethods = {
+  .writeHeader = rstWriteHeader,
+  .beginElement = rstBeginElement,
+  .endElements = rstEndElements
+};
+
 int
 main (int argc, char *argv[]) {
   ProgramExitStatus exitStatus = PROG_EXIT_SUCCESS;
@@ -226,8 +342,19 @@ main (int argc, char *argv[]) {
         KeyTable *keyTable = compileKeyTable(ktd.path, ktd.names);
 
         if (keyTable) {
-          if (opt_listKeyTable) {
+          if (opt_listInternalFormat) {
             if (!listKeyTable(keyTable, NULL, listLine, NULL)) {
+              exitStatus = PROG_EXIT_FATAL;
+            }
+          }
+
+          if (opt_listRestructuredText) {
+            RestructuredTextData rst = {
+              .headerLevel = 0,
+              .elementLevel = 0
+            };
+
+            if (!listKeyTable(keyTable, &rstMethods, rstWriteLine, &rst)) {
               exitStatus = PROG_EXIT_FATAL;
             }
           }
