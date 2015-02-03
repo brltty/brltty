@@ -82,19 +82,6 @@ END_OPTION_TABLE
 
 static void *driverObject;
 
-static int
-putLine (const wchar_t *line) {
-  FILE *stream = stdout;
-
-  fprintf(stream, "%" PRIws "\n", line);
-  return !ferror(stream);
-}
-
-static int
-hlpWriteLine (const wchar_t *line, void *data) {
-  return putLine(line);
-}
-
 typedef struct {
   KEY_NAME_TABLES_REFERENCE names;
   char *path;
@@ -196,6 +183,19 @@ getKeyTableDescriptor (KeyTableDescriptor *ktd, const char *name) {
   return 0;
 }
 
+static int
+writeLine (const wchar_t *line) {
+  FILE *stream = stdout;
+
+  fprintf(stream, "%" PRIws "\n", line);
+  return !ferror(stream);
+}
+
+static int
+hlpWriteLine (const wchar_t *line, void *data) {
+  return writeLine(line);
+}
+
 typedef struct {
   unsigned int headerLevel;
   unsigned int elementLevel;
@@ -204,7 +204,7 @@ typedef struct {
 } RestructuredTextData;
 
 static int
-rstPutLine (const wchar_t *line, RestructuredTextData *rst) {
+rstAddLine (const wchar_t *line, RestructuredTextData *rst) {
   if (*line) {
     rst->blankLine = 0;
   } else if (rst->blankLine) {
@@ -213,12 +213,12 @@ rstPutLine (const wchar_t *line, RestructuredTextData *rst) {
     rst->blankLine = 1;
   }
 
-  return putLine(line);
+  return writeLine(line);
 }
 
 static int
-rstPutBlankLine (RestructuredTextData *rst) {
-  return rstPutLine(WS_C(""), rst);
+rstAddBlankLine (RestructuredTextData *rst) {
+  return rstAddLine(WS_C(""), rst);
 }
 
 static int
@@ -239,11 +239,11 @@ rstWriteLine (const wchar_t *line, void *data) {
     line = buffer;
   }
 
-  return rstPutLine(line, rst);
+  return rstAddLine(line, rst);
 }
 
 static int
-rstPutHeader (const wchar_t *text, RestructuredTextData *rst) {
+rstAddHeader (const wchar_t *text, RestructuredTextData *rst) {
   static const wchar_t characters[] = {
     WC_C('~'), WC_C('='), WC_C('-'), WC_C('~')
   };
@@ -256,17 +256,17 @@ rstPutHeader (const wchar_t *text, RestructuredTextData *rst) {
   underline[length] = 0;
 
   if (isTitle) {
-    if (!rstPutLine(underline, rst)) return 0;
+    if (!rstAddLine(underline, rst)) return 0;
   }
 
-  if (!rstPutLine(text, rst)) return 0;
-  if (!rstPutLine(underline, rst)) return 0;
+  if (!rstAddLine(text, rst)) return 0;
+  if (!rstAddLine(underline, rst)) return 0;
 
   if (isTitle) {
-    if (!rstPutLine(WS_C(".. contents::"), rst)) return 0;
+    if (!rstAddLine(WS_C(".. contents::"), rst)) return 0;
   }
 
-  if (!rstPutBlankLine(rst)) return 0;
+  if (!rstAddBlankLine(rst)) return 0;
   return 1;
 }
 
@@ -276,13 +276,13 @@ rstWriteHeader (const wchar_t *text, unsigned int level, void *data) {
 
   if (rst->headerLevel < level) {
     while (++rst->headerLevel < level) {
-      if (!rstPutHeader(WS_C("\\ "), rst)) return 0;
+      if (!rstAddHeader(WS_C("\\ "), rst)) return 0;
     }
   } else if (rst->headerLevel > level) {
     rst->headerLevel = level;
   }
 
-  return rstPutHeader(text, rst);
+  return rstAddHeader(text, rst);
 }
 
 static int
@@ -296,23 +296,23 @@ rstBeginElement (unsigned int level, void *data) {
   rst->elementLevel = level;
   rst->elementBullet = bullets[level - 1];
 
-  if (!rstPutBlankLine(rst)) return 0;
+  if (!rstAddBlankLine(rst)) return 0;
   return 1;
 }
 
 static int
-rstEndElements (void *data) {
+rstEndList (void *data) {
   RestructuredTextData *rst = data;
 
   rst->elementLevel = 0;
-  if (!rstPutBlankLine(rst)) return 0;
+  if (!rstAddBlankLine(rst)) return 0;
   return 1;
 }
 
 static const KeyTableListMethods rstMethods = {
   .writeHeader = rstWriteHeader,
   .beginElement = rstBeginElement,
-  .endElements = rstEndElements
+  .endList = rstEndList
 };
 
 int

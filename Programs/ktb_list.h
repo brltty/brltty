@@ -38,7 +38,7 @@ typedef struct {
   KeyTable *const keyTable;
 
   const wchar_t *topicHeader;
-  const wchar_t *groupHeader;
+  const wchar_t *listHeader;
 
   struct {
     wchar_t *characters;

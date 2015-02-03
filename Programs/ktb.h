@@ -34,12 +34,12 @@ extern int forEachKeyName (KEY_NAME_TABLES_REFERENCE keys, KeyNameEntryHandler *
 typedef int KeyTableWriteLineMethod (const wchar_t *line, void *data);
 typedef int KeyTableWriteHeaderMethod (const wchar_t *text, unsigned int level, void *data);
 typedef int KeyTableBeginElementMethod (unsigned int level, void *data);
-typedef int KeyTableEndElementsMethod (void *data);
+typedef int KeyTableEndListMethod (void *data);
 
 typedef struct {
   KeyTableWriteHeaderMethod *writeHeader;
   KeyTableBeginElementMethod *beginElement;
-  KeyTableEndElementsMethod *endElements;
+  KeyTableEndListMethod *endList;
 } KeyTableListMethods;
 
 extern int listKeyTable (KeyTable *table, const KeyTableListMethods *methods, KeyTableWriteLineMethod *writeLine, void *data);
