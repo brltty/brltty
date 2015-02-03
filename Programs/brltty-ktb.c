@@ -34,7 +34,7 @@
 static char *opt_driversDirectory;
 static char *opt_tablesDirectory;
 static int opt_listKeyNames;
-static int opt_listInternalFormat;
+static int opt_listHelpScreen;
 static int opt_listRestructuredText;
 
 BEGIN_OPTION_TABLE(programOptions)
@@ -48,8 +48,8 @@ BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'l',
     .word = "list",
     .flags = OPT_Config | OPT_Environ,
-    .setting.flag = &opt_listInternalFormat,
-    .description = strtext("List key table in internal format.")
+    .setting.flag = &opt_listHelpScreen,
+    .description = strtext("List key table in help screen format.")
   },
 
   { .letter = 'r',
@@ -83,7 +83,7 @@ END_OPTION_TABLE
 static void *driverObject;
 
 static int
-listLine (const wchar_t *line, void *data) {
+putLine (const wchar_t *line) {
   FILE *stream = stdout;
 
   fprintf(stream, "%" PRIws "\n", line);
@@ -91,8 +91,8 @@ listLine (const wchar_t *line, void *data) {
 }
 
 static int
-listBlankLine (void) {
-  return listLine(WS_C(""), NULL);
+hlpWriteLine (const wchar_t *line, void *data) {
+  return putLine(line);
 }
 
 typedef struct {
@@ -200,7 +200,26 @@ typedef struct {
   unsigned int headerLevel;
   unsigned int elementLevel;
   wchar_t elementBullet;
+  unsigned blankLine:1;
 } RestructuredTextData;
+
+static int
+rstPutLine (const wchar_t *line, RestructuredTextData *rst) {
+  if (*line) {
+    rst->blankLine = 0;
+  } else if (rst->blankLine) {
+    return 1;
+  } else {
+    rst->blankLine = 1;
+  }
+
+  return putLine(line);
+}
+
+static int
+rstPutBlankLine (RestructuredTextData *rst) {
+  return rstPutLine(WS_C(""), rst);
+}
 
 static int
 rstWriteLine (const wchar_t *line, void *data) {
@@ -220,11 +239,11 @@ rstWriteLine (const wchar_t *line, void *data) {
     line = buffer;
   }
 
-  return listLine(line, NULL);
+  return rstPutLine(line, rst);
 }
 
 static int
-rstListHeader (const wchar_t *text, RestructuredTextData *rst) {
+rstPutHeader (const wchar_t *text, RestructuredTextData *rst) {
   static const wchar_t characters[] = {
     WC_C('~'), WC_C('='), WC_C('-'), WC_C('~')
   };
@@ -237,17 +256,17 @@ rstListHeader (const wchar_t *text, RestructuredTextData *rst) {
   underline[length] = 0;
 
   if (isTitle) {
-    if (!listLine(underline, NULL)) return 0;
+    if (!rstPutLine(underline, rst)) return 0;
   }
 
-  if (!listLine(text, NULL)) return 0;
-  if (!listLine(underline, NULL)) return 0;
+  if (!rstPutLine(text, rst)) return 0;
+  if (!rstPutLine(underline, rst)) return 0;
 
   if (isTitle) {
-    if (!listLine(WS_C(".. contents::"), NULL)) return 0;
+    if (!rstPutLine(WS_C(".. contents::"), rst)) return 0;
   }
 
-  if (!listBlankLine()) return 0;
+  if (!rstPutBlankLine(rst)) return 0;
   return 1;
 }
 
@@ -257,13 +276,13 @@ rstWriteHeader (const wchar_t *text, unsigned int level, KeyTableWriteLineMethod
 
   if (rst->headerLevel < level) {
     while (++rst->headerLevel < level) {
-      if (!rstListHeader(WS_C("\\ "), rst)) return 0;
+      if (!rstPutHeader(WS_C("\\ "), rst)) return 0;
     }
   } else if (rst->headerLevel > level) {
     rst->headerLevel = level;
   }
 
-  return rstListHeader(text, rst);
+  return rstPutHeader(text, rst);
 }
 
 static int
@@ -277,7 +296,7 @@ rstBeginElement (unsigned int level, KeyTableWriteLineMethod *writeLine, void *d
   rst->elementLevel = level;
   rst->elementBullet = bullets[level - 1];
 
-  if (!listBlankLine()) return 0;
+  if (!rstPutBlankLine(rst)) return 0;
   return 1;
 }
 
@@ -285,11 +304,8 @@ static int
 rstEndElements (KeyTableWriteLineMethod *writeLine, void *data) {
   RestructuredTextData *rst = data;
 
-  if (rst->elementLevel > 0) {
-    rst->elementLevel = 0;
-    if (!listBlankLine()) return 0;
-  }
-
+  rst->elementLevel = 0;
+  if (!rstPutBlankLine(rst)) return 0;
   return 1;
 }
 
@@ -333,7 +349,7 @@ main (int argc, char *argv[]) {
 
     if (gotKeyTableDescriptor) {
       if (opt_listKeyNames) {
-        if (!listKeyNames(ktd.names, listLine, NULL)) {
+        if (!listKeyNames(ktd.names, hlpWriteLine, NULL)) {
           exitStatus = PROG_EXIT_FATAL;
         }
       }
@@ -342,8 +358,8 @@ main (int argc, char *argv[]) {
         KeyTable *keyTable = compileKeyTable(ktd.path, ktd.names);
 
         if (keyTable) {
-          if (opt_listInternalFormat) {
-            if (!listKeyTable(keyTable, NULL, listLine, NULL)) {
+          if (opt_listHelpScreen) {
+            if (!listKeyTable(keyTable, NULL, hlpWriteLine, NULL)) {
               exitStatus = PROG_EXIT_FATAL;
             }
           }
@@ -351,7 +367,9 @@ main (int argc, char *argv[]) {
           if (opt_listRestructuredText) {
             RestructuredTextData rst = {
               .headerLevel = 0,
-              .elementLevel = 0
+              .elementLevel = 0,
+              .elementBullet = WC_C(' '),
+              .blankLine = 0
             };
 
             if (!listKeyTable(keyTable, &rstMethods, rstWriteLine, &rst)) {
