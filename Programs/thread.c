@@ -280,8 +280,8 @@ setThreadName (const char *name) {
 #endif /* HAVE_THREAD_NAMES */
 
 #if defined(PTHREAD_MUTEX_INITIALIZER)
-void *
-getThreadSpecificData (ThreadSpecificDataControl *ctl) {
+ASYNC_WITH_SIGNALS_BLOCKED_FUNCTION(createThreadSpecificDataKey) {
+  ThreadSpecificDataControl *ctl = data;
   int error;
 
   pthread_mutex_lock(&ctl->mutex);
@@ -295,6 +295,13 @@ getThreadSpecificData (ThreadSpecificDataControl *ctl) {
       }
     }
   pthread_mutex_unlock(&ctl->mutex);
+}
+
+void *
+getThreadSpecificData (ThreadSpecificDataControl *ctl) {
+  int error;
+
+  asyncCallWithAllSignalsBlocked(createThreadSpecificDataKey, ctl);
 
   if (ctl->key.created) {
     void *tsd = pthread_getspecific(ctl->key.value);
