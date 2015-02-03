@@ -18,35 +18,35 @@
 
 title Braille Memo Smart
 
-note The six slightly angled keys along the top are a braille keyboard;
-note * from left to right, their names are: Dot3, Dot2, Dot1, Dot4, Dot5, Dot6.
+note The six slightly angled keys along the top are a braille keyboard.
+note * From left to right, their names are: Dot3, Dot2, Dot1, Dot4, Dot5, Dot6.
 note The two keys to the left of Dot3, from top to bottom, are named: Control, Alt.
 note The two keys to the right of Dot6, from top to bottom, are named: Select, Read.
-note The key immediately below Dot2 is named: Backspace.
-note The key immediately below Dot5 is named: Delete.
+note The key immediately below Dot2 is named Backspace.
+note The key immediately below Dot5 is named Delete.
 note The three keys below Dot1 and Dot4, from left to right, are named: Dot7, Extension, Dot8.
 note The keys to the left and right of the braille cells are named: PanLeft, PanRight.
 note The two keys on the front at the left are named: ArrowUp, ArrowDown.
 note The two keys on the front at the right are named: ArrowLeft, ArrowRight.
 note Some keys are entered by pressing a set of keys simultaneously:
-note * Return: Dot7
-note * Space: Dot8
-note * ArrowUp: Extension + Dot1
-note * ArrowDown: Extension + Dot4
-note * Control+ArrowLeft: Extension + Dot2
-note * Control+ArrowRight: Extension + Dot5
-note * ArrowLeft: Extension + Dot3
-note * ArrowRight: Extension + Dot6
-note * OK: Extension + Dot7
-note * Set: Extension + Dot8
-note * Info (Tab): Extension + Dot4 + Dot5
-note * Select+Info (Shift+Tab): Extension + Dot1 + Dot2
-note * Escape: Extension + Dot1 + Dot5
-note * Insert: Extension + Dot2 + Dot4
-note * Backward: Extension + ArrowUp
-note * Forward: Extension + ArrowDown
-note * ScrollLeft: Extension + ArrowLeft
-note * ScrollRight: Extension + ArrowRight
+note + Return: Dot7
+note + Space: Dot8
+note + ArrowUp: Extension + Dot1
+note + ArrowDown: Extension + Dot4
+note + Control+ArrowLeft: Extension + Dot2
+note + Control+ArrowRight: Extension + Dot5
+note + ArrowLeft: Extension + Dot3
+note + ArrowRight: Extension + Dot6
+note + OK: Extension + Dot7
+note + Set: Extension + Dot8
+note + Info (Tab): Extension + Dot4 + Dot5
+note + Select+Info (Shift+Tab): Extension + Dot1 + Dot2
+note + Escape: Extension + Dot1 + Dot5
+note + Insert: Extension + Dot2 + Dot4
+note + Backward: Extension + ArrowUp
+note + Forward: Extension + ArrowDown
+note + ScrollLeft: Extension + ArrowLeft
+note + ScrollRight: Extension + ArrowRight
 
 hide on
 bind Info KEY_TAB

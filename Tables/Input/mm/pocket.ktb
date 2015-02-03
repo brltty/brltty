@@ -18,35 +18,35 @@
 
 title Braille Memo Pocket
 
-note The six round keys along the top are a braille keyboard;
-note * from left to right, their names are: Dot3, Dot2, Dot1, Dot4, Dot5, Dot6.
+note The six round keys along the top are a braille keyboard.
+note * From left to right, their names are: Dot3, Dot2, Dot1, Dot4, Dot5, Dot6.
 note The two keys to the left of Dot3, from top to bottom, are named: Control, Alt.
 note The two keys to the right of Dot6, from top to bottom, are named: Select, Read.
 note The three keys below Dot1 and Dot4, from left to right, are named: Dot7, Extension, Dot8.
-note At the bottom left is a group of four keys arranged in a cross;
-note * starting with the leftmost key and moving clockwise, their names are:
+note At the bottom left is a group of four keys arranged in a cross.
+note * Starting with the leftmost key and moving clockwise, their names are:
 note * ArrowLeft, ArrowUp, ArrowRight, ArrowDown.
 note A driver implementation constraint requires that some of the bindings
 note * refer to the ArrowLeft and ArrowRight keys as PanLeft and PanRight.
 note Some keys are entered by pressing a set of keys simultaneously:
-note * Return: Dot7
-note * Space: Dot8
-note * ArrowUp: Extension + Dot1
-note * ArrowDown: Extension + Dot4
-note * ArrowLeft: Extension + Dot2
-note * ArrowRight: Extension + Dot5
-note * Insert: Extension + Dot3
-note * Change: Extension + Dot6
-note * Backspace: Extension + Dot7
-note * Delete: Extension + Dot8
-note * Escape: Extension + ArrowUp
-note * Info: Extension + ArrowDown
-note * Backward: Extension + ArrowRight + Dot1
-note * Forward: Extension + ArrowRight + Dot4
-note * ScrollLeft: Extension + ArrowRight + Dot2
-note * ScrollRight: Extension + ArrowRight + Dot5
-note * OK: Extension + ArrowRight + Dot7
-note * Set: Extension + ArrowRight + Dot8
+note + Return: Dot7
+note + Space: Dot8
+note + ArrowUp: Extension + Dot1
+note + ArrowDown: Extension + Dot4
+note + ArrowLeft: Extension + Dot2
+note + ArrowRight: Extension + Dot5
+note + Insert: Extension + Dot3
+note + Change: Extension + Dot6
+note + Backspace: Extension + Dot7
+note + Delete: Extension + Dot8
+note + Escape: Extension + ArrowUp
+note + Info: Extension + ArrowDown
+note + Backward: Extension + ArrowRight + Dot1
+note + Forward: Extension + ArrowRight + Dot4
+note + ScrollLeft: Extension + ArrowRight + Dot2
+note + ScrollRight: Extension + ArrowRight + Dot5
+note + OK: Extension + ArrowRight + Dot7
+note + Set: Extension + ArrowRight + Dot8
 
 bind ArrowUp+ArrowDown CSRJMP_VERT
 bind PanLeft+PanRight RETURN

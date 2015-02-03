@@ -17,11 +17,11 @@
 ###############################################################################
 
 # Key subtable for HandyTech keypad keys
-note The 16 keys of a Handy Tech Keypad are named like this:
-note * B9    One   Two   Three
-note * B10   Four  Five  Six
-note * B11   Seven Eight Nine
-note * B12   B13   Zero  B14
+note The 16-key pad is arranged in four columns and four rows.
+note * The keys in the first (top) row are named: B9, One, Two, Three.
+note * The keys in the second row are named: B10, Four, Five, Six.
+note * The keys in the third row are named: B11, Seven, Eight, Nine.
+note * The keys in the fourth (bottom) row are named: B12, B13, Zero, B14.
 
 bind B9 SAY_ABOVE
 bind B10 SAY_LINE

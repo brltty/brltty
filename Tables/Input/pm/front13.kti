@@ -17,7 +17,7 @@
 ###############################################################################
 
 # This key subtable is for Papenmeier displays which have 13 front keys.
-note The front surface layout is as follows:
+note There are 13 keys on the front.
 note * The rectangular key at the center is named Shift.
 note * The square keys immediately to its left and right are named Home and End.
 note * The left and right bars are named Up and Down.

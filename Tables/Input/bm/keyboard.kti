@@ -18,9 +18,9 @@
 
 # This key subtable is for Baum displays which have an eight-dot braille keyboard.
 note For models which have a braille keyboard:
-note * F1 and F2 are the two keys at the very left of the front.
-note * F3 and F4 are the two keys at the very right of the front.
-note * B10, if present, is between the Dot1 and Dot4 keys.
+note * F1 and F2 are the two keys at the very left of the front,
+note * F3 and F4 are the two keys at the very right of the front,
+note * and B10 (if present) is between the Dot1 and Dot4 keys.
 
 map Dot1 DOT1
 map Dot2 DOT2

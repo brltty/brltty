@@ -692,12 +692,27 @@ listKeyTableNotes (ListGenerationData *lgd) {
 
   for (noteIndex=0; noteIndex<lgd->keyTable->notes.count; noteIndex+=1) {
     const wchar_t *line = lgd->keyTable->notes.table[noteIndex];
+    unsigned int level;
+    int prefixed;
 
     if (*line == WC_C('*')) {
+      level = 0;
+      prefixed = 1;
+    } else if (*line == WC_C('+')) {
+      level = 2;
+      prefixed = 1;
+    } else {
+      level = 1;
+      prefixed = 0;
+    }
+
+    if (level > 0) {
+      if (!beginElement(lgd, level)) return 0;
+    }
+
+    if (prefixed) {
       line += 1;
       while (iswspace(*line)) line += 1;
-    } else if (!beginElement(lgd, 1)) {
-      return 0;
     }
 
     if (!putCharacterString(lgd, line)) return 0;
