@@ -23,6 +23,7 @@ defaultOutputRoot="doc-ktb"
 addProgramOption s string.directory sourceRoot "top-level directory of source tree" "the location of this script"
 addProgramOption b string.directory buildRoot "top-level directory of build tree" "the source tree"
 addProgramOption o string.directory outputRoot "top-level directory of output tree" "${defaultOutputRoot}"
+addProgramOption k flag keepFiles "don't remove intermediate files"
 parseProgramArguments "${@}"
 
 set -e
@@ -158,7 +159,7 @@ listKeyTable() {
    sed -e "2a\\${newLine}* \`Plain Text Version <${name}.${plainTextExtension}>\`_" -i "${output}.${reStructuredTextExtension}"
 
    rst2html --config "${sourceRoot}/docutils.conf" "${output}.${reStructuredTextExtension}" "${output}.${hypertextExtension}"
-   rm "${output}.${reStructuredTextExtension}"
+   "${keepFiles}" || rm "${output}.${reStructuredTextExtension}"
 }
 
 driversSubdirectory="Drivers/Braille"
