@@ -245,7 +245,7 @@ rstWriteLine (const wchar_t *line, void *data) {
 static int
 rstAddHeader (const wchar_t *text, RestructuredTextData *rst) {
   static const wchar_t characters[] = {
-    WC_C('~'), WC_C('='), WC_C('-'), WC_C('~')
+    WC_C('='), WC_C('-'), WC_C('~')
   };
 
   int isTitle = rst->headerLevel == 0;
@@ -255,18 +255,15 @@ rstAddHeader (const wchar_t *text, RestructuredTextData *rst) {
   wmemset(underline, characters[rst->headerLevel], length);
   underline[length] = 0;
 
-  if (isTitle) {
-    if (!rstAddLine(underline, rst)) return 0;
-  }
-
   if (!rstAddLine(text, rst)) return 0;
   if (!rstAddLine(underline, rst)) return 0;
+  if (!rstAddBlankLine(rst)) return 0;
 
   if (isTitle) {
     if (!rstAddLine(WS_C(".. contents::"), rst)) return 0;
+    if (!rstAddBlankLine(rst)) return 0;
   }
 
-  if (!rstAddBlankLine(rst)) return 0;
   return 1;
 }
 
