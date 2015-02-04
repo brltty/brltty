@@ -1,5 +1,5 @@
-String Operand
---------------
+The String Operand
+------------------
 
 A *string* operand may be specified as a non-whitespace sequence of:
 

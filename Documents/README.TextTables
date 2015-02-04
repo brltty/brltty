@@ -9,7 +9,7 @@ Files with names of the form ``*.ttb`` are text tables, and with names of the
 form ``*.tti`` are text subtables. They are used by BRLTTY to translate the
 characters on the screen into their corresponding 8-dot computer braille
 representations (see |README.BrailleDots| for details). They can usually be
-found in the``/etc/brltty/Text/`` directory (see |README.Customize| for more
+found in the ``/etc/brltty/Text/`` directory (see |README.Customize| for more
 details).
 
 A text table consists of a sequence of directives, one per line, which define 
@@ -39,7 +39,7 @@ directive (which is allowed for backward compatibility) then the first one is
 used when entered from a braille keyboard.
 
 *character*
-   The character being defined (see `String Operand`_ for details).
+   The character being defined (see `The String Operand`_ for details).
 
 *dots*
    The braille representation for the character being defined (see
@@ -77,7 +77,7 @@ The Alias Directive
 
 Use this directive to define the *from* Unicode character such that it has the
 same braille representation as the *to* Unicode character. See
-`String Operand`_ for details on how to specify both operands.
+`The String Operand`_ for details on how to specify both operands.
 
 The Byte Directive
 ------------------
@@ -94,7 +94,7 @@ valid regardless of what the local character set is.
 
 *byte*
    The character being defined. It may be specified in any of the ways
-   supported by a `String Operand`_ except that the Unicode-specific forms
+   supported by `The String Operand`_ except that the Unicode-specific forms
    (``\u``, ``\U``, ``\<``) may not be used.
 
 *dots*
