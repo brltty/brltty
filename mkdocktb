@@ -181,11 +181,11 @@ keyTableExtension="ktb"
 keyTableLister="${buildRoot}/Programs/brltty-ktb"
 make -C "${keyTableLister%/*}" -s "${keyTableLister##*/}"
 
-documentTitle="Key Tables"
+documentTitle="Key Binding Lists"
 beginDocument "${documentTitle}"
 beginSection "${documentTitle}"
 
-beginSection "Keyboards"
+beginSection "Computer Keyboard Bindings"
 beginLayoutList
 set -- "${tablesDirectory}/${keyboardSubdirectory}/"*".${keyTableExtension}"
 for inputFile
@@ -198,7 +198,7 @@ endLayoutList
 addLine "<HR>"
 endSection
 
-beginSection "Braille Drivers"
+beginSection "Braille Device Bindings"
 addLine "<DL>"
 for driverDirectory in "${driversDirectory}/"*
 do
