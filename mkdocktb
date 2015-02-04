@@ -17,14 +17,33 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-unset HOME
-export XDG_CONFIG_HOME=/
-export XDG_CONFIG_DIRS=/
+defaultOutputRoot="doc-ktb"
+
 . "`dirname "${0}"`/prologue.sh"
+addProgramOption s string.directory sourceRoot "top-level directory of source tree" "the location of this script"
+addProgramOption b string.directory buildRoot "top-level directory of build tree" "the source tree"
+addProgramOption o string.directory outputRoot "top-level directory of output tree" "${defaultOutputRoot}"
+parseProgramArguments "${@}"
 
 set -e
 umask 022
 shopt -s nullglob
+
+[ -n "${sourceRoot}" ] || sourceRoot="$(dirname "${0}")"
+verifyInputDirectory "${sourceRoot}"
+sourceRoot="$(cd "${sourceRoot}" && pwd)"
+
+[ -n "${buildRoot}" ] || buildRoot="${sourceRoot}"
+buildRoot="$(cd "${buildRoot}" && pwd)"
+
+[ -n "${outputRoot}" ] || outputRoot="${defaultOutputRoot}"
+verifyOutputDirectory "${outputRoot}"
+
+unset HOME
+export XDG_CONFIG_HOME=/
+export XDG_CONFIG_DIRS=/
+
+readonly newLine=$'\n'
 
 declare -a documentLines
 addLine() {
@@ -85,17 +104,18 @@ endLayoutList() {
 
 beginLayoutEntry() {
    local prefix="${1}"
+   local outputExtension="${2}"
 
    local layout="${inputFile##*/}"
    layout="${layout%.*}"
 
-   outputFile="${outputRoot}/${prefix}-${layout}.${plainTextExtension}"
+   outputFile="${outputRoot}/${prefix}-${layout}.${outputExtension}"
 }
 
 endLayoutEntry() {
    local category="${1}"
 
-   exec 4<"${outputFile}"
+   exec 4<"${outputFile%.*}.${plainTextExtension}"
    local description
    read -r -u 4 description
    exec 4<&-
@@ -124,37 +144,22 @@ endLayoutEntry() {
    addLine "<LI><A HREF=\"${outputFile##*/}\">${description}</A>"
 }
 
-translateKeyTable() {
+listKeyTable() {
    local prefix="${1}"
 
-   "${keyTableLister}" -D"${buildRoot}/lib" -T"${sourceRoot}/${tablesSubdirectory}" -l "${prefix}-${inputFile##*/}" >"${outputFile}"
+   local input="${prefix}-${inputFile##*/}"
+   local output="${outputFile%.*}"
+   local name="${output##*/}"
+
+   local command=( "${keyTableLister}" -D"${buildRoot}/lib" -T"${sourceRoot}/${tablesSubdirectory}" )
+   "${command[@]}" -l "${input}" >"${output}.${plainTextExtension}"
+   "${command[@]}" -r "${input}" >"${output}.${reStructuredTextExtension}"
+
+   sed -e "2a\\${newLine}* \`Plain Text Version <${name}.${plainTextExtension}>\`_" -i "${output}.${reStructuredTextExtension}"
+
+   rst2html --config "${sourceRoot}/docutils.conf" "${output}.${reStructuredTextExtension}" "${output}.${hypertextExtension}"
+   rm "${output}.${reStructuredTextExtension}"
 }
-
-sourceRoot="$(dirname "${0}")"
-outputRoot="doc-ktb"
-buildRoot="${sourceRoot}"
-
-while getopts ":o:s:b:" option
-do
-   case "${option}"
-   in
-      o) outputRoot="${OPTARG}";;
-      s) sourceRoot="${OPTARG}";;
-      b) buildRoot="${OPTARG}";;
-      :) syntaxError "missing value: -${OPTARG}";;
-     \?) syntaxError "unknown option: -${OPTARG}";;
-      *) syntaxError "unimplemented option: -${option}";;
-   esac
-done
-
-shift $((OPTIND - 1))
-[ "${#}" -eq 0 ] || syntaxError "too many parameters"
-
-verifyInputDirectory "${sourceRoot}"
-verifyOutputDirectory "${outputRoot}"
-
-sourceRoot="$(cd "${sourceRoot}" && pwd)"
-buildRoot="$(cd "${buildRoot}" && pwd)"
 
 driversSubdirectory="Drivers/Braille"
 driversDirectory="${sourceRoot}/${driversSubdirectory}"
@@ -169,6 +174,7 @@ braillePrefix="brl"
 keyboardPrefix="kbd"
 
 plainTextExtension="txt"
+reStructuredTextExtension="rst"
 hypertextExtension="html"
 keyTableExtension="ktb"
 
@@ -184,8 +190,8 @@ beginLayoutList
 set -- "${tablesDirectory}/${keyboardSubdirectory}/"*".${keyTableExtension}"
 for inputFile
 do
-   beginLayoutEntry "${keyboardPrefix}"
-   translateKeyTable "${keyboardPrefix}"
+   beginLayoutEntry "${keyboardPrefix}" "${hypertextExtension}"
+   listKeyTable "${keyboardPrefix}"
    endLayoutEntry
 done
 endLayoutList
@@ -216,15 +222,15 @@ do
    then
       for inputFile
       do
-         beginLayoutEntry "${braillePrefix}-${driverCode}"
-         translateKeyTable "${braillePrefix}-${driverCode}"
+         beginLayoutEntry "${braillePrefix}-${driverCode}" "${hypertextExtension}"
+         listKeyTable "${braillePrefix}-${driverCode}" "${hypertextExtension}"
          endLayoutEntry "${driverName}"
       done
    else
       set -- "${tablesDirectory}/${brailleSubdirectory}/${driverCode}/"*".${plainTextExtension}"
       for inputFile
       do
-         beginLayoutEntry "${braillePrefix}-${driverCode}"
+         beginLayoutEntry "${braillePrefix}-${driverCode}" "${plainTextExtension}"
          cp -a -- "${inputFile}" "${outputFile}"
          endLayoutEntry "${driverName}"
       done
