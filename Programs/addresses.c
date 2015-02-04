@@ -135,6 +135,8 @@ setAddressName (void *address, const char *format, ...) {
     }
 
     if (insertAddressEntry(index, entry)) return 1;
+
+    free(entry);
   } else {
     logMallocError();
   }
