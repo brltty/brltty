@@ -1,155 +1,150 @@
+~~~~~~~~~~
 Key Tables
-----------
+~~~~~~~~~~
 
-Files with names of the form "*.ktb" are key tables, and with names of the form 
-"*.kti" are key subtables. They are used by BRLTTY to bind braille display and 
-keyboard key combinations to BRLTTY commands.
+.. include:: includes.rst
+.. contents::
 
-The names of braille display key table files begin with "brl-xx-", where "xx" 
-is the two-letter driver identification code. The rest of the name identifies 
-the model(s) for which the key table is used.
+Files with names of the form ``*.ktb`` are key tables, and with names of the
+form ``*.kti`` are key subtables. They are used to bind braille device and
+computer keyboard key combinations to BRLTTY commands.
 
-The names of keyboard key table files begin with "kbd-". The rest of the name 
-describes the kind of keyboard for which the key table has been designed.
+Braille device key tables can usually be found in the ``/etc/brltty/Input/xx/``
+directory, where ``xx`` is the two-letter braille driver identification code.
+The name of a braille device key table identifies the model(s) for which it is
+used.
+
+Computer keyboard key tables can usually be found in the
+``/etc/brltty/Keyboard/`` directory. The name of a keyboard key table describes
+the kind of keyboard for which it has been designed.
 
 A key table consists of a sequence of directives, one per line, which define 
 how keys and key combinations are to be interpreted. UTF-8 character encoding 
 must be used. White-space (blanks, tabs) at the beginning of a line, as well as 
 before and/or after any operand, is ignored. Lines containing only white-space 
-are ignored. If the first non-white-space character of a line is a number (#) 
-sign then that line is a comment and is ignored.
+are ignored. If the first non-white-space character of a line is ``#`` then
+that line is a comment and is ignored.
 
 The precedence for resolving each key press/release event is as follows:
+
 1) A hotkey press or release defined within the current context.
 2) A key combination defined within the current context.
 3) A braille keyboard command defined within the current context.
 4) A key combination defined within the default context.
 
-===============================================================================
-
-The Assign Directive
---------------------
-
-Use the "assign" directive to create or update a variable associated with the 
-current include level. The variable is visible to the current and to lower 
-include levels, but not to higher include levels.
-
-   assign <variable> [<value>]
-
-The <variable> operand specifies the name of the variable. If the variable 
-doesn't already exist at the current include level then it is created.
-
-The <value> operand specifies the value which is to be assigned to the 
-variable. If it's not supplied then a zero-length (null) value is assigned.
-
-The escape sequence \{variable} is substituted with the value of the variable 
-named within the braces. The variable must have been defined at the current or 
-at a higher include level.
-
-Examples:
-
-   assign nullValue
-   assign ReturnKey Key1
-   bind \{ReturnKey} RETURN
-
-===============================================================================
+Directives
+==========
 
 The Bind Directive
 ------------------
 
-Use the "bind" directive to define which BRLTTY command is executed when a 
-particular combination of one or more keys is pressed. The binding is defined 
-within the current context.
+::
 
-   bind <keys> <commands>
+   bind *keys* *commands*
 
-The <keys> operand specifies the key combination which is to be bound. It's a 
-sequence of one or more key and/or key set names separated by plus (+) signs. 
-The final (or only) key name may be optionally prefixed with an exclamation (!) 
-point. For example:
+Use this directive to define which BRLTTY command is executed when a particular
+combination of keys is pressed. The binding is defined within the current
+context.
 
-   key1
-   set1
-   key1+key2
-   key1+key2+set1
-   !set1
-   key1+!key2
+*keys*
+   The key combination which is to be bound. It's a sequence of one or more key
+   and/or key group names separated by plus (+) signs. The final (or only) key
+   name may be optionally prefixed with an exclamation (!) point. For example:
 
-A key set name refers to any key within the named set. A specific key within 
-the set may be identified by appending a dot (.) and a number to the name. The 
-first key within the set is key #1 (e.g. "keySetName.1").
+   *  key1
+   *  group1
+   *  key1+key2
+   *  key1+key2+group1
+   *  !group1
+   *  key1+!key2
 
-The keys may be pressed in any order, with the exception that if the final key 
-name is prefixed with an exclamation point then it must be pressed last. The 
-exclamation point prefix means that the primary command (see below) is executed 
-as soon as that key is pressed. If not used, the primary command is executed as 
-soon as any of the keys is released.
+   A key group name refers to any key within the named group. A specific key
+   within the group may be identified by appending a dot (.) and a number to
+   the name. The first key within a group is key #1 (e.g. ``keyGroupName.1``).
 
-The <commands> operand specifies the primary and secondary BRLTTY commands 
-which are to be bound to the key combination. The two commands (primary first 
-and secondary last) are separated from one another by a colon (:). Both 
-commands are optional. If just a primary command is being bound then the colon 
-needn't be supplied. All of these are valid:
+   The keys may be pressed in any order, with the exception that if the final
+   key name is prefixed with an exclamation point then it must be pressed last.
+   The exclamation point prefix means that the primary command (see below) is
+   executed as soon as that key is pressed. If not used, the primary command is
+   executed as soon as any of the keys is released.
 
-   bind key primaryCommand
-   bind key primaryCommand:
-   bind key primaryCommand:secondaryCommand
-   bind key :secondaryCommand
-   bind key :
+*commands*
+   The primary and secondary BRLTTY commands that are to be bound to the key
+   combination. The two commands (primary first and secondary last) are
+   separated from one another by a colon (:). Both commands are optional. If
+   just a primary command is being bound then the colon needn't be supplied.
+   All of these are valid:
 
-The primary command is executed as described above. The secondary command is 
-executed if the key combination is held for a while (i.e. when a long key press 
-is detected). If the autorepeat feature is enabled then the secondary command 
-is autorepeated if it has been defined else the primary command is 
-autorepeated.
+   *  bind key primaryCommand
+   *  bind key primaryCommand:
+   *  bind key primaryCommand:secondaryCommand
+   *  bind key :secondaryCommand
+   *  bind key :
 
-One or more modifiers may be optionally appended to the command name by using a 
+   The primary command is executed as described above. The secondary command is
+   executed if the key combination is held for a while (i.e. when a long key
+   press is detected). If the **autorepeat** feature is enabled then the
+   secondary command is autorepeated if it has been defined, else the primary
+   command is autorepeated.
+
+One or more modifiers may be optionally appended to a command name by using a 
 plus (+) sign as the separator. For example:
 
-   bind key command
-   bind key command+modifier1
-   bind key command+modifier1+modifier2
+*  bind key command
+*  bind key command+modifier1
+*  bind key command+modifier1+modifier2
 
-*  For commands which enable/disable a feature:
-   +  If the modifier +on is specified then the feature is enabled.
-   +  If the modifier +off is specified then the feature is disabled.
-   +  If neither +on nor +off is specified then the state of the feature is 
-      toggled on/off.
+For commands which enable/disable a feature:
 
-*  For commands which move the braille window:
-   +  If the modifier +route is specified then, if necessary, the cursor is
-      automatically routed so that it's always visible on the braille display.
+*  If the modifier ``+on`` is specified then the feature is enabled.
+*  If the modifier ``+off`` is specified then the feature is disabled.
+*  If neither ``+on`` nor ``+off`` is specified then the state of the feature
+   is toggled on/off.
 
-*  For commands which move the braille window to a specific line on the screen:
-   +  If the modifier +toleft is specified then the braille window is also
-      moved to the beginning of that line.
-   +  If the modifier +scaled is specified then the set of keys bound to the 
-      command is interpreted as though it were a scroll bar. If it isn't, then 
-      there's a one-to-one correspondence between keys and lines.
+For commands which move the braille window:
 
-*  For commands which require an offset:
-   +  The modifier +<offset>, where <offset> is a non-negative integer, may be 
-      specified. If it isn't supplied then +0 is assumed.
+*  If the modifier ``+route`` is specified then, if necessary, the screen
+   cursor is automatically routed so that it's always visible on the braille
+   display.
 
-*  For commands which input any keyboard key (print or braille): 
-   +  The +shift modifier adds the shift key.
-   +  The +control modifier adds the control key.
-   +  The +meta modifier adds the meta (or left alt) key.
+For commands which move the braille window to a specific line on the screen:
 
-*  For commands which input characters (print or braille):
-   +  The modifier +upper converts a lowercase character to uppercase.
+*  If the modifier ``+toleft`` is specified then the braille window is also
+   moved to the beginning of that line.
+*  If the modifier ``+scaled`` is specified then the key group bound to the 
+   command is interpreted as though it were a scroll bar. If it isn't
+   specified then there's a one-to-one correspondence between keys and lines.
 
-*  For commands which input braille characters:
-   +  The modifiers +dot1 through +dot8 add those dots to the character.
-   +  The modifier +space adds the space bar (or chord key) to the character.
+For commands which require an offset:
 
-*  For commands which input keyboard scancodes:
-   +  The +release modifier means that it's a key release scancode. If it
-      isn't supplied then it's a key press scancode.
-   +  The +emul0 modifier means that it's an emulation mode 0 scancode.
-   +  The +emul1 modifier means that it's an emulation mode 1 scancode.
+*  The modifier ``+offset``, where ``offset`` is a non-negative integer, may be
+   specified. If it isn't specified then ``+0`` is assumed.
 
-Examples:
+For commands which input any keyboard key (print or braille): 
+
+*  The ``+shift`` modifier adds the shift key.
+*  The ``+control`` modifier adds the control key.
+*  The ``+meta`` modifier adds the left alt (or meta) key.
+
+For commands which input characters (print or braille):
+
+*  The modifier ``+upper`` converts a lowercase character to uppercase.
+
+For commands which input braille characters:
+
+*  The modifiers ``+dot1`` through ``+dot8`` add those dots to the character.
+*  The modifier ``+space`` adds the space bar (or "chord" key) to the
+   character.
+
+For commands which input keyboard scancodes:
+
+*  The ``+release`` modifier means that it's a key release scancode. If it
+   isn't specified then it's a key press scancode (unless, of course, the
+   scancode itself indicates something else).
+*  The ``+emul0`` modifier means that it's an emulation mode 0 scancode.
+*  The ``+emul1`` modifier means that it's an emulation mode 1 scancode.
+
+Examples::
 
    bind Key1 CSRTRK
    bind Key1+Key2 CSRTRK+off
@@ -159,41 +154,50 @@ Examples:
    bind VerticalSensor GOTOLINE+toleft+scaled
    bind Key6 CONTEXT+context1
 
-===============================================================================
-
 The Context Directive
 ---------------------
 
-Use the "context" directive to define alternate ways to interpret certain key
-events and/or combinations. A context contains definitions created by the
-"bind", "hotkey", "map", and "superimpose" directives.
+::
 
-   context <name> [<title>]
+   context *name* *title*
 
-The <name> operand specifies which context subsequent definitions are to be
-created within. These special contexts are predefined:
-*  default: The default context. If a key combination hasn't been defined 
-   within the current context then its definition within the default context
-   is used. This only applies to definitions created by the "bind" directive.
-*  menu: This context is used when within BRLTTY's preferences menu.
+Use this directive to define alternate ways to interpret certain key events
+and/or combinations. A context contains definitions created by any of:
 
-The <title> operand specifies a person-readable description of the context. It 
-may contain spaces, and standard capitalization conventions should be used. 
-This operand is optional. If supplied when selecting a context which already 
-has a title then the two must match. Special contexts already have 
-internally-assigned titles.
+*  `The Bind Directive`_
+*  `The Hotkey Directive`_
+*  `The Map Directive`_
+*  `The Superimpose Directive`_
+
+*name*
+   Which context subsequent definitions are to be created within.
+
+*title*
+   A person-readable description of the context. It may contain spaces, and
+   standard capitalization conventions should be used. This operand is
+   optional. If supplied when selecting a context which already has a title
+   then the two must match. Special contexts already have internally-assigned
+   titles.
 
 A context is created the first time it's selected. It may be reselected any
-number of times thereafter.
+number of times thereafter. These special contexts are predefined:
 
-All subsequent definitions until either the next "context" directive or the end 
-of the current include level are created within the selected context. The 
-initial context of the top-level key table is "default". The initial context of 
-an included key subtable is the context which was selected when it was 
+``default``
+   The default context. If a definition can't be found within the current
+   context then it's looked up within the default context. This only applies
+   to definitions created by `The Bind Directive`_.
+
+``menu``
+   This context is used when within BRLTTY's Preferences Menu.
+
+All subsequent definitions until either the next ``context`` directive or the
+end of the current include level are created within the selected context. The 
+initial context of the top-level key table is ``default``. The initial context
+of an included key subtable is the context which was selected when it was 
 included. Context changes within included key subtables don't affect the 
 context of the including key table or subtable.
 
-If a context has a title then it is persisten. When a key event causes a
+If a context has a title then it is persistent. When a key event causes a
 persistent context to be activated, that context remains current until a
 subsequent key event causes a different persistent context to be activated.
 
@@ -201,214 +205,256 @@ If a context doesn't have a title then it is temporary. When a key event causes
 a temporary context to be activated, that context is only used to interpret the 
 very next key event.
 
-Examples:
+Examples::
 
    context menu
    context braille Braille Input
    context DESCCHAR
 
-===============================================================================
-
 The Hide Directive
 ------------------
 
-Use the "hide" directive to determine whether or not certain definitions (see
-the "bind", "hotkey", "map", and "superimpose" directives) and notes (see the 
-"note" directive) are included within the key table's help text.
+::
 
-   hide <state>
+   hide *state*
 
-The <state> operand may be one of these keywords:
-*  "on" means that they're excluded.
-*  "off" means that they're included.
+Use this directive to specify whether or not definitions created by:
 
-The specified state applies to all subsequent definitions and notes until 
-either the next "hide" directive or the end of the current include level. The 
-initial state of the top-level key table is "off". The initial state of an 
-included key subtable is the state which was selected when it was included. 
-State changes within included key subtables don't affect the state of the 
-including key table or subtable.
+*  `The Bind Directive`_
+*  `The Hotkey Directive`_
+*  `The Map Directive`_
+*  `The Superimpose Directive`_
 
-Examples:
+and text added by:
+
+*  `The Note Directive`_
+
+are to be included within the key table's help text.
+
+*state*
+   One of these keywords:
+
+   ``on``
+      They're excluded.
+   ``off``
+      They're included.
+
+The specified hide state applies to all subsequent definitions and notes until 
+either the next ``hide`` directive or the end of the current include level. The
+initial hide state of the top-level key table is ``off``. The initial hide
+state of an included key subtable is the hide state that was in effect when it
+was included. Hide State changes within included key subtables don't affect the
+hide state of the including key table or subtable.
+
+Examples::
 
    hide on
-
-===============================================================================
 
 The Hotkey Directive
 --------------------
 
-Use the "hotkey" directive to bind the press and release events of a specific 
-key to two separate BRLTTY commands. The bindings are defined within the 
-current context.
+::
 
-   hotkey <key> <press> <release>
+   hotkey *key* *press* *release*
 
-The <key> operand specifies the name of the key which is to be bound.
+Use this directive to bind the press and release events of a specific key to
+two separate BRLTTY commands. The bindings are defined within the current
+context.
 
-The <press> operand specifies the name of the BRLTTY command which is to be 
-executed whenever the key is pressed.
+*key*
+   The name of the key which is to be bound.
 
-The <release> operand specifies the name of the BRLTTY command which is to be 
-executed whenever the key is released.
+*press*
+   The name of the BRLTTY command which is to be executed whenever the key is
+   pressed.
 
-Modifiers may be appended to the command names. See the <command> operand of 
-the "bind" directive for details.
+*release*
+   The name of the BRLTTY command which is to be executed whenever the key is
+   released.
 
-Specify "NOOP" if no command is to be executed. Specifying "NOOP" for both 
-commands effectively disables the key.
+Modifiers may be appended to the command names. See the *commands* operand of 
+`The Bind Directive`_ for details.
 
-Examples:
+Specify the ``NOOP`` command if no command is to be executed. Specifying the
+``NOOP`` command for both events effectively disables the key.
+
+Examples::
 
    hotkey Key1 CSRVIS+off CSRVIS+on
    hotkey Key2 NOOP NOOP
 
-===============================================================================
-
 The IfKey Directive
 -------------------
 
-Use the "ifkey" directive to conditionally process a key table directive only 
-if the device has a particular key.
+::
 
-   ifkey <key> <directive>
+   ifKey *key* *directive*
 
-The <key> operand specifies the name of the key whose availability is to be 
-tested.
+Use this directive to only process one or more directives if the device has a
+particular key.
 
-The <directive> operand specifies the key table directive which is to be 
-conditionally processed.
+*key*
+   The name of the key whose availability is to be tested.
 
-Examples:
+*directive*
+   The directive which is to be conditionally processed. It may contain spaces.
+   This operand is optional. If it isn't supplied then this directive applies
+   to all subsequent lines until `The EndIf Directive`_ or
+   `The Else Directive`_ that is at the same conditional nesting level.
 
-   ifkey Key1 ifkey Key2 bind Key1+Key2 HOME
+Examples::
 
-===============================================================================
+   ifKey Key1 ifkey Key2 bind Key1+Key2 HOME
 
-The Include Directive
----------------------
+The IfNotKey Directive
+----------------------
 
-Use the "include" directive to process the directives within a key subtable. 
-It's recursive, which means that any key subtable can itself include yet 
-another key subtable. Care must be taken to ensure that an "include loop" is 
-not created.
+::
 
-   include <file>
+   ifNotKey *key* *directive*
 
-The <file> operand specifies the key subtable which is to be included. It may 
-be either a relative or an absolute path. If relative, it's anchored at the 
-directory containing the including key table or subtable.
+Use this directive to only process one or more directives if the device doesn't
+have a particular key.
 
-Examples:
+*key*
+   The name of the key whose availability is to be tested.
 
-   include common.kti
-   include /path/to/my/keys.kti
+*directive*
+   The directive which is to be conditionally processed. It may contain spaces.
+   This operand is optional. If it isn't supplied then this directive applies
+   to all subsequent lines until `The EndIf Directive`_ or
+   `The Else Directive`_ that is at the same conditional nesting level.
 
-===============================================================================
+Examples::
+
+   ifNotKey Key2 bind Key1 HOME
 
 The Map Directive
 -----------------
 
-Use the "map" directive to map a key to a braille keyboard function. The 
-mapping is defined within the current context.
+::
 
-   map <key> <function>
+   map *key* *function*
 
-the <key> operand specifies the name of the key which is to be mapped. More 
-than one key may be mapped to the same braille keyboard function.
+Use this directive to map a key to a braille keyboard function. The mapping is
+defined within the current context.
 
-The <function> operand specifies the name of the braille keyboard function. It 
-may be one of the following keywords:
-*  DOT1: The upper-left standard braille dot.
-*  DOT2: The middle-left standard braille dot.
-*  DOT3: The lower-left standard braille dot.
-*  DOT4: The upper-right standard braille dot.
-*  DOT5: The middle-right standard braille dot.
-*  DOT6: The lower-right standard braille dot.
-*  DOT7: The lower-left computer braille dot.
-*  DOT8: The lower-right computer braille dot.
-*  SPACE: The space bar.
-*  SHIFT: The shift key.
-*  UPPERCASE: If a lowercase letter is being entered then translate it to its
-   uppercase equivalent.
-*  CONTROL: The control key.
-*  META: The left alt key.
+*key*
+   The name of the key that is to be mapped. More than one key may be mapped to
+   the same braille keyboard function.
+
+*function*
+   The name of the braille keyboard function. It may be one of the following
+   keywords:
+
+   ``DOT1``
+      The upper-left standard braille dot key.
+   ``DOT2``
+      The middle-left standard braille dot key.
+   ``DOT3``
+      The lower-left standard braille dot key.
+   ``DOT4``
+      The upper-right standard braille dot key.
+   ``DOT5``
+      The middle-right standard braille dot key.
+   ``DOT6``
+      The lower-right standard braille dot key.
+   ``DOT7``
+      The lower-left computer braille dot key.
+   ``DOT8``
+      The lower-right computer braille dot key.
+   ``SPACE``
+      The space bar.
+   ``SHIFT``
+      The shift key.
+   ``UPPERCASE``
+      If a lowercase letter is being entered then translate it to its
+      uppercase equivalent.
+   ``CONTROL``
+      The control key.
+   ``META``
+      The left alt (or meta) key.
 
 If a key combination consists only of keys which have been mapped to braille 
-keyboard functions, and if those functions when combined form a valid braille 
+keyboard functions, and if those functions, when combined, form a valid braille 
 keyboard command, then that command is executed as soon as any of the keys is 
 released. A valid braille keyboard command must include either any combination 
 of dot keys or the space bar (but not both). If at least one dot key is 
-included then the braille keyboard functions specified by the "superimpose" 
-directives within the same context are also implicitly included.
+included then the braille keyboard functions specified by
+`The Superimpose Directive`_ within the same context are also implicitly
+included.
 
-Examples:
+Examples::
 
    map Key1 DOT1
-
-===============================================================================
 
 The Note Directive
 ------------------
 
-Use the "note" directive to add a person-readable explanation to the key 
-table's help text. Notes are commonly used, for example, to describe the 
-placement, sizes, and shapes of the keys on the device.
+::
 
-   note <text>
+   note *text*
 
-The <text> operand specifies the explanation which is to be added. It may
-contain spaces, and should be grammatically correct.
+Use this directive to add a person-readable explanation to the key table's help
+text. Notes are commonly used, for example, to describe the placement, sizes,
+and shapes of the keys on the device.
+
+*text*
+   The explanation that is to be added. It may contain spaces, and should be
+   grammatically correct.
 
 Each note specifies exactly one line of explanatory text. Leading space is 
 ignored so indentation cannot be specified.
 
-There's no limit to the number of notes which may be specified. All of them are 
+There's no limit to the number of notes that may be added. All of them are 
 gathered together and presented in a single block at the start of the key 
 table's help text.
 
-Examples:
+Examples::
 
    note Key1 is the round key at the far left on the front surface.
-
-===============================================================================
 
 The Superimpose Directive
 -------------------------
 
-Use the "superimpose" directive to implicitly include a braille keyboard
-function whenever a braille keyboard command consisting of at least one dot is
-executed. The implicit inclusion is defined within the current context. Any
-number of them may be specified.
+::
 
-   superimpose <function>
+   superimpose *function*
 
-The <function> operand specifies the name of the braille keyboard function. See 
-the <function> operand of the "map" directive for details.
+Use this directive to implicitly include a braille keyboard function whenever a
+braille keyboard command consisting of at least one dot is executed. Only
+implicit inclusions defined within the current context are performed. Any
+number of these directives may be specified.
 
-Examples:
+*function*
+   The name of the braille keyboard function that is to be implicitly included.
+   See the *function>* operand of `The Map Directive`_ for details.
+
+Examples::
 
    superimpose DOT7
-
-===============================================================================
 
 The Title Directive
 -------------------
 
-Use the "title" directive to provide a person-readable summary of the key 
-table's purpose.
+::
 
    title <text>
 
-The <text> operand specifies a one-line summary of what the key table is used
-for. It may contain spaces, and standard capitalization conventions should be
-used.
+Use this directive to specify a person-readable, one-line summary of the key
+table's purpose.
+
+*text*
+   A brief summary of what the key table is used for. It may contain spaces,
+   and standard capitalization conventions should be used.
 
 The title of the key table may be specified only once.
 
-Examples:
+Examples::
 
    title Bindings for Keypad-based Navigation
 
-===============================================================================
+.. include:: nesting-directives.rst
+.. include:: variable-directives.rst
+.. include:: condition-directives.rst
 

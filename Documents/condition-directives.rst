@@ -1,6 +1,6 @@
 The EndIf Directive
 -------------------
 
-The Else Direcvive
+The Else Directive
 ------------------
 
