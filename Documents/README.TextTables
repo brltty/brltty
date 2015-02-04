@@ -1,63 +1,49 @@
+~~~~~~~~~~~
 Text Tables
------------
+~~~~~~~~~~~
 
-Files with names of the form *.ttb are text tables, and with names of the form 
-*.tti are text subtables. They are used by BRLTTY to translate the characters 
-on the screen into their corresponding 8-dot computer braille representations.
+.. include:: includes.rst
+.. contents::
+
+Files with names of the form ``*.ttb`` are text tables, and with names of the
+form ``*.tti`` are text subtables. They are used by BRLTTY to translate the
+characters on the screen into their corresponding 8-dot computer braille
+representations (see |README.BrailleDots|).
 
 A text table consists of a sequence of directives, one per line, which define 
 how each character is to be represented in braille. UTF-8 character encoding 
 must be used. White-space (blanks, tabs) at the beginning of a line, as well as 
 before and/or after any operand of any directive, is ignored. Lines containing 
 only white-space are ignored. If the first non-white-space character of a line 
-is "#" then that line is a comment and is ignored.
+is ``#`` then that line is a comment and is ignored.
 
-===============================================================================
+Directives
+==========
 
 The Char Directive
 ------------------
 
-   char <character> <dots> # <comment>
+::
 
-Use the "char" directive to specify how a Unicode character is to be 
-represented in braille. Characters defined with this directive can also be
-entered from a braille keyboard. If several characters have the same braille
-representation then only one of them should be defined with the "char"
-directive - the others should be defined with teh "glyph" directive (which has
-the same syntax). If more than one character with the same braille
-representation is defined with the "char" directive (which is currently allowed
-for backward compatibility) then the first one is selected.
+   char *character* *dots* # *comment*
 
-The <character> operand specifies the Unicode character being defined. It may
-be:
-*  Any single character other than a backslash or a white-space character.
-*  A backslash-prefixed special character. These are:
-   -  \b          The backspace character.
-   -  \f          The formfeed character.
-   -  \n          The newline character.
-   -  \o###       The three-digit octal representation of a character.
-   -  \r          The carriage return character.
-   -  \s          The space character.
-   -  \t          The horizontal tab character.
-   -  \u####      The four-digit hexadecimal representation of a character.
-   -  \U########  The eight-digit hexadecimal representation of a character.
-   -  \v          The vertical tab character.
-   -  \x##        The two-digit hexadecimal representation of a character.
-   -  \X##        ... (the case of the X and of the digits isn't significant)
-   -  \#          A literal number sign.
-   -  \<name>     The Unicode name of a character (use _ for space).
-   -  \\          A literal backslash.
+Use this directive to specify how a Unicode character is to be represented in
+braille. Characters defined via this directive can also be entered from a
+braille keyboard. If several characters have the same braille representation
+then only one of them should be defined via this directive - the others should
+be defined via `The Glyph Directive`_ (which has the same syntax). If more than
+one character with the same braille representation is defined via this
+directive (which is allowed for backward compatibility) then the first one is
+used when entered from a braille keyboard.
 
-The <dots> operand specifies the braille representation of the Unicode 
-character. It is a sequence of one to eight dot numbers. If the dot number 
-sequence is enclosed within parentheses then the dot numbers may be separated 
-from one another by white-space. A dot number is a digit within the range 1-8 
-as defined by the standard braille dot numbering convention (see
-README.BrailleDots). The special dot number 0 is recognized when not enclosed
-within parentheses, and means no dots; it may not be used in conjunction with
-any other dot number.
+*character*
+   The character being defined (see `The Character Operand`_ for details).
 
-Examples:
+*dots*
+   The braille representation for the character being defined (see
+   `The Dots Operand`_ for details).
+
+Examples::
 
    char a 1
    char b (12)
@@ -67,55 +53,84 @@ Examples:
    char \x20 ()
    char \<LATIN_SMALL_LETTER_D> 145
 
-===============================================================================
-
 The Glyph Directive
 -------------------
 
-   glyph <character> <dots> # <comment>
+::
 
-Use the "glyph" directive to specify how a Unicode character is to be 
-represented in braille. Characters defined with this directive are output-only. 
-They cannot be entered from a braille keyboard.
+   glyph *character* *dots* # *comment*
 
-See the "char" directive for syntax details and for examples.
+Use this directive to specify how a Unicode character is to be represented in
+braille.  Characters defined via this directive are output-only - they cannot
+be entered from a braille keyboard.
 
-===============================================================================
+See the `The Char Directive`_ for syntax, examples, etc.
 
 The Byte Directive
 ------------------
 
-   byte <byte> <dots> # <comment>
+::
 
-Use the "byte" directive to specify how a character in the local character set 
-is to be represented in braille. It has been retained for backward 
-compatibility but should not be used. Unicode characters should be defined (via 
-the "char" directive) so that the text table remains valid regardless of what 
-the local character set is.
+   byte *byte* *dots* # *comment*
 
-The <byte> operand specifies the local character being defined. It may be 
-specified in the same ways as the <character> operand of the "char" directive 
-except that the Unicode-specific forms (\u, \U, \<) may not be used.
+Use this directive to specify how a character in the local character set is to
+be represented in braille. It has been retained for backward compatibility but
+should not be used. Unicode characters should be defined (via either
+`The Char Directive`_ or `The Glyph Directive`_) so that the text table remains
+valid regardless of what the local character set is.
 
-The <dots> operand specifies the braille representation of the local character. 
-It may be specified in the same ways as the <dots> operand of the "char" 
-directive.
+*byte*
+   The character being defined. It may be specified in any of the ways
+   supported by `The Character Operand`_ except that the Unicode-specific forms
+   (``\u``, ``\U``, ``\<``) may not be used.
 
-===============================================================================
+*dots*
+   The braille representation for the character being defined (see
+   `The Dots Operand`_ for details).
 
-The Include Directive
+.. include:: nesting-directives.rst
+
+Operands
+========
+
+The Character Operand
 ---------------------
 
-   include <file> # <comment>
+A *character* operand may be specified as:
 
-Use the "include" directive to include the content of a text subtable. It is 
-recursive, which means that any text subtable can itself include yet another 
-text subtable. Care must be taken to ensure that an "include loop" is not
-created.
+*  Any single character other than a backslash (\\\\) or a white-space
+   character.
 
-The <file> operand specifies the file to be included. It may be either a 
-relative or an absolute path. If relative, it is anchored at the directory 
-containing the including file.
+*  A backslash-prefixed special character. These are:
 
-===============================================================================
+   ==============  ==========================================================
+   Sequence        Meaning
+   --------------  ----------------------------------------------------------
+   ``\b``          The backspace character.
+   ``\f``          The formfeed character.
+   ``\n``          The newline character.
+   ``\o###``       The three-digit octal representation of a character.
+   ``\r``          The carriage return character.
+   ``\s``          The space character.
+   ``\t``          The horizontal tab character.
+   ``\u####``      The four-digit hexadecimal representation of a character.
+   ``\U########``  The eight-digit hexadecimal representation of a character.
+   ``\v``          The vertical tab character.
+   ``\x##``        The two-digit hexadecimal representation of a character.
+   ``\X##``        (the case of the X and of the digits isn't significant)
+   ``\<name>``     The Unicode name of a character (use _ for space).
+   ``\\``          A literal backslash.
+   ``\#``          A literal number sign.
+   ==============  ==========================================================
+
+The Dots Operand
+----------------
+
+A *dots* operand is a sequence of one to eight dot numbers. If the dot numbers
+are enclosed within (parentheses) then they may be separated from one another
+by white-space. A dot number is a digit within the range ``1``-``8``
+as defined by the standard braille dot numbering convention (see
+|README.BrailleDots| for details). The special dot number ``0`` is recognized
+when not enclosed within (parentheses), and means no dots - it may not be used
+in conjunction with any other dot number.
 
