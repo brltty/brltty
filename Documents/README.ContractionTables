@@ -38,8 +38,286 @@ Statements that match character sequences are automatically rearranged such
 that longer sequences are matched first. If more than one statement matches the
 same character sequence then their original table ordering is maintained.
 
+The Literal Directive
+---------------------
+
+::
+
+   literal *characters*
+
+Translate the entire white-space-bounded containing character sequence into
+computer braille.
+
+The Always Directive
+--------------------
+
+::
+
+   always *characters* *representation*
+
+Unconditionally translate the characters no matter where they appear. If
+there's only one character, then, in addition, define the default
+representation for that character.
+
+The Repeatable Directive
+------------------------
+
+::
+
+   repeatable *characters* *representation*
+
+Unconditionally translate the characters no matter where they appear. Ignore
+any consecutive repetitions of the same sequence.
+
+The LargeSign Directive
+-----------------------
+
+::
+
+   largeSign *characters* *representation*
+
+Unconditionally translate the characters no matter where they appear. Remove
+white-space between consecutive words matched by this directive.
+
+The LastLargeSign Directive
+---------------------------
+
+::
+
+   lastLargeSign *characters* *representation*
+
+Unconditionally translate the characters no matter where they appear. Remove
+preceding white-space if the previous word was matched by
+`The LargeSign Directive`_.
+
+The Word Directive
+------------------
+
+::
+
+   word *characters* *representation*
+
+Translate the characters if they're a word.
+
+The JoinWord Directive
+----------------------
+
+::
+
+   joinWord *characters* *representation*
+
+Translate the characters if they're a word. Remove the following white-space if
+the first character after it is a letter.
+
+The LowWord Directive
+---------------------
+
+::
+
+   lowWord *characters* *representation*
+
+Translate the characters if they're a white-space-bounded word.
+
+The Contraction Directive
+-------------------------
+
+::
+
+   contraction *characters*
+
+Prefix the characters with a letter sign (see
+`The LetSign Directive`_) if they're a word.
+
+The SufWord Directive
+---------------------
+
+::
+
+   sufWord *characters* *representation*
+
+Translate the characters if they're either a word or at the beginning of a
+word.
+
+The PrfWord Directive
+---------------------
+
+::
+
+   prfWord *characters* *representation*
+
+Translate the characters if they're either a word or at the end of a word.
+
+The BegWord Directive
+---------------------
+
+::
+
+   begWord *characters* *representation*
+
+Translate the characters if they're at the beginning of a word.
+
+The BegMidWord Directive
+------------------------
+
+::
+
+   begMidWord *characters* *representation*
+
+Translate the characters if they're either at the beginning or in the middle of
+a word.
+
+The MidWord Directive
+---------------------
+
+::
+
+   midWord *characters* *representation*
+
+Translate the characters if they're in the middle of a word.
+
+The MidEndWord Directive
+------------------------
+
+::
+
+   midEndWord *characters* *representation*
+
+Translate the characters if they're either in the middle or at the end of a
+word.
+
+The EndWord Directive
+---------------------
+
+::
+
+   endWord *characters* *representation*
+
+Translate the characters if they're at the end of a word.
+
+The PrePunc Directive
+---------------------
+
+::
+
+   prePunc *characters* *representation*
+
+Translate the characters if they're part of punctuation at the beginning of a
+word.
+
+The PostPunc Directive
+----------------------
+
+::
+
+   postPunc *characters* *representation*
+
+Translate the characters if they're part of punctuation at the end of a word.
+
+The BegNum Directive
+--------------------
+
+::
+
+   begNum *characters* *representation*
+
+Translate the characters if they're at the beginning of a number.
+
+The MidNum Directive
+--------------------
+
+::
+
+   midNum *characters* *representation*
+
+Translate the characters if they're in the middle of a number.
+
+The EndNum Directive
+--------------------
+
+::
+
+   endNum *characters* *representation*
+
+Translate the characters if they're at the end of a number.
+
 The Class Directive
 -------------------
+
+::
+
+   class *name* *characters*
+
+Define a new character class. A character class may not be used until it has
+been defined.
+
+The After Directive
+-------------------
+
+::
+
+   after *class* *directive*
+
+The specified directive is further constrained in that the matched character
+sequence must be immediately preceded by a character belonging to the specified
+class. If this directive is used more than once on the same line then the union
+of the characters in all the classes is used.
+
+The Before Directive
+--------------------
+
+::
+
+   before *class* *directive*
+
+The specified directive is further constrained in that the matched character
+sequence must be immediately followed by a character belonging to the specified
+class. If this directive is used more than once on the same line then the union
+of the characters in all the classes is used.
+
+The CapSign Directive
+---------------------
+
+::
+
+   capSign *representation*
+
+Define the symbol which capitalizes a single letter.
+
+The BegCaps Directive
+---------------------
+
+::
+
+   begCaps *representation*
+
+Define the symbol which begins a block of capital letters within a word.
+
+The EndCaps Directive
+---------------------
+
+::
+
+   endCaps *representation*
+
+Define the symbol which ends a block of capital letters within a word.
+
+The LetSign Directive
+---------------------
+
+::
+
+   letSign *representation*
+
+Define the symbol which marks a letter which isn't part of a word.
+
+The NumSign Directive
+---------------------
+
+::
+
+   numSign *representation*
+
+Define the symbol which marks the beginning of a number.
 
 .. include:: nesting-directives.rst
 
