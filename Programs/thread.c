@@ -280,8 +280,8 @@ setThreadName (const char *name) {
 #endif /* HAVE_THREAD_NAMES */
 
 #if defined(PTHREAD_MUTEX_INITIALIZER)
-ASYNC_WITH_SIGNALS_BLOCKED_FUNCTION(createThreadSpecificDataKey) {
-  ThreadSpecificDataControl *ctl = data;
+static void
+createThreadSpecificDataKey (ThreadSpecificDataControl *ctl) {
   int error;
 
   pthread_mutex_lock(&ctl->mutex);
@@ -297,11 +297,23 @@ ASYNC_WITH_SIGNALS_BLOCKED_FUNCTION(createThreadSpecificDataKey) {
   pthread_mutex_unlock(&ctl->mutex);
 }
 
+#ifdef ASYNC_CAN_BLOCK_SIGNALS
+ASYNC_WITH_SIGNALS_BLOCKED_FUNCTION(createThreadSpecificDataKeyWithSignalsBlocked) {
+  ThreadSpecificDataControl *ctl = data;
+
+  createThreadSpecificDataKey(ctl);
+}
+#endif /* ASYNC_CAN_BLOCK_SIGNALS */
+
 void *
 getThreadSpecificData (ThreadSpecificDataControl *ctl) {
   int error;
 
-  asyncWithAllSignalsBlocked(createThreadSpecificDataKey, ctl);
+#ifdef ASYNC_CAN_BLOCK_SIGNALS
+  asyncWithAllSignalsBlocked(createThreadSpecificDataKeyWithSignalsBlocked, ctl);
+#else /* ASYNC_CAN_BLOCK_SIGNALS */
+  createThreadSpecificDataKey(ctl);
+#endif /* ASYNC_CAN_BLOCK_SIGNALS */
 
   if (ctl->key.created) {
     void *tsd = pthread_getspecific(ctl->key.value);
