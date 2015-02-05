@@ -835,8 +835,8 @@ static int
 processConfigurationLine (DataFile *file, void *data) {
   BEGIN_DATA_DIRECTIVE_TABLE
     DATA_NESTING_DIRECTIVES,
-    DATA_CONDITION_DIRECTIVES,
     DATA_VARIABLE_DIRECTIVES,
+    DATA_CONDITION_DIRECTIVES,
     {.name=WS_C("ifset"), .processor=processIfSetOperands},
     {.name=WS_C("ifnotset"), .processor=processIfNotSetOperands},
     {.name=NULL, .processor=processConfigurationOperands},

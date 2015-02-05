@@ -196,13 +196,13 @@ static DATA_OPERANDS_PROCESSOR(processGlyphOperands) {
 static int
 processTextTableLine (DataFile *file, void *data) {
   BEGIN_DATA_DIRECTIVE_TABLE
+    DATA_NESTING_DIRECTIVES,
+    DATA_VARIABLE_DIRECTIVES,
+    DATA_CONDITION_DIRECTIVES,
     {.name=WS_C("alias"), .processor=processAliasOperands},
     {.name=WS_C("byte"), .processor=processByteOperands},
     {.name=WS_C("char"), .processor=processCharOperands},
     {.name=WS_C("glyph"), .processor=processGlyphOperands},
-    DATA_NESTING_DIRECTIVES,
-    DATA_CONDITION_DIRECTIVES,
-    DATA_VARIABLE_DIRECTIVES,
   END_DATA_DIRECTIVE_TABLE
 
   return processDirectiveOperand(file, &directives, "text table directive", data);

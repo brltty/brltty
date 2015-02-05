@@ -1142,6 +1142,8 @@ static DATA_OPERANDS_PROCESSOR(processTitleOperands) {
 static int
 processKeyTableLine (DataFile *file, void *data) {
   BEGIN_DATA_DIRECTIVE_TABLE
+    DATA_VARIABLE_DIRECTIVES,
+    DATA_CONDITION_DIRECTIVES,
     {.name=WS_C("bind"), .processor=processBindOperands},
     {.name=WS_C("context"), .processor=processContextOperands},
     {.name=WS_C("hide"), .processor=processHideOperands},
@@ -1153,8 +1155,6 @@ processKeyTableLine (DataFile *file, void *data) {
     {.name=WS_C("note"), .processor=processNoteOperands},
     {.name=WS_C("superimpose"), .processor=processSuperimposeOperands},
     {.name=WS_C("title"), .processor=processTitleOperands},
-    DATA_CONDITION_DIRECTIVES,
-    DATA_VARIABLE_DIRECTIVES,
   END_DATA_DIRECTIVE_TABLE
 
   return processDirectiveOperand(file, &directives, "key table directive", data);

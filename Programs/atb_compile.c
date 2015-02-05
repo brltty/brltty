@@ -155,8 +155,8 @@ static DATA_OPERANDS_PROCESSOR(processDotOperands) {
 static int
 processAttributesTableLine (DataFile *file, void *data) {
   BEGIN_DATA_DIRECTIVE_TABLE
-    {.name=WS_C("dot"), .processor=processDotOperands},
     DATA_NESTING_DIRECTIVES,
+    {.name=WS_C("dot"), .processor=processDotOperands},
   END_DATA_DIRECTIVE_TABLE
 
   return processDirectiveOperand(file, &directives, "attributes table directive", data);
