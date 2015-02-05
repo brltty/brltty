@@ -156,7 +156,7 @@ listKeyTable() {
    "${command[@]}" -l "${input}" >"${output}.${plainTextExtension}"
    "${command[@]}" -r "${input}" >"${output}.${reStructuredTextExtension}"
 
-   sed -e "2a\\${newLine}* \`Plain Text Version <${name}.${plainTextExtension}>\`_" -i "${output}.${reStructuredTextExtension}"
+   sed -e "2a\\${newLine}* \`Help Screen Version <${name}.${plainTextExtension}>\`_" -i "${output}.${reStructuredTextExtension}"
 
    rst2html --config "${sourceRoot}/docutils.conf" "${output}.${reStructuredTextExtension}" "${output}.${hypertextExtension}"
    "${keepFiles}" || rm "${output}.${reStructuredTextExtension}"
