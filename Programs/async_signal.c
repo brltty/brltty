@@ -50,6 +50,7 @@ asyncDeallocateSignalData (AsyncSignalData *sd) {
   }
 }
 
+#if defined(ASYNC_CAN_BLOCK_SIGNALS) || defined(ASYNC_CAN_MONITOR_SIGNALS) || defined(ASYNC_CAN_OBTAIN_SIGNALS)
 static AsyncSignalData *
 getSignalData (void) {
   AsyncThreadSpecificData *tsd = asyncGetThreadSpecificData();
@@ -92,6 +93,7 @@ getSignalData (void) {
 
   return tsd->signalData;
 }
+#endif /* need signal data */
 
 int
 asyncHandleSignal (int signalNumber, AsyncSignalHandler *newHandler, AsyncSignalHandler **oldHandler) {
