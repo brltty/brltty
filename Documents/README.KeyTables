@@ -86,6 +86,8 @@ context.
    secondary command is autorepeated if it has been defined, else the primary
    command is autorepeated.
 
+.. _Bind Command Modifiers:
+
 One or more modifiers may be optionally appended to a command name by using a 
 plus (+) sign as the separator. For example:
 
@@ -265,8 +267,8 @@ context.
    The name of the BRLTTY command which is to be executed whenever the key is
    released.
 
-Modifiers may be appended to the command names. See the *commands* operand of 
-`The Bind Directive`_ for details.
+Modifiers may be appended to the command names. See
+`Bind Command Modifiers`_ for details.
 
 Specify the ``NOOP`` command if no command is to be executed. Specifying the
 ``NOOP`` command for both events effectively disables the key.
@@ -329,6 +331,8 @@ defined within the current context.
 *key*
    The name of the key that is to be mapped. More than one key may be mapped to
    the same braille keyboard function.
+
+.. _The Map Function Operand:
 
 *function*
    The name of the braille keyboard function. It may be one of the following
@@ -438,7 +442,7 @@ number of these directives may be specified.
 
 *function*
    The name of the braille keyboard function that is to be implicitly included.
-   See the *function>* operand of `The Map Directive`_ for details.
+   See `The Map Function Operand`_ for details.
 
 Examples::
 
