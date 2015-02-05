@@ -8,14 +8,16 @@ Files with names of the form ``*.ktb`` are key tables, and with names of the
 form ``*.kti`` are key subtables. They are used to bind braille device and
 computer keyboard key combinations to BRLTTY commands.
 
-Braille device key tables can usually be found in the ``/etc/brltty/Input/xx/``
-directory, where ``xx`` is the two-letter braille driver identification code.
-The name of a braille device key table identifies the model(s) for which it is
-used.
+*  Braille device key tables can usually be found in the
+   ``/etc/brltty/Input/xx/`` directory, where ``xx`` is the two-letter braille
+   driver identification code. The name of a braille device key table
+   identifies the model(s) for which it is used.
 
-Computer keyboard key tables can usually be found in the
-``/etc/brltty/Keyboard/`` directory. The name of a keyboard key table describes
-the kind of keyboard for which it has been designed.
+*  Computer keyboard key tables can usually be found in the
+   ``/etc/brltty/Keyboard/`` directory. The name of a keyboard key table
+   describes the kind of keyboard for which it has been designed.
+
+*  See |README.Customize| for more details.
 
 A key table consists of a sequence of directives, one per line, which define 
 how keys and key combinations are to be interpreted. UTF-8 character encoding 
