@@ -24,9 +24,7 @@ Directives
 
 The format of a contraction table statement is:
 
-::
-
-   *directive* *operand* ... *comment*
+.. parsed-literal:: *directive* *operand* ... *comment*
 
 Each directive has a specific number of operands. Any text beyond the last 
 operand of a directive is interpreted as a comment. The order of the directives 
@@ -41,9 +39,7 @@ same character sequence then their original table ordering is maintained.
 The Literal Directive
 ---------------------
 
-::
-
-   literal *characters*
+.. parsed-literal:: literal *characters*
 
 Translate the entire white-space-bounded containing character sequence into
 computer braille.
@@ -51,9 +47,7 @@ computer braille.
 The Always Directive
 --------------------
 
-::
-
-   always *characters* *representation*
+.. parsed-literal:: always *characters* *representation*
 
 Unconditionally translate the characters no matter where they appear. If
 there's only one character, then, in addition, define the default
@@ -62,9 +56,7 @@ representation for that character.
 The Repeatable Directive
 ------------------------
 
-::
-
-   repeatable *characters* *representation*
+.. parsed-literal:: repeatable *characters* *representation*
 
 Unconditionally translate the characters no matter where they appear. Ignore
 any consecutive repetitions of the same sequence.
@@ -72,9 +64,7 @@ any consecutive repetitions of the same sequence.
 The LargeSign Directive
 -----------------------
 
-::
-
-   largeSign *characters* *representation*
+.. parsed-literal:: largeSign *characters* *representation*
 
 Unconditionally translate the characters no matter where they appear. Remove
 white-space between consecutive words matched by this directive.
@@ -82,9 +72,7 @@ white-space between consecutive words matched by this directive.
 The LastLargeSign Directive
 ---------------------------
 
-::
-
-   lastLargeSign *characters* *representation*
+.. parsed-literal:: lastLargeSign *characters* *representation*
 
 Unconditionally translate the characters no matter where they appear. Remove
 preceding white-space if the previous word was matched by
@@ -93,18 +81,14 @@ preceding white-space if the previous word was matched by
 The Word Directive
 ------------------
 
-::
-
-   word *characters* *representation*
+.. parsed-literal:: word *characters* *representation*
 
 Translate the characters if they're a word.
 
 The JoinWord Directive
 ----------------------
 
-::
-
-   joinWord *characters* *representation*
+.. parsed-literal:: joinWord *characters* *representation*
 
 Translate the characters if they're a word. Remove the following white-space if
 the first character after it is a letter.
@@ -112,18 +96,14 @@ the first character after it is a letter.
 The LowWord Directive
 ---------------------
 
-::
-
-   lowWord *characters* *representation*
+.. parsed-literal:: lowWord *characters* *representation*
 
 Translate the characters if they're a white-space-bounded word.
 
 The Contraction Directive
 -------------------------
 
-::
-
-   contraction *characters*
+.. parsed-literal:: contraction *characters*
 
 Prefix the characters with a letter sign (see
 `The LetSign Directive`_) if they're a word.
@@ -131,9 +111,7 @@ Prefix the characters with a letter sign (see
 The SufWord Directive
 ---------------------
 
-::
-
-   sufWord *characters* *representation*
+.. parsed-literal:: sufWord *characters* *representation*
 
 Translate the characters if they're either a word or at the beginning of a
 word.
@@ -141,27 +119,21 @@ word.
 The PrfWord Directive
 ---------------------
 
-::
-
-   prfWord *characters* *representation*
+.. parsed-literal:: prfWord *characters* *representation*
 
 Translate the characters if they're either a word or at the end of a word.
 
 The BegWord Directive
 ---------------------
 
-::
-
-   begWord *characters* *representation*
+.. parsed-literal:: begWord *characters* *representation*
 
 Translate the characters if they're at the beginning of a word.
 
 The BegMidWord Directive
 ------------------------
 
-::
-
-   begMidWord *characters* *representation*
+.. parsed-literal:: begMidWord *characters* *representation*
 
 Translate the characters if they're either at the beginning or in the middle of
 a word.
@@ -169,18 +141,14 @@ a word.
 The MidWord Directive
 ---------------------
 
-::
-
-   midWord *characters* *representation*
+.. parsed-literal:: midWord *characters* *representation*
 
 Translate the characters if they're in the middle of a word.
 
 The MidEndWord Directive
 ------------------------
 
-::
-
-   midEndWord *characters* *representation*
+.. parsed-literal:: midEndWord *characters* *representation*
 
 Translate the characters if they're either in the middle or at the end of a
 word.
@@ -188,18 +156,14 @@ word.
 The EndWord Directive
 ---------------------
 
-::
-
-   endWord *characters* *representation*
+.. parsed-literal:: endWord *characters* *representation*
 
 Translate the characters if they're at the end of a word.
 
 The PrePunc Directive
 ---------------------
 
-::
-
-   prePunc *characters* *representation*
+.. parsed-literal:: prePunc *characters* *representation*
 
 Translate the characters if they're part of punctuation at the beginning of a
 word.
@@ -207,45 +171,35 @@ word.
 The PostPunc Directive
 ----------------------
 
-::
-
-   postPunc *characters* *representation*
+.. parsed-literal:: postPunc *characters* *representation*
 
 Translate the characters if they're part of punctuation at the end of a word.
 
 The BegNum Directive
 --------------------
 
-::
-
-   begNum *characters* *representation*
+.. parsed-literal:: begNum *characters* *representation*
 
 Translate the characters if they're at the beginning of a number.
 
 The MidNum Directive
 --------------------
 
-::
-
-   midNum *characters* *representation*
+.. parsed-literal:: midNum *characters* *representation*
 
 Translate the characters if they're in the middle of a number.
 
 The EndNum Directive
 --------------------
 
-::
-
-   endNum *characters* *representation*
+.. parsed-literal:: endNum *characters* *representation*
 
 Translate the characters if they're at the end of a number.
 
 The Class Directive
 -------------------
 
-::
-
-   class *name* *characters*
+.. parsed-literal:: class *name* *characters*
 
 Define a new character class. A character class may not be used until it has
 been defined.
@@ -253,9 +207,7 @@ been defined.
 The After Directive
 -------------------
 
-::
-
-   after *class* *directive*
+.. parsed-literal:: after *class* *directive*
 
 The specified directive is further constrained in that the matched character
 sequence must be immediately preceded by a character belonging to the specified
@@ -265,9 +217,7 @@ of the characters in all the classes is used.
 The Before Directive
 --------------------
 
-::
-
-   before *class* *directive*
+.. parsed-literal:: before *class* *directive*
 
 The specified directive is further constrained in that the matched character
 sequence must be immediately followed by a character belonging to the specified
@@ -277,45 +227,35 @@ of the characters in all the classes is used.
 The CapSign Directive
 ---------------------
 
-::
-
-   capSign *representation*
+.. parsed-literal:: capSign *representation*
 
 Define the symbol which capitalizes a single letter.
 
 The BegCaps Directive
 ---------------------
 
-::
-
-   begCaps *representation*
+.. parsed-literal:: begCaps *representation*
 
 Define the symbol which begins a block of capital letters within a word.
 
 The EndCaps Directive
 ---------------------
 
-::
-
-   endCaps *representation*
+.. parsed-literal:: endCaps *representation*
 
 Define the symbol which ends a block of capital letters within a word.
 
 The LetSign Directive
 ---------------------
 
-::
-
-   letSign *representation*
+.. parsed-literal:: letSign *representation*
 
 Define the symbol which marks a letter which isn't part of a word.
 
 The NumSign Directive
 ---------------------
 
-::
-
-   numSign *representation*
+.. parsed-literal:: numSign *representation*
 
 Define the symbol which marks the beginning of a number.
 

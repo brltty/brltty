@@ -26,9 +26,7 @@ Directives
 The Dot Directive
 -----------------
 
-::
-
-   dot *dot* *state* # *comment*
+.. parsed-literal:: dot *dot* *state* # *comment*
 
 Use this directive to specify what a specific dot represents. The default is
 that all dots are down and not used to represent anything.

@@ -38,9 +38,7 @@ Directives
 The Bind Directive
 ------------------
 
-::
-
-   bind *keys* *commands*
+.. parsed-literal:: bind *keys* *commands*
 
 Use this directive to define which BRLTTY command is executed when a particular
 combination of keys is pressed. The binding is defined within the current
@@ -157,9 +155,7 @@ Examples::
 The Context Directive
 ---------------------
 
-::
-
-   context *name* *title*
+.. parsed-literal:: context *name* *title*
 
 Use this directive to define alternate ways to interpret certain key events
 and/or combinations. A context contains definitions created by any of:
@@ -214,9 +210,7 @@ Examples::
 The Hide Directive
 ------------------
 
-::
-
-   hide *state*
+.. parsed-literal:: hide *state*
 
 Use this directive to specify whether or not definitions created by:
 
@@ -253,9 +247,7 @@ Examples::
 The Hotkey Directive
 --------------------
 
-::
-
-   hotkey *key* *press* *release*
+.. parsed-literal:: hotkey *key* *press* *release*
 
 Use this directive to bind the press and release events of a specific key to
 two separate BRLTTY commands. The bindings are defined within the current
@@ -286,9 +278,7 @@ Examples::
 The IfKey Directive
 -------------------
 
-::
-
-   ifKey *key* *directive*
+.. parsed-literal:: ifKey *key* *directive*
 
 Use this directive to only process one or more directives if the device has a
 particular key.
@@ -309,9 +299,7 @@ Examples::
 The IfNotKey Directive
 ----------------------
 
-::
-
-   ifNotKey *key* *directive*
+.. parsed-literal:: ifNotKey *key* *directive*
 
 Use this directive to only process one or more directives if the device doesn't
 have a particular key.
@@ -332,9 +320,7 @@ Examples::
 The Map Directive
 -----------------
 
-::
-
-   map *key* *function*
+.. parsed-literal:: map *key* *function*
 
 Use this directive to map a key to a braille keyboard function. The mapping is
 defined within the current context.
@@ -391,9 +377,7 @@ Examples::
 The Note Directive
 ------------------
 
-::
-
-   note *text*
+.. parsed-literal:: note *text*
 
 Use this directive to add a person-readable explanation to the key table's help
 text. Notes are commonly used, for example, to describe the placement, sizes,
@@ -417,9 +401,7 @@ Examples::
 The Superimpose Directive
 -------------------------
 
-::
-
-   superimpose *function*
+.. parsed-literal:: superimpose *function*
 
 Use this directive to implicitly include a braille keyboard function whenever a
 braille keyboard command consisting of at least one dot is executed. Only
@@ -437,9 +419,7 @@ Examples::
 The Title Directive
 -------------------
 
-::
-
-   title <text>
+.. parsed-literal:: title <text>
 
 Use this directive to specify a person-readable, one-line summary of the key
 table's purpose.

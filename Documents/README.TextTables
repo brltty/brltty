@@ -25,9 +25,7 @@ Directives
 The Char Directive
 ------------------
 
-::
-
-   char *character* *dots* # *comment*
+.. parsed-literal:: char *character* *dots* # *comment*
 
 Use this directive to specify how a Unicode character is to be represented in
 braille. Characters defined via this directive can also be entered from a
@@ -58,9 +56,7 @@ Examples::
 The Glyph Directive
 -------------------
 
-::
-
-   glyph *character* *dots* # *comment*
+.. parsed-literal:: glyph *character* *dots* # *comment*
 
 Use this directive to specify how a Unicode character is to be represented in
 braille.  Characters defined via this directive are output-only - they cannot
@@ -71,9 +67,7 @@ See `The Char Directive`_ for syntax, examples, etc.
 The Alias Directive
 -------------------
 
-::
-
-  alias *from* *to* # *comment*
+.. parsed-literal:: alias *from* *to* # *comment*
 
 Use this directive to define the *from* Unicode character such that it has the
 same braille representation as the *to* Unicode character. See
@@ -82,9 +76,7 @@ same braille representation as the *to* Unicode character. See
 The Byte Directive
 ------------------
 
-::
-
-   byte *byte* *dots* # *comment*
+.. parsed-literal:: byte *byte* *dots* # *comment*
 
 Use this directive to specify how a character in the local character set is to
 be represented in braille. It has been retained for backward compatibility but
