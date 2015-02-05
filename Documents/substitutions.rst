@@ -3,7 +3,7 @@
 .. |README.Bluetooth| replace:: `Bluetooth Connections`_
 .. |README.BrailleDots| replace:: `Braille Dots`_
 .. |README.ContractionTables| replace:: `Contraction Tables`_
-.. |README.Customize| replace:: `Making Local Customizations`_
+.. |README.Customize| replace:: `Local Customizations`_
 .. |README.Devices| replace:: `Device Identifiers`_
 .. |README.DOS| replace:: `Using the DOS Platform`_
 .. |README.KeyTables| replace:: `Key Tables`_

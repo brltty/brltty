@@ -3,7 +3,7 @@
 .. _`Bluetooth Connections`: Bluetooth.html
 .. _`Braille Dots`: BrailleDots.html
 .. _`Contraction Tables`: ContractionTables.html
-.. _`Making Local Customizations`: Customize.html
+.. _`Local Customizations`: Customize.html
 .. _`Device Identifiers`: Devices.html
 .. _`Using the DOS Platform`: DOS.html
 .. _`Key Tables`: KeyTables.html

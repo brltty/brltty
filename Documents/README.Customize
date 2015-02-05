@@ -1,57 +1,66 @@
-BRLTTY supports the XDG configuration file paradigm. The most important thing 
-this offers is an easy way to customize your BRLTTY configuration which won't 
-be overwritten by an upgrade. The XDG paradigm defines a standard location for 
-your own data files which will override BRLTTY's provided data files. In other 
-words, you no longer need to modify BRLTTY's provided data files in order to 
-make your own customizations.
+~~~~~~~~~~~~~~~~~~~~
+Local Customizations
+~~~~~~~~~~~~~~~~~~~~
+
+.. include:: includes.rst
+.. contents::
+
+BRLTTY supports the XDG configuration file paradigm. The most important
+capability this offers is an easy way to customize your BRLTTY configuration
+that won't be overwritten during an upgrade, reinstall, etc. The XDG paradigm
+defines standard locations for your own data files that will override BRLTTY's
+provided data files. In other words, you no longer need to modify BRLTTY's
+provided data files in order to make your own local customizations.
 
 The following data files are covered by this feature:
 
-   The Configuration File (brltty.conf)
-   Text Tables (*.ttb)
-   Text Subtables (*.tti)
-   Attributes Tables (*.atb)
-   Attributes Subtables (*.ati)
-   Contraction Tables (*.ctb)
-   Contraction Subtables (*.cti)
-   Key Tables (*.ktb)
-   Key Subtables (*.kti)
+*  The configuration file (``brltty.conf``).
+*  Text tables (``*.ttb``) and subtables (``*.tti``).
+   See |README.TextTables| for details.
+*  Attributes tables (``*.atb``) and subtables (``*.ati``).
+   See |README.AttributesTables| for details.
+*  Contraction tables (``*.ctb``) and subtables (``*.cti``).
+   See |README.ContractionTables| for details.
+*  Key tables (``*.ktb``) and subtables (``*.kti``).
+   See |README.KeyTables| for details.
 
-The standard directory where to put your customized files is:
+The standard directory where you should put your customized files is
+``/etc/xdg/brltty/``.
 
-   /etc/xdg/brltty
-
-The simplest way to customize a data file is to copy it to this directory, and 
-then to modify your copy as needed. You can, however, just place your changes 
-in your version of the file, and then include the provided file in order to 
-automatically always pick up the latest versions of all the unchanged lines.
+The simplest way to customize a provided data file is to copy it to this
+directory, and then to modify your copy as needed. You can, however, just place
+your changes in your version of the file, and then ``include`` the provided
+file in order to automatically always pick up the latest versions of all the
+unchanged lines.
 
 For example: Let's say that you'd like to add your own key bindings to the 
-laptop keyboard table. To do so, create "/etc/xdg/brltty/kbd-laptop.ktb", 
-and place lines like these in it:
+``laptop`` keyboard table. To do so, create ``/etc/xdg/brltty/laptop.ktb``, 
+and place lines like these into it::
 
    bind Key1 COMMAND1
    bind Key2 COMMAND2
-...
-   include kbd-laptop.ktb
+   ...
+   include laptop.ktb
 
-The XDG_CONFIG_HOME environment variable defines the base directory in which to 
-check before the standard directory is checked. If it's set and not empty then 
-the primary override directory is "$XDG_CONFIG_HOME/brltty". If it either isn't 
-set or is empty, but the HOME environment variable is set and not empty (the 
-usual case when you're logged in) then the primary override directory is 
-"$HOME/.config/brltty". If both the XDG_CONFIG_HOME and HOME environment 
-variables are either not set or empty (the usual case during the system boot 
-sequence) then the primary override directory isn't defined.
+The ``XDG_CONFIG_HOME`` environment variable defines the base directory in
+which to check before the standard directory is checked. If it's set and not
+empty then the primary override directory is ``$XDG_CONFIG_HOME/brltty/``. If
+it either isn't set or is empty, but the ``HOME`` environment variable is set
+and not empty (the usual case when you're logged in) then the primary override
+directory is ``$HOME/.config/brltty/``. If both the ``XDG_CONFIG_HOME`` and
+``HOME`` environment variables are either not set or empty (the usual case
+during the system boot sequence) then the primary override directory isn't
+defined.
 
-The XDG_CONFIG_DIRS environment variable defines a colon-separated list of 
-secondary base directories. The "brltty" subdirectory of each of these 
+The ``XDG_CONFIG_DIRS`` environment variable defines a colon-separated list of 
+secondary base directories. The ``brltty/`` subdirectory of each of these 
 secondary base directories is BRLTTY's corresponding secondary override 
-directory. So, for example, if XDG_CONFIG_DIRS is set to "/a:/b" then BRLTTY 
-would check "/a/brltty" and "/b/brltty" (in that order). If XDG_CONFIG_DIRS is 
-set and not empty then "/etc/xdg/brltty" is no longer implicitly checked.
+directory. So, for example, if ``XDG_CONFIG_DIRS`` is set to ``/a:/b`` then
+BRLTTY will check ``/a/brltty/`` and ``/b/brltty/`` (in that order). If
+``XDG_CONFIG_DIRS`` is set and not empty then ``/etc/xdg/brltty/`` is no longer
+implicitly checked.
 
 For backward compatibility, the original data file override paradigm is also 
-supported. If the HOME environment variable is set and not empty then the 
-tertiary override directory is "$HOME/.brltty". If it isn't set, or if it's 
-empty, then the tertiary override directory is "./.brltty".
+supported. If the ``HOME`` environment variable is set and not empty then the 
+tertiary override directory is ``$HOME/.brltty/``. If it isn't set, or if it's 
+empty, then the tertiary override directory is ``./.brltty/``.
