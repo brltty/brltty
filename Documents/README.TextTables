@@ -2,8 +2,7 @@
 Text Tables
 ~~~~~~~~~~~
 
-.. include:: includes.rst
-.. contents::
+.. include:: prologue.rst
 
 Files with names of the form ``*.ttb`` are text tables, and with names of the
 form ``*.tti`` are text subtables. They are used by BRLTTY to translate the

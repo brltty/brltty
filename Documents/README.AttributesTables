@@ -2,8 +2,7 @@
 Attributes Tables
 ~~~~~~~~~~~~~~~~~
 
-.. include:: includes.rst
-.. contents::
+.. include:: prologue.rst
 
 Files with names of the form ``*.atb`` are attributes tables, and with names of
 the form ``*.ati`` are attributes subtables. They are used when BRLTTY is

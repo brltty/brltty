@@ -2,8 +2,7 @@
 Contraction Tables
 ~~~~~~~~~~~~~~~~~~
 
-.. include:: includes.rst
-.. contents::
+.. include:: prologue.rst
 
 Files with names of the form ``*.ctb`` are contraction tables, and with names
 of the form ``*.cti`` are contraction subtables. They are used by BRLTTY to

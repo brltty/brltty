@@ -2,8 +2,7 @@
 Local Customizations
 ~~~~~~~~~~~~~~~~~~~~
 
-.. include:: includes.rst
-.. contents::
+.. include:: prologue.rst
 
 BRLTTY supports the XDG configuration file paradigm. The most important
 capability this offers is an easy way to customize your BRLTTY configuration
