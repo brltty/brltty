@@ -1,32 +1,48 @@
-General Description
--------------------
+~~~~~~~~
+Profiles
+~~~~~~~~
+
+.. include:: prologue.rst
+
+Description
+===========
 
 A profile is an activatable group of settings which explicitly override the 
 ones that were established via command line options, the configuration file 
-(brltty.conf), the preferences file (brltty.prefs), etc when BRLTTY was 
-invoked. Profiles must be placed in the /etc/brltty/Profiles directory.
+(``brltty.conf``), the preferences file (``brltty.prefs``), etc when BRLTTY
+was invoked. Profiles must be placed in the ``/etc/brltty/Profiles/``
+directory (see |README.Customize| for more details).
 
 A profile must be encoded in UTF-8. Blank lines are ignored. A line whose first 
-non-whitespace character is a number sign (#) is a comment. The standard data 
-file commands (e.g. include, assign, ifVar, ifNotVar, else, endIf) are 
-supported. All other lines specify the settings which are to be overridden, and 
-must be in the form:
+non-whitespace character is a number sign (``#``) is a comment and is ignored.
+The `Standard Directives`_ are supported. All other lines specify the settings
+which are to be overridden, and must be in the form:
 
-   name value
+.. parsed-literal:: *name* *value*
 
 Each type of profile has the following properties:
-*  a specific group of settings that it can override
-*  its own file extension
-*  its own selector within the Profiles submenu
-*  is own SET_*_PROFILE command for direct selection (see below)
 
+*  A specific group of settings that it can override.
+*  Its own file extension.
+*  Its own selector within BRLTTY's Profiles submenu.
+*  Its own SET_*_PROFILE command for direct selection (see below).
+
+Supported Profile Types
+-----------------------
 
 Language Profiles
------------------
+~~~~~~~~~~~~~~~~~
 
-A language profile must have the .lpf file extension. It can override the 
-following settings: locale, speech-driver, speech-parameters, text-table, 
-contraction-table. A profile for the German language might look like this:
+A language profile must have the ``.lpf`` file extension. It can override the 
+following settings:
+
+*  locale
+*  speech-driver
+*  speech-parameters
+*  text-table 
+*  contraction-table
+
+A profile for the German language might look like this::
 
    locale de_DE.UTF-8
    speech-driver es
@@ -34,26 +50,25 @@ contraction-table. A profile for the German language might look like this:
    text-table de
    contraction-table de-kurzschrift
 
-
 Profile Selection
 -----------------
 
-Each type of profile has a selector within the Profiles submenu. The selector 
-for a given profile type allows for setting that type of profile either to 
-"off" (which means "no profile") or to any of the files in the 
-/etc/brltty/Profiles directory which have the file extension for that type of 
-profile. The file names are sorted alphabetically.
+Each type of profile has a selector within BRLTTY's Profiles submenu. The
+selector for a given profile type allows for setting that type of profile
+either to ``off`` (which means "no profile") or to any of the files in the 
+``/etc/brltty/Profiles/`` directory which have the file extension for that type
+of profile. The file names are sorted alphabetically.
 
 If you'd like to select a profile directly (rather than use the Profiles 
-submenu) then you can define key bindings for the appropriate SET_*_PROFILE 
+submenu) then you can define key bindings for the appropriate ``SET_*_PROFILE`` 
 command. For example, if you'd like to directly select your language profile 
-then you'd define bindings for the SET_LANGUAGE_PROFILE command. You can add 
-your bindings either to the keyboard table that you're using or to the key 
+then you'd define bindings for the ``SET_LANGUAGE_PROFILE`` command. You may
+add your bindings either to the keyboard table that you're using or to the key 
 table for your braille device. Except for a few examples below, exactly how to 
 do this is beyond the scope of this document.
 
 One approach is to define a single binding which involves a routing key. For 
-example:
+example::
 
    bind Key1+Key2+RoutingKey SET_LANGUAGE_PROFILE
 
@@ -62,36 +77,36 @@ and the next few routing keys select each of your language profiles in the same
 order as they appear within the Language selector of the Profiles submenu.
 
 Another approach is to define a specific binding for each language profile. For 
-example:
+example::
 
    bind Key1+Key2 SET_LANGUAGE_PROFILE+0
    bind Key1+Key3 SET_LANGUAGE_PROFILE+1
    bind Key2+Key3 SET_LANGUAGE_PROFILE+2
    bind Key1+Key2+Key3 SET_LANGUAGE_PROFILE+3
 
-Using this paradigm, the binding for +0 (Key1+Key2) means to use no language 
-profile, and the bindings for +1 (Key1+Key3), +2 (Key2+Key3), etc select each 
-of your language profiles in the same order as they appear within the Language 
-selector of the Profiles submenu.
+Using this paradigm, the binding for ``+0`` (Key1+Key2) means to use no
+language profile, and the bindings for ``+1`` (Key1+Key3), ``+2`` (Key2+Key3),
+etc select each of your language profiles in the same order as they appear
+within the Language selector of the Profiles submenu.
 
 A practical approach, which would make it easy to remember the bindings, might 
-be to use a keyboard table and to use a simple key combination plus a 
+be to use a keyboard table, and to use a simple key combination plus a 
 meaningful letter for each language name. Let's say that your primary language 
 is English and that you also use French and German. In this case, your default 
 settings (no profile) would be for English, and you'd create french.lpf for 
 French and german.lpf for German. You could then define a set of bindings which 
-use e for English, f for French, and g for German. For example:
+use ``e`` for English, ``f`` for French, and ``g`` for German. For example::
 
    bind ShiftLeft+ShiftRight+!e SET_LANGUAGE_PROFILE+0
    bind ShiftLeft+ShiftRight+!f SET_LANGUAGE_PROFILE+1
    bind ShiftLeft+ShiftRight+!g SET_LANGUAGE_PROFILE+2
 
-The +1 binding would activate french.lpf and the +2 binding would activate 
-german.lpf because that's how the profile name list would be sorted. If, 
-however, you choose to use the native language names then you'd have 
-deutsch.lpf for German and français.lpf for French. In this case, you'd need a 
-different set of bindings because deutsch.lpf (for German) sorts before 
-français.lpf (for French):
+The ``+1`` binding would activate ``french.lpf`` and the ``+2`` binding would
+activate ``german.lpf`` because that's how the profile name list would be
+sorted. If, however, you choose to use the native language names then you'd
+have ``deutsch.lpf`` for German and ``français.lpf`` for French. In this case,
+you'd need a different set of bindings because ``deutsch.lpf`` (for German)
+sorts before ``français.lpf`` (for French)::
 
    bind ShiftLeft+ShiftRight+!e SET_LANGUAGE_PROFILE+0
    bind ShiftLeft+ShiftRight+!d SET_LANGUAGE_PROFILE+1
@@ -99,21 +114,27 @@ français.lpf (for French):
 
 When adding the bindings to a key table, they should most likely be defined 
 within the default context. The best way to ensure this is to add them at the 
-very end of the appropriate key table or subtable, and to add the "context 
-default" statement just before them. For example:
+very end of the appropriate key table or subtable, and to add the ``context 
+default`` statement just before them. For example::
 
    context default
-   bind Key1+Key2 SET_LANGUAGE_PROFILE
+   bind Key1+RoutingKey SET_LANGUAGE_PROFILE
 
 If you'd like your binding definitions to survive a BRLTTY reinstall then you 
 should use a customized data file which includes the provided one and then 
 defines your bindings. Let's say that you'd like to add your bindings to the 
-laptop keyboard table (laptop.ktb). Create a file with the same name - 
-laptop.ktb - in the /etc/xdg/brltty directory, and, with an editor, make it 
-look like this:
+``laptop`` keyboard table (``laptop.ktb``). Create a file with the same name - 
+``laptop.ktb`` - in the ``/etc/xdg/brltty/`` directory, and, with an editor,
+make it look like this::
 
    include laptop.ktb
    context default
    bind Key1+Key2+RoutingKey SET_LANGUAGE_PROFILE
 
+Standard Directives
+===================
+
+.. include:: nesting-directives.rst
+.. include:: variable-directives.rst
+.. include:: condition-directives.rst
 
