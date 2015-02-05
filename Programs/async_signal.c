@@ -31,12 +31,13 @@ struct AsyncSignalDataStruct {
   Queue *signalQueue;
 
 #ifdef ASYNC_CAN_BLOCK_SIGNALS
-  sigset_t claimedSignals;
-  sigset_t obtainedSignals;
   sigset_t obtainableSignals;
 #endif /* ASYNC_CAN_BLOCK_SIGNALS */
 
 #ifdef ASYNC_CAN_OBTAIN_SIGNALS
+  sigset_t claimedSignals;
+  sigset_t obtainedSignals;
+
   int firstObtainableSignal;
   int lastObtainableSignal;
 #endif /* ASYNC_CAN_OBTAIN_SIGNALS */
@@ -68,12 +69,13 @@ getSignalData (void) {
     sd->signalQueue = NULL;
 
 #ifdef ASYNC_CAN_BLOCK_SIGNALS
-    sigemptyset(&sd->claimedSignals);
-    sigemptyset(&sd->obtainedSignals);
     sigemptyset(&sd->obtainableSignals);
 #endif /* ASYNC_CAN_BLOCK_SIGNALS */
 
 #ifdef ASYNC_CAN_OBTAIN_SIGNALS
+    sigemptyset(&sd->claimedSignals);
+    sigemptyset(&sd->obtainedSignals);
+
     sd->firstObtainableSignal = SIGRTMIN;
     sd->lastObtainableSignal = SIGRTMAX;
 
