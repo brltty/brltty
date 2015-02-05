@@ -395,9 +395,36 @@ There's no limit to the number of notes that may be added. All of them are
 gathered together and presented in a single block at the start of the key 
 table's help text.
 
+*  A note that doesn't have a special prefix begins a new outer bulleted list
+   element.
+
+*  A note that is prefixed with an asterisk (*) continues the current outer
+   bulleted list element.
+
+*  A note that is prefixed with a plus (+) sign is an inner bulletged list
+   element.
+
 Examples::
 
-   note Key1 is the round key at the far left on the front surface.
+   note This is the first outer list element.
+   note This is the second outer list element.
+   note * Continue the second outer list element.
+   note + The first element of an inner list.
+   note + The second element of an inner list.
+   note * The third line of the second outer list element.
+
+The above example would be rendered as:
+
+*  This is the first outer list element.
+
+*  This is the second outer list element.
+   Continue the second outer list element.
+
+   +  The first element of an inner list.
+
+   +  The second element of an inner list.
+
+   The third line of the second outer list element.
 
 The Superimpose Directive
 -------------------------
