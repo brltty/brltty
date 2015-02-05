@@ -301,9 +301,7 @@ void *
 getThreadSpecificData (ThreadSpecificDataControl *ctl) {
   int error;
 
-  if (!ctl->key.created) {
-    asyncWithAllSignalsBlocked(createThreadSpecificDataKey, ctl);
-  }
+  asyncWithAllSignalsBlocked(createThreadSpecificDataKey, ctl);
 
   if (ctl->key.created) {
     void *tsd = pthread_getspecific(ctl->key.value);
