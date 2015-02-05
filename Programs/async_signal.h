@@ -85,6 +85,8 @@ extern int asyncWithObtainableSignalsBlocked (
   AsyncWithSignalsBlockedFunction *function,
   void *data
 );
+
+extern int asyncBlockObtainableSignals (void);
 #endif /* ASYNC_CAN_BLOCK_SIGNALS */
 
 
@@ -111,9 +113,6 @@ extern int asyncReleaseSignalNumber (int signal);
 extern int asyncObtainSignalNumber (void);
 extern int asyncRelinquishSignalNumber (int signal);
 
-#ifdef ASYNC_CAN_BLOCK_SIGNALS
-extern int asyncBlockObtainableSignals (void);
-#endif /* ASYNC_CAN_BLOCK_SIGNALS */
 #endif /* ASYNC_CAN_OBTAIN_SIGNALS */
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */
 

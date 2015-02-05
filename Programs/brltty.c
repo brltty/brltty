@@ -1130,9 +1130,9 @@ brlttyConstruct (int argc, char *argv[]) {
   programTerminationRequestCount = 0;
   programTerminationRequestTime = time(NULL);
 
-#ifdef ASYNC_CAN_OBTAIN_SIGNALS
+#ifdef ASYNC_CAN_BLOCK_SIGNALS
   asyncBlockObtainableSignals();
-#endif /* ASYNC_CAN_OBTAIN_SIGNALS */
+#endif /* ASYNC_CAN_BLOCK_SIGNALS */
 
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
 #ifdef SIGPIPE

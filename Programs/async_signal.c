@@ -28,7 +28,9 @@
 
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
 struct AsyncSignalDataStruct {
+#ifdef ASYNC_CAN_MONITOR_SIGNALS
   Queue *signalQueue;
+#endif /* ASYNC_CAN_MONITOR_SIGNALS */
 
 #ifdef ASYNC_CAN_BLOCK_SIGNALS
   sigset_t obtainableSignals;
@@ -46,7 +48,10 @@ struct AsyncSignalDataStruct {
 void
 asyncDeallocateSignalData (AsyncSignalData *sd) {
   if (sd) {
+#ifdef ASYNC_CAN_MONITOR_SIGNALS
     if (sd->signalQueue) deallocateQueue(sd->signalQueue);
+#endif /* ASYNC_CAN_MONITOR_SIGNALS */
+
     free(sd);
   }
 }
@@ -66,7 +71,10 @@ getSignalData (void) {
     }
 
     memset(sd, 0, sizeof(*sd));
+
+#ifdef ASYNC_CAN_MONITOR_SIGNALS
     sd->signalQueue = NULL;
+#endif /* ASYNC_CAN_MONITOR_SIGNALS */
 
 #ifdef ASYNC_CAN_BLOCK_SIGNALS
     sigemptyset(&sd->obtainableSignals);
@@ -264,6 +272,19 @@ asyncWithObtainableSignalsBlocked (
 
   if (sd) {
     if (asyncWithSignalsBlocked(&sd->obtainableSignals, function, data)) {
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+int
+asyncBlockObtainableSignals (void) {
+  AsyncSignalData *sd = getSignalData();
+
+  if (sd) {
+    if (setSignalMask(SIG_BLOCK, &sd->obtainableSignals, NULL)) {
       return 1;
     }
   }
@@ -627,20 +648,5 @@ asyncRelinquishSignalNumber (int signal) {
   logMessage(LOG_ERR, "signal number not obtained: %d", signal);
   return 0;
 }
-
-#ifdef ASYNC_CAN_BLOCK_SIGNALS
-int
-asyncBlockObtainableSignals (void) {
-  AsyncSignalData *sd = getSignalData();
-
-  if (sd) {
-    if (setSignalMask(SIG_BLOCK, &sd->obtainableSignals, NULL)) {
-      return 1;
-    }
-  }
-
-  return 0;
-}
-#endif /* ASYNC_CAN_BLOCK_SIGNALS */
 #endif /* ASYNC_CAN_OBTAIN_SIGNALS */
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */
