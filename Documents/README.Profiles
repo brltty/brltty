@@ -13,10 +13,10 @@ ones that were established via command line options, the configuration file
 was invoked. Profiles must be placed in the ``/etc/brltty/Profiles/``
 directory (see |README.Customize| for more details).
 
-A profile must be encoded in UTF-8. Blank lines are ignored. A line whose first 
-non-whitespace character is a number sign (``#``) is a comment and is ignored.
-The `Standard Directives`_ are supported. All other lines specify the settings
-which are to be overridden, and must be in the form:
+A profile must be encoded in UTF-8. Blank lines are ignored. If the first
+non-whitespace character of a line is ``#`` then that line is a comment and is
+ignored. The `Standard Directives`_ are supported. All other lines specify the
+settings that are to be overridden, and must be in the form:
 
 .. parsed-literal:: *name* *value*
 

@@ -13,9 +13,9 @@ details).
 
 A contraction table consists of a sequence of directives, one per line, that 
 define how character sequences are to be represented in contracted braille.
-UTF-8 character encoding must be used. White-space (blanks, tabs) at the
+UTF-8 character encoding must be used. Whitespace (blanks, tabs) at the
 beginning of a line, as well as before and/or after any operand, is ignored.
-Lines containing only white-space are ignored. If the first non-white-space
+Lines containing only whitespace are ignored. If the first non-whitespace
 character of a line is ``#`` then that line is a comment and is ignored.
 
 Directives
@@ -40,8 +40,8 @@ The Literal Directive
 
 .. parsed-literal:: literal *characters*
 
-Translate the entire white-space-bounded containing character sequence into
-computer braille.
+Translate the entire whitespace-bounded text containing the character sequence
+into computer braille.
 
 The Always Directive
 --------------------
@@ -66,7 +66,7 @@ The LargeSign Directive
 .. parsed-literal:: largeSign *characters* *representation*
 
 Unconditionally translate the characters no matter where they appear. Remove
-white-space between consecutive words matched by this directive.
+whitespace between consecutive words matched by this directive.
 
 The LastLargeSign Directive
 ---------------------------
@@ -74,7 +74,7 @@ The LastLargeSign Directive
 .. parsed-literal:: lastLargeSign *characters* *representation*
 
 Unconditionally translate the characters no matter where they appear. Remove
-preceding white-space if the previous word was matched by
+preceding whitespace if the previous word was matched by
 `The LargeSign Directive`_.
 
 The Word Directive
@@ -89,7 +89,7 @@ The JoinWord Directive
 
 .. parsed-literal:: joinWord *characters* *representation*
 
-Translate the characters if they're a word. Remove the following white-space if
+Translate the characters if they're a word. Remove the following whitespace if
 the first character after it is a letter.
 
 The LowWord Directive
@@ -97,7 +97,7 @@ The LowWord Directive
 
 .. parsed-literal:: lowWord *characters* *representation*
 
-Translate the characters if they're a white-space-bounded word.
+Translate the characters if they're a whitespace-bounded word.
 
 The Contraction Directive
 -------------------------
