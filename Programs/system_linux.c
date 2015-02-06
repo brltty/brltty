@@ -165,7 +165,7 @@ LINUX_KEY_MAP(xtE0) = {
   [XT_KEY_E0_LeftGUI] = KEY_LEFTMETA,
   [XT_KEY_E0_RightAlt] = KEY_RIGHTALT,
   [XT_KEY_E0_RightGUI] = KEY_RIGHTMETA,
-  [XT_KEY_E0_App] = KEY_COMPOSE,
+  [XT_KEY_E0_Context] = KEY_COMPOSE,
   [XT_KEY_E0_RightControl] = KEY_RIGHTCTRL,
 
   [XT_KEY_E0_Insert] = KEY_INSERT,
@@ -348,7 +348,7 @@ LINUX_KEY_MAP(atE0) = {
   [AT_KEY_E0_LeftGUI] = KEY_LEFTMETA,
   [AT_KEY_E0_RightAlt] = KEY_RIGHTALT,
   [AT_KEY_E0_RightGUI] = KEY_RIGHTMETA,
-  [AT_KEY_E0_App] = KEY_COMPOSE,
+  [AT_KEY_E0_Context] = KEY_COMPOSE,
   [AT_KEY_E0_RightControl] = KEY_RIGHTCTRL,
 
   [AT_KEY_E0_Insert] = KEY_INSERT,
@@ -486,7 +486,7 @@ LINUX_KEY_MAP(ps2) = {
   [PS2_KEY_Space] = KEY_SPACE,
   [PS2_KEY_RightAlt] = KEY_RIGHTALT,
   [PS2_KEY_RightGUI] = KEY_RIGHTMETA,
-  [PS2_KEY_App] = KEY_COMPOSE,
+  [PS2_KEY_Context] = KEY_COMPOSE,
   [PS2_KEY_RightControl] = KEY_RIGHTCTRL,
 
   [PS2_KEY_Insert] = KEY_INSERT,
@@ -622,7 +622,7 @@ LINUX_KEY_MAP(hid) = {
   [HID_KEY_Space] = KEY_SPACE,
   [HID_KEY_RightAlt] = KEY_RIGHTALT,
   [HID_KEY_RightGUI] = KEY_RIGHTMETA,
-  [HID_KEY_App] = KEY_COMPOSE,
+  [HID_KEY_Context] = KEY_COMPOSE,
   [HID_KEY_RightControl] = KEY_RIGHTCTRL,
 
   [HID_KEY_Insert] = KEY_INSERT,

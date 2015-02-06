@@ -713,10 +713,10 @@ static const HidKeyEntry hidKeyTable[] = {
   },
 
   /* App */
-  [HID_KEY_App] = {
-    .xtCode = XT_KEY(E0, App),
-    .atCode = AT_KEY(E0, App),
-    .ps2Code = PS2_KEY_App
+  [HID_KEY_Context] = {
+    .xtCode = XT_KEY(E0, Context),
+    .atCode = AT_KEY(E0, Context),
+    .ps2Code = PS2_KEY_Context
   },
 
   /* Keyboard Power */

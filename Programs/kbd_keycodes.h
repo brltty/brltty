@@ -179,7 +179,7 @@ typedef enum {
   XT_KEY_E0_Delete            = 0X53,
   XT_KEY_E0_LeftGUI           = 0X5B,
   XT_KEY_E0_RightGUI          = 0X5C,
-  XT_KEY_E0_App               = 0X5D,
+  XT_KEY_E0_Context           = 0X5D,
   XT_KEY_E0_Power             = 0X5E,
   XT_KEY_E0_Sleep             = 0X5F,
   XT_KEY_E0_Wake              = 0X63,
@@ -343,7 +343,7 @@ typedef enum {
   AT_KEY_E0_RightGUI          = 0X27,
   AT_KEY_E0_WebStop           = 0X28,
   AT_KEY_E0_Calculator        = 0X2B,
-  AT_KEY_E0_App               = 0X2F,
+  AT_KEY_E0_Context           = 0X2F,
   AT_KEY_E0_WebForward        = 0X30,
   AT_KEY_E0_VolumeUp          = 0X32,
   AT_KEY_E0_MediaPlayPause    = 0X34,
@@ -502,7 +502,7 @@ typedef enum {
   PS2_KEY_International2 = 0X87,
   PS2_KEY_LeftGUI        = 0X8B,
   PS2_KEY_RightGUI       = 0X8C,
-  PS2_KEY_App            = 0X8D,
+  PS2_KEY_Context        = 0X8D,
 } Ps2Key;
 
 #define PS2_MOD_RELEASE 0XF0
@@ -608,7 +608,7 @@ typedef enum {
   HID_KEY_KP0                  = 0X62,
   HID_KEY_KPPeriod             = 0X63,
   HID_KEY_Europe2              = 0X64,
-  HID_KEY_App                  = 0X65,
+  HID_KEY_Context              = 0X65,
   HID_KEY_Power                = 0X66,
   HID_KEY_KPEqual              = 0X67,
   HID_KEY_F13                  = 0X68,

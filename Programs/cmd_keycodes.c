@@ -33,7 +33,7 @@ typedef enum {
 
   MOD_WINDOWS_LEFT,
   MOD_WINDOWS_RIGHT,
-  MOD_APP,
+  MOD_CONTEXT,
 
   MOD_LOCK_CAPS,
   MOD_LOCK_SCROLL,
@@ -151,7 +151,7 @@ static const KeyEntry keyEntry_LeftAlt = {MOD_ALT_LEFT};
 static const KeyEntry keyEntry_Space = {BRL_CMD_CHAR(WC_C(' '))};
 static const KeyEntry keyEntry_RightAlt = {MOD_ALT_RIGHT};
 static const KeyEntry keyEntry_RightGUI = {MOD_WINDOWS_RIGHT};
-static const KeyEntry keyEntry_App = {MOD_APP};
+static const KeyEntry keyEntry_Context = {MOD_CONTEXT};
 static const KeyEntry keyEntry_RightControl = {MOD_CONTROL_RIGHT};
 
 static const KeyEntry keyEntry_Insert = {BRL_CMD_KEY(INSERT)};
@@ -406,7 +406,7 @@ static const KeyEntry *const xtKeyMapE0[] = {
   [XT_KEY_E0_LeftGUI] = &keyEntry_LeftGUI,
   [XT_KEY_E0_RightAlt] = &keyEntry_RightAlt,
   [XT_KEY_E0_RightGUI] = &keyEntry_RightGUI,
-  [XT_KEY_E0_App] = &keyEntry_App,
+  [XT_KEY_E0_Context] = &keyEntry_Context,
   [XT_KEY_E0_RightControl] = &keyEntry_RightControl,
 
   [XT_KEY_E0_Insert] = &keyEntry_Insert,
@@ -558,7 +558,7 @@ static const KeyEntry *const atKeyMapE0[] = {
   [AT_KEY_E0_LeftGUI] = &keyEntry_LeftGUI,
   [AT_KEY_E0_RightAlt] = &keyEntry_RightAlt,
   [AT_KEY_E0_RightGUI] = &keyEntry_RightGUI,
-  [AT_KEY_E0_App] = &keyEntry_App,
+  [AT_KEY_E0_Context] = &keyEntry_Context,
   [AT_KEY_E0_RightControl] = &keyEntry_RightControl,
 
   [AT_KEY_E0_Insert] = &keyEntry_Insert,
@@ -678,7 +678,7 @@ static const KeyEntry *const ps2KeyMap[] = {
   [PS2_KEY_Space] = &keyEntry_Space,
   [PS2_KEY_RightAlt] = &keyEntry_RightAlt,
   [PS2_KEY_RightGUI] = &keyEntry_RightGUI,
-  [PS2_KEY_App] = &keyEntry_App,
+  [PS2_KEY_Context] = &keyEntry_Context,
   [PS2_KEY_RightControl] = &keyEntry_RightControl,
 
   [PS2_KEY_Insert] = &keyEntry_Insert,
