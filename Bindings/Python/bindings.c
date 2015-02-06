@@ -23,6 +23,15 @@
 
 #include "brlapi.h"
 
+/* a kludge to get around a broken MinGW <pthread.h> header */
+#ifdef __MINGW32__
+#ifdef __struct_timespec_defined
+#ifndef _TIMESPEC_DEFINED
+#define _TIMESPEC_DEFINED
+#endif /* _TIMESPEC_DEFINED */
+#endif /* __struct_timespec_defined */
+#endif /* __MINGW32__ */
+
 #include <pthread.h>
 
 #include <stdlib.h>
