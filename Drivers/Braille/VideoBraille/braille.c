@@ -26,6 +26,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "timing.h"
 #include "ports.h"
 
 #include "brl_driver.h"
@@ -153,7 +154,15 @@ static int brl_readCommand(BrailleDisplay *brl, KeyTableCommandContext context) 
     do {
       BrButtons(&b);
       buttons.bigbuttons |= b.bigbuttons;
-      usleep(1);
+
+      {
+        const TimeValue duration = {
+          .seconds = 0,
+          .nanoseconds = 1 * NSECS_PER_USEC
+        };
+
+        accurateDelay(&duration);
+      }
     } while (b.keypressed);
     /* Test which buttons has been pressed */
     if (buttons.bigbuttons==KEY_UP) return BRL_CMD_LNUP;
@@ -182,7 +191,12 @@ static int brl_readCommand(BrailleDisplay *brl, KeyTableCommandContext context) 
     else if (buttons.bigbuttons==0) {
       /* A cursor routing key has been pressed */
       if (buttons.routingkey>0) {
-        usleep(5);
+        const TimeValue duration = {
+          .seconds = 0,
+          .nanoseconds = 5 * NSECS_PER_USEC
+        };
+
+        accurateDelay(&duration);
         return BRL_CMD_BLK(ROUTE)+buttons.routingkey-1;
       }
       else return EOF;

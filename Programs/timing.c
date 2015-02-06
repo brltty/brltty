@@ -327,6 +327,35 @@ approximateDelay (int milliseconds) {
       if (errno != EINTR) logSystemError("select");
     }
 
-#endif /* delay */
+#endif /* approximate delay */
+  }
+}
+
+void
+accurateDelay (const TimeValue *duration) {
+  if ((duration->seconds > 0) || ((duration->seconds == 0) && (duration->nanoseconds > 0))) {
+#if defined(HAVE_NANOSLEEP)
+    const struct timespec timeout = {
+      .tv_sec = duration->seconds,
+      .tv_nsec = duration->nanoseconds
+    };
+
+    if (nanosleep(&timeout, NULL) == -1) {
+      if (errno != EINTR) logSystemError("nanosleep");
+    }
+
+#elif defined(HAVE_SELECT)
+    struct timeval timeout = {
+      .tv_sec = duration->seconds,
+      .tv_usec = duration->nanoseconds / NSECS_PER_USEC
+    };
+
+    if (select(0, NULL, NULL, NULL, &timeout) == -1) {
+      if (errno != EINTR) logSystemError("select");
+    }
+
+#else /* accurate delay */
+    approximateDelay((duration->seconds * MSECS_PER_SEC) + ((duration->nanoseconds + (NSECS_PER_MSEC - 1)) / NSECS_PER_MSEC));
+#endif /* accurate delay */
   }
 }

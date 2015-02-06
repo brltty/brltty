@@ -30,6 +30,7 @@
 
 #include "log.h"
 #include "async_wait.h"
+#include "timing.h"
 #include "ports.h"
 #include "fm.h"
 #include "fm_adlib.h"
@@ -111,7 +112,16 @@ fmTestCard (int errorLevel) {
 
     AL_writeRegister(ALR_T1DATA, 0xFF);
     AL_writeRegister(ALR_TCTL, AL_TCTL_T1START|AL_TCTL_T2MASK);
-    usleep(80);
+
+    {
+      const TimeValue duration = {
+        .seconds = 0,
+        .nanoseconds = 80 * NSECS_PER_USEC
+      };
+
+      accurateDelay(&duration);
+    }
+
     status = AL_readStatus();
     AL_resetTimers(); 
 
