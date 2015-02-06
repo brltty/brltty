@@ -637,7 +637,7 @@ gettimeofday (struct timeval *tvp, void *tzp) {
 void
 usleep (int usec) {
   if (usec > 0) {
-    approximateDelay((usec+999)/1000);
+    approximateDelay((usec + (USECS_PER_MSEC - 1)) / USECS_PER_MSEC);
   }
 }
 #endif /* usleep() */
