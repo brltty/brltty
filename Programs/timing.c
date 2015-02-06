@@ -333,11 +333,14 @@ approximateDelay (int milliseconds) {
 
 void
 accurateDelay (const TimeValue *duration) {
-  if ((duration->seconds > 0) || ((duration->seconds == 0) && (duration->nanoseconds > 0))) {
+  TimeValue delay = *duration;
+  normalizeTimeValue(&delay);
+
+  if ((delay.seconds > 0) || ((delay.seconds == 0) && (delay.nanoseconds > 0))) {
 #if defined(HAVE_NANOSLEEP)
     const struct timespec timeout = {
-      .tv_sec = duration->seconds,
-      .tv_nsec = duration->nanoseconds
+      .tv_sec = delay.seconds,
+      .tv_nsec = delay.nanoseconds
     };
 
     if (nanosleep(&timeout, NULL) == -1) {
@@ -346,16 +349,21 @@ accurateDelay (const TimeValue *duration) {
 
 #elif defined(HAVE_SELECT)
     struct timeval timeout = {
-      .tv_sec = duration->seconds,
-      .tv_usec = duration->nanoseconds / NSECS_PER_USEC
+      .tv_sec = delay.seconds,
+      .tv_usec = (delay.nanoseconds + (NSECS_PER_USEC - 1)) / NSECS_PER_USEC
     };
+
+    if (timeout.tv_usec == USECS_PER_SEC) {
+      timeout.tv_sec += 1;
+      timeout.tv_usec = 0;
+    }
 
     if (select(0, NULL, NULL, NULL, &timeout) == -1) {
       if (errno != EINTR) logSystemError("select");
     }
 
 #else /* accurate delay */
-    approximateDelay((duration->seconds * MSECS_PER_SEC) + ((duration->nanoseconds + (NSECS_PER_MSEC - 1)) / NSECS_PER_MSEC));
+    approximateDelay((delay.seconds * MSECS_PER_SEC) + ((delay.nanoseconds + (NSECS_PER_MSEC - 1)) / NSECS_PER_MSEC));
 #endif /* accurate delay */
   }
 }
