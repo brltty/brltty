@@ -225,8 +225,10 @@ BEGIN_KEY_NAME_TABLE(keyboard)
   KBD_KEY_NAME(ACTION, GuiRight, "GuiRight"),
   KBD_KEY_NAME(ACTION, GuiRight, "ACTION_GuiRight"),
 
-  KBD_KEY_NAME(ACTION, Application, "Application"),
-  KBD_KEY_NAME(ACTION, Application, "ACTION_Application"),
+  KBD_KEY_NAME(ACTION, Context, "Context"),
+  KBD_KEY_NAME(ACTION, Context, "ACTION_Context"),
+  KBD_KEY_NAME(ACTION, Context, "Application"),
+  KBD_KEY_NAME(ACTION, Context, "ACTION_Application"),
 
   KBD_KEY_NAME(ACTION, Help, "ACTION_Help"),
 

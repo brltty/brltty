@@ -171,7 +171,7 @@ typedef enum {
 
   KBD_KEY(ACTION, GuiLeft),
   KBD_KEY(ACTION, GuiRight),
-  KBD_KEY(ACTION, Application),
+  KBD_KEY(ACTION, Context),
 
   KBD_KEY(ACTION, Help),
   KBD_KEY(ACTION, Stop),
