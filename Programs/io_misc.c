@@ -438,7 +438,7 @@ connectSocket (
 #endif /* GOT_SOCKETS */
 
 int
-changeOpenFlags (int fileDescriptor, int flagsToClear, int flagsToSet) {
+changeOpenFlags (FileDescriptor fileDescriptor, int flagsToClear, int flagsToSet) {
 #if defined(F_GETFL) && defined(F_SETFL)
   int flags;
 
@@ -461,7 +461,7 @@ changeOpenFlags (int fileDescriptor, int flagsToClear, int flagsToSet) {
 }
 
 int
-setOpenFlags (int fileDescriptor, int state, int flags) {
+setOpenFlags (FileDescriptor fileDescriptor, int state, int flags) {
   if (state) {
     return changeOpenFlags(fileDescriptor, 0, flags);
   } else {
@@ -470,7 +470,7 @@ setOpenFlags (int fileDescriptor, int state, int flags) {
 }
 
 int
-setBlockingIo (int fileDescriptor, int state) {
+setBlockingIo (FileDescriptor fileDescriptor, int state) {
 #ifdef O_NONBLOCK
   if (setOpenFlags(fileDescriptor, !state, O_NONBLOCK)) return 1;
 #else /* O_NONBLOCK */
@@ -481,7 +481,7 @@ setBlockingIo (int fileDescriptor, int state) {
 }
 
 int
-setCloseOnExec (int fileDescriptor, int state) {
+setCloseOnExec (FileDescriptor fileDescriptor, int state) {
 #if defined(F_SETFD) && defined(FD_CLOEXEC)
   if (fcntl(fileDescriptor, F_SETFD, (state? FD_CLOEXEC: 0)) != -1) return 1;
 #else /* defined(F_SETFD) && defined(FD_CLOEXEC) */

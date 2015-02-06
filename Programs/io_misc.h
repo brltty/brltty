@@ -67,10 +67,10 @@ getSocketOption (
 }
 #endif /* GOT_SOCKETS */
 
-extern int changeOpenFlags (int fileDescriptor, int flagsToClear, int flagsToSet);
-extern int setOpenFlags (int fileDescriptor, int state, int flags);
-extern int setBlockingIo (int fileDescriptor, int state);
-extern int setCloseOnExec (int fileDescriptor, int state);
+extern int changeOpenFlags (FileDescriptor fileDescriptor, int flagsToClear, int flagsToSet);
+extern int setOpenFlags (FileDescriptor fileDescriptor, int state, int flags);
+extern int setBlockingIo (FileDescriptor fileDescriptor, int state);
+extern int setCloseOnExec (FileDescriptor fileDescriptor, int state);
 
 #ifdef __cplusplus
 }
