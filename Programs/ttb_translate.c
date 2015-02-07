@@ -159,6 +159,10 @@ convertCharacterToDots (TextTable *table, wchar_t character) {
           if (row) {
             unsigned int cellNumber = UNICODE_CELL_NUMBER(character);
 
+            if (BITMASK_TEST(row->cellDefined, cellNumber)) {
+              return row->cells[cellNumber];
+            }
+
             if (BITMASK_TEST(row->cellAliased, cellNumber)) {
               const TextTableAliasEntry *alias = findTextTableAlias(table, character);
 
