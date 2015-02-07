@@ -1,0 +1,5 @@
+"braille","bindings for braille keyboards"
+"desktop","bindings for full keyboards"
+"keypad","bindings for keypad-based navigation"
+"laptop","bindings for keyboards without a keypad"
+"sun_type6","bindings for Sun Type 6 keyboards"

@@ -4,6 +4,9 @@ Key Tables
 
 .. include:: prologue.rst
 
+Description
+===========
+
 Files with names of the form ``*.ktb`` are key tables, and with names of the
 form ``*.kti`` are key subtables. They are used to bind braille device and
 computer keyboard key combinations to BRLTTY commands.

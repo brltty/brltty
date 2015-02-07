@@ -4,12 +4,17 @@ Attributes Tables
 
 .. include:: prologue.rst
 
+Description
+===========
+
 Files with names of the form ``*.atb`` are attributes tables, and with names of
 the form ``*.ati`` are attributes subtables. They are used when BRLTTY is
 displaying screen attributes rather than screen content. Each of the eight
-braille dots represents one of the eight VGA attribute bits. They can usually
-be found in the ``/etc/brltty/Attributes/`` directory (see |README.Customize|
-for more details).
+braille dots represents one of the eight VGA attribute bits.
+
+Attributes tables can usually be found in the ``/etc/brltty/Attributes/``
+directory (see |README.Customize| for more details). See
+`Attributes Table List`_ for a list of BRLTTY's attributes tables.
 
 An attributes table consists of a sequence of directives, one per line, which 
 define how combinations of VGA attributes are to be represented in braille. 
@@ -65,3 +70,11 @@ Examples::
    dot 2 ~bg-blue
 
 .. include:: nesting-directives.rst
+
+Attributes Table List
+=====================
+
+.. csv-table::
+   :header: "Name", "Description"
+   :file: attributes-table.csv
+

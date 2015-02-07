@@ -4,12 +4,17 @@ Text Tables
 
 .. include:: prologue.rst
 
+Description
+===========
+
 Files with names of the form ``*.ttb`` are text tables, and with names of the
 form ``*.tti`` are text subtables. They are used by BRLTTY to translate the
 characters on the screen into their corresponding 8-dot computer braille
-representations (see |README.BrailleDots| for details). They can usually be
-found in the ``/etc/brltty/Text/`` directory (see |README.Customize| for more
-details).
+representations (see |README.BrailleDots| for details).
+
+Text tables can usually be found in the ``/etc/brltty/Text/`` directory (see
+|README.Customize| for more details). See `Text Table List`_ for a list of
+BRLTTY's text tables.
 
 A text table consists of a sequence of directives, one per line, which define 
 how each character is to be represented in braille. UTF-8 character encoding 
@@ -111,4 +116,11 @@ as defined by the standard braille dot numbering convention (see
 |README.BrailleDots| for details). The special dot number ``0`` is recognized
 when not enclosed within (parentheses), and means no dots - it may not be used
 in conjunction with any other dot number.
+
+Text Table List
+===============
+
+.. csv-table::
+   :header: "Name", "Description"
+   :file: text-table.csv
 

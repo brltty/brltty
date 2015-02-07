@@ -1,0 +1,72 @@
+#!/bin/bash
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2015 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any
+# later version. Please see the file LICENSE-GPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+. "`dirname "${0}"`/../prologue.sh"
+parseProgramArguments "${@}"
+
+set -e
+
+declare -A lists
+readonly newLine=$'\n'
+
+writeList() {
+   local list="${1}"
+   local file="${2}"
+
+   echo >"${file}" -n -E "${lists["${list}"]}"
+}
+
+while read list name description
+do
+   lists["${list}"]+="\"${name}\",\"${description}\"${newLine}"
+done < <(sed <"${programDirectory}/brltty.conf.in" -n -r -e 's/^#(\w+-(driver|table))\s+(\w+)\s*#\s*(.*\S)\s*/\1 \3 \4/p')
+
+fileUpdated=false
+set -- "${!lists[@]}"
+
+for list
+do
+   file="${list}.csv"
+
+   if [ -f "${file}" ]
+   then
+      exec 3<"${file}"
+      read -u 3 -r -N $(( ${#lists["${list}"]} + 1 )) oldText || :
+      exec 3<&-
+
+      [ "${oldText}" != "${lists["${list}"]}" ] || continue
+      logMessage task "updating ${file}"
+      fileUpdated=true
+
+      oldFile="${file}.old"
+      newFile="${file}.new"
+
+      writeList "${list}" "${newFile}"
+      mv "${file}" "${oldFile}"
+      mv "${newFile}" "${file}"
+      rm "${oldFile}"
+   else
+      logMessage task "creating ${file}"
+      fileUpdated=true
+      writeList "${list}" "${file}"
+   fi
+done
+
+"${fileUpdated}" || logMessage task "no files updated"
+exit 0

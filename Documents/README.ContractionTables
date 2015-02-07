@@ -4,12 +4,17 @@ Contraction Tables
 
 .. include:: prologue.rst
 
+Description
+===========
+
 Files with names of the form ``*.ctb`` are contraction tables, and with names
 of the form ``*.cti`` are contraction subtables. They are used by BRLTTY to
 translate character sequences on the screen into their corresponding contracted
-braille representations. They can usually be found in the
-``/etc/brltty/Contraction/`` directory (see |README.Customize| for more
-details).
+braille representations.
+
+Contraction tables can usually be found in the ``/etc/brltty/Contraction/``
+directory (see |README.Customize| for more details). SEe
+`Contraction Table list`_ for a list of BRLTTY's contraction tables.
 
 A contraction table consists of a sequence of directives, one per line, that 
 define how character sequences are to be represented in contracted braille.
@@ -18,10 +23,10 @@ beginning of a line, as well as before and/or after any operand, is ignored.
 Lines containing only whitespace are ignored. If the first non-whitespace
 character of a line is ``#`` then that line is a comment and is ignored.
 
-Directives
-==========
+Contraction Directives
+======================
 
-The format of a contraction table statement is:
+The format of a contraction directive is:
 
 .. parsed-literal:: *directive* *operand* ... *comment*
 
@@ -31,8 +36,8 @@ within a contraction table is, in general, anything that is convenient for its
 maintainer(s). A directive that defines an entity, e.g. `The Class Directive`_,
 must precede all references to that entity.
 
-Statements that match character sequences are automatically rearranged such
-that longer sequences are matched first. If more than one statement matches the
+directives that match character sequences are automatically rearranged such
+that longer sequences are matched first. If more than one directive matches the
 same character sequence then their original table ordering is maintained.
 
 The Literal Directive
@@ -258,6 +263,9 @@ The NumSign Directive
 
 Define the symbol which marks the beginning of a number.
 
+Standard Directives
+===================
+
 .. include:: nesting-directives.rst
 
 Operands
@@ -275,4 +283,11 @@ within the range ``1``-``8`` as defined by the standard braille dot numbering
 convention (see |README.BrailleDots| for details). The special dot number
 ``0`` means no dots, and may not be used in conjunction with any other dot
 numbers.
+
+Contraction Table List
+======================
+
+.. csv-table::
+   :header: "Name", "Description"
+   :file: contraction-table.csv
 
