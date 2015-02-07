@@ -13,14 +13,16 @@ computer keyboard key combinations to BRLTTY commands.
 
 *  Braille device key tables can usually be found in the
    ``/etc/brltty/Input/xx/`` directory, where ``xx`` is the two-letter braille
-   driver identification code. The name of a braille device key table
-   identifies the model(s) for which it is used.
+   driver identification code (see `Braille Driver List`_). The name of a
+   braille device key table identifies the model(s) for which it is used. The
+   driver selects which key table is to be used.
 
 *  Computer keyboard key tables can usually be found in the
    ``/etc/brltty/Keyboard/`` directory. The name of a keyboard key table
-   describes the kind of keyboard for which it has been designed.
+   describes the kind of keyboard for which it has been designed. See
+   `Keyboard Table List`_ for a list of BRLTTY's keyboard tables.
 
-*  See |README.Customize| for more details.
+*  See |README.Customize| for more details regarding key table locations.
 
 A key table consists of a sequence of directives, one per line, which define 
 how keys and key combinations are to be interpreted. UTF-8 character encoding 
@@ -472,4 +474,18 @@ Examples::
 .. include:: nesting-directives.rst
 .. include:: variable-directives.rst
 .. include:: condition-directives.rst
+
+Keyboard Table List
+===================
+
+.. csv-table::
+   :header: "Name", "Description"
+   :file: keyboard-table.csv
+
+Braille Driver List
+===================
+
+.. csv-table::
+   :header: "Code", "Name"
+   :file: braille-driver.csv
 
