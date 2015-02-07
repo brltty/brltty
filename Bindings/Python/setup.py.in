@@ -22,22 +22,51 @@ from distutils.core import setup, Extension
 
 if __name__ == "__main__":
     brlapi = Extension("brlapi",
-        sources = ["brlapi.auto.c","@srcdir@/bindings.c"],
-        include_dirs = ["@builddir@", "@srcdir@", "@top_builddir@/Programs", "@top_srcdir@/Programs", "@top_builddir@/", "@top_srcdir@/"],
-        library_dirs = ["./@top_builddir@/Programs"],
-        libraries = ["brlapi", "pthread"],
         language = "c",
-        define_macros = [],
-        extra_compile_args = "@CYTHON_CFLAGS@".split())
+
+        sources = [
+            "brlapi.auto.c",
+            "@srcdir@/bindings.c"
+        ],
+
+        include_dirs = [
+            "@builddir@",
+            "@srcdir@",
+            "@top_builddir@/Programs",
+            "@top_srcdir@/Programs",
+            "@top_builddir@/",
+            "@top_srcdir@/"
+        ],
+
+        library_dirs = [
+            "./@top_builddir@/Programs"
+        ],
+
+        libraries = [
+            "brlapi",
+            "pthread"
+        ],
+
+        define_macros = [
+            ('__USE_MINGW_ANSI_STDIO', '1')
+        ],
+
+        extra_compile_args = "@CYTHON_CFLAGS@".split()
+    )
     
     setup(
         name = "Brlapi",
         version = "@api_release@",
         description = "BrlAPI Client Bindings for Python",
+
         author = "Alexis Robert",
         author_email = "alexissoft@free.fr",
+
         maintainer = "The BRLTTY Developers",
         maintainer_email = "@PACKAGE_BUGREPORT@",
+
         license = "LGPL 2.1",
         url = "@PACKAGE_URL@",
-        ext_modules = [brlapi],)
+
+        ext_modules = [brlapi]
+    )
