@@ -171,6 +171,9 @@ mkdir -p "${temporaryDirectory}"
 cd "${temporaryDirectory}"
 temporaryDirectory="$(pwd -W)"
 
+revisionIdentifier="$("${sourceRoot}/getrevid" "${sourceRoot}")"
+logMessage task "revision identifier: ${revisionIdentifier}"
+
 logMessage task "copying source tree"
 newSourceRoot="${temporaryDirectory}/source"
 cp -a "${sourceRoot}" "${newSourceRoot}"
@@ -198,7 +201,6 @@ buildName="${BRLTTY_TARNAME}-win-${buildVersion}-${usbPackage}"
 logMessage task "building programs"
 make -s
 make -s -C Drivers/BrlAPI/WindowEyes we-dynamic-library-windows
-revisionIdentifier="$(sed -e 's/"//g' <"Programs/revision_identifier.h")"
 
 logMessage task "building documents"
 make -s -C Documents
