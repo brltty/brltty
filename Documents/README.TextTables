@@ -23,6 +23,47 @@ before and/or after any operand of any directive, is ignored. Lines containing
 only whitespace are ignored. If the first non-whitespace character of a line 
 is ``#`` then that line is a comment and is ignored.
 
+The precedence for determining the braille representation for a character is as
+follows:
+
+1) If the character is within the Unicode braille Row (U+2800 through U+28FF)
+   then its low-order eight bits are used as follows:
+
+   ===  ========  ===
+   Hex  Binary    Dot
+   ---  --------  ---
+   01   00000001  1
+   02   00000010  2
+   04   00000100  3
+   08   00001000  4
+   10   00010000  5
+   20   00100000  6
+   40   01000000  7
+   80   10000000  8
+   ===  ========  ===
+
+2) If the character is within the Unicode private use row U+F000 through U+F0FF
+   then its low-order byte is:
+
+   1) interpreted as a single-byte character within the locAL character set
+   2) translated to Unicode
+   3) reprocessed
+
+3) An explicit representation (defined via `The Char Directive`_,
+   `The Glyph Directive`_, or `The Byte Directive`_.
+
+4) An equivalent representation (defined via `The Alias Directive`_).
+
+5) The explicit representation of the Unicode base character.
+
+6) The explicit representation of the transliterated ASCII character.
+
+7) The explicit representation of the Unicode Replacement Character (U+FFFD).
+
+8) The explicit representation of a question mark (``?``).
+
+9) All eight braille dots.
+
 Directives
 ==========
 
