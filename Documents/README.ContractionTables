@@ -31,14 +31,23 @@ The format of a contraction directive is:
 .. parsed-literal:: *directive* *operand* ... *comment*
 
 Each directive has a specific number of operands. Any text beyond the last 
-operand of a directive is interpreted as a comment. The order of the directives 
-within a contraction table is, in general, anything that is convenient for its 
-maintainer(s). A directive that defines an entity, e.g. `The Class Directive`_,
-must precede all references to that entity.
+operand of a directive is interpreted as a comment. This commenting capability
+is often used to list some of the words that make the directive necessary.
 
-directives that match character sequences are automatically rearranged such
+The order of the directives within a contraction table is, in general, anything
+that is convenient for its maintainer(s). A directive that defines an entity,
+e.g. `The Class Directive`_, must precede all references to that entity.
+
+Directives that match character sequences are automatically rearranged such
 that longer sequences are matched first. If more than one directive matches the
 same character sequence then their original table ordering is maintained.
+
+Whenever a character needs to be written, its representation as defined via
+`The Always Directive`_ is used. In principle, this means that every character
+within the *representation* operand of every contraction directive should be
+explicitly defined via `The Always Directive`_. If a character's representation
+hasn't been defined then the Unicode Replacement Character (U+FFFD) is used -
+if it's representation hasn't been defined then all eight dots are used.
 
 The Literal Directive
 ---------------------
@@ -277,12 +286,15 @@ The Representation Operand
 --------------------------
 
 The contracted braille representation of a character sequence. Braille cells
-are separated from one another by a minus (-) sign. Each braille cell is
+are separated from one another by a minus (``-``) sign. Each braille cell is
 specified as a sequence of one to eight dot numbers. A dot number is a digit
 within the range ``1``-``8`` as defined by the standard braille dot numbering
 convention (see |README.BrailleDots| for details). The special dot number
 ``0`` means no dots, and may not be used in conjunction with any other dot
 numbers.
+
+The equals (``=``) sign , when used all by itself, means that the *characters*
+operand of the contraction directive is to be written without any translation.
 
 Contraction Table List
 ======================
