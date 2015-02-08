@@ -2598,6 +2598,7 @@ brlttyStart (void) {
     enableScreenDriver();
   }
   
+#ifdef ENABLE_API
   if (!opt_noApi) {
     const char *const *parameters = api.getParameters();
 
@@ -2617,6 +2618,7 @@ brlttyStart (void) {
       }
     }
   }
+#endif /* ENABLE_API */
 
   /* The device(s) the braille display might be connected to. */
   if (!*opt_brailleDevice) {
