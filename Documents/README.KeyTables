@@ -52,19 +52,21 @@ context.
 
 *keys*
    The key combination which is to be bound. It's a sequence of one or more key
-   and/or key group names separated by plus (+) signs. The final (or only) key
-   name may be optionally prefixed with an exclamation (!) point. For example:
+   and/or key group names separated by plus (``+``) signs. The final (or only)
+   key name may be optionally prefixed with an exclamation (``!``) point. For
+   example::
 
-   *  key1
-   *  group1
-   *  key1+key2
-   *  key1+key2+group1
-   *  !group1
-   *  key1+!key2
+      key1
+      group1
+      key1+key2
+      key1+key2+group1
+      !group1
+      key1+!key2
 
    A key group name refers to any key within the named group. A specific key
-   within the group may be identified by appending a dot (.) and a number to
-   the name. The first key within a group is key #1 (e.g. ``keyGroupName.1``).
+   within the group may be identified by appending a dot (``.``) and a number
+   to the group's name. The first key within a group is key #1 (e.g.
+   ``keyGroupName.1``).
 
    The keys may be pressed in any order, with the exception that if the final
    key name is prefixed with an exclamation point then it must be pressed last.
@@ -75,8 +77,8 @@ context.
 *commands*
    The primary and secondary BRLTTY commands that are to be bound to the key
    combination. The two commands (primary first and secondary last) are
-   separated from one another by a colon (:). Both commands are optional. If
-   just a primary command is being bound then the colon needn't be supplied.
+   separated from one another by a colon (``:``). Both commands are optional.
+   If just a primary command is being bound then the colon needn't be supplied.
    All of these are valid:
 
    *  bind key primaryCommand
@@ -94,11 +96,11 @@ context.
 .. _Bind Command Modifiers:
 
 One or more modifiers may be optionally appended to a command name by using a 
-plus (+) sign as the separator. For example:
+plus (``+``) sign as the separator. For example::
 
-*  bind key command
-*  bind key command+modifier1
-*  bind key command+modifier1+modifier2
+   bind key command
+   bind key command+modifier1
+   bind key command+modifier1+modifier2
 
 For commands which enable/disable a feature:
 
@@ -407,10 +409,10 @@ table's help text.
 *  A note that doesn't have a special prefix begins a new outer bulleted list
    element.
 
-*  A note that is prefixed with an asterisk (*) continues the current outer
+*  A note that is prefixed with an asterisk (``*``) continues the current outer
    bulleted list element.
 
-*  A note that is prefixed with a plus (+) sign is an inner bulletged list
+*  A note that is prefixed with a plus (``+``) sign is an inner bulletged list
    element.
 
 Examples::
