@@ -121,7 +121,7 @@ fi
 
 if test "${GCC}" = "yes"
 then
-   CYTHON_CFLAGS="-Wno-parentheses -Wno-unused -fno-strict-aliasing -U_POSIX_C_SOURCE -U_XOPEN_SOURCE"
+   CYTHON_CFLAGS="-Wno-parentheses -Wno-unused -Wno-format -fno-strict-aliasing -U_POSIX_C_SOURCE -U_XOPEN_SOURCE"
 else
    case "${host_os}"
    in
