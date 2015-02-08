@@ -110,9 +110,26 @@ addWindowsPackageOption X libusb1
 addWindowsPackageOption W winusb
 addWindowsPackageOption P python
 addWindowsPackageOption I icu
+addProgramOption C string.directory cygwinRoot "the root directory of a Cygwin installation"
 addProgramParameter source sourceRoot "the top-level directory of the source tree"
 addProgramParameter revision buildRevision "the revision of the build"
 parseProgramArguments "${@}"
+
+sourceRoot="$(cd "${sourceRoot}" && pwd -W)"
+[ -f "${sourceRoot}/configure" ] || semanticError "not a source tree: ${sourceRoot}"
+
+revisionIdentifier="$("${sourceRoot}/getrevid" "${sourceRoot}")"
+logMessage task "revision identifier: ${revisionIdentifier}"
+
+[ -z "${cygwinRoot}" ] || {
+   if [ -d "${cygwinRoot}/cygdrive" ]
+   then
+      export PATH="${PATH}:${cygwinRoot}/bin"
+      export nodosfilewarning=1
+   else
+      logMessage warning "not a Cygwin root directory: ${cygwinRoot}"
+   fi
+}
 
 [ -n "${usbPackage}" ] || usbPackage="${defaultUsbPackage}"
 
@@ -135,9 +152,6 @@ libusb1Filter="\
 
 set -- ${usbWindowsPackages}
 copyProperties "${1}" usb Name Location Download Version Pattern Filter
-
-sourceRoot="$(cd "${sourceRoot}" && pwd -W)"
-[ -f "${sourceRoot}/configure" ] || semanticError "not a source tree: ${sourceRoot}"
 
 [ -z "${msvcRoot}" ] || {
    if verifyWindowsPackage msvc
@@ -170,9 +184,6 @@ fi
 mkdir -p "${temporaryDirectory}"
 cd "${temporaryDirectory}"
 temporaryDirectory="$(pwd -W)"
-
-revisionIdentifier="$("${sourceRoot}/getrevid" "${sourceRoot}")"
-logMessage task "revision identifier: ${revisionIdentifier}"
 
 logMessage task "copying source tree"
 newSourceRoot="${temporaryDirectory}/source"
