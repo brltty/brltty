@@ -203,7 +203,7 @@ cd "${buildRoot}"
 
 logMessage task "configuring build"
 configureOptions="--enable-relocatable-install --with-usb-package="${usbPackage}" --disable-i18n --without-params-package --without-mntpt-package --without-mntfs-package --without-kbd-package --without-libbraille --disable-speech-support --disable-java-bindings --disable-ocaml-bindings --disable-tcl-bindings"
-"${sourceRoot}/configure" --quiet --prefix=/ ${configureOptions}
+"../source/configure" --quiet --prefix=/ ${configureOptions}
 
 . ./config.sh
 buildVersion="${BRLTTY_VERSION}-${buildRevision}"
