@@ -25,7 +25,8 @@ Each type of profile has the following properties:
 *  A specific group of settings that it can override.
 *  Its own file extension.
 *  Its own selector within BRLTTY's Profiles submenu.
-*  Its own SET_*_PROFILE command for direct selection (see below).
+*  Its own SET_*_PROFILE command for direct selection (see
+   `Profile Selection`_).
 
 Supported Profile Types
 -----------------------
@@ -42,13 +43,16 @@ following settings:
 *  text-table 
 *  contraction-table
 
-A profile for the German language might look like this::
+For example, a profile for the German language might look like this::
 
    locale de_DE.UTF-8
    speech-driver es
    speech-parameters voice=de,maxrate=300
    text-table de
    contraction-table de-kurzschrift
+
+All of the speech driver parameters must be specified on a single line, and be
+separated from one another by a comma (``,``).
 
 Profile Selection
 -----------------
@@ -65,7 +69,8 @@ command. For example, if you'd like to directly select your language profile
 then you'd define bindings for the ``SET_LANGUAGE_PROFILE`` command. You may
 add your bindings either to the keyboard table that you're using or to the key 
 table for your braille device. Except for a few examples below, exactly how to 
-do this is beyond the scope of this document.
+do this is beyond the scope of this document (see |README.KeyTables| for
+details).
 
 One approach is to define a single binding which involves a routing key. For 
 example::
@@ -92,7 +97,7 @@ within the Language selector of the Profiles submenu.
 A practical approach, which would make it easy to remember the bindings, might 
 be to use a keyboard table, and to use a simple key combination plus a 
 meaningful letter for each language name. Let's say that your primary language 
-is English and that you also use French and German. In this case, your default 
+is English, and that you also use French and German. In this case, your default 
 settings (no profile) would be for English, and you'd create french.lpf for 
 French and german.lpf for German. You could then define a set of bindings which 
 use ``e`` for English, ``f`` for French, and ``g`` for German. For example::
@@ -120,12 +125,12 @@ default`` statement just before them. For example::
    context default
    bind Key1+RoutingKey SET_LANGUAGE_PROFILE
 
-If you'd like your binding definitions to survive a BRLTTY reinstall then you 
-should use a customized data file which includes the provided one and then 
-defines your bindings. Let's say that you'd like to add your bindings to the 
-``laptop`` keyboard table (``laptop.ktb``). Create a file with the same name - 
-``laptop.ktb`` - in the ``/etc/xdg/brltty/`` directory, and, with an editor,
-make it look like this::
+If you'd like your additional binding definitions to survive a BRLTTY reinstall
+then you should use a customized key table or subtable (see |README.Customize|)
+that includes the provided one, and then defines your additiional bindings.
+Let's say that you'd like to add your bindings to the ``laptop`` keyboard table
+(``laptop.ktb``). Create a file with the same name - ``laptop.ktb`` - in the
+``/etc/xdg/brltty/`` directory, and, with an editor, make it look like this::
 
    include laptop.ktb
    context default
