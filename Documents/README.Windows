@@ -460,6 +460,11 @@ Use the -v (verbose) option to increase output verbosity, and/or the -q (quiet)
 option to decrease output verbosity. These two options are complementary, and
 both are cumulative - each may be specified any number of times.
 
+use the -C (Cygwin) option to specify the root (top-level) directory of a
+Cygwin installation. Cygwin's bin directory is added to the end of the command
+search path as a last resort for finding needed commands that MinGW may not
+have.
+
 Use the -t (temporary) option to explicitly specify the temporary directory 
 which is to be used for the build. It must not already exist. If you do not 
 specify it then an internally generated path is used.
