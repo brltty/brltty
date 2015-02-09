@@ -1,45 +1,87 @@
-As of release 5.0, brltty was converted from being polling-based to being 
+~~~~~~~
+Polling
+~~~~~~~
+
+.. include:: prologue.rst
+
+As of release 5.0, BRLTTY has been converted from being polling-based to being 
 event-based. This means, among other things, that it's now able to become 
 completely idle whenever it doesn't have anything useful to do. For comparison, 
 it formerly used a huge, central, main loop which was run frequently (about 25 
-times per second), and which was aware of, and to check for, every single task 
-that might need to be performed.
+times per second), and which was aware of, and had to check for, every single
+task that might need to be performed.
 
-In practical terms, this change, when compared with how brltty used to work, 
+In practical terms, this change, when compared with how BRLTTY used to work, 
 delivers at least the following significant benefits:
-*  Noticeably improved response time.
-*  Much less system load (very temporary rather than constant).
-*  Way less battery drain (the system is no longer forced to remain awake).
 
-There are still some cases in which polling is still being used. Some of these 
-will eventually be resolved by future code changes, while others, 
-unfortunately, are required due to host platform limitations.
+*  Noticeably improved response time. Near instant reaction to significant user
+   and system events rather than waiting for the next polling cycle to check
+   for them.
 
-Determining that the screen has been updated (size change, content change, 
-highlighting change, cursor location, etc) still uses frequent polling (about
-every 40 milliseconds) unless you are using one of the following:
-*  Android.
-*  A Linux text console and the kernel is at least 2.6.37 which was released on
-   2011 January 4.
+*  Much less system load. Just a few, short-lived bursts of activity when
+   actually necessary rather than frequent, much longer-lived checking that,
+   far more often than not, resulted in nothing needing to be done.
 
-Serial input still uses frequent polling (about every 40 milliseconds) unless
-you are using one of the following:
-*  Linux.
+*  Way less battery drain. The system is no longer forced either to remain
+   awake or to continually wake up after a rather brief nap.
 
-USB input still uses frequent polling (about every 40 milliseconds) unless you
-are using one of the following:
-*  Linux.
+There are cases in which polling is still being used. Some of these will
+eventually be resolved by future code changes, while others, unfortunately, are
+required due to host platform limitations.
 
-Bluetooth input still uses frequent polling (about every 40 milliseconds)
-unless you are using one of the following:
-*  Android.
-*  Linux.
+.. |frequent polling| replace:: frequent polling (about every 40 milliseconds)
+.. |regular polling| replace:: regular polling (about every five seconds)
 
-Waiting for a braille device to become available for use still uses regular 
-polling (about every five seconds).
+.. topic:: Monitoring for Screen Updates
 
-Waiting for a speech device or package to become available for use still uses 
-regular polling (about every five seconds).
+   This task involves checking for size changes, content changes, highlighting
+   changes, cursor movement, etc. It's event-based on:
 
-Waiting for the screen to become readable still uses regular polling (about
-every five seconds).
+   *  Android
+
+   *  Linux text consoles if the kernel is at least 2.6.37 (released on January 4,
+      2011)
+
+   On other platforms, |frequent polling| is used.
+
+.. topic:: Monitoring for Serial Input
+
+   This task is event-based on:
+
+   *  Linux
+
+   On other platforms, |frequent polling| is used.
+
+.. topic:: Monitoring for USB Input
+
+   This task is event-based on:
+
+   *  Linux
+
+   On other platforms, |frequent polling| is used.
+
+.. topic:: Monitoring for Bluetooth Input
+
+   Tghis task is event-based on:
+
+   *  Android
+
+   *  Linux
+
+   On other platforms, |frequent polling| is used.
+
+.. topic:: Waiting for a Braille Device to Become Available
+
+   This task involves attempting to start the selected braille driver.
+   On all platforms, |regular polling| is used.
+
+.. topic:: Waiting for a Speech Device or Package to Become Available
+
+   This task involves attempting to start the selected speech driver.
+   On all platforms, |regular polling| is used.
+
+.. topic:: Waiting for the Screen to Become Readable
+
+   This task involves attempting to start the selected screen driver.
+   On all platforms, |regular polling| is used.
+
