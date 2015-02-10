@@ -45,9 +45,9 @@ follows:
 2) If the character is within the Unicode private use row U+F000 through U+F0FF
    then its low-order byte is:
 
-   1) interpreted as a single-byte character within the locAL character set
-   2) translated to Unicode
-   3) reprocessed
+   A) interpreted as a single-byte character within the locAL character set
+   B) translated to Unicode
+   C) reprocessed
 
 3) An explicit representation (defined via `The Char Directive`_,
    `The Glyph Directive`_, or `The Byte Directive`_.
