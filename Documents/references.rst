@@ -1,18 +1,22 @@
-.. _`Using the Android Platform`: Android.html
-.. _`Attributes Tables`: AttributesTables.html
-.. _`Bluetooth Connections`: Bluetooth.html
-.. _`Braille Dots`: BrailleDots.html
-.. _`Contraction Tables`: ContractionTables.html
-.. _`Local Customizations`: Customize.html
-.. _`Device Identifiers`: Devices.html
-.. _`Using the DOS Platform`: DOS.html
-.. _`Key Tables`: KeyTables.html
-.. _`Using the OpenBSD Platform`: OpenBSD.html
-.. _`Polling`: Polling.html
-.. _`Profiles`: Profiles.html
-.. _`Using the Stow Build Manager`: Stow.html
-.. _`Using Systemd Service Management`: Systemd.html
-.. _`Text Tables`: TextTables.html
-.. _`Using Upstart Service Management`: Upstart.html
-.. _`Using the Windows Platform`: Windows.html
-.. _`Using the X11 User Interface`: X11.html
+.. _Using BRLTTY on Android: Android.html
+.. _Attributes Tables: AttributesTables.html
+.. _Bluetooth Connections: Bluetooth.html
+.. _Braille Dots: BrailleDots.html
+.. _Contraction Tables: ContractionTables.html
+.. _Local Customization: Customize.html
+.. _Device Identifiers: Devices.html
+.. _Using BRLTTY on DOS: DOS.html
+.. _Key Tables: KeyTables.html
+.. _Using BRLTTY on OpenBSD: OpenBSD.html
+.. _Polling: Polling.html
+.. _Profiles: Profiles.html
+.. _Using the Stow Build Manager: Stow.html
+.. _Using Systemd Service Management: Systemd.html
+.. _Text Tables: TextTables.html
+.. _Using Upstart Service Management: Upstart.html
+.. _Using BRLTTY on Windows: Windows.html
+.. _Using the X11 User Interface: X11.html
+
+.. _BRLTTY's Website: http://www.brltty.com/
+.. _The Android SDK Web Page: http://developer.android.com/sdk/index.html
+.. _The Android NDK Web Page: https://developer.android.com/tools/sdk/ndk/index.html

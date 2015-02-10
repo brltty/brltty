@@ -29,9 +29,6 @@ There are cases in which polling is still being used. Some of these will
 eventually be resolved by future code changes, while others, unfortunately, are
 required due to host platform limitations.
 
-.. |frequent polling| replace:: frequent polling (about every 40 milliseconds)
-.. |periodic retrying| replace:: periodic retrying (about every five seconds)
-
 .. topic:: Monitoring for Screen Updates
 
    This task involves checking for size changes, content changes, highlighting
@@ -90,3 +87,5 @@ required due to host platform limitations.
 
    On all platforms, |periodic retrying| is used.
 
+.. |frequent polling| replace:: frequent polling (about every 40 milliseconds)
+.. |periodic retrying| replace:: periodic retrying (about every five seconds)
