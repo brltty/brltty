@@ -1,32 +1,41 @@
-An Upstart job for brltty can be found within the "Autostart/Upstart/" 
-subdirectory of BRLTTY's source tree. It's called "brltty.conf". All you need 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Using Upstart Service Management
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. include:: prologue.rst
+
+An Upstart job for BRLTTY can be found within the ``Autostart/Upstart/`` 
+subdirectory of BRLTTY's source tree. It's called ``brltty.conf``. All you need
 to do is to copy this file into Upstart's jobs directory.
 
-Upstart's jobs directory has changed over time. Older Upstart releases use 
-"/etc/event.d/" whereas newer ones use "/etc/init/". You'll need to check your 
-system to see which of these directories it's using. Don't get confused by the 
-directory "/etc/init.d/", which your system probably also has, and which has a 
-similar name. It's used for something entirely different - SysV init scripts.
+Upstart's jobs directory has changed over time. Older Upstart releases use
+``/etc/event.d/`` whereas newer ones use ``/etc/init/``. You'll need to check
+your system to see which of these directories it's using. Don't get confused by
+the directory ``/etc/init.d/``, which your system probably also has, and which
+has a similar name. It's used for something entirely different - SysV init
+scripts.
 
 The file also needs to have the correct name. Older Upstart releases just use 
-the job name itself, e.g. "brltty", whereas newer ones append the ".conf" 
-extension, e.g. "brltty.conf".
+the job name itself, e.g. ``brltty``, whereas newer ones append the ``.conf`` 
+extension, e.g. ``brltty.conf``.
 
-so, for an older Upstart release, you'd do something like this:
+So, to define BRLTTY's Upstart job, you'll need to do something like this:
 
-   cp brltty.conf /etc/event.d/brltty
+*  For an older Upstart release::
 
-and, for a newer Upstart release, you'd do something like this:
+      cp brltty.conf /etc/event.d/brltty
 
-   cp brltty.conf /etc/init/brltty.conf
+*  For a newer Upstart release::
 
-Once the job file is in the right place, brltty will automatically start when 
+      cp brltty.conf /etc/init/brltty.conf
+
+Once the job file is in the right place, BRLTTY will automatically start when 
 the system is rebooted. You'll also be able to use standard Upstart commands to 
-manage the brltty job. The most common ones are:
+manage the ``brltty`` job. The most common ones are::
 
    status brltty
    start brltty
    stop brltty
 
-For example: You don't need to reboot the system in order to start brltty. 
-Just use Upstart's start command to start it right away.
+For example: You don't need to reboot the system in order to start BRLTTY.
+Just use Upstart's ``start`` command to start it right away.
