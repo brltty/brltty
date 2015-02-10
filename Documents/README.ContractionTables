@@ -209,6 +209,9 @@ The EndNum Directive
 
 Translate the characters if they're at the end of a number.
 
+Character Classes
+=================
+
 The Class Directive
 -------------------
 
@@ -236,6 +239,9 @@ The specified directive is further constrained in that the matched character
 sequence must be immediately followed by a character belonging to the specified
 class. If this directive is used more than once on the same line then the union
 of the characters in all the classes is used.
+
+Indicator Specification
+=======================
 
 The CapSign Directive
 ---------------------
