@@ -30,7 +30,7 @@ eventually be resolved by future code changes, while others, unfortunately, are
 required due to host platform limitations.
 
 .. |frequent polling| replace:: frequent polling (about every 40 milliseconds)
-.. |regular polling| replace:: regular polling (about every five seconds)
+.. |periodic retrying| replace:: periodic retrying (about every five seconds)
 
 .. topic:: Monitoring for Screen Updates
 
@@ -70,18 +70,23 @@ required due to host platform limitations.
 
    On other platforms, |frequent polling| is used.
 
-.. topic:: Waiting for a Braille Device to Become Available
+.. topic:: Starting the Braille Driver
 
-   This task involves attempting to start the selected braille driver.
-   On all platforms, |regular polling| is used.
+   On all platforms, |periodic retrying| is used.
 
-.. topic:: Waiting for a Speech Device or Package to Become Available
+.. topic:: Starting the Speech Driver
 
-   This task involves attempting to start the selected speech driver.
-   On all platforms, |regular polling| is used.
+   On all platforms, |periodic retrying| is used.
 
-.. topic:: Waiting for the Screen to Become Readable
+.. topic:: Starting the Screen Driver
 
-   This task involves attempting to start the selected screen driver.
-   On all platforms, |regular polling| is used.
+   On all platforms, |periodic retrying| is used.
+
+.. topic:: Starting the Keyboard Monitor
+
+   On all platforms, |periodic retrying| is used.
+
+.. topic:: Creating the PID File
+
+   On all platforms, |periodic retrying| is used.
 
