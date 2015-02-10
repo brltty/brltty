@@ -643,7 +643,7 @@ static void toX_f(const char *display) {
 	    if (window->wm_name)
 	      if (!XFree(window->wm_name)) fatal(gettext("XFree(wm_name) for change"));
 	    if ((window->wm_name=getWindowTitle(win))) {
-	      if (win==curWindow)
+	      if (!quiet && win==curWindow)
 		api_setName(window->wm_name);
 	    } else fprintf(stderr,gettext("window %#010lx changed to NULL name\n"),win);
 	  }
