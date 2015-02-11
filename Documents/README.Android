@@ -7,8 +7,8 @@ Using BRLTTY on Android
 Introduction
 ============
 
-Android Platform Considerations
--------------------------------
+System Requirements
+-------------------
 
 BRLTTY has been designed to run on at least Android 4.1 (Jelly Bean). While it
 does run on Android 4.0 (Ice Cream Sandwich), many of its highly desirable
@@ -50,7 +50,7 @@ different web browser and/or operating system.
 
 A) On your computer:
 
-   1) Go to `BRLTTY's Website`_.
+   1) Go to `BRLTTY's Web Site`_.
 
    2) Find the ``Download`` link and press enter on it.
 
