@@ -1003,6 +1003,8 @@ ASYNC_SIGNAL_CALLBACK(usbHandleInputSignal) {
     }
 
     free(request);
+  } else if (errno == EAGAIN) {
+    return 1;
   } else {
     usbLogInputProblem(endpoint, "input URB not available");
   }
