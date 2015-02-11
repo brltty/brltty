@@ -523,21 +523,58 @@ getSignalElement (int signalNumber, int create) {
 }
 
 #if defined(HAVE_SYS_SIGNALFD_H)
-ASYNC_INPUT_CALLBACK(asyncHandleSignalInput) {
+ASYNC_INPUT_CALLBACK(asyncHandleSignalfdInput) {
   static const char label[] = "signalfd";
   const SignalEntry *sig = parameters->data;
 
   if (parameters->error) {
-    logMessage(LOG_DEBUG, "%s read error: fd=%d sig=%d: %s",
+    logMessage(LOG_WARNING, "%s read error: fd=%d sig=%d: %s",
                label, sig->fileDescriptor, sig->number, strerror(parameters->error));
   } else if (parameters->end) {
-    logMessage(LOG_DEBUG, "%s end-of-file: fd=%d sig=%d",
+    logMessage(LOG_WARNING, "%s end-of-file: fd=%d sig=%d",
                label, sig->fileDescriptor, sig->number);
   } else {
     const struct signalfd_siginfo *info = parameters->buffer;
 
     handlePendingSignal(sig);
     return sizeof(*info);
+  }
+
+  return 0;
+}
+
+static int
+enableSignalEntry (SignalEntry *sig) {
+  sigset_t mask;
+
+  if (makeSignalMask(&mask, sig->number)) {
+    int flags = 0;
+
+#ifdef SFD_NONBLOCK
+    flags |= SFD_NONBLOCK;
+#endif /* SFD_NONBLOCK */
+
+#ifdef SFD_CLOEXEC
+    flags |= SFD_CLOEXEC;
+#endif /* SFD_CLOEXEC */
+
+    if ((sig->fileDescriptor = signalfd(-1, &mask, flags)) != -1) {
+      if (asyncReadFile(&sig->monitor, sig->fileDescriptor,
+                        sizeof(struct signalfd_siginfo),
+                        asyncHandleSignalfdInput, sig)) {
+        if (sig->wasBlocked || asyncSetSignalBlocked(sig->number, 1)) {
+          return 1;
+        }
+
+        asyncCancelRequest(sig->monitor);
+        sig->monitor = NULL;
+      }
+
+      close(sig->fileDescriptor);
+      sig->fileDescriptor = -1;
+    } else {
+      logSystemError("signalfd");
+    }
   }
 
   return 0;
@@ -558,6 +595,25 @@ ASYNC_SIGNAL_HANDLER(asyncHandleMonitoredSignal) {
 
     asyncSignalEvent(sig->event, NULL);
   }
+}
+
+static int
+enableSignalEntry (SignalEntry *sig) {
+  if ((sig->event = asyncNewEvent(asyncHandlePendingSignal, sig))) {
+    if (asyncHandleSignal(sig->number, asyncHandleMonitoredSignal, &sig->oldHandler)) {
+      if (!sig->wasBlocked || asyncSetSignalBlocked(sig->number, 0)) {
+        return 1;
+      }
+
+      asyncHandleSignal(sig->number, sig->oldHandler, NULL);
+      sig->oldHandler = NULL;
+    }
+
+    asyncDiscardEvent(sig->event);
+    sig->event = NULL;
+  }
+
+  return 0;
 }
 #endif /* signal monitoring functions */
 
@@ -591,59 +647,17 @@ newMonitorElement (const void *parameters) {
         Element *monitorElement = enqueueItem(sig->monitors, mon);
 
         if (monitorElement) {
-          logSymbol(LOG_CATEGORY(ASYNC_EVENTS), mon->callback, "signal %d added", sig->number);
-          if (!newSignal) return monitorElement;
-          sig->wasBlocked = asyncIsSignalBlocked(mep->signal);
+          int added = !newSignal;
 
-#if defined(HAVE_SYS_SIGNALFD_H)
-          {
-            sigset_t mask;
-
-            if (makeSignalMask(&mask, mep->signal)) {
-              int flags = 0;
-
-#ifdef SFD_NONBLOCK
-              flags |= SFD_NONBLOCK;
-#endif /* SFD_NONBLOCK */
-
-#ifdef SFD_CLOEXEC
-              flags |= SFD_CLOEXEC;
-#endif /* SFD_CLOEXEC */
-
-              if ((sig->fileDescriptor = signalfd(-1, &mask, flags)) != -1) {
-                if (asyncReadFile(&sig->monitor, sig->fileDescriptor,
-                                  sizeof(struct signalfd_siginfo),
-                                  asyncHandleSignalInput, sig)) {
-                  if (sig->wasBlocked || asyncSetSignalBlocked(sig->number, 1)) {
-                    return monitorElement;
-                  }
-
-                  asyncCancelRequest(sig->monitor);
-                  sig->monitor = NULL;
-                }
-
-                close(sig->fileDescriptor);
-                sig->fileDescriptor = -1;
-              } else {
-                logSystemError("signalfd");
-              }
-            }
+          if (!added) {
+            sig->wasBlocked = asyncIsSignalBlocked(sig->number);
+            if (enableSignalEntry(sig)) added = 1;
           }
 
-#else /* signal monitoring setup */
-          if ((sig->event = asyncNewEvent(asyncHandlePendingSignal, sig))) {
-            if (asyncHandleSignal(mep->signal, asyncHandleMonitoredSignal, &sig->oldHandler)) {
-              if (!sig->wasBlocked || asyncSetSignalBlocked(sig->number, 0)) {
-                return monitorElement;
-              }
-
-              asyncHandleSignal(mep->signal, sig->oldHandler, NULL);
-            }
-
-            asyncDiscardEvent(sig->event);
-            sig->event = NULL;
+          if (added) {
+            logSymbol(LOG_CATEGORY(ASYNC_EVENTS), mon->callback, "signal %d monitor added", sig->number);
+            return monitorElement;
           }
-#endif /* signal monitoring setup */
 
           deleteElement(monitorElement);
         }
