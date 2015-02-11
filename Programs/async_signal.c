@@ -367,7 +367,7 @@ deleteMonitor (Element *monitorElement) {
   MonitorEntry *mon = getElementItem(monitorElement);
   SignalEntry *sig = mon->signal;
 
-  logSymbol(LOG_CATEGORY(ASYNC_EVENTS), mon->callback, "signal %d monitor removed", sig->number);
+  logSymbol(LOG_CATEGORY(ASYNC_EVENTS), mon->callback, "signal monitor removed: %d", sig->number);
   deleteElement(monitorElement);
 
   if (getQueueSize(sig->monitors) == 0) {
@@ -387,6 +387,7 @@ deleteMonitor (Element *monitorElement) {
 #endif /* signal monitoring cleanup */
 
     asyncSetSignalBlocked(sig->number, sig->wasBlocked);
+    logMessage(LOG_CATEGORY(ASYNC_EVENTS), "signal disabled: %d", sig->number);
 
     {
       DeleteSignalEntryParameters parameters = {
@@ -652,11 +653,15 @@ newMonitorElement (const void *parameters) {
 
           if (!added) {
             sig->wasBlocked = asyncIsSignalBlocked(sig->number);
-            if (enableSignalEntry(sig)) added = 1;
+
+            if (enableSignalEntry(sig)) {
+              added = 1;
+              logMessage(LOG_CATEGORY(ASYNC_EVENTS), "signal enabled: %d", sig->number);
+            }
           }
 
           if (added) {
-            logSymbol(LOG_CATEGORY(ASYNC_EVENTS), mon->callback, "signal %d monitor added", sig->number);
+            logSymbol(LOG_CATEGORY(ASYNC_EVENTS), mon->callback, "signal monitor added: %d", sig->number);
             return monitorElement;
           }
 
