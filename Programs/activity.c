@@ -136,13 +136,13 @@ logActivityActionRequest (ActivityObject *activity, const char *action) {
 
 static void
 logActivityActionFailed (ActivityObject *activity, const char *action) {
-  logMessage(LOG_WARNING, "activity action failed: %s: %s",
+  logMessage(LOG_DEBUG, "activity action failed: %s: %s",
              activity->methods->activityName, action);
 }
 
 static void
 logActivityActionTimeout (ActivityObject *activity, const char *action) {
-  logMessage(LOG_WARNING, "activity action timeout: %s: %s",
+  logMessage(LOG_DEBUG, "activity action timeout: %s: %s",
              activity->methods->activityName, action);
 }
 
