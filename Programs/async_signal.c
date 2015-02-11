@@ -26,12 +26,13 @@
 #include "async_internal.h"
 #include "get_pthreads.h"
 
-#ifdef HAVE_SYS_SIGNALFD_H
+#ifdef ASYNC_CAN_HANDLE_SIGNALS
+#if defined(HAVE_SYS_SIGNALFD_H)
 #include <sys/signalfd.h>
 #include "async_io.h"
-#endif /* HAVE_SYS_SIGNALFD_H */
 
-#ifdef ASYNC_CAN_HANDLE_SIGNALS
+#endif /* signal monitoring definitions */
+
 struct AsyncSignalDataStruct {
 #ifdef ASYNC_CAN_MONITOR_SIGNALS
   Queue *signalQueue;
@@ -304,13 +305,14 @@ typedef struct {
   Queue *monitors;
   unsigned wasBlocked:1;
 
-#ifdef HAVE_SYS_SIGNALFD_H
+#if defined(HAVE_SYS_SIGNALFD_H)
   int fileDescriptor;
   AsyncHandle monitor;
-#else /* HAVE_SYS_SIGNALFD_H */
+
+#else /* signal monitoring fields */
   AsyncEvent *event;
   AsyncSignalHandler *oldHandler;
-#endif /* HAVE_SYS_SIGNALFD_H */
+#endif /* signal monitoring fields */
 } SignalEntry;
 
 typedef struct {
@@ -369,19 +371,20 @@ deleteMonitor (Element *monitorElement) {
   deleteElement(monitorElement);
 
   if (getQueueSize(sig->monitors) == 0) {
-#ifdef HAVE_SYS_SIGNALFD_H
+#if defined(HAVE_SYS_SIGNALFD_H)
     asyncCancelRequest(sig->monitor);
     sig->monitor = NULL;
 
     close(sig->fileDescriptor);
     sig->fileDescriptor = -1;
-#else /* HAVE_SYS_SIGNALFD_H */
+
+#else /* signal monitoring cleanup */
     asyncHandleSignal(sig->number, sig->oldHandler, NULL);
     sig->oldHandler = NULL;
 
     asyncDiscardEvent(sig->event);
     sig->event = NULL;
-#endif /* HAVE_SYS_SIGNALFD_H */
+#endif /* signal monitoring cleanup */
 
     asyncSetSignalBlocked(sig->number, sig->wasBlocked);
 
@@ -476,13 +479,14 @@ getSignalElement (int signalNumber, int create) {
         memset(sig, 0, sizeof(*sig));
         sig->number = signalNumber;
 
-#ifdef HAVE_SYS_SIGNALFD_H
+#if defined(HAVE_SYS_SIGNALFD_H)
         sig->fileDescriptor = -1;
         sig->monitor = NULL;
-#else /* HAVE_SYS_SIGNALFD_H */
+
+#else /* signal monitoring initialization */
         sig->event = NULL;
         sig->oldHandler = NULL;
-#endif /* HAVE_SYS_SIGNALFD_H */
+#endif /* signal monitoring initialization */
 
         if ((sig->monitors = newQueue(deallocateMonitorEntry, NULL))) {
           {
@@ -518,7 +522,7 @@ getSignalElement (int signalNumber, int create) {
   return NULL;
 }
 
-#ifdef HAVE_SYS_SIGNALFD_H
+#if defined(HAVE_SYS_SIGNALFD_H)
 ASYNC_INPUT_CALLBACK(asyncHandleSignalInput) {
   static const char label[] = "signalfd";
   const SignalEntry *sig = parameters->data;
@@ -538,7 +542,8 @@ ASYNC_INPUT_CALLBACK(asyncHandleSignalInput) {
 
   return 0;
 }
-#else /* HAVE_SYS_SIGNALFD_H */
+
+#else /* signal monitoring functions */
 ASYNC_EVENT_CALLBACK(asyncHandlePendingSignal) {
   SignalEntry *sig = parameters->eventData;
 
@@ -554,7 +559,7 @@ ASYNC_SIGNAL_HANDLER(asyncHandleMonitoredSignal) {
     asyncSignalEvent(sig->event, NULL);
   }
 }
-#endif /* HAVE_SYS_SIGNALFD_H */
+#endif /* signal monitoring functions */
 
 typedef struct {
   int signal;
@@ -590,7 +595,7 @@ newMonitorElement (const void *parameters) {
           if (!newSignal) return monitorElement;
           sig->wasBlocked = asyncIsSignalBlocked(mep->signal);
 
-#ifdef HAVE_SYS_SIGNALFD_H
+#if defined(HAVE_SYS_SIGNALFD_H)
           {
             sigset_t mask;
 
@@ -624,7 +629,8 @@ newMonitorElement (const void *parameters) {
               }
             }
           }
-#else /* HAVE_SYS_SIGNALFD_H */
+
+#else /* signal monitoring setup */
           if ((sig->event = asyncNewEvent(asyncHandlePendingSignal, sig))) {
             if (asyncHandleSignal(mep->signal, asyncHandleMonitoredSignal, &sig->oldHandler)) {
               if (!sig->wasBlocked || asyncSetSignalBlocked(sig->number, 0)) {
@@ -637,7 +643,7 @@ newMonitorElement (const void *parameters) {
             asyncDiscardEvent(sig->event);
             sig->event = NULL;
           }
-#endif /* HAVE_SYS_SIGNALFD_H */
+#endif /* signal monitoring setup */
 
           deleteElement(monitorElement);
         }
