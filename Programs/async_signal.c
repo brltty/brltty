@@ -367,7 +367,7 @@ deleteMonitor (Element *monitorElement) {
   MonitorEntry *mon = getElementItem(monitorElement);
   SignalEntry *sig = mon->signal;
 
-  logSymbol(LOG_CATEGORY(ASYNC_EVENTS), mon->callback, "signal %d removed", sig->number);
+  logSymbol(LOG_CATEGORY(ASYNC_EVENTS), mon->callback, "signal %d monitor removed", sig->number);
   deleteElement(monitorElement);
 
   if (getQueueSize(sig->monitors) == 0) {
@@ -411,7 +411,7 @@ cancelMonitor (Element *monitorElement) {
 
 static void
 handlePendingSignal (const SignalEntry *sig) {
-  Element *monitorElement = getQueueHead(sig->monitors);
+  Element *monitorElement = getStackHead(sig->monitors);
 
   if (monitorElement) {
     MonitorEntry *mon = getElementItem(monitorElement);
@@ -426,6 +426,7 @@ handlePendingSignal (const SignalEntry *sig) {
     mon->active = 1;
     if (!callback(&parameters)) mon->delete = 1;
     mon->active = 0;
+    logSymbol(LOG_CATEGORY(ASYNC_EVENTS), callback, "signal %d finished", sig->number);
     if (mon->delete) deleteMonitor(monitorElement);
   }
 }
