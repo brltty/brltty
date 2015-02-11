@@ -752,7 +752,7 @@ AC_CHECK_DECLS([localtime_r], [], [], [dnl
 AC_CHECK_HEADERS([sys/poll.h sys/select.h sys/wait.h])
 AC_CHECK_FUNCS([select])
 
-AC_CHECK_HEADERS([signal.h])
+AC_CHECK_HEADERS([signal.h sys/signalfd.h])
 AC_CHECK_FUNCS([sigaction])
 
 AC_CHECK_HEADERS([alloca.h getopt.h glob.h langinfo.h regex.h syslog.h])

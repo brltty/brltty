@@ -121,6 +121,9 @@ extern "C" {
 /* Define this if the header file signal.h exists. */
 #undef HAVE_SIGNAL_H
 
+/* Define this if the header file sys/signalfd.h exists. */
+#undef HAVE_SYS_SIGNALFD_H
+
 /* Define this if the function sigaction exists. */
 #undef HAVE_SIGACTION
 
