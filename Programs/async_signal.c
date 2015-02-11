@@ -372,8 +372,17 @@ deleteMonitor (Element *monitorElement) {
 
   if (getQueueSize(sig->monitors) == 0) {
 #if defined(HAVE_SYS_SIGNALFD_H)
+    logMessage(LOG_CATEGORY(ASYNC_EVENTS), "closing signalfd monitor: sig=%d fd=%d",
+               sig->number, sig->fileDescriptor);
+
     asyncCancelRequest(sig->monitor);
     sig->monitor = NULL;
+
+    {
+      struct signalfd_siginfo buffer;
+
+      while (read(sig->fileDescriptor, &buffer, sizeof(buffer)) != -1);
+    }
 
     close(sig->fileDescriptor);
     sig->fileDescriptor = -1;
@@ -565,6 +574,8 @@ enableSignalEntry (SignalEntry *sig) {
                         sizeof(struct signalfd_siginfo),
                         asyncHandleSignalfdInput, sig)) {
         if (sig->wasBlocked || asyncSetSignalBlocked(sig->number, 1)) {
+          logMessage(LOG_CATEGORY(ASYNC_EVENTS), "signalfd monitor opened: sig=%d fd=%d",
+                     sig->number, sig->fileDescriptor);
           return 1;
         }
 
