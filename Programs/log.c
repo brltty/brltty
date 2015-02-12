@@ -677,3 +677,34 @@ logWindowsSocketError (const char *action) {
 }
 #endif /* __MINGW32__ */
 #endif /* WINDOWS */
+
+#if defined(HAVE_EXECINFO_H)
+#include <execinfo.h>
+
+void
+logBacktrace (void) {
+  void *frames[30];
+  size_t count = backtrace(frames, ARRAY_COUNT(frames));
+
+  if (count > 0) {
+    char **strings = backtrace_symbols(frames, count);
+
+    if (strings) {
+      char **string = strings;
+      char **end = string + count;
+
+      while (string < end) {
+        logMessage(LOG_DEBUG, "backtrace: %s", *string);
+        string += 1;
+      }
+
+      free(strings);
+    }
+  }
+}
+
+#else /* log backtrace */
+void
+logBacktrace (void) {
+}
+#endif /* log backtrace */

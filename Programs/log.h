@@ -131,6 +131,8 @@ extern void logWindowsSocketError (const char *action);
 #endif /* __MINGW32__ */
 #endif /* WINDOWS */
 
+extern void logBacktrace (void);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
