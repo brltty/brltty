@@ -31,7 +31,8 @@
 #include <sys/signalfd.h>
 #include "async_io.h"
 
-#endif /* signal monitoring definitions */
+#else /* paradigm-specific signal monitoring definitions */
+#endif /* paradigm-specific signal monitoring definitions */
 
 struct AsyncSignalDataStruct {
 #ifdef ASYNC_CAN_MONITOR_SIGNALS
@@ -306,13 +307,17 @@ typedef struct {
   unsigned wasBlocked:1;
 
 #if defined(HAVE_SYS_SIGNALFD_H)
-  int fileDescriptor;
-  AsyncHandle monitor;
+  struct {
+    int fileDescriptor;
+    AsyncHandle asyncMonitor;
+  } signalfd;
 
-#else /* signal monitoring fields */
-  AsyncEvent *event;
-  AsyncSignalHandler *oldHandler;
-#endif /* signal monitoring fields */
+#else /* paradigm-specific signal monitoring fields */
+  struct {
+    AsyncEvent *event;
+    AsyncSignalHandler *old;
+  } handler;
+#endif /* paradigm-specific signal monitoring fields */
 } SignalEntry;
 
 typedef struct {
@@ -322,6 +327,87 @@ typedef struct {
   unsigned active:1;
   unsigned delete:1;
 } MonitorEntry;
+
+#if defined(HAVE_SYS_SIGNALFD_H)
+static void
+logSignalfdAction (const SignalEntry *sig, const char *action) {
+  logMessage(LOG_CATEGORY(ASYNC_EVENTS), "%s signalfd monitor: sig=%d fd=%d",
+             action, sig->number, sig->signalfd.fileDescriptor);
+}
+
+static void
+initializeSignalfdFileDescriptor (SignalEntry *sig) {
+  sig->signalfd.fileDescriptor = -1;
+}
+
+static void
+initializeSignalfdAsyncMonitor (SignalEntry *sig) {
+  sig->signalfd.asyncMonitor = NULL;
+}
+
+static void
+initializeSignalMonitoring (SignalEntry *sig) {
+  initializeSignalfdFileDescriptor(sig);
+  initializeSignalfdAsyncMonitor(sig);
+}
+
+static void
+closeSignalfdFileDescriptor (SignalEntry *sig) {
+  struct signalfd_siginfo buffer;
+
+  while (read(sig->signalfd.fileDescriptor, &buffer, sizeof(buffer)) != -1);
+  close(sig->signalfd.fileDescriptor);
+  initializeSignalfdFileDescriptor(sig);
+}
+
+static void
+cancelSignalfdAsyncMonitor (SignalEntry *sig) {
+  asyncCancelRequest(sig->signalfd.asyncMonitor);
+  initializeSignalfdAsyncMonitor(sig);
+}
+
+static void
+deactivateSignalMonitoring (SignalEntry *sig) {
+  logSignalfdAction(sig, "destroying");
+  cancelSignalfdAsyncMonitor(sig);
+  closeSignalfdFileDescriptor(sig);
+}
+
+#else /* paradigm-specific signal monitoring functions */
+static void
+initializeHandlerEvent (SignalEntry *sig) {
+  sig->handler.event = NULL;
+}
+
+static void
+initializeOldHandler (SignalEntry *sig) {
+  sig->handler.old = NULL;
+}
+
+static void
+initializeSignalMonitoring (SignalEntry *sig) {
+  initializeHandlerEvent(sig);
+  initializeOldHandler(sig);
+}
+
+static void
+discardHandlerEvent (SignalEntry *sig) {
+  asyncDiscardEvent(sig->handler.event);
+  initializeHandlerEvent(sig);
+}
+
+static void
+restoreOldHandler (SignalEntry *sig) {
+  asyncHandleSignal(sig->number, sig->handler.old, NULL);
+  initializeOldHandler(sig);
+}
+
+static void
+deactivateSignalMonitoring (SignalEntry *sig) {
+  restoreOldHandler(sig);
+  discardHandlerEvent(sig);
+}
+#endif /* paradigm-specific signal monitoring functions */
 
 static void
 deallocateMonitorEntry (void *item, void *data) {
@@ -371,32 +457,9 @@ deleteMonitor (Element *monitorElement) {
   deleteElement(monitorElement);
 
   if (getQueueSize(sig->monitors) == 0) {
-#if defined(HAVE_SYS_SIGNALFD_H)
-    logMessage(LOG_CATEGORY(ASYNC_EVENTS), "closing signalfd monitor: sig=%d fd=%d",
-               sig->number, sig->fileDescriptor);
-
-    asyncCancelRequest(sig->monitor);
-    sig->monitor = NULL;
-
-    {
-      struct signalfd_siginfo buffer;
-
-      while (read(sig->fileDescriptor, &buffer, sizeof(buffer)) != -1);
-    }
-
-    close(sig->fileDescriptor);
-    sig->fileDescriptor = -1;
-
-#else /* signal monitoring cleanup */
-    asyncHandleSignal(sig->number, sig->oldHandler, NULL);
-    sig->oldHandler = NULL;
-
-    asyncDiscardEvent(sig->event);
-    sig->event = NULL;
-#endif /* signal monitoring cleanup */
-
+    logMessage(LOG_CATEGORY(ASYNC_EVENTS), "deactivating signal monitoring: %d", sig->number);
     asyncSetSignalBlocked(sig->number, sig->wasBlocked);
-    logMessage(LOG_CATEGORY(ASYNC_EVENTS), "signal disabled: %d", sig->number);
+    deactivateSignalMonitoring(sig);
 
     {
       DeleteSignalEntryParameters parameters = {
@@ -489,15 +552,7 @@ getSignalElement (int signalNumber, int create) {
       if ((sig = malloc(sizeof(*sig)))) {
         memset(sig, 0, sizeof(*sig));
         sig->number = signalNumber;
-
-#if defined(HAVE_SYS_SIGNALFD_H)
-        sig->fileDescriptor = -1;
-        sig->monitor = NULL;
-
-#else /* signal monitoring initialization */
-        sig->event = NULL;
-        sig->oldHandler = NULL;
-#endif /* signal monitoring initialization */
+        initializeSignalMonitoring(sig);
 
         if ((sig->monitors = newQueue(deallocateMonitorEntry, NULL))) {
           {
@@ -540,10 +595,10 @@ ASYNC_INPUT_CALLBACK(asyncHandleSignalfdInput) {
 
   if (parameters->error) {
     logMessage(LOG_WARNING, "%s read error: fd=%d sig=%d: %s",
-               label, sig->fileDescriptor, sig->number, strerror(parameters->error));
+               label, sig->signalfd.fileDescriptor, sig->number, strerror(parameters->error));
   } else if (parameters->end) {
     logMessage(LOG_WARNING, "%s end-of-file: fd=%d sig=%d",
-               label, sig->fileDescriptor, sig->number);
+               label, sig->signalfd.fileDescriptor, sig->number);
   } else {
     const struct signalfd_siginfo *info = parameters->buffer;
 
@@ -555,7 +610,7 @@ ASYNC_INPUT_CALLBACK(asyncHandleSignalfdInput) {
 }
 
 static int
-enableSignalEntry (SignalEntry *sig) {
+activateSignalMonitoring (SignalEntry *sig) {
   sigset_t mask;
 
   if (makeSignalMask(&mask, sig->number)) {
@@ -569,22 +624,19 @@ enableSignalEntry (SignalEntry *sig) {
     flags |= SFD_CLOEXEC;
 #endif /* SFD_CLOEXEC */
 
-    if ((sig->fileDescriptor = signalfd(-1, &mask, flags)) != -1) {
-      if (asyncReadFile(&sig->monitor, sig->fileDescriptor,
+    if ((sig->signalfd.fileDescriptor = signalfd(-1, &mask, flags)) != -1) {
+      if (asyncReadFile(&sig->signalfd.asyncMonitor, sig->signalfd.fileDescriptor,
                         sizeof(struct signalfd_siginfo),
                         asyncHandleSignalfdInput, sig)) {
         if (sig->wasBlocked || asyncSetSignalBlocked(sig->number, 1)) {
-          logMessage(LOG_CATEGORY(ASYNC_EVENTS), "signalfd monitor opened: sig=%d fd=%d",
-                     sig->number, sig->fileDescriptor);
+          logSignalfdAction(sig, "created");
           return 1;
         }
 
-        asyncCancelRequest(sig->monitor);
-        sig->monitor = NULL;
+        cancelSignalfdAsyncMonitor(sig);
       }
 
-      close(sig->fileDescriptor);
-      sig->fileDescriptor = -1;
+      closeSignalfdFileDescriptor(sig);
     } else {
       logSystemError("signalfd");
     }
@@ -593,7 +645,7 @@ enableSignalEntry (SignalEntry *sig) {
   return 0;
 }
 
-#else /* signal monitoring functions */
+#else /* paradigm-specific signal monitoring handlers */
 ASYNC_EVENT_CALLBACK(asyncHandlePendingSignal) {
   SignalEntry *sig = parameters->eventData;
 
@@ -606,29 +658,27 @@ ASYNC_SIGNAL_HANDLER(asyncHandleMonitoredSignal) {
   if (signalElement) {
     SignalEntry *sig = getElementItem(signalElement);
 
-    asyncSignalEvent(sig->event, NULL);
+    asyncSignalEvent(sig->handler.event, NULL);
   }
 }
 
 static int
-enableSignalEntry (SignalEntry *sig) {
-  if ((sig->event = asyncNewEvent(asyncHandlePendingSignal, sig))) {
-    if (asyncHandleSignal(sig->number, asyncHandleMonitoredSignal, &sig->oldHandler)) {
+activateSignalMonitoring (SignalEntry *sig) {
+  if ((sig->handler.event = asyncNewEvent(asyncHandlePendingSignal, sig))) {
+    if (asyncHandleSignal(sig->number, asyncHandleMonitoredSignal, &sig->handler.old)) {
       if (!sig->wasBlocked || asyncSetSignalBlocked(sig->number, 0)) {
         return 1;
       }
 
-      asyncHandleSignal(sig->number, sig->oldHandler, NULL);
-      sig->oldHandler = NULL;
+      restoreOldHandler(sig);
     }
 
-    asyncDiscardEvent(sig->event);
-    sig->event = NULL;
+    discardHandlerEvent(sig);
   }
 
   return 0;
 }
-#endif /* signal monitoring functions */
+#endif /* paradigm-specific signal monitoring handlers */
 
 typedef struct {
   int signal;
@@ -663,12 +713,9 @@ newMonitorElement (const void *parameters) {
           int added = !newSignal;
 
           if (!added) {
+            logMessage(LOG_CATEGORY(ASYNC_EVENTS), "activating signal monitoring: %d", sig->number);
             sig->wasBlocked = asyncIsSignalBlocked(sig->number);
-
-            if (enableSignalEntry(sig)) {
-              added = 1;
-              logMessage(LOG_CATEGORY(ASYNC_EVENTS), "signal enabled: %d", sig->number);
-            }
+            if (activateSignalMonitoring(sig)) added = 1;
           }
 
           if (added) {
