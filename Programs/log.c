@@ -678,6 +678,11 @@ logWindowsSocketError (const char *action) {
 #endif /* __MINGW32__ */
 #endif /* WINDOWS */
 
+static void
+logBacktraceString (const char *string) {
+  logMessage(LOG_DEBUG, "backtrace: %s", string);
+}
+
 #if defined(HAVE_EXECINFO_H)
 #include <execinfo.h>
 
@@ -694,7 +699,7 @@ logBacktrace (void) {
       char **end = string + count;
 
       while (string < end) {
-        logMessage(LOG_DEBUG, "backtrace: %s", *string);
+        logBacktraceString(*string);
         string += 1;
       }
 
@@ -706,5 +711,6 @@ logBacktrace (void) {
 #else /* log backtrace */
 void
 logBacktrace (void) {
+  logBacktraceString("not supported");
 }
 #endif /* log backtrace */
