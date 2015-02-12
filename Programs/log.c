@@ -688,13 +688,14 @@ logBacktraceString (const char *string) {
 
 void
 logBacktrace (void) {
-  void *frames[30];
-  size_t count = backtrace(frames, ARRAY_COUNT(frames));
+  const int limit = 30;
+  void *frames[limit];
+  int count = backtrace(frames, limit);
 
   if (count > 0) {
-    char **strings = backtrace_symbols(frames, count);
+    char **strings;
 
-    if (strings) {
+    if ((strings = backtrace_symbols(frames, count))) {
       char **string = strings;
       char **end = string + count;
 
@@ -703,8 +704,16 @@ logBacktrace (void) {
         string += 1;
       }
 
+      if (count == limit) {
+        logBacktraceString("...");
+      }
+
       free(strings);
+    } else {
+      logSystemError("backtrace_symbols");
     }
+  } else {
+    logBacktraceString("no frames");
   }
 }
 
