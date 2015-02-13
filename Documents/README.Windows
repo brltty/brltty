@@ -1,201 +1,221 @@
+~~~~~~~~~~~~~~~~~
+BRLTTY on Windows
+~~~~~~~~~~~~~~~~~
+
+.. include:: prologue.rst
+.. _Cygwin's Web Site: http://www.cygwin.com/
+.. _MinGW's Web Site: http://mingw.sourceforge.net/
+.. _LibUSB-Win32's Web Site: http://libusb-win32.sourceforge.net/
+.. _LibUSB-1.0's Web Site: http://www.libusb.org/wiki/windows_backend
+.. _Cygwin Ports: http://cygwinports.org/
+.. _Cygwin java-ecj jar: ftp://sourceware.org/pub/java/ecj-4.5.jar
+
+Using BRLTTY
+============
+
 System Requirements
-===================
+-------------------
 
-The earliest release of Windows which is supported by BRLTTY is Windows 98.
+The earliest release of Windows that is supported by BRLTTY is Windows 98.
 
-Pre-built versions of brltty are available for download on
-http://mielke.cc/brltty or on http://youpibouh.thefreecat.org/brltty/
+Pre-built versions of BRLTTY are available for download on
+`BRLTTY's Web Site`_. Their names begin with ``brltty-win-``. Those with the
+``.zip`` extension are archives, and those with the ``.exe`` extension are
+installers.
 
-In order to build BRLTTY yourself from a supplied tarball, you
-need either Cygwin (see [http://www.cygwin.com/]) or MinGW (see
-[http://mingw.sourceforge.net/]). In both cases, you also need the following
-additional packages:
+In order to build BRLTTY yourself from a prepared source tarball, you'll need
+Cygwin (see `Cygwin's Web Site`_) and/or MinGW (see `MinGW's Web Site`_).
+You'll also need the following additional packages:
+
 *  gcc
 *  make
 *  w32api (version 3.6 or later)
 
-If you'd like to build BRLTTY from its source repository rather than from one
-of the supplied tarballs then you'll also need these additional packages:
+If you'd like to build BRLTTY from its source repository (rather than from one
+of the prepared source tarballs) then you'll also need these packages:
+
 *  autoconf
 *  tcltk
 
-If you'd like to prepare the documentation (do make within the Documents/
-subdirectory) you'll need these packages:
-*  linuxdoc-tools (not pre-packaged in cygwin unfortunately)
+If you'd like to prepare the documentation (by doing ``make`` within the
+``Documents/`` subdirectory) then you'll need these packages:
+
+*  linuxdoc-tools (not pre-packaged in Cygwin)
 *  doxygen
 
-If you are using MSYS for running configure and make, you should always use
-Windows paths (like c:/brltty), not MSYS paths (like /c/brltty), because brltty
-does _not_ understand MSYS paths.
+If you're using MSYS (the MinGW command shell) for running ``configure`` and
+``make``, you should always use Windows-like paths (e.g. ``c:/brltty``) rather
+than MSYS paths (e.g. ``/c/brltty``) because BRLTTY does **not** understand
+MSYS paths.
 
-------------------------------------------------------------------------------
-
-
-Windows 98 and Me Limitation
-============================
+Windows 98 and ME Limitation
+----------------------------
 
 On Windows versions 2000, XP, 2003, and later, BRLTTY automatically accesses
-the Windows terminal which you're currently using as you switch between them.
+the Windows console that you're currently using as you switch between them.
 This isn't possible on earlier versions. One way to still achieve this
-functionality, however, is to run one BRLTTY (which directly accesses your
-braille display) on the root window and another one (which indirectly accesses
-your braille display via BrlAPI) on each terminal. This scheme may sound
-complicated, but it can be easily set up to run automatically.
+functionality, though, is to run one BRLTTY on the root window that directly
+accesses your braille device, and another one on each console that indirectly
+accesses your braille device via BrlAPI. This scheme may sound complicated,
+but it can be set up to run automatically.
 
 The first (or root) BRLTTY should be run as part of Windows startup. It must be
-given those options which are necessary to access your braille display, e.g.
--b, -d, and all other options you'd normally specify. It must also be given the
--Xroot=yes option, which attaches it to the root window. 
+run with the options that are necessary for it to access your braille device,
+e.g. ``-b`` (to specify the driver), ``-d`` (to specify the device), and
+(maybe) ``-B`` (to specify driver-sspecific parameters). It must also be given
+the ``-Xroot=yes`` option (which attaches it to the root window).
 
-An additional BRLTTY should then be run for each new terminal. It should be
-invoked like this:
+An additional BRLTTY must then be run for each new console. It should be
+invoked like this::
 
    brltty -bba -N
 
-The -bba option tells it to access the root BRLTTY via BrlAPI, and the -N
-option tells it not to start a BrlAPI server of its own.
+The ``-bba`` option tells it to access the root BRLTTY via BrlAPI, and the
+``-N`` option tells it not to start a BrlAPI server of its own.
 
-These BRLTTYs can be started automatically by, for example, adding this line to
-your .bashrc script. Each of these BRLTTYs takes care of the terminal it's
-running in, and connects, via BrlAPI, to the root BRLTTY in order to access
-your braille display.
+These (non-root) BRLTTYs can be started automatically by, for example, invoking
+them from your ``.bashrc`` script. Each of these BRLTTYs only reviews the
+console it's running within, and connects, via BrlAPI, to the root BRLTTY in
+order to access your braille device.
 
 If you're not concerned with security, and would rather not fiddle with the
-brlapi.key file, then add the -Aauth=none option to the command line which
-invokes the root BRLTTY. You don't need to worry about unauthorized access over
-the network since the default is that only locally running programs can connect
-to BrlAPI.
+``brlapi.key`` file, then add the ``-Aauth=none`` option to the command line
+that starts the root BRLTTY. You don't need to worry about unauthorized access
+over the network since the default is that only locally running programs can
+connect to BrlAPI.
 
-------------------------------------------------------------------------------
+Cygwin Package Management via the Command Line
+----------------------------------------------
 
+apt-cyg
+~~~~~~~
 
-Cygwin Package Management from the Cygwin Command Line
-======================================================
-
-A convenient way to manage Cygwin packages from the Cygwin command line is to 
-use the "apt-cyg" tool. It is similar to the "apt-get" command which some Linux 
+A convenient way to manage Cygwin packages from the command line is to use the
+``apt-cyg`` tool. It is similar to the ``apt-get`` command which some Linux 
 distributions use. As of the time of this writing, this is how you can install 
-it:
+it::
 
    svn --force export http://apt-cyg.googlecode.com/svn/trunk/ /usr/local/bin/
    chmod +x /usr/local/bin/apt-cyg
 
-If you're using the 64-bit Cygwin platform, then, after installing apt-cyg, you
-will need to make a couple of simple modifications to it. Using your favourite
-text editor, and remembering that the actual line numbers within your version
-may differ from those quoted below, edit /usr/local/bin/apt-cyg and make the
-following changes:
+If you're using the 64-bit Cygwin platform, then, after installing apt-cyg,
+you'll need to make a couple of simple modifications to it. Using your
+favourite text editor, and remembering that the actual line numbers within your
+version may differ from those shown below, edit ``/usr/local/bin/apt-cyg`` and
+make the following changes:
 
-1) On line 98, change "$mirror/setup.bz2" to "$mirror/x86_64/setup.bz2".
-2) On line 105, change "$mirror/setup.ini" to "$mirror/x86_64/setup.ini".
+1) On line 98, change ``$mirror/setup.bz2`` to ``$mirror/x86_64/setup.bz2``.
+
+2) On line 105, change ``$mirror/setup.ini`` to ``$mirror/x86_64/setup.ini``.
 
 To search for a package, you can do:
 
-   apt-cyg find pattern
+.. parsed-literal:: apt-cyg find *pattern*
 
 To install a package, you can do:
 
-   apt-cyg install name
+.. parsed-literal:: apt-cyg install *name*
 
 For full details, you can do:
 
-   apt-cyg help
-
-------------------------------------------------------------------------------
-
+.. parsed-literal::  apt-cyg help
 
 USB Support
-===========
+-----------
 
-USB devices are supported thanks to the libusb-win32 or libusb-1.0
-packages. If both are installed, preferrence is given to libusb-1.0.
+USB devices are supported thanks to the ``LibUSB-Win32`` and the ``LibUSB-1.0``
+packages. If both are installed, preferrence is given to ``LibUSB-1.0``.
 
-Pre-built versions of brltty have USB support compiled in, and the required
-drivers are shipped, you just need to let the installer set them up.
+Pre-built versions of BRLTTY have USB support compiled in, and the required
+Windows drivers are also included, so you just need to let the installer set
+them up.
 
-In order to build BRLTTY yourself with USB support enabled, _before_ compiling
-BRLTTY, you need to install at least one of libusb-win32 or libusb-1.0.
+In order to build BRLTTY yourself with USB support enabled, you'll need to
+**first** install at least one of LibUSB-Win32 or LibUSB-1.0.
 
-At the time of this writing, libusb-win32 binaries can be found on
-[http://libusb-win32.sourceforge.net/]. The file will be called something
-like "libusb-win32-bin-<version>.exe", and should be available on
-[http://sourceforge.net/project/showfiles.php?group_id=78138].
-Unpack it in some place.
+LibUSB-Win32
+~~~~~~~~~~~~
 
-As of the time of this writing, the libusb-1.0 binary snapshots can be found on
-[http://www.libusb.org/wiki/windows_backend]. The file will be called something
-like "libusb_<date>.7z". Unpack it in some place.
+At the time of this writing, LibUSB-Win32 binaries can be found on
+`LibUSB-Win32's Web Site`_. They'll be named something like
+``libusb-win32-bin-<version>.exe``, and should be available on
+``http://sourceforge.net/project/showfiles.php?group_id=78138``.
 
-The Cygwin or MinGW toolchain then needs to get aware of the presence of
-libusb-win32 or libusb1.0-devel.
+*  On Cygwin:
 
-For Cygwin:
+   1) Install the ``libusb-win32`` package.
 
-* Just install the libusb-win32 or libusb1.0-devel package.
+*  On MinGW:
 
-For MinGW:
+   1) Unpack the archive somewhere.
 
-  For libusb-win32:
+   2) Symlink the header and library files into your MinGW
+      installation::
 
-    Symlink the header and library files into MinGW installation, run:
+         ln -s LibUSB-Win32/include/lusb0_usb.h /mingw/include/usb.h
+         ln -s LibUSB-Win32/lib/gcc/libusb.a /mingw/lib/
+         ln -s LibUSB-Win32/bin/x86/libusb0_x86.dll /mingw/bin/libusb0.dll
 
-       +  ln -s "/path/to/LibUSB-Win32/include/lusb0_usb.h" /mingw/include/usb.h
-       +  ln -s "/path/to/LibUSB-Win32/lib/gcc/libusb.a" /mingw/lib/
-       +  ln -s "/path/to/LibUSB-Win32/bin/x86/libusb0_x86.dll" /mingw/bin/libusb0.dll
+In order to be able to use the LibUSB-Win32 driver, you'll need to copy its
+run-time files into BRLTTY's source tree::
 
-    Then you can configure, compile, install, and run BRLTTY as usual.
-  
-  For libusb-1.0:
+   cp LibUSB-Win32/bin/x86/libusb0.sys brltty/hotplug/libusb0.sys
+   cp LibUSB-Win32/bin/x86/libusb0_x86.dll brltty/hotplug/libusb0.dll
+   cp LibUSB-Win32/bin/amd64/libusb0.sys brltty/hotplug/libusb0_x64.sys
+   cp LibUSB-Win32/bin/amd64/libusb0.dll brltty/hotplug/libusb0_x64.dll
 
-    1) Symlink the header and library files into MinGW installation, run:
+Then, either right-click on ``brltty/hotplug/brltty.inf`` and select
+``install``, or, on braille device plug, point at the
+``brltty/hotplug/brltty.inf`` file.
 
-       + ln -s "/path/to/Libusb-1.0/include/libusb-1.0" /mingw/include/
-       + ln -s "/path/to/Libusb-1.0/MinGW32/dll/libusb-1.0.dll.a" /mingw/lib/
-       + ln -s "/path/to/Libusb-1.0/MinGW32/dll/libusb-1.0.dll" /mingw/bin/
+LibUSB-1.0
+~~~~~~~~~~
 
-    2) Copy the file libusb-1.0.pc in the Windows/ subdirectory of BRLTTY's
-       source tree into MinGW's /mingw/lib/pkgconfig/ directory. If the
-       pkgconfig/ subdirectory doesn't already exist then create it.
+As of the time of this writing, LibUSB-1.0 binary snapshots can be found on
+`LibUSB-1.0's Web Site`_. They'll be named something like
+``libusb_<date>.7z``.
 
-    Then you can configure, compile, install, and run BRLTTY as usual.
+*  On Cygwin:
 
-To actually be able to use the libusb-win32 driver, you need to copy the
-runtime files in the brltty source.
+   1) Install the ``libusb1.0-devel`` package.
 
-   +  cp "/path/to/LibUSB-Win32/bin/x86/libusb0.sys" brltty/hotplug/libusb0.sys
-   +  cp "/path/to/LibUSB-Win32/bin/x86/libusb0_x86.dll" brltty/hotplug/libusb0.dll
-   +  cp "/path/to/LibUSB-Win32/bin/amd64/libusb0.sys" brltty/hotplug/libusb0_x64.sys
-   +  cp "/path/to/LibUSB-Win32/bin/amd64/libusb0.dll" brltty/hotplug/libusb0_x64.dll
+*  On MinGW:
 
-and then right-click on brltty/hotplug/brltty.inf and select install, or on
-braille device plug, point at the brltty/hotplug/brltty.inf file.
+   1) Unpack the archive somewhere.
 
-To actually be able to use the libusb-1.0 driver, right-click on
-brltty/hotplug/brltty-libusb-1.0.inf and select install, or on braille
-device plug, point at the brltty/hotplug/brltty-libusb-1.0.inf file.
+   2) Symlink the header and library files into your MinGW
+      installation::
 
-------------------------------------------------------------------------------
+         ln -s LibUSB-1.0/include/libusb-1.0 /mingw/include/
+         ln -s LibUSB-1.0/MinGW32/dll/libusb-1.0.dll.a /mingw/lib/
+         ln -s LibUSB-1.0/MinGW32/dll/libusb-1.0.dll /mingw/bin/
 
+   3) Copy the file ``libusb-1.0.pc`` in the ``Windows/`` subdirectory of
+      BRLTTY's source tree into MinGW's ``/mingw/lib/pkgconfig/`` directory. If
+      the ``pkgconfig/`` subdirectory doesn't already exist then create it.
 
-Configuring BRLTTY
-==================
+In order to be able to use the LibUSB-1.0 driver, you'll need to either
+right-click on ``brltty/hotplug/brltty-libusb-1.0.inf`` and select ``install``,
+or, on braille device plug, point at the
+``brltty/hotplug/brltty-libusb-1.0.inf`` file.
+
+Configuring a BRLTTY Build
+--------------------------
 
 Some of BRLTTY's configure options are of particular interest to users of the 
 Windows platform:
 
---enable-relocatable-install: The default is for BRLTTY to refer to its
-components via absolute paths. On the Windows platform, however, the convention
-is for a package to use relative paths so that it can be installed into an
-arbitrary directory and so that it can be moved around thereafter as well. This
-option builds BRLTTY such that relative paths are used.
-
-------------------------------------------------------------------------------
-
+--enable-relocatable-install
+   The default is for BRLTTY to refer to its components via absolute paths. On
+   the Windows platform, however, the convention is for a package to use
+   relative paths so that it's entirely self-contained. This enables it to be
+   installed into an arbitrary directory, and to be moved around thereafter at
+   well. This option builds BRLTTY such that relative paths are used.
 
 Missing Java Class Definitions on Cygwin
-========================================
+----------------------------------------
 
-You may get a Java failure which looks like this:
+You may get a Java failure that looks something like this::
 
    Exception in thread "main" java.lang.NoClassDefFoundError:
    org.eclipse.jdt.internal.compiler.batch.GCCMain
@@ -205,274 +225,343 @@ You may get a Java failure which looks like this:
    not found in gnu.gcj.runtime.SystemClassLoader
    {urls=[], parent=gnu.gcj.runtime.ExtensionClassLoader{urls=[], parent=null}}
 
-This problem occurs when the java-ecj package isn't installed. It can
-be obtained from Cygwin Ports. You can also resolve the probem by
-downloading the file "ftp://sourceware.org/pub/java/ecj-4.5.jar", and
-installing it into "/usr/share/java/ecj.jar".
+This problem occurs when the ``java-ecj`` package isn't installed. It can be
+obtained from `Cygwin Ports`_. You can also resolve the probem by downloading
+the `Cygwin java-ecj jar`_, and installing it into ``/usr/share/java/ecj.jar``.
 
-------------------------------------------------------------------------------
+Sticking to a Console
+---------------------
 
+It may be useful to have BRLTTY only review the console that it's started in,
+i.e.  for it not to follow the keyboard focus. To achieve this, set the
+``FollowFocus`` parameter of BRLTTY's ``Windows`` screen driver to ``no``. This
+can be done:
 
-Sticking to a console
-=====================
+On the Command Line:
+   ``-Xwn:FollowFocus=no``
 
-It may be useful to have BRLTTY only review the console it is started in, i.e. 
-for it not to follow the keyboard focus. To achieve this, set the FollowFocus 
-parameter of the Windows screen driver to no. This can be done either on the 
-command line (-XFollowFocus=no) or in brltty.conf (screen-parameter 
-FollowFocus=no).
+In ``brltty.conf``:
+   ``screen-parameter wn:FollowFocus=no``
 
-------------------------------------------------------------------------------
+Sharing the Braille Device with Other Screen Readers
+----------------------------------------------------
 
-
-Sharing the Braille Display with Other Screen Readers
-=====================================================
-
-When you're not on a window which BRLTTY can handle its default action is to
-retain control of the braille display and to present a brief message explaining
+When you're not on a window that BRLTTY can handle, its default action is to
+retain control of the braille device and to present a short message explaining
 the problem. If you have another braille-capable screen reader and would like
-it to take over instead then both BRLTTY and that other screen reader must be
-instructed to share the braille display.
+it to take over instead, then both BRLTTY and that other screen reader must be
+instructed to share the braille device.
 
-BRLTTY can be instructed to share the braille display via its --release-device
-option; the short form of this option is -r. When this option is in effect
-BRLTTY releases the braille display when you move onto a window which it cannot
-handle and tries to regain control of the braille display when you move onto a
-window which it can handle. Note that these actions take a noticeable amount of
-time so you should only use this option if it's actually needed.
+BRLTTY can be instructed to share the braille device via its
+``--release-device`` option (the short form of this option is ``-r``). When
+this option is in effect, BRLTTY releases the braille device when you move onto
+a window that it can't handle, and then tries to regain control of the braille
+device when you move onto a window that it can handle. Note that these actions
+take a noticeable amount of time so you should only use this option if it's
+actually needed.
 
-------------------------------------------------------------------------------
-
-
-Sharing BRLTTY with JAWS
-========================
+Sharing with JAWS
+~~~~~~~~~~~~~~~~~
 
 A common case wherein a JAWS user might want BRLTTY to be in control of the
-braille display is when using Cygwin.
+braille device when on a console window is when using Cygwin.
 
 There are two phases to configuring JAWS to run in the background while BRLTTY
-controls the braille display. First, the window title must be established and
-stable. Second, JAWS braille must be put to sleep.
+controls the braille device. First, a usable window title must be established
+and stable. Second, JAWS braille must be put to sleep.
 
-What is a window title?
------------------------
+.. topic:: What is a Window Title?
 
-Every window in Windows has a title bar that contains the name of the
-application which is running in it as well as some controls to do things like
-move and resize it. BRLTTY does not show this title bar.
+   Every window in Windows has a title bar that contains the name of the
+   application that's running in it, as well as some controls to do things like
+   move and resize the window. BRLTTY doesn't show this title bar.
 
-For a program window, JAWS uses the name of the program's executable as the
-name of the configuration files to load when that program gains focus. For a
-console application such as Cygwin, however, it uses the title of the window
-instead. We must, therefore, tell JAWS within the window title that this is a
-Cygwin window.
+   For a program window, JAWS uses the name of the program's executable as the
+   name of the configuration files to load when that program gains focus. For a
+   console application such as Cygwin, however, it uses the title of the window
+   instead. You must, therefore, tell JAWS within the window title that this is
+   a Cygwin window.
 
-Setting the Window Title
-------------------------
+.. topic:: Setting the Window Title
 
-JAWS uses one of the words in the window title as the name of the configuration
-files to load. This file set is what tells JAWS the specifics of how to handle
-the application. It is, therefore, where JAWS must be instructed to put its
-braille component to sleep.
+   JAWS uses one of the words in the window title as the name of the
+   configuration file set to load. This file set is what tells JAWS the
+   specifics of how to handle the application. It is, therefore, where JAWS
+   must be instructed to put its braille component to sleep.
 
-At this writing, it appears that JAWS uses the following algorithm for choosing
-which word in the title to use as the name of the file set:
-1) If there are no slashes (/) or backslashes (\) in the title then JAWS uses 
-   the first word. Thus, if the title is "Cygwin Bash Shell" then JAWS will 
-   load the Cygwin configuration files.
-2) If there is at least one slash (/) or backslash (\) in the title then JAWS 
-   uses the last word. Thus, if the title is "$PWD - Cygwin" then JAWS will 
-   similarly load the Cygwin configuration files.
+   As of this writing, it appears that JAWS uses the following algorithm for
+   choosing which word in the title to use as the name of the file set:
 
-Setting Cygwin's Window Title
------------------------------
+   1) If there are no slashes (``/``) or backslashes (``\``) in the title then
+      JAWS uses the first word. Thus, if the title is ``Cygwin Bash Shell``
+      then JAWS will load the ``Cygwin`` configuration file set.
 
-First, it is imperative that you replace, or at least modify, the default PS1
-(primary shell prompt) setting. The default for this setting, as distributed by
-Cygwin, places $PWD (the path to the current working directory) in the window
-title, thus requiring you to have a separate JAWS configuration for every
-directory on the system! One possible way to resolve this problem is to
-uncomment the `settitle' function which can be found near the end of `.bashrc'.
-This function allows you to place a string of your own choice in the title. You
-can use this function, therefore, as follows:
+   2) If there's at least one slash (``/``) or backslash (``\``) in the title
+      then JAWS uses the last word. Thus, if the title is ``$PWD - Cygwin``
+      then JAWS will similarly load the ``Cygwin`` configuration file set.
 
-   export PROMPT_COMMAND='settitle "$PWD - Cygwin"'
-   export PS1='$ '
+.. topic:: Setting Cygwin's Window Title
 
-The first of these lines causes the window title to be set just before each
-shell prompt. Since $PWD always contains at least one slash (/), the operative
-word is `Cygwin' (the last word), and JAWS will load any Cygwin configuration
-files that it finds. The second of these lines sets the primary shell prompt to
-the customary dollar sign ($). More importantly, though, it replaces Cygwin's
-default PS1 setting which contains escape sequences that overwrite the window
-title with just $PWD thus not presenting any permanent text for JAWS to
-recognize.
+   First, it is imperative that you replace, or at least modify, the default
+   ``PS1`` (primary shell prompt) setting. The default for this setting, as
+   distributed by Cygwin, places ``$PWD`` (the path to the current working
+   directory) in the window title, thus requiring you to have a separate JAWS
+   configuration for every directory on the system! One possible way to resolve
+   this "problem" is to uncomment the ``settitle`` function (which can be found
+   near the end of ``.bashrc``). This function allows you to place a string of
+   your own choice in the title. You can use this function, therefore, as
+   follows::
 
-Putting JAWS Braille to Sleep
------------------------------
+      export PROMPT_COMMAND='settitle "$PWD - Cygwin"'
+      export PS1='$ '
 
-Now that a stable window title has been established, JAWS braille can finally
-be put to sleep. While in Cygwin and with BRLTTY not running, do the following:
-1) Press Insert+F2 to bring up the Run JAWS Manager dialog.
-2) Down-Arrow to Configuration Manager and press Enter. Verify that the title 
-   on the top line contains "Cygwin.jcf".
-3) Press Alt+S for Set Options.
-4) Press B for Braille.
-5) Press S for Braille Sleep Mode.
-6) Verify that the box is checked (it should look like <x> instead of < >). 
-   Press Space to toggle the setting if the x isn't there.
-7) Press Enter to leave the menu.
-8) Press Control+S to save the file.
-9) Press Alt+F4 to exit the configuration manager.
+   The first of these lines causes the window title to be set just before each
+   shell prompt. Since ``$PWD`` always contains at least one slash (``/``), the
+   operative word in the title will be ``Cygwin`` (the last word), and JAWS,
+   therefore, will load any ``Cygwin`` configuration files that it finds.
 
-Putting JAWS Speech to Sleep
-----------------------------
+   The second of these lines sets the primary shell prompt to the customary
+   dollar (``$``) sign. More importantly, though, it replaces Cygwin's default
+   ``PS1`` setting which, because it contains escape sequences that overwrite
+   the title with ``$PWD``, renders the window unrecognizable by JAWS.
 
-If you want to use JAWS speech in Windows but not in Cygwin, you can do the
-following:
+.. topic:: Putting JAWS Braille to Sleep
 
-1) Press Insert+F2 to bring up the Run JAWS Manager dialog.
-2) Down-Arrow to Configuration Manager and press Enter. Verify that the title 
-   on the top line contains "Cygwin.jcf".
-3) Press Alt+S for Set Options.
-4) Press A for Advanced.
-5) You should be on an item labelled "Sleep Mode Enable" with an empty check
-   box (< >). Press Space to check it (<x>). 
-6) Press Enter to leave the menu.
-7) Press Control+S to save the file.
-8) Press Alt+F4 to exit the configuration manager.
+   Now that a stable window title has been established, JAWS braille can
+   finally be put to sleep. While in Cygwin, and with BRLTTY not running, do
+   the following:
 
-Performance
------------
+   1) Press Insert+F2 to bring up the ``Run JAWS Manager`` dialog.
 
-You'll always be able to switch to Cygwin, and BRLTTY, if running, will take
-control of the braille display automatically. Switching back to Windows and
-JAWS may be a bit more problematic, though ... the degree of success seems to
-depend on the type of braille display being used. Sometimes it works properly.
-Sometimes, with a USB display, the cable must be unplugged/replugged to allow
-JAWS to regain control. In extreme cases you may need to exit BRLTTY before
-going to Windows.
+   2) Down-Arrow to ``Configuration Manager``, and press Enter. Verify that the
+      title on the top line contains ``Cygwin.jcf``.
 
-------------------------------------------------------------------------------
+   3) Press Alt+S for ``Set Options``.
 
+   4) Press B for ``Braille``.
 
-Building the Installer and the Archive
-======================================
+   5) Press S for ``Braille Sleep Mode``.
 
-The mkwin script, which can be found in the Windows/ subdirectory of BRLTTY's 
-source tree, builds the installer and the archive for BRLTTY. It assumes that
-the following software components have already been installed:
+   6) Verify that the box is checked. It should look like ``<x>`` (rather than
+      like ``< >``). Press Space to toggle the setting if the ``x`` isn't there.
 
-- MinGW [32-bit] (from http://mingw.org/). The following MinGW packages should
-  be installed:
-  * mingw32-pdcurses
-  * mingw32-pthreads-w32
-  * msys-bison
-  * msys-dos2unix
-  * msys-groff
-  * msys-m4
-  * msys-zip
-- AutoHotkey (from http://www.autohotkey.com/). The mkwin script assumes that
-  it has been installed in C:\Program Files\AutoHotkey. The -A (AutoHotkey)
-  option can be used to specify another location.
-- NSIS (from http://nsis.sourceforge.net/). The mkwin script assumes that it
-  has been installed in C:\Program Files\NSIS. The -N (NSIS) option can be used
-  to specify another location.
-- Python (from www.python.org). The 32-bit variants are required. Version 2 or
-  3 may be used. If the python command is not in your command search path, or
-  if you would like to use a different version of Python, then use the -P
-  (Python) option to specify the top-level directory of the desired Python
-  version.
-- Cython (from http://cython.org/). A corresponding version of Cython must be
-  installed for each version of Python. Each Cython version is installed within
-  the corresponding Python version's hierarchy.
-- LibUSB-Win32 (from http://libusb-win32.sourceforge.net/). The mkwin script
-  assumes that it has been installed in C:\LibUSB-Win32. The -U (LibUSB-Win32)
-  option can be used to specify another location.
-- LibUSB-1.0 (from http://www.libusb.org/wiki/windows_backend). The mkwin
-  script assumes that it has been installed in C:\LibUSB-1.0. The -X (libusbx)
-  option can be used to specify another location.
-- WinUSB (from http://www.libusb.org/wiki/windows_backend). The mkwin script
-  assumes that it has been installed in C:\WinUSB. The -W (WinUSB) option can
-  be used to specify another location.
-- ICU (from http://icu-project.org/). The mkwin script assumes that it has been
-  installed in C:\ICU. The -I (ICU) option can be used to specify another
-  location. The archive's only top-level directory is named icu, so unpack it
-  when in MinGW's /c directory. Since Windows file systems are not case
-  sensitive, renaming it from icu to ICU is optional.
-- pkg-config (from http://gtk.org/download/win32.php). Its archive should be
-  unpacked when in MinGW's /mingw directory.
-- Glib (from http://gtk.org/download/win32.php). Its archive should be unpacked
-  when in MinGW's /mingw directory.
-- gettext-runtime (from http://gtk.org/download/win32.php). Its archive should
-  be unpacked when in MinGW's /mingw directory. Only install it if your MinGW
-  installation does not already have it. Check for the presence of a libintl
-  DLL in MinGW's /mingw/bin directory.
+   7) Press Enter to leave the menu.
 
-The mkwin script uses the lib command, which belongs to MSVC (Microsoft Visual 
+   8) Press Control+S to save the file.
+
+   9) Press Alt+F4 to exit the configuration manager.
+
+.. topic:: Putting JAWS Speech to Sleep
+
+   If you'd like to use JAWS speech in Windows, but not in Cygwin, you can do
+   the following:
+
+   1) Press Insert+F2 to bring up the ``Run JAWS Manager`` dialog.
+
+   2) Down-Arrow to ``Configuration Manager`` and press Enter. Verify that the
+      title on the top line contains ``Cygwin.jcf``.
+
+   3) Press Alt+S for ``Set Options``.
+
+   4) Press A for ``Advanced``.
+
+   5) You should be on an item labelled ``Sleep Mode Enable`` with an empty
+      check box (``< >``). Press Space to check it (``<x>``). 
+
+   6) Press Enter to leave the menu.
+
+   7) Press Control+S to save the file.
+
+   8) Press Alt+F4 to exit the configuration manager.
+
+.. topic:: Known Problem
+
+   You'll always be able to switch to Cygwin, and BRLTTY (if it's running) will
+   take control of the braille device automatically. Switching back to Windows
+   and JAWS, however, may be problematic. The degree of success seems to depend
+   on the type of braille device being used. It usually works properly.
+   Sometimes, however, when using a USB device, the cable needs to be
+   unplugged/replugged to allow JAWS to regain control. In extreme cases, you
+   may need to exit BRLTTY before going to Windows.
+
+useful Scripts
+==============
+
+The ``mkwin`` Script
+--------------------
+
+The ``mkwin`` script, which can be found in the ``Windows/`` subdirectory of
+BRLTTY's source tree, builds the Windows archive and installer for BRLTTY. It
+assumes that the following software components have already been installed:
+
+*  ``MinGW`` [32-bit] (from `<http://mingw.org/>`_)
+
+   The following ``MinGW`` packages should be installed:
+
+   +  ``mingw32-pdcurses``
+   +  ``mingw32-pthreads-w32``
+   +  ``msys-bison``
+   +  ``msys-dos2unix``
+   +  ``msys-groff``
+   +  ``msys-m4``
+   +  ``msys-zip``
+
+*  ``AutoHotkey`` (from `<http://www.autohotkey.com/>`_)
+
+   The ``mkwin`` script assumes that it has been installed in
+   ``C:\Program Files\AutoHotkey``. The ``-A`` (AutoHotkey) option can be used
+   to specify another location.
+
+*  ``NSIS`` (from `<http://nsis.sourceforge.net/>`_)
+
+   The ``mkwin`` script assumes that it has been installed in
+   ``C:\Program Files\NSIS``. The ``-N`` (NSIS) option can be used to specify
+   another location.
+
+*  ``Python`` (from `<http://www.python.org>`_)
+
+   The 32-bit variants are required. Version 2 or 3 may be used. If the
+   ``python`` command isn't in your command search path, or if you'd like to
+   use a different version of ``Python``, then use the ``-P`` (Python) option
+   to specify the top-level directory of the desired ``Python`` version.
+
+*  ``Cython`` (from `<http://cython.org/>`_)
+
+   A corresponding version of ``Cython`` must be installed for each version of
+   ``Python``. Each ``Cython`` version is installed within the corresponding
+   ``Python`` version's hierarchy.
+
+*  ``LibUSB-Win32`` (from `<http://libusb-win32.sourceforge.net/>`_)
+
+   The ``mkwin`` script assumes that it has been installed in
+   ``C:\LibUSB-Win32``. The ``-U`` (LibUSB-Win32) option can be used to specify
+   another location.
+
+*  ``LibUSB-1.0`` (from `<http://www.libusb.org/wiki/windows_backend>`_)
+
+   The ``mkwin`` script assumes that it has been installed in
+   ``C:\LibUSB-1.0``. The ``-X`` (libusbx) option can be used to specify
+   another location.
+
+*  ``WinUSB`` (from `<http://www.libusb.org/wiki/windows_backend>`_)
+
+   The ``mkwin`` script assumes that it has been installed in ``C:\WinUSB``.
+   The ``-W`` (WinUSB) option can be used to specify another location.
+
+*  ``ICU`` (from `<http://icu-project.org/>`_)
+
+   The ``mkwin`` script assumes that it has been installed in ``C:\ICU``. The
+   ``-I`` (ICU) option can be used to specify another location. The archive's
+   only top-level directory is named ``icu``, so unpack it when in MinGW's
+   ``/c/`` directory. Since Windows file systems aren't case sensitive,
+   renaming it from ``icu`` to ``ICU`` is optional.
+
+*  ``pkg-config`` (from `<http://gtk.org/download/win32.php>`_)
+
+   Its archive should be unpacked when in MinGW's ``/mingw/`` directory.
+
+*  ``Glib`` (from `<http://gtk.org/download/win32.php>`_)
+
+   Its archive should be unpacked when in MinGW's ``/mingw/`` directory.
+
+*  ``gettext-runtime`` (from `<http://gtk.org/download/win32.php>`_)
+
+   Its archive should be unpacked when in MinGW's ``/mingw/`` directory. Only
+   install it if your MinGW installation doesn't already have it. Check for the
+   presence of a ``libintl`` DLL in MinGW's ``/mingw/bin/`` directory.
+
+The ``mkwin`` script uses the ``lib`` command, which belongs to MSVC (Microsoft Visual 
 C++). On newer Windows systems, MSVC has become a component of Microsoft Visual 
-Studio. If you do not have it then you will need to get the following files 
-from someone who does:
-- lib.exe
-- link.exe
-- mspdb100.dll
-- msvcr100.dll
-All of these files should be placed in the same directory. Either add this
-directory to your command search path or use the -M (MSVC) option to specify
-its location.
+Studio. If you don't have it then you'll need to get the following files from
+someone who does:
 
-Use the -u (USB) option to specify which USB package is to be used. The
-following packages are supported:
-- libusb (for LibUSB-Win32). This is the default.
-- libusb-1.0 (for LibUSB-1.0 + WinUSB).
+*  lib.exe
+*  link.exe
+*  mspdb100.dll
+*  msvcr100.dll
 
-The mkwin script requires two parameters:
-1) The path to the top-level directory of BRLTTY's source tree. It may be
-   either relative or absolute.
-2) The build revision. It may be any character sequence which does not include
-   white space. It is appended, with a prepended dash (-), to BRLTTY's version
-   number in order to construct the build version.
+All of them should be placed in the same directory. Either add this directory
+to your command search path or use the ``-M`` (MSVC) option to specify its
+location.
 
-The build name is used as:
-- the file name of the installer (which has the extension .exe)
-- the file name of the archive (which has the extension .zip)
-- the name of the top-level directory within the archive
-It has the following form:
+.. topic:: Other Useful Options
 
-   brltty-win-buildVersion-usbPackage
+   ``-u`` (USB)
+      Specify which USB package is to be used. The following USB packages are
+      supported:
 
-For example: If your current working directory is the Windows/ subdirectory of 
-BRLTTY's source tree, if the current BRLTTY version is 5.2, and remembering
-that the default USB package is libusb, then invoking the following command:
+      *  libusb (for LibUSB-Win32)
+      *  libusb-1.0 (for LibUSB-1.0 + WinUSB)
 
-   ./mkwin .. 4
+   ``-C`` (Cygwin)
+      Specify the root (top-level) directory of a Cygwin installation. Cygwin's
+      ``bin/`` directory is added to the end of the command search path as a
+      last resort for finding needed commands that MinGW may not have.
 
-will create these files within the current working directory:
-- brltty-win-5.2-4-libusb.exe (the installer)
-- brltty-win-5.2-4-libusb.zip (the archive)
+   ``-s`` (shell)
+      Invoke an interactive shell just before the archive is created so that
+      you can have a look at and/or modify what it will contain. If the
+      ``SHELL`` environment variable is set then that shell is used. If not,
+      ``/bin/sh`` is assumed.
 
-Use the -s (shell) option if you would like an interactive shell to be invoked
-just before the archive is created so that you can have a look at and/or modify
-what it will contain. If the SHELL environment variable is set then that shell
-is used. If not, /bin/sh is assumed.
+   ``-v`` (verbose)
+      Increase output verbosity. This option complements the ``-q`` option. It
+      may be specified multiple times.
 
-Use the -v (verbose) option to increase output verbosity, and/or the -q (quiet)
-option to decrease output verbosity. These two options are complementary, and
-both are cumulative - each may be specified any number of times.
+   ``-q`` (quiet)
+      Decrease output verbosity. This option complements the ``-v`` option. It
+      may be specified multiple times.
 
-use the -C (Cygwin) option to specify the root (top-level) directory of a
-Cygwin installation. Cygwin's bin directory is added to the end of the command
-search path as a last resort for finding needed commands that MinGW may not
-have.
+   ``-t`` (temporary)
+      Specify the temporary directory that is to be used for the build. It must
+      not already exist. If you don't specify it then an internally generated
+      path is used.
 
-Use the -t (temporary) option to explicitly specify the temporary directory 
-which is to be used for the build. It must not already exist. If you do not 
-specify it then an internally generated path is used.
+   ``-k`` (keep)
+      Prevent the temporary directory from being removed at the end of a
+      successful build. It isn't removed if the build fails so that you can
+      have a look at what went wrong.
 
-Use the -k (keep) option to prevent the temporary directory from being removed 
-at the end of a successful build.
+   ``-h`` (help)
+      Present a brief command line usage summary on standard output, and then
+      exit.
 
-Use the -h (help) option to view a brief command line usage summary.
+.. topic:: Parameters
 
+   The ``mkwin`` script requires two parameters:
 
-------------------------------------------------------------------------------
+   1) The path to the top-level directory of BRLTTY's source tree. It may be
+      either relative or absolute.
+
+   2) The build revision. It may be any character sequence that doesn't include
+      whitespace. It is appended, with a prepended dash (``-``), to BRLTTY's
+      version number in order to construct the build version.
+
+   The build name is used as:
+
+   *  the name of the top-level directory within the archive
+   *  the file name of the archive (which has the ``.zip`` extension)
+   *  the file name of the installer (which has the ``.exe`` extension)
+
+   It has the following form::
+
+      brltty-win-buildVersion-usbPackage
+
+   For example:
+
+   *  if your current working directory is the ``Windows/`` subdirectory of
+      BRLTTY's source tree,
+
+   *  if the current BRLTTY version is 5.2,
+
+   *  and remembering that the default USB package is ``libusb``,
+
+   then invoking the following command::
+
+      ./mkwin .. 4
+
+   will create these files within the current working directory:
+
+   *  brltty-win-5.2-4-libusb.zip (the archive)
+   *  brltty-win-5.2-4-libusb.exe (the installer)
+
