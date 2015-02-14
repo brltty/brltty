@@ -384,15 +384,19 @@ and stable. Second, JAWS braille must be put to sleep.
    unplugged/replugged to allow JAWS to regain control. In extreme cases, you
    may need to exit BRLTTY before going to Windows.
 
-useful Scripts
+Useful Scripts
 ==============
 
 The ``mkwin`` Script
 --------------------
 
 The ``mkwin`` script, which can be found in the ``Windows/`` subdirectory of
-BRLTTY's source tree, builds the Windows archive and installer for BRLTTY. It
-assumes that the following software components have already been installed:
+BRLTTY's source tree, builds the Windows archive and installer for BRLTTY.
+
+Required Software Components
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following software components should already be installed:
 
 *  ``MinGW`` [32-bit] (from `<http://mingw.org/>`_)
 
@@ -484,84 +488,76 @@ All of them should be placed in the same directory. Either add this directory
 to your command search path or use the ``-M`` (MSVC) option to specify its
 location.
 
-.. topic:: Other Useful Options
+More Options
+~~~~~~~~~~~~
 
-   ``-u`` (USB)
-      Specify which USB package is to be used. The following USB packages are
-      supported:
+``-u`` (USB)
+   Specify which USB package is to be used. The following USB packages are
+   supported:
 
-      *  libusb (for LibUSB-Win32)
-      *  libusb-1.0 (for LibUSB-1.0 + WinUSB)
+   *  libusb (for LibUSB-Win32)
+   *  libusb-1.0 (for LibUSB-1.0 + WinUSB)
 
-   ``-C`` (Cygwin)
-      Specify the root (top-level) directory of a Cygwin installation. Cygwin's
-      ``bin/`` directory is added to the end of the command search path as a
-      last resort for finding needed commands that MinGW may not have.
+``-C`` (Cygwin)
+   Specify the root (top-level) directory of a Cygwin installation. Cygwin's
+   ``bin/`` directory is added to the end of the command search path as a last
+   resort for finding needed commands that MinGW may not have.
 
-   ``-s`` (shell)
-      Invoke an interactive shell just before the archive is created so that
-      you can have a look at and/or modify what it will contain. If the
-      ``SHELL`` environment variable is set then that shell is used. If not,
-      ``/bin/sh`` is assumed.
+``-s`` (shell)
+   Invoke an interactive shell just before the archive is created so that you
+   can have a look at and/or modify what it will contain. If the ``SHELL``
+   environment variable is set then that shell is used. If not, ``/bin/sh`` is
+   assumed.
 
-   ``-v`` (verbose)
-      Increase output verbosity. This option complements the ``-q`` option. It
-      may be specified multiple times.
+``-t`` (temporary)
+   Specify the temporary directory that is to be used for the build. It must
+   not already exist. If you don't specify it then an internally generated path
+   is used.
 
-   ``-q`` (quiet)
-      Decrease output verbosity. This option complements the ``-v`` option. It
-      may be specified multiple times.
+``-k`` (keep)
+   Prevent the temporary directory from being removed at the end of a
+   successful build. It isn't removed if the build fails so that you can have a
+   look at what went wrong.
 
-   ``-t`` (temporary)
-      Specify the temporary directory that is to be used for the build. It must
-      not already exist. If you don't specify it then an internally generated
-      path is used.
+.. include:: common-options.rst
 
-   ``-k`` (keep)
-      Prevent the temporary directory from being removed at the end of a
-      successful build. It isn't removed if the build fails so that you can
-      have a look at what went wrong.
+Parameters
+~~~~~~~~~~
 
-   ``-h`` (help)
-      Present a brief command line usage summary on standard output, and then
-      exit.
+The ``mkwin`` script requires two parameters:
 
-.. topic:: Parameters
+1) The path to the top-level directory of BRLTTY's source tree. It may be
+   either relative or absolute.
 
-   The ``mkwin`` script requires two parameters:
+2) The build revision. It may be any character sequence that doesn't include
+   whitespace. It is appended, with a prepended dash (``-``), to BRLTTY's
+   version number in order to construct the build version.
 
-   1) The path to the top-level directory of BRLTTY's source tree. It may be
-      either relative or absolute.
+The build name is used as:
 
-   2) The build revision. It may be any character sequence that doesn't include
-      whitespace. It is appended, with a prepended dash (``-``), to BRLTTY's
-      version number in order to construct the build version.
+*  the name of the top-level directory within the archive
+*  the file name of the archive (which has the ``.zip`` extension)
+*  the file name of the installer (which has the ``.exe`` extension)
 
-   The build name is used as:
+It has the following form::
 
-   *  the name of the top-level directory within the archive
-   *  the file name of the archive (which has the ``.zip`` extension)
-   *  the file name of the installer (which has the ``.exe`` extension)
+   brltty-win-buildVersion-usbPackage
 
-   It has the following form::
+For example:
 
-      brltty-win-buildVersion-usbPackage
+*  if your current working directory is the ``Windows/`` subdirectory of
+   BRLTTY's source tree,
 
-   For example:
+*  if the current BRLTTY version is 5.2,
 
-   *  if your current working directory is the ``Windows/`` subdirectory of
-      BRLTTY's source tree,
+*  and remembering that the default USB package is ``libusb``,
 
-   *  if the current BRLTTY version is 5.2,
+then invoking the following command::
 
-   *  and remembering that the default USB package is ``libusb``,
+   ./mkwin .. 4
 
-   then invoking the following command::
+will create these files within the current working directory:
 
-      ./mkwin .. 4
-
-   will create these files within the current working directory:
-
-   *  brltty-win-5.2-4-libusb.zip (the archive)
-   *  brltty-win-5.2-4-libusb.exe (the installer)
+*  brltty-win-5.2-4-libusb.zip (the archive)
+*  brltty-win-5.2-4-libusb.exe (the installer)
 

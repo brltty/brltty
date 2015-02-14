@@ -1,136 +1,283 @@
+~~~~~~~~~~~~~
+BRLTTY on DOS
+~~~~~~~~~~~~~
+
+.. include:: prologue.rst
+
+Using BRLTTY
+============
+
 Serial Support
 --------------
 
 The default DOS serial driver does not support speeds above 9600 baud. For 
 higher speeds, a more capable serial driver (like ADF) must be used.
 
-
 USB Support
 -----------
 
-USB is not supported.
-
+USB isn't supported.
 
 Bluetooth Support
 -----------------
 
-Bluetooth is not supported.
+Bluetooth isn't supported.
 
+Unpacking the Archive
+---------------------
 
-Compiling
----------
+If you'd like to unpack the archive on your DOS system but don't have an 
+unzip command on it, you can get one from
+`<ftp://ftp.delorie.com/pub/djgpp/current/v2/unzip32.exe>`_.
+
+If you'd like to unpack the archive into your DOS file system from your Linux
+system then you need to be able to mount your DOS partition on your Linux
+system. If you do this then you must be careful about two things. The first is
+that you must ensure that your DOS system is shut down first so that two
+systems won't be accessing the same partition at the same time. The second is
+that you must mount the partition in a way that prevents the long file names 
+that BRLTTY uses from being converted into those cryptic Windows short file 
+names - the ones that look like ``longna~1.ext``. One way to do this is to use 
+the ``-o nonumtail`` option when mounting your DOS partition. For example::
+
+   mkdir -p /mnt/dos
+   mount -o nonumtail /dev/sda1 /mnt/dos
+
+What you most likely have is an image of the whole hard disk, rather than an 
+image of just the DOS partition. There are a number of ways to mount the DOS 
+partition within the hard disk image. We'll describe some of them here. For our 
+examples, we'll assume that the DOS partition is the first primary partition of 
+a hard disk whose image is in the file ``disk.img``.
+
+A Simple but Dangerous Way
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The simplest, but also the most dangerous, way is to do some simple math and to 
+use an obscure mount option. First, use the ``fdisk`` command to find out where
+the DOS partition starts within the hard disk image. To do this, use the
+command::
+
+   fdisk -l disk.img
+
+You should see output that looks like this::
+
+   Disk disk.img: 1073 MB, 1073741824 bytes, 2097152 sectors
+   Units = sectors of 1 * 512 = 512 bytes
+   Sector size (logical/physical): 512 bytes / 512 bytes
+   I/O size (minimum/optimal): 512 bytes / 512 bytes
+   Disk identifier: 0x00000000
+
+      Device Boot      Start         End      Blocks   Id  System
+   disk.img1   *          63     2062367     1031152+   6  FAT16
+
+From the ``Start`` column, you can see that the DOS partition starts in sector
+63 of the hard disk. Since a sector is a 512-byte block, you need to multiply
+63 by 512 in order to calculate the partition's byte offset::
+
+   63 x 512 = 32256
+
+Now you can mount the DOS partition using that obscure option::
+
+   mount -o offset=32256 disk.img /mnt/dos
+
+But don't forget the afore-mentioned Windows cryptic short file name problem. 
+The command you should really use, therefore, is::
+
+   mount -o offset=32256,nonumtail disk.img /mnt/dos
+
+Before you restart your DOS system, don't forget to first unmount the DOS 
+partition from your Linux system::
+
+   umount /mnt/dos
+
+Using ``kpatrx``
+~~~~~~~~~~~~~~~~
+
+Another way to mount the DOS partition, which is much safer, is to use the 
+``kpartx`` command to create a loop device for the desired partition within the 
+hard disk image. Use a command like this::
+
+   kpartx -v -s -a disk.img
+
+*  The ``-v`` (verbose) option tells ``kpartx`` to be informative, which is the
+   easiest way to find out the name of the loop device that it will create.
+
+*  The ``-s`` (synchronous) option tells ``kpartx`` to wait until the loop
+   device has been created by ``udev`` before returning.
+
+*  The ``-a`` (add) option tells ``kpartx`` to create the loop device.
+
+You should see output like this::
+
+   add map loop0p1 (253:11): 0 2062305 linear /dev/loop0 63
+
+So you now know that the loop device you need to mount is
+``/dev/mapper/loop0p1``::
+
+   mount -o nonumtail /dev/mapper/loop0p1 /mnt/dos
+
+When you're finished, you need to unmount the partition and to remove the loop 
+device::
+
+   umount /mnt/dos
+   kpartx -d disk.img
+
+``DOSIDLE``
+-----------
+
+``DOSIDLE`` is a DOS application that many users run in order to stop their 
+computer or virtual machine from needlessly consuming CPU time when DOS has 
+nothing meaningful to do. If you use it, don't use a "cooling strategy" more
+invasive than ``weak``. In other words, don't specify more than ``-fm1``. Using
+a "cooling strategy" that is too aggressive will cause ``DOSIDLE`` to correctly
+deduce that the system is idle when BRLTTY has nothing to do, but that will
+cause BRLTTY to stop running, too, which isn't what you want.
+
+Using ``dosemu`` on Linux
+-------------------------
+
+If you're using ``dosemu`` on Linux, and the Linux kernel is 3.15, then you'll 
+need to explicitly enable 16-bit segment support. This can be done with the 
+following command::
+
+   echo 1 >/proc/sys/abi/ldt16
+
+If you'd like this setting to take effect automatically each time you reboot,
+then create the file ``ldt16.conf`` in the directory ``/etc/sysctl.d/``, 
+and place the following line in it::
+   
+   abi.ldt16 = 1
+
+Making the Cross Compiler
+=========================
 
 The DOS version of BRLTTY can be compiled on Linux by using a cross-compiler. 
 To create it, get the following archives:
 
-   ftp://ftp.delorie.com/pub/djgpp/current/v2gnu/gcc410s2.zip
-   ftp://ftp.delorie.com/pub/djgpp/current/v2/djcrx203.zip
+*  `<ftp://ftp.delorie.com/pub/djgpp/current/v2gnu/gcc410s2.zip>`_
+*  `<ftp://ftp.delorie.com/pub/djgpp/current/v2/djcrx203.zip>`_
 
-The djcrx203.zip archive contains a file named cross/howto.32 which explains
-how to build a cross-compiler for gcc 3.2. You can build one for gcc 4.1 by
-applying the same instructions to the gcc410s2.zip archive (listed above)
-instead of to the gcc32s2.zip archive (mentioned in the howto). You can also
-use a more recent binutils package (2.2.24 works fine).
+The ``djcrx203.zip`` archive contains a file named ``cross/howto.32`` that
+explains how to build a cross-compiler for gcc 3.2. You can build one for gcc
+4.1 by applying the same instructions to the ``gcc410s2.zip`` archive (listed
+above) instead of to the ``gcc32s2.zip`` archive (mentioned in the "howto").
+You can also use a more recent ``binutils`` package (2.2.24 works fine).
 
-If, when building the cross-compiler, you encounter an error which complains 
-that the writev function and the iovec structure have not been defined, then 
-you need to upgrade to a newer version of djcrx. Upgrading to djcrx204 is 
-sufficient. It can be downloaded from:
-
-   ftp://ftp.delorie.com/pub/djgpp/beta/v2/djcrx204.zip
+If, when building the cross-compiler, you encounter an error that complains 
+about the ``writev`` function and the ``iovec`` structure not being defined,
+then you need to upgrade to a newer version of ``djcrx``. Upgrading to
+``djcrx204`` is sufficient. It can be downloaded from
+`<ftp://ftp.delorie.com/pub/djgpp/beta/v2/djcrx204.zip>`_.
 
 Another complexity when building the cross-compiler is that some parts of the 
-process need an older version of autoconf (2.13) whereas other parts of it need 
-a newer version (2.57). Also, the build works best when a specific version of 
-automake (1.9.6) is used.
+process need an older version of ``autoconf`` (2.13) whereas other parts of it
+need a newer version (2.57). Also, the build works best when a specific version
+of ``automake`` (1.9.6) is used.
 
-We've written a script which builds the cross-compiler, and which also takes 
-care of all of the idiosyncracies that we encountered when doing so.
+We've written a script that builds the cross-compiler, and that also takes care
+of all of the idiosyncracies that we encountered when doing so.
 
+The ``mkdostools`` Script
+-------------------------
 
-The mkdostools Script
+The ``mkdostools`` script builds the cross-compiler that's needed in order to 
+build BRLTTY for DOS on Linux. It resides in the ``DOS/`` subdirectory of
+BRLTTY's source tree.
+
+Basic Options
+~~~~~~~~~~~~~
+
+.. include:: common-options.rst
+
+Build Directories
+~~~~~~~~~~~~~~~~~
+
+A number of directories are used during the build process. Each of them can be
+explicitly specified via an option, and also has a default subdirectory within
+the directory that contains the script itself. Each of the default
+subdirectories may be a symbolic link that points somewhere else. These
+directories are:
+
+   ========  ======  =========
+   Purpose   Option  Default
+   --------  ------  ---------
+   archives  ``-a``  Archives/
+   build     ``-b``  Build/
+   install   ``-i``  Tools/
+   ========  ======  =========
+
+The **archives** directory is the only one that you need to prepare. It must
+contain all of the archives that are needed in order to build the
+cross-compiler. DJGPP archives have the ``.zip`` extension, and Gnu archives
+have the ``.tar.gz`` extension. See `Required Archives`_ for the list.
+
+The **build** directory will contain all of the files that are intirimly needed
+during the build process. It's created if it doesn't already exist. If it does
+already exist then it's emptied at the start of the build process. It's also
+emptied upon the completion of a successful build. This directory needs to be
+on a volume that has at least 1.5GB of free file space.
+
+The **install** directory is where the cross-compiler tools are to be
+installed. It's created if it doesn't already exist. If it does already exist
+then it's emptied at the start of the build process.
+
+Required Archives
+~~~~~~~~~~~~~~~~~
+
+You'll need the following DJGPP archives:
+
+   ================  ==================================================
+   Archive Name      Download From
+   ----------------  --------------------------------------------------
+   ``djcrx204.zip``  `<ftp://ftp.delorie.com/pub/djgpp/beta/v2>`_
+   ``gcc432s2.zip``  `<ftp://ftp.delorie.com/pub/djgpp/current/v2gnu>`_
+   ================  ==================================================
+
+You'll need the following Gnu archives:
+
+   =========================  ====================================
+   Archive Name               Download From
+   -------------------------  ------------------------------------
+   ``autoconf-2.13.tar.gz``   `<http://ftp.gnu.org/gnu/autoconf>`_
+   ``autoconf-2.57.tar.gz``   `<http://ftp.gnu.org/gnu/autoconf>`_
+   ``automake-1.9.6.tar.gz``  `<http://ftp.gnu.org/gnu/automake>`_
+   ``binutils-2.24.tar.gz``   `<http://ftp.gnu.org/gnu/binutils>`_
+   ``gcc-4.3.2.tar.gz``       `<http://gcc.gnu.org/mirrors.html>`_
+   =========================  ====================================
+
+If you'd prefer to build a different version of gcc, there are two important
+things to know. One is that you need the ``gcc*s2.zip`` archives from 
+DJGPP. The other is that the versions of the Gnu and DJGPP gcc archives must 
+match. If, for example, you'd like to build gcc-4.1.2, then you'll need 
+both ``gcc-4.1.2.tar.gz`` and ``gcc412s2.zip``. The reason we use gcc-4.3.2 in
+our examples here is because it's the highest version of gcc for which we could
+find an ``s2.zip`` DJGPP archive.
+
+If you only have one Gnu archive for gcc in your **archives** directory then
+that version will be built. If you have more than one then you'll need to use
+the ``-g`` (gcc) option (e.g. ``-g 4.3.2``) to explicitly specify the version
+that is to be built.
+
+Building BRLTTY
+===============
+
+Configuring the Build
 ---------------------
 
-The mkdostools script builds the cross-compiler that you need in order to 
-build BRLTTY for DOS on Linux. It resides in the DOS/ subdirectory of BRLTTY's 
-source tree.
+Before configuring BRLTTY, you must add the ``bin/`` subdirectory of the 
+cross-compiler tools to your command search path. If, for example, the
+cross-compiler is installed in ``/usr/local/dostools``, then add its tools to
+your command search path with a command like this::
 
-Its -h (help) option displays a brief usage summary. It's -v (verbose) option 
-increases output verbosity, and its -q (quiet) option decreases output 
-verbosity. The -v and -q options are complementary, and both are cumulative - 
-each may be specified any number of times.
+   export PATH="/usr/local/dostools/bin:$PATH"
 
-The script uses a number of directories during the build process. Each of these 
-directories can be specified by an option, and defaults to a subdirectory of 
-the one which contains the script itself. Each of the default subdirectories 
-can be a symbolic link which points somewhere else. The directories are:
-
-   Purpose   Option  Default
-   archives    -a    Archives/
-   build       -b    Build/
-   install     -i    Tools/
-
-The archives directory is the only one that you need to prepare. It needs to 
-contain all of the archives that the script will need in order to build the 
-cross-compiler. DJGPP archives require the .zip extension, and Gnu archives 
-require the .tar.gz extension. See below for the archives that you will need.
-
-The build directory will hold all of the files that are needed during the build 
-process. The script creates it if it does not already exist. If it does already 
-exist then it is emptied at the start of the build process. It is also emptied 
-upon the completion of a successful build. This directory needs to be on a 
-volume which has in the vicinity of 1.5GB of free file space.
-
-The install directory is where the cross-compiler file hierarchy is installed. 
-The script creates it if it does not already exist. If it does already exist 
-then it is emptied at the start of the build process.
-
-You will need the following DJGPP archives:
-
-   Archive Name  Download From
-   djcrx204.zip  ftp://ftp.delorie.com/pub/djgpp/beta/v2
-   gcc432s2.zip  ftp://ftp.delorie.com/pub/djgpp/current/v2gnu
-
-You will need the following Gnu archives:
-
-   Archive Name           Download From
-   autoconf-2.13.tar.gz   http://ftp.gnu.org/gnu/autoconf
-   autoconf-2.57.tar.gz   http://ftp.gnu.org/gnu/autoconf
-   automake-1.9.6.tar.gz  http://ftp.gnu.org/gnu/automake
-   binutils-2.24.tar.gz   http://ftp.gnu.org/gnu/binutils
-   gcc-4.3.2.tar.gz       http://gcc.gnu.org/mirrors.html
-
-If you would prefer to build a different version of gcc, there are two 
-important things to know. One is that you need the gcc*s2.zip archives from 
-DJGPP. The other is that the versions of the Gnu and DJGPP gcc archives must 
-match. If, for example, you would like to build gcc-4.1.2, then you will need 
-both gcc-4.1.2.tar.gz and gcc412s2.zip. The reason we use gcc-4.3.2 in our 
-examples here is because it's the highest version of gcc for which we could 
-find an s2.zip DJGPP archive.
-
-If you only have one Gnu archive for gcc in your archives directory then that 
-version will be built. If you have more than one, then you will need to use the 
--g option (e.g. -g 4.3.2) to explicitly specify the version that is to be 
-built.
-
-
-Configuring
------------
-
-Before configuring BRLTTY, you must add the bin subdirectory of the 
-cross-compiler's installed file hierarchy to your command search path. If, for 
-example, the cross-compiler is installed in /usr/local/dostools, then add it to 
-your command search path with a command like this:
-
-   export PATH=/usr/local/dostools/bin:$PATH
-
-You will also need to ensure that gcc's -fgnu89-inline option is used. This is 
-done by setting the CFLAGS environment variable before configuring. For 
-example:
+You'll also need to ensure that gcc's ``-fgnu89-inline`` option is used. This
+is done by setting the ``CFLAGS`` environment variable before configuring. For 
+example::
 
    export CFLAGS="-fgnu89-inline"
 
-You should be able to use a configure command like this one:
+You should be able to use a configure command like this one::
 
    ./configure \
       --prefix=/brltty-dos --host=i586-pc-msdosdjgpp \
@@ -142,187 +289,78 @@ You should be able to use a configure command like this one:
       --without-speechd --with-speech-driver=all \
       --with-screen-driver=pb,-all
 
-We provide a script named cfg-dos, which resides in the top-level directory of 
-BRLTTY's source tree, that should make configuring BRLTTY for DOS a bit easier. 
-It runs the configure script for you, and gives it all of the required options. 
-You can specify additional configure options simply by giving them to cfg-dos, 
-but that shouldn't be necessary. The only thing you do need to do is to point 
-the DOS_TOOLS_ROOT environment variable to the top-level directory of your 
-cross-compiler's installed files hierarchy. For example:
+The ``cfg-dos`` Script
+~~~~~~~~~~~~~~~~~~~~~~
+
+We provide a script named ``cfg-dos``, which resides in the top-level directory
+of BRLTTY's source tree, that should make configuring BRLTTY for DOS a bit
+easier. It runs the ``configure`` script for you, giving it all of the options
+that are required for a successful DOS build. You can specify additional
+``configure`` options (although that shouldn't be necessary) simply by giving
+them to ``cfg-dos``. The only thing you do need to do is to point the
+``DOS_TOOLS_ROOT`` environment variable to the top-level directory of your 
+cross-compiler tools. For example::
 
    export DOS_TOOLS_ROOT=/usr/local/dostools
 
+The ``mkdosarc`` Script
+-----------------------
 
-The mkdosarc Script
--------------------
-
-The mkdosarc script, which resides in the DOS/ subdirectory of BRLTTY's source 
-tree, creates a DOS archive (a .zip file) of BRLTTY. It does everything 
-(configure, make, ..., zip) except for building the cross-compiler. If you 
-don't already have a cross-compiler for DOS then see the section "Compiling" in 
-this document for instructions on how to build one.
+The ``mkdosarc`` script, which resides in the ``DOS/`` subdirectory of BRLTTY's
+source tree, creates a DOS archive (a ``.zip`` file) of BRLTTY. It does
+everything (``configure``, ``make``, ..., ``zip``) except for building the
+cross-compiler. If you don't already have a cross-compiler for DOS then see
+`Making the Cross Compiler`_ for instructions on how to build one.
 
 Before running this script, ensure that the following commands have been 
 installed on your system:
 
-   linuxdoc, unix2dos, zip
+*  linuxdoc
+*  unix2dos
+*  zip
 
-You'll also need to point the DOS_TOOLS_ROOT environment variable to the 
-top-level directory of the cross-compiler's installed files hierarchy. For 
-example:
+You'll also need to point the ``DOS_TOOLS_ROOT`` environment variable to the 
+top-level directory of the cross-compiler tools. For example::
 
    export DOS_TOOLS_ROOT=/usr/local/dostools
 
+Parameters
+~~~~~~~~~~
+
 The script requires only one parameter - the path to the top-level directory of
-BRLTTY's source tree. For example, if you're in the DOS/ subdirectory then 
-invoke it like this:
+BRLTTY's source tree. If, for example, you're in the ``DOS/`` subdirectory of 
+BRLTTY's source tree (where the script resides), then invoke it like this::
 
    ./mkdosarc ..
 
-and if you're in the top-level directory then invoke it like this:
+If you're in the top-level directory of BRLTTY's soruce tree then invoke it
+like this::
 
    DOS/mkdosarc .
 
-The -a (archive) option allows you to specify the name of the archive (.zip) 
-file that will be created. The default archive name is "brltty-dos".
+Options
+~~~~~~~
 
-The -o (overwrite) option allows the script to overwrite an already-existing 
-archive. The default is that an already-existing archive will not be 
-overwritten.
+``-a`` (archive)
+   Specify the name of the archive (``.zip``) file that will be created. The
+   default archive name is ``brltty-dos``.
 
-The -i (install) option allows you to specify the name of the directory on the 
-target DOS system into which the archive will be unpacked. The default 
-directory name is "BRLTTY". This directory is an immediate subdirectory of the 
-current working directory when the archive is unpacked. It will be created if 
-it does not already exist.
+``-o`` (overwrite)
+   Allow an already-existing archive to be overwritten. The default is that an
+   already-existing archive won't be overwritten.
 
-The -s (shell) option invokes an interactive shell just before the archive is 
-created so that you can inspect what will become the archive's content. The 
-current working directory is set to the top-level directory of the content. The 
-shell specified by the SHELL environment variable is used. If it isn't set then 
-/bin/sh is assumed.
+``-i`` (install)
+   Specify the name of the subdirectory on the target DOS system into which the
+   archive will be unpacked. Its default name is ``BRLTTY``. It will be an
+   immediate subdirectory of the current working directory when the archive is
+   being unpacked. It will be created if it doesn't already exist.
 
-The -h (help) option displays a brief usage summary.
+``-s`` (shell)
+   Invoke an interactive shell just before the archive is created so that you
+   can inspect and/or modify what will be in the archive. The current working
+   directory is set to the top-level directory of the content.
+   The shell specified by the ``SHELL`` environment variable is used. If it
+   isn't set then ``/bin/sh`` is assumed.
 
-The -v (verbose) option increases output verbosity, and the -q (quiet) option 
-decreases output verbosity. These two options are complementary, and both are 
-cumulative - each may be specified any number of times.
-
-
-Unpacking the Archive
----------------------
-
-If you would like to unpack the archive on your DOS system but don't have an 
-unzip command on it, you can get one from here:
-
-   ftp://ftp.delorie.com/pub/djgpp/current/v2/unzip32.exe
-
-If you would like to unpack the archive into your DOS file system from your 
-Linux system then you need to be able to mount your DOS partition on your Linux 
-system. If you do it this way then you must be careful about two things. The 
-first is that you must ensure that your DOS system is shut down first so that 
-two systems won't be accessing the same partition at the same time. The second 
-is that you must mount the partition in a way that prevents the long file names 
-which BRLTTY uses from being converted into those cryptic Windows short file 
-names - the ones which look like "longna~1.ext". One way to do this is to use 
-the "-o nonumtail" option when mounting your DOS partition. For example:
-
-   mkdir -p /mnt/dos
-   mount -o nonumtail /dev/sda1 /mnt/dos
-
-What you most likely have is an image of the whole hard disk, rather than an 
-image of just the DOS partition. There are a number of ways to mount the DOS 
-partition within the hard disk image. We'll describe some of them here. For our 
-examples, we'll assume that the DOS partition is the first primary partition of 
-a hard disk whose image is in the file disk.img.
-
-The simplest, but also the most dangerous, way is to do some simple math and to 
-use an obscure mount option. First, use the fdisk command to find out where the 
-DOS partition starts within the hard disk image. To do this, use this command:
-
-   fdisk -l disk.img
-
-You should see output that looks like this:
-
-   Disk disk.img: 1073 MB, 1073741824 bytes, 2097152 sectors
-   Units = sectors of 1 * 512 = 512 bytes
-   Sector size (logical/physical): 512 bytes / 512 bytes
-   I/O size (minimum/optimal): 512 bytes / 512 bytes
-   Disk identifier: 0x00000000
-
-      Device Boot      Start         End      Blocks   Id  System
-   disk.img1   *          63     2062367     1031152+   6  FAT16
-
-From the Start column, you can see that the DOS partition starts in sector 63 
-of the hard disk. Since a sector is a 512-byte block, you need to multiply 63 
-by 512 in order to calculate the partition's byte offset:
-
-   63 x 512 = 32256
-
-Now you can mount the DOS partition using that obscure option:
-
-   mount -o offset=32256 disk.img /mnt/dos
-
-But don't forget the afore-mentioned Windows cryptic short file name problem. 
-The command you should really use, therefore, is:
-
-   mount -o offset=32256,nonumtail disk.img /mnt/dos
-
-Before you restart your DOS system, don't forget to first unmount the DOS 
-partition from your Linux system:
-
-   umount /mnt/dos
-
-Another way to mount the DOS partition, which is much safer, is to use the 
-kpartx command to create a loop device for the desired partition within the 
-hard disk image. Use a command like this:
-
-   kpartx -v -s -a disk.img
-
-The -v (verbose) option tells kpartx to be informative, which is the easiest 
-way to find out the name of the loop device that it will create. The -s 
-(synchronous) option tells kpartx to wait until the loop device has been 
-created by udev before returning. The -a (add) option tells kpartx to create 
-the loop device. You should see output like this:
-
-   add map loop0p1 (253:11): 0 2062305 linear /dev/loop0 63
-
-So you now know that the loop device you want to mount is /dev/mapper/loop0p1.
-
-   mount -o nonumtail /dev/mapper/loop0p1 /mnt/dos
-
-When you're finished, you need to unmount the partition and to remove the loop 
-device:
-
-   umount /mnt/dos
-   kpartx -d disk.img
-
-
-DOSIDLE
--------
-
-DOSIDLE is a DOS application which many users run in order to stop their 
-computer or virtual machine from needlessly consuming CPU time when DOS has 
-nothing meaningful for it to do. If you use it, don't use a cooling strategy 
-more invasive than weak. In other words, don't specify more than -fm1. Using a 
-cooling strategy which is too aggressive will cause DOSIDLE to correctly deduce 
-that the system is idle when BRLTTY has nothing to do, but that will cause 
-BRLTTY to stop running, too, which isn't what you want.
-
-
-Using dosemu on Linux
----------------------
-
-If you are using dosemu on Linux, and the Linux kernel is 3.15, then you will 
-need to explicitly enable 16-bit segment support. This can be done with the 
-following command:
-
-   echo 1 >/proc/sys/abi/ldt16
-
-If you would like this setting to take effect automatically each time you 
-reboot, then create the file "ldt16.conf" in the directory "/etc/sysctl.d/", 
-and place the following line in it:
-   
-   abi.ldt16 = 1
-
+.. include:: common-options.rst
 
