@@ -15,7 +15,7 @@
 .. _Text Tables: TextTables.html
 .. _Using Upstart Service Management: Upstart.html
 .. _BRLTTY on Windows: Windows.html
-.. _Using the X11 User Interface: X11.html
+.. _BRLTTY with X11: X11.html
 
 .. _BRLTTY's Web Site: http://www.brltty.com/
 .. _The Android SDK Web Page: http://developer.android.com/sdk/index.html

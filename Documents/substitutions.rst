@@ -15,4 +15,4 @@
 .. |README.TextTables| replace:: `Text Tables`_
 .. |README.Upstart| replace:: `Using Upstart Service Management`_
 .. |README.Windows| replace:: `BRLTTY on Windows`_
-.. |README.X11| replace:: `Using the X11 User Interface`_
+.. |README.X11| replace:: `BRLTTY with X11`_
