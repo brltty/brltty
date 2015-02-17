@@ -207,7 +207,7 @@ public class InputService extends InputMethodService {
     public boolean performAction ();
   }
 
-  private final static Action settingsAction = new Action() {
+  private final static Action brlttySettingsAction = new Action() {
     @Override
     public boolean performAction () {
       return BrailleService.getBrailleService().launchSettingsActivity();
@@ -264,7 +264,7 @@ public class InputService extends InputMethodService {
     }
   };
 
-  private final static Action quickAction = new Action() {
+  private final static Action quickSettingsAction = new Action() {
     @Override
     public boolean performAction () {
       if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR1)) {
@@ -275,7 +275,7 @@ public class InputService extends InputMethodService {
     }
   };
 
-  private final static Action recentAction = new Action() {
+  private final static Action recentApplicationsAction = new Action() {
     @Override
     public boolean performAction () {
       if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
@@ -286,18 +286,13 @@ public class InputService extends InputMethodService {
     }
   };
 
-  private enum ChangeFocusDirection {
-    FORWARD,
-    BACKWARD
-  }
+  public static boolean changeFocus (RenderedScreen.ChangeFocusDirection direction) {
+    RenderedScreen screen = ScreenDriver.getScreen();
 
-  private static boolean changeFocus (ChangeFocusDirection direction) {
-    switch (direction) {
-      case FORWARD:
-        break;
-
-      case BACKWARD:
-        break;
+    if (screen != null) {
+      if (screen.changeFocus(direction)) {
+        return true;
+      }
     }
 
     return false;
@@ -306,14 +301,14 @@ public class InputService extends InputMethodService {
   private final static Action backwardAction = new Action() {
     @Override
     public boolean performAction () {
-      return changeFocus(ChangeFocusDirection.BACKWARD);
+      return changeFocus(RenderedScreen.ChangeFocusDirection.BACKWARD);
     }
   };
 
   private final static Action forwardAction = new Action() {
     @Override
     public boolean performAction () {
-      return changeFocus(ChangeFocusDirection.FORWARD);
+      return changeFocus(RenderedScreen.ChangeFocusDirection.FORWARD);
     }
   };
 
@@ -503,8 +498,9 @@ public class InputService extends InputMethodService {
     homeAction,
     backAction,
     notificationsAction,
-    recentAction,
-    settingsAction,
+    recentApplicationsAction,
+    brlttySettingsAction,
+    quickSettingsAction,
     backwardAction,
     forwardAction
   };

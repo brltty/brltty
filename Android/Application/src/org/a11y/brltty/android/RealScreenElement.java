@@ -298,6 +298,10 @@ public class RealScreenElement extends ScreenElement {
     return super.onScrollForward();
   }
 
+  public boolean setAccessibilityFocus () {
+    return doAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
+  }
+
   public RealScreenElement (String text, AccessibilityNodeInfo node) {
     super(text);
     accessibilityNode = AccessibilityNodeInfo.obtain(node);

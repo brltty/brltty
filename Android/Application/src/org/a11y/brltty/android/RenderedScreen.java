@@ -45,6 +45,7 @@ public class RenderedScreen {
     if (node == null) return null;
     return AccessibilityNodeInfo.obtain(node);
   }
+
   public final AccessibilityNodeInfo getRootNode () {
     return getNode(rootNode);
   }
@@ -99,6 +100,48 @@ public class RenderedScreen {
     }
 
     return null;
+  }
+
+  public enum ChangeFocusDirection {
+    FORWARD,
+    BACKWARD
+  }
+
+  public boolean changeFocus (ChangeFocusDirection direction) {
+    AccessibilityNodeInfo node = getCursorNode();
+
+    if (node != null) {
+      ScreenElement element = findScreenElement(node);
+
+      node.recycle();
+      node = null;
+
+      if (element != null) {
+        int index = screenElements.indexOf(element);
+
+        switch (direction) {
+          case FORWARD: {
+            int size = screenElements.size();
+
+            while (++index < size) {
+              if (screenElements.get(index).setAccessibilityFocus()) return true;
+            }
+
+            break;
+          }
+
+          case BACKWARD: {
+            while (--index >= 0) {
+              if (screenElements.get(index).setAccessibilityFocus()) return true;
+            }
+
+            break;
+          }
+        }
+      }
+    }
+
+    return false;
   }
 
   public final boolean performAction (int column, int row) {

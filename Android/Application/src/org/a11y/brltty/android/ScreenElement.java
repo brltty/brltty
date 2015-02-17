@@ -128,6 +128,10 @@ public class ScreenElement {
     }
   }
 
+  public boolean setAccessibilityFocus () {
+    return false;
+  }
+
   protected String[] makeBrailleText (String text) {
     if (isCheckable()) {
       StringBuilder sb = new StringBuilder();
