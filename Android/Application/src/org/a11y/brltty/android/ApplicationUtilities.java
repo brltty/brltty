@@ -38,7 +38,7 @@ public abstract class ApplicationUtilities {
     return ApplicationParameters.SDK_VERSION >= version;
   }
 
-  public static String getString (int identifier) {
+  public static String getResourceString (int identifier) {
     return ApplicationHooks.getContext().getString(identifier);
   }
 

@@ -170,7 +170,7 @@ public class ScreenElement {
   }
 
   public ScreenElement (int text) {
-    this(ApplicationUtilities.getString(text));
+    this(ApplicationUtilities.getResourceString(text));
   }
 
   public interface LocationGetter {
