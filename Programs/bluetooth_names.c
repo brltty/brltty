@@ -39,6 +39,7 @@ BLUETOOTH_NAME_DRIVERS(Braillex, "pm");
 BLUETOOTH_NAME_DRIVERS(BrailliantBI, "hw");
 BLUETOOTH_NAME_DRIVERS(Brailliant, "bm");
 BLUETOOTH_NAME_DRIVERS(Conny, "bm");
+BLUETOOTH_NAME_DRIVERS(EL12, "al", "vo");
 BLUETOOTH_NAME_DRIVERS(Focus, "fs");
 BLUETOOTH_NAME_DRIVERS(HWGBrailliant, "bm");
 BLUETOOTH_NAME_DRIVERS(Pronto, "bm");
@@ -118,6 +119,10 @@ const BluetoothNameEntry bluetoothNameTable[] = {
 
   { .namePrefix = "Conny",
     .driverCodes = bluetoothNameDrivers_Conny
+  },
+
+  { .namePrefix = "EL12-",
+    .driverCodes = bluetoothNameDrivers_EL12
   },
 
   { .namePrefix = "Focus",
