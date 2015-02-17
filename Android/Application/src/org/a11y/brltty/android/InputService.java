@@ -286,80 +286,34 @@ public class InputService extends InputMethodService {
     }
   };
 
-  private static boolean changeFocus (int direction) {
-Log.d("chg-foc", "check sdk");
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-Log.d("chg-foc", "get root");
-      AccessibilityNodeInfo root = BrailleService.getBrailleService().getRootInActiveWindow();
-
-      if (root != null) {
-Log.d("chg-foc", "get current");
-        AccessibilityNodeInfo current = root.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
-
-        root.recycle();
-        root = null;
-
-        if (current != null) {
-Log.d("chg-foc", "get next");
-          AccessibilityNodeInfo next = current.focusSearch(direction);
-
-          current.recycle();
-          current = null;
-
-          if (next != null) {
-Log.d("chg-foc", "ok");
-            next.recycle();
-            next = null;
-
-            return true;
-          }
-        }
-      }
-    }
-
-Log.d("chg-foc", "failed");
-    return false;
+  private enum ChangeFocusDirection {
+    FORWARD,
+    BACKWARD
   }
 
-  private final static Action upAction = new Action() {
-    @Override
-    public boolean performAction () {
-      return changeFocus(View.FOCUS_UP);
-    }
-  };
+  private static boolean changeFocus (ChangeFocusDirection direction) {
+    switch (direction) {
+      case FORWARD:
+        break;
 
-  private final static Action downAction = new Action() {
-    @Override
-    public boolean performAction () {
-      return changeFocus(View.FOCUS_DOWN);
+      case BACKWARD:
+        break;
     }
-  };
 
-  private final static Action leftAction = new Action() {
-    @Override
-    public boolean performAction () {
-      return changeFocus(View.FOCUS_LEFT);
-    }
-  };
-
-  private final static Action rightAction = new Action() {
-    @Override
-    public boolean performAction () {
-      return changeFocus(View.FOCUS_RIGHT);
-    }
-  };
+    return false;
+  }
 
   private final static Action backwardAction = new Action() {
     @Override
     public boolean performAction () {
-      return changeFocus(View.FOCUS_BACKWARD);
+      return changeFocus(ChangeFocusDirection.BACKWARD);
     }
   };
 
   private final static Action forwardAction = new Action() {
     @Override
     public boolean performAction () {
-      return changeFocus(View.FOCUS_FORWARD);
+      return changeFocus(ChangeFocusDirection.FORWARD);
     }
   };
 
@@ -474,29 +428,7 @@ Log.d("chg-foc", "failed");
   }
 
   public static boolean inputKeyEnter () {
-    {
-      InputService service = InputService.getInputService();
-
-      if (service != null) {
-        EditorInfo info = service.getCurrentInputEditorInfo();
-
-        if (info != null) {
-          if (info.actionId != 0) {
-            InputConnection connection = service.getCurrentInputConnection();
-
-            if (connection != null) {
-              if (connection.performEditorAction(info.actionId)) {
-                return true;
-              }
-            }
-          } else if (service.sendDefaultEditorAction(false)) {
-            return true;
-          }
-        }
-      }
-    }
-
-    return false;
+    return inputKey(KeyEvent.KEYCODE_ENTER);
   }
 
   public static boolean inputKeyTab () {
@@ -574,11 +506,7 @@ Log.d("chg-foc", "failed");
     recentAction,
     settingsAction,
     backwardAction,
-    forwardAction,
-    leftAction,
-    rightAction,
-    upAction,
-    downAction
+    forwardAction
   };
 
   public static boolean inputKeyFunction (int key) {
