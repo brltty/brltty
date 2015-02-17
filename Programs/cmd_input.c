@@ -49,6 +49,8 @@ insertKey (ScreenKey key, int flags) {
   if (flags & BRL_FLG_CHAR_UPPER) key |= SCR_KEY_UPPER;
   if (flags & BRL_FLG_CHAR_CONTROL) key |= SCR_KEY_CONTROL;
   if (flags & BRL_FLG_CHAR_META) key |= SCR_KEY_ALT_LEFT;
+  if (flags & BRL_FLG_CHAR_ALTGR) key |= SCR_KEY_ALT_RIGHT;
+  if (flags & BRL_FLG_CHAR_GUI) key |= SCR_KEY_GUI;
   return insertScreenKey(key);
 }
 
@@ -87,6 +89,14 @@ handleInputCommands (int command, void *data) {
 
     case BRL_CMD_META:
       modifier = BRL_FLG_CHAR_META;
+      goto doModifier;
+
+    case BRL_CMD_ALTGR:
+      modifier = BRL_FLG_CHAR_ALTGR;
+      goto doModifier;
+
+    case BRL_CMD_GUI:
+      modifier = BRL_FLG_CHAR_GUI;
       goto doModifier;
 
     doModifier:

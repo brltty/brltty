@@ -174,7 +174,7 @@ typedef enum {
   BRL_CMD_SHIFT /* set shift modifier of next typed character or emulated key on/off */,
   BRL_CMD_UPPER /* set upper modifier of next typed character or emulated key on/off */,
   BRL_CMD_CONTROL /* set control modifier of next typed character or emulated key on/off */,
-  BRL_CMD_META /* set meta modifier of next typed character or emulated key on/off */,
+  BRL_CMD_META /* set meta (left alt) modifier of next typed character or emulated key on/off */,
 
   BRL_CMD_TIME /* show current date and time */,
   BRL_CMD_MENU_PREV_LEVEL /* go to previous menu level */,
@@ -210,6 +210,9 @@ typedef enum {
 
   BRL_CMD_BRLUCDOTS /* set braille input mode dots/text */,
   BRL_CMD_BRLKBD /* set braille keyboard enabled/disabled */,
+
+  BRL_CMD_ALTGR /* set altgr (right alt) modifier of next typed character or emulated key on/off */,
+  BRL_CMD_GUI /* set gui (windows) modifier of next typed character or emulated key on/off */,
 
   BRL_basicCommandCount /* must be last */
 } BRL_BasicCommand;
@@ -300,11 +303,13 @@ typedef enum {
 #define BRL_FLG_CHAR_SHIFT   0X010000 /* shift key pressed */
 #define BRL_FLG_CHAR_UPPER   0X020000 /* convert to uppercase */
 #define BRL_FLG_CHAR_CONTROL 0X040000 /* control key pressed */
-#define BRL_FLG_CHAR_META    0X080000 /* meta key pressed */
+#define BRL_FLG_CHAR_META    0X080000 /* meta (left alt) key pressed */
+#define BRL_FLG_CHAR_ALTGR   0X100000 /* altgr (right alt) key pressed */
+#define BRL_FLG_CHAR_GUI     0X200000 /* gui (windows) key pressed */
 
 #define BRL_FLG_KBD_RELEASE 0X010000 /* it is a release scan code */
-#define BRL_FLG_KBD_EMUL0 0X020000 /* it is an emulation 0 scan code */
-#define BRL_FLG_KBD_EMUL1 0X040000 /* it is an emulation 1 scan code */
+#define BRL_FLG_KBD_EMUL0   0X020000 /* it is an emulation 0 scan code */
+#define BRL_FLG_KBD_EMUL1   0X040000 /* it is an emulation 1 scan code */
 
 /* The bits for each braille dot.
  *

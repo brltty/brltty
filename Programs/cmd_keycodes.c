@@ -31,8 +31,8 @@
 typedef enum {
   MOD_RELEASE = 0, /* must be first */
 
-  MOD_WINDOWS_LEFT,
-  MOD_WINDOWS_RIGHT,
+  MOD_GUI_LEFT,
+  MOD_GUI_RIGHT,
   MOD_CONTEXT,
 
   MOD_LOCK_CAPS,
@@ -146,11 +146,11 @@ static const KeyEntry keyEntry_Slash = {BRL_CMD_CHAR(WC_C('/')), BRL_CMD_CHAR(WC
 static const KeyEntry keyEntry_RightShift = {MOD_SHIFT_RIGHT};
 
 static const KeyEntry keyEntry_LeftControl = {MOD_CONTROL_LEFT};
-static const KeyEntry keyEntry_LeftGUI = {MOD_WINDOWS_LEFT};
+static const KeyEntry keyEntry_LeftGUI = {MOD_GUI_LEFT};
 static const KeyEntry keyEntry_LeftAlt = {MOD_ALT_LEFT};
 static const KeyEntry keyEntry_Space = {BRL_CMD_CHAR(WC_C(' '))};
 static const KeyEntry keyEntry_RightAlt = {MOD_ALT_RIGHT};
-static const KeyEntry keyEntry_RightGUI = {MOD_WINDOWS_RIGHT};
+static const KeyEntry keyEntry_RightGUI = {MOD_GUI_RIGHT};
 static const KeyEntry keyEntry_Context = {MOD_CONTEXT};
 static const KeyEntry keyEntry_RightControl = {MOD_CONTROL_RIGHT};
 
@@ -236,6 +236,8 @@ handleKey (const KeyEntry *key, int release, unsigned int *modifiers) {
           if (blk == BRL_CMD_BLK(PASSCHAR)) {
             if (MOD_TST(MOD_LOCK_CAPS, *modifiers)) cmd |= BRL_FLG_CHAR_UPPER;
             if (MOD_TST(MOD_ALT_LEFT, *modifiers)) cmd |= BRL_FLG_CHAR_META;
+            if (MOD_TST(MOD_ALT_RIGHT, *modifiers)) cmd |= BRL_FLG_CHAR_ALTGR;
+            if (MOD_TST(MOD_GUI_LEFT, *modifiers) || MOD_TST(MOD_GUI_RIGHT, *modifiers)) cmd |= BRL_FLG_CHAR_GUI;
             if (MOD_TST(MOD_CONTROL_LEFT, *modifiers) || MOD_TST(MOD_CONTROL_RIGHT, *modifiers)) cmd |= BRL_FLG_CHAR_CONTROL;
           } else if ((blk == BRL_CMD_BLK(PASSKEY)) && MOD_TST(MOD_ALT_LEFT, *modifiers)) {
             int arg = cmd & BRL_MSK_ARG;

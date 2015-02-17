@@ -133,6 +133,8 @@ For commands which input any keyboard key (print or braille):
 *  The ``+shift`` modifier adds the shift key.
 *  The ``+control`` modifier adds the control key.
 *  The ``+meta`` modifier adds the left alt (or meta) key.
+*  The ``+altgr`` modifier adds the right alt (or altgr) key.
+*  The ``+gui`` modifier adds the gui (or windows) key.
 
 For commands which input characters (print or braille):
 
@@ -372,6 +374,10 @@ defined within the current context.
       The control key.
    ``META``
       The left alt (or meta) key.
+   ``ALTGR``
+      The right alt (or altgr) key.
+   ``GUI``
+      The gui (or windows) key.
 
 If a key combination consists only of keys which have been mapped to braille 
 keyboard functions, and if those functions, when combined, form a valid braille 

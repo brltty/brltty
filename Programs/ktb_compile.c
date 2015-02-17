@@ -43,7 +43,9 @@ const KeyboardFunction keyboardFunctionTable[] = {
   {.name="shift", .bit=BRL_FLG_CHAR_SHIFT},
   {.name="uppercase", .bit=BRL_FLG_CHAR_UPPER},
   {.name="control", .bit=BRL_FLG_CHAR_CONTROL},
-  {.name="meta", .bit=BRL_FLG_CHAR_META}
+  {.name="meta", .bit=BRL_FLG_CHAR_META},
+  {.name="altgr", .bit=BRL_FLG_CHAR_ALTGR},
+  {.name="gui", .bit=BRL_FLG_CHAR_GUI}
 };
 unsigned char keyboardFunctionCount = ARRAY_COUNT(keyboardFunctionTable);
 

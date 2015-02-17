@@ -91,10 +91,12 @@ cmdBrlttyToBrlapi (int command, int retainDots) {
       (blk == BRL_CMD_BLK(PASSKEY)) ||
       (blk == BRL_CMD_BLK(PASSDOTS))) {
     code = code
-         | (command & BRL_FLG_CHAR_CONTROL	? BRLAPI_KEY_FLG_CONTROL	: 0)
-         | (command & BRL_FLG_CHAR_META	? BRLAPI_KEY_FLG_META		: 0)
-         | (command & BRL_FLG_CHAR_UPPER	? BRLAPI_KEY_FLG_UPPER		: 0)
-         | (command & BRL_FLG_CHAR_SHIFT	? BRLAPI_KEY_FLG_SHIFT		: 0)
+         | (command & BRL_FLG_CHAR_SHIFT   ? BRLAPI_KEY_FLG_SHIFT   : 0)
+         | (command & BRL_FLG_CHAR_UPPER   ? BRLAPI_KEY_FLG_UPPER   : 0)
+         | (command & BRL_FLG_CHAR_CONTROL ? BRLAPI_KEY_FLG_CONTROL : 0)
+         | (command & BRL_FLG_CHAR_META	   ? BRLAPI_KEY_FLG_META    : 0)
+         | (command & BRL_FLG_CHAR_ALTGR   ? BRLAPI_KEY_FLG_ALTGR   : 0)
+         | (command & BRL_FLG_CHAR_GUI     ? BRLAPI_KEY_FLG_GUI     : 0)
          ;
   } else {
     code = code
@@ -148,15 +150,17 @@ cmdBrlapiToBrltty (brlapi_keyCode_t code) {
     return EOF;
   }
   return cmd
-         | (code & BRLAPI_KEY_FLG_TOGGLE_ON		? BRL_FLG_TOGGLE_ON	: 0)
-         | (code & BRLAPI_KEY_FLG_TOGGLE_OFF		? BRL_FLG_TOGGLE_OFF	: 0)
-         | (code & BRLAPI_KEY_FLG_MOTION_ROUTE		? BRL_FLG_MOTION_ROUTE	: 0)
-         | (code & BRLAPI_KEY_FLG_LINE_SCALED		? BRL_FLG_LINE_SCALED	: 0)
-         | (code & BRLAPI_KEY_FLG_LINE_TOLEFT		? BRL_FLG_LINE_TOLEFT	: 0)
-         | (code & BRLAPI_KEY_FLG_CONTROL		? BRL_FLG_CHAR_CONTROL	: 0)
-         | (code & BRLAPI_KEY_FLG_META			? BRL_FLG_CHAR_META	: 0)
-         | (code & BRLAPI_KEY_FLG_UPPER		? BRL_FLG_CHAR_UPPER	: 0)
-         | (code & BRLAPI_KEY_FLG_SHIFT		? BRL_FLG_CHAR_SHIFT	: 0)
+         | (code & BRLAPI_KEY_FLG_TOGGLE_ON    ? BRL_FLG_TOGGLE_ON    : 0)
+         | (code & BRLAPI_KEY_FLG_TOGGLE_OFF   ? BRL_FLG_TOGGLE_OFF   : 0)
+         | (code & BRLAPI_KEY_FLG_MOTION_ROUTE ? BRL_FLG_MOTION_ROUTE : 0)
+         | (code & BRLAPI_KEY_FLG_LINE_SCALED  ? BRL_FLG_LINE_SCALED  : 0)
+         | (code & BRLAPI_KEY_FLG_LINE_TOLEFT  ? BRL_FLG_LINE_TOLEFT  : 0)
+         | (code & BRLAPI_KEY_FLG_SHIFT	       ? BRL_FLG_CHAR_SHIFT   : 0)
+         | (code & BRLAPI_KEY_FLG_UPPER	       ? BRL_FLG_CHAR_UPPER   : 0)
+         | (code & BRLAPI_KEY_FLG_CONTROL      ? BRL_FLG_CHAR_CONTROL : 0)
+         | (code & BRLAPI_KEY_FLG_META         ? BRL_FLG_CHAR_META    : 0)
+         | (code & BRLAPI_KEY_FLG_ALTGR	       ? BRL_FLG_CHAR_ALTGR   : 0)
+         | (code & BRLAPI_KEY_FLG_GUI          ? BRL_FLG_CHAR_GUI     : 0)
          ;
 }
 #endif /* ENABLE_API */
