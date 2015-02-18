@@ -192,7 +192,7 @@ cd "${newSourceRoot}"
 sourceRoot="${newSourceRoot}"
 
 logMessage task "applying patches"
-for patch in defauth affinity
+for patch in affinity
 do
    patch -p0 <"Windows/${patch}.patch"
 done

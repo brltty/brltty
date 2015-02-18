@@ -134,7 +134,12 @@ size_t BRLAPI_STDCALL brlapi_getHandleSize(void);
 #undef BRLAPI_AUTHKEYFILE
 
 /** Default authorization setting */
+#ifdef BRLAPI_WIN32
+/* No authentication by default on Windows */
+#define BRLAPI_DEFAUTH "none"
+#else
 #define BRLAPI_DEFAUTH BRLAPI_ETCDIR "/" BRLAPI_AUTHKEYFILE
+#endif /* BRLAPI_WIN32 */
 
 #ifdef __MINGW32__
 typedef HANDLE brlapi_fileDescriptor;
