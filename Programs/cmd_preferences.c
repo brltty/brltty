@@ -117,12 +117,11 @@ handlePreferencesCommands (int command, void *data) {
           if (item) {
             unsigned int count = brl.textColumns;
 
-            if (arg < count) {
-              changeMenuItem(item);
+            if (count <= arg) count = arg + 1;
+            changeMenuItem(item);
 
-              if (changeMenuSettingScaled(getMenuItemMenu(item), arg, count)) {
-                break;
-              }
+            if (changeMenuSettingScaled(getMenuItemMenu(item), arg, count)) {
+              break;
             }
           }
 
