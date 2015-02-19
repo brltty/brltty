@@ -265,6 +265,22 @@ writeCComment (FILE *file, const char *text) {
 }
 
 static int
+writeCMacro (FILE *file, const char *name, const char *args) {
+  if (!writeString(file, "#if !defined(")) return 0;
+  if (!writeString(file, name)) return 0;
+  if (!writeString(file, ")")) return 0;
+  if (!endLine(file)) return 0;
+  if (!writeString(file, "#define ")) return 0;
+  if (!writeString(file, name)) return 0;
+  if (!writeString(file, args)) return 0;
+  if (!endLine(file)) return 0;
+  if (!writeString(file, "#endif")) return 0;
+  if (!endLine(file)) return 0;
+
+  return 1;
+}
+
+static int
 writeHeaderComment (FILE *file, CommentWriter *writeComment) {
   char buffer[0X80];
 
@@ -823,17 +839,17 @@ writeTable_CPreprocessor (
   if (!writeHeaderComment(file, writeCComment)) return 0;
   if (!endLine(file)) return 0;
 
-  if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_BEGIN_CHARACTERS")) return 0;
-  if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_CHARACTER(unicode, braille, isPrimary, name)")) return 0;
-  if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_END_CHARACTERS")) return 0;
+  if (!writeCMacro(file, "BRLTTY_TEXT_TABLE_BEGIN_CHARACTERS", "")) return 0;
+  if (!writeCMacro(file, "BRLTTY_TEXT_TABLE_CHARACTER", "(unicode, braille, isPrimary, name)")) return 0;
+  if (!writeCMacro(file, "BRLTTY_TEXT_TABLE_END_CHARACTERS", "")) return 0;
   if (!endLine(file)) return 0;
 
-  if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_BEGIN_ALIASES")) return 0;
-  if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_ALIAS(from, to, name)")) return 0;
-  if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_END_ALIASES")) return 0;
+  if (!writeCMacro(file, "BRLTTY_TEXT_TABLE_BEGIN_ALIASES", "")) return 0;
+  if (!writeCMacro(file, "BRLTTY_TEXT_TABLE_ALIAS", "(from, to, name)")) return 0;
+  if (!writeCMacro(file, "BRLTTY_TEXT_TABLE_END_ALIASES", "")) return 0;
   if (!endLine(file)) return 0;
 
-  if (!writeCComment(file, "#define BRLTTY_TEXT_TABLE_NO_NAME(character)")) return 0;
+  if (!writeCMacro(file, "BRLTTY_TEXT_TABLE_NO_NAME", "(character)")) return 0;
   if (!endLine(file)) return 0;
 
   if (fprintf(file, "BRLTTY_TEXT_TABLE_BEGIN_CHARACTERS\n") == EOF) return 0;
