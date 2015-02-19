@@ -265,7 +265,7 @@ writeCComment (FILE *file, const char *text) {
 }
 
 static int
-writeCMacro (FILE *file, const char *name, const char *args) {
+defineCMacro (FILE *file, const char *name, const char *args) {
   if (!writeString(file, "#ifndef ")) return 0;
   if (!writeString(file, name)) return 0;
   if (!endLine(file)) return 0;
@@ -280,6 +280,24 @@ writeCMacro (FILE *file, const char *name, const char *args) {
 
   if (!endLine(file)) return 0;
   return 1;
+}
+
+static int
+beginCMacro (FILE *file, const char *name) {
+  if (!writeString(file, name)) return 0;
+  if (!writeString(file, "(")) return 0;
+  return 1;
+}
+
+static int
+endCMacro (FILE *file) {
+  if (!writeString(file, ")")) return 0;
+  return 1;
+}
+
+static int
+nextCArgument (FILE *file) {
+  return fprintf(file, ", ") != EOF;
 }
 
 static int
@@ -757,24 +775,6 @@ writeTable_JAWS (
 }
 
 static int
-writeMacroStart_CPreprocessor (FILE *file, const char *name) {
-  if (!writeString(file, name)) return 0;
-  if (!writeString(file, "(")) return 0;
-  return 1;
-}
-
-static int
-writeMacroEnd_CPreprocessor (FILE *file) {
-  if (!writeString(file, ")")) return 0;
-  return 1;
-}
-
-static int
-writeArgumentDelimiter_CPreprocessor (FILE *file) {
-  return fprintf(file, ", ") != EOF;
-}
-
-static int
 writeCharacterValue_CPreprocessor (FILE *file, wchar_t character) {
   return fprintf(file, "0X%08" PRIX32, (uint32_t)character) != EOF;
 }
@@ -788,9 +788,9 @@ writeCharacterName_CPreprocessor (FILE *file, wchar_t character) {
     if (!writeString(file, name)) return 0;
     if (!writeString(file, "\"")) return 0;
   } else {
-    if (!writeMacroStart_CPreprocessor(file, "BRLTTY_TEXT_TABLE_NO_NAME")) return 0;
+    if (!beginCMacro(file, "BRLTTY_TEXT_TABLE_NO_NAME")) return 0;
     if (!writeCharacterValue_CPreprocessor(file, character)) return 0;
-    if (!writeMacroEnd_CPreprocessor(file)) return 0;
+    if (!endCMacro(file)) return 0;
   }
 
   return 1;
@@ -801,35 +801,35 @@ writeCharacter_CPreprocessor (
   FILE *file, wchar_t character, unsigned char dots,
   const unsigned char *byte, int isPrimary, const void *data
 ) {
-  if (!writeMacroStart_CPreprocessor(file, "BRLTTY_TEXT_TABLE_CHARACTER")) return 0;
+  if (!beginCMacro(file, "BRLTTY_TEXT_TABLE_CHARACTER")) return 0;
   if (!writeCharacterValue_CPreprocessor(file, character)) return 0;
 
-  if (!writeArgumentDelimiter_CPreprocessor(file)) return 0;
+  if (!nextCArgument(file)) return 0;
   if (fprintf(file, "0X%02" PRIX8, dots) == EOF) return 0;
 
-  if (!writeArgumentDelimiter_CPreprocessor(file)) return 0;
+  if (!nextCArgument(file)) return 0;
   if (fprintf(file, "%d", isPrimary) == EOF) return 0;
 
-  if (!writeArgumentDelimiter_CPreprocessor(file)) return 0;
+  if (!nextCArgument(file)) return 0;
   if (!writeCharacterName_CPreprocessor(file, character)) return 0;
 
-  if (!writeMacroEnd_CPreprocessor(file)) return 0;
+  if (!endCMacro(file)) return 0;
   if (!endLine(file)) return 0;
   return 1;
 }
 
 static int
 writeAlias_CPreprocessor (FILE *file, const TextTableAliasEntry *alias, const void *data) {
-  if (!writeMacroStart_CPreprocessor(file, "BRLTTY_TEXT_TABLE_ALIAS")) return 0;
+  if (!beginCMacro(file, "BRLTTY_TEXT_TABLE_ALIAS")) return 0;
   if (!writeCharacterValue_CPreprocessor(file, alias->from) == EOF) return 0;
 
-  if (!writeArgumentDelimiter_CPreprocessor(file)) return 0;
+  if (!nextCArgument(file)) return 0;
   if (!writeCharacterValue_CPreprocessor(file, alias->to) == EOF) return 0;
 
-  if (!writeArgumentDelimiter_CPreprocessor(file)) return 0;
+  if (!nextCArgument(file)) return 0;
   if (!writeCharacterName_CPreprocessor(file, alias->from)) return 0;
 
-  if (!writeMacroEnd_CPreprocessor(file)) return 0;
+  if (!endCMacro(file)) return 0;
   if (!endLine(file)) return 0;
   return 1;
 }
@@ -841,15 +841,15 @@ writeTable_CPreprocessor (
   if (!writeHeaderComment(file, writeCComment)) return 0;
   if (!endLine(file)) return 0;
 
-  if (!writeCMacro(file, "BRLTTY_TEXT_TABLE_BEGIN_CHARACTERS", "")) return 0;
-  if (!writeCMacro(file, "BRLTTY_TEXT_TABLE_CHARACTER", "(unicode, braille, isPrimary, name)")) return 0;
-  if (!writeCMacro(file, "BRLTTY_TEXT_TABLE_END_CHARACTERS", "")) return 0;
+  if (!defineCMacro(file, "BRLTTY_TEXT_TABLE_BEGIN_CHARACTERS", "")) return 0;
+  if (!defineCMacro(file, "BRLTTY_TEXT_TABLE_CHARACTER", "(unicode, braille, isPrimary, name)")) return 0;
+  if (!defineCMacro(file, "BRLTTY_TEXT_TABLE_END_CHARACTERS", "")) return 0;
 
-  if (!writeCMacro(file, "BRLTTY_TEXT_TABLE_BEGIN_ALIASES", "")) return 0;
-  if (!writeCMacro(file, "BRLTTY_TEXT_TABLE_ALIAS", "(from, to, name)")) return 0;
-  if (!writeCMacro(file, "BRLTTY_TEXT_TABLE_END_ALIASES", "")) return 0;
+  if (!defineCMacro(file, "BRLTTY_TEXT_TABLE_BEGIN_ALIASES", "")) return 0;
+  if (!defineCMacro(file, "BRLTTY_TEXT_TABLE_ALIAS", "(from, to, name)")) return 0;
+  if (!defineCMacro(file, "BRLTTY_TEXT_TABLE_END_ALIASES", "")) return 0;
 
-  if (!writeCMacro(file, "BRLTTY_TEXT_TABLE_NO_NAME", "(character)")) return 0;
+  if (!defineCMacro(file, "BRLTTY_TEXT_TABLE_NO_NAME", "(character)")) return 0;
 
   if (fprintf(file, "BRLTTY_TEXT_TABLE_BEGIN_CHARACTERS\n") == EOF) return 0;
   if (!writeCharacters(file, ttd, writeCharacter_CPreprocessor, NULL)) return 0;
