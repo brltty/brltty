@@ -802,7 +802,7 @@ writeCharacter_CPreprocessor (
 
 static int
 writeAlias_CPreprocessor (FILE *file, const TextTableAliasEntry *alias, const void *data) {
-  if (!writeMacroStart_CPreprocessor(file, "BRLTTY_TEXT_TABL_ALIAS")) return 0;
+  if (!writeMacroStart_CPreprocessor(file, "BRLTTY_TEXT_TABLE_ALIAS")) return 0;
   if (!writeCharacterValue_CPreprocessor(file, alias->from) == EOF) return 0;
 
   if (!writeArgumentDelimiter_CPreprocessor(file)) return 0;
