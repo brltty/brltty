@@ -64,21 +64,25 @@ bind Dot4+!Shift LNEND
 bind Dot1+!RoutingKey1 SETLEFT
 bind Dot4+!RoutingKey1 DESCCHAR
 
-bind Dot2+!Up KEY_CURSOR_UP
-bind Dot2+!Down KEY_CURSOR_DOWN
+bind Dot2+!Shift KEY_TAB
 bind Dot2+!Home KEY_CURSOR_LEFT
 bind Dot2+!End KEY_CURSOR_RIGHT
+bind Dot2+!Up KEY_CURSOR_UP
+bind Dot2+!Down KEY_CURSOR_DOWN
+bind Dot2+!RoutingKey1 KEY_FUNCTION
 
-bind Dot5+!Up KEY_PAGE_UP
-bind Dot5+!Down KEY_PAGE_DOWN
+bind Dot5+!Shift KEY_INSERT
 bind Dot5+!Home KEY_HOME
 bind Dot5+!End KEY_END
-
-bind Dot2+!Shift KEY_INSERT
-bind Dot5+!Shift KEY_DELETE
-
-bind Dot2+!RoutingKey1 KEY_FUNCTION
+bind Dot5+!Up KEY_PAGE_UP
+bind Dot5+!Down KEY_PAGE_DOWN
 bind Dot5+!RoutingKey1 SWITCHVT
+
+bind Dot6+!Shift UNSTICK
+bind Dot6+!Home META
+bind Dot6+!End GUI
+bind Dot6+!Up SHIFT
+bind Dot6+!Down CONTROL
 
 bind Dot7+!Shift SPKHOME
 bind Dot7+!Home SAY_ABOVE
@@ -136,17 +140,11 @@ map Dot6 DOT6
 map Dot7 DOT7
 map Dot8 DOT8
 
-bind Dot3+!Shift PASSDOTS
-bind Dot3+!Home KEY_ESCAPE
-bind Dot3+!End KEY_TAB
-bind Dot3+!Up KEY_BACKSPACE
-bind Dot3+!Down KEY_ENTER
-
-bind Dot6+!Shift UNSTICK
-bind Dot6+!Home META
-bind Dot6+!End ALTGR
-bind Dot6+!Up CONTROL
-bind Dot6+!Down GUI
+bind Dot3+!Shift KEY_ESCAPE
+bind Dot3+!Home KEY_BACKSPACE
+bind Dot3+!End KEY_DELETE
+bind Dot3+!Up KEY_ENTER
+bind Dot3+!Down PASSDOTS
 
 
 #################
