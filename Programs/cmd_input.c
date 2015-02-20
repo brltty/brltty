@@ -38,9 +38,9 @@ typedef struct {
   ReportListenerInstance *resetListener;
 
   struct {
-    int persistent;
-    int temporary;
     AsyncHandle timeout;
+    int on;
+    int next;
   } modifiers;
 } InputCommandData;
 
@@ -58,9 +58,14 @@ cancelModifiersTimeout (InputCommandData *icd) {
 }
 
 static void
+initializeModifiers (InputCommandData *icd) {
+  icd->modifiers.on = 0;
+  icd->modifiers.next = 0;
+}
+
+static void
 clearModifiers (InputCommandData *icd) {
-  icd->modifiers.persistent = 0;
-  icd->modifiers.temporary = 0;
+  initializeModifiers(icd);
   alert(ALERT_MODIFIER_OFF);
 }
 
@@ -75,7 +80,7 @@ ASYNC_ALARM_CALLBACK(handleInputModifiersTimeout) {
 
 static int
 haveModifiers (InputCommandData *icd) {
-  return icd->modifiers.persistent || icd->modifiers.temporary;
+  return icd->modifiers.on || icd->modifiers.next;
 }
 
 static int
@@ -86,7 +91,8 @@ setModifiersTimeout (InputCommandData *icd) {
   }
 
   return icd->modifiers.timeout?
-         asyncResetAlarmIn(icd->modifiers.timeout, INPUT_STICKY_MODIFIERS_TIMEOUT):
+         asyncResetAlarmIn(icd->modifiers.timeout,
+                           INPUT_STICKY_MODIFIERS_TIMEOUT):
          asyncSetAlarmIn(&icd->modifiers.timeout,
                          INPUT_STICKY_MODIFIERS_TIMEOUT,
                          handleInputModifiersTimeout, icd);
@@ -94,9 +100,9 @@ setModifiersTimeout (InputCommandData *icd) {
 
 static void
 applyModifiers (InputCommandData *icd, int *modifiers) {
-  *modifiers |= icd->modifiers.persistent;
-  *modifiers |= icd->modifiers.temporary;
-  icd->modifiers.temporary = 0;
+  *modifiers |= icd->modifiers.on;
+  *modifiers |= icd->modifiers.next;
+  icd->modifiers.next = 0;
 
   setModifiersTimeout(icd);
 }
@@ -172,15 +178,15 @@ handleInputCommands (int command, void *data) {
     doModifier:
       cancelModifiersTimeout(icd);
 
-      if (icd->modifiers.persistent & modifier) {
-        icd->modifiers.persistent &= ~modifier;
-        icd->modifiers.temporary &= ~modifier;
+      if (icd->modifiers.on & modifier) {
+        icd->modifiers.on &= ~modifier;
+        icd->modifiers.next &= ~modifier;
         alert(ALERT_MODIFIER_OFF);
-      } else if (icd->modifiers.temporary & modifier) {
-        icd->modifiers.persistent |= modifier;
+      } else if (icd->modifiers.next & modifier) {
+        icd->modifiers.on |= modifier;
         alert(ALERT_MODIFIER_ON);
       } else {
-        icd->modifiers.temporary |= modifier;
+        icd->modifiers.next |= modifier;
         alert(ALERT_MODIFIER_NEXT);
       }
 
@@ -305,15 +311,9 @@ handleInputCommands (int command, void *data) {
 }
 
 static void
-initializeInputCommandData (InputCommandData *icd) {
-  icd->modifiers.persistent = 0;
-  icd->modifiers.temporary = 0;
-}
-
-static void
 resetInputCommandData (InputCommandData *icd) {
   cancelModifiersTimeout(icd);
-  initializeInputCommandData(icd);
+  initializeModifiers(icd);
 }
 
 REPORT_LISTENER(inputCommandDataResetListener) {
@@ -337,8 +337,8 @@ addInputCommands (void) {
 
   if ((icd = malloc(sizeof(*icd)))) {
     memset(icd, 0, sizeof(*icd));
-    initializeInputCommandData(icd);
     initializeModifiersTimeout(icd);
+    initializeModifiers(icd);
 
     if ((icd->resetListener = registerReportListener(REPORT_BRAILLE_ONLINE, inputCommandDataResetListener, icd))) {
       if (pushCommandHandler("input", KTB_CTX_DEFAULT,
