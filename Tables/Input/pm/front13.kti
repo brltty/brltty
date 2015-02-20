@@ -142,6 +142,12 @@ bind Dot3+!End KEY_TAB
 bind Dot3+!Up KEY_BACKSPACE
 bind Dot3+!Down KEY_ENTER
 
+bind Dot6+!Shift NOMODS
+bind Dot6+!Home META
+bind Dot6+!End ALTGR
+bind Dot6+!Up CONTROL
+bind Dot6+!Down GUI
+
 
 #################
 # Menu Bindings #
