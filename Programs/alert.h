@@ -59,6 +59,10 @@ typedef enum {
   ALERT_ROUTING_STARTED,
   ALERT_ROUTING_SUCCEEDED,
   ALERT_ROUTING_FAILED,
+
+  ALERT_MODIFIER_NEXT,
+  ALERT_MODIFIER_ON,
+  ALERT_MODIFIER_OFF,
 } AlertIdentifier;
 
 extern void alert (AlertIdentifier identifier);

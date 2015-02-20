@@ -19,24 +19,9 @@
 #ifndef BRLTTY_INCLUDED_CMD_UTILS
 #define BRLTTY_INCLUDED_CMD_UTILS
 
-#include "alert.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-typedef enum {
-  TOGGLE_ERROR,
-  TOGGLE_SAME,
-  TOGGLE_OFF,
-  TOGGLE_ON
-} ToggleResult;
-
-extern ToggleResult toggleBit (
-  int *bits, int bit, int command,
-  AlertIdentifier offAlert,
-  AlertIdentifier onAlert
-);
 
 extern int isTextOffset (int *arg, int end, int relaxed);
 

@@ -22,6 +22,7 @@
 
 #include "log.h"
 #include "report.h"
+#include "alert.h"
 #include "parameters.h"
 #include "cmd_queue.h"
 #include "cmd_input.h"
@@ -60,7 +61,7 @@ static void
 clearModifiers (InputCommandData *icd) {
   icd->modifiers.persistent = 0;
   icd->modifiers.temporary = 0;
-  alert(ALERT_TOGGLE_OFF);
+  alert(ALERT_MODIFIER_OFF);
 }
 
 ASYNC_ALARM_CALLBACK(handleInputModifiersTimeout) {
@@ -174,13 +175,13 @@ handleInputCommands (int command, void *data) {
       if (icd->modifiers.persistent & modifier) {
         icd->modifiers.persistent &= ~modifier;
         icd->modifiers.temporary &= ~modifier;
-        alert(ALERT_TOGGLE_OFF);
+        alert(ALERT_MODIFIER_OFF);
       } else if (icd->modifiers.temporary & modifier) {
         icd->modifiers.persistent |= modifier;
-        alert(ALERT_TOGGLE_ON);
+        alert(ALERT_MODIFIER_ON);
       } else {
         icd->modifiers.temporary |= modifier;
-        alert(ALERT_TOGGLE_ON);
+        alert(ALERT_MODIFIER_NEXT);
       }
 
       setModifiersTimeout(icd);

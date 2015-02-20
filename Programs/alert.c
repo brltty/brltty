@@ -247,6 +247,29 @@ static const TuneElement tuneRoutingFailed[] = {
   TUNE_STOP()
 };
 
+static const TuneElement tuneModifierNext[] = {
+  TUNE_NOTE( 60,  72),
+  TUNE_NOTE( 60,  76),
+  TUNE_NOTE( 90,  79),
+  TUNE_STOP()
+};
+
+static const TuneElement tuneModifierOn[] = {
+  TUNE_NOTE( 60,  72),
+  TUNE_NOTE( 60,  76),
+  TUNE_NOTE( 60,  79),
+  TUNE_NOTE( 90,  84),
+  TUNE_STOP()
+};
+
+static const TuneElement tuneModifierOff[] = {
+  TUNE_NOTE( 60,  84),
+  TUNE_NOTE( 60,  79),
+  TUNE_NOTE( 60,  76),
+  TUNE_NOTE( 90,  72),
+  TUNE_STOP()
+};
+
 typedef struct {
   unsigned char duration;
   BrlDots pattern;
@@ -366,6 +389,18 @@ static const AlertEntry alertTable[] = {
 
   [ALERT_ROUTING_FAILED] = {
     .tune = tuneRoutingFailed
+  },
+
+  [ALERT_MODIFIER_NEXT] = {
+    .tune = tuneModifierNext
+  },
+
+  [ALERT_MODIFIER_ON] = {
+    .tune = tuneModifierOn
+  },
+
+  [ALERT_MODIFIER_OFF] = {
+    .tune = tuneModifierOff
   },
 };
 
