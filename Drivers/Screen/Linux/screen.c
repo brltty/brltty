@@ -1291,6 +1291,11 @@ hasModAltRight (ScreenKey key) {
   return !!(key & SCR_KEY_ALT_RIGHT);
 }
 
+static inline int
+hasModGui (ScreenKey key) {
+  return !!(key & SCR_KEY_GUI);
+}
+
 static int
 injectKeyEvent (int key, int press) {
   if (!openKeyboard()) return 0;
@@ -1510,9 +1515,10 @@ insertCode (ScreenKey key, int raw) {
     const int modControl = hasModControl(key);
     const int modAltLeft = hasModAltLeft(key);
     const int modAltRight = hasModAltRight(key);
+    const int modGui = hasModGui(key);
 
     if (raw) {
-      char codes[18];
+      char codes[22];
       unsigned int count = 0;
 
       if (modUpper) {
@@ -1529,11 +1535,21 @@ insertCode (ScreenKey key, int raw) {
         codes[count++] = XT_KEY_E0_RightAlt;
       }
 
+      if (modGui) {
+        codes[count++] = XT_MOD_E0;
+        codes[count++] = XT_KEY_E0_LeftGUI;
+      }
+
       if (escape) codes[count++] = escape;
       codes[count++] = code;
 
       if (escape) codes[count++] = escape;
       codes[count++] = code | XT_BIT_RELEASE;
+
+      if (modGui) {
+        codes[count++] = XT_MOD_E0;
+        codes[count++] = XT_KEY_E0_LeftGUI | XT_BIT_RELEASE;
+      }
 
       if (modAltRight) {
         codes[count++] = XT_MOD_E0;
