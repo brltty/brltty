@@ -42,6 +42,17 @@ findDriverClass (volatile SpeechSynthesizer *spk) {
   return findJavaClass(spk->driver.data->env, &spk->driver.data->driverClass, "org/a11y/brltty/android/SpeechDriver");
 }
 
+static void
+releaseDriverClass (volatile SpeechSynthesizer *spk) {
+  jclass class = spk->driver.data->driverClass;
+
+  if (class) {
+    JNIEnv *env = spk->driver.data->env;
+
+    (*env)->DeleteGlobalRef(env, class);
+  }
+}
+
 static int
 findDriverMethod (volatile SpeechSynthesizer *spk, jmethodID *method, const char *name, const char *signature) {
   if (findDriverClass(spk)) {
@@ -169,6 +180,7 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
       }
     }
 
+    releaseDriverClass(spk);
     free(spk->driver.data);
   } else {
     logMallocError();
@@ -186,6 +198,7 @@ spk_destruct (volatile SpeechSynthesizer *spk) {
     clearJavaException(spk->driver.data->env, 1);
   }
 
+  releaseDriverClass(spk);
   free(spk->driver.data);
   spk->driver.data = NULL;
 }

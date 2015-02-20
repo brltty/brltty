@@ -41,6 +41,11 @@ struct BluetoothConnectionExtensionStruct {
   int inputPipe[2];
 };
 
+static void
+releaseConnectionClass (BluetoothConnectionExtension *bcx) {
+  (*bcx->env)->DeleteGlobalRef(bcx->env, bcx->connectionClass);
+}
+
 BluetoothConnectionExtension *
 bthNewConnectionExtension (uint64_t bda) {
   BluetoothConnectionExtension *bcx;
@@ -80,6 +85,8 @@ bthNewConnectionExtension (uint64_t bda) {
             }
           }
         }
+
+        releaseConnectionClass(bcx);
       }
     }
 
@@ -110,6 +117,7 @@ bthReleaseConnectionExtension (BluetoothConnectionExtension *bcx) {
     }
 
     (*bcx->env)->DeleteGlobalRef(bcx->env, bcx->connection);
+    releaseConnectionClass(bcx);
     clearJavaException(bcx->env, 1);
   }
 
