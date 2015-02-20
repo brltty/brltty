@@ -171,10 +171,10 @@ typedef enum {
 
   BRL_CMD_OFFLINE /* braille display temporarily unavailable */,
 
-  BRL_CMD_SHIFT /* set shift modifier of next typed character or emulated key on/off */,
-  BRL_CMD_UPPER /* set upper modifier of next typed character or emulated key on/off */,
-  BRL_CMD_CONTROL /* set control modifier of next typed character or emulated key on/off */,
-  BRL_CMD_META /* set meta (left alt) modifier of next typed character or emulated key on/off */,
+  BRL_CMD_SHIFT /* set Shift sticky input modifier next,on,off */,
+  BRL_CMD_UPPER /* set Upper sticky input modifier next,on,off */,
+  BRL_CMD_CONTROL /* set Control sticky input modifier next,on,off */,
+  BRL_CMD_META /* set Meta (Left Alt) sticky input modifier next,on,off */,
 
   BRL_CMD_TIME /* show current date and time */,
   BRL_CMD_MENU_PREV_LEVEL /* go to previous menu level */,
@@ -211,8 +211,9 @@ typedef enum {
   BRL_CMD_BRLUCDOTS /* set braille input mode dots/text */,
   BRL_CMD_BRLKBD /* set braille keyboard enabled/disabled */,
 
-  BRL_CMD_ALTGR /* set altgr (right alt) modifier of next typed character or emulated key on/off */,
-  BRL_CMD_GUI /* set gui (windows) modifier of next typed character or emulated key on/off */,
+  BRL_CMD_NOMODS /* clear all sticky input modifiers */,
+  BRL_CMD_ALTGR /* set AltGr (Right Alt) sticky input modifier next,on,off */,
+  BRL_CMD_GUI /* set GUI (Windows) sticky input modifier next,on,off */,
 
   BRL_basicCommandCount /* must be last */
 } BRL_BasicCommand;
