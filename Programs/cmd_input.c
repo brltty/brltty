@@ -45,48 +45,48 @@ typedef struct {
 } InputCommandData;
 
 static void
-initializeModifiersTimeout (InputCommandData *icd) {
+initializeModifierTimeout (InputCommandData *icd) {
   icd->modifiers.timeout = NULL;
 }
 
 static void
-cancelModifiersTimeout (InputCommandData *icd) {
+cancelModifierTimeout (InputCommandData *icd) {
   if (icd->modifiers.timeout) {
     asyncCancelRequest(icd->modifiers.timeout);
-    initializeModifiersTimeout(icd);
+    initializeModifierTimeout(icd);
   }
 }
 
 static void
-initializeModifiers (InputCommandData *icd) {
+initializeModifierFlags (InputCommandData *icd) {
   icd->modifiers.on = 0;
   icd->modifiers.next = 0;
 }
 
 static void
-clearModifiers (InputCommandData *icd) {
-  initializeModifiers(icd);
+clearModifierFlags (InputCommandData *icd) {
+  initializeModifierFlags(icd);
   alert(ALERT_MODIFIER_OFF);
 }
 
-ASYNC_ALARM_CALLBACK(handleInputModifiersTimeout) {
+ASYNC_ALARM_CALLBACK(handleStickyModifiersTimeout) {
   InputCommandData *icd = parameters->data;
 
   asyncDiscardHandle(icd->modifiers.timeout);
-  initializeModifiersTimeout(icd);
+  initializeModifierTimeout(icd);
 
-  clearModifiers(icd);
+  clearModifierFlags(icd);
 }
 
 static int
-haveModifiers (InputCommandData *icd) {
+haveModifierFlags (InputCommandData *icd) {
   return icd->modifiers.on || icd->modifiers.next;
 }
 
 static int
-setModifiersTimeout (InputCommandData *icd) {
-  if (!haveModifiers(icd)) {
-    cancelModifiersTimeout(icd);
+setModifierTimeout (InputCommandData *icd) {
+  if (!haveModifierFlags(icd)) {
+    cancelModifierTimeout(icd);
     return 1;
   }
 
@@ -95,16 +95,16 @@ setModifiersTimeout (InputCommandData *icd) {
                            INPUT_STICKY_MODIFIERS_TIMEOUT):
          asyncSetAlarmIn(&icd->modifiers.timeout,
                          INPUT_STICKY_MODIFIERS_TIMEOUT,
-                         handleInputModifiersTimeout, icd);
+                         handleStickyModifiersTimeout, icd);
 }
 
 static void
-applyModifiers (InputCommandData *icd, int *modifiers) {
-  *modifiers |= icd->modifiers.on;
-  *modifiers |= icd->modifiers.next;
+applyModifierFlags (InputCommandData *icd, int *flags) {
+  *flags |= icd->modifiers.on;
+  *flags |= icd->modifiers.next;
   icd->modifiers.next = 0;
 
-  setModifiersTimeout(icd);
+  setModifierTimeout(icd);
 }
 
 static int
@@ -137,10 +137,10 @@ handleInputCommands (int command, void *data) {
 
   switch (command & BRL_MSK_CMD) {
     case BRL_CMD_UNSTICK: {
-      cancelModifiersTimeout(icd);
+      cancelModifierTimeout(icd);
 
-      if (haveModifiers(icd)) {
-        clearModifiers(icd);
+      if (haveModifierFlags(icd)) {
+        clearModifierFlags(icd);
       } else {
         alert(ALERT_COMMAND_REJECTED);
       }
@@ -149,48 +149,49 @@ handleInputCommands (int command, void *data) {
     }
 
     {
-      int modifier;
+      int flag;
 
     case BRL_CMD_SHIFT:
-      modifier = BRL_FLG_CHAR_SHIFT;
+      flag = BRL_FLG_CHAR_SHIFT;
       goto doModifier;
 
     case BRL_CMD_UPPER:
-      modifier = BRL_FLG_CHAR_UPPER;
+      flag = BRL_FLG_CHAR_UPPER;
       goto doModifier;
 
     case BRL_CMD_CONTROL:
-      modifier = BRL_FLG_CHAR_CONTROL;
+      flag = BRL_FLG_CHAR_CONTROL;
       goto doModifier;
 
     case BRL_CMD_META:
-      modifier = BRL_FLG_CHAR_META;
+      flag = BRL_FLG_CHAR_META;
       goto doModifier;
 
     case BRL_CMD_ALTGR:
-      modifier = BRL_FLG_CHAR_ALTGR;
+      flag = BRL_FLG_CHAR_ALTGR;
       goto doModifier;
 
     case BRL_CMD_GUI:
-      modifier = BRL_FLG_CHAR_GUI;
+      flag = BRL_FLG_CHAR_GUI;
       goto doModifier;
 
     doModifier:
-      cancelModifiersTimeout(icd);
+      cancelModifierTimeout(icd);
 
-      if (icd->modifiers.on & modifier) {
-        icd->modifiers.on &= ~modifier;
-        icd->modifiers.next &= ~modifier;
+      if (icd->modifiers.on & flag) {
+        icd->modifiers.on &= ~flag;
+        icd->modifiers.next &= ~flag;
         alert(ALERT_MODIFIER_OFF);
-      } else if (icd->modifiers.next & modifier) {
-        icd->modifiers.on |= modifier;
+      } else if (icd->modifiers.next & flag) {
+        icd->modifiers.on |= flag;
+        icd->modifiers.next &= ~flag;
         alert(ALERT_MODIFIER_ON);
       } else {
-        icd->modifiers.next |= modifier;
+        icd->modifiers.next |= flag;
         alert(ALERT_MODIFIER_NEXT);
       }
 
-      setModifiersTimeout(icd);
+      setModifierTimeout(icd);
       break;
     }
 
@@ -259,7 +260,7 @@ handleInputCommands (int command, void *data) {
               break;
           }
 
-          applyModifiers(icd, &flags);
+          applyModifierFlags(icd, &flags);
           if (!insertKey(key, flags)) {
           badKey:
             alert(ALERT_COMMAND_REJECTED);
@@ -268,7 +269,7 @@ handleInputCommands (int command, void *data) {
         }
 
         case BRL_CMD_BLK(PASSCHAR): {
-          applyModifiers(icd, &flags);
+          applyModifierFlags(icd, &flags);
           if (!insertKey(BRL_ARG_GET(command), flags)) alert(ALERT_COMMAND_REJECTED);
           break;
         }
@@ -290,7 +291,7 @@ handleInputCommands (int command, void *data) {
               break;
           }
 
-          applyModifiers(icd, &flags);
+          applyModifierFlags(icd, &flags);
           if (!insertKey(character, flags)) alert(ALERT_COMMAND_REJECTED);
           break;
         }
@@ -312,8 +313,8 @@ handleInputCommands (int command, void *data) {
 
 static void
 resetInputCommandData (InputCommandData *icd) {
-  cancelModifiersTimeout(icd);
-  initializeModifiers(icd);
+  cancelModifierTimeout(icd);
+  initializeModifierFlags(icd);
 }
 
 REPORT_LISTENER(inputCommandDataResetListener) {
@@ -327,7 +328,7 @@ destroyInputCommandData (void *data) {
   InputCommandData *icd = data;
 
   unregisterReportListener(icd->resetListener);
-  cancelModifiersTimeout(icd);
+  cancelModifierTimeout(icd);
   free(icd);
 }
 
@@ -337,8 +338,8 @@ addInputCommands (void) {
 
   if ((icd = malloc(sizeof(*icd)))) {
     memset(icd, 0, sizeof(*icd));
-    initializeModifiersTimeout(icd);
-    initializeModifiers(icd);
+    initializeModifierTimeout(icd);
+    initializeModifierFlags(icd);
 
     if ((icd->resetListener = registerReportListener(REPORT_BRAILLE_ONLINE, inputCommandDataResetListener, icd))) {
       if (pushCommandHandler("input", KTB_CTX_DEFAULT,
