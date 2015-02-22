@@ -248,3 +248,9 @@ main (int argc, char *argv[]) {
   }
   return exitStatus;
 }
+
+#include "update.h"
+
+void
+scheduleUpdate (const char *reason) {
+}
