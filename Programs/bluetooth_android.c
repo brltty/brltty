@@ -76,7 +76,7 @@ bthNewConnectionExtension (uint64_t bda) {
             (*bcx->env)->DeleteLocalRef(bcx->env, localReference);
             localReference = NULL;
 
-            if ((globalReference)) {
+            if (globalReference) {
               bcx->connection = globalReference;
               return bcx;
             } else {
