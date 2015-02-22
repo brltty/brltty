@@ -65,8 +65,13 @@ static SpecialScreenEntry specialScreenTable[] = {
   [SCR_HELP] = SPECIAL_SCREEN_INITIALIZER(help),
 };
 
+static SpecialScreenEntry *
+getSpecialScreenEntry (SpecialScreenType type) {
+  return &specialScreenTable[type];
+}
+
 static void
-announceScreen (void) {
+announceCurrentScreen (void) {
   char buffer[0X80];
   size_t length = currentScreen->formatTitle(buffer, sizeof(buffer));
 
@@ -74,46 +79,51 @@ announceScreen (void) {
 }
 
 static void
-setScreen (BaseScreen *screen) {
+setCurrentScreen (BaseScreen *screen) {
   currentScreen = screen;
   scheduleUpdate("new screen selected");
-  announceScreen();
+  announceCurrentScreen();
 }
 
 static void
-selectScreen (void) {
-  const SpecialScreenEntry *screen = specialScreenTable;
-  const SpecialScreenEntry *end = screen + ARRAY_COUNT(specialScreenTable);
+setSpecialScreen (const SpecialScreenEntry *sse) {
+  setCurrentScreen(sse->base);
+}
 
-  while (screen < end) {
-    if (screen->isActive) break;
-    screen += 1;
+static void
+selectCurrentScreen (void) {
+  const SpecialScreenEntry *sse = specialScreenTable;
+  const SpecialScreenEntry *end = sse + ARRAY_COUNT(specialScreenTable);
+
+  while (sse < end) {
+    if (sse->isActive) break;
+    sse += 1;
   }
 
-  if (screen == end) {
-    setScreen(&mainScreen.base);
+  if (sse == end) {
+    setCurrentScreen(&mainScreen.base);
   } else {
-    setScreen(screen->base);
+    setSpecialScreen(sse);
   }
 }
 
 static int
 haveSpecialScreen (SpecialScreenType type) {
-  return specialScreenTable[type].isActive;
+  return getSpecialScreenEntry(type)->isActive;
 }
 
 static void
 activateSpecialScreen (SpecialScreenType type) {
-  SpecialScreenEntry *screen = &specialScreenTable[type];
+  SpecialScreenEntry *sse = getSpecialScreenEntry(type);
 
-  screen->isActive = 1;
-  setScreen(screen->base);
+  sse->isActive = 1;
+  setSpecialScreen(sse);
 }
 
 static void
 deactivateSpecialScreen (SpecialScreenType type) {
-  specialScreenTable[type].isActive = 0;
-  selectScreen();
+  getSpecialScreenEntry(type)->isActive = 0;
+  selectCurrentScreen();
 }
 
 int
