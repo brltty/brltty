@@ -578,12 +578,12 @@ doUpdate (void) {
     } else {
       if (brl.isSuspended) {
         logMessage(LOG_DEBUG, "resuming braille driver");
+        brl.isSuspended = !api.resume();
 
-        if (api.resume()) {
-          logMessage(LOG_DEBUG, "braille driver resumed");
-          brl.isSuspended = 0;
-        } else {
+        if (brl.isSuspended) {
           logMessage(LOG_DEBUG, "braille driver not resumed");
+        } else {
+          logMessage(LOG_DEBUG, "braille driver resumed");
         }
       }
     }
