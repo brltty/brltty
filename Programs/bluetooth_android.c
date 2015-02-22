@@ -70,7 +70,7 @@ bthNewConnectionExtension (uint64_t bda) {
                                                     ))) {
           jobject localReference = (*bcx->env)->NewObject(bcx->env, bcx->connectionClass, bcx->connectionConstructor, bda);
 
-          if (!clearJavaException(bcx->env, 0)) {
+          if (!clearJavaException(bcx->env, 1)) {
             jobject globalReference = (*bcx->env)->NewGlobalRef(bcx->env, localReference);
 
             (*bcx->env)->DeleteLocalRef(bcx->env, localReference);
