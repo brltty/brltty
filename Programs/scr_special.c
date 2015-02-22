@@ -32,16 +32,22 @@
 #include "scr_special.h"
 #include "update.h"
 #include "message.h"
-#include "menu_prefs.h"
 
 #include "scr_frozen.h"
 static FrozenScreen frozenScreen;
 
 #include "scr_menu.h"
+#include "menu_prefs.h"
 static MenuScreen menuScreen;
 
 #include "scr_help.h"
 static HelpScreen helpScreen;
+
+typedef enum {
+  SCR_FROZEN,
+  SCR_MENU,
+  SCR_HELP,
+} SpecialScreenType;
 
 typedef struct {
   BaseScreen *base;

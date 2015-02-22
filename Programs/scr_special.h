@@ -25,12 +25,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef enum {
-  SCR_FROZEN,
-  SCR_MENU,
-  SCR_HELP,
-} SpecialScreenType;
-
 extern int isFrozenScreen (void);
 extern int haveFrozenScreen (void);
 extern int activateFrozenScreen (void);
