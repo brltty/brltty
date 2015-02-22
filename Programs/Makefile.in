@@ -341,7 +341,7 @@ spk_base.$O:
 
 ###############################################################################
 
-SCREEN_OBJECTS = scr.$O scr_utils.$O scr_base.$O scr_help.$O scr_frozen.$O scr_menu.$O scr_main.$O scr_real.$O scr_driver.$O routing.$O $(SCREEN_DRIVER_OBJECTS)
+SCREEN_OBJECTS = scr.$O scr_utils.$O scr_base.$O scr_main.$O scr_real.$O scr_driver.$O routing.$O $(SCREEN_DRIVER_OBJECTS)
 
 scr.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr.c
@@ -351,15 +351,6 @@ scr_utils.$O:
 
 scr_base.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr_base.c
-
-scr_help.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr_help.c
-
-scr_frozen.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr_frozen.c
-
-scr_menu.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr_menu.c
 
 scr_main.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr_main.c
@@ -372,6 +363,22 @@ scr_driver.$O:
 
 routing.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/routing.c
+
+###############################################################################
+
+SPECIAL_SCREEN_OBJECTS = scr_special.$O scr_frozen.$O scr_menu.$O scr_help.$O
+
+scr_special.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr_special.c
+
+scr_frozen.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr_frozen.c
+
+scr_menu.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr_menu.c
+
+scr_help.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr_help.c
 
 ###############################################################################
 
@@ -600,7 +607,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O activity.$O $(PREFS_OBJECTS) profile.$O menu.$O menu_prefs.$O ses.$O status.$O update.$O blink.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_utils.$O cmd_custom.$O cmd_navigation.$O cmd_input.$O cmd_keycodes.$O cmd_touch.$O cmd_toggle.$O cmd_preferences.$O cmd_clipboard.$O cmd_speech.$O cmd_learn.$O learn.$O cmd_miscellaneous.$O pipe.$O $(TTB_OBJECTS) $(ATB_OBJECTS) $(CTB_OBJECTS) $(KTB_OBJECTS) ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) spk_input.$O api_control.$O $(API_SERVER_OBJECTS)
+CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O activity.$O $(PREFS_OBJECTS) profile.$O menu.$O menu_prefs.$O ses.$O status.$O update.$O blink.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_utils.$O cmd_custom.$O cmd_navigation.$O cmd_input.$O cmd_keycodes.$O cmd_touch.$O cmd_toggle.$O cmd_preferences.$O cmd_clipboard.$O cmd_speech.$O cmd_learn.$O learn.$O cmd_miscellaneous.$O pipe.$O $(TTB_OBJECTS) $(ATB_OBJECTS) $(CTB_OBJECTS) $(KTB_OBJECTS) ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(SPECIAL_SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) spk_input.$O api_control.$O $(API_SERVER_OBJECTS)
 CORE_NAME = brltty
 
 brltty-core: $(CORE_OBJECTS)
@@ -763,7 +770,7 @@ spktest.$O:
 
 ###############################################################################
 
-SCRTEST_OBJECTS = scrtest.$O $(PROGRAM_OBJECTS) drivers.$O driver.$O $(SCREEN_OBJECTS) kbd_keycodes.$O
+SCRTEST_OBJECTS = scrtest.$O $(PROGRAM_OBJECTS) drivers.$O driver.$O $(SCREEN_OBJECTS)
 
 scrtest$X: $(SCRTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(SCREEN_DRIVER_LIBRARIES) $(LDLIBS)

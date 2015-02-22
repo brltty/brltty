@@ -31,7 +31,7 @@ typedef struct {
   void (*destruct) (void);		/* called to discard frozen screen image */
 } FrozenScreen;
 
-extern void initializeFrozenScreen (FrozenScreen *);
+extern void initializeFrozenScreen (FrozenScreen *frozen);
 
 #ifdef __cplusplus
 }

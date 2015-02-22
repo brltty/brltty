@@ -24,6 +24,7 @@
 #include "brl_cmds.h"
 #include "prefs.h"
 #include "scr.h"
+#include "scr_special.h"
 #include "alert.h"
 #include "async_wait.h"
 #include "brltty.h"

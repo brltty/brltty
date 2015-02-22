@@ -16,26 +16,20 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_SCR_MENU
-#define BRLTTY_INCLUDED_SCR_MENU
+#ifndef BRLTTY_INCLUDED_SCR_INTERNAL
+#define BRLTTY_INCLUDED_SCR_INTERNAL
 
-#include "scr_base.h"
-#include "menu.h"
+#include "scr_main.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct {
-  BaseScreen base;
-  int (*construct) (Menu *menu);
-  void (*destruct) (void);
-} MenuScreen;
-
-extern void initializeMenuScreen (MenuScreen *menu);
+extern MainScreen mainScreen;
+extern BaseScreen *currentScreen;
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_SCR_MENU */
+#endif /* BRLTTY_INCLUDED_SCR_INTERNAL */

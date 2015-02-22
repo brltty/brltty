@@ -207,6 +207,12 @@ handleApiCommands (int command, void *data) {
 }
 
 static int
+addScreenCommands (void) {
+  return pushCommandHandler("screen", KTB_CTX_DEFAULT,
+                            handleScreenCommands, NULL, NULL);
+}
+
+static int
 addCommands (void) {
   if (!pushCommandEnvironment("main", preprocessCommand, postprocessCommand)) return 0;
 

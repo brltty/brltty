@@ -27,29 +27,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/* Routines which apply to all screens. */
-extern void constructSpecialScreens (void);
-extern void destructSpecialScreens (void);
-
 extern int isMainScreen (void);
 
-extern int isHelpScreen (void);
-extern int haveHelpScreen (void);
-extern int activateHelpScreen (void);
-extern void deactivateHelpScreen (void);
-
-extern int isMenuScreen (void);
-extern int haveMenuScreen (void);
-extern int activateMenuScreen (void);
-extern void deactivateMenuScreen (void);
-
-extern int isFrozenScreen (void);
-extern int haveFrozenScreen (void);
-extern int activateFrozenScreen (void);
-extern void deactivateFrozenScreen (void);
-
 /* Routines which apply to the current screen. */
-extern size_t formatScreenTitle (char *buffer, size_t size);
 extern int pollScreen (void);
 extern int refreshScreen (void);
 extern void describeScreen (ScreenDescription *);		/* get screen status */
@@ -64,7 +44,7 @@ extern int selectScreenVirtualTerminal (int vt);
 extern int switchScreenVirtualTerminal (int vt);
 extern int currentVirtualTerminal (void);
 extern int userVirtualTerminal (int number);
-extern int addScreenCommands (void);
+extern int handleScreenCommands (int command, void *data);
 extern KeyTableCommandContext getScreenCommandContext (void);
 
 /* Routines which apply to the routing screen.
@@ -74,17 +54,6 @@ extern KeyTableCommandContext getScreenCommandContext (void);
  */
 extern int constructRoutingScreen (void);
 extern void destructRoutingScreen (void);
-
-/* Routines which apply to the help screen. */
-extern int constructHelpScreen (void);
-extern void destructHelpScreen (void);
-extern int addHelpPage (void);
-extern unsigned int getHelpPageCount (void);
-extern unsigned int getHelpPageNumber (void);
-extern int setHelpPageNumber (unsigned int number);
-extern int clearHelpPage (void);
-extern int addHelpLine (const wchar_t *characters);
-extern unsigned int getHelpLineCount (void);
 
 extern const ScreenDriver *screen;
 extern const ScreenDriver noScreen;

@@ -30,85 +30,12 @@
 #include <string.h>
 
 #include "log.h"
-#include "update.h"
-#include "message.h"
-#include "menu_prefs.h"
 #include "scr.h"
-#include "scr_help.h"
-#include "scr_menu.h"
-#include "scr_frozen.h"
 #include "scr_real.h"
 #include "driver.h"
-#include "cmd_queue.h"
 
-static HelpScreen helpScreen;
-static MenuScreen menuScreen;
-static FrozenScreen frozenScreen;                
-static MainScreen mainScreen;
-
-typedef enum {
-  SCR_HELP   = 0X01,
-  SCR_MENU   = 0X02,
-  SCR_FROZEN = 0X04
-} ActiveScreen;
-
-static ActiveScreen activeScreens = 0;
-static BaseScreen *currentScreen = &mainScreen.base;
-
-static void
-announceScreen (void) {
-  char buffer[0X80];
-  size_t length = formatScreenTitle(buffer, sizeof(buffer));
-
-  if (length) message(NULL, buffer, 0);
-}
-
-static void
-setScreen (ActiveScreen which) {
-  typedef struct {
-    ActiveScreen which;
-    BaseScreen *screen;
-  } ScreenEntry;
-
-  static const ScreenEntry screenEntries[] = {
-    {SCR_HELP  , &helpScreen.base},
-    {SCR_MENU  , &menuScreen.base},
-    {SCR_FROZEN, &frozenScreen.base},
-    {0         , &mainScreen.base}
-  };
-  const ScreenEntry *entry = screenEntries;
-
-  while (entry->which) {
-    if (which & entry->which) break;
-    entry += 1;
-  }
-
-  currentScreen = entry->screen;
-  scheduleUpdate("new screen selected");
-  announceScreen();
-}
-
-static void
-selectScreen (void) {
-  setScreen(activeScreens);
-}
-
-int
-haveScreen (ActiveScreen which) {
-  return (activeScreens & which) != 0;
-}
-
-static void
-activateScreen (ActiveScreen which) {
-  activeScreens |= which;
-  setScreen(which);
-}
-
-static void
-deactivateScreen (ActiveScreen which) {
-  activeScreens &= ~which;
-  selectScreen();
-}
+MainScreen mainScreen;
+BaseScreen *currentScreen = &mainScreen.base;
 
 int
 isMainScreen (void) {
@@ -160,25 +87,6 @@ destructScreenDriver (void) {
   mainScreen.releaseParameters();
 }
 
-void
-constructSpecialScreens (void) {
-  initializeHelpScreen(&helpScreen);
-  initializeMenuScreen(&menuScreen);
-  initializeFrozenScreen(&frozenScreen);
-}
-
-void
-destructSpecialScreens (void) {
-  helpScreen.destruct();
-  menuScreen.destruct();
-  frozenScreen.destruct();
-}
-
-
-size_t
-formatScreenTitle (char *buffer, size_t size) {
-  return currentScreen->formatTitle(buffer, size);
-}
 
 int
 pollScreen (void) {
@@ -264,15 +172,9 @@ userVirtualTerminal (int number) {
   return mainScreen.userVirtualTerminal(number);
 }
 
-static int
+int
 handleScreenCommands (int command, void *data) {
   return currentScreen->handleCommand(command);
-}
-
-int
-addScreenCommands (void) {
-  return pushCommandHandler("screen", KTB_CTX_DEFAULT,
-                            handleScreenCommands, NULL, NULL);
 }
 
 KeyTableCommandContext
@@ -295,140 +197,4 @@ void
 destructRoutingScreen (void) {
   mainScreen.destruct();
   mainScreen.releaseParameters();
-}
-
-
-static int helpScreenConstructed = 0;
-
-int
-isHelpScreen (void) {
-  return currentScreen == &helpScreen.base;
-}
-
-int
-haveHelpScreen (void) {
-  return haveScreen(SCR_HELP);
-}
-
-int
-activateHelpScreen (void) {
-  if (!constructHelpScreen()) return 0;
-  activateScreen(SCR_HELP);
-  return 1;
-}
-
-void
-deactivateHelpScreen (void) {
-  deactivateScreen(SCR_HELP);
-}
-
-int
-constructHelpScreen (void) {
-  if (!helpScreenConstructed) {
-    if (!helpScreen.construct()) return 0;
-    helpScreenConstructed = 1;
-  }
-
-  return 1;
-}
-
-void
-destructHelpScreen (void) {
-  if (helpScreenConstructed) {
-    helpScreen.destruct();
-    helpScreenConstructed = 0;
-  }
-}
-
-int
-addHelpPage (void) {
-  return helpScreen.addPage();
-}
-
-unsigned int
-getHelpPageCount (void) {
-  return helpScreen.getPageCount();
-}
-
-unsigned int
-getHelpPageNumber (void) {
-  return helpScreen.getPageNumber();
-}
-
-int
-setHelpPageNumber (unsigned int number) {
-  return helpScreen.setPageNumber(number);
-}
-
-int
-clearHelpPage (void) {
-  return helpScreen.clearPage();
-}
-
-int
-addHelpLine (const wchar_t *characters) {
-  return helpScreen.addLine(characters);
-}
-
-unsigned int
-getHelpLineCount (void) {
-  return helpScreen.getLineCount();
-}
-
-
-static int menuScreenConstructed = 0;
-
-int
-isMenuScreen (void) {
-  return currentScreen == &menuScreen.base;
-}
-
-int
-haveMenuScreen (void) {
-  return haveScreen(SCR_MENU);
-}
-
-int
-activateMenuScreen (void) {
-  if (!menuScreenConstructed) {
-    Menu *menu = getPreferencesMenu();
-
-    if (!menu) return 0;
-    if (!menuScreen.construct(menu)) return 0;
-    menuScreenConstructed = 1;
-  }
-
-  activateScreen(SCR_MENU);
-  return 1;
-}
-
-void
-deactivateMenuScreen (void) {
-  deactivateScreen(SCR_MENU);
-}
-
-
-int
-isFrozenScreen (void) {
-  return currentScreen == &frozenScreen.base;
-}
-
-int
-haveFrozenScreen (void) {
-  return haveScreen(SCR_FROZEN);
-}
-
-int
-activateFrozenScreen (void) {
-  if (haveFrozenScreen() || !frozenScreen.construct(&mainScreen.base)) return 0;
-  activateScreen(SCR_FROZEN);
-  return 1;
-}
-
-void
-deactivateFrozenScreen (void) {
-  if (haveFrozenScreen()) {
-    frozenScreen.destruct();
-    deactivateScreen(SCR_FROZEN);
-  }
 }

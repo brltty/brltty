@@ -24,7 +24,7 @@
 #include "prefs.h"
 #include "menu.h"
 #include "menu_prefs.h"
-#include "scr.h"
+#include "scr_special.h"
 #include "message.h"
 #include "alert.h"
 #include "brltty.h"

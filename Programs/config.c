@@ -40,6 +40,7 @@
 #include "spk.h"
 #include "spk_input.h"
 #include "scr.h"
+#include "scr_special.h"
 #include "status.h"
 #include "blink.h"
 #include "datafile.h"

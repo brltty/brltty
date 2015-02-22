@@ -25,7 +25,7 @@
 #include "cmd_utils.h"
 #include "brl_cmds.h"
 #include "prefs.h"
-#include "scr.h"
+#include "scr_special.h"
 #include "message.h"
 #include "alert.h"
 #include "brltty.h"

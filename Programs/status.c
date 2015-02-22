@@ -23,7 +23,7 @@
 #include "update.h"
 #include "brl_dots.h"
 #include "brl_utils.h"
-#include "scr.h"
+#include "scr_special.h"
 #include "brltty.h"
 #include "prefs.h"
 #include "ttb.h"

@@ -40,7 +40,7 @@ typedef struct {
   unsigned int (*getLineCount) (void);
 } HelpScreen;
 
-extern void initializeHelpScreen (HelpScreen *);
+extern void initializeHelpScreen (HelpScreen *help);
 
 #ifdef __cplusplus
 }
