@@ -26,10 +26,11 @@ static const CommandListEntry commandList_modes[] = {
   { .command = BRL_CMD_HELP },
   { .command = BRL_CMD_LEARN },
   { .command = BRL_CMD_PREFMENU },
-  { .command = BRL_CMD_TIME },
   { .command = BRL_CMD_INFO },
-  { .command = BRL_CMD_FREEZE },
   { .command = BRL_CMD_DISPMD },
+  { .command = BRL_CMD_FREEZE },
+  { .command = BRL_CMD_BLK(DESCCHAR) },
+  { .command = BRL_CMD_TIME },
   { .command = BRL_CMD_BLK(CONTEXT) },
 };
 
@@ -131,7 +132,6 @@ static const CommandListEntry commandList_menu[] = {
 
 static const CommandListEntry commandList_say[] = {
   { .command = BRL_CMD_MUTE },
-  { .command = BRL_CMD_BLK(DESCCHAR) },
   { .command = BRL_CMD_SAY_LINE },
   { .command = BRL_CMD_SAY_ABOVE },
   { .command = BRL_CMD_SAY_BELOW },
