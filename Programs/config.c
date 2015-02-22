@@ -1235,7 +1235,7 @@ unloadDriverObject (void **object) {
 #endif /* ENABLE_SHARED_OBJECTS */
 }
 
-static void
+void
 forgetDevices (void) {
   usbForgetDevices();
   bthForgetDevices();

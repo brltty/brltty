@@ -578,6 +578,7 @@ doUpdate (void) {
     } else {
       if (brl.isSuspended) {
         logMessage(LOG_DEBUG, "resuming braille driver");
+        forgetDevices();
         brl.isSuspended = !api.resume();
 
         if (brl.isSuspended) {

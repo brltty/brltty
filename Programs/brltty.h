@@ -150,6 +150,7 @@ extern unsigned int verticalWindowShift;			/* Window vertical distance */
 
 extern int constructBrailleDriver (void);
 extern void destructBrailleDriver (void);
+extern void forgetDevices (void);
 
 extern void reconfigureBrailleWindow (void);
 extern int haveStatusCells (void);
