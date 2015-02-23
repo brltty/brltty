@@ -41,7 +41,6 @@ extern int activateHelpScreen (void);
 extern void deactivateHelpScreen (void);
 
 extern int constructHelpScreen (void);
-extern void destructHelpScreen (void);
 extern int addHelpPage (void);
 extern unsigned int getHelpPageCount (void);
 extern unsigned int getHelpPageNumber (void);
@@ -50,8 +49,8 @@ extern int clearHelpPage (void);
 extern int addHelpLine (const wchar_t *characters);
 extern unsigned int getHelpLineCount (void);
 
-extern void constructSpecialScreens (void);
-extern void destructSpecialScreens (void);
+extern void beginSpecialScreens (void);
+extern void endSpecialScreens (void);
 
 #ifdef __cplusplus
 }

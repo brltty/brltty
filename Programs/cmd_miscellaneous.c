@@ -215,11 +215,11 @@ handleMiscellaneousCommands (int command, void *data) {
 
         if (pageNumber > pageCount) {
           deactivateHelpScreen();
-          updateSessionAttributes();
         } else {
-          updateSessionAttributes();
           ok = 1;
         }
+
+        updateSessionAttributes();
       }
 
       if (ok) {

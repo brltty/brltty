@@ -2149,7 +2149,7 @@ restartScreenDriver (void) {
 
 static void
 exitScreenData (void *data) {
-  destructSpecialScreens();
+  endSpecialScreens();
 
   if (screenDrivers) {
     deallocateStrings(screenDrivers);
@@ -2509,7 +2509,7 @@ brlttyStart (void) {
 
   changeScreenDriver(opt_screenDriver);
   changeScreenParameters(opt_screenParameters);
-  constructSpecialScreens();
+  beginSpecialScreens();
   onProgramExit("screen-data", exitScreenData, NULL);
 
   suppressTuneDeviceOpenErrors();

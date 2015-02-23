@@ -27,8 +27,7 @@
 
 #include "prologue.h"
 
-#include <string.h>
-
+#include "log.h"
 #include "scr_special.h"
 #include "update.h"
 #include "message.h"
@@ -50,24 +49,46 @@ typedef enum {
 } SpecialScreenType;
 
 typedef struct {
+  const char *name;
   BaseScreen *base;
+  void (*destruct) (void);
+  unsigned autoDestruct:1; \
   unsigned isActive:1;
 } SpecialScreenEntry;
 
-#define SPECIAL_SCREEN_INITIALIZER(type) { \
-  .base = &type ## Screen.base, \
-  .isActive = 0 \
-}
+#define SPECIAL_SCREEN_INITIALIZER(type) \
+  .name = #type, \
+  .base = &type ## Screen.base
 
 static SpecialScreenEntry specialScreenTable[] = {
-  [SCR_FROZEN] = SPECIAL_SCREEN_INITIALIZER(frozen),
-  [SCR_MENU] = SPECIAL_SCREEN_INITIALIZER(menu),
-  [SCR_HELP] = SPECIAL_SCREEN_INITIALIZER(help),
+  [SCR_FROZEN] = {
+    SPECIAL_SCREEN_INITIALIZER(frozen),
+    .autoDestruct = 1
+  },
+
+  [SCR_MENU] = {
+    SPECIAL_SCREEN_INITIALIZER(menu)
+  },
+
+  [SCR_HELP] = {
+    SPECIAL_SCREEN_INITIALIZER(help)
+  },
 };
+
+static const unsigned char specialScreenCount = ARRAY_COUNT(specialScreenTable);
 
 static SpecialScreenEntry *
 getSpecialScreenEntry (SpecialScreenType type) {
   return &specialScreenTable[type];
+}
+
+static void
+destructSpecialScreen (SpecialScreenEntry *sse) {
+  if (sse->destruct) {
+    logMessage(LOG_DEBUG, "destruct special screen: %s", sse->name);
+    sse->destruct();
+    sse->destruct = NULL;
+  }
 }
 
 static void
@@ -93,7 +114,7 @@ setSpecialScreen (const SpecialScreenEntry *sse) {
 static void
 selectCurrentScreen (void) {
   const SpecialScreenEntry *sse = specialScreenTable;
-  const SpecialScreenEntry *end = sse + ARRAY_COUNT(specialScreenTable);
+  const SpecialScreenEntry *end = sse + specialScreenCount;
 
   while (sse < end) {
     if (sse->isActive) break;
@@ -122,7 +143,10 @@ activateSpecialScreen (SpecialScreenType type) {
 
 static void
 deactivateSpecialScreen (SpecialScreenType type) {
-  getSpecialScreenEntry(type)->isActive = 0;
+  SpecialScreenEntry *sse = getSpecialScreenEntry(type);
+
+  sse->isActive = 0;
+  if (sse->autoDestruct) destructSpecialScreen(sse);
   selectCurrentScreen();
 }
 
@@ -138,20 +162,20 @@ haveFrozenScreen (void) {
 
 int
 activateFrozenScreen (void) {
-  if (haveFrozenScreen() || !frozenScreen.construct(&mainScreen.base)) return 0;
+  SpecialScreenEntry *sse = getSpecialScreenEntry(SCR_FROZEN);
+
+  if (sse->destruct) return 0;
+  if (!frozenScreen.construct(&mainScreen.base)) return 0;
+  sse->destruct = frozenScreen.destruct;
+
   activateSpecialScreen(SCR_FROZEN);
   return 1;
 }
 
 void
 deactivateFrozenScreen (void) {
-  if (haveFrozenScreen()) {
-    frozenScreen.destruct();
-    deactivateSpecialScreen(SCR_FROZEN);
-  }
+  deactivateSpecialScreen(SCR_FROZEN);
 }
-
-static int menuScreenConstructed = 0;
 
 int
 isMenuScreen (void) {
@@ -165,12 +189,14 @@ haveMenuScreen (void) {
 
 int
 activateMenuScreen (void) {
-  if (!menuScreenConstructed) {
+  SpecialScreenEntry *sse = getSpecialScreenEntry(SCR_MENU);
+
+  if (!sse->destruct) {
     Menu *menu = getPreferencesMenu();
 
     if (!menu) return 0;
     if (!menuScreen.construct(menu)) return 0;
-    menuScreenConstructed = 1;
+    sse->destruct = menuScreen.destruct;
   }
 
   activateSpecialScreen(SCR_MENU);
@@ -181,8 +207,6 @@ void
 deactivateMenuScreen (void) {
   deactivateSpecialScreen(SCR_MENU);
 }
-
-static int helpScreenConstructed = 0;
 
 int
 isHelpScreen (void) {
@@ -208,20 +232,14 @@ deactivateHelpScreen (void) {
 
 int
 constructHelpScreen (void) {
-  if (!helpScreenConstructed) {
+  SpecialScreenEntry *sse = getSpecialScreenEntry(SCR_HELP);
+
+  if (!sse->destruct) {
     if (!helpScreen.construct()) return 0;
-    helpScreenConstructed = 1;
+    sse->destruct = helpScreen.destruct;
   }
 
   return 1;
-}
-
-void
-destructHelpScreen (void) {
-  if (helpScreenConstructed) {
-    helpScreen.destruct();
-    helpScreenConstructed = 0;
-  }
 }
 
 int
@@ -260,15 +278,19 @@ getHelpLineCount (void) {
 }
 
 void
-constructSpecialScreens (void) {
-  initializeHelpScreen(&helpScreen);
-  initializeMenuScreen(&menuScreen);
+beginSpecialScreens (void) {
   initializeFrozenScreen(&frozenScreen);
+  initializeMenuScreen(&menuScreen);
+  initializeHelpScreen(&helpScreen);
 }
 
 void
-destructSpecialScreens (void) {
-  helpScreen.destruct();
-  menuScreen.destruct();
-  frozenScreen.destruct();
+endSpecialScreens (void) {
+  SpecialScreenEntry *sse = specialScreenTable;
+  SpecialScreenEntry *end = sse + specialScreenCount;
+
+  while (sse < end) {
+    destructSpecialScreen(sse);
+    sse += 1;
+  }
 }
