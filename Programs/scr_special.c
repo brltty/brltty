@@ -46,7 +46,7 @@ static HelpScreen helpScreen;
 
 static int
 helpScreen_construct (void) {
-  return constructHelpScreen();
+  return helpScreen.construct();
 }
 
 #include "scr_menu.h"
@@ -102,7 +102,7 @@ getSpecialScreenEntry (SpecialScreenType type) {
 
 static void
 logScreenAction (const char *type, const char *name, const char *action) {
-  logMessage(LOG_CATEGORY(SCREEN_DRIVER), "%s %s screen: %s", action, type, name);
+  logMessage(LOG_DEBUG, "%s %s screen: %s", action, type, name);
 }
 
 static void
@@ -225,12 +225,7 @@ int
 constructHelpScreen (void) {
   SpecialScreenEntry *sse = getSpecialScreenEntry(SCR_HELP);
 
-  if (!sse->isConstructed) {
-    if (!helpScreen.construct()) return 0;
-    sse->isConstructed = 1;
-  }
-
-  return 1;
+  return constructSpecialScreen(sse);
 }
 
 int

@@ -39,10 +39,6 @@ extern void deactivateSpecialScreen (SpecialScreenType type);
 extern int haveSpecialScreen (SpecialScreenType type);
 extern int isSpecialScreen (SpecialScreenType type);
 
-extern int activateFrozenScreen (void);
-extern int activateHelpScreen (void);
-extern int activateMenuScreen (void);
-
 extern int constructHelpScreen (void);
 extern int addHelpPage (void);
 extern unsigned int getHelpPageCount (void);
