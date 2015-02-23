@@ -366,7 +366,7 @@ routing.$O:
 
 ###############################################################################
 
-SPECIAL_SCREEN_OBJECTS = scr_special.$O scr_frozen.$O scr_menu.$O scr_help.$O
+SPECIAL_SCREEN_OBJECTS = scr_special.$O scr_frozen.$O scr_help.$O scr_menu.$O
 
 scr_special.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr_special.c
@@ -374,11 +374,11 @@ scr_special.$O:
 scr_frozen.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr_frozen.c
 
-scr_menu.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr_menu.c
-
 scr_help.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr_help.c
+
+scr_menu.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/scr_menu.c
 
 ###############################################################################
 

@@ -229,7 +229,7 @@ handleToggleCommands (int command, void *data) {
 
       if (isMainScreen()) {
         setting = 0;
-      } else if (isFrozenScreen()) {
+      } else if (isSpecialScreen(SCR_FROZEN)) {
         setting = 1;
       } else {
         alert(ALERT_COMMAND_REJECTED);
@@ -238,11 +238,11 @@ handleToggleCommands (int command, void *data) {
 
       switch (toggleSetting(&setting, command, ALERT_SCREEN_UNFROZEN, ALERT_SCREEN_FROZEN)) {
         case TOGGLE_OFF:
-          deactivateFrozenScreen();
+          deactivateSpecialScreen(SCR_FROZEN);
           break;
 
         case TOGGLE_ON:
-          if (!activateFrozenScreen()) alert(ALERT_COMMAND_REJECTED);
+          if (!activateSpecialScreen(SCR_FROZEN)) alert(ALERT_COMMAND_REJECTED);
           break;
 
         default:

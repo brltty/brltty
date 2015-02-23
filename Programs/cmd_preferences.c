@@ -39,16 +39,16 @@ handlePreferencesCommands (int command, void *data) {
     case BRL_CMD_PREFMENU: {
       int ok = 0;
 
-      if (isMenuScreen()) {
+      if (isSpecialScreen(SCR_MENU)) {
         if (prefs.saveOnExit) {
           if (savePreferences()) {
             alert(ALERT_COMMAND_DONE);
           }
         }
 
-        deactivateMenuScreen();
+        deactivateSpecialScreen(SCR_MENU);
         ok = 1;
-      } else if (activateMenuScreen()) {
+      } else if (activateSpecialScreen(SCR_MENU)) {
         updateSessionAttributes();
         savedPreferences = prefs;
         ok = 1;
@@ -64,9 +64,9 @@ handlePreferencesCommands (int command, void *data) {
     }
 
     case BRL_CMD_PREFSAVE:
-      if (isMenuScreen()) {
+      if (isSpecialScreen(SCR_MENU)) {
         if (savePreferences()) alert(ALERT_COMMAND_DONE);
-        deactivateMenuScreen();
+        deactivateSpecialScreen(SCR_MENU);
       } else if (savePreferences()) {
         alert(ALERT_COMMAND_DONE);
       } else {
@@ -75,7 +75,7 @@ handlePreferencesCommands (int command, void *data) {
       break;
 
     case BRL_CMD_PREFLOAD:
-      if (isMenuScreen()) {
+      if (isSpecialScreen(SCR_MENU)) {
         setPreferences(&savedPreferences);
         message(modeString_preferences, gettext("changes discarded"), 0);
       } else if (loadPreferences()) {

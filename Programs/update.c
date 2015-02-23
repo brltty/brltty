@@ -240,10 +240,10 @@ showInfo (void) {
                       ses->trackScreenCursor? 't': ' ',
                       prefs.showScreenCursor? (prefs.blinkingScreenCursor? 'B': 'v'):
                                               (prefs.blinkingScreenCursor? 'b': ' '),
-                      ses->displayMode? 'a': 't',
-                      isFrozenScreen()? 'f': ' ',
-                      prefs.textStyle? '6': '8',
-                      prefs.blinkingCapitals? 'B': ' ');
+                      ses->displayMode           ? 'a': 't',
+                      isSpecialScreen(SCR_FROZEN)? 'f': ' ',
+                      prefs.textStyle            ? '6': '8',
+                      prefs.blinkingCapitals     ? 'B': ' ');
     if (length > size) length = size;
 
     {
@@ -271,10 +271,10 @@ showInfo (void) {
              ses->trackScreenCursor? 't': ' ',
              prefs.showScreenCursor? (prefs.blinkingScreenCursor? 'B': 'v'):
                                      (prefs.blinkingScreenCursor? 'b': ' '),
-             ses->displayMode? 'a': 't',
-             isFrozenScreen()? 'f': ' ',
-             prefs.textStyle? '6': '8',
-             prefs.blinkingCapitals? 'B': ' ');
+             ses->displayMode           ? 'a': 't',
+             isSpecialScreen(SCR_FROZEN)? 'f': ' ',
+             prefs.textStyle            ? '6': '8',
+             prefs.blinkingCapitals     ? 'B': ' ');
 
   {
     TimeFormattingData fmt;

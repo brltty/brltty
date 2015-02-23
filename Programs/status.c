@@ -141,25 +141,25 @@ renderStatusField_screenNumber (unsigned char *cells) {
 
 static void
 renderStatusField_stateDots (unsigned char *cells) {
-  *cells = (isFrozenScreen()           ? BRL_DOT_1: 0) |
-           (prefs.showScreenCursor     ? BRL_DOT_4: 0) |
-           (ses->displayMode           ? BRL_DOT_2: 0) |
-           (prefs.screenCursorStyle    ? BRL_DOT_5: 0) |
-           (prefs.alertTunes           ? BRL_DOT_3: 0) |
-           (prefs.blinkingScreenCursor ? BRL_DOT_6: 0) |
-           (ses->trackScreenCursor     ? BRL_DOT_7: 0) |
-           (prefs.slidingBrailleWindow ? BRL_DOT_8: 0);
+  *cells = (isSpecialScreen(SCR_FROZEN) ? BRL_DOT_1: 0) |
+           (prefs.showScreenCursor      ? BRL_DOT_4: 0) |
+           (ses->displayMode            ? BRL_DOT_2: 0) |
+           (prefs.screenCursorStyle     ? BRL_DOT_5: 0) |
+           (prefs.alertTunes            ? BRL_DOT_3: 0) |
+           (prefs.blinkingScreenCursor  ? BRL_DOT_6: 0) |
+           (ses->trackScreenCursor      ? BRL_DOT_7: 0) |
+           (prefs.slidingBrailleWindow  ? BRL_DOT_8: 0);
 }
 
 static void
 renderStatusField_stateLetter (unsigned char *cells) {
   *cells = convertCharacterToDots(textTable,
-                                  ses->displayMode      ? WC_C('a'):
-                                  isHelpScreen()        ? WC_C('h'):
-                                  isMenuScreen()        ? WC_C('m'):
-                                  isFrozenScreen()      ? WC_C('f'):
-                                  ses->trackScreenCursor? WC_C('t'):
-                                                          WC_C(' '));
+                                  ses->displayMode            ? WC_C('a'):
+                                  isSpecialScreen(SCR_HELP)   ? WC_C('h'):
+                                  isSpecialScreen(SCR_MENU)   ? WC_C('m'):
+                                  isSpecialScreen(SCR_FROZEN) ? WC_C('f'):
+                                  ses->trackScreenCursor      ? WC_C('t'):
+                                                                WC_C(' '));
 }
 
 static void
@@ -193,7 +193,7 @@ renderStatusField_generic (unsigned char *cells) {
   cells[gscScreenCursorColumn] = SCR_COLUMN_NUMBER(scr.posx);
   cells[gscScreenCursorRow] = SCR_ROW_NUMBER(scr.posy);
   cells[gscScreenNumber] = scr.number;
-  cells[gscFrozenScreen] = isFrozenScreen();
+  cells[gscFrozenScreen] = isSpecialScreen(SCR_FROZEN);
   cells[gscDisplayMode] = ses->displayMode;
   cells[gscTextStyle] = prefs.textStyle;
   cells[gscSlidingBrailleWindow] = prefs.slidingBrailleWindow;

@@ -25,20 +25,23 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int isFrozenScreen (void);
-extern int haveFrozenScreen (void);
+extern void beginSpecialScreens (void);
+extern void endSpecialScreens (void);
+
+typedef enum {
+  SCR_FROZEN,
+  SCR_MENU,
+  SCR_HELP,
+} SpecialScreenType;
+
+extern int activateSpecialScreen (SpecialScreenType type);
+extern void deactivateSpecialScreen (SpecialScreenType type);
+extern int haveSpecialScreen (SpecialScreenType type);
+extern int isSpecialScreen (SpecialScreenType type);
+
 extern int activateFrozenScreen (void);
-extern void deactivateFrozenScreen (void);
-
-extern int isMenuScreen (void);
-extern int haveMenuScreen (void);
-extern int activateMenuScreen (void);
-extern void deactivateMenuScreen (void);
-
-extern int isHelpScreen (void);
-extern int haveHelpScreen (void);
 extern int activateHelpScreen (void);
-extern void deactivateHelpScreen (void);
+extern int activateMenuScreen (void);
 
 extern int constructHelpScreen (void);
 extern int addHelpPage (void);
@@ -48,9 +51,6 @@ extern int setHelpPageNumber (unsigned int number);
 extern int clearHelpPage (void);
 extern int addHelpLine (const wchar_t *characters);
 extern unsigned int getHelpLineCount (void);
-
-extern void beginSpecialScreens (void);
-extern void endSpecialScreens (void);
 
 #ifdef __cplusplus
 }

@@ -194,12 +194,12 @@ handleMiscellaneousCommands (int command, void *data) {
       int ok = 0;
       unsigned int pageNumber;
 
-      if (isHelpScreen()) {
+      if (isSpecialScreen(SCR_HELP)) {
         pageNumber = getHelpPageNumber() + 1;
         ok = 1;
       } else {
-        pageNumber = haveHelpScreen()? getHelpPageNumber(): 1;
-        if (!activateHelpScreen()) pageNumber = 0;
+        pageNumber = haveSpecialScreen(SCR_HELP)? getHelpPageNumber(): 1;
+        if (!activateSpecialScreen(SCR_HELP)) pageNumber = 0;
       }
 
       if (pageNumber) {
@@ -214,7 +214,7 @@ handleMiscellaneousCommands (int command, void *data) {
         }
 
         if (pageNumber > pageCount) {
-          deactivateHelpScreen();
+          deactivateSpecialScreen(SCR_HELP);
         } else {
           ok = 1;
         }
