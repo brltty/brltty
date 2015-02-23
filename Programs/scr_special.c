@@ -23,8 +23,6 @@
  * run-time shared libraries, nor be a huge executable.
  */
 
-#define SCR_C 1
-
 #include "prologue.h"
 
 #include "log.h"
