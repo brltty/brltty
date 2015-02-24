@@ -61,9 +61,10 @@ menuScreen_construct (void) {
 
 typedef struct {
   const char *const name;
-  BaseScreen *const base;
   int (*const construct) (void);
   void (**const destruct) (void);
+  BaseScreen *const base;
+
   const unsigned autoDestruct:1;
 
   unsigned isConstructed:1;
@@ -72,9 +73,9 @@ typedef struct {
 
 #define SPECIAL_SCREEN_INITIALIZER(type) \
   .name = #type, \
-  .base = &type ## Screen.base, \
   .construct = type ## Screen_construct, \
-  .destruct = &type ## Screen.destruct
+  .destruct = &type ## Screen.destruct, \
+  .base = &type ## Screen.base
 
 static SpecialScreenEntry specialScreenTable[] = {
   [SCR_FROZEN] = {
@@ -82,12 +83,12 @@ static SpecialScreenEntry specialScreenTable[] = {
     .autoDestruct = 1
   },
 
-  [SCR_MENU] = {
-    SPECIAL_SCREEN_INITIALIZER(menu)
-  },
-
   [SCR_HELP] = {
     SPECIAL_SCREEN_INITIALIZER(help)
+  },
+
+  [SCR_MENU] = {
+    SPECIAL_SCREEN_INITIALIZER(menu)
   },
 };
 
