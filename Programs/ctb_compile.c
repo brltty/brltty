@@ -560,7 +560,11 @@ stopContractionCommand (ContractionTable *table) {
     logMessage(LOG_DEBUG, "external contraction table stopped: %s", table->command);
     table->data.external.commandStarted = 0;
 
-    if (table->data.external.input.buffer) free(table->data.external.input.buffer);
+    if (table->data.external.input.buffer) {
+      free(table->data.external.input.buffer);
+      table->data.external.input.buffer = NULL;
+      table->data.external.input.size = 0;
+    }
   }
 }
 
