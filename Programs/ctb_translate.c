@@ -236,16 +236,16 @@ getCharacterEntry (BrailleContractionData *bcd, wchar_t character) {
       const ContractionTableCharacter *ctc = getContractionTableCharacter(bcd, character);
 
       if (ctc) entry->attributes |= ctc->attributes;
-    }
 
-    {
-      SetAlwaysRuleData sar = {
-        .bcd = bcd,
-        .character = entry
-      };
+      {
+        SetAlwaysRuleData sar = {
+          .bcd = bcd,
+          .character = entry
+        };
 
-      if (!handleBestCharacter(character, setAlwaysRule, &sar)) {
-        entry->always = NULL;
+        if (!handleBestCharacter(character, setAlwaysRule, &sar)) {
+          entry->always = NULL;
+        }
       }
     }
 
