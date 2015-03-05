@@ -2417,6 +2417,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   descriptor.usb.options.applicationData = allProtocols;
 
   descriptor.bluetooth.channelNumber = 1;
+  descriptor.bluetooth.discoverChannel = 1;
   descriptor.bluetooth.options.applicationData = nativeProtocols;
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
