@@ -47,6 +47,7 @@ BLUETOOTH_NAME_DRIVERS(Refreshabraille, "bm");
 BLUETOOTH_NAME_DRIVERS(SuperVario, "bm");
 BLUETOOTH_NAME_DRIVERS(TSM, "sk");
 BLUETOOTH_NAME_DRIVERS(VarioConnect, "bm");
+BLUETOOTH_NAME_DRIVERS(VarioUltra, "bm");
 
 const BluetoothNameEntry bluetoothNameTable[] = {
   { .namePrefix = "Active Braille",
@@ -151,6 +152,10 @@ const BluetoothNameEntry bluetoothNameTable[] = {
 
   { .namePrefix = "VarioConnect",
     .driverCodes = bluetoothNameDrivers_VarioConnect
+  },
+
+  { .namePrefix = "VarioUltra",
+    .driverCodes = bluetoothNameDrivers_VarioUltra
   },
 
   { .namePrefix = NULL }
