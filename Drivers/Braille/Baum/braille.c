@@ -1708,10 +1708,106 @@ static const ProtocolOperations baumEscapeOperations = {
 
 /* HID Protocol */
 
+typedef union {
+  unsigned char bytes[0X100];
+
+  struct {
+    unsigned char type;
+
+    union {
+      unsigned char cellCount;
+      char deviceIdentity[16];
+      char serialNumber[16];
+    } data;
+  } fields;
+} HidPacket;
+
+static BraillePacketVerifierResult
+verifyHidPacket (
+  BrailleDisplay *brl,
+  const unsigned char *bytes, size_t size,
+  size_t *length, void *data
+) {
+  if (size == 1) {
+    switch (bytes[size-1]) {
+      case BAUM_RSP_CellCount:
+      case BAUM_RSP_DeviceIdentity:
+      case BAUM_RSP_SerialNumber:
+        *length = 17;
+        break;
+
+      default:
+        return BRL_PVR_INVALID;
+    }
+  }
+
+  return BRL_PVR_INCLUDE;
+}
+
+static int
+readHidPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
+  return readBraillePacket(brl, NULL, packet, size, verifyHidPacket, NULL);
+}
+
+static int
+writeHidPacket (BrailleDisplay *brl, const unsigned char *packet, int length) {
+  return writeBraillePacket(brl, NULL, packet, length);
+}
+
+static int
+probeHidDisplay (BrailleDisplay *brl) {
+  static const unsigned char packet[] = {0X02, 0X00};
+
+  return writeBraillePacket(brl, NULL, packet, sizeof(packet));
+}
+
+static void
+updateHidKeys (BrailleDisplay *brl) {
+  HidPacket packet;
+  size_t size;
+
+  while ((size = readHidPacket(brl, packet.bytes, sizeof(packet)))) {
+    switch (packet.fields.type) {
+      case BAUM_RSP_CellCount:
+        if (!changeCellCount(brl, packet.fields.data.cellCount)) return;
+        continue;
+
+      case BAUM_RSP_DeviceIdentity:
+        logTextField("Baum Device Identity",
+                     packet.fields.data.deviceIdentity,
+                     sizeof(packet.fields.data.deviceIdentity));
+        continue;
+
+      case BAUM_RSP_SerialNumber:
+        logTextField("Baum Serial Number",
+                     packet.fields.data.serialNumber,
+                     sizeof(packet.fields.data.serialNumber));
+        continue;
+
+      default:
+        logUnexpectedPacket(packet.bytes, size);
+        continue;
+    }
+  }
+}
+
+static int
+writeHidCells (BrailleDisplay *brl) {
+  return 1;
+}
+
+static int
+writeHidCellRange (BrailleDisplay *brl, unsigned int start, unsigned int count) {
+  return 0;
+}
+
 static const ProtocolOperations baumHidOperations = {
   "Baum HID",
-  19200, SERIAL_PARITY_NONE,
+  0, SERIAL_PARITY_NONE,
   &dotsTable_ISO11548_1,
+  readHidPacket, writeHidPacket,
+  probeHidDisplay, updateHidKeys,
+  writeHidCells, writeHidCellRange
 };
 
 /* HandyTech Protocol */
@@ -2509,7 +2605,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       if (!protocol) protocol = gioGetApplicationData(brl->gioEndpoint);
       logMessage(LOG_DEBUG, "probing with %s protocol", protocol->name);
 
-      {
+      if (protocol->serialBaud) {
         const SerialParameters parameters = {
           SERIAL_DEFAULT_PARAMETERS,
           .baud = protocol->serialBaud,
