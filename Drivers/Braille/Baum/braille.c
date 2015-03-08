@@ -339,6 +339,16 @@ updateDisplayKeys (BrailleDisplay *brl, unsigned char new) {
 }
 
 static void
+updateEntryKeys (BrailleDisplay *brl, unsigned char *new) {
+  updateNavigationKeys(brl, new, BM_KEY_ENTRY, BM_KEYS_ENTRY);
+}
+
+static void
+updateJoystick (BrailleDisplay *brl, unsigned char *new) {
+  updateNavigationKeys(brl, new, BM_KEY_JOYSTICK, BM_KEYS_JOYSTICK);
+}
+
+static void
 updateRoutingKeys (BrailleDisplay *brl, const unsigned char *new, unsigned char count) {
   updateKeyGroup(brl, keysState.routingKeys, new, BM_GRP_RoutingKeys, 0, count, 0);
 }
@@ -1591,13 +1601,11 @@ updateBaumKeys (BrailleDisplay *brl) {
       }
 
       case BAUM_RSP_EntryKeys:
-        updateNavigationKeys(brl, packet.data.values.entryKeys,
-                             BM_KEY_ENTRY, BM_KEYS_ENTRY);
+        updateEntryKeys(brl, packet.data.values.entryKeys);
         continue;
 
       case BAUM_RSP_Joystick:
-        updateNavigationKeys(brl, packet.data.values.joystick,
-                             BM_KEY_JOYSTICK, BM_KEYS_JOYSTICK);
+        updateJoystick(brl, packet.data.values.joystick);
         continue;
 
       case BAUM_RSP_HorizontalSensor:
@@ -1716,11 +1724,15 @@ typedef union {
 
     union {
       unsigned char cellCount[16];
+      unsigned char displayKeys[16];
+      unsigned char routingKey[16];
+      unsigned char entryKeys[16];
+      unsigned char joystick[16];
       char deviceIdentity[16];
       char serialNumber[16];
     } data;
-  } fields;
-} HidPacket;
+  } PACKED fields;
+} HidResponsePacket;
 
 static BraillePacketVerifierResult
 verifyHidPacket (
@@ -1731,6 +1743,10 @@ verifyHidPacket (
   if (size == 1) {
     switch (bytes[size-1]) {
       case BAUM_RSP_CellCount:
+      case BAUM_RSP_DisplayKeys:
+      case BAUM_RSP_RoutingKey:
+      case BAUM_RSP_EntryKeys:
+      case BAUM_RSP_Joystick:
       case BAUM_RSP_DeviceIdentity:
       case BAUM_RSP_SerialNumber:
         *length = 17;
@@ -1763,13 +1779,34 @@ probeHidDisplay (BrailleDisplay *brl) {
 
 static void
 updateHidKeys (BrailleDisplay *brl) {
-  HidPacket packet;
+  HidResponsePacket packet;
   size_t size;
 
   while ((size = readHidPacket(brl, packet.bytes, sizeof(packet)))) {
     switch (packet.fields.type) {
       case BAUM_RSP_CellCount:
         if (!changeCellCount(brl, packet.fields.data.cellCount[0])) return;
+        continue;
+
+      case BAUM_RSP_DisplayKeys:
+        updateDisplayKeys(brl, packet.fields.data.displayKeys[0]);
+        continue;
+
+      case BAUM_RSP_RoutingKey: {
+        unsigned char routingKeys[KEY_GROUP_SIZE(MAXIMUM_CELL_COUNT)];
+
+        resetKeyGroup(routingKeys, cellCount, packet.fields.data.routingKey[0]);
+        updateKeyGroup(brl, keysState.routingKeys, routingKeys,
+                       BM_GRP_RoutingKeys, 0, cellCount, 0);
+        continue;
+      }
+
+      case BAUM_RSP_EntryKeys:
+        updateEntryKeys(brl, packet.fields.data.entryKeys);
+        continue;
+
+      case BAUM_RSP_Joystick:
+        updateJoystick(brl, packet.fields.data.joystick);
         continue;
 
       case BAUM_RSP_DeviceIdentity:
