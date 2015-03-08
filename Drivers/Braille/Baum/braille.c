@@ -28,10 +28,10 @@
 #include "ascii.h"
 
 typedef enum {
-  PARM_PROTOCOLS,
+  PARM_PROTOCOL,
   PARM_VARIOKEYS
 } DriverParameter;
-#define BRLPARMS "protocols", "variokeys"
+#define BRLPARMS "protocol", "variokeys"
 
 #define BRLSTAT ST_TiemanStyle
 #define BRL_HAVE_STATUS_CELLS
@@ -1697,13 +1697,21 @@ writeBaumCellRange (BrailleDisplay *brl, unsigned int start, unsigned int count)
   return bdo->writeCellRange(brl, start, count);
 }
 
-static const ProtocolOperations baumOperations = {
-  "Baum",
+static const ProtocolOperations baumEscapeOperations = {
+  "Baum Escape",
   19200, SERIAL_PARITY_NONE,
   &dotsTable_ISO11548_1,
   readBaumPacket, writeBaumPacket,
   probeBaumDisplay, updateBaumKeys,
   writeBaumCells, writeBaumCellRange
+};
+
+/* HID Protocol */
+
+static const ProtocolOperations baumHidOperations = {
+  "Baum HID",
+  19200, SERIAL_PARITY_NONE,
+  &dotsTable_ISO11548_1,
 };
 
 /* HandyTech Protocol */
@@ -2243,18 +2251,6 @@ static const ProtocolOperations powerBrailleOperations = {
   writePowerBrailleCells, writePowerBrailleCellRange
 };
 
-static const ProtocolOperations *const allProtocols[] = {
-  &baumOperations,
-  &handyTechOperations,
-  &powerBrailleOperations,
-  NULL
-};
-
-static const ProtocolOperations *const nativeProtocols[] = {
-  &baumOperations,
-  NULL
-};
-
 /* Driver Handlers */
 
 static int
@@ -2268,170 +2264,195 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .vendor=0X0403, .product=0XFE70,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .disableAutosuspend=1
+      .disableAutosuspend=1,
+      .data=&baumEscapeOperations
     }
     ,
     { /* PocketVario (24 cells) */
       .vendor=0X0403, .product=0XFE71,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .disableAutosuspend=1
+      .disableAutosuspend=1,
+      .data=&baumEscapeOperations
     }
     ,
     { /* SuperVario 40 (40 cells) */
       .vendor=0X0403, .product=0XFE72,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .disableAutosuspend=1
+      .disableAutosuspend=1,
+      .data=&baumEscapeOperations
     }
     ,
     { /* SuperVario 32 (32 cells) */
       .vendor=0X0403, .product=0XFE73,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .disableAutosuspend=1
+      .disableAutosuspend=1,
+      .data=&baumEscapeOperations
     }
     ,
     { /* SuperVario 64 (64 cells) */
       .vendor=0X0403, .product=0XFE74,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .disableAutosuspend=1
+      .disableAutosuspend=1,
+      .data=&baumEscapeOperations
     }
     ,
     { /* SuperVario 80 (80 cells) */
       .vendor=0X0403, .product=0XFE75,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .disableAutosuspend=1
+      .disableAutosuspend=1,
+      .data=&baumEscapeOperations
     }
     ,
     { /* VarioPro 80 (80 cells) */
       .vendor=0X0403, .product=0XFE76,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .disableAutosuspend=1
+      .disableAutosuspend=1,
+      .data=&baumEscapeOperations
     }
     ,
     { /* VarioPro 64 (64 cells) */
       .vendor=0X0403, .product=0XFE77,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .disableAutosuspend=1
+      .disableAutosuspend=1,
+      .data=&baumEscapeOperations
     }
     ,
     { /* VarioPro 40 (40 cells) */
       .vendor=0X0904, .product=0X2000,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .disableAutosuspend=1
+      .disableAutosuspend=1,
+      .data=&baumEscapeOperations
     }
     ,
     { /* EcoVario 24 (24 cells) */
       .vendor=0X0904, .product=0X2001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .disableAutosuspend=1
+      .disableAutosuspend=1,
+      .data=&baumEscapeOperations
     }
     ,
     { /* EcoVario 40 (40 cells) */
       .vendor=0X0904, .product=0X2002,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .disableAutosuspend=1
+      .disableAutosuspend=1,
+      .data=&baumEscapeOperations
     }
     ,
     { /* VarioConnect 40 (40 cells) */
       .vendor=0X0904, .product=0X2007,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .disableAutosuspend=1
+      .disableAutosuspend=1,
+      .data=&baumEscapeOperations
     }
     ,
     { /* VarioConnect 32 (32 cells) */
       .vendor=0X0904, .product=0X2008,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .disableAutosuspend=1
+      .disableAutosuspend=1,
+      .data=&baumEscapeOperations
     }
     ,
     { /* VarioConnect 24 (24 cells) */
       .vendor=0X0904, .product=0X2009,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .disableAutosuspend=1
+      .disableAutosuspend=1,
+      .data=&baumEscapeOperations
     }
     ,
     { /* VarioConnect 64 (64 cells) */
       .vendor=0X0904, .product=0X2010,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .disableAutosuspend=1
+      .disableAutosuspend=1,
+      .data=&baumEscapeOperations
     }
     ,
     { /* VarioConnect 80 (80 cells) */
       .vendor=0X0904, .product=0X2011,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .disableAutosuspend=1
+      .disableAutosuspend=1,
+      .data=&baumEscapeOperations
     }
     ,
     { /* EcoVario 32 (32 cells) */
       .vendor=0X0904, .product=0X2014,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .disableAutosuspend=1
+      .disableAutosuspend=1,
+      .data=&baumEscapeOperations
     }
     ,
     { /* EcoVario 64 (64 cells) */
       .vendor=0X0904, .product=0X2015,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .disableAutosuspend=1
+      .disableAutosuspend=1,
+      .data=&baumEscapeOperations
     }
     ,
     { /* EcoVario 80 (80 cells) */
       .vendor=0X0904, .product=0X2016,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .disableAutosuspend=1
+      .disableAutosuspend=1,
+      .data=&baumEscapeOperations
     }
     ,
     { /* Refreshabraille 18 (18 cells) */
       .vendor=0X0904, .product=0X3000,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .disableAutosuspend=1
+      .disableAutosuspend=1,
+      .data=&baumEscapeOperations
     }
     ,
     { /* Pronto! 18 (18 cells) */
       .vendor=0X0904, .product=0X4007,
       .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=2
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&baumHidOperations
     }
     ,
     { /* Pronto! 40 (40 cells) */
       .vendor=0X0904, .product=0X4008,
       .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=2
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&baumHidOperations
     }
     ,
     { /* VarioUltra 20 (20 cells) */
       .vendor=0X0904, .product=0X6101,
       .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=2
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&baumHidOperations
     }
     ,
     { /* VarioUltra 40 (40 cells) */
       .vendor=0X0904, .product=0X6102,
       .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=2
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&baumHidOperations
     }
     ,
     { /* VarioUltra 32 (32 cells) */
       .vendor=0X0904, .product=0X6103,
       .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=2
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&baumHidOperations
     }
     ,
     { .vendor=0 }
@@ -2441,14 +2462,13 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   gioInitializeDescriptor(&descriptor);
 
   descriptor.serial.parameters = &serialParameters;
-  descriptor.serial.options.applicationData = nativeProtocols;
+  descriptor.serial.options.applicationData = &baumEscapeOperations;
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
-  descriptor.usb.options.applicationData = allProtocols;
 
   descriptor.bluetooth.channelNumber = 1;
   descriptor.bluetooth.discoverChannel = 1;
-  descriptor.bluetooth.options.applicationData = nativeProtocols;
+  descriptor.bluetooth.options.applicationData = &baumEscapeOperations;
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
     return 1;
@@ -2459,20 +2479,22 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  const ProtocolOperations *const *requestedProtocols;
+  const ProtocolOperations *requestedProtocol;
 
   {
-    static const ProtocolOperations *const *const values[] = {
+    static const ProtocolOperations *const values[] = {
       NULL,
-      allProtocols,
-      nativeProtocols
+      &baumEscapeOperations,
+      &baumHidOperations,
+      &handyTechOperations,
+      &powerBrailleOperations
     };
-    static const char *choices[] = {"default", "all", "native", NULL};
+    static const char *choices[] = {"default", "escape", "hid", "ht","pb", NULL};
     unsigned int index;
 
-    if (!validateChoice(&index, parameters[PARM_PROTOCOLS], choices))
-      logMessage(LOG_WARNING, "%s: %s", "invalid protocols setting", parameters[PARM_PROTOCOLS]);
-    requestedProtocols = values[index];
+    if (!validateChoice(&index, parameters[PARM_PROTOCOL], choices))
+      logMessage(LOG_WARNING, "%s: %s", "invalid protocol setting", parameters[PARM_PROTOCOL]);
+    requestedProtocol = values[index];
   }
 
   useVarioKeys = 0;
@@ -2483,50 +2505,46 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     int attempts = 0;
 
     while (1) {
-      const ProtocolOperations *const *protocolAddress = requestedProtocols;
+      protocol = requestedProtocol;
+      if (!protocol) protocol = gioGetApplicationData(brl->gioEndpoint);
+      logMessage(LOG_DEBUG, "probing with %s protocol", protocol->name);
 
-      if (!protocolAddress) protocolAddress = gioGetApplicationData(brl->gioEndpoint);
+      {
+        const SerialParameters parameters = {
+          SERIAL_DEFAULT_PARAMETERS,
+          .baud = protocol->serialBaud,
+          .parity = protocol->serialParity
+        };
 
-      while ((protocol = *(protocolAddress++))) {
-        logMessage(LOG_DEBUG, "probing with %s protocol", protocol->name);
+        if (!gioReconfigureResource(brl->gioEndpoint, &parameters)) goto failed;
+      }
+
+      if (!gioDiscardInput(brl->gioEndpoint)) goto failed;
+
+      memset(&keysState, 0, sizeof(keysState));
+      switchSettings = 0;
+
+      if (protocol->probeDisplay(brl)) {
+        logCellCount(brl);
+
+        makeOutputTable(protocol->dotsTable[0]);
+        if (!clearCellRange(brl, 0, cellCount)) goto failed;
+        if (!updateCells(brl)) goto failed;
 
         {
-          const SerialParameters parameters = {
-            SERIAL_DEFAULT_PARAMETERS,
-            .baud = protocol->serialBaud,
-            .parity = protocol->serialParity
-          };
+          const KeyTableDefinition *ktd;
 
-          if (!gioReconfigureResource(brl->gioEndpoint, &parameters)) goto failed;
-        }
-
-        if (!gioDiscardInput(brl->gioEndpoint)) goto failed;
-
-        memset(&keysState, 0, sizeof(keysState));
-        switchSettings = 0;
-
-        if (protocol->probeDisplay(brl)) {
-          logCellCount(brl);
-
-          makeOutputTable(protocol->dotsTable[0]);
-          if (!clearCellRange(brl, 0, cellCount)) goto failed;
-          if (!updateCells(brl)) goto failed;
-
-          {
-            const KeyTableDefinition *ktd;
-
-            if (useVarioKeys) {
-              ktd = &KEY_TABLE_DEFINITION(vario);
-            } else {
-              ktd = baumDeviceOperations[baumDeviceType].keyTableDefinition;
-            }
-
-            brl->keyBindings = ktd->bindings;
-            brl->keyNames = ktd->names;
+          if (useVarioKeys) {
+            ktd = &KEY_TABLE_DEFINITION(vario);
+          } else {
+            ktd = baumDeviceOperations[baumDeviceType].keyTableDefinition;
           }
 
-          return 1;
+          brl->keyBindings = ktd->bindings;
+          brl->keyNames = ktd->names;
         }
+
+        return 1;
       }
 
       if (++attempts == 2) break;
