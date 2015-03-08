@@ -1709,13 +1709,13 @@ static const ProtocolOperations baumEscapeOperations = {
 /* HID Protocol */
 
 typedef union {
-  unsigned char bytes[0X100];
+  unsigned char bytes[0];
 
   struct {
     unsigned char type;
 
     union {
-      unsigned char cellCount;
+      unsigned char cellCount[16];
       char deviceIdentity[16];
       char serialNumber[16];
     } data;
@@ -1769,7 +1769,7 @@ updateHidKeys (BrailleDisplay *brl) {
   while ((size = readHidPacket(brl, packet.bytes, sizeof(packet)))) {
     switch (packet.fields.type) {
       case BAUM_RSP_CellCount:
-        if (!changeCellCount(brl, packet.fields.data.cellCount)) return;
+        if (!changeCellCount(brl, packet.fields.data.cellCount[0])) return;
         continue;
 
       case BAUM_RSP_DeviceIdentity:
