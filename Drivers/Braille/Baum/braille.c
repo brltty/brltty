@@ -1830,7 +1830,13 @@ updateHidKeys (BrailleDisplay *brl) {
 
 static int
 writeHidCells (BrailleDisplay *brl) {
-  return 1;
+  unsigned char packet[1 + cellCount];
+  unsigned char *byte = packet;
+
+  *byte++ = BAUM_REQ_DisplayData;
+  byte = mempcpy(byte, externalCells, cellCount);
+
+  return writeHidPacket(brl, packet, byte-packet);
 }
 
 static int

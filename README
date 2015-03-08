@@ -182,7 +182,8 @@ The following braille displays are supported:
 -  Alva [ABT(3nn), Delphi(4nn), Satellite(5nn), Braille System 40,
          Braille Controller 640/680, Easy Link 12]
 -  Baum [Inka, Vario/RBT, SuperVario/Brailliant, PocketVario, VarioPro,
-         EcoVario, VarioConnect/BrailleConnect, Refreshabraille]
+         EcoVario, VarioConnect/BrailleConnect, Refreshabraille,
+         VarioUltra, Pronto!]
 -  BrailComm [III]
 -  BrailleLite [18/40/M20/M40]
 -  BrailleMemo [Pocket (16), Smart (16), 32, 40]
