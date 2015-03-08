@@ -2404,6 +2404,36 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .disableAutosuspend=1
     }
     ,
+    { /* Pronto! 18 (18 cells) */
+      .vendor=0X0904, .product=0X4007,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2
+    }
+    ,
+    { /* Pronto! 40 (40 cells) */
+      .vendor=0X0904, .product=0X4008,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2
+    }
+    ,
+    { /* VarioUltra 20 (20 cells) */
+      .vendor=0X0904, .product=0X6101,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2
+    }
+    ,
+    { /* VarioUltra 40 (40 cells) */
+      .vendor=0X0904, .product=0X6102,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2
+    }
+    ,
+    { /* VarioUltra 32 (32 cells) */
+      .vendor=0X0904, .product=0X6103,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2
+    }
+    ,
     { .vendor=0 }
   };
 
