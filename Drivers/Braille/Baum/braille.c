@@ -1804,10 +1804,7 @@ probeHidDisplay (BrailleDisplay *brl) {
   static const unsigned char packet[] = {0X02, 0X00};
 
   if (writeBraillePacket(brl, NULL, packet, sizeof(packet))) {
-    baumDeviceType = BAUM_DEVICE_Default;
-    cellCount = 0;
-
-    while (awaitBrailleInput(brl, 1000)) {
+    while (awaitBrailleInput(brl, probeTimeout)) {
       HidResponsePacket packet;
       size_t size = getHidPacket(brl, &packet);
       if (!size) break;
@@ -1818,6 +1815,7 @@ probeHidDisplay (BrailleDisplay *brl) {
 
           if (isAcceptableCellCount(count)) {
             cellCount = count;
+            baumDeviceType = BAUM_DEVICE_Default;
             return 1;
           }
 
