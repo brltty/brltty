@@ -1766,16 +1766,71 @@ readHidPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
 }
 
 static int
+getHidPacket (BrailleDisplay *brl, HidResponsePacket *packet) {
+  return readHidPacket(brl, packet->bytes, sizeof(*packet));
+}
+
+static int
 writeHidPacket (BrailleDisplay *brl, const unsigned char *packet, int length) {
   return writeBraillePacket(brl, NULL, packet, length);
+}
+
+static void
+logHidDeviceIdentity (const HidResponsePacket *packet) {
+  logTextField("Baum Device Identity",
+               packet->fields.data.deviceIdentity,
+               sizeof(packet->fields.data.deviceIdentity));
+}
+
+static void
+logHidSerialNumber (const HidResponsePacket *packet) {
+  logTextField("Baum Serial Number",
+               packet->fields.data.serialNumber,
+               sizeof(packet->fields.data.serialNumber));
 }
 
 static int
 probeHidDisplay (BrailleDisplay *brl) {
   static const unsigned char packet[] = {0X02, 0X00};
 
-  baumDeviceType = BAUM_DEVICE_Default;
-  return writeBraillePacket(brl, NULL, packet, sizeof(packet));
+  if (writeBraillePacket(brl, NULL, packet, sizeof(packet))) {
+    baumDeviceType = BAUM_DEVICE_Default;
+    cellCount = 0;
+
+    while (awaitBrailleInput(brl, 1000)) {
+      HidResponsePacket packet;
+      size_t size = getHidPacket(brl, &packet);
+      if (!size) break;
+
+      switch (packet.fields.type) {
+        case BAUM_RSP_CellCount: {
+          unsigned char count = packet.fields.data.cellCount[0];
+
+          if ((count > 0) && (count <= MAXIMUM_CELL_COUNT)) {
+            cellCount = count;
+            return 1;
+          }
+
+          logMessage(LOG_DEBUG, "unexpected cell count: %u", count);
+          continue;
+        }
+
+        case BAUM_RSP_DeviceIdentity:
+          logHidDeviceIdentity(&packet);
+          continue;
+
+        case BAUM_RSP_SerialNumber:
+          logHidSerialNumber(&packet);
+          continue;
+
+        default:
+          logUnexpectedPacket(packet.bytes, size);
+          continue;
+      }
+    }
+  }
+
+  return 0;
 }
 
 static void
@@ -1783,7 +1838,7 @@ updateHidKeys (BrailleDisplay *brl) {
   HidResponsePacket packet;
   size_t size;
 
-  while ((size = readHidPacket(brl, packet.bytes, sizeof(packet)))) {
+  while ((size = getHidPacket(brl, &packet))) {
     switch (packet.fields.type) {
       case BAUM_RSP_CellCount:
         if (!changeCellCount(brl, packet.fields.data.cellCount[0])) return;
@@ -1811,15 +1866,11 @@ updateHidKeys (BrailleDisplay *brl) {
         continue;
 
       case BAUM_RSP_DeviceIdentity:
-        logTextField("Baum Device Identity",
-                     packet.fields.data.deviceIdentity,
-                     sizeof(packet.fields.data.deviceIdentity));
+        logHidDeviceIdentity(&packet);
         continue;
 
       case BAUM_RSP_SerialNumber:
-        logTextField("Baum Serial Number",
-                     packet.fields.data.serialNumber,
-                     sizeof(packet.fields.data.serialNumber));
+        logHidSerialNumber(&packet);
         continue;
 
       default:
@@ -1842,7 +1893,7 @@ writeHidCells (BrailleDisplay *brl) {
 
 static int
 writeHidCellRange (BrailleDisplay *brl, unsigned int start, unsigned int count) {
-  return 0;
+  return 1;
 }
 
 static const ProtocolOperations baumHidOperations = {
