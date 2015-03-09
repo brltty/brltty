@@ -1774,6 +1774,7 @@ static int
 probeHidDisplay (BrailleDisplay *brl) {
   static const unsigned char packet[] = {0X02, 0X00};
 
+  baumDeviceType = BAUM_DEVICE_Default;
   return writeBraillePacket(brl, NULL, packet, sizeof(packet));
 }
 
