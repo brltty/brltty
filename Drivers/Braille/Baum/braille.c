@@ -391,6 +391,16 @@ putCells (BrailleDisplay *brl, const unsigned char *cells, unsigned int start, u
   return 1;
 }
 
+static int
+isAcceptableCellCount (int count) {
+  return (count > 0) && (count <= MAXIMUM_CELL_COUNT);
+}
+
+static void
+logUnexpectedCellCount (int count) {
+  logMessage(LOG_DEBUG, "unexpected cell count: %d", count);
+}
+
 static void
 logCellCount (BrailleDisplay *brl) {
   switch ((brl->textColumns = cellCount)) {
@@ -1436,12 +1446,12 @@ probeBaumDisplay (BrailleDisplay *brl) {
           case BAUM_RSP_CellCount: { /* newer models */
             unsigned char count = response.data.values.cellCount;
 
-            if ((count > 0) && (count <= MAXIMUM_CELL_COUNT)) {
+            if (isAcceptableCellCount(count)) {
               cellCount = count;
               return 1;
             }
 
-            logMessage(LOG_DEBUG, "unexpected cell count: %u", count);
+            logUnexpectedCellCount(count);
             continue;
           }
 
@@ -1467,7 +1477,7 @@ probeBaumDisplay (BrailleDisplay *brl) {
 
                 if (digits) {
                   int count = atoi(digits);
-                  if ((count > 0) && (count <= MAXIMUM_CELL_COUNT)) identityCellCount = count;
+                  if (isAcceptableCellCount(count)) identityCellCount = count;
                 }
               }
             }
@@ -1806,12 +1816,12 @@ probeHidDisplay (BrailleDisplay *brl) {
         case BAUM_RSP_CellCount: {
           unsigned char count = packet.fields.data.cellCount[0];
 
-          if ((count > 0) && (count <= MAXIMUM_CELL_COUNT)) {
+          if (isAcceptableCellCount(count)) {
             cellCount = count;
             return 1;
           }
 
-          logMessage(LOG_DEBUG, "unexpected cell count: %u", count);
+          logUnexpectedCellCount(count);
           continue;
         }
 
