@@ -928,19 +928,18 @@ logBaumPowerdownReason (BaumPowerdownReason reason) {
 }
 
 static void
-adjustPacket (const unsigned char *bytes, size_t size, size_t *length) {
-  if (size == 17) {
-    switch (bytes[0]) {
-      case BAUM_RSP_DeviceIdentity: {
-        static const char prefix[] = "Refreshabraille ";
-
-        if (memcmp(&bytes[1], prefix, (size - 1)) == 0) *length += 2;
-        break;
+adjustPacketLength (const unsigned char *bytes, size_t size, size_t *length) {
+  switch (bytes[0]) {
+    case BAUM_RSP_DeviceIdentity:
+      if (size == 17) {
+        if (memcmp(&bytes[1], "Refreshabraille ", (size - 1)) == 0) {
+          *length += 2;
+        }
       }
+      break;
 
-      default:
-        break;
-    }
+    default:
+      break;
   }
 }
 
@@ -1082,6 +1081,7 @@ readBaumPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
     .state = BAUM_PVS_WAITING
   };
 
+  memset(packet, 0, size);
   return readBraillePacket(brl, NULL, packet, size, verifyBaumPacket, &pvd);
 }
 
@@ -1797,7 +1797,7 @@ verifyHidPacket (
     return BRL_PVR_INCLUDE;
   }
 
-  adjustPacket(bytes, size, length);
+  adjustPacketLength(bytes, size, length);
   return BRL_PVR_INCLUDE;
 }
 
@@ -1820,6 +1820,7 @@ readHid1Packet (BrailleDisplay *brl, unsigned char *packet, int size) {
     }
   };
 
+  memset(packet, 0, size);
   return readBraillePacket(brl, NULL, packet, size, verifyHidPacket, &pvd);
 }
 
@@ -1842,15 +1843,13 @@ readHid2Packet (BrailleDisplay *brl, unsigned char *packet, int size) {
     }
   };
 
+  memset(packet, 0, size);
   return readBraillePacket(brl, NULL, packet, size, verifyHidPacket, &pvd);
 }
 
 static int
 getHidPacket (BrailleDisplay *brl, HidResponsePacket *packet) {
-  size_t size = sizeof(*packet);
-
-  memset(packet, 0, size);
-  return protocol->readPacket(brl, packet->bytes, size);
+  return protocol->readPacket(brl, packet->bytes, sizeof(*packet));
 }
 
 static int
