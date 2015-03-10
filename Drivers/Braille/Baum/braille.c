@@ -2544,209 +2544,209 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&baumEscapeOperations
-    }
-    ,
+    },
+
     { /* PocketVario (24 cells) */
       .vendor=0X0403, .product=0XFE71,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&baumEscapeOperations
-    }
-    ,
+    },
+
     { /* SuperVario 40 (40 cells) */
       .vendor=0X0403, .product=0XFE72,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&baumEscapeOperations
-    }
-    ,
+    },
+
     { /* SuperVario 32 (32 cells) */
       .vendor=0X0403, .product=0XFE73,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&baumEscapeOperations
-    }
-    ,
+    },
+
     { /* SuperVario 64 (64 cells) */
       .vendor=0X0403, .product=0XFE74,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&baumEscapeOperations
-    }
-    ,
+    },
+
     { /* SuperVario 80 (80 cells) */
       .vendor=0X0403, .product=0XFE75,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&baumEscapeOperations
-    }
-    ,
+    },
+
     { /* VarioPro 80 (80 cells) */
       .vendor=0X0403, .product=0XFE76,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&baumEscapeOperations
-    }
-    ,
+    },
+
     { /* VarioPro 64 (64 cells) */
       .vendor=0X0403, .product=0XFE77,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&baumEscapeOperations
-    }
-    ,
+    },
+
     { /* VarioPro 40 (40 cells) */
       .vendor=0X0904, .product=0X2000,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&baumEscapeOperations
-    }
-    ,
+    },
+
     { /* EcoVario 24 (24 cells) */
       .vendor=0X0904, .product=0X2001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&baumEscapeOperations
-    }
-    ,
+    },
+
     { /* EcoVario 40 (40 cells) */
       .vendor=0X0904, .product=0X2002,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&baumEscapeOperations
-    }
-    ,
+    },
+
     { /* VarioConnect 40 (40 cells) */
       .vendor=0X0904, .product=0X2007,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&baumEscapeOperations
-    }
-    ,
+    },
+
     { /* VarioConnect 32 (32 cells) */
       .vendor=0X0904, .product=0X2008,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&baumEscapeOperations
-    }
-    ,
+    },
+
     { /* VarioConnect 24 (24 cells) */
       .vendor=0X0904, .product=0X2009,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&baumEscapeOperations
-    }
-    ,
+    },
+
     { /* VarioConnect 64 (64 cells) */
       .vendor=0X0904, .product=0X2010,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&baumEscapeOperations
-    }
-    ,
+    },
+
     { /* VarioConnect 80 (80 cells) */
       .vendor=0X0904, .product=0X2011,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&baumEscapeOperations
-    }
-    ,
+    },
+
     { /* EcoVario 32 (32 cells) */
       .vendor=0X0904, .product=0X2014,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&baumEscapeOperations
-    }
-    ,
+    },
+
     { /* EcoVario 64 (64 cells) */
       .vendor=0X0904, .product=0X2015,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&baumEscapeOperations
-    }
-    ,
+    },
+
     { /* EcoVario 80 (80 cells) */
       .vendor=0X0904, .product=0X2016,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&baumEscapeOperations
-    }
-    ,
+    },
+
     { /* Refreshabraille 18 (18 cells) */
       .vendor=0X0904, .product=0X3000,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&baumEscapeOperations
-    }
-    ,
+    },
+
     { /* Refreshabraille 18 (18 cells) */
       .vendor=0X0904, .product=0X3001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .data=&baumHid1Operations
-    }
-    ,
-    { /* Pronto! 18 (18 cells) */
+    },
+
+    { /* Pronto! V4 18 (18 cells) */
       .vendor=0X0904, .product=0X4007,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .data=&baumHid2Operations
-    }
-    ,
-    { /* Pronto! 40 (40 cells) */
+    },
+
+    { /* Pronto! V4 40 (40 cells) */
       .vendor=0X0904, .product=0X4008,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .data=&baumHid2Operations
-    }
-    ,
+    },
+
     { /* SuperVario2 40 (40 cells) */
       .vendor=0X0904, .product=0X6001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .data=&baumHid1Operations
-    }
-    ,
+    },
+
     { /* VarioUltra 20 (20 cells) */
       .vendor=0X0904, .product=0X6101,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .data=&baumHid2Operations
-    }
-    ,
+    },
+
     { /* VarioUltra 40 (40 cells) */
       .vendor=0X0904, .product=0X6102,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .data=&baumHid2Operations
-    }
-    ,
+    },
+
     { /* VarioUltra 32 (32 cells) */
       .vendor=0X0904, .product=0X6103,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .data=&baumHid2Operations
-    }
-    ,
+    },
+
     { .vendor=0 }
   };
 
