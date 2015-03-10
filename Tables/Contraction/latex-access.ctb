@@ -124,9 +124,9 @@ def parseProgramArguments ():
     usage = "%(prog)s [option ...]",
     description = """
       This is an executable contraction table for BRLTTY
-      which uses the latex-access package
+      that uses the latex-access package
       to translate LaTeX mathematical notation into braille.
-      BRLTTY can be found at [http://mielke.cc/brltty/].
+      BRLTTY can be found at [http://brltty.com/].
       latex-access can be found at [http://www.latex-access.sourceforge.net/].
     """
   )
