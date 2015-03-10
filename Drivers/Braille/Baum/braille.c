@@ -927,147 +927,145 @@ logBaumPowerdownReason (BaumPowerdownReason reason) {
   return 1;
 }
 
-static int
-readBaumPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
-  int started = 0;
-  int escape = 0;
-  int offset = 0;
-  int length = 0;
+typedef enum {
+  BAUM_PVS_WAITING,
+  BAUM_PVS_STARTED,
+  BAUM_PVS_ESCAPED
+} BaumPacketVerificationState;
 
-  while (1) {
-    unsigned char byte;
+typedef struct {
+  BaumPacketVerificationState state;
+} BaumPacketVerificationData;
 
-    if (!gioReadByte(brl->gioEndpoint, &byte, (started || escape))) {
-      if (offset > 0) logPartialPacket(packet, offset);
-      return 0;
-    }
+static BraillePacketVerifierResult
+verifyBaumPacket (
+  BrailleDisplay *brl,
+  const unsigned char *bytes, size_t size,
+  size_t *length, void *data
+) {
+  BaumPacketVerificationData *pvd = data;
+  unsigned char byte = bytes[size-1];
+  int escape = byte == ESC;
 
-    if (byte == ESC) {
-      if ((escape = !escape)) continue;
-    } else if (escape) {
-      escape = 0;
+  switch (pvd->state) {
+    case BAUM_PVS_WAITING:
+      if (!escape) return BRL_PVR_INVALID;
+      pvd->state = BAUM_PVS_STARTED;
+      return BRL_PVR_EXCLUDE;
 
-      if (offset > 0) {
-        logShortPacket(packet, offset);
-        offset = 0;
-        length = 0;
-      } else {
-        started = 1;
+    case BAUM_PVS_STARTED:
+      if (escape) {
+        pvd->state = BAUM_PVS_ESCAPED;
+        return BRL_PVR_EXCLUDE;
       }
-    }
+      break;
 
-    if (!started) {
-      logIgnoredByte(byte);
-      continue;
-    }
+    case BAUM_PVS_ESCAPED:
+      pvd->state = BAUM_PVS_STARTED;
+      break;
 
-    if (offset < size) {
-      if (offset == 0) {
-        switch (byte) {
-          case BAUM_RSP_Switches:
-            if (!cellCount) {
-              assumeBaumDeviceIdentity("DM80P");
-              baumDeviceType = BAUM_DEVICE_DM80P;
-              cellCount = 84;
-            }
+    default:
+      logMessage(LOG_NOTICE, "unexpected %s packet verification state: %u",
+                 protocol->name, pvd->state);
+      return BRL_PVR_INVALID;
+  }
 
-          case BAUM_RSP_CellCount:
-          case BAUM_RSP_VersionNumber:
-          case BAUM_RSP_CommunicationChannel:
-          case BAUM_RSP_PowerdownSignal:
-          case BAUM_RSP_DisplayKeys:
-          case BAUM_RSP_HorizontalSensor:
-          case BAUM_RSP_RoutingKey:
-          case BAUM_RSP_Front6:
-          case BAUM_RSP_Back6:
-          case BAUM_RSP_CommandKeys:
-          case BAUM_RSP_Joystick:
-          case BAUM_RSP_ErrorCode:
-          case BAUM_RSP_ModuleRegistration:
-          case BAUM_RSP_DataRegisters:
-          case BAUM_RSP_ServiceRegisters:
-            length = 2;
-            break;
-
-          case BAUM_RSP_ModeSetting:
-          case BAUM_RSP_Front10:
-          case BAUM_RSP_Back10:
-          case BAUM_RSP_EntryKeys:
-            length = 3;
-            break;
-
-          case BAUM_RSP_VerticalSensor:
-            length = (baumDeviceType == BAUM_DEVICE_Inka)? 2: 3;
-            break;
-
-          case BAUM_RSP_VerticalSensors:
-          case BAUM_RSP_SerialNumber:
-            length = 9;
-            break;
-
-          case BAUM_RSP_BluetoothName:
-            length = 15;
-            break;
-
-          case BAUM_RSP_DeviceIdentity:
-            length = 17;
-            break;
-
-          case BAUM_RSP_RoutingKeys:
-            if (!cellCount) {
-              assumeBaumDeviceIdentity("Inka");
-              baumDeviceType = BAUM_DEVICE_Inka;
-              cellCount = 56;
-            }
-
-            if (baumDeviceType == BAUM_DEVICE_Inka) {
-              length = 2;
-              break;
-            }
-
-            length = KEY_GROUP_SIZE(cellCount) + 1;
-            break;
-
-          case BAUM_RSP_HorizontalSensors:
-            length = KEY_GROUP_SIZE(brl->textColumns) + 1;
-            break;
-
-          default:
-            logUnknownPacket(byte);
-            started = 0;
-            continue;
+  if (size == 1) {
+    switch (byte) {
+      case BAUM_RSP_Switches:
+        if (!cellCount) {
+          assumeBaumDeviceIdentity("DM80P");
+          baumDeviceType = BAUM_DEVICE_DM80P;
+          cellCount = 84;
         }
-      } else if (offset == 1) {
-        switch (packet[0]) {
-          case BAUM_RSP_ModuleRegistration:
-          case BAUM_RSP_DataRegisters:
-          case BAUM_RSP_ServiceRegisters:
-            length += byte;
-            break;
 
-          default:
-            break;
+      case BAUM_RSP_CellCount:
+      case BAUM_RSP_VersionNumber:
+      case BAUM_RSP_CommunicationChannel:
+      case BAUM_RSP_PowerdownSignal:
+      case BAUM_RSP_DisplayKeys:
+      case BAUM_RSP_HorizontalSensor:
+      case BAUM_RSP_RoutingKey:
+      case BAUM_RSP_Front6:
+      case BAUM_RSP_Back6:
+      case BAUM_RSP_CommandKeys:
+      case BAUM_RSP_Joystick:
+      case BAUM_RSP_ErrorCode:
+      case BAUM_RSP_ModuleRegistration:
+      case BAUM_RSP_DataRegisters:
+      case BAUM_RSP_ServiceRegisters:
+        *length = 2;
+        break;
+
+      case BAUM_RSP_ModeSetting:
+      case BAUM_RSP_Front10:
+      case BAUM_RSP_Back10:
+      case BAUM_RSP_EntryKeys:
+        *length = 3;
+        break;
+
+      case BAUM_RSP_VerticalSensor:
+        *length = (baumDeviceType == BAUM_DEVICE_Inka)? 2: 3;
+        break;
+
+      case BAUM_RSP_VerticalSensors:
+      case BAUM_RSP_SerialNumber:
+        *length = 9;
+        break;
+
+      case BAUM_RSP_BluetoothName:
+        *length = 15;
+        break;
+
+      case BAUM_RSP_DeviceIdentity:
+        *length = 17;
+        break;
+
+      case BAUM_RSP_RoutingKeys:
+        if (!cellCount) {
+          assumeBaumDeviceIdentity("Inka");
+          baumDeviceType = BAUM_DEVICE_Inka;
+          cellCount = 56;
         }
-      }
 
-      packet[offset] = byte;
-    } else {
-      if (offset == size) logTruncatedPacket(packet, offset);
-      logDiscardedByte(byte);
+        if (baumDeviceType == BAUM_DEVICE_Inka) {
+          *length = 2;
+          break;
+        }
+
+        *length = KEY_GROUP_SIZE(cellCount) + 1;
+        break;
+
+      case BAUM_RSP_HorizontalSensors:
+        *length = KEY_GROUP_SIZE(brl->textColumns) + 1;
+        break;
+
+      default:
+        return BRL_PVR_INVALID;
     }
+  } else if (size == 2) {
+    switch (bytes[0]) {
+      case BAUM_RSP_ModuleRegistration:
+      case BAUM_RSP_DataRegisters:
+      case BAUM_RSP_ServiceRegisters:
+        *length += byte;
+        break;
 
-    if (++offset == length) {
-      if (offset > size) {
-        offset = 0;
-        length = 0;
-        started = 0;
-        continue;
-      }
-
-      logInputPacket(packet, offset);
-      return length;
+      default:
+        break;
     }
   }
+
+  return BRL_PVR_INCLUDE;
+}
+
+static int
+readBaumPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
+  BaumPacketVerificationData pvd = {
+    .state = BAUM_PVS_WAITING
+  };
+
+  return readBraillePacket(brl, NULL, packet, size, verifyBaumPacket, &pvd);
 }
 
 static int
