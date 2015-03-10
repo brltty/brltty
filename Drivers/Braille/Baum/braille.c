@@ -927,6 +927,23 @@ logBaumPowerdownReason (BaumPowerdownReason reason) {
   return 1;
 }
 
+static void
+adjustPacket (const unsigned char *bytes, size_t size, size_t *length) {
+  if (size == 17) {
+    switch (bytes[0]) {
+      case BAUM_RSP_DeviceIdentity: {
+        static const char prefix[] = "Refreshabraille ";
+
+        if (memcmp(&bytes[1], prefix, (size - 1)) == 0) *length += 2;
+        break;
+      }
+
+      default:
+        break;
+    }
+  }
+}
+
 typedef enum {
   BAUM_PVS_WAITING,
   BAUM_PVS_STARTED,
@@ -1736,11 +1753,18 @@ typedef union {
       unsigned char routingKey[16];
       unsigned char entryKeys[16];
       unsigned char joystick[16];
-      char deviceIdentity[16];
+      char deviceIdentity[18];
       char serialNumber[16];
     } data;
   } PACKED fields;
 } HidResponsePacket;
+
+typedef struct {
+  struct {
+    const unsigned char *table;
+    unsigned char count;
+  } const packetLengths;
+} HidPacketVerificationData;
 
 static BraillePacketVerifierResult
 verifyHidPacket (
@@ -1748,34 +1772,76 @@ verifyHidPacket (
   const unsigned char *bytes, size_t size,
   size_t *length, void *data
 ) {
-  if (size == 1) {
-    switch (bytes[size-1]) {
-      case BAUM_RSP_CellCount:
-      case BAUM_RSP_DisplayKeys:
-      case BAUM_RSP_RoutingKey:
-      case BAUM_RSP_EntryKeys:
-      case BAUM_RSP_Joystick:
-      case BAUM_RSP_DeviceIdentity:
-      case BAUM_RSP_SerialNumber:
-        *length = 17;
-        break;
+  HidPacketVerificationData *pvd = data;
+  unsigned char byte = bytes[size-1];
 
-      default:
-        return BRL_PVR_INVALID;
+  if (size == 1) {
+    if (byte < pvd->packetLengths.count) {
+      unsigned char l = pvd->packetLengths.table[byte];
+
+      if (l) {
+        *length = l;
+        return BRL_PVR_INCLUDE;
+      }
     }
+
+    return BRL_PVR_INVALID;
   }
 
+  adjustPacket(bytes, size, length);
   return BRL_PVR_INCLUDE;
 }
 
 static int
-readHidPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
-  return readBraillePacket(brl, NULL, packet, size, verifyHidPacket, NULL);
+readHid1Packet (BrailleDisplay *brl, unsigned char *packet, int size) {
+  static const unsigned char packetLengths[] = {
+    [BAUM_RSP_CellCount]  = 2,
+    [BAUM_RSP_DisplayKeys]  = 2,
+    [BAUM_RSP_RoutingKey]  = 2,
+    [BAUM_RSP_EntryKeys]  = 3,
+    [BAUM_RSP_Joystick]  = 2,
+    [BAUM_RSP_DeviceIdentity]  = 17,
+    [BAUM_RSP_SerialNumber]  = 9,
+  };
+
+  HidPacketVerificationData pvd = {
+    .packetLengths = {
+      .table = packetLengths,
+      .count = ARRAY_COUNT(packetLengths)
+    }
+  };
+
+  return readBraillePacket(brl, NULL, packet, size, verifyHidPacket, &pvd);
+}
+
+static int
+readHid2Packet (BrailleDisplay *brl, unsigned char *packet, int size) {
+  static const unsigned char packetLengths[] = {
+    [BAUM_RSP_CellCount]  = 17,
+    [BAUM_RSP_DisplayKeys]  = 17,
+    [BAUM_RSP_RoutingKey]  = 17,
+    [BAUM_RSP_EntryKeys]  = 17,
+    [BAUM_RSP_Joystick]  = 17,
+    [BAUM_RSP_DeviceIdentity]  = 17,
+    [BAUM_RSP_SerialNumber]  = 17,
+  };
+
+  HidPacketVerificationData pvd = {
+    .packetLengths = {
+      .table = packetLengths,
+      .count = ARRAY_COUNT(packetLengths)
+    }
+  };
+
+  return readBraillePacket(brl, NULL, packet, size, verifyHidPacket, &pvd);
 }
 
 static int
 getHidPacket (BrailleDisplay *brl, HidResponsePacket *packet) {
-  return readHidPacket(brl, packet->bytes, sizeof(*packet));
+  size_t size = sizeof(*packet);
+
+  memset(packet, 0, size);
+  return protocol->readPacket(brl, packet->bytes, size);
 }
 
 static int
@@ -1902,11 +1968,20 @@ writeHidCellRange (BrailleDisplay *brl, unsigned int start, unsigned int count) 
   return 1;
 }
 
-static const ProtocolOperations baumHidOperations = {
+static const ProtocolOperations baumHid1Operations = {
   "Baum HID",
   0, SERIAL_PARITY_NONE,
   &dotsTable_ISO11548_1,
-  readHidPacket, writeHidPacket,
+  readHid1Packet, writeHidPacket,
+  probeHidDisplay, updateHidKeys,
+  writeHidCells, writeHidCellRange
+};
+
+static const ProtocolOperations baumHid2Operations = {
+  "Baum HID",
+  0, SERIAL_PARITY_NONE,
+  &dotsTable_ISO11548_1,
+  readHid2Packet, writeHidPacket,
   probeHidDisplay, updateHidKeys,
   writeHidCells, writeHidCellRange
 };
@@ -2617,39 +2692,53 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .data=&baumEscapeOperations
     }
     ,
+    { /* Refreshabraille 18 (18 cells) */
+      .vendor=0X0904, .product=0X3001,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&baumHid1Operations
+    }
+    ,
     { /* Pronto! 18 (18 cells) */
       .vendor=0X0904, .product=0X4007,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .data=&baumHidOperations
+      .data=&baumHid2Operations
     }
     ,
     { /* Pronto! 40 (40 cells) */
       .vendor=0X0904, .product=0X4008,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .data=&baumHidOperations
+      .data=&baumHid2Operations
+    }
+    ,
+    { /* SuperVario2 40 (40 cells) */
+      .vendor=0X0904, .product=0X6001,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&baumHid1Operations
     }
     ,
     { /* VarioUltra 20 (20 cells) */
       .vendor=0X0904, .product=0X6101,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .data=&baumHidOperations
+      .data=&baumHid2Operations
     }
     ,
     { /* VarioUltra 40 (40 cells) */
       .vendor=0X0904, .product=0X6102,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .data=&baumHidOperations
+      .data=&baumHid2Operations
     }
     ,
     { /* VarioUltra 32 (32 cells) */
       .vendor=0X0904, .product=0X6103,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .data=&baumHidOperations
+      .data=&baumHid2Operations
     }
     ,
     { .vendor=0 }
@@ -2682,11 +2771,12 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     static const ProtocolOperations *const values[] = {
       NULL,
       &baumEscapeOperations,
-      &baumHidOperations,
+      &baumHid1Operations,
+      &baumHid2Operations,
       &handyTechOperations,
       &powerBrailleOperations
     };
-    static const char *choices[] = {"default", "escape", "hid", "ht","pb", NULL};
+    static const char *choices[] = {"default", "escape", "hid1", "hid2", "ht","pb", NULL};
     unsigned int index;
 
     if (!validateChoice(&index, parameters[PARM_PROTOCOL], choices))

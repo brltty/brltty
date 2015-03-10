@@ -279,7 +279,7 @@
 #braille-parameters bl:KbEmu=yes # [yes,no]
 
 # Baum Braille Driver Parameters
-#braille-parameters bm:Protocol=default # [default,escape,hid,ht,pb]
+#braille-parameters bm:Protocol=default # [default,escape,hid1,hid2,ht,pb]
 #braille-parameters bm:VarioKeys=no # [no,yes]
 
 # EuroBraille Braille Driver Parameters
