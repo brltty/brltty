@@ -568,7 +568,7 @@ typedef enum {
   BAUM_ERR_BrailleTableIndex      = 0X2A
 } BaumError;
 
-#define BAUM_LENGTH_DeviceIdentity 16
+#define BAUM_LENGTH_DeviceIdentity 18
 #define BAUM_LENGTH_SerialNumber 8
 #define BAUM_LENGTH_BluetoothName 14
 
@@ -1072,6 +1072,7 @@ verifyBaumPacket (
     }
   }
 
+  adjustPacketLength(bytes, size, length);
   return BRL_PVR_INCLUDE;
 }
 
@@ -1753,8 +1754,8 @@ typedef union {
       unsigned char routingKey[16];
       unsigned char entryKeys[16];
       unsigned char joystick[16];
-      char deviceIdentity[18];
-      char serialNumber[16];
+      char deviceIdentity[BAUM_LENGTH_DeviceIdentity];
+      char serialNumber[BAUM_LENGTH_SerialNumber];
     } data;
   } PACKED fields;
 } HidResponsePacket;
