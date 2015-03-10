@@ -2757,6 +2757,41 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .data=&baumHid1Operations
     },
 
+    { /* Brailliant2 40 (40 cells) */
+      .vendor=0X0904, .product=0X6006,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&baumHid1Operations
+    },
+
+    { /* Brailliant2 24 (24 cells) */
+      .vendor=0X0904, .product=0X6007,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&baumHid1Operations
+    },
+
+    { /* Brailliant2 32 (32 cells) */
+      .vendor=0X0904, .product=0X6008,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&baumHid1Operations
+    },
+
+    { /* Brailliant2 64 (64 cells) */
+      .vendor=0X0904, .product=0X6009,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&baumHid1Operations
+    },
+
+    { /* Brailliant2 80 (80 cells) */
+      .vendor=0X0904, .product=0X600A,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&baumHid1Operations
+    },
+
     { /* VarioUltra 20 (20 cells) */
       .vendor=0X0904, .product=0X6101,
       .configuration=1, .interface=0, .alternative=0,
