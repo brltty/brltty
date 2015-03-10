@@ -162,6 +162,34 @@ ENV{PRODUCT}=="904/2016/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_ru
 # Baum [Refreshabraille 18 (18 cells)]
 ENV{PRODUCT}=="904/3000/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
 
+# Device: 0904:3001
+# Baum [Refreshabraille 18 (18 cells)]
+ENV{PRODUCT}=="904/3001/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+
+# Device: 0904:4007
+# Baum [Pronto! V4 18 (18 cells)]
+ENV{PRODUCT}=="904/4007/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+
+# Device: 0904:4008
+# Baum [Pronto! V4 40 (40 cells)]
+ENV{PRODUCT}=="904/4008/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+
+# Device: 0904:6001
+# Baum [SuperVario2 40 (40 cells)]
+ENV{PRODUCT}=="904/6001/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+
+# Device: 0904:6101
+# Baum [VarioUltra 20 (20 cells)]
+ENV{PRODUCT}=="904/6101/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+
+# Device: 0904:6102
+# Baum [VarioUltra 40 (40 cells)]
+ENV{PRODUCT}=="904/6102/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+
+# Device: 0904:6103
+# Baum [VarioUltra 32 (32 cells)]
+ENV{PRODUCT}=="904/6103/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+
 # Device: 0921:1200
 # HandyTech [GoHubs chip]
 ENV{PRODUCT}=="921/1200/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"

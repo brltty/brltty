@@ -220,6 +220,27 @@ ServiceBinary  = %12%\libusb0.sys
 ; Device: 0904:3000
 "LibUSB-Win32: Baum [Refreshabraille 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_3000
 
+; Device: 0904:3001
+"LibUSB-Win32: Baum [Refreshabraille 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_3001
+
+; Device: 0904:4007
+"LibUSB-Win32: Baum [Pronto! V4 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_4007
+
+; Device: 0904:4008
+"LibUSB-Win32: Baum [Pronto! V4 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_4008
+
+; Device: 0904:6001
+"LibUSB-Win32: Baum [SuperVario2 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6001
+
+; Device: 0904:6101
+"LibUSB-Win32: Baum [VarioUltra 20 (20 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6101
+
+; Device: 0904:6102
+"LibUSB-Win32: Baum [VarioUltra 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6102
+
+; Device: 0904:6103
+"LibUSB-Win32: Baum [VarioUltra 32 (32 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6103
+
 ; Device: 0921:1200
 "LibUSB-Win32: HandyTech [GoHubs chip]"=LIBUSB_DEV, USB\VID_0921&PID_1200
 
@@ -456,6 +477,27 @@ ServiceBinary  = %12%\libusb0.sys
 ; Device: 0904:3000
 "LibUSB-Win32: Baum [Refreshabraille 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_3000
 
+; Device: 0904:3001
+"LibUSB-Win32: Baum [Refreshabraille 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_3001
+
+; Device: 0904:4007
+"LibUSB-Win32: Baum [Pronto! V4 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_4007
+
+; Device: 0904:4008
+"LibUSB-Win32: Baum [Pronto! V4 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_4008
+
+; Device: 0904:6001
+"LibUSB-Win32: Baum [SuperVario2 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6001
+
+; Device: 0904:6101
+"LibUSB-Win32: Baum [VarioUltra 20 (20 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6101
+
+; Device: 0904:6102
+"LibUSB-Win32: Baum [VarioUltra 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6102
+
+; Device: 0904:6103
+"LibUSB-Win32: Baum [VarioUltra 32 (32 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6103
+
 ; Device: 0921:1200
 "LibUSB-Win32: HandyTech [GoHubs chip]"=LIBUSB_DEV, USB\VID_0921&PID_1200
 
@@ -691,6 +733,27 @@ ServiceBinary  = %12%\libusb0.sys
 
 ; Device: 0904:3000
 "LibUSB-Win32: Baum [Refreshabraille 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_3000
+
+; Device: 0904:3001
+"LibUSB-Win32: Baum [Refreshabraille 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_3001
+
+; Device: 0904:4007
+"LibUSB-Win32: Baum [Pronto! V4 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_4007
+
+; Device: 0904:4008
+"LibUSB-Win32: Baum [Pronto! V4 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_4008
+
+; Device: 0904:6001
+"LibUSB-Win32: Baum [SuperVario2 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6001
+
+; Device: 0904:6101
+"LibUSB-Win32: Baum [VarioUltra 20 (20 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6101
+
+; Device: 0904:6102
+"LibUSB-Win32: Baum [VarioUltra 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6102
+
+; Device: 0904:6103
+"LibUSB-Win32: Baum [VarioUltra 32 (32 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6103
 
 ; Device: 0921:1200
 "LibUSB-Win32: HandyTech [GoHubs chip]"=LIBUSB_DEV, USB\VID_0921&PID_1200
