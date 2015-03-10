@@ -1786,6 +1786,8 @@ verifyHidPacket (
       }
     }
 
+    if (!cellCount) return BRL_PVR_INVALID;
+
     switch (byte) {
       case BAUM_RSP_RoutingKeys:
         *length = KEY_GROUP_SIZE(cellCount) + 1;
@@ -1794,11 +1796,10 @@ verifyHidPacket (
       default:
         return BRL_PVR_INVALID;
     }
-
-    return BRL_PVR_INCLUDE;
+  } else {
+    adjustPacketLength(bytes, size, length);
   }
 
-  adjustPacketLength(bytes, size, length);
   return BRL_PVR_INCLUDE;
 }
 
@@ -1877,6 +1878,8 @@ probeHidDisplay (BrailleDisplay *brl) {
   static const unsigned char packet[] = {0X02, 0X00};
 
   if (writeBraillePacket(brl, NULL, packet, sizeof(packet))) {
+    cellCount = 0;
+
     while (awaitBrailleInput(brl, probeTimeout)) {
       HidResponsePacket packet;
       size_t size = getHidPacket(brl, &packet);
