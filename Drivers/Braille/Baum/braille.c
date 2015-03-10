@@ -2729,6 +2729,34 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .data=&baumHid1Operations
     },
 
+    { /* PocketVario2 (24 cells) */
+      .vendor=0X0904, .product=0X6002,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&baumHid1Operations
+    },
+
+    { /* SuperVario2 32 (32 cells) */
+      .vendor=0X0904, .product=0X6003,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&baumHid1Operations
+    },
+
+    { /* SuperVario2 64 (64 cells) */
+      .vendor=0X0904, .product=0X6004,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&baumHid1Operations
+    },
+
+    { /* SuperVario2 80 (80 cells) */
+      .vendor=0X0904, .product=0X6005,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&baumHid1Operations
+    },
+
     { /* VarioUltra 20 (20 cells) */
       .vendor=0X0904, .product=0X6101,
       .configuration=1, .interface=0, .alternative=0,
