@@ -1684,8 +1684,7 @@ updateBaumKeys (BrailleDisplay *brl) {
         }
 
       doRoutingKeys:
-        updateKeyGroup(brl, keysState.routingKeys, packet.data.values.routingKeys,
-                       BM_GRP_RoutingKeys, 0, cellCount, 0);
+        updateRoutingKeys(brl, packet.data.values.routingKeys, cellCount);
         continue;
 
       case BAUM_RSP_Switches:
@@ -1749,6 +1748,7 @@ typedef union {
 
     union {
       unsigned char cellCount[16];
+      unsigned char routingKeys[16];
       unsigned char displayKeys[16];
       unsigned char routingKey[16];
       unsigned char entryKeys[16];
@@ -1785,7 +1785,16 @@ verifyHidPacket (
       }
     }
 
-    return BRL_PVR_INVALID;
+    switch (byte) {
+      case BAUM_RSP_RoutingKeys:
+        *length = KEY_GROUP_SIZE(cellCount) + 1;
+        break;
+
+      default:
+        return BRL_PVR_INVALID;
+    }
+
+    return BRL_PVR_INCLUDE;
   }
 
   adjustPacket(bytes, size, length);
@@ -1916,18 +1925,15 @@ updateHidKeys (BrailleDisplay *brl) {
         if (!changeCellCount(brl, packet.fields.data.cellCount[0])) return;
         continue;
 
+      case BAUM_RSP_RoutingKey:
+        resetKeyGroup(packet.fields.data.routingKeys, cellCount, packet.fields.data.routingKey[0]);
+      case BAUM_RSP_RoutingKeys:
+        updateRoutingKeys(brl, packet.fields.data.routingKeys, cellCount);
+        continue;
+
       case BAUM_RSP_DisplayKeys:
         updateDisplayKeys(brl, packet.fields.data.displayKeys[0]);
         continue;
-
-      case BAUM_RSP_RoutingKey: {
-        unsigned char routingKeys[KEY_GROUP_SIZE(MAXIMUM_CELL_COUNT)];
-
-        resetKeyGroup(routingKeys, cellCount, packet.fields.data.routingKey[0]);
-        updateKeyGroup(brl, keysState.routingKeys, routingKeys,
-                       BM_GRP_RoutingKeys, 0, cellCount, 0);
-        continue;
-      }
 
       case BAUM_RSP_EntryKeys:
         updateEntryKeys(brl, packet.fields.data.entryKeys);
