@@ -157,6 +157,62 @@ BEGIN_KEY_NAME_TABLE(vertical)
   KEY_GROUP_ENTRY(BM_GRP_ScaledRightSensors, "ScaledRightSensor"),
 END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLES(default)
+  KEY_NAME_SUBTABLE(display,6),
+  KEY_NAME_TABLE(entry),
+  KEY_NAME_TABLE(joystick),
+  KEY_NAME_TABLE(routing),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(connect)
+  KEY_NAME_SUBTABLE(display,6),
+  KEY_NAME_TABLE(entry),
+  KEY_NAME_TABLE(joystick),
+  KEY_NAME_TABLE(routing),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(conny)
+  KEY_NAME_SUBTABLE(display,6),
+  KEY_NAME_TABLE(entry),
+  KEY_NAME_TABLE(joystick),
+  KEY_NAME_TABLE(routing),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(pronto)
+  KEY_NAME_SUBTABLE(display,6),
+  KEY_NAME_TABLE(entry),
+  KEY_NAME_TABLE(joystick),
+  KEY_NAME_TABLE(routing),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(pv)
+  KEY_NAME_SUBTABLE(display,6),
+  KEY_NAME_TABLE(entry),
+  KEY_NAME_TABLE(joystick),
+  KEY_NAME_TABLE(routing),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(rb)
+  KEY_NAME_SUBTABLE(display,6),
+  KEY_NAME_TABLE(entry),
+  KEY_NAME_TABLE(joystick),
+  KEY_NAME_TABLE(routing),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(sv)
+  KEY_NAME_SUBTABLE(display,6),
+  KEY_NAME_TABLE(entry),
+  KEY_NAME_TABLE(joystick),
+  KEY_NAME_TABLE(routing),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(ultra)
+  KEY_NAME_SUBTABLE(display,6),
+  KEY_NAME_TABLE(entry),
+  KEY_NAME_TABLE(joystick),
+  KEY_NAME_TABLE(routing),
+END_KEY_NAME_TABLES
+
 BEGIN_KEY_NAME_TABLES(inka)
   KEY_NAME_SUBTABLE(display,6),
   KEY_NAME_TABLE(horizontal),
@@ -183,16 +239,6 @@ BEGIN_KEY_NAME_TABLES(pro)
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
-BEGIN_KEY_NAME_TABLES(default)
-  KEY_NAME_SUBTABLE(display,6),
-  KEY_NAME_TABLE(command),
-  KEY_NAME_TABLE(front),
-  KEY_NAME_TABLE(back),
-  KEY_NAME_TABLE(entry),
-  KEY_NAME_TABLE(joystick),
-  KEY_NAME_TABLE(routing),
-END_KEY_NAME_TABLES
-
 BEGIN_KEY_NAME_TABLES(vario)
   KEY_NAME_SUBTABLE(display,6),
   KEY_NAME_TABLE(command),
@@ -201,19 +247,33 @@ BEGIN_KEY_NAME_TABLES(vario)
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
+DEFINE_KEY_TABLE(default)
+DEFINE_KEY_TABLE(connect)
+DEFINE_KEY_TABLE(conny)
+DEFINE_KEY_TABLE(pronto)
+DEFINE_KEY_TABLE(pv)
+DEFINE_KEY_TABLE(rb)
+DEFINE_KEY_TABLE(sv)
+DEFINE_KEY_TABLE(ultra)
 DEFINE_KEY_TABLE(inka)
 DEFINE_KEY_TABLE(dm80p)
 DEFINE_KEY_TABLE(vario80)
 DEFINE_KEY_TABLE(pro)
-DEFINE_KEY_TABLE(default)
 DEFINE_KEY_TABLE(vario)
 
 BEGIN_KEY_TABLE_LIST
+  &KEY_TABLE_DEFINITION(default),
+  &KEY_TABLE_DEFINITION(connect),
+  &KEY_TABLE_DEFINITION(conny),
+  &KEY_TABLE_DEFINITION(pronto),
+  &KEY_TABLE_DEFINITION(pv),
+  &KEY_TABLE_DEFINITION(rb),
+  &KEY_TABLE_DEFINITION(sv),
+  &KEY_TABLE_DEFINITION(ultra),
   &KEY_TABLE_DEFINITION(inka),
   &KEY_TABLE_DEFINITION(dm80p),
   &KEY_TABLE_DEFINITION(vario80),
   &KEY_TABLE_DEFINITION(pro),
-  &KEY_TABLE_DEFINITION(default),
   &KEY_TABLE_DEFINITION(vario),
 END_KEY_TABLE_LIST
 
@@ -730,6 +790,13 @@ typedef union {
 
 typedef enum {
   BAUM_DEVICE_Default,
+  BAUM_DEVICE_Conny,
+  BAUM_DEVICE_PocketVario,
+  BAUM_DEVICE_Pronto,
+  BAUM_DEVICE_Refreshabraille,
+  BAUM_DEVICE_SuperVario,
+  BAUM_DEVICE_VarioConnect,
+  BAUM_DEVICE_VarioUltra,
 
   BAUM_DEVICE_Inka,
   BAUM_DEVICE_DM80P,
@@ -744,43 +811,43 @@ typedef struct {
 
 static const BaumDeviceIdentityEntry baumDeviceIdentityTable[] = {
   { .string = "BrailleConnect",
-    .type = BAUM_DEVICE_Default
+    .type = BAUM_DEVICE_VarioConnect
   },
 
   { .string = "Brailliant",
-    .type = BAUM_DEVICE_Default
+    .type = BAUM_DEVICE_SuperVario
   },
 
   { .string = "Conny",
-    .type = BAUM_DEVICE_Default
+    .type = BAUM_DEVICE_Conny
   },
 
   { .string = "PocketVario",
-    .type = BAUM_DEVICE_Default
+    .type = BAUM_DEVICE_PocketVario
   },
 
   { .string = "Pronto",
-    .type = BAUM_DEVICE_Default
+    .type = BAUM_DEVICE_Pronto
   },
 
   { .string = "Refreshabraille",
-    .type = BAUM_DEVICE_Default
+    .type = BAUM_DEVICE_Refreshabraille
   },
 
   { .string = "SuperVario",
-    .type = BAUM_DEVICE_Default
+    .type = BAUM_DEVICE_SuperVario
   },
 
   { .string = "SVario",
-    .type = BAUM_DEVICE_Default
+    .type = BAUM_DEVICE_SuperVario
   },
 
   { .string = "VarioConnect",
-    .type = BAUM_DEVICE_Default
+    .type = BAUM_DEVICE_VarioConnect
   },
 
   { .string = "VarioUltra",
-    .type = BAUM_DEVICE_Default
+    .type = BAUM_DEVICE_VarioUltra
   },
 };
 
@@ -1290,6 +1357,41 @@ writeBaumCells_modular (BrailleDisplay *brl, unsigned int start, unsigned int co
 static const BaumDeviceOperations baumDeviceOperations[] = {
   [BAUM_DEVICE_Default] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(default),
+    .writeAllCells = writeBaumCells_all
+  },
+
+  [BAUM_DEVICE_Conny] = {
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(conny),
+    .writeAllCells = writeBaumCells_all
+  },
+
+  [BAUM_DEVICE_PocketVario] = {
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(pv),
+    .writeAllCells = writeBaumCells_all
+  },
+
+  [BAUM_DEVICE_Pronto] = {
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(pronto),
+    .writeAllCells = writeBaumCells_all
+  },
+
+  [BAUM_DEVICE_Refreshabraille] = {
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(rb),
+    .writeAllCells = writeBaumCells_all
+  },
+
+  [BAUM_DEVICE_SuperVario] = {
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(sv),
+    .writeAllCells = writeBaumCells_all
+  },
+
+  [BAUM_DEVICE_VarioConnect] = {
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(connect),
+    .writeAllCells = writeBaumCells_all
+  },
+
+  [BAUM_DEVICE_VarioUltra] = {
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(ultra),
     .writeAllCells = writeBaumCells_all
   },
 
