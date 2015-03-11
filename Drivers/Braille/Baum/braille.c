@@ -2060,6 +2060,9 @@ probeHidDisplay (BrailleDisplay *brl) {
   static const unsigned char packet[] = {0X02, 0X00};
 
   if (writeBraillePacket(brl, NULL, packet, sizeof(packet))) {
+    int haveCellCount = 0;
+    int haveDeviceIdentity = 0;
+
     baumDeviceType = BAUM_DEVICE_Default;
     cellCount = 0;
 
@@ -2074,25 +2077,29 @@ probeHidDisplay (BrailleDisplay *brl) {
 
           if (isAcceptableCellCount(count)) {
             cellCount = count;
-            return 1;
+            haveCellCount = 1;
+          } else {
+            logUnexpectedCellCount(count);
           }
 
-          logUnexpectedCellCount(count);
-          continue;
+          break;
         }
 
         case BAUM_RSP_DeviceIdentity:
           handleHidDeviceIdentity(&packet, 1);
-          continue;
+          haveDeviceIdentity = 1;
+          break;
 
         case BAUM_RSP_SerialNumber:
           logHidSerialNumber(&packet);
-          continue;
+          break;
 
         default:
           logUnexpectedPacket(packet.bytes, size);
-          continue;
+          break;
       }
+
+      if (haveCellCount && haveDeviceIdentity) return 1;
     }
   }
 
