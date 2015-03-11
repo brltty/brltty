@@ -144,6 +144,12 @@ HKR,,Icon,,-20
 ; Device: 0904:3001
 "LibUSB-1.0: Baum [Refreshabraille 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_3001
 
+; Device: 0904:4004
+"LibUSB-1.0: Baum [Pronto! V3 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_4004
+
+; Device: 0904:4005
+"LibUSB-1.0: Baum [Pronto! V3 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_4005
+
 ; Device: 0904:4007
 "LibUSB-1.0: Baum [Pronto! V4 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_4007
 
@@ -152,6 +158,42 @@ HKR,,Icon,,-20
 
 ; Device: 0904:6001
 "LibUSB-1.0: Baum [SuperVario2 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6001
+
+; Device: 0904:6002
+"LibUSB-1.0: Baum [PocketVario2 (24 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6002
+
+; Device: 0904:6003
+"LibUSB-1.0: Baum [SuperVario2 32 (32 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6003
+
+; Device: 0904:6004
+"LibUSB-1.0: Baum [SuperVario2 64 (64 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6004
+
+; Device: 0904:6005
+"LibUSB-1.0: Baum [SuperVario2 80 (80 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6005
+
+; Device: 0904:6006
+"LibUSB-1.0: Baum [Brailliant2 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6006
+
+; Device: 0904:6007
+"LibUSB-1.0: Baum [Brailliant2 24 (24 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6007
+
+; Device: 0904:6008
+"LibUSB-1.0: Baum [Brailliant2 32 (32 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6008
+
+; Device: 0904:6009
+"LibUSB-1.0: Baum [Brailliant2 64 (64 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6009
+
+; Device: 0904:600A
+"LibUSB-1.0: Baum [Brailliant2 80 (80 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_600A
+
+; Device: 0904:6011
+"LibUSB-1.0: Baum [VarioConnect 24 (24 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6011
+
+; Device: 0904:6012
+"LibUSB-1.0: Baum [VarioConnect 32 (32 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6012
+
+; Device: 0904:6013
+"LibUSB-1.0: Baum [VarioConnect 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6013
 
 ; Device: 0904:6101
 "LibUSB-1.0: Baum [VarioUltra 20 (20 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6101
@@ -401,6 +443,12 @@ HKR,,Icon,,-20
 ; Device: 0904:3001
 "LibUSB-1.0: Baum [Refreshabraille 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_3001
 
+; Device: 0904:4004
+"LibUSB-1.0: Baum [Pronto! V3 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_4004
+
+; Device: 0904:4005
+"LibUSB-1.0: Baum [Pronto! V3 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_4005
+
 ; Device: 0904:4007
 "LibUSB-1.0: Baum [Pronto! V4 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_4007
 
@@ -409,6 +457,42 @@ HKR,,Icon,,-20
 
 ; Device: 0904:6001
 "LibUSB-1.0: Baum [SuperVario2 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6001
+
+; Device: 0904:6002
+"LibUSB-1.0: Baum [PocketVario2 (24 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6002
+
+; Device: 0904:6003
+"LibUSB-1.0: Baum [SuperVario2 32 (32 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6003
+
+; Device: 0904:6004
+"LibUSB-1.0: Baum [SuperVario2 64 (64 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6004
+
+; Device: 0904:6005
+"LibUSB-1.0: Baum [SuperVario2 80 (80 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6005
+
+; Device: 0904:6006
+"LibUSB-1.0: Baum [Brailliant2 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6006
+
+; Device: 0904:6007
+"LibUSB-1.0: Baum [Brailliant2 24 (24 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6007
+
+; Device: 0904:6008
+"LibUSB-1.0: Baum [Brailliant2 32 (32 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6008
+
+; Device: 0904:6009
+"LibUSB-1.0: Baum [Brailliant2 64 (64 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6009
+
+; Device: 0904:600A
+"LibUSB-1.0: Baum [Brailliant2 80 (80 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_600A
+
+; Device: 0904:6011
+"LibUSB-1.0: Baum [VarioConnect 24 (24 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6011
+
+; Device: 0904:6012
+"LibUSB-1.0: Baum [VarioConnect 32 (32 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6012
+
+; Device: 0904:6013
+"LibUSB-1.0: Baum [VarioConnect 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6013
 
 ; Device: 0904:6101
 "LibUSB-1.0: Baum [VarioUltra 20 (20 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6101

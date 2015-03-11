@@ -158,6 +158,14 @@ brltty-bm 0x0003 0x0904 0x3000
 # Baum [Refreshabraille 18 (18 cells)]
 brltty-bm 0x0003 0x0904 0x3001
 
+# Device: 0904:4004
+# Baum [Pronto! V3 18 (18 cells)]
+brltty-bm 0x0003 0x0904 0x4004
+
+# Device: 0904:4005
+# Baum [Pronto! V3 40 (40 cells)]
+brltty-bm 0x0003 0x0904 0x4005
+
 # Device: 0904:4007
 # Baum [Pronto! V4 18 (18 cells)]
 brltty-bm 0x0003 0x0904 0x4007
@@ -169,6 +177,54 @@ brltty-bm 0x0003 0x0904 0x4008
 # Device: 0904:6001
 # Baum [SuperVario2 40 (40 cells)]
 brltty-bm 0x0003 0x0904 0x6001
+
+# Device: 0904:6002
+# Baum [PocketVario2 (24 cells)]
+brltty-bm 0x0003 0x0904 0x6002
+
+# Device: 0904:6003
+# Baum [SuperVario2 32 (32 cells)]
+brltty-bm 0x0003 0x0904 0x6003
+
+# Device: 0904:6004
+# Baum [SuperVario2 64 (64 cells)]
+brltty-bm 0x0003 0x0904 0x6004
+
+# Device: 0904:6005
+# Baum [SuperVario2 80 (80 cells)]
+brltty-bm 0x0003 0x0904 0x6005
+
+# Device: 0904:6006
+# Baum [Brailliant2 40 (40 cells)]
+brltty-bm 0x0003 0x0904 0x6006
+
+# Device: 0904:6007
+# Baum [Brailliant2 24 (24 cells)]
+brltty-bm 0x0003 0x0904 0x6007
+
+# Device: 0904:6008
+# Baum [Brailliant2 32 (32 cells)]
+brltty-bm 0x0003 0x0904 0x6008
+
+# Device: 0904:6009
+# Baum [Brailliant2 64 (64 cells)]
+brltty-bm 0x0003 0x0904 0x6009
+
+# Device: 0904:600A
+# Baum [Brailliant2 80 (80 cells)]
+brltty-bm 0x0003 0x0904 0x600a
+
+# Device: 0904:6011
+# Baum [VarioConnect 24 (24 cells)]
+brltty-bm 0x0003 0x0904 0x6011
+
+# Device: 0904:6012
+# Baum [VarioConnect 32 (32 cells)]
+brltty-bm 0x0003 0x0904 0x6012
+
+# Device: 0904:6013
+# Baum [VarioConnect 40 (40 cells)]
+brltty-bm 0x0003 0x0904 0x6013
 
 # Device: 0904:6101
 # Baum [VarioUltra 20 (20 cells)]

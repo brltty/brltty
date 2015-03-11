@@ -143,6 +143,14 @@
   <!-- Baum [Refreshabraille 18 (18 cells)] -->
   <usb-device vendor-id="2308" product-id="12289" />
 
+  <!-- Device: 0904:4004 -->
+  <!-- Baum [Pronto! V3 18 (18 cells)] -->
+  <usb-device vendor-id="2308" product-id="16388" />
+
+  <!-- Device: 0904:4005 -->
+  <!-- Baum [Pronto! V3 40 (40 cells)] -->
+  <usb-device vendor-id="2308" product-id="16389" />
+
   <!-- Device: 0904:4007 -->
   <!-- Baum [Pronto! V4 18 (18 cells)] -->
   <usb-device vendor-id="2308" product-id="16391" />
@@ -154,6 +162,54 @@
   <!-- Device: 0904:6001 -->
   <!-- Baum [SuperVario2 40 (40 cells)] -->
   <usb-device vendor-id="2308" product-id="24577" />
+
+  <!-- Device: 0904:6002 -->
+  <!-- Baum [PocketVario2 (24 cells)] -->
+  <usb-device vendor-id="2308" product-id="24578" />
+
+  <!-- Device: 0904:6003 -->
+  <!-- Baum [SuperVario2 32 (32 cells)] -->
+  <usb-device vendor-id="2308" product-id="24579" />
+
+  <!-- Device: 0904:6004 -->
+  <!-- Baum [SuperVario2 64 (64 cells)] -->
+  <usb-device vendor-id="2308" product-id="24580" />
+
+  <!-- Device: 0904:6005 -->
+  <!-- Baum [SuperVario2 80 (80 cells)] -->
+  <usb-device vendor-id="2308" product-id="24581" />
+
+  <!-- Device: 0904:6006 -->
+  <!-- Baum [Brailliant2 40 (40 cells)] -->
+  <usb-device vendor-id="2308" product-id="24582" />
+
+  <!-- Device: 0904:6007 -->
+  <!-- Baum [Brailliant2 24 (24 cells)] -->
+  <usb-device vendor-id="2308" product-id="24583" />
+
+  <!-- Device: 0904:6008 -->
+  <!-- Baum [Brailliant2 32 (32 cells)] -->
+  <usb-device vendor-id="2308" product-id="24584" />
+
+  <!-- Device: 0904:6009 -->
+  <!-- Baum [Brailliant2 64 (64 cells)] -->
+  <usb-device vendor-id="2308" product-id="24585" />
+
+  <!-- Device: 0904:600A -->
+  <!-- Baum [Brailliant2 80 (80 cells)] -->
+  <usb-device vendor-id="2308" product-id="24586" />
+
+  <!-- Device: 0904:6011 -->
+  <!-- Baum [VarioConnect 24 (24 cells)] -->
+  <usb-device vendor-id="2308" product-id="24593" />
+
+  <!-- Device: 0904:6012 -->
+  <!-- Baum [VarioConnect 32 (32 cells)] -->
+  <usb-device vendor-id="2308" product-id="24594" />
+
+  <!-- Device: 0904:6013 -->
+  <!-- Baum [VarioConnect 40 (40 cells)] -->
+  <usb-device vendor-id="2308" product-id="24595" />
 
   <!-- Device: 0904:6101 -->
   <!-- Baum [VarioUltra 20 (20 cells)] -->
