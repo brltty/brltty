@@ -305,13 +305,17 @@ static unsigned char switchSettings;
 
 typedef struct {
   const char *name;
+  const DotsTable *dotsTable;
+
   unsigned int serialBaud;
   SerialParity serialParity;
-  const DotsTable *dotsTable;
+
   int (*readPacket) (BrailleDisplay *brl, unsigned char *packet, int size);
   int (*writePacket) (BrailleDisplay *brl, const unsigned char *packet, int length);
-  int (*probeDisplay) (BrailleDisplay *brl);
-  void (*updateKeys) (BrailleDisplay *brl);
+
+  int (*probeDevice) (BrailleDisplay *brl);
+  void (*processPackets) (BrailleDisplay *brl);
+
   int (*writeCells) (BrailleDisplay *brl);
   int (*writeCellRange) (BrailleDisplay *brl, unsigned int start, unsigned int count);
 } ProtocolOperations;
@@ -1584,7 +1588,7 @@ handleBaumDataRegistersEvent (BrailleDisplay *brl, const BaumResponsePacket *pac
 }
 
 static int
-probeBaumDisplay (BrailleDisplay *brl) {
+probeBaumDevice (BrailleDisplay *brl) {
   int probes = 0;
 
   do {
@@ -1718,7 +1722,7 @@ probeBaumDisplay (BrailleDisplay *brl) {
 }
 
 static void
-updateBaumKeys (BrailleDisplay *brl) {
+processBaumPackets (BrailleDisplay *brl) {
   BaumResponsePacket packet;
   int size;
 
@@ -1911,12 +1915,20 @@ writeBaumCellRange (BrailleDisplay *brl, unsigned int start, unsigned int count)
 }
 
 static const ProtocolOperations baumEscapeOperations = {
-  "Baum Escape",
-  19200, SERIAL_PARITY_NONE,
-  &dotsTable_ISO11548_1,
-  readBaumPacket, writeBaumPacket,
-  probeBaumDisplay, updateBaumKeys,
-  writeBaumCells, writeBaumCellRange
+  .name = "Baum Escape",
+  .dotsTable = &dotsTable_ISO11548_1,
+
+  .serialBaud = 19200,
+  .serialParity = SERIAL_PARITY_NONE,
+
+  .readPacket = readBaumPacket,
+  .writePacket = writeBaumPacket,
+
+  .probeDevice = probeBaumDevice,
+  .processPackets = processBaumPackets,
+
+  .writeCells = writeBaumCells,
+  .writeCellRange = writeBaumCellRange
 };
 
 /* HID Protocol */
@@ -2056,7 +2068,7 @@ logHidSerialNumber (const HidResponsePacket *packet) {
 }
 
 static int
-probeHidDisplay (BrailleDisplay *brl) {
+probeHidDevice (BrailleDisplay *brl) {
   static const unsigned char packet[] = {0X02, 0X00};
 
   if (writeBraillePacket(brl, NULL, packet, sizeof(packet))) {
@@ -2107,7 +2119,7 @@ probeHidDisplay (BrailleDisplay *brl) {
 }
 
 static void
-updateHidKeys (BrailleDisplay *brl) {
+processHidPackets (BrailleDisplay *brl) {
   HidResponsePacket packet;
   size_t size;
 
@@ -2167,21 +2179,31 @@ writeHidCellRange (BrailleDisplay *brl, unsigned int start, unsigned int count) 
 }
 
 static const ProtocolOperations baumHid1Operations = {
-  "Baum HID",
-  0, SERIAL_PARITY_NONE,
-  &dotsTable_ISO11548_1,
-  readHid1Packet, writeHidPacket,
-  probeHidDisplay, updateHidKeys,
-  writeHidCells, writeHidCellRange
+  .name = "Baum HID1",
+  .dotsTable = &dotsTable_ISO11548_1,
+
+  .readPacket = readHid1Packet,
+  .writePacket = writeHidPacket,
+
+  .probeDevice = probeHidDevice,
+  .processPackets = processHidPackets,
+
+  .writeCells = writeHidCells,
+  .writeCellRange = writeHidCellRange
 };
 
 static const ProtocolOperations baumHid2Operations = {
-  "Baum HID",
-  0, SERIAL_PARITY_NONE,
-  &dotsTable_ISO11548_1,
-  readHid2Packet, writeHidPacket,
-  probeHidDisplay, updateHidKeys,
-  writeHidCells, writeHidCellRange
+  .name = "Baum HID2",
+  .dotsTable = &dotsTable_ISO11548_1,
+
+  .readPacket = readHid2Packet,
+  .writePacket = writeHidPacket,
+
+  .probeDevice = probeHidDevice,
+  .processPackets = processHidPackets,
+
+  .writeCells = writeHidCells,
+  .writeCellRange = writeHidCellRange
 };
 
 /* HandyTech Protocol */
@@ -2329,7 +2351,7 @@ findHandyTechModel (unsigned char identity) {
 }
 
 static int
-probeHandyTechDisplay (BrailleDisplay *brl) {
+probeHandyTechDevice (BrailleDisplay *brl) {
   int probes = 0;
   static const unsigned char request[] = {HT_REQ_RESET};
   while (writeHandyTechPacket(brl, request, sizeof(request))) {
@@ -2351,7 +2373,7 @@ probeHandyTechDisplay (BrailleDisplay *brl) {
 }
 
 static void
-updateHandyTechKeys (BrailleDisplay *brl) {
+processHandyTechPackets (BrailleDisplay *brl) {
   HandyTechResponsePacket packet;
   int size;
 
@@ -2430,12 +2452,20 @@ writeHandyTechCellRange (BrailleDisplay *brl, unsigned int start, unsigned int c
 }
 
 static const ProtocolOperations handyTechOperations = {
-  "HandyTech",
-  19200, SERIAL_PARITY_ODD,
-  &dotsTable_ISO11548_1,
-  readHandyTechPacket, writeHandyTechPacket,
-  probeHandyTechDisplay, updateHandyTechKeys,
-  writeHandyTechCells, writeHandyTechCellRange
+  .name = "HandyTech",
+  .dotsTable = &dotsTable_ISO11548_1,
+
+  .serialBaud = 19200,
+  .serialParity = SERIAL_PARITY_ODD,
+
+  .readPacket = readHandyTechPacket,
+  .writePacket = writeHandyTechPacket,
+
+  .probeDevice = probeHandyTechDevice,
+  .processPackets = processHandyTechPackets,
+
+  .writeCells = writeHandyTechCells,
+  .writeCellRange = writeHandyTechCellRange
 };
 
 /* PowerBraille Protocol */
@@ -2582,7 +2612,7 @@ writePowerBraillePacket (BrailleDisplay *brl, const unsigned char *packet, int l
 }
 
 static int
-probePowerBrailleDisplay (BrailleDisplay *brl) {
+probePowerBrailleDevice (BrailleDisplay *brl) {
   int probes = 0;
   static const unsigned char request[] = {PB_REQ_RESET};
   while (writePowerBraillePacket(brl, request, sizeof(request))) {
@@ -2606,7 +2636,7 @@ probePowerBrailleDisplay (BrailleDisplay *brl) {
 }
 
 static void
-updatePowerBrailleKeys (BrailleDisplay *brl) {
+processPowerBraillePackets (BrailleDisplay *brl) {
   PowerBrailleResponsePacket packet;
   int size;
 
@@ -2713,12 +2743,20 @@ writePowerBrailleCellRange (BrailleDisplay *brl, unsigned int start, unsigned in
 }
 
 static const ProtocolOperations powerBrailleOperations = {
-  "PowerBraille",
-  9600, SERIAL_PARITY_NONE,
-  &dotsTable_ISO11548_1,
-  readPowerBraillePacket, writePowerBraillePacket,
-  probePowerBrailleDisplay, updatePowerBrailleKeys,
-  writePowerBrailleCells, writePowerBrailleCellRange
+  .name = "PowerBraille",
+  .dotsTable = &dotsTable_ISO11548_1,
+
+  .serialBaud = 9600,
+  .serialParity = SERIAL_PARITY_NONE,
+
+  .readPacket = readPowerBraillePacket,
+  .writePacket = writePowerBraillePacket,
+
+  .probeDevice = probePowerBrailleDevice,
+  .processPackets = processPowerBraillePackets,
+
+  .writeCells = writePowerBrailleCells,
+  .writeCellRange = writePowerBrailleCellRange
 };
 
 /* Driver Handlers */
@@ -3107,7 +3145,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       memset(&keysState, 0, sizeof(keysState));
       switchSettings = 0;
 
-      if (protocol->probeDisplay(brl)) {
+      if (protocol->probeDevice(brl)) {
         logCellCount(brl);
 
         makeOutputTable(protocol->dotsTable[0]);
@@ -3176,6 +3214,6 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  protocol->updateKeys(brl);
+  protocol->processPackets(brl);
   return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
 }
