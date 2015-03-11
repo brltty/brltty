@@ -2897,6 +2897,20 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .data=&baumHid1Operations
     },
 
+    { /* Pronto! V3 18 (18 cells) */
+      .vendor=0X0904, .product=0X4004,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&baumHid2Operations
+    },
+
+    { /* Pronto! V3 40 (40 cells) */
+      .vendor=0X0904, .product=0X4005,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&baumHid2Operations
+    },
+
     { /* Pronto! V4 18 (18 cells) */
       .vendor=0X0904, .product=0X4007,
       .configuration=1, .interface=0, .alternative=0,
@@ -2976,6 +2990,27 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
     { /* Brailliant2 80 (80 cells) */
       .vendor=0X0904, .product=0X600A,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&baumHid1Operations
+    },
+
+    { /* VarioConnect 24 (24 cells) */
+      .vendor=0X0904, .product=0X6011,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&baumHid1Operations
+    },
+
+    { /* VarioConnect 32 (32 cells) */
+      .vendor=0X0904, .product=0X6012,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&baumHid1Operations
+    },
+
+    { /* VarioConnect 40 (40 cells) */
+      .vendor=0X0904, .product=0X6013,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .data=&baumHid1Operations
