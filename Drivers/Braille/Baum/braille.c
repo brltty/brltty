@@ -261,13 +261,15 @@ static const ProtocolOperations *protocol;
 /* Internal Routines */
 
 static void
-logTextField (const char *name, const char *address, int length) {
-  while (length > 0) {
-    const char byte = address[length - 1];
+logTextField (const char *name, const char *address, int size) {
+  while (size > 0) {
+    const char byte = address[size - 1];
+
     if (byte && (byte != ' ')) break;
-    --length;
+    size -= 1;
   }
-  logMessage(LOG_INFO, "%s: %.*s", name, length, address);
+
+  logMessage(LOG_INFO, "%s: %.*s", name, size, address);
 }
 
 static int
@@ -727,14 +729,88 @@ typedef union {
 } PACKED BaumResponsePacket;
 
 typedef enum {
+  BAUM_DEVICE_Default,
+
   BAUM_DEVICE_Inka,
   BAUM_DEVICE_DM80P,
   BAUM_DEVICE_Vario80,
-  BAUM_DEVICE_Modular,
-  BAUM_DEVICE_Default
+  BAUM_DEVICE_Modular
 } BaumDeviceType;
 
+typedef struct {
+  const char *string;
+  BaumDeviceType type;
+} BaumDeviceIdentityEntry;
+
+static const BaumDeviceIdentityEntry baumDeviceIdentityTable[] = {
+  { .string = "BrailleConnect",
+    .type = BAUM_DEVICE_Default
+  },
+
+  { .string = "Brailliant",
+    .type = BAUM_DEVICE_Default
+  },
+
+  { .string = "Conny",
+    .type = BAUM_DEVICE_Default
+  },
+
+  { .string = "PocketVario",
+    .type = BAUM_DEVICE_Default
+  },
+
+  { .string = "Pronto",
+    .type = BAUM_DEVICE_Default
+  },
+
+  { .string = "Refreshabraille",
+    .type = BAUM_DEVICE_Default
+  },
+
+  { .string = "SuperVario",
+    .type = BAUM_DEVICE_Default
+  },
+
+  { .string = "SVario",
+    .type = BAUM_DEVICE_Default
+  },
+
+  { .string = "VarioConnect",
+    .type = BAUM_DEVICE_Default
+  },
+
+  { .string = "VarioUltra",
+    .type = BAUM_DEVICE_Default
+  },
+};
+
+static const unsigned char baumDeviceIdentityCount = ARRAY_COUNT(baumDeviceIdentityTable);
 static BaumDeviceType baumDeviceType;
+
+static void
+setBaumDeviceType (const char *identity, size_t size) {
+  const BaumDeviceIdentityEntry *bdi = baumDeviceIdentityTable;
+  const BaumDeviceIdentityEntry *end = bdi + baumDeviceIdentityCount;
+
+  while (bdi < end) {
+    size_t length = strlen(bdi->string);
+    const char *from = identity;
+    const char *to = from + size - length;
+
+    while (from <= to) {
+      if (*from == *bdi->string) {
+        if (memcmp(from, bdi->string, length) == 0) {
+          baumDeviceType = bdi->type;
+          return;
+        }
+      }
+
+      from += 1;
+    }
+
+    bdi += 1;
+  }
+}
 
 typedef enum {
   BAUM_MODULE_Display80,
@@ -878,10 +954,12 @@ assumeBaumDeviceIdentity (const char *identity) {
 }
 
 static void
-logBaumDeviceIdentity (const BaumResponsePacket *packet) {
-  logTextField("Baum Device Identity",
-               packet->data.values.deviceIdentity,
-               sizeof(packet->data.values.deviceIdentity));
+handleBaumDeviceIdentity (const BaumResponsePacket *packet, int probing) {
+  const char *identity = packet->data.values.deviceIdentity;
+  size_t size = sizeof(packet->data.values.deviceIdentity);
+
+  logTextField("Baum Device Identity", identity, size);
+  if (probing) setBaumDeviceType(identity, size);
 }
 
 static void
@@ -1210,29 +1288,29 @@ writeBaumCells_modular (BrailleDisplay *brl, unsigned int start, unsigned int co
 }
 
 static const BaumDeviceOperations baumDeviceOperations[] = {
-  [BAUM_DEVICE_Inka] = {
-    .keyTableDefinition = &KEY_TABLE_DEFINITION(inka),
-    .writeAllCells = writeBaumCells_start
-  }
-  ,
-  [BAUM_DEVICE_DM80P] = {
-    .keyTableDefinition = &KEY_TABLE_DEFINITION(dm80p),
-    .writeAllCells = writeBaumCells_start
-  }
-  ,
-  [BAUM_DEVICE_Vario80] = {
-    .keyTableDefinition = &KEY_TABLE_DEFINITION(vario80),
-    .writeAllCells = writeBaumCells_all
-  }
-  ,
-  [BAUM_DEVICE_Modular] = {
-    .keyTableDefinition = &KEY_TABLE_DEFINITION(pro),
-    .writeCellRange = writeBaumCells_modular
-  }
-  ,
   [BAUM_DEVICE_Default] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(default),
     .writeAllCells = writeBaumCells_all
+  },
+
+  [BAUM_DEVICE_Inka] = {
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(inka),
+    .writeAllCells = writeBaumCells_start
+  },
+
+  [BAUM_DEVICE_DM80P] = {
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(dm80p),
+    .writeAllCells = writeBaumCells_start
+  },
+
+  [BAUM_DEVICE_Vario80] = {
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(vario80),
+    .writeAllCells = writeBaumCells_all
+  },
+
+  [BAUM_DEVICE_Modular] = {
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(pro),
+    .writeCellRange = writeBaumCells_modular
   }
 };
 
@@ -1479,7 +1557,7 @@ probeBaumDisplay (BrailleDisplay *brl) {
             return 1;
 
           case BAUM_RSP_DeviceIdentity: /* should contain fallback cell count */
-            logBaumDeviceIdentity(&response);
+            handleBaumDeviceIdentity(&response, 1);
 
             {
               const int length = sizeof(response.data.values.deviceIdentity);
@@ -1549,7 +1627,7 @@ updateBaumKeys (BrailleDisplay *brl) {
         continue;
 
       case BAUM_RSP_DeviceIdentity:
-        logBaumDeviceIdentity(&packet);
+        handleBaumDeviceIdentity(&packet, 0);
         continue;
 
       case BAUM_RSP_SerialNumber:
@@ -1860,10 +1938,12 @@ writeHidPacket (BrailleDisplay *brl, const unsigned char *packet, int length) {
 }
 
 static void
-logHidDeviceIdentity (const HidResponsePacket *packet) {
-  logTextField("Baum Device Identity",
-               packet->fields.data.deviceIdentity,
-               sizeof(packet->fields.data.deviceIdentity));
+handleHidDeviceIdentity (const HidResponsePacket *packet, int probing) {
+  const char *identity = packet->fields.data.deviceIdentity;
+  size_t size = sizeof(packet->fields.data.deviceIdentity);
+
+  logTextField("Baum Device Identity", identity, size);
+  if (probing) setBaumDeviceType(identity, size);
 }
 
 static void
@@ -1878,6 +1958,7 @@ probeHidDisplay (BrailleDisplay *brl) {
   static const unsigned char packet[] = {0X02, 0X00};
 
   if (writeBraillePacket(brl, NULL, packet, sizeof(packet))) {
+    baumDeviceType = BAUM_DEVICE_Default;
     cellCount = 0;
 
     while (awaitBrailleInput(brl, probeTimeout)) {
@@ -1891,7 +1972,6 @@ probeHidDisplay (BrailleDisplay *brl) {
 
           if (isAcceptableCellCount(count)) {
             cellCount = count;
-            baumDeviceType = BAUM_DEVICE_Default;
             return 1;
           }
 
@@ -1900,7 +1980,7 @@ probeHidDisplay (BrailleDisplay *brl) {
         }
 
         case BAUM_RSP_DeviceIdentity:
-          logHidDeviceIdentity(&packet);
+          handleHidDeviceIdentity(&packet, 1);
           continue;
 
         case BAUM_RSP_SerialNumber:
@@ -1947,7 +2027,7 @@ updateHidKeys (BrailleDisplay *brl) {
         continue;
 
       case BAUM_RSP_DeviceIdentity:
-        logHidDeviceIdentity(&packet);
+        handleHidDeviceIdentity(&packet, 0);
         continue;
 
       case BAUM_RSP_SerialNumber:
