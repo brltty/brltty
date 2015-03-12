@@ -2768,7 +2768,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   };
 
   static const UsbChannelDefinition usbChannelDefinitions[] = {
-    { /* Vario40 (40 cells) */
+    { /* Vario 40 (40 cells) */
       .vendor=0X0403, .product=0XFE70,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
