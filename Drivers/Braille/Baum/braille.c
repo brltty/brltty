@@ -315,7 +315,9 @@ typedef struct {
   int (*writeCellRange) (BrailleDisplay *brl, unsigned int start, unsigned int count);
 } ProtocolOperations;
 
-static const ProtocolOperations *protocol;
+struct BrailleDataStruct {
+  const ProtocolOperations *protocol;
+};
 
 /* Internal Routines */
 
@@ -417,7 +419,7 @@ updateRoutingKeys (BrailleDisplay *brl, const unsigned char *new, unsigned char 
 static int
 updateCells (BrailleDisplay *brl) {
   if (cellsUpdated) {
-    if (!protocol->writeCells(brl)) return 0;
+    if (!brl->data->protocol->writeCells(brl)) return 0;
     cellsUpdated = 0;
   }
   return 1;
@@ -428,7 +430,7 @@ updateCellRange (BrailleDisplay *brl, unsigned int start, unsigned int count) {
   if (count) {
     translateOutputCells(&externalCells[start], &internalCells[start], count);
     cellsUpdated = 1;
-    if (!protocol->writeCellRange(brl, start, count)) return 0;
+    if (!brl->data->protocol->writeCellRange(brl, start, count)) return 0;
   }
 
   return 1;
@@ -1126,7 +1128,7 @@ verifyBaumPacket (
 
     default:
       logMessage(LOG_NOTICE, "unexpected %s packet verification state: %u",
-                 protocol->name, pvd->state);
+                 brl->data->protocol->name, pvd->state);
       return BRL_PVR_INVALID;
   }
 
@@ -2038,7 +2040,7 @@ readHid2Packet (BrailleDisplay *brl, unsigned char *packet, int size) {
 
 static int
 getHidPacket (BrailleDisplay *brl, HidResponsePacket *packet) {
-  return protocol->readPacket(brl, packet->bytes, sizeof(*packet));
+  return brl->data->protocol->readPacket(brl, packet->bytes, sizeof(*packet));
 }
 
 static int
@@ -3105,70 +3107,82 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       &handyTechOperations,
       &powerBrailleOperations
     };
+
     static const char *choices[] = {"default", "escape", "hid1", "hid2", "ht","pb", NULL};
     unsigned int index;
 
-    if (!validateChoice(&index, parameters[PARM_PROTOCOL], choices))
+    if (!validateChoice(&index, parameters[PARM_PROTOCOL], choices)) {
       logMessage(LOG_WARNING, "%s: %s", "invalid protocol setting", parameters[PARM_PROTOCOL]);
+    }
+
     requestedProtocol = values[index];
   }
 
   useVarioKeys = 0;
-  if (!validateYesNo(&useVarioKeys, parameters[PARM_VARIOKEYS]))
+  if (!validateYesNo(&useVarioKeys, parameters[PARM_VARIOKEYS])) {
     logMessage(LOG_WARNING, "%s: %s", "invalid vario keys setting", parameters[PARM_VARIOKEYS]);
+  }
 
-  if (connectResource(brl, device)) {
-    int attempts = 0;
+  if ((brl->data = malloc(sizeof(*brl->data)))) {
+    memset(brl->data, 0, sizeof(*brl->data));
 
-    while (1) {
-      protocol = requestedProtocol;
-      if (!protocol) protocol = gioGetApplicationData(brl->gioEndpoint);
-      logMessage(LOG_DEBUG, "probing with %s protocol", protocol->name);
+    if (connectResource(brl, device)) {
+      unsigned int attempts = 0;
 
-      if (protocol->serialBaud) {
-        const SerialParameters parameters = {
-          SERIAL_DEFAULT_PARAMETERS,
-          .baud = protocol->serialBaud,
-          .parity = protocol->serialParity
-        };
+      while (1) {
+        brl->data->protocol = requestedProtocol;
+        if (!brl->data->protocol) brl->data->protocol = gioGetApplicationData(brl->gioEndpoint);
+        logMessage(LOG_DEBUG, "probing with %s protocol", brl->data->protocol->name);
 
-        if (!gioReconfigureResource(brl->gioEndpoint, &parameters)) goto failed;
-      }
+        if (brl->data->protocol->serialBaud) {
+          const SerialParameters parameters = {
+            SERIAL_DEFAULT_PARAMETERS,
+            .baud = brl->data->protocol->serialBaud,
+            .parity = brl->data->protocol->serialParity
+          };
 
-      if (!gioDiscardInput(brl->gioEndpoint)) goto failed;
-
-      memset(&keysState, 0, sizeof(keysState));
-      switchSettings = 0;
-
-      if (protocol->probeDevice(brl)) {
-        logCellCount(brl);
-
-        makeOutputTable(protocol->dotsTable[0]);
-        if (!clearCellRange(brl, 0, cellCount)) goto failed;
-        if (!updateCells(brl)) goto failed;
-
-        {
-          const KeyTableDefinition *ktd;
-
-          if (useVarioKeys) {
-            ktd = &KEY_TABLE_DEFINITION(vario);
-          } else {
-            ktd = baumDeviceOperations[baumDeviceType].keyTableDefinition;
-          }
-
-          brl->keyBindings = ktd->bindings;
-          brl->keyNames = ktd->names;
+          if (!gioReconfigureResource(brl->gioEndpoint, &parameters)) goto failed;
         }
 
-        return 1;
+        if (!gioDiscardInput(brl->gioEndpoint)) goto failed;
+
+        memset(&keysState, 0, sizeof(keysState));
+        switchSettings = 0;
+
+        if (brl->data->protocol->probeDevice(brl)) {
+          logCellCount(brl);
+
+          makeOutputTable(brl->data->protocol->dotsTable[0]);
+          if (!clearCellRange(brl, 0, cellCount)) goto failed;
+          if (!updateCells(brl)) goto failed;
+
+          {
+            const KeyTableDefinition *ktd;
+
+            if (useVarioKeys) {
+              ktd = &KEY_TABLE_DEFINITION(vario);
+            } else {
+              ktd = baumDeviceOperations[baumDeviceType].keyTableDefinition;
+            }
+
+            brl->keyBindings = ktd->bindings;
+            brl->keyNames = ktd->names;
+          }
+
+          return 1;
+        }
+
+        if (++attempts == 2) break;
+        asyncWait(700);
       }
 
-      if (++attempts == 2) break;
-      asyncWait(700);
+    failed:
+      disconnectBrailleResource(brl, NULL);
     }
 
-  failed:
-    disconnectBrailleResource(brl, NULL);
+    free(brl->data);
+  } else {
+    logMallocError();
   }
 
   return 0;
@@ -3177,18 +3191,19 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 static void
 brl_destruct (BrailleDisplay *brl) {
   disconnectBrailleResource(brl, NULL);
+  free(brl->data);
 }
 
 static ssize_t
 brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
-  int count = protocol->readPacket(brl, buffer, size);
+  int count = brl->data->protocol->readPacket(brl, buffer, size);
   if (!count) count = -1;
   return count;
 }
 
 static ssize_t
 brl_writePacket (BrailleDisplay *brl, const void *packet, size_t length) {
-  return protocol->writePacket(brl, packet, length)? length: -1;
+  return brl->data->protocol->writePacket(brl, packet, length)? length: -1;
 }
 
 static int
@@ -3209,6 +3224,6 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  protocol->processPackets(brl);
+  brl->data->protocol->processPackets(brl);
   return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
 }
