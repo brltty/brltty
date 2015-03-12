@@ -1598,15 +1598,15 @@ probeBaumDevice (BrailleDisplay *brl) {
       while (*bmr) clearBaumModuleRegistration(*bmr++);
     }
 
-    /* newer models return an identity string which contains the cell count */
-    {
-      static const unsigned char request[] = {BAUM_REQ_GetDeviceIdentity};
-      if (!writeBaumPacket(brl, request, sizeof(request))) break;
-    }
-
     /* get the serial number for the log */
     {
       static const unsigned char request[] = {BAUM_REQ_GetSerialNumber};
+      if (!writeBaumPacket(brl, request, sizeof(request))) break;
+    }
+
+    /* newer models return an identity string which contains the cell count */
+    {
+      static const unsigned char request[] = {BAUM_REQ_GetDeviceIdentity};
       if (!writeBaumPacket(brl, request, sizeof(request))) break;
     }
 
