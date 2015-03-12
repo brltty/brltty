@@ -39,5 +39,4 @@ bind Display2+Display3+Display4+Display5 CSRTRK
 bind Display1+Display3+Display6 ATTRVIS
 bind Display1+Display2+Display3+Display6 DISPMD
 
-include command.kti
 include routing6.kti

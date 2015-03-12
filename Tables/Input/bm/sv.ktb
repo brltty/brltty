@@ -20,5 +20,3 @@ title Baum SuperVario / HWG Brailliant
 
 include display6.kti
 include routing6.kti
-include keyboard.kti
-include joystick.kti
