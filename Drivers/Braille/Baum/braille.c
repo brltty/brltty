@@ -274,7 +274,6 @@ END_KEY_TABLE_LIST
 
 /* Global Definitions */
 
-static unsigned int useVarioKeys;
 static const int probeLimit = 2;
 static const int probeTimeout = 200;
 
@@ -3096,7 +3095,8 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  const ProtocolOperations *requestedProtocol;
+  const ProtocolOperations *requestedProtocol = NULL;
+  unsigned int useVarioKeys = 0;
 
   {
     static const ProtocolOperations *const values[] = {
@@ -3109,16 +3109,15 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     };
 
     static const char *choices[] = {"default", "escape", "hid1", "hid2", "ht","pb", NULL};
-    unsigned int index;
+    unsigned int index = 0;
 
-    if (!validateChoice(&index, parameters[PARM_PROTOCOL], choices)) {
+    if (validateChoice(&index, parameters[PARM_PROTOCOL], choices)) {
+      requestedProtocol = values[index];
+    } else {
       logMessage(LOG_WARNING, "%s: %s", "invalid protocol setting", parameters[PARM_PROTOCOL]);
     }
-
-    requestedProtocol = values[index];
   }
 
-  useVarioKeys = 0;
   if (!validateYesNo(&useVarioKeys, parameters[PARM_VARIOKEYS])) {
     logMessage(LOG_WARNING, "%s: %s", "invalid vario keys setting", parameters[PARM_VARIOKEYS]);
   }
