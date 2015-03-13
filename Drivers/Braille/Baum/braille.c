@@ -3179,6 +3179,10 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             if ((*size > 2) && (*size < 5)) *size = 5;
           }
 
+          if ((baumDeviceType == BAUM_DEVICE_VarioConnect) && (cellCount == 12)) {
+            baumDeviceType = BAUM_DEVICE_Conny;
+          }
+
           makeOutputTable(brl->data->protocol->dotsTable[0]);
           if (!clearCellRange(brl, 0, cellCount)) goto failed;
           if (!updateCells(brl)) goto failed;
