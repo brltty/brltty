@@ -422,7 +422,8 @@ public class SettingsActivity extends PreferenceActivity {
       private final Collection<BluetoothDevice> devices;
 
       public BluetoothDeviceCollection (Context context) {
-        devices = BluetoothAdapter.getDefaultAdapter().getBondedDevices();
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        devices = (adapter != null)? adapter.getBondedDevices(): Collections.EMPTY_SET;
       }
 
       @Override
