@@ -153,9 +153,12 @@ listKeyTable() {
    local name="${output##*/}"
 
    local command=( "${keyTableLister}" -D"${buildRoot}/lib" -T"${sourceRoot}/${tablesSubdirectory}" )
-   "${command[@]}" -l "${input}" >"${output}.${plainTextExtension}"
-   "${command[@]}" -r "${input}" >"${output}.${reStructuredTextExtension}"
+   "${command[@]}" -l "${input}" >"${output}.${plainTextExtension}" || {
+      rm -f "${output}.${plainTextExtension}"
+      return 1
+   }
 
+   "${command[@]}" -r "${input}" >"${output}.${reStructuredTextExtension}"
    sed -e "2a\\${newLine}* \`Help Screen Version <${name}.${plainTextExtension}>\`_" -i "${output}.${reStructuredTextExtension}"
 
    rst2html --config "${sourceRoot}/docutils.conf" "${output}.${reStructuredTextExtension}" "${output}.${hypertextExtension}"
@@ -192,7 +195,7 @@ set -- "${tablesDirectory}/${keyboardSubdirectory}/"*".${keyTableExtension}"
 for inputFile
 do
    beginLayoutEntry "${keyboardPrefix}" "${hypertextExtension}"
-   listKeyTable "${keyboardPrefix}"
+   listKeyTable "${keyboardPrefix}" || continue
    endLayoutEntry
 done
 endLayoutList
@@ -224,7 +227,7 @@ do
       for inputFile
       do
          beginLayoutEntry "${braillePrefix}-${driverCode}" "${hypertextExtension}"
-         listKeyTable "${braillePrefix}-${driverCode}" "${hypertextExtension}"
+         listKeyTable "${braillePrefix}-${driverCode}" "${hypertextExtension}" || continue
          endLayoutEntry "${driverName}"
       done
    else
