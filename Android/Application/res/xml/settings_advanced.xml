@@ -40,4 +40,16 @@
     android:entryValues="@array/LOG_CATEGORY_VALUES"
     android:defaultValue="@array/EMPTY_STRING_ARRAY"
    />
+
+  <CheckBoxPreference
+    android:key="@string/PREF_KEY_LOG_ACCESSIBILITY_EVENTS"
+    android:persistent="true"
+    android:title="@string/SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS"
+   />
+
+  <CheckBoxPreference
+    android:key="@string/PREF_KEY_LOG_KEYBOARD_EVENTS"
+    android:persistent="true"
+    android:title="@string/SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS"
+   />
 </PreferenceScreen>

@@ -143,6 +143,10 @@ public class SettingsActivity extends PreferenceActivity {
       return (MultiSelectListPreference)getPreference(key);
     }
 
+    protected boolean isChecked (Preference preference) {
+      return ((CheckBoxPreference)preference).isChecked();
+    }
+
     protected void showListSelection (ListPreference list) {
       CharSequence label = list.getEntry();
 
@@ -799,6 +803,16 @@ public class SettingsActivity extends PreferenceActivity {
     protected ListPreference attributesTableList;
     protected ListPreference logLevelList;
     protected MultiSelectListPreference logCategorySet;
+    protected CheckBoxPreference logAccessibilityEventsCheckBox;
+    protected CheckBoxPreference logKeyboardEventsCheckBox;
+
+    private void setLogAccessibilityEvents (Preference preference) {
+      ApplicationParameters.LOG_ACCESSIBILITY_EVENTS = isChecked(preference);
+    }
+
+    private void setLogKeyboardEvents (Preference preference) {
+      ApplicationParameters.LOG_KEYBOARD_EVENTS = isChecked(preference);
+    }
 
     @Override
     public void onCreate (Bundle savedInstanceState) {
@@ -810,6 +824,8 @@ public class SettingsActivity extends PreferenceActivity {
       attributesTableList = getListPreference(R.string.PREF_KEY_ATTRIBUTES_TABLE);
       logLevelList = getListPreference(R.string.PREF_KEY_LOG_LEVEL);
       logCategorySet = getMultiSelectListPreference(R.string.PREF_KEY_LOG_CATEGORIES);
+      logAccessibilityEventsCheckBox = getCheckBoxPreference(R.string.PREF_KEY_LOG_ACCESSIBILITY_EVENTS);
+      logKeyboardEventsCheckBox = getCheckBoxPreference(R.string.PREF_KEY_LOG_KEYBOARD_EVENTS);
 
       sortList(keyboardTableList);
       sortList(attributesTableList);
@@ -818,6 +834,9 @@ public class SettingsActivity extends PreferenceActivity {
       showListSelection(attributesTableList);
       showListSelection(logLevelList);
       showSetSelections(logCategorySet);
+
+      setLogAccessibilityEvents(logAccessibilityEventsCheckBox);
+      setLogKeyboardEvents(logKeyboardEventsCheckBox);
 
       keyboardTableList.setOnPreferenceChangeListener(
         new Preference.OnPreferenceChangeListener() {
@@ -890,6 +909,26 @@ public class SettingsActivity extends PreferenceActivity {
             });
 
             showSetSelections(logCategorySet, newLogCategories);
+            return true;
+          }
+        }
+      );
+
+      logAccessibilityEventsCheckBox.setOnPreferenceClickListener(
+        new Preference.OnPreferenceClickListener() {
+          @Override
+          public boolean onPreferenceClick (Preference preference) {
+            setLogAccessibilityEvents(preference);
+            return true;
+          }
+        }
+      );
+
+      logKeyboardEventsCheckBox.setOnPreferenceClickListener(
+        new Preference.OnPreferenceClickListener() {
+          @Override
+          public boolean onPreferenceClick (Preference preference) {
+            setLogKeyboardEvents(preference);
             return true;
           }
         }

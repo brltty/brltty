@@ -28,6 +28,8 @@
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Log Level</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Log Categories</string>
+  <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Log Accessibility Events</string>
+  <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Log Keyboard Events</string>
 
   <string name="DEVICES_BUTTON_SELECTED">Selected Device</string>
   <string name="DEVICES_BUTTON_ADD">Add Device</string>
