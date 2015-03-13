@@ -18,6 +18,14 @@
 
 title APH Refreshabraille
 
-include display6.kti
+note B9 is the long key in the middle, just in front of the joystick.
+note Dot7 and Dot8 are the keys immediately to the left and right of B9.
+note B10 is the narrow key between and just behind the six-dot keyboard.
+note The six display keys are emulated by the corresponding six dot keys
+note * while the joystick is pressed (the joystick must be pressed first).
+
+include d6.kti
 include routing6.kti
-include b9b10.kti
+
+assign space B9
+include keyboard.kti
