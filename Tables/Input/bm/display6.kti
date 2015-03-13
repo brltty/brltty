@@ -17,9 +17,10 @@
 ###############################################################################
 
 # This key subtable is for Baum displays which have 6 display keys.
-note The display keys are at both ends of the text cell area. From top to bottom:
-note * the three at the left are named Display1 through Display3,
-note * and the three at the right are named Display4 through Display6.
+note There are three display keys at each end of the braille cells.
+note * From top to bottom:
+note + The three at the left are named Display1, Display2, and Display3.
+note + The three at the right are named Display4, Display5, and Display6.
 
 bind Display2 FWINLT
 bind Display5 FWINRT
