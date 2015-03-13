@@ -316,6 +316,10 @@ typedef struct {
 
 struct BrailleDataStruct {
   const ProtocolOperations *protocol;
+
+  struct {
+    unsigned char routingKeys;
+  } packetSize;
 };
 
 /* Internal Routines */
@@ -1194,7 +1198,7 @@ verifyBaumPacket (
           break;
         }
 
-        *length = KEY_GROUP_SIZE(cellCount) + 1;
+        *length = brl->data->packetSize.routingKeys + 1;
         break;
 
       case BAUM_RSP_HorizontalSensors:
@@ -1978,7 +1982,7 @@ verifyHidPacket (
 
     switch (byte) {
       case BAUM_RSP_RoutingKeys:
-        *length = KEY_GROUP_SIZE(cellCount) + 1;
+        *length = brl->data->packetSize.routingKeys + 1;
         break;
 
       default:
@@ -3150,6 +3154,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
         if (brl->data->protocol->probeDevice(brl)) {
           logCellCount(brl);
+
+          {
+            unsigned char *size = &brl->data->packetSize.routingKeys;
+
+            *size = KEY_GROUP_SIZE(cellCount);
+            if ((*size > 2) && (*size < 5)) *size = 5;
+          }
 
           makeOutputTable(brl->data->protocol->dotsTable[0]);
           if (!clearCellRange(brl, 0, cellCount)) goto failed;
