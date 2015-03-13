@@ -222,7 +222,12 @@ BEGIN_KEY_NAME_TABLES(dm80p)
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
-BEGIN_KEY_NAME_TABLES(vario80)
+BEGIN_KEY_NAME_TABLES(v40)
+  KEY_NAME_SUBTABLE(display,6),
+  KEY_NAME_TABLE(routing),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(v80)
   KEY_NAME_SUBTABLE(display,6),
   KEY_NAME_TABLE(command),
   KEY_NAME_TABLE(front),
@@ -237,7 +242,7 @@ BEGIN_KEY_NAME_TABLES(pro)
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
-BEGIN_KEY_NAME_TABLES(vario)
+BEGIN_KEY_NAME_TABLES(vk)
   KEY_NAME_SUBTABLE(display,6),
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
@@ -252,9 +257,10 @@ DEFINE_KEY_TABLE(sv)
 DEFINE_KEY_TABLE(ultra)
 DEFINE_KEY_TABLE(inka)
 DEFINE_KEY_TABLE(dm80p)
-DEFINE_KEY_TABLE(vario80)
+DEFINE_KEY_TABLE(v40)
+DEFINE_KEY_TABLE(v80)
 DEFINE_KEY_TABLE(pro)
-DEFINE_KEY_TABLE(vario)
+DEFINE_KEY_TABLE(vk)
 
 BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(default),
@@ -267,9 +273,10 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(ultra),
   &KEY_TABLE_DEFINITION(inka),
   &KEY_TABLE_DEFINITION(dm80p),
-  &KEY_TABLE_DEFINITION(vario80),
+  &KEY_TABLE_DEFINITION(v40),
+  &KEY_TABLE_DEFINITION(v80),
   &KEY_TABLE_DEFINITION(pro),
-  &KEY_TABLE_DEFINITION(vario),
+  &KEY_TABLE_DEFINITION(vk),
 END_KEY_TABLE_LIST
 
 /* Global Definitions */
@@ -804,6 +811,7 @@ typedef enum {
 
   BAUM_DEVICE_Inka,
   BAUM_DEVICE_DM80P,
+  BAUM_DEVICE_Vario40,
   BAUM_DEVICE_Vario80,
   BAUM_DEVICE_Modular
 } BaumDeviceType;
@@ -844,6 +852,10 @@ static const BaumDeviceIdentityEntry baumDeviceIdentityTable[] = {
 
   { .string = "SVario",
     .type = BAUM_DEVICE_SuperVario
+  },
+
+  { .string = "Vario 40",
+    .type = BAUM_DEVICE_Vario40
   },
 
   { .string = "VarioConnect",
@@ -1409,8 +1421,13 @@ static const BaumDeviceOperations baumDeviceOperations[] = {
     .writeAllCells = writeBaumCells_start
   },
 
+  [BAUM_DEVICE_Vario40] = {
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(v40),
+    .writeAllCells = writeBaumCells_all
+  },
+
   [BAUM_DEVICE_Vario80] = {
-    .keyTableDefinition = &KEY_TABLE_DEFINITION(vario80),
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(v80),
     .writeAllCells = writeBaumCells_all
   },
 
@@ -3170,7 +3187,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             const KeyTableDefinition *ktd;
 
             if (useVarioKeys) {
-              ktd = &KEY_TABLE_DEFINITION(vario);
+              ktd = &KEY_TABLE_DEFINITION(vk);
             } else {
               ktd = baumDeviceOperations[baumDeviceType].keyTableDefinition;
             }
