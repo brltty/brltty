@@ -18,7 +18,8 @@
 
 note B9 and B10 are the keys immediately to the left and right of the joystick.
 note * If either or both are used in a combination that includes at least
-note * one of the Dot1-6 keys then they become the Dot7 and Dot8 keys.
+note * one of the Dot1-6 keys while the device is in 8-dot braille mode
+note * then they become the Dot7 and Dot8 keys.
 note B11 is the key between the Dot1 and Dot4 keys.
 
 bind B9 KEY_BACKSPACE
