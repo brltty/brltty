@@ -16,8 +16,37 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title APH Refreshabraille
+note B9 and B10 are the keys immediately to the left and right of the joystick.
 
-include display6.kti
-include routing6.kti
-include b9b10.kti
+bind B9+Press AUTOSPEAK
+bind B9+Up SAY_LOUDER
+bind B9+Down SAY_SOFTER
+bind B9+Left SAY_SLOWER
+bind B9+Right SAY_FASTER
+
+bind B10+Press SPKHOME
+bind B10+Up SAY_ABOVE
+bind B10+Down SAY_BELOW
+bind B10+Left MUTE
+bind B10+Right SAY_LINE
+
+
+#################
+# Menu Bindings #
+#################
+
+context menu
+
+bind B9 MENU_PREV_LEVEL
+bind B9+Press PREFSAVE
+bind B9+Up MENU_FIRST_ITEM
+bind B9+Down MENU_LAST_ITEM
+bind B9+Left FWINLT
+bind B9+Right FWINRT
+
+context default
+bind B9 KEY_BACKSPACE
+map B10 SPACE
+assign chord B10+
+include keyboard.kti
+include joystick.kti

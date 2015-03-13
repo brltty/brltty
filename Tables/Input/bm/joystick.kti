@@ -16,13 +16,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# This key subtable is for Baum displays which have a five-way joystick.
-note The joystick is in the middle of the front,
-note and its five positions are named Left, Right, Up, Down, and Press.
-note B9 and B11 are the keys immediately to the left and right of the joystick.
-
-map B9 SPACE
-map B11 SPACE
+note The joystick is in the middle, and its five positions are named
+note Left, Right, Up, Down, and Press.
 
 bind Press RETURN
 bind Up LNUP
@@ -86,45 +81,15 @@ bind Dot1+Right KEY_CURSOR_RIGHT
 
 bind Dot2+Press KEY_ENTER
 bind Dot2+Up KEY_INSERT
-bind Dot2+Down KEY_DELETE
+bind Dot2+Down PASTE
 bind Dot2+Left KEY_BACKSPACE
-bind Dot2+Right PASTE
+bind Dot2+Right KEY_DELETE
 
 bind Dot3+Press KEY_ESCAPE
 bind Dot3+Up KEY_PAGE_UP
 bind Dot3+Down KEY_PAGE_DOWN
 bind Dot3+Left KEY_HOME
 bind Dot3+Right KEY_END
-
-bind B9+Press AUTOSPEAK
-bind B9+Up SAY_LOUDER
-bind B9+Down SAY_SOFTER
-bind B9+Left SAY_SLOWER
-bind B9+Right SAY_FASTER
-
-bind B11+Press SPKHOME
-bind B11+Up SAY_ABOVE
-bind B11+Down SAY_BELOW
-bind B11+Left MUTE
-bind B11+Right SAY_LINE
-
-bind B10+Press SPEAK_CURR_WORD
-bind B10+Up SPEAK_PREV_LINE
-bind B10+Down SPEAK_NEXT_LINE
-bind B10+Left SPEAK_PREV_WORD
-bind B10+Right SPEAK_NEXT_WORD
-
-bind B10+B9+Press SPEAK_CURR_CHAR
-bind B10+B9+Up SPELL_CURR_WORD
-bind B10+B9+Down DESC_CURR_CHAR
-bind B10+B9+Left SPEAK_PREV_CHAR
-bind B10+B9+Right SPEAK_NEXT_CHAR
-
-bind B10+B11+Press SPEAK_CURR_LINE
-bind B10+B11+Up SPEAK_FRST_LINE
-bind B10+B11+Down SPEAK_LAST_LINE
-bind B10+B11+Left SPEAK_FRST_CHAR
-bind B10+B11+Right SPEAK_LAST_CHAR
 
 
 #################
@@ -138,12 +103,5 @@ bind Up MENU_PREV_ITEM
 bind Down MENU_NEXT_ITEM
 bind Left MENU_PREV_SETTING
 bind Right MENU_NEXT_SETTING
-
-bind B10 MENU_PREV_LEVEL
-bind B10+Press PREFSAVE
-bind B10+Up MENU_FIRST_ITEM
-bind B10+Down MENU_LAST_ITEM
-bind B10+Left FWINLT
-bind B10+Right FWINRT
 
 context default
