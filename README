@@ -274,13 +274,13 @@ are available in the `Tables' subdirectory.
 Building the Package
 ====================
 
-Building BRLTTY is a four step process. The first is to invoke `./autogen` to
-setup your build enviroment for the first time. You typically only have to do
-this once. After that, you must run `./configure' to prepare the build
-environment for your operating system, and to customize it for your particular
-requirement. The second is to invoke `make' to compile and link BRLTTY and its
-drivers. The third is to invoke `make install' to copy all the needed files into
-their proper locations.
+Building BRLTTY is a four step process. The first is to run `./autogen` to
+setup your build enviroment for the first time. You typically only need to do
+this once. The second is to run `./configure' to prepare the build environment
+for your operating system, and to customize it for your particular requirement.
+The third is to run `make' to compile and link BRLTTY and its drivers. The
+fourth is to run `make install' to copy all the needed files into their proper
+locations.
 
     ./autogen
     ./configure
