@@ -21,11 +21,11 @@ package org.a11y.brltty.android;
 import android.os.Build;
 
 public abstract class ApplicationParameters {
-  public static volatile int BRAILLE_COLUMN_SPACING = 2;
-  public static volatile int BRAILLE_ROW_SPACING = 0;
-
   public static volatile boolean LOG_ACCESSIBILITY_EVENTS = false;
   public static volatile boolean LOG_KEYBOARD_EVENTS = false;
+
+  public static volatile int BRAILLE_COLUMN_SPACING = 2;
+  public static volatile int BRAILLE_ROW_SPACING = 0;
 
   public static volatile int CORE_WAIT_DURATION = Integer.MAX_VALUE;
 
@@ -34,7 +34,6 @@ public abstract class ApplicationParameters {
   public static volatile int LONG_PRESS_DELAY = 100;
 
   public static volatile int SDK_VERSION = Build.VERSION.SDK_INT;
-//public static volatile int SDK_VERSION = Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 
   public static volatile String B2G_DEVICE_PATH = "/dev/braille0";
   public static volatile String B2G_DRIVER_CODE = "bg";
