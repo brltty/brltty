@@ -28,6 +28,7 @@ map Space SPACE
 
 assign chord Space+
 include ../chords.kti
+bind Space+RoutingKey KEY_FUNCTION
 
 # Do not remove these bindings.
 # They are required for Braille Sense models which have a qwerty keyboard
