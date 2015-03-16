@@ -149,6 +149,14 @@ public class CoreThread extends Thread {
     return coreContext.getResources().getString(resource);
   }
 
+  private boolean getBooleanSetting (int key, boolean defaultValue) {
+    return ApplicationUtilities.getSharedPreferences().getBoolean(getStringResource(key), defaultValue);
+  }
+
+  private boolean getBooleanSetting (int key) {
+    return getBooleanSetting(key, false);
+  }
+
   private String getStringSetting (int key, String defaultValue) {
     return ApplicationUtilities.getSharedPreferences().getString(getStringResource(key), defaultValue);
   }
@@ -158,7 +166,7 @@ public class CoreThread extends Thread {
   }
 
   private String getStringSetting (int key) {
-    return ApplicationUtilities.getSharedPreferences().getString(getStringResource(key), "");
+    return getStringSetting(key, "");
   }
 
   private Set<String> getStringSetSetting (int key) {
@@ -265,6 +273,9 @@ public class CoreThread extends Thread {
     }
 
     BrailleRenderer.setBrailleRenderer(getStringSetting(R.string.PREF_KEY_NAVIGATION_MODE, R.string.DEFAULT_NAVIGATION_MODE));
+
+    ApplicationParameters.LOG_ACCESSIBILITY_EVENTS = getBooleanSetting(R.string.PREF_KEY_LOG_ACCESSIBILITY_EVENTS);
+    ApplicationParameters.LOG_KEYBOARD_EVENTS = getBooleanSetting(R.string.PREF_KEY_LOG_KEYBOARD_EVENTS);
 
     UsbHelper.begin();
     CoreWrapper.run(makeArguments(), ApplicationParameters.CORE_WAIT_DURATION);

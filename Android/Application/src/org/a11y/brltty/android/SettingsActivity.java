@@ -806,14 +806,6 @@ public class SettingsActivity extends PreferenceActivity {
     protected CheckBoxPreference logAccessibilityEventsCheckBox;
     protected CheckBoxPreference logKeyboardEventsCheckBox;
 
-    private void setLogAccessibilityEvents (Preference preference) {
-      ApplicationParameters.LOG_ACCESSIBILITY_EVENTS = isChecked(preference);
-    }
-
-    private void setLogKeyboardEvents (Preference preference) {
-      ApplicationParameters.LOG_KEYBOARD_EVENTS = isChecked(preference);
-    }
-
     @Override
     public void onCreate (Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
@@ -834,9 +826,6 @@ public class SettingsActivity extends PreferenceActivity {
       showListSelection(attributesTableList);
       showListSelection(logLevelList);
       showSetSelections(logCategorySet);
-
-      setLogAccessibilityEvents(logAccessibilityEventsCheckBox);
-      setLogKeyboardEvents(logKeyboardEventsCheckBox);
 
       keyboardTableList.setOnPreferenceChangeListener(
         new Preference.OnPreferenceChangeListener() {
@@ -918,7 +907,7 @@ public class SettingsActivity extends PreferenceActivity {
         new Preference.OnPreferenceClickListener() {
           @Override
           public boolean onPreferenceClick (Preference preference) {
-            setLogAccessibilityEvents(preference);
+            ApplicationParameters.LOG_ACCESSIBILITY_EVENTS = isChecked(preference);
             return true;
           }
         }
@@ -928,7 +917,7 @@ public class SettingsActivity extends PreferenceActivity {
         new Preference.OnPreferenceClickListener() {
           @Override
           public boolean onPreferenceClick (Preference preference) {
-            setLogKeyboardEvents(preference);
+            ApplicationParameters.LOG_KEYBOARD_EVENTS = isChecked(preference);
             return true;
           }
         }
