@@ -126,17 +126,17 @@ public class ScreenLogger {
       }
 
       addValue(values, node.isEnabled(), "enb", "dsb");
-      addValue(values, node.isSelected(), "sel");
-      addValue(values, node.isScrollable(), "scl");
-      addValue(values, node.isFocusable(), "fcb");
-      addValue(values, node.isFocused(), "fcd");
+      addValue(values, node.isSelected(), "sld");
+      addValue(values, node.isScrollable(), "scb");
+      addValue(values, node.isFocusable(), "ifb");
+      addValue(values, node.isFocused(), "ifd");
 
       if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-        addValue(values, node.isAccessibilityFocused(), "fca");
+        addValue(values, node.isAccessibilityFocused(), "afd");
       }
 
-      addValue(values, node.isClickable(), "clk");
-      addValue(values, node.isLongClickable(), "lng");
+      addValue(values, node.isClickable(), "clb");
+      addValue(values, node.isLongClickable(), "lcb");
       addValue(values, node.isCheckable(), "ckb");
       addValue(values, node.isChecked(), "ckd");
       addValue(values, node.isPassword(), "pwd");
@@ -163,13 +163,13 @@ public class ScreenLogger {
       }
 
       if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY) != 0), "mgn");
-        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY) != 0), "mgp");
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY) != 0), "mvn");
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY) != 0), "mvp");
       }
 
       if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT) != 0), "hen");
-        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT) != 0), "hep");
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT) != 0), "mhn");
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT) != 0), "mhp");
       }
 
       if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
@@ -188,10 +188,10 @@ public class ScreenLogger {
       }
 
       if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
-        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_SET_SELECTION) != 0), "tss");
-        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_COPY) != 0), "tsc");
-        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CUT) != 0), "tsd");
-        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_PASTE) != 0), "cbp");
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_SET_SELECTION) != 0), "sel");
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_COPY) != 0), "cpy");
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CUT) != 0), "cut");
+        addValue(values, ((actions & AccessibilityNodeInfo.ACTION_PASTE) != 0), "pst");
       }
 
       logProperty("actn", values);
