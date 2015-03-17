@@ -33,7 +33,7 @@ extern "C" {
 
 #define JAVA_METHOD(object, name, type, ...) \
   JNIEXPORT type JNICALL Java_ ## object ## _ ## name \
-  (JNIEnv *env, jobject this, ## __VA_ARGS__)
+  (JNIEnv *env, jclass class, ## __VA_ARGS__)
 
 extern JavaVM *getJavaInvocationInterface (void);
 extern JNIEnv *getJavaNativeInterface (void);
