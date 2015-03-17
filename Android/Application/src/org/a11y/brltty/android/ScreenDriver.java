@@ -314,9 +314,9 @@ public final class ScreenDriver {
     }
 
     if (node != null) {
-      long start = System.currentTimeMillis();
+      long start = SystemClock.uptimeMillis();
       refreshScreen(node);
-      long duration = System.currentTimeMillis() - start;
+      long duration = SystemClock.uptimeMillis() - start;
       currentLogger.log("screen refresh time: " + duration + "ms");
     } else if (currentScreen == null) {
       currentScreen = new RenderedScreen(null);

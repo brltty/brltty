@@ -22,6 +22,7 @@ import android.util.Log;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.graphics.Rect;
@@ -163,7 +164,7 @@ public class RealScreenElement extends ScreenElement {
       if (node.isFocused()) {
         if (InputService.inputKey(keyCode, longPress)) done = true;
       } else if (node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)) {
-        final long start = System.currentTimeMillis();
+        final long start = SystemClock.uptimeMillis();
 
         while (true) {
           {
@@ -184,7 +185,7 @@ public class RealScreenElement extends ScreenElement {
             }
           }
 
-          if ((System.currentTimeMillis() - start) >= ApplicationParameters.KEY_RETRY_TIMEOUT) {
+          if ((SystemClock.uptimeMillis() - start) >= ApplicationParameters.KEY_RETRY_TIMEOUT) {
             break;
           }
 
