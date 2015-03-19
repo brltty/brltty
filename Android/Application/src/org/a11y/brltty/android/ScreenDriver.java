@@ -26,6 +26,7 @@ import android.os.SystemClock;
 import android.accessibilityservice.AccessibilityService;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowInfo;
 
 import android.graphics.Rect;
 import android.graphics.Point;
@@ -120,8 +121,26 @@ public final class ScreenDriver {
   public static native void screenUpdated ();
 
   public static void onAccessibilityEvent (AccessibilityEvent event) {
+    AccessibilityNodeInfo sourceNode = event.getSource();
+
     if (ApplicationParameters.LOG_ACCESSIBILITY_EVENTS) {
       currentLogger.logEvent(event);
+    }
+
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+      if (sourceNode != null) {
+        AccessibilityWindowInfo window = sourceNode.getWindow();
+
+        if (window != null) {
+          boolean ignore = !window.isActive();
+          window.recycle();
+
+          if (ignore) {
+            sourceNode.recycle();
+            return;
+          }
+        }
+      }
     }
 
     switch (event.getEventType()) {
@@ -129,15 +148,11 @@ public final class ScreenDriver {
         break;
 
       case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED: {
-        AccessibilityNodeInfo node = event.getSource();
-
-        if (node != null) {
-          goToFirstClickableSubnode(node);
-          node.recycle();
-          node = null;
+        if (sourceNode != null) {
+          goToFirstClickableSubnode(sourceNode);
         }
 
-        return;
+        break;
       }
 
       case AccessibilityEvent.TYPE_VIEW_SCROLLED:
@@ -153,34 +168,26 @@ public final class ScreenDriver {
         break;
 
       case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED: {
-        AccessibilityNodeInfo node = event.getSource();
-
-        if (node != null) {
-          ScreenTextEditor.get(node, true).setCursorLocation(event.getFromIndex() + event.getAddedCount());
-          node.recycle();
-          node = null;
+        if (sourceNode != null) {
+          ScreenTextEditor.get(sourceNode, true).setCursorLocation(event.getFromIndex() + event.getAddedCount());
         }
 
         break;
       }
 
       case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED: {
-        AccessibilityNodeInfo node = event.getSource();
-
-        if (node != null) {
-          ScreenTextEditor editor = ScreenTextEditor.get(node, true);
+        if (sourceNode != null) {
+          ScreenTextEditor editor = ScreenTextEditor.get(sourceNode, true);
 
           editor.setSelectedRegion(event.getFromIndex(), event.getToIndex());
           editor.setCursorLocation(event.getToIndex());
-
-          node.recycle();
-          node = null;
         }
 
         break;
       }
 
       default:
+        if (sourceNode != null) sourceNode.recycle();
         return;
     }
 
@@ -189,7 +196,7 @@ public final class ScreenDriver {
 
       synchronized (eventLock) {
         oldNode = eventNode;
-        eventNode = event.getSource();
+        eventNode = sourceNode;
       }
 
       if (oldNode != null) {
@@ -339,6 +346,7 @@ public final class ScreenDriver {
   }
 
   public static boolean routeCursor (int column, int row) {
+currentLogger.log("routing cursor: [" + column +  "," + row + "]");
     if (row == -1) return false;
     return currentScreen.performAction(column, row);
   }
