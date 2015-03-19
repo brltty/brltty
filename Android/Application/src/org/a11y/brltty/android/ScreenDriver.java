@@ -346,7 +346,6 @@ public final class ScreenDriver {
   }
 
   public static boolean routeCursor (int column, int row) {
-currentLogger.log("routing cursor: [" + column +  "," + row + "]");
     if (row == -1) return false;
     return currentScreen.performAction(column, row);
   }
