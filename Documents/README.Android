@@ -281,18 +281,19 @@ Since Android doesn't use the keyboard function keys (commonly named ``F1``
 through ``F12``), BRLTTY uses them to perform global Android actions according
 to the following table:
 
-  =======  =====================
-  Key      Actgion
-  -------  ---------------------
-  ``F1``   Home
-  ``F2``   Back
-  ``F3``   Notifications
-  ``F4``   Recent Apps
-  ``F5``   BRLTTY Settings
-  ``F6``   Quick Settings
-  ``F7``   Move to Previous Item
-  ``F8``   Move to Next Item
-  =======  =====================
+  =======  =====================  ===================
+  Key      Actgion                Android Release
+  -------  ---------------------  -------------------
+  ``F1``   Home                   4.1 (Jellybean)
+  ``F2``   Back                   4.1 (Jellybean)
+  ``F3``   Notifications          4.1 (Jellybean)
+  ``F4``   Recent Apps            4.1 (Jellybean)
+  ``F5``   BRLTTY Settings        *
+  ``F6``   Quick Settings         4.2 (Jellybean MR1)
+  ``F7``   Move to Previous Item  *
+  ``F8``   Move to Next Item      *
+  ``F9``   Power Dialog           5.0 (Lollipop)
+  =======  =====================  ===================
 
 The way a braille device emulates keyboard function keys differs from model to
 model, so you should check the BRLTTY documentation for your braille device.

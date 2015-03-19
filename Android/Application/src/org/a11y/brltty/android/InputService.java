@@ -251,14 +251,12 @@ public class InputService extends InputMethodService {
     }
   };
 
-  private final static Action powerAction = new Action() {
+  private final static Action powerDialogAction = new Action() {
     @Override
     public boolean performAction () {
-    /*
       if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
         return performGlobalAction(AccessibilityService.GLOBAL_ACTION_POWER_DIALOG);
       }
-    */
 
       return false;
     }
@@ -502,7 +500,8 @@ public class InputService extends InputMethodService {
     brlttySettingsAction,
     quickSettingsAction,
     backwardAction,
-    forwardAction
+    forwardAction,
+    powerDialogAction
   };
 
   public static boolean inputKeyFunction (int key) {
