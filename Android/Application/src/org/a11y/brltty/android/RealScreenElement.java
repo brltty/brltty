@@ -217,7 +217,7 @@ public class RealScreenElement extends ScreenElement {
         }
       }
 
-      return doAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
+      if (doAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS)) return true;
     }
 
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
