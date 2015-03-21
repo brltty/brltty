@@ -22,6 +22,7 @@ import android.os.Build;
 
 public abstract class ApplicationParameters {
   public static volatile boolean LOG_ACCESSIBILITY_EVENTS = false;
+  public static volatile boolean LOG_RENDERED_SCREEN = false;
   public static volatile boolean LOG_KEYBOARD_EVENTS = false;
 
   public static volatile int BRAILLE_COLUMN_SPACING = 2;

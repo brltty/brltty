@@ -219,11 +219,11 @@ public final class ScreenUtilities {
   public static String getNodeText (AccessibilityNodeInfo node) {
     String text;
 
-    if ((text = normalizeText(node.getContentDescription())) != null) {
+    if ((text = normalizeText(node.getText())) != null) {
       return text;
     }
 
-    if ((text = normalizeText(node.getText())) != null) {
+    if ((text = normalizeText(node.getContentDescription())) != null) {
       return text;
     }
 

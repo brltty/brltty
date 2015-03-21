@@ -804,6 +804,7 @@ public class SettingsActivity extends PreferenceActivity {
     protected ListPreference logLevelList;
     protected MultiSelectListPreference logCategorySet;
     protected CheckBoxPreference logAccessibilityEventsCheckBox;
+    protected CheckBoxPreference logRenderedScreenCheckBox;
     protected CheckBoxPreference logKeyboardEventsCheckBox;
 
     @Override
@@ -817,6 +818,7 @@ public class SettingsActivity extends PreferenceActivity {
       logLevelList = getListPreference(R.string.PREF_KEY_LOG_LEVEL);
       logCategorySet = getMultiSelectListPreference(R.string.PREF_KEY_LOG_CATEGORIES);
       logAccessibilityEventsCheckBox = getCheckBoxPreference(R.string.PREF_KEY_LOG_ACCESSIBILITY_EVENTS);
+      logRenderedScreenCheckBox = getCheckBoxPreference(R.string.PREF_KEY_LOG_RENDERED_SCREEN);
       logKeyboardEventsCheckBox = getCheckBoxPreference(R.string.PREF_KEY_LOG_KEYBOARD_EVENTS);
 
       sortList(keyboardTableList);
@@ -908,6 +910,16 @@ public class SettingsActivity extends PreferenceActivity {
           @Override
           public boolean onPreferenceClick (Preference preference) {
             ApplicationParameters.LOG_ACCESSIBILITY_EVENTS = isChecked(preference);
+            return true;
+          }
+        }
+      );
+
+      logRenderedScreenCheckBox.setOnPreferenceClickListener(
+        new Preference.OnPreferenceClickListener() {
+          @Override
+          public boolean onPreferenceClick (Preference preference) {
+            ApplicationParameters.LOG_RENDERED_SCREEN = isChecked(preference);
             return true;
           }
         }

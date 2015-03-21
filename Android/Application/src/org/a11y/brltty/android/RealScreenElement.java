@@ -234,7 +234,8 @@ public class RealScreenElement extends ScreenElement {
 
         node.recycle();
         node = null;
-        return isFocused;
+
+        if (isFocused) return true;
       }
     }
 

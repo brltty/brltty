@@ -275,6 +275,7 @@ public class CoreThread extends Thread {
     BrailleRenderer.setBrailleRenderer(getStringSetting(R.string.PREF_KEY_NAVIGATION_MODE, R.string.DEFAULT_NAVIGATION_MODE));
 
     ApplicationParameters.LOG_ACCESSIBILITY_EVENTS = getBooleanSetting(R.string.PREF_KEY_LOG_ACCESSIBILITY_EVENTS);
+    ApplicationParameters.LOG_RENDERED_SCREEN = getBooleanSetting(R.string.PREF_KEY_LOG_RENDERED_SCREEN);
     ApplicationParameters.LOG_KEYBOARD_EVENTS = getBooleanSetting(R.string.PREF_KEY_LOG_KEYBOARD_EVENTS);
 
     UsbHelper.begin();

@@ -158,16 +158,46 @@ public class RenderedScreen {
     return false;
   }
 
+  static final int SIGNIFICANT_NODE_ACTIONS = AccessibilityNodeInfo.ACTION_CLICK
+                                            | AccessibilityNodeInfo.ACTION_LONG_CLICK
+                                            | AccessibilityNodeInfo.ACTION_SCROLL_FORWARD
+                                            | AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD
+                                            ;
+
+  private static int getSignificantActions (AccessibilityNodeInfo node) {
+    return node.getActions() & SIGNIFICANT_NODE_ACTIONS;
+  }
+
+  private boolean hasInnerText (AccessibilityNodeInfo root) {
+    int childCount = root.getChildCount();
+
+    for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+      AccessibilityNodeInfo child = root.getChild(childIndex);
+
+      if (child != null) {
+        boolean found;
+
+        if (getSignificantActions(child) != 0) {
+          found = false;
+        } else if (child.getText() != null) {
+          found = true;
+        } else {
+          found = hasInnerText(child);
+        }
+
+        child.recycle();
+        if (found) return true;
+      }
+    }
+
+    return false;
+  }
+
   private final int addScreenElements (AccessibilityNodeInfo root) {
-    final int significantActions = AccessibilityNodeInfo.ACTION_CLICK
-                                 | AccessibilityNodeInfo.ACTION_LONG_CLICK
-                                 | AccessibilityNodeInfo.ACTION_SCROLL_FORWARD
-                                 | AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD
-                                 ;
-    int propagatedActions = significantActions;
+    int propagatedActions = SIGNIFICANT_NODE_ACTIONS;
 
     if (root != null) {
-      int actions = root.getActions() & significantActions;
+      int actions = getSignificantActions(root);
       int childCount = root.getChildCount();
 
       if (childCount > 0) {
@@ -186,21 +216,25 @@ public class RenderedScreen {
       }
 
       if (ScreenUtilities.isVisible(root)) {
-        String text = ScreenUtilities.normalizeText(root.getText());
-        String description = ScreenUtilities.normalizeText(root.getContentDescription());
+        String text = null;
 
-        if (text != null) {
-          if (description != null) text = description;
-        } else if ((childCount == 0) || ((actions & propagatedActions) != actions)) {
-          if ((text = description) == null) {
-            text = root.getClassName().toString();
-            int index = text.lastIndexOf('.');
-            if (index >= 0) text = text.substring(index+1);
-            text = "(" + text + ")";
+        {
+          CharSequence actualText = root.getText();
+          if (actualText != null) text = actualText.toString().trim();
+        }
+
+        if (text == null) {
+          if ((actions != 0) && !hasInnerText(root)) {
+            if ((text = ScreenUtilities.normalizeText(root.getContentDescription())) == null) {
+              text = root.getClassName().toString();
+              int index = text.lastIndexOf('.');
+              if (index >= 0) text = text.substring(index+1);
+              text = "(" + text + ")";
+            }
           }
         }
 
-        screenElements.add(text, root);
+        if (text != null) screenElements.add(text, root);
       }
 
       propagatedActions &= ~actions;
@@ -294,6 +328,26 @@ public class RenderedScreen {
     return root;
   }
 
+  public void logRenderedScreen () {
+    ScreenLogger logger = ScreenDriver.getLogger();
+    logger.log("begin rendered screen");
+
+    logger.log("screen element count: " + screenElements.size());
+
+    for (ScreenElement element : screenElements) {
+      logger.log("screen element: " + element.getElementText());
+    }
+
+    logger.log("screen row count: " + screenRows.size());
+    logger.log("screen width: " + screenWidth);
+
+    for (CharSequence row : screenRows) {
+      logger.log("screen row: " + row.toString());
+    }
+
+    logger.log("end rendered screen");
+  }
+
   public RenderedScreen (AccessibilityNodeInfo node) {
     if (node != null) node = AccessibilityNodeInfo.obtain(node);
 
@@ -304,5 +358,9 @@ public class RenderedScreen {
     BrailleRenderer.getBrailleRenderer().renderScreenElements(screenRows, screenElements);
     screenWidth = findScreenWidth();
     cursorNode = findCursorNode();
+
+    if (ApplicationParameters.LOG_RENDERED_SCREEN) {
+      logRenderedScreen();
+    }
   }
 }

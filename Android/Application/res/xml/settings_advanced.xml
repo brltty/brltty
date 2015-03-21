@@ -48,6 +48,12 @@
    />
 
   <CheckBoxPreference
+    android:key="@string/PREF_KEY_LOG_RENDERED_SCREEN"
+    android:persistent="true"
+    android:title="@string/SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN"
+   />
+
+  <CheckBoxPreference
     android:key="@string/PREF_KEY_LOG_KEYBOARD_EVENTS"
     android:persistent="true"
     android:title="@string/SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS"

@@ -24,7 +24,7 @@ public class ListBrailleRenderer extends BrailleRenderer {
   @Override
   protected final void setBrailleLocations (ScreenElementList elements) {
     elements.sortByVisualLocation();
-    elements.groupByContainer();
+  //elements.groupByContainer();
 
     int left = 0;
     int top = 0;
