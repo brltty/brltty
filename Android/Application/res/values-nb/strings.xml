@@ -29,6 +29,7 @@
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Loggenivå</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Loggekategorier</string>
   <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Logge tilgjengelighetshendelser</string>
+  <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">Logge gjengitt skjermbilde</string>
   <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Logge tastaturhendelser</string>
 
   <string name="DEVICES_BUTTON_SELECTED">Valgt enhet</string>
