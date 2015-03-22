@@ -56,18 +56,24 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
   }
 
   public static boolean isContainer (AccessibilityNodeInfo outer, AccessibilityNodeInfo inner) {
-    boolean found = false;
+    if ((outer == null) || (inner == null)) return false;
 
-    if ((outer != null) && (inner != null)) {
+    boolean found = true;
+    inner = AccessibilityNodeInfo.obtain(inner);
+
+    while (inner != outer) {
       AccessibilityNodeInfo parent = inner.getParent();
 
-      if (parent != null) {
-        if (parent.equals(outer)) found = true;
-        parent.recycle();
-        parent = null;
+      if (parent == null) {
+        found = false;
+        break;
       }
+
+      inner.recycle();
+      inner = parent;
     }
 
+    inner.recycle();
     return found;
   }
 
