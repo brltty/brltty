@@ -234,5 +234,7 @@ char \u0153	( 2 4 6 8)  # ⢪ œ [LATIN SMALL LIGATURE OE]
 
 glyph \u2019	(  3     )  # ⠄ ’ [RIGHT SINGLE QUOTATION MARK]
 char \u20AC	(1   5  8)  # ⢑ € [EURO SIGN]
+char \xA7	(1234 6 8)  # ⢯ § [SECTION SIGN]
+char \xBD	(1 34567 )  # ⡽ ½ [VULGAR FRACTION ONE HALF]
 
 include common.tti
