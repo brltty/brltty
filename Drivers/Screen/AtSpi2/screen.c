@@ -43,6 +43,7 @@
 #define SPI2_DBUS_INTERFACE		"org.a11y.atspi"
 #define SPI2_DBUS_INTERFACE_REG		SPI2_DBUS_INTERFACE".Registry"
 #define SPI2_DBUS_PATH_REG		"/org/a11y/atspi/registry"
+#define SPI2_DBUS_PATH_ROOT		"/org/a11y/atspi/accessible/root"
 #define SPI2_DBUS_PATH_DEC		SPI2_DBUS_PATH_REG "/deviceeventcontroller"
 #define SPI2_DBUS_INTERFACE_DEC		SPI2_DBUS_INTERFACE".DeviceEventController"
 #define SPI2_DBUS_INTERFACE_DEL		SPI2_DBUS_INTERFACE".DeviceEventListener"
@@ -51,6 +52,9 @@
 #define SPI2_DBUS_INTERFACE_TEXT	SPI2_DBUS_INTERFACE".Text"
 #define SPI2_DBUS_INTERFACE_ACCESSIBLE	SPI2_DBUS_INTERFACE".Accessible"
 #define SPI2_DBUS_INTERFACE_PROP	"org.freedesktop.DBus.Properties"
+
+#define ATSPI_STATE_ACTIVE 1
+#define ATSPI_STATE_FOCUSED 12
 
 #ifdef HAVE_X11_KEYSYM_H
 #include <X11/keysym.h>
@@ -267,6 +271,54 @@ processParameters_AtSpi2Screen (char **parameters) {
   return 1;
 }
 
+/* Creates a method call message */
+static DBusMessage *
+new_method_call(const char *sender, const char *path, const char *interface, const char *method)
+{
+  DBusError error;
+  DBusMessage *msg;
+
+  dbus_error_init(&error);
+  msg = dbus_message_new_method_call(sender, path, interface, method);
+  if (dbus_error_is_set(&error)) {
+    logMessage(LOG_DEBUG, "error while making %s message: %s %s", method, error.name, error.message);
+    dbus_error_free(&error);
+    return NULL;
+  }
+  if (!msg) {
+    logMessage(LOG_DEBUG, "no memory while making %s message", method);
+    return NULL;
+  }
+  return msg;
+}
+
+/* Sends a method call message, and returns the reply, if any. This unrefs the message.  */
+static DBusMessage *
+send_with_reply_and_block(DBusConnection *bus, DBusMessage *msg, int timeout_ms, const char *doing)
+{
+  DBusError error;
+  DBusMessage *reply;
+
+  dbus_error_init(&error);
+  reply = dbus_connection_send_with_reply_and_block(bus, msg, timeout_ms, &error);
+  dbus_message_unref(msg);
+  if (dbus_error_is_set(&error)) {
+    logMessage(LOG_DEBUG, "error while %s: %s %s", doing, error.name, error.message);
+    dbus_error_free(&error);
+    return NULL;
+  }
+  if (!reply) {
+    logMessage(LOG_DEBUG, "timeout while %s", doing);
+    return NULL;
+  }
+  if (dbus_message_get_type (reply) == DBUS_MESSAGE_TYPE_ERROR) {
+    logMessage(LOG_DEBUG, "error while %s", doing);
+    dbus_message_unref(reply);
+    return NULL;
+  }
+  return reply;
+}
+
 static void findPosition(long position, long *px, long *py) {
   long offset=0, newoffset, x, y;
   /* XXX: I don't know what they do with necessary combining accents */
@@ -313,38 +365,16 @@ static void finiTerm(void) {
 static char *getRole(const char *sender, const char *path) {
   const char *text;
   char *res = NULL;
-  DBusError error;
   DBusMessage *msg, *reply;
   DBusMessageIter iter;
 
-  dbus_error_init(&error);
-  msg = dbus_message_new_method_call(sender, path, SPI2_DBUS_INTERFACE_ACCESSIBLE, "GetRoleName");
-  if (dbus_error_is_set(&error)) {
-    logMessage(LOG_DEBUG, "error while making getrole message: %s %s", error.name, error.message);
-    dbus_error_free(&error);
+  msg = new_method_call(sender, path, SPI2_DBUS_INTERFACE_ACCESSIBLE, "GetRoleName");
+  if (!msg)
     return NULL;
-  }
-  if (!msg) {
-    logMessage(LOG_DEBUG, "no memory while getting role");
+  reply = send_with_reply_and_block(bus, msg, 1000, "getting role");
+  if (!reply)
     return NULL;
-  }
 
-  dbus_error_init(&error);
-  /* 1s max delay */
-  reply = dbus_connection_send_with_reply_and_block(bus, msg, 1000, &error);
-  if (dbus_error_is_set(&error)) {
-    logMessage(LOG_DEBUG, "error while getting role for %s:%s: %s %s", sender, path, error.name, error.message);
-    dbus_error_free(&error);
-    goto outMsg;
-  }
-  if (!reply) {
-    logMessage(LOG_DEBUG, "timeout while getting role");
-    goto outMsg;
-  }
-  if (dbus_message_get_type (reply) == DBUS_MESSAGE_TYPE_ERROR) {
-    logMessage(LOG_DEBUG, "error while getting role");
-    goto out;
-  }
   dbus_message_iter_init(reply, &iter);
   if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_STRING) {
     logMessage(LOG_DEBUG, "GetRoleName didn't return a string but '%c'", dbus_message_iter_get_arg_type(&iter));
@@ -355,8 +385,6 @@ static char *getRole(const char *sender, const char *path) {
 
 out:
   dbus_message_unref(reply);
-outMsg:
-  dbus_message_unref(msg);
   return res;
 }
 
@@ -364,41 +392,19 @@ outMsg:
 static char *getText(const char *sender, const char *path) {
   const char *text;
   char *res = NULL;
-  DBusError error;
   DBusMessage *msg, *reply;
   dbus_int32_t begin = 0;
   dbus_int32_t end = -1;
   DBusMessageIter iter;
 
-  dbus_error_init(&error);
-  msg = dbus_message_new_method_call(sender, path, SPI2_DBUS_INTERFACE_TEXT, "GetText");
-  if (dbus_error_is_set(&error)) {
-    logMessage(LOG_DEBUG, "error while making gettext message: %s %s", error.name, error.message);
-    dbus_error_free(&error);
+  msg = new_method_call(sender, path, SPI2_DBUS_INTERFACE_TEXT, "GetText");
+  if (!msg)
     return NULL;
-  }
-  if (!msg) {
-    logMessage(LOG_DEBUG, "no memory while getting text");
-    return NULL;
-  }
   dbus_message_append_args(msg, DBUS_TYPE_INT32, &begin, DBUS_TYPE_INT32, &end, DBUS_TYPE_INVALID);
+  reply = send_with_reply_and_block(bus, msg, 1000, "getting text");
+  if (!reply)
+    return NULL;
 
-  dbus_error_init(&error);
-  /* 1s max delay */
-  reply = dbus_connection_send_with_reply_and_block(bus, msg, 1000, &error);
-  if (dbus_error_is_set(&error)) {
-    logMessage(LOG_DEBUG, "error while getting text for %s:%s: %s %s", sender, path, error.name, error.message);
-    dbus_error_free(&error);
-    goto outMsg;
-  }
-  if (!reply) {
-    logMessage(LOG_DEBUG, "timeout while getting text");
-    goto outMsg;
-  }
-  if (dbus_message_get_type (reply) == DBUS_MESSAGE_TYPE_ERROR) {
-    logMessage(LOG_DEBUG, "error while getting text");
-    goto out;
-  }
   dbus_message_iter_init(reply, &iter);
   if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_STRING) {
     logMessage(LOG_DEBUG, "GetText didn't return a string but '%c'", dbus_message_iter_get_arg_type(&iter));
@@ -409,49 +415,25 @@ static char *getText(const char *sender, const char *path) {
 
 out:
   dbus_message_unref(reply);
-outMsg:
-  dbus_message_unref(msg);
   return res;
 }
 
 /* Get the caret of an AT-SPI2 object */
 static dbus_int32_t getCaret(const char *sender, const char *path) {
   dbus_int32_t res = -1;
-  DBusError error;
   DBusMessage *msg, *reply = NULL;
   const char *interface = SPI2_DBUS_INTERFACE_TEXT;
   const char *property = "CaretOffset";
   DBusMessageIter iter, iter_variant;
 
-  dbus_error_init(&error);
-  msg = dbus_message_new_method_call(sender, path, SPI2_DBUS_INTERFACE_PROP, "Get");
-  if (dbus_error_is_set(&error)) {
-    logMessage(LOG_DEBUG, "error while making caret message: %s %s", error.name, error.message);
-    dbus_error_free(&error);
+  msg = new_method_call(sender, path, SPI2_DBUS_INTERFACE_PROP, "Get");
+  if (!msg)
     return -1;
-  }
-  if (!msg) {
-    logMessage(LOG_DEBUG, "no memory while making caret message");
-    return -1;
-  }
   dbus_message_append_args(msg, DBUS_TYPE_STRING, &interface, DBUS_TYPE_STRING, &property, DBUS_TYPE_INVALID);
+  reply = send_with_reply_and_block(bus, msg, 1000, "getting caret");
+  if (!reply)
+    return -1;
 
-  dbus_error_init(&error);
-  /* 1s max delay */
-  reply = dbus_connection_send_with_reply_and_block(bus, msg, 1000, &error);
-  if (dbus_error_is_set(&error)) {
-    logMessage(LOG_DEBUG, "error while getting caret: %s %s", error.name, error.message);
-    dbus_error_free(&error);
-    goto outMsg;
-  }
-  if (!reply) {
-    logMessage(LOG_DEBUG, "timeout while getting caret");
-    goto outMsg;
-  }
-  if (dbus_message_get_type (reply) == DBUS_MESSAGE_TYPE_ERROR) {
-    logMessage(LOG_DEBUG, "error while getting caret");
-    goto out;
-  }
   dbus_message_iter_init(reply, &iter);
   if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_VARIANT) {
     logMessage(LOG_DEBUG, "getText didn't return a variant but '%c'", dbus_message_iter_get_arg_type(&iter));
@@ -467,8 +449,6 @@ static dbus_int32_t getCaret(const char *sender, const char *path) {
 
 out:
   dbus_message_unref(reply);
-outMsg:
-  dbus_message_unref(msg);
   return res;
 }
 
@@ -538,6 +518,112 @@ static void restartTerm(const char *sender, const char *path) {
   free(text);
 }
 
+/* Switched to a new object, check whether we want to read it, and if so, restart with it */
+static void tryRestartTerm(const char *sender, const char *path) {
+  char *role = getRole(sender, path);
+  logMessage(LOG_DEBUG, "state changed focused to role %s", role);
+  if (typeAll || (typeText && !strcmp(role, "text")) || (typeTerminal && !strcmp(role, "terminal"))) {
+    restartTerm(sender, path);
+  } else {
+    if (curPath)
+      finiTerm();
+  }
+  free(role);
+}
+
+/* Try to find an active object among children of the given object */
+static int findTerm(const char *sender, const char *path, int active, int depth);
+static int recurseFindTerm(const char *sender, const char *path, int active, int depth) {
+  DBusMessage *msg, *reply;
+  DBusMessageIter iter, iter_array, iter_struct;
+  int res = 0;
+
+  msg = new_method_call(sender, path, SPI2_DBUS_INTERFACE_ACCESSIBLE, "GetChildren");
+  if (!msg)
+    return 0;
+  reply = send_with_reply_and_block(bus, msg, 1000, "getting active object");
+  if (!reply)
+    return 0;
+
+  if (strcmp (dbus_message_get_signature (reply), "a(so)") != 0)
+  {
+    logMessage(LOG_DEBUG, "unexpected signature %s while getting active object", dbus_message_get_signature(reply));
+    goto out;
+  }
+  dbus_message_iter_init(reply, &iter);
+  dbus_message_iter_recurse (&iter, &iter_array);
+  while (dbus_message_iter_get_arg_type (&iter_array) != DBUS_TYPE_INVALID)
+  {
+    const char *sender, *path;
+    dbus_message_iter_recurse (&iter_array, &iter_struct);
+    dbus_message_iter_get_basic (&iter_struct, &sender);
+    dbus_message_iter_next (&iter_struct);
+    dbus_message_iter_get_basic (&iter_struct, &path);
+    //logMessage(LOG_DEBUG,"%*.sfound At-SPI2 object %s at %s", depth, "", sender, path);
+    if (findTerm(sender, path, active, depth))
+    {
+      res = 1;
+      goto out;
+    }
+    dbus_message_iter_next (&iter_array);
+  }
+
+out:
+  dbus_message_unref(reply);
+  return res;
+}
+
+/* Test whether this object is active, and if not recurse in its children */
+static int findTerm(const char *sender, const char *path, int active, int depth) {
+  DBusMessage *msg, *reply;
+  DBusMessageIter iter, iter_array;
+  dbus_uint32_t *states;
+  int count;
+
+  msg = new_method_call(sender, path, SPI2_DBUS_INTERFACE_ACCESSIBLE, "GetState");
+  if (!msg)
+    return 0;
+  reply = send_with_reply_and_block(bus, msg, 1000, "getting state");
+  if (!reply)
+    return 0;
+
+  if (strcmp (dbus_message_get_signature (reply), "au") != 0)
+  {
+    logMessage(LOG_DEBUG, "unexpected signature %s while getting active state", dbus_message_get_signature(reply));
+    goto out;
+  }
+  dbus_message_iter_init (reply, &iter);
+  dbus_message_iter_recurse (&iter, &iter_array);
+  dbus_message_iter_get_fixed_array (&iter_array, &states, &count);
+  if (count != 2)
+  {
+    logMessage(LOG_DEBUG, "unexpected signature %s while getting active state", dbus_message_get_signature(reply));
+    goto out;
+  }
+
+  //logMessage(LOG_DEBUG, "%*.sstate is %08x %08x", depth, "", (unsigned) states[0], (unsigned) states[1]);
+  if (states[0] & (1<<ATSPI_STATE_ACTIVE))
+    /* This application is active */
+    active = 1;
+
+  if (states[0] & (1<<ATSPI_STATE_FOCUSED) && active)
+  {
+    /* And this widget is focused */
+    logMessage(LOG_DEBUG, "%s %s is focused!", sender, path);
+    dbus_message_unref(reply);
+    tryRestartTerm(sender, path);
+    return 1;
+  }
+out:
+  dbus_message_unref(reply);
+  return recurseFindTerm(sender, path, active, depth+1);
+}
+
+/* Find out currently focused terminal, starting from registry */
+static void initTerm(void) {
+  recurseFindTerm(SPI2_DBUS_INTERFACE_REG, SPI2_DBUS_PATH_ROOT, 0, 0);
+}
+
 /* Handle incoming events */
 static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
 {
@@ -593,15 +679,7 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
     if (curSender && !strcmp(sender, curSender) && !strcmp(path, curPath))
       finiTerm();
   } else if (!strcmp(interface,"Focus") || (StateChanged_focused && detail1)) {
-    char *role = getRole(sender, path);
-    logMessage(LOG_DEBUG, "state changed focused to role %s", role);
-    if (typeAll || (typeText && !strcmp(role, "text")) || (typeTerminal && !strcmp(role, "terminal"))) {
-      restartTerm(sender, path);
-    } else {
-      if (curPath)
-	finiTerm();
-    }
-    free(role);
+    tryRestartTerm(sender, path);
   } else if (!strcmp(interface, "Object") && !strcmp(member, "TextCaretMoved")) {
     if (!curSender || strcmp(sender, curSender) || strcmp(path, curPath)) return;
     logMessage(LOG_DEBUG, "caret move to %d", detail1);
@@ -752,35 +830,15 @@ static int watch(const char *message, const char *event) {
     return 1;
 
   /* Register as event listener. */
-  dbus_error_init(&error);
-  msg = dbus_message_new_method_call(SPI2_DBUS_INTERFACE_REG, SPI2_DBUS_PATH_REG, SPI2_DBUS_INTERFACE_REG, "RegisterEvent");
-  if (dbus_error_is_set(&error)) {
-    logMessage(LOG_DEBUG, "error while registering listener: %s %s", error.name, error.message);
-    dbus_error_free(&error);
+  msg = new_method_call(SPI2_DBUS_INTERFACE_REG, SPI2_DBUS_PATH_REG, SPI2_DBUS_INTERFACE_REG, "RegisterEvent");
+  if (!msg)
     return 0;
-  }
-  if (!msg) {
-    logMessage(LOG_DEBUG, "no memory while registering listener");
-    return 0;
-  }
- 
   dbus_message_append_args(msg, DBUS_TYPE_STRING, &event, DBUS_TYPE_INVALID);
- 
-  dbus_error_init(&error);
-  /* 1s max delay */
-  reply = dbus_connection_send_with_reply_and_block(bus, msg, 1000, &error);
-  dbus_message_unref(msg);
-  if (dbus_error_is_set(&error)) {
-    logMessage(LOG_DEBUG, "error while registering listener: %s %s", error.name, error.message);
-    dbus_error_free(&error);
+  reply = send_with_reply_and_block(bus, msg, 1000, "registering listener");
+  if (!reply)
     return 0;
-  }
-  if (!reply) {
-    logMessage(LOG_DEBUG, "timeout while registering listener");
-    return 0;
-  }
-  dbus_message_unref(reply);
 
+  dbus_message_unref(reply);
   return 1;
 }
 
@@ -824,6 +882,7 @@ THREAD_FUNCTION(a2OpenScreenThread) {
 
   /* TODO: use dbus_watch_get_unix_fd() or dbus_watch_get_socket() instead */
   sem_post(SPI2_init_sem);
+  initTerm();
   while (!finished && dbus_connection_read_write_dispatch (bus, 1000))
     ;
 
@@ -937,34 +996,18 @@ enum key_type_e {
 static int
 AtSpi2GenerateKeyboardEvent (dbus_uint32_t keysym, enum key_type_e key_type)
 {
-  DBusError error;
   DBusMessage *msg, *reply;
   char *s = NULL;
-  int res = 0;
 
-  msg = dbus_message_new_method_call(SPI2_DBUS_INTERFACE_REG, SPI2_DBUS_PATH_DEC, SPI2_DBUS_INTERFACE_DEC, "GenerateKeyboardEvent");
-  if (!msg) {
-    logMessage(LOG_DEBUG, "no memory while getting text");
+  msg = new_method_call(SPI2_DBUS_INTERFACE_REG, SPI2_DBUS_PATH_DEC, SPI2_DBUS_INTERFACE_DEC, "GenerateKeyboardEvent");
+  if (!msg)
     return 0;
-  }
   dbus_message_append_args(msg, DBUS_TYPE_INT32, &keysym, DBUS_TYPE_STRING, &s, DBUS_TYPE_INT32, &key_type, DBUS_TYPE_INVALID);
+  reply = send_with_reply_and_block(bus, msg, 1000, "generating keyboard event");
+  if (!reply)
+    return 0;
 
-  dbus_error_init(&error);
-  /* 1s max delay */
-  reply = dbus_connection_send_with_reply_and_block(bus, msg, 1000, &error);
-  if (dbus_error_is_set(&error)) {
-    logMessage(LOG_DEBUG, "error while generating keyboard event: %s %s", error.name, error.message);
-    goto outMsg;
-  }
-  if (!reply) {
-    logMessage(LOG_DEBUG, "timeout while generating keyboard event");
-    goto outMsg;
-  }
-  res = 1;
-
-outMsg:
-  dbus_message_unref(msg);
-  return res;
+  return 1;
 }
 
 static int
