@@ -190,6 +190,13 @@ beginDocument "${documentTitle}"
 beginSection "${documentTitle}"
 
 beginSection "Computer Keyboard Bindings"
+addLine "In order to use one of these keyboard tables,"
+addLine "you need to explicitly specify it in one of the following ways:"
+addLine "<UL>"
+addLine "<LI>Use BRLTTY's <TT>-k</TT> (or <TT>--keyboard-table=</TT>) command line option."
+addLine "<LI>Use the <TT>keyboard-table</TT> configuration file (<TT>brltty.conf</TT>) directive."
+addLine "</UL>"
+
 beginLayoutList
 set -- "${tablesDirectory}/${keyboardSubdirectory}/"*".${keyTableExtension}"
 for inputFile
@@ -203,6 +210,10 @@ addLine "<HR>"
 endSection
 
 beginSection "Braille Device Bindings"
+addLine "The driver automatically selects the appropriate key table for the device model being used."
+addLine "Click on the driver's name for general information about it."
+addLine "Click on the device model for its key bindings."
+
 addLine "<DL>"
 for driverDirectory in "${driversDirectory}/"*
 do
