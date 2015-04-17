@@ -490,7 +490,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         if (afterTimePeriod(&period, NULL)) break;
       }
 
-      if (!*++baud) baud = baudTable;
+      if (!*++baud) break;
     }
 
     io->closePort();
