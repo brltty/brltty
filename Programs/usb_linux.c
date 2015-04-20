@@ -45,7 +45,6 @@
 #include "async_wait.h"
 #include "async_alarm.h"
 #include "async_io.h"
-#include "async_signal.h"
 #include "mntpt.h"
 #include "io_usb.h"
 #include "usb_internal.h"
@@ -61,19 +60,17 @@ static Queue *usbHostDevices = NULL;
 struct UsbDeviceExtensionStruct {
   const UsbHostDevice *host;
   int usbfsFile;
+  AsyncHandle inputMonitorHandle;
 };
 
 struct UsbEndpointExtensionStruct {
   Queue *completedRequests;
 
-#ifdef ASYNC_CAN_OBTAIN_SIGNALS
   struct {
     struct usbdevfs_urb *urb;
-    AsyncHandle signalHandle;
     AsyncHandle alarmHandle;
     int submitDelay;
   } monitor;
-#endif /* ASYNC_CAN_OBTAIN_SIGNALS */
 };
 
 static int
@@ -95,6 +92,10 @@ usbOpenUsbfsFile (UsbDeviceExtension *devx) {
 static void
 usbCloseUsbfsFile (UsbDeviceExtension *devx) {
   if (devx->usbfsFile != -1) {
+    if (devx->inputMonitorHandle) {
+      asyncDiscardHandle(devx->inputMonitorHandle);
+      devx->inputMonitorHandle = NULL;
+    }
     close(devx->usbfsFile);
     devx->usbfsFile = -1;
   }
@@ -378,7 +379,7 @@ usbControlTransfer (
   return -1;
 }
 
-static int
+static UsbEndpoint *
 usbReapUrb (UsbDevice *device, int wait) {
   UsbDeviceExtension *devx = device->extension;
 
@@ -394,7 +395,7 @@ usbReapUrb (UsbDevice *device, int wait) {
         if ((endpoint = usbGetEndpoint(device, urb->endpoint))) {
           UsbEndpointExtension *eptx = endpoint->extension;
 
-          if (enqueueItem(eptx->completedRequests, urb)) return 1;
+          if (enqueueItem(eptx->completedRequests, urb)) return endpoint;
           logSystemError("USB completed request enqueue");
           free(urb);
         }
@@ -406,7 +407,7 @@ usbReapUrb (UsbDevice *device, int wait) {
     }
   }
 
-  return 0;
+  return NULL;
 }
 
 typedef struct {
@@ -916,7 +917,6 @@ usbReadDeviceDescriptor (UsbDevice *device) {
   return 1;
 }
 
-#ifdef ASYNC_CAN_OBTAIN_SIGNALS
 static void
 usbLogInputProblem (UsbEndpoint *endpoint, const char *problem) {
   logMessage(LOG_WARNING, "%s: Ept:%02X",
@@ -951,65 +951,103 @@ ASYNC_ALARM_CALLBACK(usbHandleInputAlarm) {
   usbResubmitInputURB(urb, endpoint);
 }
 
-ASYNC_SIGNAL_CALLBACK(usbHandleInputSignal) {
-  UsbEndpoint *endpoint = parameters->data;
+static int
+usbWriteCompletedInputRequest (UsbEndpoint* endpoint,
+                               struct usbdevfs_urb *urb) {
   UsbEndpointExtension *eptx = endpoint->extension;
+  ssize_t count = urb->actual_length;
+  int error = urb->status < 0 ? -urb->status : urb->status;
 
-  UsbResponse response;
-  void *request = usbReapResponse(endpoint->device,
-                                  endpoint->descriptor->bEndpointAddress,
-                                  &response, 0);
+  usbLogURB(urb, "reaped");
 
-  if (request) {
-    struct usbdevfs_urb *urb = eptx->monitor.urb;
+  if (!urb->status) {
+    if (usbApplyInputFilters(endpoint, urb->buffer, urb->buffer_length,
+                             &count)) {
+      if (urb == eptx->monitor.urb) {
+        int written = 0;
+        int *const delay = &eptx->monitor.submitDelay;
 
-    if (request == urb) {
-      int written = 0;
-      int *const delay = &eptx->monitor.submitDelay;
-
-      if (response.count == 0) {
-        written = 1;
-        *delay = *delay? (*delay << 1): 1;
-        *delay = MIN(*delay, BRAILLE_DRIVER_INPUT_POLL_INTERVAL);
-      } else if (response.count > 0) {
-        if (usbEnqueueInput(endpoint, response.buffer, response.count)) {
+        if (count == 0) {
           written = 1;
-          *delay = usbGetResubmitDelay(endpoint);
-        } else {
-          usbLogInputProblem(endpoint, "input data not enqueued");
-        }
-      } else {
-        usbLogInputProblem(endpoint, "input data not available");
-        errno = response.error;
-      }
-
-      if (written) {
-        if (*delay) {
-          if (asyncSetAlarmIn(&eptx->monitor.alarmHandle, *delay, usbHandleInputAlarm, endpoint)) {
-            return 1;
+          *delay = *delay? (*delay << 1): 1;
+          *delay = MIN(*delay, BRAILLE_DRIVER_INPUT_POLL_INTERVAL);
+        } else if (count > 0) {
+          if (usbEnqueueInput(endpoint, urb->buffer, count)) {
+            written = 1;
+            *delay = usbGetResubmitDelay(endpoint);
           } else {
-            usbLogInputProblem(endpoint, "input URB resubmit not scheduled");
+            usbLogInputProblem(endpoint, "input data not enqueued");
           }
-        } else if (usbResubmitInputURB(urb, endpoint)) {
-          return 1;
+        } else {
+          usbLogInputProblem(endpoint, "input data not available");
         }
+
+        if (written) {
+          if (*delay) {
+            if (asyncSetAlarmIn(&eptx->monitor.alarmHandle, *delay,
+                                usbHandleInputAlarm, endpoint)) {
+              return 1;
+            } else {
+              usbLogInputProblem(endpoint, "input URB resubmit not scheduled");
+            }
+          } else if (usbResubmitInputURB(urb, endpoint)) {
+            return 1;
+          }
+        }
+
+        eptx->monitor.urb = NULL;
+      } else {
+        usbLogInputProblem(endpoint, "unexpected input URB");
+        errno = EIO;
       }
 
-      asyncRelinquishSignalNumber(urb->signr);
-      eptx->monitor.urb = NULL;
-    } else {
-      usbLogInputProblem(endpoint, "unexpected input URB");
-      errno = EIO;
+      free(urb);
     }
-
-    free(request);
   } else {
-    usbLogInputProblem(endpoint, "input URB not available");
+    errno = urb->status < 0 ? -urb->status : urb->status;
+    logSystemError("USB URB status");
+  }
+  return 0;
+}
+
+ASYNC_MONITOR_CALLBACK(usbHandleInputAvailable) {
+  UsbDevice *device = parameters->data;
+  UsbEndpoint *endpoint;
+
+  if (parameters->error) return 0;
+
+  while ((endpoint = usbReapUrb(device, 0))) {
+    UsbEndpointExtension *eptx = endpoint->extension;
+    struct usbdevfs_urb *urb;
+
+    while ((urb = dequeueItem(eptx->completedRequests))) {
+      if (!usbWriteCompletedInputRequest(endpoint, urb)) {
+        usbSetInputError(endpoint, errno);
+        return 0;
+      }
+    }
   }
 
-  usbSetInputError(endpoint, errno);
-  asyncDiscardHandle(eptx->monitor.signalHandle);
-  eptx->monitor.signalHandle = NULL;
+  return 1;
+}
+
+static int
+usbMonitorUsbfsFile (UsbDevice* device) {
+  UsbDeviceExtension *devx = device->extension;
+
+  if (devx->inputMonitorHandle) return 1;
+
+  if (usbOpenUsbfsFile(devx)) {
+    if (asyncMonitorFileOutput(&devx->inputMonitorHandle,
+                                devx->usbfsFile,
+                                usbHandleInputAvailable,
+                               device)) {
+      return 1;
+    }
+    logMessage(LOG_ERR, "USBFS monitor error: %s: %s",
+               devx->host->usbfsPath, strerror(errno));
+  }    
+
   return 0;
 }
 
@@ -1023,35 +1061,23 @@ usbPrepareInputEndpoint (UsbEndpoint *endpoint) {
     const UsbEndpointDescriptor *descriptor = endpoint->descriptor;
     size_t size = getLittleEndian16(descriptor->wMaxPacketSize);
 
-    if ((eptx->monitor.urb = usbMakeURB(descriptor, NULL, size, endpoint))) {
-      if ((eptx->monitor.urb->signr = asyncObtainSignalNumber())) {
-        if (asyncMonitorSignal(&eptx->monitor.signalHandle,
-                               eptx->monitor.urb->signr,
-                               usbHandleInputSignal, endpoint)) {
-          if (usbSubmitURB(eptx->monitor.urb, endpoint)) {
-            endpoint->direction.input.asynchronous = 0;
-            return 1;
-          } else {
-            usbLogInputProblem(endpoint, "input URB not submitted");
-          }
-
-          asyncCancelRequest(eptx->monitor.signalHandle);
-          eptx->monitor.signalHandle = NULL;
+    if (usbMonitorUsbfsFile(endpoint->device)) {
+      if ((eptx->monitor.urb = usbMakeURB(descriptor, NULL, size, endpoint))) {
+        if (usbSubmitURB(eptx->monitor.urb, endpoint)) {
+          endpoint->direction.input.asynchronous = 0;
+          return 1;
         } else {
-          usbLogInputProblem(endpoint, "input monitor not registered");
+          usbLogInputProblem(endpoint, "input URB not submitted");
         }
 
-        asyncRelinquishSignalNumber(eptx->monitor.urb->signr);
+        free(eptx->monitor.urb);
+        eptx->monitor.urb = NULL;
       } else {
-        usbLogInputProblem(endpoint, "input signal number not obtained");
+        usbLogInputProblem(endpoint, "input URB not created");
       }
-
-      free(eptx->monitor.urb);
-      eptx->monitor.urb = NULL;
     } else {
-      usbLogInputProblem(endpoint, "input URB not created");
+      usbLogInputProblem(endpoint, "usbfs file monitor not created");
     }
-
     usbDestroyInputPipe(endpoint);
   } else {
     usbLogInputProblem(endpoint, "input pipe not created");
@@ -1059,7 +1085,6 @@ usbPrepareInputEndpoint (UsbEndpoint *endpoint) {
 
   return 0;
 }
-#endif /* ASYNC_CAN_OBTAIN_SIGNALS */
 
 int
 usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
@@ -1068,19 +1093,14 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
   if ((eptx = malloc(sizeof(*eptx)))) {
     memset(eptx, 0, sizeof(*eptx));
 
-#ifdef ASYNC_CAN_OBTAIN_SIGNALS
     eptx->monitor.urb = NULL;
-    eptx->monitor.signalHandle = NULL;
     eptx->monitor.alarmHandle = NULL;
     eptx->monitor.submitDelay = usbGetResubmitDelay(endpoint);
-#endif /* ASYNC_CAN_OBTAIN_SIGNALS */
 
     if ((eptx->completedRequests = newQueue(NULL, NULL))) {
       switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
         case UsbEndpointDirection_Input:
-#ifdef ASYNC_CAN_OBTAIN_SIGNALS
           endpoint->prepare = usbPrepareInputEndpoint;
-#endif /* ASYNC_CAN_OBTAIN_SIGNALS */
           break;
       }
 
@@ -1100,7 +1120,6 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 
 void
 usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
-#ifdef ASYNC_CAN_OBTAIN_SIGNALS
   if (eptx->monitor.alarmHandle) {
     asyncCancelRequest(eptx->monitor.alarmHandle);
     eptx->monitor.alarmHandle = NULL;
@@ -1113,17 +1132,9 @@ usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
   }
 
   if (eptx->monitor.urb) {
-    asyncRelinquishSignalNumber(eptx->monitor.urb->signr);
-
     free(eptx->monitor.urb);
     eptx->monitor.urb = NULL;
   }
-
-  if (eptx->monitor.signalHandle) {
-    asyncCancelRequest(eptx->monitor.signalHandle);
-    eptx->monitor.signalHandle = NULL;
-  }
-#endif /* ASYNC_CAN_OBTAIN_SIGNALS */
 
   if (eptx->completedRequests) {
     deallocateQueue(eptx->completedRequests);
