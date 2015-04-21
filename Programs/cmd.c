@@ -23,6 +23,7 @@
 
 #include "log.h"
 #include "brl_cmds.h"
+#include "brl_custom.h"
 #include "cmd.h"
 #include "program.h"
 
