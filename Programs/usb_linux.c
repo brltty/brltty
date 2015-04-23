@@ -16,6 +16,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#undef USB_INPUT_USE_SIGNAL
+//#define USB_INPUT_USE_SIGNAL
+
 #include "prologue.h"
 
 #include <stdio.h>
@@ -45,7 +48,6 @@
 #include "async_wait.h"
 #include "async_alarm.h"
 #include "async_io.h"
-#include "async_signal.h"
 #include "mntpt.h"
 #include "io_usb.h"
 #include "usb_internal.h"
@@ -61,19 +63,24 @@ static Queue *usbHostDevices = NULL;
 struct UsbDeviceExtensionStruct {
   const UsbHostDevice *host;
   int usbfsFile;
+
+#ifndef USB_INPUT_USE_SIGNAL
+  AsyncHandle inputMonitorHandle;
+#endif /* USB_INPUT_USE_SIGNAL */
 };
 
 struct UsbEndpointExtensionStruct {
   Queue *completedRequests;
 
-#ifdef ASYNC_CAN_OBTAIN_SIGNALS
   struct {
     struct usbdevfs_urb *urb;
-    AsyncHandle signalHandle;
     AsyncHandle alarmHandle;
     int submitDelay;
+
+#ifdef USB_INPUT_USE_SIGNAL
+    AsyncHandle signalHandle;
+#endif /* USB_INPUT_USE_SIGNAL */
   } monitor;
-#endif /* ASYNC_CAN_OBTAIN_SIGNALS */
 };
 
 static int
@@ -378,8 +385,8 @@ usbControlTransfer (
   return -1;
 }
 
-static int
-usbReapUrb (UsbDevice *device, int wait) {
+static UsbEndpoint *
+usbReapURB (UsbDevice *device, int wait) {
   UsbDeviceExtension *devx = device->extension;
 
   if (usbOpenUsbfsFile(devx)) {
@@ -394,7 +401,7 @@ usbReapUrb (UsbDevice *device, int wait) {
         if ((endpoint = usbGetEndpoint(device, urb->endpoint))) {
           UsbEndpointExtension *eptx = endpoint->extension;
 
-          if (enqueueItem(eptx->completedRequests, urb)) return 1;
+          if (enqueueItem(eptx->completedRequests, urb)) return endpoint;
           logSystemError("USB completed request enqueue");
           free(urb);
         }
@@ -406,7 +413,7 @@ usbReapUrb (UsbDevice *device, int wait) {
     }
   }
 
-  return 0;
+  return NULL;
 }
 
 typedef struct {
@@ -671,7 +678,7 @@ usbCancelRequest (UsbDevice *device, void *request) {
         while (!deleteItem(eptx->completedRequests, request)) {
           if (!reap) break;
 
-          if (!usbReapUrb(device, 0)) {
+          if (!usbReapURB(device, 0)) {
             found = 0;
             break;
           }
@@ -705,7 +712,7 @@ usbReapResponse (
     struct usbdevfs_urb *urb;
 
     while (!(urb = dequeueItem(eptx->completedRequests))) {
-      if (!usbReapUrb(device, wait)) return NULL;
+      if (!usbReapURB(device, wait)) return NULL;
     }
 
     usbLogURB(urb, "reaped");
@@ -789,7 +796,7 @@ usbInterruptTransfer (
     if (timeout) startTimePeriod(&period, timeout);
 
     do {
-      if (usbReapUrb(device, 0) &&
+      if (usbReapURB(device, 0) &&
           deleteItem(eptx->completedRequests, urb)) {
         if (!urb->status) return urb;
         if ((errno = urb->status) < 0) errno = -errno;
@@ -916,7 +923,6 @@ usbReadDeviceDescriptor (UsbDevice *device) {
   return 1;
 }
 
-#ifdef ASYNC_CAN_OBTAIN_SIGNALS
 static void
 usbLogInputProblem (UsbEndpoint *endpoint, const char *problem) {
   logMessage(LOG_WARNING, "%s: Ept:%02X",
@@ -951,70 +957,232 @@ ASYNC_ALARM_CALLBACK(usbHandleInputAlarm) {
   usbResubmitInputURB(urb, endpoint);
 }
 
+static int
+usbHandleInputURB (UsbEndpoint *endpoint, struct usbdevfs_urb *urb) {
+  UsbEndpointExtension *eptx = endpoint->extension;
+
+  if (urb == eptx->monitor.urb) {
+    int written = 0;
+    int *const delay = &eptx->monitor.submitDelay;
+
+    if (urb->actual_length == 0) {
+      written = 1;
+      *delay = *delay? (*delay << 1): 1;
+      *delay = MIN(*delay, BRAILLE_DRIVER_INPUT_POLL_INTERVAL);
+    } else if (urb->actual_length > 0) {
+      if (usbEnqueueInput(endpoint, urb->buffer, urb->actual_length)) {
+        written = 1;
+        *delay = usbGetResubmitDelay(endpoint);
+      } else {
+        usbLogInputProblem(endpoint, "input data not enqueued");
+      }
+    } else {
+      usbLogInputProblem(endpoint, "input data not available");
+    }
+
+    if (written) {
+      if (*delay) {
+        if (asyncSetAlarmIn(&eptx->monitor.alarmHandle, *delay,
+                            usbHandleInputAlarm, endpoint)) {
+          return 1;
+        } else {
+          usbLogInputProblem(endpoint, "input URB resubmit not scheduled");
+        }
+      } else if (usbResubmitInputURB(urb, endpoint)) {
+        return 1;
+      }
+    }
+
+    eptx->monitor.urb = NULL;
+  } else {
+    usbLogInputProblem(endpoint, "unexpected input URB");
+    errno = EIO;
+  }
+
+  return 0;
+}
+
+#ifdef USB_INPUT_USE_SIGNAL
+#include "async_signal.h"
+
+static void
+usbInitializeDeviceInputMonitor (UsbDeviceExtension *devx) {
+}
+
+static void
+usbInitializeEndpointInputMonitor (UsbEndpointExtension *eptx) {
+  eptx->monitor.signalHandle = NULL;
+}
+
+static void
+usbStopDeviceInputMonitor (UsbDeviceExtension *devx) {
+}
+
+static void
+usbStopEndpointInputMonitor (UsbEndpointExtension *eptx) {
+  if (eptx->monitor.urb) {
+    if (eptx->monitor.urb->signr) {
+      asyncRelinquishSignalNumber(eptx->monitor.urb->signr);
+      eptx->monitor.urb->signr = 0;
+    }
+  }
+
+  if (eptx->monitor.signalHandle) {
+    asyncCancelRequest(eptx->monitor.signalHandle);
+    eptx->monitor.signalHandle = NULL;
+  }
+}
+
 ASYNC_SIGNAL_CALLBACK(usbHandleInputSignal) {
   UsbEndpoint *endpoint = parameters->data;
   UsbEndpointExtension *eptx = endpoint->extension;
 
   UsbResponse response;
-  void *request = usbReapResponse(endpoint->device,
-                                  endpoint->descriptor->bEndpointAddress,
-                                  &response, 0);
+  struct usbdevfs_urb *urb = usbReapResponse(endpoint->device,
+                                             endpoint->descriptor->bEndpointAddress,
+                                             &response, 0);
 
-  if (request) {
-    struct usbdevfs_urb *urb = eptx->monitor.urb;
-
-    if (request == urb) {
-      int written = 0;
-      int *const delay = &eptx->monitor.submitDelay;
-
-      if (response.count == 0) {
-        written = 1;
-        *delay = *delay? (*delay << 1): 1;
-        *delay = MIN(*delay, BRAILLE_DRIVER_INPUT_POLL_INTERVAL);
-      } else if (response.count > 0) {
-        if (usbEnqueueInput(endpoint, response.buffer, response.count)) {
-          written = 1;
-          *delay = usbGetResubmitDelay(endpoint);
-        } else {
-          usbLogInputProblem(endpoint, "input data not enqueued");
-        }
-      } else {
-        usbLogInputProblem(endpoint, "input data not available");
-        errno = response.error;
-      }
-
-      if (written) {
-        if (*delay) {
-          if (asyncSetAlarmIn(&eptx->monitor.alarmHandle, *delay, usbHandleInputAlarm, endpoint)) {
-            return 1;
-          } else {
-            usbLogInputProblem(endpoint, "input URB resubmit not scheduled");
-          }
-        } else if (usbResubmitInputURB(urb, endpoint)) {
-          return 1;
-        }
-      }
-
-      asyncRelinquishSignalNumber(urb->signr);
-      eptx->monitor.urb = NULL;
+  if (urb) {
+    if (!response.error) {
+      urb->actual_length = response.count;
+      if (usbHandleInputURB(endpoint, urb)) return 1;
     } else {
-      usbLogInputProblem(endpoint, "unexpected input URB");
-      errno = EIO;
+      errno = response.error;
     }
 
-    free(request);
+    free(urb);
   } else {
     usbLogInputProblem(endpoint, "input URB not available");
   }
 
   usbSetInputError(endpoint, errno);
-  asyncDiscardHandle(eptx->monitor.signalHandle);
-  eptx->monitor.signalHandle = NULL;
+  usbStopEndpointInputMonitor(eptx);
   return 0;
 }
 
 static int
+usbStartDeviceInputMonitor (UsbDevice *device) {
+  return 1;
+}
+
+static int
+usbStartEndpointInputMonitor (UsbEndpoint *endpoint) {
+  UsbEndpointExtension *eptx = endpoint->extension;
+
+  if ((eptx->monitor.urb->signr = asyncObtainSignalNumber())) {
+    if (asyncMonitorSignal(&eptx->monitor.signalHandle,
+                           eptx->monitor.urb->signr,
+                           usbHandleInputSignal, endpoint)) {
+      return 1;
+    } else {
+      usbLogInputProblem(endpoint, "input monitor not registered");
+    }
+
+    asyncRelinquishSignalNumber(eptx->monitor.urb->signr);
+  } else {
+    usbLogInputProblem(endpoint, "input signal number not obtained");
+  }
+
+  return 0;
+}
+
+#else /* USB_INPUT_USE_SIGNAL */
+static void
+usbInitializeDeviceInputMonitor (UsbDeviceExtension *devx) {
+  devx->inputMonitorHandle = NULL;
+}
+
+static void
+usbInitializeEndpointInputMonitor (UsbEndpointExtension *eptx) {
+}
+
+static void
+usbStopDeviceInputMonitor (UsbDeviceExtension *devx) {
+  if (devx->inputMonitorHandle) {
+    asyncCancelRequest(devx->inputMonitorHandle);
+    devx->inputMonitorHandle = NULL;
+  }
+}
+
+static void
+usbStopEndpointInputMonitor (UsbEndpointExtension *eptx) {
+}
+
+static int
+usbHandleCompletedInputRequest (UsbEndpoint *endpoint, struct usbdevfs_urb *urb) {
+  ssize_t count = urb->actual_length;
+  int error = urb->status;
+
+  if (!error) {
+    if (usbApplyInputFilters(endpoint, urb->buffer, urb->buffer_length, &count)) {
+      urb->actual_length = count;
+
+      if (usbHandleInputURB(endpoint, urb)) {
+        return 1;
+      }
+    }
+  } else {
+    if (error < 0) error = -error;
+    errno = error;
+    logSystemError("USB URB status");
+  }
+
+  return 0;
+}
+
+ASYNC_MONITOR_CALLBACK(usbHandleCompletedInputRequests) {
+  UsbDevice *device = parameters->data;
+  UsbEndpoint *endpoint;
+
+  if (parameters->error) return 0;
+
+  while ((endpoint = usbReapURB(device, 0))) {
+    UsbEndpointExtension *eptx = endpoint->extension;
+    struct usbdevfs_urb *urb;
+
+    while ((urb = dequeueItem(eptx->completedRequests))) {
+      usbLogURB(urb, "reaped");
+
+      if (!usbHandleCompletedInputRequest(endpoint, urb)) {
+        usbSetInputError(endpoint, errno);
+        free(urb);
+        return 0;
+      }
+    }
+  }
+
+  return 1;
+}
+
+static int
+usbStartDeviceInputMonitor (UsbDevice *device) {
+  UsbDeviceExtension *devx = device->extension;
+
+  if (usbOpenUsbfsFile(devx)) {
+    if (asyncMonitorFileOutput(&devx->inputMonitorHandle,
+                               devx->usbfsFile,
+                               usbHandleCompletedInputRequests,
+                               device)) {
+      return 1;
+    } else {
+      logMessage(LOG_ERR, "USBFS monitor error: %s: %s",
+                 devx->host->usbfsPath, strerror(errno));
+    }
+  }
+
+  return 0;
+}
+
+static int
+usbStartEndpointInputMonitor (UsbEndpoint *endpoint) {
+  return 1;
+}
+#endif /* USB_INPUT_USE_SIGNAL */
+
+static int
 usbPrepareInputEndpoint (UsbEndpoint *endpoint) {
+  UsbDevice *device = endpoint->device;
+  UsbDeviceExtension *devx = device->extension;
   UsbEndpointExtension *eptx = endpoint->extension;
 
   if (LINUX_USB_INPUT_PIPE_DISABLE) return 1;
@@ -1024,10 +1192,8 @@ usbPrepareInputEndpoint (UsbEndpoint *endpoint) {
     size_t size = getLittleEndian16(descriptor->wMaxPacketSize);
 
     if ((eptx->monitor.urb = usbMakeURB(descriptor, NULL, size, endpoint))) {
-      if ((eptx->monitor.urb->signr = asyncObtainSignalNumber())) {
-        if (asyncMonitorSignal(&eptx->monitor.signalHandle,
-                               eptx->monitor.urb->signr,
-                               usbHandleInputSignal, endpoint)) {
+      if (usbStartDeviceInputMonitor(device)) {
+        if (usbStartEndpointInputMonitor(endpoint)) {
           if (usbSubmitURB(eptx->monitor.urb, endpoint)) {
             endpoint->direction.input.asynchronous = 0;
             return 1;
@@ -1035,15 +1201,14 @@ usbPrepareInputEndpoint (UsbEndpoint *endpoint) {
             usbLogInputProblem(endpoint, "input URB not submitted");
           }
 
-          asyncCancelRequest(eptx->monitor.signalHandle);
-          eptx->monitor.signalHandle = NULL;
+          usbStopEndpointInputMonitor(eptx);
         } else {
-          usbLogInputProblem(endpoint, "input monitor not registered");
+          usbLogInputProblem(endpoint, "USB endpoint input monitor not started");
         }
 
-        asyncRelinquishSignalNumber(eptx->monitor.urb->signr);
+        usbStopDeviceInputMonitor(devx);
       } else {
-        usbLogInputProblem(endpoint, "input signal number not obtained");
+        usbLogInputProblem(endpoint, "USB device input monitor not started");
       }
 
       free(eptx->monitor.urb);
@@ -1059,7 +1224,6 @@ usbPrepareInputEndpoint (UsbEndpoint *endpoint) {
 
   return 0;
 }
-#endif /* ASYNC_CAN_OBTAIN_SIGNALS */
 
 int
 usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
@@ -1068,19 +1232,15 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
   if ((eptx = malloc(sizeof(*eptx)))) {
     memset(eptx, 0, sizeof(*eptx));
 
-#ifdef ASYNC_CAN_OBTAIN_SIGNALS
     eptx->monitor.urb = NULL;
-    eptx->monitor.signalHandle = NULL;
     eptx->monitor.alarmHandle = NULL;
     eptx->monitor.submitDelay = usbGetResubmitDelay(endpoint);
-#endif /* ASYNC_CAN_OBTAIN_SIGNALS */
+    usbInitializeEndpointInputMonitor(eptx);
 
     if ((eptx->completedRequests = newQueue(NULL, NULL))) {
       switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
         case UsbEndpointDirection_Input:
-#ifdef ASYNC_CAN_OBTAIN_SIGNALS
           endpoint->prepare = usbPrepareInputEndpoint;
-#endif /* ASYNC_CAN_OBTAIN_SIGNALS */
           break;
       }
 
@@ -1100,7 +1260,8 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 
 void
 usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
-#ifdef ASYNC_CAN_OBTAIN_SIGNALS
+  usbStopEndpointInputMonitor(eptx);
+
   if (eptx->monitor.alarmHandle) {
     asyncCancelRequest(eptx->monitor.alarmHandle);
     eptx->monitor.alarmHandle = NULL;
@@ -1113,17 +1274,9 @@ usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
   }
 
   if (eptx->monitor.urb) {
-    asyncRelinquishSignalNumber(eptx->monitor.urb->signr);
-
     free(eptx->monitor.urb);
     eptx->monitor.urb = NULL;
   }
-
-  if (eptx->monitor.signalHandle) {
-    asyncCancelRequest(eptx->monitor.signalHandle);
-    eptx->monitor.signalHandle = NULL;
-  }
-#endif /* ASYNC_CAN_OBTAIN_SIGNALS */
 
   if (eptx->completedRequests) {
     deallocateQueue(eptx->completedRequests);
@@ -1135,6 +1288,7 @@ usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
 
 void
 usbDeallocateDeviceExtension (UsbDeviceExtension *devx) {
+  usbStopDeviceInputMonitor(devx);
   usbCloseUsbfsFile(devx);
   free(devx);
 }
@@ -1164,6 +1318,7 @@ usbTestHostDevice (void *item, void *data) {
     memset(devx, 0, sizeof(*devx));
     devx->host = host;
     devx->usbfsFile = -1;
+    usbInitializeDeviceInputMonitor(devx);
 
     if ((test->device = usbTestDevice(devx, test->chooser, test->data))) return 1;
 
