@@ -16,9 +16,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#undef USB_INPUT_USE_SIGNAL
-//#define USB_INPUT_USE_SIGNAL
-
 #include "prologue.h"
 
 #include <stdio.h>
@@ -48,6 +45,7 @@
 #include "async_wait.h"
 #include "async_alarm.h"
 #include "async_io.h"
+#include "async_signal.h"
 #include "mntpt.h"
 #include "io_usb.h"
 #include "usb_internal.h"
@@ -63,10 +61,7 @@ static Queue *usbHostDevices = NULL;
 struct UsbDeviceExtensionStruct {
   const UsbHostDevice *host;
   int usbfsFile;
-
-#ifndef USB_INPUT_USE_SIGNAL
-  AsyncHandle inputMonitorHandle;
-#endif /* USB_INPUT_USE_SIGNAL */
+  AsyncHandle usbfsMonitorHandle;
 };
 
 struct UsbEndpointExtensionStruct {
@@ -76,10 +71,7 @@ struct UsbEndpointExtensionStruct {
     struct usbdevfs_urb *urb;
     AsyncHandle alarmHandle;
     int submitDelay;
-
-#ifdef USB_INPUT_USE_SIGNAL
     AsyncHandle signalHandle;
-#endif /* USB_INPUT_USE_SIGNAL */
   } monitor;
 };
 
@@ -1002,24 +994,13 @@ usbHandleInputURB (UsbEndpoint *endpoint, struct usbdevfs_urb *urb) {
   return 0;
 }
 
-#ifdef USB_INPUT_USE_SIGNAL
-#include "async_signal.h"
-
 static void
-usbInitializeDeviceInputMonitor (UsbDeviceExtension *devx) {
-}
-
-static void
-usbInitializeEndpointInputMonitor (UsbEndpointExtension *eptx) {
+usbInitializeSignalMonitor (UsbEndpointExtension *eptx) {
   eptx->monitor.signalHandle = NULL;
 }
 
 static void
-usbStopDeviceInputMonitor (UsbDeviceExtension *devx) {
-}
-
-static void
-usbStopEndpointInputMonitor (UsbEndpointExtension *eptx) {
+usbStopSignalMonitor (UsbEndpointExtension *eptx) {
   if (eptx->monitor.urb) {
     if (eptx->monitor.urb->signr) {
       asyncRelinquishSignalNumber(eptx->monitor.urb->signr);
@@ -1056,17 +1037,12 @@ ASYNC_SIGNAL_CALLBACK(usbHandleInputSignal) {
   }
 
   usbSetInputError(endpoint, errno);
-  usbStopEndpointInputMonitor(eptx);
+  usbStopSignalMonitor(eptx);
   return 0;
 }
 
 static int
-usbStartDeviceInputMonitor (UsbDevice *device) {
-  return 1;
-}
-
-static int
-usbStartEndpointInputMonitor (UsbEndpoint *endpoint) {
+usbStartSignalMonitor (UsbEndpoint *endpoint) {
   UsbEndpointExtension *eptx = endpoint->extension;
 
   if ((eptx->monitor.urb->signr = asyncObtainSignalNumber())) {
@@ -1086,26 +1062,17 @@ usbStartEndpointInputMonitor (UsbEndpoint *endpoint) {
   return 0;
 }
 
-#else /* USB_INPUT_USE_SIGNAL */
 static void
-usbInitializeDeviceInputMonitor (UsbDeviceExtension *devx) {
-  devx->inputMonitorHandle = NULL;
+usbInitializeUsbfsMonitor (UsbDeviceExtension *devx) {
+  devx->usbfsMonitorHandle = NULL;
 }
 
 static void
-usbInitializeEndpointInputMonitor (UsbEndpointExtension *eptx) {
-}
-
-static void
-usbStopDeviceInputMonitor (UsbDeviceExtension *devx) {
-  if (devx->inputMonitorHandle) {
-    asyncCancelRequest(devx->inputMonitorHandle);
-    devx->inputMonitorHandle = NULL;
+usbStopUsbfsMonitor (UsbDeviceExtension *devx) {
+  if (devx->usbfsMonitorHandle) {
+    asyncCancelRequest(devx->usbfsMonitorHandle);
+    devx->usbfsMonitorHandle = NULL;
   }
-}
-
-static void
-usbStopEndpointInputMonitor (UsbEndpointExtension *eptx) {
 }
 
 static int
@@ -1155,11 +1122,13 @@ ASYNC_MONITOR_CALLBACK(usbHandleCompletedInputRequests) {
 }
 
 static int
-usbStartDeviceInputMonitor (UsbDevice *device) {
+usbStartUsbfsMonitor (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
 
+  if (devx->usbfsMonitorHandle) return 1;
+
   if (usbOpenUsbfsFile(devx)) {
-    if (asyncMonitorFileOutput(&devx->inputMonitorHandle,
+    if (asyncMonitorFileOutput(&devx->usbfsMonitorHandle,
                                devx->usbfsFile,
                                usbHandleCompletedInputRequests,
                                device)) {
@@ -1174,12 +1143,6 @@ usbStartDeviceInputMonitor (UsbDevice *device) {
 }
 
 static int
-usbStartEndpointInputMonitor (UsbEndpoint *endpoint) {
-  return 1;
-}
-#endif /* USB_INPUT_USE_SIGNAL */
-
-static int
 usbPrepareInputEndpoint (UsbEndpoint *endpoint) {
   UsbDevice *device = endpoint->device;
   UsbDeviceExtension *devx = device->extension;
@@ -1192,23 +1155,22 @@ usbPrepareInputEndpoint (UsbEndpoint *endpoint) {
     size_t size = getLittleEndian16(descriptor->wMaxPacketSize);
 
     if ((eptx->monitor.urb = usbMakeURB(descriptor, NULL, size, endpoint))) {
-      if (usbStartDeviceInputMonitor(device)) {
-        if (usbStartEndpointInputMonitor(endpoint)) {
-          if (usbSubmitURB(eptx->monitor.urb, endpoint)) {
-            endpoint->direction.input.asynchronous = 0;
-            return 1;
-          } else {
-            usbLogInputProblem(endpoint, "input URB not submitted");
-          }
+      int monitorStarted = LINUX_USB_INPUT_USE_SIGNAL_MONITOR?
+                           usbStartSignalMonitor(endpoint):
+                           usbStartUsbfsMonitor(device);
 
-          usbStopEndpointInputMonitor(eptx);
+      if (monitorStarted) {
+        if (usbSubmitURB(eptx->monitor.urb, endpoint)) {
+          endpoint->direction.input.asynchronous = 0;
+          return 1;
         } else {
-          usbLogInputProblem(endpoint, "USB endpoint input monitor not started");
+          usbLogInputProblem(endpoint, "input URB not submitted");
         }
 
-        usbStopDeviceInputMonitor(devx);
+        usbStopSignalMonitor(eptx);
+        usbStopUsbfsMonitor(devx);
       } else {
-        usbLogInputProblem(endpoint, "USB device input monitor not started");
+        usbLogInputProblem(endpoint, "USB input monitor not started");
       }
 
       free(eptx->monitor.urb);
@@ -1235,7 +1197,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
     eptx->monitor.urb = NULL;
     eptx->monitor.alarmHandle = NULL;
     eptx->monitor.submitDelay = usbGetResubmitDelay(endpoint);
-    usbInitializeEndpointInputMonitor(eptx);
+    usbInitializeSignalMonitor(eptx);
 
     if ((eptx->completedRequests = newQueue(NULL, NULL))) {
       switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
@@ -1260,7 +1222,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 
 void
 usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
-  usbStopEndpointInputMonitor(eptx);
+  usbStopSignalMonitor(eptx);
 
   if (eptx->monitor.alarmHandle) {
     asyncCancelRequest(eptx->monitor.alarmHandle);
@@ -1288,7 +1250,7 @@ usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
 
 void
 usbDeallocateDeviceExtension (UsbDeviceExtension *devx) {
-  usbStopDeviceInputMonitor(devx);
+  usbStopUsbfsMonitor(devx);
   usbCloseUsbfsFile(devx);
   free(devx);
 }
@@ -1318,7 +1280,7 @@ usbTestHostDevice (void *item, void *data) {
     memset(devx, 0, sizeof(*devx));
     devx->host = host;
     devx->usbfsFile = -1;
-    usbInitializeDeviceInputMonitor(devx);
+    usbInitializeUsbfsMonitor(devx);
 
     if ((test->device = usbTestDevice(devx, test->chooser, test->data))) return 1;
 
