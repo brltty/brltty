@@ -26,7 +26,7 @@
 # Cebra [all models]
 # HIMS [Sync Braille]
 # HandyTech [FTDI chip]
-brltty-at,ce,hm,ht 0x0003 0x0403 0x6001
+brltty-ht 0x0003 0x0403 0x6001
 
 # Device: 0403:DE58
 # Hedo [MobilLine]
@@ -41,7 +41,7 @@ brltty-hd 0x0003 0x0403 0xde59
 brltty-pm 0x0003 0x0403 0xf208
 
 # Device: 0403:FE70
-# Baum [Vario40 (40 cells)]
+# Baum [Vario 40 (40 cells)]
 brltty-bm 0x0003 0x0403 0xfe70
 
 # Device: 0403:FE71
@@ -264,7 +264,7 @@ brltty-fs 0x0003 0x0f4e 0x0114
 # Product: CP210x UART Bridge / myAVR mySmartUSB light
 # BrailleMemo [Pocket]
 # Seika [Braille Display]
-brltty-mm,sk 0x0003 0x10c4 0xea60
+brltty-sk 0x0003 0x10c4 0xea60
 
 # Device: 10C4:EA80
 # Generic Identifier

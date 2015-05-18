@@ -58,7 +58,7 @@ HKR,,Icon,,-20
 "LibUSB-1.0: Papenmeier [all models]"=LIBUSB_DEV, USB\VID_0403&PID_F208
 
 ; Device: 0403:FE70
-"LibUSB-1.0: Baum [Vario40 (40 cells)]"=LIBUSB_DEV, USB\VID_0403&PID_FE70
+"LibUSB-1.0: Baum [Vario 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0403&PID_FE70
 
 ; Device: 0403:FE71
 "LibUSB-1.0: Baum [PocketVario (24 cells)]"=LIBUSB_DEV, USB\VID_0403&PID_FE71
@@ -357,7 +357,7 @@ HKR,,Icon,,-20
 "LibUSB-1.0: Papenmeier [all models]"=LIBUSB_DEV, USB\VID_0403&PID_F208
 
 ; Device: 0403:FE70
-"LibUSB-1.0: Baum [Vario40 (40 cells)]"=LIBUSB_DEV, USB\VID_0403&PID_FE70
+"LibUSB-1.0: Baum [Vario 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0403&PID_FE70
 
 ; Device: 0403:FE71
 "LibUSB-1.0: Baum [PocketVario (24 cells)]"=LIBUSB_DEV, USB\VID_0403&PID_FE71

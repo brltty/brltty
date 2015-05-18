@@ -440,7 +440,17 @@ proc makeLines {linesArray schemes deviceTable} {
                set exclude $excludeGenericDevices
             }
 
-            eval [list lappend lines] [$makeLines $vendor $product [lsort -unique $codes] [lsort $descriptions] $exclude]
+            set drivers [lsort -unique $codes]
+            set descriptions [lsort $descriptions]
+
+            foreach driver {ht sk} {
+               if {[lsearch -exact $drivers $driver] >= 0} {
+                  set drivers [list $driver]
+                  break
+               }
+            }
+
+            eval [list lappend lines] [$makeLines $vendor $product $drivers $descriptions $exclude]
             lappend lines ""
          }
       }

@@ -34,7 +34,7 @@ LABEL="brltty_usb_begin"
 # Cebra [all models]
 # HIMS [Sync Braille]
 # HandyTech [FTDI chip]
-ENV{PRODUCT}=="403/6001/*", ENV{BRLTTY_BRAILLE_DRIVER}="at,ce,hm,ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/6001/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
 
 # Device: 0403:DE58
 # Hedo [MobilLine]
@@ -49,7 +49,7 @@ ENV{PRODUCT}=="403/de59/*", ENV{BRLTTY_BRAILLE_DRIVER}="hd", GOTO="brltty_usb_ru
 ENV{PRODUCT}=="403/f208/*", ENV{BRLTTY_BRAILLE_DRIVER}="pm", GOTO="brltty_usb_run"
 
 # Device: 0403:FE70
-# Baum [Vario40 (40 cells)]
+# Baum [Vario 40 (40 cells)]
 ENV{PRODUCT}=="403/fe70/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
 
 # Device: 0403:FE71
@@ -272,7 +272,7 @@ ENV{PRODUCT}=="f4e/114/*", ENV{BRLTTY_BRAILLE_DRIVER}="fs", GOTO="brltty_usb_run
 # Product: CP210x UART Bridge / myAVR mySmartUSB light
 # BrailleMemo [Pocket]
 # Seika [Braille Display]
-ENV{PRODUCT}=="10c4/ea60/*", ENV{BRLTTY_BRAILLE_DRIVER}="mm,sk", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="10c4/ea60/*", ENV{BRLTTY_BRAILLE_DRIVER}="sk", GOTO="brltty_usb_run"
 
 # Device: 10C4:EA80
 # Generic Identifier

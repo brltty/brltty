@@ -137,7 +137,7 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUSB-Win32: Papenmeier [all models]"=LIBUSB_DEV, USB\VID_0403&PID_F208
 
 ; Device: 0403:FE70
-"LibUSB-Win32: Baum [Vario40 (40 cells)]"=LIBUSB_DEV, USB\VID_0403&PID_FE70
+"LibUSB-Win32: Baum [Vario 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0403&PID_FE70
 
 ; Device: 0403:FE71
 "LibUSB-Win32: Baum [PocketVario (24 cells)]"=LIBUSB_DEV, USB\VID_0403&PID_FE71
@@ -436,7 +436,7 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUSB-Win32: Papenmeier [all models]"=LIBUSB_DEV, USB\VID_0403&PID_F208
 
 ; Device: 0403:FE70
-"LibUSB-Win32: Baum [Vario40 (40 cells)]"=LIBUSB_DEV, USB\VID_0403&PID_FE70
+"LibUSB-Win32: Baum [Vario 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0403&PID_FE70
 
 ; Device: 0403:FE71
 "LibUSB-Win32: Baum [PocketVario (24 cells)]"=LIBUSB_DEV, USB\VID_0403&PID_FE71
@@ -735,7 +735,7 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUSB-Win32: Papenmeier [all models]"=LIBUSB_DEV, USB\VID_0403&PID_F208
 
 ; Device: 0403:FE70
-"LibUSB-Win32: Baum [Vario40 (40 cells)]"=LIBUSB_DEV, USB\VID_0403&PID_FE70
+"LibUSB-Win32: Baum [Vario 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0403&PID_FE70
 
 ; Device: 0403:FE71
 "LibUSB-Win32: Baum [PocketVario (24 cells)]"=LIBUSB_DEV, USB\VID_0403&PID_FE71

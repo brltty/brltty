@@ -26,7 +26,7 @@
   <usb-device vendor-id="1027" product-id="61960" />
 
   <!-- Device: 0403:FE70 -->
-  <!-- Baum [Vario40 (40 cells)] -->
+  <!-- Baum [Vario 40 (40 cells)] -->
   <usb-device vendor-id="1027" product-id="65136" />
 
   <!-- Device: 0403:FE71 -->
