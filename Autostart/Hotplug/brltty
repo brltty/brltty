@@ -18,9 +18,11 @@
 ###############################################################################
 
 programName="${0##*/}"
+
 programMessage() {
    echo >&2 "${programName}: ${1}"
 }
+
 programError() {
    [ -n "${1}" ] && programMessage "${1}"
    exit "${2:-2}"
@@ -30,7 +32,7 @@ programError() {
 case "${ACTION}"
 in
    add)
-      driver="${programName#*-}"
+      driver="auto"
       device="usb:"
 
       brltty -b"${driver}" -d"${device}" && {

@@ -34,237 +34,237 @@ LABEL="brltty_usb_begin"
 # Cebra [all models]
 # HIMS [Sync Braille]
 # HandyTech [FTDI chip]
-ENV{PRODUCT}=="403/6001/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/6001/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0403:DE58
 # Hedo [MobilLine]
-ENV{PRODUCT}=="403/de58/*", ENV{BRLTTY_BRAILLE_DRIVER}="hd", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/de58/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0403:DE59
 # Hedo [ProfiLine]
-ENV{PRODUCT}=="403/de59/*", ENV{BRLTTY_BRAILLE_DRIVER}="hd", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/de59/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0403:F208
 # Papenmeier [all models]
-ENV{PRODUCT}=="403/f208/*", ENV{BRLTTY_BRAILLE_DRIVER}="pm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/f208/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0403:FE70
 # Baum [Vario 40 (40 cells)]
-ENV{PRODUCT}=="403/fe70/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/fe70/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0403:FE71
 # Baum [PocketVario (24 cells)]
-ENV{PRODUCT}=="403/fe71/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/fe71/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0403:FE72
 # Baum [SuperVario 40 (40 cells)]
-ENV{PRODUCT}=="403/fe72/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/fe72/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0403:FE73
 # Baum [SuperVario 32 (32 cells)]
-ENV{PRODUCT}=="403/fe73/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/fe73/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0403:FE74
 # Baum [SuperVario 64 (64 cells)]
-ENV{PRODUCT}=="403/fe74/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/fe74/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0403:FE75
 # Baum [SuperVario 80 (80 cells)]
-ENV{PRODUCT}=="403/fe75/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/fe75/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0403:FE76
 # Baum [VarioPro 80 (80 cells)]
-ENV{PRODUCT}=="403/fe76/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/fe76/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0403:FE77
 # Baum [VarioPro 64 (64 cells)]
-ENV{PRODUCT}=="403/fe77/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/fe77/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0452:0100
 # Metec [all models]
-ENV{PRODUCT}=="452/100/*", ENV{BRLTTY_BRAILLE_DRIVER}="mt", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="452/100/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 045E:930A
 # HIMS [Braille Sense (USB 1.1)]
 # HIMS [Braille Sense (USB 2.0)]
 # HIMS [Braille Sense U2 (USB 2.0)]
-ENV{PRODUCT}=="45e/930a/*", ENV{BRLTTY_BRAILLE_DRIVER}="hm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="45e/930a/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 045E:930B
 # HIMS [Braille Edge]
-ENV{PRODUCT}=="45e/930b/*", ENV{BRLTTY_BRAILLE_DRIVER}="hm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="45e/930b/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 06B0:0001
 # Alva [Satellite (5nn)]
-ENV{PRODUCT}=="6b0/1/*", ENV{BRLTTY_BRAILLE_DRIVER}="al", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="6b0/1/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0798:0001
 # Voyager [all models]
-ENV{PRODUCT}=="798/1/*", ENV{BRLTTY_BRAILLE_DRIVER}="vo", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="798/1/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0798:0624
 # Alva [BC624]
-ENV{PRODUCT}=="798/624/*", ENV{BRLTTY_BRAILLE_DRIVER}="al", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="798/624/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0798:0640
 # Alva [BC640]
-ENV{PRODUCT}=="798/640/*", ENV{BRLTTY_BRAILLE_DRIVER}="al", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="798/640/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0798:0680
 # Alva [BC680]
-ENV{PRODUCT}=="798/680/*", ENV{BRLTTY_BRAILLE_DRIVER}="al", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="798/680/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:2000
 # Baum [VarioPro 40 (40 cells)]
-ENV{PRODUCT}=="904/2000/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2000/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:2001
 # Baum [EcoVario 24 (24 cells)]
-ENV{PRODUCT}=="904/2001/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2001/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:2002
 # Baum [EcoVario 40 (40 cells)]
-ENV{PRODUCT}=="904/2002/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2002/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:2007
 # Baum [VarioConnect 40 (40 cells)]
-ENV{PRODUCT}=="904/2007/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2007/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:2008
 # Baum [VarioConnect 32 (32 cells)]
-ENV{PRODUCT}=="904/2008/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2008/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:2009
 # Baum [VarioConnect 24 (24 cells)]
-ENV{PRODUCT}=="904/2009/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2009/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:2010
 # Baum [VarioConnect 64 (64 cells)]
-ENV{PRODUCT}=="904/2010/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2010/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:2011
 # Baum [VarioConnect 80 (80 cells)]
-ENV{PRODUCT}=="904/2011/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2011/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:2014
 # Baum [EcoVario 32 (32 cells)]
-ENV{PRODUCT}=="904/2014/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2014/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:2015
 # Baum [EcoVario 64 (64 cells)]
-ENV{PRODUCT}=="904/2015/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2015/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:2016
 # Baum [EcoVario 80 (80 cells)]
-ENV{PRODUCT}=="904/2016/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2016/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:3000
 # Baum [Refreshabraille 18 (18 cells)]
-ENV{PRODUCT}=="904/3000/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/3000/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:3001
 # Baum [Refreshabraille 18 (18 cells)]
-ENV{PRODUCT}=="904/3001/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/3001/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:4004
 # Baum [Pronto! V3 18 (18 cells)]
-ENV{PRODUCT}=="904/4004/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/4004/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:4005
 # Baum [Pronto! V3 40 (40 cells)]
-ENV{PRODUCT}=="904/4005/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/4005/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:4007
 # Baum [Pronto! V4 18 (18 cells)]
-ENV{PRODUCT}=="904/4007/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/4007/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:4008
 # Baum [Pronto! V4 40 (40 cells)]
-ENV{PRODUCT}=="904/4008/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/4008/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:6001
 # Baum [SuperVario2 40 (40 cells)]
-ENV{PRODUCT}=="904/6001/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/6001/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:6002
 # Baum [PocketVario2 (24 cells)]
-ENV{PRODUCT}=="904/6002/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/6002/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:6003
 # Baum [SuperVario2 32 (32 cells)]
-ENV{PRODUCT}=="904/6003/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/6003/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:6004
 # Baum [SuperVario2 64 (64 cells)]
-ENV{PRODUCT}=="904/6004/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/6004/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:6005
 # Baum [SuperVario2 80 (80 cells)]
-ENV{PRODUCT}=="904/6005/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/6005/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:6006
 # Baum [Brailliant2 40 (40 cells)]
-ENV{PRODUCT}=="904/6006/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/6006/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:6007
 # Baum [Brailliant2 24 (24 cells)]
-ENV{PRODUCT}=="904/6007/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/6007/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:6008
 # Baum [Brailliant2 32 (32 cells)]
-ENV{PRODUCT}=="904/6008/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/6008/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:6009
 # Baum [Brailliant2 64 (64 cells)]
-ENV{PRODUCT}=="904/6009/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/6009/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:600A
 # Baum [Brailliant2 80 (80 cells)]
-ENV{PRODUCT}=="904/600a/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/600a/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:6011
 # Baum [VarioConnect 24 (24 cells)]
-ENV{PRODUCT}=="904/6011/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/6011/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:6012
 # Baum [VarioConnect 32 (32 cells)]
-ENV{PRODUCT}=="904/6012/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/6012/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:6013
 # Baum [VarioConnect 40 (40 cells)]
-ENV{PRODUCT}=="904/6013/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/6013/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:6101
 # Baum [VarioUltra 20 (20 cells)]
-ENV{PRODUCT}=="904/6101/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/6101/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:6102
 # Baum [VarioUltra 40 (40 cells)]
-ENV{PRODUCT}=="904/6102/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/6102/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0904:6103
 # Baum [VarioUltra 32 (32 cells)]
-ENV{PRODUCT}=="904/6103/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/6103/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0921:1200
 # HandyTech [GoHubs chip]
-ENV{PRODUCT}=="921/1200/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="921/1200/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0F4E:0100
 # FreedomScientific [Focus 1]
-ENV{PRODUCT}=="f4e/100/*", ENV{BRLTTY_BRAILLE_DRIVER}="fs", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="f4e/100/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0F4E:0111
 # FreedomScientific [PAC Mate]
-ENV{PRODUCT}=="f4e/111/*", ENV{BRLTTY_BRAILLE_DRIVER}="fs", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="f4e/111/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0F4E:0112
 # FreedomScientific [Focus 2]
-ENV{PRODUCT}=="f4e/112/*", ENV{BRLTTY_BRAILLE_DRIVER}="fs", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="f4e/112/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0F4E:0114
 # FreedomScientific [Focus Blue]
-ENV{PRODUCT}=="f4e/114/*", ENV{BRLTTY_BRAILLE_DRIVER}="fs", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="f4e/114/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 10C4:EA60
 # Generic Identifier
@@ -272,154 +272,154 @@ ENV{PRODUCT}=="f4e/114/*", ENV{BRLTTY_BRAILLE_DRIVER}="fs", GOTO="brltty_usb_run
 # Product: CP210x UART Bridge / myAVR mySmartUSB light
 # BrailleMemo [Pocket]
 # Seika [Braille Display]
-ENV{PRODUCT}=="10c4/ea60/*", ENV{BRLTTY_BRAILLE_DRIVER}="sk", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="10c4/ea60/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 10C4:EA80
 # Generic Identifier
 # Vendor: Cygnal Integrated Products, Inc.
 # Product: CP210x UART Bridge
 # Seika [Note Taker]
-ENV{PRODUCT}=="10c4/ea80/*", ENV{BRLTTY_BRAILLE_DRIVER}="sk", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="10c4/ea80/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 1148:0301
 # BrailleMemo [Smart]
-ENV{PRODUCT}=="1148/301/*", ENV{BRLTTY_BRAILLE_DRIVER}="mm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="1148/301/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 1C71:C004
 # BrailleNote [HumanWare APEX]
-ENV{PRODUCT}=="1c71/c004/*", ENV{BRLTTY_BRAILLE_DRIVER}="bn", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="1c71/c004/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 1C71:C005
 # HumanWare [all models]
-ENV{PRODUCT}=="1c71/c005/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="1c71/c005/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0003
 # HandyTech [USB-HID adapter]
-ENV{PRODUCT}=="1fe4/3/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="1fe4/3/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0044
 # HandyTech [Easy Braille (HID)]
-ENV{PRODUCT}=="1fe4/44/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="1fe4/44/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0054
 # HandyTech [Active Braille]
-ENV{PRODUCT}=="1fe4/54/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="1fe4/54/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0055
 # HandyTech [Connect Braille 40]
-ENV{PRODUCT}=="1fe4/55/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="1fe4/55/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0064
 # HandyTech [Active Star 40]
-ENV{PRODUCT}=="1fe4/64/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="1fe4/64/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0074
 # HandyTech [Braille Star 40 (HID)]
-ENV{PRODUCT}=="1fe4/74/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="1fe4/74/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0081
 # HandyTech [Basic Braille 16]
-ENV{PRODUCT}=="1fe4/81/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="1fe4/81/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0082
 # HandyTech [Basic Braille 20]
-ENV{PRODUCT}=="1fe4/82/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="1fe4/82/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0083
 # HandyTech [Basic Braille 32]
-ENV{PRODUCT}=="1fe4/83/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="1fe4/83/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0084
 # HandyTech [Basic Braille 40]
-ENV{PRODUCT}=="1fe4/84/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="1fe4/84/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0086
 # HandyTech [Basic Braille 64]
-ENV{PRODUCT}=="1fe4/86/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="1fe4/86/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0087
 # HandyTech [Basic Braille 80]
-ENV{PRODUCT}=="1fe4/87/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="1fe4/87/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 1FE4:008A
 # HandyTech [Basic Braille 48]
-ENV{PRODUCT}=="1fe4/8a/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="1fe4/8a/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 1FE4:008B
 # HandyTech [Basic Braille 160]
-ENV{PRODUCT}=="1fe4/8b/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="1fe4/8b/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 4242:0001
 # Pegasus [all models]
-ENV{PRODUCT}=="4242/1/*", ENV{BRLTTY_BRAILLE_DRIVER}="pg", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="4242/1/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: C251:1122
 # EuroBraille [Esys (version < 3.0, no SD card)]
-ENV{PRODUCT}=="c251/1122/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/1122/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: C251:1123
 # EuroBraille [reserved]
-ENV{PRODUCT}=="c251/1123/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/1123/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: C251:1124
 # EuroBraille [Esys (version < 3.0, with SD card)]
-ENV{PRODUCT}=="c251/1124/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/1124/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: C251:1125
 # EuroBraille [reserved]
-ENV{PRODUCT}=="c251/1125/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/1125/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: C251:1126
 # EuroBraille [Esys (version >= 3.0, no SD card)]
-ENV{PRODUCT}=="c251/1126/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/1126/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: C251:1127
 # EuroBraille [reserved]
-ENV{PRODUCT}=="c251/1127/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/1127/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: C251:1128
 # EuroBraille [Esys (version >= 3.0, with SD card)]
-ENV{PRODUCT}=="c251/1128/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/1128/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: C251:1129
 # EuroBraille [reserved]
-ENV{PRODUCT}=="c251/1129/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/1129/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: C251:112A
 # EuroBraille [reserved]
-ENV{PRODUCT}=="c251/112a/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/112a/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: C251:112B
 # EuroBraille [reserved]
-ENV{PRODUCT}=="c251/112b/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/112b/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: C251:112C
 # EuroBraille [reserved]
-ENV{PRODUCT}=="c251/112c/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/112c/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: C251:112D
 # EuroBraille [reserved]
-ENV{PRODUCT}=="c251/112d/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/112d/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: C251:112E
 # EuroBraille [reserved]
-ENV{PRODUCT}=="c251/112e/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/112e/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: C251:112F
 # EuroBraille [reserved]
-ENV{PRODUCT}=="c251/112f/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/112f/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: C251:1130
 # EuroBraille [Esytime]
-ENV{PRODUCT}=="c251/1130/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/1130/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: C251:1131
 # EuroBraille [reserved]
-ENV{PRODUCT}=="c251/1131/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/1131/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: C251:1132
 # EuroBraille [reserved]
-ENV{PRODUCT}=="c251/1132/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/1132/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # END_USB_DEVICES
 
