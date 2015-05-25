@@ -16,7 +16,7 @@
 .\"
 .\" This software is maintained by Dave Mielke <dave@mielke.cc>.
 .\"
-3TH "BRLTTY" "1" "2014-11-06" "brltty 5.2" "BRLTTY User's Manual"
+.TH "BRLTTY" "1" "2014-11-06" "brltty 5.2" "BRLTTY User's Manual"
 .SH NAME
 brltty \- refreshable braille display driver for Linux/Unix
 .SH SYNOPSIS
