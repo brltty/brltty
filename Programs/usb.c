@@ -1277,9 +1277,7 @@ usbPrepareChannel (UsbChannel *channel) {
         }
       }
 
-      if (ok) {
-        return 1;
-      }
+      if (ok) return 1;
       usbCloseInterface(device);
     }
   }
@@ -1314,23 +1312,28 @@ usbChooseChannel (UsbDevice *device, UsbChooseChannelData *data) {
   }
 
   while (definition->vendor) {
-    if (!definition->version || (definition->version == getLittleEndian16(descriptor->bcdUSB))) {
-      if (USB_IS_PRODUCT(descriptor, definition->vendor, definition->product)) {
-        if (!data->genericDevices) {
-          const UsbSerialAdapter *adapter = usbFindSerialAdapter(descriptor);
+    if (definition->version && (definition->version != getLittleEndian16(descriptor->bcdUSB))) goto nextDefinition;
+    if (!USB_IS_PRODUCT(descriptor, definition->vendor, definition->product)) goto nextDefinition;
 
-          if (adapter && adapter->generic) break;
-        }
+    if (!data->genericDevices) {
+      const UsbSerialAdapter *adapter = usbFindSerialAdapter(descriptor);
 
-        if (!usbVerifyVendorIdentifier(descriptor, data->vendorIdentifier)) break;
-        if (!usbVerifyProductIdentifier(descriptor, data->productIdentifier)) break;
-        if (!usbVerifySerialNumber(device, data->serialNumber)) break;
-
-        data->definition = definition;
-        return 1;
-      }
+      if (adapter && adapter->generic) goto nextDefinition;
     }
 
+    if (!usbVerifyVendorIdentifier(descriptor, data->vendorIdentifier)) goto nextDefinition;
+    if (!usbVerifyProductIdentifier(descriptor, data->productIdentifier)) goto nextDefinition;
+    if (!usbVerifySerialNumber(device, data->serialNumber)) goto nextDefinition;
+
+    if (definition->verifyInterface) {
+      if (!usbConfigureDevice(device, definition->configuration)) goto nextDefinition;
+      if (!usbInterfaceDescriptor(device, definition->interface, definition->alternative)) goto nextDefinition;
+    }
+
+    data->definition = definition;
+    return 1;
+
+  nextDefinition:
     definition += 1;
   }
 

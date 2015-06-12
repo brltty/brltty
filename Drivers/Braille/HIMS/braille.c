@@ -394,6 +394,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .vendor=0X045E, .product=0X930A,
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
+      .verifyInterface=1,
       .disableAutosuspend=1,
       .data=&brailleSenseProtocol
     },
@@ -403,6 +404,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .vendor=0X045E, .product=0X930A,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
+      .verifyInterface=1,
       .disableAutosuspend=1,
       .data=&brailleSenseProtocol
     },
