@@ -69,13 +69,14 @@ setScreenKeyModifiers (ScreenKey *key, ScreenKey which) {
       }
     } else {
       if (modifiers & SCR_KEY_CONTROL) {
-        if (iswLatin1(character)) {
+        if (character <= 0X7F) {
           if ((character & 0X6F) == 0X2F) {
             character |= 0X50;
           } else {
-            character &= 0X9F;
+            character &= 0X1F;
           }
         }
+
         modifiers &= ~SCR_KEY_CONTROL;
       }
     }
