@@ -297,6 +297,7 @@ to the following table:
   ``F7``   Move to Previous Item  *
   ``F8``   Move to Next Item      *
   ``F9``   Power Dialog           5.0 (Lollipop)
+  ``F10``  Menu Key               *
   =======  =====================  ===================
 
 The way a braille device emulates keyboard function keys differs from model to

@@ -416,6 +416,13 @@ public class InputService extends InputMethodService {
     return false;
   }
 
+  private final static Action menuAction = new Action() {
+    @Override
+    public boolean performAction () {
+      return inputKey(KeyEvent.KEYCODE_MENU);
+    }
+  };
+
   public static boolean inputKey (int keyCode) {
     return inputKey(keyCode, false);
   }
@@ -501,7 +508,8 @@ public class InputService extends InputMethodService {
     quickSettingsAction,
     backwardAction,
     forwardAction,
-    powerDialogAction
+    powerDialogAction,
+    menuAction
   };
 
   public static boolean inputKeyFunction (int key) {
