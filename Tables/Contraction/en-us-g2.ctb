@@ -644,6 +644,7 @@ sufword kurdistan 13-136-1235-145-24-34-1-1345 Kurdistani
 # the letter l
 always l 123
 always L 123
+sufword lameduck =
 begword leatherett 123-2-2346-1235-15-2345-2345 leatherette
 midendword less 46-234
 always lesson = unlessoned
