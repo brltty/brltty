@@ -38,6 +38,11 @@ const DotsTable dotsTable_ISO11548_1 = {
   BRL_DOT_5, BRL_DOT_6, BRL_DOT_7, BRL_DOT_8
 };
 
+const DotsTable dotsTable_rotated = {
+  BRL_DOT_8, BRL_DOT_6, BRL_DOT_5, BRL_DOT_7,
+  BRL_DOT_3, BRL_DOT_2, BRL_DOT_4, BRL_DOT_1
+};
+
 void
 makeTranslationTable (const DotsTable dots, TranslationTable table) {
   int byte;
@@ -146,12 +151,7 @@ applyBrailleDisplayOrientation (unsigned char *cells, size_t count) {
       unsigned char *target = &buffer[count];
 
       if (!rotateTable[1]) {
-        static const DotsTable dotsTable = {
-          BRL_DOT_8, BRL_DOT_6, BRL_DOT_5, BRL_DOT_7,
-          BRL_DOT_3, BRL_DOT_2, BRL_DOT_4, BRL_DOT_1
-        };
-
-        makeTranslationTable(dotsTable, rotateTable);
+        makeTranslationTable(dotsTable_rotated, rotateTable);
       }
 
       while (source < end) *--target = rotateTable[*source++];

@@ -48,6 +48,7 @@ typedef unsigned char TranslationTable[TRANSLATION_TABLE_SIZE];
 #define DOTS_TABLE_SIZE 8
 typedef unsigned char DotsTable[DOTS_TABLE_SIZE];
 extern const DotsTable dotsTable_ISO11548_1;
+extern const DotsTable dotsTable_rotated;
 
 extern void makeTranslationTable (const DotsTable dots, TranslationTable table);
 extern void reverseTranslationTable (const TranslationTable from, TranslationTable to);
