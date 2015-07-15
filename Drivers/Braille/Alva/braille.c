@@ -118,9 +118,10 @@
 #include "io_usb.h"
 
 typedef enum {
+  PARM_ROTATED_CELLS,
   PARM_SECONDARY_ROUTING_KEY_EMULATION
 } DriverParameter;
-#define BRLPARMS "secondaryroutingkeyemulation"
+#define BRLPARMS "rotatedcells", "secondaryroutingkeyemulation"
 
 #define BRL_STATUS_FIELDS sfAlphabeticCursorCoordinates, sfAlphabeticWindowCoordinates, sfStateLetter
 #define BRL_HAVE_STATUS_CELLS
@@ -329,6 +330,8 @@ BEGIN_KEY_TABLE_LIST
 END_KEY_TABLE_LIST
 
 struct BrailleDataStruct {
+  unsigned int rotatedCells;
+
   struct {
     unsigned char buffer[0X20];
     unsigned char *end;
@@ -1116,9 +1119,10 @@ static void
 initializeVariables2 (BrailleDisplay *brl, char **parameters) {
   brl->data->protocol.bc.secondaryRoutingKeyEmulation = 0;
   if (*parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION]) {
-    if (!validateYesNo(&brl->data->protocol.bc.secondaryRoutingKeyEmulation, parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION]))
+    if (!validateYesNo(&brl->data->protocol.bc.secondaryRoutingKeyEmulation, parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION])) {
       logMessage(LOG_WARNING, "%s: %s", "invalid secondary routing key emulation setting",
                  parameters[PARM_SECONDARY_ROUTING_KEY_EMULATION]);
+    }
   }
 
   initializeHidKeyboardPacket(&brl->data->protocol.bc.hidKeyboardPacket);
@@ -1880,6 +1884,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (connectResource(brl, device)) {
       protocol->initializeVariables(brl, parameters);
 
+      brl->data->rotatedCells = 0;
+      if (*parameters[PARM_ROTATED_CELLS]) {
+        if (!validateYesNo(&brl->data->rotatedCells, parameters[PARM_ROTATED_CELLS])) {
+          logMessage(LOG_WARNING, "%s: %s", "invalid rotated cells setting",
+                     parameters[PARM_ROTATED_CELLS]);
+        }
+      }
+
       if (protocol->detectModel(brl)) {
         if (updateSettings(brl)) {
           {
@@ -1889,7 +1901,12 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             brl->keyNames = ktd->names;
           }
 
-          makeOutputTable(dotsTable_ISO11548_1);
+          if (brl->data->rotatedCells) {
+            makeOutputTable(dotsTable_rotated);
+          } else {
+            makeOutputTable(dotsTable_ISO11548_1);
+          }
+
           brailleDisplay = brl;
           return 1;
         }

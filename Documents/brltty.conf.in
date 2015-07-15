@@ -268,6 +268,7 @@
 #braille-parameters driver:parameter=setting,...
 
 # Alva Braille Driver Parameters
+#braille-parameters al:RotatedCells=no # [no,yes]
 #braille-parameters al:SecondaryRoutingKeyEmulation=no # [no,yes]
 
 # BrlAPI Braille Driver Parameters
