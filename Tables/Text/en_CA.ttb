@@ -73,6 +73,7 @@ char \xAC	(1 345  8)  # ⢝ ¬ [NOT SIGN]
 char \xB6	(1234   8)  # ⢏ ¶ [PILCROW SIGN]
 char \xAE	(123 5  8)  # ⢗ ® [REGISTERED SIGN]
 char \xA7	( 234   8)  # ⢎ § [SECTION SIGN]
+char \u2122	( 2345  8)  # ⢞ ™ [TRADE MARK SIGN]
 char \xA5	(1 3456 8)  # ⢽ ¥ [YEN SIGN]
 
 # symbols represented using punctuation with dot 7 added
