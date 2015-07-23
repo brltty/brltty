@@ -154,15 +154,15 @@ static const int32_t noteFrequencies[] = {
 };
 
 size_t
-getNoteCount (void) {
-  return ARRAY_COUNT(noteFrequencies);
+getMaximumNote (void) {
+  return ARRAY_COUNT(noteFrequencies) - 1;
 }
 
 static inline int32_t
 getNoteFrequency (unsigned char note) {
-  size_t count = getNoteCount();
+  size_t maximum = getMaximumNote();
 
-  if (note >= count) note = count - 1;
+  if (note > maximum) note = maximum;
   return noteFrequencies[note];
 }
 

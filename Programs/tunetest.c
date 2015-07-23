@@ -125,32 +125,32 @@ validateInstrument (unsigned char *value, const char *string) {
 #endif /* HAVE_MIDI_SUPPORT */
 
 static int
-parseTone (const char *tone, int *note, int *duration) {
-  const size_t stringSize = strlen(tone) + 1;
-  char noteString[stringSize];
-  char durationString[stringSize];
+parseTone (const char *operand, int *note, int *duration) {
+  const size_t operandSize = strlen(operand) + 1;
+  char noteOperand[operandSize];
+  char durationOperand[operandSize];
 
-  int noteValue = 60;
+  int noteValue = NOTE_MIDDLE_C;
   int durationValue = 255;
 
   {
-    const char *delimiter = strchr(tone, '/');
+    const char *delimiter = strchr(operand, '/');
 
     if (delimiter) {
-      const size_t length = delimiter - tone;
+      const size_t length = delimiter - operand;
 
-      memcpy(noteString, tone, length);
-      noteString[length] = 0;
+      memcpy(noteOperand, operand, length);
+      noteOperand[length] = 0;
 
-      strcpy(durationString, delimiter+1);
+      strcpy(durationOperand, delimiter+1);
     } else {
-      strcpy(noteString, tone);
-      *durationString = 0;
+      strcpy(noteOperand, operand);
+      *durationOperand = 0;
     }
   }
 
-  if (*noteString) {
-    const char *c = noteString;
+  if (*noteOperand) {
+    const char *c = noteOperand;
 
     static const char letters[] = "cdefgab";
     const char *letter = strchr(letters, *c);
@@ -171,30 +171,30 @@ parseTone (const char *tone, int *note, int *duration) {
           return 0;
         }
 
-        noteValue += (octave - 4) * 12;
+        noteValue += (octave - 4) * NOTES_PER_OCTAVE;
       }
     } else {
       static const int minimum = 0;
-      const int maximum = getNoteCount() - 1;
+      const int maximum = getMaximumNote();
 
       if (!validateInteger(&noteValue, c, &minimum, &maximum)) {
-        logMessage(LOG_ERR, "invalid note: %s", noteString);
+        logMessage(LOG_ERR, "invalid note: %s", noteOperand);
         return 0;
       }
     }
   }
 
-  if ((noteValue < 0) || (noteValue >= getNoteCount())) {
-    logMessage(LOG_ERR, "note out of range: %s", noteString);
+  if ((noteValue < 0) || (noteValue > getMaximumNote())) {
+    logMessage(LOG_ERR, "note out of range: %s", noteOperand);
     return 0;
   }
 
-  if (*durationString) {
+  if (*durationOperand) {
     static const int minimum = 1;
     int maximum = durationValue;
 
-    if (!validateInteger(&durationValue, durationString, &minimum, &maximum)) {
-      logMessage(LOG_ERR, "duration out of range: %s", durationString);
+    if (!validateInteger(&durationValue, durationOperand, &minimum, &maximum)) {
+      logMessage(LOG_ERR, "invalid duration: %s", durationOperand);
       return 0;
     }
   }
@@ -276,28 +276,31 @@ main (int argc, char *argv[]) {
 
   {
     TuneElement elements[argc + 1];
-    TuneElement *element = elements;
 
-    while (argc) {
-      int note;
-      int duration;
+    {
+      TuneElement *element = elements;
 
-      if (!parseTone(*argv, &note, &duration)) {
-        return PROG_EXIT_SYNTAX;
+      while (argc) {
+        int note;
+        int duration;
+
+        if (!parseTone(*argv, &note, &duration)) {
+          return PROG_EXIT_SYNTAX;
+        }
+
+        {
+          TuneElement tone = TUNE_NOTE(duration, note);
+          *(element++) = tone;
+        }
+
+        argv += 1;
+        argc -= 1;
       }
 
       {
-        TuneElement te = TUNE_NOTE(duration, note);
-        *(element++) = te;
+        TuneElement tone = TUNE_STOP();
+        *element = tone;
       }
-
-      argv += 1;
-      argc -= 1;
-    }
-
-    {
-      TuneElement te = TUNE_STOP();
-      *element = te;
     }
 
     if (!setTuneDevice(prefs.tuneDevice)) {
@@ -305,10 +308,8 @@ main (int argc, char *argv[]) {
       return PROG_EXIT_SEMANTIC;
     }
 
-    {
-      playTune(elements);
-      closeTuneDevice();
-    }
+    playTune(elements);
+    closeTuneDevice();
   }
 
   return PROG_EXIT_SUCCESS;
