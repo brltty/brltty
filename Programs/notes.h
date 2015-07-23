@@ -23,6 +23,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
+extern size_t getNoteCount (void);
 extern int32_t getIntegerNoteFrequency (unsigned char note);
 
 #ifndef NO_FLOAT

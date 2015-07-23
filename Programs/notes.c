@@ -153,9 +153,14 @@ static const int32_t noteFrequencies[] = {
   /* 127 +5G  */ 12543854
 };
 
+size_t
+getNoteCount (void) {
+  return ARRAY_COUNT(noteFrequencies);
+}
+
 static inline int32_t
 getNoteFrequency (unsigned char note) {
-  size_t count = ARRAY_COUNT(noteFrequencies);
+  size_t count = getNoteCount();
 
   if (note >= count) note = count - 1;
   return noteFrequencies[note];
