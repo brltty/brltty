@@ -124,13 +124,93 @@ validateInstrument (unsigned char *value, const char *string) {
 }
 #endif /* HAVE_MIDI_SUPPORT */
 
+static int
+parseTone (const char *tone, int *note, int *duration) {
+  const size_t stringSize = strlen(tone) + 1;
+  char noteString[stringSize];
+  char durationString[stringSize];
+
+  int noteValue = 60;
+  int durationValue = 255;
+
+  {
+    const char *delimiter = strchr(tone, '/');
+
+    if (delimiter) {
+      const size_t length = delimiter - tone;
+
+      memcpy(noteString, tone, length);
+      noteString[length] = 0;
+
+      strcpy(durationString, delimiter+1);
+    } else {
+      strcpy(noteString, tone);
+      *durationString = 0;
+    }
+  }
+
+  if (*noteString) {
+    const char *c = noteString;
+
+    static const char letters[] = "cdefgab";
+    const char *letter = strchr(letters, *c);
+
+    if (letter) {
+      static const unsigned char offsets[] = {0, 2, 4, 5, 7, 9, 11};
+
+      noteValue += offsets[letter - letters];
+      c += 1;
+
+      if (*c) {
+        static const int minimum = -1;
+        static const int maximum = 9;
+        int octave = 4;
+
+        if (!validateInteger(&octave, c, &minimum, &maximum)) {
+          logMessage(LOG_ERR, "invalid octave: %s", c);
+          return 0;
+        }
+
+        noteValue += (octave - 4) * 12;
+      }
+    } else {
+      static const int minimum = 0;
+      const int maximum = getNoteCount() - 1;
+
+      if (!validateInteger(&noteValue, c, &minimum, &maximum)) {
+        logMessage(LOG_ERR, "invalid note: %s", noteString);
+        return 0;
+      }
+    }
+  }
+
+  if ((noteValue < 0) || (noteValue >= getNoteCount())) {
+    logMessage(LOG_ERR, "note out of range: %s", noteString);
+    return 0;
+  }
+
+  if (*durationString) {
+    static const int minimum = 1;
+    int maximum = durationValue;
+
+    if (!validateInteger(&durationValue, durationString, &minimum, &maximum)) {
+      logMessage(LOG_ERR, "duration out of range: %s", durationString);
+      return 0;
+    }
+  }
+
+  *note = noteValue;
+  *duration = durationValue;
+  return 1;
+}
+
 int
 main (int argc, char *argv[]) {
   {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "tunetest",
-      .argumentsSummary = "{note duration} ..."
+      .argumentsSummary = "[note][/[duration]] ..."
     };
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
@@ -190,61 +270,34 @@ main (int argc, char *argv[]) {
   }
 
   if (!argc) {
-    logMessage(LOG_ERR, "missing tune.");
-    return PROG_EXIT_SYNTAX;
-  }
-
-  if (argc % 2) {
-    logMessage(LOG_ERR, "missing note duration.");
+    logMessage(LOG_ERR, "missing tune");
     return PROG_EXIT_SYNTAX;
   }
 
   {
-    unsigned int count = argc / 2;
-    TuneElement *elements = malloc((sizeof(*elements) * count) + 1);
+    TuneElement elements[argc + 1];
+    TuneElement *element = elements;
 
-    if (elements) {
-      TuneElement *element = elements;
+    while (argc) {
+      int note;
+      int duration;
 
-      while (argc) {
-        int note;
-        int duration;
-
-        {
-          static const int minimum = 0X01;
-          static const int maximum = 0X7F;
-          const char *argument = *argv++;
-          if (!validateInteger(&note, argument, &minimum, &maximum)) {
-            logMessage(LOG_ERR, "%s: %s", "invalid note number", argument);
-            return PROG_EXIT_SYNTAX;
-          }
-          --argc;
-        }
-
-        {
-          static const int minimum = 1;
-          static const int maximum = 255;
-          const char *argument = *argv++;
-          if (!validateInteger(&duration, argument, &minimum, &maximum)) {
-            logMessage(LOG_ERR, "%s: %s", "invalid note duration", argument);
-            return PROG_EXIT_SYNTAX;
-          }
-          --argc;
-        }
-
-        {
-          TuneElement te = TUNE_NOTE(duration, note);
-          *(element++) = te;
-        }
+      if (!parseTone(*argv, &note, &duration)) {
+        return PROG_EXIT_SYNTAX;
       }
 
       {
-        TuneElement te = TUNE_STOP();
-        *element = te;
+        TuneElement te = TUNE_NOTE(duration, note);
+        *(element++) = te;
       }
-    } else {
-      logMallocError();
-      return PROG_EXIT_FATAL;
+
+      argv += 1;
+      argc -= 1;
+    }
+
+    {
+      TuneElement te = TUNE_STOP();
+      *element = te;
     }
 
     if (!setTuneDevice(prefs.tuneDevice)) {
@@ -256,8 +309,6 @@ main (int argc, char *argv[]) {
       playTune(elements);
       closeTuneDevice();
     }
-
-    free(elements);
   }
 
   return PROG_EXIT_SUCCESS;
