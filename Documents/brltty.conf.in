@@ -60,7 +60,6 @@
 #braille-driver	ba	# BrlAPI
 #braille-driver	bc	# BrailComm
 #braille-driver	bd	# Braudi
-#braille-driver	bg	# B2G
 #braille-driver	bl	# BrailleLite
 #braille-driver	bm	# Baum
 #braille-driver	bn	# BrailleNote

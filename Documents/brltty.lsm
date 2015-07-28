@@ -53,7 +53,6 @@ Platforms: Linux (kernel 1.1.92 or later)
            - BrailleMemo [Pocket (16), Smart (16), 32, 40]
            - BrailleNote [18/32]
            - BrlAPI
-           - B2G [20]
            - CombiBraille [25/45/85]
            - EcoBraille [20/40/80]
            - EuroBraille [AzerBraille, Clio, Esys, Iris, NoteBraille,

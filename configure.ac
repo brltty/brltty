@@ -1401,14 +1401,6 @@ BRLTTY_BRAILLE_DRIVER([vs], [VisioBraille])
 test -n "${gui_toolkit_package}" && {
    BRLTTY_BRAILLE_DRIVER([xw], [XWindow], [$(XTK_LIBS) $(XSV_LIBS)])
 }
-case "${host_os}"
-in
-   *android*)
-      BRLTTY_BRAILLE_DRIVER([bg], [B2G])
-      ;;
-   *)
-      ;;
-esac
 BRLTTY_ARG_DRIVER([braille], [Braille])
 
 AC_CACHE_CHECK([for device directory], [brltty_cv_device_directory], [dnl

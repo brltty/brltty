@@ -36,9 +36,6 @@ public abstract class ApplicationParameters {
 
   public static volatile int SDK_VERSION = Build.VERSION.SDK_INT;
 
-  public static volatile String B2G_DEVICE_PATH = "/dev/braille0";
-  public static volatile String B2G_DRIVER_CODE = "bg";
-
   private ApplicationParameters () {
   }
 }
