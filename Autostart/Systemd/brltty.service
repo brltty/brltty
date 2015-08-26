@@ -10,9 +10,8 @@ Before=sysinit.target
 
 [Service]
 
-Type=forking
-PIDFile=/run/brltty.pid
-ExecStart=/bin/brltty -P /run/brltty.pid
+Type=notify
+ExecStart=/bin/brltty --no-daemon
 
 TimeoutStartSec=5
 TimeoutStopSec=10

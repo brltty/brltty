@@ -2661,6 +2661,8 @@ brlttyStart (void) {
   }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
+  if (!opt_verify) notifyReadyService();
+
   return opt_verify? PROG_EXIT_FORCE: PROG_EXIT_SUCCESS;
 }
 

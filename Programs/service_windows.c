@@ -98,3 +98,9 @@ removeService (const char *name) {
 
   return removed;
 }
+
+int
+notifyReadyService () {
+  logUnsupportedFeature("service notification");
+  return 0;
+}

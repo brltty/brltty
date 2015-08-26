@@ -18,6 +18,8 @@
 
 #include "prologue.h"
 
+#include <systemd/sd-daemon.h>
+
 #include "log.h"
 #include "service.h"
 
@@ -35,6 +37,9 @@ removeService (const char *name) {
 
 int
 notifyReadyService () {
-  logUnsupportedFeature("service notification");
-  return 0;
+  if (sd_notify(1, "READY=1") < 0) {
+    logSystemError("sd_notify");
+  }
+
+  return 1;
 }
