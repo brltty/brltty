@@ -92,6 +92,7 @@ distclean:: clean
 	-cd $(DOC_DIR) && $(MAKE) $@
 	$(ITERATE)
 	-rm -f brltty.spec
+	-rm -f Autostart/Systemd/brltty.service
 	-rm -fr autom4te*.cache
 	-rm -f config.log config.cache config.status
 	-rm -f config.mk config.h config.sh
