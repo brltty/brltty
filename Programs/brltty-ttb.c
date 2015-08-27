@@ -821,10 +821,10 @@ writeCharacter_CPreprocessor (
 static int
 writeAlias_CPreprocessor (FILE *file, const TextTableAliasEntry *alias, const void *data) {
   if (!beginCMacro(file, "BRLTTY_TEXT_TABLE_ALIAS")) return 0;
-  if (!writeCharacterValue_CPreprocessor(file, alias->from) == EOF) return 0;
+  if (!writeCharacterValue_CPreprocessor(file, alias->from)) return 0;
 
   if (!nextCArgument(file)) return 0;
-  if (!writeCharacterValue_CPreprocessor(file, alias->to) == EOF) return 0;
+  if (!writeCharacterValue_CPreprocessor(file, alias->to)) return 0;
 
   if (!nextCArgument(file)) return 0;
   if (!writeCharacterName_CPreprocessor(file, alias->from)) return 0;
