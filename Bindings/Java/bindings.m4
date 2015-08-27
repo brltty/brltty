@@ -64,6 +64,21 @@ then
    JAVA_JNI_HDR="jni.h"
    JAVA_JNI_FLAGS=""
    AC_CHECK_HEADER([${JAVA_JNI_HDR}], [], [AC_CHECK_FILE(["${JAVA_JNI_INC}/${JAVA_JNI_HDR}"], [JAVA_JNI_FLAGS="-I${JAVA_JNI_INC}"], [JAVA_OK=false])])
+
+   "${JAVA_OK}" && {
+     set -- "${JAVA_JNI_INC}"/*/jni_md.h
+
+     if test ${#} -eq 1
+     then
+        directory=`AS_DIRNAME("${1}")`
+        JAVA_JNI_FLAGS="${JAVA_JNI_FLAGS} -I${directory}"
+     elif test ${#} -gt 0
+     then
+        AC_MSG_WARN([more than one machine-dependent Java header found: ${*}])
+        JAVA_OK=false
+     fi
+   }
+
    AC_SUBST([JAVA_JNI_HDR])
    AC_SUBST([JAVA_JNI_INC], ["'${JAVA_JNI_INC}'"])
    AC_SUBST([JAVA_JNI_FLAGS])
