@@ -1784,5 +1784,6 @@ AC_OUTPUT([
    Bindings/Lisp/brlapi.lisp
    Bindings/Python/setup.py
    Android/Application/res/values/configured.xml:Android/Application/res.strings.in
+   Autostart/Systemd/brltty.service
    ${brltty_make_files}
 ])
