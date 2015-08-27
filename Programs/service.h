@@ -26,7 +26,7 @@ extern "C" {
 extern int installService (const char *name, const char *description);
 extern int removeService (const char *name);
 
-extern int notifyReadyService ();
+extern int notifyServiceReady (void);
 
 #ifdef __cplusplus
 }

@@ -51,6 +51,7 @@ BuildRequires: libicu-devel
 BuildRequires: ncurses-devel
 BuildRequires: linuxdoc-tools
 BuildRequires: doxygen
+BuildRequires: systemd-devel
 BuildRequires: bluez-libs-devel
 BuildRequires: alsa-lib-devel
 

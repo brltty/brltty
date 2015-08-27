@@ -100,7 +100,7 @@ removeService (const char *name) {
 }
 
 int
-notifyReadyService () {
-  logUnsupportedFeature("service notification");
+notifyServiceReady (void) {
+  logUnsupportedFeature("service ready notification");
   return 0;
 }

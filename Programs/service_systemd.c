@@ -36,7 +36,7 @@ removeService (const char *name) {
 }
 
 int
-notifyReadyService () {
+notifyServiceReady (void) {
   if (sd_notify(1, "READY=1") < 0) {
     logSystemError("sd_notify");
   }

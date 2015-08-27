@@ -1059,11 +1059,12 @@ BRLTTY_ARG_PACKAGE([service], [system service], [systemd], [dnl
    mingw*)
       service_package="windows"
       ;;
-   linux*)
+], [dnl
+   systemd)
       BRLTTY_HAVE_PACKAGE([systemd], [libsystemd], [dnl
          service_package="systemd"
-         service_libs="$systemd_libs"
-         service_include="$systemd_includes"
+         service_libs="${systemd_libs}"
+         service_includes="${systemd_includes}"
       ])
       ;;
 ])
