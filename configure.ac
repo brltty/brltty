@@ -1055,17 +1055,9 @@ BRLTTY_ARG_PACKAGE([pgmpath], [program path], [], [dnl
       ;;
 ])
 
-BRLTTY_ARG_PACKAGE([service], [system service], [systemd], [dnl
+BRLTTY_ARG_PACKAGE([service], [system service], [libsystemd], [dnl
    mingw*)
       service_package="windows"
-      ;;
-], [dnl
-   systemd)
-      BRLTTY_HAVE_PACKAGE([systemd], [libsystemd], [dnl
-         service_package="systemd"
-         service_libs="${systemd_libs}"
-         service_includes="${systemd_includes}"
-      ])
       ;;
 ])
 
