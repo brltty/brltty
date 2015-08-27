@@ -32,6 +32,7 @@ fi
 JAVA_OK=false
 if test -n "${JAVAC_PATH}"
 then
+   path=`realpath -e -- "${JAVAC_PATH}"` && JAVAC_PATH="${path}"
    AC_MSG_NOTICE([Java compiler is ${JAVAC_PATH}])
    JAVA_OK=true
 
