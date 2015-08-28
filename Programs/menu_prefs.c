@@ -1189,7 +1189,7 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Preferences File"));
-      ITEM(newTextMenuItem(buildSubmenu, &itemName, makePreferencesFilePath(PREFERENCES_FILE)));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, PREFERENCES_FILE));
     }
 
     {
