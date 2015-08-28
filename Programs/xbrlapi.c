@@ -671,7 +671,7 @@ static void toX_f(const char *display) {
     }
 #ifdef CAN_SIMULATE_KEY_PRESSES
     if (haveXTest && FD_ISSET(brlapi_fd,&readfds)) {
-      while ((res = brlapi_readKey(0, &code)==1)) {
+      while (((res = brlapi_readKey(0, &code))==1)) {
 	switch (code & BRLAPI_KEY_TYPE_MASK) {
 	  case BRLAPI_KEY_TYPE_CMD:
 	    switch (code & BRLAPI_KEY_CODE_MASK) {
