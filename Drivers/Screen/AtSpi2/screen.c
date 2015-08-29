@@ -1002,12 +1002,12 @@ static int
 AtSpi2GenerateKeyboardEvent (dbus_uint32_t keysym, enum key_type_e key_type)
 {
   DBusMessage *msg, *reply;
-  char *s = NULL;
+  char *s = "";
 
   msg = new_method_call(SPI2_DBUS_INTERFACE_REG, SPI2_DBUS_PATH_DEC, SPI2_DBUS_INTERFACE_DEC, "GenerateKeyboardEvent");
   if (!msg)
     return 0;
-  dbus_message_append_args(msg, DBUS_TYPE_INT32, &keysym, DBUS_TYPE_STRING, &s, DBUS_TYPE_INT32, &key_type, DBUS_TYPE_INVALID);
+  dbus_message_append_args(msg, DBUS_TYPE_INT32, &keysym, DBUS_TYPE_STRING, &s, DBUS_TYPE_UINT32, &key_type, DBUS_TYPE_INVALID);
   reply = send_with_reply_and_block(bus, msg, 1000, "generating keyboard event");
   if (!reply)
     return 0;
