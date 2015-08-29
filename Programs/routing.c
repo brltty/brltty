@@ -34,6 +34,7 @@
 #include "log.h"
 #include "program.h"
 #include "timing.h"
+#include "async_wait.h"
 #include "scr.h"
 #include "routing.h"
 
@@ -214,7 +215,7 @@ awaitCursorMotion (RoutingData *routing, int direction, const CursorAxisEntry *a
     int oldy;
     int oldx;
 
-    approximateDelay(ROUTING_INTERVAL);
+    asyncWait(ROUTING_INTERVAL);
     getMonotonicTime(&now);
     time = millisecondsBetween(&start, &now) + 1;
 
@@ -275,7 +276,7 @@ awaitCursorMotion (RoutingData *routing, int direction, const CursorAxisEntry *a
       if (ROUTING_INTERVAL) {
         start = now;
       } else {
-        approximateDelay(1);
+        asyncWait(1);
         getMonotonicTime(&start);
       }
     } else if (time > timeout) {
