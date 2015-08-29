@@ -51,7 +51,9 @@
 #define SPI2_DBUS_INTERFACE_TREE	SPI2_DBUS_INTERFACE".Tree"
 #define SPI2_DBUS_INTERFACE_TEXT	SPI2_DBUS_INTERFACE".Text"
 #define SPI2_DBUS_INTERFACE_ACCESSIBLE	SPI2_DBUS_INTERFACE".Accessible"
-#define SPI2_DBUS_INTERFACE_PROP	"org.freedesktop.DBus.Properties"
+#define FREEDESKTOP_DBUS_INTERFACE	"org.freedesktop.DBus"
+#define FREEDESKTOP_DBUS_INTERFACE_PROP	FREEDESKTOP_DBUS_INTERFACE".Properties"
+
 
 #define ATSPI_STATE_ACTIVE 1
 #define ATSPI_STATE_FOCUSED 12
@@ -65,6 +67,8 @@
 #include "thread.h"
 #include "brl_cmds.h"
 #include "charset.h"
+#include "async_io.h"
+#include "async_alarm.h"
 #include "async_event.h"
 
 typedef enum {
@@ -82,13 +86,10 @@ static long curNumRows, curNumCols;
 static wchar_t **curRows;
 static long *curRowLengths;
 static long curCaret,curPosX,curPosY;
-static pthread_mutex_t updateMutex = PTHREAD_MUTEX_INITIALIZER;
-
-pthread_t SPI2_main_thread;
 
 static DBusConnection *bus = NULL;
 
-static AsyncEvent *updateEvent;
+static int updated;
 
 /* having our own implementation is much more independant on locales */
 
@@ -429,7 +430,7 @@ static dbus_int32_t getCaret(const char *sender, const char *path) {
   const char *property = "CaretOffset";
   DBusMessageIter iter, iter_variant;
 
-  msg = new_method_call(sender, path, SPI2_DBUS_INTERFACE_PROP, "Get");
+  msg = new_method_call(sender, path, FREEDESKTOP_DBUS_INTERFACE_PROP, "Get");
   if (!msg)
     return -1;
   dbus_message_append_args(msg, DBUS_TYPE_STRING, &interface, DBUS_TYPE_STRING, &property, DBUS_TYPE_INVALID);
@@ -799,7 +800,7 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
       //logMessage(LOG_DEBUG,"interface %s, member %s, detail %s, detail1 %d detail2 %d",interface, member, detail, detail1, detail2);
       return;
   }
-  asyncSignalEvent(updateEvent, NULL);
+  updated = 1;
 }
 
 static DBusHandlerResult AtSpi2Filter(DBusConnection *connection, DBusMessage *message, void *user_data)
@@ -817,7 +818,153 @@ static DBusHandlerResult AtSpi2Filter(DBusConnection *connection, DBusMessage *m
   return DBUS_HANDLER_RESULT_HANDLED;
 }
 
-static int finished;
+/* Integration of DBus watches with brltty monitors */
+
+struct a2Watch
+{
+  AsyncHandle input_monitor;
+  AsyncHandle output_monitor;
+  DBusWatch *watch;
+};
+
+int a2ProcessWatch(const AsyncMonitorCallbackParameters *parameters, int flags);
+
+ASYNC_MONITOR_CALLBACK(a2ProcessInput) {
+  return a2ProcessWatch(parameters, DBUS_WATCH_READABLE);
+}
+
+ASYNC_MONITOR_CALLBACK(a2ProcessOutput) {
+  return a2ProcessWatch(parameters, DBUS_WATCH_WRITABLE);
+}
+
+int a2ProcessWatch(const AsyncMonitorCallbackParameters *parameters, int flags)
+{
+  struct a2Watch *a2Watch = parameters->data;
+  DBusWatch *watch = a2Watch->watch;
+  /* Read/Write on socket */
+  dbus_watch_handle(watch, parameters->error?DBUS_WATCH_ERROR:flags);
+  /* And process messages */
+  while (dbus_connection_dispatch(bus) != DBUS_DISPATCH_COMPLETE)
+    ;
+  if (updated)
+  {
+    updated = 0;
+    mainScreenUpdated();
+  }
+  if (flags == DBUS_WATCH_READABLE) {
+    asyncDiscardHandle(a2Watch->input_monitor);
+    a2Watch->input_monitor = NULL;
+    if (dbus_watch_get_enabled(watch))
+      /* Still enabled, requeue it */
+      asyncMonitorFileInput(&a2Watch->input_monitor, dbus_watch_get_unix_fd(watch), a2ProcessInput, a2Watch);
+  } else {
+    asyncDiscardHandle(a2Watch->output_monitor);
+    a2Watch->output_monitor = NULL;
+    if (dbus_watch_get_enabled(watch))
+      /* Still enabled, requeue it */
+      asyncMonitorFileOutput(&a2Watch->output_monitor, dbus_watch_get_unix_fd(watch), a2ProcessOutput, a2Watch);
+  }
+  return 0;
+}
+
+dbus_bool_t a2AddWatch(DBusWatch *watch, void *data)
+{
+  struct a2Watch *a2Watch = calloc(1, sizeof(*a2Watch));
+  a2Watch->watch = watch;
+  int flags = dbus_watch_get_flags(watch);
+  if (dbus_watch_get_enabled(watch))
+  {
+    if (flags & DBUS_WATCH_READABLE)
+      asyncMonitorFileInput(&a2Watch->input_monitor, dbus_watch_get_unix_fd(watch), a2ProcessInput, a2Watch);
+    if (flags & DBUS_WATCH_WRITABLE)
+      asyncMonitorFileOutput(&a2Watch->output_monitor, dbus_watch_get_unix_fd(watch), a2ProcessOutput, a2Watch);
+  }
+  dbus_watch_set_data(watch, a2Watch, NULL);
+  return TRUE;
+}
+
+void a2RemoveWatch(DBusWatch *watch, void *data)
+{
+  struct a2Watch *a2Watch = dbus_watch_get_data(watch);
+  dbus_watch_set_data(watch, NULL, NULL);
+  if (a2Watch->input_monitor)
+    asyncCancelRequest(a2Watch->input_monitor);
+  if (a2Watch->output_monitor)
+    asyncCancelRequest(a2Watch->output_monitor);
+  free(a2Watch);
+}
+
+void a2WatchToggled(DBusWatch *watch, void *data)
+{
+  if (dbus_watch_get_enabled(watch)) {
+    if (!dbus_watch_get_data(watch))
+      a2AddWatch(watch, data);
+  } else {
+    if (dbus_watch_get_data(watch))
+      a2RemoveWatch(watch, data);
+  }
+}
+
+/* Integration of DBus timeouts with brltty monitors */
+
+struct a2Timeout
+{
+  AsyncHandle monitor;
+  DBusTimeout *timeout;
+};
+
+ASYNC_ALARM_CALLBACK(a2ProcessTimeout)
+{
+  struct a2Timeout *a2Timeout = parameters->data;
+  DBusTimeout *timeout = a2Timeout->timeout;
+  /* Process timeout */
+  dbus_timeout_handle(timeout);
+  /* And process messages */
+  while (dbus_connection_dispatch(bus) != DBUS_DISPATCH_COMPLETE)
+    ;
+  if (updated)
+  {
+    updated = 0;
+    mainScreenUpdated();
+  }
+  asyncDiscardHandle(a2Timeout->monitor);
+  a2Timeout->monitor = NULL;
+  if (dbus_timeout_get_enabled(timeout))
+    /* Still enabled, requeue it */
+    asyncSetAlarmIn(&a2Timeout->monitor, dbus_timeout_get_interval(timeout), a2ProcessTimeout, a2Timeout);
+}
+
+dbus_bool_t a2AddTimeout(DBusTimeout *timeout, void *data)
+{
+  struct a2Timeout *a2Timeout = calloc(1, sizeof(*a2Timeout));
+  a2Timeout->timeout = timeout;
+  if (dbus_timeout_get_enabled(timeout))
+    asyncSetAlarmIn(&a2Timeout->monitor, dbus_timeout_get_interval(timeout), a2ProcessTimeout, a2Timeout);
+  dbus_timeout_set_data(timeout, a2Timeout, NULL);
+  return TRUE;
+}
+
+void a2RemoveTimeout(DBusTimeout *timeout, void *data)
+{
+  struct a2Timeout *a2Timeout = dbus_timeout_get_data(timeout);
+  dbus_timeout_set_data(timeout, NULL, NULL);
+  if (a2Timeout->monitor)
+    asyncCancelRequest(a2Timeout->monitor);
+  free(a2Timeout);
+}
+
+void a2TimeoutToggled(DBusTimeout *timeout, void *data)
+{
+  if (dbus_timeout_get_enabled(timeout)) {
+    if (!dbus_timeout_get_data(timeout))
+      a2AddTimeout(timeout, data);
+  } else {
+    if (dbus_timeout_get_data(timeout))
+      a2RemoveTimeout(timeout, data);
+  }
+}
+
+/* Driver construction / destruction */
 
 static int watch(const char *message, const char *event) {
   DBusError error;
@@ -847,10 +994,9 @@ static int watch(const char *message, const char *event) {
   return 1;
 }
 
-THREAD_FUNCTION(a2OpenScreenThread) {
+static int
+construct_AtSpi2Screen (void) {
   DBusError error;
-
-  sem_t *SPI2_init_sem = argument;
 
   dbus_error_init(&error);
 #ifdef HAVE_ATSPI_GET_A11Y_BUS
@@ -885,49 +1031,28 @@ THREAD_FUNCTION(a2OpenScreenThread) {
   WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='TextCaretMoved'", "object:textcaretmoved");
   WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='StateChanged'", "object:statechanged");
 
-  /* TODO: use dbus_watch_get_unix_fd() or dbus_watch_get_socket() instead */
-  sem_post(SPI2_init_sem);
   initTerm();
-  while (!finished && dbus_connection_read_write_dispatch (bus, 1000))
-    ;
 
-  if (curPath)
-    finiTerm();
+  dbus_connection_set_watch_functions(bus, a2AddWatch, a2RemoveWatch, a2WatchToggled, NULL, NULL);
+  dbus_connection_set_timeout_functions(bus, a2AddTimeout, a2RemoveTimeout, a2TimeoutToggled, NULL, NULL);
 
-  dbus_connection_remove_filter(bus, AtSpi2Filter, NULL);
+  logMessage(LOG_DEBUG,"SPI2 initialized");
+  return 1;
 outConn:
   dbus_connection_unref(bus);
 
 out:
-  return NULL;
-}
-
-static int
-construct_AtSpi2Screen (void) {
-  sem_t SPI2_init_sem;
-  sem_init(&SPI2_init_sem,0,0);
-  finished = 0;
-  if (createThread("driver-screen-AtSpi2",
-                        &SPI2_main_thread, NULL,
-                        a2OpenScreenThread, (void *)&SPI2_init_sem)) {
-    logMessage(LOG_ERR,"main SPI2 thread failed to be launched");
-    return 0;
-  }
-  do {
-    errno = 0;
-  } while (sem_wait(&SPI2_init_sem) == -1 && errno == EINTR);
-  if (errno) {
-    logSystemError("SPI2 initialization wait failed");
-    return 0;
-  }
-  logMessage(LOG_DEBUG,"SPI2 initialized");
-  return 1;
+  return 0;
 }
 
 static void
 destruct_AtSpi2Screen (void) {
-  finished = 1;
-  pthread_join(SPI2_main_thread,NULL);
+  if (curPath)
+    finiTerm();
+
+  dbus_connection_remove_filter(bus, AtSpi2Filter, NULL);
+  dbus_connection_close(bus);
+  dbus_connection_unref(bus);
   logMessage(LOG_DEBUG,"SPI2 stopped");
 }
 
@@ -966,7 +1091,6 @@ refresh_AtSpi2Screen (void)
 
 static void
 describe_AtSpi2Screen (ScreenDescription *description) {
-  pthread_mutex_lock(&updateMutex);
   if (curPath) {
     description->cols = curPosX>=curNumCols?curPosX+1:curNumCols;
     description->rows = curNumRows?curNumRows:1;
@@ -979,7 +1103,6 @@ describe_AtSpi2Screen (ScreenDescription *description) {
     description->posx = 0;
     description->posy = 0;
   }
-  pthread_mutex_unlock(&updateMutex);
   description->number = currentVirtualTerminal_AtSpi2Screen();
 }
 
@@ -992,11 +1115,9 @@ readCharacters_AtSpi2Screen (const ScreenBox *box, ScreenCharacter *buffer) {
     return 1;
   }
   if (!curNumCols || !curNumRows) return 0;
-  pthread_mutex_lock(&updateMutex);
   short cols = curPosX>=curNumCols?curPosX+1:curNumCols;
   if (!validateScreenBox(box, cols, curNumRows))
   {
-    pthread_mutex_unlock(&updateMutex);
     return 0;
   }
   for (y=0; y<box->height; y++) {
@@ -1008,7 +1129,6 @@ readCharacters_AtSpi2Screen (const ScreenBox *box, ScreenCharacter *buffer) {
       }
     }
   }
-  pthread_mutex_unlock(&updateMutex);
   return 1;
 }
 
@@ -1175,5 +1295,4 @@ scr_initialize (MainScreen *main) {
   main->processParameters = processParameters_AtSpi2Screen;
   main->construct = construct_AtSpi2Screen;
   main->destruct = destruct_AtSpi2Screen;
-  updateEvent = asyncNewEvent(AtSpi2ScreenUpdated, NULL);
 }
