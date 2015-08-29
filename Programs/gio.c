@@ -29,6 +29,7 @@
 #include "io_serial.h"
 
 const GioClass *const gioClasses[] = {
+  &gioNullClass,
   &gioSerialClass,
   &gioUsbClass,
   &gioBluetoothClass,
@@ -46,6 +47,8 @@ gioInitializeOptions (GioOptions *options) {
 
 void
 gioInitializeDescriptor (GioDescriptor *descriptor) {
+  gioInitializeOptions(&descriptor->null.options);
+
   descriptor->serial.parameters = NULL;
   gioInitializeOptions(&descriptor->serial.options);
   descriptor->serial.options.inputTimeout = 100;

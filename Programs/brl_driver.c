@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include "log.h"
 #include "drivers.h"
 #include "brl.h"
 #include "brl.auto.h"
@@ -31,13 +32,30 @@
 #include "brl_driver.h"
 
 static int
-brl_construct (BrailleDisplay *brl UNUSED, char **parameters UNUSED, const char *device UNUSED) {
-  brl->keyBindings = NULL;
-  return 1;
+connectResource (BrailleDisplay *brl, const char *identifier) {
+  GioDescriptor descriptor;
+  gioInitializeDescriptor(&descriptor);
+
+  if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
+    return 1;
+  }
+
+  return 0;
+}
+
+static int
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
+  if (connectResource(brl, "null:")) {
+    brl->keyBindings = NULL;
+    return 1;
+  }
+
+  return 0;
 }
 
 static void
 brl_destruct (BrailleDisplay *brl UNUSED) {
+  disconnectBrailleResource(brl, NULL);
 }
 
 static int

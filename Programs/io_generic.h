@@ -119,6 +119,7 @@ extern void gioDestroyHandleInputObject (GioHandleInputObject *hio);
 
 typedef enum {
   GIO_RESOURCE_UNTYPED = 0,
+  GIO_RESOURCE_NULL,
   GIO_RESOURCE_SERIAL,
   GIO_RESOURCE_USB,
   GIO_RESOURCE_BLUETOOTH

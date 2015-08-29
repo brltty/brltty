@@ -202,6 +202,9 @@ io_misc.$O:
 gio.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/gio.c
 
+gio_null.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/gio_null.c
+
 gio_serial.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/gio_serial.c
 

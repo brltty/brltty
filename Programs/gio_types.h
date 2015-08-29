@@ -65,6 +65,10 @@ typedef void GioUsbSetConnectionPropertiesMethod (
 
 typedef struct {
   struct {
+    GioOptions options;
+  } null;
+
+  struct {
     const SerialParameters *parameters;
     GioOptions options;
   } serial;

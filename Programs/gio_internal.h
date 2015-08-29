@@ -158,6 +158,7 @@ typedef struct {
 } GioClass;
 
 extern const GioClass *const gioClasses[];
+extern const GioClass gioNullClass;
 extern const GioClass gioSerialClass;
 extern const GioClass gioUsbClass;
 extern const GioClass gioBluetoothClass;
