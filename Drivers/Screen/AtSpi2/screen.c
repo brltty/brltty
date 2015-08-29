@@ -65,6 +65,7 @@
 #include "thread.h"
 #include "brl_cmds.h"
 #include "charset.h"
+#include "async_event.h"
 
 typedef enum {
   PARM_TYPE
@@ -86,6 +87,8 @@ static pthread_mutex_t updateMutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_t SPI2_main_thread;
 
 static DBusConnection *bus = NULL;
+
+static AsyncEvent *updateEvent;
 
 /* having our own implementation is much more independant on locales */
 
@@ -794,7 +797,9 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
     caretPosition(curCaret);
   } else {
       //logMessage(LOG_DEBUG,"interface %s, member %s, detail %s, detail1 %d detail2 %d",interface, member, detail, detail1, detail2);
+      return;
   }
+  asyncSignalEvent(updateEvent, NULL);
 }
 
 static DBusHandlerResult AtSpi2Filter(DBusConnection *connection, DBusMessage *message, void *user_data)
@@ -942,6 +947,22 @@ currentVirtualTerminal_AtSpi2Screen (void) {
 }
 
 static const char nonatspi [] = "not an AT-SPI2 text widget";
+
+static int
+poll_AtSpi2Screen (void)
+{
+  return 0;
+}
+
+ASYNC_EVENT_CALLBACK(AtSpi2ScreenUpdated) {
+  mainScreenUpdated();
+}
+
+static int
+refresh_AtSpi2Screen (void)
+{
+  return 1;
+}
 
 static void
 describe_AtSpi2Screen (ScreenDescription *description) {
@@ -1143,6 +1164,8 @@ insertKey_AtSpi2Screen (ScreenKey key) {
 static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
+  main->base.poll = poll_AtSpi2Screen;
+  main->base.refresh = refresh_AtSpi2Screen;
   main->base.describe = describe_AtSpi2Screen;
   main->base.readCharacters = readCharacters_AtSpi2Screen;
   main->base.insertKey = insertKey_AtSpi2Screen;
@@ -1152,4 +1175,5 @@ scr_initialize (MainScreen *main) {
   main->processParameters = processParameters_AtSpi2Screen;
   main->construct = construct_AtSpi2Screen;
   main->destruct = destruct_AtSpi2Screen;
+  updateEvent = asyncNewEvent(AtSpi2ScreenUpdated, NULL);
 }
