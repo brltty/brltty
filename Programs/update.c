@@ -516,10 +516,6 @@ autospeak (AutospeakMode mode) {
         return;
       }
 
-      if (!oldCharacters) {
-        registerProgramMemory("autospeak-buffer", &oldCharacters);
-      }
-
       oldCharacters = newBuffer;
       oldSize = newSize;
     }
