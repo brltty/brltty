@@ -947,7 +947,7 @@ static void
 describe_AtSpi2Screen (ScreenDescription *description) {
   pthread_mutex_lock(&updateMutex);
   if (curPath) {
-    description->cols = curNumCols;
+    description->cols = curPosX>=curNumCols?curPosX+1:curNumCols;
     description->rows = curNumRows?curNumRows:1;
     description->posx = curPosX;
     description->posy = curPosY;
@@ -971,8 +971,13 @@ readCharacters_AtSpi2Screen (const ScreenBox *box, ScreenCharacter *buffer) {
     return 1;
   }
   if (!curNumCols || !curNumRows) return 0;
-  if (!validateScreenBox(box, curNumCols, curNumRows)) return 0;
   pthread_mutex_lock(&updateMutex);
+  short cols = curPosX>=curNumCols?curPosX+1:curNumCols;
+  if (!validateScreenBox(box, cols, curNumRows))
+  {
+    pthread_mutex_unlock(&updateMutex);
+    return 0;
+  }
   for (y=0; y<box->height; y++) {
     if (curRowLengths[box->top+y]) {
       for (x=0; x<box->width; x++) {
