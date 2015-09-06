@@ -1030,8 +1030,6 @@ ASYNC_SIGNAL_CALLBACK(usbHandleInputSignal) {
     } else {
       errno = response.error;
     }
-
-    free(urb);
   } else {
     usbLogInputProblem(endpoint, "input URB not available");
   }
@@ -1112,7 +1110,6 @@ ASYNC_MONITOR_CALLBACK(usbHandleCompletedInputRequests) {
 
       if (!usbHandleCompletedInputRequest(endpoint, urb)) {
         usbSetInputError(endpoint, errno);
-        free(urb);
         return 0;
       }
     }
