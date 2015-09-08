@@ -1,0 +1,221 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <string name="app_name">BRLTTY</string>
+  <string name="app_description">BRLTTY podporuje braillské řádky.</string>
+
+  <string name="input_service_name">Služba vstupu BRLTTY</string>
+  <string name="input_service_type">Klávesnice braillských zařízení</string>
+
+  <string name="VIRTUAL_BUTTON_NOTIFICATIONS">Oznámení</string>
+  <string name="VIRTUAL_BUTTON_QUICK_SETTINGS">Rychlé nastavení</string>
+  <string name="VIRTUAL_BUTTON_BACK">Zpět</string>
+  <string name="VIRTUAL_BUTTON_HOME">Domů</string>
+  <string name="VIRTUAL_BUTTON_RECENT_APPS">Poslední Aplikace</string>
+
+  <string name="SETTINGS_SCREEN_MAIN">Nastavení BRLTTY</string>
+  <string name="SETTINGS_SCREEN_GENERAL">Obecná nastavení</string>
+  <string name="SETTINGS_SCREEN_DEVICES">Správa zařízení</string>
+  <string name="SETTINGS_SCREEN_ADVANCED">Pokročilá nastavení</string>
+
+  <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Režim navigace</string>
+  <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Hlasová podpora</string>
+
+  <string name="SETTINGS_BUTTON_TEXT_TABLE">Tabulka pro převod textu</string>
+  <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Tabulka atributů</string>
+  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Tabulka zkratkopisu</string>
+  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tabulka klávesnice</string>
+
+  <string name="SETTINGS_BUTTON_LOG_LEVEL">Úroveň protokolu</string>
+  <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Kategorie protokolu událostí</string>
+  <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Zaznamenávat události usnadnění</string>
+  <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Zaznamenávat události klávesnice</string>
+
+  <string name="DEVICES_BUTTON_SELECTED">Vybrané zařízení</string>
+  <string name="DEVICES_BUTTON_ADD">Přidat zařízení</string>
+  <string name="DEVICES_BUTTON_REMOVE">Odebrat zařízení</string>
+
+  <string name="SELECTED_DEVICE_NONE">Žádné zařízení</string>
+  <string name="SELECTED_DEVICE_UNSELECTED">Zařízení nevybráno</string>
+
+  <string name="ADD_DEVICE_NAME">Jméno zařízení</string>
+  <string name="ADD_DEVICE_METHOD">Způsob komunikace</string>
+  <string name="ADD_DEVICE_SELECT">Vybrat zařízení</string>
+  <string name="ADD_DEVICE_DRIVER">braillský ovladač</string>
+  <string name="ADD_DEVICE_DONE">Dokončit</string>
+  <string name="ADD_DEVICE_UNSELECTED_METHOD">Způsob komunikace nevybrán</string>
+  <string name="ADD_DEVICE_UNSELECTED_DEVICE">Zařízení nevybráno</string>
+  <string name="ADD_DEVICE_UNSELECTED_DRIVER">braillský ovladač nevybrán</string>
+  <string name="ADD_DEVICE_NO_DEVICES">Žádná zařízení</string>
+  <string name="ADD_DEVICE_DUPLICATE_NAME">Jméno zařízení se již používá</string>
+
+  <string name="REMOVE_DEVICE_ASK">Opravdu si přejete odebrat toto zařízení?</string>
+
+  <string name="SET_SELECTION_NONE">Nic nevybráno</string>
+
+  <string name="NAVIGATION_MODE_LABEL_List">Svislý seznam</string>
+  <string name="NAVIGATION_MODE_LABEL_Grid">Dvourozměrná mřížka</string>
+
+  <string name="SPEECH_SUPPORT_LABEL_None">Žádná</string>
+  <string name="SPEECH_SUPPORT_LABEL_Native">Nativní</string>
+
+  <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
+  <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>
+  <string name="COMMUNICATION_METHOD_LABEL_Serial">Sériová</string>
+
+  <string name="LOG_LEVEL_LABEL_debug">Ladění</string>
+  <string name="LOG_LEVEL_LABEL_information">Informace</string>
+  <string name="LOG_LEVEL_LABEL_notice">Upozornění</string>
+  <string name="LOG_LEVEL_LABEL_warning">Varování</string>
+  <string name="LOG_LEVEL_LABEL_error">Chyby</string>
+  <string name="LOG_LEVEL_LABEL_critical">Kritické</string>
+  <string name="LOG_LEVEL_LABEL_alert">Výstrahy</string>
+  <string name="LOG_LEVEL_LABEL_emergency">Nouzové</string>
+
+  <string name="LOG_CATEGORY_LABEL_ingio">Obecný vstup</string>
+  <string name="LOG_CATEGORY_LABEL_inpkts">Vstupní pakety</string>
+  <string name="LOG_CATEGORY_LABEL_outpkts">Výstupní pakety</string>
+  <string name="LOG_CATEGORY_LABEL_brlkeys">Události klávesnice braillského zařízení</string>
+  <string name="LOG_CATEGORY_LABEL_kbdkeys">Události klávesnice</string>
+  <string name="LOG_CATEGORY_LABEL_csrtrk">Sledování kurzoru</string>
+  <string name="LOG_CATEGORY_LABEL_csrrtg">Navádění kurzoru</string>
+  <string name="LOG_CATEGORY_LABEL_update">Události aktualizací</string>
+  <string name="LOG_CATEGORY_LABEL_speech">Události hlasu</string>
+  <string name="LOG_CATEGORY_LABEL_async">Asynchronní události</string>
+  <string name="LOG_CATEGORY_LABEL_server">Události serveru</string>
+  <string name="LOG_CATEGORY_LABEL_serial">Sériový Vstup/Výstup</string>
+  <string name="LOG_CATEGORY_LABEL_usb">USB Vstup/Výstup</string>
+  <string name="LOG_CATEGORY_LABEL_bluetooth">Bluetooth Vstup/Výstup</string>
+  <string name="LOG_CATEGORY_LABEL_brldrv">Události braillského ovladače</string>
+  <string name="LOG_CATEGORY_LABEL_spkdrv">Události ovladače hlasu</string>
+  <string name="LOG_CATEGORY_LABEL_scrdrv">Události ovladače obrazovky</string>
+
+  <string name="BRAILLE_DRIVER_LABEL_auto">Autodetekce</string>
+
+  <string name="TEXT_TABLE_LABEL_auto">Automatický výběr dle národního prostředí</string>
+  <string name="TEXT_TABLE_LABEL_ar">Arabština (obecná)</string>
+  <string name="TEXT_TABLE_LABEL_as">Ásámština</string>
+  <string name="TEXT_TABLE_LABEL_awa">Avadhí</string>
+  <string name="TEXT_TABLE_LABEL_bg">Bulharština</string>
+  <string name="TEXT_TABLE_LABEL_bh">Bihárské jazyky</string>
+  <string name="TEXT_TABLE_LABEL_bn">Bengálština</string>
+  <string name="TEXT_TABLE_LABEL_bo">Tibetština</string>
+  <string name="TEXT_TABLE_LABEL_bra">Bradžština</string>
+  <string name="TEXT_TABLE_LABEL_brf">Braille Ready Format (pro zobrazení souborů .brf v editoru či pageru)</string>
+  <string name="TEXT_TABLE_LABEL_cs">Čeština</string>
+  <string name="TEXT_TABLE_LABEL_cy">Velština</string>
+  <string name="TEXT_TABLE_LABEL_da_1252">Dánština (Svend Thougaard, 2002-11-18)</string>
+  <string name="TEXT_TABLE_LABEL_da">Dánština</string>
+  <string name="TEXT_TABLE_LABEL_da_lt">Dánština (LogText)</string>
+  <string name="TEXT_TABLE_LABEL_de">Němčina</string>
+  <string name="TEXT_TABLE_LABEL_dra">Drávidské jazyky</string>
+  <string name="TEXT_TABLE_LABEL_el">Řečtina</string>
+  <string name="TEXT_TABLE_LABEL_en_CA">Angličtina (Kanada)</string>
+  <string name="TEXT_TABLE_LABEL_en">Angličtina</string>
+  <string name="TEXT_TABLE_LABEL_en_GB">Angličtina (Spojené Království)</string>
+  <string name="TEXT_TABLE_LABEL_en_nabcc">Angličtina (North American Braille Computer Code)</string>
+  <string name="TEXT_TABLE_LABEL_en_US">Angličtina (Spojené státy)</string>
+  <string name="TEXT_TABLE_LABEL_eo">Esperanto</string>
+  <string name="TEXT_TABLE_LABEL_es">Španělština</string>
+  <string name="TEXT_TABLE_LABEL_et">Estonština</string>
+  <string name="TEXT_TABLE_LABEL_fi">Finština</string>
+  <string name="TEXT_TABLE_LABEL_fr_2007">Francouzština (unified 2007)</string>
+  <string name="TEXT_TABLE_LABEL_fr_CA">Francouzština (Kanada)</string>
+  <string name="TEXT_TABLE_LABEL_fr_cbifs">Francouzština (Code Braille Informatique FranĂ§ais Standard)</string>
+  <string name="TEXT_TABLE_LABEL_fr">Francouzština</string>
+  <string name="TEXT_TABLE_LABEL_fr_FR">Francouzština (Francie)</string>
+  <string name="TEXT_TABLE_LABEL_fr_vs">Francouzština (VisioBraille)</string>
+  <string name="TEXT_TABLE_LABEL_ga">Irština</string>
+  <string name="TEXT_TABLE_LABEL_gd">Skotská gaelština</string>
+  <string name="TEXT_TABLE_LABEL_gon">Góndí</string>
+  <string name="TEXT_TABLE_LABEL_gu">Gudžarátština</string>
+  <string name="TEXT_TABLE_LABEL_he">Hebrejština</string>
+  <string name="TEXT_TABLE_LABEL_hi">Hindština</string>
+  <string name="TEXT_TABLE_LABEL_hr">Chorvatština</string>
+  <string name="TEXT_TABLE_LABEL_hu">Maďarština</string>
+  <string name="TEXT_TABLE_LABEL_hy">Arménština</string>
+  <string name="TEXT_TABLE_LABEL_is">Islandština</string>
+  <string name="TEXT_TABLE_LABEL_it">Italština</string>
+  <string name="TEXT_TABLE_LABEL_kha">Khasi</string>
+  <string name="TEXT_TABLE_LABEL_kn">Kannadština</string>
+  <string name="TEXT_TABLE_LABEL_kok">Konkanština</string>
+  <string name="TEXT_TABLE_LABEL_kru">Kurukh</string>
+  <string name="TEXT_TABLE_LABEL_lt">Litevština</string>
+  <string name="TEXT_TABLE_LABEL_lv">Lotyština</string>
+  <string name="TEXT_TABLE_LABEL_mg">Malgaština</string>
+  <string name="TEXT_TABLE_LABEL_mi">Maorština</string>
+  <string name="TEXT_TABLE_LABEL_ml">Malajálamština</string>
+  <string name="TEXT_TABLE_LABEL_mni">Manipurština</string>
+  <string name="TEXT_TABLE_LABEL_mr">Maráthština</string>
+  <string name="TEXT_TABLE_LABEL_mt">Maltština</string>
+  <string name="TEXT_TABLE_LABEL_mun">Mundské jazyky</string>
+  <string name="TEXT_TABLE_LABEL_mwr">Márvárí</string>
+  <string name="TEXT_TABLE_LABEL_ne">Nepálština</string>
+  <string name="TEXT_TABLE_LABEL_new">Nevarština</string>
+  <string name="TEXT_TABLE_LABEL_nl_BE">Nizozemština (Belgie)</string>
+  <string name="TEXT_TABLE_LABEL_nl">Nizozemština</string>
+  <string name="TEXT_TABLE_LABEL_nl_NL">Nizozemština (Nizozemí)</string>
+  <string name="TEXT_TABLE_LABEL_no_generic">Norština (s podporou ostatních jazyků)</string>
+  <string name="TEXT_TABLE_LABEL_no">Norština</string>
+  <string name="TEXT_TABLE_LABEL_no_oup">Norština (Offentlig utvalg for punktskrift)</string>
+  <string name="TEXT_TABLE_LABEL_nwc">Klasická nevarština (stará)</string>
+  <string name="TEXT_TABLE_LABEL_or">Urijština</string>
+  <string name="TEXT_TABLE_LABEL_pa">Paňdžábština</string>
+  <string name="TEXT_TABLE_LABEL_pi">Páli</string>
+  <string name="TEXT_TABLE_LABEL_pl">Polština</string>
+  <string name="TEXT_TABLE_LABEL_pt">Portugalština</string>
+  <string name="TEXT_TABLE_LABEL_ro">Rumunština</string>
+  <string name="TEXT_TABLE_LABEL_ru">Ruština</string>
+  <string name="TEXT_TABLE_LABEL_sa">Sanskrt</string>
+  <string name="TEXT_TABLE_LABEL_sat">Santálština</string>
+  <string name="TEXT_TABLE_LABEL_sd">Sindhština</string>
+  <string name="TEXT_TABLE_LABEL_sk">Slovenština</string>
+  <string name="TEXT_TABLE_LABEL_sl">Slovinština</string>
+  <string name="TEXT_TABLE_LABEL_sv_1989">Švédština (standard 1989)</string>
+  <string name="TEXT_TABLE_LABEL_sv_1996">Švédština (standard 1996)</string>
+  <string name="TEXT_TABLE_LABEL_sv">Švédština</string>
+  <string name="TEXT_TABLE_LABEL_sw">Svahilština</string>
+  <string name="TEXT_TABLE_LABEL_ta">Tamilština</string>
+  <string name="TEXT_TABLE_LABEL_te">Telugština</string>
+  <string name="TEXT_TABLE_LABEL_tr">Turečtina</string>
+  <string name="TEXT_TABLE_LABEL_vi">Vietnamština</string>
+
+  <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">Invertovaná (barva popředí v levém sloupci a barva pozadí v pravém sloupci)</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_left_right">Barva popředí v levém sloupci a barva pozadí v pravém sloupci</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">Barva popředí v horním čtyřbodu a barva pozadí v dolním čtyřbodu</string>
+
+  <string name="CONTRACTION_TABLE_LABEL_af">Afrikánština (zkratkopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_am">Amharština (plnopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_basis">Němčina (plnopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift">Němčina (zkratkopis - standart 1998)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">Němčina (základní zkratkopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">Angličtina (Unified English Braille, grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_us_g2">Angličtina (US, grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_es">Španělština (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_abrege">Francouzština (zkratkopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_integral">Francouzština (plnopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ha">Hauština (zkratkopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_id">Indonéština (zkratkopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ipa">International Phonetic Alphabet</string>
+  <string name="CONTRACTION_TABLE_LABEL_ja">Japonština (plnopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g1">Korejština (grade 1)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g2">Korejština (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko">Korejština (plnopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_mg">Malgaština (zkratkopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_mun">Mundské jazyky (zkratkopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_nl">Nizozemština (zkratkopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ny">Čičeva (zkratkopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_pt">Portugalština (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_si">Sinhalština (plnopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_sw">Svahilština (zkratkopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_th">Thajština (zkratkopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_tw">Čínština (Tchaj-wan, plnopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">Čínština (Tchaj-wan, Unique Chinese Braille)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zu">Zulština (zkratkopis)</string>
+
+  <string name="KEYBOARD_TABLE_LABEL_braille">Pravidla pro braillské klávesnice</string>
+  <string name="KEYBOARD_TABLE_LABEL_desktop">Pravidla pro standardní klávesnice</string>
+  <string name="KEYBOARD_TABLE_LABEL_keypad">Pravidla pro klávesnice telefonů</string>
+  <string name="KEYBOARD_TABLE_LABEL_laptop">Pravidla pro klávesnice notebooků</string>
+  <string name="KEYBOARD_TABLE_LABEL_sun_type6">Pravidla pro klávesnice typu sun type6</string>
+</resources>
