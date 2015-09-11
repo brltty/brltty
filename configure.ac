@@ -12,7 +12,7 @@ dnl Process this file with autoconf 2.53 to produce a configure script.
 # Foundation; either version 2 of the License, or (at your option) any
 # later version. Please see the file LICENSE-GPL for details.
 #
-# Web Page: http://mielke.cc/brltty/
+# Web Page: http://brltty.com/
 #
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################

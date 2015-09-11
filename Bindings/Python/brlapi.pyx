@@ -1,7 +1,7 @@
 """
 This module implements a set of bindings for BrlAPI, a braille bridge for applications.
 
-The reference C API documentation is available online http://mielke.cc/brltty/doc/BrlAPIref-HTML, as well as in manual pages.
+The reference C API documentation is available online http://brltty.com/doc/BrlAPIref-HTML, as well as in manual pages.
 
 This documentation is only a python helper, you should also read C manual pages.
 
@@ -69,7 +69,7 @@ except brlapi.ConnectionError as e:
 # Foundation; either version 2.1 of the License, or (at your option) any
 # later version. Please see the file LICENSE-LGPL for details.
 #
-# Web Page: http://mielke.cc/brltty/
+# Web Page: http://brltty.com/
 #
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################

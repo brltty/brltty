@@ -11,7 +11,7 @@
 # Foundation; either version 2.1 of the License, or (at your option) any
 # later version. Please see the file LICENSE-LGPL for details.
 #
-# Web Page: http://mielke.cc/brltty/
+# Web Page: http://brltty.com/
 #
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
