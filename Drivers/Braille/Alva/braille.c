@@ -300,7 +300,16 @@ BEGIN_KEY_NAME_TABLES(sat_large)
   KEY_NAME_TABLE(routing2),
 END_KEY_NAME_TABLES
 
-BEGIN_KEY_NAME_TABLES(bc)
+BEGIN_KEY_NAME_TABLES(bc640)
+  KEY_NAME_TABLE(etouch),
+  KEY_NAME_TABLE(smartpad),
+  KEY_NAME_TABLE(thumb),
+  KEY_NAME_TABLE(featurepack),
+  KEY_NAME_TABLE(routing1),
+  KEY_NAME_TABLE(routing2),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(bc680)
   KEY_NAME_TABLE(etouch),
   KEY_NAME_TABLE(smartpad),
   KEY_NAME_TABLE(thumb),
@@ -317,7 +326,8 @@ DEFINE_KEY_TABLE(abt_small)
 DEFINE_KEY_TABLE(abt_large)
 DEFINE_KEY_TABLE(sat_small)
 DEFINE_KEY_TABLE(sat_large)
-DEFINE_KEY_TABLE(bc)
+DEFINE_KEY_TABLE(bc640)
+DEFINE_KEY_TABLE(bc680)
 DEFINE_KEY_TABLE(el)
 
 BEGIN_KEY_TABLE_LIST
@@ -325,7 +335,8 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(abt_large),
   &KEY_TABLE_DEFINITION(sat_small),
   &KEY_TABLE_DEFINITION(sat_large),
-  &KEY_TABLE_DEFINITION(bc),
+  &KEY_TABLE_DEFINITION(bc640),
+  &KEY_TABLE_DEFINITION(bc680),
   &KEY_TABLE_DEFINITION(el),
 END_KEY_TABLE_LIST
 
@@ -492,21 +503,21 @@ static const ModelEntry modelBC624 = {
   .identifier = 0X24,
   .name = "BC624",
   .columns = 24,
-  .keyTableDefinition = &KEY_TABLE_DEFINITION(bc)
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(bc640)
 };
 
 static const ModelEntry modelBC640 = {
   .identifier = 0X40,
   .name = "BC640",
   .columns = 40,
-  .keyTableDefinition = &KEY_TABLE_DEFINITION(bc)
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(bc640)
 };
 
 static const ModelEntry modelBC680 = {
   .identifier = 0X80,
   .name = "BC680",
   .columns = 80,
-  .keyTableDefinition = &KEY_TABLE_DEFINITION(bc)
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(bc680)
 };
 
 static const ModelEntry modelEL12 = {
