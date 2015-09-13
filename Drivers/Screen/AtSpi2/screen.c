@@ -526,7 +526,7 @@ static void restartTerm(const char *sender, const char *path) {
 static void tryRestartTerm(const char *sender, const char *path) {
   char *role = getRole(sender, path);
   logMessage(LOG_DEBUG, "state changed focused to role %s", role);
-  if (typeAll || (typeText && !strcmp(role, "text")) || (typeTerminal && !strcmp(role, "terminal"))) {
+  if (typeAll || (role && typeText && !strcmp(role, "text")) || (role && typeTerminal && !strcmp(role, "terminal"))) {
     restartTerm(sender, path);
   } else {
     if (curPath)
