@@ -535,6 +535,112 @@ static void tryRestartTerm(const char *sender, const char *path) {
   free(role);
 }
 
+/* Get the state of an object */
+static dbus_uint32_t *getState(const char *sender, const char *path)
+{
+  DBusMessage *msg, *reply;
+  DBusMessageIter iter, iter_array;
+  dbus_uint32_t *states, *ret = NULL;
+  int count;
+
+  msg = new_method_call(sender, path, SPI2_DBUS_INTERFACE_ACCESSIBLE, "GetState");
+  if (!msg)
+    return NULL;
+  reply = send_with_reply_and_block(bus, msg, 1000, "getting state");
+  if (!reply)
+    return NULL;
+
+  if (strcmp (dbus_message_get_signature (reply), "au") != 0)
+  {
+    logMessage(LOG_DEBUG, "unexpected signature %s while getting active state", dbus_message_get_signature(reply));
+    goto out;
+  }
+  dbus_message_iter_init (reply, &iter);
+  dbus_message_iter_recurse (&iter, &iter_array);
+  dbus_message_iter_get_fixed_array (&iter_array, &states, &count);
+  if (count != 2)
+  {
+    logMessage(LOG_DEBUG, "unexpected signature %s while getting active state", dbus_message_get_signature(reply));
+    goto out;
+  }
+  ret = malloc(sizeof(*ret) * count);
+  memcpy(ret, states, sizeof(*ret) * count);
+
+out:
+  dbus_message_unref(reply);
+  return ret;
+}
+
+/* Check whether an ancestor of this object is active */
+static int checkActiveParent(const char *sender, const char *path) {
+  DBusMessage *msg, *reply;
+  DBusMessageIter iter, iter_variant, iter_struct;
+  int res = 0;
+  const char *interface = SPI2_DBUS_INTERFACE_ACCESSIBLE;
+  const char *property = "Parent";
+  dbus_uint32_t *states;
+
+  msg = new_method_call(sender, path, FREEDESKTOP_DBUS_INTERFACE_PROP, "Get");
+  if (!msg)
+    return 0;
+  dbus_message_append_args(msg, DBUS_TYPE_STRING, &interface, DBUS_TYPE_STRING, &property, DBUS_TYPE_INVALID);
+  reply = send_with_reply_and_block(bus, msg, 1000, "checking active object");
+  if (!reply)
+    return 0;
+
+  if (strcmp (dbus_message_get_signature (reply), "v") != 0)
+  {
+    logMessage(LOG_DEBUG, "unexpected signature %s while checking active object", dbus_message_get_signature(reply));
+    goto out;
+  }
+
+  dbus_message_iter_init (reply, &iter);
+  dbus_message_iter_recurse (&iter, &iter_variant);
+  dbus_message_iter_recurse (&iter_variant, &iter_struct);
+  dbus_message_iter_get_basic (&iter_struct, &sender);
+  dbus_message_iter_next (&iter_struct);
+  dbus_message_iter_get_basic (&iter_struct, &path);
+  //logMessage(LOG_DEBUG,"%*.sfound At-SPI2 object %s at %s", depth, "", sender, path);
+
+  states = getState(sender, path);
+  res = (states[0] & (1<<ATSPI_STATE_ACTIVE)) != 0 || checkActiveParent(sender, path);
+
+out:
+  dbus_message_unref(reply);
+  return res;
+}
+
+/* Check whether this object is the focused object (which is way faster than
+ * browsing all objects of the desktop) */
+static int reinitTerm(const char *sender, const char *path) {
+  dbus_uint32_t *states = getState(sender, path);
+  int active = 0;
+
+  if (!states)
+    return 0;
+
+  //logMessage(LOG_DEBUG, "state is %08x %08x", (unsigned) states[0], (unsigned) states[1]);
+  /* Whether this widget is active */
+  active = (states[0] & (1<<ATSPI_STATE_ACTIVE)) != 0;
+
+  if (states[0] & (1<<ATSPI_STATE_FOCUSED)) {
+    free(states);
+    logMessage(LOG_DEBUG, "%s %s is focused!", sender, path);
+    /* This widget is focused */
+    if (active) {
+      /* And it is active, we are done.  */
+      tryRestartTerm(sender, path);
+      return 1;
+    } else {
+      /* Check that a parent is active.  */
+      return checkActiveParent(sender, path);
+    }
+  }
+
+  free(states);
+  return 0;
+}
+
 /* Try to find an active object among children of the given object */
 static int findTerm(const char *sender, const char *path, int active, int depth);
 static int recurseFindTerm(const char *sender, const char *path, int active, int depth) {
@@ -579,31 +685,10 @@ out:
 
 /* Test whether this object is active, and if not recurse in its children */
 static int findTerm(const char *sender, const char *path, int active, int depth) {
-  DBusMessage *msg, *reply;
-  DBusMessageIter iter, iter_array;
-  dbus_uint32_t *states;
-  int count;
+  dbus_uint32_t *states = getState(sender, path);
 
-  msg = new_method_call(sender, path, SPI2_DBUS_INTERFACE_ACCESSIBLE, "GetState");
-  if (!msg)
+  if (!states)
     return 0;
-  reply = send_with_reply_and_block(bus, msg, 1000, "getting state");
-  if (!reply)
-    return 0;
-
-  if (strcmp (dbus_message_get_signature (reply), "au") != 0)
-  {
-    logMessage(LOG_DEBUG, "unexpected signature %s while getting active state", dbus_message_get_signature(reply));
-    goto out;
-  }
-  dbus_message_iter_init (reply, &iter);
-  dbus_message_iter_recurse (&iter, &iter_array);
-  dbus_message_iter_get_fixed_array (&iter_array, &states, &count);
-  if (count != 2)
-  {
-    logMessage(LOG_DEBUG, "unexpected signature %s while getting active state", dbus_message_get_signature(reply));
-    goto out;
-  }
 
   //logMessage(LOG_DEBUG, "%*.sstate is %08x %08x", depth, "", (unsigned) states[0], (unsigned) states[1]);
   if (states[0] & (1<<ATSPI_STATE_ACTIVE))
@@ -614,12 +699,12 @@ static int findTerm(const char *sender, const char *path, int active, int depth)
   {
     /* And this widget is focused */
     logMessage(LOG_DEBUG, "%s %s is focused!", sender, path);
-    dbus_message_unref(reply);
+    free(states);
     tryRestartTerm(sender, path);
     return 1;
   }
-out:
-  dbus_message_unref(reply);
+
+  free(states);
   return recurseFindTerm(sender, path, active, depth+1);
 }
 
@@ -1039,7 +1124,14 @@ construct_AtSpi2Screen (void) {
   WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='TextCaretMoved'", "object:textcaretmoved");
   WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='StateChanged'", "object:statechanged");
 
-  initTerm();
+  if (curPath) {
+    if (!reinitTerm(curSender, curPath)) {
+      logMessage(LOG_DEBUG, "Caching failed, restart from scratch");
+      initTerm();
+    }
+  } else {
+    initTerm();
+  }
 
   dbus_connection_set_watch_functions(bus, a2AddWatch, a2RemoveWatch, a2WatchToggled, NULL, NULL);
   dbus_connection_set_timeout_functions(bus, a2AddTimeout, a2RemoveTimeout, a2TimeoutToggled, NULL, NULL);
@@ -1055,9 +1147,6 @@ out:
 
 static void
 destruct_AtSpi2Screen (void) {
-  if (curPath)
-    finiTerm();
-
   dbus_connection_remove_filter(bus, AtSpi2Filter, NULL);
   dbus_connection_close(bus);
   dbus_connection_unref(bus);
