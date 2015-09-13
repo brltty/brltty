@@ -80,42 +80,6 @@ bind ThumbLeft+ETouchLeftRear CSRVIS
 bind ThumbLeft+ETouchLeftFront ATTRVIS
 bind ThumbLeft+ETouchRightFront SIXDOTS
 
-bind SmartpadLeft KEY_CURSOR_LEFT
-bind SmartpadRight KEY_CURSOR_RIGHT
-bind SmartpadUp KEY_CURSOR_UP
-bind SmartpadDown KEY_CURSOR_DOWN
-bind SmartpadEnter PASTE
-
-bind SmartpadF2 TIME
-
-bind SmartpadF1+SmartpadLeft SWITCHVT_PREV
-bind SmartpadF1+SmartpadRight SWITCHVT_NEXT
-bind SmartpadF1+SmartpadEnter KEY_INSERT
-bind SmartpadF1+!RoutingKey1 SWITCHVT
-
-bind SmartpadF2+SmartpadUp KEY_PAGE_UP
-bind SmartpadF2+SmartpadDown KEY_PAGE_DOWN
-bind SmartpadF2+SmartpadLeft KEY_HOME
-bind SmartpadF2+SmartpadRight KEY_END
-bind SmartpadF2+SmartpadEnter KEY_DELETE
-bind SmartpadF2+!RoutingKey1 KEY_FUNCTION
-
-bind SmartpadF3+SmartpadF4 MUTE
-
-bind SmartpadF3+SmartpadRight SAY_LINE
-bind SmartpadF3+SmartpadUp SAY_ABOVE
-bind SmartpadF3+SmartpadDown SAY_BELOW
-bind SmartpadF3+SmartpadEnter SPKHOME
-
-bind SmartpadF4+SmartpadLeft SAY_SLOWER
-bind SmartpadF4+SmartpadRight SAY_FASTER
-bind SmartpadF4+SmartpadDown SAY_SOFTER
-bind SmartpadF4+SmartpadUp SAY_LOUDER
-bind SmartpadF4+SmartpadEnter AUTOSPEAK
-
-bind SmartpadF1+SmartpadF2+SmartpadEnter RESTARTBRL
-bind SmartpadF3+SmartpadF4+SmartpadEnter RESTARTSPEECH
-
 map Dot1 DOT1
 map Dot2 DOT2
 map Dot3 DOT3
@@ -152,13 +116,5 @@ bind ETouchRightFront MENU_NEXT_SETTING
 bind ThumbHome PREFMENU
 bind ETouchLeftRear+ETouchLeftFront PREFLOAD
 bind ETouchRightRear+ETouchRightFront PREFSAVE
-
-bind SmartpadF1 PREFMENU
-bind SmartpadF2 PREFLOAD
-bind SmartpadUp MENU_PREV_ITEM
-bind SmartpadDown MENU_NEXT_ITEM
-bind SmartpadLeft MENU_PREV_SETTING
-bind SmartpadRight MENU_NEXT_SETTING
-bind SmartpadEnter PREFSAVE
 
 
