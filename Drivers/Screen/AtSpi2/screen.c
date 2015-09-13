@@ -690,11 +690,18 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
     caretPosition(detail1);
   } else if (!strcmp(interface, "Object") && !strcmp(member, "TextChanged") && !strcmp(detail, "delete")) {
     long x,y,toDelete = detail2;
+    const char *deleted;
     long length = 0, toCopy;
     long downTo; /* line that will provide what will follow x */
-    logMessage(LOG_DEBUG,"delete %d from %d",detail2,detail1);
     if (!curSender || strcmp(sender, curSender) || strcmp(path, curPath)) return;
+    logMessage(LOG_DEBUG,"delete %d from %d",detail2,detail1);
     findPosition(detail1,&x,&y);
+    if (dbus_message_iter_get_arg_type(&iter_variant) != DBUS_TYPE_STRING) {
+      logMessage(LOG_DEBUG, "ergl, not string but '%c'", dbus_message_iter_get_arg_type(&iter_variant));
+      return;
+    }
+    dbus_message_iter_get_basic(&iter_variant, &deleted);
+    logMessage(LOG_DEBUG,"'%s'",deleted);
     downTo = y;
     if (downTo < curNumRows)
       length = curRowLengths[downTo];
@@ -737,14 +744,15 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
     long len=detail2,semilen,x,y;
     const char *added;
     const char *adding,*c;
-    logMessage(LOG_DEBUG,"insert %d from %d",detail2,detail1);
     if (!curSender || strcmp(sender, curSender) || strcmp(path, curPath)) return;
+    logMessage(LOG_DEBUG,"insert %d from %d",detail2,detail1);
     findPosition(detail1,&x,&y);
     if (dbus_message_iter_get_arg_type(&iter_variant) != DBUS_TYPE_STRING) {
       logMessage(LOG_DEBUG, "ergl, not string but '%c'", dbus_message_iter_get_arg_type(&iter_variant));
       return;
     }
     dbus_message_iter_get_basic(&iter_variant, &added);
+    logMessage(LOG_DEBUG,"'%s'",added);
     adding = c = added;
     if (x && (c = strchr(adding,'\n'))) {
       /* splitting line */
