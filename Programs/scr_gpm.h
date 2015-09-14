@@ -16,20 +16,19 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include "prologue.h"
+#ifndef BRLTTY_INCLUDED_SCR_GPM
+#define BRLTTY_INCLUDED_SCR_GPM
 
-#include "log.h"
-#include "scr.h"
-#include "scr_real.h"
-#include "routing.h"
+#include "scr_main.h"
 
-static int
-routeCursor_RealScreen (int column, int row, int screen) {
-  return startRouting(column, row, screen);
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+extern void includeGpmScreen (MainScreen *);
+
+#ifdef __cplusplus
 }
+#endif /* __cplusplus */
 
-void
-initializeRealScreen (MainScreen *main) {
-  initializeMainScreen(main);
-  main->base.routeCursor = routeCursor_RealScreen;
-}
+#endif /* BRLTTY_INCLUDED_SCR_GPM */
