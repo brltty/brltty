@@ -252,5 +252,5 @@ main (int argc, char *argv[]) {
 #include "update.h"
 
 void
-scheduleUpdate (const char *reason) {
+scheduleUpdateIn (const char *reason, int delay) {
 }

@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 
+#include "parameters.h"
 #include "update.h"
 #include "scr.h"
 #include "scr_main.h"
@@ -68,5 +69,7 @@ initializeMainScreen (MainScreen *main) {
 
 void
 mainScreenUpdated (void) {
-  if (isMainScreen()) scheduleUpdate("main screen updated");
+  if (isMainScreen()) {
+    scheduleUpdateIn("main screen updated", SCREEN_UPDATE_SCHEDULE_DELAY);
+  }
 }
