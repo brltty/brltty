@@ -144,7 +144,8 @@ libusb0Filter="\
     select "USB:", and install ${libusb0Name}'s filter by doing one of the
     following:
     + run Install ${libusb0Name} Filter from the Start Menu
-    + answer yes to the setup prompt for installing the ${libusb0Name} filter"
+    + answer yes to the setup prompt for installing the ${libusb0Name} filter
+    + install it by hand, from ${libusb0Download}"
 
 libusb1Filter="\
     you will need to use ${libusb0Name} instead because
