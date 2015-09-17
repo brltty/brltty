@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-note There are four ETouch keys, two at each end of the text cell are.
+note There are four ETouch keys, two at each end of the text cell area.
 note * Each is subnamed according to the side it's on (Left, Right),
 note * and according to its position on that side (Rear, Front).
 note * The two Rear keys are identified by two vertical bars.
