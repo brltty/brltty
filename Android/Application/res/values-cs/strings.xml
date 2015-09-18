@@ -29,6 +29,7 @@
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Úroveň protokolu</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Kategorie protokolu událostí</string>
   <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Zaznamenávat události usnadnění</string>
+  <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">Zaznamenávat vykreslený obsah obrazovky</string>
   <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Zaznamenávat události klávesnice</string>
 
   <string name="DEVICES_BUTTON_SELECTED">Vybrané zařízení</string>
