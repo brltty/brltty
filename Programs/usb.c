@@ -1265,7 +1265,7 @@ usbPrepareChannel (UsbChannel *channel) {
 
           if (!endpoint) {
             ok = 0;
-          } else {
+          } else if (USB_ENDPOINT_TRANSFER(endpoint->descriptor) == UsbEndpointTransfer_Interrupt) {
             usbBeginInput(device, definition->inputEndpoint, USB_INPUT_INTERRUPT_URB_COUNT);
           }
         }
