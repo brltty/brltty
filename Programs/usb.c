@@ -983,7 +983,7 @@ usbDeallocatePendingInputRequest (void *item, void *data) {
   usbCancelRequest(endpoint->device, request);
 }
 
-static Element *
+Element *
 usbAddPendingInputRequest (
   UsbEndpoint *endpoint
 ) {
@@ -992,11 +992,14 @@ usbAddPendingInputRequest (
                                    NULL,
                                    getLittleEndian16(endpoint->descriptor->wMaxPacketSize),
                                    endpoint);
+
   if (request) {
     Element *element = enqueueItem(endpoint->direction.input.pending, request);
+
     if (element) return element;
     usbCancelRequest(endpoint->device, request);
   }
+
   return NULL;
 }
 
@@ -1008,6 +1011,7 @@ usbBeginInput (
 ) {
   int actual = 0;
   UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
+
   if (endpoint) {
     if (!endpoint->direction.input.pending) {
       if ((endpoint->direction.input.pending = newQueue(usbDeallocatePendingInputRequest, NULL))) {
@@ -1016,11 +1020,14 @@ usbBeginInput (
     }
 
     if (endpoint->direction.input.pending) {
-      while ((actual = getQueueSize(endpoint->direction.input.pending)) < count)
-        if (!usbAddPendingInputRequest(endpoint))
+      while ((actual = getQueueSize(endpoint->direction.input.pending)) < count) {
+        if (!usbAddPendingInputRequest(endpoint)) {
           break;
+        }
+      }
     }
   }
+
   return actual;
 }
 
@@ -1260,9 +1267,7 @@ usbPrepareChannel (UsbChannel *channel) {
           if (!endpoint) {
             ok = 0;
           } else {
-            if (endpoint->direction.input.asynchronous) {
-              usbBeginInput(device, definition->inputEndpoint, USB_INPUT_INTERRUPT_URB_COUNT);
-            }
+            usbBeginInput(device, definition->inputEndpoint, USB_INPUT_INTERRUPT_URB_COUNT);
           }
         }
       }
