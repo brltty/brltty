@@ -1108,6 +1108,7 @@ usbPrepareInputEndpoint (UsbEndpoint *endpoint) {
   UsbDevice *device = endpoint->device;
 
   if (LINUX_USB_INPUT_PIPE_DISABLE) return 1;
+  if (USB_ENDPOINT_TRANSFER(endpoint->descriptor) != UsbEndpointTransfer_Interrupt) return 1;
 
   if (usbMakeInputPipe(endpoint)) {
     int monitorStarted = LINUX_USB_INPUT_USE_SIGNAL_MONITOR?
