@@ -43,7 +43,6 @@ struct UsbEndpointStruct {
   union {
     struct {
       Queue *pending;
-      unsigned asynchronous:1;
 
       struct {
         void *request;

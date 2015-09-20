@@ -721,7 +721,6 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
       switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
         case UsbEndpointDirection_Input:
           endpoint->direction.input.pending = NULL;
-          endpoint->direction.input.asynchronous = USB_ENDPOINT_TRANSFER(endpoint->descriptor) == UsbEndpointTransfer_Interrupt;
 
           endpoint->direction.input.completed.request = NULL;
           endpoint->direction.input.completed.buffer = NULL;

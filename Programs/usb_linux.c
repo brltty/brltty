@@ -1115,7 +1115,6 @@ usbPrepareInputEndpoint (UsbEndpoint *endpoint) {
                          usbStartUsbfsMonitor(device);
 
     if (monitorStarted) {
-      endpoint->direction.input.asynchronous = 0;
       return 1;
     } else {
       usbLogInputProblem(endpoint, "USB input monitor not started");
