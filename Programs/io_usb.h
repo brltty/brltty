@@ -156,10 +156,9 @@ extern int usbVerifyVendorIdentifier (const UsbDeviceDescriptor *descriptor, uin
 extern int usbParseProductIdentifier (uint16_t *identifier, const char *string);
 extern int usbVerifyProductIdentifier (const UsbDeviceDescriptor *descriptor, uint16_t identifier);
 
-extern int usbBeginInput (
+extern void usbBeginInput (
   UsbDevice *device,
-  unsigned char endpointNumber,
-  int count
+  unsigned char endpointNumber
 );
 
 extern int usbMonitorInputEndpoint (

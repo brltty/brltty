@@ -902,12 +902,16 @@ done:
 void
 usbCloseDevice (UsbDevice *device) {
   usbCloseInterface(device);
-
   usbRemoveEndpoints(device, 1);
 
   if (device->inputFilters) {
     deallocateQueue(device->inputFilters);
     device->inputFilters = NULL;
+  }
+
+  if (device->serial.data) {
+    device->serial.operations->destroyData(device->serial.data);
+    device->serial.data = NULL;
   }
 
   if (device->extension) {
@@ -925,8 +929,8 @@ usbOpenDevice (UsbDeviceExtension *extension) {
   if ((device = malloc(sizeof(*device)))) {
     memset(device, 0, sizeof(*device));
     device->extension = extension;
-    device->serialOperations = NULL;
-    device->serialData = NULL;
+    device->serial.operations = NULL;
+    device->serial.data = NULL;
     device->disableEndpointReset = 0;
 
     if ((device->endpoints = newQueue(usbDeallocateEndpoint, NULL))) {
@@ -1002,13 +1006,11 @@ usbAddPendingInputRequest (
   return NULL;
 }
 
-int
+void
 usbBeginInput (
   UsbDevice *device,
-  unsigned char endpointNumber,
-  int count
+  unsigned char endpointNumber
 ) {
-  int actual = 0;
   UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
 
   if (endpoint) {
@@ -1019,15 +1021,15 @@ usbBeginInput (
     }
 
     if (endpoint->direction.input.pending) {
-      while ((actual = getQueueSize(endpoint->direction.input.pending)) < count) {
+      const int count = USB_INPUT_INTERRUPT_URB_COUNT;
+
+      while (getQueueSize(endpoint->direction.input.pending) < count) {
         if (!usbAddPendingInputRequest(endpoint)) {
           break;
         }
       }
     }
   }
-
-  return actual;
 }
 
 int
@@ -1242,22 +1244,29 @@ usbPrepareChannel (UsbChannel *channel) {
       if (ok) {
         if (!usbSetSerialOperations(device)) {
           ok = 0;
-        } else if (device->serialOperations) {
+        } else if (device->serial.operations) {
           logMessage(LOG_CATEGORY(USB_IO), "serial adapter: %s",
-                     device->serialOperations->name);
+                     device->serial.operations->name);
         }
       }
 
-      if (ok)
-        if (device->serialOperations)
-          if (device->serialOperations->enableAdapter)
-            if (!device->serialOperations->enableAdapter(device))
+      if (ok) {
+        if (device->serial.operations) {
+          if (device->serial.operations->enableAdapter) {
+            if (!device->serial.operations->enableAdapter(device)) {
               ok = 0;
+            }
+          }
+        }
+      }
 
-      if (ok)
-        if (definition->serial)
-          if (!usbSetSerialParameters(device, definition->serial))
+      if (ok) {
+        if (definition->serial) {
+          if (!usbSetSerialParameters(device, definition->serial)) {
             ok = 0;
+          }
+        }
+      }
 
       if (ok) {
         if (definition->inputEndpoint) {
@@ -1267,7 +1276,7 @@ usbPrepareChannel (UsbChannel *channel) {
             ok = 0;
           } else if ((USB_ENDPOINT_TRANSFER(endpoint->descriptor) == UsbEndpointTransfer_Interrupt) ||
                      usbHaveInputPipe(endpoint)) {
-            usbBeginInput(device, definition->inputEndpoint, USB_INPUT_INTERRUPT_URB_COUNT);
+            usbBeginInput(device, definition->inputEndpoint);
           }
         }
       }

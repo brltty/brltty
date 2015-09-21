@@ -320,6 +320,7 @@ typedef struct {
 } UsbChannelDefinition;
 
 typedef struct UsbDeviceStruct UsbDevice;
+typedef struct UsbSerialDataStruct UsbSerialData;
 
 typedef struct {
   void *const buffer;
@@ -332,6 +333,9 @@ typedef int UsbInputFilter (UsbInputFilterData *data);
 
 typedef struct {
   const char *name;
+
+  int (*makeData) (UsbDevice *device, UsbSerialData **serialData);
+  void (*destroyData) (UsbSerialData *usd);
 
   int (*setLineConfiguration) (UsbDevice *device, unsigned int baud, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity, SerialFlowControl flowControl);
   int (*setLineProperties) (UsbDevice *device, unsigned int baud, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity);

@@ -27,6 +27,88 @@
 #include "usb_internal.h"
 #include "bitfield.h"
 
+struct UsbSerialDataStruct {
+  UsbDevice *device;
+  const UsbInterfaceDescriptor *interface;
+  const UsbEndpointDescriptor *endpoint;
+};
+
+static const UsbInterfaceDescriptor *
+usbFindCommunicationInterface (UsbDevice *device) {
+  const UsbDescriptor *descriptor = NULL;
+
+  while (usbNextDescriptor(device, &descriptor)) {
+    if (descriptor->header.bDescriptorType == UsbDescriptorType_Interface) {
+      if (descriptor->interface.bInterfaceClass == 0X02) {
+        return &descriptor->interface;
+      }
+    }
+  }
+
+  logMessage(LOG_WARNING, "USB: communication interface descriptor not found");
+  errno = ENOENT;
+  return NULL;
+}
+
+static const UsbEndpointDescriptor *
+usbFindInterruptInputEndpoint (UsbDevice *device, const UsbInterfaceDescriptor *interface) {
+  const UsbDescriptor *descriptor = (const UsbDescriptor *)interface;
+
+  while (usbNextDescriptor(device, &descriptor)) {
+    if (descriptor->header.bDescriptorType == UsbDescriptorType_Interface) break;
+
+    if (descriptor->header.bDescriptorType == UsbDescriptorType_Endpoint) {
+      if (USB_ENDPOINT_DIRECTION(&descriptor->endpoint) == UsbEndpointDirection_Input) {
+        if (USB_ENDPOINT_TRANSFER(&descriptor->endpoint) == UsbEndpointTransfer_Interrupt) {
+          return &descriptor->endpoint;
+        }
+      }
+    }
+  }
+
+  logMessage(LOG_WARNING, "USB: interrupt input endpoint descriptor not found");
+  errno = ENOENT;
+  return NULL;
+}
+
+static int
+usbMakeData_CDC_ACM (UsbDevice *device, UsbSerialData **serialData) {
+  UsbSerialData *usd;
+
+  if ((usd = malloc(sizeof(*usd)))) {
+    memset(usd, 0, sizeof(*usd));
+    usd->device = device;
+
+    if ((usd->interface = usbFindCommunicationInterface(device))) {
+      unsigned char interfaceNumber = usd->interface->bInterfaceNumber;
+
+      if (usbClaimInterface(device, interfaceNumber)) {
+        if (usbSetAlternative(device, usd->interface->bInterfaceNumber, usd->interface->bAlternateSetting)) {
+          if ((usd->endpoint = usbFindInterruptInputEndpoint(device, usd->interface))) {
+            usbBeginInput(device, USB_ENDPOINT_NUMBER(usd->endpoint));
+            *serialData = usd;
+            return 1;
+          }
+        }
+
+        usbReleaseInterface(device, interfaceNumber);
+      }
+    }
+
+    free(usd);
+  } else {
+    logMallocError();
+  }
+
+  return 0;
+}
+
+static void
+usbDestroyData_CDC_ACM (UsbSerialData *usd) {
+  usbReleaseInterface(usd->device, usd->interface->bInterfaceNumber);
+  free(usd);
+}
+
 static int
 usbSetLineProperties_CDC_ACM (UsbDevice *device, unsigned int baud, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity) {
   USB_CDC_ACM_LineCoding lineCoding;
@@ -96,12 +178,11 @@ usbSetLineProperties_CDC_ACM (UsbDevice *device, unsigned int baud, unsigned int
   }
 
   {
-    const UsbInterfaceDescriptor *interface = device->serialData;
     ssize_t result = usbControlWrite(device,
                                      UsbControlRecipient_Interface, UsbControlType_Class,
                                      USB_CDC_ACM_CTL_SetLineCoding,
                                      0,
-                                     interface->bInterfaceNumber,
+                                     device->serial.data->interface->bInterfaceNumber,
                                      &lineCoding, sizeof(lineCoding), 1000);
 
     if (result == -1) return 0;
@@ -123,12 +204,11 @@ usbSetFlowControl_CDC_ACM (UsbDevice *device, SerialFlowControl flow) {
 
 static int
 usbEnableAdapter_CDC_ACM (UsbDevice *device) {
-  const UsbInterfaceDescriptor *interface = device->serialData;
   ssize_t result = usbControlWrite(device,
                                    UsbControlRecipient_Interface, UsbControlType_Class,
                                    USB_CDC_ACM_CTL_SetControlLines,
                                    USB_CDC_ACM_LINE_DTR,
-                                   interface->bInterfaceNumber,
+                                   device->serial.data->interface->bInterfaceNumber,
                                    NULL, 0, 1000);
 
   if (result != -1) return 1;
@@ -137,6 +217,10 @@ usbEnableAdapter_CDC_ACM (UsbDevice *device) {
 
 const UsbSerialOperations usbSerialOperations_CDC_ACM = {
   .name = "CDC_ACM",
+
+  .makeData = usbMakeData_CDC_ACM,
+  .destroyData = usbDestroyData_CDC_ACM,
+
   .setLineProperties = usbSetLineProperties_CDC_ACM,
   .setFlowControl = usbSetFlowControl_CDC_ACM,
   .enableAdapter = usbEnableAdapter_CDC_ACM

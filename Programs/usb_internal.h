@@ -30,9 +30,9 @@ typedef struct {
   UsbInputFilter *filter;
 } UsbInputFilterEntry;
 
-typedef struct UsbEndpointExtensionStruct UsbEndpointExtension;
-
+typedef struct UsbDeviceExtensionStruct UsbDeviceExtension;
 typedef struct UsbEndpointStruct UsbEndpoint;
+typedef struct UsbEndpointExtensionStruct UsbEndpointExtension;
 
 struct UsbEndpointStruct {
   UsbDevice *device;
@@ -64,13 +64,15 @@ struct UsbEndpointStruct {
   } direction;
 };
 
-typedef struct UsbDeviceExtensionStruct UsbDeviceExtension;
-
 struct UsbDeviceStruct {
   UsbDeviceDescriptor descriptor;
   UsbDeviceExtension *extension;
-  const UsbSerialOperations *serialOperations;
-  const void *serialData;
+
+  struct {
+    const UsbSerialOperations *operations;
+    UsbSerialData *data;
+  } serial;
+
   UsbConfigurationDescriptor *configuration;
   const UsbInterfaceDescriptor *interface;
   Queue *endpoints;

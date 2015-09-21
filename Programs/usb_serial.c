@@ -42,38 +42,6 @@ usbSkipInitialBytes (UsbInputFilterData *data, unsigned int count) {
 
 static const UsbSerialAdapter **usbSerialAdapters = NULL;
 
-static const UsbInterfaceDescriptor *
-usbFindCommunicationInterface (UsbDevice *device) {
-  const UsbDescriptor *descriptor = NULL;
-
-  while (usbNextDescriptor(device, &descriptor))
-    if (descriptor->header.bDescriptorType == UsbDescriptorType_Interface)
-      if (descriptor->interface.bInterfaceClass == 0X02)
-        return &descriptor->interface;
-
-  logMessage(LOG_WARNING, "USB: communication interface descriptor not found");
-  errno = ENOENT;
-  return NULL;
-}
-
-static const UsbEndpointDescriptor *
-usbFindInterruptInputEndpoint (UsbDevice *device, const UsbInterfaceDescriptor *interface) {
-  const UsbDescriptor *descriptor = (const UsbDescriptor *)interface;
-
-  while (usbNextDescriptor(device, &descriptor)) {
-    if (descriptor->header.bDescriptorType == UsbDescriptorType_Interface) break;
-
-    if (descriptor->header.bDescriptorType == UsbDescriptorType_Endpoint)
-      if (USB_ENDPOINT_DIRECTION(&descriptor->endpoint) == UsbEndpointDirection_Input)
-        if (USB_ENDPOINT_TRANSFER(&descriptor->endpoint) == UsbEndpointTransfer_Interrupt)
-          return &descriptor->endpoint;
-  }
-
-  logMessage(LOG_WARNING, "USB: interrupt input endpoint descriptor not found");
-  errno = ENOENT;
-  return NULL;
-}
-
 static int
 usbCompareSerialAdapters (const UsbSerialAdapter *adapter1, const UsbSerialAdapter *adapter2) {
   if (adapter1->vendor < adapter2->vendor) return -1;
@@ -147,55 +115,38 @@ usbFindSerialAdapter (const UsbDeviceDescriptor *descriptor) {
 
 int
 usbSetSerialOperations (UsbDevice *device) {
-  if (device->serialOperations) return 1;
+  if (!device->serial.operations) {
+    const UsbSerialOperations *uso = NULL;
 
-  {
-    const UsbSerialAdapter *adapter = usbFindSerialAdapter(&device->descriptor);
+    {
+      const UsbSerialAdapter *adapter = usbFindSerialAdapter(&device->descriptor);
 
-    if (adapter) {
-      const UsbSerialOperations *operations = adapter->operations;
-
-      if (operations) {
-        UsbInputFilter *filter = operations->inputFilter;
-       
-        if (filter && !usbAddInputFilter(device, filter)) return 0;
-      }
-
-      device->serialOperations = operations;
-      return 1;
-    }
-  }
-
-  if (device->descriptor.bDeviceClass == 0X02) {
-    const UsbInterfaceDescriptor *interface = usbFindCommunicationInterface(device);
-
-    if (interface) {
-      switch (interface->bInterfaceSubClass) {
-        case 0X02:
-          device->serialOperations = &usbSerialOperations_CDC_ACM;
-          break;
-
-        default:
-          break;
-      }
-
-      if (device->serialOperations) {
-        device->serialData = interface;
-
-        if (usbClaimInterface(device, interface->bInterfaceNumber)) {
-          if (usbSetAlternative(device, interface->bInterfaceNumber, interface->bAlternateSetting)) {
-            {
-              const UsbEndpointDescriptor *endpoint = usbFindInterruptInputEndpoint(device, interface);
-
-              if (endpoint) {
-                usbBeginInput(device, USB_ENDPOINT_NUMBER(endpoint), 8);
-              }
-            }
-
-            return 1;
-          }
+      if (adapter) {
+        if ((uso = adapter->operations)) {
+          UsbInputFilter *filter = uso->inputFilter;
+         
+          if (filter && !usbAddInputFilter(device, filter)) return 0;
         }
       }
+    }
+
+    if (!uso) {
+      if (device->descriptor.bDeviceClass == 0X02) {
+        uso = &usbSerialOperations_CDC_ACM;
+      }
+    }
+
+    if (uso) {
+      UsbSerialData *usd = NULL;
+
+      if (uso->makeData) {
+        if (!uso->makeData(device, &usd)) {
+          return 0;
+        }
+      }
+
+      device->serial.operations = uso;
+      device->serial.data = usd;
     }
   }
 
@@ -204,7 +155,7 @@ usbSetSerialOperations (UsbDevice *device) {
 
 const UsbSerialOperations *
 usbGetSerialOperations (UsbDevice *device) {
-  return device->serialOperations;
+  return device->serial.operations;
 }
 
 int
