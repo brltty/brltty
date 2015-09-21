@@ -296,7 +296,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
     { /* Smart */
       .vendor=0X1148, .product=0X0301,
-      .configuration=1, .interface=0, .alternative=0,
+      .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=3, .outputEndpoint=2,
       .serial=&serialParameters
     },
