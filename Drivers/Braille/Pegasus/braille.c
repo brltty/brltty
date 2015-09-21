@@ -390,15 +390,13 @@ static UsbChannel *usbChannel = NULL;
 
 static int
 openUsbPort (const char *device) {
-  static const UsbChannelDefinition usbChannelDefinitions[] = {
+  BEGIN_USB_CHANNEL_DEFINITIONS
     { /* all models */
       .vendor=0X4242, .product=0X0001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2
-    }
-    ,
-    { .vendor=0 }
-  };
+    },
+  END_USB_CHANNEL_DEFINITIONS
 
   if ((usbChannel = usbOpenChannel(usbChannelDefinitions, (void *)device))) {
     return 1;

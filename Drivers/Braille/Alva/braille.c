@@ -1833,7 +1833,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     .baud = 9600
   };
 
-  static const UsbChannelDefinition usbChannelDefinitions[] = {
+  BEGIN_USB_CHANNEL_DEFINITIONS
     { /* Satellite (5nn) */
       .vendor=0X06B0, .product=0X0001,
       .configuration=1, .interface=0, .alternative=0,
@@ -1860,9 +1860,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .inputEndpoint=1, .outputEndpoint=0,
       .data=&modelBC680
     },
-
-    { .vendor=0 }
-  };
+  END_USB_CHANNEL_DEFINITIONS
 
   GioDescriptor descriptor;
   gioInitializeDescriptor(&descriptor);

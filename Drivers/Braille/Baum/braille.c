@@ -2784,7 +2784,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     SERIAL_DEFAULT_PARAMETERS
   };
 
-  static const UsbChannelDefinition usbChannelDefinitions[] = {
+  BEGIN_USB_CHANNEL_DEFINITIONS
     { /* Vario 40 (40 cells) */
       .vendor=0X0403, .product=0XFE70,
       .configuration=1, .interface=0, .alternative=0,
@@ -3091,9 +3091,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .inputEndpoint=1, .outputEndpoint=2,
       .data=&baumHid2Operations
     },
-
-    { .vendor=0 }
-  };
+  END_USB_CHANNEL_DEFINITIONS
 
   GioDescriptor descriptor;
   gioInitializeDescriptor(&descriptor);

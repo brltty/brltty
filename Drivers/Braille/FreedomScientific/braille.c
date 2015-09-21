@@ -714,7 +714,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     .baud = 57600
   };
 
-  static const UsbChannelDefinition usbChannelDefinitions[] = {
+  BEGIN_USB_CHANNEL_DEFINITIONS
     { /* Focus 1 */
       .vendor=0X0F4E, .product=0X0100,
       .configuration=1, .interface=0, .alternative=0,
@@ -739,9 +739,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .inputEndpoint=2, .outputEndpoint=1,
       .disableEndpointReset = 1
     },
-
-    { .vendor=0 }
-  };
+  END_USB_CHANNEL_DEFINITIONS
 
   GioDescriptor descriptor;
   gioInitializeDescriptor(&descriptor);

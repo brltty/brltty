@@ -343,15 +343,13 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     .baud = 38400
   };
 
-  static const UsbChannelDefinition usbChannelDefinitions[] = {
+  BEGIN_USB_CHANNEL_DEFINITIONS
     { /* HumanWare APEX */
       .vendor=0X1C71, .product=0XC004,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2
     },
-
-    { .vendor=0 }
-  };
+  END_USB_CHANNEL_DEFINITIONS
 
   GioDescriptor descriptor;
   gioInitializeDescriptor(&descriptor);

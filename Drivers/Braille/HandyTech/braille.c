@@ -1108,7 +1108,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     .parity = SERIAL_PARITY_ODD
   };
 
-  static const UsbChannelDefinition usbChannelDefinitions[] = {
+  BEGIN_USB_CHANNEL_DEFINITIONS
     { /* GoHubs chip */
       .vendor=0X0921, .product=0X1200,
       .configuration=1, .interface=0, .alternative=0,
@@ -1217,9 +1217,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .inputEndpoint=1, .outputEndpoint=1,
       .data=&usbOperations3
     },
-
-    { .vendor=0 }
-  };
+  END_USB_CHANNEL_DEFINITIONS
 
   GioDescriptor descriptor;
   gioInitializeDescriptor(&descriptor);

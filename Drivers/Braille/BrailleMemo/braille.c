@@ -286,7 +286,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     .baud = 9600
   };
 
-  static const UsbChannelDefinition usbChannelDefinitions[] = {
+  BEGIN_USB_CHANNEL_DEFINITIONS
     { /* Pocket */
       .vendor=0X10C4, .product=0XEA60,
       .configuration=1, .interface=0, .alternative=0,
@@ -300,9 +300,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .inputEndpoint=3, .outputEndpoint=2,
       .serial=&serialParameters
     },
-
-    { .vendor=0 }
-  };
+  END_USB_CHANNEL_DEFINITIONS
 
   GioDescriptor descriptor;
   gioInitializeDescriptor(&descriptor);

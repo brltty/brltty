@@ -129,7 +129,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     .parity = SERIAL_PARITY_EVEN
   };
 
-  static const UsbChannelDefinition usbChannelDefinitions[] = {
+  BEGIN_USB_CHANNEL_DEFINITIONS
     { /* Esys (version < 3.0, no SD card) */
       .vendor=0XC251, .product=0X1122,
       .configuration=1, .interface=0, .alternative=0,
@@ -248,9 +248,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .inputEndpoint=1, .outputEndpoint=0,
       .disableEndpointReset = 1
     },
-
-    { .vendor=0 }
-  };
+  END_USB_CHANNEL_DEFINITIONS
 
   GioDescriptor descriptor;
   gioInitializeDescriptor(&descriptor);

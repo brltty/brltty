@@ -348,15 +348,13 @@ static const ProtocolOperations usbProtocolOperations = {
 
 static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
-  static const UsbChannelDefinition usbChannelDefinitions[] = {
+  BEGIN_USB_CHANNEL_DEFINITIONS
     { /* all models */
       .vendor=0X0452, .product=0X0100,
       .configuration=1, .interface=0, .alternative=0,
       .disableEndpointReset=1
     },
-
-    { .vendor=0 }
-  };
+  END_USB_CHANNEL_DEFINITIONS
 
   GioDescriptor descriptor;
   gioInitializeDescriptor(&descriptor);

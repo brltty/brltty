@@ -117,16 +117,14 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     .parity = SERIAL_PARITY_EVEN
   };
 
-  static const UsbChannelDefinition usbChannelDefinitions[] = {
+  BEGIN_USB_CHANNEL_DEFINITIONS
     { /* all models */
       .vendor=0X1C71, .product=0XC005, 
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=2, .outputEndpoint=3,
       .serial = &serialParameters
-    }
-    ,
-    { .vendor=0 }
-  };
+    },
+  END_USB_CHANNEL_DEFINITIONS
 
   GioDescriptor descriptor;
   gioInitializeDescriptor(&descriptor);

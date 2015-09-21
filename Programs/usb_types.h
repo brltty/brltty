@@ -319,6 +319,9 @@ typedef struct {
   const void *data;
 } UsbChannelDefinition;
 
+#define BEGIN_USB_CHANNEL_DEFINITIONS static const UsbChannelDefinition usbChannelDefinitions[] = {
+#define END_USB_CHANNEL_DEFINITIONS { .vendor=0 } };
+
 typedef struct UsbDeviceStruct UsbDevice;
 typedef struct UsbSerialDataStruct UsbSerialData;
 

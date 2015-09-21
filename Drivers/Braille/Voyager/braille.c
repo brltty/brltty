@@ -689,15 +689,13 @@ static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
   SerialParameters serialParameters;
 
-  static const UsbChannelDefinition usbChannelDefinitions[] = {
+  BEGIN_USB_CHANNEL_DEFINITIONS
     { /* all models */
       .vendor=0X0798, .product=0X0001, 
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1
-    }
-    ,
-    { .vendor=0 }
-  };
+    },
+  END_USB_CHANNEL_DEFINITIONS
 
   GioDescriptor descriptor;
   gioInitializeDescriptor(&descriptor);

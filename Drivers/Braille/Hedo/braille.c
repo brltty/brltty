@@ -247,7 +247,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     .parity = SERIAL_PARITY_ODD
   };
 
-  static const UsbChannelDefinition usbChannelDefinitions[] = {
+  BEGIN_USB_CHANNEL_DEFINITIONS
     { /* ProfiLine */
       .vendor=0X0403, .product=0XDE59,
       .configuration=1, .interface=0, .alternative=0,
@@ -263,9 +263,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .serial = &serialParameters_MobilLine,
       .data = &modelEntry_MobilLine
     },
-
-    { .vendor=0 }
-  };
+  END_USB_CHANNEL_DEFINITIONS
 
   GioDescriptor descriptor;
   gioInitializeDescriptor(&descriptor);
