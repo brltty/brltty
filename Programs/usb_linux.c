@@ -1008,6 +1008,10 @@ usbStartSignalMonitor (UsbEndpoint *endpoint) {
     if (asyncMonitorSignal(&eptx->monitor.signal.handle,
                            eptx->monitor.signal.number,
                            usbHandleInputSignal, endpoint)) {
+      logMessage(LOG_CATEGORY(USB_IO),
+                 "signal monitor started: Ept:%02X Sig:%d",
+                 endpoint->descriptor->bEndpointAddress,
+                 eptx->monitor.signal.number);
       return 1;
     } else {
       usbLogInputProblem(endpoint, "input monitor not registered");
@@ -1093,6 +1097,7 @@ usbStartUsbfsMonitor (UsbDevice *device) {
                                devx->usbfsFile,
                                usbHandleCompletedInputRequests,
                                device)) {
+      logMessage(LOG_CATEGORY(USB_IO), "USBFS monitor started");
       return 1;
     } else {
       logMessage(LOG_ERR, "USBFS monitor error: %s: %s",
