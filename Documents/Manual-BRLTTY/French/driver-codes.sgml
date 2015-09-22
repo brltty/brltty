@@ -2,6 +2,8 @@ al|Alva@
 at|Albatross@
 ba|BrlAPI@
 bc|BrailComm@
+bd|Braudi@
+bg|B2G@
 bl|BrailleLite@
 bm|Baum (Native, HT, PB1, PB2)@
 bn|BrailleNote@
@@ -33,6 +35,7 @@ sd|SpeechDispatcher@
 sk|Seika@
 sw|Swift@
 th|Theta@
+tn|TechniBraille@
 ts|Telesensory Systems Inc.@
 tt|TTY@
 vd|VideoBraille@
