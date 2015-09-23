@@ -18,3 +18,51 @@
 
 title B2G
 
+####################
+# Default Bindings #
+####################
+
+map Dot1 DOT1
+map Dot2 DOT2
+map Dot3 DOT3
+map Dot4 DOT4
+map Dot5 DOT5
+map Dot6 DOT6
+map Dot7 DOT7
+map Dot8 DOT8
+map Space SPACE
+
+map Up UPPERCASE
+map Down CONTROL
+map Left META
+map Right ALTGR
+map Center GUI
+
+assign chord Space+
+include ../chords.kti
+
+bind Backward FWINLT
+bind Forward FWINRT
+
+bind Space+Backward FWINLTSKIP
+bind Space+Forward FWINRTSKIP
+
+bind Center HOME
+bind Up LNUP
+bind Down LNDN
+bind Left CHRLT
+bind Right CHRRT
+
+bind Space+Center BACK
+bind Space+Up TOP
+bind Space+Down BOT
+bind Space+Left LNBEG
+bind Space+Right LNEND
+
+
+#################
+# Menu Bindings #
+#################
+
+context menu
+

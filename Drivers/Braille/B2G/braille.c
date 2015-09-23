@@ -33,10 +33,33 @@
 #define MAXIMUM_CELL_COUNT 140
 
 BEGIN_KEY_NAME_TABLE(navigation)
+  KEY_NAME_ENTRY(BG_NAV_Dot1, "Dot1"),
+  KEY_NAME_ENTRY(BG_NAV_Dot2, "Dot2"),
+  KEY_NAME_ENTRY(BG_NAV_Dot3, "Dot3"),
+  KEY_NAME_ENTRY(BG_NAV_Dot4, "Dot4"),
+  KEY_NAME_ENTRY(BG_NAV_Dot5, "Dot5"),
+  KEY_NAME_ENTRY(BG_NAV_Dot6, "Dot6"),
+  KEY_NAME_ENTRY(BG_NAV_Dot7, "Dot7"),
+  KEY_NAME_ENTRY(BG_NAV_Dot8, "Dot8"),
+
+  KEY_NAME_ENTRY(BG_NAV_Space, "Space"),
+  KEY_NAME_ENTRY(BG_NAV_Backward, "Backward"),
+  KEY_NAME_ENTRY(BG_NAV_Forward, "Forward"),
+
+  KEY_NAME_ENTRY(BG_NAV_Center, "Center"),
+  KEY_NAME_ENTRY(BG_NAV_Left, "Left"),
+  KEY_NAME_ENTRY(BG_NAV_Right, "Right"),
+  KEY_NAME_ENTRY(BG_NAV_Up, "Up"),
+  KEY_NAME_ENTRY(BG_NAV_Down, "Down"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(routing)
+  KEY_GROUP_ENTRY(BG_GRP_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(all)
   KEY_NAME_TABLE(navigation),
+  KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
 DEFINE_KEY_TABLE(all)
