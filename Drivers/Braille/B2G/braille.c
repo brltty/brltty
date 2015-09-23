@@ -20,15 +20,20 @@
 
 #include <string.h>
 #include <errno.h>
+#include <dirent.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
+#include <linux/input.h>
 
 #include "log.h"
+#include "async_io.h"
 
 #include "brl_driver.h"
 #include "brldefs-bg.h"
 #include "metec_flat20_ioctl.h"
 
+#define KEYBOARD_DEVICE_NAME "cp430_keypad"
 #define BRAILLE_DEVICE_PATH "/dev/braille0"
 #define TEXT_CELL_COUNT 20
 
@@ -71,6 +76,7 @@ END_KEY_TABLE_LIST
 struct BrailleDataStruct {
   struct {
     int fileDescriptor;
+    AsyncHandle inputHandler;
   } keyboard;
 
   struct {
@@ -84,15 +90,177 @@ struct BrailleDataStruct {
 };
 
 static int
-openBrailleDevice (BrailleDisplay *brl) {
-  if (brl->data->braille.fileDescriptor == -1) {
-    if ((brl->data->braille.fileDescriptor = open(BRAILLE_DEVICE_PATH, O_WRONLY)) == -1) {
-      logSystemError("open[braille]");
+handleKeyEvent (BrailleDisplay *brl, int code, int press) {
+  KeyNumber number;
+
+  switch(code) {
+    case 0X067: number = BG_NAV_Up;       break;
+    case 0X069: number = BG_NAV_Left;     break;
+    case 0X06A: number = BG_NAV_Right;    break;
+    case 0X06C: number = BG_NAV_Down;     break;
+    case 0X160: number = BG_NAV_Center;   break;
+
+    case 0X197: number = BG_NAV_Forward;  break;
+    case 0X19C: number = BG_NAV_Backward; break;
+
+    case 0X1F1: number = BG_NAV_Dot7;     break;
+    case 0X1F2: number = BG_NAV_Dot3;     break;
+    case 0X1F3: number = BG_NAV_Dot2;     break;
+    case 0X1F4: number = BG_NAV_Dot1;     break;
+    case 0X1F5: number = BG_NAV_Dot4;     break;
+    case 0X1F6: number = BG_NAV_Dot5;     break;
+    case 0X1F7: number = BG_NAV_Dot6;     break;
+    case 0X1F8: number = BG_NAV_Dot8;     break;
+    case 0X1F9: number = BG_NAV_Space;    break;
+
+    default:
       return 0;
+  }
+
+  return enqueueKeyEvent(brl, BG_GRP_NavigationKeys, number, press);
+}
+
+ASYNC_INPUT_CALLBACK(handleKeyboardEvent) {
+  BrailleDisplay *brl = parameters->data;
+  static const char label[] = "keyboard";
+
+  if (parameters->error) {
+    logMessage(LOG_DEBUG, "%s read error: fd=%d: %s",
+               label, brl->data->keyboard.fileDescriptor, strerror(parameters->error));
+  } else if (parameters->end) {
+    logMessage(LOG_DEBUG, "%s end-of-file: fd=%d", 
+               label, brl->data->keyboard.fileDescriptor);
+  } else {
+    const struct input_event *event = parameters->buffer;
+
+    if (parameters->length >= sizeof(*event)) {
+      logInputPacket(event, sizeof(*event));
+
+      switch (event->type) {
+        case EV_KEY: {
+          int release = event->value == 0;
+          int press   = event->value == 1;
+
+          if (release || press) handleKeyEvent(brl, event->code, press);
+          break;
+        }
+
+        default:
+          break;
+      }
+
+      return sizeof(*event);
     }
   }
 
-  return 1;
+  return 0;
+}
+
+static char *
+findEventDevice (const char *deviceName) {
+  char *devicePath = NULL;
+  char directoryPath[0X80];
+  DIR *directory;
+
+  snprintf(directoryPath, sizeof(directoryPath),
+           "/sys/bus/platform/devices/%s/input", deviceName);
+
+  if ((directory = opendir(directoryPath))) {
+    struct dirent *entry;
+
+    while ((entry = readdir(directory))) {
+      unsigned int eventNumber;
+      char extra;
+
+      if (sscanf(entry->d_name, "input%u%c", &eventNumber, &extra) == 1) {
+        char path[0X80];
+
+        snprintf(path, sizeof(path), "/dev/input/event%u", eventNumber);
+        if (!(devicePath = strdup(path))) logMallocError();
+        break;
+      }
+    }
+
+    closedir(directory);
+  } else {
+    logMessage(LOG_ERR, "event device input directory open error: %s: %s",
+               directoryPath, strerror(errno));
+  }
+
+  return devicePath;
+}
+
+static int
+openEventDevice (const char *deviceName) {
+  char *devicePath = findEventDevice(deviceName);
+
+  if (devicePath) {
+    int deviceDescriptor = open(devicePath, O_RDONLY);
+
+    if (deviceDescriptor != -1) {
+      if (ioctl(deviceDescriptor, EVIOCGRAB, 1) != -1) {
+        logMessage(LOG_INFO, "Event Device Opened: %s: %s: fd=%d",
+                   deviceName, devicePath, deviceDescriptor);
+
+        free(devicePath);
+        return deviceDescriptor;
+      } else {
+        logSystemError("ioctl[EVIOCGRAB]");
+      }
+
+      close(deviceDescriptor);
+    } else {
+      logMessage(LOG_ERR, "event device open error: %s: %s",
+                 devicePath, strerror(errno));
+    }
+
+    free(devicePath);
+  }
+
+  return -1;
+}
+
+static int
+openKeyboardDevice (BrailleDisplay *brl) {
+  if ((brl->data->keyboard.fileDescriptor = openEventDevice(KEYBOARD_DEVICE_NAME)) != -1) {
+    if (asyncReadFile(&brl->data->keyboard.inputHandler,
+                      brl->data->keyboard.fileDescriptor,
+                      sizeof(struct input_event),
+                      handleKeyboardEvent, brl)) {
+      return 1;
+    }
+
+    close(brl->data->keyboard.fileDescriptor);
+    brl->data->keyboard.fileDescriptor = -1;
+  } else {
+    logSystemError("open[keyboard]");
+  }
+
+  return 0;
+}
+
+static void
+closeKeyboardDevice (BrailleDisplay *brl) {
+  if (brl->data->keyboard.inputHandler) {
+    asyncCancelRequest(brl->data->keyboard.inputHandler);
+    brl->data->keyboard.inputHandler = NULL;
+  }
+
+  if (brl->data->keyboard.fileDescriptor != -1) {
+    close(brl->data->keyboard.fileDescriptor);
+    brl->data->keyboard.fileDescriptor = -1;
+  }
+}
+
+static int
+openBrailleDevice (BrailleDisplay *brl) {
+  if ((brl->data->braille.fileDescriptor = open(BRAILLE_DEVICE_PATH, O_WRONLY)) != -1) {
+    return 1;
+  } else {
+    logSystemError("open[braille]");
+  }
+
+  return 0;
 }
 
 static void
@@ -129,25 +297,31 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
     brl->data->keyboard.fileDescriptor = -1;
+    brl->data->keyboard.inputHandler = NULL;
     brl->data->braille.fileDescriptor = -1;
 
-    if (openBrailleDevice(brl)) {
-      if (connectResource(brl, device)) {
-        brl->textColumns = TEXT_CELL_COUNT;
+    if (connectResource(brl, device)) {
+      if (openBrailleDevice(brl)) {
+        if (openKeyboardDevice(brl)) {
+          brl->textColumns = TEXT_CELL_COUNT;
 
-        {
-          const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+          {
+            const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
 
-          brl->keyBindings = ktd->bindings;
-          brl->keyNames = ktd->names;
+            brl->keyBindings = ktd->bindings;
+            brl->keyNames = ktd->names;
+          }
+
+          makeOutputTable(dotsTable_ISO11548_1);
+          brl->data->text.rewrite = 1;
+
+          return 1;
         }
 
-        makeOutputTable(dotsTable_ISO11548_1);
-        brl->data->text.rewrite = 1;
-        return 1;
+        closeBrailleDevice(brl);
       }
 
-      closeBrailleDevice(brl);
+      disconnectBrailleResource(brl, NULL);
     }
 
     free(brl->data);
@@ -163,6 +337,7 @@ brl_destruct (BrailleDisplay *brl) {
   disconnectBrailleResource(brl, NULL);
 
   if (brl->data) {
+    closeKeyboardDevice(brl);
     closeBrailleDevice(brl);
 
     free(brl->data);
