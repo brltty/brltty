@@ -18,6 +18,18 @@
 
 title B2G
 
+note The eight, rectangular, concave keys (in two groups of four) near the back are a braille keyboard.
+note * The four on the left, from left to right, are: Dot7, Dot3, Dot2, Dot1.
+note * The four on the right, from left to right, are: Dot4, Dot5, Dot6, Dot8.
+note The square pad with a small, round button in the middle, in between Dot1 and Dot4, is the D-Pad (directional pad).
+note * Its four edges are the Up, Down, Left, and Right keys.
+note * The button in the middle is the Center key.
+note The long, rectangular key in front of Dot1, the D-Pad, and Dot4 is the Space bar.
+note The small, round buttons just behind each cell are the routing keys.
+note The convex, square button to the left of the routing keys is the Backward key.
+note The convex, square button to the right of the routing keys is the Forward key.
+
+
 ####################
 # Default Bindings #
 ####################
