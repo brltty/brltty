@@ -20,6 +20,8 @@
 
 #include <string.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #include "log.h"
 
@@ -27,10 +29,8 @@
 #include "brldefs-bg.h"
 #include "metec_flat20_ioctl.h"
 
-#define PROBE_RETRY_LIMIT 2
-#define PROBE_INPUT_TIMEOUT 1000
-#define MAXIMUM_RESPONSE_SIZE (0XFF + 4)
-#define MAXIMUM_CELL_COUNT 140
+#define BRAILLE_DEVICE_PATH "/dev/braille0"
+#define TEXT_CELL_COUNT 20
 
 BEGIN_KEY_NAME_TABLE(navigation)
   KEY_NAME_ENTRY(BG_NAV_Dot1, "Dot1"),
@@ -69,71 +69,55 @@ BEGIN_KEY_TABLE_LIST
 END_KEY_TABLE_LIST
 
 struct BrailleDataStruct {
-  int forceRewrite;
-  unsigned char textCells[MAXIMUM_CELL_COUNT];
+  struct {
+    int fileDescriptor;
+  } keyboard;
+
+  struct {
+    int fileDescriptor;
+  } braille;
+
+  struct {
+    int rewrite;
+    unsigned char cells[TEXT_CELL_COUNT];
+  } text;
 };
 
 static int
-writeBytes (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
-  return writeBraillePacket(brl, NULL, bytes, count);
+openBrailleDevice (BrailleDisplay *brl) {
+  if (brl->data->braille.fileDescriptor == -1) {
+    if ((brl->data->braille.fileDescriptor = open(BRAILLE_DEVICE_PATH, O_WRONLY)) == -1) {
+      logSystemError("open[braille]");
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+static void
+closeBrailleDevice (BrailleDisplay *brl) {
+  if (brl->data->braille.fileDescriptor != -1) {
+    close(brl->data->braille.fileDescriptor);
+    brl->data->braille.fileDescriptor = -1;
+  }
 }
 
 static int
-writePacket (BrailleDisplay *brl, const unsigned char *packet, size_t size) {
-  unsigned char bytes[size];
-  unsigned char *byte = bytes;
+writeBrailleCells (BrailleDisplay *brl, const unsigned char *cells, size_t count) {
+  logOutputPacket(cells, count);
+  if (write(brl->data->braille.fileDescriptor, cells, count) != -1) return 1;
 
-  byte = mempcpy(byte, packet, size);
-
-  return writeBytes(brl, bytes, byte-bytes);
-}
-
-static BraillePacketVerifierResult
-verifyPacket (
-  BrailleDisplay *brl,
-  const unsigned char *bytes, size_t size,
-  size_t *length, void *data
-) {
-  unsigned char byte = bytes[size-1];
-
-  switch (size) {
-    case 1:
-      switch (byte) {
-        default:
-          return BRL_PVR_INVALID;
-      }
-      break;
-
-    default:
-      break;
-  }
-
-  return BRL_PVR_INCLUDE;
-}
-
-static size_t
-readPacket (BrailleDisplay *brl, void *packet, size_t size) {
-  return readBraillePacket(brl, NULL, packet, size, verifyPacket, NULL);
+  logSystemError("write[braille]");
+  return 0;
 }
 
 static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
-  static const SerialParameters serialParameters = {
-    SERIAL_DEFAULT_PARAMETERS
-  };
-
-  static const UsbChannelDefinition usbChannelDefinitions[] = {
-    { .vendor=0 }
-  };
-
   GioDescriptor descriptor;
   gioInitializeDescriptor(&descriptor);
 
-  descriptor.serial.parameters = &serialParameters;
-
-  descriptor.usb.channelDefinitions = usbChannelDefinitions;
-
-  if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
+  if (connectBrailleResource(brl, "null:", &descriptor, NULL)) {
     return 1;
   }
 
@@ -141,28 +125,16 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 }
 
 static int
-writeIdentityRequest (BrailleDisplay *brl) {
-  static const unsigned char packet[] = {0};
-  return writePacket(brl, packet, sizeof(packet));
-}
-
-static BrailleResponseResult
-isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
-  return BRL_RSP_UNEXPECTED;
-}
-
-static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
+    brl->data->keyboard.fileDescriptor = -1;
+    brl->data->braille.fileDescriptor = -1;
 
-    if (connectResource(brl, device)) {
-      unsigned char response[MAXIMUM_RESPONSE_SIZE];
+    if (openBrailleDevice(brl)) {
+      if (connectResource(brl, device)) {
+        brl->textColumns = TEXT_CELL_COUNT;
 
-      if (probeBrailleDisplay(brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT,
-                              writeIdentityRequest,
-                              readPacket, &response, sizeof(response),
-                              isIdentityResponse)) {
         {
           const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
 
@@ -171,11 +143,11 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         }
 
         makeOutputTable(dotsTable_ISO11548_1);
-        brl->data->forceRewrite = 1;
+        brl->data->text.rewrite = 1;
         return 1;
       }
 
-      disconnectBrailleResource(brl, NULL);
+      closeBrailleDevice(brl);
     }
 
     free(brl->data);
@@ -191,6 +163,8 @@ brl_destruct (BrailleDisplay *brl) {
   disconnectBrailleResource(brl, NULL);
 
   if (brl->data) {
+    closeBrailleDevice(brl);
+
     free(brl->data);
     brl->data = NULL;
   }
@@ -198,10 +172,11 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  if (cellsHaveChanged(brl->data->textCells, brl->buffer, brl->textColumns, NULL, NULL, &brl->data->forceRewrite)) {
+  if (cellsHaveChanged(brl->data->text.cells, brl->buffer, brl->textColumns, NULL, NULL, &brl->data->text.rewrite)) {
     unsigned char cells[brl->textColumns];
 
-    translateOutputCells(cells, brl->data->textCells, brl->textColumns);
+    translateOutputCells(cells, brl->data->text.cells, brl->textColumns);
+    if (!writeBrailleCells(brl, cells, sizeof(cells))) return 0;
   }
 
   return 1;
@@ -209,12 +184,5 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  unsigned char packet[MAXIMUM_RESPONSE_SIZE];
-  size_t size;
-
-  while ((size = readPacket(brl, packet, sizeof(packet)))) {
-    logUnexpectedPacket(packet, size);
-  }
-
-  return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
+  return EOF;
 }
