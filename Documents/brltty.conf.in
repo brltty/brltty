@@ -568,7 +568,8 @@
 # Linux Screen Driver Parameters
 #screen-parameters lx:Charset=name+... # []
 #screen-parameters lx:DebugSfm=no # [no,yes]
-#screen-parameters lx:Hfb=auto # [auto,vga,fb,0-7]
+#screen-parameters lx:HFB=auto # [auto,vga,fb,0-7]
+#screen-parameters lx:VT=0 # [0-63]
 
 # Windows Screen Driver Parameters
 #screen-parameters wn:Root=no # [no,yes]

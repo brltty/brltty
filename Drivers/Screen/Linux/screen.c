@@ -45,16 +45,18 @@
 
 typedef enum {
   PARM_CHARSET,
-  PARM_HFB,
   PARM_DEBUGSFM,
+  PARM_HFB,
+  PARM_VT,
 } ScreenParameters;
-#define SCRPARMS "charset", "hfb", "debugsfm"
+#define SCRPARMS "charset", "debugsfm", "hfb", "vt"
 
 #include "scr_driver.h"
 #include "screen.h"
 
 static const char *problemText;
-static unsigned int debugScreenFontMap = 0;
+static unsigned int debugScreenFontMap;
+static int initialVirtualTerminal;
 
 #define UNICODE_ROW_DIRECT 0XF000
 
@@ -776,6 +778,7 @@ processParameters_LinuxScreen (char **parameters) {
     if (!allocateCharsetEntries(names)) return 0;
   }
 
+  debugScreenFontMap = 0;
   if (!validateYesNo(&debugScreenFontMap, parameters[PARM_DEBUGSFM])) {
     logMessage(LOG_WARNING, "%s: %s", "invalid screen font map debug setting", parameters[PARM_DEBUGSFM]);
   }
@@ -797,6 +800,20 @@ processParameters_LinuxScreen (char **parameters) {
     } else if (choice) {
       static const unsigned short bits[] = {0X0800, 0X0100};
       highFontBit = bits[choice-1];
+    }
+  }
+
+  initialVirtualTerminal = 0;
+  {
+    const char *parameter = parameters[PARM_VT];
+
+    if (parameter && *parameter) {
+      static const int minimum = 0;
+      static const int maximum = 0X3F;
+
+      if (!validateInteger(&initialVirtualTerminal, parameter, &minimum, &maximum)) {
+        logMessage(LOG_WARNING, "%s: %s", "invalid virtual terminal number", parameter);
+      }
     }
   }
 
@@ -920,7 +937,7 @@ construct_LinuxScreen (void) {
     if (setConsoleName()) {
       consoleDescriptor = -1;
 
-      if (openScreen(0)) {
+      if (openScreen(initialVirtualTerminal)) {
         if (setTranslationTable(1)) {
           openKeyboard();
           brailleOfflineListener = registerReportListener(REPORT_BRAILLE_OFFLINE, lxBrailleOfflineListener, NULL);
