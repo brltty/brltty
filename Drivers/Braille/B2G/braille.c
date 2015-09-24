@@ -93,29 +93,39 @@ static int
 handleKeyEvent (BrailleDisplay *brl, int code, int press) {
   KeyNumber number;
 
+#define NAV(CODE,KEY) case KEY_##CODE: number = BG_NAV_##KEY; break;
   switch(code) {
-    case 0X067: number = BG_NAV_Up;       break;
-    case 0X069: number = BG_NAV_Left;     break;
-    case 0X06A: number = BG_NAV_Right;    break;
-    case 0X06C: number = BG_NAV_Down;     break;
-    case 0X160: number = BG_NAV_Center;   break;
+    NAV(UP, Up)
+    NAV(LEFT, Left)
+    NAV(RIGHT, Right)
+    NAV(DOWN, Down)
+    NAV(OK, Center)
 
-    case 0X197: number = BG_NAV_Forward;  break;
-    case 0X19C: number = BG_NAV_Backward; break;
+    NAV(NEXT, Forward)
+    NAV(PREVIOUS, Backward)
 
-    case 0X1F1: number = BG_NAV_Dot7;     break;
-    case 0X1F2: number = BG_NAV_Dot3;     break;
-    case 0X1F3: number = BG_NAV_Dot2;     break;
-    case 0X1F4: number = BG_NAV_Dot1;     break;
-    case 0X1F5: number = BG_NAV_Dot4;     break;
-    case 0X1F6: number = BG_NAV_Dot5;     break;
-    case 0X1F7: number = BG_NAV_Dot6;     break;
-    case 0X1F8: number = BG_NAV_Dot8;     break;
-    case 0X1F9: number = BG_NAV_Space;    break;
+    NAV(BRL_DOT1, Dot7)
+    NAV(BRL_DOT2, Dot3)
+    NAV(BRL_DOT3, Dot2)
+    NAV(BRL_DOT4, Dot1)
+    NAV(BRL_DOT5, Dot4)
+    NAV(BRL_DOT6, Dot5)
+    NAV(BRL_DOT7, Dot6)
+    NAV(BRL_DOT8, Dot8)
+    NAV(BRL_DOT9, Space)
 
     default:
+      {
+        int key = code - 0X2D0;
+
+        if ((key >= 0) && (key < TEXT_CELL_COUNT)) {
+          return enqueueKeyEvent(brl, BG_GRP_RoutingKeys, key, press);
+        }
+      }
+
       return 0;
   }
+#undef NAV
 
   return enqueueKeyEvent(brl, BG_GRP_NavigationKeys, number, press);
 }
