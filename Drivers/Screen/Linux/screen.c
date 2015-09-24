@@ -348,7 +348,8 @@ closeConsole (void) {
       logSystemError("console close");
     }
 
-    logMessage(LOG_DEBUG, "console closed: fd=%d", consoleDescriptor);
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "console closed: fd=%d", consoleDescriptor);
     consoleDescriptor = -1;
   }
 }
@@ -362,7 +363,8 @@ openConsole (unsigned char vt) {
     int console = openCharacterDevice(name, O_RDWR|O_NOCTTY, 4, vt);
 
     if (console != -1) {
-      logMessage(LOG_DEBUG, "console opened: %s: fd=%d", name, console);
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+                 "console opened: %s: fd=%d", name, console);
       closeConsole();
       consoleDescriptor = console;
       opened = 1;
@@ -465,7 +467,8 @@ closeScreen (void) {
       logSystemError("screen close");
     }
 
-    logMessage(LOG_DEBUG, "screen closed: fd=%d", screenDescriptor);
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "screen closed: fd=%d", screenDescriptor);
     screenDescriptor = -1;
   }
 }
@@ -479,7 +482,8 @@ openScreen (unsigned char vt) {
     int screen = openCharacterDevice(name, O_RDWR, 7, 0X80|vt);
 
     if (screen != -1) {
-      logMessage(LOG_DEBUG, "screen opened: %s: fd=%d", name, screen);
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+                 "screen opened: %s: fd=%d", name, screen);
 
       if (openConsole(vt)) {
         closeScreen();
@@ -488,14 +492,16 @@ openScreen (unsigned char vt) {
         opened = 1;
 
         isMonitorable = canMonitorScreen();
-        logMessage(LOG_DEBUG, "screen is monitorable: %s",
+        logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+                   "screen is monitorable: %s",
                    (isMonitorable? "yes": "no"));
 
         screenMonitor = NULL;
         screenUpdated = 1;
       } else {
         close(screen);
-        logMessage(LOG_DEBUG, "screen closed: fd=%d", screen);
+        logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+                   "screen closed: fd=%d", screen);
       }
     }
 
@@ -621,7 +627,9 @@ setScreenFontMap (int force) {
   screenFontMapTable = sfm.entries;
   screenFontMapCount = sfm.entry_ct;
   screenFontMapSize = size;
-  logMessage(LOG_INFO, "Screen Font Map Size: %d", screenFontMapCount);
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+             "Font Map Size: %d",
+             screenFontMapCount);
 
   if (debugScreenFontMap) {
     unsigned int i;
@@ -629,7 +637,8 @@ setScreenFontMap (int force) {
     for (i=0; i<screenFontMapCount; ++i) {
       const struct unipair *map = &screenFontMapTable[i];
 
-      logMessage(LOG_DEBUG, "sfm[%03u]: unum=%4.4X fpos=%4.4X",
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+                 "SFM[%03u]: U+%04X@%04X",
                  i, map->unicode, map->fontpos);
     }
   }
@@ -645,14 +654,16 @@ setVgaCharacterCount (int force) {
   int oldCount = vgaCharacterCount;
 
   {
-    struct console_font_op cfo;
-
-    memset(&cfo, 0, sizeof(cfo));
-    cfo.op = KD_FONT_OP_GET;
-    cfo.height = UINT_MAX;
-    cfo.width = UINT_MAX;
+    struct console_font_op cfo = {
+      .height = UINT_MAX,
+      .width = UINT_MAX,
+      .op = KD_FONT_OP_GET
+    };
 
     if (controlConsole(KDFONTOP, &cfo) != -1) {
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+                 "Font Properties: %ux%u*%u",
+                 cfo.width, cfo.height, cfo.charcount);
       vgaCharacterCount = cfo.charcount;
     } else {
       vgaCharacterCount = 0;
@@ -682,7 +693,8 @@ setVgaCharacterCount (int force) {
     }
   }
 
-  logMessage(LOG_INFO, "VGA Character Count: %d(%s)",
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+             "VGA Character Count: %d(%s)",
              vgaCharacterCount,
              vgaLargeTable? "large": "small");
 
@@ -701,7 +713,8 @@ setAttributesMasks (unsigned short bit) {
                             (((bit & 0X0F00) - 0X0100) & 0X0F00);
   shiftedAttributesMask = ((~((bit & 0XF000) - 0X1000) << 1) & 0XE000) |
                           ((~((bit & 0X0F00) - 0X0100) << 1) & 0X0E00);
-  logMessage(LOG_DEBUG, "attributes masks: font=%04X unshifted=%04X shifted=%04X",
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+             "Attributes Masks: Font:%04X Unshifted:%04X Shifted:%04X",
              fontAttributesMask, unshiftedAttributesMask, shiftedAttributesMask);
 }
 
@@ -1142,7 +1155,7 @@ refresh_LinuxScreen (void) {
         int consoleNumber = getConsoleNumber();
 
         if (consoleNumber == currentConsoleNumber) break;
-        logMessage(LOG_DEBUG,
+        logMessage(LOG_CATEGORY(SCREEN_DRIVER),
                    "console number changed: %u -> %u",
                    currentConsoleNumber, consoleNumber);
 
@@ -1775,7 +1788,8 @@ static int
 insertKey_LinuxScreen (ScreenKey key) {
   int ok = 0;
 
-  logMessage(LOG_DEBUG, "insert key: %4.4X", key);
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+             "insert key: %4.4X", key);
 
   if (rebindConsole()) {
     int mode;
@@ -1865,7 +1879,7 @@ unhighlightRegion_LinuxScreen (void) {
 static int
 validateVt (int vt) {
   if ((vt >= 1) && (vt <= 0X3F)) return 1;
-  logMessage(LOG_DEBUG, "virtual terminal out of range: %d", vt);
+  logMessage(LOG_WARNING, "virtual terminal out of range: %d", vt);
   return 0;
 }
 
@@ -1881,7 +1895,8 @@ switchVirtualTerminal_LinuxScreen (int vt) {
   if (validateVt(vt)) {
     if (selectVirtualTerminal_LinuxScreen(0)) {
       if (ioctl(consoleDescriptor, VT_ACTIVATE, vt) != -1) {
-        logMessage(LOG_DEBUG, "switched to virtual tertminal %d.", vt);
+        logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+                   "switched to virtual tertminal %d", vt);
         return 1;
       } else {
         logSystemError("ioctl[VT_ACTIVATE]");
