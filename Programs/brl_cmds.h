@@ -265,7 +265,7 @@ typedef enum {
   BRL_BLK_ALERT /* (raise an alert) */,
   BRL_BLK_PASSKEY /* (emulate special key) */,
   BRL_BLK_PASSCHAR /* type unicode character */,
-  BRL_BLK_PASSDOTS /* type braille character */,
+  BRL_BLK_PASSDOTS /* type braille dots */,
   BRL_BLK_PASSAT /* AT (set 2) keyboard scan code */,
   BRL_BLK_PASSXT /* XT (set 1) keyboard scan code */,
   BRL_BLK_PASSPS2 /* PS/2 (set 3) keyboard scan code */,

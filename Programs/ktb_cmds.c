@@ -170,6 +170,8 @@ static const CommandListEntry commandList_speak[] = {
 };
 
 static const CommandListEntry commandList_input[] = {
+  { .command = BRL_CMD_BLK(PASSDOTS) },
+  { .command = BRL_CMD_BLK(PASSCHAR) },
   { .command = BRL_CMD_BRLKBD },
   { .command = BRL_CMD_BRLUCDOTS },
   { .command = BRL_CMD_KEY(ENTER) },
@@ -187,8 +189,6 @@ static const CommandListEntry commandList_input[] = {
   { .command = BRL_CMD_KEY(INSERT) },
   { .command = BRL_CMD_KEY(DELETE) },
   { .command = BRL_CMD_KEY(FUNCTION) },
-  { .command = BRL_CMD_BLK(PASSCHAR) },
-  { .command = BRL_CMD_BLK(PASSDOTS) },
   { .command = BRL_CMD_UNSTICK },
   { .command = BRL_CMD_UPPER },
   { .command = BRL_CMD_SHIFT },
