@@ -60,16 +60,55 @@ bind Space+Backward FWINLTSKIP
 bind Space+Forward FWINRTSKIP
 
 bind Center HOME
+bind Space+Center BACK
+
 bind Up LNUP
 bind Down LNDN
-bind Left CHRLT
-bind Right CHRRT
+bind Left LNBEG
+bind Right LNEND
 
-bind Space+Center BACK
 bind Space+Up TOP
 bind Space+Down BOT
-bind Space+Left LNBEG
-bind Space+Right LNEND
+bind Space+Left CHRLT
+bind Space+Right CHRRT
+
+bind Backward+Center PRSEARCH
+bind Forward+Center NXSEARCH
+
+bind Backward+Up PRDIFLN
+bind Backward+Down NXDIFLN
+bind Backward+Left ATTRUP
+bind Backward+Right ATTRDN
+
+bind Forward+Up PRPROMPT
+bind Forward+Down NXPROMPT
+bind Forward+Left PRPGRPH
+bind Forward+Right NXPGRPH
+
+bind RoutingKey ROUTE
+bind RoutingKey+RoutingKey CLIP_COPY
+bind RoutingKey+RoutingKey+Space CLIP_APPEND
+
+bind Dot7+RoutingKey CLIP_NEW
+bind Dot3+RoutingKey CLIP_ADD
+bind Dot6+RoutingKey COPY_LINE
+bind Dot8+RoutingKey COPY_RECT
+
+bind Dot2+RoutingKey SWITCHVT
+bind Dot5+RoutingKey PASTE_HISTORY
+
+bind Dot1+RoutingKey SETMARK
+bind Dot4+RoutingKey GOTOMARK
+
+bind Space+RoutingKey KEY_FUNCTION
+
+bind Backward+RoutingKey SETLEFT
+bind Forward+RoutingKey DESCCHAR
+
+bind Up+RoutingKey PRINDENT
+bind Down+RoutingKey NXINDENT
+bind Left+RoutingKey PRDIFCHAR
+bind Right+RoutingKey NXDIFCHAR
 
 
 #################
@@ -77,4 +116,17 @@ bind Space+Right LNEND
 #################
 
 context menu
+
+bind Dot1 MENU_PREV_ITEM
+bind Dot4 MENU_NEXT_ITEM
+
+bind Dot2 MENU_PREV_SETTING
+bind Dot5 MENU_NEXT_SETTING
+
+bind Dot3 MENU_PREV_LEVEL
+bind Dot6 PREFMENU
+
+bind Dot7 PREFLOAD
+bind Dot8 PREFSAVE
+
 
