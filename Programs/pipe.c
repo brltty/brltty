@@ -310,7 +310,13 @@ newNamedPipeObject (const char *name, NamedPipeInputCallback *callback, void *da
     initializeInputDescriptor(obj);
     initializeInputMonitor(obj);
 
-    if ((obj->host.path = makePath(getNamedPipeDirectory(), name))) {
+    {
+      const char *directory = getNamedPipeDirectory();
+
+      obj->host.path = directory? makePath(directory, name): NULL;
+    }
+
+    if (obj->host.path) {
       if (!obj->createPipe) {
         logUnsupportedOperation("create named pipe");
       } else if (obj->createPipe(obj)) {

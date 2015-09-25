@@ -368,9 +368,11 @@ const char *writableDirectory = NULL;
 
 const char *
 getWritableDirectory (void) {
-  if (writableDirectory && *writableDirectory)
-    if (ensureDirectory(writableDirectory))
+  if (writableDirectory && *writableDirectory) {
+    if (ensureDirectory(writableDirectory)) {
       return writableDirectory;
+    }
+  }
 
   return NULL;
 }
@@ -987,7 +989,7 @@ writeFileDescriptor (FileDescriptor fileDescriptor, const void *buffer, size_t s
 
 const char *
 getNamedPipeDirectory (void) {
-  return STATE_DIRECTORY;
+  return getWritableDirectory();
 }
 
 int
