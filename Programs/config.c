@@ -2388,8 +2388,12 @@ validateInterval (int *value, const char *string) {
 
 static void
 logProperty (const char *value, const char *variable, const char *label) {
-  setGlobalDataVariable(variable, value);
-  if (!*value) value = gettext("none");
+  if (*value) {
+    setGlobalDataVariable(variable, value);
+  } else {
+    value = gettext("none");
+  }
+
   logMessage(LOG_INFO, "%s: %s", label, value);
 }
 
