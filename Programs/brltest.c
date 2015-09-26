@@ -108,7 +108,7 @@ main (int argc, char *argv[]) {
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
 
-  writableDirectory = opt_writableDirectory;
+  setWritableDirectory(opt_writableDirectory);
 
   if (argc) {
     driver = *argv++, --argc;

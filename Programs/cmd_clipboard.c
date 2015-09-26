@@ -381,19 +381,15 @@ cpbPaste (ClipboardCommandData *ccd, unsigned int index) {
 static FILE *
 cpbOpenFile (const char *mode) {
   const char *file = "clipboard";
-  const char *directory = STATE_DIRECTORY;
+  char *path = makeUpdatablePath(file);
 
-  if (directory) {
-    char *path = makePath(directory, file);
+  if (path) {
+    FILE *stream = openDataFile(path, mode, 0);
 
-    if (path) {
-      FILE *stream = openDataFile(path, mode, 0);
+    free(path);
+    path = NULL;
 
-      free(path);
-      path = NULL;
-
-      if (stream) return stream;
-    }
+    if (stream) return stream;
   }
 
   return NULL;

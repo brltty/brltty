@@ -364,24 +364,61 @@ ensureDirectory (const char *path) {
   return 0;
 }
 
-const char *writableDirectory = NULL;
+static void
+setDirectory (const char **variable, const char *directory) {
+  *variable = directory;
+}
 
-const char *
-getWritableDirectory (void) {
-  if (writableDirectory && *writableDirectory) {
-    if (ensureDirectory(writableDirectory)) {
-      return writableDirectory;
+static const char *
+getDirectory (const char *const *variable) {
+  if (*variable && **variable) {
+    if (ensureDirectory(*variable)) {
+      return *variable;
     }
   }
 
   return NULL;
 }
 
-char *
-makeWritablePath (const char *file) {
-  const char *directory = getWritableDirectory();
+static char *
+makeDirectoryPath (const char *const *variable, const char *file) {
+  const char *directory = getDirectory(variable);
   if (directory) return makePath(directory, file);
   return NULL;
+}
+
+static const char *updatableDirectory = NULL;
+
+void
+setUpdatableDirectory (const char *directory) {
+  setDirectory(&updatableDirectory, directory);
+}
+
+const char *
+getUpdatableDirectory (void) {
+  return getDirectory(&updatableDirectory);
+}
+
+char *
+makeUpdatablePath (const char *file) {
+  return makeDirectoryPath(&updatableDirectory, file);
+}
+
+static const char *writableDirectory = NULL;
+
+void
+setWritableDirectory (const char *directory) {
+  setDirectory(&writableDirectory, directory);
+}
+
+const char *
+getWritableDirectory (void) {
+  return getDirectory(&writableDirectory);
+}
+
+char *
+makeWritablePath (const char *file) {
+  return makeDirectoryPath(&writableDirectory, file);
 }
 
 char *

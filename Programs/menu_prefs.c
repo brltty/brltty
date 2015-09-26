@@ -1173,18 +1173,8 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Tables Directory"));
-      ITEM(newTextMenuItem(buildSubmenu, &itemName, TABLES_DIRECTORY));
-    }
-
-    {
-      NAME(strtext("Drivers Directory"));
-      ITEM(newTextMenuItem(buildSubmenu, &itemName, DRIVERS_DIRECTORY));
-    }
-
-    {
-      NAME(strtext("State Directory"));
-      ITEM(newTextMenuItem(buildSubmenu, &itemName, STATE_DIRECTORY));
+      NAME(strtext("Updatable Directory"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, UPDATABLE_DIRECTORY));
     }
 
     {
@@ -1195,6 +1185,16 @@ makePreferencesMenu (void) {
     {
       NAME(strtext("Writable Directory"));
       ITEM(newTextMenuItem(buildSubmenu, &itemName, WRITABLE_DIRECTORY));
+    }
+
+    {
+      NAME(strtext("Drivers Directory"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, DRIVERS_DIRECTORY));
+    }
+
+    {
+      NAME(strtext("Tables Directory"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, TABLES_DIRECTORY));
     }
 
     {

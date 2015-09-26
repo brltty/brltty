@@ -325,7 +325,7 @@ Recognize environment variables.
 \fB\-F \fIfile\fR (\fB\-\-preferences\-file=\fR)
 The path to the preferences file.
 Relative paths are anchored at
-.BR "@STATE_DIRECTORY@" "."
+.BR "@UPDATABLE_DIRECTORY@" "."
 The built-in default is
 .BR "@PREFERENCES_FILE@" "."
 .TP
@@ -394,6 +394,11 @@ The path to the directory which contains
 the text, attributes, contraction, keyboard, and input tables.
 The built-in default is
 .RB "@TABLES_DIRECTORY@" "."
+.TP
+\fB\-U \fIdirectory\fR (\fB\-\-updatable\-directory=\fR)
+The path to a directory which contains files that can be updated.
+The built-in default is
+.RB "@UPDATABLE_DIRECTORY@" "."
 .TP
 \fB\-V\fR (\fB\-\-version\fR)
 Print the versions of

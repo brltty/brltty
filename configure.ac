@@ -1755,7 +1755,7 @@ BRLTTY_DEFINE_DIRECTORY([DRIVERS_DIRECTORY], [${execute_root}${drivers_directory
                         [Define this to be a string containing the path to the drivers directory.])
 BRLTTY_DEFINE_DIRECTORY([CONFIGURATION_DIRECTORY], [${sysconfdir}],
                         [Define this to be a string containing the path to the configuration directory.])
-BRLTTY_DEFINE_DIRECTORY([STATE_DIRECTORY], [${localstatedir}/lib/${PACKAGE_TARNAME}],
+BRLTTY_DEFINE_DIRECTORY([UPDATABLE_DIRECTORY], [${localstatedir}/lib/${PACKAGE_TARNAME}],
                         [Define this to be a string containing the path to the state directory.])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_ETCDIR], ["${CONFIGURATION_DIRECTORY}"],
                        [Define this to be a string containing the path to the directory where the authorization key and driver-dependent key names are found.])

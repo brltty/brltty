@@ -84,7 +84,7 @@ resetPreferences (void) {
 char *
 makePreferencesFilePath (const char *name) {
   if (!name) name = PREFERENCES_FILE;
-  return makePath(STATE_DIRECTORY, name);
+  return makeUpdatablePath(name);
 }
 
 static int

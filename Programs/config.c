@@ -172,6 +172,7 @@ static const char *const optionStrings_CancelExecution[] = {
 static char *opt_configurationFile;
 static char *opt_preferencesFile;
 static char *opt_pidFile;
+static char *opt_updatableDirectory;
 static char *opt_writableDirectory;
 static char *opt_driversDirectory;
 
@@ -266,6 +267,20 @@ static const char *const optionStrings_SpeechDriver[] = {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 BEGIN_OPTION_TABLE(programOptions)
+  { .letter = 'E',
+    .word = "environment-variables",
+    .flags = OPT_Hidden,
+    .setting.flag = &opt_environmentVariables,
+    .description = strtext("Recognize environment variables.")
+  },
+
+  { .letter = 'n',
+    .word = "no-daemon",
+    .flags = OPT_Hidden,
+    .setting.flag = &opt_noDaemon,
+    .description = strtext("Remain a foreground process.")
+  },
+
   { .letter = 'I',
     .word = "install-service",
     .flags = OPT_Hidden,
@@ -290,23 +305,33 @@ BEGIN_OPTION_TABLE(programOptions)
     .strings.array = optionStrings_CancelExecution
   },
 
-  { .letter = 'P',
-    .word = "pid-file",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+  { .letter = 'f',
+    .word = "configuration-file",
+    .flags = OPT_Environ,
     .argument = strtext("file"),
-    .setting.string = &opt_pidFile,
+    .setting.string = &opt_configurationFile,
+    .internal.setting = CONFIGURATION_DIRECTORY "/" CONFIGURATION_FILE,
     .internal.adjust = fixInstallPath,
-    .description = strtext("Path to process identifier file.")
+    .description = strtext("Path to default settings file.")
   },
 
-  { .letter = 'D',
-    .word = "drivers-directory",
+  { .letter = 'U',
+    .word = "updatable-directory",
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("directory"),
-    .setting.string = &opt_driversDirectory,
-    .internal.setting = DRIVERS_DIRECTORY,
+    .setting.string = &opt_updatableDirectory,
+    .internal.setting = UPDATABLE_DIRECTORY,
     .internal.adjust = fixInstallPath,
-    .description = strtext("Path to directory containing drivers.")
+    .description = strtext("Path to directory which contains files that can be updated.")
+  },
+
+  { .letter = 'F',
+    .word = "preferences-file",
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .argument = strtext("file"),
+    .setting.string = &opt_preferencesFile,
+    .internal.setting = PREFERENCES_FILE,
+    .description = strtext("Name of or path to default preferences file.")
   },
 
   { .letter = 'W',
@@ -319,33 +344,24 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to directory which can be written to.")
   },
 
-  { .letter = 'f',
-    .word = "configuration-file",
-    .flags = OPT_Environ,
-    .argument = strtext("file"),
-    .setting.string = &opt_configurationFile,
-    .internal.setting = CONFIGURATION_DIRECTORY "/" CONFIGURATION_FILE,
-    .internal.adjust = fixInstallPath,
-    .description = strtext("Path to default settings file.")
-  },
-
-  { .letter = 'F',
-    .word = "preferences-file",
+  { .letter = 'D',
+    .word = "drivers-directory",
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
-    .argument = strtext("file"),
-    .setting.string = &opt_preferencesFile,
-    .internal.setting = PREFERENCES_FILE,
-    .description = strtext("Name of or path to default preferences file.")
-  },
-
-  { .letter = 'E',
-    .word = "environment-variables",
-    .flags = OPT_Hidden,
-    .setting.flag = &opt_environmentVariables,
-    .description = strtext("Recognize environment variables.")
+    .argument = strtext("directory"),
+    .setting.string = &opt_driversDirectory,
+    .internal.setting = DRIVERS_DIRECTORY,
+    .internal.adjust = fixInstallPath,
+    .description = strtext("Path to directory containing drivers.")
   },
 
 #ifdef ENABLE_API
+  { .letter = 'N',
+    .word = "no-api",
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .setting.flag = &opt_noApi,
+    .description = strtext("Disable the application programming interface.")
+  },
+
   { .letter = 'A',
     .word = "api-parameters",
     .flags = OPT_Extend | OPT_Config | OPT_Environ,
@@ -353,13 +369,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_apiParameters,
     .internal.setting = API_PARAMETERS,
     .description = strtext("Parameters for the application programming interface.")
-  },
-
-  { .letter = 'N',
-    .word = "no-api",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
-    .setting.flag = &opt_noApi,
-    .description = strtext("Disable the application programming interface.")
   },
 #endif /* ENABLE_API */
 
@@ -542,6 +551,13 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Message hold timeout (in 10ms units).")
   },
 
+  { .letter = 'e',
+    .word = "standard-error",
+    .flags = OPT_Hidden,
+    .setting.flag = &opt_standardError,
+    .description = strtext("Log to standard error rather than to the system log.")
+  },
+
   { .letter = 'q',
     .word = "quiet",
     .setting.flag = &opt_quiet,
@@ -565,18 +581,13 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to log file.")
   },
 
-  { .letter = 'e',
-    .word = "standard-error",
-    .flags = OPT_Hidden,
-    .setting.flag = &opt_standardError,
-    .description = strtext("Log to standard error rather than to the system log.")
-  },
-
-  { .letter = 'n',
-    .word = "no-daemon",
-    .flags = OPT_Hidden,
-    .setting.flag = &opt_noDaemon,
-    .description = strtext("Remain a foreground process.")
+  { .letter = 'P',
+    .word = "pid-file",
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .argument = strtext("file"),
+    .setting.string = &opt_pidFile,
+    .internal.adjust = fixInstallPath,
+    .description = strtext("Path to process identifier file.")
   },
 
   { .letter = 'v',
@@ -657,7 +668,8 @@ brlttyPrepare (int argc, char *argv[]) {
     logMessage(LOG_ERR, "%s: %s", gettext("excess argument"), argv[0]);
   }
 
-  writableDirectory = opt_writableDirectory;
+  setUpdatableDirectory(opt_updatableDirectory);
+  setWritableDirectory(opt_writableDirectory);
 
   systemLogLevel = LOG_NOTICE;
   disableAllLogCategories();

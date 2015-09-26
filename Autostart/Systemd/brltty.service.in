@@ -7,7 +7,7 @@ Documentation=http://brltty.com/
 DefaultDependencies=no
 Before=sysinit.target
 
-RequiresMountsFor=@STATE_DIRECTORY@
+RequiresMountsFor=@UPDATABLE_DIRECTORY@
 
 
 [Service]

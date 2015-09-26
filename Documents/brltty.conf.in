@@ -472,7 +472,7 @@
 ##########################
 
 # The preferences-file directive specifies the file in which to save the user's
-# preferences. Relative paths are anchored at "@STATE_DIRECTORY@". If not
+# preferences. Relative paths are anchored at "@UPDATABLE_DIRECTORY@". If not
 # specified, "@PREFERENCES_FILE@" will be used.
 # (can be overridden with the -F [--preferences-file=] option)
 #preferences-file	@PREFERENCES_FILE@
@@ -496,17 +496,23 @@
 # (can be overridden with the -L [--log-file=] option)
 #log-file	/tmp/brltty.log
 
-# The drivers-directory directive specifies the absolute path to the
-# directory which contains the dynamically loadable drivers. If not
-# specified, @DRIVERS_DIRECTORY@ will be used.
-# (can be overridden with the -D [--drivers-directory=] option)
-#drivers-directory @DRIVERS_DIRECTORY@
+# The updatable-directory directive specifies the absolute path to a directory
+# which contains files that can be updated (preferences, saved clipboard, etc).
+# If not specified, "@UPDATABLE_DIRECTORY@" will be used.
+# (can be overridden with the -U [--updatable-directory=] option)
+#updatable-directory @UPDATABLE_DIRECTORY@
 
 # The writable-directory directive specifies the absolute path to a directory
 # which can be written to (creation of missing but needed resources, etc). If
 # not specified, "@WRITABLE_DIRECTORY@" will be used.
 # (can be overridden with the -W [--writable-directory=] option)
 #writable-directory @WRITABLE_DIRECTORY@
+
+# The drivers-directory directive specifies the absolute path to the
+# directory which contains the dynamically loadable drivers. If not
+# specified, @DRIVERS_DIRECTORY@ will be used.
+# (can be overridden with the -D [--drivers-directory=] option)
+#drivers-directory @DRIVERS_DIRECTORY@
 
 # The tables-directory directive specifies the absolute path to the directory
 # which contains the text, attributes, contraction, keyboard, and input tables.
