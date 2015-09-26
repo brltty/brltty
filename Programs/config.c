@@ -2386,6 +2386,13 @@ validateInterval (int *value, const char *string) {
   }
 }
 
+static void
+logProperty (const char *value, const char *variable, const char *label) {
+  setGlobalDataVariable(variable, value);
+  if (!*value) value = gettext("none");
+  logMessage(LOG_INFO, "%s: %s", label, value);
+}
+
 ProgramExitStatus
 brlttyStart (void) {
   if (opt_cancelExecution) {
@@ -2530,23 +2537,21 @@ brlttyStart (void) {
     char *directory;
 
     if ((directory = getWorkingDirectory())) {
-      logMessage(LOG_INFO, "%s: %s", gettext("Working Directory"), directory);
+      logProperty(directory, "workingDirectory", gettext("Working Directory"));
       free(directory);
     } else {
-      logMessage(LOG_ERR, "%s: %s", gettext("cannot determine working directory"), strerror(errno));
+      logMessage(LOG_WARNING, "%s: %s", gettext("cannot determine working directory"), strerror(errno));
     }
   }
 
-  logMessage(LOG_INFO, "%s: %s", gettext("Writable Directory"), opt_writableDirectory);
-  logMessage(LOG_INFO, "%s: %s", gettext("Configuration File"), opt_configurationFile);
+  logProperty(opt_configurationFile, "configurationFile", gettext("Configuration File"));
+  logProperty(opt_updatableDirectory, "updatableDirectory", gettext("Updatable Directory"));
+  logProperty(opt_preferencesFile, "preferencesFile", gettext("Preferences File"));
+  logProperty(opt_writableDirectory, "writableDirectory", gettext("Writable Directory"));
+  logProperty(opt_driversDirectory, "driversDirectory", gettext("Drivers Directory"));
+  logProperty(opt_tablesDirectory, "tablesDirectory", gettext("Tables Directory"));
 
-  logMessage(LOG_INFO, "%s: %s", gettext("Preferences File"), opt_preferencesFile);
   loadPreferences();
-
-  logMessage(LOG_INFO, "%s: %s", gettext("Drivers Directory"), opt_driversDirectory);
-
-  logMessage(LOG_INFO, "%s: %s", gettext("Tables Directory"), opt_tablesDirectory);
-  setGlobalDataVariable("tablesDirectory", opt_tablesDirectory);
 
   /* handle text table option */
   if (*opt_textTable) {
@@ -2571,7 +2576,7 @@ brlttyStart (void) {
     changeStringSetting(&opt_textTable, TEXT_TABLE);
   }
 
-  logMessage(LOG_INFO, "%s: %s", gettext("Text Table"), opt_textTable);
+  logProperty(opt_textTable, "textTable", gettext("Text Table"));
   onProgramExit("text-table", exitTextTable, NULL);
 
   /* handle attributes table option */
@@ -2585,23 +2590,21 @@ brlttyStart (void) {
     changeStringSetting(&opt_attributesTable, ATTRIBUTES_TABLE);
   }
 
-  logMessage(LOG_INFO, "%s: %s", gettext("Attributes Table"), opt_attributesTable);
+  logProperty(opt_attributesTable, "attributesTable", gettext("Attributes Table"));
   onProgramExit("attributes-table", exitAttributesTable, NULL);
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   /* handle contraction table option */
   onProgramExit("contraction-table", exitContractionTable, NULL);
   if (*opt_contractionTable) changeContractionTable(opt_contractionTable);
-  logMessage(LOG_INFO, "%s: %s", gettext("Contraction Table"),
-             *opt_contractionTable? opt_contractionTable: gettext("none"));
+  logProperty(opt_contractionTable, "contractionTable", gettext("Contraction Table"));
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   parseKeyboardProperties(&keyboardProperties, opt_keyboardProperties);
 
   onProgramExit("keyboard-table", exitKeyboardTable, NULL);
   changeKeyboardTable(opt_keyboardTable);
-  logMessage(LOG_INFO, "%s: %s", gettext("Keyboard Table"),
-             *opt_keyboardTable? opt_keyboardTable: gettext("none"));
+  logProperty(opt_keyboardTable, "keyboardTable", gettext("Keyboard Table"));
 
   /* initialize screen driver */
   if (opt_verify) {
@@ -2663,8 +2666,7 @@ brlttyStart (void) {
   }
 
   /* Create the file system object for speech input. */
-  logMessage(LOG_INFO, "%s: %s", gettext("Speech Input"),
-             *opt_speechInput? opt_speechInput: gettext("none"));
+  logProperty(opt_speechInput, "speechInput", gettext("Speech Input"));
   if (!opt_verify) {
     if (*opt_speechInput) {
       speechInputObject = newSpeechInputObject(opt_speechInput);
