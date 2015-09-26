@@ -89,11 +89,11 @@ bind \{chord}Dot4 KEY_CURSOR_DOWN
 
 bind \{chord}Dot2+Dot3 KEY_PAGE_UP
 bind \{chord}Dot5+Dot6 KEY_PAGE_DOWN
-bind \{chord}Dot2+Dot3+Dot5+Dot6 KEY_TAB
+bind \{chord}Dot4+Dot5 KEY_TAB
 
-bind \{chord}Dot3+Dot5 KEY_INSERT
 bind \{chord}Dot2+Dot5+Dot6 KEY_DELETE
 bind \{chord}Dot2+Dot6 KEY_ESCAPE
+bind \{chord}Dot3+Dot5 KEY_INSERT
 
 bind Dot7 KEY_BACKSPACE
 bind Dot8 KEY_ENTER
