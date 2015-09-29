@@ -109,6 +109,9 @@ handleKeyEvent (BrailleDisplay *brl, int code, int press) {
     NAV(NEXT, Forward)
     NAV(PREVIOUS, Backward)
 
+    NAV(VOLUMEUP, Louder)
+    NAV(VOLUMEDOWN, Softer)
+
     NAV(BRL_DOT1, Dot7)
     NAV(BRL_DOT2, Dot3)
     NAV(BRL_DOT3, Dot2)
