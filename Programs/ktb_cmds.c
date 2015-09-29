@@ -205,7 +205,13 @@ static const CommandListEntry commandList_special[] = {
   { .command = BRL_CMD_BLK(SETMARK) },
   { .command = BRL_CMD_BLK(GOTOMARK) },
   { .command = BRL_CMD_RESTARTBRL },
+  { .command = BRL_CMD_BRL_STOP },
+  { .command = BRL_CMD_BRL_START },
   { .command = BRL_CMD_RESTARTSPEECH },
+  { .command = BRL_CMD_SPK_STOP },
+  { .command = BRL_CMD_SPK_START },
+  { .command = BRL_CMD_SCR_STOP },
+  { .command = BRL_CMD_SCR_START },
 };
 
 static const CommandListEntry commandList_internal[] = {
