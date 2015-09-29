@@ -24,7 +24,6 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
-#include <linux/input.h>
 
 #include "log.h"
 #include "async_io.h"
@@ -89,12 +88,15 @@ struct BrailleDataStruct {
   } text;
 };
 
+#ifdef HAVE_LINUX_INPUT_H
+#include <linux/input.h>
+
 static int
 handleKeyEvent (BrailleDisplay *brl, int code, int press) {
   KeyNumber number;
 
-#define NAV(CODE,KEY) case KEY_##CODE: number = BG_NAV_##KEY; break;
   switch(code) {
+#define NAV(CODE,KEY) case KEY_##CODE: number = BG_NAV_##KEY; break;
     NAV(UP, Up)
     NAV(LEFT, Left)
     NAV(RIGHT, Right)
@@ -113,6 +115,7 @@ handleKeyEvent (BrailleDisplay *brl, int code, int press) {
     NAV(BRL_DOT7, Dot6)
     NAV(BRL_DOT8, Dot8)
     NAV(BRL_DOT9, Space)
+#undef NAV
 
     default:
       {
@@ -125,7 +128,6 @@ handleKeyEvent (BrailleDisplay *brl, int code, int press) {
 
       return 0;
   }
-#undef NAV
 
   return enqueueKeyEvent(brl, BG_GRP_NavigationKeys, number, press);
 }
@@ -229,9 +231,11 @@ openEventDevice (const char *deviceName) {
 
   return -1;
 }
+#endif /* HAVE_LINUX_INPUT_H */
 
 static int
 openKeyboardDevice (BrailleDisplay *brl) {
+#ifdef HAVE_LINUX_INPUT_H
   if ((brl->data->keyboard.fileDescriptor = openEventDevice(KEYBOARD_DEVICE_NAME)) != -1) {
     if (asyncReadFile(&brl->data->keyboard.inputHandler,
                       brl->data->keyboard.fileDescriptor,
@@ -245,6 +249,7 @@ openKeyboardDevice (BrailleDisplay *brl) {
   } else {
     logSystemError("open[keyboard]");
   }
+#endif /* HAVE_LINUX_INPUT_H */
 
   return 0;
 }
