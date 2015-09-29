@@ -54,7 +54,7 @@ processParameters_NoScreen (char **parameters) {
 
 static int
 currentVirtualTerminal_NoScreen (void) {
-  return -1;
+  return 0;
 }
 
 static void
