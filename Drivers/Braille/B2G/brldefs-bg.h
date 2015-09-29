@@ -38,6 +38,9 @@ typedef enum {
   BG_NAV_Right,
   BG_NAV_Up,
   BG_NAV_Down,
+
+  BG_NAV_Louder,
+  BG_NAV_Softer,
 } BG_NavigationKey;
 
 typedef enum {

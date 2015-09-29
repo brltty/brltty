@@ -55,6 +55,9 @@ BEGIN_KEY_NAME_TABLE(navigation)
   KEY_NAME_ENTRY(BG_NAV_Right, "Right"),
   KEY_NAME_ENTRY(BG_NAV_Up, "Up"),
   KEY_NAME_ENTRY(BG_NAV_Down, "Down"),
+
+  KEY_NAME_ENTRY(BG_NAV_Louder, "Louder"),
+  KEY_NAME_ENTRY(BG_NAV_Softer, "Softer"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(routing)

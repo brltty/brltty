@@ -28,6 +28,8 @@ note The long, rectangular key in front of Dot1, the D-Pad, and Dot4 is the Spac
 note The small, round buttons just behind each cell are the routing keys.
 note The convex, square button to the left of the routing keys is the Backward key.
 note The convex, square button to the right of the routing keys is the Forward key.
+note The two small, round buttons on the right side near the front are the volume keys.
+note * From front to back, they are: Softer, Louder.
 
 
 ####################
@@ -109,6 +111,8 @@ bind Up+RoutingKey PRINDENT
 bind Down+RoutingKey NXINDENT
 bind Left+RoutingKey PRDIFCHAR
 bind Right+RoutingKey NXDIFCHAR
+
+bind Louder+Softer BRL_STOP
 
 
 #################
