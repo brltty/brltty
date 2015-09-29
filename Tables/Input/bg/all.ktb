@@ -97,7 +97,7 @@ bind Dot6+RoutingKey COPY_LINE
 bind Dot8+RoutingKey COPY_RECT
 
 bind Dot2+RoutingKey SWITCHVT
-bind Dot5+RoutingKey PASTE_HISTORY
+bind Dot5+RoutingKey SELECTVT
 
 bind Dot1+RoutingKey SETMARK
 bind Dot4+RoutingKey GOTOMARK
@@ -107,6 +107,7 @@ bind Space+RoutingKey KEY_FUNCTION
 bind Backward+RoutingKey SETLEFT
 bind Forward+RoutingKey DESCCHAR
 
+bind Center+RoutingKey PASTE_HISTORY
 bind Up+RoutingKey PRINDENT
 bind Down+RoutingKey NXINDENT
 bind Left+RoutingKey PRDIFCHAR
