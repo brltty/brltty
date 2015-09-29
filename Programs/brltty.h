@@ -148,6 +148,8 @@ extern unsigned int fullWindowShift;			/* Full window horizontal distance */
 extern unsigned int halfWindowShift;			/* Half window horizontal distance */
 extern unsigned int verticalWindowShift;			/* Window vertical distance */
 
+extern void enableBrailleDriver (void);
+extern void disableBrailleDriver (void);
 extern int constructBrailleDriver (void);
 extern void destructBrailleDriver (void);
 extern void forgetDevices (void);
@@ -176,9 +178,14 @@ extern void sayScreenCharacters (const ScreenCharacter *characters, size_t count
 extern void speakCharacters (const ScreenCharacter *characters, size_t count, int spell);
 extern void trackSpeech (void);
 
+extern void enableSpeechDriver (int sayBanner);
+extern void disableSpeechDriver (void);
 extern int constructSpeechDriver (void);
 extern void destructSpeechDriver (void);
 #endif /* ENABLE_SPEECH_SUPPORT */
+
+extern void enableScreenDriver (void);
+extern void disableScreenDriver (void);
 
 #ifdef __MINGW32__
 extern int isWindowsService;

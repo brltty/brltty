@@ -190,6 +190,30 @@ handleMiscellaneousCommands (int command, void *data) {
       brl.hasFailed = 1;
       break;
 
+    case BRL_CMD_BRL_STOP:
+      disableBrailleDriver();
+      break;
+
+    case BRL_CMD_BRL_START:
+      enableBrailleDriver();
+      break;
+
+    case BRL_CMD_SPK_STOP:
+      disableSpeechDriver();
+      break;
+
+    case BRL_CMD_SPK_START:
+      enableSpeechDriver(0);
+      break;
+
+    case BRL_CMD_SCR_STOP:
+      disableScreenDriver();
+      break;
+
+    case BRL_CMD_SCR_START:
+      enableScreenDriver();
+      break;
+
     case BRL_CMD_HELP: {
       int ok = 0;
       unsigned int pageNumber;

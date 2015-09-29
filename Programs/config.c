@@ -1575,14 +1575,14 @@ getBrailleDriverActivity (void) {
   return brailleDriverActivity;
 }
 
-static void
+void
 enableBrailleDriver (void) {
   ActivityObject *activity = getBrailleDriverActivity();
 
   if (activity) startActivity(activity);
 }
 
-static void
+void
 disableBrailleDriver (void) {
   ActivityObject *activity = getBrailleDriverActivity();
 
@@ -1916,7 +1916,7 @@ getSpeechDriverActivity (void) {
   return speechDriverActivity;
 }
 
-static void
+void
 enableSpeechDriver (int sayBanner) {
   ActivityObject *activity = getSpeechDriverActivity();
 
@@ -1924,7 +1924,7 @@ enableSpeechDriver (int sayBanner) {
   if (activity) startActivity(activity);
 }
 
-static void
+void
 disableSpeechDriver (void) {
   ActivityObject *activity = getSpeechDriverActivity();
 
@@ -2136,14 +2136,14 @@ getScreenDriverActivity (void) {
   return screenDriverActivity;
 }
 
-static void
+void
 enableScreenDriver (void) {
   ActivityObject *activity = getScreenDriverActivity();
 
   if (activity) startActivity(activity);
 }
 
-static void
+void
 disableScreenDriver (void) {
   ActivityObject *activity = getScreenDriverActivity();
 

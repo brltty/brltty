@@ -215,6 +215,13 @@ typedef enum {
   BRL_CMD_ALTGR /* cycle the AltGr (Right Alt) sticky input modifier (next, on, off) */,
   BRL_CMD_GUI /* cycle the GUI (Windows) sticky input modifier (next, on, off) */,
 
+  BRL_CMD_BRL_STOP /* stop the braille driver */,
+  BRL_CMD_BRL_START /* start the braille driver */,
+  BRL_CMD_SPK_STOP /* stop the speech driver */,
+  BRL_CMD_SPK_START /* start the speech driver */,
+  BRL_CMD_SCR_STOP /* stop the screen driver */,
+  BRL_CMD_SCR_START /* start the screen driver */,
+
   BRL_basicCommandCount /* must be last */
 } BRL_BasicCommand;
 
