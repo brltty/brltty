@@ -215,6 +215,9 @@ typedef enum {
   BRL_CMD_ALTGR /* cycle the AltGr (Right Alt) sticky input modifier (next, on, off) */,
   BRL_CMD_GUI /* cycle the GUI (Windows) sticky input modifier (next, on, off) */,
 
+  BRL_CMD_SELECTVT_PREV /* bind to previous virtual terminal */,
+  BRL_CMD_SELECTVT_NEXT /* bind to next virtual terminal */,
+
   BRL_CMD_BRL_STOP /* stop the braille driver */,
   BRL_CMD_BRL_START /* start the braille driver */,
   BRL_CMD_SPK_STOP /* stop the speech driver */,
@@ -268,7 +271,7 @@ typedef enum {
   BRL_BLK_1B /* (reserved) */,
   BRL_BLK_1C /* (reserved) */,
   BRL_BLK_1D /* (reserved) */,
-  BRL_BLK_1E /* (reserved) */,
+  BRL_BLK_SELECTVT /* bind to a specific virtual terminal */,
   BRL_BLK_ALERT /* (raise an alert) */,
   BRL_BLK_PASSKEY /* (emulate special key) */,
   BRL_BLK_PASSCHAR /* type unicode character */,

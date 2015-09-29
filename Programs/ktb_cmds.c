@@ -197,6 +197,9 @@ static const CommandListEntry commandList_input[] = {
   { .command = BRL_CMD_BLK(SWITCHVT) },
   { .command = BRL_CMD_SWITCHVT_PREV },
   { .command = BRL_CMD_SWITCHVT_NEXT },
+  { .command = BRL_CMD_BLK(SELECTVT) },
+  { .command = BRL_CMD_SELECTVT_PREV },
+  { .command = BRL_CMD_SELECTVT_NEXT },
   { .command = BRL_CMD_BRLKBD },
   { .command = BRL_CMD_BRLUCDOTS },
 };

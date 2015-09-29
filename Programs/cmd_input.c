@@ -132,6 +132,19 @@ switchVirtualTerminal (int vt) {
 }
 
 static int
+selectVirtualTerminal (int vt) {
+  int selected = selectScreenVirtualTerminal(vt);
+
+  if (selected) {
+    updateSessionAttributes();
+  } else {
+    alert(ALERT_COMMAND_REJECTED);
+  }
+
+  return selected;
+}
+
+static int
 handleInputCommands (int command, void *data) {
   InputCommandData *icd = data;
 
@@ -201,6 +214,14 @@ handleInputCommands (int command, void *data) {
 
     case BRL_CMD_SWITCHVT_NEXT:
       switchVirtualTerminal(scr.number+1);
+      break;
+
+    case BRL_CMD_SELECTVT_PREV:
+      selectVirtualTerminal(scr.number-1);
+      break;
+
+    case BRL_CMD_SELECTVT_NEXT:
+      selectVirtualTerminal(scr.number+1);
       break;
 
     default: {
@@ -298,6 +319,10 @@ handleInputCommands (int command, void *data) {
 
         case BRL_CMD_BLK(SWITCHVT):
           switchVirtualTerminal(arg+1);
+          break;
+
+        case BRL_CMD_BLK(SELECTVT):
+          selectVirtualTerminal(arg+1);
           break;
 
         default:
