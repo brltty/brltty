@@ -198,14 +198,6 @@ handleMiscellaneousCommands (int command, void *data) {
       enableBrailleDriver();
       break;
 
-    case BRL_CMD_SPK_STOP:
-      disableSpeechDriver();
-      break;
-
-    case BRL_CMD_SPK_START:
-      enableSpeechDriver(0);
-      break;
-
     case BRL_CMD_SCR_STOP:
       disableScreenDriver();
       break;

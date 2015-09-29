@@ -86,6 +86,14 @@ handleSpeechCommands (int command, void *data) {
       restartSpeechDriver();
       break;
 
+    case BRL_CMD_SPK_STOP:
+      disableSpeechDriver();
+      break;
+
+    case BRL_CMD_SPK_START:
+      enableSpeechDriver(0);
+      break;
+
     case BRL_CMD_SPKHOME:
       if (scr.number == spk.track.screenNumber) {
         trackSpeech();
