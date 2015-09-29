@@ -160,8 +160,8 @@ typedef enum {
   BRL_CMD_SAY_LOUDER /* increase speaking volume */,
   
   /* virtual terminal switching */
-  BRL_CMD_SWITCHVT_PREV /* switch to previous virtual terminal */,
-  BRL_CMD_SWITCHVT_NEXT /* switch to next virtual terminal */,
+  BRL_CMD_SWITCHVT_PREV /* switch to the previous virtual terminal */,
+  BRL_CMD_SWITCHVT_NEXT /* switch to the next virtual terminal */,
   
   /* miscellaneous */
   BRL_CMD_CSRJMP_VERT /* bring screen cursor to current line */,
@@ -215,8 +215,8 @@ typedef enum {
   BRL_CMD_ALTGR /* cycle the AltGr (Right Alt) sticky input modifier (next, on, off) */,
   BRL_CMD_GUI /* cycle the GUI (Windows) sticky input modifier (next, on, off) */,
 
-  BRL_CMD_SELECTVT_PREV /* bind to previous virtual terminal */,
-  BRL_CMD_SELECTVT_NEXT /* bind to next virtual terminal */,
+  BRL_CMD_SELECTVT_PREV /* bind to the previous virtual terminal */,
+  BRL_CMD_SELECTVT_NEXT /* bind to the next virtual terminal */,
 
   BRL_CMD_BRL_STOP /* stop the braille driver */,
   BRL_CMD_BRL_START /* start the braille driver */,
@@ -247,7 +247,7 @@ typedef enum {
   BRL_BLK_CLIP_ADD /* append to clipboard from character */,
   BRL_BLK_COPY_RECT /* rectangular copy to character */,
   BRL_BLK_COPY_LINE /* linear copy to character */,
-  BRL_BLK_SWITCHVT /* switch to virtual terminal */,
+  BRL_BLK_SWITCHVT /* switch to a specific virtual terminal */,
   BRL_BLK_PRINDENT /* go up to nearest line with less indent than character */,
   BRL_BLK_NXINDENT /* go down to nearest line with less indent than character */,
   BRL_BLK_DESCCHAR /* describe character */,
