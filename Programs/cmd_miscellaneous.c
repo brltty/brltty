@@ -192,6 +192,7 @@ handleMiscellaneousCommands (int command, void *data) {
 
     case BRL_CMD_BRL_STOP:
       message(NULL, gettext("braille stopped"), MSG_NODELAY|MSG_SILENT|MSG_SYNC);
+      brl.noDisplay = 1;
       disableBrailleDriver();
       break;
 

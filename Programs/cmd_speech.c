@@ -91,7 +91,7 @@ handleSpeechCommands (int command, void *data) {
       break;
 
     case BRL_CMD_SPK_START:
-      enableSpeechDriver(0);
+      enableSpeechDriver(1);
       break;
 
     case BRL_CMD_SPKHOME:
