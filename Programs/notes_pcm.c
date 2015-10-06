@@ -157,7 +157,7 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
                             / (NOTE_FREQUENCY_TYPE)device->sampleRate
                             * GET_NOTE_FREQUENCY(note);
 
-    int32_t maximumAmplitude = INT16_MAX * prefs.pcmVolume / 100;
+    int32_t maximumAmplitude = INT16_MAX * prefs.pcmVolume * prefs.pcmVolume / 10000;
     int32_t amplitudeGranularity = positiveShiftsPerQuarterWave / maximumAmplitude;
 
     logMessage(LOG_DEBUG, "tone: msec=%d smct=%lu note=%d",
