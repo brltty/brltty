@@ -163,10 +163,11 @@ handleTuneRequest (TuneRequest *req) {
 typedef enum {
   TUNE_THREAD_NONE,
   TUNE_THREAD_STARTING,
+  TUNE_THREAD_FAILED,
+
   TUNE_THREAD_RUNNING,
   TUNE_THREAD_STOPPING,
-  TUNE_THREAD_STOPPED,
-  TUNE_THREAD_FAILED
+  TUNE_THREAD_STOPPED
 } TuneThreadState;
 
 static TuneThreadState tuneThreadState = TUNE_THREAD_NONE;
@@ -342,7 +343,11 @@ exitTunes (void *data) {
   sendTuneRequest(NULL);
 
 #ifdef GOT_PTHREADS
-  asyncWaitFor(testTuneThreadStopped, NULL);
+  if (tuneThreadState >= TUNE_THREAD_RUNNING) {
+    asyncWaitFor(testTuneThreadStopped, NULL);
+  }
+
+  tuneThreadState = TUNE_THREAD_NONE;
 #endif /* GOT_PTHREADS */
 
   tuneInitialized = 0;
