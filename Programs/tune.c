@@ -81,6 +81,8 @@ typedef enum {
   TUNE_REQ_DEVICE
 } TuneRequestType;
 
+typedef unsigned char TuneSyncMonitor;
+
 typedef struct {
   TuneRequestType type;
 
@@ -94,7 +96,7 @@ typedef struct {
     } wait;
 
     struct {
-      unsigned char *monitor;
+      TuneSyncMonitor *monitor;
     } sync;
 
     struct {
@@ -120,7 +122,7 @@ handleTuneRequest_wait (int time) {
 }
 
 static void
-handleTuneRequest_sync (unsigned char *monitor) {
+handleTuneRequest_sync (TuneSyncMonitor *monitor) {
   *monitor = 1;
 }
 
@@ -394,7 +396,8 @@ tuneWait (int time) {
 }
 
 ASYNC_CONDITION_TESTER(testTuneSyncMonitor) {
-  unsigned char *monitor = data;
+  TuneSyncMonitor *monitor = data;
+
   return !!*monitor;
 }
 
@@ -403,7 +406,7 @@ tuneSync (void) {
   TuneRequest *req;
 
   if ((req = newTuneRequest(TUNE_REQ_SYNC))) {
-    unsigned char monitor = 0;
+    TuneSyncMonitor monitor = 0;
     req->data.sync.monitor = &monitor;
 
     if (sendTuneRequest(req)) {
