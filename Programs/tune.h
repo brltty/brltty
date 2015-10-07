@@ -37,8 +37,9 @@ typedef struct {
 
 extern void suppressTuneDeviceOpenErrors (void);
 extern int setTuneDevice (TuneDevice device);
-extern void closeTuneDevice (void);
-extern int playTune (const TuneElement *tune);
+
+extern void playTune (const TuneElement *tune);
+extern void waitTune (int time);
 
 #ifdef __cplusplus
 }

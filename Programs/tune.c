@@ -22,22 +22,22 @@
 
 #include "log.h"
 #include "parameters.h"
+#include "thread.h"
+#include "async_event.h"
 #include "async_alarm.h"
+#include "async_wait.h"
 #include "program.h"
 #include "tune.h"
 #include "notes.h"
 
-static const NoteMethods *noteMethods = NULL;
-static NoteDevice *noteDevice = NULL;
+static int tuneInitialized = 0;
 static AsyncHandle tuneDeviceCloseTimer = NULL;
 static int openErrorLevel = LOG_ERR;
 
-void
-suppressTuneDeviceOpenErrors (void) {
-  openErrorLevel = LOG_DEBUG;
-}
+static const NoteMethods *noteMethods = NULL;
+static NoteDevice *noteDevice = NULL;
 
-void
+static void
 closeTuneDevice (void) {
   if (tuneDeviceCloseTimer) {
     asyncCancelRequest(tuneDeviceCloseTimer);
@@ -58,8 +58,6 @@ ASYNC_ALARM_CALLBACK(handleTuneDeviceCloseTimeout) {
 
   closeTuneDevice();
 }
-
-static int tuneInitialized = 0;
 
 static void
 exitTunes (void *data) {
@@ -87,14 +85,263 @@ openTuneDevice (void) {
   return 1;
 }
 
+typedef enum {
+  TUNE_REQ_PLAY,
+  TUNE_REQ_WAIT,
+  TUNE_REQ_SET
+} TuneRequestType;
+
+typedef struct {
+  TuneRequestType type;
+
+  union {
+    struct {
+      const TuneElement *tune;
+    } play;
+
+    struct {
+      int time;
+    } wait;
+
+    struct {
+      const NoteMethods *methods;
+    } set;
+  } data;
+} TuneRequest;
+
+static void
+handleTuneRequest_play (const TuneElement *tune) {
+  while (tune->duration) {
+    if (!openTuneDevice()) return;
+    if (!noteMethods->play(noteDevice, tune->note, tune->duration)) return;
+    tune += 1;
+  }
+
+  noteMethods->flush(noteDevice);
+}
+
+static void
+handleTuneRequest_wait (int time) {
+  asyncWait(time);
+}
+
+static void
+handleTuneRequest_set (const NoteMethods *methods) {
+  if (methods != noteMethods) {
+    closeTuneDevice();
+    noteMethods = methods;
+  }
+}
+
+static void
+handleTuneRequest (TuneRequest *req) {
+  switch (req->type) {
+    case TUNE_REQ_PLAY:
+      handleTuneRequest_play(req->data.play.tune);
+      break;
+
+    case TUNE_REQ_WAIT:
+      handleTuneRequest_wait(req->data.wait.time);
+      break;
+
+    case TUNE_REQ_SET:
+      handleTuneRequest_set(req->data.set.methods);
+      break;
+  }
+
+  free(req);
+}
+
+static TuneRequest *
+newTuneRequest (TuneRequestType type) {
+  TuneRequest *req;
+
+  if ((req = malloc(sizeof(*req)))) {
+    memset(req, 0, sizeof(*req));
+    req->type = type;
+    return req;
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
+
+#ifdef GOT_PTHREADS
+typedef enum {
+  TUNE_THREAD_NONE,
+  TUNE_THREAD_STARTING,
+  TUNE_THREAD_RUNNING,
+  TUNE_THREAD_STOPPING,
+  TUNE_THREAD_STOPPED,
+  TUNE_THREAD_FAILED
+} TuneThreadState;
+
+static TuneThreadState tuneThreadState = TUNE_THREAD_NONE;
+static pthread_t tuneThreadIdentifier;
+static AsyncEvent *tuneRequestEvent = NULL;
+static AsyncEvent *tuneMessageEvent = NULL;
+
+static void
+setTuneThreadState (TuneThreadState newState) {
+  TuneThreadState oldState = tuneThreadState;
+
+  logMessage(LOG_DEBUG, "tune thread state change: %d -> %d", oldState, newState);
+  tuneThreadState = newState;
+}
+
+ASYNC_CONDITION_TESTER(testTuneThreadStarted) {
+  return tuneThreadState != TUNE_THREAD_STARTING;
+}
+
+ASYNC_CONDITION_TESTER(testTuneThreadStopping) {
+  return tuneThreadState == TUNE_THREAD_STOPPING;
+}
+
+typedef enum {
+  TUNE_MSG_STATE
+} TuneMessageType;
+
+typedef struct {
+  TuneMessageType type;
+
+  union {
+    struct {
+      TuneThreadState state;
+    } state;
+  } data;
+} TuneMessage;
+
+static void
+handleTuneMessage (TuneMessage *msg) {
+  switch (msg->type) {
+    case TUNE_MSG_STATE:
+      setTuneThreadState(msg->data.state.state);
+      break;
+  }
+
+  free(msg);
+}
+
+ASYNC_EVENT_CALLBACK(handleTuneMessageEvent) {
+  TuneMessage *msg = parameters->signalData;
+
+  handleTuneMessage(msg);
+}
+
+static int
+sendTuneMessage (TuneMessage *msg) {
+  return asyncSignalEvent(tuneMessageEvent, msg);
+}
+
+static TuneMessage *
+newTuneMessage (TuneMessageType type) {
+  TuneMessage *msg;
+
+  if ((msg = malloc(sizeof(*msg)))) {
+    memset(msg, 0, sizeof(*msg));
+    msg->type = type;
+    return msg;
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
+
+static void
+sendTuneThreadState (TuneThreadState state) {
+  TuneMessage *msg;
+
+  if ((msg = newTuneMessage(TUNE_MSG_STATE))) {
+    msg->data.state.state = state;
+    if (!sendTuneMessage(msg)) free(msg);
+  }
+}
+
+ASYNC_EVENT_CALLBACK(handleTuneRequestEvent) {
+  TuneRequest *req = parameters->signalData;
+
+  handleTuneRequest(req);
+}
+
+THREAD_FUNCTION(runTuneThread) {
+  if ((tuneRequestEvent = asyncNewEvent(handleTuneRequestEvent, NULL))) {
+    sendTuneThreadState(TUNE_THREAD_RUNNING);
+    asyncWaitFor(testTuneThreadStopping, NULL);
+
+    asyncDiscardEvent(tuneRequestEvent);
+    tuneRequestEvent = NULL;
+  }
+
+  sendTuneThreadState(TUNE_THREAD_STOPPED);
+  return NULL;
+}
+
+static int
+startTuneThread (void) {
+  if (tuneThreadState == TUNE_THREAD_NONE) {
+    setTuneThreadState(TUNE_THREAD_STARTING);
+
+    if ((tuneMessageEvent = asyncNewEvent(handleTuneMessageEvent, NULL))) {
+      int creationError = createThread("tune-thread", &tuneThreadIdentifier,
+                                       NULL, runTuneThread, NULL);
+
+      if (!creationError) {
+        asyncWaitFor(testTuneThreadStarted, NULL);
+      } else {
+        logActionError(creationError, "tune thread creation");
+        setTuneThreadState(TUNE_THREAD_FAILED);
+      }
+
+      asyncDiscardEvent(tuneMessageEvent);
+      tuneMessageEvent = NULL;
+    }
+  }
+
+  return tuneThreadState == TUNE_THREAD_RUNNING;
+}
+#endif /* GOT_PTHREADS */
+
+static int
+sendTuneRequest (TuneRequest *req) {
+#ifdef GOT_PTHREADS
+  if (startTuneThread()) {
+    return asyncSignalEvent(tuneRequestEvent, req);
+  }
+#endif /* GOT_PTHREADS */
+
+  handleTuneRequest(req);
+  return 1;
+}
+
+void
+playTune (const TuneElement *tune) {
+  TuneRequest *req;
+
+  if ((req = newTuneRequest(TUNE_REQ_PLAY))) {
+    req->data.play.tune = tune;
+    if (!sendTuneRequest(req)) free(req);
+  }
+}
+
+void
+waitTune (int time) {
+  TuneRequest *req;
+
+  if ((req = newTuneRequest(TUNE_REQ_WAIT))) {
+    req->data.wait.time = time;
+    if (!sendTuneRequest(req)) free(req);
+  }
+}
+
 int
 setTuneDevice (TuneDevice device) {
   const NoteMethods *methods;
 
   switch (device) {
     default:
-      methods = NULL;
-      break;
+      return 0;
 
 #ifdef HAVE_BEEP_SUPPORT
     case tdBeeper:
@@ -120,23 +367,20 @@ setTuneDevice (TuneDevice device) {
       break;
 #endif /* HAVE_FM_SUPPORT */
   }
-  if (!methods) return 0;
 
-  if (methods != noteMethods) {
-    closeTuneDevice();
-    noteMethods = methods;
+  {
+    TuneRequest *req;
+
+    if ((req = newTuneRequest(TUNE_REQ_SET))) {
+      req->data.set.methods = methods;
+      if (!sendTuneRequest(req)) free(req);
+    }
   }
 
   return 1;
 }
 
-int
-playTune (const TuneElement *tune) {
-  while (tune->duration) {
-    if (!openTuneDevice()) return 0;
-    if (!noteMethods->play(noteDevice, tune->note, tune->duration)) return 0;
-    tune += 1;
-  }
-
-  return noteMethods->flush(noteDevice);
+void
+suppressTuneDeviceOpenErrors (void) {
+  openErrorLevel = LOG_DEBUG;
 }

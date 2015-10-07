@@ -309,7 +309,6 @@ main (int argc, char *argv[]) {
     }
 
     playTune(elements);
-    closeTuneDevice();
   }
 
   return PROG_EXIT_SUCCESS;

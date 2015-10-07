@@ -409,12 +409,12 @@ alert (AlertIdentifier identifier) {
   if ((identifier >= 0) && (identifier < ARRAY_COUNT(alertTable))) {
     const AlertEntry *alert = &alertTable[identifier];
 
-    if (!(prefs.alertTunes && alert->tune && playTune(alert->tune))) {
-      if (prefs.alertDots && alert->tactile.duration) {
-        showDotPattern(alert->tactile.pattern, alert->tactile.duration);
-      } else if (prefs.alertMessages && alert->message) {
-        message(NULL, gettext(alert->message), 0);
-      }
+    if (prefs.alertTunes && alert->tune) {
+      playTune(alert->tune);
+    } else if (prefs.alertDots && alert->tactile.duration) {
+      showDotPattern(alert->tactile.pattern, alert->tactile.duration);
+    } else if (prefs.alertMessages && alert->message) {
+      message(NULL, gettext(alert->message), 0);
     }
   }
 }

@@ -84,7 +84,8 @@ toDifferentLine (
       } else if (skipped % 4 == 0) {
         alert(ALERT_SKIP_MORE);
       }
-      skipped++;
+
+      skipped += 1;
     } while (canMoveWindow());
   }
 
