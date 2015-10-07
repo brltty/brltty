@@ -144,11 +144,11 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
      * these are especially important on PDAs without any FPU.
      */ 
 
-    int32_t positiveShiftsPerQuarterWave = INT32_MAX / 8;
+    int32_t positiveShiftsPerQuarterWave = (INT32_MAX >> 3) + INT32_C(1);
     int32_t negativeShiftsPerQuarterWave = -positiveShiftsPerQuarterWave;
 
     int32_t positiveShiftsPerHalfWave = 2 * positiveShiftsPerQuarterWave;
-    int32_t negativeSiftsPerHalfWave = -positiveShiftsPerHalfWave;
+    int32_t negativeShiftsPerHalfWave = -positiveShiftsPerHalfWave;
 
     int32_t positiveShiftsPerFullWave = 2 * positiveShiftsPerHalfWave;
     int32_t currentShift = 0;
@@ -158,7 +158,6 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
                             * GET_NOTE_FREQUENCY(note);
 
     int32_t maximumAmplitude = INT16_MAX * prefs.pcmVolume * prefs.pcmVolume / 10000;
-    int32_t amplitudeGranularity = positiveShiftsPerQuarterWave / maximumAmplitude;
 
     logMessage(LOG_DEBUG, "tone: msec=%d smct=%lu note=%d",
                duration, sampleCount, note);
@@ -171,11 +170,13 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
           if (normalizedAmplitude > positiveShiftsPerQuarterWave) {
             normalizedAmplitude = positiveShiftsPerHalfWave - normalizedAmplitude;
           } else if (normalizedAmplitude < negativeShiftsPerQuarterWave) {
-            normalizedAmplitude = negativeSiftsPerHalfWave - normalizedAmplitude;
+            normalizedAmplitude = negativeShiftsPerHalfWave - normalizedAmplitude;
           }
 
           {
-            int32_t actualAmplitude = normalizedAmplitude / amplitudeGranularity;
+            int16_t actualAmplitude =
+              ((normalizedAmplitude >> 12) * maximumAmplitude) >> 16;
+
             if (!pcmWriteSample(device, actualAmplitude)) return 0;
             sampleCount -= 1;
           }
