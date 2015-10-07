@@ -1085,7 +1085,7 @@ applySpeechPreferences (void) {
 
 static void
 applyAllPreferences (void) {
-  setTuneDevice(prefs.tuneDevice);
+  tuneDevice(prefs.tuneDevice);
   applyBraillePreferences();
 
 #ifdef ENABLE_SPEECH_SUPPORT

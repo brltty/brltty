@@ -36,10 +36,11 @@ typedef struct {
 #define TUNE_STOP() TUNE_REST(0)
 
 extern void suppressTuneDeviceOpenErrors (void);
-extern int setTuneDevice (TuneDevice device);
 
-extern void playTune (const TuneElement *tune);
-extern void waitTune (int time);
+extern void tunePlay (const TuneElement *tune);
+extern void tuneWait (int time);
+extern void tuneSync (void);
+extern int tuneDevice (TuneDevice device);
 
 #ifdef __cplusplus
 }

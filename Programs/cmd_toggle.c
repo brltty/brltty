@@ -26,6 +26,7 @@
 #include "scr.h"
 #include "scr_special.h"
 #include "alert.h"
+#include "tune.h"
 #include "brltty.h"
 
 typedef enum {
@@ -68,7 +69,7 @@ toggleBit (
     alert(identifier);
     if (*bits != oldBits) return isOn? TOGGLE_ON: TOGGLE_OFF;
 
-    waitTune(TUNE_TOGGLE_REPEAT_DELAY);
+    tuneWait(TUNE_TOGGLE_REPEAT_DELAY);
     alert(identifier);
     return TOGGLE_SAME;
   }

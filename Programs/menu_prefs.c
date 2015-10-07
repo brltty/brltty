@@ -177,7 +177,7 @@ testTunes (void) {
 
 static int
 changedTuneDevice (const MenuItem *item UNUSED, unsigned char setting) {
-  return setTuneDevice(setting);
+  return tuneDevice(setting);
 }
 
 #ifdef HAVE_PCM_SUPPORT

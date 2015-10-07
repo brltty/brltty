@@ -303,12 +303,13 @@ main (int argc, char *argv[]) {
       }
     }
 
-    if (!setTuneDevice(prefs.tuneDevice)) {
+    if (!tuneDevice(prefs.tuneDevice)) {
       logMessage(LOG_ERR, "unsupported tune device: %s", deviceNames[prefs.tuneDevice]);
       return PROG_EXIT_SEMANTIC;
     }
 
-    playTune(elements);
+    tunePlay(elements);
+    tuneSync();
   }
 
   return PROG_EXIT_SUCCESS;
