@@ -46,7 +46,7 @@ pcmFlushBytes (NoteDevice *device) {
 }
 
 static int
-pcmWriteBytes (NoteDevice *device, const unsigned char *address, size_t length) {
+pcmWriteBytes (NoteDevice *device, const void *address, size_t length) {
   while (length > 0) {
     size_t count = device->blockSize - device->blockUsed;
     if (length < count) count = length;
@@ -63,20 +63,16 @@ pcmWriteBytes (NoteDevice *device, const unsigned char *address, size_t length) 
 }
 
 static int
-pcmWriteSample (NoteDevice *device, int amplitude) {
+pcmWriteSample (NoteDevice *device, int16_t amplitude) {
   PcmAmplitudeFormat format = device->amplitudeFormat;
-  size_t length = getPcmSampleLength(format);
+  PcmSample sample;
+  size_t length = makePcmSample(&sample, amplitude, format);
 
-  if (length) {
-    unsigned char buffer[length];
-    length = makePcmSample(format, amplitude, buffer, sizeof(buffer));
+  {
+    int channel;
 
-    {
-      int channel;
-
-      for (channel=0; channel<device->channelCount; channel+=1) {
-        if (!pcmWriteBytes(device, buffer, length)) return 0;
-      }
+    for (channel=0; channel<device->channelCount; channel+=1) {
+      if (!pcmWriteBytes(device, &sample, length)) return 0;
     }
   }
 

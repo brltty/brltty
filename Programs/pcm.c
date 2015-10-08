@@ -20,146 +20,81 @@
 
 #include "pcm.h"
 
-typedef struct {
-  unsigned char size;
-} PcmSampleEntry;
-
-static const PcmSampleEntry pcmSampleTable[] = {
-  [PCM_FMT_U8] = {
-    .size = 1
-  },
-
-  [PCM_FMT_S8] = {
-    .size = 1
-  },
-
-  [PCM_FMT_U16B] = {
-    .size = 2
-  },
-
-  [PCM_FMT_S16B] = {
-    .size = 2
-  },
-
-  [PCM_FMT_U16L] = {
-    .size = 2
-  },
-
-  [PCM_FMT_S16L] = {
-    .size = 2
-  },
-
-  [PCM_FMT_U16N] = {
-    .size = 2
-  },
-
-  [PCM_FMT_S16N] = {
-    .size = 2
-  },
-
-  [PCM_FMT_ULAW] = {
-    .size = 1
-  },
-
-  [PCM_FMT_ALAW] = {
-    .size = 1
-  }
-};
-
-size_t
-getPcmSampleLength (PcmAmplitudeFormat format) {
-  return (format < ARRAY_COUNT(pcmSampleTable))? pcmSampleTable[format].size: 0;
-}
-
 size_t
 makePcmSample (
-  PcmAmplitudeFormat format, int16_t amplitude,
-  void *buffer, size_t size
+  PcmSample *sample, int16_t amplitude, PcmAmplitudeFormat format
 ) {
-  size_t length = getPcmSampleLength(format);
+  const int U2S = 0X8000;
 
-  if (size >= length) {
-    typedef union {
-      unsigned char bytes[4];
-      int16_t s16N;
-    } Sample;
+  switch (format) {
+    case PCM_FMT_U8:
+      amplitude += U2S;
+    case PCM_FMT_S8:
+      sample->bytes[0] = amplitude >> 8;
+      return 1;
 
-    Sample *sample = buffer;
-    const int U2S = 0X8000;
+    case PCM_FMT_U16B:
+      amplitude += U2S;
+    case PCM_FMT_S16B:
+      sample->bytes[0] = amplitude >> 8;
+      sample->bytes[1] = amplitude;
+      return 2;
 
-    switch (format) {
-      case PCM_FMT_U8:
-        amplitude += U2S;
-      case PCM_FMT_S8:
-        sample->bytes[0] = amplitude >> 8;
-        break;
+    case PCM_FMT_U16L:
+      amplitude += U2S;
+    case PCM_FMT_S16L:
+      sample->bytes[0] = amplitude;
+      sample->bytes[1] = amplitude >> 8;
+      return 2;
 
-      case PCM_FMT_U16B:
-        amplitude += U2S;
-      case PCM_FMT_S16B:
-        sample->bytes[0] = amplitude >> 8;
-        sample->bytes[1] = amplitude;
-        break;
+    case PCM_FMT_U16N:
+      amplitude += U2S;
+    case PCM_FMT_S16N:
+      sample->s16N = amplitude;
+      return 2;
 
-      case PCM_FMT_U16L:
-        amplitude += U2S;
-      case PCM_FMT_S16L:
-        sample->bytes[0] = amplitude;
-        sample->bytes[1] = amplitude >> 8;
-        break;
+    case PCM_FMT_ULAW: {
+      int negative = amplitude < 0;
+      int exponent = 0X7;
+      unsigned char value;
+      const unsigned int bias = 0X84;
+      const unsigned int clip = 0X7FFF - bias;
 
-      case PCM_FMT_U16N:
-        amplitude += U2S;
-      case PCM_FMT_S16N:
-        sample->s16N = amplitude;
-        break;
+      if (negative) amplitude = -amplitude;
+      if (amplitude > clip) amplitude = clip;
+      amplitude += bias;
 
-      case PCM_FMT_ULAW: {
-        int negative = amplitude < 0;
-        int exponent = 0X7;
-        unsigned char value;
-        const unsigned int bias = 0X84;
-        const unsigned int clip = 0X7FFF - bias;
-
-        if (negative) amplitude = -amplitude;
-        if (amplitude > clip) amplitude = clip;
-        amplitude += bias;
-
-        while ((exponent > 0) && !(amplitude & 0X4000)) {
-          amplitude <<= 1;
-          --exponent;
-        }
-
-        value = (exponent << 4) | ((amplitude >> 10) & 0X0F);
-        if (negative) value |= 0X80;
-        sample->bytes[0] = ~value;
-        break;
+      while ((exponent > 0) && !(amplitude & 0X4000)) {
+        amplitude <<= 1;
+        --exponent;
       }
 
-      case PCM_FMT_ALAW: {
-        int negative = amplitude < 0;
-        int exponent = 0X7;
-        unsigned char value;
-
-        if (negative) amplitude = -amplitude;
-
-        while ((exponent > 0) && !(amplitude & 0X4000)) {
-          amplitude <<= 1;
-          --exponent;
-        }
-
-        if (!exponent) amplitude >>= 1;
-        value = (exponent << 4) | ((amplitude >> 10) & 0X0F);
-        if (negative) value |= 0X80;
-        sample->bytes[0] = value ^ 0X55;
-        break;
-      }
-
-      default:
-        length = 0;
-        break;
+      value = (exponent << 4) | ((amplitude >> 10) & 0X0F);
+      if (negative) value |= 0X80;
+      sample->bytes[0] = ~value;
+      return 1;
     }
-  }
 
-  return length;
+    case PCM_FMT_ALAW: {
+      int negative = amplitude < 0;
+      int exponent = 0X7;
+      unsigned char value;
+
+      if (negative) amplitude = -amplitude;
+
+      while ((exponent > 0) && !(amplitude & 0X4000)) {
+        amplitude <<= 1;
+        --exponent;
+      }
+
+      if (!exponent) amplitude >>= 1;
+      value = (exponent << 4) | ((amplitude >> 10) & 0X0F);
+      if (negative) value |= 0X80;
+      sample->bytes[0] = value ^ 0X55;
+      return 1;
+    }
+
+    default:
+      return 0;
+  }
 }

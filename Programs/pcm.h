@@ -37,11 +37,15 @@ typedef enum {
   PCM_FMT_UNKNOWN
 } PcmAmplitudeFormat;
 
-extern size_t getPcmSampleLength (PcmAmplitudeFormat format);
+#define PCM_MAX_SAMPLE_SIZE 2
+
+typedef union {
+  uint8_t bytes[PCM_MAX_SAMPLE_SIZE];
+  int16_t s16N;
+} PcmSample;
 
 extern size_t makePcmSample (
-  PcmAmplitudeFormat format, int16_t amplitude,
-  void *buffer, size_t size
+  PcmSample *sample, int16_t amplitude, PcmAmplitudeFormat format
 );
 
 typedef struct PcmDeviceStruct PcmDevice;
