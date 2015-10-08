@@ -140,22 +140,22 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
      * these are especially important on PDAs without any FPU.
      */ 
 
-    int32_t positiveShiftsPerQuarterWave = (INT32_MAX >> 3) + INT32_C(1);
-    int32_t negativeShiftsPerQuarterWave = -positiveShiftsPerQuarterWave;
+    const int32_t positiveShiftsPerQuarterWave = (INT32_MAX >> 3) + INT32_C(1);
+    const int32_t negativeShiftsPerQuarterWave = -positiveShiftsPerQuarterWave;
 
-    int32_t positiveShiftsPerHalfWave = 2 * positiveShiftsPerQuarterWave;
-    int32_t negativeShiftsPerHalfWave = -positiveShiftsPerHalfWave;
+    const int32_t positiveShiftsPerHalfWave = positiveShiftsPerQuarterWave << 1;
+    const int32_t negativeShiftsPerHalfWave = -positiveShiftsPerHalfWave;
 
-    int32_t positiveShiftsPerFullWave = 2 * positiveShiftsPerHalfWave;
+    const int32_t positiveShiftsPerFullWave = positiveShiftsPerHalfWave << 1;
+
+    const int32_t shiftsPerSample = (NOTE_FREQUENCY_TYPE)positiveShiftsPerFullWave 
+                                  / (NOTE_FREQUENCY_TYPE)device->sampleRate
+                                  * GET_NOTE_FREQUENCY(note);
+
+    const int32_t maximumAmplitude = INT16_MAX * prefs.pcmVolume * prefs.pcmVolume / 10000;
     int32_t currentShift = 0;
 
-    int32_t shiftsPerSample = (NOTE_FREQUENCY_TYPE)positiveShiftsPerFullWave 
-                            / (NOTE_FREQUENCY_TYPE)device->sampleRate
-                            * GET_NOTE_FREQUENCY(note);
-
-    int32_t maximumAmplitude = INT16_MAX * prefs.pcmVolume * prefs.pcmVolume / 10000;
-
-    logMessage(LOG_DEBUG, "tone: msec=%d smct=%lu note=%d",
+    logMessage(LOG_DEBUG, "tone: msec=%u smct=%ld note=%u",
                duration, sampleCount, note);
 
     while (sampleCount > 0) {
@@ -170,7 +170,7 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
           }
 
           {
-            int16_t actualAmplitude =
+            const int16_t actualAmplitude =
               ((normalizedAmplitude >> 12) * maximumAmplitude) >> 16;
 
             if (!pcmWriteSample(device, actualAmplitude)) return 0;
@@ -184,12 +184,12 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
       } while (currentShift >= positiveShiftsPerFullWave);
     }
   } else {
-    logMessage(LOG_DEBUG, "tone: msec=%d smct=%lu note=%d",
+    logMessage(LOG_DEBUG, "tone: msec=%u smct=%ld note=%u",
                duration, sampleCount, note);
 
     while (sampleCount > 0) {
       if (!pcmWriteSample(device, 0)) return 0;
-      --sampleCount;
+      sampleCount -= 1;
     }
   }
 
