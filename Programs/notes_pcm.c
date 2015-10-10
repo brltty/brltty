@@ -148,40 +148,68 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
     const int32_t negativeShiftsPerHalfWave = -positiveShiftsPerHalfWave;
     const int32_t negativeShiftsPerQuarterWave = -positiveShiftsPerQuarterWave;
 
+    /* We need to know how many shifts to make from one sample to the next.
+     * shiftsPerSample = shiftsPerWave * wavesPerSecond / samplesPerSecond
+     *                 = shiftsPerWave * frequency / sampleRate
+     *                 = shiftsPerWave / sampleRate * frequency
+     */
     const int32_t shiftsPerSample = (NOTE_FREQUENCY_TYPE)positiveShiftsPerFullWave 
                                   / (NOTE_FREQUENCY_TYPE)device->sampleRate
                                   * GET_NOTE_FREQUENCY(note);
 
-    const int32_t maximumAmplitude = INT16_MAX * prefs.pcmVolume * prefs.pcmVolume / 10000;
-    int32_t currentShift = 0;
+    /* We need to know the maximum amplitude based on the volume percentage.
+     * The percentage needs to be squared since we perceive loudness exponentially.
+     */
+    const int32_t maximumAmplitude = INT16_MAX
+                                   * (prefs.pcmVolume * prefs.pcmVolume)
+                                   / (100 * 100);
+
+    /* We start, of course, with no shifts having been made yet. */
+    int32_t currentShifts = 0;
 
     logMessage(LOG_DEBUG, "tone: msec=%u smct=%ld note=%u",
                duration, sampleCount, note);
 
+    /* This loop iterates once per sample. */
     while (sampleCount > 0) {
+      /* This loop iterates once per wave. */
       do {
-        {
-          int32_t normalizedAmplitude = positiveShiftsPerHalfWave - currentShift;
+        /* Start by calculating an amplitude that descends straight from
+         * twice as high to twice as low as it should. This already makes
+         * amplitudes within the second and third quarter waves correct.
+         */
+        int32_t waveAmplitude = positiveShiftsPerHalfWave - currentShifts;
 
-          if (normalizedAmplitude > positiveShiftsPerQuarterWave) {
-            normalizedAmplitude = positiveShiftsPerHalfWave - normalizedAmplitude;
-          } else if (normalizedAmplitude < negativeShiftsPerQuarterWave) {
-            normalizedAmplitude = negativeShiftsPerHalfWave - normalizedAmplitude;
-          }
-
-          {
-            const int16_t actualAmplitude =
-              ((normalizedAmplitude >> 12) * maximumAmplitude) >> 16;
-
-            if (!pcmWriteSample(device, actualAmplitude)) return 0;
-            sampleCount -= 1;
-          }
+        if (waveAmplitude > positiveShiftsPerQuarterWave) {
+          /* Amplitudes within the first quarter wave need to be flipped. */
+          waveAmplitude = positiveShiftsPerHalfWave - waveAmplitude;
+        } else if (waveAmplitude < negativeShiftsPerQuarterWave) {
+          /* Amplitudes within the fourth quarter wave need to be flipped. */
+          waveAmplitude = negativeShiftsPerHalfWave - waveAmplitude;
         }
-      } while ((currentShift += shiftsPerSample) < positiveShiftsPerFullWave);
+
+        {
+          int32_t actualAmplitude =
+            ((waveAmplitude >> 12) * maximumAmplitude) >> 16;
+
+          /* Clip the amplitude in case we've gone out of range. A known
+           * case is the most positive amplitude being one value too high.
+           */
+          if (actualAmplitude > INT16_MAX) {
+            actualAmplitude = INT16_MAX;
+          } else if (actualAmplitude < INT16_MIN) {
+            actualAmplitude = INT16_MIN;
+          }
+
+          if (!pcmWriteSample(device, actualAmplitude)) return 0;
+        }
+
+        sampleCount -= 1;
+      } while ((currentShifts += shiftsPerSample) < positiveShiftsPerFullWave);
 
       do {
-        currentShift -= positiveShiftsPerFullWave;
-      } while (currentShift >= positiveShiftsPerFullWave);
+        currentShifts -= positiveShiftsPerFullWave;
+      } while (currentShifts >= positiveShiftsPerFullWave);
     }
   } else {
     logMessage(LOG_DEBUG, "tone: msec=%u smct=%ld note=%u",
