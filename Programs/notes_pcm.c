@@ -178,40 +178,53 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
          * twice as high to twice as low as it should. This already makes
          * amplitudes within the second and third quarter waves correct.
          */
-        int32_t waveAmplitude = positiveShiftsPerHalfWave - currentShifts;
+        int32_t amplitude = positiveShiftsPerHalfWave - currentShifts;
 
-        if (waveAmplitude > positiveShiftsPerQuarterWave) {
+        /* Fix the amplitudes within the first and fourth quarter waves. */
+        if (amplitude > positiveShiftsPerQuarterWave) {
           /* Amplitudes within the first quarter wave need to be flipped. */
-          waveAmplitude = positiveShiftsPerHalfWave - waveAmplitude;
-        } else if (waveAmplitude < negativeShiftsPerQuarterWave) {
+          amplitude = positiveShiftsPerHalfWave - amplitude;
+        } else if (amplitude < negativeShiftsPerQuarterWave) {
           /* Amplitudes within the fourth quarter wave need to be flipped. */
-          waveAmplitude = negativeShiftsPerHalfWave - waveAmplitude;
+          amplitude = negativeShiftsPerHalfWave - amplitude;
         }
 
-        {
-          int32_t actualAmplitude =
-            ((waveAmplitude >> 12) * maximumAmplitude) >> 16;
+        /* Convert from our amplitude to a 16-bit audio amplitude. */
+        amplitude >>= 12;
 
-          /* Clip the amplitude in case we've gone out of range. A known
-           * case is the most positive amplitude being one value too high.
-           */
-          if (actualAmplitude > INT16_MAX) {
-            actualAmplitude = INT16_MAX;
-          } else if (actualAmplitude < INT16_MIN) {
-            actualAmplitude = INT16_MIN;
-          }
+        /* Multiply the full amplitude by the maximum amplitude as set by
+         * the currently set volume.
+         */
+        amplitude *= maximumAmplitude;
 
-          if (!pcmWriteSample(device, actualAmplitude)) return 0;
+        /* Multiplying two 16-bit amplitudes together yields a 32-bit
+         * amplitude which must be converted back to a 16-bit amplitude.
+         */
+        amplitude >>= 16;
+
+        /* Clip the amplitude in case we've gone out of range. A known
+         * case is the most positive amplitude being one value too high.
+         */
+        if (amplitude > INT16_MAX) {
+          amplitude = INT16_MAX;
+        } else if (amplitude < INT16_MIN) {
+          amplitude = INT16_MIN;
         }
 
+        if (!pcmWriteSample(device, amplitude)) return 0;
         sampleCount -= 1;
-      } while ((currentShifts += shiftsPerSample) < positiveShiftsPerFullWave);
+        currentShifts += shiftsPerSample;
+      } while (currentShifts < positiveShiftsPerFullWave);
 
+      /* Bring the current shift count back into range such that the next
+       * wave will begin exactly where the previous one left off.
+       */
       do {
         currentShifts -= positiveShiftsPerFullWave;
       } while (currentShifts >= positiveShiftsPerFullWave);
     }
   } else {
+    /* generate silence */
     logMessage(LOG_DEBUG, "tone: msec=%u smct=%ld note=%u",
                duration, sampleCount, note);
 
