@@ -39,12 +39,13 @@ typedef enum {
 
 #define PCM_MAX_SAMPLE_SIZE 2
 
-typedef union {
+typedef struct {
   uint8_t bytes[PCM_MAX_SAMPLE_SIZE];
-  int16_t s16N;
+  size_t size;
+  PcmAmplitudeFormat format;
 } PcmSample;
 
-extern size_t makePcmSample (
+extern void makePcmSample (
   PcmSample *sample, int16_t amplitude, PcmAmplitudeFormat format
 );
 

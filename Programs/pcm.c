@@ -20,38 +20,49 @@
 
 #include "pcm.h"
 
-size_t
+void
 makePcmSample (
   PcmSample *sample, int16_t amplitude, PcmAmplitudeFormat format
 ) {
+  union {
+    unsigned char *bytes;
+    int16_t *s16;
+  } overlay;
+
   const int U2S = 0X8000;
+  overlay.bytes = sample->bytes;
+  sample->format = format;
 
   switch (format) {
     case PCM_FMT_U8:
       amplitude += U2S;
     case PCM_FMT_S8:
-      sample->bytes[0] = amplitude >> 8;
-      return 1;
+      overlay.bytes[0] = amplitude >> 8;
+      sample->size = 1;
+      break;
 
     case PCM_FMT_U16B:
       amplitude += U2S;
     case PCM_FMT_S16B:
-      sample->bytes[0] = amplitude >> 8;
-      sample->bytes[1] = amplitude;
-      return 2;
+      overlay.bytes[0] = amplitude >> 8;
+      overlay.bytes[1] = amplitude;
+      sample->size = 2;
+      break;
 
     case PCM_FMT_U16L:
       amplitude += U2S;
     case PCM_FMT_S16L:
-      sample->bytes[0] = amplitude;
-      sample->bytes[1] = amplitude >> 8;
-      return 2;
+      overlay.bytes[0] = amplitude;
+      overlay.bytes[1] = amplitude >> 8;
+      sample->size = 2;
+      break;
 
     case PCM_FMT_U16N:
       amplitude += U2S;
     case PCM_FMT_S16N:
-      sample->s16N = amplitude;
-      return 2;
+      *overlay.s16 = amplitude;
+      sample->size = 2;
+      break;
 
     case PCM_FMT_ULAW: {
       int negative = amplitude < 0;
@@ -71,8 +82,10 @@ makePcmSample (
 
       value = (exponent << 4) | ((amplitude >> 10) & 0X0F);
       if (negative) value |= 0X80;
-      sample->bytes[0] = ~value;
-      return 1;
+
+      overlay.bytes[0] = ~value;
+      sample->size = 1;
+      break;
     }
 
     case PCM_FMT_ALAW: {
@@ -90,11 +103,14 @@ makePcmSample (
       if (!exponent) amplitude >>= 1;
       value = (exponent << 4) | ((amplitude >> 10) & 0X0F);
       if (negative) value |= 0X80;
-      sample->bytes[0] = value ^ 0X55;
-      return 1;
+
+      overlay.bytes[0] = value ^ 0X55;
+      sample->size = 1;
+      break;
     }
 
     default:
-      return 0;
+      sample->size = 0;
+      break;
   }
 }
