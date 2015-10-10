@@ -64,17 +64,11 @@ pcmWriteBytes (NoteDevice *device, const void *address, size_t length) {
 
 static int
 pcmWriteSample (NoteDevice *device, int16_t amplitude) {
-  PcmAmplitudeFormat format = device->amplitudeFormat;
   PcmSample sample;
+  makePcmSample(&sample, amplitude, device->amplitudeFormat);
 
-  makePcmSample(&sample, amplitude, format);
-
-  {
-    int channel;
-
-    for (channel=0; channel<device->channelCount; channel+=1) {
-      if (!pcmWriteBytes(device, sample.bytes, sample.size)) return 0;
-    }
+  for (int channel=0; channel<device->channelCount; channel+=1) {
+    if (!pcmWriteBytes(device, sample.bytes, sample.size)) return 0;
   }
 
   return 1;
