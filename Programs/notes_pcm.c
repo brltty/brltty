@@ -141,13 +141,12 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
      * these are especially important on PDAs without any FPU.
      */ 
 
-    const int32_t positiveShiftsPerQuarterWave = (INT32_MAX >> 3) + INT32_C(1);
-    const int32_t negativeShiftsPerQuarterWave = -positiveShiftsPerQuarterWave;
+    const int32_t positiveShiftsPerFullWave = (INT32_MAX >> 1) + INT32_C(1);
+    const int32_t positiveShiftsPerHalfWave = positiveShiftsPerFullWave >> 1;
+    const int32_t positiveShiftsPerQuarterWave = positiveShiftsPerHalfWave >> 1;
 
-    const int32_t positiveShiftsPerHalfWave = positiveShiftsPerQuarterWave << 1;
     const int32_t negativeShiftsPerHalfWave = -positiveShiftsPerHalfWave;
-
-    const int32_t positiveShiftsPerFullWave = positiveShiftsPerHalfWave << 1;
+    const int32_t negativeShiftsPerQuarterWave = -positiveShiftsPerQuarterWave;
 
     const int32_t shiftsPerSample = (NOTE_FREQUENCY_TYPE)positiveShiftsPerFullWave 
                                   / (NOTE_FREQUENCY_TYPE)device->sampleRate

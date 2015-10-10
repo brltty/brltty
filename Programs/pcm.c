@@ -29,9 +29,10 @@ makePcmSample (
     int16_t *s16;
   } overlay;
 
-  const int U2S = 0X8000;
+  const int16_t U2S = INT16_MIN;
   overlay.bytes = sample->bytes;
   sample->format = format;
+  sample->amplitude = amplitude;
 
   switch (format) {
     case PCM_FMT_U8:
@@ -111,6 +112,7 @@ makePcmSample (
 
     default:
       sample->size = 0;
+      sample->format = PCM_FMT_UNKNOWN;
       break;
   }
 }
