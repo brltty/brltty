@@ -20,7 +20,7 @@
 
 #include "pcm.h"
 
-void
+size_t
 makePcmSample (
   PcmSample *sample, int16_t amplitude, PcmAmplitudeFormat format
 ) {
@@ -31,39 +31,33 @@ makePcmSample (
 
   const int16_t U2S = INT16_MIN;
   overlay.bytes = sample->bytes;
-  sample->format = format;
-  sample->amplitude = amplitude;
 
   switch (format) {
     case PCM_FMT_U8:
       amplitude += U2S;
     case PCM_FMT_S8:
       overlay.bytes[0] = amplitude >> 8;
-      sample->size = 1;
-      break;
+      return 1;
 
     case PCM_FMT_U16B:
       amplitude += U2S;
     case PCM_FMT_S16B:
       overlay.bytes[0] = amplitude >> 8;
       overlay.bytes[1] = amplitude;
-      sample->size = 2;
-      break;
+      return 2;
 
     case PCM_FMT_U16L:
       amplitude += U2S;
     case PCM_FMT_S16L:
       overlay.bytes[0] = amplitude;
       overlay.bytes[1] = amplitude >> 8;
-      sample->size = 2;
-      break;
+      return 2;
 
     case PCM_FMT_U16N:
       amplitude += U2S;
     case PCM_FMT_S16N:
       *overlay.s16 = amplitude;
-      sample->size = 2;
-      break;
+      return 2;
 
     case PCM_FMT_ULAW: {
       int negative = amplitude < 0;
@@ -85,8 +79,7 @@ makePcmSample (
       if (negative) value |= 0X80;
 
       overlay.bytes[0] = ~value;
-      sample->size = 1;
-      break;
+      return 1;
     }
 
     case PCM_FMT_ALAW: {
@@ -106,13 +99,10 @@ makePcmSample (
       if (negative) value |= 0X80;
 
       overlay.bytes[0] = value ^ 0X55;
-      sample->size = 1;
-      break;
+      return 1;
     }
 
     default:
-      sample->size = 0;
-      sample->format = PCM_FMT_UNKNOWN;
-      break;
+      return 0;
   }
 }

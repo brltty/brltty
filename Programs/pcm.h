@@ -41,12 +41,9 @@ typedef enum {
 
 typedef struct {
   uint8_t bytes[PCM_MAX_SAMPLE_SIZE];
-  size_t size;
-  PcmAmplitudeFormat format;
-  int16_t amplitude;
 } PcmSample;
 
-extern void makePcmSample (
+extern size_t makePcmSample (
   PcmSample *sample, int16_t amplitude, PcmAmplitudeFormat format
 );
 
