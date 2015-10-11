@@ -165,9 +165,9 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
     logMessage(LOG_DEBUG, "tone: msec=%u smct=%ld note=%u",
                duration, sampleCount, note);
 
-    /* This loop iterates once per sample. */
+    /* This loop iterates once per wave till the note is complete. */
     while (sampleCount > 0) {
-      /* This loop iterates once per wave. */
+      /* This loop iterates once per sample for one wave. */
       do {
         /* Start by calculating an amplitude that descends straight from
          * twice as high to twice as low as it should. This already makes
