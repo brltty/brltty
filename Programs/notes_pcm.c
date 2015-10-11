@@ -155,9 +155,9 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
      * The percentage needs to be squared since we perceive loudness exponentially.
      */
     const unsigned char fullVolume = 100;
-    const unsigned char volume = MAX(fullVolume, prefs.pcmVolume);
+    const unsigned char currentVolume = MIN(fullVolume, prefs.pcmVolume);
     const int32_t maximumAmplitude = INT16_MAX
-                                   * (volume * volume)
+                                   * (currentVolume * currentVolume)
                                    / (fullVolume * fullVolume);
 
     /* We start, of course, with no shifts having been made yet. */
