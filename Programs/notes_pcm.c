@@ -135,9 +135,9 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
      * these are especially important on PDAs without any FPU.
      */ 
 
-    const int32_t positiveShiftsPerFullWave = (INT32_MAX >> 1) + INT32_C(1);
-    const int32_t positiveShiftsPerHalfWave = positiveShiftsPerFullWave >> 1;
-    const int32_t positiveShiftsPerQuarterWave = positiveShiftsPerHalfWave >> 1;
+    const int32_t positiveShiftsPerQuarterWave = INT32_C(1) << (16 + 12);
+    const int32_t positiveShiftsPerHalfWave = positiveShiftsPerQuarterWave << 1;
+    const int32_t positiveShiftsPerFullWave = positiveShiftsPerHalfWave << 1;
 
     const int32_t negativeShiftsPerHalfWave = -positiveShiftsPerHalfWave;
     const int32_t negativeShiftsPerQuarterWave = -positiveShiftsPerQuarterWave;
@@ -154,8 +154,9 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
     /* We need to know the maximum amplitude based on the volume percentage.
      * The percentage needs to be squared since we perceive loudness exponentially.
      */
+    const unsigned char volume = MAX(100, prefs.pcmVolume);
     const int32_t maximumAmplitude = INT16_MAX
-                                   * (prefs.pcmVolume * prefs.pcmVolume)
+                                   * (volume * volume)
                                    / (100 * 100);
 
     /* We start, of course, with no shifts having been made yet. */
@@ -195,15 +196,6 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
          * amplitude which must be converted back to a 16-bit amplitude.
          */
         amplitude >>= 16;
-
-        /* Clip the amplitude in case we've gone out of range. A known
-         * case is the most positive amplitude being one value too high.
-         */
-        if (amplitude > INT16_MAX) {
-          amplitude = INT16_MAX;
-        } else if (amplitude < INT16_MIN) {
-          amplitude = INT16_MIN;
-        }
 
         if (!pcmWriteSample(device, amplitude)) return 0;
         sampleCount -= 1;
