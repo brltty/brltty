@@ -168,47 +168,31 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
 
     /* This loop iterates once per wave till the note is complete. */
     while (sampleCount > 0) {
-      /* This loop iterates once per sample for one wave. */
-      do {
-        /* Start by calculating an amplitude that descends straight from
-         * twice as high to twice as low as it should. This already makes
-         * amplitudes within the second and third quarter waves correct.
-         */
-        int32_t amplitude = positiveShiftsPerHalfWave - currentShifts;
 
-        /* Fix the amplitudes within the first and fourth quarter waves. */
-        if (amplitude > positiveShiftsPerQuarterWave) {
-          /* Amplitudes within the first quarter wave need to be flipped. */
-          amplitude = positiveShiftsPerHalfWave - amplitude;
-        } else if (amplitude < negativeShiftsPerQuarterWave) {
-          /* Amplitudes within the fourth quarter wave need to be flipped. */
-          amplitude = negativeShiftsPerHalfWave - amplitude;
-        }
+#define writeSample() \
+  int32_t y = ((currentShifts >> 12) * maximumAmplitude) >> 16; \
+  if (!pcmWriteSample(device, y)) return 0; \
+  sampleCount -= 1;
 
-        /* Convert from our amplitude to a 16-bit audio amplitude. */
-        amplitude >>= 12;
-
-        /* Multiply the full amplitude by the maximum amplitude as set by
-         * the currently set volume.
-         */
-        amplitude *= maximumAmplitude;
-
-        /* Multiplying two 16-bit amplitudes together yields a 32-bit
-         * amplitude which must be converted back to a 16-bit amplitude.
-         */
-        amplitude >>= 16;
-
-        if (!pcmWriteSample(device, amplitude)) return 0;
-        sampleCount -= 1;
+      /* This loop iterates once per sample for the first quarter wave. */
+      while (currentShifts < positiveShiftsPerQuarterWave) {
+        writeSample();
         currentShifts += shiftsPerSample;
-      } while (currentShifts < positiveShiftsPerFullWave);
+      }
+      currentShifts = positiveShiftsPerHalfWave - currentShifts;
 
-      /* Bring the current shift count back into range such that the next
-       * wave will begin exactly where the previous one left off.
-       */
-      do {
-        currentShifts -= positiveShiftsPerFullWave;
-      } while (currentShifts >= positiveShiftsPerFullWave);
+      /* This loop iterates once per sample for the second and third quarter waves. */
+      while (currentShifts > negativeShiftsPerQuarterWave) {
+        writeSample();
+        currentShifts -= shiftsPerSample;
+      }
+      currentShifts = negativeShiftsPerHalfWave - currentShifts;
+
+      /* This loop iterates once per sample for the fourth quarter wave. */
+      while (currentShifts < 0) {
+        writeSample();
+        currentShifts += shiftsPerSample;
+      }
     }
   } else {
     /* generate silence */
