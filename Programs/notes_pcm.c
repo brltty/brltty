@@ -128,6 +128,9 @@ static int
 pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
   long int sampleCount = device->sampleRate * duration / 1000;
 
+  logMessage(LOG_DEBUG, "tone: msec=%u smct=%ld note=%u",
+             duration, sampleCount, note);
+
   if (note) {
     /* A triangle waveform sounds nice, is lightweight, and avoids
      * relying too much on floating-point performance and/or on
@@ -135,21 +138,21 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
      * these are especially important on PDAs without any FPU.
      */ 
 
-    const int32_t positiveShiftsPerQuarterWave = INT32_C(1) << (16 + 12);
-    const int32_t positiveShiftsPerHalfWave = positiveShiftsPerQuarterWave << 1;
-    const int32_t positiveShiftsPerFullWave = positiveShiftsPerHalfWave << 1;
+    const int32_t positiveStepsPerQuarterWave = INT32_C(1) << (16 + 12);
+    const int32_t positiveStepsPerHalfWave = positiveStepsPerQuarterWave << 1;
+    const int32_t positiveStepsPerFullWave = positiveStepsPerHalfWave << 1;
 
-    const int32_t negativeShiftsPerHalfWave = -positiveShiftsPerHalfWave;
-    const int32_t negativeShiftsPerQuarterWave = -positiveShiftsPerQuarterWave;
+    const int32_t negativeStepsPerHalfWave = -positiveStepsPerHalfWave;
+    const int32_t negativeStepsPerQuarterWave = -positiveStepsPerQuarterWave;
 
-    /* We need to know how many shifts to make from one sample to the next.
-     * shiftsPerSample = shiftsPerWave * wavesPerSecond / samplesPerSecond
-     *                 = shiftsPerWave * frequency / sampleRate
-     *                 = shiftsPerWave / sampleRate * frequency
+    /* We need to know how many steps to make from one sample to the next.
+     * stepsPerSample = stepsPerWave * wavesPerSecond / samplesPerSecond
+     *                = stepsPerWave * frequency / sampleRate
+     *                = stepsPerWave / sampleRate * frequency
      */
-    const int32_t shiftsPerSample = (NOTE_FREQUENCY_TYPE)positiveShiftsPerFullWave 
-                                  / (NOTE_FREQUENCY_TYPE)device->sampleRate
-                                  * GET_NOTE_FREQUENCY(note);
+    const int32_t stepsPerSample = (NOTE_FREQUENCY_TYPE)positiveStepsPerFullWave 
+                                 / (NOTE_FREQUENCY_TYPE)device->sampleRate
+                                 * GET_NOTE_FREQUENCY(note);
 
     /* We need to know the maximum amplitude based on the volume percentage.
      * The percentage needs to be squared since we perceive loudness exponentially.
@@ -160,45 +163,42 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
                                    * (currentVolume * currentVolume)
                                    / (fullVolume * fullVolume);
 
-    /* We start, of course, with no shifts having been made yet. */
-    int32_t currentShifts = 0;
-
-    logMessage(LOG_DEBUG, "tone: msec=%u smct=%ld note=%u",
-               duration, sampleCount, note);
+    /* We start with an amplitude of 0. */
+    int32_t currentOffset = 0;
 
     /* This loop iterates once per wave till the note is complete. */
     while (sampleCount > 0) {
 
-#define writeSample() \
-  int32_t y = ((currentShifts >> 12) * maximumAmplitude) >> 16; \
-  if (!pcmWriteSample(device, y)) return 0; \
-  sampleCount -= 1;
+#define writeSample() { \
+  int32_t amplitude = ((currentOffset >> 12) * maximumAmplitude) >> 16; \
+  if (!pcmWriteSample(device, amplitude)) return 0; \
+  sampleCount -= 1; \
+}
 
       /* This loop iterates once per sample for the first quarter wave. */
-      while (currentShifts < positiveShiftsPerQuarterWave) {
+      while (currentOffset < positiveStepsPerQuarterWave) {
         writeSample();
-        currentShifts += shiftsPerSample;
+        currentOffset += stepsPerSample;
       }
-      currentShifts = positiveShiftsPerHalfWave - currentShifts;
+
+      currentOffset = positiveStepsPerHalfWave - currentOffset;
 
       /* This loop iterates once per sample for the second and third quarter waves. */
-      while (currentShifts > negativeShiftsPerQuarterWave) {
+      while (currentOffset > negativeStepsPerQuarterWave) {
         writeSample();
-        currentShifts -= shiftsPerSample;
+        currentOffset -= stepsPerSample;
       }
-      currentShifts = negativeShiftsPerHalfWave - currentShifts;
+
+      currentOffset = negativeStepsPerHalfWave - currentOffset;
 
       /* This loop iterates once per sample for the fourth quarter wave. */
-      while (currentShifts < 0) {
+      while (currentOffset < 0) {
         writeSample();
-        currentShifts += shiftsPerSample;
+        currentOffset += stepsPerSample;
       }
     }
   } else {
     /* generate silence */
-    logMessage(LOG_DEBUG, "tone: msec=%u smct=%ld note=%u",
-               duration, sampleCount, note);
-
     while (sampleCount > 0) {
       if (!pcmWriteSample(device, 0)) return 0;
       sampleCount -= 1;
