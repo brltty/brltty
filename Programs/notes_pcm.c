@@ -163,7 +163,7 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
                                    * (currentVolume * currentVolume)
                                    / (fullVolume * fullVolume);
 
-    /* We start with an amplitude of 0. */
+    /* We start with an offset of 0. */
     int32_t currentOffset = 0;
 
     /* This loop iterates once per wave till the note is complete. */
@@ -175,23 +175,36 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
   sampleCount -= 1; \
 }
 
-      /* This loop iterates once per sample for the first quarter wave. */
+      /* This loop iterates once per sample for the first quarter wave. It
+       * writes samples that ascend from 0 to the positive peak.
+       */
       while (currentOffset < positiveStepsPerQuarterWave) {
         writeSample();
         currentOffset += stepsPerSample;
       }
 
+      /* The offset has gone too high so prepare for the next part of the
+       * wave by recalculating the offset for descending samples.
+       */
       currentOffset = positiveStepsPerHalfWave - currentOffset;
 
-      /* This loop iterates once per sample for the second and third quarter waves. */
+      /* This loop iterates once per sample for the second and third
+       * quarter waves. It writes samples that descend from the positive
+       * peak to the negative peak.
+       */
       while (currentOffset > negativeStepsPerQuarterWave) {
         writeSample();
         currentOffset -= stepsPerSample;
       }
 
+      /* The offset has gone too low so prepare for the next part of the
+       * wave by recalculating the offset for ascending samples.
+       */
       currentOffset = negativeStepsPerHalfWave - currentOffset;
 
-      /* This loop iterates once per sample for the fourth quarter wave. */
+      /* This loop iterates once per sample for the fourth quarter wave. It
+       * writes samples that ascend from the negative peak to 0.
+       */
       while (currentOffset < 0) {
         writeSample();
         currentOffset += stepsPerSample;
