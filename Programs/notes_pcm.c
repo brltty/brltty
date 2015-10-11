@@ -154,10 +154,11 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
     /* We need to know the maximum amplitude based on the volume percentage.
      * The percentage needs to be squared since we perceive loudness exponentially.
      */
-    const unsigned char volume = MAX(100, prefs.pcmVolume);
+    const unsigned char fullVolume = 100;
+    const unsigned char volume = MAX(fullVolume, prefs.pcmVolume);
     const int32_t maximumAmplitude = INT16_MAX
                                    * (volume * volume)
-                                   / (100 * 100);
+                                   / (fullVolume * fullVolume);
 
     /* We start, of course, with no shifts having been made yet. */
     int32_t currentShifts = 0;
