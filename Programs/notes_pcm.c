@@ -166,18 +166,15 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
     /* We start with an offset of 0. */
     int32_t currentOffset = 0;
 
-    /* This loop iterates once per wave till the note is complete. */
-    while (sampleCount > 0) {
-
 #define writeSample() { \
   int32_t amplitude = ((currentOffset >> 12) * maximumAmplitude) >> 16; \
   if (!pcmWriteSample(device, amplitude)) return 0; \
   sampleCount -= 1; \
 }
 
-      /* This loop iterates once per sample for the first quarter wave. It
-       * writes samples that ascend from 0 to the positive peak.
-       */
+    /* This loop iterates once per wave till the note is complete. */
+    while (sampleCount > 0) {
+      /* This loop writes the samples for the ascending portion of the wave. */
       while (currentOffset < positiveStepsPerQuarterWave) {
         writeSample();
         currentOffset += stepsPerSample;
@@ -188,10 +185,7 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
        */
       currentOffset = positiveStepsPerHalfWave - currentOffset;
 
-      /* This loop iterates once per sample for the second and third
-       * quarter waves. It writes samples that descend from the positive
-       * peak to the negative peak.
-       */
+      /* This loop writes the samples for the descending portion of the wave. */
       while (currentOffset > negativeStepsPerQuarterWave) {
         writeSample();
         currentOffset -= stepsPerSample;
@@ -201,14 +195,12 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
        * wave by recalculating the offset for ascending samples.
        */
       currentOffset = negativeStepsPerHalfWave - currentOffset;
+    }
 
-      /* This loop iterates once per sample for the fourth quarter wave. It
-       * writes samples that ascend from the negative peak to 0.
-       */
-      while (currentOffset < 0) {
-        writeSample();
-        currentOffset += stepsPerSample;
-      }
+    /* This loop writes the samples to complete the fianl wave. */
+    while (currentOffset < 0) {
+      writeSample();
+      currentOffset += stepsPerSample;
     }
   } else {
     /* generate silence */
