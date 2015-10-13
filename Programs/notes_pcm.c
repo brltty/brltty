@@ -46,17 +46,19 @@ pcmFlushBytes (NoteDevice *device) {
 }
 
 static int
-pcmWriteBytes (NoteDevice *device, const void *address, size_t length) {
+pcmWriteBytes (NoteDevice *device, const uint8_t *buffer, size_t length) {
   while (length > 0) {
     size_t count = device->blockSize - device->blockUsed;
     if (length < count) count = length;
-    memcpy(&device->blockAddress[device->blockUsed], address, count);
-    address += count;
-    length -= count;
 
-    if ((device->blockUsed += count) == device->blockSize)
-      if (!pcmFlushBytes(device))
+    length -= count;
+    while (count--) device->blockAddress[device->blockUsed++] = *buffer++;
+
+    if (device->blockUsed == device->blockSize) {
+      if (!pcmFlushBytes(device)) {
         return 0;
+      }
+    }
   }
 
   return 1;
