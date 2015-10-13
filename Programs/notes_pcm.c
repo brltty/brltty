@@ -197,10 +197,26 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
     sampleCount += (uint32_t)(sampleCount * -stepsPerSample) / stepsPerSample;
 
     while (sampleCount > 0) {
-      int32_t amplitude = (currentValue ^ (currentValue >> 31))
-                        - zeroValue;
+      /* Convert the current 32-bit unsigned linear value to a 31-bit
+       * triangular amplitude by inverting its low-order 31 bits if its
+       * high-order (sign) bit is set.
+       */
+      int32_t amplitude = currentValue ^ (currentValue >> 31);
 
-      amplitude = ((amplitude >> (magnitudeWidth - 16)) * maximumAmplitude) >> 16;
+      /* Convert the 31-bit amplitude from unsigned to signed. */
+      amplitude -= zeroValue;
+
+      /* Convert the signed amplitude from 31 bits to 17 bits. */
+      amplitude >>= magnitudeWidth - 16;
+
+      /* Adjust the 17-bit signed amplitude (sign bit + 16-bit value) by
+       * the currently set volume (15-bit value):
+       * (16-bit value) * (15-bit value) + (sign bit) = 32-bit signed value
+       */
+      amplitude *= maximumAmplitude;
+
+      /* Convert the signed amplitude from 32 bits to 16 bits. */
+      amplitude >>= 16;
 
       if (!pcmWriteSample(device, amplitude)) break;
       currentValue += stepsPerSample;
