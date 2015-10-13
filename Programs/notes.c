@@ -22,7 +22,7 @@
 
 #define NOTE_FREQUENCY_FACTOR 1000
 
-static const int32_t noteFrequencies[] = {
+static const uint32_t noteFrequencies[] = {
   /*   0 -5C  */     8176,
   /*   1 -5C# */     8662,
   /*   2 -5D  */     9177,
@@ -158,7 +158,7 @@ getMaximumNote (void) {
   return ARRAY_COUNT(noteFrequencies) - 1;
 }
 
-static inline int32_t
+static inline uint32_t
 getNoteFrequency (unsigned char note) {
   size_t maximum = getMaximumNote();
 
@@ -166,7 +166,7 @@ getNoteFrequency (unsigned char note) {
   return noteFrequencies[note];
 }
 
-int32_t
+uint32_t
 getIntegerNoteFrequency (unsigned char note) {
   return getNoteFrequency(note) / NOTE_FREQUENCY_FACTOR;
 }

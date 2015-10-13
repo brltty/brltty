@@ -27,14 +27,14 @@ extern "C" {
 #define NOTE_MIDDLE_C 60
 
 extern size_t getMaximumNote (void);
-extern int32_t getIntegerNoteFrequency (unsigned char note);
+extern uint32_t getIntegerNoteFrequency (unsigned char note);
 
 #ifndef NO_FLOAT
 extern float getRealNoteFrequency (unsigned char note);
 #endif /* NO_FLOAT */
 
 #ifdef NO_FLOAT
-#define NOTE_FREQUENCY_TYPE int32_t
+#define NOTE_FREQUENCY_TYPE uint32_t
 #define GET_NOTE_FREQUENCY getIntegerNoteFrequency
 #else /* NO_FLOAT */
 #define NOTE_FREQUENCY_TYPE float
