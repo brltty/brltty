@@ -138,8 +138,37 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
      * these are especially important on PDAs without any FPU.
      */ 
 
-    /* A full period is mapped onto a 32-bit range.
-     * We need to know how many steps to make from one sample to the next.
+    /* We need to know the maximum amplitude based on the currently set
+     * volume percentage. This percentage then needs to be squared because
+     * we perceive loudness exponentially.
+     */
+    const unsigned char fullVolume = 100;
+    const unsigned char currentVolume = MIN(fullVolume, prefs.pcmVolume);
+    const int32_t maximumAmplitude = INT16_MAX
+                                   * (currentVolume * currentVolume)
+                                   / (fullVolume * fullVolume);
+
+    /* The calculations for triangle wave generation work out nicely and
+     * efficiently if we map a full period onto a 32-bit unsigned range.
+     */
+
+    /* The two high-order bits specify which quarter wave a sample is for.
+     *   00 -> ascending from the negative peak to zero
+     *   01 -> ascending from zero to the positive peak
+     *   10 -> descending from the positive peak to zero
+     *   11 -> descending from zero to the negative peak
+     * The higher bit is 0 for the ascending segment and 1 for the
+     * descending segment. The lower bit is 0 when going from a peak to
+     * zero and 1 when going from zero to a peak.
+     */
+    const uint8_t quarterWaveIndicatorWidth = 2;
+
+    /* The amplitude is 0 when the lower bit of the quarter wave indicator
+     * is 1 and the rest of the (magnitude) bits are all 0.
+     */
+    const uint32_t zeroAmplitude = UINT32_C(1) << (32 - quarterWaveIndicatorWidth);
+
+    /* We need to know how many steps to make from one sample to the next.
      * stepsPerSample = stepsPerWave * wavesPerSecond / samplesPerSecond
      *                = stepsPerWave * frequency / sampleRate
      *                = stepsPerWave / sampleRate * frequency
@@ -148,33 +177,31 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
                                   / (NOTE_FREQUENCY_TYPE)device->sampleRate
                                   * GET_NOTE_FREQUENCY(note);
 
-    /* We need to know the maximum amplitude based on the volume percentage.
-     * The percentage needs to be squared since we perceive loudness exponentially.
+    /* The current offset needs to be a signed value so that the >>
+     * operator will extend its sign bit. We start by initializing it to
+     * the value that corresponds to the start of the first logical quarter
+     * wave (the one that ascends from zero to the positive peak).
      */
-    const unsigned char fullVolume = 100;
-    const unsigned char currentVolume = MIN(fullVolume, prefs.pcmVolume);
-    const int32_t maximumAmplitude = INT16_MAX
-                                   * (currentVolume * currentVolume)
-                                   / (fullVolume * fullVolume);
-
-    const int32_t zeroAmplitude = INT32_C(1) << 30;
-
-    /* We start with an offset corresponding to an amplitude of 0. */
     int32_t currentOffset = zeroAmplitude;
 
-    /* Round the number of samples up to a whole number of periods.
+    /* Round the number of samples up to a whole number of periods:
      * partialSteps = (sampleCount * stepsPerSample) % stepsPerWave
+     *
      * With stepsPerWave being (1 << 32), we simply let the product
-     * overflow and the modulus corresponds to the remaining steps:
+     * overflow and the modulus corresponds to the partial steps:
      * partialSteps = (uint32_t)(sampleCount * stepsPerSample)
+     *
      * missingSteps = (uint32_t) -partialSteps
      * extraSamples = missingSteps / stepsPerSample
      */
     sampleCount += (uint32_t)(sampleCount * -stepsPerSample) / stepsPerSample;
 
     while (sampleCount > 0) {
-      int32_t amplitude = (currentOffset ^ (currentOffset >> 31)) - zeroAmplitude;
-      amplitude = ((amplitude >> 14) * maximumAmplitude) >> 16;
+      int32_t amplitude = (currentOffset ^ (currentOffset >> 31))
+                        - zeroAmplitude;
+
+      amplitude = ((amplitude >> (16 - quarterWaveIndicatorWidth)) * maximumAmplitude) >> 16;
+
       if (!pcmWriteSample(device, amplitude)) break;
       currentOffset += stepsPerSample;
       sampleCount -= 1;
