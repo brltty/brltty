@@ -188,10 +188,12 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
      * partialSteps = (sampleCount * stepsPerSample) % stepsPerWave
      *
      * With stepsPerWave being (1 << 32), we simply let the product
-     * overflow and the modulus corresponds to the partial steps:
+     * overflow. The modulus corresponds to the remaining 32 low bits:
      * partialSteps = (uint32_t)(sampleCount * stepsPerSample)
      *
-     * missingSteps = (uint32_t) -partialSteps
+     * missingSteps = stepsPerWave - partialSteps
+     *              = (uint32_t) -partialSteps
+
      * extraSamples = missingSteps / stepsPerSample
      */
     sampleCount += (uint32_t)(sampleCount * -stepsPerSample) / stepsPerSample;
