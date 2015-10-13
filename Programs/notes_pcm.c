@@ -138,21 +138,15 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
      * these are especially important on PDAs without any FPU.
      */ 
 
-    const int32_t positiveStepsPerQuarterWave = INT32_C(1) << (16 + 12);
-    const int32_t positiveStepsPerHalfWave = positiveStepsPerQuarterWave << 1;
-    const int32_t positiveStepsPerFullWave = positiveStepsPerHalfWave << 1;
-
-    const int32_t negativeStepsPerHalfWave = -positiveStepsPerHalfWave;
-    const int32_t negativeStepsPerQuarterWave = -positiveStepsPerQuarterWave;
-
-    /* We need to know how many steps to make from one sample to the next.
+    /* A full period is mapped onto a 32-bit range.
+     * We need to know how many steps to make from one sample to the next.
      * stepsPerSample = stepsPerWave * wavesPerSecond / samplesPerSecond
      *                = stepsPerWave * frequency / sampleRate
      *                = stepsPerWave / sampleRate * frequency
      */
-    const int32_t stepsPerSample = (NOTE_FREQUENCY_TYPE)positiveStepsPerFullWave 
-                                 / (NOTE_FREQUENCY_TYPE)device->sampleRate
-                                 * GET_NOTE_FREQUENCY(note);
+    const uint32_t stepsPerSample = (NOTE_FREQUENCY_TYPE)UINT32_MAX 
+                                  / (NOTE_FREQUENCY_TYPE)device->sampleRate
+                                  * GET_NOTE_FREQUENCY(note);
 
     /* We need to know the maximum amplitude based on the volume percentage.
      * The percentage needs to be squared since we perceive loudness exponentially.
@@ -163,54 +157,37 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
                                    * (currentVolume * currentVolume)
                                    / (fullVolume * fullVolume);
 
-    /* We start with an offset of 0. */
-    int32_t currentOffset = 0;
+    const int32_t zeroAmplitude = INT32_C(1) << 30;
 
-#define writeSample() { \
-  int32_t amplitude = ((currentOffset >> 12) * maximumAmplitude) >> 16; \
-  if (!pcmWriteSample(device, amplitude)) return 0; \
-  sampleCount -= 1; \
-}
+    /* We start with an offset corresponding to an amplitude of 0. */
+    int32_t currentOffset = zeroAmplitude;
 
-    /* This loop iterates once per wave till the note is complete. */
+    /* Round the number of samples up to a whole number of periods.
+     * partialSteps = (sampleCount * stepsPerSample) % stepsPerWave
+     * With stepsPerWave being (1 << 32), we simply let the product
+     * overflow and the modulus corresponds to the remaining steps:
+     * partialSteps = (uint32_t)(sampleCount * stepsPerSample)
+     * missingSteps = (uint32_t) -partialSteps
+     * extraSamples = missingSteps / stepsPerSample
+     */
+    sampleCount += (uint32_t)(sampleCount * -stepsPerSample) / stepsPerSample;
+
     while (sampleCount > 0) {
-      /* This loop writes the samples for the ascending portion of the wave. */
-      while (currentOffset < positiveStepsPerQuarterWave) {
-        writeSample();
-        currentOffset += stepsPerSample;
-      }
-
-      /* The offset has gone too high so prepare for the next part of the
-       * wave by recalculating the offset for descending samples.
-       */
-      currentOffset = positiveStepsPerHalfWave - currentOffset;
-
-      /* This loop writes the samples for the descending portion of the wave. */
-      while (currentOffset > negativeStepsPerQuarterWave) {
-        writeSample();
-        currentOffset -= stepsPerSample;
-      }
-
-      /* The offset has gone too low so prepare for the next part of the
-       * wave by recalculating the offset for ascending samples.
-       */
-      currentOffset = negativeStepsPerHalfWave - currentOffset;
-    }
-
-    /* This loop writes the samples to complete the fianl wave. */
-    while (currentOffset < 0) {
-      writeSample();
+      int32_t amplitude = (currentOffset ^ (currentOffset >> 31)) - zeroAmplitude;
+      amplitude = ((amplitude >> 14) * maximumAmplitude) >> 16;
+      if (!pcmWriteSample(device, amplitude)) break;
       currentOffset += stepsPerSample;
+      sampleCount -= 1;
     }
   } else {
     /* generate silence */
     while (sampleCount > 0) {
-      if (!pcmWriteSample(device, 0)) return 0;
+      if (!pcmWriteSample(device, 0)) break;
       sampleCount -= 1;
     }
   }
 
-  return 1;
+  return (sampleCount > 0) ? 0 : 1;
 }
 
 static int
