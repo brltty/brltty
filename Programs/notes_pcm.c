@@ -208,7 +208,7 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
       /* Convert the 31-bit amplitude from unsigned to signed. */
       amplitude -= zeroValue;
 
-      /* Convert the signed amplitude from 31 bits to 17 bits. */
+      /* Convert the amplitude's magnitude from 30 bits to 16 bits. */
       amplitude >>= magnitudeWidth - 16;
 
       /* Adjust the 17-bit signed amplitude (sign bit + 16-bit value) by
