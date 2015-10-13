@@ -161,12 +161,12 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
      * descending segment. The lower bit is 0 when going from a peak to
      * zero and 1 when going from zero to a peak.
      */
-    const uint8_t quarterWaveIndicatorWidth = 2;
+    const uint8_t magnitudeWidth = 32 - 2;
 
     /* The amplitude is 0 when the lower bit of the quarter wave indicator
      * is 1 and the rest of the (magnitude) bits are all 0.
      */
-    const uint32_t zeroAmplitude = UINT32_C(1) << (32 - quarterWaveIndicatorWidth);
+    const uint32_t zeroAmplitude = UINT32_C(1) << magnitudeWidth;
 
     /* We need to know how many steps to make from one sample to the next.
      * stepsPerSample = stepsPerWave * wavesPerSecond / samplesPerSecond
@@ -200,7 +200,7 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
       int32_t amplitude = (currentOffset ^ (currentOffset >> 31))
                         - zeroAmplitude;
 
-      amplitude = ((amplitude >> (16 - quarterWaveIndicatorWidth)) * maximumAmplitude) >> 16;
+      amplitude = ((amplitude >> (magnitudeWidth - 16)) * maximumAmplitude) >> 16;
 
       if (!pcmWriteSample(device, amplitude)) break;
       currentOffset += stepsPerSample;
