@@ -166,7 +166,7 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
     /* The amplitude is 0 when the lower bit of the quarter wave indicator
      * is 1 and the rest of the (magnitude) bits are all 0.
      */
-    const uint32_t zeroAmplitude = UINT32_C(1) << magnitudeWidth;
+    const uint32_t zeroValue = UINT32_C(1) << magnitudeWidth;
 
     /* We need to know how many steps to make from one sample to the next.
      * stepsPerSample = stepsPerWave * wavesPerSecond / samplesPerSecond
@@ -177,12 +177,12 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
                                   / (NOTE_FREQUENCY_TYPE)device->sampleRate
                                   * GET_NOTE_FREQUENCY(note);
 
-    /* The current offset needs to be a signed value so that the >>
-     * operator will extend its sign bit. We start by initializing it to
-     * the value that corresponds to the start of the first logical quarter
-     * wave (the one that ascends from zero to the positive peak).
+    /* The current value needs to be a signed value so that the >> operator
+     * will extend its sign bit. We start by initializing it to the value
+     * that corresponds to the start of the first logical quarter wave
+     * (the one that ascends from zero to the positive peak).
      */
-    int32_t currentOffset = zeroAmplitude;
+    int32_t currentValue = zeroValue;
 
     /* Round the number of samples up to a whole number of periods:
      * partialSteps = (sampleCount * stepsPerSample) % stepsPerWave
@@ -197,13 +197,13 @@ pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
     sampleCount += (uint32_t)(sampleCount * -stepsPerSample) / stepsPerSample;
 
     while (sampleCount > 0) {
-      int32_t amplitude = (currentOffset ^ (currentOffset >> 31))
-                        - zeroAmplitude;
+      int32_t amplitude = (currentValue ^ (currentValue >> 31))
+                        - zeroValue;
 
       amplitude = ((amplitude >> (magnitudeWidth - 16)) * maximumAmplitude) >> 16;
 
       if (!pcmWriteSample(device, amplitude)) break;
-      currentOffset += stepsPerSample;
+      currentValue += stepsPerSample;
       sampleCount -= 1;
     }
   } else {
