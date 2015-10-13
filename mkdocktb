@@ -46,11 +46,33 @@ export XDG_CONFIG_DIRS=/
 
 readonly newLine=$'\n'
 
+declare -a tocLines
+
+addTocLine() {
+   local line="${1}"
+
+   tocLines[${#tocLines[*]}]="${line}"
+}
+
+addTocEntry() {
+   local title="${1}"
+   local anchor="${2}"
+
+   addTocLine "<LI><A HREF=\"#${anchor}\">${title}</A></LI>"
+}
+
 declare -a documentLines
+
 addLine() {
    local line="${1}"
 
    documentLines[${#documentLines[*]}]="${line}"
+}
+
+addAnchor() {
+   local anchor="${1}"
+
+   addLine "<A NAME=\"${anchor}\"></A>"
 }
 
 beginDocument() {
@@ -70,26 +92,53 @@ endDocument() {
 
    addLine "</BODY>"
    addLine "</HTML>"
+   addTocLine "<HR>"
 
-   local count="${#documentLines[*]}"
-   local index=0
+   local docCount="${#documentLines[*]}"
+   local docIndex=0
+
+   local tocCount="${#tocLines[*]}"
+   local tocIndex=0
 
    exec 3>"${file}"
-   while ((index < count))
-   do
-      echo >&3 "${documentLines[index++]}"
-   done
+      while ((docIndex < tocStart))
+      do
+         echo >&3 "${documentLines[docIndex++]}"
+      done
+
+      while ((tocIndex < tocCount))
+      do
+         echo >&3 "${tocLines[tocIndex++]}"
+      done
+
+      while ((docIndex < docCount))
+      do
+         echo >&3 "${documentLines[docIndex++]}"
+      done
    exec 3>&-
 }
 
 beginSection() {
    local title="${1}"
 
+   local anchor="${title,,?}"
+   anchor="${anchor//[^a-zA-Z_0-9]/-}"
+   addAnchor "${anchor}"
+
    headerLevel=$((headerLevel + 1))
    addLine "<H${headerLevel}>${title}</H${headerLevel}>"
+
+   if ((headerLevel == 1))
+   then
+      tocStart="${#documentLines[*]}"
+      addTocLine "<UL>"
+   else
+      addTocEntry "${title}" "${anchor}"
+   fi
 }
 
 endSection() {
+   ((headerLevel > 1)) || addTocLine "</UL>"
    headerLevel=$((headerLevel - 1))
 }
 
@@ -214,7 +263,9 @@ addLine "The driver automatically selects the appropriate key table for the devi
 addLine "Click on the driver's name for general information about it."
 addLine "Click on the device model for its key bindings."
 
+addTocLine "<LI><UL>"
 addLine "<DL>"
+
 for driverDirectory in "${driversDirectory}/"*
 do
    [ -d "${driverDirectory}" ] || continue
@@ -229,6 +280,10 @@ do
       cp -a -- "${inputFile}" "${outputFile}"
       header="<A HREF=\"${outputFile##*/}\">${header}</A>"
    }
+
+   anchor="${braillePrefix}-${driverCode}"
+   addTocEntry "${driverName}" "${anchor}"
+   addAnchor "${anchor}"
    addLine "<DT>${header}<DD>"
 
    beginLayoutList
@@ -253,7 +308,10 @@ do
 
    endLayoutList
 done
+
 addLine "</DL>"
+addTocLine "</UL></LI>"
+
 addLine "<HR>"
 endSection
 
