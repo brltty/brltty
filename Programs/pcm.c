@@ -41,42 +41,6 @@ makePcmSample_U8 (PcmSample *sample, int16_t amplitude) {
 }
 
 static inline size_t
-makePcmSample_16B (PcmSample *sample, int16_t amplitude) {
-  sample->bytes[0] = amplitude >> 8;
-  sample->bytes[1] = amplitude;
-  return 2;
-}
-
-static size_t
-makePcmSample_S16B (PcmSample *sample, int16_t amplitude) {
-  return makePcmSample_16B(sample, amplitude);
-}
-
-static size_t
-makePcmSample_U16B (PcmSample *sample, int16_t amplitude) {
-  UNSIGNED_TO_SIGNED;
-  return makePcmSample_16B(sample, amplitude);
-}
-
-static inline size_t
-makePcmSample_16L (PcmSample *sample, int16_t amplitude) {
-  sample->bytes[0] = amplitude;
-  sample->bytes[1] = amplitude >> 8;
-  return 2;
-}
-
-static size_t
-makePcmSample_S16L (PcmSample *sample, int16_t amplitude) {
-  return makePcmSample_16L(sample, amplitude);
-}
-
-static size_t
-makePcmSample_U16L (PcmSample *sample, int16_t amplitude) {
-  UNSIGNED_TO_SIGNED;
-  return makePcmSample_16L(sample, amplitude);
-}
-
-static inline size_t
 makePcmSample_16N (PcmSample *sample, int16_t amplitude) {
   union {
     unsigned char *bytes;
@@ -98,6 +62,52 @@ makePcmSample_U16N (PcmSample *sample, int16_t amplitude) {
   UNSIGNED_TO_SIGNED;
   return makePcmSample_16N(sample, amplitude);
 }
+
+#ifdef WORDS_BIGENDIAN
+#define makePcmSample_S16B makePcmSample_S16N
+#define makePcmSample_U16B makePcmSample_U16N
+#else /* WORDS_BIGENDIAN */
+static inline size_t
+makePcmSample_16B (PcmSample *sample, int16_t amplitude) {
+  sample->bytes[0] = amplitude >> 8;
+  sample->bytes[1] = amplitude;
+  return 2;
+}
+
+static size_t
+makePcmSample_S16B (PcmSample *sample, int16_t amplitude) {
+  return makePcmSample_16B(sample, amplitude);
+}
+
+static size_t
+makePcmSample_U16B (PcmSample *sample, int16_t amplitude) {
+  UNSIGNED_TO_SIGNED;
+  return makePcmSample_16B(sample, amplitude);
+}
+#endif /* WORDS_BIGENDIAN */
+
+#ifndef WORDS_BIGENDIAN
+#define makePcmSample_S16L makePcmSample_S16N
+#define makePcmSample_U16L makePcmSample_U16N
+#else /* WORDS_BIGENDIAN */
+static inline size_t
+makePcmSample_16L (PcmSample *sample, int16_t amplitude) {
+  sample->bytes[0] = amplitude;
+  sample->bytes[1] = amplitude >> 8;
+  return 2;
+}
+
+static size_t
+makePcmSample_S16L (PcmSample *sample, int16_t amplitude) {
+  return makePcmSample_16L(sample, amplitude);
+}
+
+static size_t
+makePcmSample_U16L (PcmSample *sample, int16_t amplitude) {
+  UNSIGNED_TO_SIGNED;
+  return makePcmSample_16L(sample, amplitude);
+}
+#endif /* WORDS_BIGENDIAN */
 
 static size_t
 makePcmSample_ULAW (PcmSample *sample, int16_t amplitude) {
@@ -171,29 +181,6 @@ getPcmSampleMaker (PcmAmplitudeFormat format) {
 
     PCM_SAMPLE_MAKER_ENTRY(UNKNOWN)
   };
-
-  switch (format) {
-#ifdef WORDS_BIGENDIAN
-    case PCM_FMT_S16B:
-      format = PCM_FMT_S16N;
-      break;
-
-    case PCM_FMT_U16B:
-      format = PCM_FMT_U16N;
-      break;
-#else /* WORDS_BIGENDIAN */
-    case PCM_FMT_S16L:
-      format = PCM_FMT_S16N;
-      break;
-
-    case PCM_FMT_U16L:
-      format = PCM_FMT_U16N;
-      break;
-#endif /* WORDS_BIGENDIAN */
-
-    default:
-      break;
-  }
 
   if (format < ARRAY_COUNT(pcmSampleMakers)) {
     PcmSampleMaker sampleMaker = pcmSampleMakers[format];
