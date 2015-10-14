@@ -183,10 +183,3 @@ getPcmSampleMaker (PcmAmplitudeFormat format) {
   logMessage(LOG_WARNING, "unsupported PCM format: %d", format);
   return pcmSampleMakers[PCM_FMT_UNKNOWN];
 }
-
-size_t
-makePcmSample (
-  PcmSample *sample, int16_t amplitude, PcmAmplitudeFormat format
-) {
-  return getPcmSampleMaker(format)(sample, amplitude);
-}

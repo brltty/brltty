@@ -48,10 +48,6 @@ typedef union {
   uint8_t bytes[PCM_MAX_SAMPLE_SIZE];
 } PcmSample;
 
-extern size_t makePcmSample (
-  PcmSample *sample, int16_t amplitude, PcmAmplitudeFormat format
-);
-
 typedef size_t (*PcmSampleMaker) (PcmSample *sample, int16_t amplitude);
 extern PcmSampleMaker getPcmSampleMaker (PcmAmplitudeFormat format);
 
