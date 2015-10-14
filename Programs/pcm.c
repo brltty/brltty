@@ -23,24 +23,24 @@
 
 #define UNSIGNED_TO_SIGNED amplitude += INT16_MIN
 
-static inline size_t
+static inline PcmSampleSize
 makePcmSample_8 (PcmSample *sample, int16_t amplitude) {
   sample->bytes[0] = amplitude >> 8;
   return 1;
 }
 
-static size_t
+static PcmSampleSize
 makePcmSample_S8 (PcmSample *sample, int16_t amplitude) {
   return makePcmSample_8(sample, amplitude);
 }
 
-static size_t
+static PcmSampleSize
 makePcmSample_U8 (PcmSample *sample, int16_t amplitude) {
   UNSIGNED_TO_SIGNED;
   return makePcmSample_8(sample, amplitude);
 }
 
-static inline size_t
+static inline PcmSampleSize
 makePcmSample_16N (PcmSample *sample, int16_t amplitude) {
   union {
     unsigned char *bytes;
@@ -52,12 +52,12 @@ makePcmSample_16N (PcmSample *sample, int16_t amplitude) {
   return 2;
 }
 
-static size_t
+static PcmSampleSize
 makePcmSample_S16N (PcmSample *sample, int16_t amplitude) {
   return makePcmSample_16N(sample, amplitude);
 }
 
-static size_t
+static PcmSampleSize
 makePcmSample_U16N (PcmSample *sample, int16_t amplitude) {
   UNSIGNED_TO_SIGNED;
   return makePcmSample_16N(sample, amplitude);
@@ -67,19 +67,19 @@ makePcmSample_U16N (PcmSample *sample, int16_t amplitude) {
 #define makePcmSample_S16B makePcmSample_S16N
 #define makePcmSample_U16B makePcmSample_U16N
 #else /* WORDS_BIGENDIAN */
-static inline size_t
+static inline PcmSampleSize
 makePcmSample_16B (PcmSample *sample, int16_t amplitude) {
   sample->bytes[0] = amplitude >> 8;
   sample->bytes[1] = amplitude;
   return 2;
 }
 
-static size_t
+static PcmSampleSize
 makePcmSample_S16B (PcmSample *sample, int16_t amplitude) {
   return makePcmSample_16B(sample, amplitude);
 }
 
-static size_t
+static PcmSampleSize
 makePcmSample_U16B (PcmSample *sample, int16_t amplitude) {
   UNSIGNED_TO_SIGNED;
   return makePcmSample_16B(sample, amplitude);
@@ -90,26 +90,26 @@ makePcmSample_U16B (PcmSample *sample, int16_t amplitude) {
 #define makePcmSample_S16L makePcmSample_S16N
 #define makePcmSample_U16L makePcmSample_U16N
 #else /* WORDS_BIGENDIAN */
-static inline size_t
+static inline PcmSampleSize
 makePcmSample_16L (PcmSample *sample, int16_t amplitude) {
   sample->bytes[0] = amplitude;
   sample->bytes[1] = amplitude >> 8;
   return 2;
 }
 
-static size_t
+static PcmSampleSize
 makePcmSample_S16L (PcmSample *sample, int16_t amplitude) {
   return makePcmSample_16L(sample, amplitude);
 }
 
-static size_t
+static PcmSampleSize
 makePcmSample_U16L (PcmSample *sample, int16_t amplitude) {
   UNSIGNED_TO_SIGNED;
   return makePcmSample_16L(sample, amplitude);
 }
 #endif /* WORDS_BIGENDIAN */
 
-static size_t
+static PcmSampleSize
 makePcmSample_ULAW (PcmSample *sample, int16_t amplitude) {
   int negative = amplitude < 0;
   int exponent = 0X7;
@@ -133,7 +133,7 @@ makePcmSample_ULAW (PcmSample *sample, int16_t amplitude) {
   return 1;
 }
 
-static size_t
+static PcmSampleSize
 makePcmSample_ALAW (PcmSample *sample, int16_t amplitude) {
   int negative = amplitude < 0;
   int exponent = 0X7;
@@ -154,7 +154,7 @@ makePcmSample_ALAW (PcmSample *sample, int16_t amplitude) {
   return 1;
 }
 
-static size_t
+static PcmSampleSize
 makePcmSample_UNKNOWN (PcmSample *sample, int16_t amplitude) {
   return 0;
 }

@@ -37,7 +37,7 @@ struct NoteDeviceStruct {
   PcmAmplitudeFormat amplitudeFormat;
 
   unsigned char *blockAddress;
-  size_t blockUsed;
+  int blockUsed;
 
   PcmSampleMaker makeSample;
 };
@@ -52,7 +52,7 @@ pcmFlushBytes (NoteDevice *device) {
 static int
 pcmWriteSample (NoteDevice *device, int16_t amplitude) {
   PcmSample *sample = (PcmSample *)&device->blockAddress[device->blockUsed];
-  size_t size = device->makeSample(sample, amplitude);
+  PcmSampleSize size = device->makeSample(sample, amplitude);
   device->blockUsed += size;
 
   for (int channel=1; channel<device->channelCount; channel+=1) {
@@ -96,7 +96,7 @@ pcmConstruct (int errorLevel) {
       device->makeSample = getPcmSampleMaker(device->amplitudeFormat);
 
       PcmSample sample;
-      size_t sampleSize = device->makeSample(&sample, 0);
+      PcmSampleSize sampleSize = device->makeSample(&sample, 0);
       sampleSize *= device->channelCount;
 
       if (sampleSize && device->blockSize &&
@@ -111,7 +111,7 @@ pcmConstruct (int errorLevel) {
       } else {
         logMessage(LOG_ERR,
                    "PCM block size not multiple of sample size:"
-                   " BlkSz:%d" " SmpSz:%"PRIsize,
+                   " BlkSz:%d" " SmpSz:%u",
                    device->blockSize, sampleSize);
       }
 
@@ -138,9 +138,9 @@ pcmDestruct (NoteDevice *device) {
 
 static int
 pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
-  long int sampleCount = device->sampleRate * duration / 1000;
+  int32_t sampleCount = device->sampleRate * duration / 1000;
 
-  logMessage(LOG_DEBUG, "tone: msec=%u smct=%ld note=%u",
+  logMessage(LOG_DEBUG, "tone: MSecs:%u SmpCt:%"PRId32 " Note:%u",
              duration, sampleCount, note);
 
   if (note) {
