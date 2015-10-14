@@ -24,16 +24,21 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef enum {
-  PCM_FMT_U8,
   PCM_FMT_S8,
-  PCM_FMT_U16B,
+  PCM_FMT_U8,
+
   PCM_FMT_S16B,
-  PCM_FMT_U16L,
+  PCM_FMT_U16B,
+
   PCM_FMT_S16L,
-  PCM_FMT_U16N,
+  PCM_FMT_U16L,
+
   PCM_FMT_S16N,
+  PCM_FMT_U16N,
+
   PCM_FMT_ULAW,
   PCM_FMT_ALAW,
+
   PCM_FMT_UNKNOWN
 } PcmAmplitudeFormat;
 
@@ -46,6 +51,9 @@ typedef union {
 extern size_t makePcmSample (
   PcmSample *sample, int16_t amplitude, PcmAmplitudeFormat format
 );
+
+typedef size_t (*PcmSampleMaker) (PcmSample *sample, int16_t amplitude);
+extern PcmSampleMaker getPcmSampleMaker (PcmAmplitudeFormat format);
 
 typedef struct PcmDeviceStruct PcmDevice;
 

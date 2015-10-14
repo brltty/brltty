@@ -30,12 +30,16 @@ char *opt_pcmDevice;
 
 struct NoteDeviceStruct {
   PcmDevice *pcm;
+
   int blockSize;
   int sampleRate;
   int channelCount;
   PcmAmplitudeFormat amplitudeFormat;
+
   unsigned char *blockAddress;
   size_t blockUsed;
+
+  PcmSampleMaker makeSample;
 };
 
 static int
@@ -48,7 +52,7 @@ pcmFlushBytes (NoteDevice *device) {
 static int
 pcmWriteSample (NoteDevice *device, int16_t amplitude) {
   PcmSample *sample = (PcmSample *)&device->blockAddress[device->blockUsed];
-  size_t size = makePcmSample(sample, amplitude, device->amplitudeFormat);
+  size_t size = device->makeSample(sample, amplitude);
   device->blockUsed += size;
 
   for (int channel=1; channel<device->channelCount; channel+=1) {
@@ -80,15 +84,19 @@ pcmConstruct (int errorLevel) {
   NoteDevice *device;
 
   if ((device = malloc(sizeof(*device)))) {
+    memset(device, 0, sizeof(*device));
+
     if ((device->pcm = openPcmDevice(errorLevel, opt_pcmDevice))) {
       device->blockSize = getPcmBlockSize(device->pcm);
       device->sampleRate = getPcmSampleRate(device->pcm);
       device->channelCount = getPcmChannelCount(device->pcm);
       device->amplitudeFormat = getPcmAmplitudeFormat(device->pcm);
+
       device->blockUsed = 0;
+      device->makeSample = getPcmSampleMaker(device->amplitudeFormat);
 
       PcmSample sample;
-      size_t sampleSize = makePcmSample(&sample, 0, device->amplitudeFormat);
+      size_t sampleSize = device->makeSample(&sample, 0);
       sampleSize *= device->channelCount;
 
       if (sampleSize && device->blockSize &&
