@@ -102,7 +102,7 @@ pcmConstruct (int errorLevel) {
       if (sampleSize && device->blockSize &&
           !(device->blockSize % sampleSize)) {
         if ((device->blockAddress = malloc(device->blockSize))) {
-          logMessage(LOG_DEBUG, "PCM enabled: blk=%d rate=%d chan=%d fmt=%d",
+          logMessage(LOG_DEBUG, "PCM enabled: BlkSz:%d Rate:%d ChnCt:%d Fmt:%d",
                      device->blockSize, device->sampleRate, device->channelCount, device->amplitudeFormat);
           return device;
         } else {
