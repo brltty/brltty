@@ -46,31 +46,21 @@ pcmFlushBytes (NoteDevice *device) {
 }
 
 static int
-pcmWriteBytes (NoteDevice *device, const uint8_t *buffer, size_t length) {
-  while (length > 0) {
-    size_t count = device->blockSize - device->blockUsed;
-    if (length < count) count = length;
+pcmWriteSample (NoteDevice *device, int16_t amplitude) {
+  PcmSample *sample = (PcmSample *)&device->blockAddress[device->blockUsed];
+  size_t size = makePcmSample(sample, amplitude, device->amplitudeFormat);
+  device->blockUsed += size;
 
-    length -= count;
-    while (count--) device->blockAddress[device->blockUsed++] = *buffer++;
-
-    if (device->blockUsed == device->blockSize) {
-      if (!pcmFlushBytes(device)) {
-        return 0;
-      }
+  for (int channel=1; channel<device->channelCount; channel+=1) {
+    for (int byte=0; byte<size; byte+=1) {
+      device->blockAddress[device->blockUsed++] = sample->bytes[byte];
     }
   }
 
-  return 1;
-}
-
-static int
-pcmWriteSample (NoteDevice *device, int16_t amplitude) {
-  PcmSample sample;
-  size_t size = makePcmSample(&sample, amplitude, device->amplitudeFormat);
-
-  for (int channel=0; channel<device->channelCount; channel+=1) {
-    if (!pcmWriteBytes(device, sample.bytes, size)) return 0;
+  if (device->blockUsed == device->blockSize) {
+    if (!pcmFlushBytes(device)) {
+      return 0;
+    }
   }
 
   return 1;
@@ -97,12 +87,24 @@ pcmConstruct (int errorLevel) {
       device->amplitudeFormat = getPcmAmplitudeFormat(device->pcm);
       device->blockUsed = 0;
 
-      if ((device->blockAddress = malloc(device->blockSize))) {
-        logMessage(LOG_DEBUG, "PCM enabled: blk=%d rate=%d chan=%d fmt=%d",
-                   device->blockSize, device->sampleRate, device->channelCount, device->amplitudeFormat);
-        return device;
+      PcmSample sample;
+      size_t sampleSize = makePcmSample(&sample, 0, device->amplitudeFormat);
+      sampleSize *= device->channelCount;
+
+      if (sampleSize && device->blockSize &&
+          !(device->blockSize % sampleSize)) {
+        if ((device->blockAddress = malloc(device->blockSize))) {
+          logMessage(LOG_DEBUG, "PCM enabled: blk=%d rate=%d chan=%d fmt=%d",
+                     device->blockSize, device->sampleRate, device->channelCount, device->amplitudeFormat);
+          return device;
+        } else {
+          logMallocError();
+        }
       } else {
-        logMallocError();
+        logMessage(LOG_ERR,
+                   "PCM block size not multiple of sample size:"
+                   " BlkSz:%d" " SmpSz:%"PRIsize " ChnCt:%d",
+                   device->blockSize, sampleSize, device->channelCount);
       }
 
       closePcmDevice(device->pcm);
