@@ -152,6 +152,29 @@ getPcmSampleMaker (PcmAmplitudeFormat format) {
     PCM_SAMPLE_MAKER_ENTRY(UNKNOWN)
   };
 
+  switch (format) {
+#ifdef WORDS_BIGENDIAN
+    case PCM_FMT_S16B:
+      format = PCM_FMT_S16N;
+      break;
+
+    case PCM_FMT_U16B:
+      format = PCM_FMT_U16N;
+      break;
+#else /* WORDS_BIGENDIAN */
+    case PCM_FMT_S16L:
+      format = PCM_FMT_S16N;
+      break;
+
+    case PCM_FMT_U16L:
+      format = PCM_FMT_U16N;
+      break;
+#endif /* WORDS_BIGENDIAN */
+
+    default:
+      break;
+  }
+
   if (format < ARRAY_COUNT(pcmSampleMakers)) {
     PcmSampleMaker sampleMaker = pcmSampleMakers[format];
     if (sampleMaker) return sampleMaker;
