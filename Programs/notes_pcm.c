@@ -103,8 +103,8 @@ pcmConstruct (int errorLevel) {
       } else {
         logMessage(LOG_ERR,
                    "PCM block size not multiple of sample size:"
-                   " BlkSz:%d" " SmpSz:%"PRIsize " ChnCt:%d",
-                   device->blockSize, sampleSize, device->channelCount);
+                   " BlkSz:%d" " SmpSz:%"PRIsize,
+                   device->blockSize, sampleSize);
       }
 
       closePcmDevice(device->pcm);
