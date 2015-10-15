@@ -24,20 +24,20 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef enum {
-  PCM_FMT_S8,
-  PCM_FMT_U8,
+  PCM_FMT_S8,   // signed, 8 bits, linear
+  PCM_FMT_U8,   // unsigned, 8 bits, linear
 
-  PCM_FMT_S16N,
-  PCM_FMT_U16N,
+  PCM_FMT_S16N, // signed, 16 bits, linear, native endian
+  PCM_FMT_U16N, // unsigned, 16 bits, linear, native endian
 
-  PCM_FMT_S16B,
-  PCM_FMT_U16B,
+  PCM_FMT_S16B, // signed, 16 bits, linear, big endian
+  PCM_FMT_U16B, // unsigned, 16 bits, linear, big endian
 
-  PCM_FMT_S16L,
-  PCM_FMT_U16L,
+  PCM_FMT_S16L, // signed, 16 bits, linear, little endian
+  PCM_FMT_U16L, // unsigned, 16 bits, linear, little endian
 
-  PCM_FMT_ULAW,
-  PCM_FMT_ALAW,
+  PCM_FMT_ULAW, // signed, 8 bits, logarithmic
+  PCM_FMT_ALAW, // signed, 8 bits, logarithmic
 
   PCM_FMT_UNKNOWN
 } PcmAmplitudeFormat;
