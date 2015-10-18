@@ -568,19 +568,20 @@ processBootParameters (
   const char *value;
   char *allocated = NULL;
 
-  if (!(value = allocated = getBootParameters(parameter)))
-    if (!(value = getenv(parameter)))
+  if (!(value = allocated = getBootParameters(parameter))) {
+    if (!(value = getenv(parameter))) {
       return;
+    }
+  }
 
   {
-    int count = 0;
-    char **parameters = splitString(value, ',', &count);
-    int optionIndex;
+    int parameterCount = 0;
+    char **parameters = splitString(value, ',', &parameterCount);
 
-    for (optionIndex=0; optionIndex<info->optionCount; ++optionIndex) {
+    for (unsigned int optionIndex=0; optionIndex<info->optionCount; optionIndex+=1) {
       const OptionEntry *option = &info->optionTable[optionIndex];
 
-      if ((option->bootParameter) && (option->bootParameter <= count)) {
+      if ((option->bootParameter) && (option->bootParameter <= parameterCount)) {
         char *parameter = parameters[option->bootParameter-1];
 
         if (*parameter) {
@@ -987,21 +988,23 @@ processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char **
   beginProgram(*argumentCount, *argumentVector);
   processCommandLine(&info, argumentCount, argumentVector, descriptor->argumentsSummary);
 
+  if (descriptor->doBootParameters && *descriptor->doBootParameters) {
+    processBootParameters(&info, descriptor->applicationName);
+  }
+
+  if (descriptor->doEnvironmentVariables && *descriptor->doEnvironmentVariables) {
+    processEnvironmentVariables(&info, descriptor->applicationName);
+  }
+
+  processInternalSettings(&info, 0);
   {
     int configurationFileSpecified = descriptor->configurationFile && *descriptor->configurationFile;
 
-    if (descriptor->doBootParameters && *descriptor->doBootParameters)
-      processBootParameters(&info, descriptor->applicationName);
-
-    if (descriptor->doEnvironmentVariables && *descriptor->doEnvironmentVariables)
-      processEnvironmentVariables(&info, descriptor->applicationName);
-
-    processInternalSettings(&info, 0);
-    if (descriptor->configurationFile && *descriptor->configurationFile) {
+    if (configurationFileSpecified) {
       processConfigurationFile(&info, *descriptor->configurationFile, !configurationFileSpecified);
     }
-    processInternalSettings(&info, 1);
   }
+  processInternalSettings(&info, 1);
 
   if (info.exitImmediately) return PROG_EXIT_FORCE;
   if (info.syntaxError) return PROG_EXIT_SYNTAX;
