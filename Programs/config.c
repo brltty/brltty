@@ -385,6 +385,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'B',
     .word = "braille-parameters",
+    .bootParameter = 4,
     .flags = OPT_Extend | OPT_Config | OPT_Environ,
     .argument = strtext("name=value,..."),
     .setting.string = &opt_brailleParameters,
