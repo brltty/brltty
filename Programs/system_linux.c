@@ -867,7 +867,7 @@ newUinputObject (const char *name) {
     }
 
     if (device) {
-      if ((uinput->fileDescriptor = openCharacterDevice(device, O_WRONLY, 10, 223)) != -1) {
+      if ((uinput->fileDescriptor = openCharacterDevice(device, O_RDWR, 10, 223)) != -1) {
         struct uinput_user_dev description;
         
         memset(&description, 0, sizeof(description));
@@ -922,6 +922,11 @@ destroyUinputObject (UinputObject *uinput) {
   close(uinput->fileDescriptor);
   free(uinput);
 #endif /* HAVE_LINUX_UINPUT_H */
+}
+
+int
+getUinputFileDescriptor (UinputObject *uinput) {
+  return uinput->fileDescriptor;
 }
 
 int
@@ -1064,6 +1069,16 @@ enableKeyboardKeys (UinputObject *uinput) {
   return 1;
 }
 #endif /* HAVE_LINUX_INPUT_H */
+
+int
+enableUinputSound (UinputObject *uinput, int sound) {
+#ifdef HAVE_LINUX_UINPUT_H
+  if (ioctl(uinput->fileDescriptor, UI_SET_SNDBIT, sound) != -1) return 1;
+  logSystemError("ioctl[UI_SET_SNDBIT]");
+#endif /* HAVE_LINUX_UINPUT_H */
+
+  return 0;
+}
 
 UinputObject *
 newUinputKeyboard (const char *name) {

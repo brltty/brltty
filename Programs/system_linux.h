@@ -30,6 +30,8 @@ extern int openCharacterDevice (const char *name, int flags, int major, int mino
 typedef struct UinputObjectStruct UinputObject;
 extern UinputObject *newUinputObject (const char *name);
 extern void destroyUinputObject (UinputObject *uinput);
+
+extern int getUinputFileDescriptor (UinputObject *uinput);
 extern int createUinputDevice (UinputObject *uinput);
 
 extern int enableUinputEventType (UinputObject *uinput, int type);
@@ -41,6 +43,8 @@ extern int releasePressedKeys (UinputObject *uinput);
 
 extern int writeRepeatDelay (UinputObject *uinput, int delay);
 extern int writeRepeatPeriod (UinputObject *uinput, int period);
+
+extern int enableUinputSound (UinputObject *uinput, int sound);
 
 extern UinputObject *newUinputKeyboard (const char *name);
 

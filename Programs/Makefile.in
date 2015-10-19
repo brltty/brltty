@@ -786,13 +786,26 @@ scrtest.$O:
 
 ###############################################################################
 
-TUNETEST_OBJECTS = tunetest.$O $(PROGRAM_OBJECTS) $(PREFS_OBJECTS) $(TUNE_OBJECTS) io_misc.$O
+TUNETEST_OBJECTS = tunetest.$O tune_utils.$O $(PROGRAM_OBJECTS) $(PREFS_OBJECTS) $(TUNE_OBJECTS) io_misc.$O
 
 tunetest$X: $(TUNETEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(TUNETEST_OBJECTS) $(PCM_LIBS) $(MIDI_LIBS) $(LDLIBS)
 
 tunetest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/tunetest.c
+
+tune_utils.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/tune_utils.c
+
+###############################################################################
+
+BEEP2PCM_OBJECTS = beep2pcm.$O tune_utils.$O $(PROGRAM_OBJECTS) $(PREFS_OBJECTS) $(TUNE_OBJECTS) io_misc.$O
+
+beep2pcm$X: $(BEEP2PCM_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(BEEP2PCM_OBJECTS) $(PCM_LIBS) $(MIDI_LIBS) $(LDLIBS)
+
+beep2pcm.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/beep2pcm.c
 
 ###############################################################################
 

@@ -25,13 +25,13 @@
 #include <string.h>
 #include <strings.h>
 
+#include "log.h"
 #include "options.h"
 #include "tune.h"
+#include "tune_utils.h"
 #include "notes.h"
 #include "midi.h"
-#include "log.h"
 #include "parse.h"
-#include "defaults.h"
 #include "prefs.h"
 
 static char *opt_tuneDevice;
@@ -83,8 +83,6 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 #endif /* HAVE_MIDI_SUPPORT */
 END_OPTION_TABLE
-
-static const char *deviceNames[] = {"beeper", "pcm", "midi", "fm", NULL};
 
 #ifdef HAVE_MIDI_SUPPORT
 static int
@@ -220,7 +218,7 @@ main (int argc, char *argv[]) {
   if (opt_tuneDevice && *opt_tuneDevice) {
     unsigned int device;
 
-    if (!validateChoice(&device, opt_tuneDevice, deviceNames)) {
+    if (!validateChoice(&device, opt_tuneDevice, tuneDeviceNames)) {
       logMessage(LOG_ERR, "%s: %s", "invalid tune device", opt_tuneDevice);
       return PROG_EXIT_SYNTAX;
     }
@@ -241,33 +239,7 @@ main (int argc, char *argv[]) {
   }
 #endif /* HAVE_MIDI_SUPPORT */
 
-  if (opt_outputVolume && *opt_outputVolume) {
-    static const int minimum = 0;
-    static const int maximum = 100;
-    int volume;
-
-    if (!validateInteger(&volume, opt_outputVolume, &minimum, &maximum)) {
-      logMessage(LOG_ERR, "%s: %s", "invalid volume percentage", opt_outputVolume);
-      return PROG_EXIT_SYNTAX;
-    }
-
-    switch (prefs.tuneDevice) {
-      case tdPcm:
-        prefs.pcmVolume = volume;
-        break;
-
-      case tdMidi:
-        prefs.midiVolume = volume;
-        break;
-
-      case tdFm:
-        prefs.fmVolume = volume;
-        break;
-
-      default:
-        break;
-    }
-  }
+  if (!setOutputVolume(opt_outputVolume)) return PROG_EXIT_SYNTAX;
 
   if (!argc) {
     logMessage(LOG_ERR, "missing tune");
@@ -304,7 +276,7 @@ main (int argc, char *argv[]) {
     }
 
     if (!tuneDevice(prefs.tuneDevice)) {
-      logMessage(LOG_ERR, "unsupported tune device: %s", deviceNames[prefs.tuneDevice]);
+      logMessage(LOG_ERR, "unsupported tune device: %s", tuneDeviceNames[prefs.tuneDevice]);
       return PROG_EXIT_SEMANTIC;
     }
 
