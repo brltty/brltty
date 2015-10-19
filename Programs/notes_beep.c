@@ -68,8 +68,7 @@ beepFrequency (NoteDevice *device, unsigned int duration, NOTE_FREQUENCY_TYPE fr
 
 static int
 beepNote (NoteDevice *device, unsigned int duration, unsigned char note) {
-  return beepFrequency(device, duration,
-                       (note? GET_NOTE_FREQUENCY(note): 0));
+  return beepFrequency(device, duration, GET_NOTE_FREQUENCY(note));
 }
 
 static int

@@ -133,7 +133,7 @@ parseTone (const char *operand, int *note, int *duration) {
         noteValue += (octave - 4) * NOTES_PER_OCTAVE;
       }
     } else {
-      const int minimum = getLowestNote();
+      static const int minimum = 0;
       const int maximum = getHighestNote();
 
       if (!validateInteger(&noteValue, c, &minimum, &maximum)) {

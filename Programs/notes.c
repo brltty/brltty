@@ -23,7 +23,7 @@
 #define NOTE_FREQUENCY_FACTOR 1000
 
 static const uint32_t noteFrequencies[] = {
-  /*   0 -5C  */     8176,
+  /*   0 rest */        0,
   /*   1 -5C# */     8662,
   /*   2 -5D  */     9177,
   /*   3 -5D# */     9723,
@@ -165,15 +165,9 @@ getHighestNote (void) {
 
 static inline uint32_t
 getNoteFrequency (unsigned char note) {
-  unsigned char lowestNote = getLowestNote();
+  unsigned char highestNote = getHighestNote();
 
-  if (note < lowestNote) {
-    note = lowestNote;
-  } else {
-    unsigned char highestNote = getHighestNote();
-    if (note > highestNote) note = highestNote;
-  }
-
+  if (note > highestNote) note = highestNote;
   return noteFrequencies[note];
 }
 
@@ -191,6 +185,8 @@ getRealNoteFrequency (unsigned char note) {
 
 unsigned char
 getNearestNote (NOTE_FREQUENCY_TYPE frequency) {
+  if (!frequency) return 0;
+
   unsigned char lowestNote = getLowestNote();
   if (frequency <= GET_NOTE_FREQUENCY(lowestNote)) return lowestNote;
 

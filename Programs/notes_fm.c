@@ -77,8 +77,7 @@ fmFrequency (NoteDevice *device, unsigned int duration, NOTE_FREQUENCY_TYPE freq
 
 static int
 fmNote (NoteDevice *device, unsigned int duration, unsigned char note) {
-  return fmFrequency(device, duration,
-                     (note? GET_NOTE_FREQUENCY(note): 0));
+  return fmFrequency(device, duration, GET_NOTE_FREQUENCY(note));
 }
 
 static int

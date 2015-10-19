@@ -249,8 +249,7 @@ pcmFrequency (NoteDevice *device, unsigned int duration, NOTE_FREQUENCY_TYPE fre
 
 static int
 pcmNote (NoteDevice *device, unsigned int duration, unsigned char note) {
-  return pcmFrequency(device, duration,
-                      (note? GET_NOTE_FREQUENCY(note): 0));
+  return pcmFrequency(device, duration, GET_NOTE_FREQUENCY(note));
 }
 
 static int

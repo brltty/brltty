@@ -81,8 +81,7 @@ midiNote (NoteDevice *device, unsigned int duration, unsigned char note) {
 
 static int
 midiFrequency (NoteDevice *device, unsigned int duration, NOTE_FREQUENCY_TYPE frequency) {
-  return midiNote(device, duration,
-                  (frequency? getNearestNote(frequency): 0));
+  return midiNote(device, duration, getNearestNote(frequency));
 }
 
 static int
