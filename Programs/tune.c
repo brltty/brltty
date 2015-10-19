@@ -75,11 +75,11 @@ openTuneDevice (void) {
 }
 
 typedef enum {
+  TUNE_REQ_SET_DEVICE,
   TUNE_REQ_PLAY_NOTES,
   TUNE_REQ_PLAY_FREQUENCIES,
   TUNE_REQ_WAIT,
-  TUNE_REQ_SYNC,
-  TUNE_REQ_SET_DEVICE
+  TUNE_REQ_SYNC
 } TuneRequestType;
 
 typedef unsigned char TuneSyncMonitor;
@@ -88,6 +88,10 @@ typedef struct {
   TuneRequestType type;
 
   union {
+    struct {
+      const NoteMethods *methods;
+    } setDevice;
+
     struct {
       const NoteElement *tune;
     } playNotes;
@@ -103,12 +107,16 @@ typedef struct {
     struct {
       TuneSyncMonitor *monitor;
     } sync;
-
-    struct {
-      const NoteMethods *methods;
-    } setDevice;
   } parameters;
 } TuneRequest;
+
+static void
+handleTuneRequest_setDevice (const NoteMethods *methods) {
+  if (methods != noteMethods) {
+    closeTuneDevice();
+    noteMethods = methods;
+  }
+}
 
 static void
 handleTuneRequest_playNotes (const NoteElement *tune) {
@@ -143,17 +151,13 @@ handleTuneRequest_sync (TuneSyncMonitor *monitor) {
 }
 
 static void
-handleTuneRequest_setDevice (const NoteMethods *methods) {
-  if (methods != noteMethods) {
-    closeTuneDevice();
-    noteMethods = methods;
-  }
-}
-
-static void
 handleTuneRequest (TuneRequest *req) {
   if (req) {
     switch (req->type) {
+      case TUNE_REQ_SET_DEVICE:
+        handleTuneRequest_setDevice(req->parameters.setDevice.methods);
+        break;
+
       case TUNE_REQ_PLAY_NOTES:
         handleTuneRequest_playNotes(req->parameters.playNotes.tune);
         break;
@@ -168,10 +172,6 @@ handleTuneRequest (TuneRequest *req) {
 
       case TUNE_REQ_SYNC:
         handleTuneRequest_sync(req->parameters.sync.monitor);
-        break;
-
-      case TUNE_REQ_SET_DEVICE:
-        handleTuneRequest_setDevice(req->parameters.setDevice.methods);
         break;
     }
 
@@ -218,7 +218,7 @@ ASYNC_CONDITION_TESTER(testTuneThreadStopped) {
 }
 
 typedef enum {
-  TUNE_MSG_STATE
+  TUNE_MSG_SET_STATE
 } TuneMessageType;
 
 typedef struct {
@@ -227,15 +227,15 @@ typedef struct {
   union {
     struct {
       TuneThreadState state;
-    } state;
+    } setState;
   } parameters;
 } TuneMessage;
 
 static void
 handleTuneMessage (TuneMessage *msg) {
   switch (msg->type) {
-    case TUNE_MSG_STATE:
-      setTuneThreadState(msg->parameters.state.state);
+    case TUNE_MSG_SET_STATE:
+      setTuneThreadState(msg->parameters.setState.state);
       break;
   }
 
@@ -272,8 +272,8 @@ static void
 sendTuneThreadState (TuneThreadState state) {
   TuneMessage *msg;
 
-  if ((msg = newTuneMessage(TUNE_MSG_STATE))) {
-    msg->parameters.state.state = state;
+  if ((msg = newTuneMessage(TUNE_MSG_SET_STATE))) {
+    msg->parameters.setState.state = state;
     if (!sendTuneMessage(msg)) free(msg);
   }
 }
@@ -395,6 +395,51 @@ newTuneRequest (TuneRequestType type) {
   return NULL;
 }
 
+int
+tuneSetDevice (TuneDevice device) {
+  const NoteMethods *methods;
+
+  switch (device) {
+    default:
+      return 0;
+
+#ifdef HAVE_BEEP_SUPPORT
+    case tdBeeper:
+      methods = &beepNoteMethods;
+      break;
+#endif /* HAVE_BEEP_SUPPORT */
+
+#ifdef HAVE_PCM_SUPPORT
+    case tdPcm:
+      methods = &pcmNoteMethods;
+      break;
+#endif /* HAVE_PCM_SUPPORT */
+
+#ifdef HAVE_MIDI_SUPPORT
+    case tdMidi:
+      methods = &midiNoteMethods;
+      break;
+#endif /* HAVE_MIDI_SUPPORT */
+
+#ifdef HAVE_FM_SUPPORT
+    case tdFm:
+      methods = &fmNoteMethods;
+      break;
+#endif /* HAVE_FM_SUPPORT */
+  }
+
+  {
+    TuneRequest *req;
+
+    if ((req = newTuneRequest(TUNE_REQ_SET_DEVICE))) {
+      req->parameters.setDevice.methods = methods;
+      if (!sendTuneRequest(req)) free(req);
+    }
+  }
+
+  return 1;
+}
+
 void
 tunePlayNotes (const NoteElement *tune) {
   TuneRequest *req;
@@ -445,51 +490,6 @@ tuneSync (void) {
       free(req);
     }
   }
-}
-
-int
-tuneSetDevice (TuneDevice device) {
-  const NoteMethods *methods;
-
-  switch (device) {
-    default:
-      return 0;
-
-#ifdef HAVE_BEEP_SUPPORT
-    case tdBeeper:
-      methods = &beepNoteMethods;
-      break;
-#endif /* HAVE_BEEP_SUPPORT */
-
-#ifdef HAVE_PCM_SUPPORT
-    case tdPcm:
-      methods = &pcmNoteMethods;
-      break;
-#endif /* HAVE_PCM_SUPPORT */
-
-#ifdef HAVE_MIDI_SUPPORT
-    case tdMidi:
-      methods = &midiNoteMethods;
-      break;
-#endif /* HAVE_MIDI_SUPPORT */
-
-#ifdef HAVE_FM_SUPPORT
-    case tdFm:
-      methods = &fmNoteMethods;
-      break;
-#endif /* HAVE_FM_SUPPORT */
-  }
-
-  {
-    TuneRequest *req;
-
-    if ((req = newTuneRequest(TUNE_REQ_SET_DEVICE))) {
-      req->parameters.setDevice.methods = methods;
-      if (!sendTuneRequest(req)) free(req);
-    }
-  }
-
-  return 1;
 }
 
 void
