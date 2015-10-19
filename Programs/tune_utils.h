@@ -19,13 +19,18 @@
 #ifndef BRLTTY_INCLUDED_TUNE_UTILS
 #define BRLTTY_INCLUDED_TUNE_UTILS
 
+#include "tune_types.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern const char *tuneDeviceNames[];
+extern const char *getTuneDeviceName (TuneDevice device);
+extern int setTuneDevice (const char *setting);
+extern int selectTuneDevice (void);
 
-extern int setOutputVolume (const char *setting);
+extern int setTuneVolume (const char *setting);
+extern int setTuneInstrument (const char *setting);
 
 #ifdef __cplusplus
 }

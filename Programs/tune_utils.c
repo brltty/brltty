@@ -18,13 +18,17 @@
 
 #include "prologue.h"
 
+#include <string.h>
+
 #include "log.h"
+#include "tune.h"
 #include "tune_utils.h"
 #include "tune_types.h"
+#include "midi.h"
 #include "parse.h"
 #include "prefs.h"
 
-const char *tuneDeviceNames[] = {
+static const char *tuneDeviceNames[] = {
   "beeper",
   "pcm",
   "midi",
@@ -32,8 +36,41 @@ const char *tuneDeviceNames[] = {
   NULL
 };
 
+const char *
+getTuneDeviceName (TuneDevice device) {
+  return tuneDeviceNames[device];
+}
+
 int
-setOutputVolume (const char *setting) {
+selectTuneDevice (void) {
+  unsigned char device = prefs.tuneDevice;
+
+  if (!tuneSetDevice(device)) {
+    logMessage(LOG_ERR, "unsupported tune device: %s", getTuneDeviceName(device));
+    return 0;
+  }
+
+  return 1;
+}
+
+int
+setTuneDevice (const char *setting) {
+  if (setting && *setting) {
+    unsigned int device;
+
+    if (!validateChoice(&device, setting, tuneDeviceNames)) {
+      logMessage(LOG_ERR, "%s: %s", "invalid tune device", setting);
+      return 0;
+    }
+
+    prefs.tuneDevice = device;
+  }
+
+  return 1;
+}
+
+int
+setTuneVolume (const char *setting) {
   if (setting && *setting) {
     static const int minimum = 0;
     static const int maximum = 100;
@@ -64,3 +101,57 @@ setOutputVolume (const char *setting) {
 
   return 1;
 }
+
+#ifdef HAVE_MIDI_SUPPORT
+static int
+validateMidiInstrument (unsigned char *value, const char *string) {
+  size_t stringLength = strlen(string);
+  unsigned char instrument;
+  for (instrument=0; instrument<midiInstrumentCount; ++instrument) {
+    const char *component = midiInstrumentTable[instrument];
+    size_t componentLeft = strlen(component);
+    const char *word = string;
+    size_t wordLeft = stringLength;
+    {
+      const char *delimiter = memchr(component, '(', componentLeft);
+      if (delimiter) componentLeft = delimiter - component;
+    }
+    while (1) {
+      while (*component == ' ') component++, componentLeft--;
+      if ((componentLeft == 0) != (wordLeft == 0)) break; 
+      if (!componentLeft) {
+        *value = instrument;
+        return 1;
+      }
+      {
+        size_t wordLength = wordLeft;
+        size_t componentLength = componentLeft;
+        const char *delimiter;
+        if ((delimiter = memchr(word, '-', wordLeft))) wordLength = delimiter - word;
+        if ((delimiter = memchr(component, ' ', componentLeft))) componentLength = delimiter - component;
+        if (strncasecmp(word, component, wordLength) != 0) break;
+        word += wordLength; wordLeft -= wordLength;
+        if (*word) word++, wordLeft--;
+        component += componentLength; componentLeft -= componentLength;
+      }
+    }
+  }
+  return 0;
+}
+
+int
+setTuneInstrument (const char *setting) {
+  if (setting && *setting) {
+    unsigned char instrument;
+
+    if (!validateMidiInstrument(&instrument, setting)) {
+      logMessage(LOG_ERR, "%s: %s", "invalid musical instrument", setting);
+      return 0;
+    }
+
+    prefs.midiInstrument = instrument;
+  }
+
+  return 1;
+}
+#endif /* HAVE_MIDI_SUPPORT */

@@ -30,7 +30,6 @@
 #include "tune.h"
 #include "tune_utils.h"
 #include "notes.h"
-#include "midi.h"
 #include "parse.h"
 #include "prefs.h"
 
@@ -83,44 +82,6 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 #endif /* HAVE_MIDI_SUPPORT */
 END_OPTION_TABLE
-
-#ifdef HAVE_MIDI_SUPPORT
-static int
-validateInstrument (unsigned char *value, const char *string) {
-  size_t stringLength = strlen(string);
-  unsigned char instrument;
-  for (instrument=0; instrument<midiInstrumentCount; ++instrument) {
-    const char *component = midiInstrumentTable[instrument];
-    size_t componentLeft = strlen(component);
-    const char *word = string;
-    size_t wordLeft = stringLength;
-    {
-      const char *delimiter = memchr(component, '(', componentLeft);
-      if (delimiter) componentLeft = delimiter - component;
-    }
-    while (1) {
-      while (*component == ' ') component++, componentLeft--;
-      if ((componentLeft == 0) != (wordLeft == 0)) break; 
-      if (!componentLeft) {
-        *value = instrument;
-        return 1;
-      }
-      {
-        size_t wordLength = wordLeft;
-        size_t componentLength = componentLeft;
-        const char *delimiter;
-        if ((delimiter = memchr(word, '-', wordLeft))) wordLength = delimiter - word;
-        if ((delimiter = memchr(component, ' ', componentLeft))) componentLength = delimiter - component;
-        if (strncasecmp(word, component, wordLength) != 0) break;
-        word += wordLength; wordLeft -= wordLength;
-        if (*word) word++, wordLeft--;
-        component += componentLength; componentLeft -= componentLength;
-      }
-    }
-  }
-  return 0;
-}
-#endif /* HAVE_MIDI_SUPPORT */
 
 static int
 parseTone (const char *operand, int *note, int *duration) {
@@ -214,32 +175,12 @@ main (int argc, char *argv[]) {
   }
 
   resetPreferences();
-
-  if (opt_tuneDevice && *opt_tuneDevice) {
-    unsigned int device;
-
-    if (!validateChoice(&device, opt_tuneDevice, tuneDeviceNames)) {
-      logMessage(LOG_ERR, "%s: %s", "invalid tune device", opt_tuneDevice);
-      return PROG_EXIT_SYNTAX;
-    }
-
-    prefs.tuneDevice = device;
-  }
+  if (!setTuneDevice(opt_tuneDevice)) return PROG_EXIT_SYNTAX;
+  if (!setTuneVolume(opt_outputVolume)) return PROG_EXIT_SYNTAX;
 
 #ifdef HAVE_MIDI_SUPPORT
-  if (opt_midiInstrument && *opt_midiInstrument) {
-    unsigned char instrument;
-
-    if (!validateInstrument(&instrument, opt_midiInstrument)) {
-      logMessage(LOG_ERR, "%s: %s", "invalid musical instrument", opt_midiInstrument);
-      return PROG_EXIT_SYNTAX;
-    }
-
-    prefs.midiInstrument = instrument;
-  }
+  if (!setTuneInstrument(opt_midiInstrument)) return PROG_EXIT_SYNTAX;
 #endif /* HAVE_MIDI_SUPPORT */
-
-  if (!setOutputVolume(opt_outputVolume)) return PROG_EXIT_SYNTAX;
 
   if (!argc) {
     logMessage(LOG_ERR, "missing tune");
@@ -275,11 +216,7 @@ main (int argc, char *argv[]) {
       }
     }
 
-    if (!tuneSetDevice(prefs.tuneDevice)) {
-      logMessage(LOG_ERR, "unsupported tune device: %s", tuneDeviceNames[prefs.tuneDevice]);
-      return PROG_EXIT_SEMANTIC;
-    }
-
+    if (!selectTuneDevice()) return PROG_EXIT_SEMANTIC;
     tunePlayNotes(elements);
     tuneSynchronize();
   }
