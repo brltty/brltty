@@ -42,19 +42,7 @@ getTuneDeviceName (TuneDevice device) {
 }
 
 int
-selectTuneDevice (void) {
-  unsigned char device = prefs.tuneDevice;
-
-  if (!tuneSetDevice(device)) {
-    logMessage(LOG_ERR, "unsupported tune device: %s", getTuneDeviceName(device));
-    return 0;
-  }
-
-  return 1;
-}
-
-int
-setTuneDevice (const char *setting) {
+parseTuneDevice (const char *setting) {
   if (setting && *setting) {
     unsigned int device;
 
@@ -70,7 +58,19 @@ setTuneDevice (const char *setting) {
 }
 
 int
-setTuneVolume (const char *setting) {
+setTuneDevice (void) {
+  unsigned char device = prefs.tuneDevice;
+
+  if (!tuneSetDevice(device)) {
+    logMessage(LOG_ERR, "unsupported tune device: %s", getTuneDeviceName(device));
+    return 0;
+  }
+
+  return 1;
+}
+
+int
+parseTuneVolume (const char *setting) {
   if (setting && *setting) {
     static const int minimum = 0;
     static const int maximum = 100;
@@ -140,7 +140,7 @@ validateMidiInstrument (unsigned char *value, const char *string) {
 }
 
 int
-setTuneInstrument (const char *setting) {
+parseTuneInstrument (const char *setting) {
   if (setting && *setting) {
     unsigned char instrument;
 

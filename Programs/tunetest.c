@@ -175,11 +175,11 @@ main (int argc, char *argv[]) {
   }
 
   resetPreferences();
-  if (!setTuneDevice(opt_tuneDevice)) return PROG_EXIT_SYNTAX;
-  if (!setTuneVolume(opt_outputVolume)) return PROG_EXIT_SYNTAX;
+  if (!parseTuneDevice(opt_tuneDevice)) return PROG_EXIT_SYNTAX;
+  if (!parseTuneVolume(opt_outputVolume)) return PROG_EXIT_SYNTAX;
 
 #ifdef HAVE_MIDI_SUPPORT
-  if (!setTuneInstrument(opt_midiInstrument)) return PROG_EXIT_SYNTAX;
+  if (!parseTuneInstrument(opt_midiInstrument)) return PROG_EXIT_SYNTAX;
 #endif /* HAVE_MIDI_SUPPORT */
 
   if (!argc) {
@@ -216,7 +216,7 @@ main (int argc, char *argv[]) {
       }
     }
 
-    if (!selectTuneDevice()) return PROG_EXIT_SEMANTIC;
+    if (!setTuneDevice()) return PROG_EXIT_SEMANTIC;
     tunePlayNotes(elements);
     tuneSynchronize();
   }

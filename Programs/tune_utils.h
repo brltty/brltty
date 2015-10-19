@@ -26,11 +26,11 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern const char *getTuneDeviceName (TuneDevice device);
-extern int setTuneDevice (const char *setting);
-extern int selectTuneDevice (void);
+extern int parseTuneDevice (const char *setting);
+extern int setTuneDevice (void);
 
-extern int setTuneVolume (const char *setting);
-extern int setTuneInstrument (const char *setting);
+extern int parseTuneVolume (const char *setting);
+extern int parseTuneInstrument (const char *setting);
 
 #ifdef __cplusplus
 }

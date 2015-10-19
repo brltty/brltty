@@ -189,18 +189,14 @@ main (int argc, char *argv[]) {
   resetPreferences();
   prefs.tuneDevice = tdPcm;
 
-  if (!setOutputVolume(opt_outputVolume)) return PROG_EXIT_SYNTAX;
+  if (!parseTuneVolume(opt_outputVolume)) return PROG_EXIT_SYNTAX;
 
   if (argc) {
     logMessage(LOG_ERR, "too many parameters");
     return PROG_EXIT_SYNTAX;
   }
 
-  if (!tuneSetDevice(prefs.tuneDevice)) {
-    logMessage(LOG_ERR, "unsupported tune device: %s", tuneDeviceNames[prefs.tuneDevice]);
-    return PROG_EXIT_SEMANTIC;
-  }
-
+  if (!setTuneDevice()) return PROG_EXIT_SEMANTIC;
   if (!startSoundMonitor()) return PROG_EXIT_FATAL;
   return PROG_EXIT_SUCCESS;
 }
