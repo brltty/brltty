@@ -592,14 +592,10 @@ prepareUinputInstance (UinputObject *uinput, int keyboard) {
 
       if (!enableUinputEventType(uinput, type)) return 0;
 
-      {
-        int key;
-
-        for (key=0; key<count; key+=1) {
-          if (BITMASK_TEST(mask, key)) {
-            if (!enableUinputKey(uinput, key)) {
-              return 0;
-            }
+      for (int key=0; key<count; key+=1) {
+        if (BITMASK_TEST(mask, key)) {
+          if (!enableUinputKey(uinput, key)) {
+            return 0;
           }
         }
       }
@@ -624,9 +620,7 @@ prepareUinputInstance (UinputObject *uinput, int keyboard) {
 
     if (size != -1) {
       int count = size * 8;
-      int key;
-
-      for (key=0; key<count; key+=1) {
+      for (int key=0; key<count; key+=1) {
         if (BITMASK_TEST(mask, key)) {
           logMessage(LOG_WARNING, "key already pressed: %d", key);
         }
@@ -646,78 +640,80 @@ monitorKeyboard (KeyboardInstanceObject *kio) {
 
     if (fstat(kio->kix->file.descriptor, &status) != -1) {
       if (S_ISCHR(status.st_mode)) {
-        char description[0X100];
-
-        STR_BEGIN(description, sizeof(description));
-        STR_PRINTF("%s:", deviceName);
-
         {
-          struct input_id identity;
+          char description[0X100];
 
-          if (ioctl(kio->kix->file.descriptor, EVIOCGID, &identity) != -1) {
-            STR_PRINTF(" bus=%04X vnd=%04X prd=%04X ver=%04X",
-                       identity.bustype, identity.vendor, identity.product, identity.version);
+          STR_BEGIN(description, sizeof(description));
+          STR_PRINTF("%s:", deviceName);
 
-            {
-              static const KeyboardType typeTable[] = {
-#ifdef BUS_I8042
-                [BUS_I8042] = KBD_TYPE_PS2,
-#endif /* BUS_I8042 */
+          {
+            struct input_id identity;
 
-#ifdef BUS_USB
-                [BUS_USB] = KBD_TYPE_USB,
-#endif /* BUS_USB */
+            if (ioctl(kio->kix->file.descriptor, EVIOCGID, &identity) != -1) {
+              STR_PRINTF(" bus=%04X vnd=%04X prd=%04X ver=%04X",
+                         identity.bustype, identity.vendor, identity.product, identity.version);
 
-#ifdef BUS_BLUETOOTH
-                [BUS_BLUETOOTH] = KBD_TYPE_Bluetooth,
-#endif /* BUS_BLUETOOTH */
-              };
+              {
+                static const KeyboardType typeTable[] = {
+  #ifdef BUS_I8042
+                  [BUS_I8042] = KBD_TYPE_PS2,
+  #endif /* BUS_I8042 */
 
-              if (identity.bustype < ARRAY_COUNT(typeTable)) {
-                kio->actualProperties.type = typeTable[identity.bustype];
+  #ifdef BUS_USB
+                  [BUS_USB] = KBD_TYPE_USB,
+  #endif /* BUS_USB */
+
+  #ifdef BUS_BLUETOOTH
+                  [BUS_BLUETOOTH] = KBD_TYPE_Bluetooth,
+  #endif /* BUS_BLUETOOTH */
+                };
+
+                if (identity.bustype < ARRAY_COUNT(typeTable)) {
+                  kio->actualProperties.type = typeTable[identity.bustype];
+                }
+              }
+
+              kio->actualProperties.vendor = identity.vendor;
+              kio->actualProperties.product = identity.product;
+            } else if (errno != ENOTTY) {
+              logMessage(LOG_WARNING, "cannot get input device identity: %s: %s",
+                         deviceName, strerror(errno));
+            }
+          }
+
+          {
+            char topology[0X100];
+
+            if (ioctl(kio->kix->file.descriptor, EVIOCGPHYS(sizeof(topology)), topology) != -1) {
+              if (*topology) {
+                STR_PRINTF(" tpl=%s", topology);
               }
             }
-
-            kio->actualProperties.vendor = identity.vendor;
-            kio->actualProperties.product = identity.product;
-          } else if (errno != ENOTTY) {
-            logMessage(LOG_WARNING, "cannot get input device identity: %s: %s",
-                       deviceName, strerror(errno));
           }
-        }
 
-        {
-          char topology[0X100];
+          {
+            char identifier[0X100];
 
-          if (ioctl(kio->kix->file.descriptor, EVIOCGPHYS(sizeof(topology)), topology) != -1) {
-            if (*topology) {
-              STR_PRINTF(" tpl=%s", topology);
+            if (ioctl(kio->kix->file.descriptor, EVIOCGUNIQ(sizeof(identifier)), identifier) != -1) {
+              if (*identifier) {
+                STR_PRINTF(" id=%s", identifier);
+              }
             }
           }
-        }
 
-        {
-          char identifier[0X100];
+          {
+            char name[0X100];
 
-          if (ioctl(kio->kix->file.descriptor, EVIOCGUNIQ(sizeof(identifier)), identifier) != -1) {
-            if (*identifier) {
-              STR_PRINTF(" id=%s", identifier);
+            if (ioctl(kio->kix->file.descriptor, EVIOCGNAME(sizeof(name)), name) != -1) {
+              if (*name) {
+                STR_PRINTF(" nam=%s", name);
+              }
             }
           }
+
+          STR_END;
+          logMessage(LOG_DEBUG, "checking input device: %s", description);
         }
-
-        {
-          char name[0X100];
-
-          if (ioctl(kio->kix->file.descriptor, EVIOCGNAME(sizeof(name)), name) != -1) {
-            if (*name) {
-              STR_PRINTF(" nam=%s", name);
-            }
-          }
-        }
-
-        STR_END;
-        logMessage(LOG_DEBUG, "checking input device: %s", description);
         
         if (kio->actualProperties.type) {
           if (checkKeyboardProperties(&kio->actualProperties, &kio->kmo->requiredProperties)) {
