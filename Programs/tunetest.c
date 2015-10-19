@@ -22,9 +22,11 @@
 #include "prologue.h"
 
 #include <stdio.h>
-#include <limits.h>
 #include <string.h>
 #include <strings.h>
+#include <ctype.h>
+#include <limits.h>
+#include <errno.h>
 
 #include "log.h"
 #include "options.h"
@@ -84,83 +86,145 @@ BEGIN_OPTION_TABLE(programOptions)
 #endif /* HAVE_MIDI_SUPPORT */
 END_OPTION_TABLE
 
+static void
+logProblem (const char *problem) {
+  logMessage(LOG_ERR, "%s", problem);
+}
+
 static int
-parseTone (const char *operand, unsigned char *note, int *duration) {
-  const size_t operandSize = strlen(operand) + 1;
-  char noteOperand[operandSize];
-  char durationOperand[operandSize];
+parseNumber (
+  unsigned int *value, const char **operand,
+  const unsigned int *minimum, const unsigned int *maximum,
+  int required
+) {
+  if (isdigit(**operand)) {
+    errno = 0;
+    char *end;
+    unsigned long ul = strtoul(*operand, &end, 10);
 
-  int noteValue = NOTE_MIDDLE_C;
-  int durationValue = 255;
+    if (errno) return 0;
+    if (ul > UINT_MAX) return 0;
 
-  {
-    const char *delimiter = strchr(operand, '/');
+    if (minimum && (ul < *minimum)) return 0;
+    if (maximum && (ul > *maximum)) return 0;
 
-    if (delimiter) {
-      const size_t length = delimiter - operand;
-
-      memcpy(noteOperand, operand, length);
-      noteOperand[length] = 0;
-
-      strcpy(durationOperand, delimiter+1);
-    } else {
-      strcpy(noteOperand, operand);
-      *durationOperand = 0;
-    }
-  }
-
-  if (*noteOperand) {
-    const char *c = noteOperand;
-
-    static const char letters[] = "cdefgab";
-    const char *letter = strchr(letters, *c);
-
-    if (letter) {
-      static const unsigned char offsets[] = {0, 2, 4, 5, 7, 9, 11};
-
-      noteValue += offsets[letter - letters];
-      c += 1;
-
-      if (*c) {
-        static const int minimum = -1;
-        static const int maximum = 9;
-        int octave = 4;
-
-        if (!validateInteger(&octave, c, &minimum, &maximum)) {
-          logMessage(LOG_ERR, "invalid octave: %s", c);
-          return 0;
-        }
-
-        noteValue += (octave - 4) * NOTES_PER_OCTAVE;
-      }
-    } else {
-      static const int minimum = 0;
-      const int maximum = getHighestNote();
-
-      if (!validateInteger(&noteValue, c, &minimum, &maximum)) {
-        logMessage(LOG_ERR, "invalid note: %s", noteOperand);
-        return 0;
-      }
-    }
-  }
-
-  if ((noteValue < 0) || (noteValue > getHighestNote())) {
-    logMessage(LOG_ERR, "note out of range: %s", noteOperand);
+    *value = ul;
+    *operand = end;
+  } else if (required) {
     return 0;
   }
 
-  if (*durationOperand) {
-    static const int minimum = 1;
-    int maximum = INT_MAX;
+  return 1;
+}
 
-    if (!validateInteger(&durationValue, durationOperand, &minimum, &maximum)) {
-      logMessage(LOG_ERR, "invalid duration: %s", durationOperand);
+static int
+parseDuration (const char **operand, int *duration) {
+  switch (**operand) {
+    case '@': {
+      *operand += 1;
+
+      static const unsigned int minimum = 1;
+      static const unsigned int maximum = INT_MAX;
+      unsigned int value;
+
+      if (!parseNumber(&value, operand, &minimum, &maximum, 1)) {
+        logProblem("invalid absolute duration");
+        return 0;
+      }
+
+      *duration = value;
+      break;
+    }
+
+    default:
+      *duration = 100;
+      break;
+  }
+
+  return 1;
+}
+
+static int
+parseNote (const char **operand, unsigned char *note) {
+  const unsigned char lowestNote = getLowestNote();
+  const unsigned char highestNote = getHighestNote();
+  int noteValue = NOTE_MIDDLE_C;
+
+  static const char letters[] = "cdefgab";
+  const char *letter = strchr(letters, **operand);
+
+  if (letter) {
+    static const unsigned char offsets[] = {0, 2, 4, 5, 7, 9, 11};
+
+    noteValue += offsets[letter - letters];
+    *operand += 1;
+
+    {
+      static const unsigned int maximum = 9;
+      static const unsigned int offset = 4;
+      unsigned int octave = offset;
+
+      if (!parseNumber(&octave, operand, NULL, &maximum, 0)) {
+        logProblem("invalid octave");
+        return 0;
+      }
+
+      noteValue += ((int)octave - (int)offset) * NOTES_PER_OCTAVE;
+    }
+  } else {
+    const unsigned int minimum = lowestNote;
+    const unsigned int maximum = highestNote;
+    unsigned int value = noteValue;
+
+    if (!parseNumber(&value, operand, &minimum, &maximum, 0)) {
+      logProblem("invalid note");
       return 0;
     }
+
+    noteValue = value;
+  }
+
+  {
+    char sign = **operand;
+    int increment;
+
+    switch (sign) {
+      case '+':
+        increment = 1;
+        break;
+
+      case '-':
+        increment = -1;
+        break;
+
+      default:
+        goto noSign;
+    }
+
+    do {
+      noteValue += increment;
+    } while (*++*operand == sign);
+  }
+noSign:
+
+  if (noteValue < lowestNote) {
+    logProblem("note too low");
+    return 0;
+  }
+
+  if (noteValue > highestNote) {
+    logProblem("note too high");
+    return 0;
   }
 
   *note = noteValue;
-  *duration = durationValue;
+  return 1;
+}
+
+static int
+parseTone (const char *operand, unsigned char *note, int *duration) {
+  if (!parseNote(&operand, note)) return 0;
+  if (!parseDuration(&operand, duration)) return 0;
   return 1;
 }
 
