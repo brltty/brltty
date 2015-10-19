@@ -31,6 +31,7 @@ extern "C" {
 extern unsigned char getLowestNote (void);
 extern unsigned char getHighestNote (void);
 extern uint32_t getIntegerNoteFrequency (unsigned char note);
+extern unsigned char getNearestNote (NOTE_FREQUENCY_TYPE frequency);
 
 #ifndef NO_FLOAT
 extern float getRealNoteFrequency (unsigned char note);

@@ -54,15 +54,21 @@ beepDestruct (NoteDevice *device) {
 }
 
 static int
-beepNote (NoteDevice *device, unsigned char note, unsigned int duration) {
-  logMessage(LOG_DEBUG, "tone: msec=%d note=%d", duration, note);
+beepFrequency (NoteDevice *device, NOTE_FREQUENCY_TYPE frequency, unsigned int duration) {
+  uint32_t pitch = frequency;
+  logMessage(LOG_DEBUG, "tone: MSecs:%u Freq:%"PRIu32, duration, pitch);
 
-  if (!note) {
+  if (!pitch) {
     asyncWait(duration);
     return 1;
   }
 
-  return playBeep(getIntegerNoteFrequency(note), duration);
+  return playBeep(pitch, duration);
+}
+
+static int
+beepNote (NoteDevice *device, unsigned char note, unsigned int duration) {
+  return beepFrequency(device, GET_NOTE_FREQUENCY(note), duration);
 }
 
 static int
@@ -74,6 +80,7 @@ const NoteMethods beepNoteMethods = {
   .construct = beepConstruct,
   .destruct = beepDestruct,
 
+  .frequency = beepFrequency,
   .note = beepNote,
   .flush = beepFlush
 };

@@ -64,20 +64,24 @@ midiDestruct (NoteDevice *device) {
 
 static int
 midiNote (NoteDevice *device, unsigned char note, unsigned int duration) {
+  logMessage(LOG_DEBUG, "tone: MSecs:%u Note:%u", duration, note);
   beginMidiBlock(device->midi);
 
   if (note) {
-    logMessage(LOG_DEBUG, "tone: msec=%d note=%d", duration, note);
     startMidiNote(device->midi, device->channelNumber, note, prefs.midiVolume);
     insertMidiWait(device->midi, duration);
     stopMidiNote(device->midi, device->channelNumber);
   } else {
-    logMessage(LOG_DEBUG, "tone: msec=%d", duration);
     insertMidiWait(device->midi, duration);
   }
 
   endMidiBlock(device->midi);
   return 1;
+}
+
+static int
+midiFrequency (NoteDevice *device, NOTE_FREQUENCY_TYPE frequency, unsigned int duration) {
+  return midiNote(device, getNearestNote(frequency), duration);
 }
 
 static int
@@ -89,6 +93,7 @@ const NoteMethods midiNoteMethods = {
   .construct = midiConstruct,
   .destruct = midiDestruct,
 
+  .frequency = midiFrequency,
   .note = midiNote,
   .flush = midiFlush
 };

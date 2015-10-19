@@ -188,3 +188,31 @@ getRealNoteFrequency (unsigned char note) {
   return (float)getNoteFrequency(note) / (float)NOTE_FREQUENCY_FACTOR;
 }
 #endif /* NO_FLOAT */
+
+unsigned char
+getNearestNote (NOTE_FREQUENCY_TYPE frequency) {
+  unsigned char lowestNote = getLowestNote();
+  if (frequency <= GET_NOTE_FREQUENCY(lowestNote)) return lowestNote;
+
+  unsigned char highestNote = getHighestNote();
+  if (frequency >= GET_NOTE_FREQUENCY(highestNote)) return highestNote;
+
+  while (lowestNote <= highestNote) {
+    unsigned char currentNote = (lowestNote + highestNote) / 2;
+
+    if (frequency < GET_NOTE_FREQUENCY(currentNote)) {
+      highestNote = currentNote - 1;
+    } else {
+      lowestNote = currentNote + 1;
+    }
+  }
+
+  unsigned char lowerNote = highestNote;
+  unsigned char higherNote = lowerNote + 1;
+
+  NOTE_FREQUENCY_TYPE lowerFrequency = GET_NOTE_FREQUENCY(lowerNote);
+  NOTE_FREQUENCY_TYPE higherFrequency = GET_NOTE_FREQUENCY(higherNote);
+
+  return ((frequency - lowerFrequency) < (higherFrequency - frequency))?
+         lowerNote: higherNote;
+}
