@@ -410,7 +410,7 @@ alert (AlertIdentifier identifier) {
     const AlertEntry *alert = &alertTable[identifier];
 
     if (prefs.alertTunes && alert->tune) {
-      tuneNotes(alert->tune);
+      tunePlayNotes(alert->tune);
     } else if (prefs.alertDots && alert->tactile.duration) {
       showDotPattern(alert->tactile.pattern, alert->tactile.duration);
     } else if (prefs.alertMessages && alert->message) {

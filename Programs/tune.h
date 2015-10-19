@@ -47,11 +47,11 @@ typedef struct {
 
 extern void suppressTuneDeviceOpenErrors (void);
 
-extern void tuneNotes (const NoteElement *tune);
-extern void tuneFrequencies (const FrequencyElement *tune);
+extern void tunePlayNotes (const NoteElement *tune);
+extern void tunePlayFrequencies (const FrequencyElement *tune);
 extern void tuneWait (int time);
 extern void tuneSync (void);
-extern int tuneDevice (TuneDevice device);
+extern int tuneSetDevice (TuneDevice device);
 
 #ifdef __cplusplus
 }

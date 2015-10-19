@@ -90,7 +90,7 @@ startTone (SoundMonitorData *smd, int frequency) {
     tune[1] = tone;
   }
 
-  return tuneFrequencies(tune);
+  return tunePlayFrequencies(tune);
 }
 
 ASYNC_INPUT_CALLBACK(handleSoundEvent) {
@@ -195,7 +195,7 @@ main (int argc, char *argv[]) {
     return PROG_EXIT_SYNTAX;
   }
 
-  if (!tuneDevice(prefs.tuneDevice)) {
+  if (!tuneSetDevice(prefs.tuneDevice)) {
     logMessage(LOG_ERR, "unsupported tune device: %s", tuneDeviceNames[prefs.tuneDevice]);
     return PROG_EXIT_SEMANTIC;
   }
