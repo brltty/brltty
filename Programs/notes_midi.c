@@ -63,7 +63,7 @@ midiDestruct (NoteDevice *device) {
 }
 
 static int
-midiNote (NoteDevice *device, unsigned char note, unsigned int duration) {
+midiNote (NoteDevice *device, unsigned int duration, unsigned char note) {
   logMessage(LOG_DEBUG, "tone: MSecs:%u Note:%u", duration, note);
   beginMidiBlock(device->midi);
 
@@ -80,8 +80,9 @@ midiNote (NoteDevice *device, unsigned char note, unsigned int duration) {
 }
 
 static int
-midiFrequency (NoteDevice *device, NOTE_FREQUENCY_TYPE frequency, unsigned int duration) {
-  return midiNote(device, getNearestNote(frequency), duration);
+midiFrequency (NoteDevice *device, unsigned int duration, NOTE_FREQUENCY_TYPE frequency) {
+  return midiNote(device, duration,
+                  (frequency? getNearestNote(frequency): 0));
 }
 
 static int

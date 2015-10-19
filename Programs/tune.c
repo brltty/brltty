@@ -122,7 +122,7 @@ static void
 handleTuneRequest_playNotes (const NoteElement *tune) {
   while (tune->duration) {
     if (!openTuneDevice()) return;
-    if (!noteMethods->note(noteDevice, tune->note, tune->duration)) return;
+    if (!noteMethods->note(noteDevice, tune->duration, tune->note)) return;
     tune += 1;
   }
 
@@ -133,7 +133,7 @@ static void
 handleTuneRequest_playFrequencies (const FrequencyElement *tune) {
   while (tune->duration) {
     if (!openTuneDevice()) return;
-    if (!noteMethods->frequency(noteDevice, tune->frequency, tune->duration)) return;
+    if (!noteMethods->frequency(noteDevice, tune->duration, tune->frequency)) return;
     tune += 1;
   }
 
