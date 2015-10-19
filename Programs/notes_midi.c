@@ -63,7 +63,7 @@ midiDestruct (NoteDevice *device) {
 }
 
 static int
-midiPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
+midiNote (NoteDevice *device, unsigned char note, unsigned int duration) {
   beginMidiBlock(device->midi);
 
   if (note) {
@@ -89,6 +89,6 @@ const NoteMethods midiNoteMethods = {
   .construct = midiConstruct,
   .destruct = midiDestruct,
 
-  .play = midiPlay,
+  .note = midiNote,
   .flush = midiFlush
 };

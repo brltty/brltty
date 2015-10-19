@@ -54,7 +54,7 @@ beepDestruct (NoteDevice *device) {
 }
 
 static int
-beepPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
+beepNote (NoteDevice *device, unsigned char note, unsigned int duration) {
   logMessage(LOG_DEBUG, "tone: msec=%d note=%d", duration, note);
 
   if (!note) {
@@ -74,6 +74,6 @@ const NoteMethods beepNoteMethods = {
   .construct = beepConstruct,
   .destruct = beepDestruct,
 
-  .play = beepPlay,
+  .note = beepNote,
   .flush = beepFlush
 };

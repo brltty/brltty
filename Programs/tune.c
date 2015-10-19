@@ -75,7 +75,7 @@ openTuneDevice (void) {
 }
 
 typedef enum {
-  TUNE_REQ_PLAY,
+  TUNE_REQ_NOTES,
   TUNE_REQ_WAIT,
   TUNE_REQ_SYNC,
   TUNE_REQ_DEVICE
@@ -88,8 +88,8 @@ typedef struct {
 
   union {
     struct {
-      const TuneElement *tune;
-    } play;
+      const NoteElement *tune;
+    } notes;
 
     struct {
       int time;
@@ -106,10 +106,10 @@ typedef struct {
 } TuneRequest;
 
 static void
-handleTuneRequest_play (const TuneElement *tune) {
+handleTuneRequest_notes (const NoteElement *tune) {
   while (tune->duration) {
     if (!openTuneDevice()) return;
-    if (!noteMethods->play(noteDevice, tune->note, tune->duration)) return;
+    if (!noteMethods->note(noteDevice, tune->note, tune->duration)) return;
     tune += 1;
   }
 
@@ -138,8 +138,8 @@ static void
 handleTuneRequest (TuneRequest *req) {
   if (req) {
     switch (req->type) {
-      case TUNE_REQ_PLAY:
-        handleTuneRequest_play(req->data.play.tune);
+      case TUNE_REQ_NOTES:
+        handleTuneRequest_notes(req->data.notes.tune);
         break;
 
       case TUNE_REQ_WAIT:
@@ -376,11 +376,11 @@ newTuneRequest (TuneRequestType type) {
 }
 
 void
-tunePlay (const TuneElement *tune) {
+tuneNotes (const NoteElement *tune) {
   TuneRequest *req;
 
-  if ((req = newTuneRequest(TUNE_REQ_PLAY))) {
-    req->data.play.tune = tune;
+  if ((req = newTuneRequest(TUNE_REQ_NOTES))) {
+    req->data.notes.tune = tune;
     if (!sendTuneRequest(req)) free(req);
   }
 }

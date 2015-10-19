@@ -153,16 +153,27 @@ static const uint32_t noteFrequencies[] = {
   /* 127 +5G  */ 12543854
 };
 
-size_t
-getMaximumNote (void) {
+unsigned char
+getLowestNote (void) {
+  return 1;
+}
+
+unsigned char
+getHighestNote (void) {
   return ARRAY_COUNT(noteFrequencies) - 1;
 }
 
 static inline uint32_t
 getNoteFrequency (unsigned char note) {
-  size_t maximum = getMaximumNote();
+  unsigned char lowestNote = getLowestNote();
 
-  if (note > maximum) note = maximum;
+  if (note < lowestNote) {
+    note = lowestNote;
+  } else {
+    unsigned char highestNote = getHighestNote();
+    if (note > highestNote) note = highestNote;
+  }
+
   return noteFrequencies[note];
 }
 

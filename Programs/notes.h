@@ -26,7 +26,8 @@ extern "C" {
 #define NOTES_PER_OCTAVE 12
 #define NOTE_MIDDLE_C 60
 
-extern size_t getMaximumNote (void);
+extern unsigned char getLowestNote (void);
+extern unsigned char getHighestNote (void);
 extern uint32_t getIntegerNoteFrequency (unsigned char note);
 
 #ifndef NO_FLOAT
@@ -47,7 +48,8 @@ typedef struct {
   NoteDevice * (*construct) (int errorLevel);
   void (*destruct) (NoteDevice *device);
 
-  int (*play) (NoteDevice *device, unsigned char note, unsigned int duration);
+  int (*frequency) (NoteDevice *device, NOTE_FREQUENCY_TYPE frequency, unsigned int duration);
+  int (*note) (NoteDevice *device, unsigned char note, unsigned int duration);
   int (*flush) (NoteDevice *device);
 } NoteMethods;
 

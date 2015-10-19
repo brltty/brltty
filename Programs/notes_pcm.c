@@ -137,7 +137,7 @@ pcmDestruct (NoteDevice *device) {
 }
 
 static int
-pcmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
+pcmNote (NoteDevice *device, unsigned char note, unsigned int duration) {
   int32_t sampleCount = device->sampleRate * duration / 1000;
 
   logMessage(LOG_DEBUG, "tone: MSecs:%u SmpCt:%"PRId32 " Note:%u",
@@ -256,6 +256,6 @@ const NoteMethods pcmNoteMethods = {
   .construct = pcmConstruct,
   .destruct = pcmDestruct,
 
-  .play = pcmPlay,
+  .note = pcmNote,
   .flush = pcmFlush
 };

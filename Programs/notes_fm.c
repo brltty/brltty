@@ -61,7 +61,7 @@ fmDestruct (NoteDevice *device) {
 }
 
 static int
-fmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
+fmNote (NoteDevice *device, unsigned char note, unsigned int duration) {
   logMessage(LOG_DEBUG, "tone: msec=%d note=%d",
              duration, note);
 
@@ -83,6 +83,6 @@ const NoteMethods fmNoteMethods = {
   .construct = fmConstruct,
   .destruct = fmDestruct,
 
-  .play = fmPlay,
+  .note = fmNote,
   .flush = fmFlush
 };

@@ -172,8 +172,8 @@ parseTone (const char *operand, int *note, int *duration) {
         noteValue += (octave - 4) * NOTES_PER_OCTAVE;
       }
     } else {
-      static const int minimum = 0;
-      const int maximum = getMaximumNote();
+      const int minimum = getLowestNote();
+      const int maximum = getHighestNote();
 
       if (!validateInteger(&noteValue, c, &minimum, &maximum)) {
         logMessage(LOG_ERR, "invalid note: %s", noteOperand);
@@ -182,7 +182,7 @@ parseTone (const char *operand, int *note, int *duration) {
     }
   }
 
-  if ((noteValue < 0) || (noteValue > getMaximumNote())) {
+  if ((noteValue < 0) || (noteValue > getHighestNote())) {
     logMessage(LOG_ERR, "note out of range: %s", noteOperand);
     return 0;
   }
@@ -247,10 +247,10 @@ main (int argc, char *argv[]) {
   }
 
   {
-    TuneElement elements[argc + 1];
+    NoteElement elements[argc + 1];
 
     {
-      TuneElement *element = elements;
+      NoteElement *element = elements;
 
       while (argc) {
         int note;
@@ -261,7 +261,7 @@ main (int argc, char *argv[]) {
         }
 
         {
-          TuneElement tone = TUNE_NOTE(duration, note);
+          NoteElement tone = NOTE_PLAY(duration, note);
           *(element++) = tone;
         }
 
@@ -270,7 +270,7 @@ main (int argc, char *argv[]) {
       }
 
       {
-        TuneElement tone = TUNE_STOP();
+        NoteElement tone = NOTE_STOP();
         *element = tone;
       }
     }
@@ -280,7 +280,7 @@ main (int argc, char *argv[]) {
       return PROG_EXIT_SEMANTIC;
     }
 
-    tunePlay(elements);
+    tuneNotes(elements);
     tuneSync();
   }
 
