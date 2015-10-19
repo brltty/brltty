@@ -409,7 +409,6 @@ char \XAA (       8)  # 170   ª  feminine ordinal indicator
      #Hex    Dots       Dec Char Description
 char \XAF ( 2   67 )  # 175   ¯  macron
 char \XB5 (    567 )  # 181   µ  micro sign
-char \XA0 (      78)  # 160  ~   no-break space
 
 # The nonbreaking space is dots 7 and 8 because this presents a sequence of
 # nonbreaking spaces as a smooth low line segment.

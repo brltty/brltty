@@ -127,7 +127,6 @@ char \u203A	(   4567 )  # 9B ⡸ › [SINGLE RIGHT-POINTING ANGLE QUOTATION MARK
 char \u0153	(1 3 5  8)  # 9C ⢕ œ [LATIN SMALL LIGATURE OE]
 char \u017E	(  34 6  )  # 9E ⠬ ž [LATIN SMALL LETTER Z WITH CARON]
 char \u0178	( 2345678)  # 9F ⣾ Ÿ [LATIN CAPITAL LETTER Y WITH DIAERESIS]
-char \xA0	( 2  567 )  # A0 ⡲   [NO-BREAK SPACE]
 char \xA1	( 2  56  )  # A1 ⠲ ¡ [INVERTED EXCLAMATION MARK]
 char \xA2	( 2  5 78)  # A2 ⣒ ¢ [CENT SIGN]
 char \xA3	(123    8)  # A3 ⢇ £ [POUND SIGN]
