@@ -137,13 +137,13 @@ pcmDestruct (NoteDevice *device) {
 }
 
 static int
-pcmNote (NoteDevice *device, unsigned char note, unsigned int duration) {
+pcmFrequency (NoteDevice *device, NOTE_FREQUENCY_TYPE frequency, unsigned int duration) {
   int32_t sampleCount = device->sampleRate * duration / 1000;
 
-  logMessage(LOG_DEBUG, "tone: MSecs:%u SmpCt:%"PRId32 " Note:%u",
-             duration, sampleCount, note);
+  logMessage(LOG_DEBUG, "tone: MSecs:%u SmpCt:%"PRId32 " Freq:%"PRIfreq,
+             duration, sampleCount, frequency);
 
-  if (note) {
+  if (frequency) {
     /* A triangle waveform sounds nice, is lightweight, and avoids
      * relying too much on floating-point performance and/or on
      * expensive math functions like sin(). Considerations like
@@ -187,7 +187,7 @@ pcmNote (NoteDevice *device, unsigned char note, unsigned int duration) {
      */
     const uint32_t stepsPerSample = (NOTE_FREQUENCY_TYPE)UINT32_MAX 
                                   / (NOTE_FREQUENCY_TYPE)device->sampleRate
-                                  * GET_NOTE_FREQUENCY(note);
+                                  * frequency;
 
     /* The current value needs to be a signed value so that the >> operator
      * will extend its sign bit. We start by initializing it to the value
@@ -248,6 +248,11 @@ pcmNote (NoteDevice *device, unsigned char note, unsigned int duration) {
 }
 
 static int
+pcmNote (NoteDevice *device, unsigned char note, unsigned int duration) {
+  return pcmFrequency(device, GET_NOTE_FREQUENCY(note), duration);
+}
+
+static int
 pcmFlush (NoteDevice *device) {
   return pcmFlushBlock(device);
 }
@@ -256,6 +261,7 @@ const NoteMethods pcmNoteMethods = {
   .construct = pcmConstruct,
   .destruct = pcmDestruct,
 
+  .frequency = pcmFrequency,
   .note = pcmNote,
   .flush = pcmFlush
 };

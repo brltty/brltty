@@ -76,6 +76,7 @@ openTuneDevice (void) {
 
 typedef enum {
   TUNE_REQ_NOTES,
+  TUNE_REQ_FREQUENCIES,
   TUNE_REQ_WAIT,
   TUNE_REQ_SYNC,
   TUNE_REQ_DEVICE
@@ -90,6 +91,10 @@ typedef struct {
     struct {
       const NoteElement *tune;
     } notes;
+
+    struct {
+      const FrequencyElement *tune;
+    } frequencies;
 
     struct {
       int time;
@@ -110,6 +115,17 @@ handleTuneRequest_notes (const NoteElement *tune) {
   while (tune->duration) {
     if (!openTuneDevice()) return;
     if (!noteMethods->note(noteDevice, tune->note, tune->duration)) return;
+    tune += 1;
+  }
+
+  noteMethods->flush(noteDevice);
+}
+
+static void
+handleTuneRequest_frequencies (const FrequencyElement *tune) {
+  while (tune->duration) {
+    if (!openTuneDevice()) return;
+    if (!noteMethods->frequency(noteDevice, tune->frequency, tune->duration)) return;
     tune += 1;
   }
 
@@ -140,6 +156,10 @@ handleTuneRequest (TuneRequest *req) {
     switch (req->type) {
       case TUNE_REQ_NOTES:
         handleTuneRequest_notes(req->data.notes.tune);
+        break;
+
+      case TUNE_REQ_FREQUENCIES:
+        handleTuneRequest_frequencies(req->data.frequencies.tune);
         break;
 
       case TUNE_REQ_WAIT:
@@ -381,6 +401,16 @@ tuneNotes (const NoteElement *tune) {
 
   if ((req = newTuneRequest(TUNE_REQ_NOTES))) {
     req->data.notes.tune = tune;
+    if (!sendTuneRequest(req)) free(req);
+  }
+}
+
+void
+tuneFrequencies (const FrequencyElement *tune) {
+  TuneRequest *req;
+
+  if ((req = newTuneRequest(TUNE_REQ_FREQUENCIES))) {
+    req->data.frequencies.tune = tune;
     if (!sendTuneRequest(req)) free(req);
   }
 }

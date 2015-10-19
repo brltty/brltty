@@ -62,6 +62,7 @@ END_OPTION_TABLE
 
 typedef struct {
   int fileDescriptor;
+  FrequencyElement tune[2];
 } SoundMonitorData;
 
 ASYNC_CONDITION_TESTER(testSoundMonitorStopped) {
@@ -73,6 +74,23 @@ static void
 stopSoundMonitor (SoundMonitorData *smd) {
   close(smd->fileDescriptor);
   smd->fileDescriptor = -1;
+}
+
+static void
+startTone (SoundMonitorData *smd, int frequency) {
+  FrequencyElement *tune = smd->tune;
+
+  {
+    FrequencyElement tone = FREQ_PLAY(5000, frequency);
+    tune[0] = tone;
+  }
+
+  {
+    FrequencyElement tone = FREQ_STOP();
+    tune[1] = tone;
+  }
+
+  return tuneFrequencies(tune);
 }
 
 ASYNC_INPUT_CALLBACK(handleSoundEvent) {
@@ -94,11 +112,19 @@ ASYNC_INPUT_CALLBACK(handleSoundEvent) {
       switch (event->type) {
         case EV_SND: {
           int value = event->value;
-          logMessage(LOG_NOTICE, "event: c=%d v=%d",event->code, value);
 
           switch (event->code) {
-           default:
-             break;
+            case SND_BELL:
+              if (value) value = 750;
+            case SND_TONE:
+              if (value) {
+                startTone(smd, value);
+              } else {
+              }
+              break;
+
+            default:
+              break;
           }
 
           break;

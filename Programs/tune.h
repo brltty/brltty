@@ -20,6 +20,7 @@
 #define BRLTTY_INCLUDED_TUNE
 
 #include "tune_types.h"
+#include "note_types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,9 +36,19 @@ typedef struct {
 #define NOTE_REST(duration) NOTE_PLAY(duration, 0)
 #define NOTE_STOP() NOTE_REST(0)
 
+typedef struct {
+  NOTE_FREQUENCY_TYPE frequency; /* Herz (0 means silence) */
+  int duration;        /* milliseconds (0 means stop) */
+} FrequencyElement;
+
+#define FREQ_PLAY(duration,frequency) {frequency, duration}
+#define FREQ_REST(duration) FREQ_PLAY(duration, 0)
+#define FREQ_STOP() FREQ_REST(0)
+
 extern void suppressTuneDeviceOpenErrors (void);
 
 extern void tuneNotes (const NoteElement *tune);
+extern void tuneFrequencies (const FrequencyElement *tune);
 extern void tuneWait (int time);
 extern void tuneSync (void);
 extern int tuneDevice (TuneDevice device);
