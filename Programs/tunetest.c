@@ -22,6 +22,7 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <limits.h>
 #include <string.h>
 #include <strings.h>
 
@@ -84,7 +85,7 @@ BEGIN_OPTION_TABLE(programOptions)
 END_OPTION_TABLE
 
 static int
-parseTone (const char *operand, int *note, int *duration) {
+parseTone (const char *operand, unsigned char *note, int *duration) {
   const size_t operandSize = strlen(operand) + 1;
   char noteOperand[operandSize];
   char durationOperand[operandSize];
@@ -150,7 +151,7 @@ parseTone (const char *operand, int *note, int *duration) {
 
   if (*durationOperand) {
     static const int minimum = 1;
-    int maximum = durationValue;
+    int maximum = INT_MAX;
 
     if (!validateInteger(&durationValue, durationOperand, &minimum, &maximum)) {
       logMessage(LOG_ERR, "invalid duration: %s", durationOperand);
@@ -188,21 +189,18 @@ main (int argc, char *argv[]) {
   }
 
   {
-    NoteElement elements[argc + 1];
+    FrequencyElement elements[argc + 1];
 
     {
-      NoteElement *element = elements;
+      FrequencyElement *element = elements;
 
       while (argc) {
-        int note;
+        unsigned char note;
         int duration;
-
-        if (!parseTone(*argv, &note, &duration)) {
-          return PROG_EXIT_SYNTAX;
-        }
+        if (!parseTone(*argv, &note, &duration)) return PROG_EXIT_SYNTAX;
 
         {
-          NoteElement tone = NOTE_PLAY(duration, note);
+          FrequencyElement tone = FREQ_PLAY(duration, GET_NOTE_FREQUENCY(note));
           *(element++) = tone;
         }
 
@@ -211,13 +209,13 @@ main (int argc, char *argv[]) {
       }
 
       {
-        NoteElement tone = NOTE_STOP();
+        FrequencyElement tone = FREQ_STOP();
         *element = tone;
       }
     }
 
     if (!setTuneDevice()) return PROG_EXIT_SEMANTIC;
-    tunePlayNotes(elements);
+    tunePlayFrequencies(elements);
     tuneSynchronize();
   }
 
