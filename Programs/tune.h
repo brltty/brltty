@@ -51,7 +51,7 @@ extern int tuneSetDevice (TuneDevice device);
 extern void tunePlayNotes (const NoteElement *tune);
 extern void tunePlayFrequencies (const FrequencyElement *tune);
 extern void tuneWait (int time);
-extern void tuneSync (void);
+extern void tuneSynchronize (void);
 
 #ifdef __cplusplus
 }

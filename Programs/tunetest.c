@@ -281,7 +281,7 @@ main (int argc, char *argv[]) {
     }
 
     tunePlayNotes(elements);
-    tuneSync();
+    tuneSynchronize();
   }
 
   return PROG_EXIT_SUCCESS;

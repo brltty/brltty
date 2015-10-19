@@ -166,6 +166,7 @@ startSoundMonitor (void) {
                    smd.fileDescriptor);
 
         asyncWaitFor(testSoundMonitorStopped, &smd);
+        tuneSynchronize();
       }
     }
 

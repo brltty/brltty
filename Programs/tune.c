@@ -79,10 +79,10 @@ typedef enum {
   TUNE_REQ_PLAY_NOTES,
   TUNE_REQ_PLAY_FREQUENCIES,
   TUNE_REQ_WAIT,
-  TUNE_REQ_SYNC
+  TUNE_REQ_SYNCHRONIZE
 } TuneRequestType;
 
-typedef unsigned char TuneSyncMonitor;
+typedef unsigned char TuneSynchronizationMonitor;
 
 typedef struct {
   TuneRequestType type;
@@ -105,8 +105,8 @@ typedef struct {
     } wait;
 
     struct {
-      TuneSyncMonitor *monitor;
-    } sync;
+      TuneSynchronizationMonitor *monitor;
+    } synchronize;
   } parameters;
 } TuneRequest;
 
@@ -146,7 +146,7 @@ handleTuneRequest_wait (int time) {
 }
 
 static void
-handleTuneRequest_sync (TuneSyncMonitor *monitor) {
+handleTuneRequest_synchronize (TuneSynchronizationMonitor *monitor) {
   *monitor = 1;
 }
 
@@ -170,8 +170,8 @@ handleTuneRequest (TuneRequest *req) {
         handleTuneRequest_wait(req->parameters.wait.time);
         break;
 
-      case TUNE_REQ_SYNC:
-        handleTuneRequest_sync(req->parameters.sync.monitor);
+      case TUNE_REQ_SYNCHRONIZE:
+        handleTuneRequest_synchronize(req->parameters.synchronize.monitor);
         break;
     }
 
@@ -284,7 +284,7 @@ finishTuneRequest_stop (void) {
 }
 
 static void
-finishTuneRequest_sync (void) {
+finishTuneRequest_synchronize (void) {
   sendTuneMessage(NULL);
 }
 
@@ -294,8 +294,8 @@ ASYNC_EVENT_CALLBACK(handleTuneRequestEvent) {
 
   if (req) {
     switch (req->type) {
-      case TUNE_REQ_SYNC:
-        finish = finishTuneRequest_sync;
+      case TUNE_REQ_SYNCHRONIZE:
+        finish = finishTuneRequest_synchronize;
         break;
 
       default:
@@ -470,22 +470,22 @@ tuneWait (int time) {
   }
 }
 
-ASYNC_CONDITION_TESTER(testTuneSyncMonitor) {
-  TuneSyncMonitor *monitor = data;
+ASYNC_CONDITION_TESTER(testTuneSynchronizationMonitor) {
+  TuneSynchronizationMonitor *monitor = data;
 
   return !!*monitor;
 }
 
 void
-tuneSync (void) {
+tuneSynchronize (void) {
   TuneRequest *req;
 
-  if ((req = newTuneRequest(TUNE_REQ_SYNC))) {
-    TuneSyncMonitor monitor = 0;
-    req->parameters.sync.monitor = &monitor;
+  if ((req = newTuneRequest(TUNE_REQ_SYNCHRONIZE))) {
+    TuneSynchronizationMonitor monitor = 0;
+    req->parameters.synchronize.monitor = &monitor;
 
     if (sendTuneRequest(req)) {
-      asyncWaitFor(testTuneSyncMonitor, &monitor);
+      asyncWaitFor(testTuneSynchronizationMonitor, &monitor);
     } else {
       free(req);
     }
