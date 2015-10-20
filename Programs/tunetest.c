@@ -86,12 +86,48 @@ BEGIN_OPTION_TABLE(programOptions)
 #endif /* HAVE_MIDI_SUPPORT */
 END_OPTION_TABLE
 
-static unsigned char tempo = 108;
-static unsigned char denominator = 4;
+typedef struct {
+  unsigned char tempo;
+
+  struct {
+    unsigned char denominator;
+  } meter;
+
+  struct {
+    FrequencyElement *array;
+    unsigned int size;
+    unsigned int count;
+  } tones;
+} TuneData;
 
 static void
 logProblem (const char *problem) {
   logMessage(LOG_ERR, "%s", problem);
+}
+
+static int
+addTone (TuneData *tune, const FrequencyElement *tone) {
+  if (tune->tones.count == tune->tones.size) {
+    unsigned int newSize = tune->tones.size? (tune->tones.size << 1): 1;
+    FrequencyElement *newArray;
+
+    if (!(newArray = realloc(tune->tones.array, ARRAY_SIZE(newArray, newSize)))) {
+      logMallocError();
+      return 0;
+    }
+
+    tune->tones.array = newArray;
+    tune->tones.size = newSize;
+  }
+
+  tune->tones.array[tune->tones.count++] = *tone;
+  return 1;
+}
+
+static int
+addNote (TuneData *tune, unsigned char note, int duration) {
+  FrequencyElement tone = FREQ_PLAY(duration, GET_NOTE_FREQUENCY(note));
+  return addTone(tune, &tone);
 }
 
 static int
@@ -121,7 +157,7 @@ parseNumber (
 }
 
 static int
-parseDuration (const char **operand, int *duration) {
+parseDuration (TuneData *tune, const char **operand, int *duration) {
   switch (**operand) {
     case '@': {
       *operand += 1;
@@ -151,7 +187,7 @@ parseDuration (const char **operand, int *duration) {
         return 0;
       }
 
-      *duration = (60000 * denominator) / (tempo * divisor);
+      *duration = (60000 * tune->meter.denominator) / (tune->tempo * divisor);
       break;
     }
 
@@ -167,12 +203,12 @@ parseDuration (const char **operand, int *duration) {
         return 0;
       }
 
-      *duration = (60000 * denominator * multiplier) / tempo;
+      *duration = (60000 * tune->meter.denominator * multiplier) / tune->tempo;
       break;
     }
 
     default:
-      *duration = 60000 / tempo;
+      *duration = 60000 / tune->tempo;
       break;
   }
 
@@ -263,15 +299,18 @@ parseNote (const char **operand, unsigned char *note) {
 }
 
 static int
-parseTone (const char *operand, unsigned char *note, int *duration) {
-  if (!parseNote(&operand, note)) return 0;
-  if (!parseDuration(&operand, duration)) return 0;
+parseTone (TuneData *tune, const char *operand) {
+  unsigned char note;
+  if (!parseNote(&operand, &note)) return 0;
+
+  int duration;
+  if (!parseDuration(tune, &operand, &duration)) return 0;
 
   {
-    int increment = *duration;
+    int increment = duration;
 
     while (*operand == '.') {
-      *duration += (increment /= 2);
+      duration += (increment /= 2);
       operand += 1;
     }
   }
@@ -281,7 +320,7 @@ parseTone (const char *operand, unsigned char *note, int *duration) {
     return 0;
   }
 
-  return 1;
+  return addNote(tune, note, duration);
 }
 
 int
@@ -308,36 +347,34 @@ main (int argc, char *argv[]) {
     return PROG_EXIT_SYNTAX;
   }
 
-  {
-    FrequencyElement elements[argc + 1];
+  TuneData tune = {
+    .tempo = 108,
 
-    {
-      FrequencyElement *element = elements;
+    .meter = {
+      .denominator = 4
+    },
 
-      while (argc) {
-        unsigned char note;
-        int duration;
-        if (!parseTone(*argv, &note, &duration)) return PROG_EXIT_SYNTAX;
-
-        {
-          FrequencyElement tone = FREQ_PLAY(duration, GET_NOTE_FREQUENCY(note));
-          *(element++) = tone;
-        }
-
-        argv += 1;
-        argc -= 1;
-      }
-
-      {
-        FrequencyElement tone = FREQ_STOP();
-        *element = tone;
-      }
+    .tones = {
+      .array = NULL,
+      .size = 0,
+      .count = 0
     }
+  };
 
-    if (!setTuneDevice()) return PROG_EXIT_SEMANTIC;
-    tunePlayFrequencies(elements);
-    tuneSynchronize();
+  while (argc) {
+    if (!parseTone(&tune, *argv)) return PROG_EXIT_SYNTAX;
+    argv += 1, argc -= 1;
   }
+
+  {
+    FrequencyElement tone = FREQ_STOP();
+    if (!addTone(&tune, &tone)) return PROG_EXIT_FATAL;
+  }
+
+  if (!setTuneDevice()) return PROG_EXIT_SEMANTIC;
+  tunePlayFrequencies(tune.tones.array);
+  tuneSynchronize();
+  free(tune.tones.array);
 
   return PROG_EXIT_SUCCESS;
 }
