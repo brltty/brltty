@@ -46,6 +46,7 @@ typedef struct {
   } tones;
 
   TuneParameter tempo;
+  TuneParameter percentage;
 
   struct {
     TuneParameter numerator;
