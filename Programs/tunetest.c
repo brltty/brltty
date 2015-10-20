@@ -21,21 +21,33 @@
 
 #include "prologue.h"
 
+#include <stdio.h>
+#include <string.h>
+
 #include "log.h"
+#include "program.h"
 #include "options.h"
+#include "file.h"
+#include "prefs.h"
 #include "tune_utils.h"
 #include "tune_build.h"
 #include "notes.h"
-#include "prefs.h"
 
-static char *opt_tuneDevice;
+static int opt_fromFiles;
 static char *opt_outputVolume;
+static char *opt_tuneDevice;
 
 #ifdef HAVE_MIDI_SUPPORT
 static char *opt_midiInstrument;
 #endif /* HAVE_MIDI_SUPPORT */
 
 BEGIN_OPTION_TABLE(programOptions)
+  { .letter = 'f',
+    .word = "files",
+    .setting.flag = &opt_fromFiles,
+    .description = "Use files rather than command line arguments."
+  },
+
   { .letter = 'v',
     .word = "volume",
     .argument = "loudness",
@@ -78,6 +90,24 @@ BEGIN_OPTION_TABLE(programOptions)
 #endif /* HAVE_MIDI_SUPPORT */
 END_OPTION_TABLE
 
+static int
+processLine (char *line, void *data) {
+  TuneBuilder *tune = data;
+  tune->source.index += 1;
+  return parseTuneLine(tune, line);
+}
+
+static int
+processStream (TuneBuilder *tune, FILE *stream) {
+  return processLines(stream, processLine, tune);
+}
+
+static int
+processStandardInput (TuneBuilder *tune) {
+  tune->source.name = standardInputName;
+  return processStream(tune, stdin);
+}
+
 int
 main (int argc, char *argv[]) {
   {
@@ -97,25 +127,50 @@ main (int argc, char *argv[]) {
   if (!parseTuneInstrument(opt_midiInstrument)) return PROG_EXIT_SYNTAX;
 #endif /* HAVE_MIDI_SUPPORT */
 
-  if (!argc) {
-    logMessage(LOG_ERR, "missing tune");
-    return PROG_EXIT_SYNTAX;
-  }
-
   TuneBuilder tune;
-  constructTuneBuilder(&tune);
+  initializeTuneBuilder(&tune);
 
-  while (argc) {
-    tune.source.index += 1;
-    if (!parseTuneLine(&tune, *argv)) return PROG_EXIT_SYNTAX;
-    argv += 1, argc -= 1;
+  if (opt_fromFiles) {
+    if (argc) {
+      do {
+        const char *argument = *argv++;
+
+        if (strcmp(argument, standardStreamArgument) == 0) {
+          if (!processStandardInput(&tune)) return PROG_EXIT_FATAL;
+        } else {
+          FILE *stream = fopen(argument, "r");
+
+          if (stream) {
+            tune.source.name = argument;
+            tune.source.index = 0;
+            processStream(&tune, stream);
+            fclose(stream);
+          }
+        }
+      } while (argc -= 1);
+    } else {
+      if (!processStandardInput(&tune)) return PROG_EXIT_FATAL;
+    }
+  } else {
+    tune.source.name = "<command-line>";
+
+    if (!argc) {
+      logMessage(LOG_ERR, "missing tune");
+      return PROG_EXIT_SYNTAX;
+    }
+
+    while (argc) {
+      tune.source.index += 1;
+      if (!parseTuneLine(&tune, *argv)) return PROG_EXIT_SYNTAX;
+      argv += 1, argc -= 1;
+    }
   }
 
   if (!endTune(&tune)) return PROG_EXIT_FATAL;
   if (!setTuneDevice()) return PROG_EXIT_SEMANTIC;
   tunePlayFrequencies(tune.tones.array);
   tuneSynchronize();
-  destructTuneBuilder(&tune);
+  resetTuneBuilder(&tune);
 
   return PROG_EXIT_SUCCESS;
 }

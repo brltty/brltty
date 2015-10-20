@@ -29,8 +29,9 @@
 
 static void
 logTuneProblem (TuneBuilder *tune, const char *problem) {
-  logMessage(LOG_ERR, "%s[%u]: %s",
-             tune->source.name, tune->source.index, problem);
+  logMessage(LOG_ERR, "%s[%u]: %s: %s",
+             tune->source.name, tune->source.index,
+             problem, tune->source.text);
 }
 
 int
@@ -185,10 +186,10 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
     }
 
     {
-      char sign = **operand;
+      char accidental = **operand;
       int increment;
 
-      switch (sign) {
+      switch (accidental) {
         case '+':
           increment = 1;
           break;
@@ -198,14 +199,14 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
           break;
 
         default:
-          goto noSign;
+          goto noAccidental;
       }
 
       do {
         noteNumber += increment;
-      } while (*++*operand == sign);
+      } while (*++*operand == accidental);
     }
-  noSign:
+  noAccidental:
 
     if (noteNumber < lowestNote) {
       logTuneProblem(tune, "note too low");
@@ -250,11 +251,14 @@ parseTone (TuneBuilder *tune, const char *operand) {
 
 static int
 parseTuneOperand (TuneBuilder *tune, const char *operand) {
+  tune->source.text = operand;
   return parseTone(tune, operand);
 }
 
 int
 parseTuneLine (TuneBuilder *tune, const char *line) {
+  tune->source.text = line;
+
   char buffer[strlen(line) + 1];
   strcpy(buffer, line);
 
@@ -270,17 +274,13 @@ parseTuneLine (TuneBuilder *tune, const char *line) {
   return 1;
 }
 
-static void
-initializeTones (TuneBuilder *tune) {
+void
+initializeTuneBuilder (TuneBuilder *tune) {
+  memset(tune, 0, sizeof(*tune));
+
   tune->tones.array = NULL;
   tune->tones.size = 0;
   tune->tones.count = 0;
-}
-
-void
-constructTuneBuilder (TuneBuilder *tune) {
-  memset(tune, 0, sizeof(*tune));
-  initializeTones(tune);
 
   tune->tempo.name = "tempo (beats per minute)";
   tune->tempo.minimum = 40;
@@ -295,12 +295,13 @@ constructTuneBuilder (TuneBuilder *tune) {
   tune->meter.numerator = tune->meter.denominator;
   tune->meter.numerator.name = "meter numerator";
 
+  tune->source.text = "";
   tune->source.name = "";
   tune->source.index = 0;
 }
 
 void
-destructTuneBuilder (TuneBuilder *tune) {
+resetTuneBuilder (TuneBuilder *tune) {
   if (tune->tones.array) free(tune->tones.array);
-  initializeTones(tune);
+  initializeTuneBuilder(tune);
 }

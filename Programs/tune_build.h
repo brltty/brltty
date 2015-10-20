@@ -47,13 +47,14 @@ typedef struct {
   } meter;
 
   struct {
+    const char *text;
     const char *name;
     unsigned int index;
   } source;
 } TuneBuilder;
 
-extern void constructTuneBuilder (TuneBuilder *tune);
-extern void destructTuneBuilder (TuneBuilder *tune);
+extern void initializeTuneBuilder (TuneBuilder *tune);
+extern void resetTuneBuilder (TuneBuilder *tune);
 
 extern int parseTuneLine (TuneBuilder *tune, const char *line);
 extern int endTune (TuneBuilder *tune);
