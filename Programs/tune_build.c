@@ -28,7 +28,9 @@
 #include "notes.h"
 
 static void
-logTuneProblem (TuneBuilder *tune, const char *problem) {
+logSyntaxError (TuneBuilder *tune, const char *problem) {
+  tune->status = TUNE_BUILD_SYNTAX;
+
   logMessage(LOG_ERR, "%s[%u]: %s: %s",
              tune->source.name, tune->source.index,
              problem, tune->source.text);
@@ -41,6 +43,7 @@ addTone (TuneBuilder *tune, const FrequencyElement *tone) {
     FrequencyElement *newArray;
 
     if (!(newArray = realloc(tune->tones.array, ARRAY_SIZE(newArray, newSize)))) {
+      tune->status = TUNE_BUILD_FATAL;
       logMallocError();
       return 0;
     }
@@ -106,7 +109,7 @@ parseDuration (TuneBuilder *tune, const char **operand, int *duration) {
     unsigned int value;
 
     if (!parseNumber(&value, operand, 1, 1, INT_MAX)) {
-      logTuneProblem(tune, "invalid absolute duration");
+      logSyntaxError(tune, "invalid absolute duration");
       return 0;
     }
 
@@ -120,7 +123,7 @@ parseDuration (TuneBuilder *tune, const char **operand, int *duration) {
       *operand += 1;
 
       if (!parseNumber(&multiplier, operand, 1, 1, 16)) {
-        logTuneProblem(tune, "invalid multiplier");
+        logSyntaxError(tune, "invalid multiplier");
         return 0;
       }
     } else {
@@ -131,7 +134,7 @@ parseDuration (TuneBuilder *tune, const char **operand, int *duration) {
       *operand += 1;
 
       if (!parseNumber(&divisor, operand, 1, 1, 128)) {
-        logTuneProblem(tune, "invalid divisor");
+        logSyntaxError(tune, "invalid divisor");
         return 0;
       }
     } else {
@@ -168,7 +171,7 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
         unsigned int octave = offset;
 
         if (!parseNumber(&octave, operand, 0, 0, 9)) {
-          logTuneProblem(tune, "invalid octave");
+          logSyntaxError(tune, "invalid octave");
           return 0;
         }
 
@@ -178,7 +181,7 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
       unsigned int number;
 
       if (!parseNumber(&number, operand, 1, lowestNote, highestNote)) {
-        logTuneProblem(tune, "invalid note");
+        logSyntaxError(tune, "invalid note");
         return 0;
       }
 
@@ -209,12 +212,12 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
   noAccidental:
 
     if (noteNumber < lowestNote) {
-      logTuneProblem(tune, "note too low");
+      logSyntaxError(tune, "note too low");
       return 0;
     }
 
     if (noteNumber > highestNote) {
-      logTuneProblem(tune, "note too high");
+      logSyntaxError(tune, "note too high");
       return 0;
     }
 
@@ -242,7 +245,7 @@ parseTone (TuneBuilder *tune, const char *operand) {
   }
 
   if (*operand) {
-    logTuneProblem(tune, "extra data");
+    logSyntaxError(tune, "extra data");
     return 0;
   }
 
@@ -298,6 +301,8 @@ initializeTuneBuilder (TuneBuilder *tune) {
   tune->source.text = "";
   tune->source.name = "";
   tune->source.index = 0;
+
+  tune->status = TUNE_BUILD_OK;
 }
 
 void

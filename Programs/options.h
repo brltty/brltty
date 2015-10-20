@@ -20,6 +20,7 @@
 #define BRLTTY_INCLUDED_OPTIONS
 
 #include "program.h"
+#include "file.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -98,6 +99,17 @@ extern ProgramExitStatus processOptions (
 }
 
 extern void resetOptions (const OptionsDescriptor *descriptor);
+
+typedef struct {
+  void (*beginStream) (const char *name, void *data);
+  LineHandler *handleLine;
+  void *data;
+} InputFilesProcessingParameters;
+
+extern ProgramExitStatus processInputFiles (
+  char **paths, int count,
+  const InputFilesProcessingParameters *parameters
+);
 
 #ifdef __cplusplus
 }

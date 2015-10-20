@@ -25,6 +25,12 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef enum {
+  TUNE_BUILD_OK,
+  TUNE_BUILD_SYNTAX,
+  TUNE_BUILD_FATAL
+} TuneBuildStatus;
+
 typedef struct {
   const char *name;
   unsigned char minimum;
@@ -51,6 +57,8 @@ typedef struct {
     const char *name;
     unsigned int index;
   } source;
+
+  TuneBuildStatus status;
 } TuneBuilder;
 
 extern void initializeTuneBuilder (TuneBuilder *tune);
