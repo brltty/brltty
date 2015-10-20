@@ -86,6 +86,9 @@ BEGIN_OPTION_TABLE(programOptions)
 #endif /* HAVE_MIDI_SUPPORT */
 END_OPTION_TABLE
 
+static unsigned char tempo = 108;
+static unsigned char denominator = 4;
+
 static void
 logProblem (const char *problem) {
   logMessage(LOG_ERR, "%s", problem);
@@ -136,8 +139,40 @@ parseDuration (const char **operand, int *duration) {
       break;
     }
 
+    case '/': {
+      *operand += 1;
+
+      static const unsigned int minimum = 1;
+      static const unsigned int maximum = 128;
+      unsigned int divisor;
+
+      if (!parseNumber(&divisor, operand, &minimum, &maximum, 1)) {
+        logProblem("invalid divisor");
+        return 0;
+      }
+
+      *duration = (60000 * denominator) / (tempo * divisor);
+      break;
+    }
+
+    case '*': {
+      *operand += 1;
+
+      static const unsigned int minimum = 1;
+      static const unsigned int maximum = 16;
+      unsigned int multiplier;
+
+      if (!parseNumber(&multiplier, operand, &minimum, &maximum, 1)) {
+        logProblem("invalid multiplier");
+        return 0;
+      }
+
+      *duration = (60000 * denominator * multiplier) / tempo;
+      break;
+    }
+
     default:
-      *duration = 256;
+      *duration = 60000 / tempo;
       break;
   }
 
@@ -231,6 +266,21 @@ static int
 parseTone (const char *operand, unsigned char *note, int *duration) {
   if (!parseNote(&operand, note)) return 0;
   if (!parseDuration(&operand, duration)) return 0;
+
+  {
+    int increment = *duration;
+
+    while (*operand == '.') {
+      *duration += (increment /= 2);
+      operand += 1;
+    }
+  }
+
+  if (*operand) {
+    logProblem("extra data");
+    return 0;
+  }
+
   return 1;
 }
 
