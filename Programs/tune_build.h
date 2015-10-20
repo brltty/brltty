@@ -56,6 +56,8 @@ extern void constructTuneBuilder (TuneBuilder *tune);
 extern void destructTuneBuilder (TuneBuilder *tune);
 
 extern int parseTuneLine (TuneBuilder *tune, const char *line);
+extern int endTune (TuneBuilder *tune);
+
 extern int addTone (TuneBuilder *tune, const FrequencyElement *tone);
 extern int addNote (TuneBuilder *tune, unsigned char note, int duration);
 

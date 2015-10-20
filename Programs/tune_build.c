@@ -58,6 +58,12 @@ addNote (TuneBuilder *tune, unsigned char note, int duration) {
   return addTone(tune, &tone);
 }
 
+int
+endTune (TuneBuilder *tune) {
+  FrequencyElement tone = FREQ_STOP();
+  return addTone(tune, &tone);
+}
+
 static int
 parseNumber (
   unsigned int *value, const char **operand, int required,

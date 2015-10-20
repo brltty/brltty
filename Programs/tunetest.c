@@ -111,11 +111,7 @@ main (int argc, char *argv[]) {
     argv += 1, argc -= 1;
   }
 
-  {
-    FrequencyElement tone = FREQ_STOP();
-    if (!addTone(&tune, &tone)) return PROG_EXIT_FATAL;
-  }
-
+  if (!endTune(&tune)) return PROG_EXIT_FATAL;
   if (!setTuneDevice()) return PROG_EXIT_SEMANTIC;
   tunePlayFrequencies(tune.tones.array);
   tuneSynchronize();
