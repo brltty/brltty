@@ -1020,8 +1020,13 @@ processInputStream (
     parameters->beginStream(name, parameters->data);
   }
 
-  return processLines(stream, parameters->handleLine, parameters->data)?
-         PROG_EXIT_SUCCESS: PROG_EXIT_FATAL;
+  int ok = processLines(stream, parameters->handleLine, parameters->data);
+
+  if (parameters->endStream) {
+    parameters->endStream(!ok, parameters->data);
+  }
+
+  return ok? PROG_EXIT_SUCCESS: PROG_EXIT_FATAL;
 }
 
 static ProgramExitStatus

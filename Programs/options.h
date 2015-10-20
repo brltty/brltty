@@ -102,6 +102,7 @@ extern void resetOptions (const OptionsDescriptor *descriptor);
 
 typedef struct {
   void (*beginStream) (const char *name, void *data);
+  void (*endStream) (int incomplete, void *data);
   LineHandler *handleLine;
   void *data;
 } InputFilesProcessingParameters;

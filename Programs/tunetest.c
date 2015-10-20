@@ -88,18 +88,36 @@ BEGIN_OPTION_TABLE(programOptions)
 #endif /* HAVE_MIDI_SUPPORT */
 END_OPTION_TABLE
 
-static int
-handleTuneLine (char *line, void *data) {
-  TuneBuilder *tune = data;
-  tune->source.index += 1;
-  return parseTuneLine(tune, line);
-}
-
 static void
 beginTuneStream (const char *name, void *data) {
   TuneBuilder *tune = data;
   resetTuneBuilder(tune);
   tune->source.name = name;
+}
+
+static void
+playTune (TuneBuilder *tune) {
+  if (tune->status == TUNE_BUILD_OK) {
+    if (endTune(tune)) {
+      tunePlayFrequencies(tune->tones.array);
+      tuneSynchronize();
+    }
+  }
+}
+
+static void
+endTuneStream (int incomplete, void *data) {
+  if (!incomplete) {
+    TuneBuilder *tune = data;
+    playTune(tune);
+  }
+}
+
+static int
+handleTuneLine (char *line, void *data) {
+  TuneBuilder *tune = data;
+  tune->source.index += 1;
+  return parseTuneLine(tune, line);
 }
 
 int
@@ -121,52 +139,41 @@ main (int argc, char *argv[]) {
   if (!parseTuneInstrument(opt_midiInstrument)) return PROG_EXIT_SYNTAX;
 #endif /* HAVE_MIDI_SUPPORT */
 
-  ProgramExitStatus exitStatus;
+  if (!setTuneDevice()) return PROG_EXIT_SEMANTIC;
   TuneBuilder tune;
   initializeTuneBuilder(&tune);
+  ProgramExitStatus exitStatus;
 
   if (opt_fromFiles) {
     const InputFilesProcessingParameters parameters = {
       .beginStream = beginTuneStream,
+      .endStream = endTuneStream,
       .handleLine = handleTuneLine,
       .data = &tune
     };
 
     exitStatus = processInputFiles(argv, argc, &parameters);
-  } else {
+  } else if (argc) {
+    exitStatus = PROG_EXIT_SUCCESS;
     tune.source.name = "<command-line>";
 
-    if (argc) {
-      exitStatus = PROG_EXIT_SUCCESS;
+    do {
+      tune.source.index += 1;
+      if (!parseTuneLine(&tune, *argv)) break;
+      argv += 1;
+    } while (argc -= 1);
 
-      do {
-        tune.source.index += 1;
-        if (!parseTuneLine(&tune, *argv)) break;
-        argv += 1;
-      } while (argc -= 1);
-    } else {
-      logMessage(LOG_ERR, "missing tune");
-      exitStatus = PROG_EXIT_SYNTAX;
-    }
+    playTune(&tune);
+  } else {
+    logMessage(LOG_ERR, "missing tune");
+    exitStatus = PROG_EXIT_SYNTAX;
   }
 
   if (exitStatus == PROG_EXIT_SUCCESS) {
     switch (tune.status) {
-      case TUNE_BUILD_OK: {
-        exitStatus = PROG_EXIT_FATAL;
-
-        if (endTune(&tune)) {
-          if (setTuneDevice()) {
-            tunePlayFrequencies(tune.tones.array);
-            tuneSynchronize();
-            exitStatus = PROG_EXIT_SUCCESS;
-          } else {
-            exitStatus = PROG_EXIT_SEMANTIC;
-          }
-        }
-
+      case TUNE_BUILD_OK:
+        exitStatus = PROG_EXIT_SUCCESS;
         break;
-      }
 
       case TUNE_BUILD_SYNTAX:
         exitStatus = PROG_EXIT_SYNTAX;
