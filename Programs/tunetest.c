@@ -146,78 +146,84 @@ parseDuration (const char **operand, int *duration) {
 
 static int
 parseNote (const char **operand, unsigned char *note) {
-  const unsigned char lowestNote = getLowestNote();
-  const unsigned char highestNote = getHighestNote();
-  int noteNumber = NOTE_MIDDLE_C + 9;
-
-  static const char letters[] = "cdefgab";
-  const char *letter = strchr(letters, **operand);
-
-  if (letter && *letter) {
-    static const unsigned char offsets[] = {0, 2, 4, 5, 7, 9, 11};
-
-    noteNumber = NOTE_MIDDLE_C + offsets[letter - letters];
+  if (**operand == 'r') {
     *operand += 1;
+    *note = 0;
+  } else {
+    const unsigned char lowestNote = getLowestNote();
+    const unsigned char highestNote = getHighestNote();
+    int noteNumber;
 
-    {
-      static const unsigned int maximum = 9;
-      static const unsigned int offset = 4;
-      unsigned int octave = offset;
+    static const char letters[] = "cdefgab";
+    const char *letter = strchr(letters, **operand);
 
-      if (!parseNumber(&octave, operand, NULL, &maximum, 0)) {
-        logProblem("invalid octave");
+    if (letter && *letter) {
+      static const unsigned char offsets[] = {0, 2, 4, 5, 7, 9, 11};
+
+      noteNumber = NOTE_MIDDLE_C + offsets[letter - letters];
+      *operand += 1;
+
+      {
+        static const unsigned int maximum = 9;
+        static const unsigned int offset = 4;
+        unsigned int octave = offset;
+
+        if (!parseNumber(&octave, operand, NULL, &maximum, 0)) {
+          logProblem("invalid octave");
+          return 0;
+        }
+
+        noteNumber += ((int)octave - (int)offset) * NOTES_PER_OCTAVE;
+      }
+    } else {
+      const unsigned int minimum = lowestNote;
+      const unsigned int maximum = highestNote;
+      unsigned int number;
+
+      if (!parseNumber(&number, operand, &minimum, &maximum, 1)) {
+        logProblem("invalid note");
         return 0;
       }
 
-      noteNumber += ((int)octave - (int)offset) * NOTES_PER_OCTAVE;
+      noteNumber = number;
     }
-  } else {
-    const unsigned int minimum = lowestNote;
-    const unsigned int maximum = highestNote;
-    unsigned int number = noteNumber;
 
-    if (!parseNumber(&number, operand, &minimum, &maximum, 0)) {
-      logProblem("invalid note");
+    {
+      char sign = **operand;
+      int increment;
+
+      switch (sign) {
+        case '+':
+          increment = 1;
+          break;
+
+        case '-':
+          increment = -1;
+          break;
+
+        default:
+          goto noSign;
+      }
+
+      do {
+        noteNumber += increment;
+      } while (*++*operand == sign);
+    }
+  noSign:
+
+    if (noteNumber < lowestNote) {
+      logProblem("note too low");
       return 0;
     }
 
-    noteNumber = number;
-  }
-
-  {
-    char sign = **operand;
-    int increment;
-
-    switch (sign) {
-      case '+':
-        increment = 1;
-        break;
-
-      case '-':
-        increment = -1;
-        break;
-
-      default:
-        goto noSign;
+    if (noteNumber > highestNote) {
+      logProblem("note too high");
+      return 0;
     }
 
-    do {
-      noteNumber += increment;
-    } while (*++*operand == sign);
-  }
-noSign:
-
-  if (noteNumber < lowestNote) {
-    logProblem("note too low");
-    return 0;
+    *note = noteNumber;
   }
 
-  if (noteNumber > highestNote) {
-    logProblem("note too high");
-    return 0;
-  }
-
-  *note = noteNumber;
   return 1;
 }
 
