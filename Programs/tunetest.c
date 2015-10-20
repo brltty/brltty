@@ -98,11 +98,17 @@ typedef struct {
     unsigned int size;
     unsigned int count;
   } tones;
+
+  struct {
+    const char *name;
+    unsigned int index;
+  } source;
 } TuneData;
 
 static void
-logProblem (const char *problem) {
-  logMessage(LOG_ERR, "%s", problem);
+logTuneProblem (TuneData *tune, const char *problem) {
+  logMessage(LOG_ERR, "%s[%u]: %s",
+             tune->source.name, tune->source.index, problem);
 }
 
 static int
@@ -167,7 +173,7 @@ parseDuration (TuneData *tune, const char **operand, int *duration) {
       unsigned int value;
 
       if (!parseNumber(&value, operand, &minimum, &maximum, 1)) {
-        logProblem("invalid absolute duration");
+        logTuneProblem(tune, "invalid absolute duration");
         return 0;
       }
 
@@ -183,7 +189,7 @@ parseDuration (TuneData *tune, const char **operand, int *duration) {
       unsigned int divisor;
 
       if (!parseNumber(&divisor, operand, &minimum, &maximum, 1)) {
-        logProblem("invalid divisor");
+        logTuneProblem(tune, "invalid divisor");
         return 0;
       }
 
@@ -199,7 +205,7 @@ parseDuration (TuneData *tune, const char **operand, int *duration) {
       unsigned int multiplier;
 
       if (!parseNumber(&multiplier, operand, &minimum, &maximum, 1)) {
-        logProblem("invalid multiplier");
+        logTuneProblem(tune, "invalid multiplier");
         return 0;
       }
 
@@ -216,7 +222,7 @@ parseDuration (TuneData *tune, const char **operand, int *duration) {
 }
 
 static int
-parseNote (const char **operand, unsigned char *note) {
+parseNote (TuneData *tune, const char **operand, unsigned char *note) {
   if (**operand == 'r') {
     *operand += 1;
     *note = 0;
@@ -240,7 +246,7 @@ parseNote (const char **operand, unsigned char *note) {
         unsigned int octave = offset;
 
         if (!parseNumber(&octave, operand, NULL, &maximum, 0)) {
-          logProblem("invalid octave");
+          logTuneProblem(tune, "invalid octave");
           return 0;
         }
 
@@ -252,7 +258,7 @@ parseNote (const char **operand, unsigned char *note) {
       unsigned int number;
 
       if (!parseNumber(&number, operand, &minimum, &maximum, 1)) {
-        logProblem("invalid note");
+        logTuneProblem(tune, "invalid note");
         return 0;
       }
 
@@ -283,12 +289,12 @@ parseNote (const char **operand, unsigned char *note) {
   noSign:
 
     if (noteNumber < lowestNote) {
-      logProblem("note too low");
+      logTuneProblem(tune, "note too low");
       return 0;
     }
 
     if (noteNumber > highestNote) {
-      logProblem("note too high");
+      logTuneProblem(tune, "note too high");
       return 0;
     }
 
@@ -301,7 +307,7 @@ parseNote (const char **operand, unsigned char *note) {
 static int
 parseTone (TuneData *tune, const char *operand) {
   unsigned char note;
-  if (!parseNote(&operand, &note)) return 0;
+  if (!parseNote(tune, &operand, &note)) return 0;
 
   int duration;
   if (!parseDuration(tune, &operand, &duration)) return 0;
@@ -316,11 +322,33 @@ parseTone (TuneData *tune, const char *operand) {
   }
 
   if (*operand) {
-    logProblem("extra data");
+    logTuneProblem(tune, "extra data");
     return 0;
   }
 
   return addNote(tune, note, duration);
+}
+
+static int
+parseTuneOperand (TuneData *tune, const char *operand) {
+  return parseTone(tune, operand);
+}
+
+static int
+parseTuneLine (TuneData *tune, const char *line) {
+  char buffer[strlen(line) + 1];
+  strcpy(buffer, line);
+
+  static const char delimiters[] = " \t\r\n";
+  char *string = buffer;
+  char *operand;
+
+  while ((operand = strtok(string, delimiters))) {
+    if (!parseTuneOperand(tune, operand)) return 0;
+    string = NULL;
+  }
+
+  return 1;
 }
 
 int
@@ -358,11 +386,17 @@ main (int argc, char *argv[]) {
       .array = NULL,
       .size = 0,
       .count = 0
+    },
+
+    .source = {
+      .name = "<command-line>",
+      .index = 0
     }
   };
 
   while (argc) {
-    if (!parseTone(&tune, *argv)) return PROG_EXIT_SYNTAX;
+    tune.source.index += 1;
+    if (!parseTuneLine(&tune, *argv)) return PROG_EXIT_SYNTAX;
     argv += 1, argc -= 1;
   }
 
