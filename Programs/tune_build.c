@@ -67,12 +67,6 @@ addNote (TuneBuilder *tune, unsigned char note, int duration) {
   return addTone(tune, &tone);
 }
 
-int
-endTune (TuneBuilder *tune) {
-  FrequencyElement tone = FREQ_STOP();
-  return addTone(tune, &tone);
-}
-
 static int
 parseNumber (
   TuneBuilder *tune,
@@ -286,11 +280,13 @@ parseTone (TuneBuilder *tune, const char **operand) {
     }
   }
 
-  int onDuration = (duration * tune->percentage.current) / 100;
-  if (!addNote(tune, note, onDuration)) return 0;
-  if (!addNote(tune, 0, (duration - onDuration))) return 0;
+  if (note) {
+    int onDuration = (duration * tune->percentage.current) / 100;
+    if (!addNote(tune, note, onDuration)) return 0;
+    duration -= onDuration;
+  }
 
-  return 1;
+  return addNote(tune, 0, duration);
 }
 
 static int
@@ -345,6 +341,23 @@ parseTuneLine (TuneBuilder *tune, const char *line) {
   return 1;
 }
 
+int
+endTune (TuneBuilder *tune) {
+  FrequencyElement tone = FREQ_STOP();
+  return addTone(tune, &tone);
+}
+
+static inline void
+setParameter (
+  TuneParameter *parameter, const char *name,
+  unsigned char minimum, unsigned char maximum, unsigned char current
+) {
+  parameter->name = name;
+  parameter->minimum = minimum;
+  parameter->maximum = maximum;
+  parameter->current = current;
+}
+
 void
 initializeTuneBuilder (TuneBuilder *tune) {
   memset(tune, 0, sizeof(*tune));
@@ -353,21 +366,10 @@ initializeTuneBuilder (TuneBuilder *tune) {
   tune->tones.size = 0;
   tune->tones.count = 0;
 
-  tune->tempo.name = "tempo (beats per minute)";
-  tune->tempo.minimum = 40;
-  tune->tempo.maximum = UINT8_MAX;
-  tune->tempo.current = 108;
+  setParameter(&tune->tempo, "tempo", 40, UINT8_MAX, 108);
+  setParameter(&tune->percentage, "percentage", 1, 100, 80);
 
-  tune->percentage.name = "percentage";
-  tune->percentage.minimum = 1;
-  tune->percentage.maximum = 100;
-  tune->percentage.current = 80;
-
-  tune->meter.denominator.name = "meter denominator";
-  tune->meter.denominator.minimum = 2;
-  tune->meter.denominator.maximum = 128;
-  tune->meter.denominator.current = 4;
-
+  setParameter(&tune->meter.denominator, "meter denominator", 2, 128, 4);
   tune->meter.numerator = tune->meter.denominator;
   tune->meter.numerator.name = "meter numerator";
 
