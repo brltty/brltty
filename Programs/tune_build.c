@@ -60,9 +60,8 @@ addNote (TuneBuilder *tune, unsigned char note, int duration) {
 
 static int
 parseNumber (
-  unsigned int *value, const char **operand,
-  const unsigned int *minimum, const unsigned int *maximum,
-  int required
+  unsigned int *value, const char **operand, int required,
+  const unsigned int minimum, const unsigned int maximum
 ) {
   if (isdigit(**operand)) {
     errno = 0;
@@ -72,8 +71,8 @@ parseNumber (
     if (errno) return 0;
     if (ul > UINT_MAX) return 0;
 
-    if (minimum && (ul < *minimum)) return 0;
-    if (maximum && (ul > *maximum)) return 0;
+    if (ul < minimum) return 0;
+    if (ul > maximum) return 0;
 
     *value = ul;
     *operand = end;
@@ -84,60 +83,55 @@ parseNumber (
   return 1;
 }
 
+static inline int
+calculateToneDuration (TuneBuilder *tune, uint8_t multiplier, uint8_t divisor) {
+  return (60000 * multiplier) / (tune->tempo.current * divisor);
+}
+
+static inline int
+calculateNoteDuration (TuneBuilder *tune, uint8_t multiplier, uint8_t divisor) {
+  return calculateToneDuration(tune, (tune->meter.denominator.current * multiplier), divisor);
+}
+
 static int
 parseDuration (TuneBuilder *tune, const char **operand, int *duration) {
-  switch (**operand) {
-    case '@': {
-      *operand += 1;
+  if (**operand == '@') {
+    unsigned int value;
 
-      static const unsigned int minimum = 1;
-      static const unsigned int maximum = INT_MAX;
-      unsigned int value;
-
-      if (!parseNumber(&value, operand, &minimum, &maximum, 1)) {
-        logTuneProblem(tune, "invalid absolute duration");
-        return 0;
-      }
-
-      *duration = value;
-      break;
+    if (!parseNumber(&value, operand, 1, 1, INT_MAX)) {
+      logTuneProblem(tune, "invalid absolute duration");
+      return 0;
     }
 
-    case '/': {
+    *duration = value;
+    *operand += 1;
+  } else {
+    unsigned int multiplier;
+    unsigned int divisor;
+
+    if (**operand == '*') {
       *operand += 1;
 
-      static const unsigned int minimum = 1;
-      static const unsigned int maximum = 128;
-      unsigned int divisor;
-
-      if (!parseNumber(&divisor, operand, &minimum, &maximum, 1)) {
-        logTuneProblem(tune, "invalid divisor");
-        return 0;
-      }
-
-      *duration = (60000 * tune->meter.denominator) / (tune->tempo * divisor);
-      break;
-    }
-
-    case '*': {
-      *operand += 1;
-
-      static const unsigned int minimum = 1;
-      static const unsigned int maximum = 16;
-      unsigned int multiplier;
-
-      if (!parseNumber(&multiplier, operand, &minimum, &maximum, 1)) {
+      if (!parseNumber(&multiplier, operand, 1, 1, 16)) {
         logTuneProblem(tune, "invalid multiplier");
         return 0;
       }
-
-      *duration = (60000 * tune->meter.denominator * multiplier) / tune->tempo;
-      break;
+    } else {
+      multiplier = 1;
     }
 
-    default:
-      *duration = 60000 / tune->tempo;
-      break;
+    if (**operand == '/') {
+      *operand += 1;
+
+      if (!parseNumber(&divisor, operand, 1, 1, 128)) {
+        logTuneProblem(tune, "invalid divisor");
+        return 0;
+      }
+    } else {
+      divisor = tune->meter.denominator.current;
+    }
+
+    *duration = calculateNoteDuration(tune, multiplier, divisor);
   }
 
   return 1;
@@ -163,11 +157,10 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
       *operand += 1;
 
       {
-        static const unsigned int maximum = 9;
         static const unsigned int offset = 4;
         unsigned int octave = offset;
 
-        if (!parseNumber(&octave, operand, NULL, &maximum, 0)) {
+        if (!parseNumber(&octave, operand, 0, 0, 9)) {
           logTuneProblem(tune, "invalid octave");
           return 0;
         }
@@ -175,11 +168,9 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
         noteNumber += ((int)octave - (int)offset) * NOTES_PER_OCTAVE;
       }
     } else {
-      const unsigned int minimum = lowestNote;
-      const unsigned int maximum = highestNote;
       unsigned int number;
 
-      if (!parseNumber(&number, operand, &minimum, &maximum, 1)) {
+      if (!parseNumber(&number, operand, 1, lowestNote, highestNote)) {
         logTuneProblem(tune, "invalid note");
         return 0;
       }
@@ -285,9 +276,18 @@ constructTuneBuilder (TuneBuilder *tune) {
   memset(tune, 0, sizeof(*tune));
   initializeTones(tune);
 
-  tune->tempo = 108;
+  tune->tempo.name = "tempo (beats per minute)";
+  tune->tempo.minimum = 40;
+  tune->tempo.maximum = UINT8_MAX;
+  tune->tempo.current = 108;
 
-  tune->meter.denominator = 4;
+  tune->meter.denominator.name = "meter denominator";
+  tune->meter.denominator.minimum = 2;
+  tune->meter.denominator.maximum = 128;
+  tune->meter.denominator.current = 4;
+
+  tune->meter.numerator = tune->meter.denominator;
+  tune->meter.numerator.name = "meter numerator";
 
   tune->source.name = "";
   tune->source.index = 0;

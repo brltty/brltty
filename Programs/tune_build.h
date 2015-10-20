@@ -26,17 +26,25 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct {
-  unsigned char tempo;
+  const char *name;
+  unsigned char minimum;
+  unsigned char maximum;
+  unsigned char current;
+} TuneParameter;
 
-  struct {
-    unsigned char denominator;
-  } meter;
-
+typedef struct {
   struct {
     FrequencyElement *array;
     unsigned int size;
     unsigned int count;
   } tones;
+
+  TuneParameter tempo;
+
+  struct {
+    TuneParameter numerator;
+    TuneParameter denominator;
+  } meter;
 
   struct {
     const char *name;
