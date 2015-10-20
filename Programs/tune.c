@@ -37,6 +37,12 @@ static int openErrorLevel = LOG_ERR;
 static const NoteMethods *noteMethods = NULL;
 static NoteDevice *noteDevice = NULL;
 
+static int
+flushNoteDevice (void) {
+  if (!noteDevice) return 1;
+  return noteMethods->flush(noteDevice);
+}
+
 static void
 closeTuneDevice (void) {
   if (tuneDeviceCloseTimer) {
@@ -126,7 +132,7 @@ handleTuneRequest_playNotes (const NoteElement *tune) {
     tune += 1;
   }
 
-  noteMethods->flush(noteDevice);
+  flushNoteDevice();
 }
 
 static void
@@ -137,7 +143,7 @@ handleTuneRequest_playFrequencies (const FrequencyElement *tune) {
     tune += 1;
   }
 
-  noteMethods->flush(noteDevice);
+  flushNoteDevice();
 }
 
 static void
