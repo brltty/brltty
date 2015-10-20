@@ -1010,3 +1010,56 @@ processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char **
   if (info.syntaxError) return PROG_EXIT_SYNTAX;
   return PROG_EXIT_SUCCESS;
 }
+
+static ProgramExitStatus
+processInputStream (
+  FILE *stream, const char *name,
+  const InputFilesProcessingParameters *parameters
+) {
+  if (parameters->beginStream) {
+    parameters->beginStream(name, parameters->data);
+  }
+
+  return processLines(stream, parameters->handleLine, parameters->data)?
+         PROG_EXIT_SUCCESS: PROG_EXIT_FATAL;
+}
+
+static ProgramExitStatus
+processStandardInput (const InputFilesProcessingParameters *parameters) {
+  return processInputStream(stdin, standardInputName, parameters);
+}
+
+static ProgramExitStatus
+processInputFile (const char *path, const InputFilesProcessingParameters *parameters) {
+  if (strcmp(path, standardStreamArgument) == 0) {
+    return processStandardInput(parameters);
+  }
+
+  {
+    FILE *stream = fopen(path, "r");
+
+    if (!stream) {
+      logMessage(LOG_ERR, "input file open error: %s: %s", path,strerror(errno));
+      return PROG_EXIT_FATAL;
+    }
+
+    ProgramExitStatus status = processInputStream(stream, path, parameters);
+    fclose(stream);
+    return status;
+  }
+}
+
+ProgramExitStatus
+processInputFiles (
+  char **paths, int count,
+  const InputFilesProcessingParameters *parameters
+) {
+  if (!count) return processStandardInput(parameters);
+
+  do {
+    ProgramExitStatus status = processInputFile(*paths++, parameters);
+    if (status != PROG_EXIT_SUCCESS) return status;
+  } while (count -= 1);
+
+  return PROG_EXIT_SUCCESS;
+}

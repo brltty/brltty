@@ -11,6 +11,7 @@
 /scrtest
 /spktest
 /tunetest
+/beep2pcm
 
 /revision_identifier.h
 /brlapi.h

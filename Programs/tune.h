@@ -20,6 +20,7 @@
 #define BRLTTY_INCLUDED_TUNE
 
 #include "tune_types.h"
+#include "note_types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,18 +30,28 @@ typedef struct {
   unsigned char note;     /* standard MIDI values (0 means silence) */
                           /* 1 through 127 are semitones, 60 is middle C */
   unsigned char duration; /* milliseconds (0 means stop) */
-} TuneElement;
+} NoteElement;
 
-#define TUNE_NOTE(duration,note) {note, duration}
-#define TUNE_REST(duration) TUNE_NOTE(duration, 0)
-#define TUNE_STOP() TUNE_REST(0)
+#define NOTE_PLAY(duration,note) {note, duration}
+#define NOTE_REST(duration) NOTE_PLAY(duration, 0)
+#define NOTE_STOP() NOTE_REST(0)
+
+typedef struct {
+  NOTE_FREQUENCY_TYPE frequency; /* Herz (0 means silence) */
+  int duration;        /* milliseconds (0 means stop) */
+} FrequencyElement;
+
+#define FREQ_PLAY(duration,frequency) {frequency, duration}
+#define FREQ_REST(duration) FREQ_PLAY(duration, 0)
+#define FREQ_STOP() FREQ_REST(0)
 
 extern void suppressTuneDeviceOpenErrors (void);
 
-extern void tunePlay (const TuneElement *tune);
+extern int tuneSetDevice (TuneDevice device);
+extern void tunePlayNotes (const NoteElement *tune);
+extern void tunePlayFrequencies (const FrequencyElement *tune);
 extern void tuneWait (int time);
-extern void tuneSync (void);
-extern int tuneDevice (TuneDevice device);
+extern void tuneSynchronize (void);
 
 #ifdef __cplusplus
 }

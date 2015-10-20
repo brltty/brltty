@@ -23,7 +23,7 @@
 #define NOTE_FREQUENCY_FACTOR 1000
 
 static const uint32_t noteFrequencies[] = {
-  /*   0 -5C  */     8176,
+  /*   0 rest */        0,
   /*   1 -5C# */     8662,
   /*   2 -5D  */     9177,
   /*   3 -5D# */     9723,
@@ -153,16 +153,21 @@ static const uint32_t noteFrequencies[] = {
   /* 127 +5G  */ 12543854
 };
 
-size_t
-getMaximumNote (void) {
+unsigned char
+getLowestNote (void) {
+  return 1;
+}
+
+unsigned char
+getHighestNote (void) {
   return ARRAY_COUNT(noteFrequencies) - 1;
 }
 
 static inline uint32_t
 getNoteFrequency (unsigned char note) {
-  size_t maximum = getMaximumNote();
+  unsigned char highestNote = getHighestNote();
 
-  if (note > maximum) note = maximum;
+  if (note > highestNote) note = highestNote;
   return noteFrequencies[note];
 }
 
@@ -177,3 +182,33 @@ getRealNoteFrequency (unsigned char note) {
   return (float)getNoteFrequency(note) / (float)NOTE_FREQUENCY_FACTOR;
 }
 #endif /* NO_FLOAT */
+
+unsigned char
+getNearestNote (NOTE_FREQUENCY_TYPE frequency) {
+  if (!frequency) return 0;
+
+  unsigned char lowestNote = getLowestNote();
+  if (frequency <= GET_NOTE_FREQUENCY(lowestNote)) return lowestNote;
+
+  unsigned char highestNote = getHighestNote();
+  if (frequency >= GET_NOTE_FREQUENCY(highestNote)) return highestNote;
+
+  while (lowestNote <= highestNote) {
+    unsigned char currentNote = (lowestNote + highestNote) / 2;
+
+    if (frequency < GET_NOTE_FREQUENCY(currentNote)) {
+      highestNote = currentNote - 1;
+    } else {
+      lowestNote = currentNote + 1;
+    }
+  }
+
+  unsigned char lowerNote = highestNote;
+  unsigned char higherNote = lowerNote + 1;
+
+  NOTE_FREQUENCY_TYPE lowerFrequency = GET_NOTE_FREQUENCY(lowerNote);
+  NOTE_FREQUENCY_TYPE higherFrequency = GET_NOTE_FREQUENCY(higherNote);
+
+  return ((frequency - lowerFrequency) < (higherFrequency - frequency))?
+         lowerNote: higherNote;
+}

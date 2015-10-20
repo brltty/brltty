@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_NOTES
 #define BRLTTY_INCLUDED_NOTES
 
+#include "note_types.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -26,18 +28,18 @@ extern "C" {
 #define NOTES_PER_OCTAVE 12
 #define NOTE_MIDDLE_C 60
 
-extern size_t getMaximumNote (void);
+extern unsigned char getLowestNote (void);
+extern unsigned char getHighestNote (void);
 extern uint32_t getIntegerNoteFrequency (unsigned char note);
+extern unsigned char getNearestNote (NOTE_FREQUENCY_TYPE frequency);
 
 #ifndef NO_FLOAT
 extern float getRealNoteFrequency (unsigned char note);
 #endif /* NO_FLOAT */
 
 #ifdef NO_FLOAT
-#define NOTE_FREQUENCY_TYPE uint32_t
 #define GET_NOTE_FREQUENCY getIntegerNoteFrequency
 #else /* NO_FLOAT */
-#define NOTE_FREQUENCY_TYPE float
 #define GET_NOTE_FREQUENCY getRealNoteFrequency
 #endif /* NO_FLOAT */
 
@@ -47,7 +49,8 @@ typedef struct {
   NoteDevice * (*construct) (int errorLevel);
   void (*destruct) (NoteDevice *device);
 
-  int (*play) (NoteDevice *device, unsigned char note, unsigned int duration);
+  int (*frequency) (NoteDevice *device, unsigned int duration, NOTE_FREQUENCY_TYPE frequency);
+  int (*note) (NoteDevice *device, unsigned int duration, unsigned char note);
   int (*flush) (NoteDevice *device);
 } NoteMethods;
 

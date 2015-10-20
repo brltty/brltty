@@ -37,6 +37,12 @@ static int openErrorLevel = LOG_ERR;
 static const NoteMethods *noteMethods = NULL;
 static NoteDevice *noteDevice = NULL;
 
+static int
+flushNoteDevice (void) {
+  if (!noteDevice) return 1;
+  return noteMethods->flush(noteDevice);
+}
+
 static void
 closeTuneDevice (void) {
   if (tuneDeviceCloseTimer) {
@@ -75,45 +81,69 @@ openTuneDevice (void) {
 }
 
 typedef enum {
-  TUNE_REQ_PLAY,
+  TUNE_REQ_SET_DEVICE,
+  TUNE_REQ_PLAY_NOTES,
+  TUNE_REQ_PLAY_FREQUENCIES,
   TUNE_REQ_WAIT,
-  TUNE_REQ_SYNC,
-  TUNE_REQ_DEVICE
+  TUNE_REQ_SYNCHRONIZE
 } TuneRequestType;
 
-typedef unsigned char TuneSyncMonitor;
+typedef unsigned char TuneSynchronizationMonitor;
 
 typedef struct {
   TuneRequestType type;
 
   union {
     struct {
-      const TuneElement *tune;
-    } play;
+      const NoteMethods *methods;
+    } setDevice;
+
+    struct {
+      const NoteElement *tune;
+    } playNotes;
+
+    struct {
+      const FrequencyElement *tune;
+    } playFrequencies;
 
     struct {
       int time;
     } wait;
 
     struct {
-      TuneSyncMonitor *monitor;
-    } sync;
-
-    struct {
-      const NoteMethods *methods;
-    } device;
-  } data;
+      TuneSynchronizationMonitor *monitor;
+    } synchronize;
+  } parameters;
 } TuneRequest;
 
 static void
-handleTuneRequest_play (const TuneElement *tune) {
+handleTuneRequest_setDevice (const NoteMethods *methods) {
+  if (methods != noteMethods) {
+    closeTuneDevice();
+    noteMethods = methods;
+  }
+}
+
+static void
+handleTuneRequest_playNotes (const NoteElement *tune) {
   while (tune->duration) {
     if (!openTuneDevice()) return;
-    if (!noteMethods->play(noteDevice, tune->note, tune->duration)) return;
+    if (!noteMethods->note(noteDevice, tune->duration, tune->note)) return;
     tune += 1;
   }
 
-  noteMethods->flush(noteDevice);
+  flushNoteDevice();
+}
+
+static void
+handleTuneRequest_playFrequencies (const FrequencyElement *tune) {
+  while (tune->duration) {
+    if (!openTuneDevice()) return;
+    if (!noteMethods->frequency(noteDevice, tune->duration, tune->frequency)) return;
+    tune += 1;
+  }
+
+  flushNoteDevice();
 }
 
 static void
@@ -122,36 +152,32 @@ handleTuneRequest_wait (int time) {
 }
 
 static void
-handleTuneRequest_sync (TuneSyncMonitor *monitor) {
+handleTuneRequest_synchronize (TuneSynchronizationMonitor *monitor) {
   *monitor = 1;
-}
-
-static void
-handleTuneRequest_device (const NoteMethods *methods) {
-  if (methods != noteMethods) {
-    closeTuneDevice();
-    noteMethods = methods;
-  }
 }
 
 static void
 handleTuneRequest (TuneRequest *req) {
   if (req) {
     switch (req->type) {
-      case TUNE_REQ_PLAY:
-        handleTuneRequest_play(req->data.play.tune);
+      case TUNE_REQ_SET_DEVICE:
+        handleTuneRequest_setDevice(req->parameters.setDevice.methods);
+        break;
+
+      case TUNE_REQ_PLAY_NOTES:
+        handleTuneRequest_playNotes(req->parameters.playNotes.tune);
+        break;
+
+      case TUNE_REQ_PLAY_FREQUENCIES:
+        handleTuneRequest_playFrequencies(req->parameters.playFrequencies.tune);
         break;
 
       case TUNE_REQ_WAIT:
-        handleTuneRequest_wait(req->data.wait.time);
+        handleTuneRequest_wait(req->parameters.wait.time);
         break;
 
-      case TUNE_REQ_SYNC:
-        handleTuneRequest_sync(req->data.sync.monitor);
-        break;
-
-      case TUNE_REQ_DEVICE:
-        handleTuneRequest_device(req->data.device.methods);
+      case TUNE_REQ_SYNCHRONIZE:
+        handleTuneRequest_synchronize(req->parameters.synchronize.monitor);
         break;
     }
 
@@ -198,7 +224,7 @@ ASYNC_CONDITION_TESTER(testTuneThreadStopped) {
 }
 
 typedef enum {
-  TUNE_MSG_STATE
+  TUNE_MSG_SET_STATE
 } TuneMessageType;
 
 typedef struct {
@@ -207,15 +233,15 @@ typedef struct {
   union {
     struct {
       TuneThreadState state;
-    } state;
-  } data;
+    } setState;
+  } parameters;
 } TuneMessage;
 
 static void
 handleTuneMessage (TuneMessage *msg) {
   switch (msg->type) {
-    case TUNE_MSG_STATE:
-      setTuneThreadState(msg->data.state.state);
+    case TUNE_MSG_SET_STATE:
+      setTuneThreadState(msg->parameters.setState.state);
       break;
   }
 
@@ -252,8 +278,8 @@ static void
 sendTuneThreadState (TuneThreadState state) {
   TuneMessage *msg;
 
-  if ((msg = newTuneMessage(TUNE_MSG_STATE))) {
-    msg->data.state.state = state;
+  if ((msg = newTuneMessage(TUNE_MSG_SET_STATE))) {
+    msg->parameters.setState.state = state;
     if (!sendTuneMessage(msg)) free(msg);
   }
 }
@@ -264,7 +290,7 @@ finishTuneRequest_stop (void) {
 }
 
 static void
-finishTuneRequest_sync (void) {
+finishTuneRequest_synchronize (void) {
   sendTuneMessage(NULL);
 }
 
@@ -274,8 +300,8 @@ ASYNC_EVENT_CALLBACK(handleTuneRequestEvent) {
 
   if (req) {
     switch (req->type) {
-      case TUNE_REQ_SYNC:
-        finish = finishTuneRequest_sync;
+      case TUNE_REQ_SYNCHRONIZE:
+        finish = finishTuneRequest_synchronize;
         break;
 
       default:
@@ -375,50 +401,8 @@ newTuneRequest (TuneRequestType type) {
   return NULL;
 }
 
-void
-tunePlay (const TuneElement *tune) {
-  TuneRequest *req;
-
-  if ((req = newTuneRequest(TUNE_REQ_PLAY))) {
-    req->data.play.tune = tune;
-    if (!sendTuneRequest(req)) free(req);
-  }
-}
-
-void
-tuneWait (int time) {
-  TuneRequest *req;
-
-  if ((req = newTuneRequest(TUNE_REQ_WAIT))) {
-    req->data.wait.time = time;
-    if (!sendTuneRequest(req)) free(req);
-  }
-}
-
-ASYNC_CONDITION_TESTER(testTuneSyncMonitor) {
-  TuneSyncMonitor *monitor = data;
-
-  return !!*monitor;
-}
-
-void
-tuneSync (void) {
-  TuneRequest *req;
-
-  if ((req = newTuneRequest(TUNE_REQ_SYNC))) {
-    TuneSyncMonitor monitor = 0;
-    req->data.sync.monitor = &monitor;
-
-    if (sendTuneRequest(req)) {
-      asyncWaitFor(testTuneSyncMonitor, &monitor);
-    } else {
-      free(req);
-    }
-  }
-}
-
 int
-tuneDevice (TuneDevice device) {
+tuneSetDevice (TuneDevice device) {
   const NoteMethods *methods;
 
   switch (device) {
@@ -453,13 +437,65 @@ tuneDevice (TuneDevice device) {
   {
     TuneRequest *req;
 
-    if ((req = newTuneRequest(TUNE_REQ_DEVICE))) {
-      req->data.device.methods = methods;
+    if ((req = newTuneRequest(TUNE_REQ_SET_DEVICE))) {
+      req->parameters.setDevice.methods = methods;
       if (!sendTuneRequest(req)) free(req);
     }
   }
 
   return 1;
+}
+
+void
+tunePlayNotes (const NoteElement *tune) {
+  TuneRequest *req;
+
+  if ((req = newTuneRequest(TUNE_REQ_PLAY_NOTES))) {
+    req->parameters.playNotes.tune = tune;
+    if (!sendTuneRequest(req)) free(req);
+  }
+}
+
+void
+tunePlayFrequencies (const FrequencyElement *tune) {
+  TuneRequest *req;
+
+  if ((req = newTuneRequest(TUNE_REQ_PLAY_FREQUENCIES))) {
+    req->parameters.playFrequencies.tune = tune;
+    if (!sendTuneRequest(req)) free(req);
+  }
+}
+
+void
+tuneWait (int time) {
+  TuneRequest *req;
+
+  if ((req = newTuneRequest(TUNE_REQ_WAIT))) {
+    req->parameters.wait.time = time;
+    if (!sendTuneRequest(req)) free(req);
+  }
+}
+
+ASYNC_CONDITION_TESTER(testTuneSynchronizationMonitor) {
+  TuneSynchronizationMonitor *monitor = data;
+
+  return !!*monitor;
+}
+
+void
+tuneSynchronize (void) {
+  TuneRequest *req;
+
+  if ((req = newTuneRequest(TUNE_REQ_SYNCHRONIZE))) {
+    TuneSynchronizationMonitor monitor = 0;
+    req->parameters.synchronize.monitor = &monitor;
+
+    if (sendTuneRequest(req)) {
+      asyncWaitFor(testTuneSynchronizationMonitor, &monitor);
+    } else {
+      free(req);
+    }
+  }
 }
 
 void

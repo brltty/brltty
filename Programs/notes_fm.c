@@ -18,8 +18,8 @@
 
 #include "prologue.h"
 
-#include "prefs.h"
 #include "log.h"
+#include "prefs.h"
 #include "async_wait.h"
 #include "notes.h"
 #include "fm.h"
@@ -61,17 +61,23 @@ fmDestruct (NoteDevice *device) {
 }
 
 static int
-fmPlay (NoteDevice *device, unsigned char note, unsigned int duration) {
-  logMessage(LOG_DEBUG, "tone: msec=%d note=%d",
-             duration, note);
+fmFrequency (NoteDevice *device, unsigned int duration, NOTE_FREQUENCY_TYPE frequency) {
+  uint32_t pitch = frequency;
+  logMessage(LOG_DEBUG, "tone: MSecs:%u Freq:%"PRIu32,
+             duration, pitch);
 
-  if (note) {
-    fmPlayTone(device->channelNumber, getIntegerNoteFrequency(note), duration, prefs.fmVolume);
+  if (pitch) {
+    fmPlayTone(device->channelNumber, pitch, duration, prefs.fmVolume);
   } else {
     asyncWait(duration);
   }
 
   return 1;
+}
+
+static int
+fmNote (NoteDevice *device, unsigned int duration, unsigned char note) {
+  return fmFrequency(device, duration, GET_NOTE_FREQUENCY(note));
 }
 
 static int
@@ -83,6 +89,7 @@ const NoteMethods fmNoteMethods = {
   .construct = fmConstruct,
   .destruct = fmDestruct,
 
-  .play = fmPlay,
+  .frequency = fmFrequency,
+  .note = fmNote,
   .flush = fmFlush
 };
