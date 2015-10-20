@@ -117,6 +117,29 @@ parseParameter (TuneBuilder *tune, TuneParameter *parameter, const char **operan
   return ok;
 }
 
+static int
+parseMeter (TuneBuilder *tune, const char **operand) {
+  if (!parseParameter(tune, &tune->meter.numerator, operand)) return 0;
+
+  if (**operand != '/') {
+    logSyntaxError(tune, "missing meter delimiter");
+    return 0;
+  }
+
+  *operand += 1;
+  return parseParameter(tune, &tune->meter.denominator, operand);
+}
+
+static int
+parsePercentage (TuneBuilder *tune, const char **operand) {
+  return parseParameter(tune, &tune->percentage, operand);
+}
+
+static int
+parseTempo (TuneBuilder *tune, const char **operand) {
+  return parseParameter(tune, &tune->tempo, operand);
+}
+
 static inline int
 calculateToneDuration (TuneBuilder *tune, uint8_t multiplier, uint8_t divisor) {
   return (60000 * multiplier) / (tune->tempo.current * divisor);
@@ -275,14 +298,19 @@ parseTuneOperand (TuneBuilder *tune, const char *operand) {
   tune->source.text = operand;
 
   switch (*operand) {
+    case 'm':
+      operand += 1;
+      if (!parseMeter(tune, &operand)) return 0;
+      break;
+
     case 'p':
       operand += 1;
-      if (!parseParameter(tune, &tune->percentage, &operand)) return 0;
+      if (!parsePercentage(tune, &operand)) return 0;
       break;
 
     case 't':
       operand += 1;
-      if (!parseParameter(tune, &tune->tempo, &operand)) return 0;
+      if (!parseTempo(tune, &operand)) return 0;
       break;
 
     default:
