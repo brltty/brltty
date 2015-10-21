@@ -147,6 +147,7 @@ calculateNoteDuration (TuneBuilder *tune, uint8_t multiplier, uint8_t divisor) {
 static int
 parseDuration (TuneBuilder *tune, const char **operand, int *duration) {
   if (**operand == '@') {
+    *operand += 1;
     TuneNumber value;
 
     if (!parseNumber(tune, &value, operand, 1, 1, INT_MAX, "absolute duration")) {
@@ -154,7 +155,6 @@ parseDuration (TuneBuilder *tune, const char **operand, int *duration) {
     }
 
     *duration = value;
-    *operand += 1;
   } else {
     TuneNumber multiplier;
     TuneNumber divisor;
@@ -180,6 +180,15 @@ parseDuration (TuneBuilder *tune, const char **operand, int *duration) {
     }
 
     *duration = calculateNoteDuration(tune, multiplier, divisor);
+  }
+
+  {
+    int increment = *duration;
+
+    while (**operand == '.') {
+      *duration += (increment /= 2);
+      *operand += 1;
+    }
   }
 
   return 1;
@@ -270,15 +279,6 @@ parseTone (TuneBuilder *tune, const char **operand) {
 
   int duration;
   if (!parseDuration(tune, operand, &duration)) return 0;
-
-  {
-    int increment = duration;
-
-    while (**operand == '.') {
-      duration += (increment /= 2);
-      *operand += 1;
-    }
-  }
 
   if (note) {
     int onDuration = (duration * tune->percentage.current) / 100;
