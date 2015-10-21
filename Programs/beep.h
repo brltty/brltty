@@ -35,6 +35,10 @@ extern int startBeep (BeepFrequency frequency);
 extern int stopBeep (void);
 extern void endBeep (void);
 
+extern int canInterceptBeeps (void);
+extern int startInterceptingBeeps (void);
+extern void stopInterceptingBeeps (void);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

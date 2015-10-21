@@ -71,3 +71,17 @@ stopBeep (void) {
 void
 endBeep (void) {
 }
+
+int
+canInterceptBeeps (void) {
+  return 0;
+}
+
+int
+startInterceptingBeeps (void) {
+  return 0;
+}
+
+void
+stopInterceptingBeeps (void) {
+}
