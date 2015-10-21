@@ -123,7 +123,7 @@ playBell (BeepInterceptor *bi) {
   return tunePlayFrequencies(tune);
 }
 
-ASYNC_INPUT_CALLBACK(handleSoundEvent) {
+ASYNC_INPUT_CALLBACK(lxHandleSoundEvent) {
   BeepInterceptor *bi = parameters->data;
   static const char label[] = "beep interceptor";
 
@@ -186,7 +186,7 @@ newBeepInterceptor (void) {
       if (prepareUinputObject(bi->uinputObject)) {
         if (asyncReadFile(&bi->asyncHandle, bi->fileDescriptor,
                           sizeof(struct input_event),
-                          handleSoundEvent, bi)) {
+                          lxHandleSoundEvent, bi)) {
           logMessage(LOG_DEBUG, "beep interceptor opened: fd=%d",
                      bi->fileDescriptor);
 
