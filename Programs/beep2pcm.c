@@ -16,9 +16,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* tunetest.c - Test program for the tune playing library
- */
-
 #include "prologue.h"
 
 #include <string.h>
@@ -62,7 +59,7 @@ END_OPTION_TABLE
 
 typedef struct {
   int fileDescriptor;
-  FrequencyElement tune[2];
+  FrequencyElement tune[4];
 } SoundMonitorData;
 
 ASYNC_CONDITION_TESTER(testSoundMonitorStopped) {
@@ -80,15 +77,24 @@ static void
 startTone (SoundMonitorData *smd, int frequency) {
   FrequencyElement *tune = smd->tune;
 
-  {
-    FrequencyElement tone = FREQ_PLAY(5000, frequency);
-    tune[0] = tone;
-  }
+  *tune = *(FrequencyElement[]){
+    FREQ_PLAY(5000, frequency),
+    FREQ_STOP()
+  };
 
-  {
-    FrequencyElement tone = FREQ_STOP();
-    tune[1] = tone;
-  }
+  return tunePlayFrequencies(tune);
+}
+
+static void
+playBell (SoundMonitorData *smd) {
+  FrequencyElement *tune = smd->tune;
+
+  *tune = *(FrequencyElement[]){
+    FREQ_PLAY(40, 750),
+    FREQ_PLAY(40, 800),
+    FREQ_PLAY(80, 750),
+    FREQ_STOP()
+  };
 
   return tunePlayFrequencies(tune);
 }
@@ -115,7 +121,9 @@ ASYNC_INPUT_CALLBACK(handleSoundEvent) {
 
           switch (event->code) {
             case SND_BELL:
-              if (value) value = 750;
+              if (value) playBell(smd);
+              break;
+
             case SND_TONE:
               if (value) {
                 startTone(smd, value);
@@ -145,7 +153,7 @@ static int
 prepareUinputObject (UinputObject *uinput) {
   if (!enableUinputEventType(uinput, EV_SND)) return 0;
   if (!enableUinputSound(uinput, SND_BELL)) return 0;
-  if (!enableUinputSound(uinput, SND_TONE)) return 0;
+//if (!enableUinputSound(uinput, SND_TONE)) return 0;
   return createUinputDevice(uinput);
 }
 
