@@ -23,12 +23,15 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int playBeep (unsigned short frequency, unsigned int duration);
+typedef uint16_t BeepFrequency;
+typedef uint16_t BeepDuration;
+
+extern int playBeep (BeepFrequency frequency, BeepDuration duration);
 
 extern int canBeep (void);
-extern int synchronousBeep (unsigned short frequency, unsigned short milliseconds);
-extern int asynchronousBeep (unsigned short frequency, unsigned short milliseconds);
-extern int startBeep (unsigned short frequency);
+extern int synchronousBeep (BeepFrequency frequency, BeepDuration duration);
+extern int asynchronousBeep (BeepFrequency frequency, BeepDuration duration);
+extern int startBeep (BeepFrequency frequency);
 extern int stopBeep (void);
 extern void endBeep (void);
 

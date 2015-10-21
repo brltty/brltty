@@ -42,38 +42,37 @@ canBeep (void) {
 }
 
 int
-synchronousBeep (unsigned short frequency, unsigned short milliseconds) {
+synchronousBeep (BeepFrequency frequency, BeepDuration duration) {
   return 0;
 }
 
 int
-asynchronousBeep (unsigned short frequency, unsigned short milliseconds) {
+asynchronousBeep (BeepFrequency frequency, BeepDuration duration) {
   FILE *console = getConsole();
+
   if (console) {
-    if (ioctl(fileno(console), KDMKTONE, ((milliseconds << 0X10) | (BEEP_DIVIDEND / frequency))) != -1) return 1;
-    logSystemError("ioctl KDMKTONE");
+    if (ioctl(fileno(console), KDMKTONE, ((duration << 0X10) | (BEEP_DIVIDEND / frequency))) != -1) return 1;
+    logSystemError("ioctl[KDMKTONE]");
   }
+
   return 0;
 }
 
 int
-startBeep (unsigned short frequency) {
+startBeep (BeepFrequency frequency) {
   FILE *console = getConsole();
+
   if (console) {
     if (ioctl(fileno(console), KIOCSOUND, BEEP_DIVIDEND/frequency) != -1) return 1;
-    logSystemError("ioctl KIOCSOUND");
+    logSystemError("ioctl[KIOCSOUND]");
   }
+
   return 0;
 }
 
 int
 stopBeep (void) {
-  FILE *console = getConsole();
-  if (console) {
-    if (ioctl(fileno(console), KIOCSOUND, 0) != -1) return 1;
-    logSystemError("ioctl KIOCSOUND");
-  }
-  return 0;
+  return startBeep(0);
 }
 
 void

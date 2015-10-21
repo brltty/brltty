@@ -64,14 +64,14 @@ canBeep (void) {
 }
 
 int
-synchronousBeep (unsigned short frequency, unsigned short milliseconds) {
+synchronousBeep (BeepFrequency frequency, BeepDuration duration) {
 #ifdef CAN_BEEP
   int speaker = getSpeaker();
   if (speaker != -1) {
     tone_t tone;
     memset(&tone, 0, sizeof(tone));
     tone.frequency = frequency;
-    tone.duration = (milliseconds + 9) / 10;
+    tone.duration = (duration + 9) / 10;
     if (ioctl(speaker, SPKRTONE, &tone) != -1) return 1;
     logSystemError("speaker tone");
   }
@@ -80,12 +80,12 @@ synchronousBeep (unsigned short frequency, unsigned short milliseconds) {
 }
 
 int
-asynchronousBeep (unsigned short frequency, unsigned short milliseconds) {
+asynchronousBeep (BeepFrequency frequency, BeepDuration duration) {
   return 0;
 }
 
 int
-startBeep (unsigned short frequency) {
+startBeep (BeepFrequency frequency) {
   return 0;
 }
 

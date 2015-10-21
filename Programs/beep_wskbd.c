@@ -30,16 +30,16 @@ canBeep (void) {
 }
 
 int
-synchronousBeep (unsigned short frequency, unsigned short milliseconds) {
+synchronousBeep (BeepFrequency frequency, BeepDuration duration) {
   return 0;
 }
 
 int
-asynchronousBeep (unsigned short frequency, unsigned short milliseconds) {
+asynchronousBeep (BeepFrequency frequency, BeepDuration duration) {
   FILE *console = getConsole();
   if (console) {
     struct wskbd_bell_data bell;
-    if (!(bell.period = milliseconds)) return 1;
+    if (!(bell.period = duration)) return 1;
     bell.pitch = frequency;
     bell.volume = 100;
     bell.which = WSKBD_BELL_DOALL;
@@ -50,7 +50,7 @@ asynchronousBeep (unsigned short frequency, unsigned short milliseconds) {
 }
 
 int
-startBeep (unsigned short frequency) {
+startBeep (BeepFrequency frequency) {
   return 0;
 }
 

@@ -28,17 +28,17 @@ canBeep (void) {
 }
 
 int
-asynchronousBeep (unsigned short frequency, unsigned short milliseconds) {
+asynchronousBeep (BeepFrequency frequency, BeepDuration duration) {
   return 0;
 }
 
 int
-synchronousBeep (unsigned short frequency, unsigned short milliseconds) {
+synchronousBeep (BeepFrequency frequency, BeepDuration duration) {
   return 0;
 }
 
 int
-startBeep (unsigned short frequency) {
+startBeep (BeepFrequency frequency) {
   sound(frequency);
   return 1;
 }

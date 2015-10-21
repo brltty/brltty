@@ -22,7 +22,7 @@
 #include "beep.h"
 
 int
-playBeep (unsigned short frequency, unsigned int duration) {
+playBeep (BeepFrequency frequency, BeepDuration duration) {
   if (asynchronousBeep(frequency, duration*4)) {
     asyncWait(duration);
     stopBeep();
