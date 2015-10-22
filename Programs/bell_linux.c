@@ -67,9 +67,12 @@ canInterceptBell (void) {
 int
 startInterceptingBell (void) {
   if (!inputEventInterceptor) {
-    if (!(inputEventInterceptor = newInputEventInterceptor("Console Bell Interceptor", prepareUinputObject, handleInputEvent))) {
-      return 0;
-    }
+    InputEventInterceptor *interceptor = newInputEventInterceptor(
+      "Console Bell Interceptor", prepareUinputObject, handleInputEvent
+    );
+
+    if (!interceptor) return 0;
+    inputEventInterceptor = interceptor;
   }
 
   return 1;
