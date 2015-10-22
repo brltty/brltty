@@ -172,12 +172,12 @@ testBrailleDisplayOrientation (void) {
 }
 
 static int
-testConsoleBellAlerts (void) {
+testConsoleBellAlert (void) {
   return canInterceptBeeps();
 }
 
 static int
-changedConsoleBellAlerts (const MenuItem *item UNUSED, unsigned char setting) {
+changedConsoleBellAlert (const MenuItem *item UNUSED, unsigned char setting) {
   if (setting) return startInterceptingBeeps();
 
   stopInterceptingBeeps();
@@ -791,10 +791,10 @@ makePreferencesMenu (void) {
     SUBMENU(alertsSubmenu, rootMenu, strtext("Event Alerts"));
 
     {
-      NAME(strtext("Console Bell Alerts"));
-      ITEM(newBooleanMenuItem(alertsSubmenu, &prefs.consoleBellAlerts, &itemName));
-      TEST(ConsoleBellAlerts);
-      CHANGED(ConsoleBellAlerts);
+      NAME(strtext("Console Bell Alert"));
+      ITEM(newBooleanMenuItem(alertsSubmenu, &prefs.consoleBellAlert, &itemName));
+      TEST(ConsoleBellAlert);
+      CHANGED(ConsoleBellAlert);
     }
 
     {

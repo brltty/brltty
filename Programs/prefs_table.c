@@ -335,9 +335,9 @@ const PreferenceEntry preferenceTable[] = {
   },
 
   { .name = "alerts-console-bell",
-    .defaultValue = DEFAULT_CONSOLE_BELL_ALERTS,
+    .defaultValue = DEFAULT_CONSOLE_BELL_ALERT,
     .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.consoleBellAlerts
+    .setting = &prefs.consoleBellAlert
   },
 
   { .name = "alert-tunes",

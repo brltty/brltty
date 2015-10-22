@@ -188,7 +188,7 @@ typedef struct {
   unsigned char dateFormat;
   unsigned char dateSeparator;
 
-  unsigned char consoleBellAlerts;
+  unsigned char consoleBellAlert;
 
   unsigned char saveOnExit;
   unsigned char showSubmenuSizes;
