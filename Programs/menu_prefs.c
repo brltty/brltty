@@ -33,6 +33,7 @@
 #include "atb.h"
 #include "ctb.h"
 #include "tune.h"
+#include "beep.h"
 #include "midi.h"
 #include "brltty.h"
 
@@ -168,6 +169,19 @@ changedBrailleSensitivity (const MenuItem *item UNUSED, unsigned char setting) {
 static int
 testBrailleDisplayOrientation (void) {
   return brl.rotateInput != NULL;
+}
+
+static int
+testConsoleBellAlerts (void) {
+  return canInterceptBeeps();
+}
+
+static int
+changedConsoleBellAlerts (const MenuItem *item UNUSED, unsigned char setting) {
+  if (setting) return startInterceptingBeeps();
+
+  stopInterceptingBeeps();
+  return 1;
 }
 
 static int
@@ -775,6 +789,13 @@ makePreferencesMenu (void) {
 
   {
     SUBMENU(alertsSubmenu, rootMenu, strtext("Event Alerts"));
+
+    {
+      NAME(strtext("Console Bell Alerts"));
+      ITEM(newBooleanMenuItem(alertsSubmenu, &prefs.consoleBellAlerts, &itemName));
+      TEST(ConsoleBellAlerts);
+      CHANGED(ConsoleBellAlerts);
+    }
 
     {
       NAME(strtext("Alert Tunes"));

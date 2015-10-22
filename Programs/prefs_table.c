@@ -334,6 +334,12 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.brailleDisplayOrientation
   },
 
+  { .name = "alerts-console-bell",
+    .defaultValue = DEFAULT_CONSOLE_BELL_ALERTS,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.consoleBellAlerts
+  },
+
   { .name = "alert-tunes",
     .defaultValue = DEFAULT_ALERT_TUNES,
     .settingNames = &preferenceStringTable_boolean,

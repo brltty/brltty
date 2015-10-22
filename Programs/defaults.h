@@ -85,6 +85,8 @@ extern "C" {
 #define DEFAULT_BRAILLE_INPUT_MODE BRL_INPUT_TEXT
 #define DEFAULT_BRAILLE_DISPLAY_ORIENTATION BRL_ORIENTATION_NORMAL
 
+#define DEFAULT_CONSOLE_BELL_ALERTS 0 /* 1 for on, 0 for off */
+
 #define DEFAULT_ALERT_TUNES 1		/* 1 for on, 0 for off */
 #define DEFAULT_ALERT_DOTS 0		/* 1 for on, 0 for off */
 #define DEFAULT_ALERT_MESSAGES 0		/* 1 for on, 0 for off */
