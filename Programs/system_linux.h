@@ -48,6 +48,21 @@ extern int enableUinputSound (UinputObject *uinput, int sound);
 
 extern UinputObject *newUinputKeyboard (const char *name);
 
+typedef struct InputEventInterceptorStruct InputEventInterceptor;
+typedef struct input_event InputEvent;
+typedef int UinputObjectPreparer (UinputObject *uinput);
+typedef void InputEventHandler (const InputEvent *event);
+
+extern InputEventInterceptor * newInputEventInterceptor (
+  const char *name,
+  UinputObjectPreparer *prepareUinputObject,
+  InputEventHandler *handleInputEvent
+);
+
+extern void destroyInputEventInterceptor (
+  InputEventInterceptor *interceptor
+);
+
 typedef uint8_t LinuxKeyCode;
 #define LINUX_KEY_MAP_NAME(type) linuxKeyMap_ ## type
 #define LINUX_KEY_MAP(type) const LinuxKeyCode LINUX_KEY_MAP_NAME(type)[0X100]

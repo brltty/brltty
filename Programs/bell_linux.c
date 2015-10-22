@@ -22,69 +22,12 @@
 #include "bell.h"
 
 #ifdef HAVE_LINUX_INPUT_H
-#include <string.h>
 #include <linux/input.h>
 
 #include "system_linux.h"
-#include "async_io.h"
 #include "alert.h"
 
-typedef struct {
-  UinputObject *uinputObject;
-  int fileDescriptor;
-  AsyncHandle asyncHandle;
-} BellInterceptor;
-
-static BellInterceptor *bellInterceptor = NULL;
-
-static void
-stopBellInterception (BellInterceptor *bi) {
-  close(bi->fileDescriptor);
-  bi->fileDescriptor = -1;
-}
-
-ASYNC_INPUT_CALLBACK(lxHandleSoundEvent) {
-  BellInterceptor *bi = parameters->data;
-  static const char label[] = "bell interceptor";
-
-  if (parameters->error) {
-    logMessage(LOG_DEBUG, "%s read error: fd=%d: %s",
-               label, bi->fileDescriptor, strerror(parameters->error));
-    stopBellInterception(bi);
-  } else if (parameters->end) {
-    logMessage(LOG_DEBUG, "%s end-of-file: fd=%d",
-               label, bi->fileDescriptor);
-    stopBellInterception(bi);
-  } else {
-    const struct input_event *event = parameters->buffer;
-
-    if (parameters->length >= sizeof(*event)) {
-      switch (event->type) {
-        case EV_SND: {
-          int value = event->value;
-
-          switch (event->code) {
-            case SND_BELL:
-              if (value) alert(ALERT_CONSOLE_BELL);
-              break;
-
-            default:
-              break;
-          }
-
-          break;
-        }
-
-        default:
-          break;
-      }
-
-      return sizeof(*event);
-    }
-  }
-
-  return 0;
-}
+static InputEventInterceptor *inputEventInterceptor = NULL;
 
 static int
 prepareUinputObject (UinputObject *uinput) {
@@ -93,43 +36,27 @@ prepareUinputObject (UinputObject *uinput) {
   return createUinputDevice(uinput);
 }
 
-static BellInterceptor *
-newBellInterceptor (void) {
-  BellInterceptor *bi;
+static void
+handleInputEvent (const InputEvent *event) {
+  switch (event->type) {
+    case EV_SND: {
+      int value = event->value;
 
-  if ((bi = malloc(sizeof(*bi)))) {
-    memset(bi, 0, sizeof(*bi));
+      switch (event->code) {
+        case SND_BELL:
+          if (value) alert(ALERT_CONSOLE_BELL);
+          break;
 
-    if ((bi->uinputObject = newUinputObject("Console Bell Interceptor"))) {
-      bi->fileDescriptor = getUinputFileDescriptor(bi->uinputObject);
-
-      if (prepareUinputObject(bi->uinputObject)) {
-        if (asyncReadFile(&bi->asyncHandle, bi->fileDescriptor,
-                          sizeof(struct input_event),
-                          lxHandleSoundEvent, bi)) {
-          logMessage(LOG_DEBUG, "bell interceptor opened: fd=%d",
-                     bi->fileDescriptor);
-
-          return bi;
-        }
+        default:
+          break;
       }
 
-      destroyUinputObject(bi->uinputObject);
+      break;
     }
 
-    free(bi);
-  } else {
-    logMallocError();
+    default:
+      break;
   }
-
-  return NULL;
-}
-
-static void
-destroyBellInterceptor (BellInterceptor *bi) {
-  asyncCancelRequest(bi->asyncHandle);
-  destroyUinputObject(bi->uinputObject);
-  free(bi);
 }
 
 int
@@ -139,8 +66,8 @@ canInterceptBell (void) {
 
 int
 startInterceptingBell (void) {
-  if (!bellInterceptor) {
-    if (!(bellInterceptor = newBellInterceptor())) {
+  if (!inputEventInterceptor) {
+    if (!(inputEventInterceptor = newInputEventInterceptor("Console Bell Interceptor", prepareUinputObject, handleInputEvent))) {
       return 0;
     }
   }
@@ -150,9 +77,9 @@ startInterceptingBell (void) {
 
 void
 stopInterceptingBell (void) {
-  if (bellInterceptor) {
-    destroyBellInterceptor(bellInterceptor);
-    bellInterceptor = NULL;
+  if (inputEventInterceptor) {
+    destroyInputEventInterceptor(inputEventInterceptor);
+    inputEventInterceptor = NULL;
   }
 }
 

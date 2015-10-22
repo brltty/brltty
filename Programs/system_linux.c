@@ -29,6 +29,7 @@
 #include "file.h"
 #include "device.h"
 #include "async_wait.h"
+#include "async_io.h"
 #include "hostcmd.h"
 #include "bitmask.h"
 #include "system.h"
@@ -1099,6 +1100,90 @@ newUinputKeyboard (const char *name) {
 #endif /* HAVE_LINUX_INPUT_H */
 
   return NULL;
+}
+
+struct InputEventInterceptorStruct {
+  UinputObject *uinputObject;
+  int fileDescriptor;
+  AsyncHandle asyncHandle;
+
+  UinputObjectPreparer *prepareUinputObject;
+  InputEventHandler *handleInputEvent;
+};
+
+static void
+stopInputEventInterception (InputEventInterceptor *interceptor) {
+  close(interceptor->fileDescriptor);
+  interceptor->fileDescriptor = -1;
+}
+
+ASYNC_INPUT_CALLBACK(handleInterceptedInputEvent) {
+  InputEventInterceptor *interceptor = parameters->data;
+  static const char label[] = "input event interceptor";
+
+  if (parameters->error) {
+    logMessage(LOG_DEBUG, "%s read error: fd=%d: %s",
+               label, interceptor->fileDescriptor, strerror(parameters->error));
+    stopInputEventInterception(interceptor);
+  } else if (parameters->end) {
+    logMessage(LOG_DEBUG, "%s end-of-file: fd=%d",
+               label, interceptor->fileDescriptor);
+    stopInputEventInterception(interceptor);
+  } else {
+    const struct input_event *event = parameters->buffer;
+
+    if (parameters->length >= sizeof(*event)) {
+      interceptor->handleInputEvent(event);
+      return sizeof(*event);
+    }
+  }
+
+  return 0;
+}
+
+InputEventInterceptor *
+newInputEventInterceptor (
+  const char *name,
+  UinputObjectPreparer *prepareUinputObject,
+  InputEventHandler *handleInputEvent
+) {
+  InputEventInterceptor *interceptor;
+
+  if ((interceptor = malloc(sizeof(*interceptor)))) {
+    memset(interceptor, 0, sizeof(*interceptor));
+    interceptor->prepareUinputObject = prepareUinputObject;
+    interceptor->handleInputEvent = handleInputEvent;
+
+    if ((interceptor->uinputObject = newUinputObject(name))) {
+      interceptor->fileDescriptor = getUinputFileDescriptor(interceptor->uinputObject);
+
+      if (prepareUinputObject(interceptor->uinputObject)) {
+        if (asyncReadFile(&interceptor->asyncHandle, interceptor->fileDescriptor,
+                          sizeof(struct input_event),
+                          handleInterceptedInputEvent, interceptor)) {
+          logMessage(LOG_DEBUG, "input event interceptor opened: fd=%d",
+                     interceptor->fileDescriptor);
+
+          return interceptor;
+        }
+      }
+
+      destroyUinputObject(interceptor->uinputObject);
+    }
+
+    free(interceptor);
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
+
+void
+destroyInputEventInterceptor (InputEventInterceptor *interceptor) {
+  asyncCancelRequest(interceptor->asyncHandle);
+  destroyUinputObject(interceptor->uinputObject);
+  free(interceptor);
 }
 
 void
