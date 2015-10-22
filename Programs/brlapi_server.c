@@ -1953,8 +1953,10 @@ static void closeSockets(void *arg)
 #ifdef __MINGW32__
     pthread_cancel(socketThreads[i]);
 #else /* __MINGW32__ */
+logBytes(LOG_NOTICE, "kill socket thread", &socketThreads[0], sizeof(socketThreads[0]));
     pthread_kill(socketThreads[i], SIGUSR2);
 #endif /* __MINGW32__ */
+    pthread_join(socketThreads[i], NULL);
 
     info=&socketInfo[i];
 
@@ -2160,9 +2162,6 @@ THREAD_FUNCTION(runServer) {
 #endif /* __MINGW32__ */
 
   pthread_attr_init(&attr);
-#ifndef __MINGW32__
-  pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED);
-#endif /* __MINGW32__ */
   /* don't care if it fails */
   pthread_attr_setstacksize(&attr,stackSize);
 
@@ -2204,10 +2203,12 @@ THREAD_FUNCTION(runServer) {
 #else /* __MINGW32__ */
 	  pthread_kill(socketThreads[i], SIGUSR2);
 #endif /* __MINGW32__ */
+	  pthread_join(socketThreads[i], NULL);
         }
 
 	goto finished;
       }
+logBytes(LOG_NOTICE, "create socket thread", &socketThreads[0], sizeof(socketThreads[0]));
 
 #ifdef __MINGW32__
     } else {
@@ -2514,6 +2515,7 @@ static void terminationHandler(void)
 #else /* __MINGW32__ */
   res = pthread_kill(serverThread, SIGUSR2);
 #endif /* __MINGW32__ */
+  pthread_join(serverThread, NULL);
 
   if (res != 0) {
     logMessage(LOG_WARNING,"pthread_cancel: %s",strerror(res));
@@ -3013,10 +3015,6 @@ int api_start(BrailleDisplay *brl, char **parameters)
   pthread_attr_init(&attr);
   pthread_attr_setstacksize(&attr,stackSize);
 
-#ifndef __MINGW32__
-  pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED);
-#endif /* __MINGW32__ */
-
   if (!(flushEvent = asyncNewEvent(handleServerFlushEvent, brl))) goto noFlushEvent;
 
 #ifndef __MINGW32__
@@ -3038,6 +3036,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
 #else /* __MINGW32__ */
       pthread_kill(socketThreads[i], SIGUSR2);
 #endif /* __MINGW32__ */
+      pthread_join(socketThreads[i], NULL);
     }
 
     goto noServerThread;
