@@ -18,14 +18,12 @@
 
 #include "prologue.h"
 
-#include "log.h"
 #include "bell.h"
 
 #ifdef HAVE_LINUX_INPUT_H
 #include <linux/input.h>
 
 #include "system_linux.h"
-#include "alert.h"
 
 static InputEventInterceptor *inputEventInterceptor = NULL;
 
