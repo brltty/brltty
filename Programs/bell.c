@@ -23,6 +23,14 @@
 #include "prefs.h"
 #include "tune_types.h"
 
+int
+setBellInterception (int on) {
+  if (on) return startInterceptingBell();
+
+  stopInterceptingBell();
+  return 1;
+}
+
 void
 alertBell (void) {
   if (prefs.tuneDevice != tdBeeper) alert(ALERT_CONSOLE_BELL);

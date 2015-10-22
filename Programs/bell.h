@@ -23,6 +23,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
+extern int setBellInterception (int on);
 extern void alertBell (void);
 
 extern int canInterceptBell (void);

@@ -178,10 +178,7 @@ testConsoleBellAlert (void) {
 
 static int
 changedConsoleBellAlert (const MenuItem *item UNUSED, unsigned char setting) {
-  if (setting) return startInterceptingBell();
-
-  stopInterceptingBell();
-  return 1;
+  return setBellInterception(setting);
 }
 
 static int

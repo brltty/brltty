@@ -51,6 +51,7 @@
 #include "ktb_keyboard.h"
 #include "kbd.h"
 #include "alert.h"
+#include "bell.h"
 #include "tune.h"
 #include "notes.h"
 #include "message.h"
@@ -1086,6 +1087,7 @@ applySpeechPreferences (void) {
 
 static void
 applyAllPreferences (void) {
+  setBellInterception(prefs.consoleBellAlert);
   tuneSetDevice(prefs.tuneDevice);
   applyBraillePreferences();
 
