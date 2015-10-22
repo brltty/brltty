@@ -347,6 +347,10 @@ extern "C" {
 #undef USE_PKG_KBD_ANDROID
 #undef USE_PKG_KBD_LINUX
 
+/* Define only one of the following console bell packages. */
+#undef USE_PKG_BELL_NONE
+#undef USE_PKG_BELL_LINUX
+
 /* Define only one of the following beeper packages. */
 #undef USE_PKG_BEEP_NONE
 #undef USE_PKG_BEEP_LINUX

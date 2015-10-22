@@ -103,17 +103,3 @@ endBeep (void) {
   }
 #endif /* CAN_BEEP */
 }
-
-int
-canInterceptBeeps (void) {
-  return 0;
-}
-
-int
-startInterceptingBeeps (void) {
-  return 0;
-}
-
-void
-stopInterceptingBeeps (void) {
-}

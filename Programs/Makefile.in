@@ -106,8 +106,10 @@ kbd_keycodes.$O:
 
 ###############################################################################
 
-beep.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/beep.c
+$(BELL_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(BELL_INCLUDES) -c $(SRC_DIR)/$(BELL_OBJECT).c
+
+###############################################################################
 
 $(BEEP_OBJECT).$O:
 	$(CC) $(LIBCFLAGS) $(BEEP_INCLUDES) -c $(SRC_DIR)/$(BEEP_OBJECT).c
@@ -613,7 +615,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O activity.$O $(PREFS_OBJECTS) profile.$O menu.$O menu_prefs.$O ses.$O status.$O update.$O blink.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_utils.$O cmd_custom.$O cmd_navigation.$O cmd_input.$O cmd_keycodes.$O cmd_touch.$O cmd_toggle.$O cmd_preferences.$O cmd_clipboard.$O cmd_speech.$O cmd_learn.$O learn.$O cmd_miscellaneous.$O pipe.$O $(TTB_OBJECTS) $(ATB_OBJECTS) $(CTB_OBJECTS) $(KTB_OBJECTS) ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(SPECIAL_SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) spk_input.$O api_control.$O $(API_SERVER_OBJECTS)
+CORE_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O activity.$O $(PREFS_OBJECTS) profile.$O menu.$O menu_prefs.$O ses.$O status.$O update.$O blink.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_utils.$O cmd_custom.$O cmd_navigation.$O cmd_input.$O cmd_keycodes.$O cmd_touch.$O cmd_toggle.$O cmd_preferences.$O cmd_clipboard.$O cmd_speech.$O cmd_learn.$O learn.$O cmd_miscellaneous.$O pipe.$O $(TTB_OBJECTS) $(ATB_OBJECTS) $(CTB_OBJECTS) $(KTB_OBJECTS) ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(BELL_OBJECTS) $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(SPECIAL_SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) spk_input.$O api_control.$O $(API_SERVER_OBJECTS)
 CORE_NAME = brltty
 
 brltty-core: $(CORE_OBJECTS)

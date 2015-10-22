@@ -158,6 +158,12 @@ KBD_OBJECTS = kbd.$O $(KBD_OBJECT).$O
 KBD_INCLUDES = @kbd_includes@
 KBD_LIBS = @kbd_libs@
 
+BELL_PACKAGE = @bell_package@
+BELL_OBJECT = bell_$(BELL_PACKAGE)
+BELL_OBJECTS = $(BELL_OBJECT).$O
+BELL_INCLUDES = @bell_includes@
+BELL_LIBS = @bell_libs@
+
 BEEP_PACKAGE = @beep_package@
 BEEP_OBJECT = beep_$(BEEP_PACKAGE)
 BEEP_OBJECTS = notes_beep.$O beep.$O $(BEEP_OBJECT).$O

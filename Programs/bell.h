@@ -16,27 +16,19 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_BEEP
-#define BRLTTY_INCLUDED_BEEP
+#ifndef BRLTTY_INCLUDED_BELL
+#define BRLTTY_INCLUDED_BELL
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef uint16_t BeepFrequency;
-typedef uint16_t BeepDuration;
-
-extern int playBeep (BeepFrequency frequency, BeepDuration duration);
-
-extern int canBeep (void);
-extern int synchronousBeep (BeepFrequency frequency, BeepDuration duration);
-extern int asynchronousBeep (BeepFrequency frequency, BeepDuration duration);
-extern int startBeep (BeepFrequency frequency);
-extern int stopBeep (void);
-extern void endBeep (void);
+extern int canInterceptBell (void);
+extern int startInterceptingBell (void);
+extern void stopInterceptingBell (void);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_BEEP */
+#endif /* BRLTTY_INCLUDED_BELL */

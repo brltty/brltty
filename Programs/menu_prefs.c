@@ -33,7 +33,7 @@
 #include "atb.h"
 #include "ctb.h"
 #include "tune.h"
-#include "beep.h"
+#include "bell.h"
 #include "midi.h"
 #include "brltty.h"
 
@@ -173,14 +173,14 @@ testBrailleDisplayOrientation (void) {
 
 static int
 testConsoleBellAlert (void) {
-  return canInterceptBeeps();
+  return canInterceptBell();
 }
 
 static int
 changedConsoleBellAlert (const MenuItem *item UNUSED, unsigned char setting) {
-  if (setting) return startInterceptingBeeps();
+  if (setting) return startInterceptingBell();
 
-  stopInterceptingBeeps();
+  stopInterceptingBell();
   return 1;
 }
 
