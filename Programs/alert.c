@@ -270,6 +270,11 @@ static const NoteElement tuneModifierOff[] = {
   NOTE_STOP()
 };
 
+static const NoteElement tuneConsoleBell[] = {
+  NOTE_PLAY(100,  78),
+  NOTE_STOP()
+};
+
 typedef struct {
   unsigned char duration;
   BrlDots pattern;
@@ -401,6 +406,11 @@ static const AlertEntry alertTable[] = {
 
   [ALERT_MODIFIER_OFF] = {
     .tune = tuneModifierOff
+  },
+
+  [ALERT_CONSOLE_BELL] = {
+    .message = strtext("Console Bell"),
+    .tune = tuneConsoleBell
   },
 };
 

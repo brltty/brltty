@@ -190,3 +190,9 @@ main (int argc, char *argv[]) {
   resetTuneBuilder(&tune);
   return exitStatus;
 }
+
+#include "alert.h"
+
+void
+alert (AlertIdentifier identifier) {
+}

@@ -91,41 +91,19 @@ endBeep (void) {
 #include <string.h>
 #include <linux/input.h>
 
-#include "async_wait.h"
 #include "async_io.h"
-#include "tune.h"
+#include "alert.h"
 
 struct BeepInterceptorStruct {
   UinputObject *uinputObject;
   int fileDescriptor;
   AsyncHandle asyncHandle;
-
-  FrequencyElement tune[4];
 };
-
-ASYNC_CONDITION_TESTER(testBeepInterceptionStopped) {
-  BeepInterceptor *bi = data;
-  return bi->fileDescriptor == -1;
-}
 
 static void
 stopBeepInterception (BeepInterceptor *bi) {
   close(bi->fileDescriptor);
   bi->fileDescriptor = -1;
-}
-
-static void
-playBell (BeepInterceptor *bi) {
-  FrequencyElement *tune = bi->tune;
-
-  *tune = *(FrequencyElement[]){
-    FREQ_PLAY(40, 750),
-    FREQ_PLAY(40, 800),
-    FREQ_PLAY(80, 750),
-    FREQ_STOP()
-  };
-
-  return tunePlayFrequencies(tune);
 }
 
 ASYNC_INPUT_CALLBACK(lxHandleSoundEvent) {
@@ -150,7 +128,7 @@ ASYNC_INPUT_CALLBACK(lxHandleSoundEvent) {
 
           switch (event->code) {
             case SND_BELL:
-              if (value) playBell(bi);
+              if (value) alert(ALERT_CONSOLE_BELL);
               break;
 
             default:
