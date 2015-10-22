@@ -106,10 +106,16 @@ kbd_keycodes.$O:
 
 ###############################################################################
 
+bell.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/bell.c
+
 $(BELL_OBJECT).$O:
 	$(CC) $(LIBCFLAGS) $(BELL_INCLUDES) -c $(SRC_DIR)/$(BELL_OBJECT).c
 
 ###############################################################################
+
+beep.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/beep.c
 
 $(BEEP_OBJECT).$O:
 	$(CC) $(LIBCFLAGS) $(BEEP_INCLUDES) -c $(SRC_DIR)/$(BEEP_OBJECT).c

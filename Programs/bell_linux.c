@@ -44,7 +44,7 @@ handleInputEvent (const InputEvent *event) {
 
       switch (event->code) {
         case SND_BELL:
-          if (value) alert(ALERT_CONSOLE_BELL);
+          if (value) alertBell();
           break;
 
         default:

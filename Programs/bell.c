@@ -16,21 +16,14 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_BELL
-#define BRLTTY_INCLUDED_BELL
+#include "prologue.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+#include "bell.h"
+#include "alert.h"
+#include "prefs.h"
+#include "tune_types.h"
 
-extern void alertBell (void);
-
-extern int canInterceptBell (void);
-extern int startInterceptingBell (void);
-extern void stopInterceptingBell (void);
-
-#ifdef __cplusplus
+void
+alertBell (void) {
+  if (prefs.tuneDevice != tdBeeper) alert(ALERT_CONSOLE_BELL);
 }
-#endif /* __cplusplus */
-
-#endif /* BRLTTY_INCLUDED_BELL */
