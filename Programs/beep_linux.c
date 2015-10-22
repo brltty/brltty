@@ -31,6 +31,11 @@ static BeepInterceptor *beepInterceptor = NULL;
 
 #define BEEP_DIVIDEND 1193180
 
+static inline BeepFrequency
+getWaveLength (BeepFrequency frequency) {
+  return frequency? (BEEP_DIVIDEND / frequency): 0;
+}
+
 static void
 enableBeeps (void) {
   static unsigned char status = 0;
@@ -54,7 +59,7 @@ asynchronousBeep (BeepFrequency frequency, BeepDuration duration) {
   FILE *console = getConsole();
 
   if (console) {
-    if (ioctl(fileno(console), KDMKTONE, ((duration << 0X10) | (BEEP_DIVIDEND / frequency))) != -1) return 1;
+    if (ioctl(fileno(console), KDMKTONE, ((duration << 0X10) | getWaveLength(frequency))) != -1) return 1;
     logSystemError("ioctl[KDMKTONE]");
   }
 
@@ -66,9 +71,7 @@ startBeep (BeepFrequency frequency) {
   FILE *console = getConsole();
 
   if (console) {
-    int ticks = frequency? (BEEP_DIVIDEND / frequency): 0;
-
-    if (ioctl(fileno(console), KIOCSOUND, ticks) != -1) return 1;
+    if (ioctl(fileno(console), KIOCSOUND, getWaveLength(frequency)) != -1) return 1;
     logSystemError("ioctl[KIOCSOUND]");
   }
 
