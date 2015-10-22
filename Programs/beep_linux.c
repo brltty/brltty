@@ -66,7 +66,9 @@ startBeep (BeepFrequency frequency) {
   FILE *console = getConsole();
 
   if (console) {
-    if (ioctl(fileno(console), KIOCSOUND, BEEP_DIVIDEND/frequency) != -1) return 1;
+    int ticks = frequency? (BEEP_DIVIDEND / frequency): 0;
+
+    if (ioctl(fileno(console), KIOCSOUND, ticks) != -1) return 1;
     logSystemError("ioctl[KIOCSOUND]");
   }
 
