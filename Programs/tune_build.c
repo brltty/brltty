@@ -135,22 +135,22 @@ parseTempo (TuneBuilder *tune, const char **operand) {
   return parseRequiredParameter(tune, &tune->tempo, operand);
 }
 
-static inline uint32_t
+static void
 setDuration (TuneBuilder *tune) {
-  return 60000 / tune->tempo.current;
+  tune->duration.current = 60000 / tune->tempo.current;
 }
 
 static int
 parseDuration (TuneBuilder *tune, const char **operand, int *duration) {
   if (**operand == '@') {
     *operand += 1;
-    TuneNumber value;
+    TuneParameter parameter = tune->duration;
 
-    if (!parseNumber(tune, &value, operand, 1, 1, INT_MAX, "absolute duration")) {
+    if (!parseRequiredParameter(tune, &parameter, operand)) {
       return 0;
     }
 
-    *duration = value;
+    *duration = parameter.current;
   } else {
     TuneNumber multiplier;
     TuneNumber divisor;
