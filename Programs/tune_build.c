@@ -192,26 +192,36 @@ parseDuration (TuneBuilder *tune, const char **operand, int *duration) {
   return 1;
 }
 
+static TuneNumber
+toOctave (TuneNumber note) {
+  return (note / NOTES_PER_OCTAVE) - 1;
+}
+
+static void
+setOctave (TuneBuilder *tune) {
+  tune->octave.current = toOctave(tune->note.current);
+}
+
 static int
 parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
   if (**operand == 'r') {
     *operand += 1;
     *note = 0;
   } else {
-    const unsigned char lowestNote = getLowestNote();
-    const unsigned char highestNote = getHighestNote();
+    int noOctave = 0;
     int noteNumber;
 
     static const char letters[] = "cdefgab";
     const char *letter = strchr(letters, **operand);
 
     if (letter && *letter) {
-      static const unsigned char offsets[] = {0, 2, 4, 5, 7, 9, 11};
-
-      noteNumber = 12 + offsets[letter - letters];
       *operand += 1;
 
+      static const unsigned char offsets[] = {0, 2, 4, 5, 7, 9, 11};
+      noteNumber = (NOTE_MIDDLE_C - (4 * NOTES_PER_OCTAVE)) + offsets[letter - letters];
+
       {
+        const char **originalOperand = operand;
         TuneParameter octave = tune->octave;
 
         if (!parseOptionalParameter(tune, &octave, operand)) {
@@ -219,16 +229,16 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
         }
 
         noteNumber += octave.current * NOTES_PER_OCTAVE;
-        tune->octave.current = octave.current;
+        if (operand == originalOperand) noOctave = 1;
       }
     } else {
-      TuneNumber number;
+      TuneParameter parameter = tune->note;
 
-      if (!parseNumber(tune, &number, operand, 1, lowestNote, highestNote, "note")) {
+      if (!parseRequiredParameter(tune, &parameter, operand)) {
         return 0;
       }
 
-      noteNumber = number;
+      noteNumber = parameter.current;
     }
 
     {
@@ -254,17 +264,40 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
     }
   noAccidental:
 
-    if (noteNumber < lowestNote) {
-      logSyntaxError(tune, "note too low");
-      return 0;
+    if (noOctave) {
+      int adjustOctave = 0;
+      TuneNumber previousNote = tune->note.current;
+      TuneNumber currentNote = noteNumber;
+
+      if (currentNote < previousNote) {
+        currentNote += NOTES_PER_OCTAVE;
+        if ((currentNote - previousNote) <= 3) adjustOctave = 1;
+      } else if (currentNote > previousNote) {
+        currentNote -= NOTES_PER_OCTAVE;
+        if ((previousNote - currentNote) <= 3) adjustOctave = 1;
+      }
+
+      if (adjustOctave) noteNumber = currentNote;
     }
 
-    if (noteNumber > highestNote) {
-      logSyntaxError(tune, "note too high");
-      return 0;
+    {
+      const unsigned char lowestNote = getLowestNote();
+      const unsigned char highestNote = getHighestNote();
+
+      if (noteNumber < lowestNote) {
+        logSyntaxError(tune, "note too low");
+        return 0;
+      }
+
+      if (noteNumber > highestNote) {
+        logSyntaxError(tune, "note too high");
+        return 0;
+      }
     }
 
     tune->note.current = noteNumber;
+    setOctave(tune);
+
     *note = noteNumber;
   }
 
@@ -366,13 +399,14 @@ initializeTuneBuilder (TuneBuilder *tune) {
   tune->tones.size = 0;
   tune->tones.count = 0;
 
-  setParameter(&tune->duration, "duration", 1, UINT16_MAX, 1000);
+  setParameter(&tune->duration, "duration", 1, UINT16_MAX, 0);
   setParameter(&tune->note, "note", getLowestNote(), getHighestNote(), NOTE_MIDDLE_C);
-  setParameter(&tune->octave, "octave", 0, 9, 4);
+  setParameter(&tune->octave, "octave", 0, 9, 0);
   setParameter(&tune->percentage, "percentage", 1, 100, 80);
   setParameter(&tune->tempo, "tempo", 40, UINT8_MAX, 108);
 
   setDuration(tune);
+  setOctave(tune);
 
   tune->source.text = "";
   tune->source.name = "";
