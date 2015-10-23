@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include "log.h"
 #include "leds.h"
 
 #ifdef HAVE_LINUX_INPUT_H
@@ -29,11 +30,16 @@ static InputEventInterceptor *inputEventInterceptor = NULL;
 
 static int
 prepareUinputObject (UinputObject *uinput) {
-  return createUinputDevice(uinput);
+  if (!enableUinputEventType(uinput, EV_LED)) return 0;
+  if (!enableUinputLed(uinput, LED_NUML)) return 0;
+  if (!enableUinputLed(uinput, LED_CAPSL)) return 0;
+  if (!enableUinputLed(uinput, LED_SCROLLL)) return 0;
+  return 1;
 }
 
 static void
 handleInputEvent (const InputEvent *event) {
+logMessage(LOG_NOTICE, "LED event: t=%u c=%u v=%d", event->type, event->code, event->value);
   switch (event->type) {
     case EV_LED: {
       switch (event->code) {

@@ -1081,6 +1081,16 @@ enableUinputSound (UinputObject *uinput, int sound) {
   return 0;
 }
 
+int
+enableUinputLed (UinputObject *uinput, int led) {
+#ifdef HAVE_LINUX_UINPUT_H
+  if (ioctl(uinput->fileDescriptor, UI_SET_LEDBIT, led) != -1) return 1;
+  logSystemError("ioctl[UI_SET_LEDBIT]");
+#endif /* HAVE_LINUX_UINPUT_H */
+
+  return 0;
+}
+
 UinputObject *
 newUinputKeyboard (const char *name) {
 #ifdef HAVE_LINUX_INPUT_H
@@ -1158,13 +1168,15 @@ newInputEventInterceptor (
       interceptor->fileDescriptor = getUinputFileDescriptor(interceptor->uinputObject);
 
       if (prepareUinputObject(interceptor->uinputObject)) {
-        if (asyncReadFile(&interceptor->asyncHandle, interceptor->fileDescriptor,
-                          sizeof(struct input_event),
-                          handleInterceptedInputEvent, interceptor)) {
-          logMessage(LOG_DEBUG, "input event interceptor opened: fd=%d",
-                     interceptor->fileDescriptor);
+        if (createUinputDevice(interceptor->uinputObject)) {
+          if (asyncReadFile(&interceptor->asyncHandle, interceptor->fileDescriptor,
+                            sizeof(struct input_event),
+                            handleInterceptedInputEvent, interceptor)) {
+            logMessage(LOG_DEBUG, "input event interceptor opened: fd=%d",
+                       interceptor->fileDescriptor);
 
-          return interceptor;
+            return interceptor;
+          }
         }
       }
 

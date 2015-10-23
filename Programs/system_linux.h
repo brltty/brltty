@@ -45,6 +45,7 @@ extern int writeRepeatDelay (UinputObject *uinput, int delay);
 extern int writeRepeatPeriod (UinputObject *uinput, int period);
 
 extern int enableUinputSound (UinputObject *uinput, int sound);
+extern int enableUinputLed (UinputObject *uinput, int led);
 
 extern UinputObject *newUinputKeyboard (const char *name);
 

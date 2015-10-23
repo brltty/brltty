@@ -31,7 +31,7 @@ static int
 prepareUinputObject (UinputObject *uinput) {
   if (!enableUinputEventType(uinput, EV_SND)) return 0;
   if (!enableUinputSound(uinput, SND_BELL)) return 0;
-  return createUinputDevice(uinput);
+  return 1;
 }
 
 static void
