@@ -235,6 +235,7 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
         }
 
         noteNumber += octave.current * NOTES_PER_OCTAVE;
+        tune->octave.current = octave.current;
       }
     } else {
       TuneNumber number;
