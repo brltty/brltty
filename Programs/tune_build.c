@@ -28,8 +28,6 @@
 #include "tune_build.h"
 #include "notes.h"
 
-typedef unsigned int TuneNumber;
-
 static void
 logSyntaxError (TuneBuilder *tune, const char *message) {
   tune->status = TUNE_BUILD_SYNTAX;
@@ -104,16 +102,27 @@ invalidValue:
 }
 
 static int
-parseParameter (TuneBuilder *tune, TuneParameter *parameter, const char **operand) {
-  TuneNumber number;
-  int ok = parseNumber(tune, &number, operand, 1, parameter->minimum, parameter->maximum, parameter->name);
-  if (ok) parameter->current = number;
-  return ok;
+parseParameter (
+  TuneBuilder *tune, TuneParameter *parameter,
+  const char **operand, int required
+) {
+  return parseNumber(tune, &parameter->current, operand, required,
+                     parameter->minimum, parameter->maximum, parameter->name);
+}
+
+static int
+parseOptionalParameter (TuneBuilder *tune, TuneParameter *parameter, const char **operand) {
+  return parseParameter(tune, parameter, operand, 0);
+}
+
+static int
+parseRequiredParameter (TuneBuilder *tune, TuneParameter *parameter, const char **operand) {
+  return parseParameter(tune, parameter, operand, 1);
 }
 
 static int
 parseMeter (TuneBuilder *tune, const char **operand) {
-  if (!parseParameter(tune, &tune->meter.numerator, operand)) return 0;
+  if (!parseRequiredParameter(tune, &tune->meter.numerator, operand)) return 0;
 
   if (**operand != '/') {
     logSyntaxError(tune, "missing meter delimiter");
@@ -121,26 +130,31 @@ parseMeter (TuneBuilder *tune, const char **operand) {
   }
 
   *operand += 1;
-  return parseParameter(tune, &tune->meter.denominator, operand);
+  return parseRequiredParameter(tune, &tune->meter.denominator, operand);
+}
+
+static int
+parseOctave (TuneBuilder *tune, const char **operand) {
+  return parseRequiredParameter(tune, &tune->octave, operand);
 }
 
 static int
 parsePercentage (TuneBuilder *tune, const char **operand) {
-  return parseParameter(tune, &tune->percentage, operand);
+  return parseRequiredParameter(tune, &tune->percentage, operand);
 }
 
 static int
 parseTempo (TuneBuilder *tune, const char **operand) {
-  return parseParameter(tune, &tune->tempo, operand);
+  return parseRequiredParameter(tune, &tune->tempo, operand);
 }
 
-static inline int
-calculateToneDuration (TuneBuilder *tune, uint8_t multiplier, uint8_t divisor) {
+static inline uint32_t
+calculateToneDuration (TuneBuilder *tune, uint32_t multiplier, uint32_t divisor) {
   return (60000 * multiplier) / (tune->tempo.current * divisor);
 }
 
-static inline int
-calculateNoteDuration (TuneBuilder *tune, uint8_t multiplier, uint8_t divisor) {
+static inline uint32_t
+calculateNoteDuration (TuneBuilder *tune, uint32_t multiplier, uint32_t divisor) {
   return calculateToneDuration(tune, (tune->meter.denominator.current * multiplier), divisor);
 }
 
@@ -210,18 +224,17 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
     if (letter && *letter) {
       static const unsigned char offsets[] = {0, 2, 4, 5, 7, 9, 11};
 
-      noteNumber = NOTE_MIDDLE_C + offsets[letter - letters];
+      noteNumber = 12 + offsets[letter - letters];
       *operand += 1;
 
       {
-        static const TuneNumber offset = 4;
-        TuneNumber octave = offset;
+        TuneParameter octave = tune->octave;
 
-        if (!parseNumber(tune, &octave, operand, 0, 0, 9, "octave")) {
+        if (!parseOptionalParameter(tune, &octave, operand)) {
           return 0;
         }
 
-        noteNumber += ((int)octave - (int)offset) * NOTES_PER_OCTAVE;
+        noteNumber += octave.current * NOTES_PER_OCTAVE;
       }
     } else {
       TuneNumber number;
@@ -299,6 +312,11 @@ parseTuneOperand (TuneBuilder *tune, const char *operand) {
       if (!parseMeter(tune, &operand)) return 0;
       break;
 
+    case 'o':
+      operand += 1;
+      if (!parseOctave(tune, &operand)) return 0;
+      break;
+
     case 'p':
       operand += 1;
       if (!parsePercentage(tune, &operand)) return 0;
@@ -350,7 +368,7 @@ endTune (TuneBuilder *tune) {
 static inline void
 setParameter (
   TuneParameter *parameter, const char *name,
-  unsigned char minimum, unsigned char maximum, unsigned char current
+  TuneNumber minimum, TuneNumber maximum, TuneNumber current
 ) {
   parameter->name = name;
   parameter->minimum = minimum;
@@ -368,6 +386,7 @@ initializeTuneBuilder (TuneBuilder *tune) {
 
   setParameter(&tune->tempo, "tempo", 40, UINT8_MAX, 108);
   setParameter(&tune->percentage, "percentage", 1, 100, 80);
+  setParameter(&tune->octave, "octave", 0, 9, 4);
 
   setParameter(&tune->meter.denominator, "meter denominator", 2, 128, 4);
   tune->meter.numerator = tune->meter.denominator;

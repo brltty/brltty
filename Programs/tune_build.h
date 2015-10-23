@@ -31,11 +31,13 @@ typedef enum {
   TUNE_BUILD_FATAL
 } TuneBuildStatus;
 
+typedef unsigned int TuneNumber;
+
 typedef struct {
   const char *name;
-  unsigned char minimum;
-  unsigned char maximum;
-  unsigned char current;
+  TuneNumber minimum;
+  TuneNumber maximum;
+  TuneNumber current;
 } TuneParameter;
 
 typedef struct {
@@ -47,6 +49,7 @@ typedef struct {
 
   TuneParameter tempo;
   TuneParameter percentage;
+  TuneParameter octave;
 
   struct {
     TuneParameter numerator;
