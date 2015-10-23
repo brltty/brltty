@@ -121,19 +121,6 @@ parseRequiredParameter (TuneBuilder *tune, TuneParameter *parameter, const char 
 }
 
 static int
-parseMeter (TuneBuilder *tune, const char **operand) {
-  if (!parseRequiredParameter(tune, &tune->meter.numerator, operand)) return 0;
-
-  if (**operand != '/') {
-    logSyntaxError(tune, "missing meter delimiter");
-    return 0;
-  }
-
-  *operand += 1;
-  return parseRequiredParameter(tune, &tune->meter.denominator, operand);
-}
-
-static int
 parseOctave (TuneBuilder *tune, const char **operand) {
   return parseRequiredParameter(tune, &tune->octave, operand);
 }
@@ -149,13 +136,8 @@ parseTempo (TuneBuilder *tune, const char **operand) {
 }
 
 static inline uint32_t
-calculateToneDuration (TuneBuilder *tune, uint32_t multiplier, uint32_t divisor) {
-  return (60000 * multiplier) / (tune->tempo.current * divisor);
-}
-
-static inline uint32_t
-calculateNoteDuration (TuneBuilder *tune, uint32_t multiplier, uint32_t divisor) {
-  return calculateToneDuration(tune, (tune->meter.denominator.current * multiplier), divisor);
+setDuration (TuneBuilder *tune) {
+  return 60000 / tune->tempo.current;
 }
 
 static int
@@ -190,11 +172,13 @@ parseDuration (TuneBuilder *tune, const char **operand, int *duration) {
         return 0;
       }
     } else {
-      divisor = tune->meter.denominator.current;
+      divisor = 1;
     }
 
-    *duration = calculateNoteDuration(tune, multiplier, divisor);
+    *duration = tune->duration.current * multiplier / divisor;
   }
+
+  tune->duration.current = *duration;
 
   {
     int increment = *duration;
@@ -280,6 +264,7 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
       return 0;
     }
 
+    tune->note.current = noteNumber;
     *note = noteNumber;
   }
 
@@ -308,11 +293,6 @@ parseTuneOperand (TuneBuilder *tune, const char *operand) {
   tune->source.text = operand;
 
   switch (*operand) {
-    case 'm':
-      operand += 1;
-      if (!parseMeter(tune, &operand)) return 0;
-      break;
-
     case 'o':
       operand += 1;
       if (!parseOctave(tune, &operand)) return 0;
@@ -326,6 +306,7 @@ parseTuneOperand (TuneBuilder *tune, const char *operand) {
     case 't':
       operand += 1;
       if (!parseTempo(tune, &operand)) return 0;
+      setDuration(tune);
       break;
 
     default:
@@ -385,13 +366,13 @@ initializeTuneBuilder (TuneBuilder *tune) {
   tune->tones.size = 0;
   tune->tones.count = 0;
 
-  setParameter(&tune->tempo, "tempo", 40, UINT8_MAX, 108);
-  setParameter(&tune->percentage, "percentage", 1, 100, 80);
+  setParameter(&tune->duration, "duration", 1, UINT16_MAX, 1000);
+  setParameter(&tune->note, "note", getLowestNote(), getHighestNote(), NOTE_MIDDLE_C);
   setParameter(&tune->octave, "octave", 0, 9, 4);
+  setParameter(&tune->percentage, "percentage", 1, 100, 80);
+  setParameter(&tune->tempo, "tempo", 40, UINT8_MAX, 108);
 
-  setParameter(&tune->meter.denominator, "meter denominator", 2, 128, 4);
-  tune->meter.numerator = tune->meter.denominator;
-  tune->meter.numerator.name = "meter numerator";
+  setDuration(tune);
 
   tune->source.text = "";
   tune->source.name = "";

@@ -47,14 +47,11 @@ typedef struct {
     unsigned int count;
   } tones;
 
-  TuneParameter tempo;
-  TuneParameter percentage;
+  TuneParameter duration;
+  TuneParameter note;
   TuneParameter octave;
-
-  struct {
-    TuneParameter numerator;
-    TuneParameter denominator;
-  } meter;
+  TuneParameter percentage;
+  TuneParameter tempo;
 
   struct {
     const char *text;
