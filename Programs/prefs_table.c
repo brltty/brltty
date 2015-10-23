@@ -340,6 +340,12 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.consoleBellAlert
   },
 
+  { .name = "alerts-keyboard-leds",
+    .defaultValue = DEFAULT_KEYBOARD_LED_ALERTS,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.keyboardLedAlerts
+  },
+
   { .name = "alert-tunes",
     .defaultValue = DEFAULT_ALERT_TUNES,
     .settingNames = &preferenceStringTable_boolean,

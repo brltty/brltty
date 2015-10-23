@@ -52,6 +52,7 @@
 #include "kbd.h"
 #include "alert.h"
 #include "bell.h"
+#include "leds.h"
 #include "tune.h"
 #include "notes.h"
 #include "message.h"
@@ -1088,6 +1089,7 @@ applySpeechPreferences (void) {
 static void
 applyAllPreferences (void) {
   setBellInterception(prefs.consoleBellAlert);
+  setLedMonitoring(prefs.keyboardLedAlerts);
   tuneSetDevice(prefs.tuneDevice);
   applyBraillePreferences();
 

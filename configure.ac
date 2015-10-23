@@ -1165,6 +1165,12 @@ BRLTTY_ARG_PACKAGE([bell], [console bell], [], [dnl
       ;;
 ])
 
+BRLTTY_ARG_PACKAGE([leds], [keyboard LEDs], [], [dnl
+   linux*)
+      leds_package="linux"
+      ;;
+])
+
 BRLTTY_ARG_PACKAGE([beep], [beeper], [], [dnl
    *android*)
       beep_package="none"

@@ -351,6 +351,10 @@ extern "C" {
 #undef USE_PKG_BELL_NONE
 #undef USE_PKG_BELL_LINUX
 
+/* Define only one of the following keyboard LEDs packages. */
+#undef USE_PKG_LEDS_NONE
+#undef USE_PKG_LEDS_LINUX
+
 /* Define only one of the following beeper packages. */
 #undef USE_PKG_BEEP_NONE
 #undef USE_PKG_BEEP_LINUX

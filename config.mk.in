@@ -164,6 +164,12 @@ BELL_OBJECTS = bell.$O $(BELL_OBJECT).$O
 BELL_INCLUDES = @bell_includes@
 BELL_LIBS = @bell_libs@
 
+LEDS_PACKAGE = @leds_package@
+LEDS_OBJECT = leds_$(LEDS_PACKAGE)
+LEDS_OBJECTS = leds.$O $(LEDS_OBJECT).$O
+LEDS_INCLUDES = @leds_includes@
+LEDS_LIBS = @leds_libs@
+
 BEEP_PACKAGE = @beep_package@
 BEEP_OBJECT = beep_$(BEEP_PACKAGE)
 BEEP_OBJECTS = notes_beep.$O beep.$O $(BEEP_OBJECT).$O

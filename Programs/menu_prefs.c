@@ -34,6 +34,7 @@
 #include "ctb.h"
 #include "tune.h"
 #include "bell.h"
+#include "leds.h"
 #include "midi.h"
 #include "brltty.h"
 
@@ -179,6 +180,16 @@ testConsoleBellAlert (void) {
 static int
 changedConsoleBellAlert (const MenuItem *item UNUSED, unsigned char setting) {
   return setBellInterception(setting);
+}
+
+static int
+testKeyboardLedAlerts (void) {
+  return canMonitorLeds();
+}
+
+static int
+changedKeyboardLedAlerts (const MenuItem *item UNUSED, unsigned char setting) {
+  return setLedMonitoring(setting);
 }
 
 static int
@@ -792,6 +803,13 @@ makePreferencesMenu (void) {
       ITEM(newBooleanMenuItem(alertsSubmenu, &prefs.consoleBellAlert, &itemName));
       TEST(ConsoleBellAlert);
       CHANGED(ConsoleBellAlert);
+    }
+
+    {
+      NAME(strtext("Keyboard LED Alerts"));
+      ITEM(newBooleanMenuItem(alertsSubmenu, &prefs.keyboardLedAlerts, &itemName));
+      TEST(KeyboardLedAlerts);
+      CHANGED(KeyboardLedAlerts);
     }
 
     {
