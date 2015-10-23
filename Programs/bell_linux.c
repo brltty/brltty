@@ -25,7 +25,7 @@
 
 #include "system_linux.h"
 
-static InputEventInterceptor *inputEventInterceptor = NULL;
+static InputEventMonitor *inputEventMonitor = NULL;
 
 static int
 prepareUinputObject (UinputObject *uinput) {
@@ -42,7 +42,7 @@ handleInputEvent (const InputEvent *event) {
 
       switch (event->code) {
         case SND_BELL:
-          if (value) alertBell();
+          if (value) alertConsoleBell();
           break;
 
         default:
@@ -58,44 +58,44 @@ handleInputEvent (const InputEvent *event) {
 }
 
 int
-canInterceptBell (void) {
+canMonitorConsoleBell (void) {
   return 1;
 }
 
 int
-startInterceptingBell (void) {
-  if (!inputEventInterceptor) {
-    InputEventInterceptor *interceptor = newInputEventInterceptor(
-      "Console Bell Interceptor", prepareUinputObject, handleInputEvent
+startMonitoringConsoleBell (void) {
+  if (!inputEventMonitor) {
+    InputEventMonitor *monitor = newInputEventMonitor(
+      "Console Bell Monitor", prepareUinputObject, handleInputEvent
     );
 
-    if (!interceptor) return 0;
-    inputEventInterceptor = interceptor;
+    if (!monitor) return 0;
+    inputEventMonitor = monitor;
   }
 
   return 1;
 }
 
 void
-stopInterceptingBell (void) {
-  if (inputEventInterceptor) {
-    destroyInputEventInterceptor(inputEventInterceptor);
-    inputEventInterceptor = NULL;
+stopMonitoringConsoleBell (void) {
+  if (inputEventMonitor) {
+    destroyInputEventMonitor(inputEventMonitor);
+    inputEventMonitor = NULL;
   }
 }
 
 #else /* HAVE_LINUX_INPUT_H */
 int
-canInterceptBell (void) {
+canMonitorConsoleBell (void) {
   return 0;
 }
 
 int
-startInterceptingBell (void) {
+startMonitoringConsoleBell (void) {
   return 0;
 }
 
 void
-stopInterceptingBell (void) {
+stopMonitoringConsoleBell (void) {
 }
 #endif /* HAVE_LINUX_INPUT_H */

@@ -49,19 +49,19 @@ extern int enableUinputLed (UinputObject *uinput, int led);
 
 extern UinputObject *newUinputKeyboard (const char *name);
 
-typedef struct InputEventInterceptorStruct InputEventInterceptor;
+typedef struct InputEventMonitorStruct InputEventMonitor;
 typedef struct input_event InputEvent;
 typedef int UinputObjectPreparer (UinputObject *uinput);
 typedef void InputEventHandler (const InputEvent *event);
 
-extern InputEventInterceptor * newInputEventInterceptor (
+extern InputEventMonitor *newInputEventMonitor (
   const char *name,
   UinputObjectPreparer *prepareUinputObject,
   InputEventHandler *handleInputEvent
 );
 
-extern void destroyInputEventInterceptor (
-  InputEventInterceptor *interceptor
+extern void destroyInputEventMonitor (
+  InputEventMonitor *monitor
 );
 
 typedef uint8_t LinuxKeyCode;

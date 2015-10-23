@@ -23,12 +23,12 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int setBellInterception (int on);
-extern void alertBell (void);
+extern int setConsoleBellMonitoring (int on);
+extern void alertConsoleBell (void);
 
-extern int canInterceptBell (void);
-extern int startInterceptingBell (void);
-extern void stopInterceptingBell (void);
+extern int canMonitorConsoleBell (void);
+extern int startMonitoringConsoleBell (void);
+extern void stopMonitoringConsoleBell (void);
 
 #ifdef __cplusplus
 }

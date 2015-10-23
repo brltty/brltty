@@ -1112,7 +1112,7 @@ newUinputKeyboard (const char *name) {
   return NULL;
 }
 
-struct InputEventInterceptorStruct {
+struct InputEventMonitorStruct {
   UinputObject *uinputObject;
   int fileDescriptor;
   AsyncHandle asyncHandle;
@@ -1122,28 +1122,28 @@ struct InputEventInterceptorStruct {
 };
 
 static void
-stopInputEventInterception (InputEventInterceptor *interceptor) {
-  close(interceptor->fileDescriptor);
-  interceptor->fileDescriptor = -1;
+closeInputEventMonitor (InputEventMonitor *monitor) {
+  close(monitor->fileDescriptor);
+  monitor->fileDescriptor = -1;
 }
 
 ASYNC_INPUT_CALLBACK(handleInterceptedInputEvent) {
-  InputEventInterceptor *interceptor = parameters->data;
-  static const char label[] = "input event interceptor";
+  InputEventMonitor *monitor = parameters->data;
+  static const char label[] = "input event monitor";
 
   if (parameters->error) {
     logMessage(LOG_DEBUG, "%s read error: fd=%d: %s",
-               label, interceptor->fileDescriptor, strerror(parameters->error));
-    stopInputEventInterception(interceptor);
+               label, monitor->fileDescriptor, strerror(parameters->error));
+    closeInputEventMonitor(monitor);
   } else if (parameters->end) {
     logMessage(LOG_DEBUG, "%s end-of-file: fd=%d",
-               label, interceptor->fileDescriptor);
-    stopInputEventInterception(interceptor);
+               label, monitor->fileDescriptor);
+    closeInputEventMonitor(monitor);
   } else {
     const struct input_event *event = parameters->buffer;
 
     if (parameters->length >= sizeof(*event)) {
-      interceptor->handleInputEvent(event);
+      monitor->handleInputEvent(event);
       return sizeof(*event);
     }
   }
@@ -1151,39 +1151,39 @@ ASYNC_INPUT_CALLBACK(handleInterceptedInputEvent) {
   return 0;
 }
 
-InputEventInterceptor *
-newInputEventInterceptor (
+InputEventMonitor *
+newInputEventMonitor (
   const char *name,
   UinputObjectPreparer *prepareUinputObject,
   InputEventHandler *handleInputEvent
 ) {
-  InputEventInterceptor *interceptor;
+  InputEventMonitor *monitor;
 
-  if ((interceptor = malloc(sizeof(*interceptor)))) {
-    memset(interceptor, 0, sizeof(*interceptor));
-    interceptor->prepareUinputObject = prepareUinputObject;
-    interceptor->handleInputEvent = handleInputEvent;
+  if ((monitor = malloc(sizeof(*monitor)))) {
+    memset(monitor, 0, sizeof(*monitor));
+    monitor->prepareUinputObject = prepareUinputObject;
+    monitor->handleInputEvent = handleInputEvent;
 
-    if ((interceptor->uinputObject = newUinputObject(name))) {
-      interceptor->fileDescriptor = getUinputFileDescriptor(interceptor->uinputObject);
+    if ((monitor->uinputObject = newUinputObject(name))) {
+      monitor->fileDescriptor = getUinputFileDescriptor(monitor->uinputObject);
 
-      if (prepareUinputObject(interceptor->uinputObject)) {
-        if (createUinputDevice(interceptor->uinputObject)) {
-          if (asyncReadFile(&interceptor->asyncHandle, interceptor->fileDescriptor,
+      if (prepareUinputObject(monitor->uinputObject)) {
+        if (createUinputDevice(monitor->uinputObject)) {
+          if (asyncReadFile(&monitor->asyncHandle, monitor->fileDescriptor,
                             sizeof(struct input_event),
-                            handleInterceptedInputEvent, interceptor)) {
-            logMessage(LOG_DEBUG, "input event interceptor opened: fd=%d",
-                       interceptor->fileDescriptor);
+                            handleInterceptedInputEvent, monitor)) {
+            logMessage(LOG_DEBUG, "input event monitor opened: fd=%d",
+                       monitor->fileDescriptor);
 
-            return interceptor;
+            return monitor;
           }
         }
       }
 
-      destroyUinputObject(interceptor->uinputObject);
+      destroyUinputObject(monitor->uinputObject);
     }
 
-    free(interceptor);
+    free(monitor);
   } else {
     logMallocError();
   }
@@ -1192,10 +1192,10 @@ newInputEventInterceptor (
 }
 
 void
-destroyInputEventInterceptor (InputEventInterceptor *interceptor) {
-  asyncCancelRequest(interceptor->asyncHandle);
-  destroyUinputObject(interceptor->uinputObject);
-  free(interceptor);
+destroyInputEventMonitor (InputEventMonitor *monitor) {
+  asyncCancelRequest(monitor->asyncHandle);
+  destroyUinputObject(monitor->uinputObject);
+  free(monitor);
 }
 
 void

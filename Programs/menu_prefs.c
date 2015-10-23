@@ -174,12 +174,12 @@ testBrailleDisplayOrientation (void) {
 
 static int
 testConsoleBellAlert (void) {
-  return canInterceptBell();
+  return canMonitorConsoleBell();
 }
 
 static int
 changedConsoleBellAlert (const MenuItem *item UNUSED, unsigned char setting) {
-  return setBellInterception(setting);
+  return setConsoleBellMonitoring(setting);
 }
 
 static int

@@ -24,14 +24,14 @@
 #include "tune_types.h"
 
 int
-setBellInterception (int on) {
-  if (on) return startInterceptingBell();
+setConsoleBellMonitoring (int on) {
+  if (on) return startMonitoringConsoleBell();
 
-  stopInterceptingBell();
+  stopMonitoringConsoleBell();
   return 1;
 }
 
 void
-alertBell (void) {
+alertConsoleBell (void) {
   if (prefs.tuneDevice != tdBeeper) alert(ALERT_CONSOLE_BELL);
 }

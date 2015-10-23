@@ -21,15 +21,15 @@
 #include "bell.h"
 
 int
-canInterceptBell (void) {
+canMonitorConsoleBell (void) {
   return 0;
 }
 
 int
-startInterceptingBell (void) {
+startMonitoringConsoleBell (void) {
   return 0;
 }
 
 void
-stopInterceptingBell (void) {
+stopMonitoringConsoleBell (void) {
 }

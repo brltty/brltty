@@ -1088,7 +1088,7 @@ applySpeechPreferences (void) {
 
 static void
 applyAllPreferences (void) {
-  setBellInterception(prefs.consoleBellAlert);
+  setConsoleBellMonitoring(prefs.consoleBellAlert);
   setLedMonitoring(prefs.keyboardLedAlerts);
   tuneSetDevice(prefs.tuneDevice);
   applyBraillePreferences();

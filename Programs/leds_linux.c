@@ -26,7 +26,7 @@
 
 #include "system_linux.h"
 
-static InputEventInterceptor *inputEventInterceptor = NULL;
+static InputEventMonitor *inputEventMonitor = NULL;
 
 static int
 prepareUinputObject (UinputObject *uinput) {
@@ -62,13 +62,13 @@ canMonitorLeds (void) {
 
 int
 startMonitoringLeds (void) {
-  if (!inputEventInterceptor) {
-    InputEventInterceptor *interceptor = newInputEventInterceptor(
+  if (!inputEventMonitor) {
+    InputEventMonitor *monitor = newInputEventMonitor(
       "Keyboard LED Monitor", prepareUinputObject, handleInputEvent
     );
 
-    if (!interceptor) return 0;
-    inputEventInterceptor = interceptor;
+    if (!monitor) return 0;
+    inputEventMonitor = monitor;
   }
 
   return 1;
@@ -76,9 +76,9 @@ startMonitoringLeds (void) {
 
 void
 stopMonitoringLeds (void) {
-  if (inputEventInterceptor) {
-    destroyInputEventInterceptor(inputEventInterceptor);
-    inputEventInterceptor = NULL;
+  if (inputEventMonitor) {
+    destroyInputEventMonitor(inputEventMonitor);
+    inputEventMonitor = NULL;
   }
 }
 
