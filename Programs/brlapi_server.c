@@ -1953,7 +1953,6 @@ static void closeSockets(void *arg)
 #ifdef __MINGW32__
     pthread_cancel(socketThreads[i]);
 #else /* __MINGW32__ */
-logBytes(LOG_NOTICE, "kill socket thread", &socketThreads[0], sizeof(socketThreads[0]));
     pthread_kill(socketThreads[i], SIGUSR2);
 #endif /* __MINGW32__ */
     pthread_join(socketThreads[i], NULL);
@@ -2208,7 +2207,6 @@ THREAD_FUNCTION(runServer) {
 
 	goto finished;
       }
-logBytes(LOG_NOTICE, "create socket thread", &socketThreads[0], sizeof(socketThreads[0]));
 
 #ifdef __MINGW32__
     } else {
