@@ -1,0 +1,67 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2015 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.com/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+title MDV
+
+bind F1 TOP_LEFT
+bind F2 BOT_LEFT
+
+bind F4 HOME
+bind F5 CSRTRK
+
+bind F3 CHRLT
+bind F8 CHRRT
+
+bind Shift+F3 HWINLT
+bind Shift+F8 HWINRT
+
+bind Shift+Up KEY_CURSOR_UP
+bind Shift+Down KEY_CURSOR_DOWN
+
+bind Shift+F1 FREEZE
+bind Shift+F2 INFO
+
+bind Shift+F4 CSRSIZE
+bind Long+F4 CSRBLINK
+
+bind Shift+F5 CSRVIS
+bind Long+F5 CAPBLINK
+
+bind F6 SKPIDLNS
+bind F7 SKPBLNKWINS
+
+bind Shift+F6 DISPMD
+bind Shift+Long+F6 ATTRVIS
+bind Long+F6 ATTRBLINK
+
+hotkey StatusKey.1 CSRHIDE+on CSRHIDE+off
+
+bind RoutingKey+Right CLIP_NEW
+bind RoutingKey+Left COPY_RECT
+bind RoutingKey+RoutingKey CLIP_COPY
+bind RoutingKey.2+RoutingKey.3 PASTE
+bind Shift+F10 PASTE
+
+bind F10 PREFMENU
+context menu
+
+bind F9 MENU_PREV_SETTING
+bind F10 MENU_NEXT_SETTING
+
+bind Up MENU_PREV_ITEM
+bind Down MENU_NEXT_ITEM

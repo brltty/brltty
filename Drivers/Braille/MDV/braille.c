@@ -254,6 +254,11 @@ brl_destruct (BrailleDisplay *brl) {
 }
 
 static int
+brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells) {
+  return 1;
+}
+
+static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   if (cellsHaveChanged(brl->data->textCells, brl->buffer, brl->textColumns, NULL, NULL, &brl->data->forceRewrite)) {
     unsigned char cells[brl->textColumns];
