@@ -50,18 +50,29 @@ REPORT_LISTENER(brailleWindowMovedListener) {
   handleBrailleWindowMoved(report, tcd);
 }
 
-static int
-constructTouchCommandData (TouchCommandData *tcd) {
-  if ((tcd->brailleWindowMovedListener = registerReportListener(REPORT_BRAILLE_WINDOW_MOVED, brailleWindowMovedListener, tcd))) {
-    return 1;
+static TouchCommandData *
+newTouchCommandData (void) {
+  TouchCommandData *tcd;
+
+  if ((tcd = malloc(sizeof(*tcd)))) {
+    memset(tcd, 0, sizeof(*tcd));
+
+    if ((tcd->brailleWindowMovedListener = registerReportListener(REPORT_BRAILLE_WINDOW_MOVED, brailleWindowMovedListener, tcd))) {
+      return tcd;
+    }
+
+    free(tcd);
+  } else {
+    logMallocError();
   }
 
-  return 0;
+  return NULL;
 }
 
 static void
-destructTouchCommandData (TouchCommandData *tcd) {
+destroyTouchCommandData (TouchCommandData *tcd) {
   unregisterReportListener(tcd->brailleWindowMovedListener);
+  free(tcd);
 }
 
 static int
@@ -87,32 +98,23 @@ handleTouchCommands (int command, void *data) {
 }
 
 static void
-destroyTouchCommandData (void *data) {
+destructTouchCommandData (void *data) {
   TouchCommandData *tcd = data;
 
-  destructTouchCommandData(tcd);
-  free(tcd);
+  destroyTouchCommandData(tcd);
 }
 
 int
 addTouchCommands (void) {
   TouchCommandData *tcd;
 
-  if ((tcd = malloc(sizeof(*tcd)))) {
-    memset(tcd, 0, sizeof(*tcd));
-
-    if (constructTouchCommandData(tcd)) {
-      if (pushCommandHandler("touch", KTB_CTX_DEFAULT,
-                             handleTouchCommands, destroyTouchCommandData, tcd)) {
-        return 1;
-      }
-
-      destructTouchCommandData(tcd);
+  if ((tcd = newTouchCommandData())) {
+    if (pushCommandHandler("touch", KTB_CTX_DEFAULT, handleTouchCommands,
+                           destructTouchCommandData, tcd)) {
+      return 1;
     }
 
-    free(tcd);
-  } else {
-    logMallocError();
+    destroyTouchCommandData(tcd);
   }
 
   return 0;
