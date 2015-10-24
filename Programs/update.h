@@ -23,6 +23,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+extern void reportBrailleWindowMoved (void);
+
 extern void scheduleUpdate (const char *reason);
 extern void scheduleUpdateIn (const char *reason, int delay);
 

@@ -26,6 +26,7 @@ extern "C" {
 typedef enum {
   REPORT_BRAILLE_ONLINE,
   REPORT_BRAILLE_OFFLINE,
+  REPORT_BRAILLE_WINDOW_MOVED,
 } ReportIdentifier;
 
 extern void report (ReportIdentifier identiier, const void *data);
@@ -47,6 +48,17 @@ extern ReportListenerInstance *registerReportListener (
 );
 
 extern void unregisterReportListener (ReportListenerInstance *rli);
+
+typedef struct {
+  struct {
+    unsigned int column;
+    unsigned int row;
+  } screen;
+
+  struct {
+    unsigned int count;
+  } text;
+} BrailleWindowMovedReport;
 
 #ifdef __cplusplus
 }

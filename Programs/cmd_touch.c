@@ -25,9 +25,10 @@
 #include "cmd_queue.h"
 #include "cmd_touch.h"
 #include "brl_cmds.h"
+#include "report.h"
 
 typedef struct {
-  int placeHolder;
+  ReportListenerInstance *brailleWindowMovedListener;
 } TouchCommandData;
 
 static void
@@ -38,13 +39,23 @@ static void
 handleTouchOff (TouchCommandData *tcd) {
 }
 
+REPORT_LISTENER(brailleWindowMovedListener) {
+  TouchCommandData *tcd = parameters->listenerData;
+  const BrailleWindowMovedReport *report = parameters->reportData;
+}
+
 static int
 constructTouchCommandData (TouchCommandData *tcd) {
-  return 1;
+  if ((tcd->brailleWindowMovedListener = registerReportListener(REPORT_BRAILLE_WINDOW_MOVED, brailleWindowMovedListener, tcd))) {
+    return 1;
+  }
+
+  return 0;
 }
 
 static void
 destructTouchCommandData (TouchCommandData *tcd) {
+  unregisterReportListener(tcd->brailleWindowMovedListener);
 }
 
 static int

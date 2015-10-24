@@ -540,6 +540,22 @@ suppressAutospeak (void) {
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
+void
+reportBrailleWindowMoved (void) {
+  const BrailleWindowMovedReport data = {
+    .screen = {
+      .column = ses->winx,
+      .row = ses->winy
+    },
+
+    .text = {
+      .count = textCount
+    }
+  };
+
+  report(REPORT_BRAILLE_WINDOW_MOVED, &data);
+}
+
 static void
 doUpdate (void) {
   int screenPointerMoved = 0;
@@ -961,7 +977,17 @@ ASYNC_ALARM_CALLBACK(handleUpdateAlarm) {
   setUpdateTime((pollScreen()? SCREEN_UPDATE_POLL_INTERVAL: (SECS_PER_DAY * MSECS_PER_SEC)),
                 parameters->now, 0);
 
-  doUpdate();
+  {
+    int oldColumn = ses->winx;
+    int oldRow = ses->winy;
+
+    doUpdate();
+
+    if ((ses->winx != oldColumn) || (ses->winy != oldRow)) {
+      reportBrailleWindowMoved();
+    }
+  }
+
   setUpdateDelay(MAX((brl.writeDelay + 1), UPDATE_SCHEDULE_DELAY));
   brl.writeDelay = 0;
 

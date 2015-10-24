@@ -138,6 +138,8 @@ postprocessCommand (void *state, int command, int handled) {
 
     if ((ses->winx != pre->motionColumn) || (ses->winy != pre->motionRow)) {
       /* The braille window has been manually moved. */
+      reportBrailleWindowMoved();
+
       ses->motx = ses->winx;
       ses->moty = ses->winy;
 
