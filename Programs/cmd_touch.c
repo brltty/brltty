@@ -30,15 +30,27 @@ typedef struct {
 } TouchCommandData;
 
 static void
-handleTouchOffset (int offset, TouchCommandData *tcd) {
+handleTouchAt (int offset, TouchCommandData *tcd) {
+}
+
+static void
+handleTouchOff (TouchCommandData *tcd) {
 }
 
 static int
 handleTouchCommands (int command, void *data) {
   switch (command & BRL_MSK_BLK) {
-    case BRL_CMD_BLK(TOUCH):
-      handleTouchOffset((command & BRL_MSK_ARG), data);
+    case BRL_CMD_BLK(TOUCH): {
+      int arg = command & BRL_MSK_ARG;
+
+      if (arg == BRL_MSK_ARG) {
+        handleTouchOff(data);
+      } else {
+        handleTouchAt(arg, data);
+      }
+
       break;
+    }
 
     default:
       return 0;
