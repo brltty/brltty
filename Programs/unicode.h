@@ -77,6 +77,8 @@ extern int getCharacterByName (wchar_t *character, const char *name);
 
 extern int getCharacterWidth (wchar_t character);
 
+extern int isBrailleCharacter (wchar_t character);
+
 extern wchar_t getBaseCharacter (wchar_t character);
 extern wchar_t getTransliteratedCharacter (wchar_t character);
 

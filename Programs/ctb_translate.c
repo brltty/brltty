@@ -599,8 +599,11 @@ static int
 putCharacter (BrailleContractionData *bcd, wchar_t character) {
   {
     const ContractionTableRule *rule = getAlwaysRule(bcd, character);
-
     if (rule) return putReplace(bcd, rule, character);
+  }
+
+  if (isBrailleCharacter(character)) {
+    return putCell(bcd, (character & UNICODE_CELL_MASK));
   }
 
   {

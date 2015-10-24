@@ -119,6 +119,11 @@ getCharacterWidth (wchar_t character) {
 #endif /* character width */
 }
 
+int
+isBrailleCharacter (wchar_t character) {
+  return (character & ~UNICODE_CELL_MASK) == UNICODE_BRAILLE_ROW;
+}
+
 wchar_t
 getBaseCharacter (wchar_t character) {
 #ifdef HAVE_ICU
@@ -168,8 +173,9 @@ getTransliteratedCharacter (wchar_t character) {
 
 int
 handleBestCharacter (wchar_t character, CharacterHandler handleCharacter, void *data) {
-  typedef wchar_t CharacterTranslator (wchar_t character);
+  if (isBrailleCharacter(character)) return 0;
 
+  typedef wchar_t CharacterTranslator (wchar_t character);
   static CharacterTranslator *const characterTranslators[] = {
     getBaseCharacter,
     getTransliteratedCharacter,
@@ -177,13 +183,11 @@ handleBestCharacter (wchar_t character, CharacterHandler handleCharacter, void *
   };
 
   CharacterTranslator *const *translateCharacter = characterTranslators;
-
   while (!handleCharacter(character, data)) {
     if (!*translateCharacter) return 0;
 
     {
       wchar_t alternate = (*translateCharacter++)(character);
-
       if (alternate) character = alternate;
     }
   }
