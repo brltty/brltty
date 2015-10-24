@@ -18,9 +18,16 @@
 
 #include "prologue.h"
 
+#include <string.h>
+
+#include "log.h"
 #include "cmd_queue.h"
 #include "cmd_touch.h"
 #include "brl_cmds.h"
+
+typedef struct {
+  int placeHolder;
+} TouchCommandData;
 
 static int
 handleTouchCommands (int command, void *data) {
@@ -35,8 +42,29 @@ handleTouchCommands (int command, void *data) {
   return 1;
 }
 
+static void
+destroyTouchCommandData (void *data) {
+  TouchCommandData *tcd = data;
+
+  free(tcd);
+}
+
 int
 addTouchCommands (void) {
-  return pushCommandHandler("touch", KTB_CTX_DEFAULT,
-                            handleTouchCommands, NULL, NULL);
+  TouchCommandData *tcd;
+
+  if ((tcd = malloc(sizeof(*tcd)))) {
+    memset(tcd, 0, sizeof(*tcd));
+
+    if (pushCommandHandler("touch", KTB_CTX_DEFAULT,
+                           handleTouchCommands, destroyTouchCommandData, tcd)) {
+      return 1;
+    }
+
+    free(tcd);
+  } else {
+    logMallocError();
+  }
+
+  return 0;
 }
