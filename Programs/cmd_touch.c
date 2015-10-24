@@ -39,9 +39,15 @@ static void
 handleTouchOff (TouchCommandData *tcd) {
 }
 
+static void
+handleBrailleWindowMoved (const BrailleWindowMovedReport *report, TouchCommandData *tcd) {
+}
+
 REPORT_LISTENER(brailleWindowMovedListener) {
   TouchCommandData *tcd = parameters->listenerData;
   const BrailleWindowMovedReport *report = parameters->reportData;
+
+  handleBrailleWindowMoved(report, tcd);
 }
 
 static int
