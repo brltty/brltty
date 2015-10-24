@@ -29,10 +29,15 @@ typedef struct {
   int placeHolder;
 } TouchCommandData;
 
+static void
+handleTouchOffset (int offset, TouchCommandData *tcd) {
+}
+
 static int
 handleTouchCommands (int command, void *data) {
   switch (command & BRL_MSK_BLK) {
     case BRL_CMD_BLK(TOUCH):
+      handleTouchOffset((command & BRL_MSK_ARG), data);
       break;
 
     default:
