@@ -65,8 +65,9 @@
 
 #define BRL_STATUS_FIELDS sfWindowCoordinates
 #define BRL_HAVE_STATUS_CELLS
+
 #include "brl_driver.h"
-#include "braille.h"
+#include "brldefs-md.h"
 #include "io_serial.h"
 
 /* Braille display parameters that do not change */

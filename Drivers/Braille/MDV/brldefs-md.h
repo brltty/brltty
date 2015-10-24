@@ -7,17 +7,16 @@
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
  * This is free software, placed under the terms of the
- * GNU General Public License, as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option) any
- * later version. Please see the file LICENSE-GPL for details.
+ * GNU Lesser General Public License, as published by the Free Software
+ * Foundation; either version 2.1 of the License, or (at your option) any
+ * later version. Please see the file LICENSE-LGPL for details.
  *
  * Web Page: http://brltty.com/
  *
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* MDV/braille.h - Configurable definitions for the Eco Braille series
- *
- * Edit as necessary for your system.
- */
+#ifndef BRLTTY_INCLUDED_MD_BRLDEFS
+#define BRLTTY_INCLUDED_MD_BRLDEFS
 
+#endif /* BRLTTY_INCLUDED_MD_BRLDEFS */ 
