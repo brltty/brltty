@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "cmd_utils.h"
 #include "cmd_queue.h"
 #include "cmd_touch.h"
 #include "brl_cmds.h"
@@ -45,7 +46,7 @@ handleTouchCommands (int command, void *data) {
 
       if (arg == BRL_MSK_ARG) {
         handleTouchOff(data);
-      } else {
+      } else if (isTextOffset(&arg, 0, 0)) {
         handleTouchAt(arg, data);
       }
 
