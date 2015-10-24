@@ -39,6 +39,15 @@ handleTouchOff (TouchCommandData *tcd) {
 }
 
 static int
+constructTouchCommandData (TouchCommandData *tcd) {
+  return 1;
+}
+
+static void
+destructTouchCommandData (TouchCommandData *tcd) {
+}
+
+static int
 handleTouchCommands (int command, void *data) {
   switch (command & BRL_MSK_BLK) {
     case BRL_CMD_BLK(TOUCH): {
@@ -64,6 +73,7 @@ static void
 destroyTouchCommandData (void *data) {
   TouchCommandData *tcd = data;
 
+  destructTouchCommandData(tcd);
   free(tcd);
 }
 
@@ -74,9 +84,13 @@ addTouchCommands (void) {
   if ((tcd = malloc(sizeof(*tcd)))) {
     memset(tcd, 0, sizeof(*tcd));
 
-    if (pushCommandHandler("touch", KTB_CTX_DEFAULT,
-                           handleTouchCommands, destroyTouchCommandData, tcd)) {
-      return 1;
+    if (constructTouchCommandData(tcd)) {
+      if (pushCommandHandler("touch", KTB_CTX_DEFAULT,
+                             handleTouchCommands, destroyTouchCommandData, tcd)) {
+        return 1;
+      }
+
+      destructTouchCommandData(tcd);
     }
 
     free(tcd);
