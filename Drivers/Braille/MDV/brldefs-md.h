@@ -59,6 +59,11 @@ typedef union {
         unsigned char MinorVersion;
       } identity;
     } data;
+
+    /* Declare the checksum bytes here to ensure that the size is correct
+     * even though the actual checksum is just after the last data byte.
+     */
+    unsigned char checksum[2];
   } PACKED fields;
 } MD_Packet;
 

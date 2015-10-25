@@ -72,7 +72,8 @@
 #define PROBE_RETRY_LIMIT 2
 #define PROBE_INPUT_TIMEOUT 1000
 #define MAXIMUM_RESPONSE_SIZE sizeof(MD_Packet)
-#define MAXIMUM_CELL_COUNT 140
+#define MAXIMUM_TEXT_CELLS 80
+#define MAXIMUM_STATUS_CELLS 2
 
 BEGIN_KEY_NAME_TABLE(navigation)
   KEY_NAME_ENTRY(MD_KEY_F1, "F1"),
@@ -127,9 +128,27 @@ BEGIN_KEY_TABLE_LIST
 END_KEY_TABLE_LIST
 
 struct BrailleDataStruct {
-  int forceRewrite;
-  unsigned char textCells[MAXIMUM_CELL_COUNT];
+  struct {
+    unsigned char cells[MAXIMUM_TEXT_CELLS];
+    int rewrite;
+  } text;
+
+  struct {
+    unsigned char cells[MAXIMUM_STATUS_CELLS];
+    int rewrite;
+  } status;
 };
+
+static uint16_t
+calculateChecksum (const unsigned char *from, const unsigned char *to) {
+  uint16_t checksum = 0;
+
+  while (from < to) {
+    checksum += *from++;
+  }
+
+  return checksum ^ 0XAA55;
+}
 
 static int
 writeBytes (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
@@ -137,13 +156,23 @@ writeBytes (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
 }
 
 static int
-writePacket (BrailleDisplay *brl, const unsigned char *packet, size_t size) {
-  unsigned char bytes[size];
-  unsigned char *byte = bytes;
+writePacket (BrailleDisplay *brl, unsigned char code, const void *data, unsigned char length) {
+  MD_Packet packet;
+  unsigned char *byte = packet.fields.data.bytes;
 
-  byte = mempcpy(byte, packet, size);
+  packet.fields.soh = SOH;
+  packet.fields.stx = STX;
+  packet.fields.etx = ETX;
 
-  return writeBytes(brl, bytes, byte-bytes);
+  packet.fields.code = code;
+  packet.fields.length = length;
+  byte = mempcpy(byte, data, length);
+
+  uint16_t checksum = calculateChecksum(&packet.fields.stx, byte);
+  *byte++ = checksum & 0XFF;
+  *byte++ = checksum >> 8;
+
+  return writeBytes(brl, packet.bytes, byte-packet.bytes);
 }
 
 static BraillePacketVerifierResult
@@ -156,13 +185,31 @@ verifyPacket (
 
   switch (size) {
     case 1:
-      switch (byte) {
-        default:
-          return BRL_PVR_INVALID;
-      }
+      if (byte != SOH) return BRL_PVR_INVALID;
+      *length = 5;
+      break;
+
+    case 2:
+      if (byte != STX) return BRL_PVR_INVALID;
+      break;
+
+    case 4:
+      *length += byte + 2;
+      break;
+
+    case 5:
+      if (byte != ETX) return BRL_PVR_INVALID;
       break;
 
     default:
+      if (size == *length) {
+        uint16_t checksum = (byte << 8) | bytes[size-2];
+
+        if (checksum != calculateChecksum(&bytes[1], &bytes[size-2])) {
+          return BRL_PVR_INVALID;
+        }
+      }
+
       break;
   }
 
@@ -170,8 +217,13 @@ verifyPacket (
 }
 
 static size_t
-readPacket (BrailleDisplay *brl, void *packet, size_t size) {
+readBytes (BrailleDisplay *brl, void *packet, size_t size) {
   return readBraillePacket(brl, NULL, packet, size, verifyPacket, NULL);
+}
+
+static size_t
+readPacket (BrailleDisplay *brl, MD_Packet *packet) {
+  return readBytes(brl, packet, sizeof(*packet));
 }
 
 static int
@@ -199,8 +251,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
 static int
 writeIdentityRequest (BrailleDisplay *brl) {
-  static const unsigned char packet[] = {0};
-  return writePacket(brl, packet, sizeof(packet));
+  return writePacket(brl, MD_PT_IDENTIFY, NULL, 0);
 }
 
 static BrailleResponseResult
@@ -214,11 +265,11 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     memset(brl->data, 0, sizeof(*brl->data));
 
     if (connectResource(brl, device)) {
-      unsigned char response[MAXIMUM_RESPONSE_SIZE];
+      MD_Packet response;
 
       if (probeBrailleDisplay(brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT,
                               writeIdentityRequest,
-                              readPacket, &response, sizeof(response),
+                              readBytes, &response, sizeof(response),
                               isIdentityResponse)) {
         {
           const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
@@ -227,8 +278,16 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           brl->keyNames = ktd->names;
         }
 
-        makeOutputTable(dotsTable_ISO11548_1);
-        brl->data->forceRewrite = 1;
+        {
+          static const DotsTable dots = {
+            0X08, 0X04, 0X02, 0X80, 0X40, 0X20, 0X01, 0X10
+          };
+          makeOutputTable(dots);
+        }
+
+        brl->data->text.rewrite = 1;
+        brl->data->status.rewrite = 1;
+
         return 1;
       }
 
@@ -260,10 +319,10 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  if (cellsHaveChanged(brl->data->textCells, brl->buffer, brl->textColumns, NULL, NULL, &brl->data->forceRewrite)) {
+  if (cellsHaveChanged(brl->data->text.cells, brl->buffer, brl->textColumns, NULL, NULL, &brl->data->text.rewrite)) {
     unsigned char cells[brl->textColumns];
 
-    translateOutputCells(cells, brl->data->textCells, brl->textColumns);
+    translateOutputCells(cells, brl->data->text.cells, brl->textColumns);
   }
 
   return 1;
@@ -271,11 +330,11 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  unsigned char packet[MAXIMUM_RESPONSE_SIZE];
+  MD_Packet packet;
   size_t size;
 
-  while ((size = readPacket(brl, packet, sizeof(packet)))) {
-    logUnexpectedPacket(packet, size);
+  while ((size = readPacket(brl, &packet))) {
+    logUnexpectedPacket(packet.bytes, size);
   }
 
   return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
