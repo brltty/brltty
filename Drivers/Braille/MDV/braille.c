@@ -218,7 +218,15 @@ verifyPacket (
 
 static size_t
 readBytes (BrailleDisplay *brl, void *packet, size_t size) {
-  return readBraillePacket(brl, NULL, packet, size, verifyPacket, NULL);
+  int ok = readBraillePacket(brl, NULL, packet, size, verifyPacket, NULL);
+
+  if (ok) {
+    if (!writePacket(brl, MD_CODE_ACKNOWLEDGE, NULL, 0)) {
+      brl->hasFailed = 1;
+    }
+  }
+
+  return ok;
 }
 
 static size_t
@@ -254,14 +262,17 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
 static int
 writeIdentityRequest (BrailleDisplay *brl) {
-  return writePacket(brl, MD_PT_IDENTIFY, NULL, 0);
+  return writePacket(brl, MD_CODE_IDENTIFY, NULL, 0);
 }
 
 static BrailleResponseResult
 isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
   const MD_Packet *response = packet;
+  unsigned char code = response->fields.code;
 
-  return (response->fields.code == MD_PT_IDENTITY)? BRL_RSP_DONE: BRL_RSP_UNEXPECTED;
+  if (code == MD_CODE_IDENTITY) return BRL_RSP_DONE;
+  if (code == MD_CODE_ACKNOWLEDGE) return BRL_RSP_CONTINUE;
+  return BRL_RSP_UNEXPECTED;
 }
 
 static int
@@ -338,7 +349,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
     cell = mempcpy(cell, brl->data->status.cells, brl->statusColumns);
     cell = translateOutputCells(cell, brl->data->text.cells, brl->textColumns);
 
-    if (!writePacket(brl, MD_PT_WRITE_ALL, cells, (cell - cells))) return 0;
+    if (!writePacket(brl, MD_CODE_WRITE_ALL, cells, (cell - cells))) return 0;
   }
 
   return 1;
@@ -350,6 +361,14 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   size_t size;
 
   while ((size = readPacket(brl, &packet))) {
+    switch (packet.fields.code) {
+      case MD_CODE_ACKNOWLEDGE:
+        break;
+
+      default:
+        break;
+    }
+
     logUnexpectedPacket(packet.bytes, size);
   }
 

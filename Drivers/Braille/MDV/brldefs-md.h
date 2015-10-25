@@ -68,18 +68,18 @@ typedef union {
 } MD_Packet;
 
 typedef enum {
-  MD_PT_WRITE_ALL       =   0,
-  MD_PT_WRITE_STATUS    =   1,
-  MD_PT_WRITE_TEXT      =   2,
-  MD_PT_WRITE_LCD       =   5,
-  MD_PT_NAVIGATION_KEY  =  16,
-  MD_PT_ROUTING_PRESS   =  17,
-  MD_PT_ROUTING_RELEASE =  18,
-  MD_PT_BRAILLE_KEY     =  21,
-  MD_PT_IDENTIFY        =  36,
-  MD_PT_IDENTITY        =  37,
-  MD_PT_ACKNOWLEDGE     = 127,
-} MD_PacketType;
+  MD_CODE_WRITE_ALL       =   0,
+  MD_CODE_WRITE_STATUS    =   1,
+  MD_CODE_WRITE_TEXT      =   2,
+  MD_CODE_WRITE_LCD       =   5,
+  MD_CODE_NAVIGATION_KEY  =  16,
+  MD_CODE_ROUTING_PRESS   =  17,
+  MD_CODE_ROUTING_RELEASE =  18,
+  MD_CODE_BRAILLE_KEY     =  21,
+  MD_CODE_IDENTIFY        =  36,
+  MD_CODE_IDENTITY        =  37,
+  MD_CODE_ACKNOWLEDGE     = 127,
+} MD_PacketCode;
 
 typedef enum {
   MD_NAV_F1            = 0X01,
