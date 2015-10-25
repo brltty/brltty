@@ -68,8 +68,10 @@ bind Long+F6 ATTRBLINK
 hotkey StatusKey.1 CSRHIDE+on CSRHIDE+off
 
 bind RoutingKey ROUTE
-bind RoutingKey+Right CLIP_NEW
-bind RoutingKey+Left COPY_RECT
+bind RoutingKey+Left CLIP_NEW
+bind RoutingKey+Up CLIP_APPEND
+bind RoutingKey+Right COPY_LINE
+bind RoutingKey+Down COPY_RECT
 bind RoutingKey+RoutingKey CLIP_COPY
 bind RoutingKey.2+RoutingKey.3 PASTE
 bind Shift+F10 PASTE
