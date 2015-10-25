@@ -166,9 +166,11 @@ verifyPacket (
 
     default:
       if (size == *length) {
-        uint16_t checksum = (byte << 8) | bytes[size-2];
+        const unsigned char *from = &bytes[1];
+        const unsigned char *to = &bytes[size-2];
+        uint16_t checksum = (to[1] << 8) | to[0];
 
-        if (checksum != calculateChecksum(&bytes[1], &bytes[size-2])) {
+        if (checksum != calculateChecksum(from, to)) {
           return BRL_PVR_INVALID;
         }
       }
