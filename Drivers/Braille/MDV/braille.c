@@ -16,45 +16,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* MDV/braille.c - Braille display driver for MDV displays.
- *
- * Written by Stéphane Doyon (s.doyon@videotron.ca) in collaboration with
- * Simone Dal Maso <sdalmaso@protec.it>.
- *
- * It is being tested on MB408S, should also support MB208 and MB408L.
- * It is designed to be compiled in BRLTTY version 2.91-3.0.
- *
- * History:
- * 0.8: Stupid mistake processing keycode for SHIFT_PRESS/RELEASE. Swapped
- *    bindings for ATTRVIS and DISPMD. Send ACK for packet_to_process packets.
- *    Safety that forgets held routing keys when getting bad combination with
- *    ordinary keys. Bugs reported about locking/crashing with paste with
- *    routing keys, getting out of help, and getting out of freeze, are
- *    probably not solved.
- * 0.7: They have changed the protocol so that the SHIFT key pressed alone
- *    sends a code. Added plenty of key bindings. Fixed help.
- * 0.6: Added help file. Added hide/show cursor toggle on status cell
- *    routing key 1.
- * Unnumbered version: Fixes for dynmically loading drivers (declare all
- *    non-exported functions and variables static, satized debugging vs print).
- * 0.5: When receiving response to identification query, read all that's
- *    available, because there is usually an ACK packet pending (perhaps it
- *    always sends ACK + the response). Fixed bug that caused combiknation
- *    of routing and movement keys to fail.
- * 0.4: Fixed bug that put garbage instead of logging packet contents.
- *    Added key binding for showing attributes, and also for preferences menu
- *    (might change).
- * 0.3: Fixed bug in interpreting query reply which caused nonsense number
- *    of content and status cells.
- * 0.2: Added a few function keys, such as cursor tracking toggle. Put the
- *    display's line and column in status cells, with the line on top and
- *    the column on the bottom (reverse of what it was), does it work?
- *    Display parameters now set according to query reply.
- * 0.1: First draft ve5rsion. Query reply interpretation is bypassed and
- *    parameters are hard-coded. Has basic movement keys, routing keys
- *    and commands involving combinations of routing keys.
- */
-
 #include "prologue.h"
 
 #include <string.h>
@@ -76,47 +37,49 @@
 #define MAXIMUM_STATUS_CELLS 2
 
 BEGIN_KEY_NAME_TABLE(navigation)
-  KEY_NAME_ENTRY(MD_KEY_F1, "F1"),
-  KEY_NAME_ENTRY(MD_KEY_F2, "F2"),
-  KEY_NAME_ENTRY(MD_KEY_F3, "F3"),
-  KEY_NAME_ENTRY(MD_KEY_F4, "F4"),
-  KEY_NAME_ENTRY(MD_KEY_F5, "F5"),
-  KEY_NAME_ENTRY(MD_KEY_F6, "F6"),
-  KEY_NAME_ENTRY(MD_KEY_F7, "F7"),
-  KEY_NAME_ENTRY(MD_KEY_F8, "F8"),
-  KEY_NAME_ENTRY(MD_KEY_F9, "F9"),
-  KEY_NAME_ENTRY(MD_KEY_F10, "F10"),
+  BRL_KEY_NAME_ENTRY(MD, NAV, F1, "F1"),
+  BRL_KEY_NAME_ENTRY(MD, NAV, F2, "F2"),
+  BRL_KEY_NAME_ENTRY(MD, NAV, F3, "F3"),
+  BRL_KEY_NAME_ENTRY(MD, NAV, F4, "F4"),
+  BRL_KEY_NAME_ENTRY(MD, NAV, F5, "F5"),
+  BRL_KEY_NAME_ENTRY(MD, NAV, F6, "F6"),
+  BRL_KEY_NAME_ENTRY(MD, NAV, F7, "F7"),
+  BRL_KEY_NAME_ENTRY(MD, NAV, F8, "F8"),
+  BRL_KEY_NAME_ENTRY(MD, NAV, F9, "F9"),
+  BRL_KEY_NAME_ENTRY(MD, NAV, F10, "F10"),
 
-  KEY_NAME_ENTRY(MD_KEY_LEFT, "Left"),
-  KEY_NAME_ENTRY(MD_KEY_UP, "Up"),
-  KEY_NAME_ENTRY(MD_KEY_RIGHT, "Right"),
-  KEY_NAME_ENTRY(MD_KEY_DOWN, "Down"),
+  BRL_KEY_NAME_ENTRY(MD, NAV, LEFT, "Left"),
+  BRL_KEY_NAME_ENTRY(MD, NAV, UP, "Up"),
+  BRL_KEY_NAME_ENTRY(MD, NAV, RIGHT, "Right"),
+  BRL_KEY_NAME_ENTRY(MD, NAV, DOWN, "Down"),
 
-  KEY_NAME_ENTRY(MD_KEY_SHIFT, "Shift"),
-  KEY_NAME_ENTRY(MD_KEY_LONG, "Long"),
+  BRL_KEY_NAME_ENTRY(MD, NAV, SHIFT, "Shift"),
+  BRL_KEY_NAME_ENTRY(MD, NAV, LONG, "Long"),
+END_KEY_NAME_TABLE
 
-  KEY_NAME_ENTRY(MD_KEY_DOT1, "Dot1"),
-  KEY_NAME_ENTRY(MD_KEY_DOT2, "Dot2"),
-  KEY_NAME_ENTRY(MD_KEY_DOT3, "Dot3"),
-  KEY_NAME_ENTRY(MD_KEY_DOT4, "Dot4"),
-  KEY_NAME_ENTRY(MD_KEY_DOT5, "Dot5"),
-  KEY_NAME_ENTRY(MD_KEY_DOT6, "Dot6"),
-  KEY_NAME_ENTRY(MD_KEY_DOT7, "Dot7"),
-  KEY_NAME_ENTRY(MD_KEY_DOT8, "Dot8"),
-
-  KEY_NAME_ENTRY(MD_KEY_SPACE, "Space"),
+BEGIN_KEY_NAME_TABLE(braille)
+  BRL_KEY_NAME_ENTRY(MD, BRL, DOT1, "Dot1"),
+  BRL_KEY_NAME_ENTRY(MD, BRL, DOT2, "Dot2"),
+  BRL_KEY_NAME_ENTRY(MD, BRL, DOT3, "Dot3"),
+  BRL_KEY_NAME_ENTRY(MD, BRL, DOT4, "Dot4"),
+  BRL_KEY_NAME_ENTRY(MD, BRL, DOT5, "Dot5"),
+  BRL_KEY_NAME_ENTRY(MD, BRL, DOT6, "Dot6"),
+  BRL_KEY_NAME_ENTRY(MD, BRL, DOT7, "Dot7"),
+  BRL_KEY_NAME_ENTRY(MD, BRL, DOT8, "Dot8"),
+  BRL_KEY_NAME_ENTRY(MD, BRL, SPACE, "Space"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(routing)
-  KEY_GROUP_ENTRY(MD_GRP_RoutingKeys, "RoutingKey"),
+  BRL_KEY_GROUP_ENTRY(MD, RK, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(status)
-  KEY_GROUP_ENTRY(MD_GRP_StatusKeys, "StatusKey"),
+  BRL_KEY_GROUP_ENTRY(MD, SK, "StatusKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(all)
   KEY_NAME_TABLE(navigation),
+  KEY_NAME_TABLE(braille),
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(status),
 END_KEY_NAME_TABLES
@@ -362,6 +325,38 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
   while ((size = readPacket(brl, &packet))) {
     switch (packet.fields.code) {
+      case MD_CODE_NAVIGATION_KEY: {
+        unsigned char key = packet.fields.data.navigationKey.key;
+
+        if (key == MD_NAV_SHIFT_PRESS) break;
+        if (key == MD_NAV_SHIFT_RELEASE) break;
+
+        int shiftPressed = (key & MD_NAV_SHIFT) != 0;
+        int longPressed = (key & MD_NAV_LONG) != 0;
+
+        key &= MD_NAV_MASK_KEY;
+        MD_KeyGroup group = MD_GRP_NAV;
+
+        if (shiftPressed) enqueueKeyEvent(brl, group, MD_NAV_SHIFT, 1);
+        if (longPressed) enqueueKeyEvent(brl, group, MD_NAV_LONG, 1);
+        enqueueKey(brl, group, key);
+        if (longPressed) enqueueKeyEvent(brl, group, MD_NAV_LONG, 0);
+        if (shiftPressed) enqueueKeyEvent(brl, group, MD_NAV_SHIFT, 0);
+
+        break;
+      }
+
+      case MD_CODE_BRAILLE_KEY: {
+        MD_KeyGroup group = MD_GRP_BRL;
+        unsigned char spacePressed = packet.fields.data.brailleKey.isChord != 0;
+
+        if (spacePressed) enqueueKeyEvent(brl, group, MD_BRL_SPACE, 1);
+        enqueueKeys(brl, packet.fields.data.brailleKey.dots, group, 0);
+        if (spacePressed) enqueueKeyEvent(brl, group, MD_BRL_SPACE, 0);
+
+        break;
+      }
+
       {
         unsigned char key;
         int press;
@@ -384,26 +379,15 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
           MD_KeyGroup group;
 
           if (key < brl->statusColumns) {
-            group = MD_GRP_StatusKeys;
+            group = MD_GRP_SK;
           } else if ((key -= brl->statusColumns) < brl->textColumns) {
-            group = MD_GRP_RoutingKeys;
+            group = MD_GRP_RK;
           } else {
             break;
           }
 
           enqueueKeyEvent(brl, group, key, press);
         }
-
-        break;
-      }
-
-      case MD_CODE_BRAILLE_KEY: {
-        MD_KeyGroup group = MD_GRP_NavigationKeys;
-        unsigned char includeSpace = packet.fields.data.brailleKey.isChord;
-
-        if (includeSpace) enqueueKeyEvent(brl, group, MD_KEY_SPACE, 1);
-        enqueueKeys(brl, packet.fields.data.brailleKey.dots, group, MD_KEY_DOT1);
-        if (includeSpace) enqueueKeyEvent(brl, group, MD_KEY_SPACE, 0);
 
         break;
       }

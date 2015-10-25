@@ -98,13 +98,25 @@ typedef enum {
   MD_NAV_DOWN          = 0X0E,
   MD_NAV_MASK_KEY      = 0X0F,
 
-  MD_NAV_MOD_SHIFT     = 0X10,
-  MD_NAV_MOD_LONG      = 0X20,
+  MD_NAV_SHIFT         = 0X10,
+  MD_NAV_LONG          = 0X20,
   MD_NAV_MASK_MOD      = 0X30,
 
   MD_NAV_SHIFT_PRESS   = 0X3F,
   MD_NAV_SHIFT_RELEASE = 0X40,
 } MD_NavigationKey;
+
+typedef enum {
+  MD_BRL_DOT1  = 0,
+  MD_BRL_DOT2  = 1,
+  MD_BRL_DOT3  = 2,
+  MD_BRL_DOT4  = 3,
+  MD_BRL_DOT5  = 4,
+  MD_BRL_DOT6  = 5,
+  MD_BRL_DOT7  = 6,
+  MD_BRL_DOT8  = 7,
+  MD_BRL_SPACE = 8,
+} MD_BrailleKey;
 
 typedef enum {
   MD_ROUTING_FIRST = 0X01,
@@ -113,52 +125,10 @@ typedef enum {
 } MD_RoutingKey;
 
 typedef enum {
-  MD_BRL_DOT1 = 0X01,
-  MD_BRL_DOT2 = 0X02,
-  MD_BRL_DOT3 = 0X04,
-  MD_BRL_DOT4 = 0X08,
-  MD_BRL_DOT5 = 0X10,
-  MD_BRL_DOT6 = 0X20,
-  MD_BRL_DOT7 = 0X40,
-  MD_BRL_DOT8 = 0X80,
-} MD_BrailleKey;
-
-typedef enum {
-  MD_KEY_F1,
-  MD_KEY_F2,
-  MD_KEY_F3,
-  MD_KEY_F4,
-  MD_KEY_F5,
-  MD_KEY_F6,
-  MD_KEY_F7,
-  MD_KEY_F8,
-  MD_KEY_F9,
-  MD_KEY_F10,
-
-  MD_KEY_LEFT,
-  MD_KEY_UP,
-  MD_KEY_RIGHT,
-  MD_KEY_DOWN,
-
-  MD_KEY_SHIFT,
-  MD_KEY_LONG,
-
-  MD_KEY_DOT1,
-  MD_KEY_DOT2,
-  MD_KEY_DOT3,
-  MD_KEY_DOT4,
-  MD_KEY_DOT5,
-  MD_KEY_DOT6,
-  MD_KEY_DOT7,
-  MD_KEY_DOT8,
-
-  MD_KEY_SPACE,
-} MD_KeyNumber;
-
-typedef enum {
-  MD_GRP_NavigationKeys,
-  MD_GRP_RoutingKeys,
-  MD_GRP_StatusKeys,
+  MD_GRP_NAV,
+  MD_GRP_BRL,
+  MD_GRP_RK,
+  MD_GRP_SK,
 } MD_KeyGroup;
 
 #endif /* BRLTTY_INCLUDED_MD_BRLDEFS */ 
