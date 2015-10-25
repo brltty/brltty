@@ -56,7 +56,7 @@ typedef union {
         unsigned char dotsPerCell;
         unsigned char haveRoutingKeys;
         unsigned char majorVersion;
-        unsigned char MinorVersion;
+        unsigned char minorVersion;
       } identity;
     } data;
 

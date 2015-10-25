@@ -250,6 +250,20 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                               writeIdentityRequest,
                               readBytes, &response, sizeof(response),
                               isIdentityResponse)) {
+        logMessage(LOG_INFO,
+          "MDV Model Description:"
+          " Version:%u.%u Text:%u Status:%u Dots:%u Routing:%s",
+          response.fields.data.identity.majorVersion,
+          response.fields.data.identity.minorVersion,
+          response.fields.data.identity.textCellCount,
+          response.fields.data.identity.statusCellCount,
+          response.fields.data.identity.dotsPerCell,
+          (response.fields.data.identity.haveRoutingKeys? "yes": "no")
+        );
+
+        brl->textColumns = response.fields.data.identity.textCellCount;
+        brl->statusColumns = response.fields.data.identity.statusCellCount;
+
         {
           const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
 
@@ -266,9 +280,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
         brl->data->text.rewrite = 1;
         brl->data->status.rewrite = 1;
-
-        brl->textColumns = response.fields.data.identity.textCellCount;
-        brl->statusColumns = response.fields.data.identity.statusCellCount;
 
         return 1;
       }
