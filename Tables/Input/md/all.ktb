@@ -28,6 +28,12 @@ map Dot6 DOT6
 map Dot7 DOT7
 map Dot8 DOT8
 
+bind Left FWINLT
+bind Right FWINRT
+
+bind Up LNUP
+bind Down LNDN
+
 bind F1 TOP_LEFT
 bind F2 BOT_LEFT
 
@@ -61,6 +67,7 @@ bind Long+F6 ATTRBLINK
 
 hotkey StatusKey.1 CSRHIDE+on CSRHIDE+off
 
+bind RoutingKey ROUTE
 bind RoutingKey+Right CLIP_NEW
 bind RoutingKey+Left COPY_RECT
 bind RoutingKey+RoutingKey CLIP_COPY

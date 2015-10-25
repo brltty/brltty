@@ -362,6 +362,41 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
   while ((size = readPacket(brl, &packet))) {
     switch (packet.fields.code) {
+      {
+        unsigned char key;
+        int press;
+
+      case MD_CODE_ROUTING_PRESS:
+        key = packet.fields.data.routingPress.key;
+        press = 1;
+        goto doRoutingKey;
+
+      case MD_CODE_ROUTING_RELEASE:
+        key = packet.fields.data.routingRelease.key;
+        press = 0;
+        goto doRoutingKey;
+
+      doRoutingKey:
+        key &= ~MD_ROUTING_SHIFT;
+
+        if (key >= MD_ROUTING_FIRST) {
+          key -= MD_ROUTING_FIRST;
+          MD_KeyGroup group;
+
+          if (key < brl->statusColumns) {
+            group = MD_GRP_StatusKeys;
+          } else if ((key -= brl->statusColumns) < brl->textColumns) {
+            group = MD_GRP_RoutingKeys;
+          } else {
+            break;
+          }
+
+          enqueueKeyEvent(brl, group, key, press);
+        }
+
+        break;
+      }
+
       case MD_CODE_BRAILLE_KEY: {
         MD_KeyGroup group = MD_GRP_NavigationKeys;
         unsigned char includeSpace = packet.fields.data.brailleKey.isChord;
