@@ -229,7 +229,8 @@ readPacket (BrailleDisplay *brl, MD_Packet *packet) {
 static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
   static const SerialParameters serialParameters = {
-    SERIAL_DEFAULT_PARAMETERS
+    SERIAL_DEFAULT_PARAMETERS,
+    .baud = 19200
   };
 
   BEGIN_USB_CHANNEL_DEFINITIONS
@@ -241,6 +242,8 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   descriptor.serial.parameters = &serialParameters;
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
+
+  descriptor.bluetooth.discoverChannel = 1;
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
     return 1;
@@ -256,7 +259,9 @@ writeIdentityRequest (BrailleDisplay *brl) {
 
 static BrailleResponseResult
 isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
-  return BRL_RSP_UNEXPECTED;
+  const MD_Packet *response = packet;
+
+  return (response->fields.code == MD_PT_IDENTITY)? BRL_RSP_DONE: BRL_RSP_UNEXPECTED;
 }
 
 static int
@@ -288,6 +293,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         brl->data->text.rewrite = 1;
         brl->data->status.rewrite = 1;
 
+        brl->textColumns = response.fields.data.identity.textCellCount;
+        brl->statusColumns = response.fields.data.identity.statusCellCount;
+
         return 1;
       }
 
@@ -314,15 +322,23 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells) {
+  if (cellsHaveChanged(brl->data->status.cells, cells, brl->statusColumns, NULL, NULL, &brl->data->status.rewrite)) {
+    brl->data->text.rewrite = 1;
+  }
+
   return 1;
 }
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   if (cellsHaveChanged(brl->data->text.cells, brl->buffer, brl->textColumns, NULL, NULL, &brl->data->text.rewrite)) {
-    unsigned char cells[brl->textColumns];
+    unsigned char cells[brl->statusColumns + brl->textColumns];
+    unsigned char *cell = cells;
 
-    translateOutputCells(cells, brl->data->text.cells, brl->textColumns);
+    cell = mempcpy(cell, brl->data->status.cells, brl->statusColumns);
+    cell = translateOutputCells(cell, brl->data->text.cells, brl->textColumns);
+
+    if (!writePacket(brl, MD_PT_WRITE_ALL, cells, (cell - cells))) return 0;
   }
 
   return 1;
