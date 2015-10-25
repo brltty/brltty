@@ -28,6 +28,9 @@ map Dot6 DOT6
 map Dot7 DOT7
 map Dot8 DOT8
 
+assign chord Space+
+include ../chords.kti
+
 bind Left FWINLT
 bind Right FWINRT
 
