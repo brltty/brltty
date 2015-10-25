@@ -362,6 +362,17 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
   while ((size = readPacket(brl, &packet))) {
     switch (packet.fields.code) {
+      case MD_CODE_BRAILLE_KEY: {
+        MD_KeyGroup group = MD_GRP_NavigationKeys;
+        unsigned char includeSpace = packet.fields.data.brailleKey.isChord;
+
+        if (includeSpace) enqueueKeyEvent(brl, group, MD_KEY_SPACE, 1);
+        enqueueKeys(brl, packet.fields.data.brailleKey.dots, group, MD_KEY_DOT1);
+        if (includeSpace) enqueueKeyEvent(brl, group, MD_KEY_SPACE, 0);
+
+        break;
+      }
+
       case MD_CODE_ACKNOWLEDGE:
         break;
 
