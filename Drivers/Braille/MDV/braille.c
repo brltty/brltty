@@ -207,6 +207,12 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   };
 
   BEGIN_USB_CHANNEL_DEFINITIONS
+    { /* all models */
+      .vendor=0X0403, .product=0X6001,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .serial = &serialParameters
+    },
   END_USB_CHANNEL_DEFINITIONS
 
   GioDescriptor descriptor;
