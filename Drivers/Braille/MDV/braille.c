@@ -273,12 +273,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           brl->keyNames = ktd->names;
         }
 
-        {
-          static const DotsTable dots = {
-            0X08, 0X04, 0X02, 0X80, 0X40, 0X20, 0X01, 0X10
-          };
-          makeOutputTable(dots);
-        }
+        MAKE_OUTPUT_TABLE(0X08, 0X04, 0X02, 0X80, 0X40, 0X20, 0X01, 0X10);
 
         brl->data->text.rewrite = 1;
         brl->data->status.rewrite = 1;

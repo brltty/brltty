@@ -47,6 +47,7 @@ typedef unsigned char TranslationTable[TRANSLATION_TABLE_SIZE];
 
 #define DOTS_TABLE_SIZE 8
 typedef unsigned char DotsTable[DOTS_TABLE_SIZE];
+
 extern const DotsTable dotsTable_ISO11548_1;
 extern const DotsTable dotsTable_rotated;
 
@@ -61,6 +62,13 @@ extern unsigned char translateOutputCell (unsigned char cell);
 extern void makeInputTable (void);
 extern void *translateInputCells (unsigned char *target, const unsigned char *source, size_t count);
 extern unsigned char translateInputCell (unsigned char cell);
+
+#define MAKE_OUTPUT_TABLE(dot1, dot2, dot3, dot4, dot5, dot6, dot7, dot8) { \
+  static const DotsTable dots = { \
+    (dot1), (dot2), (dot3), (dot4), (dot5), (dot6), (dot7), (dot8) \
+  }; \
+  makeOutputTable(dots); \
+}
 
 extern void applyBrailleDisplayOrientation (unsigned char *cells, size_t count);
 
