@@ -42,9 +42,10 @@ extern "C" {
 #define BRL_KEY_NUMBER_ENTRY(drv,grp,num,nam) {.value={.group=BRL_KEY_GROUP(drv, grp), .number=(num)}, .name=nam}
 #define BRL_KEY_NAME_ENTRY(drv,grp,key,nam) BRL_KEY_NUMBER_ENTRY(drv, grp, BRL_KEY_NAME(drv, grp, key), nam)
 
-#define SET_KEY_TABLE(brl, ktd) { \
-  (brl)->keyBindings = (ktd)->bindings; \
-  (brl)->keyNames = (ktd)->names; \
+static inline void
+setBrailleKeyTable (BrailleDisplay *brl, const KeyTableDefinition *ktd) {
+  brl->keyBindings = ktd->bindings;
+  brl->keyNames = ktd->names;
 }
 
 #define TRANSLATION_TABLE_SIZE 0X100

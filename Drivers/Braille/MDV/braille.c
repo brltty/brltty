@@ -266,7 +266,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         brl->textColumns = response.fields.data.identity.textCellCount;
         brl->statusColumns = response.fields.data.identity.statusCellCount;
 
-        SET_KEY_TABLE(brl, &KEY_TABLE_DEFINITION(all));
+        setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
         MAKE_OUTPUT_TABLE(0X08, 0X04, 0X02, 0X80, 0X40, 0X20, 0X01, 0X10);
 
         brl->data->text.rewrite = 1;
