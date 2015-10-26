@@ -138,14 +138,11 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                               writeIdentityRequest,
                               readPacket, &response, sizeof(response),
                               isIdentityResponse)) {
-        {
-          const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
-
-          brl->keyBindings = ktd->bindings;
-          brl->keyNames = ktd->names;
-        }
+        setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
 
         makeOutputTable(dotsTable_ISO11548_1);
+      //MAKE_OUTPUT_TABLE(0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80);
+
         brl->data->forceRewrite = 1;
         return 1;
       }
