@@ -91,14 +91,16 @@ BEGIN_KEY_TABLE_LIST
 END_KEY_TABLE_LIST
 
 struct BrailleDataStruct {
+  unsigned shiftPressed:1;
+
   struct {
-    unsigned char cells[MAXIMUM_TEXT_CELLS];
     int rewrite;
+    unsigned char cells[MAXIMUM_TEXT_CELLS];
   } text;
 
   struct {
-    unsigned char cells[MAXIMUM_STATUS_CELLS];
     int rewrite;
+    unsigned char cells[MAXIMUM_STATUS_CELLS];
   } status;
 };
 
@@ -275,6 +277,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
         MAKE_OUTPUT_TABLE(0X08, 0X04, 0X02, 0X80, 0X40, 0X20, 0X01, 0X10);
 
+        brl->data->shiftPressed = 0;
         brl->data->text.rewrite = 1;
         brl->data->status.rewrite = 1;
 
@@ -336,20 +339,31 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       case MD_CODE_NAVIGATION_KEY: {
         unsigned char key = packet.fields.data.navigationKey.key;
 
-        if (key == MD_NAV_SHIFT_PRESS) break;
-        if (key == MD_NAV_SHIFT_RELEASE) break;
+        switch (key) {
+          case MD_NAV_SHIFT_PRESS:
+            brl->data->shiftPressed = 1;
+            break;
 
-        int shiftPressed = (key & MD_NAV_SHIFT) != 0;
-        int longPressed = (key & MD_NAV_LONG) != 0;
+          case MD_NAV_SHIFT_RELEASE:
+            brl->data->shiftPressed = 0;
+            break;
 
-        key &= MD_NAV_MASK_KEY;
-        MD_KeyGroup group = MD_GRP_NAV;
+          default: {
+            int shiftPressed = ((key & MD_NAV_SHIFT) != 0) && !brl->data->shiftPressed;
+            int longPressed = (key & MD_NAV_LONG) != 0;
 
-        if (shiftPressed) enqueueKeyEvent(brl, group, MD_NAV_SHIFT, 1);
-        if (longPressed) enqueueKeyEvent(brl, group, MD_NAV_LONG, 1);
-        enqueueKey(brl, group, key);
-        if (longPressed) enqueueKeyEvent(brl, group, MD_NAV_LONG, 0);
-        if (shiftPressed) enqueueKeyEvent(brl, group, MD_NAV_SHIFT, 0);
+            key &= MD_NAV_MASK_KEY;
+            MD_KeyGroup group = MD_GRP_NAV;
+
+            if (shiftPressed) enqueueKeyEvent(brl, group, MD_NAV_SHIFT, 1);
+            if (longPressed) enqueueKeyEvent(brl, group, MD_NAV_LONG, 1);
+            enqueueKey(brl, group, key);
+            if (longPressed) enqueueKeyEvent(brl, group, MD_NAV_LONG, 0);
+            if (shiftPressed) enqueueKeyEvent(brl, group, MD_NAV_SHIFT, 0);
+
+            break;
+          }
+        }
 
         break;
       }
