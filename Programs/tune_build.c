@@ -194,7 +194,7 @@ parseDuration (TuneBuilder *tune, const char **operand, int *duration) {
 
 static TuneNumber
 toOctave (TuneNumber note) {
-  return (note / NOTES_PER_OCTAVE) - 1;
+  return note / NOTES_PER_OCTAVE;
 }
 
 static void
@@ -218,10 +218,10 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
       *operand += 1;
 
       static const unsigned char offsets[] = {0, 2, 4, 5, 7, 9, 11};
-      noteNumber = (NOTE_MIDDLE_C - (4 * NOTES_PER_OCTAVE)) + offsets[letter - letters];
+      noteNumber = offsets[letter - letters];
 
       {
-        const char **originalOperand = operand;
+        const char *originalOperand = *operand;
         TuneParameter octave = tune->octave;
 
         if (!parseOptionalParameter(tune, &octave, operand)) {
@@ -229,7 +229,7 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
         }
 
         noteNumber += octave.current * NOTES_PER_OCTAVE;
-        if (operand == originalOperand) noOctave = 1;
+        if (*operand == originalOperand) noOctave = 1;
       }
     } else {
       TuneParameter parameter = tune->note;
@@ -401,7 +401,7 @@ initializeTuneBuilder (TuneBuilder *tune) {
 
   setParameter(&tune->duration, "duration", 1, UINT16_MAX, 0);
   setParameter(&tune->note, "note", getLowestNote(), getHighestNote(), NOTE_MIDDLE_C);
-  setParameter(&tune->octave, "octave", 0, 9, 0);
+  setParameter(&tune->octave, "octave", 0, 10, 0);
   setParameter(&tune->percentage, "percentage", 1, 100, 80);
   setParameter(&tune->tempo, "tempo", 40, UINT8_MAX, 108);
 
