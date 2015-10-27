@@ -50,8 +50,8 @@ typedef enum {
   /* Braille Edge keys */
   HM_KEY_LeftScrollUp    = 16,
   HM_KEY_RightScrollUp   = 17,
-  HM_KEY_LeftScrollDown  = 18,
-  HM_KEY_RightScrollDown = 19,
+  HM_KEY_RightScrollDown = 18,
+  HM_KEY_LeftScrollDown  = 19,
 
   HM_KEY_F5 = 20,
   HM_KEY_F6 = 21,
