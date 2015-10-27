@@ -342,10 +342,14 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         switch (key) {
           case MD_NAV_SHIFT_PRESS:
             brl->data->shiftPressed = 1;
-            break;
+            goto doShiftEvent;
 
           case MD_NAV_SHIFT_RELEASE:
             brl->data->shiftPressed = 0;
+            goto doShiftEvent;
+
+          doShiftEvent:
+            enqueueKeyEvent(brl, MD_GRP_NAV, MD_NAV_SHIFT, brl->data->shiftPressed);
             break;
 
           default: {
