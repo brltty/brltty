@@ -241,6 +241,25 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
       noteNumber = parameter.current;
     }
 
+    if (noOctave) {
+      int adjustOctave = 0;
+      TuneNumber previousNote = tune->note.current;
+      TuneNumber currentNote = noteNumber;
+
+      if (currentNote < previousNote) {
+        currentNote += NOTES_PER_OCTAVE;
+        if ((currentNote - previousNote) <= 3) adjustOctave = 1;
+      } else if (currentNote > previousNote) {
+        currentNote -= NOTES_PER_OCTAVE;
+        if ((previousNote - currentNote) <= 3) adjustOctave = 1;
+      }
+
+      if (adjustOctave) noteNumber = currentNote;
+    }
+
+    tune->note.current = noteNumber;
+    setOctave(tune);
+
     {
       char accidental = **operand;
       int increment;
@@ -264,22 +283,6 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
     }
   noAccidental:
 
-    if (noOctave) {
-      int adjustOctave = 0;
-      TuneNumber previousNote = tune->note.current;
-      TuneNumber currentNote = noteNumber;
-
-      if (currentNote < previousNote) {
-        currentNote += NOTES_PER_OCTAVE;
-        if ((currentNote - previousNote) <= 3) adjustOctave = 1;
-      } else if (currentNote > previousNote) {
-        currentNote -= NOTES_PER_OCTAVE;
-        if ((previousNote - currentNote) <= 3) adjustOctave = 1;
-      }
-
-      if (adjustOctave) noteNumber = currentNote;
-    }
-
     {
       const unsigned char lowestNote = getLowestNote();
       const unsigned char highestNote = getHighestNote();
@@ -294,9 +297,6 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
         return 0;
       }
     }
-
-    tune->note.current = noteNumber;
-    setOctave(tune);
 
     *note = noteNumber;
   }
