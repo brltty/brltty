@@ -687,7 +687,6 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 
             eptx->endpoint = endpoint;
             endpoint->extension = eptx;
-            endpoint->direction.input.asynchronous = 1;
             return 1;
           }
         } else {
