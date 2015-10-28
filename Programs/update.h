@@ -19,10 +19,13 @@
 #ifndef BRLTTY_INCLUDED_UPDATE
 #define BRLTTY_INCLUDED_UPDATE
 
+#include "brl_types.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
+extern int writeBrailleWindow (BrailleDisplay *brl, const wchar_t *text);
 extern void reportBrailleWindowMoved (void);
 
 extern void scheduleUpdate (const char *reason);

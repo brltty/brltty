@@ -556,6 +556,19 @@ reportBrailleWindowMoved (void) {
   report(REPORT_BRAILLE_WINDOW_MOVED, &data);
 }
 
+int
+writeBrailleWindow (BrailleDisplay *brl, const wchar_t *text) {
+  const BrailleWindowUpdatedReport data = {
+    .text = {
+      .cells = &brl->buffer[textStart],
+      .count = textCount
+    }
+  };
+
+  report(REPORT_BRAILLE_WINDOW_UPDATED, &data);
+  return braille->writeWindow(brl, text);
+}
+
 static void
 doUpdate (void) {
   int screenPointerMoved = 0;
@@ -908,7 +921,7 @@ doUpdate (void) {
         fillStatusSeparator(textBuffer, brl.buffer);
       }
 
-      if (!(writeStatusCells() && braille->writeWindow(&brl, textBuffer))) brl.hasFailed = 1;
+      if (!(writeStatusCells() && writeBrailleWindow(&brl, textBuffer))) brl.hasFailed = 1;
     }
 
     api.releaseDriver();

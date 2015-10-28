@@ -366,7 +366,7 @@ writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t leng
 
   fillStatusSeparator(textBuffer, brl.buffer);
 
-  return braille->writeWindow(&brl, textBuffer);
+  return writeBrailleWindow(&brl, textBuffer);
 }
 
 int
@@ -1088,7 +1088,7 @@ showDotPattern (unsigned char dots, unsigned char duration) {
   }
 
   memset(brl.buffer, dots, brl.textColumns*brl.textRows);
-  if (!braille->writeWindow(&brl, NULL)) return 0;
+  if (!writeBrailleWindow(&brl, NULL)) return 0;
 
   drainBrailleOutput(&brl, duration);
   return 1;

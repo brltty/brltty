@@ -27,6 +27,7 @@ typedef enum {
   REPORT_BRAILLE_ONLINE,
   REPORT_BRAILLE_OFFLINE,
   REPORT_BRAILLE_WINDOW_MOVED,
+  REPORT_BRAILLE_WINDOW_UPDATED,
 } ReportIdentifier;
 
 extern void report (ReportIdentifier identiier, const void *data);
@@ -59,6 +60,13 @@ typedef struct {
     unsigned int count;
   } text;
 } BrailleWindowMovedReport;
+
+typedef struct {
+  struct {
+    const unsigned char *cells;
+    unsigned int count;
+  } text;
+} BrailleWindowUpdatedReport;
 
 #ifdef __cplusplus
 }
