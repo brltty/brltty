@@ -559,10 +559,8 @@ reportBrailleWindowMoved (void) {
 int
 writeBrailleWindow (BrailleDisplay *brl, const wchar_t *text) {
   const BrailleWindowUpdatedReport data = {
-    .text = {
-      .cells = &brl->buffer[textStart],
-      .count = textCount
-    }
+    .cells = &brl->buffer[textStart],
+    .count = textCount
   };
 
   report(REPORT_BRAILLE_WINDOW_UPDATED, &data);

@@ -62,10 +62,8 @@ typedef struct {
 } BrailleWindowMovedReport;
 
 typedef struct {
-  struct {
-    const unsigned char *cells;
-    unsigned int count;
-  } text;
+  const unsigned char *cells;
+  unsigned int count;
 } BrailleWindowUpdatedReport;
 
 #ifdef __cplusplus
