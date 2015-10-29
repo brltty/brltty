@@ -28,6 +28,12 @@
 #include "tune_build.h"
 #include "notes.h"
 
+static const char noteLetters[] = "cdefgab";
+static const unsigned char noteOffsets[] = {0, 2, 4, 5, 7, 9, 11};
+static const signed char scaleAccidentals[] = {0, 2, 4, -1, 1, 3, 5};
+static const unsigned char sharpTable[] = {3, 0, 4, 1, 5, 2, 6};
+static const unsigned char flatTable[] = {6, 2, 5, 1, 4, 0, 3};
+
 static void
 logSyntaxError (TuneBuilder *tune, const char *message) {
   tune->status = TUNE_BUILD_SYNTAX;
@@ -202,6 +208,74 @@ setOctave (TuneBuilder *tune) {
   tune->octave.current = toOctave(tune->note.current);
 }
 
+static void
+setAccidentals (TuneBuilder *tune, int accidentals) {
+  int quotient = accidentals / 8;
+  int remainder = accidentals % 8;
+
+  for (unsigned int index=0; index<ARRAY_COUNT(tune->accidentals); index+=1) {
+    tune->accidentals[index] = quotient;
+  }
+
+  while (remainder > 0) {
+    tune->accidentals[sharpTable[--remainder]] += 1;
+  }
+
+  while (remainder < 0) {
+    tune->accidentals[flatTable[-++remainder]] -= 1;
+  }
+}
+
+static int
+parseNoteLetter (unsigned char *index, const char **operand) {
+  const char *letter = strchr(noteLetters, **operand);
+
+  if (!letter) return 0;
+  if (!*letter) return 0;
+
+  *index = letter - noteLetters;
+  *operand += 1;
+  return 1;
+}
+
+static int
+parseKey (TuneBuilder *tune, const char **operand) {
+  int accidentals;
+  int increment;
+
+  {
+    unsigned char index;
+
+    if (parseNoteLetter(&index, operand)) {
+      accidentals = scaleAccidentals[index];
+      increment = 7;
+    } else {
+      accidentals = 0;
+      increment = 1;
+    }
+  }
+
+  {
+    char accidental = **operand;
+
+    switch (accidental) {
+      case '-':
+        increment = -increment;
+      case '+':
+        do {
+          accidentals += increment;
+        } while (*++*operand == accidental);
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  setAccidentals(tune, accidentals);
+  return 1;
+}
+
 static int
 parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
   if (**operand == 'r') {
@@ -209,28 +283,21 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
     *note = 0;
   } else {
     int noOctave = 0;
+    int defaultAccidentals = 0;
     int noteNumber;
+    unsigned char noteIndex;
 
-    static const char letters[] = "cdefgab";
-    const char *letter = strchr(letters, **operand);
+    if (parseNoteLetter(&noteIndex, operand)) {
+      const char *originalOperand = *operand;
+      TuneParameter octave = tune->octave;
 
-    if (letter && *letter) {
-      *operand += 1;
-
-      static const unsigned char offsets[] = {0, 2, 4, 5, 7, 9, 11};
-      noteNumber = offsets[letter - letters];
-
-      {
-        const char *originalOperand = *operand;
-        TuneParameter octave = tune->octave;
-
-        if (!parseOptionalParameter(tune, &octave, operand)) {
-          return 0;
-        }
-
-        noteNumber += octave.current * NOTES_PER_OCTAVE;
-        if (*operand == originalOperand) noOctave = 1;
+      if (!parseOptionalParameter(tune, &octave, operand)) {
+        return 0;
       }
+
+      noteNumber = (octave.current * NOTES_PER_OCTAVE) + noteOffsets[noteIndex];
+      if (*operand == originalOperand) noOctave = 1;
+      defaultAccidentals = tune->accidentals[noteIndex];
     } else {
       TuneParameter parameter = tune->note;
 
@@ -262,26 +329,36 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
 
     {
       char accidental = **operand;
-      int increment;
 
       switch (accidental) {
+        {
+          int increment;
+
         case '+':
           increment = 1;
-          break;
+          goto doAccidental;
 
         case '-':
           increment = -1;
+          goto doAccidental;
+
+        doAccidental:
+          do {
+            noteNumber += increment;
+          } while (*++*operand == accidental);
+
+          break;
+        }
+
+        case '=':
+          *operand += 1;
           break;
 
         default:
-          goto noAccidental;
+          noteNumber += defaultAccidentals;
+          break;
       }
-
-      do {
-        noteNumber += increment;
-      } while (*++*operand == accidental);
     }
-  noAccidental:
 
     {
       const unsigned char lowestNote = getLowestNote();
@@ -326,6 +403,11 @@ parseTuneOperand (TuneBuilder *tune, const char *operand) {
   tune->source.text = operand;
 
   switch (*operand) {
+    case 'k':
+      operand += 1;
+      if (!parseKey(tune, &operand)) return 0;
+      break;
+
     case 'o':
       operand += 1;
       if (!parseOctave(tune, &operand)) return 0;
@@ -394,6 +476,7 @@ setParameter (
 void
 initializeTuneBuilder (TuneBuilder *tune) {
   memset(tune, 0, sizeof(*tune));
+  tune->status = TUNE_BUILD_OK;
 
   tune->tones.array = NULL;
   tune->tones.size = 0;
@@ -405,14 +488,13 @@ initializeTuneBuilder (TuneBuilder *tune) {
   setParameter(&tune->percentage, "percentage", 1, 100, 80);
   setParameter(&tune->tempo, "tempo", 40, UINT8_MAX, 108);
 
+  setAccidentals(tune, 0);
   setDuration(tune);
   setOctave(tune);
 
   tune->source.text = "";
   tune->source.name = "";
   tune->source.index = 0;
-
-  tune->status = TUNE_BUILD_OK;
 }
 
 void

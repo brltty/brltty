@@ -41,12 +41,15 @@ typedef struct {
 } TuneParameter;
 
 typedef struct {
+  TuneBuildStatus status;
+
   struct {
     FrequencyElement *array;
     unsigned int size;
     unsigned int count;
   } tones;
 
+  signed char accidentals[7];
   TuneParameter duration;
   TuneParameter note;
   TuneParameter octave;
@@ -58,8 +61,6 @@ typedef struct {
     const char *name;
     unsigned int index;
   } source;
-
-  TuneBuildStatus status;
 } TuneBuilder;
 
 extern void initializeTuneBuilder (TuneBuilder *tune);
