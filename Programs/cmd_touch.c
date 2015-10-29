@@ -25,29 +25,77 @@
 #include "cmd_queue.h"
 #include "cmd_touch.h"
 #include "brl_cmds.h"
+#include "brl_utils.h"
 #include "report.h"
+#include "bitmask.h"
 
 typedef struct {
   struct {
     ReportListenerInstance *brailleWindowMoved;
     ReportListenerInstance *brailleWindowUpdated;
   } reportListeners;
+
+  BITMASK(touched, 88, int);
+  unsigned char cells[88];
+  unsigned int count;
+  unsigned int activeCells;
+  unsigned int lastActive;
+  unsigned int lastTouched;
 } TouchCommandData;
 
 static void
 handleTouchAt (int offset, TouchCommandData *tcd) {
+  logMessage(LOG_DEBUG, "Touch: at: %d", offset);
+  tcd->lastTouched = offset;
+  BITMASK_CLEAR(tcd->touched, offset);
 }
 
 static void
 handleTouchOff (TouchCommandData *tcd) {
+  int ok = 0;
+  int unread = 0;
+
+  for (int i = 0; i < tcd->count; ++i) {
+    if (BITMASK_TEST(tcd->touched, i)) unread += 1;
+  }
+
+  if (tcd->activeCells && unread == 0) ok = 1;
+
+  if (!ok && tcd->activeCells && unread) {
+    float factor = (float)tcd->activeCells / unread;
+    logMessage(LOG_DEBUG, "Touch: factor %f, pos %d/%d", factor, tcd->lastTouched, tcd->lastActive);
+
+    if ((factor > 7) && (tcd->lastTouched > (tcd->lastActive - 3))) ok = 1;
+  }
+
+  if (ok) handleCommand(BRL_CMD_FWINRT);
 }
 
 static void
-handleBrailleWindowMoved (const BrailleWindowMovedReport *report, TouchCommandData *tcd) {
+handleBrailleWindowMoved (
+  const BrailleWindowMovedReport *report, TouchCommandData *tcd
+) {
 }
 
 static void
-handleBrailleWindowUpdated (const BrailleWindowUpdatedReport *report, TouchCommandData *tcd) {
+handleBrailleWindowUpdated (
+  const BrailleWindowUpdatedReport *report, TouchCommandData *tcd
+) {
+  if (cellsHaveChanged(&tcd->cells[0], report->cells, report->count, NULL, NULL, NULL)) {
+    tcd->count = report->count;
+    tcd->activeCells = 0;
+
+    for (int i = 0; i < tcd->count; ++i) {
+      BITMASK_CLEAR(tcd->touched, i);
+      if (report->cells[i]) {
+        BITMASK_SET(tcd->touched, i);
+        tcd->lastActive = i;
+        tcd->activeCells += 1;
+      }
+    }
+
+    logMessage(LOG_DEBUG, "Touch: reset to %d cells, %d active", tcd->count, tcd->activeCells);
+  }
 }
 
 REPORT_LISTENER(brailleWindowMovedListener) {

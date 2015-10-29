@@ -29,7 +29,18 @@ extern void drainBrailleOutput (BrailleDisplay *brl, int minimumDelay);
 extern void setBrailleOffline (BrailleDisplay *brl);
 extern void setBrailleOnline (BrailleDisplay *brl);
 
-/* Formatting of status cells. */
+extern int cellsHaveChanged (
+  unsigned char *cells, const unsigned char *new, unsigned int count,
+  unsigned int *from, unsigned int *to, int *force
+);
+
+extern int textHasChanged (
+  wchar_t *text, const wchar_t *new, unsigned int count,
+  unsigned int *from, unsigned int *to, int *force
+);
+
+extern int cursorHasChanged (int *cursor, int new, int *force);
+
 extern unsigned char toLowerDigit (unsigned char upper);
 
 typedef const unsigned char DigitsTable[11];

@@ -61,7 +61,87 @@ setBrailleOnline (BrailleDisplay *brl) {
   }
 }
 
-/* Functions which support vertical and horizontal status cells. */
+int
+cellsHaveChanged (
+  unsigned char *cells, const unsigned char *new, unsigned int count,
+  unsigned int *from, unsigned int *to, int *force
+) {
+  unsigned int first = 0;
+
+  if (force && *force) {
+    *force = 0;
+  } else if (memcmp(cells, new, count) != 0) {
+    if (to) {
+      while (count) {
+        unsigned int last = count - 1;
+        if (cells[last] != new[last]) break;
+        count = last;
+      }
+    }
+
+    if (from) {
+      while (first < count) {
+        if (cells[first] != new[first]) break;
+        first += 1;
+      }
+    }
+  } else {
+    return 0;
+  }
+
+  if (from) *from = first;
+  if (to) *to = count;
+
+  memcpy(cells+first, new+first, count-first);
+  return 1;
+}
+
+int
+textHasChanged (
+  wchar_t *text, const wchar_t *new, unsigned int count,
+  unsigned int *from, unsigned int *to, int *force
+) {
+  unsigned int first = 0;
+
+  if (force && *force) {
+    *force = 0;
+  } else if (wmemcmp(text, new, count) != 0) {
+    if (to) {
+      while (count) {
+        unsigned int last = count - 1;
+        if (text[last] != new[last]) break;
+        count = last;
+      }
+    }
+
+    if (from) {
+      while (first < count) {
+        if (text[first] != new[first]) break;
+        first += 1;
+      }
+    }
+  } else {
+    return 0;
+  }
+
+  if (from) *from = first;
+  if (to) *to = count;
+
+  wmemcpy(text+first, new+first, count-first);
+  return 1;
+}
+
+int
+cursorHasChanged (int *cursor, int new, int *force) {
+  if (force && *force) {
+    *force = 0;
+  } else if (new == *cursor) {
+    return 0;
+  }
+
+  *cursor = new;
+  return 1;
+}
 
 unsigned char
 toLowerDigit (unsigned char upper) {

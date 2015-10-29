@@ -141,18 +141,6 @@ extern int probeBrailleDisplay (
   BrailleResponseHandler *handleResponse
 );
 
-extern int cellsHaveChanged (
-  unsigned char *cells, const unsigned char *new, unsigned int count,
-  unsigned int *from, unsigned int *to, int *force
-);
-
-extern int textHasChanged (
-  wchar_t *text, const wchar_t *new, unsigned int count,
-  unsigned int *from, unsigned int *to, int *force
-);
-
-extern int cursorHasChanged (int *cursor, int new, int *force);
-
 typedef uint32_t KeyNumberSet;
 #define KEY_NUMBER_BIT(number) (UINT32_C(1) << (number))
 
