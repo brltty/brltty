@@ -494,7 +494,7 @@ initializeTuneBuilder (TuneBuilder *tune) {
   tune->tones.count = 0;
 
   setParameter(&tune->duration, "duration", 1, UINT16_MAX, 0);
-  setParameter(&tune->note, "note", getLowestNote(), getHighestNote(), NOTE_MIDDLE_C);
+  setParameter(&tune->note, "note", getLowestNote(), getHighestNote(), NOTE_MIDDLE_C+noteOffsets[2]);
   setParameter(&tune->octave, "octave", 0, 10, 0);
   setParameter(&tune->percentage, "percentage", 1, 100, 80);
   setParameter(&tune->tempo, "tempo", 40, UINT8_MAX, 108);
