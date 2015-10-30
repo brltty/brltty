@@ -68,7 +68,7 @@ handleTouchOff (TouchCommandData *tcd) {
     if ((factor > 7) && (tcd->lastTouched > (tcd->lastActive - 3))) ok = 1;
   }
 
-  if (ok) handleCommand(BRL_CMD_FWINRT);
+  if (ok) handleCommand(BRL_CMD_NXNBWIN);
 }
 
 static void

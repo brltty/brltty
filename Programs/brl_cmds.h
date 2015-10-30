@@ -218,6 +218,9 @@ typedef enum {
   BRL_CMD_SELECTVT_PREV /* bind to the previous virtual terminal */,
   BRL_CMD_SELECTVT_NEXT /* bind to the next virtual terminal */,
 
+  BRL_CMD_PRNBWIN /* go backward to nearest non-blank braille window */,
+  BRL_CMD_NXNBWIN /* go forward to nearest non-blank braille window */,
+
   BRL_CMD_BRL_STOP /* stop the braille driver */,
   BRL_CMD_BRL_START /* start the braille driver */,
   BRL_CMD_SPK_STOP /* stop the speech driver */,

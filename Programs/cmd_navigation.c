@@ -186,6 +186,98 @@ testPrompt (int column, int row, void *data) {
   return isSameRow(characters, prompt, count, isSameText);
 }
 
+static void
+toPreviousNonblankWindow (void) {
+  int oldX = ses->winx;
+  int oldY = ses->winy;
+  int tuneLimit = 3;
+  ScreenCharacter characters[scr.cols];
+
+  while (1) {
+    int charCount;
+    int charIndex;
+
+    if (!shiftBrailleWindowLeft(fullWindowShift)) {
+      if (ses->winy == 0) {
+        ses->winx = oldX;
+        ses->winy = oldY;
+
+        alert(ALERT_BOUNCE);
+        break;
+      }
+
+      if (tuneLimit-- > 0) alert(ALERT_WRAP_UP);
+      upLine(isSameText);
+      placeBrailleWindowRight();
+    }
+
+    charCount = getWindowLength();
+    charCount = MIN(charCount, scr.cols-ses->winx);
+    readScreen(ses->winx, ses->winy, charCount, 1, characters);
+
+    for (charIndex=charCount-1; charIndex>=0; charIndex-=1) {
+      wchar_t text = characters[charIndex].text;
+
+      if (text != WC_C(' ')) break;
+    }
+
+    if (showScreenCursor() &&
+        (scr.posy == ses->winy) &&
+        (scr.posx >= 0) &&
+        (scr.posx < (ses->winx + charCount))) {
+      charIndex = MAX(charIndex, scr.posx-ses->winx);
+    }
+
+    if (charIndex >= 0) break;
+  }
+}
+
+static void
+toNextNonblankWindow (void) {
+  int oldX = ses->winx;
+  int oldY = ses->winy;
+  int tuneLimit = 3;
+  ScreenCharacter characters[scr.cols];
+
+  while (1) {
+    int charCount;
+    int charIndex;
+
+    if (!shiftBrailleWindowRight(fullWindowShift)) {
+      if (ses->winy >= (scr.rows - brl.textRows)) {
+        ses->winx = oldX;
+        ses->winy = oldY;
+
+        alert(ALERT_BOUNCE);
+        break;
+      }
+
+      if (tuneLimit-- > 0) alert(ALERT_WRAP_DOWN);
+      downLine(isSameText);
+      ses->winx = 0;
+    }
+
+    charCount = getWindowLength();
+    charCount = MIN(charCount, scr.cols-ses->winx);
+    readScreen(ses->winx, ses->winy, charCount, 1, characters);
+
+    for (charIndex=0; charIndex<charCount; charIndex+=1) {
+      wchar_t text = characters[charIndex].text;
+
+      if (text != WC_C(' ')) break;
+    }
+
+    if (showScreenCursor() &&
+        (scr.posy == ses->winy) &&
+        (scr.posx < scr.cols) &&
+        (scr.posx >= ses->winx)) {
+      charIndex = MIN(charIndex, scr.posx-ses->winx);
+    }
+
+    if (charIndex < charCount) break;
+  }
+}
+
 static int
 handleNavigationCommands (int command, void *data) {
   switch (command & BRL_MSK_CMD) {
@@ -369,55 +461,22 @@ handleNavigationCommands (int command, void *data) {
     case BRL_CMD_HWINLT:
       if (!shiftBrailleWindowLeft(halfWindowShift)) alert(ALERT_BOUNCE);
       break;
+
     case BRL_CMD_HWINRT:
       if (!shiftBrailleWindowRight(halfWindowShift)) alert(ALERT_BOUNCE);
       break;
 
+    case BRL_CMD_PRNBWIN:
+      toPreviousNonblankWindow();
+      break;
+
+    case BRL_CMD_NXNBWIN:
+      toNextNonblankWindow();
+      break;
+
     case BRL_CMD_FWINLTSKIP:
       if (prefs.skipBlankBrailleWindowsMode == sbwAll) {
-        int oldX = ses->winx;
-        int oldY = ses->winy;
-        int tuneLimit = 3;
-        ScreenCharacter characters[scr.cols];
-
-        while (1) {
-          int charCount;
-          int charIndex;
-
-          if (!shiftBrailleWindowLeft(fullWindowShift)) {
-            if (ses->winy == 0) {
-              ses->winx = oldX;
-              ses->winy = oldY;
-
-              alert(ALERT_BOUNCE);
-              break;
-            }
-
-            if (tuneLimit-- > 0) alert(ALERT_WRAP_UP);
-            upLine(isSameText);
-            placeBrailleWindowRight();
-          }
-
-          charCount = getWindowLength();
-          charCount = MIN(charCount, scr.cols-ses->winx);
-          readScreen(ses->winx, ses->winy, charCount, 1, characters);
-
-          for (charIndex=charCount-1; charIndex>=0; charIndex-=1) {
-            wchar_t text = characters[charIndex].text;
-
-            if (text != WC_C(' ')) break;
-          }
-
-          if (showScreenCursor() &&
-              (scr.posy == ses->winy) &&
-              (scr.posx >= 0) &&
-              (scr.posx < (ses->winx + charCount))) {
-            charIndex = MAX(charIndex, scr.posx-ses->winx);
-          }
-
-          if (charIndex >= 0) break;
-        }
-
+        toPreviousNonblankWindow();
         break;
       }
 
@@ -501,49 +560,7 @@ handleNavigationCommands (int command, void *data) {
 
     case BRL_CMD_FWINRTSKIP:
       if (prefs.skipBlankBrailleWindowsMode == sbwAll) {
-        int oldX = ses->winx;
-        int oldY = ses->winy;
-        int tuneLimit = 3;
-        ScreenCharacter characters[scr.cols];
-
-        while (1) {
-          int charCount;
-          int charIndex;
-
-          if (!shiftBrailleWindowRight(fullWindowShift)) {
-            if (ses->winy >= (scr.rows - brl.textRows)) {
-              ses->winx = oldX;
-              ses->winy = oldY;
-
-              alert(ALERT_BOUNCE);
-              break;
-            }
-
-            if (tuneLimit-- > 0) alert(ALERT_WRAP_DOWN);
-            downLine(isSameText);
-            ses->winx = 0;
-          }
-
-          charCount = getWindowLength();
-          charCount = MIN(charCount, scr.cols-ses->winx);
-          readScreen(ses->winx, ses->winy, charCount, 1, characters);
-
-          for (charIndex=0; charIndex<charCount; charIndex+=1) {
-            wchar_t text = characters[charIndex].text;
-
-            if (text != WC_C(' ')) break;
-          }
-
-          if (showScreenCursor() &&
-              (scr.posy == ses->winy) &&
-              (scr.posx < scr.cols) &&
-              (scr.posx >= ses->winx)) {
-            charIndex = MIN(charIndex, scr.posx-ses->winx);
-          }
-
-          if (charIndex < charCount) break;
-        }
-
+        toNextNonblankWindow();
         break;
       }
 
