@@ -448,6 +448,7 @@ parseTuneLine (TuneBuilder *tune, const char *line) {
   char *operand;
 
   while ((operand = strtok(string, delimiters))) {
+    if (*operand == '#') break;
     if (!parseTuneOperand(tune, operand)) return 0;
     string = NULL;
   }
