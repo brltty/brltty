@@ -31,8 +31,7 @@
 static const char noteLetters[] = "cdefgab";
 static const unsigned char noteOffsets[] = {0, 2, 4, 5, 7, 9, 11};
 static const signed char scaleAccidentals[] = {0, 2, 4, -1, 1, 3, 5};
-static const unsigned char sharpTable[] = {3, 0, 4, 1, 5, 2, 6};
-static const unsigned char flatTable[] = {6, 2, 5, 1, 4, 0, 3};
+static const unsigned char accidentalTable[] = {3, 0, 4, 1, 5, 2, 6};
 
 static void
 logSyntaxError (TuneBuilder *tune, const char *message) {
@@ -210,19 +209,19 @@ setOctave (TuneBuilder *tune) {
 
 static void
 setAccidentals (TuneBuilder *tune, int accidentals) {
-  int quotient = accidentals / 8;
-  int remainder = accidentals % 8;
+  int quotient = accidentals / NOTES_PER_SCALE;
+  int remainder = accidentals % NOTES_PER_SCALE;
 
   for (unsigned int index=0; index<ARRAY_COUNT(tune->accidentals); index+=1) {
     tune->accidentals[index] = quotient;
   }
 
   while (remainder > 0) {
-    tune->accidentals[sharpTable[--remainder]] += 1;
+    tune->accidentals[accidentalTable[--remainder]] += 1;
   }
 
   while (remainder < 0) {
-    tune->accidentals[flatTable[-++remainder]] -= 1;
+    tune->accidentals[accidentalTable[NOTES_PER_SCALE + remainder++]] -= 1;
   }
 }
 
@@ -248,7 +247,7 @@ parseKey (TuneBuilder *tune, const char **operand) {
 
     if (parseNoteLetter(&index, operand)) {
       accidentals = scaleAccidentals[index];
-      increment = 7;
+      increment = NOTES_PER_SCALE;
     } else {
       accidentals = 0;
       increment = 1;

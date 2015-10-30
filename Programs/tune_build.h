@@ -25,6 +25,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#define NOTES_PER_SCALE 7
+
 typedef enum {
   TUNE_BUILD_OK,
   TUNE_BUILD_SYNTAX,
@@ -49,7 +51,7 @@ typedef struct {
     unsigned int count;
   } tones;
 
-  signed char accidentals[7];
+  signed char accidentals[NOTES_PER_SCALE];
   TuneParameter duration;
   TuneParameter note;
   TuneParameter octave;
