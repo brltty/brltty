@@ -238,7 +238,7 @@ parseNoteLetter (unsigned char *index, const char **operand) {
 }
 
 static int
-parseKey (TuneBuilder *tune, const char **operand) {
+parseKeySignature (TuneBuilder *tune, const char **operand) {
   int accidentals;
   int increment;
 
@@ -254,23 +254,34 @@ parseKey (TuneBuilder *tune, const char **operand) {
     }
   }
 
-  {
-    char accidental = **operand;
-
-    switch (accidental) {
-      case '-':
-        increment = -increment;
-      case '+':
-        do {
-          accidentals += increment;
-        } while (*++*operand == accidental);
-        break;
-
-      default:
-        break;
-    }
+  TuneNumber count = 0;
+  if (!parseNumber(tune, &count, operand, 0, 1, NOTES_PER_OCTAVE-1, "accidental count")) {
+    return 0;
   }
 
+  int haveCount = count != 0;
+  char accidental = **operand;
+
+  switch (accidental) {
+    case '-':
+      increment = -increment;
+    case '+':
+      if (haveCount) {
+        *operand += 1;
+      } else {
+        do {
+          count += 1;
+        } while (*++*operand == accidental);
+      }
+      break;
+
+    default:
+      if (!haveCount) break;
+      logSyntaxError(tune, "accidental not specified");
+      return 0;
+  }
+
+  accidentals += increment * count;
   setAccidentals(tune, accidentals);
   return 1;
 }
@@ -404,7 +415,7 @@ parseTuneOperand (TuneBuilder *tune, const char *operand) {
   switch (*operand) {
     case 'k':
       operand += 1;
-      if (!parseKey(tune, &operand)) return 0;
+      if (!parseKeySignature(tune, &operand)) return 0;
       break;
 
     case 'o':
