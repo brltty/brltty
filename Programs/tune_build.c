@@ -170,15 +170,13 @@ static int
 parseDuration (TuneBuilder *tune, const char **operand, int *duration) {
   if (**operand == '@') {
     *operand += 1;
+
     TuneParameter parameter = tune->duration;
-
-    if (!parseRequiredParameter(tune, &parameter, operand)) {
-      return 0;
-    }
-
+    if (!parseRequiredParameter(tune, &parameter, operand)) return 0;
     *duration = parameter.current;
   } else {
-    const char *originalOperand = *operand;
+    const char *durationOperand = *operand;
+
     TuneNumber multiplier;
     TuneNumber divisor;
 
@@ -202,7 +200,7 @@ parseDuration (TuneBuilder *tune, const char **operand, int *duration) {
       divisor = 1;
     }
 
-    if (*operand != originalOperand) setCurrentDuration(tune, multiplier, divisor);
+    if (*operand != durationOperand) setCurrentDuration(tune, multiplier, divisor);
     *duration = tune->duration.current;
   }
 
@@ -359,24 +357,20 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
     if (**operand == 'n') {
       *operand += 1;
       TuneParameter parameter = tune->note;
-
-      if (!parseRequiredParameter(tune, &parameter, operand)) {
-        return 0;
-      }
-
+      if (!parseRequiredParameter(tune, &parameter, operand)) return 0;
       noteNumber = parameter.current;
     } else {
       unsigned char noteIndex;
       if (!parseNoteLetter(&noteIndex, operand)) return 0;
 
-      const char *originalOperand = *operand;
+      const char *octaveOperand = *operand;
       TuneParameter octave = tune->octave;
       if (!parseOptionalParameter(tune, &octave, operand)) return 0;
 
       noteNumber = (octave.current * NOTES_PER_OCTAVE) + noteOffsets[noteIndex];
       defaultAccidentals = tune->accidentals[noteIndex];
 
-      if (*operand == originalOperand) {
+      if (*operand == octaveOperand) {
         int adjustOctave = 0;
         TuneNumber previousNote = tune->note.current;
         TuneNumber currentNote = noteNumber;
@@ -452,11 +446,12 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
 static int
 parseTone (TuneBuilder *tune, const char **operand) {
   while (1) {
+    tune->source.text = *operand;
     unsigned char note;
 
     {
-      const char *originalOperand = *operand;
-      if (!parseNote(tune, operand, &note)) return *operand == originalOperand;
+      const char *noteOperand = *operand;
+      if (!parseNote(tune, operand, &note)) return *operand == noteOperand;
     }
 
     int duration;
