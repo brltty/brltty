@@ -289,8 +289,8 @@ static CellWriter writeCells_Evolution;
 
 static SetBrailleFirmnessMethod setFirmness;
 
-static SetBrailleSensitivityMethod setSensitivity_Evolution;
-static SetBrailleSensitivityMethod setSensitivity_ActiveBraille;
+static SetTouchSensitivityMethod setSensitivity_Evolution;
+static SetTouchSensitivityMethod setSensitivity_ActiveBraille;
 
 typedef struct {
   const char *name;
@@ -299,7 +299,7 @@ typedef struct {
   ByteInterpreter *interpretByte;
   CellWriter *writeCells;
   SetBrailleFirmnessMethod *setFirmness;
-  SetBrailleSensitivityMethod *setSensitivity;
+  SetTouchSensitivityMethod *setSensitivity;
 
   BrailleSessionEnder *sessionEnder;
 
@@ -981,13 +981,13 @@ setFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
 }
 
 static int
-setSensitivity_Evolution (BrailleDisplay *brl, BrailleSensitivity setting) {
+setSensitivity_Evolution (BrailleDisplay *brl, TouchSensitivity setting) {
   const unsigned char data[] = {0XFF - (setting * 0XF0 / BRL_SENSITIVITY_MAXIMUM)};
   return writeExtendedPacket(brl, HT_EXTPKT_SetAtcSensitivity, data, sizeof(data));
 }
 
 static int
-setSensitivity_ActiveBraille (BrailleDisplay *brl, BrailleSensitivity setting) {
+setSensitivity_ActiveBraille (BrailleDisplay *brl, TouchSensitivity setting) {
   const unsigned char data[] = {setting * 6 / BRL_SENSITIVITY_MAXIMUM};
   return writeExtendedPacket(brl, HT_EXTPKT_SetAtcSensitivity2, data, sizeof(data));
 }

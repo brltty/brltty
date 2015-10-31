@@ -54,7 +54,7 @@ PREFERENCE_STRING_TABLE(brailleFirmness,
   "minimum", "low", "medium", "high", "maximum"
 )
 
-PREFERENCE_STRING_TABLE(brailleSensitivity,
+PREFERENCE_STRING_TABLE(touchSensitivity,
   "minimum", "low", "medium", "high", "maximum"
 )
 
@@ -288,12 +288,6 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.highlightBrailleWindowLocation
   },
 
-  { .name = "touch-navigation",
-    .defaultValue = DEFAULT_TOUCH_NAVIGATION,
-    .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.touchNavigation
-  },
-
   { .name = "long-press-time",
     .defaultValue = DEFAULT_LONG_PRESS_TIME,
     .setting = &prefs.longPressTime
@@ -316,10 +310,16 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.autorepeatInterval
   },
 
-  { .name = "braille-sensitivity",
-    .defaultValue = DEFAULT_BRAILLE_SENSITIVITY,
-    .settingNames = &preferenceStringTable_brailleSensitivity,
-    .setting = &prefs.brailleSensitivity
+  { .name = "touch-navigation",
+    .defaultValue = DEFAULT_TOUCH_NAVIGATION,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.touchNavigation
+  },
+
+  { .name = "touch-sensitivity",
+    .defaultValue = DEFAULT_TOUCH_SENSITIVITY,
+    .settingNames = &preferenceStringTable_touchSensitivity,
+    .setting = &prefs.touchSensitivity
   },
 
   { .name = "braille-keyboard-enabled",

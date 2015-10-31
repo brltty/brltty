@@ -395,7 +395,7 @@ loadPreferencesFile (const char *path) {
 
       if (prefs.version == 4) {
         prefs.version += 1;
-        prefs.brailleSensitivity = DEFAULT_BRAILLE_SENSITIVITY;
+        prefs.touchSensitivity = DEFAULT_TOUCH_SENSITIVITY;
       }
 
       if (prefs.version == 5) {

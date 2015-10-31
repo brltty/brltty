@@ -108,7 +108,7 @@ typedef struct {
   unsigned char showScreenCursor;
   unsigned char version;
   unsigned char showAttributes;
-  unsigned char brailleSensitivity;
+  unsigned char touchSensitivity;
   unsigned char blinkingScreenCursor;
   unsigned char autorepeat;
   unsigned char blinkingCapitals;

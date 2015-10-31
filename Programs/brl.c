@@ -251,14 +251,14 @@ setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
 }
 
 int
-canSetBrailleSensitivity (BrailleDisplay *brl) {
+canSetTouchSensitivity (BrailleDisplay *brl) {
   return brl->setSensitivity != NULL;
 }
 
 int
-setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting) {
-  if (!canSetBrailleSensitivity(brl)) return 0;
-  logMessage(LOG_DEBUG, "setting braille sensitivity: %d", setting);
+setTouchSensitivity (BrailleDisplay *brl, TouchSensitivity setting) {
+  if (!canSetTouchSensitivity(brl)) return 0;
+  logMessage(LOG_DEBUG, "setting touch sensitivity: %d", setting);
   return brl->setSensitivity(brl, setting);
 }
 

@@ -44,7 +44,7 @@ typedef enum {
   BRL_SENSITIVITY_MEDIUM,
   BRL_SENSITIVITY_HIGH,
   BRL_SENSITIVITY_MAXIMUM
-} BrailleSensitivity;
+} TouchSensitivity;
 
 typedef enum {
   BRL_INPUT_TEXT,
@@ -60,7 +60,7 @@ typedef struct BrailleDisplayStruct BrailleDisplay;
 typedef struct BrailleDataStruct BrailleData;
 
 typedef int SetBrailleFirmnessMethod (BrailleDisplay *brl, BrailleFirmness setting);
-typedef int SetBrailleSensitivityMethod (BrailleDisplay *brl, BrailleSensitivity setting);
+typedef int SetTouchSensitivityMethod (BrailleDisplay *brl, TouchSensitivity setting);
 typedef int SetBrailleAutorepeatMethod (BrailleDisplay *brl, int on, int delay, int interval);
 
 typedef void SetRotateInputMethod (BrailleDisplay *brl, KeyGroup *group, KeyNumber *number);
@@ -87,7 +87,7 @@ struct BrailleDisplayStruct {
   unsigned isSuspended:1;
 
   SetBrailleFirmnessMethod *setFirmness;
-  SetBrailleSensitivityMethod *setSensitivity;
+  SetTouchSensitivityMethod *setSensitivity;
   SetBrailleAutorepeatMethod *setAutorepeat;
 
   void (*bufferResized) (unsigned int rows, unsigned int columns);

@@ -149,7 +149,7 @@ testBlinkingCapitals (void) {
 
 static int
 testBrailleFirmness (void) {
-  return brl.setFirmness != NULL;
+  return canSetBrailleFirmness(&brl);
 }
 
 static int
@@ -158,13 +158,13 @@ changedBrailleFirmness (const MenuItem *item UNUSED, unsigned char setting) {
 }
 
 static int
-testBrailleSensitivity (void) {
-  return brl.setSensitivity != NULL;
+testTouchSensitivity (void) {
+  return canSetTouchSensitivity(&brl);
 }
 
 static int
-changedBrailleSensitivity (const MenuItem *item UNUSED, unsigned char setting) {
-  return setBrailleSensitivity(&brl, setting);
+changedTouchSensitivity (const MenuItem *item UNUSED, unsigned char setting) {
+  return setTouchSensitivity(&brl, setting);
 }
 
 static int
@@ -722,11 +722,6 @@ makePreferencesMenu (void) {
     SUBMENU(inputSubmenu, rootMenu, strtext("Input Options"));
 
     {
-      NAME(strtext("Touch Navigation"));
-      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.touchNavigation, &itemName));
-    }
-
-    {
       NAME(strtext("Long Press Time"));
       ITEM(newTimeMenuItem(inputSubmenu, &prefs.longPressTime, &itemName));
       CHANGED(AutorepeatDelay);
@@ -752,6 +747,12 @@ makePreferencesMenu (void) {
     }
 
     {
+      NAME(strtext("Touch Navigation"));
+      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.touchNavigation, &itemName));
+      TEST(TouchSensitivity);
+    }
+
+    {
       static const MenuString strings[] = {
         {.label=strtext("Minimum")},
         {.label=strtext("Low")},
@@ -760,10 +761,10 @@ makePreferencesMenu (void) {
         {.label=strtext("Maximum")}
       };
 
-      NAME(strtext("Braille Sensitivity"));
-      ITEM(newEnumeratedMenuItem(inputSubmenu, &prefs.brailleSensitivity, &itemName, strings));
-      TEST(BrailleSensitivity);
-      CHANGED(BrailleSensitivity);
+      NAME(strtext("Touch Sensitivity"));
+      ITEM(newEnumeratedMenuItem(inputSubmenu, &prefs.touchSensitivity, &itemName, strings));
+      TEST(TouchSensitivity);
+      CHANGED(TouchSensitivity);
     }
 
     {
