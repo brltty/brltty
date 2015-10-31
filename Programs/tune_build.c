@@ -160,8 +160,13 @@ parseTempo (TuneBuilder *tune, const char **operand) {
 }
 
 static void
-setDuration (TuneBuilder *tune) {
-  tune->duration.current = 60000 / tune->tempo.current;
+setCurrentDuration (TuneBuilder *tune, TuneNumber multiplier, TuneNumber divisor) {
+  tune->duration.current = (60000 * multiplier) / (tune->tempo.current * divisor);
+}
+
+static void
+setBaseDuration (TuneBuilder *tune) {
+  setCurrentDuration(tune, 1, 1);
 }
 
 static int
@@ -176,6 +181,7 @@ parseDuration (TuneBuilder *tune, const char **operand, int *duration) {
 
     *duration = parameter.current;
   } else {
+    const char *originalOperand = *operand;
     TuneNumber multiplier;
     TuneNumber divisor;
 
@@ -199,7 +205,8 @@ parseDuration (TuneBuilder *tune, const char **operand, int *duration) {
       divisor = 1;
     }
 
-    *duration = tune->duration.current * multiplier / divisor;
+    if (*operand != originalOperand) setCurrentDuration(tune, multiplier, divisor);
+    *duration = tune->duration.current;
   }
 
   tune->duration.current = *duration;
@@ -487,7 +494,7 @@ parseTuneOperand (TuneBuilder *tune, const char *operand) {
     case 't':
       operand += 1;
       if (!parseTempo(tune, &operand)) return 0;
-      setDuration(tune);
+      setBaseDuration(tune);
       break;
 
     default:
@@ -553,10 +560,10 @@ initializeTuneBuilder (TuneBuilder *tune) {
   setParameter(&tune->note, "note", getLowestNote(), getHighestNote(), NOTE_MIDDLE_C+noteOffsets[2]);
   setParameter(&tune->octave, "octave", 0, 10, 0);
   setParameter(&tune->percentage, "percentage", 1, 100, 80);
-  setParameter(&tune->tempo, "tempo", 40, UINT8_MAX, 108);
+  setParameter(&tune->tempo, "tempo", 40, UINT8_MAX, (60 * 2));
 
   setAccidentals(tune, 0);
-  setDuration(tune);
+  setBaseDuration(tune);
   setOctave(tune);
 
   tune->source.text = "";
