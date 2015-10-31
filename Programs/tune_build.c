@@ -96,29 +96,31 @@ parseNumber (
   const TuneNumber minimum, const TuneNumber maximum,
   const char *name
 ) {
+  const char *problem = "invalid";
+
   if (isdigit(**operand)) {
     errno = 0;
     char *end;
     unsigned long ul = strtoul(*operand, &end, 10);
 
-    if (errno) goto invalidValue;
-    if (ul > UINT_MAX) goto invalidValue;
+    if (errno) goto PROBLEM_ENCOUNTERED;
+    if (ul > UINT_MAX) goto PROBLEM_ENCOUNTERED;
 
-    if (ul < minimum) goto invalidValue;
-    if (ul > maximum) goto invalidValue;
+    if (ul < minimum) goto PROBLEM_ENCOUNTERED;
+    if (ul > maximum) goto PROBLEM_ENCOUNTERED;
 
     *number = ul;
     *operand = end;
-  } else if (required) {
-    goto invalidValue;
+    return 1;
   }
 
-  return 1;
+  if (!required) return 1;
+  problem = "missing";
 
-invalidValue:
+PROBLEM_ENCOUNTERED:
   if (name) {
     char message[0X80];
-    snprintf(message, sizeof(message), "invalid %s", name);
+    snprintf(message, sizeof(message), "%s %s", problem, name);
     logSyntaxError(tune, message);
   }
 
