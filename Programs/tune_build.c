@@ -351,27 +351,16 @@ parseKeySignature (TuneBuilder *tune, const char **operand) {
 
 static int
 parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
+  int noteNumber;
+
   if (**operand == 'r') {
     *operand += 1;
-    *note = 0;
+    noteNumber = 0;
   } else {
-    int noOctave = 0;
     int defaultAccidentals = 0;
-    int noteNumber;
-    unsigned char noteIndex;
 
-    if (parseNoteLetter(&noteIndex, operand)) {
-      const char *originalOperand = *operand;
-      TuneParameter octave = tune->octave;
-
-      if (!parseOptionalParameter(tune, &octave, operand)) {
-        return 0;
-      }
-
-      noteNumber = (octave.current * NOTES_PER_OCTAVE) + noteOffsets[noteIndex];
-      if (*operand == originalOperand) noOctave = 1;
-      defaultAccidentals = tune->accidentals[noteIndex];
-    } else {
+    if (**operand == 'n') {
+      *operand += 1;
       TuneParameter parameter = tune->note;
 
       if (!parseRequiredParameter(tune, &parameter, operand)) {
@@ -379,22 +368,38 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
       }
 
       noteNumber = parameter.current;
-    }
+    } else {
+      unsigned char noteIndex;
 
-    if (noOctave) {
-      int adjustOctave = 0;
-      TuneNumber previousNote = tune->note.current;
-      TuneNumber currentNote = noteNumber;
+      if (parseNoteLetter(&noteIndex, operand)) {
+        const char *originalOperand = *operand;
+        TuneParameter octave = tune->octave;
 
-      if (currentNote < previousNote) {
-        currentNote += NOTES_PER_OCTAVE;
-        if ((currentNote - previousNote) <= 3) adjustOctave = 1;
-      } else if (currentNote > previousNote) {
-        currentNote -= NOTES_PER_OCTAVE;
-        if ((previousNote - currentNote) <= 3) adjustOctave = 1;
+        if (!parseOptionalParameter(tune, &octave, operand)) {
+          return 0;
+        }
+
+        noteNumber = (octave.current * NOTES_PER_OCTAVE) + noteOffsets[noteIndex];
+        defaultAccidentals = tune->accidentals[noteIndex];
+
+        if (*operand == originalOperand) {
+          int adjustOctave = 0;
+          TuneNumber previousNote = tune->note.current;
+          TuneNumber currentNote = noteNumber;
+
+          if (currentNote < previousNote) {
+            currentNote += NOTES_PER_OCTAVE;
+            if ((currentNote - previousNote) <= 3) adjustOctave = 1;
+          } else if (currentNote > previousNote) {
+            currentNote -= NOTES_PER_OCTAVE;
+            if ((previousNote - currentNote) <= 3) adjustOctave = 1;
+          }
+
+          if (adjustOctave) noteNumber = currentNote;
+        }
+      } else {
+        return 0;
       }
-
-      if (adjustOctave) noteNumber = currentNote;
     }
 
     tune->note.current = noteNumber;
@@ -447,28 +452,35 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
         return 0;
       }
     }
-
-    *note = noteNumber;
   }
 
+  *note = noteNumber;
   return 1;
 }
 
 static int
 parseTone (TuneBuilder *tune, const char **operand) {
-  unsigned char note;
-  if (!parseNote(tune, operand, &note)) return 0;
+  while (1) {
+    unsigned char note;
 
-  int duration;
-  if (!parseDuration(tune, operand, &duration)) return 0;
+    {
+      const char *originalOperand = *operand;
+      if (!parseNote(tune, operand, &note)) return *operand == originalOperand;
+    }
 
-  if (note) {
-    int onDuration = (duration * tune->percentage.current) / 100;
-    if (!addNote(tune, note, onDuration)) return 0;
-    duration -= onDuration;
+    int duration;
+    if (!parseDuration(tune, operand, &duration)) return 0;
+
+    if (note) {
+      int onDuration = (duration * tune->percentage.current) / 100;
+      if (!addNote(tune, note, onDuration)) return 0;
+      duration -= onDuration;
+    }
+
+    if (!addNote(tune, 0, duration)) return 0;
   }
 
-  return addNote(tune, 0, duration);
+  return 1;
 }
 
 static int
@@ -556,9 +568,9 @@ initializeTuneBuilder (TuneBuilder *tune) {
   tune->tones.size = 0;
   tune->tones.count = 0;
 
-  setParameter(&tune->duration, "duration", 1, UINT16_MAX, 0);
-  setParameter(&tune->note, "note", getLowestNote(), getHighestNote(), NOTE_MIDDLE_C+noteOffsets[2]);
-  setParameter(&tune->octave, "octave", 0, 10, 0);
+  setParameter(&tune->duration, "note duration", 1, UINT16_MAX, 0);
+  setParameter(&tune->note, "MIDI note number", getLowestNote(), getHighestNote(), NOTE_MIDDLE_C+noteOffsets[2]);
+  setParameter(&tune->octave, "octave number", 0, 10, 0);
   setParameter(&tune->percentage, "percentage", 1, 100, 80);
   setParameter(&tune->tempo, "tempo", 40, UINT8_MAX, (60 * 2));
 
