@@ -33,6 +33,25 @@ static const unsigned char noteOffsets[] = {0, 2, 4, 5, 7, 9, 11};
 static const signed char scaleAccidentals[] = {0, 2, 4, -1, 1, 3, 5};
 static const unsigned char accidentalTable[] = {3, 0, 4, 1, 5, 2, 6};
 
+typedef struct {
+  const char *name;
+  signed char accidentals;
+} ModeEntry;
+
+static const ModeEntry modeTable[] = {
+  {.name="major", .accidentals=0},
+  {.name="minor", .accidentals=-3},
+
+  {.name="ionian", .accidentals=0},
+  {.name="dorian", .accidentals=-2},
+  {.name="phrygian", .accidentals=-4},
+  {.name="lydian", .accidentals=1},
+  {.name="mixolydian", .accidentals=-1},
+  {.name="aeolian", .accidentals=-3},
+  {.name="locrian", .accidentals=-5},
+};
+static const unsigned char modeCount = ARRAY_COUNT(modeTable);
+
 static void
 logSyntaxError (TuneBuilder *tune, const char *message) {
   tune->status = TUNE_BUILD_SYNTAX;
@@ -248,6 +267,29 @@ parseKeySignature (TuneBuilder *tune, const char **operand) {
     if (parseNoteLetter(&index, operand)) {
       accidentals = scaleAccidentals[index];
       increment = NOTES_PER_SCALE;
+
+      if (isalpha(**operand)) {
+        const char *from = *operand;
+        const char *to = from;
+        while (isalpha(*++to));
+        unsigned int length = to - from;
+
+        const ModeEntry *mode = modeTable;
+        const ModeEntry *end = mode + modeCount;
+
+        while (mode < end) {
+          if (strncmp(mode->name, from, length) == 0) break;
+          mode += 1;
+        }
+
+        if (mode == end) {
+          logSyntaxError(tune, "unrecognized mode");
+          return 0;
+        }
+
+        accidentals += mode->accidentals;
+        *operand = to;
+      }
     } else {
       accidentals = 0;
       increment = 1;
