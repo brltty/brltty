@@ -53,19 +53,23 @@ handleTouchAt (int offset, TouchCommandData *tcd) {
 static void
 handleTouchOff (TouchCommandData *tcd) {
   int ok = 0;
-  int unread = 0;
 
-  for (int i = 0; i < tcd->count; ++i) {
-    if (BITMASK_TEST(tcd->touched, i)) unread += 1;
-  }
+  if ((tcd->lastTouched > (tcd->lastActive - 2))) {
+    int unread = 0;
 
-  if (tcd->activeCells && unread == 0) ok = 1;
+    for (int i = 0; i < tcd->count; ++i) {
+      if (BITMASK_TEST(tcd->touched, i)) unread += 1;
+    }
 
-  if (!ok && tcd->activeCells && unread) {
-    float factor = (float)tcd->activeCells / unread;
-    logMessage(LOG_DEBUG, "Touch: factor %f, pos %d/%d", factor, tcd->lastTouched, tcd->lastActive);
+    if (tcd->activeCells && unread == 0) {
+      ok = 1;
+    }
 
-    if ((factor > 7) && (tcd->lastTouched > (tcd->lastActive - 3))) ok = 1;
+    if (!ok && tcd->activeCells && unread) {
+      float factor = (float)tcd->activeCells / unread;
+
+      if (factor > 7) ok = 1;
+    }
   }
 
   if (ok) handleCommand(BRL_CMD_NXNBWIN);
