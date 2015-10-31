@@ -257,6 +257,42 @@ parseNoteLetter (unsigned char *index, const char **operand) {
 }
 
 static int
+parseMode (TuneBuilder *tune, int *accidentals, const char **operand) {
+  const char *from = *operand;
+  if (!isalpha(*from)) return 1;
+
+  const char *to = from;
+  while (isalpha(*++to));
+  unsigned int length = to - from;
+
+  const ModeEntry *mode = NULL;
+  const ModeEntry *current = modeTable;
+  const ModeEntry *end = current + modeCount;
+
+  while (current < end) {
+    if (strncmp(current->name, from, length) == 0) {
+      if (mode) {
+        logSyntaxError(tune, "ambiguous mode");
+        return 0;
+      }
+
+      mode = current;
+    }
+
+    current += 1;
+  }
+
+  if (!mode) {
+    logSyntaxError(tune, "unrecognized mode");
+    return 0;
+  }
+
+  *accidentals += mode->accidentals;
+  *operand = to;
+  return 1;
+}
+
+static int
 parseKeySignature (TuneBuilder *tune, const char **operand) {
   int accidentals;
   int increment;
@@ -267,29 +303,7 @@ parseKeySignature (TuneBuilder *tune, const char **operand) {
     if (parseNoteLetter(&index, operand)) {
       accidentals = scaleAccidentals[index];
       increment = NOTES_PER_SCALE;
-
-      if (isalpha(**operand)) {
-        const char *from = *operand;
-        const char *to = from;
-        while (isalpha(*++to));
-        unsigned int length = to - from;
-
-        const ModeEntry *mode = modeTable;
-        const ModeEntry *end = mode + modeCount;
-
-        while (mode < end) {
-          if (strncmp(mode->name, from, length) == 0) break;
-          mode += 1;
-        }
-
-        if (mode == end) {
-          logSyntaxError(tune, "unrecognized mode");
-          return 0;
-        }
-
-        accidentals += mode->accidentals;
-        *operand = to;
-      }
+      if (!parseMode(tune, &accidentals, operand)) return 0;
     } else {
       accidentals = 0;
       increment = 1;
