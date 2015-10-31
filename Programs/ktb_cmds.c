@@ -99,6 +99,7 @@ static const CommandListEntry commandList_clipboard[] = {
 };
 
 static const CommandListEntry commandList_feature[] = {
+  { .command = BRL_CMD_TOUCH_NAV },
   { .command = BRL_CMD_AUTOREPEAT },
   { .command = BRL_CMD_SIXDOTS },
   { .command = BRL_CMD_SKPIDLNS },
@@ -185,7 +186,6 @@ static const CommandListEntry commandList_input[] = {
   { .command = BRL_CMD_KEY(PAGE_DOWN) },
   { .command = BRL_CMD_KEY(HOME) },
   { .command = BRL_CMD_KEY(END) },
-  { .command = BRL_CMD_KEY(ESCAPE) },
   { .command = BRL_CMD_KEY(INSERT) },
   { .command = BRL_CMD_KEY(DELETE) },
   { .command = BRL_CMD_UNSTICK },
@@ -195,6 +195,7 @@ static const CommandListEntry commandList_input[] = {
   { .command = BRL_CMD_META },
   { .command = BRL_CMD_ALTGR },
   { .command = BRL_CMD_GUI },
+  { .command = BRL_CMD_KEY(ESCAPE) },
   { .command = BRL_CMD_KEY(FUNCTION) },
   { .command = BRL_CMD_BLK(SWITCHVT) },
   { .command = BRL_CMD_SWITCHVT_PREV },
@@ -226,7 +227,7 @@ static const CommandListEntry commandList_internal[] = {
   { .command = BRL_CMD_BLK(PASSXT) },
   { .command = BRL_CMD_BLK(PASSAT) },
   { .command = BRL_CMD_BLK(PASSPS2) },
-  { .command = BRL_CMD_BLK(TOUCH) },
+  { .command = BRL_CMD_BLK(TOUCH_AT) },
 };
 
 #define COMMAND_LIST(name) .commands = { \

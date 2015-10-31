@@ -75,6 +75,8 @@ extern "C" {
 #define DEFAULT_TRACK_SCREEN_POINTER 0		/* 1 for on, 0 for off */
 #define DEFAULT_HIGHLIGHT_BRAILLE_WINDOW_LOCATION 0		/* 1 for on, 0 for off */
 
+#define DEFAULT_TOUCH_NAVIGATION 0
+
 #define DEFAULT_LONG_PRESS_TIME 50	/* hundredths of a second */
 #define DEFAULT_AUTOREPEAT 1		/* 1 for on, 0 for off */
 #define DEFAULT_AUTOREPEAT_PANNING 0	/* 1 for on, 0 for off */

@@ -118,12 +118,32 @@ handleToggleCommands (int command, void *data) {
       toggleFeatureSetting(&prefs.textStyle, command);
       break;
 
+    case BRL_CMD_CSRTRK:
+      toggleSetting(&ses->trackScreenCursor, command, ALERT_CURSOR_UNLINKED, ALERT_CURSOR_LINKED);
+
+      if (ses->trackScreenCursor) {
+#ifdef ENABLE_SPEECH_SUPPORT
+        if (spk.track.isActive && (scr.number == spk.track.screenNumber)) {
+          spk.track.speechLocation = SPK_LOC_NONE;
+        } else
+#endif /* ENABLE_SPEECH_SUPPORT */
+
+        {
+          trackScreenCursor(1);
+        }
+      }
+      break;
+
     case BRL_CMD_CSRSIZE:
       toggleFeatureSetting(&prefs.screenCursorStyle, command);
       break;
 
     case BRL_CMD_CSRVIS:
       toggleFeatureSetting(&prefs.showScreenCursor, command);
+      break;
+
+    case BRL_CMD_CSRHIDE:
+      toggleModeSetting(&ses->hideScreenCursor, command);
       break;
 
     case BRL_CMD_CSRBLINK:
@@ -146,12 +166,16 @@ handleToggleCommands (int command, void *data) {
       toggleFeatureSetting(&prefs.autorepeat, command);
       break;
 
+    case BRL_CMD_BRLKBD:
+      toggleFeatureSetting(&prefs.brailleKeyboardEnabled, command);
+      break;
+
     case BRL_CMD_BRLUCDOTS:
       toggleFeatureSetting(&prefs.brailleInputMode, command);
       break;
 
-    case BRL_CMD_BRLKBD:
-      toggleFeatureSetting(&prefs.brailleKeyboardEnabled, command);
+    case BRL_CMD_TOUCH_NAV:
+      toggleFeatureSetting(&prefs.touchNavigation, command);
       break;
 
     case BRL_CMD_TUNES:
@@ -202,26 +226,6 @@ handleToggleCommands (int command, void *data) {
 
     case BRL_CMD_DISPMD:
       toggleModeSetting(&ses->displayMode, command);
-      break;
-
-    case BRL_CMD_CSRHIDE:
-      toggleModeSetting(&ses->hideScreenCursor, command);
-      break;
-
-    case BRL_CMD_CSRTRK:
-      toggleSetting(&ses->trackScreenCursor, command, ALERT_CURSOR_UNLINKED, ALERT_CURSOR_LINKED);
-
-      if (ses->trackScreenCursor) {
-#ifdef ENABLE_SPEECH_SUPPORT
-        if (spk.track.isActive && (scr.number == spk.track.screenNumber)) {
-          spk.track.speechLocation = SPK_LOC_NONE;
-        } else
-#endif /* ENABLE_SPEECH_SUPPORT */
-
-        {
-          trackScreenCursor(1);
-        }
-      }
       break;
 
     case BRL_CMD_FREEZE: {

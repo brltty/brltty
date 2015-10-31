@@ -191,6 +191,8 @@ typedef struct {
   unsigned char consoleBellAlert;
   unsigned char keyboardLedAlerts;
 
+  unsigned char touchNavigation;
+
   unsigned char saveOnExit;
   unsigned char showSubmenuSizes;
   unsigned char showAdvancedSubmenus;

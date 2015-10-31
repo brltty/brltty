@@ -149,7 +149,7 @@ destroyTouchCommandData (TouchCommandData *tcd) {
 static int
 handleTouchCommands (int command, void *data) {
   switch (command & BRL_MSK_BLK) {
-    case BRL_CMD_BLK(TOUCH): {
+    case BRL_CMD_BLK(TOUCH_AT): {
       int arg = command & BRL_MSK_ARG;
 
       if (arg == BRL_MSK_ARG) {

@@ -722,6 +722,11 @@ makePreferencesMenu (void) {
     SUBMENU(inputSubmenu, rootMenu, strtext("Input Options"));
 
     {
+      NAME(strtext("Touch Navigation"));
+      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.touchNavigation, &itemName));
+    }
+
+    {
       NAME(strtext("Long Press Time"));
       ITEM(newTimeMenuItem(inputSubmenu, &prefs.longPressTime, &itemName));
       CHANGED(AutorepeatDelay);

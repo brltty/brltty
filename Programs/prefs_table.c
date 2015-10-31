@@ -288,6 +288,12 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.highlightBrailleWindowLocation
   },
 
+  { .name = "touch-navigation",
+    .defaultValue = DEFAULT_TOUCH_NAVIGATION,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.touchNavigation
+  },
+
   { .name = "long-press-time",
     .defaultValue = DEFAULT_LONG_PRESS_TIME,
     .setting = &prefs.longPressTime

@@ -1572,7 +1572,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                       if (readingPosition >= cellCount) readingPosition = BRL_MSK_ARG;
                     }
 
-                    enqueueCommand(BRL_CMD_BLK(TOUCH) | readingPosition);
+                    enqueueCommand(BRL_CMD_BLK(TOUCH_AT) | readingPosition);
                     continue;
                   }
 
@@ -1584,7 +1584,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                       readingPosition = BRL_MSK_ARG;
                     }
 
-                    enqueueCommand(BRL_CMD_BLK(TOUCH) | readingPosition);
+                    enqueueCommand(BRL_CMD_BLK(TOUCH_AT) | readingPosition);
                     continue;
                   }
 

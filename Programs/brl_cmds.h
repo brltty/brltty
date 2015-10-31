@@ -215,18 +215,20 @@ typedef enum {
   BRL_CMD_ALTGR /* cycle the AltGr (Right Alt) sticky input modifier (next, on, off) */,
   BRL_CMD_GUI /* cycle the GUI (Windows) sticky input modifier (next, on, off) */,
 
-  BRL_CMD_SELECTVT_PREV /* bind to the previous virtual terminal */,
-  BRL_CMD_SELECTVT_NEXT /* bind to the next virtual terminal */,
-
-  BRL_CMD_PRNBWIN /* go backward to nearest non-blank braille window */,
-  BRL_CMD_NXNBWIN /* go forward to nearest non-blank braille window */,
-
   BRL_CMD_BRL_STOP /* stop the braille driver */,
   BRL_CMD_BRL_START /* start the braille driver */,
   BRL_CMD_SPK_STOP /* stop the speech driver */,
   BRL_CMD_SPK_START /* start the speech driver */,
   BRL_CMD_SCR_STOP /* stop the screen driver */,
   BRL_CMD_SCR_START /* start the screen driver */,
+
+  BRL_CMD_SELECTVT_PREV /* bind to the previous virtual terminal */,
+  BRL_CMD_SELECTVT_NEXT /* bind to the next virtual terminal */,
+
+  BRL_CMD_PRNBWIN /* go backward to nearest non-blank braille window */,
+  BRL_CMD_NXNBWIN /* go forward to nearest non-blank braille window */,
+
+  BRL_CMD_TOUCH_NAV /* set touch navigation on/off */,
 
   BRL_basicCommandCount /* must be last */
 } BRL_BasicCommand;
@@ -283,7 +285,7 @@ typedef enum {
   BRL_BLK_PASSXT /* XT (set 1) keyboard scan code */,
   BRL_BLK_PASSPS2 /* PS/2 (set 3) keyboard scan code */,
   BRL_BLK_CONTEXT /* switch to command context */,
-  BRL_BLK_TOUCH /* current reading location */,
+  BRL_BLK_TOUCH_AT /* current reading location */,
 
   BRL_blockCommandCount /* must be last */
 } BRL_BlockCommand;
