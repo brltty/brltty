@@ -185,7 +185,7 @@ parseDuration (TuneBuilder *tune, const char **operand, int *duration) {
     if (**operand == '*') {
       *operand += 1;
 
-      if (!parseNumber(tune, &multiplier, operand, 1, 1, 16, "multiplier")) {
+      if (!parseNumber(tune, &multiplier, operand, 1, 1, 16, "duration multiplier")) {
         return 0;
       }
     } else {
@@ -195,7 +195,7 @@ parseDuration (TuneBuilder *tune, const char **operand, int *duration) {
     if (**operand == '/') {
       *operand += 1;
 
-      if (!parseNumber(tune, &divisor, operand, 1, 1, 128, "divisor")) {
+      if (!parseNumber(tune, &divisor, operand, 1, 1, 128, "duration divisor")) {
         return 0;
       }
     } else {
@@ -367,35 +367,29 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
       noteNumber = parameter.current;
     } else {
       unsigned char noteIndex;
+      if (!parseNoteLetter(&noteIndex, operand)) return 0;
 
-      if (parseNoteLetter(&noteIndex, operand)) {
-        const char *originalOperand = *operand;
-        TuneParameter octave = tune->octave;
+      const char *originalOperand = *operand;
+      TuneParameter octave = tune->octave;
+      if (!parseOptionalParameter(tune, &octave, operand)) return 0;
 
-        if (!parseOptionalParameter(tune, &octave, operand)) {
-          return 0;
+      noteNumber = (octave.current * NOTES_PER_OCTAVE) + noteOffsets[noteIndex];
+      defaultAccidentals = tune->accidentals[noteIndex];
+
+      if (*operand == originalOperand) {
+        int adjustOctave = 0;
+        TuneNumber previousNote = tune->note.current;
+        TuneNumber currentNote = noteNumber;
+
+        if (currentNote < previousNote) {
+          currentNote += NOTES_PER_OCTAVE;
+          if ((currentNote - previousNote) <= 3) adjustOctave = 1;
+        } else if (currentNote > previousNote) {
+          currentNote -= NOTES_PER_OCTAVE;
+          if ((previousNote - currentNote) <= 3) adjustOctave = 1;
         }
 
-        noteNumber = (octave.current * NOTES_PER_OCTAVE) + noteOffsets[noteIndex];
-        defaultAccidentals = tune->accidentals[noteIndex];
-
-        if (*operand == originalOperand) {
-          int adjustOctave = 0;
-          TuneNumber previousNote = tune->note.current;
-          TuneNumber currentNote = noteNumber;
-
-          if (currentNote < previousNote) {
-            currentNote += NOTES_PER_OCTAVE;
-            if ((currentNote - previousNote) <= 3) adjustOctave = 1;
-          } else if (currentNote > previousNote) {
-            currentNote -= NOTES_PER_OCTAVE;
-            if ((previousNote - currentNote) <= 3) adjustOctave = 1;
-          }
-
-          if (adjustOctave) noteNumber = currentNote;
-        }
-      } else {
-        return 0;
+        if (adjustOctave) noteNumber = currentNote;
       }
     }
 
