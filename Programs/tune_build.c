@@ -147,11 +147,6 @@ parseRequiredParameter (TuneBuilder *tune, TuneParameter *parameter, const char 
 }
 
 static int
-parseOctave (TuneBuilder *tune, const char **operand) {
-  return parseRequiredParameter(tune, &tune->octave, operand);
-}
-
-static int
 parsePercentage (TuneBuilder *tune, const char **operand) {
   return parseRequiredParameter(tune, &tune->percentage, operand);
 }
@@ -493,11 +488,6 @@ parseTuneOperand (TuneBuilder *tune, const char *operand) {
     case 'k':
       operand += 1;
       if (!parseKeySignature(tune, &operand)) return 0;
-      break;
-
-    case 'o':
-      operand += 1;
-      if (!parseOctave(tune, &operand)) return 0;
       break;
 
     case 'p':
