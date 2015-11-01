@@ -31,7 +31,6 @@
 
 typedef struct {
   struct {
-    ReportListenerInstance *brailleWindowMoved;
     ReportListenerInstance *brailleWindowUpdated;
   } reportListeners;
 
@@ -102,13 +101,6 @@ handleBrailleWindowUpdated (
   }
 }
 
-REPORT_LISTENER(brailleWindowMovedListener) {
-  TouchCommandData *tcd = parameters->listenerData;
-  const BrailleWindowMovedReport *report = parameters->reportData;
-
-  handleBrailleWindowMoved(report, tcd);
-}
-
 REPORT_LISTENER(brailleWindowUpdatedListener) {
   TouchCommandData *tcd = parameters->listenerData;
   const BrailleWindowUpdatedReport *report = parameters->reportData;
@@ -123,12 +115,8 @@ newTouchCommandData (void) {
   if ((tcd = malloc(sizeof(*tcd)))) {
     memset(tcd, 0, sizeof(*tcd));
 
-    if ((tcd->reportListeners.brailleWindowMoved = registerReportListener(REPORT_BRAILLE_WINDOW_MOVED, brailleWindowMovedListener, tcd))) {
-      if ((tcd->reportListeners.brailleWindowUpdated = registerReportListener(REPORT_BRAILLE_WINDOW_UPDATED, brailleWindowUpdatedListener, tcd))) {
-        return tcd;
-      }
-
-      unregisterReportListener(tcd->reportListeners.brailleWindowMoved);
+    if ((tcd->reportListeners.brailleWindowUpdated = registerReportListener(REPORT_BRAILLE_WINDOW_UPDATED, brailleWindowUpdatedListener, tcd))) {
+      return tcd;
     }
 
     free(tcd);
@@ -142,7 +130,6 @@ newTouchCommandData (void) {
 static void
 destroyTouchCommandData (TouchCommandData *tcd) {
   unregisterReportListener(tcd->reportListeners.brailleWindowUpdated);
-  unregisterReportListener(tcd->reportListeners.brailleWindowMoved);
   free(tcd);
 }
 
