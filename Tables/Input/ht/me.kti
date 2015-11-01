@@ -41,4 +41,6 @@ bind B6+Right CHRRT
 bind B2+B3+Left MUTE
 bind B2+B3+Right SAY_LINE
 
+bind B1+B4+Left TOUCH_NAV
+
 include dots.kti
