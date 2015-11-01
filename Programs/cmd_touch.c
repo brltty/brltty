@@ -28,6 +28,7 @@
 #include "brl_utils.h"
 #include "report.h"
 #include "bitmask.h"
+#include "prefs.h"
 
 typedef struct {
   struct {
@@ -39,8 +40,23 @@ typedef struct {
   unsigned int count;
   unsigned int activeCells;
   unsigned int lastActive;
-  unsigned int lastTouched;
+  int lastTouched;
 } TouchCommandData;
+
+static void
+resetTouched (TouchCommandData *tcd) {
+  tcd->activeCells = 0;
+  tcd->lastTouched = -1;
+
+  for (int i = 0; i < tcd->count; ++i) {
+    BITMASK_CLEAR(tcd->touched, i);
+    if (tcd->cells[i]) {
+      BITMASK_SET(tcd->touched, i);
+      tcd->lastActive = i;
+      tcd->activeCells += 1;
+    }
+  }
+}
 
 static void
 handleTouchAt (int offset, TouchCommandData *tcd) {
@@ -53,10 +69,10 @@ static void
 handleTouchOff (TouchCommandData *tcd) {
   int ok = 0;
 
-  if ((tcd->lastTouched > (tcd->lastActive - 2))) {
-    int unread = 0;
+  if (prefs.touchNavigation && (tcd->lastTouched > ((int)tcd->lastActive - 2))) {
+    unsigned int unread = 0;
 
-    for (int i = 0; i < tcd->count; ++i) {
+    for (unsigned int i = 0; i < tcd->count; ++i) {
       if (BITMASK_TEST(tcd->touched, i)) unread += 1;
     }
 
@@ -67,17 +83,14 @@ handleTouchOff (TouchCommandData *tcd) {
     if (!ok && tcd->activeCells && unread) {
       float factor = (float)tcd->activeCells / unread;
 
-      if (factor > 7) ok = 1;
+      if (factor > 6) ok = 1;
     }
   }
 
-  if (ok) handleCommand(BRL_CMD_NXNBWIN);
-}
-
-static void
-handleBrailleWindowMoved (
-  const BrailleWindowMovedReport *report, TouchCommandData *tcd
-) {
+  if (ok) {
+    resetTouched(tcd);
+    handleCommand(BRL_CMD_NXNBWIN);
+  }
 }
 
 static void
@@ -86,18 +99,8 @@ handleBrailleWindowUpdated (
 ) {
   if (cellsHaveChanged(&tcd->cells[0], report->cells, report->count, NULL, NULL, NULL)) {
     tcd->count = report->count;
-    tcd->activeCells = 0;
 
-    for (int i = 0; i < tcd->count; ++i) {
-      BITMASK_CLEAR(tcd->touched, i);
-      if (report->cells[i]) {
-        BITMASK_SET(tcd->touched, i);
-        tcd->lastActive = i;
-        tcd->activeCells += 1;
-      }
-    }
-
-    logMessage(LOG_DEBUG, "Touch: reset to %d cells, %d active", tcd->count, tcd->activeCells);
+    resetTouched(tcd);
   }
 }
 
