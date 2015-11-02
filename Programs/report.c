@@ -110,9 +110,6 @@ tellListener (void *item, void *data) {
   ReportListenerInstance *rli = item;
   ReportListenerParameters *parameters = data;
 
-  logSymbol(LOG_DEBUG, rli->listener,
-            "report: %u", parameters->reportIdentifier);
-
   parameters->listenerData = rli->data;
   rli->listener(parameters);
 
