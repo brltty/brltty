@@ -16,9 +16,38 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title MDV
+bind F3 CHRLT
+bind F8 CHRRT
 
-include common.kti
-include keyboard.kti
-include fkeys.kti
-include status.kti
+bind Shift+F3 HWINLT
+bind Shift+F8 HWINRT
+
+bind F1 TOP_LEFT
+bind F2 BOT_LEFT
+
+bind Shift+F1 FREEZE
+bind Shift+F2 INFO
+
+bind F4 HOME
+bind Shift+F4 CSRSIZE
+bind Long+F4 CSRBLINK
+
+bind F5 CSRTRK
+bind Shift+F5 CSRVIS
+bind Long+F5 CAPBLINK
+
+bind F6 SKPIDLNS
+bind Shift+F6 DISPMD
+bind Shift+Long+F6 ATTRVIS
+bind Long+F6 ATTRBLINK
+
+bind F7 SKPBLNKWINS
+
+bind F10 PREFMENU
+bind Shift+F10 PASTE
+
+context menu
+
+bind F9 MENU_PREV_SETTING
+bind F10 MENU_NEXT_SETTING
+

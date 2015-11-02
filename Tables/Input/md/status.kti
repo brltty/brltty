@@ -16,9 +16,5 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title MDV
+hotkey StatusKey.1 CSRHIDE+on CSRHIDE+off
 
-include common.kti
-include keyboard.kti
-include fkeys.kti
-include status.kti
