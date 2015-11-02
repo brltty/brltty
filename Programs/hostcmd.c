@@ -106,7 +106,18 @@ runHostCommand (
     options = &defaults;
   }
 
-  logMessage(LOG_DEBUG, "starting host command: %s", command[0]);
+  {
+    char buffer[0X100];
+    STR_BEGIN(buffer, sizeof(buffer));
+
+    {
+      const char *const *argument = command;
+      while (*argument) STR_PRINTF(" %s", *argument++);
+    }
+
+    STR_END;
+    logMessage(LOG_DEBUG, "starting host command:%s", buffer);
+  }
 
   {
     HostCommandStream streams[] = {
