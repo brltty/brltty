@@ -832,8 +832,7 @@ static DATA_OPERANDS_PROCESSOR(processIfNotSetOperands) {
   return processConfigurationDirectiveTestOperands(file, 0, data);
 }
 
-static int
-processConfigurationLine (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processConfigurationLine) {
   BEGIN_DATA_DIRECTIVE_TABLE
     DATA_NESTING_DIRECTIVES,
     DATA_VARIABLE_DIRECTIVES,

@@ -1141,8 +1141,7 @@ static DATA_OPERANDS_PROCESSOR(processTitleOperands) {
   return 1;
 }
 
-static int
-processKeyTableLine (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processKeyTableLine) {
   BEGIN_DATA_DIRECTIVE_TABLE
     DATA_VARIABLE_DIRECTIVES,
     DATA_CONDITION_DIRECTIVES,

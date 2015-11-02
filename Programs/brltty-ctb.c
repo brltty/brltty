@@ -400,8 +400,7 @@ static DATA_OPERANDS_PROCESSOR(processContractsOperands) {
   return 0;
 }
 
-static int
-processVerificationLine (DataFile *file, void *data) {
+static  DATA_OPERANDS_PROCESSOR(processVerificationLine) {
   BEGIN_DATA_DIRECTIVE_TABLE
     {.name=WS_C("contracts"), .processor=processContractsOperands},
   END_DATA_DIRECTIVE_TABLE

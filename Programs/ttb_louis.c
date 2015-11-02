@@ -132,8 +132,7 @@ static DATA_OPERANDS_PROCESSOR(processInclude) {
   return 1;
 }
 
-static int
-processLibLouisLine (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processLibLouisLine) {
   BEGIN_DATA_DIRECTIVE_TABLE
     {.name=WS_C("space"), .processor=processChar},
     {.name=WS_C("punctuation"), .processor=processChar},

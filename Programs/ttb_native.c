@@ -193,8 +193,7 @@ static DATA_OPERANDS_PROCESSOR(processGlyphOperands) {
   return 1;
 }
 
-static int
-processTextTableLine (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processTextTableLine) {
   BEGIN_DATA_DIRECTIVE_TABLE
     DATA_NESTING_DIRECTIVES,
     DATA_VARIABLE_DIRECTIVES,

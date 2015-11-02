@@ -162,8 +162,7 @@ static DATA_OPERANDS_PROCESSOR(processUnicodeCharOperands) {
   return 1;
 }
 
-static int
-processGnomeBrailleLine (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processGnomeBrailleLine) {
   if (inUcsBlock) {
     BEGIN_DATA_DIRECTIVE_TABLE
       {.name=WS_C("UCS-BLOCK"), .processor=processUcsBlockOperands},

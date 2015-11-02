@@ -82,8 +82,7 @@ static DATA_OPERANDS_PROCESSOR(processPropertyOperands) {
   return ok;
 }
 
-static int
-processProfileLine (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processProfileLine) {
   BEGIN_DATA_DIRECTIVE_TABLE
     DATA_NESTING_DIRECTIVES,
     DATA_VARIABLE_DIRECTIVES,

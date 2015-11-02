@@ -152,8 +152,7 @@ static DATA_OPERANDS_PROCESSOR(processDotOperands) {
   return 1;
 }
 
-static int
-processAttributesTableLine (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processAttributesTableLine) {
   BEGIN_DATA_DIRECTIVE_TABLE
     DATA_NESTING_DIRECTIVES,
     {.name=WS_C("dot"), .processor=processDotOperands},

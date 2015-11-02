@@ -520,8 +520,7 @@ static DATA_OPERANDS_PROCESSOR(processContractionTableDirective) {
   }
 }
 
-static int
-processContractionTableLine (DataFile *file, void *data) {
+static DATA_OPERANDS_PROCESSOR(processContractionTableLine) {
   BEGIN_DATA_DIRECTIVE_TABLE
     DATA_NESTING_DIRECTIVES,
     {.name=NULL, .processor=processContractionTableDirective},
