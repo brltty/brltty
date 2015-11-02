@@ -876,8 +876,6 @@ addKeyBinding (KeyContext *ctx, const KeyBinding *binding) {
   return 1;
 }
 
-static int processKeyTableLine (DataFile *file, void *data);
-
 static DATA_OPERANDS_PROCESSOR(processBindOperands) {
   KeyTableData *ktd = data;
   KeyBinding binding;

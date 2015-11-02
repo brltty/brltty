@@ -143,23 +143,23 @@ extern int processConditionOperands (
   const char *description, void *data
 );
 
-extern int processIncludeOperands (DataFile *file, void *data);
+extern DATA_OPERANDS_PROCESSOR(processIncludeOperands);
 extern int includeDataFile (DataFile *file, const wchar_t *name, unsigned int length);
 
 #define DATA_NESTING_DIRECTIVES \
   {.name=WS_C("include"), .processor=processIncludeOperands}
 
-extern int processElseOperands (DataFile *file, void *data);
-extern int processEndIfOperands (DataFile *file, void *data);
+extern DATA_OPERANDS_PROCESSOR(processElseOperands);
+extern DATA_OPERANDS_PROCESSOR(processEndIfOperands);
 
 #define DATA_CONDITION_DIRECTIVES \
   {.name=WS_C("else"), .processor=processElseOperands, .unconditional=1}, \
   {.name=WS_C("endif"), .processor=processEndIfOperands, .unconditional=1}
 
-extern int processIfVarOperands (DataFile *file, void *data);
-extern int processIfNotVarOperands (DataFile *file, void *data);
-extern int processAssignDefaultOperands (DataFile *file, void *data);
-extern int processAssignOperands (DataFile *file, void *data);
+extern DATA_OPERANDS_PROCESSOR(processIfVarOperands);
+extern DATA_OPERANDS_PROCESSOR(processIfNotVarOperands);
+extern DATA_OPERANDS_PROCESSOR(processAssignDefaultOperands);
+extern DATA_OPERANDS_PROCESSOR(processAssignOperands);
 
 #define DATA_VARIABLE_DIRECTIVES \
   {.name=WS_C("ifvar"), .processor=processIfVarOperands, .unconditional=1}, \
