@@ -244,6 +244,9 @@ brltty_gcc_cppflags=""
 
 case "${host_os}"
 in
+   darwin*)
+      brltty_gcc_cflags="${brltty_gcc_cflags} -Wno-initializer-overrides"
+      ;;
    elf*)
       brltty_gcc_cppflags="${brltty_gcc_cppflags} -ffreestanding -nostdinc -nostdlib"
       CPPFLAGS="${CPPFLAGS} -DGRUB_RUNTIME -DGRUB_FILE=__FILE__ -DNESTED_FUNC_ATTR="
