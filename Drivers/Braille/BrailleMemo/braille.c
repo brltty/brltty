@@ -186,7 +186,7 @@ writePacket (
   *byte++ = (length >> 0) & 0XFF;
   *byte++ = (length >> 8) & 0XFF;
 
-  byte = mempcpy(byte, data, length);
+  if (data) byte = mempcpy(byte, data, length);
 
   return writeBytes(brl, bytes, byte-bytes);
 }

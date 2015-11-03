@@ -549,7 +549,7 @@ usbMakeURB (
     urb->usercontext = context;
     urb->buffer = (urb->buffer_length = length)? (urb + 1): NULL;
 
-    if (buffer) {
+    if (urb->buffer && buffer) {
       if (USB_ENDPOINT_DIRECTION(endpoint) == UsbEndpointDirection_Output) {
         memcpy(urb->buffer, buffer, length);
       }

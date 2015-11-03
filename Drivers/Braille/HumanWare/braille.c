@@ -103,7 +103,7 @@ writePacket (BrailleDisplay *brl, unsigned char type, unsigned char length, cons
   packet.fields.type = type;
   packet.fields.length = length;
 
-  memcpy(packet.fields.data.bytes, data, length);
+  if (data) memcpy(packet.fields.data.bytes, data, length);
   length += packet.fields.data.bytes - packet.bytes;
 
   return writeBraillePacket(brl, NULL, &packet, length);

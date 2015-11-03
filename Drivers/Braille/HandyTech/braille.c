@@ -962,7 +962,7 @@ writeExtendedPacket (
   packet.fields.data.extended.model = brl->data->model->identifier;
   packet.fields.data.extended.length = size + 1; /* type byte is included */
   packet.fields.data.extended.type = type;
-  memcpy(packet.fields.data.extended.data.bytes, data, size);
+  if (data) memcpy(packet.fields.data.extended.data.bytes, data, size);
   packet.fields.data.extended.data.bytes[size] = SYN;
   size += 5; /* EXT, ID, LEN, TYPE, ..., SYN */
   return writeBrailleMessage(brl, NULL, type, &packet, size);
