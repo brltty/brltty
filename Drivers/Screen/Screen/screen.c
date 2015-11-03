@@ -205,7 +205,6 @@ readCharacters_ScreenScreen (const ScreenBox *box, ScreenCharacter *buffer) {
 
 static int
 insertKey_ScreenScreen (ScreenKey key) {
-  const unsigned char flags = getAuxiliaryData()[1];
   char *sequence;
   char buffer[0X10];
 
@@ -213,8 +212,11 @@ insertKey_ScreenScreen (ScreenKey key) {
   wchar_t character = key & SCR_KEY_CHAR_MASK;
 
   if (isSpecialKey(key)) {
+    const unsigned char flags = getAuxiliaryData()[1];
+
 #define KEY(key,string) case (key): sequence = (string); break
 #define CURSOR_KEY(key,string1,string2) KEY((key), ((flags & 0X01)? (string1): (string2)))
+
     switch (character) {
       KEY(SCR_KEY_ENTER, "\r");
       KEY(SCR_KEY_TAB, "\t");
@@ -257,6 +259,7 @@ insertKey_ScreenScreen (ScreenKey key) {
         logMessage(LOG_WARNING, "unsuported key: %04X", key);
         return 0;
     }
+
 #undef CURSOR_KEY
 #undef KEY
   } else {
