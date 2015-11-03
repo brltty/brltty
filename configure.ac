@@ -497,7 +497,7 @@ in
       ;;
    darwin*)
       brltty_mklib_ld_make="-dylib"
-      brltty_mklib_ld_options="-macosx_version_min 10.2 /usr/lib/dylib1.o -single_module -install_name"
+      brltty_mklib_ld_options="/usr/lib/dylib1.o -single_module -install_name"
       brltty_mklib_gcc_make="-dynamiclib"
       ;;
    *)
