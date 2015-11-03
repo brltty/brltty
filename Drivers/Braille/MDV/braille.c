@@ -77,17 +77,39 @@ BEGIN_KEY_NAME_TABLE(status)
   BRL_KEY_GROUP_ENTRY(MD, SK, "StatusKey"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLES(all)
+BEGIN_KEY_NAME_TABLES(default)
   KEY_NAME_TABLE(common),
   KEY_NAME_TABLE(keyboard),
   KEY_NAME_TABLE(fkeys),
   KEY_NAME_TABLE(status),
 END_KEY_NAME_TABLES
 
-DEFINE_KEY_TABLE(all)
+BEGIN_KEY_NAME_TABLES(kbd)
+  KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(keyboard),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(fk)
+  KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(fkeys),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(fk_s)
+  KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(fkeys),
+  KEY_NAME_TABLE(status),
+END_KEY_NAME_TABLES
+
+DEFINE_KEY_TABLE(default)
+DEFINE_KEY_TABLE(kbd)
+DEFINE_KEY_TABLE(fk)
+DEFINE_KEY_TABLE(fk_s)
 
 BEGIN_KEY_TABLE_LIST
-  &KEY_TABLE_DEFINITION(all),
+  &KEY_TABLE_DEFINITION(default),
+  &KEY_TABLE_DEFINITION(kbd),
+  &KEY_TABLE_DEFINITION(fk),
+  &KEY_TABLE_DEFINITION(fk_s),
 END_KEY_TABLE_LIST
 
 struct BrailleDataStruct {
@@ -103,6 +125,24 @@ struct BrailleDataStruct {
     unsigned char cells[MAXIMUM_STATUS_CELLS];
   } status;
 };
+
+static const KeyTableDefinition *
+getKeyTableDefinition (BrailleDisplay *brl) {
+  switch (brl->textColumns) {
+    case 24:
+      if (!brl->statusColumns) return &KEY_TABLE_DEFINITION(kbd);
+      break;
+
+    case 40:
+      if (!brl->statusColumns) return &KEY_TABLE_DEFINITION(fk);
+      return &KEY_TABLE_DEFINITION(fk_s);
+
+    default:
+      break;
+  }
+
+  return &KEY_TABLE_DEFINITION(default);
+}
 
 static uint16_t
 calculateChecksum (const unsigned char *from, const unsigned char *to) {
@@ -274,7 +314,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         brl->textColumns = response.fields.data.identity.textCellCount;
         brl->statusColumns = response.fields.data.identity.statusCellCount;
 
-        setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
+        setBrailleKeyTable(brl, getKeyTableDefinition(brl));
         MAKE_OUTPUT_TABLE(0X08, 0X04, 0X02, 0X80, 0X40, 0X20, 0X01, 0X10);
 
         brl->data->shiftPressed = 0;
