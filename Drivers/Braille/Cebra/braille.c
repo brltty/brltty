@@ -343,8 +343,7 @@ brl_destruct (BrailleDisplay *brl) {
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   if (!brl->data->acknowledgementPending) {
-    if (brl->data->textCells &&
-        cellsHaveChanged(brl->data->textCells, brl->buffer, brl->textColumns, NULL, NULL, &brl->data->forceRewrite)) {
+    if (cellsHaveChanged(brl->data->textCells, brl->buffer, brl->textColumns, NULL, NULL, &brl->data->forceRewrite)) {
       unsigned char cells[brl->textColumns];
 
       translateOutputCells(cells, brl->data->textCells, brl->textColumns);
