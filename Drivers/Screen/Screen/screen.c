@@ -41,6 +41,7 @@ static int shmFileDescriptor = -1;
 #include "log.h"
 #include "hostcmd.h"
 #include "charset.h"
+#include "ascii.h"
 
 #include "scr_driver.h"
 #include "screen.h"
@@ -205,12 +206,11 @@ readCharacters_ScreenScreen (const ScreenBox *box, ScreenCharacter *buffer) {
 static int
 insertKey_ScreenScreen (ScreenKey key) {
   const unsigned char flags = getAuxiliaryData()[1];
-  wchar_t character = key & SCR_KEY_CHAR_MASK;
-  char buffer[3];
   char *sequence;
+  char buffer[0X10];
 
-  logMessage(LOG_DEBUG, "insert key: %04X", key);
   setScreenKeyModifiers(&key, 0);
+  wchar_t character = key & SCR_KEY_CHAR_MASK;
 
   if (isSpecialKey(key)) {
 #define KEY(key,string) case (key): sequence = (string); break
@@ -264,14 +264,18 @@ insertKey_ScreenScreen (ScreenKey key) {
 
     if (byte == EOF) {
       logMessage(LOG_WARNING, "character not supported in local character set: 0X%04X", key);
+      return 0;
     }
 
-    sequence = buffer + sizeof(buffer);
-    *--sequence = 0;
-    *--sequence = byte;
-    if (key & SCR_KEY_ALT_LEFT) *--sequence = 0X1B;
+    STR_BEGIN(buffer, sizeof(buffer));
+    if (key & SCR_KEY_ALT_LEFT) STR_PRINTF("%c", ESC);
+    STR_PRINTF("\\%03o", byte);
+    STR_END;
+
+    sequence = buffer;
   }
 
+  logBytes(LOG_CATEGORY(SCREEN_DRIVER), "insert bytes", sequence, strlen(sequence));
   return doScreenCommand("stuff", sequence, NULL);
 }
 

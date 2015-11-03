@@ -81,7 +81,11 @@ setScreenKeyModifiers (ScreenKey *key, ScreenKey which) {
       }
     }
 
-    *key = character | modifiers;
+    ScreenKey newKey = character | modifiers;
+    if (newKey != *key) {
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER), "transformed key: 0X%04X -> 0X%04X", *key, newKey);
+      *key = newKey;
+    }
   }
 }
 

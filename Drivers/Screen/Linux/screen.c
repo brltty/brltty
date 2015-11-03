@@ -1805,9 +1805,6 @@ static int
 insertKey_LinuxScreen (ScreenKey key) {
   int ok = 0;
 
-  logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-             "insert key: %4.4X", key);
-
   if (rebindConsole()) {
     int mode;
 

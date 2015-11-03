@@ -127,6 +127,7 @@ readScreenText (short left, short top, short width, short height, wchar_t *buffe
 
 int
 insertScreenKey (ScreenKey key) {
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER), "insert key: 0X%04X", key);
   return currentScreen->insertKey(key);
 }
 

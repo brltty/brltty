@@ -272,7 +272,6 @@ insertKey_AndroidScreen (ScreenKey key) {
   if (findInputServiceClass()) {
     wchar_t character = key & SCR_KEY_CHAR_MASK;
 
-    logMessage(LOG_DEBUG, "insert key: %04X", key);
     setScreenKeyModifiers(&key, 0);
 
     if (!isSpecialKey(key)) {
