@@ -60,7 +60,6 @@ resetTouched (TouchCommandData *tcd) {
 
 static void
 handleTouchAt (int offset, TouchCommandData *tcd) {
-  logMessage(LOG_DEBUG, "Touch: at: %d", offset);
   tcd->lastTouched = offset;
   BITMASK_CLEAR(tcd->touched, offset);
 }
