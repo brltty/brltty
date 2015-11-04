@@ -547,12 +547,12 @@ usbMakeURB (
     urb->flags = 0;
     urb->signr = 0;
     urb->usercontext = context;
-    urb->buffer = (urb->buffer_length = length)? (urb + 1): NULL;
 
-    if (buffer) {
-      if (USB_ENDPOINT_DIRECTION(endpoint) == UsbEndpointDirection_Output) {
-        memcpy(urb->buffer, buffer, length);
-      }
+    if (!(urb->buffer_length = length)) {
+      urb->buffer = NULL;
+    } else {
+      urb->buffer = urb + 1;
+      if (buffer) memcpy(urb->buffer, buffer, length);
     }
 
     switch (USB_ENDPOINT_TRANSFER(endpoint)) {
