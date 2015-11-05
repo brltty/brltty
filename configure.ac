@@ -245,7 +245,7 @@ brltty_gcc_cppflags=""
 case "${host_os}"
 in
    darwin*)
-      brltty_gcc_cflags="${brltty_gcc_cflags} -Wno-initializer-overrides -Wno-unused-const-variable"
+      brltty_gcc_cflags="${brltty_gcc_cflags} -Wno-initializer-overrides -Wno-unused-const-variable -Wno-pointer-bool-conversion"
       ;;
    elf*)
       brltty_gcc_cppflags="${brltty_gcc_cppflags} -ffreestanding -nostdinc -nostdlib"

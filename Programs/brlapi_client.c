@@ -155,10 +155,10 @@ static WIN_PROC_STUB(freeaddrinfo);
 #pragma weak pthread_getspecific
 #pragma weak pthread_setspecific
 
-#define sem_t semaphore_t
+typedef semaphore_t sem_t;
 
 static int
-sem_init (sem_t *sem, int shared, unsigned int value) {
+sem_init (sem_t *sem, int shared, int value) {
   return semaphore_create(mach_task_self(), sem, SYNC_POLICY_FIFO, value);
 }
 
