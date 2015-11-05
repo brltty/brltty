@@ -203,7 +203,10 @@ struct LogPrefixEntryStruct {
 
 static inline const LogCategoryEntry *
 getLogCategoryEntry (LogCategoryIndex index) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wtautological-compare"
   return ((index >= 0) && (index < LOG_CATEGORY_COUNT))? &logCategoryTable[index]: NULL;
+#pragma clang diagnostic pop
 }
 
 const char *

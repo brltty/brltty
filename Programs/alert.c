@@ -416,7 +416,10 @@ static const AlertEntry alertTable[] = {
 
 void
 alert (AlertIdentifier identifier) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wtautological-compare"
   if ((identifier >= 0) && (identifier < ARRAY_COUNT(alertTable))) {
+#pragma clang diagnostic pop
     const AlertEntry *alert = &alertTable[identifier];
 
     if (prefs.alertTunes && alert->tune) {
