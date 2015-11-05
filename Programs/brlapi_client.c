@@ -53,8 +53,15 @@
 #include <netdb.h>
 
 #include <pthread.h>
-#include <semaphore.h>
 #include <syslog.h>
+
+#if defined(__APPLE__)
+#include <mach/mach.h>
+#include <mach/semaphore.h>
+
+#else /* semaphore support */
+#include <semaphore.h>
+#endif /* semaphore support */
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -142,6 +149,34 @@ static WIN_PROC_STUB(freeaddrinfo);
  */
 #if defined(WINDOWS)
 
+#elif defined(__APPLE__)
+#pragma weak pthread_key_create
+#pragma weak pthread_once
+#pragma weak pthread_getspecific
+#pragma weak pthread_setspecific
+
+#define sem_t semaphore_t
+
+static int
+sem_init (sem_t *sem, int shared, unsigned int value) {
+  return semaphore_create(mach_task_self(), sem, SYNC_POLICY_FIFO, value);
+}
+
+static int
+sem_post (sem_t *sem) {
+  return semaphore_signal(*sem);
+}
+
+static int
+sem_wait (sem_t *sem) {
+  return semaphore_wait(*sem);
+}
+
+static int
+sem_destroy (sem_t *sem) {
+  return semaphore_destroy(mach_task_self(), *sem);
+}
+
 #elif defined(__GNUC__) || defined(__sun__)
 #pragma weak pthread_key_create
 #pragma weak pthread_once
@@ -151,7 +186,6 @@ static WIN_PROC_STUB(freeaddrinfo);
 #pragma weak sem_post
 #pragma weak sem_wait
 #pragma weak sem_destroy
-
 #endif /* weak external references */
 
 /** key presses buffer size
