@@ -1234,7 +1234,7 @@ BRLTTY_ARG_PACKAGE([pcm], [PCm], [alsa oss], [dnl
       ;;
 ], [dnl
    oss)
-      AC_CHECK_HEADER([linux/soundcard.h], [dnl
+      AC_CHECK_HEADER([sys/soundcard.h], [dnl
          pcm_package="oss"
       ])
       ;;
@@ -1253,7 +1253,7 @@ BRLTTY_ARG_PACKAGE([midi], [MIDI], [alsa oss], [dnl
       ;;
 ], [dnl
    oss)
-      AC_CHECK_HEADER([linux/soundcard.h], [dnl
+      AC_CHECK_HEADER([sys/soundcard.h], [dnl
          midi_package="oss"
       ])
       ;;
