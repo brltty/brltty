@@ -574,13 +574,8 @@ doUpdate (void) {
   logMessage(LOG_CATEGORY(UPDATE_EVENTS), "starting");
   unrequireAllBlinkDescriptors();
   refreshScreen();
-
-  {
-    const SessionEntry *previousSession = ses;
-
-    updateSessionAttributes();
-    if (ses != previousSession) api.flush();
-  }
+  updateSessionAttributes();
+  api.flush();
 
   if (scr.unreadable) {
     logMessage(LOG_CATEGORY(UPDATE_EVENTS), "screen unreadable: %s", scr.unreadable);
