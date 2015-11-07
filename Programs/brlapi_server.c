@@ -314,8 +314,7 @@ static AuthDescriptor *authDescriptor;
 static WSADATA wsadata;
 #endif /* __MINGW32__ */
 
-static unsigned char cursorShape;
-static int lastCursorVisible;
+static unsigned char cursorOverlay = 0;
 
 /****************************************************************************/
 /** SOME PROTOTYPES                                                        **/
@@ -582,8 +581,14 @@ static void freeBrailleWindow(BrailleWindow *brailleWindow)
 }
 
 static int
-isScreenCursorVisible (void) {
+isCursorVisible (void) {
   return isBlinkVisible(&screenCursorBlinkDescriptor);
+}
+
+static unsigned char
+getCursorOverlay (void) {
+  if (!isCursorVisible()) return 0;
+  return getScreenCursorDots();
 }
 
 /* Function: getDots */
@@ -599,8 +604,7 @@ static void getDots(const BrailleWindow *brailleWindow, unsigned char *buf)
   }
 
   if (brailleWindow->cursor) {
-    lastCursorVisible = isScreenCursorVisible();
-    if (lastCursorVisible) buf[brailleWindow->cursor-1] |= cursorShape;
+    buf[brailleWindow->cursor-1] |= cursorOverlay;
   }
 }
 
@@ -2762,7 +2766,6 @@ int api_flush(BrailleDisplay *brl) {
   int ok = 1;
   int drain = 0;
   int update = 0;
-  unsigned char newCursorShape;
 
   lockMutex(&apiConnectionsMutex);
   lockMutex(&apiRawMutex);
@@ -2783,18 +2786,14 @@ int api_flush(BrailleDisplay *brl) {
 	goto out;
       }
     }
-    newCursorShape = getScreenCursorDots();
-    if (newCursorShape!=cursorShape) {
-      cursorShape = newCursorShape;
-      update = 1;
-    }
 
     if (c->brailleWindow.cursor) {
-      int visible = isScreenCursorVisible();
+      requireBlinkDescriptor(&screenCursorBlinkDescriptor);
+      unsigned char newCursorOverlay = getCursorOverlay();
 
-      if (lastCursorVisible != visible) {
-	lastCursorVisible = visible;
-	update = 1;
+      if (newCursorOverlay != cursorOverlay) {
+        cursorOverlay = newCursorOverlay;
+        update = 1;
       }
     }
 
