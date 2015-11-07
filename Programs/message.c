@@ -26,6 +26,7 @@
 #include "async_task.h"
 #include "charset.h"
 #include "brl_utils.h"
+#include "brl_cmds.h"
 #include "spk.h"
 #include "ktb_types.h"
 #include "update.h"
@@ -49,7 +50,13 @@ static int
 handleMessageCommands (int command, void *data) {
   MessageData *mgd = data;
 
-  mgd->endWait = 1;
+  switch (command & BRL_MSK_BLK) {
+    default:
+      mgd->endWait = 1;
+    case BRL_CMD_BLK(TOUCH_AT):
+      break;
+  }
+
   return 1;
 }
 
