@@ -923,11 +923,21 @@ struct a2Watch
 int a2ProcessWatch(const AsyncMonitorCallbackParameters *parameters, int flags);
 
 ASYNC_MONITOR_CALLBACK(a2ProcessInput) {
-  return a2ProcessWatch(parameters, DBUS_WATCH_READABLE);
+  if (a2ProcessWatch(parameters, DBUS_WATCH_READABLE)) return 1;
+
+  struct a2Watch *a2Watch = parameters->data;
+  asyncDiscardHandle(a2Watch->input_monitor);
+  a2Watch->input_monitor = NULL;
+  return 0;
 }
 
 ASYNC_MONITOR_CALLBACK(a2ProcessOutput) {
-  return a2ProcessWatch(parameters, DBUS_WATCH_WRITABLE);
+  if (a2ProcessWatch(parameters, DBUS_WATCH_WRITABLE)) return 1;
+
+  struct a2Watch *a2Watch = parameters->data;
+  asyncDiscardHandle(a2Watch->output_monitor);
+  a2Watch->output_monitor = NULL;
+  return 0;
 }
 
 int a2ProcessWatch(const AsyncMonitorCallbackParameters *parameters, int flags)
@@ -944,20 +954,7 @@ int a2ProcessWatch(const AsyncMonitorCallbackParameters *parameters, int flags)
     updated = 0;
     mainScreenUpdated();
   }
-  if (flags == DBUS_WATCH_READABLE) {
-    asyncDiscardHandle(a2Watch->input_monitor);
-    a2Watch->input_monitor = NULL;
-    if (dbus_watch_get_enabled(watch))
-      /* Still enabled, requeue it */
-      asyncMonitorFileInput(&a2Watch->input_monitor, dbus_watch_get_unix_fd(watch), a2ProcessInput, a2Watch);
-  } else {
-    asyncDiscardHandle(a2Watch->output_monitor);
-    a2Watch->output_monitor = NULL;
-    if (dbus_watch_get_enabled(watch))
-      /* Still enabled, requeue it */
-      asyncMonitorFileOutput(&a2Watch->output_monitor, dbus_watch_get_unix_fd(watch), a2ProcessOutput, a2Watch);
-  }
-  return 0;
+  return dbus_watch_get_enabled(watch);
 }
 
 dbus_bool_t a2AddWatch(DBusWatch *watch, void *data)
