@@ -506,18 +506,15 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       };
 
       BEGIN_OPTIONS
-        {
-          OPTION(session, enterTtyMode, events),
+        { OPTION(session, enterTtyMode, events),
           OPERANDS(1, "<driver>")
-        }
-        ,
-        {
-          OPTION(session, enterTtyMode, keyCodes),
+        },
+
+        { OPTION(session, enterTtyMode, keyCodes),
           OPERANDS(0, "")
-        }
-        ,
-        {
-          OPTION(session, enterTtyMode, tty),
+        },
+
+        { OPTION(session, enterTtyMode, tty),
           OPERANDS(1, "{default | <number>}")
         }
       END_OPTIONS(2)
@@ -544,18 +541,15 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       int count;
 
       BEGIN_OPTIONS
-        {
-          OPTION(session, enterTtyModeWithPath, events),
+        { OPTION(session, enterTtyModeWithPath, events),
           OPERANDS(1, "<driver>")
-        }
-        ,
-        {
-          OPTION(session, enterTtyModeWithPath, keyCodes),
+        },
+
+        { OPTION(session, enterTtyModeWithPath, keyCodes),
           OPERANDS(0, "")
-        }
-        ,
-        {
-          OPTION(session, enterTtyModeWithPath, path),
+        },
+
+        { OPTION(session, enterTtyModeWithPath, path),
           OPERANDS(1, "<list>")
         }
       END_OPTIONS(2)
@@ -821,33 +815,27 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       }
 
       BEGIN_OPTIONS
-        {
-          OPTION(session, write, andMask),
+        { OPTION(session, write, andMask),
           OPERANDS(1, "<dots>")
-        }
-        ,
-        {
-          OPTION(session, write, begin),
+        },
+
+        { OPTION(session, write, begin),
           OPERANDS(1, "<offset>")
-        }
-        ,
-        {
-          OPTION(session, write, cursor),
+        },
+
+        { OPTION(session, write, cursor),
           OPERANDS(1, "{leave | off | <offset>}")
-        }
-        ,
-        {
-          OPTION(session, write, displayNumber),
+        },
+
+        { OPTION(session, write, displayNumber),
           OPERANDS(1, "{default | <number>}")
-        }
-        ,
-        {
-          OPTION(session, write, orMask),
+        },
+
+        { OPTION(session, write, orMask),
           OPERANDS(1, "<dots>")
-        }
-        ,
-        {
-          OPTION(session, write, text),
+        },
+
+        { OPTION(session, write, text),
           OPERANDS(1, "<string>")
         }
       END_OPTIONS(2)
@@ -1151,13 +1139,11 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       };
 
       BEGIN_OPTIONS
-        {
-          OPTION(general, openConnection, auth),
+        { OPTION(general, openConnection, auth),
           OPERANDS(1, "<file>")
-        }
-        ,
-        {
-          OPTION(general, openConnection, host),
+        },
+
+        { OPTION(general, openConnection, host),
           OPERANDS(1, "<hostSpec>")
         }
       END_OPTIONS(2)
