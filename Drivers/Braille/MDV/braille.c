@@ -113,7 +113,25 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(fk_s),
 END_KEY_TABLE_LIST
 
+typedef struct {
+  const unsigned int *bauds;
+} InputOutputOperations;
+
+static const unsigned int serialBauds[] = {38400, 19200, 0};
+
+static const InputOutputOperations serialOperations = {
+  .bauds = serialBauds
+};
+
+static const unsigned int usbBauds[] = {38400, 0};
+
+static const InputOutputOperations usbOperations = {
+  .bauds = usbBauds
+};
+
 struct BrailleDataStruct {
+  const InputOutputOperations *io;
+
   unsigned shiftPressed:1;
 
   struct {
@@ -262,12 +280,15 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   gioInitializeDescriptor(&descriptor);
 
   descriptor.serial.parameters = &serialParameters;
+  descriptor.serial.options.applicationData = &serialOperations;
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
+  descriptor.usb.options.applicationData = &usbOperations;
 
   descriptor.bluetooth.discoverChannel = 1;
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
+    brl->data->io = gioGetApplicationData(brl->gioEndpoint);
     return 1;
   }
 
@@ -290,17 +311,49 @@ isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
 }
 
 static int
+probeDevice (BrailleDisplay *brl, MD_Packet *response) {
+  return probeBrailleDisplay(
+    brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT, writeIdentityRequest,
+    readBytes, response, sizeof(*response), isIdentityResponse
+  );
+}
+
+static int
+probe (BrailleDisplay *brl, MD_Packet *response) {
+  if (brl->data->io) {
+    if (brl->data->io->bauds) {
+      const unsigned int *baud = brl->data->io->bauds;
+
+      if (*baud) {
+        do {
+          SerialParameters parameters;
+          gioInitializeSerialParameters(&parameters);
+
+          parameters.baud = *baud;
+          logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "probing at %u baud", parameters.baud);
+
+          if (!gioReconfigureResource(brl->gioEndpoint, &parameters)) break;
+          if (probeDevice(brl, response)) return 1;
+        } while (*++baud);
+
+        return 0;
+      }
+    }
+  }
+
+  return probeDevice(brl, response);
+}
+
+static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
+    brl->data->io = NULL;
 
     if (connectResource(brl, device)) {
       MD_Packet response;
 
-      if (probeBrailleDisplay(brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT,
-                              writeIdentityRequest,
-                              readBytes, &response, sizeof(response),
-                              isIdentityResponse)) {
+      if (probe(brl, &response)) {
         logMessage(LOG_INFO,
           "MDV Model Description:"
           " Version:%u.%u Text:%u Status:%u Dots:%u Routing:%s",
@@ -314,14 +367,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
         brl->textColumns = response.fields.data.identity.textCellCount;
         brl->statusColumns = response.fields.data.identity.statusCellCount;
-
         setBrailleKeyTable(brl, getKeyTableDefinition(brl));
-        MAKE_OUTPUT_TABLE(0X08, 0X04, 0X02, 0X80, 0X40, 0X20, 0X01, 0X10);
 
         brl->data->shiftPressed = 0;
         brl->data->text.rewrite = 1;
         brl->data->status.rewrite = 1;
 
+        MAKE_OUTPUT_TABLE(0X08, 0X04, 0X02, 0X80, 0X40, 0X20, 0X01, 0X10);
         return 1;
       }
 
