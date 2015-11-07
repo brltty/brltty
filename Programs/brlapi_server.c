@@ -2847,6 +2847,7 @@ out:
 ASYNC_EVENT_CALLBACK(handleServerFlushEvent) {
   BrailleDisplay *brl = parameters->eventData;
   api_flush(brl);
+  resetAllBlinkDescriptors();
 }
 
 int api_resume(BrailleDisplay *brl) {
@@ -2898,6 +2899,7 @@ REPORT_LISTENER(brlapi_handleReports)
   if (parameters->reportIdentifier == REPORT_BRAILLE_ONLINE) {
     BrailleDisplay *brl = parameters->listenerData;
     api_flush(brl);
+    resetAllBlinkDescriptors();
   }
 }
 
