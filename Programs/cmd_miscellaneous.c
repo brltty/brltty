@@ -269,7 +269,7 @@ handleMiscellaneousCommands (int command, void *data) {
           int column, row;
 
           if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
-            char description[0X50];
+            char description[0X80];
             formatCharacterDescription(description, sizeof(description), column, row);
             message(NULL, description, 0);
           } else {
