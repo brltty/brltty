@@ -84,6 +84,7 @@
 #include "async_event.h"
 #include "async_signal.h"
 #include "thread.h"
+#include "blink.h"
 
 #ifdef __MINGW32__
 #define LogSocketError(msg) logWindowsSocketError(msg)
@@ -314,6 +315,7 @@ static WSADATA wsadata;
 #endif /* __MINGW32__ */
 
 static unsigned char cursorShape;
+static int lastCursorVisible;
 
 /****************************************************************************/
 /** SOME PROTOTYPES                                                        **/
@@ -579,6 +581,11 @@ static void freeBrailleWindow(BrailleWindow *brailleWindow)
   free(brailleWindow->orAttr); brailleWindow->orAttr = NULL;
 }
 
+static int
+isScreenCursorVisible (void) {
+  return isBlinkVisible(&screenCursorBlinkDescriptor);
+}
+
 /* Function: getDots */
 /* Returns the braille dots corresponding to a BrailleWindow structure */
 /* No allocation of buf is performed */
@@ -590,7 +597,11 @@ static void getDots(const BrailleWindow *brailleWindow, unsigned char *buf)
     c = convertCharacterToDots(textTable, brailleWindow->text[i]);
     buf[i] = (c & brailleWindow->andAttr[i]) | brailleWindow->orAttr[i];
   }
-  if (brailleWindow->cursor) buf[brailleWindow->cursor-1] |= cursorShape;
+
+  if (brailleWindow->cursor) {
+    lastCursorVisible = isScreenCursorVisible();
+    if (lastCursorVisible) buf[brailleWindow->cursor-1] |= cursorShape;
+  }
 }
 
 static void handleResize(BrailleDisplay *brl)
@@ -2750,6 +2761,7 @@ int api_flush(BrailleDisplay *brl) {
   Connection *c;
   int ok = 1;
   int drain = 0;
+  int update = 0;
   unsigned char newCursorShape;
 
   lockMutex(&apiConnectionsMutex);
@@ -2774,8 +2786,19 @@ int api_flush(BrailleDisplay *brl) {
     newCursorShape = getScreenCursorDots();
     if (newCursorShape!=cursorShape) {
       cursorShape = newCursorShape;
+      update = 1;
     }
-    if (c->brlbufstate==TODISPLAY) {
+
+    if (c->brailleWindow.cursor) {
+      int visible = isScreenCursorVisible();
+
+      if (lastCursorVisible != visible) {
+	lastCursorVisible = visible;
+	update = 1;
+      }
+    }
+
+    if (c->brlbufstate==TODISPLAY || update) {
       unsigned char *oldbuf = disp->buffer, buf[displaySize];
       disp->buffer = buf;
       getDots(&c->brailleWindow, buf);
