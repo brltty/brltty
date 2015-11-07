@@ -140,6 +140,9 @@ extern "C" {
 /* Define this if posix threads are supported. */
 #undef HAVE_POSIX_THREADS
 
+/* Define this if thread-local variables are supported. */
+#undef THREAD_LOCAL
+
 /* Define this if the header file sys/io.h exists. */
 #undef HAVE_SYS_IO_H
 

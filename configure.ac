@@ -897,6 +897,27 @@ then
              [Define this if the unused attribute is supported.])
 fi
 
+AC_CACHE_CHECK(
+   [if the compiler supports thread-local variables],
+   [brltty_cv_c_thread_local],
+   [
+      brltty_cv_c_thread_local=""
+      for thread_local_qualifier in "_Thread_local" "__thread" "__declspec(thread)"
+      do
+         AC_TRY_COMPILE([
+static ${thread_local_qualifier} int i;
+],
+            [],
+            [brltty_cv_c_thread_local="${thread_local_qualifier}"; break])
+      done
+   ]
+)
+if test -n "${brltty_cv_c_thread_local}"
+then
+   AC_DEFINE_UNQUOTED([THREAD_LOCAL], [${brltty_cv_c_thread_local}],
+                      [Define this if thread-local variables are supported.])
+fi
+
 AC_SUBST([archive_prefix], [lib])
 AC_SUBST([archive_extension], [a])
 
