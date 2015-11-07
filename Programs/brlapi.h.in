@@ -532,7 +532,17 @@ typedef struct {
  * text = andMask = orMask = NULL; (no text, no attribute)
  * cursor = ::BRLAPI_CURSOR_LEAVE; (don't touch cursor)
 */
-#define BRLAPI_WRITEARGUMENTS_INITIALIZER { BRLAPI_DISPLAY_DEFAULT, 0, 0, NULL, -1, NULL, NULL, BRLAPI_CURSOR_LEAVE, NULL }
+#define BRLAPI_WRITEARGUMENTS_INITIALIZER { \
+  .displayNumber = BRLAPI_DISPLAY_DEFAULT, \
+  .regionBegin = 0, \
+  .regionSize = 0, \
+  .text = NULL, \
+  .textSize = -1, \
+  .andMask = NULL, \
+  .orMask = NULL, \
+  .cursor = BRLAPI_CURSOR_LEAVE, \
+  .charset = NULL \
+}
 
 /* brlapi_write */
 /** Update a specific region of the braille display and apply and/or masks
