@@ -71,9 +71,10 @@
 #include "ttb.h"
 #include "brltty.h"
 #include "api_server.h"
-#include "log.h"
 #include "report.h"
+#include "log.h"
 #include "addresses.h"
+#include "prefs.h"
 #include "file.h"
 #include "parse.h"
 #include "timing.h"
@@ -580,15 +581,18 @@ static void freeBrailleWindow(BrailleWindow *brailleWindow)
   free(brailleWindow->orAttr); brailleWindow->orAttr = NULL;
 }
 
-static int
-isCursorVisible (void) {
-  return isBlinkVisible(&screenCursorBlinkDescriptor);
-}
-
 static unsigned char
 getCursorOverlay (void) {
-  if (!isCursorVisible()) return 0;
-  return getScreenCursorDots();
+  if (prefs.showScreenCursor) {
+    BlinkDescriptor *blink = &screenCursorBlinkDescriptor;
+    requireBlinkDescriptor(blink);
+
+    if (isBlinkVisible(blink)) {
+      return getScreenCursorDots();
+    }
+  }
+
+  return 0;
 }
 
 /* Function: getDots */
@@ -2788,7 +2792,6 @@ int api_flush(BrailleDisplay *brl) {
     }
 
     if (c->brailleWindow.cursor) {
-      requireBlinkDescriptor(&screenCursorBlinkDescriptor);
       unsigned char newCursorOverlay = getCursorOverlay();
 
       if (newCursorOverlay != cursorOverlay) {
