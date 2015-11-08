@@ -37,12 +37,14 @@
 int messageHoldTimeout = DEFAULT_MESSAGE_HOLD_TIMEOUT;
 
 typedef struct {
+  unsigned touch:1;
+
+  int timeout;
   unsigned endWait:1;
 } MessageData;
 
 ASYNC_CONDITION_TESTER(testEndMessageWait) {
   MessageData *mgd = data;
-
   return mgd->endWait;
 }
 
@@ -50,13 +52,26 @@ static int
 handleMessageCommands (int command, void *data) {
   MessageData *mgd = data;
 
-  switch (command & BRL_MSK_BLK) {
-    default:
-      mgd->endWait = 1;
-    case BRL_CMD_BLK(TOUCH_AT):
+  switch (command & BRL_MSK_CMD) {
+    default: {
+      int arg = command & BRL_MSK_ARG;
+
+      switch (command & BRL_MSK_BLK) {
+        case BRL_CMD_BLK(TOUCH_AT):
+          mgd->touch = arg != BRL_MSK_ARG;
+          mgd->timeout = 1000;
+          break;
+
+        default:
+          mgd->timeout = -1;
+          break;
+      }
+
       break;
+    }
   }
 
+  if (!mgd->touch) mgd->endWait = 1;
   return 1;
 }
 
@@ -80,7 +95,9 @@ ASYNC_TASK_CALLBACK(presentMessage) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   if (canBraille()) {
-    MessageData mgd;
+    MessageData mgd = {
+      .touch = 0
+    };
 
     size_t size = textCount * brl.textRows;
     wchar_t buffer[size];
@@ -126,17 +143,19 @@ ASYNC_TASK_CALLBACK(presentMessage) {
         break;
       }
 
-      {
-        int delay = messageHoldTimeout - brl.writeDelay;
+      mgd.timeout = messageHoldTimeout - brl.writeDelay;
+      drainBrailleOutput(&brl, 0);
 
-        mgd.endWait = 0;
-        drainBrailleOutput(&brl, 0);
+      if (length || !(mgp->options & MSG_NODELAY)) {
+        mgd.timeout = MAX(mgd.timeout, 0);
 
-        if (length || !(mgp->options & MSG_NODELAY)) {
-          if (delay < 0) delay = 0;
+        while (1) {
+          mgd.endWait = 0;
 
-          while (!asyncAwaitCondition(delay, testEndMessageWait, &mgd)) {
-            if (!(mgp->options & MSG_WAITKEY)) break;
+          if (asyncAwaitCondition(mgd.timeout, testEndMessageWait, &mgd)) {
+            if (mgd.timeout < 0) break;
+          } else {
+            if (!(mgd.touch || (mgp->options & MSG_WAITKEY))) break;
           }
         }
       }
