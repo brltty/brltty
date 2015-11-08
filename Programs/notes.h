@@ -31,16 +31,16 @@ extern "C" {
 extern unsigned char getLowestNote (void);
 extern unsigned char getHighestNote (void);
 extern uint32_t getIntegerNoteFrequency (unsigned char note);
-extern unsigned char getNearestNote (NOTE_FREQUENCY_TYPE frequency);
+extern unsigned char getNearestNote (NoteFrequency frequency);
 
 #ifndef NO_FLOAT
 extern float getRealNoteFrequency (unsigned char note);
 #endif /* NO_FLOAT */
 
 #ifdef NO_FLOAT
-#define GET_NOTE_FREQUENCY getIntegerNoteFrequency
+#define getNoteFrequency getIntegerNoteFrequency
 #else /* NO_FLOAT */
-#define GET_NOTE_FREQUENCY getRealNoteFrequency
+#define getNoteFrequency getRealNoteFrequency
 #endif /* NO_FLOAT */
 
 typedef struct NoteDeviceStruct NoteDevice;
@@ -49,7 +49,7 @@ typedef struct {
   NoteDevice * (*construct) (int errorLevel);
   void (*destruct) (NoteDevice *device);
 
-  int (*tone) (NoteDevice *device, unsigned int duration, NOTE_FREQUENCY_TYPE frequency);
+  int (*tone) (NoteDevice *device, unsigned int duration, NoteFrequency frequency);
   int (*note) (NoteDevice *device, unsigned int duration, unsigned char note);
   int (*flush) (NoteDevice *device);
 } NoteMethods;

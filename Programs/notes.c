@@ -22,7 +22,7 @@
 
 #define NOTE_FREQUENCY_FACTOR 1000
 
-static const uint32_t noteFrequencies[] = {
+static const uint32_t scaledNoteFrequencies[] = {
   /*   0 rest */        0,
   /*   1 -5C# */     8662,
   /*   2 -5D  */     9177,
@@ -160,43 +160,43 @@ getLowestNote (void) {
 
 unsigned char
 getHighestNote (void) {
-  return ARRAY_COUNT(noteFrequencies) - 1;
+  return ARRAY_COUNT(scaledNoteFrequencies) - 1;
 }
 
 static inline uint32_t
-getNoteFrequency (unsigned char note) {
+getScaledNoteFrequency (unsigned char note) {
   unsigned char highestNote = getHighestNote();
 
   if (note > highestNote) note = highestNote;
-  return noteFrequencies[note];
+  return scaledNoteFrequencies[note];
 }
 
 uint32_t
 getIntegerNoteFrequency (unsigned char note) {
-  return getNoteFrequency(note) / NOTE_FREQUENCY_FACTOR;
+  return getScaledNoteFrequency(note) / NOTE_FREQUENCY_FACTOR;
 }
 
 #ifndef NO_FLOAT
 float
 getRealNoteFrequency (unsigned char note) {
-  return (float)getNoteFrequency(note) / (float)NOTE_FREQUENCY_FACTOR;
+  return (float)getScaledNoteFrequency(note) / (float)NOTE_FREQUENCY_FACTOR;
 }
 #endif /* NO_FLOAT */
 
 unsigned char
-getNearestNote (NOTE_FREQUENCY_TYPE frequency) {
+getNearestNote (NoteFrequency frequency) {
   if (!frequency) return 0;
 
   unsigned char lowestNote = getLowestNote();
-  if (frequency <= GET_NOTE_FREQUENCY(lowestNote)) return lowestNote;
+  if (frequency <= getNoteFrequency(lowestNote)) return lowestNote;
 
   unsigned char highestNote = getHighestNote();
-  if (frequency >= GET_NOTE_FREQUENCY(highestNote)) return highestNote;
+  if (frequency >= getNoteFrequency(highestNote)) return highestNote;
 
   while (lowestNote <= highestNote) {
     unsigned char currentNote = (lowestNote + highestNote) / 2;
 
-    if (frequency < GET_NOTE_FREQUENCY(currentNote)) {
+    if (frequency < getNoteFrequency(currentNote)) {
       highestNote = currentNote - 1;
     } else {
       lowestNote = currentNote + 1;
@@ -206,8 +206,8 @@ getNearestNote (NOTE_FREQUENCY_TYPE frequency) {
   unsigned char lowerNote = highestNote;
   unsigned char higherNote = lowerNote + 1;
 
-  NOTE_FREQUENCY_TYPE lowerFrequency = GET_NOTE_FREQUENCY(lowerNote);
-  NOTE_FREQUENCY_TYPE higherFrequency = GET_NOTE_FREQUENCY(higherNote);
+  NoteFrequency lowerFrequency = getNoteFrequency(lowerNote);
+  NoteFrequency higherFrequency = getNoteFrequency(higherNote);
 
   return ((frequency - lowerFrequency) < (higherFrequency - frequency))?
          lowerNote: higherNote;

@@ -137,7 +137,7 @@ pcmDestruct (NoteDevice *device) {
 }
 
 static int
-pcmTone (NoteDevice *device, unsigned int duration, NOTE_FREQUENCY_TYPE frequency) {
+pcmTone (NoteDevice *device, unsigned int duration, NoteFrequency frequency) {
   int32_t sampleCount = device->sampleRate * duration / 1000;
 
   logMessage(LOG_DEBUG, "tone: MSecs:%u SmpCt:%"PRId32 " Freq:%"PRIfreq,
@@ -185,8 +185,8 @@ pcmTone (NoteDevice *device, unsigned int duration, NOTE_FREQUENCY_TYPE frequenc
      *                = stepsPerWave * frequency / sampleRate
      *                = stepsPerWave / sampleRate * frequency
      */
-    const uint32_t stepsPerSample = (NOTE_FREQUENCY_TYPE)UINT32_MAX 
-                                  / (NOTE_FREQUENCY_TYPE)device->sampleRate
+    const uint32_t stepsPerSample = (NoteFrequency)UINT32_MAX 
+                                  / (NoteFrequency)device->sampleRate
                                   * frequency;
 
     /* The current value needs to be a signed value so that the >> operator
@@ -249,7 +249,7 @@ pcmTone (NoteDevice *device, unsigned int duration, NOTE_FREQUENCY_TYPE frequenc
 
 static int
 pcmNote (NoteDevice *device, unsigned int duration, unsigned char note) {
-  return pcmTone(device, duration, GET_NOTE_FREQUENCY(note));
+  return pcmTone(device, duration, getNoteFrequency(note));
 }
 
 static int

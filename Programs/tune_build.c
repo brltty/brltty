@@ -85,7 +85,7 @@ int
 addNote (TuneBuilder *tune, unsigned char note, int duration) {
   if (!duration) return 1;
 
-  ToneElement tone = TONE_PLAY(duration, GET_NOTE_FREQUENCY(note));
+  ToneElement tone = TONE_PLAY(duration, getNoteFrequency(note));
   return addTone(tune, &tone);
 }
 

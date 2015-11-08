@@ -37,7 +37,7 @@ typedef struct {
 #define NOTE_STOP() NOTE_REST(0)
 
 typedef struct {
-  NOTE_FREQUENCY_TYPE frequency; /* Herz (0 means silence) */
+  NoteFrequency frequency; /* Herz (0 means silence) */
   int duration;        /* milliseconds (0 means stop) */
 } ToneElement;
 

@@ -26,10 +26,10 @@ extern "C" {
 #endif /* __cplusplus */
 
 #ifdef NO_FLOAT
-#define NOTE_FREQUENCY_TYPE uint32_t
+typedef uint32_t NoteFrequency;
 #define PRIfreq PRIu32
 #else /* NO_FLOAT */
-#define NOTE_FREQUENCY_TYPE float
+typedef float NoteFrequency;
 #define PRIfreq "f"
 #endif /* NO_FLOAT */
 

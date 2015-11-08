@@ -61,7 +61,7 @@ fmDestruct (NoteDevice *device) {
 }
 
 static int
-fmTone (NoteDevice *device, unsigned int duration, NOTE_FREQUENCY_TYPE frequency) {
+fmTone (NoteDevice *device, unsigned int duration, NoteFrequency frequency) {
   uint32_t pitch = frequency;
   logMessage(LOG_DEBUG, "tone: MSecs:%u Freq:%"PRIu32,
              duration, pitch);
@@ -77,7 +77,7 @@ fmTone (NoteDevice *device, unsigned int duration, NOTE_FREQUENCY_TYPE frequency
 
 static int
 fmNote (NoteDevice *device, unsigned int duration, unsigned char note) {
-  return fmTone(device, duration, GET_NOTE_FREQUENCY(note));
+  return fmTone(device, duration, getNoteFrequency(note));
 }
 
 static int
