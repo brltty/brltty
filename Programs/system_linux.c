@@ -1048,7 +1048,7 @@ enableKeyboardKeys (UinputObject *uinput) {
   BITMASK(enabledKeys, KEY_MAX+1, char);
 
   if (!enableUinputEventType(uinput, EV_KEY)) return 0;
-  memset(enabledKeys, 0, sizeof(enabledKeys));
+  BITMASK_CLEAR_ALL(enabledKeys);
 
   while (map < end) {
     unsigned int code;
