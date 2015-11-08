@@ -1630,7 +1630,7 @@ processHidKeyboardPacket (
   BITMASK(pressedKeys, 0X100, char);
   unsigned char index;
 
-  BITMASK_CLEAR_ALL(pressedKeys);
+  BITMASK_ZERO(pressedKeys);
 
   for (index=0; index<newCount; index+=1) {
     unsigned char key = newKeys[index];

@@ -34,9 +34,9 @@ extern "C" {
 /* These macros are for public use. */
 #define BITMASK(name,bits,type) unsigned type name[BITMASK_ELEMENT_COUNT((bits), BITMASK_ELEMENT_SIZE(type))]
 #define BITMASK_SIZE(name) BITMASK_ELEMENT_SIZE((name))
-#define BITMASK_SET(name,bit) (BITMASK_ELEMENT((name), (bit)) |= BITMASK_BIT((name), (bit)))
+#define BITMASK_ZERO(name) memset((name), 0, sizeof(name))
 #define BITMASK_CLEAR(name,bit) (BITMASK_ELEMENT((name), (bit)) &= ~BITMASK_BIT((name), (bit)))
-#define BITMASK_CLEAR_ALL(name) memset((name), 0, sizeof(name))
+#define BITMASK_SET(name,bit) (BITMASK_ELEMENT((name), (bit)) |= BITMASK_BIT((name), (bit)))
 #define BITMASK_TEST(name,bit) (BITMASK_ELEMENT((name), (bit)) & BITMASK_BIT((name), (bit)))
 
 #ifdef __cplusplus
