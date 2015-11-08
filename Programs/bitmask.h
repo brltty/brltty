@@ -36,6 +36,7 @@ extern "C" {
 #define BITMASK_SIZE(name) BITMASK_ELEMENT_SIZE((name))
 #define BITMASK_SET(name,bit) (BITMASK_ELEMENT((name), (bit)) |= BITMASK_BIT((name), (bit)))
 #define BITMASK_CLEAR(name,bit) (BITMASK_ELEMENT((name), (bit)) &= ~BITMASK_BIT((name), (bit)))
+#define BITMASK_CLEAR_ALL(name) memset((name), 0, sizeof(name))
 #define BITMASK_TEST(name,bit) (BITMASK_ELEMENT((name), (bit)) & BITMASK_BIT((name), (bit)))
 
 #ifdef __cplusplus

@@ -47,9 +47,9 @@ static void
 resetTouched (TouchCommandData *tcd) {
   tcd->activeCells = 0;
   tcd->lastTouched = -1;
+  BITMASK_CLEAR_ALL(tcd->touched);
 
   for (int i = 0; i < tcd->count; ++i) {
-    BITMASK_CLEAR(tcd->touched, i);
     if (tcd->cells[i]) {
       BITMASK_SET(tcd->touched, i);
       tcd->lastActive = i;
