@@ -920,7 +920,22 @@ struct a2Watch
   DBusWatch *watch;
 };
 
-int a2ProcessWatch(const AsyncMonitorCallbackParameters *parameters, int flags);
+int a2ProcessWatch(const AsyncMonitorCallbackParameters *parameters, int flags)
+{
+  struct a2Watch *a2Watch = parameters->data;
+  DBusWatch *watch = a2Watch->watch;
+  /* Read/Write on socket */
+  dbus_watch_handle(watch, parameters->error?DBUS_WATCH_ERROR:flags);
+  /* And process messages */
+  while (dbus_connection_dispatch(bus) != DBUS_DISPATCH_COMPLETE)
+    ;
+  if (updated)
+  {
+    updated = 0;
+    mainScreenUpdated();
+  }
+  return dbus_watch_get_enabled(watch);
+}
 
 ASYNC_MONITOR_CALLBACK(a2ProcessInput) {
   if (a2ProcessWatch(parameters, DBUS_WATCH_READABLE)) return 1;
@@ -938,23 +953,6 @@ ASYNC_MONITOR_CALLBACK(a2ProcessOutput) {
   asyncDiscardHandle(a2Watch->output_monitor);
   a2Watch->output_monitor = NULL;
   return 0;
-}
-
-int a2ProcessWatch(const AsyncMonitorCallbackParameters *parameters, int flags)
-{
-  struct a2Watch *a2Watch = parameters->data;
-  DBusWatch *watch = a2Watch->watch;
-  /* Read/Write on socket */
-  dbus_watch_handle(watch, parameters->error?DBUS_WATCH_ERROR:flags);
-  /* And process messages */
-  while (dbus_connection_dispatch(bus) != DBUS_DISPATCH_COMPLETE)
-    ;
-  if (updated)
-  {
-    updated = 0;
-    mainScreenUpdated();
-  }
-  return dbus_watch_get_enabled(watch);
 }
 
 dbus_bool_t a2AddWatch(DBusWatch *watch, void *data)
