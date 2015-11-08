@@ -80,7 +80,7 @@ midiNote (NoteDevice *device, unsigned int duration, unsigned char note) {
 }
 
 static int
-midiFrequency (NoteDevice *device, unsigned int duration, NOTE_FREQUENCY_TYPE frequency) {
+midiTone (NoteDevice *device, unsigned int duration, NOTE_FREQUENCY_TYPE frequency) {
   return midiNote(device, duration, getNearestNote(frequency));
 }
 
@@ -93,7 +93,7 @@ const NoteMethods midiNoteMethods = {
   .construct = midiConstruct,
   .destruct = midiDestruct,
 
-  .frequency = midiFrequency,
+  .tone = midiTone,
   .note = midiNote,
   .flush = midiFlush
 };

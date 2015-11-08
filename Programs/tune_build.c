@@ -62,10 +62,10 @@ logSyntaxError (TuneBuilder *tune, const char *message) {
 }
 
 int
-addTone (TuneBuilder *tune, const FrequencyElement *tone) {
+addTone (TuneBuilder *tune, const ToneElement *tone) {
   if (tune->tones.count == tune->tones.size) {
     unsigned int newSize = tune->tones.size? (tune->tones.size << 1): 1;
-    FrequencyElement *newArray;
+    ToneElement *newArray;
 
     if (!(newArray = realloc(tune->tones.array, ARRAY_SIZE(newArray, newSize)))) {
       tune->status = TUNE_BUILD_FATAL;
@@ -85,7 +85,7 @@ int
 addNote (TuneBuilder *tune, unsigned char note, int duration) {
   if (!duration) return 1;
 
-  FrequencyElement tone = FREQ_PLAY(duration, GET_NOTE_FREQUENCY(note));
+  ToneElement tone = TONE_PLAY(duration, GET_NOTE_FREQUENCY(note));
   return addTone(tune, &tone);
 }
 
@@ -525,7 +525,7 @@ parseTuneLine (TuneBuilder *tune, const char *line) {
 
 int
 endTune (TuneBuilder *tune) {
-  FrequencyElement tone = FREQ_STOP();
+  ToneElement tone = TONE_STOP();
   return addTone(tune, &tone);
 }
 

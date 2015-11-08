@@ -49,7 +49,7 @@ typedef struct {
   NoteDevice * (*construct) (int errorLevel);
   void (*destruct) (NoteDevice *device);
 
-  int (*frequency) (NoteDevice *device, unsigned int duration, NOTE_FREQUENCY_TYPE frequency);
+  int (*tone) (NoteDevice *device, unsigned int duration, NOTE_FREQUENCY_TYPE frequency);
   int (*note) (NoteDevice *device, unsigned int duration, unsigned char note);
   int (*flush) (NoteDevice *device);
 } NoteMethods;

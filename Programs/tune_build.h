@@ -46,7 +46,7 @@ typedef struct {
   TuneBuildStatus status;
 
   struct {
-    FrequencyElement *array;
+    ToneElement *array;
     unsigned int size;
     unsigned int count;
   } tones;
@@ -71,7 +71,7 @@ extern void resetTuneBuilder (TuneBuilder *tune);
 extern int parseTuneLine (TuneBuilder *tune, const char *line);
 extern int endTune (TuneBuilder *tune);
 
-extern int addTone (TuneBuilder *tune, const FrequencyElement *tone);
+extern int addTone (TuneBuilder *tune, const ToneElement *tone);
 extern int addNote (TuneBuilder *tune, unsigned char note, int duration);
 
 #ifdef __cplusplus

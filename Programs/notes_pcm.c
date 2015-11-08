@@ -137,7 +137,7 @@ pcmDestruct (NoteDevice *device) {
 }
 
 static int
-pcmFrequency (NoteDevice *device, unsigned int duration, NOTE_FREQUENCY_TYPE frequency) {
+pcmTone (NoteDevice *device, unsigned int duration, NOTE_FREQUENCY_TYPE frequency) {
   int32_t sampleCount = device->sampleRate * duration / 1000;
 
   logMessage(LOG_DEBUG, "tone: MSecs:%u SmpCt:%"PRId32 " Freq:%"PRIfreq,
@@ -249,7 +249,7 @@ pcmFrequency (NoteDevice *device, unsigned int duration, NOTE_FREQUENCY_TYPE fre
 
 static int
 pcmNote (NoteDevice *device, unsigned int duration, unsigned char note) {
-  return pcmFrequency(device, duration, GET_NOTE_FREQUENCY(note));
+  return pcmTone(device, duration, GET_NOTE_FREQUENCY(note));
 }
 
 static int
@@ -261,7 +261,7 @@ const NoteMethods pcmNoteMethods = {
   .construct = pcmConstruct,
   .destruct = pcmDestruct,
 
-  .frequency = pcmFrequency,
+  .tone = pcmTone,
   .note = pcmNote,
   .flush = pcmFlush
 };

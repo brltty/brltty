@@ -39,17 +39,17 @@ typedef struct {
 typedef struct {
   NOTE_FREQUENCY_TYPE frequency; /* Herz (0 means silence) */
   int duration;        /* milliseconds (0 means stop) */
-} FrequencyElement;
+} ToneElement;
 
-#define FREQ_PLAY(duration,frequency) {frequency, duration}
-#define FREQ_REST(duration) FREQ_PLAY(duration, 0)
-#define FREQ_STOP() FREQ_REST(0)
+#define TONE_PLAY(duration,frequency) {frequency, duration}
+#define TONE_REST(duration) TONE_PLAY(duration, 0)
+#define TONE_STOP() TONE_REST(0)
 
 extern void suppressTuneDeviceOpenErrors (void);
 
 extern int tuneSetDevice (TuneDevice device);
 extern void tunePlayNotes (const NoteElement *tune);
-extern void tunePlayFrequencies (const FrequencyElement *tune);
+extern void tunePlayTones (const ToneElement *tune);
 extern void tuneWait (int time);
 extern void tuneSynchronize (void);
 

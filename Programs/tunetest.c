@@ -99,7 +99,7 @@ static void
 playTune (TuneBuilder *tune) {
   if (tune->status == TUNE_BUILD_OK) {
     if (endTune(tune)) {
-      tunePlayFrequencies(tune->tones.array);
+      tunePlayTones(tune->tones.array);
       tuneSynchronize();
     }
   }

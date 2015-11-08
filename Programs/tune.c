@@ -81,14 +81,14 @@ openTuneDevice (void) {
 }
 
 static const NoteElement *currentlyPlayingNotes = NULL;
-static const FrequencyElement *currentlyPlayingFrequencies = NULL;
+static const ToneElement *currentlyPlayingTones = NULL;
 
 typedef unsigned char TuneSynchronizationMonitor;
 
 typedef enum {
   TUNE_REQ_SET_DEVICE,
   TUNE_REQ_PLAY_NOTES,
-  TUNE_REQ_PLAY_FREQUENCIES,
+  TUNE_REQ_PLAY_TONES,
   TUNE_REQ_WAIT,
   TUNE_REQ_SYNCHRONIZE
 } TuneRequestType;
@@ -106,8 +106,8 @@ typedef struct {
     } playNotes;
 
     struct {
-      const FrequencyElement *tune;
-    } playFrequencies;
+      const ToneElement *tune;
+    } playTones;
 
     struct {
       int time;
@@ -139,10 +139,10 @@ handleTuneRequest_playNotes (const NoteElement *tune) {
 }
 
 static void
-handleTuneRequest_playFrequencies (const FrequencyElement *tune) {
+handleTuneRequest_playTones (const ToneElement *tune) {
   while (tune->duration) {
     if (!openTuneDevice()) return;
-    if (!noteMethods->frequency(noteDevice, tune->duration, tune->frequency)) return;
+    if (!noteMethods->tone(noteDevice, tune->duration, tune->frequency)) return;
     tune += 1;
   }
 
@@ -177,12 +177,12 @@ handleTuneRequest (TuneRequest *req) {
         break;
       }
 
-      case TUNE_REQ_PLAY_FREQUENCIES: {
-        const FrequencyElement *tune = req->parameters.playFrequencies.tune;
+      case TUNE_REQ_PLAY_TONES: {
+        const ToneElement *tune = req->parameters.playTones.tune;
 
-        currentlyPlayingFrequencies = tune;
-        handleTuneRequest_playFrequencies(tune);
-        currentlyPlayingFrequencies = NULL;
+        currentlyPlayingTones = tune;
+        handleTuneRequest_playTones(tune);
+        currentlyPlayingTones = NULL;
 
         break;
       }
@@ -474,12 +474,12 @@ tunePlayNotes (const NoteElement *tune) {
 }
 
 void
-tunePlayFrequencies (const FrequencyElement *tune) {
-  if (tune != currentlyPlayingFrequencies) {
+tunePlayTones (const ToneElement *tune) {
+  if (tune != currentlyPlayingTones) {
     TuneRequest *req;
 
-    if ((req = newTuneRequest(TUNE_REQ_PLAY_FREQUENCIES))) {
-      req->parameters.playFrequencies.tune = tune;
+    if ((req = newTuneRequest(TUNE_REQ_PLAY_TONES))) {
+      req->parameters.playTones.tune = tune;
       if (!sendTuneRequest(req)) free(req);
     }
   }
