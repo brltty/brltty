@@ -156,6 +156,7 @@ ASYNC_TASK_CALLBACK(presentMessage) {
             if (mgd.timeout < 0) break;
           } else {
             if (!(mgd.touch || (mgp->options & MSG_WAITKEY))) break;
+            mgd.timeout = messageHoldTimeout;
           }
         }
       }
