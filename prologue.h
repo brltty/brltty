@@ -25,12 +25,6 @@ extern "C" {
 
 #define PACKAGE_COPYRIGHT "Copyright (C) 1995-2015 by The BRLTTY Developers."
 
-#define CONCATENATE_1(a,b) a##b
-#define CONCATENATE(a,b) CONCATENATE_1(a,b)
-
-#define STRINGIFY_1(a) #a
-#define STRINGIFY(a) STRINGIFY_1(a)
-
 #undef HAVE_BUILTIN_POPCOUNT
 
 #if defined(__has_builtin)
@@ -38,6 +32,12 @@ extern "C" {
 #define HAVE_BUILTIN_POPCOUNT
 #endif /* __has_builtin(__builtin_popcount) */
 #endif /* defined(__has_builtin) */
+
+#define CONCATENATE_1(a,b) a##b
+#define CONCATENATE(a,b) CONCATENATE_1(a,b)
+
+#define STRINGIFY_1(a) #a
+#define STRINGIFY(a) STRINGIFY_1(a)
 
 #define MIN(a, b)  (((a) < (b))? (a): (b)) 
 #define MAX(a, b)  (((a) > (b))? (a): (b)) 
