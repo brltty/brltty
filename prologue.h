@@ -27,11 +27,11 @@ extern "C" {
 
 #undef HAVE_BUILTIN_POPCOUNT
 
-#if defined(__has_builtin)
+#ifdef __has_builtin
 #if __has_builtin(__builtin_popcount)
 #define HAVE_BUILTIN_POPCOUNT
 #endif /* __has_builtin(__builtin_popcount) */
-#endif /* defined(__has_builtin) */
+#endif /* __has_builtin */
 
 #define CONCATENATE_1(a,b) a##b
 #define CONCATENATE(a,b) CONCATENATE_1(a,b)
