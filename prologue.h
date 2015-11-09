@@ -31,6 +31,14 @@ extern "C" {
 #define STRINGIFY_1(a) #a
 #define STRINGIFY(a) STRINGIFY_1(a)
 
+#undef HAVE_BUILTIN_POPCOUNT
+
+#if defined(__has_builtin)
+#if __has_builtin(__builtin_popcount)
+#define HAVE_BUILTIN_POPCOUNT
+#endif /* __has_builtin(__builtin_popcount) */
+#endif /* defined(__has_builtin) */
+
 #define MIN(a, b)  (((a) < (b))? (a): (b)) 
 #define MAX(a, b)  (((a) > (b))? (a): (b)) 
 

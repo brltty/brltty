@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_BITMASK
 #define BRLTTY_INCLUDED_BITMASK
 
+#include "prologue.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -38,6 +40,22 @@ extern "C" {
 #define BITMASK_CLEAR(name,bit) (BITMASK_ELEMENT((name), (bit)) &= ~BITMASK_BIT((name), (bit)))
 #define BITMASK_SET(name,bit) (BITMASK_ELEMENT((name), (bit)) |= BITMASK_BIT((name), (bit)))
 #define BITMASK_TEST(name,bit) (BITMASK_ELEMENT((name), (bit)) & BITMASK_BIT((name), (bit)))
+
+static inline unsigned char
+countBits (unsigned int bits) {
+#if HAVE_BUILTIN_POPCOUNT
+  return __builtin_popcount(bits);
+#else /* __builtin_popcount */
+  unsigned char count = 0;
+
+  while (bits) {
+    if (bits & 0X1) count += 1;
+    bits >>= 1;
+  }
+
+  return count;
+#endif /* __builtin_popcount */
+}
 
 #ifdef __cplusplus
 }
