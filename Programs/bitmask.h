@@ -42,7 +42,7 @@ extern "C" {
 #define BITMASK_TEST(name,bit) (BITMASK_ELEMENT((name), (bit)) & BITMASK_BIT((name), (bit)))
 
 static inline unsigned char
-countBits (unsigned int bits) {
+popcount (unsigned int bits) {
 #if HAVE_BUILTIN_POPCOUNT
   return __builtin_popcount(bits);
 #else /* __builtin_popcount */
@@ -56,6 +56,10 @@ countBits (unsigned int bits) {
   return count;
 #endif /* __builtin_popcount */
 }
+
+#define BITMASK_COUNT(name,variable) \
+unsigned int variable = 0; \
+for (int i=0; i<ARRAY_COUNT(name); i+=1) variable += popcount(name[i]);
 
 #ifdef __cplusplus
 }
