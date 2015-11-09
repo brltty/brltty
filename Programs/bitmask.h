@@ -43,7 +43,7 @@ extern "C" {
 
 static inline unsigned char
 popcount (unsigned int bits) {
-#if HAVE_BUILTIN_POPCOUNT
+#ifdef HAVE_BUILTIN_POPCOUNT
   return __builtin_popcount(bits);
 #else /* __builtin_popcount */
   unsigned char count = 0;
