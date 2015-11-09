@@ -69,11 +69,7 @@ handleTouchOff (TouchCommandData *tcd) {
   int ok = 0;
 
   if (prefs.touchNavigation && (tcd->lastTouched > ((int)tcd->lastActive - 2))) {
-    unsigned int unread = 0;
-
-    for (unsigned int i = 0; i < tcd->count; ++i) {
-      if (BITMASK_TEST(tcd->touched, i)) unread += 1;
-    }
+    BITMASK_COUNT(tcd->touched, unread);
 
     if (tcd->activeCells && unread == 0) {
       ok = 1;
