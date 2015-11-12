@@ -29,7 +29,7 @@
 #define PROBE_RETRY_LIMIT 2
 #define PROBE_INPUT_TIMEOUT 1000
 #define MAXIMUM_RESPONSE_SIZE (0XFF + 4)
-#define MAXIMUM_CELL_COUNT 140
+#define MAXIMUM_TEXT_CELLS 0XFF
 
 BEGIN_KEY_NAME_TABLE(navigation)
 END_KEY_NAME_TABLE
@@ -45,8 +45,10 @@ BEGIN_KEY_TABLE_LIST
 END_KEY_TABLE_LIST
 
 struct BrailleDataStruct {
-  int forceRewrite;
-  unsigned char textCells[MAXIMUM_CELL_COUNT];
+  struct {
+    int rewrite;
+    unsigned char cells[MAXIMUM_TEXT_CELLS];
+  } text;
 };
 
 static int
@@ -138,15 +140,12 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                               writeIdentityRequest,
                               readPacket, &response, sizeof(response),
                               isIdentityResponse)) {
-        {
-          const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
-
-          brl->keyBindings = ktd->bindings;
-          brl->keyNames = ktd->names;
-        }
+        setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
 
         makeOutputTable(dotsTable_ISO11548_1);
-        brl->data->forceRewrite = 1;
+      //MAKE_OUTPUT_TABLE(0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80);
+
+        brl->data->text.rewrite = 1;
         return 1;
       }
 
@@ -173,10 +172,11 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  if (cellsHaveChanged(brl->data->textCells, brl->buffer, brl->textColumns, NULL, NULL, &brl->data->forceRewrite)) {
+  if (cellsHaveChanged(brl->data->text.cells, brl->buffer, brl->textColumns,
+                       NULL, NULL, &brl->data->text.rewrite)) {
     unsigned char cells[brl->textColumns];
 
-    translateOutputCells(cells, brl->data->textCells, brl->textColumns);
+    translateOutputCells(cells, brl->data->text.cells, brl->textColumns);
   }
 
   return 1;

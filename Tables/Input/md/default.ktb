@@ -16,6 +16,9 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Metec BD I with 3 Keys
+title MDV Unrecognized Model (all keys defined)
 
-include bd1_3.kti
+include common.kti
+include keyboard.kti
+include fkeys.kti
+include status.kti

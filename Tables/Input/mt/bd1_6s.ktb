@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Metec I with 6 keys and status cells
+title Metec BD I with 6 Keys and Status Cells
 
 include bd1_6.kti
 include status.kti

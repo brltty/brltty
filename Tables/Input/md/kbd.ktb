@@ -16,6 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Metec BD I with 3 Keys
+title MDV Models with a Keyboard
 
-include bd1_3.kti
+include common.kti
+include keyboard.kti

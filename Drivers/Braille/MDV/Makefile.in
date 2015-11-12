@@ -19,8 +19,8 @@
 DRIVER_CODE = md
 DRIVER_NAME = MDV
 DRIVER_COMMENT = MB208/MB408L/MB408S (protocol 5)
-DRIVER_VERSION = 0.8 (August 2000)
-DRIVER_DEVELOPERS = Stéphane Doyon <s.doyon@videotron.ca>
+DRIVER_VERSION = 
+DRIVER_DEVELOPERS = Dave Mielke <dave@mielke.cc>
 include $(SRC_TOP)braille.mk
 
 braille.$O:
