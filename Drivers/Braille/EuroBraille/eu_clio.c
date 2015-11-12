@@ -288,9 +288,9 @@ static int haveSystemInformation;
 static unsigned char firmwareVersion[21];
 static const ModelEntry *model;
 
-static int forceWindowRewrite;
-static int forceVisualRewrite;
-static int forceCursorRewrite;
+static unsigned char forceWindowRewrite;
+static unsigned char forceVisualRewrite;
+static unsigned char forceCursorRewrite;
 static int inputPacketNumber;
 static int outputPacketNumber;
 

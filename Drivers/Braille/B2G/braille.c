@@ -86,7 +86,7 @@ struct BrailleDataStruct {
   } braille;
 
   struct {
-    int rewrite;
+    unsigned char rewrite;
     unsigned char cells[TEXT_CELL_COUNT];
   } text;
 };

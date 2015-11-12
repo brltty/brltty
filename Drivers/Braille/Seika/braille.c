@@ -135,7 +135,7 @@ static const ProtocolOperations *protocol;
 static unsigned char keyCount;
 static unsigned char routingCount;
 
-static int forceRewrite;
+static unsigned char forceRewrite;
 static unsigned char textCells[80];
 
 static size_t

@@ -65,7 +65,7 @@ BEGIN_KEY_TABLE_LIST
 END_KEY_TABLE_LIST
 
 struct BrailleDataStruct {
-  int forceRewrite;
+  unsigned char forceRewrite;
   unsigned char textCells[MAXIMUM_CELL_COUNT];
 };
 

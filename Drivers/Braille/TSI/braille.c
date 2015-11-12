@@ -403,7 +403,7 @@ struct BrailleDataStruct {
   SerialParameters serialParameters;
   unsigned char routingKeys[ROUTING_BYTES_MAXIMUM];
 
-  int forceWrite;
+  unsigned char forceWrite;
   unsigned char cellCount;
   unsigned char cells[0XFF];
 

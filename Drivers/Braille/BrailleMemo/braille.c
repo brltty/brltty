@@ -151,7 +151,7 @@ static const ModelEntry *const modelEntries[] = {
 struct BrailleDataStruct {
   const ModelEntry *model;
 
-  int forceRewrite;
+  unsigned char forceRewrite;
   unsigned char textCells[MM_MAXIMUM_LINE_LENGTH];
 };
 

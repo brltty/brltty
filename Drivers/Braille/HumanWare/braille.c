@@ -66,7 +66,7 @@ BEGIN_KEY_TABLE_LIST
 END_KEY_TABLE_LIST
 
 struct BrailleDataStruct {
-  int forceWrite;
+  unsigned char forceWrite;
   unsigned char textCells[0XFF];
 };
 

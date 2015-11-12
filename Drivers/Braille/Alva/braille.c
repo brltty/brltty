@@ -567,8 +567,8 @@ static unsigned char actualColumns;
 static unsigned char textOffset;
 static unsigned char statusOffset;
 
-static int textRewriteRequired = 0;
-static int statusRewriteRequired;
+static unsigned char textRewriteRequired = 0;
+static unsigned char statusRewriteRequired;
 
 typedef unsigned char FieldByteConverter (unsigned char byte);
 

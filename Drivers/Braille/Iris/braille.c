@@ -749,7 +749,7 @@ struct BrailleDataStruct {
   } latch;
 
   struct {
-    int refresh;
+    unsigned char refresh;
     unsigned char cells[0XFF];
   } braille;
 

@@ -31,15 +31,15 @@ extern void setBrailleOnline (BrailleDisplay *brl);
 
 extern int cellsHaveChanged (
   unsigned char *cells, const unsigned char *new, unsigned int count,
-  unsigned int *from, unsigned int *to, int *force
+  unsigned int *from, unsigned int *to, unsigned char *force
 );
 
 extern int textHasChanged (
   wchar_t *text, const wchar_t *new, unsigned int count,
-  unsigned int *from, unsigned int *to, int *force
+  unsigned int *from, unsigned int *to, unsigned char *force
 );
 
-extern int cursorHasChanged (int *cursor, int new, int *force);
+extern int cursorHasChanged (int *cursor, int new, unsigned char *force);
 
 extern unsigned char toLowerDigit (unsigned char upper);
 

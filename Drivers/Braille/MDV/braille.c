@@ -135,12 +135,12 @@ struct BrailleDataStruct {
   unsigned shiftPressed:1;
 
   struct {
-    int rewrite;
+    unsigned char rewrite;
     unsigned char cells[MAXIMUM_TEXT_CELLS];
   } text;
 
   struct {
-    int rewrite;
+    unsigned char rewrite;
     unsigned char cells[MAXIMUM_STATUS_CELLS];
   } status;
 };

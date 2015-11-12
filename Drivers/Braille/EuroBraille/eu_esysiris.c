@@ -316,9 +316,9 @@ static uint32_t protocolVersion;
 static uint32_t deviceOptions;
 static uint16_t maximumFrameLength;
 
-static int forceWindowRewrite;
-static int forceVisualRewrite;
-static int forceCursorRewrite;
+static unsigned char forceWindowRewrite;
+static unsigned char forceVisualRewrite;
+static unsigned char forceCursorRewrite;
 
 static unsigned char sequenceCheck;
 static unsigned char sequenceKnown;

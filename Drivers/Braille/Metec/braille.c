@@ -147,8 +147,8 @@ struct BrailleDataStruct {
   unsigned char textCount;
   unsigned char statusCount;
 
-  int writeModule[MT_MODULES_MAXIMUM];
   unsigned char moduleCount;
+  unsigned char writeModule[MT_MODULES_MAXIMUM];
 
   KeyNumberSet allNavigationKeys;
   KeyNumberSet pressedNavigationKeys;

@@ -122,7 +122,7 @@ END_KEY_TABLE_LIST
 #define READY_BEEP_DURATION 200
 #define MAXIMUM_CELL_COUNT 70 /* arbitrary max for allocations */
 
-static int forceWrite;
+static unsigned char forceWrite;
 static unsigned char cellCount;
 #define IS_TEXT_RANGE(key1,key2) (((key1) <= (key2)) && ((key2) < cellCount))
 #define IS_TEXT_KEY(key) IS_TEXT_RANGE((key), (key))

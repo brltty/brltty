@@ -66,7 +66,7 @@ setBrailleOnline (BrailleDisplay *brl) {
 int
 cellsHaveChanged (
   unsigned char *cells, const unsigned char *new, unsigned int count,
-  unsigned int *from, unsigned int *to, int *force
+  unsigned int *from, unsigned int *to, unsigned char *force
 ) {
   unsigned int first = 0;
 
@@ -101,7 +101,7 @@ cellsHaveChanged (
 int
 textHasChanged (
   wchar_t *text, const wchar_t *new, unsigned int count,
-  unsigned int *from, unsigned int *to, int *force
+  unsigned int *from, unsigned int *to, unsigned char *force
 ) {
   unsigned int first = 0;
 
@@ -134,7 +134,7 @@ textHasChanged (
 }
 
 int
-cursorHasChanged (int *cursor, int new, int *force) {
+cursorHasChanged (int *cursor, int new, unsigned char *force) {
   if (force && *force) {
     *force = 0;
   } else if (new == *cursor) {

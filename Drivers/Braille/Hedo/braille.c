@@ -103,7 +103,7 @@ typedef struct {
 struct BrailleDataStruct {
   const ModelEntry *model;
 
-  int forceRewrite;
+  unsigned char forceRewrite;
   unsigned char textCells[MAXIMUM_TEXT_CELL_COUNT];
   unsigned char statusCells[MAXIMUM_STATUS_CELL_COUNT];
 

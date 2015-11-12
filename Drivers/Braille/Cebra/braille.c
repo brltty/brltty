@@ -148,8 +148,8 @@ static const ModelEntry modelTable[] = {
 
 struct BrailleDataStruct {
   const ModelEntry *model;
-  int forceRewrite;
-  int acknowledgementPending;
+  unsigned char forceRewrite;
+  unsigned char acknowledgementPending;
   unsigned char textCells[MAXIMUM_CELL_COUNT];
 };
 
