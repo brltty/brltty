@@ -1019,13 +1019,7 @@ identifyTerminal2 (BrailleDisplay *brl) {
     if (interpretIdentity2(brl, packet.data.bytes)) {
       brl->data->protocol = &protocolOperations2;
 
-      {
-        static const DotsTable dots = {
-          0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01
-        };
-
-        makeOutputTable(dots);
-      }
+      MAKE_OUTPUT_TABLE(0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01);
 
       brl->data->prot.p2.inputKeySize = (brl->data->model->protocolRevision < 2)? 4: 8;
       {

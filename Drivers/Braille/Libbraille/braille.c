@@ -83,20 +83,17 @@ brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
       brl->textColumns = braille_size();  /* initialise size of display */
       brl->textRows = 1;
 
-      {
-        static const DotsTable dots = {
-          BRAILLE(1, 0, 0, 0, 0, 0, 0, 0),
-          BRAILLE(0, 1, 0, 0, 0, 0, 0, 0),
-          BRAILLE(0, 0, 1, 0, 0, 0, 0, 0),
-          BRAILLE(0, 0, 0, 1, 0, 0, 0, 0),
-          BRAILLE(0, 0, 0, 0, 1, 0, 0, 0),
-          BRAILLE(0, 0, 0, 0, 0, 1, 0, 0),
-          BRAILLE(0, 0, 0, 0, 0, 0, 1, 0),
-          BRAILLE(0, 0, 0, 0, 0, 0, 0, 1)
-        };
-        makeOutputTable(dots);
-        makeInputTable();
-      }
+      MAKE_OUTPUT_TABLE(
+        BRAILLE(1, 0, 0, 0, 0, 0, 0, 0),
+        BRAILLE(0, 1, 0, 0, 0, 0, 0, 0),
+        BRAILLE(0, 0, 1, 0, 0, 0, 0, 0),
+        BRAILLE(0, 0, 0, 1, 0, 0, 0, 0),
+        BRAILLE(0, 0, 0, 0, 1, 0, 0, 0),
+        BRAILLE(0, 0, 0, 0, 0, 1, 0, 0),
+        BRAILLE(0, 0, 0, 0, 0, 0, 1, 0),
+        BRAILLE(0, 0, 0, 0, 0, 0, 0, 1)
+      );
+      makeInputTable();
   
       braille_timeout(100);
 

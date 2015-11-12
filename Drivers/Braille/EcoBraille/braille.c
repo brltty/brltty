@@ -214,12 +214,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   brl->textColumns = model->Cols;		/* initialise size of main display */
   brl->textRows = BRLROWS;		/* ever is 1 in this type of braille lines */
   
-  {
-    static const DotsTable dots = {
-      0X10, 0X20, 0X40, 0X01, 0X02, 0X04, 0X80, 0X08
-    };
-    makeOutputTable(dots);
-  }
+  MAKE_OUTPUT_TABLE(0X10, 0X20, 0X40, 0X01, 0X02, 0X04, 0X80, 0X08);
 
   /* Need to calculate the size; Cols + Status + 1 (space between) */
   BrailleSize = brl->textColumns + model->NbStCells + 1;

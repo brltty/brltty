@@ -462,19 +462,12 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         if (byte == 0XFF) {
           if (!acknowledgeDisplay(brl)) break;
 
-          {
-            static const DotsTable dots = {
-              0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01
-            };
-
-            makeOutputTable(dots);
-          }
-
           brl->textColumns = windowWidth;
           brl->textRows = 1;
 
-          clearDisplay(brl);
           setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
+          MAKE_OUTPUT_TABLE(0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01);
+          clearDisplay(brl);
 
           return 1;
         }

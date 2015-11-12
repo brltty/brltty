@@ -189,14 +189,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                               readPacket, &response, sizeof(response),
                               isIdentityResponse)) {
         setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
-
-        {
-          static const DotsTable dots = {
-            0X01, 0X04, 0X10, 0X02, 0X08, 0X20, 0X40, 0X80
-          };
-
-          makeOutputTable(dots);
-        }
+        MAKE_OUTPUT_TABLE(0X01, 0X04, 0X10, 0X02, 0X08, 0X20, 0X40, 0X80);
 
         brl->textColumns = MAXIMUM_CELL_COUNT;
         brl->data->forceRewrite = 1;

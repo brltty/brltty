@@ -157,14 +157,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                 brl->statusRows = 1;
 
                 setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
-
-                {
-                  static const DotsTable dots = {
-                    0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10
-                  };
-                  makeOutputTable(dots);
-                }
-
+                MAKE_OUTPUT_TABLE(0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10);
                 return 1;
               } else {
                 logMallocError();

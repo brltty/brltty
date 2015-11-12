@@ -355,13 +355,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       serialSetBaud(serialDevice, 38400);
       */
 
-      {
-        static const DotsTable dots = {
-          0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10
-        };
-        makeOutputTable(dots);
-      }
-
+      MAKE_OUTPUT_TABLE(0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10);
       clearCells(textCells,  sizeof(textCells));
       clearCells(statusCells,  sizeof(statusCells));
       resetInputMode();

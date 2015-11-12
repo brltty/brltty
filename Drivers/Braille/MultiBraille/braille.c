@@ -156,14 +156,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
               brl->statusColumns = 5;
               brl->statusRows = 1;
 
-              {
-                static const DotsTable dots = {
-                  0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10
-                };
-
-                makeOutputTable(dots);
-              }
-
+              MAKE_OUTPUT_TABLE(0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10);
               return 1;
             } else {
               logMallocError();
