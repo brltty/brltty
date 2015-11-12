@@ -1903,12 +1903,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
       if (protocol->detectModel(brl)) {
         if (updateSettings(brl)) {
-          {
-            const KeyTableDefinition *ktd = model->keyTableDefinition;
-
-            brl->keyBindings = ktd->bindings;
-            brl->keyNames = ktd->names;
-          }
+          setBrailleKeyTable(brl, model->keyTableDefinition);
 
           if (brl->data->rotatedCells) {
             makeOutputTable(dotsTable_rotated);

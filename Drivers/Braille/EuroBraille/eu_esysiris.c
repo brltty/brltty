@@ -810,12 +810,7 @@ initializeDevice (BrailleDisplay *brl) {
 
       if (haveSystemInformation) {
         if (!model) return 0;
-
-        {
-          const KeyTableDefinition *ktd = model->keyTable;
-          brl->keyBindings = ktd->bindings;
-          brl->keyNames = ktd->names;
-        }
+        setBrailleKeyTable(brl, model->keyTable);
 
         if (!maximumFrameLength) {
           if (model->isIris) maximumFrameLength = 2048;

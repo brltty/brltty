@@ -329,12 +329,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                               writeIdentityRequest,
                               readPacket, &response, sizeof(response),
                               isIdentityResponse)) {
-        {
-          const KeyTableDefinition *ktd = brl->data->model->keyTableDefinition;
-
-          brl->keyBindings = ktd->bindings;
-          brl->keyNames = ktd->names;
-        }
+        setBrailleKeyTable(brl, brl->data->model->keyTableDefinition);
 
         brl->data->forceRewrite = 1;
         return 1;

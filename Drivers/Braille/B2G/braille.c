@@ -326,13 +326,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         if (openKeyboardDevice(brl)) {
           brl->textColumns = TEXT_CELL_COUNT;
 
-          {
-            const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
-
-            brl->keyBindings = ktd->bindings;
-            brl->keyNames = ktd->names;
-          }
-
+          setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
           makeOutputTable(dotsTable_ISO11548_1);
           brl->data->text.rewrite = 1;
 

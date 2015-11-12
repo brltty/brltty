@@ -470,16 +470,11 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             makeOutputTable(dots);
           }
 
-          clearDisplay(brl);
           brl->textColumns = windowWidth;
           brl->textRows = 1;
 
-          {
-            const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
-
-            brl->keyBindings = ktd->bindings;
-            brl->keyNames = ktd->names;
-          }
+          clearDisplay(brl);
+          setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
 
           return 1;
         }

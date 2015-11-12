@@ -3194,8 +3194,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               ktd = baumDeviceOperations[baumDeviceType].keyTableDefinition;
             }
 
-            brl->keyBindings = ktd->bindings;
-            brl->keyNames = ktd->names;
+            setBrailleKeyTable(brl, ktd);
           }
 
           return 1;

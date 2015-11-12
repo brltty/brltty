@@ -717,11 +717,7 @@ initializeDevice (BrailleDisplay *brl) {
             break;
         }
 
-        {
-          const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(clio);
-          brl->keyBindings = ktd->bindings;
-          brl->keyNames = ktd->names;
-        }
+        setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(clio));
 
         logMessage(LOG_INFO, "Model Detected: %s (%u cells)",
                    model->modelName, brl->textColumns);

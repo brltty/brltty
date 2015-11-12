@@ -946,12 +946,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           brl->textColumns = cellCount;		/* initialize size of display */
           brl->textRows = 1;		/* always 1 */
 
-          {
-            const KeyTableDefinition *ktd = deviceType->keyTableDefinition;
-            brl->keyBindings = ktd->bindings;
-            brl->keyNames = ktd->names;
-          }
-
+          setBrailleKeyTable(brl, deviceType->keyTableDefinition);
           brl->setFirmness = setFirmness;
 
           if ((previousCells = malloc(cellCount))) {

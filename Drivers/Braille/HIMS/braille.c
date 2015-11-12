@@ -478,9 +478,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
       if (getCellCount(brl, &brl->textColumns)) {
         brl->textRows = 1;
-        brl->keyBindings = brl->data->protocol->keyTableDefinition->bindings;
-        brl->keyNames = brl->data->protocol->keyTableDefinition->names;
 
+        setBrailleKeyTable(brl, brl->data->protocol->keyTableDefinition);
         makeOutputTable(dotsTable_ISO11548_1);
   
         if (clearCells(brl)) return 1;

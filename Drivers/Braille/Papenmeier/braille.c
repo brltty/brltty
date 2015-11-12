@@ -192,8 +192,7 @@ interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) 
       brl->textRows = 1;
       brl->statusRows = (brl->statusColumns = brl->data->model->statusCount)? 1: 0;
 
-      brl->keyBindings = brl->data->model->keyTableDefinition->bindings;
-      brl->keyNames = brl->data->model->keyTableDefinition->names;
+      setBrailleKeyTable(brl, brl->data->model->keyTableDefinition);
 
       return 1;
     }

@@ -417,8 +417,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             }
 
             brl->data->allNavigationKeys = makeKeyNumberSet(ktd->names, MT_GRP_NavigationKeys);
-            brl->keyBindings = ktd->bindings;
-            brl->keyNames = ktd->names;
+            setBrailleKeyTable(brl, ktd);
           }
 
           brl->data->pressedNavigationKeys = 0;

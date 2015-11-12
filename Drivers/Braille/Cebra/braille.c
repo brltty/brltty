@@ -309,12 +309,12 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                               readPacket, &response, sizeof(response),
                               isIdentityResponse)) {
         if (setModel(brl, response[1])) {
-          brl->keyBindings = brl->data->model->ktd->bindings;
-          brl->keyNames = brl->data->model->ktd->names;
-
+          setBrailleKeyTable(brl, brl->data->model->ktd);
           makeOutputTable(dotsTable_ISO11548_1);
+
           brl->data->forceRewrite = 1;
           brl->data->acknowledgementPending = 0;
+
           return 1;
         }
       }

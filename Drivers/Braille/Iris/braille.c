@@ -2017,8 +2017,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           }
 
           if (ktd) {
-            brl->keyBindings = ktd->bindings;
-            brl->keyNames = ktd->names;
+            setBrailleKeyTable(brl, ktd);
 
             if ((brl->data->firmwareVersion = malloc(size - 1))) {
               memcpy(brl->data->firmwareVersion, deviceResponse+2, size-2);

@@ -935,9 +935,7 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   brl->statusColumns = brl->data->model->statusCells;
   brl->statusRows = 1;
 
-  brl->keyBindings = brl->data->model->keyTableDefinition->bindings;
-  brl->keyNames = brl->data->model->keyTableDefinition->names;
-
+  setBrailleKeyTable(brl, brl->data->model->keyTableDefinition);
   brl->setFirmness = brl->data->model->setFirmness;
   brl->setSensitivity = brl->data->model->setSensitivity;
 

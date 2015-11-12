@@ -400,12 +400,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       dataCells = brl->textColumns * brl->textRows;
       cellCount = statusCells + dataCells;
 
-      {
-        const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
-        brl->keyBindings = ktd->bindings;
-        brl->keyNames = ktd->names;
-      }
-
+      setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
       makeOutputTable(dotsTable_ISO11548_1);
       makeInputTable();
 

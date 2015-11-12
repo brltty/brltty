@@ -918,9 +918,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         brl->textColumns = brl->data->model->cellCount;
         brl->textRows = 1;
 
-        brl->keyBindings = brl->data->keyTableDefinition->bindings;
-        brl->keyNames = brl->data->keyTableDefinition->names;
-
+        setBrailleKeyTable(brl, brl->data->keyTableDefinition);
         brl->setFirmness = setFirmness;
 
         return writeRequest(brl);

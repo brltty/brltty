@@ -156,11 +156,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                 brl->statusColumns = 5;
                 brl->statusRows = 1;
 
-                {
-                  const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
-                  brl->keyBindings = ktd->bindings;
-                  brl->keyNames = ktd->names;
-                }
+                setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
 
                 {
                   static const DotsTable dots = {

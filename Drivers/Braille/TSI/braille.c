@@ -738,19 +738,15 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         }
       }
 
-      {
-        const KeyTableDefinition *ktd = brl->data->model->keyTableDefinition;
-
-        brl->keyBindings = ktd->bindings;
-        brl->keyNames = ktd->names;
-      }
+      setBrailleKeyTable(brl, brl->data->model->keyTableDefinition);
+      makeOutputTable(dotsTable_ISO11548_1);
 
       brl->textColumns = brl->data->cellCount;		/* initialise size of display */
       brl->setAutorepeat = setAutorepeat;
 
-      makeOutputTable(dotsTable_ISO11548_1);
       memset(brl->data->routingKeys, 0, sizeof(brl->data->routingKeys));
       brl->data->forceWrite = 1;
+
       return 1;
 
     failure:
