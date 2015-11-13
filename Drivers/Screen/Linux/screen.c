@@ -383,7 +383,7 @@ static int screenDescriptor;
 static unsigned char virtualTerminal;
 
 static int isMonitorable;
-static AsyncHandle screenMonitor;
+static THREAD_LOCAL AsyncHandle screenMonitor = NULL;
 
 static int screenUpdated;
 static unsigned char *cacheBuffer;

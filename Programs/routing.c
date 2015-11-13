@@ -33,6 +33,8 @@
 
 #include "log.h"
 #include "program.h"
+#include "thread.h"
+#include "async_wait.h"
 #include "timing.h"
 #include "scr.h"
 #include "routing.h"
@@ -214,7 +216,7 @@ awaitCursorMotion (RoutingData *routing, int direction, const CursorAxisEntry *a
     int oldy;
     int oldx;
 
-    approximateDelay(ROUTING_INTERVAL);
+    asyncWait(ROUTING_INTERVAL);
     getMonotonicTime(&now);
     time = millisecondsBetween(&start, &now) + 1;
 
@@ -275,7 +277,7 @@ awaitCursorMotion (RoutingData *routing, int direction, const CursorAxisEntry *a
       if (ROUTING_INTERVAL) {
         start = now;
       } else {
-        approximateDelay(1);
+        asyncWait(1);
         getMonotonicTime(&start);
       }
     } else if (time > timeout) {
@@ -359,8 +361,14 @@ adjustCursorVertically (RoutingData *routing, int where, int row) {
   return adjustCursorPosition(routing, where, row, -1, &cursorAxisTable[CURSOR_AXIS_VERTICAL]);
 }
 
+typedef struct {
+  int column;
+  int row;
+  int screen;
+} RoutingParameters;
+
 static RoutingStatus
-doRouting (int column, int row, int screen) {
+routeCursor (const RoutingParameters *parameters) {
   RoutingData routing;
 
 #ifdef SIGUSR1
@@ -371,7 +379,7 @@ doRouting (int column, int row, int screen) {
 #endif /* SIGUSR1 */
 
   /* initialize the routing data structure */
-  routing.screenNumber = screen;
+  routing.screenNumber = parameters->screen;
   routing.rowBuffer = NULL;
   routing.timeSum = ROUTING_TIMEOUT;
   routing.timeCount = 1;
@@ -379,22 +387,26 @@ doRouting (int column, int row, int screen) {
   if (getCurrentPosition(&routing)) {
     logRouting("from: [%d,%d]", routing.curx, routing.cury);
 
-    if (column < 0) {
-      adjustCursorVertically(&routing, 0, row);
+    if (parameters->column < 0) {
+      adjustCursorVertically(&routing, 0, parameters->row);
     } else {
-      if (adjustCursorVertically(&routing, -1, row) != CRR_FAIL)
-        if (adjustCursorHorizontally(&routing, 0, row, column) == CRR_NEAR)
-          if (routing.cury < row)
-            if (adjustCursorVertically(&routing, 1, routing.cury+1) != CRR_FAIL)
-              adjustCursorHorizontally(&routing, 0, row, column);
+      if (adjustCursorVertically(&routing, -1, parameters->row) != CRR_FAIL) {
+        if (adjustCursorHorizontally(&routing, 0, parameters->row, parameters->column) == CRR_NEAR) {
+          if (routing.cury < parameters->row) {
+            if (adjustCursorVertically(&routing, 1, routing.cury+1) != CRR_FAIL) {
+              adjustCursorHorizontally(&routing, 0, parameters->row, parameters->column);
+            }
+          }
+        }
+      }
     }
   }
 
   if (routing.rowBuffer) free(routing.rowBuffer);
 
-  if (routing.screenNumber != screen) return ROUTING_ERROR;
-  if (routing.cury != row) return ROUTING_WRONG_ROW;
-  if ((column >= 0) && (routing.curx != column)) return ROUTING_WRONG_COLUMN;
+  if (routing.screenNumber != parameters->screen) return ROUTING_ERROR;
+  if (routing.cury != parameters->row) return ROUTING_WRONG_ROW;
+  if ((parameters->column >= 0) && (routing.curx != parameters->column)) return ROUTING_WRONG_COLUMN;
   return ROUTING_DONE;
 }
 
@@ -468,8 +480,8 @@ isRouting (void) {
 }
 #endif /* SIGUSR1 */
 
-int
-startRouting (int column, int row, int screen) {
+static int
+startRoutingProcess (const RoutingParameters *parameters) {
 #ifdef SIGUSR1
   int started = 0;
 
@@ -488,7 +500,7 @@ startRouting (int column, int row, int screen) {
       }
 
       if (constructRoutingScreen()) {
-        result = doRouting(column, row, screen);		/* terminate child process */
+        result = routeCursor(parameters);		/* terminate child process */
         destructRoutingScreen();		/* close second thread of screen reading */
       }
 
@@ -515,7 +527,34 @@ startRouting (int column, int row, int screen) {
 
   return started;
 #else /* SIGUSR1 */
-  routingStatus = doRouting(column, row, screen);
+  routingStatus = routeCursor(parameters);
   return 1;
 #endif /* SIGUSR1 */
+}
+
+#ifdef GOT_PTHREADS
+THREAD_FUNCTION(runRoutingThread) {
+  const RoutingParameters *parameters = argument;
+  startRoutingProcess(parameters);
+  return NULL;
+}
+#endif /* GOT_PTHREADS */
+
+int
+startRouting (int column, int row, int screen) {
+  const RoutingParameters parameters = {
+    .column = column,
+    .row = row,
+    .screen = screen
+  };
+
+#ifdef GOT_PTHREADS
+  void *result;
+  int started = callThreadFunction("cursor-routing", runRoutingThread,
+                                   (void *)&parameters, &result);
+
+  return started;
+#else /* GOT_PTHREADS */
+  return startRoutingProcess(&parameters);
+#endif /* GOT_PTHREADS */
 }
