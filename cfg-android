@@ -97,6 +97,9 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
    \
    --with-screen-driver=an,-all \
    \
+   --without-bell-package \
+   --without-leds-package \
+   \
    --without-beep-package \
    --without-midi-package \
    --without-fm-package \

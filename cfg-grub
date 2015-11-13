@@ -35,6 +35,9 @@ directory=`dirname "${0}"`
    \
    --disable-speech-support \
    \
+   --without-bell-package \
+   --without-leds-package \
+   \
    --without-pcm-package \
    --without-midi-package \
    --without-fm-package \
