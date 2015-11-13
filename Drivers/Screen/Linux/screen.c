@@ -710,15 +710,10 @@ static unsigned short shiftedAttributesMask;
 
 static void
 setAttributesMasks (unsigned short bit) {
-  if ((fontAttributesMask = bit)) {
-    unshiftedAttributesMask = bit - 1;
-    shiftedAttributesMask = ~unshiftedAttributesMask & ~bit;
-    unshiftedAttributesMask &= 0XFF00;
-  } else {
-    unshiftedAttributesMask = 0;
-    shiftedAttributesMask = 0;
-  }
-
+  fontAttributesMask = bit;
+  unshiftedAttributesMask = bit - 1;
+  shiftedAttributesMask = ~unshiftedAttributesMask & ~bit;
+  unshiftedAttributesMask &= 0XFF00;
   logMessage(LOG_CATEGORY(SCREEN_DRIVER),
              "Attributes Masks: Font:%04X Unshifted:%04X Shifted:%04X",
              fontAttributesMask, unshiftedAttributesMask, shiftedAttributesMask);
