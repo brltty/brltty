@@ -723,14 +723,14 @@ driver.$O:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = main.$O $(CORE_OBJECTS)
+BRLTTY_OBJECTS = brltty.$O $(CORE_OBJECTS)
 BRLTTY_LIBRARIES = $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(PCM_LIBS) $(MIDI_LIBS) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LDLIBS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRLTTY_LIBRARIES)
 
-main.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/main.c
+brltty.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty.c
 
 ###############################################################################
 
