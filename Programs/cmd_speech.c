@@ -451,7 +451,7 @@ handleSpeechCommands (int command, void *data) {
     }
 
     case BRL_CMD_ROUTE_CURR_LOCN:
-      if (routeCursor(ses->spkx, ses->spky, scr.number)) {
+      if (routeScreenCursor(ses->spkx, ses->spky, scr.number)) {
         alert(ALERT_ROUTING_STARTED);
       } else {
         alert(ALERT_COMMAND_REJECTED);

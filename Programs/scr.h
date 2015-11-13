@@ -36,7 +36,7 @@ extern void describeScreen (ScreenDescription *);		/* get screen status */
 extern int readScreen (short left, short top, short width, short height, ScreenCharacter *buffer);
 extern int readScreenText (short left, short top, short width, short height, wchar_t *buffer);
 extern int insertScreenKey (ScreenKey key);
-extern int routeCursor (int column, int row, int screen);
+extern int routeScreenCursor (int column, int row, int screen);
 extern int highlightScreenRegion (int left, int right, int top, int bottom);
 extern int unhighlightScreenRegion (void);
 extern int getScreenPointer (int *column, int *row);

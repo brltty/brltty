@@ -165,7 +165,7 @@ postprocessCommand (void *state, int command, int handled) {
 
         if ((scr.posx < left) || (scr.posx > right) ||
             (scr.posy < top) || (scr.posy > bottom)) {
-          if (routeCursor(MIN(MAX(scr.posx, left), right),
+          if (routeScreenCursor(MIN(MAX(scr.posx, left), right),
                           MIN(MAX(scr.posy, top), bottom),
                           scr.number)) {
             alert(ALERT_ROUTING_STARTED);

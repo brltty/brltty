@@ -630,7 +630,7 @@ handleNavigationCommands (int command, void *data) {
       break;
 
     case BRL_CMD_CSRJMP_VERT:
-      alert(routeCursor(-1, ses->winy, scr.number)?
+      alert(routeScreenCursor(-1, ses->winy, scr.number)?
                ALERT_ROUTING_STARTED:
                ALERT_COMMAND_REJECTED);
       break;
@@ -645,7 +645,7 @@ handleNavigationCommands (int command, void *data) {
           int column, row;
 
           if (getCharacterCoordinates(arg, &column, &row, 0, 1)) {
-            if (routeCursor(column, row, scr.number)) {
+            if (routeScreenCursor(column, row, scr.number)) {
               alert(ALERT_ROUTING_STARTED);
               break;
             }

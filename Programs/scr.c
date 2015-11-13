@@ -132,7 +132,7 @@ insertScreenKey (ScreenKey key) {
 }
 
 int
-routeCursor (int column, int row, int screen) {
+routeScreenCursor (int column, int row, int screen) {
   return currentScreen->routeCursor(column, row, screen);
 }
 
