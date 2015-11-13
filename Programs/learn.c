@@ -28,7 +28,7 @@
 #include "cmd_queue.h"
 #include "brl.h"
 #include "brl_cmds.h"
-#include "brltty.h"
+#include "core.h"
 
 typedef enum {
   LMS_CONTINUE,

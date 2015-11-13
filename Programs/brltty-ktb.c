@@ -393,7 +393,7 @@ main (int argc, char *argv[]) {
   return exitStatus;
 }
 
-#include "brltty.h"
+#include "core.h"
 
 unsigned int textStart;
 unsigned int textCount;

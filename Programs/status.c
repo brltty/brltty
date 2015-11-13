@@ -24,7 +24,7 @@
 #include "brl_dots.h"
 #include "brl_utils.h"
 #include "scr_special.h"
-#include "brltty.h"
+#include "core.h"
 #include "prefs.h"
 #include "ttb.h"
 

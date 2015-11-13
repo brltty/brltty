@@ -24,7 +24,7 @@
 #include "spk_input.h"
 #include "spk.h"
 #include "pipe.h"
-#include "brltty.h"
+#include "core.h"
 
 #ifdef ENABLE_SPEECH_SUPPORT
 struct SpeechInputObjectStruct {

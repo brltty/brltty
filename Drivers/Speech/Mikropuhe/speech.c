@@ -37,7 +37,7 @@
 #include "notes.h"
 #include "pcm.h"
 #include "dynld.h"
-#include "brltty.h"
+#include "core.h"
 
 typedef enum {
   PARM_NAME,

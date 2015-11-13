@@ -27,7 +27,7 @@
 #include "scr_special.h"
 #include "alert.h"
 #include "tune.h"
-#include "brltty.h"
+#include "core.h"
 
 typedef enum {
   TOGGLE_ERROR,

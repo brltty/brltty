@@ -28,7 +28,7 @@
 #include <string.h>
 
 #include "log.h"
-#include "brltty.h"
+#include "core.h"
 
 #include <braille.h>
 

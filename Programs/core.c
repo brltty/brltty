@@ -63,7 +63,7 @@
 #include "brl_utils.h"
 #include "prefs.h"
 #include "api_control.h"
-#include "brltty.h"
+#include "core.h"
 
 #ifdef ENABLE_SPEECH_SUPPORT
 #include "spk.h"

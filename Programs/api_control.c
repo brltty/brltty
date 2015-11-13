@@ -21,7 +21,7 @@
 #include "log.h"
 #include "api_control.h"
 #include "api_server.h"
-#include "brltty.h"
+#include "core.h"
 
 #ifndef ENABLE_API
 const char *const api_parameters[] = {NULL};

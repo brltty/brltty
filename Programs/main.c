@@ -27,7 +27,7 @@
 #include "embed.h"
 #include "log.h"
 #include "api_control.h"
-#include "brltty.h"
+#include "core.h"
 
 static ProgramExitStatus
 brlttyRun (void) {

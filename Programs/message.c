@@ -32,7 +32,7 @@
 #include "update.h"
 #include "cmd_queue.h"
 #include "api_control.h"
-#include "brltty.h"
+#include "core.h"
 
 int messageHoldTimeout = DEFAULT_MESSAGE_HOLD_TIMEOUT;
 

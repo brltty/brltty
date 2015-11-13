@@ -27,7 +27,7 @@
 #include "scr_special.h"
 #include "message.h"
 #include "alert.h"
-#include "brltty.h"
+#include "core.h"
 
 static int
 handlePreferencesCommands (int command, void *data) {

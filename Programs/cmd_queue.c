@@ -30,7 +30,7 @@
 #include "prefs.h"
 #include "ktb_types.h"
 #include "scr.h"
-#include "brltty.h"
+#include "core.h"
 
 #define LOG_LEVEL LOG_DEBUG
 

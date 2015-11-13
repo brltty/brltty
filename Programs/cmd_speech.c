@@ -30,7 +30,7 @@
 #include "spk.h"
 #include "scr.h"
 #include "update.h"
-#include "brltty.h"
+#include "core.h"
 
 #ifdef ENABLE_SPEECH_SUPPORT
 static void

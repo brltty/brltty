@@ -23,7 +23,7 @@
 #include "brl_cmds.h"
 #include "unicode.h"
 #include "scr.h"
-#include "brltty.h"
+#include "core.h"
 
 int
 isTextOffset (int *arg, int end, int relaxed) {

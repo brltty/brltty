@@ -31,7 +31,7 @@
 #include "alert.h"
 #include "routing.h"
 #include "scr.h"
-#include "brltty.h"
+#include "core.h"
 
 static int
 getWindowLength (void) {

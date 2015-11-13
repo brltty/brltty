@@ -32,7 +32,7 @@
 #include "ttb.h"
 #include "scr.h"
 #include "async_alarm.h"
-#include "brltty.h"
+#include "core.h"
 
 typedef struct {
   ReportListenerInstance *resetListener;

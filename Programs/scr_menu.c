@@ -28,7 +28,7 @@
 #include "cmd_queue.h"
 #include "alert.h"
 #include "charset.h"
-#include "brltty.h"
+#include "core.h"
 
 typedef struct {
   MenuItem *item;

@@ -69,7 +69,7 @@
 #include "profile_types.h"
 #include "brl_input.h"
 #include "cmd_queue.h"
-#include "brltty.h"
+#include "core.h"
 #include "api_control.h"
 #include "prefs.h"
 #include "charset.h"

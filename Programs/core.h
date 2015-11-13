@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_BRLTTY
-#define BRLTTY_INCLUDED_BRLTTY
+#ifndef BRLTTY_INCLUDED_CORE
+#define BRLTTY_INCLUDED_CORE
 
 #include "prologue.h"
 
@@ -197,4 +197,4 @@ extern const ProfileDescriptor languageProfile;
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_BRLTTY */
+#endif /* BRLTTY_INCLUDED_CORE */

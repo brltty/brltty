@@ -34,7 +34,7 @@
 #include "file.h"
 #include "datafile.h"
 #include "charset.h"
-#include "brltty.h"
+#include "core.h"
 
 typedef struct {
   struct {

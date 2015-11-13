@@ -41,7 +41,7 @@
 #include "blink.h"
 #include "routing.h"
 #include "api_control.h"
-#include "brltty.h"
+#include "core.h"
 
 static int oldwinx;
 static int oldwiny;

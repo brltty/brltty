@@ -28,7 +28,7 @@
 #include "scr_special.h"
 #include "message.h"
 #include "alert.h"
-#include "brltty.h"
+#include "core.h"
 
 #ifdef ENABLE_SPEECH_SUPPORT
 static size_t

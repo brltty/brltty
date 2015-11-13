@@ -30,7 +30,7 @@
 #include "async_task.h"
 #include "update.h"
 #include "message.h"
-#include "brltty.h"
+#include "core.h"
 
 typedef struct {
   int timeout;

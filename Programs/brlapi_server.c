@@ -69,7 +69,7 @@
 #include "brl_utils.h"
 #include "embed.h"
 #include "ttb.h"
-#include "brltty.h"
+#include "core.h"
 #include "api_server.h"
 #include "report.h"
 #include "log.h"

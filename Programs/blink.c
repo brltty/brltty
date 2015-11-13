@@ -22,7 +22,7 @@
 #include "prefs.h"
 #include "async_alarm.h"
 #include "update.h"
-#include "brltty.h"
+#include "core.h"
 
 struct BlinkDescriptorStruct {
   const char *const name;

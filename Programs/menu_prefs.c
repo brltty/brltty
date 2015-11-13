@@ -36,7 +36,7 @@
 #include "bell.h"
 #include "leds.h"
 #include "midi.h"
-#include "brltty.h"
+#include "core.h"
 
 #define PREFS_MENU_ITEM_VARIABLE(name) prefsMenuItemVariable_##name
 #define PREFS_MENU_ITEM_GETTER_DECLARE(name) \
