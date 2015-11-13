@@ -129,7 +129,7 @@ proc getDependencies {file} {
             lappend dependencies $include
          } else {
             set found 0
-            foreach location [list $directory Programs ""] {
+            foreach location [list $directory Programs Headers ""] {
                if {[dependencyExists [set path [file join $location $include]]]} {
                   lvarcat dependencies [lindex [intersect3 $dependencies [getDependencies $path]] 2]
                   set found 1
@@ -151,9 +151,6 @@ set optionDefinitions {
 
 if {![processOptions optionValues argv $optionDefinitions]} {
    syntaxError
-}
-
-if {[llength $argv] == 0} {
 }
 
 if {[llength $argv] > 0} {
