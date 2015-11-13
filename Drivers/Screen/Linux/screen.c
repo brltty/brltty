@@ -1266,20 +1266,16 @@ readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
         return 1;
       }
 
-      {
-        int row;
+      for (unsigned int row=0; row<box->height; row+=1) {
+        ScreenCharacter characters[size.columns];
+        if (!readScreenRow(box->top+row, size.columns, characters, NULL)) return 0;
 
-        for (row=0; row<box->height; ++row) {
-          ScreenCharacter characters[size.columns];
-          if (!readScreenRow(box->top+row, size.columns, characters, NULL)) return 0;
-
-          memcpy(buffer, &characters[box->left],
-                 box->width * sizeof(characters[0]));
-          buffer += box->width;
-        }
-
-        return 1;
+        memcpy(buffer, &characters[box->left],
+               box->width * sizeof(characters[0]));
+        buffer += box->width;
       }
+
+      return 1;
     }
   }
 
