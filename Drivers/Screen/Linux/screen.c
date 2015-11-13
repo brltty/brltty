@@ -710,11 +710,15 @@ static unsigned short shiftedAttributesMask;
 
 static void
 setAttributesMasks (unsigned short bit) {
-  fontAttributesMask = bit;
-  unshiftedAttributesMask = (((bit & 0XF000) - 0X1000) & 0XF000) |
-                            (((bit & 0X0F00) - 0X0100) & 0X0F00);
-  shiftedAttributesMask = ((~((bit & 0XF000) - 0X1000) << 1) & 0XE000) |
-                          ((~((bit & 0X0F00) - 0X0100) << 1) & 0X0E00);
+  if ((fontAttributesMask = bit)) {
+    unshiftedAttributesMask = bit - 1;
+    shiftedAttributesMask = ~unshiftedAttributesMask & ~bit;
+    unshiftedAttributesMask &= 0XFF00;
+  } else {
+    unshiftedAttributesMask = 0;
+    shiftedAttributesMask = 0;
+  }
+
   logMessage(LOG_CATEGORY(SCREEN_DRIVER),
              "Attributes Masks: Font:%04X Unshifted:%04X Shifted:%04X",
              fontAttributesMask, unshiftedAttributesMask, shiftedAttributesMask);
@@ -752,12 +756,12 @@ determineAttributesMasks (void) {
         unsigned short buffer[count];
 
         if (readScreenContent(0, buffer, ARRAY_COUNT(buffer))) {
-          int counts[0X10];
-          unsigned int index;
-
+          unsigned int counts[0X10];
           memset(counts, 0, sizeof(counts));
 
-          for (index=0; index<count; index+=1) ++counts[(buffer[index] & 0X0F00) >> 8];
+          for (unsigned int index=0; index<count; index+=1) {
+            counts[(buffer[index] & 0X0F00) >> 8] += 1;
+          }
 
           setAttributesMasks((counts[0XE] > counts[0X7])? 0X0100: 0X0800);
           return 1;
