@@ -80,25 +80,6 @@ getCharacterCoordinates (int arg, int *column, int *row, int end, int relaxed) {
 
 size_t
 formatCharacterDescription (char *buffer, size_t size, int column, int row) {
-  static char *const colours[] = {
-    strtext("black"),
-    strtext("blue"),
-    strtext("green"),
-    strtext("cyan"),
-    strtext("red"),
-    strtext("magenta"),
-    strtext("brown"),
-    strtext("light grey"),
-    strtext("dark grey"),
-    strtext("light blue"),
-    strtext("light green"),
-    strtext("light cyan"),
-    strtext("light red"),
-    strtext("light magenta"),
-    strtext("yellow"),
-    strtext("white")
-  };
-
   size_t length;
   ScreenCharacter character;
 
@@ -107,11 +88,32 @@ formatCharacterDescription (char *buffer, size_t size, int column, int row) {
 
   {
     uint32_t text = character.text;
+    STR_PRINTF("char %" PRIu32 " (U+%04" PRIX32 "):", text, text);
+  }
 
-    STR_PRINTF("char %" PRIu32 " (U+%04" PRIX32 "): %s on %s",
-               text, text,
-               gettext(colours[character.attributes & 0X0F]),
-               gettext(colours[(character.attributes & 0X70) >> 4]));
+  {
+    static char *const colours[] = {
+      strtext("black"),
+      strtext("blue"),
+      strtext("green"),
+      strtext("cyan"),
+      strtext("red"),
+      strtext("magenta"),
+      strtext("brown"),
+      strtext("light grey"),
+      strtext("dark grey"),
+      strtext("light blue"),
+      strtext("light green"),
+      strtext("light cyan"),
+      strtext("light red"),
+      strtext("light magenta"),
+      strtext("yellow"),
+      strtext("white")
+    };
+
+    unsigned char attributes = character.attributes;
+    STR_PRINTF(" %s", gettext(colours[attributes & 0X0F]));
+    STR_PRINTF(" on %s", gettext(colours[(attributes & 0X70) >> 4]));
   }
 
   if (character.attributes & SCR_ATTR_BLINK) {
