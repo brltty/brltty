@@ -47,6 +47,11 @@ constructBrailleDisplay (BrailleDisplay *brl) {
   brl->buffer = NULL;
   brl->writeDelay = 0;
 
+  brl->isCoreBuffer = 0;
+  brl->resizeRequired = 0;
+  brl->noDisplay = 0;
+  brl->hideCursor = 0;
+
   brl->hasFailed = 0;
   brl->isOffline = 0;
   brl->isSuspended = 0;

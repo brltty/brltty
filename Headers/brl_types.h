@@ -81,6 +81,7 @@ struct BrailleDisplayStruct {
   unsigned isCoreBuffer:1;
   unsigned resizeRequired:1;
   unsigned noDisplay:1;
+  unsigned hideCursor:1;
 
   unsigned hasFailed:1;
   unsigned isOffline:1;

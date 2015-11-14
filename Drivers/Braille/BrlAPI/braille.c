@@ -66,6 +66,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   logMessage(LOG_DEBUG, "Got tty successfully");
   CHECK((brlapi_getDisplaySize(&brl->textColumns, &brl->textRows)==0), out1);
   logMessage(LOG_DEBUG,"Found out display size: %dx%d", brl->textColumns, brl->textRows);
+  brl->hideCursor = 1;
   displaySize = brl->textColumns*brl->textRows;
   prevData = malloc(displaySize);
   CHECK((prevData!=NULL), out1);

@@ -582,8 +582,8 @@ static void freeBrailleWindow(BrailleWindow *brailleWindow)
 }
 
 static unsigned char
-getCursorOverlay (void) {
-  if (prefs.showScreenCursor) {
+getCursorOverlay (BrailleDisplay *brl) {
+  if (prefs.showScreenCursor && !brl->hideCursor) {
     BlinkDescriptor *blink = &screenCursorBlinkDescriptor;
     requireBlinkDescriptor(blink);
 
@@ -2792,7 +2792,7 @@ int api_flush(BrailleDisplay *brl) {
     }
 
     if (c->brailleWindow.cursor) {
-      unsigned char newCursorOverlay = getCursorOverlay();
+      unsigned char newCursorOverlay = getCursorOverlay(brl);
 
       if (newCursorOverlay != cursorOverlay) {
         cursorOverlay = newCursorOverlay;
