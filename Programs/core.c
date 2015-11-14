@@ -900,7 +900,7 @@ int
 showScreenCursor (void) {
   return scr.cursor &&
          prefs.showScreenCursor &&
-         !(ses->hideScreenCursor | brl.hideCursor);
+         !(ses->hideScreenCursor || brl.hideCursor);
 }
 
 int
