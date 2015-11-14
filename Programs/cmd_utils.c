@@ -93,27 +93,27 @@ formatCharacterDescription (char *buffer, size_t size, int column, int row) {
 
   {
     static char *const colours[] = {
-      strtext("black"),
-      strtext("blue"),
-      strtext("green"),
-      strtext("cyan"),
-      strtext("red"),
-      strtext("magenta"),
-      strtext("brown"),
-      strtext("light grey"),
-      strtext("dark grey"),
-      strtext("light blue"),
-      strtext("light green"),
-      strtext("light cyan"),
-      strtext("light red"),
-      strtext("light magenta"),
-      strtext("yellow"),
-      strtext("white")
+      /*      */ strtext("black"),
+      /*    B */ strtext("blue"),
+      /*   G  */ strtext("green"),
+      /*   GB */ strtext("cyan"),
+      /*  R   */ strtext("red"),
+      /*  R B */ strtext("magenta"),
+      /*  RG  */ strtext("brown"),
+      /*  RGB */ strtext("light grey"),
+      /* L    */ strtext("dark grey"),
+      /* L  B */ strtext("light blue"),
+      /* L G  */ strtext("light green"),
+      /* L GB */ strtext("light cyan"),
+      /* LR   */ strtext("light red"),
+      /* LR B */ strtext("light magenta"),
+      /* LRG  */ strtext("yellow"),
+      /* LRGB */ strtext("white")
     };
 
     unsigned char attributes = character.attributes;
-    STR_PRINTF(" %s", gettext(colours[attributes & 0X0F]));
-    STR_PRINTF(" on %s", gettext(colours[(attributes & 0X70) >> 4]));
+    STR_PRINTF(" %s", gettext(colours[attributes & SCR_MASK_FG]));
+    STR_PRINTF(" on %s", gettext(colours[(attributes & SCR_MASK_BG) >> 4]));
   }
 
   if (character.attributes & SCR_ATTR_BLINK) {
