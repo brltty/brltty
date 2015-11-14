@@ -898,7 +898,9 @@ getContractedLength (unsigned int outputLimit) {
 
 int
 showScreenCursor (void) {
-  return scr.cursor && prefs.showScreenCursor && !ses->hideScreenCursor;
+  return scr.cursor &&
+         prefs.showScreenCursor &&
+         !(ses->hideScreenCursor | brl.hideCursor);
 }
 
 int
