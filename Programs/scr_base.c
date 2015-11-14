@@ -210,8 +210,6 @@ describeBaseScreen (BaseScreen *base, ScreenDescription *description) {
 
   if (description->unreadable) {
     description->cursor = 0;
-  } else if (description->number == -1) {
-    description->unreadable = "unreadable screen";
   }
 }
 
