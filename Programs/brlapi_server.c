@@ -738,7 +738,7 @@ static inline Tty *newTty(Tty *father, int number)
   if (!(tty->connections = createConnection(INVALID_FILE_DESCRIPTOR,0))) goto outtty;
   tty->connections->next = tty->connections->prev = tty->connections;
   tty->number = number;
-  tty->focus = -1;
+  tty->focus = SCR_NO_VT;
   tty->father = father;
   tty->prevnext = &father->subttys;
   if ((tty->next = father->subttys))
@@ -2567,7 +2567,7 @@ static Connection *whoFillsTty(Tty *tty) {
   c = NULL;
 found:
   for (t = tty->subttys; t; t = t->next)
-    if (tty->focus==-1 || t->number == tty->focus) {
+    if (tty->focus==SCR_NO_VT || t->number == tty->focus) {
       Connection *recur_c = whoFillsTty(t);
       return recur_c ? recur_c : c;
     }
@@ -2617,7 +2617,7 @@ static Connection *whoGetsKey(Tty *tty, brlapi_keyCode_t code, unsigned int how)
   c = NULL;
 found:
   for (t = tty->subttys; t; t = t->next)
-    if (tty->focus==-1 || t->number == tty->focus) {
+    if (tty->focus==SCR_NO_VT || t->number == tty->focus) {
       Connection *recur_c = whoGetsKey(t, code, how);
       return recur_c ? recur_c : c;
     }
@@ -3027,7 +3027,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
     goto noTtysConnections;
   }
   ttys.connections->prev = ttys.connections->next = ttys.connections;
-  ttys.focus = -1;
+  ttys.focus = SCR_NO_VT;
 
   pthread_mutexattr_init(&mattr);
   pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);

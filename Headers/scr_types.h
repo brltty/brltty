@@ -131,6 +131,9 @@ typedef enum {
   SCR_KEY_F24,
 } ScreenKey;
 
+/* must be less than 0 */
+#define SCR_NO_VT -1
+
 typedef struct ScreenDriverStruct ScreenDriver;
 
 #ifdef __cplusplus
