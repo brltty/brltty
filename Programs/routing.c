@@ -533,9 +533,16 @@ startRoutingProcess (const RoutingParameters *parameters) {
 }
 
 #ifdef GOT_PTHREADS
+typedef struct {
+  const RoutingParameters *const parameters;
+
+  int result;
+} RoutingThreadArgument;
+
 THREAD_FUNCTION(runRoutingThread) {
-  const RoutingParameters *parameters = argument;
-  startRoutingProcess(parameters);
+  RoutingThreadArgument *rta = argument;
+
+  rta->result = startRoutingProcess(rta->parameters);
   return NULL;
 }
 #endif /* GOT_PTHREADS */
@@ -549,9 +556,17 @@ startRouting (int column, int row, int screen) {
   };
 
 #ifdef GOT_PTHREADS
-  void *result;
-  int started = callThreadFunction("cursor-routing", runRoutingThread,
-                                   (void *)&parameters, &result);
+  int started = 0;
+
+  RoutingThreadArgument rta = {
+    .parameters = &parameters
+  };
+
+  if (callThreadFunction("cursor-routing", runRoutingThread, &rta, NULL)) {
+    if (rta.result) {
+      started = 1;
+    }
+  }
 
   return started;
 #else /* GOT_PTHREADS */
