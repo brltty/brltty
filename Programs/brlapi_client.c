@@ -1662,9 +1662,7 @@ brlapi_describeKeyCode (brlapi_keyCode_t keyCode, brlapi_describedKeyCode_t *dkc
     switch (ekc.type) {
       case BRLAPI_KEY_TYPE_CMD:
         switch (ekc.command & BRLAPI_KEY_CMD_BLK_MASK) {
-        //case BRLAPI_KEY_CMD_PASSCHAR:
           case BRLAPI_KEY_CMD_PASSDOTS:
-        //case BRLAPI_KEY_CMD_PASSKEY:
             break;
 
           case BRLAPI_KEY_CMD_PASSXT:

@@ -38,9 +38,10 @@ cmdWCharToBrlapi (wchar_t wc) {
 
 brlapi_keyCode_t
 cmdBrlttyToBrlapi (int command, int retainDots) {
-  brlapi_keyCode_t code;
-  int arg = BRL_ARG_GET(command);
   int blk = command & BRL_MSK_BLK;
+  int arg = BRL_ARG_GET(command);
+  brlapi_keyCode_t code;
+
   switch (blk) {
     case BRL_CMD_BLK(PASSCHAR):
       code = cmdWCharToBrlapi(arg);
@@ -132,42 +133,6 @@ cmdBrlapiToBrltty (brlapi_keyCode_t code) {
   switch (code & BRLAPI_KEY_TYPE_MASK) {
     case BRLAPI_KEY_TYPE_CMD:
       cmd = BRL_BLK_PUT((code & BRLAPI_KEY_CMD_BLK_MASK) >> BRLAPI_KEY_CMD_BLK_SHIFT);
-
-      switch (cmd) {
-        case BRL_CMD_BLK(PASSCHAR):
-        case BRL_CMD_BLK(PASSDOTS):
-        case BRL_CMD_BLK(PASSKEY):
-          cmd = cmd
-              | (code & BRLAPI_KEY_FLG_SHIFT   ? BRL_FLG_INPUT_SHIFT   : 0)
-              | (code & BRLAPI_KEY_FLG_UPPER   ? BRL_FLG_INPUT_UPPER   : 0)
-              | (code & BRLAPI_KEY_FLG_CONTROL ? BRL_FLG_INPUT_CONTROL : 0)
-              | (code & BRLAPI_KEY_FLG_META    ? BRL_FLG_INPUT_META    : 0)
-              | (code & BRLAPI_KEY_FLG_ALTGR   ? BRL_FLG_INPUT_ALTGR   : 0)
-              | (code & BRLAPI_KEY_FLG_GUI     ? BRL_FLG_INPUT_GUI     : 0)
-              ;
-          break;
-
-        case BRL_CMD_BLK(PASSXT):
-        case BRL_CMD_BLK(PASSAT):
-        case BRL_CMD_BLK(PASSPS2):
-          cmd = cmd
-              | (code & BRLAPI_KEY_FLG_KBD_RELEASE ? BRL_FLG_KBD_RELEASE : 0)
-              | (code & BRLAPI_KEY_FLG_KBD_EMUL0   ? BRL_FLG_KBD_EMUL0   : 0)
-              | (code & BRLAPI_KEY_FLG_KBD_EMUL1   ? BRL_FLG_KBD_EMUL1   : 0)
-              ;
-          break;
-
-        default:
-          cmd = cmd
-              | (code & BRLAPI_KEY_FLG_TOGGLE_ON     ? BRL_FLG_TOGGLE_ON     : 0)
-              | (code & BRLAPI_KEY_FLG_TOGGLE_OFF    ? BRL_FLG_TOGGLE_OFF    : 0)
-              | (code & BRLAPI_KEY_FLG_MOTION_ROUTE  ? BRL_FLG_MOTION_ROUTE  : 0)
-              | (code & BRLAPI_KEY_FLG_MOTION_SCALED ? BRL_FLG_MOTION_SCALED : 0)
-              | (code & BRLAPI_KEY_FLG_MOTION_TOLEFT ? BRL_FLG_MOTION_TOLEFT : 0)
-              ;
-          break;
-      }
-
       cmd |= BRL_ARG_SET((code & BRLAPI_KEY_CMD_ARG_MASK) >> BRLAPI_KEY_CMD_ARG_SHIFT);
       break;
 
@@ -209,6 +174,41 @@ cmdBrlapiToBrltty (brlapi_keyCode_t code) {
 
     default:
       return EOF;
+  }
+
+  switch (cmd & BRL_MSK_BLK) {
+    case BRL_CMD_BLK(PASSCHAR):
+    case BRL_CMD_BLK(PASSDOTS):
+    case BRL_CMD_BLK(PASSKEY):
+      cmd = cmd
+          | (code & BRLAPI_KEY_FLG_SHIFT   ? BRL_FLG_INPUT_SHIFT   : 0)
+          | (code & BRLAPI_KEY_FLG_UPPER   ? BRL_FLG_INPUT_UPPER   : 0)
+          | (code & BRLAPI_KEY_FLG_CONTROL ? BRL_FLG_INPUT_CONTROL : 0)
+          | (code & BRLAPI_KEY_FLG_META    ? BRL_FLG_INPUT_META    : 0)
+          | (code & BRLAPI_KEY_FLG_ALTGR   ? BRL_FLG_INPUT_ALTGR   : 0)
+          | (code & BRLAPI_KEY_FLG_GUI     ? BRL_FLG_INPUT_GUI     : 0)
+          ;
+      break;
+
+    case BRL_CMD_BLK(PASSXT):
+    case BRL_CMD_BLK(PASSAT):
+    case BRL_CMD_BLK(PASSPS2):
+      cmd = cmd
+          | (code & BRLAPI_KEY_FLG_KBD_RELEASE ? BRL_FLG_KBD_RELEASE : 0)
+          | (code & BRLAPI_KEY_FLG_KBD_EMUL0   ? BRL_FLG_KBD_EMUL0   : 0)
+          | (code & BRLAPI_KEY_FLG_KBD_EMUL1   ? BRL_FLG_KBD_EMUL1   : 0)
+          ;
+      break;
+
+    default:
+      cmd = cmd
+          | (code & BRLAPI_KEY_FLG_TOGGLE_ON     ? BRL_FLG_TOGGLE_ON     : 0)
+          | (code & BRLAPI_KEY_FLG_TOGGLE_OFF    ? BRL_FLG_TOGGLE_OFF    : 0)
+          | (code & BRLAPI_KEY_FLG_MOTION_ROUTE  ? BRL_FLG_MOTION_ROUTE  : 0)
+          | (code & BRLAPI_KEY_FLG_MOTION_SCALED ? BRL_FLG_MOTION_SCALED : 0)
+          | (code & BRLAPI_KEY_FLG_MOTION_TOLEFT ? BRL_FLG_MOTION_TOLEFT : 0)
+          ;
+      break;
   }
 
   return cmd;
