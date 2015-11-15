@@ -28,6 +28,9 @@
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Nivel de Registro</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Categorías de Registro</string>
+  <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Registra Eventos de Accesibilidad</string>
+  <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">Registra Pantalla Renderizada</string>
+  <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Registra Eventos de Teclado</string>
 
   <string name="DEVICES_BUTTON_SELECTED">Dispositivo Seleccionado</string>
   <string name="DEVICES_BUTTON_ADD">Añada un Dispositivo</string>
