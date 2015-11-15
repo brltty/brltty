@@ -27,20 +27,25 @@ typedef struct {
   const char *name;
   const char *description;
   int code;
+
   unsigned isToggle:1;
+
   unsigned isMotion:1;
+  unsigned isRow:1;
   unsigned isVertical:1;
   unsigned isHorizontal:1;
   unsigned isPanning:1;
-  unsigned isRouting:1;
-  unsigned isColumn:1;
-  unsigned isRow:1;
-  unsigned isOffset:1;
-  unsigned isRange:1;
+
   unsigned isInput:1;
   unsigned isCharacter:1;
   unsigned isBraille:1;
+
   unsigned isKeyboard:1;
+
+  unsigned isRouting:1;
+  unsigned isColumn:1;
+  unsigned isOffset:1;
+  unsigned isRange:1;
 } CommandEntry;
 
 #ifdef __cplusplus

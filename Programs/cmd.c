@@ -32,6 +32,31 @@ const CommandEntry commandTable[] = {
   {.name=NULL, .code=EOF, .description=NULL}
 };
 
+const CommandModifierEntry commandModifierTable_toggle[] = {
+  {.name="on" , .bit=BRL_FLG_TOGGLE_ON },
+  {.name="off", .bit=BRL_FLG_TOGGLE_OFF},
+  {.name=NULL , .bit=0                 }
+};
+
+const CommandModifierEntry commandModifierTable_motion[] = {
+  {.name="route", .bit=BRL_FLG_MOTION_ROUTE},
+  {.name=NULL   , .bit=0                   }
+};
+
+const CommandModifierEntry commandModifierTable_input[] = {
+  {.name="shift"  , .bit=BRL_FLG_CHAR_SHIFT  },
+  {.name="control", .bit=BRL_FLG_CHAR_CONTROL},
+  {.name="meta"   , .bit=BRL_FLG_CHAR_META   },
+  {.name="altgr"  , .bit=BRL_FLG_CHAR_ALTGR  },
+  {.name="gui"    , .bit=BRL_FLG_CHAR_GUI    },
+  {.name=NULL     , .bit=0                   }
+};
+
+const CommandModifierEntry commandModifierTable_character[] = {
+  {.name="upper", .bit=BRL_FLG_CHAR_UPPER},
+  {.name=NULL   , .bit=0                 }
+};
+
 const CommandModifierEntry commandModifierTable_braille[] = {
   {.name="dot1" , .bit=BRL_DOT1},
   {.name="dot2" , .bit=BRL_DOT2},
@@ -45,20 +70,6 @@ const CommandModifierEntry commandModifierTable_braille[] = {
   {.name=NULL   , .bit=0       }
 };
 
-const CommandModifierEntry commandModifierTable_character[] = {
-  {.name="upper", .bit=BRL_FLG_CHAR_UPPER},
-  {.name=NULL   , .bit=0                 }
-};
-
-const CommandModifierEntry commandModifierTable_input[] = {
-  {.name="shift"  , .bit=BRL_FLG_CHAR_SHIFT  },
-  {.name="control", .bit=BRL_FLG_CHAR_CONTROL},
-  {.name="meta"   , .bit=BRL_FLG_CHAR_META   },
-  {.name="altgr"  , .bit=BRL_FLG_CHAR_ALTGR  },
-  {.name="gui"    , .bit=BRL_FLG_CHAR_GUI    },
-  {.name=NULL     , .bit=0                   }
-};
-
 const CommandModifierEntry commandModifierTable_keyboard[] = {
   {.name="release", .bit=BRL_FLG_KBD_RELEASE},
   {.name="emul0"  , .bit=BRL_FLG_KBD_EMUL0  },
@@ -70,17 +81,6 @@ const CommandModifierEntry commandModifierTable_line[] = {
   {.name="scaled", .bit=BRL_FLG_LINE_SCALED},
   {.name="toleft", .bit=BRL_FLG_LINE_TOLEFT},
   {.name=NULL    , .bit=0                  }
-};
-
-const CommandModifierEntry commandModifierTable_motion[] = {
-  {.name="route", .bit=BRL_FLG_MOTION_ROUTE},
-  {.name=NULL   , .bit=0                   }
-};
-
-const CommandModifierEntry commandModifierTable_toggle[] = {
-  {.name="on" , .bit=BRL_FLG_TOGGLE_ON },
-  {.name="off", .bit=BRL_FLG_TOGGLE_OFF},
-  {.name=NULL , .bit=0                 }
 };
 
 static int
