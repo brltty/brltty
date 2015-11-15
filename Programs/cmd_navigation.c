@@ -280,12 +280,15 @@ toNextNonblankWindow (void) {
 
 static int
 handleNavigationCommands (int command, void *data) {
+  int oldwiny = ses->winy;
+
   switch (command & BRL_MSK_CMD) {
     case BRL_CMD_TOP_LEFT:
       ses->winx = 0;
     case BRL_CMD_TOP:
       ses->winy = 0;
       break;
+
     case BRL_CMD_BOT_LEFT:
       ses->winx = 0;
     case BRL_CMD_BOT:
@@ -672,7 +675,6 @@ handleNavigationCommands (int command, void *data) {
           }
           if (arg < scr.rows) {
             slideWindowVertically(arg);
-            if (flags & BRL_FLG_MOTION_TOLEFT) ses->winx = 0;
           } else {
             alert(ALERT_COMMAND_REJECTED);
           }
@@ -742,6 +744,12 @@ handleNavigationCommands (int command, void *data) {
       }
 
       break;
+    }
+  }
+
+  if (ses->winy != oldwiny) {
+    if (command & BRL_FLG_MOTION_TOLEFT) {
+      ses->winx = 0;
     }
   }
 
