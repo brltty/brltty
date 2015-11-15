@@ -71,7 +71,8 @@ cmdBrlttyToBrlapi (int command, int retainDots) {
         default: {
           int key = arg - BRL_KEY_FUNCTION;
           if (key < 0) return EOF;
-          code = BRLAPI_KEY_SYM_FUNCTION | key;
+          if (key > 34) return EOF;
+          code = BRLAPI_KEY_SYM_FUNCTION + key;
           break;
         }
       }
