@@ -28,6 +28,9 @@
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Livello di Log</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Categorie Log</string>
+  <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Log Eventi Accessibilità</string>
+  <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">Log Layout Schermo</string>
+  <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Log Eventi Tastiera</string>
 
   <string name="DEVICES_BUTTON_SELECTED">Dispositivo Selezionato</string>
   <string name="DEVICES_BUTTON_ADD">Aggiungi Dispositivo</string>
