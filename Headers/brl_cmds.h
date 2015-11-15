@@ -353,7 +353,7 @@ typedef enum {
 #define BRL_DOT6 BRL_ARG_DOT(6) /* lower-right dot of standard braille cell */
 #define BRL_DOT7 BRL_ARG_DOT(7) /* lower-left dot of computer braille cell */
 #define BRL_DOT8 BRL_ARG_DOT(8) /* lower-right dot of computer braille cell */
-#define BRL_DOTC BRL_ARG_DOT(9) /* space key pressed */
+#define BRL_DOTC BRL_ARG_DOT(9) /* chord (space bar on braille keyboard) */
 
 #ifdef __cplusplus
 }
