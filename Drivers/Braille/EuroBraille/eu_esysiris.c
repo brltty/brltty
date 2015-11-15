@@ -674,8 +674,8 @@ makeKeyboardCommand (BrailleDisplay *brl, const unsigned char *packet) {
 
   if (!command) return BRL_CMD_NOOP;
 
-  if (c & 0X02) command |= BRL_FLG_CHAR_CONTROL;
-  if (c & 0X04) command |= BRL_FLG_CHAR_META;
+  if (c & 0X02) command |= BRL_FLG_INPUT_CONTROL;
+  if (c & 0X04) command |= BRL_FLG_INPUT_META;
   return command;
 }
 

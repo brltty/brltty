@@ -374,8 +374,8 @@ int brl_keyToCommand(BrailleDisplay *brl, KeyTableCommandContext context, int co
       case BRL_VSKEY_PLOC_PLOC_S: return BRL_CMD_PREFSAVE;
       case BRL_VSKEY_PLOC_PLOC_T: return BRL_CMD_CSRTRK;
       case BRL_VSKEY_PLOC_PLOC_U: return BRL_CMD_KEY(PAGE_UP);
-      case BRL_VSKEY_CONTROL: ctrlpressed = BRL_FLG_CHAR_CONTROL; return BRL_CMD_NOOP;
-      case BRL_VSKEY_ALT: altpressed = BRL_FLG_CHAR_META; return BRL_CMD_NOOP;   
+      case BRL_VSKEY_CONTROL: ctrlpressed = BRL_FLG_INPUT_CONTROL; return BRL_CMD_NOOP;
+      case BRL_VSKEY_ALT: altpressed = BRL_FLG_INPUT_META; return BRL_CMD_NOOP;   
       case BRL_VSKEY_ESCAPE: return BRL_CMD_KEY(ESCAPE);
       default: return EOF;
     }

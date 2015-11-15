@@ -498,15 +498,15 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
         switch (vkey) {
           case 0XA2:
-            inputFlags |= BRL_FLG_CHAR_CONTROL;
+            inputFlags |= BRL_FLG_INPUT_CONTROL;
             break;
 
           case 0XA4:
-            inputFlags |= BRL_FLG_CHAR_META;
+            inputFlags |= BRL_FLG_INPUT_META;
             break;
 
           case 0X91:
-            inputFlags |= BRL_FLG_CHAR_SHIFT;
+            inputFlags |= BRL_FLG_INPUT_SHIFT;
             break;
 
           default: {

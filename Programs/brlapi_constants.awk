@@ -48,8 +48,8 @@ function brlKey(name, symbol, value, help) {
 function brlFlag(name, symbol, value, help) {
   if (value ~ /^0[xX][0-9a-fA-F]+0000$/) {
     value = substr(value, 1, length(value)-4)
-    if (name ~ /^CHAR_/) {
-      name = substr(name, 6)
+    if (name ~ /^INPUT_/) {
+      name = substr(name, 7)
     } else {
       value = value "00"
     }

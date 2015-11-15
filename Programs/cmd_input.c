@@ -109,12 +109,12 @@ applyModifierFlags (InputCommandData *icd, int *flags) {
 
 static int
 insertKey (ScreenKey key, int flags) {
-  if (flags & BRL_FLG_CHAR_SHIFT) key |= SCR_KEY_SHIFT;
-  if (flags & BRL_FLG_CHAR_UPPER) key |= SCR_KEY_UPPER;
-  if (flags & BRL_FLG_CHAR_CONTROL) key |= SCR_KEY_CONTROL;
-  if (flags & BRL_FLG_CHAR_META) key |= SCR_KEY_ALT_LEFT;
-  if (flags & BRL_FLG_CHAR_ALTGR) key |= SCR_KEY_ALT_RIGHT;
-  if (flags & BRL_FLG_CHAR_GUI) key |= SCR_KEY_GUI;
+  if (flags & BRL_FLG_INPUT_SHIFT) key |= SCR_KEY_SHIFT;
+  if (flags & BRL_FLG_INPUT_UPPER) key |= SCR_KEY_UPPER;
+  if (flags & BRL_FLG_INPUT_CONTROL) key |= SCR_KEY_CONTROL;
+  if (flags & BRL_FLG_INPUT_META) key |= SCR_KEY_ALT_LEFT;
+  if (flags & BRL_FLG_INPUT_ALTGR) key |= SCR_KEY_ALT_RIGHT;
+  if (flags & BRL_FLG_INPUT_GUI) key |= SCR_KEY_GUI;
   return insertScreenKey(key);
 }
 
@@ -165,27 +165,27 @@ handleInputCommands (int command, void *data) {
       int flag;
 
     case BRL_CMD_SHIFT:
-      flag = BRL_FLG_CHAR_SHIFT;
+      flag = BRL_FLG_INPUT_SHIFT;
       goto doModifier;
 
     case BRL_CMD_UPPER:
-      flag = BRL_FLG_CHAR_UPPER;
+      flag = BRL_FLG_INPUT_UPPER;
       goto doModifier;
 
     case BRL_CMD_CONTROL:
-      flag = BRL_FLG_CHAR_CONTROL;
+      flag = BRL_FLG_INPUT_CONTROL;
       goto doModifier;
 
     case BRL_CMD_META:
-      flag = BRL_FLG_CHAR_META;
+      flag = BRL_FLG_INPUT_META;
       goto doModifier;
 
     case BRL_CMD_ALTGR:
-      flag = BRL_FLG_CHAR_ALTGR;
+      flag = BRL_FLG_INPUT_ALTGR;
       goto doModifier;
 
     case BRL_CMD_GUI:
-      flag = BRL_FLG_CHAR_GUI;
+      flag = BRL_FLG_INPUT_GUI;
       goto doModifier;
 
     doModifier:

@@ -54,16 +54,16 @@ const CommandModifierEntry commandModifierTable_vertical[] = {
 };
 
 const CommandModifierEntry commandModifierTable_input[] = {
-  {.name="shift"  , .bit=BRL_FLG_CHAR_SHIFT  },
-  {.name="control", .bit=BRL_FLG_CHAR_CONTROL},
-  {.name="meta"   , .bit=BRL_FLG_CHAR_META   },
-  {.name="altgr"  , .bit=BRL_FLG_CHAR_ALTGR  },
-  {.name="gui"    , .bit=BRL_FLG_CHAR_GUI    },
+  {.name="shift"  , .bit=BRL_FLG_INPUT_SHIFT  },
+  {.name="control", .bit=BRL_FLG_INPUT_CONTROL},
+  {.name="meta"   , .bit=BRL_FLG_INPUT_META   },
+  {.name="altgr"  , .bit=BRL_FLG_INPUT_ALTGR  },
+  {.name="gui"    , .bit=BRL_FLG_INPUT_GUI    },
   {.name=NULL     , .bit=0                   }
 };
 
 const CommandModifierEntry commandModifierTable_character[] = {
-  {.name="upper", .bit=BRL_FLG_CHAR_UPPER},
+  {.name="upper", .bit=BRL_FLG_INPUT_UPPER},
   {.name=NULL   , .bit=0                 }
 };
 

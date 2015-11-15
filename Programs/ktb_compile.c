@@ -40,12 +40,12 @@ const KeyboardFunction keyboardFunctionTable[] = {
   {.name="dot7", .bit=BRL_DOT7},
   {.name="dot8", .bit=BRL_DOT8},
   {.name="space", .bit=BRL_DOTC},
-  {.name="shift", .bit=BRL_FLG_CHAR_SHIFT},
-  {.name="uppercase", .bit=BRL_FLG_CHAR_UPPER},
-  {.name="control", .bit=BRL_FLG_CHAR_CONTROL},
-  {.name="meta", .bit=BRL_FLG_CHAR_META},
-  {.name="altgr", .bit=BRL_FLG_CHAR_ALTGR},
-  {.name="gui", .bit=BRL_FLG_CHAR_GUI}
+  {.name="shift", .bit=BRL_FLG_INPUT_SHIFT},
+  {.name="uppercase", .bit=BRL_FLG_INPUT_UPPER},
+  {.name="control", .bit=BRL_FLG_INPUT_CONTROL},
+  {.name="meta", .bit=BRL_FLG_INPUT_META},
+  {.name="altgr", .bit=BRL_FLG_INPUT_ALTGR},
+  {.name="gui", .bit=BRL_FLG_INPUT_GUI}
 };
 unsigned char keyboardFunctionCount = ARRAY_COUNT(keyboardFunctionTable);
 

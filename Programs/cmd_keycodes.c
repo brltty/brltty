@@ -234,11 +234,11 @@ handleKey (const KeyEntry *key, int release, unsigned int *modifiers) {
       if (blk) {
         if (!release) {
           if (blk == BRL_CMD_BLK(PASSCHAR)) {
-            if (MOD_TST(MOD_LOCK_CAPS, *modifiers)) cmd |= BRL_FLG_CHAR_UPPER;
-            if (MOD_TST(MOD_ALT_LEFT, *modifiers)) cmd |= BRL_FLG_CHAR_META;
-            if (MOD_TST(MOD_ALT_RIGHT, *modifiers)) cmd |= BRL_FLG_CHAR_ALTGR;
-            if (MOD_TST(MOD_GUI_LEFT, *modifiers) || MOD_TST(MOD_GUI_RIGHT, *modifiers)) cmd |= BRL_FLG_CHAR_GUI;
-            if (MOD_TST(MOD_CONTROL_LEFT, *modifiers) || MOD_TST(MOD_CONTROL_RIGHT, *modifiers)) cmd |= BRL_FLG_CHAR_CONTROL;
+            if (MOD_TST(MOD_LOCK_CAPS, *modifiers)) cmd |= BRL_FLG_INPUT_UPPER;
+            if (MOD_TST(MOD_ALT_LEFT, *modifiers)) cmd |= BRL_FLG_INPUT_META;
+            if (MOD_TST(MOD_ALT_RIGHT, *modifiers)) cmd |= BRL_FLG_INPUT_ALTGR;
+            if (MOD_TST(MOD_GUI_LEFT, *modifiers) || MOD_TST(MOD_GUI_RIGHT, *modifiers)) cmd |= BRL_FLG_INPUT_GUI;
+            if (MOD_TST(MOD_CONTROL_LEFT, *modifiers) || MOD_TST(MOD_CONTROL_RIGHT, *modifiers)) cmd |= BRL_FLG_INPUT_CONTROL;
           } else if ((blk == BRL_CMD_BLK(PASSKEY)) && MOD_TST(MOD_ALT_LEFT, *modifiers)) {
             int arg = cmd & BRL_MSK_ARG;
 

@@ -679,18 +679,18 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context)
 #ifndef USE_TEXTTRANS
       if (ctrl && key.asc >= 96)
 	/* old code was (key.asc & 0x1f) */
-	temp = BRL_CMD_BLK(PASSCHAR) | key.asc | BRL_FLG_CHAR_CONTROL;
+	temp = BRL_CMD_BLK(PASSCHAR) | key.asc | BRL_FLG_INPUT_CONTROL;
       else if (meta && key.asc >= 96)
-	temp = BRL_CMD_BLK(PASSCHAR) | key.asc | BRL_FLG_CHAR_META;
+	temp = BRL_CMD_BLK(PASSCHAR) | key.asc | BRL_FLG_INPUT_META;
       else if (shift && (key.asc & 0x40))
 	/* old code was (key.asc & 0xdf) */
-	temp = BRL_CMD_BLK(PASSCHAR) | key.asc | BRL_FLG_CHAR_SHIFT;
+	temp = BRL_CMD_BLK(PASSCHAR) | key.asc | BRL_FLG_INPUT_SHIFT;
       else
 	temp = BRL_CMD_BLK(PASSCHAR) | key.asc;
 #else /* USE_TEXTTRANS */
       temp = BRL_CMD_BLK(PASSDOTS) |
 	(keys_to_dots[key.raw &0x3F]
-	 | ((meta) ? BRL_FLG_CHAR_META : 0)
+	 | ((meta) ? BRL_FLG_INPUT_META : 0)
 	 | ((ctrl) ? (BRL_DOT7 | BRL_DOT8) : 
 	    (shift) ? BRL_DOT7 : 
 	    (dot8shift) ? BRL_DOT8 : 0));

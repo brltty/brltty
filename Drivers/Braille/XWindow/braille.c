@@ -387,10 +387,10 @@ static void keypress(Widget w, XEvent *event, String *params, Cardinal *num_para
     default: logMessage(LOG_DEBUG,"unsupported keysym %lx",keysym); return;
   }
 
-  if (modifiers & ControlMask) keypressed |= BRL_FLG_CHAR_CONTROL;
-  if (modifiers & Mod1Mask) keypressed |= BRL_FLG_CHAR_META;
-  if (modifiers & ShiftMask) keypressed |= BRL_FLG_CHAR_SHIFT;
-  if (modifiers & LockMask) keypressed |= BRL_FLG_CHAR_UPPER;
+  if (modifiers & ControlMask) keypressed |= BRL_FLG_INPUT_CONTROL;
+  if (modifiers & Mod1Mask) keypressed |= BRL_FLG_INPUT_META;
+  if (modifiers & ShiftMask) keypressed |= BRL_FLG_INPUT_SHIFT;
+  if (modifiers & LockMask) keypressed |= BRL_FLG_INPUT_UPPER;
   if (event->type != KeyPress) keypressed = BRL_CMD_NOOP;
 
   logMessage(LOG_DEBUG,"keypressed %#lx", keypressed);
@@ -478,11 +478,11 @@ static struct button buttons_simple[] = {
   { "<=",     BRL_CMD_FWINLTSKIP, 0, 3, 2 },
   { "v",      BRL_CMD_LNDN,   1, 4, 2 },
   { "=>",     BRL_CMD_FWINRTSKIP, 0, 5, 2 },
-  { "alt-c",  BRL_FLG_CHAR_META    | BRL_CMD_BLK(PASSCHAR) | 'c', 0, 3, 3 },
-  { "ctrl-c", BRL_FLG_CHAR_CONTROL | BRL_CMD_BLK(PASSCHAR) | 'c', 0, 4, 3 },
+  { "alt-c",  BRL_FLG_INPUT_META    | BRL_CMD_BLK(PASSCHAR) | 'c', 0, 3, 3 },
+  { "ctrl-c", BRL_FLG_INPUT_CONTROL | BRL_CMD_BLK(PASSCHAR) | 'c', 0, 4, 3 },
   { "a",      BRL_CMD_BLK(PASSCHAR)                        | 'a', 0, 5, 3 },
   { "A",      BRL_CMD_BLK(PASSCHAR)                        | 'A', 0, 6, 3 },
-  { "Alt-F1", BRL_FLG_CHAR_META | BRL_KEY_FUNCTION | BRL_CMD_BLK(PASSKEY) , 0, 7, 3 },
+  { "Alt-F1", BRL_FLG_INPUT_META | BRL_KEY_FUNCTION | BRL_CMD_BLK(PASSKEY) , 0, 7, 3 },
   { "Frez",   BRL_CMD_FREEZE,   0, 6, 0 },
   { "Help",   BRL_CMD_HELP,     0, 7, 0 },
   { "Pref",   BRL_CMD_PREFMENU, 0, 6, 1 },
