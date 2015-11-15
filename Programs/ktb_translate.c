@@ -298,7 +298,7 @@ logKeyEvent (
     STR_PRINTF(" (Ctx:%u Grp:%u Num:%u)", context, keyValue->group, keyValue->number);
 
     if (command != EOF) {
-      const CommandEntry *cmd = getCommandEntry(command);
+      const CommandEntry *cmd = findCommandEntry(command);
       const char *name = cmd? cmd->name: "?";
 
       STR_PRINTF(" -> %s (Cmd:%06X)", name, command);

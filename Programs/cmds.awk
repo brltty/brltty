@@ -64,6 +64,7 @@ function writeCommandEntry(name, symbol, value, help) {
       writeCommandAttribute("Range")
     } else if (help ~ / line$/) {
       writeCommandAttribute("Row")
+      writeCommandAttribute("Vertical")
     } else {
       writeCommandAttribute("Offset")
     }

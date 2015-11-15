@@ -667,11 +667,12 @@ handleNavigationCommands (int command, void *data) {
         }
 
         case BRL_CMD_BLK(GOTOLINE):
-          if (flags & BRL_FLG_LINE_SCALED)
+          if (flags & BRL_FLG_MOTION_SCALED) {
             arg = rescaleInteger(arg, BRL_MSK_ARG, scr.rows-1);
+          }
           if (arg < scr.rows) {
             slideWindowVertically(arg);
-            if (flags & BRL_FLG_LINE_TOLEFT) ses->winx = 0;
+            if (flags & BRL_FLG_MOTION_TOLEFT) ses->winx = 0;
           } else {
             alert(ALERT_COMMAND_REJECTED);
           }

@@ -233,14 +233,6 @@ typedef enum {
   BRL_basicCommandCount /* must be last */
 } BRL_BasicCommand;
 
-/* For explicitly setting toggles on/off. */
-#define BRL_FLG_TOGGLE_ON   0X010000 /* enable feature */
-#define BRL_FLG_TOGGLE_OFF  0X020000 /* disable feature */
-#define BRL_FLG_TOGGLE_MASK (BRL_FLG_TOGGLE_ON | BRL_FLG_TOGGLE_OFF) /* mask for all toggle flags */
-
-/* For automatic cursor routing. */
-#define BRL_FLG_MOTION_ROUTE 0X040000 /* bring screen cursor into braille window after function */
-
 /*
  * Please comment all BRL_BLK_* definitions. They are
  * used during automatic help file generation.
@@ -313,8 +305,13 @@ typedef enum {
 #define BRL_CMD_KFN(n) (BRL_CMD_KEY(FUNCTION) + ((n) - 1))
 #define BRL_CMD_CHAR(wc) (BRL_CMD_BLK(PASSCHAR) | BRL_ARG_SET((wc)))
 
-#define BRL_FLG_LINE_SCALED 0X010000 /* scale arg=0X00-0XFF to screen height */
-#define BRL_FLG_LINE_TOLEFT 0X020000 /* go to beginning of line */
+#define BRL_FLG_TOGGLE_ON   0X010000 /* enable feature */
+#define BRL_FLG_TOGGLE_OFF  0X020000 /* disable feature */
+#define BRL_FLG_TOGGLE_MASK (BRL_FLG_TOGGLE_ON | BRL_FLG_TOGGLE_OFF) /* mask for all toggle flags */
+
+#define BRL_FLG_MOTION_SCALED 0X010000 /* scale arg=0X00-0XFF to screen height */
+#define BRL_FLG_MOTION_TOLEFT 0X020000 /* go to beginning of line */
+#define BRL_FLG_MOTION_ROUTE  0X040000 /* bring screen cursor into braille window after function */
 
 #define BRL_FLG_CHAR_SHIFT   0X010000 /* shift key pressed */
 #define BRL_FLG_CHAR_UPPER   0X020000 /* convert to uppercase */

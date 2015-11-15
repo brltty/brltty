@@ -82,8 +82,8 @@ cmdBrlttyToBrlapi (int command, int retainDots) {
 
   if (blk == BRL_CMD_BLK(GOTOLINE)) {
     code = code
-         | (command & BRL_FLG_LINE_SCALED	? BRLAPI_KEY_FLG_LINE_SCALED	: 0)
-         | (command & BRL_FLG_LINE_TOLEFT	? BRLAPI_KEY_FLG_LINE_TOLEFT	: 0)
+         | (command & BRL_FLG_MOTION_SCALED	? BRLAPI_KEY_FLG_MOTION_SCALED	: 0)
+         | (command & BRL_FLG_MOTION_TOLEFT	? BRLAPI_KEY_FLG_MOTION_TOLEFT	: 0)
          ;
   }
 
@@ -153,8 +153,8 @@ cmdBrlapiToBrltty (brlapi_keyCode_t code) {
          | (code & BRLAPI_KEY_FLG_TOGGLE_ON    ? BRL_FLG_TOGGLE_ON    : 0)
          | (code & BRLAPI_KEY_FLG_TOGGLE_OFF   ? BRL_FLG_TOGGLE_OFF   : 0)
          | (code & BRLAPI_KEY_FLG_MOTION_ROUTE ? BRL_FLG_MOTION_ROUTE : 0)
-         | (code & BRLAPI_KEY_FLG_LINE_SCALED  ? BRL_FLG_LINE_SCALED  : 0)
-         | (code & BRLAPI_KEY_FLG_LINE_TOLEFT  ? BRL_FLG_LINE_TOLEFT  : 0)
+         | (code & BRLAPI_KEY_FLG_MOTION_SCALED  ? BRL_FLG_MOTION_SCALED  : 0)
+         | (code & BRLAPI_KEY_FLG_MOTION_TOLEFT  ? BRL_FLG_MOTION_TOLEFT  : 0)
          | (code & BRLAPI_KEY_FLG_SHIFT	       ? BRL_FLG_CHAR_SHIFT   : 0)
          | (code & BRLAPI_KEY_FLG_UPPER	       ? BRL_FLG_CHAR_UPPER   : 0)
          | (code & BRLAPI_KEY_FLG_CONTROL      ? BRL_FLG_CHAR_CONTROL : 0)

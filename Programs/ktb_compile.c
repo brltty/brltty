@@ -737,10 +737,14 @@ parseCommandOperand (DataFile *file, BoundCommand *cmd, const wchar_t *character
 
     if ((*command)->isMotion) {
       if (applyCommandModifier(&cmd->value, commandModifierTable_motion, &modifier)) continue;
+    }
 
-      if ((*command)->isRow) {
-        if (applyCommandModifier(&cmd->value, commandModifierTable_line, &modifier)) continue;
-      }
+    if ((*command)->isRow) {
+      if (applyCommandModifier(&cmd->value, commandModifierTable_row, &modifier)) continue;
+    }
+
+    if ((*command)->isVertical) {
+      if (applyCommandModifier(&cmd->value, commandModifierTable_vertical, &modifier)) continue;
     }
 
     if ((*command)->isInput) {
@@ -1574,7 +1578,7 @@ compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
     {
       BoundCommand *cmd = &ktd.nullBoundCommand;
 
-      cmd->entry = getCommandEntry(cmd->value = BRL_CMD_NOOP);
+      cmd->entry = findCommandEntry(cmd->value = BRL_CMD_NOOP);
     }
 
     if ((ktd.table = malloc(sizeof(*ktd.table)))) {

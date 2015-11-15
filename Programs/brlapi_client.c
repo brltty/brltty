@@ -1666,8 +1666,8 @@ brlapi_describeKeyCode (brlapi_keyCode_t keyCode, brlapi_describedKeyCode_t *dkc
             break;
 
           case BRLAPI_KEY_CMD_GOTOLINE:
-            FLAG(LINE_SCALED);
-            FLAG(LINE_TOLEFT);
+            FLAG(MOTION_SCALED);
+            FLAG(MOTION_TOLEFT);
             break;
 
           case BRLAPI_KEY_CMD_PASSXT:

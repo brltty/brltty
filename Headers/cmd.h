@@ -26,20 +26,21 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern const CommandEntry commandTable[];
-extern const CommandEntry *getCommandEntry (int code);
+extern const CommandEntry *findCommandEntry (int code);
 
 typedef struct {
   const char *name;
   int bit;
 } CommandModifierEntry;
 
-extern const CommandModifierEntry commandModifierTable_braille[];
-extern const CommandModifierEntry commandModifierTable_character[];
-extern const CommandModifierEntry commandModifierTable_input[];
-extern const CommandModifierEntry commandModifierTable_keyboard[];
-extern const CommandModifierEntry commandModifierTable_line[];
-extern const CommandModifierEntry commandModifierTable_motion[];
 extern const CommandModifierEntry commandModifierTable_toggle[];
+extern const CommandModifierEntry commandModifierTable_motion[];
+extern const CommandModifierEntry commandModifierTable_row[];
+extern const CommandModifierEntry commandModifierTable_vertical[];
+extern const CommandModifierEntry commandModifierTable_input[];
+extern const CommandModifierEntry commandModifierTable_character[];
+extern const CommandModifierEntry commandModifierTable_braille[];
+extern const CommandModifierEntry commandModifierTable_keyboard[];
 
 typedef enum {
   CDO_IncludeName    = 0X1,

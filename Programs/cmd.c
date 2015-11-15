@@ -43,6 +43,16 @@ const CommandModifierEntry commandModifierTable_motion[] = {
   {.name=NULL   , .bit=0                   }
 };
 
+const CommandModifierEntry commandModifierTable_row[] = {
+  {.name="scaled", .bit=BRL_FLG_MOTION_SCALED},
+  {.name=NULL    , .bit=0                  }
+};
+
+const CommandModifierEntry commandModifierTable_vertical[] = {
+  {.name="toleft", .bit=BRL_FLG_MOTION_TOLEFT},
+  {.name=NULL    , .bit=0                  }
+};
+
 const CommandModifierEntry commandModifierTable_input[] = {
   {.name="shift"  , .bit=BRL_FLG_CHAR_SHIFT  },
   {.name="control", .bit=BRL_FLG_CHAR_CONTROL},
@@ -77,12 +87,6 @@ const CommandModifierEntry commandModifierTable_keyboard[] = {
   {.name=NULL     , .bit=0                  }
 };
 
-const CommandModifierEntry commandModifierTable_line[] = {
-  {.name="scaled", .bit=BRL_FLG_LINE_SCALED},
-  {.name="toleft", .bit=BRL_FLG_LINE_TOLEFT},
-  {.name=NULL    , .bit=0                  }
-};
-
 static int
 compareCommandCodes (const void *element1, const void *element2) {
   const CommandEntry *const *cmd1 = element1;
@@ -94,7 +98,7 @@ compareCommandCodes (const void *element1, const void *element2) {
 }
 
 const CommandEntry *
-getCommandEntry (int code) {
+findCommandEntry (int code) {
   static const CommandEntry **commandEntries = NULL;
   static int commandCount;
 
@@ -194,7 +198,7 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
   unsigned int arg = BRL_ARG_GET(command);
   unsigned int arg1 = BRL_CODE_GET(ARG, command);
   unsigned int arg2 = BRL_CODE_GET(EXT, command);
-  const CommandEntry *cmd = getCommandEntry(command);
+  const CommandEntry *cmd = findCommandEntry(command);
 
   if (!cmd) {
     STR_PRINTF("%s: %06X", gettext("unknown command"), command);
@@ -313,19 +317,18 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
     }
 
     if (cmd->isMotion) {
-      if (cmd->isRow) {
-        if (command & BRL_FLG_LINE_TOLEFT) {
-          STR_PRINTF(", %s", gettext("left margin"));
-        }
+      size_t length = formatCommandModifiers(STR_NEXT, STR_LEFT, command, commandModifierTable_motion);
+      STR_ADJUST(length);
+    }
 
-        if (command & BRL_FLG_LINE_SCALED) {
-          STR_PRINTF(", %s", gettext("normalized position"));
-        }
-      }
+    if (cmd->isRow) {
+      size_t length = formatCommandModifiers(STR_NEXT, STR_LEFT, command, commandModifierTable_row);
+      STR_ADJUST(length);
+    }
 
-      if (command & BRL_FLG_MOTION_ROUTE) {
-        STR_PRINTF(", %s", gettext("drag cursor"));
-      }
+    if (cmd->isVertical) {
+      size_t length = formatCommandModifiers(STR_NEXT, STR_LEFT, command, commandModifierTable_vertical);
+      STR_ADJUST(length);
     }
   }
 
