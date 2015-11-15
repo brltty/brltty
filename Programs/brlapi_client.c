@@ -1662,17 +1662,9 @@ brlapi_describeKeyCode (brlapi_keyCode_t keyCode, brlapi_describedKeyCode_t *dkc
     switch (ekc.type) {
       case BRLAPI_KEY_TYPE_CMD:
         switch (ekc.command & BRLAPI_KEY_CMD_BLK_MASK) {
-          case 0:
-          case BRLAPI_KEY_CMD_GOTOLINE:
-          case BRLAPI_KEY_CMD_PRINDENT:
-          case BRLAPI_KEY_CMD_NXINDENT:
-          case BRLAPI_KEY_CMD_PRDIFCHAR:
-          case BRLAPI_KEY_CMD_NXDIFCHAR:
-            FLAG(TOGGLE_ON);
-            FLAG(TOGGLE_OFF);
-            FLAG(MOTION_ROUTE);
-            FLAG(MOTION_SCALED);
-            FLAG(MOTION_TOLEFT);
+        //case BRLAPI_KEY_CMD_PASSCHAR:
+          case BRLAPI_KEY_CMD_PASSDOTS:
+        //case BRLAPI_KEY_CMD_PASSKEY:
             break;
 
           case BRLAPI_KEY_CMD_PASSXT:
@@ -1681,6 +1673,14 @@ brlapi_describeKeyCode (brlapi_keyCode_t keyCode, brlapi_describedKeyCode_t *dkc
             FLAG(KBD_RELEASE);
             FLAG(KBD_EMUL0);
             FLAG(KBD_EMUL1);
+            break;
+
+          default:
+            FLAG(TOGGLE_ON);
+            FLAG(TOGGLE_OFF);
+            FLAG(MOTION_ROUTE);
+            FLAG(MOTION_SCALED);
+            FLAG(MOTION_TOLEFT);
             break;
         }
         break;
