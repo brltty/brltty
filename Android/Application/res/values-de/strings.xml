@@ -28,6 +28,9 @@
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Protokollstufe</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Protokollkategorien</string>
+  <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Protokolliere Barrierefreiheitsereignisse</string>
+  <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">Protokolliere den Bildschirminhalt</string>
+  <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Protokolliere Tastaturereignisse</string>
 
   <string name="DEVICES_BUTTON_SELECTED">Gerät auswählen</string>
   <string name="DEVICES_BUTTON_ADD">Gerät hinzufügen</string>
