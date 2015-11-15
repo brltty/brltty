@@ -28,6 +28,9 @@
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Уровень журнала</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Категории журнала</string>
+  <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Log событий доступности</string>
+  <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">Log экранного представления</string>
+  <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Log клавиатурных событий</string>
 
   <string name="DEVICES_BUTTON_SELECTED">Выбранное устройство</string>
   <string name="DEVICES_BUTTON_ADD">Добавить устройство</string>
