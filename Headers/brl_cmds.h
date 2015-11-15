@@ -141,10 +141,10 @@ typedef enum {
   BRL_CMD_PREFLOAD /* restore preferences from disk */,
   
   /* menu navigation */
-  BRL_CMD_MENU_FIRST_ITEM /* go to first item */,
-  BRL_CMD_MENU_LAST_ITEM /* go to last item */,
-  BRL_CMD_MENU_PREV_ITEM /* go to previous item */,
-  BRL_CMD_MENU_NEXT_ITEM /* go to next item */,
+  BRL_CMD_MENU_FIRST_ITEM /* go up to first item */,
+  BRL_CMD_MENU_LAST_ITEM /* go down to last item */,
+  BRL_CMD_MENU_PREV_ITEM /* go up to previous item */,
+  BRL_CMD_MENU_NEXT_ITEM /* go down to next item */,
   BRL_CMD_MENU_PREV_SETTING /* select previous choice */,
   BRL_CMD_MENU_NEXT_SETTING /* select next choice */,
  

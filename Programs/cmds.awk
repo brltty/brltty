@@ -16,52 +16,66 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+function writeCommandField(name, value) {
+  print "  ." name " = " value ","
+}
+
+function writeCommandAttribute(attribute) {
+  writeCommandField("is" attribute, "1")
+}
+
 function writeCommandEntry(name, symbol, value, help) {
   if (help ~ /^deprecated /) return
 
   print "{ // " symbol
-  print "  .name = \"" name "\","
-  print "  .code = " value ","
+  writeCommandField("name", "\"" name "\"")
+  writeCommandField("code", value)
 
-  if (help ~ /^set .*\//) print "  .isToggle = 1,"
-  if (help ~ /^go /) print "  .isMotion = 1,"
-  if (help ~ /^bring /) print "  .isRouting = 1,"
+  if (help ~ /^set .*\//) writeCommandAttribute("Toggle")
+  if (help ~ /^bring /) writeCommandAttribute("Routing")
+
+  if (help ~ /^go /) {
+    writeCommandAttribute("Motion")
+    if (help ~ / (up|down|top|bottom) /) writeCommandAttribute("Vertical")
+    if (help ~ / (left|right|beginning|end) /) writeCommandAttribute("Horizontal")
+    if (help ~ / (backward|forward) /) writeCommandAttribute("Panning")
+  }
 
   if (symbol ~ /^BRL_BLK_/) {
     if (symbol ~ /^BRL_BLK_PASS/) {
       if (symbol ~ /PASS(CHAR|DOTS|KEY)/) {
-        print "  .isInput = 1,"
+        writeCommandAttribute("Input")
       }
 
       if (symbol ~ /PASSCHAR/) {
-        print "  .isCharacter = 1,"
+        writeCommandAttribute("Character")
       }
 
       if (symbol ~ /PASSDOTS/) {
-        print "  .isBraille = 1,"
+        writeCommandAttribute("Braille")
       }
 
       if (symbol ~ /PASS(XT|AT|PS2)/) {
-        print "  .isKeyboard = 1,"
+        writeCommandAttribute("Keyboard")
       }
     } else if (help ~ / character$/) {
-      print "  .isColumn = 1,"
+      writeCommandAttribute("Column")
     } else if (help ~ / characters /) {
-      print "  .isRange = 1,"
+      writeCommandAttribute("Range")
     } else if (help ~ / line$/) {
-      print "  .isRow = 1,"
+      writeCommandAttribute("Row")
     } else {
-      print "  .isOffset = 1,"
+      writeCommandAttribute("Offset")
     }
   } else if (symbol ~ /^BRL_KEY_/) {
-    print "  .isInput = 1,"
+    writeCommandAttribute("Input")
 
     if (symbol ~ /_FUNCTION/) {
-      print "  .isOffset = 1,"
+      writeCommandAttribute("Offset")
     }
   }
 
-  print "  .description = strtext(\"" help "\")"
+  writeCommandField("description", "strtext(\"" help "\")")
   print "},"
   print ""
 }
