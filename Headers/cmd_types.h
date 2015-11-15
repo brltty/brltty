@@ -29,7 +29,6 @@ typedef struct {
   int code;
 
   unsigned isToggle:1;
-
   unsigned isMotion:1;
   unsigned isRow:1;
   unsigned isVertical:1;
