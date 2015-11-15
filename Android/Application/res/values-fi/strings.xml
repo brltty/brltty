@@ -28,6 +28,9 @@
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Lokitaso</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Lokikategoriat</string>
+  <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Tallenna saavutettavuustapahtumat lokiin</string>
+  <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">Tallenna hahmonnettu näyttö lokiin</string>
+  <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Tallenna näppäimistötapahtumat lokiin</string>
 
   <string name="DEVICES_BUTTON_SELECTED">Valittu laite</string>
   <string name="DEVICES_BUTTON_ADD">Lisää laite</string>
