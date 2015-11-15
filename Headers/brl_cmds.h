@@ -309,9 +309,9 @@ typedef enum {
 #define BRL_FLG_TOGGLE_OFF  0X020000 /* disable feature */
 #define BRL_FLG_TOGGLE_MASK (BRL_FLG_TOGGLE_ON | BRL_FLG_TOGGLE_OFF) /* mask for all toggle flags */
 
-#define BRL_FLG_MOTION_SCALED 0X010000 /* scale arg=0X00-0XFF to screen height */
-#define BRL_FLG_MOTION_TOLEFT 0X020000 /* go to beginning of line */
 #define BRL_FLG_MOTION_ROUTE  0X040000 /* bring screen cursor into braille window after function */
+#define BRL_FLG_MOTION_SCALED 0X080000 /* scale arg=0X00-0XFF to screen height */
+#define BRL_FLG_MOTION_TOLEFT 0X100000 /* go to beginning of line */
 
 #define BRL_FLG_INPUT_SHIFT   0X010000 /* shift key pressed */
 #define BRL_FLG_INPUT_UPPER   0X020000 /* convert to uppercase */

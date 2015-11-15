@@ -1651,21 +1651,26 @@ brlapi_describeKeyCode (brlapi_keyCode_t keyCode, brlapi_describedKeyCode_t *dkc
 
 #define FLAG(name) if (keyCode & BRLAPI_KEY_FLG_##name) dkc->flag[dkc->flags++] = #name
     dkc->flags = 0;
-    FLAG(UPPER);
+
     FLAG(SHIFT);
+    FLAG(UPPER);
     FLAG(CONTROL);
     FLAG(META);
+    FLAG(ALTGR);
+    FLAG(GUI);
 
     switch (ekc.type) {
       case BRLAPI_KEY_TYPE_CMD:
         switch (ekc.command & BRLAPI_KEY_CMD_BLK_MASK) {
           case 0:
+          case BRLAPI_KEY_CMD_GOTOLINE:
+          case BRLAPI_KEY_CMD_PRINDENT:
+          case BRLAPI_KEY_CMD_NXINDENT:
+          case BRLAPI_KEY_CMD_PRDIFCHAR:
+          case BRLAPI_KEY_CMD_NXDIFCHAR:
             FLAG(TOGGLE_ON);
             FLAG(TOGGLE_OFF);
             FLAG(MOTION_ROUTE);
-            break;
-
-          case BRLAPI_KEY_CMD_GOTOLINE:
             FLAG(MOTION_SCALED);
             FLAG(MOTION_TOLEFT);
             break;
