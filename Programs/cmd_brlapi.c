@@ -27,13 +27,8 @@
 #ifdef ENABLE_API
 static brlapi_keyCode_t
 cmdWCharToBrlapi (wchar_t wc) {
-  if (iswLatin1(wc)) {
-    /* latin1 character */
-    return BRLAPI_KEY_TYPE_SYM | wc;
-  } else {
-    /* unicode character */
-    return BRLAPI_KEY_TYPE_SYM | BRLAPI_KEY_SYM_UNICODE | wc;
-  }
+  if (iswLatin1(wc)) return BRLAPI_KEY_TYPE_SYM | wc;
+  return BRLAPI_KEY_TYPE_SYM | BRLAPI_KEY_SYM_UNICODE | wc;
 }
 
 brlapi_keyCode_t
@@ -73,9 +68,12 @@ cmdBrlttyToBrlapi (int command, int retainDots) {
         case BRL_KEY_INSERT:       code = BRLAPI_KEY_SYM_INSERT;    break;
         case BRL_KEY_DELETE:       code = BRLAPI_KEY_SYM_DELETE;    break;
 
-        default:
-          code = BRLAPI_KEY_SYM_FUNCTION + arg - BRL_KEY_FUNCTION;
+        default: {
+          int key = arg - BRL_KEY_FUNCTION;
+          if (key < 0) return EOF;
+          code = BRLAPI_KEY_SYM_FUNCTION | key;
           break;
+        }
       }
       break;
 
