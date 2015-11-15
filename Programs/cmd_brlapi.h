@@ -30,7 +30,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #ifdef ENABLE_API
-extern brlapi_keyCode_t cmdBrlttyToBrlapi (int command, int retainDots);
+extern int cmdBrlttyToBrlapi (brlapi_keyCode_t *code, int command, int retainDots);
 extern int cmdBrlapiToBrltty (brlapi_keyCode_t code);
 #endif /* ENABLE_API */
 

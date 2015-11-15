@@ -2687,13 +2687,15 @@ static int api__handleCommand(int command) {
 
   if (command != EOF) {
     Connection *c;
-    brlapi_keyCode_t code = cmdBrlttyToBrlapi(command, 1);
+    brlapi_keyCode_t code;
+    cmdBrlttyToBrlapi(&code, command, 1);
 
     logMessage(LOG_CATEGORY(SERVER_EVENTS), "command %08x -> client code %016"BRLAPI_PRIxKEYCODE, command, code);
     c = whoGetsKey(&ttys, code, BRL_COMMANDS);
 
     if (!c) {
-      brlapi_keyCode_t alternate = cmdBrlttyToBrlapi(command, 0);
+      brlapi_keyCode_t alternate;
+      cmdBrlttyToBrlapi(&alternate, command, 0);
 
       if (alternate != code) {
         logMessage(LOG_CATEGORY(SERVER_EVENTS), "command %08x -> client code %016"BRLAPI_PRIxKEYCODE, command, alternate);
