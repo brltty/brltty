@@ -94,6 +94,10 @@ struct BrailleDataStruct {
 #ifdef HAVE_LINUX_INPUT_H
 #include <linux/input.h>
 
+#ifndef KEY_BRL_DOT9
+#define KEY_BRL_DOT9 0X1F9
+#endif /* KEY_BRL_DOT9 */
+
 static int
 handleKeyEvent (BrailleDisplay *brl, int code, int press) {
   KeyNumber number;
