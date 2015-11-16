@@ -1578,7 +1578,7 @@ static const brlapi_keyEntry_t brlapi_keyTable[] = {
   {.code=0X2000U, .name="CURRENCY"},
   {.code=0XFD00U, .name="3270"},
   {.code=0XFE00U, .name="XKB"},
-  {.code=0XFF00, .name="MISCELLANY"},
+  {.code=0XFF00U, .name="MISCELLANY"},
   {.code=0X01000000U, .name="UNICODE"},
 
   {.name=NULL}
