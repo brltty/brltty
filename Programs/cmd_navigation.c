@@ -283,17 +283,35 @@ handleNavigationCommands (int command, void *data) {
   int oldwiny = ses->winy;
 
   switch (command & BRL_MSK_CMD) {
+    {
+      int row;
+      int ok;
+
     case BRL_CMD_TOP_LEFT:
-      ses->winx = 0;
+      command |= BRL_FLG_MOTION_TOLEFT;
     case BRL_CMD_TOP:
-      ses->winy = 0;
-      break;
+      row = 0;
+      ok = ses->winy > row;
+      goto doTopBottom;
 
     case BRL_CMD_BOT_LEFT:
-      ses->winx = 0;
+      command |= BRL_FLG_MOTION_TOLEFT;
     case BRL_CMD_BOT:
-      ses->winy = scr.rows - brl.textRows;
+      row = MAX(scr.rows, brl.textRows) - brl.textRows;
+      ok = ses->winy < row;
+      goto doTopBottom;
+
+    doTopBottom:
+      if (ok) {
+        ses->winy = row;
+      } else if ((command & BRL_FLG_MOTION_TOLEFT) && (ses->winx > 0)) {
+        oldwiny = -1;
+      } else {
+        alert(ALERT_COMMAND_REJECTED);
+      }
+
       break;
+    }
 
     case BRL_CMD_WINUP:
       if (canMoveUp()) {
@@ -675,6 +693,7 @@ handleNavigationCommands (int command, void *data) {
           }
           if (arg < scr.rows) {
             slideWindowVertically(arg);
+            oldwiny = -1;
           } else {
             alert(ALERT_COMMAND_REJECTED);
           }
