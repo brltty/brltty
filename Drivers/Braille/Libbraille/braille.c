@@ -128,9 +128,9 @@ brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
         }
       braille_write(bytes, brl->textColumns);
 
-      if(brl->cursor >= 0)
+      if(brl->cursor != BRL_NO_CURSOR)
         {
-          braille_filter(translateOutputCell(getCursorDots()), brl->cursor);
+          braille_filter(translateOutputCell(getScreenCursorDots()), brl->cursor);
         }
 
       braille_render();
