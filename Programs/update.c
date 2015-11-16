@@ -211,6 +211,7 @@ showInfo (void) {
   const size_t size = brl.textColumns * brl.textRows;
   char text[size + 1];
 
+  brl.cursor = -1;
   if (!setStatusText(&brl, mode)) return 0;
 
   /* Here we must be careful. Some displays (e.g. Braille Lite 18)
