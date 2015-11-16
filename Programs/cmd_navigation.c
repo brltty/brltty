@@ -307,7 +307,7 @@ handleNavigationCommands (int command, void *data) {
       } else if ((command & BRL_FLG_MOTION_TOLEFT) && (ses->winx > 0)) {
         oldwiny = -1;
       } else {
-        alert(ALERT_COMMAND_REJECTED);
+        alert(ALERT_BOUNCE);
       }
 
       break;
