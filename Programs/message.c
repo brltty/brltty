@@ -138,7 +138,7 @@ ASYNC_TASK_CALLBACK(presentMessage) {
         buffer[count - 1] = WC_C('>');
       }
 
-      brl.cursor = -1;
+      brl.cursor = BRL_NO_CURSOR;
       if (!writeBrailleCharacters(mgp->mode, buffer, count)) {
         mgp->presented = 0;
         break;

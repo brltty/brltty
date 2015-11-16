@@ -128,7 +128,7 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
     arguments.regionSize = displaySize;
     arguments.andMask = and;
     arguments.orMask = brl->buffer;
-    arguments.cursor = brl->cursor + 1;
+    arguments.cursor = (brl->cursor != BRL_NO_CURSOR)? (brl->cursor + 1): BRLAPI_CURSOR_OFF;
     if (brlapi_write(&arguments)==0) {
       memcpy(prevData,brl->buffer,displaySize);
       wmemcpy(prevText,text,displaySize);

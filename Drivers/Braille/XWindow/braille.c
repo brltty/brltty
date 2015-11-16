@@ -234,7 +234,7 @@ static Widget displayb[WHOLESIZE];
 #ifdef USE_XAW
 static Pixmap check;
 #endif /* USE_XAW */
-static int lastcursor = -1;
+static int lastcursor = BRL_NO_CURSOR;
 #ifdef USE_XT
 static Atom wm_delete_window;
 static Widget vbox,keybox;
@@ -1062,7 +1062,7 @@ static int generateToplevel(void)
   memset(displayedWindow,0,sizeof(displayedWindow));
 #endif /* USE_XAW || USE_WINDOWS */
   memset(displayedVisual,0,sizeof(displayedVisual));
-  lastcursor = -1;
+  lastcursor = BRL_NO_CURSOR;
   return 1;
 }
 
@@ -1207,7 +1207,7 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 #endif
 
   if (lastcursor != brl->cursor) {
-    if (lastcursor>=0) {
+    if (lastcursor != BRL_NO_CURSOR) {
 #if defined(USE_XT)
       XtVaSetValues(display[lastcursor],
 	XtNforeground, displayForeground,
@@ -1220,7 +1220,7 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 #endif /* USE_ */
     }
     lastcursor = brl->cursor;
-    if (lastcursor>=0) {
+    if (lastcursor != BRL_NO_CURSOR) {
 #if defined(USE_XT)
       XtVaSetValues(display[lastcursor],
 	XtNforeground, displayBackground,

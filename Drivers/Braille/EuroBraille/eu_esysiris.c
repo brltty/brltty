@@ -890,7 +890,7 @@ writeVisual (BrailleDisplay *brl, const wchar_t *text) {
 
       if (cursorHasChanged(&previousCursor, brl->cursor, &forceCursorRewrite )) {
         const unsigned char packet[] = {
-          'L', 'C', ((brl->cursor >= 0)? (brl->cursor + 1): 0)
+          'L', 'C', ((brl->cursor != BRL_NO_CURSOR)? (brl->cursor + 1): 0)
         };
 
         if (writePacket(brl, packet, sizeof(packet)) == -1) return 0;

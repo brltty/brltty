@@ -870,13 +870,18 @@ isContracting (void) {
 
 int
 getUncontractedCursorOffset (int x, int y) {
-  return ((y == ses->winy) && (x >= ses->winx) && (x < scr.cols))? (x - ses->winx): -1;
+  return ((y == ses->winy) && (x >= ses->winx) && (x < scr.cols))?
+         (x - ses->winx):
+         BRL_NO_CURSOR;
 }
 
 int
 getContractedCursor (void) {
   int offset = getUncontractedCursorOffset(scr.posx, scr.posy);
-  return ((offset >= 0) && !ses->hideScreenCursor)? offset: CTB_NO_CURSOR;
+
+  return ((offset != BRL_NO_CURSOR) && !ses->hideScreenCursor)?
+         offset:
+         CTB_NO_CURSOR;
 }
 
 int

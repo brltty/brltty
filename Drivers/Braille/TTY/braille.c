@@ -288,13 +288,15 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   }
 
 #ifdef GOT_CURSES
-  if ((brl->cursor >= 0) && (brl->cursor < (brl->textColumns * brl->textRows)))
+  if ((brl->cursor != BRL_NO_CURSOR) && (brl->cursor < (brl->textColumns * brl->textRows))) {
     move(brl->cursor/brl->textColumns, brl->cursor%brl->textColumns);
-  else
+  } else {
     move(brl->textRows, 0);
+  }
+
   refresh();
 #else /* GOT_CURSES */
-  if ((brl->textRows == 1) && (brl->cursor >= 0) && (brl->cursor < brl->textColumns)) {
+  if ((brl->textRows == 1) && (brl->cursor != BRL_NO_CURSOR) && (brl->cursor < brl->textColumns)) {
     addch('\r');
     writeText(text, brl->cursor);
   } else {

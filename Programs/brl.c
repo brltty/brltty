@@ -34,33 +34,38 @@
 
 void
 constructBrailleDisplay (BrailleDisplay *brl) {
+  brl->data = NULL;
+
+  brl->setFirmness = NULL;
+  brl->setSensitivity = NULL;
+  brl->setAutorepeat = NULL;
+
   brl->textColumns = 0;
   brl->textRows = 1;
   brl->statusColumns = 0;
   brl->statusRows = 0;
+  brl->hideCursor = 0;
 
   brl->keyBindings = "all";
   brl->keyNames = NULL;
   brl->keyTable = NULL;
 
   brl->gioEndpoint = NULL;
-  brl->buffer = NULL;
   brl->writeDelay = 0;
 
+  brl->buffer = NULL;
   brl->isCoreBuffer = 0;
-  brl->resizeRequired = 0;
-  brl->noDisplay = 0;
-  brl->hideCursor = 0;
 
+  brl->bufferResized = NULL;
+  brl->resizeRequired = 0;
+
+  brl->cursor = BRL_NO_CURSOR;
+
+  brl->noDisplay = 0;
   brl->hasFailed = 0;
   brl->isOffline = 0;
   brl->isSuspended = 0;
 
-  brl->setFirmness = NULL;
-  brl->setSensitivity = NULL;
-  brl->setAutorepeat = NULL;
-
-  brl->bufferResized = NULL;
   brl->rotateInput = NULL;
   brl->api = NULL;
 
@@ -69,8 +74,6 @@ constructBrailleDisplay (BrailleDisplay *brl) {
   brl->acknowledgements.missing.timeout = BRAILLE_MESSAGE_ACKNOWLEDGEMENT_TIMEOUT;
   brl->acknowledgements.missing.count = 0;
   brl->acknowledgements.missing.limit = BRAILLE_MESSAGE_UNACKNOWLEDGEED_LIMIT;
-
-  brl->data = NULL;
 }
 
 void

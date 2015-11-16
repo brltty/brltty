@@ -30,6 +30,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#define BRL_NO_CURSOR -1
+
 typedef enum {
   BRL_FIRMNESS_MINIMUM,
   BRL_FIRMNESS_LOW,
@@ -66,32 +68,38 @@ typedef int SetBrailleAutorepeatMethod (BrailleDisplay *brl, int on, int delay, 
 typedef void SetRotateInputMethod (BrailleDisplay *brl, KeyGroup *group, KeyNumber *number);
 
 struct BrailleDisplayStruct {
-  unsigned int textColumns, textRows;
-  unsigned int statusColumns, statusRows;
+  BrailleData *data;
+
+  SetBrailleFirmnessMethod *setFirmness;
+  SetTouchSensitivityMethod *setSensitivity;
+  SetBrailleAutorepeatMethod *setAutorepeat;
+
+  unsigned int textColumns;
+  unsigned int textRows;
+  unsigned int statusColumns;
+  unsigned int statusRows;
+  unsigned hideCursor:1;
 
   const char *keyBindings;
   KEY_NAME_TABLES_REFERENCE keyNames;
   KeyTable *keyTable;
 
   GioEndpoint *gioEndpoint;
-  unsigned char *buffer;
   unsigned int writeDelay;
 
-  int cursor;
+  unsigned char *buffer;
   unsigned isCoreBuffer:1;
-  unsigned resizeRequired:1;
-  unsigned noDisplay:1;
-  unsigned hideCursor:1;
 
+  void (*bufferResized) (unsigned int rows, unsigned int columns);
+  unsigned resizeRequired:1;
+
+  int cursor;
+
+  unsigned noDisplay:1;
   unsigned hasFailed:1;
   unsigned isOffline:1;
   unsigned isSuspended:1;
 
-  SetBrailleFirmnessMethod *setFirmness;
-  SetTouchSensitivityMethod *setSensitivity;
-  SetBrailleAutorepeatMethod *setAutorepeat;
-
-  void (*bufferResized) (unsigned int rows, unsigned int columns);
   SetRotateInputMethod *rotateInput;
   const ApiMethods *api;
 
@@ -105,8 +113,6 @@ struct BrailleDisplayStruct {
       unsigned int limit;
     } missing;
   } acknowledgements;
-
-  BrailleData *data;
 };
 
 typedef struct {

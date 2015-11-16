@@ -562,7 +562,7 @@ writeVisual (BrailleDisplay *brl, const wchar_t *text) {
     if (changed) {
       const wchar_t *source = text;
       const wchar_t *end = source + size;
-      const wchar_t *cursor = (brl->cursor >= 0)? source+brl->cursor: NULL;
+      const wchar_t *cursor = (brl->cursor != BRL_NO_CURSOR)? source+brl->cursor: NULL;
 
       unsigned char buffer[size + 4]; // code, subcode, and possibly two bytes for cursor
       unsigned char *target = buffer;

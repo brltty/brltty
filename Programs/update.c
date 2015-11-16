@@ -117,7 +117,7 @@ getScreenCursorDots (void) {
 
 static int
 getScreenCursorPosition (int x, int y) {
-  int position = -1;
+  int position = BRL_NO_CURSOR;
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   if (isContracted) {
@@ -126,6 +126,7 @@ getScreenCursorPosition (int x, int y) {
     if (uncontractedOffset < contractedLength) {
       while (uncontractedOffset >= 0) {
         int contractedOffset = contractedOffsets[uncontractedOffset];
+
         if (contractedOffset != CTB_NO_OFFSET) {
           position = ((contractedOffset / textCount) * brl.textColumns) + textStart + (contractedOffset % textCount);
           break;
@@ -211,7 +212,7 @@ showInfo (void) {
   const size_t size = brl.textColumns * brl.textRows;
   char text[size + 1];
 
-  brl.cursor = -1;
+  brl.cursor = BRL_NO_CURSOR;
   if (!setStatusText(&brl, mode)) return 0;
 
   /* Here we must be careful. Some displays (e.g. Braille Lite 18)
@@ -877,7 +878,7 @@ doUpdate (void) {
         }
       }
 
-      if ((brl.cursor = getScreenCursorPosition(scr.posx, scr.posy)) >= 0) {
+      if ((brl.cursor = getScreenCursorPosition(scr.posx, scr.posy)) != BRL_NO_CURSOR) {
         if (showScreenCursor()) {
           BlinkDescriptor *blink = &screenCursorBlinkDescriptor;
 
@@ -889,7 +890,7 @@ doUpdate (void) {
       if (prefs.showSpeechCursor) {
         int position = getScreenCursorPosition(ses->spkx, ses->spky);
 
-        if (position >= 0) {
+        if (position != BRL_NO_CURSOR) {
           if (position != brl.cursor) {
             BlinkDescriptor *blink = &speechCursorBlinkDescriptor;
 
