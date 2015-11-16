@@ -60,20 +60,31 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   brlapi_connectionSettings_t settings;
   settings.host = parameters[PARM_HOST];
   settings.auth = parameters[PARM_AUTH];
+
   CHECK((brlapi_openConnection(&settings, &settings)>=0), out);
   logMessage(LOG_DEBUG, "Connected to %s using %s", settings.host, settings.auth);
+
   CHECK((brlapi_enterTtyModeWithPath(NULL, 0, NULL)>=0), out0);
   logMessage(LOG_DEBUG, "Got tty successfully");
+
   CHECK((brlapi_getDisplaySize(&brl->textColumns, &brl->textRows)==0), out1);
   logMessage(LOG_DEBUG,"Found out display size: %dx%d", brl->textColumns, brl->textRows);
+  displaySize = brl->textColumns * brl->textRows;
+
   brl->hideCursor = 1;
-  displaySize = brl->textColumns*brl->textRows;
+
   prevData = malloc(displaySize);
   CHECK((prevData!=NULL), out1);
+  memset(prevData, 0, displaySize);
+
   prevText = malloc(displaySize * sizeof(wchar_t));
   CHECK((prevText!=NULL), out2);
+  wmemset(prevText, WC_C(' '), displaySize);
+
   prevShown = 0;
+  prevCursor = BRL_NO_CURSOR;
   restart = 0;
+
   logMessage(LOG_DEBUG, "Memory allocated, returning 1");
   return 1;
   
@@ -103,32 +114,36 @@ static void brl_destruct(BrailleDisplay *brl)
 static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 {
   brlapi_writeArguments_t arguments = BRLAPI_WRITEARGUMENTS_INITIALIZER;
-  int vt;
-  vt = currentVirtualTerminal();
-  if (vt == -1) {
+  int vt = currentVirtualTerminal();
+
+  if (vt == SCR_NO_VT) {
     /* should leave display */
     if (prevShown) {
       brlapi_write(&arguments);
       prevShown = 0;
     }
   } else {
-    unsigned char and[displaySize];
     if (prevShown
 	&& memcmp(prevData,brl->buffer,displaySize) == 0
 	&& (!text || wmemcmp(prevText,text,displaySize) == 0)
 	&& brl->cursor == prevCursor)
       return 1;
-    memset(and,0,sizeof(and));
+
+    unsigned char and[displaySize];
+    memset(and, 0, sizeof(and));
+    arguments.andMask = and;
+    arguments.orMask = brl->buffer;
+
     if (text) {
       arguments.text = (char*) text;
       arguments.textSize = displaySize * sizeof(wchar_t);
       arguments.charset = (char*) getWcharCharset();
     }
+
     arguments.regionBegin = 1;
     arguments.regionSize = displaySize;
-    arguments.andMask = and;
-    arguments.orMask = brl->buffer;
     arguments.cursor = (brl->cursor != BRL_NO_CURSOR)? (brl->cursor + 1): BRLAPI_CURSOR_OFF;
+
     if (brlapi_write(&arguments)==0) {
       memcpy(prevData,brl->buffer,displaySize);
       wmemcpy(prevText,text,displaySize);
@@ -139,6 +154,7 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
       restart = 1;
     }
   }
+
   return 1;
 }
 
