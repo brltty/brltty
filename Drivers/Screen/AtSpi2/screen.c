@@ -315,12 +315,15 @@ new_method_call(const char *sender, const char *path, const char *interface, con
   dbus_error_init(&error);
   msg = dbus_message_new_method_call(sender, path, interface, method);
   if (dbus_error_is_set(&error)) {
-    logMessage(LOG_DEBUG, "error while making %s message: %s %s", method, error.name, error.message);
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "error while making %s message: %s %s", method, error.name, error.message);
+
     dbus_error_free(&error);
     return NULL;
   }
   if (!msg) {
-    logMessage(LOG_DEBUG, "no memory while making %s message", method);
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "no memory while making %s message", method);
     return NULL;
   }
   return msg;
@@ -337,16 +340,19 @@ send_with_reply_and_block(DBusConnection *bus, DBusMessage *msg, int timeout_ms,
   reply = dbus_connection_send_with_reply_and_block(bus, msg, timeout_ms, &error);
   dbus_message_unref(msg);
   if (dbus_error_is_set(&error)) {
-    logMessage(LOG_DEBUG, "error while %s: %s %s", doing, error.name, error.message);
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "error while %s: %s %s", doing, error.name, error.message);
     dbus_error_free(&error);
     return NULL;
   }
   if (!reply) {
-    logMessage(LOG_DEBUG, "timeout while %s", doing);
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "timeout while %s", doing);
     return NULL;
   }
   if (dbus_message_get_type (reply) == DBUS_MESSAGE_TYPE_ERROR) {
-    logMessage(LOG_DEBUG, "error while %s", doing);
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "error while %s", doing);
     dbus_message_unref(reply);
     return NULL;
   }
@@ -384,7 +390,8 @@ static void caretPosition(long caret) {
 }
 
 static void finiTerm(void) {
-  logMessage(LOG_DEBUG,"end of term %s:%s",curSender,curPath);
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+             "end of term %s:%s",curSender,curPath);
   free(curSender);
   curSender = NULL;
   free(curPath);
@@ -411,7 +418,8 @@ static char *getRole(const char *sender, const char *path) {
 
   dbus_message_iter_init(reply, &iter);
   if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_STRING) {
-    logMessage(LOG_DEBUG, "GetRoleName didn't return a string but '%c'", dbus_message_iter_get_arg_type(&iter));
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "GetRoleName didn't return a string but '%c'", dbus_message_iter_get_arg_type(&iter));
     goto out;
   }
   dbus_message_iter_get_basic(&iter, &text);
@@ -441,7 +449,8 @@ static char *getText(const char *sender, const char *path) {
 
   dbus_message_iter_init(reply, &iter);
   if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_STRING) {
-    logMessage(LOG_DEBUG, "GetText didn't return a string but '%c'", dbus_message_iter_get_arg_type(&iter));
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "GetText didn't return a string but '%c'", dbus_message_iter_get_arg_type(&iter));
     goto out;
   }
   dbus_message_iter_get_basic(&iter, &text);
@@ -470,16 +479,19 @@ static dbus_int32_t getCaret(const char *sender, const char *path) {
 
   dbus_message_iter_init(reply, &iter);
   if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_VARIANT) {
-    logMessage(LOG_DEBUG, "getText didn't return a variant but '%c'", dbus_message_iter_get_arg_type(&iter));
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "getText didn't return a variant but '%c'", dbus_message_iter_get_arg_type(&iter));
     goto out;
   }
   dbus_message_iter_recurse(&iter, &iter_variant);
   if (dbus_message_iter_get_arg_type(&iter_variant) != DBUS_TYPE_INT32) {
-    logMessage(LOG_DEBUG, "getText didn't return an int32 but '%c'", dbus_message_iter_get_arg_type(&iter_variant));
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "getText didn't return an int32 but '%c'", dbus_message_iter_get_arg_type(&iter_variant));
     goto out;
   }
   dbus_message_iter_get_basic(&iter_variant, &res);
-  logMessage(LOG_DEBUG,"Got caret %d", res);
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+             "Got caret %d", res);
 
 out:
   dbus_message_unref(reply);
@@ -502,7 +514,8 @@ static void restartTerm(const char *sender, const char *path) {
 
   curSender = strdup(sender);
   curPath = strdup(path);
-  logMessage(LOG_DEBUG,"new term %s:%s with text %s",curSender,curPath, text);
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+             "new term %s:%s with text %s",curSender,curPath, text);
 
   if (curRows) {
     for (i=0;i<curNumRows;i++)
@@ -518,7 +531,8 @@ static void restartTerm(const char *sender, const char *path) {
       break;
     c++;
   }
-  logMessage(LOG_DEBUG,"%ld rows",curNumRows);
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+             "%ld rows",curNumRows);
   curRows = malloc(curNumRows * sizeof(*curRows));
   curRowLengths = malloc(curNumRows * sizeof(*curRowLengths));
   i = 0;
@@ -547,7 +561,8 @@ static void restartTerm(const char *sender, const char *path) {
       break;
     i++;
   }
-  logMessage(LOG_DEBUG,"%ld cols",curNumCols);
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+             "%ld cols",curNumCols);
   caretPosition(getCaret(sender, path));
   free(text);
 }
@@ -555,7 +570,8 @@ static void restartTerm(const char *sender, const char *path) {
 /* Switched to a new object, check whether we want to read it, and if so, restart with it */
 static void tryRestartTerm(const char *sender, const char *path) {
   char *role = getRole(sender, path);
-  logMessage(LOG_DEBUG, "state changed focused to role %s", role);
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+             "state changed focused to role %s", role);
   if (typeFlags[TYPE_ALL] || (role && typeFlags[TYPE_TEXT] && !strcmp(role, "text")) || (role && typeFlags[TYPE_TERMINAL] && !strcmp(role, "terminal"))) {
     restartTerm(sender, path);
   } else {
@@ -582,7 +598,8 @@ static dbus_uint32_t *getState(const char *sender, const char *path)
 
   if (strcmp (dbus_message_get_signature (reply), "au") != 0)
   {
-    logMessage(LOG_DEBUG, "unexpected signature %s while getting active state", dbus_message_get_signature(reply));
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "unexpected signature %s while getting active state", dbus_message_get_signature(reply));
     goto out;
   }
   dbus_message_iter_init (reply, &iter);
@@ -590,7 +607,8 @@ static dbus_uint32_t *getState(const char *sender, const char *path)
   dbus_message_iter_get_fixed_array (&iter_array, &states, &count);
   if (count != 2)
   {
-    logMessage(LOG_DEBUG, "unexpected signature %s while getting active state", dbus_message_get_signature(reply));
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "unexpected signature %s while getting active state", dbus_message_get_signature(reply));
     goto out;
   }
   ret = malloc(sizeof(*ret) * count);
@@ -620,7 +638,8 @@ static int checkActiveParent(const char *sender, const char *path) {
 
   if (strcmp (dbus_message_get_signature (reply), "v") != 0)
   {
-    logMessage(LOG_DEBUG, "unexpected signature %s while checking active object", dbus_message_get_signature(reply));
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "unexpected signature %s while checking active object", dbus_message_get_signature(reply));
     goto out;
   }
 
@@ -630,7 +649,6 @@ static int checkActiveParent(const char *sender, const char *path) {
   dbus_message_iter_get_basic (&iter_struct, &sender);
   dbus_message_iter_next (&iter_struct);
   dbus_message_iter_get_basic (&iter_struct, &path);
-  //logMessage(LOG_DEBUG,"%*.sfound At-SPI2 object %s at %s", depth, "", sender, path);
 
   states = getState(sender, path);
   res = (states[0] & (1<<ATSPI_STATE_ACTIVE)) != 0 || checkActiveParent(sender, path);
@@ -649,13 +667,13 @@ static int reinitTerm(const char *sender, const char *path) {
   if (!states)
     return 0;
 
-  //logMessage(LOG_DEBUG, "state is %08x %08x", (unsigned) states[0], (unsigned) states[1]);
   /* Whether this widget is active */
   active = (states[0] & (1<<ATSPI_STATE_ACTIVE)) != 0;
 
   if (states[0] & (1<<ATSPI_STATE_FOCUSED)) {
     free(states);
-    logMessage(LOG_DEBUG, "%s %s is focused!", sender, path);
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "%s %s is focused!", sender, path);
     /* This widget is focused */
     if (active) {
       /* And it is active, we are done.  */
@@ -687,7 +705,8 @@ static int recurseFindTerm(const char *sender, const char *path, int active, int
 
   if (strcmp (dbus_message_get_signature (reply), "a(so)") != 0)
   {
-    logMessage(LOG_DEBUG, "unexpected signature %s while getting active object", dbus_message_get_signature(reply));
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "unexpected signature %s while getting active object", dbus_message_get_signature(reply));
     goto out;
   }
   dbus_message_iter_init(reply, &iter);
@@ -699,7 +718,6 @@ static int recurseFindTerm(const char *sender, const char *path, int active, int
     dbus_message_iter_get_basic (&iter_struct, &sender);
     dbus_message_iter_next (&iter_struct);
     dbus_message_iter_get_basic (&iter_struct, &path);
-    //logMessage(LOG_DEBUG,"%*.sfound At-SPI2 object %s at %s", depth, "", sender, path);
     if (findTerm(sender, path, active, depth))
     {
       res = 1;
@@ -720,7 +738,6 @@ static int findTerm(const char *sender, const char *path, int active, int depth)
   if (!states)
     return 0;
 
-  //logMessage(LOG_DEBUG, "%*.sstate is %08x %08x", depth, "", (unsigned) states[0], (unsigned) states[1]);
   if (states[0] & (1<<ATSPI_STATE_ACTIVE))
     /* This application is active */
     active = 1;
@@ -728,7 +745,8 @@ static int findTerm(const char *sender, const char *path, int active, int depth)
   if (states[0] & (1<<ATSPI_STATE_FOCUSED) && active)
   {
     /* And this widget is focused */
-    logMessage(LOG_DEBUG, "%s %s is focused!", sender, path);
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "%s %s is focused!", sender, path);
     free(states);
     tryRestartTerm(sender, path);
     return 1;
@@ -762,32 +780,35 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
   }
 
   if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_STRING) {
-    logMessage(LOG_DEBUG, "message detail not a string but '%c'", dbus_message_iter_get_arg_type(&iter));
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "message detail not a string but '%c'", dbus_message_iter_get_arg_type(&iter));
     return;
   }
   dbus_message_iter_get_basic(&iter, &detail);
 
   dbus_message_iter_next(&iter);
   if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_INT32) {
-    logMessage(LOG_DEBUG, "message detail1 not an int32 but '%c'", dbus_message_iter_get_arg_type(&iter));
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "message detail1 not an int32 but '%c'", dbus_message_iter_get_arg_type(&iter));
     return;
   }
   dbus_message_iter_get_basic(&iter, &detail1);
 
   dbus_message_iter_next(&iter);
   if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_INT32) {
-    logMessage(LOG_DEBUG, "message detail2 not an int32 but '%c'", dbus_message_iter_get_arg_type(&iter));
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "message detail2 not an int32 but '%c'", dbus_message_iter_get_arg_type(&iter));
     return;
   }
   dbus_message_iter_get_basic(&iter, &detail2);
 
   dbus_message_iter_next(&iter);
   if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_VARIANT) {
-    logMessage(LOG_DEBUG, "message detail2 not a variant but '%c'", dbus_message_iter_get_arg_type(&iter));
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "message detail2 not a variant but '%c'", dbus_message_iter_get_arg_type(&iter));
     return;
   }
   dbus_message_iter_recurse(&iter, &iter_variant);
-  //logMessage(LOG_DEBUG, "event %s %s %s %s %s %d %d", interface, member, sender, path, detail, detail1, detail2);
 
   StateChanged_focused =
        !strcmp(interface, "Object")
@@ -801,7 +822,8 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
     tryRestartTerm(sender, path);
   } else if (!strcmp(interface, "Object") && !strcmp(member, "TextCaretMoved")) {
     if (!curSender || strcmp(sender, curSender) || strcmp(path, curPath)) return;
-    logMessage(LOG_DEBUG, "caret move to %d", detail1);
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "caret move to %d", detail1);
     caretPosition(detail1);
   } else if (!strcmp(interface, "Object") && !strcmp(member, "TextChanged") && !strcmp(detail, "delete")) {
     long x,y,toDelete = detail2;
@@ -809,14 +831,17 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
     long length = 0, toCopy;
     long downTo; /* line that will provide what will follow x */
     if (!curSender || strcmp(sender, curSender) || strcmp(path, curPath)) return;
-    logMessage(LOG_DEBUG,"delete %d from %d",detail2,detail1);
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "delete %d from %d",detail2,detail1);
     findPosition(detail1,&x,&y);
     if (dbus_message_iter_get_arg_type(&iter_variant) != DBUS_TYPE_STRING) {
-      logMessage(LOG_DEBUG, "ergl, not string but '%c'", dbus_message_iter_get_arg_type(&iter_variant));
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+                 "ergl, not string but '%c'", dbus_message_iter_get_arg_type(&iter_variant));
       return;
     }
     dbus_message_iter_get_basic(&iter_variant, &deleted);
-    logMessage(LOG_DEBUG,"'%s'",deleted);
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "'%s'",deleted);
     downTo = y;
     if (downTo < curNumRows)
       length = curRowLengths[downTo];
@@ -860,14 +885,17 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
     const char *added;
     const char *adding,*c;
     if (!curSender || strcmp(sender, curSender) || strcmp(path, curPath)) return;
-    logMessage(LOG_DEBUG,"insert %d from %d",detail2,detail1);
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "insert %d from %d",detail2,detail1);
     findPosition(detail1,&x,&y);
     if (dbus_message_iter_get_arg_type(&iter_variant) != DBUS_TYPE_STRING) {
-      logMessage(LOG_DEBUG, "ergl, not string but '%c'", dbus_message_iter_get_arg_type(&iter_variant));
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+                 "ergl, not string but '%c'", dbus_message_iter_get_arg_type(&iter_variant));
       return;
     }
     dbus_message_iter_get_basic(&iter_variant, &added);
-    logMessage(LOG_DEBUG,"'%s'",added);
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "'%s'",added);
     adding = c = added;
     if (x && (c = strchr(adding,'\n'))) {
       /* splitting line */
@@ -920,8 +948,7 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
     }
     caretPosition(curCaret);
   } else {
-      //logMessage(LOG_DEBUG,"interface %s, member %s, detail %s, detail1 %d detail2 %d",interface, member, detail, detail1, detail2);
-      return;
+    return;
   }
   updated = 1;
 }
@@ -932,12 +959,16 @@ static DBusHandlerResult AtSpi2Filter(DBusConnection *connection, DBusMessage *m
   const char *interface = dbus_message_get_interface(message);
   const char *member = dbus_message_get_member(message);
   if (type == DBUS_MESSAGE_TYPE_SIGNAL) {
-    if (!strncmp(interface, SPI2_DBUS_INTERFACE_EVENT".", strlen(SPI2_DBUS_INTERFACE_EVENT".")))
+    if (!strncmp(interface, SPI2_DBUS_INTERFACE_EVENT".", strlen(SPI2_DBUS_INTERFACE_EVENT"."))) {
       AtSpi2HandleEvent(interface + strlen(SPI2_DBUS_INTERFACE_EVENT"."), message);
-    else
-      logMessage(LOG_DEBUG, "unknown signal %s %s", interface, member);
-  } else
-    logMessage(LOG_DEBUG, "unknown message %d %s %s", type, interface, member);
+    } else {
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+                 "unknown signal %s %s", interface, member);
+    }
+  } else {
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "unknown message %d %s %s", type, interface, member);
+  }
   return DBUS_HANDLER_RESULT_HANDLED;
 }
 
@@ -1151,7 +1182,8 @@ construct_AtSpi2Screen (void) {
 
   if (curPath) {
     if (!reinitTerm(curSender, curPath)) {
-      logMessage(LOG_DEBUG, "Caching failed, restart from scratch");
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+                 "Caching failed, restart from scratch");
       initTerm();
     }
   } else {
@@ -1161,7 +1193,8 @@ construct_AtSpi2Screen (void) {
   dbus_connection_set_watch_functions(bus, a2AddWatch, a2RemoveWatch, a2WatchToggled, NULL, NULL);
   dbus_connection_set_timeout_functions(bus, a2AddTimeout, a2RemoveTimeout, a2TimeoutToggled, NULL, NULL);
 
-  logMessage(LOG_DEBUG,"SPI2 initialized");
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+             "SPI2 initialized");
   return 1;
 outConn:
   dbus_connection_unref(bus);
@@ -1175,7 +1208,8 @@ destruct_AtSpi2Screen (void) {
   dbus_connection_remove_filter(bus, AtSpi2Filter, NULL);
   dbus_connection_close(bus);
   dbus_connection_unref(bus);
-  logMessage(LOG_DEBUG,"SPI2 stopped");
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+             "SPI2 stopped");
 }
 
 static int
@@ -1364,7 +1398,8 @@ insertKey_AtSpi2Screen (ScreenKey key) {
     else
       keysym = 0x1000000 | wc;
   }
-  logMessage(LOG_DEBUG, "inserting key: %04X -> %s%s%ld",
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+             "inserting key: %04X -> %s%s%ld",
              key,
              (modMeta? "meta ": ""),
              (modControl? "control ": ""),
