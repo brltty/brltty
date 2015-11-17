@@ -1160,7 +1160,7 @@ switchVirtualTerminal_AtSpi2Screen (int vt) {
 
 static int
 currentVirtualTerminal_AtSpi2Screen (void) {
-  return curPath? 0: -1;
+  return curPath? 0: SCR_NO_VT;
 }
 
 static const char nonatspi [] = "not an AT-SPI2 text widget";
