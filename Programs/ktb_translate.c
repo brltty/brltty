@@ -153,16 +153,12 @@ makeKeyboardCommand (KeyTable *table, unsigned char context) {
   if ((ctx = getKeyContext(table, context))) {
     int keyboardCommand = BRL_CMD_BLK(PASSDOTS);
 
-    {
-      unsigned int pressedIndex;
+    for (unsigned int pressedIndex=0; pressedIndex<table->pressedKeys.count; pressedIndex+=1) {
+      const KeyValue *keyValue = &table->pressedKeys.table[pressedIndex];
+      const MappedKeyEntry *map = findMappedKeyEntry(ctx, keyValue);
 
-      for (pressedIndex=0; pressedIndex<table->pressedKeys.count; pressedIndex+=1) {
-        const KeyValue *keyValue = &table->pressedKeys.table[pressedIndex];
-        const MappedKeyEntry *map = findMappedKeyEntry(ctx, keyValue);
-
-        if (!map) return EOF;
-        keyboardCommand |= map->keyboardFunction->bit;
-      }
+      if (!map) return EOF;
+      keyboardCommand |= map->keyboardFunction->bit;
     }
 
     {
@@ -172,10 +168,6 @@ makeKeyboardCommand (KeyTable *table, unsigned char context) {
       if (dotPressed == spacePressed) return EOF;
       if (dotPressed) keyboardCommand |= ctx->mappedKeys.superimpose;
       keyboardCommand &= ~BRL_DOTC;
-    }
-
-    if (table->options.keyboardEnabledFlag && !*table->options.keyboardEnabledFlag) {
-      keyboardCommand = BRL_CMD_BLK(ALERT) + ALERT_COMMAND_REJECTED;
     }
 
     return keyboardCommand;
@@ -270,6 +262,14 @@ processCommand (KeyTable *table, int command) {
 
       break;
     }
+
+    case BRL_CMD_BLK(PASSCHAR):
+    case BRL_CMD_BLK(PASSDOTS):
+    case BRL_CMD_BLK(PASSKEY):
+      if (table->options.keyboardEnabledFlag && !*table->options.keyboardEnabledFlag) {
+        command = BRL_CMD_BLK(ALERT) + ALERT_COMMAND_REJECTED;
+      }
+      break;
 
     default:
       break;
