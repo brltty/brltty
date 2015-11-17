@@ -72,13 +72,23 @@
 #include "async_event.h"
 
 typedef enum {
+  PARM_RELEASE,
   PARM_TYPE
 } ScreenParameters;
-#define SCRPARMS "type"
+#define SCRPARMS "release", "type"
 
 #include "scr_driver.h"
 
-static int typeText = 1, typeTerminal = 1, typeAll = 0;
+typedef enum {
+  TYPE_TEXT,
+  TYPE_TERMINAL,
+  TYPE_ALL,
+  TYPE_COUNT
+} TypeValue;
+
+static unsigned int releaseScreen;
+static unsigned char typeFlags[TYPE_COUNT];
+
 static char *curSender;
 static char *curPath;
 
@@ -237,39 +247,59 @@ static void delRows(long pos, long num) {
 
 static int
 processParameters_AtSpi2Screen (char **parameters) {
-  if (*parameters[PARM_TYPE]) {
-    static const char *const choices[] = {"text"   , "terminal"   , "all"   , NULL}; 
-    static       int  *const flags  [] = {&typeText, &typeTerminal, &typeAll, NULL};
-    int count;
-    char **types = splitString(parameters[PARM_TYPE], '+', &count);
+  releaseScreen = 1;
+  {
+    const char *parameter = parameters[PARM_RELEASE];
 
-    {
-      int *const *flag = flags;
-      while (*flag) **flag++ = 0;
-    }
-
-    {
-      int index;
-      for (index=0; index<count; index++) {
-        const char *type = types[index];
-        unsigned int choice;
-
-        if (validateChoice(&choice, type, choices)) {
-          int *flag = flags[choice];
-          if ((flag == &typeAll) && (index > 0)) {
-            logMessage(LOG_WARNING, "widget type is mutually exclusive: %s", type);
-          } else if (*flag || typeAll) {
-            logMessage(LOG_WARNING, "widget type specified more than once: %s", type);
-          } else {
-            *flag = 1;
-          }
-        } else {
-          logMessage(LOG_WARNING, "%s: %s", "invalid widget type", type);
-        }
+    if (*parameter) {
+      if (!validateYesNo(&releaseScreen, parameter)) {
+        logMessage(LOG_WARNING, "invalid release screen setting: %s", parameter);
       }
     }
+  }
 
-    deallocateStrings(types);
+  typeFlags[TYPE_TEXT] = 1;
+  typeFlags[TYPE_TERMINAL] = 1;
+  typeFlags[TYPE_ALL] = 0;
+  {
+    const char *parameter = parameters[PARM_TYPE];
+
+    if (*parameter) {
+      int count;
+      char **types = splitString(parameter, '+', &count);
+
+      if (types) {
+        static const char *const choices[] = {
+          [TYPE_TEXT] = "text",
+          [TYPE_TERMINAL] = "terminal",
+          [TYPE_ALL] = "all",
+          [TYPE_COUNT] = NULL
+        };
+
+        for (unsigned int index=0; index<TYPE_COUNT; index+=1) {
+          typeFlags[index] = 0;
+        }
+
+        for (unsigned int index=0; index<count; index+=1) {
+          const char *type = types[index];
+          unsigned int choice;
+
+          if (validateChoice(&choice, type, choices)) {
+            if ((choice == TYPE_ALL) && (index > 0)) {
+              logMessage(LOG_WARNING, "widget type is mutually exclusive: %s", type);
+            } else if (typeFlags[choice] || typeFlags[TYPE_ALL]) {
+              logMessage(LOG_WARNING, "widget type specified more than once: %s", type);
+            } else {
+              typeFlags[choice] = 1;
+            }
+          } else {
+            logMessage(LOG_WARNING, "%s: %s", "invalid widget type", type);
+          }
+        }
+
+        deallocateStrings(types);
+      }
+    }
   }
 
   return 1;
@@ -526,7 +556,7 @@ static void restartTerm(const char *sender, const char *path) {
 static void tryRestartTerm(const char *sender, const char *path) {
   char *role = getRole(sender, path);
   logMessage(LOG_DEBUG, "state changed focused to role %s", role);
-  if (typeAll || (role && typeText && !strcmp(role, "text")) || (role && typeTerminal && !strcmp(role, "terminal"))) {
+  if (typeFlags[TYPE_ALL] || (role && typeFlags[TYPE_TEXT] && !strcmp(role, "text")) || (role && typeFlags[TYPE_TERMINAL] && !strcmp(role, "terminal"))) {
     restartTerm(sender, path);
   } else {
     if (curPath)
@@ -1160,7 +1190,7 @@ switchVirtualTerminal_AtSpi2Screen (int vt) {
 
 static int
 currentVirtualTerminal_AtSpi2Screen (void) {
-  return curPath? 0: SCR_NO_VT;
+  return (curPath || !releaseScreen)? 0: SCR_NO_VT;
 }
 
 static const char nonatspi [] = "not an AT-SPI2 text widget";
@@ -1189,38 +1219,41 @@ describe_AtSpi2Screen (ScreenDescription *description) {
     description->posx = curPosX;
     description->posy = curPosY;
   } else {
-    description->unreadable = nonatspi;
+    const char *message = nonatspi;
+    if (releaseScreen) description->unreadable = message;
+
     description->rows = 1;
-    description->cols = strlen(nonatspi);
+    description->cols = strlen(message);
     description->posx = 0;
     description->posy = 0;
   }
+
   description->number = currentVirtualTerminal_AtSpi2Screen();
 }
 
 static int
 readCharacters_AtSpi2Screen (const ScreenBox *box, ScreenCharacter *buffer) {
-  long x,y;
-  clearScreenCharacters(buffer,box->height*box->width);
+  clearScreenCharacters(buffer, (box->height * box->width));
+
   if (!curPath) {
     setScreenMessage(box, buffer, nonatspi);
     return 1;
   }
+
   if (!curNumCols || !curNumRows) return 0;
-  short cols = curPosX>=curNumCols?curPosX+1:curNumCols;
-  if (!validateScreenBox(box, cols, curNumRows))
-  {
-    return 0;
-  }
-  for (y=0; y<box->height; y++) {
+  short cols = (curPosX >= curNumCols)? (curPosX + 1): curNumCols;
+  if (!validateScreenBox(box, cols, curNumRows)) return 0;
+
+  for (unsigned int y=0; y<box->height; y+=1) {
     if (curRowLengths[box->top+y]) {
-      for (x=0; x<box->width; x++) {
-        if (box->left+x<curRowLengths[box->top+y] - (curRows[box->top+y][curRowLengths[box->top+y]-1]=='\n')) {
+      for (unsigned int x=0; x<box->width; x+=1) {
+        if (box->left+x < curRowLengths[box->top+y] - (curRows[box->top+y][curRowLengths[box->top+y]-1]=='\n')) {
           buffer[y*box->width+x].text = curRows[box->top+y][box->left+x];
         }
       }
     }
   }
+
   return 1;
 }
 
