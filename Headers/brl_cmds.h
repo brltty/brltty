@@ -301,9 +301,10 @@ typedef enum {
 } BRL_Key;
 
 #define BRL_CMD_BLK(cmd) (BRL_BLK_##cmd << BRL_SHIFT_BLK)
-#define BRL_CMD_KEY(key) (BRL_CMD_BLK(PASSKEY) + BRL_KEY_##key)
-#define BRL_CMD_KFN(n) (BRL_CMD_KEY(FUNCTION) + ((n) - 1))
-#define BRL_CMD_CHAR(wc) (BRL_CMD_BLK(PASSCHAR) | BRL_ARG_SET((wc)))
+#define BRL_CMD_ARG(blk,arg) (BRL_CMD_BLK(blk) | BRL_ARG_SET((arg)))
+#define BRL_CMD_CHAR(wc) BRL_CMD_ARG(PASSCHAR, (wc))
+#define BRL_CMD_KEY(key) BRL_CMD_ARG(PASSKEY, (BRL_KEY_##key))
+#define BRL_CMD_KFN(n) BRL_CMD_KEY(FUNCTION + ((n) - 1))
 
 #define BRL_FLG_TOGGLE_ON   0X010000 /* enable feature */
 #define BRL_FLG_TOGGLE_OFF  0X020000 /* disable feature */

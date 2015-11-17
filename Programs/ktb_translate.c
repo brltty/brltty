@@ -32,6 +32,8 @@
 #include "cmd_enqueue.h"
 #include "async_alarm.h"
 
+#define BRL_CMD_ALERT(alert) BRL_CMD_ARG(ALERT, ALERT_##alert)
+
 static int
 sortModifierKeys (const void *element1, const void *element2) {
   const KeyValue *modifier1 = element1;
@@ -253,10 +255,10 @@ processCommand (KeyTable *table, int command) {
         table->context.next = context;
 
         if (isTemporaryKeyContext(table, ctx)) {
-          if (!enqueueCommand(BRL_CMD_BLK(ALERT) + ALERT_TOGGLE_ON)) return 0;
+          if (!enqueueCommand(BRL_CMD_ALERT(TOGGLE_ON))) return 0;
         } else {
           table->context.persistent = context;
-          if (!enqueueCommand(BRL_CMD_BLK(ALERT) + ALERT_TOGGLE_OFF)) return 0;
+          if (!enqueueCommand(BRL_CMD_ALERT(TOGGLE_OFF))) return 0;
         }
       }
 
@@ -267,7 +269,7 @@ processCommand (KeyTable *table, int command) {
     case BRL_CMD_BLK(PASSDOTS):
     case BRL_CMD_BLK(PASSKEY):
       if (table->options.keyboardEnabledFlag && !*table->options.keyboardEnabledFlag) {
-        command = BRL_CMD_BLK(ALERT) + ALERT_COMMAND_REJECTED;
+        command = BRL_CMD_ALERT(COMMAND_REJECTED);
       }
       break;
 
