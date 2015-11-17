@@ -269,7 +269,7 @@ typedef enum {
   BRL_BLK_1C /* (reserved) */,
   BRL_BLK_1D /* (reserved) */,
   BRL_BLK_SELECTVT /* bind to a specific virtual terminal */,
-  BRL_BLK_ALERT /* (raise an alert) */,
+  BRL_BLK_ALERT /* render an alert */,
   BRL_BLK_PASSKEY /* (emulate special key) */,
   BRL_BLK_PASSCHAR /* type unicode character */,
   BRL_BLK_PASSDOTS /* type braille dots */,
