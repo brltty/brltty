@@ -25,5 +25,9 @@ BRLTTY_DRIVERS_DIRECTORY="${currentDirectory}/lib"
 BRLTTY_TABLES_DIRECTORY="${currentDirectory}/Tables"
 export BRLTTY_DRIVERS_DIRECTORY BRLTTY_TABLES_DIRECTORY
 
+[ -z "${LD_LIBRARY_PATH}" ] || LD_LIBRARY_PATH=":${LD_LIBRARY_PATH}"
+LD_LIBRARY_PATH="${currentDirectory}/Programs${LD_LIBRARY_PATH}"
+export LD_LIBRARY_PATH
+
 exec "Programs/brltty" -E "$@"
 exit "${?}"
