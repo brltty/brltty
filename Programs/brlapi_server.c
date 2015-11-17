@@ -1074,8 +1074,9 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
     else {
       lockCharset(0);
       charset = coreCharset = (char *) getCharset();
-      if (!coreCharset)
+      if (!coreCharset) {
         unlockCharset();
+      }
     }
     if (charset) {
       iconv_t conv;
@@ -1097,9 +1098,10 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
     {
       int i;
       lockMutex(&c->brailleWindowMutex);
-      for (i=0; i<rsiz; i++)
+      for (i=0; i<rsiz; i++) {
 	/* assume latin1 */
         c->brailleWindow.text[rbeg-1+i] = text[i];
+      }
     }
     if (!andAttr) memset(c->brailleWindow.andAttr+rbeg-1,0xFF,rsiz);
     if (!orAttr)  memset(c->brailleWindow.orAttr+rbeg-1,0x00,rsiz);
@@ -2436,7 +2438,37 @@ static int initializeAcceptedKeys(Connection *c, int how)
 
         { .action = removeKeyrange,
           .type = brlapi_rangeType_command,
+          .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_BRL_START
+        },
+
+        { .action = removeKeyrange,
+          .type = brlapi_rangeType_command,
+          .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_BRL_STOP
+        },
+
+        { .action = removeKeyrange,
+          .type = brlapi_rangeType_command,
           .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_RESTARTSPEECH
+        },
+
+        { .action = removeKeyrange,
+          .type = brlapi_rangeType_command,
+          .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_SPK_START
+        },
+
+        { .action = removeKeyrange,
+          .type = brlapi_rangeType_command,
+          .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_SPK_STOP
+        },
+
+        { .action = removeKeyrange,
+          .type = brlapi_rangeType_command,
+          .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_SCR_START
+        },
+
+        { .action = removeKeyrange,
+          .type = brlapi_rangeType_command,
+          .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_SCR_STOP
         },
 
         { .action = removeKeyrange,
@@ -2456,6 +2488,21 @@ static int initializeAcceptedKeys(Connection *c, int how)
 
         { .action = removeKeyrange,
           .type = brlapi_rangeType_command,
+          .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_SELECTVT
+        },
+
+        { .action = removeKeyrange,
+          .type = brlapi_rangeType_command,
+          .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_SELECTVT_PREV
+        },
+
+        { .action = removeKeyrange,
+          .type = brlapi_rangeType_command,
+          .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_SELECTVT_NEXT
+        },
+
+        { .action = removeKeyrange,
+          .type = brlapi_rangeType_command,
           .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_PASSXT
         },
 
@@ -2467,6 +2514,11 @@ static int initializeAcceptedKeys(Connection *c, int how)
         { .action = removeKeyrange,
           .type = brlapi_rangeType_command,
           .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_PASSPS2
+        },
+
+        { .action = removeKeyrange,
+          .type = brlapi_rangeType_command,
+          .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_CONTEXT
         },
 
         { .action = removeKeyrange,
