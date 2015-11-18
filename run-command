@@ -17,11 +17,10 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-rootDirectory=`dirname "${0}"`
-rootDirectory=`realpath "${rootDirectory}"`
+. "`dirname "${0}"`/prologue.sh"
 
 [ -z "${LD_LIBRARY_PATH}" ] || LD_LIBRARY_PATH=":${LD_LIBRARY_PATH}"
-LD_LIBRARY_PATH="${rootDirectory}/Programs${LD_LIBRARY_PATH}"
+LD_LIBRARY_PATH="${programDirectory}/Programs${LD_LIBRARY_PATH}"
 export LD_LIBRARY_PATH
 
 exec "${@}"
