@@ -1119,7 +1119,7 @@ void a2TimeoutToggled(DBusTimeout *timeout, void *data)
 
 /* Driver construction / destruction */
 
-static int watch(const char *message, const char *event) {
+static int addWatch(const char *message, const char *event) {
   DBusError error;
   DBusMessage *msg, *reply;
 
@@ -1186,8 +1186,8 @@ addWatches (void) {
     { .message = NULL }
   };
 
-  for (const WatchEntry *w=watchTable; w->message; w+=1) {
-    if (!watch(w->message, w->event)) return 0;
+  for (const WatchEntry *watch=watchTable; watch->message; watch+=1) {
+    if (!addWatch(watch->message, watch->event)) return 0;
   }
 
   return 1;
