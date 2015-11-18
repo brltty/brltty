@@ -571,8 +571,10 @@ static void restartTerm(const char *sender, const char *path) {
 static void tryRestartTerm(const char *sender, const char *path) {
   char *role = getRole(sender, path);
   logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-             "state changed focused to role %s", role);
-  if (typeFlags[TYPE_ALL] || (role && typeFlags[TYPE_TEXT] && !strcmp(role, "text")) || (role && typeFlags[TYPE_TERMINAL] && !strcmp(role, "terminal"))) {
+             "state changed focus to role %s", role);
+  if (typeFlags[TYPE_ALL] ||
+      (role && typeFlags[TYPE_TEXT] && (strcmp(role, "text") == 0)) ||
+      (role && typeFlags[TYPE_TERMINAL] && (strcmp(role, "terminal") == 0))) {
     restartTerm(sender, path);
   } else {
     if (curPath)
@@ -958,17 +960,19 @@ static DBusHandlerResult AtSpi2Filter(DBusConnection *connection, DBusMessage *m
   int type = dbus_message_get_type(message);
   const char *interface = dbus_message_get_interface(message);
   const char *member = dbus_message_get_member(message);
+
   if (type == DBUS_MESSAGE_TYPE_SIGNAL) {
     if (!strncmp(interface, SPI2_DBUS_INTERFACE_EVENT".", strlen(SPI2_DBUS_INTERFACE_EVENT"."))) {
       AtSpi2HandleEvent(interface + strlen(SPI2_DBUS_INTERFACE_EVENT"."), message);
     } else {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-                 "unknown signal %s %s", interface, member);
+                 "unknown signal: Intf:%s Msg:%s", interface, member);
     }
   } else {
     logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-               "unknown message %d %s %s", type, interface, member);
+               "unknown message: Type:%d Intf:%s Msg:%s", type, interface, member);
   }
+
   return DBUS_HANDLER_RESULT_HANDLED;
 }
 
@@ -1144,6 +1148,52 @@ static int watch(const char *message, const char *event) {
 }
 
 static int
+addWatches (void) {
+  typedef struct {
+    const char *message;
+    const char *event;
+  } WatchEntry;
+
+  static const WatchEntry watchTable[] = {
+    { .message = "type='method_call',interface='"SPI2_DBUS_INTERFACE_TREE"'",
+      .event = NULL
+    },
+
+    { .message = "type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Focus'",
+      .event = "focus"
+    },
+
+    { .message = "type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object'",
+      .event = "object"
+    },
+
+    { .message = "type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='ChildrenChanged'",
+      .event = "object:childrenchanged"
+    },
+
+    { .message = "type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='TextChanged'",
+      .event = "object:textchanged"
+    },
+
+    { .message = "type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='TextCaretMoved'",
+      .event = "object:textcaretmoved"
+    },
+
+    { .message = "type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='StateChanged'",
+      .event = "object:statechanged"
+    },
+
+    { .message = NULL }
+  };
+
+  for (const WatchEntry *w=watchTable; w->message; w+=1) {
+    if (!watch(w->message, w->event)) return 0;
+  }
+
+  return 1;
+}
+
+static int
 construct_AtSpi2Screen (void) {
   DBusError error;
 
@@ -1155,51 +1205,40 @@ construct_AtSpi2Screen (void) {
   {
     bus = dbus_bus_get(DBUS_BUS_SESSION, &error);
     if (dbus_error_is_set(&error)) {
-      logMessage(LOG_ERR, "Can't get dbus session bus: %s %s", error.name, error.message);
+      logMessage(LOG_ERR, "can't get dbus session bus: %s %s", error.name, error.message);
       dbus_error_free(&error);
-      goto out;
+      goto noBus;
     }
   }
+
   if (!bus) {
-    logMessage(LOG_ERR, "Can't get dbus session bus.");
-    goto out;
-  }
-  if (!dbus_connection_add_filter(bus, AtSpi2Filter, NULL, NULL)) {
-    goto outConn;
+    logMessage(LOG_ERR, "can't get dbus session bus");
+    goto noBus;
   }
 
-#define WATCH(str, event) \
-  if (!watch((str), (event))) \
-    goto outConn;
+  if (!dbus_connection_add_filter(bus, AtSpi2Filter, NULL, NULL)) goto noConnection;
+  if (!addWatches()) goto noWatches;
 
-  WATCH("type='method_call',interface='"SPI2_DBUS_INTERFACE_TREE"'", NULL);
-  WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Focus'", "focus");
-  WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object'", "object");
-  WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='ChildrenChanged'", "object:childrenchanged");
-  WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='TextChanged'", "object:textchanged");
-  WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='TextCaretMoved'", "object:textcaretmoved");
-  WATCH("type='signal',interface='"SPI2_DBUS_INTERFACE_EVENT".Object',member='StateChanged'", "object:statechanged");
-
-  if (curPath) {
-    if (!reinitTerm(curSender, curPath)) {
-      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-                 "Caching failed, restart from scratch");
-      initTerm();
-    }
-  } else {
+  if (!curPath) {
+    initTerm();
+  } else if (!reinitTerm(curSender, curPath)) {
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "caching failed, restarting from scratch");
     initTerm();
   }
 
   dbus_connection_set_watch_functions(bus, a2AddWatch, a2RemoveWatch, a2WatchToggled, NULL, NULL);
   dbus_connection_set_timeout_functions(bus, a2AddTimeout, a2RemoveTimeout, a2TimeoutToggled, NULL, NULL);
 
-  logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-             "SPI2 initialized");
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER), "SPI2 initialized");
   return 1;
-outConn:
+
+noWatches:
+
+noConnection:
   dbus_connection_unref(bus);
 
-out:
+noBus:
   return 0;
 }
 
