@@ -16,6 +16,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Voyager
+title Voyager Protocol Converter
 
-include all.kti
+include ../vo/all.kti

@@ -270,6 +270,30 @@ BEGIN_KEY_NAME_TABLE(el)
   KEY_GROUP_ENTRY(AL_GRP_RoutingKeys1, "RoutingKey"),
 END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(voyager)
+  KEY_NAME_ENTRY(AL_KEY_THUMB+0, "Thumb1"),
+  KEY_NAME_ENTRY(AL_KEY_THUMB+1, "Thumb2"),
+  KEY_NAME_ENTRY(AL_KEY_THUMB+3, "Thumb3"),
+  KEY_NAME_ENTRY(AL_KEY_THUMB+4, "Thumb4"),
+
+  KEY_NAME_ENTRY(AL_KEY_SmartpadLeft, "Left"),
+  KEY_NAME_ENTRY(AL_KEY_SmartpadUp, "Up"),
+  KEY_NAME_ENTRY(AL_KEY_SmartpadDown, "Down"),
+  KEY_NAME_ENTRY(AL_KEY_SmartpadRight, "Right"),
+
+  KEY_NAME_ENTRY(AL_KEY_SmartpadF1, "Dot1"),
+  KEY_NAME_ENTRY(AL_KEY_SmartpadF2, "Dot2"),
+  KEY_NAME_ENTRY(AL_KEY_SmartpadF3, "Dot3"),
+  KEY_NAME_ENTRY(AL_KEY_SmartpadF4, "Dot4"),
+
+  KEY_NAME_ENTRY(AL_KEY_ETouchLeftRear, "Dot5"),
+  KEY_NAME_ENTRY(AL_KEY_ETouchLeftFront, "Dot6"),
+  KEY_NAME_ENTRY(AL_KEY_ETouchRightRear, "Dot7"),
+  KEY_NAME_ENTRY(AL_KEY_ETouchRightFront, "Dot8"),
+
+  KEY_GROUP_ENTRY(AL_GRP_RoutingKeys1, "RoutingKey"),
+END_KEY_NAME_TABLE
+
 BEGIN_KEY_NAME_TABLES(abt_small)
   KEY_NAME_TABLE(abt_basic),
   KEY_NAME_TABLE(status1),
@@ -322,6 +346,10 @@ BEGIN_KEY_NAME_TABLES(el)
   KEY_NAME_TABLE(el),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLES(voyager)
+  KEY_NAME_TABLE(voyager),
+END_KEY_NAME_TABLES
+
 DEFINE_KEY_TABLE(abt_small)
 DEFINE_KEY_TABLE(abt_large)
 DEFINE_KEY_TABLE(sat_small)
@@ -329,6 +357,7 @@ DEFINE_KEY_TABLE(sat_large)
 DEFINE_KEY_TABLE(bc640)
 DEFINE_KEY_TABLE(bc680)
 DEFINE_KEY_TABLE(el)
+DEFINE_KEY_TABLE(voyager)
 
 BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(abt_small),
@@ -338,6 +367,7 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(bc640),
   &KEY_TABLE_DEFINITION(bc680),
   &KEY_TABLE_DEFINITION(el),
+  &KEY_TABLE_DEFINITION(voyager),
 END_KEY_TABLE_LIST
 
 struct BrailleDataStruct {
@@ -526,6 +556,13 @@ static const ModelEntry modelEL12 = {
   .columns = 12,
   .flags = MOD_FLAG_FORCE_FROM_0,
   .keyTableDefinition = &KEY_TABLE_DEFINITION(el)
+};
+
+static const ModelEntry modelVoyager = {
+  .identifier = 0X00,
+  .name = "Voyager Protocol Converter",
+  .columns = 70,
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(voyager)
 };
 
 typedef struct {
@@ -1838,6 +1875,13 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .vendor=0X06B0, .product=0X0001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2
+    },
+
+    { /* Voyager Protocol Converter */
+      .vendor=0X0798, .product=0X0600,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0,
+      .data=&modelVoyager
     },
 
     { /* BC624 */
