@@ -125,7 +125,7 @@ ServiceBinary  = %12%\libusb0.sys
 ; Generic Identifier
 ; Vendor: Future Technology Devices International, Ltd
 ; Product: FT232 USB-Serial (UART) IC
-"LibUSB-Win32: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip]"=LIBUSB_DEV, USB\VID_0403&PID_6001
+"LibUSB-Win32: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip], MDV [all models]"=LIBUSB_DEV, USB\VID_0403&PID_6001
 
 ; Device: 0403:DE58
 "LibUSB-Win32: Hedo [MobilLine]"=LIBUSB_DEV, USB\VID_0403&PID_DE58
@@ -174,6 +174,9 @@ ServiceBinary  = %12%\libusb0.sys
 
 ; Device: 0798:0001
 "LibUSB-Win32: Voyager [all models]"=LIBUSB_DEV, USB\VID_0798&PID_0001
+
+; Device: 0798:0600
+"LibUSB-Win32: Alva [Voyager Protocol Converter]"=LIBUSB_DEV, USB\VID_0798&PID_0600
 
 ; Device: 0798:0624
 "LibUSB-Win32: Alva [BC624]"=LIBUSB_DEV, USB\VID_0798&PID_0624
@@ -424,7 +427,7 @@ ServiceBinary  = %12%\libusb0.sys
 ; Generic Identifier
 ; Vendor: Future Technology Devices International, Ltd
 ; Product: FT232 USB-Serial (UART) IC
-"LibUSB-Win32: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip]"=LIBUSB_DEV, USB\VID_0403&PID_6001
+"LibUSB-Win32: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip], MDV [all models]"=LIBUSB_DEV, USB\VID_0403&PID_6001
 
 ; Device: 0403:DE58
 "LibUSB-Win32: Hedo [MobilLine]"=LIBUSB_DEV, USB\VID_0403&PID_DE58
@@ -473,6 +476,9 @@ ServiceBinary  = %12%\libusb0.sys
 
 ; Device: 0798:0001
 "LibUSB-Win32: Voyager [all models]"=LIBUSB_DEV, USB\VID_0798&PID_0001
+
+; Device: 0798:0600
+"LibUSB-Win32: Alva [Voyager Protocol Converter]"=LIBUSB_DEV, USB\VID_0798&PID_0600
 
 ; Device: 0798:0624
 "LibUSB-Win32: Alva [BC624]"=LIBUSB_DEV, USB\VID_0798&PID_0624
@@ -723,7 +729,7 @@ ServiceBinary  = %12%\libusb0.sys
 ; Generic Identifier
 ; Vendor: Future Technology Devices International, Ltd
 ; Product: FT232 USB-Serial (UART) IC
-"LibUSB-Win32: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip]"=LIBUSB_DEV, USB\VID_0403&PID_6001
+"LibUSB-Win32: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip], MDV [all models]"=LIBUSB_DEV, USB\VID_0403&PID_6001
 
 ; Device: 0403:DE58
 "LibUSB-Win32: Hedo [MobilLine]"=LIBUSB_DEV, USB\VID_0403&PID_DE58
@@ -772,6 +778,9 @@ ServiceBinary  = %12%\libusb0.sys
 
 ; Device: 0798:0001
 "LibUSB-Win32: Voyager [all models]"=LIBUSB_DEV, USB\VID_0798&PID_0001
+
+; Device: 0798:0600
+"LibUSB-Win32: Alva [Voyager Protocol Converter]"=LIBUSB_DEV, USB\VID_0798&PID_0600
 
 ; Device: 0798:0624
 "LibUSB-Win32: Alva [BC624]"=LIBUSB_DEV, USB\VID_0798&PID_0624

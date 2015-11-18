@@ -26,6 +26,7 @@
 # Cebra [all models]
 # HIMS [Sync Braille]
 # HandyTech [FTDI chip]
+# MDV [all models]
 brltty 0x0003 0x0403 0x6001
 
 # Device: 0403:DE58
@@ -93,6 +94,10 @@ brltty 0x0003 0x06b0 0x0001
 # Device: 0798:0001
 # Voyager [all models]
 brltty 0x0003 0x0798 0x0001
+
+# Device: 0798:0600
+# Alva [Voyager Protocol Converter]
+brltty 0x0003 0x0798 0x0600
 
 # Device: 0798:0624
 # Alva [BC624]

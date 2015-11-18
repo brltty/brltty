@@ -46,7 +46,7 @@ HKR,,Icon,,-20
 ; Generic Identifier
 ; Vendor: Future Technology Devices International, Ltd
 ; Product: FT232 USB-Serial (UART) IC
-"LibUSB-1.0: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip]"=LIBUSB_DEV, USB\VID_0403&PID_6001
+"LibUSB-1.0: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip], MDV [all models]"=LIBUSB_DEV, USB\VID_0403&PID_6001
 
 ; Device: 0403:DE58
 "LibUSB-1.0: Hedo [MobilLine]"=LIBUSB_DEV, USB\VID_0403&PID_DE58
@@ -95,6 +95,9 @@ HKR,,Icon,,-20
 
 ; Device: 0798:0001
 "LibUSB-1.0: Voyager [all models]"=LIBUSB_DEV, USB\VID_0798&PID_0001
+
+; Device: 0798:0600
+"LibUSB-1.0: Alva [Voyager Protocol Converter]"=LIBUSB_DEV, USB\VID_0798&PID_0600
 
 ; Device: 0798:0624
 "LibUSB-1.0: Alva [BC624]"=LIBUSB_DEV, USB\VID_0798&PID_0624
@@ -345,7 +348,7 @@ HKR,,Icon,,-20
 ; Generic Identifier
 ; Vendor: Future Technology Devices International, Ltd
 ; Product: FT232 USB-Serial (UART) IC
-"LibUSB-1.0: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip]"=LIBUSB_DEV, USB\VID_0403&PID_6001
+"LibUSB-1.0: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip], MDV [all models]"=LIBUSB_DEV, USB\VID_0403&PID_6001
 
 ; Device: 0403:DE58
 "LibUSB-1.0: Hedo [MobilLine]"=LIBUSB_DEV, USB\VID_0403&PID_DE58
@@ -394,6 +397,9 @@ HKR,,Icon,,-20
 
 ; Device: 0798:0001
 "LibUSB-1.0: Voyager [all models]"=LIBUSB_DEV, USB\VID_0798&PID_0001
+
+; Device: 0798:0600
+"LibUSB-1.0: Alva [Voyager Protocol Converter]"=LIBUSB_DEV, USB\VID_0798&PID_0600
 
 ; Device: 0798:0624
 "LibUSB-1.0: Alva [BC624]"=LIBUSB_DEV, USB\VID_0798&PID_0624

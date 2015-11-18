@@ -34,6 +34,7 @@ LABEL="brltty_usb_begin"
 # Cebra [all models]
 # HIMS [Sync Braille]
 # HandyTech [FTDI chip]
+# MDV [all models]
 ENV{PRODUCT}=="403/6001/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0403:DE58
@@ -101,6 +102,10 @@ ENV{PRODUCT}=="6b0/1/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run
 # Device: 0798:0001
 # Voyager [all models]
 ENV{PRODUCT}=="798/1/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
+
+# Device: 0798:0600
+# Alva [Voyager Protocol Converter]
+ENV{PRODUCT}=="798/600/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 0798:0624
 # Alva [BC624]

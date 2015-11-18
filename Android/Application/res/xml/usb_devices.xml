@@ -11,6 +11,7 @@
   <!-- Cebra [all models] -->
   <!-- HIMS [Sync Braille] -->
   <!-- HandyTech [FTDI chip] -->
+  <!-- MDV [all models] -->
   <usb-device vendor-id="1027" product-id="24577" />
 
   <!-- Device: 0403:DE58 -->
@@ -78,6 +79,10 @@
   <!-- Device: 0798:0001 -->
   <!-- Voyager [all models] -->
   <usb-device vendor-id="1944" product-id="1" />
+
+  <!-- Device: 0798:0600 -->
+  <!-- Alva [Voyager Protocol Converter] -->
+  <usb-device vendor-id="1944" product-id="1536" />
 
   <!-- Device: 0798:0624 -->
   <!-- Alva [BC624] -->
