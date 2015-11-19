@@ -210,7 +210,7 @@ The following braille displays are supported:
 -  Iris
 -  Libbraille
 -  LogText [32]
--  MDV [MB208/MB408L/MB408S (protocol 5)]
+-  MDV [MB208, MB248, MB408L, MB408L+, Lilli Blu]
 -  Metec [BD-40]
 -  MiniBraille [20]
 -  MultiBraille [MB125CR/MB145CR/MB185CR]
