@@ -20,17 +20,14 @@
 
 #include <string.h>
 #include <errno.h>
-#include <dirent.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <sys/ioctl.h>
 
 #include "log.h"
 #include "async_io.h"
 
 #include "brl_driver.h"
 #include "brldefs-bg.h"
-#include "metec_flat20_ioctl.h"
 
 #define KEYBOARD_DEVICE_NAME "cp430_keypad"
 #define BRAILLE_DEVICE_PATH "/dev/braille0"
@@ -97,6 +94,10 @@ struct BrailleDataStruct {
 #ifndef KEY_BRL_DOT9
 #define KEY_BRL_DOT9 0X1F9
 #endif /* KEY_BRL_DOT9 */
+
+#include <dirent.h>
+#include <sys/ioctl.h>
+#include "metec_flat20_ioctl.h"
 
 static int
 handleKeyEvent (BrailleDisplay *brl, int code, int press) {
