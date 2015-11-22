@@ -2743,21 +2743,25 @@ static int api__handleCommand(int command) {
   }
 
   if (command != EOF) {
-    Connection *c;
+    Connection *c = NULL;
     brlapi_keyCode_t code;
-    cmdBrlttyToBrlapi(&code, command, 1);
-
-    logMessage(LOG_CATEGORY(SERVER_EVENTS), "command %08x -> client code %016"BRLAPI_PRIxKEYCODE, command, code);
-    c = whoGetsKey(&ttys, code, BRL_COMMANDS);
+    if (!cmdBrlttyToBrlapi(&code, command, 1)) {
+      logMessage(LOG_CATEGORY(SERVER_EVENTS), "command %08x could not be converted to BrlAPI with retaindots", command);
+    } else {
+      logMessage(LOG_CATEGORY(SERVER_EVENTS), "command %08x -> client code %016"BRLAPI_PRIxKEYCODE, command, code);
+      c = whoGetsKey(&ttys, code, BRL_COMMANDS);
+    }
 
     if (!c) {
       brlapi_keyCode_t alternate;
-      cmdBrlttyToBrlapi(&alternate, command, 0);
-
-      if (alternate != code) {
-        logMessage(LOG_CATEGORY(SERVER_EVENTS), "command %08x -> client code %016"BRLAPI_PRIxKEYCODE, command, alternate);
-        c = whoGetsKey(&ttys, alternate, BRL_COMMANDS);
-        if (c) code = alternate;
+      if (!cmdBrlttyToBrlapi(&alternate, command, 0)) {
+	logMessage(LOG_CATEGORY(SERVER_EVENTS), "command %08x could not be converted to BrlAPI without retaindots", command);
+      } else {
+	if (alternate != code) {
+	  logMessage(LOG_CATEGORY(SERVER_EVENTS), "command %08x -> client code %016"BRLAPI_PRIxKEYCODE, command, alternate);
+	  c = whoGetsKey(&ttys, alternate, BRL_COMMANDS);
+	  if (c) code = alternate;
+	}
       }
     }
 
