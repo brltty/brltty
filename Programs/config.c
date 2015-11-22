@@ -606,6 +606,37 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 END_OPTION_TABLE
 
+static void
+makeProgramBanner (char *buffer, size_t size) {
+  const char *revision = getRevisionIdentifier();
+  snprintf(buffer, size, "%s %s%s%s",
+           PACKAGE_NAME, PACKAGE_VERSION,
+           (*revision? " rev ": ""), revision);
+}
+
+static void
+logProgramBanner (void) {
+  char banner[0X100];
+  makeProgramBanner(banner, sizeof(banner));
+
+  {
+    int pushed = pushLogPrefix(NULL);
+    logMessage(LOG_NOTICE, "%s [%s]", banner, PACKAGE_URL);
+    if (pushed) popLogPrefix();
+  }
+}
+
+static void
+logProperty (const char *value, const char *variable, const char *label) {
+  if (*value) {
+    if (variable) setGlobalDataVariable(variable, value);
+  } else {
+    value = gettext("none");
+  }
+
+  logMessage(LOG_INFO, "%s: %s", label, value);
+}
+
 int
 changeLogLevel (const char *operand) {
   int ok = 1;
@@ -698,6 +729,9 @@ brlttyPrepare (int argc, char *argv[]) {
   } else {
     openSystemLog();
   }
+
+  logProgramBanner();
+  logProperty(opt_logLevel, "logLevel", gettext("Log Level"));
 
   return PROG_EXIT_SUCCESS;
 }
@@ -1257,14 +1291,6 @@ void
 forgetDevices (void) {
   usbForgetDevices();
   bthForgetDevices();
-}
-
-static void
-makeProgramBanner (char *buffer, size_t size) {
-  const char *revision = getRevisionIdentifier();
-  snprintf(buffer, size, "%s %s%s%s",
-           PACKAGE_NAME, PACKAGE_VERSION,
-           (*revision? " rev ": ""), revision);
 }
 
 static void
@@ -2391,17 +2417,6 @@ validateInterval (int *value, const char *string) {
   }
 }
 
-static void
-logProperty (const char *value, const char *variable, const char *label) {
-  if (*value) {
-    setGlobalDataVariable(variable, value);
-  } else {
-    value = gettext("none");
-  }
-
-  logMessage(LOG_INFO, "%s: %s", label, value);
-}
-
 ProgramExitStatus
 brlttyStart (void) {
   if (opt_cancelExecution) {
@@ -2437,17 +2452,6 @@ brlttyStart (void) {
 
   if (!validateInterval(&messageHoldTimeout, opt_messageHoldTimeout)) {
     logMessage(LOG_ERR, "%s: %s", gettext("invalid message hold timeout"), opt_messageHoldTimeout);
-  }
-
-  {
-    char banner[0X100];
-    makeProgramBanner(banner, sizeof(banner));
-
-    {
-      int pushed = pushLogPrefix(NULL);
-      logMessage(LOG_NOTICE, "%s [%s]", banner, PACKAGE_URL);
-      if (pushed) popLogPrefix();
-    }
   }
 
   if (opt_version) {
