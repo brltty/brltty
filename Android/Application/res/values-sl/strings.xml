@@ -28,6 +28,9 @@
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Nivo Dnevnika</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Kategorije Dnevnikov</string>
+  <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Beleži Dogodke Dostopnosti</string>
+  <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">Beleži Dogodke v Zvezi z Upodabljanjem na Zaslon</string>
+  <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Beleži Dogodke s Tipkovnico</string>
 
   <string name="DEVICES_BUTTON_SELECTED">Izbrana Naprava</string>
   <string name="DEVICES_BUTTON_ADD">Dodaj Napravo</string>
