@@ -101,3 +101,23 @@ bind Dot8 KEY_ENTER
 bind \{chord}Dot7 PASSDOTS+dot7
 bind \{chord}Dot8 PASSDOTS+dot8
 
+
+#################
+# Menu Bindings #
+#################
+
+context menu
+
+bind Dot1 MENU_PREV_ITEM
+bind Dot4 MENU_NEXT_ITEM
+
+bind Dot2 MENU_FIRST_ITEM
+bind Dot5 MENU_LAST_ITEM
+
+bind Dot3 MENU_PREV_SETTING
+bind Dot6 MENU_NEXT_SETTING
+
+bind Dot7 MENU_PREV_LEVEL
+bind Dot8 PREFMENU
+
+

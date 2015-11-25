@@ -116,22 +116,3 @@ bind Right+RoutingKey NXDIFCHAR
 bind Louder+Softer BRL_STOP
 
 
-#################
-# Menu Bindings #
-#################
-
-context menu
-
-bind Dot1 MENU_PREV_ITEM
-bind Dot4 MENU_NEXT_ITEM
-
-bind Dot2 MENU_PREV_SETTING
-bind Dot5 MENU_NEXT_SETTING
-
-bind Dot3 MENU_PREV_LEVEL
-bind Dot6 PREFMENU
-
-bind Dot7 PREFLOAD
-bind Dot8 PREFSAVE
-
-
