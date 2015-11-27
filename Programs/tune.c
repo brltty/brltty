@@ -71,13 +71,17 @@ openTuneDevice (void) {
 
   if (noteDevice) {
     asyncResetAlarmIn(tuneDeviceCloseTimer, timeout);
-  } else if ((noteDevice = noteMethods->construct(openErrorLevel)) != NULL) {
-    asyncSetAlarmIn(&tuneDeviceCloseTimer, timeout, handleTuneDeviceCloseTimeout, NULL);
-  } else {
-    return 0;
+    return 1;
   }
 
-  return 1;
+  if (noteMethods) {
+    if ((noteDevice = noteMethods->construct(openErrorLevel)) != NULL) {
+      asyncSetAlarmIn(&tuneDeviceCloseTimer, timeout, handleTuneDeviceCloseTimeout, NULL);
+      return 1;
+    }
+  }
+
+  return 0;
 }
 
 static const NoteElement *currentlyPlayingNotes = NULL;
