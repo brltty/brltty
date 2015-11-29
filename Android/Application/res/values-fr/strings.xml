@@ -28,6 +28,9 @@
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Niveau de journalisation</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Catégorie de journal</string>
+  <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Journal des événements liés à l\'accessibilité</string>
+  <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">Journal de l\'affichage à l\'écran</string>
+  <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Journal des événements liés au clavier</string>
 
   <string name="DEVICES_BUTTON_SELECTED">Périphérique sélectionné</string>
   <string name="DEVICES_BUTTON_ADD">Ajouter un périphérique</string>
