@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Contraction Table - Chinese (Taiwan, uncontracted) by Coscell Kao <coscell@gmail.com>
+# BRLTTY Contraction Table - Chinese (Taiwan, uncontracted) by Coscell Kao <coscell@gmail.com> (2015)
 
 #English characters
 include nabcc.cti
@@ -206,7 +206,7 @@ always \u20AC 4-15
 always \u20B9 4-1235
 always \u2103 45-46-16-0-147
 always \u2109 45-46-16-0-1247
-always \u2122 12356-23457-23456
+always \u2122 12356-23457-1347-23456
 always \u2160 247
 always \u2161 247-247
 always \u2162 247-247-247
@@ -951,6 +951,46 @@ always \u336D 23-2-125
 always \u336E 23-23-125
 always \u336F 23-25-125
 always \u3370 23-256-125
+always \u3380 1234-1-12346
+always \u3381 1345-1
+always \u3382 134-136-1
+always \u3383 134-1
+always \u3384 13-1
+always \u3385 13-12
+always \u3386 134-12
+always \u3387 1245-12
+always \u3388 14-1-123
+always \u3389 13-14-1-123
+always \u338A 1234-124
+always \u338B 1345-124
+always \u338C 134-136-124
+always \u338D 134-136-1245
+always \u338E 134-1245
+always \u338F 13-1245
+always \u3390 125-1356
+always \u3391 13-125-1356
+always \u3392 134-125-1356
+always \u3393 1245-125-1356
+always \u3394 2345-125-1356
+always \u3395 134-136-123
+always \u3396 134-123
+always \u3397 145-123
+always \u3398 13-123
+always \u3399 124-134
+always \u339A 1345-134
+always \u339B 134-136-134
+always \u339C 134-134
+always \u339D 14-134
+always \u339E 13-134
+always \u339F 134-134-457-23
+always \u33A0 14-134-457-23
+always \u33A1 134-457-23
+always \u33A2 13-134-457-23
+always \u33A3 134-134-457-25
+always \u33A4 14-134-457-25
+always \u33A5 134-457-25
+always \u33A6 13-134-457-25
+always \u33D5 134-24-123
 always \u33E0 2-145
 always \u33E1 23-145
 always \u33E2 25-145
@@ -7686,7 +7726,7 @@ always \u543C 1235-12356-4
 always \u543D 12356-2
 always \u543E 34-2
 always \u543F 13-146-5
-always \u5440 23456-3
+always \u5440 23456-1
 always \u5441 13-256-5
 always \u5442 14-1256-4
 always \u5443 2346-5
@@ -9450,7 +9490,7 @@ always \u5B20 245-1236-2
 always \u5B21 2456-5
 always \u5B22 1345-46-2
 always \u5B23 1345-1356-2
-always \u5B24 134-126-2
+always \u5B24 134-345-3
 always \u5B25 124-246-4
 always \u5B26 12-12356-2
 always \u5B27 13-1456-5
@@ -11284,7 +11324,7 @@ always \u624A 2345-4
 always \u624B 24-12356-4
 always \u624C 24-12356-4
 always \u624D 245-2456-2
-always \u624E 1-345-3
+always \u624E 1-345-2
 always \u624F 245-234-2
 always \u6250 14-2346-5
 always \u6251 1234-34-3
@@ -18274,7 +18314,7 @@ always \u7D98 12345-1356-2
 always \u7D99 13-16-5
 always \u7D9A 15-1256-5
 always \u7D9B 1245-136-4
-always \u7D9C 125-1356-3
+always \u7D9C 125-12346-5
 always \u7D9D 12-136-3
 always \u7D9E 145-25-4
 always \u7D9F 14-16-5
@@ -19365,7 +19405,7 @@ always \u81DB 1235-25-5
 always \u81DC 125-345-3
 always \u81DD 14-25-4
 always \u81DE 245-1256-2
-always \u81DF 125-1346-3
+always \u81DF 125-1346-5
 always \u81E0 14-12456-2
 always \u81E1 1345-16-2
 always \u81E2 125-1236-3
@@ -22418,7 +22458,7 @@ always \u8DC8 1345-2345-4
 always \u8DC9 14-13456-2
 always \u8DCA 134-356-5
 always \u8DCB 135-345-2
-always \u8DCC 145-346-3
+always \u8DCC 145-346-2
 always \u8DCD 123-34-3
 always \u8DCE 124-25-2
 always \u8DCF 13-23456-3
@@ -25053,7 +25093,7 @@ always \u9813 145-123456-5
 always \u9814 145-16-2
 always \u9815 145-1236-3
 always \u9816 1234-1236-5
-always \u9817 1234-126-3
+always \u9817 1234-126-4
 always \u9818 14-13456-4
 always \u9819 245-2346-5
 always \u981A 13-13456-4
@@ -25637,7 +25677,7 @@ always \u9A5B 16-5
 always \u9A5C 346-5
 always \u9A5D 124-25-3
 always \u9A5E 135-1456-3
-always \u9A5F 1-12356-5
+always \u9A5F 125-12356-5
 always \u9A60 2345-5
 always \u9A61 1234-1356-2
 always \u9A62 14-1256-2
@@ -28100,6 +28140,8 @@ always \u5f37\u5e79 245-46-4-13-1236-5
 always \u5f37\u6a6b 245-46-2-1235-1356-5
 always \u5f37\u6c42 245-46-4-245-234-2
 always \u5f37\u8a18 245-46-4-13-16-5
+always \u5F48\u6027 124-1236-2-15-13456-5
+always \u5F48\u7C27 124-1236-2-1235-456-2
 always \u5f4c\u6492 134-16-2-15-345-3
 always \u5f4e\u66f2 12456-3-245-1256-3
 always \u5f71\u5b50 13456-4-125-156-1
