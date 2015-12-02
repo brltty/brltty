@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: brltty 4.3\n"
 "Report-Msgid-Bugs-To: brltty@mielke.cc\n"
 "POT-Creation-Date: 2015-11-28 11:37+0100\n"
-"PO-Revision-Date: 2015-11-29 05:00+0100\n"
+"PO-Revision-Date: 2015-12-02 01:58+0100\n"
 "Last-Translator: Jean-Philippe MENGUAL (de Traduc.org) <mengualjeanphi@free.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: fr\n"
@@ -129,14 +129,12 @@ msgid "All"
 msgstr "Toutes"
 
 #: Programs/menu_prefs.c:444
-#, fuzzy
 msgid "Alphabetic Braille Window Coordinates"
-msgstr "Coordonnées alphabétiques de la fenêtre"
+msgstr "Coordonnées alphabétiques de la fenêtre braille"
 
 #: Programs/menu_prefs.c:445
-#, fuzzy
 msgid "Alphabetic Screen Cursor Coordinates"
-msgstr "Coordonnées alphabétiques du curseur"
+msgstr "Coordonnées alphabétiques du curseur à l'écran"
 
 #: Programs/midi.c:117
 msgid "Alto Sax"
@@ -231,9 +229,8 @@ msgid "Blinking Capitals"
 msgstr "Clignotement des majuscules"
 
 #: Programs/menu_prefs.c:609
-#, fuzzy
 msgid "Blinking Screen Cursor"
-msgstr "Clignotement du curseur de la synthèse"
+msgstr "Clignotement du curseur de l'écran"
 
 #: Programs/menu_prefs.c:1010
 msgid "Blinking Speech Cursor"
@@ -296,24 +293,20 @@ msgid "Braille Tables"
 msgstr "Tables braille"
 
 #: Programs/menu_prefs.c:433
-#, fuzzy
 msgid "Braille Window Column"
-msgstr "Colonne de la fenêtre"
+msgstr "Colonne de la fenêtre braille"
 
 #: Programs/menu_prefs.c:432
-#, fuzzy
 msgid "Braille Window Coordinates"
-msgstr "Coordonnées de la fenêtre"
+msgstr "Coordonnées de la fenêtre braille"
 
 #: Programs/menu_prefs.c:703
-#, fuzzy
 msgid "Braille Window Overlap"
-msgstr "Chevauchement de fenêtre"
+msgstr "Chevauchement de fenêtre braille"
 
 #: Programs/menu_prefs.c:434
-#, fuzzy
 msgid "Braille Window Row"
-msgstr "Ligne de la fenêtre"
+msgstr "Ligne de la fenêtre braille"
 
 #: Programs/config.c:384
 #, c-format
@@ -378,9 +371,8 @@ msgid "Cello"
 msgstr "violoncelle"
 
 #: Programs/brltty-ttb.c:185
-#, fuzzy
 msgid "Check for undefined characters."
-msgstr "Va au caractère à gauche"
+msgstr "Vérifie les ca!actères indéfinis"
 
 #: Programs/midi.c:102
 msgid "Choir Aahs"
@@ -419,14 +411,12 @@ msgid "Configuration File"
 msgstr "Fichier de configuration"
 
 #: Programs/alert.c:412
-#, fuzzy
 msgid "Console Bell"
-msgstr "Tintement de cloches"
+msgstr "Beep de la console"
 
 #: Programs/menu_prefs.c:808
-#, fuzzy
 msgid "Console Bell Alert"
-msgstr "Générateur de beep de console"
+msgstr "Beep de la console"
 
 #: Programs/midi.c:92
 msgid "Contrabass"
@@ -544,9 +534,8 @@ msgid "Dulcimer"
 msgstr "Dulcimer"
 
 #: Programs/menu_prefs.c:697
-#, fuzzy
 msgid "Eager Sliding Braille Window"
-msgstr "Défilement dynamique de la fenêtre"
+msgstr "Défilement dynamique de la fenêtre braille"
 
 #: Programs/brltty-ttb.c:157
 msgid "Edit table."
@@ -751,9 +740,8 @@ msgid "High"
 msgstr "Forte"
 
 #: Programs/menu_prefs.c:716
-#, fuzzy
 msgid "Highlight Braille Window Location"
-msgstr "Surlignement de la fenêtre"
+msgstr "Surlignement de l'emplacement de la fenêtre braille"
 
 #: Programs/midi.c:47
 msgid "Honkytonk Piano"
@@ -813,9 +801,8 @@ msgid "Key Bindings"
 msgstr "Associations de touches"
 
 #: Programs/config.c:975
-#, fuzzy
 msgid "Key Help"
-msgstr "Aide"
+msgstr "Touche Aide"
 
 #: Programs/config.c:1317 Programs/ktb_list.c:668
 msgid "Key Table"
@@ -826,9 +813,8 @@ msgid "Keyboard Key Events"
 msgstr "Événements liés aux touches du clavier"
 
 #: Programs/menu_prefs.c:815
-#, fuzzy
 msgid "Keyboard LED Alerts"
-msgstr "Événements liés aux touches du clavier"
+msgstr "Alertes lumineuses du clavier"
 
 #: Programs/config.c:2620 Programs/menu_prefs.c:797
 msgid "Keyboard Table"
@@ -884,19 +870,16 @@ msgid "Left"
 msgstr "Gauche"
 
 #: Programs/brltty-ktb.c:45
-#, fuzzy
 msgid "List key names."
-msgstr "Liste les noms de touche sur la sortie standard."
+msgstr "Liste les noms des touches"
 
 #: Programs/brltty-ktb.c:52
-#, fuzzy
 msgid "List key table in help screen format."
-msgstr "Liste la table de touches sur la sortie standard"
+msgstr "Liste la table de touches au format écran d'aide"
 
 #: Programs/brltty-ktb.c:59
-#, fuzzy
 msgid "List key table in reStructuredText format."
-msgstr "Liste la table de touches sur la sortie standard"
+msgstr "Liste la table de touches au format reStructuredText"
 
 #: Programs/menu_prefs.c:1243
 msgid "Locale Directory"
@@ -907,9 +890,8 @@ msgid "Log Categories"
 msgstr "Catégories de journal"
 
 #: Programs/config.c:734
-#, fuzzy
 msgid "Log Level"
-msgstr "Niveau de journalisation du système"
+msgstr "Niveau de journalisation"
 
 #: Programs/config.c:605
 msgid "Log the versions of the core, API, and built-in drivers, and then exit."
@@ -1214,9 +1196,8 @@ msgid "Path to directory which can be written to."
 msgstr "Chemin du répertoire oÃ¹ il est possible d'écrire."
 
 #: Programs/config.c:327
-#, fuzzy
 msgid "Path to directory which contains files that can be updated."
-msgstr "Chemin du répertoire oÃ¹ il est possible d'écrire."
+msgstr "Chemin du répertoire où des fichiers peuvent être mis à jour."
 
 #: Programs/brltty-trtxt.c:59
 msgid "Path to input text table."
@@ -1379,44 +1360,36 @@ msgid "Say Space"
 msgstr "Dire les espaces"
 
 #: Programs/menu_prefs.c:436
-#, fuzzy
 msgid "Screen Cursor Column"
-msgstr "Colonne du curseur"
+msgstr "Colonne du curseur de l'écran"
 
 #: Programs/menu_prefs.c:435
-#, fuzzy
 msgid "Screen Cursor Coordinates"
-msgstr "Coordonnées du curseur"
+msgstr "Coordonnées du curseur de l'écran"
 
 #: Programs/menu_prefs.c:621
-#, fuzzy
 msgid "Screen Cursor Invisible Time"
-msgstr "Durée d'invisibilité du curseur"
+msgstr "Durée d'invisibilité du curseur d'écran"
 
 #: Programs/menu_prefs.c:437
-#, fuzzy
 msgid "Screen Cursor Row"
-msgstr "Ligne du curseur"
+msgstr "Ligne du curseur de l'écran"
 
 #: Programs/menu_prefs.c:603
-#, fuzzy
 msgid "Screen Cursor Style"
-msgstr "Apparence du curseur de la synthèse"
+msgstr "Apparence du curseur de l'écran"
 
 #: Programs/menu_prefs.c:615
-#, fuzzy
 msgid "Screen Cursor Visible Time"
-msgstr "Durée de visibilité du curseur de la synthèse"
+msgstr "Durée de visibilité du curseur de l'écran"
 
 #: Programs/menu_prefs.c:438
-#, fuzzy
 msgid "Screen Cursor and Braille Window Column"
-msgstr "Colonne du curseur et de la fenêtre"
+msgstr "Colonne du curseur de l'écran et de la fenêtre braille"
 
 #: Programs/menu_prefs.c:439
-#, fuzzy
 msgid "Screen Cursor and Braille Window Row"
-msgstr "Ligne du curseur et de la fenêtre"
+msgstr "Ligne du curseur de l'écran et de la fenêtre braille"
 
 #: Programs/config.c:2052
 msgid "Screen Driver"
@@ -1480,9 +1453,8 @@ msgid "Show Attributes"
 msgstr "Afficher les attributs"
 
 #: Programs/menu_prefs.c:598
-#, fuzzy
 msgid "Show Screen Cursor"
-msgstr "Afficher le curseur de la synthèse"
+msgstr "Afficher le curseur de l'écran"
 
 #: Programs/menu_prefs.c:1053
 msgid "Show Seconds"
@@ -1502,18 +1474,16 @@ msgid "Sitar"
 msgstr "Cithare"
 
 #: Programs/menu_prefs.c:676
-#, fuzzy
 msgid "Skip Blank Braille Windows"
-msgstr "Passer les fenêtres vierges"
+msgstr "Passer les fenêtres braille vierges"
 
 #: Programs/menu_prefs.c:671
 msgid "Skip Identical Lines"
 msgstr "Passer les lignes identiques"
 
 #: Programs/menu_prefs.c:687
-#, fuzzy
 msgid "Skip Which Blank Braille Windows"
-msgstr "Quelles fenêtres vierges sauter."
+msgstr "Quelles fenêtres braille vierges sauter."
 
 #: Programs/midi.c:84
 msgid "Slap Bass 1"
@@ -1528,7 +1498,6 @@ msgid "Slash"
 msgstr "Barre oblique"
 
 #: Programs/menu_prefs.c:692
-#, fuzzy
 msgid "Sliding Braille Window"
 msgstr "Faire défiler la fenêtre"
 
@@ -1623,18 +1592,16 @@ msgid "Speech Rate"
 msgstr "Vitesse de la synthèse"
 
 #: Programs/menu_prefs.c:933
-#, fuzzy
 msgid "Speech Uppercase Indicator"
-msgstr "Indicateur de majuscules"
+msgstr "Indicateur vocal de majuscules"
 
 #: Programs/menu_prefs.c:891
 msgid "Speech Volume"
 msgstr "Volume de la synthèse"
 
 #: Programs/menu_prefs.c:943
-#, fuzzy
 msgid "Speech Whitespace Indicator"
-msgstr "Indicateur d'espace insécable"
+msgstr "Indicateur vocal d'espace insécable"
 
 #: Programs/config.c:482
 #, c-format
@@ -1826,17 +1793,15 @@ msgstr "Outils"
 
 #: Programs/menu_prefs.c:750
 msgid "Touch Navigation"
-msgstr ""
+msgstr "Navigation tactile"
 
 #: Programs/menu_prefs.c:764
-#, fuzzy
 msgid "Touch Sensitivity"
-msgstr "Sensibilité du braille"
+msgstr "Sensibilité du tactile"
 
 #: Programs/menu_prefs.c:710
-#, fuzzy
 msgid "Track Screen Pointer"
-msgstr "Paramètre de l'écran"
+msgstr "Poursuivre le pointeur de l'écran"
 
 #: Programs/menu_prefs.c:777
 msgid "Translated via Text Table"
@@ -1880,9 +1845,8 @@ msgid "Unfrozen"
 msgstr "Dégelé"
 
 #: Programs/config.c:2561 Programs/menu_prefs.c:1218
-#, fuzzy
 msgid "Updatable Directory"
-msgstr "Répertoire accessible en écriture"
+msgstr "Répertoire qu'on peut mettre à jour"
 
 #: Programs/log.c:101
 msgid "Update Events"
@@ -2013,19 +1977,16 @@ msgid "battery low"
 msgstr "Batterie faible"
 
 #: Programs/cmds.auto.h:999
-#, fuzzy
 msgid "bind to a specific virtual terminal"
-msgstr "Va au terminal virtuel précédent"
+msgstr "Envoie dans un terminal virtuel particulier"
 
 #: Programs/cmds.auto.h:803
-#, fuzzy
 msgid "bind to the next virtual terminal"
-msgstr "Va au terminal virtuel suivant"
+msgstr "Envoie au terminal virtuel suivant"
 
 #: Programs/cmds.auto.h:797
-#, fuzzy
 msgid "bind to the previous virtual terminal"
-msgstr "Va au terminal virtuel précédent"
+msgstr "Envoie au terminal virtuel précédent"
 
 #.
 #: Programs/cmd_utils.c:96
@@ -2059,24 +2020,20 @@ msgid "braille driver not loadable"
 msgstr "Impossible de charger le pilote braille"
 
 #: Programs/cmd_miscellaneous.c:194
-#, fuzzy
 msgid "braille stopped"
-msgstr "Mode de saisie braille"
+msgstr "Braille arrêté"
 
 #: Programs/cmds.auto.h:832
-#, fuzzy
 msgid "bring screen cursor to character"
-msgstr "Amener le curseur au caractère"
+msgstr "Amener le curseur de l'écran au caractère"
 
 #: Programs/cmds.auto.h:488
-#, fuzzy
 msgid "bring screen cursor to current line"
-msgstr "Amène le curseur sur la ligne"
+msgstr "Amène le curseur de l'écran sur la ligne actuelle"
 
 #: Programs/cmds.auto.h:698
-#, fuzzy
 msgid "bring screen cursor to speech cursor"
-msgstr "Amène le curseur là où est la synthèse"
+msgstr "Amène le curseur de l'écran au curseur de synthèse"
 
 #. RG
 #: Programs/cmd_utils.c:102
@@ -2223,7 +2180,7 @@ msgstr "Changements annulés"
 
 #: Programs/cmds.auto.h:743
 msgid "clear all sticky input modifiers"
-msgstr ""
+msgstr "Vider les modificateurs d'entrée polluants"
 
 #: Programs/cmd_speech.c:465
 msgid "column"
@@ -2277,27 +2234,27 @@ msgstr "cyan"
 
 #: Programs/cmds.auto.h:749
 msgid "cycle the AltGr (Right Alt) sticky input modifier (next, on, off)"
-msgstr ""
+msgstr "Change le cycle de l'action d'AltGr (Alt Droite) (la prochaine fois, activé, désactivé)"
 
 #: Programs/cmds.auto.h:530
 msgid "cycle the Control sticky input modifier (next, on, off)"
-msgstr ""
+msgstr "Change le cycle du modificateur Contrôle (la prochaine fois, activé, désactivé)"
 
 #: Programs/cmds.auto.h:755
 msgid "cycle the GUI (Windows) sticky input modifier (next, on, off)"
-msgstr ""
+msgstr "Change le cycle du modificateur Touche Windows (La prochaine fois, activé, désactivé)"
 
 #: Programs/cmds.auto.h:536
 msgid "cycle the Meta (Left Alt) sticky input modifier (next, on, off)"
-msgstr ""
+msgstr "Change le cycle du modificateur Meta (Alt Gauche) (La prochaine fois, activé, désactivé)"
 
 #: Programs/cmds.auto.h:518
 msgid "cycle the Shift sticky input modifier (next, on, off)"
-msgstr ""
+msgstr "Change le cycle de la touche Majuscule (Shift), (La prochaine fois, activé, désactivé)"
 
 #: Programs/cmds.auto.h:524
 msgid "cycle the Upper sticky input modifier (next, on, off)"
-msgstr ""
+msgstr "Change le cycle de la touche Verrmaj (Upper), (La prochaine fois, activé, désactivé)"
 
 #. L
 #: Programs/cmd_utils.c:104
@@ -2305,12 +2262,10 @@ msgid "dark grey"
 msgstr "gris foncé"
 
 #: Programs/cmds.auto.h:451
-#, fuzzy
 msgid "decrease speaking rate"
 msgstr "Diminuer la vitesse de la parole"
 
 #: Programs/cmds.auto.h:463
-#, fuzzy
 msgid "decrease speaking volume"
 msgstr "Diminuer le volume de la parole"
 
@@ -2471,18 +2426,16 @@ msgid "go back after cursor tracking"
 msgstr "Revenir après la poursuite du curseur"
 
 #: Programs/cmds.auto.h:163
-#, fuzzy
 msgid "go backward one braille window"
-msgstr "Va une fenêtre à droite"
+msgstr "Recule d'une fenêtre braille"
 
 #: Programs/cmds.auto.h:177
 msgid "go backward skipping blank braille windows"
-msgstr ""
+msgstr "Recule en sautant les fenêtres braille vides"
 
 #: Programs/cmds.auto.h:810
-#, fuzzy
 msgid "go backward to nearest non-blank braille window"
-msgstr "Va à droite sur la ligne non vierge la plus proche"
+msgstr "Recule à la fenêtre braille non vide la plus proche"
 
 #: Programs/cmds.auto.h:18
 msgid "go down one line"
@@ -2517,32 +2470,28 @@ msgid "go down to next command prompt"
 msgstr "Descend à l'invite de commande suivant"
 
 #: Programs/cmds.auto.h:170
-#, fuzzy
 msgid "go forward one braille window"
-msgstr "Va à la fenêtre à gauche"
+msgstr "Avance d'une fenêtre braille"
 
 #: Programs/cmds.auto.h:184
 msgid "go forward skipping blank braille windows"
-msgstr ""
+msgstr "Avance en sautant les fenêtres braille vides"
 
 #: Programs/cmds.auto.h:817
-#, fuzzy
 msgid "go forward to nearest non-blank braille window"
-msgstr "Va à gauche sur la ligne non vierge la plus proche"
+msgstr "Va à la prochaine fenêtre braille non vide"
 
 #: Programs/cmds.auto.h:149
-#, fuzzy
 msgid "go left half a braille window"
-msgstr "Va d'une demi-fenêtre à gauche"
+msgstr "Va d'une demi-fenêtre braille à gauche"
 
 #: Programs/cmds.auto.h:135
 msgid "go left one character"
 msgstr "Va au caractère à gauche"
 
 #: Programs/cmds.auto.h:156
-#, fuzzy
 msgid "go right half a braille window"
-msgstr "Va d'une moitié de fenêtre à droite"
+msgstr "Va d'une demi-fenêtre braille à droite"
 
 #: Programs/cmds.auto.h:142
 msgid "go right one character"
@@ -2605,7 +2554,6 @@ msgid "go to bottom line"
 msgstr "Va à la toute dernière ligne"
 
 #: Programs/cmds.auto.h:427
-#, fuzzy
 msgid "go to current speaking position"
 msgstr "Va à la position actuelle de la synthèse vocale"
 
@@ -2634,19 +2582,16 @@ msgid "go to previous menu level"
 msgstr "Va au niveau de menu précédent"
 
 #: Programs/cmds.auto.h:912
-#, fuzzy
 msgid "go to remembered braille window position"
-msgstr "Va à la position de la fenêtre dont on se rappelle"
+msgstr "Va à la position de la fenêtre braille dont on se rappelle"
 
 #: Programs/cmds.auto.h:205
-#, fuzzy
 msgid "go to screen cursor"
-msgstr "Va au curseur"
+msgstr "Va au curseur de l'écran"
 
 #: Programs/cmds.auto.h:219
-#, fuzzy
 msgid "go to screen cursor or go back after cursor tracking"
-msgstr "Va au curseur ou revient après la poursuite du curseur"
+msgstr "Va au curseur de l'écran ou revient d'une poursuite du curseur"
 
 #: Programs/cmds.auto.h:920
 msgid "go to selected line"
@@ -2665,9 +2610,8 @@ msgid "go up several lines"
 msgstr "Remonte de plusieurs ligne"
 
 #: Programs/cmds.auto.h:95
-#, fuzzy
 msgid "go up to first line of paragraph"
-msgstr "Descend à la première ligne du paragraphe suivant"
+msgstr "Monte à la première ligne du paragraphe"
 
 #: Programs/cmds.auto.h:928
 msgid "go up to nearest line with different character"
@@ -2715,24 +2659,20 @@ msgid "idle timeout"
 msgstr "Délai d'inactivité"
 
 #: Programs/cmds.auto.h:457
-#, fuzzy
 msgid "increase speaking rate"
-msgstr "Augmente la vitesse de la parole"
+msgstr "Augmente le débit de la parole"
 
 #: Programs/cmds.auto.h:469
-#, fuzzy
 msgid "increase speaking volume"
 msgstr "Augmente le volume de la parole"
 
 #: Programs/cmds.auto.h:957
-#, fuzzy
 msgid "insert clipboard history entry after screen cursor"
-msgstr "Insérer l'entrée de l'historique du presse-papier au niveau du curseur"
+msgstr "Insère l'entrée de l'historique du presse-papiers après le curseur de l'écran"
 
 #: Programs/cmds.auto.h:494
-#, fuzzy
 msgid "insert clipboard text after screen cursor"
-msgstr "Insérer le contenu du presse-papier au niveau du curseur"
+msgstr "Insère le texte du presse-papiers après le curseur de l'écran"
 
 #: Programs/cmds.auto.h:1141
 msgid "insert key"
@@ -2905,9 +2845,8 @@ msgid "pitch"
 msgstr "Ton"
 
 #: Programs/cmds.auto.h:897
-#, fuzzy
 msgid "place left end of braille window at character"
-msgstr "met le côté gauche de la fenêtre braille sur le caractère"
+msgstr "met le coin gauche de la fenêtre braille sur le caractère"
 
 #: Drivers/Braille/Baum/braille.c:1063
 msgid "power switch"
@@ -2942,9 +2881,8 @@ msgid "reinitializing speech driver"
 msgstr "Réinitialisation de la synthèse vocale"
 
 #: Programs/cmds.auto.h:904
-#, fuzzy
 msgid "remember current braille window position"
-msgstr "Rappelle la position de la fenêtre actuelle"
+msgstr "Mémorise la position actuelle de la fenêtre braille"
 
 #: Drivers/Braille/BrailleLite/braille.c:601
 #: Drivers/Braille/BrailleLite/braille.c:780
@@ -3025,7 +2963,6 @@ msgid "set attribute underlining on/off"
 msgstr "Active ou désactive le soulignement des attributs"
 
 #: Programs/cmds.auto.h:971
-#, fuzzy
 msgid "set attributes table"
 msgstr "Définit la table des attributs"
 
@@ -3066,7 +3003,6 @@ msgid "set braille input mode dots/text"
 msgstr "Définit le mode de saisie de texte/points braille"
 
 #: Programs/cmds.auto.h:737
-#, fuzzy
 msgid "set braille keyboard enabled/disabled"
 msgstr "Active ou désactive le clavier braille"
 
@@ -3075,7 +3011,6 @@ msgid "set capital letter blinking on/off"
 msgstr "Active ou désactive le clignottement des lettres majuscules"
 
 #: Programs/cmds.auto.h:978
-#, fuzzy
 msgid "set contraction table"
 msgstr "Définit la table de braille abrégé"
 
@@ -3084,32 +3019,26 @@ msgid "set display mode attributes/text"
 msgstr "Bascule l'affichage entre les modes attributs-texte"
 
 #: Programs/cmds.auto.h:275
-#, fuzzy
 msgid "set hidden screen cursor on/off"
-msgstr "Cache ou fait apparaÂ±tre le curseur"
+msgstr "Cache ou fait apparaître le curseur de l'écran"
 
 #: Programs/cmds.auto.h:985
-#, fuzzy
 msgid "set keyboard table"
 msgstr "Définit la table de touches"
 
 #: Programs/cmds.auto.h:992
-#, fuzzy
 msgid "set language profile"
 msgstr "Définir le profil de la langue"
 
 #: Programs/cmds.auto.h:296
-#, fuzzy
 msgid "set screen cursor blinking on/off"
-msgstr "Active ou désactive le clignotement du curseur"
+msgstr "Active ou désactive le clignotement du curseur de l'écran"
 
 #: Programs/cmds.auto.h:289
-#, fuzzy
 msgid "set screen cursor style block/underline"
 msgstr "Bascule entre un style de curseur souligné ou en bloc"
 
 #: Programs/cmds.auto.h:268
-#, fuzzy
 msgid "set screen cursor visibility on/off"
 msgstr "Rend le curseur visible ou invisible"
 
@@ -3118,47 +3047,40 @@ msgid "set screen image frozen/unfrozen"
 msgstr "Geler/dégeler l'image de l'écran"
 
 #: Programs/cmds.auto.h:261
-#, fuzzy
 msgid "set skipping of blank braille windows on/off"
-msgstr "Active ou désactive le saut des fenêtres vides"
+msgstr "Active ou désactive le saut des fenêtres braille vides"
 
 #: Programs/cmds.auto.h:254
 msgid "set skipping of lines with identical content on/off"
 msgstr "Activation/désactivation du saut de ligne ayant un contenu identique"
 
 #: Programs/cmds.auto.h:247
-#, fuzzy
 msgid "set sliding braille window on/off"
-msgstr "Active ou désactive le glissement de la fenêtre"
+msgstr "Active ou désactive le glissement de la fenêtre braille"
 
 #: Programs/cmds.auto.h:711
-#, fuzzy
 msgid "set speech cursor visibility on/off"
-msgstr "Rend le curseur visible ou invisible"
+msgstr "Rend le curseur de synthèse visible ou invisible"
 
 #: Programs/cmds.auto.h:240
 msgid "set text style 6-dot/8-dot"
 msgstr "Bascule l'apparencu de texte entre 6 et 8 points"
 
 #: Programs/cmds.auto.h:964
-#, fuzzy
 msgid "set text table"
 msgstr "Définit la table du texte"
 
 #: Programs/cmds.auto.h:824
-#, fuzzy
 msgid "set touch navigation on/off"
-msgstr "Active ou désactive la répétition automatique"
+msgstr "Active ou désactive la navigation tactile"
 
 #: Programs/cmds.auto.h:282
-#, fuzzy
 msgid "set track screen cursor on/off"
-msgstr "Cache ou fait apparaÂ±tre le curseur"
+msgstr "Active ou désacti(e la poursuite du curseur de l'écran"
 
 #: Programs/cmds.auto.h:542
-#, fuzzy
 msgid "show current date and time"
-msgstr "Afficher la date et l'heure actuelles"
+msgstr "Affiche la date et l'heure actuelles"
 
 #: Programs/menu_prefs.c:829
 msgid "soundcard digital audio"
@@ -3193,9 +3115,8 @@ msgid "speak from top of screen through current line"
 msgstr "Lit vocalement du haut de l'écran jusquà la ligne actuelle"
 
 #: Programs/cmds.auto.h:704
-#, fuzzy
 msgid "speak speech cursor location"
-msgstr "Lire là où est la synthèse"
+msgstr "Lit là où est le curseur de synthèse"
 
 #: Programs/config.c:1834
 msgid "speech driver not loadable"
@@ -3210,59 +3131,50 @@ msgid "start new clipboard at character"
 msgstr "Démarre un nouveau presse-papier au caractère"
 
 #: Programs/cmds.auto.h:767
-#, fuzzy
 msgid "start the braille driver"
-msgstr "Redémarre le pilote braille"
+msgstr "Démarre le pilote braille"
 
 #: Programs/cmds.auto.h:791
-#, fuzzy
 msgid "start the screen driver"
-msgstr "Redémarre le pilote de l'écran"
+msgstr "Démarre le pilote de l'écran"
 
 #: Programs/cmds.auto.h:779
-#, fuzzy
 msgid "start the speech driver"
-msgstr "Redémarre le pilote de synthèse vocale"
+msgstr "Démarre le pilote de synthèse vocale"
 
 #: Programs/cmds.auto.h:420
 msgid "stop speaking"
 msgstr "Arrêt de la parole"
 
 #: Programs/cmds.auto.h:761
-#, fuzzy
 msgid "stop the braille driver"
-msgstr "Redémarre le pilote braille"
+msgstr "Démarre le pilote braille"
 
 #: Programs/cmds.auto.h:785
-#, fuzzy
 msgid "stop the screen driver"
-msgstr "Paramètres pour le pilote de l'écran."
+msgstr "Arrête le pilote de l'écran"
 
 #: Programs/cmds.auto.h:773
-#, fuzzy
 msgid "stop the speech driver"
-msgstr "Redémarre le pilote de synthèse vocale"
+msgstr "Arrête le pilote de synthèse vocale"
 
 #: Programs/xbrlapi.c:526
 msgid "strange old error handler\n"
 msgstr "Gestionnaire d'étranges erreurs anciennes\n"
 
 #: Programs/cmds.auto.h:867
-#, fuzzy
 msgid "switch to a specific virtual terminal"
-msgstr "Va au terminal virtuel précédent"
+msgstr "Va à un terminal virtuel spécifique"
 
 #: Programs/cmds.auto.h:1043
 msgid "switch to command context"
 msgstr "Va au contexte de la commande"
 
 #: Programs/cmds.auto.h:481
-#, fuzzy
 msgid "switch to the next virtual terminal"
 msgstr "Va au terminal virtuel suivant"
 
 #: Programs/cmds.auto.h:475
-#, fuzzy
 msgid "switch to the previous virtual terminal"
 msgstr "Va au terminal virtuel précédent"
 
@@ -3271,9 +3183,8 @@ msgid "tab key"
 msgstr "Touche tab"
 
 #: Programs/cmds.auto.h:1015
-#, fuzzy
 msgid "type braille dots"
-msgstr "Caractère de type braille"
+msgstr "Saisie de points braille"
 
 #: Programs/cmds.auto.h:1007
 msgid "type unicode character"
