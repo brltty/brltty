@@ -1225,6 +1225,7 @@ verifyBaumPacket (
       case BAUM_RSP_ModuleRegistration:
       case BAUM_RSP_DataRegisters:
       case BAUM_RSP_ServiceRegisters:
+        if (byte < 4) return BRL_PVR_INVALID;
         *length += byte;
         break;
 
@@ -1488,8 +1489,9 @@ handleBaumModuleRegistrationEvent (BrailleDisplay *brl, const BaumResponsePacket
   if (packet->data.values.modular.data.registration.event == BAUM_MRE_Addition) {
     if (!writeBaumModuleRegistrationCommand(brl,
                                             moduleIdentifier, serialNumber,
-                                            BAUM_MRC_Acknowledge))
+                                            BAUM_MRC_Acknowledge)) {
       return 0;
+    }
 
     if (bmd) {
       BaumModuleRegistration *bmr;
