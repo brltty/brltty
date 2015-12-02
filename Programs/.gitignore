@@ -6,11 +6,11 @@
 /brltty-ktb
 /brltty-trtxt
 /brltty-ttb
+/brltty-tune
 
 /brltest
 /scrtest
 /spktest
-/tunetest
 
 /revision_identifier.h
 /brlapi.h

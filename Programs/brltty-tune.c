@@ -16,9 +16,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* tunetest.c - Test program for the tune playing library
- */
-
 #include "prologue.h"
 
 #include <stdio.h>
@@ -125,7 +122,7 @@ main (int argc, char *argv[]) {
   {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
-      .applicationName = "tunetest",
+      .applicationName = "brltty-tune",
       .argumentsSummary = "note... | -f [{file | -}...]"
     };
     PROCESS_OPTIONS(descriptor, argc, argv);

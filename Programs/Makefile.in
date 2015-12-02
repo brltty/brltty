@@ -16,8 +16,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-all: all-brltty brltty-trtxt$X brltty-ttb$X brltty-atb$X brltty-ctb$X $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
-everything: all all-brltest all-scrtest all-spktest all-brltty-ktb tunetest$X $(ALL_API)
+all: all-brltty brltty-trtxt$X brltty-ttb$X brltty-atb$X brltty-ctb$X all-brltty-ktb brltty-tune$X $(ALL_API_BINDINGS) $(ALL_XBRLAPI)
+everything: all all-brltest all-scrtest all-spktest $(ALL_API)
 all-brltty: brltty$X $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
 all-spktest: spktest$X $(SPEECH_DRIVERS)
@@ -802,13 +802,13 @@ scrtest.$O:
 
 ###############################################################################
 
-TUNETEST_OBJECTS = tunetest.$O tune_utils.$O tune_build.$O $(PROGRAM_OBJECTS) $(PREFS_OBJECTS) $(TUNE_OBJECTS) io_misc.$O
+BRLTTY_TUNE_OBJECTS = brltty-tune.$O tune_utils.$O tune_build.$O $(PROGRAM_OBJECTS) $(PREFS_OBJECTS) $(TUNE_OBJECTS) io_misc.$O
 
-tunetest$X: $(TUNETEST_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(TUNETEST_OBJECTS) $(PCM_LIBS) $(MIDI_LIBS) $(LDLIBS)
+brltty-tune$X: $(BRLTTY_TUNE_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_TUNE_OBJECTS) $(PCM_LIBS) $(MIDI_LIBS) $(LDLIBS)
 
-tunetest.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/tunetest.c
+brltty-tune.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-tune.c
 
 tune_utils.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/tune_utils.c
@@ -918,6 +918,8 @@ install-programs: brltty$X brltty-trtxt$X brltty-ttb$X brltty-atb$X brltty-ctb$X
 	$(INSTALL_PROGRAM) brltty-ttb$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-atb$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-ctb$X $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_PROGRAM) brltty-ktb$X $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_PROGRAM) brltty-tune$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_DATA) $(BLD_TOP)config.sh $(INSTALL_PROGRAM_DIRECTORY)/brltty-config
 
 install-xbrlapi: xbrlapi$X install-program-directory install-gdm-autostart-directory
@@ -1079,7 +1081,7 @@ distclean clean::
 	for language do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) $@); done
 
 clean::
-	-rm -f brltty$X brltty-trtxt$X brltty-ttb$X brltty-atb$X brltty-ctb$X xbrlapi$X
+	-rm -f brltty$X brltty-trtxt$X brltty-ttb$X brltty-atb$X brltty-ctb$X brltty-tune$X xbrlapi$X
 	-rm -f tbl2hex$(X_FOR_BUILD) *test$X *-static$X
 	-rm -f brlapi_constants.h *.$(LIB_EXT) *.$(LIB_EXT).* *.$(ARC_EXT) *.def *.class *.jar
 	-rm -f $(BLD_TOP)$(DRV_DIR)/*
