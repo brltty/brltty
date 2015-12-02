@@ -676,6 +676,27 @@ exitLog (void *data) {
   closeLogFile();
 }
 
+static void
+setLogLevels (void) {
+  systemLogLevel = LOG_NOTICE;
+  disableAllLogCategories();
+  changeLogLevel(opt_logLevel);
+
+  {
+    unsigned char level;
+
+    if (opt_standardError) {
+      level = systemLogLevel;
+    } else {
+      level = LOG_NOTICE;
+      if (opt_version || opt_verify) level += 1;
+      if (opt_quiet) level -= 1;
+    }
+
+    stderrLogLevel = level;
+  }
+}
+
 ProgramExitStatus
 brlttyPrepare (int argc, char *argv[]) {
   {
@@ -705,25 +726,9 @@ brlttyPrepare (int argc, char *argv[]) {
   setUpdatableDirectory(opt_updatableDirectory);
   setWritableDirectory(opt_writableDirectory);
 
-  systemLogLevel = LOG_NOTICE;
-  disableAllLogCategories();
-  changeLogLevel(opt_logLevel);
-
-  {
-    unsigned char level;
-
-    if (opt_standardError) {
-      level = systemLogLevel;
-    } else {
-      level = LOG_NOTICE;
-      if (opt_version || opt_verify) level += 1;
-      if (opt_quiet) level -= 1;
-    }
-
-    stderrLogLevel = level;
-  }
-
+  setLogLevels();
   onProgramExit("log", exitLog, NULL);
+
   if (*opt_logFile) {
     openLogFile(opt_logFile);
   } else {
