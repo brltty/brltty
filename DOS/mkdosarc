@@ -106,7 +106,6 @@ logMessage task "configuring build"
 "${sourceDirectory}/cfg-dos" --prefix="${installDirectory}"
 logMessage task "building programs"
 make -s all
-make -s -C Programs brltty-atb.exe brltty-ktb.exe brltty-tune.exe
 logMessage task "building documentation"
 make -s -C Documents
 logMessage task "installing files"
@@ -115,14 +114,12 @@ logMessage task "updating files"
 
 cd "${installDirectory}/bin"
 rm brltty-config
-mv brltty-ttb.exe brlttb.exe
-mv brltty-ctb.exe brlctb.exe
 mv brltty-trtxt.exe brltrtxt.exe
-
-cd "${buildDirectory}/Programs"
-installFile brltty-atb.exe bin/brlatb.exe
-installFile brltty-ktb.exe bin/brlktb.exe
-installFile brltty-tune.exe bin/brltune.exe
+mv brltty-ttb.exe brlttb.exe
+mv brltty-atb.exe brlatb.exe
+mv brltty-ctb.exe brlctb.exe
+mv brltty-ktb.exe brlktb.exe
+mv brltty-tune.exe brltune.exe
 
 cd "${sourceDirectory}/DOS"
 installFile cwsdpmi.exe "bin/cwsdpmi.exe"
