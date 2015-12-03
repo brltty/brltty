@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=BRLTTY Screen Reader
+Exec=brltty -n -f brltty-gdm.conf 
+NoDisplay=true
+AutostartCondition=GSettings org.gnome.desktop.a11y.applications screen-reader-enabled
+X-GNOME-AutoRestart=true
