@@ -1,0 +1,34 @@
+[Unit]
+
+Description=Braille Device Support
+Documentation=man:brltty(1)
+Documentation=http://mielke.cc/brltty/
+
+DefaultDependencies=no
+Before=sysinit.target
+
+
+[Service]
+
+Type=forking
+PIDFile=/run/brltty.pid
+ExecStart=/bin/brltty -P /run/brltty.pid
+
+TimeoutStartSec=5
+TimeoutStopSec=10
+
+Restart=always
+RestartSec=30
+
+Nice=-10
+OOMScoreAdjust=-900
+
+ProtectHome=read-only
+ProtectSystem=full
+SystemCallArchitectures=native
+
+
+[Install]
+WantedBy=sysinit.target
+
+

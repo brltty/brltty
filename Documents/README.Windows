@@ -118,7 +118,7 @@ To install a package, you can do:
 
 For full details, you can do:
 
-.. parsed-literal::  apt-cyg help
+.. parsed-literal:: apt-cyg help
 
 USB Support
 -----------

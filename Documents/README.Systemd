@@ -3,19 +3,63 @@ Using Systemd Service Management
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. include:: prologue.rst
+.. |service warning| replace:: system service support not available on this platform
 
-A Systemd unit for BRLTTY can be found within the ``Autostart/Systemd/`` 
-subdirectory of BRLTTY's source tree. It's called ``brltty.service``. You need
-to copy this file into Systemd's unit directory. You can locate Systemd's unit 
-directory with this command::
+Choosing the Correct Service Unit
+=================================
+
+Two service units for BRLTTY can be found within the ``Autostart/Systemd/`` 
+subdirectory of BRLTTY's source tree.
+
+For Older Versions of Systemd
+-----------------------------
+
+If your system is using Systemd for service administration,
+but, when configuring BRLTTY, you get the following warning:
+
+.. parsed-literal:: |service warning|
+
+then you'll need to use the older service unit.
+It's provided as ``brltty-old.service``.
+Remember to install it as ``brltty.service``.
+
+You're getting this warning for one of the following reasons:
+
+* Your system is using an older version of Systemd.
+
+* You haven't installed Systemd's development package.
+  Check your system and your distribution for a package named something like
+  ``systemd-dev`` or ``systemd-devel``.
+  If the development package isn't installed but is available
+  then we recommend that you install it and then reconfigure BRLTTY.
+
+For Newer Versions of Systemd
+-----------------------------
+
+If your system is using Systemd for service administration,
+and, when configuring BRLTTY, you don't get the following warning:
+
+.. parsed-literal:: |service warning|
+
+then you should use the newer service unit.
+It's provided as ``brltty.service``.
+
+Installing the Service Unit
+===========================
+
+You need to copy the service unit into Systemd's unit directory. You can locate
+Systemd's unit directory with this command::
 
    pkg-config systemd --variable=systemduserunitdir
 
 Assuming that Systemd's unit directory is ``/usr/lib/systemd/user`` (please 
-ensure to use whatever it really is on your system), define the Systemd unit 
+ensure to use whatever it really is on your system), define the service unit 
 for BRLTTY as follows::
 
    cp brltty.service /usr/lib/systemd/user/brltty.service
+
+Managing the BRLTTY Service
+===========================
 
 Once the unit file is in the right place, you'll be able to use standard 
 Systemd commands to manage the ``brltty`` service. The most common ones are::
