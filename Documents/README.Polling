@@ -39,6 +39,8 @@ required due to host platform limitations.
    *  Linux text consoles if the kernel is at least 2.6.37 (released on January 4,
       2011)
 
+   *  Linux graphics consoles monitored via AT-SPI2.
+
    On other platforms, |frequent polling| is used.
 
 .. topic:: Monitoring for Serial Input
