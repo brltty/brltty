@@ -585,6 +585,7 @@ const PreferenceAliasEntry preferenceAliasTable[] = {
   {.oldName="highlight-window", .newName="highlight-braille-window-location"},
   {.oldName="uppercase-indicator", .newName="speech-uppercase-indicator"},
   {.oldName="whitespace-indicator", .newName="speech-whitespace-indicator"},
+  {.oldName="braille-sensitivity", .newName="touch-sensitivity"},
 };
 
 const unsigned char preferenceAliasCount = ARRAY_COUNT(preferenceAliasTable);
