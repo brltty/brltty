@@ -182,7 +182,7 @@ BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'u',
     .word = "undefined",
     .setting.flag = &opt_undefined,
-    .description = strtext("Check for undefined characters.")
+    .description = strtext("Report the characters within the current screen font that aren't defined within the text table.")
   },
 #endif /* HAVE_UNDEFINED_CHARACTERS_SUPPORT */
 END_OPTION_TABLE
