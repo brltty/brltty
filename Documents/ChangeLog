@@ -1,6 +1,166 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+December 15, 2015:
+ - BRLTTY 5.3 released:
+   General fixes:
+      The missing key event (stuck key) problem has been resolved.
+      The braille display is now initialized when the -q (--quiet) option is used.
+      Playing alert tunes has been moved to a dedicated thread.
+      PCM (sound card) tone generation is now way more efficient.
+      Program-relative paths are no longer used for relative paths specified via
+         command line options or configuration file directives.
+      Explicit paths for tables no longer consider the tables directory path.
+      The -U (--updatable-directory) option has been added (it used to be
+         hard-coded to /var/lib/brltty/).
+      Braille driver parameters may be specified via the fourth boot parameter
+         (use + to separate them).
+      The speech FIFO on Linux has been moved to the writable directory (see -W -
+         the default is /var/run/brltty/).
+      The Console Bell Alert preference has been added - when enabled, and with
+         the tune device set to PCM, the console bell can be heard even if the PC
+         speaker either doesn't exist or isn't supported.
+   New and changed commands:
+      The toLeft modifier can be applied to any vertical motion command.
+      The AltGr (Right Alt) and GUI (Windows) keys are supported.
+      The PRPGRPH (go to previous paragraph) command navigates to the first line
+         of the current paragraph (or, if already on it, to the first line of the
+         previous paragraph) rather than to the last line of the previous
+         paragraph.
+      The space bar is a real space (rather than a braille character with no dots)
+         when the keyboard is in Unicode braille input mode.
+      Disabling the braille keyboard now disables all braille input commands.
+      New commands that always skip forward/backward to a nonblank braille window:
+         NXNBWIN, PRNBWIN
+      Sticky modifier command improvements:
+         Cycle through next,on,off (rather than just on,off) - next means just for
+         the next typed character, and times out after five seconds.
+      New commands to start/stop the braille,speech,screen drivers:
+         BRL_START, BRL_STOP, SPK_START, SPK_STOP, SCR_START, SCR_STOP
+      New commands for attaching to a specific (not necessarily current) console:
+         SELECT, SELECT_NEXT, SELECT_PREV
+   Albatross braille driver changes:
+      Detection of no pending input has been improved.
+      Recognizing a failed autodetection probe has been improved.
+   Alva braille driver changes:
+      Establishing a Bluetooth connection is now supported for more models.
+   Baum braille driver changes:
+      The standard braille keyboard chords are supported.
+      The Refreshabraille has an improved key table.
+      The Conny has an improved key table.
+      The 12-cell Vario/BrailleConnect now uses the Conny key table.
+      The protocols= parameter has been renamed to protocol= and accepts a
+         specific protocol name (default, escape, hid1, hid2, ht, pb).
+      Support for the following models has been added:
+         VarioUltra, Pronto!, Brailliant2, SuperVario2, HID Refreshabraille 18
+   BrailleMemo braille driver changes:
+      Model autodetection has been improved.
+   FreedomScientific braille driver changes:
+      The key tables for newer models use the newer key names:
+         The wheels are called Nav keys.
+         The GDF keys are called Selector keys.
+   HandyTech braille driver changes:
+      Touch-based navigation has been implemented for the following models:
+         Modular Evolution, Active Braille, Active Star
+   HIMS braille driver changes:
+      Function keys can be emulated by pressing space with a routing key.
+      The Braille Sense U2 is recognized.
+      The Braille Edge scroll keys are now mapped correctly.
+   HumanWare braille driver changes:
+      Bindings for adding Alt, Control, or both to a function key have been added.
+   MDV braille driver changes:
+      The bindings are now defined within key tables.
+      Support for the following models has been added:
+         Lilli Blu, MB248, MB408+
+   Papenmeier braille driver changes:
+      The status key bindings have been standardized across the various models.
+      Minor changes to the front key bindings (for models with 13).
+      XT keyboard support has been fixed.
+   XWindow braille driver changes:
+      Support for the Unicode braille characters has been added.
+   AtSpi2 screen driver changes:
+      The widget with focus on startup is determined correctly.
+      The currently focused widget is cached for efficiency.
+      The screen size is implicitly increased based on the cursor's location.
+      The release= (yes, no) parameter has been added.
+   Linux screen driver changes:
+      VGA foreground and background colours are now reported correctly.
+      A font change now triggers a braille display update.
+      The VT= (number) parameter has been added - 0 means the current console.
+      Systemd is no longer blocked from starting a login session on an unused tty.
+   Screen screen driver changes:
+      ASCII control characters can now be entered.
+   BrlAPI changes:
+      The version is now 0.6.4 (it was 0.6.3).
+      Cursor blinking finally works again.
+      The braille display is refreshed whenever it comes back online if the client
+         has focus.
+   Language profile support fixes:
+      The language profile can now be changed when there's no braille device.
+      The braille device and keyboard key table help texts are regenerated
+         according to the new localization when the language profile is changed.
+   Text table changes:
+      The en_CA (English Canada) text table has been updated.
+      The fr-vs (VisioBraille) text table has been updated.
+      The alias directive has been added.
+      Support for the variable and conditional directives has been added.
+      The -u (--undefined) option has been added to brltty-ttb - it reports
+         the characters in the current screen font that aren't yet defined in the
+         text table.
+      brltty-ttb can write C preprocessor format (cpp) tables.
+   Contraction table changes:
+      The Unicode braille characters are now handled internally.
+      The en-us-g2 (grade 2 US English) contraction table has been updated.
+      The zh-tw (Taiwan Chinese) contraction table has been updated.
+   Key table changes:
+      Major chords key subtable changes:
+         Tab is now Space+Dots45 (it was Space+Dots2356).
+         Backspace is now just Dot7, and Enter is now just Dot8.
+         Add Space to get just dot 7 or just dot 8.
+         Unchorded bindings have been added for navigating the preferences menu:
+            Dot1: go to the previous item
+            Dot4: go to the next item
+            Dot2: go to the first item
+            Dot5: go to the last item
+            Dot3: select the previous setting for the current item
+            Dot6: select the next setting for the current item
+            Dot7: go back one level
+            Dot8: exit the menu
+      Minor changes to the keypad keyboard table.
+      The assignDefault directive has been added.
+      The -r (--reStructuredText) option has been added to brltty-ktb - it causes
+         the help text to be formatted as reStructuredText.
+      The help text has been improved:
+         Related bindings have been organized into functional groups.
+         Each of these groups has a descriptive header.
+         Variants of the same binding are listed together.
+         The bindings for Help and Learn are intentionally listed at the top.
+   Java bindings fixes:
+      The JDK hierarchy is located even when symbolic links point to it.
+      The subdirectory containing machine-dependent JNI definitions is included.
+   Android updates:
+      F9 goes to the Global Actions (Power Off) dialog (Lollipop and later).
+      F10 is the Menu key.
+      The braille display stays in the active window (new problem as of Lollipop).
+      The order in which screen elements are rendered is more intuitive.
+      Czech translations have been added.
+      Finnish translations have been added.
+   Windows updates:
+      Support for the Unicode braille characters has been added.
+   brltty-tune (formerly tunetest) changes:
+      The tune syntax has been completely changed.
+      Tunes can be read from files.
+   Build changes:
+      The autoconf dependency has been updated to 2.64 (from 2.53).
+      The ktbtest command has been renamed to brltty-ktb.
+      The tunetest command has been renamed to brltty-tune.
+      The brltty-atb, brltty-ktb, and brltty-tune commands are installed.
+      Key table help text is rendered in HTML (as well as in plain text).
+      Systemd service ready notification (via type=notify) is supported.
+      mkwin command updates:
+         The -C (Cygwin root directory) option has been added.
+         A safe, relative path to the configure script can now be used.
+
 November 6, 2014:
  - BRLTTY 5.2 released:
    General Fixes:
