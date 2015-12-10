@@ -428,6 +428,29 @@ canMonitorScreen (void) {
 }
 #endif /* can poll */
 
+static const int NO_CONSOLE = 0;
+static const int MAIN_CONSOLE = 1;
+static const char MAIN_CONSOLE_PATH[] = "/dev/tty1";
+
+static int mainConsoleDescriptor;
+
+static int
+getConsoleState (struct vt_stat *state) {
+  if (mainConsoleDescriptor == -1) {
+    if ((mainConsoleDescriptor = open(MAIN_CONSOLE_PATH, O_RDONLY)) == -1) {
+      logMessage(LOG_ERR, "can't open main console: %s: %s",
+                 MAIN_CONSOLE_PATH, strerror(errno));
+      problemText = "can't open main console";
+      return 0;
+    }
+  }
+
+  if (ioctl(mainConsoleDescriptor, VT_GETSTATE, state) != -1) return 1;
+  logSystemError("ioctl[VT_GETSTATE]");
+  problemText = "can't get console state";
+  return 0;
+}
+
 static size_t
 readScreenDevice (off_t offset, void *buffer, size_t size) {
   const ssize_t count = pread(screenDescriptor, buffer, size, offset);
@@ -913,6 +936,8 @@ REPORT_LISTENER(lxBrailleOfflineListener) {
 
 static int
 construct_LinuxScreen (void) {
+  mainConsoleDescriptor = -1;
+
   screenUpdated = 0;
   cacheBuffer = NULL;
   cacheSize = 0;
@@ -973,6 +998,11 @@ destruct_LinuxScreen (void) {
   if (brailleOfflineListener) {
     unregisterReportListener(brailleOfflineListener);
     brailleOfflineListener = NULL;
+  }
+
+  if (mainConsoleDescriptor != -1) {
+    close(mainConsoleDescriptor);
+    mainConsoleDescriptor = -1;
   }
 }
 
@@ -1042,38 +1072,31 @@ poll_LinuxScreen (void) {
 
 static int
 getConsoleNumber (void) {
-  int number;
+  int console;
 
   if (virtualTerminal) {
-    number = virtualTerminal;
+    console = virtualTerminal;
   } else {
-    {
-      struct vt_stat state;
+    struct vt_stat state;
+    if (!getConsoleState(&state)) return NO_CONSOLE;
+    console = state.v_active;
 
-      if (controlConsole(VT_GETSTATE, &state) == -1) {
-        logSystemError("ioctl[VT_GETSTATE]");
-        problemText = "can't get console number";
-        return 0;
-      }
-
-      number = state.v_active;
-    }
-
-    if (number != currentConsoleNumber) {
+    if (console != currentConsoleNumber) {
       if (currentConsoleNumber && !rebindConsole()) {
         problemText = "can't access console";
-        return 0;
+        return NO_CONSOLE;
       }
 
       setTranslationTable(1);
     }
   }
 
-  return number;
+  return console;
 }
 
 static int
 testTextMode (void) {
+  if (problemText) return 0;
   int mode;
 
   if (controlConsole(KDGETMODE, &mode) == -1) {
@@ -1161,11 +1184,9 @@ refresh_LinuxScreen (void) {
       problemText = NULL;
 
       if (!refreshCacheBuffer()) {
-        problemText = "cannot read screen content";
+        problemText = "can't read screen content";
         return 0;
       }
-
-      inTextMode = testTextMode();
 
       {
         int consoleNumber = getConsoleNumber();
@@ -1179,6 +1200,7 @@ refresh_LinuxScreen (void) {
       }
     }
 
+    inTextMode = testTextMode();
     screenUpdated = 0;
   }
 
@@ -1235,8 +1257,8 @@ static void
 describe_LinuxScreen (ScreenDescription *description) {
   if (!cacheBuffer) {
     problemText = NULL;
-    inTextMode = testTextMode();
     currentConsoleNumber = getConsoleNumber();
+    inTextMode = testTextMode();
   }
 
   if ((description->number = currentConsoleNumber)) {
