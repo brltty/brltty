@@ -442,6 +442,10 @@ openMainConsole (void) {
                  MAIN_CONSOLE_PATH, strerror(errno));
       return 0;
     }
+
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "main console opened: %s: fd=%d",
+               MAIN_CONSOLE_PATH, mainConsoleDescriptor);
   }
 
   return 1;
@@ -450,7 +454,10 @@ openMainConsole (void) {
 static void
 closeMainConsole (void) {
   if (mainConsoleDescriptor != -1) {
-    close(mainConsoleDescriptor);
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "closing main console: fd=%d", mainConsoleDescriptor);
+
+    if (close(mainConsoleDescriptor) == -1) logSystemError("close main console");
     mainConsoleDescriptor = -1;
   }
 }
@@ -981,8 +988,14 @@ construct_LinuxScreen (void) {
             return 1;
           }
         }
+
+        closeConsole();
       }
+
+      closeScreen();
     }
+
+    closeMainConsole();
   }
 
   return 0;
