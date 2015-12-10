@@ -1401,7 +1401,6 @@ test -n "${api_server_objects}" && {
 }
 BRLTTY_BRAILLE_DRIVER([bc], [BrailComm])
 BRLTTY_BRAILLE_DRIVER([bd], [Braudi])
-BRLTTY_BRAILLE_DRIVER([bg], [B2G])
 BRLTTY_BRAILLE_DRIVER([bl], [BrailleLite])
 BRLTTY_BRAILLE_DRIVER([bm], [Baum])
 BRLTTY_BRAILLE_DRIVER([bn], [BrailleNote])
@@ -1438,6 +1437,13 @@ BRLTTY_BRAILLE_DRIVER([vs], [VisioBraille])
 test -n "${gui_toolkit_package}" && {
    BRLTTY_BRAILLE_DRIVER([xw], [XWindow], [$(XTK_LIBS) $(XSV_LIBS)])
 }
+case "${host_os}"
+in
+   linux*)
+      BRLTTY_BRAILLE_DRIVER([bg], [B2G])
+      ;;
+   *) ;;
+esac
 BRLTTY_ARG_DRIVER([braille], [Braille])
 
 AC_CACHE_CHECK([for device directory], [brltty_cv_device_directory], [dnl
@@ -1670,8 +1676,7 @@ BRLTTY_ARG_DISABLE(
       *android*)
          BRLTTY_SPEECH_DRIVER([an], [Android])
          ;;
-      *)
-         ;;
+      *) ;;
    esac
 ])
 AC_SUBST([speech_support_object])
