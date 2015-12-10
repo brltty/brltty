@@ -435,16 +435,28 @@ static const char MAIN_CONSOLE_PATH[] = "/dev/tty1";
 static int mainConsoleDescriptor;
 
 static int
-getConsoleState (struct vt_stat *state) {
+openMainConsole (void) {
   if (mainConsoleDescriptor == -1) {
     if ((mainConsoleDescriptor = open(MAIN_CONSOLE_PATH, O_RDONLY)) == -1) {
       logMessage(LOG_ERR, "can't open main console: %s: %s",
                  MAIN_CONSOLE_PATH, strerror(errno));
-      problemText = "can't open main console";
       return 0;
     }
   }
 
+  return 1;
+}
+
+static void
+closeMainConsole (void) {
+  if (mainConsoleDescriptor != -1) {
+    close(mainConsoleDescriptor);
+    mainConsoleDescriptor = -1;
+  }
+}
+
+static int
+getConsoleState (struct vt_stat *state) {
   if (ioctl(mainConsoleDescriptor, VT_GETSTATE, state) != -1) return 1;
   logSystemError("ioctl[VT_GETSTATE]");
   problemText = "can't get console state";
@@ -955,17 +967,19 @@ construct_LinuxScreen (void) {
   ps2KeyPressed = 1;
 #endif /* HAVE_LINUX_INPUT_H */
 
-  if (setScreenName()) {
-    screenDescriptor = -1;
+  if (openMainConsole()) {
+    if (setScreenName()) {
+      screenDescriptor = -1;
 
-    if (setConsoleName()) {
-      consoleDescriptor = -1;
+      if (setConsoleName()) {
+        consoleDescriptor = -1;
 
-      if (openScreen(initialVirtualTerminal)) {
-        if (setTranslationTable(1)) {
-          openKeyboard();
-          brailleOfflineListener = registerReportListener(REPORT_BRAILLE_OFFLINE, lxBrailleOfflineListener, NULL);
-          return 1;
+        if (openScreen(initialVirtualTerminal)) {
+          if (setTranslationTable(1)) {
+            openKeyboard();
+            brailleOfflineListener = registerReportListener(REPORT_BRAILLE_OFFLINE, lxBrailleOfflineListener, NULL);
+            return 1;
+          }
         }
       }
     }
@@ -1000,10 +1014,7 @@ destruct_LinuxScreen (void) {
     brailleOfflineListener = NULL;
   }
 
-  if (mainConsoleDescriptor != -1) {
-    close(mainConsoleDescriptor);
-    mainConsoleDescriptor = -1;
-  }
+  closeMainConsole();
 }
 
 static int
@@ -1925,7 +1936,7 @@ static int
 switchVirtualTerminal_LinuxScreen (int vt) {
   if (validateVt(vt)) {
     if (selectVirtualTerminal_LinuxScreen(0)) {
-      if (ioctl(consoleDescriptor, VT_ACTIVATE, vt) != -1) {
+      if (ioctl(mainConsoleDescriptor, VT_ACTIVATE, vt) != -1) {
         logMessage(LOG_CATEGORY(SCREEN_DRIVER),
                    "switched to virtual tertminal %d", vt);
         return 1;
