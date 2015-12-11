@@ -343,6 +343,28 @@ setConsoleName (void) {
   return setDeviceName(&consoleName, names, "console");
 }
 
+static int
+openConsoleDevice (int *fd, int vt) {
+  int opened = 0;
+  char *name = vtName(consoleName, vt);
+
+  if (name) {
+    int console = openCharacterDevice(name, O_RDWR|O_NOCTTY, 4, vt);
+
+    if (console != -1) {
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+                 "console opened: %s: fd=%d", name, console);
+
+      *fd = console;
+      opened = 1;
+    }
+
+    free(name);
+  }
+
+  return opened;
+}
+
 static void
 closeConsole (void) {
   if (consoleDescriptor != -1) {
@@ -358,25 +380,12 @@ closeConsole (void) {
 
 static int
 reopenConsole (unsigned char vt) {
-  int opened = 0;
-  char *name = vtName(consoleName, vt);
+  int console;
+  if (!openConsoleDevice(&console, vt)) return 0;
 
-  if (name) {
-    int console = openCharacterDevice(name, O_RDWR|O_NOCTTY, 4, vt);
-
-    if (console != -1) {
-      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-                 "console opened: %s: fd=%d", name, console);
-
-      closeConsole();
-      consoleDescriptor = console;
-      opened = 1;
-    }
-
-    free(name);
-  }
-
-  return opened;
+  closeConsole();
+  consoleDescriptor = console;
+  return 1;
 }
 
 static int
@@ -436,22 +445,14 @@ canMonitorScreen (void) {
 
 static const int NO_CONSOLE = 0;
 static const int MAIN_CONSOLE = 1;
-static const char MAIN_CONSOLE_PATH[] = "/dev/tty1";
-
 static int mainConsoleDescriptor;
 
 static int
 openMainConsole (void) {
   if (mainConsoleDescriptor == -1) {
-    if ((mainConsoleDescriptor = open(MAIN_CONSOLE_PATH, O_RDONLY)) == -1) {
-      logMessage(LOG_ERR, "can't open main console: %s: %s",
-                 MAIN_CONSOLE_PATH, strerror(errno));
+    if (!openConsoleDevice(&mainConsoleDescriptor, MAIN_CONSOLE)) {
       return 0;
     }
-
-    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-               "main console opened: %s: fd=%d",
-               MAIN_CONSOLE_PATH, mainConsoleDescriptor);
   }
 
   return 1;
@@ -505,6 +506,28 @@ setScreenName (void) {
   return setDeviceName(&screenName, names, "screen");
 }
 
+static int
+openScreenDevice (int *fd, int vt) {
+  int opened = 0;
+  char *name = vtName(screenName, vt);
+
+  if (name) {
+    int screen = openCharacterDevice(name, O_RDWR, 7, 0X80|vt);
+
+    if (screen != -1) {
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+                 "screen opened: %s: fd=%d", name, screen);
+
+      *fd = screen;
+      opened = 1;
+    }
+
+    free(name);
+  }
+
+  return opened;
+}
+
 static void
 closeScreen (void) {
   if (screenMonitor) {
@@ -525,35 +548,22 @@ closeScreen (void) {
 
 static int
 reopenScreen (unsigned char vt) {
-  int opened = 0;
-  char *name = vtName(screenName, vt);
+  int screen;
+  if (!openScreenDevice(&screen, vt)) return 0;
 
-  if (name) {
-    int screen = openCharacterDevice(name, O_RDWR, 7, 0X80|vt);
+  closeConsole();
+  closeScreen();
+  screenDescriptor = screen;
+  virtualTerminal = vt;
 
-    if (screen != -1) {
-      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-                 "screen opened: %s: fd=%d", name, screen);
+  isMonitorable = canMonitorScreen();
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+             "screen is monitorable: %s",
+             (isMonitorable? "yes": "no"));
 
-      closeConsole();
-      closeScreen();
-      screenDescriptor = screen;
-      virtualTerminal = vt;
-      opened = 1;
-
-      isMonitorable = canMonitorScreen();
-      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-                 "screen is monitorable: %s",
-                 (isMonitorable? "yes": "no"));
-
-      screenMonitor = NULL;
-      screenUpdated = 1;
-    }
-
-    free(name);
-  }
-
-  return opened;
+  screenMonitor = NULL;
+  screenUpdated = 1;
+  return 1;
 }
 
 static size_t
@@ -939,6 +949,8 @@ REPORT_LISTENER(lxBrailleOfflineListener) {
 static int
 construct_LinuxScreen (void) {
   mainConsoleDescriptor = -1;
+  screenDescriptor = -1;
+  consoleDescriptor = -1;
 
   screenUpdated = 0;
   cacheBuffer = NULL;
@@ -957,13 +969,9 @@ construct_LinuxScreen (void) {
   ps2KeyPressed = 1;
 #endif /* HAVE_LINUX_INPUT_H */
 
-  if (openMainConsole()) {
-    if (setScreenName()) {
-      screenDescriptor = -1;
-
-      if (setConsoleName()) {
-        consoleDescriptor = -1;
-
+  if (setScreenName()) {
+    if (setConsoleName()) {
+      if (openMainConsole()) {
         if (reopenScreen(virtualTerminal)) {
           if (setTranslationTable(1)) {
             openKeyboard();
@@ -971,16 +979,13 @@ construct_LinuxScreen (void) {
             return 1;
           }
         }
-
-        closeConsole();
       }
-
-      closeScreen();
     }
-
-    closeMainConsole();
   }
 
+  closeConsole();
+  closeScreen();
+  closeMainConsole();
   return 0;
 }
 
