@@ -1824,41 +1824,38 @@ insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
 static int
 insertKey_LinuxScreen (ScreenKey key) {
   int ok = 0;
+  int mode;
 
-  if (openConsole(virtualTerminal)) {
-    int mode;
+  if (controlConsole(KDGKBMODE, &mode) != -1) {
+    switch (mode) {
+      case K_RAW:
+        if (insertCode(key, 1)) ok = 1;
+        break;
 
-    if (controlConsole(KDGKBMODE, &mode) != -1) {
-      switch (mode) {
-        case K_RAW:
-          if (insertCode(key, 1)) ok = 1;
-          break;
+      case K_MEDIUMRAW:
+        if (insertCode(key, 0)) ok = 1;
+        break;
 
-        case K_MEDIUMRAW:
-          if (insertCode(key, 0)) ok = 1;
-          break;
+      case K_XLATE:
+        if (insertTranslated(key, insertXlate)) ok = 1;
+        break;
 
-        case K_XLATE:
-          if (insertTranslated(key, insertXlate)) ok = 1;
-          break;
-
-        case K_UNICODE:
-          if (insertTranslated(key, insertUnicode)) ok = 1;
-          break;
+      case K_UNICODE:
+        if (insertTranslated(key, insertUnicode)) ok = 1;
+        break;
 
 #ifdef K_OFF
-        case K_OFF:
-          ok = 1;
-          break;
+      case K_OFF:
+        ok = 1;
+        break;
 #endif /* K_OFF */
 
-        default:
-          logMessage(LOG_WARNING, "unsupported keyboard mode: %d", mode);
-          break;
-      }
-    } else {
-      logSystemError("ioctl[KDGKBMODE]");
+      default:
+        logMessage(LOG_WARNING, "unsupported keyboard mode: %d", mode);
+        break;
     }
+  } else {
+    logSystemError("ioctl[KDGKBMODE]");
   }
 
   return ok;
