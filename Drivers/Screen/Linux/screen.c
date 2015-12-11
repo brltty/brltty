@@ -56,7 +56,7 @@ typedef enum {
 
 static const char *problemText;
 static unsigned int debugScreenFontMap;
-static int initialVirtualTerminal;
+static int virtualTerminal;
 
 #define UNICODE_ROW_DIRECT 0XF000
 
@@ -357,7 +357,7 @@ closeConsole (void) {
 }
 
 static int
-openConsole (unsigned char vt) {
+reopenConsole (unsigned char vt) {
   int opened = 0;
   char *name = vtName(consoleName, vt);
 
@@ -367,6 +367,7 @@ openConsole (unsigned char vt) {
     if (console != -1) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
                  "console opened: %s: fd=%d", name, console);
+
       closeConsole();
       consoleDescriptor = console;
       opened = 1;
@@ -378,9 +379,14 @@ openConsole (unsigned char vt) {
   return opened;
 }
 
+static int
+openConsole (unsigned char vt) {
+  if (consoleDescriptor != -1) return 1;
+  return reopenConsole(vt);
+}
+
 static const char *screenName = NULL;
 static int screenDescriptor;
-static unsigned char virtualTerminal;
 
 static int isMonitorable;
 static THREAD_LOCAL AsyncHandle screenMonitor = NULL;
@@ -518,7 +524,7 @@ closeScreen (void) {
 }
 
 static int
-openScreen (unsigned char vt) {
+reopenScreen (unsigned char vt) {
   int opened = 0;
   char *name = vtName(screenName, vt);
 
@@ -529,24 +535,19 @@ openScreen (unsigned char vt) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
                  "screen opened: %s: fd=%d", name, screen);
 
-      if (openConsole(vt)) {
-        closeScreen();
-        screenDescriptor = screen;
-        virtualTerminal = vt;
-        opened = 1;
+      closeConsole();
+      closeScreen();
+      screenDescriptor = screen;
+      virtualTerminal = vt;
+      opened = 1;
 
-        isMonitorable = canMonitorScreen();
-        logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-                   "screen is monitorable: %s",
-                   (isMonitorable? "yes": "no"));
+      isMonitorable = canMonitorScreen();
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+                 "screen is monitorable: %s",
+                 (isMonitorable? "yes": "no"));
 
-        screenMonitor = NULL;
-        screenUpdated = 1;
-      } else {
-        close(screen);
-        logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-                   "screen closed: fd=%d", screen);
-      }
+      screenMonitor = NULL;
+      screenUpdated = 1;
     }
 
     free(name);
@@ -600,17 +601,13 @@ readScreenContent (off_t offset, uint16_t *buffer, size_t count) {
 }
 
 static int
-rebindConsole (void) {
-  return virtualTerminal? 1: openConsole(0);
-}
-
-static int
 controlConsole (int operation, void *argument) {
+  if (!openConsole(virtualTerminal)) return -1;
   int result = ioctl(consoleDescriptor, operation, argument);
 
   if (result == -1) {
     if (errno == EIO) {
-      if (openConsole(virtualTerminal)) {
+      if (reopenConsole(virtualTerminal)) {
         result = ioctl(consoleDescriptor, operation, argument);
       }
     }
@@ -844,7 +841,7 @@ processParameters_LinuxScreen (char **parameters) {
     }
   }
 
-  initialVirtualTerminal = 0;
+  virtualTerminal = 0;
   {
     const char *parameter = parameters[PARM_VT];
 
@@ -852,7 +849,7 @@ processParameters_LinuxScreen (char **parameters) {
       static const int minimum = 0;
       static const int maximum = 0X3F;
 
-      if (!validateInteger(&initialVirtualTerminal, parameter, &minimum, &maximum)) {
+      if (!validateInteger(&virtualTerminal, parameter, &minimum, &maximum)) {
         logMessage(LOG_WARNING, "%s: %s", "invalid virtual terminal number", parameter);
       }
     }
@@ -981,7 +978,7 @@ construct_LinuxScreen (void) {
       if (setConsoleName()) {
         consoleDescriptor = -1;
 
-        if (openScreen(initialVirtualTerminal)) {
+        if (reopenScreen(virtualTerminal)) {
           if (setTranslationTable(1)) {
             openKeyboard();
             brailleOfflineListener = registerReportListener(REPORT_BRAILLE_OFFLINE, lxBrailleOfflineListener, NULL);
@@ -1003,6 +1000,11 @@ construct_LinuxScreen (void) {
 
 static void
 destruct_LinuxScreen (void) {
+  if (brailleOfflineListener) {
+    unregisterReportListener(brailleOfflineListener);
+    brailleOfflineListener = NULL;
+  }
+
   closeConsole();
   consoleName = NULL;
 
@@ -1021,11 +1023,6 @@ destruct_LinuxScreen (void) {
     cacheBuffer = NULL;
   }
   cacheSize = 0;
-
-  if (brailleOfflineListener) {
-    unregisterReportListener(brailleOfflineListener);
-    brailleOfflineListener = NULL;
-  }
 
   closeMainConsole();
 }
@@ -1106,11 +1103,7 @@ getConsoleNumber (void) {
     console = state.v_active;
 
     if (console != currentConsoleNumber) {
-      if (currentConsoleNumber && !rebindConsole()) {
-        problemText = "can't access console";
-        return NO_CONSOLE;
-      }
-
+      closeConsole();
       setTranslationTable(1);
     }
   }
@@ -1846,7 +1839,7 @@ static int
 insertKey_LinuxScreen (ScreenKey key) {
   int ok = 0;
 
-  if (rebindConsole()) {
+  if (openConsole(virtualTerminal)) {
     int mode;
 
     if (controlConsole(KDGKBMODE, &mode) != -1) {
@@ -1942,7 +1935,7 @@ static int
 selectVirtualTerminal_LinuxScreen (int vt) {
   if (vt == virtualTerminal) return 1;
   if (vt && !validateVt(vt)) return 0;
-  return openScreen(vt);
+  return reopenScreen(vt);
 }
 
 static int
