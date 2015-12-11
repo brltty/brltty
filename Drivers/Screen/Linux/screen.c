@@ -651,14 +651,7 @@ setScreenFontMap (int force) {
   if (!force) {
     if (sfm.entry_ct == screenFontMapCount) {
       if (memcmp(sfm.entries, screenFontMapTable, sfm.entry_ct*sizeof(sfm.entries[0])) == 0) {
-        if (size == screenFontMapSize) {
-          free(sfm.entries);
-        } else {
-          free(screenFontMapTable);
-          screenFontMapTable = sfm.entries;
-          screenFontMapSize = size;
-        }
-
+        free(sfm.entries);
         return 0;
       }
     }
@@ -669,13 +662,10 @@ setScreenFontMap (int force) {
   screenFontMapCount = sfm.entry_ct;
   screenFontMapSize = size;
   logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-             "Font Map Size: %d",
-             screenFontMapCount);
+             "Font Map Size: %d", screenFontMapCount);
 
   if (debugScreenFontMap) {
-    unsigned int i;
-
-    for (i=0; i<screenFontMapCount; ++i) {
+    for (unsigned int i=0; i<screenFontMapCount; i+=1) {
       const struct unipair *map = &screenFontMapTable[i];
 
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
@@ -875,12 +865,8 @@ setTranslationTable (int force) {
   if (sfmChanged || vccChanged) {
     unsigned int count = ARRAY_COUNT(translationTable);
 
-    {
-      unsigned int i;
-
-      for (i=0; i<count; ++i) {
-        translationTable[i] = UNICODE_ROW_DIRECT | i;
-      }
+    for (unsigned int i=0; i<count; i+=1) {
+      translationTable[i] = UNICODE_ROW_DIRECT | i;
     }
 
     {
@@ -1101,11 +1087,11 @@ getConsoleNumber (void) {
     struct vt_stat state;
     if (!getConsoleState(&state)) return NO_CONSOLE;
     console = state.v_active;
+  }
 
-    if (console != currentConsoleNumber) {
-      closeConsole();
-      setTranslationTable(1);
-    }
+  if (console != currentConsoleNumber) {
+    closeConsole();
+    setTranslationTable(1);
   }
 
   return console;
