@@ -366,7 +366,7 @@ openConsoleDevice (int *fd, int vt) {
 }
 
 static void
-closeConsole (void) {
+closeCurrentConsole (void) {
   if (consoleDescriptor != -1) {
     if (close(consoleDescriptor) == -1) {
       logSystemError("console close");
@@ -379,19 +379,69 @@ closeConsole (void) {
 }
 
 static int
-reopenConsole (unsigned char vt) {
+reopenCurrentConsole (unsigned char vt) {
   int console;
   if (!openConsoleDevice(&console, vt)) return 0;
 
-  closeConsole();
+  closeCurrentConsole();
   consoleDescriptor = console;
   return 1;
 }
 
 static int
-openConsole (unsigned char vt) {
+openCurrentConsole (unsigned char vt) {
   if (consoleDescriptor != -1) return 1;
-  return reopenConsole(vt);
+  return reopenCurrentConsole(vt);
+}
+
+static int
+controlCurrentConsole (int operation, void *argument) {
+  if (!openCurrentConsole(virtualTerminal)) return -1;
+  int result = ioctl(consoleDescriptor, operation, argument);
+
+  if (result == -1) {
+    if (errno == EIO) {
+      if (reopenCurrentConsole(virtualTerminal)) {
+        result = ioctl(consoleDescriptor, operation, argument);
+      }
+    }
+  }
+
+  return result;
+}
+
+static const int NO_CONSOLE = 0;
+static const int MAIN_CONSOLE = 1;
+static int mainConsoleDescriptor;
+
+static int
+openMainConsole (void) {
+  if (mainConsoleDescriptor == -1) {
+    if (!openConsoleDevice(&mainConsoleDescriptor, MAIN_CONSOLE)) {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+static void
+closeMainConsole (void) {
+  if (mainConsoleDescriptor != -1) {
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "closing main console: fd=%d", mainConsoleDescriptor);
+
+    if (close(mainConsoleDescriptor) == -1) logSystemError("close main console");
+    mainConsoleDescriptor = -1;
+  }
+}
+
+static int
+getConsoleState (struct vt_stat *state) {
+  if (ioctl(mainConsoleDescriptor, VT_GETSTATE, state) != -1) return 1;
+  logSystemError("ioctl[VT_GETSTATE]");
+  problemText = "can't get console state";
+  return 0;
 }
 
 static const char *screenName = NULL;
@@ -443,63 +493,6 @@ canMonitorScreen (void) {
 }
 #endif /* can poll */
 
-static const int NO_CONSOLE = 0;
-static const int MAIN_CONSOLE = 1;
-static int mainConsoleDescriptor;
-
-static int
-openMainConsole (void) {
-  if (mainConsoleDescriptor == -1) {
-    if (!openConsoleDevice(&mainConsoleDescriptor, MAIN_CONSOLE)) {
-      return 0;
-    }
-  }
-
-  return 1;
-}
-
-static void
-closeMainConsole (void) {
-  if (mainConsoleDescriptor != -1) {
-    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-               "closing main console: fd=%d", mainConsoleDescriptor);
-
-    if (close(mainConsoleDescriptor) == -1) logSystemError("close main console");
-    mainConsoleDescriptor = -1;
-  }
-}
-
-static int
-getConsoleState (struct vt_stat *state) {
-  if (ioctl(mainConsoleDescriptor, VT_GETSTATE, state) != -1) return 1;
-  logSystemError("ioctl[VT_GETSTATE]");
-  problemText = "can't get console state";
-  return 0;
-}
-
-static size_t
-readScreenDevice (off_t offset, void *buffer, size_t size) {
-  const ssize_t count = pread(screenDescriptor, buffer, size, offset);
-
-  if (count == -1) {
-    logSystemError("screen read");
-  } else {
-    return count;
-  }
-
-  return 0;
-}
-
-ASYNC_MONITOR_CALLBACK(lxScreenUpdated) {
-  asyncDiscardHandle(screenMonitor);
-  screenMonitor = NULL;
-
-  screenUpdated = 1;
-  mainScreenUpdated();
-
-  return 0;
-}
-
 static int
 setScreenName (void) {
   static const char *const names[] = {"vcsa", "vcsa0", "vcc/a", NULL};
@@ -529,7 +522,7 @@ openScreenDevice (int *fd, int vt) {
 }
 
 static void
-closeScreen (void) {
+closeCurrentScreen (void) {
   if (screenMonitor) {
     asyncCancelRequest(screenMonitor);
     screenMonitor = NULL;
@@ -547,12 +540,12 @@ closeScreen (void) {
 }
 
 static int
-reopenScreen (unsigned char vt) {
+setCurrentScreen (unsigned char vt) {
   int screen;
   if (!openScreenDevice(&screen, vt)) return 0;
 
-  closeConsole();
-  closeScreen();
+  closeCurrentConsole();
+  closeCurrentScreen();
   screenDescriptor = screen;
   virtualTerminal = vt;
 
@@ -564,6 +557,19 @@ reopenScreen (unsigned char vt) {
   screenMonitor = NULL;
   screenUpdated = 1;
   return 1;
+}
+
+static size_t
+readScreenDevice (off_t offset, void *buffer, size_t size) {
+  const ssize_t count = pread(screenDescriptor, buffer, size, offset);
+
+  if (count == -1) {
+    logSystemError("screen read");
+  } else {
+    return count;
+  }
+
+  return 0;
 }
 
 static size_t
@@ -610,25 +616,10 @@ readScreenContent (off_t offset, uint16_t *buffer, size_t count) {
   return readScreenData(offset, buffer, count);
 }
 
-static int
-controlConsole (int operation, void *argument) {
-  if (!openConsole(virtualTerminal)) return -1;
-  int result = ioctl(consoleDescriptor, operation, argument);
-
-  if (result == -1) {
-    if (errno == EIO) {
-      if (reopenConsole(virtualTerminal)) {
-        result = ioctl(consoleDescriptor, operation, argument);
-      }
-    }
-  }
-
-  return result;
-}
-
 static struct unipair *screenFontMapTable = NULL;
 static unsigned short screenFontMapSize = 0;
 static unsigned short screenFontMapCount;
+
 static int
 setScreenFontMap (int force) {
   struct unimapdesc sfm;
@@ -644,7 +635,7 @@ setScreenFontMap (int force) {
       return 0;
     }
 
-    if (controlConsole(GIO_UNIMAP, &sfm) != -1) break;
+    if (controlCurrentConsole(GIO_UNIMAP, &sfm) != -1) break;
     free(sfm.entries);
 
     if (errno != ENOMEM) {
@@ -701,7 +692,7 @@ setVgaCharacterCount (int force) {
       .op = KD_FONT_OP_GET
     };
 
-    if (controlConsole(KDFONTOP, &cfo) != -1) {
+    if (controlCurrentConsole(KDFONTOP, &cfo) != -1) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
                  "Font Properties: %ux%u*%u",
                  cfo.width, cfo.height, cfo.charcount);
@@ -772,7 +763,7 @@ determineAttributesMasks (void) {
     {
       unsigned short mask;
 
-      if (controlConsole(VT_GETHIFONTMASK, &mask) == -1) {
+      if (controlCurrentConsole(VT_GETHIFONTMASK, &mask) == -1) {
         if (errno != EINVAL) logSystemError("ioctl[VT_GETHIFONTMASK]");
       } else if (mask & 0XFF) {
         logMessage(LOG_ERR, "high font mask has bit set in low-order byte: %04X", mask);
@@ -972,7 +963,7 @@ construct_LinuxScreen (void) {
   if (setScreenName()) {
     if (setConsoleName()) {
       if (openMainConsole()) {
-        if (reopenScreen(virtualTerminal)) {
+        if (setCurrentScreen(virtualTerminal)) {
           if (setTranslationTable(1)) {
             openKeyboard();
             brailleOfflineListener = registerReportListener(REPORT_BRAILLE_OFFLINE, lxBrailleOfflineListener, NULL);
@@ -983,8 +974,8 @@ construct_LinuxScreen (void) {
     }
   }
 
-  closeConsole();
-  closeScreen();
+  closeCurrentConsole();
+  closeCurrentScreen();
   closeMainConsole();
   return 0;
 }
@@ -996,10 +987,10 @@ destruct_LinuxScreen (void) {
     brailleOfflineListener = NULL;
   }
 
-  closeConsole();
+  closeCurrentConsole();
   consoleName = NULL;
 
-  closeScreen();
+  closeCurrentScreen();
   screenName = NULL;
 
   if (screenFontMapTable) {
@@ -1071,6 +1062,16 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
   return 0;
 }
 
+ASYNC_MONITOR_CALLBACK(lxScreenUpdated) {
+  asyncDiscardHandle(screenMonitor);
+  screenMonitor = NULL;
+
+  screenUpdated = 1;
+  mainScreenUpdated();
+
+  return 0;
+}
+
 static int
 poll_LinuxScreen (void) {
   int poll = !isMonitorable? 1:
@@ -1095,7 +1096,7 @@ getConsoleNumber (void) {
   }
 
   if (console != currentConsoleNumber) {
-    closeConsole();
+    closeCurrentConsole();
     setTranslationTable(1);
   }
 
@@ -1107,7 +1108,7 @@ testTextMode (void) {
   if (problemText) return 0;
   int mode;
 
-  if (controlConsole(KDGETMODE, &mode) == -1) {
+  if (controlCurrentConsole(KDGETMODE, &mode) == -1) {
     logSystemError("ioctl[KDGETMODE]");
   } else if (mode == KD_TEXT) {
     if (afterTimePeriod(&mappingRecalculationTimer, NULL)) setTranslationTable(0);
@@ -1315,7 +1316,7 @@ readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
 static int
 getCapsLockState (void) {
   char leds;
-  if (controlConsole(KDGETLED, &leds) != -1)
+  if (controlCurrentConsole(KDGETLED, &leds) != -1)
     if (leds & LED_CAP)
       return 1;
   return 0;
@@ -1399,7 +1400,7 @@ insertUinput (
 
 static int
 insertByte (char byte) {
-  if (controlConsole(TIOCSTI, &byte) != -1) return 1;
+  if (controlCurrentConsole(TIOCSTI, &byte) != -1) return 1;
   logSystemError("ioctl[TIOCSTI]");
   return 0;
 }
@@ -1796,7 +1797,7 @@ insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
     if (hasModAltLeft(key)) {
       int meta;
 
-      if (controlConsole(KDGKBMETA, &meta) == -1) return 0;
+      if (controlCurrentConsole(KDGKBMETA, &meta) == -1) return 0;
 
       switch (meta) {
         case K_ESCPREFIX:
@@ -1831,7 +1832,7 @@ insertKey_LinuxScreen (ScreenKey key) {
   int ok = 0;
   int mode;
 
-  if (controlConsole(KDGKBMODE, &mode) != -1) {
+  if (controlCurrentConsole(KDGKBMODE, &mode) != -1) {
     switch (mode) {
       case K_RAW:
         if (insertCode(key, 1)) ok = 1;
@@ -1873,7 +1874,7 @@ typedef struct {
 
 static int
 selectRegion (RegionSelectionArgument *argument) {
-  if (controlConsole(TIOCLINUX, argument) != -1) return 1;
+  if (controlCurrentConsole(TIOCLINUX, argument) != -1) return 1;
   if (errno != EINVAL) logSystemError("ioctl[TIOCLINUX]");
   return 0;
 }
@@ -1923,7 +1924,7 @@ static int
 selectVirtualTerminal_LinuxScreen (int vt) {
   if (vt == virtualTerminal) return 1;
   if (vt && !validateVt(vt)) return 0;
-  return reopenScreen(vt);
+  return setCurrentScreen(vt);
 }
 
 static int
