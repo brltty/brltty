@@ -798,6 +798,161 @@ determineAttributesMasks (void) {
   return 0;
 }
 
+static wchar_t translationTable[0X200];
+
+static int
+setTranslationTable (int force) {
+  int mappingChanged = 0;
+  int sfmChanged = setScreenFontMap(force);
+  int vccChanged = (sfmChanged || force)? setVgaCharacterCount(force): 0;
+
+  if (vccChanged || force) determineAttributesMasks();
+
+  if (sfmChanged || vccChanged) {
+    unsigned int count = ARRAY_COUNT(translationTable);
+
+    for (unsigned int i=0; i<count; i+=1) {
+      translationTable[i] = UNICODE_ROW_DIRECT | i;
+    }
+
+    {
+      unsigned int screenFontMapIndex = screenFontMapCount;
+
+      while (screenFontMapIndex > 0) {
+        const struct unipair *sfm = &screenFontMapTable[--screenFontMapIndex];
+
+        if (sfm->fontpos < count) {
+          translationTable[sfm->fontpos] = sfm->unicode;
+        }
+      }
+    }
+
+    mappingChanged = 1;
+  }
+
+  if (mappingChanged) {
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER), "character mapping changed");
+  }
+
+  restartTimePeriod(&mappingRecalculationTimer);
+  return mappingChanged;
+}
+
+static int
+readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) {
+  uint16_t line[size];
+  int column = 0;
+
+  if (readScreenContent((row * size), line, size)) {
+    const uint16_t *source = line;
+    const uint16_t *end = source + size;
+    ScreenCharacter *character = characters;
+
+    while (source != end) {
+      uint16_t position = *source & 0XFF;
+      wint_t wc;
+
+      if (*source & fontAttributesMask) position |= 0X100;
+      if ((wc = convertCharacter(&translationTable[position])) != WEOF) {
+        if (character) {
+          character->text = wc;
+          character->attributes = ((*source & unshiftedAttributesMask) |
+                                   ((*source & shiftedAttributesMask) >> 1)) >> 8;
+          character += 1;
+        }
+
+        if (offsets) offsets[column++] = source - line;
+      }
+
+      source += 1;
+    }
+
+    {
+      wint_t wc;
+      while ((wc = convertCharacter(NULL)) != WEOF) {
+        if (character) {
+          character->text = wc;
+          character->attributes = 0X07;
+          character += 1;
+        }
+
+        if (offsets) offsets[column++] = size - 1;
+      }
+    }
+
+    return 1;
+  }
+
+  return 0;
+}
+
+static void
+adjustCursorColumn (short *column, short row, short columns) {
+  const CharsetEntry *charset = getCharsetEntry();
+
+  if (charset->isMultiByte) {
+    int offsets[columns];
+
+    if (readScreenRow(row, columns, NULL, offsets)) {
+      int first = 0;
+      int last = columns - 1;
+
+      while (first <= last) {
+        int current = (first + last) / 2;
+
+        if (offsets[current] < *column) {
+          first = current + 1;
+        } else {
+          last = current - 1;
+        }
+      }
+
+      if (first == columns) first -= 1;
+      *column = first;
+    }
+  }
+}
+
+#ifdef HAVE_LINUX_INPUT_H
+#include <linux/input.h>
+
+static const LinuxKeyCode *xtKeys;
+static const LinuxKeyCode *atKeys;
+static int atKeyPressed;
+static int ps2KeyPressed;
+#endif /* HAVE_LINUX_INPUT_H */
+
+static UinputObject *uinputKeyboard = NULL;
+static ReportListenerInstance *brailleOfflineListener;
+
+static void
+closeKeyboard (void) {
+  if (uinputKeyboard) {
+    destroyUinputObject(uinputKeyboard);
+    uinputKeyboard = NULL;
+  }
+}
+
+static int
+openKeyboard (void) {
+  if (!uinputKeyboard) {
+    if (!(uinputKeyboard = newUinputKeyboard("Linux Screen Driver Keyboard"))) {
+      return 0;
+    }
+
+    atexit(closeKeyboard);
+  }
+
+  return 1;
+}
+
+static void
+resetKeyboard (void) {
+  if (uinputKeyboard) {
+    releasePressedKeys(uinputKeyboard);
+  }
+}
+
 static int
 processParameters_LinuxScreen (char **parameters) {
   {
@@ -852,85 +1007,6 @@ processParameters_LinuxScreen (char **parameters) {
 static void
 releaseParameters_LinuxScreen (void) {
   deallocateCharsetEntries();
-}
-
-static wchar_t translationTable[0X200];
-static int
-setTranslationTable (int force) {
-  int mappingChanged = 0;
-  int sfmChanged = setScreenFontMap(force);
-  int vccChanged = (sfmChanged || force)? setVgaCharacterCount(force): 0;
-
-  if (vccChanged || force) determineAttributesMasks();
-
-  if (sfmChanged || vccChanged) {
-    unsigned int count = ARRAY_COUNT(translationTable);
-
-    for (unsigned int i=0; i<count; i+=1) {
-      translationTable[i] = UNICODE_ROW_DIRECT | i;
-    }
-
-    {
-      unsigned int screenFontMapIndex = screenFontMapCount;
-
-      while (screenFontMapIndex > 0) {
-        const struct unipair *sfm = &screenFontMapTable[--screenFontMapIndex];
-
-        if (sfm->fontpos < count) {
-          translationTable[sfm->fontpos] = sfm->unicode;
-        }
-      }
-    }
-
-    mappingChanged = 1;
-  }
-
-  if (mappingChanged) {
-    logMessage(LOG_CATEGORY(SCREEN_DRIVER), "character mapping changed");
-  }
-
-  restartTimePeriod(&mappingRecalculationTimer);
-  return mappingChanged;
-}
-
-#ifdef HAVE_LINUX_INPUT_H
-#include <linux/input.h>
-
-static const LinuxKeyCode *xtKeys;
-static const LinuxKeyCode *atKeys;
-static int atKeyPressed;
-static int ps2KeyPressed;
-#endif /* HAVE_LINUX_INPUT_H */
-
-static UinputObject *uinputKeyboard = NULL;
-static ReportListenerInstance *brailleOfflineListener;
-
-static void
-closeKeyboard (void) {
-  if (uinputKeyboard) {
-    destroyUinputObject(uinputKeyboard);
-    uinputKeyboard = NULL;
-  }
-}
-
-static int
-openKeyboard (void) {
-  if (!uinputKeyboard) {
-    if (!(uinputKeyboard = newUinputKeyboard("Linux Screen Driver Keyboard"))) {
-      return 0;
-    }
-
-    atexit(closeKeyboard);
-  }
-
-  return 1;
-}
-
-static void
-resetKeyboard (void) {
-  if (uinputKeyboard) {
-    releasePressedKeys(uinputKeyboard);
-  }
 }
 
 REPORT_LISTENER(lxBrailleOfflineListener) {
@@ -1007,59 +1083,6 @@ destruct_LinuxScreen (void) {
   cacheSize = 0;
 
   closeMainConsole();
-}
-
-static int
-userVirtualTerminal_LinuxScreen (int number) {
-  return MAX_NR_CONSOLES + 1 + number;
-}
-
-static int
-readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) {
-  uint16_t line[size];
-  int column = 0;
-
-  if (readScreenContent((row * size), line, size)) {
-    const uint16_t *source = line;
-    const uint16_t *end = source + size;
-    ScreenCharacter *character = characters;
-
-    while (source != end) {
-      uint16_t position = *source & 0XFF;
-      wint_t wc;
-
-      if (*source & fontAttributesMask) position |= 0X100;
-      if ((wc = convertCharacter(&translationTable[position])) != WEOF) {
-        if (character) {
-          character->text = wc;
-          character->attributes = ((*source & unshiftedAttributesMask) |
-                                   ((*source & shiftedAttributesMask) >> 1)) >> 8;
-          character += 1;
-        }
-
-        if (offsets) offsets[column++] = source - line;
-      }
-
-      source += 1;
-    }
-
-    {
-      wint_t wc;
-      while ((wc = convertCharacter(NULL)) != WEOF) {
-        if (character) {
-          character->text = wc;
-          character->attributes = 0X07;
-          character += 1;
-        }
-
-        if (offsets) offsets[column++] = size - 1;
-      }
-    }
-
-    return 1;
-  }
-
-  return 0;
 }
 
 ASYNC_MONITOR_CALLBACK(lxScreenUpdated) {
@@ -1214,33 +1237,6 @@ refresh_LinuxScreen (void) {
   }
 
   return 1;
-}
-
-static void
-adjustCursorColumn (short *column, short row, short columns) {
-  const CharsetEntry *charset = getCharsetEntry();
-
-  if (charset->isMultiByte) {
-    int offsets[columns];
-
-    if (readScreenRow(row, columns, NULL, offsets)) {
-      int first = 0;
-      int last = columns - 1;
-
-      while (first <= last) {
-        int current = (first + last) / 2;
-
-        if (offsets[current] < *column) {
-          first = current + 1;
-        } else {
-          last = current - 1;
-        }
-      }
-
-      if (first == columns) first -= 1;
-      *column = first;
-    }
-  }
 }
 
 static int
@@ -1946,6 +1942,11 @@ switchVirtualTerminal_LinuxScreen (int vt) {
 static int
 currentVirtualTerminal_LinuxScreen (void) {
   return currentConsoleNumber;
+}
+
+static int
+userVirtualTerminal_LinuxScreen (int number) {
+  return MAX_NR_CONSOLES + 1 + number;
 }
 
 static int
