@@ -1226,10 +1226,9 @@ isUnusedConsole (int vt) {
         }
       }
     }
-
-    free(buffer);
   }
 
+  if (buffer) free(buffer);
   return isUnused;
 }
 
@@ -1278,7 +1277,7 @@ getConsoleNumber (void) {
 
   if (consoleDescriptor == -1) {
     if (!canOpenCurrentConsole()) {
-      problemText = "console not in use";
+      problemText = gettext("console not in use");
     } else if (!openCurrentConsole()) {
       problemText = "can't open console";
     }
