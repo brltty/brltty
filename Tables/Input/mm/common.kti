@@ -79,9 +79,6 @@ map Dot8 DOT8
 map Control CONTROL
 map Alt META
 
-bind Dot7 KEY_ENTER
-bind Dot8 PASSDOTS+space
-
 bind Insert KEY_INSERT
 bind Delete KEY_DELETE
 bind Backspace KEY_BACKSPACE
@@ -98,4 +95,6 @@ bind ArrowRight KEY_CURSOR_RIGHT
 bind Escape KEY_ESCAPE
 
 assign chord Read+
+assign commandDot7 KEY_ENTER
+assign commandDot8 PASSDOTS+space
 include ../chords.kti
