@@ -649,7 +649,7 @@ readScreenContent (off_t offset, uint16_t *buffer, size_t count) {
 }
 
 static size_t
-toScreenBufferSize (const ScreenSize *screenSize) {
+getScreenBufferSize (const ScreenSize *screenSize) {
   return (screenSize->columns * screenSize->rows * 2) + sizeof(ScreenHeader);
 }
 
@@ -671,7 +671,7 @@ refreshScreenBuffer (unsigned char **screenBuffer, size_t *screenSize) {
     }
 
     {
-      size_t size = toScreenBufferSize(&header.size);
+      size_t size = getScreenBufferSize(&header.size);
       unsigned char *buffer = malloc(size);
 
       if (!buffer) {
@@ -695,7 +695,7 @@ refreshScreenBuffer (unsigned char **screenBuffer, size_t *screenSize) {
 
     {
       ScreenHeader *header = (void *)*screenBuffer;
-      size_t size = toScreenBufferSize(&header->size);
+      size_t size = getScreenBufferSize(&header->size);
       if (count >= size) return 1;
 
       {
@@ -1214,7 +1214,7 @@ isUnusedConsole (int vt) {
   if (refreshScreenBuffer(&buffer, &size)) {
     const ScreenHeader *header = (void *)buffer;
     const uint16_t *from = (void *)(buffer + sizeof(*header));
-    const uint16_t *to = (void *)(buffer + toScreenBufferSize(&header->size));
+    const uint16_t *to = (void *)(buffer + getScreenBufferSize(&header->size));
 
     if (from < to) {
       const uint16_t character = *from++;
@@ -1274,7 +1274,9 @@ getConsoleNumber (void) {
 
   if (console != currentConsoleNumber) {
     closeCurrentConsole();
+  }
 
+  if (consoleDescriptor == -1) {
     if (!canOpenCurrentConsole()) {
       problemText = "console not in use";
     } else if (!openCurrentConsole()) {
