@@ -906,7 +906,11 @@ check-speech-drivers: brltty speech-drivers
 
 ###############################################################################
 
-check-all: check-text-tables check-attributes-tables check-contraction-tables check-keyboard-tables check-input-tables check-braille-drivers check-speech-drivers
+check-public-headers:
+	@echo checking public headers
+	$(SRC_TOP)chkhdrs $(SRC_TOP)$(HDR_DIR)
+
+check-all: check-text-tables check-attributes-tables check-contraction-tables check-keyboard-tables check-input-tables check-braille-drivers check-speech-drivers check-public-headers
 
 ###############################################################################
 
