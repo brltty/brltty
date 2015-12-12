@@ -30,6 +30,10 @@
 #include <linux/kd.h>
 #include <linux/tiocl.h>
 
+#ifndef VT_GETHIFONTMASK
+#define VT_GETHIFONTMASK 0X560D
+#endif /* VT_GETHIFONTMASK */
+
 #include "log.h"
 #include "report.h"
 #include "async_io.h"
@@ -379,9 +383,9 @@ closeCurrentConsole (void) {
 }
 
 static int
-reopenCurrentConsole (unsigned char vt) {
+openCurrentConsole (void) {
   int console;
-  if (!openConsoleDevice(&console, vt)) return 0;
+  if (!openConsoleDevice(&console, virtualTerminal)) return 0;
 
   closeCurrentConsole();
   consoleDescriptor = console;
@@ -389,19 +393,55 @@ reopenCurrentConsole (unsigned char vt) {
 }
 
 static int
-openCurrentConsole (unsigned char vt) {
-  if (consoleDescriptor != -1) return 1;
-  return reopenCurrentConsole(vt);
-}
-
-static int
 controlCurrentConsole (int operation, void *argument) {
-  if (!openCurrentConsole(virtualTerminal)) return -1;
-  int result = ioctl(consoleDescriptor, operation, argument);
+  int result;
 
-  if (result == -1) {
+  if (consoleDescriptor == -1) {
+    switch (operation) {
+      case GIO_UNIMAP: {
+        struct unimapdesc *sfm = argument;
+        memset(sfm, 0, sizeof(*sfm));
+        sfm->entries = NULL;
+        sfm->entry_ct = 0;
+        return 0;
+      }
+
+      case KDFONTOP: {
+        struct console_font_op *cfo = argument;
+
+        if (cfo->op == KD_FONT_OP_GET) {
+          cfo->charcount = 0;
+          cfo->width = 8;
+          cfo->height = 16;
+          return 0;
+        }
+
+        break;
+      }
+
+      case VT_GETHIFONTMASK: {
+        unsigned short *mask = argument;
+        *mask = 0;
+        return 0;
+      }
+
+      case KDGETMODE: {
+        int *mode = argument;
+        *mode = KD_TEXT;
+        return 0;
+      }
+
+      default:
+        break;
+    }
+
+    errno = EAGAIN;
+    return -1;
+  }
+
+  if ((result = ioctl(consoleDescriptor, operation, argument)) == -1) {
     if (errno == EIO) {
-      if (reopenCurrentConsole(virtualTerminal)) {
+      if (openCurrentConsole()) {
         result = ioctl(consoleDescriptor, operation, argument);
       }
     }
@@ -434,14 +474,6 @@ closeMainConsole (void) {
     if (close(mainConsoleDescriptor) == -1) logSystemError("close main console");
     mainConsoleDescriptor = -1;
   }
-}
-
-static int
-getConsoleState (struct vt_stat *state) {
-  if (ioctl(mainConsoleDescriptor, VT_GETSTATE, state) != -1) return 1;
-  logSystemError("ioctl[VT_GETSTATE]");
-  problemText = "can't get console state";
-  return 0;
 }
 
 static const char *screenName = NULL;
@@ -616,6 +648,71 @@ readScreenContent (off_t offset, uint16_t *buffer, size_t count) {
   return readScreenData(offset, buffer, count);
 }
 
+static size_t
+toScreenBufferSize (const ScreenSize *screenSize) {
+  return (screenSize->columns * screenSize->rows * 2) + sizeof(ScreenHeader);
+}
+
+static int
+refreshScreenBuffer (unsigned char **screenBuffer, size_t *screenSize) {
+  if (!*screenBuffer) {
+    ScreenHeader header;
+
+    {
+      size_t size = sizeof(header);
+      size_t count = readScreenDevice(0, &header, size);
+
+      if (!count) return 0;
+
+      if (count < size) {
+        logBytes(LOG_ERR, "truncated screen header", &header, count);
+        return 0;
+      }
+    }
+
+    {
+      size_t size = toScreenBufferSize(&header.size);
+      unsigned char *buffer = malloc(size);
+
+      if (!buffer) {
+        logMallocError();
+        return 0;
+      }
+
+      *screenBuffer = buffer;
+      *screenSize = size;
+    }
+  }
+
+  while (1) {
+    size_t count = readScreenDevice(0, *screenBuffer, *screenSize);
+    if (!count) return 0;
+
+    if (count < sizeof(ScreenHeader)) {
+      logBytes(LOG_ERR, "truncated screen header", *screenBuffer, count);
+      return 0;
+    }
+
+    {
+      ScreenHeader *header = (void *)*screenBuffer;
+      size_t size = toScreenBufferSize(&header->size);
+      if (count >= size) return 1;
+
+      {
+        unsigned char *buffer = realloc(*screenBuffer, size);
+
+        if (!buffer) {
+          logMallocError();
+          return 0;
+        }
+
+        *screenBuffer = buffer;
+        *screenSize = size;
+      }
+    }
+  }
+}
+
 static struct unipair *screenFontMapTable = NULL;
 static unsigned short screenFontMapSize = 0;
 static unsigned short screenFontMapCount;
@@ -687,8 +784,8 @@ setVgaCharacterCount (int force) {
 
   {
     struct console_font_op cfo = {
-      .height = UINT_MAX,
       .width = UINT_MAX,
+      .height = UINT_MAX,
       .op = KD_FONT_OP_GET
     };
 
@@ -748,10 +845,6 @@ setAttributesMasks (unsigned short bit) {
              "Attributes Masks: Font:%04X Unshifted:%04X Shifted:%04X",
              fontAttributesMask, unshiftedAttributesMask, shiftedAttributesMask);
 }
-
-#ifndef VT_GETHIFONTMASK
-#define VT_GETHIFONTMASK 0X560D
-#endif /* VT_GETHIFONTMASK */
 
 static int
 determineAttributesMasks (void) {
@@ -993,7 +1086,7 @@ processParameters_LinuxScreen (char **parameters) {
 
     if (parameter && *parameter) {
       static const int minimum = 0;
-      static const int maximum = 0X3F;
+      static const int maximum = MAX_NR_CONSOLES;
 
       if (!validateInteger(&virtualTerminal, parameter, &minimum, &maximum)) {
         logMessage(LOG_WARNING, "%s: %s", "invalid virtual terminal number", parameter);
@@ -1040,11 +1133,9 @@ construct_LinuxScreen (void) {
     if (setConsoleName()) {
       if (openMainConsole()) {
         if (setCurrentScreen(virtualTerminal)) {
-          if (setTranslationTable(1)) {
-            openKeyboard();
-            brailleOfflineListener = registerReportListener(REPORT_BRAILLE_OFFLINE, lxBrailleOfflineListener, NULL);
-            return 1;
-          }
+          openKeyboard();
+          brailleOfflineListener = registerReportListener(REPORT_BRAILLE_OFFLINE, lxBrailleOfflineListener, NULL);
+          return 1;
         }
       }
     }
@@ -1107,6 +1198,69 @@ poll_LinuxScreen (void) {
 }
 
 static int
+getConsoleState (struct vt_stat *state) {
+  if (ioctl(mainConsoleDescriptor, VT_GETSTATE, state) != -1) return 1;
+  logSystemError("ioctl[VT_GETSTATE]");
+  problemText = "can't get console state";
+  return 0;
+}
+
+static int
+isUnusedConsole (int vt) {
+  int isUnused = 1;
+  unsigned char *buffer = NULL;
+  size_t size = 0;
+
+  if (refreshScreenBuffer(&buffer, &size)) {
+    const ScreenHeader *header = (void *)buffer;
+    const uint16_t *from = (void *)(buffer + sizeof(*header));
+    const uint16_t *to = (void *)(buffer + toScreenBufferSize(&header->size));
+
+    if (from < to) {
+      const uint16_t character = *from++;
+
+      while (from < to) {
+        if (*from++ != character) {
+          isUnused = 0;
+          break;
+        }
+      }
+    }
+
+    free(buffer);
+  }
+
+  return isUnused;
+}
+
+static int
+canOpenCurrentConsole (void) {
+  typedef uint16_t OpenableConsoles;
+  static OpenableConsoles openableConsoles = 0;
+
+  struct vt_stat state;
+  if (!getConsoleState(&state)) return 0;
+
+  int console = virtualTerminal;
+  if (!console) console = state.v_active;
+  OpenableConsoles bit = 1 << console;
+
+  if (bit && !(openableConsoles & bit)) {
+    if (console != MAIN_CONSOLE) {
+      if (!(state.v_state & bit)) {
+        if (isUnusedConsole(console)) {
+          return 0;
+        }
+      }
+    }
+
+    openableConsoles |= bit;
+  }
+
+  return 1;
+}
+
+static int
 getConsoleNumber (void) {
   int console;
 
@@ -1120,6 +1274,13 @@ getConsoleNumber (void) {
 
   if (console != currentConsoleNumber) {
     closeCurrentConsole();
+
+    if (!canOpenCurrentConsole()) {
+      problemText = "console not in use";
+    } else if (!openCurrentConsole()) {
+      problemText = "can't open console";
+    }
+
     setTranslationTable(1);
   }
 
@@ -1142,71 +1303,9 @@ testTextMode (void) {
   return 0;
 }
 
-static size_t
-toScreenCacheSize (const ScreenSize *screenSize) {
-  return (screenSize->columns * screenSize->rows * 2) + sizeof(ScreenHeader);
-}
-
 static int
 refreshCacheBuffer (void) {
-  if (!cacheBuffer) {
-    ScreenHeader header;
-
-    {
-      size_t size = sizeof(header);
-      size_t count = readScreenDevice(0, &header, size);
-
-      if (!count) return 0;
-
-      if (count < size) {
-        logBytes(LOG_ERR, "truncated screen header", &header, count);
-        return 0;
-      }
-    }
-
-    {
-      size_t size = toScreenCacheSize(&header.size);
-      unsigned char *buffer = malloc(size);
-
-      if (!buffer) {
-        logMallocError();
-        return 0;
-      }
-
-      cacheBuffer = buffer;
-      cacheSize = size;
-    }
-  }
-
-  while (1) {
-    size_t count = readScreenDevice(0, cacheBuffer, cacheSize);
-
-    if (!count) return 0;
-
-    if (count < sizeof(ScreenHeader)) {
-      logBytes(LOG_ERR, "truncated screen header", cacheBuffer, count);
-      return 0;
-    }
-
-    {
-      ScreenHeader *header = (void *)cacheBuffer;
-      size_t size = toScreenCacheSize(&header->size);
-
-      if (count >= size) return 1;
-
-      {
-        unsigned char *buffer = realloc(cacheBuffer, size);
-
-        if (!buffer) {
-          logMallocError();
-          return 0;
-        }
-
-        cacheBuffer = buffer;
-        cacheSize = size;
-      }
-    }
-  }
+  return refreshScreenBuffer(&cacheBuffer, &cacheSize);
 }
 
 static int
@@ -1222,8 +1321,8 @@ refresh_LinuxScreen (void) {
 
       {
         int consoleNumber = getConsoleNumber();
-
         if (consoleNumber == currentConsoleNumber) break;
+
         logMessage(LOG_CATEGORY(SCREEN_DRIVER),
                    "console number changed: %u -> %u",
                    currentConsoleNumber, consoleNumber);
@@ -1254,7 +1353,7 @@ getScreenDescription (ScreenDescription *description) {
     return 1;
   }
 
-  problemText = "screen header read error";
+  problemText = "can't read screen header";
   return 0;
 }
 
@@ -1911,7 +2010,7 @@ unhighlightRegion_LinuxScreen (void) {
 
 static int
 validateVt (int vt) {
-  if ((vt >= 1) && (vt <= 0X3F)) return 1;
+  if ((vt >= 1) && (vt <= MAX_NR_CONSOLES)) return 1;
   logMessage(LOG_WARNING, "virtual terminal out of range: %d", vt);
   return 0;
 }
