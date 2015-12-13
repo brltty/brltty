@@ -420,6 +420,11 @@ getScreenCommandContext (void) {
   return KTB_CTX_DEFAULT;
 }
 
+int
+currentVirtualTerminal (void) {
+  return 1;
+}
+
 #include "message.h"
 
 int
