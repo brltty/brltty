@@ -497,16 +497,19 @@ in
       ;;
    darwin*)
       dylibPath=/usr/lib/dylib1.o
-
-      for sdkRoot in /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX*.sdk
-      do
-         sdkPath="${sdkRoot}${dylibPath}"
-
-         test ! -f "${sdkPath}" || {
-            dylibPath="${sdkPath}"
-            break
-         }
-      done
+      test -f "${dylibPath}" || {
+         dylibFound=false
+         for sdkRoot in /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX*.sdk
+         do
+            sdkPath="${sdkRoot}${dylibPath}"
+            test ! -f "${sdkPath}" || {
+               dylibPath="${sdkPath}"
+               dylibFound=true
+               break
+            }
+         done
+         "${dylibFound}" || AC_MSG_WARN([cannot find ${dylibPath}])
+      }
 
       brltty_mklib_ld_make="-dylib"
       brltty_mklib_ld_options="${dylibPath} -single_module -install_name"
