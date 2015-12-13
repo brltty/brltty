@@ -35,6 +35,5 @@ removeService (const char *name) {
 
 int
 notifyServiceReady (void) {
-  logUnsupportedFeature("service ready notification");
   return 0;
 }
