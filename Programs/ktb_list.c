@@ -614,14 +614,14 @@ listKeyBindings (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *
     binding += 1, count -= 1;
   }
 
-  if (keysPrefix) return 1;
-  return listBindingLines(lgd, ctx);
+  return 1;
 }
 
 static int
 listKeyContext (ListGenerationData *lgd, const KeyContext *ctx) {
   lgd->topicHeader = ctx->title;
   if (!listKeyBindings(lgd, ctx, NULL)) return 0;
+  if (!listBindingLines(lgd, ctx)) return 0;
   return 1;
 }
 
