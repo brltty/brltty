@@ -553,13 +553,12 @@ static int listKeyBindings (ListGenerationData *lgd, const KeyContext *ctx, cons
 static int
 listKeyBinding (ListGenerationData *lgd, const KeyBinding *binding, int longPress, const wchar_t *keysPrefix) {
   const BoundCommand *cmd = longPress? &binding->secondaryCommand: &binding->primaryCommand;
-  size_t keysOffset;
 
   if (cmd->value == BRL_CMD_NOOP) return 1;
 
   if (!putCommandDescription(lgd, cmd, !binding->keyCombination.anyKeyCount)) return 0;
   if (!putCharacterString(lgd, WS_C(": "))) return 0;
-  keysOffset = lgd->line.length;
+  size_t keysOffset = lgd->line.length;
 
   if (keysPrefix) {
     if (!putCharacterString(lgd, keysPrefix)) return 0;
@@ -615,6 +614,7 @@ listKeyBindings (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *
     binding += 1, count -= 1;
   }
 
+  if (keysPrefix) return 1;
   return listBindingLines(lgd, ctx);
 }
 
@@ -650,9 +650,7 @@ listSpecialKeyContexts (ListGenerationData *lgd) {
 
 static int
 listPersistentKeyContexts (ListGenerationData *lgd) {
-  unsigned int context;
-
-  for (context=KTB_CTX_DEFAULT+1; context<lgd->keyTable->keyContexts.count; context+=1) {
+  for (unsigned int context=KTB_CTX_DEFAULT+1; context<lgd->keyTable->keyContexts.count; context+=1) {
     const KeyContext *ctx = getKeyContext(lgd->keyTable, context);
 
     if (ctx && !isTemporaryKeyContext(lgd->keyTable, ctx)) {
