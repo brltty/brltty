@@ -496,20 +496,32 @@ in
       brltty_mklib_gcc_make="not_supported_on_msdos"
       ;;
    darwin*)
+      dylibFound=false
       dylibPath=/usr/lib/dylib1.o
-      test -f "${dylibPath}" || {
-         dylibFound=false
-         for sdkRoot in /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX*.sdk
-         do
-            sdkPath="${sdkRoot}${dylibPath}"
-            test ! -f "${sdkPath}" || {
-               dylibPath="${sdkPath}"
-               dylibFound=true
-               break
-            }
-         done
-         "${dylibFound}" || AC_MSG_WARN([cannot find ${dylibPath}])
-      }
+      set -- "${dylibPath}"
+
+      sdkRootPrefix="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX"
+      sdkRootSuffix=".sdk/${dylibPath}"
+      sdkVersion=`sw_vers -productVersion`
+
+      while true
+      do
+         set -- "${@}" "${sdkRootPrefix}${sdkVersion}${sdkRootSuffix}"
+         sdkNext="${sdkVersion%.*}"
+         test "${sdkNext}" != "${sdkVersion}" || break
+         sdkVersion="${sdkNext}"
+      done
+
+      set -- "${@}" "${sdkRootPrefix}"*"${sdkRootSuffix}"
+      for sdkPath
+      do
+         test ! -f "${sdkPath}" || {
+            dylibPath="${sdkPath}"
+            dylibFound=true
+            break
+         }
+      done
+      "${dylibFound}" || AC_MSG_WARN([cannot find ${dylibPath}])
 
       brltty_mklib_ld_make="-dylib"
       brltty_mklib_ld_options="${dylibPath} -single_module -install_name"
