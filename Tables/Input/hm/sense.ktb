@@ -70,6 +70,8 @@ include dots.kti
 map F2 META
 map F3 CONTROL
 
+include scroll.kti
+
 
 ############################
 # Routing Key Alternatives #
