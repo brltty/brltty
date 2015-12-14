@@ -57,6 +57,8 @@ bind F1+F2+Forward BOT_LEFT
 bind F3+F4+Backward CHRLT
 bind F3+F4+Forward CHRRT
 
+include scroll.kti
+
 bind F1+F3+F4 CONTEXT+CLIP_NEW
 bind F2+F3+F4 CONTEXT+CLIP_ADD
 bind F1+F2+F3 CONTEXT+COPY_LINE
@@ -69,8 +71,6 @@ bind F2+F4 CONTEXT+DESCCHAR
 include dots.kti
 map F2 META
 map F3 CONTROL
-
-include scroll.kti
 
 
 ############################
