@@ -180,58 +180,69 @@ struct BrailleDataStruct {
   unsigned char previousCells[MAXIMUM_CELL_COUNT];
 };
 
-static size_t
-readPacket (BrailleDisplay *brl, InputPacket *packet) {
-  const size_t length = 10;
-  size_t offset = 0;
+static BraillePacketVerifierResult
+verifyPacket (
+  BrailleDisplay *brl,
+  const unsigned char *bytes, size_t size,
+  size_t *length, void *data
+) {
+  unsigned char byte = bytes[size-1];
 
-  while (1) {
-    unsigned char byte;
+  switch (size) {
+    case 1: {
+      switch (byte) {
+        case 0X1C:
+          *length = 4;
+          break;
 
-    {
-      int started = offset > 0;
-      if (!gioReadByte(brl->gioEndpoint, &byte, started)) {
-        if (started) logPartialPacket(packet->bytes, offset);
-        return 0;
+        case 0XFA:
+          *length = 10;
+          break;
+
+        default:
+          return BRL_PVR_INVALID;
       }
+
+      break;
     }
 
-    if (!offset) {
-      if (byte != 0XFA) {
-        logIgnoredByte(byte);
-        continue;
+    default:
+      break;
+  }
+
+  if (size == *length) {
+    switch (bytes[0]) {
+      case 0X1C: {
+        if (byte != 0X1F) return BRL_PVR_INVALID;
+        break;
       }
-    }
 
-    packet->bytes[offset++] = byte;
-    if (offset == length) {
-      if (byte == 0XFB) {
-        {
-          int checksum = -packet->data.checksum;
+      case 0XFA: {
+        if (byte != 0XFB) return BRL_PVR_INVALID;
 
-          {
-            size_t i;
-            for (i=0; i<offset; i+=1) checksum += packet->bytes[i];
-          }
+        const InputPacket *packet = (const void *)bytes;
+        int checksum = -packet->data.checksum;
+        for (size_t i=0; i<size; i+=1) checksum += packet->bytes[i];
 
-          if ((checksum & 0XFF) != packet->data.checksum) {
-            logInputProblem("Incorrect Input Checksum", packet->bytes, offset);
-          }
+        if ((checksum & 0XFF) != packet->data.checksum) {
+          logInputProblem("incorrect input checksum", packet->bytes, size);
+          return BRL_PVR_INVALID;
         }
 
-        logInputPacket(packet->bytes, offset);
-        return length;
+        break;
       }
 
-      {
-        const unsigned char *start = memchr(packet->bytes+1, packet->bytes[0], offset-1);
-        const unsigned char *end = packet->bytes + offset;
-        if (!start) start = end;
-        logDiscardedBytes(packet->bytes, start-packet->bytes);
-        memmove(packet->bytes, start, (offset = end - start));
-      }
+      default:
+        break;
     }
   }
+
+  return BRL_PVR_INCLUDE;
+}
+
+static size_t
+readPacket (BrailleDisplay *brl, InputPacket *packet) {
+  return readBraillePacket(brl, NULL, packet, sizeof(*packet), verifyPacket, NULL);
 }
 
 static size_t
