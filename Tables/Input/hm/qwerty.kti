@@ -14,7 +14,7 @@ bind Dot1+Dot2+Dot3+Dot4+Dot8+F2 KEY_INSERT+control
 bind Dot1+Dot2+Dot3+Dot4+Dot8+F1 KEY_INSERT+shift+control
 
 bind Space+Dot4+Dot5 KEY_TAB
-bind Space+Dot1+Dot2 KEY_TAB+shift
+#bind Space+Dot1+Dot2 KEY_TAB+shift # same as F2
 bind Space+Dot1+Dot2+Dot8 KEY_TAB+control
 bind F2+F3 KEY_TAB+meta
 bind F2+F3+F1 KEY_TAB+shift+meta
@@ -34,8 +34,8 @@ bind Space+Dot3+Dot4+Dot5+Dot8 KEY_PAGE_dOWN+control
 bind Space+Dot1 KEY_CURSOR_UP
 bind Space+Dot4 KEY_CURSOR_DOWN
 
-bind Space+Backward KEY_CURSOR_UP+shift
-bind Space+Forward KEY_CURSOR_DOWN+shift
+bind Space+RightScrollUp KEY_CURSOR_UP+shift
+bind Space+RightScrollDown KEY_CURSOR_DOWN+shift
 
 bind Space+Dot2+Dot3 KEY_CURSOR_UP+control
 bind Space+Dot5+Dot6 KEY_CURSOR_DOWN+control
@@ -65,6 +65,7 @@ bind Dot2+Dot7+F1 KEY_CURSOR_LEFT+shift+meta
 bind Dot5+Dot7+F1 KEY_CURSOR_RIGHT+shift+meta
 
 bind Space+Dot1+Dot2+Dot5 KEY_FUNCTION+0
+bind Space+Dot1+Dot2 KEY_FUNCTION+1
 bind Dot1+Dot2+Dot4+Dot8 KEY_FUNCTION+2
 bind Dot7+F3 KEY_FUNCTION+3
 bind Dot7+F2 KEY_FUNCTION+4
@@ -74,6 +75,7 @@ bind Dot8+F4 KEY_FUNCTION+7
 bind Dot3+Dot4+Dot5+Dot6+Dot7 KEY_FUNCTION+8
 bind Space+Dot1+Dot3+Dot5 KEY_FUNCTION+9
 bind Dot1+Dot4+Dot5+Dot6+Dot7 KEY_FUNCTION+10
+bind Dot1+Dot2+Dot4+Dot5+Dot8 KEY_FUNCTION+11
 
 bind Space+Dot1+Dot3+Dot5+Dot6+F2 KEY_FUNCTION+3+gui
 bind Dot7+F1 KEY_FUNCTION+5+shift
