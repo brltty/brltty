@@ -16,29 +16,13 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title HIMS Braille Edge
+bind F1 HELP
+bind F2 LEARN
+bind F3 INFO
+bind F4 PREFMENU
 
-include common.kti
-include scroll.kti
-include left.kti
-include right.kti
-include f18.kti
-include contexts.kti
-
-assign metaModifier F4
-assign controlModifier F5
-include braille.kti
-
-
-context PRDIFCHAR
-bind RoutingKey PRDIFCHAR
-
-context NXDIFCHAR
-bind RoutingKey NXDIFCHAR
-
-context PRINDENT
-bind RoutingKey PRINDENT
-
-context NXINDENT
-bind RoutingKey NXINDENT
+bind F5 DISPMD
+bind F6 BACK
+bind F7 HOME
+bind F8 CSRTRK
 

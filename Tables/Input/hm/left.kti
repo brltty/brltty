@@ -16,29 +16,17 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title HIMS Braille Edge
+bind LeftPadLeft+LeftPadRight CSRJMP_VERT
+bind LeftPadUp+LeftPadDown CONTEXT+SETLEFT
 
-include common.kti
-include scroll.kti
-include left.kti
-include right.kti
-include f18.kti
-include contexts.kti
+bind LeftPadUp ATTRUP
+bind LeftPadDown ATTRDN
+bind LeftPadLeft PRSEARCH
+bind LeftPadRight NXSEARCH
 
-assign metaModifier F4
-assign controlModifier F5
-include braille.kti
+bind LeftPadLeft+LeftPadUp CONTEXT+PRDIFCHAR
+bind LeftPadLeft+LeftPadDown CONTEXT+NXDIFCHAR
 
-
-context PRDIFCHAR
-bind RoutingKey PRDIFCHAR
-
-context NXDIFCHAR
-bind RoutingKey NXDIFCHAR
-
-context PRINDENT
-bind RoutingKey PRINDENT
-
-context NXINDENT
-bind RoutingKey NXINDENT
+bind LeftPadRight+LeftPadUp CONTEXT+PRINDENT
+bind LeftPadRight+LeftPadDown CONTEXT+NXINDENT
 
