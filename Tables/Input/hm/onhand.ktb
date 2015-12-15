@@ -16,10 +16,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title HIMS Braille Sense
+title HIMS Braille Sense OnHand
 
 include common.kti
 include braille.kti
-include pan.kti
 include scroll.kti
-include contexts.kti

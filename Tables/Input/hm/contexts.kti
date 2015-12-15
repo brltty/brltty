@@ -16,10 +16,25 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title HIMS Braille Sense
+############################
+# Routing Key Alternatives #
+############################
 
-include common.kti
-include braille.kti
-include pan.kti
-include scroll.kti
-include contexts.kti
+context CLIP_NEW
+bind !RoutingKey CLIP_NEW
+
+context CLIP_ADD
+bind !RoutingKey CLIP_ADD
+
+context COPY_LINE
+bind !RoutingKey COPY_LINE
+
+context COPY_RECT
+bind !RoutingKey COPY_RECT
+
+context SETLEFT
+bind !RoutingKey SETLEFT
+
+context DESCCHAR
+bind !RoutingKey DESCCHAR
+

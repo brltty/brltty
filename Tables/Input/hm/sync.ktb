@@ -23,7 +23,7 @@ title HIMS SyncBraille
 # Default Bindings #
 ####################
 
-bind RoutingKey ROUTE
+include common.kti
 
 bind LeftUp LNUP
 bind LeftDown LNDN

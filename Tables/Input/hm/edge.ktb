@@ -18,14 +18,14 @@
 
 title HIMS Braille Edge
 
-
-####################
-# Default Bindings #
-####################
-
+include common.kti
 include scroll.kti
+include contexts.kti
 
-bind RoutingKey ROUTE
+assign metaModifier F4
+assign controlModifier F5
+include braille.kti
+
 bind LeftPadLeft+LeftPadRight CSRJMP_VERT
 
 bind F1 HELP
@@ -64,22 +64,6 @@ bind RightPadLeft+RightPadRight PASTE
 bind LeftPadUp+LeftPadDown CONTEXT+SETLEFT
 bind RightPadUp+RightPadDown CONTEXT+DESCCHAR
 
-include dots.kti
-map F4 META
-map F5 CONTROL
-
-
-context CLIP_NEW
-bind RoutingKey CLIP_NEW
-
-context CLIP_ADD
-bind RoutingKey CLIP_ADD
-
-context COPY_LINE
-bind RoutingKey COPY_LINE
-
-context COPY_RECT
-bind RoutingKey COPY_RECT
 
 context PRDIFCHAR
 bind RoutingKey PRDIFCHAR
@@ -92,10 +76,4 @@ bind RoutingKey PRINDENT
 
 context NXINDENT
 bind RoutingKey NXINDENT
-
-context SETLEFT
-bind RoutingKey SETLEFT
-
-context DESCCHAR
-bind RoutingKey DESCCHAR
 
