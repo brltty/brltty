@@ -29,7 +29,7 @@ bind Space+Dot1+Dot2+Dot6 KEY_PAGE_UP
 bind Space+Dot3+Dot4+Dot5 KEY_PAGE_DOWN
 
 bind Space+Dot1+Dot2+Dot6+Dot8 KEY_PAGE_UP+control
-bind Space+Dot3+Dot4+Dot5+Dot8 KEY_PAGE_dOWN+control
+bind Space+Dot3+Dot4+Dot5+Dot8 KEY_PAGE_DOWN+control
 
 bind Space+Dot1 KEY_CURSOR_UP
 bind Space+Dot4 KEY_CURSOR_DOWN
@@ -84,3 +84,13 @@ bind Dot8+F1 KEY_FUNCTION+7+shift
 bind F1+F4 KEY_FUNCTION+9+meta
 
 hide off
+
+# F2 conflicts with Shift-Tab: Space+Dot1+Dot2
+# F12 conflicts with Control-G: Dot1+Dot2+Dot4+Dot5+Dot8
+# new: Control-Tab: Space+Dot1+Dot2+Dot8
+# modifier: Shift Dot7+Space
+# modifier: Shift-Alt Dot7+F1
+# modifier: Alt Dot7
+# modifier: Control Dot8
+# modifier: Windows F1
+# modifier: Function Space+F2
