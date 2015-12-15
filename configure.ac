@@ -243,7 +243,7 @@ then
 fi
 AC_PROG_CXX
 
-brltty_gcc_cflags="-std=gnu99 -Wall"
+brltty_gcc_cflags="-std=gnu99 -Wall -Werror=format-security"
 brltty_gcc_cppflags=""
 
 case "${host_os}"
