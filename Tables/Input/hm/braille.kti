@@ -36,15 +36,3 @@ assign chord Space+
 include ../chords.kti
 bind Space+RoutingKey KEY_FUNCTION
 
-#######################################################################
-# Do not remove the following bindings. They are required for Braille #
-# Sense models that have a qwerty keyboard because the keys send dot  #
-# combinations rather than scan codes or characters.                  #
-#######################################################################
-
-bind Space+Dot1+Dot2+Dot6 KEY_PAGE_UP
-bind Space+Dot3+Dot4+Dot5 KEY_PAGE_DOWN
-
-bind Space+Dot1+Dot3 KEY_HOME
-bind Space+Dot4+Dot6 KEY_END
-

@@ -60,4 +60,3 @@ bind RightScrollUp+RightScrollDown FWINRT
 bind LeftScrollUp+RightScrollUp MENU_FIRST_ITEM
 bind LeftScrollDown+RightScrollDown MENU_LAST_ITEM
 
-

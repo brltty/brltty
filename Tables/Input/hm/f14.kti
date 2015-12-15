@@ -16,10 +16,23 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title HIMS Braille Sense
+bind F4 HOME
+bind F1+F4 BACK
+bind F2+F3 CSRJMP_VERT
 
-include common.kti
-include braille.kti
-include f14.kti
-include pan.kti
-include scroll.kti
+bind F2 LNUP
+bind F3 LNDN
+
+bind F1+F2 FWINLTSKIP
+bind F3+F4 FWINRTSKIP
+
+bind F1+F3+F4 CONTEXT+CLIP_NEW
+bind F2+F3+F4 CONTEXT+CLIP_ADD
+bind F1+F2+F3 CONTEXT+COPY_LINE
+bind F1+F2+F4 CONTEXT+COPY_RECT
+bind F1+F2+F3+F4 PASTE
+
+bind F1+F3 CONTEXT+SETLEFT
+bind F2+F4 CONTEXT+DESCCHAR
+
+include contexts.kti

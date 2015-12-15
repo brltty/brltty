@@ -20,4 +20,5 @@ title HIMS Braille Sense OnHand
 
 include common.kti
 include braille.kti
+include f14.kti
 include scroll.kti

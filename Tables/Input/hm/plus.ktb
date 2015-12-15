@@ -20,5 +20,5 @@ title HIMS Braille Sense Plus
 
 include common.kti
 include braille.kti
+include f14.kti
 include pan.kti
-include contexts.kti
