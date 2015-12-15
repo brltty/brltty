@@ -114,7 +114,7 @@ showUndefinedCharacters (TextTableData *ttd) {
             }
 
             STR_END;
-            logMessage(LOG_WARNING, buffer);
+            logMessage(LOG_WARNING, "%s", buffer);
           }
         }
       }
