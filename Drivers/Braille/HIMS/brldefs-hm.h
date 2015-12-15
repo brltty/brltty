@@ -20,7 +20,7 @@
 #define BRLTTY_INCLUDED_HM_BRLDEFS
 
 typedef enum {
-  /* dot keys */
+  /* braille keyboard keys */
   HM_KEY_Dot1  = 0,
   HM_KEY_Dot2  = 1,
   HM_KEY_Dot3  = 2,
@@ -31,13 +31,13 @@ typedef enum {
   HM_KEY_Dot8  = 7,
   HM_KEY_Space = 8,
 
-  /* Braille Sense/Edge keys */
+  /* Braille Sense/Edge function keys */
   HM_KEY_F1 =  9,
   HM_KEY_F2 = 10,
   HM_KEY_F3 = 11,
   HM_KEY_F4 = 12,
 
-  /* Braille Sense keys */
+  /* Braille Sense panning keys */
   HM_KEY_Backward = 13,
   HM_KEY_Forward  = 14,
 
@@ -47,22 +47,31 @@ typedef enum {
   HM_KEY_RightDown = 14,
   HM_KEY_LeftDown  = 15,
 
-  /* Braille Edge keys */
-  HM_KEY_LeftScrollUp    = 16,
-  HM_KEY_RightScrollUp   = 17,
-  HM_KEY_RightScrollDown = 18,
-  HM_KEY_LeftScrollDown  = 19,
+  /* Braille Sense scroll keys */
+  HM_KEY_BS_LeftScrollUp    = 16,
+  HM_KEY_BS_LeftScrollDown  = 17,
+  HM_KEY_BS_RightScrollUp   = 18,
+  HM_KEY_BS_RightScrollDown = 19,
 
+  /* Braille Edge scroll keys */
+  HM_KEY_BE_LeftScrollUp    = 16,
+  HM_KEY_BE_RightScrollUp   = 17,
+  HM_KEY_BE_RightScrollDown = 18,
+  HM_KEY_BE_LeftScrollDown  = 19,
+
+  /* Braille Edge function keys */
   HM_KEY_F5 = 20,
   HM_KEY_F6 = 21,
   HM_KEY_F7 = 22,
   HM_KEY_F8 = 23,
 
+  /* Braille Edge left pad */
   HM_KEY_LeftPadUp     = 24,
   HM_KEY_LeftPadDown   = 25,
   HM_KEY_LeftPadLeft   = 26,
   HM_KEY_LeftPadRight  = 27,
 
+  /* Braille Edge right pad */
   HM_KEY_RightPadUp    = 28,
   HM_KEY_RightPadDown  = 29,
   HM_KEY_RightPadLeft  = 30,

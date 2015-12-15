@@ -49,11 +49,18 @@ BEGIN_KEY_NAME_TABLE(pan)
   KEY_NAME_ENTRY(HM_KEY_Forward, "Forward"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(scroll)
-  KEY_NAME_ENTRY(HM_KEY_LeftScrollUp, "LeftScrollUp"),
-  KEY_NAME_ENTRY(HM_KEY_RightScrollUp, "RightScrollUp"),
-  KEY_NAME_ENTRY(HM_KEY_LeftScrollDown, "LeftScrollDown"),
-  KEY_NAME_ENTRY(HM_KEY_RightScrollDown, "RightScrollDown"),
+BEGIN_KEY_NAME_TABLE(BS_scroll)
+  KEY_NAME_ENTRY(HM_KEY_BS_LeftScrollUp, "LeftScrollUp"),
+  KEY_NAME_ENTRY(HM_KEY_BS_LeftScrollDown, "LeftScrollDown"),
+  KEY_NAME_ENTRY(HM_KEY_BS_RightScrollUp, "RightScrollUp"),
+  KEY_NAME_ENTRY(HM_KEY_BS_RightScrollDown, "RightScrollDown"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(BE_scroll)
+  KEY_NAME_ENTRY(HM_KEY_BE_LeftScrollUp, "LeftScrollUp"),
+  KEY_NAME_ENTRY(HM_KEY_BE_LeftScrollDown, "LeftScrollDown"),
+  KEY_NAME_ENTRY(HM_KEY_BE_RightScrollUp, "RightScrollUp"),
+  KEY_NAME_ENTRY(HM_KEY_BE_RightScrollDown, "RightScrollDown"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(f14)
@@ -88,14 +95,14 @@ BEGIN_KEY_NAME_TABLES(sense)
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(braille),
   KEY_NAME_TABLE(pan),
-  KEY_NAME_TABLE(scroll),
+  KEY_NAME_TABLE(BS_scroll),
   KEY_NAME_TABLE(f14),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(edge)
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(braille),
-  KEY_NAME_TABLE(scroll),
+  KEY_NAME_TABLE(BE_scroll),
   KEY_NAME_TABLE(f14),
   KEY_NAME_TABLE(f58),
   KEY_NAME_TABLE(lp),
