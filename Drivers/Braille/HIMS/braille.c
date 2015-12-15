@@ -91,29 +91,14 @@ BEGIN_KEY_NAME_TABLE(rp)
   KEY_NAME_ENTRY(HM_KEY_RightPadRight, "RightPadRight"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLES(sense)
-  KEY_NAME_TABLE(common),
-  KEY_NAME_TABLE(braille),
-  KEY_NAME_TABLE(f14),
-  KEY_NAME_TABLE(pan),
-  KEY_NAME_TABLE(BS_scroll),
-END_KEY_NAME_TABLES
-
-BEGIN_KEY_NAME_TABLES(classic)
+BEGIN_KEY_NAME_TABLES(pan)
   KEY_NAME_TABLE(common),
   KEY_NAME_TABLE(braille),
   KEY_NAME_TABLE(f14),
   KEY_NAME_TABLE(pan),
 END_KEY_NAME_TABLES
 
-BEGIN_KEY_NAME_TABLES(plus)
-  KEY_NAME_TABLE(common),
-  KEY_NAME_TABLE(braille),
-  KEY_NAME_TABLE(f14),
-  KEY_NAME_TABLE(pan),
-END_KEY_NAME_TABLES
-
-BEGIN_KEY_NAME_TABLES(onhand)
+BEGIN_KEY_NAME_TABLES(scroll)
   KEY_NAME_TABLE(common),
   KEY_NAME_TABLE(braille),
   KEY_NAME_TABLE(f14),
@@ -149,19 +134,15 @@ BEGIN_KEY_NAME_TABLES(sync)
   KEY_NAME_TABLE(sync),
 END_KEY_NAME_TABLES
 
-DEFINE_KEY_TABLE(sense)
-DEFINE_KEY_TABLE(classic)
-DEFINE_KEY_TABLE(plus)
-DEFINE_KEY_TABLE(onhand)
+DEFINE_KEY_TABLE(pan)
+DEFINE_KEY_TABLE(scroll)
 DEFINE_KEY_TABLE(qwerty)
 DEFINE_KEY_TABLE(edge)
 DEFINE_KEY_TABLE(sync)
 
 BEGIN_KEY_TABLE_LIST
-  &KEY_TABLE_DEFINITION(sense),
-  &KEY_TABLE_DEFINITION(classic),
-  &KEY_TABLE_DEFINITION(plus),
-  &KEY_TABLE_DEFINITION(onhand),
+  &KEY_TABLE_DEFINITION(pan),
+  &KEY_TABLE_DEFINITION(scroll),
   &KEY_TABLE_DEFINITION(qwerty),
   &KEY_TABLE_DEFINITION(edge),
   &KEY_TABLE_DEFINITION(sync),
@@ -339,7 +320,7 @@ getBrailleSenseDefaultCellCount (BrailleDisplay *brl, unsigned int *count) {
 
 static const ProtocolEntry brailleSenseProtocol = {
   .modelName = "Braille Sense",
-  .keyTableDefinition = &KEY_TABLE_DEFINITION(sense),
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(pan),
   .getDefaultCellCount = getBrailleSenseDefaultCellCount
 };
 
