@@ -101,6 +101,19 @@ bind F1+Space KEY_FUNCTION+6+shift
 bind F1+Dot8 KEY_FUNCTION+7+shift
 bind F1+F4 KEY_FUNCTION+9+meta
 
+map Dot1 dot1
+map Dot2 dot2
+map Dot3 dot3
+map Dot4 dot4
+map Dot5 dot5
+map Dot6 dot6
+
+bind Space+Dot7+Dot4 PASSDOTS+dot4
+bind Space+Dot7+Dot2+Dot4+Dot6 PASSDOTS+dot2+dot4+dot6
+bind Space+Dot7+Dot1+Dot2+Dot5+Dot6 PASSDOTS+dot1+dot2+dot5+dot6
+bind Space+Dot7+Dot2+Dot3+Dot4+Dot5+Dot6 PASSDOTS+dot2+dot3+dot4+dot5+dot6
+bind Space+Dot7+Dot4+Dot5 PASSDOTS+dot4+dot5
+
 assign keys
 assign flags
 include letters.kti
