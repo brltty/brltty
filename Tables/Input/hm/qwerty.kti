@@ -10,14 +10,14 @@ bind Space+Dot1+Dot5 KEY_ESCAPE
 bind Space+Dot2+Dot4 KEY_INSERT
 bind Space+Dot1+Dot4+Dot5 KEY_DELETE
 
-bind Dot1+Dot2+Dot3+Dot4+Dot8+F2 KEY_INSERT+control
-bind Dot1+Dot2+Dot3+Dot4+Dot8+F1 KEY_INSERT+shift+control
+bind F2+Dot1+Dot2+Dot3+Dot4+Dot8 KEY_INSERT+control
+bind F1+Dot1+Dot2+Dot3+Dot4+Dot8 KEY_INSERT+shift+control
 
 bind Space+Dot4+Dot5 KEY_TAB
 #bind Space+Dot1+Dot2 KEY_TAB+shift # same as F2
 bind Space+Dot1+Dot2+Dot8 KEY_TAB+control
 bind F2+F3 KEY_TAB+meta
-bind F2+F3+F1 KEY_TAB+shift+meta
+bind F1+F2+F3 KEY_TAB+shift+meta
 
 bind Space+Dot1+Dot3 KEY_HOME
 bind Space+Dot4+Dot6 KEY_END
@@ -40,14 +40,14 @@ bind Space+RightScrollDown KEY_CURSOR_DOWN+shift
 bind Space+Dot2+Dot3 KEY_CURSOR_UP+control
 bind Space+Dot5+Dot6 KEY_CURSOR_DOWN+control
 
-bind Space+Dot2+Dot3+Dot8+F1 KEY_CURSOR_UP+shift+control
-bind Space+Dot5+Dot6+Dot8+F1 KEY_CURSOR_DOWN+shift+control
+bind F1+Space+Dot2+Dot3+Dot8 KEY_CURSOR_UP+shift+control
+bind F1+Space+Dot5+Dot6+Dot8 KEY_CURSOR_DOWN+shift+control
 
 bind Dot2+Dot3+Dot7 KEY_CURSOR_UP+meta
 bind Dot5+Dot6+Dot7 KEY_CURSOR_DOWN+meta
 
-bind Dot2+Dot3+Dot7+F1 KEY_CURSOR_UP+shift+meta
-bind Dot5+Dot6+Dot7+F1 KEY_CURSOR_DOWN+shift+meta
+bind F1+Dot2+Dot3+Dot7 KEY_CURSOR_UP+shift+meta
+bind F1+Dot5+Dot6+Dot7 KEY_CURSOR_DOWN+shift+meta
 
 bind Space+Dot3 KEY_CURSOR_LEFT
 bind Space+Dot6 KEY_CURSOR_RIGHT
@@ -55,42 +55,46 @@ bind Space+Dot6 KEY_CURSOR_RIGHT
 bind Space+Dot2 KEY_CURSOR_LEFT+control
 bind Space+Dot5 KEY_CURSOR_RIGHT+control
 
-bind Space+Dot2+Dot8+F1 KEY_CURSOR_LEFT+shift+control
-bind Space+Dot5+Dot8+F1 KEY_CURSOR_RIGHT+shift+control
+bind F1+Space+Dot2+Dot8 KEY_CURSOR_LEFT+shift+control
+bind F1+Space+Dot5+Dot8 KEY_CURSOR_RIGHT+shift+control
 
 bind Dot2+Dot7 KEY_CURSOR_LEFT+meta
 bind Dot5+Dot7 KEY_CURSOR_RIGHT+meta
 
-bind Dot2+Dot7+F1 KEY_CURSOR_LEFT+shift+meta
-bind Dot5+Dot7+F1 KEY_CURSOR_RIGHT+shift+meta
+bind F1+Dot2+Dot7 KEY_CURSOR_LEFT+shift+meta
+bind F1+Dot5+Dot7 KEY_CURSOR_RIGHT+shift+meta
 
 bind Space+Dot1+Dot2+Dot5 KEY_FUNCTION+0
 bind Space+Dot1+Dot2 KEY_FUNCTION+1
 bind Dot1+Dot2+Dot4+Dot8 KEY_FUNCTION+2
-bind Dot7+F3 KEY_FUNCTION+3
-bind Dot7+F2 KEY_FUNCTION+4
-bind Dot7+F4 KEY_FUNCTION+5
-bind Space+F4 KEY_FUNCTION+6
-bind Dot8+F4 KEY_FUNCTION+7
+bind F3+Dot7 KEY_FUNCTION+3
+bind F2+Dot7 KEY_FUNCTION+4
+bind F4+Dot7 KEY_FUNCTION+5
+bind F4+Space KEY_FUNCTION+6
+bind F4+Dot8 KEY_FUNCTION+7
 bind Dot3+Dot4+Dot5+Dot6+Dot7 KEY_FUNCTION+8
 bind Space+Dot1+Dot3+Dot5 KEY_FUNCTION+9
 bind Dot1+Dot4+Dot5+Dot6+Dot7 KEY_FUNCTION+10
 bind Dot1+Dot2+Dot4+Dot5+Dot8 KEY_FUNCTION+11
 
-bind Space+Dot1+Dot3+Dot5+Dot6+F2 KEY_FUNCTION+3+gui
-bind Dot7+F1 KEY_FUNCTION+5+shift
-bind Space+F1 KEY_FUNCTION+6+shift
-bind Dot8+F1 KEY_FUNCTION+7+shift
+bind F2+Space+Dot1+Dot3+Dot5+Dot6 KEY_FUNCTION+3+gui
+bind F1+Dot7 KEY_FUNCTION+5+shift
+bind F1+Space KEY_FUNCTION+6+shift
+bind F1+Dot8 KEY_FUNCTION+7+shift
 bind F1+F4 KEY_FUNCTION+9+meta
+
+assign function F2+Space
+bind \{function}+Dot1+Dot2+Dot3+Dot4 PREFMENU
 
 hide off
 
 # F2 conflicts with Shift-Tab: Space+Dot1+Dot2
 # F12 conflicts with Control-G: Dot1+Dot2+Dot4+Dot5+Dot8
+# Function-F4 conflicts with Function-z: F2+Space+Dot1+Dot3+Dot5+Dot6
 # new: Control-Tab: Space+Dot1+Dot2+Dot8
-# modifier: Shift Dot7+Space
-# modifier: Shift-Alt Dot7+F1
+# modifier: Shift Space+Dot7
+# modifier: Shift-Alt F1+Dot7
 # modifier: Alt Dot7
 # modifier: Control Dot8
 # modifier: Windows F1
-# modifier: Function Space+F2
+# modifier: Function F2+Space
