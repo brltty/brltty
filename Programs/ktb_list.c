@@ -927,6 +927,21 @@ typedef struct {
 #define REPORT_DUPLICATES_FUNCTION(name) int name (const ReportDuplicatesData *rdd)
 typedef REPORT_DUPLICATES_FUNCTION(ReportDuplicatesFunction);
 
+static size_t
+formatReportDuplicatePrefix (
+  char *buffer, size_t length,
+  const ReportDuplicatesData *rdd, const char *what
+) {
+  size_t size;
+
+  STR_BEGIN(buffer, length);
+  STR_PRINTF("%s: duplicate %s: ", rdd->path, what);
+
+  size = STR_LENGTH;
+  STR_END;
+  return size;
+}
+
 static REPORT_DUPLICATES_FUNCTION(reportDuplicateKeyBindings) {
   int ok = 1;
   const KeyBinding *const *binding = rdd->ctx->keyBindings.sorted;
@@ -946,12 +961,69 @@ static REPORT_DUPLICATES_FUNCTION(reportDuplicateKeyBindings) {
       char message[0X100];
       STR_BEGIN(message, sizeof(message));
 
-      if (rdd->path) STR_PRINTF("%s: ", rdd->path);
-      STR_PRINTF("duplicate key binding: %" PRIws ": ", rdd->ctx->name);
+      STR_ADJUST(formatReportDuplicatePrefix(STR_NEXT, STR_LEFT, rdd, "key binding"));
       STR_ADJUST(formatKeyCombination(STR_NEXT, STR_LEFT, rdd->table, &current->keyCombination));
 
       STR_END;
       logMessage(LOG_WARNING, "%s", message);
+    }
+  }
+
+  return ok;
+}
+
+static void
+reportDuplicateKeyValue (const ReportDuplicatesData *rdd, const KeyValue *key, const char *what) {
+  char message[0X100];
+  STR_BEGIN(message, sizeof(message));
+
+  STR_ADJUST(formatReportDuplicatePrefix(STR_NEXT, STR_LEFT, rdd, what));
+  STR_ADJUST(formatKeyName(rdd->table, STR_NEXT, STR_LEFT, key));
+
+  STR_END;
+  logMessage(LOG_WARNING, "%s", message);
+}
+
+static REPORT_DUPLICATES_FUNCTION(reportDuplicateHotkeys) {
+  int ok = 1;
+  const HotkeyEntry *const *hotkey = rdd->ctx->hotkeys.sorted;
+  const HotkeyEntry *const *end = hotkey + rdd->ctx->hotkeys.count;
+  int reported = 0;
+
+  while (++hotkey < end) {
+    const HotkeyEntry *current = *hotkey;
+    const HotkeyEntry *previous = *(hotkey - 1);
+
+    if (compareKeyValues(&current->keyValue, &previous->keyValue) != 0) {
+      reported = 0;
+    } else if (!reported) {
+      reported = 1;
+      ok = 0;
+
+      reportDuplicateKeyValue(rdd, &current->keyValue, "hotkey");
+    }
+  }
+
+  return ok;
+}
+
+static REPORT_DUPLICATES_FUNCTION(reportDuplicateMappedKeys) {
+  int ok = 1;
+  const MappedKeyEntry *const *map = rdd->ctx->mappedKeys.sorted;
+  const MappedKeyEntry *const *end = map + rdd->ctx->mappedKeys.count;
+  int reported = 0;
+
+  while (++map < end) {
+    const MappedKeyEntry *current = *map;
+    const MappedKeyEntry *previous = *(map - 1);
+
+    if (compareKeyValues(&current->keyValue, &previous->keyValue) != 0) {
+      reported = 0;
+    } else if (!reported) {
+      reported = 1;
+      ok = 0;
+
+      reportDuplicateKeyValue(rdd, &current->keyValue, "mapped key");
     }
   }
 
@@ -967,6 +1039,8 @@ reportKeyTableDuplicates (KeyTable *table, const char *path) {
     if (ctx) {
       static ReportDuplicatesFunction *const reporters[] = {
         reportDuplicateKeyBindings,
+        reportDuplicateHotkeys,
+        reportDuplicateMappedKeys,
         NULL
       };
 
