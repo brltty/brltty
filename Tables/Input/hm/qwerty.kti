@@ -19,6 +19,9 @@
 note enter/leave the preferences menu: Function-p
 hide on
 
+assign function F2+Space
+bind \{function}+Dot1+Dot2+Dot3+Dot4 PREFMENU
+
 bind Dot7 KEY_BACKSPACE
 bind Dot8 KEY_ENTER
 
@@ -138,9 +141,6 @@ include letters.kti
 assign keys F1+
 assign flags +gui
 include letters.kti
-
-assign function F2+Space
-bind \{function}+Dot1+Dot2+Dot3+Dot4 PREFMENU
 
 hide off
 # F2 conflicts with Shift-Tab: Space+Dot1+Dot2
