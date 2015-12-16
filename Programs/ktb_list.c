@@ -919,7 +919,7 @@ formatKeyCombination (
 }
 
 int
-reportKeyTableDuplicates (KeyTable *table) {
+reportKeyTableDuplicates (KeyTable *table, const char *path) {
   int ok = 1;
   for (unsigned int context=0; context<table->keyContexts.count; context+=1) {
     const KeyContext *ctx = getKeyContext(table, context);
@@ -938,11 +938,12 @@ reportKeyTableDuplicates (KeyTable *table) {
           char message[0X100];
           STR_BEGIN(message, sizeof(message));
 
-          STR_PRINTF(" %" PRIws ": ", ctx->name);
+          if (path) STR_PRINTF("%s: ", path);
+          STR_PRINTF("duplicate key binding: %" PRIws ": ", ctx->name);
           STR_ADJUST(formatKeyCombination(STR_NEXT, STR_LEFT, table, &current->keyCombination));
 
           STR_END;
-          logMessage(LOG_WARNING, "duplicate key binding:%s", message);
+          logMessage(LOG_WARNING, "%s", message);
         }
       }
     }

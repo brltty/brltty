@@ -44,7 +44,7 @@ typedef struct {
 
 extern int listKeyTable (KeyTable *table, const KeyTableListMethods *methods, KeyTableWriteLineMethod *writeLine, void *data);
 extern int listKeyNames (KEY_NAME_TABLES_REFERENCE keys, KeyTableWriteLineMethod *writeLine, void *data);
-extern int reportKeyTableDuplicates (KeyTable *table);
+extern int reportKeyTableDuplicates (KeyTable *table, const char *path);
 
 extern char *ensureKeyTableExtension (const char *path);
 extern char *makeKeyTablePath (const char *directory, const char *name);

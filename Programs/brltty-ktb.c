@@ -364,7 +364,7 @@ main (int argc, char *argv[]) {
 
         if (keyTable) {
           if (opt_reportDuplicates) {
-            if (!reportKeyTableDuplicates(keyTable)) {
+            if (!reportKeyTableDuplicates(keyTable, ktd.path)) {
               exitStatus = PROG_EXIT_FATAL;
             }
           }
