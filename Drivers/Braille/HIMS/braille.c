@@ -169,9 +169,35 @@ typedef union {
 } PACKED InputPacket;
 
 typedef struct {
+  const KeyTableDefinition *keyTable;
+  unsigned char id1;
+  unsigned char id2;
+} IdentityEntry;
+
+static const IdentityEntry panIdentity = {
+  .keyTable = &KEY_TABLE_DEFINITION(pan)
+};
+
+static const IdentityEntry scrollIdentity = {
+  .id1 = 0X4C, .id2 = 0X58,
+  .keyTable = &KEY_TABLE_DEFINITION(scroll)
+};
+
+static const IdentityEntry qwertyIdentity = {
+  .id1 = 0X51, .id2 = 0X58,
+  .keyTable = &KEY_TABLE_DEFINITION(qwerty)
+};
+
+static const IdentityEntry edgeIdentity = {
+  .id1 = 0X42, .id2 = 0X45,
+  .keyTable = &KEY_TABLE_DEFINITION(edge)
+};
+
+typedef struct {
   const char *modelName;
   const char *resourceNamePrefix;
-  const KeyTableDefinition *keyTableDefinition;
+  const KeyTableDefinition *keyTable;
+  const KeyTableDefinition * (*testIdentities) (BrailleDisplay *brl);
   int (*getDefaultCellCount) (BrailleDisplay *brl, unsigned int *count);
 } ProtocolEntry;
 
@@ -256,6 +282,71 @@ writeBytes (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
 }
 
 static int
+testIdentity (BrailleDisplay *brl, unsigned char id1, unsigned char id2) {
+  const unsigned char sequence[] = {0X1C, id1, id2, 0X1F};
+  const size_t length = sizeof(sequence);
+
+  if (writeBytes(brl, sequence, length)) {
+    while (awaitBrailleInput(brl, 200)) {
+      InputPacket response;
+      size_t size = readPacket(brl, &response);
+      if (!size) break;
+
+      if (response.bytes[0] == sequence[0]) {
+        return memcmp(response.bytes, sequence, length) == 0;
+      }
+    }
+  }
+
+  return 0;
+}
+
+static const KeyTableDefinition *
+testIdentities (BrailleDisplay *brl, const IdentityEntry *const *identities) {
+  while (*identities) {
+    const IdentityEntry *identity = *identities;
+    const char *name = identity->keyTable->bindings;
+
+    if (!identity->id1 && !identity->id2) {
+      logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "assuming identity: %s", name);
+    } else {
+      logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "testing identity: %s", name);
+
+      if (!testIdentity(brl, identity->id1, identity->id2)) {
+        identities += 1;
+        continue;
+      }
+    }
+
+    return identity->keyTable;
+  }
+
+  return NULL;
+}
+
+static const KeyTableDefinition *
+testBrailleSenseIdentities (BrailleDisplay *brl) {
+  static const IdentityEntry *const identities[] = {
+    &qwertyIdentity,
+    &scrollIdentity,
+    &panIdentity,
+    NULL
+  };
+
+  return testIdentities(brl, identities);
+}
+
+static const KeyTableDefinition *
+testBrailleEdgeIdentities (BrailleDisplay *brl) {
+  static const IdentityEntry *const identities[] = {
+    &edgeIdentity,
+    NULL
+  };
+
+  return testIdentities(brl, identities);
+}
+
+static int
 writePacket (
   BrailleDisplay *brl,
   unsigned char type, unsigned char mode,
@@ -331,7 +422,8 @@ getBrailleSenseDefaultCellCount (BrailleDisplay *brl, unsigned int *count) {
 
 static const ProtocolEntry brailleSenseProtocol = {
   .modelName = "Braille Sense",
-  .keyTableDefinition = &KEY_TABLE_DEFINITION(pan),
+  .keyTable = &KEY_TABLE_DEFINITION(pan),
+  .testIdentities = testBrailleSenseIdentities,
   .getDefaultCellCount = getBrailleSenseDefaultCellCount
 };
 
@@ -343,7 +435,7 @@ getSyncBrailleDefaultCellCount (BrailleDisplay *brl, unsigned int *count) {
 
 static const ProtocolEntry syncBrailleProtocol = {
   .modelName = "SyncBraille",
-  .keyTableDefinition = &KEY_TABLE_DEFINITION(sync),
+  .keyTable = &KEY_TABLE_DEFINITION(sync),
   .getDefaultCellCount = getSyncBrailleDefaultCellCount
 };
 
@@ -357,7 +449,8 @@ getBrailleEdgeDefaultCellCount (BrailleDisplay *brl, unsigned int *count) {
 static const ProtocolEntry brailleEdgeProtocol = {
   .modelName = "Braille Edge",
   .resourceNamePrefix = "BrailleEDGE",
-  .keyTableDefinition = &KEY_TABLE_DEFINITION(edge),
+  .keyTable = &KEY_TABLE_DEFINITION(edge),
+  .testIdentities = testBrailleEdgeIdentities,
   .getDefaultCellCount = getBrailleEdgeDefaultCellCount
 };
 
@@ -521,10 +614,19 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
       logMessage(LOG_INFO, "detected: %s", brl->data->protocol->modelName);
 
+      {
+        const KeyTableDefinition *ktd =
+          brl->data->protocol->testIdentities?
+            brl->data->protocol->testIdentities(brl):
+            NULL;
+
+        if (!ktd) ktd = brl->data->protocol->keyTable;
+        setBrailleKeyTable(brl, ktd);
+      }
+
       if (getCellCount(brl, &brl->textColumns)) {
         brl->textRows = 1;
 
-        setBrailleKeyTable(brl, brl->data->protocol->keyTableDefinition);
         makeOutputTable(dotsTable_ISO11548_1);
   
         if (clearCells(brl)) return 1;
