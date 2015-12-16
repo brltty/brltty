@@ -918,6 +918,46 @@ formatKeyCombination (
   return size;
 }
 
+typedef struct {
+  KeyTable *table;
+  const KeyContext *ctx;
+  const char *path;
+} ReportDuplicatesData;
+
+#define REPORT_DUPLICATES_FUNCTION(name) int name (const ReportDuplicatesData *rdd)
+typedef REPORT_DUPLICATES_FUNCTION(ReportDuplicatesFunction);
+
+static REPORT_DUPLICATES_FUNCTION(reportDuplicateKeyBindings) {
+  int ok = 1;
+  const KeyBinding *const *binding = rdd->ctx->keyBindings.sorted;
+  const KeyBinding *const *end = binding + rdd->ctx->keyBindings.count;
+  int reported = 0;
+
+  while (++binding < end) {
+    const KeyBinding *current = *binding;
+    const KeyBinding *previous = *(binding - 1);
+
+    if (compareKeyBindings(current, previous) != 0) {
+      reported = 0;
+    } else if (!reported) {
+      reported = 1;
+      ok = 0;
+
+      char message[0X100];
+      STR_BEGIN(message, sizeof(message));
+
+      if (rdd->path) STR_PRINTF("%s: ", rdd->path);
+      STR_PRINTF("duplicate key binding: %" PRIws ": ", rdd->ctx->name);
+      STR_ADJUST(formatKeyCombination(STR_NEXT, STR_LEFT, rdd->table, &current->keyCombination));
+
+      STR_END;
+      logMessage(LOG_WARNING, "%s", message);
+    }
+  }
+
+  return ok;
+}
+
 int
 reportKeyTableDuplicates (KeyTable *table, const char *path) {
   int ok = 1;
@@ -925,26 +965,22 @@ reportKeyTableDuplicates (KeyTable *table, const char *path) {
     const KeyContext *ctx = getKeyContext(table, context);
 
     if (ctx) {
-      const KeyBinding *const *binding = ctx->keyBindings.sorted;
-      const KeyBinding *const *end = binding + ctx->keyBindings.count;
+      static ReportDuplicatesFunction *const reporters[] = {
+        reportDuplicateKeyBindings,
+        NULL
+      };
 
-      while (++binding < end) {
-        const KeyBinding *current = *binding;
-        const KeyBinding *previous = *(binding - 1);
+      const ReportDuplicatesData rdd = {
+        .table = table,
+        .ctx = ctx,
+        .path = path
+      };
 
-        if (compareKeyBindings(current, previous) == 0) {
-          ok = 0;
-
-          char message[0X100];
-          STR_BEGIN(message, sizeof(message));
-
-          if (path) STR_PRINTF("%s: ", path);
-          STR_PRINTF("duplicate key binding: %" PRIws ": ", ctx->name);
-          STR_ADJUST(formatKeyCombination(STR_NEXT, STR_LEFT, table, &current->keyCombination));
-
-          STR_END;
-          logMessage(LOG_WARNING, "%s", message);
-        }
+      for (
+        ReportDuplicatesFunction *const *reporter=reporters;
+        *reporter!=NULL; reporter+=1
+      ) {
+        if (!(*reporter)(&rdd)) ok = 0;
       }
     }
   }
