@@ -105,6 +105,7 @@ bind F1+Space KEY_FUNCTION+6+shift
 bind F1+Dot8 KEY_FUNCTION+7+shift
 bind F1+F4 KEY_FUNCTION+9+meta
 
+map Space SPACE
 map Dot1 dot1
 map Dot2 dot2
 map Dot3 dot3
