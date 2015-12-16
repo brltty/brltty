@@ -16,6 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+note enter/leave the preferences menu: Function-p
 hide on
 
 bind Dot7 KEY_BACKSPACE
@@ -142,7 +143,6 @@ assign function F2+Space
 bind \{function}+Dot1+Dot2+Dot3+Dot4 PREFMENU
 
 hide off
-
 # F2 conflicts with Shift-Tab: Space+Dot1+Dot2
 # F12 conflicts with Control-G: Dot1+Dot2+Dot4+Dot5+Dot8
 # Function-F4 conflicts with Function-z: F2+Space+Dot1+Dot3+Dot5+Dot6
