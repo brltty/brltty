@@ -1,3 +1,21 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2015 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.com/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
 hide on
 
 bind Dot7 KEY_BACKSPACE
@@ -83,6 +101,30 @@ bind F1+Space KEY_FUNCTION+6+shift
 bind F1+Dot8 KEY_FUNCTION+7+shift
 bind F1+F4 KEY_FUNCTION+9+meta
 
+assign keys
+assign flags
+include letters.kti
+
+assign keys Space+Dot7+
+assign flags +shift
+include letters.kti
+
+assign keys F1+Dot7+
+assign flags +shift+meta
+include letters.kti
+
+assign keys Dot7+
+assign flags +meta
+include letters.kti
+
+assign keys Dot8+
+assign flags +control
+include letters.kti
+
+assign keys F1+
+assign flags +gui
+include letters.kti
+
 assign function F2+Space
 bind \{function}+Dot1+Dot2+Dot3+Dot4 PREFMENU
 
@@ -92,9 +134,3 @@ hide off
 # F12 conflicts with Control-G: Dot1+Dot2+Dot4+Dot5+Dot8
 # Function-F4 conflicts with Function-z: F2+Space+Dot1+Dot3+Dot5+Dot6
 # new: Control-Tab: Space+Dot1+Dot2+Dot8
-# modifier: Shift Space+Dot7
-# modifier: Shift-Alt F1+Dot7
-# modifier: Alt Dot7
-# modifier: Control Dot8
-# modifier: Windows F1
-# modifier: Function F2+Space
