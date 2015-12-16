@@ -219,7 +219,6 @@ formatKeyName (KeyTable *table, char *buffer, size_t size, const KeyValue *value
 static int
 putKeyName (ListGenerationData *lgd, const KeyValue *value) {
   char name[0X100];
-
   formatKeyName(lgd->keyTable, name, sizeof(name), value);
   return putUtf8String(lgd, name);
 }
@@ -228,23 +227,22 @@ static int
 putKeyCombination (ListGenerationData *lgd, const KeyCombination *combination) {
   wchar_t delimiter = 0;
 
-  {
-    unsigned char index;
-    for (index=0; index<combination->modifierCount; index+=1) {
-      if (!delimiter) {
-        delimiter = WC_C('+');
-      } else if (!putCharacter(lgd, delimiter)) {
-        return 0;
-      }
-
-      if (!putKeyName(lgd, &combination->modifierKeys[combination->modifierPositions[index]])) return 0;
+  for (unsigned char index=0; index<combination->modifierCount; index+=1) {
+    if (!delimiter) {
+      delimiter = WC_C('+');
+    } else if (!putCharacter(lgd, delimiter)) {
+      return 0;
     }
+
+    if (!putKeyName(lgd, &combination->modifierKeys[combination->modifierPositions[index]])) return 0;
   }
 
   if (combination->flags & KCF_IMMEDIATE_KEY) {
-    if (delimiter)
-      if (!putCharacter(lgd, delimiter))
+    if (delimiter) {
+      if (!putCharacter(lgd, delimiter)) {
         return 0;
+      }
+    }
 
     if (!putKeyName(lgd, &combination->immediateKey)) return 0;
   }
@@ -883,4 +881,72 @@ listKeyNames (KEY_NAME_TABLES_REFERENCE keys, KeyTableWriteLineMethod *writeLine
   };
 
   return forEachKeyName(keys, listKeyName, &lkn);
+}
+
+static size_t
+formatKeyCombination (
+  char *buffer, size_t length,
+  KeyTable *table,
+  const KeyCombination *combination
+) {
+  size_t size;
+
+  STR_BEGIN(buffer, length);
+  char delimiter = 0;
+
+  for (unsigned char index=0; index<combination->modifierCount; index+=1) {
+    if (delimiter) {
+      STR_PRINTF("%c", delimiter);
+    } else {
+      delimiter = '+';
+    }
+
+    STR_ADJUST(formatKeyName(table, STR_NEXT, STR_LEFT,
+                             &combination->modifierKeys[combination->modifierPositions[index]]));
+  }
+
+  if (combination->flags & KCF_IMMEDIATE_KEY) {
+    if (delimiter) STR_PRINTF("%c", delimiter);
+    STR_PRINTF("!");
+
+    STR_ADJUST(formatKeyName(table, STR_NEXT, STR_LEFT,
+                             &combination->immediateKey));
+  }
+
+  size = STR_LENGTH;
+  STR_END;
+  return size;
+}
+
+int
+reportKeyTableDuplicates (KeyTable *table) {
+  int ok = 1;
+  for (unsigned int context=0; context<table->keyContexts.count; context+=1) {
+    const KeyContext *ctx = getKeyContext(table, context);
+
+    if (ctx) {
+      const KeyBinding *const *binding = ctx->keyBindings.sorted;
+      const KeyBinding *const *end = binding + ctx->keyBindings.count;
+
+      while (++binding < end) {
+        const KeyBinding *current = *binding;
+        const KeyBinding *previous = *(binding - 1);
+
+        if (compareKeyBindings(current, previous) == 0) {
+          ok = 0;
+
+          char message[0X100];
+          STR_BEGIN(message, sizeof(message));
+
+          STR_PRINTF(" %" PRIws ": ", ctx->name);
+          STR_ADJUST(formatKeyCombination(STR_NEXT, STR_LEFT, table, &current->keyCombination));
+
+          STR_END;
+          logMessage(LOG_WARNING, "duplicate key binding:%s", message);
+        }
+      }
+    }
+  }
+
+  return ok;
 }

@@ -31,13 +31,21 @@
 #include "ktb_keyboard.h"
 #include "brl.h"
 
-static char *opt_driversDirectory;
-static char *opt_tablesDirectory;
+static int opt_reportDuplicates;
 static int opt_listKeyNames;
 static int opt_listHelpScreen;
 static int opt_listRestructuredText;
+static char *opt_driversDirectory;
+static char *opt_tablesDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
+  { .letter = 'd',
+    .word = "duplicates",
+    .flags = OPT_Config | OPT_Environ,
+    .setting.flag = &opt_reportDuplicates,
+    .description = strtext("Report duplicate definitions.")
+  },
+
   { .letter = 'k',
     .word = "keys",
     .flags = OPT_Config | OPT_Environ,
@@ -355,6 +363,12 @@ main (int argc, char *argv[]) {
         KeyTable *keyTable = compileKeyTable(ktd.path, ktd.names);
 
         if (keyTable) {
+          if (opt_reportDuplicates) {
+            if (!reportKeyTableDuplicates(keyTable)) {
+              exitStatus = PROG_EXIT_FATAL;
+            }
+          }
+
           if (opt_listHelpScreen) {
             if (!listKeyTable(keyTable, NULL, hlpWriteLine, NULL)) {
               exitStatus = PROG_EXIT_FATAL;
