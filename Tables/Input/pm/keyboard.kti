@@ -34,6 +34,7 @@ map RightThumb META
 
 assign chord Space+
 include ../chords.kti
+assign noUnchorded
 
 hide on
 assign chord LeftSpace+

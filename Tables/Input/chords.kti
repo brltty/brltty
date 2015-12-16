@@ -95,6 +95,7 @@ bind \{chord}Dot2+Dot5+Dot6 KEY_DELETE
 bind \{chord}Dot2+Dot6 KEY_ESCAPE
 bind \{chord}Dot3+Dot5 KEY_INSERT
 
+ifNotVar noUnchorded
 assignDefault commandDot7 KEY_BACKSPACE
 assignDefault commandDot8 KEY_ENTER
 
@@ -122,5 +123,4 @@ bind Dot6 MENU_NEXT_SETTING
 
 bind Dot7 MENU_PREV_LEVEL
 bind Dot8 PREFMENU
-
-
+endIf

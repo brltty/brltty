@@ -122,6 +122,7 @@ bind Dot2+Dot3+!End CONTEXT+braille
 context chords Chorded Commands Mode
 
 assign chord
+assign noUnchorded
 include ../chords.kti
 
 
