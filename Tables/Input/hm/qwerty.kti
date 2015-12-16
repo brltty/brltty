@@ -36,7 +36,7 @@ bind F2+Dot1+Dot2+Dot3+Dot4+Dot8 KEY_INSERT+control
 bind F1+Dot1+Dot2+Dot3+Dot4+Dot8 KEY_INSERT+shift+control
 
 bind Space+Dot4+Dot5 KEY_TAB
-#bind Space+Dot1+Dot2 KEY_TAB+shift # same as F2
+bind Space+Dot1+Dot2 KEY_TAB+shift
 bind Space+Dot1+Dot2+Dot8 KEY_TAB+control
 bind F2+F3 KEY_TAB+meta
 bind F1+F2+F3 KEY_TAB+shift+meta
@@ -145,6 +145,7 @@ include letters.kti
 
 hide off
 # F2 conflicts with Shift-Tab: Space+Dot1+Dot2
+# F2 conflicts with Control-F: Dot1+Dot2+Dot4+Dot8
 # F12 conflicts with Control-G: Dot1+Dot2+Dot4+Dot5+Dot8
 # Function-F4 conflicts with Function-z: F2+Space+Dot1+Dot3+Dot5+Dot6
 # new: Control-Tab: Space+Dot1+Dot2+Dot8
