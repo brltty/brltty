@@ -720,16 +720,16 @@ parseCommandOperand (DataFile *file, BoundCommand *cmd, const wchar_t *character
   while (end) {
     DataOperand modifier;
 
-    if (!(length -= end - characters + 1)) {
+    if ((modifier.length = (length -= (end - characters) + 1))) {
+      modifier.characters = characters = end + 1;
+      end = wmemchr(characters, WC_C('+'), length);
+      if (end) modifier.length = end - characters;
+    }
+
+    if (!modifier.length) {
       reportDataError(file, "missing command modifier");
       return 0;
     }
-
-    characters = end + 1;
-    end = wmemchr(characters, WC_C('+'), length);
-
-    modifier.characters = characters;
-    modifier.length = end? end-characters: length;
 
     if ((*command)->isToggle && !(cmd->value & BRL_FLG_TOGGLE_MASK)) {
       if (applyCommandModifier(&cmd->value, commandModifierTable_toggle, &modifier)) continue;
