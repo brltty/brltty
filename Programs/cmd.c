@@ -184,11 +184,7 @@ STR_BEGIN_FORMATTER(formatCommandModifiers, int command, const CommandModifierEn
   }
 STR_END_FORMATTER
 
-size_t
-describeCommand (int command, char *buffer, size_t size, CommandDescriptionOption options) {
-  size_t length;
-  STR_BEGIN(buffer, size);
-
+STR_BEGIN_FORMATTER(describeCommand, int command, CommandDescriptionOption options)
   unsigned int arg = BRL_ARG_GET(command);
   unsigned int arg1 = BRL_CODE_GET(ARG, command);
   unsigned int arg2 = BRL_CODE_GET(EXT, command);
@@ -319,17 +315,12 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
       STR_FORMAT(formatCommandModifiers, command, commandModifierTable_vertical);
     }
   }
-
-  length = STR_LENGTH;
-  STR_END;
-  return length;
-}
+STR_END_FORMATTER
 
 static
 STR_BEGIN_FORMATTER(formatCommand, int command)
   STR_PRINTF("%06X (", command);
-  STR_ADJUST(describeCommand(command, STR_NEXT, STR_LEFT, 
-                             CDO_IncludeName | CDO_IncludeOperand));
+  STR_FORMAT(describeCommand, command, CDO_IncludeName | CDO_IncludeOperand);
   STR_PRINTF(")");
 STR_END_FORMATTER
 

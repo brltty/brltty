@@ -48,7 +48,7 @@ typedef enum {
   CDO_DefaultOperand = 0X4
 } CommandDescriptionOption;
 
-extern size_t describeCommand (int command, char *buffer, size_t size, CommandDescriptionOption options);
+extern STR_DEFINE_FORMATTER(describeCommand, int command, CommandDescriptionOption options);
 extern void logCommand (int command);
 extern void logTransformedCommand (int oldCommand, int newCommand);
 

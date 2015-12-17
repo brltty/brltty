@@ -70,8 +70,8 @@ handleLearnModeCommands (int command, void *data) {
   {
     char buffer[0X100];
 
-    describeCommand(command, buffer, sizeof(buffer),
-                    CDO_IncludeName | CDO_IncludeOperand);
+    describeCommand(buffer, sizeof(buffer), command,
+                    (CDO_IncludeName | CDO_IncludeOperand));
 
     logMessage(LOG_DEBUG, "learn: %s", buffer);
     if (!message(lmd->mode, buffer, MSG_SYNC|MSG_NODELAY)) lmd->state = LMS_ERROR;

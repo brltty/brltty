@@ -247,8 +247,8 @@ static int
 putCommandDescription (ListGenerationData *lgd, const BoundCommand *cmd, int details) {
   char description[0X60];
 
-  describeCommand(cmd->value, description, sizeof(description),
-                  details? (CDO_IncludeOperand | CDO_DefaultOperand): 0);
+  describeCommand(description, sizeof(description), cmd->value,
+                  (details? (CDO_IncludeOperand | CDO_DefaultOperand): 0));
   return putUtf8String(lgd, description);
 }
 
