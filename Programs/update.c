@@ -282,7 +282,7 @@ showInfo (void) {
     TimeFormattingData fmt;
 
     getTimeFormattingData(&fmt);
-    STR_ADJUST(formatBrailleTime(STR_NEXT, STR_LEFT, &fmt));
+    STR_FORMAT(formatBrailleTime, &fmt);
 
     if (prefs.showSeconds) {
       scheduleUpdateIn("info clock second", millisecondsTillNextSecond(&fmt.value));

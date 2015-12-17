@@ -216,7 +216,7 @@ formatTitle_HelpScreen (char *buffer, size_t size) {
   STR_BEGIN(buffer, size);
   STR_PRINTF("%s", gettext("Help Screen"));
   length = STR_LENGTH;
-  STR_END
+  STR_END;
   return length;
 }
 

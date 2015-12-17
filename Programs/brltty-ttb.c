@@ -1201,7 +1201,7 @@ makeCharacterDescription (TextTableData *ttd, wchar_t character, size_t *length,
              DOT(1), DOT(2), DOT(3), DOT(4), DOT(5), DOT(6), DOT(7), DOT(8),
              (gotDots? ']': ' '));
     descriptionLength = STR_LENGTH;
-    STR_END
+    STR_END;
   }
 #undef DOT
 

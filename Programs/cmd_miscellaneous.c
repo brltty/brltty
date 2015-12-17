@@ -103,7 +103,7 @@ formatSpeechDate (char *buffer, size_t size, const TimeFormattingData *fmt) {
   }
 
   length = STR_LENGTH;
-  STR_END
+  STR_END;
 
   return length;
 }
@@ -135,7 +135,7 @@ formatSpeechTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
   }
 
   length = STR_LENGTH;
-  STR_END
+  STR_END;
 
   return length;
 }
@@ -170,7 +170,7 @@ speakTime (const TimeFormattingData *fmt) {
   }
 
   STR_PRINTF(".");
-  STR_END
+  STR_END;
   sayString(&spk, announcement, SAY_OPT_MUTE_FIRST);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */

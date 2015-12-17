@@ -219,7 +219,7 @@ getDeviceParameters (const char *const *names, const char *identifier) {
     }
   }
 
-  STR_END
+  STR_END;
   return getParameters(names, NULL, parameters);
 }
 

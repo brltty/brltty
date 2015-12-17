@@ -708,7 +708,7 @@ formatAddress (
           while (byte < end) STR_PRINTF(" %02X", *byte++);
         }
 
-        STR_END
+        STR_END;
       }
       break;
   }

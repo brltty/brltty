@@ -961,7 +961,7 @@ formatInputError (char *buffer, size_t size, const char *file, const int *line, 
   if (STR_LENGTH) STR_PRINTF(": ");
   STR_VPRINTF(format, argp);
   length = STR_LENGTH;
-  STR_END
+  STR_END;
   return length;
 }
 

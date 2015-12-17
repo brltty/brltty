@@ -467,7 +467,7 @@ formatBrailleTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
     }
 
     if (fmt->meridian) STR_PRINTF("%s", fmt->meridian);
-    STR_END
+    STR_END;
   }
 
   if (prefs.datePosition == dpNone) {
@@ -528,7 +528,7 @@ formatBrailleTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
           STR_PRINTF(yearFormat, year);
           break;
       }
-      STR_END
+      STR_END;
 
       switch (prefs.datePosition) {
         case dpBeforeTime:
@@ -547,7 +547,7 @@ formatBrailleTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
   }
 
   length = STR_LENGTH;
-  STR_END
+  STR_END;
   return length;
 }
 
