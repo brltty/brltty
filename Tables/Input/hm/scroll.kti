@@ -29,7 +29,7 @@ bind RightScrollDown FWINRT
 bind LeftScrollUp+RightScrollUp TOP
 bind LeftScrollDown+RightScrollDown BOT
 bind LeftScrollUp+LeftScrollDown LNBEG
-bind RightScrollUp+RightScrollDown TIME
+bind RightScrollUp+RightScrollDown HOME
 
 bind LeftScrollUp+LeftScrollDown+RightScrollUp PRPGRPH
 bind LeftScrollUp+LeftScrollDown+RightScrollDown NXPGRPH
@@ -51,6 +51,7 @@ context menu
 
 bind LeftScrollUp MENU_PREV_ITEM
 bind LeftScrollDown MENU_NEXT_ITEM
+
 bind RightScrollUp MENU_PREV_SETTING
 bind RightScrollDown MENU_NEXT_SETTING
 
@@ -59,4 +60,10 @@ bind RightScrollUp+RightScrollDown FWINRT
 
 bind LeftScrollUp+RightScrollUp MENU_FIRST_ITEM
 bind LeftScrollDown+RightScrollDown MENU_LAST_ITEM
+
+bind LeftScrollUp+LeftScrollDown+RightScrollUp PREFLOAD
+bind LeftScrollUp+LeftScrollDown+RightScrollDown PREFSAVE
+
+bind RightScrollUp+RightScrollDown+LeftScrollUp MENU_PREV_LEVEL
+bind RightScrollUp+RightScrollDown+LeftScrollDown PREFMENU
 

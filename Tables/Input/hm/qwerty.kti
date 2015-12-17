@@ -16,11 +16,27 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-note enter/leave the preferences menu: Function-p
+note Function-a: display attributes
+note Function-b: skip blank windows
+note Function-c: cursor visibility
+note Function-h: help screen
+note Function-i: skip identical lines
+note Function-l: learn mode
+note Function-p: preferences menu
+note Function-s: status line
+note Function-u: highlight underline visibility
 hide on
 
 assign function F2+Space
+bind \{function}+Dot1 DISPMD
+bind \{function}+Dot1+Dot2 SKPBLNKWINS
+bind \{function}+Dot1+Dot4 CSRVIS
+bind \{function}+Dot1+Dot2+Dot5 HELP
+bind \{function}+Dot2+Dot4 SKPIDLNS
+bind \{function}+Dot1+Dot2+Dot3 LEARN
 bind \{function}+Dot1+Dot2+Dot3+Dot4 PREFMENU
+bind \{function}+Dot2+Dot3+Dot4 INFO
+bind \{function}+Dot1+Dot3+Dot6 ATTRVIS
 
 bind Dot7 KEY_BACKSPACE
 bind Dot8 KEY_ENTER
@@ -99,7 +115,6 @@ bind Space+Dot1+Dot3+Dot5 KEY_FUNCTION+9
 bind Dot1+Dot4+Dot5+Dot6+Dot7 KEY_FUNCTION+10
 bind Dot1+Dot2+Dot4+Dot5+Dot8 KEY_FUNCTION+11
 
-bind F2+Space+Dot1+Dot3+Dot5+Dot6 KEY_FUNCTION+3+gui
 bind F1+Dot7 KEY_FUNCTION+5+shift
 bind F1+Space KEY_FUNCTION+6+shift
 bind F1+Dot8 KEY_FUNCTION+7+shift
@@ -145,7 +160,7 @@ include letters.kti
 
 hide off
 # F2 conflicts with Shift-Tab: Space+Dot1+Dot2
-# F2 conflicts with Control-F: Dot1+Dot2+Dot4+Dot8
-# F12 conflicts with Control-G: Dot1+Dot2+Dot4+Dot5+Dot8
+# F3 conflicts with Control-f: Dot1+Dot2+Dot4+Dot8
+# F12 conflicts with Control-g: Dot1+Dot2+Dot4+Dot5+Dot8
 # Function-F4 conflicts with Function-z: F2+Space+Dot1+Dot3+Dot5+Dot6
 # new: Control-Tab: Space+Dot1+Dot2+Dot8

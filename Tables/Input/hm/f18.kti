@@ -21,8 +21,8 @@ bind F2 LEARN
 bind F3 INFO
 bind F4 PREFMENU
 
-bind F5 DISPMD
-bind F6 BACK
-bind F7 HOME
+bind F5 TIME
+bind F6 ATTRVIS
+bind F7 CSRVIS
 bind F8 CSRTRK
 
