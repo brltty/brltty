@@ -923,30 +923,35 @@ typedef struct {
   KeyTable *table;
   const KeyContext *ctx;
   const char *path;
-} ReportDuplicatesData;
+} KeyTableAuditorParameters;
 
-#define REPORT_DUPLICATES_FUNCTION(name) int name (const ReportDuplicatesData *rdd)
-typedef REPORT_DUPLICATES_FUNCTION(ReportDuplicatesFunction);
+#define KEY_TABLE_AUDITOR(name) int name (const KeyTableAuditorParameters *kta)
+typedef KEY_TABLE_AUDITOR(KeyTableAuditor);
+
+static void
+logKeyTableAudit (const char *audit) {
+  logMessage(LOG_WARNING, "%s", audit);
+}
 
 static size_t
-formatReportDuplicatePrefix (
+formatKeyTableAuditPrefix (
   char *buffer, size_t length,
-  const ReportDuplicatesData *rdd, const char *what
+  const KeyTableAuditorParameters *kta, const char *problem
 ) {
   size_t size;
 
   STR_BEGIN(buffer, length);
-  STR_PRINTF("%s: duplicate %s: ", rdd->path, what);
+  STR_PRINTF("%s: %s: ", kta->path, problem);
 
   size = STR_LENGTH;
   STR_END;
   return size;
 }
 
-static REPORT_DUPLICATES_FUNCTION(reportDuplicateKeyBindings) {
+static KEY_TABLE_AUDITOR(reportDuplicateKeyBindings) {
   int ok = 1;
-  const KeyBinding *const *binding = rdd->ctx->keyBindings.sorted;
-  const KeyBinding *const *end = binding + rdd->ctx->keyBindings.count;
+  const KeyBinding *const *binding = kta->ctx->keyBindings.sorted;
+  const KeyBinding *const *end = binding + kta->ctx->keyBindings.count;
   int reported = 0;
 
   while (++binding < end) {
@@ -959,14 +964,14 @@ static REPORT_DUPLICATES_FUNCTION(reportDuplicateKeyBindings) {
       reported = 1;
       ok = 0;
 
-      char message[0X100];
-      STR_BEGIN(message, sizeof(message));
+      char audit[0X100];
+      STR_BEGIN(audit, sizeof(audit));
 
-      STR_ADJUST(formatReportDuplicatePrefix(STR_NEXT, STR_LEFT, rdd, "key binding"));
-      STR_ADJUST(formatKeyCombination(STR_NEXT, STR_LEFT, rdd->table, &current->keyCombination));
+      STR_ADJUST(formatKeyTableAuditPrefix(STR_NEXT, STR_LEFT, kta, "duplicate key binding"));
+      STR_ADJUST(formatKeyCombination(STR_NEXT, STR_LEFT, kta->table, &current->keyCombination));
 
       STR_END;
-      logMessage(LOG_WARNING, "%s", message);
+      logKeyTableAudit(audit);
     }
   }
 
@@ -974,21 +979,21 @@ static REPORT_DUPLICATES_FUNCTION(reportDuplicateKeyBindings) {
 }
 
 static void
-reportDuplicateKeyValue (const ReportDuplicatesData *rdd, const KeyValue *key, const char *what) {
-  char message[0X100];
-  STR_BEGIN(message, sizeof(message));
+reportKeyProblem (const KeyTableAuditorParameters *kta, const KeyValue *key, const char *problem) {
+  char audit[0X100];
+  STR_BEGIN(audit, sizeof(audit));
 
-  STR_ADJUST(formatReportDuplicatePrefix(STR_NEXT, STR_LEFT, rdd, what));
-  STR_ADJUST(formatKeyName(rdd->table, STR_NEXT, STR_LEFT, key));
+  STR_ADJUST(formatKeyTableAuditPrefix(STR_NEXT, STR_LEFT, kta, problem));
+  STR_ADJUST(formatKeyName(kta->table, STR_NEXT, STR_LEFT, key));
 
   STR_END;
-  logMessage(LOG_WARNING, "%s", message);
+  logKeyTableAudit(audit);
 }
 
-static REPORT_DUPLICATES_FUNCTION(reportDuplicateHotkeys) {
+static KEY_TABLE_AUDITOR(reportDuplicateHotkeys) {
   int ok = 1;
-  const HotkeyEntry *const *hotkey = rdd->ctx->hotkeys.sorted;
-  const HotkeyEntry *const *end = hotkey + rdd->ctx->hotkeys.count;
+  const HotkeyEntry *const *hotkey = kta->ctx->hotkeys.sorted;
+  const HotkeyEntry *const *end = hotkey + kta->ctx->hotkeys.count;
   int reported = 0;
 
   while (++hotkey < end) {
@@ -1001,17 +1006,17 @@ static REPORT_DUPLICATES_FUNCTION(reportDuplicateHotkeys) {
       reported = 1;
       ok = 0;
 
-      reportDuplicateKeyValue(rdd, &current->keyValue, "hotkey");
+      reportKeyProblem(kta, &current->keyValue, "duplicate hotkey");
     }
   }
 
   return ok;
 }
 
-static REPORT_DUPLICATES_FUNCTION(reportDuplicateMappedKeys) {
+static KEY_TABLE_AUDITOR(reportDuplicateMappedKeys) {
   int ok = 1;
-  const MappedKeyEntry *const *map = rdd->ctx->mappedKeys.sorted;
-  const MappedKeyEntry *const *end = map + rdd->ctx->mappedKeys.count;
+  const MappedKeyEntry *const *map = kta->ctx->mappedKeys.sorted;
+  const MappedKeyEntry *const *end = map + kta->ctx->mappedKeys.count;
   int reported = 0;
 
   while (++map < end) {
@@ -1024,7 +1029,7 @@ static REPORT_DUPLICATES_FUNCTION(reportDuplicateMappedKeys) {
       reported = 1;
       ok = 0;
 
-      reportDuplicateKeyValue(rdd, &current->keyValue, "mapped key");
+      reportKeyProblem(kta, &current->keyValue, "duplicate mapped key");
     }
   }
 
@@ -1034,28 +1039,29 @@ static REPORT_DUPLICATES_FUNCTION(reportDuplicateMappedKeys) {
 int
 auditKeyTable (KeyTable *table, const char *path) {
   int ok = 1;
+
   for (unsigned int context=0; context<table->keyContexts.count; context+=1) {
     const KeyContext *ctx = getKeyContext(table, context);
 
     if (ctx) {
-      static ReportDuplicatesFunction *const reporters[] = {
+      static KeyTableAuditor *const auditors[] = {
         reportDuplicateKeyBindings,
         reportDuplicateHotkeys,
         reportDuplicateMappedKeys,
         NULL
       };
 
-      const ReportDuplicatesData rdd = {
+      const KeyTableAuditorParameters kta = {
         .table = table,
         .ctx = ctx,
         .path = path
       };
 
       for (
-        ReportDuplicatesFunction *const *reporter=reporters;
-        *reporter!=NULL; reporter+=1
+        KeyTableAuditor *const *auditor=auditors;
+        *auditor!=NULL; auditor+=1
       ) {
-        if (!(*reporter)(&rdd)) ok = 0;
+        if (!(*auditor)(&kta)) ok = 0;
       }
     }
   }
