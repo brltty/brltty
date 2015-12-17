@@ -16,15 +16,17 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-note Function-a: display attributes
-note Function-b: skip blank windows
-note Function-c: cursor visibility
-note Function-h: help screen
-note Function-i: skip identical lines
-note Function-l: learn mode
-note Function-p: preferences menu
-note Function-s: status line
-note Function-u: highlight underline visibility
+note Keyboard Bindings
+note + Function-a: display attributes
+note + Function-b: skip blank windows
+note + Function-c: cursor visibility
+note + Function-h: help screen
+note + Function-i: skip identical lines
+note + Function-l: learn mode
+note + Function-p: preferences menu
+note + Function-s: status line
+note + Function-t: display date and time
+note + Function-u: highlight underline visibility
 hide on
 
 assign function F2+Space
@@ -36,6 +38,7 @@ bind \{function}+Dot2+Dot4 SKPIDLNS
 bind \{function}+Dot1+Dot2+Dot3 LEARN
 bind \{function}+Dot1+Dot2+Dot3+Dot4 PREFMENU
 bind \{function}+Dot2+Dot3+Dot4 INFO
+bind \{function}+Dot2+Dot3+Dot4+Dot5 TIME
 bind \{function}+Dot1+Dot3+Dot6 ATTRVIS
 
 bind Dot7 KEY_BACKSPACE
