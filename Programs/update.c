@@ -21,9 +21,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "parameters.h"
 #include "log.h"
 #include "report.h"
-#include "parameters.h"
+#include "strfmt.h"
 #include "update.h"
 #include "async_alarm.h"
 #include "timing.h"

@@ -23,6 +23,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "strfmt.h"
 #include "parse.h"
 #include "async_wait.h"
 #include "ascii.h"

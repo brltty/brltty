@@ -29,6 +29,7 @@
 #endif /* HAVE_REGEX_H */
 
 #include "log.h"
+#include "strfmt.h"
 #include "parameters.h"
 #include "parse.h"
 #include "file.h"

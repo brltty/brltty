@@ -109,6 +109,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "strfmt.h"
 #include "parse.h"
 #include "bitfield.h"
 #include "timing.h"

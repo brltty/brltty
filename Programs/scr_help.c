@@ -23,6 +23,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "strfmt.h"
 #include "scr.h"
 #include "scr_help.h"
 

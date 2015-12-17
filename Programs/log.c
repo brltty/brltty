@@ -30,6 +30,7 @@
 #endif /* __ANDROID__ */
 
 #include "log.h"
+#include "strfmt.h"
 #include "timing.h"
 #include "addresses.h"
 #include "file.h"

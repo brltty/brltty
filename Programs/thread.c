@@ -22,6 +22,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "strfmt.h"
 #include "thread.h"
 #include "async_signal.h"
 #include "async_event.h"

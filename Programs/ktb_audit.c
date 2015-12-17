@@ -21,6 +21,7 @@
 #include <stdio.h>
 
 #include "log.h"
+#include "strfmt.h"
 #include "ktb.h"
 #include "ktb_internal.h"
 #include "ktb_inspect.h"

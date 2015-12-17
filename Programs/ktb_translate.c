@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "strfmt.h"
 #include "alert.h"
 #include "prefs.h"
 #include "ktb.h"

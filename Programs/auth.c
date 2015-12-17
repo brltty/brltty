@@ -51,6 +51,7 @@ typedef unsigned int gid_t;
 #endif /* !defined(PF_LOCAL) && defined(PF_UNIX) */
 
 #include "log.h"
+#include "strfmt.h"
 #include "parse.h"
 #include "auth.h"
 

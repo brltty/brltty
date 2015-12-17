@@ -30,8 +30,11 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#include "embed.h"
 #include "parameters.h"
+#include "embed.h"
+#include "log.h"
+#include "report.h"
+#include "strfmt.h"
 #include "activity.h"
 #include "update.h"
 #include "cmd.h"
@@ -56,8 +59,6 @@
 #include "tune.h"
 #include "notes.h"
 #include "message.h"
-#include "log.h"
-#include "report.h"
 #include "file.h"
 #include "parse.h"
 #include "dynld.h"

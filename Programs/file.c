@@ -31,8 +31,9 @@
 #endif /* HAVE_SYS_FILE_H */
 
 #include "parameters.h"
-#include "file.h"
 #include "log.h"
+#include "strfmt.h"
+#include "file.h"
 #include "parse.h"
 #include "async_wait.h"
 #include "charset.h"

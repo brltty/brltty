@@ -21,8 +21,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "log.h"
 #include "parameters.h"
+#include "log.h"
+#include "strfmt.h"
 #include "prefs.h"
 #include "spk_thread.h"
 #include "spk.h"

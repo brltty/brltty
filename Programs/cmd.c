@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "strfmt.h"
 #include "brl_cmds.h"
 #include "brl_custom.h"
 #include "cmd.h"

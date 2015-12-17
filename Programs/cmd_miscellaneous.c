@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 
+#include "strfmt.h"
 #include "cmd_queue.h"
 #include "cmd_miscellaneous.h"
 #include "cmd_utils.h"

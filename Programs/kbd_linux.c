@@ -22,8 +22,9 @@
 #include <string.h>
 #include <errno.h>
 
-#include "log.h"
 #include "parameters.h"
+#include "log.h"
+#include "strfmt.h"
 #include "file.h"
 #include "system_linux.h"
 #include "kbd.h"

@@ -25,6 +25,7 @@
 #include <fcntl.h>
 
 #include "log.h"
+#include "strfmt.h"
 #include "device.h"
 #include "file.h"
 #include "parse.h"

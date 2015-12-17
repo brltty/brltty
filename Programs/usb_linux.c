@@ -37,8 +37,9 @@
 #define USBDEVFS_CONNECT _IO('U', 23)
 #endif /* USBDEVFS_CONNECT */
 
-#include "log.h"
 #include "parameters.h"
+#include "log.h"
+#include "strfmt.h"
 #include "file.h"
 #include "parse.h"
 #include "timing.h"

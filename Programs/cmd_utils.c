@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 
+#include "strfmt.h"
 #include "brl_cmds.h"
 #include "unicode.h"
 #include "scr.h"

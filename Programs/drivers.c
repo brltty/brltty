@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "strfmt.h"
 #include "file.h"
 #include "dynld.h"
 #include "drivers.h"

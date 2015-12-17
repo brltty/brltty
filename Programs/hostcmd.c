@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include "log.h"
+#include "strfmt.h"
 #include "hostcmd.h"
 
 #if defined(USE_PKG_HOSTCMD_NONE)

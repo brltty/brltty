@@ -39,6 +39,7 @@ static int shmFileDescriptor = -1;
 #endif /* HAVE_SHM_OPEN */
 
 #include "log.h"
+#include "strfmt.h"
 #include "hostcmd.h"
 #include "charset.h"
 #include "ascii.h"

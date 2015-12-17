@@ -64,41 +64,6 @@ extern "C" {
   FUNCTION_TYPEDEF(functionName, returnType, argumentList); \
   extern SYMBOL_TYPE(functionName) functionName
 
-#define STR_BEGIN(buffer, size) { \
-  char *strNext = (buffer); \
-  char *strStart = strNext; \
-  char *strEnd = strStart + (size); \
-  *strNext = 0;
-#define STR_END }
-#define STR_LENGTH (size_t)(strNext - strStart)
-#define STR_NEXT strNext
-#define STR_LEFT (size_t)(strEnd - strNext)
-#define STR_ADJUST(length) if ((strNext += (length)) > strEnd) strNext = strEnd
-#define STR_PRINTF(format, ...) { \
-  size_t strLength = snprintf(STR_NEXT, STR_LEFT, format, ## __VA_ARGS__); \
-  STR_ADJUST(strLength); \
-}
-#define STR_VPRINTF(format, arguments) { \
-  size_t strLength = vsnprintf(STR_NEXT, STR_LEFT, format, arguments); \
-  STR_ADJUST(strLength); \
-}
-
-#define STR_DEFINE_FORMATTER(name, ...) \
-  size_t name (char *strFormatterBuffer, size_t strFormatterSize, __VA_ARGS__)
-
-#define STR_BEGIN_FORMATTER(name, ...) \
-STR_DEFINE_FORMATTER(name, __VA_ARGS__) { \
-  size_t strFormatterResult; \
-  STR_BEGIN(strFormatterBuffer, strFormatterSize);
-
-#define STR_END_FORMATTER \
-  strFormatterResult = STR_LENGTH; \
-  STR_END; \
-  return strFormatterResult; \
-}
-
-#define STR_FORMAT(formatter, ...) STR_ADJUST(formatter(STR_NEXT, STR_LEFT, __VA_ARGS__))
-
 #ifdef HAVE_CONFIG_H
 #ifdef FOR_BUILD
 #include "forbuild.h"

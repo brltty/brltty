@@ -32,9 +32,10 @@
 #include <sys/wait.h>
 #endif /* HAVE_SYS_WAIT_H */
 
+#include "parameters.h"
 #include "embed.h"
 #include "log.h"
-#include "parameters.h"
+#include "strfmt.h"
 #include "brl_cmds.h"
 #include "cmd_queue.h"
 #include "cmd_custom.h"
