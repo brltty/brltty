@@ -83,6 +83,19 @@ extern "C" {
   STR_ADJUST(strLength); \
 }
 
+#define STR_BEGIN_FORMATTER(name, ...) size_t name ( \
+  char *strFormatterBuffer, size_t strFormatterSize, __VA_ARGS__) { \
+  size_t strFormatterResult; \
+  STR_BEGIN(strFormatterBuffer, strFormatterSize);
+
+#define STR_END_FORMATTER \
+  strFormatterResult = STR_LENGTH; \
+  STR_END; \
+  return strFormatterResult; \
+}
+
+#define STR_FORMAT(formatter, ...) STR_ADJUST(formatter(STR_NEXT, STR_LEFT, __VA_ARGS__))
+
 #ifdef HAVE_CONFIG_H
 #ifdef FOR_BUILD
 #include "forbuild.h"
