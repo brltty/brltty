@@ -171,11 +171,9 @@ findCommandEntry (int code) {
   return NULL;
 }
 
-static size_t
-formatCommandModifiers (char *buffer, size_t size, int command, const CommandModifierEntry *modifiers) {
+static
+STR_BEGIN_FORMATTER(formatCommandModifiers, int command, const CommandModifierEntry *modifiers)
   const CommandModifierEntry *modifier = modifiers;
-  size_t length;
-  STR_BEGIN(buffer, size);
 
   while (modifier->name) {
     if (command & modifier->bit) {
@@ -184,11 +182,7 @@ formatCommandModifiers (char *buffer, size_t size, int command, const CommandMod
 
     modifier += 1;
   }
-
-  length = STR_LENGTH;
-  STR_END;
-  return length;
-}
+STR_END_FORMATTER
 
 size_t
 describeCommand (int command, char *buffer, size_t size, CommandDescriptionOption options) {
@@ -301,34 +295,28 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
       }
 
       if (cmd->isInput) {
-        size_t length = formatCommandModifiers(STR_NEXT, STR_LEFT, command, commandModifierTable_input);
-        STR_ADJUST(length);
+        STR_FORMAT(formatCommandModifiers, command, commandModifierTable_input);
       }
 
       if (cmd->isCharacter) {
-        size_t length = formatCommandModifiers(STR_NEXT, STR_LEFT, command, commandModifierTable_character);
-        STR_ADJUST(length);
+        STR_FORMAT(formatCommandModifiers, command, commandModifierTable_character);
       }
 
       if (cmd->isKeyboard) {
-        size_t length = formatCommandModifiers(STR_NEXT, STR_LEFT, command, commandModifierTable_keyboard);
-        STR_ADJUST(length);
+        STR_FORMAT(formatCommandModifiers, command, commandModifierTable_keyboard);
       }
     }
 
     if (cmd->isMotion) {
-      size_t length = formatCommandModifiers(STR_NEXT, STR_LEFT, command, commandModifierTable_motion);
-      STR_ADJUST(length);
+      STR_FORMAT(formatCommandModifiers, command, commandModifierTable_motion);
     }
 
     if (cmd->isRow) {
-      size_t length = formatCommandModifiers(STR_NEXT, STR_LEFT, command, commandModifierTable_row);
-      STR_ADJUST(length);
+      STR_FORMAT(formatCommandModifiers, command, commandModifierTable_row);
     }
 
     if (cmd->isVertical) {
-      size_t length = formatCommandModifiers(STR_NEXT, STR_LEFT, command, commandModifierTable_vertical);
-      STR_ADJUST(length);
+      STR_FORMAT(formatCommandModifiers, command, commandModifierTable_vertical);
     }
   }
 
@@ -337,47 +325,25 @@ describeCommand (int command, char *buffer, size_t size, CommandDescriptionOptio
   return length;
 }
 
-static size_t
-formatCommand (char *buffer, size_t size, int command) {
-  size_t length;
-  STR_BEGIN(buffer, size);
-
+static
+STR_BEGIN_FORMATTER(formatCommand, int command)
   STR_PRINTF("%06X (", command);
-
-  {
-    size_t length = describeCommand(command, STR_NEXT, STR_LEFT, 
-                                    CDO_IncludeName | CDO_IncludeOperand);
-    STR_ADJUST(length);
-  }
-
+  STR_ADJUST(describeCommand(command, STR_NEXT, STR_LEFT, 
+                             CDO_IncludeName | CDO_IncludeOperand));
   STR_PRINTF(")");
-
-  length = STR_LENGTH;
-  STR_END;
-  return length;
-}
+STR_END_FORMATTER
 
 typedef struct {
   int command;
 } LogCommandData;
 
-static size_t
-formatLogCommandData (char *buffer, size_t size, const void *data) {
+static
+STR_BEGIN_FORMATTER(formatLogCommandData, const void *data)
   const LogCommandData *cmd = data;
-  size_t length;
 
-  STR_BEGIN(buffer, size);
   STR_PRINTF("command: ");
-
-  {
-    size_t sublength = formatCommand(STR_NEXT, STR_LEFT, cmd->command);
-    STR_ADJUST(sublength);
-  }
-
-  length = STR_LENGTH;
-  STR_END
-  return length;
-}
+  STR_FORMAT(formatCommand, cmd->command);
+STR_END_FORMATTER
 
 void
 logCommand (int command) {
@@ -393,30 +359,16 @@ typedef struct {
   int newCommand;
 } LogTransformedCommandData;
 
-static size_t
-formatLogTransformedCommandData (char *buffer, size_t size, const void *data) {
+static
+STR_BEGIN_FORMATTER(formatLogTransformedCommandData, const void *data)
   const LogTransformedCommandData *cmd = data;
-  size_t length;
 
-  STR_BEGIN(buffer, size);
   STR_PRINTF("command: ");
-
-  {
-    size_t sublength = formatCommand(STR_NEXT, STR_LEFT, cmd->oldCommand);
-    STR_ADJUST(sublength);
-  }
+  STR_FORMAT(formatCommand, cmd->oldCommand);
 
   STR_PRINTF(" -> ");
-
-  {
-    size_t sublength = formatCommand(STR_NEXT, STR_LEFT, cmd->newCommand);
-    STR_ADJUST(sublength);
-  }
-
-  length = STR_LENGTH;
-  STR_END
-  return length;
-}
+  STR_FORMAT(formatCommand, cmd->newCommand);
+STR_END_FORMATTER
 
 void
 logTransformedCommand (int oldCommand, int newCommand) {
