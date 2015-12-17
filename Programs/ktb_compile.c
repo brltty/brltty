@@ -1479,35 +1479,12 @@ prepareMappedKeyEntries (KeyContext *ctx) {
 
 int
 finishKeyTable (KeyTableData *ktd) {
-  {
-    unsigned int context;
+  for (unsigned int context=0; context<ktd->table->keyContexts.count; context+=1) {
+    KeyContext *ctx = &ktd->table->keyContexts.table[context];
 
-    for (context=0; context<ktd->table->keyContexts.count; context+=1) {
-      KeyContext *ctx = &ktd->table->keyContexts.table[context];
-
-      if (ctx->name && !ctx->isSpecial) {
-        const char *problem = NULL;
-
-        if (!ctx->isDefined) {
-          problem = "undefined context";
-        } else if (!ctx->isReferenced) {
-          problem = "unreferenced context";
-        } else if (!(ctx->keyBindings.count ||
-                     ctx->mappedKeys.count ||
-                     ctx->mappedKeys.superimpose ||
-                     ctx->hotkeys.count)) {
-          problem = "empty context";
-        }
-
-        if (problem) {
-          reportDataError(NULL, "%s: %s: %"PRIws, ktd->file, problem, ctx->name);
-        }
-      }
-
-      if (!prepareKeyBindings(ctx)) return 0;
-      if (!prepareHotkeyEntries(ctx)) return 0;
-      if (!prepareMappedKeyEntries(ctx)) return 0;
-    }
+    if (!prepareKeyBindings(ctx)) return 0;
+    if (!prepareHotkeyEntries(ctx)) return 0;
+    if (!prepareMappedKeyEntries(ctx)) return 0;
   }
 
   qsort(ktd->table->keyNames.table, ktd->table->keyNames.count, sizeof(*ktd->table->keyNames.table), sortKeyValues);

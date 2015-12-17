@@ -929,7 +929,7 @@ typedef struct {
 typedef KEY_TABLE_AUDITOR(KeyTableAuditor);
 
 static void
-logKeyTableAudit (const char *audit) {
+reportKeyTableAudit (const char *audit) {
   logMessage(LOG_WARNING, "%s", audit);
 }
 
@@ -939,13 +939,48 @@ formatKeyTableAuditPrefix (
   const KeyTableAuditorParameters *kta, const char *problem
 ) {
   size_t size;
-
   STR_BEGIN(buffer, length);
-  STR_PRINTF("%s: %s: ", kta->path, problem);
+
+  if (kta->path) STR_PRINTF("%s: ", kta->path);
+  STR_PRINTF("%s", problem);
+  if (kta->ctx) STR_PRINTF(": %" PRIws, kta->ctx->name);
 
   size = STR_LENGTH;
   STR_END;
   return size;
+}
+
+static KEY_TABLE_AUDITOR(reportKeyContextProblems) {
+  int ok = 1;
+
+  if (kta->ctx->name && !kta->ctx->isSpecial) {
+    const char *problem = NULL;
+
+    if (!kta->ctx->isDefined) {
+      problem = "undefined context";
+    } else if (!kta->ctx->isReferenced) {
+      problem = "unreferenced context";
+    } else if (!(kta->ctx->keyBindings.count ||
+                 kta->ctx->mappedKeys.count ||
+                 kta->ctx->mappedKeys.superimpose ||
+                 kta->ctx->hotkeys.count)) {
+      problem = "empty context";
+    }
+
+    if (problem) {
+      ok = 0;
+
+      char audit[0X100];
+      STR_BEGIN(audit, sizeof(audit));
+
+      STR_ADJUST(formatKeyTableAuditPrefix(STR_NEXT, STR_LEFT, kta, problem));
+
+      STR_END;
+      reportKeyTableAudit(audit);
+    }
+  }
+
+  return ok;
 }
 
 static KEY_TABLE_AUDITOR(reportDuplicateKeyBindings) {
@@ -968,10 +1003,11 @@ static KEY_TABLE_AUDITOR(reportDuplicateKeyBindings) {
       STR_BEGIN(audit, sizeof(audit));
 
       STR_ADJUST(formatKeyTableAuditPrefix(STR_NEXT, STR_LEFT, kta, "duplicate key binding"));
+      STR_PRINTF(": ");
       STR_ADJUST(formatKeyCombination(STR_NEXT, STR_LEFT, kta->table, &current->keyCombination));
 
       STR_END;
-      logKeyTableAudit(audit);
+      reportKeyTableAudit(audit);
     }
   }
 
@@ -984,10 +1020,11 @@ reportKeyProblem (const KeyTableAuditorParameters *kta, const KeyValue *key, con
   STR_BEGIN(audit, sizeof(audit));
 
   STR_ADJUST(formatKeyTableAuditPrefix(STR_NEXT, STR_LEFT, kta, problem));
+  STR_PRINTF(": ");
   STR_ADJUST(formatKeyName(kta->table, STR_NEXT, STR_LEFT, key));
 
   STR_END;
-  logKeyTableAudit(audit);
+  reportKeyTableAudit(audit);
 }
 
 static KEY_TABLE_AUDITOR(reportDuplicateHotkeys) {
@@ -1045,6 +1082,7 @@ auditKeyTable (KeyTable *table, const char *path) {
 
     if (ctx) {
       static KeyTableAuditor *const auditors[] = {
+        reportKeyContextProblems,
         reportDuplicateKeyBindings,
         reportDuplicateHotkeys,
         reportDuplicateMappedKeys,
