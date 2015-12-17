@@ -29,6 +29,7 @@
 #include <linux/vt.h>
 #include <linux/kd.h>
 #include <linux/tiocl.h>
+#include <linux/major.h>
 
 #ifndef VT_GETHIFONTMASK
 #define VT_GETHIFONTMASK 0X560D
@@ -361,7 +362,7 @@ openConsole (int *fd, int vt) {
   char *name = vtName(consoleName, vt);
 
   if (name) {
-    int console = openCharacterDevice(name, O_RDWR|O_NOCTTY, 4, vt);
+    int console = openCharacterDevice(name, O_RDWR|O_NOCTTY, TTY_MAJOR, vt);
 
     if (console != -1) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
@@ -535,7 +536,7 @@ openScreenDevice (int *fd, int vt) {
   char *name = vtName(screenName, vt);
 
   if (name) {
-    int screen = openCharacterDevice(name, O_RDWR, 7, 0X80|vt);
+    int screen = openCharacterDevice(name, O_RDWR, VCS_MAJOR, 0X80|vt);
 
     if (screen != -1) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),

@@ -24,6 +24,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
+#include <linux/major.h>
 
 #include "log.h"
 #include "file.h"
@@ -868,7 +869,7 @@ newUinputObject (const char *name) {
     }
 
     if (device) {
-      if ((uinput->fileDescriptor = openCharacterDevice(device, O_RDWR, 10, 223)) != -1) {
+      if ((uinput->fileDescriptor = openCharacterDevice(device, O_RDWR, MISC_MAJOR, 223)) != -1) {
         struct uinput_user_dev description;
         
         memset(&description, 0, sizeof(description));
