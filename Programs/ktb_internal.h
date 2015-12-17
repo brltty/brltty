@@ -76,9 +76,14 @@ typedef struct {
   unsigned char flags;
 } HotkeyEntry;
 
+typedef enum {
+  MKF_HIDDEN   = 0X01,
+} MappedKeyFlag;
+
 typedef struct {
   KeyValue keyValue;
   const KeyboardFunction *keyboardFunction;
+  unsigned char flags;
 } MappedKeyEntry;
 
 typedef struct {

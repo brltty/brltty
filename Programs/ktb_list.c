@@ -271,15 +271,16 @@ putKeyboardFunction (ListGenerationData *lgd, const KeyboardFunction *kbf) {
 int
 listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
   if (ctx->mappedKeys.count > 0) {
-    unsigned int index;
-
-    for (index=0; index<ctx->mappedKeys.count; index+=1) {
+    for (unsigned int index=0; index<ctx->mappedKeys.count; index+=1) {
       const MappedKeyEntry *map = &ctx->mappedKeys.table[index];
-      const KeyboardFunction *kbf = map->keyboardFunction;
 
-      if (!putKeyboardFunction(lgd, kbf)) return 0;
-      if (!putKeyName(lgd, &map->keyValue)) return 0;
-      if (!endLine(lgd)) return 0;
+      if (!(map->flags & MKF_HIDDEN)) {
+        const KeyboardFunction *kbf = map->keyboardFunction;
+
+        if (!putKeyboardFunction(lgd, kbf)) return 0;
+        if (!putKeyName(lgd, &map->keyValue)) return 0;
+        if (!endLine(lgd)) return 0;
+      }
     }
 
     {

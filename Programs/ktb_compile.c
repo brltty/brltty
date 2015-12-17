@@ -1029,6 +1029,7 @@ static DATA_OPERANDS_PROCESSOR(processMapOperands) {
   MappedKeyEntry map;
 
   memset(&map, 0, sizeof(map));
+  if (hideBindings(ktd)) map.flags |= MKF_HIDDEN;
 
   if (getKeyOperand(file, &map.keyValue, ktd)) {
     if (map.keyValue.number != KTB_KEY_ANY) {
