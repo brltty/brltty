@@ -59,8 +59,8 @@ hotkey Comma NOOP NOOP
 hotkey Period NOOP NOOP
 hotkey Slash NOOP NOOP
 
-map ShiftLeft UPPERCASE
-map ShiftRight UPPERCASE
+map ShiftLeft UPPER
+map ShiftRight UPPER
 map ControlLeft CONTROL
 map ControlRight CONTROL
 map AltLeft META

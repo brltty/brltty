@@ -367,7 +367,7 @@ defined within the current context.
       The space bar.
    ``SHIFT``
       The shift key.
-   ``UPPERCASE``
+   ``UPPER``
       If a lowercase letter is being entered then translate it to its
       uppercase equivalent.
    ``CONTROL``

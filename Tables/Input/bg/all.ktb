@@ -46,7 +46,7 @@ map Dot7 DOT7
 map Dot8 DOT8
 map Space SPACE
 
-map Up UPPERCASE
+map Up UPPER
 map Down CONTROL
 map Left META
 map Right ALTGR

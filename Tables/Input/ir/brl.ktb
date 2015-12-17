@@ -65,7 +65,7 @@ map Dot8 DOT8
 map Space SPACE
 map L4 CONTROL
 map L5 META
-map L3 UPPERCASE
+map L3 UPPER
 
 bind Backspace KEY_BACKSPACE
 bind Backspace+Space KEY_ENTER

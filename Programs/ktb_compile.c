@@ -41,7 +41,7 @@ const KeyboardFunction keyboardFunctionTable[] = {
   {.name="dot8", .bit=BRL_DOT8},
   {.name="space", .bit=BRL_DOTC},
   {.name="shift", .bit=BRL_FLG_INPUT_SHIFT},
-  {.name="uppercase", .bit=BRL_FLG_INPUT_UPPER},
+  {.name="upper", .bit=BRL_FLG_INPUT_UPPER},
   {.name="control", .bit=BRL_FLG_INPUT_CONTROL},
   {.name="meta", .bit=BRL_FLG_INPUT_META},
   {.name="altgr", .bit=BRL_FLG_INPUT_ALTGR},

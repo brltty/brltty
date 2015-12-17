@@ -5049,7 +5049,7 @@ The mapping is defined within the current context.
       <tag/DOT8/The lower-right computer braille dot.
       <tag/SPACE/The space bar.
       <tag/SHIFT/The shift key.
-      <tag/UPPERCASE/
+      <tag/UPPER/
         If a lowercase letter is being entered
         then translate it to its uppercase equivalent.
       <tag/CONTROL/The control key.
