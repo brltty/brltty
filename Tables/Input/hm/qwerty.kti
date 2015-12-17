@@ -17,28 +17,28 @@
 ###############################################################################
 
 note Keyboard Bindings
-note + Function-a: display attributes
-note + Function-b: skip blank windows
-note + Function-c: cursor visibility
-note + Function-h: help screen
-note + Function-i: skip identical lines
-note + Function-l: learn mode
-note + Function-p: preferences menu
-note + Function-s: status line
-note + Function-t: display date and time
-note + Function-u: highlight underline visibility
+note + Function-b: skip blank windows on/off
+note + Function-c: cursor show/hide
+note + Function-d: display mode attributes/text
+note + Function-h: help screen enter/leave
+note + Function-i: skip identical lines on/off
+note + Function-l: learn mode enter/leave
+note + Function-p: preferences menu enter/leave
+note + Function-s: status line enter/leave
+note + Function-t: cursor tracking on/off
+note + Function-u: highlight underline on/off
 hide on
 
 assign function F2+Space
-bind \{function}+Dot1 DISPMD
 bind \{function}+Dot1+Dot2 SKPBLNKWINS
 bind \{function}+Dot1+Dot4 CSRVIS
+bind \{function}+Dot1+Dot4+Dot5 DISPMD
 bind \{function}+Dot1+Dot2+Dot5 HELP
 bind \{function}+Dot2+Dot4 SKPIDLNS
 bind \{function}+Dot1+Dot2+Dot3 LEARN
 bind \{function}+Dot1+Dot2+Dot3+Dot4 PREFMENU
 bind \{function}+Dot2+Dot3+Dot4 INFO
-bind \{function}+Dot2+Dot3+Dot4+Dot5 TIME
+bind \{function}+Dot2+Dot3+Dot4+Dot5 CSRTRK
 bind \{function}+Dot1+Dot3+Dot6 ATTRVIS
 
 bind Dot7 KEY_BACKSPACE

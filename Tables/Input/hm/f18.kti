@@ -16,13 +16,29 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-bind F1 HELP
-bind F2 LEARN
-bind F3 INFO
-bind F4 PREFMENU
+bind F1 PRPROMPT
+bind F2 NXPROMPT
+bind F3 PRPGRPH
+bind F4 NXPGRPH
 
-bind F5 TIME
+bind F5 CSRVIS
 bind F6 ATTRVIS
-bind F7 CSRVIS
-bind F8 CSRTRK
+bind F7 CHRLT
+bind F8 CHRRT
+
+bind Space+F1 BRLKBD
+bind Space+F2 BRLUCDOTS
+bind Space+F3 SKPIDLNS
+bind Space+F4 CONTEXT+KEY_FUNCTION
+
+bind Space+F5 CONTEXT+SWITCHVT
+bind Space+F6 SKPBLNKWINS
+bind Space+F7 PRNBWIN
+bind Space+F8 NXNBWIN
+
+context KEY_FUNCTION
+bind RoutingKey KEY_FUNCTION
+
+context SWITCHVT
+bind RoutingKey SWITCHVT
 

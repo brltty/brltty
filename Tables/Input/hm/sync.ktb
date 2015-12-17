@@ -24,41 +24,4 @@ title HIMS SyncBraille
 ####################
 
 include common.kti
-
-bind LeftUp LNUP
-bind LeftDown LNDN
-bind RightUp FWINLT
-bind RightDown FWINRT
-bind RightUp+RightDown RETURN
-
-bind LeftUp+LeftDown LNBEG
-bind LeftUp+LeftDown+RightUp TOP_LEFT
-bind LeftUp+LeftDown+RightDown BOT_LEFT
-
-bind LeftUp+RightUp CSRTRK
-bind LeftUp+RightDown SIXDOTS
-bind LeftDown+RightUp FREEZE
-bind LeftDown+RightDown DISPMD
-
-bind LeftUp+RightUp+RightDown INFO
-bind LeftDown+RightUp+RightDown PREFMENU
-bind LeftUp+LeftDown+RightUp+RightDown HELP
-
-
-#################
-# Menu Bindings #
-#################
-
-context menu
-
-bind LeftUp MENU_PREV_ITEM
-bind LeftDown MENU_NEXT_ITEM
-bind RightUp MENU_PREV_SETTING
-bind RightDown MENU_NEXT_SETTING
-
-bind LeftUp+LeftDown FWINLT
-bind RightUp+RightDown FWINRT
-
-bind LeftUp+RightUp MENU_FIRST_ITEM
-bind LeftDown+RightDown MENU_LAST_ITEM
-
+include scroll.kti

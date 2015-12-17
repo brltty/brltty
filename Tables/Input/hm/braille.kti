@@ -34,5 +34,4 @@ map \{controlModifier} CONTROL
 
 assign chord Space+
 include ../chords.kti
-bind Space+RoutingKey KEY_FUNCTION
 

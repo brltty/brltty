@@ -122,16 +122,16 @@ BEGIN_KEY_NAME_TABLES(edge)
   KEY_NAME_TABLE(rp),
 END_KEY_NAME_TABLES
 
-BEGIN_KEY_NAME_TABLE(sync)
-  KEY_NAME_ENTRY(HM_KEY_LeftUp, "LeftUp"),
-  KEY_NAME_ENTRY(HM_KEY_LeftDown, "LeftDown"),
-  KEY_NAME_ENTRY(HM_KEY_RightUp, "RightUp"),
-  KEY_NAME_ENTRY(HM_KEY_RightDown, "RightDown"),
+BEGIN_KEY_NAME_TABLE(SB_scroll)
+  KEY_NAME_ENTRY(HM_KEY_SB_LeftScrollUp, "LeftScrollUp"),
+  KEY_NAME_ENTRY(HM_KEY_SB_LeftScrollDown, "LeftScrollDown"),
+  KEY_NAME_ENTRY(HM_KEY_SB_RightScrollUp, "RightScrollUp"),
+  KEY_NAME_ENTRY(HM_KEY_SB_RightScrollDown, "RightScrollDown"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(sync)
   KEY_NAME_TABLE(common),
-  KEY_NAME_TABLE(sync),
+  KEY_NAME_TABLE(SB_scroll),
 END_KEY_NAME_TABLES
 
 DEFINE_KEY_TABLE(pan)

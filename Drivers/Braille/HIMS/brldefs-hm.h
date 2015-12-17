@@ -41,11 +41,11 @@ typedef enum {
   HM_KEY_Backward = 13,
   HM_KEY_Forward  = 14,
 
-  /* SyncBraille keys */
-  HM_KEY_LeftUp    = 12,
-  HM_KEY_RightUp   = 13,
-  HM_KEY_RightDown = 14,
-  HM_KEY_LeftDown  = 15,
+  /* SyncBraille scroll keys */
+  HM_KEY_SB_LeftScrollUp    = 12,
+  HM_KEY_SB_RightScrollUp   = 13,
+  HM_KEY_SB_RightScrollDown = 14,
+  HM_KEY_SB_LeftScrollDown  = 15,
 
   /* Braille Sense scroll keys */
   HM_KEY_BS_LeftScrollUp    = 16,
