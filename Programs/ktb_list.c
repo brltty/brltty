@@ -1032,7 +1032,7 @@ static REPORT_DUPLICATES_FUNCTION(reportDuplicateMappedKeys) {
 }
 
 int
-reportKeyTableDuplicates (KeyTable *table, const char *path) {
+auditKeyTable (KeyTable *table, const char *path) {
   int ok = 1;
   for (unsigned int context=0; context<table->keyContexts.count; context+=1) {
     const KeyContext *ctx = getKeyContext(table, context);

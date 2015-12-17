@@ -31,19 +31,19 @@
 #include "ktb_keyboard.h"
 #include "brl.h"
 
-static int opt_reportDuplicates;
+static int opt_audit;
 static int opt_listKeyNames;
 static int opt_listHelpScreen;
 static int opt_listRestructuredText;
-static char *opt_driversDirectory;
 static char *opt_tablesDirectory;
+static char *opt_driversDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'd',
-    .word = "duplicates",
+  { .letter = 'a',
+    .word = "audit",
     .flags = OPT_Config | OPT_Environ,
-    .setting.flag = &opt_reportDuplicates,
-    .description = strtext("Report duplicate definitions.")
+    .setting.flag = &opt_audit,
+    .description = strtext("Report problems with the key table.")
   },
 
   { .letter = 'k',
@@ -67,16 +67,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("List key table in reStructuredText format.")
   },
 
-  { .letter = 'D',
-    .word = "drivers-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
-    .argument = strtext("directory"),
-    .setting.string = &opt_driversDirectory,
-    .internal.setting = DRIVERS_DIRECTORY,
-    .internal.adjust = fixInstallPath,
-    .description = strtext("Path to directory for loading drivers.")
-  },
-
   { .letter = 'T',
     .word = "tables-directory",
     .flags = OPT_Hidden,
@@ -85,6 +75,16 @@ BEGIN_OPTION_TABLE(programOptions)
     .internal.setting = TABLES_DIRECTORY,
     .internal.adjust = fixInstallPath,
     .description = strtext("Path to directory containing tables.")
+  },
+
+  { .letter = 'D',
+    .word = "drivers-directory",
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .argument = strtext("directory"),
+    .setting.string = &opt_driversDirectory,
+    .internal.setting = DRIVERS_DIRECTORY,
+    .internal.adjust = fixInstallPath,
+    .description = strtext("Path to directory for loading drivers.")
   },
 END_OPTION_TABLE
 
@@ -363,8 +363,8 @@ main (int argc, char *argv[]) {
         KeyTable *keyTable = compileKeyTable(ktd.path, ktd.names);
 
         if (keyTable) {
-          if (opt_reportDuplicates) {
-            if (!reportKeyTableDuplicates(keyTable, ktd.path)) {
+          if (opt_audit) {
+            if (!auditKeyTable(keyTable, ktd.path)) {
               exitStatus = PROG_EXIT_FATAL;
             }
           }

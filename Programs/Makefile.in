@@ -547,7 +547,7 @@ check-keyboard-tables: all-brltty-ktb
 	for file; do \
 	name=$${file##*/}; \
 	name=$${name%.*}; \
-	./brltty-ktb$X -d -D$(BLD_TOP)$(DRV_DIR) -T$(SRC_TOP)$(TBL_DIR) kbd-$$name; \
+	./brltty-ktb$X -a -D$(BLD_TOP)$(DRV_DIR) -T$(SRC_TOP)$(TBL_DIR) kbd-$$name; \
 	done
 
 check-input-tables: all-brltty-ktb
@@ -558,7 +558,7 @@ check-input-tables: all-brltty-ktb
 	driver=$${driver##*/}; \
 	name=$${file##*/}; \
 	name=$${name%.*}; \
-	./brltty-ktb$X -d -D$(BLD_TOP)$(DRV_DIR) -T$(SRC_TOP)$(TBL_DIR) brl-$$driver-$$name; \
+	./brltty-ktb$X -a -D$(BLD_TOP)$(DRV_DIR) -T$(SRC_TOP)$(TBL_DIR) brl-$$driver-$$name; \
 	done
 
 ###############################################################################
