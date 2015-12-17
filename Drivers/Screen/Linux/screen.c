@@ -323,12 +323,12 @@ vtName (const char *name, unsigned char vt) {
   char *string;
 
   if (vt) {
-    size_t length = strlen(name);
-    char buffer[length+4];
-
+    int length = strlen(name);
     if (name[length-1] == '0') length -= 1;
-    strncpy(buffer, name, length);
-    sprintf(buffer+length,  "%u", vt);
+
+    char buffer[length+4];
+    snprintf(buffer, sizeof(buffer), "%*s%u", length, name, vt);
+
     string = strdup(buffer);
   } else {
     string = strdup(name);
