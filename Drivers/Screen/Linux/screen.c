@@ -327,7 +327,7 @@ vtName (const char *name, unsigned char vt) {
     if (name[length-1] == '0') length -= 1;
 
     char buffer[length+4];
-    snprintf(buffer, sizeof(buffer), "%*s%u", length, name, vt);
+    snprintf(buffer, sizeof(buffer), "%.*s%u", length, name, vt);
 
     string = strdup(buffer);
   } else {
