@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_STRFMT
 #define BRLTTY_INCLUDED_STRFMT
 
+#include "strfmth.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -39,18 +41,11 @@ extern "C" {
 
 #define STR_ADJUST(length) if ((strNext += (length)) > strEnd) strNext = strEnd
 
-#define STR_PRINTF(format, ...) { \
-  size_t strLength = snprintf(STR_NEXT, STR_LEFT, format, ## __VA_ARGS__); \
-  STR_ADJUST(strLength); \
-}
+#define STR_PRINTF(format, ...) \
+STR_ADJUST(snprintf(STR_NEXT, STR_LEFT, format, ## __VA_ARGS__))
 
-#define STR_VPRINTF(format, arguments) { \
-  size_t strLength = vsnprintf(STR_NEXT, STR_LEFT, format, arguments); \
-  STR_ADJUST(strLength); \
-}
-
-#define STR_DEFINE_FORMATTER(name, ...) \
-  size_t name (char *strFormatterBuffer, size_t strFormatterSize, __VA_ARGS__)
+#define STR_VPRINTF(format, arguments) \
+STR_ADJUST(vsnprintf(STR_NEXT, STR_LEFT, format, arguments))
 
 #define STR_BEGIN_FORMATTER(name, ...) \
 STR_DEFINE_FORMATTER(name, __VA_ARGS__) { \
