@@ -413,15 +413,11 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
 
     if (write || print) {
       int oldErrno = errno;
-      char record[0X1000];
 
+      char record[0X1000];
       STR_BEGIN(record, sizeof(record));
       if (prefix) STR_PRINTF("%s: ", prefix);
-
-      {
-        size_t sublength = formatLogData(STR_NEXT, STR_LEFT, data);
-        STR_ADJUST(sublength);
-      }
+      STR_FORMAT(formatLogData, data);
       STR_END;
 
       if (write) {
@@ -486,7 +482,6 @@ typedef struct {
 static size_t
 formatLogMessageData (char *buffer, size_t size, const void *data) {
   const LogMessageData *msg = data;
-
   return formatLogArguments(buffer, size, msg->format, msg->arguments);
 }
 
@@ -516,17 +511,14 @@ typedef struct {
   size_t length;
 } LogBytesData;
 
-static size_t
-formatLogBytesData (char *buffer, size_t size, const void *data) {
+static
+STR_BEGIN_FORMATTER(formatLogBytesData, const void *data)
   const LogBytesData *bytes = data;
   const unsigned char *byte = bytes->data;
   const unsigned char *end = byte + bytes->length;
-  size_t length;
-  STR_BEGIN(buffer, size);
 
   if (bytes->label) {
-    length = formatLogArguments(STR_NEXT, STR_LEFT, bytes->label, bytes->arguments);
-    STR_ADJUST(length);
+    STR_FORMAT(formatLogArguments, bytes->label, bytes->arguments);
     STR_PRINTF(": ");
   }
 
@@ -534,11 +526,7 @@ formatLogBytesData (char *buffer, size_t size, const void *data) {
     if (byte != bytes->data) STR_PRINTF(" ");
     STR_PRINTF("%2.2X", *byte++);
   }
-
-  length = STR_LENGTH;
-  STR_END
-  return length;
-}
+STR_END_FORMATTER
 
 void
 logBytes (int level, const char *label, const void *data, size_t length, ...) {
@@ -565,18 +553,13 @@ typedef struct {
   va_list *arguments;
 } LogSymbolData;
 
-static size_t
-formatLogSymbolData (char *buffer, size_t size, const void *data) {
+static
+STR_BEGIN_FORMATTER(formatLogSymbolData, const void *data)
   const LogSymbolData *symbol = data;
-  size_t length;
-
   ptrdiff_t offset = 0;
   const char *name = getAddressName(symbol->address, &offset);
 
-  STR_BEGIN(buffer, size);
-
-  length = formatLogArguments(STR_NEXT, STR_LEFT, symbol->format, symbol->arguments);
-  STR_ADJUST(length);
+  STR_FORMAT(formatLogArguments, symbol->format, symbol->arguments);
   STR_PRINTF(": ");
 
   if (name && *name) {
@@ -585,11 +568,7 @@ formatLogSymbolData (char *buffer, size_t size, const void *data) {
   } else {
     STR_PRINTF("%p", symbol->address);
   }
-
-  length = STR_LENGTH;
-  STR_END;
-  return length;
-}
+STR_END_FORMATTER
 
 void
 logSymbol (int level, void *address, const char *format, ...) {
