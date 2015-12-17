@@ -339,7 +339,6 @@ vtName (const char *name, unsigned char vt) {
 }
 
 static const char *consoleName = NULL;
-static int consoleDescriptor;
 
 static int
 setConsoleName (void) {
@@ -347,8 +346,17 @@ setConsoleName (void) {
   return setDeviceName(&consoleName, names, "console");
 }
 
+static void
+closeConsole (int *fd) {
+  if (*fd != -1) {
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER), "closing console: fd=%d", *fd);
+    if (close(*fd) == -1) logSystemError("close[console]");
+    *fd = -1;
+  }
+}
+
 static int
-openConsoleDevice (int *fd, int vt) {
+openConsole (int *fd, int vt) {
   int opened = 0;
   char *name = vtName(consoleName, vt);
 
@@ -359,6 +367,7 @@ openConsoleDevice (int *fd, int vt) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
                  "console opened: %s: fd=%d", name, console);
 
+      closeConsole(fd);
       *fd = console;
       opened = 1;
     }
@@ -369,80 +378,16 @@ openConsoleDevice (int *fd, int vt) {
   return opened;
 }
 
-static void
-closeCurrentConsole (void) {
-  if (consoleDescriptor != -1) {
-    if (close(consoleDescriptor) == -1) {
-      logSystemError("console close");
-    }
-
-    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-               "console closed: fd=%d", consoleDescriptor);
-    consoleDescriptor = -1;
-  }
-}
-
 static int
-openCurrentConsole (void) {
-  int console;
-  if (!openConsoleDevice(&console, virtualTerminal)) return 0;
+controlConsole (int *fd, int vt, int operation, void *argument) {
+  int result = ioctl(*fd, operation, argument);
 
-  closeCurrentConsole();
-  consoleDescriptor = console;
-  return 1;
-}
-
-static int
-controlCurrentConsole (int operation, void *argument) {
-  int result;
-
-  if (consoleDescriptor == -1) {
-    switch (operation) {
-      case GIO_UNIMAP: {
-        struct unimapdesc *sfm = argument;
-        memset(sfm, 0, sizeof(*sfm));
-        sfm->entries = NULL;
-        sfm->entry_ct = 0;
-        return 0;
-      }
-
-      case KDFONTOP: {
-        struct console_font_op *cfo = argument;
-
-        if (cfo->op == KD_FONT_OP_GET) {
-          cfo->charcount = 0;
-          cfo->width = 8;
-          cfo->height = 16;
-          return 0;
-        }
-
-        break;
-      }
-
-      case VT_GETHIFONTMASK: {
-        unsigned short *mask = argument;
-        *mask = 0;
-        return 0;
-      }
-
-      case KDGETMODE: {
-        int *mode = argument;
-        *mode = KD_TEXT;
-        return 0;
-      }
-
-      default:
-        break;
-    }
-
-    errno = EAGAIN;
-    return -1;
-  }
-
-  if ((result = ioctl(consoleDescriptor, operation, argument)) == -1) {
+  if (result == -1) {
     if (errno == EIO) {
-      if (openCurrentConsole()) {
-        result = ioctl(consoleDescriptor, operation, argument);
+      logSystemError("control[console]");
+
+      if (openConsole(fd, vt)) {
+        result = ioctl(*fd, operation, argument);
       }
     }
   }
@@ -450,30 +395,83 @@ controlCurrentConsole (int operation, void *argument) {
   return result;
 }
 
+static int consoleDescriptor;
+
+static void
+closeCurrentConsole (void) {
+  closeConsole(&consoleDescriptor);
+}
+
+static int
+openCurrentConsole (void) {
+  return openConsole(&consoleDescriptor, virtualTerminal);
+}
+
+static int
+controlCurrentConsole (int operation, void *argument) {
+  if (consoleDescriptor != -1) {
+    return controlConsole(&consoleDescriptor, virtualTerminal, operation, argument);
+  }
+
+  switch (operation) {
+    case GIO_UNIMAP: {
+      struct unimapdesc *sfm = argument;
+      memset(sfm, 0, sizeof(*sfm));
+      sfm->entries = NULL;
+      sfm->entry_ct = 0;
+      return 0;
+    }
+
+    case KDFONTOP: {
+      struct console_font_op *cfo = argument;
+
+      if (cfo->op == KD_FONT_OP_GET) {
+        cfo->charcount = 0;
+        cfo->width = 8;
+        cfo->height = 16;
+        return 0;
+      }
+
+      break;
+    }
+
+    case VT_GETHIFONTMASK: {
+      unsigned short *mask = argument;
+      *mask = 0;
+      return 0;
+    }
+
+    case KDGETMODE: {
+      int *mode = argument;
+      *mode = KD_TEXT;
+      return 0;
+    }
+
+    default:
+      break;
+  }
+
+  errno = EAGAIN;
+  return -1;
+}
+
 static const int NO_CONSOLE = 0;
 static const int MAIN_CONSOLE = 1;
 static int mainConsoleDescriptor;
 
-static int
-openMainConsole (void) {
-  if (mainConsoleDescriptor == -1) {
-    if (!openConsoleDevice(&mainConsoleDescriptor, MAIN_CONSOLE)) {
-      return 0;
-    }
-  }
-
-  return 1;
-}
-
 static void
 closeMainConsole (void) {
-  if (mainConsoleDescriptor != -1) {
-    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-               "closing main console: fd=%d", mainConsoleDescriptor);
+  closeConsole(&mainConsoleDescriptor);
+}
 
-    if (close(mainConsoleDescriptor) == -1) logSystemError("close main console");
-    mainConsoleDescriptor = -1;
-  }
+static int
+openMainConsole (void) {
+  return openConsole(&mainConsoleDescriptor, MAIN_CONSOLE);
+}
+
+static int
+controlMainConsole (int operation, void *argument) {
+  return controlConsole(&mainConsoleDescriptor, MAIN_CONSOLE, operation, argument);
 }
 
 static const char *screenName = NULL;
@@ -561,12 +559,10 @@ closeCurrentScreen (void) {
   }
 
   if (screenDescriptor != -1) {
-    if (close(screenDescriptor) == -1) {
-      logSystemError("screen close");
-    }
-
     logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-               "screen closed: fd=%d", screenDescriptor);
+               "closing screen: fd=%d", screenDescriptor);
+
+    if (close(screenDescriptor) == -1) logSystemError("close[screen]");
     screenDescriptor = -1;
   }
 }
@@ -1199,7 +1195,7 @@ poll_LinuxScreen (void) {
 
 static int
 getConsoleState (struct vt_stat *state) {
-  if (ioctl(mainConsoleDescriptor, VT_GETSTATE, state) != -1) return 1;
+  if (controlMainConsole(VT_GETSTATE, state) != -1) return 1;
   logSystemError("ioctl[VT_GETSTATE]");
   problemText = "can't get console state";
   return 0;
@@ -2027,7 +2023,7 @@ static int
 switchVirtualTerminal_LinuxScreen (int vt) {
   if (validateVt(vt)) {
     if (selectVirtualTerminal_LinuxScreen(0)) {
-      if (ioctl(mainConsoleDescriptor, VT_ACTIVATE, vt) != -1) {
+      if (controlMainConsole(VT_ACTIVATE, (void *)(intptr_t)vt) != -1) {
         logMessage(LOG_CATEGORY(SCREEN_DRIVER),
                    "switched to virtual tertminal %d", vt);
         return 1;
