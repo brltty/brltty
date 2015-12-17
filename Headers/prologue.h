@@ -83,8 +83,11 @@ extern "C" {
   STR_ADJUST(strLength); \
 }
 
-#define STR_BEGIN_FORMATTER(name, ...) size_t name ( \
-  char *strFormatterBuffer, size_t strFormatterSize, __VA_ARGS__) { \
+#define STR_DEFINE_FORMATTER(name, ...) \
+  size_t name (char *strFormatterBuffer, size_t strFormatterSize, __VA_ARGS__)
+
+#define STR_BEGIN_FORMATTER(name, ...) \
+STR_DEFINE_FORMATTER(name, __VA_ARGS__) { \
   size_t strFormatterResult; \
   STR_BEGIN(strFormatterBuffer, strFormatterSize);
 

@@ -190,12 +190,8 @@ findKeyNameEntry (KeyTable *table, const KeyValue *value) {
   return *kne;
 }
 
-size_t
-formatKeyName (KeyTable *table, char *buffer, size_t size, const KeyValue *value) {
+STR_BEGIN_FORMATTER(formatKeyName, KeyTable *table, const KeyValue *value)
   const KeyNameEntry *kne = findKeyNameEntry(table, value);
-
-  size_t length;
-  STR_BEGIN(buffer, size);
 
   if (kne) {
     STR_PRINTF("%s", kne->name);
@@ -211,15 +207,12 @@ formatKeyName (KeyTable *table, char *buffer, size_t size, const KeyValue *value
   }
 
   if (STR_LENGTH == 0) STR_PRINTF("?");
-  length = STR_LENGTH;
-  STR_END;
-  return length;
-}
+STR_END_FORMATTER
 
 static int
 putKeyName (ListGenerationData *lgd, const KeyValue *value) {
   char name[0X100];
-  formatKeyName(lgd->keyTable, name, sizeof(name), value);
+  formatKeyName(name, sizeof(name), lgd->keyTable, value);
   return putUtf8String(lgd, name);
 }
 
@@ -902,16 +895,15 @@ formatKeyCombination (
       delimiter = '+';
     }
 
-    STR_ADJUST(formatKeyName(table, STR_NEXT, STR_LEFT,
-                             &combination->modifierKeys[combination->modifierPositions[index]]));
+    STR_FORMAT(formatKeyName, table,
+               &combination->modifierKeys[combination->modifierPositions[index]]);
   }
 
   if (combination->flags & KCF_IMMEDIATE_KEY) {
     if (delimiter) STR_PRINTF("%c", delimiter);
     STR_PRINTF("!");
 
-    STR_ADJUST(formatKeyName(table, STR_NEXT, STR_LEFT,
-                             &combination->immediateKey));
+    STR_FORMAT(formatKeyName, table, &combination->immediateKey);
   }
 
   size = STR_LENGTH;
@@ -1015,7 +1007,7 @@ reportKeyProblem (const KeyTableAuditorParameters *kta, const KeyValue *key, con
 
   STR_FORMAT(formatKeyTableAuditPrefix, kta, problem);
   STR_PRINTF(": ");
-  STR_ADJUST(formatKeyName(kta->table, STR_NEXT, STR_LEFT, key));
+  STR_FORMAT(formatKeyName, kta->table, key);
 
   STR_END;
   reportKeyTableAudit(audit);

@@ -291,12 +291,7 @@ logKeyEvent (
     STR_BEGIN(buffer, sizeof(buffer));
     if (table->options.logLabel) STR_PRINTF("%s ", table->options.logLabel);
     STR_PRINTF("key %s: ", action);
-
-    {
-      size_t length = formatKeyName(table, STR_NEXT, STR_LEFT, keyValue);
-      STR_ADJUST(length);
-    }
-
+    STR_FORMAT(formatKeyName, table, keyValue);
     STR_PRINTF(" (Ctx:%u Grp:%u Num:%u)", context, keyValue->group, keyValue->number);
 
     if (command != EOF) {
