@@ -933,22 +933,16 @@ reportKeyTableAudit (const char *audit) {
   logMessage(LOG_WARNING, "%s", audit);
 }
 
-static size_t
-formatKeyTableAuditPrefix (
-  char *buffer, size_t length,
-  const KeyTableAuditorParameters *kta, const char *problem
-) {
-  size_t size;
-  STR_BEGIN(buffer, length);
-
+static
+STR_BEGIN_FORMATTER(
+  formatKeyTableAuditPrefix,
+  const KeyTableAuditorParameters *kta,
+  const char *problem
+)
   if (kta->path) STR_PRINTF("%s: ", kta->path);
   STR_PRINTF("%s", problem);
   if (kta->ctx) STR_PRINTF(": %" PRIws, kta->ctx->name);
-
-  size = STR_LENGTH;
-  STR_END;
-  return size;
-}
+STR_END_FORMATTER
 
 static KEY_TABLE_AUDITOR(reportKeyContextProblems) {
   int ok = 1;
@@ -973,7 +967,7 @@ static KEY_TABLE_AUDITOR(reportKeyContextProblems) {
       char audit[0X100];
       STR_BEGIN(audit, sizeof(audit));
 
-      STR_ADJUST(formatKeyTableAuditPrefix(STR_NEXT, STR_LEFT, kta, problem));
+      STR_FORMAT(formatKeyTableAuditPrefix, kta, problem);
 
       STR_END;
       reportKeyTableAudit(audit);
@@ -1002,9 +996,9 @@ static KEY_TABLE_AUDITOR(reportDuplicateKeyBindings) {
       char audit[0X100];
       STR_BEGIN(audit, sizeof(audit));
 
-      STR_ADJUST(formatKeyTableAuditPrefix(STR_NEXT, STR_LEFT, kta, "duplicate key binding"));
+      STR_FORMAT(formatKeyTableAuditPrefix, kta, "duplicate key binding");
       STR_PRINTF(": ");
-      STR_ADJUST(formatKeyCombination(STR_NEXT, STR_LEFT, kta->table, &current->keyCombination));
+      STR_FORMAT(formatKeyCombination, kta->table, &current->keyCombination);
 
       STR_END;
       reportKeyTableAudit(audit);
@@ -1019,7 +1013,7 @@ reportKeyProblem (const KeyTableAuditorParameters *kta, const KeyValue *key, con
   char audit[0X100];
   STR_BEGIN(audit, sizeof(audit));
 
-  STR_ADJUST(formatKeyTableAuditPrefix(STR_NEXT, STR_LEFT, kta, problem));
+  STR_FORMAT(formatKeyTableAuditPrefix, kta, problem);
   STR_PRINTF(": ");
   STR_ADJUST(formatKeyName(kta->table, STR_NEXT, STR_LEFT, key));
 
