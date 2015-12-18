@@ -184,6 +184,8 @@ isNumber (int *number, const wchar_t *characters, int length) {
   return 0;
 }
 
+static Queue *localDataVariableQueue = NULL;
+
 typedef struct {
   DataOperand name;
   DataOperand value;
@@ -199,9 +201,14 @@ deallocateDataVariable (void *item, void *data UNUSED) {
 }
 
 static Queue *
-newDataVariableQueue (Queue *previous) {
+newDataVariableQueue (void) {
   Queue *queue = newQueue(deallocateDataVariable, NULL);
-  if (queue) setQueueData(queue, previous);
+
+  if (queue) {
+    setQueueData(queue, localDataVariableQueue);
+    localDataVariableQueue = queue;
+  }
+
   return queue;
 }
 
@@ -296,11 +303,11 @@ setDataVariable (DataVariable *variable, const wchar_t *characters, int length) 
 
 static Queue *
 createGlobalDataVariableQueue (void *data) {
-  return newDataVariableQueue(NULL);
+  return newDataVariableQueue();
 }
 
 static Queue *
-getGlobalDataVariables (int create) {
+getGlobalDataVariableQueue (int create) {
   static Queue *variables = NULL;
 
   return getProgramQueue(&variables, "global-data-variables", create,
@@ -328,7 +335,7 @@ setGlobalDataVariable (const char *name, const char *value) {
   }
 
   {
-    Queue *variables = getGlobalDataVariables(1);
+    Queue *variables = getGlobalDataVariableQueue(1);
 
     if (variables) {
       const DataOperand nameArgument = {
@@ -346,6 +353,25 @@ setGlobalDataVariable (const char *name, const char *value) {
   }
 
   return 0;
+}
+
+static void
+removeDataVariableQueues (Queue *until) {
+  if (!until) until = getGlobalDataVariableQueue(0);
+
+  while (1) {
+    Queue *current = localDataVariableQueue;
+    if (current == until) break;
+    Queue *previous = getQueueData(current);
+
+    if (!previous) {
+      logMessage(LOG_WARNING, "can't remove global data variables");
+      break;
+    }
+
+    localDataVariableQueue = previous;
+    deallocateQueue(current);
+  }
 }
 
 int
@@ -1356,45 +1382,42 @@ processDataStream (
   FILE *stream, const char *name,
   DataOperandsProcessor *processLine, void *data
 ) {
-  int ok = 0;
-  Queue *variables;
-
   logMessage(LOG_DEBUG, "including data file: %s", name);
 
-  if ((variables = includer? includer->variables: getGlobalDataVariables(1))) {
-    DataFile file = {
-      .name = name,
-      .includer = includer,
-      .line = 0,
+  Queue *oldVariables = localDataVariableQueue;
+  int ok = 0;
 
-      .processLine = processLine,
-      .data = data
-    };
+  DataFile file = {
+    .name = name,
+    .includer = includer,
+    .line = 0,
 
-    {
-      struct stat info;
+    .processLine = processLine,
+    .data = data
+  };
 
-      if (fstat(fileno(stream), &info) != -1) {
-        file.identity.device = info.st_dev;
-        file.identity.file = info.st_ino;
-      }
+  {
+    struct stat info;
+
+    if (fstat(fileno(stream), &info) != -1) {
+      file.identity.device = info.st_dev;
+      file.identity.file = info.st_ino;
     }
+  }
 
+  if ((file.variables = newDataVariableQueue())) {
     if ((file.conditions = newQueue(deallocateDataCondition, NULL))) {
-      if ((file.variables = newDataVariableQueue(variables))) {
-        if (processLines(stream, processDataLine, &file)) ok = 1;
+      if (processLines(stream, processDataLine, &file)) ok = 1;
 
-        if (getInnermostDataCondition(&file)) {
-          reportDataError(&file, "outstanding condition at end of file");
-        }
-
-        deallocateQueue(file.variables);
+      if (getInnermostDataCondition(&file)) {
+        reportDataError(&file, "outstanding condition at end of file");
       }
 
       deallocateQueue(file.conditions);
     }
   }
 
+  removeDataVariableQueues(oldVariables);
   return ok;
 }
 
