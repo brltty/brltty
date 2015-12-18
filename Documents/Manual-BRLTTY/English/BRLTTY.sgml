@@ -4860,6 +4860,7 @@ Define alternate ways to interpret certain key events and/or combinations.
 A context contains definitions created by the
 <ref id="key-table-bind" name="bind">, 
 <ref id="key-table-hotkey" name="hotkey">,
+<ref id="key-table-ignore" name="ignore">,
 <ref id="key-table-map" name="map">,
 and
 <ref id="key-table-superimpose" name="superimpose">
@@ -5024,6 +5025,20 @@ Examples:
 <itemize>
   <item><tt/include common.kti/
   <item><tt>include /path/to/my/keys.kti</tt>
+</itemize>
+
+<sect3>The Ignore Directive<label id="key-table-ignore"><p>
+Ignore a specific key while within the current context.
+
+<tt/ignore/ <em/key/
+<descrip>
+  <tag><em/key/</tag>
+    The name of the key which is to be ignored.
+</descrip>
+
+Examples:
+<itemize>
+  <item><tt/ignore Key1/
 </itemize>
 
 <sect3>The Map Directive<label id="key-table-map"><p>

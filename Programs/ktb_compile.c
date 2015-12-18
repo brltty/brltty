@@ -957,6 +957,26 @@ static DATA_OPERANDS_PROCESSOR(processHideOperands) {
   return 1;
 }
 
+static int
+addHotkey (const HotkeyEntry *hotkey, KeyTableData *ktd) {
+  KeyContext *ctx = getCurrentKeyContext(ktd);
+
+  if (ctx) {
+    unsigned int newCount = ctx->hotkeys.count + 1;
+    HotkeyEntry *newTable = realloc(ctx->hotkeys.table, ARRAY_SIZE(newTable, newCount));
+
+    if (newTable) {
+      ctx->hotkeys.table = newTable;
+      ctx->hotkeys.table[ctx->hotkeys.count++] = *hotkey;
+      return 1;
+    } else {
+      logMallocError();
+    }
+  }
+
+  return 0;
+}
+
 static DATA_OPERANDS_PROCESSOR(processHotkeyOperands) {
   KeyTableData *ktd = data;
   HotkeyEntry hotkey;
@@ -967,23 +987,27 @@ static DATA_OPERANDS_PROCESSOR(processHotkeyOperands) {
   if (getKeyOperand(file, &hotkey.keyValue, ktd)) {
     if (getCommandOperand(file, &hotkey.pressCommand, ktd)) {
       if (getCommandOperand(file, &hotkey.releaseCommand, ktd)) {
-        KeyContext *ctx = getCurrentKeyContext(ktd);
-
-        if (ctx) {
-          unsigned int newCount = ctx->hotkeys.count + 1;
-          HotkeyEntry *newTable = realloc(ctx->hotkeys.table, ARRAY_SIZE(newTable, newCount));
-
-          if (newTable) {
-            ctx->hotkeys.table = newTable;
-            ctx->hotkeys.table[ctx->hotkeys.count++] = hotkey;
-            return 1;
-          } else {
-            logMallocError();
-          }
+        if (!addHotkey(&hotkey, ktd)) {
+          return 0;
         }
-
-        return 0;
       }
+    }
+  }
+
+  return 1;
+}
+
+static DATA_OPERANDS_PROCESSOR(processIgnoreOperands) {
+  KeyTableData *ktd = data;
+  HotkeyEntry hotkey;
+
+  memset(&hotkey, 0, sizeof(hotkey));
+  if (hideBindings(ktd)) hotkey.flags |= HKF_HIDDEN;
+  hotkey.pressCommand = hotkey.releaseCommand = ktd->nullBoundCommand;
+
+  if (getKeyOperand(file, &hotkey.keyValue, ktd)) {
+    if (!addHotkey(&hotkey, ktd)) {
+      return 0;
     }
   }
 
@@ -1154,6 +1178,7 @@ static DATA_OPERANDS_PROCESSOR(processKeyTableLine) {
     {.name=WS_C("hotkey"), .processor=processHotkeyOperands},
     {.name=WS_C("ifkey"), .processor=processIfKeyOperands, .unconditional=1},
     {.name=WS_C("ifnotkey"), .processor=processIfNotKeyOperands, .unconditional=1},
+    {.name=WS_C("ignore"), .processor=processIgnoreOperands},
     {.name=WS_C("include"), .processor=processIncludeWrapper},
     {.name=WS_C("map"), .processor=processMapOperands},
     {.name=WS_C("note"), .processor=processNoteOperands},
