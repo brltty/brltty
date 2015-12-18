@@ -121,9 +121,10 @@ bind Dot2+Dot3+!End CONTEXT+braille
 
 context chords Chorded Commands Mode
 
-assign chord
 assign noUnchorded
+assign chord
 include ../chords.kti
+include ../menu.kti
 
 
 ######################
@@ -148,11 +149,3 @@ bind Dot3+!Up KEY_ENTER
 bind Dot3+!Down PASSDOTS
 
 
-#################
-# Menu Bindings #
-#################
-
-context menu
-bind !Shift PREFMENU
-bind !Home PREFLOAD
-bind !End PREFSAVE
