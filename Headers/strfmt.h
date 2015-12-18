@@ -26,10 +26,10 @@ extern "C" {
 #endif /* __cplusplus */
 
 #define STR_BEGIN(buffer, size) { \
-  char *strNext = (buffer); \
-  char *strStart = strNext; \
-  char *strEnd = strStart + (size); \
-  *strNext = 0;
+char *strNext = (buffer); \
+char *strStart = strNext; \
+char *strEnd = strStart + (size); \
+*strNext = 0;
 
 #define STR_END }
 
@@ -39,7 +39,8 @@ extern "C" {
 
 #define STR_LEFT (size_t)(strEnd - strNext)
 
-#define STR_ADJUST(length) if ((strNext += (length)) > strEnd) strNext = strEnd
+#define STR_ADJUST(length) \
+do { if ((strNext += (length)) > strEnd) strNext = strEnd; } while (0)
 
 #define STR_BEGIN_FORMATTER(name, ...) \
 STR_DEFINE_FORMATTER(name, __VA_ARGS__) { \
