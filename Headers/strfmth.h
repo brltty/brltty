@@ -23,7 +23,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#define STR_DEFINE_FORMATTER(name, ...) size_t name ( \
+#define STR_DECLARE_FORMATTER(name, ...) size_t name ( \
   char *const strFormatterBuffer, \
   size_t const strFormatterSize, \
   __VA_ARGS__ \

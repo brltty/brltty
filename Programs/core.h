@@ -111,7 +111,7 @@ typedef struct {
 } TimeFormattingData;
 
 extern void getTimeFormattingData (TimeFormattingData *fmt);
-extern STR_DEFINE_FORMATTER(formatBrailleTime, const TimeFormattingData *fmt);
+extern STR_DECLARE_FORMATTER(formatBrailleTime, const TimeFormattingData *fmt);
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
 extern int isContracted;

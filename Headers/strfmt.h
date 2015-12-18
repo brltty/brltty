@@ -43,7 +43,7 @@ char *const strEnd = strStart + (size); \
 do { if ((strNext += (length)) > strEnd) strNext = strEnd; } while (0)
 
 #define STR_BEGIN_FORMATTER(name, ...) \
-STR_DEFINE_FORMATTER(name, __VA_ARGS__) { \
+STR_DECLARE_FORMATTER(name, __VA_ARGS__) { \
   size_t strFormatterResult; \
   STR_BEGIN(strFormatterBuffer, strFormatterSize);
 

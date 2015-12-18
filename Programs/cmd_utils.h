@@ -29,7 +29,7 @@ extern int isTextOffset (int *arg, int end, int relaxed);
 
 extern int getCharacterCoordinates (int arg, int *column, int *row, int end, int relaxed);
 
-extern STR_DEFINE_FORMATTER(formatCharacterDescription, int column, int row);
+extern STR_DECLARE_FORMATTER(formatCharacterDescription, int column, int row);
 
 #ifdef __cplusplus
 }

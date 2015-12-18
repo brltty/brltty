@@ -59,7 +59,7 @@ typedef struct {
 
   union {
     const char *const *array;
-    STR_DEFINE_FORMATTER((*format), unsigned int index);
+    STR_DECLARE_FORMATTER((*format), unsigned int index);
   } strings;
 } OptionEntry;
 
