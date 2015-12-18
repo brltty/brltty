@@ -952,19 +952,12 @@ processLines (FILE *file, LineHandler handleLine, void *data) {
   return !ferror(file);
 }
 
-size_t
-formatInputError (char *buffer, size_t size, const char *file, const int *line, const char *format, va_list argp) {
-  size_t length;
-
-  STR_BEGIN(buffer, size);
+STR_BEGIN_FORMATTER(formatInputError, const char *file, const int *line, const char *format, va_list arguments)
   if (file) STR_PRINTF("%s", file);
   if (line) STR_PRINTF("[%d]", *line);
   if (STR_LENGTH) STR_PRINTF(": ");
-  STR_VPRINTF(format, argp);
-  length = STR_LENGTH;
-  STR_END;
-  return length;
-}
+  STR_VPRINTF(format, arguments);
+STR_END_FORMATTER
 
 #ifdef __MINGW32__
 ssize_t

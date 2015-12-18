@@ -41,12 +41,6 @@ extern "C" {
 
 #define STR_ADJUST(length) if ((strNext += (length)) > strEnd) strNext = strEnd
 
-#define STR_PRINTF(format, ...) \
-STR_ADJUST(snprintf(STR_NEXT, STR_LEFT, format, ## __VA_ARGS__))
-
-#define STR_VPRINTF(format, arguments) \
-STR_ADJUST(vsnprintf(STR_NEXT, STR_LEFT, format, arguments))
-
 #define STR_BEGIN_FORMATTER(name, ...) \
 STR_DEFINE_FORMATTER(name, __VA_ARGS__) { \
   size_t strFormatterResult; \
@@ -58,7 +52,14 @@ STR_DEFINE_FORMATTER(name, __VA_ARGS__) { \
   return strFormatterResult; \
 }
 
-#define STR_FORMAT(formatter, ...) STR_ADJUST(formatter(STR_NEXT, STR_LEFT, __VA_ARGS__))
+#define STR_FORMAT(formatter, ...) \
+STR_ADJUST(formatter(STR_NEXT, STR_LEFT, __VA_ARGS__))
+
+#define STR_PRINTF(...) \
+STR_FORMAT(snprintf, __VA_ARGS__)
+
+#define STR_VPRINTF(format, arguments) \
+STR_FORMAT(vsnprintf, format, arguments)
 
 #ifdef __cplusplus
 }

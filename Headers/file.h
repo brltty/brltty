@@ -21,6 +21,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <strfmth.h>
 
 #include "get_sockets.h"
 
@@ -87,7 +88,7 @@ typedef int LineHandler (char *line, void *data);
 extern int processLines (FILE *file, LineHandler handleLine, void *data);
 extern int readLine (FILE *file, char **buffer, size_t *size);
 
-extern size_t formatInputError (char *buffer, size_t size, const char *file, const int *line, const char *format, va_list argp);
+extern STR_DEFINE_FORMATTER(formatInputError, const char *file, const int *line, const char *format, va_list arguments);
 
 extern ssize_t readFileDescriptor (FileDescriptor fileDescriptor, void *buffer, size_t size);
 extern ssize_t writeFileDescriptor (FileDescriptor fileDescriptor, const void *buffer, size_t size);
