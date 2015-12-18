@@ -257,15 +257,9 @@ currentVirtualTerminal_MenuScreen (void) {
   return userVirtualTerminal(2 + getMenuNumber(screenMenu));
 }
 
-static size_t
-formatTitle_MenuScreen (char *buffer, size_t size) {
-  size_t length;
-
-  STR_BEGIN(buffer, size);
-  STR_PRINTF("%s", gettext("Preferences Menu"));
-  length = STR_LENGTH;
-  STR_END;
-  return length;
+static const char *
+getTitle_MenuScreen (void) {
+  return gettext("Preferences Menu");
 }
 
 static void
@@ -484,7 +478,7 @@ initializeMenuScreen (MenuScreen *menu) {
   initializeBaseScreen(&menu->base);
 
   menu->base.currentVirtualTerminal = currentVirtualTerminal_MenuScreen;
-  menu->base.formatTitle = formatTitle_MenuScreen;
+  menu->base.getTitle = getTitle_MenuScreen;
 
   menu->base.refresh = refresh_MenuScreen;
   menu->base.describe = describe_MenuScreen;

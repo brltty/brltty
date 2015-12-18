@@ -106,10 +106,9 @@ currentVirtualTerminal_BaseScreen (void) {
   return 0;
 }
 
-static size_t
-formatTitle_BaseScreen (char *buffer, size_t size) {
-  *buffer = 0;
-  return 0;
+static const char *
+getTitle_BaseScreen (void) {
+  return NULL;
 }
 
 static int
@@ -177,7 +176,7 @@ getCommandContext_BaseScreen (void) {
 
 void
 initializeBaseScreen (BaseScreen *base) {
-  base->formatTitle = formatTitle_BaseScreen;
+  base->getTitle = getTitle_BaseScreen;
 
   base->poll = poll_BaseScreen;
   base->refresh = refresh_BaseScreen;

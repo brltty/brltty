@@ -152,10 +152,8 @@ endSpecialScreens (void) {
 
 static void
 announceCurrentScreen (void) {
-  char buffer[0X80];
-  size_t length = currentScreen->formatTitle(buffer, sizeof(buffer));
-
-  if (length) message(NULL, buffer, 0);
+  const char *title = currentScreen->getTitle();
+  if (title) message(NULL, title, 0);
 }
 
 static void
