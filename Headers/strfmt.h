@@ -27,8 +27,8 @@ extern "C" {
 
 #define STR_BEGIN(buffer, size) { \
 char *strNext = (buffer); \
-char *strStart = strNext; \
-char *strEnd = strStart + (size); \
+char *const strStart = strNext; \
+char *const strEnd = strStart + (size); \
 *strNext = 0;
 
 #define STR_END }
