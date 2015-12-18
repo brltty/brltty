@@ -26,15 +26,8 @@
 #include "ktb_internal.h"
 #include "ktb_inspect.h"
 
-static size_t
-formatKeyCombination (
-  char *buffer, size_t length,
-  KeyTable *table,
-  const KeyCombination *combination
-) {
-  size_t size;
-
-  STR_BEGIN(buffer, length);
+static
+STR_BEGIN_FORMATTER(formatKeyCombination, KeyTable *table, const KeyCombination *combination)
   char delimiter = 0;
 
   for (unsigned char index=0; index<combination->modifierCount; index+=1) {
@@ -54,11 +47,7 @@ formatKeyCombination (
 
     STR_FORMAT(formatKeyName, table, &combination->immediateKey);
   }
-
-  size = STR_LENGTH;
-  STR_END;
-  return size;
-}
+STR_END_FORMATTER
 
 typedef struct {
   KeyTable *table;

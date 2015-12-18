@@ -469,7 +469,6 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
 static size_t
 formatLogArguments (char *buffer, size_t size, const char *format, va_list *arguments) {
   int length = vsnprintf(buffer, size, format, *arguments);
-
   if (length < 0) return 0;
   if (length < size) return length;
   return size;

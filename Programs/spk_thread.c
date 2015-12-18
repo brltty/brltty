@@ -204,12 +204,10 @@ typedef struct {
   unsigned int value;
 } LogSpeechActionData;
 
-static size_t
-formatLogSpeechActionData (char *buffer, size_t size, const void *data) {
+static
+STR_BEGIN_FORMATTER(formatLogSpeechActionData, const void *data)
   const LogSpeechActionData *lsa = data;
-  size_t length;
 
-  STR_BEGIN(buffer, size);
   STR_PRINTF("%s speech %s: ", lsa->action, lsa->type);
 
   if (lsa->name) {
@@ -217,11 +215,7 @@ formatLogSpeechActionData (char *buffer, size_t size, const void *data) {
   } else {
     STR_PRINTF("%u", lsa->value);
   }
-
-  length = STR_LENGTH;
-  STR_END;
-  return length;
-}
+STR_END_FORMATTER
 
 static void
 logSpeechAction (const LogSpeechActionData *lsa) {

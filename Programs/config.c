@@ -93,11 +93,8 @@ static const char optionOperand_autodetect[] = "auto";
 #define SERVICE_NAME "BrlAPI"
 #define SERVICE_DESCRIPTION "Braille API (BrlAPI)"
 
-static size_t
-formatLogLevelString (unsigned int index, char *buffer, size_t size) {
-  size_t length;
-  STR_BEGIN(buffer, size);
-
+static
+STR_BEGIN_FORMATTER(formatLogLevelString, unsigned int index)
   switch (index) {
     case 0:
       STR_PRINTF("0-%u", logLevelCount-1);
@@ -137,11 +134,7 @@ formatLogLevelString (unsigned int index, char *buffer, size_t size) {
     default:
       break;
   }
-
-  length = STR_LENGTH;  
-  STR_END;
-  return length;
-}
+STR_END_FORMATTER
 
 static int opt_installService;
 static const char *const optionStrings_InstallService[] = {

@@ -206,7 +206,7 @@ printHelp (
           const char *string;
 
           if (formatStrings) {
-            size_t length = option->strings.format(index, from, (to - from));
+            size_t length = option->strings.format(from, (to - from), index);
 
             if (length) {
               string = from;

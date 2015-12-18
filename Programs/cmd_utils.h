@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_CMD_UTILS
 #define BRLTTY_INCLUDED_CMD_UTILS
 
+#include "strfmth.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -27,7 +29,7 @@ extern int isTextOffset (int *arg, int end, int relaxed);
 
 extern int getCharacterCoordinates (int arg, int *column, int *row, int end, int relaxed);
 
-extern size_t formatCharacterDescription (char *buffer, size_t size, int column, int row);
+extern STR_DEFINE_FORMATTER(formatCharacterDescription, int column, int row);
 
 #ifdef __cplusplus
 }

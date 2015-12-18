@@ -32,10 +32,8 @@
 #include "core.h"
 
 #ifdef ENABLE_SPEECH_SUPPORT
-static size_t
-formatSpeechDate (char *buffer, size_t size, const TimeFormattingData *fmt) {
-  size_t length;
-
+static
+STR_BEGIN_FORMATTER(formatSpeechDate, const TimeFormattingData *fmt)
   const char *yearFormat = "%u";
   const char *monthFormat = "%s";
   const char *dayFormat = "%u";
@@ -74,8 +72,6 @@ formatSpeechDate (char *buffer, size_t size, const TimeFormattingData *fmt) {
   }
 #endif /* MON_1 */
 
-  STR_BEGIN(buffer, size);
-
   switch (prefs.dateFormat) {
     default:
     case dfYearMonthDay:
@@ -102,18 +98,10 @@ formatSpeechDate (char *buffer, size_t size, const TimeFormattingData *fmt) {
       STR_PRINTF(yearFormat, year);
       break;
   }
+STR_END_FORMATTER
 
-  length = STR_LENGTH;
-  STR_END;
-
-  return length;
-}
-
-static size_t
-formatSpeechTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
-  size_t length;
-
-  STR_BEGIN(buffer, size);
+static
+STR_BEGIN_FORMATTER(formatSpeechTime, const TimeFormattingData *fmt)
   STR_PRINTF("%u", fmt->components.hour);
   if (fmt->components.minute < 10) STR_PRINTF(" 0");
   STR_PRINTF(" %u", fmt->components.minute);
@@ -134,12 +122,7 @@ formatSpeechTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
                  ngettext("second", "seconds", fmt->components.second));
     }
   }
-
-  length = STR_LENGTH;
-  STR_END;
-
-  return length;
-}
+STR_END_FORMATTER
 
 static void
 speakTime (const TimeFormattingData *fmt) {

@@ -79,13 +79,9 @@ getCharacterCoordinates (int arg, int *column, int *row, int end, int relaxed) {
   return 1;
 }
 
-size_t
-formatCharacterDescription (char *buffer, size_t size, int column, int row) {
-  size_t length;
+STR_BEGIN_FORMATTER(formatCharacterDescription, int column, int row)
   ScreenCharacter character;
-
   readScreen(column, row, 1, 1, &character);
-  STR_BEGIN(buffer, size);
 
   {
     uint32_t text = character.text;
@@ -128,8 +124,4 @@ formatCharacterDescription (char *buffer, size_t size, int column, int row) {
       STR_PRINTF(" [%s]", name);
     }
   }
-
-  length = STR_LENGTH;
-  STR_END;
-  return length;
-}
+STR_END_FORMATTER

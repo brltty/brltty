@@ -19,6 +19,7 @@
 #ifndef BRLTTY_INCLUDED_OPTIONS
 #define BRLTTY_INCLUDED_OPTIONS
 
+#include "strfmth.h"
 #include "program.h"
 #include "file.h"
 
@@ -58,7 +59,7 @@ typedef struct {
 
   union {
     const char *const *array;
-    size_t (*format) (unsigned int index, char *buffer, size_t size);
+    STR_DEFINE_FORMATTER((*format), unsigned int index);
   } strings;
 } OptionEntry;
 

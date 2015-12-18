@@ -424,11 +424,8 @@ getMeridianString (uint8_t *hour) {
   return string;
 }
 
-size_t
-formatBrailleTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
-  size_t length;
+STR_BEGIN_FORMATTER(formatBrailleTime, const TimeFormattingData *fmt)
   char time[0X40];
-  STR_BEGIN(buffer, size);
 
   {
     const char *hourFormat = "%02" PRIu8;
@@ -546,11 +543,7 @@ formatBrailleTime (char *buffer, size_t size, const TimeFormattingData *fmt) {
       }
     }
   }
-
-  length = STR_LENGTH;
-  STR_END;
-  return length;
-}
+STR_END_FORMATTER
 
 void
 getTimeFormattingData (TimeFormattingData *fmt) {

@@ -21,6 +21,7 @@
 
 #include "prologue.h"
 
+#include "strfmth.h"
 #include "program.h"
 #include "timing.h"
 #include "cmd.h"
@@ -110,7 +111,7 @@ typedef struct {
 } TimeFormattingData;
 
 extern void getTimeFormattingData (TimeFormattingData *fmt);
-extern size_t formatBrailleTime (char *buffer, size_t size, const TimeFormattingData *fmt);
+extern STR_DEFINE_FORMATTER(formatBrailleTime, const TimeFormattingData *fmt);
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
 extern int isContracted;
