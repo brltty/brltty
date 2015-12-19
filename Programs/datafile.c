@@ -25,6 +25,7 @@
 #include <sys/stat.h>
 
 #include "log.h"
+#include "strfmt.h"
 #include "file.h"
 #include "queue.h"
 #include "datafile.h"
@@ -413,6 +414,34 @@ setTableDataVariables (const char *tableExtension, const char *subtableExtension
   };
 
   return setBaseDataVariables(initializers);
+}
+
+static int
+listDataVariable (void *item, void *data) {
+  const DataVariable *variable = item;
+
+  char line[0X100];
+  STR_BEGIN(line, sizeof(line));
+
+  STR_PRINTF("data variable: ");
+  STR_PRINTF("%.*" PRIws, (int)variable->name.length, variable->name.characters);
+  STR_PRINTF(" = ");
+  STR_PRINTF("%.*" PRIws, (int)variable->value.length, variable->value.characters);
+
+  STR_END;
+  logMessage(LOG_INFO, "%s", line);
+
+  return 0;
+}
+
+void
+listDataVariables (void) {
+  Queue *variables = localDataVariables;
+
+  while (variables) {
+    processQueue(variables, listDataVariable, NULL);
+    variables = getQueueData(variables);
+  }
 }
 
 int
