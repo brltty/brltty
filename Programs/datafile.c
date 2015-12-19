@@ -268,7 +268,7 @@ getDataVariable (Queue *variables, const DataOperand *name, int create) {
 
 static const DataVariable *
 getReadableDataVariable (DataFile *file, const DataOperand *name) {
-  Queue *variables = file->variables;
+  Queue *variables = localDataVariables;
 
   do {
     DataVariable *variable = getDataVariable(variables, name, 0);
@@ -280,7 +280,7 @@ getReadableDataVariable (DataFile *file, const DataOperand *name) {
 
 static DataVariable *
 getWritableDataVariable (DataFile *file, const DataOperand *name) {
-  return getDataVariable(file->variables, name, 1);
+  return getDataVariable(localDataVariables, name, 1);
 }
 
 static int
