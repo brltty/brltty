@@ -115,29 +115,41 @@ bind Space+Dot7+Dot1+Dot2+Dot5+Dot6 PASSDOTS+dot1+dot2+dot5+dot6
 bind Space+Dot7+Dot2+Dot3+Dot4+Dot5+Dot6 PASSDOTS+dot2+dot3+dot4+dot5+dot6
 bind Space+Dot7+Dot4+Dot5 PASSDOTS+dot4+dot5
 
+beginVariables
 assign keys
 assign flags
 include letters.kti
+endVariables
 
+beginVariables
 assign keys Space+Dot7+
 assign flags +shift
 include letters.kti
+endVariables
 
+beginVariables
 assign keys F1+Dot7+
 assign flags +shift+meta
 include letters.kti
+endVariables
 
+beginVariables
 assign keys Dot7+
 assign flags +meta
 include letters.kti
+endVariables
 
+beginVariables
 assign keys Dot8+
 assign flags +control
 include letters.kti
+endVariables
 
+beginVariables
 assign keys F1+
 assign flags +gui
 include letters.kti
+endVariables
 
 hide off
 # F2 conflicts with Shift-Tab: Space+Dot1+Dot2
