@@ -174,9 +174,9 @@ extern DATA_OPERANDS_PROCESSOR(processAssignOperands);
 #define DATA_VARIABLE_DIRECTIVES \
   {.name=WS_C("ifvar"), .processor=processIfVarOperands, .unconditional=1}, \
   {.name=WS_C("ifnotvar"), .processor=processIfNotVarOperands, .unconditional=1}, \
-  {.name=WS_C("beginvariables"), .processor=processBeginVariablesOperands, .unconditional=1}, \
-  {.name=WS_C("endvariables"), .processor=processEndVariablesOperands, .unconditional=1}, \
-  {.name=WS_C("listvariables"), .processor=processListVariablesOperands, .unconditional=1}, \
+  {.name=WS_C("beginvariables"), .processor=processBeginVariablesOperands}, \
+  {.name=WS_C("endvariables"), .processor=processEndVariablesOperands}, \
+  {.name=WS_C("listvariables"), .processor=processListVariablesOperands}, \
   {.name=WS_C("assigndefault"), .processor=processAssignDefaultOperands}, \
   {.name=WS_C("assign"), .processor=processAssignOperands}
 
