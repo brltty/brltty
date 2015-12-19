@@ -167,15 +167,17 @@ extern DATA_OPERANDS_PROCESSOR(processIfVarOperands);
 extern DATA_OPERANDS_PROCESSOR(processIfNotVarOperands);
 extern DATA_OPERANDS_PROCESSOR(processBeginVariablesOperands);
 extern DATA_OPERANDS_PROCESSOR(processEndVariablesOperands);
+extern DATA_OPERANDS_PROCESSOR(processListVariablesOperands);
 extern DATA_OPERANDS_PROCESSOR(processAssignDefaultOperands);
 extern DATA_OPERANDS_PROCESSOR(processAssignOperands);
 
 #define DATA_VARIABLE_DIRECTIVES \
   {.name=WS_C("ifvar"), .processor=processIfVarOperands, .unconditional=1}, \
   {.name=WS_C("ifnotvar"), .processor=processIfNotVarOperands, .unconditional=1}, \
-  {.name=WS_C("beginVariables"), .processor=processBeginVariablesOperands, .unconditional=1}, \
-  {.name=WS_C("endVariables"), .processor=processEndVariablesOperands, .unconditional=1}, \
-  {.name=WS_C("assignDefault"), .processor=processAssignDefaultOperands}, \
+  {.name=WS_C("beginvariables"), .processor=processBeginVariablesOperands, .unconditional=1}, \
+  {.name=WS_C("endvariables"), .processor=processEndVariablesOperands, .unconditional=1}, \
+  {.name=WS_C("listvariables"), .processor=processListVariablesOperands, .unconditional=1}, \
+  {.name=WS_C("assigndefault"), .processor=processAssignDefaultOperands}, \
   {.name=WS_C("assign"), .processor=processAssignOperands}
 
 #define BRL_DOT_COUNT 8

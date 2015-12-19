@@ -197,7 +197,7 @@ typedef struct {
   } value;
 } DataVariable;
 
-static Queue *localDataVariables = NULL;
+static Queue *currentDataVariables = NULL;
 
 static void
 deallocateDataVariable (void *item, void *data UNUSED) {
@@ -213,8 +213,8 @@ newDataVariables (void) {
   Queue *newVariables = newQueue(deallocateDataVariable, NULL);
 
   if (newVariables) {
-    setQueueData(newVariables, localDataVariables);
-    localDataVariables = newVariables;
+    setQueueData(newVariables, currentDataVariables);
+    currentDataVariables = newVariables;
   }
 
   return newVariables;
@@ -275,7 +275,7 @@ getDataVariable (Queue *variables, const DataOperand *name, int create) {
 
 static const DataVariable *
 getReadableDataVariable (DataFile *file, const DataOperand *name) {
-  Queue *variables = localDataVariables;
+  Queue *variables = currentDataVariables;
 
   do {
     DataVariable *variable = getDataVariable(variables, name, 0);
@@ -287,7 +287,7 @@ getReadableDataVariable (DataFile *file, const DataOperand *name) {
 
 static DataVariable *
 getWritableDataVariable (DataFile *file, const DataOperand *name) {
-  return getDataVariable(localDataVariables, name, 1);
+  return getDataVariable(currentDataVariables, name, 1);
 }
 
 static int
@@ -369,7 +369,7 @@ removeDataVariables (Queue *until) {
   if (!until) until = getGlobalDataVariables(0);
 
   while (1) {
-    Queue *current = localDataVariables;
+    Queue *current = currentDataVariables;
     if (current == until) break;
     Queue *previous = getQueueData(current);
 
@@ -378,7 +378,7 @@ removeDataVariables (Queue *until) {
       break;
     }
 
-    localDataVariables = previous;
+    currentDataVariables = previous;
     deallocateQueue(current);
   }
 }
@@ -423,6 +423,11 @@ setTableDataVariables (const char *tableExtension, const char *subtableExtension
   return setBaseDataVariables(initializers);
 }
 
+static void
+listDataVariableLine (const char *line) {
+  logMessage(LOG_NOTICE, "%s", line);
+}
+
 static int
 listDataVariable (void *item, void *data) {
   const DataVariable *variable = item;
@@ -436,19 +441,25 @@ listDataVariable (void *item, void *data) {
   STR_PRINTF("%.*" PRIws, variable->value.length, variable->value.characters);
 
   STR_END;
-  logMessage(LOG_INFO, "%s", line);
+  listDataVariableLine(line);
 
   return 0;
 }
 
 void
 listDataVariables (void) {
-  Queue *variables = localDataVariables;
+  listDataVariableLine("begin data variable listing");
 
-  while (variables) {
-    processQueue(variables, listDataVariable, NULL);
-    variables = getQueueData(variables);
+  Queue *first = currentDataVariables;
+  Queue *current = first;
+
+  while (current) {
+    if (current != first) listDataVariableLine("next data variable level");
+    processQueue(current, listDataVariable, NULL);
+    current = getQueueData(current);
   }
+
+  listDataVariableLine("end data variable listing");
 }
 
 int
@@ -1227,14 +1238,19 @@ DATA_OPERANDS_PROCESSOR(processBeginVariablesOperands) {
 }
 
 DATA_OPERANDS_PROCESSOR(processEndVariablesOperands) {
-  if (localDataVariables == file->variables) {
+  if (currentDataVariables == file->variables) {
     reportDataError(file, "no nested variables");
   } else {
-    Queue *variables = localDataVariables;
-    localDataVariables = getQueueData(variables);
+    Queue *variables = currentDataVariables;
+    currentDataVariables = getQueueData(variables);
     deallocateQueue(variables);
   }
 
+  return 1;
+}
+
+DATA_OPERANDS_PROCESSOR(processListVariablesOperands) {
+  listDataVariables();
   return 1;
 }
 
@@ -1471,7 +1487,7 @@ processDataStream (
 ) {
   logMessage(LOG_DEBUG, "including data file: %s", name);
 
-  Queue *oldVariables = localDataVariables;
+  Queue *oldVariables = currentDataVariables;
   int ok = 0;
 
   DataFile file = {
