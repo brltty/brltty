@@ -1214,6 +1214,22 @@ DATA_OPERANDS_PROCESSOR(processIfNotVarOperands) {
   return processVariableTestOperands(file, 0, data);
 }
 
+DATA_OPERANDS_PROCESSOR(processBeginVariablesOperands) {
+  return !!newDataVariables();
+}
+
+DATA_OPERANDS_PROCESSOR(processEndVariablesOperands) {
+  if (localDataVariables == file->variables) {
+    reportDataError(file, "no nested variables");
+  } else {
+    Queue *variables = localDataVariables;
+    localDataVariables = getQueueData(variables);
+    deallocateQueue(variables);
+  }
+
+  return 1;
+}
+
 static int
 processVariableAssignmentOperands (DataFile *file, int ifNotSet, void *data) {
   DataOperand name;
