@@ -186,8 +186,15 @@ isNumber (int *number, const wchar_t *characters, int length) {
 }
 
 typedef struct {
-  DataOperand name;
-  DataOperand value;
+  struct {
+    wchar_t *characters;
+    int length;
+  } name;
+
+  struct {
+    wchar_t *characters;
+    int length;
+  } value;
 } DataVariable;
 
 static Queue *localDataVariables = NULL;
@@ -196,8 +203,8 @@ static void
 deallocateDataVariable (void *item, void *data UNUSED) {
   DataVariable *variable = item;
 
-  if (variable->name.characters) free((void *)variable->name.characters);
-  if (variable->value.characters) free((void *)variable->value.characters);
+  if (variable->name.characters) free(variable->name.characters);
+  if (variable->value.characters) free(variable->value.characters);
   free(variable);
 }
 
@@ -358,7 +365,7 @@ setGlobalDataVariable (const char *name, const char *value) {
 }
 
 static void
-removeLocalDataVariables (Queue *until) {
+removeDataVariables (Queue *until) {
   if (!until) until = getGlobalDataVariables(0);
 
   while (1) {
@@ -378,10 +385,10 @@ removeLocalDataVariables (Queue *until) {
 
 static Queue *
 getBaseDataVariables (void) {
-  Queue *globalVariables = getGlobalDataVariables(1);
-  if (!globalVariables) return NULL;
+  Queue *variables = getGlobalDataVariables(1);
+  if (!variables) return NULL;
 
-  removeLocalDataVariables(globalVariables);
+  removeDataVariables(variables);
   return newDataVariables();
 }
 
@@ -424,9 +431,9 @@ listDataVariable (void *item, void *data) {
   STR_BEGIN(line, sizeof(line));
 
   STR_PRINTF("data variable: ");
-  STR_PRINTF("%.*" PRIws, (int)variable->name.length, variable->name.characters);
+  STR_PRINTF("%.*" PRIws, variable->name.length, variable->name.characters);
   STR_PRINTF(" = ");
-  STR_PRINTF("%.*" PRIws, (int)variable->value.length, variable->value.characters);
+  STR_PRINTF("%.*" PRIws, variable->value.length, variable->value.characters);
 
   STR_END;
   logMessage(LOG_INFO, "%s", line);
@@ -636,7 +643,8 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
               index += count;
 
               if (variable) {
-                substitution = variable->value;
+                substitution.characters = variable->value.characters;
+                substitution.length = variable->value.length;
                 ok = 1;
               }
             } else {
@@ -1388,7 +1396,7 @@ openDataFile (const char *path, const char *mode, int optional) {
 }
 
 int
-includeDataFile (DataFile *file, const wchar_t *name, unsigned int length) {
+includeDataFile (DataFile *file, const wchar_t *name, int length) {
   int ok = 0;
 
   const char *prefixAddress = file->name;
@@ -1496,7 +1504,7 @@ processDataStream (
     }
   }
 
-  removeLocalDataVariables(oldVariables);
+  removeDataVariables(oldVariables);
   return ok;
 }
 

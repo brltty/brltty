@@ -65,7 +65,7 @@ extern int ungetDataCharacters (DataFile *file, unsigned int count);
 
 typedef struct {
   const wchar_t *characters;
-  unsigned int length;
+  int length;
 } DataOperand;
 
 extern int getDataOperand (DataFile *file, DataOperand *operand, const char *description);
@@ -151,7 +151,7 @@ extern int processConditionOperands (
 );
 
 extern DATA_OPERANDS_PROCESSOR(processIncludeOperands);
-extern int includeDataFile (DataFile *file, const wchar_t *name, unsigned int length);
+extern int includeDataFile (DataFile *file, const wchar_t *name, int length);
 
 #define DATA_NESTING_DIRECTIVES \
   {.name=WS_C("include"), .processor=processIncludeOperands}
