@@ -25,8 +25,14 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef struct {
+  const char *name;
+  const char *value;
+} DataVariableInitializer;
+
 extern int setGlobalDataVariable (const char *name, const char *value);
-extern int setGlobalTableVariables (const char *tableExtension, const char *subtableExtension);
+extern int setBaseDataVariables (const DataVariableInitializer *initializers);
+extern int setTableDataVariables (const char *tableExtension, const char *subtableExtension);
 
 extern FILE *openDataFile (const char *path, const char *mode, int optional);
 

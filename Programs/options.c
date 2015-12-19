@@ -893,49 +893,51 @@ processConfigurationFile (
   const char *path,
   int optional
 ) {
-  FILE *file = openDataFile(path, "r", optional);
+  if (setBaseDataVariables(NULL)) {
+    FILE *file = openDataFile(path, "r", optional);
 
-  if (file) {
-    char *settings[info->optionCount];
-    ConfigurationDirective *directives[info->optionCount];
+    if (file) {
+      char *settings[info->optionCount];
+      ConfigurationDirective *directives[info->optionCount];
 
-    ConfigurationFileProcessingData conf = {
-      .info = info,
-      .settings = settings,
+      ConfigurationFileProcessingData conf = {
+        .info = info,
+        .settings = settings,
 
-      .directive = {
-        .table = directives,
-        .count = 0
-      }
-    };
-
-    if (addConfigurationDirectives(&conf)) {
-      unsigned int index;
-      int processed;
-
-      for (index=0; index<info->optionCount; index+=1) conf.settings[index] = NULL;
-      processed = processDataStream(NULL, file, path, processConfigurationLine, &conf);
-
-      for (index=0; index<info->optionCount; index+=1) {
-        char *setting = conf.settings[index];
-
-        if (setting) {
-          ensureSetting(info, &info->optionTable[index], setting);
-          free(setting);
+        .directive = {
+          .table = directives,
+          .count = 0
         }
+      };
+
+      if (addConfigurationDirectives(&conf)) {
+        unsigned int index;
+        int processed;
+
+        for (index=0; index<info->optionCount; index+=1) conf.settings[index] = NULL;
+        processed = processDataStream(NULL, file, path, processConfigurationLine, &conf);
+
+        for (index=0; index<info->optionCount; index+=1) {
+          char *setting = conf.settings[index];
+
+          if (setting) {
+            ensureSetting(info, &info->optionTable[index], setting);
+            free(setting);
+          }
+        }
+
+        if (!processed) {
+          logMessage(LOG_ERR, gettext("file '%s' processing error."), path);
+          info->warning = 1;
+        }
+
+        freeConfigurationDirectives(&conf);
       }
 
-      if (!processed) {
-        logMessage(LOG_ERR, gettext("file '%s' processing error."), path);
-        info->warning = 1;
-      }
-
-      freeConfigurationDirectives(&conf);
+      fclose(file);
+    } else if (!optional || (errno != ENOENT)) {
+      info->warning = 1;
     }
-
-    fclose(file);
-  } else if (!optional || (errno != ENOENT)) {
-    info->warning = 1;
   }
 }
 

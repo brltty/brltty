@@ -184,12 +184,12 @@ isNumber (int *number, const wchar_t *characters, int length) {
   return 0;
 }
 
-static Queue *localDataVariableQueue = NULL;
-
 typedef struct {
   DataOperand name;
   DataOperand value;
 } DataVariable;
+
+static Queue *localDataVariables = NULL;
 
 static void
 deallocateDataVariable (void *item, void *data UNUSED) {
@@ -201,15 +201,15 @@ deallocateDataVariable (void *item, void *data UNUSED) {
 }
 
 static Queue *
-newDataVariableQueue (void) {
-  Queue *queue = newQueue(deallocateDataVariable, NULL);
+newDataVariables (void) {
+  Queue *newVariables = newQueue(deallocateDataVariable, NULL);
 
-  if (queue) {
-    setQueueData(queue, localDataVariableQueue);
-    localDataVariableQueue = queue;
+  if (newVariables) {
+    setQueueData(newVariables, localDataVariables);
+    localDataVariables = newVariables;
   }
 
-  return queue;
+  return newVariables;
 }
 
 static int
@@ -302,20 +302,20 @@ setDataVariable (DataVariable *variable, const wchar_t *characters, int length) 
 }
 
 static Queue *
-createGlobalDataVariableQueue (void *data) {
-  return newDataVariableQueue();
+createGlobalDataVariables (void *data) {
+  return newDataVariables();
 }
 
 static Queue *
-getGlobalDataVariableQueue (int create) {
+getGlobalDataVariables (int create) {
   static Queue *variables = NULL;
 
   return getProgramQueue(&variables, "global-data-variables", create,
-                         createGlobalDataVariableQueue, NULL);
+                         createGlobalDataVariables, NULL);
 }
 
-int
-setGlobalDataVariable (const char *name, const char *value) {
+static int
+setStringDataVariable (Queue *variables, const char *name, const char *value) {
   size_t nameLength = getUtf8Length(name);
   wchar_t nameBuffer[nameLength + 1];
 
@@ -334,33 +334,34 @@ setGlobalDataVariable (const char *name, const char *value) {
     convertUtf8ToWchars(&utf8, &wc, ARRAY_COUNT(valueBuffer));
   }
 
-  {
-    Queue *variables = getGlobalDataVariableQueue(1);
+  const DataOperand nameArgument = {
+    .characters = nameBuffer,
+    .length = nameLength
+  };
+  DataVariable *variable = getDataVariable(variables, &nameArgument, 1);
 
-    if (variables) {
-      const DataOperand nameArgument = {
-        .characters = nameBuffer,
-        .length = nameLength
-      };
-      DataVariable *variable = getDataVariable(variables, &nameArgument, 1);
-
-      if (variable) {
-        if (setDataVariable(variable, valueBuffer, valueLength)) {
-          return 1;
-        }
-      }
+  if (variable) {
+    if (setDataVariable(variable, valueBuffer, valueLength)) {
+      return 1;
     }
   }
 
   return 0;
 }
 
+int
+setGlobalDataVariable (const char *name, const char *value) {
+  Queue *variables = getGlobalDataVariables(1);
+  if (!variables) return 0;
+  return setStringDataVariable(variables, name, value);
+}
+
 static void
-removeDataVariableQueues (Queue *until) {
-  if (!until) until = getGlobalDataVariableQueue(0);
+removeLocalDataVariables (Queue *until) {
+  if (!until) until = getGlobalDataVariables(0);
 
   while (1) {
-    Queue *current = localDataVariableQueue;
+    Queue *current = localDataVariables;
     if (current == until) break;
     Queue *previous = getQueueData(current);
 
@@ -369,16 +370,49 @@ removeDataVariableQueues (Queue *until) {
       break;
     }
 
-    localDataVariableQueue = previous;
+    localDataVariables = previous;
     deallocateQueue(current);
   }
 }
 
+static Queue *
+getBaseDataVariables (void) {
+  Queue *globalVariables = getGlobalDataVariables(1);
+  if (!globalVariables) return NULL;
+
+  removeLocalDataVariables(globalVariables);
+  return newDataVariables();
+}
+
 int
-setGlobalTableVariables (const char *tableExtension, const char *subtableExtension) {
-  if (!setGlobalDataVariable("tableExtension", tableExtension)) return 0;
-  if (!setGlobalDataVariable("subtableExtension", subtableExtension)) return 0;
+setBaseDataVariables (const DataVariableInitializer *initializers) {
+  Queue *variables = getBaseDataVariables();
+  if (!variables) return 0;
+
+  if (initializers) {
+    const DataVariableInitializer *initializer = initializers;
+     
+    while (initializer->name) {
+      if (!setStringDataVariable(variables, initializer->name, initializer->value)) {
+        return 0;
+      }
+
+      initializer += 1;
+    }
+  }
+
   return 1;
+}
+
+int
+setTableDataVariables (const char *tableExtension, const char *subtableExtension) {
+  const DataVariableInitializer initializers[] = {
+    { .name = "tableExtension", .value = tableExtension },
+    { .name = "subtableExtension", .value = subtableExtension },
+    { .name = NULL }
+  };
+
+  return setBaseDataVariables(initializers);
 }
 
 int
@@ -1384,7 +1418,7 @@ processDataStream (
 ) {
   logMessage(LOG_DEBUG, "including data file: %s", name);
 
-  Queue *oldVariables = localDataVariableQueue;
+  Queue *oldVariables = localDataVariables;
   int ok = 0;
 
   DataFile file = {
@@ -1405,7 +1439,7 @@ processDataStream (
     }
   }
 
-  if ((file.variables = newDataVariableQueue())) {
+  if ((file.variables = newDataVariables())) {
     if ((file.conditions = newQueue(deallocateDataCondition, NULL))) {
       if (processLines(stream, processDataLine, &file)) ok = 1;
 
@@ -1417,7 +1451,7 @@ processDataStream (
     }
   }
 
-  removeDataVariableQueues(oldVariables);
+  removeLocalDataVariables(oldVariables);
   return ok;
 }
 

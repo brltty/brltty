@@ -165,7 +165,7 @@ AttributesTable *
 compileAttributesTable (const char *name) {
   AttributesTable *table = NULL;
 
-  if (setGlobalTableVariables(ATTRIBUTES_TABLE_EXTENSION, ATTRIBUTES_SUBTABLE_EXTENSION)) {
+  if (setTableDataVariables(ATTRIBUTES_TABLE_EXTENSION, ATTRIBUTES_SUBTABLE_EXTENSION)) {
     AttributesTableData atd;
     memset(&atd, 0, sizeof(atd));
 

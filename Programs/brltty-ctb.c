@@ -410,7 +410,7 @@ static  DATA_OPERANDS_PROCESSOR(processVerificationLine) {
 
 static ProgramExitStatus
 processVerificationTable (void) {
-  if (setGlobalTableVariables(VERIFICATION_TABLE_EXTENSION, VERIFICATION_SUBTABLE_EXTENSION)) {
+  if (setTableDataVariables(VERIFICATION_TABLE_EXTENSION, VERIFICATION_SUBTABLE_EXTENSION)) {
     if (processDataStream(NULL, verificationTableStream, verificationTablePath, processVerificationLine, NULL)) {
       return PROG_EXIT_SUCCESS;
     }

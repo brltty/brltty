@@ -1571,7 +1571,7 @@ KeyTable *
 compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
   KeyTable *table = NULL;
 
-  if (setGlobalTableVariables(KEY_TABLE_EXTENSION, KEY_SUBTABLE_EXTENSION)) {
+  if (setTableDataVariables(KEY_TABLE_EXTENSION, KEY_SUBTABLE_EXTENSION)) {
     KeyTableData ktd;
 
     memset(&ktd, 0, sizeof(ktd));

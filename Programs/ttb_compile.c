@@ -319,7 +319,7 @@ finishTextTableData (TextTableData *ttd) {
 
 TextTableData *
 processTextTableLines (FILE *stream, const char *name, DataOperandsProcessor *processor) {
-  if (setGlobalTableVariables(TEXT_TABLE_EXTENSION, TEXT_SUBTABLE_EXTENSION)) {
+  if (setTableDataVariables(TEXT_TABLE_EXTENSION, TEXT_SUBTABLE_EXTENSION)) {
     TextTableData *ttd;
 
     if ((ttd = newTextTableData())) {

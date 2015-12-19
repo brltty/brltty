@@ -612,7 +612,7 @@ compileContractionTable (const char *fileName) {
     return NULL;
   }
 
-  if (setGlobalTableVariables(CONTRACTION_TABLE_EXTENSION, CONTRACTION_SUBTABLE_EXTENSION)) {
+  if (setTableDataVariables(CONTRACTION_TABLE_EXTENSION, CONTRACTION_SUBTABLE_EXTENSION)) {
     ContractionTableData ctd;
     memset(&ctd, 0, sizeof(ctd));
 
