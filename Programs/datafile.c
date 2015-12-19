@@ -450,11 +450,17 @@ void
 listDataVariables (void) {
   listDataVariableLine("begin data variable listing");
 
+  Queue *global = getGlobalDataVariables(1);
   Queue *first = currentDataVariables;
   Queue *current = first;
 
   while (current) {
-    if (current != first) listDataVariableLine("next data variable level");
+    if (current == global) {
+      listDataVariableLine("global data variables");
+    } else if (current != first) {
+      listDataVariableLine("prevoius data variable level");
+    }
+
     processQueue(current, listDataVariable, NULL);
     current = getQueueData(current);
   }
