@@ -1,6 +1,24 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+December 22, 2015:
+ - BRLTTY 5.3.1 released:
+   Linux screen driver fix:
+      Some consoles couldn't be accessed due to an I/O error.
+   Android fix:
+      The preference settings can be saved.
+   HIMS braille driver changes:
+      Autodetecting the braille device's model has been improved.
+      Keys that a model doesn't have are no longer listed within its help text.
+      Support for qwerty keyboards has been improved.
+      The scroll key bindings have been harmonized across all models.
+   Key table changes:
+      The -a (--audit) option has been added to brltty-ktb.
+      Duplicate key bindings have been removed.
+      The "uppercase" command modifier has been renamed to "upper".
+      The following directives have been added:
+         beginVariables, endVariables, ignore, listVariables
+
 December 15, 2015:
  - BRLTTY 5.3 released:
    General fixes:
