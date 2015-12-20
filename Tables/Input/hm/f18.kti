@@ -21,10 +21,10 @@ bind F2 NXPROMPT
 bind F3 PRPGRPH
 bind F4 NXPGRPH
 
-bind F5 CSRVIS
-bind F6 ATTRVIS
-bind F7 TIME
-bind F8 LEARN
+bind F5 LEARN
+bind F6 TIME
+bind F7 CHRLT
+bind F8 CHRRT
 
 bind Space+F1 BRLKBD
 bind Space+F2 BRLUCDOTS
@@ -33,8 +33,8 @@ bind Space+F4 CONTEXT+KEY_FUNCTION
 
 bind Space+F5 CONTEXT+SWITCHVT
 bind Space+F6 SKPBLNKWINS
-bind Space+F7 CHRLT
-bind Space+F8 CHRRT
+bind Space+F7 ATTRVIS
+bind Space+F8 CSRVIS
 
 context KEY_FUNCTION
 bind RoutingKey KEY_FUNCTION
