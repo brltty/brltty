@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-include functions.kti
+include fnkey.kti
 hide on
 
 bind Dot7 KEY_BACKSPACE
