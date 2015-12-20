@@ -23,8 +23,8 @@ bind F4 NXPGRPH
 
 bind F5 CSRVIS
 bind F6 ATTRVIS
-bind F7 CHRLT
-bind F8 CHRRT
+bind F7 TIME
+bind F8 LEARN
 
 bind Space+F1 BRLKBD
 bind Space+F2 BRLUCDOTS
@@ -33,8 +33,8 @@ bind Space+F4 CONTEXT+KEY_FUNCTION
 
 bind Space+F5 CONTEXT+SWITCHVT
 bind Space+F6 SKPBLNKWINS
-bind Space+F7 PRNBWIN
-bind Space+F8 NXNBWIN
+bind Space+F7 CHRLT
+bind Space+F8 CHRRT
 
 context KEY_FUNCTION
 bind RoutingKey KEY_FUNCTION
