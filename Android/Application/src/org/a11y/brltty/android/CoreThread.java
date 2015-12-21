@@ -184,6 +184,7 @@ public class CoreThread extends Thread {
     builder.setWritableDirectory(coreContext.getFilesDir().getPath());
 
     File stateDirectory = getDataDirectory(DATA_TYPE_STATE);
+    builder.setUpdatableDirectory(stateDirectory.getPath());
     builder.setConfigurationFile(new File(stateDirectory, "default.conf").getPath());
     builder.setPreferencesFile(new File(stateDirectory, "default.prefs").getPath());
 

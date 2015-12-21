@@ -98,6 +98,13 @@ public class ArgumentsBuilder {
     return oldValue;
   }
 
+  private String updatableDirectory = null;
+  public String setUpdatableDirectory (String newValue) {
+    String oldValue = updatableDirectory;
+    updatableDirectory = newValue;
+    return oldValue;
+  }
+
   private String tablesDirectory = null;
   public String setTablesDirectory (String newValue) {
     String oldValue = tablesDirectory;
@@ -208,6 +215,7 @@ public class ArgumentsBuilder {
 
     addOption(arguments, "-D", driversDirectory);
     addOption(arguments, "-W", writableDirectory);
+    addOption(arguments, "-U", updatableDirectory);
 
     addOption(arguments, "-T", tablesDirectory);
     addOption(arguments, "-t", textTable);
