@@ -54,45 +54,45 @@ static const ModeEntry modeTable[] = {
 static const unsigned char modeCount = ARRAY_COUNT(modeTable);
 
 static void
-logSyntaxError (TuneBuilder *tune, const char *message) {
-  tune->status = TUNE_BUILD_SYNTAX;
+logSyntaxError (TuneBuilder *tb, const char *message) {
+  tb->status = TUNE_BUILD_SYNTAX;
 
   logMessage(LOG_ERR, "%s[%u]: %s: %" PRIws,
-             tune->source.name, tune->source.index,
-             message, tune->source.text);
+             tb->source.name, tb->source.index,
+             message, tb->source.text);
 }
 
 int
-addTone (TuneBuilder *tune, const ToneElement *tone) {
-  if (tune->tones.count == tune->tones.size) {
-    unsigned int newSize = tune->tones.size? (tune->tones.size << 1): 1;
+addTone (TuneBuilder *tb, const ToneElement *tone) {
+  if (tb->tones.count == tb->tones.size) {
+    unsigned int newSize = tb->tones.size? (tb->tones.size << 1): 1;
     ToneElement *newArray;
 
-    if (!(newArray = realloc(tune->tones.array, ARRAY_SIZE(newArray, newSize)))) {
-      tune->status = TUNE_BUILD_FATAL;
+    if (!(newArray = realloc(tb->tones.array, ARRAY_SIZE(newArray, newSize)))) {
+      tb->status = TUNE_BUILD_FATAL;
       logMallocError();
       return 0;
     }
 
-    tune->tones.array = newArray;
-    tune->tones.size = newSize;
+    tb->tones.array = newArray;
+    tb->tones.size = newSize;
   }
 
-  tune->tones.array[tune->tones.count++] = *tone;
+  tb->tones.array[tb->tones.count++] = *tone;
   return 1;
 }
 
 int
-addNote (TuneBuilder *tune, unsigned char note, int duration) {
+addNote (TuneBuilder *tb, unsigned char note, int duration) {
   if (!duration) return 1;
 
   ToneElement tone = TONE_PLAY(duration, getNoteFrequency(note));
-  return addTone(tune, &tone);
+  return addTone(tb, &tone);
 }
 
 static int
 parseNumber (
-  TuneBuilder *tune,
+  TuneBuilder *tb,
   TuneNumber *number, const wchar_t **operand, int required,
   const TuneNumber minimum, const TuneNumber maximum,
   const char *name
@@ -122,7 +122,7 @@ PROBLEM_ENCOUNTERED:
   if (name) {
     char message[0X80];
     snprintf(message, sizeof(message), "%s %s", problem, name);
-    logSyntaxError(tune, message);
+    logSyntaxError(tb, message);
   }
 
   return 0;
@@ -130,50 +130,50 @@ PROBLEM_ENCOUNTERED:
 
 static int
 parseParameter (
-  TuneBuilder *tune, TuneParameter *parameter,
+  TuneBuilder *tb, TuneParameter *parameter,
   const wchar_t **operand, int required
 ) {
-  return parseNumber(tune, &parameter->current, operand, required,
+  return parseNumber(tb, &parameter->current, operand, required,
                      parameter->minimum, parameter->maximum, parameter->name);
 }
 
 static int
-parseOptionalParameter (TuneBuilder *tune, TuneParameter *parameter, const wchar_t **operand) {
-  return parseParameter(tune, parameter, operand, 0);
+parseOptionalParameter (TuneBuilder *tb, TuneParameter *parameter, const wchar_t **operand) {
+  return parseParameter(tb, parameter, operand, 0);
 }
 
 static int
-parseRequiredParameter (TuneBuilder *tune, TuneParameter *parameter, const wchar_t **operand) {
-  return parseParameter(tune, parameter, operand, 1);
+parseRequiredParameter (TuneBuilder *tb, TuneParameter *parameter, const wchar_t **operand) {
+  return parseParameter(tb, parameter, operand, 1);
 }
 
 static int
-parsePercentage (TuneBuilder *tune, const wchar_t **operand) {
-  return parseRequiredParameter(tune, &tune->percentage, operand);
+parsePercentage (TuneBuilder *tb, const wchar_t **operand) {
+  return parseRequiredParameter(tb, &tb->percentage, operand);
 }
 
 static int
-parseTempo (TuneBuilder *tune, const wchar_t **operand) {
-  return parseRequiredParameter(tune, &tune->tempo, operand);
+parseTempo (TuneBuilder *tb, const wchar_t **operand) {
+  return parseRequiredParameter(tb, &tb->tempo, operand);
 }
 
 static void
-setCurrentDuration (TuneBuilder *tune, TuneNumber multiplier, TuneNumber divisor) {
-  tune->duration.current = (60000 * multiplier) / (tune->tempo.current * divisor);
+setCurrentDuration (TuneBuilder *tb, TuneNumber multiplier, TuneNumber divisor) {
+  tb->duration.current = (60000 * multiplier) / (tb->tempo.current * divisor);
 }
 
 static void
-setBaseDuration (TuneBuilder *tune) {
-  setCurrentDuration(tune, 1, 1);
+setBaseDuration (TuneBuilder *tb) {
+  setCurrentDuration(tb, 1, 1);
 }
 
 static int
-parseDuration (TuneBuilder *tune, const wchar_t **operand, int *duration) {
+parseDuration (TuneBuilder *tb, const wchar_t **operand, int *duration) {
   if (**operand == '@') {
     *operand += 1;
 
-    TuneParameter parameter = tune->duration;
-    if (!parseRequiredParameter(tune, &parameter, operand)) return 0;
+    TuneParameter parameter = tb->duration;
+    if (!parseRequiredParameter(tb, &parameter, operand)) return 0;
     *duration = parameter.current;
   } else {
     const wchar_t *durationOperand = *operand;
@@ -184,7 +184,7 @@ parseDuration (TuneBuilder *tune, const wchar_t **operand, int *duration) {
     if (**operand == '*') {
       *operand += 1;
 
-      if (!parseNumber(tune, &multiplier, operand, 1, 1, 16, "duration multiplier")) {
+      if (!parseNumber(tb, &multiplier, operand, 1, 1, 16, "duration multiplier")) {
         return 0;
       }
     } else {
@@ -194,18 +194,18 @@ parseDuration (TuneBuilder *tune, const wchar_t **operand, int *duration) {
     if (**operand == '/') {
       *operand += 1;
 
-      if (!parseNumber(tune, &divisor, operand, 1, 1, 128, "duration divisor")) {
+      if (!parseNumber(tb, &divisor, operand, 1, 1, 128, "duration divisor")) {
         return 0;
       }
     } else {
       divisor = 1;
     }
 
-    if (*operand != durationOperand) setCurrentDuration(tune, multiplier, divisor);
-    *duration = tune->duration.current;
+    if (*operand != durationOperand) setCurrentDuration(tb, multiplier, divisor);
+    *duration = tb->duration.current;
   }
 
-  tune->duration.current = *duration;
+  tb->duration.current = *duration;
 
   {
     int increment = *duration;
@@ -225,25 +225,25 @@ toOctave (TuneNumber note) {
 }
 
 static void
-setOctave (TuneBuilder *tune) {
-  tune->octave.current = toOctave(tune->note.current);
+setOctave (TuneBuilder *tb) {
+  tb->octave.current = toOctave(tb->note.current);
 }
 
 static void
-setAccidentals (TuneBuilder *tune, int accidentals) {
+setAccidentals (TuneBuilder *tb, int accidentals) {
   int quotient = accidentals / NOTES_PER_SCALE;
   int remainder = accidentals % NOTES_PER_SCALE;
 
-  for (unsigned int index=0; index<ARRAY_COUNT(tune->accidentals); index+=1) {
-    tune->accidentals[index] = quotient;
+  for (unsigned int index=0; index<ARRAY_COUNT(tb->accidentals); index+=1) {
+    tb->accidentals[index] = quotient;
   }
 
   while (remainder > 0) {
-    tune->accidentals[accidentalTable[--remainder]] += 1;
+    tb->accidentals[accidentalTable[--remainder]] += 1;
   }
 
   while (remainder < 0) {
-    tune->accidentals[accidentalTable[NOTES_PER_SCALE + remainder++]] -= 1;
+    tb->accidentals[accidentalTable[NOTES_PER_SCALE + remainder++]] -= 1;
   }
 }
 
@@ -260,7 +260,7 @@ parseNoteLetter (unsigned char *index, const wchar_t **operand) {
 }
 
 static int
-parseMode (TuneBuilder *tune, int *accidentals, const wchar_t **operand) {
+parseMode (TuneBuilder *tb, int *accidentals, const wchar_t **operand) {
   const wchar_t *from = *operand;
   if (!isalpha(*from)) return 1;
 
@@ -275,7 +275,7 @@ parseMode (TuneBuilder *tune, int *accidentals, const wchar_t **operand) {
   while (current < end) {
     if (wcsncmp(current->name, from, length) == 0) {
       if (mode) {
-        logSyntaxError(tune, "ambiguous mode");
+        logSyntaxError(tb, "ambiguous mode");
         return 0;
       }
 
@@ -286,7 +286,7 @@ parseMode (TuneBuilder *tune, int *accidentals, const wchar_t **operand) {
   }
 
   if (!mode) {
-    logSyntaxError(tune, "unrecognized mode");
+    logSyntaxError(tb, "unrecognized mode");
     return 0;
   }
 
@@ -296,7 +296,7 @@ parseMode (TuneBuilder *tune, int *accidentals, const wchar_t **operand) {
 }
 
 static int
-parseKeySignature (TuneBuilder *tune, const wchar_t **operand) {
+parseKeySignature (TuneBuilder *tb, const wchar_t **operand) {
   int accidentals;
   int increment;
 
@@ -306,7 +306,7 @@ parseKeySignature (TuneBuilder *tune, const wchar_t **operand) {
     if (parseNoteLetter(&index, operand)) {
       accidentals = scaleAccidentals[index];
       increment = NOTES_PER_SCALE;
-      if (!parseMode(tune, &accidentals, operand)) return 0;
+      if (!parseMode(tb, &accidentals, operand)) return 0;
     } else {
       accidentals = 0;
       increment = 1;
@@ -314,7 +314,7 @@ parseKeySignature (TuneBuilder *tune, const wchar_t **operand) {
   }
 
   TuneNumber count = 0;
-  if (!parseNumber(tune, &count, operand, 0, 1, NOTES_PER_OCTAVE-1, "accidental count")) {
+  if (!parseNumber(tb, &count, operand, 0, 1, NOTES_PER_OCTAVE-1, "accidental count")) {
     return 0;
   }
 
@@ -336,17 +336,17 @@ parseKeySignature (TuneBuilder *tune, const wchar_t **operand) {
 
     default:
       if (!haveCount) break;
-      logSyntaxError(tune, "accidental not specified");
+      logSyntaxError(tb, "accidental not specified");
       return 0;
   }
 
   accidentals += increment * count;
-  setAccidentals(tune, accidentals);
+  setAccidentals(tb, accidentals);
   return 1;
 }
 
 static int
-parseNote (TuneBuilder *tune, const wchar_t **operand, unsigned char *note) {
+parseNote (TuneBuilder *tb, const wchar_t **operand, unsigned char *note) {
   int noteNumber;
 
   if (**operand == 'r') {
@@ -357,23 +357,23 @@ parseNote (TuneBuilder *tune, const wchar_t **operand, unsigned char *note) {
 
     if (**operand == 'n') {
       *operand += 1;
-      TuneParameter parameter = tune->note;
-      if (!parseRequiredParameter(tune, &parameter, operand)) return 0;
+      TuneParameter parameter = tb->note;
+      if (!parseRequiredParameter(tb, &parameter, operand)) return 0;
       noteNumber = parameter.current;
     } else {
       unsigned char noteIndex;
       if (!parseNoteLetter(&noteIndex, operand)) return 0;
 
       const wchar_t *octaveOperand = *operand;
-      TuneParameter octave = tune->octave;
-      if (!parseOptionalParameter(tune, &octave, operand)) return 0;
+      TuneParameter octave = tb->octave;
+      if (!parseOptionalParameter(tb, &octave, operand)) return 0;
 
       noteNumber = (octave.current * NOTES_PER_OCTAVE) + noteOffsets[noteIndex];
-      defaultAccidentals = tune->accidentals[noteIndex];
+      defaultAccidentals = tb->accidentals[noteIndex];
 
       if (*operand == octaveOperand) {
         int adjustOctave = 0;
-        TuneNumber previousNote = tune->note.current;
+        TuneNumber previousNote = tb->note.current;
         TuneNumber currentNote = noteNumber;
 
         if (currentNote < previousNote) {
@@ -388,8 +388,8 @@ parseNote (TuneBuilder *tune, const wchar_t **operand, unsigned char *note) {
       }
     }
 
-    tune->note.current = noteNumber;
-    setOctave(tune);
+    tb->note.current = noteNumber;
+    setOctave(tb);
 
     {
       wchar_t accidental = **operand;
@@ -429,12 +429,12 @@ parseNote (TuneBuilder *tune, const wchar_t **operand, unsigned char *note) {
       const unsigned char highestNote = getHighestNote();
 
       if (noteNumber < lowestNote) {
-        logSyntaxError(tune, "note too low");
+        logSyntaxError(tb, "note too low");
         return 0;
       }
 
       if (noteNumber > highestNote) {
-        logSyntaxError(tune, "note too high");
+        logSyntaxError(tb, "note too high");
         return 0;
       }
     }
@@ -445,59 +445,59 @@ parseNote (TuneBuilder *tune, const wchar_t **operand, unsigned char *note) {
 }
 
 static int
-parseTone (TuneBuilder *tune, const wchar_t **operand) {
+parseTone (TuneBuilder *tb, const wchar_t **operand) {
   while (1) {
-    tune->source.text = *operand;
+    tb->source.text = *operand;
     unsigned char note;
 
     {
       const wchar_t *noteOperand = *operand;
-      if (!parseNote(tune, operand, &note)) return *operand == noteOperand;
+      if (!parseNote(tb, operand, &note)) return *operand == noteOperand;
     }
 
     int duration;
-    if (!parseDuration(tune, operand, &duration)) return 0;
+    if (!parseDuration(tb, operand, &duration)) return 0;
 
     if (note) {
-      int onDuration = (duration * tune->percentage.current) / 100;
-      if (!addNote(tune, note, onDuration)) return 0;
+      int onDuration = (duration * tb->percentage.current) / 100;
+      if (!addNote(tb, note, onDuration)) return 0;
       duration -= onDuration;
     }
 
-    if (!addNote(tune, 0, duration)) return 0;
+    if (!addNote(tb, 0, duration)) return 0;
   }
 
   return 1;
 }
 
 static int
-parseTuneOperand (TuneBuilder *tune, const wchar_t *operand) {
-  tune->source.text = operand;
+parseTuneOperand (TuneBuilder *tb, const wchar_t *operand) {
+  tb->source.text = operand;
 
   switch (*operand) {
     case 'k':
       operand += 1;
-      if (!parseKeySignature(tune, &operand)) return 0;
+      if (!parseKeySignature(tb, &operand)) return 0;
       break;
 
     case 'p':
       operand += 1;
-      if (!parsePercentage(tune, &operand)) return 0;
+      if (!parsePercentage(tb, &operand)) return 0;
       break;
 
     case 't':
       operand += 1;
-      if (!parseTempo(tune, &operand)) return 0;
-      setBaseDuration(tune);
+      if (!parseTempo(tb, &operand)) return 0;
+      setBaseDuration(tb);
       break;
 
     default:
-      if (!parseTone(tune, &operand)) return 0;
+      if (!parseTone(tb, &operand)) return 0;
       break;
   }
 
   if (*operand) {
-    logSyntaxError(tune, "extra data");
+    logSyntaxError(tb, "extra data");
     return 0;
   }
 
@@ -505,8 +505,8 @@ parseTuneOperand (TuneBuilder *tune, const wchar_t *operand) {
 }
 
 int
-parseTuneText (TuneBuilder *tune, const wchar_t *text) {
-  tune->source.text = text;
+parseTuneText (TuneBuilder *tb, const wchar_t *text) {
+  tb->source.text = text;
 
   wchar_t buffer[wcslen(text) + 1];
   wcscpy(buffer, text);
@@ -518,7 +518,7 @@ parseTuneText (TuneBuilder *tune, const wchar_t *text) {
 
   while ((operand = wcstok(string, delimiters, &next))) {
     if (*operand == '#') break;
-    if (!parseTuneOperand(tune, operand)) return 0;
+    if (!parseTuneOperand(tb, operand)) return 0;
     string = NULL;
   }
 
@@ -526,7 +526,7 @@ parseTuneText (TuneBuilder *tune, const wchar_t *text) {
 }
 
 int
-parseTuneString (TuneBuilder *tune, const char *string) {
+parseTuneString (TuneBuilder *tb, const char *string) {
   const size_t size = strlen(string) + 1;
   wchar_t characters[size];
 
@@ -535,13 +535,13 @@ parseTuneString (TuneBuilder *tune, const char *string) {
 
   convertUtf8ToWchars(&byte, &character, size);
 
-  return parseTuneText(tune, characters);
+  return parseTuneText(tb, characters);
 }
 
 int
-endTune (TuneBuilder *tune) {
+endTune (TuneBuilder *tb) {
   ToneElement tone = TONE_STOP();
-  return addTone(tune, &tone);
+  return addTone(tb, &tone);
 }
 
 static inline void
@@ -556,31 +556,47 @@ setParameter (
 }
 
 void
-initializeTuneBuilder (TuneBuilder *tune) {
-  memset(tune, 0, sizeof(*tune));
-  tune->status = TUNE_BUILD_OK;
+resetTuneBuilder (TuneBuilder *tb) {
+  tb->status = TUNE_BUILD_OK;
 
-  tune->tones.array = NULL;
-  tune->tones.size = 0;
-  tune->tones.count = 0;
+  tb->tones.count = 0;
 
-  setParameter(&tune->duration, "note duration", 1, UINT16_MAX, 0);
-  setParameter(&tune->note, "MIDI note number", getLowestNote(), getHighestNote(), NOTE_MIDDLE_C+noteOffsets[2]);
-  setParameter(&tune->octave, "octave number", 0, 10, 0);
-  setParameter(&tune->percentage, "percentage", 1, 100, 80);
-  setParameter(&tune->tempo, "tempo", 40, UINT8_MAX, (60 * 2));
+  setParameter(&tb->duration, "note duration", 1, UINT16_MAX, 0);
+  setParameter(&tb->note, "MIDI note number", getLowestNote(), getHighestNote(), NOTE_MIDDLE_C+noteOffsets[2]);
+  setParameter(&tb->octave, "octave number", 0, 10, 0);
+  setParameter(&tb->percentage, "percentage", 1, 100, 80);
+  setParameter(&tb->tempo, "tempo", 40, UINT8_MAX, (60 * 2));
 
-  setAccidentals(tune, 0);
-  setBaseDuration(tune);
-  setOctave(tune);
+  setAccidentals(tb, 0);
+  setBaseDuration(tb);
+  setOctave(tb);
 
-  tune->source.text = WS_C("");
-  tune->source.name = "";
-  tune->source.index = 0;
+  tb->source.text = WS_C("");
+  tb->source.name = "";
+  tb->source.index = 0;
+}
+
+TuneBuilder *
+newTuneBuilder (void) {
+  TuneBuilder *tb;
+
+  if ((tb = malloc(sizeof(*tb)))) {
+    memset(tb, 0, sizeof(*tb));
+
+    tb->tones.array = NULL;
+    tb->tones.size = 0;
+
+    resetTuneBuilder(tb);
+    return tb;
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
 }
 
 void
-resetTuneBuilder (TuneBuilder *tune) {
-  if (tune->tones.array) free(tune->tones.array);
-  initializeTuneBuilder(tune);
+destroyTuneBuilder (TuneBuilder *tb) {
+  if (tb->tones.array) free(tb->tones.array);
+  free(tb);
 }

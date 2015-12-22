@@ -65,8 +65,9 @@ typedef struct {
   } source;
 } TuneBuilder;
 
-extern void initializeTuneBuilder (TuneBuilder *tune);
+extern TuneBuilder *newTuneBuilder (void);
 extern void resetTuneBuilder (TuneBuilder *tune);
+extern void destroyTuneBuilder (TuneBuilder *tb);
 
 extern int parseTuneString (TuneBuilder *tune, const char *string);
 extern int parseTuneText (TuneBuilder *tune, const wchar_t *text);

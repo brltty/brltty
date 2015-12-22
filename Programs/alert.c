@@ -165,6 +165,18 @@ static const AlertEntry alertTable[] = {
 };
 
 static ToneElement *tuneTable[ARRAY_COUNT(alertTable)] = {NULL};
+static TuneBuilder *tuneBuilder = NULL;
+
+static TuneBuilder *
+getTuneBuilder (void) {
+  if (!tuneBuilder) {
+    if (!(tuneBuilder = newTuneBuilder())) {
+      return NULL;
+    }
+  }
+
+  return tuneBuilder;
+}
 
 void
 alert (AlertIdentifier identifier) {
@@ -177,18 +189,18 @@ alert (AlertIdentifier identifier) {
       if (!*tune) {
         static ToneElement noTune[] = {TONE_STOP()};
         *tune = noTune;
+        TuneBuilder *tb = getTuneBuilder();
 
-        TuneBuilder tb;
-        initializeTuneBuilder(&tb);
-
-        if (parseTuneString(&tb, alert->tune)) {
-          if (endTune(&tb)) {
-            *tune = tb.tones.array;
-            tb.tones.array = NULL;
+        if (tb) {
+          if (parseTuneString(tb, alert->tune)) {
+            if (endTune(tb)) {
+              *tune = tb->tones.array;
+              tb->tones.array = NULL;
+            }
           }
-        }
 
-        resetTuneBuilder(&tb);
+          resetTuneBuilder(tb);
+        }
       }
 
       tunePlayTones(*tune);

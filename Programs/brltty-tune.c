@@ -88,16 +88,16 @@ END_OPTION_TABLE
 
 static void
 beginTuneStream (const char *name, void *data) {
-  TuneBuilder *tune = data;
-  resetTuneBuilder(tune);
-  tune->source.name = name;
+  TuneBuilder *tb = data;
+  resetTuneBuilder(tb);
+  tb->source.name = name;
 }
 
 static void
-playTune (TuneBuilder *tune) {
-  if (tune->status == TUNE_BUILD_OK) {
-    if (endTune(tune)) {
-      tunePlayTones(tune->tones.array);
+playTune (TuneBuilder *tb) {
+  if (tb->status == TUNE_BUILD_OK) {
+    if (endTune(tb)) {
+      tunePlayTones(tb->tones.array);
       tuneSynchronize();
     }
   }
@@ -106,8 +106,8 @@ playTune (TuneBuilder *tune) {
 static void
 endTuneStream (int incomplete, void *data) {
   if (!incomplete) {
-    TuneBuilder *tune = data;
-    playTune(tune);
+    TuneBuilder *tb = data;
+    playTune(tb);
   }
 }
 
@@ -128,8 +128,8 @@ DATA_OPERANDS_PROCESSOR(processTuneOperands) {
 
 static
 DATA_OPERANDS_PROCESSOR(processTuneLine) {
-  TuneBuilder *tune = data;
-  tune->source.index += 1;
+  TuneBuilder *tb = data;
+  tb->source.index += 1;
 
   BEGIN_DATA_DIRECTIVE_TABLE
     DATA_NESTING_DIRECTIVES,
@@ -138,7 +138,7 @@ DATA_OPERANDS_PROCESSOR(processTuneLine) {
     {.name=NULL, .processor=processTuneOperands},
   END_DATA_DIRECTIVE_TABLE
 
-  return processDirectiveOperand(file, &directives, "tune file directive", tune);
+  return processDirectiveOperand(file, &directives, "tune file directive", tb);
 }
 
 int
@@ -161,54 +161,56 @@ main (int argc, char *argv[]) {
 #endif /* HAVE_MIDI_SUPPORT */
 
   if (!setTuneDevice()) return PROG_EXIT_SEMANTIC;
-  TuneBuilder tune;
-  initializeTuneBuilder(&tune);
-  ProgramExitStatus exitStatus;
+  ProgramExitStatus exitStatus = PROG_EXIT_FATAL;
+  TuneBuilder *tb = newTuneBuilder();
 
-  if (opt_fromFiles) {
-    const InputFilesProcessingParameters parameters = {
-      .beginStream = beginTuneStream,
-      .endStream = endTuneStream,
-      .processLine = processTuneLine,
-      .data = &tune
-    };
+  if (tb) {
+    if (opt_fromFiles) {
+      const InputFilesProcessingParameters parameters = {
+        .beginStream = beginTuneStream,
+        .endStream = endTuneStream,
+        .processLine = processTuneLine,
+        .data = tb
+      };
 
-    exitStatus = processInputFiles(argv, argc, &parameters);
-  } else if (argc) {
-    exitStatus = PROG_EXIT_SUCCESS;
-    tune.source.name = "<command-line>";
+      exitStatus = processInputFiles(argv, argc, &parameters);
+    } else if (argc) {
+      exitStatus = PROG_EXIT_SUCCESS;
+      tb->source.name = "<command-line>";
 
-    do {
-      tune.source.index += 1;
-      if (!parseTuneString(&tune, *argv)) break;
-      argv += 1;
-    } while (argc -= 1);
+      do {
+        tb->source.index += 1;
+        if (!parseTuneString(tb, *argv)) break;
+        argv += 1;
+      } while (argc -= 1);
 
-    playTune(&tune);
-  } else {
-    logMessage(LOG_ERR, "missing tune");
-    exitStatus = PROG_EXIT_SYNTAX;
-  }
-
-  if (exitStatus == PROG_EXIT_SUCCESS) {
-    switch (tune.status) {
-      case TUNE_BUILD_OK:
-        exitStatus = PROG_EXIT_SUCCESS;
-        break;
-
-      case TUNE_BUILD_SYNTAX:
-        exitStatus = PROG_EXIT_SYNTAX;
-        break;
-
-      case TUNE_BUILD_FATAL:
-        exitStatus = PROG_EXIT_FATAL;
-        break;
+      playTune(tb);
+    } else {
+      logMessage(LOG_ERR, "missing tune");
+      exitStatus = PROG_EXIT_SYNTAX;
     }
-  } else if (exitStatus == PROG_EXIT_FORCE) {
-    exitStatus = PROG_EXIT_SUCCESS;
+
+    if (exitStatus == PROG_EXIT_SUCCESS) {
+      switch (tb->status) {
+        case TUNE_BUILD_OK:
+          exitStatus = PROG_EXIT_SUCCESS;
+          break;
+
+        case TUNE_BUILD_SYNTAX:
+          exitStatus = PROG_EXIT_SYNTAX;
+          break;
+
+        case TUNE_BUILD_FATAL:
+          exitStatus = PROG_EXIT_FATAL;
+          break;
+      }
+    } else if (exitStatus == PROG_EXIT_FORCE) {
+      exitStatus = PROG_EXIT_SUCCESS;
+    }
+
+    destroyTuneBuilder(tb);
   }
 
-  resetTuneBuilder(&tune);
   return exitStatus;
 }
 
