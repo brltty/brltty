@@ -41,7 +41,8 @@ extern void destroyTuneBuilder (TuneBuilder *tb);
 
 extern TuneStatus getTuneStatus (TuneBuilder *tb);
 extern void setTuneSourceName (TuneBuilder *tb, const char *name);
-extern void nextTuneSourceLine (TuneBuilder *tb);
+extern void setTuneSourceIndex (TuneBuilder *tb, unsigned int index);
+extern void incrementTuneSourceIndex (TuneBuilder *tb);
 
 extern int parseTuneString (TuneBuilder *tune, const char *string);
 extern int parseTuneText (TuneBuilder *tune, const wchar_t *text);

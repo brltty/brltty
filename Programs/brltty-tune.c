@@ -130,7 +130,7 @@ DATA_OPERANDS_PROCESSOR(processTuneOperands) {
 static
 DATA_OPERANDS_PROCESSOR(processTuneLine) {
   TuneBuilder *tb = data;
-  nextTuneSourceLine(tb);
+  incrementTuneSourceIndex(tb);
 
   BEGIN_DATA_DIRECTIVE_TABLE
     DATA_NESTING_DIRECTIVES,
@@ -180,7 +180,7 @@ main (int argc, char *argv[]) {
       setTuneSourceName(tb, "<command-line>");
 
       do {
-        nextTuneSourceLine(tb);
+        incrementTuneSourceIndex(tb);
         if (!parseTuneString(tb, *argv)) break;
         argv += 1;
       } while (argc -= 1);

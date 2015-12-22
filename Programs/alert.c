@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include "alert.h"
+#include "program.h"
 #include "prefs.h"
 #include "tune.h"
 #include "tune_build.h"
@@ -167,12 +168,34 @@ static const AlertEntry alertTable[] = {
 static ToneElement *tuneTable[ARRAY_COUNT(alertTable)] = {NULL};
 static TuneBuilder *tuneBuilder = NULL;
 
+static void
+exitAlertTunes (void *data) {
+  ToneElement **tune = tuneTable;
+  ToneElement **end = tune + ARRAY_COUNT(tuneTable);
+
+  while (tune < end) {
+    if (*tune) {
+      free(*tune);
+      *tune = NULL;
+    }
+
+    tune += 1;
+  }
+
+  if (tuneBuilder) {
+    destroyTuneBuilder(tuneBuilder);
+    tuneBuilder = NULL;
+  }
+}
+
 static TuneBuilder *
 getTuneBuilder (void) {
   if (!tuneBuilder) {
     if (!(tuneBuilder = newTuneBuilder())) {
       return NULL;
     }
+
+    onProgramExit("alert-tunes", exitAlertTunes, NULL);
   }
 
   return tuneBuilder;
@@ -190,6 +213,9 @@ alert (AlertIdentifier identifier) {
         TuneBuilder *tb = getTuneBuilder();
 
         if (tb) {
+          setTuneSourceName(tuneBuilder, "alert");
+          setTuneSourceIndex(tb, identifier);
+
           if (parseTuneString(tb, alert->tune)) {
             *tune = getTune(tb);
           }

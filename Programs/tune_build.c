@@ -602,7 +602,12 @@ setTuneSourceName (TuneBuilder *tb, const char *name) {
 }
 
 void
-nextTuneSourceLine (TuneBuilder *tb) {
+setTuneSourceIndex (TuneBuilder *tb, unsigned int index) {
+  tb->source.index = index;
+}
+
+void
+incrementTuneSourceIndex (TuneBuilder *tb) {
   tb->source.index += 1;
 }
 
