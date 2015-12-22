@@ -95,11 +95,12 @@ beginTuneStream (const char *name, void *data) {
 
 static void
 playTune (TuneBuilder *tb) {
-  if (tb->status == TUNE_BUILD_OK) {
-    if (endTune(tb)) {
-      tunePlayTones(tb->tones.array);
-      tuneSynchronize();
-    }
+  ToneElement *tune = getTune(tb);
+
+  if (tune) {
+    tunePlayTones(tune);
+    tuneSynchronize();
+    free(tune);
   }
 }
 

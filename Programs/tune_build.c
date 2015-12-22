@@ -538,10 +538,25 @@ parseTuneString (TuneBuilder *tb, const char *string) {
   return parseTuneText(tb, characters);
 }
 
-int
-endTune (TuneBuilder *tb) {
-  ToneElement tone = TONE_STOP();
-  return addTone(tb, &tone);
+ToneElement *
+getTune (TuneBuilder *tb) {
+  if (tb->status == TUNE_BUILD_OK) {
+    unsigned int count = tb->tones.count;
+    ToneElement *tune;
+
+    if ((tune = malloc(ARRAY_SIZE(tune, (count + 1))))) {
+      memcpy(tune, tb->tones.array, ARRAY_SIZE(tune, count));
+
+      static const ToneElement tone = TONE_STOP();
+      tune[count] = tone;
+
+      return tune;
+    } else {
+      logMallocError();
+    }
+  }
+
+  return NULL;
 }
 
 static inline void

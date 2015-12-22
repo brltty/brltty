@@ -71,7 +71,7 @@ extern void destroyTuneBuilder (TuneBuilder *tb);
 
 extern int parseTuneString (TuneBuilder *tune, const char *string);
 extern int parseTuneText (TuneBuilder *tune, const wchar_t *text);
-extern int endTune (TuneBuilder *tune);
+extern ToneElement *getTune (TuneBuilder *tune);
 
 extern int addTone (TuneBuilder *tune, const ToneElement *tone);
 extern int addNote (TuneBuilder *tune, unsigned char note, int duration);

@@ -187,19 +187,19 @@ alert (AlertIdentifier identifier) {
       ToneElement **tune = &tuneTable[identifier];
 
       if (!*tune) {
-        static ToneElement noTune[] = {TONE_STOP()};
-        *tune = noTune;
         TuneBuilder *tb = getTuneBuilder();
 
         if (tb) {
           if (parseTuneString(tb, alert->tune)) {
-            if (endTune(tb)) {
-              *tune = tb->tones.array;
-              tb->tones.array = NULL;
-            }
+            *tune = getTune(tb);
           }
 
           resetTuneBuilder(tb);
+        }
+
+        if (!*tune) {
+          static ToneElement noTune[] = {TONE_STOP()};
+          *tune = noTune;
         }
       }
 
