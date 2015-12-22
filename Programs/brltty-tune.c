@@ -90,7 +90,7 @@ static void
 beginTuneStream (const char *name, void *data) {
   TuneBuilder *tb = data;
   resetTuneBuilder(tb);
-  tb->source.name = name;
+  setTuneSourceName(tb, name);
 }
 
 static void
@@ -130,7 +130,7 @@ DATA_OPERANDS_PROCESSOR(processTuneOperands) {
 static
 DATA_OPERANDS_PROCESSOR(processTuneLine) {
   TuneBuilder *tb = data;
-  tb->source.index += 1;
+  nextTuneSourceLine(tb);
 
   BEGIN_DATA_DIRECTIVE_TABLE
     DATA_NESTING_DIRECTIVES,
@@ -177,10 +177,10 @@ main (int argc, char *argv[]) {
       exitStatus = processInputFiles(argv, argc, &parameters);
     } else if (argc) {
       exitStatus = PROG_EXIT_SUCCESS;
-      tb->source.name = "<command-line>";
+      setTuneSourceName(tb, "<command-line>");
 
       do {
-        tb->source.index += 1;
+        nextTuneSourceLine(tb);
         if (!parseTuneString(tb, *argv)) break;
         argv += 1;
       } while (argc -= 1);
@@ -192,16 +192,16 @@ main (int argc, char *argv[]) {
     }
 
     if (exitStatus == PROG_EXIT_SUCCESS) {
-      switch (tb->status) {
-        case TUNE_BUILD_OK:
+      switch (getTuneStatus(tb)) {
+        case TUNE_STATUS_OK:
           exitStatus = PROG_EXIT_SUCCESS;
           break;
 
-        case TUNE_BUILD_SYNTAX:
+        case TUNE_STATUS_SYNTAX:
           exitStatus = PROG_EXIT_SYNTAX;
           break;
 
-        case TUNE_BUILD_FATAL:
+        case TUNE_STATUS_FATAL:
           exitStatus = PROG_EXIT_FATAL;
           break;
       }

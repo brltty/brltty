@@ -29,6 +29,38 @@
 #include "notes.h"
 #include "charset.h"
 
+typedef unsigned int TuneNumber;
+
+typedef struct {
+  const char *name;
+  TuneNumber minimum;
+  TuneNumber maximum;
+  TuneNumber current;
+} TuneParameter;
+
+struct TuneBuilderStruct {
+  TuneStatus status;
+
+  struct {
+    ToneElement *array;
+    unsigned int size;
+    unsigned int count;
+  } tones;
+
+  signed char accidentals[NOTES_PER_SCALE];
+  TuneParameter duration;
+  TuneParameter note;
+  TuneParameter octave;
+  TuneParameter percentage;
+  TuneParameter tempo;
+
+  struct {
+    const wchar_t *text;
+    const char *name;
+    unsigned int index;
+  } source;
+};
+
 static const wchar_t noteLetters[] = WS_C("cdefgab");
 static const unsigned char noteOffsets[] = {0, 2, 4, 5, 7, 9, 11};
 static const signed char scaleAccidentals[] = {0, 2, 4, -1, 1, 3, 5};
@@ -55,7 +87,7 @@ static const unsigned char modeCount = ARRAY_COUNT(modeTable);
 
 static void
 logSyntaxError (TuneBuilder *tb, const char *message) {
-  tb->status = TUNE_BUILD_SYNTAX;
+  tb->status = TUNE_STATUS_SYNTAX;
 
   logMessage(LOG_ERR, "%s[%u]: %s: %" PRIws,
              tb->source.name, tb->source.index,
@@ -69,7 +101,7 @@ addTone (TuneBuilder *tb, const ToneElement *tone) {
     ToneElement *newArray;
 
     if (!(newArray = realloc(tb->tones.array, ARRAY_SIZE(newArray, newSize)))) {
-      tb->status = TUNE_BUILD_FATAL;
+      tb->status = TUNE_STATUS_FATAL;
       logMallocError();
       return 0;
     }
@@ -540,7 +572,7 @@ parseTuneString (TuneBuilder *tb, const char *string) {
 
 ToneElement *
 getTune (TuneBuilder *tb) {
-  if (tb->status == TUNE_BUILD_OK) {
+  if (tb->status == TUNE_STATUS_OK) {
     unsigned int count = tb->tones.count;
     ToneElement *tune;
 
@@ -559,6 +591,21 @@ getTune (TuneBuilder *tb) {
   return NULL;
 }
 
+TuneStatus
+getTuneStatus (TuneBuilder *tb) {
+  return tb->status;
+}
+
+void
+setTuneSourceName (TuneBuilder *tb, const char *name) {
+  tb->source.name = name;
+}
+
+void
+nextTuneSourceLine (TuneBuilder *tb) {
+  tb->source.index += 1;
+}
+
 static inline void
 setParameter (
   TuneParameter *parameter, const char *name,
@@ -572,7 +619,7 @@ setParameter (
 
 void
 resetTuneBuilder (TuneBuilder *tb) {
-  tb->status = TUNE_BUILD_OK;
+  tb->status = TUNE_STATUS_OK;
 
   tb->tones.count = 0;
 

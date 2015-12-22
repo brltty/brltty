@@ -28,46 +28,20 @@ extern "C" {
 #define NOTES_PER_SCALE 7
 
 typedef enum {
-  TUNE_BUILD_OK,
-  TUNE_BUILD_SYNTAX,
-  TUNE_BUILD_FATAL
-} TuneBuildStatus;
+  TUNE_STATUS_OK,
+  TUNE_STATUS_SYNTAX,
+  TUNE_STATUS_FATAL
+} TuneStatus;
 
-typedef unsigned int TuneNumber;
-
-typedef struct {
-  const char *name;
-  TuneNumber minimum;
-  TuneNumber maximum;
-  TuneNumber current;
-} TuneParameter;
-
-typedef struct {
-  TuneBuildStatus status;
-
-  struct {
-    ToneElement *array;
-    unsigned int size;
-    unsigned int count;
-  } tones;
-
-  signed char accidentals[NOTES_PER_SCALE];
-  TuneParameter duration;
-  TuneParameter note;
-  TuneParameter octave;
-  TuneParameter percentage;
-  TuneParameter tempo;
-
-  struct {
-    const wchar_t *text;
-    const char *name;
-    unsigned int index;
-  } source;
-} TuneBuilder;
+typedef struct TuneBuilderStruct TuneBuilder;
 
 extern TuneBuilder *newTuneBuilder (void);
 extern void resetTuneBuilder (TuneBuilder *tune);
 extern void destroyTuneBuilder (TuneBuilder *tb);
+
+extern TuneStatus getTuneStatus (TuneBuilder *tb);
+extern void setTuneSourceName (TuneBuilder *tb, const char *name);
+extern void nextTuneSourceLine (TuneBuilder *tb);
 
 extern int parseTuneString (TuneBuilder *tune, const char *string);
 extern int parseTuneText (TuneBuilder *tune, const wchar_t *text);
