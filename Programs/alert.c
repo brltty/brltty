@@ -167,6 +167,7 @@ static const AlertEntry alertTable[] = {
 
 static ToneElement *tuneTable[ARRAY_COUNT(alertTable)] = {NULL};
 static TuneBuilder *tuneBuilder = NULL;
+static ToneElement emptyTune[] = {TONE_STOP()};
 
 static void
 exitAlertTunes (void *data) {
@@ -175,7 +176,7 @@ exitAlertTunes (void *data) {
 
   while (tune < end) {
     if (*tune) {
-      free(*tune);
+      if (*tune != emptyTune) free(*tune);
       *tune = NULL;
     }
 
@@ -223,10 +224,7 @@ alert (AlertIdentifier identifier) {
           resetTuneBuilder(tb);
         }
 
-        if (!*tune) {
-          static ToneElement noTune[] = {TONE_STOP()};
-          *tune = noTune;
-        }
+        if (!*tune) *tune = emptyTune;
       }
 
       tunePlayTones(*tune);
