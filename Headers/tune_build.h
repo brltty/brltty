@@ -59,7 +59,7 @@ typedef struct {
   TuneParameter tempo;
 
   struct {
-    const char *text;
+    const wchar_t *text;
     const char *name;
     unsigned int index;
   } source;
@@ -68,7 +68,8 @@ typedef struct {
 extern void initializeTuneBuilder (TuneBuilder *tune);
 extern void resetTuneBuilder (TuneBuilder *tune);
 
-extern int parseTuneLine (TuneBuilder *tune, const char *line);
+extern int parseTuneString (TuneBuilder *tune, const char *string);
+extern int parseTuneText (TuneBuilder *tune, const wchar_t *text);
 extern int endTune (TuneBuilder *tune);
 
 extern int addTone (TuneBuilder *tune, const ToneElement *tone);

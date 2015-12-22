@@ -27,6 +27,7 @@
 #include "tune_utils.h"
 #include "tune_build.h"
 #include "notes.h"
+#include "datafile.h"
 
 static int opt_fromFiles;
 static char *opt_outputVolume;
@@ -110,11 +111,34 @@ endTuneStream (int incomplete, void *data) {
   }
 }
 
-static int
-handleTuneLine (char *line, void *data) {
+static
+DATA_OPERANDS_PROCESSOR(processTuneOperands) {
+  DataOperand line;
+
+  if (getDataText(file, &line, NULL)) {
+    DataString text;
+
+    if (parseDataString(file, &text, line.characters, line.length, 0)) {
+      return parseTuneText(data, text.characters);
+    }
+  }
+
+  return 1;
+}
+
+static
+DATA_OPERANDS_PROCESSOR(processTuneLine) {
   TuneBuilder *tune = data;
   tune->source.index += 1;
-  return parseTuneLine(tune, line);
+
+  BEGIN_DATA_DIRECTIVE_TABLE
+    DATA_NESTING_DIRECTIVES,
+    DATA_VARIABLE_DIRECTIVES,
+    DATA_CONDITION_DIRECTIVES,
+    {.name=NULL, .processor=processTuneOperands},
+  END_DATA_DIRECTIVE_TABLE
+
+  return processDirectiveOperand(file, &directives, "tune file directive", tune);
 }
 
 int
@@ -145,7 +169,7 @@ main (int argc, char *argv[]) {
     const InputFilesProcessingParameters parameters = {
       .beginStream = beginTuneStream,
       .endStream = endTuneStream,
-      .handleLine = handleTuneLine,
+      .processLine = processTuneLine,
       .data = &tune
     };
 
@@ -156,7 +180,7 @@ main (int argc, char *argv[]) {
 
     do {
       tune.source.index += 1;
-      if (!parseTuneLine(&tune, *argv)) break;
+      if (!parseTuneString(&tune, *argv)) break;
       argv += 1;
     } while (argc -= 1);
 

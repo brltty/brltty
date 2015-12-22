@@ -21,7 +21,7 @@
 
 #include "strfmth.h"
 #include "program.h"
-#include "file.h"
+#include "datafile.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -104,7 +104,7 @@ extern void resetOptions (const OptionsDescriptor *descriptor);
 typedef struct {
   void (*beginStream) (const char *name, void *data);
   void (*endStream) (int incomplete, void *data);
-  LineHandler *handleLine;
+  DataOperandsProcessor *processLine;
   void *data;
 } InputFilesProcessingParameters;
 

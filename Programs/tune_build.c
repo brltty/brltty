@@ -27,28 +27,29 @@
 #include "log.h"
 #include "tune_build.h"
 #include "notes.h"
+#include "charset.h"
 
-static const char noteLetters[] = "cdefgab";
+static const wchar_t noteLetters[] = WS_C("cdefgab");
 static const unsigned char noteOffsets[] = {0, 2, 4, 5, 7, 9, 11};
 static const signed char scaleAccidentals[] = {0, 2, 4, -1, 1, 3, 5};
 static const unsigned char accidentalTable[] = {3, 0, 4, 1, 5, 2, 6};
 
 typedef struct {
-  const char *name;
+  const wchar_t *name;
   signed char accidentals;
 } ModeEntry;
 
 static const ModeEntry modeTable[] = {
-  {.name="major", .accidentals=0},
-  {.name="minor", .accidentals=-3},
+  {.name=WS_C("major"), .accidentals=0},
+  {.name=WS_C("minor"), .accidentals=-3},
 
-  {.name="ionian", .accidentals=0},
-  {.name="dorian", .accidentals=-2},
-  {.name="phrygian", .accidentals=-4},
-  {.name="lydian", .accidentals=1},
-  {.name="mixolydian", .accidentals=-1},
-  {.name="aeolian", .accidentals=-3},
-  {.name="locrian", .accidentals=-5},
+  {.name=WS_C("ionian"), .accidentals=0},
+  {.name=WS_C("dorian"), .accidentals=-2},
+  {.name=WS_C("phrygian"), .accidentals=-4},
+  {.name=WS_C("lydian"), .accidentals=1},
+  {.name=WS_C("mixolydian"), .accidentals=-1},
+  {.name=WS_C("aeolian"), .accidentals=-3},
+  {.name=WS_C("locrian"), .accidentals=-5},
 };
 static const unsigned char modeCount = ARRAY_COUNT(modeTable);
 
@@ -56,7 +57,7 @@ static void
 logSyntaxError (TuneBuilder *tune, const char *message) {
   tune->status = TUNE_BUILD_SYNTAX;
 
-  logMessage(LOG_ERR, "%s[%u]: %s: %s",
+  logMessage(LOG_ERR, "%s[%u]: %s: %" PRIws,
              tune->source.name, tune->source.index,
              message, tune->source.text);
 }
@@ -92,7 +93,7 @@ addNote (TuneBuilder *tune, unsigned char note, int duration) {
 static int
 parseNumber (
   TuneBuilder *tune,
-  TuneNumber *number, const char **operand, int required,
+  TuneNumber *number, const wchar_t **operand, int required,
   const TuneNumber minimum, const TuneNumber maximum,
   const char *name
 ) {
@@ -100,8 +101,8 @@ parseNumber (
 
   if (isdigit(**operand)) {
     errno = 0;
-    char *end;
-    unsigned long ul = strtoul(*operand, &end, 10);
+    wchar_t *end;
+    unsigned long ul = wcstoul(*operand, &end, 10);
 
     if (errno) goto PROBLEM_ENCOUNTERED;
     if (ul > UINT_MAX) goto PROBLEM_ENCOUNTERED;
@@ -130,29 +131,29 @@ PROBLEM_ENCOUNTERED:
 static int
 parseParameter (
   TuneBuilder *tune, TuneParameter *parameter,
-  const char **operand, int required
+  const wchar_t **operand, int required
 ) {
   return parseNumber(tune, &parameter->current, operand, required,
                      parameter->minimum, parameter->maximum, parameter->name);
 }
 
 static int
-parseOptionalParameter (TuneBuilder *tune, TuneParameter *parameter, const char **operand) {
+parseOptionalParameter (TuneBuilder *tune, TuneParameter *parameter, const wchar_t **operand) {
   return parseParameter(tune, parameter, operand, 0);
 }
 
 static int
-parseRequiredParameter (TuneBuilder *tune, TuneParameter *parameter, const char **operand) {
+parseRequiredParameter (TuneBuilder *tune, TuneParameter *parameter, const wchar_t **operand) {
   return parseParameter(tune, parameter, operand, 1);
 }
 
 static int
-parsePercentage (TuneBuilder *tune, const char **operand) {
+parsePercentage (TuneBuilder *tune, const wchar_t **operand) {
   return parseRequiredParameter(tune, &tune->percentage, operand);
 }
 
 static int
-parseTempo (TuneBuilder *tune, const char **operand) {
+parseTempo (TuneBuilder *tune, const wchar_t **operand) {
   return parseRequiredParameter(tune, &tune->tempo, operand);
 }
 
@@ -167,7 +168,7 @@ setBaseDuration (TuneBuilder *tune) {
 }
 
 static int
-parseDuration (TuneBuilder *tune, const char **operand, int *duration) {
+parseDuration (TuneBuilder *tune, const wchar_t **operand, int *duration) {
   if (**operand == '@') {
     *operand += 1;
 
@@ -175,7 +176,7 @@ parseDuration (TuneBuilder *tune, const char **operand, int *duration) {
     if (!parseRequiredParameter(tune, &parameter, operand)) return 0;
     *duration = parameter.current;
   } else {
-    const char *durationOperand = *operand;
+    const wchar_t *durationOperand = *operand;
 
     TuneNumber multiplier;
     TuneNumber divisor;
@@ -247,8 +248,8 @@ setAccidentals (TuneBuilder *tune, int accidentals) {
 }
 
 static int
-parseNoteLetter (unsigned char *index, const char **operand) {
-  const char *letter = strchr(noteLetters, **operand);
+parseNoteLetter (unsigned char *index, const wchar_t **operand) {
+  const wchar_t *letter = wcschr(noteLetters, **operand);
 
   if (!letter) return 0;
   if (!*letter) return 0;
@@ -259,11 +260,11 @@ parseNoteLetter (unsigned char *index, const char **operand) {
 }
 
 static int
-parseMode (TuneBuilder *tune, int *accidentals, const char **operand) {
-  const char *from = *operand;
+parseMode (TuneBuilder *tune, int *accidentals, const wchar_t **operand) {
+  const wchar_t *from = *operand;
   if (!isalpha(*from)) return 1;
 
-  const char *to = from;
+  const wchar_t *to = from;
   while (isalpha(*++to));
   unsigned int length = to - from;
 
@@ -272,7 +273,7 @@ parseMode (TuneBuilder *tune, int *accidentals, const char **operand) {
   const ModeEntry *end = current + modeCount;
 
   while (current < end) {
-    if (strncmp(current->name, from, length) == 0) {
+    if (wcsncmp(current->name, from, length) == 0) {
       if (mode) {
         logSyntaxError(tune, "ambiguous mode");
         return 0;
@@ -295,7 +296,7 @@ parseMode (TuneBuilder *tune, int *accidentals, const char **operand) {
 }
 
 static int
-parseKeySignature (TuneBuilder *tune, const char **operand) {
+parseKeySignature (TuneBuilder *tune, const wchar_t **operand) {
   int accidentals;
   int increment;
 
@@ -318,7 +319,7 @@ parseKeySignature (TuneBuilder *tune, const char **operand) {
   }
 
   int haveCount = count != 0;
-  char accidental = **operand;
+  wchar_t accidental = **operand;
 
   switch (accidental) {
     case '-':
@@ -345,7 +346,7 @@ parseKeySignature (TuneBuilder *tune, const char **operand) {
 }
 
 static int
-parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
+parseNote (TuneBuilder *tune, const wchar_t **operand, unsigned char *note) {
   int noteNumber;
 
   if (**operand == 'r') {
@@ -363,7 +364,7 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
       unsigned char noteIndex;
       if (!parseNoteLetter(&noteIndex, operand)) return 0;
 
-      const char *octaveOperand = *operand;
+      const wchar_t *octaveOperand = *operand;
       TuneParameter octave = tune->octave;
       if (!parseOptionalParameter(tune, &octave, operand)) return 0;
 
@@ -391,7 +392,7 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
     setOctave(tune);
 
     {
-      char accidental = **operand;
+      wchar_t accidental = **operand;
 
       switch (accidental) {
         {
@@ -444,13 +445,13 @@ parseNote (TuneBuilder *tune, const char **operand, unsigned char *note) {
 }
 
 static int
-parseTone (TuneBuilder *tune, const char **operand) {
+parseTone (TuneBuilder *tune, const wchar_t **operand) {
   while (1) {
     tune->source.text = *operand;
     unsigned char note;
 
     {
-      const char *noteOperand = *operand;
+      const wchar_t *noteOperand = *operand;
       if (!parseNote(tune, operand, &note)) return *operand == noteOperand;
     }
 
@@ -470,7 +471,7 @@ parseTone (TuneBuilder *tune, const char **operand) {
 }
 
 static int
-parseTuneOperand (TuneBuilder *tune, const char *operand) {
+parseTuneOperand (TuneBuilder *tune, const wchar_t *operand) {
   tune->source.text = operand;
 
   switch (*operand) {
@@ -504,23 +505,37 @@ parseTuneOperand (TuneBuilder *tune, const char *operand) {
 }
 
 int
-parseTuneLine (TuneBuilder *tune, const char *line) {
-  tune->source.text = line;
+parseTuneText (TuneBuilder *tune, const wchar_t *text) {
+  tune->source.text = text;
 
-  char buffer[strlen(line) + 1];
-  strcpy(buffer, line);
+  wchar_t buffer[wcslen(text) + 1];
+  wcscpy(buffer, text);
 
-  static const char delimiters[] = " \t\r\n";
-  char *string = buffer;
-  char *operand;
+  static const wchar_t delimiters[] = WS_C(" \t\r\n");
+  wchar_t *string = buffer;
+  wchar_t *operand;
+  wchar_t *next;
 
-  while ((operand = strtok(string, delimiters))) {
+  while ((operand = wcstok(string, delimiters, &next))) {
     if (*operand == '#') break;
     if (!parseTuneOperand(tune, operand)) return 0;
     string = NULL;
   }
 
   return 1;
+}
+
+int
+parseTuneString (TuneBuilder *tune, const char *string) {
+  const size_t size = strlen(string) + 1;
+  wchar_t characters[size];
+
+  const char *byte = string;
+  wchar_t *character = characters;
+
+  convertUtf8ToWchars(&byte, &character, size);
+
+  return parseTuneText(tune, characters);
 }
 
 int
@@ -559,7 +574,7 @@ initializeTuneBuilder (TuneBuilder *tune) {
   setBaseDuration(tune);
   setOctave(tune);
 
-  tune->source.text = "";
+  tune->source.text = WS_C("");
   tune->source.name = "";
   tune->source.index = 0;
 }

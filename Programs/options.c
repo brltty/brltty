@@ -1017,11 +1017,17 @@ processInputStream (
   FILE *stream, const char *name,
   const InputFilesProcessingParameters *parameters
 ) {
+  int ok = 0;
+
   if (parameters->beginStream) {
     parameters->beginStream(name, parameters->data);
   }
 
-  int ok = processLines(stream, parameters->handleLine, parameters->data);
+  if (setBaseDataVariables(NULL)) {
+    if (processDataStream(NULL, stream, name, parameters->processLine, parameters->data)) {
+      ok = 1;
+    }
+  }
 
   if (parameters->endStream) {
     parameters->endStream(!ok, parameters->data);
