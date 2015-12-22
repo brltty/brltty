@@ -50,7 +50,7 @@ static const AlertEntry alertTable[] = {
 
   [ALERT_COMMAND_DONE] = {
     .message = strtext("Done"),
-    .tune = "n74@40 r30 n74@40 r40 n74@140 r20 n79@50"
+    .tune = "n74@40 r@30 n74@40 r@40 n74@140 r@20 n79@50"
   },
 
   [ALERT_COMMAND_REJECTED] = {
@@ -72,17 +72,17 @@ static const AlertEntry alertTable[] = {
 
   [ALERT_NO_CHANGE] = {
     .tactile = ALERT_TACTILE(30, BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_5 | BRL_DOT_6),
-    .tune = "n79@30 r30 n79@30 r30 n79@30"
+    .tune = "n79@30 r@30 n79@30 r@30 n79@30"
   },
 
   [ALERT_TOGGLE_ON] = {
     .tactile = ALERT_TACTILE(30, BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5),
-    .tune = "n74@30 r30 n79@30 r30 n86@30"
+    .tune = "n74@30 r@30 n79@30 r@30 n86@30"
   },
 
   [ALERT_TOGGLE_OFF] = {
     .tactile = ALERT_TACTILE(30, BRL_DOT_3 | BRL_DOT_7 | BRL_DOT_6 | BRL_DOT_8),
-    .tune = "n86@30 r30 n79@30 r30 n74@30"
+    .tune = "n86@30 r@30 n79@30 r@30 n74@30"
   },
 
   [ALERT_CURSOR_LINKED] = {
@@ -95,16 +95,16 @@ static const AlertEntry alertTable[] = {
 
   [ALERT_SCREEN_FROZEN] = {
     .message = strtext("Frozen"),
-    .tune = "n58@5 n59@5 n60@5 n61@5 n62@5 n63@5 n64@5 n65@5 n66@5 n67@5 n68@5 n69@5 n70@5 n71@5 n72@5 n73@5 n74@5 n76@5 n78@5 n80@5 n83@5 n86@5 n90@5 n95@5"
+    .tune = "n58@5 n59 n60 n61 n62 n63 n64 n65 n66 n67 n68 n69 n70 n71 n72 n73 n74 n76 n78 n80 n83 n86 n90 n95"
   },
 
   [ALERT_SCREEN_UNFROZEN] = {
     .message = strtext("Unfrozen"),
-    .tune = "n95@5 n90@5 n86@5 n83@5 n80@5 n78@5 n76@5 n74@5 n73@5 n72@5 n71@5 n70@5 n69@5 n68@5 n67@5 n66@5 n65@5 n64@5 n63@5 n62@5 n61@5 n60@5 n59@5 n58@5"
+    .tune = "n95@5 n90 n86 n83 n80 n78 n76 n74 n73 n72 n71 n70 n69 n68 n67 n66 n65 n64 n63 n62 n61 n60 n59 n58"
   },
 
   [ALERT_FREEZE_REMINDER] = {
-    .tune = "n60@50 r30 n60@50"
+    .tune = "n60@50 r@30 n60@50"
   },
 
   [ALERT_WRAP_DOWN] = {
@@ -119,15 +119,15 @@ static const AlertEntry alertTable[] = {
 
   [ALERT_SKIP_FIRST] = {
     .tactile = ALERT_TACTILE(30, BRL_DOT_1 | BRL_DOT_4 | BRL_DOT_7 | BRL_DOT_8),
-    .tune = "r40 n62@4 n67@6 n74@8 r25"
+    .tune = "r@40 n62@4 n67@6 n74@8 r@25"
   },
 
   [ALERT_SKIP] = {
-    .tune = "n74@10 r18"
+    .tune = "n74@10 r@18"
   },
 
   [ALERT_SKIP_MORE] = {
-    .tune = "n73@20 r1"
+    .tune = "n73@20 r@1"
   },
 
   [ALERT_BOUNCE] = {
@@ -136,7 +136,7 @@ static const AlertEntry alertTable[] = {
   },
 
   [ALERT_ROUTING_STARTED] = {
-    .tune = "n55@10 r60 n60@15"
+    .tune = "n55@10 r@60 n60@15"
   },
 
   [ALERT_ROUTING_SUCCEEDED] = {
@@ -144,7 +144,7 @@ static const AlertEntry alertTable[] = {
   },
 
   [ALERT_ROUTING_FAILED] = {
-    .tune = "n80@80 n79@90 n78@100 n77@100 r20 n77@100 r20 n77@150"
+    .tune = "n80@80 n79@90 n78@100 n77@100 r@20 n77@100 r@20 n77@150"
   },
 
   [ALERT_MODIFIER_NEXT] = {
@@ -171,16 +171,20 @@ static ToneElement emptyTune[] = {TONE_STOP()};
 
 static void
 exitAlertTunes (void *data) {
-  ToneElement **tune = tuneTable;
-  ToneElement **end = tune + ARRAY_COUNT(tuneTable);
+  tuneSynchronize();
 
-  while (tune < end) {
-    if (*tune) {
-      if (*tune != emptyTune) free(*tune);
-      *tune = NULL;
+  {
+    ToneElement **tune = tuneTable;
+    ToneElement **end = tune + ARRAY_COUNT(tuneTable);
+
+    while (tune < end) {
+      if (*tune) {
+        if (*tune != emptyTune) free(*tune);
+        *tune = NULL;
+      }
+
+      tune += 1;
     }
-
-    tune += 1;
   }
 
   if (tuneBuilder) {
