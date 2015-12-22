@@ -21,259 +21,9 @@
 #include "alert.h"
 #include "prefs.h"
 #include "tune.h"
+#include "tune_build.h"
 #include "message.h"
 #include "brl_dots.h"
-
-static const NoteElement tuneBrailleOn[] = {
-  NOTE_PLAY( 60,  64),
-  NOTE_PLAY(100,  69),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneBrailleOff[] = {
-  NOTE_PLAY( 60,  64),
-  NOTE_PLAY( 60,  57),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneCommandDone[] = {
-  NOTE_PLAY( 40,  74),
-  NOTE_REST( 30),
-  NOTE_PLAY( 40,  74),
-  NOTE_REST( 40),
-  NOTE_PLAY(140,  74),
-  NOTE_REST( 20),
-  NOTE_PLAY( 50,  79),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneCommandRejected[] = {
-  NOTE_PLAY(100,  78),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneMarkSet[] = {
-  NOTE_PLAY( 20,  83),
-  NOTE_PLAY( 15,  81),
-  NOTE_PLAY( 15,  79),
-  NOTE_PLAY( 25,  84),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneClipboardBegin[] = {
-  NOTE_PLAY( 40,  74),
-  NOTE_PLAY( 20,  86),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneClipboardEnd[] = {
-  NOTE_PLAY( 50,  86),
-  NOTE_PLAY( 30,  74),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneNoChange[] = {
-  NOTE_PLAY( 30,  79),
-  NOTE_REST( 30),
-  NOTE_PLAY( 30,  79),
-  NOTE_REST( 30),
-  NOTE_PLAY( 30,  79),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneToggleOn[] = {
-  NOTE_PLAY( 30,  74),
-  NOTE_REST( 30),
-  NOTE_PLAY( 30,  79),
-  NOTE_REST( 30),
-  NOTE_PLAY( 30,  86),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneToggleOff[] = {
-  NOTE_PLAY( 30,  86),
-  NOTE_REST( 30),
-  NOTE_PLAY( 30,  79),
-  NOTE_REST( 30),
-  NOTE_PLAY( 30,  74),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneCursorLinked[] = {
-  NOTE_PLAY(  7,  80),
-  NOTE_PLAY(  7,  79),
-  NOTE_PLAY( 12,  76),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneCursorUnlinked[] = {
-  NOTE_PLAY(  7,  78),
-  NOTE_PLAY(  7,  79),
-  NOTE_PLAY( 20,  83),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneScreenFrozen[] = {
-  NOTE_PLAY(  5,  58),
-  NOTE_PLAY(  5,  59),
-  NOTE_PLAY(  5,  60),
-  NOTE_PLAY(  5,  61),
-  NOTE_PLAY(  5,  62),
-  NOTE_PLAY(  5,  63),
-  NOTE_PLAY(  5,  64),
-  NOTE_PLAY(  5,  65),
-  NOTE_PLAY(  5,  66),
-  NOTE_PLAY(  5,  67),
-  NOTE_PLAY(  5,  68),
-  NOTE_PLAY(  5,  69),
-  NOTE_PLAY(  5,  70),
-  NOTE_PLAY(  5,  71),
-  NOTE_PLAY(  5,  72),
-  NOTE_PLAY(  5,  73),
-  NOTE_PLAY(  5,  74),
-  NOTE_PLAY(  5,  76),
-  NOTE_PLAY(  5,  78),
-  NOTE_PLAY(  5,  80),
-  NOTE_PLAY(  5,  83),
-  NOTE_PLAY(  5,  86),
-  NOTE_PLAY(  5,  90),
-  NOTE_PLAY(  5,  95),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneScreenUnfrozen[] = {
-  NOTE_PLAY(  5,  95),
-  NOTE_PLAY(  5,  90),
-  NOTE_PLAY(  5,  86),
-  NOTE_PLAY(  5,  83),
-  NOTE_PLAY(  5,  80),
-  NOTE_PLAY(  5,  78),
-  NOTE_PLAY(  5,  76),
-  NOTE_PLAY(  5,  74),
-  NOTE_PLAY(  5,  73),
-  NOTE_PLAY(  5,  72),
-  NOTE_PLAY(  5,  71),
-  NOTE_PLAY(  5,  70),
-  NOTE_PLAY(  5,  69),
-  NOTE_PLAY(  5,  68),
-  NOTE_PLAY(  5,  67),
-  NOTE_PLAY(  5,  66),
-  NOTE_PLAY(  5,  65),
-  NOTE_PLAY(  5,  64),
-  NOTE_PLAY(  5,  63),
-  NOTE_PLAY(  5,  62),
-  NOTE_PLAY(  5,  61),
-  NOTE_PLAY(  5,  60),
-  NOTE_PLAY(  5,  59),
-  NOTE_PLAY(  5,  58),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneFreezeReminder[] = {
-  NOTE_PLAY( 50,  60),
-  NOTE_REST( 30),
-  NOTE_PLAY( 50,  60),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneWrapDown[] = {
-  NOTE_PLAY(  6,  86),
-  NOTE_PLAY(  6,  74),
-  NOTE_PLAY(  6,  62),
-  NOTE_PLAY( 10,  50),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneWrapUp[] = {
-  NOTE_PLAY(  6,  50),
-  NOTE_PLAY(  6,  62),
-  NOTE_PLAY(  6,  74),
-  NOTE_PLAY( 10,  86),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneSkipFirst[] = {
-  NOTE_REST( 40),
-  NOTE_PLAY(  4,  62),
-  NOTE_PLAY(  6,  67),
-  NOTE_PLAY(  8,  74),
-  NOTE_REST( 25),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneSkip[] = {
-  NOTE_PLAY( 10,  74),
-  NOTE_REST( 18),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneSkipMore[] = {
-  NOTE_PLAY( 20,  73),
-  NOTE_REST(  1),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneBounce[] = {
-  NOTE_PLAY(  6,  98),
-  NOTE_PLAY(  6,  86),
-  NOTE_PLAY(  6,  74),
-  NOTE_PLAY(  6,  62),
-  NOTE_PLAY( 10,  50),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneRoutingStarted[] = {
-  NOTE_PLAY( 10,  55),
-  NOTE_REST( 60),
-  NOTE_PLAY( 15,  60),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneRoutingSucceeded[] = {
-  NOTE_PLAY( 60,  64),
-  NOTE_PLAY( 20,  76),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneRoutingFailed[] = {
-  NOTE_PLAY( 80,  80),
-  NOTE_PLAY( 90,  79),
-  NOTE_PLAY(100,  78),
-  NOTE_PLAY(100,  77),
-  NOTE_REST( 20),
-  NOTE_PLAY(100,  77),
-  NOTE_REST( 20),
-  NOTE_PLAY(150,  77),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneModifierNext[] = {
-  NOTE_PLAY( 60,  72),
-  NOTE_PLAY( 60,  76),
-  NOTE_PLAY( 90,  79),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneModifierOn[] = {
-  NOTE_PLAY( 60,  72),
-  NOTE_PLAY( 60,  76),
-  NOTE_PLAY( 60,  79),
-  NOTE_PLAY( 90,  84),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneModifierOff[] = {
-  NOTE_PLAY( 60,  84),
-  NOTE_PLAY( 60,  79),
-  NOTE_PLAY( 60,  76),
-  NOTE_PLAY( 90,  72),
-  NOTE_STOP()
-};
-
-static const NoteElement tuneConsoleBell[] = {
-  NOTE_PLAY(100,  78),
-  NOTE_STOP()
-};
 
 typedef struct {
   unsigned char duration;
@@ -281,7 +31,7 @@ typedef struct {
 } TactileAlert;
 
 typedef struct {
-  const NoteElement *tune;
+  const char *tune;
   const char *message;
   TactileAlert tactile;
 } AlertEntry;
@@ -290,137 +40,158 @@ typedef struct {
 
 static const AlertEntry alertTable[] = {
   [ALERT_BRAILLE_ON] = {
-    .tune = tuneBrailleOn
+    .tune = "n64@60 n69@100"
   },
 
   [ALERT_BRAILLE_OFF] = {
-    .tune = tuneBrailleOff
+    .tune = "n64@60 n57@60"
   },
 
   [ALERT_COMMAND_DONE] = {
     .message = strtext("Done"),
-    .tune = tuneCommandDone
+    .tune = "n74@40 r30 n74@40 r40 n74@140 r20 n79@50"
   },
 
   [ALERT_COMMAND_REJECTED] = {
     .tactile = ALERT_TACTILE(50, BRL_DOT_1 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_6),
-    .tune = tuneCommandRejected
+    .tune = "n78@100"
   },
 
   [ALERT_MARK_SET] = {
-    .tune = tuneMarkSet
+    .tune = "n83@20 n81@15 n79@15 n84@25"
   },
 
   [ALERT_CLIPBOARD_BEGIN] = {
-    .tune = tuneClipboardBegin
+    .tune = "n74@40 n86@20"
   },
 
   [ALERT_CLIPBOARD_END] = {
-    .tune = tuneClipboardEnd
+    .tune = "n86@50 n74@30"
   },
 
   [ALERT_NO_CHANGE] = {
     .tactile = ALERT_TACTILE(30, BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_5 | BRL_DOT_6),
-    .tune = tuneNoChange
+    .tune = "n79@30 r30 n79@30 r30 n79@30"
   },
 
   [ALERT_TOGGLE_ON] = {
     .tactile = ALERT_TACTILE(30, BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_4 | BRL_DOT_5),
-    .tune = tuneToggleOn
+    .tune = "n74@30 r30 n79@30 r30 n86@30"
   },
 
   [ALERT_TOGGLE_OFF] = {
     .tactile = ALERT_TACTILE(30, BRL_DOT_3 | BRL_DOT_7 | BRL_DOT_6 | BRL_DOT_8),
-    .tune = tuneToggleOff
+    .tune = "n86@30 r30 n79@30 r30 n74@30"
   },
 
   [ALERT_CURSOR_LINKED] = {
-    .tune = tuneCursorLinked
+    .tune = "n80@7 n79@7 n76@12"
   },
 
   [ALERT_CURSOR_UNLINKED] = {
-    .tune = tuneCursorUnlinked
+    .tune = "n78@7 n79@7 n83@20"
   },
 
   [ALERT_SCREEN_FROZEN] = {
     .message = strtext("Frozen"),
-    .tune = tuneScreenFrozen
+    .tune = "n58@5 n59@5 n60@5 n61@5 n62@5 n63@5 n64@5 n65@5 n66@5 n67@5 n68@5 n69@5 n70@5 n71@5 n72@5 n73@5 n74@5 n76@5 n78@5 n80@5 n83@5 n86@5 n90@5 n95@5"
   },
 
   [ALERT_SCREEN_UNFROZEN] = {
     .message = strtext("Unfrozen"),
-    .tune = tuneScreenUnfrozen
+    .tune = "n95@5 n90@5 n86@5 n83@5 n80@5 n78@5 n76@5 n74@5 n73@5 n72@5 n71@5 n70@5 n69@5 n68@5 n67@5 n66@5 n65@5 n64@5 n63@5 n62@5 n61@5 n60@5 n59@5 n58@5"
   },
 
   [ALERT_FREEZE_REMINDER] = {
-    .tune = tuneFreezeReminder
+    .tune = "n60@50 r30 n60@50"
   },
 
   [ALERT_WRAP_DOWN] = {
     .tactile = ALERT_TACTILE(20, BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_8),
-    .tune = tuneWrapDown
+    .tune = "n86@6 n74@6 n62@6 n50@10"
   },
 
   [ALERT_WRAP_UP] = {
     .tactile = ALERT_TACTILE(20, BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_7),
-    .tune = tuneWrapUp
+    .tune = "n50@6 n62@6 n74@6 n86@10"
   },
 
   [ALERT_SKIP_FIRST] = {
     .tactile = ALERT_TACTILE(30, BRL_DOT_1 | BRL_DOT_4 | BRL_DOT_7 | BRL_DOT_8),
-    .tune = tuneSkipFirst
+    .tune = "r40 n62@4 n67@6 n74@8 r25"
   },
 
   [ALERT_SKIP] = {
-    .tune = tuneSkip
+    .tune = "n74@10 r18"
   },
 
   [ALERT_SKIP_MORE] = {
-    .tune = tuneSkipMore
+    .tune = "n73@20 r1"
   },
 
   [ALERT_BOUNCE] = {
     .tactile = ALERT_TACTILE(50, BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_7 | BRL_DOT_8),
-    .tune = tuneBounce
+    .tune = "n98@6 n86@6 n74@6 n62@6 n50@10"
   },
 
   [ALERT_ROUTING_STARTED] = {
-    .tune = tuneRoutingStarted
+    .tune = "n55@10 r60 n60@15"
   },
 
   [ALERT_ROUTING_SUCCEEDED] = {
-    .tune = tuneRoutingSucceeded
+    .tune = "n64@60 n76@20"
   },
 
   [ALERT_ROUTING_FAILED] = {
-    .tune = tuneRoutingFailed
+    .tune = "n80@80 n79@90 n78@100 n77@100 r20 n77@100 r20 n77@150"
   },
 
   [ALERT_MODIFIER_NEXT] = {
-    .tune = tuneModifierNext
+    .tune = "n72@60 n76@60 n79@90"
   },
 
   [ALERT_MODIFIER_ON] = {
-    .tune = tuneModifierOn
+    .tune = "n72@60 n76@60 n79@60 n84@90"
   },
 
   [ALERT_MODIFIER_OFF] = {
-    .tune = tuneModifierOff
+    .tune = "n84@60 n79@60 n76@60 n72@90"
   },
 
   [ALERT_CONSOLE_BELL] = {
     .message = strtext("Console Bell"),
-    .tune = tuneConsoleBell
+    .tune = "n78@100"
   },
 };
+
+static ToneElement *tuneTable[ARRAY_COUNT(alertTable)] = {NULL};
 
 void
 alert (AlertIdentifier identifier) {
   if (identifier < ARRAY_COUNT(alertTable)) {
     const AlertEntry *alert = &alertTable[identifier];
 
-    if (prefs.alertTunes && alert->tune) {
-      tunePlayNotes(alert->tune);
+    if (prefs.alertTunes && alert->tune && *alert->tune) {
+      ToneElement **tune = &tuneTable[identifier];
+
+      if (!*tune) {
+        static ToneElement noTune[] = {TONE_STOP()};
+        *tune = noTune;
+
+        TuneBuilder tb;
+        initializeTuneBuilder(&tb);
+
+        if (parseTuneString(&tb, alert->tune)) {
+          if (endTune(&tb)) {
+            *tune = tb.tones.array;
+            tb.tones.array = NULL;
+          }
+        }
+
+        resetTuneBuilder(&tb);
+      }
+
+      tunePlayTones(*tune);
     } else if (prefs.alertDots && alert->tactile.duration) {
       showDotPattern(alert->tactile.pattern, alert->tactile.duration);
     } else if (prefs.alertMessages && alert->message) {

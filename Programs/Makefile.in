@@ -404,7 +404,7 @@ scr_menu.$O:
 
 ###############################################################################
 
-ALERT_OBJECTS = alert.$O message.$O $(TUNE_OBJECTS)
+ALERT_OBJECTS = alert.$O tune_build.$O message.$O $(TUNE_OBJECTS)
 
 alert.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/alert.c
