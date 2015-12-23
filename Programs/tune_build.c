@@ -89,7 +89,7 @@ static void
 logSyntaxError (TuneBuilder *tb, const char *message) {
   tb->status = TUNE_STATUS_SYNTAX;
 
-  logMessage(LOG_ERR, "%s[%u]: %s: %" PRIws,
+  logMessage(LOG_ERR, "tune error: %s[%u]: %s: %" PRIws,
              tb->source.name, tb->source.index,
              message, tb->source.text);
 }
