@@ -373,23 +373,14 @@ handleSpeechCommands (int command, void *data) {
         if (prefs.skipIdenticalLines) {
           ScreenCharacter original[scr.cols];
           ScreenCharacter current[scr.cols];
-          int count = 0;
+          unsigned int count = 0;
 
           readScreen(0, ses->spky, scr.cols, 1, original);
 
           do {
             readScreen(0, ses->spky+=increment, scr.cols, 1, current);
             if (!isSameRow(original, current, scr.cols, isSameText)) break;
-
-            if (!count) {
-              alert(ALERT_SKIP_FIRST);
-            } else if (count < 4) {
-              alert(ALERT_SKIP);
-            } else if (!(count % 4)) {
-              alert(ALERT_SKIP_MORE);
-            }
-
-            count += 1;
+            alertLineSkipped(&count);
           } while (ses->spky != limit);
         } else {
           ses->spky += increment;

@@ -62,7 +62,7 @@ toDifferentLine (
 ) {
   if (canMoveWindow()) {
     ScreenCharacter characters1[width];
-    int skipped = 0;
+    unsigned int skipped = 0;
 
     if ((isSameCharacter == isSameText) && ses->displayMode) isSameCharacter = isSameAttributes;
     readScreen(from, ses->winy, width, 1, characters1);
@@ -73,19 +73,12 @@ toDifferentLine (
 
       if (!isSameRow(characters1, characters2, width, isSameCharacter) ||
           (showScreenCursor() && (scr.posy == ses->winy) &&
-           (scr.posx >= from) && (scr.posx < (from + width))))
+           (scr.posx >= from) && (scr.posx < (from + width)))) {
         return 1;
-
-      /* lines are identical */
-      if (skipped == 0) {
-        alert(ALERT_SKIP_FIRST);
-      } else if (skipped <= 4) {
-        alert(ALERT_SKIP);
-      } else if (skipped % 4 == 0) {
-        alert(ALERT_SKIP_MORE);
       }
 
-      skipped += 1;
+      /* lines are identical */
+      alertLineSkipped(&skipped);
     } while (canMoveWindow());
   }
 

@@ -21,10 +21,24 @@
 #include <stdio.h>
 
 #include "strfmt.h"
+#include "alert.h"
 #include "brl_cmds.h"
 #include "unicode.h"
 #include "scr.h"
 #include "core.h"
+
+void
+alertLineSkipped (unsigned int *count) {
+  if (!*count) {
+    alert(ALERT_SKIP_FIRST);
+  } else if (*count <= 4) {
+    alert(ALERT_SKIP_ONE);
+  } else if (!(*count % 4)) {
+    alert(ALERT_SKIP_SEVERAL);
+  }
+
+  *count += 1;
+}
 
 int
 isTextOffset (int *arg, int end, int relaxed) {

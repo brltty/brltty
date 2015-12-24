@@ -122,11 +122,11 @@ static const AlertEntry alertTable[] = {
     .tune = "r@40 n62@4 n67@6 n74@8 r@25"
   },
 
-  [ALERT_SKIP] = {
+  [ALERT_SKIP_ONE] = {
     .tune = "n74@10 r@18"
   },
 
-  [ALERT_SKIP_MORE] = {
+  [ALERT_SKIP_SEVERAL] = {
     .tune = "n73@20 r@1"
   },
 
