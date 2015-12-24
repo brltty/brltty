@@ -146,34 +146,33 @@ changeProperties (const ProfileDescriptor *profile, char **values) {
 int
 activateProfile (const ProfileDescriptor *profile, const char *directory, const char *name) {
   int ok = 0;
-  char *path;
 
-  if ((path = makeProfilePath(profile, directory, name))) {
-    ProfileActivationData pad = {
-      .profile = profile
-    };
+  if (setBaseDataVariables(NULL)) {
+    char *path;
 
-    if ((pad.values = malloc(ARRAY_SIZE(pad.values, profile->properties.count)))) {
-      {
-        unsigned int index;
+    if ((path = makeProfilePath(profile, directory, name))) {
+      ProfileActivationData pad = {
+        .profile = profile
+      };
 
-        for (index=0; index<profile->properties.count; index+=1) {
+      if ((pad.values = malloc(ARRAY_SIZE(pad.values, profile->properties.count)))) {
+        for (unsigned int index=0; index<profile->properties.count; index+=1) {
           pad.values[index] = NULL;
         }
-      }
 
-      if (processDataFile(path, processProfileLine, &pad)) {
-        if (changeProperties(profile, pad.values)) {
-          ok = 1;
+        if (processDataFile(path, processProfileLine, &pad)) {
+          if (changeProperties(profile, pad.values)) {
+            ok = 1;
+          }
         }
+
+        free(pad.values);
+      } else {
+        logMallocError();
       }
 
-      free(pad.values);
-    } else {
-      logMallocError();
+      free(path);
     }
-
-    free(path);
   }
 
   return ok;
