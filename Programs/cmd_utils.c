@@ -29,11 +29,13 @@
 
 void
 alertLineSkipped (unsigned int *count) {
+  const unsigned int interval = 4;
+
   if (!*count) {
     alert(ALERT_SKIP_FIRST);
-  } else if (*count <= 4) {
+  } else if (*count <= interval) {
     alert(ALERT_SKIP_ONE);
-  } else if (!(*count % 4)) {
+  } else if (!(*count % interval)) {
     alert(ALERT_SKIP_SEVERAL);
   }
 
