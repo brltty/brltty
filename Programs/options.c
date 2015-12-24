@@ -118,9 +118,8 @@ printHelp (
   char line[lineWidth+1];
   unsigned int wordWidth = 0;
   unsigned int argumentWidth = 0;
-  unsigned int optionIndex;
 
-  for (optionIndex=0; optionIndex<info->optionCount; ++optionIndex) {
+  for (unsigned int optionIndex=0; optionIndex<info->optionCount; ++optionIndex) {
     const OptionEntry *option = &info->optionTable[optionIndex];
 
     if (option->word) {
@@ -145,7 +144,7 @@ printHelp (
   }
   fprintf(outputStream, "\n");
 
-  for (optionIndex=0; optionIndex<info->optionCount; ++optionIndex) {
+  for (unsigned int optionIndex=0; optionIndex<info->optionCount; ++optionIndex) {
     const OptionEntry *option = &info->optionTable[optionIndex];
     unsigned int lineLength = 0;
 
@@ -282,7 +281,6 @@ processCommandLine (
   const char *argumentsSummary
 ) {
   int lastOptInd = -1;
-  unsigned int index;
 
   const char resetPrefix = '+';
   const char *reset = NULL;
@@ -303,7 +301,8 @@ processCommandLine (
 
   {
     struct option *opt = longOptions;
-    for (index=0; index<info->optionCount; ++index) {
+
+    for (unsigned int index=0; index<info->optionCount; ++index) {
       const OptionEntry *entry = &info->optionTable[index];
 
       if (entry->word) {
@@ -345,13 +344,15 @@ processCommandLine (
   }
 #endif /* HAVE_GETOPT_LONG */
 
-  for (index=0; index<0X100; index+=1) optionEntries[index] = NULL;
+  for (unsigned int index=0; index<0X100; index+=1) {
+    optionEntries[index] = NULL;
+  }
 
   {
     char *opt = shortOptions;
     *opt++ = '+';
 
-    for (index=0; index<info->optionCount; ++index) {
+    for (unsigned int index=0; index<info->optionCount; ++index) {
       const OptionEntry *entry = &info->optionTable[index];
       optionEntries[entry->letter] = entry;
 
@@ -651,9 +652,7 @@ processEnvironmentVariables (
   OptionProcessingInformation *info,
   const char *prefix
 ) {
-  unsigned int optionIndex;
-
-  for (optionIndex=0; optionIndex<info->optionCount; optionIndex+=1) {
+  for (unsigned int optionIndex=0; optionIndex<info->optionCount; optionIndex+=1) {
     const OptionEntry *option = &info->optionTable[optionIndex];
 
     if (!processEnvironmentVariable(info, option, prefix)) return 0;
@@ -667,9 +666,7 @@ processInternalSettings (
   OptionProcessingInformation *info,
   int config
 ) {
-  unsigned int optionIndex;
-
-  for (optionIndex=0; optionIndex<info->optionCount; ++optionIndex) {
+  for (unsigned int optionIndex=0; optionIndex<info->optionCount; ++optionIndex) {
     const OptionEntry *option = &info->optionTable[optionIndex];
 
     if (!(option->flags & OPT_Config) == !config) {
@@ -852,9 +849,7 @@ freeConfigurationDirectives (ConfigurationFileProcessingData *conf) {
 
 static int
 addConfigurationDirectives (ConfigurationFileProcessingData *conf) {
-  unsigned int optionIndex;
-
-  for (optionIndex=0; optionIndex<conf->info->optionCount; optionIndex+=1) {
+  for (unsigned int optionIndex=0; optionIndex<conf->info->optionCount; optionIndex+=1) {
     const OptionEntry *option = &conf->info->optionTable[optionIndex];
 
     if ((option->flags & OPT_Config) && option->word) {
@@ -911,13 +906,13 @@ processConfigurationFile (
       };
 
       if (addConfigurationDirectives(&conf)) {
-        unsigned int index;
-        int processed;
+        for (unsigned int index=0; index<info->optionCount; index+=1) {
+          conf.settings[index] = NULL;
+        }
 
-        for (index=0; index<info->optionCount; index+=1) conf.settings[index] = NULL;
-        processed = processDataStream(NULL, file, path, processConfigurationLine, &conf);
+        int processed = processDataStream(NULL, file, path, processConfigurationLine, &conf);
 
-        for (index=0; index<info->optionCount; index+=1) {
+        for (unsigned int index=0; index<info->optionCount; index+=1) {
           char *setting = conf.settings[index];
 
           if (setting) {
@@ -980,10 +975,8 @@ processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char **
 
   onProgramExit("options", exitOptions, (void *)descriptor);
 
-  {
-    unsigned int index;
-
-    for (index=0; index<0X100; index+=1) info.ensuredSettings[index] = 0;
+  for (unsigned int index=0; index<0X100; index+=1) {
+    info.ensuredSettings[index] = 0;
   }
 
   beginProgram(*argumentCount, *argumentVector);
