@@ -29,6 +29,7 @@
 #include "file.h"
 #include "queue.h"
 #include "datafile.h"
+#include "variables.h"
 #include "charset.h"
 #include "unicode.h"
 #include "brl_dots.h"
@@ -47,7 +48,7 @@ struct DataFileStruct {
   void *data;
 
   Queue *conditions;
-  Queue *variables;
+  VariableNestingLevel *variables;
 
   const wchar_t *start;
   const wchar_t *end;
@@ -185,236 +186,38 @@ isNumber (int *number, const wchar_t *characters, int length) {
   return 0;
 }
 
-typedef struct {
-  struct {
-    wchar_t *characters;
-    int length;
-  } name;
+static VariableNestingLevel *baseDataVariables = NULL;
+static VariableNestingLevel *currentDataVariables = NULL;
 
-  struct {
-    wchar_t *characters;
-    int length;
-  } value;
-} DataVariable;
-
-static Queue *currentDataVariables = NULL;
-
-static void
-deallocateDataVariable (void *item, void *data UNUSED) {
-  DataVariable *variable = item;
-
-  if (variable->name.characters) free(variable->name.characters);
-  if (variable->value.characters) free(variable->value.characters);
-  free(variable);
-}
-
-static Queue *
-newDataVariables (void) {
-  Queue *newVariables = newQueue(deallocateDataVariable, NULL);
-
-  if (newVariables) {
-    setQueueData(newVariables, currentDataVariables);
-    currentDataVariables = newVariables;
-  }
-
-  return newVariables;
-}
-
-static int
-testDataVariableName (const void *item, void *data) {
-  const DataVariable *variable = item;
-  DataOperand *name = data;
-
-  if (variable->name.length == name->length) {
-    if (wmemcmp(variable->name.characters, name->characters, name->length) == 0) {
-      return 1;
-    }
-  }
-
-  return 0;
-}
-
-static DataVariable *
-getDataVariable (Queue *variables, const DataOperand *name, int create) {
-  DataVariable *variable;
-
-  {
-    DataOperand data = *name;
-
-    if ((variable = findItem(variables, testDataVariableName, &data))) return variable;
-  }
-
-  if (create) {
-    if ((variable = malloc(sizeof(*variable)))) {
-      wchar_t *nameCharacters;
-
-      memset(variable, 0, sizeof(*variable));
-
-      if ((nameCharacters = malloc(ARRAY_SIZE(nameCharacters, name->length)))) {
-        variable->name.characters = wmemcpy(nameCharacters, name->characters, name->length);
-        variable->name.length = name->length;
-
-        variable->value.characters = NULL;
-        variable->value.length = 0;
-
-        if (enqueueItem(variables, variable)) return variable;
-
-        free(nameCharacters);
-      } else {
-        logMallocError();
-      }
-
-      free(variable);
-    } else {
-      logMallocError();
-    }
-  }
-
-  return NULL;
-}
-
-static const DataVariable *
-getReadableDataVariable (DataFile *file, const DataOperand *name) {
-  Queue *variables = currentDataVariables;
-
-  do {
-    DataVariable *variable = getDataVariable(variables, name, 0);
-    if (variable) return variable;
-  } while ((variables = getQueueData(variables)));
-
-  return NULL;
-}
-
-static DataVariable *
-getWritableDataVariable (DataFile *file, const DataOperand *name) {
-  return getDataVariable(currentDataVariables, name, 1);
-}
-
-static int
-setDataVariable (DataVariable *variable, const wchar_t *characters, int length) {
-  wchar_t *value;
-
-  if (!length) {
-    value = NULL;
-  } else if (!(value = malloc(ARRAY_SIZE(value, length)))) {
-    logMallocError();
-    return 0;
-  } else {
-    wmemcpy(value, characters, length);
-  }
-
-  if (variable->value.characters) free((void *)variable->value.characters);
-  variable->value.characters = value;
-  variable->value.length = length;
-  return 1;
-}
-
-static Queue *
-createGlobalDataVariables (void *data) {
-  return newDataVariables();
-}
-
-static Queue *
-getGlobalDataVariables (int create) {
-  static Queue *variables = NULL;
-
-  return getProgramQueue(&variables, "global-data-variables", create,
-                         createGlobalDataVariables, NULL);
-}
-
-static int
-setStringDataVariable (Queue *variables, const char *name, const char *value) {
-  size_t nameLength = getUtf8Length(name);
-  wchar_t nameBuffer[nameLength + 1];
-
-  size_t valueLength = getUtf8Length(value);
-  wchar_t valueBuffer[valueLength + 1];
-
-  {
-    const char *utf8 = name;
-    wchar_t *wc = nameBuffer;
-    convertUtf8ToWchars(&utf8, &wc, ARRAY_COUNT(nameBuffer));
-  }
-
-  {
-    const char *utf8 = value;
-    wchar_t *wc = valueBuffer;
-    convertUtf8ToWchars(&utf8, &wc, ARRAY_COUNT(valueBuffer));
-  }
-
-  const DataOperand nameArgument = {
-    .characters = nameBuffer,
-    .length = nameLength
-  };
-  DataVariable *variable = getDataVariable(variables, &nameArgument, 1);
-
-  if (variable) {
-    if (setDataVariable(variable, valueBuffer, valueLength)) {
-      return 1;
-    }
-  }
-
-  return 0;
-}
-
-int
-setGlobalDataVariable (const char *name, const char *value) {
-  Queue *variables = getGlobalDataVariables(1);
-  if (!variables) return 0;
-  return setStringDataVariable(variables, name, value);
-}
-
-static void
-removeDataVariables (Queue *until) {
-  if (!until) until = getGlobalDataVariables(0);
-
-  while (1) {
-    Queue *current = currentDataVariables;
-    if (current == until) break;
-    Queue *previous = getQueueData(current);
-
-    if (!previous) {
-      logMessage(LOG_WARNING, "can't remove global data variables");
-      break;
-    }
-
-    currentDataVariables = previous;
-    deallocateQueue(current);
-  }
-}
-
-static Queue *
+static VariableNestingLevel *
 getBaseDataVariables (void) {
-  Queue *variables = getGlobalDataVariables(1);
-  if (!variables) return NULL;
+  if (baseDataVariables) {
+    releaseVariableNestingLevel(currentDataVariables);
+    deleteVariables(baseDataVariables);
+  } else {
+    VariableNestingLevel *globalVariables = getGlobalVariables(1);
+    if (!globalVariables) return NULL;
 
-  removeDataVariables(variables);
-  return newDataVariables();
+    VariableNestingLevel *baseVariables = newVariableNestingLevel(globalVariables, "base");
+    if (!baseVariables) return NULL;
+
+    baseDataVariables = claimVariableNestingLevel(baseVariables);
+  }
+
+  currentDataVariables = claimVariableNestingLevel(baseDataVariables);
+  return baseDataVariables;
 }
 
 int
-setBaseDataVariables (const DataVariableInitializer *initializers) {
-  Queue *variables = getBaseDataVariables();
+setBaseDataVariables (const VariableInitializer *initializers) {
+  VariableNestingLevel *variables = getBaseDataVariables();
   if (!variables) return 0;
-
-  if (initializers) {
-    const DataVariableInitializer *initializer = initializers;
-     
-    while (initializer->name) {
-      if (!setStringDataVariable(variables, initializer->name, initializer->value)) {
-        return 0;
-      }
-
-      initializer += 1;
-    }
-  }
-
-  return 1;
+  return setStringVariables(variables, initializers);
 }
 
 int
 setTableDataVariables (const char *tableExtension, const char *subtableExtension) {
-  const DataVariableInitializer initializers[] = {
+  const VariableInitializer initializers[] = {
     { .name = "tableExtension", .value = tableExtension },
     { .name = "subtableExtension", .value = subtableExtension },
     { .name = NULL }
@@ -423,49 +226,15 @@ setTableDataVariables (const char *tableExtension, const char *subtableExtension
   return setBaseDataVariables(initializers);
 }
 
-static void
-listDataVariableLine (const char *line) {
-  logMessage(LOG_NOTICE, "%s", line);
-}
-
 static int
-listDataVariable (void *item, void *data) {
-  const DataVariable *variable = item;
+pushDataVariableNestingLevel (void) {
+  VariableNestingLevel *variables = newVariableNestingLevel(currentDataVariables, NULL);
+  if (!variables) return 0;
 
-  char line[0X100];
-  STR_BEGIN(line, sizeof(line));
+  releaseVariableNestingLevel(currentDataVariables);
+  currentDataVariables = claimVariableNestingLevel(variables);
 
-  STR_PRINTF("data variable: ");
-  STR_PRINTF("%.*" PRIws, variable->name.length, variable->name.characters);
-  STR_PRINTF(" = ");
-  STR_PRINTF("%.*" PRIws, variable->value.length, variable->value.characters);
-
-  STR_END;
-  listDataVariableLine(line);
-
-  return 0;
-}
-
-void
-listDataVariables (void) {
-  listDataVariableLine("begin data variable listing");
-
-  Queue *global = getGlobalDataVariables(1);
-  Queue *first = currentDataVariables;
-  Queue *current = first;
-
-  while (current) {
-    if (current == global) {
-      listDataVariableLine("global data variables");
-    } else if (current != first) {
-      listDataVariableLine("prevoius data variable level");
-    }
-
-    processQueue(current, listDataVariable, NULL);
-    current = getQueueData(current);
-  }
-
-  listDataVariableLine("end data variable listing");
+  return 1;
 }
 
 int
@@ -651,17 +420,12 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
 
             if (end) {
               int count = end - first;
-              DataOperand name = {
-                .characters = first,
-                .length = count
-              };
-              const DataVariable *variable = getReadableDataVariable(file, &name);
-
               index += count;
 
+              const Variable *variable = findReadableVariable(currentDataVariables, first, count);
+
               if (variable) {
-                substitution.characters = variable->value.characters;
-                substitution.length = variable->value.length;
+                getVariableValue(variable, &substitution.characters, &substitution.length);
                 ok = 1;
               }
             } else {
@@ -1223,7 +987,7 @@ processConditionOperands (
 }
 
 static DATA_CONDITION_TESTER(testVariableDefined) {
-  return !!getReadableDataVariable(file, identifier);
+  return !!findReadableVariable(currentDataVariables, identifier->characters, identifier->length);
 }
 
 static int
@@ -1240,23 +1004,21 @@ DATA_OPERANDS_PROCESSOR(processIfNotVarOperands) {
 }
 
 DATA_OPERANDS_PROCESSOR(processBeginVariablesOperands) {
-  return !!newDataVariables();
+  return pushDataVariableNestingLevel();
 }
 
 DATA_OPERANDS_PROCESSOR(processEndVariablesOperands) {
   if (currentDataVariables == file->variables) {
     reportDataError(file, "no nested variables");
   } else {
-    Queue *variables = currentDataVariables;
-    currentDataVariables = getQueueData(variables);
-    deallocateQueue(variables);
+    currentDataVariables = removeVariableNestingLevel(currentDataVariables);
   }
 
   return 1;
 }
 
 DATA_OPERANDS_PROCESSOR(processListVariablesOperands) {
-  listDataVariables();
+  listVariables(currentDataVariables);
   return 1;
 }
 
@@ -1272,16 +1034,16 @@ processVariableAssignmentOperands (DataFile *file, int ifNotSet, void *data) {
     }
 
     if (ifNotSet) {
-      const DataVariable *variable = getReadableDataVariable(file, &name);
+      const Variable *variable = findReadableVariable(currentDataVariables, name.characters, name.length);
 
       if (variable) return 1;
     }
 
     {
-      DataVariable *variable = getWritableDataVariable(file, &name);
+      Variable *variable = findWritableVariable(currentDataVariables, name.characters, name.length);
 
       if (variable) {
-        if (setDataVariable(variable, value.characters, value.length)) return 1;
+        if (setVariable(variable, value.characters, value.length)) return 1;
       }
     }
   }
@@ -1492,8 +1254,6 @@ processDataStream (
   DataOperandsProcessor *processLine, void *data
 ) {
   logMessage(LOG_DEBUG, "including data file: %s", name);
-
-  Queue *oldVariables = currentDataVariables;
   int ok = 0;
 
   DataFile file = {
@@ -1514,7 +1274,11 @@ processDataStream (
     }
   }
 
-  if ((file.variables = newDataVariables())) {
+  VariableNestingLevel *oldVariables = currentDataVariables;
+
+  if ((file.variables = newVariableNestingLevel(oldVariables, name))) {
+    currentDataVariables = claimVariableNestingLevel(file.variables);
+
     if ((file.conditions = newQueue(deallocateDataCondition, NULL))) {
       if (processLines(stream, processDataLine, &file)) ok = 1;
 
@@ -1524,9 +1288,11 @@ processDataStream (
 
       deallocateQueue(file.conditions);
     }
+
+    releaseVariableNestingLevel(currentDataVariables);
+    currentDataVariables = oldVariables;
   }
 
-  removeDataVariables(oldVariables);
   return ok;
 }
 

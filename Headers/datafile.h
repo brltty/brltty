@@ -21,19 +21,14 @@
 
 #include <stdio.h>
 
+#include "variables.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct {
-  const char *name;
-  const char *value;
-} DataVariableInitializer;
-
-extern int setGlobalDataVariable (const char *name, const char *value);
-extern int setBaseDataVariables (const DataVariableInitializer *initializers);
+extern int setBaseDataVariables (const VariableInitializer *initializers);
 extern int setTableDataVariables (const char *tableExtension, const char *subtableExtension);
-extern void listDataVariables (void);
 
 extern FILE *openDataFile (const char *path, const char *mode, int optional);
 

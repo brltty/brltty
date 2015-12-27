@@ -46,6 +46,7 @@
 #include "scr_special.h"
 #include "status.h"
 #include "blink.h"
+#include "variables.h"
 #include "datafile.h"
 #include "ttb.h"
 #include "atb.h"
@@ -623,7 +624,7 @@ logProgramBanner (void) {
 static void
 logProperty (const char *value, const char *variable, const char *label) {
   if (*value) {
-    if (variable) setGlobalDataVariable(variable, value);
+    if (variable) setGlobalVariable(variable, value);
   } else {
     value = gettext("none");
   }
