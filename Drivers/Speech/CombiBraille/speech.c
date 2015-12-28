@@ -16,12 +16,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* CombiBraille/speech.c - Speech library
- * For Tieman B.V.'s CombiBraille (serial interface only)
- * Maintained by Nikhil Nair <nn201@cus.cam.ac.uk>
- * $Id: speech.c,v 1.2 1996/09/24 01:04:29 nn201 Exp $
- */
-
 #include "prologue.h"
 
 #include <stdio.h>

@@ -16,14 +16,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* CombiBraille/braille.h - Configurable definitions for the
- * Tieman B.V. CombiBraille driver
- * N. Nair, 25 January 1996
- * $Id: brlconf.h,v 1.2 1996/09/21 23:34:52 nn201 Exp $
- *
- * Edit as necessary for your system.
- */
-
 /* used by speech.c */
 #include "io_serial.h"
 extern SerialDevice *CB_serialDevice;

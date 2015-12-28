@@ -16,10 +16,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* tbl2hex.c - filter to compile 256-byte table file into C code
- * $Id: tbl2hex.c,v 1.3 1996/09/24 01:04:25 nn201 Exp $
- */
-
 #include "prologue.h"
 
 #include <stdio.h>

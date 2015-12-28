@@ -16,12 +16,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* CombiBraille/braille.c - Braille display library
- * For Tieman B.V.'s CombiBraille (serial interface only)
- * Was maintained by Nikhil Nair <nn201@cus.cam.ac.uk>
- * $Id: braille.c,v 1.3 1996/09/24 01:04:29 nn201 Exp $
- */
-
 #include "prologue.h"
 
 #include <stdio.h>

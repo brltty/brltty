@@ -16,10 +16,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* brltest.c - Test progrm for the Braille display library
- * $Id: brltest.c,v 1.3 1996/09/24 01:04:24 nn201 Exp $
- */
-
 #include "prologue.h"
 
 #include <stdio.h>

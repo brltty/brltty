@@ -325,7 +325,7 @@ createDirectory (const char *path) {
 #else /* make directory */
   if (mkdir(path
 #ifndef __MINGW32__
-           ,S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH
+           ,(S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)
 #endif /* __MINGW32__ */
            ) != -1) return 1;
 #endif /* make directory */

@@ -1044,7 +1044,7 @@ processInputFile (const char *path, const InputFilesProcessingParameters *parame
     FILE *stream = fopen(path, "r");
 
     if (!stream) {
-      logMessage(LOG_ERR, "input file open error: %s: %s", path,strerror(errno));
+      logMessage(LOG_ERR, "input file open error: %s: %s", path, strerror(errno));
       return PROG_EXIT_FATAL;
     }
 

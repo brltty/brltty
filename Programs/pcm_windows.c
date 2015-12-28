@@ -102,7 +102,7 @@ openPcmDevice (int errorLevel, const char *device) {
 	|WAVE_FORMAT_1S16))
       pcm->format.nSamplesPerSec = 11025;
     else {
-      logMessage(errorLevel, "unknown PCM capability %#lx",caps.dwFormats);
+      logMessage(errorLevel, "unknown PCM capability %#lx", caps.dwFormats);
       goto out;
     }
     if (caps.dwFormats &
@@ -122,7 +122,7 @@ openPcmDevice (int errorLevel, const char *device) {
 	|WAVE_FORMAT_4S08))
       pcm->format.wBitsPerSample = 8;
     else {
-      logMessage(LOG_ERR, "unknown PCM capability %#lx",caps.dwFormats);
+      logMessage(LOG_ERR, "unknown PCM capability %#lx", caps.dwFormats);
       goto out;
     }
     recomputeWaveOutFormat(&pcm->format);

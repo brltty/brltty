@@ -16,10 +16,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* scrtest.c - Test program for the screen reading library
- * $Id: scrtest.c,v 1.3 1996/09/24 01:04:27 nn201 Exp $
- */
-
 #include "prologue.h"
 
 #include <stdio.h>

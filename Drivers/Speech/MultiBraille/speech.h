@@ -16,11 +16,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* CombiBraille/speech.h - definitions for rudimentary speech support
- * N. Nair, 3 September 1996
- * $Id: speech.h,v 1.2 1996/09/21 23:34:52 nn201 Exp $
- */
-
 /* These sequences are sent to the CombiBraille before and after the
  * speech data itself.  The first byte is the length, so embedded nuls are
  * allowed.
