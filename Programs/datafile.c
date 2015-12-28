@@ -959,7 +959,7 @@ processConditionSubdirective (DataFile *file, Element *element) {
   int identifier = getElementIdentifier(element);
 
   if (findDataOperand(file, NULL)) {
-    int result = processDataOperands(file, file->start);
+    int result = file->processLine(file, file->data);
 
     removeDataCondition(file, element, identifier);
     return result;
