@@ -906,11 +906,20 @@ processConfigurationFile (
       };
 
       if (addConfigurationDirectives(&conf)) {
+        int processed;
+
         for (unsigned int index=0; index<info->optionCount; index+=1) {
           conf.settings[index] = NULL;
         }
 
-        int processed = processDataStream(NULL, file, path, processConfigurationLine, &conf);
+        {
+          const DataFileParameters dataFileParameters = {
+            .processOperands = processConfigurationLine,
+            .data = &conf
+          };
+
+          processed = processDataStream(NULL, file, path, &dataFileParameters);
+        }
 
         for (unsigned int index=0; index<info->optionCount; index+=1) {
           char *setting = conf.settings[index];
@@ -1013,17 +1022,17 @@ processInputStream (
   int ok = 0;
 
   if (parameters->beginStream) {
-    parameters->beginStream(name, parameters->data);
+    parameters->beginStream(name, parameters->dataFileParameters.data);
   }
 
   if (setBaseDataVariables(NULL)) {
-    if (processDataStream(NULL, stream, name, parameters->processLine, parameters->data)) {
+    if (processDataStream(NULL, stream, name, &parameters->dataFileParameters)) {
       ok = 1;
     }
   }
 
   if (parameters->endStream) {
-    parameters->endStream(!ok, parameters->data);
+    parameters->endStream(!ok, parameters->dataFileParameters.data);
   }
 
   return ok? PROG_EXIT_SUCCESS: PROG_EXIT_FATAL;

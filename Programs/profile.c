@@ -82,7 +82,7 @@ static DATA_OPERANDS_PROCESSOR(processPropertyOperands) {
   return ok;
 }
 
-static DATA_OPERANDS_PROCESSOR(processProfileLine) {
+static DATA_OPERANDS_PROCESSOR(processProfileOperands) {
   BEGIN_DATA_DIRECTIVE_TABLE
     DATA_NESTING_DIRECTIVES,
     DATA_VARIABLE_DIRECTIVES,
@@ -160,7 +160,12 @@ activateProfile (const ProfileDescriptor *profile, const char *directory, const 
           pad.values[index] = NULL;
         }
 
-        if (processDataFile(path, processProfileLine, &pad)) {
+        const DataFileParameters parameters = {
+          .processOperands = processProfileOperands,
+          .data = &pad
+        };
+
+        if (processDataFile(path, &parameters)) {
           if (changeProperties(profile, pad.values)) {
             ok = 1;
           }

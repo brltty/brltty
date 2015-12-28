@@ -318,12 +318,17 @@ finishTextTableData (TextTableData *ttd) {
 }
 
 TextTableData *
-processTextTableLines (FILE *stream, const char *name, DataOperandsProcessor *processor) {
+processTextTableLines (FILE *stream, const char *name, DataOperandsProcessor *processOperands) {
   if (setTableDataVariables(TEXT_TABLE_EXTENSION, TEXT_SUBTABLE_EXTENSION)) {
     TextTableData *ttd;
 
     if ((ttd = newTextTableData())) {
-      if (processDataStream(NULL, stream, name, processor, ttd)) {
+      const DataFileParameters parameters = {
+        .processOperands = processOperands,
+        .data = ttd
+      };
+
+      if (processDataStream(NULL, stream, name, &parameters)) {
         if (finishTextTableData(ttd)) {
           return ttd;
         }

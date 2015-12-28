@@ -923,7 +923,7 @@ static DATA_OPERANDS_PROCESSOR(processContextOperands) {
 
         ctx->isDefined = 1;
 
-        if (getDataText(file, &title, NULL)) {
+        if (getTextOperand(file, &title, NULL)) {
           if (ctx->title) {
             if ((title.length != wcslen(ctx->title)) ||
                 (wmemcmp(title.characters, ctx->title, title.length) != 0)) {
@@ -1088,7 +1088,7 @@ static DATA_OPERANDS_PROCESSOR(processNoteOperands) {
   KeyTableData *ktd = data;
   DataOperand operand;
 
-  if (getDataText(file, &operand, "note text")) {
+  if (getTextOperand(file, &operand, "note text")) {
     if (!hideBindings(ktd)) {
       DataString string;
 
@@ -1152,7 +1152,7 @@ static DATA_OPERANDS_PROCESSOR(processTitleOperands) {
   KeyTableData *ktd = data;
   DataOperand title;
 
-  if (getDataText(file, &title, "title text")) {
+  if (getTextOperand(file, &title, "title text")) {
     if (ktd->table->title) {
       reportDataError(file, "table title specified more than once");
     } else if (!(ktd->table->title = malloc(ARRAY_SIZE(ktd->table->title, title.length+1)))) {
@@ -1168,7 +1168,7 @@ static DATA_OPERANDS_PROCESSOR(processTitleOperands) {
   return 1;
 }
 
-static DATA_OPERANDS_PROCESSOR(processKeyTableLine) {
+static DATA_OPERANDS_PROCESSOR(processKeyTableOperands) {
   BEGIN_DATA_DIRECTIVE_TABLE
     DATA_VARIABLE_DIRECTIVES,
     DATA_CONDITION_DIRECTIVES,
@@ -1610,7 +1610,12 @@ compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
       if (defineInitialKeyContexts(&ktd)) {
         if (allocateKeyNameTable(&ktd, keys)) {
           if (allocateCommandTable(&ktd)) {
-            if (processDataFile(name, processKeyTableLine, &ktd)) {
+            const DataFileParameters parameters = {
+              .processOperands = processKeyTableOperands,
+              .data = &ktd
+            };
+
+            if (processDataFile(name, &parameters)) {
               if (finishKeyTable(&ktd)) {
                 table = ktd.table;
                 ktd.table = NULL;

@@ -520,7 +520,7 @@ static DATA_OPERANDS_PROCESSOR(processContractionTableDirective) {
   }
 }
 
-static DATA_OPERANDS_PROCESSOR(processContractionTableLine) {
+static DATA_OPERANDS_PROCESSOR(processContractionTableOperands) {
   BEGIN_DATA_DIRECTIVE_TABLE
     DATA_NESTING_DIRECTIVES,
     {.name=NULL, .processor=processContractionTableDirective},
@@ -633,7 +633,12 @@ compileContractionTable (const char *fileName) {
     if ((ctd.area = newDataArea())) {
       if (allocateDataItem(ctd.area, NULL, sizeof(ContractionTableHeader), __alignof__(ContractionTableHeader))) {
         if (allocateCharacterClasses(&ctd)) {
-          if (processDataFile(fileName, processContractionTableLine, &ctd)) {
+          const DataFileParameters parameters = {
+            .processOperands = processContractionTableOperands,
+            .data = &ctd
+          };
+
+          if (processDataFile(fileName, &parameters)) {
             if (saveCharacterTable(&ctd)) {
               if ((table = malloc(sizeof(*table)))) {
                 initializeCommonFields(table);

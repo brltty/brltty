@@ -152,7 +152,7 @@ static DATA_OPERANDS_PROCESSOR(processDotOperands) {
   return 1;
 }
 
-static DATA_OPERANDS_PROCESSOR(processAttributesTableLine) {
+static DATA_OPERANDS_PROCESSOR(processAttributesTableOperands) {
   BEGIN_DATA_DIRECTIVE_TABLE
     DATA_NESTING_DIRECTIVES,
     {.name=WS_C("dot"), .processor=processDotOperands},
@@ -171,7 +171,12 @@ compileAttributesTable (const char *name) {
 
     if ((atd.area = newDataArea())) {
       if (allocateDataItem(atd.area, NULL, sizeof(AttributesTableHeader), __alignof__(AttributesTableHeader))) {
-        if (processDataFile(name, processAttributesTableLine, &atd)) {
+        const DataFileParameters parameters = {
+          .processOperands = processAttributesTableOperands,
+          .data = &atd
+        };
+
+        if (processDataFile(name, &parameters)) {
           if (makeAttributesToDots(&atd)) {
             if ((table = malloc(sizeof(*table)))) {
               table->header.fields = getAttributesTableHeader(&atd);

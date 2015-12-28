@@ -162,7 +162,7 @@ static DATA_OPERANDS_PROCESSOR(processUnicodeCharOperands) {
   return 1;
 }
 
-static DATA_OPERANDS_PROCESSOR(processGnomeBrailleLine) {
+static DATA_OPERANDS_PROCESSOR(processGnomeBrailleOperands) {
   if (inUcsBlock) {
     BEGIN_DATA_DIRECTIVE_TABLE
       {.name=WS_C("UCS-BLOCK"), .processor=processUcsBlockOperands},
@@ -193,7 +193,7 @@ processGnomeBrailleStream (FILE *stream, const char *name) {
   TextTableData *ttd;
 
   inUcsBlock = 0;
-  if ((ttd = processTextTableLines(stream, name, processGnomeBrailleLine))) {
+  if ((ttd = processTextTableLines(stream, name, processGnomeBrailleOperands))) {
     if (inUcsBlock) {
       reportDataError(NULL, "unterminated UCS block");
     }

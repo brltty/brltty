@@ -104,8 +104,7 @@ extern void resetOptions (const OptionsDescriptor *descriptor);
 typedef struct {
   void (*beginStream) (const char *name, void *data);
   void (*endStream) (int incomplete, void *data);
-  DataOperandsProcessor *processLine;
-  void *data;
+  DataFileParameters dataFileParameters;
 } InputFilesProcessingParameters;
 
 extern ProgramExitStatus processInputFiles (

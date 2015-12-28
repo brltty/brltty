@@ -193,7 +193,7 @@ static DATA_OPERANDS_PROCESSOR(processGlyphOperands) {
   return 1;
 }
 
-static DATA_OPERANDS_PROCESSOR(processTextTableLine) {
+static DATA_OPERANDS_PROCESSOR(processNativeTextTableOperands) {
   BEGIN_DATA_DIRECTIVE_TABLE
     DATA_NESTING_DIRECTIVES,
     DATA_VARIABLE_DIRECTIVES,
@@ -209,7 +209,7 @@ static DATA_OPERANDS_PROCESSOR(processTextTableLine) {
 
 TextTableData *
 processTextTableStream (FILE *stream, const char *name) {
-  return processTextTableLines(stream, name, processTextTableLine);
+  return processTextTableLines(stream, name, processNativeTextTableOperands);
 }
 
 TextTable *

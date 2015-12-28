@@ -396,7 +396,7 @@ static DATA_OPERANDS_PROCESSOR(processContractsOperands) {
   return 0;
 }
 
-static  DATA_OPERANDS_PROCESSOR(processVerificationLine) {
+static  DATA_OPERANDS_PROCESSOR(processVerificationOperands) {
   BEGIN_DATA_DIRECTIVE_TABLE
     {.name=WS_C("contracts"), .processor=processContractsOperands},
   END_DATA_DIRECTIVE_TABLE
@@ -407,7 +407,12 @@ static  DATA_OPERANDS_PROCESSOR(processVerificationLine) {
 static ProgramExitStatus
 processVerificationTable (void) {
   if (setTableDataVariables(VERIFICATION_TABLE_EXTENSION, VERIFICATION_SUBTABLE_EXTENSION)) {
-    if (processDataStream(NULL, verificationTableStream, verificationTablePath, processVerificationLine, NULL)) {
+    const DataFileParameters parameters = {
+      .processOperands = processVerificationOperands,
+      .data = NULL
+    };
+
+    if (processDataStream(NULL, verificationTableStream, verificationTablePath, &parameters)) {
       return PROG_EXIT_SUCCESS;
     }
   }
@@ -415,34 +420,10 @@ processVerificationTable (void) {
   return PROG_EXIT_FATAL;
 }
 
-static int
-processInputLine (char *line, void *data) {
-  const char *string = line;
-  size_t length = strlen(string);
-  const char *byte = string;
-
-  size_t count = length + 1;
-  wchar_t characters[count];
-  wchar_t *character = characters;
-
-  convertUtf8ToWchars(&byte, &character, count);
-  length = character - characters;
-
-  return processInputCharacters(characters, length, data);
-}
-
-static ProgramExitStatus
-processInputStream (FILE *stream) {
-  LineProcessingData lpd = {
-    .exitStatus = PROG_EXIT_SUCCESS
-  };
-  ProgramExitStatus exitStatus = processLines(stream, processInputLine, &lpd)? lpd.exitStatus: PROG_EXIT_FATAL;
-
-  if (exitStatus == PROG_EXIT_SUCCESS)
-    if (!(flushCharacters('\n', &lpd) && flushOutputStream(&lpd)))
-      exitStatus = lpd.exitStatus;
-
-  return exitStatus;
+static DATA_OPERANDS_PROCESSOR(processInputLine) {
+  DataOperand line;
+  getTextRemaining(file, &line);
+  return processInputCharacters(line.characters, line.length, data);
 }
 
 int
@@ -521,27 +502,26 @@ main (int argc, char *argv[]) {
         }
 
         if (exitStatus == PROG_EXIT_SUCCESS) {
-          if (argc) {
-            do {
-              char *path = *argv;
-              if (strcmp(path, standardStreamArgument) == 0) {
-                exitStatus = processInputStream(stdin);
-              } else {
-                FILE *stream = fopen(path, "r");
-                if (stream) {
-                  exitStatus = processInputStream(stream);
-                  fclose(stream);
-                } else {
-                  logMessage(LOG_ERR, "cannot open input file: %s: %s",
-                             path, strerror(errno));
-                  exitStatus = PROG_EXIT_FATAL;
-                }
-              }
-            } while ((exitStatus == PROG_EXIT_SUCCESS) && (++argv, --argc));
-          } else if (verificationTableStream) {
+          if (verificationTableStream && !argc) {
             exitStatus = processVerificationTable();
           } else {
-            exitStatus = processInputStream(stdin);
+            LineProcessingData lpd = {
+              .exitStatus = PROG_EXIT_SUCCESS
+            };
+
+            const InputFilesProcessingParameters parameters = {
+              .dataFileParameters = {
+                .options = DFO_NO_COMMENTS,
+                .processOperands = processInputLine,
+                .data = &lpd
+              }
+            };
+
+            if ((exitStatus = processInputFiles(argv, argc, &parameters)) == PROG_EXIT_SUCCESS) {
+              if (!(flushCharacters('\n', &lpd) && flushOutputStream(&lpd))) {
+                exitStatus = lpd.exitStatus;
+              }
+            }
           }
 
           if (textTable) destroyTextTable(textTable);

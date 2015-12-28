@@ -35,17 +35,15 @@
 #include "brl_dots.h"
 
 struct DataFileStruct {
-  const char *name;
-  DataFile *includer;
+  const char *const name;
+  const DataFileParameters *const parameters;
+  DataFile *const includer;
   int line;
 
   struct {
     dev_t device;
     ino_t file;
   } identity;
-
-  DataOperandsProcessor *processLine;
-  void *data;
 
   Queue *conditions;
   VariableNestingLevel *variables;
@@ -268,6 +266,27 @@ ungetDataCharacters (DataFile *file, unsigned int count) {
   return 1;
 }
 
+void
+getTextRemaining (DataFile *file, DataOperand *text) {
+  file->end = file->start + wcslen(file->start);
+  text->characters = file->start;
+  text->length = file->end - file->start;
+}
+
+int
+getTextOperand (DataFile *file, DataOperand *text, const char *description) {
+  if (!findDataOperand(file, description)) return 0;
+  getTextRemaining(file, text);
+
+  while (text->length) {
+    unsigned int newLength = text->length - 1;
+    if (!iswspace(text->characters[newLength])) break;
+    text->length = newLength;
+  }
+
+  return 1;
+}
+
 int
 getDataOperand (DataFile *file, DataOperand *operand, const char *description) {
   if (!findDataOperand(file, description)) return 0;
@@ -278,23 +297,6 @@ getDataOperand (DataFile *file, DataOperand *operand, const char *description) {
 
   operand->characters = file->start;
   operand->length = file->end - file->start;
-  return 1;
-}
-
-int
-getDataText (DataFile *file, DataOperand *text, const char *description) {
-  if (!findDataOperand(file, description)) return 0;
-  file->end = file->start + wcslen(file->start);
-
-  text->characters = file->start;
-  text->length = file->end - file->start;
-
-  while (text->length) {
-    unsigned int newLength = text->length - 1;
-    if (!iswspace(text->characters[newLength])) break;
-    text->length = newLength;
-  }
-
   return 1;
 }
 
@@ -802,7 +804,7 @@ pushDataCondition (
         .length = name->length
       };
 
-      condition->isIncluding = testCondition(file, &identifier, file->data);
+      condition->isIncluding = testCondition(file, &identifier, file->parameters->data);
       if (negateCondition) condition->isIncluding = !condition->isIncluding;
     }
 
@@ -946,12 +948,20 @@ processDirectiveOperand (DataFile *file, DataDirectives *directives, const char 
 }
 
 static int
-processDataOperands (DataFile *file, const wchar_t *line) {
+processDataOperands (DataFile *file) {
+  return file->parameters->processOperands(file, file->parameters->data);
+}
+
+static int
+processDataCharacters (DataFile *file, const wchar_t *line) {
   file->end = file->start = line;
 
-  if (!findDataOperand(file, NULL)) return 1;			/*blank line */
-  if (file->start[0] == WC_C('#')) return 1;
-  return file->processLine(file, file->data);
+  if (!(file->parameters->options & DFO_NO_COMMENTS)) {
+    if (!findDataOperand(file, NULL)) return 1;
+    if (file->start[0] == WC_C('#')) return 1;
+  }
+
+  return processDataOperands(file);
 }
 
 static int
@@ -959,8 +969,7 @@ processConditionSubdirective (DataFile *file, Element *element) {
   int identifier = getElementIdentifier(element);
 
   if (findDataOperand(file, NULL)) {
-    int result = file->processLine(file, file->data);
-
+    int result = processDataOperands(file);
     removeDataCondition(file, element, identifier);
     return result;
   }
@@ -1204,7 +1213,7 @@ includeDataFile (DataFile *file, const wchar_t *name, int length) {
                (int)suffixLength, suffixAddress);
 
       if ((stream = openIncludedDataFile(file, path, "r", 0))) {
-        if (processDataStream(file, stream, path, file->processLine, file->data)) ok = 1;
+        if (processDataStream(file, stream, path, file->parameters)) ok = 1;
         fclose(stream);
       }
     }
@@ -1244,25 +1253,23 @@ processDataLine (char *line, void *dataAddress) {
     return 1;
   }
 
-  return processDataOperands(file, characters);
+  return processDataCharacters(file, characters);
 }
 
 int
 processDataStream (
   DataFile *includer,
   FILE *stream, const char *name,
-  DataOperandsProcessor *processLine, void *data
+  const DataFileParameters *parameters
 ) {
   logMessage(LOG_DEBUG, "including data file: %s", name);
   int ok = 0;
 
   DataFile file = {
     .name = name,
+    .parameters = parameters,
     .includer = includer,
     .line = 0,
-
-    .processLine = processLine,
-    .data = data
   };
 
   {
@@ -1297,12 +1304,12 @@ processDataStream (
 }
 
 int
-processDataFile (const char *name, DataOperandsProcessor *processLine, void *data) {
+processDataFile (const char *name, const DataFileParameters *parameters) {
   int ok = 0;
   FILE *stream;
 
   if ((stream = openDataFile(name, "r", 0))) {
-    if (processDataStream(NULL, stream, name, processLine, data)) ok = 1;
+    if (processDataStream(NULL, stream, name, parameters)) ok = 1;
     fclose(stream);
   }
 

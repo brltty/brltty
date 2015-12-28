@@ -132,7 +132,7 @@ static DATA_OPERANDS_PROCESSOR(processInclude) {
   return 1;
 }
 
-static DATA_OPERANDS_PROCESSOR(processLibLouisLine) {
+static DATA_OPERANDS_PROCESSOR(processLibLouisOperands) {
   BEGIN_DATA_DIRECTIVE_TABLE
     {.name=WS_C("space"), .processor=processChar},
     {.name=WS_C("punctuation"), .processor=processChar},
@@ -154,5 +154,5 @@ static DATA_OPERANDS_PROCESSOR(processLibLouisLine) {
 
 TextTableData *
 processLibLouisStream (FILE *stream, const char *name) {
-  return processTextTableLines(stream, name, processLibLouisLine);
+  return processTextTableLines(stream, name, processLibLouisOperands);
 }

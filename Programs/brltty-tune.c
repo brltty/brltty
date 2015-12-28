@@ -116,7 +116,7 @@ static
 DATA_OPERANDS_PROCESSOR(processTuneOperands) {
   DataOperand line;
 
-  if (getDataText(file, &line, NULL)) {
+  if (getTextOperand(file, &line, NULL)) {
     DataString text;
 
     if (parseDataString(file, &text, line.characters, line.length, 0)) {
@@ -170,8 +170,11 @@ main (int argc, char *argv[]) {
       const InputFilesProcessingParameters parameters = {
         .beginStream = beginTuneStream,
         .endStream = endTuneStream,
-        .processLine = processTuneLine,
-        .data = tb
+
+        .dataFileParameters = {
+          .processOperands = processTuneLine,
+          .data = tb
+        }
       };
 
       exitStatus = processInputFiles(argv, argc, &parameters);

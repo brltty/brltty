@@ -37,13 +37,23 @@ typedef struct DataFileStruct DataFile;
 #define DATA_OPERANDS_PROCESSOR(name) int name (DataFile *file, void *data)
 typedef DATA_OPERANDS_PROCESSOR(DataOperandsProcessor);
 
-extern int processDataFile (const char *name, DataOperandsProcessor *processLine, void *data);
+typedef enum {
+  DFO_NO_COMMENTS = 0X01
+} DataFileOptions;
+
+typedef struct {
+  DataOperandsProcessor *processOperands;
+  void *data;
+  unsigned char options;
+} DataFileParameters;
+
+extern int processDataFile (const char *name, const DataFileParameters *parameters);
 extern void reportDataError (DataFile *file, char *format, ...) PRINTF(2, 3);
 
 extern int processDataStream (
   DataFile *includer,
   FILE *stream, const char *name,
-  DataOperandsProcessor *processLine, void *data
+  const DataFileParameters *parameters
 );
 
 extern int compareKeyword (const wchar_t *keyword, const wchar_t *characters, size_t count);
@@ -64,7 +74,8 @@ typedef struct {
 } DataOperand;
 
 extern int getDataOperand (DataFile *file, DataOperand *operand, const char *description);
-extern int getDataText (DataFile *file, DataOperand *text, const char *description);
+extern int getTextOperand (DataFile *file, DataOperand *text, const char *description);
+extern void getTextRemaining (DataFile *file, DataOperand *text);
 
 typedef struct {
   unsigned char length;
