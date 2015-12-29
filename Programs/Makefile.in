@@ -635,7 +635,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-CORE_OBJECTS = core.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O activity.$O $(PREFS_OBJECTS) profile.$O menu.$O menu_prefs.$O ses.$O status.$O update.$O blink.$O dataarea.$O cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_utils.$O cmd_custom.$O cmd_navigation.$O cmd_input.$O cmd_keycodes.$O cmd_touch.$O cmd_toggle.$O cmd_preferences.$O cmd_clipboard.$O cmd_speech.$O cmd_learn.$O learn.$O cmd_miscellaneous.$O pipe.$O $(TTB_OBJECTS) $(ATB_OBJECTS) $(CTB_OBJECTS) $(KTB_OBJECTS) ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(BELL_OBJECTS) $(LEDS_OBJECTS) $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(SPECIAL_SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) spk_input.$O api_control.$O $(API_SERVER_OBJECTS)
+CORE_OBJECTS = core.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O activity.$O $(PREFS_OBJECTS) profile.$O menu.$O menu_prefs.$O ses.$O status.$O update.$O blink.$O dataarea.$O $(CMD_OBJECTS) pipe.$O $(TTB_OBJECTS) $(ATB_OBJECTS) $(CTB_OBJECTS) $(KTB_OBJECTS) ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(BELL_OBJECTS) $(LEDS_OBJECTS) $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(SPECIAL_SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) spk_input.$O api_control.$O $(API_SERVER_OBJECTS)
 CORE_NAME = brltty
 
 brltty-core: $(CORE_OBJECTS)
@@ -670,6 +670,19 @@ update.$O:
 blink.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/blink.c
 
+hidkeys.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hidkeys.c
+
+drivers.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/drivers.c
+
+driver.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/driver.c
+
+###############################################################################
+
+CMD_OBJECTS = cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_utils.$O cmd_clipboard.$O cmd_custom.$O cmd_input.$O cmd_keycodes.$O cmd_learn.$O cmd_miscellaneous.$O cmd_navigation.$O cmd_preferences.$O cmd_speech.$O cmd_toggle.$O cmd_touch.$O learn.$O
+
 cmd.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd.c
 
@@ -682,11 +695,11 @@ cmd_queue.$O:
 cmd_utils.$O:
 	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/cmd_utils.c
 
+cmd_clipboard.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_clipboard.c
+
 cmd_custom.$O:
 	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/cmd_custom.c
-
-cmd_navigation.$O:
-	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/cmd_navigation.c
 
 cmd_input.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_input.c
@@ -694,38 +707,29 @@ cmd_input.$O:
 cmd_keycodes.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_keycodes.c
 
-cmd_touch.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_touch.c
-
-cmd_toggle.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_toggle.c
-
-cmd_preferences.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_preferences.c
-
-cmd_clipboard.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_clipboard.c
-
-cmd_speech.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_speech.c
-
 cmd_learn.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_learn.c
-
-learn.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/learn.c
 
 cmd_miscellaneous.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_miscellaneous.c
 
-hidkeys.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hidkeys.c
+cmd_navigation.$O:
+	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/cmd_navigation.c
 
-drivers.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/drivers.c
+cmd_preferences.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_preferences.c
 
-driver.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/driver.c
+cmd_speech.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_speech.c
+
+cmd_toggle.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_toggle.c
+
+cmd_touch.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_touch.c
+
+learn.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/learn.c
 
 ###############################################################################
 
