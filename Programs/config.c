@@ -16,10 +16,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/*
- * config.c - Everything configuration related.
- */
-
 #include "prologue.h"
 
 #include <stdio.h>
