@@ -183,7 +183,12 @@ static const IdentityEntry scrollIdentity = {
   .keyTable = &KEY_TABLE_DEFINITION(scroll)
 };
 
-static const IdentityEntry qwertyIdentity = {
+static const IdentityEntry qwerty2Identity = {
+  .id1 = 0X53, .id2 = 0X58,
+  .keyTable = &KEY_TABLE_DEFINITION(qwerty)
+};
+
+static const IdentityEntry qwerty1Identity = {
   .id1 = 0X51, .id2 = 0X58,
   .keyTable = &KEY_TABLE_DEFINITION(qwerty)
 };
@@ -327,7 +332,8 @@ testIdentities (BrailleDisplay *brl, const IdentityEntry *const *identities) {
 static const KeyTableDefinition *
 testBrailleSenseIdentities (BrailleDisplay *brl) {
   static const IdentityEntry *const identities[] = {
-    &qwertyIdentity,
+    &qwerty2Identity,
+    &qwerty1Identity,
     &scrollIdentity,
     &panIdentity,
     NULL

@@ -84,8 +84,8 @@ bind F1+Dot2+Dot7 KEY_CURSOR_LEFT+shift+meta
 bind F1+Dot5+Dot7 KEY_CURSOR_RIGHT+shift+meta
 
 bind Space+Dot1+Dot2+Dot5 KEY_FUNCTION+0
-bind Space+Dot1+Dot2 KEY_FUNCTION+1
-bind Dot1+Dot2+Dot4+Dot8 KEY_FUNCTION+2
+bind F4+Space+Dot1+Dot2 KEY_FUNCTION+1
+bind F4+Dot1+Dot2+Dot4+Dot8 KEY_FUNCTION+2
 bind F3+Dot7 KEY_FUNCTION+3
 bind F2+Dot7 KEY_FUNCTION+4
 bind F4+Dot7 KEY_FUNCTION+5
@@ -94,7 +94,7 @@ bind F4+Dot8 KEY_FUNCTION+7
 bind Dot3+Dot4+Dot5+Dot6+Dot7 KEY_FUNCTION+8
 bind Space+Dot1+Dot3+Dot5 KEY_FUNCTION+9
 bind Dot1+Dot4+Dot5+Dot6+Dot7 KEY_FUNCTION+10
-bind Dot1+Dot2+Dot4+Dot5+Dot8 KEY_FUNCTION+11
+bind F4+Dot1+Dot2+Dot4+Dot5+Dot8 KEY_FUNCTION+11
 
 bind F1+Dot7 KEY_FUNCTION+5+shift
 bind F1+Space KEY_FUNCTION+6+shift
@@ -152,8 +152,3 @@ include letters.kti
 endVariables
 
 hide off
-# F2 conflicts with Shift-Tab: Space+Dot1+Dot2
-# F3 conflicts with Control-f: Dot1+Dot2+Dot4+Dot8
-# F12 conflicts with Control-g: Dot1+Dot2+Dot4+Dot5+Dot8
-# Function-F4 conflicts with Function-z: F2+Space+Dot1+Dot3+Dot5+Dot6
-# new: Control-Tab: Space+Dot1+Dot2+Dot8
