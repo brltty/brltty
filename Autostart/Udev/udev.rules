@@ -442,10 +442,16 @@ GOTO="brltty_end"
 
 LABEL="brltty_add"
 SYMLINK+="brltty/$env{BRLTTY_BRAILLE_DRIVER}-$env{BRLTTY_BRAILLE_DEVICE}"
+PROGRAM="/usr/bin/mountpoint -q /sys/fs/cgroup/systemd", GOTO="brltty_add_systemd"
 RUN+="/bin/brltty -E -P$env{BRLTTY_PID_FILE}"
 GOTO="brltty_end"
 
+LABEL="brltty_add_systemd"
+TAG+="systemd", ENV{SYSTEMD_WANTS}+="brltty.service"
+GOTO="brltty_end"
+
 LABEL="brltty_remove"
+PROGRAM="/usr/bin/mountpoint -q /sys/fs/cgroup/systemd", GOTO="brltty_end"
 RUN+="/bin/sh -c 'kill -TERM `cat $env{BRLTTY_PID_FILE}`'"
 GOTO="brltty_end"
 
