@@ -1219,6 +1219,7 @@ verifyBaumPacket (
         break;
 
       default:
+        pvd->state = BAUM_PVS_WAITING;
         return BRL_PVR_INVALID;
     }
   } else if (size == 2) {
