@@ -214,22 +214,21 @@ readBraillePacket (
   unsigned char *bytes = packet;
   size_t count = 0;
   size_t length = 1;
+  int started = 0;
 
   if (!endpoint) endpoint = brl->gioEndpoint;
 
   while (1) {
     unsigned char byte;
 
-    {
-      int started = count > 0;
-
-      if (!gioReadByte(endpoint, &byte, started)) {
-        if (started) logPartialPacket(bytes, count);
-        return 0;
-      }
+    if (!gioReadByte(endpoint, &byte, started)) {
+      if (count > 0) logPartialPacket(bytes, count);
+      return 0;
     }
 
   gotByte:
+    started = 1;
+
     if (count < size) {
       bytes[count++] = byte;
 
@@ -245,6 +244,8 @@ readBraillePacket (
           default:
             logMessage(LOG_WARNING, "unimplemented braille packet verifier result: %u", result);
           case BRL_PVR_INVALID:
+            started = 0;
+
             if (--count) {
               logShortPacket(bytes, count);
               count = 0;
