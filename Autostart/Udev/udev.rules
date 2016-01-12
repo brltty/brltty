@@ -431,7 +431,7 @@ ENV{PRODUCT}=="c251/1132/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb
 GOTO="brltty_end"
 
 LABEL="brltty_usb_run"
-ENV{BRLTTY_BRAILLE_DEVICE}="usb:$sysfs{serial}"
+ENV{BRLTTY_BRAILLE_DEVICE}="usb:vendor=0X$sysfs{idVendor}+product=0X$sysfs{idProduct}+serial=$sysfs{serial}"
 GOTO="brltty_run"
 
 LABEL="brltty_run"
