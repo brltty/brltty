@@ -12,7 +12,7 @@ StopWhenUnneeded=true
 
 Type=forking
 PIDFile=/run/brltty-%i.pid
-ExecStart=/bin/sh -c 'device="%I" /bin/brltty -E -P /run/brltty-%i.pid -d "${device#DEFAULT}"'
+ExecStart=/bin/sh -c 'device="%I" /bin/brltty -E -P /run/brltty-%I.pid -d "${device#DEFAULT}"'
 
 TimeoutStartSec=5
 TimeoutStopSec=10
