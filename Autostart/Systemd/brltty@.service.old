@@ -5,14 +5,14 @@ Documentation=man:brltty(1)
 Documentation=http://mielke.cc/brltty/
 
 DefaultDependencies=no
-Before=sysinit.target
+StopWhenUnneeded=true
 
 
 [Service]
 
 Type=forking
-PIDFile=/run/brltty.pid
-ExecStart=/bin/brltty -P /run/brltty.pid
+PIDFile=/run/brltty-%i.pid
+ExecStart=/bin/sh -c 'device="%I" /bin/brltty -E -P /run/brltty-%i.pid -d "${device#DEFAULT}"'
 
 TimeoutStartSec=5
 TimeoutStopSec=10
@@ -26,9 +26,5 @@ OOMScoreAdjust=-900
 ProtectHome=read-only
 ProtectSystem=full
 SystemCallArchitectures=native
-
-
-[Install]
-WantedBy=sysinit.target
 
 

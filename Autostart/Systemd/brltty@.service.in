@@ -1,11 +1,11 @@
 [Unit]
 
-Description=Braille Device Support
+Description=Braille Device: %I
 Documentation=man:brltty(1)
-Documentation=http://brltty.com/
+Documentation=@PACKAGE_URL@
 
 DefaultDependencies=no
-Before=sysinit.target
+StopWhenUnneeded=true
 
 RequiresMountsFor=@UPDATABLE_DIRECTORY@
 
@@ -13,7 +13,7 @@ RequiresMountsFor=@UPDATABLE_DIRECTORY@
 [Service]
 
 Type=notify
-ExecStart=/bin/brltty --no-daemon
+ExecStart=/bin/sh -c 'device="%I" /bin/brltty -n -E -P /run/brltty-%i.pid -d "${device#DEFAULT}"'
 
 TimeoutStartSec=5
 TimeoutStopSec=10
@@ -27,9 +27,5 @@ OOMScoreAdjust=-900
 ProtectHome=read-only
 ProtectSystem=full
 SystemCallArchitectures=native
-
-
-[Install]
-WantedBy=sysinit.target
 
 
