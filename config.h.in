@@ -424,6 +424,9 @@ extern "C" {
 #undef USE_PKG_PORTS_MSDOS
 #undef USE_PKG_PORTS_WINDOWS
 
+/* Define this if the Polkit authorization manager is to be used. */
+#undef USE_POLKIT
+
 /* Define only one of the following curses packages. */
 #undef HAVE_PKG_CURSES
 #undef HAVE_PKG_NCURSES

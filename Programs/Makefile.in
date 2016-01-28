@@ -308,7 +308,7 @@ pid.$O:
 ###############################################################################
 
 auth.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/auth.c
+	$(CC) $(LIBCFLAGS) $(POLKIT_INCLUDES) -c $(SRC_DIR)/auth.c
 
 dataarea.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/dataarea.c

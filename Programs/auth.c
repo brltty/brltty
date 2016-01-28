@@ -437,6 +437,84 @@ authGroup_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
   return getPeerCredentials(auth, fd) &&
          checkPeerGroup(&auth->peerCredentials, group);
 }
+
+#ifdef USE_POLKIT
+#include <polkit/polkit.h>
+
+typedef struct {
+  PolkitAuthority *authority;
+} MethodDescriptor_polkit;
+
+static void *
+authPolkit_initialize (const char *parameter) {
+  MethodDescriptor_polkit *polkit;
+
+  if ((polkit = malloc(sizeof(*polkit)))) {
+    memset(polkit, 0, sizeof(*polkit));
+
+    GError *error_local = NULL;
+    polkit->authority = polkit_authority_get_sync(NULL, &error_local);
+
+    if (polkit->authority) {
+      return polkit;
+    } else {
+      g_error_free(error_local);
+      g_free(polkit);
+    }
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
+
+static void
+authPolkit_release (void *data) {
+  MethodDescriptor_polkit *polkit = data;
+  g_object_unref (polkit->authority);
+  free(polkit);
+}
+
+static int
+authPolkit_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
+  MethodDescriptor_polkit *polkit = data;
+
+  struct ucred cred;
+  socklen_t length = sizeof(cred);
+
+  if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &cred, &length) != -1) {
+    logMessage(LOG_DEBUG, "attempting to authenticate pid %d via polkit", cred.pid);
+
+    PolkitSubject *subject = polkit_unix_process_new_for_owner(cred.pid, -1, -1);
+    GError *error_local = NULL;
+
+    PolkitAuthorizationResult *result = polkit_authority_check_authorization_sync(
+      polkit->authority,
+      subject,
+      "org.brltty.write-display",
+      NULL,
+      POLKIT_CHECK_AUTHORIZATION_FLAGS_NONE,
+      NULL,
+      &error_local
+    );
+
+    if (result) {
+      g_object_unref(result);
+
+      int isAuthorized = polkit_authorization_result_get_is_authorized(result);
+      logMessage(LOG_DEBUG, "polkit_authority_check_authorization_sync returned %d", isAuthorized);
+      return isAuthorized;
+    } else {
+      logSystemError("polkit_authority_check_authorization_sync");
+      g_error_free(error_local);
+    }
+  } else {
+    logSystemError("getsockopt[SO_PEERCRED]");
+  }
+
+  return 0;
+}
+#endif /* USE_POLKIT */
 #endif /* CAN_CHECK_CREDENTIALS */
 
 /* general functions */
@@ -463,6 +541,15 @@ static const MethodDefinition methodDefinitions[] = {
     .client = NULL,
     .server = authGroup_server
   },
+
+#ifdef USE_POLKIT
+  { .name = "polkit",
+    .initialize = authPolkit_initialize,
+    .release = authPolkit_release,
+    .client = NULL,
+    .server = authPolkit_server
+  },
+#endif /* USE_POLKIT */
 #endif /* CAN_CHECK_CREDENTIALS */
 
   {.name = NULL}
