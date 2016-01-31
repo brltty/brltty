@@ -5,11 +5,11 @@ Using Systemd Service Management
 .. include:: prologue.rst
 .. |service warning| replace:: system service support not available on this platform
 
-Choosing the Correct Service Unit
-=================================
+Choosing the Correct Service Instance Unit
+==========================================
 
-Two service units for BRLTTY can be found within the ``Autostart/Systemd/`` 
-subdirectory of BRLTTY's source tree.
+Two service instance units for BRLTTY can be found within the
+``Autostart/Systemd/`` subdirectory of BRLTTY's source tree.
 
 For Older Versions of Systemd
 -----------------------------
@@ -19,9 +19,9 @@ but, when configuring BRLTTY, you get the following warning:
 
 .. parsed-literal:: |service warning|
 
-then you'll need to use the older service unit.
-It's provided as ``brltty-old.service``.
-Remember to install it as ``brltty.service``.
+then you'll need to use the older service instance unit.
+It's provided as ``brltty@.service.old``.
+Remember to install it as ``brltty@.service``.
 
 You're getting this warning for one of the following reasons:
 
@@ -41,22 +41,32 @@ and, when configuring BRLTTY, you don't get the following warning:
 
 .. parsed-literal:: |service warning|
 
-then you should use the newer service unit.
-It's provided as ``brltty.service``.
+then you should use the newer service instance unit.
+It's provided as ``brltty@.service``.
 
 Installing the Service Unit
 ===========================
 
-You need to copy the service unit into Systemd's unit directory. You can locate
-Systemd's unit directory with this command::
+You need to copy both the service unit and the service instance unit
+into Systemd's unit directory.
+You can locate Systemd's unit directory with this command::
 
    pkg-config systemd --variable=systemduserunitdir
 
 Assuming that Systemd's unit directory is ``/usr/lib/systemd/user`` (please 
-ensure to use whatever it really is on your system), define the service unit 
-for BRLTTY as follows::
+ensure to use whatever it really is on your system):
 
-   cp brltty.service /usr/lib/systemd/user/brltty.service
+1) Define the service instance unit for BRLTTY as follows::
+
+     cp brltty@.service /usr/lib/systemd/user/brltty@.service
+
+2) Define the service unit for BRLTTY as follows::
+
+     cp brltty.service /usr/lib/systemd/user/brltty.service
+
+3) Tell Systemd that these units have been defined as follows::
+
+      systemctl daemon-reload
 
 Managing the BRLTTY Service
 ===========================
