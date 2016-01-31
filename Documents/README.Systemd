@@ -62,15 +62,27 @@ Managing the BRLTTY Service
 ===========================
 
 Once the unit file is in the right place, you'll be able to use standard 
-Systemd commands to manage the ``brltty`` service. The most common ones are::
+Systemd commands to manage the ``brltty`` service. The most common ones are:
 
-   systemctl status brltty
-   systemctl start brltty
-   systemctl stop brltty
-   systemctl enable brltty
-   systemctl disable brltty
+systemctl start brltty
+   Explicitly start the ``brltty`` service.
 
-Nothing is automatic. If you'd like to start the ``brltty`` service right away
+systemctl stop brltty
+   Explicitly stop the ``brltty`` service.
+
+systemctl enable brltty
+   Automatically start the ``brltty`` service on system boot.
+
+systemctl disable brltty
+   Don't automatically start the ``brltty`` service on system boot.
+
+systemctl status brltty
+   Show the current status of the ``brltty`` service.
+
+journalctl -u brltty
+   Show system log messages pertaining to the ``brltty`` service.
+
+Nothing is implicit. If you'd like to start the ``brltty`` service right away
 then use the ``start`` function. If you'd like the ``brltty`` service to be
 automatically started when the system is booted then use the ``enable``
 function.
