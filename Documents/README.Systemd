@@ -3,7 +3,14 @@ Using Systemd Service Management
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. include:: prologue.rst
+
 .. |service warning| replace:: system service support not available on this platform
+
+.. |default user configuration directory| replace:: /etc
+.. |default system unit directory| replace:: |default user configuration directory|/systemd/system
+.. |service unit| replace:: brltty.service
+.. |new service instance unit| replace:: brltty@.service
+.. |old service instance unit| replace:: |new service instance unit|.old
 
 Choosing the Correct Service Instance Unit
 ==========================================
@@ -20,8 +27,8 @@ but, when configuring BRLTTY, you get the following warning:
 .. parsed-literal:: |service warning|
 
 then you'll need to use the older service instance unit.
-It's provided as ``brltty@.service.old``.
-Remember to install it as ``brltty@.service``.
+It's provided as |old service instance unit|.
+Remember to install it as |new service instance unit|.
 
 You're getting this warning for one of the following reasons:
 
@@ -42,33 +49,34 @@ and, when configuring BRLTTY, you don't get the following warning:
 .. parsed-literal:: |service warning|
 
 then you should use the newer service instance unit.
-It's provided as ``brltty@.service``.
+It's provided as |new service instance unit|.
 
-Installing the Service Unit
-===========================
+Installing the Service Units
+============================
 
 You need to copy both the service unit and the service instance unit
-into Systemd's unit directory.
-You can locate Systemd's unit directory with this command::
+into Systemd's system unit directory.
+You can find out where this directory is on your system with this command::
 
-   pkg-config systemd --variable=systemduserunitdir
+   pkg-config systemd --variable=systemdsystemunitpath
 
-Assuming that Systemd's unit directory is ``/usr/lib/systemd/user`` (please 
-ensure to use whatever it really is on your system):
+The output from this command is a colon-delimtied list of directories.
+Look for the one that starts with |default user configuration directory|.
+Assuming that Systemd's system unit directory is |default system unit directory|
+(please ensure to use whatever it really is on your system):
 
 1) Define the service instance unit for BRLTTY as follows:
 
-   *  For older versinos of Systemd::
+   *  For older versinos of Systemd:
 
-         cp brltty@.service.old /usr/lib/systemd/user/brltty@.service
+      .. parsed-literal:: cp |old service instance unit| |default system unit directory|/|new service instance unit| 
+   *  For newer versinos of Systemd:
 
-   *  For newer versinos of Systemd::
+      .. parsed-literal:: cp |new service instance unit| |default system unit directory|/|new service instance unit|
 
-         cp brltty@.service /usr/lib/systemd/user/brltty@.service
+2) Define the service unit for BRLTTY as follows:
 
-2) Define the service unit for BRLTTY as follows::
-
-     cp brltty.service /usr/lib/systemd/user/brltty.service
+  .. parsed-literal:: cp |service unit| |default system unit directory|/|service unit|
 
 3) Tell Systemd that these units have been defined as follows::
 
