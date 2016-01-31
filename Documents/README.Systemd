@@ -56,9 +56,15 @@ You can locate Systemd's unit directory with this command::
 Assuming that Systemd's unit directory is ``/usr/lib/systemd/user`` (please 
 ensure to use whatever it really is on your system):
 
-1) Define the service instance unit for BRLTTY as follows::
+1) Define the service instance unit for BRLTTY as follows:
 
-     cp brltty@.service /usr/lib/systemd/user/brltty@.service
+   *  For older versinos of Systemd::
+
+         cp brltty@.service.old /usr/lib/systemd/user/brltty@.service
+
+   *  For newer versinos of Systemd::
+
+         cp brltty@.service /usr/lib/systemd/user/brltty@.service
 
 2) Define the service unit for BRLTTY as follows::
 
