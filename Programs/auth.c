@@ -486,27 +486,31 @@ authPolkit_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
     logMessage(LOG_DEBUG, "attempting to authenticate pid %d via polkit", cred.pid);
 
     PolkitSubject *subject = polkit_unix_process_new_for_owner(cred.pid, -1, -1);
-    GError *error_local = NULL;
+    if (subject) {
+      GError *error_local = NULL;
 
-    PolkitAuthorizationResult *result = polkit_authority_check_authorization_sync(
-      polkit->authority,
-      subject,
-      "org.brltty.write-display",
-      NULL,
-      POLKIT_CHECK_AUTHORIZATION_FLAGS_NONE,
-      NULL,
-      &error_local
-    );
+      PolkitAuthorizationResult *result = polkit_authority_check_authorization_sync(
+        polkit->authority,			/* authority */
+        subject,				/* PolkitSubject for client */
+        "org.brltty.write-display",		/* name of polkit action */
+        NULL,					/* details */
+        POLKIT_CHECK_AUTHORIZATION_FLAGS_NONE,	/* disallow interaction */
+        NULL,					/* GCancellable */
+        &error_local				/* returned error */
+      );
 
-    if (result) {
-      g_object_unref(result);
+      if (result) {
+        int isAuthorized = polkit_authorization_result_get_is_authorized(result);
+        g_object_unref(result);
 
-      int isAuthorized = polkit_authorization_result_get_is_authorized(result);
-      logMessage(LOG_DEBUG, "polkit_authority_check_authorization_sync returned %d", isAuthorized);
-      return isAuthorized;
+        logMessage(LOG_DEBUG, "polkit_authority_check_authorization_sync returned %d", isAuthorized);
+        return isAuthorized;
+      } else {
+        logSystemError("polkit_authority_check_authorization_sync");
+        g_error_free(error_local);
+      }
     } else {
-      logSystemError("polkit_authority_check_authorization_sync");
-      g_error_free(error_local);
+      logSystemError("polkit_unix_process_new_for_owner");
     }
   } else {
     logSystemError("getsockopt[SO_PEERCRED]");
