@@ -912,7 +912,9 @@ setTranslationTable (int force) {
         const struct unipair *sfm = &screenFontMapTable[--screenFontMapIndex];
 
         if (sfm->fontpos < count) {
-          translationTable[sfm->fontpos] = sfm->unicode;
+          wchar_t *character = &translationTable[sfm->fontpos];
+          if (*character == 0X20) continue;
+          *character = sfm->unicode;
         }
       }
     }
