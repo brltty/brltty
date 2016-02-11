@@ -624,6 +624,15 @@ BRLTTY_ARG_DISABLE(
 ])
 
 BRLTTY_ARG_DISABLE(
+   [polkit],
+   [support for the Polkit authorization manager],
+   [],
+[dnl
+   BRLTTY_HAVE_PACKAGE([polkit], [polkit-gobject-1],
+   AC_DEFINE(USE_POLKIT, 1, [if the Polkit authorization manager should be used]))
+])
+
+BRLTTY_ARG_DISABLE(
    [api],
    [the application programming interface],
    [],
@@ -1777,9 +1786,6 @@ BRLTTY_HAVE_PACKAGE([dbus], ["dbus-1 >= 1.0"], [dnl
 
 BRLTTY_ARG_DRIVER([screen], [Screen])
 BRLTTY_SUMMARY_ITEM([screen-driver], [default_screen_driver])
-
-BRLTTY_HAVE_PACKAGE([polkit], [polkit-gobject-1],
-AC_DEFINE(USE_POLKIT, 1, [if the Polkit authorization manager should be used]))
 
 BRLTTY_ARG_ENABLE(
    [relocatable-install],
