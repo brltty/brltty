@@ -61,7 +61,7 @@ struct TuneBuilderStruct {
   } source;
 };
 
-static const wchar_t noteLetters[] = WS_C("cdefgab");
+static const wchar_t *noteLetters = WS_C("cdefgab");
 static const unsigned char noteOffsets[] = {0, 2, 4, 5, 7, 9, 11};
 static const signed char scaleAccidentals[] = {0, 2, 4, -1, 1, 3, 5};
 static const unsigned char accidentalTable[] = {3, 0, 4, 1, 5, 2, 6};
@@ -543,11 +543,11 @@ parseTuneText (TuneBuilder *tb, const wchar_t *text) {
   wchar_t buffer[wcslen(text) + 1];
   wcscpy(buffer, text);
 
-  static const wchar_t delimiters[] = WS_C(" \t\r\n");
+  static const wchar_t *delimiters = WS_C(" \t\r\n");
   wchar_t *string = buffer;
   wchar_t *operand;
 
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined(__MSDOS__)
   wchar_t *next;
 #endif /* __MINGW32__ */
 

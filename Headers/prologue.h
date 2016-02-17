@@ -276,7 +276,7 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 #define wcslen(source) strlen((const char *)(source))
 #define wcsnlen(source,count) strnlen((const char *)(source), (count))
 
-#define wcschr(source,character) strchr((const char *)(source), (char)(character))
+#define wcschr(source,character) ((wchar_t *)strchr((const char *)(source), (char)(character)))
 #define wcscoll(source1,source2) strcoll((const char *)(source1), (const char *)(source2))
 #define wcscspn(source,reject) strcspn((const char *)(source), (const char *)(reject))
 #define wcsdup(source) strdup((const char *)(source))
@@ -284,9 +284,10 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 #define wcsrchr(source,character) strrchr((const char *)(source), (char)(character))
 #define wcsspn(source,accept) strspn((const char *)(source), (const char *)(accept))
 #define wcsstr(source,substring) strstr((const char *)(source), (const char *)(substring))
-#define wcstok(target,delimiters,end) strtok_r((char *)(target), (const char *)(delimiters), (char **)(end))
+#define wcstok(target,delimiters,end) ((wchar_t *)strtok(((char *)(target)), ((const char *)(delimiters))))
 #define wcswcs(source,substring) strstr((const char *)(source), (const char *)(substring))
 #define wcsxfrm(target,source,count) strxfrm((char *)(target), (const char *)(source), (count))
+#define wcstoul(nptr, endptr, base) strtoul(((const char *)(nptr)), ((char **)(endptr)), (base))
 
 #define wcstol(source,end,base) strtol((const char *)(source), (char **)(end), (base))
 #define wcstoll(source,end,base) strtoll((const char *)(source), (char **)(end), (base))
@@ -332,8 +333,8 @@ mbsinit (const mbstate_t *ps) {
   return 1;
 }
 
-#define WC_C(wc) (wchar_t)wc
-#define WS_C(ws) (const wchar_t *)ws
+#define WC_C(wc) ((wchar_t)wc)
+#define WS_C(ws) ((const wchar_t *)ws)
 #define PRIwc "c"
 #define PRIws "s"
 #define iswLatin1(wc) (1)
