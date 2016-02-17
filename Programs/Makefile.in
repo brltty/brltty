@@ -294,6 +294,9 @@ rabiables.$O:
 datafile.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/datafile.c
 
+variables.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/variables.c
+
 unicode.$O:
 	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/unicode.c
 
