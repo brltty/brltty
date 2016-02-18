@@ -128,17 +128,17 @@ typedef union {
   unsigned char bytes[4 + 0XFF];
 
   struct {
-    HT_PacketType type:8;
+    unsigned char type;
 
     union {
       struct {
-        HT_ModelIdentifier model:8;
+        unsigned char model;
       } PACKED ok;
 
       struct {
-        HT_ModelIdentifier model:8;
+        unsigned char model;
         unsigned char length;
-        HT_ExtendedPacketType type:8;
+        unsigned char type;
 
         union {
           HT_DateTime dateTime;
