@@ -868,8 +868,9 @@ verifyPacket (
       break;
   }
 
-  if ((size == *length) && (bytes[0] == HT_PKT_Extended) && (byte != SYN))
+  if ((size == *length) && (bytes[0] == HT_PKT_Extended) && (byte != SYN)) {
     return BRL_PVR_INVALID;
+  }
 
   return BRL_PVR_INCLUDE;
 }
@@ -1252,10 +1253,12 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       unsigned int setTime = 0;
       HT_Packet response;
 
-      if (*parameters[PARM_SETTIME])
-        if (!validateYesNo(&setTime, parameters[PARM_SETTIME]))
+      if (*parameters[PARM_SETTIME]) {
+        if (!validateYesNo(&setTime, parameters[PARM_SETTIME])) {
           logMessage(LOG_WARNING, "%s: %s", "invalid set time setting",
                      parameters[PARM_SETTIME]);
+        }
+      }
 
       setTime = !!setTime;
 
