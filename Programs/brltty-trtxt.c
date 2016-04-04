@@ -35,6 +35,7 @@ static char *opt_tablesDirectory;
 static char *opt_inputTable;
 static char *opt_outputTable;
 static int opt_sixDots;
+static int opt_noBaseCharacters;
 
 static const char tableName_autoselect[] = "auto";
 static const char tableName_unicode[] = "unicode";
@@ -73,6 +74,13 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Config | OPT_Environ,
     .setting.flag = &opt_sixDots,
     .description = strtext("Remove dots seven and eight.")
+  },
+
+  { .letter = 'b',
+    .word = "no-base-characters",
+    .flags = OPT_Config | OPT_Environ,
+    .setting.flag = &opt_noBaseCharacters,
+    .description = strtext("Don't fall back to the Unicode base character.")
   },
 END_OPTION_TABLE
 
@@ -214,6 +222,7 @@ getTable (TextTable **table, const char *name) {
     }
 
     if (allocated) free(allocated);
+     if (opt_noBaseCharacters) setTryBaseCharacter(*table, 0);
     if (!*table) return 0;
   }
 

@@ -346,8 +346,13 @@ makeTextTable (TextTableData *ttd) {
   TextTable *table = malloc(sizeof(*table));
 
   if (table) {
+    memset(table, 0, sizeof(*table));
+
     table->header.fields = getTextTableHeader(ttd);
     table->size = getDataSize(ttd->area);
+
+    table->options.tryBaseCharacter = 1;
+
     resetDataArea(ttd->area);
   }
 

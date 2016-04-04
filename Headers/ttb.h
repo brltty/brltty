@@ -32,12 +32,14 @@ extern void destroyTextTable (TextTable *table);
 
 extern char *ensureTextTableExtension (const char *path);
 extern char *makeTextTablePath (const char *directory, const char *name);
+
 extern char *selectTextTable (const char *directory);
+extern int replaceTextTable (const char *directory, const char *name);
 
 extern unsigned char convertCharacterToDots (TextTable *table, wchar_t character);
 extern wchar_t convertDotsToCharacter (TextTable *table, unsigned char dots);
 
-extern int replaceTextTable (const char *directory, const char *name);
+extern void setTryBaseCharacter (TextTable *table, unsigned char yes);
 
 #ifdef __cplusplus
 }

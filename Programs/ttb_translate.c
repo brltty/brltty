@@ -86,6 +86,11 @@ getUnicodeCellEntry (TextTable *table, wchar_t character) {
   return NULL;
 }
 
+void
+setTryBaseCharacter (TextTable *table, unsigned char yes) {
+  table->options.tryBaseCharacter = yes;
+}
+
 static int
 searchTextTableAlias (const void *target, const void *element) {
   const wchar_t *reference = target;
@@ -145,11 +150,6 @@ convertCharacterToDots (TextTable *table, wchar_t character) {
     }
 
     default: {
-      SetBrailleRepresentationData sbr = {
-        .table = table,
-        .dots = 0
-      };
-
       {
         unsigned int counter = 0;
 
@@ -177,8 +177,15 @@ convertCharacterToDots (TextTable *table, wchar_t character) {
         }
       }
 
-      if (handleBestCharacter(character, setBrailleRepresentation, &sbr)) {
-        return sbr.dots;
+      if (table->options.tryBaseCharacter) {
+        SetBrailleRepresentationData sbr = {
+          .table = table,
+          .dots = 0
+        };
+
+        if (handleBestCharacter(character, setBrailleRepresentation, &sbr)) {
+          return sbr.dots;
+        }
       }
 
       break;

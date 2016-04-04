@@ -67,6 +67,10 @@ struct TextTableStruct {
   } header;
 
   size_t size;
+
+  struct {
+    unsigned char tryBaseCharacter;
+  } options;
 };
 
 extern const TextTableAliasEntry *locateTextTableAlias (
