@@ -75,6 +75,8 @@ static char *host;
 static char *xDisplay;
 static int quiet;
 
+static int brlapi_fd;
+
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'b',
     .word = "brlapi",
@@ -108,6 +110,15 @@ END_OPTION_TABLE
  * error handling
  */
 
+static void api_cleanExit(void) {
+  if (brlapi_fd>=0)
+  {
+    close(brlapi_fd);
+    brlapi_fd=-1;
+  }
+}
+
+/* dumps errors which are fatal to brlapi only */
 static void fatal_brlapi_errno(const char *msg, const char *fmt, ...) {
   brlapi_perror(msg);
   if (fmt) {
@@ -116,9 +127,17 @@ static void fatal_brlapi_errno(const char *msg, const char *fmt, ...) {
     vfprintf(stderr,fmt,va);
     va_end(va);
   }
-  exit(PROG_EXIT_FATAL);
+  api_cleanExit();
 }
 
+static void exception_handler(int error, brlapi_packetType_t type, const void *packet, size_t size) {
+  char str[0X100];
+  brlapi_strexception(str,0X100, error, type, packet, size);
+  fprintf(stderr, "BrlAPI exception: %s\nDisconnecting from brlapi\n", str);
+  api_cleanExit();
+}
+
+/* dumps errors which are fatal to the whole xbrlapi */
 static void fatal_errno(const char *msg, const char *fmt, ...) {
   perror(msg);
   if (fmt) {
@@ -149,36 +168,34 @@ static void fatal(const char *fmt, ...) {
 #define MIN(a, b) (((a) < (b))? (a): (b))
 #endif /* MIN */
 
-static int brlapi_fd;
-
-static void api_cleanExit(int foo) {
-  close(brlapi_fd);
-  exit(PROG_EXIT_SUCCESS);
-}
-
-static void tobrltty_init(char *auth, char *host) {
+static int tobrltty_init(char *auth, char *host) {
   brlapi_connectionSettings_t settings;
   unsigned int x,y;
   settings.host=host;
   settings.auth=auth;
 
-  signal(SIGTERM,api_cleanExit);
-  signal(SIGINT,api_cleanExit);
-#ifdef SIGHUP
-  signal(SIGHUP,api_cleanExit);
-#endif /* SIGHUP */
-#ifdef SIGQUIT
-  signal(SIGQUIT,api_cleanExit);
-#endif /* SIGQUIT */
-#ifdef SIGPIPE
-  signal(SIGPIPE,api_cleanExit);
-#endif /* SIGPIPE */
-
   if ((brlapi_fd = brlapi_openConnection(&settings,&settings))<0)
-    fatal_brlapi_errno("openConnection",gettext("cannot connect to brltty at %s\n"),settings.host);
+  {
+    static int tried;
+    if (!tried)
+    {
+      /* Only produce an error message the first time we try to connect, to
+       * provide feedback to users running xbrlapi by hand, but not fill logs
+       * with reconnection attempts.  */
+      tried = 1;
+      fatal_brlapi_errno("openConnection",gettext("cannot connect to brltty at %s\n"),settings.host);
+    }
+    return 0;
+  }
 
   if (brlapi_getDisplaySize(&x,&y)<0)
+  {
     fatal_brlapi_errno("getDisplaySize",NULL);
+    return 0;
+  }
+
+  brlapi_setExceptionHandler(exception_handler);
+  return 1;
 }
 
 static int getXVTnb(void);
@@ -193,36 +210,70 @@ static void getVT(void) {
 
   if (path || vtnr || vtno == -1) {
     if (brlapi_enterTtyModeWithPath(NULL,0,NULL)<0)
+    {
       fatal_brlapi_errno("geTtyPath",gettext("cannot get tty\n"));
+      return;
+    }
   } else {
     if (brlapi_enterTtyMode(vtno,NULL)<0)
+    {
       fatal_brlapi_errno("enterTtyMode",gettext("cannot get tty %d\n"),vtno);
+      return;
+    }
   }
 
   if (brlapi_ignoreAllKeys()<0)
+  {
     fatal_brlapi_errno("ignoreAllKeys",gettext("cannot ignore keys\n"));
+    return;
+  }
 #ifdef CAN_SIMULATE_KEY_PRESSES
   /* All X keysyms with any modifier */
   brlapi_keyCode_t cmd = BRLAPI_KEY_TYPE_SYM;
   if (brlapi_acceptKeys(brlapi_rangeType_type, &cmd, 1))
+  {
     fatal_brlapi_errno("acceptKeys",NULL);
+    return;
+  }
   cmd = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_SHIFT;
   if (brlapi_acceptKeys(brlapi_rangeType_key, &cmd, 1))
+  {
     fatal_brlapi_errno("acceptKeys",NULL);
+    return;
+  }
   cmd = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_UPPER;
   if (brlapi_acceptKeys(brlapi_rangeType_key, &cmd, 1))
+  {
     fatal_brlapi_errno("acceptKeys",NULL);
+    return;
+  }
   cmd = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_CONTROL;
   if (brlapi_acceptKeys(brlapi_rangeType_key, &cmd, 1))
+  {
     fatal_brlapi_errno("acceptKeys",NULL);
+    return;
+  }
   cmd = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_META;
   if (brlapi_acceptKeys(brlapi_rangeType_key, &cmd, 1))
+  {
     fatal_brlapi_errno("acceptKeys",NULL);
+    return;
+  }
 #endif /* CAN_SIMULATE_KEY_PRESSES */
 }
 
+static char *last_name;
+
+static void api_setLastName(void) {
+  if (!last_name) return;
+  if (brlapi_writeText(0,last_name)<0) {
+    brlapi_perror("writeText");
+    fprintf(stderr,gettext("cannot write window name %s\n"),last_name);
+  }
+}
+
 static void api_setName(const char *wm_name) {
-  static char *last_name;
+  if (brlapi_fd<0) return;
 
   debugf("%s got focus\n",wm_name);
   if (last_name) {
@@ -230,17 +281,22 @@ static void api_setName(const char *wm_name) {
     free(last_name);
   }
   if (!(last_name=strdup(wm_name))) fatal_errno("strdup(wm_name)",NULL);
+  api_setLastName();
+}
 
-  if (brlapi_writeText(0,wm_name)<0) {
-    brlapi_perror("writeText");
-    fprintf(stderr,gettext("cannot write window name %s\n"),wm_name);
-  }
+static int last_win;
+
+static void api_setLastFocus(void)
+{
+  if (brlapi_setFocus(last_win)<0)
+    fatal_brlapi_errno("setFocus",gettext("cannot set focus to %#010x\n"),last_win);
 }
 
 static void api_setFocus(int win) {
+  if (brlapi_fd<0) return;
   debugf("%#010x (%d) got focus\n",win,win);
-  if (brlapi_setFocus(win)<0)
-    fatal_brlapi_errno("setFocus",gettext("cannot set focus to %#010x\n"),win);
+  last_win = win;
+  api_setLastFocus();
 }
 
 /******************************************************************************
@@ -500,7 +556,10 @@ static void ignoreServerKeys(void) {
     .last  = BRLAPI_KEY_FLG(ControlMask|Mod1Mask)|~BRLAPI_KEY_FLAGS_MASK,
   };
   if (brlapi_ignoreKeyRanges(&range, 1))
+  {
     fatal_brlapi_errno("ignoreKeyRanges",NULL);
+    return;
+  }
 }
 #endif /* CAN_SIMULATE_KEY_PRESSES */
 
@@ -509,7 +568,7 @@ static void toX_f(const char *display) {
   XEvent ev;
   int i;
   int X_fd;
-  fd_set fds,readfds;
+  fd_set readfds;
   int maxfd;
 #ifdef CAN_SIMULATE_KEY_PRESSES
   int res;
@@ -539,15 +598,14 @@ static void toX_f(const char *display) {
   }
 
   X_fd = XConnectionNumber(dpy);
-  FD_ZERO(&fds);
-  FD_SET(brlapi_fd, &fds);
-  FD_SET(X_fd, &fds);
-  maxfd = X_fd>brlapi_fd ? X_fd+1 : brlapi_fd+1;
 
-  getVT();
+  if (brlapi_fd>=0)
+  {
+    getVT();
 #ifdef CAN_SIMULATE_KEY_PRESSES
-  ignoreServerKeys();
+    ignoreServerKeys();
 #endif /* CAN_SIMULATE_KEY_PRESSES */
+  }
   netWmNameAtom = XInternAtom(dpy,"_NET_WM_NAME",False);
   utf8StringAtom = XInternAtom(dpy,"UTF8_STRING",False);
 
@@ -576,9 +634,15 @@ static void toX_f(const char *display) {
     setFocus(win);
   }
   while(1) {
+    struct timeval timeout={.tv_sec=1,.tv_usec=0};
     XFlush(dpy);
-    memcpy(&readfds,&fds,sizeof(readfds));
-    if (select(maxfd,&readfds,NULL,NULL,NULL)<0)
+    FD_ZERO(&readfds);
+    if (brlapi_fd>=0)
+      FD_SET(brlapi_fd, &readfds);
+    FD_SET(X_fd, &readfds);
+    maxfd = brlapi_fd>=0 && X_fd<brlapi_fd ? brlapi_fd+1 : X_fd+1;
+    /* Try to reconnect to brlapi every second while disconnected */
+    if (select(maxfd,&readfds,NULL,NULL,brlapi_fd<=0?&timeout:NULL)<0)
       fatal_errno("select",NULL);
     if (FD_ISSET(X_fd,&readfds))
     while (XPending(dpy)) {
@@ -669,8 +733,9 @@ static void toX_f(const char *display) {
       default: fprintf(stderr,gettext("unhandled event type: %d\n"),ev.type); break;
       }
     }
+    if (brlapi_fd>=0 && FD_ISSET(brlapi_fd,&readfds)) {
 #ifdef CAN_SIMULATE_KEY_PRESSES
-    if (haveXTest && FD_ISSET(brlapi_fd,&readfds)) {
+     if (haveXTest) {
       while (((res = brlapi_readKey(0, &code))==1)) {
 	switch (code & BRLAPI_KEY_TYPE_MASK) {
 	  case BRLAPI_KEY_TYPE_CMD:
@@ -775,14 +840,31 @@ static void toX_f(const char *display) {
       }
       if (res<0)
 	fatal_brlapi_errno("brlapi_readKey",NULL);
-    }
+     }
 #endif /* CAN_SIMULATE_KEY_PRESSES */
+    } else {
+      /* Try to reconnect */
+      if (tobrltty_init(auth,host))
+      {
+	getVT();
+#ifdef CAN_SIMULATE_KEY_PRESSES
+	ignoreServerKeys();
+#endif /* CAN_SIMULATE_KEY_PRESSES */
+	api_setLastName();
+	api_setLastFocus();
+      }
+    }
   }
 }
 
 /******************************************************************************
  * main 
  */
+
+static void term_handler(int foo) {
+  api_cleanExit();
+  exit(PROG_EXIT_SUCCESS);
+}
 
 int
 main (int argc, char *argv[]) {
@@ -793,6 +875,18 @@ main (int argc, char *argv[]) {
     };
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
+
+  signal(SIGTERM,term_handler);
+  signal(SIGINT,term_handler);
+#ifdef SIGHUP
+  signal(SIGHUP,term_handler);
+#endif /* SIGHUP */
+#ifdef SIGQUIT
+  signal(SIGQUIT,term_handler);
+#endif /* SIGQUIT */
+#ifdef SIGPIPE
+  signal(SIGPIPE,term_handler);
+#endif /* SIGPIPE */
 
   tobrltty_init(auth,host);
 
