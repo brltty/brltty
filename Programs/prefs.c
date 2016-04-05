@@ -208,7 +208,9 @@ getPreferenceSetting (
   int value;
 
   if (isInteger(&value, operand)) {
-    if ((value >= 0) && (value <= 0XFF)) {
+    unsigned char maximum = names? (names->count - 1): 0XFF;
+
+    if ((value >= 0) && (value <= maximum)) {
       *setting = value;
       return 1;
     }
