@@ -710,7 +710,7 @@ trackScreenCursor (int place) {
     }
 
     return 1;
-  } else if ((prefs.cursorTrackingDelay > 0) &&
+  } else if ((prefs.cursorTrackingDelay > 0) && (ses->dctx != -1) &&
              !isWithinBrailleWindow(ses->trkx, ses->trky)) {
     /* The cursor may move spuriously while a program updates information
      * on a status bar. If cursor tracking is on and the cursor was
@@ -727,6 +727,10 @@ trackScreenCursor (int place) {
 
     return 1;
   }
+
+  /* anything but -1 */
+  ses->dctx = 0;
+  ses->dcty = 0;
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   if (isContracted) {
