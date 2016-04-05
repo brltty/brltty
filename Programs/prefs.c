@@ -205,18 +205,22 @@ getPreferenceSetting (
   const char *name, const char *operand,
   unsigned char *setting, const PreferenceStringTable *names
 ) {
-  int value;
-
-  if (isInteger(&value, operand)) {
-    unsigned char maximum = names? (names->count - 1): 0XFF;
-
-    if ((value >= 0) && (value <= maximum)) {
-      *setting = value;
-      return 1;
+  if (names) {
+    for (unsigned int index=0; index<names->count; index+=1) {
+      if (strcmp(operand, names->table[index]) == 0) {
+        *setting = index;
+        return 1;
+      }
     }
-  } else {
-    for (value=0; value<names->count; value+=1) {
-      if (strcmp(operand, names->table[value]) == 0) {
+  }
+
+  {
+    int value;
+
+    if (isInteger(&value, operand)) {
+      unsigned char maximum = names? (names->count - 1): 0XFF;
+
+      if ((value >= 0) && (value <= maximum)) {
         *setting = value;
         return 1;
       }
