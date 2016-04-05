@@ -100,6 +100,14 @@ typedef enum {
   ssTextSide
 } StatusSeparator;
 
+typedef enum {
+  ctdNone,
+  ctd250ms,
+  ctd500ms,
+  ctd1s,
+  ctd2s
+} CursorTrackingDelay;
+
 /*
  * Structure definition for preferences (settings which are saveable).
  */
@@ -192,6 +200,8 @@ typedef struct {
   unsigned char keyboardLedAlerts;
 
   unsigned char touchNavigation;
+
+  unsigned char cursorTrackingDelay;
 
   unsigned char saveOnExit;
   unsigned char showSubmenuSizes;

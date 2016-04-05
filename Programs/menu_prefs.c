@@ -705,6 +705,19 @@ makePreferencesMenu (void) {
       CHANGED(BrailleWindowOverlap);
     }
 
+    {
+      static const MenuString strings[] = {
+        {.label=strtext("None")},
+        {.label=strtext("250 milliseconds")},
+        {.label=strtext("500 milliseconds")},
+        {.label=strtext("1 second")},
+        {.label=strtext("2 seconds")}
+      };
+
+      NAME(strtext("Cursor Tracking Delay"));
+      ITEM(newEnumeratedMenuItem(navigationSubmenu, &prefs.cursorTrackingDelay, &itemName, strings));
+    }
+
 #ifdef HAVE_LIBGPM
     {
       NAME(strtext("Track Screen Pointer"));

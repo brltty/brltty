@@ -101,6 +101,8 @@ extern int shiftBrailleWindowRight (unsigned int amount);
 
 extern void slideWindowVertically (int y);
 
+extern void navigationCommandFinished (void);
+
 extern int showScreenCursor (void);
 extern int trackScreenCursor (int place);
 

@@ -53,6 +53,7 @@
 #include "async_wait.h"
 #include "async_event.h"
 #include "async_signal.h"
+#include "async_alarm.h"
 #include "alert.h"
 #include "ctb.h"
 #include "routing.h"
@@ -656,9 +657,76 @@ shiftBrailleWindowRight (unsigned int amount) {
   return moveWindowRight(amount);
 }
 
+static int
+isWithinBrailleWindow (int x, int y) {
+  return (x >= ses->winx)
+      && (x < (int)(ses->winx + textCount))
+      && (y >= ses->winy)
+      && (y < (int)(ses->winy + brl.textRows))
+      ;
+}
+
+static AsyncHandle cursorTrackingAlarm = NULL;
+
+ASYNC_ALARM_CALLBACK(handleCursorTrackingAlarm) {
+  asyncDiscardHandle(cursorTrackingAlarm);
+  cursorTrackingAlarm = NULL;
+
+  ses->trkx = ses->dctx;
+  ses->trky = ses->dcty;
+
+  ses->dctx = -1;
+  ses->dcty = -1;
+
+  scheduleUpdate("delayed cursor tracking");
+}
+
+static void
+cancelCursorTrackingAlarm (void) {
+  if (cursorTrackingAlarm) {
+    asyncCancelRequest(cursorTrackingAlarm);
+    cursorTrackingAlarm = NULL;
+  }
+}
+
+void
+navigationCommandFinished (void) {
+  cancelCursorTrackingAlarm();
+}
+
 int
 trackScreenCursor (int place) {
   if (!SCR_CURSOR_OK()) return 0;
+
+  if (place) {
+    cancelCursorTrackingAlarm();
+  } else if (cursorTrackingAlarm) {
+    /* A cursor tracking motion has been delayed. If the cursor returned
+     * to its initial location in the mean time then we discard and ignore
+     * the previous motion. Otherwise we wait for the timer to expire.
+     */
+    if ((ses->dctx == scr.posx) && (ses->dcty == scr.posy)) {
+      cancelCursorTrackingAlarm();
+    }
+
+    return 1;
+  } else if ((prefs.cursorTrackingDelay > 0) &&
+             !isWithinBrailleWindow(ses->trkx, ses->trky)) {
+    /* The cursor may move spuriously while a program updates information
+     * on a status bar. If cursor tracking is on and the cursor was
+     * outside the braille window before it moved, we delay the tracking
+     * motion for a while so as not to obnoxiously move the braille window
+     * in case the cursor will eventually return to its initial location
+     * within a short time.
+     */
+    ses->dctx = ses->trkx;
+    ses->dcty = ses->trky;
+
+    int delay = 250 << (prefs.cursorTrackingDelay - 1);
+    asyncSetAlarmIn(&cursorTrackingAlarm, delay, handleCursorTrackingAlarm, NULL);
+
+    return 1;
+  }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   if (isContracted) {
@@ -685,11 +753,8 @@ trackScreenCursor (int place) {
   }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-  if (place) {
-    if ((scr.posx < ses->winx) || (scr.posx >= (int)(ses->winx + textCount)) ||
-        (scr.posy < ses->winy) || (scr.posy >= (int)(ses->winy + brl.textRows))) {
-      placeBrailleWindowHorizontally(scr.posx);
-    }
+  if (place && !isWithinBrailleWindow(scr.posx, scr.posy)) {
+    placeBrailleWindowHorizontally(scr.posx);
   }
 
   if (prefs.slidingBrailleWindow) {

@@ -42,6 +42,7 @@ typedef struct {
   int winx, winy;	/* upper-left corner of braille window */
   int motx, moty;	/* last user motion of braille window */
   int trkx, trky;	/* tracked cursor position */
+  int dctx, dcty;	/* initial cursor position */
   int ptrx, ptry;	/* last known screen pointer position */
   int spkx, spky;	/* current speech position */
 

@@ -765,6 +765,7 @@ handleNavigationCommands (int command, void *data) {
     }
   }
 
+  navigationCommandFinished();
   return 1;
 }
 

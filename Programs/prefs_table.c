@@ -46,6 +46,10 @@ PREFERENCE_STRING_TABLE(skipBlankWindowsMode,
   "all", "end", "rest"
 )
 
+PREFERENCE_STRING_TABLE(cursorTrackingDelay,
+  "0", "25", "50", "100", "200"
+)
+
 PREFERENCE_STRING_TABLE(cursorStyle,
   "underline", "block", "dot7", "dot8"
 )
@@ -274,6 +278,12 @@ const PreferenceEntry preferenceTable[] = {
   { .name = "braille-window-overlap",
     .defaultValue = DEFAULT_BRAILLE_WINDOW_OVERLAP,
     .setting = &prefs.brailleWindowOverlap
+  },
+
+  { .name = "cursor-tracking-delay",
+    .defaultValue = DEFAULT_CURSOR_TRACKING_DELAY,
+    .settingNames = &preferenceStringTable_cursorTrackingDelay,
+    .setting = &prefs.cursorTrackingDelay
   },
 
   { .name = "track-screen-pointer",
