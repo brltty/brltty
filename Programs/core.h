@@ -39,9 +39,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern ScreenDescription scr;
-#define SCR_COORDINATE_OK(coordinate,limit) (((coordinate) >= 0) && ((coordinate) < (limit)))
-#define SCR_COLUMN_OK(column) SCR_COORDINATE_OK((column), scr.cols)
-#define SCR_ROW_OK(row) SCR_COORDINATE_OK((row), scr.rows)
+#define SCR_COLUMN_OK(column) WITHIN_BOUNDS((column), scr.cols)
+#define SCR_ROW_OK(row) WITHIN_BOUNDS((row), scr.rows)
 #define SCR_COORDINATES_OK(column,row) (SCR_COLUMN_OK((column)) && SCR_ROW_OK((row)))
 #define SCR_CURSOR_OK() SCR_COORDINATES_OK(scr.posx, scr.posy)
 #define SCR_COLUMN_NUMBER(column) (SCR_COLUMN_OK((column))? (column)+1: 0)

@@ -45,6 +45,9 @@ extern "C" {
 #define ARRAY_COUNT(array) (sizeof((array)) / sizeof((array)[0]))
 #define ARRAY_SIZE(pointer, count) ((count) * sizeof(*(pointer)))
 
+#define WITHIN_RANGE(index,start,end) (((index) >= (start)) && ((index) < (end)))
+#define WITHIN_BOUNDS(index,count) WITHIN_RANGE((index), 0, (count))
+
 #define SYMBOL_TYPE(name) name ## _t
 #define SYMBOL_POINTER(name) static SYMBOL_TYPE(name) *name##_p = NULL;
 
