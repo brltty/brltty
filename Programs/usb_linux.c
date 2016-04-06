@@ -991,7 +991,7 @@ ASYNC_SIGNAL_CALLBACK(usbHandleInputSignal) {
       }
 
       if (!handled) {
-        usbSetInputError(endpoint, errno);
+        usbSetEndpointInputError(endpoint, errno);
         usbStopSignalMonitor(eptx);
       }
 
@@ -1068,30 +1068,28 @@ ASYNC_MONITOR_CALLBACK(usbHandleCompletedInputRequests) {
 
   if (error) {
     logActionError(error, "USBFS output monitor");
+    usbSetDeviceInputError(device, errno);
+    return 0;
   }
 
   while ((endpoint = usbReapURB(device, 0))) {
-    if (error) {
-      usbSetInputError(endpoint, errno);
-    } else {
-      UsbEndpointExtension *eptx = endpoint->extension;
-      struct usbdevfs_urb *urb;
+    UsbEndpointExtension *eptx = endpoint->extension;
+    struct usbdevfs_urb *urb;
 
-      while ((urb = dequeueItem(eptx->completedRequests))) {
-        usbLogURB(urb, "reaped");
+    while ((urb = dequeueItem(eptx->completedRequests))) {
+      usbLogURB(urb, "reaped");
 
-        {
-          int handled = usbHandleCompletedInputRequest(endpoint, urb);
-          if (!handled) usbSetInputError(endpoint, errno);
+      {
+        int handled = usbHandleCompletedInputRequest(endpoint, urb);
+        if (!handled) usbSetEndpointInputError(endpoint, errno);
 
-          free(urb);
-          if (!handled) return 0;
-        }
+        free(urb);
+        if (!handled) return 0;
       }
     }
   }
 
-  return !error;
+  return 1;
 }
 
 static int

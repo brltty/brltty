@@ -572,11 +572,28 @@ usbHaveInputError (UsbEndpoint *endpoint) {
 }
 
 void
-usbSetInputError (UsbEndpoint *endpoint, int error) {
+usbSetEndpointInputError (UsbEndpoint *endpoint, int error) {
   if (!usbHaveInputError(endpoint)) {
     endpoint->direction.input.pipe.error = error;
     closeFile(&endpoint->direction.input.pipe.input);
   }
+}
+
+static int
+usbSetInputError (void *item, void *data) {
+  UsbEndpoint *endpoint = item;
+  const int *error = data;
+
+  if (usbHaveInputPipe(endpoint)) {
+    usbSetEndpointInputError(endpoint, *error);
+  }
+
+  return 0;
+}
+
+void
+usbSetDeviceInputError (UsbDevice *device, int error) {
+  processQueue(device->endpoints, usbSetInputError, &error);
 }
 
 int
