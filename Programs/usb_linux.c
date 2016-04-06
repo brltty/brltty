@@ -1062,14 +1062,17 @@ usbHandleCompletedInputRequest (UsbEndpoint *endpoint, struct usbdevfs_urb *urb)
 }
 
 ASYNC_MONITOR_CALLBACK(usbHandleCompletedInputRequests) {
-  int error = parameters->error;
   UsbDevice *device = parameters->data;
   UsbEndpoint *endpoint;
 
-  if (error) {
-    logActionError(error, "USBFS output monitor");
-    usbSetDeviceInputError(device, errno);
-    return 0;
+  {
+    int error = parameters->error;
+
+    if (error) {
+      logActionError(error, "USBFS output monitor");
+      usbSetDeviceInputError(device, errno);
+      return 0;
+    }
   }
 
   while ((endpoint = usbReapURB(device, 0))) {
@@ -1089,7 +1092,9 @@ ASYNC_MONITOR_CALLBACK(usbHandleCompletedInputRequests) {
     }
   }
 
-  return 1;
+  if (errno == EAGAIN) return 1;
+  usbSetDeviceInputError(device, errno);
+  return 0;
 }
 
 static int
