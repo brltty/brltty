@@ -221,8 +221,10 @@ alert (AlertIdentifier identifier) {
           setTuneSourceName(tuneBuilder, "alert");
           setTuneSourceIndex(tb, identifier);
 
-          if (parseTuneString(tb, alert->tune)) {
-            *tune = getTune(tb);
+          if (parseTuneString(tb, "p100")) {
+            if (parseTuneString(tb, alert->tune)) {
+              *tune = getTune(tb);
+            }
           }
 
           resetTuneBuilder(tb);
