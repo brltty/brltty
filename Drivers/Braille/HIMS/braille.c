@@ -134,11 +134,28 @@ BEGIN_KEY_NAME_TABLES(sync)
   KEY_NAME_TABLE(SB_scroll),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLE(beetle)
+  KEY_NAME_ENTRY(HM_KEY_BS_RightScrollUp, "Backward"),
+  KEY_NAME_ENTRY(HM_KEY_BS_RightScrollDown, "Forward"),
+
+  KEY_NAME_ENTRY(HM_KEY_F1, "F1"),
+  KEY_NAME_ENTRY(HM_KEY_F4, "F2"),
+  KEY_NAME_ENTRY(HM_KEY_F3, "F3"),
+  KEY_NAME_ENTRY(HM_KEY_F2, "F4"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLES(beetle)
+  KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(braille),
+  KEY_NAME_TABLE(beetle),
+END_KEY_NAME_TABLES
+
 DEFINE_KEY_TABLE(pan)
 DEFINE_KEY_TABLE(scroll)
 DEFINE_KEY_TABLE(qwerty)
 DEFINE_KEY_TABLE(edge)
 DEFINE_KEY_TABLE(sync)
+DEFINE_KEY_TABLE(beetle)
 
 BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(pan),
@@ -146,6 +163,7 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(qwerty),
   &KEY_TABLE_DEFINITION(edge),
   &KEY_TABLE_DEFINITION(sync),
+  &KEY_TABLE_DEFINITION(beetle),
 END_KEY_TABLE_LIST
 
 typedef enum {
@@ -516,6 +534,21 @@ getCellCount (BrailleDisplay *brl, unsigned int *count) {
   return brl->data->protocol->getDefaultCellCount(brl, count);
 }
 
+static void
+setKeyTable (BrailleDisplay *brl, const KeyTableDefinition *ktd) {
+  if (!ktd) ktd = brl->data->protocol->keyTable;
+
+  switch (brl->textColumns) {
+    case 14:
+      if (ktd == &KEY_TABLE_DEFINITION(scroll)) {
+        ktd = &KEY_TABLE_DEFINITION(beetle);
+      }
+      break;
+  }
+
+  setBrailleKeyTable(brl, ktd);
+}
+
 static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
   static const SerialParameters serialParameters = {
@@ -620,19 +653,15 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
       logMessage(LOG_INFO, "detected: %s", brl->data->protocol->modelName);
 
-      {
-        const KeyTableDefinition *ktd =
-          brl->data->protocol->testIdentities?
-            brl->data->protocol->testIdentities(brl):
-            NULL;
-
-        if (!ktd) ktd = brl->data->protocol->keyTable;
-        setBrailleKeyTable(brl, ktd);
-      }
+      const KeyTableDefinition *ktd =
+        brl->data->protocol->testIdentities?
+          brl->data->protocol->testIdentities(brl):
+          NULL;
 
       if (getCellCount(brl, &brl->textColumns)) {
         brl->textRows = 1;
 
+        setKeyTable(brl, ktd);
         makeOutputTable(dotsTable_ISO11548_1);
   
         if (clearCells(brl)) return 1;
