@@ -1350,11 +1350,7 @@ updateCells (BrailleDisplay *brl) {
   if (!brl->data->updateRequired) return 1;
   if (brl->data->currentState != BDS_READY) return 1;
 
-  if (!writeCells(brl)) {
-    setState(brl, BDS_OFF);
-    return 0;
-  }
-
+  if (!writeCells(brl)) return 0;
   brl->data->updateRequired = 0;
   return 1;
 }
@@ -1368,8 +1364,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
     brl->data->updateRequired = 1;
   }
 
-  updateCells(brl);
-  return 1;
+  return updateCells(brl);
 }
 
 static int
