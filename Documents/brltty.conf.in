@@ -537,6 +537,7 @@
 #api-parameters Auth=keyfile:@CONFIGURATION_DIRECTORY@/@api_authkeyfile@	# Require authentication key
 #api-parameters Auth=user:joe		# Allow some local user
 #api-parameters Auth=group:brl		# Allow some local group
+#api-parameters Auth=polkit		# authenticate via Polkit
 #api-parameters Host=:0			# Accept only local Unix connections
 #api-parameters Host=0.0.0.0:0		# Accept any internet connection.
 #api-parameters StackSize=65536
