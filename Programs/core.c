@@ -254,6 +254,7 @@ setSessionEntry (void) {
                   DIFFERENT;
 
     if (state != SAME) {
+      cancelDelayedCursorTrackingAlarm();
       ses = getSessionEntry(scr.number);
 
       if (state == FIRST) {
@@ -282,6 +283,7 @@ updateSessionAttributes (void) {
     int maximum = MAX(scr.cols-1, 0);
     int *table[] = {&ses->winx, &ses->motx, NULL};
     int **value = table;
+
     while (*value) {
       if (**value > maximum) **value = maximum;
       value += 1;
@@ -666,11 +668,11 @@ isWithinBrailleWindow (int x, int y) {
       ;
 }
 
-static AsyncHandle cursorTrackingAlarm = NULL;
+static AsyncHandle delayedCursorTrackingAlarm;
 
-ASYNC_ALARM_CALLBACK(handleCursorTrackingAlarm) {
-  asyncDiscardHandle(cursorTrackingAlarm);
-  cursorTrackingAlarm = NULL;
+ASYNC_ALARM_CALLBACK(handleDelayedCursorTrackingAlarm) {
+  asyncDiscardHandle(delayedCursorTrackingAlarm);
+  delayedCursorTrackingAlarm = NULL;
 
   ses->trkx = ses->dctx;
   ses->trky = ses->dcty;
@@ -681,17 +683,12 @@ ASYNC_ALARM_CALLBACK(handleCursorTrackingAlarm) {
   scheduleUpdate("delayed cursor tracking");
 }
 
-static void
-cancelCursorTrackingAlarm (void) {
-  if (cursorTrackingAlarm) {
-    asyncCancelRequest(cursorTrackingAlarm);
-    cursorTrackingAlarm = NULL;
-  }
-}
-
 void
-navigationCommandFinished (void) {
-  cancelCursorTrackingAlarm();
+cancelDelayedCursorTrackingAlarm (void) {
+  if (delayedCursorTrackingAlarm) {
+    asyncCancelRequest(delayedCursorTrackingAlarm);
+    delayedCursorTrackingAlarm = NULL;
+  }
 }
 
 int
@@ -699,14 +696,14 @@ trackScreenCursor (int place) {
   if (!SCR_CURSOR_OK()) return 0;
 
   if (place) {
-    cancelCursorTrackingAlarm();
-  } else if (cursorTrackingAlarm) {
+    cancelDelayedCursorTrackingAlarm();
+  } else if (delayedCursorTrackingAlarm) {
     /* A cursor tracking motion has been delayed. If the cursor returned
      * to its initial location in the mean time then we discard and ignore
      * the previous motion. Otherwise we wait for the timer to expire.
      */
     if ((ses->dctx == scr.posx) && (ses->dcty == scr.posy)) {
-      cancelCursorTrackingAlarm();
+      cancelDelayedCursorTrackingAlarm();
     }
 
     return 1;
@@ -723,7 +720,8 @@ trackScreenCursor (int place) {
     ses->dcty = ses->trky;
 
     int delay = 250 << (prefs.cursorTrackingDelay - 1);
-    asyncSetAlarmIn(&cursorTrackingAlarm, delay, handleCursorTrackingAlarm, NULL);
+    asyncSetAlarmIn(&delayedCursorTrackingAlarm, delay,
+                    handleDelayedCursorTrackingAlarm, NULL);
 
     return 1;
   }
@@ -1233,6 +1231,8 @@ brlttyConstruct (int argc, char *argv[]) {
   interruptEvent = NULL;
   interruptPending = 0;
 
+  delayedCursorTrackingAlarm = NULL;
+
   beginCommandQueue();
   beginUpdates();
   suspendUpdates();
@@ -1249,8 +1249,8 @@ brlttyConstruct (int argc, char *argv[]) {
   if (!trackScreenCursor(1)) ses->winx = ses->winy = 0;
   ses->motx = ses->winx; ses->moty = ses->winy;
   ses->spkx = ses->winx; ses->spky = ses->winy;
-  resumeUpdates(1);
 
+  resumeUpdates(1);
   return PROG_EXIT_SUCCESS;
 }
 

@@ -765,7 +765,7 @@ handleNavigationCommands (int command, void *data) {
     }
   }
 
-  navigationCommandFinished();
+  cancelDelayedCursorTrackingAlarm();
   return 1;
 }
 

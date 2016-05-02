@@ -100,10 +100,9 @@ extern int shiftBrailleWindowRight (unsigned int amount);
 
 extern void slideWindowVertically (int y);
 
-extern void navigationCommandFinished (void);
-
 extern int showScreenCursor (void);
 extern int trackScreenCursor (int place);
+extern void cancelDelayedCursorTrackingAlarm (void);
 
 typedef struct {
   TimeValue value;
