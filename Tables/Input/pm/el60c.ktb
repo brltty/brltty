@@ -18,5 +18,6 @@
 
 title Papenmeier BrailleX EL60c
 
+assign hasSingleStepBar
 assign statusKeys 0
 include bar.kti

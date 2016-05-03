@@ -20,10 +20,11 @@
 
 bind BarUp1 LNUP
 bind BarDown1 LNDN
-bind BarUp2 TOP
-bind BarDown2 BOT
 bind BarLeft1 FWINLT
 bind BarRight1 FWINRT
+
+bind BarUp2 TOP
+bind BarDown2 BOT
 bind BarLeft2 LNBEG
 bind BarRight2 LNEND
 
@@ -37,19 +38,22 @@ hide off
 include routing.kti
 bind BarUp1+!RoutingKey1 PRINDENT
 bind BarDown1+!RoutingKey1 NXINDENT
-bind BarUp2+!RoutingKey1 SETLEFT
-bind BarDown2+!RoutingKey1 DESCCHAR
 bind BarLeft1+!RoutingKey1 CLIP_ADD
 bind BarRight1+!RoutingKey1 COPY_LINE
-bind BarLeft2+!RoutingKey1 CLIP_NEW
-bind BarRight2+!RoutingKey1 COPY_RECT
 
-hide on
-bind BarUp1+BarUp2+!RoutingKey1 SETLEFT
-bind BarDown1+BarDown2+!RoutingKey1 DESCCHAR
-bind BarLeft1+BarLeft2+!RoutingKey1 CLIP_NEW
-bind BarRight1+BarRight2+!RoutingKey1 COPY_RECT
-hide off
+ifNotVar hasSingleStepBar
+  bind BarUp2+!RoutingKey1 SETLEFT
+  bind BarDown2+!RoutingKey1 DESCCHAR
+  bind BarLeft2+!RoutingKey1 CLIP_NEW
+  bind BarRight2+!RoutingKey1 COPY_RECT
+
+  hide on
+  bind BarUp1+BarUp2+!RoutingKey1 SETLEFT
+  bind BarDown1+BarDown2+!RoutingKey1 DESCCHAR
+  bind BarLeft1+BarLeft2+!RoutingKey1 CLIP_NEW
+  bind BarRight1+BarRight2+!RoutingKey1 COPY_RECT
+  hide off
+endIf
 
 assign toggleOff BarLeft1
 assign toggleOn BarRight1
