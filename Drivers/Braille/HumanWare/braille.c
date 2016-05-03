@@ -72,8 +72,10 @@ typedef struct {
 struct BrailleDataStruct {
   const ProtocolEntry *protocol;
 
-  unsigned char forceWrite;
-  unsigned char textCells[0XFF];
+  struct {
+    unsigned char rewrite;
+    unsigned char cells[0XFF];
+  } text;
 };
 
 static const ProtocolEntry serialProtocol = {
@@ -211,7 +213,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
         makeOutputTable(dotsTable_ISO11548_1);
 
-        brl->data->forceWrite = 1;
+        brl->data->text.rewrite = 1;
         return 1;
       }
 
@@ -239,10 +241,10 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  if (cellsHaveChanged(brl->data->textCells, brl->buffer, brl->textColumns, NULL, NULL, &brl->data->forceWrite)) {
+  if (cellsHaveChanged(brl->data->text.cells, brl->buffer, brl->textColumns, NULL, NULL, &brl->data->text.rewrite)) {
     unsigned char cells[brl->textColumns];
 
-    translateOutputCells(cells, brl->data->textCells, brl->textColumns);
+    translateOutputCells(cells, brl->data->text.cells, brl->textColumns);
     if (!writePacket(brl, HW_MSG_DISPLAY, brl->textColumns, cells)) return 0;
   }
 
