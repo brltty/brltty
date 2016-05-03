@@ -67,6 +67,7 @@ END_KEY_TABLE_LIST
 
 typedef struct {
   const char *name;
+  int (*probeDisplay) (BrailleDisplay *brl);
 } ProtocolEntry;
 
 struct BrailleDataStruct {
@@ -76,14 +77,6 @@ struct BrailleDataStruct {
     unsigned char rewrite;
     unsigned char cells[0XFF];
   } text;
-};
-
-static const ProtocolEntry serialProtocol = {
-  .name = "serial"
-};
-
-static const ProtocolEntry hidProtocol = {
-  .name = "HID"
 };
 
 static BraillePacketVerifierResult
@@ -124,6 +117,78 @@ writePacket (BrailleDisplay *brl, unsigned char type, unsigned char length, cons
 
   return writeBraillePacket(brl, NULL, &packet, length);
 }
+
+static int
+writeIdentifyRequest (BrailleDisplay *brl) {
+  return writePacket(brl, HW_MSG_INIT, 0, NULL);
+}
+
+static size_t
+readResponse (BrailleDisplay *brl, void *packet, size_t size) {
+  return readBraillePacket(brl, NULL, packet, size, verifyPacket, NULL);
+}
+
+static BrailleResponseResult
+isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
+  const HW_Packet *response = packet;
+
+  return (response->fields.type == HW_MSG_INIT_RESP)? BRL_RSP_DONE: BRL_RSP_UNEXPECTED;
+}
+
+static int
+probeSerialDisplay (BrailleDisplay *brl) {
+  HW_Packet response;
+
+  if (probeBrailleDisplay(brl, 0, NULL, 1000,
+                          writeIdentifyRequest,
+                          readResponse, &response, sizeof(response.bytes),
+                          isIdentityResponse)) {
+    logMessage(LOG_INFO, "detected Humanware device: model=%u cells=%u",
+               response.fields.data.init.modelIdentifier,
+               response.fields.data.init.cellCount);
+
+    if (response.fields.data.init.communicationDisabled) {
+      logMessage(LOG_WARNING, "communication channel not available");
+    }
+
+    brl->textColumns = response.fields.data.init.cellCount;
+    return 1;
+  }
+
+  return 0;
+}
+
+static const ProtocolEntry serialProtocol = {
+  .name = "serial",
+  .probeDisplay = probeSerialDisplay
+};
+
+typedef struct {
+  unsigned char reportIdentifier;
+  char systemLanguage[2];
+
+  struct {
+    char major;
+    char minor;
+    char revision[2];
+  } version;
+
+  char serialNumber[16];
+  unsigned char zero;
+  unsigned char cellCount;
+  unsigned char cellType;
+  unsigned char pad[13];
+} CapabilitiesReport;
+
+static int
+probeHidDisplay (BrailleDisplay *brl) {
+  return 0;
+}
+
+static const ProtocolEntry hidProtocol = {
+  .name = "HID",
+  .probeDisplay = probeHidDisplay
+};
 
 static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
@@ -171,43 +236,12 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 }
 
 static int
-writeIdentifyRequest (BrailleDisplay *brl) {
-  return writePacket(brl, HW_MSG_INIT, 0, NULL);
-}
-
-static size_t
-readResponse (BrailleDisplay *brl, void *packet, size_t size) {
-  return readBraillePacket(brl, NULL, packet, size, verifyPacket, NULL);
-}
-
-static BrailleResponseResult
-isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
-  const HW_Packet *response = packet;
-
-  return (response->fields.type == HW_MSG_INIT_RESP)? BRL_RSP_DONE: BRL_RSP_UNEXPECTED;
-}
-
-static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
 
     if (connectResource(brl, device)) {
-      HW_Packet response;
-
-      if (probeBrailleDisplay(brl, 0, NULL, 1000,
-                              writeIdentifyRequest,
-                              readResponse, &response, sizeof(response.bytes),
-                              isIdentityResponse)) {
-        logMessage(LOG_INFO, "detected Humanware device: model=%u cells=%u",
-                   response.fields.data.init.modelIdentifier,
-                   response.fields.data.init.cellCount);
-
-        if (response.fields.data.init.communicationDisabled) {
-          logMessage(LOG_WARNING, "communication channel not available");
-        }
-
-        brl->textColumns = response.fields.data.init.cellCount;
+      if (brl->data->protocol->probeDisplay(brl)) {
         brl->textRows = 1;
 
         setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
