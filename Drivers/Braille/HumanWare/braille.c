@@ -65,9 +65,23 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(all),
 END_KEY_TABLE_LIST
 
+typedef struct {
+  const char *name;
+} ProtocolEntry;
+
 struct BrailleDataStruct {
+  const ProtocolEntry *protocol;
+
   unsigned char forceWrite;
   unsigned char textCells[0XFF];
+};
+
+static const ProtocolEntry serialProtocol = {
+  .name = "serial"
+};
+
+static const ProtocolEntry hidProtocol = {
+  .name = "HID"
 };
 
 static BraillePacketVerifierResult
@@ -118,11 +132,18 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   };
 
   BEGIN_USB_CHANNEL_DEFINITIONS
-    { /* all models */
+    { /* all models (serial protocol) */
       .vendor=0X1C71, .product=0XC005, 
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=2, .outputEndpoint=3,
-      .serial = &serialParameters
+      .serial = &serialParameters,
+      .data = &serialProtocol
+    },
+
+    { /* all models (HID protocol) */
+      .vendor=0X1C71, .product=0XC006,
+      .configuration=1, .interface=1, .alternative=0,
+      .data = &hidProtocol
     },
   END_USB_CHANNEL_DEFINITIONS
 
@@ -130,14 +151,17 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   gioInitializeDescriptor(&descriptor);
 
   descriptor.serial.parameters = &serialParameters;
+  descriptor.serial.options.applicationData = &serialProtocol;
   descriptor.serial.options.readyDelay = 100;
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
 
   descriptor.bluetooth.channelNumber = 1;
+  descriptor.bluetooth.options.applicationData = &serialProtocol;
   descriptor.bluetooth.options.readyDelay = 100;
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
+    brl->data->protocol = gioGetApplicationData(brl->gioEndpoint);
     return 1;
   }
 
