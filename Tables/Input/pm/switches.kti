@@ -106,25 +106,6 @@ context switchesFrontRear Unused (left switch front, right switch rear)
 context switchesFrontFront Unused (left switch front, right switch front)
 
 
-context menu
-
-bind BarUp1 MENU_PREV_ITEM
-bind BarDown1 MENU_NEXT_ITEM
-bind BarUp2 MENU_FIRST_ITEM
-bind BarDown2 MENU_LAST_ITEM
-bind BarLeft1 MENU_PREV_SETTING
-bind BarRight1 MENU_NEXT_SETTING
-bind BarLeft2 PREFLOAD
-bind BarRight2 PREFSAVE
-
-hide on
-bind BarUp1+BarUp2 MENU_FIRST_ITEM
-bind BarDown1+BarDown2 MENU_LAST_ITEM
-bind BarLeft1+BarLeft2 PREFLOAD
-bind BarRight1+BarRight2 PREFSAVE
-hide off
-
-
 context switchesRearCenter
 hotkey LeftSwitchRear NOOP CONTEXT+default
 hotkey RightSwitchRear CONTEXT+switchesRearRear NOOP
