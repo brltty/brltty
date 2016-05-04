@@ -291,7 +291,7 @@ writeHidCells (BrailleDisplay *brl, const unsigned char *cells, unsigned char co
 
 static int
 handleHidKeys (BrailleDisplay *brl) {
-  return 0;
+  return EOF;
 }
 
 static const ProtocolEntry hidProtocol = {
