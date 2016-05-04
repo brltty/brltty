@@ -59,6 +59,33 @@ typedef union {
 } HW_Packet;
 
 typedef enum {
+  HW_REP_FTR_Capabilities  = 1,
+  HW_REP_FTR_Settings      = 2,
+  HW_REP_FTR_Configuration = 3,
+  HW_REP_IN_PressedKeys    = 4,
+  HW_REP_OUT_WriteCells    = 5,
+  HW_REP_FTR_KeepAwake     = 6,
+  HW_REP_IN_PoweringOff    = 7
+} HW_ReportIdentifier;
+
+typedef struct {
+  unsigned char reportIdentifier;
+  char systemLanguage[2];
+
+  struct {
+    char major;
+    char minor;
+    char revision[2];
+  } version;
+
+  char serialNumber[16];
+  unsigned char zero;
+  unsigned char cellCount;
+  unsigned char cellType;
+  unsigned char pad[13];
+} HW_CapabilitiesReport;
+
+typedef enum {
   HW_KEY_Power   =  1,
 
   HW_KEY_Dot1    =  2,

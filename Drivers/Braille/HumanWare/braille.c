@@ -163,25 +163,50 @@ static const ProtocolEntry serialProtocol = {
   .probeDisplay = probeSerialDisplay
 };
 
-typedef struct {
-  unsigned char reportIdentifier;
-  char systemLanguage[2];
+static ssize_t
+readFeature (
+  BrailleDisplay *brl, unsigned char report,
+  unsigned char *buffer, size_t size
+) {
+  ssize_t length = gioGetHidFeature(brl->gioEndpoint, report, buffer, size);
 
-  struct {
-    char major;
-    char minor;
-    char revision[2];
-  } version;
+  if (length != -1) {
+    logInputPacket(buffer, length);
+  } else {
+    logSystemError("HID feature read");
+  }
 
-  char serialNumber[16];
-  unsigned char zero;
-  unsigned char cellCount;
-  unsigned char cellType;
-  unsigned char pad[13];
-} CapabilitiesReport;
+  return length;
+}
 
 static int
 probeHidDisplay (BrailleDisplay *brl) {
+  const unsigned char report = HW_REP_FTR_Capabilities;
+  const size_t size = gioGetHidReportSize(brl->gioEndpoint, report);
+
+  if (size > 0) {
+    unsigned char buffer[size];
+    const ssize_t length = readFeature(brl, report, buffer, size);
+
+    if (length != -1) {
+      HW_CapabilitiesReport capabilities;
+
+      {
+        const size_t maximum = sizeof(capabilities);
+        size_t count = MIN(length, maximum);
+        memcpy(&capabilities, buffer, count);
+
+        if (count < maximum) {
+          memset(((unsigned char *)&capabilities)+count,
+                 0, (maximum - count));
+        }
+      }
+
+      brl->textColumns = capabilities.cellCount;
+      return 1;
+    }
+  }
+
   return 0;
 }
 
@@ -242,8 +267,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
     if (connectResource(brl, device)) {
       if (brl->data->protocol->probeDisplay(brl)) {
-        brl->textRows = 1;
-
         setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
         makeOutputTable(dotsTable_ISO11548_1);
 
