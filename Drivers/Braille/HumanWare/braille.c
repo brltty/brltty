@@ -263,6 +263,10 @@ probeHidDisplay (BrailleDisplay *brl) {
         }
       }
 
+      logMessage(LOG_INFO, "Firmware Version: %c.%c.%c%c",
+                 capabilities.version.major, capabilities.version.minor,
+                 capabilities.version.revision[0], capabilities.version.revision[1]);
+
       brl->textColumns = capabilities.cellCount;
       return 1;
     }
