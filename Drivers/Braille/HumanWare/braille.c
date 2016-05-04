@@ -78,7 +78,7 @@ typedef struct {
   const char *name;
   int (*probeDisplay) (BrailleDisplay *brl);
   int (*writeCells) (BrailleDisplay *brl, const unsigned char *cells, unsigned char count);
-  int (*handleKeys) (BrailleDisplay *brl);
+  int (*processKeys) (BrailleDisplay *brl);
 } ProtocolEntry;
 
 struct BrailleDataStruct {
@@ -201,7 +201,7 @@ writeSerialCells (BrailleDisplay *brl, const unsigned char *cells, unsigned char
 }
 
 static int
-handleSerialKeys (BrailleDisplay *brl) {
+processSerialKeys (BrailleDisplay *brl) {
   HW_Packet packet;
   size_t length;
 
@@ -222,14 +222,14 @@ handleSerialKeys (BrailleDisplay *brl) {
     logUnexpectedPacket(&packet, length);
   }
 
-  return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
+  return errno == EAGAIN;
 }
 
 static const ProtocolEntry serialProtocol = {
   .name = "serial",
   .probeDisplay = probeSerialDisplay,
   .writeCells = writeSerialCells,
-  .handleKeys = handleSerialKeys
+  .processKeys = processSerialKeys
 };
 
 static void
@@ -337,13 +337,13 @@ writeHidCells (BrailleDisplay *brl, const unsigned char *cells, unsigned char co
 }
 
 static int
-handleHidKeys (BrailleDisplay *brl) {
+processHidKeys (BrailleDisplay *brl) {
   size_t size = brl->data->hid.reportSizes.pressedKeys;
 
   if (size > 0) {
     unsigned char buffer[size];
     ssize_t length = readReport(brl, HW_REP_IN_PressedKeys, buffer, size);
-    if (length == -1) return BRL_CMD_RESTARTBRL;
+    if (length == -1) return 0;
 
     KEYS_BITMASK(pressedMask);
     BITMASK_ZERO(pressedMask);
@@ -384,14 +384,14 @@ handleHidKeys (BrailleDisplay *brl) {
     }
   }
 
-  return EOF;
+  return 1;
 }
 
 static const ProtocolEntry hidProtocol = {
   .name = "HID",
   .probeDisplay = probeHidDisplay,
   .writeCells = writeHidCells,
-  .handleKeys = handleHidKeys
+  .processKeys = processHidKeys
 };
 
 static int
@@ -491,5 +491,5 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  return brl->data->protocol->handleKeys(brl);
+  return brl->data->protocol->processKeys(brl)? EOF: BRL_CMD_RESTARTBRL;
 }
