@@ -72,9 +72,6 @@ bind LeftKeyFront+BarUp1+BarUp2 RESTARTBRL
 bind LeftKeyFront+BarDown1+BarDown2 FREEZE
 hide off
 
-bind LeftKeyRear+!RoutingKey1 CLIP_NEW
-bind LeftKeyFront+!RoutingKey1 COPY_LINE
-
 ifNotVar noRightKey
 bind RightKeyRear HELP
 bind RightKeyFront LEARN
@@ -109,7 +106,9 @@ bind RightKeyFront+BarUp1+BarUp2 RESTARTSPEECH
 bind RightKeyFront+BarRight1+BarRight2 SLIDEWIN
 hide off
 
-bind RightKeyRear+!RoutingKey1 CLIP_ADD
+bind LeftKeyRear+!RoutingKey1 CLIP_NEW
+bind LeftKeyFront+!RoutingKey1 CLIP_ADD
+bind RightKeyRear+!RoutingKey1 COPY_LINE
 bind RightKeyFront+!RoutingKey1 COPY_RECT
 endIf
 
