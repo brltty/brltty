@@ -79,6 +79,12 @@ struct BrailleDataStruct {
     unsigned char rewrite;
     unsigned char cells[0XFF];
   } text;
+
+  struct {
+    struct {
+      size_t pressedKeys;
+    } reportSizes;
+  } hid;
 };
 
 static BraillePacketVerifierResult
@@ -211,6 +217,11 @@ static const ProtocolEntry serialProtocol = {
   .handleKeys = handleSerialKeys
 };
 
+static void
+getReportSize (BrailleDisplay *brl, unsigned char report, size_t *size) {
+  *size = gioGetHidReportSize(brl->gioEndpoint, report);
+}
+
 static ssize_t
 readFeature (
   BrailleDisplay *brl, unsigned char report,
@@ -222,6 +233,22 @@ readFeature (
     logInputPacket(buffer, length);
   } else {
     logSystemError("HID feature read");
+  }
+
+  return length;
+}
+
+static ssize_t
+readReport (
+  BrailleDisplay *brl, unsigned char report,
+  unsigned char *buffer, size_t size
+) {
+  ssize_t length = gioGetHidReport(brl->gioEndpoint, report, buffer, size);
+
+  if (length != -1) {
+    logInputPacket(buffer, length);
+  } else {
+    logSystemError("HID report read");
   }
 
   return length;
@@ -243,17 +270,19 @@ writeReport (BrailleDisplay *brl, const unsigned char *data, size_t size) {
 static int
 probeHidDisplay (BrailleDisplay *brl) {
   const unsigned char report = HW_REP_FTR_Capabilities;
-  const size_t size = gioGetHidReportSize(brl->gioEndpoint, report);
+
+  size_t size;
+  getReportSize(brl, report, &size);
 
   if (size > 0) {
     unsigned char buffer[size];
-    const ssize_t length = readFeature(brl, report, buffer, size);
+    ssize_t length = readFeature(brl, report, buffer, size);
 
     if (length != -1) {
       HW_CapabilitiesReport capabilities;
 
       {
-        const size_t maximum = sizeof(capabilities);
+        size_t maximum = sizeof(capabilities);
         size_t count = MIN(length, maximum);
         memcpy(&capabilities, buffer, count);
 
@@ -266,6 +295,9 @@ probeHidDisplay (BrailleDisplay *brl) {
       logMessage(LOG_INFO, "Firmware Version: %c.%c.%c%c",
                  capabilities.version.major, capabilities.version.minor,
                  capabilities.version.revision[0], capabilities.version.revision[1]);
+
+      getReportSize(brl, HW_REP_IN_PressedKeys,
+                    &brl->data->hid.reportSizes.pressedKeys);
 
       brl->textColumns = capabilities.cellCount;
       return 1;
@@ -291,6 +323,19 @@ writeHidCells (BrailleDisplay *brl, const unsigned char *cells, unsigned char co
 
 static int
 handleHidKeys (BrailleDisplay *brl) {
+  size_t size = brl->data->hid.reportSizes.pressedKeys;
+
+  if (size > 0) {
+    unsigned char buffer[size];
+    ssize_t length = readReport(brl, HW_REP_IN_PressedKeys, buffer, size);
+    if (length == -1) return BRL_CMD_RESTARTBRL;
+
+    for (unsigned int index=1; index<length; index+=1) {
+      unsigned char key = buffer[index];
+      if (!key) break;
+    }
+  }
+
   return EOF;
 }
 
