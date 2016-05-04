@@ -463,6 +463,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               break;
 
             default:
+            case 40:
+            case 32:
               ktd = &KEY_TABLE_DEFINITION(mb2);
               break;
           }
