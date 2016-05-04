@@ -69,6 +69,7 @@ typedef struct {
   const char *name;
   int (*probeDisplay) (BrailleDisplay *brl);
   int (*writeCells) (BrailleDisplay *brl, const unsigned char *cells, unsigned char count);
+  int (*handleKeys) (BrailleDisplay *brl);
 } ProtocolEntry;
 
 struct BrailleDataStruct {
@@ -164,10 +165,50 @@ writeSerialCells (BrailleDisplay *brl, const unsigned char *cells, unsigned char
   return writePacket(brl, HW_MSG_DISPLAY, count, cells);
 }
 
+static int
+handleKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
+  KeyGroup group;
+
+  if (key < HW_KEY_ROUTING) {
+    group = HW_GRP_NavigationKeys;
+  } else {
+    group = HW_GRP_RoutingKeys;
+    key -= HW_KEY_ROUTING;
+  }
+
+  return enqueueKeyEvent(brl, group, key, press);
+}
+
+static int
+handleSerialKeys (BrailleDisplay *brl) {
+  HW_Packet packet;
+  size_t length;
+
+  while ((length = readBraillePacket(brl, NULL, &packet, sizeof(packet), verifyPacket, NULL))) {
+    switch (packet.fields.type) {
+      case HW_MSG_KEY_DOWN:
+        handleKeyEvent(brl, packet.fields.data.key.id, 1);
+        continue;
+
+      case HW_MSG_KEY_UP:
+        handleKeyEvent(brl, packet.fields.data.key.id, 0);
+        continue;
+
+      default:
+        break;
+    }
+
+    logUnexpectedPacket(&packet, length);
+  }
+
+  return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
+}
+
 static const ProtocolEntry serialProtocol = {
   .name = "serial",
   .probeDisplay = probeSerialDisplay,
-  .writeCells = writeSerialCells
+  .writeCells = writeSerialCells,
+  .handleKeys = handleSerialKeys
 };
 
 static ssize_t
@@ -244,10 +285,16 @@ writeHidCells (BrailleDisplay *brl, const unsigned char *cells, unsigned char co
   return writeReport(brl, buffer, byte-buffer);
 }
 
+static int
+handleHidKeys (BrailleDisplay *brl) {
+  return 0;
+}
+
 static const ProtocolEntry hidProtocol = {
   .name = "HID",
   .probeDisplay = probeHidDisplay,
-  .writeCells = writeHidCells
+  .writeCells = writeHidCells,
+  .handleKeys = handleHidKeys
 };
 
 static int
@@ -345,41 +392,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   return 1;
 }
 
-static void
-handleKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
-  KeyGroup group;
-
-  if (key < HW_KEY_ROUTING) {
-    group = HW_GRP_NavigationKeys;
-  } else {
-    group = HW_GRP_RoutingKeys;
-    key -= HW_KEY_ROUTING;
-  }
-
-  enqueueKeyEvent(brl, group, key, press);
-}
-
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  HW_Packet packet;
-  size_t length;
-
-  while ((length = readBraillePacket(brl, NULL, &packet, sizeof(packet), verifyPacket, NULL))) {
-    switch (packet.fields.type) {
-      case HW_MSG_KEY_DOWN:
-        handleKeyEvent(brl, packet.fields.data.key.id, 1);
-        continue;
-
-      case HW_MSG_KEY_UP:
-        handleKeyEvent(brl, packet.fields.data.key.id, 0);
-        continue;
-
-      default:
-        break;
-    }
-
-    logUnexpectedPacket(&packet, length);
-  }
-
-  return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
+  return brl->data->protocol->handleKeys(brl);
 }
