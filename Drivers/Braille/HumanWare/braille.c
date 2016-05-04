@@ -68,6 +68,7 @@ END_KEY_TABLE_LIST
 typedef struct {
   const char *name;
   int (*probeDisplay) (BrailleDisplay *brl);
+  int (*writeCells) (BrailleDisplay *brl, const unsigned char *cells, unsigned char count);
 } ProtocolEntry;
 
 struct BrailleDataStruct {
@@ -158,9 +159,15 @@ probeSerialDisplay (BrailleDisplay *brl) {
   return 0;
 }
 
+static int
+writeSerialCells (BrailleDisplay *brl, const unsigned char *cells, unsigned char count) {
+  return writePacket(brl, HW_MSG_DISPLAY, count, cells);
+}
+
 static const ProtocolEntry serialProtocol = {
   .name = "serial",
-  .probeDisplay = probeSerialDisplay
+  .probeDisplay = probeSerialDisplay,
+  .writeCells = writeSerialCells
 };
 
 static ssize_t
@@ -177,6 +184,19 @@ readFeature (
   }
 
   return length;
+}
+
+static int
+writeReport (BrailleDisplay *brl, const unsigned char *data, size_t size) {
+  logOutputPacket(data, size);
+
+  {
+    ssize_t result = gioWriteHidReport(brl->gioEndpoint, data, size);
+    if (result != -1) return 1;
+  }
+
+  logSystemError("HID report write");
+  return 0;
 }
 
 static int
@@ -210,9 +230,24 @@ probeHidDisplay (BrailleDisplay *brl) {
   return 0;
 }
 
+static int
+writeHidCells (BrailleDisplay *brl, const unsigned char *cells, unsigned char count) {
+  unsigned char buffer[4 + count];
+  unsigned char *byte = buffer;
+
+  *byte++ = HW_REP_OUT_WriteCells;
+  *byte++ = 1;
+  *byte++ = 0;
+  *byte++ = count;
+  byte = mempcpy(byte, cells, count);
+
+  return writeReport(brl, buffer, byte-buffer);
+}
+
 static const ProtocolEntry hidProtocol = {
   .name = "HID",
-  .probeDisplay = probeHidDisplay
+  .probeDisplay = probeHidDisplay,
+  .writeCells = writeHidCells
 };
 
 static int
@@ -298,11 +333,13 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  if (cellsHaveChanged(brl->data->text.cells, brl->buffer, brl->textColumns, NULL, NULL, &brl->data->text.rewrite)) {
-    unsigned char cells[brl->textColumns];
+  const size_t count = brl->textColumns;
 
-    translateOutputCells(cells, brl->data->text.cells, brl->textColumns);
-    if (!writePacket(brl, HW_MSG_DISPLAY, brl->textColumns, cells)) return 0;
+  if (cellsHaveChanged(brl->data->text.cells, brl->buffer, count, NULL, NULL, &brl->data->text.rewrite)) {
+    unsigned char cells[count];
+
+    translateOutputCells(cells, brl->data->text.cells, count);
+    if (!brl->data->protocol->writeCells(brl, cells, count)) return 0;
   }
 
   return 1;
