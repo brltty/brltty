@@ -86,7 +86,10 @@ struct BrailleDataStruct {
       size_t pressedKeys;
     } reportSizes;
 
-    BITMASK(pressedKeys, 0XFF, int);
+    struct {
+      unsigned char count;
+      BITMASK(mask, 0XFF, int);
+    } pressedKeys;
   } hid;
 };
 
@@ -341,17 +344,21 @@ handleHidKeys (BrailleDisplay *brl) {
       if (!key) break;
       BITMASK_SET(keys, key);
 
-      if (!BITMASK_TEST(brl->data->hid.pressedKeys, key)) {
-        BITMASK_SET(brl->data->hid.pressedKeys, key);
+      if (!BITMASK_TEST(brl->data->hid.pressedKeys.mask, key)) {
         handleKeyEvent(brl, key, 1);
+        BITMASK_SET(brl->data->hid.pressedKeys.mask, key);
+        brl->data->hid.pressedKeys.count += 1;
       }
     }
 
-    for (unsigned int key=0; key<=0XFF; key+=1) {
-      if (BITMASK_TEST(brl->data->hid.pressedKeys, key)) {
-        if (!BITMASK_TEST(keys, key)) {
-          BITMASK_CLEAR(brl->data->hid.pressedKeys, key);
-          handleKeyEvent(brl, key, 0);
+    if (brl->data->hid.pressedKeys.count > 0) {
+      for (unsigned int key=0; key<=0XFF; key+=1) {
+        if (BITMASK_TEST(brl->data->hid.pressedKeys.mask, key)) {
+          if (!BITMASK_TEST(keys, key)) {
+            handleKeyEvent(brl, key, 0);
+            BITMASK_CLEAR(brl->data->hid.pressedKeys.mask, key);
+            if (!--brl->data->hid.pressedKeys.count) break;
+          }
         }
       }
     }
