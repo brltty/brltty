@@ -23,6 +23,7 @@
 
 #include "log.h"
 #include "ascii.h"
+#include "bitmask.h"
 
 #include "brl_driver.h"
 #include "brldefs-hw.h"
@@ -84,8 +85,24 @@ struct BrailleDataStruct {
     struct {
       size_t pressedKeys;
     } reportSizes;
+
+    BITMASK(pressedKeys, 0XFF, int);
   } hid;
 };
+
+static int
+handleKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
+  KeyGroup group;
+
+  if (key < HW_KEY_ROUTING) {
+    group = HW_GRP_NavigationKeys;
+  } else {
+    group = HW_GRP_RoutingKeys;
+    key -= HW_KEY_ROUTING;
+  }
+
+  return enqueueKeyEvent(brl, group, key, press);
+}
 
 static BraillePacketVerifierResult
 verifyPacket (
@@ -169,20 +186,6 @@ probeSerialDisplay (BrailleDisplay *brl) {
 static int
 writeSerialCells (BrailleDisplay *brl, const unsigned char *cells, unsigned char count) {
   return writePacket(brl, HW_MSG_DISPLAY, count, cells);
-}
-
-static int
-handleKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
-  KeyGroup group;
-
-  if (key < HW_KEY_ROUTING) {
-    group = HW_GRP_NavigationKeys;
-  } else {
-    group = HW_GRP_RoutingKeys;
-    key -= HW_KEY_ROUTING;
-  }
-
-  return enqueueKeyEvent(brl, group, key, press);
 }
 
 static int
@@ -330,9 +333,27 @@ handleHidKeys (BrailleDisplay *brl) {
     ssize_t length = readReport(brl, HW_REP_IN_PressedKeys, buffer, size);
     if (length == -1) return BRL_CMD_RESTARTBRL;
 
+    BITMASK(keys, 0XFF, int);
+    BITMASK_ZERO(keys);
+
     for (unsigned int index=1; index<length; index+=1) {
       unsigned char key = buffer[index];
       if (!key) break;
+      BITMASK_SET(keys, key);
+
+      if (!BITMASK_TEST(brl->data->hid.pressedKeys, key)) {
+        BITMASK_SET(brl->data->hid.pressedKeys, key);
+        handleKeyEvent(brl, key, 1);
+      }
+    }
+
+    for (unsigned int key=0; key<=0XFF; key+=1) {
+      if (BITMASK_TEST(brl->data->hid.pressedKeys, key)) {
+        if (!BITMASK_TEST(keys, key)) {
+          BITMASK_CLEAR(brl->data->hid.pressedKeys, key);
+          handleKeyEvent(brl, key, 0);
+        }
+      }
     }
   }
 
