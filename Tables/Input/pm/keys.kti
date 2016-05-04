@@ -73,42 +73,42 @@ bind LeftKeyFront+BarDown1+BarDown2 FREEZE
 hide off
 
 ifNotVar noRightKey
-bind RightKeyRear HELP
-bind RightKeyFront LEARN
+  bind RightKeyRear HELP
+  bind RightKeyFront LEARN
 
-bind RightKeyRear+BarLeft1 MUTE
-bind RightKeyRear+BarRight1 SAY_LINE
-bind RightKeyRear+BarUp1 SAY_ABOVE
-bind RightKeyRear+BarDown1 SAY_BELOW
+  bind RightKeyRear+BarLeft1 MUTE
+  bind RightKeyRear+BarRight1 SAY_LINE
+  bind RightKeyRear+BarUp1 SAY_ABOVE
+  bind RightKeyRear+BarDown1 SAY_BELOW
 
-bind RightKeyRear+BarLeft2 SAY_SLOWER
-bind RightKeyRear+BarRight2 SAY_FASTER
-bind RightKeyRear+BarUp2 SAY_LOUDER
-bind RightKeyRear+BarDown2 SAY_SOFTER
+  bind RightKeyRear+BarLeft2 SAY_SLOWER
+  bind RightKeyRear+BarRight2 SAY_FASTER
+  bind RightKeyRear+BarUp2 SAY_LOUDER
+  bind RightKeyRear+BarDown2 SAY_SOFTER
 
-hide on
-bind RightKeyRear+BarLeft1+BarLeft2 SAY_SLOWER
-bind RightKeyRear+BarRight1+BarRight2 SAY_FASTER
-bind RightKeyRear+BarUp1+BarUp2 SAY_LOUDER
-bind RightKeyRear+BarDown1+BarDown2 SAY_SOFTER
-hide off
+  hide on
+  bind RightKeyRear+BarLeft1+BarLeft2 SAY_SLOWER
+  bind RightKeyRear+BarRight1+BarRight2 SAY_FASTER
+  bind RightKeyRear+BarUp1+BarUp2 SAY_LOUDER
+  bind RightKeyRear+BarDown1+BarDown2 SAY_SOFTER
+  hide off
 
-bind RightKeyFront+BarLeft1 SKPIDLNS
-bind RightKeyFront+BarRight1 SKPBLNKWINS
-bind RightKeyFront+BarUp1 SPKHOME
-bind RightKeyFront+BarDown1 TUNES
+  bind RightKeyFront+BarLeft1 SKPIDLNS
+  bind RightKeyFront+BarRight1 SKPBLNKWINS
+  bind RightKeyFront+BarUp1 SPKHOME
+  bind RightKeyFront+BarDown1 TUNES
 
-bind RightKeyFront+BarUp2 RESTARTSPEECH
-bind RightKeyFront+BarRight2 SLIDEWIN
+  bind RightKeyFront+BarUp2 RESTARTSPEECH
+  bind RightKeyFront+BarRight2 SLIDEWIN
 
-hide on
-bind RightKeyFront+BarUp1+BarUp2 RESTARTSPEECH
-bind RightKeyFront+BarRight1+BarRight2 SLIDEWIN
-hide off
+  hide on
+  bind RightKeyFront+BarUp1+BarUp2 RESTARTSPEECH
+  bind RightKeyFront+BarRight1+BarRight2 SLIDEWIN
+  hide off
 
-bind LeftKeyRear+!RoutingKey1 CLIP_NEW
-bind LeftKeyFront+!RoutingKey1 CLIP_ADD
-bind RightKeyRear+!RoutingKey1 COPY_LINE
-bind RightKeyFront+!RoutingKey1 COPY_RECT
+  bind LeftKeyRear+!RoutingKey1 CLIP_NEW
+  bind LeftKeyFront+!RoutingKey1 CLIP_ADD
+  bind RightKeyRear+!RoutingKey1 COPY_LINE
+  bind RightKeyFront+!RoutingKey1 COPY_RECT
 endIf
 

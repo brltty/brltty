@@ -21,11 +21,11 @@
 note The long key on the front is the Easy Access Bar.
 
 ifVar hasSingleStepBar
-note * It can only be moved one step in each direction.
-note * To emulate the second step, also press any of the lower routing keys
-note * (those in the row just behind the text cells).
+  note * It can only be moved one step in each direction (left, right, up, down).
+  note * To emulate the second step, also press any of the lower routing keys
+  note * (those in the row just behind the text cells).
 else
-note * It can be moved two steps in each direction.
+  note * It can be moved two steps in each direction (left, right, up, down).
 endIf
 
 bind BarUp1 LNUP
