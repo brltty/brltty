@@ -336,28 +336,39 @@ handleHidKeys (BrailleDisplay *brl) {
     ssize_t length = readReport(brl, HW_REP_IN_PressedKeys, buffer, size);
     if (length == -1) return BRL_CMD_RESTARTBRL;
 
-    BITMASK(keys, 0XFF, int);
-    BITMASK_ZERO(keys);
+    BITMASK(pressedKeys, 0XFF, int);
+    BITMASK_ZERO(pressedKeys);
+    unsigned int pressedCount = 0;
 
-    for (unsigned int index=1; index<length; index+=1) {
-      unsigned char key = buffer[index];
-      if (!key) break;
-      BITMASK_SET(keys, key);
+    {
+      const unsigned char *key = buffer + 1;
+      const unsigned char *end = buffer + length;
 
-      if (!BITMASK_TEST(brl->data->hid.pressedKeys.mask, key)) {
-        handleKeyEvent(brl, key, 1);
-        BITMASK_SET(brl->data->hid.pressedKeys.mask, key);
-        brl->data->hid.pressedKeys.count += 1;
+      while (key < end) {
+        if (!*key) break;
+
+        if (!BITMASK_TEST(pressedKeys, *key)) {
+          BITMASK_SET(pressedKeys, *key);
+          pressedCount += 1;
+
+          if (!BITMASK_TEST(brl->data->hid.pressedKeys.mask, *key)) {
+            handleKeyEvent(brl, *key, 1);
+            BITMASK_SET(brl->data->hid.pressedKeys.mask, *key);
+            brl->data->hid.pressedKeys.count += 1;
+          }
+        }
+
+        key += 1;
       }
     }
 
-    if (brl->data->hid.pressedKeys.count > 0) {
+    if (brl->data->hid.pressedKeys.count > pressedCount) {
       for (unsigned int key=0; key<=0XFF; key+=1) {
         if (BITMASK_TEST(brl->data->hid.pressedKeys.mask, key)) {
-          if (!BITMASK_TEST(keys, key)) {
+          if (!BITMASK_TEST(pressedKeys, key)) {
             handleKeyEvent(brl, key, 0);
             BITMASK_CLEAR(brl->data->hid.pressedKeys.mask, key);
-            if (!--brl->data->hid.pressedKeys.count) break;
+            if (--brl->data->hid.pressedKeys.count == pressedCount) break;
           }
         }
       }
