@@ -86,31 +86,31 @@ typedef struct {
 } HW_CapabilitiesReport;
 
 typedef enum {
-  HW_KEY_Power   =  1,
+  HW_KEY_Reset    =  1,
 
-  HW_KEY_Dot1    =  2,
-  HW_KEY_Dot2    =  3,
-  HW_KEY_Dot3    =  4,
-  HW_KEY_Dot4    =  5,
-  HW_KEY_Dot5    =  6,
-  HW_KEY_Dot6    =  7,
-  HW_KEY_Dot7    =  8,
-  HW_KEY_Dot8    =  9,
-  HW_KEY_Space   = 10,
+  HW_KEY_Dot1     =  2,
+  HW_KEY_Dot2     =  3,
+  HW_KEY_Dot3     =  4,
+  HW_KEY_Dot4     =  5,
+  HW_KEY_Dot5     =  6,
+  HW_KEY_Dot6     =  7,
+  HW_KEY_Dot7     =  8,
+  HW_KEY_Dot8     =  9,
+  HW_KEY_Space    = 10,
 
-  HW_KEY_Nav1    = 11,
-  HW_KEY_Nav2    = 12,
-  HW_KEY_Nav3    = 13,
-  HW_KEY_Nav4    = 14,
-  HW_KEY_Nav5    = 15,
-  HW_KEY_Nav6    = 16,
+  HW_KEY_Command1 = 11,
+  HW_KEY_Command2 = 12,
+  HW_KEY_Command3 = 13,
+  HW_KEY_Command4 = 14,
+  HW_KEY_Command5 = 15,
+  HW_KEY_Command6 = 16,
 
-  HW_KEY_Thumb1  = 17,
-  HW_KEY_Thumb2  = 18,
-  HW_KEY_Thumb3  = 19,
-  HW_KEY_Thumb4  = 20,
+  HW_KEY_Thumb1   = 17,
+  HW_KEY_Thumb2   = 18,
+  HW_KEY_Thumb3   = 19,
+  HW_KEY_Thumb4   = 20,
 
-  HW_KEY_ROUTING = 80
+  HW_KEY_ROUTING  = 80
 } HW_NavigationKey;
 
 typedef enum {

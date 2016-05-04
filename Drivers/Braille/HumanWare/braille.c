@@ -28,25 +28,15 @@
 #include "brl_driver.h"
 #include "brldefs-hw.h"
 
-BEGIN_KEY_NAME_TABLE(all)
-  KEY_NAME_ENTRY(HW_KEY_Power, "Power"),
+BEGIN_KEY_NAME_TABLE(nav)
+  KEY_NAME_ENTRY(HW_KEY_Reset, "Reset"),
 
-  KEY_NAME_ENTRY(HW_KEY_Dot1, "Dot1"),
-  KEY_NAME_ENTRY(HW_KEY_Dot2, "Dot2"),
-  KEY_NAME_ENTRY(HW_KEY_Dot3, "Dot3"),
-  KEY_NAME_ENTRY(HW_KEY_Dot4, "Dot4"),
-  KEY_NAME_ENTRY(HW_KEY_Dot5, "Dot5"),
-  KEY_NAME_ENTRY(HW_KEY_Dot6, "Dot6"),
-  KEY_NAME_ENTRY(HW_KEY_Dot7, "Dot7"),
-  KEY_NAME_ENTRY(HW_KEY_Dot8, "Dot8"),
-  KEY_NAME_ENTRY(HW_KEY_Space, "Space"),
-
-  KEY_NAME_ENTRY(HW_KEY_Nav1, "Display1"),
-  KEY_NAME_ENTRY(HW_KEY_Nav2, "Display2"),
-  KEY_NAME_ENTRY(HW_KEY_Nav3, "Display3"),
-  KEY_NAME_ENTRY(HW_KEY_Nav4, "Display4"),
-  KEY_NAME_ENTRY(HW_KEY_Nav5, "Display5"),
-  KEY_NAME_ENTRY(HW_KEY_Nav6, "Display6"),
+  KEY_NAME_ENTRY(HW_KEY_Command1, "Display1"),
+  KEY_NAME_ENTRY(HW_KEY_Command2, "Display2"),
+  KEY_NAME_ENTRY(HW_KEY_Command3, "Display3"),
+  KEY_NAME_ENTRY(HW_KEY_Command4, "Display4"),
+  KEY_NAME_ENTRY(HW_KEY_Command5, "Display5"),
+  KEY_NAME_ENTRY(HW_KEY_Command6, "Display6"),
 
   KEY_NAME_ENTRY(HW_KEY_Thumb1, "Thumb1"),
   KEY_NAME_ENTRY(HW_KEY_Thumb2, "Thumb2"),
@@ -56,14 +46,33 @@ BEGIN_KEY_NAME_TABLE(all)
   KEY_GROUP_ENTRY(HW_GRP_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLES(all)
-  KEY_NAME_TABLE(all),
+BEGIN_KEY_NAME_TABLE(kbd)
+  KEY_NAME_ENTRY(HW_KEY_Dot1, "Dot1"),
+  KEY_NAME_ENTRY(HW_KEY_Dot2, "Dot2"),
+  KEY_NAME_ENTRY(HW_KEY_Dot3, "Dot3"),
+  KEY_NAME_ENTRY(HW_KEY_Dot4, "Dot4"),
+  KEY_NAME_ENTRY(HW_KEY_Dot5, "Dot5"),
+  KEY_NAME_ENTRY(HW_KEY_Dot6, "Dot6"),
+  KEY_NAME_ENTRY(HW_KEY_Dot7, "Dot7"),
+  KEY_NAME_ENTRY(HW_KEY_Dot8, "Dot8"),
+  KEY_NAME_ENTRY(HW_KEY_Space, "Space"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLES(mb1)
+  KEY_NAME_TABLE(nav),
 END_KEY_NAME_TABLES
 
-DEFINE_KEY_TABLE(all)
+BEGIN_KEY_NAME_TABLES(mb2)
+  KEY_NAME_TABLE(nav),
+  KEY_NAME_TABLE(kbd),
+END_KEY_NAME_TABLES
+
+DEFINE_KEY_TABLE(mb1)
+DEFINE_KEY_TABLE(mb2)
 
 BEGIN_KEY_TABLE_LIST
-  &KEY_TABLE_DEFINITION(all),
+  &KEY_TABLE_DEFINITION(mb1),
+  &KEY_TABLE_DEFINITION(mb2),
 END_KEY_TABLE_LIST
 
 #define SERIAL_PROBE_RETRIES 0
@@ -446,9 +455,22 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
     if (connectResource(brl, device)) {
       if (brl->data->protocol->probeDisplay(brl)) {
-        setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
-        makeOutputTable(dotsTable_ISO11548_1);
+        {
+          const KeyTableDefinition *ktd;
+          switch (brl->textColumns) {
+            case 80:
+              ktd = &KEY_TABLE_DEFINITION(mb1);
+              break;
 
+            default:
+              ktd = &KEY_TABLE_DEFINITION(mb2);
+              break;
+          }
+
+          setBrailleKeyTable(brl, ktd);
+        }
+
+        makeOutputTable(dotsTable_ISO11548_1);
         brl->data->text.rewrite = 1;
         return 1;
       }
