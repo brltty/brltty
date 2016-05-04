@@ -18,8 +18,20 @@
 
 # This key subtable is for Papenmeier displays which have switches.
 
-note The rockers at each side of the top that stay when pressed
-note * are named the Left and Right Switch.
+ifVar keyEmulation
+  note The left and right switches are emulated. Enter key emulation mode by
+  note * pressing Thumb1 + Thumb2 (Left Windows + Right Windows). Then press:
+  note + Left Switch Rear: Dot 1 (f)
+  note + Left Switch Center: Dot 2 (d)
+  note + Left Switch Front: Dot 3 (s)
+  note + Right Switch Rear: Dot 4 (j)
+  note + Right Switch Center: Dot 5 (k)
+  note + Right Switch Front: Dot 6 (l)
+  note + center both switches: Dot 7 (a)
+else
+  note The rockers at each side of the top that stay when pressed
+  note * are named the Left and Right Switch.
+endIf
 
 context switchesRearCenter Advanced Vertical Navigation (left switch rear)
 

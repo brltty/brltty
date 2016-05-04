@@ -18,12 +18,21 @@
 
 # This key subtable is for Papenmeier displays which have keys.
 
-ifVar noRightKey
-note The rocker at the left side of the top that doesn't stay when pressed
-note * is named the Left Key.
+ifVar keyEmulation
+  note The left and right keys are emulated. Enter key emulation mode by
+  note * pressing Thumb1 + Thumb2 (Left Windows + Right Windows). Then press:
+  note + Left Key Rear: Left Thumb (Left Windows)
+  note + Left Key Front: Space + Left Thumb (Context + Left Windows)
+  note + Right Key Rear: Right Thumb (Right Windows)
+  note + Right Key Front: Space + Right Thumb (Context + Right Windows)
 else
-note The rockers at each side of the top that don't stay when pressed
-note * are named the Left and Right Key.
+  ifVar noRightKey
+    note The rocker at the left side of the top that doesn't stay when pressed
+    note * is named the Left Key.
+  else
+    note The rockers at each side of the top that don't stay when pressed
+    note * are named the Left and Right Key.
+  endIf
 endIf
 
 bind LeftKeyRear BACK
