@@ -18,6 +18,16 @@
 
 # This key subtable is for Papenmeier displays which have an Easy Access Bar.
 
+note The long key on the front is the Easy Access Bar.
+
+ifVar hasSingleStepBar
+note * It can only be moved one step in each direction.
+note * To emulate the second step, also press any of the lower routing keys
+note * (those in the row just behind the text cells).
+else
+note * It can be moved two steps in each direction.
+endIf
+
 bind BarUp1 LNUP
 bind BarDown1 LNDN
 bind BarLeft1 FWINLT
@@ -36,12 +46,13 @@ bind BarRight1+BarRight2 LNEND
 hide off
 
 include routing.kti
-bind BarUp1+!RoutingKey1 PRINDENT
-bind BarDown1+!RoutingKey1 NXINDENT
-bind BarLeft1+!RoutingKey1 CLIP_ADD
-bind BarRight1+!RoutingKey1 COPY_LINE
 
 ifNotVar hasSingleStepBar
+  bind BarUp1+!RoutingKey1 PRINDENT
+  bind BarDown1+!RoutingKey1 NXINDENT
+  bind BarLeft1+!RoutingKey1 CLIP_ADD
+  bind BarRight1+!RoutingKey1 COPY_LINE
+
   bind BarUp2+!RoutingKey1 SETLEFT
   bind BarDown2+!RoutingKey1 DESCCHAR
   bind BarLeft2+!RoutingKey1 CLIP_NEW

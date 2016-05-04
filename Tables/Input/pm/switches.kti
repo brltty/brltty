@@ -18,6 +18,9 @@
 
 # This key subtable is for Papenmeier displays which have switches.
 
+note The rockers at each side of the top that stay when pressed
+note * are named the Left and Right Switch.
+
 context switchesRearCenter Advanced Vertical Navigation (left switch rear)
 
 bind BarUp1 PRDIFLN
