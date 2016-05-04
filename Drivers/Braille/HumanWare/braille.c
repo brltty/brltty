@@ -66,6 +66,14 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(all),
 END_KEY_TABLE_LIST
 
+#define SERIAL_PROBE_RETRIES 0
+#define SERIAL_PROBE_TIMEOUT 1000
+
+#define MAXIMUM_TEXT_CELL_COUNT 0XFF
+
+#define MAXIMUM_KEY_VALUE 0XFF
+#define KEYS_BITMASK(name) BITMASK(name, (MAXIMUM_KEY_VALUE + 1), int)
+
 typedef struct {
   const char *name;
   int (*probeDisplay) (BrailleDisplay *brl);
@@ -78,7 +86,7 @@ struct BrailleDataStruct {
 
   struct {
     unsigned char rewrite;
-    unsigned char cells[0XFF];
+    unsigned char cells[MAXIMUM_TEXT_CELL_COUNT];
   } text;
 
   struct {
@@ -88,7 +96,7 @@ struct BrailleDataStruct {
 
     struct {
       unsigned char count;
-      BITMASK(mask, 0XFF, int);
+      KEYS_BITMASK(mask);
     } pressedKeys;
   } hid;
 };
@@ -167,7 +175,8 @@ static int
 probeSerialDisplay (BrailleDisplay *brl) {
   HW_Packet response;
 
-  if (probeBrailleDisplay(brl, 0, NULL, 1000,
+  if (probeBrailleDisplay(brl, SERIAL_PROBE_RETRIES,
+                          NULL, SERIAL_PROBE_TIMEOUT,
                           writeIdentifyRequest,
                           readResponse, &response, sizeof(response.bytes),
                           isIdentityResponse)) {
@@ -336,8 +345,8 @@ handleHidKeys (BrailleDisplay *brl) {
     ssize_t length = readReport(brl, HW_REP_IN_PressedKeys, buffer, size);
     if (length == -1) return BRL_CMD_RESTARTBRL;
 
-    BITMASK(pressedKeys, 0XFF, int);
-    BITMASK_ZERO(pressedKeys);
+    KEYS_BITMASK(pressedMask);
+    BITMASK_ZERO(pressedMask);
     unsigned int pressedCount = 0;
 
     {
@@ -347,8 +356,8 @@ handleHidKeys (BrailleDisplay *brl) {
       while (key < end) {
         if (!*key) break;
 
-        if (!BITMASK_TEST(pressedKeys, *key)) {
-          BITMASK_SET(pressedKeys, *key);
+        if (!BITMASK_TEST(pressedMask, *key)) {
+          BITMASK_SET(pressedMask, *key);
           pressedCount += 1;
 
           if (!BITMASK_TEST(brl->data->hid.pressedKeys.mask, *key)) {
@@ -363,9 +372,9 @@ handleHidKeys (BrailleDisplay *brl) {
     }
 
     if (brl->data->hid.pressedKeys.count > pressedCount) {
-      for (unsigned int key=0; key<=0XFF; key+=1) {
+      for (unsigned int key=0; key<=MAXIMUM_KEY_VALUE; key+=1) {
         if (BITMASK_TEST(brl->data->hid.pressedKeys.mask, key)) {
-          if (!BITMASK_TEST(pressedKeys, key)) {
+          if (!BITMASK_TEST(pressedMask, key)) {
             handleKeyEvent(brl, key, 0);
             BITMASK_CLEAR(brl->data->hid.pressedKeys.mask, key);
             if (--brl->data->hid.pressedKeys.count == pressedCount) break;
