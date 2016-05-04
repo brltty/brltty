@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title HumanWare
+title HumanWare Brailliant with a Braille Keyboard
 
 include nav.kti
 include kbd.kti
