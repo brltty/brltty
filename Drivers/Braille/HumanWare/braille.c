@@ -100,10 +100,6 @@ struct BrailleDataStruct {
 
   struct {
     struct {
-      size_t pressedKeys;
-    } reportSizes;
-
-    struct {
       unsigned char count;
       KEYS_BITMASK(mask);
     } pressedKeys;
@@ -241,11 +237,6 @@ static const ProtocolEntry serialProtocol = {
   .processKeys = processSerialKeys
 };
 
-static void
-getReportSize (BrailleDisplay *brl, unsigned char report, size_t *size) {
-  *size = gioGetHidReportSize(brl->gioEndpoint, report);
-}
-
 static ssize_t
 readFeature (
   BrailleDisplay *brl, unsigned char report,
@@ -293,39 +284,20 @@ writeReport (BrailleDisplay *brl, const unsigned char *data, size_t size) {
 
 static int
 probeHidDisplay (BrailleDisplay *brl) {
-  const unsigned char report = HW_REP_FTR_Capabilities;
+  HW_CapabilitiesReport capabilities;
+  unsigned char *const buffer = (unsigned char *)&capabilities;
+  const size_t size = sizeof(capabilities);
+  ssize_t length = readFeature(brl, HW_REP_FTR_Capabilities, buffer, size);
 
-  size_t size;
-  getReportSize(brl, report, &size);
+  if (length != -1) {
+    memset(&buffer[length], 0, (size - length));
 
-  if (size > 0) {
-    unsigned char buffer[size];
-    ssize_t length = readFeature(brl, report, buffer, size);
+    logMessage(LOG_INFO, "Firmware Version: %c.%c.%c%c",
+               capabilities.version.major, capabilities.version.minor,
+               capabilities.version.revision[0], capabilities.version.revision[1]);
 
-    if (length != -1) {
-      HW_CapabilitiesReport capabilities;
-
-      {
-        size_t maximum = sizeof(capabilities);
-        size_t count = MIN(length, maximum);
-        memcpy(&capabilities, buffer, count);
-
-        if (count < maximum) {
-          memset(((unsigned char *)&capabilities)+count,
-                 0, (maximum - count));
-        }
-      }
-
-      logMessage(LOG_INFO, "Firmware Version: %c.%c.%c%c",
-                 capabilities.version.major, capabilities.version.minor,
-                 capabilities.version.revision[0], capabilities.version.revision[1]);
-
-      getReportSize(brl, HW_REP_IN_PressedKeys,
-                    &brl->data->hid.reportSizes.pressedKeys);
-
-      brl->textColumns = capabilities.cellCount;
-      return 1;
-    }
+    brl->textColumns = capabilities.cellCount;
+    return 1;
   }
 
   return 0;
@@ -347,47 +319,43 @@ writeHidCells (BrailleDisplay *brl, const unsigned char *cells, unsigned char co
 
 static int
 processHidKeys (BrailleDisplay *brl) {
-  size_t size = brl->data->hid.reportSizes.pressedKeys;
+  unsigned char buffer[0X100];
+  ssize_t length = readReport(brl, HW_REP_IN_PressedKeys, buffer, sizeof(buffer));
+  if (length == -1) return 0;
 
-  if (size > 0) {
-    unsigned char buffer[size];
-    ssize_t length = readReport(brl, HW_REP_IN_PressedKeys, buffer, size);
-    if (length == -1) return 0;
+  KEYS_BITMASK(pressedMask);
+  BITMASK_ZERO(pressedMask);
+  unsigned int pressedCount = 0;
 
-    KEYS_BITMASK(pressedMask);
-    BITMASK_ZERO(pressedMask);
-    unsigned int pressedCount = 0;
+  {
+    const unsigned char *key = buffer + 1;
+    const unsigned char *end = buffer + length;
 
-    {
-      const unsigned char *key = buffer + 1;
-      const unsigned char *end = buffer + length;
+    while (key < end) {
+      if (!*key) break;
 
-      while (key < end) {
-        if (!*key) break;
+      if (!BITMASK_TEST(pressedMask, *key)) {
+        BITMASK_SET(pressedMask, *key);
+        pressedCount += 1;
 
-        if (!BITMASK_TEST(pressedMask, *key)) {
-          BITMASK_SET(pressedMask, *key);
-          pressedCount += 1;
-
-          if (!BITMASK_TEST(brl->data->hid.pressedKeys.mask, *key)) {
-            handleKeyEvent(brl, *key, 1);
-            BITMASK_SET(brl->data->hid.pressedKeys.mask, *key);
-            brl->data->hid.pressedKeys.count += 1;
-          }
+        if (!BITMASK_TEST(brl->data->hid.pressedKeys.mask, *key)) {
+          handleKeyEvent(brl, *key, 1);
+          BITMASK_SET(brl->data->hid.pressedKeys.mask, *key);
+          brl->data->hid.pressedKeys.count += 1;
         }
-
-        key += 1;
       }
-    }
 
-    if (brl->data->hid.pressedKeys.count > pressedCount) {
-      for (unsigned int key=0; key<=MAXIMUM_KEY_VALUE; key+=1) {
-        if (BITMASK_TEST(brl->data->hid.pressedKeys.mask, key)) {
-          if (!BITMASK_TEST(pressedMask, key)) {
-            handleKeyEvent(brl, key, 0);
-            BITMASK_CLEAR(brl->data->hid.pressedKeys.mask, key);
-            if (--brl->data->hid.pressedKeys.count == pressedCount) break;
-          }
+      key += 1;
+    }
+  }
+
+  if (brl->data->hid.pressedKeys.count > pressedCount) {
+    for (unsigned int key=0; key<=MAXIMUM_KEY_VALUE; key+=1) {
+      if (BITMASK_TEST(brl->data->hid.pressedKeys.mask, key)) {
+        if (!BITMASK_TEST(pressedMask, key)) {
+          handleKeyEvent(brl, key, 0);
+          BITMASK_CLEAR(brl->data->hid.pressedKeys.mask, key);
+          if (--brl->data->hid.pressedKeys.count == pressedCount) break;
         }
       }
     }
