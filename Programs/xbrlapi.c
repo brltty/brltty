@@ -133,7 +133,7 @@ static void fatal_brlapi_errno(const char *msg, const char *fmt, ...) {
 static void exception_handler(int error, brlapi_packetType_t type, const void *packet, size_t size) {
   char str[0X100];
   brlapi_strexception(str,0X100, error, type, packet, size);
-  fprintf(stderr, "BrlAPI exception: %s\nDisconnecting from brlapi\n", str);
+  fprintf(stderr, "xbrlapi: BrlAPI exception: %s\nDisconnecting from brlapi\n", str);
   api_cleanExit();
 }
 
@@ -183,7 +183,7 @@ static int tobrltty_init(char *auth, char *host) {
        * provide feedback to users running xbrlapi by hand, but not fill logs
        * with reconnection attempts.  */
       tried = 1;
-      fatal_brlapi_errno("openConnection",gettext("cannot connect to brltty at %s\n"),settings.host);
+      fatal_brlapi_errno("openConnection",gettext("cannot connect to braille devices daemon brltty at %s\n"),settings.host);
     }
     return 0;
   }
@@ -268,7 +268,7 @@ static void api_setLastName(void) {
   if (!last_name) return;
   if (brlapi_writeText(0,last_name)<0) {
     brlapi_perror("writeText");
-    fprintf(stderr,gettext("cannot write window name %s\n"),last_name);
+    fprintf(stderr,gettext("xbrlapi: cannot write window name %s\n"),last_name);
   }
 }
 
@@ -365,8 +365,8 @@ static int ErrorHandler(Display *dpy, XErrorEvent *ev) {
   }
   if (!XGetErrorText(dpy, ev->error_code, buffer, sizeof(buffer)))
     fatal("XGetErrorText");
-  fprintf(stderr,gettext("X Error %d, %s on display %s\n"), ev->type, buffer, XDisplayName(Xdisplay));
-  fprintf(stderr,gettext("resource %#010lx, req %u:%u\n"),ev->resourceid,ev->request_code,ev->minor_code);
+  fprintf(stderr,gettext("xbrlapi: X Error %d, %s on display %s\n"), ev->type, buffer, XDisplayName(Xdisplay));
+  fprintf(stderr,gettext("xbrlapi: resource %#010lx, req %u:%u\n"),ev->resourceid,ev->request_code,ev->minor_code);
   exit(PROG_EXIT_FATAL);
 }
 
@@ -383,22 +383,22 @@ static int getXVTnb(void) {
   root=DefaultRootWindow(dpy);
 
   if ((property=XInternAtom(dpy,"XFree86_VT",False))==None) {
-    fprintf(stderr,gettext("no XFree86_VT atom\n"));
+    fprintf(stderr,gettext("xbrlapi: no XFree86_VT atom\n"));
     return -1;
   }
 
   if (XGetWindowProperty(dpy,root,property,0,1,False,AnyPropertyType,
     &actual_type, &actual_format, &nitems, &bytes_after, &buf)) {
-    fprintf(stderr,gettext("cannot get root window XFree86_VT property\n"));
+    fprintf(stderr,gettext("xbrlapi: cannot get root window XFree86_VT property\n"));
     return -1;
   }
 
   if (nitems<1) {
-    fprintf(stderr, gettext("no items for VT number\n"));
+    fprintf(stderr, gettext("xbrlapi: no items for VT number\n"));
     goto out;
   }
   if (nitems>1)
-    fprintf(stderr,gettext("more than one item for VT number\n"));
+    fprintf(stderr,gettext("xbrlapi: more than one item for VT number\n"));
   switch (actual_type) {
   case XA_CARDINAL:
   case XA_INTEGER:
@@ -407,10 +407,10 @@ static int getXVTnb(void) {
     case 8:  vt = (*(uint8_t *)buf); break;
     case 16: vt = (*(uint16_t *)buf); break;
     case 32: vt = (*(uint32_t *)buf); break;
-    default: fprintf(stderr, gettext("bad format for VT number\n")); goto out;
+    default: fprintf(stderr, gettext("xbrlapi: bad format for VT number\n")); goto out;
     }
     break;
-  default: fprintf(stderr, gettext("bad type for VT number\n")); goto out;
+  default: fprintf(stderr, gettext("xbrlapi: bad type for VT number\n")); goto out;
   }
 out:
   if (!XFree(buf)) fatal("XFree(VTnobuf)");
@@ -532,7 +532,7 @@ static void setFocus(Window win) {
 
   if (!quiet) {
     if (!(window=window_of_Window(win))) {
-      fprintf(stderr,gettext("didn't grab window %#010lx but got focus\n"),win);
+      fprintf(stderr,gettext("xbrlapi: didn't grab window %#010lx but got focus\n"),win);
       api_setName("unknown");
     } else setName(window);
   }
@@ -683,7 +683,7 @@ static void toX_f(const char *display) {
 	if (!grabWindow(win,0)) break; /* window already disappeared ! */
 	debugf("win %#010lx created\n",win);
 	if (!(window = window_of_Window(ev.xcreatewindow.parent))) {
-	  fprintf(stderr,gettext("didn't grab parent of %#010lx\n"),win);
+	  fprintf(stderr,gettext("xbrlapi: didn't grab parent of %#010lx\n"),win);
 	  add_window(win,None,getWindowTitle(win));
 	} else add_window(win,window->root,getWindowTitle(win));
       } break;
@@ -701,7 +701,7 @@ static void toX_f(const char *display) {
 	  debugf("WM_NAME property of %#010lx changed\n",win);
 	  struct window *window;
 	  if (!(window=window_of_Window(win))) {
-	    fprintf(stderr,gettext("didn't grab window %#010lx\n"),win);
+	    fprintf(stderr,gettext("xbrlapi: didn't grab window %#010lx\n"),win);
 	    add_window(win,None,getWindowTitle(win));
 	  } else {
 	    if (window->wm_name)
@@ -709,7 +709,7 @@ static void toX_f(const char *display) {
 	    if ((window->wm_name=getWindowTitle(win))) {
 	      if (!quiet && win==curWindow)
 		api_setName(window->wm_name);
-	    } else fprintf(stderr,gettext("window %#010lx changed to NULL name\n"),win);
+	    } else fprintf(stderr,gettext("xbrlapi: window %#010lx changed to NULL name\n"),win);
 	  }
 	}
 	break;
@@ -730,7 +730,7 @@ static void toX_f(const char *display) {
 	break;
 
       /* "shouldn't happen" events */
-      default: fprintf(stderr,gettext("unhandled event type: %d\n"),ev.type); break;
+      default: fprintf(stderr,gettext("xbrlapi: unhandled event type: %d\n"),ev.type); break;
       }
     }
     if (brlapi_fd>=0 && FD_ISSET(brlapi_fd,&readfds)) {
@@ -782,7 +782,7 @@ static void toX_f(const char *display) {
               }
 
 	      default:
-		fprintf(stderr, "%s: %" BRLAPI_PRIxKEYCODE "\n",
+		fprintf(stderr, "xbrlapi: %s: %" BRLAPI_PRIxKEYCODE "\n",
 			gettext("unexpected cmd"), code);
 		break;
 	    }
@@ -792,7 +792,7 @@ static void toX_f(const char *display) {
 	    keysym = code & BRLAPI_KEY_CODE_MASK;
 	    keycode = XKeysymToKeycode(dpy,keysym);
 	    if (keycode == NoSymbol) {
-	      fprintf(stderr,gettext("Couldn't translate keysym %08X to keycode.\n"),keysym);
+	      fprintf(stderr,gettext("xbrlapi: Couldn't translate keysym %08X to keycode.\n"),keysym);
 	      continue;
 	    }
 
@@ -816,7 +816,7 @@ static void toX_f(const char *display) {
 		if (tryModifiers(keycode, &modifiers, *try, keysym)) goto foundModifiers;
 	      } while (*++try);
 
-	      fprintf(stderr,gettext("Couldn't find modifiers to apply to %d for getting keysym %08X\n"),keycode,keysym);
+	      fprintf(stderr,gettext("xbrlapi: Couldn't find modifiers to apply to %d for getting keysym %08X\n"),keycode,keysym);
 	      continue;
 	    }
 	  foundModifiers:
@@ -832,7 +832,7 @@ static void toX_f(const char *display) {
 	      XkbLockModifiers(dpy, XkbUseCoreKbd, modifiers, 0);
 	    break;
 	  default:
-	    fprintf(stderr, "%s: %" BRLAPI_PRIxKEYCODE "\n",
+	    fprintf(stderr, "xbrlapi: %s: %" BRLAPI_PRIxKEYCODE "\n",
 		    gettext("unexpected block type"), code);
 	    next_modifiers = 0;
 	    break;
