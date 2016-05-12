@@ -142,13 +142,20 @@ awaitAction (long int timeout) {
 
 int
 asyncAwaitCondition (int timeout, AsyncConditionTester *testCondition, void *data) {
+  int first = 1;
   TimePeriod period;
   startTimePeriod(&period, timeout);
 
   while (!(testCondition && testCondition(data))) {
     long int elapsed;
 
-    if (afterTimePeriod(&period, &elapsed)) return 0;
+    if (first) {
+      first = 0;
+      elapsed = 0;
+    } else if (afterTimePeriod(&period, &elapsed)) {
+      return 0;
+    }
+
     awaitAction(timeout - elapsed);
   }
 
