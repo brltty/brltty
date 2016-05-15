@@ -28,6 +28,7 @@ directory=`dirname "${0}"`
    --disable-api \
    --disable-icu \
    --disable-gpm \
+   --disable-polkit \
    --disable-x \
    \
    --without-libbraille \

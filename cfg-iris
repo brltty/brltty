@@ -30,6 +30,7 @@ export CC="gcc -m32"
    \
    --disable-gpm \
    --disable-icu \
+   --disable-polkit \
    --disable-x \
    --without-curses \
    \
