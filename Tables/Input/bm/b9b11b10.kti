@@ -34,5 +34,4 @@ bind B11+Down BOT
 bind B11+Left FWINLTSKIP
 bind B11+Right FWINRTSKIP
 bind B11+Press PASTE
-bind B11+RoutingKey+!RoutingKey CLIP_APPEND
 

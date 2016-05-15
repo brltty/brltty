@@ -32,6 +32,7 @@ assign chord \{space}+
 include ../chords.kti
 bind B9+RoutingKey SETLEFT
 bind \{space}+RoutingKey KEY_FUNCTION
+bind \{space}+RoutingKey+!RoutingKey CLIP_APPEND
 
 bind Press RETURN
 bind Up LNUP
