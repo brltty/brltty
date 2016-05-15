@@ -30,6 +30,8 @@ map Dot8 DOT8
 map \{space} SPACE
 assign chord \{space}+
 include ../chords.kti
+bind B9+RoutingKey SETLEFT
+bind \{space}+RoutingKey KEY_FUNCTION
 
 bind Press RETURN
 bind Up LNUP

@@ -27,37 +27,12 @@ bind B10 KEY_ENTER
 
 assign space B11
 include keyboard.kti
+bind B10+RoutingKey SWITCHVT
 
 bind B11+Up TOP
 bind B11+Down BOT
-
-bind B9+Up PRDIFLN
-bind B9+Down NXDIFLN
-
-bind B10+Up ATTRUP
-bind B10+Down ATTRDN
-
 bind B11+Left FWINLTSKIP
 bind B11+Right FWINRTSKIP
-
-bind B9+Left PRPROMPT
-bind B9+Right NXPROMPT
-
-bind B10+Left PRPGRPH
-bind B10+Right NXPGRPH
-
 bind B11+Press PASTE
-bind B9+Press LNBEG
-bind B10+Press LNEND
-
-bind B11+RoutingKey KEY_FUNCTION
-bind B9+RoutingKey SETLEFT
-bind B10+RoutingKey DESCCHAR
-bind Press+RoutingKey SWITCHVT
-
-bind Left+RoutingKey CLIP_NEW
-bind Up+RoutingKey CLIP_ADD
-bind Right+RoutingKey COPY_LINE
-bind Down+RoutingKey COPY_RECT
-bind RoutingKey+!RoutingKey CLIP_APPEND
+bind B11+RoutingKey+!RoutingKey CLIP_APPEND
 
