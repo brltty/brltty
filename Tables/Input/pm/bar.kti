@@ -48,21 +48,21 @@ hide off
 include routing.kti
 
 ifNotVar hasSingleStepBar
-  bind BarUp1+!RoutingKey1 PRINDENT
-  bind BarDown1+!RoutingKey1 NXINDENT
-  bind BarLeft1+!RoutingKey1 CLIP_ADD
-  bind BarRight1+!RoutingKey1 COPY_LINE
+  bind BarUp1+RoutingKey1 PRINDENT
+  bind BarDown1+RoutingKey1 NXINDENT
+  bind BarLeft1+RoutingKey1 CLIP_ADD
+  bind BarRight1+RoutingKey1 COPY_LINE
 
-  bind BarUp2+!RoutingKey1 SETLEFT
-  bind BarDown2+!RoutingKey1 DESCCHAR
-  bind BarLeft2+!RoutingKey1 CLIP_NEW
-  bind BarRight2+!RoutingKey1 COPY_RECT
+  bind BarUp2+RoutingKey1 SETLEFT
+  bind BarDown2+RoutingKey1 DESCCHAR
+  bind BarLeft2+RoutingKey1 CLIP_NEW
+  bind BarRight2+RoutingKey1 COPY_RECT
 
   hide on
-  bind BarUp1+BarUp2+!RoutingKey1 SETLEFT
-  bind BarDown1+BarDown2+!RoutingKey1 DESCCHAR
-  bind BarLeft1+BarLeft2+!RoutingKey1 CLIP_NEW
-  bind BarRight1+BarRight2+!RoutingKey1 COPY_RECT
+  bind BarUp1+BarUp2+RoutingKey1 SETLEFT
+  bind BarDown1+BarDown2+RoutingKey1 DESCCHAR
+  bind BarLeft1+BarLeft2+RoutingKey1 CLIP_NEW
+  bind BarRight1+BarRight2+RoutingKey1 COPY_RECT
   hide off
 endIf
 
