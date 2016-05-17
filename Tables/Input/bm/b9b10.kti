@@ -21,3 +21,4 @@ note B9 and B10 are the keys immediately to the left and right of the joystick.
 bind B9 KEY_BACKSPACE
 assign space B10
 include keyboard.kti
+bind B9+RoutingKey SETLEFT
