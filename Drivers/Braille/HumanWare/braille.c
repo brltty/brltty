@@ -85,6 +85,7 @@ END_KEY_TABLE_LIST
 
 typedef struct {
   const char *name;
+  unsigned monitorInput:1;
   int (*probeDisplay) (BrailleDisplay *brl);
   int (*writeCells) (BrailleDisplay *brl, const unsigned char *cells, unsigned char count);
   int (*processKeys) (BrailleDisplay *brl);
@@ -92,6 +93,7 @@ typedef struct {
 
 struct BrailleDataStruct {
   const ProtocolEntry *protocol;
+  GioEndpoint *gioEndpoint;
 
   struct {
     unsigned char rewrite;
@@ -237,6 +239,7 @@ processSerialKeys (BrailleDisplay *brl) {
 
 static const ProtocolEntry serialProtocol = {
   .name = "serial",
+  .monitorInput = 1,
   .probeDisplay = probeSerialDisplay,
   .writeCells = writeSerialCells,
   .processKeys = processSerialKeys
@@ -250,7 +253,7 @@ readHidPacket (
   const char *operation
 ) {
   if (size > 0) *buffer = 0;
-  ssize_t length = readPacket(brl->gioEndpoint, report, buffer, size);
+  ssize_t length = readPacket(brl->data->gioEndpoint, report, buffer, size);
 
   if (length == -1) {
     logSystemError(operation);
@@ -285,7 +288,7 @@ writeHidReport (BrailleDisplay *brl, const unsigned char *data, size_t size) {
   logOutputPacket(data, size);
 
   {
-    ssize_t result = gioWriteHidReport(brl->gioEndpoint, data, size);
+    ssize_t result = gioWriteHidReport(brl->data->gioEndpoint, data, size);
     if (result != -1) return 1;
   }
 
@@ -422,6 +425,10 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
     brl->data->protocol = gioGetApplicationData(brl->gioEndpoint);
+
+    brl->data->gioEndpoint = brl->gioEndpoint;
+    if (!brl->data->protocol->monitorInput) brl->gioEndpoint = NULL;
+
     return 1;
   }
 
@@ -471,6 +478,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
+  if (!brl->data->protocol->monitorInput) brl->gioEndpoint = brl->data->gioEndpoint;
   disconnectBrailleResource(brl, NULL);
 
   if (brl->data) {
