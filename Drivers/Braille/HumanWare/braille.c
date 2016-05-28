@@ -121,7 +121,7 @@ handleKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
 }
 
 static BraillePacketVerifierResult
-verifyPacket (
+verifySerialPacket (
   BrailleDisplay *brl,
   const unsigned char *bytes, size_t size,
   size_t *length, void *data
@@ -145,8 +145,13 @@ verifyPacket (
   return BRL_PVR_INCLUDE;
 }
 
+static size_t
+readSerialPacket (BrailleDisplay *brl, void *buffer, size_t size) {
+  return readBraillePacket(brl, NULL, buffer, size, verifySerialPacket, NULL);
+}
+
 static int
-writePacket (BrailleDisplay *brl, unsigned char type, unsigned char length, const void *data) {
+writeSerialPacket (BrailleDisplay *brl, unsigned char type, unsigned char length, const void *data) {
   HW_Packet packet;
 
   packet.fields.header = ESC;
@@ -160,17 +165,17 @@ writePacket (BrailleDisplay *brl, unsigned char type, unsigned char length, cons
 }
 
 static int
-writeIdentifyRequest (BrailleDisplay *brl) {
-  return writePacket(brl, HW_MSG_INIT, 0, NULL);
+writeSerialIdentifyRequest (BrailleDisplay *brl) {
+  return writeSerialPacket(brl, HW_MSG_INIT, 0, NULL);
 }
 
 static size_t
-readResponse (BrailleDisplay *brl, void *packet, size_t size) {
-  return readBraillePacket(brl, NULL, packet, size, verifyPacket, NULL);
+readSerialResponse (BrailleDisplay *brl, void *packet, size_t size) {
+  return readSerialPacket(brl, packet, size);
 }
 
 static BrailleResponseResult
-isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
+isSerialIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
   const HW_Packet *response = packet;
 
   return (response->fields.type == HW_MSG_INIT_RESP)? BRL_RSP_DONE: BRL_RSP_UNEXPECTED;
@@ -182,9 +187,9 @@ probeSerialDisplay (BrailleDisplay *brl) {
 
   if (probeBrailleDisplay(brl, SERIAL_PROBE_RETRIES,
                           NULL, SERIAL_PROBE_TIMEOUT,
-                          writeIdentifyRequest,
-                          readResponse, &response, sizeof(response.bytes),
-                          isIdentityResponse)) {
+                          writeSerialIdentifyRequest,
+                          readSerialResponse, &response, sizeof(response.bytes),
+                          isSerialIdentityResponse)) {
     logMessage(LOG_INFO, "detected Humanware device: model=%u cells=%u",
                response.fields.data.init.modelIdentifier,
                response.fields.data.init.cellCount);
@@ -202,7 +207,7 @@ probeSerialDisplay (BrailleDisplay *brl) {
 
 static int
 writeSerialCells (BrailleDisplay *brl, const unsigned char *cells, unsigned char count) {
-  return writePacket(brl, HW_MSG_DISPLAY, count, cells);
+  return writeSerialPacket(brl, HW_MSG_DISPLAY, count, cells);
 }
 
 static int
@@ -210,7 +215,7 @@ processSerialKeys (BrailleDisplay *brl) {
   HW_Packet packet;
   size_t length;
 
-  while ((length = readBraillePacket(brl, NULL, &packet, sizeof(packet), verifyPacket, NULL))) {
+  while ((length = readSerialPacket(brl, &packet, sizeof(packet)))) {
     switch (packet.fields.type) {
       case HW_MSG_KEY_DOWN:
         handleKeyEvent(brl, packet.fields.data.key.id, 1);
@@ -238,39 +243,45 @@ static const ProtocolEntry serialProtocol = {
 };
 
 static ssize_t
-readFeature (
+readHidPacket (
   BrailleDisplay *brl, unsigned char report,
-  unsigned char *buffer, size_t size
+  unsigned char *buffer, size_t size,
+  ssize_t (*readPacket) (GioEndpoint *endpoint, unsigned char report, void *buffer, uint16_t size),
+  const char *operation
 ) {
-  ssize_t length = gioGetHidFeature(brl->gioEndpoint, report, buffer, size);
+  if (size > 0) *buffer = 0;
+  ssize_t length = readPacket(brl->gioEndpoint, report, buffer, size);
 
-  if (length != -1) {
+  if (length == -1) {
+    logSystemError(operation);
+  } else if ((length > 0) && (*buffer == report)) {
     logInputPacket(buffer, length);
   } else {
-    logSystemError("HID feature read");
+    errno = EAGAIN;
+    length = -1;
   }
 
   return length;
 }
 
 static ssize_t
-readReport (
+readHidReport (
   BrailleDisplay *brl, unsigned char report,
   unsigned char *buffer, size_t size
 ) {
-  ssize_t length = gioGetHidReport(brl->gioEndpoint, report, buffer, size);
+  return readHidPacket(brl, report, buffer, size, gioGetHidReport, "HID report read");
+}
 
-  if (length != -1) {
-    logInputPacket(buffer, length);
-  } else {
-    logSystemError("HID report read");
-  }
-
-  return length;
+static ssize_t
+readHidFeature (
+  BrailleDisplay *brl, unsigned char report,
+  unsigned char *buffer, size_t size
+) {
+  return readHidPacket(brl, report, buffer, size, gioGetHidFeature, "HID feature read");
 }
 
 static int
-writeReport (BrailleDisplay *brl, const unsigned char *data, size_t size) {
+writeHidReport (BrailleDisplay *brl, const unsigned char *data, size_t size) {
   logOutputPacket(data, size);
 
   {
@@ -287,7 +298,7 @@ probeHidDisplay (BrailleDisplay *brl) {
   HW_CapabilitiesReport capabilities;
   unsigned char *const buffer = (unsigned char *)&capabilities;
   const size_t size = sizeof(capabilities);
-  ssize_t length = readFeature(brl, HW_REP_FTR_Capabilities, buffer, size);
+  ssize_t length = readHidFeature(brl, HW_REP_FTR_Capabilities, buffer, size);
 
   if (length != -1) {
     memset(&buffer[length], 0, (size - length));
@@ -314,14 +325,14 @@ writeHidCells (BrailleDisplay *brl, const unsigned char *cells, unsigned char co
   *byte++ = count;
   byte = mempcpy(byte, cells, count);
 
-  return writeReport(brl, buffer, byte-buffer);
+  return writeHidReport(brl, buffer, byte-buffer);
 }
 
 static int
 processHidKeys (BrailleDisplay *brl) {
-  unsigned char buffer[0X100];
-  ssize_t length = readReport(brl, HW_REP_IN_PressedKeys, buffer, sizeof(buffer));
-  if (length == -1) return 0;
+  unsigned char buffer[52];
+  ssize_t length = readHidReport(brl, HW_REP_IN_PressedKeys, buffer, sizeof(buffer));
+  if (length == -1) return errno == EAGAIN;
 
   KEYS_BITMASK(pressedMask);
   BITMASK_ZERO(pressedMask);
