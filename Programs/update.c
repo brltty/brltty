@@ -135,10 +135,8 @@ getScreenCursorPosition (int x, int y) {
             int offset = ((contractedOffset / textCount) * brl.textColumns)
                        + textStart + (contractedOffset % textCount);
 
-            if (offset < windowLength) {
-              position = offset;
-              break;
-            }
+            if (offset < windowLength) position = offset;
+            break;
           }
 
           uncontractedOffset -= 1;
@@ -151,8 +149,10 @@ getScreenCursorPosition (int x, int y) {
   {
     if ((x >= ses->winx) && (x < (int)(ses->winx + textCount)) &&
         (y >= ses->winy) && (y < (int)(ses->winy + brl.textRows)) &&
-        (x < scr.cols) && (y < scr.rows))
-      position = ((y - ses->winy) * brl.textColumns) + textStart + x - ses->winx;
+        (x < scr.cols) && (y < scr.rows)) {
+      position = ((y - ses->winy) * brl.textColumns)
+               + textStart + (x - ses->winx);
+    }
   }
 
   return position;
