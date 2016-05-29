@@ -23,5 +23,23 @@
 LD_LIBRARY_PATH="${programDirectory}/Programs${LD_LIBRARY_PATH}"
 export LD_LIBRARY_PATH
 
-exec "${@}"
+vgFile=""
+vgDirectory="${BRLTTY_VALGRIND}"
+
+[ -z "${vgDirectory}" ] || {
+  [ ! -d "${vgDirectory}" ] || {
+    [ ! -w "${vgDirectory}" ] || {
+      vgFile="${vgDirectory}/$(basename "${1}")-$(date +%Y%m%d-%H%M%S).vg"
+    }
+  }
+}
+
+if [ -n "${vgFile}" ]
+then
+  set -- valgrind --log-file="${vgFile}" --leak-check=full --show-reachable=yes "${@}"
+else
+  set -- exec "${@}"
+fi
+
+"${@}"
 exit "${?}"
