@@ -85,7 +85,7 @@ END_KEY_TABLE_LIST
 
 typedef struct {
   const char *name;
-  unsigned monitorInput:1;
+  unsigned pollForInput:1;
   int (*probeDisplay) (BrailleDisplay *brl);
   int (*writeCells) (BrailleDisplay *brl, const unsigned char *cells, unsigned char count);
   int (*processKeys) (BrailleDisplay *brl);
@@ -239,7 +239,6 @@ processSerialKeys (BrailleDisplay *brl) {
 
 static const ProtocolEntry serialProtocol = {
   .name = "serial",
-  .monitorInput = 1,
   .probeDisplay = probeSerialDisplay,
   .writeCells = writeSerialCells,
   .processKeys = processSerialKeys
@@ -380,6 +379,7 @@ processHidKeys (BrailleDisplay *brl) {
 
 static const ProtocolEntry hidProtocol = {
   .name = "HID",
+  .pollForInput = 1,
   .probeDisplay = probeHidDisplay,
   .writeCells = writeHidCells,
   .processKeys = processHidKeys
@@ -427,7 +427,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     brl->data->protocol = gioGetApplicationData(brl->gioEndpoint);
 
     brl->data->gioEndpoint = brl->gioEndpoint;
-    if (!brl->data->protocol->monitorInput) brl->gioEndpoint = NULL;
+    if (brl->data->protocol->pollForInput) brl->gioEndpoint = NULL;
 
     return 1;
   }
@@ -478,7 +478,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  if (!brl->data->protocol->monitorInput) brl->gioEndpoint = brl->data->gioEndpoint;
+  if (brl->data->protocol->pollForInput) brl->gioEndpoint = brl->data->gioEndpoint;
   disconnectBrailleResource(brl, NULL);
 
   if (brl->data) {
