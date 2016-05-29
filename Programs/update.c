@@ -124,16 +124,25 @@ getScreenCursorPosition (int x, int y) {
   if (isContracted) {
     int uncontractedOffset = getUncontractedCursorOffset(x, y);
 
-    if (uncontractedOffset < contractedLength) {
-      while (uncontractedOffset >= 0) {
-        int contractedOffset = contractedOffsets[uncontractedOffset];
+    if (uncontractedOffset != BRL_NO_CURSOR) {
+      if (uncontractedOffset < contractedLength) {
+        const unsigned int windowLength = brl.textColumns * brl.textRows;
 
-        if (contractedOffset != CTB_NO_OFFSET) {
-          position = ((contractedOffset / textCount) * brl.textColumns) + textStart + (contractedOffset % textCount);
-          break;
+        while (uncontractedOffset >= 0) {
+          int contractedOffset = contractedOffsets[uncontractedOffset];
+
+          if (contractedOffset != CTB_NO_OFFSET) {
+            int offset = ((contractedOffset / textCount) * brl.textColumns)
+                       + textStart + (contractedOffset % textCount);
+
+            if (offset < windowLength) {
+              position = offset;
+              break;
+            }
+          }
+
+          uncontractedOffset -= 1;
         }
-
-        uncontractedOffset -= 1;
       }
     }
   } else
