@@ -82,6 +82,7 @@ api_flush (BrailleDisplay *brl) {
 #endif /* ENABLE_API */
 
 static int apiStarted = 0;
+static int apiLinked = 0;
 static int driverClaimed = 0;
 
 static void
@@ -117,12 +118,23 @@ apiIsStarted (void) {
 
 static void
 apiLink (void) {
-  if (apiStarted) api_link(&brl);
+  if (apiStarted) {
+    api_link(&brl);
+    apiLinked = 1;
+  }
 }
 
 static void
 apiUnlink (void) {
-  if (apiStarted) api_unlink(&brl);
+  if (apiStarted) {
+    api_unlink(&brl);
+    apiLinked = 0;
+  }
+}
+
+static int
+apiIsLinked (void) {
+  return apiLinked;
 }
 
 static void
@@ -193,6 +205,7 @@ const ApiMethods api = {
 
   .link = apiLink,
   .unlink = apiUnlink,
+  .isLinked = apiIsLinked,
 
   .suspend = apiSuspend,
   .resume = apiResume,

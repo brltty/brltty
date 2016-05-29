@@ -35,6 +35,7 @@ typedef struct {
 
   void (*link) (void);
   void (*unlink) (void);
+  int (*isLinked) (void);
 
   void (*suspend) (void);
   int (*resume) (void);
