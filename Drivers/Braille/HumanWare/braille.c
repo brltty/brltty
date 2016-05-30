@@ -87,7 +87,7 @@ typedef struct {
   const char *name;
   int (*probeDisplay) (BrailleDisplay *brl);
   int (*writeCells) (BrailleDisplay *brl, const unsigned char *cells, unsigned char count);
-  void (*processPackets) (BrailleDisplay *brl);
+  int (*processInputPacket) (BrailleDisplay *brl);
 } ProtocolEntry;
 
 struct BrailleDataStruct {
@@ -210,26 +210,24 @@ writeSerialCells (BrailleDisplay *brl, const unsigned char *cells, unsigned char
   return writeSerialPacket(brl, HW_MSG_DISPLAY, count, cells);
 }
 
-static void
-processSerialPackets (BrailleDisplay *brl) {
+static int
+processSerialInputPacket (BrailleDisplay *brl) {
   HW_Packet packet;
-  size_t length;
+  size_t length = readSerialPacket(brl, &packet, sizeof(packet));
+  if (!length) return 0;
 
-  while ((length = readSerialPacket(brl, &packet, sizeof(packet)))) {
-    switch (packet.fields.type) {
-      case HW_MSG_KEY_DOWN:
-        handleKeyEvent(brl, packet.fields.data.key.id, 1);
-        continue;
+  switch (packet.fields.type) {
+    case HW_MSG_KEY_DOWN:
+      handleKeyEvent(brl, packet.fields.data.key.id, 1);
+      return 1;
 
-      case HW_MSG_KEY_UP:
-        handleKeyEvent(brl, packet.fields.data.key.id, 0);
-        continue;
+    case HW_MSG_KEY_UP:
+      handleKeyEvent(brl, packet.fields.data.key.id, 0);
+      return 1;
 
-      default:
-        break;
-    }
-
-    logUnexpectedPacket(&packet, length);
+    default:
+      logUnexpectedPacket(&packet, length);
+      return 1;
   }
 }
 
@@ -237,7 +235,7 @@ static const ProtocolEntry serialProtocol = {
   .name = "serial",
   .probeDisplay = probeSerialDisplay,
   .writeCells = writeSerialCells,
-  .processPackets = processSerialPackets
+  .processInputPacket = processSerialInputPacket
 };
 
 static ssize_t
@@ -285,7 +283,7 @@ verifyHidPacket (
     case 1:
       switch (byte) {
         case HW_REP_FTR_Capabilities:
-          *length = 39;
+          *length = sizeof(HW_CapabilitiesReport);
           break;
 
         case HW_REP_IN_PressedKeys:
@@ -385,22 +383,23 @@ processHidKeys (BrailleDisplay *brl, unsigned char *buffer, size_t size) {
   }
 }
 
-static void
-processHidPackets (BrailleDisplay *brl) {
+static int
+processHidInputPacket (BrailleDisplay *brl) {
   unsigned char packet[0XFF];
-  size_t length;
+  size_t length = readHidPacket(brl, packet, sizeof(packet));
+  if (!length) return 0;
 
-  while ((length = readHidPacket(brl, packet, sizeof(packet)))) {
-    switch (packet[0]) {
-      case HW_REP_IN_PressedKeys:
-        processHidKeys(brl, packet+1, length-1);
-        continue;
+  switch (packet[0]) {
+    case HW_REP_IN_PressedKeys: {
+      const unsigned int offset = 1;
 
-      default:
-        break;
+      processHidKeys(brl, packet+offset, length-offset);
+      return 1;
     }
 
-    logUnexpectedPacket(packet, length);
+    default:
+      logUnexpectedPacket(packet, length);
+      return 1;
   }
 }
 
@@ -408,7 +407,7 @@ static const ProtocolEntry hidProtocol = {
   .name = "HID",
   .probeDisplay = probeHidDisplay,
   .writeCells = writeHidCells,
-  .processPackets = processHidPackets
+  .processInputPacket = processHidInputPacket
 };
 
 static int
@@ -526,6 +525,6 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  brl->data->protocol->processPackets(brl);
+  while (brl->data->protocol->processInputPacket(brl));
   return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
 }
