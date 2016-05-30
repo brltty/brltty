@@ -85,7 +85,6 @@ END_KEY_TABLE_LIST
 
 typedef struct {
   const char *name;
-  unsigned pollForInput:1;
   int (*probeDisplay) (BrailleDisplay *brl);
   int (*writeCells) (BrailleDisplay *brl, const unsigned char *cells, unsigned char count);
   int (*processKeys) (BrailleDisplay *brl);
@@ -93,7 +92,6 @@ typedef struct {
 
 struct BrailleDataStruct {
   const ProtocolEntry *protocol;
-  GioEndpoint *gioEndpoint;
 
   struct {
     unsigned char rewrite;
@@ -252,7 +250,7 @@ readHidPacket (
   const char *operation
 ) {
   if (size > 0) *buffer = 0;
-  ssize_t length = readPacket(brl->data->gioEndpoint, report, buffer, size);
+  ssize_t length = readPacket(brl->gioEndpoint, report, buffer, size);
 
   if (length == -1) {
     logSystemError(operation);
@@ -264,14 +262,6 @@ readHidPacket (
   }
 
   return length;
-}
-
-static ssize_t
-readHidReport (
-  BrailleDisplay *brl, unsigned char report,
-  unsigned char *buffer, size_t size
-) {
-  return readHidPacket(brl, report, buffer, size, gioGetHidReport, "HID report read");
 }
 
 static ssize_t
@@ -287,7 +277,7 @@ writeHidReport (BrailleDisplay *brl, const unsigned char *data, size_t size) {
   logOutputPacket(data, size);
 
   {
-    ssize_t result = gioWriteHidReport(brl->data->gioEndpoint, data, size);
+    ssize_t result = gioWriteHidReport(brl->gioEndpoint, data, size);
     if (result != -1) return 1;
   }
 
@@ -333,7 +323,7 @@ writeHidCells (BrailleDisplay *brl, const unsigned char *cells, unsigned char co
 static int
 processHidKeys (BrailleDisplay *brl) {
   unsigned char buffer[52];
-  ssize_t length = readHidReport(brl, HW_REP_IN_PressedKeys, buffer, sizeof(buffer));
+  ssize_t length = gioReadData(brl->gioEndpoint, buffer, sizeof(buffer), 0);
   if (length == -1) return errno == EAGAIN;
 
   KEYS_BITMASK(pressedMask);
@@ -379,7 +369,6 @@ processHidKeys (BrailleDisplay *brl) {
 
 static const ProtocolEntry hidProtocol = {
   .name = "HID",
-  .pollForInput = 1,
   .probeDisplay = probeHidDisplay,
   .writeCells = writeHidCells,
   .processKeys = processHidKeys
@@ -406,6 +395,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     { /* all models (HID protocol) */
       .vendor=0X1C71, .product=0XC006,
       .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1,
       .data = &hidProtocol
     },
   END_USB_CHANNEL_DEFINITIONS
@@ -425,10 +415,6 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
     brl->data->protocol = gioGetApplicationData(brl->gioEndpoint);
-
-    brl->data->gioEndpoint = brl->gioEndpoint;
-    if (brl->data->protocol->pollForInput) brl->gioEndpoint = NULL;
-
     return 1;
   }
 
@@ -437,7 +423,6 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
 static void
 disconnectResource (BrailleDisplay *brl) {
-  if (brl->data->protocol->pollForInput) brl->gioEndpoint = brl->data->gioEndpoint;
   disconnectBrailleResource(brl, NULL);
 }
 
