@@ -87,7 +87,7 @@ typedef struct {
   const char *name;
   int (*probeDisplay) (BrailleDisplay *brl);
   int (*writeCells) (BrailleDisplay *brl, const unsigned char *cells, unsigned char count);
-  int (*processKeys) (BrailleDisplay *brl);
+  void (*processPackets) (BrailleDisplay *brl);
 } ProtocolEntry;
 
 struct BrailleDataStruct {
@@ -210,8 +210,8 @@ writeSerialCells (BrailleDisplay *brl, const unsigned char *cells, unsigned char
   return writeSerialPacket(brl, HW_MSG_DISPLAY, count, cells);
 }
 
-static int
-processSerialKeys (BrailleDisplay *brl) {
+static void
+processSerialPackets (BrailleDisplay *brl) {
   HW_Packet packet;
   size_t length;
 
@@ -231,29 +231,25 @@ processSerialKeys (BrailleDisplay *brl) {
 
     logUnexpectedPacket(&packet, length);
   }
-
-  return errno == EAGAIN;
 }
 
 static const ProtocolEntry serialProtocol = {
   .name = "serial",
   .probeDisplay = probeSerialDisplay,
   .writeCells = writeSerialCells,
-  .processKeys = processSerialKeys
+  .processPackets = processSerialPackets
 };
 
 static ssize_t
-readHidPacket (
+readHidFeature (
   BrailleDisplay *brl, unsigned char report,
-  unsigned char *buffer, size_t size,
-  ssize_t (*readPacket) (GioEndpoint *endpoint, unsigned char report, void *buffer, uint16_t size),
-  const char *operation
+  unsigned char *buffer, size_t size
 ) {
   if (size > 0) *buffer = 0;
-  ssize_t length = readPacket(brl->gioEndpoint, report, buffer, size);
+  ssize_t length = gioGetHidFeature(brl->gioEndpoint, report, buffer, size);
 
   if (length == -1) {
-    logSystemError(operation);
+    logSystemError("USB HID feature read");
   } else if ((length > 0) && (*buffer == report)) {
     logInputPacket(buffer, length);
   } else {
@@ -262,14 +258,6 @@ readHidPacket (
   }
 
   return length;
-}
-
-static ssize_t
-readHidFeature (
-  BrailleDisplay *brl, unsigned char report,
-  unsigned char *buffer, size_t size
-) {
-  return readHidPacket(brl, report, buffer, size, gioGetHidFeature, "HID feature read");
 }
 
 static int
@@ -283,6 +271,42 @@ writeHidReport (BrailleDisplay *brl, const unsigned char *data, size_t size) {
 
   logSystemError("HID report write");
   return 0;
+}
+
+static BraillePacketVerifierResult
+verifyHidPacket (
+  BrailleDisplay *brl,
+  const unsigned char *bytes, size_t size,
+  size_t *length, void *data
+) {
+  unsigned char byte = bytes[size-1];
+
+  switch (size) {
+    case 1:
+      switch (byte) {
+        case HW_REP_FTR_Capabilities:
+          *length = 39;
+          break;
+
+        case HW_REP_IN_PressedKeys:
+          *length = 52;
+          break;
+
+        default:
+          return BRL_PVR_INVALID;
+      }
+      break;
+
+    default:
+      break;
+  }
+
+  return BRL_PVR_INCLUDE;
+}
+
+static size_t
+readHidPacket (BrailleDisplay *brl, void *buffer, size_t size) {
+  return readBraillePacket(brl, NULL, buffer, size, verifyHidPacket, NULL);
 }
 
 static int
@@ -320,19 +344,15 @@ writeHidCells (BrailleDisplay *brl, const unsigned char *cells, unsigned char co
   return writeHidReport(brl, buffer, byte-buffer);
 }
 
-static int
-processHidKeys (BrailleDisplay *brl) {
-  unsigned char buffer[52];
-  ssize_t length = gioReadData(brl->gioEndpoint, buffer, sizeof(buffer), 0);
-  if (length == -1) return errno == EAGAIN;
-
+static void
+processHidKeys (BrailleDisplay *brl, unsigned char *buffer, size_t size) {
   KEYS_BITMASK(pressedMask);
   BITMASK_ZERO(pressedMask);
   unsigned int pressedCount = 0;
 
   {
-    const unsigned char *key = buffer + 1;
-    const unsigned char *end = buffer + length;
+    const unsigned char *key = buffer;
+    const unsigned char *end = buffer + size;
 
     while (key < end) {
       if (!*key) break;
@@ -363,15 +383,32 @@ processHidKeys (BrailleDisplay *brl) {
       }
     }
   }
+}
 
-  return 1;
+static void
+processHidPackets (BrailleDisplay *brl) {
+  unsigned char packet[0XFF];
+  size_t length;
+
+  while ((length = readHidPacket(brl, packet, sizeof(packet)))) {
+    switch (packet[0]) {
+      case HW_REP_IN_PressedKeys:
+        processHidKeys(brl, packet+1, length-1);
+        continue;
+
+      default:
+        break;
+    }
+
+    logUnexpectedPacket(packet, length);
+  }
 }
 
 static const ProtocolEntry hidProtocol = {
   .name = "HID",
   .probeDisplay = probeHidDisplay,
   .writeCells = writeHidCells,
-  .processKeys = processHidKeys
+  .processPackets = processHidPackets
 };
 
 static int
@@ -489,5 +526,6 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  return brl->data->protocol->processKeys(brl)? EOF: BRL_CMD_RESTARTBRL;
+  brl->data->protocol->processPackets(brl);
+  return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
 }
