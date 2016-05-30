@@ -435,6 +435,12 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   return 0;
 }
 
+static void
+disconnectResource (BrailleDisplay *brl) {
+  if (brl->data->protocol->pollForInput) brl->gioEndpoint = brl->data->gioEndpoint;
+  disconnectBrailleResource(brl, NULL);
+}
+
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
@@ -464,7 +470,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         return 1;
       }
 
-      disconnectBrailleResource(brl, NULL);
+      disconnectResource(brl);
     }
 
     free(brl->data);
@@ -478,13 +484,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  if (brl->data->protocol->pollForInput) brl->gioEndpoint = brl->data->gioEndpoint;
-  disconnectBrailleResource(brl, NULL);
-
-  if (brl->data) {
-    free(brl->data);
-    brl->data = NULL;
-  }
+  disconnectResource(brl);
+  free(brl->data);
 }
 
 static int
