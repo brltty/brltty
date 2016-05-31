@@ -85,6 +85,28 @@ typedef struct {
   unsigned char pad[13];
 } HW_CapabilitiesReport;
 
+typedef struct {
+  unsigned char reportIdentifier;
+  unsigned char dotPressure;
+} HW_SettingsReport;
+
+typedef struct {
+  unsigned char reportIdentifier;
+  unsigned char one;
+  unsigned char seventyOne;
+  unsigned char cellCount;
+
+  struct {
+    unsigned char firstIndex;
+    unsigned char lastIndex;
+  } primaryRoutingKeys;
+
+  struct {
+    unsigned char firstIndex;
+    unsigned char lastIndex;
+  } secondaryRoutingKeys;
+} HW_ConfigurationReport;
+
 typedef enum {
   HW_KEY_Reset    =  1,
 

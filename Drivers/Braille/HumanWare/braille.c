@@ -302,6 +302,14 @@ verifyHidPacket (
           *length = sizeof(HW_CapabilitiesReport);
           break;
 
+        case HW_REP_FTR_Settings:
+          *length = sizeof(HW_SettingsReport);
+          break;
+
+        case HW_REP_FTR_Configuration:
+          *length = sizeof(HW_ConfigurationReport);
+          break;
+
         case HW_REP_IN_PressedKeys:
           *length = brl->data->hid.pressedKeys.reportSize;
           break;
@@ -439,6 +447,8 @@ processHidInputPacket (BrailleDisplay *brl) {
 
     default:
       logUnexpectedPacket(packet, length);
+    case HW_REP_FTR_Settings:
+    case HW_REP_FTR_Configuration:
       break;
   }
 
