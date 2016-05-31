@@ -266,16 +266,16 @@ readHidFeature (
   if (size > 0) *buffer = 0;
   ssize_t length = gioGetHidFeature(brl->gioEndpoint, report, buffer, size);
 
-  if (length == -1) {
-    logSystemError("USB HID feature read");
-  } else if ((length > 0) && (*buffer == report)) {
+  if (length != -1) {
     logInputPacket(buffer, length);
-  } else {
-    errno = EAGAIN;
+    if ((length > 0) && (*buffer == report)) return length;
+
+    errno = EBADMSG;
     length = -1;
   }
 
-  return length;
+  logSystemError("USB HID feature read");
+  return -1;
 }
 
 static int
