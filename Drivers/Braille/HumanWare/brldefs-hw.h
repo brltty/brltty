@@ -92,8 +92,8 @@ typedef struct {
 
 typedef struct {
   unsigned char reportIdentifier;
-  unsigned char one;
-  unsigned char seventyOne;
+  unsigned char fill1;
+  unsigned char fill2;
   unsigned char cellCount;
 
   struct {
@@ -106,6 +106,11 @@ typedef struct {
     unsigned char lastIndex;
   } secondaryRoutingKeys;
 } HW_ConfigurationReport;
+
+typedef struct {
+  unsigned char reportIdentifier;
+  unsigned char fill;
+} HW_PoweringOffReport;
 
 typedef enum {
   HW_KEY_Reset    =  1,

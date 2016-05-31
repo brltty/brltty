@@ -319,7 +319,7 @@ verifyHidPacket (
           break;
 
         case HW_REP_IN_PoweringOff:
-          *length = 2;
+          *length = sizeof(HW_PoweringOffReport);
           break;
 
         default:
