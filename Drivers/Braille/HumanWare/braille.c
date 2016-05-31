@@ -83,6 +83,10 @@ END_KEY_TABLE_LIST
 #define MAXIMUM_KEY_VALUE 0XFF
 #define KEYS_BITMASK(name) BITMASK(name, (MAXIMUM_KEY_VALUE + 1), int)
 
+#define BRAILLE_KEY_COUNT (8 + 1)
+#define COMMAND_KEY_COUNT 6
+#define THUMB_KEY_COUNT 4
+
 typedef struct {
   const char *name;
   int (*probeDisplay) (BrailleDisplay *brl);
@@ -109,15 +113,15 @@ struct BrailleDataStruct {
 
 static int
 hasBrailleKeyboard (BrailleDisplay *brl) {
-  switch (brl->textColumns) {
-    case 80:
-      return 0;
+  if (brl->textColumns == 32) return 1;
+  if (brl->textColumns == 40) return 1;
+  return 0;
+}
 
-    default:
-    case 40:
-    case 32:
-      return 1;
-  }
+static int
+hasSecondThumbKeys (BrailleDisplay *brl) {
+  if (brl->textColumns == 80) return 1;
+  return 0;
 }
 
 static int
@@ -353,17 +357,10 @@ probeHidDisplay (BrailleDisplay *brl) {
 
     {
       unsigned char *size = &brl->data->hid.pressedKeys.reportSize;
-      *size = 1 // report identifier
-            + 4 // thumb keys
-            + 6 // command keys
-            + brl->textColumns // routing keys
-            ;
 
-      if (hasBrailleKeyboard(brl)) {
-        *size += 8 + 1; // braille keyboard (dots + space)
-      } else {
-        *size += 4; // second set of thumb keys
-      }
+      *size = 1 + THUMB_KEY_COUNT + COMMAND_KEY_COUNT + brl->textColumns;
+      if (hasBrailleKeyboard(brl)) *size += BRAILLE_KEY_COUNT;
+      if (hasSecondThumbKeys(brl)) *size += THUMB_KEY_COUNT;
     }
 
     return 1;
