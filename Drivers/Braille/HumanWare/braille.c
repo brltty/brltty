@@ -75,7 +75,7 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(mb2),
 END_KEY_TABLE_LIST
 
-#define SERIAL_PROBE_RETRIES 2
+#define SERIAL_PROBE_RETRIES 0
 #define SERIAL_PROBE_TIMEOUT 1000
 
 #define MAXIMUM_TEXT_CELL_COUNT 0XFF
@@ -472,7 +472,6 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .vendor=0X1C71, .product=0XC005, 
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=2, .outputEndpoint=3,
-      .disableEndpointReset = 1,
       .serial = &serialParameters,
       .data = &serialProtocol
     },
