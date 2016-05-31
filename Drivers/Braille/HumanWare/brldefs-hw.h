@@ -32,7 +32,7 @@ typedef enum {
   HW_MSG_CONFIGURATION_UPDATE = 0X09,
   HW_MSG_CONFIGURATION_RESP   = 0X0A,
   HW_MSG_GET_CONFIGURATION    = 0X0B,
-  HW_MSG_POWER_OFF            = 0X10
+  HW_MSG_POWERING_OFF         = 0X10
 } HW_MessageType;
 
 typedef union {
