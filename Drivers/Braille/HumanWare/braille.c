@@ -124,6 +124,12 @@ hasSecondThumbKeys (BrailleDisplay *brl) {
   return 0;
 }
 
+static void
+handlePowerOff (BrailleDisplay *brl) {
+  logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "power off");
+  enqueueCommand(BRL_CMD_RESTARTBRL);
+}
+
 static int
 handleKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
   KeyGroup group;
@@ -241,6 +247,10 @@ processSerialInputPacket (BrailleDisplay *brl) {
 
     case HW_MSG_KEY_UP:
       handleKeyEvent(brl, packet.fields.data.key.id, 0);
+      break;
+
+    case HW_MSG_POWER_OFF:
+      handlePowerOff(brl);
       break;
 
     default:
@@ -439,7 +449,7 @@ processHidInputPacket (BrailleDisplay *brl) {
     }
 
     case HW_REP_IN_PoweringOff:
-      logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "powering off");
+      handlePowerOff(brl);
       break;
 
     default:
