@@ -100,11 +100,25 @@ struct BrailleDataStruct {
 
   struct {
     struct {
+      unsigned char reportSize;
       unsigned char count;
       KEYS_BITMASK(mask);
     } pressedKeys;
   } hid;
 };
+
+static int
+hasBrailleKeyboard (BrailleDisplay *brl) {
+  switch (brl->textColumns) {
+    case 80:
+      return 0;
+
+    default:
+    case 40:
+    case 32:
+      return 1;
+  }
+}
 
 static int
 handleKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
@@ -219,16 +233,18 @@ processSerialInputPacket (BrailleDisplay *brl) {
   switch (packet.fields.type) {
     case HW_MSG_KEY_DOWN:
       handleKeyEvent(brl, packet.fields.data.key.id, 1);
-      return 1;
+      break;
 
     case HW_MSG_KEY_UP:
       handleKeyEvent(brl, packet.fields.data.key.id, 0);
-      return 1;
+      break;
 
     default:
       logUnexpectedPacket(&packet, length);
-      return 1;
+      break;
   }
+
+  return 1;
 }
 
 static const ProtocolEntry serialProtocol = {
@@ -287,7 +303,11 @@ verifyHidPacket (
           break;
 
         case HW_REP_IN_PressedKeys:
-          *length = 52;
+          *length = brl->data->hid.pressedKeys.reportSize;
+          break;
+
+        case HW_REP_IN_PoweringOff:
+          *length = 2;
           break;
 
         default:
@@ -322,6 +342,22 @@ probeHidDisplay (BrailleDisplay *brl) {
                capabilities.version.revision[0], capabilities.version.revision[1]);
 
     brl->textColumns = capabilities.cellCount;
+
+    {
+      unsigned char *size = &brl->data->hid.pressedKeys.reportSize;
+      *size = 1 // report identifier
+            + 4 // thumb keys
+            + 6 // command keys
+            + brl->textColumns // routing keys
+            ;
+
+      if (hasBrailleKeyboard(brl)) {
+        *size += 8 + 1; // braille keyboard (dots + space)
+      } else {
+        *size += 4; // second set of thumb keys
+      }
+    }
+
     return 1;
   }
 
@@ -394,13 +430,19 @@ processHidInputPacket (BrailleDisplay *brl) {
       const unsigned int offset = 1;
 
       processHidKeys(brl, packet+offset, length-offset);
-      return 1;
+      break;
     }
+
+    case HW_REP_IN_PoweringOff:
+      logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "powering off");
+      break;
 
     default:
       logUnexpectedPacket(packet, length);
-      return 1;
+      break;
   }
+
+  return 1;
 }
 
 static const ProtocolEntry hidProtocol = {
@@ -470,18 +512,10 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (connectResource(brl, device)) {
       if (brl->data->protocol->probeDisplay(brl)) {
         {
-          const KeyTableDefinition *ktd;
-          switch (brl->textColumns) {
-            case 80:
-              ktd = &KEY_TABLE_DEFINITION(mb1);
-              break;
-
-            default:
-            case 40:
-            case 32:
-              ktd = &KEY_TABLE_DEFINITION(mb2);
-              break;
-          }
+          const KeyTableDefinition *ktd =
+            hasBrailleKeyboard(brl)?
+            &KEY_TABLE_DEFINITION(mb2):
+            &KEY_TABLE_DEFINITION(mb1);
 
           setBrailleKeyTable(brl, ktd);
         }
