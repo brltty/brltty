@@ -91,11 +91,16 @@ typedef struct {
   const char *name;
   int (*probeDisplay) (BrailleDisplay *brl);
   int (*writeCells) (BrailleDisplay *brl, const unsigned char *cells, unsigned char count);
-  int (*processInputPacket) (BrailleDisplay *brl);
+  int (*handleInputPacket) (BrailleDisplay *brl);
 } ProtocolEntry;
 
 struct BrailleDataStruct {
   const ProtocolEntry *protocol;
+
+  struct {
+    unsigned char count;
+    KEYS_BITMASK(mask);
+  } pressedKeys;
 
   struct {
     unsigned char rewrite;
@@ -105,8 +110,6 @@ struct BrailleDataStruct {
   struct {
     struct {
       unsigned char reportSize;
-      unsigned char count;
-      KEYS_BITMASK(mask);
     } pressedKeys;
   } hid;
 };
@@ -127,7 +130,6 @@ hasSecondThumbKeys (BrailleDisplay *brl) {
 static void
 handlePoweringOff (BrailleDisplay *brl) {
   logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "powering off");
-  enqueueCommand(BRL_CMD_RESTARTBRL);
 }
 
 static int
@@ -142,6 +144,65 @@ handleKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
   }
 
   return enqueueKeyEvent(brl, group, key, press);
+}
+
+static int
+handleKeyPress (BrailleDisplay *brl, unsigned char key) {
+  if (BITMASK_TEST(brl->data->pressedKeys.mask, key)) return 0;
+
+  BITMASK_SET(brl->data->pressedKeys.mask, key);
+  brl->data->pressedKeys.count += 1;
+
+  handleKeyEvent(brl, key, 1);
+  return 1;
+}
+
+static int
+handleKeyRelease (BrailleDisplay *brl, unsigned char key) {
+  if (!BITMASK_TEST(brl->data->pressedKeys.mask, key)) return 0;
+
+  BITMASK_CLEAR(brl->data->pressedKeys.mask, key);
+  brl->data->pressedKeys.count -= 1;
+
+  handleKeyEvent(brl, key, 0);
+  return 1;
+}
+
+static void
+handlePressedKeysArray (BrailleDisplay *brl, unsigned char *keys, size_t count) {
+  KEYS_BITMASK(pressedMask);
+  BITMASK_ZERO(pressedMask);
+  unsigned int pressedCount = 0;
+
+  {
+    const unsigned char *key = keys;
+    const unsigned char *end = keys + count;
+
+    while (key < end) {
+      if (!*key) break;
+
+      if (!BITMASK_TEST(pressedMask, *key)) {
+        BITMASK_SET(pressedMask, *key);
+        pressedCount += 1;
+
+        handleKeyPress(brl, *key);
+      }
+
+      key += 1;
+    }
+  }
+
+  if (brl->data->pressedKeys.count > pressedCount) {
+    for (unsigned int key=0; key<=MAXIMUM_KEY_VALUE; key+=1) {
+      if (!BITMASK_TEST(pressedMask, key)) {
+        if (handleKeyRelease(brl, key)) {
+          if (brl->data->pressedKeys.count == pressedCount) {
+            break;
+          }
+        }
+      }
+    }
+  }
 }
 
 static BraillePacketVerifierResult
@@ -235,18 +296,22 @@ writeSerialCells (BrailleDisplay *brl, const unsigned char *cells, unsigned char
 }
 
 static int
-processSerialInputPacket (BrailleDisplay *brl) {
+handleSerialInputPacket (BrailleDisplay *brl) {
   HW_Packet packet;
   size_t length = readSerialPacket(brl, &packet, sizeof(packet));
   if (!length) return 0;
 
   switch (packet.fields.type) {
+    case HW_MSG_KEYS:
+      handlePressedKeysArray(brl, packet.fields.data.bytes, packet.fields.length);
+      break;
+
     case HW_MSG_KEY_DOWN:
-      handleKeyEvent(brl, packet.fields.data.key.id, 1);
+      handleKeyPress(brl, packet.fields.data.key.id);
       break;
 
     case HW_MSG_KEY_UP:
-      handleKeyEvent(brl, packet.fields.data.key.id, 0);
+      handleKeyRelease(brl, packet.fields.data.key.id);
       break;
 
     case HW_MSG_POWERING_OFF:
@@ -265,7 +330,7 @@ static const ProtocolEntry serialProtocol = {
   .name = "serial",
   .probeDisplay = probeSerialDisplay,
   .writeCells = writeSerialCells,
-  .processInputPacket = processSerialInputPacket
+  .handleInputPacket = handleSerialInputPacket
 };
 
 static ssize_t
@@ -392,49 +457,8 @@ writeHidCells (BrailleDisplay *brl, const unsigned char *cells, unsigned char co
   return writeHidReport(brl, buffer, byte-buffer);
 }
 
-static void
-processHidKeys (BrailleDisplay *brl, unsigned char *buffer, size_t size) {
-  KEYS_BITMASK(pressedMask);
-  BITMASK_ZERO(pressedMask);
-  unsigned int pressedCount = 0;
-
-  {
-    const unsigned char *key = buffer;
-    const unsigned char *end = buffer + size;
-
-    while (key < end) {
-      if (!*key) break;
-
-      if (!BITMASK_TEST(pressedMask, *key)) {
-        BITMASK_SET(pressedMask, *key);
-        pressedCount += 1;
-
-        if (!BITMASK_TEST(brl->data->hid.pressedKeys.mask, *key)) {
-          handleKeyEvent(brl, *key, 1);
-          BITMASK_SET(brl->data->hid.pressedKeys.mask, *key);
-          brl->data->hid.pressedKeys.count += 1;
-        }
-      }
-
-      key += 1;
-    }
-  }
-
-  if (brl->data->hid.pressedKeys.count > pressedCount) {
-    for (unsigned int key=0; key<=MAXIMUM_KEY_VALUE; key+=1) {
-      if (BITMASK_TEST(brl->data->hid.pressedKeys.mask, key)) {
-        if (!BITMASK_TEST(pressedMask, key)) {
-          handleKeyEvent(brl, key, 0);
-          BITMASK_CLEAR(brl->data->hid.pressedKeys.mask, key);
-          if (--brl->data->hid.pressedKeys.count == pressedCount) break;
-        }
-      }
-    }
-  }
-}
-
 static int
-processHidInputPacket (BrailleDisplay *brl) {
+handleHidInputPacket (BrailleDisplay *brl) {
   unsigned char packet[0XFF];
   size_t length = readHidPacket(brl, packet, sizeof(packet));
   if (!length) return 0;
@@ -443,7 +467,7 @@ processHidInputPacket (BrailleDisplay *brl) {
     case HW_REP_IN_PressedKeys: {
       const unsigned int offset = 1;
 
-      processHidKeys(brl, packet+offset, length-offset);
+      handlePressedKeysArray(brl, packet+offset, length-offset);
       break;
     }
 
@@ -465,7 +489,7 @@ static const ProtocolEntry hidProtocol = {
   .name = "HID",
   .probeDisplay = probeHidDisplay,
   .writeCells = writeHidCells,
-  .processInputPacket = processHidInputPacket
+  .handleInputPacket = handleHidInputPacket
 };
 
 static int
@@ -574,6 +598,6 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  while (brl->data->protocol->processInputPacket(brl));
+  while (brl->data->protocol->handleInputPacket(brl));
   return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
 }
