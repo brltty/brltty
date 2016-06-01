@@ -92,6 +92,7 @@ typedef struct {
   int (*probeDisplay) (BrailleDisplay *brl);
   int (*writeCells) (BrailleDisplay *brl, const unsigned char *cells, unsigned char count);
   int (*processInputPacket) (BrailleDisplay *brl);
+  int (*keepAwake) (BrailleDisplay *brl);
 } ProtocolEntry;
 
 struct BrailleDataStruct {
@@ -115,12 +116,31 @@ struct BrailleDataStruct {
   } hid;
 };
 
+static int
+getDecimalValue (const char *digits, unsigned int count) {
+  unsigned int result = 0;
+
+  const char zero = '0';
+  const char nine = '9';
+
+  const char *digit = digits;
+  const char *end = digit + count;
+
+  while (digit < end) {
+    if (*digit < zero) return 0;
+    if (*digit > nine) return 0;
+
+    result *= 10;
+    result += *digit++ - zero;
+  }
+
+  return result;
+}
+
 static void
-logFirmwareVersion (BrailleDisplay *brl) {
-  logMessage(LOG_INFO, "Firmware Version: %u.%u.%u",
-             (brl->data->firmwareVersion >> 16) & 0XFF,
-             (brl->data->firmwareVersion >>  8) & 0XFF,
-             (brl->data->firmwareVersion >>  0) & 0XFF);
+setFirmwareVersion (BrailleDisplay *brl, unsigned char major, unsigned char minor, unsigned char build) {
+  logMessage(LOG_INFO, "Firmware Version: %u.%u.%u", major, minor, build);
+  brl->data->firmwareVersion = (major << 16) | (minor << 8) << (build << 0);
 }
 
 static int
@@ -259,6 +279,11 @@ writeSerialPacket (BrailleDisplay *brl, unsigned char type, unsigned char length
 }
 
 static int
+keepSerialAwake (BrailleDisplay *brl) {
+  return writeSerialPacket(brl, HW_MSG_KEEP_AWAKE, 0, NULL);
+}
+
+static int
 writeSerialIdentifyRequest (BrailleDisplay *brl) {
   return writeSerialPacket(brl, HW_MSG_INIT, 0, NULL);
 }
@@ -272,7 +297,12 @@ static BrailleResponseResult
 isSerialIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
   const HW_Packet *response = packet;
 
-  return (response->fields.type == HW_MSG_INIT_RESP)? BRL_RSP_DONE: BRL_RSP_UNEXPECTED;
+  if (response->fields.type != HW_MSG_INIT_RESP) return BRL_RSP_UNEXPECTED;
+  if (!response->fields.data.init.notReady) return BRL_RSP_DONE;
+  logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "communication not enabled yet");
+
+  if (writeSerialIdentifyRequest(brl)) return BRL_RSP_CONTINUE;
+  return BRL_RSP_FAIL;
 }
 
 static int
@@ -287,10 +317,6 @@ probeSerialDisplay (BrailleDisplay *brl) {
     logMessage(LOG_INFO, "detected Humanware device: model=%u cells=%u",
                response.fields.data.init.modelIdentifier,
                response.fields.data.init.cellCount);
-
-    if (response.fields.data.init.communicationDisabled) {
-      logMessage(LOG_WARNING, "communication channel not available");
-    }
 
     brl->textColumns = response.fields.data.init.cellCount;
 
@@ -328,10 +354,10 @@ processSerialInputPacket (BrailleDisplay *brl) {
       break;
 
     case HW_MSG_FIRMWARE_VERSION_RESP:
-      brl->data->firmwareVersion |= packet.fields.data.firmwareVersion.major << 16;
-      brl->data->firmwareVersion |= packet.fields.data.firmwareVersion.minor <<  8;
-      brl->data->firmwareVersion |= packet.fields.data.firmwareVersion.build <<  0;
-      logFirmwareVersion(brl);
+      setFirmwareVersion(brl,
+        packet.fields.data.firmwareVersion.major,
+        packet.fields.data.firmwareVersion.minor,
+        packet.fields.data.firmwareVersion.build);
       break;
 
     case HW_MSG_KEEP_AWAKE_RESP:
@@ -353,7 +379,8 @@ static const ProtocolEntry serialProtocol = {
   .name = "serial",
   .probeDisplay = probeSerialDisplay,
   .writeCells = writeSerialCells,
-  .processInputPacket = processSerialInputPacket
+  .processInputPacket = processSerialInputPacket,
+  .keepAwake = keepSerialAwake
 };
 
 static ssize_t
@@ -377,7 +404,7 @@ readHidFeature (
 }
 
 static int
-writeHidReport (BrailleDisplay *brl, const unsigned char *data, size_t size) {
+writeHidReport (BrailleDisplay *brl, const void *data, size_t size) {
   logOutputPacket(data, size);
 
   {
@@ -416,6 +443,10 @@ verifyHidPacket (
           *length = brl->data->hid.pressedKeys.reportSize;
           break;
 
+        case HW_REP_FTR_KeepAwake:
+          *length = sizeof(HW_KeepAwakeReport);
+          break;
+
         case HW_REP_IN_PoweringOff:
           *length = sizeof(HW_PoweringOffReport);
           break;
@@ -447,9 +478,10 @@ probeHidDisplay (BrailleDisplay *brl) {
   if (length != -1) {
     memset(&buffer[length], 0, (size - length));
 
-    logMessage(LOG_INFO, "Firmware Version: %c.%c.%c%c",
-               capabilities.version.major, capabilities.version.minor,
-               capabilities.version.revision[0], capabilities.version.revision[1]);
+    setFirmwareVersion(brl,
+      getDecimalValue(&capabilities.version.major, 1),
+      getDecimalValue(&capabilities.version.minor, 1),
+      getDecimalValue(&capabilities.version.build[0], 2));
 
     brl->textColumns = capabilities.cellCount;
 
@@ -508,11 +540,22 @@ processHidInputPacket (BrailleDisplay *brl) {
   return 1;
 }
 
+static int
+keepHidAwake (BrailleDisplay *brl) {
+  HW_KeepAwakeReport report;
+
+  memset(&report, 0, sizeof(report));
+  report.reportIdentifier = HW_REP_FTR_KeepAwake;
+
+  return writeHidReport(brl, &report, sizeof(report));;
+}
+
 static const ProtocolEntry hidProtocol = {
   .name = "HID",
   .probeDisplay = probeHidDisplay,
   .writeCells = writeHidCells,
-  .processInputPacket = processHidInputPacket
+  .processInputPacket = processHidInputPacket,
+  .keepAwake = keepHidAwake
 };
 
 static int

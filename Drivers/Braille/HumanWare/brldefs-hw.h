@@ -51,7 +51,7 @@ typedef union {
       unsigned char bytes[0XFF];
 
       struct {
-        unsigned char communicationDisabled;
+        unsigned char notReady;
         unsigned char modelIdentifier;
         unsigned char cellCount;
       } PACKED init;
@@ -87,7 +87,7 @@ typedef struct {
   struct {
     char major;
     char minor;
-    char revision[2];
+    char build[2];
   } version;
 
   char serialNumber[16];
@@ -118,6 +118,11 @@ typedef struct {
     unsigned char lastIndex;
   } secondaryRoutingKeys;
 } HW_ConfigurationReport;
+
+typedef struct {
+  unsigned char reportIdentifier;
+  unsigned char fill;
+} HW_KeepAwakeReport;
 
 typedef struct {
   unsigned char reportIdentifier;
