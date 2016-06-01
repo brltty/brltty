@@ -91,11 +91,12 @@ typedef struct {
   const char *name;
   int (*probeDisplay) (BrailleDisplay *brl);
   int (*writeCells) (BrailleDisplay *brl, const unsigned char *cells, unsigned char count);
-  int (*handleInputPacket) (BrailleDisplay *brl);
+  int (*processInputPacket) (BrailleDisplay *brl);
 } ProtocolEntry;
 
 struct BrailleDataStruct {
   const ProtocolEntry *protocol;
+  uint32_t firmwareVersion;
 
   struct {
     unsigned char count;
@@ -114,6 +115,14 @@ struct BrailleDataStruct {
   } hid;
 };
 
+static void
+logFirmwareVersion (BrailleDisplay *brl) {
+  logMessage(LOG_INFO, "Firmware Version: %u.%u.%u",
+             (brl->data->firmwareVersion >> 16) & 0XFF,
+             (brl->data->firmwareVersion >>  8) & 0XFF,
+             (brl->data->firmwareVersion >>  0) & 0XFF);
+}
+
 static int
 hasBrailleKeyboard (BrailleDisplay *brl) {
   if (brl->textColumns == 32) return 1;
@@ -125,11 +134,6 @@ static int
 hasSecondThumbKeys (BrailleDisplay *brl) {
   if (brl->textColumns == 80) return 1;
   return 0;
-}
-
-static void
-handlePoweringOff (BrailleDisplay *brl) {
-  logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "powering off");
 }
 
 static int
@@ -203,6 +207,11 @@ handlePressedKeysArray (BrailleDisplay *brl, unsigned char *keys, size_t count) 
       }
     }
   }
+}
+
+static void
+handlePoweringOff (BrailleDisplay *brl) {
+  logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "powering off");
 }
 
 static BraillePacketVerifierResult
@@ -284,6 +293,10 @@ probeSerialDisplay (BrailleDisplay *brl) {
     }
 
     brl->textColumns = response.fields.data.init.cellCount;
+
+    writeSerialPacket(brl, HW_MSG_GET_FIRMWARE_VERSION, 0, NULL);
+    writeSerialPacket(brl, HW_MSG_GET_KEYS, 0, NULL);
+
     return 1;
   }
 
@@ -296,7 +309,7 @@ writeSerialCells (BrailleDisplay *brl, const unsigned char *cells, unsigned char
 }
 
 static int
-handleSerialInputPacket (BrailleDisplay *brl) {
+processSerialInputPacket (BrailleDisplay *brl) {
   HW_Packet packet;
   size_t length = readSerialPacket(brl, &packet, sizeof(packet));
   if (!length) return 0;
@@ -312,6 +325,16 @@ handleSerialInputPacket (BrailleDisplay *brl) {
 
     case HW_MSG_KEY_UP:
       handleKeyRelease(brl, packet.fields.data.key.id);
+      break;
+
+    case HW_MSG_FIRMWARE_VERSION_RESP:
+      brl->data->firmwareVersion |= packet.fields.data.firmwareVersion.major << 16;
+      brl->data->firmwareVersion |= packet.fields.data.firmwareVersion.minor <<  8;
+      brl->data->firmwareVersion |= packet.fields.data.firmwareVersion.build <<  0;
+      logFirmwareVersion(brl);
+      break;
+
+    case HW_MSG_KEEP_AWAKE_RESP:
       break;
 
     case HW_MSG_POWERING_OFF:
@@ -330,7 +353,7 @@ static const ProtocolEntry serialProtocol = {
   .name = "serial",
   .probeDisplay = probeSerialDisplay,
   .writeCells = writeSerialCells,
-  .handleInputPacket = handleSerialInputPacket
+  .processInputPacket = processSerialInputPacket
 };
 
 static ssize_t
@@ -458,7 +481,7 @@ writeHidCells (BrailleDisplay *brl, const unsigned char *cells, unsigned char co
 }
 
 static int
-handleHidInputPacket (BrailleDisplay *brl) {
+processHidInputPacket (BrailleDisplay *brl) {
   unsigned char packet[0XFF];
   size_t length = readHidPacket(brl, packet, sizeof(packet));
   if (!length) return 0;
@@ -489,7 +512,7 @@ static const ProtocolEntry hidProtocol = {
   .name = "HID",
   .probeDisplay = probeHidDisplay,
   .writeCells = writeHidCells,
-  .handleInputPacket = handleHidInputPacket
+  .processInputPacket = processHidInputPacket
 };
 
 static int
@@ -598,6 +621,6 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  while (brl->data->protocol->handleInputPacket(brl));
+  while (brl->data->protocol->processInputPacket(brl));
   return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
 }

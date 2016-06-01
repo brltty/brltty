@@ -20,19 +20,23 @@
 #define BRLTTY_INCLUDED_HW_BRLDEFS
 
 typedef enum {
-  HW_MSG_INIT                 = 0X00,
-  HW_MSG_INIT_RESP            = 0X01,
-  HW_MSG_DISPLAY              = 0X02,
-  HW_MSG_GET_KEYS             = 0X03,
-  HW_MSG_KEYS                 = 0X04,
-  HW_MSG_KEY_DOWN             = 0X05,
-  HW_MSG_KEY_UP               = 0X06,
-  HW_MSG_FIRMWARE_UPDATE      = 0X07,
-  HW_MSG_FIRMWARE_RESP        = 0X08,
-  HW_MSG_CONFIGURATION_UPDATE = 0X09,
-  HW_MSG_CONFIGURATION_RESP   = 0X0A,
-  HW_MSG_GET_CONFIGURATION    = 0X0B,
-  HW_MSG_POWERING_OFF         = 0X10
+  HW_MSG_INIT                  = 0X00,
+  HW_MSG_INIT_RESP             = 0X01,
+  HW_MSG_DISPLAY               = 0X02,
+  HW_MSG_GET_KEYS              = 0X03,
+  HW_MSG_KEYS                  = 0X04,
+  HW_MSG_KEY_DOWN              = 0X05,
+  HW_MSG_KEY_UP                = 0X06,
+  HW_MSG_FIRMWARE_UPDATE       = 0X07,
+  HW_MSG_FIRMWARE_RESP         = 0X08,
+  HW_MSG_CONFIGURATION_UPDATE  = 0X09,
+  HW_MSG_CONFIGURATION_RESP    = 0X0A,
+  HW_MSG_GET_CONFIGURATION     = 0X0B,
+  HW_MSG_GET_FIRMWARE_VERSION  = 0X0C,
+  HW_MSG_FIRMWARE_VERSION_RESP = 0X0D,
+  HW_MSG_KEEP_AWAKE            = 0X0E,
+  HW_MSG_KEEP_AWAKE_RESP       = 0X0F,
+  HW_MSG_POWERING_OFF          = 0X10
 } HW_MessageType;
 
 typedef union {
@@ -55,6 +59,13 @@ typedef union {
       struct {
         unsigned char id;
       } PACKED key;
+
+      struct {
+        unsigned char have;
+        unsigned char major;
+        unsigned char minor;
+        unsigned char build;
+      } PACKED firmwareVersion;
     } data;
   } PACKED fields;
 } HW_Packet;
