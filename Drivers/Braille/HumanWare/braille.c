@@ -279,13 +279,13 @@ writeSerialPacket (BrailleDisplay *brl, unsigned char type, unsigned char length
 }
 
 static int
-keepSerialAwake (BrailleDisplay *brl) {
-  return writeSerialPacket(brl, HW_MSG_KEEP_AWAKE, 0, NULL);
+writeSerialRequest (BrailleDisplay *brl, unsigned char type) {
+  return writeSerialPacket(brl, type, 0, NULL);
 }
 
 static int
 writeSerialIdentifyRequest (BrailleDisplay *brl) {
-  return writeSerialPacket(brl, HW_MSG_INIT, 0, NULL);
+  return writeSerialRequest(brl, HW_MSG_INIT);
 }
 
 static size_t
@@ -320,8 +320,8 @@ probeSerialDisplay (BrailleDisplay *brl) {
 
     brl->textColumns = response.fields.data.init.cellCount;
 
-    writeSerialPacket(brl, HW_MSG_GET_FIRMWARE_VERSION, 0, NULL);
-    writeSerialPacket(brl, HW_MSG_GET_KEYS, 0, NULL);
+    writeSerialRequest(brl, HW_MSG_GET_FIRMWARE_VERSION);
+    writeSerialRequest(brl, HW_MSG_GET_KEYS);
 
     return 1;
   }
@@ -373,6 +373,11 @@ processSerialInputPacket (BrailleDisplay *brl) {
   }
 
   return 1;
+}
+
+static int
+keepSerialAwake (BrailleDisplay *brl) {
+  return writeSerialRequest(brl, HW_MSG_KEEP_AWAKE);
 }
 
 static const ProtocolEntry serialProtocol = {
