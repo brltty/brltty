@@ -24,6 +24,7 @@
 #include "log.h"
 #include "ascii.h"
 #include "bitmask.h"
+#include "async_wait.h"
 
 #include "brl_driver.h"
 #include "brldefs-hw.h"
@@ -74,6 +75,8 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(mb1),
   &KEY_TABLE_DEFINITION(mb2),
 END_KEY_TABLE_LIST
+
+#define OPEN_READY_DELAY 100
 
 #define SERIAL_PROBE_RETRIES 0
 #define SERIAL_PROBE_TIMEOUT 1000
@@ -299,7 +302,9 @@ isSerialIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) 
 
   if (response->fields.type != HW_MSG_INIT_RESP) return BRL_RSP_UNEXPECTED;
   if (!response->fields.data.init.notReady) return BRL_RSP_DONE;
+
   logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "communication not enabled yet");
+  asyncWait(100);
 
   if (writeSerialIdentifyRequest(brl)) return BRL_RSP_CONTINUE;
   return BRL_RSP_FAIL;
@@ -593,13 +598,14 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
   descriptor.serial.parameters = &serialParameters;
   descriptor.serial.options.applicationData = &serialProtocol;
-  descriptor.serial.options.readyDelay = 100;
+  descriptor.serial.options.readyDelay = OPEN_READY_DELAY;
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
+  descriptor.usb.options.readyDelay = OPEN_READY_DELAY;
 
   descriptor.bluetooth.channelNumber = 1;
   descriptor.bluetooth.options.applicationData = &serialProtocol;
-  descriptor.bluetooth.options.readyDelay = 100;
+  descriptor.bluetooth.options.readyDelay = OPEN_READY_DELAY;
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
     brl->data->protocol = gioGetApplicationData(brl->gioEndpoint);
