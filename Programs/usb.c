@@ -845,21 +845,28 @@ usbApplyInputFilter (void *item, void *data) {
 
 int
 usbApplyInputFilters (UsbEndpoint *endpoint, void *buffer, size_t size, ssize_t *length) {
-  UsbInputFilterData data = {
-    .buffer = buffer,
-    .size = size,
-    .length = *length
-  };
+  Queue *filters = endpoint->device->inputFilters;
 
-  usbLogEndpointData(endpoint, "unfiltered input", buffer, *length);
+  if (getQueueSize(filters) == 0) {
+    usbLogEndpointData(endpoint, "input", buffer, *length);
+  } else {
+    usbLogEndpointData(endpoint, "unfiltered input", buffer, *length);
 
-  if (processQueue(endpoint->device->inputFilters, usbApplyInputFilter, &data)) {
-    errno = EIO;
-    return 0;
+    UsbInputFilterData data = {
+      .buffer = buffer,
+      .size = size,
+      .length = *length
+    };
+
+    if (processQueue(filters, usbApplyInputFilter, &data)) {
+      errno = EIO;
+      return 0;
+    }
+
+    *length = data.length;
+    usbLogEndpointData(endpoint, "filtered input", buffer, *length);
   }
 
-  *length = data.length;
-  usbLogEndpointData(endpoint, "filtered input", buffer, *length);
   return 1;
 }
 
