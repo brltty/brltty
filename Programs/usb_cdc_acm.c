@@ -22,6 +22,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "strfmt.h"
 #include "usb_serial.h"
 #include "usb_cdc_acm.h"
 #include "usb_internal.h"
@@ -31,6 +32,8 @@ struct UsbSerialDataStruct {
   UsbDevice *device;
   const UsbInterfaceDescriptor *interface;
   const UsbEndpointDescriptor *endpoint;
+
+  USB_CDC_ACM_LineCoding lineCoding;
 };
 
 static const UsbInterfaceDescriptor *
@@ -110,6 +113,86 @@ usbDestroyData_CDC_ACM (UsbSerialData *usd) {
 }
 
 static int
+usbGetParameters_CDC_ACM (UsbDevice *device, uint8_t request, void *data, uint16_t size) {
+  ssize_t result = usbControlRead(device, UsbControlRecipient_Interface,
+                                  UsbControlType_Class, request, 0,
+                                   device->serial.data->interface->bInterfaceNumber,
+                                   data, size, 1000);
+
+  return result != -1;
+}
+
+static int
+usbSetParameters_CDC_ACM (UsbDevice *device, uint8_t request, uint16_t value, const void *data, uint16_t size) {
+  ssize_t result = usbControlWrite(device, UsbControlRecipient_Interface,
+                                   UsbControlType_Class, request, value,
+                                   device->serial.data->interface->bInterfaceNumber,
+                                   data, size, 1000);
+
+  return result != -1;
+}
+
+static int
+usbSetControlLines_CDC_ACM (UsbDevice *device, uint16_t lines) {
+  return usbSetParameters_CDC_ACM(device, USB_CDC_ACM_CTL_SetControlLineState,
+                                  lines, NULL, 0);
+}
+
+static void
+usbLogLineCoding_CDC_ACM (const USB_CDC_ACM_LineCoding *lineCoding) {
+  char log[0X80];
+
+  STR_BEGIN(log, sizeof(log));
+  STR_PRINTF("CDC ACM line coding:");
+
+  { // baud (bits per second)
+    uint32_t baud = getLittleEndian32(lineCoding->dwDTERate);
+    STR_PRINTF(" Baud:%" PRIu32, baud);
+  }
+
+  { // number of data bits
+    STR_PRINTF(" Data:%u", lineCoding->bDataBits);
+  }
+
+  { // number of stop bits
+    const char *bits;
+
+#define USB_CDC_ACM_STOP(value,name) \
+case USB_CDC_ACM_STOP_##value: bits = #name; break;
+    switch (lineCoding->bCharFormat) {
+      USB_CDC_ACM_STOP(1  , 1  )
+      USB_CDC_ACM_STOP(1_5, 1.5)
+      USB_CDC_ACM_STOP(2  , 2  )
+      default: bits = "?"; break;
+    }
+#undef USB_CDC_ACM_STOP
+
+    STR_PRINTF(" Stop:%s", bits);
+  }
+
+  { // type of parity
+    const char *parity;
+
+#define USB_CDC_ACM_PARITY(value,name) \
+case USB_CDC_ACM_PARITY_##value: parity = #name; break;
+    switch (lineCoding->bParityType) {
+      USB_CDC_ACM_PARITY(NONE , none )
+      USB_CDC_ACM_PARITY(ODD  , odd  )
+      USB_CDC_ACM_PARITY(EVEN , even )
+      USB_CDC_ACM_PARITY(MARK , mark )
+      USB_CDC_ACM_PARITY(SPACE, space)
+      default: parity = "?"; break;
+    }
+#undef USB_CDC_ACM_PARITY
+
+    STR_PRINTF(" Parity:%s", parity);
+  }
+
+  STR_END;
+  logMessage(LOG_CATEGORY(USB_IO), "%s", log);
+}
+
+static int
 usbSetLineProperties_CDC_ACM (UsbDevice *device, unsigned int baud, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity) {
   USB_CDC_ACM_LineCoding lineCoding;
   memset(&lineCoding, 0, sizeof(lineCoding));
@@ -178,14 +261,17 @@ usbSetLineProperties_CDC_ACM (UsbDevice *device, unsigned int baud, unsigned int
   }
 
   {
-    ssize_t result = usbControlWrite(device,
-                                     UsbControlRecipient_Interface, UsbControlType_Class,
-                                     USB_CDC_ACM_CTL_SetLineCoding,
-                                     0,
-                                     device->serial.data->interface->bInterfaceNumber,
-                                     &lineCoding, sizeof(lineCoding), 1000);
+    USB_CDC_ACM_LineCoding *oldCoding = &device->serial.data->lineCoding;
 
-    if (result == -1) return 0;
+    if (memcmp(&lineCoding, oldCoding, sizeof(lineCoding)) != 0) {
+      if (!usbSetParameters_CDC_ACM(device, USB_CDC_ACM_CTL_SetLineCoding, 0,
+                                    &lineCoding, sizeof(lineCoding))) {
+        return 0;
+      }
+
+      *oldCoding = lineCoding;
+      usbLogLineCoding_CDC_ACM(&lineCoding);
+    }
   }
 
   return 1;
@@ -204,15 +290,23 @@ usbSetFlowControl_CDC_ACM (UsbDevice *device, SerialFlowControl flow) {
 
 static int
 usbEnableAdapter_CDC_ACM (UsbDevice *device) {
-  ssize_t result = usbControlWrite(device,
-                                   UsbControlRecipient_Interface, UsbControlType_Class,
-                                   USB_CDC_ACM_CTL_SetControlLines,
-                                   USB_CDC_ACM_LINE_DTR,
-                                   device->serial.data->interface->bInterfaceNumber,
-                                   NULL, 0, 1000);
+  UsbSerialData *usd = device->serial.data;
 
-  if (result != -1) return 1;
-  return 0;
+  {
+    USB_CDC_ACM_LineCoding *lineCoding = &usd->lineCoding;
+
+    if (!usbGetParameters_CDC_ACM(device, USB_CDC_ACM_CTL_GetLineCoding,
+                                  lineCoding, sizeof(*lineCoding))) {
+      return 0;
+    }
+
+    usbLogLineCoding_CDC_ACM(lineCoding);
+  }
+
+  if (!usbSetControlLines_CDC_ACM(device, 0)) return 0;
+  if (!usbSetControlLines_CDC_ACM(device, USB_CDC_ACM_LINE_DTR)) return 0;
+
+  return 1;
 }
 
 const UsbSerialOperations usbSerialOperations_CDC_ACM = {

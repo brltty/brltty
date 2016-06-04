@@ -24,10 +24,13 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef enum {
-  USB_CDC_ACM_CTL_SetLineCoding   = 0X20,
-  USB_CDC_ACM_CTL_GetLineCoding   = 0X21,
-  USB_CDC_ACM_CTL_SetControlLines = 0X22,
-  USB_CDC_ACM_CTL_SendBreak       = 0X23
+  USB_CDC_ACM_CTL_SetCommFeature      = 0X02,
+  USB_CDC_ACM_CTL_GetCommFeature      = 0X03,
+  USB_CDC_ACM_CTL_ClearCommFeature    = 0X04,
+  USB_CDC_ACM_CTL_SetLineCoding       = 0X20,
+  USB_CDC_ACM_CTL_GetLineCoding       = 0X21,
+  USB_CDC_ACM_CTL_SetControlLineState = 0X22,
+  USB_CDC_ACM_CTL_SendBreak           = 0X23
 } USB_CDC_ACM_ControlRequest;
 
 typedef enum {

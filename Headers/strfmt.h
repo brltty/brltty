@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_STRFMT
 #define BRLTTY_INCLUDED_STRFMT
 
+#include <stdio.h>
+
 #include "strfmth.h"
 
 #ifdef __cplusplus
