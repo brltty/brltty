@@ -78,8 +78,11 @@ END_KEY_TABLE_LIST
 
 #define OPEN_READY_DELAY 100
 
-#define SERIAL_PROBE_RETRIES 0
-#define SERIAL_PROBE_TIMEOUT 1000
+#define SERIAL_PROBE_RESPONSE_TIMEOUT 1000
+#define SERIAL_PROBE_RETRY_LIMIT 0
+
+#define SERIAL_INIT_RESEND_DELAY 100
+#define SERIAL_INIT_RESEND_LIMIT 10
 
 #define MAXIMUM_TEXT_CELL_COUNT 0XFF
 
@@ -111,6 +114,12 @@ struct BrailleDataStruct {
     unsigned char rewrite;
     unsigned char cells[MAXIMUM_TEXT_CELL_COUNT];
   } text;
+
+  struct {
+    struct {
+      unsigned char resendCount;
+    } init;
+  } serial;
 
   struct {
     struct {
@@ -303,8 +312,13 @@ isSerialIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) 
   if (response->fields.type != HW_MSG_INIT_RESP) return BRL_RSP_UNEXPECTED;
   if (!response->fields.data.init.stillInitializing) return BRL_RSP_DONE;
 
-  logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "channel not initialized yet");
-  asyncWait(100);
+  if (++brl->data->serial.init.resendCount > SERIAL_INIT_RESEND_LIMIT) {
+    logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "channel initialization timeout");
+    return BRL_RSP_FAIL;
+  }
+
+  logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "channel still initializing");
+  asyncWait(SERIAL_INIT_RESEND_DELAY);
 
   if (writeSerialIdentifyRequest(brl)) return BRL_RSP_CONTINUE;
   return BRL_RSP_FAIL;
@@ -314,8 +328,10 @@ static int
 probeSerialDisplay (BrailleDisplay *brl) {
   HW_Packet response;
 
-  if (probeBrailleDisplay(brl, SERIAL_PROBE_RETRIES,
-                          NULL, SERIAL_PROBE_TIMEOUT,
+  brl->data->serial.init.resendCount = 0;
+
+  if (probeBrailleDisplay(brl, SERIAL_PROBE_RETRY_LIMIT,
+                          NULL, SERIAL_PROBE_RESPONSE_TIMEOUT,
                           writeSerialIdentifyRequest,
                           readSerialResponse, &response, sizeof(response.bytes),
                           isSerialIdentityResponse)) {
