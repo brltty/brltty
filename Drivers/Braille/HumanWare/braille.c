@@ -301,9 +301,9 @@ isSerialIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) 
   const HW_Packet *response = packet;
 
   if (response->fields.type != HW_MSG_INIT_RESP) return BRL_RSP_UNEXPECTED;
-  if (!response->fields.data.init.notReady) return BRL_RSP_DONE;
+  if (!response->fields.data.init.stillInitializing) return BRL_RSP_DONE;
 
-  logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "communication not enabled yet");
+  logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "channel not initialized yet");
   asyncWait(100);
 
   if (writeSerialIdentifyRequest(brl)) return BRL_RSP_CONTINUE;
