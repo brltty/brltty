@@ -51,7 +51,9 @@ ASYNC_CONDITION_TESTER(testEndLearnWait) {
 static int
 handleLearnModeCommands (int command, void *data) {
   LearnModeData *lmd = data;
+
   logMessage(LOG_DEBUG, "learn: command=%06X", command);
+  lmd->state = LMS_CONTINUE;
 
   switch (command & BRL_MSK_CMD) {
     case BRL_CMD_LEARN:
@@ -59,11 +61,16 @@ handleLearnModeCommands (int command, void *data) {
       return 1;
 
     case BRL_CMD_NOOP:
-      lmd->state = LMS_CONTINUE;
       return 1;
 
     default:
-      lmd->state = LMS_CONTINUE;
+      switch (command & BRL_MSK_BLK) {
+        case BRL_CMD_BLK(TOUCH_AT):
+          return 1;
+
+        default:
+          break;
+      }
       break;
   }
 
