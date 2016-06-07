@@ -36,90 +36,19 @@ struct UsbSerialDataStruct {
   USB_CDC_ACM_LineCoding lineCoding;
 };
 
-static const UsbInterfaceDescriptor *
-usbFindCommunicationInterface (UsbDevice *device) {
-  const UsbDescriptor *descriptor = NULL;
-
-  while (usbNextDescriptor(device, &descriptor)) {
-    if (descriptor->header.bDescriptorType == UsbDescriptorType_Interface) {
-      if (descriptor->interface.bInterfaceClass == 0X02) {
-        return &descriptor->interface;
-      }
-    }
-  }
-
-  logMessage(LOG_WARNING, "USB: communication interface descriptor not found");
-  errno = ENOENT;
-  return NULL;
-}
-
-static const UsbEndpointDescriptor *
-usbFindInterruptInputEndpoint (UsbDevice *device, const UsbInterfaceDescriptor *interface) {
-  const UsbDescriptor *descriptor = (const UsbDescriptor *)interface;
-
-  while (usbNextDescriptor(device, &descriptor)) {
-    if (descriptor->header.bDescriptorType == UsbDescriptorType_Interface) break;
-
-    if (descriptor->header.bDescriptorType == UsbDescriptorType_Endpoint) {
-      if (USB_ENDPOINT_DIRECTION(&descriptor->endpoint) == UsbEndpointDirection_Input) {
-        if (USB_ENDPOINT_TRANSFER(&descriptor->endpoint) == UsbEndpointTransfer_Interrupt) {
-          return &descriptor->endpoint;
-        }
-      }
-    }
-  }
-
-  logMessage(LOG_WARNING, "USB: interrupt input endpoint descriptor not found");
-  errno = ENOENT;
-  return NULL;
-}
-
 static int
-usbMakeData_CDC_ACM (UsbDevice *device, UsbSerialData **serialData) {
-  UsbSerialData *usd;
-
-  if ((usd = malloc(sizeof(*usd)))) {
-    memset(usd, 0, sizeof(*usd));
-    usd->device = device;
-
-    if ((usd->interface = usbFindCommunicationInterface(device))) {
-      unsigned char interfaceNumber = usd->interface->bInterfaceNumber;
-
-      if (usbClaimInterface(device, interfaceNumber)) {
-        if (usbSetAlternative(device, usd->interface->bInterfaceNumber, usd->interface->bAlternateSetting)) {
-          if ((usd->endpoint = usbFindInterruptInputEndpoint(device, usd->interface))) {
-            usbBeginInput(device, USB_ENDPOINT_NUMBER(usd->endpoint));
-            *serialData = usd;
-            return 1;
-          }
-        }
-
-        usbReleaseInterface(device, interfaceNumber);
-      }
-    }
-
-    free(usd);
-  } else {
-    logMallocError();
-  }
-
-  return 0;
-}
-
-static void
-usbDestroyData_CDC_ACM (UsbSerialData *usd) {
-  usbReleaseInterface(usd->device, usd->interface->bInterfaceNumber);
-  free(usd);
-}
-
-static int
-usbGetParameters_CDC_ACM (UsbDevice *device, uint8_t request, void *data, uint16_t size) {
+usbGetParameters_CDC_ACM (UsbDevice *device, uint8_t request, uint16_t value, void *data, uint16_t size) {
   ssize_t result = usbControlRead(device, UsbControlRecipient_Interface,
-                                  UsbControlType_Class, request, 0,
+                                  UsbControlType_Class, request, value,
                                    device->serial.data->interface->bInterfaceNumber,
                                    data, size, 1000);
 
   return result != -1;
+}
+
+static int
+usbGetParameter_CDC_ACM (UsbDevice *device, uint8_t request, void *data, uint16_t size) {
+  return usbGetParameters_CDC_ACM(device, request, 0, data, size);
 }
 
 static int
@@ -133,9 +62,13 @@ usbSetParameters_CDC_ACM (UsbDevice *device, uint8_t request, uint16_t value, co
 }
 
 static int
+usbSetParameter_CDC_ACM (UsbDevice *device, uint8_t request, uint16_t value) {
+  return usbSetParameters_CDC_ACM(device, request, value, NULL, 0);
+}
+
+static int
 usbSetControlLines_CDC_ACM (UsbDevice *device, uint16_t lines) {
-  return usbSetParameters_CDC_ACM(device, USB_CDC_ACM_CTL_SetControlLineState,
-                                  lines, NULL, 0);
+  return usbSetParameter_CDC_ACM(device, USB_CDC_ACM_CTL_SetControlLineState, lines);
 }
 
 static void
@@ -288,23 +221,100 @@ usbSetFlowControl_CDC_ACM (UsbDevice *device, SerialFlowControl flow) {
   return 1;
 }
 
+static const UsbInterfaceDescriptor *
+usbFindCommunicationInterface (UsbDevice *device) {
+  const UsbDescriptor *descriptor = NULL;
+
+  while (usbNextDescriptor(device, &descriptor)) {
+    if (descriptor->header.bDescriptorType == UsbDescriptorType_Interface) {
+      if (descriptor->interface.bInterfaceClass == 0X02) {
+        return &descriptor->interface;
+      }
+    }
+  }
+
+  logMessage(LOG_WARNING, "USB: communication interface descriptor not found");
+  errno = ENOENT;
+  return NULL;
+}
+
+static const UsbEndpointDescriptor *
+usbFindInterruptInputEndpoint (UsbDevice *device, const UsbInterfaceDescriptor *interface) {
+  const UsbDescriptor *descriptor = (const UsbDescriptor *)interface;
+
+  while (usbNextDescriptor(device, &descriptor)) {
+    if (descriptor->header.bDescriptorType == UsbDescriptorType_Interface) break;
+
+    if (descriptor->header.bDescriptorType == UsbDescriptorType_Endpoint) {
+      if (USB_ENDPOINT_DIRECTION(&descriptor->endpoint) == UsbEndpointDirection_Input) {
+        if (USB_ENDPOINT_TRANSFER(&descriptor->endpoint) == UsbEndpointTransfer_Interrupt) {
+          return &descriptor->endpoint;
+        }
+      }
+    }
+  }
+
+  logMessage(LOG_WARNING, "USB: interrupt input endpoint descriptor not found");
+  errno = ENOENT;
+  return NULL;
+}
+
+static int
+usbMakeData_CDC_ACM (UsbDevice *device, UsbSerialData **serialData) {
+  UsbSerialData *usd;
+
+  if ((usd = malloc(sizeof(*usd)))) {
+    memset(usd, 0, sizeof(*usd));
+    usd->device = device;
+
+    if ((usd->interface = usbFindCommunicationInterface(device))) {
+      unsigned char interfaceNumber = usd->interface->bInterfaceNumber;
+
+      if (usbClaimInterface(device, interfaceNumber)) {
+        if (usbSetAlternative(device, usd->interface->bInterfaceNumber, usd->interface->bAlternateSetting)) {
+          if ((usd->endpoint = usbFindInterruptInputEndpoint(device, usd->interface))) {
+            usbBeginInput(device, USB_ENDPOINT_NUMBER(usd->endpoint));
+            *serialData = usd;
+            return 1;
+          }
+        }
+
+        usbReleaseInterface(device, interfaceNumber);
+      }
+    }
+
+    free(usd);
+  } else {
+    logMallocError();
+  }
+
+  return 0;
+}
+
+static void
+usbDestroyData_CDC_ACM (UsbSerialData *usd) {
+  usbSetControlLines_CDC_ACM(usd->device, 0);
+  usbReleaseInterface(usd->device, usd->interface->bInterfaceNumber);
+  free(usd);
+}
+
 static int
 usbEnableAdapter_CDC_ACM (UsbDevice *device) {
   UsbSerialData *usd = device->serial.data;
 
+  if (!usbSetControlLines_CDC_ACM(device, 0)) return 0;
+  if (!usbSetControlLines_CDC_ACM(device, USB_CDC_ACM_LINE_DTR)) return 0;
+
   {
     USB_CDC_ACM_LineCoding *lineCoding = &usd->lineCoding;
 
-    if (!usbGetParameters_CDC_ACM(device, USB_CDC_ACM_CTL_GetLineCoding,
+    if (!usbGetParameter_CDC_ACM(device, USB_CDC_ACM_CTL_GetLineCoding,
                                   lineCoding, sizeof(*lineCoding))) {
       return 0;
     }
 
     usbLogLineCoding_CDC_ACM(lineCoding);
   }
-
-  if (!usbSetControlLines_CDC_ACM(device, 0)) return 0;
-  if (!usbSetControlLines_CDC_ACM(device, USB_CDC_ACM_LINE_DTR)) return 0;
 
   return 1;
 }
