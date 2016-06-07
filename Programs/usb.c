@@ -926,6 +926,11 @@ done:
 
 void
 usbCloseDevice (UsbDevice *device) {
+  if (device->serial.operations) {
+    const UsbSerialOperations *uso = device->serial.operations;
+    if (uso->disableAdapter) uso->disableAdapter(device);
+  }
+
   usbCloseInterface(device);
   usbRemoveEndpoints(device, 1);
 

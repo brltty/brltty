@@ -293,7 +293,6 @@ usbMakeData_CDC_ACM (UsbDevice *device, UsbSerialData **serialData) {
 
 static void
 usbDestroyData_CDC_ACM (UsbSerialData *usd) {
-  usbSetControlLines_CDC_ACM(usd->device, 0);
   usbReleaseInterface(usd->device, usd->interface->bInterfaceNumber);
   free(usd);
 }
@@ -319,6 +318,11 @@ usbEnableAdapter_CDC_ACM (UsbDevice *device) {
   return 1;
 }
 
+static void
+usbDisableAdapter_CDC_ACM (UsbDevice *device) {
+  usbSetControlLines_CDC_ACM(device, 0);
+}
+
 const UsbSerialOperations usbSerialOperations_CDC_ACM = {
   .name = "CDC_ACM",
 
@@ -327,5 +331,7 @@ const UsbSerialOperations usbSerialOperations_CDC_ACM = {
 
   .setLineProperties = usbSetLineProperties_CDC_ACM,
   .setFlowControl = usbSetFlowControl_CDC_ACM,
-  .enableAdapter = usbEnableAdapter_CDC_ACM
+
+  .enableAdapter = usbEnableAdapter_CDC_ACM,
+  .disableAdapter = usbDisableAdapter_CDC_ACM
 };

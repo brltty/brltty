@@ -350,6 +350,7 @@ typedef struct {
   int (*setRtsState) (UsbDevice *device, int state);
 
   int (*enableAdapter) (UsbDevice *device);
+  void (*disableAdapter) (UsbDevice *device);
 
   UsbInputFilter *inputFilter;
   ssize_t (*writeData) (UsbDevice *device, const void *data, size_t size);
