@@ -104,6 +104,7 @@ typedef struct {
 struct BrailleDataStruct {
   const ProtocolEntry *protocol;
   uint32_t firmwareVersion;
+  unsigned isOffline:1;
 
   struct {
     unsigned char count;
@@ -244,6 +245,7 @@ handlePressedKeysArray (BrailleDisplay *brl, unsigned char *keys, size_t count) 
 static void
 handlePoweringOff (BrailleDisplay *brl) {
   logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "powering off");
+  brl->data->isOffline = 1;
 }
 
 static BraillePacketVerifierResult
@@ -360,6 +362,7 @@ processSerialInputPacket (BrailleDisplay *brl) {
   HW_Packet packet;
   size_t length = readSerialPacket(brl, &packet, sizeof(packet));
   if (!length) return 0;
+  brl->data->isOffline = 0;
 
   switch (packet.fields.type) {
     case HW_MSG_KEYS:
@@ -543,6 +546,7 @@ processHidInputPacket (BrailleDisplay *brl) {
   unsigned char packet[0XFF];
   size_t length = readHidPacket(brl, packet, sizeof(packet));
   if (!length) return 0;
+  brl->data->isOffline = 0;
 
   switch (packet[0]) {
     case HW_REP_IN_PressedKeys: {
@@ -692,5 +696,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   while (brl->data->protocol->processInputPacket(brl));
-  return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
+  if (errno != EAGAIN) return BRL_CMD_RESTARTBRL;
+  if (brl->data->isOffline) return BRL_CMD_OFFLINE;
+  return EOF;
 }
