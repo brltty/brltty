@@ -487,14 +487,17 @@ usbNextDescriptor (
     const UsbDescriptor *next = (UsbDescriptor *)&(*descriptor)->bytes[(*descriptor)->header.bLength];
     const UsbDescriptor *first = (UsbDescriptor *)device->configuration;
     unsigned int length = getLittleEndian16(first->configuration.wTotalLength);
+
     if ((&next->bytes[0] - &first->bytes[0]) >= length) return 0;
     if ((&next->bytes[next->header.bLength] - &first->bytes[0]) > length) return 0;
+
     *descriptor = next;
   } else if (usbConfigurationDescriptor(device)) {
     *descriptor = (UsbDescriptor *)device->configuration;
   } else {
     return 0;
   }
+
   return 1;
 }
 
@@ -507,10 +510,13 @@ usbInterfaceDescriptor (
   const UsbDescriptor *descriptor = NULL;
 
   while (usbNextDescriptor(device, &descriptor)) {
-    if (descriptor->interface.bDescriptorType == UsbDescriptorType_Interface)
-      if (descriptor->interface.bInterfaceNumber == interface)
-        if (descriptor->interface.bAlternateSetting == alternative)
+    if (descriptor->interface.bDescriptorType == UsbDescriptorType_Interface) {
+      if (descriptor->interface.bInterfaceNumber == interface) {
+        if (descriptor->interface.bAlternateSetting == alternative) {
           return &descriptor->interface;
+        }
+      }
+    }
   }
 
   logMessage(LOG_WARNING, "USB: interface descriptor not found: %d.%d", interface, alternative);
@@ -527,9 +533,11 @@ usbAlternativeCount (
   const UsbDescriptor *descriptor = NULL;
 
   while (usbNextDescriptor(device, &descriptor)) {
-    if (descriptor->interface.bDescriptorType == UsbDescriptorType_Interface)
-      if (descriptor->interface.bInterfaceNumber == interface)
+    if (descriptor->interface.bDescriptorType == UsbDescriptorType_Interface) {
+      if (descriptor->interface.bInterfaceNumber == interface) {
         count += 1;
+      }
+    }
   }
 
   return count;
@@ -543,9 +551,11 @@ usbEndpointDescriptor (
   const UsbDescriptor *descriptor = NULL;
 
   while (usbNextDescriptor(device, &descriptor)) {
-    if (descriptor->endpoint.bDescriptorType == UsbDescriptorType_Endpoint)
-      if (descriptor->endpoint.bEndpointAddress == endpointAddress)
+    if (descriptor->endpoint.bDescriptorType == UsbDescriptorType_Endpoint) {
+      if (descriptor->endpoint.bEndpointAddress == endpointAddress) {
         return &descriptor->endpoint;
+      }
+    }
   }
 
   logMessage(LOG_WARNING, "USB: endpoint descriptor not found: %02X", endpointAddress);
@@ -710,13 +720,13 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
       const char *transfer;
 
       switch (USB_ENDPOINT_DIRECTION(descriptor)) {
-        default:                            direction = "?";   break;
+        default:                          direction = "?";   break;
         case UsbEndpointDirection_Input:  direction = "in";  break;
         case UsbEndpointDirection_Output: direction = "out"; break;
       }
 
       switch (USB_ENDPOINT_TRANSFER(descriptor)) {
-        default:                                transfer = "?";   break;
+        default:                              transfer = "?";   break;
         case UsbEndpointTransfer_Control:     transfer = "ctl"; break;
         case UsbEndpointTransfer_Isochronous: transfer = "iso"; break;
         case UsbEndpointTransfer_Bulk:        transfer = "blk"; break;
