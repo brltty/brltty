@@ -244,7 +244,6 @@ handlePressedKeysArray (BrailleDisplay *brl, unsigned char *keys, size_t count) 
 static void
 handlePoweringOff (BrailleDisplay *brl) {
   logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "powering off");
-  enqueueCommand(BRL_CMD_RESTARTBRL);
 }
 
 static BraillePacketVerifierResult
