@@ -167,13 +167,15 @@ BRLTTY has been tested on:
 *  an Alpha workstation
 *  a StrongARM based Netwinder
 *  several Linux kernels (1.2.13 and beyond)
-*  all major Linux distributions (including Red Hat, Debian, Slackware, SuSE)
+*  all major Linux distributions (including Red Hat, Fedora, Debian, Ubuntu, Slackware, SuSE)
 *  Solaris/Sparc (release 7 and beyond)
 *  Solaris/Intel (release 9 and beyond)
 *  OpenBSD/Intel (release 3.4 and beyond)
 *  FreeBSD/Intel (release 5.1 and beyond)
 *  NetBSD/Intel (release 1.6 and beyond)
 *  Windows 95/98/XP
+*  MS-DOS
+*  Mac OS X (in conjunction with a supplied patch for the screen program)
 *  Android/ARM (4.0 and beyond)
 
 The following braille displays are supported:
