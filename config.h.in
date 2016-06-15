@@ -98,8 +98,14 @@ extern "C" {
 /* Define this if the function gettimeofday exists. */
 #undef HAVE_GETTIMEOFDAY
 
+/* Define this if the function settimeofday exists. */
+#undef HAVE_SETTIMEOFDAY
+
 /* Define this if the function clock_gettime exists. */
 #undef HAVE_CLOCK_GETTIME
+
+/* Define this if the function clock_settime exists. */
+#undef HAVE_CLOCK_SETTIME
 
 /* Define this if the function pthread_getname_np exists. */
 #undef HAVE_PTHREAD_GETNAME_NP

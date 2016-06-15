@@ -21,9 +21,9 @@
 #include <errno.h>
 #include <time.h>
 
-#ifdef HAVE_GETTIMEOFDAY
+#if defined(HAVE_GETTIMEOFDAY) || defined(HAVE_SETTIMEOFDAY)
 #include <sys/time.h>
-#endif /* HAVE_GETTIMEOFDAY */
+#endif /* HAVE_(GET|SET)TIMEOFDAY */
 
 #ifdef HAVE_SYS_POLL_H
 #include <sys/poll.h>
@@ -72,15 +72,23 @@ getCurrentTime (TimeValue *now) {
 
 #elif defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_REALTIME)
   struct timespec ts;
-  clock_gettime(CLOCK_REALTIME, &ts);
-  now->seconds = ts.tv_sec;
-  now->nanoseconds = ts.tv_nsec;
+
+  if (clock_gettime(CLOCK_REALTIME, &ts) != -1) {
+    now->seconds = ts.tv_sec;
+    now->nanoseconds = ts.tv_nsec;
+  } else {
+    logSystemError("clock_gettime");
+  }
 
 #elif defined(HAVE_GETTIMEOFDAY)
   struct timeval tv;
-  gettimeofday(&tv, NULL);
-  now->seconds = tv.tv_sec;
-  now->nanoseconds = tv.tv_usec * USECS_PER_MSEC;
+
+  if (gettimeofday(&tv, NULL) != -1) {
+    now->seconds = tv.tv_sec;
+    now->nanoseconds = tv.tv_usec * NSECS_PER_USEC;
+  } else {
+    logSystemError("gettimeofday");
+  }
 
 #elif defined(HAVE_TIME)
   now->seconds = time(NULL);
@@ -89,6 +97,33 @@ getCurrentTime (TimeValue *now) {
 #else /* get current time */
   now->seconds = 0;
   now->nanoseconds = 0;
+#endif /* get current time */
+}
+
+void
+setCurrentTime (const TimeValue *now) {
+#if defined(HAVE_CLOCK_SETTIME) && defined(CLOCK_REALTIME)
+  const struct timespec ts = {
+    .tv_sec = now->seconds,
+    .tv_nsec = now->nanoseconds
+  };
+
+  if (clock_settime(CLOCK_REALTIME, &ts) == -1) {
+    logSystemError("clock_settime");
+  }
+
+#elif defined(HAVE_GETTIMEOFDAY)
+  const struct timeval tv = {
+    .tv_sec = now->seconds,
+    .tv_usec = now->nanoseconds / NSECS_PER_USEC
+  };
+
+  if (settimeofday(&tv, NULL) == -1) {
+    logSystemError("settimeofday");
+  }
+
+#else /* set current time */
+#warning set current time not supported on this platform
 #endif /* get current time */
 }
 
