@@ -77,7 +77,7 @@ getCurrentTime (TimeValue *now) {
     now->seconds = ts.tv_sec;
     now->nanoseconds = ts.tv_nsec;
   } else {
-    logSystemError("clock_gettime");
+  //logSystemError("clock_gettime");
   }
 
 #elif defined(HAVE_GETTIMEOFDAY)
@@ -87,7 +87,7 @@ getCurrentTime (TimeValue *now) {
     now->seconds = tv.tv_sec;
     now->nanoseconds = tv.tv_usec * NSECS_PER_USEC;
   } else {
-    logSystemError("gettimeofday");
+  //logSystemError("gettimeofday");
   }
 
 #elif defined(HAVE_TIME)
@@ -120,6 +120,13 @@ setCurrentTime (const TimeValue *now) {
 
   if (settimeofday(&tv, NULL) == -1) {
     logSystemError("settimeofday");
+  }
+
+#elif defined(HAVE_STIME)
+  const time_t seconds = now->seconds;
+
+  if (stime(&seconds) == -1) {
+    logSystemError("stime");
   }
 
 #else /* set current time */

@@ -783,7 +783,7 @@ test -z "$gui_toolkit_package" && {
    esac
 }
 
-AC_CHECK_FUNCS([time gettimeofday settimeofday nanosleep])
+AC_CHECK_FUNCS([time stime gettimeofday settimeofday nanosleep])
 BRLTTY_CHECK_FUNCTION([clock_gettime], [time.h], [rt])
 BRLTTY_CHECK_FUNCTION([clock_settime], [time.h], [rt])
 

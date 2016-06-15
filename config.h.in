@@ -95,6 +95,9 @@ extern "C" {
 /* Define this if the function time exists. */
 #undef HAVE_TIME
 
+/* Define this if the function stime exists. */
+#undef HAVE_STIME
+
 /* Define this if the function gettimeofday exists. */
 #undef HAVE_GETTIMEOFDAY
 
