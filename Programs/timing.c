@@ -112,7 +112,7 @@ setCurrentTime (const TimeValue *now) {
     logSystemError("clock_settime");
   }
 
-#elif defined(HAVE_GETTIMEOFDAY)
+#elif defined(HAVE_SETTIMEOFDAY)
   const struct timeval tv = {
     .tv_sec = now->seconds,
     .tv_usec = now->nanoseconds / NSECS_PER_USEC
