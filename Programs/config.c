@@ -1101,7 +1101,7 @@ applyBraillePreferences (void) {
   reconfigureBrailleWindow();
   setBrailleFirmness(&brl, prefs.brailleFirmness);
   setTouchSensitivity(&brl, prefs.touchSensitivity);
-  setBrailleAutorepeat(&brl, prefs.autorepeat,
+  setBrailleAutorepeat(&brl, prefs.autorepeatEnabled,
                        PREFERENCES_TIME(prefs.longPressTime),
                        PREFERENCES_TIME(prefs.autorepeatInterval));
 }

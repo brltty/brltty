@@ -124,24 +124,24 @@ changedAutorepeatInterval (const MenuItem *item UNUSED, unsigned char setting) {
 }
 
 static int
-testAutoresetEnabled (void) {
-  return prefs.autoresetEnabled;
+testAutoreleaseEnabled (void) {
+  return prefs.autoreleaseEnabled;
 }
 
 static void
-setAutoreset (unsigned char seconds) {
-  if (brl.keyTable) setKeyResetTime(brl.keyTable, seconds);
+setAutorelease (unsigned char seconds) {
+  if (brl.keyTable) setKeyAutoreleaseTime(brl.keyTable, seconds);
 }
 
 static int
-changedAutoresetEnabled (const MenuItem *item UNUSED, unsigned char setting) {
-  setAutoreset(setting? prefs.autoresetTime: 0);
+changedAutoreleaseEnabled (const MenuItem *item UNUSED, unsigned char setting) {
+  setAutorelease(setting? prefs.autoreleaseTime: 0);
   return 1;
 }
 
 static int
-changedAutoresetTime (const MenuItem *item UNUSED, unsigned char setting) {
-  setAutoreset(setting);
+changedAutoreleaseTime (const MenuItem *item UNUSED, unsigned char setting) {
+  setAutorelease(setting);
   return 1;
 }
 
@@ -783,16 +783,16 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Autoreset"));
-      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.autoresetEnabled, &itemName));
-      CHANGED(AutoresetEnabled);
+      NAME(strtext("Autorelease"));
+      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.autoreleaseEnabled, &itemName));
+      CHANGED(AutoreleaseEnabled);
     }
 
     {
-      NAME(strtext("Autoreset Time"));
-      ITEM(newNumericMenuItem(inputSubmenu, &prefs.autoresetTime, &itemName, 5, 60, 5, strtext("seconds")));
-      TEST(AutoresetEnabled);
-      CHANGED(AutoresetTime);
+      NAME(strtext("Autorelease Time"));
+      ITEM(newNumericMenuItem(inputSubmenu, &prefs.autoreleaseTime, &itemName, 5, 60, 5, strtext("seconds")));
+      TEST(AutoreleaseEnabled);
+      CHANGED(AutoreleaseTime);
     }
 
     {

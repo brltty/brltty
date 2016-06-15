@@ -163,7 +163,7 @@ handleToggleCommands (int command, void *data) {
       break;
 
     case BRL_CMD_AUTOREPEAT:
-      toggleFeatureSetting(&prefs.autorepeat, command);
+      toggleFeatureSetting(&prefs.autorepeatEnabled, command);
       break;
 
     case BRL_CMD_BRLKBD:

@@ -320,15 +320,15 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.autorepeatInterval
   },
 
-  { .name = "autoreset",
-    .defaultValue = DEFAULT_AUTORESET_ENABLED,
+  { .name = "autorelease",
+    .defaultValue = DEFAULT_AUTORELEASE_ENABLED,
     .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.autoresetEnabled
+    .setting = &prefs.autoreleaseEnabled
   },
 
-  { .name = "autoreset-time",
-    .defaultValue = DEFAULT_AUTORESET_TIME,
-    .setting = &prefs.autoresetTime
+  { .name = "autorelease-time",
+    .defaultValue = DEFAULT_AUTORELEASE_TIME,
+    .setting = &prefs.autoreleaseTime
   },
 
   { .name = "touch-navigation",

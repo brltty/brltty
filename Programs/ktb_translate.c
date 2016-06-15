@@ -546,7 +546,7 @@ setKeyboardEnabledFlag (KeyTable *table, const unsigned char *flag) {
 }
 
 void
-setKeyResetTime (KeyTable *table, unsigned char seconds) {
+setKeyAutoreleaseTime (KeyTable *table, unsigned char seconds) {
 }
 
 void

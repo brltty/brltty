@@ -199,8 +199,8 @@ typedef struct {
   unsigned char consoleBellAlert;
   unsigned char keyboardLedAlerts;
 
-  unsigned char autoresetEnabled;
-  unsigned char autoresetTime;
+  unsigned char autoreleaseEnabled;
+  unsigned char autoreleaseTime;
 
   unsigned char touchNavigation;
   unsigned char cursorTrackingDelay;
