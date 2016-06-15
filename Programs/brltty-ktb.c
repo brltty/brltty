@@ -451,3 +451,9 @@ message (const char *mode, const char *text, MessageOptions options) {
 void
 scheduleUpdate (const char *reason) {
 }
+
+#include "alert.h"
+
+void
+alert (AlertIdentifier identifier) {
+}

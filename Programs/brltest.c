@@ -288,7 +288,15 @@ message (const char *mode, const char *text, MessageOptions options) {
   return 1;
 }
 
+#include "scr.h"
+
 KeyTableCommandContext
 getScreenCommandContext (void) {
   return KTB_CTX_DEFAULT;
+}
+
+#include "alert.h"
+
+void
+alert (AlertIdentifier identifier) {
 }

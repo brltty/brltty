@@ -163,6 +163,10 @@ static const AlertEntry alertTable[] = {
     .message = strtext("Console Bell"),
     .tune = "n78@100"
   },
+
+  [ALERT_KEY_AUTORELEASE] = {
+    .tune = "c6@50 b- g e- p50 c@100 c c"
+  },
 };
 
 static ToneElement *tuneTable[ARRAY_COUNT(alertTable)] = {NULL};

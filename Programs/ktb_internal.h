@@ -162,6 +162,11 @@ struct KeyTableStruct {
   } longPress;
 
   struct {
+    AsyncHandle alarm;
+    unsigned char time;
+  } autorelease;
+
+  struct {
     const char *logLabel;
     const unsigned char *logKeyEventsFlag;
     const unsigned char *keyboardEnabledFlag;

@@ -1190,15 +1190,6 @@ static DATA_OPERANDS_PROCESSOR(processKeyTableOperands) {
 }
 
 void
-releaseAllKeys (KeyTable *table) {
-  while (table->pressedKeys.count) {
-    const KeyValue *kv = &table->pressedKeys.table[0];
-
-    processKeyEvent(table, KTB_CTX_DEFAULT, kv->group, kv->number, 0);
-  }
-}
-
-void
 resetLongPressData (KeyTable *table) {
   table->release.command = BRL_CMD_NOOP;
 
@@ -1603,6 +1594,9 @@ compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
 
       ktd.table->longPress.alarm = NULL;
 
+      ktd.table->autorelease.alarm = NULL;
+      ktd.table->autorelease.time = 0;
+
       ktd.table->options.logLabel = NULL;
       ktd.table->options.logKeyEventsFlag = NULL;
       ktd.table->options.keyboardEnabledFlag = NULL;
@@ -1639,6 +1633,7 @@ compileKeyTable (const char *name, KEY_NAME_TABLES_REFERENCE keys) {
 void
 destroyKeyTable (KeyTable *table) {
   resetLongPressData(table);
+  setKeyAutoreleaseTime(table, 0);
 
   while (table->notes.count) free(table->notes.table[--table->notes.count]);
 

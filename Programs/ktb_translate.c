@@ -35,6 +35,54 @@
 
 #define BRL_CMD_ALERT(alert) BRL_CMD_ARG(ALERT, ALERT_##alert)
 
+void
+releaseAllKeys (KeyTable *table) {
+  while (table->pressedKeys.count) {
+    const KeyValue *kv = &table->pressedKeys.table[0];
+
+    processKeyEvent(table, KTB_CTX_DEFAULT, kv->group, kv->number, 0);
+  }
+}
+
+ASYNC_ALARM_CALLBACK(handleKeyAutoreleaseAlarm) {
+  KeyTable *table = parameters->data;
+
+  asyncDiscardHandle(table->autorelease.alarm);
+  table->autorelease.alarm = NULL;
+
+  releaseAllKeys(table);
+  alert(ALERT_KEY_AUTORELEASE);
+}
+
+static void
+cancelAutoreleaseAlarm (KeyTable *table) {
+  if (table->autorelease.alarm) {
+    asyncCancelRequest(table->autorelease.alarm);
+    table->autorelease.alarm = NULL;
+  }
+}
+
+static void
+setAutoreleaseAlarm (KeyTable *table) {
+  if (!prefs.autoreleaseTime || !table->pressedKeys.count) {
+    cancelAutoreleaseAlarm(table);
+  } else {
+    int time = 5000 << (prefs.autoreleaseTime - 1);
+
+    if (table->autorelease.alarm) {
+      asyncResetAlarmIn(table->autorelease.alarm, time);
+    } else {
+      asyncSetAlarmIn(&table->autorelease.alarm, time, handleKeyAutoreleaseAlarm, table);
+    }
+  }
+}
+
+void
+setKeyAutoreleaseTime (KeyTable *table, unsigned char seconds) {
+  table->autorelease.time = seconds;
+  setAutoreleaseAlarm(table);
+}
+
 static int
 sortModifierKeys (const void *element1, const void *element2) {
   const KeyValue *modifier1 = element1;
@@ -524,6 +572,8 @@ processKeyEvent (
 
       resetLongPressData(table);
     }
+
+    setAutoreleaseAlarm(table);
   }
 
   logKeyEvent(table, (press? "press": "release"), context, &keyValue, command);
@@ -543,10 +593,6 @@ setLogKeyEventsFlag (KeyTable *table, const unsigned char *flag) {
 void
 setKeyboardEnabledFlag (KeyTable *table, const unsigned char *flag) {
   table->options.keyboardEnabledFlag = flag;
-}
-
-void
-setKeyAutoreleaseTime (KeyTable *table, unsigned char seconds) {
 }
 
 void
