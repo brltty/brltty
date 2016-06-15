@@ -124,24 +124,8 @@ changedAutorepeatInterval (const MenuItem *item UNUSED, unsigned char setting) {
 }
 
 static int
-testAutoreleaseEnabled (void) {
-  return prefs.autoreleaseEnabled;
-}
-
-static void
-setAutorelease (unsigned char seconds) {
-  if (brl.keyTable) setKeyAutoreleaseTime(brl.keyTable, seconds);
-}
-
-static int
-changedAutoreleaseEnabled (const MenuItem *item UNUSED, unsigned char setting) {
-  setAutorelease(setting? prefs.autoreleaseTime: 0);
-  return 1;
-}
-
-static int
 changedAutoreleaseTime (const MenuItem *item UNUSED, unsigned char setting) {
-  setAutorelease(setting);
+  if (brl.keyTable) setKeyAutoreleaseTime(brl.keyTable, setting);
   return 1;
 }
 
@@ -783,15 +767,16 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Autorelease"));
-      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.autoreleaseEnabled, &itemName));
-      CHANGED(AutoreleaseEnabled);
-    }
+      static const MenuString strings[] = {
+        {.label=strtext("Off")},
+        {.label=strtext("5 seconds")},
+        {.label=strtext("10 seconds")},
+        {.label=strtext("20 seconds")},
+        {.label=strtext("40 seconds")}
+      };
 
-    {
       NAME(strtext("Autorelease Time"));
-      ITEM(newNumericMenuItem(inputSubmenu, &prefs.autoreleaseTime, &itemName, 5, 60, 5, strtext("seconds")));
-      TEST(AutoreleaseEnabled);
+      ITEM(newEnumeratedMenuItem(inputSubmenu, &prefs.autoreleaseTime, &itemName, strings));
       CHANGED(AutoreleaseTime);
     }
 

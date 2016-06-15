@@ -50,6 +50,10 @@ PREFERENCE_STRING_TABLE(cursorTrackingDelay,
   "0", "25", "50", "100", "200"
 )
 
+PREFERENCE_STRING_TABLE(autoreleaseTime,
+  "off", "5", "10", "20", "40"
+)
+
 PREFERENCE_STRING_TABLE(cursorStyle,
   "underline", "block", "dot7", "dot8"
 )
@@ -320,14 +324,9 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.autorepeatInterval
   },
 
-  { .name = "autorelease",
-    .defaultValue = DEFAULT_AUTORELEASE_ENABLED,
-    .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.autoreleaseEnabled
-  },
-
   { .name = "autorelease-time",
     .defaultValue = DEFAULT_AUTORELEASE_TIME,
+    .settingNames = &preferenceStringTable_autoreleaseTime,
     .setting = &prefs.autoreleaseTime
   },
 
