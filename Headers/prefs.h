@@ -118,7 +118,7 @@ typedef struct {
   unsigned char showAttributes;
   unsigned char touchSensitivity;
   unsigned char blinkingScreenCursor;
-  unsigned char autorepeat;
+  unsigned char autorepeatEnabled;
   unsigned char blinkingCapitals;
   unsigned char longPressTime;
   unsigned char blinkingAttributes;
@@ -199,8 +199,10 @@ typedef struct {
   unsigned char consoleBellAlert;
   unsigned char keyboardLedAlerts;
 
-  unsigned char touchNavigation;
+  unsigned char autoresetEnabled;
+  unsigned char autoresetTime;
 
+  unsigned char touchNavigation;
   unsigned char cursorTrackingDelay;
 
   unsigned char saveOnExit;

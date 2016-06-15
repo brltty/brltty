@@ -63,6 +63,7 @@ extern KeyTableState processKeyEvent (
 extern void setKeyTableLogLabel (KeyTable *table, const char *label);
 extern void setLogKeyEventsFlag (KeyTable *table, const unsigned char *flag);
 extern void setKeyboardEnabledFlag (KeyTable *table, const unsigned char *flag);
+extern void setKeyResetTime (KeyTable *table, unsigned char seconds);
 
 extern void getKeyGroupCommands (KeyTable *table, KeyGroup group, int *commands, unsigned int size);
 

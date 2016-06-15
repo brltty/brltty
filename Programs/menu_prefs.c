@@ -32,6 +32,7 @@
 #include "ttb.h"
 #include "atb.h"
 #include "ctb.h"
+#include "ktb.h"
 #include "tune.h"
 #include "bell.h"
 #include "leds.h"
@@ -91,8 +92,8 @@ changedBrailleWindowOverlap (const MenuItem *item UNUSED, unsigned char setting)
 }
 
 static int
-testAutorepeat (void) {
-  return prefs.autorepeat;
+testAutorepeatEnabled (void) {
+  return prefs.autorepeatEnabled;
 }
 
 static int
@@ -102,7 +103,7 @@ setAutorepeat (BrailleDisplay *brl, int on, int delay, int interval) {
 }
 
 static int
-changedAutorepeat (const MenuItem *item UNUSED, unsigned char setting) {
+changedAutorepeatEnabled (const MenuItem *item UNUSED, unsigned char setting) {
   return setAutorepeat(&brl, setting,
                        PREFERENCES_TIME(prefs.longPressTime),
                        PREFERENCES_TIME(prefs.autorepeatInterval));
@@ -110,16 +111,38 @@ changedAutorepeat (const MenuItem *item UNUSED, unsigned char setting) {
 
 static int
 changedAutorepeatDelay (const MenuItem *item UNUSED, unsigned char setting) {
-  return setAutorepeat(&brl, prefs.autorepeat,
+  return setAutorepeat(&brl, prefs.autorepeatEnabled,
                        setting,
                        PREFERENCES_TIME(prefs.autorepeatInterval));
 }
 
 static int
 changedAutorepeatInterval (const MenuItem *item UNUSED, unsigned char setting) {
-  return setAutorepeat(&brl, prefs.autorepeat,
+  return setAutorepeat(&brl, prefs.autorepeatEnabled,
                        PREFERENCES_TIME(prefs.longPressTime),
                        setting);
+}
+
+static int
+testAutoresetEnabled (void) {
+  return prefs.autoresetEnabled;
+}
+
+static void
+setAutoreset (unsigned char seconds) {
+  if (brl.keyTable) setKeyResetTime(brl.keyTable, seconds);
+}
+
+static int
+changedAutoresetEnabled (const MenuItem *item UNUSED, unsigned char setting) {
+  setAutoreset(setting? prefs.autoresetTime: 0);
+  return 1;
+}
+
+static int
+changedAutoresetTime (const MenuItem *item UNUSED, unsigned char setting) {
+  setAutoreset(setting);
+  return 1;
 }
 
 static int
@@ -742,21 +765,34 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Autorepeat"));
-      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.autorepeat, &itemName));
-      CHANGED(Autorepeat);
+      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.autorepeatEnabled, &itemName));
+      CHANGED(AutorepeatEnabled);
     }
 
     {
       NAME(strtext("Autorepeat Panning"));
       ITEM(newBooleanMenuItem(inputSubmenu, &prefs.autorepeatPanning, &itemName));
-      TEST(Autorepeat);
+      TEST(AutorepeatEnabled);
     }
 
     {
       NAME(strtext("Autorepeat Interval"));
       ITEM(newTimeMenuItem(inputSubmenu, &prefs.autorepeatInterval, &itemName));
-      TEST(Autorepeat);
+      TEST(AutorepeatEnabled);
       CHANGED(AutorepeatInterval);
+    }
+
+    {
+      NAME(strtext("Autoreset"));
+      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.autoresetEnabled, &itemName));
+      CHANGED(AutoresetEnabled);
+    }
+
+    {
+      NAME(strtext("Autoreset Time"));
+      ITEM(newNumericMenuItem(inputSubmenu, &prefs.autoresetTime, &itemName, 5, 60, 5, strtext("seconds")));
+      TEST(AutoresetEnabled);
+      CHANGED(AutoresetTime);
     }
 
     {

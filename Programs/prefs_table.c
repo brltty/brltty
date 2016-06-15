@@ -304,9 +304,9 @@ const PreferenceEntry preferenceTable[] = {
   },
 
   { .name = "autorepeat",
-    .defaultValue = DEFAULT_AUTOREPEAT,
+    .defaultValue = DEFAULT_AUTOREPEAT_ENABLED,
     .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.autorepeat
+    .setting = &prefs.autorepeatEnabled
   },
 
   { .name = "autorepeat-panning",
@@ -318,6 +318,17 @@ const PreferenceEntry preferenceTable[] = {
   { .name = "autorepeat-interval",
     .defaultValue = DEFAULT_AUTOREPEAT_INTERVAL,
     .setting = &prefs.autorepeatInterval
+  },
+
+  { .name = "autoreset",
+    .defaultValue = DEFAULT_AUTORESET_ENABLED,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.autoresetEnabled
+  },
+
+  { .name = "autoreset-time",
+    .defaultValue = DEFAULT_AUTORESET_TIME,
+    .setting = &prefs.autoresetTime
   },
 
   { .name = "touch-navigation",

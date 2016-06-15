@@ -338,7 +338,7 @@ setLongPressAlarm (KeyTable *table, unsigned char when) {
 
 static int
 isRepeatableCommand (int command) {
-  if (prefs.autorepeat) {
+  if (prefs.autorepeatEnabled) {
     switch (command & BRL_MSK_BLK) {
       case BRL_CMD_BLK(PASSCHAR):
       case BRL_CMD_BLK(PASSDOTS):
@@ -543,6 +543,10 @@ setLogKeyEventsFlag (KeyTable *table, const unsigned char *flag) {
 void
 setKeyboardEnabledFlag (KeyTable *table, const unsigned char *flag) {
   table->options.keyboardEnabledFlag = flag;
+}
+
+void
+setKeyResetTime (KeyTable *table, unsigned char seconds) {
 }
 
 void

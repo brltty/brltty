@@ -77,9 +77,12 @@ extern "C" {
 #define DEFAULT_HIGHLIGHT_BRAILLE_WINDOW_LOCATION 0		/* 1 for on, 0 for off */
 
 #define DEFAULT_LONG_PRESS_TIME 50	/* hundredths of a second */
-#define DEFAULT_AUTOREPEAT 1		/* 1 for on, 0 for off */
+#define DEFAULT_AUTOREPEAT_ENABLED 1		/* 1 for on, 0 for off */
 #define DEFAULT_AUTOREPEAT_PANNING 0	/* 1 for on, 0 for off */
 #define DEFAULT_AUTOREPEAT_INTERVAL 10	/* hundredths of a second */
+
+#define DEFAULT_AUTORESET_ENABLED 1
+#define DEFAULT_AUTORESET_TIME 10	/* seconds */
 
 #define DEFAULT_TOUCH_NAVIGATION 0
 #define DEFAULT_TOUCH_SENSITIVITY BRL_SENSITIVITY_MEDIUM
