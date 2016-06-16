@@ -165,6 +165,7 @@ static const AlertEntry alertTable[] = {
   },
 
   [ALERT_KEYS_AUTORELEASED] = {
+    .message = strtext("Autorelease"),
     .tune = "c6@50 b- g e- p50 c@100 c c"
   },
 };
