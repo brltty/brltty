@@ -65,7 +65,7 @@ typedef enum {
   ALERT_MODIFIER_OFF,
 
   ALERT_CONSOLE_BELL,
-  ALERT_KEY_AUTORELEASE,
+  ALERT_KEYS_AUTORELEASED,
 } AlertIdentifier;
 
 extern void alert (AlertIdentifier identifier);

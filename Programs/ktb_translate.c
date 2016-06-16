@@ -51,7 +51,7 @@ ASYNC_ALARM_CALLBACK(handleKeyAutoreleaseAlarm) {
   table->autorelease.alarm = NULL;
 
   releaseAllKeys(table);
-  alert(ALERT_KEY_AUTORELEASE);
+  alert(ALERT_KEYS_AUTORELEASED);
 }
 
 static void

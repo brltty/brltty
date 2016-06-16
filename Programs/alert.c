@@ -164,7 +164,7 @@ static const AlertEntry alertTable[] = {
     .tune = "n78@100"
   },
 
-  [ALERT_KEY_AUTORELEASE] = {
+  [ALERT_KEYS_AUTORELEASED] = {
     .tune = "c6@50 b- g e- p50 c@100 c c"
   },
 };
