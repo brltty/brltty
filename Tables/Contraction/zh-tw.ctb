@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Contraction Table - Chinese (Taiwan, uncontracted) by Coscell Kao <coscell@gmail.com> (2016-4)
+# BRLTTY Contraction Table - Chinese (Taiwan, uncontracted) by Coscell Kao <coscell@gmail.com> (2016-5)
 
 #English characters
 include nabcc.cti
@@ -250,12 +250,12 @@ always \u21E8 1246-25-25-135
 always \u2200 256-1-123-123
 always \u2201 14-135-134-1234-123
 always \u2202 1234-14
-always \u2203 2345-15
+always \u2203 4-26
 always \u2204 2345-1345-15
 always \u2205 456-356
 always \u2206 24-1345-13
 always \u2207 46-1246
-always \u2208 15-123-134
+always \u2208 4-15
 always \u2209 1345-15-123-134
 always \u220A 234-15-123-134
 always \u220B 134-15-134-12
@@ -281,16 +281,17 @@ always \u2223 1256
 always \u2224 34-46-16
 always \u2225 1246-123
 always \u2226 34-1246-123
-always \u2227 46-1237
-always \u2228 12367
+always \u2227 4-146
+always \u2228 4-346
 always \u2229 46-146
 always \u222A 46-346
 always \u222B 23467-2368
 always \u222E 23467-1468
 always \u2234 6-16
 always \u2235 4-34
-always \u2236 156
+always \u2236 5-2
 always \u2237 1234-1235-135-1234
+always \u223C 4-156-4-156
 always \u2245 5-123456-126-156-12456
 always \u224C 4-156-123456
 always \u2251 123456
@@ -307,10 +308,12 @@ always \u2272 126-123456
 always \u2273 345-123456
 always \u2276 126-345
 always \u2277 345-126
-always \u2282 234-136-12-234
-always \u2283 234-136-1234-234
+always \u2282 456-5-13
+always \u2283 456-46-2
 always \u2286 234-136-12-234-123456
 always \u2287 234-136-1234-234-123456
+always \u2295 1246-14-456-1246-346-12456
+always \u2296 1246-14-456-1246-36-12456
 always \u22A5 1246-1234
 always \u22BF 1246-2345
 always \u22DC 123456-126
@@ -8240,7 +8243,7 @@ always \u563D 124-1236-3
 always \u563E 124-1236-2
 always \u563F 1235-356-3
 always \u5640 15-256-5
-always \u5641 34-5
+always \u5641 2346-4
 always \u5642 125-123456-4
 always \u5643 12345-1236-3
 always \u5644 12-156-3
@@ -19497,7 +19500,7 @@ always \u8236 135-126-2
 always \u8237 15-2345-2
 always \u8238 13-2346-4
 always \u8239 12-12456-2
-always \u823A 15-23456-2
+always \u823A 13-23456-4
 always \u823B 14-34-2
 always \u823C 245-235-2
 always \u823D 1234-1346-2
@@ -27958,7 +27961,6 @@ always \u5614\u5410 12356-4-124-34-5
 always \u5614\u6c23 12356-5-245-16-5
 always \u5629\u5566 1235-35-3-14-345-3
 always \u5630\u54e9 13-16-3-14-16-3
-always \u5641\u5fc3 2346-4-15-1456-3
 always \u5668\u6a02 245-16-5-236-5
 always \u5687\u963b 1235-2346-5-125-34-4
 always \u56db\u884c 15-156-5-1235-1346-2
