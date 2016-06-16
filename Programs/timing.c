@@ -54,6 +54,9 @@ localtime_r (const time_t *timep, struct tm *result) {
 
 void
 getCurrentTime (TimeValue *now) {
+  now->seconds = 0;
+  now->nanoseconds = 0;
+
 #if defined(GRUB_RUNTIME)
   static time_t baseSeconds = 0;
   static uint64_t baseMilliseconds;
@@ -92,11 +95,9 @@ getCurrentTime (TimeValue *now) {
 
 #elif defined(HAVE_TIME)
   now->seconds = time(NULL);
-  now->nanoseconds = 0;
 
 #else /* get current time */
-  now->seconds = 0;
-  now->nanoseconds = 0;
+#warning get current time not supported on this platform
 #endif /* get current time */
 }
 
