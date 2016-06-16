@@ -35,22 +35,13 @@
 
 #define BRL_CMD_ALERT(alert) BRL_CMD_ARG(ALERT, ALERT_##alert)
 
-void
-releaseAllKeys (KeyTable *table) {
-  while (table->pressedKeys.count) {
-    const KeyValue *kv = &table->pressedKeys.table[0];
-
-    processKeyEvent(table, KTB_CTX_DEFAULT, kv->group, kv->number, 0);
-  }
-}
-
 ASYNC_ALARM_CALLBACK(handleKeyAutoreleaseAlarm) {
   KeyTable *table = parameters->data;
 
   asyncDiscardHandle(table->autorelease.alarm);
   table->autorelease.alarm = NULL;
 
-  releaseAllKeys(table);
+  resetKeyTable(table);
   alert(ALERT_KEYS_AUTORELEASED);
 }
 
@@ -578,6 +569,14 @@ processKeyEvent (
 
   logKeyEvent(table, (press? "press": "release"), context, &keyValue, command);
   return state;
+}
+
+void
+releaseAllKeys (KeyTable *table) {
+  while (table->pressedKeys.count) {
+    const KeyValue *kv = &table->pressedKeys.table[0];
+    processKeyEvent(table, KTB_CTX_DEFAULT, kv->group, kv->number, 0);
+  }
 }
 
 void
