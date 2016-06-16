@@ -1059,6 +1059,7 @@ logBaumPowerdownReason (BaumPowerdownReason reason) {
     BaumPowerdownReason bit;
     const char *explanation;
   } ReasonEntry;
+
   static const ReasonEntry reasonTable[] = {
     {BAUM_PDR_ProtocolRequested, strtext("driver request")},
     {BAUM_PDR_PowerSwitch      , strtext("power switch")},
@@ -1066,16 +1067,15 @@ logBaumPowerdownReason (BaumPowerdownReason reason) {
     {BAUM_PDR_BatteryLow       , strtext("battery low")},
     {0}
   };
-  const ReasonEntry *entry;
 
   char buffer[0X100];
-  int length = 0;
   char delimiter = ':';
+  int length;
 
   STR_BEGIN(buffer, sizeof(buffer));
   STR_PRINTF("%s %s", STRINGIFY(DRIVER_NAME), gettext("Powerdown"));
 
-  for (entry=reasonTable; entry->bit; entry+=1) {
+  for (const ReasonEntry *entry=reasonTable; entry->bit; entry+=1) {
     if (reason & entry->bit) {
       STR_PRINTF("%c %s", delimiter, gettext(entry->explanation));
       delimiter = ',';
