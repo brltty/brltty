@@ -26,6 +26,5 @@ OOMScoreAdjust=-900
 
 ProtectHome=read-only
 ProtectSystem=full
-SystemCallArchitectures=native
 
 
