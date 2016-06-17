@@ -320,7 +320,10 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUSB-Win32: BrailleNote [HumanWare APEX]"=LIBUSB_DEV, USB\VID_1C71&PID_C004
 
 ; Device: 1C71:C005
-"LibUSB-Win32: HumanWare [all models]"=LIBUSB_DEV, USB\VID_1C71&PID_C005
+"LibUSB-Win32: HumanWare [all models (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C005
+
+; Device: 1C71:C006
+"LibUSB-Win32: HumanWare [all models (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C006
 
 ; Device: 1FE4:0003
 "LibUSB-Win32: HandyTech [USB-HID adapter]"=LIBUSB_DEV, USB\VID_1FE4&PID_0003
@@ -622,7 +625,10 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUSB-Win32: BrailleNote [HumanWare APEX]"=LIBUSB_DEV, USB\VID_1C71&PID_C004
 
 ; Device: 1C71:C005
-"LibUSB-Win32: HumanWare [all models]"=LIBUSB_DEV, USB\VID_1C71&PID_C005
+"LibUSB-Win32: HumanWare [all models (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C005
+
+; Device: 1C71:C006
+"LibUSB-Win32: HumanWare [all models (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C006
 
 ; Device: 1FE4:0003
 "LibUSB-Win32: HandyTech [USB-HID adapter]"=LIBUSB_DEV, USB\VID_1FE4&PID_0003
@@ -924,7 +930,10 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUSB-Win32: BrailleNote [HumanWare APEX]"=LIBUSB_DEV, USB\VID_1C71&PID_C004
 
 ; Device: 1C71:C005
-"LibUSB-Win32: HumanWare [all models]"=LIBUSB_DEV, USB\VID_1C71&PID_C005
+"LibUSB-Win32: HumanWare [all models (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C005
+
+; Device: 1C71:C006
+"LibUSB-Win32: HumanWare [all models (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C006
 
 ; Device: 1FE4:0003
 "LibUSB-Win32: HandyTech [USB-HID adapter]"=LIBUSB_DEV, USB\VID_1FE4&PID_0003

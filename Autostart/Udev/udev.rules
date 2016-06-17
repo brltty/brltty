@@ -295,8 +295,12 @@ ENV{PRODUCT}=="1148/301/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_
 ENV{PRODUCT}=="1c71/c004/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 1C71:C005
-# HumanWare [all models]
+# HumanWare [all models (serial protocol)]
 ENV{PRODUCT}=="1c71/c005/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
+
+# Device: 1C71:C006
+# HumanWare [all models (HID protocol)]
+ENV{PRODUCT}=="1c71/c006/*", ENV{BRLTTY_BRAILLE_DRIVER}="auto", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0003
 # HandyTech [USB-HID adapter]
