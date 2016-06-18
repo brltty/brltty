@@ -517,7 +517,9 @@ serialConnectDevice (SerialDevice *serial, const char *device) {
 
     close(serial->fileDescriptor);
   } else {
-    logMessage(LOG_ERR, "cannot open serial device: %s: %s", device, strerror(errno));
+    logMessage(((errno == ENOENT)? LOG_DEBUG: LOG_ERR),
+               "cannot open serial device: %s: %s",
+               device, strerror(errno));
   }
 
   return 0;
