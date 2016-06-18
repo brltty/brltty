@@ -366,7 +366,7 @@ proc makeLines_udev {vendor product drivers descriptions exclude} {
       lappend lines [makeComment_udev $description]
    }
 
-   set line [format "ENV\{PRODUCT\}==\"%x/%x/*\", ENV\{BRLTTY_BRAILLE_DRIVER\}=\"auto\", GOTO=\"brltty_usb_run\"" $vendor $product]
+   set line [format "ENV\{PRODUCT\}==\"%x/%x/*\", ENV\{BRLTTY_BRAILLE_DRIVER\}=\"%s\", GOTO=\"brltty_usb_run\"" $vendor $product [join $drivers ,]]
    if {$exclude} {
       set line [makeComment_udev $line]
    }
