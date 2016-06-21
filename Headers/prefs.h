@@ -101,6 +101,14 @@ typedef enum {
 } StatusSeparator;
 
 typedef enum {
+  atOff,
+  at5s,
+  at10s,
+  at20s,
+  at40s
+} AutoreleaseTime;
+
+typedef enum {
   ctdNone,
   ctd250ms,
   ctd500ms,

@@ -92,6 +92,12 @@ changedBrailleWindowOverlap (const MenuItem *item UNUSED, unsigned char setting)
 }
 
 static int
+changedAutoreleaseTime (const MenuItem *item UNUSED, unsigned char setting) {
+  if (brl.keyTable) setKeyAutoreleaseTime(brl.keyTable, setting);
+  return 1;
+}
+
+static int
 testAutorepeatEnabled (void) {
   return prefs.autorepeatEnabled;
 }
@@ -121,12 +127,6 @@ changedAutorepeatInterval (const MenuItem *item UNUSED, unsigned char setting) {
   return setAutorepeat(&brl, prefs.autorepeatEnabled,
                        PREFERENCES_TIME(prefs.longPressTime),
                        setting);
-}
-
-static int
-changedAutoreleaseTime (const MenuItem *item UNUSED, unsigned char setting) {
-  if (brl.keyTable) setKeyAutoreleaseTime(brl.keyTable, setting);
-  return 1;
 }
 
 static int
@@ -742,6 +742,20 @@ makePreferencesMenu (void) {
     SUBMENU(inputSubmenu, rootMenu, strtext("Input Options"));
 
     {
+      static const MenuString strings[] = {
+        {.label=strtext("Off")},
+        {.label=strtext("5 seconds")},
+        {.label=strtext("10 seconds")},
+        {.label=strtext("20 seconds")},
+        {.label=strtext("40 seconds")}
+      };
+
+      NAME(strtext("Autorelease Time"));
+      ITEM(newEnumeratedMenuItem(inputSubmenu, &prefs.autoreleaseTime, &itemName, strings));
+      CHANGED(AutoreleaseTime);
+    }
+
+    {
       NAME(strtext("Long Press Time"));
       ITEM(newTimeMenuItem(inputSubmenu, &prefs.longPressTime, &itemName));
       CHANGED(AutorepeatDelay);
@@ -764,20 +778,6 @@ makePreferencesMenu (void) {
       ITEM(newTimeMenuItem(inputSubmenu, &prefs.autorepeatInterval, &itemName));
       TEST(AutorepeatEnabled);
       CHANGED(AutorepeatInterval);
-    }
-
-    {
-      static const MenuString strings[] = {
-        {.label=strtext("Off")},
-        {.label=strtext("5 seconds")},
-        {.label=strtext("10 seconds")},
-        {.label=strtext("20 seconds")},
-        {.label=strtext("40 seconds")}
-      };
-
-      NAME(strtext("Autorelease Time"));
-      ITEM(newEnumeratedMenuItem(inputSubmenu, &prefs.autoreleaseTime, &itemName, strings));
-      CHANGED(AutoreleaseTime);
     }
 
     {

@@ -51,7 +51,7 @@ PREFERENCE_STRING_TABLE(cursorTrackingDelay,
 )
 
 PREFERENCE_STRING_TABLE(autoreleaseTime,
-  "off", "5", "10", "20", "40"
+  "0", "5", "10", "20", "40"
 )
 
 PREFERENCE_STRING_TABLE(cursorStyle,

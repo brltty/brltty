@@ -81,7 +81,7 @@ extern "C" {
 #define DEFAULT_AUTOREPEAT_PANNING 0	/* 1 for on, 0 for off */
 #define DEFAULT_AUTOREPEAT_INTERVAL 10	/* hundredths of a second */
 
-#define DEFAULT_AUTORELEASE_TIME 0	/* seconds */
+#define DEFAULT_AUTORELEASE_TIME at40s
 #define DEFAULT_TOUCH_NAVIGATION 0
 #define DEFAULT_TOUCH_SENSITIVITY BRL_SENSITIVITY_MEDIUM
 
