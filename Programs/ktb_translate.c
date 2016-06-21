@@ -41,6 +41,19 @@ ASYNC_ALARM_CALLBACK(handleKeyAutoreleaseAlarm) {
   asyncDiscardHandle(table->autorelease.alarm);
   table->autorelease.alarm = NULL;
 
+  for (unsigned int index=0; index<table->pressedKeys.count; index+=1) {
+    const KeyValue *kv = &table->pressedKeys.table[index];
+
+    char key[0X40];
+    STR_BEGIN(key, sizeof(key));
+
+    STR_FORMAT(formatKeyName, table, kv);
+    STR_PRINTF(" (Grp:%u Num:%u)", kv->group, kv->number);
+
+    STR_END;
+    logMessage(LOG_WARNING, "autoreleasing key: %s", key);
+  }
+
   resetKeyTable(table);
   alert(ALERT_KEYS_AUTORELEASED);
 }
