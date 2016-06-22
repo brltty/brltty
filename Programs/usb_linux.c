@@ -928,24 +928,29 @@ usbLogInputProblem (UsbEndpoint *endpoint, const char *problem) {
 
 static int
 usbHandleInputURB (UsbEndpoint *endpoint, struct usbdevfs_urb *urb) {
-  int written = 0;
+  deleteItem(endpoint->direction.input.pending.requests, urb);
+  int urbsLeft = getQueueSize(endpoint->direction.input.pending.requests);
+  int inputLength = urb->actual_length;
 
-  if (urb->actual_length == 0) {
-    written = 1;
-  } else if (urb->actual_length > 0) {
-    if (usbEnqueueInput(endpoint, urb->buffer, urb->actual_length)) {
-      written = 1;
-    } else {
-      usbLogInputProblem(endpoint, "input data not enqueued");
-    }
-  } else {
+  if (inputLength < 0) {
     usbLogInputProblem(endpoint, "input data not available");
+    return 0;
   }
 
-  deleteItem(endpoint->direction.input.pending, urb);
-  if (!written) return 0;
+  if (inputLength > 0) {
+    if (!usbEnqueueInput(endpoint, urb->buffer, inputLength)) {
+      usbLogInputProblem(endpoint, "input data not enqueued");
+      return 0;
+    }
 
-  usbAddPendingInputRequest(endpoint);
+    usbEnsurePendingInputRequests(endpoint, urbsLeft+2);
+    return 1;
+  }
+
+  if (urbsLeft == 0) {
+    usbSchedulePendingInputRequest(endpoint, 1);
+  }
+
   return 1;
 }
 

@@ -37,6 +37,7 @@
 #include "device.h"
 #include "timing.h"
 #include "async_wait.h"
+#include "async_alarm.h"
 #include "io_misc.h"
 #include "io_usb.h"
 #include "usb_internal.h"
@@ -667,9 +668,14 @@ usbDeallocateEndpoint (void *item, void *data) {
 
   switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
     case UsbEndpointDirection_Input:
-      if (endpoint->direction.input.pending) {
-        deallocateQueue(endpoint->direction.input.pending);
-        endpoint->direction.input.pending = NULL;
+      if (endpoint->direction.input.pending.alarm) {
+        asyncCancelRequest(endpoint->direction.input.pending.alarm);
+        endpoint->direction.input.pending.alarm = NULL;
+      }
+
+      if (endpoint->direction.input.pending.requests) {
+        deallocateQueue(endpoint->direction.input.pending.requests);
+        endpoint->direction.input.pending.requests = NULL;
       }
 
       if (endpoint->direction.input.completed.request) {
@@ -748,7 +754,8 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
 
       switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
         case UsbEndpointDirection_Input:
-          endpoint->direction.input.pending = NULL;
+          endpoint->direction.input.pending.requests = NULL;
+          endpoint->direction.input.pending.alarm = NULL;
 
           endpoint->direction.input.completed.request = NULL;
           endpoint->direction.input.completed.buffer = NULL;
@@ -801,7 +808,9 @@ usbFinishEndpoint (void *item, void *data) {
 
   switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
     case UsbEndpointDirection_Input:
-      if (endpoint->direction.input.pending) deleteElements(endpoint->direction.input.pending);
+      if (endpoint->direction.input.pending.requests) {
+        deleteElements(endpoint->direction.input.pending.requests);
+      }
       break;
 
     default:
@@ -1026,10 +1035,8 @@ usbDeallocatePendingInputRequest (void *item, void *data) {
   usbCancelRequest(endpoint->device, request);
 }
 
-Element *
-usbAddPendingInputRequest (
-  UsbEndpoint *endpoint
-) {
+static Element *
+usbAddPendingInputRequest (UsbEndpoint *endpoint) {
   void *request = usbSubmitRequest(endpoint->device,
                                    endpoint->descriptor->bEndpointAddress,
                                    NULL,
@@ -1037,13 +1044,44 @@ usbAddPendingInputRequest (
                                    endpoint);
 
   if (request) {
-    Element *element = enqueueItem(endpoint->direction.input.pending, request);
+    Element *element = enqueueItem(endpoint->direction.input.pending.requests, request);
 
     if (element) return element;
     usbCancelRequest(endpoint->device, request);
   }
 
   return NULL;
+}
+
+void
+usbEnsurePendingInputRequests (UsbEndpoint *endpoint, int count) {
+  int limit = USB_INPUT_INTERRUPT_URB_COUNT;
+  if ((count < 1) || (count > limit)) count = limit;
+
+  while (getQueueSize(endpoint->direction.input.pending.requests) < count) {
+    if (!usbAddPendingInputRequest(endpoint)) {
+      break;
+    }
+  }
+}
+
+ASYNC_ALARM_CALLBACK(usbHandleSchedulePendingInputRequest) {
+  UsbEndpoint *endpoint = parameters->data;
+
+  asyncDiscardHandle(endpoint->direction.input.pending.alarm);
+  endpoint->direction.input.pending.alarm = NULL;
+
+  usbEnsurePendingInputRequests(endpoint, 1);
+}
+
+void
+usbSchedulePendingInputRequest (UsbEndpoint *endpoint, int when) {
+  if (endpoint->direction.input.pending.alarm) {
+    asyncResetAlarmIn(endpoint->direction.input.pending.alarm, when);
+  } else {
+    asyncSetAlarmIn(&endpoint->direction.input.pending.alarm, when,
+                    usbHandleSchedulePendingInputRequest, endpoint);
+  }
 }
 
 void
@@ -1054,20 +1092,14 @@ usbBeginInput (
   UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
 
   if (endpoint) {
-    if (!endpoint->direction.input.pending) {
-      if ((endpoint->direction.input.pending = newQueue(usbDeallocatePendingInputRequest, NULL))) {
-        setQueueData(endpoint->direction.input.pending, endpoint);
+    if (!endpoint->direction.input.pending.requests) {
+      if ((endpoint->direction.input.pending.requests = newQueue(usbDeallocatePendingInputRequest, NULL))) {
+        setQueueData(endpoint->direction.input.pending.requests, endpoint);
       }
     }
 
-    if (endpoint->direction.input.pending) {
-      const int count = USB_INPUT_INTERRUPT_URB_COUNT;
-
-      while (getQueueSize(endpoint->direction.input.pending) < count) {
-        if (!usbAddPendingInputRequest(endpoint)) {
-          break;
-        }
-      }
+    if (endpoint->direction.input.pending.requests) {
+      usbEnsurePendingInputRequests(endpoint, 0);
     }
   }
 }
@@ -1106,7 +1138,7 @@ usbAwaitInput (
   retryInterval = endpoint->descriptor->bInterval;
   retryInterval = MAX(USB_INPUT_AWAIT_RETRY_INTERVAL_MINIMUM, retryInterval);
 
-  if (!(endpoint->direction.input.pending && getQueueSize(endpoint->direction.input.pending))) {
+  if (!(endpoint->direction.input.pending.requests && getQueueSize(endpoint->direction.input.pending.requests))) {
     int size = getLittleEndian16(endpoint->descriptor->wMaxPacketSize);
     unsigned char *buffer = malloc(size);
 
@@ -1162,7 +1194,7 @@ usbAwaitInput (
       }
 
       usbAddPendingInputRequest(endpoint);
-      deleteItem(endpoint->direction.input.pending, request);
+      deleteItem(endpoint->direction.input.pending.requests, request);
 
       if (response.count > 0) {
         endpoint->direction.input.completed.request = request;
