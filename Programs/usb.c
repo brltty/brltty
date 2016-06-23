@@ -1078,17 +1078,17 @@ ASYNC_ALARM_CALLBACK(usbHandleSchedulePendingInputRequest) {
 
 void
 usbSchedulePendingInputRequest (UsbEndpoint *endpoint) {
-  int *delay = &endpoint->direction.input.pending.delay;
-  if (!*delay) *delay = 1;
+  if (!endpoint->direction.input.pending.alarm) {
+    int *delay = &endpoint->direction.input.pending.delay;
 
-  if (endpoint->direction.input.pending.alarm) {
-    asyncResetAlarmIn(endpoint->direction.input.pending.alarm, *delay);
-  } else {
+    if (!*delay) *delay = 1;
+    *delay = MIN(*delay, 16);
+
     asyncSetAlarmIn(&endpoint->direction.input.pending.alarm, *delay,
                     usbHandleSchedulePendingInputRequest, endpoint);
-  }
 
-  *delay = MIN(((*delay) << 1), 16);
+    *delay += 1;
+  }
 }
 
 void
