@@ -1073,7 +1073,7 @@ ASYNC_ALARM_CALLBACK(usbHandleSchedulePendingInputRequest) {
   asyncDiscardHandle(endpoint->direction.input.pending.alarm);
   endpoint->direction.input.pending.alarm = NULL;
 
-  usbEnsurePendingInputRequests(endpoint, 1);
+  usbAddPendingInputRequest(endpoint);
 }
 
 void
