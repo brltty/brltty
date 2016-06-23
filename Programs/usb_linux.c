@@ -948,7 +948,7 @@ usbHandleInputURB (UsbEndpoint *endpoint, struct usbdevfs_urb *urb) {
   }
 
   if (urbsLeft == 0) {
-    usbSchedulePendingInputRequest(endpoint, 1);
+    usbSchedulePendingInputRequest(endpoint);
   }
 
   return 1;

@@ -756,6 +756,7 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
         case UsbEndpointDirection_Input:
           endpoint->direction.input.pending.requests = NULL;
           endpoint->direction.input.pending.alarm = NULL;
+          endpoint->direction.input.pending.delay = 0;
 
           endpoint->direction.input.completed.request = NULL;
           endpoint->direction.input.completed.buffer = NULL;
@@ -1057,6 +1058,7 @@ void
 usbEnsurePendingInputRequests (UsbEndpoint *endpoint, int count) {
   int limit = USB_INPUT_INTERRUPT_URB_COUNT;
   if ((count < 1) || (count > limit)) count = limit;
+  endpoint->direction.input.pending.delay = 0;
 
   while (getQueueSize(endpoint->direction.input.pending.requests) < count) {
     if (!usbAddPendingInputRequest(endpoint)) {
@@ -1075,13 +1077,18 @@ ASYNC_ALARM_CALLBACK(usbHandleSchedulePendingInputRequest) {
 }
 
 void
-usbSchedulePendingInputRequest (UsbEndpoint *endpoint, int when) {
+usbSchedulePendingInputRequest (UsbEndpoint *endpoint) {
+  int *delay = &endpoint->direction.input.pending.delay;
+  if (!*delay) *delay = 1;
+
   if (endpoint->direction.input.pending.alarm) {
-    asyncResetAlarmIn(endpoint->direction.input.pending.alarm, when);
+    asyncResetAlarmIn(endpoint->direction.input.pending.alarm, *delay);
   } else {
-    asyncSetAlarmIn(&endpoint->direction.input.pending.alarm, when,
+    asyncSetAlarmIn(&endpoint->direction.input.pending.alarm, *delay,
                     usbHandleSchedulePendingInputRequest, endpoint);
   }
+
+  *delay = MIN(((*delay) << 1), 16);
 }
 
 void

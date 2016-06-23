@@ -45,6 +45,7 @@ struct UsbEndpointStruct {
       struct {
         Queue *requests;
         AsyncHandle alarm;
+        int delay;
       } pending;
 
       struct {
@@ -95,7 +96,7 @@ extern UsbEndpoint *usbGetOutputEndpoint (UsbDevice *device, unsigned char endpo
 extern int usbApplyInputFilters (UsbEndpoint *endpoint, void *buffer, size_t size, ssize_t *length);
 
 extern void usbEnsurePendingInputRequests (UsbEndpoint *endpoint, int count);
-extern void usbSchedulePendingInputRequest (UsbEndpoint *endpoint, int when);
+extern void usbSchedulePendingInputRequest (UsbEndpoint *endpoint);
 
 extern int usbSetSerialOperations (UsbDevice *device);
 
