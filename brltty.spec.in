@@ -45,15 +45,16 @@ BuildRequires: gcc
 BuildRequires: coreutils
 BuildRequires: binutils
 BuildRequires: /usr/bin/awk
-BuildRequires: glibc-devel
 BuildRequires: tcl
+BuildRequires: glibc-devel
 BuildRequires: libicu-devel
 BuildRequires: ncurses-devel
+BuildRequires: alsa-lib-devel
+BuildRequires: bluez-libs-devel
+BuildRequires: polkit-libs-devel
+BuildRequires: systemd-devel
 BuildRequires: linuxdoc-tools
 BuildRequires: doxygen
-BuildRequires: systemd-devel
-BuildRequires: bluez-libs-devel
-BuildRequires: alsa-lib-devel
 
 AutoProv: no
 Provides: brlapi-server
