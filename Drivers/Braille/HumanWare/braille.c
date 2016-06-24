@@ -421,11 +421,12 @@ readHidFeature (
   ssize_t length = gioGetHidFeature(brl->gioEndpoint, report, buffer, size);
 
   if (length != -1) {
-    logInputPacket(buffer, length);
-    if ((length > 0) && (*buffer == report)) return length;
+    if ((length > 0) && (*buffer == report)) {
+      logInputPacket(buffer, length);
+      return length;
+    }
 
-    errno = EBADMSG;
-    length = -1;
+    errno = EAGAIN;
   }
 
   logSystemError("USB HID feature read");
@@ -502,29 +503,26 @@ probeHidDisplay (BrailleDisplay *brl) {
   HW_CapabilitiesReport capabilities;
   unsigned char *const buffer = (unsigned char *)&capabilities;
   const size_t size = sizeof(capabilities);
+
   ssize_t length = readHidFeature(brl, HW_REP_FTR_Capabilities, buffer, size);
+  if (length == -1) return 0;
+  memset(&buffer[length], 0, (size - length));
 
-  if (length != -1) {
-    memset(&buffer[length], 0, (size - length));
+  setFirmwareVersion(brl,
+    getDecimalValue(&capabilities.version.major, 1),
+    getDecimalValue(&capabilities.version.minor, 1),
+    getDecimalValue(&capabilities.version.build[0], 2));
 
-    setFirmwareVersion(brl,
-      getDecimalValue(&capabilities.version.major, 1),
-      getDecimalValue(&capabilities.version.minor, 1),
-      getDecimalValue(&capabilities.version.build[0], 2));
+  brl->textColumns = capabilities.cellCount;
 
-    brl->textColumns = capabilities.cellCount;
-
-    {
-      unsigned char *size = &brl->data->hid.pressedKeys.reportSize;
-      *size = 1 + THUMB_KEY_COUNT + COMMAND_KEY_COUNT + brl->textColumns;
-      if (hasBrailleKeyboard(brl)) *size += BRAILLE_KEY_COUNT;
-      if (hasSecondThumbKeys(brl)) *size += THUMB_KEY_COUNT;
-    }
-
-    return 1;
+  {
+    unsigned char *size = &brl->data->hid.pressedKeys.reportSize;
+    *size = 1 + THUMB_KEY_COUNT + COMMAND_KEY_COUNT + brl->textColumns;
+    if (hasBrailleKeyboard(brl)) *size += BRAILLE_KEY_COUNT;
+    if (hasSecondThumbKeys(brl)) *size += THUMB_KEY_COUNT;
   }
 
-  return 0;
+  return 1;
 }
 
 static int
