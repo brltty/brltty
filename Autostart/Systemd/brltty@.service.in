@@ -12,8 +12,12 @@ RequiresMountsFor=@UPDATABLE_DIRECTORY@
 
 [Service]
 
-Type=notify
-ExecStart=/bin/sh -c 'device="%I" /bin/brltty -n -E -d "${device#DEFAULT}"'
+Type=forking
+PIDFile=/run/brltty-%i.pid
+ExecStart=/bin/sh -c 'device="%I" /bin/brltty -E -d "${device#DEFAULT}" -P "/run/brltty-%I.pid"'
+
+#Type=notify
+#ExecStart=/bin/sh -c 'device="%I" /bin/brltty -E -d "${device#DEFAULT}" -n'
 
 TimeoutStartSec=5
 TimeoutStopSec=10
