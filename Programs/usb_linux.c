@@ -925,7 +925,7 @@ usbHandleInputURB (UsbEndpoint *endpoint, struct usbdevfs_urb *urb) {
   deleteItem(endpoint->direction.input.pending.requests, urb);
 
   if (urb->actual_length < 0) {
-    usbLogInputProblem(endpoint, "input data not available");
+    usbLogInputProblem(endpoint, "data not available");
     return 0;
   }
 
@@ -998,12 +998,12 @@ usbStartSignalMonitor (UsbEndpoint *endpoint) {
                  eptx->monitor.signal.number);
       return 1;
     } else {
-      usbLogInputProblem(endpoint, "input monitor not registered");
+      usbLogInputProblem(endpoint, "monitor not registered");
     }
 
     asyncRelinquishSignalNumber(eptx->monitor.signal.number);
   } else {
-    usbLogInputProblem(endpoint, "input signal number not obtained");
+    usbLogInputProblem(endpoint, "signal number not obtained");
   }
 
   return 0;
@@ -1125,12 +1125,12 @@ usbPrepareInputEndpoint (UsbEndpoint *endpoint) {
     if (monitorStarted) {
       return 1;
     } else {
-      usbLogInputProblem(endpoint, "input monitor not started");
+      usbLogInputProblem(endpoint, "monitor not started");
     }
 
     usbDestroyInputPipe(endpoint);
   } else {
-    usbLogInputProblem(endpoint, "input pipe not created");
+    usbLogInputProblem(endpoint, "pipe not created");
   }
 
   return 0;

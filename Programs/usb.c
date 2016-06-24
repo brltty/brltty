@@ -1031,7 +1031,7 @@ usbTestDevice (UsbDeviceExtension *extension, UsbDeviceChooser *chooser, UsbChoo
 
 void
 usbLogInputProblem (UsbEndpoint *endpoint, const char *problem) {
-  logMessage(LOG_WARNING, "%s: Ept:%02X",
+  logMessage(LOG_WARNING, "USB input: %s: Ept:%02X",
              problem, endpoint->descriptor->bEndpointAddress);
 }
 
@@ -1103,7 +1103,7 @@ usbHandleInputResponse (UsbEndpoint *endpoint, const void *buffer, size_t length
 
   if (length > 0) {
     if (!usbEnqueueInput(endpoint, buffer, length)) {
-      usbLogInputProblem(endpoint, "input data not enqueued");
+      usbLogInputProblem(endpoint, "data not enqueued");
       return 0;
     }
 
