@@ -95,8 +95,8 @@ extern UsbEndpoint *usbGetInputEndpoint (UsbDevice *device, unsigned char endpoi
 extern UsbEndpoint *usbGetOutputEndpoint (UsbDevice *device, unsigned char endpointNumber);
 extern int usbApplyInputFilters (UsbEndpoint *endpoint, void *buffer, size_t size, ssize_t *length);
 
-extern void usbEnsurePendingInputRequests (UsbEndpoint *endpoint, int count);
-extern void usbSchedulePendingInputRequest (UsbEndpoint *endpoint);
+extern void usbLogInputProblem (UsbEndpoint *endpoint, const char *problem);
+extern int usbHandleInputResponse (UsbEndpoint *endpoint, const void *buffer, size_t length);
 
 extern int usbSetSerialOperations (UsbDevice *device);
 

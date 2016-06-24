@@ -313,7 +313,7 @@ int
 usbClearHalt (UsbDevice *device, unsigned char endpointAddress) {
   UsbDeviceExtension *devx = device->extension;
 
-  logMessage(LOG_CATEGORY(USB_IO), "clearing endpoint: %02X", endpointAddress);
+  logMessage(LOG_CATEGORY(USB_IO), "clear halt: %02X", endpointAddress);
 
   if (usbOpenUsbfsFile(devx)) {
     unsigned int arg = endpointAddress;
@@ -920,38 +920,16 @@ usbReadDeviceDescriptor (UsbDevice *device) {
   return 1;
 }
 
-static void
-usbLogInputProblem (UsbEndpoint *endpoint, const char *problem) {
-  logMessage(LOG_WARNING, "%s: Ept:%02X",
-             problem, endpoint->descriptor->bEndpointAddress);
-}
-
 static int
 usbHandleInputURB (UsbEndpoint *endpoint, struct usbdevfs_urb *urb) {
   deleteItem(endpoint->direction.input.pending.requests, urb);
-  int urbsLeft = getQueueSize(endpoint->direction.input.pending.requests);
-  int inputLength = urb->actual_length;
 
-  if (inputLength < 0) {
+  if (urb->actual_length < 0) {
     usbLogInputProblem(endpoint, "input data not available");
     return 0;
   }
 
-  if (inputLength > 0) {
-    if (!usbEnqueueInput(endpoint, urb->buffer, inputLength)) {
-      usbLogInputProblem(endpoint, "input data not enqueued");
-      return 0;
-    }
-
-    usbEnsurePendingInputRequests(endpoint, urbsLeft+2);
-    return 1;
-  }
-
-  if (urbsLeft == 0) {
-    usbSchedulePendingInputRequest(endpoint);
-  }
-
-  return 1;
+  return usbHandleInputResponse(endpoint, urb->buffer, urb->actual_length);;
 }
 
 static void
@@ -1147,7 +1125,7 @@ usbPrepareInputEndpoint (UsbEndpoint *endpoint) {
     if (monitorStarted) {
       return 1;
     } else {
-      usbLogInputProblem(endpoint, "USB input monitor not started");
+      usbLogInputProblem(endpoint, "input monitor not started");
     }
 
     usbDestroyInputPipe(endpoint);

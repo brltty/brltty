@@ -1029,6 +1029,12 @@ usbTestDevice (UsbDeviceExtension *extension, UsbDeviceChooser *chooser, UsbChoo
   return NULL;
 }
 
+void
+usbLogInputProblem (UsbEndpoint *endpoint, const char *problem) {
+  logMessage(LOG_WARNING, "%s: Ept:%02X",
+             problem, endpoint->descriptor->bEndpointAddress);
+}
+
 static void
 usbDeallocatePendingInputRequest (void *item, void *data) {
   void *request = item;
@@ -1054,9 +1060,9 @@ usbAddPendingInputRequest (UsbEndpoint *endpoint) {
   return NULL;
 }
 
-void
+static void
 usbEnsurePendingInputRequests (UsbEndpoint *endpoint, int count) {
-  int limit = USB_INPUT_INTERRUPT_URB_COUNT;
+  int limit = USB_INPUT_INTERRUPT_REQUESTS_MAXIMUM;
   if ((count < 1) || (count > limit)) count = limit;
   endpoint->direction.input.pending.delay = 0;
 
@@ -1076,19 +1082,40 @@ ASYNC_ALARM_CALLBACK(usbHandleSchedulePendingInputRequest) {
   usbAddPendingInputRequest(endpoint);
 }
 
-void
+static void
 usbSchedulePendingInputRequest (UsbEndpoint *endpoint) {
   if (!endpoint->direction.input.pending.alarm) {
     int *delay = &endpoint->direction.input.pending.delay;
 
     if (!*delay) *delay = 1;
-    *delay = MIN(*delay, 16);
+    *delay = MIN(*delay, USB_INPUT_INTERRUPT_DELAY_MAXIMUM);
 
     asyncSetAlarmIn(&endpoint->direction.input.pending.alarm, *delay,
                     usbHandleSchedulePendingInputRequest, endpoint);
 
     *delay += 1;
   }
+}
+
+int
+usbHandleInputResponse (UsbEndpoint *endpoint, const void *buffer, size_t length) {
+  int requestsLeft = getQueueSize(endpoint->direction.input.pending.requests);
+
+  if (length > 0) {
+    if (!usbEnqueueInput(endpoint, buffer, length)) {
+      usbLogInputProblem(endpoint, "input data not enqueued");
+      return 0;
+    }
+
+    usbEnsurePendingInputRequests(endpoint, requestsLeft+2);
+    return 1;
+  }
+
+  if (requestsLeft == 0) {
+    usbSchedulePendingInputRequest(endpoint);
+  }
+
+  return 1;
 }
 
 void
