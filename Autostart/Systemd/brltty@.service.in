@@ -13,8 +13,9 @@ RequiresMountsFor=@UPDATABLE_DIRECTORY@
 [Service]
 
 Type=forking
-PIDFile=/run/brltty-%i.pid
-ExecStart=/bin/sh -c 'device="%I" /bin/brltty -E -d "${device#DEFAULT}" -P "/run/brltty-%I.pid"'
+PIDFile=%t/brltty-%i.pid
+Environment=BRLTTY_PID_FILE=%t/brltty-%i.pid
+ExecStart=/bin/sh -c 'device="%I" /bin/brltty -E -d "${device#DEFAULT}"'
 
 #Type=notify
 #ExecStart=/bin/sh -c 'device="%I" /bin/brltty -E -d "${device#DEFAULT}" -n'
