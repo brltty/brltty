@@ -1,0 +1,71 @@
+#!/bin/bash -p
+set -e
+
+readonly programName="${0##*/}"
+
+programMessage() {
+  local message="${1}"
+
+  echo >&2 "${programName}: ${message}"
+}
+
+syntaxError() {
+  local message="${1}"
+
+  programMessage "${message}"
+  exit 2
+}
+
+semanticError() {
+  local message="${1}"
+
+  programMessage "${message}"
+  exit 3
+}
+
+[ "${#}" -ge 1 ] || syntaxError "missing instance name"
+readonly instanceName="${1}"
+shift 1
+readonly -a additionalArguments=( "${@}" )
+
+[ -e "${instanceName}" ] || semanticError "instance not found: ${instanceName}"
+[ -r "${instanceName}" ] || semanticError "instance not readable: ${instanceName}"
+
+if [ -c "${instanceName}" ]
+then
+  udevMaintained=false
+
+  while read line
+  do
+    if [[ "${line}" =~ ^'N: ' ]]
+    then
+      udevMaintained=true
+    elif [[ "${line}" =~ ^'E: '([^ =]+)=(.*) ]]
+    then
+      name="${BASH_REMATCH[1]}"
+      value="${BASH_REMATCH[2]}"
+
+      [[ "${name}" =~ ^'BRLTTY_' ]] || continue
+      [ -z "${!name}" ] || continue
+
+      export "${name}=${value}"
+    fi
+  done < <((udevadm info --name="${instanceName}" --export 2>/dev/null))
+
+  "${udevMaintained}" || semanticError "not maintained by udev: ${instanceName}"
+elif [ -f "${instanceName}" ]
+then
+  export BRLTTY_CONFIGURATION_FILE="${instanceName}"
+else
+  semanticError "unrecognized instance type: ${instanceName}"
+fi
+
+readonly executablePath="${BRLTTY_EXECUTABLE_PATH:-/bin/brltty}"
+[ -e "${executablePath}" ] || semanticError "executable not found: ${executablePath}"
+[ -f "${executablePath}" ] || semanticError "executable not a file: ${executablePath}"
+[ -x "${executablePath}" ] || semanticError "executable not executable: ${executablePath}"
+
+set -- "${executablePath}" -q -E "${additionalArguments[@]}"
+programMessage "invoking: ${*}"
+exec "${@}"
+exit "${?}"
