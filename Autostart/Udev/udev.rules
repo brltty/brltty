@@ -439,7 +439,7 @@ ENV{BRLTTY_BRAILLE_DEVICE}="usb:vendor=0X$sysfs{idVendor}+product=0X$sysfs{idPro
 GOTO="brltty_run"
 
 LABEL="brltty_run"
-ENV{BRLTTY_PID_FILE}="/var/run/brltty.$kernel.pid"
+ENV{BRLTTY_PID_FILE}="/run/brltty.$kernel.pid"
 ACTION=="add", GOTO="brltty_add"
 ACTION=="remove", GOTO="brltty_remove"
 GOTO="brltty_end"
