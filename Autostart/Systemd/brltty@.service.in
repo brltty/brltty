@@ -15,10 +15,10 @@ RequiresMountsFor=@UPDATABLE_DIRECTORY@
 Type=forking
 PIDFile=%t/brltty-%i.pid
 Environment=BRLTTY_PID_FILE=%t/brltty-%i.pid
-ExecStart=/bin/sh -c 'device="%I" /bin/brltty -E -d "${device#DEFAULT}"'
+ExecStart=/bin/brltty -E
 
 #Type=notify
-#ExecStart=/bin/sh -c 'device="%I" /bin/brltty -E -d "${device#DEFAULT}" -n'
+#ExecStart=/bin/brltty -E -n
 
 TimeoutStartSec=5
 TimeoutStopSec=10
