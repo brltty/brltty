@@ -447,11 +447,11 @@ GOTO="brltty_end"
 LABEL="brltty_add"
 SYMLINK+="brltty/$env{BRLTTY_BRAILLE_DEVICE}"
 TEST=="/sys/fs/cgroup/systemd", GOTO="brltty_add_systemd"
-RUN+="/bin/brltty -E -P$env{BRLTTY_PID_FILE}"
+RUN+="/bin/brltty -E
 GOTO="brltty_end"
 
 LABEL="brltty_add_systemd"
-TAG+="systemd", ENV{SYSTEMD_WANTS}+="brltty@$env{BRLTTY_BRAILLE_DEVICE}.service"
+TAG+="systemd", ENV{SYSTEMD_WANTS}+="brltty@$env{DEVNAME}.service"
 GOTO="brltty_end"
 
 LABEL="brltty_remove"
