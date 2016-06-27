@@ -15,10 +15,10 @@ RequiresMountsFor=@UPDATABLE_DIRECTORY@
 Type=forking
 PIDFile=%t/brltty-%i.pid
 Environment=BRLTTY_PID_FILE=%t/brltty-%i.pid
-ExecStart=/bin/brltty -E
+ExecStart=/sbin/brltty-systemd-wrapper %I
 
 #Type=notify
-#ExecStart=/bin/brltty -E -n
+#ExecStart=/sbin/brltty-systemd-wrapper %I -n
 
 TimeoutStartSec=5
 TimeoutStopSec=10
