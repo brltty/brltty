@@ -6,7 +6,7 @@ Documentation=http://brltty.com/
 
 DefaultDependencies=no
 Before=sysinit.target
-Requires=brltty@DEFAULT.service
+Requires=brltty@-etc-brltty.conf.service
 
 
 [Service]

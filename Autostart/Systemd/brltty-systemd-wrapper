@@ -52,7 +52,7 @@ then
     fi
   done < <((udevadm info --name="${instanceName}" --export 2>/dev/null))
 
-  "${udevMaintained}" || semanticError "not maintained by udev: ${instanceName}"
+  "${udevMaintained}" || semanticError "instance not maintained by udev: ${instanceName}"
 elif [ -f "${instanceName}" ]
 then
   export BRLTTY_CONFIGURATION_FILE="${instanceName}"
@@ -66,6 +66,6 @@ readonly executablePath="${BRLTTY_EXECUTABLE_PATH:-/bin/brltty}"
 [ -x "${executablePath}" ] || semanticError "executable not executable: ${executablePath}"
 
 set -- "${executablePath}" -q -E "${additionalArguments[@]}"
-programMessage "invoking: ${*}"
+programMessage "starting executable: ${*}"
 exec "${@}"
 exit "${?}"
