@@ -12,10 +12,12 @@ RequiresMountsFor=@UPDATABLE_DIRECTORY@
 
 [Service]
 
+Environment="BRLTTY_SYSTEMD_INSTANCE=%I"
+ExecStart=/sbin/brltty-systemd-wrapper
+
 Type=forking
 PIDFile=%t/brltty-%i.pid
 Environment=BRLTTY_PID_FILE=%t/brltty-%i.pid
-ExecStart=/sbin/brltty-systemd-wrapper %I
 
 TimeoutStartSec=5
 TimeoutStopSec=10

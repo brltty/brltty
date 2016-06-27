@@ -1,6 +1,8 @@
 #!/bin/bash -p
 set -e
 
+readonly defaultInstance="/etc/brltty.conf"
+
 readonly programName="${0##*/}"
 
 programMessage() {
@@ -23,15 +25,11 @@ semanticError() {
   exit 3
 }
 
-[ "${#}" -ge 1 ] || syntaxError "missing instance name"
-readonly instanceName="${1}"
-shift 1
-readonly -a additionalArguments=( "${@}" )
+readonly currentInstance="${BRLTTY_SYSTEMD_INSTANCE:-${defaultInstance}}"
+[ -e "${currentInstance}" ] || semanticError "instance not found: ${currentInstance}"
+[ -r "${currentInstance}" ] || semanticError "instance not readable: ${currentInstance}"
 
-[ -e "${instanceName}" ] || semanticError "instance not found: ${instanceName}"
-[ -r "${instanceName}" ] || semanticError "instance not readable: ${instanceName}"
-
-if [ -c "${instanceName}" ]
+if [ -c "${currentInstance}" ]
 then
   udevMaintained=false
 
@@ -50,14 +48,14 @@ then
 
       export "${name}=${value}"
     fi
-  done < <((udevadm info --name="${instanceName}" --export 2>/dev/null))
+  done < <((udevadm info --name="${currentInstance}" --export 2>/dev/null))
 
-  "${udevMaintained}" || semanticError "instance not maintained by udev: ${instanceName}"
-elif [ -f "${instanceName}" ]
+  "${udevMaintained}" || semanticError "instance not maintained by udev: ${currentInstance}"
+elif [ -f "${currentInstance}" ]
 then
-  export BRLTTY_CONFIGURATION_FILE="${instanceName}"
+  export BRLTTY_CONFIGURATION_FILE="${currentInstance}"
 else
-  semanticError "unrecognized instance type: ${instanceName}"
+  semanticError "unrecognized instance type: ${currentInstance}"
 fi
 
 readonly executablePath="${BRLTTY_EXECUTABLE_PATH:-/bin/brltty}"
@@ -65,7 +63,7 @@ readonly executablePath="${BRLTTY_EXECUTABLE_PATH:-/bin/brltty}"
 [ -f "${executablePath}" ] || semanticError "executable not a file: ${executablePath}"
 [ -x "${executablePath}" ] || semanticError "executable not executable: ${executablePath}"
 
-set -- "${executablePath}" -E ${BRLTTY_EXECUTABLE_ARGUMENTS} "${additionalArguments[@]}"
+set -- "${executablePath}" -E ${BRLTTY_EXECUTABLE_ARGUMENTS} "${@}"
 programMessage "starting executable: ${*}"
 exec "${@}"
 exit "${?}"
