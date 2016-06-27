@@ -65,7 +65,7 @@ readonly executablePath="${BRLTTY_EXECUTABLE_PATH:-/bin/brltty}"
 [ -f "${executablePath}" ] || semanticError "executable not a file: ${executablePath}"
 [ -x "${executablePath}" ] || semanticError "executable not executable: ${executablePath}"
 
-set -- "${executablePath}" -q -E "${additionalArguments[@]}"
+set -- "${executablePath}" -E ${BRLTTY_EXECUTABLE_ARGUMENTS} "${additionalArguments[@]}"
 programMessage "starting executable: ${*}"
 exec "${@}"
 exit "${?}"
