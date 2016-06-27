@@ -1126,6 +1126,17 @@ BRLTTY_ARG_PACKAGE([service], [system service], [libsystemd], [dnl
       ;;
 ])
 
+AC_SUBST([SYSTEMD_SERVICE_TYPE], ["forking"])
+AC_SUBST([SYSTEMD_SERVICE_ARGUMENTS], [""])
+
+case "${service_package}"
+in
+   libsystemd)
+      SYSTEMD_SERVICE_TYPE="notify"
+      SYSTEMD_SERVICE_ARGUMENTS="-n"
+      ;;
+esac
+
 BRLTTY_ARG_PACKAGE([params], [boot parameters], [], [dnl
    linux*)
       params_package="linux"
