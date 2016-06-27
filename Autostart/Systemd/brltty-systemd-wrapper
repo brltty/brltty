@@ -58,12 +58,7 @@ else
   semanticError "unrecognized instance type: ${currentInstance}"
 fi
 
-readonly executablePath="${BRLTTY_EXECUTABLE_PATH:-/bin/brltty}"
-[ -e "${executablePath}" ] || semanticError "executable not found: ${executablePath}"
-[ -f "${executablePath}" ] || semanticError "executable not a file: ${executablePath}"
-[ -x "${executablePath}" ] || semanticError "executable not executable: ${executablePath}"
-
-set -- "${executablePath}" -E ${BRLTTY_EXECUTABLE_ARGUMENTS} "${@}"
+set -- "${BRLTTY_EXECUTABLE_PATH:-brltty}" -E ${BRLTTY_EXECUTABLE_ARGUMENTS} "${@}"
 programMessage "starting executable: ${*}"
 exec "${@}"
 exit "${?}"
