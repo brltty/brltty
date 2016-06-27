@@ -17,9 +17,6 @@ PIDFile=%t/brltty-%i.pid
 Environment=BRLTTY_PID_FILE=%t/brltty-%i.pid
 ExecStart=/sbin/brltty-systemd-wrapper %I
 
-#Type=notify
-#ExecStart=/sbin/brltty-systemd-wrapper %I -n
-
 TimeoutStartSec=5
 TimeoutStopSec=10
 
