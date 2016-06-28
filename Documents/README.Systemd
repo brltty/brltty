@@ -8,6 +8,8 @@ Using Systemd Service Management
 .. |default system unit directory| replace:: |default user configuration directory|/systemd/system
 .. |service unit| replace:: brltty.service
 .. |service instance unit| replace:: brltty@.service
+.. |wrapper directory| replace:: /sbin
+.. |wrapper script| replace:: brltty-systemd-wrapper
 
 Installing the Service Units
 ============================
@@ -18,7 +20,7 @@ You can find out where this directory is on your system with this command::
 
    pkg-config systemd --variable=systemdsystemunitpath
 
-The output from this command is a colon-delimtied list of directories.
+The output from this command is a colon-delimited list of directories.
 Look for the one that starts with |default user configuration directory|.
 Assuming that Systemd's system unit directory is |default system unit directory|
 (please ensure to use whatever it really is on your system):
@@ -34,6 +36,11 @@ Assuming that Systemd's system unit directory is |default system unit directory|
 3) Tell Systemd that these units have been defined as follows::
 
      systemctl daemon-reload
+
+You also need to install a wrapper script that's used by the service units:
+
+  .. parsed-literal:: cp |wrapper script| |wrapper directory|/|wrapper script|
+  .. parsed-literal:: chmod 755 |wrapper directory|/|wrapper script|
 
 Managing the BRLTTY Service
 ===========================
