@@ -1,6 +1,6 @@
 [Unit]
 
-Description=Braille Device Support
+Description=Default BRLTTY Instance
 Documentation=man:brltty(1)
 Documentation=http://brltty.com/
 

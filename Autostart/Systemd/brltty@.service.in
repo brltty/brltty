@@ -1,6 +1,6 @@
 [Unit]
 
-Description=Braille Device: %I
+Description=BRLTTY Instance: %I
 Documentation=man:brltty(1)
 Documentation=@PACKAGE_URL@
 
