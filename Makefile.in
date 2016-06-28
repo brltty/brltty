@@ -22,6 +22,9 @@ all install uninstall install-documents:
 install-messages uninstall-messages:
 	cd $(MSG_DIR) && $(MAKE) $(@:-messages=)
 
+install-systemd uninstall-systemd:
+	cd Autostart/Systemd && $(MAKE) $(@:-systemd=)
+
 ARCHIVE_NAME = $(PACKAGE_TARNAME)-$(PACKAGE_VERSION)
 TAR_EXTENSION = tar
 GZIP_EXTENSION = gz

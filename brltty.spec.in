@@ -302,6 +302,22 @@ needs to interpret and/or create raw braille device packets, or which needs to
 interpret key codes as delivered by BrlAPI's raw mode.
 
 
+%package -n brltty-systemd
+Version: @PACKAGE_VERSION@
+Release: 1
+Group: System Environment/Daemons
+License: GPL
+
+AutoProv: no
+AutoReq: yes
+
+Summary: Systemd units and wrappers for BRLTTY.
+%description -n brltty-systemd
+This package provides the units and wrappers for managing BRLTTY via Systemd.
+
+Install this package if you'd like to manage BRLTTY processes via Systemd.
+
+
 %package -n brlapi
 Version: @api_release@
 Release: 1
@@ -454,7 +470,7 @@ This package provides a set of commands for maintaining BRLTTY's datafiles.
 make
 
 %install
-make install install-documents install-messages
+make install install-documents install-messages install-systemd
 install -m 644 Documents/brltty.conf "${RPM_BUILD_ROOT}%{_sysconfdir}"
 install -d "${RPM_BUILD_ROOT}%{_systemddir}"
 install -m 644 Autostart/Systemd/brltty.service "${RPM_BUILD_ROOT}%{_systemddir}/brltty.service"
@@ -522,6 +538,11 @@ rm -fr "${RPM_BUILD_ROOT}"
 
 %files -n brltty-devel
 %{_includedir}/brltty
+
+%files -n brltty-systemd
+/usr/lib/systemd/system/brltty.*
+/usr/lib/systemd/system/brltty@.*
+%{_sbindir}/brltty-systemd-*
 
 %files -n brlapi
 %defattr(-,root,root)
