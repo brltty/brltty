@@ -82,7 +82,14 @@ $(BIN_TAR_XZ): $(BIN_TAR)
 	xz -9 -c $(BIN_TAR) >$@
 bin-tar-xz: $(BIN_TAR_XZ)
 
-ITERATE = -for directory in $(PGM_DIR) $(MSG_DIR) Android/Application; do (cd $$directory && $(MAKE) $@); done
+ITERATE = \
+   -for directory in \
+   $(PGM_DIR) \
+   $(MSG_DIR) \
+   Autostart/Systemd \
+   Android/Application \
+   ; do (cd $$directory && $(MAKE) $@); done
+
 clean::
 	$(ITERATE)
 	-rm -f -- *.$(TAR_EXTENSION) *.$(GZIP_EXTENSION) *.$(BZIP2_EXTENSION) *.$(XZ_EXTENSION) *.$(ZIP_EXTENSION) *.rpm

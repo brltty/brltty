@@ -42,6 +42,13 @@ brltty_build_directories=". Programs Documents Messages Android/Core Android/App
 brltty_source_directory="`dirname "${0}"`"
 brltty_manual_directories=""
 
+for brltty_autostart_directory in `(cd "${brltty_source_directory}" && echo Autostart/*)`
+do
+   test -f "${brltty_source_directory}/${brltty_autostart_directory}/Makefile.in" && {
+      brltty_build_directories="${brltty_build_directories} ${brltty_autostart_directory}"
+   }
+done
+
 for brltty_manual_directory in `(cd "${brltty_source_directory}" && echo Documents/Manual-*/*)`
 do
    test -f "${brltty_source_directory}/${brltty_manual_directory}/Makefile.in" && {
