@@ -1,6 +1,49 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+June 28, 2016:
+ - BRLTTY 5.4 released:
+   Core changes:
+      The Delayed Cursor Tracking feature (and preference) has been added.
+      Stuck keys are now automatically released after a specifiable timeout.
+      Touch events no longer interfere with Learn Mode.
+      Support for the Polkit authorization manager has been added.
+      A couple of memory corruption issues have been resolved.
+   USB fixes:
+      Device disconnect detection has been improved.
+      Excessive CPU consumption for some older serial adapters has been resolved.
+   Baum braille driver changes:
+      More bindings have been defined for models that have the B11 key.
+      False reporting of input timeouts has been resolved.
+      Handling of unknown packet types has been improved.
+   HandyTech braille driver changes:
+      Model detection on Windows has been fixed.
+      Output errors now restart the driver.
+   HIMS braille driver changes:
+      Support for the Smart Beetle has been added.
+      Newer firmware resolution of qwerty key code conflicts is supported.
+   HumanWare braille driver changes:
+      Several USB connection problems have been resolved.
+      The newer HID-based USB protocol is supported.
+      The Brailliant B 80's Bluetooth device name is recognized.
+   Papenmeier braille driver changes:
+      Clipboard bindings have been added that work on EL-C models.
+      Bar bindings for the menu now work on EL models that don't have switches.
+      Bindings may now be defined that use a routing key and an EL key.
+   XWindow braille driver changes:
+      Fixed-size font restrictions have been removed.
+   xbrlapi changes:
+      Brltty restarts are handled.
+      Logs written to .xsession have been improved.
+   brltty-trtxt changes:
+      The -b [--no-base-characters] option has been added.
+   Systemd/Udev changes:
+      Multiple USB braille devices are handled - each starts its own brltty.
+      Disconnecting a USB braille device stops the associated brltty.
+   Updated Tables:
+      The en_CA (English Canada) text table.
+      The zh_tw (Chinese, Taiwan) contraction table.
+
 December 22, 2015:
  - BRLTTY 5.3.1 released:
    Linux screen driver fix:
