@@ -17,7 +17,6 @@
 ###############################################################################
 
 # udev rules file for BRLTTY
-ENV{BRLTTY_EXECUTABLE_PATH}=="", ENV{BRLTTY_EXECUTABLE_PATH}="/bin/brltty"
 
 SUBSYSTEM=="usb_device", GOTO="brltty_usb_begin"
 SUBSYSTEM=="usb", KERNEL!="*:*", GOTO="brltty_usb_begin"
@@ -438,6 +437,9 @@ ENV{BRLTTY_BRAILLE_DEVICE}="usb:vendor=0X$sysfs{idVendor}+product=0X$sysfs{idPro
 GOTO="brltty_run"
 
 LABEL="brltty_run"
+TEST=="/sys/fs/cgroup/systemd", GOTO="brltty_systemd"
+
+ENV{BRLTTY_EXECUTABLE_PATH}=="", ENV{BRLTTY_EXECUTABLE_PATH}="/bin/brltty"
 ENV{BRLTTY_PID_FILE}="/run/brltty.$kernel.pid"
 
 ACTION=="add", GOTO="brltty_add"
@@ -445,18 +447,14 @@ ACTION=="remove", GOTO="brltty_remove"
 GOTO="brltty_end"
 
 LABEL="brltty_add"
-SYMLINK+="brltty/$env{BRLTTY_BRAILLE_DEVICE}"
-TEST=="/sys/fs/cgroup/systemd", GOTO="brltty_add_systemd"
 RUN+="$env{BRLTTY_EXECUTABLE_PATH} -E"
 GOTO="brltty_end"
 
-LABEL="brltty_add_systemd"
-TAG+="systemd", ENV{SYSTEMD_WANTS}+="brltty@$env{DEVNAME}.service"
-GOTO="brltty_end"
-
 LABEL="brltty_remove"
-TEST=="/sys/fs/cgroup/systemd", GOTO="brltty_end"
 RUN+="$env{BRLTTY_EXECUTABLE_PATH} -E -C"
 GOTO="brltty_end"
 
+LABEL="brltty_systemd"
+ACTION!="add", GOTO="brltty_end"
+TAG+="systemd", ENV{SYSTEMD_WANTS}+="brltty@$env{DEVNAME}.service"
 LABEL="brltty_end"
