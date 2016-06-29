@@ -16,14 +16,14 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# udev rules file for brltty
+# udev rules file for BRLTTY
+ENV{BRLTTY_EXECUTABLE_PATH}=="", ENV{BRLTTY_EXECUTABLE_PATH}="/bin/brltty"
 
 SUBSYSTEM=="usb_device", GOTO="brltty_usb_begin"
 SUBSYSTEM=="usb", KERNEL!="*:*", GOTO="brltty_usb_begin"
 GOTO="brltty_end"
 
 LABEL="brltty_usb_begin"
-
 # BEGIN_USB_DEVICES
 
 # Device: 0403:6001
@@ -431,7 +431,6 @@ ENV{PRODUCT}=="c251/1131/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_r
 ENV{PRODUCT}=="c251/1132/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_run"
 
 # END_USB_DEVICES
-
 GOTO="brltty_end"
 
 LABEL="brltty_usb_run"
@@ -440,6 +439,7 @@ GOTO="brltty_run"
 
 LABEL="brltty_run"
 ENV{BRLTTY_PID_FILE}="/run/brltty.$kernel.pid"
+
 ACTION=="add", GOTO="brltty_add"
 ACTION=="remove", GOTO="brltty_remove"
 GOTO="brltty_end"
@@ -447,7 +447,7 @@ GOTO="brltty_end"
 LABEL="brltty_add"
 SYMLINK+="brltty/$env{BRLTTY_BRAILLE_DEVICE}"
 TEST=="/sys/fs/cgroup/systemd", GOTO="brltty_add_systemd"
-RUN+="/bin/brltty -E"
+RUN+="$env{BRLTTY_EXECUTABLE_PATH} -E"
 GOTO="brltty_end"
 
 LABEL="brltty_add_systemd"
@@ -456,7 +456,7 @@ GOTO="brltty_end"
 
 LABEL="brltty_remove"
 TEST=="/sys/fs/cgroup/systemd", GOTO="brltty_end"
-RUN+="/bin/sh -c 'kill -TERM `cat $env{BRLTTY_PID_FILE}`'"
+RUN+="$env{BRLTTY_EXECUTABLE_PATH} -E -C"
 GOTO="brltty_end"
 
 LABEL="brltty_end"
