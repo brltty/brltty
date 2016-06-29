@@ -447,7 +447,7 @@ GOTO="brltty_end"
 LABEL="brltty_add"
 SYMLINK+="brltty/$env{BRLTTY_BRAILLE_DEVICE}"
 TEST=="/sys/fs/cgroup/systemd", GOTO="brltty_add_systemd"
-RUN+="/bin/brltty -E
+RUN+="/bin/brltty -E"
 GOTO="brltty_end"
 
 LABEL="brltty_add_systemd"
