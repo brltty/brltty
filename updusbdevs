@@ -590,7 +590,7 @@ proc updateFile {file newLines} {
       }
 
       if {[writeFile $lines $file]} {
-         writeProgramMessage "file updated: $file"
+         logMessage warning "file updated: $file"
          return 1
       }
    }

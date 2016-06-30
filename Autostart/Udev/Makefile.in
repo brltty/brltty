@@ -35,7 +35,7 @@ install-rules-all: install-rules-directory
 	$(INSTALL_DATA) $(SRC_DIR)/rules $(UDEV_RULES_DIRECTORY)/$(UDEV_RULES_FILE)
 
 install-rules-nogeneric: install-rules-all
-	$(SRC_TOP)updusbdevs -quiet -nogeneric udev:$(UDEV_RULES_DIRECTORY)/$(UDEV_RULES_FILE)
+	$(SRC_TOP)updusbdevs -quiet -quiet -nogeneric udev:$(UDEV_RULES_DIRECTORY)/$(UDEV_RULES_FILE)
 
 install-rules: install-rules-$(UDEV_RULES_TYPE)
 
