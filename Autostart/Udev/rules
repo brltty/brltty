@@ -445,11 +445,11 @@ ACTION=="remove", GOTO="brltty_remove"
 GOTO="brltty_end"
 
 LABEL="brltty_add"
-RUN+="/sbin/brltty-udev-wrapper"
+RUN+="brltty-wrapper"
 GOTO="brltty_end"
 
 LABEL="brltty_remove"
-RUN+="/sbin/brltty-udev-wrapper -C"
+RUN+="brltty-wrapper -C"
 GOTO="brltty_end"
 
 LABEL="brltty_systemd"

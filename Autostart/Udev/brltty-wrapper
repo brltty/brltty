@@ -17,6 +17,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+# This script must be installed in the udev programs directory: /usr/lib/udev/
+
 set -e
 readonly rootDirectory="/sys/fs/cgroup/systemd"
 
