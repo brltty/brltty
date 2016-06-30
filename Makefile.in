@@ -25,6 +25,9 @@ install-messages uninstall-messages:
 install-systemd uninstall-systemd:
 	cd Autostart/Systemd && $(MAKE) $(@:-systemd=)
 
+install-udev uninstall-udev:
+	cd Autostart/Udev && $(MAKE) $(@:-udev=)
+
 ARCHIVE_NAME = $(PACKAGE_TARNAME)-$(PACKAGE_VERSION)
 TAR_EXTENSION = tar
 GZIP_EXTENSION = gz
@@ -90,6 +93,7 @@ ITERATE = \
    $(PGM_DIR) \
    $(MSG_DIR) \
    Autostart/Systemd \
+   Autostart/Udev \
    Android/Application \
    ; do (cd $$directory && $(MAKE) $@); done
 
