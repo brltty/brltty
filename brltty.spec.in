@@ -34,6 +34,8 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
 %define _libdir /lib
 %define _sysconfdir /etc
 %define _systemddir /usr/lib/systemd/system
+%define _udevlibdir /usr/lib/udev
+%define _udevrulesdir /etc/udev/rules.d
 
 Requires: libicu
 
@@ -313,9 +315,25 @@ AutoReq: yes
 
 Summary: Systemd units and wrappers for BRLTTY.
 %description -n brltty-systemd
-This package provides the units and wrappers for managing BRLTTY via Systemd.
+This package provides the units and wrapper for managing BRLTTY via Systemd.
 
 Install this package if you'd like to manage BRLTTY processes via Systemd.
+
+
+%package -n brltty-udev
+Version: @PACKAGE_VERSION@
+Release: 1
+Group: System Environment/Daemons
+License: GPL
+
+AutoProv: no
+AutoReq: yes
+
+Summary: Udev rules for BRLTTY.
+%description -n brltty-udev
+This package provides the rules and wrapper for managing BRLTTY via Udev.
+
+Install this package if you'd like to manage BRLTTY processes via Udev.
 
 
 %package -n brlapi
@@ -470,10 +488,9 @@ This package provides a set of commands for maintaining BRLTTY's datafiles.
 make
 
 %install
-make install install-documents install-messages install-systemd
+make install install-documents install-messages
+make install-systemd install-udev UDEV_RULES_TYPE=nogeneric
 install -m 644 Documents/brltty.conf "${RPM_BUILD_ROOT}%{_sysconfdir}"
-install -d "${RPM_BUILD_ROOT}%{_systemddir}"
-install -m 644 Autostart/Systemd/brltty.service "${RPM_BUILD_ROOT}%{_systemddir}/brltty.service"
 %find_lang %{name}
 
 %clean
@@ -504,7 +521,6 @@ rm -fr "${RPM_BUILD_ROOT}"
 %doc %{_docdir}/*/KeyTables
 %doc %{_docdir}/*/Manual-BRLTTY
 %config(noreplace) %verify(not size md5 mtime) %{_sysconfdir}/brltty.conf
-%{_systemddir}/brltty.service
 
 %files -n brltty-braille-brlapi
 %{_libdir}/brltty/libbrlttybba.so
@@ -540,9 +556,12 @@ rm -fr "${RPM_BUILD_ROOT}"
 %{_includedir}/brltty
 
 %files -n brltty-systemd
-/usr/lib/systemd/system/brltty.*
-/usr/lib/systemd/system/brltty@.*
+%{_systemddir}/*
 %{_sbindir}/brltty-systemd-*
+
+%files -n brltty-udev
+%{_udevlibdir}/*
+%{_udevrulesdir}/*
 
 %files -n brlapi
 %defattr(-,root,root)
