@@ -438,8 +438,6 @@ GOTO="brltty_run"
 
 LABEL="brltty_run"
 TEST=="/sys/fs/cgroup/systemd", GOTO="brltty_systemd"
-
-ENV{BRLTTY_EXECUTABLE_PATH}=="", ENV{BRLTTY_EXECUTABLE_PATH}="/bin/brltty"
 ENV{BRLTTY_PID_FILE}="/run/brltty.$kernel.pid"
 
 ACTION=="add", GOTO="brltty_add"
@@ -451,7 +449,7 @@ RUN+="/sbin/brltty-udev-wrapper"
 GOTO="brltty_end"
 
 LABEL="brltty_remove"
-RUN+="$env{BRLTTY_EXECUTABLE_PATH} -E -C"
+RUN+="/sbin/brltty-udev-wrapper -C"
 GOTO="brltty_end"
 
 LABEL="brltty_systemd"
