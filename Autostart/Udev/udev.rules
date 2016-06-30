@@ -447,7 +447,7 @@ ACTION=="remove", GOTO="brltty_remove"
 GOTO="brltty_end"
 
 LABEL="brltty_add"
-RUN+="$env{BRLTTY_EXECUTABLE_PATH} -E"
+RUN+="/sbin/brltty-udev-wrapper"
 GOTO="brltty_end"
 
 LABEL="brltty_remove"
