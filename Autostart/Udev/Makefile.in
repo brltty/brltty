@@ -20,8 +20,8 @@ UDEV_RULES_SEQUENCE = 90
 UDEV_RULES_TYPE = all
 #UDEV_RULES_TYPE = nogeneric
 
-UDEV_RULES_DIRECTORY = $(INSTALL_ROOT)/etc/udev/rules.d
-UDEV_PROGRAMS_DIRECTORY = $(INSTALL_ROOT)/usr/lib/udev
+UDEV_LIBRARY_DIRECTORY = $(INSTALL_ROOT)$(libdir)/udev
+UDEV_RULES_DIRECTORY = $(UDEV_LIBRARY_DIRECTORY)/rules.d
 
 UDEV_RULES_EXTENSION = rules
 UDEV_RULES_FILE = $(UDEV_RULES_SEQUENCE)-$(PACKAGE_TARNAME).$(UDEV_RULES_EXTENSION)
@@ -39,13 +39,13 @@ install-rules-nogeneric: install-rules-all
 
 install-rules: install-rules-$(UDEV_RULES_TYPE)
 
-install-programs-directory:
-	$(INSTALL_DIRECTORY) $(UDEV_PROGRAMS_DIRECTORY)
+install-library-directory:
+	$(INSTALL_DIRECTORY) $(UDEV_LIBRARY_DIRECTORY)
 
-install-programs: install-programs-directory
-	$(INSTALL_SCRIPT) $(SRC_DIR)/$(PACKAGE_TARNAME)-wrapper $(UDEV_PROGRAMS_DIRECTORY)
+install-programs: install-library-directory
+	$(INSTALL_SCRIPT) $(SRC_DIR)/$(PACKAGE_TARNAME)-wrapper $(UDEV_LIBRARY_DIRECTORY)
 
 uninstall:
 	-rm -f $(UDEV_RULES_DIRECTORY)/?*-$(PACKAGE_TARNAME).$(UDEV_RULES_EXTENSION)
-	-rm -f $(UDEV_PROGRAMS_DIRECTORY)/$(PACKAGE_TARNAME)-*
+	-rm -f $(UDEV_LIBRARY_DIRECTORY)/$(PACKAGE_TARNAME)-*
 

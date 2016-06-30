@@ -33,9 +33,9 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
 %define _sbindir /sbin
 %define _libdir /lib
 %define _sysconfdir /etc
-%define _systemddir /usr/lib/systemd/system
-%define _udevlibdir /usr/lib/udev
-%define _udevrulesdir /etc/udev/rules.d
+%define _systemddir %{_libdir}/systemd/system
+%define _udevlibdir %{_libdir}/udev
+%define _udevrulesdir %{_udevlibdir}/rules.d
 
 Requires: libicu
 
