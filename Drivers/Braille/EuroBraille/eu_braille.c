@@ -232,6 +232,15 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .vendor=0XC251, .product=0X1130,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=0,
+      .verifyInterface = 1,
+      .disableEndpointReset = 1
+    },
+
+    { /* Esytime */
+      .vendor=0XC251, .product=0X1130,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=7, .outputEndpoint=0,
+      .verifyInterface = 1,
       .disableEndpointReset = 1
     },
 
