@@ -31,6 +31,7 @@
 #include "log.h"
 #include "strfmt.h"
 #include "parameters.h"
+#include "bitmask.h"
 #include "parse.h"
 #include "file.h"
 #include "charset.h"
@@ -1405,6 +1406,40 @@ usbPrepareChannel (UsbChannel *channel) {
   return 0;
 }
 
+static int
+usbVerifyInterface (UsbDevice *device, const UsbChannelDefinition *definition) {
+  const UsbInterfaceDescriptor *interface = usbInterfaceDescriptor(device, definition->interface, definition->alternative);
+  if (!interface) return 0;
+
+  BITMASK(endpoints, 0X100, char);
+  BITMASK_ZERO(endpoints);
+
+  {
+    const UsbDescriptor *descriptor = (const UsbDescriptor *)interface;
+
+    while (usbNextDescriptor(device, &descriptor)) {
+      uint8_t type = descriptor->header.bDescriptorType;
+      if (type == UsbDescriptorType_Interface) break;
+      if (type != UsbDescriptorType_Endpoint) continue;
+      BITMASK_SET(endpoints, descriptor->endpoint.bEndpointAddress);
+    }
+  }
+
+  if (definition->inputEndpoint) {
+    if (!BITMASK_TEST(endpoints, (definition->inputEndpoint | UsbEndpointDirection_Input))) {
+      return 0;
+    }
+  }
+
+  if (definition->outputEndpoint) {
+    if (!BITMASK_TEST(endpoints, (definition->outputEndpoint | UsbEndpointDirection_Output))) {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
 struct UsbChooseChannelDataStruct {
   const UsbChannelDefinition *definition;
 
@@ -1437,7 +1472,6 @@ usbChooseChannel (UsbDevice *device, UsbChooseChannelData *data) {
 
     if (!data->genericDevices) {
       const UsbSerialAdapter *adapter = usbFindSerialAdapter(descriptor);
-
       if (adapter && adapter->generic) goto nextDefinition;
     }
 
@@ -1447,7 +1481,7 @@ usbChooseChannel (UsbDevice *device, UsbChooseChannelData *data) {
 
     if (definition->verifyInterface) {
       if (!usbConfigureDevice(device, definition->configuration)) goto nextDefinition;
-      if (!usbInterfaceDescriptor(device, definition->interface, definition->alternative)) goto nextDefinition;
+      if (!usbVerifyInterface(device, definition)) goto nextDefinition;
     }
 
     data->definition = definition;
