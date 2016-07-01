@@ -194,6 +194,7 @@ usbControlDriver (
 static int
 usbDisconnectDriver (UsbDevice *device, unsigned char interface) {
 #ifdef USBDEVFS_DISCONNECT
+  logMessage(LOG_CATEGORY(USB_IO), "disconnecting kernel driver: Int:%u", interface);
   if (usbControlDriver(device, interface, USBDEVFS_DISCONNECT, NULL)) return 1;
 #else /* USBDEVFS_DISCONNECT */
   errno = ENOSYS;
