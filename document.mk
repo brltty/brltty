@@ -27,7 +27,7 @@ txt: $(DOCUMENT_NAME).txt
 html: html.made
 
 $(DOCUMENT_NAME).txt: $(SRC_DIR)/$(DOCUMENT_NAME).sgml
-	$(SETLOCALE) linuxdoc -B txt -l $(DOCUMENT_LANGUAGE) -c latin $<
+	$(SETLOCALE) linuxdoc -B txt -f -l $(DOCUMENT_LANGUAGE) -c latin $<
 	sed -e 's/\x1B\[[0-9][0-9]*m//g' -i $@
 
 html.made: $(SRC_DIR)/$(DOCUMENT_NAME).sgml
