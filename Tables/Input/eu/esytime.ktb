@@ -19,4 +19,17 @@
 title EuroBraille Esytime
 
 include common.kti
-include joysticks.kti
+
+note L1 is the key in front of the left joystick.
+note L5 is the key in front of the right joystick.
+note Some key combinations have been reserved for internal use:
+note + LeftJoystickDown: the Alt key
+note + LeftJoystickPress: the Alt key pressed twice in a row
+note + LeftJoystickLeft + RightJoystick(Right/Left): turn braille functions on/off
+note + LeftJoystickDown + RightJoystick(Up/Down): internal USB (Esytime -> Esytime communication) / external USB (Esytime -> PC communication)
+note + LeftJoystickDown + (l1/l5): read without/with word wrap
+note + LeftJoystickDown + L1 + Escape: switch to single-hand braille keyboard 1
+note + LeftJoystickDown + Cap + Tab: switch to single-hand braille keyboard 2
+note + LeftJoystickDown + Insert + L5: switch to the standard braille keyboard
+note + RightJoystickPress: the Enter key
+note + RightJoystick(left/right/up/down): the left/right/up/down arrow key
