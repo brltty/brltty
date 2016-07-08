@@ -1690,17 +1690,21 @@ BRLTTY_ARG_TABLE([attributes], [left_right], [atb])
 
 BRLTTY_ARG_DISABLE(
    [speech-support],
-   [support for speech synthesizers],
+   [support for speech synthesizers and text-to-speech engines],
    [],
 [dnl
    AC_DEFINE([ENABLE_SPEECH_SUPPORT], [1],
-             [Define this to include speech synthesizer support.])
+             [Define this to include speech synthesizer and text-to-speech engine support.])
    speech_support_object='spk.$O'
 
    BRLTTY_SPEECH_DRIVER([al], [Alva])
    BRLTTY_SPEECH_DRIVER([bl], [BrailleLite])
    BRLTTY_SPEECH_DRIVER([cb], [CombiBraille])
-   BRLTTY_IF_PACKAGE([eSpeak], [espeak], [include/espeak/speak_lib.h], [BRLTTY_SPEECH_DRIVER([es], [eSpeak], [-L$(ESPEAK_ROOT)/lib -lespeak])])
+
+   BRLTTY_IF_PACKAGE([eSpeak], [espeak], [include/espeak/speak_lib.h], [dnl
+      BRLTTY_SPEECH_DRIVER([es], [eSpeak], [-L$(ESPEAK_ROOT)/lib -lespeak])
+   ])
+
    BRLTTY_IF_PACKAGE([FestivalLite], [flite], [include/flite/flite.h], [dnl
       BRLTTY_ARG_REQUIRED(
          [flite-language], [LANGUAGE],
@@ -1722,14 +1726,34 @@ BRLTTY_ARG_DISABLE(
 
       BRLTTY_SPEECH_DRIVER([fl], [FestivalLite], [-L$(FLITE_ROOT)/lib -lflite_$(FLITE_VOICE) -lflite_$(FLITE_LEXICON) -lflite_$(FLITE_LANGUAGE) -lflite -lm])
    ])
+
    BRLTTY_SPEECH_DRIVER([fv], [Festival])
    BRLTTY_SPEECH_DRIVER([gs], [GenericSay])
-   BRLTTY_IF_PACKAGE([Mikropuhe], [mikropuhe], [mpwrfile.h], [BRLTTY_IF_PTHREADS([BRLTTY_SPEECH_DRIVER([mp], [Mikropuhe], [-L$(MPLINUX_ROOT) -lmplinux])])])
-   BRLTTY_IF_PACKAGE([speech-dispatcher], [speechd], [include/libspeechd.h], [BRLTTY_SPEECH_DRIVER([sd], [SpeechDispatcher], [-L$(SPEECHD_ROOT)/lib -lspeechd])])
-   BRLTTY_IF_PACKAGE([Swift], [swift], [include/swift.h], [BRLTTY_SPEECH_DRIVER([sw], [Swift], [-L$(SWIFT_ROOT)/lib -lswift -lm])])
-   BRLTTY_IF_PACKAGE([Theta], [theta], [include/theta.h], [BRLTTY_SPEECH_DRIVER([th], [Theta], [-L$(THETA_ROOT)/lib -ltheta])])
-   BRLTTY_IF_PACKAGE([ViaVoice], [viavoice], [include/eci.h], [BRLTTY_SPEECH_DRIVER([vv], [ViaVoice], [-L$(VIAVOICE_ROOT)/lib -libmeci50])])
+
+   BRLTTY_IF_PACKAGE([Mikropuhe], [mikropuhe], [mpwrfile.h], [dnl
+      BRLTTY_IF_PTHREADS([dnl
+         BRLTTY_SPEECH_DRIVER([mp], [Mikropuhe], [-L$(MPLINUX_ROOT) -lmplinux])
+      ])
+   ])
+
+   BRLTTY_IF_PACKAGE([speech-dispatcher], [speechd], [include/libspeechd.h], [dnl
+      BRLTTY_SPEECH_DRIVER([sd], [SpeechDispatcher], [-L$(SPEECHD_ROOT)/lib -lspeechd])
+   ])
+
+   BRLTTY_IF_PACKAGE([Swift], [swift], [include/swift.h], [dnl
+      BRLTTY_SPEECH_DRIVER([sw], [Swift], [-L$(SWIFT_ROOT)/lib -lswift -lm])
+   ])
+
+   BRLTTY_IF_PACKAGE([Theta], [theta], [include/theta.h], [dnl
+      BRLTTY_SPEECH_DRIVER([th], [Theta], [-L$(THETA_ROOT)/lib -ltheta])
+   ])
+
+   BRLTTY_IF_PACKAGE([ViaVoice], [viavoice], [include/eci.h], [dnl
+      BRLTTY_SPEECH_DRIVER([vv], [ViaVoice], [-L$(VIAVOICE_ROOT)/lib -libmeci50])
+   ])
+
    BRLTTY_SPEECH_DRIVER([xs], [ExternalSpeech])
+
    case "${host_os}"
    in
       *android*)
