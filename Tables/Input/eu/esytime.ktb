@@ -33,3 +33,11 @@ note + LeftJoystickDown + Cap + Tab: switch to single-hand braille keyboard 2
 note + LeftJoystickDown + Insert + L5: switch to the standard braille keyboard
 note + RightJoystickPress: the Enter key
 note + RightJoystick(left/right/up/down): the left/right/up/down arrow key
+
+bind L1 FWINLT
+bind L5 FWINRT
+
+bind LeftJoystickUp RETURN
+bind LeftJoystickLeft LNUP
+bind LeftJoystickRight LNDN
+
