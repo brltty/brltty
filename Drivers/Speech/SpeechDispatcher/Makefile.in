@@ -25,5 +25,5 @@ SPK_OBJS = $(SPEECHD_LIBS)
 include $(SRC_TOP)speech.mk
 
 speech.$O:
-	$(CC) $(SPK_CFLAGS) -I$(SPEECHD_INCLUDES) -c $(SRC_DIR)/speech.c
+	$(CC) $(SPK_CFLAGS) $(SPEECHD_INCLUDES) -c $(SRC_DIR)/speech.c
 
