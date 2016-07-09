@@ -48,6 +48,11 @@ BEGIN_KEY_NAME_TABLE(linear)
   COMMAND_KEY_ENTRY(L8, "L8"),
 END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(linear15)
+  COMMAND_KEY_ENTRY(L1, "L1"),
+  COMMAND_KEY_ENTRY(L5, "L5"),
+END_KEY_NAME_TABLE
+
 BEGIN_KEY_NAME_TABLE(arrow)
   COMMAND_KEY_ENTRY(Left, "Left"),
   COMMAND_KEY_ENTRY(Right, "Right"),
@@ -112,7 +117,7 @@ BEGIN_KEY_NAME_TABLE(joystick2)
   COMMAND_KEY_ENTRY(RightJoystickPress, "RightJoystickPress"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(common)
+BEGIN_KEY_NAME_TABLE(keyboard)
   BRAILLE_KEY_ENTRY(Dot1, "Dot1"),
   BRAILLE_KEY_ENTRY(Dot2, "Dot2"),
   BRAILLE_KEY_ENTRY(Dot3, "Dot3"),
@@ -123,7 +128,9 @@ BEGIN_KEY_NAME_TABLE(common)
   BRAILLE_KEY_ENTRY(Dot8, "Dot8"),
   BRAILLE_KEY_ENTRY(Backspace, "Backspace"),
   BRAILLE_KEY_ENTRY(Space, "Space"),
+END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(routing)
   KEY_GROUP_ENTRY(EU_GRP_RoutingKeys1, "RoutingKey1"),
   KEY_GROUP_ENTRY(EU_GRP_RoutingKeys2, "RoutingKey2"),
 END_KEY_NAME_TABLE
@@ -131,7 +138,8 @@ END_KEY_NAME_TABLE
 BEGIN_KEY_NAME_TABLES(iris)
   KEY_NAME_TABLE(linear),
   KEY_NAME_TABLE(arrow),
-  KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(keyboard),
+  KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(esys_small)
@@ -139,7 +147,8 @@ BEGIN_KEY_NAME_TABLES(esys_small)
   KEY_NAME_TABLE(switch2),
   KEY_NAME_TABLE(joystick1),
   KEY_NAME_TABLE(joystick2),
-  KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(keyboard),
+  KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(esys_medium)
@@ -149,7 +158,8 @@ BEGIN_KEY_NAME_TABLES(esys_medium)
   KEY_NAME_TABLE(switch4),
   KEY_NAME_TABLE(joystick1),
   KEY_NAME_TABLE(joystick2),
-  KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(keyboard),
+  KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(esys_large)
@@ -161,14 +171,15 @@ BEGIN_KEY_NAME_TABLES(esys_large)
   KEY_NAME_TABLE(switch6),
   KEY_NAME_TABLE(joystick1),
   KEY_NAME_TABLE(joystick2),
-  KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(keyboard),
+  KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(esytime)
-  KEY_NAME_TABLE(function),
   KEY_NAME_TABLE(joystick1),
   KEY_NAME_TABLE(joystick2),
-  KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(linear15),
+  KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
 PUBLIC_KEY_TABLE(iris)
