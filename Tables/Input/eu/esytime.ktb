@@ -41,3 +41,27 @@ bind LeftJoystickUp RETURN
 bind LeftJoystickLeft LNUP
 bind LeftJoystickRight LNDN
 
+bind LeftJoystickUp+RightJoystickPress NOOP
+bind LeftJoystickUp+RightJoystickLeft NOOP
+bind LeftJoystickUp+RightJoystickRight NOOP
+bind LeftJoystickUp+RightJoystickUp NOOP
+bind LeftJoystickUp+RightJoystickDown NOOP
+
+bind LeftJoystickLeft+RightJoystickPress NOOP
+bind LeftJoystickLeft+RightJoystickLeft NOOP
+bind LeftJoystickLeft+RightJoystickRight NOOP
+bind LeftJoystickLeft+RightJoystickUp NOOP
+bind LeftJoystickLeft+RightJoystickDown NOOP
+
+bind LeftJoystickRight+RightJoystickPress NOOP
+bind LeftJoystickRight+RightJoystickLeft NOOP
+bind LeftJoystickRight+RightJoystickRight NOOP
+bind LeftJoystickRight+RightJoystickUp NOOP
+bind LeftJoystickRight+RightJoystickDown NOOP
+
+bind LeftJoystickDown+RightJoystickPress NOOP # works but let's leave it free
+bind LeftJoystickDown+RightJoystickLeft NOOP # internal: braille functions off
+bind LeftJoystickDown+RightJoystickRight NOOP # internal: braille functions on
+bind LeftJoystickDown+RightJoystickUp NOOP # internal: internal USB
+bind LeftJoystickDown+RightJoystickDown NOOP # internal: external USB
+
