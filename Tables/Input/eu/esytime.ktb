@@ -37,7 +37,7 @@ note + RightJoystick(left/right/up/down): the left/right/up/down arrow key
 bind L1 FWINLT
 bind L5 FWINRT
 
-bind LeftJoystickUp RETURN
+bind LeftJoystickUp CSRTRK
 bind LeftJoystickLeft LNUP
 bind LeftJoystickRight LNDN
 
@@ -53,13 +53,13 @@ bind LeftJoystickRight+RightJoystickRight NXPGRPH
 bind LeftJoystickRight+RightJoystickUp NXDIFLN
 bind LeftJoystickRight+RightJoystickDown ATTRDN
 
-bind LeftJoystickUp+RightJoystickPress NOOP
-bind LeftJoystickUp+RightJoystickLeft NOOP
-bind LeftJoystickUp+RightJoystickRight NOOP
-bind LeftJoystickUp+RightJoystickUp NOOP
-bind LeftJoystickUp+RightJoystickDown NOOP
+bind LeftJoystickUp+RightJoystickPress DISPMD
+bind LeftJoystickUp+RightJoystickLeft CSRVIS
+bind LeftJoystickUp+RightJoystickRight ATTRVIS
+bind LeftJoystickUp+RightJoystickUp SIXDOTS+on
+bind LeftJoystickUp+RightJoystickDown SIXDOTS+off
 
-bind LeftJoystickDown+RightJoystickPress NOOP # INFO
+bind LeftJoystickDown+RightJoystickPress INFO
 bind LeftJoystickDown+RightJoystickLeft NOOP # internal: braille functions off
 bind LeftJoystickDown+RightJoystickRight NOOP # internal: braille functions on
 bind LeftJoystickDown+RightJoystickUp NOOP # internal: internal USB
@@ -71,21 +71,9 @@ bind L1+RightJoystickRight PREFSAVE
 bind L1+RightJoystickUp HELP
 bind L1+RightJoystickDown LEARN
 
-bind L5+RightJoystickLeft CONTEXT+CLIP_NEW
-bind L5+RightJoystickUp CONTEXT+CLIP_ADD
-bind L5+RightJoystickRight CONTEXT+COPY_LINE
-bind L5+RightJoystickDown CONTEXT+COPY_RECT
+bind L5+RightJoystickLeft+RoutingKey1 CLIP_NEW
+bind L5+RightJoystickUp+RoutingKey1 CLIP_ADD
+bind L5+RightJoystickRight+RoutingKey1 COPY_LINE
+bind L5+RightJoystickDown+RoutingKey1 COPY_RECT
 bind L5+RightJoystickPress PASTE
-
-context CLIP_NEW
-bind RoutingKey1 CLIP_NEW
-
-context CLIP_ADD
-bind RoutingKey1 CLIP_ADD
-
-context COPY_LINE
-bind RoutingKey1 COPY_LINE
-
-context COPY_RECT
-bind RoutingKey1 COPY_RECT
 
