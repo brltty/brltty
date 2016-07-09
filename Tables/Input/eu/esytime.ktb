@@ -34,6 +34,7 @@ note + LeftJoystickDown + Insert + L5: switch to the standard braille keyboard
 note + RightJoystickPress: the Enter key
 note + RightJoystick(left/right/up/down): the left/right/up/down arrow key
 
+bind L1+L5 RETURN
 bind L1 FWINLT
 bind L5 FWINRT
 
@@ -71,9 +72,15 @@ bind L1+RightJoystickRight PREFSAVE
 bind L1+RightJoystickUp HELP
 bind L1+RightJoystickDown LEARN
 
-bind L5+RightJoystickLeft+RoutingKey1 CLIP_NEW
-bind L5+RightJoystickUp+RoutingKey1 CLIP_ADD
-bind L5+RightJoystickRight+RoutingKey1 COPY_LINE
-bind L5+RightJoystickDown+RoutingKey1 COPY_RECT
+bind RightJoystickPress+RoutingKey1 SETLEFT
+bind RightJoystickLeft+RoutingKey1 CLIP_NEW
+bind RightJoystickUp+RoutingKey1 CLIP_ADD
+bind RightJoystickRight+RoutingKey1 COPY_LINE
+bind RightJoystickDown+RoutingKey1 COPY_RECT
+
 bind L5+RightJoystickPress PASTE
+bind L5+RightJoystickLeft CLIP_RESTORE
+bind L5+RightJoystickRight CLIP_SAVE
+bind L5+RightJoystickUp CSRJMP_VERT
+bind L5+RightJoystickDown TIME
 
