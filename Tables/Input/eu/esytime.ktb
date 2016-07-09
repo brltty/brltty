@@ -35,6 +35,8 @@ note + RightJoystickPress: the Enter key
 note + RightJoystick(left/right/up/down): the left/right/up/down arrow key
 
 bind L1+L5 HOME
+bind LeftJoystickPress+RightJoystickPress BACK
+
 bind L1 FWINLT
 bind L5 FWINRT
 
@@ -78,7 +80,7 @@ bind RightJoystickUp+RoutingKey1 CLIP_ADD
 bind RightJoystickRight+RoutingKey1 COPY_LINE
 bind RightJoystickDown+RoutingKey1 COPY_RECT
 
-bind L1+LeftJoystickPress BACK
+bind L1+LeftJoystickPress AUTOREPEAT
 bind L1+LeftJoystickLeft CHRLT
 bind L1+LeftJoystickRight CHRRT
 bind L1+LeftJoystickUp PRSEARCH
