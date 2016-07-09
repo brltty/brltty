@@ -559,14 +559,17 @@ test -n "${$2_root}" && {
 
    ifelse($2_find, [true], [dnl
       test "${$2_root}" = "yes" || {
-         $2_includes="${$2_root}/$5"
-         $2_libs="${$2_root}/$6 $7"
+         $2_includes="BRLTTY_WORDS_PREPEND([$5], [-I${$2_root}/])"
+         $2_libs="BRLTTY_WORDS_PREPEND([$6], [-L${$2_root}/]) BRLTTY_WORDS_PREPEND([$7], [-l])"
       }
    ])
 
    $4
 }
 ])
+
+AC_DEFUN([BRLTTY_WORDS_PREPEND], [dnl
+patsubst([$1], [\(\S+\)], [$2\1])])
 
 AC_DEFUN([BRLTTY_HAVE_PACKAGE], [dnl
 $1_package=""
