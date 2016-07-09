@@ -21,9 +21,9 @@ DRIVER_NAME = SpeechDispatcher
 DRIVER_COMMENT = text to speech server
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = 
-SPK_OBJS = @speech_libraries_sd@
+SPK_OBJS = $(SPEECHD_LIBS)
 include $(SRC_TOP)speech.mk
 
 speech.$O:
-	$(CC) $(SPK_CFLAGS) -I$(SPEECHD_ROOT)/include -c $(SRC_DIR)/speech.c
+	$(CC) $(SPK_CFLAGS) -I$(SPEECHD_INCLUDES) -c $(SRC_DIR)/speech.c
 

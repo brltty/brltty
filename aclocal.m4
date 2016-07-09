@@ -521,34 +521,52 @@ BRLTTY_ARG_WITH(
    [where the $1 package is installed],
    [$2_root], ["yes"]
 )
+
+$2_found=false
+m4_define([$2_find], ifelse(m4_eval($# > 4), 1, [true], [false]))
+ifelse($2_find, [true], [BRLTTY_HAVE_PACKAGE([$2], [$1], [$2_found=true]) ])
+
 if test "${$2_root}" = "no"
 then
    $2_root=""
 elif test "${$2_root}" = "yes"
 then
-   $2_root=""
-   roots="/usr /usr/local /usr/local/$1 /usr/local/$2 /opt/$1 /opt/$2 /mingw /mingw/$1 /mingw/$2"
-   for root in ${roots}
-   do
-      if test -f "${root}/$3"
+   "${$2_found}" || {
+      $2_root=""
+      roots="/usr /usr/local /usr/local/$1 /usr/local/$2 /opt/$1 /opt/$2 /mingw /mingw/$1 /mingw/$2"
+
+      for root in ${roots}
+      do
+         test -f "${root}/$3" && {
+            $2_root="${root}"
+            break
+         }
+      done
+
+      if test -z "${$2_root}"
       then
-         $2_root="${root}"
-         break
+         AC_MSG_WARN([$1 package not found: ${roots}])
       fi
-   done
-   if test -z "${$2_root}"
-   then
-      AC_MSG_WARN([$1 package not found: ${roots}])
-   fi
+   }
 fi
+
 AC_SUBST([$2_root])
 BRLTTY_SUMMARY_ITEM([$2-root], [$2_root])
-if test -n "${$2_root}"
-then
+
+test -n "${$2_root}" && {
    AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE_TRANSLATE([$2_root]), ["${$2_root}"],
                       [Define this to be a string containing the path to the root of the $1 package.])
+
+   ifelse($2_find, [true], [dnl
+      test "${$2_root}" = "yes" || {
+         $2_includes="${$2_root}/$5"
+         $2_libs="${$2_root}/$6 $7"
+      }
+   ])
+
    $4
-fi])
+}
+])
 
 AC_DEFUN([BRLTTY_HAVE_PACKAGE], [dnl
 $1_package=""

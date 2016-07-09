@@ -1737,8 +1737,8 @@ BRLTTY_ARG_DISABLE(
    ])
 
    BRLTTY_IF_PACKAGE([speech-dispatcher], [speechd], [include/libspeechd.h], [dnl
-      BRLTTY_SPEECH_DRIVER([sd], [SpeechDispatcher], [-L$(SPEECHD_ROOT)/lib -lspeechd])
-   ])
+      BRLTTY_SPEECH_DRIVER([sd], [SpeechDispatcher])
+   ], [include], [lib], [speechd])
 
    BRLTTY_IF_PACKAGE([Swift], [swift], [include/swift.h], [dnl
       BRLTTY_SPEECH_DRIVER([sw], [Swift], [-L$(SWIFT_ROOT)/lib -lswift -lm])
