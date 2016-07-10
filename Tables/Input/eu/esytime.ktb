@@ -40,9 +40,17 @@ bind LeftJoystickPress+RightJoystickPress BACK
 bind L1 FWINLT
 bind L5 FWINRT
 
-bind LeftJoystickUp CSRTRK
 bind LeftJoystickLeft LNUP
 bind LeftJoystickRight LNDN
+bind LeftJoystickUp CSRTRK
+bind LeftJoystickDown NOOP # internal: the Alt key
+bind LeftJoystickPress NOOP # internal: the Alt key pressed twice in a row
+
+bind RightJoystickLeft NOOP # internal: the Arrow Left key
+bind RightJoystickRight NOOP # internal: the Arrow Right key
+bind RightJoystickUp NOOP # internal: the Arrow Up key
+bind RightJoystickDown NOOP # internal: the Arrow Down key
+bind RightJoystickPress NOOP # internal: the Enter key
 
 bind LeftJoystickLeft+RightJoystickPress TOP
 bind LeftJoystickLeft+RightJoystickLeft PRPROMPT
@@ -63,10 +71,10 @@ bind LeftJoystickUp+RightJoystickUp SIXDOTS+on
 bind LeftJoystickUp+RightJoystickDown SIXDOTS+off
 
 bind LeftJoystickDown+RightJoystickPress INFO
-bind LeftJoystickDown+RightJoystickLeft NOOP # internal: braille functions off
-bind LeftJoystickDown+RightJoystickRight NOOP # internal: braille functions on
-bind LeftJoystickDown+RightJoystickUp NOOP # internal: internal USB
-bind LeftJoystickDown+RightJoystickDown NOOP # internal: external USB
+bind LeftJoystickDown+RightJoystickLeft NOOP # internal: disable braille functions
+bind LeftJoystickDown+RightJoystickRight NOOP # internal: enable braille functions
+bind LeftJoystickDown+RightJoystickUp NOOP # internal: switch to internal (Esytime) USB interface
+bind LeftJoystickDown+RightJoystickDown NOOP # internal: switch to external (PC) USB interface
 
 bind LeftJoystickPress+RoutingKey1 SETLEFT
 bind LeftJoystickLeft+RoutingKey1 PRDIFCHAR
