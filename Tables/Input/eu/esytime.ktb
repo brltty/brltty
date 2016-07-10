@@ -29,7 +29,6 @@ note + LeftJoystickDown: the Alt key
 note + LeftJoystickPress: the Alt key pressed twice in a row
 note + LeftJoystickDown + RightJoystick(Right/Left): enable/disable braille functions
 note + LeftJoystickDown + RightJoystick(Up/Down): switch to internal/external (Esytime/PC) USB interface
-note + LeftJoystickDown + (L1/L5): read without/with word wrap
 note + LeftJoystickDown + L1 + Escape: switch to single-hand braille keyboard 1
 note + LeftJoystickDown + Cap + Tab: switch to single-hand braille keyboard 2
 note + LeftJoystickDown + Insert + L5: switch to standard (two-hand) braille keyboard
