@@ -20,14 +20,16 @@ title EuroBraille Esytime
 
 include routing.kti
 
-note L1 is the key in front of the left joystick.
-note L5 is the key in front of the right joystick.
+note The four keys below the left joystick, from top to bottom, are:
+note * L1, Escape, Tab, Shift.
+note The four keys below the right joystick, from top to bottom, are:
+note * L5, Insert, Alt, Control.
 note Some key combinations have been reserved for internal use:
 note + LeftJoystickDown: the Alt key
 note + LeftJoystickPress: the Alt key pressed twice in a row
-note + LeftJoystickLeft + RightJoystick(Right/Left): enable/disable braille functions
+note + LeftJoystickDown + RightJoystick(Right/Left): enable/disable braille functions
 note + LeftJoystickDown + RightJoystick(Up/Down): switch to internal/external (Esytime/PC) USB interface
-note + LeftJoystickDown + (l1/l5): read without/with word wrap
+note + LeftJoystickDown + (L1/L5): read without/with word wrap
 note + LeftJoystickDown + L1 + Escape: switch to single-hand braille keyboard 1
 note + LeftJoystickDown + Cap + Tab: switch to single-hand braille keyboard 2
 note + LeftJoystickDown + Insert + L5: switch to standard (two-hand) braille keyboard
@@ -76,6 +78,11 @@ bind LeftJoystickDown+RightJoystickRight NOOP # internal: enable braille functio
 bind LeftJoystickDown+RightJoystickUp NOOP # internal: switch to internal (Esytime) USB interface
 bind LeftJoystickDown+RightJoystickDown NOOP # internal: switch to external (PC) USB interface
 
+bind LeftJoystickPress+RightJoystickLeft NOOP
+bind LeftJoystickPress+RightJoystickRight NOOP
+bind LeftJoystickPress+RightJoystickUp NOOP
+bind LeftJoystickPress+RightJoystickDown NOOP
+
 bind LeftJoystickPress+RoutingKey1 SETLEFT
 bind LeftJoystickLeft+RoutingKey1 PRDIFCHAR
 bind LeftJoystickRight+RoutingKey1 NXDIFCHAR
@@ -111,4 +118,11 @@ bind L5+RightJoystickLeft CLIP_RESTORE
 bind L5+RightJoystickRight CLIP_SAVE
 bind L5+RightJoystickUp FREEZE
 bind L5+RightJoystickDown TIME
+
+context menu
+bind LeftJoystickUp+RightJoystickUp MENU_PREV_ITEM
+bind LeftJoystickUp+RightJoystickDown MENU_NEXT_ITEM
+bind LeftJoystickUp+RightJoystickLeft MENU_PREV_SETTING
+bind LeftJoystickUp+RightJoystickRight MENU_NEXT_SETTING
+bind LeftJoystickUp+RightJoystickPress MENU_PREV_LEVEL
 
