@@ -33,7 +33,7 @@ note + LeftJoystickDown + L1 + Escape: switch to single-hand braille keyboard 1
 note + LeftJoystickDown + Shift + Tab: switch to single-hand braille keyboard 2
 note + LeftJoystickDown + Insert + L5: switch to standard (two-hand) braille keyboard
 note + RightJoystickPress: the Enter key
-note + RightJoystick(left/right/up/down): the left/right/up/down arrow key
+note + RightJoystick(left/right/up/down): the Arrow Left/Right/Up/Down key
 
 bind L1+L5 HOME
 bind LeftJoystickPress+RightJoystickPress BACK
@@ -94,7 +94,7 @@ bind RightJoystickUp+RoutingKey1 CLIP_ADD
 bind RightJoystickRight+RoutingKey1 COPY_LINE
 bind RightJoystickDown+RoutingKey1 COPY_RECT
 
-bind L1+LeftJoystickPress AUTOREPEAT
+bind L1+LeftJoystickPress TIME
 bind L1+LeftJoystickLeft CHRLT
 bind L1+LeftJoystickRight CHRRT
 bind L1+LeftJoystickUp PRSEARCH
@@ -116,12 +116,12 @@ bind L5+RightJoystickPress PASTE
 bind L5+RightJoystickLeft CLIP_RESTORE
 bind L5+RightJoystickRight CLIP_SAVE
 bind L5+RightJoystickUp FREEZE
-bind L5+RightJoystickDown TIME
+bind L5+RightJoystickDown AUTOREPEAT
 
 context menu
-bind LeftJoystickUp+RightJoystickUp MENU_PREV_ITEM
-bind LeftJoystickUp+RightJoystickDown MENU_NEXT_ITEM
-bind LeftJoystickUp+RightJoystickLeft MENU_PREV_SETTING
-bind LeftJoystickUp+RightJoystickRight MENU_NEXT_SETTING
-bind LeftJoystickUp+RightJoystickPress MENU_PREV_LEVEL
+bind L5+RightJoystickUp MENU_PREV_ITEM
+bind L5+RightJoystickDown MENU_NEXT_ITEM
+bind L5+RightJoystickLeft MENU_PREV_SETTING
+bind L5+RightJoystickRight MENU_NEXT_SETTING
+bind L5+RightJoystickPress MENU_PREV_LEVEL
 
