@@ -236,7 +236,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .disableEndpointReset = 1
     },
 
-    { /* Esytime */
+    { /* Esytime (firmware 1.03, 2014-03-31) */
       .vendor=0XC251, .product=0X1130,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=7, .outputEndpoint=0,
