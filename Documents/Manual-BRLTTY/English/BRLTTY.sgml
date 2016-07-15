@@ -2433,7 +2433,7 @@ The default name for this file is <tt>/etc/brltty.conf</tt>,
 although it may be overridden with the
 <ref id="options-configuration-file" name="-f"> command line option.
 It doesn't need to exist.
-A template for it can be found within the <tt/DOCS/ subdirectory.
+A template for it can be found within the <tt/Documents/ subdirectory.
 
 Blank lines are ignored.
 A comment begin with a number sign (<tt/&num;/),

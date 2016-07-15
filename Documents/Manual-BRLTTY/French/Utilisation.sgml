@@ -496,7 +496,7 @@ fichier est <tt>/etc/brltty.conf</tt>, même s'il peut être contourné
 par l'option en ligne de commande <ref id="options-configuration-file" name="-f">.
 Son existence n'est pas indispensable.
 Vous pouvez trouver un fichier type dans le sous-répertoire
-<tt>DOCS</tt>
+<tt>Documents</tt>
 
 Les lignes vides sont ignorées.
 Un commentaire commence par un signe nombre (<tt>&num;</tt>), et continue jusqu'à
