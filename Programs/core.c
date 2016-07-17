@@ -1164,6 +1164,8 @@ showDotPattern (unsigned char dots, unsigned char duration) {
 
 static void
 exitSessions (void *data) {
+  cancelDelayedCursorTrackingAlarm();
+
   if (ses) {
     popCommandEnvironment();
     ses = NULL;
