@@ -929,7 +929,7 @@ check-all: check-text-tables check-attributes-tables check-contraction-tables ch
 
 install:: install-programs install-tables $(INSTALL_DRIVERS) install-core-headers $(INSTALL_MESSAGES) install-manpages $(INSTALL_API)
 
-install-programs: brltty$X brltty-trtxt$X brltty-ttb$X brltty-atb$X brltty-ctb$X install-program-directory install-writable-directory
+install-programs: brltty$X brltty-trtxt$X brltty-ttb$X brltty-atb$X brltty-ctb$X brltty-ktb$X brltty-tune$X install-program-directory install-writable-directory
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-trtxt$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-ttb$X $(INSTALL_PROGRAM_DIRECTORY) 
