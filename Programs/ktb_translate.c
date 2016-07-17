@@ -68,22 +68,19 @@ cancelAutoreleaseAlarm (KeyTable *table) {
 
 static void
 setAutoreleaseAlarm (KeyTable *table) {
-  if (!prefs.autoreleaseTime || !table->pressedKeys.count) {
+  if (!table->autorelease.time || !table->pressedKeys.count) {
     cancelAutoreleaseAlarm(table);
+  } else if (table->autorelease.alarm) {
+    asyncResetAlarmIn(table->autorelease.alarm, table->autorelease.time);
   } else {
-    int time = 5000 << (prefs.autoreleaseTime - 1);
-
-    if (table->autorelease.alarm) {
-      asyncResetAlarmIn(table->autorelease.alarm, time);
-    } else {
-      asyncSetAlarmIn(&table->autorelease.alarm, time, handleKeyAutoreleaseAlarm, table);
-    }
+    asyncSetAlarmIn(&table->autorelease.alarm, table->autorelease.time,
+                    handleKeyAutoreleaseAlarm, table);
   }
 }
 
 void
-setKeyAutoreleaseTime (KeyTable *table, unsigned char seconds) {
-  table->autorelease.time = seconds;
+setKeyAutoreleaseTime (KeyTable *table, unsigned char setting) {
+  table->autorelease.time = setting? (5000 << (setting - 1)): 0;
   setAutoreleaseAlarm(table);
 }
 

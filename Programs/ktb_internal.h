@@ -163,7 +163,7 @@ struct KeyTableStruct {
 
   struct {
     AsyncHandle alarm;
-    unsigned char time;
+    int time;
   } autorelease;
 
   struct {
