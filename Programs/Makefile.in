@@ -955,6 +955,9 @@ install-attributes-tables: install-attributes-tables-directory
 
 install-contraction-tables: install-contraction-tables-directory
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(CONTRACTION_TABLES_SUBDIRECTORY)/*$(CONTRACTION_TABLE_EXTENSION) $(INSTALL_CONTRACTION_TABLES_DIRECTORY)
+	for table in latex-access; do \
+	$(INSTALL_SCRIPT) $(SRC_TOP)$(TBL_DIR)/$(CONTRACTION_TABLES_SUBDIRECTORY)/$$table$(CONTRACTION_TABLE_EXTENSION) $(INSTALL_CONTRACTION_TABLES_DIRECTORY); \
+	done
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(CONTRACTION_TABLES_SUBDIRECTORY)/*$(CONTRACTION_SUBTABLE_EXTENSION) $(INSTALL_CONTRACTION_TABLES_DIRECTORY)
 
 install-keyboard-tables: install-keyboard-tables-directory
