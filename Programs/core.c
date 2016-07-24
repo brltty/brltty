@@ -1188,6 +1188,11 @@ ASYNC_SIGNAL_HANDLER(handleProgramTerminationRequest) {
 
   programTerminationRequestTime = now;
 }
+
+#ifdef SIGCHLD
+ASYNC_SIGNAL_HANDLER(handleChildDeath) {
+}
+#endif /* SIGCHLD */
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */
 
 ProgramExitStatus
@@ -1227,6 +1232,10 @@ brlttyConstruct (int argc, char *argv[]) {
 #ifdef SIGINT
   asyncHandleSignal(SIGINT, handleProgramTerminationRequest, NULL);
 #endif /* SIGINT */
+
+#ifdef SIGCHLD
+  asyncHandleSignal(SIGCHLD, handleChildDeath, NULL);
+#endif /* SIGCHLD */
 #endif /* ASYNC_CAN_HANDLE_SIGNALS */
 
   interruptEnabledCount = 0;
