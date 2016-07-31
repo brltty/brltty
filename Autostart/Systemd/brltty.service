@@ -24,6 +24,8 @@ Documentation=http://brltty.com/
 
 DefaultDependencies=no
 Before=sysinit.target
+After=local-fs.target
+Requires=local-fs.target
 Requires=brltty@-etc-brltty.conf.service
 
 
