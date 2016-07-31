@@ -491,7 +491,7 @@ make
 
 %install
 make install install-documents install-messages
-make install-systemd install-udev UDEV_RULES_TYPE=nogeneric
+make install-systemd install-udev
 install -m 644 Documents/brltty.conf "${RPM_BUILD_ROOT}%{_sysconfdir}"
 %find_lang %{name}
 
