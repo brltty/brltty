@@ -493,6 +493,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'Q',
     .word = "quiet-if-no-braille",
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .setting.flag = &opt_quietIfNoBraille,
     .description = strtext("Do not autospeak when braille is not being used.")
   },

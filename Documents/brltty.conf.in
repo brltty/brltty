@@ -351,6 +351,11 @@
 #speech-driver	vv	# ViaVoice (text to speech engine)
 #speech-driver	xs	# ExternalSpeech (executes /usr/local/bin/externalspeech)
 
+# The quiet-if-no-braille directive fully disables the autospeak feature.
+# Screen content won't be automatically spoken when braille isn't being used.
+# (can be overridden with the -Q [--quiet-if-no-braille=] option)
+#quiet-if-no-braille	off	# [off,on]
+
 # The speech-input directive specifies the name of the file system object
 # (FIFO, named pipe, named socket, etc) which can be used by external
 # applications for text-to-speech conversion via BRLTTY's speech driver.
