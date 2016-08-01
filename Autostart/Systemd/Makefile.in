@@ -25,8 +25,9 @@ install-units-directory:
 	$(INSTALL_DIRECTORY) $(SYSTEMD_UNITS_DIRECTORY)
 
 install-units: install-units-directory
-	$(INSTALL_DATA) $(SRC_DIR)/$(PACKAGE_TARNAME).service $(SYSTEMD_UNITS_DIRECTORY)
-	$(INSTALL_DATA) $(BLD_DIR)/$(PACKAGE_TARNAME)@.service $(SYSTEMD_UNITS_DIRECTORY)
+	for extension in service target; do \
+	$(INSTALL_DATA) $(SRC_DIR)/*.$$extension $(SYSTEMD_UNITS_DIRECTORY); \
+	done
 
 install-scripts-directory:
 	$(INSTALL_DIRECTORY) $(SYSTEMD_SCRIPTS_DIRECTORY)
