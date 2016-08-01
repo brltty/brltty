@@ -17,39 +17,9 @@
 ###############################################################################
 
 [Unit]
+Description=BRLTTY Configuration File: %I
+Requires=brltty@-etc-brltty_%i.conf.service
 
-Description=BRLTTY Instance: %I
-Documentation=man:brltty(1)
-Documentation=@PACKAGE_URL@
-
-DefaultDependencies=no
-After=local-fs.target
-Before=sysinit.target
-RequiresMountsFor=@UPDATABLE_DIRECTORY@
-
-StopWhenUnneeded=true
-RefuseManualStart=true
-RefuseManualStop=true
-
-
-[Service]
-
-Environment="BRLTTY_SYSTEMD_INSTANCE=%I"
-ExecStart=/sbin/brltty-systemd-wrapper
-
-Type=@SYSTEMD_SERVICE_TYPE@
-Environment="BRLTTY_EXECUTABLE_ARGUMENTS=@SYSTEMD_SERVICE_ARGUMENTS@"
-
-PIDFile=%t/brltty-%i.pid
-Environment="BRLTTY_PID_FILE=%t/brltty-%i.pid"
-
-TimeoutStartSec=5
-TimeoutStopSec=10
-
-Restart=always
-RestartSec=30
-
-Nice=-10
-OOMScoreAdjust=-900
-
+[Install]
+WantedBy=sysinit.target
 

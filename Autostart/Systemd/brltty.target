@@ -17,25 +17,9 @@
 ###############################################################################
 
 [Unit]
-
 Description=Default BRLTTY Instance
-Documentation=man:brltty(1)
-Documentation=http://brltty.com/
-
-DefaultDependencies=no
-After=local-fs.target
-Before=sysinit.target
 Requires=brltty@-etc-brltty.conf.service
-
-
-[Service]
-
-Type=oneshot
-RemainAfterExit=true
-ExecStart=/bin/true
-
 
 [Install]
 WantedBy=sysinit.target
-
 
