@@ -27,6 +27,7 @@ After=local-fs.target
 Before=sysinit.target
 RequiresMountsFor=@UPDATABLE_DIRECTORY@
 
+ConditionPathExists=%I
 StopWhenUnneeded=true
 RefuseManualStart=true
 RefuseManualStop=true
@@ -46,7 +47,7 @@ Environment="BRLTTY_PID_FILE=%t/brltty-%i.pid"
 TimeoutStartSec=5
 TimeoutStopSec=10
 
-Restart=always
+Restart=on-failure
 RestartSec=30
 
 Nice=-10

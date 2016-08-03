@@ -17,7 +17,7 @@
 ###############################################################################
 
 [Unit]
-Description=BRLTTY Configuration File: %I
+Description=BRLTTY (using configuration file /etc/brltty_%I.conf)
 Requires=brltty@-etc-brltty_%i.conf.service
 
 [Install]
