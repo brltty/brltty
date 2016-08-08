@@ -1191,8 +1191,6 @@ static DATA_OPERANDS_PROCESSOR(processKeyTableOperands) {
 
 void
 resetLongPressData (KeyTable *table) {
-  table->release.command = BRL_CMD_NOOP;
-
   if (table->longPress.alarm) {
     asyncCancelRequest(table->longPress.alarm);
     table->longPress.alarm = NULL;
@@ -1210,8 +1208,9 @@ resetLongPressData (KeyTable *table) {
 void
 resetKeyTable (KeyTable *table) {
   resetLongPressData(table);
-  table->context.current = table->context.next = table->context.persistent = KTB_CTX_DEFAULT;
+  table->release.command = BRL_CMD_NOOP;
   table->pressedKeys.count = 0;
+  table->context.current = table->context.next = table->context.persistent = KTB_CTX_DEFAULT;
 }
 
 static int

@@ -468,14 +468,10 @@ processKeyEvent (
   }
 
   if (hotkey) {
+    const BoundCommand *cmd = press? &hotkey->pressCommand: &hotkey->releaseCommand;
+
+    if (cmd->value != BRL_CMD_NOOP) processCommand(table, (command = cmd->value));
     state = KTS_HOTKEY;
-    resetLongPressData(table);
-
-    {
-      const BoundCommand *cmd = press? &hotkey->pressCommand: &hotkey->releaseCommand;
-
-      if (cmd->value != BRL_CMD_NOOP) processCommand(table, (command = cmd->value));
-    }
   } else {
     int isImmediate = 1;
     unsigned int keyPosition;
@@ -525,6 +521,7 @@ processKeyEvent (
         int secondaryCommand = BRL_CMD_NOOP;
 
         resetLongPressData(table);
+        table->release.command = BRL_CMD_NOOP;
 
         if (binding) {
           addCommandArguments(table, &command, binding->primaryCommand.entry, binding);
@@ -564,14 +561,16 @@ processKeyEvent (
         processCommand(table, command);
       }
     } else {
-      int *cmd = &table->release.command;
-
-      if (*cmd != BRL_CMD_NOOP) {
-        processCommand(table, (command = *cmd));
-        *cmd = BRL_CMD_NOOP;
-      }
-
       resetLongPressData(table);
+
+      if (1 || (table->pressedKeys.count == 0)) {
+        int *cmd = &table->release.command;
+
+        if (*cmd != BRL_CMD_NOOP) {
+          processCommand(table, (command = *cmd));
+          *cmd = BRL_CMD_NOOP;
+        }
+      }
     }
 
     setAutoreleaseAlarm(table);
