@@ -48,6 +48,8 @@ public class CoreWrapper {
   public static native boolean restartSpeechDriver ();
   public static native boolean changeSpeechDriver (String driver);
 
+  public static native boolean setEnvironmentVariable (String name, String value);
+
   public static boolean changeLogCategories (Set<String> categories) {
     StringBuffer sb = new StringBuffer();
 
@@ -110,8 +112,35 @@ public class CoreWrapper {
     System.exit(run(arguments, Integer.MAX_VALUE));
   }
 
+  private static void setOverrideDirectories () {
+    String[] names = new String[] {
+      "EXTERNAL_STORAGE",
+      "SECONDARY_STORAGE"
+    };
+
+    StringBuilder sb = new StringBuilder();
+    boolean first = true;
+
+    for (String name : names) {
+      String value = System.getenv(name);
+
+      if ((value != null) && (!value.isEmpty())) {
+        if (first) {
+          first = false;
+        } else {
+          sb.append(':');
+        }
+
+        sb.append(value);
+      }
+    }
+
+    setEnvironmentVariable("XDG_CONFIG_DIRS", sb.toString());
+  }
+
   static {
     System.loadLibrary("brltty_core");
     System.loadLibrary("brltty_jni");
+    setOverrideDirectories();
   }
 }

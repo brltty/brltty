@@ -21,6 +21,8 @@
 #include <jni.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
+#include <errno.h>
 #include <dlfcn.h>
 
 #include "embed.h"
@@ -438,6 +440,28 @@ JAVA_METHOD (
   jstring parameters
 ) {
   return changeStringValue(env, changeScreenParameters_p, parameters);
+}
+
+JAVA_METHOD (
+  org_a11y_brltty_core_CoreWrapper, setEnvironmentVariable, jboolean,
+  jstring jName, jstring jValue
+) {
+  jboolean isCopy;
+  const char *cName = (*env)->GetStringUTFChars(env, jName, &isCopy);
+  const char *cValue = (*env)->GetStringUTFChars(env, jValue, &isCopy);
+
+  int cResult = setenv(cName, cValue, 1) != -1;
+  jboolean jResult = cResult? JNI_TRUE: JNI_FALSE;
+
+  if (cResult) {
+    LOG("environment variable set: %s: %s", cName, cValue);
+  } else {
+    LOG("environment variable not set: %s: %s", cName, strerror(errno));
+  }
+
+  (*env)->ReleaseStringUTFChars(env, jName, cName);
+  (*env)->ReleaseStringUTFChars(env, jValue, cValue);
+  return jResult;
 }
 
 JNIEXPORT jint
