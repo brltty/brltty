@@ -412,7 +412,7 @@ static void writeKey(FileDescriptor fd, brlapi_keyCode_t key) {
   uint32_t buf[2];
   buf[0] = htonl(key >> 32);
   buf[1] = htonl(key & 0xffffffff);
-  logMessage(LOG_CATEGORY(SERVER_EVENTS), "writing key %08"PRIx32" %08"PRIx32,buf[0],buf[1]);
+  logMessage(LOG_CATEGORY(SERVER_EVENTS), "writing key %08"PRIx32" %08"PRIx32" to fd %"PRIfd,buf[0],buf[1],fd);
   brlapiserver_writePacket(fd,BRLAPI_PACKET_KEY,&buf,sizeof(buf));
 }
 
@@ -913,7 +913,7 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
   __addConnection(c,tty->connections);
   unlockMutex(&apiConnectionsMutex);
   writeAck(c->fd);
-  logMessage(LOG_CATEGORY(SERVER_EVENTS), "taking control of tty %#010x (how=%d)",tty->number,how);
+  logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" taking control of tty %#010x (how=%d)",c->fd,tty->number,how);
   return 0;
 }
 
@@ -923,7 +923,7 @@ static int handleSetFocus(Connection *c, brlapi_packetType_t type, brlapi_packet
   CHECKEXC(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   CHECKEXC(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
   c->tty->focus = ntohl(ints[0]);
-  logMessage(LOG_CATEGORY(SERVER_EVENTS), "focus on window %#010x",c->tty->focus);
+  logMessage(LOG_CATEGORY(SERVER_EVENTS), "focus on window %#010x from fd%"PRIfd,c->tty->focus,c->fd);
   return 0;
 }
 
@@ -932,7 +932,7 @@ static int handleSetFocus(Connection *c, brlapi_packetType_t type, brlapi_packet
 static void doLeaveTty(Connection *c)
 {
   Tty *tty = c->tty;
-  logMessage(LOG_CATEGORY(SERVER_EVENTS), "releasing tty %#010x",tty->number);
+  logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd"releasing tty %#010x",c->fd,tty->number);
   c->tty = NULL;
   lockMutex(&apiConnectionsMutex);
   __removeConnection(c);
@@ -964,7 +964,7 @@ static int handleKeyRanges(Connection *c, brlapi_packetType_t type, brlapi_packe
   for (i=0; i<size/(2*sizeof(brlapi_keyCode_t)); i++) {
     x = ((brlapi_keyCode_t)ntohl(ints[i][0]) << 32) | ntohl(ints[i][1]);
     y = ((brlapi_keyCode_t)ntohl(ints[i][2]) << 32) | ntohl(ints[i][3]);
-    logMessage(LOG_CATEGORY(SERVER_EVENTS), "range: [%016"BRLAPI_PRIxKEYCODE"..%016"BRLAPI_PRIxKEYCODE"]",x,y);
+    logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" range: [%016"BRLAPI_PRIxKEYCODE"..%016"BRLAPI_PRIxKEYCODE"]",c->fd,x,y);
     if (type==BRLAPI_PACKET_IGNOREKEYRANGES) res = removeKeyrange(x,y,&c->acceptedKeys);
     else res = addKeyrange(x,y,&c->acceptedKeys);
     if (res==-1) {
@@ -1023,7 +1023,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
       BRLAPI_ERROR_INVALID_PARAMETER, "invalid region"
     );
   } else {
-    logMessage(LOG_CATEGORY(SERVER_EVENTS), "warning: client uses deprecated regionBegin=0 and regionSize = 0");
+    logMessage(LOG_CATEGORY(SERVER_EVENTS), "warning: fd %"PRIfd" uses deprecated regionBegin=0 and regionSize = 0",c->fd);
     rbeg = 1;
     rsiz = displaySize;
   }
@@ -1083,7 +1083,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
       wchar_t textBuf[rsiz];
       char *in = (char *) text, *out = (char *) textBuf;
       size_t sin = textLen, sout = sizeof(textBuf), res;
-      logMessage(LOG_CATEGORY(SERVER_EVENTS), "charset %s", charset);
+      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" charset %s",c->fd,charset);
       CHECKEXC((conv = iconv_open(getWcharCharset(),charset)) != (iconv_t)(-1), BRLAPI_ERROR_INVALID_PACKET, "invalid charset");
       res = iconv(conv,&in,&sin,&out,&sout);
       iconv_close(conv);
@@ -1158,7 +1158,7 @@ static int handleEnterRawMode(Connection *c, brlapi_packetType_t type, brlapi_pa
 static int handleLeaveRawMode(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
   CHECKERR(c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of raw mode");
-  logMessage(LOG_CATEGORY(SERVER_EVENTS), "going out of raw mode");
+  logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" going out of raw mode",c->fd);
   lockMutex(&apiRawMutex);
   c->raw = 0;
   rawConnection = NULL;
@@ -2706,7 +2706,7 @@ static int api__handleKeyEvent(brlapi_keyCode_t clientCode) {
   }
   /* somebody gets the raw code */
   if ((c = whoGetsKey(&ttys,clientCode,BRL_KEYCODES))) {
-    logMessage(LOG_CATEGORY(SERVER_EVENTS), "transmitting accepted key %016"BRLAPI_PRIxKEYCODE, clientCode);
+    logMessage(LOG_CATEGORY(SERVER_EVENTS), "transmitting accepted key %016"BRLAPI_PRIxKEYCODE" to fd %"PRIfd,clientCode,c->fd);
     writeKey(c->fd,clientCode);
     return 1;
   }
@@ -2766,7 +2766,7 @@ static int api__handleCommand(int command) {
     }
 
     if (c) {
-      logMessage(LOG_CATEGORY(SERVER_EVENTS), "transmitting accepted command %lx as client code %016"BRLAPI_PRIxKEYCODE,(unsigned long)command, code);
+      logMessage(LOG_CATEGORY(SERVER_EVENTS), "transmitting accepted command %lx as client code %016"BRLAPI_PRIxKEYCODE" to fd %"PRIfd,(unsigned long)command,code,c->fd);
       writeKey(c->fd, code);
       return 1;
     }
