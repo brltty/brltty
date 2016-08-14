@@ -36,9 +36,6 @@ bind Space+F6 SKPBLNKWINS
 bind Space+F7 ATTRVIS
 bind Space+F8 CSRVIS
 
-context KEY_FUNCTION
-bind RoutingKey KEY_FUNCTION
-
 context SWITCHVT
 bind RoutingKey SWITCHVT
 

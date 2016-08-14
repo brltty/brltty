@@ -16,8 +16,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-bind F4 HOME
-bind F1+F4 BACK
+bind F4 RETURN
+bind F1+F4 CONTEXT+KEY_FUNCTION
 bind F2+F3 CSRJMP_VERT
 
 bind F2 LNUP

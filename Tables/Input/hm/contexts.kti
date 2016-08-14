@@ -38,3 +38,6 @@ bind !RoutingKey SETLEFT
 context DESCCHAR
 bind !RoutingKey DESCCHAR
 
+context KEY_FUNCTION
+bind RoutingKey KEY_FUNCTION
+
