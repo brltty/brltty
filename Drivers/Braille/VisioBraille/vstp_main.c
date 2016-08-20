@@ -99,7 +99,7 @@ static void Parse(char *filename) {
    } else if (!strcmp(s,"vbs_ext")) {
     visiobases_ext = (char *) malloc(5);
     strncpy(visiobases_ext,c,4);
-    visiobases_ext[5]=0;
+    visiobases_ext[4]=0;
    } else if (!strcmp(s,"vbs_dir")) {
     visiobases_dir = (char *) malloc(strlen(c)+1);
     strcpy(visiobases_dir,c);
