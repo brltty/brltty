@@ -41,6 +41,10 @@ capabilities. The required permissions are as follows:
    This permission is required so that BRLTTY can listen on a TCP/IP port for
    BrlAPI client connection requests.
 
+``READ_EXTERNAL_STORAGE``
+   This permission is required so that BRLTTY can read customized data files
+   from your SD card.
+
 Quick Start
 -----------
 
