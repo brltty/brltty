@@ -538,6 +538,7 @@ then
       do
          test -f "${root}/$3" && {
             $2_root="${root}"
+            AC_MSG_NOTICE([$1 root: ${$2_root}])
             break
          }
       done
