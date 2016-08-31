@@ -62,9 +62,9 @@ API_LIBS = -L$(BLD_TOP)$(PGM_DIR) -lbrlapi
 INSTALL_ROOT = @install_root@
 EXECUTE_ROOT = @execute_root@
 
-XSV_PACKAGE = @xsv_package@
-XSV_INCLUDES = @xsv_includes@
-XSV_LIBS = @xsv_libs@
+X11_PACKAGE = @x11_package@
+X11_INCLUDES = @x11_includes@
+X11_LIBS = @x11_libs@
 
 XEXT_PACKAGE = @xext_package@
 XEXT_INCLUDES = @xext_includes@

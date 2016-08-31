@@ -139,8 +139,7 @@ test -z "${$1_package}" && {
    test -n "${packages}" && {
       for package in ${packages}
       do
-         BRLTTY_HAVE_PACKAGE([$1], ["${package}"])
-         test -n "${$1_package}" && break
+         BRLTTY_HAVE_PACKAGE([$1], [${package}], [break], [])
 
          ifelse(len([$5]), 0, [], [dnl
             case "${package}"
@@ -524,7 +523,7 @@ BRLTTY_ARG_WITH(
 
 $2_found=false
 m4_define([$2_find], ifelse(m4_eval($# > 4), 1, [true], [false]))
-ifelse($2_find, [true], [BRLTTY_HAVE_PACKAGE([$2], [$1], [$2_found=true]) ])
+ifelse($2_find, [true], [BRLTTY_HAVE_PACKAGE([$2], [$1], [$2_found=true], [])])
 
 if test "${$2_root}" = "no"
 then
@@ -586,6 +585,10 @@ do
       break
    }
 done
+
+test -n "${$1_package}" || {
+   ifelse([$#], 4, [:], AC_MSG_WARN([$1 support not available]))
+}
 
 AC_SUBST([$1_package])
 AC_SUBST([$1_includes])

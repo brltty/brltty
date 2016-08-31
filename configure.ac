@@ -635,8 +635,9 @@ BRLTTY_ARG_DISABLE(
    [support for the Polkit authorization manager],
    [],
 [dnl
-   BRLTTY_HAVE_PACKAGE([polkit], [polkit-gobject-1],
-   AC_DEFINE(USE_POLKIT, 1, [if the Polkit authorization manager should be used]))
+   BRLTTY_HAVE_PACKAGE([polkit], [polkit-gobject-1], [dnl
+      AC_DEFINE(USE_POLKIT, 1, [if the Polkit authorization manager should be used])
+   ])
 ])
 
 BRLTTY_ARG_DISABLE(
@@ -736,7 +737,7 @@ BRLTTY_ARG_DISABLE(
    [support for X11],
    [],
 [dnl
-   BRLTTY_HAVE_PACKAGE([xsv], [x11], [dnl
+   BRLTTY_HAVE_PACKAGE([x11], [x11], [dnl
       all_xbrlapi="all-xbrlapi"
       install_xbrlapi="install-xbrlapi"
 
@@ -757,10 +758,10 @@ BRLTTY_ARG_DISABLE(
          xtk_libs="${xt_libs} ${xtk_libs}"
 
          brltty_cppflags_save="${CPPFLAGS}"
-         CPPFLAGS="${CPPFLAGS} ${xsv_includes}"
+         CPPFLAGS="${CPPFLAGS} ${x11_includes}"
 
          brltty_libs_save="${LIBS}"
-         LIBS="${xtk_libs} ${xsv_libs} ${LIBS}"
+         LIBS="${xtk_libs} ${x11_libs} ${LIBS}"
 
          BRLTTY_PACKAGE_CHOOSE([gui_toolkit],
             [Xaw X11/Xaw/Form.h X11/Xaw/Paned.h X11/Xaw/Label.h X11/Xaw/Command.h X11/Xaw/Repeater.h],
@@ -769,7 +770,7 @@ BRLTTY_ARG_DISABLE(
             [XawPlus X11/XawPlus/Form.h X11/XawPlus/Paned.h X11/XawPlus/Label.h X11/XawPlus/Command.h X11/XawPlus/Repeater.h],
             [Xm Xm/Xm.h Xm/Form.h Xm/PanedW.h Xm/Label.h Xm/PushB.h])
 
-         xtk_libs="${LIBS%${xsv_libs} ${brltty_libs_save}}"
+         xtk_libs="${LIBS%${x11_libs} ${brltty_libs_save}}"
 
          CPPFLAGS="${brltty_cppflags_save}"
          LIBS="${brltty_libs_save}"
@@ -1494,7 +1495,7 @@ BRLTTY_BRAILLE_DRIVER([vo], [Voyager])
 BRLTTY_BRAILLE_DRIVER([vr], [Virtual])
 BRLTTY_BRAILLE_DRIVER([vs], [VisioBraille])
 test -n "${gui_toolkit_package}" && {
-   BRLTTY_BRAILLE_DRIVER([xw], [XWindow], [$(XTK_LIBS) $(XSV_LIBS)])
+   BRLTTY_BRAILLE_DRIVER([xw], [XWindow], [$(XTK_LIBS) $(X11_LIBS)])
 }
 case "${host_os}"
 in
@@ -1800,7 +1801,7 @@ then
    BRLTTY_HAVE_PACKAGE([cspi], [cspi-1.0], [dnl
       AC_CHECK_HEADER([X11/keysym.h], [dnl
          AC_CHECK_HEADER([X11/Xlib.h], [dnl
-            BRLTTY_SCREEN_DRIVER([as], [AtSpi], [$(XSV_LIBS) $(CSPI_LIBS)])
+            BRLTTY_SCREEN_DRIVER([as], [AtSpi], [$(X11_LIBS) $(CSPI_LIBS)])
          ])
       ])
    ])
