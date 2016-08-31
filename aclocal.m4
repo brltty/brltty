@@ -579,8 +579,14 @@ for package_specification in $2
 do
    ${PKG_CONFIG} --exists "${package_specification}" && {
       $1_package="${package_specification%% *}"
+      AC_MSG_NOTICE([$1 package: ${$1_package}])
+
       $1_includes=`${PKG_CONFIG} --cflags-only-I "${$1_package}"`
+      AC_MSG_NOTICE([$1 includes: ${$1_includes}])
+
       $1_libs=`${PKG_CONFIG} ${pkgconfig_flags_libs} "${$1_package}"`
+      AC_MSG_NOTICE([$1 libs: ${$1_libs}])
+
       $3
       break
    }
