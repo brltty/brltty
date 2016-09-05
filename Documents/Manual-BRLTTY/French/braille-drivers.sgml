@@ -6,6 +6,7 @@ Alva
   |Satellite (5nn)@
   |Braille System 40@
   |Braille Controller 640/680@
+  |Easy Link 12@
 B2G@
 Baum
   |BrailleConnect 12/24/32/40/64/80@
@@ -28,6 +29,11 @@ BrailComm
   |III@
 BrailleLite
   |18/40/M20/M40@
+BrailleMemo
+  |Pocket (16)@
+  |Smart (16)@
+  |32@
+  |40@
 BrailleNote
   |18/32@
   |Apex@
@@ -58,12 +64,13 @@ HandyTech
   |Active Braille@
   |Active Star 40@
   |Actilino@
+  |Basic Braille 16/20/32/40/48/64/80@
+  |Braillino@
   |Braille Wave@
   |Easy Braille@
   |Braille Star 40/80@
   |Connect Braille 40@
   |Bookworm@
-  |Braillino@
 Hedo
   |ProfiLine@
   |MobilLine@
@@ -123,12 +130,12 @@ TTY
 VideoBraille
   |40@
 Virtual
-  |TCP/Unix, client/serveur@
+  |TCP/Unix, client/server@
 VisioBraille
   |20/40@
 Voyager
   |44/70@
-  |Part232 (adaptateur série)@
+  |Part232 (serial adapter)@
   |BraillePen/EasyLink@
 XWindow
   |X11@
