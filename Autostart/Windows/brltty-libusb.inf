@@ -337,6 +337,9 @@ ServiceBinary  = %12%\libusb0.sys
 ; Device: 1FE4:0055
 "LibUSB-Win32: HandyTech [Connect Braille 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0055
 
+; Device: 1FE4:0061
+"LibUSB-Win32: HandyTech [Actilino]"=LIBUSB_DEV, USB\VID_1FE4&PID_0061
+
 ; Device: 1FE4:0064
 "LibUSB-Win32: HandyTech [Active Star 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0064
 
@@ -413,7 +416,7 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUSB-Win32: EuroBraille [reserved]"=LIBUSB_DEV, USB\VID_C251&PID_112F
 
 ; Device: C251:1130
-"LibUSB-Win32: EuroBraille [Esytime]"=LIBUSB_DEV, USB\VID_C251&PID_1130
+"LibUSB-Win32: EuroBraille [Esytime (firmware 1.03, 2014-03-31)], EuroBraille [Esytime]"=LIBUSB_DEV, USB\VID_C251&PID_1130
 
 ; Device: C251:1131
 "LibUSB-Win32: EuroBraille [reserved]"=LIBUSB_DEV, USB\VID_C251&PID_1131
@@ -642,6 +645,9 @@ ServiceBinary  = %12%\libusb0.sys
 ; Device: 1FE4:0055
 "LibUSB-Win32: HandyTech [Connect Braille 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0055
 
+; Device: 1FE4:0061
+"LibUSB-Win32: HandyTech [Actilino]"=LIBUSB_DEV, USB\VID_1FE4&PID_0061
+
 ; Device: 1FE4:0064
 "LibUSB-Win32: HandyTech [Active Star 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0064
 
@@ -718,7 +724,7 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUSB-Win32: EuroBraille [reserved]"=LIBUSB_DEV, USB\VID_C251&PID_112F
 
 ; Device: C251:1130
-"LibUSB-Win32: EuroBraille [Esytime]"=LIBUSB_DEV, USB\VID_C251&PID_1130
+"LibUSB-Win32: EuroBraille [Esytime (firmware 1.03, 2014-03-31)], EuroBraille [Esytime]"=LIBUSB_DEV, USB\VID_C251&PID_1130
 
 ; Device: C251:1131
 "LibUSB-Win32: EuroBraille [reserved]"=LIBUSB_DEV, USB\VID_C251&PID_1131
@@ -947,6 +953,9 @@ ServiceBinary  = %12%\libusb0.sys
 ; Device: 1FE4:0055
 "LibUSB-Win32: HandyTech [Connect Braille 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0055
 
+; Device: 1FE4:0061
+"LibUSB-Win32: HandyTech [Actilino]"=LIBUSB_DEV, USB\VID_1FE4&PID_0061
+
 ; Device: 1FE4:0064
 "LibUSB-Win32: HandyTech [Active Star 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0064
 
@@ -1023,7 +1032,7 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUSB-Win32: EuroBraille [reserved]"=LIBUSB_DEV, USB\VID_C251&PID_112F
 
 ; Device: C251:1130
-"LibUSB-Win32: EuroBraille [Esytime]"=LIBUSB_DEV, USB\VID_C251&PID_1130
+"LibUSB-Win32: EuroBraille [Esytime (firmware 1.03, 2014-03-31)], EuroBraille [Esytime]"=LIBUSB_DEV, USB\VID_C251&PID_1130
 
 ; Device: C251:1131
 "LibUSB-Win32: EuroBraille [reserved]"=LIBUSB_DEV, USB\VID_C251&PID_1131

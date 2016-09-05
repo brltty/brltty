@@ -30,6 +30,7 @@ typedef enum {
   HT_MODEL_EasyBraille         = 0X44,
   HT_MODEL_ActiveBraille       = 0X54,
   HT_MODEL_ConnectBraille40    = 0X55,
+  HT_MODEL_Actilino            = 0X61,
   HT_MODEL_ActiveStar40        = 0X64,
   HT_MODEL_BasicBraille16      = 0X81,
   HT_MODEL_BasicBraille20      = 0X82,
@@ -194,6 +195,13 @@ typedef enum {
 
   /* Braille star keys */
   HT_KEY_SpaceRight = 0X18,
+
+  /* Actilino keys */
+  HT_KEY_JoystickLeft       = 0X74,
+  HT_KEY_JoystickRight      = 0X75,
+  HT_KEY_JoystickUp         = 0X76,
+  HT_KEY_JoystickDown       = 0X77,
+  HT_KEY_JoystickAction     = 0X78,
 
   /* ranges and flags */
   HT_KEY_ROUTING = 0X20,

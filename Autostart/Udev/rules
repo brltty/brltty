@@ -317,6 +317,10 @@ ENV{PRODUCT}=="1fe4/54/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run
 # HandyTech [Connect Braille 40]
 ENV{PRODUCT}=="1fe4/55/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
 
+# Device: 1FE4:0061
+# HandyTech [Actilino]
+ENV{PRODUCT}=="1fe4/61/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
+
 # Device: 1FE4:0064
 # HandyTech [Active Star 40]
 ENV{PRODUCT}=="1fe4/64/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
@@ -418,6 +422,7 @@ ENV{PRODUCT}=="c251/112e/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_r
 ENV{PRODUCT}=="c251/112f/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_run"
 
 # Device: C251:1130
+# EuroBraille [Esytime (firmware 1.03, 2014-03-31)]
 # EuroBraille [Esytime]
 ENV{PRODUCT}=="c251/1130/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_run"
 

@@ -87,6 +87,15 @@ BEGIN_KEY_NAME_TABLE(rockers)
   KEY_NAME_ENTRY(HT_KEY_Down, "RightRockerBottom"),
 END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(joystick)
+  KEY_NAME_ENTRY(HT_KEY_JoystickLeft, "Left"),
+  KEY_NAME_ENTRY(HT_KEY_JoystickRight, "Right"),
+  KEY_NAME_ENTRY(HT_KEY_JoystickUp, "Up"),
+  KEY_NAME_ENTRY(HT_KEY_JoystickDown, "Down"),
+
+  KEY_NAME_ENTRY(HT_KEY_JoystickAction, "Action"),
+END_KEY_NAME_TABLE
+
 BEGIN_KEY_NAME_TABLE(modular)
   KEY_NAME_ENTRY(HT_KEY_Up, "Left"),
   KEY_NAME_ENTRY(HT_KEY_Down, "Right"),
@@ -218,6 +227,14 @@ END_KEY_NAME_TABLE
 BEGIN_KEY_NAME_TABLES(bb)
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(basicBraille),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(alo)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(rockers),
+  KEY_NAME_TABLE(brailleStar),
+  KEY_NAME_TABLE(joystick),
 END_KEY_NAME_TABLES
 
 typedef enum {
@@ -447,6 +464,19 @@ static const ModelEntry modelTable[] = {
   HT_BASIC_BRAILLE(80),
   HT_BASIC_BRAILLE(160),
 #undef HT_BASIC_BRAILLE
+
+  { .identifier = HT_MODEL_Actilino,
+    .name = "Actilino",
+    .textCells = 16,
+    .statusCells = 0,
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(as40),
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_Evolution,
+    .setFirmness = setFirmness,
+    .setSensitivity = setSensitivity_ActiveBraille,
+    .hasATC = 1,
+    .hasTime = 1
+  },
 
   { .identifier = HT_MODEL_ActiveStar40,
     .name = "Active Star 40",
@@ -1198,6 +1228,13 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
     { /* Basic Braille 160 */
       .vendor=0X1FE4, .product=0X008B,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    },
+
+    { /* Actilino */
+      .vendor=0X1FE4, .product=0X0061,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .data=&usbOperations3

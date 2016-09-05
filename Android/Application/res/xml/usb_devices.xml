@@ -295,6 +295,10 @@
   <!-- HandyTech [Connect Braille 40] -->
   <usb-device vendor-id="8164" product-id="85" />
 
+  <!-- Device: 1FE4:0061 -->
+  <!-- HandyTech [Actilino] -->
+  <usb-device vendor-id="8164" product-id="97" />
+
   <!-- Device: 1FE4:0064 -->
   <!-- HandyTech [Active Star 40] -->
   <usb-device vendor-id="8164" product-id="100" />
@@ -396,6 +400,7 @@
   <usb-device vendor-id="49745" product-id="4399" />
 
   <!-- Device: C251:1130 -->
+  <!-- EuroBraille [Esytime (firmware 1.03, 2014-03-31)] -->
   <!-- EuroBraille [Esytime] -->
   <usb-device vendor-id="49745" product-id="4400" />
 

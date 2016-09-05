@@ -21,6 +21,7 @@
 #include "bluetooth_internal.h"
 
 #define BLUETOOTH_NAME_DRIVERS(name, ...) static const char *const bluetoothNameDrivers_##name[] = {__VA_ARGS__, NULL}
+BLUETOOTH_NAME_DRIVERS(Actilino, "ht");
 BLUETOOTH_NAME_DRIVERS(ActiveBraille, "ht");
 BLUETOOTH_NAME_DRIVERS(AlvaBC, "al");
 BLUETOOTH_NAME_DRIVERS(BasicBraille, "ht");
@@ -52,6 +53,10 @@ BLUETOOTH_NAME_DRIVERS(VarioConnect, "bm");
 BLUETOOTH_NAME_DRIVERS(VarioUltra, "bm");
 
 const BluetoothNameEntry bluetoothNameTable[] = {
+  { .namePrefix = "Actilino ALO",
+    .driverCodes = bluetoothNameDrivers_Actilino
+  },
+
   { .namePrefix = "Active Braille",
     .driverCodes = bluetoothNameDrivers_ActiveBraille
   },

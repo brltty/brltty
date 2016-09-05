@@ -310,6 +310,10 @@ brltty 0x0003 0x1fe4 0x0054
 # HandyTech [Connect Braille 40]
 brltty 0x0003 0x1fe4 0x0055
 
+# Device: 1FE4:0061
+# HandyTech [Actilino]
+brltty 0x0003 0x1fe4 0x0061
+
 # Device: 1FE4:0064
 # HandyTech [Active Star 40]
 brltty 0x0003 0x1fe4 0x0064
@@ -411,6 +415,7 @@ brltty 0x0003 0xc251 0x112e
 brltty 0x0003 0xc251 0x112f
 
 # Device: C251:1130
+# EuroBraille [Esytime (firmware 1.03, 2014-03-31)]
 # EuroBraille [Esytime]
 brltty 0x0003 0xc251 0x1130
 
