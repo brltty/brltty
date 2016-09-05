@@ -1433,7 +1433,7 @@ interpretByte_key (BrailleDisplay *brl, unsigned char byte) {
     return enqueueKeyEvent(brl, HT_GRP_NavigationKeys, byte, !release);
   }
 
-  if ((byte > 0) && (byte < 0X20)) {
+  if (byte > 0) {
     return enqueueKeyEvent(brl, HT_GRP_NavigationKeys, byte, !release);
   }
 
