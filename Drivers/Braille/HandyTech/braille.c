@@ -270,6 +270,7 @@ DEFINE_KEY_TABLE(cb40)
 DEFINE_KEY_TABLE(wave)
 DEFINE_KEY_TABLE(easy)
 DEFINE_KEY_TABLE(bb)
+DEFINE_KEY_TABLE(alo)
 DEFINE_KEY_TABLE(bkwm)
 
 BEGIN_KEY_TABLE_LIST
@@ -286,6 +287,7 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(wave),
   &KEY_TABLE_DEFINITION(easy),
   &KEY_TABLE_DEFINITION(bb),
+  &KEY_TABLE_DEFINITION(alo),
   &KEY_TABLE_DEFINITION(bkwm),
 END_KEY_TABLE_LIST
 
@@ -469,7 +471,7 @@ static const ModelEntry modelTable[] = {
     .name = "Actilino",
     .textCells = 16,
     .statusCells = 0,
-    .keyTableDefinition = &KEY_TABLE_DEFINITION(as40),
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(alo),
     .interpretByte = interpretByte_key,
     .writeCells = writeCells_Evolution,
     .setFirmness = setFirmness,
