@@ -1233,6 +1233,44 @@ savePreferences (void) {
   return ok;
 }
 
+#ifdef ENABLE_API
+static void
+exitApiServer (void *data) {
+  if (api.isLinked()) api.unlink();
+  api.stop();
+
+  if (apiParameters) {
+    deallocateStrings(apiParameters);
+    apiParameters = NULL;
+  }
+}
+#endif /* ENABLE_API */
+
+static void
+startApiServer (void) {
+#ifdef ENABLE_API
+  if (!(opt_noApi || api.isStarted())) {
+    const char *const *parameters = api.getParameters();
+
+    apiParameters = getParameters(parameters,
+                                  NULL,
+                                  opt_apiParameters);
+
+    if (apiParameters) {
+      api.identify(0);
+      logParameters(parameters, apiParameters,
+                    gettext("API Parameter"));
+
+      if (!opt_verify) {
+        if (api.start(apiParameters)) {
+          onProgramExit("api-server", exitApiServer, NULL);
+        }
+      }
+    }
+  }
+#endif /* ENABLE_API */
+}
+
 typedef struct {
   const char *driverType;
   const char *const *requestedDrivers;
@@ -1377,7 +1415,6 @@ initializeBrailleDriver (const char *code, int verify) {
                    braille->definition.code, brailleDevice);
 
         if (constructBrailleDriver()) {
-          api.link();
           brailleDriver = braille;
           constructed = 1;
         }
@@ -1403,6 +1440,9 @@ initializeBrailleDriver (const char *code, int verify) {
 
         if (oldPreferencesFile) {
           logMessage(LOG_INFO, "%s: %s", gettext("Old Preferences File"), oldPreferencesFile);
+
+          startApiServer();
+          api.link();
 
           return 1;
         } else {
@@ -1698,18 +1738,6 @@ changeBrailleDevice (const char *device) {
 
   return 0;
 }
-
-#ifdef ENABLE_API
-static void
-exitApiServer (void *data) {
-  api.stop();
-
-  if (apiParameters) {
-    deallocateStrings(apiParameters);
-    apiParameters = NULL;
-  }
-}
-#endif /* ENABLE_API */
 
 #ifdef ENABLE_SPEECH_SUPPORT
 static AsyncHandle autospeakDelayAlarm = NULL;
@@ -2630,28 +2658,6 @@ brlttyStart (void) {
     enableScreenDriver();
   }
   
-#ifdef ENABLE_API
-  if (!opt_noApi) {
-    const char *const *parameters = api.getParameters();
-
-    apiParameters = getParameters(parameters,
-                                  NULL,
-                                  opt_apiParameters);
-
-    if (apiParameters) {
-      api.identify(0);
-      logParameters(parameters, apiParameters,
-                    gettext("API Parameter"));
-
-      if (!opt_verify) {
-        if (api.start(apiParameters)) {
-          onProgramExit("api-server", exitApiServer, NULL);
-        }
-      }
-    }
-  }
-#endif /* ENABLE_API */
-
   /* The device(s) the braille display might be connected to. */
   if (!*opt_brailleDevice) {
     logMessage(LOG_ERR, gettext("braille device not specified"));
