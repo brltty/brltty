@@ -1237,7 +1237,7 @@ savePreferences (void) {
 static void
 exitApiServer (void *data) {
   if (api.isLinked()) api.unlink();
-  api.stop();
+  if (api.isStarted()) api.stop();
 
   if (apiParameters) {
     deallocateStrings(apiParameters);
