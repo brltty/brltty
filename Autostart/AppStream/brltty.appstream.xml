@@ -19,6 +19,16 @@
 -->
 
 <component>
+  <id>org.a11y.brltty</id>
+  <name>BRLTTY</name>
+  <summary>Support for braille devices.</summary>
+
+  <developer_name>The BRLTTY Developers</developer_name>
+  <url type="homepage">http://brltty.com/</url>
+
+  <metadata_license>LGPL-2.1</metadata_license>
+  <project_license>GPL-2.0</project_license>
+
   <provides>
     <!-- BEGIN_USB_DEVICES -->
 
