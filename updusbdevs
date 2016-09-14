@@ -315,8 +315,12 @@ proc parseFileArguments {filesArray schemes arguments} {
    }
 }
 
-proc makeComment_android {comment} {
+proc makeComment_xml {comment} {
    return "<!-- $comment -->"
+}
+
+proc makeComment_android {comment} {
+   return [makeComment_xml $comment]
 }
 
 proc makeLines_android {vendor product drivers descriptions exclude} {
@@ -329,6 +333,26 @@ proc makeLines_android {vendor product drivers descriptions exclude} {
    set line "<usb-device vendor-id=\"$vendor\" product-id=\"$product\" />"
    if {$exclude} {
       set line [makeComment_android $line]
+   }
+   lappend lines $line
+
+   return $lines
+}
+
+proc makeComment_appstream {comment} {
+   return [makeComment_xml $comment]
+}
+
+proc makeLines_appstream {vendor product drivers descriptions exclude} {
+   set lines [list]
+
+   foreach description $descriptions {
+      lappend lines [makeComment_appstream $description]
+   }
+
+   set line [format "<modalias>v%04Xp%04X</modalias>" $vendor $product]
+   if {$exclude} {
+      set line [makeComment_appstream $line]
    }
    lappend lines $line
 
@@ -642,6 +666,7 @@ incr logLevel -$optionValues(verbose)
 
 if {[llength $argv] == 0} {
    lappend argv "android:[file join $sourceDirectory Android Application res xml usb_devices.xml]"
+   lappend argv "appstream:[file join $sourceDirectory Autostart AppStream brltty.appdata.xml]"
    lappend argv "hotplug:[file join $sourceDirectory Autostart Hotplug brltty.usermap]"
    lappend argv "udev:[file join $sourceDirectory Autostart Udev rules]"
    lappend argv "windows:[file join $sourceDirectory Autostart Windows brltty-libusb.inf]"
