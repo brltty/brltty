@@ -315,12 +315,12 @@ proc parseFileArguments {filesArray schemes arguments} {
    }
 }
 
-proc makeComment_xml {comment} {
+proc xmlMakeComment {comment} {
    return "<!-- $comment -->"
 }
 
 proc makeComment_android {comment} {
-   return [makeComment_xml $comment]
+   return [xmlMakeComment $comment]
 }
 
 proc makeLines_android {vendor product drivers descriptions exclude} {
@@ -340,7 +340,7 @@ proc makeLines_android {vendor product drivers descriptions exclude} {
 }
 
 proc makeComment_appstream {comment} {
-   return [makeComment_xml $comment]
+   return [xmlMakeComment $comment]
 }
 
 proc makeLines_appstream {vendor product drivers descriptions exclude} {
