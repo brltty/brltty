@@ -13,10 +13,16 @@
   without any warranty.
 -->
 
+<!--
+  While the license does permit modification, the copyright holder will
+  appreciate it if modifications were restricted to the modalias list,
+  and that the rest of the metadata remain as it was originally written.
+-->
+
 <component>
   <id>org.a11y.brltty</id>
   <name>BRLTTY</name>
-  <summary>Support for braille devices.</summary>
+  <summary>Support for braille devices</summary>
 
   <description>
     A background process providing access to the console screen (when in
