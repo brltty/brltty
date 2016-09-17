@@ -116,19 +116,23 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   {
     unsigned int baud = ttyBaud;
-    if (serialValidateBaud(&baud, "TTY baud", parameters[PARM_BAUD], NULL))
+
+    if (serialValidateBaud(&baud, "TTY baud", parameters[PARM_BAUD], NULL)) {
       ttyBaud = baud;
+    }
   }
 
 #ifdef GOT_CURSES
-  if (*parameters[PARM_TERM])
+  if (*parameters[PARM_TERM]) {
     ttyType = parameters[PARM_TERM];
+  }
 #endif /* GOT_CURSES */
 
   {
     static const int minimum = 1;
     static const int maximum = MAX_WINDOW_LINES;
     int lines = windowLines;
+
     if (validateInteger(&lines, parameters[PARM_LINES], &minimum, &maximum)) {
       windowLines = lines;
     } else {
@@ -140,6 +144,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     static const int minimum = 1;
     static const int maximum = MAX_WINDOW_COLUMNS;
     int columns = windowColumns;
+
     if (validateInteger(&columns, parameters[PARM_COLUMNS], &minimum, &maximum)) {
       windowColumns = columns;
     } else {
@@ -148,12 +153,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   }
 
 #ifdef HAVE_ICONV_H
-  if (*parameters[PARM_CHARSET])
+  if (*parameters[PARM_CHARSET]) {
     characterSet = parameters[PARM_CHARSET];
+  }
 #endif /* HAVE_ICONV_H */
 
-  if (*parameters[PARM_LOCALE])
+  if (*parameters[PARM_LOCALE]) {
     classificationLocale = parameters[PARM_LOCALE];
+  }
 
 #ifdef HAVE_ICONV_H
   if ((conversionDescriptor = iconv_open(characterSet, "WCHAR_T")) != (iconv_t)-1) {
@@ -200,6 +207,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   } else {
     logSystemError("iconv_open");
   }
+
   conversionDescriptor = NULL;
 #endif /* HAVE_ICONV_H */
 
@@ -211,9 +219,11 @@ brl_destruct (BrailleDisplay *brl) {
 #ifdef GOT_CURSES
   if (ttyScreen) {
     endwin();
+
 #ifndef __MINGW32__
     delscreen(ttyScreen);
 #endif /* __MINGW32__ */
+
     ttyScreen = NULL;
   }
 #endif /* GOT_CURSES */
