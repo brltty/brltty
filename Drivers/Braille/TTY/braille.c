@@ -36,6 +36,7 @@ static iconv_t conversionDescriptor = NULL;
 #include "log.h"
 #include "parse.h"
 #include "charset.h"
+#include "unicode.h"
 #include "get_curses.h"
 
 #ifndef GOT_CURSES
@@ -289,11 +290,32 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 #endif /* GOT_CURSES */
 
   {
-    int row;
-    for (row=0; row<brl->textRows; row++) {
-      writeText(&text[row*brl->textColumns], brl->textColumns);
-      if (row < brl->textRows-1)
+    wchar_t braille[brl->textColumns];
+
+    for (unsigned int row=0; row<brl->textRows; row++) {
+      unsigned int offset = row * brl->textColumns;
+      writeText(&text[offset], brl->textColumns);
+
+      for (unsigned int column=0; column<brl->textColumns; column+=1) {
+        unsigned char c = brl->buffer[offset + column];
+        braille[column] = UNICODE_BRAILLE_ROW
+                        | (!!(c & BRL_DOT1) << 0)
+                        | (!!(c & BRL_DOT2) << 1)
+                        | (!!(c & BRL_DOT3) << 2)
+                        | (!!(c & BRL_DOT4) << 3)
+                        | (!!(c & BRL_DOT5) << 4)
+                        | (!!(c & BRL_DOT6) << 5)
+                        | (!!(c & BRL_DOT7) << 6)
+                        | (!!(c & BRL_DOT8) << 7)
+                        ;
+      }
+
+      addstr("\r\n");
+      writeText(braille, brl->textColumns);
+
+      if (row < (brl->textRows - 1)) {
         addstr("\r\n");
+      }
     }
   }
 
