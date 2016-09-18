@@ -39,10 +39,13 @@ static iconv_t conversionDescriptor = NULL;
 #include "unicode.h"
 #include "get_curses.h"
 
-#ifndef GOT_CURSES
+#ifdef GOT_CURSES
+#define newline() addstr("\n")
+#else /* GOT_CURSES */
 #define addstr(string) serialWriteData(ttyDevice, string, strlen(string))
 #define addch(character) do { unsigned char __c = (character); serialWriteData(ttyDevice, &__c, 1); } while(0)
 #define getch() my_getch()
+#define newline() addstr("\r\n")
 #endif /* GOT_CURSES */
 
 #ifdef GOT_CURSES
@@ -286,7 +289,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 #ifdef GOT_CURSES
   clear();
 #else /* GOT_CURSES */
-  addstr("\r\n");
+  newline();
 #endif /* GOT_CURSES */
 
   {
@@ -310,11 +313,11 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
                         ;
       }
 
-      addstr("\r\n");
+      newline();
       writeText(braille, brl->textColumns);
 
       if (row < (brl->textRows - 1)) {
-        addstr("\r\n");
+        newline();
       }
     }
   }
@@ -332,7 +335,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
     addch('\r');
     writeText(text, brl->cursor);
   } else {
-    addstr("\r\n");
+    newline();
   }
 #endif /* GOT_CURSES */
 
