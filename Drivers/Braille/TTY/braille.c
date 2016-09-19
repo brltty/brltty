@@ -40,12 +40,12 @@ static iconv_t conversionDescriptor = NULL;
 #include "get_curses.h"
 
 #ifdef GOT_CURSES
-#define newline() addch('\n')
+#define newLine() addch('\n')
 #else /* GOT_CURSES */
 #define addstr(string) serialWriteData(ttyDevice, string, strlen(string))
 #define addch(character) do { unsigned char __c = (character); serialWriteData(ttyDevice, &__c, 1); } while(0)
-#define getch() my_getch()
-#define newline() addstr("\r\n")
+#define getch() getch_noCurses()
+#define newLine() addstr("\r\n")
 #endif /* GOT_CURSES */
 
 #ifdef GOT_CURSES
@@ -95,7 +95,7 @@ static char *classificationLocale = NULL;
 static SCREEN *ttyScreen = NULL;
 #else /* GOT_CURSES */
 static inline int
-my_getch (void) {
+getch_noCurses (void) {
   unsigned char c;
   if (serialReadData(ttyDevice, &c, 1, 0, 0) == 1) return c;
   return EOF;
@@ -289,7 +289,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 #ifdef GOT_CURSES
   clear();
 #else /* GOT_CURSES */
-  newline();
+  newLine();
 #endif /* GOT_CURSES */
 
   {
@@ -313,11 +313,11 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
                         ;
       }
 
-      newline();
+      newLine();
       writeText(braille, brl->textColumns);
 
       if (row < (brl->textRows - 1)) {
-        newline();
+        newLine();
       }
     }
   }
@@ -335,7 +335,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
     addch('\r');
     writeText(text, brl->cursor);
   } else {
-    newline();
+    newLine();
   }
 #endif /* GOT_CURSES */
 
@@ -355,6 +355,8 @@ brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key) 
 
 #ifdef GOT_CURSES
 #define MAP(key,cmd) case KEY_##key: return BRL_CMD_##cmd
+    MAP(BACKSPACE, KEY(BACKSPACE));
+
     MAP(LEFT, FWINLT);
     MAP(RIGHT, FWINRT);
     MAP(UP, LNUP);
@@ -388,8 +390,6 @@ brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key) 
     MAP(F(10), CHRLT);
     MAP(F(11), CHRRT);
     MAP(F(12), LNEND);
-
-    MAP(BACKSPACE, KEY(BACKSPACE));
 #undef MAP
 #endif /* GOT_CURSES */
   }
