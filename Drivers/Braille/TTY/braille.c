@@ -40,7 +40,7 @@ static iconv_t conversionDescriptor = NULL;
 #include "get_curses.h"
 
 #ifdef GOT_CURSES
-#define newline() addstr("\n")
+#define newline() addch('\n')
 #else /* GOT_CURSES */
 #define addstr(string) serialWriteData(ttyDevice, string, strlen(string))
 #define addch(character) do { unsigned char __c = (character); serialWriteData(ttyDevice, &__c, 1); } while(0)
@@ -348,8 +348,9 @@ brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key) 
 #define KEY(key,cmd) case (key): return (cmd)
   switch (key) {
     KEY(EOF, EOF);
+
     default:
-      if (key <= 0XFF) return BRL_CMD_BLK(PASSCHAR)|key;
+      if (key <= 0XFF) return BRL_CMD_CHAR(key);
       logMessage(LOG_WARNING, "Unknown key: %d", key);
       return BRL_CMD_NOOP;
 
@@ -391,7 +392,7 @@ brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key) 
     KEY(KEY_F(19), BRL_CMD_PRPGRPH);
     KEY(KEY_F(20), BRL_CMD_NXPGRPH);
 
-    KEY(KEY_BACKSPACE, BRL_CMD_BLK(PASSKEY)|BRL_KEY_BACKSPACE);
+    KEY(KEY_BACKSPACE, BRL_CMD_KEY(BACKSPACE));
 #endif /* GOT_CURSES */
   }
 #undef KEY
