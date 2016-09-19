@@ -345,9 +345,8 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 int
 brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key) {
-#define KEY(key,cmd) case (key): return (cmd)
   switch (key) {
-    KEY(EOF, EOF);
+    case EOF: return EOF;
 
     default:
       if (key <= 0XFF) return BRL_CMD_CHAR(key);
@@ -355,47 +354,45 @@ brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key) 
       return BRL_CMD_NOOP;
 
 #ifdef GOT_CURSES
-    KEY(KEY_LEFT, BRL_CMD_FWINLT);
-    KEY(KEY_RIGHT, BRL_CMD_FWINRT);
-    KEY(KEY_UP, BRL_CMD_LNUP);
-    KEY(KEY_DOWN, BRL_CMD_LNDN);
+#define MAP(key,cmd) case KEY_##key: return BRL_CMD_##cmd
+    MAP(LEFT, FWINLT);
+    MAP(RIGHT, FWINRT);
+    MAP(UP, LNUP);
+    MAP(DOWN, LNDN);
 
-    KEY(KEY_HOME, BRL_CMD_TOP_LEFT);
-    KEY(KEY_A1, BRL_CMD_TOP_LEFT);
-    KEY(KEY_END, BRL_CMD_BOT_LEFT);
-    KEY(KEY_C1, BRL_CMD_BOT_LEFT);
-    KEY(KEY_IC, BRL_CMD_HOME);
-    KEY(KEY_B2, BRL_CMD_HOME);
-    KEY(KEY_DC, BRL_CMD_CSRTRK);
-    KEY(KEY_PPAGE, BRL_CMD_TOP);
-    KEY(KEY_A3, BRL_CMD_TOP);
-    KEY(KEY_NPAGE, BRL_CMD_BOT);
-    KEY(KEY_C3, BRL_CMD_BOT);
+    MAP(PPAGE, PRDIFLN);
+    MAP(NPAGE, NXDIFLN);
+    MAP(A3, PRDIFLN);
+    MAP(C3, NXDIFLN);
 
-    KEY(KEY_F(1), BRL_CMD_HELP);
-    KEY(KEY_F(2), BRL_CMD_LEARN);
-    KEY(KEY_F(3), BRL_CMD_INFO);
-    KEY(KEY_F(4), BRL_CMD_PREFMENU);
+    MAP(HOME, TOP);
+    MAP(END, BOT);
+    MAP(A1, TOP);
+    MAP(C1, BOT);
 
-    KEY(KEY_F(5), BRL_CMD_PRDIFLN);
-    KEY(KEY_F(6), BRL_CMD_NXDIFLN);
-    KEY(KEY_F(7), BRL_CMD_ATTRUP);
-    KEY(KEY_F(8), BRL_CMD_ATTRDN);
+    MAP(IC, ATTRUP);
+    MAP(DC, ATTRDN);
+    MAP(B2, HOME);
 
-    KEY(KEY_F(9), BRL_CMD_LNBEG);
-    KEY(KEY_F(10), BRL_CMD_CHRLT);
-    KEY(KEY_F(11), BRL_CMD_CHRRT);
-    KEY(KEY_F(12), BRL_CMD_LNEND);
+    MAP(F(1), HELP);
+    MAP(F(2), LEARN);
+    MAP(F(3), INFO);
+    MAP(F(4), PREFMENU);
 
-    KEY(KEY_F(17), BRL_CMD_PRPROMPT);
-    KEY(KEY_F(18), BRL_CMD_NXPROMPT);
-    KEY(KEY_F(19), BRL_CMD_PRPGRPH);
-    KEY(KEY_F(20), BRL_CMD_NXPGRPH);
+    MAP(F(5), PRPROMPT);
+    MAP(F(6), NXPROMPT);
+    MAP(F(7), PRPGRPH);
+    MAP(F(8), NXPGRPH);
 
-    KEY(KEY_BACKSPACE, BRL_CMD_KEY(BACKSPACE));
+    MAP(F(9), LNBEG);
+    MAP(F(10), CHRLT);
+    MAP(F(11), CHRRT);
+    MAP(F(12), LNEND);
+
+    MAP(BACKSPACE, KEY(BACKSPACE));
+#undef MAP
 #endif /* GOT_CURSES */
   }
-#undef KEY
 }
 
 static int
