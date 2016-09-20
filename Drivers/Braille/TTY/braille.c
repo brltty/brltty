@@ -350,7 +350,7 @@ brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key) 
 
     default:
       if (key <= 0XFF) return BRL_CMD_CHAR(key);
-      logMessage(LOG_WARNING, "Unknown key: %d", key);
+      logMessage(LOG_WARNING, "unrecognized curses key: %d", key);
       return BRL_CMD_NOOP;
 
 #ifdef GOT_CURSES
@@ -403,13 +403,20 @@ brl_readKey (BrailleDisplay *brl) {
   if (key == ERR) return EOF;
 #endif /* GOT_CURSES */
 
-  logMessage(LOG_DEBUG, "key %d", key);
+  if (key != EOF) {
+    logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "curses key: %d", key);
+  }
+
   return key;
 }
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   int command = brl_keyToCommand(brl, context, brl_readKey(brl));
-  if (command != EOF) logMessage(LOG_DEBUG, "cmd %04X", command);
+
+  if (command != EOF) {
+    logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "command: 0X%04X", command);
+  }
+
   return command;
 }
