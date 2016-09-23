@@ -24,6 +24,7 @@
 BLUETOOTH_NAME_DRIVERS(Actilino, "ht");
 BLUETOOTH_NAME_DRIVERS(ActiveBraille, "ht");
 BLUETOOTH_NAME_DRIVERS(AlvaBC, "al");
+BLUETOOTH_NAME_DRIVERS(Apex, "bn");
 BLUETOOTH_NAME_DRIVERS(BasicBraille, "ht");
 BLUETOOTH_NAME_DRIVERS(BaumConny, "bm");
 BLUETOOTH_NAME_DRIVERS(BaumPocketVario, "bm");
@@ -63,6 +64,10 @@ const BluetoothNameEntry bluetoothNameTable[] = {
 
   { .namePrefix = "ALVA BC",
     .driverCodes = bluetoothNameDrivers_AlvaBC
+  },
+
+  { .namePrefix = "Apex",
+    .driverCodes = bluetoothNameDrivers_Apex
   },
 
   { .namePrefix = "Basic Braille",
