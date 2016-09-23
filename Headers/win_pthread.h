@@ -271,12 +271,12 @@ typedef struct {
 } pthread_cond_t;
 #define PTHREAD_COND_INITIALIZER { NULL, 0}
 
-#ifndef __struct_timespec_defined
+#if !defined(__struct_timespec_defined) && !defined(__MINGW64_VERSION_MAJOR)
 struct timespec {
   time_t  tv_sec;  /* Seconds */
   long    tv_nsec; /* Nanoseconds */
 };
-#endif /* __struct_timespec_defined */
+#endif /* struct timespec */
 
 typedef unsigned pthread_condattr_t;
 
