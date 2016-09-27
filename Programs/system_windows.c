@@ -541,7 +541,9 @@ getWindowsLocaleName (void) {
             LANGUAGE(LOWER_SORBIAN, "dsb");
             LANGUAGE(LUXEMBOURGISH, "lb");
             LANGUAGE(MACEDONIAN, "mk");
+#ifndef __MINGW64_VERSION_MAJOR
             LANGUAGE(MALAGASY, "mg");
+#endif
             LANGUAGE(MALAY, "ms");
             LANGUAGE(MALAYALAM, "ml");
             LANGUAGE(MALTESE, "mt");
@@ -633,7 +635,7 @@ gettimeofday (struct timeval *tvp, void *tzp) {
 }
 #endif /* gettimeofday() */
 
-#if (__MINGW32_MAJOR_VERSION < 3) || ((__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION < 15))
+#if !defined(__MINGW64_VERSION_MAJOR) && ((__MINGW32_MAJOR_VERSION < 3) || ((__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION < 15)))
 void
 usleep (int usec) {
   if (usec > 0) {

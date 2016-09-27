@@ -133,7 +133,7 @@ extern "C" {
 extern int gettimeofday (struct timeval *tvp, void *tzp);
 #endif /* gettimeofday */
 
-#if (__MINGW32_MAJOR_VERSION < 3) || ((__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION < 15))
+#if !defined(__MINGW64_VERSION_MAJOR) && ((__MINGW32_MAJOR_VERSION < 3) || ((__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION < 15)))
 extern void usleep (int usec);
 #endif /* usleep */
 #endif /* __MINGW32__ */
