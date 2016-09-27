@@ -80,7 +80,6 @@ typedef enum {
 
 struct SpeechDriverThreadStruct {
   ThreadState threadState;
-  unsigned stopping:1;
   Queue *requestQueue;
 
   volatile SpeechSynthesizer *speechSynthesizer;
@@ -253,7 +252,7 @@ testThreadValidity (volatile SpeechDriverThread *sdt) {
 
     if (spk) {
       if (sdt == spk->driver.thread) {
-        if (!sdt->stopping) {
+        if (sdt->threadState == THD_READY) {
           return 1;
         }
       }
@@ -874,7 +873,6 @@ constructSpeechDriverThread (
 
   if ((sdt = malloc(sizeof(*sdt)))) {
     memset((void *)sdt, 0, sizeof(*sdt));
-    sdt->stopping = 0;
     setThreadState(sdt, THD_CONSTRUCTING);
     setResponsePending(sdt);
 
