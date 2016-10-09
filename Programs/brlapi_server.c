@@ -1225,6 +1225,18 @@ static void handleNewConnection(Connection *c)
   brlapiserver_writePacket(c->fd,BRLAPI_PACKET_VERSION,&versionPacket.data,sizeof(versionPacket.version));
 }
 
+static int
+hasKeyFile(const char *auth)
+{
+  if (isAbsolutePath(auth))
+    return 1;
+  if (!strncmp(auth,"keyfile:", 8))
+    return 1;
+  if (strstr(auth,"+keyfile:"))
+    return 1;
+  return 0;
+}
+
 /* Function : handleUnauthorizedConnection */
 /* Returns 1 if connection has to be removed */
 static int handleUnauthorizedConnection(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
@@ -1252,7 +1264,7 @@ static int handleUnauthorizedConnection(Connection *c, brlapi_packetType_t type,
 	unauthConnections--;
 	c->auth = 1;
       } else {
-	if (isAbsolutePath(auth))
+	if (hasKeyFile(auth))
 	  authPacket->type[nbmethods++] = htonl(BRLAPI_AUTH_KEY);
 	c->auth = 0;
       }
@@ -1288,15 +1300,18 @@ static int handleUnauthorizedConnection(Connection *c, brlapi_packetType_t type,
 	  if (authDescriptor) authCorrect = authPerform(authDescriptor, c->fd);
 	  break;
 	case BRLAPI_AUTH_KEY:
-	  if (isAbsolutePath(auth)) {
-	    if (brlapiserver_loadAuthKey(auth,&authKeyLength,&authKey)==-1) {
-	      logMessage(LOG_WARNING,"Unable to load API authorization key from %s: %s in %s. You may use parameter auth=none if you don't want any authorization (dangerous)", auth, strerror(brlapi_libcerrno), brlapi_errfun);
+	  if (hasKeyFile(auth)) {
+	    char *path = brlapiserver_getKeyFile(auth);
+	    int ret = brlapiserver_loadAuthKey(path,&authKeyLength,&authKey);
+	    free(path);
+	    if (ret==-1) {
+	      logMessage(LOG_WARNING,"Unable to load API authorization key from %s: %s in %s. You may use parameter auth=none if you don't want any authorization (dangerous)", path, strerror(brlapi_libcerrno), brlapi_errfun);
 	      break;
 	    }
 	    logMessage(LOG_CATEGORY(SERVER_EVENTS), "authorization key loaded");
 	    authCorrect = (remaining==authKeyLength) && (!memcmp(&authPacket->key, &authKey, authKeyLength));
 	    memset(&authKey, 0, authKeyLength);
-	    memset(&authPacket->key, 0, authKeyLength);
+	    memset(&authPacket->key, 0, remaining);
 	  }
 	  break;
 	default:

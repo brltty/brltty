@@ -415,3 +415,23 @@ BRLAPI(getKeyrangeMask) (brlapi_rangeType_t r, brlapi_keyCode_t code, brlapi_key
   brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
   return -1;
 }
+
+static char *
+BRLAPI(getKeyFile)(const char *auth)
+{
+  const char *path;
+  char *ret, *delim;
+  if (!strncmp(auth,"keyfile:",8))
+    path=auth+8;
+  else {
+    path=strstr(auth,"+keyfile:");
+    if (path) path+=9;
+    else path=auth;
+  }
+  ret=strdup(path);
+  delim=strchr(ret,'+');
+  if (delim)
+    *delim = 0;
+  return ret;
+}
+

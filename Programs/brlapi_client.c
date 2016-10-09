@@ -724,7 +724,12 @@ brlapi_fileDescriptor BRLAPI_STDCALL brlapi__openConnection(brlapi_handle_t *han
       case BRLAPI_AUTH_KEY: {
         size_t authKeyLength;
 	int res;
-        if (brlapi_loadAuthKey(settings.auth, &authKeyLength, (void *) &auth->key) < 0)
+	char *keyfile = brlapi_getKeyFile(settings.auth);
+	if (!keyfile)
+	  continue;
+	res = brlapi_loadAuthKey(keyfile, &authKeyLength, (void *) &auth->key);
+	free(keyfile);
+        if (res < 0)
 	  continue;
         res = brlapi_writePacket(handle->fileDescriptor, BRLAPI_PACKET_AUTH, auth,
 	  sizeof(auth->type)+authKeyLength);
