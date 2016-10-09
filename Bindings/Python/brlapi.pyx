@@ -93,6 +93,8 @@ class OperationError(Exception):
 			self.gaierrno = c_brlapi.brlapi_error.gaierrno
 			if (c_brlapi.brlapi_error.errfun):
 				self.errfun = c_brlapi.brlapi_error.errfun
+			else:
+				self.errfun = b""
 
 	def __str__(self):
 		cdef c_brlapi.brlapi_error_t error
