@@ -54,6 +54,7 @@ typedef unsigned int gid_t;
 #include "strfmt.h"
 #include "parse.h"
 #include "auth.h"
+#include "async_wait.h"
 
 /* peer credentials */
 #undef CAN_CHECK_CREDENTIALS
@@ -452,15 +453,28 @@ authPolkit_initialize (const char *parameter) {
   if ((polkit = malloc(sizeof(*polkit)))) {
     memset(polkit, 0, sizeof(*polkit));
 
-    GError *error_local = NULL;
-    polkit->authority = polkit_authority_get_sync(NULL, &error_local);
+    while(1) {
+      GError *error_local = NULL;
+      polkit->authority = polkit_authority_get_sync(NULL, &error_local);
 
-    if (polkit->authority) {
-      return polkit;
-    } else {
-      g_error_free(error_local);
-      g_free(polkit);
+      if (polkit->authority) {
+	return polkit;
+      } else {
+        GQuark domain = error_local->domain;
+        gint code = error_local->code;
+
+        logMessage(LOG_WARNING, "Unable to connect to polkit: %s (%d) %s (%d)", g_quark_to_string(domain), (int) domain, error_local->message, code);
+        g_error_free(error_local);
+
+        if ((domain != G_IO_ERROR) && (code != G_IO_ERROR_NOT_FOUND)) {
+          break;
+        }
+      }
+
+      asyncWait(1000);
     }
+
+    g_free(polkit);
   } else {
     logMallocError();
   }

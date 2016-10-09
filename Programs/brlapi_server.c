@@ -2183,6 +2183,12 @@ THREAD_FUNCTION(runServer) {
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "server thread started");
   if (!prepareThread()) goto finished;
 
+  if (auth && !isAbsolutePath(auth)) 
+    if (!(authDescriptor = authBeginServer(auth))) {
+      logMessage(LOG_WARNING, "Unable to start auth server");
+      goto finished;
+    }
+
   socketHosts = splitString(hosts,'+',&numSockets);
   if (numSockets>MAXSOCKETS) {
     logMessage(LOG_ERR,"too many hosts specified (%d, max %d)",numSockets,MAXSOCKETS);
@@ -3085,10 +3091,6 @@ int api_start(BrailleDisplay *brl, char **parameters)
 
     if (*operand) auth = operand;
   }
-
-  if (auth && !isAbsolutePath(auth)) 
-    if (!(authDescriptor = authBeginServer(auth)))
-      return 0;
 
   pthread_attr_t attr;
   pthread_mutexattr_t mattr;
