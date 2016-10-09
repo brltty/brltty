@@ -924,6 +924,7 @@ static int handleSetFocus(Connection *c, brlapi_packetType_t type, brlapi_packet
   CHECKEXC(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
   c->tty->focus = ntohl(ints[0]);
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "focus on window %#010x from fd%"PRIfd,c->tty->focus,c->fd);
+  asyncSignalEvent(flushEvent, NULL);
   return 0;
 }
 
@@ -2851,6 +2852,7 @@ out:
  */
 int api_flush(BrailleDisplay *brl) {
   Connection *c;
+  static Connection *displayed_last;
   int ok = 1;
   int drain = 0;
   int update = 0;
@@ -2884,7 +2886,7 @@ int api_flush(BrailleDisplay *brl) {
       }
     }
 
-    if (c->brlbufstate==TODISPLAY || update) {
+    if (c != displayed_last || c->brlbufstate==TODISPLAY || update) {
       unsigned char *oldbuf = disp->buffer, buf[displaySize];
       disp->buffer = buf;
       getDots(&c->brailleWindow, buf);
@@ -2892,6 +2894,7 @@ int api_flush(BrailleDisplay *brl) {
       ok = trueBraille->writeWindow(brl, c->brailleWindow.text);
       drain = 1;
       disp->buffer = oldbuf;
+      displayed_last = c;
     }
     unlockMutex(&apiDriverMutex);
     unlockMutex(&c->brailleWindowMutex);
