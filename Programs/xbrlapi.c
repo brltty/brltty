@@ -733,9 +733,9 @@ static void toX_f(const char *display) {
       default: fprintf(stderr,gettext("xbrlapi: unhandled event type: %d\n"),ev.type); break;
       }
     }
-    if (brlapi_fd>=0 && FD_ISSET(brlapi_fd,&readfds)) {
+    if (brlapi_fd>=0) {
 #ifdef CAN_SIMULATE_KEY_PRESSES
-     if (haveXTest) {
+     if (haveXTest && FD_ISSET(brlapi_fd,&readfds)) {
       while (((res = brlapi_readKey(0, &code))==1)) {
 	switch (code & BRLAPI_KEY_TYPE_MASK) {
 	  case BRLAPI_KEY_TYPE_CMD:
