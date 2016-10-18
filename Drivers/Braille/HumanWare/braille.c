@@ -158,6 +158,7 @@ setFirmwareVersion (BrailleDisplay *brl, unsigned char major, unsigned char mino
 
 static int
 hasBrailleKeyboard (BrailleDisplay *brl) {
+  if (brl->textColumns == 18) return 1;
   if (brl->textColumns == 32) return 1;
   if (brl->textColumns == 40) return 1;
   return 0;
@@ -605,6 +606,13 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
     { /* all models (HID protocol) */
       .vendor=0X1C71, .product=0XC006,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1,
+      .data = &hidProtocol
+    },
+
+    { /* Braille Note Touch (HID protocol) */
+      .vendor=0X1C71, .product=0XC00A,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1,
       .data = &hidProtocol
