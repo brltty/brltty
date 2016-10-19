@@ -187,6 +187,10 @@ handleKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
 static int
 handleKeyPress (BrailleDisplay *brl, unsigned char key) {
   if (BITMASK_TEST(brl->data->pressedKeys.mask, key)) return 0;
+  if (key == HW_KEY_CAL_OK) return 0;
+  if (key == HW_KEY_CAL_FAIL) return 0;
+  if (key == HW_KEY_CAL_EMPTY) return 0;
+  if (key == HW_KEY_CAL_RESET) return 0;
 
   BITMASK_SET(brl->data->pressedKeys.mask, key);
   brl->data->pressedKeys.count += 1;
@@ -611,7 +615,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .data = &hidProtocol
     },
 
-    { /* Braille Note Touch (HID protocol) */
+    { /* BrailleNote Touch (HID protocol) */
       .vendor=0X1C71, .product=0XC00A,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1,
