@@ -370,7 +370,7 @@ proc makeLines_metainfo {vendor product drivers descriptions exclude} {
       lappend lines [makeComment_metainfo $description]
    }
 
-   set line [format "<modalias>usb:v%04xp%04x*</modalias>" $vendor $product]
+   set line [format "<modalias>usb:v%04Xp%04X*</modalias>" $vendor $product]
    if {$exclude} {
       set line [makeComment_metainfo $line]
    }
