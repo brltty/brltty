@@ -294,6 +294,10 @@ brltty 0x0003 0x1c71 0xc005
 # HumanWare [all models (HID protocol)]
 brltty 0x0003 0x1c71 0xc006
 
+# Device: 1C71:C00A
+# HumanWare [BrailleNote Touch (HID protocol)]
+brltty 0x0003 0x1c71 0xc00a
+
 # Device: 1FE4:0003
 # HandyTech [USB-HID adapter]
 brltty 0x0003 0x1fe4 0x0003

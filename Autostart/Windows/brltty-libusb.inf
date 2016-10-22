@@ -325,6 +325,9 @@ ServiceBinary  = %12%\libusb0.sys
 ; Device: 1C71:C006
 "LibUSB-Win32: HumanWare [all models (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C006
 
+; Device: 1C71:C00A
+"LibUSB-Win32: HumanWare [BrailleNote Touch (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C00A
+
 ; Device: 1FE4:0003
 "LibUSB-Win32: HandyTech [USB-HID adapter]"=LIBUSB_DEV, USB\VID_1FE4&PID_0003
 
@@ -633,6 +636,9 @@ ServiceBinary  = %12%\libusb0.sys
 ; Device: 1C71:C006
 "LibUSB-Win32: HumanWare [all models (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C006
 
+; Device: 1C71:C00A
+"LibUSB-Win32: HumanWare [BrailleNote Touch (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C00A
+
 ; Device: 1FE4:0003
 "LibUSB-Win32: HandyTech [USB-HID adapter]"=LIBUSB_DEV, USB\VID_1FE4&PID_0003
 
@@ -940,6 +946,9 @@ ServiceBinary  = %12%\libusb0.sys
 
 ; Device: 1C71:C006
 "LibUSB-Win32: HumanWare [all models (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C006
+
+; Device: 1C71:C00A
+"LibUSB-Win32: HumanWare [BrailleNote Touch (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C00A
 
 ; Device: 1FE4:0003
 "LibUSB-Win32: HandyTech [USB-HID adapter]"=LIBUSB_DEV, USB\VID_1FE4&PID_0003

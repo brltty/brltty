@@ -246,6 +246,9 @@ HKR,,Icon,,-20
 ; Device: 1C71:C006
 "LibUSB-1.0: HumanWare [all models (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C006
 
+; Device: 1C71:C00A
+"LibUSB-1.0: HumanWare [BrailleNote Touch (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C00A
+
 ; Device: 1FE4:0003
 "LibUSB-1.0: HandyTech [USB-HID adapter]"=LIBUSB_DEV, USB\VID_1FE4&PID_0003
 
@@ -553,6 +556,9 @@ HKR,,Icon,,-20
 
 ; Device: 1C71:C006
 "LibUSB-1.0: HumanWare [all models (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C006
+
+; Device: 1C71:C00A
+"LibUSB-1.0: HumanWare [BrailleNote Touch (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C00A
 
 ; Device: 1FE4:0003
 "LibUSB-1.0: HandyTech [USB-HID adapter]"=LIBUSB_DEV, USB\VID_1FE4&PID_0003

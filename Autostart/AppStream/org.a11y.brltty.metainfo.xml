@@ -51,47 +51,47 @@
 
     <!-- Device: 0403:DE58 -->
     <!-- Hedo [MobilLine] -->
-    <modalias>usb:v0403pde58*</modalias>
+    <modalias>usb:v0403pDE58*</modalias>
 
     <!-- Device: 0403:DE59 -->
     <!-- Hedo [ProfiLine] -->
-    <modalias>usb:v0403pde59*</modalias>
+    <modalias>usb:v0403pDE59*</modalias>
 
     <!-- Device: 0403:F208 -->
     <!-- Papenmeier [all models] -->
-    <modalias>usb:v0403pf208*</modalias>
+    <modalias>usb:v0403pF208*</modalias>
 
     <!-- Device: 0403:FE70 -->
     <!-- Baum [Vario 40 (40 cells)] -->
-    <modalias>usb:v0403pfe70*</modalias>
+    <modalias>usb:v0403pFE70*</modalias>
 
     <!-- Device: 0403:FE71 -->
     <!-- Baum [PocketVario (24 cells)] -->
-    <modalias>usb:v0403pfe71*</modalias>
+    <modalias>usb:v0403pFE71*</modalias>
 
     <!-- Device: 0403:FE72 -->
     <!-- Baum [SuperVario 40 (40 cells)] -->
-    <modalias>usb:v0403pfe72*</modalias>
+    <modalias>usb:v0403pFE72*</modalias>
 
     <!-- Device: 0403:FE73 -->
     <!-- Baum [SuperVario 32 (32 cells)] -->
-    <modalias>usb:v0403pfe73*</modalias>
+    <modalias>usb:v0403pFE73*</modalias>
 
     <!-- Device: 0403:FE74 -->
     <!-- Baum [SuperVario 64 (64 cells)] -->
-    <modalias>usb:v0403pfe74*</modalias>
+    <modalias>usb:v0403pFE74*</modalias>
 
     <!-- Device: 0403:FE75 -->
     <!-- Baum [SuperVario 80 (80 cells)] -->
-    <modalias>usb:v0403pfe75*</modalias>
+    <modalias>usb:v0403pFE75*</modalias>
 
     <!-- Device: 0403:FE76 -->
     <!-- Baum [VarioPro 80 (80 cells)] -->
-    <modalias>usb:v0403pfe76*</modalias>
+    <modalias>usb:v0403pFE76*</modalias>
 
     <!-- Device: 0403:FE77 -->
     <!-- Baum [VarioPro 64 (64 cells)] -->
-    <modalias>usb:v0403pfe77*</modalias>
+    <modalias>usb:v0403pFE77*</modalias>
 
     <!-- Device: 0452:0100 -->
     <!-- Metec [all models] -->
@@ -101,15 +101,15 @@
     <!-- HIMS [Braille Sense (USB 1.1)] -->
     <!-- HIMS [Braille Sense (USB 2.0)] -->
     <!-- HIMS [Braille Sense U2 (USB 2.0)] -->
-    <modalias>usb:v045ep930a*</modalias>
+    <modalias>usb:v045Ep930A*</modalias>
 
     <!-- Device: 045E:930B -->
     <!-- HIMS [Braille Edge] -->
-    <modalias>usb:v045ep930b*</modalias>
+    <modalias>usb:v045Ep930B*</modalias>
 
     <!-- Device: 06B0:0001 -->
     <!-- Alva [Satellite (5nn)] -->
-    <modalias>usb:v06b0p0001*</modalias>
+    <modalias>usb:v06B0p0001*</modalias>
 
     <!-- Device: 0798:0001 -->
     <!-- Voyager [all models] -->
@@ -237,7 +237,7 @@
 
     <!-- Device: 0904:600A -->
     <!-- Baum [Brailliant2 80 (80 cells)] -->
-    <modalias>usb:v0904p600a*</modalias>
+    <modalias>usb:v0904p600A*</modalias>
 
     <!-- Device: 0904:6011 -->
     <!-- Baum [VarioConnect 24 (24 cells)] -->
@@ -269,19 +269,19 @@
 
     <!-- Device: 0F4E:0100 -->
     <!-- FreedomScientific [Focus 1] -->
-    <modalias>usb:v0f4ep0100*</modalias>
+    <modalias>usb:v0F4Ep0100*</modalias>
 
     <!-- Device: 0F4E:0111 -->
     <!-- FreedomScientific [PAC Mate] -->
-    <modalias>usb:v0f4ep0111*</modalias>
+    <modalias>usb:v0F4Ep0111*</modalias>
 
     <!-- Device: 0F4E:0112 -->
     <!-- FreedomScientific [Focus 2] -->
-    <modalias>usb:v0f4ep0112*</modalias>
+    <modalias>usb:v0F4Ep0112*</modalias>
 
     <!-- Device: 0F4E:0114 -->
     <!-- FreedomScientific [Focus Blue] -->
-    <modalias>usb:v0f4ep0114*</modalias>
+    <modalias>usb:v0F4Ep0114*</modalias>
 
     <!-- Device: 10C4:EA60 -->
     <!-- Generic Identifier -->
@@ -289,14 +289,14 @@
     <!-- Product: CP210x UART Bridge / myAVR mySmartUSB light -->
     <!-- BrailleMemo [Pocket] -->
     <!-- Seika [Braille Display] -->
-    <modalias>usb:v10c4pea60*</modalias>
+    <modalias>usb:v10C4pEA60*</modalias>
 
     <!-- Device: 10C4:EA80 -->
     <!-- Generic Identifier -->
     <!-- Vendor: Cygnal Integrated Products, Inc. -->
     <!-- Product: CP210x UART Bridge -->
     <!-- Seika [Note Taker] -->
-    <modalias>usb:v10c4pea80*</modalias>
+    <modalias>usb:v10C4pEA80*</modalias>
 
     <!-- Device: 1148:0301 -->
     <!-- BrailleMemo [Smart] -->
@@ -304,75 +304,79 @@
 
     <!-- Device: 1C71:C004 -->
     <!-- BrailleNote [HumanWare APEX] -->
-    <modalias>usb:v1c71pc004*</modalias>
+    <modalias>usb:v1C71pC004*</modalias>
 
     <!-- Device: 1C71:C005 -->
     <!-- HumanWare [all models (serial protocol)] -->
-    <modalias>usb:v1c71pc005*</modalias>
+    <modalias>usb:v1C71pC005*</modalias>
 
     <!-- Device: 1C71:C006 -->
     <!-- HumanWare [all models (HID protocol)] -->
-    <modalias>usb:v1c71pc006*</modalias>
+    <modalias>usb:v1C71pC006*</modalias>
+
+    <!-- Device: 1C71:C00A -->
+    <!-- HumanWare [BrailleNote Touch (HID protocol)] -->
+    <modalias>usb:v1C71pC00A*</modalias>
 
     <!-- Device: 1FE4:0003 -->
     <!-- HandyTech [USB-HID adapter] -->
-    <modalias>usb:v1fe4p0003*</modalias>
+    <modalias>usb:v1FE4p0003*</modalias>
 
     <!-- Device: 1FE4:0044 -->
     <!-- HandyTech [Easy Braille (HID)] -->
-    <modalias>usb:v1fe4p0044*</modalias>
+    <modalias>usb:v1FE4p0044*</modalias>
 
     <!-- Device: 1FE4:0054 -->
     <!-- HandyTech [Active Braille] -->
-    <modalias>usb:v1fe4p0054*</modalias>
+    <modalias>usb:v1FE4p0054*</modalias>
 
     <!-- Device: 1FE4:0055 -->
     <!-- HandyTech [Connect Braille 40] -->
-    <modalias>usb:v1fe4p0055*</modalias>
+    <modalias>usb:v1FE4p0055*</modalias>
 
     <!-- Device: 1FE4:0061 -->
     <!-- HandyTech [Actilino] -->
-    <modalias>usb:v1fe4p0061*</modalias>
+    <modalias>usb:v1FE4p0061*</modalias>
 
     <!-- Device: 1FE4:0064 -->
     <!-- HandyTech [Active Star 40] -->
-    <modalias>usb:v1fe4p0064*</modalias>
+    <modalias>usb:v1FE4p0064*</modalias>
 
     <!-- Device: 1FE4:0074 -->
     <!-- HandyTech [Braille Star 40 (HID)] -->
-    <modalias>usb:v1fe4p0074*</modalias>
+    <modalias>usb:v1FE4p0074*</modalias>
 
     <!-- Device: 1FE4:0081 -->
     <!-- HandyTech [Basic Braille 16] -->
-    <modalias>usb:v1fe4p0081*</modalias>
+    <modalias>usb:v1FE4p0081*</modalias>
 
     <!-- Device: 1FE4:0082 -->
     <!-- HandyTech [Basic Braille 20] -->
-    <modalias>usb:v1fe4p0082*</modalias>
+    <modalias>usb:v1FE4p0082*</modalias>
 
     <!-- Device: 1FE4:0083 -->
     <!-- HandyTech [Basic Braille 32] -->
-    <modalias>usb:v1fe4p0083*</modalias>
+    <modalias>usb:v1FE4p0083*</modalias>
 
     <!-- Device: 1FE4:0084 -->
     <!-- HandyTech [Basic Braille 40] -->
-    <modalias>usb:v1fe4p0084*</modalias>
+    <modalias>usb:v1FE4p0084*</modalias>
 
     <!-- Device: 1FE4:0086 -->
     <!-- HandyTech [Basic Braille 64] -->
-    <modalias>usb:v1fe4p0086*</modalias>
+    <modalias>usb:v1FE4p0086*</modalias>
 
     <!-- Device: 1FE4:0087 -->
     <!-- HandyTech [Basic Braille 80] -->
-    <modalias>usb:v1fe4p0087*</modalias>
+    <modalias>usb:v1FE4p0087*</modalias>
 
     <!-- Device: 1FE4:008A -->
     <!-- HandyTech [Basic Braille 48] -->
-    <modalias>usb:v1fe4p008a*</modalias>
+    <modalias>usb:v1FE4p008A*</modalias>
 
     <!-- Device: 1FE4:008B -->
     <!-- HandyTech [Basic Braille 160] -->
-    <modalias>usb:v1fe4p008b*</modalias>
+    <modalias>usb:v1FE4p008B*</modalias>
 
     <!-- Device: 4242:0001 -->
     <!-- Pegasus [all models] -->
@@ -380,72 +384,72 @@
 
     <!-- Device: C251:1122 -->
     <!-- EuroBraille [Esys (version < 3.0, no SD card)] -->
-    <modalias>usb:vc251p1122*</modalias>
+    <modalias>usb:vC251p1122*</modalias>
 
     <!-- Device: C251:1123 -->
     <!-- EuroBraille [reserved] -->
-    <modalias>usb:vc251p1123*</modalias>
+    <modalias>usb:vC251p1123*</modalias>
 
     <!-- Device: C251:1124 -->
     <!-- EuroBraille [Esys (version < 3.0, with SD card)] -->
-    <modalias>usb:vc251p1124*</modalias>
+    <modalias>usb:vC251p1124*</modalias>
 
     <!-- Device: C251:1125 -->
     <!-- EuroBraille [reserved] -->
-    <modalias>usb:vc251p1125*</modalias>
+    <modalias>usb:vC251p1125*</modalias>
 
     <!-- Device: C251:1126 -->
     <!-- EuroBraille [Esys (version >= 3.0, no SD card)] -->
-    <modalias>usb:vc251p1126*</modalias>
+    <modalias>usb:vC251p1126*</modalias>
 
     <!-- Device: C251:1127 -->
     <!-- EuroBraille [reserved] -->
-    <modalias>usb:vc251p1127*</modalias>
+    <modalias>usb:vC251p1127*</modalias>
 
     <!-- Device: C251:1128 -->
     <!-- EuroBraille [Esys (version >= 3.0, with SD card)] -->
-    <modalias>usb:vc251p1128*</modalias>
+    <modalias>usb:vC251p1128*</modalias>
 
     <!-- Device: C251:1129 -->
     <!-- EuroBraille [reserved] -->
-    <modalias>usb:vc251p1129*</modalias>
+    <modalias>usb:vC251p1129*</modalias>
 
     <!-- Device: C251:112A -->
     <!-- EuroBraille [reserved] -->
-    <modalias>usb:vc251p112a*</modalias>
+    <modalias>usb:vC251p112A*</modalias>
 
     <!-- Device: C251:112B -->
     <!-- EuroBraille [reserved] -->
-    <modalias>usb:vc251p112b*</modalias>
+    <modalias>usb:vC251p112B*</modalias>
 
     <!-- Device: C251:112C -->
     <!-- EuroBraille [reserved] -->
-    <modalias>usb:vc251p112c*</modalias>
+    <modalias>usb:vC251p112C*</modalias>
 
     <!-- Device: C251:112D -->
     <!-- EuroBraille [reserved] -->
-    <modalias>usb:vc251p112d*</modalias>
+    <modalias>usb:vC251p112D*</modalias>
 
     <!-- Device: C251:112E -->
     <!-- EuroBraille [reserved] -->
-    <modalias>usb:vc251p112e*</modalias>
+    <modalias>usb:vC251p112E*</modalias>
 
     <!-- Device: C251:112F -->
     <!-- EuroBraille [reserved] -->
-    <modalias>usb:vc251p112f*</modalias>
+    <modalias>usb:vC251p112F*</modalias>
 
     <!-- Device: C251:1130 -->
     <!-- EuroBraille [Esytime (firmware 1.03, 2014-03-31)] -->
     <!-- EuroBraille [Esytime] -->
-    <modalias>usb:vc251p1130*</modalias>
+    <modalias>usb:vC251p1130*</modalias>
 
     <!-- Device: C251:1131 -->
     <!-- EuroBraille [reserved] -->
-    <modalias>usb:vc251p1131*</modalias>
+    <modalias>usb:vC251p1131*</modalias>
 
     <!-- Device: C251:1132 -->
     <!-- EuroBraille [reserved] -->
-    <modalias>usb:vc251p1132*</modalias>
+    <modalias>usb:vC251p1132*</modalias>
 
     <!-- END_USB_DEVICES -->
   </provides>
