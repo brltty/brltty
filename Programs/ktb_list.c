@@ -219,17 +219,21 @@ putKeyName (ListGenerationData *lgd, const KeyValue *value) {
 
 static int
 putKeyCombination (ListGenerationData *lgd, const KeyCombination *combination) {
-  wchar_t nameDelimiter = 0;
+  wchar_t keyDelimiter = 0;
   unsigned char dotCount = 0;
 
+  const char *dotPrefix = "dot";
+  size_t dotPrefixLength = strlen(dotPrefix);
+  size_t dotNameLength = dotPrefixLength + 1;
+
   for (unsigned char index=0; index<combination->modifierCount; index+=1) {
-    char name[0X100];
-    formatKeyName(name, sizeof(name), lgd->keyTable,
+    char keyName[0X100];
+    formatKeyName(keyName, sizeof(keyName), lgd->keyTable,
                   &combination->modifierKeys[combination->modifierPositions[index]]);
 
-    if (strlen(name) == 4) {
-      if (strncasecmp(name, "dot", 3) == 0) {
-        wchar_t number = name[3];
+    if (strlen(keyName) == dotNameLength) {
+      if (strncasecmp(keyName, dotPrefix, dotPrefixLength) == 0) {
+        wchar_t number = keyName[dotPrefixLength];
 
         if ((number >= '1') && (number <= '8')) {
           if (++dotCount == 1) goto firstDot;
@@ -254,18 +258,18 @@ putKeyCombination (ListGenerationData *lgd, const KeyCombination *combination) {
     dotCount = 0;
   firstDot:
 
-    if (!nameDelimiter) {
-      nameDelimiter = WC_C('+');
-    } else if (!putCharacter(lgd, nameDelimiter)) {
+    if (!keyDelimiter) {
+      keyDelimiter = WC_C('+');
+    } else if (!putCharacter(lgd, keyDelimiter)) {
       return 0;
     }
 
-    if (!putUtf8String(lgd, name)) return 0;
+    if (!putUtf8String(lgd, keyName)) return 0;
   }
 
   if (combination->flags & KCF_IMMEDIATE_KEY) {
-    if (nameDelimiter) {
-      if (!putCharacter(lgd, nameDelimiter)) {
+    if (keyDelimiter) {
+      if (!putCharacter(lgd, keyDelimiter)) {
         return 0;
       }
     }
