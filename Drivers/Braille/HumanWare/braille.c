@@ -22,6 +22,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "ktb.h"
 #include "ascii.h"
 #include "bitmask.h"
 #include "async_wait.h"
@@ -185,12 +186,27 @@ handleKeyEvent (BrailleDisplay *brl, unsigned char key, int press) {
 }
 
 static int
+isCalibrationKey (BrailleDisplay *brl, unsigned char key) {
+  switch (key) {
+    default:
+      return 0;
+
+    case HW_KEY_CAL_OK:
+    case HW_KEY_CAL_FAIL:
+    case HW_KEY_CAL_EMPTY:
+    case HW_KEY_CAL_RESET:
+      break;
+  }
+
+  releaseAllKeys(brl->keyTable);
+  BITMASK_ZERO(brl->data->pressedKeys.mask);
+  brl->data->pressedKeys.count = 0;
+  return 1;
+}
+
+static int
 handleKeyPress (BrailleDisplay *brl, unsigned char key) {
   if (BITMASK_TEST(brl->data->pressedKeys.mask, key)) return 0;
-  if (key == HW_KEY_CAL_OK) return 0;
-  if (key == HW_KEY_CAL_FAIL) return 0;
-  if (key == HW_KEY_CAL_EMPTY) return 0;
-  if (key == HW_KEY_CAL_RESET) return 0;
 
   BITMASK_SET(brl->data->pressedKeys.mask, key);
   brl->data->pressedKeys.count += 1;
@@ -227,6 +243,7 @@ handlePressedKeysArray (BrailleDisplay *brl, unsigned char *keys, size_t count) 
         BITMASK_SET(pressedMask, *key);
         pressedCount += 1;
 
+        if (isCalibrationKey(brl, *key)) return;
         handleKeyPress(brl, *key);
       }
 
@@ -374,9 +391,13 @@ processSerialInputPacket (BrailleDisplay *brl) {
       handlePressedKeysArray(brl, packet.fields.data.bytes, packet.fields.length);
       break;
 
-    case HW_MSG_KEY_DOWN:
-      handleKeyPress(brl, packet.fields.data.key.id);
+    case HW_MSG_KEY_DOWN: {
+      unsigned char key = packet.fields.data.key.id;
+      if (isCalibrationKey(brl, key)) break;
+
+      handleKeyPress(brl, key);
       break;
+    }
 
     case HW_MSG_KEY_UP:
       handleKeyRelease(brl, packet.fields.data.key.id);
