@@ -2156,7 +2156,7 @@ THREAD_FUNCTION(createServerSocket) {
   return NULL;
 }
 
-/* Function : server */
+/* Function : runServer */
 /* The server thread */
 /* Returns NULL in any case */
 THREAD_FUNCTION(runServer) {
