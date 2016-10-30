@@ -2177,7 +2177,7 @@ THREAD_FUNCTION(runServer) {
   int nbHandles = 0;
 #else /* __MINGW32__ */
   int fdmax;
-  struct timeval tv;
+  struct timeval tv, *timeout;
   int n;
 #endif /* __MINGW32__ */
 
@@ -2317,10 +2317,15 @@ THREAD_FUNCTION(runServer) {
     addTtyFds(&sockset, &fdmax, &ttys);
     unlockMutex(&apiConnectionsMutex);
 
-    tv.tv_sec = 1;
-    tv.tv_usec = 0;
+    if (unauthConnections) {
+      tv.tv_sec = 1;
+      tv.tv_usec = 0;
+      timeout = &tv;
+    } else {
+      timeout = NULL;
+    }
 
-    if ((n=select(fdmax+1, &sockset, NULL, NULL, &tv))<0) {
+    if ((n=select(fdmax+1, &sockset, NULL, NULL, timeout))<0) {
       if (fdmax==0) continue; /* still no server socket */
       logMessage(LOG_WARNING,"select: %s",strerror(errno));
       break;
