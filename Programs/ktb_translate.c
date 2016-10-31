@@ -33,6 +33,9 @@
 #include "cmd_enqueue.h"
 #include "async_alarm.h"
 
+#define RETAIN_CHORD_KEY 0
+#define ON_FIRST_RELEASE 1
+
 #define BRL_CMD_ALERT(alert) BRL_CMD_ARG(ALERT, ALERT_##alert)
 
 ASYNC_ALARM_CALLBACK(handleKeyAutoreleaseAlarm) {
@@ -203,7 +206,7 @@ makeKeyboardCommand (KeyTable *table, unsigned char context, int allowChords) {
   const KeyContext *ctx;
 
   if ((ctx = getKeyContext(table, context))) {
-    int keyboardCommand = BRL_CMD_BLK(PASSDOTS);
+    int keyboardCommand = 0;
 
     for (unsigned int pressedIndex=0; pressedIndex<table->pressedKeys.count; pressedIndex+=1) {
       const KeyValue *keyValue = &table->pressedKeys.table[pressedIndex];
@@ -225,6 +228,8 @@ makeKeyboardCommand (KeyTable *table, unsigned char context, int allowChords) {
         if (dots) keyboardCommand |= ctx->mappedKeys.superimpose;
         keyboardCommand &= ~BRL_DOTC;
       }
+
+      keyboardCommand |= BRL_CMD_BLK(PASSDOTS);
     }
 
     return keyboardCommand;
@@ -489,12 +494,10 @@ processKeyEvent (
       const KeyBinding *binding = findKeyBinding(table, context, &keyValue, &isIncomplete);
       int inserted = insertPressedKey(table, &keyValue, keyPosition);
 
-      if (0 && ((command = makeKeyboardCommand(table, context, 1)) != EOF)) {
+      if (RETAIN_CHORD_KEY && ((command = makeKeyboardCommand(table, context, 1)) != EOF)) {
         binding = NULL;
         isImmediate = 0;
-      }
-
-      if (binding) {
+      } else if (binding) {
         command = binding->primaryCommand.value;
       } else if ((binding = findKeyBinding(table, context, NULL, &isIncomplete))) {
         command = binding->primaryCommand.value;
@@ -573,7 +576,7 @@ processKeyEvent (
     } else {
       resetLongPressData(table);
 
-      if (1 || (table->pressedKeys.count == 0)) {
+      if (ON_FIRST_RELEASE || (table->pressedKeys.count == 0)) {
         int *cmd = &table->release.command;
 
         if (*cmd != BRL_CMD_NOOP) {
