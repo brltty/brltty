@@ -1215,7 +1215,8 @@ static PacketHandlers packetHandlers = {
   handleGetDriverName, handleGetDisplaySize,
   handleEnterTtyMode, handleSetFocus, handleLeaveTtyMode,
   handleKeyRanges, handleKeyRanges, handleWrite,
-  handleEnterRawMode, handleLeaveRawMode, handlePacket, handleSuspendDriver, handleResumeDriver
+  handleEnterRawMode, handleLeaveRawMode, handlePacket,
+  handleSuspendDriver, handleResumeDriver,
 };
 
 static void handleNewConnection(Connection *c)
