@@ -199,7 +199,7 @@ findMappedKeyEntry (const KeyContext *ctx, const KeyValue *keyValue) {
 }
 
 static int
-makeKeyboardCommand (KeyTable *table, unsigned char context) {
+makeKeyboardCommand (KeyTable *table, unsigned char context, int allowChords) {
   const KeyContext *ctx;
 
   if ((ctx = getKeyContext(table, context))) {
@@ -214,12 +214,17 @@ makeKeyboardCommand (KeyTable *table, unsigned char context) {
     }
 
     {
-      int dotPressed = !!(keyboardCommand & (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8));
-      int spacePressed = !!(keyboardCommand & BRL_DOTC);
+      int space = keyboardCommand & BRL_DOTC;
+      int dots = keyboardCommand & (
+        BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 |
+        BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8
+      );
 
-      if (dotPressed == spacePressed) return EOF;
-      if (dotPressed) keyboardCommand |= ctx->mappedKeys.superimpose;
-      keyboardCommand &= ~BRL_DOTC;
+      if (!(allowChords && ((space | dots) == keyboardCommand))) {
+        if (!space == !dots) return EOF;
+        if (dots) keyboardCommand |= ctx->mappedKeys.superimpose;
+        keyboardCommand &= ~BRL_DOTC;
+      }
     }
 
     return keyboardCommand;
@@ -484,12 +489,17 @@ processKeyEvent (
       const KeyBinding *binding = findKeyBinding(table, context, &keyValue, &isIncomplete);
       int inserted = insertPressedKey(table, &keyValue, keyPosition);
 
+      if (0 && ((command = makeKeyboardCommand(table, context, 1)) != EOF)) {
+        binding = NULL;
+        isImmediate = 0;
+      }
+
       if (binding) {
         command = binding->primaryCommand.value;
       } else if ((binding = findKeyBinding(table, context, NULL, &isIncomplete))) {
         command = binding->primaryCommand.value;
         isImmediate = 0;
-      } else if ((command = makeKeyboardCommand(table, context)) != EOF) {
+      } else if ((command = makeKeyboardCommand(table, context, 0)) != EOF) {
         isImmediate = 0;
       } else if (context == KTB_CTX_DEFAULT) {
         command = EOF;
