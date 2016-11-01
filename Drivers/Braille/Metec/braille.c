@@ -53,19 +53,20 @@ BEGIN_KEY_NAME_TABLE(4keys)
   KEY_NAME_ENTRY(MT_KEY_RightDown, "RightDown"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(front)
-  KEY_NAME_ENTRY(MT_KEY_CursorLeft, "CursorLeft"),
-  KEY_NAME_ENTRY(MT_KEY_CursorUp, "CursorUp"),
-  KEY_NAME_ENTRY(MT_KEY_CursorRight, "CursorRight"),
-  KEY_NAME_ENTRY(MT_KEY_CursorDown, "CursorDown"),
-END_KEY_NAME_TABLE
-
 BEGIN_KEY_NAME_TABLE(routing1)
   KEY_GROUP_ENTRY(MT_GRP_RoutingKeys1, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(status1)
   KEY_GROUP_ENTRY(MT_GRP_StatusKeys1, "StatusKey"),
+END_KEY_NAME_TABLE
+
+/*
+BEGIN_KEY_NAME_TABLE(front)
+  KEY_NAME_ENTRY(MT_KEY_CursorLeft, "CursorLeft"),
+  KEY_NAME_ENTRY(MT_KEY_CursorUp, "CursorUp"),
+  KEY_NAME_ENTRY(MT_KEY_CursorRight, "CursorRight"),
+  KEY_NAME_ENTRY(MT_KEY_CursorDown, "CursorDown"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(routing2)
@@ -75,6 +76,7 @@ END_KEY_NAME_TABLE
 BEGIN_KEY_NAME_TABLE(status2)
   KEY_GROUP_ENTRY(MT_GRP_StatusKeys2, "StatusKey2"),
 END_KEY_NAME_TABLE
+*/
 
 BEGIN_KEY_NAME_TABLES(bd1_3)
   KEY_NAME_TABLE(3keys),
