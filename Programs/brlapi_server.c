@@ -2178,7 +2178,6 @@ THREAD_FUNCTION(runServer) {
   int nbHandles = 0;
 #else /* __MINGW32__ */
   int fdmax;
-  struct timeval tv, *timeout;
   int n;
 #endif /* __MINGW32__ */
 
@@ -2318,9 +2317,11 @@ THREAD_FUNCTION(runServer) {
     addTtyFds(&sockset, &fdmax, &ttys);
     unlockMutex(&apiConnectionsMutex);
 
-    if (unauthConnections) {
+    struct timeval tv, *timeout;
+
+    if (unauthConnections || !fdmax) {
+      memset(&tv, 0, sizeof(tv));
       tv.tv_sec = 1;
-      tv.tv_usec = 0;
       timeout = &tv;
     } else {
       timeout = NULL;
