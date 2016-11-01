@@ -206,33 +206,31 @@ makeKeyboardCommand (KeyTable *table, unsigned char context, int allowChords) {
   const KeyContext *ctx;
 
   if ((ctx = getKeyContext(table, context))) {
-    int keyboardCommand = 0;
+    int bits = 0;
 
     for (unsigned int pressedIndex=0; pressedIndex<table->pressedKeys.count; pressedIndex+=1) {
       const KeyValue *keyValue = &table->pressedKeys.table[pressedIndex];
       const MappedKeyEntry *map = findMappedKeyEntry(ctx, keyValue);
 
       if (!map) return EOF;
-      keyboardCommand |= map->keyboardFunction->bit;
+      bits |= map->keyboardFunction->bit;
     }
 
     {
-      int space = keyboardCommand & BRL_DOTC;
-      int dots = keyboardCommand & (
+      int space = bits & BRL_DOTC;
+      int dots = bits & (
         BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 |
         BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8
       );
 
-      if (!(allowChords && ((space | dots) == keyboardCommand))) {
+      if (!(allowChords && ((space | dots) == bits))) {
         if (!space == !dots) return EOF;
-        if (dots) keyboardCommand |= ctx->mappedKeys.superimpose;
-        keyboardCommand &= ~BRL_DOTC;
+        if (dots) bits |= ctx->mappedKeys.superimpose;
+        bits &= ~BRL_DOTC;
       }
-
-      keyboardCommand |= BRL_CMD_BLK(PASSDOTS);
     }
 
-    return keyboardCommand;
+    return BRL_CMD_BLK(PASSDOTS) | bits;
   }
 
   return EOF;
