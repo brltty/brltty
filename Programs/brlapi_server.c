@@ -2178,7 +2178,6 @@ THREAD_FUNCTION(runServer) {
   int nbHandles = 0;
 #else /* __MINGW32__ */
   int fdmax;
-  int n;
 #endif /* __MINGW32__ */
 
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "server thread started");
@@ -2327,7 +2326,7 @@ THREAD_FUNCTION(runServer) {
       timeout = NULL;
     }
 
-    if ((n=select(fdmax+1, &sockset, NULL, NULL, timeout))<0) {
+    if (select(fdmax+1, &sockset, NULL, NULL, timeout) < 0) {
       if (fdmax==0) continue; /* still no server socket */
       logMessage(LOG_WARNING,"select: %s",strerror(errno));
       break;
