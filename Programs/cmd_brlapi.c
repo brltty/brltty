@@ -42,11 +42,7 @@ cmdBrlttyToBrlapi (brlapi_keyCode_t *code, int command, int retainDots) {
       break;
 
     case BRL_CMD_BLK(PASSDOTS):
-      if (retainDots) {
-        if (arg == (BRLAPI_DOTC >> BRLAPI_KEY_CMD_ARG_SHIFT)) arg = 0;
-        goto doDefault;
-      }
-
+      if (retainDots) goto doDefault;
       *code = cmdWCharToBrlapi(convertDotsToCharacter(textTable, arg));
       break;
 
