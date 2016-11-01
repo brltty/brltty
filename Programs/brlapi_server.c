@@ -2320,20 +2320,22 @@ THREAD_FUNCTION(runServer) {
     addTtyFds(&sockset, &fdmax, &ttys);
     unlockMutex(&apiConnectionsMutex);
 
-    struct timeval tv, *timeout;
+    {
+      struct timeval tv, *timeout;
 
-    if (unauthConnections || !fdmax) {
-      memset(&tv, 0, sizeof(tv));
-      tv.tv_sec = 1;
-      timeout = &tv;
-    } else {
-      timeout = NULL;
-    }
+      if (unauthConnections || !fdmax) {
+        memset(&tv, 0, sizeof(tv));
+        tv.tv_sec = 1;
+        timeout = &tv;
+      } else {
+        timeout = NULL;
+      }
 
-    if (select(fdmax+1, &sockset, NULL, NULL, timeout) < 0) {
-      if (fdmax==0) continue; /* still no server socket */
-      logMessage(LOG_WARNING,"select: %s",strerror(errno));
-      break;
+      if (select(fdmax+1, &sockset, NULL, NULL, timeout) < 0) {
+        if (fdmax==0) continue; /* still no server socket */
+        logMessage(LOG_WARNING,"select: %s",strerror(errno));
+        break;
+      }
     }
 #endif /* __MINGW32__ */
 
