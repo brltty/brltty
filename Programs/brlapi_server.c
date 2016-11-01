@@ -250,8 +250,12 @@ pthread_mutex_t apiRawMutex;
 static Connection *rawConnection = NULL;
 static Connection *suspendConnection = NULL;
 
-/* mutex lock order is apiConnectionsMutex first, then apiRawMutex, then (acceptedKeysMutex
- * or brailleWindowMutex) then apiDriverMutex */
+/* mutex lock order is as follows:
+ * 1. apiConnectionsMutex
+ * 2. apiRawMutex
+ * 3. acceptedKeysMutex or brailleWindowMutex
+ * 4. apiDriverMutex
+*/
 
 static Tty notty;
 static Tty ttys;
