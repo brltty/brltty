@@ -18,6 +18,20 @@
 
 /* api_server.c : Main file for BrlApi server */
 
+#define SERVER_SOCKET_LIMIT 4
+#define SERVER_SELECT_TIMEOUT 1
+#define UNAUTH_LIMIT 5
+#define UNAUTH_TIMEOUT 30
+#define OUR_STACK_MIN 0X10000
+
+#ifndef PTHREAD_STACK_MIN
+#define PTHREAD_STACK_MIN OUR_STACK_MIN
+#endif /* PTHREAD_STACK_MIN */
+
+#define RELEASE "BrlAPI Server: release " BRLAPI_RELEASE
+#define COPYRIGHT "   Copyright (C) 2002-2016 by Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>, \
+Samuel Thibault <samuel.thibault@ens-lyon.org>"
+
 #include "prologue.h"
 
 #include <stdio.h>
@@ -97,14 +111,6 @@
 #undef PF_LOCAL
 #endif /* __CYGWIN__ */
 
-#define UNAUTH_MAX 5
-#define UNAUTH_DELAY 30
-
-#define OUR_STACK_MIN 0X10000
-#ifndef PTHREAD_STACK_MIN
-#define PTHREAD_STACK_MIN OUR_STACK_MIN
-#endif /* PTHREAD_STACK_MIN */
-
 typedef enum {
   PARM_AUTH,
   PARM_HOST,
@@ -115,10 +121,6 @@ const char *const api_parameters[] = { "auth", "host", "stacksize", NULL };
 
 static size_t stackSize;
 static AsyncEvent *flushEvent;
-
-#define RELEASE "BrlAPI Server: release " BRLAPI_RELEASE
-#define COPYRIGHT "   Copyright (C) 2002-2016 by Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>, \
-Samuel Thibault <samuel.thibault@ens-lyon.org>"
 
 #define WERR(x, y, ...) do { \
   logMessage(LOG_ERR, "writing error %d to %"PRIfd, y, x); \
@@ -221,11 +223,9 @@ typedef struct Tty {
   struct Tty *subttys; /* children */
 } Tty;
 
-#define MAXSOCKETS 4 /* who knows what users want to do... */
-
 /* Pointer to the connection accepter thread */
 static pthread_t serverThread; /* server */
-static pthread_t socketThreads[MAXSOCKETS]; /* socket binding threads */
+static pthread_t socketThreads[SERVER_SOCKET_LIMIT]; /* socket binding threads */
 static int running; /* should threads be running? */
 static char **socketHosts = NULL; /* socket local hosts */
 static struct socketInfo {
@@ -236,10 +236,10 @@ static struct socketInfo {
 #ifdef __MINGW32__
   OVERLAPPED overl;
 #endif /* __MINGW32__ */
-} socketInfo[MAXSOCKETS]; /* information for cleaning sockets */
+} socketInfo[SERVER_SOCKET_LIMIT]; /* information for cleaning sockets */
 
 static int serverSocketCount; /* number of sockets */
-static int serverSocketsLeft; /* number of sockets not opened yet */
+static int serverSocketsPending; /* number of sockets not opened yet */
 pthread_mutex_t serverSocketsMutex;
 
 /* Protects from connection addition / remove from the server thread */
@@ -2091,23 +2091,31 @@ static void handleTtyFds(fd_set *fds, time_t currentTime, Tty *tty) {
   {
     Connection *c,*next;
     c = tty->connections->next;
-    while (c!=tty->connections) {
+
+    while (c != tty->connections) {
       int remove = 0;
       next = c->next;
+
 #ifdef __MINGW32__
-      if (WaitForSingleObject(c->packet.overl.hEvent,0) == WAIT_OBJECT_0)
+      if (WaitForSingleObject(c->packet.overl.hEvent, 0) == WAIT_OBJECT_0)
 #else /* __MINGW32__ */
       if (FD_ISSET(c->fd, fds))
 #endif /* __MINGW32__ */
+      {
 	remove = processRequest(c, &packetHandlers);
-      else remove = c->auth!=1 && currentTime-(c->upTime) > UNAUTH_DELAY;
+      } else {
+        remove = (c->auth != 1) && ((currentTime - c->upTime) > UNAUTH_TIMEOUT);
+      }
+
 #ifndef __MINGW32__
       FD_CLR(c->fd,fds);
 #endif /* __MINGW32__ */
+
       if (remove) removeFreeConnection(c);
       c = next;
     }
   }
+
   {
     Tty *t,*next;
     for (t = tty->subttys; t; t = next) {
@@ -2161,7 +2169,7 @@ THREAD_FUNCTION(createServerSocket) {
   }
 
   lockMutex(&serverSocketsMutex);
-    serverSocketsLeft -= 1;
+    serverSocketsPending -= 1;
   unlockMutex(&serverSocketsMutex);
 
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "socket creation finished: %"PRIdPTR, num);
@@ -2202,8 +2210,9 @@ THREAD_FUNCTION(runServer) {
   }
 
   socketHosts = splitString(hosts,'+',&serverSocketCount);
-  if (serverSocketCount>MAXSOCKETS) {
-    logMessage(LOG_ERR,"too many hosts specified (%d, max %d)",serverSocketCount,MAXSOCKETS);
+  if (serverSocketCount > SERVER_SOCKET_LIMIT) {
+    logMessage(LOG_ERR, "too many hosts specified: %d > %d)",
+               serverSocketCount, SERVER_SOCKET_LIMIT);
     goto finished;
   }
   if (serverSocketCount == 0) {
@@ -2237,7 +2246,7 @@ THREAD_FUNCTION(runServer) {
     pthread_mutexattr_t attributes;
     pthread_mutexattr_init(&attributes);
     pthread_mutex_init(&serverSocketsMutex, &attributes);
-    serverSocketsLeft = serverSocketCount;
+    serverSocketsPending = serverSocketCount;
   }
 
   for (i=0;i<serverSocketCount;i++) {
@@ -2339,9 +2348,9 @@ THREAD_FUNCTION(runServer) {
       struct timeval tv, *timeout;
 
       lockMutex(&serverSocketsMutex);
-        if (unauthConnections || serverSocketsLeft) {
+        if (unauthConnections || serverSocketsPending) {
           memset(&tv, 0, sizeof(tv));
-          tv.tv_sec = 1;
+          tv.tv_sec = SERVER_SELECT_TIMEOUT;
           timeout = &tv;
         } else {
           timeout = NULL;
@@ -2399,7 +2408,7 @@ THREAD_FUNCTION(runServer) {
 #endif /* __MINGW32__ */
         logMessage(LOG_NOTICE, "BrlAPI connection fd=%"PRIfd" accepted: %s", resfd, source);
 
-        if (unauthConnections>=UNAUTH_MAX) {
+        if (unauthConnections >= UNAUTH_LIMIT) {
           writeError(resfd, BRLAPI_ERROR_CONNREFUSED);
           closeFileDescriptor(resfd);
 
