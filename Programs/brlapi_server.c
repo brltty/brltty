@@ -237,7 +237,10 @@ static struct socketInfo {
   OVERLAPPED overl;
 #endif /* __MINGW32__ */
 } socketInfo[MAXSOCKETS]; /* information for cleaning sockets */
-static int numSockets; /* number of sockets */
+
+static int serverSocketCount; /* number of sockets */
+static int serverSocketsLeft; /* number of sockets not opened yet */
+pthread_mutex_t serverSocketsMutex;
 
 /* Protects from connection addition / remove from the server thread */
 pthread_mutex_t apiConnectionsMutex;
@@ -1991,7 +1994,7 @@ static void closeSockets(void *arg)
   int i;
   struct socketInfo *info;
   
-  for (i=0;i<numSockets;i++) {
+  for (i=0;i<serverSocketCount;i++) {
 #ifdef __MINGW32__
     pthread_cancel(socketThreads[i]);
 #else /* __MINGW32__ */
@@ -2157,6 +2160,10 @@ THREAD_FUNCTION(createServerSocket) {
     createSocket(num);
   }
 
+  lockMutex(&serverSocketsMutex);
+    serverSocketsLeft -= 1;
+  unlockMutex(&serverSocketsMutex);
+
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "socket creation finished: %"PRIdPTR, num);
   return NULL;
 }
@@ -2187,30 +2194,31 @@ THREAD_FUNCTION(runServer) {
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "server thread started");
   if (!prepareThread()) goto finished;
 
-  if (auth && !isAbsolutePath(auth)) 
+  if (auth && !isAbsolutePath(auth)) {
     if (!(authDescriptor = authBeginServer(auth))) {
       logMessage(LOG_WARNING, "Unable to start auth server");
       goto finished;
     }
+  }
 
-  socketHosts = splitString(hosts,'+',&numSockets);
-  if (numSockets>MAXSOCKETS) {
-    logMessage(LOG_ERR,"too many hosts specified (%d, max %d)",numSockets,MAXSOCKETS);
+  socketHosts = splitString(hosts,'+',&serverSocketCount);
+  if (serverSocketCount>MAXSOCKETS) {
+    logMessage(LOG_ERR,"too many hosts specified (%d, max %d)",serverSocketCount,MAXSOCKETS);
     goto finished;
   }
-  if (numSockets == 0) {
+  if (serverSocketCount == 0) {
     logMessage(LOG_INFO,"no hosts specified");
     goto finished;
   }
 #ifdef __MINGW32__
-  nbAlloc = numSockets;
+  nbAlloc = serverSocketCount;
 #endif /* __MINGW32__ */
 
   pthread_attr_init(&attr);
   /* don't care if it fails */
   pthread_attr_setstacksize(&attr,stackSize);
 
-  for (i=0;i<numSockets;i++)
+  for (i=0;i<serverSocketCount;i++)
     socketInfo[i].fd = INVALID_FILE_DESCRIPTOR;
 
 #ifdef __MINGW32__
@@ -2225,7 +2233,14 @@ THREAD_FUNCTION(runServer) {
   pthread_cleanup_push(closeSockets,NULL);
 #endif /* __MINGW32__ */
 
-  for (i=0;i<numSockets;i++) {
+  {
+    pthread_mutexattr_t attributes;
+    pthread_mutexattr_init(&attributes);
+    pthread_mutex_init(&serverSocketsMutex, &attributes);
+    serverSocketsLeft = serverSocketCount;
+  }
+
+  for (i=0;i<serverSocketCount;i++) {
     socketInfo[i].addrfamily=brlapiserver_expandHost(socketHosts[i],&socketInfo[i].host,&socketInfo[i].port);
 
 #ifdef __MINGW32__
@@ -2233,8 +2248,8 @@ THREAD_FUNCTION(runServer) {
 #endif /* __MINGW32__ */
       {
         char name[0X100];
-
         snprintf(name, sizeof(name), "server-socket-create-%d", i);
+
         res = createThread(name, &socketThreads[i], &attr,
                            createServerSocket, (void *)(intptr_t)i);
       }
@@ -2273,7 +2288,7 @@ THREAD_FUNCTION(runServer) {
     lpHandles = malloc(nbAlloc * sizeof(*lpHandles));
     nbHandles = 0;
 
-    for (i=0;i<numSockets;i++) {
+    for (i=0;i<serverSocketCount;i++) {
       if (socketInfo[i].fd != INVALID_HANDLE_VALUE) {
 	lpHandles[nbHandles++] = socketInfo[i].overl.hEvent;
       }
@@ -2305,7 +2320,7 @@ THREAD_FUNCTION(runServer) {
     FD_ZERO(&sockset);
     fdmax=0;
 
-    for (i=0;i<numSockets;i++) {
+    for (i=0;i<serverSocketCount;i++) {
       if (socketInfo[i].fd>=0) {
 	FD_SET(socketInfo[i].fd, &sockset);
 
@@ -2323,13 +2338,15 @@ THREAD_FUNCTION(runServer) {
     {
       struct timeval tv, *timeout;
 
-      if (unauthConnections || !fdmax) {
-        memset(&tv, 0, sizeof(tv));
-        tv.tv_sec = 1;
-        timeout = &tv;
-      } else {
-        timeout = NULL;
-      }
+      lockMutex(&serverSocketsMutex);
+        if (unauthConnections || serverSocketsLeft) {
+          memset(&tv, 0, sizeof(tv));
+          tv.tv_sec = 1;
+          timeout = &tv;
+        } else {
+          timeout = NULL;
+        }
+      unlockMutex(&serverSocketsMutex);
 
       if (select(fdmax+1, &sockset, NULL, NULL, timeout) < 0) {
         if (fdmax==0) continue; /* still no server socket */
@@ -2341,7 +2358,7 @@ THREAD_FUNCTION(runServer) {
 
     time(&currentTime);
 
-    for (i=0;i<numSockets;i++) {
+    for (i=0;i<serverSocketCount;i++) {
       char source[0X100];
 
 #ifdef __MINGW32__
@@ -3150,7 +3167,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
     logMessage(LOG_WARNING,"pthread_create: %s",strerror(res));
     running = 0;
 
-    for (i=0;i<numSockets;i++) {
+    for (i=0;i<serverSocketCount;i++) {
 #ifdef __MINGW32__
       pthread_cancel(socketThreads[i]);
 #else /* __MINGW32__ */
