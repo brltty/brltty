@@ -145,12 +145,14 @@ CAMLprim value brlapiml_errorCode_of_error(value camlError)
 static void raise_brlapi_error(void)
 {
   static value *exception = NULL;
+  CAMLparam0();
   CAMLlocal1(res);
   if (exception==NULL) exception = caml_named_value("Brlapi_error");
   res = caml_alloc(2,0);
   Store_field(res, 0, *exception);
   Store_field(res, 1, constrCamlError(&brlapi_error));
   caml_raise(res);
+  CAMLreturn0;
 }
 
 /* Function : raise_brlapi_exception */
@@ -159,6 +161,7 @@ static void BRLAPI_STDCALL raise_brlapi_exception(int err, brlapi_packetType_t t
 {
   static value *exception = NULL;
   int i;
+  CAMLparam0();
   CAMLlocal2(str, res);
   str = caml_alloc_string(size);
   for (i=0; i<size; i++) Byte(str, i) = ((char *) packet)[i];
@@ -169,6 +172,7 @@ static void BRLAPI_STDCALL raise_brlapi_exception(int err, brlapi_packetType_t t
   Store_field(res, 2, caml_copy_int32(type));
   Store_field(res, 3, str);
   caml_raise(res);
+  CAMLreturn0;
 }
 
 /* function packDots */
