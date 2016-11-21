@@ -676,9 +676,18 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     .baud = 9600
   };
 
+  BEGIN_USB_STRING_LIST(usbManufacturers_BrailleDisplay)
+    "Silicon Labs",
+  END_USB_STRING_LIST
+
+  BEGIN_USB_STRING_LIST(usbManufacturers_NoteTaker)
+    "Silicon Laboratories",
+  END_USB_STRING_LIST
+
   BEGIN_USB_CHANNEL_DEFINITIONS
     { /* Braille Display */
       .vendor=0X10C4, .product=0XEA60,
+      .manufacturers = usbManufacturers_BrailleDisplay,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .serial=&serialParameters
@@ -686,6 +695,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
     { /* Note Taker */
       .vendor=0X10C4, .product=0XEA80,
+      .manufacturers = usbManufacturers_NoteTaker,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1,
       .serial=&serialParameters

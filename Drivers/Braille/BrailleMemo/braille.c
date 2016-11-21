@@ -286,9 +286,14 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     .baud = 9600
   };
 
+  BEGIN_USB_STRING_LIST(usbManufacturers_Pocket)
+    "Silicon Labs",
+  END_USB_STRING_LIST
+
   BEGIN_USB_CHANNEL_DEFINITIONS
     { /* Pocket */
       .vendor=0X10C4, .product=0XEA60,
+      .manufacturers = usbManufacturers_Pocket,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .serial=&serialParameters

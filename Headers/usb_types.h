@@ -300,7 +300,15 @@ typedef enum {
 #define USB_HID_ITEM_LENGTH(item) ((item) & ~UsbHidItemType_Mask)
 #define USB_HID_ITEM_BIT(type) (UINT64_C(1) << ((type) >> 2))
 
+#define BEGIN_USB_STRING_LIST(name) static const char *const name[] = {
+#define END_USB_STRING_LIST NULL};
+
 typedef struct {
+  const void *data;
+  const SerialParameters *serial;
+  const char *const *manufacturers;
+  const char *const *products;
+
   uint16_t vendor;
   uint16_t product;
   uint16_t version;
@@ -314,9 +322,6 @@ typedef struct {
   unsigned disableAutosuspend:1;
   unsigned disableEndpointReset:1;
   unsigned verifyInterface:1;
-
-  const SerialParameters *serial;
-  const void *data;
 } UsbChannelDefinition;
 
 #define BEGIN_USB_CHANNEL_DEFINITIONS static const UsbChannelDefinition usbChannelDefinitions[] = {

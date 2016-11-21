@@ -1139,6 +1139,10 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     .parity = SERIAL_PARITY_ODD
   };
 
+  BEGIN_USB_STRING_LIST(usbManufacturers_FTDI)
+    "FTDI",
+  END_USB_STRING_LIST
+
   BEGIN_USB_CHANNEL_DEFINITIONS
     { /* GoHubs chip */
       .vendor=0X0921, .product=0X1200,
@@ -1149,6 +1153,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
     { /* FTDI chip */
       .vendor=0X0403, .product=0X6001,
+      .manufacturers = usbManufacturers_FTDI,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .serial = &serialParameters

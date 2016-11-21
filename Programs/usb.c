@@ -371,6 +371,34 @@ usbVerifyProductIdentifier (const UsbDeviceDescriptor *descriptor, uint16_t iden
   return identifier == getLittleEndian16(descriptor->idProduct);
 }
 
+static int
+usbVerifyStrings (
+  UsbDevice *device,
+  const char *const *strings,
+  unsigned char number
+) {
+  if (!strings) return 1;
+  if (!number) return 0;
+
+  char *string = usbGetString(device, number, 1000);
+  int matched = 0;
+
+  if (string) {
+    while (*strings) {
+      if (strcmp(*strings, string) == 0) {
+        matched = 1;
+        break;
+      }
+
+      strings += 1;
+    }
+
+    free(string);
+  }
+
+  return matched;
+}
+
 const UsbDeviceDescriptor *
 usbDeviceDescriptor (UsbDevice *device) {
   return &device->descriptor;
@@ -1478,6 +1506,9 @@ usbChooseChannel (UsbDevice *device, UsbChooseChannelData *data) {
     if (!usbVerifyVendorIdentifier(descriptor, data->vendorIdentifier)) goto nextDefinition;
     if (!usbVerifyProductIdentifier(descriptor, data->productIdentifier)) goto nextDefinition;
     if (!usbVerifySerialNumber(device, data->serialNumber)) goto nextDefinition;
+
+    if (!usbVerifyStrings(device, definition->manufacturers, descriptor->iManufacturer)) goto nextDefinition;
+    if (!usbVerifyStrings(device, definition->products, descriptor->iProduct)) goto nextDefinition;
 
     if (definition->verifyInterface) {
       if (!usbConfigureDevice(device, definition->configuration)) goto nextDefinition;
