@@ -173,14 +173,14 @@ static UsbChannel *usbChannel = NULL;
 
 static int
 openUsbPort (const char *device) {
-  BEGIN_USB_STRING_LIST(usbManufacturers)
+  BEGIN_USB_STRING_LIST(usbManufacturers_0403_6001)
     "Tivomatic Oy",
   END_USB_STRING_LIST
 
   BEGIN_USB_CHANNEL_DEFINITIONS
     { /* all models */
       .vendor=0X0403, .product=0X6001,
-      .manufacturers = usbManufacturers,
+      .manufacturers = usbManufacturers_0403_6001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2
     },

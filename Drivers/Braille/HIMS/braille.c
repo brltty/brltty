@@ -556,7 +556,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     .baud = 115200
   };
 
-  BEGIN_USB_STRING_LIST(usbManufacturers_SyncBraille)
+  BEGIN_USB_STRING_LIST(usbManufacturers_0403_6001)
     "FTDI",
   END_USB_STRING_LIST
 
@@ -592,7 +592,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
     { /* Sync Braille */
       .vendor=0X0403, .product=0X6001,
-      .manufacturers = usbManufacturers_SyncBraille,
+      .manufacturers = usbManufacturers_0403_6001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .data=&syncBrailleProtocol

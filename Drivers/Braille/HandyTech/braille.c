@@ -1139,7 +1139,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     .parity = SERIAL_PARITY_ODD
   };
 
-  BEGIN_USB_STRING_LIST(usbManufacturers_FTDI)
+  BEGIN_USB_STRING_LIST(usbManufacturers_0403_6001)
     "FTDI",
   END_USB_STRING_LIST
 
@@ -1153,7 +1153,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
     { /* FTDI chip */
       .vendor=0X0403, .product=0X6001,
-      .manufacturers = usbManufacturers_FTDI,
+      .manufacturers = usbManufacturers_0403_6001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .serial = &serialParameters
