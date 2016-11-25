@@ -62,11 +62,7 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean isEditable () {
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
-      return accessibilityNode.isEditable();
-    } else {
-      return LanguageUtilities.canAssign(android.widget.EditText.class, accessibilityNode.getClassName().toString());
-    }
+    return ScreenUtilities.isEditable(accessibilityNode);
   }
 
   @Override

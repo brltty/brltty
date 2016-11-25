@@ -35,6 +35,14 @@ public final class ScreenUtilities {
     return ScreenDriver.getWindow().contains(location);
   }
 
+  public static boolean isEditable (AccessibilityNodeInfo node) {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+      return node.isEditable();
+    } else {
+      return LanguageUtilities.canAssign(android.widget.EditText.class, node.getClassName().toString());
+    }
+  }
+
   public static AccessibilityNodeInfo getRefreshedNode (AccessibilityNodeInfo node) {
     if (node != null) {
       if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {

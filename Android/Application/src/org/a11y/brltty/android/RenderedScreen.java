@@ -220,7 +220,11 @@ public class RenderedScreen {
 
         {
           CharSequence actualText = root.getText();
-          if (actualText != null) text = actualText.toString().trim();
+
+          if (actualText != null) {
+            text = actualText.toString();
+            if (!ScreenUtilities.isEditable(root)) text = text.trim();
+          }
         }
 
         if (text == null) {
