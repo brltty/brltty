@@ -638,7 +638,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-CORE_OBJECTS = core.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O activity.$O $(PREFS_OBJECTS) profile.$O menu.$O menu_prefs.$O ses.$O status.$O update.$O blink.$O dataarea.$O $(CMD_OBJECTS) pipe.$O $(TTB_OBJECTS) $(ATB_OBJECTS) $(CTB_OBJECTS) $(KTB_OBJECTS) ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(BELL_OBJECTS) $(LEDS_OBJECTS) $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(SPECIAL_SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) spk_input.$O api_control.$O $(API_SERVER_OBJECTS)
+CORE_OBJECTS = core.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O $(SERVICE_OBJECTS) activity.$O $(PREFS_OBJECTS) profile.$O menu.$O menu_prefs.$O ses.$O status.$O update.$O blink.$O dataarea.$O $(CMD_OBJECTS) pipe.$O $(TTB_OBJECTS) $(ATB_OBJECTS) $(CTB_OBJECTS) $(KTB_OBJECTS) ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(BELL_OBJECTS) $(LEDS_OBJECTS) $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(SPECIAL_SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) spk_input.$O api_control.$O $(API_SERVER_OBJECTS)
 CORE_NAME = brltty
 
 brltty-core: $(CORE_OBJECTS)
@@ -736,7 +736,7 @@ learn.$O:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = brltty.$O $(CORE_OBJECTS) $(SERVICE_OBJECTS)
+BRLTTY_OBJECTS = brltty.$O $(CORE_OBJECTS)
 BRLTTY_LIBRARIES = $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(SERVICE_LIBS) $(PCM_LIBS) $(MIDI_LIBS) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LDLIBS)
 
 brltty$X: $(BRLTTY_OBJECTS)
