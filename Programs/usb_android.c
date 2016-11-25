@@ -456,6 +456,7 @@ usbDisableAutosuspend (UsbDevice *device) {
 
 int
 usbSetConfiguration (UsbDevice *device, unsigned char configuration) {
+  logMessage(LOG_CATEGORY(USB_IO), "setting configuration: %u", configuration);
   if (configuration == 1) return 1;
 
   logUnsupportedFunction();
@@ -466,10 +467,15 @@ int
 usbClaimInterface (UsbDevice *device, unsigned char interface) {
   UsbDeviceExtension *devx = device->extension;
 
-  if (usbSetInterface(devx, interface))
-    if (usbOpenConnection(devx))
-      if (usbDoClaimInterface(devx->host->env, devx->connection, devx->interface))
+  logMessage(LOG_CATEGORY(USB_IO), "claiming interface: %u", interface);
+
+  if (usbSetInterface(devx, interface)) {
+    if (usbOpenConnection(devx)) {
+      if (usbDoClaimInterface(devx->host->env, devx->connection, devx->interface)) {
         return 1;
+      }
+    }
+  }
 
   return 0;
 }
@@ -478,10 +484,15 @@ int
 usbReleaseInterface (UsbDevice *device, unsigned char interface) {
   UsbDeviceExtension *devx = device->extension;
 
-  if (usbSetInterface(devx, interface))
-    if (usbOpenConnection(devx))
-      if (usbDoReleaseInterface(devx->host->env, devx->connection, devx->interface))
+  logMessage(LOG_CATEGORY(USB_IO), "releasing interface: %u", interface);
+
+  if (usbSetInterface(devx, interface)) {
+    if (usbOpenConnection(devx)) {
+      if (usbDoReleaseInterface(devx->host->env, devx->connection, devx->interface)) {
         return 1;
+      }
+    }
+  }
 
   return 0;
 }
@@ -492,6 +503,7 @@ usbSetAlternative (
   unsigned char interface,
   unsigned char alternative
 ) {
+  logMessage(LOG_CATEGORY(USB_IO), "setting alternative: %u[%u]", interface, alternative);
   if (alternative == 0) return 1;
 
   logUnsupportedFunction();
@@ -500,6 +512,7 @@ usbSetAlternative (
 
 int
 usbClearHalt (UsbDevice *device, unsigned char endpointAddress) {
+  logMessage(LOG_CATEGORY(USB_IO), "clear halt: %02X", endpointAddress);
   logUnsupportedFunction();
   return 0;
 }
@@ -527,6 +540,7 @@ usbControlTransfer (
     if (bytes) {
       if (direction == UsbControlDirection_Output) {
         (*host->env)->SetByteArrayRegion(host->env, bytes, 0, length, buffer);
+        if (length) logBytes(LOG_CATEGORY(USB_IO), "control output", buffer, length);
       }
 
       result = usbDoControlTransfer(host->env, devx->connection,
@@ -537,6 +551,7 @@ usbControlTransfer (
       if (direction == UsbControlDirection_Input) {
         if (result > 0) {
           (*host->env)->GetByteArrayRegion(host->env, bytes, 0, result, buffer);
+          logBytes(LOG_CATEGORY(USB_IO), "control input", buffer, result);
         }
       }
 
@@ -598,6 +613,8 @@ usbReadEndpoint (
   ssize_t result = -1;
   UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
 
+  logMessage(LOG_CATEGORY(USB_IO), "reading endpoint: %u", endpointNumber);
+
   if (endpoint) {
     UsbDeviceExtension *devx = device->extension;
 
@@ -648,6 +665,8 @@ usbWriteEndpoint (
 
   if (endpoint) {
     UsbDeviceExtension *devx = device->extension;
+
+    usbLogEndpointData(endpoint, "output", buffer, length);
 
     if (usbOpenConnection(devx)) {
       const UsbHostDevice *host = devx->host;
