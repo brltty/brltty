@@ -55,8 +55,8 @@ sed >"${outputFile}" -e "
   s/PACKAGE/${packageName}/
 
   /^#: /{
-    s% ${sourceRoot}/*% %
-    s% ${buildRoot}/*% %
+    s% ${sourceRoot}/*% %g
+    s% ${buildRoot}/*% %g
   }
 "
 exit "${?}"

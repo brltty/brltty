@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 5.4\n"
 "Report-Msgid-Bugs-To: brltty@mielke.cc\n"
-"POT-Creation-Date: 2016-11-01 21:58+0100\n"
+"POT-Creation-Date: 2016-11-29 20:09+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,14 +23,10 @@ msgstr ""
 msgid "\"%s\" started as \"%s\"\n"
 msgstr ""
 
-#: Programs/menu_prefs.c:440
-#: Programs/menu_prefs.c:441
-#: Programs/menu_prefs.c:443
-#: Programs/menu_prefs.c:444
-#: Programs/menu_prefs.c:447
-#: Programs/menu_prefs.c:448
-#: Programs/menu_prefs.c:449
-#: Programs/menu_prefs.c:451
+#: Programs/menu_prefs.c:440 Programs/menu_prefs.c:441
+#: Programs/menu_prefs.c:443 Programs/menu_prefs.c:444
+#: Programs/menu_prefs.c:447 Programs/menu_prefs.c:448
+#: Programs/menu_prefs.c:449 Programs/menu_prefs.c:451
 #: Programs/menu_prefs.c:452
 msgid "1 cell"
 msgstr ""
@@ -47,10 +43,8 @@ msgstr ""
 msgid "12 Hour"
 msgstr ""
 
-#: Programs/menu_prefs.c:439
-#: Programs/menu_prefs.c:442
-#: Programs/menu_prefs.c:445
-#: Programs/menu_prefs.c:446
+#: Programs/menu_prefs.c:439 Programs/menu_prefs.c:442
+#: Programs/menu_prefs.c:445 Programs/menu_prefs.c:446
 #: Programs/menu_prefs.c:450
 msgid "2 cells"
 msgstr ""
@@ -154,8 +148,7 @@ msgstr ""
 msgid "Alert Tunes"
 msgstr ""
 
-#: Programs/menu_prefs.c:689
-#: Programs/menu_prefs.c:949
+#: Programs/menu_prefs.c:689 Programs/menu_prefs.c:949
 msgid "All"
 msgstr ""
 
@@ -187,8 +180,7 @@ msgstr ""
 msgid "Attributes Invisible Time"
 msgstr ""
 
-#: Programs/config.c:2637
-#: Programs/menu_prefs.c:1191
+#: Programs/config.c:2637 Programs/menu_prefs.c:1191
 msgid "Attributes Table"
 msgstr ""
 
@@ -276,8 +268,7 @@ msgstr ""
 msgid "Blinking Speech Cursor"
 msgstr ""
 
-#: Programs/menu_prefs.c:519
-#: Programs/menu_prefs.c:1154
+#: Programs/menu_prefs.c:519 Programs/menu_prefs.c:1154
 msgid "Block"
 msgstr ""
 
@@ -443,8 +434,7 @@ msgstr ""
 msgid "Configuration Directory"
 msgstr ""
 
-#: Programs/config.c:2591
-#: Programs/menu_prefs.c:1247
+#: Programs/config.c:2591 Programs/menu_prefs.c:1247
 msgid "Configuration File"
 msgstr ""
 
@@ -464,8 +454,7 @@ msgstr ""
 msgid "Contracted Braille"
 msgstr ""
 
-#: Programs/config.c:2644
-#: Programs/menu_prefs.c:1199
+#: Programs/config.c:2644 Programs/menu_prefs.c:1199
 msgid "Contraction Table"
 msgstr ""
 
@@ -563,8 +552,7 @@ msgstr ""
 msgid "Drawbar Organ"
 msgstr ""
 
-#: Programs/config.c:2595
-#: Programs/menu_prefs.c:1267
+#: Programs/config.c:2595 Programs/menu_prefs.c:1267
 msgid "Drivers Directory"
 msgstr ""
 
@@ -774,8 +762,7 @@ msgstr ""
 msgid "Help Screen"
 msgstr ""
 
-#: Programs/menu_prefs.c:590
-#: Programs/menu_prefs.c:794
+#: Programs/menu_prefs.c:590 Programs/menu_prefs.c:794
 msgid "High"
 msgstr ""
 
@@ -844,8 +831,7 @@ msgstr ""
 msgid "Key Help"
 msgstr ""
 
-#: Programs/config.c:1358
-#: Programs/ktb_list.c:695
+#: Programs/config.c:1358 Programs/ktb_list.c:695
 msgid "Key Table"
 msgstr ""
 
@@ -857,8 +843,7 @@ msgstr ""
 msgid "Keyboard LED Alerts"
 msgstr ""
 
-#: Programs/config.c:2651
-#: Programs/menu_prefs.c:831
+#: Programs/config.c:2651 Programs/menu_prefs.c:831
 msgid "Keyboard Table"
 msgstr ""
 
@@ -952,8 +937,7 @@ msgstr ""
 msgid "Long Press Time"
 msgstr ""
 
-#: Programs/menu_prefs.c:588
-#: Programs/menu_prefs.c:792
+#: Programs/menu_prefs.c:588 Programs/menu_prefs.c:792
 msgid "Low"
 msgstr ""
 
@@ -989,8 +973,7 @@ msgstr ""
 msgid "Marimba"
 msgstr ""
 
-#: Programs/menu_prefs.c:591
-#: Programs/menu_prefs.c:795
+#: Programs/menu_prefs.c:591 Programs/menu_prefs.c:795
 msgid "Maximum"
 msgstr ""
 
@@ -1002,8 +985,7 @@ msgstr ""
 msgid "May"
 msgstr ""
 
-#: Programs/menu_prefs.c:589
-#: Programs/menu_prefs.c:793
+#: Programs/menu_prefs.c:589 Programs/menu_prefs.c:793
 msgid "Medium"
 msgstr ""
 
@@ -1019,8 +1001,7 @@ msgstr ""
 msgid "Message hold timeout (in 10ms units)."
 msgstr ""
 
-#: Programs/menu_prefs.c:587
-#: Programs/menu_prefs.c:791
+#: Programs/menu_prefs.c:587 Programs/menu_prefs.c:791
 msgid "Minimum"
 msgstr ""
 
@@ -1077,10 +1058,8 @@ msgstr ""
 msgid "No Capitalization"
 msgstr ""
 
-#: Programs/menu_prefs.c:717
-#: Programs/menu_prefs.c:947
-#: Programs/menu_prefs.c:960
-#: Programs/menu_prefs.c:973
+#: Programs/menu_prefs.c:717 Programs/menu_prefs.c:947
+#: Programs/menu_prefs.c:960 Programs/menu_prefs.c:973
 #: Programs/menu_prefs.c:1093
 #: Programs/menu_prefs.c:1132
 #: Programs/menu_prefs.c:1152
@@ -1228,10 +1207,8 @@ msgstr ""
 msgid "Path to directory containing drivers."
 msgstr ""
 
-#: Programs/brltest.c:68
-#: Programs/brltty-atb.c:36
-#: Programs/brltty-ctb.c:54
-#: Programs/brltty-ktb.c:77
+#: Programs/brltest.c:68 Programs/brltty-atb.c:36
+#: Programs/brltty-ctb.c:54 Programs/brltty-ktb.c:77
 #: Programs/config.c:418
 msgid "Path to directory containing tables."
 msgstr ""
@@ -1248,8 +1225,7 @@ msgstr ""
 msgid "Path to directory for text tables."
 msgstr ""
 
-#: Programs/brltest.c:78
-#: Programs/config.c:337
+#: Programs/brltest.c:78 Programs/config.c:337
 msgid "Path to directory which can be written to."
 msgstr ""
 
@@ -1302,8 +1278,7 @@ msgstr ""
 msgid "Powerdown"
 msgstr ""
 
-#: Programs/config.c:2593
-#: Programs/menu_prefs.c:1257
+#: Programs/config.c:2593 Programs/menu_prefs.c:1257
 msgid "Preferences File"
 msgstr ""
 
@@ -1789,8 +1764,7 @@ msgstr ""
 msgid "System Log Level"
 msgstr ""
 
-#: Programs/config.c:2596
-#: Programs/menu_prefs.c:1272
+#: Programs/config.c:2596 Programs/menu_prefs.c:1272
 msgid "Tables Directory"
 msgstr ""
 
@@ -1822,8 +1796,7 @@ msgstr ""
 msgid "Text Style"
 msgstr ""
 
-#: Programs/config.c:2623
-#: Programs/menu_prefs.c:1184
+#: Programs/config.c:2623 Programs/menu_prefs.c:1184
 msgid "Text Table"
 msgstr ""
 
@@ -1913,8 +1886,7 @@ msgstr ""
 msgid "Unfrozen"
 msgstr ""
 
-#: Programs/config.c:2592
-#: Programs/menu_prefs.c:1252
+#: Programs/config.c:2592 Programs/menu_prefs.c:1252
 msgid "Updatable Directory"
 msgstr ""
 
@@ -1967,8 +1939,7 @@ msgstr ""
 msgid "Working Directory"
 msgstr ""
 
-#: Programs/config.c:2594
-#: Programs/menu_prefs.c:1262
+#: Programs/config.c:2594 Programs/menu_prefs.c:1262
 msgid "Writable Directory"
 msgstr ""
 
@@ -2136,8 +2107,7 @@ msgstr ""
 msgid "cannot determine program directory"
 msgstr ""
 
-#: Programs/config.c:2587
-#: Programs/menu.c:538
+#: Programs/config.c:2587 Programs/menu.c:538
 msgid "cannot determine working directory"
 msgstr ""
 
@@ -2204,8 +2174,7 @@ msgstr ""
 msgid "cannot set focus to %#010x\n"
 msgstr ""
 
-#: Programs/file.c:471
-#: Programs/menu.c:525
+#: Programs/file.c:471 Programs/menu.c:525
 msgid "cannot set working directory"
 msgstr ""
 
@@ -2219,8 +2188,7 @@ msgstr ""
 msgid "cap"
 msgstr ""
 
-#: Programs/menu_prefs.c:711
-#: Programs/menu_prefs.c:1145
+#: Programs/menu_prefs.c:711 Programs/menu_prefs.c:1145
 msgid "cells"
 msgstr ""
 
@@ -2257,8 +2225,7 @@ msgstr ""
 msgid "copy characters to clipboard"
 msgstr ""
 
-#: Programs/config.c:544
-#: Programs/menu_prefs.c:486
+#: Programs/config.c:544 Programs/menu_prefs.c:486
 msgid "csecs"
 msgstr ""
 
@@ -2336,21 +2303,15 @@ msgstr ""
 msgid "describe current character"
 msgstr ""
 
-#: Programs/config.c:525
-#: Programs/config.c:535
+#: Programs/config.c:525 Programs/config.c:535
 msgid "device"
 msgstr ""
 
-#: Programs/brltest.c:64
-#: Programs/brltest.c:74
-#: Programs/brltty-atb.c:32
-#: Programs/brltty-ctb.c:50
-#: Programs/brltty-ktb.c:73
-#: Programs/brltty-ktb.c:83
-#: Programs/brltty-trtxt.c:47
-#: Programs/config.c:314
-#: Programs/config.c:333
-#: Programs/config.c:343
+#: Programs/brltest.c:64 Programs/brltest.c:74
+#: Programs/brltty-atb.c:32 Programs/brltty-ctb.c:50
+#: Programs/brltty-ktb.c:73 Programs/brltty-ktb.c:83
+#: Programs/brltty-trtxt.c:47 Programs/config.c:314
+#: Programs/config.c:333 Programs/config.c:343
 #: Programs/config.c:414
 msgid "directory"
 msgstr ""
@@ -2383,8 +2344,7 @@ msgstr ""
 msgid "driver request"
 msgstr ""
 
-#: Programs/config.c:372
-#: Programs/config.c:470
+#: Programs/config.c:372 Programs/config.c:470
 #: Programs/config.c:505
 msgid "driver,..."
 msgstr ""
@@ -2446,16 +2406,11 @@ msgid "failed to get first focus\n"
 msgstr ""
 
 #: Programs/brltty-trtxt.c:57
-#: Programs/brltty-trtxt.c:66
-#: Programs/config.c:304
-#: Programs/config.c:324
-#: Programs/config.c:425
-#: Programs/config.c:435
-#: Programs/config.c:444
-#: Programs/config.c:453
-#: Programs/config.c:489
-#: Programs/config.c:574
-#: Programs/config.c:582
+#: Programs/brltty-trtxt.c:66 Programs/config.c:304
+#: Programs/config.c:324 Programs/config.c:425
+#: Programs/config.c:435 Programs/config.c:444
+#: Programs/config.c:453 Programs/config.c:489
+#: Programs/config.c:574 Programs/config.c:582
 #: Programs/xbrlapi.c:90
 msgid "file"
 msgstr ""
@@ -2752,7 +2707,7 @@ msgstr ""
 msgid "invalid message hold timeout"
 msgstr ""
 
-#: Programs/brlapi_server.c:3096
+#: Programs/brlapi_server.c:3124
 msgid "invalid thread stack size"
 msgstr ""
 
@@ -2829,10 +2784,8 @@ msgstr ""
 msgid "missing parameter value"
 msgstr ""
 
-#: Programs/config.c:361
-#: Programs/config.c:383
-#: Programs/config.c:461
-#: Programs/config.c:480
+#: Programs/config.c:361 Programs/config.c:383
+#: Programs/config.c:461 Programs/config.c:480
 #: Programs/config.c:515
 msgid "name=value,..."
 msgstr ""
@@ -3130,8 +3083,7 @@ msgstr ""
 msgid "soundcard synthesizer"
 msgstr ""
 
-#: Programs/cmd.c:274
-#: Programs/core.c:869
+#: Programs/cmd.c:274 Programs/core.c:869
 msgid "space"
 msgstr ""
 
@@ -3139,8 +3091,7 @@ msgstr ""
 msgid "speak current character"
 msgstr ""
 
-#: Programs/cmds.auto.h:465
-#: Programs/cmds.auto.h:669
+#: Programs/cmds.auto.h:465 Programs/cmds.auto.h:669
 msgid "speak current line"
 msgstr ""
 
