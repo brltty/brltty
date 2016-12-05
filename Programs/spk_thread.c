@@ -563,6 +563,7 @@ testSpeechRequest (const void *item, void *data) {
   const SpeechRequest *req = item;
   const TestSpeechRequestData *tsr = data;
 
+  if (!req) return 0;
   return req->type == tsr->type;
 }
 
