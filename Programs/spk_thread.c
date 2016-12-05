@@ -937,9 +937,8 @@ destroySpeechDriverThread (volatile SpeechSynthesizer *spk) {
   deleteElements(sdt->requestQueue);
 
 #ifdef GOT_PTHREADS
-  sdt->beingDestroyed = 1;
-
   if (enqueueSpeechRequest(sdt, NULL)) {
+    sdt->beingDestroyed = 1;
     awaitSpeechResponse(sdt, SPEECH_DRIVER_THREAD_STOP_TIMEOUT);
 
     setResponsePending(sdt);
