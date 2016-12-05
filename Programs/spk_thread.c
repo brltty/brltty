@@ -89,6 +89,7 @@ struct SpeechDriverThreadStruct {
   pthread_t threadIdentifier;
   AsyncEvent *requestEvent;
   AsyncEvent *messageEvent;
+  unsigned beingDestroyed:1;
 #endif /* GOT_PTHREADS */
 
   struct {
@@ -247,19 +248,15 @@ logSpeechMessage (SpeechMessage *msg, const char *action) {
 
 static int
 testThreadValidity (volatile SpeechDriverThread *sdt) {
-  if (sdt) {
-    volatile SpeechSynthesizer *spk = sdt->speechSynthesizer;
+  if (!sdt) return 0;
+  if (sdt->beingDestroyed) return 0;
 
-    if (spk) {
-      if (sdt == spk->driver.thread) {
-        if (sdt->threadState == THD_READY) {
-          return 1;
-        }
-      }
-    }
-  }
+  volatile SpeechSynthesizer *spk = sdt->speechSynthesizer;
+  if (!spk) return 0;
+  if (sdt != spk->driver.thread) return 0;
 
-  return 0;
+  if (sdt->threadState != THD_READY) return 0;
+  return 1;
 }
 
 static void
@@ -563,7 +560,6 @@ testSpeechRequest (const void *item, void *data) {
   const SpeechRequest *req = item;
   const TestSpeechRequestData *tsr = data;
 
-  if (!req) return 0;
   return req->type == tsr->type;
 }
 
@@ -941,6 +937,8 @@ destroySpeechDriverThread (volatile SpeechSynthesizer *spk) {
   deleteElements(sdt->requestQueue);
 
 #ifdef GOT_PTHREADS
+  sdt->beingDestroyed = 1;
+
   if (enqueueSpeechRequest(sdt, NULL)) {
     awaitSpeechResponse(sdt, SPEECH_DRIVER_THREAD_STOP_TIMEOUT);
 
