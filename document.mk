@@ -19,6 +19,7 @@
 LOCALE = C
 SETLOCALE = LC_ALL=$(LOCALE)
 
+all: all-yes
 all-yes: txt html
 all-no:
 	@echo linuxdoc is not installed - document will not be made
