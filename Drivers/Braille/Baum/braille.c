@@ -1609,6 +1609,23 @@ handleBaumDataRegistersEvent (BrailleDisplay *brl, const BaumResponsePacket *pac
 }
 
 static int
+getIdentityCellCount(char* deviceIdentity, const int length) {
+  char buffer[length+1];
+  memcpy(buffer, deviceIdentity, length);
+  buffer[length] = 0;
+
+  char *digits = strpbrk(buffer, "123456789");
+
+  if (digits) {
+    int count = atoi(digits);
+    if (isAcceptableCellCount(count))
+      return count;
+  }
+
+  return 0;
+}
+
+static int
 probeBaumDevice (BrailleDisplay *brl) {
   int probes = 0;
 
@@ -1685,23 +1702,8 @@ probeBaumDevice (BrailleDisplay *brl) {
 
           case BAUM_RSP_DeviceIdentity: /* should contain fallback cell count */
             handleBaumDeviceIdentity(&response, 1);
-
-            {
-              const int length = sizeof(response.data.values.deviceIdentity);
-              char buffer[length+1];
-
-              memcpy(buffer, response.data.values.deviceIdentity, length);
-              buffer[length] = 0;
-
-              {
-                char *digits = strpbrk(buffer, "123456789");
-
-                if (digits) {
-                  int count = atoi(digits);
-                  if (isAcceptableCellCount(count)) identityCellCount = count;
-                }
-              }
-            }
+            identityCellCount = getIdentityCellCount(response.data.values.deviceIdentity,
+                                                     sizeof(response.data.values.deviceIdentity));
             continue;
 
           case BAUM_RSP_SerialNumber:
@@ -2095,6 +2097,7 @@ probeHidDevice (BrailleDisplay *brl) {
   if (writeBraillePacket(brl, NULL, packet, sizeof(packet))) {
     int haveCellCount = 0;
     int haveDeviceIdentity = 0;
+    int identityCellCount = 0;
 
     baumDeviceType = BAUM_DEVICE_Default;
     cellCount = 0;
@@ -2121,6 +2124,8 @@ probeHidDevice (BrailleDisplay *brl) {
         case BAUM_RSP_DeviceIdentity:
           handleHidDeviceIdentity(&packet, 1);
           haveDeviceIdentity = 1;
+          identityCellCount = getIdentityCellCount(packet.fields.data.deviceIdentity,
+                                                   sizeof(packet.fields.data.deviceIdentity));
           break;
 
         case BAUM_RSP_SerialNumber:
@@ -2133,6 +2138,14 @@ probeHidDevice (BrailleDisplay *brl) {
       }
 
       if (haveCellCount && haveDeviceIdentity) return 1;
+    }
+
+    if (identityCellCount) {
+      /* Older models don't provide the actual cell count
+       * so it must be derived from the identity string.
+       */
+      cellCount = identityCellCount;
+      return 1;
     }
   }
 
@@ -2952,8 +2965,15 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     { /* Refreshabraille 18 (18 cells) */
       .vendor=0X0904, .product=0X3001,
       .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=2,
+      .inputEndpoint=1, .outputEndpoint=1,
       .data=&baumHid1Operations
+    },
+
+    { /* Orbit 20 (20 cells) */
+      .vendor=0X0483, .product=0XA1D3,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&baumHid1Operations,
     },
 
     { /* Pronto! V3 18 (18 cells) */
