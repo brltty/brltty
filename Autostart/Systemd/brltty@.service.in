@@ -22,12 +22,16 @@ Description=BRLTTY Instance: %I
 Documentation=man:brltty(1)
 Documentation=@PACKAGE_URL@
 
+ConditionPathExists=%I
+RequiresMountsFor=@UPDATABLE_DIRECTORY@
 DefaultDependencies=no
+
 After=local-fs.target
 Before=sysinit.target
-RequiresMountsFor=@UPDATABLE_DIRECTORY@
 
-ConditionPathExists=%I
+Wants=systemd-udev-settle.service
+After=systemd-udev-settle.service
+
 StopWhenUnneeded=true
 RefuseManualStart=true
 RefuseManualStop=true
