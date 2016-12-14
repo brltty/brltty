@@ -131,7 +131,8 @@ usbSetSerialOperations (UsbDevice *device) {
     }
 
     if (!uso) {
-      if (device->descriptor.bDeviceClass == 0X02) {
+      if (device->descriptor.bDeviceClass == 0X02
+          || device->descriptor.bDeviceClass == 239) {  ///////////////////////////////
         uso = &usbSerialOperations_CDC_ACM;
       }
     }
