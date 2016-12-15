@@ -22,6 +22,7 @@
 
 #include "log.h"
 #include "brl_cmds.h"
+#include "unicode.h"
 
 #include "scr_driver.h"
 #include "system_java.h"
@@ -290,8 +291,8 @@ insertKey_AndroidScreen (ScreenKey key) {
         }
       }
     } else if (character < SCR_KEY_FUNCTION) {
-#define SIZE (SCR_KEY_FUNCTION - SCR_KEY_UNICODE_ROW)
-#define KEY(key,method) [SCR_KEY_##key - SCR_KEY_UNICODE_ROW] = method
+#define SIZE UNICODE_CELL_NUMBER(SCR_KEY_FUNCTION)
+#define KEY(key,method) [UNICODE_CELL_NUMBER(SCR_KEY_##key)] = method
 
       static const char *const methodNames[SIZE] = {
         KEY(ENTER, "inputKeyEnter"),
@@ -310,7 +311,7 @@ insertKey_AndroidScreen (ScreenKey key) {
         KEY(DELETE, "inputKeyDelete"),
       };
 
-      const unsigned int key = character - SCR_KEY_UNICODE_ROW;
+      const unsigned int key = UNICODE_CELL_NUMBER(character);
       const char *methodName = methodNames[key];
       if (!methodName) return 0;
 
