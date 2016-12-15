@@ -290,28 +290,35 @@ insertKey_AndroidScreen (ScreenKey key) {
         }
       }
     } else if (character < SCR_KEY_FUNCTION) {
-#define KEY(key,method) [key] = method
-      static const char *const methodNames[SCR_KEY_FUNCTION] = {
-        KEY(SCR_KEY_ENTER, "inputKeyEnter"),
-        KEY(SCR_KEY_TAB, "inputKeyTab"),
-        KEY(SCR_KEY_BACKSPACE, "inputKeyBackspace"),
-        KEY(SCR_KEY_ESCAPE, "inputKeyEscape"),
-        KEY(SCR_KEY_CURSOR_LEFT, "inputKeyCursorLeft"),
-        KEY(SCR_KEY_CURSOR_RIGHT, "inputKeyCursorRight"),
-        KEY(SCR_KEY_CURSOR_UP, "inputKeyCursorUp"),
-        KEY(SCR_KEY_CURSOR_DOWN, "inputKeyCursorDown"),
-        KEY(SCR_KEY_PAGE_UP, "inputKeyPageUp"),
-        KEY(SCR_KEY_PAGE_DOWN, "inputKeyPageDown"),
-        KEY(SCR_KEY_HOME, "inputKeyHome"),
-        KEY(SCR_KEY_END, "inputKeyEnd"),
-        KEY(SCR_KEY_INSERT, "inputKeyInsert"),
-        KEY(SCR_KEY_DELETE, "inputKeyDelete"),
-      };
-      const char *methodName = methodNames[character];
-#undef KEY
+#define SIZE (SCR_KEY_FUNCTION - SCR_KEY_UNICODE_ROW)
+#define KEY(key,method) [SCR_KEY_##key - SCR_KEY_UNICODE_ROW] = method
 
-      static jmethodID methodIdentifiers[SCR_KEY_FUNCTION];
-      jmethodID *methodIdentifier = &methodIdentifiers[character];
+      static const char *const methodNames[SIZE] = {
+        KEY(ENTER, "inputKeyEnter"),
+        KEY(TAB, "inputKeyTab"),
+        KEY(BACKSPACE, "inputKeyBackspace"),
+        KEY(ESCAPE, "inputKeyEscape"),
+        KEY(CURSOR_LEFT, "inputKeyCursorLeft"),
+        KEY(CURSOR_RIGHT, "inputKeyCursorRight"),
+        KEY(CURSOR_UP, "inputKeyCursorUp"),
+        KEY(CURSOR_DOWN, "inputKeyCursorDown"),
+        KEY(PAGE_UP, "inputKeyPageUp"),
+        KEY(PAGE_DOWN, "inputKeyPageDown"),
+        KEY(HOME, "inputKeyHome"),
+        KEY(END, "inputKeyEnd"),
+        KEY(INSERT, "inputKeyInsert"),
+        KEY(DELETE, "inputKeyDelete"),
+      };
+
+      const unsigned int key = character - SCR_KEY_UNICODE_ROW;
+      const char *methodName = methodNames[key];
+      if (!methodName) return 0;
+
+      static jmethodID methodIdentifiers[SIZE];
+      jmethodID *methodIdentifier = &methodIdentifiers[key];
+
+#undef SIZE
+#undef KEY
 
       if (findJavaStaticMethod(env, methodIdentifier, inputServiceClass, methodName,
                                JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
