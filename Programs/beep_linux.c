@@ -18,15 +18,19 @@
 
 #include "prologue.h"
 
+#include <string.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/kd.h>
 
 #include "log.h"
-#include "device.h"
 #include "beep.h"
 #include "system_linux.h"
 
 #define BEEP_DIVIDEND 1193180
+
+static int consoleDevice = INVALID_FILE_DESCRIPTOR;
 
 static inline BeepFrequency
 getWaveLength (BeepFrequency frequency) {
@@ -42,8 +46,20 @@ enableBeeps (void) {
 
 int
 canBeep (void) {
-  enableBeeps();
-  return !!getConsole();
+  if (consoleDevice == INVALID_FILE_DESCRIPTOR) {
+    const char *path = "/dev/tty0";
+    int device = open(path, O_WRONLY);
+
+    if (device == -1) {
+      logMessage(LOG_WARNING, "can't open console: %s: %s", path, strerror(errno));
+      return 0;
+    }
+
+    consoleDevice = device;
+    enableBeeps();
+  }
+
+  return 1;
 }
 
 int
@@ -53,10 +69,8 @@ synchronousBeep (BeepFrequency frequency, BeepDuration duration) {
 
 int
 asynchronousBeep (BeepFrequency frequency, BeepDuration duration) {
-  FILE *console = getConsole();
-
-  if (console) {
-    if (ioctl(fileno(console), KDMKTONE, ((duration << 0X10) | getWaveLength(frequency))) != -1) return 1;
+  if (consoleDevice != INVALID_FILE_DESCRIPTOR) {
+    if (ioctl(consoleDevice, KDMKTONE, ((duration << 0X10) | getWaveLength(frequency))) != -1) return 1;
     logSystemError("ioctl[KDMKTONE]");
   }
 
@@ -65,10 +79,8 @@ asynchronousBeep (BeepFrequency frequency, BeepDuration duration) {
 
 int
 startBeep (BeepFrequency frequency) {
-  FILE *console = getConsole();
-
-  if (console) {
-    if (ioctl(fileno(console), KIOCSOUND, getWaveLength(frequency)) != -1) return 1;
+  if (consoleDevice != INVALID_FILE_DESCRIPTOR) {
+    if (ioctl(consoleDevice, KIOCSOUND, getWaveLength(frequency)) != -1) return 1;
     logSystemError("ioctl[KIOCSOUND]");
   }
 
@@ -82,4 +94,8 @@ stopBeep (void) {
 
 void
 endBeep (void) {
+  if (consoleDevice != INVALID_FILE_DESCRIPTOR) {
+    close(consoleDevice);
+    consoleDevice = INVALID_FILE_DESCRIPTOR;
+  }
 }
