@@ -28,13 +28,14 @@
 #include "beep.h"
 #include "system_linux.h"
 
-#define BEEP_DIVIDEND 1193180
+#define BEEP_DEVICE_PATH "/dev/tty0"
+#define BEEP_DURATION_DIVIDEND 1193180
 
-static int consoleDevice = INVALID_FILE_DESCRIPTOR;
+static int beepDevice = INVALID_FILE_DESCRIPTOR;
 
 static inline BeepFrequency
 getWaveLength (BeepFrequency frequency) {
-  return frequency? (BEEP_DIVIDEND / frequency): 0;
+  return frequency? (BEEP_DURATION_DIVIDEND / frequency): 0;
 }
 
 static void
@@ -46,16 +47,16 @@ enableBeeps (void) {
 
 int
 canBeep (void) {
-  if (consoleDevice == INVALID_FILE_DESCRIPTOR) {
-    const char *path = "/dev/tty0";
+  if (beepDevice == INVALID_FILE_DESCRIPTOR) {
+    const char *path = BEEP_DEVICE_PATH;
     int device = open(path, O_WRONLY);
 
     if (device == -1) {
-      logMessage(LOG_WARNING, "can't open console: %s: %s", path, strerror(errno));
+      logMessage(LOG_WARNING, "can't open beep device: %s: %s", path, strerror(errno));
       return 0;
     }
 
-    consoleDevice = device;
+    beepDevice = device;
     enableBeeps();
   }
 
@@ -69,8 +70,8 @@ synchronousBeep (BeepFrequency frequency, BeepDuration duration) {
 
 int
 asynchronousBeep (BeepFrequency frequency, BeepDuration duration) {
-  if (consoleDevice != INVALID_FILE_DESCRIPTOR) {
-    if (ioctl(consoleDevice, KDMKTONE, ((duration << 0X10) | getWaveLength(frequency))) != -1) return 1;
+  if (beepDevice != INVALID_FILE_DESCRIPTOR) {
+    if (ioctl(beepDevice, KDMKTONE, ((duration << 0X10) | getWaveLength(frequency))) != -1) return 1;
     logSystemError("ioctl[KDMKTONE]");
   }
 
@@ -79,8 +80,8 @@ asynchronousBeep (BeepFrequency frequency, BeepDuration duration) {
 
 int
 startBeep (BeepFrequency frequency) {
-  if (consoleDevice != INVALID_FILE_DESCRIPTOR) {
-    if (ioctl(consoleDevice, KIOCSOUND, getWaveLength(frequency)) != -1) return 1;
+  if (beepDevice != INVALID_FILE_DESCRIPTOR) {
+    if (ioctl(beepDevice, KIOCSOUND, getWaveLength(frequency)) != -1) return 1;
     logSystemError("ioctl[KIOCSOUND]");
   }
 
@@ -94,8 +95,8 @@ stopBeep (void) {
 
 void
 endBeep (void) {
-  if (consoleDevice != INVALID_FILE_DESCRIPTOR) {
-    close(consoleDevice);
-    consoleDevice = INVALID_FILE_DESCRIPTOR;
+  if (beepDevice != INVALID_FILE_DESCRIPTOR) {
+    close(beepDevice);
+    beepDevice = INVALID_FILE_DESCRIPTOR;
   }
 }

@@ -89,7 +89,7 @@ struct SpeechDriverThreadStruct {
   pthread_t threadIdentifier;
   AsyncEvent *requestEvent;
   AsyncEvent *messageEvent;
-  unsigned beingDestroyed:1;
+  unsigned isBeingDestroyed:1;
 #endif /* GOT_PTHREADS */
 
   struct {
@@ -249,7 +249,7 @@ logSpeechMessage (SpeechMessage *msg, const char *action) {
 static int
 testThreadValidity (volatile SpeechDriverThread *sdt) {
   if (!sdt) return 0;
-  if (sdt->beingDestroyed) return 0;
+  if (sdt->isBeingDestroyed) return 0;
 
   volatile SpeechSynthesizer *spk = sdt->speechSynthesizer;
   if (!spk) return 0;
@@ -938,7 +938,7 @@ destroySpeechDriverThread (volatile SpeechSynthesizer *spk) {
 
 #ifdef GOT_PTHREADS
   if (enqueueSpeechRequest(sdt, NULL)) {
-    sdt->beingDestroyed = 1;
+    sdt->isBeingDestroyed = 1;
     awaitSpeechResponse(sdt, SPEECH_DRIVER_THREAD_STOP_TIMEOUT);
 
     setResponsePending(sdt);
