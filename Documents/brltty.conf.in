@@ -74,6 +74,7 @@
 #braille-driver	ht	# HandyTech
 #braille-driver	hw	# HumanWare
 #braille-driver	ir	# Iris
+#braille-driver	iv	# Innovision
 #braille-driver	lb	# Libbraille
 #braille-driver	lt	# LogText
 #braille-driver	mb	# MultiBraille

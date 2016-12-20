@@ -747,6 +747,9 @@ HumanWare
 .B ir
 Iris
 .TP 4
+.B iv
+Innovision
+.TP 4
 .B lb
 Libbraille
 .TP 4
