@@ -29,13 +29,13 @@
 #include "system_linux.h"
 
 #define BEEP_DEVICE_PATH "/dev/tty0"
-#define BEEP_DURATION_DIVIDEND 1193180
+#define TICKS_PER_SECOND 1193180
 
 static int beepDevice = INVALID_FILE_DESCRIPTOR;
 
 static inline BeepFrequency
-getWaveLength (BeepFrequency frequency) {
-  return frequency? (BEEP_DURATION_DIVIDEND / frequency): 0;
+getTicksPerWave (BeepFrequency frequency) {
+  return frequency? (TICKS_PER_SECOND / frequency): 0;
 }
 
 static void
@@ -71,7 +71,7 @@ synchronousBeep (BeepFrequency frequency, BeepDuration duration) {
 int
 asynchronousBeep (BeepFrequency frequency, BeepDuration duration) {
   if (beepDevice != INVALID_FILE_DESCRIPTOR) {
-    if (ioctl(beepDevice, KDMKTONE, ((duration << 0X10) | getWaveLength(frequency))) != -1) return 1;
+    if (ioctl(beepDevice, KDMKTONE, ((duration << 0X10) | getTicksPerWave(frequency))) != -1) return 1;
     logSystemError("ioctl[KDMKTONE]");
   }
 
@@ -81,7 +81,7 @@ asynchronousBeep (BeepFrequency frequency, BeepDuration duration) {
 int
 startBeep (BeepFrequency frequency) {
   if (beepDevice != INVALID_FILE_DESCRIPTOR) {
-    if (ioctl(beepDevice, KIOCSOUND, getWaveLength(frequency)) != -1) return 1;
+    if (ioctl(beepDevice, KIOCSOUND, getTicksPerWave(frequency)) != -1) return 1;
     logSystemError("ioctl[KIOCSOUND]");
   }
 
