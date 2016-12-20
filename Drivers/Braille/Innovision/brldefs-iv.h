@@ -16,7 +16,21 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_XX_BRLDEFS
-#define BRLTTY_INCLUDED_XX_BRLDEFS
+#ifndef BRLTTY_INCLUDED_IV_BRLDEFS
+#define BRLTTY_INCLUDED_IV_BRLDEFS
 
-#endif /* BRLTTY_INCLUDED_XX_BRLDEFS */ 
+typedef union {
+  unsigned char bytes[10];
+
+  struct {
+    unsigned char start;
+    unsigned char type;
+    unsigned char count;
+    unsigned char data;
+    unsigned char reserved[4];
+    unsigned char checksum;
+    unsigned char end;
+  } PACKED fields;
+} InputPacket;
+
+#endif /* BRLTTY_INCLUDED_IV_BRLDEFS */ 
