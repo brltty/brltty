@@ -112,6 +112,8 @@ newVariableNestingLevel (VariableNestingLevel *previous, const char *name) {
       if ((vnl->previous = previous)) claimVariableNestingLevel(previous);
       return vnl;
     }
+
+    free(vnl);
   } else {
     logMallocError();
   }

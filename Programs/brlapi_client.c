@@ -371,18 +371,21 @@ static ssize_t brlapi__waitForPacket(brlapi_handle_t *handle, brlapi_packetType_
   sem_t sem;
 again:
   pthread_mutex_lock(&handle->read_mutex);
-  if (!handle->reading) doread = handle->reading = 1;
-  else {
+  if (!handle->reading) {
+    doread = handle->reading = 1;
+  } else {
     if (
 #ifndef WINDOWS
     	!sem_init || !sem_post || !sem_wait || !sem_destroy ||
 #endif /* WINDOWS */
 	handle->altSem) {
       /* This can't happen without threads */
+      pthread_mutex_unlock(&handle->read_mutex);
       syslog(LOG_ERR,"third call to brlapi_waitForPacket !");
       brlapi_errno = BRLAPI_ERROR_ILLEGAL_INSTRUCTION;
       return -1;
     }
+
     handle->altExpectedPacketType = expectedPacketType;
     handle->altPacket = packet;
     handle->altSize = size;
@@ -1227,6 +1230,7 @@ static int brlapi___writeText(brlapi_handle_t *handle, int cursor, const void *s
 	switch(eaten) {
 	  case (size_t)(-2):
 	    errno = EILSEQ;
+	    /* fall through */
 	  case (size_t)(-1):
 	    brlapi_libcerrno = errno;
 	    brlapi_errfun = "mbrlen";
@@ -1536,7 +1540,7 @@ int BRLAPI_STDCALL brlapi__readKey(brlapi_handle_t *handle, int block, brlapi_ke
   pthread_mutex_unlock(&handle->key_mutex);
   if (res == -3) {
     if (!block) return 0;
-    brlapi_libcerrno = block?EINTR:EAGAIN;
+    brlapi_libcerrno = EINTR;
     brlapi_errno = BRLAPI_ERROR_LIBCERR;
     brlapi_errfun = "waitForPacket";
     return -1;

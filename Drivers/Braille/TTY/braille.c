@@ -251,18 +251,22 @@ writeText (const wchar_t *buffer, int columns) {
   int column;
   for (column=0; column<columns; column++) {
     wchar_t c = buffer[column];
+
 #ifdef HAVE_ICONV_H
     char *pc = (char*) &c;
     size_t sc = sizeof(wchar_t);
     char d[MB_MAX_LEN+1];
     char *pd = d;
     size_t sd = MB_MAX_LEN;
-    if (iconv(conversionDescriptor, &pc, &sc, &pd, &sd) >= 0) {
+
+    if (iconv(conversionDescriptor, &pc, &sc, &pd, &sd) != (size_t)-1) {
       *pd = 0;
       addstr(d);
     } else
 #endif /* HAVE_ICONV_H */
+    {
       addch(c);
+    }
   }
 }
 

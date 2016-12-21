@@ -1103,6 +1103,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
           case WC_C('"'):
           case WC_C('\\'):
             writeCharacter(WC_C('\\'));
+            /* fall through */
           default:
             writeCharacter(character);
             break;

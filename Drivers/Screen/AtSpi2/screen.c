@@ -216,7 +216,7 @@ static size_t my_mbslen(const char *s, size_t n) {
   size_t eaten;
   memset(&ps,0,sizeof(ps));
   while(n) {
-    if ((eaten = my_mbrlen(s,n,&ps))<0)
+    if ((ssize_t)(eaten = my_mbrlen(s,n,&ps))<0)
       return eaten;
     if (!(eaten)) return ret;
     s+=eaten;
@@ -653,7 +653,12 @@ static int checkActiveParent(const char *sender, const char *path) {
   dbus_message_iter_get_basic (&iter_struct, &path);
 
   states = getState(sender, path);
-  res = (states[0] & (1<<ATSPI_STATE_ACTIVE)) != 0 || checkActiveParent(sender, path);
+  if (states) {
+    res = (states[0] & (1<<ATSPI_STATE_ACTIVE)) != 0 || checkActiveParent(sender, path);
+    free(states);
+  } else {
+    res = 0;
+  }
 
 out:
   dbus_message_unref(reply);

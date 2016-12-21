@@ -130,17 +130,18 @@ writeCharacter (const wchar_t *character, mbstate_t *state) {
 static int
 processStream (FILE *inputStream, const char *inputName) {
   mbstate_t inputState;
-  mbstate_t outputState;
-
   memset(&inputState, 0, sizeof(inputState));
+
+  mbstate_t outputState;
   memset(&outputState, 0, sizeof(outputState));
 
   while (!feof(inputStream)) {
     char inputBuffer[0X1000];
-    size_t inputCount = fread(inputBuffer, 1, sizeof(inputBuffer), inputStream);
+    size_t inputCount = fread(inputBuffer, 1, sizeof(inputBuffer)-1, inputStream);
 
     if (ferror(inputStream)) goto inputError;
     if (!inputCount) break;
+    inputBuffer[inputCount] = 0;
 
     {
       char *byte = inputBuffer;

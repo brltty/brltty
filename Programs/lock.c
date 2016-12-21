@@ -174,7 +174,9 @@ newLockDescriptor (void) {
   if ((lock = malloc(sizeof(*lock)))) {
     memset(lock, 0, sizeof(*lock));
     if (constructLockDescriptor(lock)) return lock;
+
     free(lock);
+    lock = NULL;
   } else {
     logMallocError();
   }

@@ -243,6 +243,7 @@ readBraillePacket (
 
           default:
             logMessage(LOG_WARNING, "unimplemented braille packet verifier result: %u", result);
+            /* fall through */
           case BRL_PVR_INVALID:
             started = 0;
 

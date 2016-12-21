@@ -91,14 +91,20 @@ spk_destruct (volatile SpeechSynthesizer *spk)
 }
 
 static int
-doChild (void)
-{
+doChild (void) {
   FILE *stream = fdopen(*readfd, "r");
-  char buffer[0X400];
-  char *line;
-  while ((line = fgets(buffer, sizeof(buffer), stream))) {
-    flite_text_to_speech(line, voice, outtype);
+
+  if (stream) {
+    char buffer[0X400];
+    char *line;
+
+    while ((line = fgets(buffer, sizeof(buffer), stream))) {
+      flite_text_to_speech(line, voice, outtype);
+    }
+
+    fclose(stream);
   }
+
   return 0;
 }
 

@@ -1718,6 +1718,7 @@ static int readPid(char *path)
   int n;
   FileDescriptor fd;
   fd = open(path, O_RDONLY);
+  if (fd == -1) return 0;
   n = read(fd, pids, sizeof(pids)-1);
   closeFileDescriptor(fd);
   if (n == -1) return 0;
@@ -1888,7 +1889,7 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
     if (res == -1) {
       if (errno != ENOSPC) {
 	logSystemError("writing pid in local socket lock");
-	goto outtmp;
+	goto outlockfd;
       }
 
       approximateDelay(1000);
@@ -1958,6 +1959,8 @@ outlock:
   unlink(lockpath);
 outtmp:
   unlink(tmppath);
+outlockfd:
+  closeFileDescriptor(lock);
 #endif /* __MINGW32__ */
 outfd:
   closeFileDescriptor(fd);
@@ -2945,9 +2948,7 @@ int api_flush(BrailleDisplay *brl) {
 	unsigned char *oldbuf = disp->buffer;
 	disp->buffer = coreWindowDots;
 	brl->cursor = coreWindowCursor;
-	lockMutex(&apiDriverMutex);
 	trueBraille->writeWindow(brl, coreWindowText);
-	unlockMutex(&apiDriverMutex);
 	disp->buffer = oldbuf;
 	suspendDriver(brl);
       }
