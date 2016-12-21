@@ -669,8 +669,10 @@ static Connection *createConnection(FileDescriptor fd, time_t currentTime)
 outmalloc:
   free(c);
 out:
-  writeError(fd,BRLAPI_ERROR_NOMEM);
-  closeFileDescriptor(fd);
+  if (fd != INVALID_FILE_DESCRIPTOR) {
+    writeError(fd,BRLAPI_ERROR_NOMEM);
+    closeFileDescriptor(fd);
+  }
   return NULL;
 }
 
