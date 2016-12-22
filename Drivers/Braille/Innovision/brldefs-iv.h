@@ -33,4 +33,9 @@ typedef union {
   } PACKED fields;
 } InputPacket;
 
+typedef enum {
+  IV_GRP_NavigationKeys = 0,
+  IV_GRP_RoutingKeys
+} IV_KeyGroup;
+
 #endif /* BRLTTY_INCLUDED_IV_BRLDEFS */ 

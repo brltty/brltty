@@ -264,6 +264,28 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   size_t size;
 
   while ((size = readPacket(brl, &packet, sizeof(packet)))) {
+    switch (packet.fields.type) {
+      case 0X00: {
+        unsigned char key = packet.fields.data;
+
+        enqueueKey(brl, IV_GRP_RoutingKeys, key);
+        continue;
+      }
+
+      case 0X01: {
+        KeyNumberSet bits = (packet.fields.reserved[0] << 0X00)
+                          | (packet.fields.reserved[1] << 0X08)
+                          | (packet.fields.reserved[2] << 0X10)
+                          | (packet.fields.reserved[3] << 0X18);
+
+        enqueueKeys(brl, bits, IV_GRP_NavigationKeys, 0);
+        continue;
+      }
+
+      default:
+        break;
+    }
+
     logUnexpectedPacket(&packet, size);
   }
 
