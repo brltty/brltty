@@ -18,3 +18,49 @@
 
 title Innovision
 
+map Dot1 DOT1
+map Dot2 DOT2
+map Dot3 DOT3
+map Dot4 DOT4
+map Dot5 DOT5
+map Dot6 DOT6
+map Dot7 DOT7
+map Dot8 DOT8
+map Space SPACE
+bind Space+Dot7 KEY_BACKSPACE
+
+bind Space+Dot1+Dot2 KEY_FUNCTION+1 # Android Back
+bind Space+Dot1+Dot2+Dot5 KEY_FUNCTION+0 # Android Home
+bind Space+Dot1+Dot3+Dot4 KEY_FUNCTION+9 # Android Menu
+bind Space+Dot1+Dot3+Dot4+Dot5 KEY_FUNCTION+2 # Android Notifications
+bind Space+Dot1+Dot2+Dot3+Dot5 KEY_FUNCTION+3 # Android RecentApps
+
+bind F2 LNUP
+bind F3 LNDN
+bind F2+F3 CSRJMP_VERT
+
+bind Left FWINLT
+bind Right FWINRT
+bind Left+Right LNBEG
+
+bind F1+F2 FWINLTSKIP
+bind F3+F4 FWINRTSKIP
+
+bind F1+Left PRPROMPT
+bind F1+Right NXPROMPT
+
+bind F2+Left PRDIFLN
+bind F2+Right NXDIFLN
+
+bind F3+Left ATTRUP
+bind F3+Right ATTRDN
+
+bind F4+Left PRPGRPH
+bind F4+Right NXPGRPH
+
+bind F1+F2+Left TOP_LEFT
+bind F1+F2+Right BOT_LEFT
+
+bind F3+F4+Left CHRLT
+bind F3+F4+Right CHRRT
+

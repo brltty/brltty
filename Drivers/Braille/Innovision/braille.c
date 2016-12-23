@@ -31,6 +31,25 @@
 #define MAXIMUM_TEXT_CELLS 0XFF
 
 BEGIN_KEY_NAME_TABLE(navigation)
+  KEY_NAME_ENTRY(IV_KEY_DOT1, "Dot1"),
+  KEY_NAME_ENTRY(IV_KEY_DOT2, "Dot2"),
+  KEY_NAME_ENTRY(IV_KEY_DOT3, "Dot3"),
+  KEY_NAME_ENTRY(IV_KEY_DOT4, "Dot4"),
+  KEY_NAME_ENTRY(IV_KEY_DOT5, "Dot5"),
+  KEY_NAME_ENTRY(IV_KEY_DOT6, "Dot6"),
+  KEY_NAME_ENTRY(IV_KEY_DOT7, "Dot7"),
+  KEY_NAME_ENTRY(IV_KEY_DOT8, "Dot8"),
+  KEY_NAME_ENTRY(IV_KEY_SPACE, "Space"),
+
+  KEY_NAME_ENTRY(IV_KEY_F1, "F1"),
+  KEY_NAME_ENTRY(IV_KEY_F2, "F2"),
+  KEY_NAME_ENTRY(IV_KEY_F3, "F3"),
+  KEY_NAME_ENTRY(IV_KEY_F4, "F4"),
+
+  KEY_NAME_ENTRY(IV_KEY_LEFT, "Left"),
+  KEY_NAME_ENTRY(IV_KEY_RIGHT, "Right"),
+
+  KEY_GROUP_ENTRY(IV_GRP_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(all)
@@ -115,6 +134,7 @@ writePacket (
   {
     unsigned char sum = 0;
     const unsigned char *ptr = packet;
+
     while (ptr != byte) sum += *ptr++;
     *checksum = sum;
   }
@@ -182,6 +202,8 @@ static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
   GioDescriptor descriptor;
   gioInitializeDescriptor(&descriptor);
+
+  descriptor.bluetooth.channelNumber = 1;
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
     return 1;
