@@ -157,6 +157,12 @@ const UsbSerialAdapter usbSerialAdapterTable[] = {
     .vendor=0X10C4, .product=0XEA80,
     .generic = 1,
     .operations = &usbSerialOperations_CP2110
+  },
+
+  { /* Bristol Canute */
+    .vendor=0X2341, .product=0X8036,
+    .generic = 1,
+    .operations = &usbSerialOperations_CDC_ACM
   }
 };
 
