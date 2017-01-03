@@ -7,7 +7,9 @@
 ** Started on  Sun Mar 20 16:10:06 2005 Olivier BERT
 Last update Fri Jun  1 15:23:17 2007 Olivier BERT
 */
+#ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE 500
+#endif
 #include <sys/types.h>
 #include <dirent.h>
 #include <string.h>

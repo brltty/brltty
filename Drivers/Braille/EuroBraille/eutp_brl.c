@@ -5,7 +5,9 @@
 ** Login   <obert01@epita.fr>
 */
 
+#ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE 500
+#endif
 
 /* globals */
 unsigned char extensions[] = {'K', 'L', 'B', 'T', 'A'};
