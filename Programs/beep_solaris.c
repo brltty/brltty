@@ -17,6 +17,7 @@
  */
 
 #include "prologue.h"
+#include "log.h"
 
 #include <sys/kbio.h>
 #include <sys/kbd.h>
