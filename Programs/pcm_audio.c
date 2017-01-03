@@ -18,6 +18,9 @@
 
 #include "prologue.h"
 
+#include <string.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <sys/audio.h>
 #include <stropts.h>
 
