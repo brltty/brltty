@@ -287,7 +287,7 @@ in
    linux*|gnu*|kfreebsd*)
       brltty_prog_cc_sysflags="-D_DEFAULT_SOURCE -D_POSIX_C_SOURCE=2 -D_BSD_SOURCE -D_XOPEN_SOURCE=500 -D_XOPEN_SOURCE_EXTENDED -D_GNU_SOURCE"
       ;;
-   solaris2.1?) # Solaris 10 & 11 require _XOPEN_SOURCE=600 if using C99
+   solaris2.1?*) # Solaris 10 & 11 require _XOPEN_SOURCE=600 if using C99
       brltty_prog_cc_sysflags="-D_XOPEN_SOURCE=600 -D__EXTENSIONS__"
       ;;
    solaris*)

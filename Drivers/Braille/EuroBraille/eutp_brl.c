@@ -7,7 +7,7 @@
 
 #ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE 500
-#endif
+#endif /* _XOPEN_SOURCE */
 
 /* globals */
 unsigned char extensions[] = {'K', 'L', 'B', 'T', 'A'};

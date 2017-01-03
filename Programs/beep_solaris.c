@@ -17,12 +17,12 @@
  */
 
 #include "prologue.h"
-#include "log.h"
 
 #include <fcntl.h>
 #include <sys/kbio.h>
 #include <sys/kbd.h>
 
+#include "log.h"
 #include "beep.h"
 
 static int
