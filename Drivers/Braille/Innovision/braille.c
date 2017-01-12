@@ -66,7 +66,17 @@ struct BrailleDataStruct {
   struct {
     unsigned char rewrite;
     unsigned char cells[MAXIMUM_TEXT_CELLS];
+  } braille;
+
+  struct {
+    unsigned char rewrite;
+    wchar_t characters[MAXIMUM_TEXT_CELLS];
   } text;
+
+  struct {
+    unsigned char rewrite;
+    int position;
+  } cursor;
 };
 
 static int
@@ -242,7 +252,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
         makeOutputTable(dotsTable_ISO11548_1);
 
+        brl->data->braille.rewrite = 1;
         brl->data->text.rewrite = 1;
+        brl->data->cursor.rewrite = 1;
         return 1;
       }
 
@@ -269,12 +281,46 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  if (cellsHaveChanged(brl->data->text.cells, brl->buffer, brl->textColumns,
-                       NULL, NULL, &brl->data->text.rewrite)) {
-    unsigned char cells[brl->textColumns];
+  int cellCount = brl->textColumns;
 
-    translateOutputCells(cells, brl->data->text.cells, brl->textColumns);
-    if (!writePacket(brl, 0XFC, 0X01, cells, sizeof(cells), NULL, 0)) return 0;
+  int newBraille =
+      cellsHaveChanged(brl->data->braille.cells, brl->buffer, cellCount,
+                       NULL, NULL, &brl->data->braille.rewrite);
+
+  int newText =
+      textHasChanged(brl->data->text.characters, text, cellCount,
+                     NULL, NULL, &brl->data->text.rewrite);
+
+  int newCursor =
+      cursorHasChanged(&brl->data->cursor.position, brl->cursor,
+                       &brl->data->cursor.rewrite);
+
+  if (newBraille || newText || newCursor) {
+    unsigned char cells[cellCount];
+    unsigned char attributes[cellCount];
+    int cursor;
+
+    translateOutputCells(cells, brl->data->braille.cells, cellCount);
+    memset(attributes, sizeof(attributes), 0);
+    cursor = 0;
+
+    for (int i=0; i<cellCount; i+=1) {
+      unsigned char *byte = &attributes[i];
+
+      if (text) {
+        wchar_t character = text[i];
+
+        if (iswupper(character)) *byte |= 0X01;
+      }
+    }
+
+    if ((brl->cursor >= 0) && (brl->cursor < cellCount)) {
+      cursor = brl->cursor + 1;
+    }
+
+    if (!writePacket(brl, 0XFC, cursor,
+                     cells, sizeof(cells),
+                     attributes, sizeof(attributes))) return 0;
   }
 
   return 1;
