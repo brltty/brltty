@@ -2448,6 +2448,20 @@ validateInterval (int *value, const char *string) {
   }
 }
 
+static void
+detachStream (FILE *stream, const char *name, int output) {
+  const char *nullDevice = "/dev/null";
+
+  if (!freopen(nullDevice, (output? "a": "r"), stream)) {
+    if (errno != ENOENT) {
+      char action[0X40];
+
+      snprintf(action, sizeof(action), "freopen[%s]", name);
+      logSystemError(action);
+    }
+  }
+}
+
 ProgramExitStatus
 brlttyStart (void) {
   if (opt_cancelExecution) {
@@ -2525,23 +2539,9 @@ brlttyStart (void) {
 #if defined(GRUB_RUNTIME)
 
 #else /* redirect stdio streams to /dev/null */
-    {
-      const char *nullDevice = "/dev/null";
-
-      if (!freopen(nullDevice, "r", stdin)) {
-        logSystemError("freopen[stdin]");
-      }
-
-      if (!freopen(nullDevice, "a", stdout)) {
-        logSystemError("freopen[stdout]");
-      }
-
-      if (!opt_standardError) {
-        if (!freopen(nullDevice, "a", stderr)) {
-          logSystemError("freopen[stderr]");
-        }
-      }
-    }
+    detachStream(stdin, "stdin", 0);
+    detachStream(stdout, "stdout", 1);
+    if (!opt_standardError) detachStream(stderr, "stderr", 1);
 #endif /* redirect stdio streams to /dev/null */
 
 #ifdef __MINGW32__
