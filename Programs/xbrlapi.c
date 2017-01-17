@@ -173,20 +173,25 @@ static int tobrltty_init(char *auth, char *host) {
   unsigned int x,y;
   settings.host=host;
   settings.auth=auth;
+  static int had_succeeded;
 
   if ((brlapi_fd = brlapi_openConnection(&settings,&settings))<0)
   {
-    static int tried;
-    if (!tried)
+    if (!had_succeeded)
     {
-      /* Only produce an error message the first time we try to connect, to
-       * provide feedback to users running xbrlapi by hand, but not fill logs
-       * with reconnection attempts.  */
-      tried = 1;
+      /* This is the first attempt to connect to BRLTTY, and it failed.
+       * Return the error immediately to the user, to provide feedback to users
+       * running xbrlapi by hand, but not fill logs, eat battery, spam
+       * 127.0.0.1 with reconnection attempts.
+       */
       fatal_brlapi_errno("openConnection",gettext("cannot connect to braille devices daemon brltty at %s\n"),settings.host);
+      exit(PROG_EXIT_FATAL);
     }
     return 0;
   }
+  /* We achieved connecting to BRLTTY.  If BRLTTY dies later on, we will
+   * silently try to reconnect to it.  */
+  had_succeeded = 1;
 
   if (brlapi_getDisplaySize(&x,&y)<0)
   {
