@@ -2973,10 +2973,19 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .data=&baumEscapeOperations
     },
 
-    { /* Refreshabraille 18 (18 cells) */
+    { /* Orbit in Refreshabraille Emulation Mode (18 cells) */
       .vendor=0X0904, .product=0X3001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
+      .verifyInterface=1,
+      .data=&baumHid1Operations
+    },
+
+    { /* Refreshabraille 18 (18 cells) */
+      .vendor=0X0904, .product=0X3001,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .verifyInterface=1,
       .data=&baumHid1Operations
     },
 
