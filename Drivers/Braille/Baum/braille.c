@@ -179,6 +179,12 @@ BEGIN_KEY_NAME_TABLES(conny)
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLES(orbit)
+  KEY_NAME_SUBTABLE(display,6),
+  KEY_NAME_TABLE(entry),
+  KEY_NAME_TABLE(joystick),
+END_KEY_NAME_TABLES
+
 BEGIN_KEY_NAME_TABLES(pronto)
   KEY_NAME_SUBTABLE(display,6),
   KEY_NAME_TABLE(entry),
@@ -251,6 +257,7 @@ END_KEY_NAME_TABLES
 DEFINE_KEY_TABLE(default)
 DEFINE_KEY_TABLE(connect)
 DEFINE_KEY_TABLE(conny)
+DEFINE_KEY_TABLE(orbit)
 DEFINE_KEY_TABLE(pronto)
 DEFINE_KEY_TABLE(pv)
 DEFINE_KEY_TABLE(rb)
@@ -267,6 +274,7 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(default),
   &KEY_TABLE_DEFINITION(connect),
   &KEY_TABLE_DEFINITION(conny),
+  &KEY_TABLE_DEFINITION(orbit),
   &KEY_TABLE_DEFINITION(pronto),
   &KEY_TABLE_DEFINITION(pv),
   &KEY_TABLE_DEFINITION(rb),
@@ -803,6 +811,7 @@ typedef union {
 typedef enum {
   BAUM_DEVICE_Default,
   BAUM_DEVICE_Conny,
+  BAUM_DEVICE_Orbit,
   BAUM_DEVICE_PocketVario,
   BAUM_DEVICE_Pronto,
   BAUM_DEVICE_Refreshabraille,
@@ -833,6 +842,10 @@ static const BaumDeviceIdentityEntry baumDeviceIdentityTable[] = {
 
   { .string = "Conny",
     .type = BAUM_DEVICE_Conny
+  },
+
+  { .string = "Orbit",
+    .type = BAUM_DEVICE_Orbit
   },
 
   { .string = "PocketVario",
