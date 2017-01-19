@@ -49,6 +49,7 @@ BLUETOOTH_NAME_DRIVERS(EL12, "al", "vo");
 BLUETOOTH_NAME_DRIVERS(Focus, "fs");
 BLUETOOTH_NAME_DRIVERS(HWGBrailliant, "bm");
 BLUETOOTH_NAME_DRIVERS(MB248, "md");
+BLUETOOTH_NAME_DRIVERS(OrbitReader, "bm");
 BLUETOOTH_NAME_DRIVERS(Pronto, "bm");
 BLUETOOTH_NAME_DRIVERS(Refreshabraille, "bm");
 BLUETOOTH_NAME_DRIVERS(SuperVario, "bm");
@@ -167,6 +168,10 @@ const BluetoothNameEntry bluetoothNameTable[] = {
 
   { .namePrefix = "MB248",
     .driverCodes = bluetoothNameDrivers_MB248
+  },
+
+  { .namePrefix = "Orbit Reader",
+    .driverCodes = bluetoothNameDrivers_OrbitReader
   },
 
   { .namePrefix = "Pronto!",
