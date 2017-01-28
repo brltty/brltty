@@ -55,6 +55,52 @@ setStatusFields (const unsigned char *fields) {
 }
 
 static void
+setStatusStyle (unsigned char style) {
+  static const unsigned char styleNone[] = {
+    sfEnd
+  };
+
+  static const unsigned char styleAlva[] = {
+    sfAlphabeticCursorCoordinates, sfAlphabeticWindowCoordinates, sfStateLetter, sfEnd
+  };
+
+  static const unsigned char styleTieman[] = {
+    sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots, sfEnd
+  };
+
+  static const unsigned char stylePB80[] = {
+    sfWindowRow, sfEnd
+  };
+
+  static const unsigned char styleConfigurable[] = {
+    sfGeneric, sfEnd
+  };
+
+  static const unsigned char styleMDV[] = {
+    sfWindowCoordinates, sfEnd
+  };
+
+  static const unsigned char styleVoyager[] = {
+    sfWindowRow, sfCursorRow, sfCursorColumn, sfEnd
+  };
+
+  static const unsigned char styleTime[] = {
+    sfTime, sfEnd
+  };
+
+  static const unsigned char *const styleTable[] = {
+    styleNone, styleAlva, styleTieman, stylePB80,
+    styleConfigurable, styleMDV, styleVoyager, styleTime
+  };
+  static const unsigned char styleCount = ARRAY_COUNT(styleTable);
+
+  if (style < styleCount) {
+    const unsigned char *fields = styleTable[style];
+    if (*fields != sfEnd) setStatusFields(fields);
+  }
+}
+
+static void
 resetPreference (const PreferenceEntry *pref) {
   if (pref->settingCount) {
     memset(pref->setting, pref->defaultValue, pref->settingCount);
@@ -192,7 +238,7 @@ findPreferenceByAlias (const char *name) {
 }
 
 const PreferenceEntry *
-findPreference (const char *name) {
+findPreferenceEntry (const char *name) {
   const PreferenceEntry *pref;
 
   if ((pref = findPreferenceByName(name))) return pref;
@@ -201,7 +247,7 @@ findPreference (const char *name) {
 }
 
 static int
-getPreferenceSetting (
+changePreferenceSetting (
   const char *name, const char *operand,
   unsigned char *setting, const PreferenceStringTable *names
 ) {
@@ -231,18 +277,26 @@ getPreferenceSetting (
   return 0;
 }
 
-static int
-processPreferenceLine (char *line, void *data) {
-  static const char delimiters[] = " \t";
-  const char *name = strtok(line, delimiters);
+int
+setPreference (char *string) {
+  const char *name;
+
+  {
+    static const char delimiters[] = {
+      ' ', '\t', PARAMETER_ASSIGNMENT_CHARACTER, 0
+    };
+
+    name = strtok(string, delimiters);
+  }
 
   if (name && (*name != PREFS_COMMENT_CHARACTER)) {
-    const PreferenceEntry *pref = findPreference(name);
+    const PreferenceEntry *pref = findPreferenceEntry(name);
 
     if (pref) {
-      const char *operand;
-
       if (pref->encountered) *pref->encountered = 1;
+
+      static const char delimiters[] = " \t";
+      const char *operand;
 
       if (pref->settingCount) {
         unsigned char count = pref->settingCount;
@@ -250,7 +304,7 @@ processPreferenceLine (char *line, void *data) {
 
         while (count) {
           if ((operand = strtok(NULL, delimiters))) {
-            if (getPreferenceSetting(name, operand, setting, pref->settingNames)) {
+            if (changePreferenceSetting(name, operand, setting, pref->settingNames)) {
               setting += 1;
               count -= 1;
               continue;
@@ -262,7 +316,7 @@ processPreferenceLine (char *line, void *data) {
         }
       } else if (!(operand = strtok(NULL, delimiters))) {
         logMessage(LOG_WARNING, "missing preference setting: %s", name);
-      } else if (!getPreferenceSetting(name, operand, pref->setting, pref->settingNames)) {
+      } else if (!changePreferenceSetting(name, operand, pref->setting, pref->settingNames)) {
       }
     } else {
       logMessage(LOG_WARNING, "unknown preference: %s", name);
@@ -272,50 +326,9 @@ processPreferenceLine (char *line, void *data) {
   return 1;
 }
 
-static void
-setStatusStyle (unsigned char style) {
-  static const unsigned char styleNone[] = {
-    sfEnd
-  };
-
-  static const unsigned char styleAlva[] = {
-    sfAlphabeticCursorCoordinates, sfAlphabeticWindowCoordinates, sfStateLetter, sfEnd
-  };
-
-  static const unsigned char styleTieman[] = {
-    sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots, sfEnd
-  };
-
-  static const unsigned char stylePB80[] = {
-    sfWindowRow, sfEnd
-  };
-
-  static const unsigned char styleConfigurable[] = {
-    sfGeneric, sfEnd
-  };
-
-  static const unsigned char styleMDV[] = {
-    sfWindowCoordinates, sfEnd
-  };
-
-  static const unsigned char styleVoyager[] = {
-    sfWindowRow, sfCursorRow, sfCursorColumn, sfEnd
-  };
-
-  static const unsigned char styleTime[] = {
-    sfTime, sfEnd
-  };
-
-  static const unsigned char *const styleTable[] = {
-    styleNone, styleAlva, styleTieman, stylePB80,
-    styleConfigurable, styleMDV, styleVoyager, styleTime
-  };
-  static const unsigned char styleCount = ARRAY_COUNT(styleTable);
-
-  if (style < styleCount) {
-    const unsigned char *fields = styleTable[style];
-    if (*fields != sfEnd) setStatusFields(fields);
-  }
+static int
+processPreferenceLine (char *line, void *data) {
+  return setPreference(line);
 }
 
 int

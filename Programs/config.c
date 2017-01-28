@@ -162,9 +162,11 @@ static const char *const optionStrings_CancelExecution[] = {
   NULL
 };
 
+static char *opt_pidFile;
 static char *opt_configurationFile;
 static char *opt_preferencesFile;
-static char *opt_pidFile;
+static char *opt_preferenceOverrides;
+
 static char *opt_updatableDirectory;
 static char *opt_writableDirectory;
 static char *opt_driversDirectory;
@@ -298,6 +300,15 @@ BEGIN_OPTION_TABLE(programOptions)
     .strings.array = optionStrings_CancelExecution
   },
 
+  { .letter = 'P',
+    .word = "pid-file",
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .argument = strtext("file"),
+    .setting.string = &opt_pidFile,
+    .internal.adjust = fixInstallPath,
+    .description = strtext("Path to process identifier file.")
+  },
+
   { .letter = 'f',
     .word = "configuration-file",
     .flags = OPT_Environ,
@@ -308,6 +319,23 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to default settings file.")
   },
 
+  { .letter = 'F',
+    .word = "preferences-file",
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .argument = strtext("file"),
+    .setting.string = &opt_preferencesFile,
+    .internal.setting = PREFERENCES_FILE,
+    .description = strtext("Name of or path to default preferences file.")
+  },
+
+  { .letter = 'o',
+    .word = "override-preference",
+    .flags = OPT_Extend | OPT_Config | OPT_Environ,
+    .argument = strtext("name=value,..."),
+    .setting.string = &opt_preferenceOverrides,
+    .description = strtext("Explicit preference settings.")
+  },
+
   { .letter = 'U',
     .word = "updatable-directory",
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
@@ -316,15 +344,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .internal.setting = UPDATABLE_DIRECTORY,
     .internal.adjust = fixInstallPath,
     .description = strtext("Path to directory which contains files that can be updated.")
-  },
-
-  { .letter = 'F',
-    .word = "preferences-file",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
-    .argument = strtext("file"),
-    .setting.string = &opt_preferencesFile,
-    .internal.setting = PREFERENCES_FILE,
-    .description = strtext("Name of or path to default preferences file.")
   },
 
   { .letter = 'W',
@@ -574,15 +593,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("file"),
     .setting.string = &opt_logFile,
     .description = strtext("Path to log file.")
-  },
-
-  { .letter = 'P',
-    .word = "pid-file",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
-    .argument = strtext("file"),
-    .setting.string = &opt_pidFile,
-    .internal.adjust = fixInstallPath,
-    .description = strtext("Path to process identifier file.")
   },
 
   { .letter = 'v',
@@ -1189,6 +1199,24 @@ ensureStatusFields (void) {
   setStatusFields(fields);
 }
 
+static void
+setPreferenceOverrides (void) {
+  int count;
+  char **settings = splitString(opt_preferenceOverrides, PARAMETER_SEPARATOR_CHARACTER, &count);
+
+  if (settings) {
+    char **setting = settings;
+    char **end = setting + count;
+
+    while (setting < end) {
+      setPreference(*setting);
+      setting += 1;
+    }
+
+    deallocateStrings(settings);
+  }
+}
+
 int
 loadPreferences (void) {
   int ok = 0;
@@ -1211,6 +1239,7 @@ loadPreferences (void) {
   }
 
   if (!ok) resetPreferences();
+  setPreferenceOverrides();
   applyAllPreferences();
   return ok;
 }
@@ -2589,13 +2618,13 @@ brlttyStart (void) {
   }
 
   logProperty(opt_configurationFile, "configurationFile", gettext("Configuration File"));
-  logProperty(opt_updatableDirectory, "updatableDirectory", gettext("Updatable Directory"));
   logProperty(opt_preferencesFile, "preferencesFile", gettext("Preferences File"));
+  loadPreferences();
+
+  logProperty(opt_updatableDirectory, "updatableDirectory", gettext("Updatable Directory"));
   logProperty(opt_writableDirectory, "writableDirectory", gettext("Writable Directory"));
   logProperty(opt_driversDirectory, "driversDirectory", gettext("Drivers Directory"));
   logProperty(opt_tablesDirectory, "tablesDirectory", gettext("Tables Directory"));
-
-  loadPreferences();
 
   /* handle text table option */
   if (*opt_textTable) {
