@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <ctype.h>
 
 #include "prefs.h"
 #include "prefs_internal.h"
@@ -289,7 +290,7 @@ setPreference (char *string) {
     name = strtok(string, delimiters);
   }
 
-  if (name && (*name != PREFS_COMMENT_CHARACTER)) {
+  if (name) {
     const PreferenceEntry *pref = findPreferenceEntry(name);
 
     if (pref) {
@@ -321,6 +322,8 @@ setPreference (char *string) {
     } else {
       logMessage(LOG_WARNING, "unknown preference: %s", name);
     }
+  } else {
+    logMessage(LOG_WARNING, "missing preference name");
   }
 
   return 1;
@@ -328,6 +331,9 @@ setPreference (char *string) {
 
 static int
 processPreferenceLine (char *line, void *data) {
+  while (isspace(*line)) line += 1;
+  if (!*line) return 1;
+  if (*line == PREFS_COMMENT_CHARACTER) return 1;
   return setPreference(line);
 }
 
