@@ -829,8 +829,8 @@ int
 isAutospeakActive (void) {
   if (speech->definition.code == noSpeech.definition.code) return 0;
   if (prefs.autospeak) return 1;
-  if (opt_quietIfNoBraille) return 0;
-  return braille->definition.code == noBraille.definition.code;
+  if (braille->definition.code != noBraille.definition.code) return 0;
+  return !opt_quietIfNoBraille;
 }
 
 void
