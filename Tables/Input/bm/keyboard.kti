@@ -97,17 +97,21 @@ bind Dot3+Down KEY_PAGE_DOWN
 bind Dot3+Left KEY_HOME
 bind Dot3+Right KEY_END
 
+ifKey B9
 bind B9+Press AUTOSPEAK
 bind B9+Up SAY_LOUDER
 bind B9+Down SAY_SOFTER
 bind B9+Left SAY_SLOWER
 bind B9+Right SAY_FASTER
+endIf
 
+ifKey B10
 bind B10+Press SPKHOME
 bind B10+Up SAY_ABOVE
 bind B10+Down SAY_BELOW
 bind B10+Left MUTE
 bind B10+Right SAY_LINE
+endIf
 
 ifKey RoutingKey
 bind \{space}+RoutingKey KEY_FUNCTION
@@ -133,11 +137,11 @@ bind Down MENU_NEXT_ITEM
 bind Left MENU_PREV_SETTING
 bind Right MENU_NEXT_SETTING
 
-bind B9 MENU_PREV_LEVEL
-bind B9+Press PREFSAVE
-bind B9+Up MENU_FIRST_ITEM
-bind B9+Down MENU_LAST_ITEM
-bind B9+Left FWINLT
-bind B9+Right FWINRT
+bind \{space} MENU_PREV_LEVEL
+bind \{space}+Press PREFSAVE
+bind \{space}+Up MENU_FIRST_ITEM
+bind \{space}+Down MENU_LAST_ITEM
+bind \{space}+Left FWINLT
+bind \{space}+Right FWINRT
 
 context default
