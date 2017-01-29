@@ -37,7 +37,7 @@
 static char *opt_textString;
 static char *opt_speechVolume;
 static char *opt_speechRate;
-char *opt_pcmDevice;
+static char *opt_pcmDevice;
 static char *opt_driversDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)

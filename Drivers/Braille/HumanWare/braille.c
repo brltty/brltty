@@ -601,7 +601,7 @@ keepHidAwake (BrailleDisplay *brl) {
   memset(&report, 0, sizeof(report));
   report.reportIdentifier = HW_REP_FTR_KeepAwake;
 
-  return writeHidReport(brl, &report, sizeof(report));;
+  return writeHidReport(brl, &report, sizeof(report));
 }
 
 static const ProtocolEntry hidProtocol = {

@@ -747,7 +747,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         setBrailleKeyTable(brl, protocol->keyTableDefinition);
         makeOutputTable(dotsTable_ISO11548_1);
 
-        forceRewrite = 1;;
+        forceRewrite = 1;
         return 1;
       }
     }

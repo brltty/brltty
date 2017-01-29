@@ -930,7 +930,7 @@ usbHandleInputURB (UsbEndpoint *endpoint, struct usbdevfs_urb *urb) {
     return 0;
   }
 
-  return usbHandleInputResponse(endpoint, urb->buffer, urb->actual_length);;
+  return usbHandleInputResponse(endpoint, urb->buffer, urb->actual_length);
 }
 
 static void

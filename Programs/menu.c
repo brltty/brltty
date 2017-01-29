@@ -126,7 +126,7 @@ struct MenuItemStruct {
 
     struct {
       MenuToolFunction *function;
-    }tool;
+    } tool;
   } data;
 };
 
