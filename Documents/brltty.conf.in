@@ -472,34 +472,83 @@
 #midi-device	client:port	# ALSA (may use number or case-sensitive substring of name)
 
 
-##########################
-# Miscellaneous Settings #
-##########################
-
-# The preferences-file directive specifies the file in which to save the user's
-# preferences. Relative paths are anchored at "@UPDATABLE_DIRECTORY@". If not
-# specified, "@PREFERENCES_FILE@" will be used.
-# (can be overridden with the -F [--preferences-file=] option)
-#preferences-file	@PREFERENCES_FILE@
-
-# The log-level directive specifies the severity threshold for diagnostics
-# written to the system log. Less severe diagnostics will not be logged. If not
-# specified, "notice" will be used.
-# (can be overridden with the -l [--log-level=] option)
-#log-level	emergency
-#log-level	alert
-#log-level	critical
-#log-level	error
-#log-level	warning
-#log-level	notice
-#log-level	information
-#log-level	debug
+###################
+# Logging Options #
+###################
 
 # The log-file directive specifies the file to which diagnostics are written.
 # Relative paths are anchored at the current working directory. If not
 # specified, diagnostics are written to the system log.
 # (can be overridden with the -L [--log-file=] option)
 #log-file	/tmp/brltty.log
+
+# The log-level directive specifies which event categories are to be
+# logged as well as the severity threshold for uncategorized events.
+# The category names and severity threshold are separated by commas.
+# (can be overridden with the -l [--log-level=] option)
+#log-level	notice
+
+# Only one severity threshold may be specified. Less severe uncategorized
+# events will not be logged. If not specified, "notice" will be assumed.
+# The severity thresholds are:
+#	emergency
+#	alert
+#	critical
+#	error
+#	warning
+#	notice
+#	information
+#	debug
+
+# Any number of event categories may be enabled. Prefixing a category name
+# with a minus sign [-] disables it (particularly useful if "all" is used).
+# The categories are:
+#	all	enable all of the categories
+#	ingio	generic input
+#	inpkts	input packets
+#	outpkts	output packets
+#	brlkeys	braille device key events
+#	kbdkeys	keyboard key events
+#	csrtrk	cursor tracking
+#	csrrtg	cursor routing
+#	update	update events
+#	speech	speech events
+#	async	asynchronous event scheduling
+#	server	BrlAPI server events
+#	serial	serial I/O
+#	usb	USB I/O
+#	bluetooth	Bluetooth I/O
+#	brldrv	braille driver events
+#	spkdrv	speech driver events
+#	scrdrv	screen driver events
+
+
+#######################
+# Preference Settings #
+#######################
+
+# The preferences-file directive specifies the file in which to save the user's
+# preferences. Relative paths are usually anchored at "@UPDATABLE_DIRECTORY@"
+# (can be changed via the updatable-directory directive).
+# If not specified, "@PREFERENCES_FILE@" will be used.
+# (can be overridden with the -F [--preferences-file=] option)
+#preferences-file	@PREFERENCES_FILE@
+
+# The override-preference directive can be used to explicitly specify the
+# initial setting of any preference. More than one preference may be overridden
+# by separating them by commas and/or by using this directive multiple times.
+# (can be overridden with the -o [--override-preference=] option)
+#override-preference preference=setting,...
+
+
+##########################
+# Miscellaneous Settings #
+##########################
+
+# The pid-file directive specifies the absolute path to a file that will
+# contain BRLTTY's process identifier. It is removed when BRLTTY terminates.
+# (can be overridden with the -P [--pid-file=] option)
+#pid-file /run/brltty.pid
 
 # The updatable-directory directive specifies the absolute path to a directory
 # which contains files that can be updated (preferences, saved clipboard, etc).
