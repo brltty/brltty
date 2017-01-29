@@ -30,8 +30,6 @@ map Dot8 DOT8
 map \{space} SPACE
 assign chord \{space}+
 include ../chords.kti
-bind \{space}+RoutingKey KEY_FUNCTION
-bind \{space}+RoutingKey+!RoutingKey CLIP_APPEND
 
 bind Press RETURN
 bind Up LNUP
@@ -81,12 +79,6 @@ Bind Dot5+Dot6+Down SLIDEWIN
 Bind Dot5+Dot6+Left SKPIDLNS
 Bind Dot5+Dot6+Right SKPBLNKWINS
 
-bind RoutingKey+Press DESCCHAR
-bind RoutingKey+Left CLIP_NEW
-bind RoutingKey+Up CLIP_ADD
-bind RoutingKey+Right COPY_LINE
-bind RoutingKey+Down COPY_RECT
-
 bind Dot1+Press KEY_TAB
 bind Dot1+Up KEY_CURSOR_UP
 bind Dot1+Down KEY_CURSOR_DOWN
@@ -116,6 +108,17 @@ bind B10+Up SAY_ABOVE
 bind B10+Down SAY_BELOW
 bind B10+Left MUTE
 bind B10+Right SAY_LINE
+
+ifKey RoutingKey
+bind \{space}+RoutingKey KEY_FUNCTION
+bind \{space}+RoutingKey+!RoutingKey CLIP_APPEND
+
+bind RoutingKey+Press DESCCHAR
+bind RoutingKey+Left CLIP_NEW
+bind RoutingKey+Up CLIP_ADD
+bind RoutingKey+Right COPY_LINE
+bind RoutingKey+Down COPY_RECT
+endIf
 
 
 #################

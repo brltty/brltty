@@ -24,8 +24,8 @@ note B10 is the narrow key between and just behind the six-dot keyboard.
 note The six display keys are emulated by the corresponding six dot keys
 note * while the joystick is pressed (the joystick must be pressed first).
 
-include d6.kti
-include routing6.kti
+bind Display2 FWINLT
+bind Display5 FWINRT
 
 assign space B9
 include keyboard.kti
