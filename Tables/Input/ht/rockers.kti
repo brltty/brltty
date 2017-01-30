@@ -58,3 +58,11 @@ bind LeftRockerBottom+RoutingKey CLIP_ADD
 bind RightRockerTop+RoutingKey COPY_LINE
 bind RightRockerTop+RightRockerBottom+RoutingKey SWITCHVT
 bind RightRockerBottom+RoutingKey COPY_RECT
+
+
+context menu
+bind RightRockerTop MENU_PREV_ITEM
+bind RightRockerBottom MENU_NEXT_ITEM
+bind LeftRockerTop MENU_PREV_SETTING
+bind LeftRockerBottom MENU_NEXT_SETTING
+
