@@ -609,8 +609,8 @@ BEGIN_OPTION_TABLE(programOptions)
 END_OPTION_TABLE
 
 static void
-makeProgramBanner (char *buffer, size_t size) {
-  const char *revision = getRevisionIdentifier();
+makeProgramBanner (char *buffer, size_t size, int includeRevision) {
+  const char *revision = includeRevision? getRevisionIdentifier(): "";
   snprintf(buffer, size, "%s %s%s%s",
            PACKAGE_NAME, PACKAGE_VERSION,
            (*revision? " rev ": ""), revision);
@@ -619,7 +619,7 @@ makeProgramBanner (char *buffer, size_t size) {
 static void
 logProgramBanner (void) {
   char banner[0X100];
-  makeProgramBanner(banner, sizeof(banner));
+  makeProgramBanner(banner, sizeof(banner), 1);
 
   {
     int pushed = pushLogPrefix(NULL);
@@ -1604,7 +1604,7 @@ startBrailleDriver (void) {
       {
         char banner[0X100];
 
-        makeProgramBanner(banner, sizeof(banner));
+        makeProgramBanner(banner, sizeof(banner), 0);
         if (message(NULL, banner, MSG_SILENT)) return 1;
       }
     }
@@ -1941,7 +1941,7 @@ startSpeechDriver (void) {
   if (!opt_quiet && spk.sayBanner) {
     char banner[0X100];
 
-    makeProgramBanner(banner, sizeof(banner));
+    makeProgramBanner(banner, sizeof(banner), 0);
     sayString(&spk, banner, SAY_OPT_MUTE_FIRST);
     beginAutospeakDelay(SPEECH_DRIVER_START_AUTOSPEAK_DELAY);
   } else if (isAutospeakActive()) {
