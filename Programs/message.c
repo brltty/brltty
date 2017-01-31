@@ -63,7 +63,7 @@ handleMessageCommands (int command, void *data) {
           break;
 
         default:
-          mgd->timeout = -1;
+          if (!mgd->touch) mgd->timeout = -1;
           break;
       }
 
@@ -177,7 +177,7 @@ int
 message (const char *mode, const char *text, MessageOptions options) {
   int presented = 0;
   MessageParameters *mgp;
-  size_t size = sizeof(*mgp) + strlen(text);
+  size_t size = sizeof(*mgp) + strlen(text) + 1;
 
   if ((mgp = malloc(size))) {
     memset(mgp, 0, size);
