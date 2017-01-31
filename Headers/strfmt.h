@@ -41,6 +41,8 @@ char *const strEnd = strStart + (size); \
 
 #define STR_LEFT (size_t)(strEnd - strNext)
 
+#define STR_POP() ((strNext > strStart)? --strNext: NULL)
+
 #define STR_ADJUST(length) \
 do { if ((strNext += (length)) > strEnd) strNext = strEnd; } while (0)
 

@@ -212,72 +212,66 @@ STR_END_FORMATTER
 
 static int
 putKeyName (ListGenerationData *lgd, const KeyValue *value) {
-  char name[0X100];
-  formatKeyName(name, sizeof(name), lgd->keyTable, value);
-  return putUtf8String(lgd, name);
+  char string[0X100];
+  formatKeyName(string, sizeof(string), lgd->keyTable, value);
+  return putUtf8String(lgd, string);
 }
 
-static int
-putKeyCombination (ListGenerationData *lgd, const KeyCombination *combination) {
-  wchar_t keyDelimiter = 0;
+static
+STR_BEGIN_FORMATTER(formatKeyCombination, KeyTable *table, const KeyCombination *combination)
+  char keyDelimiter = 0;
   unsigned char dotCount = 0;
 
   const char *dotPrefix = "dot";
-  size_t dotPrefixLength = strlen(dotPrefix);
-  size_t dotNameLength = dotPrefixLength + 1;
+  const size_t dotPrefixLength = strlen(dotPrefix);
+  const size_t dotNameLength = dotPrefixLength + 1;
 
   for (unsigned char index=0; index<combination->modifierCount; index+=1) {
     char keyName[0X100];
-    formatKeyName(keyName, sizeof(keyName), lgd->keyTable,
+    formatKeyName(keyName, sizeof(keyName), table,
                   &combination->modifierKeys[combination->modifierPositions[index]]);
 
     if (strlen(keyName) == dotNameLength) {
       if (strncasecmp(keyName, dotPrefix, dotPrefixLength) == 0) {
-        wchar_t number = keyName[dotPrefixLength];
+        char dotNumber = keyName[dotPrefixLength];
 
-        if ((number >= '1') && (number <= '8')) {
-          if (++dotCount == 1) goto firstDot;
+        if ((dotNumber >= '1') && (dotNumber <= '8')) {
+          if (++dotCount == 1) goto FIRST_DOT;
 
           if (dotCount == 2) {
-            size_t to = lgd->line.length;
-            size_t from = to - 1;
-
-            if (!putCharacter(lgd, WC_C(' '))) return 0;
-            wchar_t *characters = lgd->line.characters;
-
-            characters[to] = characters[from];
-            characters[from] = WC_C('s');
+            char firstDot = *STR_POP();
+            STR_PRINTF("s%c", firstDot);
           }
 
-          if (!putCharacter(lgd, number)) return 0;
+          STR_PRINTF("%c", dotNumber);
           continue;
         }
       }
     }
 
     dotCount = 0;
-  firstDot:
+  FIRST_DOT:
 
-    if (!keyDelimiter) {
-      keyDelimiter = WC_C('+');
-    } else if (!putCharacter(lgd, keyDelimiter)) {
-      return 0;
+    if (keyDelimiter) {
+      STR_PRINTF("%c", keyDelimiter);
+    } else {
+      keyDelimiter = '+';
     }
 
-    if (!putUtf8String(lgd, keyName)) return 0;
+    STR_PRINTF("%s", keyName);
   }
 
   if (combination->flags & KCF_IMMEDIATE_KEY) {
-    if (keyDelimiter) {
-      if (!putCharacter(lgd, keyDelimiter)) {
-        return 0;
-      }
-    }
-
-    if (!putKeyName(lgd, &combination->immediateKey)) return 0;
+    if (keyDelimiter) STR_PRINTF("%c", keyDelimiter);
+    STR_FORMAT(formatKeyName, table, &combination->immediateKey);
   }
+STR_END_FORMATTER
 
-  return 1;
+static int
+putKeyCombination (ListGenerationData *lgd, const KeyCombination *combination) {
+  char string[0X100];
+  formatKeyCombination(string, sizeof(string), lgd->keyTable, combination);
+  return putUtf8String(lgd, string);
 }
 
 static int
