@@ -25,7 +25,6 @@ extern "C" {
 
 typedef enum {
   MSG_SILENT  = 0X1, /* don't speak the message */
-  MSG_WAITKEY = 0X2, /* wait for a key press before scrolling or dismissing the message */
   MSG_NODELAY = 0X4, /* don't wait */
   MSG_SYNC    = 0X8  /* run synchronously */
 } MessageOptions;

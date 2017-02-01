@@ -37,10 +37,20 @@
 int messageHoldTimeout = DEFAULT_MESSAGE_HOLD_TIMEOUT;
 
 typedef struct {
-  unsigned touch:1;
+  const wchar_t *start;
+  size_t length;
+} MessageSegment;
+
+typedef struct {
+  struct {
+    MessageSegment *first;
+    MessageSegment *last;
+    MessageSegment *current;
+  } segments;
 
   int timeout;
   unsigned endWait:1;
+  unsigned touch:1;
 } MessageData;
 
 ASYNC_CONDITION_TESTER(testEndMessageWait) {
@@ -99,70 +109,92 @@ ASYNC_TASK_CALLBACK(presentMessage) {
       .touch = 0
     };
 
-    size_t size = textCount * brl.textRows;
-    wchar_t buffer[size];
+    size_t characterCount = getTextLength(mgp->text);
+    wchar_t characters[characterCount + 1];
+    convertTextToWchars(characters, mgp->text, ARRAY_COUNT(characters));
 
-    size_t length = getTextLength(mgp->text);
-    wchar_t characters[length + 1];
-    const wchar_t *character = characters;
+    MessageSegment messageSegments[characterCount];
+    mgd.segments.last = mgd.segments.current = mgd.segments.first = messageSegments;
+
+    size_t brailleSize = textCount * brl.textRows;
+    wchar_t brailleBuffer[brailleSize];
+
+    {
+      const wchar_t *character = characters;
+
+      while (*character) {
+        /* strip leading spaces */
+        while (iswspace(*character)) {
+          character += 1;
+          characterCount -= 1;
+        }
+
+        if (!*character) break;
+        MessageSegment *segment = mgd.segments.last++;
+        segment->start = character;
+
+        if (characterCount <= brailleSize) {
+          /* the whole message fits in the braille window */
+          segment->length = characterCount;
+        } else {
+          /* split the message across multiple braille windows on space characters */
+          size_t length = brailleSize - 2;
+          while ((length > 0) && iswspace(character[length])) length -= 1;
+          segment->length = length? (length + 1): (brailleSize - 1);
+        }
+
+        character += segment->length;
+        characterCount -= segment->length;
+      }
+
+      mgd.segments.last -= 1;
+    }
 
     int wasLinked = api.isLinked();
     if (wasLinked) api.unlink();
 
-    convertTextToWchars(characters, mgp->text, ARRAY_COUNT(characters));
     suspendUpdates();
     pushCommandEnvironment("message", NULL, NULL);
     pushCommandHandler("message", KTB_CTX_WAITING,
                        handleMessageCommands, NULL, &mgd);
 
-    while (length) {
-      size_t count;
+    while (1) {
+      const MessageSegment *segment = mgd.segments.current;
+      size_t cellCount = segment->length;
+      int lastSegment = segment == mgd.segments.last;
 
-      /* strip leading spaces */
-      while (iswspace(*character)) {
-        character += 1;
-        length -= 1;
-      }
-
-      if (length <= size) {
-        count = length; /* the whole message fits in the braille window */
-      } else {
-        /* split the message across multiple braille windows on space characters */
-        for (count=size-2; count>0 && iswspace(characters[count]); count-=1);
-        count = count? count+1: size-1;
-      }
-
-      wmemcpy(buffer, character, count);
-      character += count;
-
-      if (length -= count) {
-        while (count < size) buffer[count++] = WC_C('-');
-        buffer[count - 1] = WC_C('>');
-      }
-
+      wmemcpy(brailleBuffer, segment->start, cellCount);
       brl.cursor = BRL_NO_CURSOR;
-      if (!writeBrailleCharacters(mgp->mode, buffer, count)) {
+
+      if (!lastSegment) {
+        while (cellCount < brailleSize) brailleBuffer[cellCount++] = WC_C('-');
+        brailleBuffer[cellCount - 1] = WC_C('>');
+      }
+
+      if (!writeBrailleCharacters(mgp->mode, brailleBuffer, cellCount)) {
         mgp->presented = 0;
         break;
       }
 
       mgd.timeout = messageHoldTimeout - brl.writeDelay;
       drainBrailleOutput(&brl, 0);
+      if (lastSegment && (mgp->options & MSG_NODELAY)) break;
+      mgd.timeout = MAX(mgd.timeout, 0);
 
-      if (length || !(mgp->options & MSG_NODELAY)) {
-        mgd.timeout = MAX(mgd.timeout, 0);
+      while (1) {
+        mgd.endWait = 0;
+        int waitEnded = asyncAwaitCondition(mgd.timeout, testEndMessageWait, &mgd);
 
-        while (1) {
-          mgd.endWait = 0;
-
-          if (asyncAwaitCondition(mgd.timeout, testEndMessageWait, &mgd)) {
-            if (mgd.timeout < 0) break;
-          } else {
-            if (!(mgd.touch || (mgp->options & MSG_WAITKEY))) break;
-            mgd.timeout = messageHoldTimeout;
-          }
+        if (waitEnded) {
+          if (mgd.timeout < 0) break;
+        } else {
+          if (!mgd.touch) break;
+          mgd.timeout = messageHoldTimeout;
         }
       }
+
+      if (lastSegment) break;
+      mgd.segments.current += 1;
     }
 
     popCommandEnvironment();
