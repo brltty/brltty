@@ -30,7 +30,6 @@ bind B12 MUTE
 bind Zero SPKHOME
 bind B13 SWITCHVT_PREV
 bind B14 SWITCHVT_NEXT
-bind Seven LEARN
 bind Eight MENU_PREV_ITEM
 bind Nine MENU_FIRST_ITEM
 bind Four MENU_PREV_SETTING
