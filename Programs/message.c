@@ -37,11 +37,21 @@
 int messageHoldTimeout = DEFAULT_MESSAGE_HOLD_TIMEOUT;
 
 typedef struct {
+  const char *mode;
+  MessageOptions options;
+  unsigned presented:1;
+  unsigned deallocate:1;
+  char text[0];
+} MessageParameters;
+
+typedef struct {
   const wchar_t *start;
   size_t length;
 } MessageSegment;
 
 typedef struct {
+  const MessageParameters *parameters;
+
   struct {
     MessageSegment *first;
     MessageSegment *last;
@@ -50,11 +60,12 @@ typedef struct {
 
   int timeout;
   unsigned endWait:1;
+  unsigned hold:1;
   unsigned touch:1;
 } MessageData;
 
 ASYNC_CONDITION_TESTER(testEndMessageWait) {
-  MessageData *mgd = data;
+  const MessageData *mgd = data;
   return mgd->endWait;
 }
 
@@ -63,35 +74,57 @@ handleMessageCommands (int command, void *data) {
   MessageData *mgd = data;
 
   switch (command & BRL_MSK_CMD) {
+    case BRL_CMD_NOOP:
+      return 1;
+
+    case BRL_CMD_LNUP:
+    case BRL_CMD_PRDIFLN:
+    case BRL_CMD_FWINLTSKIP:
+    case BRL_CMD_FWINLT: {
+      if (mgd->segments.current > mgd->segments.first) {
+        mgd->segments.current -= 1;
+        mgd->endWait = 1;
+      }
+
+      mgd->hold = 1;
+      return 1;
+    }
+
+    case BRL_CMD_LNDN:
+    case BRL_CMD_NXDIFLN:
+    case BRL_CMD_FWINRTSKIP:
+    case BRL_CMD_FWINRT: {
+      if (mgd->segments.current < mgd->segments.last) {
+        mgd->segments.current += 1;
+        mgd->endWait = 1;
+      }
+
+      mgd->hold = 1;
+      return 1;
+    }
+
     default: {
       int arg = command & BRL_MSK_ARG;
 
       switch (command & BRL_MSK_BLK) {
-        case BRL_CMD_BLK(TOUCH_AT):
-          mgd->touch = arg != BRL_MSK_ARG;
-          mgd->timeout = 1000;
-          break;
+        case BRL_CMD_BLK(TOUCH_AT): {
+          if (!(mgd->touch = arg != BRL_MSK_ARG)) {
+            mgd->timeout = 1000;
+            mgd->endWait = 1;
+          }
+
+          return 1;
+        }
 
         default:
-          if (!mgd->touch) mgd->timeout = -1;
-          break;
+          mgd->hold = 0;
+          mgd->timeout = -1;
+          mgd->endWait = 1;
+          return 1;
       }
-
-      break;
     }
   }
-
-  if (!mgd->touch) mgd->endWait = 1;
-  return 1;
 }
-
-typedef struct {
-  const char *mode;
-  MessageOptions options;
-  unsigned presented:1;
-  unsigned deallocate:1;
-  char text[0];
-} MessageParameters;
 
 ASYNC_TASK_CALLBACK(presentMessage) {
   MessageParameters *mgp = data;
@@ -106,7 +139,9 @@ ASYNC_TASK_CALLBACK(presentMessage) {
 
   if (canBraille()) {
     MessageData mgd = {
-      .touch = 0
+      .hold = 0,
+      .touch = 0,
+      .parameters = mgp
     };
 
     size_t characterCount = getTextLength(mgp->text);
@@ -183,20 +218,23 @@ ASYNC_TASK_CALLBACK(presentMessage) {
 
       while (1) {
         mgd.endWait = 0;
-        int waitEnded = asyncAwaitCondition(mgd.timeout, testEndMessageWait, &mgd);
+        int timedOut = !asyncAwaitCondition(mgd.timeout, testEndMessageWait, &mgd);
+        if (mgd.segments.current != segment) break;
 
-        if (waitEnded) {
-          if (mgd.timeout < 0) break;
-        } else {
-          if (!mgd.touch) break;
+        if (mgd.hold || mgd.touch) {
+          mgd.timeout = 1000000;
+        } else if (timedOut) {
+          if (lastSegment) goto DONE;
+          mgd.segments.current += 1;
           mgd.timeout = messageHoldTimeout;
+          break;
+        } else if (mgd.timeout < 0) {
+          goto DONE;
         }
       }
-
-      if (lastSegment) break;
-      mgd.segments.current += 1;
     }
 
+  DONE:
     popCommandEnvironment();
     resumeUpdates(1);
     if (wasLinked) api.link();
