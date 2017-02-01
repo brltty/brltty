@@ -59,8 +59,6 @@ static struct TermInfo {
 } terminfo;
 #endif /* SendIdReq */
 
-static int printcode = 0;
-
 /* Function : brl_writePacket */ 
 /* Sends a packet of size bytes, stored at address p to the braille terminal */
 /* Returns 0 if everything is right, -1 if an error occured while sending */
@@ -344,7 +342,6 @@ int brl_keyToCommand(BrailleDisplay *brl, KeyTableCommandContext context, int co
       case BRL_VSKEY_D3: return BRL_CMD_KEY(INSERT);
       case BRL_VSKEY_C5: return BRL_CMD_PASTE;
       case BRL_VSKEY_D5: descchar = 1; return EOF;
-      case BRL_VSKEY_B4: printcode = 1; return EOF;
       default: return EOF;
     }
   } else if (type==BRL_VSMSK_OTHER) {
@@ -403,13 +400,6 @@ static int brl_readKey(BrailleDisplay *brl)
     return EOF;
   }
   ch = packet[1];
-  if (printcode) {
-    char buf [100];
-    snprintf(buf,sizeof(buf),"Keycode: 0x%x",ch);
-    printcode = 0; /* MUST BE DONE BEFORE THE CALL TO MESSAGE */
-    message(NULL,buf,MSG_WAITKEY | MSG_NODELAY);
-    return EOF;
-  }
   if (routing) {
     routing=0;
     if (ch>=0xc0)  return (packet[1]-0xc0) | BRL_VSMSK_ROUTING;

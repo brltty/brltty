@@ -866,7 +866,7 @@ handleInputPacket (BrailleDisplay *brl, const InputPacket *packet) {
     }
 
     case IPT_BATTERY:
-      message(NULL, gettext("battery low"), MSG_WAITKEY);
+      message(NULL, gettext("battery low"), 0);
       return 1;
 
     default:
