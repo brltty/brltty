@@ -53,9 +53,9 @@ typedef struct {
   const MessageParameters *parameters;
 
   struct {
-    MessageSegment *first;
-    MessageSegment *last;
-    MessageSegment *current;
+    const MessageSegment *first;
+    const MessageSegment *current;
+    const MessageSegment *last;
   } segments;
 
   int timeout;
@@ -144,33 +144,32 @@ ASYNC_TASK_CALLBACK(presentMessage) {
       .parameters = mgp
     };
 
-    size_t characterCount = getTextLength(mgp->text);
+    const size_t characterCount = getTextLength(mgp->text);
+    MessageSegment messageSegments[characterCount];
     wchar_t characters[characterCount + 1];
     convertTextToWchars(characters, mgp->text, ARRAY_COUNT(characters));
 
-    MessageSegment messageSegments[characterCount];
-    mgd.segments.last = mgd.segments.current = mgd.segments.first = messageSegments;
-
-    size_t brailleSize = textCount * brl.textRows;
+    const size_t brailleSize = textCount * brl.textRows;
     wchar_t brailleBuffer[brailleSize];
 
     {
       const wchar_t *character = characters;
+      const wchar_t *const end = character + characterCount;
+
+      MessageSegment *segment = messageSegments;
+      mgd.segments.current = mgd.segments.first = segment;
 
       while (*character) {
         /* strip leading spaces */
-        while (iswspace(*character)) {
-          character += 1;
-          characterCount -= 1;
-        }
+        while ((character < end) && iswspace(*character)) character += 1;
 
-        if (!*character) break;
-        MessageSegment *segment = mgd.segments.last++;
+        const size_t charactersLeft = end - character;
+        if (!charactersLeft) break;
         segment->start = character;
 
-        if (characterCount <= brailleSize) {
+        if (charactersLeft <= brailleSize) {
           /* the whole message fits in the braille window */
-          segment->length = characterCount;
+          segment->length = charactersLeft;
         } else {
           /* split the message across multiple braille windows on space characters */
           size_t length = brailleSize - 2;
@@ -179,10 +178,10 @@ ASYNC_TASK_CALLBACK(presentMessage) {
         }
 
         character += segment->length;
-        characterCount -= segment->length;
+        segment += 1;
       }
 
-      mgd.segments.last -= 1;
+      mgd.segments.last = segment - 1;
     }
 
     int wasLinked = api.isLinked();
@@ -213,7 +212,7 @@ ASYNC_TASK_CALLBACK(presentMessage) {
 
       mgd.timeout = messageHoldTimeout - brl.writeDelay;
       drainBrailleOutput(&brl, 0);
-      if (lastSegment && (mgp->options & MSG_NODELAY)) break;
+      if (!mgd.hold && lastSegment && (mgp->options & MSG_NODELAY)) break;
       mgd.timeout = MAX(mgd.timeout, 0);
 
       while (1) {
