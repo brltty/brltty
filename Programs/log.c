@@ -411,21 +411,16 @@ pushLogMessage (const char *message) {
 
 void
 logData (int level, LogDataFormatter *formatLogData, const void *data) {
-  int push;
   const char *prefix = NULL;
+  int push = 0;
 
   if (level & LOG_FLG_CATEGORY) {
     int category = level & LOG_MSK_CATEGORY;
     if (!logCategoryFlags[category]) return;
+    const LogCategoryEntry *ctg = &logCategoryTable[category];
 
+    prefix = ctg->prefix;
     level = categoryLogLevel;
-    push = 0;
-
-    {
-      const LogCategoryEntry *ctg = &logCategoryTable[category];
-
-      prefix = ctg->prefix;
-    }
   } else {
     push = level <= LOG_WARNING;
   }

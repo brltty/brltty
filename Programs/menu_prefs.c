@@ -51,7 +51,7 @@ PREFS_MENU_ITEM_APPLY(PREFS_MENU_ITEM_GETTER_DECLARE)
 #define NAME(name) static const MenuString itemName = {.label=name}
 #define ITEM(new) MenuItem *item = (new); if (!item) goto noItem
 #define TEST(property) setMenuItemTester(item, test##property)
-#define CHANGED(setting) setMenuItemChanged(item, changed##setting)
+#define CHANGED(property) setMenuItemChanged(item, changed##property)
 #define SET(name) PREFS_MENU_ITEM_VARIABLE(name) = item
 
 #define SUBMENU(variable, parent, name) \
@@ -1378,9 +1378,36 @@ noMenu:
   return NULL;
 }
 
+static int
+addNewLogMessages (Menu *menu, const LogStackElement *element) {
+  static const LogStackElement *newest = NULL;
+  if (element == newest) return 1;
+  if (!addNewLogMessages(menu, element->previous)) return 0;
+
+  MenuItem *item = newTextMenuItem(menu, NULL, element->string);
+  if (!item) return 0;
+
+  newest = element;
+  return 1;
+}
+
 Menu *
 getPreferencesMenu (void) {
   static Menu *menu = NULL;
   if (!menu) menu = makePreferencesMenu();
+
+  if (menu && logMessageStack) {
+    static Menu *logMessageMenu = NULL;
+
+    if (!logMessageMenu) {
+      NAME(strtext("Log Messages"));
+      logMessageMenu = newSubmenuMenuItem(menu, &itemName);
+
+      if (logMessageMenu) {
+        addNewLogMessages(logMessageMenu, logMessageStack);
+      }
+    }
+  }
+
   return menu;
 }

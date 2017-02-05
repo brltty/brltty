@@ -65,25 +65,32 @@ setFocusedItem (void) {
 static RenderedMenuItem *
 newRenderedMenuItem (Menu *menu) {
   MenuItem *item = getCurrentMenuItem(menu);
+
   char labelString[0X100];
   size_t labelLength;
-
-  char settingString[0X100];
-  size_t settingLength;
-
   {
     const char *title = getMenuItemTitle(item);
     const char *subtitle = getMenuItemSubtitle(item);
 
     STR_BEGIN(labelString, ARRAY_COUNT(labelString));
     STR_PRINTF("%s", title);
-    if (*subtitle) STR_PRINTF(" %s", subtitle);
-    if (!isMenuItemAction(item)) STR_PRINTF(":");
-    STR_PRINTF(" ");
+
+    if (*subtitle) {
+      if (*title) STR_PRINTF(" ");
+      STR_PRINTF("%s", subtitle);
+    }
+
+    if (labelString[0]) {
+      if (!isMenuItemAction(item)) STR_PRINTF(":");
+      STR_PRINTF(" ");
+    }
+
     labelLength = STR_LENGTH;
     STR_END;
   }
 
+  char settingString[0X100];
+  size_t settingLength;
   {
     const char *text = getMenuItemText(item);
     const char *comment = getMenuItemComment(item);

@@ -317,8 +317,8 @@ newMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
     item->menu = menu;
     item->setting = setting;
 
-    item->title = name->label;
-    item->subtitle = name->comment;
+    item->title = name? name->label: "";
+    item->subtitle = name? name->comment: "";
 
     item->methods = NULL;
     item->test = NULL;
