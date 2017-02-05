@@ -20,6 +20,7 @@
 
 #include <string.h>
 
+#include "log.h"
 #include "message.h"
 #include "defaults.h"
 #include "async_wait.h"
@@ -244,6 +245,8 @@ ASYNC_TASK_CALLBACK(presentMessage) {
 
 int 
 message (const char *mode, const char *text, MessageOptions options) {
+  if (options & MSG_LOG) pushLogMessage(text);
+
   int presented = 0;
   MessageParameters *mgp;
   size_t size = sizeof(*mgp) + strlen(text) + 1;

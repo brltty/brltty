@@ -133,6 +133,23 @@ extern void logWindowsSocketError (const char *action);
 
 extern void logBacktrace (void);
 
+typedef enum {
+  LPO_SQUASH = 0X01,
+} LogPushOptions;
+
+typedef struct LogStackElementStruct LogStackElement;
+extern int logPush (LogStackElement **head, const char *string, LogPushOptions options);
+extern int logPop (LogStackElement **head);
+
+struct LogStackElementStruct {
+  LogStackElement *previous;
+  unsigned int count;
+  char string[0];
+};
+
+extern LogStackElement *logMessageStack;
+extern void pushLogMessage (const char *message);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

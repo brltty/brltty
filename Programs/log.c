@@ -193,14 +193,53 @@ toAndroidLogPriority (int level) {
 static int syslogOpened = 0;
 #endif /* system log internal definitions */
 
-typedef struct LogPrefixEntryStruct LogPrefixEntry;
-static LogPrefixEntry *logPrefixStack = NULL;
-static FILE *logFile = NULL;
+int
+logPush (LogStackElement **head, const char *string, LogPushOptions options) {
+  LogStackElement *element = NULL;
 
-struct LogPrefixEntryStruct {
-  LogPrefixEntry *previous;
-  char *prefix;
-};
+  if (!element) {
+    if (options & LPO_SQUASH) {
+      if ((element = *head)) {
+        if (strcmp(element->string, string) == 0) {
+          element->count += 1;
+        } else {
+          element = NULL;
+        }
+      }
+    }
+  }
+
+  if (!element) {
+    const size_t size = sizeof(*element) + strlen(string) + 1;
+
+    if (!(element = malloc(size))) {
+      logMallocError();
+      return 0;
+    }
+
+    memset(element, 0, sizeof(*element));
+    element->count = 1;
+    strcpy(element->string, string);
+
+    element->previous = *head;
+    *head = element;
+  }
+
+  return 1;
+}
+
+int
+logPop (LogStackElement **head) {
+  if (!*head) return 0;
+  LogStackElement *element = *head;
+  *head = element->previous;
+  free(element);
+  return 1;
+}
+
+LogStackElement *logMessageStack = NULL;
+static LogStackElement *logPrefixStack = NULL;
+static FILE *logFile = NULL;
 
 static inline const LogCategoryEntry *
 getLogCategoryEntry (LogCategoryIndex index) {
@@ -263,38 +302,13 @@ setLogCategory (const char *name) {
 
 int
 pushLogPrefix (const char *prefix) {
-  LogPrefixEntry *entry;
-
-  if ((entry = malloc(sizeof(*entry)))) {
-    memset(entry, 0, sizeof(*entry));
-    if (!prefix) prefix = "";
-
-    if ((entry->prefix = strdup(prefix))) {
-      entry->previous = logPrefixStack;
-      logPrefixStack = entry;
-      return 1;
-    }
-
-    free(entry);
-  }
-
-  return 0;
+  if (!prefix) prefix = "";
+  return logPush(&logPrefixStack, prefix, 0);
 }
 
 int
 popLogPrefix (void) {
-  if (logPrefixStack) {
-    LogPrefixEntry *entry = logPrefixStack;
-    logPrefixStack = entry->previous;
-    entry->previous = NULL;
-
-    free(entry->prefix);
-    free(entry);
-
-    return 1;
-  }
-
-  return 0;
+  return logPop(&logPrefixStack);
 }
 
 void
@@ -392,6 +406,11 @@ closeSystemLog (void) {
 }
 
 void
+pushLogMessage (const char *message) {
+  logPush(&logMessageStack, message, (LPO_SQUASH));
+}
+
+void
 logData (int level, LogDataFormatter *formatLogData, const void *data) {
   const char *prefix = NULL;
 
@@ -446,7 +465,7 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
         lockStream(stream);
 
         if (logPrefixStack) {
-          const char *prefix = logPrefixStack->prefix;
+          const char *prefix = logPrefixStack->string;
 
           if (*prefix) {
             fputs(prefix, stream);
@@ -459,6 +478,10 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
 
         flushStream(stream);
         unlockStream(stream);
+      }
+
+      if (level <= LOG_WARNING) {
+        pushLogMessage(record);
       }
 
       errno = oldErrno;

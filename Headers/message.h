@@ -25,6 +25,7 @@ extern "C" {
 
 typedef enum {
   MSG_SILENT  = 0X1, /* don't speak the message */
+  MSG_LOG     = 0X2, /* add the message to the log's message stack */
   MSG_NODELAY = 0X4, /* don't wait */
   MSG_SYNC    = 0X8  /* run synchronously */
 } MessageOptions;
