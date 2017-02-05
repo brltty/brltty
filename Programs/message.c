@@ -163,17 +163,9 @@ ASYNC_TASK_CALLBACK(presentMessage) {
 
         const size_t charactersLeft = end - character;
         if (!charactersLeft) break;
-        segment->start = character;
 
-        if (charactersLeft <= brailleSize) {
-          /* the whole message fits in the braille window */
-          segment->length = charactersLeft;
-        } else {
-          /* split the message across multiple braille windows on space characters */
-          size_t length = brailleSize - 2;
-          while ((length > 0) && iswspace(character[length])) length -= 1;
-          segment->length = length? (length + 1): (brailleSize - 1);
-        }
+        segment->start = character;
+        segment->length = MIN(charactersLeft, brailleSize);
 
         character += segment->length;
         segment += 1;
@@ -197,11 +189,6 @@ ASYNC_TASK_CALLBACK(presentMessage) {
 
       wmemcpy(brailleBuffer, segment->start, cellCount);
       brl.cursor = BRL_NO_CURSOR;
-
-      if (!lastSegment) {
-        while (cellCount < brailleSize) brailleBuffer[cellCount++] = WC_C('-');
-        brailleBuffer[cellCount - 1] = WC_C('>');
-      }
 
       if (!writeBrailleCharacters(mgp->mode, brailleBuffer, cellCount)) {
         mgp->presented = 0;
