@@ -195,6 +195,7 @@ static int syslogOpened = 0;
 
 int
 logPush (LogStackElement **head, const char *string, LogPushOptions options) {
+  int log = !(options & LPO_NOLOG);
   LogStackElement *element = NULL;
 
   if (options & LPO_SQUASH) {
@@ -211,7 +212,7 @@ logPush (LogStackElement **head, const char *string, LogPushOptions options) {
     const size_t size = sizeof(*element) + strlen(string) + 1;
 
     if (!(element = malloc(size))) {
-      logMallocError();
+      if (log) logMallocError();
       return 0;
     }
 
@@ -405,30 +406,33 @@ closeSystemLog (void) {
 
 void
 pushLogMessage (const char *message) {
-  logPush(&logMessageStack, message, (LPO_SQUASH));
+  logPush(&logMessageStack, message, (LPO_NOLOG | LPO_SQUASH));
 }
 
 void
 logData (int level, LogDataFormatter *formatLogData, const void *data) {
+  int push;
   const char *prefix = NULL;
 
   if (level & LOG_FLG_CATEGORY) {
     int category = level & LOG_MSK_CATEGORY;
-
     if (!logCategoryFlags[category]) return;
+
     level = categoryLogLevel;
+    push = 0;
 
     {
       const LogCategoryEntry *ctg = &logCategoryTable[category];
 
       prefix = ctg->prefix;
     }
+  } else {
+    push = level <= LOG_WARNING;
   }
 
   {
     int write = level <= systemLogLevel;
     int print = level <= stderrLogLevel;
-    int push = level <= LOG_WARNING;
 
     if (write || print || push) {
       int oldErrno = errno;

@@ -134,7 +134,8 @@ extern void logWindowsSocketError (const char *action);
 extern void logBacktrace (void);
 
 typedef enum {
-  LPO_SQUASH = 0X01,
+  LPO_NOLOG  = 0X01,
+  LPO_SQUASH = 0X02,
 } LogPushOptions;
 
 typedef struct LogStackElementStruct LogStackElement;
