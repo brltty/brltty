@@ -197,7 +197,7 @@ struct LogEntryStruct {
   struct LogEntryStruct *previous;
   TimeValue time;
   unsigned int count;
-  char string[0];
+  char text[0];
 };
 
 const LogEntry *
@@ -206,8 +206,8 @@ getPreviousLogEntry (const LogEntry *entry) {
 }
 
 const char *
-getLogEntryString (const LogEntry *entry) {
-  return entry->string;
+getLogEntryText (const LogEntry *entry) {
+  return entry->text;
 }
 
 const TimeValue *
@@ -221,13 +221,13 @@ getLogEntryCount (const LogEntry *entry) {
 }
 
 int
-pushLogEntry (LogEntry **head, const char *string, LogEntryOptions options) {
+pushLogEntry (LogEntry **head, const char *text, LogEntryOptions options) {
   int log = !(options & LEO_NOLOG);
   LogEntry *entry = NULL;
 
   if (options & LEO_SQUASH) {
     if ((entry = *head)) {
-      if (strcmp(entry->string, string) == 0) {
+      if (strcmp(entry->text, text) == 0) {
         entry->count += 1;
       } else {
         entry = NULL;
@@ -236,7 +236,7 @@ pushLogEntry (LogEntry **head, const char *string, LogEntryOptions options) {
   }
 
   if (!entry) {
-    const size_t size = sizeof(*entry) + strlen(string) + 1;
+    const size_t size = sizeof(*entry) + strlen(text) + 1;
 
     if (!(entry = malloc(size))) {
       if (log) logMallocError();
@@ -245,7 +245,7 @@ pushLogEntry (LogEntry **head, const char *string, LogEntryOptions options) {
 
     memset(entry, 0, sizeof(*entry));
     entry->count = 1;
-    strcpy(entry->string, string);
+    strcpy(entry->text, text);
 
     entry->previous = *head;
     *head = entry;
@@ -269,7 +269,7 @@ static LogEntry *logPrefixStack = NULL;
 static FILE *logFile = NULL;
 
 const LogEntry *
-getLogMessages (void) {
+getNewestLogMessage (void) {
   return logMessageStack;
 }
 
@@ -501,7 +501,7 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
         lockStream(stream);
 
         if (logPrefixStack) {
-          const char *prefix = logPrefixStack->string;
+          const char *prefix = logPrefixStack->text;
 
           if (*prefix) {
             fputs(prefix, stream);

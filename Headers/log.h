@@ -142,14 +142,14 @@ typedef enum {
 
 typedef struct LogEntryStruct LogEntry;
 extern const LogEntry *getPreviousLogEntry (const LogEntry *entry);
-extern const char *getLogEntryString (const LogEntry *entry);
+extern const char *getLogEntryText (const LogEntry *entry);
 extern const TimeValue *getLogEntryTime (const LogEntry *entry);
 extern unsigned int getLogEntryCount (const LogEntry *entry);
 
-extern int pushLogEntry (LogEntry **head, const char *string, LogEntryOptions options);
+extern int pushLogEntry (LogEntry **head, const char *text, LogEntryOptions options);
 extern int popLogEntry (LogEntry **head);
 
-extern const LogEntry *getLogMessages (void);
+extern const LogEntry *getNewestLogMessage (void);
 extern void pushLogMessage (const char *message);
 
 #ifdef __cplusplus

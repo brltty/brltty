@@ -1380,14 +1380,14 @@ noMenu:
 }
 
 static int
-addNewLogMessages (Menu *menu, const LogEntry *entry) {
+addNewLogMessages (Menu *menu, const LogEntry *message) {
   static const LogEntry *newest = NULL;
-  if (entry == newest) return 1;
-  if (!addNewLogMessages(menu, getPreviousLogEntry(entry))) return 0;
+  if (message == newest) return 1;
+  if (!addNewLogMessages(menu, getPreviousLogEntry(message))) return 0;
 
-  const TimeValue *time = getLogEntryTime(entry);
-  unsigned int count = getLogEntryCount(entry);
   MenuString name;
+  const TimeValue *time = getLogEntryTime(message);
+  unsigned int count = getLogEntryCount(message);
 
   if (time) {
     char buffer[0X20];
@@ -1405,10 +1405,10 @@ addNewLogMessages (Menu *menu, const LogEntry *entry) {
     name.comment = NULL;
   }
 
-  MenuItem *item = newTextMenuItem(menu, &name, getLogEntryString(entry));
+  MenuItem *item = newTextMenuItem(menu, &name, getLogEntryText(message));
   if (!item) return 0;
 
-  newest = entry;
+  newest = message;
   return 1;
 }
 
@@ -1418,9 +1418,9 @@ getPreferencesMenu (void) {
   if (!menu) menu = makePreferencesMenu();
 
   if (menu) {
-    const LogEntry *messages = getLogMessages();
+    const LogEntry *message = getNewestLogMessage();
 
-    if (messages) {
+    if (message) {
       static Menu *submenu = NULL;
 
       if (!submenu) {
@@ -1428,7 +1428,7 @@ getPreferencesMenu (void) {
         submenu = newSubmenuMenuItem(menu, &itemName);
       }
 
-      if (submenu) addNewLogMessages(submenu, messages);
+      if (submenu) addNewLogMessages(submenu, message);
     }
   }
 
