@@ -33,7 +33,7 @@
 #include "strfmt.h"
 #include "timing.h"
 #include "addresses.h"
-#include "file.h"
+#include "stdiox.h"
 #include "thread.h"
 
 const char logCategoryName_all[] = "all";

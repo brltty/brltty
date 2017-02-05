@@ -72,15 +72,6 @@ extern int attemptFileLock (int file, int exclusive);
 extern int releaseFileLock (int file);
 
 extern void registerProgramStream (const char *name, FILE **stream);
-extern void flushStream (FILE *stream);
-
-#if defined(_POSIX_THREAD_SAFE_FUNCTIONS) && !defined(__MINGW32__)
-#define lockStream(stream) flockfile((stream))
-#define unlockStream(stream) funlockfile((stream))
-#else /* _POSIX_THREAD_SAFE_FUNCTIONS */
-#define lockStream(stream)
-#define unlockStream(stream)
-#endif /* _POSIX_THREAD_SAFE_FUNCTIONS */
 
 extern FILE *openFile (const char *path, const char *mode, int optional);
 

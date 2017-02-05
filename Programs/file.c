@@ -845,15 +845,6 @@ registerProgramStream (const char *name, FILE **stream) {
   onProgramExit(name, exitProgramStream, stream);
 }
 
-void
-flushStream (FILE *stream) {
-  fflush(stream);
-
-#ifdef __MSDOS__
-  fsync(fileno(stream));
-#endif /* __MSDOS__ */
-}
-
 FILE *
 openFile (const char *path, const char *mode, int optional) {
   FILE *file = fopen(path, mode);
