@@ -1402,11 +1402,9 @@ getPreferencesMenu (void) {
     if (!logMessageMenu) {
       NAME(strtext("Log Messages"));
       logMessageMenu = newSubmenuMenuItem(menu, &itemName);
-
-      if (logMessageMenu) {
-        addNewLogMessages(logMessageMenu, logMessageStack);
-      }
     }
+
+    if (logMessageMenu) addNewLogMessages(logMessageMenu, logMessageStack);
   }
 
   return menu;
