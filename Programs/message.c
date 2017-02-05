@@ -105,14 +105,10 @@ handleMessageCommands (int command, void *data) {
       int arg = command & BRL_MSK_ARG;
 
       switch (command & BRL_MSK_BLK) {
-        case BRL_CMD_BLK(TOUCH_AT): {
-          if (!(mgd->touch = arg != BRL_MSK_ARG)) {
-            mgd->timeout = 1000;
-            mgd->endWait = 1;
-          }
-
-          return 1;
-        }
+        case BRL_CMD_BLK(TOUCH_AT):
+          if ((mgd->touch = arg != BRL_MSK_ARG)) return 1;
+          mgd->timeout = 1000;
+          break;
 
         default:
           mgd->hold = 0;
