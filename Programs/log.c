@@ -428,8 +428,9 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
   {
     int write = level <= systemLogLevel;
     int print = level <= stderrLogLevel;
+    int push = level <= LOG_WARNING;
 
-    if (write || print) {
+    if (write || print || push) {
       int oldErrno = errno;
 
       char record[0X1000];
@@ -478,10 +479,7 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
         unlockStream(stream);
       }
 
-      if (level <= LOG_WARNING) {
-        pushLogMessage(record);
-      }
-
+      if (push) pushLogMessage(record);
       errno = oldErrno;
     }
   }
