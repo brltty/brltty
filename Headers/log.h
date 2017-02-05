@@ -27,6 +27,8 @@
 #include <syslog.h>
 #endif /* HAVE_SYSLOG_H */
 
+#include "timing.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -134,21 +136,20 @@ extern void logWindowsSocketError (const char *action);
 extern void logBacktrace (void);
 
 typedef enum {
-  LPO_NOLOG  = 0X01,
-  LPO_SQUASH = 0X02,
-} LogPushOptions;
+  LEO_NOLOG  = 0X01,
+  LEO_SQUASH = 0X02,
+} LogEntryOptions;
 
-typedef struct LogStackElementStruct LogStackElement;
-extern int logPush (LogStackElement **head, const char *string, LogPushOptions options);
-extern int logPop (LogStackElement **head);
+typedef struct LogEntryStruct LogEntry;
+extern const LogEntry *getPreviousLogEntry (const LogEntry *entry);
+extern const char *getLogEntryString (const LogEntry *entry);
+extern const TimeValue *getLogEntryTime (const LogEntry *entry);
+extern unsigned int getLogEntryCount (const LogEntry *entry);
 
-struct LogStackElementStruct {
-  LogStackElement *previous;
-  unsigned int count;
-  char string[0];
-};
+extern int pushLogEntry (LogEntry **head, const char *string, LogEntryOptions options);
+extern int popLogEntry (LogEntry **head);
 
-extern LogStackElement *logMessageStack;
+extern const LogEntry *getLogMessages (void);
 extern void pushLogMessage (const char *message);
 
 #ifdef __cplusplus

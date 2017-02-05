@@ -193,52 +193,90 @@ toAndroidLogPriority (int level) {
 static int syslogOpened = 0;
 #endif /* system log internal definitions */
 
-int
-logPush (LogStackElement **head, const char *string, LogPushOptions options) {
-  int log = !(options & LPO_NOLOG);
-  LogStackElement *element = NULL;
+struct LogEntryStruct {
+  struct LogEntryStruct *previous;
+  TimeValue time;
+  unsigned int count;
+  char string[0];
+};
 
-  if (options & LPO_SQUASH) {
-    if ((element = *head)) {
-      if (strcmp(element->string, string) == 0) {
-        element->count += 1;
+const LogEntry *
+getPreviousLogEntry (const LogEntry *entry) {
+  return entry->previous;
+}
+
+const char *
+getLogEntryString (const LogEntry *entry) {
+  return entry->string;
+}
+
+const TimeValue *
+getLogEntryTime (const LogEntry *entry) {
+  return &entry->time;
+}
+
+unsigned int
+getLogEntryCount (const LogEntry *entry) {
+  return entry->count;
+}
+
+int
+pushLogEntry (LogEntry **head, const char *string, LogEntryOptions options) {
+  int log = !(options & LEO_NOLOG);
+  LogEntry *entry = NULL;
+
+  if (options & LEO_SQUASH) {
+    if ((entry = *head)) {
+      if (strcmp(entry->string, string) == 0) {
+        entry->count += 1;
       } else {
-        element = NULL;
+        entry = NULL;
       }
     }
   }
 
-  if (!element) {
-    const size_t size = sizeof(*element) + strlen(string) + 1;
+  if (!entry) {
+    const size_t size = sizeof(*entry) + strlen(string) + 1;
 
-    if (!(element = malloc(size))) {
+    if (!(entry = malloc(size))) {
       if (log) logMallocError();
       return 0;
     }
 
-    memset(element, 0, sizeof(*element));
-    element->count = 1;
-    strcpy(element->string, string);
+    memset(entry, 0, sizeof(*entry));
+    entry->count = 1;
+    strcpy(entry->string, string);
 
-    element->previous = *head;
-    *head = element;
+    entry->previous = *head;
+    *head = entry;
   }
 
+  getCurrentTime(&entry->time);
   return 1;
 }
 
 int
-logPop (LogStackElement **head) {
+popLogEntry (LogEntry **head) {
   if (!*head) return 0;
-  LogStackElement *element = *head;
-  *head = element->previous;
-  free(element);
+  LogEntry *entry = *head;
+  *head = entry->previous;
+  free(entry);
   return 1;
 }
 
-LogStackElement *logMessageStack = NULL;
-static LogStackElement *logPrefixStack = NULL;
+static LogEntry *logMessageStack = NULL;
+static LogEntry *logPrefixStack = NULL;
 static FILE *logFile = NULL;
+
+const LogEntry *
+getLogMessages (void) {
+  return logMessageStack;
+}
+
+void
+pushLogMessage (const char *message) {
+  pushLogEntry(&logMessageStack, message, (LEO_NOLOG | LEO_SQUASH));
+}
 
 static inline const LogCategoryEntry *
 getLogCategoryEntry (LogCategoryIndex index) {
@@ -302,12 +340,12 @@ setLogCategory (const char *name) {
 int
 pushLogPrefix (const char *prefix) {
   if (!prefix) prefix = "";
-  return logPush(&logPrefixStack, prefix, 0);
+  return pushLogEntry(&logPrefixStack, prefix, 0);
 }
 
 int
 popLogPrefix (void) {
-  return logPop(&logPrefixStack);
+  return popLogEntry(&logPrefixStack);
 }
 
 void
@@ -405,11 +443,6 @@ closeSystemLog (void) {
 }
 
 void
-pushLogMessage (const char *message) {
-  logPush(&logMessageStack, message, (LPO_NOLOG | LPO_SQUASH));
-}
-
-void
 logData (int level, LogDataFormatter *formatLogData, const void *data) {
   const char *prefix = NULL;
   int push = 0;
@@ -444,14 +477,19 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
 #if defined(WINDOWS)
         if (windowsEventLog != INVALID_HANDLE_VALUE) {
           const char *strings[] = {record};
-          ReportEvent(windowsEventLog, toWindowsEventType(level), 0, 0, NULL,
-                      ARRAY_COUNT(strings), 0, strings, NULL);
+
+          ReportEvent(
+            windowsEventLog, toWindowsEventType(level), 0, 0, NULL,
+            ARRAY_COUNT(strings), 0, strings, NULL
+          );
         }
 
 #elif defined(__MSDOS__)
 
 #elif defined(__ANDROID__)
-        __android_log_write(toAndroidLogPriority(level), PACKAGE_TARNAME, record);
+        __android_log_write(
+          toAndroidLogPriority(level), PACKAGE_TARNAME, record
+        );
 
 #elif defined(HAVE_SYSLOG_H)
         if (syslogOpened) syslog(level, "%s", record);

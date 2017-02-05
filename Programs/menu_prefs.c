@@ -29,6 +29,7 @@
 #include "prefs.h"
 #include "profile.h"
 #include "status_types.h"
+#include "timing.h"
 #include "ttb.h"
 #include "atb.h"
 #include "ctb.h"
@@ -1379,15 +1380,35 @@ noMenu:
 }
 
 static int
-addNewLogMessages (Menu *menu, const LogStackElement *element) {
-  static const LogStackElement *newest = NULL;
-  if (element == newest) return 1;
-  if (!addNewLogMessages(menu, element->previous)) return 0;
+addNewLogMessages (Menu *menu, const LogEntry *entry) {
+  static const LogEntry *newest = NULL;
+  if (entry == newest) return 1;
+  if (!addNewLogMessages(menu, getPreviousLogEntry(entry))) return 0;
 
-  MenuItem *item = newTextMenuItem(menu, NULL, element->string);
+  const TimeValue *time = getLogEntryTime(entry);
+  unsigned int count = getLogEntryCount(entry);
+  MenuString name;
+
+  if (time) {
+    char buffer[0X20];
+    formatSeconds(buffer, sizeof(buffer), "%Y-%m-%d@%H:%M:%S", time->seconds);
+    name.label = strdup(buffer);
+  } else {
+    name.label = NULL;
+  }
+
+  if (count > 1) {
+    char buffer[0X10];
+    snprintf(buffer, sizeof(buffer), "(%u)", count);
+    name.comment = strdup(buffer);
+  } else {
+    name.comment = NULL;
+  }
+
+  MenuItem *item = newTextMenuItem(menu, &name, getLogEntryString(entry));
   if (!item) return 0;
 
-  newest = element;
+  newest = entry;
   return 1;
 }
 
@@ -1396,15 +1417,19 @@ getPreferencesMenu (void) {
   static Menu *menu = NULL;
   if (!menu) menu = makePreferencesMenu();
 
-  if (menu && logMessageStack) {
-    static Menu *logMessageMenu = NULL;
+  if (menu) {
+    const LogEntry *messages = getLogMessages();
 
-    if (!logMessageMenu) {
-      NAME(strtext("Log Messages"));
-      logMessageMenu = newSubmenuMenuItem(menu, &itemName);
+    if (messages) {
+      static Menu *submenu = NULL;
+
+      if (!submenu) {
+        NAME(strtext("Log Messages"));
+        submenu = newSubmenuMenuItem(menu, &itemName);
+      }
+
+      if (submenu) addNewLogMessages(submenu, messages);
     }
-
-    if (logMessageMenu) addNewLogMessages(logMessageMenu, logMessageStack);
   }
 
   return menu;
