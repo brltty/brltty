@@ -197,14 +197,12 @@ int
 logPush (LogStackElement **head, const char *string, LogPushOptions options) {
   LogStackElement *element = NULL;
 
-  if (!element) {
-    if (options & LPO_SQUASH) {
-      if ((element = *head)) {
-        if (strcmp(element->string, string) == 0) {
-          element->count += 1;
-        } else {
-          element = NULL;
-        }
+  if (options & LPO_SQUASH) {
+    if ((element = *head)) {
+      if (strcmp(element->string, string) == 0) {
+        element->count += 1;
+      } else {
+        element = NULL;
       }
     }
   }
