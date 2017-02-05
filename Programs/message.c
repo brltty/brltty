@@ -94,13 +94,11 @@ handleMessageCommands (int command, void *data) {
     case BRL_CMD_NXDIFLN:
     case BRL_CMD_FWINRTSKIP:
     case BRL_CMD_FWINRT: {
-      if (mgd->segments.current < mgd->segments.last) {
+      if ((mgd->hold = mgd->segments.current < mgd->segments.last)) {
         mgd->segments.current += 1;
-        mgd->endWait = 1;
       }
 
-      mgd->hold = 1;
-      return 1;
+      break;
     }
 
     default: {
@@ -118,12 +116,15 @@ handleMessageCommands (int command, void *data) {
 
         default:
           mgd->hold = 0;
-          mgd->timeout = -1;
-          mgd->endWait = 1;
-          return 1;
+          break;
       }
+
+      break;
     }
   }
+
+  mgd->endWait = 1;
+  return 1;
 }
 
 ASYNC_TASK_CALLBACK(presentMessage) {
@@ -216,8 +217,11 @@ ASYNC_TASK_CALLBACK(presentMessage) {
       mgd.timeout = MAX(mgd.timeout, 0);
 
       while (1) {
+        int timeout = mgd.timeout;
+        mgd.timeout = -1;
+
         mgd.endWait = 0;
-        int timedOut = !asyncAwaitCondition(mgd.timeout, testEndMessageWait, &mgd);
+        int timedOut = !asyncAwaitCondition(timeout, testEndMessageWait, &mgd);
         if (mgd.segments.current != segment) break;
 
         if (mgd.hold || mgd.touch) {
