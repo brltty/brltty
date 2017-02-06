@@ -98,45 +98,47 @@ compareCommandCodes (const void *element1, const void *element2) {
   return 0;
 }
 
+int
+getCommandCount (void) {
+  static int commandCount = -1;
+
+  if (commandCount < 0) {
+    const CommandEntry *cmd = commandTable;
+    while (cmd->name) cmd += 1;
+    commandCount = cmd - commandTable;
+  }
+
+  return commandCount;
+}
+
 const CommandEntry *
 findCommandEntry (int code) {
   static const CommandEntry **commandEntries = NULL;
-  static int commandCount;
+  int count = getCommandCount();
+  code &= BRL_MSK_CMD;
 
   if (!commandEntries) {
+    const CommandEntry **entries = malloc(ARRAY_SIZE(entries, count));
+
+    if (!entries) {
+      logMallocError();
+      return NULL;
+    }
+
     {
       const CommandEntry *cmd = commandTable;
-
-      while (cmd->name) cmd += 1;
-      commandCount = cmd - commandTable;
+      const CommandEntry **entry = entries;
+      while (cmd->name) *entry++ = cmd++;
     }
 
-    {
-      const CommandEntry **entries = malloc(ARRAY_SIZE(entries, commandCount));
-
-      if (!entries) {
-        logMallocError();
-        return NULL;
-      }
-
-      {
-        const CommandEntry *cmd = commandTable;
-        const CommandEntry **entry = entries;
-
-        while (cmd->name) *entry++ = cmd++;
-      }
-
-      qsort(entries, commandCount, sizeof(*entries), compareCommandCodes);
-      commandEntries = entries;
-    }
-
+    qsort(entries, count, sizeof(*entries), compareCommandCodes);
+    commandEntries = entries;
     registerProgramMemory("sorted-command-table", &commandEntries);
   }
 
-  code &= BRL_MSK_CMD;
   {
     int first = 0;
-    int last = commandCount - 1;
+    int last = count - 1;
 
     while (first <= last) {
       int current = (first + last) / 2;
@@ -158,12 +160,13 @@ findCommandEntry (int code) {
         if (arg == (code & BRL_MSK_ARG)) return cmd;
 
         if (blk) {
-          return cmd;
           int next = last + 1;
 
-          if (next < commandCount)
-            if (blk != (commandEntries[next]->code & BRL_MSK_BLK))
+          if (next < count) {
+            if (blk != (commandEntries[next]->code & BRL_MSK_BLK)) {
               return cmd;
+            }
+          }
         }
       }
     }

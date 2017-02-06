@@ -27,6 +27,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern const CommandEntry commandTable[];
+extern int getCommandCount (void);
 extern const CommandEntry *findCommandEntry (int code);
 
 typedef struct {

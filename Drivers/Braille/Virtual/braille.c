@@ -753,14 +753,6 @@ writeLine (void) {
   return 0;
 }
 
-static size_t
-getCommandCount (void) {
-  size_t count = 0;
-  const CommandEntry *entry = commandTable;
-  while (entry++->name) ++count;
-  return count;
-}
-
 static void
 sortCommands (int (*compareCommands) (const void *item1, const void *item2)) {
   qsort(commandDescriptors, commandCount, commandSize, compareCommands);
