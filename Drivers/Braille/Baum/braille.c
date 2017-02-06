@@ -1412,6 +1412,11 @@ static const BaumDeviceOperations baumDeviceOperations[] = {
     .writeAllCells = writeBaumCells_all
   },
 
+  [BAUM_DEVICE_Orbit] = {
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(orbit),
+    .writeAllCells = writeBaumCells_all
+  },
+
   [BAUM_DEVICE_PocketVario] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(pv),
     .writeAllCells = writeBaumCells_all
