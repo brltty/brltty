@@ -51,10 +51,6 @@ typedef enum {
   IV_KEY_Back          = 12,
   IV_KEY_Space         = 13,
   IV_KEY_Shift         = 14,
-  IV_KEY_Enter         = 15,
-
-  IV_KEY_PanLeft       = 16,
-  IV_KEY_PanRight      = 17,
 } IV_NavigationKey;
 
 typedef enum {

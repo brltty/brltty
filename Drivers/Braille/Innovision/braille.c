@@ -48,10 +48,6 @@ BEGIN_KEY_NAME_TABLE(navigation)
   KEY_NAME_ENTRY(IV_KEY_Back, "Back"),
   KEY_NAME_ENTRY(IV_KEY_Space, "Space"),
   KEY_NAME_ENTRY(IV_KEY_Shift, "Shift"),
-  KEY_NAME_ENTRY(IV_KEY_Enter, "Enter"),
-
-  KEY_NAME_ENTRY(IV_KEY_PanLeft, "PanLeft"),
-  KEY_NAME_ENTRY(IV_KEY_PanRight, "PanRight"),
 
   KEY_GROUP_ENTRY(IV_GRP_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
