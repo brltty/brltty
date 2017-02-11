@@ -304,7 +304,7 @@ cdef class Connection:
 			raise ConnectionError(self.settings.host, self.settings.auth)
 
 	def __del__(self):
-		"""Close the BrlAPI conection"""
+		"""Close the BrlAPI connection"""
 		c_brlapi.brlapi__closeConnection(self.h)
 		c_brlapi.free(self.h)
 
