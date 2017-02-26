@@ -30,6 +30,7 @@
 #endif /* __ANDROID__ */
 
 #include "log.h"
+#include "log_history.h"
 #include "strfmt.h"
 #include "timing.h"
 #include "addresses.h"
@@ -192,77 +193,6 @@ toAndroidLogPriority (int level) {
 #elif defined(HAVE_SYSLOG_H)
 static int syslogOpened = 0;
 #endif /* system log internal definitions */
-
-struct LogEntryStruct {
-  struct LogEntryStruct *previous;
-  TimeValue time;
-  unsigned int count;
-  char text[0];
-};
-
-const LogEntry *
-getPreviousLogEntry (const LogEntry *entry) {
-  return entry->previous;
-}
-
-const char *
-getLogEntryText (const LogEntry *entry) {
-  return entry->text;
-}
-
-const TimeValue *
-getLogEntryTime (const LogEntry *entry) {
-  return &entry->time;
-}
-
-unsigned int
-getLogEntryCount (const LogEntry *entry) {
-  return entry->count;
-}
-
-int
-pushLogEntry (LogEntry **head, const char *text, LogEntryOptions options) {
-  int log = !(options & LEO_NOLOG);
-  LogEntry *entry = NULL;
-
-  if (options & LEO_SQUASH) {
-    if ((entry = *head)) {
-      if (strcmp(entry->text, text) == 0) {
-        entry->count += 1;
-      } else {
-        entry = NULL;
-      }
-    }
-  }
-
-  if (!entry) {
-    const size_t size = sizeof(*entry) + strlen(text) + 1;
-
-    if (!(entry = malloc(size))) {
-      if (log) logMallocError();
-      return 0;
-    }
-
-    memset(entry, 0, sizeof(*entry));
-    entry->count = 1;
-    strcpy(entry->text, text);
-
-    entry->previous = *head;
-    *head = entry;
-  }
-
-  getCurrentTime(&entry->time);
-  return 1;
-}
-
-int
-popLogEntry (LogEntry **head) {
-  if (!*head) return 0;
-  LogEntry *entry = *head;
-  *head = entry->previous;
-  free(entry);
-  return 1;
-}
 
 static LogEntry *logMessageStack = NULL;
 static LogEntry *logPrefixStack = NULL;
@@ -501,7 +431,7 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
         lockStream(stream);
 
         if (logPrefixStack) {
-          const char *prefix = logPrefixStack->text;
+          const char *prefix = getLogEntryText(logPrefixStack);
 
           if (*prefix) {
             fputs(prefix, stream);

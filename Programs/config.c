@@ -622,7 +622,7 @@ logProgramBanner (void) {
   makeProgramBanner(banner, sizeof(banner), 1);
 
   {
-    int pushed = pushLogPrefix(NULL);
+    int pushed = pushLogPrefix("");
     logMessage(LOG_NOTICE, "%s [%s]", banner, PACKAGE_URL);
     if (pushed) popLogPrefix();
   }

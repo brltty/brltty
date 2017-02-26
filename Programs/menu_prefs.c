@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "log_history.h"
 #include "embed.h"
 #include "revision.h"
 #include "menu.h"

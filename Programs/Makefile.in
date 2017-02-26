@@ -264,6 +264,9 @@ thread.$O:
 log.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/log.c
 
+log_history.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/log_history.c
+
 addresses.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/addresses.c
 

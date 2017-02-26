@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "log_history.h"
 #include "message.h"
 #include "defaults.h"
 #include "async_wait.h"
