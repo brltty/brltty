@@ -194,19 +194,8 @@ toAndroidLogPriority (int level) {
 static int syslogOpened = 0;
 #endif /* system log internal definitions */
 
-static LogEntry *logMessageStack = NULL;
 static LogEntry *logPrefixStack = NULL;
 static FILE *logFile = NULL;
-
-const LogEntry *
-getNewestLogMessage (void) {
-  return logMessageStack;
-}
-
-void
-pushLogMessage (const char *message) {
-  pushLogEntry(&logMessageStack, message, (LEO_NOLOG | LEO_SQUASH));
-}
 
 static inline const LogCategoryEntry *
 getLogCategoryEntry (LogCategoryIndex index) {

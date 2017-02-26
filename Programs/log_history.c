@@ -94,3 +94,15 @@ popLogEntry (LogEntry **head) {
   free(entry);
   return 1;
 }
+
+static LogEntry *logMessageStack = NULL;
+
+const LogEntry *
+getNewestLogMessage (void) {
+  return logMessageStack;
+}
+
+void
+pushLogMessage (const char *message) {
+  pushLogEntry(&logMessageStack, message, (LEO_NOLOG | LEO_SQUASH));
+}
