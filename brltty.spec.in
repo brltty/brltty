@@ -59,8 +59,10 @@ BuildRequires: linuxdoc-tools
 BuildRequires: doxygen
 
 AutoProv: no
-Provides: brlapi-server
 AutoReq: yes
+
+Provides: brlapi-server
+Provides: config(%{name}) = %{version}
 
 Summary: Braille display driver for Linux/Unix.
 %description
@@ -379,7 +381,7 @@ Install this package if you're developing or maintaining an application
 which directly accesses a refreshable braille display.
 
 
-%package -n brlapi-java
+%package -n java-brlapi
 Version: @api_release@
 Release: 1
 Group: System Environment/Libraries
@@ -391,7 +393,7 @@ AutoProv: no
 AutoReq: yes
 
 Summary: Java bindings for BrlAPI.
-%description -n brlapi-java
+%description -n java-brlapi
 This package provides the Java bindings for BrlAPI,
 which is the Application Programming Interface to BRLTTY.
 
@@ -399,7 +401,7 @@ Install this package if you have a Java application
 which directly accesses a refreshable braille display.
 
 
-%package -n brlapi-ocaml
+%package -n ocaml-brlapi
 Version: @api_release@
 Release: 1
 Group: System Environment/Libraries
@@ -412,7 +414,7 @@ AutoProv: no
 AutoReq: yes
 
 Summary: OCaml bindings for BrlAPI.
-%description -n brlapi-ocaml
+%description -n ocaml-brlapi
 This package provides the OCaml bindings for BrlAPI,
 which is the Application Programming Interface to BRLTTY.
 
@@ -420,7 +422,7 @@ Install this package if you have an OCaml application
 which directly accesses a refreshable braille display.
 
 
-%package -n brlapi-python
+%package -n python-brlapi
 Version: @api_release@
 Release: 1
 Group: System Environment/Libraries
@@ -434,7 +436,7 @@ AutoProv: no
 AutoReq: yes
 
 Summary: Python bindings for BrlAPI.
-%description -n brlapi-python
+%description -n python-brlapi
 This package provides the Python bindings for BrlAPI,
 which is the Application Programming Interface to BRLTTY.
 
@@ -442,7 +444,7 @@ Install this package if you have a Python application
 which directly accesses a refreshable braille display.
 
 
-%package -n brlapi-tcl
+%package -n tcl-brlapi
 Version: @api_release@
 Release: 1
 Group: System Environment/Libraries
@@ -455,7 +457,7 @@ AutoProv: no
 AutoReq: yes
 
 Summary: Tcl bindings for BrlAPI.
-%description -n brlapi-tcl
+%description -n tcl-brlapi
 This package provides the Tcl bindings for BrlAPI,
 which is the Application Programming Interface to BRLTTY.
 
@@ -570,17 +572,17 @@ rm -fr "${RPM_BUILD_ROOT}"
 %{_libdir}/libbrlapi.so.*
 %doc %{_docdir}/*/Manual-BrlAPI
 
-%files -n brlapi-java
+%files -n java-brlapi
 @JAVA_JAR_DIR@/*
 @JAVA_JNI_DIR@/*
 
-%files -n brlapi-ocaml
+%files -n ocaml-brlapi
 @OCAMLLIB@/brlapi
 
-%files -n brlapi-python
+%files -n python-brlapi
 @PYTHON_SITE_PKG@/[bB]rlapi[-.]*
 
-%files -n brlapi-tcl
+%files -n tcl-brlapi
 @TCL_DIR@/brlapi-@api_release@/libbrlapi_tcl.so
 @TCL_DIR@/brlapi-@api_release@/pkgIndex.tcl
 
