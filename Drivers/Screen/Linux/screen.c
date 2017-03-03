@@ -385,7 +385,9 @@ controlConsole (int *fd, int vt, int operation, void *argument) {
 
   if (result == -1) {
     if (errno == EIO) {
-      logSystemError("control[console]");
+      logMessage(LOG_ERR,
+                 "console control error %d: fd=%d vt=%d op=0X%04X: %s",
+                 errno, *fd, vt, operation, strerror(errno));
 
       if (openConsole(fd, vt)) {
         result = ioctl(*fd, operation, argument);
