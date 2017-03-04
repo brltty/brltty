@@ -26,20 +26,21 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef enum {
-  LEO_NOLOG  = 0X01,
-  LEO_SQUASH = 0X02,
-} LogEntryOptions;
+  LPO_NOLOG  = 0X01,
+  LPO_SQUASH = 0X02,
+} LogEntryPushOptions;
 
 typedef struct LogEntryStruct LogEntry;
-extern const LogEntry *getPreviousLogEntry (const LogEntry *entry);
+extern void setLogEntryNoSquash (LogEntry *entry);
+extern LogEntry *getPreviousLogEntry (const LogEntry *entry);
 extern const char *getLogEntryText (const LogEntry *entry);
 extern const TimeValue *getLogEntryTime (const LogEntry *entry);
 extern unsigned int getLogEntryCount (const LogEntry *entry);
 
-extern int pushLogEntry (LogEntry **head, const char *text, LogEntryOptions options);
+extern int pushLogEntry (LogEntry **head, const char *text, LogEntryPushOptions options);
 extern int popLogEntry (LogEntry **head);
 
-extern const LogEntry *getNewestLogMessage (void);
+extern LogEntry *getNewestLogMessage (void);
 extern void pushLogMessage (const char *message);
 
 #ifdef __cplusplus

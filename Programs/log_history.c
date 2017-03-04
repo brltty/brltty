@@ -28,10 +28,16 @@ struct LogEntryStruct {
   struct LogEntryStruct *previous;
   TimeValue time;
   unsigned int count;
+  unsigned noSquash:1;
   char text[0];
 };
 
-const LogEntry *
+void
+setLogEntryNoSquash (LogEntry *entry) {
+  entry->noSquash = 1;
+}
+
+LogEntry *
 getPreviousLogEntry (const LogEntry *entry) {
   return entry->previous;
 }
@@ -52,13 +58,13 @@ getLogEntryCount (const LogEntry *entry) {
 }
 
 int
-pushLogEntry (LogEntry **head, const char *text, LogEntryOptions options) {
-  int log = !(options & LEO_NOLOG);
+pushLogEntry (LogEntry **head, const char *text, LogEntryPushOptions options) {
+  int log = !(options & LPO_NOLOG);
   LogEntry *entry = NULL;
 
-  if (options & LEO_SQUASH) {
+  if (options & LPO_SQUASH) {
     if ((entry = *head)) {
-      if (strcmp(entry->text, text) == 0) {
+      if (!entry->noSquash && (strcmp(entry->text, text) == 0)) {
         entry->count += 1;
       } else {
         entry = NULL;
@@ -97,12 +103,12 @@ popLogEntry (LogEntry **head) {
 
 static LogEntry *logMessageStack = NULL;
 
-const LogEntry *
+LogEntry *
 getNewestLogMessage (void) {
   return logMessageStack;
 }
 
 void
 pushLogMessage (const char *message) {
-  pushLogEntry(&logMessageStack, message, (LEO_NOLOG | LEO_SQUASH));
+  pushLogEntry(&logMessageStack, message, (LPO_NOLOG | LPO_SQUASH));
 }

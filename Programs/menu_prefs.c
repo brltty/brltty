@@ -518,9 +518,10 @@ static Menu *logMessagesMenu = NULL;
 static const LogEntry *newestLogMessage = NULL;
 
 static int
-addNewLogMessages (const LogEntry *message) {
+addNewLogMessages (LogEntry *message) {
   if (message == newestLogMessage) return 1;
   if (!addNewLogMessages(getPreviousLogEntry(message))) return 0;
+  setLogEntryNoSquash(message);
 
   MenuString name;
   const TimeValue *time = getLogEntryTime(message);
