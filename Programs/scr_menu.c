@@ -162,9 +162,8 @@ removeLines (void) {
 static int
 setScreenRow (void) {
   const MenuItem *item = getCurrentItem();
-  unsigned int row;
 
-  for (row=0; row<screenHeight; row+=1) {
+  for (unsigned int row=0; row<screenHeight; row+=1) {
     const RenderedMenuItem *rmi = screenLines[row];
 
     if (rmi->item == item) {
@@ -284,13 +283,11 @@ static int
 readCharacters_MenuScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   if (validateScreenBox(box, screenWidth, screenHeight)) {
     ScreenCharacter *character = buffer;
-    unsigned int row;
 
-    for (row=0; row<box->height; row+=1) {
+    for (unsigned int row=0; row<box->height; row+=1) {
       const RenderedMenuItem *rmi = screenLines[row + box->top];
-      unsigned int column;
 
-      for (column=0; column<box->width; column+=1) {
+      for (unsigned int column=0; column<box->width; column+=1) {
         unsigned int index = column + box->left;
 
         character->text = (index < rmi->length)? rmi->text[index]: WC_C(' ');

@@ -54,8 +54,9 @@ static MenuScreen menuScreen;
 static int
 menuScreen_construct (void) {
   Menu *menu = getPreferencesMenu();
-
   if (!menu) return 0;
+
+  updateLogMessagesSubmenu();
   return menuScreen.construct(menu);
 }
 
