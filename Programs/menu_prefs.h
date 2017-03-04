@@ -26,6 +26,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern Menu *getPreferencesMenu (void);
+extern int updateLogMessagesSubmenu (void);
 
 #define PREFS_MENU_ITEM_APPLY(apply) \
 apply(textTable) \

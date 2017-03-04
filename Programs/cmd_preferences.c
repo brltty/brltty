@@ -48,10 +48,14 @@ handlePreferencesCommands (int command, void *data) {
 
         deactivateSpecialScreen(SCR_MENU);
         ok = 1;
-      } else if (activateSpecialScreen(SCR_MENU)) {
-        updateSessionAttributes();
-        savedPreferences = prefs;
-        ok = 1;
+      } else {
+        updateLogMessagesSubmenu();
+
+        if (activateSpecialScreen(SCR_MENU)) {
+          updateSessionAttributes();
+          savedPreferences = prefs;
+          ok = 1;
+        }
       }
 
       if (ok) {

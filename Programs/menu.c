@@ -91,6 +91,7 @@ struct MenuStruct {
 };
 
 typedef struct {
+  int (*testItem) (const MenuItem *item);
   int (*beginItem) (MenuItem *item);
   void (*endItem) (MenuItem *item, int deallocating);
   void (*activateItem) (MenuItem *item);
@@ -232,8 +233,8 @@ static int
 testMenuItem (const MenuItem *item, int all) {
   if (!item) return 0;
   if (all) return 1;
-  if (!item->test) return 1;
-  return item->test();
+  if (item->methods->testItem && !item->methods->testItem(item)) return 0;
+  return !item->test || item->test();
 }
 
 int
@@ -742,15 +743,19 @@ getParentMenuItem (const MenuItem *item) {
 }
 
 static int
+testItem_submenu (const MenuItem *item) {
+  return getMenuSize(item->data.submenu->menu) > 1;
+}
+
+static int
 beginItem_submenu (MenuItem *item) {
   item->data.submenu->visible = 0;
 
   {
     Menu *menu = item->data.submenu->menu;
     unsigned int size = getMenuSize(menu);
-    unsigned int index;
 
-    for (index=1; index<size; index+=1) {
+    for (unsigned int index=1; index<size; index+=1) {
       if (testMenuItemActive(menu, index)) {
         item->data.submenu->visible += 1;
       }
@@ -797,6 +802,7 @@ getComment_submenu (const MenuItem *item) {
 }
 
 static const MenuItemMethods menuItemMethods_submenu = {
+  .testItem = testItem_submenu,
   .beginItem = beginItem_submenu,
   .endItem = endItem_submenu,
   .activateItem = activateItem_submenu,

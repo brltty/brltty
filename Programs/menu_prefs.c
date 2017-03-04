@@ -514,6 +514,46 @@ makeMidiInstrumentMenuStrings (void) {
 }
 #endif /* HAVE_MIDI_SUPPORT */
 
+static Menu *logMessagesMenu = NULL;
+static const LogEntry *newestLogMessage = NULL;
+
+static int
+addNewLogMessages (const LogEntry *message) {
+  if (message == newestLogMessage) return 1;
+  if (!addNewLogMessages(getPreviousLogEntry(message))) return 0;
+
+  MenuString name;
+  const TimeValue *time = getLogEntryTime(message);
+  unsigned int count = getLogEntryCount(message);
+
+  if (time) {
+    char buffer[0X20];
+    formatSeconds(buffer, sizeof(buffer), "%Y-%m-%d@%H:%M:%S", time->seconds);
+    name.label = strdup(buffer);
+  } else {
+    name.label = NULL;
+  }
+
+  if (count > 1) {
+    char buffer[0X10];
+    snprintf(buffer, sizeof(buffer), "(%u)", count);
+    name.comment = strdup(buffer);
+  } else {
+    name.comment = NULL;
+  }
+
+  MenuItem *item = newTextMenuItem(logMessagesMenu, &name, getLogEntryText(message));
+  if (!item) return 0;
+
+  newestLogMessage = message;
+  return 1;
+}
+
+int
+updateLogMessagesSubmenu (void) {
+  return addNewLogMessages(getNewestLogMessage());
+}
+
 static Menu *
 makePreferencesMenu (void) {
   static const MenuString cursorStyles[] = {
@@ -1372,6 +1412,11 @@ makePreferencesMenu (void) {
     }
   }
 
+  {
+    NAME(strtext("Log Messages"));
+    logMessagesMenu = newSubmenuMenuItem(rootMenu, &itemName);
+  }
+
   return rootMenu;
 
 noItem:
@@ -1380,58 +1425,9 @@ noMenu:
   return NULL;
 }
 
-static int
-addNewLogMessages (Menu *menu, const LogEntry *message) {
-  static const LogEntry *newest = NULL;
-  if (message == newest) return 1;
-  if (!addNewLogMessages(menu, getPreviousLogEntry(message))) return 0;
-
-  MenuString name;
-  const TimeValue *time = getLogEntryTime(message);
-  unsigned int count = getLogEntryCount(message);
-
-  if (time) {
-    char buffer[0X20];
-    formatSeconds(buffer, sizeof(buffer), "%Y-%m-%d@%H:%M:%S", time->seconds);
-    name.label = strdup(buffer);
-  } else {
-    name.label = NULL;
-  }
-
-  if (count > 1) {
-    char buffer[0X10];
-    snprintf(buffer, sizeof(buffer), "(%u)", count);
-    name.comment = strdup(buffer);
-  } else {
-    name.comment = NULL;
-  }
-
-  MenuItem *item = newTextMenuItem(menu, &name, getLogEntryText(message));
-  if (!item) return 0;
-
-  newest = message;
-  return 1;
-}
-
 Menu *
 getPreferencesMenu (void) {
   static Menu *menu = NULL;
   if (!menu) menu = makePreferencesMenu();
-
-  if (menu) {
-    const LogEntry *message = getNewestLogMessage();
-
-    if (message) {
-      static Menu *submenu = NULL;
-
-      if (!submenu) {
-        NAME(strtext("Log Messages"));
-        submenu = newSubmenuMenuItem(menu, &itemName);
-      }
-
-      if (submenu) addNewLogMessages(submenu, message);
-    }
-  }
-
   return menu;
 }
