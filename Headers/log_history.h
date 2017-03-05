@@ -32,8 +32,7 @@ typedef enum {
 } LogEntryPushOptions;
 
 typedef struct LogEntryStruct LogEntry;
-extern void setLogEntryNoSquash (LogEntry *entry);
-extern LogEntry *getPreviousLogEntry (const LogEntry *entry);
+extern const LogEntry *getPreviousLogEntry (const LogEntry *entry);
 extern const char *getLogEntryText (const LogEntry *entry);
 extern const TimeValue *getLogEntryTime (const LogEntry *entry);
 extern unsigned int getLogEntryCount (const LogEntry *entry);
@@ -41,10 +40,7 @@ extern unsigned int getLogEntryCount (const LogEntry *entry);
 extern int pushLogEntry (LogEntry **head, const char *text, LogEntryPushOptions options);
 extern int popLogEntry (LogEntry **head);
 
-extern void lockLogMessages (void);
-extern void unlockLogMessages (void);
-
-extern LogEntry *getNewestLogMessage (void);
+extern const LogEntry *getNewestLogMessage (int freeze);
 extern void pushLogMessage (const char *message);
 
 #ifdef __cplusplus

@@ -32,12 +32,7 @@ struct LogEntryStruct {
   char text[0];
 };
 
-void
-setLogEntryNoSquash (LogEntry *entry) {
-  entry->noSquash = 1;
-}
-
-LogEntry *
+const LogEntry *
 getPreviousLogEntry (const LogEntry *entry) {
   return entry->previous;
 }
@@ -103,21 +98,25 @@ popLogEntry (LogEntry **head) {
 
 static CriticalSectionLock logMessageLock = CRITICAL_SECTION_LOCK_INITIALIZER;
 
-void
+static void
 lockLogMessages (void) {
   enterCriticalSection(&logMessageLock);
 }
 
-void
+static void
 unlockLogMessages (void) {
   leaveCriticalSection(&logMessageLock);
 }
 
 static LogEntry *logMessageStack = NULL;
 
-LogEntry *
-getNewestLogMessage (void) {
-  return logMessageStack;
+const LogEntry *
+getNewestLogMessage (int freeze) {
+  lockLogMessages();
+  LogEntry *message = logMessageStack;
+  if (freeze && message) message->noSquash = 1;
+  unlockLogMessages();
+  return message;
 }
 
 void
