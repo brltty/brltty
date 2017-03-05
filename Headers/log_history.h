@@ -19,6 +19,7 @@
 #ifndef BRLTTY_INCLUDED_LOG_HISTORY
 #define BRLTTY_INCLUDED_LOG_HISTORY
 
+#include "thread.h"
 #include "timing.h"
 
 #ifdef __cplusplus
@@ -39,6 +40,9 @@ extern unsigned int getLogEntryCount (const LogEntry *entry);
 
 extern int pushLogEntry (LogEntry **head, const char *text, LogEntryPushOptions options);
 extern int popLogEntry (LogEntry **head);
+
+extern void lockLogMessages (void);
+extern void unlockLogMessages (void);
 
 extern LogEntry *getNewestLogMessage (void);
 extern void pushLogMessage (const char *message);

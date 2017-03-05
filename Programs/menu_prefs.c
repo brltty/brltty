@@ -521,7 +521,6 @@ static int
 addNewLogMessages (LogEntry *message) {
   if (message == newestLogMessage) return 1;
   if (!addNewLogMessages(getPreviousLogEntry(message))) return 0;
-  setLogEntryNoSquash(message);
 
   MenuString name;
   const TimeValue *time = getLogEntryTime(message);
@@ -552,7 +551,11 @@ addNewLogMessages (LogEntry *message) {
 
 int
 updateLogMessagesSubmenu (void) {
-  return addNewLogMessages(getNewestLogMessage());
+  lockLogMessages();
+  LogEntry *message = getNewestLogMessage();
+  if (message) setLogEntryNoSquash(message);
+  unlockLogMessages();
+  return addNewLogMessages(message);
 }
 
 static Menu *

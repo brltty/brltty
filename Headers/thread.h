@@ -47,6 +47,33 @@ extern int unlockMutex (pthread_mutex_t *mutex);
 extern size_t formatThreadName (char *buffer, size_t size);
 extern void setThreadName (const char *name);
 
+#if defined(PTHREAD_MUTEX_INITIALIZER)
+typedef pthread_mutex_t CriticalSectionLock;
+#define CRITICAL_SECTION_LOCK_INITIALIZER PTHREAD_MUTEX_INITIALIZER
+
+static inline void
+enterCriticalSection (CriticalSectionLock *lock) {
+  pthread_mutex_lock(lock);
+}
+
+static inline void
+leaveCriticalSection (CriticalSectionLock *lock) {
+  pthread_mutex_unlock(lock);
+}
+
+#else /* critical section lock */
+typedef unsigned char CriticalSectionLock;
+#define CRITICAL_SECTION_LOCK_INITIALIZER 0
+
+static inline void
+enterCriticalSection (CriticalSectionLock *lock) {
+}
+
+static inline void
+leaveCriticalSection (CriticalSectionLock *lock) {
+}
+#endif /* critical section lock */
+
 #define THREAD_SPECIFIC_DATA_NEW(name) void *name##_new (void)
 typedef THREAD_SPECIFIC_DATA_NEW(ThreadSpecificData);
 
