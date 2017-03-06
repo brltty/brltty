@@ -525,10 +525,18 @@ processCommandLine (
         break;
       }
 
-      case '?':
-        logMessage(LOG_ERR, "%s: %c%c", gettext("unknown option"), prefix, optopt);
+      case '?': {
+        const char *message = gettext("unknown option");
+
+        if (optopt) {
+          logMessage(LOG_ERR, "%s: %c%c", message, prefix, optopt);
+        } else {
+          logMessage(LOG_ERR, "%s: %s", message, (*argumentVector)[optind-1]);
+        }
+
         info->syntaxError = 1;
         break;
+      }
 
       case ':': /* An invalid option has been specified. */
         logMessage(LOG_ERR, "%s: %c%c", gettext("missing operand"), prefix, optopt);
