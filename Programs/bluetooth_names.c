@@ -23,6 +23,7 @@
 #define BLUETOOTH_NAME_DRIVERS(name, ...) static const char *const bluetoothNameDrivers_##name[] = {__VA_ARGS__, NULL}
 BLUETOOTH_NAME_DRIVERS(Actilino, "ht");
 BLUETOOTH_NAME_DRIVERS(ActiveBraille, "ht");
+BLUETOOTH_NAME_DRIVERS(ActiveStar, "ht");
 BLUETOOTH_NAME_DRIVERS(AlvaBC, "al");
 BLUETOOTH_NAME_DRIVERS(Apex, "bn");
 BLUETOOTH_NAME_DRIVERS(BasicBraille, "ht");
@@ -61,6 +62,10 @@ const BluetoothNameEntry bluetoothNameTable[] = {
 
   { .namePrefix = "Active Braille",
     .driverCodes = bluetoothNameDrivers_ActiveBraille
+  },
+
+  { .namePrefix = "Active Star AS4",
+    .driverCodes = bluetoothNameDrivers_ActiveStar
   },
 
   { .namePrefix = "ALVA BC",
