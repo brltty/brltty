@@ -969,7 +969,7 @@ static int handleKeyRanges(Connection *c, brlapi_packetType_t type, brlapi_packe
   unsigned int i;
   CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   CHECKERR(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
-  CHECKERR(!(size%2*sizeof(brlapi_keyCode_t)),BRLAPI_ERROR_INVALID_PACKET,"wrong packet size");
+  CHECKERR(!(size%(2*sizeof(brlapi_keyCode_t))),BRLAPI_ERROR_INVALID_PACKET,"wrong packet size");
   lockMutex(&c->acceptedKeysMutex);
   for (i=0; i<size/(2*sizeof(brlapi_keyCode_t)); i++) {
     x = ((brlapi_keyCode_t)ntohl(ints[i][0]) << 32) | ntohl(ints[i][1]);
