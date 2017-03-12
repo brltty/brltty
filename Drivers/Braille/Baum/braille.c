@@ -3104,6 +3104,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   descriptor.serial.options.applicationData = &baumEscapeOperations;
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
+  descriptor.usb.options.ignoreWriteTimeouts = 1;
 
   descriptor.bluetooth.channelNumber = 1;
   descriptor.bluetooth.discoverChannel = 1;

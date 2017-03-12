@@ -228,8 +228,18 @@ gioWriteData (GioEndpoint *endpoint, const void *data, size_t size) {
     return -1;
   }
 
-  return method(endpoint->handle, data, size,
-                endpoint->options.outputTimeout);
+  ssize_t result = method(endpoint->handle, data, size,
+                          endpoint->options.outputTimeout);
+
+  if (endpoint->options.ignoreWriteTimeouts) {
+    if (result == -1) {
+      if (errno == ETIMEDOUT) {
+        result = size;
+      }
+    }
+  }
+
+  return result;
 }
 
 int

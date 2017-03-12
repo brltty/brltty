@@ -32,6 +32,7 @@ typedef struct {
   int inputTimeout;
   int outputTimeout;
   int requestTimeout;
+  unsigned ignoreWriteTimeouts:1;
 } GioOptions;
 
 typedef ssize_t GioUsbWriteDataMethod (
