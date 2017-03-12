@@ -962,7 +962,7 @@ int BRLAPI_STDCALL brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int 
   uint32_t displaySize[2];
   ssize_t res;
 
-  if (handle->brlx*handle->brly) { *x = handle->brlx; *y = handle->brly; return 0; }
+  if (handle->brlx&&handle->brly) { *x = handle->brlx; *y = handle->brly; return 0; }
   res = brlapi__request(handle, BRLAPI_PACKET_GETDISPLAYSIZE, displaySize, sizeof(displaySize));
   if (res==-1) { return -1; }
   handle->brlx = ntohl(displaySize[0]);
