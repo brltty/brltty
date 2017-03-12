@@ -1167,6 +1167,19 @@ usbBeginInput (
   }
 }
 
+static int
+usbGetPollInterval (UsbEndpoint *endpoint) {
+  int interval = endpoint->descriptor->bInterval;
+
+  if (interval > 0) {
+    if (getLittleEndian16(endpoint->device->descriptor.bcdUSB) >= UsbSpecificationVersion_2_0) {
+      interval = (1 << (interval - 1)) / 8;
+    }
+  }
+
+  return interval;
+}
+
 int
 usbAwaitInput (
   UsbDevice *device,
@@ -1198,7 +1211,7 @@ usbAwaitInput (
     return 0;
   }
 
-  retryInterval = endpoint->descriptor->bInterval;
+  retryInterval = usbGetPollInterval(endpoint);
   retryInterval = MAX(USB_INPUT_AWAIT_RETRY_INTERVAL_MINIMUM, retryInterval);
 
   if (!(endpoint->direction.input.pending.requests && getQueueSize(endpoint->direction.input.pending.requests))) {
