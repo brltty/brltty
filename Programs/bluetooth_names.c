@@ -42,6 +42,7 @@ BLUETOOTH_NAME_DRIVERS(BrailleStar, "ht");
 BLUETOOTH_NAME_DRIVERS(Braillex, "pm");
 BLUETOOTH_NAME_DRIVERS(BrailliantBI, "hw");
 BLUETOOTH_NAME_DRIVERS(Brailliant80, "hw");
+BLUETOOTH_NAME_DRIVERS(Braillino, "ht");
 BLUETOOTH_NAME_DRIVERS(B2G, "bm");
 BLUETOOTH_NAME_DRIVERS(Conny, "bm");
 BLUETOOTH_NAME_DRIVERS(EL12, "al", "vo");
@@ -60,11 +61,11 @@ const BluetoothNameEntry bluetoothNameTable[] = {
     .driverCodes = bluetoothNameDrivers_Actilino
   },
 
-  { .namePrefix = "Active Braille",
+  { .namePrefix = "Active Braille AB",
     .driverCodes = bluetoothNameDrivers_ActiveBraille
   },
 
-  { .namePrefix = "Active Star AS4",
+  { .namePrefix = "Active Star AS",
     .driverCodes = bluetoothNameDrivers_ActiveStar
   },
 
@@ -76,7 +77,7 @@ const BluetoothNameEntry bluetoothNameTable[] = {
     .driverCodes = bluetoothNameDrivers_Apex
   },
 
-  { .namePrefix = "Basic Braille",
+  { .namePrefix = "Basic Braille BB",
     .driverCodes = bluetoothNameDrivers_BasicBraille
   },
 
@@ -124,7 +125,7 @@ const BluetoothNameEntry bluetoothNameTable[] = {
     .driverCodes = bluetoothNameDrivers_BrailleSense
   },
 
-  { .namePrefix = "Braille Star",
+  { .namePrefix = "Braille Star BS",
     .driverCodes = bluetoothNameDrivers_BrailleStar
   },
 
@@ -138,6 +139,10 @@ const BluetoothNameEntry bluetoothNameTable[] = {
 
   { .namePrefix = "Brailliant 80",
     .driverCodes = bluetoothNameDrivers_Brailliant80
+  },
+
+  { .namePrefix = "Braillino BL",
+    .driverCodes = bluetoothNameDrivers_Braillino
   },
 
   { .namePrefix = "B2G",
