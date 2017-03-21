@@ -27,6 +27,7 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <sys/sysmacros.h>
 #include <sys/stat.h>
 #include <locale.h>
 
