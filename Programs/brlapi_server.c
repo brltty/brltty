@@ -2994,10 +2994,11 @@ int api_resume(BrailleDisplay *brl) {
 /* try to get access to device. If suspended, returns 0 */
 int api_claimDriver (BrailleDisplay *brl)
 {
+  int ret;
   lockMutex(&apiSuspendMutex);
-  if (driverConstructed) return 1;
+  ret = driverConstructed;
   unlockMutex(&apiSuspendMutex);
-  return 0;
+  return ret;
 }
 
 void api_releaseDriver(BrailleDisplay *brl)
