@@ -1314,11 +1314,12 @@ static int handleUnauthorizedConnection(Connection *c, brlapi_packetType_t type,
 	  if (hasKeyFile(auth)) {
 	    char *path = brlapiserver_getKeyFile(auth);
 	    int ret = brlapiserver_loadAuthKey(path,&authKeyLength,&authKey);
-	    free(path);
 	    if (ret==-1) {
 	      logMessage(LOG_WARNING,"Unable to load API authorization key from %s: %s in %s. You may use parameter auth=none if you don't want any authorization (dangerous)", path, strerror(brlapi_libcerrno), brlapi_errfun);
+	      free(path);
 	      break;
 	    }
+	    free(path);
 	    logMessage(LOG_CATEGORY(SERVER_EVENTS), "authorization key loaded");
 	    authCorrect = (remaining==authKeyLength) && (!memcmp(&authPacket->key, &authKey, authKeyLength));
 	    memset(&authKey, 0, authKeyLength);
