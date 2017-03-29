@@ -620,9 +620,10 @@ logDBusError (const char *action, const DBusError *error) {
 
 void
 bthProcessDiscoveredDevices (
-  DiscoveredBluetoothDeviceHandler *handleDiscoveredDevice,
-  void *data
+  DiscoveredBluetoothDeviceTester *testDevice, void *data
 ) {
+  int found = 0;
+
 #ifdef HAVE_PKG_DBUS
   DBusError error;
   DBusConnection *bus;
@@ -632,6 +633,7 @@ bthProcessDiscoveredDevices (
 
   if (dbus_error_is_set(&error)) {
     logDBusError("get bus", &error);
+    dbus_error_free(&error);
   } else if (!bus) {
     logMallocError();
   } else {
@@ -653,6 +655,7 @@ bthProcessDiscoveredDevices (
 
       if (dbus_error_is_set(&error)) {
         logDBusError("send message", &error);
+        dbus_error_free(&error);
       } else if (!managedObjects) {
         logMallocError();
       } else {
@@ -666,7 +669,7 @@ bthProcessDiscoveredDevices (
           DBusMessageIter objects;
           dbus_message_iter_recurse(&args, &objects);
 
-          while (DBUS_TYPE_DICT_ENTRY == dbus_message_iter_get_arg_type(&objects)) {
+          while (dbus_message_iter_get_arg_type(&objects) == DBUS_TYPE_DICT_ENTRY) {
             DBusMessageIter object;
             dbus_message_iter_recurse(&objects, &object);
 
@@ -678,7 +681,7 @@ bthProcessDiscoveredDevices (
                 DBusMessageIter interfaces;
                 dbus_message_iter_recurse(&object, &interfaces);
 
-                while (DBUS_TYPE_DICT_ENTRY == dbus_message_iter_get_arg_type(&interfaces)) {
+                while (dbus_message_iter_get_arg_type(&interfaces) == DBUS_TYPE_DICT_ENTRY) {
                   DBusMessageIter interface;
                   dbus_message_iter_recurse(&interfaces, &interface);
 
@@ -690,8 +693,8 @@ bthProcessDiscoveredDevices (
                       dbus_message_iter_next(&interface);
 
                       if (dbus_message_iter_get_arg_type(&interface) == DBUS_TYPE_ARRAY) {
-                        DiscoveredBluetoothDevice dbd;
-                        memset(&dbd, 0, sizeof(dbd));
+                        DiscoveredBluetoothDevice device;
+                        memset(&device, 0, sizeof(device));
 
                         DBusMessageIter properties;
                         dbus_message_iter_recurse(&interface, &properties);
@@ -714,15 +717,17 @@ bthProcessDiscoveredDevices (
                                   (dbus_message_iter_get_arg_type(&variant) == DBUS_TYPE_STRING)) {
                                 const char *address;
                                 dbus_message_iter_get_basic(&variant, &address);
+                                bthParseAddress(&device.address, address);
                               } else if ((strcmp(propertyName, "Name") == 0) &&
                                          (dbus_message_iter_get_arg_type(&variant) == DBUS_TYPE_STRING)) {
                                 const char *name;
                                 dbus_message_iter_get_basic(&variant, &name);
+                                device.name = name;
                               } else if ((strcmp(propertyName, "Paired") == 0) &&
                                          (dbus_message_iter_get_arg_type(&variant) == DBUS_TYPE_BOOLEAN)) {
                                 dbus_bool_t paired;
                                 dbus_message_iter_get_basic(&variant, &paired);
-                                dbd.paired = paired == TRUE;
+                                device.paired = paired == TRUE;
                               }
                             }
                           }
@@ -730,16 +735,22 @@ bthProcessDiscoveredDevices (
                           dbus_message_iter_next(&properties);
                         }
 
-                        handleDiscoveredDevice(&dbd, data);
+                        if (device.address) {
+                          if (testDevice(&device, data)) {
+                            found = 1;
+                          }
+                        }
                       }
                     }
                   }
 
+                  if (found) break;
                   dbus_message_iter_next(&interfaces);
                 }
               }
             }
 
+            if (found) break;
             dbus_message_iter_next(&objects);
           }
         }

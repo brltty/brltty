@@ -68,14 +68,12 @@ typedef struct {
   unsigned paired:1;
 } DiscoveredBluetoothDevice;
 
-typedef int DiscoveredBluetoothDeviceHandler (
-  DiscoveredBluetoothDevice *device,
-  void *data
+typedef int DiscoveredBluetoothDeviceTester (
+  const DiscoveredBluetoothDevice *device, void *data
 );
 
 extern void bthProcessDiscoveredDevices (
-  DiscoveredBluetoothDeviceHandler *handleDiscoveredDevice,
-  void *data
+  DiscoveredBluetoothDeviceTester *testDevice, void *data
 );
 
 #ifdef __cplusplus
