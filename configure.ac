@@ -1429,6 +1429,11 @@ BRLTTY_ARG_PACKAGE([bluetooth], [Bluetooth I/O], [], [dnl
       AC_CHECK_HEADER([bluetooth/bluetooth.h], [dnl
          bluetooth_package="linux"
          AC_HAVE_LIBRARY([bluetooth])
+
+         BRLTTY_HAVE_PACKAGE([dbus], ["dbus-1 >= 1.0"], [dnl
+            bluetooth_includes="${dbus_includes}"
+            bluetooth_libs="${dbus_libs}"
+         ])
       ])
       ;;
 ])

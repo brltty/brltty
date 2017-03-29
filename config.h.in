@@ -119,6 +119,9 @@ extern "C" {
 /* Define this if the function localtime_r is declared. */
 #undef HAVE_DECL_LOCALTIME_R
 
+/* Define this if the package dbus is available. */
+#undef HAVE_PKG_DBUS
+
 #ifndef __MINGW32__
 /* Define this if the header file sys/poll.h exists. */
 #undef HAVE_SYS_POLL_H

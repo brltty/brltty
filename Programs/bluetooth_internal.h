@@ -62,6 +62,22 @@ typedef struct {
 
 extern const BluetoothNameEntry bluetoothNameTable[];
 
+typedef struct {
+  const char *name;
+  uint64_t address;
+  unsigned paired:1;
+} DiscoveredBluetoothDevice;
+
+typedef int DiscoveredBluetoothDeviceHandler (
+  DiscoveredBluetoothDevice *device,
+  void *data
+);
+
+extern void bthProcessDiscoveredDevices (
+  DiscoveredBluetoothDeviceHandler *handleDiscoveredDevice,
+  void *data
+);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

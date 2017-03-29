@@ -91,3 +91,10 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
   errno = ENOSYS;
   return NULL;
 }
+
+void
+bthProcessDiscoveredDevices (
+  DiscoveredBluetoothDeviceHandler *handleDiscoveredDevice,
+  void *data
+) {
+}

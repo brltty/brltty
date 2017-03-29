@@ -606,3 +606,149 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
 
   return name;
 }
+
+#ifdef HAVE_PKG_DBUS
+#include <dbus/dbus.h>
+
+static void
+logDBusError (const char *action, const DBusError *error) {
+  logMessage(LOG_ERR,
+             "DBus error: %s: %s: %s",
+             action, error->name, error->message);
+}
+#endif /* HAVE_PKG_DBUS */
+
+void
+bthProcessDiscoveredDevices (
+  DiscoveredBluetoothDeviceHandler *handleDiscoveredDevice,
+  void *data
+) {
+#ifdef HAVE_PKG_DBUS
+  DBusError error;
+  DBusConnection *bus;
+ 
+  dbus_error_init(&error);
+  bus = dbus_bus_get(DBUS_BUS_SYSTEM, &error);
+
+  if (dbus_error_is_set(&error)) {
+    logDBusError("get bus", &error);
+  } else if (!bus) {
+    logMallocError();
+  } else {
+    DBusMessage *getManagedObjects = dbus_message_new_method_call(
+      "org.bluez", "/",
+      "org.freedesktop.DBus.ObjectManager",
+      "GetManagedObjects"
+    );
+
+    if (!getManagedObjects) {
+      logMallocError();
+    } else {
+      DBusMessage *managedObjects = dbus_connection_send_with_reply_and_block(
+        bus, getManagedObjects, -1, &error
+      );
+
+      dbus_message_unref(getManagedObjects);
+      getManagedObjects = NULL;
+
+      if (dbus_error_is_set(&error)) {
+        logDBusError("send message", &error);
+      } else if (!managedObjects) {
+        logMallocError();
+      } else {
+        DBusMessageIter args;
+
+        if (dbus_message_iter_init(managedObjects, &args) == FALSE) {
+          logMessage(LOG_ERR, "reply has no arguments");
+        } else if (dbus_message_iter_get_arg_type(&args) != DBUS_TYPE_ARRAY) {
+          logMessage(LOG_ERR, "expecting an array");
+        } else {
+          DBusMessageIter objects;
+          dbus_message_iter_recurse(&args, &objects);
+
+          while (DBUS_TYPE_DICT_ENTRY == dbus_message_iter_get_arg_type(&objects)) {
+            DBusMessageIter object;
+            dbus_message_iter_recurse(&objects, &object);
+
+            if (dbus_message_iter_get_arg_type(&object) == DBUS_TYPE_OBJECT_PATH) {
+              // DBus path to talk to this object
+              dbus_message_iter_next(&object);
+
+              if (dbus_message_iter_get_arg_type(&object) == DBUS_TYPE_ARRAY) {
+                DBusMessageIter interfaces;
+                dbus_message_iter_recurse(&object, &interfaces);
+
+                while (DBUS_TYPE_DICT_ENTRY == dbus_message_iter_get_arg_type(&interfaces)) {
+                  DBusMessageIter interface;
+                  dbus_message_iter_recurse(&interfaces, &interface);
+
+                  if (dbus_message_iter_get_arg_type(&interface) == DBUS_TYPE_STRING) {
+                    const char *interfaceName;
+                    dbus_message_iter_get_basic(&interface, &interfaceName);
+
+                    if (strcmp(interfaceName, "org.bluez.Device1") == 0) {
+                      dbus_message_iter_next(&interface);
+
+                      if (dbus_message_iter_get_arg_type(&interface) == DBUS_TYPE_ARRAY) {
+                        DiscoveredBluetoothDevice dbd;
+                        memset(&dbd, 0, sizeof(dbd));
+
+                        DBusMessageIter properties;
+                        dbus_message_iter_recurse(&interface, &properties);
+
+                        while (DBUS_TYPE_DICT_ENTRY == dbus_message_iter_get_arg_type(&properties)) {
+                          DBusMessageIter property;
+                          dbus_message_iter_recurse(&properties, &property);
+
+                          if (dbus_message_iter_get_arg_type(&property) == DBUS_TYPE_STRING) {
+                            const char *propertyName;
+
+                            dbus_message_iter_get_basic(&property, &propertyName);
+                            dbus_message_iter_next(&property);
+
+                            if (dbus_message_iter_get_arg_type(&property) == DBUS_TYPE_VARIANT) {
+                              DBusMessageIter variant;
+                              dbus_message_iter_recurse(&property, &variant);
+
+                              if ((strcmp(propertyName, "Address") == 0) &&
+                                  (dbus_message_iter_get_arg_type(&variant) == DBUS_TYPE_STRING)) {
+                                const char *address;
+                                dbus_message_iter_get_basic(&variant, &address);
+                              } else if ((strcmp(propertyName, "Name") == 0) &&
+                                         (dbus_message_iter_get_arg_type(&variant) == DBUS_TYPE_STRING)) {
+                                const char *name;
+                                dbus_message_iter_get_basic(&variant, &name);
+                              } else if ((strcmp(propertyName, "Paired") == 0) &&
+                                         (dbus_message_iter_get_arg_type(&variant) == DBUS_TYPE_BOOLEAN)) {
+                                dbus_bool_t paired;
+                                dbus_message_iter_get_basic(&variant, &paired);
+                                dbd.paired = paired == TRUE;
+                              }
+                            }
+                          }
+
+                          dbus_message_iter_next(&properties);
+                        }
+
+                        handleDiscoveredDevice(&dbd, data);
+                      }
+                    }
+                  }
+
+                  dbus_message_iter_next(&interfaces);
+                }
+              }
+            }
+
+            dbus_message_iter_next(&objects);
+          }
+        }
+      }
+
+      dbus_message_unref(managedObjects);
+    }
+
+    dbus_connection_unref(bus);
+  }
+#endif /* HAVE_PKG_DBUS */
+}

@@ -1,7 +1,7 @@
 AC_DEFUN([BRLTTY_UPPERCASE_TRANSLATE], [translit([$1], [a-z], [A-Z])])
 
 AC_DEFUN([BRLTTY_TRANSLATE_ASSIGN], [$1=`echo "$2" | sed -e 'y%$3%$4%'`])
-AC_DEFUN([BRLTTY_UPPERCASE_ASSIGN], [BRLTTY_TRANSLATE_ASSIGN([$1], [$2], [abcdefghijklmnopqrstuvwxyz$3], [ABCDEFGHIJKLMNOPQRSTUVWXYZ$4])])
+AC_DEFUN([BRLTTY_UPPERCASE_ASSIGN], BRLTTY_TRANSLATE_ASSIGN([$1], [$2], [abcdefghijklmnopqrstuvwxyz$3], [ABCDEFGHIJKLMNOPQRSTUVWXYZ$4]))
 AC_DEFUN([BRLTTY_LOWERCASE_ASSIGN], [BRLTTY_TRANSLATE_ASSIGN([$1], [$2], [ABCDEFGHIJKLMNOPQRSTUVWXYZ$3], [abcdefghijklmnopqrstuvwxyz$4])])
 
 AC_DEFUN([BRLTTY_INCLUDE_HEADERS], [dnl
@@ -579,6 +579,8 @@ $1_libs=""
 for package_specification in $2
 do
    ${PKG_CONFIG} --exists "${package_specification}" && {
+      AC_DEFINE(BRLTTY_UPPERCASE_TRANSLATE([HAVE_PKG_$1]))
+
       $1_package="${package_specification%% *}"
       AC_MSG_NOTICE([$1 package: ${$1_package}])
 

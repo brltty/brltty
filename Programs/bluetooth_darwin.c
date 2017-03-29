@@ -365,3 +365,10 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
     return result;
   }
 @end
+
+void
+bthProcessDiscoveredDevices (
+  DiscoveredBluetoothDeviceHandler *handleDiscoveredDevice,
+  void *data
+) {
+}
