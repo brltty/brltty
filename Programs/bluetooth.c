@@ -522,18 +522,14 @@ bthGetDriverCodes (const char *identifier, int timeout) {
   char **parameters = bthGetConnectionParameters(identifier);
 
   if (parameters) {
-    const char *name = parameters[BTH_CONN_NAME];
+    uint64_t address;
 
-    {
-      const char *address = parameters[BTH_CONN_ADDRESS];
-
-      if (address && *address) {
-        name = bthGetNameAtAddress(address, timeout);
-      }
+    if (bthGetDeviceAddress(&address, parameters)) {
+      const char *name = bthGetDeviceName(address, timeout);
+      const BluetoothNameEntry *entry = bthGetNameEntry(name);
+      if (entry) codes = entry->driverCodes;
     }
 
-    const BluetoothNameEntry *entry = bthGetNameEntry(name);
-    if (entry) codes = entry->driverCodes;
     deallocateStrings(parameters);
   }
 
