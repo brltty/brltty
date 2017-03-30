@@ -323,7 +323,7 @@ bthTestDiscoveredDevice (const DiscoveredBluetoothDevice *device, void *data) {
   GetDeviceAddressData *gda = data;
 
   logMessage(LOG_CATEGORY(BLUETOOTH_IO),
-             "testing device: Addr:%06" PRIX64 " Name:%s Paired:%s",
+             "testing device: Addr:%012" PRIX64 " Name:%s Paired:%s",
              device->address, device->name,
              (device->paired? "yes": "no")
   );

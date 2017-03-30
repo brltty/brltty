@@ -754,10 +754,14 @@ bthProcessDiscoveredDevices (
             dbus_message_iter_next(&objects);
           }
         }
+
+        dbus_message_unref(managedObjects);
+        managedObjects = NULL;
       }
     }
 
     dbus_connection_unref(bus);
+    bus = NULL;
   }
 #endif /* HAVE_PKG_DBUS */
 }
