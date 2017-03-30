@@ -755,8 +755,6 @@ bthProcessDiscoveredDevices (
           }
         }
       }
-
-      dbus_message_unref(managedObjects);
     }
 
     dbus_connection_unref(bus);

@@ -147,48 +147,47 @@ bthRecallConnectError (uint64_t bda, int *value) {
 }
 
 static BluetoothConnection *
-bthNewConnection (const char *address, uint8_t channel, int discover, int timeout) {
+bthNewConnection (uint64_t address, uint8_t channel, int discover, int timeout) {
   BluetoothConnection *connection;
 
   if ((connection = malloc(sizeof(*connection)))) {
     memset(connection, 0, sizeof(*connection));
+    connection->address = address;
     connection->channel = channel;
 
-    if (bthParseAddress(&connection->address, address)) {
-      if ((connection->extension = bthNewConnectionExtension(connection->address))) {
-        int alreadyTried = 0;
+    if ((connection->extension = bthNewConnectionExtension(connection->address))) {
+      int alreadyTried = 0;
 
-        if (discover) bthDiscoverSerialPortChannel(&connection->channel, connection->extension, timeout);
-        bthLogChannel(connection->channel);
+      if (discover) bthDiscoverSerialPortChannel(&connection->channel, connection->extension, timeout);
+      bthLogChannel(connection->channel);
 
-        {
-          int value;
+      {
+        int value;
 
-          if (bthRecallConnectError(connection->address, &value)) {
-            errno = value;
-            alreadyTried = 1;
-          }
+        if (bthRecallConnectError(connection->address, &value)) {
+          errno = value;
+          alreadyTried = 1;
         }
-
-        if (!alreadyTried) {
-          TimePeriod period;
-          startTimePeriod(&period, BLUETOOTH_CHANNEL_BUSY_RETRY_TIMEOUT);
-
-          while (1) {
-            if (bthOpenChannel(connection->extension, connection->channel, timeout)) {
-              return connection;
-            }
-
-            if (afterTimePeriod(&period, NULL)) break;
-            if (errno != EBUSY) break;
-            asyncWait(BLUETOOTH_CHANNEL_BUSY_RETRY_INTERVAL);
-          }
-
-          bthRememberConnectError(connection->address, errno);
-        }
-
-        bthReleaseConnectionExtension(connection->extension);
       }
+
+      if (!alreadyTried) {
+        TimePeriod period;
+        startTimePeriod(&period, BLUETOOTH_CHANNEL_BUSY_RETRY_TIMEOUT);
+
+        while (1) {
+          if (bthOpenChannel(connection->extension, connection->channel, timeout)) {
+            return connection;
+          }
+
+          if (afterTimePeriod(&period, NULL)) break;
+          if (errno != EBUSY) break;
+          asyncWait(BLUETOOTH_CHANNEL_BUSY_RETRY_INTERVAL);
+        }
+
+        bthRememberConnectError(connection->address, errno);
+      }
+
+      bthReleaseConnectionExtension(connection->extension);
     }
 
     free(connection);
@@ -206,6 +205,29 @@ bthInitializeConnectionRequest (BluetoothConnectionRequest *request) {
   request->timeout = BLUETOOTH_CHANNEL_CONNECT_TIMEOUT;
   request->channel = 0;
   request->discover = 0;
+}
+
+typedef enum {
+  BTH_CONN_ADDRESS,
+  BTH_CONN_NAME,
+  BTH_CONN_CHANNEL,
+  BTH_CONN_DISCOVER,
+  BTH_CONN_TIMEOUT
+} BluetoothConnectionParameter;
+
+static char **
+bthGetConnectionParameters (const char *identifier) {
+  static const char *const names[] = {
+    "address",
+    "name",
+    "channel",
+    "discover",
+    "timeout",
+    NULL
+  };
+
+  if (!identifier) identifier = "";
+  return getDeviceParameters(names, identifier);
 }
 
 int
@@ -270,6 +292,88 @@ bthParseChannelNumber (uint8_t *channel, const char *string) {
   return 0;
 }
 
+static const BluetoothNameEntry *
+bthGetNameEntry (const char *name) {
+  if (name && *name) {
+    const BluetoothNameEntry *entry = bluetoothNameTable;
+
+    while (entry->namePrefix) {
+      if (strncmp(name, entry->namePrefix, strlen(entry->namePrefix)) == 0) {
+        return entry;
+      }
+
+      entry += 1;
+    }
+  }
+
+  return NULL;
+}
+
+typedef struct {
+  struct {
+    const char *address;
+    size_t length;
+  } name;
+
+  uint64_t address;
+} GetDeviceAddressData;
+
+static int
+bthTestDiscoveredDevice (const DiscoveredBluetoothDevice *device, void *data) {
+  GetDeviceAddressData *gda = data;
+
+  logMessage(LOG_CATEGORY(BLUETOOTH_IO),
+             "testing device: Addr:%06" PRIX64 " Name:%s Paired:%s",
+             device->address, device->name,
+             (device->paired? "yes": "no")
+  );
+
+  if (gda->name.address) {
+    if (strncmp(device->name, gda->name.address, gda->name.length) != 0) {
+      logMessage(LOG_CATEGORY(BLUETOOTH_IO), "skipping");
+      return 0;
+    }
+  }
+
+  const BluetoothNameEntry *entry = bthGetNameEntry(device->name);
+
+  if (entry) {
+    logMessage(LOG_CATEGORY(BLUETOOTH_IO), "found");
+    gda->address = device->address;
+    return 1;
+  }
+
+  logMessage(LOG_CATEGORY(BLUETOOTH_IO), "not found");
+  return 0;
+}
+
+static int
+bthGetDeviceAddress (uint64_t *address, char **parameters) {
+  {
+    const char *parameter = parameters[BTH_CONN_ADDRESS];
+
+    if (parameter && *parameter) {
+      return bthParseAddress(address, parameter);
+    }
+  }
+
+  const char *name = parameters[BTH_CONN_NAME];
+  GetDeviceAddressData gda = {
+    .name = {
+      .address = name,
+      .length = name? strlen(name): 0
+    },
+
+    .address = 0
+  };
+
+  bthProcessDiscoveredDevices(bthTestDiscoveredDevice, &gda);
+  if (!gda.address) return 0;
+
+  *address = gda.address;
+  return 1;
+}
+
 static int
 bthProcessTimeoutParameter (BluetoothConnectionRequest *request, const char *parameter) {
   int seconds;
@@ -320,27 +424,6 @@ bthProcessDiscoverParameter (BluetoothConnectionRequest *request, const char *pa
   return 0;
 }
 
-typedef enum {
-  BTH_CONN_ADDRESS,
-  BTH_CONN_TIMEOUT,
-  BTH_CONN_CHANNEL,
-  BTH_CONN_DISCOVER
-} BluetoothConnectionParameter;
-
-static char **
-bthGetConnectionParameters (const char *identifier) {
-  static const char *const names[] = {
-    "address",
-    "timeout",
-    "channel",
-    "discover",
-    NULL
-  };
-
-  if (!identifier) identifier = "";
-  return getDeviceParameters(names, identifier);
-}
-
 BluetoothConnection *
 bthOpenConnection (const BluetoothConnectionRequest *request) {
   BluetoothConnection *connection = NULL;
@@ -352,11 +435,14 @@ bthOpenConnection (const BluetoothConnectionRequest *request) {
       int ok = 1;
 
       if (!req.channel) req.discover = 1;
-      if (!bthProcessTimeoutParameter(&req, parameters[BTH_CONN_TIMEOUT])) ok = 0;
       if (!bthProcessChannelParameter(&req, parameters[BTH_CONN_CHANNEL])) ok = 0;
       if (!bthProcessDiscoverParameter(&req, parameters[BTH_CONN_DISCOVER])) ok = 0;
+      if (!bthProcessTimeoutParameter(&req, parameters[BTH_CONN_TIMEOUT])) ok = 0;
 
-      if (ok) connection = bthNewConnection(parameters[BTH_CONN_ADDRESS], req.channel, req.discover, req.timeout);
+      uint64_t address;
+      if (!bthGetDeviceAddress(&address, parameters)) ok = 0;
+
+      if (ok) connection = bthNewConnection(address, req.channel, req.discover, req.timeout);
     }
 
     deallocateStrings(parameters);
@@ -436,21 +522,18 @@ bthGetDriverCodes (const char *identifier, int timeout) {
   char **parameters = bthGetConnectionParameters(identifier);
 
   if (parameters) {
-    const char *name = bthGetNameAtAddress(parameters[BTH_CONN_ADDRESS], timeout);
+    const char *name = parameters[BTH_CONN_NAME];
 
-    if (name) {
-      const BluetoothNameEntry *entry = bluetoothNameTable;
+    {
+      const char *address = parameters[BTH_CONN_ADDRESS];
 
-      while (entry->namePrefix) {
-        if (strncmp(name, entry->namePrefix, strlen(entry->namePrefix)) == 0) {
-          codes = entry->driverCodes;
-          break;
-        }
-
-        entry += 1;
+      if (address && *address) {
+        name = bthGetNameAtAddress(address, timeout);
       }
     }
 
+    const BluetoothNameEntry *entry = bthGetNameEntry(name);
+    if (entry) codes = entry->driverCodes;
     deallocateStrings(parameters);
   }
 
