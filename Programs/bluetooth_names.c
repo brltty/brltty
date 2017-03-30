@@ -125,7 +125,7 @@ const BluetoothNameEntry bluetoothNameTable[] = {
     .driverCodes = bluetoothNameDrivers_BrailleSense
   },
 
-  { .namePrefix = "Braille Star BS",
+  { .namePrefix = "Braille Star",
     .driverCodes = bluetoothNameDrivers_BrailleStar
   },
 
