@@ -127,14 +127,12 @@ enable scan mode:
    [CHG] Controller 01:23:45:67:89:AB Discovering: no
 
 To be able to receive PIN code requests directly on the console, you need to
-enable the *agent*, and to select the *default-agent*:
+enable the *agent*:
 
 .. code-block:: console
 
    [bluetooth]# agent on
    Agent registered
-   [bluetooth]# default-agent
-   Default agent request successful
 
 Now you are finally ready to initiate the pairing:
 
