@@ -172,3 +172,34 @@ or::
    cat /etc/brltty.conf
    braille-device bluetooth:12:34:56:78:9A:BC
 
+On some platforms,
+BRLTTY supports the detection of a Bluetooth device based on its name.
+These platforms include:
+
+* Linux (if the Bluetooth version is at least 5)
+
+The address of the device needn't be specified on these platforms -
+specifying just ``bluetooth:`` is sufficient.
+BRLTTY will find the braille device based on its name.
+It'll only consider devices that have already been paired with the host.
+
+If two (or more) braille devices are paired with your host,
+and if both of them are near by, turned on, and configured for Bluetooth access,
+then, of course, BRLTTY might choose the wrong one.
+As long as both of them don't have the same Bluetooth name,
+you can still specify the intended device without knowing its address.
+You can limit the devices that BRLTTY will consider
+by specifying the beginning of its Bluetooth name::
+
+   bluetooth:name=prefix
+
+If you need to specify a space within the prefix, then:
+
+* On the command line, use quotes::
+
+    -d "bluetooth:name=braille device"
+
+* In ``/etc/brltty.conf``, use \\s::
+
+    braille-device bluetooth:name=braille\sdevice
+

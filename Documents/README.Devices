@@ -120,7 +120,7 @@ USB device identifiers support the following parameters:
    ======================  ===================================================
    Name                    Value
    ----------------------  ---------------------------------------------------
-   ``serialNumber=``       an arbitrary sequence of characters (exept ``=``)
+   ``serialNumber=``       an arbitrary sequence of characters (except ``=``)
    ``vendorIdentifier=``   an integer within the range 1-65535 (0X0001-0XFFFF)
    ``productIdentifier=``  an integer within the range 1-65535 (0X0001-0XFFFF)
    ``genericDevices=``     ``yes``, ``no``
@@ -157,25 +157,34 @@ Bluetooth Device Parameters
 Bluetooth device identifiers support the following parameters:
 
    =============  =============================================================
+   Name           Value
    -------------  -------------------------------------------------------------
    ``address=``   six two-digit hexadecimal numbers separated by ``:`` or ``-``
-   ``timeout=``   an integer within the range ``1``-``59``
+   ``name=``      one or more arbitrary characters
    ``channel=``   an integer within the range ``1``-``30``
    ``discover=``  ``yes``, ``no``
+   ``timeout=``   an integer within the range ``1``-``59``
    =============  =============================================================
 
-The ``address=`` parameter is required. All of the others are optional, and it
-shouldn't normally be necessary to supply any of them.
+All of the parameters are optional except that
+the ``address=`` parameter is required on platforms where
+BRLTTY can't yet detect a Bluetooth device based on its name.
+It shouldn't normally be necessary to supply any of the others.
+
+BRLTTY can detect a Bluetooth device by name on the following platforms:
+
+* Linux (if the Bluetooth version is at least 5)
 
 ``address=``
    Specify the Bluetooth address of the device. It must be six two-digit
    hexadecimal numbers (the "letter" digits may be in either case) separated
    from one another by either a colon (``:``) or a minus (``-``) sign.
 
-``timeout=``
-   Specify the number of seconds to wait for a connection to the device to be
-   acquired. It must be an integer within the range ``1``-``59``. If this
-   parameter isn't supplied then a reasonable default is assumed.
+``name=``
+   Specify the Bluetooth name of the device. It must be one or more
+   arbitrary characters. They need only match the beginning (so not
+   necessarily all) of the name. Case is significant.
+   Only the names of paired devices are considered.
 
 ``channel=``
    Specify the RFCOMM channel to use. It must be an integer within the range
@@ -194,4 +203,9 @@ shouldn't normally be necessary to supply any of them.
    2) If the driver has requested service discovery, then **yes**.
    3) If the driver has specified a default channel number, then **no**.
    4) Otherwise, **yes**.
+
+``timeout=``
+   Specify the number of seconds to wait for a connection to the device to be
+   acquired. It must be an integer within the range ``1``-``59``. If this
+   parameter isn't supplied then a reasonable default is assumed.
 
