@@ -328,9 +328,14 @@ bthTestDiscoveredDevice (const DiscoveredBluetoothDevice *device, void *data) {
              (device->paired? "yes": "no")
   );
 
+  if (!device->paired) {
+    logMessage(LOG_CATEGORY(BLUETOOTH_IO), "not paired");
+    return 0;
+  }
+
   if (gda->name.address) {
     if (strncmp(device->name, gda->name.address, gda->name.length) != 0) {
-      logMessage(LOG_CATEGORY(BLUETOOTH_IO), "skipping");
+      logMessage(LOG_CATEGORY(BLUETOOTH_IO), "ineligible name");
       return 0;
     }
   }
