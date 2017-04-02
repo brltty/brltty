@@ -185,6 +185,7 @@ BRLTTY can detect a Bluetooth device by name on the following platforms:
    arbitrary characters. They need only match the beginning (so not
    necessarily all) of the name. Case is significant.
    Only the names of paired devices are considered.
+   This parameter is ignored if the ``address=`` parameter has been specified.
 
 ``channel=``
    Specify the RFCOMM channel to use. It must be an integer within the range
