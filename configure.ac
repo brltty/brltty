@@ -1591,9 +1591,13 @@ then
    braille_device=""
 elif test "${braille_device}" = "yes"
 then
-   if test "${usb_package}" != "none"
+   braille_device=""
+   test "${usb_package}" != "none" && braille_device="${braille_device},usb:"
+   test "${bluetooth_package}" != "none" && braille_device="${braille_device},bluetooth:"
+
+   if test -n "${braille_device}"
    then
-      braille_device="usb:"
+      braille_device="${braille_device#,}"
    else
       braille_device="serial:${serial_first_device}"
    fi
