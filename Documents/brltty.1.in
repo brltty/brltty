@@ -93,12 +93,12 @@ is assumed.
 The following device types are supported:
 .TP
 .B Bluetooth
-For a bluetooth device, specify \fBbluez:\fIaddress\fR.
+For a bluetooth device, specify \fBbluetooth:\fIaddress\fR.
 The address must be six two-digit hexadecimal numbers separated by colons, e.g.
 .BR "01:23:45:67:89:AB" "."
 .TP
 .B Serial
-For a serial device, specify \fBserial:\fI/path/to/device\fR.
+For a serial device, specify \fBserial:\fIdevice\fR.
 The
 .B serial:
 qualifier is optional (for backward compatibility).
@@ -106,11 +106,11 @@ If a relative path is given then it's anchored at
 .B /dev/
 (the usual location where devices are defined on a Unix-like system).
 The following device specifications all refer
-to the primary serial device:
-.BR "serial:/dev/@serial_first_device@" ","
+to the primary serial device on Linux:
 .BR "serial:@serial_first_device@" ","
-.BR "/dev/@serial_first_device@" ","
-.BR "@serial_first_device@" "."
+.BR "serial:/dev/@serial_first_device@" ","
+.BR "@serial_first_device@" ","
+.BR "/dev/@serial_first_device@" "."
 .TP
 .B USB
 For a USB device, specify \fBusb:\fR.
