@@ -233,9 +233,11 @@ gioWriteData (GioEndpoint *endpoint, const void *data, size_t size) {
 
   if (endpoint->options.ignoreWriteTimeouts) {
     if (result == -1) {
-      if (errno == ETIMEDOUT) {
-        result = size;
-      }
+      if ((errno == EAGAIN)
+#ifdef ETIMEDOUT
+       || (errno == ETIMEDOUT)
+#endif /* ETIMEDOUT */
+      ) result = size;
     }
   }
 
