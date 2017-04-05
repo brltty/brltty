@@ -372,9 +372,11 @@ bthGetDeviceAddress (uint64_t *address, char **parameters) {
     .address = 0
   };
 
+  logMessage(LOG_CATEGORY(BLUETOOTH_IO), "begin device search");
   bthProcessDiscoveredDevices(bthTestDiscoveredDevice, &gda);
-  if (!gda.address) return 0;
+  logMessage(LOG_CATEGORY(BLUETOOTH_IO), "end device search");
 
+  if (!gda.address) return 0;
   *address = gda.address;
   return 1;
 }
