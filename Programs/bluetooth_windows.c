@@ -175,8 +175,9 @@ bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout)
 }
 
 typedef union {
+  double ensureCorrectAlignment;
+  unsigned char ensureAdequateSize[0X1000];
   WSAQUERYSET querySet;
-  unsigned char bytes[0X1000];
 } BluetoothServiceLookupResult;
 
 static int
@@ -226,13 +227,13 @@ bthPerformServiceLookup (
           found = 1;
         } else {
           static const DWORD exceptions[] = {
-  #ifdef WSA_E_NO_MORE
+#ifdef WSA_E_NO_MORE
             WSA_E_NO_MORE,
-  #endif /* WSA_E_NO_MORE */
+#endif /* WSA_E_NO_MORE */
 
-  #ifdef WSAENOMORE
+#ifdef WSAENOMORE
             WSAENOMORE,
-  #endif /* WSAENOMORE */
+#endif /* WSAENOMORE */
 
             NO_ERROR
           };
@@ -402,4 +403,66 @@ void
 bthProcessDiscoveredDevices (
   DiscoveredBluetoothDeviceTester *testDevice, void *data
 ) {
+  if (bthStartSockets()) {
+    HANDLE handle;
+
+    WSAQUERYSET restrictions = {
+      .dwNameSpace = NS_BTH,
+      .dwSize = sizeof(restrictions)
+    };
+
+    if (WSALookupServiceBegin(&restrictions, LUP_CONTAINERS, &handle) != SOCKET_ERROR) {
+      while (1) {
+        BluetoothServiceLookupResult result;
+        DWORD resultLength = sizeof(result);
+
+        if (WSALookupServiceNext(handle,
+                                 (LUP_RETURN_ADDR | LUP_RETURN_NAME | LUP_RETURN_BLOB),
+                                 &resultLength, &result.querySet) == SOCKET_ERROR) {
+          static const DWORD exceptions[] = {
+#ifdef WSA_E_NO_MORE
+            WSA_E_NO_MORE,
+#endif /* WSA_E_NO_MORE */
+
+#ifdef WSAENOMORE
+            WSAENOMORE,
+#endif /* WSAENOMORE */
+
+            NO_ERROR
+          };
+
+          bthSocketError("WSALookupServiceNext", exceptions);
+          break;
+        }
+
+        if (result.querySet.dwNumberOfCsAddrs == 1) {
+          DiscoveredBluetoothDevice device;
+          memset(&device, 0, sizeof(device));
+
+          {
+            BTH_ADDR address = ((SOCKADDR_BTH *)result.querySet.lpcsaBuffer->RemoteAddr.lpSockaddr)->btAddr;
+            device.address = ((uint64_t)GET_NAP(address) << 0X20) | (uint64_t)GET_SAP(address);
+          }
+
+          {
+            char *name = result.querySet.lpszServiceInstanceName;
+            if (name && *name) device.name = name;
+          }
+
+          {
+            BTH_DEVICE_INFO *info = (BTH_DEVICE_INFO *)result.querySet.lpBlob->pBlobData;
+            device.paired = !!(info->flags & BDIF_PAIRED);
+          }
+
+          if (testDevice(&device, data)) break;
+        }
+      }
+
+      if (WSALookupServiceEnd(handle) == SOCKET_ERROR) {
+        bthSocketError("WSALookupServiceEnd", NULL);
+      }
+    } else {
+      bthSocketError("WSALookupServiceBegin", NULL);
+    }
+  }
 }
