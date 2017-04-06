@@ -27,24 +27,67 @@
 #include "thread.h"
 #include "system_java.h"
 
+static jclass connectionClass = NULL;
+static jmethodID connectionConstructor = 0;
+static jmethodID openMethod = 0;
+static jmethodID closeMethod = 0;
+static jmethodID writeMethod = 0;
+
+static int
+bthGetConnectionClass (JNIEnv *env) {
+  return findJavaClass(
+    env, &connectionClass, "org/a11y/brltty/android/BluetoothConnection"
+  );
+}
+
+static int
+bthGetConnectionConstructor (JNIEnv *env) {
+  return findJavaConstructor(
+    env, &connectionConstructor, connectionClass,
+    JAVA_SIG_CONSTRUCTOR(
+      JAVA_SIG_LONG // deviceAddress
+    )
+  );
+}
+
+static int
+bthGetOpenMethod (JNIEnv *env) {
+  return findJavaInstanceMethod(
+    env, &openMethod, connectionClass, "open",
+    JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+      JAVA_SIG_INT // inputPipe
+      JAVA_SIG_INT // channel
+      JAVA_SIG_BOOLEAN // secure
+    )
+  );
+}
+
+static int
+bthGetCloseMethod (JNIEnv *env) {
+  return findJavaInstanceMethod(
+    env, &closeMethod, connectionClass, "close",
+    JAVA_SIG_METHOD(JAVA_SIG_VOID,
+    )
+  );
+}
+
+static int
+bthGetWriteMethod (JNIEnv *env) {
+  return (findJavaInstanceMethod(
+    env, &writeMethod, connectionClass, "write",
+    JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+      JAVA_SIG_ARRAY(JAVA_SIG_BYTE)) // bytes
+    )
+  );
+}
+
 struct BluetoothConnectionExtensionStruct {
   JNIEnv *env;
-
-  jclass connectionClass;
-  jmethodID connectionConstructor;
-  jmethodID openMethod;
-  jmethodID closeMethod;
-  jmethodID writeMethod;
 
   jobject connection;
   AsyncHandle inputMonitor;
   int inputPipe[2];
 };
-
-static void
-releaseConnectionClass (BluetoothConnectionExtension *bcx) {
-  (*bcx->env)->DeleteGlobalRef(bcx->env, bcx->connectionClass);
-}
 
 BluetoothConnectionExtension *
 bthNewConnectionExtension (uint64_t bda) {
@@ -53,22 +96,13 @@ bthNewConnectionExtension (uint64_t bda) {
   if ((bcx = malloc(sizeof(*bcx)))) {
     memset(bcx, 0, sizeof(*bcx));
 
-    bcx->connectionClass = NULL;
-    bcx->connectionConstructor = 0;
-    bcx->openMethod = 0;
-    bcx->closeMethod = 0;
-    bcx->writeMethod = 0;
-
     bcx->inputPipe[0] = INVALID_FILE_DESCRIPTOR;
     bcx->inputPipe[1] = INVALID_FILE_DESCRIPTOR;
 
     if ((bcx->env = getJavaNativeInterface())) {
-      if (findJavaClass(bcx->env, &bcx->connectionClass, "org/a11y/brltty/android/BluetoothConnection")) {
-        if (findJavaConstructor(bcx->env, &bcx->connectionConstructor, bcx->connectionClass,
-                                JAVA_SIG_CONSTRUCTOR(
-                                                     JAVA_SIG_LONG // deviceAddress
-                                                    ))) {
-          jobject localReference = (*bcx->env)->NewObject(bcx->env, bcx->connectionClass, bcx->connectionConstructor, bda);
+      if (bthGetConnectionClass(bcx->env)) {
+        if (bthGetConnectionConstructor(bcx->env)) {
+          jobject localReference = (*bcx->env)->NewObject(bcx->env, connectionClass, connectionConstructor, bda);
 
           if (!clearJavaException(bcx->env, 1)) {
             jobject globalReference = (*bcx->env)->NewGlobalRef(bcx->env, localReference);
@@ -85,8 +119,6 @@ bthNewConnectionExtension (uint64_t bda) {
             }
           }
         }
-
-        releaseConnectionClass(bcx);
       }
     }
 
@@ -111,13 +143,11 @@ bthReleaseConnectionExtension (BluetoothConnectionExtension *bcx) {
   bthCancelInputMonitor(bcx);
 
   if (bcx->connection) {
-    if (findJavaInstanceMethod(bcx->env, &bcx->closeMethod, bcx->connectionClass, "close",
-                               JAVA_SIG_METHOD(JAVA_SIG_VOID, ))) {
-      (*bcx->env)->CallVoidMethod(bcx->env, bcx->connection, bcx->closeMethod);
+    if (bthGetCloseMethod(bcx->env)) {
+      (*bcx->env)->CallVoidMethod(bcx->env, bcx->connection, closeMethod);
     }
 
     (*bcx->env)->DeleteGlobalRef(bcx->env, bcx->connection);
-    releaseConnectionClass(bcx);
     clearJavaException(bcx->env, 1);
   }
 
@@ -142,13 +172,8 @@ THREAD_FUNCTION(runOpenBluetoothConnection) {
   if ((env = getJavaNativeInterface())) {
     if (pipe(obc->bcx->inputPipe) != -1) {
       if (setBlockingIo(obc->bcx->inputPipe[0], 0)) {
-        if (findJavaInstanceMethod(env, &obc->bcx->openMethod, obc->bcx->connectionClass, "open",
-                                   JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
-                                                   JAVA_SIG_INT // inputPipe
-                                                   JAVA_SIG_INT // channel
-                                                   JAVA_SIG_BOOLEAN // secure
-                                                  ))) {
-          jboolean result = (*env)->CallBooleanMethod(env, obc->bcx->connection, obc->bcx->openMethod,
+        if (bthGetOpenMethod(env)) {
+          jboolean result = (*env)->CallBooleanMethod(env, obc->bcx->connection, openMethod,
                                                       obc->bcx->inputPipe[1], obc->channel, JNI_FALSE);
 
           if (!clearJavaException(env, 1)) {
@@ -227,17 +252,14 @@ bthGetData (
 
 ssize_t
 bthPutData (BluetoothConnectionExtension *bcx, const void *buffer, size_t size) {
-  if (findJavaInstanceMethod(bcx->env, &bcx->writeMethod, bcx->connectionClass, "write",
-                             JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
-                                             JAVA_SIG_ARRAY(JAVA_SIG_BYTE)) // bytes
-                                            )) {
+  if (bthGetWriteMethod(bcx->env)) {
     jbyteArray bytes = (*bcx->env)->NewByteArray(bcx->env, size);
 
     if (bytes) {
       jboolean result;
 
       (*bcx->env)->SetByteArrayRegion(bcx->env, bytes, 0, size, buffer);
-      result = (*bcx->env)->CallBooleanMethod(bcx->env, bcx->connection, bcx->writeMethod, bytes);
+      result = (*bcx->env)->CallBooleanMethod(bcx->env, bcx->connection, writeMethod, bytes);
       (*bcx->env)->DeleteLocalRef(bcx->env, bytes);
 
       if (!clearJavaException(bcx->env, 1)) {
@@ -264,16 +286,14 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
   JNIEnv *env = getJavaNativeInterface();
 
   if (env) {
-    static jclass class = NULL;
-
-    if (findJavaClass(env, &class, "org/a11y/brltty/android/BluetoothConnection")) {
+    if (bthGetConnectionClass(env)) {
       static jmethodID method = 0;
 
-      if (findJavaStaticMethod(env, &method, class, "getName",
+      if (findJavaStaticMethod(env, &method, connectionClass, "getName",
                                JAVA_SIG_METHOD(JAVA_SIG_OBJECT(java/lang/String),
                                                JAVA_SIG_LONG // deviceAddress
                                               ))) {
-        jstring jName = (*env)->CallStaticObjectMethod(env, class, method, bda);
+        jstring jName = (*env)->CallStaticObjectMethod(env, connectionClass, method, bda);
 
         if (jName) {
           const char *cName = (*env)->GetStringUTFChars(env, jName, NULL);
