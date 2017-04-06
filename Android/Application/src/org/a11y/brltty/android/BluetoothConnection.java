@@ -19,6 +19,7 @@
 package org.a11y.brltty.android;
 
 import java.lang.reflect.*;
+import java.util.Set;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -255,5 +256,45 @@ public class BluetoothConnection {
     }
 
     return false;
+  }
+
+  private static BluetoothDevice[] pairedDevices = null;
+
+  public static int getPairedDeviceCount () {
+    if (bluetoothAdapter != null) {
+      Set<BluetoothDevice> devices = bluetoothAdapter.getBondedDevices();
+
+      if (devices != null) {
+        pairedDevices = devices.toArray(new BluetoothDevice[devices.size()]);
+        return pairedDevices.length;
+      }
+    }
+
+    pairedDevices = null;
+    return 0;
+  }
+
+  private static BluetoothDevice getPairedDevice (int index) {
+    if (index >= 0) {
+      if (pairedDevices != null) {
+        if (index < pairedDevices.length) {
+          return pairedDevices[index];
+        }
+      }
+    }
+
+    return null;
+  }
+
+  public static String getPairedDeviceAddress (int index) {
+    BluetoothDevice device = getPairedDevice(index);
+    if (device == null) return null;
+    return device.getAddress();
+  }
+
+  public static String getPairedDeviceName (int index) {
+    BluetoothDevice device = getPairedDevice(index);
+    if (device == null) return null;
+    return device.getName();
   }
 }

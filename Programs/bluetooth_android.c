@@ -318,8 +318,93 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
   return name;
 }
 
+static jmethodID getPairedDeviceCountMethod = 0;
+static jmethodID getPairedDeviceAddressMethod = 0;
+static jmethodID getPairedDeviceNameMethod = 0;
+
+static int
+bthGetPairedDeviceCountMethod (JNIEnv *env) {
+  return findJavaStaticMethod(
+    env, &getPairedDeviceCountMethod, connectionClass, "getPairedDeviceCount",
+    JAVA_SIG_METHOD(JAVA_SIG_INT,
+    )
+  );
+}
+
+static int
+bthGetPairedDeviceAddressMethod (JNIEnv *env) {
+  return findJavaStaticMethod(
+    env, &getPairedDeviceAddressMethod, connectionClass, "getPairedDeviceAddress",
+    JAVA_SIG_METHOD(JAVA_SIG_OBJECT(java/lang/String),
+      JAVA_SIG_INT // index
+    )
+  );
+}
+
+static int
+bthGetPairedDeviceNameMethod (JNIEnv *env) {
+  return findJavaStaticMethod(
+    env, &getPairedDeviceNameMethod, connectionClass, "getPairedDeviceName",
+    JAVA_SIG_METHOD(JAVA_SIG_OBJECT(java/lang/String),
+      JAVA_SIG_INT // index
+    )
+  );
+}
+
+static JNIEnv *
+bthGetPairedDeviceMethods (void) {
+  JNIEnv *env = getJavaNativeInterface();
+
+  if (env) {
+    if (bthGetConnectionClass(env)) {
+      if (bthGetPairedDeviceCountMethod(env)) {
+        if (bthGetPairedDeviceAddressMethod(env)) {
+          if (bthGetPairedDeviceNameMethod(env)) {
+            return env;
+          }
+        }
+      }
+    }
+  }
+
+  return NULL;
+}
+
 void
 bthProcessDiscoveredDevices (
   DiscoveredBluetoothDeviceTester *testDevice, void *data
 ) {
+  JNIEnv *env = bthGetPairedDeviceMethods();
+
+  if (env) {
+    jint count = (*env)->CallStaticIntMethod(env, connectionClass, getPairedDeviceCountMethod);
+
+    for (jint index=0; index<count; index+=1) {
+      jstring jAddress = (*env)->CallStaticObjectMethod(env, connectionClass, getPairedDeviceAddressMethod, index);
+
+      if (jAddress) {
+        const char *cAddress = (*env)->GetStringUTFChars(env, jAddress, NULL);
+
+        if (cAddress) {
+          uint64_t address;
+
+          if (bthParseAddress(&address, cAddress)) {
+            jstring jName = (*env)->CallStaticObjectMethod(env, connectionClass, getPairedDeviceNameMethod, index);
+            const char *cName = jName? (*env)->GetStringUTFChars(env, jName, NULL): NULL;
+
+            DiscoveredBluetoothDevice device = {
+              .address = address,
+              .name = cName,
+              .paired = 1
+            };
+
+            int found = testDevice(&device, data);
+            if (cName) (*env)->ReleaseStringUTFChars(env, jName, cName);
+            (*env)->ReleaseStringUTFChars(env, jAddress, cAddress);
+            if (found) break;
+          }
+        }
+      }
+    }
+  }
 }
