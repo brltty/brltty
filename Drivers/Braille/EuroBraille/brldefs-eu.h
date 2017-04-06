@@ -42,8 +42,11 @@ typedef enum {
   EU_ESYS_24             = 0X0A,
   EU_ESYS_64             = 0X0B,
   EU_ESYS_80             = 0X0C,
+  EU_ESYS_LIGHT_80       = 0x0D,
   EU_ESYTIME_32          = 0X0E,
-  EU_ESYTIME_32_STANDARD = 0X0F
+  EU_ESYTIME_32_STANDARD = 0X0F,
+  EU_ESYTIME_EVO         = 0x10,
+  EU_ESYTIME_EVO_STANDARD = 0x11
 } EU_EsysirisModel;
 
 typedef enum {

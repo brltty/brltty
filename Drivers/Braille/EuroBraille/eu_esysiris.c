@@ -289,6 +289,13 @@ static const ModelEntry modelTable[] = {
     .keyTable = &KEY_TABLE_DEFINITION(esys_large)
   },
 
+  { .modelIdentifier = EU_ESYS_LIGHT_80,
+    .modelName = "Esys Light 80",
+    .cellCount = 80,
+    .isEsys = 1,
+    .keyTable = &KEY_TABLE_DEFINITION(esys_large)
+  },
+
   { .modelIdentifier = EU_ESYTIME_32,
     .modelName = "Esytime 32",
     .cellCount = 32,
@@ -300,6 +307,23 @@ static const ModelEntry modelTable[] = {
 
   { .modelIdentifier = EU_ESYTIME_32_STANDARD,
     .modelName = "Esytime 32 Standard",
+    .cellCount = 32,
+    .hasBrailleKeyboard = 1,
+    .isEsytime = 1,
+    .keyTable = &KEY_TABLE_DEFINITION(esytime)
+  },
+
+  { .modelIdentifier = EU_ESYTIME_EVO,
+    .modelName = "Esytime evolution",
+    .cellCount = 32,
+    .hasBrailleKeyboard = 1,
+    .hasOpticalBar = 1,
+    .isEsytime = 1,
+    .keyTable = &KEY_TABLE_DEFINITION(esytime)
+  },
+
+  { .modelIdentifier = EU_ESYTIME_EVO_STANDARD,
+    .modelName = "Esytime evolution Standard",
     .cellCount = 32,
     .hasBrailleKeyboard = 1,
     .isEsytime = 1,
