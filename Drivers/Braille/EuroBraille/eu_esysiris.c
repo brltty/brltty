@@ -314,7 +314,7 @@ static const ModelEntry modelTable[] = {
   },
 
   { .modelIdentifier = EU_ESYTIME_EVO,
-    .modelName = "Esytime evolution",
+    .modelName = "Esytime Evolution",
     .cellCount = 32,
     .hasBrailleKeyboard = 1,
     .hasOpticalBar = 1,
@@ -323,7 +323,7 @@ static const ModelEntry modelTable[] = {
   },
 
   { .modelIdentifier = EU_ESYTIME_EVO_STANDARD,
-    .modelName = "Esytime evolution Standard",
+    .modelName = "Esytime Evolution Standard",
     .cellCount = 32,
     .hasBrailleKeyboard = 1,
     .isEsytime = 1,

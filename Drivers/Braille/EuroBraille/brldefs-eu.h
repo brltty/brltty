@@ -30,22 +30,22 @@
 #define EU_LCD_CURSOR 0X02
 
 typedef enum {
-  EU_IRIS_20             = 0X01,
-  EU_IRIS_40             = 0X02,
-  EU_IRIS_S20            = 0X03,
-  EU_IRIS_S32            = 0X04,
-  EU_IRIS_KB20           = 0X05,
-  EU_IRIS_KB40           = 0X06,
-  EU_ESYS_12             = 0X07,
-  EU_ESYS_40             = 0X08,
-  EU_ESYS_LIGHT_40       = 0X09,
-  EU_ESYS_24             = 0X0A,
-  EU_ESYS_64             = 0X0B,
-  EU_ESYS_80             = 0X0C,
-  EU_ESYS_LIGHT_80       = 0x0D,
-  EU_ESYTIME_32          = 0X0E,
-  EU_ESYTIME_32_STANDARD = 0X0F,
-  EU_ESYTIME_EVO         = 0x10,
+  EU_IRIS_20              = 0X01,
+  EU_IRIS_40              = 0X02,
+  EU_IRIS_S20             = 0X03,
+  EU_IRIS_S32             = 0X04,
+  EU_IRIS_KB20            = 0X05,
+  EU_IRIS_KB40            = 0X06,
+  EU_ESYS_12              = 0X07,
+  EU_ESYS_40              = 0X08,
+  EU_ESYS_LIGHT_40        = 0X09,
+  EU_ESYS_24              = 0X0A,
+  EU_ESYS_64              = 0X0B,
+  EU_ESYS_80              = 0X0C,
+  EU_ESYS_LIGHT_80        = 0x0D,
+  EU_ESYTIME_32           = 0X0E,
+  EU_ESYTIME_32_STANDARD  = 0X0F,
+  EU_ESYTIME_EVO          = 0x10,
   EU_ESYTIME_EVO_STANDARD = 0x11
 } EU_EsysirisModel;
 
