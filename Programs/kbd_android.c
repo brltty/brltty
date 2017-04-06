@@ -337,7 +337,7 @@ static KeyboardInstanceObject *keyboardInstance = NULL;
 
 struct KeyboardInstanceExtensionStruct {
   JNIEnv *env;
-  jclass class;
+  jobject object;
 
   jclass inputService;
   jmethodID forwardKeyEvent;
@@ -358,7 +358,7 @@ newKeyboardInstanceExtension (KeyboardInstanceExtension **kix) {
     memset(*kix,  0, sizeof(**kix));
 
     (*kix)->env = NULL;
-    (*kix)->class = NULL;
+    (*kix)->object = NULL;
 
     (*kix)->inputService = NULL;
     (*kix)->forwardKeyEvent = 0;
@@ -388,7 +388,7 @@ forwardKeyEvent (KeyboardInstanceObject *kio, int code, int press) {
                                                JAVA_SIG_BOOLEAN // press
                                               ))) {
       (*kix->env)->CallVoidMethod(
-        kix->env, kix->class, kix->forwardKeyEvent,
+        kix->env, kix->object, kix->forwardKeyEvent,
         code, (press? JNI_TRUE: JNI_FALSE)
       );
 
@@ -411,7 +411,7 @@ JAVA_METHOD (
     KeyboardInstanceExtension *kix = kio->kix;
 
     kix->env = env;
-    kix->class = class;
+    kix->object = this;
 
     handleKeyEvent(kio, code, (press != JNI_FALSE));
     return JNI_TRUE;
