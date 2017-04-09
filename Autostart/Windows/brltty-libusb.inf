@@ -46,7 +46,7 @@ libusb_files_dll_x64 = 10,system32
 libusb0.sys
 
 [libusb_files_sys_x64]
-libusb0.sys,libusb0_x64.sys
+libusb0_x64.sys
 
 [libusb_files_dll]
 libusb0.dll
@@ -55,7 +55,7 @@ libusb0.dll
 libusb0.dll
 
 [libusb_files_dll_x64]
-libusb0.dll,libusb0_x64.dll
+libusb0_x64.dll
 
 ;--------------------------------------------------------------------------
 ; Device driver
@@ -87,7 +87,7 @@ AddReg = libusb_add_reg_hw
 AddService = libusb0, 0x00000002, libusb_add_service
 
 [LIBUSB_DEV.NTAMD64.Services]
-AddService = libusb0, 0x00000002, libusb_add_service
+AddService = libusb0, 0x00000002, libusb_add_service_amd64
 
 [libusb_add_reg]
 HKR,,DevLoader,,*ntkern
@@ -113,6 +113,14 @@ ServiceType    = 1
 StartType      = 3
 ErrorControl   = 0
 ServiceBinary  = %12%\libusb0.sys
+
+[libusb_add_service_amd64]
+DisplayName    = "LibUsb-Win32 - Kernel Driver 03/31/2007, 0.1.12.1"
+ServiceType    = 1
+StartType      = 3
+ErrorControl   = 0
+ServiceBinary  = %12%\libusb0_x64.sys
+
 
 ;--------------------------------------------------------------------------
 ; Devices
