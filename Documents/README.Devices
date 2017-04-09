@@ -173,7 +173,9 @@ It shouldn't normally be necessary to supply any of the others.
 
 BRLTTY can detect a Bluetooth device by name on the following platforms:
 
+* Android
 * Linux (if the Bluetooth version is at least 5)
+* Windows
 
 ``address=``
    Specify the Bluetooth address of the device. It must be six two-digit

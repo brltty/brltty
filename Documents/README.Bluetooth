@@ -176,7 +176,9 @@ On some platforms,
 BRLTTY supports the detection of a Bluetooth device based on its name.
 These platforms include:
 
+* Android
 * Linux (if the Bluetooth version is at least 5)
+* Windows
 
 The address of the device needn't be specified on these platforms -
 specifying just ``bluetooth:`` is sufficient.
