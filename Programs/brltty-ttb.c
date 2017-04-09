@@ -902,6 +902,11 @@ static const FormatEntry formatEntries[] = {
     .write = writeTable_libLouis,
   },
 
+  { .name = "utb",
+    .read = readTable_libLouis,
+    .write = writeTable_libLouis,
+  },
+
   { .name = "XCompose",
     .write = writeTable_XCompose,
   },
