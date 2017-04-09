@@ -75,7 +75,7 @@ doc: doc.made
 
 doc.made: $(JAVA_SOURCES)
 	$(INSTALL_DIRECTORY) doc
-	$(JAVADOC) -quiet -d doc -author -version -use $(JAVA_SOURCES)
+	$(JAVADOC) -quiet -d doc -author -notimestamp -version -use $(JAVA_SOURCES)
 	touch $@
 
 clean::
