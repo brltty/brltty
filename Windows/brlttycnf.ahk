@@ -33,8 +33,9 @@ Return
 SelectPortAndDisplay:
 
   ; Fill a listbox for port selection
-   ComPorts = USB:|COM1|COM2|COM3|COM4|COM5|COM6|COM7|COM8|COM9|COM10|
-   ComPorts = %ComPorts%COM11|COM12|COM13|COM14|COM15|COM16|
+   ComPorts = USB:,BLUETOOTH:|USB:|BLUETOOTH:
+   ComPorts = %ComPorts%|COM1|COM2|COM3|COM4|COM5|COM6|COM7|COM8|COM9
+   ComPorts = %ComPorts%|COM10|COM11|COM12|COM13|COM14|COM15|COM16|
 
   ; Fill a listbox for terminal selection
   ; getting data from brltty.conf
