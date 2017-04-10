@@ -506,7 +506,7 @@ authPolkit_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
       PolkitAuthorizationResult *result = polkit_authority_check_authorization_sync(
         polkit->authority,			/* authority */
         subject,				/* PolkitSubject for client */
-        "org.brltty.write-display",		/* name of polkit action */
+        "org.a11y.brlapi.write-display",		/* name of polkit action */
         NULL,					/* details */
         POLKIT_CHECK_AUTHORIZATION_FLAGS_NONE,	/* disallow interaction */
         NULL,					/* GCancellable */
