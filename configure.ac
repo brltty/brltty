@@ -1892,6 +1892,7 @@ BRLTTY_DEFINE_EXPANDED([BRLAPI_ETCDIR], ["${CONFIGURATION_DIRECTORY}"],
                        [Define this to be a string containing the path to the directory where the authorization key and driver-dependent key names are found.])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_SOCKETPATH], ["${api_socket_path}"],
 		       [Define this to be a string containing the path to the local sockets.])
+BRLTTY_SUBST_EXPANDED([api_socket_directory], ["${api_socket_path}"])
 prefix="${original_prefix}"
 exec_prefix="${original_exec_prefix}"
 
