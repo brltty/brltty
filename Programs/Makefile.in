@@ -942,8 +942,9 @@ install-programs: brltty$X brltty-trtxt$X brltty-ttb$X brltty-atb$X brltty-ctb$X
 	$(INSTALL_PROGRAM) brltty-tune$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_DATA) $(BLD_TOP)config.sh $(INSTALL_PROGRAM_DIRECTORY)/brltty-config
 
-install-xbrlapi: xbrlapi$X install-program-directory install-gdm-autostart-directory
+install-xbrlapi: xbrlapi$X install-program-directory install-x11-autostart-directory install-gdm-autostart-directory
 	$(INSTALL_PROGRAM) xbrlapi$X $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_DATA) $(SRC_TOP)Autostart/X11/60xbrlapi $(INSTALL_X11_AUTOSTART_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_TOP)Autostart/gdm/xbrlapi.desktop $(INSTALL_GDM_AUTOSTART_DIRECTORY)
 
 install-tables: $(INSTALL_TEXT_TABLES) $(INSTALL_ATTRIBUTES_TABLES) $(INSTALL_CONTRACTION_TABLES) install-keyboard-tables install-input-tables
@@ -1042,6 +1043,7 @@ uninstall-programs:
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty$X
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty-*
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/xbrlapi$X
+	-rm -f $(INSTALL_X11_AUTOSTART_DIRECTORY)/60xbrlapi
 	-rm -f $(INSTALL_GDM_AUTOSTART_DIRECTORY)/xbrlapi.desktop
 
 uninstall-tables:
