@@ -32,6 +32,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
 %define _bindir /bin
 %define _sbindir /sbin
 %define _libdir /lib
+%define _datadir /usr/share
 %define _sysconfdir /etc
 %define _systemddir %{_libdir}/systemd/system
 %define _udevlibdir %{_libdir}/udev
@@ -515,6 +516,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %exclude %{_libdir}/brltty/libbrlttyxa2.so
 %exclude %{_libdir}/brltty/libbrlttyxsc.so
 %{_sysconfdir}/brltty
+%{_datadir}/metainfo/org.a11y.brltty.metainfo.xml
 %doc %{_mandir}/man1/brltty.1.gz
 %doc %{_docdir}/*/LICENSE*
 %doc %{_docdir}/*/README*
@@ -570,6 +572,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %files -n brlapi
 %defattr(-,root,root)
 %{_libdir}/libbrlapi.so.*
+%{_datadir}/polkit-1/actions/org.a11y.brlapi.policy
 %doc %{_docdir}/*/Manual-BrlAPI
 
 %files -n java-brlapi
@@ -602,7 +605,8 @@ rm -fr "${RPM_BUILD_ROOT}"
 %doc %{_mandir}/man1/xbrlapi.1.gz
 %doc %{_mandir}/man1/eutp.1.gz
 %doc %{_mandir}/man1/vstp.1.gz
-/usr/share/gdm/greeter/autostart/xbrlapi.desktop
+%{_sysconfdir}/X11/Xsession.d/60xbrlapi
+%{_datadir}/gdm/greeter/autostart/xbrlapi.desktop
 
 
 %changelog
