@@ -41,6 +41,7 @@ typedef enum {
 #include "brldefs-bm.h"
 
 BEGIN_KEY_NAME_TABLE(display)
+  KEY_NAME_ENTRY(BM_KEY_DISPLAY+7, "Display8"),
   KEY_NAME_ENTRY(BM_KEY_DISPLAY+6, "Display7"),
   KEY_NAME_ENTRY(BM_KEY_DISPLAY+5, "Display6"),
   KEY_NAME_ENTRY(BM_KEY_DISPLAY+4, "Display5"),
@@ -116,8 +117,6 @@ BEGIN_KEY_NAME_TABLE(joystick)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(orbit)
-  KEY_NAME_ENTRY(BM_KEY_DISPLAY+1, "PanLeft"),
-  KEY_NAME_ENTRY(BM_KEY_DISPLAY+4, "PanRight"),
   KEY_NAME_ENTRY(BM_KEY_ENTRY+0, "Space"),
 END_KEY_NAME_TABLE
 
@@ -194,6 +193,7 @@ BEGIN_KEY_NAME_TABLES(orbit)
   KEY_NAME_TABLE(orbit),
   KEY_NAME_TABLE(dots),
   KEY_NAME_TABLE(joystick),
+  KEY_NAME_SUBTABLE(display,8),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(pronto)
@@ -1827,6 +1827,10 @@ processBaumPackets (BrailleDisplay *brl) {
             keys = packet.data.values.displayKeys ^ 0X7F;
             count = 7;
             break;
+
+          case BAUM_DEVICE_Orbit:
+            count = 8;
+            /* fall through */
 
           default:
             keys = packet.data.values.displayKeys;

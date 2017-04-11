@@ -21,8 +21,7 @@ title Orbit Reader
 note Space is the long key in the middle, just in front of the joystick.
 note Dot7 and Dot8 are the keys immediately to the left and right of Space.
 
-bind PanLeft FWINLT
-bind PanRight FWINRT
-
 assign space Space
 include keyboard.kti
+
+include d6.kti
