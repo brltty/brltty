@@ -930,7 +930,7 @@ check-all: check-text-tables check-attributes-tables check-contraction-tables ch
 
 ###############################################################################
 
-install:: install-programs install-tables $(INSTALL_DRIVERS) install-core-headers $(INSTALL_MESSAGES) install-manpages $(INSTALL_API)
+install:: install-programs install-tables $(INSTALL_DRIVERS) install-core-headers $(INSTALL_MESSAGES) install-manpages install-metainfo $(INSTALL_API)
 
 install-programs: brltty$X brltty-trtxt$X brltty-ttb$X brltty-atb$X brltty-ctb$X brltty-ktb$X brltty-tune$X install-program-directory install-writable-directory
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY) 
@@ -942,10 +942,13 @@ install-programs: brltty$X brltty-trtxt$X brltty-ttb$X brltty-atb$X brltty-ctb$X
 	$(INSTALL_PROGRAM) brltty-tune$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_DATA) $(BLD_TOP)config.sh $(INSTALL_PROGRAM_DIRECTORY)/brltty-config
 
+XBRLAPI_X11_AUTOSTART_FILE = 60xbrlapi
+XBRLAPI_GDM_AUTOSTART_FILE = xbrlapi.desktop
+
 install-xbrlapi: xbrlapi$X install-program-directory install-x11-autostart-directory install-gdm-autostart-directory
 	$(INSTALL_PROGRAM) xbrlapi$X $(INSTALL_PROGRAM_DIRECTORY) 
-	$(INSTALL_DATA) $(SRC_TOP)Autostart/X11/60xbrlapi $(INSTALL_X11_AUTOSTART_DIRECTORY)
-	$(INSTALL_DATA) $(SRC_TOP)Autostart/gdm/xbrlapi.desktop $(INSTALL_GDM_AUTOSTART_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_TOP)Autostart/X11/$(XBRLAPI_X11_AUTOSTART_FILE) $(INSTALL_X11_AUTOSTART_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_TOP)Autostart/gdm/$(XBRLAPI_GDM_AUTOSTART_FILE) $(INSTALL_GDM_AUTOSTART_DIRECTORY)
 
 install-tables: $(INSTALL_TEXT_TABLES) $(INSTALL_ATTRIBUTES_TABLES) $(INSTALL_CONTRACTION_TABLES) install-keyboard-tables install-input-tables
 
@@ -996,6 +999,10 @@ install-documents: install-document-directory brltty-ktb$X $(BRAILLE_DRIVERS)
 	cd $(BLD_TOP)$(DOC_DIR) && $(MAKE) all
 	$(SRC_TOP)mkdocs -o $(INSTALL_DOCUMENT_DIRECTORY) -s $(SRC_TOP) -b $(BLD_TOP) -d $(DOC_DIR) -t $(TBL_DIR)
 
+METAINFO_FILE = org.a11y.brltty.metainfo.xml
+install-metainfo: install-metainfo-directory
+	$(INSTALL_DATA) $(SRC_TOP)Autostart/AppStream/$(METAINFO_FILE) $(INSTALL_METAINFO_DIRECTORY)
+
 install-api: $(INSTALL_API_LIBRARIES) install-api-headers install-api-manpages install-api-key install-api-policy $(INSTALL_XBRLAPI) $(INSTALL_API_BINDINGS)
 
 install-api-libraries: $(API_LIB) $(API_ARC) install-apilib-directory install-apisoc-directory
@@ -1037,14 +1044,14 @@ install-api-policy: install-apipol-directory
 
 ###############################################################################
 
-uninstall:: uninstall-programs uninstall-tables uninstall-drivers uninstall-messages uninstall-manpages uninstall-documents uninstall-headers uninstall-api-bindings uninstall-api-files
+uninstall:: uninstall-programs uninstall-tables uninstall-drivers uninstall-messages uninstall-manpages uninstall-documents uninstall-headers uninstall-metainfo uninstall-api-bindings uninstall-api-files
 
 uninstall-programs:
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty$X
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty-*
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/xbrlapi$X
-	-rm -f $(INSTALL_X11_AUTOSTART_DIRECTORY)/60xbrlapi
-	-rm -f $(INSTALL_GDM_AUTOSTART_DIRECTORY)/xbrlapi.desktop
+	-rm -f $(INSTALL_X11_AUTOSTART_DIRECTORY)/$(XBRLAPI_X11_AUTOSTART_FILE)
+	-rm -f $(INSTALL_GDM_AUTOSTART_DIRECTORY)/$(XBRLAPI_GDM_AUTOSTART_FILE)
 
 uninstall-tables:
 	-rm -f -r $(INSTALL_TEXT_TABLES_DIRECTORY)
@@ -1062,6 +1069,21 @@ uninstall-drivers: $(UNINSTALL_API_LIBRARIES)
 uninstall-messages:
 	cd $(BLD_TOP)$(MSG_DIR) && $(MAKE) uninstall
 
+uninstall-manpages:
+	-rm -f $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1/brltty.1
+	-rm -f $(INSTALL_MAN3_DIRECTORY)/brlapi_*.3
+
+uninstall-documents:
+	-rm -r -f $(INSTALL_DOCUMENT_DIRECTORY)
+
+uninstall-headers:
+	-rm -f $(INSTALL_APIHDR_DIRECTORY)/brlapi.h
+	-rm -f $(INSTALL_APIHDR_DIRECTORY)/brlapi_*.h
+	-[ ! -d $(INSTALL_INCLUDE_DIRECTORY) ] || rm -f -r $(INSTALL_INCLUDE_DIRECTORY)
+
+uninstall-metainfo:
+	-rm -f $(INSTALL_METAINFO_DIRECTORY)/$(METAINFO_FILE)
+
 uninstall-api-libraries:
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_LIB)
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_LIB).$(API_VERSION)
@@ -1076,18 +1098,6 @@ uninstall-api-libraries-windows:
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_IMPLIB_VERSIONED)
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_DEF)
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/$(API_DLL)
-
-uninstall-manpages:
-	-rm -f $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1/brltty.1
-	-rm -f $(INSTALL_MAN3_DIRECTORY)/brlapi_*.3
-
-uninstall-documents:
-	-rm -r -f $(INSTALL_DOCUMENT_DIRECTORY)
-
-uninstall-headers:
-	-rm -f $(INSTALL_APIHDR_DIRECTORY)/brlapi.h
-	-rm -f $(INSTALL_APIHDR_DIRECTORY)/brlapi_*.h
-	-[ ! -d $(INSTALL_INCLUDE_DIRECTORY) ] || rm -f -r $(INSTALL_INCLUDE_DIRECTORY)
 
 uninstall-api-files:
 	-rm -f $(INSTALL_APIPOL_DIRECTORY)/$(API_POLICY_FILE)
