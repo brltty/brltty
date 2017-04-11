@@ -123,6 +123,24 @@ setCurrentTime (const TimeValue *now) {
     logSystemError("settimeofday");
   }
 
+#elif defined(__MINGW32__)
+  TimeComponents components;
+  expandTimeValue(now, &components);
+
+  SYSTEMTIME time = {
+    .wYear = components.year,
+    .wMonth = components.month + 1,
+    .wDay = components.day + 1,
+    .wHour = components.hour,
+    .wMinute = components.minute,
+    .wSecond = components.second,
+    .wMilliseconds = now->nanoseconds / NSECS_PER_MSEC
+  };
+
+  if (!SetLocalTime(&time)) {
+    logWindowsSystemError("SetLocalTime");
+  }
+
 #elif defined(HAVE_STIME)
   const time_t seconds = now->seconds;
 
