@@ -18,8 +18,15 @@
 
 title Orbit Reader
 
+note A six-dot standard braille keyboard is along the back edge of the top.
+note * From left to right, its keys are: Dot3, Dot2, Dot1, Dot4, Dot5, Dot6.
+note There's a five-position joystick in between Dot1 and Dot4.
 note Space is the long key in the middle, just in front of the joystick.
 note Dot7 and Dot8 are the keys immediately to the left and right of Space.
+note The rocker to the left of the braille cells emulates the Display2 key,
+note * and the one to their right emulates the Display5 key.
+note Any display key combination can be emulated by pressing the joystick
+note * while typing the corresponding combination of the eight dot keys.
 
 assign space Space
 include keyboard.kti
