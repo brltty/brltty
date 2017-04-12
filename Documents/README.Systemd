@@ -4,69 +4,77 @@ Using Systemd Service Management
 
 .. include:: prologue.rst
 
-.. |default user configuration directory| replace:: /etc
-.. |default system unit directory| replace:: |default user configuration directory|/systemd/system
-.. |service unit| replace:: brltty.service
-.. |service instance unit| replace:: brltty@.service
+.. |configuration directory| replace:: /usr/lib
+.. |unit directory| replace:: |configuration directory|/systemd/system
 .. |wrapper directory| replace:: /sbin
-.. |wrapper script| replace:: brltty-systemd-wrapper
+.. |build subdirectory| replace:: Autostart/Systemd
 
-Installing the Service Units
-============================
+Initial Setup
+=============
 
-You need to copy both the service unit and the service instance unit
-into Systemd's system unit directory.
-You can find out where this directory is on your system with this command::
+A set of Systemd service and target units needs to be installed
+into the |unit directory| directory,
+and a wrapper script needs to be installed
+into the |wrapper directory| directory.
+A make file has been provided in order to make this easy to do.
+It can be found within the |build subdirectory| subdirectory
+of BRLTTY's build tree.
+To install all of these files, change to this subdirectory
+and run the command::
 
-   pkg-config systemd --variable=systemdsystemunitpath
+  make install
 
-The output from this command is a colon-delimited list of directories.
-Look for the one that starts with |default user configuration directory|.
-Assuming that Systemd's system unit directory is |default system unit directory|
-(please ensure to use whatever it really is on your system):
+You then need to tell Systemd that the files have been installed.
+To do this, run the command::
 
-1) Define the service instance unit for BRLTTY as follows:
+  systemctl daemon-reload
 
-  .. parsed-literal:: cp |service instance unit| |default system unit directory|/|service instance unit|
-
-2) Define the service unit for BRLTTY as follows:
-
-  .. parsed-literal:: cp |service unit| |default system unit directory|/|service unit|
-
-3) Tell Systemd that these units have been defined as follows::
-
-     systemctl daemon-reload
-
-You also need to install a wrapper script that's used by the service units:
-
-  .. parsed-literal:: cp |wrapper script| |wrapper directory|/|wrapper script|
-  .. parsed-literal:: chmod 755 |wrapper directory|/|wrapper script|
+That's all you need to do.
+Your system is now able to manage BRLTTY instances via Systemd.
 
 Managing the BRLTTY Service
 ===========================
 
-Once the unit file is in the right place, you'll be able to use standard 
-Systemd commands to manage the ``brltty`` service. The most common ones are:
+Systemd manages BRLTTY instances on your system in a number of ways.
 
-systemctl start brltty
-   Explicitly start the ``brltty`` service.
+USB Braille Devices
+-------------------
 
-systemctl stop brltty
-   Explicitly stop the ``brltty`` service.
+If BRLTTY's Udev rules have also been installed
+then a BRLTTY instance will be automatically started
+when a USB braille device is connected,
+and automatically stopped when it's disconnected.
+Several braille devices can be managed in this way at the same time.
+They can be connected and disconnected at any time and in any order.
 
-systemctl enable brltty
-   Automatically start the ``brltty`` service on system boot.
+The Default Instance
+--------------------
 
-systemctl disable brltty
-   Don't automatically start the ``brltty`` service on system boot.
+The default BRLTTY instance is the one that's configured
+via the file ``/etc/brltty.conf``.
+It's managed via standard Systemd commands like these::
 
-systemctl status brltty
-   Show the current status of the ``brltty`` service.
+  systemctl enable brltty
+  systemctl start brltty
+  systemctl stop brltty
+  systemctl disable brltty
 
-journalctl -u brltty
-   Show system log messages pertaining to the ``brltty`` service.
+Additional Instances
+--------------------
 
-Nothing is implicit. If you'd like to start the ``brltty`` service right away
-then use the ``start`` function. If you'd like the ``brltty`` service to be
-automatically started when the system is booted then use the ``enable``
-function.
+Additional BRLTTY instances can also be managed.
+They're managed via Systemd instance targets,
+and each has its own configuration file.
+
+If, for example, the name of an instance is ``iname``,
+then its Systemd target name would be ``brltty@iname``,
+its configuration file would be ``/etc/brltty_iname.conf``,
+and it'd be managed via Systemd commands like these::
+
+  systemctl enable brltty@iname.target
+  systemctl start brltty@iname.target
+  systemctl stop brltty@iname.target
+  systemctl disable brltty@iname.target
+
+Any number of instances may be defined in this way.
+
