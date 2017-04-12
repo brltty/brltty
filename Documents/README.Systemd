@@ -52,22 +52,22 @@ The Default Instance
 
 The default BRLTTY instance is the one that's configured
 via the file ``/etc/brltty.conf``.
-It's managed via standard Systemd commands like these::
+It's managed by applying standard Systemd commands to BRLTTY's target unit.
+For example::
 
-  systemctl enable brltty
-  systemctl start brltty
-  systemctl stop brltty
-  systemctl disable brltty
+  systemctl enable brltty.target
+  systemctl start brltty.target
+  systemctl stop brltty.target
+  systemctl disable brltty.target
 
 Additional Instances
 --------------------
 
-Additional BRLTTY instances can also be managed.
-They're managed via Systemd instance targets,
-and each has its own configuration file.
+Additional BRLTTY instances can be managed via target instance references.
+Each of them has its own configuration file.
 
-If, for example, the name of an instance is ``iname``,
-then its Systemd target name would be ``brltty@iname``,
+If, for example, the name of an instance is ``iname``, then
+its Systemd target name would be ``brltty@iname``,
 its configuration file would be ``/etc/brltty_iname.conf``,
 and it'd be managed via Systemd commands like these::
 
@@ -76,5 +76,5 @@ and it'd be managed via Systemd commands like these::
   systemctl stop brltty@iname.target
   systemctl disable brltty@iname.target
 
-Any number of instances may be defined in this way.
+Any number of instances may be managed in this way.
 
