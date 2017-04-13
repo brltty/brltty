@@ -275,9 +275,12 @@ instructions supplémentaires spécifiques.
     Spécifie le port par défaut auquel l'afficheur braille est relié
     (voir la section <ref id="operand-braille-device"
     name="Spécification du port braille">). Si vous ne spécifiez pas
-    cette option, usb: est assumé si le support USB est disponible, et un
-    chemin approprié pour le port série Com1 correspondant au système 
-    d'exploitation est assumé. Voir la ligne
+    cette option, usb: est supposé si le support USB est disponible,
+    bluetooth: est supposé si le support Bluetooth est disponible, et
+    usb:,bluetooth: est supposé si les deux sont disponibles. Si ni le support
+    USB ni le support Bluetooth ne sont disponibles, un
+    chemin approprié pour le périphérique du port série primaire correspondant au système
+    d'exploitation est supposé. Voir la ligne
     <ref id="configure-braille-device" name="braille-device"> du
     fichier de configuration et l'option <ref
     id="options-braille-device" name="-d"> de la ligne de commande
@@ -1555,7 +1558,7 @@ la sortie standard (stdout) en braille abrégé.
     est ancré au répertoire configuré par l'option de compilation
     <ref id="build-data-directory" name="--with-data-directory">.
     L'extension .ctb est facultative. Si vous ne fournissez pas cette option,
-    en-us-g2 est assumé.
+    en-us-g2 est supposé.
   <tag><tt/-t/<em/file/|<tt/auto/ <tt/--text-table=/<em/file/|<tt/auto/</tag>
     Spécifie la table de texte (voir
     la section <ref id="table-text" name="Tables de texte"> pour les détails).
