@@ -133,7 +133,7 @@ ServiceBinary  = %12%\libusb0_x64.sys
 ; Generic Identifier
 ; Vendor: Future Technology Devices International, Ltd
 ; Product: FT232 USB-Serial (UART) IC
-"LibUSB-Win32: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip], MDV [all models]"=LIBUSB_DEV, USB\VID_0403&PID_6001
+"LibUSB-Win32: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HelpTech [FTDI chip], MDV [all models]"=LIBUSB_DEV, USB\VID_0403&PID_6001
 
 ; Device: 0403:DE58
 "LibUSB-Win32: Hedo [MobilLine]"=LIBUSB_DEV, USB\VID_0403&PID_DE58
@@ -295,7 +295,7 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: Baum [VarioUltra 32 (32 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6103
 
 ; Device: 0921:1200
-"LibUSB-Win32: HandyTech [GoHubs chip]"=LIBUSB_DEV, USB\VID_0921&PID_1200
+"LibUSB-Win32: HelpTech [GoHubs chip]"=LIBUSB_DEV, USB\VID_0921&PID_1200
 
 ; Device: 0F4E:0100
 "LibUSB-Win32: FreedomScientific [Focus 1]"=LIBUSB_DEV, USB\VID_0F4E&PID_0100
@@ -337,49 +337,49 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: HumanWare [BrailleNote Touch (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C00A
 
 ; Device: 1FE4:0003
-"LibUSB-Win32: HandyTech [USB-HID adapter]"=LIBUSB_DEV, USB\VID_1FE4&PID_0003
+"LibUSB-Win32: HelpTech [USB-HID adapter]"=LIBUSB_DEV, USB\VID_1FE4&PID_0003
 
 ; Device: 1FE4:0044
-"LibUSB-Win32: HandyTech [Easy Braille (HID)]"=LIBUSB_DEV, USB\VID_1FE4&PID_0044
+"LibUSB-Win32: HelpTech [Easy Braille (HID)]"=LIBUSB_DEV, USB\VID_1FE4&PID_0044
 
 ; Device: 1FE4:0054
-"LibUSB-Win32: HandyTech [Active Braille]"=LIBUSB_DEV, USB\VID_1FE4&PID_0054
+"LibUSB-Win32: HelpTech [Active Braille]"=LIBUSB_DEV, USB\VID_1FE4&PID_0054
 
 ; Device: 1FE4:0055
-"LibUSB-Win32: HandyTech [Connect Braille 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0055
+"LibUSB-Win32: HelpTech [Connect Braille 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0055
 
 ; Device: 1FE4:0061
-"LibUSB-Win32: HandyTech [Actilino]"=LIBUSB_DEV, USB\VID_1FE4&PID_0061
+"LibUSB-Win32: HelpTech [Actilino]"=LIBUSB_DEV, USB\VID_1FE4&PID_0061
 
 ; Device: 1FE4:0064
-"LibUSB-Win32: HandyTech [Active Star 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0064
+"LibUSB-Win32: HelpTech [Active Star 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0064
 
 ; Device: 1FE4:0074
-"LibUSB-Win32: HandyTech [Braille Star 40 (HID)]"=LIBUSB_DEV, USB\VID_1FE4&PID_0074
+"LibUSB-Win32: HelpTech [Braille Star 40 (HID)]"=LIBUSB_DEV, USB\VID_1FE4&PID_0074
 
 ; Device: 1FE4:0081
-"LibUSB-Win32: HandyTech [Basic Braille 16]"=LIBUSB_DEV, USB\VID_1FE4&PID_0081
+"LibUSB-Win32: HelpTech [Basic Braille 16]"=LIBUSB_DEV, USB\VID_1FE4&PID_0081
 
 ; Device: 1FE4:0082
-"LibUSB-Win32: HandyTech [Basic Braille 20]"=LIBUSB_DEV, USB\VID_1FE4&PID_0082
+"LibUSB-Win32: HelpTech [Basic Braille 20]"=LIBUSB_DEV, USB\VID_1FE4&PID_0082
 
 ; Device: 1FE4:0083
-"LibUSB-Win32: HandyTech [Basic Braille 32]"=LIBUSB_DEV, USB\VID_1FE4&PID_0083
+"LibUSB-Win32: HelpTech [Basic Braille 32]"=LIBUSB_DEV, USB\VID_1FE4&PID_0083
 
 ; Device: 1FE4:0084
-"LibUSB-Win32: HandyTech [Basic Braille 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0084
+"LibUSB-Win32: HelpTech [Basic Braille 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0084
 
 ; Device: 1FE4:0086
-"LibUSB-Win32: HandyTech [Basic Braille 64]"=LIBUSB_DEV, USB\VID_1FE4&PID_0086
+"LibUSB-Win32: HelpTech [Basic Braille 64]"=LIBUSB_DEV, USB\VID_1FE4&PID_0086
 
 ; Device: 1FE4:0087
-"LibUSB-Win32: HandyTech [Basic Braille 80]"=LIBUSB_DEV, USB\VID_1FE4&PID_0087
+"LibUSB-Win32: HelpTech [Basic Braille 80]"=LIBUSB_DEV, USB\VID_1FE4&PID_0087
 
 ; Device: 1FE4:008A
-"LibUSB-Win32: HandyTech [Basic Braille 48]"=LIBUSB_DEV, USB\VID_1FE4&PID_008A
+"LibUSB-Win32: HelpTech [Basic Braille 48]"=LIBUSB_DEV, USB\VID_1FE4&PID_008A
 
 ; Device: 1FE4:008B
-"LibUSB-Win32: HandyTech [Basic Braille 160]"=LIBUSB_DEV, USB\VID_1FE4&PID_008B
+"LibUSB-Win32: HelpTech [Basic Braille 160]"=LIBUSB_DEV, USB\VID_1FE4&PID_008B
 
 ; Device: 4242:0001
 "LibUSB-Win32: Pegasus [all models]"=LIBUSB_DEV, USB\VID_4242&PID_0001
@@ -444,7 +444,7 @@ ServiceBinary  = %12%\libusb0_x64.sys
 ; Generic Identifier
 ; Vendor: Future Technology Devices International, Ltd
 ; Product: FT232 USB-Serial (UART) IC
-"LibUSB-Win32: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip], MDV [all models]"=LIBUSB_DEV, USB\VID_0403&PID_6001
+"LibUSB-Win32: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HelpTech [FTDI chip], MDV [all models]"=LIBUSB_DEV, USB\VID_0403&PID_6001
 
 ; Device: 0403:DE58
 "LibUSB-Win32: Hedo [MobilLine]"=LIBUSB_DEV, USB\VID_0403&PID_DE58
@@ -606,7 +606,7 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: Baum [VarioUltra 32 (32 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6103
 
 ; Device: 0921:1200
-"LibUSB-Win32: HandyTech [GoHubs chip]"=LIBUSB_DEV, USB\VID_0921&PID_1200
+"LibUSB-Win32: HelpTech [GoHubs chip]"=LIBUSB_DEV, USB\VID_0921&PID_1200
 
 ; Device: 0F4E:0100
 "LibUSB-Win32: FreedomScientific [Focus 1]"=LIBUSB_DEV, USB\VID_0F4E&PID_0100
@@ -648,49 +648,49 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: HumanWare [BrailleNote Touch (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C00A
 
 ; Device: 1FE4:0003
-"LibUSB-Win32: HandyTech [USB-HID adapter]"=LIBUSB_DEV, USB\VID_1FE4&PID_0003
+"LibUSB-Win32: HelpTech [USB-HID adapter]"=LIBUSB_DEV, USB\VID_1FE4&PID_0003
 
 ; Device: 1FE4:0044
-"LibUSB-Win32: HandyTech [Easy Braille (HID)]"=LIBUSB_DEV, USB\VID_1FE4&PID_0044
+"LibUSB-Win32: HelpTech [Easy Braille (HID)]"=LIBUSB_DEV, USB\VID_1FE4&PID_0044
 
 ; Device: 1FE4:0054
-"LibUSB-Win32: HandyTech [Active Braille]"=LIBUSB_DEV, USB\VID_1FE4&PID_0054
+"LibUSB-Win32: HelpTech [Active Braille]"=LIBUSB_DEV, USB\VID_1FE4&PID_0054
 
 ; Device: 1FE4:0055
-"LibUSB-Win32: HandyTech [Connect Braille 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0055
+"LibUSB-Win32: HelpTech [Connect Braille 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0055
 
 ; Device: 1FE4:0061
-"LibUSB-Win32: HandyTech [Actilino]"=LIBUSB_DEV, USB\VID_1FE4&PID_0061
+"LibUSB-Win32: HelpTech [Actilino]"=LIBUSB_DEV, USB\VID_1FE4&PID_0061
 
 ; Device: 1FE4:0064
-"LibUSB-Win32: HandyTech [Active Star 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0064
+"LibUSB-Win32: HelpTech [Active Star 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0064
 
 ; Device: 1FE4:0074
-"LibUSB-Win32: HandyTech [Braille Star 40 (HID)]"=LIBUSB_DEV, USB\VID_1FE4&PID_0074
+"LibUSB-Win32: HelpTech [Braille Star 40 (HID)]"=LIBUSB_DEV, USB\VID_1FE4&PID_0074
 
 ; Device: 1FE4:0081
-"LibUSB-Win32: HandyTech [Basic Braille 16]"=LIBUSB_DEV, USB\VID_1FE4&PID_0081
+"LibUSB-Win32: HelpTech [Basic Braille 16]"=LIBUSB_DEV, USB\VID_1FE4&PID_0081
 
 ; Device: 1FE4:0082
-"LibUSB-Win32: HandyTech [Basic Braille 20]"=LIBUSB_DEV, USB\VID_1FE4&PID_0082
+"LibUSB-Win32: HelpTech [Basic Braille 20]"=LIBUSB_DEV, USB\VID_1FE4&PID_0082
 
 ; Device: 1FE4:0083
-"LibUSB-Win32: HandyTech [Basic Braille 32]"=LIBUSB_DEV, USB\VID_1FE4&PID_0083
+"LibUSB-Win32: HelpTech [Basic Braille 32]"=LIBUSB_DEV, USB\VID_1FE4&PID_0083
 
 ; Device: 1FE4:0084
-"LibUSB-Win32: HandyTech [Basic Braille 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0084
+"LibUSB-Win32: HelpTech [Basic Braille 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0084
 
 ; Device: 1FE4:0086
-"LibUSB-Win32: HandyTech [Basic Braille 64]"=LIBUSB_DEV, USB\VID_1FE4&PID_0086
+"LibUSB-Win32: HelpTech [Basic Braille 64]"=LIBUSB_DEV, USB\VID_1FE4&PID_0086
 
 ; Device: 1FE4:0087
-"LibUSB-Win32: HandyTech [Basic Braille 80]"=LIBUSB_DEV, USB\VID_1FE4&PID_0087
+"LibUSB-Win32: HelpTech [Basic Braille 80]"=LIBUSB_DEV, USB\VID_1FE4&PID_0087
 
 ; Device: 1FE4:008A
-"LibUSB-Win32: HandyTech [Basic Braille 48]"=LIBUSB_DEV, USB\VID_1FE4&PID_008A
+"LibUSB-Win32: HelpTech [Basic Braille 48]"=LIBUSB_DEV, USB\VID_1FE4&PID_008A
 
 ; Device: 1FE4:008B
-"LibUSB-Win32: HandyTech [Basic Braille 160]"=LIBUSB_DEV, USB\VID_1FE4&PID_008B
+"LibUSB-Win32: HelpTech [Basic Braille 160]"=LIBUSB_DEV, USB\VID_1FE4&PID_008B
 
 ; Device: 4242:0001
 "LibUSB-Win32: Pegasus [all models]"=LIBUSB_DEV, USB\VID_4242&PID_0001
@@ -755,7 +755,7 @@ ServiceBinary  = %12%\libusb0_x64.sys
 ; Generic Identifier
 ; Vendor: Future Technology Devices International, Ltd
 ; Product: FT232 USB-Serial (UART) IC
-"LibUSB-Win32: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip], MDV [all models]"=LIBUSB_DEV, USB\VID_0403&PID_6001
+"LibUSB-Win32: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HelpTech [FTDI chip], MDV [all models]"=LIBUSB_DEV, USB\VID_0403&PID_6001
 
 ; Device: 0403:DE58
 "LibUSB-Win32: Hedo [MobilLine]"=LIBUSB_DEV, USB\VID_0403&PID_DE58
@@ -917,7 +917,7 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: Baum [VarioUltra 32 (32 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6103
 
 ; Device: 0921:1200
-"LibUSB-Win32: HandyTech [GoHubs chip]"=LIBUSB_DEV, USB\VID_0921&PID_1200
+"LibUSB-Win32: HelpTech [GoHubs chip]"=LIBUSB_DEV, USB\VID_0921&PID_1200
 
 ; Device: 0F4E:0100
 "LibUSB-Win32: FreedomScientific [Focus 1]"=LIBUSB_DEV, USB\VID_0F4E&PID_0100
@@ -959,49 +959,49 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: HumanWare [BrailleNote Touch (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C00A
 
 ; Device: 1FE4:0003
-"LibUSB-Win32: HandyTech [USB-HID adapter]"=LIBUSB_DEV, USB\VID_1FE4&PID_0003
+"LibUSB-Win32: HelpTech [USB-HID adapter]"=LIBUSB_DEV, USB\VID_1FE4&PID_0003
 
 ; Device: 1FE4:0044
-"LibUSB-Win32: HandyTech [Easy Braille (HID)]"=LIBUSB_DEV, USB\VID_1FE4&PID_0044
+"LibUSB-Win32: HelpTech [Easy Braille (HID)]"=LIBUSB_DEV, USB\VID_1FE4&PID_0044
 
 ; Device: 1FE4:0054
-"LibUSB-Win32: HandyTech [Active Braille]"=LIBUSB_DEV, USB\VID_1FE4&PID_0054
+"LibUSB-Win32: HelpTech [Active Braille]"=LIBUSB_DEV, USB\VID_1FE4&PID_0054
 
 ; Device: 1FE4:0055
-"LibUSB-Win32: HandyTech [Connect Braille 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0055
+"LibUSB-Win32: HelpTech [Connect Braille 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0055
 
 ; Device: 1FE4:0061
-"LibUSB-Win32: HandyTech [Actilino]"=LIBUSB_DEV, USB\VID_1FE4&PID_0061
+"LibUSB-Win32: HelpTech [Actilino]"=LIBUSB_DEV, USB\VID_1FE4&PID_0061
 
 ; Device: 1FE4:0064
-"LibUSB-Win32: HandyTech [Active Star 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0064
+"LibUSB-Win32: HelpTech [Active Star 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0064
 
 ; Device: 1FE4:0074
-"LibUSB-Win32: HandyTech [Braille Star 40 (HID)]"=LIBUSB_DEV, USB\VID_1FE4&PID_0074
+"LibUSB-Win32: HelpTech [Braille Star 40 (HID)]"=LIBUSB_DEV, USB\VID_1FE4&PID_0074
 
 ; Device: 1FE4:0081
-"LibUSB-Win32: HandyTech [Basic Braille 16]"=LIBUSB_DEV, USB\VID_1FE4&PID_0081
+"LibUSB-Win32: HelpTech [Basic Braille 16]"=LIBUSB_DEV, USB\VID_1FE4&PID_0081
 
 ; Device: 1FE4:0082
-"LibUSB-Win32: HandyTech [Basic Braille 20]"=LIBUSB_DEV, USB\VID_1FE4&PID_0082
+"LibUSB-Win32: HelpTech [Basic Braille 20]"=LIBUSB_DEV, USB\VID_1FE4&PID_0082
 
 ; Device: 1FE4:0083
-"LibUSB-Win32: HandyTech [Basic Braille 32]"=LIBUSB_DEV, USB\VID_1FE4&PID_0083
+"LibUSB-Win32: HelpTech [Basic Braille 32]"=LIBUSB_DEV, USB\VID_1FE4&PID_0083
 
 ; Device: 1FE4:0084
-"LibUSB-Win32: HandyTech [Basic Braille 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0084
+"LibUSB-Win32: HelpTech [Basic Braille 40]"=LIBUSB_DEV, USB\VID_1FE4&PID_0084
 
 ; Device: 1FE4:0086
-"LibUSB-Win32: HandyTech [Basic Braille 64]"=LIBUSB_DEV, USB\VID_1FE4&PID_0086
+"LibUSB-Win32: HelpTech [Basic Braille 64]"=LIBUSB_DEV, USB\VID_1FE4&PID_0086
 
 ; Device: 1FE4:0087
-"LibUSB-Win32: HandyTech [Basic Braille 80]"=LIBUSB_DEV, USB\VID_1FE4&PID_0087
+"LibUSB-Win32: HelpTech [Basic Braille 80]"=LIBUSB_DEV, USB\VID_1FE4&PID_0087
 
 ; Device: 1FE4:008A
-"LibUSB-Win32: HandyTech [Basic Braille 48]"=LIBUSB_DEV, USB\VID_1FE4&PID_008A
+"LibUSB-Win32: HelpTech [Basic Braille 48]"=LIBUSB_DEV, USB\VID_1FE4&PID_008A
 
 ; Device: 1FE4:008B
-"LibUSB-Win32: HandyTech [Basic Braille 160]"=LIBUSB_DEV, USB\VID_1FE4&PID_008B
+"LibUSB-Win32: HelpTech [Basic Braille 160]"=LIBUSB_DEV, USB\VID_1FE4&PID_008B
 
 ; Device: 4242:0001
 "LibUSB-Win32: Pegasus [all models]"=LIBUSB_DEV, USB\VID_4242&PID_0001

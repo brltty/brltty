@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title HandyTech Active Star 40
+title Help Tech Active Star
 
 bind B1+B4+SpaceLeft TOUCH_NAV
 

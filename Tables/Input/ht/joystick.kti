@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# Key subtable for HandyTech Actilino
+# Key subtable for Help Tech Actilino
 
 bind Left KEY_CURSOR_LEFT
 bind Right KEY_CURSOR_RIGHT

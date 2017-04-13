@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# Key subtable for HandyTech Modular Evolution
+# Key subtable for Help Tech Modular Evolution
 
 bind Left FWINLT
 bind Right FWINRT

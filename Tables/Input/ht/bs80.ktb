@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title HandyTech Braille Star 80
+title Help Tech Braille Star 80
 
 include bs.kti
 include keypad.kti

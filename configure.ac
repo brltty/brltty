@@ -1473,7 +1473,7 @@ BRLTTY_BRAILLE_DRIVER([eu], [EuroBraille])
 BRLTTY_BRAILLE_DRIVER([fs], [FreedomScientific])
 BRLTTY_BRAILLE_DRIVER([hd], [Hedo])
 BRLTTY_BRAILLE_DRIVER([hm], [HIMS])
-BRLTTY_BRAILLE_DRIVER([ht], [HandyTech])
+BRLTTY_BRAILLE_DRIVER([ht], [HelpTech])
 BRLTTY_BRAILLE_DRIVER([hw], [HumanWare])
 BRLTTY_BRAILLE_DRIVER([ir], [Iris])
 BRLTTY_IF_PACKAGE([Libbraille], [libbraille], [include/braille.h], [dnl

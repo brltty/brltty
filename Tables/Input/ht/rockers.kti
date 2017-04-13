@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# Key subtable for HandyTech rocker keys
+# Key subtable for Help Tech rocker keys
 
 bind LeftRockerTop KEY_CURSOR_UP
 bind LeftRockerBottom KEY_CURSOR_DOWN

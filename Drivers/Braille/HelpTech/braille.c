@@ -953,7 +953,7 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   );
 
   if (!brl->data->model->name) {
-    logMessage(LOG_ERR, "Detected unknown HandyTech model with ID %02X.",
+    logMessage(LOG_ERR, "Detected unknown Help Tech model with ID %02X.",
                identifier);
     return 0;
   }

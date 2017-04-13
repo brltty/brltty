@@ -32,7 +32,7 @@ LABEL="brltty_usb_begin"
 # Albatross [all models]
 # Cebra [all models]
 # HIMS [Sync Braille]
-# HandyTech [FTDI chip]
+# HelpTech [FTDI chip]
 # MDV [all models]
 ENV{PRODUCT}=="403/6001/*", ENV{BRLTTY_BRAILLE_DRIVER}="at,ce,hm,ht,md", GOTO="brltty_usb_run"
 
@@ -251,7 +251,7 @@ ENV{PRODUCT}=="904/6102/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_ru
 ENV{PRODUCT}=="904/6103/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
 
 # Device: 0921:1200
-# HandyTech [GoHubs chip]
+# HelpTech [GoHubs chip]
 ENV{PRODUCT}=="921/1200/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
 
 # Device: 0F4E:0100
@@ -306,63 +306,63 @@ ENV{PRODUCT}=="1c71/c006/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_r
 ENV{PRODUCT}=="1c71/c00a/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0003
-# HandyTech [USB-HID adapter]
+# HelpTech [USB-HID adapter]
 ENV{PRODUCT}=="1fe4/3/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0044
-# HandyTech [Easy Braille (HID)]
+# HelpTech [Easy Braille (HID)]
 ENV{PRODUCT}=="1fe4/44/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0054
-# HandyTech [Active Braille]
+# HelpTech [Active Braille]
 ENV{PRODUCT}=="1fe4/54/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0055
-# HandyTech [Connect Braille 40]
+# HelpTech [Connect Braille 40]
 ENV{PRODUCT}=="1fe4/55/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0061
-# HandyTech [Actilino]
+# HelpTech [Actilino]
 ENV{PRODUCT}=="1fe4/61/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0064
-# HandyTech [Active Star 40]
+# HelpTech [Active Star 40]
 ENV{PRODUCT}=="1fe4/64/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0074
-# HandyTech [Braille Star 40 (HID)]
+# HelpTech [Braille Star 40 (HID)]
 ENV{PRODUCT}=="1fe4/74/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0081
-# HandyTech [Basic Braille 16]
+# HelpTech [Basic Braille 16]
 ENV{PRODUCT}=="1fe4/81/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0082
-# HandyTech [Basic Braille 20]
+# HelpTech [Basic Braille 20]
 ENV{PRODUCT}=="1fe4/82/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0083
-# HandyTech [Basic Braille 32]
+# HelpTech [Basic Braille 32]
 ENV{PRODUCT}=="1fe4/83/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0084
-# HandyTech [Basic Braille 40]
+# HelpTech [Basic Braille 40]
 ENV{PRODUCT}=="1fe4/84/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0086
-# HandyTech [Basic Braille 64]
+# HelpTech [Basic Braille 64]
 ENV{PRODUCT}=="1fe4/86/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
 
 # Device: 1FE4:0087
-# HandyTech [Basic Braille 80]
+# HelpTech [Basic Braille 80]
 ENV{PRODUCT}=="1fe4/87/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
 
 # Device: 1FE4:008A
-# HandyTech [Basic Braille 48]
+# HelpTech [Basic Braille 48]
 ENV{PRODUCT}=="1fe4/8a/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
 
 # Device: 1FE4:008B
-# HandyTech [Basic Braille 160]
+# HelpTech [Basic Braille 160]
 ENV{PRODUCT}=="1fe4/8b/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
 
 # Device: 4242:0001

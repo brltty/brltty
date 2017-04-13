@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title HandyTech Modular Evolution 88
+title Help Tech Modular Evolution 88
 
 include me.kti
 include keypad.kti

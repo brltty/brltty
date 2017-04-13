@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title HandyTech Modular
+title Help Tech Modular
 
 bind RoutingKey ROUTE
 bind RoutingKey+!RoutingKey CLIP_COPY

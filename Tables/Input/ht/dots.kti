@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# Key subtable for HandyTech braille dot keys
+# Key subtable for Help Tech braille dot keys
 
 bind B1 HOME
 bind B2 TOP_LEFT
