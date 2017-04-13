@@ -18,7 +18,7 @@
   <string name="BRAILLE_DRIVER_LABEL_fs">FreedomScientific</string>
   <string name="BRAILLE_DRIVER_LABEL_hd">Hedo</string>
   <string name="BRAILLE_DRIVER_LABEL_hm">HIMS</string>
-  <string name="BRAILLE_DRIVER_LABEL_ht">HandyTech</string>
+  <string name="BRAILLE_DRIVER_LABEL_ht">HelpTech</string>
   <string name="BRAILLE_DRIVER_LABEL_hw">HumanWare</string>
   <string name="BRAILLE_DRIVER_LABEL_ir">Iris</string>
   <string name="BRAILLE_DRIVER_LABEL_lb">Libbraille</string>

@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# Key subtable for HandyTech keypad keys
+# Key subtable for Help Tech keypad keys
 note The 16-key pad is arranged in four columns and four rows.
 note * The keys in the first (top) row are named: B9, One, Two, Three.
 note * The keys in the second row are named: B10, Four, Five, Six.

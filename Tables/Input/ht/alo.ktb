@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title HandyTech Actilino
+title Help Tech Actilino
 
 bind B1+B4+SpaceLeft TOUCH_NAV
 

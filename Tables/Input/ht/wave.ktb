@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title HandyTech Braille Wave
+title Help Tech Braille Wave
 
 bind Left FWINLT
 bind Right FWINRT

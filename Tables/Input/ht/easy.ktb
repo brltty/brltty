@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title HandyTech Easy Braille
+title Help Tech Easy Braille
 
 bind Left FWINLT
 bind Right FWINRT

@@ -45,7 +45,7 @@
     <!-- Albatross [all models] -->
     <!-- Cebra [all models] -->
     <!-- HIMS [Sync Braille] -->
-    <!-- HandyTech [FTDI chip] -->
+    <!-- HelpTech [FTDI chip] -->
     <!-- MDV [all models] -->
     <modalias>usb:v0403p6001*</modalias>
 
@@ -264,7 +264,7 @@
     <modalias>usb:v0904p6103*</modalias>
 
     <!-- Device: 0921:1200 -->
-    <!-- HandyTech [GoHubs chip] -->
+    <!-- HelpTech [GoHubs chip] -->
     <modalias>usb:v0921p1200*</modalias>
 
     <!-- Device: 0F4E:0100 -->
@@ -319,63 +319,63 @@
     <modalias>usb:v1C71pC00A*</modalias>
 
     <!-- Device: 1FE4:0003 -->
-    <!-- HandyTech [USB-HID adapter] -->
+    <!-- HelpTech [USB-HID adapter] -->
     <modalias>usb:v1FE4p0003*</modalias>
 
     <!-- Device: 1FE4:0044 -->
-    <!-- HandyTech [Easy Braille (HID)] -->
+    <!-- HelpTech [Easy Braille (HID)] -->
     <modalias>usb:v1FE4p0044*</modalias>
 
     <!-- Device: 1FE4:0054 -->
-    <!-- HandyTech [Active Braille] -->
+    <!-- HelpTech [Active Braille] -->
     <modalias>usb:v1FE4p0054*</modalias>
 
     <!-- Device: 1FE4:0055 -->
-    <!-- HandyTech [Connect Braille 40] -->
+    <!-- HelpTech [Connect Braille 40] -->
     <modalias>usb:v1FE4p0055*</modalias>
 
     <!-- Device: 1FE4:0061 -->
-    <!-- HandyTech [Actilino] -->
+    <!-- HelpTech [Actilino] -->
     <modalias>usb:v1FE4p0061*</modalias>
 
     <!-- Device: 1FE4:0064 -->
-    <!-- HandyTech [Active Star 40] -->
+    <!-- HelpTech [Active Star 40] -->
     <modalias>usb:v1FE4p0064*</modalias>
 
     <!-- Device: 1FE4:0074 -->
-    <!-- HandyTech [Braille Star 40 (HID)] -->
+    <!-- HelpTech [Braille Star 40 (HID)] -->
     <modalias>usb:v1FE4p0074*</modalias>
 
     <!-- Device: 1FE4:0081 -->
-    <!-- HandyTech [Basic Braille 16] -->
+    <!-- HelpTech [Basic Braille 16] -->
     <modalias>usb:v1FE4p0081*</modalias>
 
     <!-- Device: 1FE4:0082 -->
-    <!-- HandyTech [Basic Braille 20] -->
+    <!-- HelpTech [Basic Braille 20] -->
     <modalias>usb:v1FE4p0082*</modalias>
 
     <!-- Device: 1FE4:0083 -->
-    <!-- HandyTech [Basic Braille 32] -->
+    <!-- HelpTech [Basic Braille 32] -->
     <modalias>usb:v1FE4p0083*</modalias>
 
     <!-- Device: 1FE4:0084 -->
-    <!-- HandyTech [Basic Braille 40] -->
+    <!-- HelpTech [Basic Braille 40] -->
     <modalias>usb:v1FE4p0084*</modalias>
 
     <!-- Device: 1FE4:0086 -->
-    <!-- HandyTech [Basic Braille 64] -->
+    <!-- HelpTech [Basic Braille 64] -->
     <modalias>usb:v1FE4p0086*</modalias>
 
     <!-- Device: 1FE4:0087 -->
-    <!-- HandyTech [Basic Braille 80] -->
+    <!-- HelpTech [Basic Braille 80] -->
     <modalias>usb:v1FE4p0087*</modalias>
 
     <!-- Device: 1FE4:008A -->
-    <!-- HandyTech [Basic Braille 48] -->
+    <!-- HelpTech [Basic Braille 48] -->
     <modalias>usb:v1FE4p008A*</modalias>
 
     <!-- Device: 1FE4:008B -->
-    <!-- HandyTech [Basic Braille 160] -->
+    <!-- HelpTech [Basic Braille 160] -->
     <modalias>usb:v1FE4p008B*</modalias>
 
     <!-- Device: 4242:0001 -->

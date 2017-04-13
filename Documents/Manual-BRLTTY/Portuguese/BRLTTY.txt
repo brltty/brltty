@@ -5621,7 +5621,7 @@ GenericSay
 hm
 HIMS
 ht
-HandyTech
+HelpTech
 il
 IrisLinux
 lb
@@ -5715,7 +5715,7 @@ selecionar a opção padrão do sistema Hurd.
                           Focus 2 40/80
                           Focus Blue 40
                           PAC Mate 20/40
-      HandyTech           Modular 20/40/80
+      HelpTech            Modular 20/40/80
                           Modular Evolution 64/88
                           Active Braille
                           Braille Wave
@@ -5777,7 +5777,7 @@ selecionar a opção padrão do sistema Hurd.
       fv     Festival
       gs     GenericSay
       hm     HIMS
-      ht     HandyTech
+      ht     HelpTech
       il     IrisLinux
       lb     Libbraille
       lt     LogText

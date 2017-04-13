@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title HandyTech Modular Connect 88
+title Help Tech Modular Connect 88
 
 include me.kti
 include keypad.kti

@@ -10,7 +10,7 @@
   <!-- Albatross [all models] -->
   <!-- Cebra [all models] -->
   <!-- HIMS [Sync Braille] -->
-  <!-- HandyTech [FTDI chip] -->
+  <!-- HelpTech [FTDI chip] -->
   <!-- MDV [all models] -->
   <usb-device vendor-id="1027" product-id="24577" />
 
@@ -229,7 +229,7 @@
   <usb-device vendor-id="2308" product-id="24835" />
 
   <!-- Device: 0921:1200 -->
-  <!-- HandyTech [GoHubs chip] -->
+  <!-- HelpTech [GoHubs chip] -->
   <usb-device vendor-id="2337" product-id="4608" />
 
   <!-- Device: 0F4E:0100 -->
@@ -284,63 +284,63 @@
   <usb-device vendor-id="7281" product-id="49162" />
 
   <!-- Device: 1FE4:0003 -->
-  <!-- HandyTech [USB-HID adapter] -->
+  <!-- HelpTech [USB-HID adapter] -->
   <usb-device vendor-id="8164" product-id="3" />
 
   <!-- Device: 1FE4:0044 -->
-  <!-- HandyTech [Easy Braille (HID)] -->
+  <!-- HelpTech [Easy Braille (HID)] -->
   <usb-device vendor-id="8164" product-id="68" />
 
   <!-- Device: 1FE4:0054 -->
-  <!-- HandyTech [Active Braille] -->
+  <!-- HelpTech [Active Braille] -->
   <usb-device vendor-id="8164" product-id="84" />
 
   <!-- Device: 1FE4:0055 -->
-  <!-- HandyTech [Connect Braille 40] -->
+  <!-- HelpTech [Connect Braille 40] -->
   <usb-device vendor-id="8164" product-id="85" />
 
   <!-- Device: 1FE4:0061 -->
-  <!-- HandyTech [Actilino] -->
+  <!-- HelpTech [Actilino] -->
   <usb-device vendor-id="8164" product-id="97" />
 
   <!-- Device: 1FE4:0064 -->
-  <!-- HandyTech [Active Star 40] -->
+  <!-- HelpTech [Active Star 40] -->
   <usb-device vendor-id="8164" product-id="100" />
 
   <!-- Device: 1FE4:0074 -->
-  <!-- HandyTech [Braille Star 40 (HID)] -->
+  <!-- HelpTech [Braille Star 40 (HID)] -->
   <usb-device vendor-id="8164" product-id="116" />
 
   <!-- Device: 1FE4:0081 -->
-  <!-- HandyTech [Basic Braille 16] -->
+  <!-- HelpTech [Basic Braille 16] -->
   <usb-device vendor-id="8164" product-id="129" />
 
   <!-- Device: 1FE4:0082 -->
-  <!-- HandyTech [Basic Braille 20] -->
+  <!-- HelpTech [Basic Braille 20] -->
   <usb-device vendor-id="8164" product-id="130" />
 
   <!-- Device: 1FE4:0083 -->
-  <!-- HandyTech [Basic Braille 32] -->
+  <!-- HelpTech [Basic Braille 32] -->
   <usb-device vendor-id="8164" product-id="131" />
 
   <!-- Device: 1FE4:0084 -->
-  <!-- HandyTech [Basic Braille 40] -->
+  <!-- HelpTech [Basic Braille 40] -->
   <usb-device vendor-id="8164" product-id="132" />
 
   <!-- Device: 1FE4:0086 -->
-  <!-- HandyTech [Basic Braille 64] -->
+  <!-- HelpTech [Basic Braille 64] -->
   <usb-device vendor-id="8164" product-id="134" />
 
   <!-- Device: 1FE4:0087 -->
-  <!-- HandyTech [Basic Braille 80] -->
+  <!-- HelpTech [Basic Braille 80] -->
   <usb-device vendor-id="8164" product-id="135" />
 
   <!-- Device: 1FE4:008A -->
-  <!-- HandyTech [Basic Braille 48] -->
+  <!-- HelpTech [Basic Braille 48] -->
   <usb-device vendor-id="8164" product-id="138" />
 
   <!-- Device: 1FE4:008B -->
-  <!-- HandyTech [Basic Braille 160] -->
+  <!-- HelpTech [Basic Braille 160] -->
   <usb-device vendor-id="8164" product-id="139" />
 
   <!-- Device: 4242:0001 -->

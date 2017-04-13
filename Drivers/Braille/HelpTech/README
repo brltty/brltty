@@ -1,9 +1,7 @@
 This directory contains the BRLTTY driver for braille displays which are
-manufactured by Handy Tech Elektronik GmbH [http://www.handytech.com/] of
+manufactured by Help Tech Hilfsmittel GmbH [http://www.helptech.de/] of
 Germany. As a component of BRLTTY, this driver is released under the terms of
-the GNU Public License. It has been tested with the modular displays
-[20/40/80], the Braille Wave, the Braille Star [40/80], the Bookworm, the
-Easy Braille, the Active Braille, and the Braillino.
+the GNU Public License.
 
 This driver was originally implemented by Andreas Gross <andi@andi-bika.de>. It
 has since been extended, and is being maintained, by Dave Mielke
@@ -14,7 +12,7 @@ us a Bookworm so that its component could be tested. Thanks to Mario Lang
 <mlang@delysid.org> for his help with the development of USB and bluetooth 
 support.
 
-A HandyTech display can be used via its serial, USB, or bluetooth interface. If
+A Help Tech display can be used via its serial, USB, or bluetooth interface. If
 you're using a serial connection then specify "serial:/path/to/device", e.g. 
 "serial:/dev/ttyS0". If you're using a USB connection then specify "usb:" (the
 trailing colon is important). If you're using a bluetooth connection then
@@ -44,7 +42,7 @@ example above with that of your Active Braille.
 Basic Braille:
 --------------
 
-Starting with the Active Braille, Handy Tech has introduced a resistor 
+Starting with the Active Braille, Help Tech has introduced a resistor 
 which limits the amount of power drawn via USB. This eliminates 
 excessive draining of the host's battery. This artificial reduction in 
 power consumtion has the side effect that the dots do not lower as 
