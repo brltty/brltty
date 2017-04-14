@@ -34,6 +34,7 @@ extern char *bthGetNameAtAddress (const char *address, int timeout);
 extern const char *const *bthGetDriverCodes (const char *address, int timeout);
 
 typedef struct {
+  const char *driver;
   const char *identifier;
   int timeout;
   uint8_t channel;

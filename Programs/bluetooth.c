@@ -201,6 +201,7 @@ bthNewConnection (uint64_t address, uint8_t channel, int discover, int timeout) 
 void
 bthInitializeConnectionRequest (BluetoothConnectionRequest *request) {
   memset(request, 0, sizeof(*request));
+  request->driver = NULL;
   request->identifier = NULL;
   request->timeout = BLUETOOTH_CHANNEL_CONNECT_TIMEOUT;
   request->channel = 0;
@@ -315,6 +316,11 @@ typedef struct {
     size_t length;
   } name;
 
+  struct {
+    const char *address;
+    size_t length;
+  } driver;
+
   uint64_t address;
 } GetDeviceAddressData;
 
@@ -333,7 +339,7 @@ bthTestDiscoveredDevice (const DiscoveredBluetoothDevice *device, void *data) {
     return 0;
   }
 
-  if (gda->name.address) {
+  if (gda->name.length) {
     if (strncmp(device->name, gda->name.address, gda->name.length) != 0) {
       logMessage(LOG_CATEGORY(BLUETOOTH_IO), "ineligible name");
       return 0;
@@ -341,19 +347,37 @@ bthTestDiscoveredDevice (const DiscoveredBluetoothDevice *device, void *data) {
   }
 
   const BluetoothNameEntry *entry = bthGetNameEntry(device->name);
-
-  if (entry) {
-    logMessage(LOG_CATEGORY(BLUETOOTH_IO), "found");
-    gda->address = device->address;
-    return 1;
+  if (!entry) {
+    logMessage(LOG_CATEGORY(BLUETOOTH_IO), "not found");
+    return 0;
   }
 
-  logMessage(LOG_CATEGORY(BLUETOOTH_IO), "not found");
-  return 0;
+  if (gda->driver.length) {
+    const char *const *code = entry->driverCodes;
+    int found = 0;
+
+    while (*code) {
+      if (strncmp(*code, gda->driver.address, gda->driver.length) == 0) {
+        found = 1;
+        break;
+      }
+
+      code += 1;
+    }
+
+    if (!found) {
+      logMessage(LOG_CATEGORY(BLUETOOTH_IO), "ineligible driver");
+      return 0;
+    }
+  }
+
+  logMessage(LOG_CATEGORY(BLUETOOTH_IO), "found");
+  gda->address = device->address;
+  return 1;
 }
 
 static int
-bthGetDeviceAddress (uint64_t *address, char **parameters) {
+bthGetDeviceAddress (uint64_t *address, char **parameters, const char *driver) {
   {
     const char *parameter = parameters[BTH_CONN_ADDRESS];
 
@@ -367,6 +391,11 @@ bthGetDeviceAddress (uint64_t *address, char **parameters) {
     .name = {
       .address = name,
       .length = name? strlen(name): 0
+    },
+
+    .driver = {
+      .address = driver,
+      .length = driver? strlen(driver): 0
     },
 
     .address = 0
@@ -447,7 +476,7 @@ bthOpenConnection (const BluetoothConnectionRequest *request) {
       if (!bthProcessTimeoutParameter(&req, parameters[BTH_CONN_TIMEOUT])) ok = 0;
 
       uint64_t address;
-      if (!bthGetDeviceAddress(&address, parameters)) ok = 0;
+      if (!bthGetDeviceAddress(&address, parameters, req.driver)) ok = 0;
 
       if (ok) connection = bthNewConnection(address, req.channel, req.discover, req.timeout);
     }
@@ -531,7 +560,7 @@ bthGetDriverCodes (const char *identifier, int timeout) {
   if (parameters) {
     uint64_t address;
 
-    if (bthGetDeviceAddress(&address, parameters)) {
+    if (bthGetDeviceAddress(&address, parameters, NULL)) {
       const char *name = bthGetDeviceName(address, timeout);
       const BluetoothNameEntry *entry = bthGetNameEntry(name);
       if (entry) codes = entry->driverCodes;

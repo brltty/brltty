@@ -24,6 +24,7 @@
 #include "io_generic.h"
 #include "gio_internal.h"
 #include "io_bluetooth.h"
+#include "brl.h"
 
 struct GioHandleStruct {
   BluetoothConnection *connection;
@@ -115,6 +116,7 @@ connectBluetoothResource (
     BluetoothConnectionRequest request;
 
     bthInitializeConnectionRequest(&request);
+    request.driver = braille->definition.code;
     request.identifier = identifier;
     request.channel = descriptor->bluetooth.channelNumber;
     request.discover = descriptor->bluetooth.discoverChannel;
