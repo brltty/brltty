@@ -61,9 +61,9 @@ bthLogChannel (uint8_t channel) {
 }
 
 typedef struct {
-  uint64_t bda;
-  int connectError;
+  uint64_t deviceAddress;
   char *deviceName;
+  int connectError;
 } BluetoothDeviceEntry;
 
 static void
@@ -88,26 +88,26 @@ bthGetDeviceQueue (int create) {
 }
 
 static int
-bthTestDeviceEntry (const void *item, void *data) {
+bthTestDeviceAddress (const void *item, void *data) {
   const BluetoothDeviceEntry *entry = item;
-  const uint64_t *bda = data;
+  const uint64_t *address = data;
 
-  return entry->bda == *bda;
+  return entry->deviceAddress == *address;
 }
 
 static BluetoothDeviceEntry *
-bthGetDeviceEntry (uint64_t bda, int add) {
+bthGetDeviceEntry (uint64_t address, int add) {
   Queue *devices = bthGetDeviceQueue(add);
 
   if (devices) {
-    BluetoothDeviceEntry *entry = findItem(devices, bthTestDeviceEntry, &bda);
+    BluetoothDeviceEntry *entry = findItem(devices, bthTestDeviceAddress, &address);
     if (entry) return entry;
 
     if (add) {
       if ((entry = malloc(sizeof(*entry)))) {
-        entry->bda = bda;
-        entry->connectError = 0;
+        entry->deviceAddress = address;
         entry->deviceName = NULL;
+        entry->connectError = 0;
 
         if (enqueueItem(devices, entry)) return entry;
         free(entry);
@@ -120,11 +120,57 @@ bthGetDeviceEntry (uint64_t bda, int add) {
   return NULL;
 }
 
+static void
+bthRememberDeviceName (uint64_t address, const char *name) {
+  if (name && *name) {
+    char *copy = strdup(name);
+
+    if (copy) {
+      BluetoothDeviceEntry *entry = bthGetDeviceEntry(address, 1);
+
+      if (entry) {
+        if (entry->deviceName) free(entry->deviceName);
+        entry->deviceName = copy;
+        copy = NULL;
+      }
+
+      if (copy) free(copy);
+    } else {
+      logMallocError();
+    }
+  }
+}
+
+static int
+bthRememberDiscoveredDevice (const DiscoveredBluetoothDevice *device, void *data) {
+  logMessage(LOG_CATEGORY(BLUETOOTH_IO),
+             "remember discovered device: Addr:%012" PRIX64 " Name:%s Paired:%s",
+             device->address, device->name,
+             (device->paired? "yes": "no")
+  );
+
+  bthRememberDeviceName(device->address, device->name);
+  return 0;
+}
+
+static int bluetoothDevicesDiscovered = 0;
+
+static void
+bthDiscoverDevices (void) {
+  if (!bluetoothDevicesDiscovered) {
+    logMessage(LOG_CATEGORY(BLUETOOTH_IO), "begin device discovery");
+    bthProcessDiscoveredDevices(bthRememberDiscoveredDevice, NULL);
+    bluetoothDevicesDiscovered = 1;
+    logMessage(LOG_CATEGORY(BLUETOOTH_IO), "end device discovery");
+  }
+}
+
 void
 bthForgetDevices (void) {
   Queue *devices = bthGetDeviceQueue(0);
 
   if (devices) deleteElements(devices);
+  bluetoothDevicesDiscovered = 0;
 }
 
 static int
@@ -320,40 +366,33 @@ typedef struct {
     const char *address;
     size_t length;
   } driver;
-
-  uint64_t address;
 } GetDeviceAddressData;
 
 static int
-bthTestDiscoveredDevice (const DiscoveredBluetoothDevice *device, void *data) {
-  GetDeviceAddressData *gda = data;
+bthTestDeviceName (const void *item, void *data) {
+  const BluetoothDeviceEntry *device = item;
+  const GetDeviceAddressData *gda = data;
 
   logMessage(LOG_CATEGORY(BLUETOOTH_IO),
-             "testing device: Addr:%012" PRIX64 " Name:%s Paired:%s",
-             device->address, device->name,
-             (device->paired? "yes": "no")
+             "testing device: Addr:%012" PRIX64 " Name:%s",
+             device->deviceAddress, device->deviceName
   );
 
-  if (!device->paired) {
-    logMessage(LOG_CATEGORY(BLUETOOTH_IO), "not paired");
-    return 0;
-  }
-
   if (gda->name.length) {
-    if (strncmp(device->name, gda->name.address, gda->name.length) != 0) {
+    if (strncmp(device->deviceName, gda->name.address, gda->name.length) != 0) {
       logMessage(LOG_CATEGORY(BLUETOOTH_IO), "ineligible name");
       return 0;
     }
   }
 
-  const BluetoothNameEntry *entry = bthGetNameEntry(device->name);
-  if (!entry) {
-    logMessage(LOG_CATEGORY(BLUETOOTH_IO), "not found");
+  const BluetoothNameEntry *name = bthGetNameEntry(device->deviceName);
+  if (!name) {
+    logMessage(LOG_CATEGORY(BLUETOOTH_IO), "unrecognized name");
     return 0;
   }
 
   if (gda->driver.length) {
-    const char *const *code = entry->driverCodes;
+    const char *const *code = name->driverCodes;
     int found = 0;
 
     while (*code) {
@@ -372,7 +411,6 @@ bthTestDiscoveredDevice (const DiscoveredBluetoothDevice *device, void *data) {
   }
 
   logMessage(LOG_CATEGORY(BLUETOOTH_IO), "found");
-  gda->address = device->address;
   return 1;
 }
 
@@ -386,28 +424,37 @@ bthGetDeviceAddress (uint64_t *address, char **parameters, const char *driver) {
     }
   }
 
-  const char *name = parameters[BTH_CONN_NAME];
-  GetDeviceAddressData gda = {
-    .name = {
-      .address = name,
-      .length = name? strlen(name): 0
-    },
+  {
+    bthDiscoverDevices();
+    Queue *devices = bthGetDeviceQueue(0);
 
-    .driver = {
-      .address = driver,
-      .length = driver? strlen(driver): 0
-    },
+    if (devices) {
+      const char *name = parameters[BTH_CONN_NAME];
 
-    .address = 0
-  };
+      GetDeviceAddressData gda = {
+        .name = {
+          .address = name,
+          .length = name? strlen(name): 0
+        },
 
-  logMessage(LOG_CATEGORY(BLUETOOTH_IO), "begin device search");
-  bthProcessDiscoveredDevices(bthTestDiscoveredDevice, &gda);
-  logMessage(LOG_CATEGORY(BLUETOOTH_IO), "end device search");
+        .driver = {
+          .address = driver,
+          .length = driver? strlen(driver): 0
+        }
+      };
 
-  if (!gda.address) return 0;
-  *address = gda.address;
-  return 1;
+      logMessage(LOG_CATEGORY(BLUETOOTH_IO), "begin device search");
+      const BluetoothDeviceEntry *entry = findItem(devices, bthTestDeviceName, &gda);
+      logMessage(LOG_CATEGORY(BLUETOOTH_IO), "end device search");
+
+      if (entry) {
+        *address = entry->deviceAddress;
+        return 1;
+      }
+    }
+  }
+
+  return 0;
 }
 
 static int
