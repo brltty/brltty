@@ -61,17 +61,18 @@ bthLogChannel (uint8_t channel) {
 }
 
 typedef struct {
-  uint64_t deviceAddress;
-  char *deviceName;
-  int connectError;
+  uint64_t address;
+  char *name;
+  int error;
+  unsigned paired:1;
 } BluetoothDeviceEntry;
 
 static void
 bthDeallocateDeviceEntry (void *item, void *data) {
-  BluetoothDeviceEntry *entry = item;
+  BluetoothDeviceEntry *device = item;
 
-  if (entry->deviceName) free(entry->deviceName);
-  free(entry);
+  if (device->name) free(device->name);
+  free(device);
 }
 
 static Queue *
@@ -89,10 +90,10 @@ bthGetDeviceQueue (int create) {
 
 static int
 bthTestDeviceAddress (const void *item, void *data) {
-  const BluetoothDeviceEntry *entry = item;
+  const BluetoothDeviceEntry *device = item;
   const uint64_t *address = data;
 
-  return entry->deviceAddress == *address;
+  return device->address == *address;
 }
 
 static BluetoothDeviceEntry *
@@ -100,17 +101,18 @@ bthGetDeviceEntry (uint64_t address, int add) {
   Queue *devices = bthGetDeviceQueue(add);
 
   if (devices) {
-    BluetoothDeviceEntry *entry = findItem(devices, bthTestDeviceAddress, &address);
-    if (entry) return entry;
+    BluetoothDeviceEntry *device = findItem(devices, bthTestDeviceAddress, &address);
+    if (device) return device;
 
     if (add) {
-      if ((entry = malloc(sizeof(*entry)))) {
-        entry->deviceAddress = address;
-        entry->deviceName = NULL;
-        entry->connectError = 0;
+      if ((device = malloc(sizeof(*device)))) {
+        device->address = address;
+        device->name = NULL;
+        device->error = 0;
+        device->paired = 0;
 
-        if (enqueueItem(devices, entry)) return entry;
-        free(entry);
+        if (enqueueItem(devices, device)) return device;
+        free(device);
       } else {
         logMallocError();
       }
@@ -120,25 +122,21 @@ bthGetDeviceEntry (uint64_t address, int add) {
   return NULL;
 }
 
-static void
-bthRememberDeviceName (uint64_t address, const char *name) {
+static int
+bthSetDeviceName (BluetoothDeviceEntry *device, const char *name) {
   if (name && *name) {
     char *copy = strdup(name);
 
     if (copy) {
-      BluetoothDeviceEntry *entry = bthGetDeviceEntry(address, 1);
-
-      if (entry) {
-        if (entry->deviceName) free(entry->deviceName);
-        entry->deviceName = copy;
-        copy = NULL;
-      }
-
-      if (copy) free(copy);
+      if (device->name) free(device->name);
+      device->name = copy;
+      return 1;
     } else {
       logMallocError();
     }
   }
+
+  return 0;
 }
 
 static int
@@ -149,7 +147,13 @@ bthRememberDiscoveredDevice (const DiscoveredBluetoothDevice *device, void *data
              (device->paired? "yes": "no")
   );
 
-  bthRememberDeviceName(device->address, device->name);
+  BluetoothDeviceEntry *entry = bthGetDeviceEntry(device->address, 1);
+
+  if (entry) {
+    bthSetDeviceName(entry, device->name);
+    entry->paired = device->paired;
+  }
+
   return 0;
 }
 
@@ -174,21 +178,21 @@ bthForgetDevices (void) {
 }
 
 static int
-bthRememberConnectError (uint64_t bda, int value) {
-  BluetoothDeviceEntry *entry = bthGetDeviceEntry(bda, 1);
-  if (!entry) return 0;
+bthRememberConnectError (uint64_t address, int value) {
+  BluetoothDeviceEntry *device = bthGetDeviceEntry(address, 1);
+  if (!device) return 0;
 
-  entry->connectError = value;
+  device->error = value;
   return 1;
 }
 
 static int
-bthRecallConnectError (uint64_t bda, int *value) {
-  BluetoothDeviceEntry *entry = bthGetDeviceEntry(bda, 0);
-  if (!entry) return 0;
-  if (!entry->connectError) return 0;
+bthRecallConnectError (uint64_t address, int *value) {
+  BluetoothDeviceEntry *device = bthGetDeviceEntry(address, 0);
+  if (!device) return 0;
+  if (!device->error) return 0;
 
-  *value = entry->connectError;
+  *value = device->error;
   return 1;
 }
 
@@ -375,17 +379,22 @@ bthTestDeviceName (const void *item, void *data) {
 
   logMessage(LOG_CATEGORY(BLUETOOTH_IO),
              "testing device: Addr:%012" PRIX64 " Name:%s",
-             device->deviceAddress, device->deviceName
+             device->address, device->name
   );
 
+  if (!device->paired) {
+    logMessage(LOG_CATEGORY(BLUETOOTH_IO), "not paired");
+    return 0;
+  }
+
   if (gda->name.length) {
-    if (strncmp(device->deviceName, gda->name.address, gda->name.length) != 0) {
+    if (strncmp(device->name, gda->name.address, gda->name.length) != 0) {
       logMessage(LOG_CATEGORY(BLUETOOTH_IO), "ineligible name");
       return 0;
     }
   }
 
-  const BluetoothNameEntry *name = bthGetNameEntry(device->deviceName);
+  const BluetoothNameEntry *name = bthGetNameEntry(device->name);
   if (!name) {
     logMessage(LOG_CATEGORY(BLUETOOTH_IO), "unrecognized name");
     return 0;
@@ -444,11 +453,11 @@ bthGetDeviceAddress (uint64_t *address, char **parameters, const char *driver) {
       };
 
       logMessage(LOG_CATEGORY(BLUETOOTH_IO), "begin device search");
-      const BluetoothDeviceEntry *entry = findItem(devices, bthTestDeviceName, &gda);
+      const BluetoothDeviceEntry *device = findItem(devices, bthTestDeviceName, &gda);
       logMessage(LOG_CATEGORY(BLUETOOTH_IO), "end device search");
 
-      if (entry) {
-        *address = entry->deviceAddress;
+      if (device) {
+        *address = device->address;
         return 1;
       }
     }
@@ -563,21 +572,22 @@ bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) 
 }
 
 static char *
-bthGetDeviceName (uint64_t bda, int timeout) {
-  BluetoothDeviceEntry *entry = bthGetDeviceEntry(bda, 1);
+bthGetDeviceName (uint64_t address, int timeout) {
+  bthDiscoverDevices();
+  BluetoothDeviceEntry *device = bthGetDeviceEntry(address, 1);
 
-  if (entry) {
-    if (!entry->deviceName) {
+  if (device) {
+    if (!device->name) {
       logMessage(LOG_CATEGORY(BLUETOOTH_IO), "obtaining device name");
 
-      if ((entry->deviceName = bthObtainDeviceName(bda, timeout))) {
-        logMessage(LOG_CATEGORY(BLUETOOTH_IO), "device name: %s", entry->deviceName);
+      if ((device->name = bthObtainDeviceName(address, timeout))) {
+        logMessage(LOG_CATEGORY(BLUETOOTH_IO), "device name: %s", device->name);
       } else {
         logMessage(LOG_CATEGORY(BLUETOOTH_IO), "device name not obtained");
       }
     }
 
-    return entry->deviceName;
+    return device->name;
   }
 
   return NULL;
