@@ -617,8 +617,7 @@ logDBusError (const char *action, const DBusError *error) {
 
   while (length > 0) {
     char character = message[--length];
-    if (character == '\n') break;
-    if (character == '\r') break;
+    if (character != '\n') break;
   }
 
   logMessage(LOG_ERR,
