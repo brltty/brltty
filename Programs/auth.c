@@ -453,24 +453,35 @@ authPolkit_initialize (const char *parameter) {
   if ((polkit = malloc(sizeof(*polkit)))) {
     memset(polkit, 0, sizeof(*polkit));
 
-    while(1) {
-      GError *error_local = NULL;
-      polkit->authority = polkit_authority_get_sync(NULL, &error_local);
+    while (1) {
+      GError *error = NULL;
+      polkit->authority = polkit_authority_get_sync(NULL, &error);
+      if (polkit->authority) return polkit;
 
-      if (polkit->authority) {
-	return polkit;
-      } else {
-        GQuark domain = error_local->domain;
-        gint code = error_local->code;
+      int wait = 0;
+      char message[0X100];
 
-        logMessage(LOG_WARNING, "Unable to connect to polkit: %s (%d) %s (%d)", g_quark_to_string(domain), (int) domain, error_local->message, code);
-        g_error_free(error_local);
+      STR_BEGIN(message, sizeof(message));
+      STR_PRINTF("unable to connect to polkit");
 
-        if ((domain != G_IO_ERROR) && (code != G_IO_ERROR_NOT_FOUND)) {
-          break;
-        }
+      if (error) {
+        GQuark domain = error->domain;
+        gint code = error->code;
+
+        STR_PRINTF(": %s (%d) %s (%d)",
+                   g_quark_to_string(domain), (int)domain,
+                   error->message, code);
+
+        g_error_free(error);
+        error = NULL;
+
+        if ((domain == G_IO_ERROR) || (code == G_IO_ERROR_NOT_FOUND)) wait = 1;
       }
 
+      STR_END;
+      logMessage(LOG_WARNING, "%s", message);
+
+      if (!wait) break;
       asyncWait(1000);
     }
 
