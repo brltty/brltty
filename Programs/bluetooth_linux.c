@@ -612,9 +612,18 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
 
 static void
 logDBusError (const char *action, const DBusError *error) {
+  const char *message = error->message;
+  int length = strlen(message);
+
+  while (length > 0) {
+    char character = message[--length];
+    if (character == '\n') break;
+    if (character == '\r') break;
+  }
+
   logMessage(LOG_ERR,
-             "DBus error: %s: %s: %s",
-             action, error->name, error->message);
+             "DBus error: %s: %s: %.*s",
+             action, error->name, length, message);
 }
 #endif /* HAVE_PKG_DBUS */
 
