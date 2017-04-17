@@ -39,7 +39,44 @@ extern int isLogLevel (unsigned int *level, const char *string);
 
 extern int validateInteger (int *value, const char *string, const int *minimum, const int *maximum);
 extern int validateChoice (unsigned int *value, const char *string, const char *const *choices);
-extern int validateFlag (unsigned int *value, const char *string, const char *on, const char *off);
+
+typedef struct {
+  const char *true;
+  const char *false;
+} FlagKeywordPair;
+
+static inline const char *
+getFlagKeyword (const FlagKeywordPair *fkp, int state) {
+  return state? fkp->true: fkp->false;
+}
+
+extern FlagKeywordPair fkpOnOff;
+extern FlagKeywordPair fkpTrueFalse;
+extern FlagKeywordPair fkpYesNo;
+extern FlagKeywordPair fkp10;
+
+static inline const char *
+getFlagKeywordOnOff (int state) {
+  return getFlagKeyword(&fkpOnOff, state);
+}
+
+static inline const char *
+getFlagKeywordTrueFalse (int state) {
+  return getFlagKeyword(&fkpTrueFalse, state);
+}
+
+static inline const char *
+getFlagKeywordYesNo (int state) {
+  return getFlagKeyword(&fkpYesNo, state);
+}
+
+static inline const char *
+getFlagKeyword10 (int state) {
+  return getFlagKeyword(&fkp10, state);
+}
+
+extern int validateFlagKeyword (unsigned int *value, const char *string);
+extern int validateFlag (unsigned int *value, const char *string, const FlagKeywordPair *fkp);
 extern int validateOnOff (unsigned int *value, const char *string);
 extern int validateYesNo (unsigned int *value, const char *string);
 

@@ -254,21 +254,60 @@ validateChoice (unsigned int *value, const char *string, const char *const *choi
   return 0;
 }
 
-int
-validateFlag (unsigned int *value, const char *string, const char *on, const char *off) {
-  const char *choices[] = {off, on, NULL};
+FlagKeywordPair fkpOnOff     = {.true="on"  , .false="off"  };
+FlagKeywordPair fkpTrueFalse = {.true="true", .false="false"};
+FlagKeywordPair fkpYesNo     = {.true="yes" , .false="no"   };
+FlagKeywordPair fkp10        = {.true="1"   , .false="0"    };
 
+const FlagKeywordPair *const flagKeywordPairs[] = {
+  &fkpOnOff, &fkpTrueFalse, &fkpYesNo, &fkp10
+};
+
+int
+validateFlagKeyword (unsigned int *value, const char *string) {
+  static const char **choices = NULL;
+
+  if (!choices) {
+    unsigned int count = ARRAY_COUNT(flagKeywordPairs);
+    size_t size = ARRAY_SIZE(choices, ((count * 2) + 1));
+
+    if (!(choices = malloc(size))) {
+      logMallocError();
+      return 0;
+    }
+
+    const FlagKeywordPair *const *fkp = flagKeywordPairs;
+    const FlagKeywordPair *const *end = fkp + count;
+    const char **choice = choices;
+
+    while (fkp < end) {
+      *choice++ = (*fkp)->false;
+      *choice++ = (*fkp)->true;
+      fkp += 1;
+    }
+
+    *choice = NULL;
+  }
+
+  if (!validateChoice(value, string, choices)) return 0;
+  *value %= 2;
+  return 1;
+}
+
+int
+validateFlag (unsigned int *value, const char *string, const FlagKeywordPair *fkp) {
+  const char *choices[] = {fkp->false, fkp->true, NULL};
   return validateChoice(value, string, choices);
 }
 
 int
 validateOnOff (unsigned int *value, const char *string) {
-  return validateFlag(value, string, "on", "off");
+  return validateFlag(value, string, &fkpOnOff);
 }
 
 int
 validateYesNo (unsigned int *value, const char *string) {
-  return validateFlag(value, string, "yes", "no");
+  return validateFlag(value, string, &fkpYesNo);
 }
 
 #ifndef NO_FLOAT

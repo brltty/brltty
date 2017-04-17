@@ -139,13 +139,17 @@ bthSetDeviceName (BluetoothDeviceEntry *device, const char *name) {
   return 0;
 }
 
+static inline const char *
+bthGetPairedKeyword (int state) {
+  return getFlagKeywordYesNo(state);
+}
+
 static int
 bthRememberDiscoveredDevice (const DiscoveredBluetoothDevice *device, void *data) {
   logMessage(LOG_CATEGORY(BLUETOOTH_IO),
-             "remember discovered device: Addr:%012" PRIX64 " Name:%s Paired:%s",
-             device->address, device->name,
-             (device->paired? "yes": "no")
-  );
+             "remember discovered device: "
+             "Addr:%012" PRIX64 " Paired:%s Name:%s",
+             device->address, bthGetPairedKeyword(device->paired), device->name);
 
   BluetoothDeviceEntry *entry = bthGetDeviceEntry(device->address, 1);
 
@@ -378,8 +382,8 @@ bthTestDeviceName (const void *item, void *data) {
   const GetDeviceAddressData *gda = data;
 
   logMessage(LOG_CATEGORY(BLUETOOTH_IO),
-             "testing device: Addr:%012" PRIX64 " Name:%s",
-             device->address, device->name
+             "testing device: Addr:%012" PRIX64 " Paired:%s Name:%s",
+             device->address, bthGetPairedKeyword(device->paired), device->name
   );
 
   if (!device->paired) {
