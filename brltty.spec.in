@@ -610,45 +610,72 @@ rm -fr "${RPM_BUILD_ROOT}"
 
 
 %changelog
-* Tue Jun 28 2016 Dave Mielke <dave@mielke.cc> 5.4
-Core changes:
-   The Delayed Cursor Tracking feature (and preference) has been added.
-   Stuck keys are now automatically released after a specifiable timeout.
-   Touch events no longer interfere with Learn Mode.
-   Support for the Polkit authorization manager has been added.
-   A couple of memory corruption issues have been resolved.
-USB fixes:
-   Device disconnect detection has been improved.
-   Excessive CPU consumption for some older serial adapters has been resolved.
+* Tue Apr 18 2017 Dave Mielke <dave@mielke.cc> 5.5
+General changes:
+   The braille and speech banners no longer include the revision identifier.
+   The -o (--override-preference=) option has been added.
+   quiet-if-no-braille can be specified via the configuration file.
+   Cursor routing hangs have been resolved.
+   The Log Messages submenu (for warnings and errors) has been added.
+   Support for panning within a long alert message has been added.
+   Alert beeps work on a Linux serial console.
+   The Greek text table has been improved.
+Braille device changes:
+   The default is to check both USB and Bluetooth (not just USB).
+   Specifying the Bluetooth address is no longer mandatory.
+   A prefix of a Bluetooth device's name can be specified.
+   A generic USB serial adapter is probed only if it's been customized.
 Baum braille driver changes:
-   More bindings have been defined for models that have the B11 key.
-   False reporting of input timeouts has been resolved.
-   Handling of unknown packet types has been improved.
+   Support for the Vario Ultra has been improved.
+   Support for the Orbit 20 has been added.
+EuroBraille braille driver changes:
+   More Esytime bindings have been added.
+   Support has been added for the EsysLight 80 and the Esytime Evolution.
 HandyTech braille driver changes:
-   Model detection on Windows has been fixed.
-   Output errors now restart the driver.
+   Support has been added for the Actilino.
+   The rocker keys can be used for efficient navigation of the menu.
+   B4+B5 has been bound to Command Learn Mode.
+   The (now redundant) keypad binding for Command Learn Mode has been removed.
+   The Bluetooth names of the Active Star and the Braillino are recognized.
 HIMS braille driver changes:
-   Support for the Smart Beetle has been added.
-   Newer firmware resolution of qwerty key code conflicts is supported.
+   Function key bindings have been added for models with four scroll keys.
+TTY braille driver changes:
+   The braille cells are shown (in addition to the text).
 HumanWare braille driver changes:
-   Several USB connection problems have been resolved.
-   The newer HID-based USB protocol is supported.
-   The Brailliant B 80's Bluetooth device name is recognized.
-Papenmeier braille driver changes:
-   Clipboard bindings have been added that work on EL-C models.
-   Bar bindings for the menu now work on EL models that don't have switches.
-   Bindings may now be defined that use a routing key and an EL key.
-XWindow braille driver changes:
-   Fixed-size font restrictions have been removed.
+   The Braille Note is autodetected when using USB.
+   Support has been added for the Braille Note Touch.
+Polkit changes:
+   The policy file is installed.
+   The policy has been renamed to org.a11y.brlapi (from org.brltty).
+   Initialization doesn't delay BRLTTY startup.
+Systemd changes:
+   The default instance is now brltty.target (not brltty.service).
+   Multiple instances can be managed (via brltty@.target instances).
+   A make file has been added to simplify unit and wrapper installation.
+   BRLTTY isn't started until Udev has finished initializing.
+   BRLTTY isn't automatically restarted if it terminates cleanly.
+Udev changes:
+   A make file has been added to simplify rules and wrapper installation.
+BrlAPI changes:
+   The version is now 0.6.6 (it was 0.6.5).
+   The server isn't started until the braille driver has started.
+   Several small fixes.
 xbrlapi changes:
-   Brltty restarts are handled.
-   Logs written to .xsession have been improved.
-brltty-trtxt changes:
-   The -b [--no-base-characters] option has been added.
-Systemd/Udev changes:
-   Multiple USB braille devices are handled - each starts its own brltty.
-   Disconnecting a USB braille device stops the associated brltty.
-Updated Tables:
-   The en_CA (English Canada) text table.
-   The zh_tw (Chinese, Taiwan) contraction table.
+   The X11 and gdm autostart files are installed.
+   Constantly trying to connect when BRLTTY isn't available has been fixed.
+   Reconnection on every window change has been fixed.
+Key table changes:
+   Common chords for all of the sticky modifier keys have been added.
+   Listings combine dot keys, e.g. Dots12 instead of Dot1+Dot2.
+Android changes:
+   The cursor no longer jumps back to the start while spaces are being typed.
+   Customization files can be in internal storage and/or on the SD card.
+Windows changes:
+   Interaction with NVDA has been revived.
+   LibUSB can be used on a 64-bit system.
+   Builds can be done on MinGW64.
+Build changes:
+   AppStream metainfo is maintained and installed.
+   The new Speech Dispatcher installation layout is supported.
+   Fixes to support building on Solaris 10 and 11 with C99.
 
