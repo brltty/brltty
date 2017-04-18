@@ -456,13 +456,15 @@ bthGetDeviceAddress (uint64_t *address, char **parameters, const char *driver) {
         }
       };
 
-      logMessage(LOG_CATEGORY(BLUETOOTH_IO), "begin device search");
-      const BluetoothDeviceEntry *device = findItem(devices, bthTestDeviceName, &gda);
-      logMessage(LOG_CATEGORY(BLUETOOTH_IO), "end device search");
+      if (gda.driver.length) {
+        logMessage(LOG_CATEGORY(BLUETOOTH_IO), "begin device search");
+        const BluetoothDeviceEntry *device = findItem(devices, bthTestDeviceName, &gda);
+        logMessage(LOG_CATEGORY(BLUETOOTH_IO), "end device search");
 
-      if (device) {
-        *address = device->address;
-        return 1;
+        if (device) {
+          *address = device->address;
+          return 1;
+        }
       }
     }
   }
