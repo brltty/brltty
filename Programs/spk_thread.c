@@ -249,7 +249,10 @@ logSpeechMessage (SpeechMessage *msg, const char *action) {
 static int
 testThreadValidity (volatile SpeechDriverThread *sdt) {
   if (!sdt) return 0;
+
+#ifdef GOT_PTHREADS
   if (sdt->isBeingDestroyed) return 0;
+#endif /* GOT_PTHREADS */
 
   volatile SpeechSynthesizer *spk = sdt->speechSynthesizer;
   if (!spk) return 0;

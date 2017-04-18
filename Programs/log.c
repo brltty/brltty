@@ -32,6 +32,7 @@
 #include "log.h"
 #include "log_history.h"
 #include "strfmt.h"
+#include "file.h"
 #include "timing.h"
 #include "addresses.h"
 #include "stdiox.h"
