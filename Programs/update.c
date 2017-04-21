@@ -572,7 +572,7 @@ trackScreenScroll (void) {
     int y = ses->winy;
 
     while (y > 0) {
-      if (ses->winy == scr.posx) break;
+      if (y == scr.posy) break;
 
       if (isSameRow(oldCharacters, newCharacters, newWidth, isSameCharacter)) {
         ses->winy = y;
