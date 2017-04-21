@@ -638,21 +638,23 @@ doUpdate (void) {
       }
 
       /* If the cursor moves in cursor tracking mode: */
-      if (!isRouting() && (scr.posx != ses->trkx || scr.posy != ses->trky)) {
-        int oldx = ses->winx;
-        int oldy = ses->winy;
+      if (!isRouting()) {
+        if ((scr.posx != ses->trkx) || (scr.posy != ses->trky)) {
+          int oldx = ses->winx;
+          int oldy = ses->winy;
 
-        trackScreenCursor(0);
-        logMessage(LOG_CATEGORY(CURSOR_TRACKING),
-                   "scr=%u csr=[%u,%u]->[%u,%u] win=[%u,%u]->[%u,%u]",
-                   scr.number,
-                   ses->trkx, ses->trky, scr.posx, scr.posy,
-                   oldx, oldy, ses->winx, ses->winy);
+          trackScreenCursor(0);
+          logMessage(LOG_CATEGORY(CURSOR_TRACKING),
+                     "scr=%u csr=[%u,%u]->[%u,%u] win=[%u,%u]->[%u,%u]",
+                     scr.number,
+                     ses->trkx, ses->trky, scr.posx, scr.posy,
+                     oldx, oldy, ses->winx, ses->winy);
 
-        ses->spkx = ses->trkx = scr.posx;
-        ses->spky = ses->trky = scr.posy;
-      } else if (checkScreenPointer()) {
-        screenPointerMoved = 1;
+          ses->spkx = ses->trkx = scr.posx;
+          ses->spky = ses->trky = scr.posy;
+        } else if (checkScreenPointer()) {
+          screenPointerMoved = 1;
+        }
       }
     }
   }
