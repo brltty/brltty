@@ -767,6 +767,11 @@ makePreferencesMenu (void) {
       ITEM(newEnumeratedMenuItem(navigationSubmenu, &prefs.cursorTrackingDelay, &itemName, strings));
     }
 
+    {
+      NAME(strtext("Track Screen Scroll"));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.trackScreenScroll, &itemName));
+    }
+
 #ifdef HAVE_LIBGPM
     {
       NAME(strtext("Track Screen Pointer"));

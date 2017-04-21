@@ -64,6 +64,12 @@ extern int isSameAttributes (
   const ScreenCharacter *character2
 );
 
+extern int
+isSameCharacter (
+  const ScreenCharacter *character1,
+  const ScreenCharacter *character2
+);
+
 extern int isSameRow (
   const ScreenCharacter *characters1,
   const ScreenCharacter *characters2,

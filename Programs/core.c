@@ -986,6 +986,14 @@ isSameAttributes (
 }
 
 int
+isSameCharacter (
+  const ScreenCharacter *character1,
+  const ScreenCharacter *character2
+) {
+  return isSameText(character1, character2) && isSameAttributes(character1, character2);
+}
+
+int
 isSameRow (
   const ScreenCharacter *characters1,
   const ScreenCharacter *characters2,

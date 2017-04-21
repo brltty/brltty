@@ -290,6 +290,12 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.cursorTrackingDelay
   },
 
+  { .name = "track-screen-scroll",
+    .defaultValue = DEFAULT_TRACK_SCREEN_SCROLL,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.trackScreenScroll
+  },
+
   { .name = "track-screen-pointer",
     .defaultValue = DEFAULT_TRACK_SCREEN_POINTER,
     .settingNames = &preferenceStringTable_boolean,

@@ -73,6 +73,7 @@ extern "C" {
 #define DEFAULT_BRAILLE_WINDOW_OVERLAP 0
 #define DEFAULT_CURSOR_TRACKING_DELAY ctd250ms
 
+#define DEFAULT_TRACK_SCREEN_SCROLL 0		/* 1 for on, 0 for off */
 #define DEFAULT_TRACK_SCREEN_POINTER 0		/* 1 for on, 0 for off */
 #define DEFAULT_HIGHLIGHT_BRAILLE_WINDOW_LOCATION 0		/* 1 for on, 0 for off */
 

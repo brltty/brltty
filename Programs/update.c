@@ -552,6 +552,60 @@ suppressAutospeak (void) {
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
+static void
+trackScreenScroll (void) {
+  static int oldScreen = -1;
+  static int oldY = -1;
+  static int oldWidth = 0;
+  static ScreenCharacter *oldCharacters = NULL;
+  static size_t oldSize = 0;
+
+  int newScreen = scr.number;
+  int newWidth = scr.cols;
+  ScreenCharacter newCharacters[newWidth];
+
+  readScreen(0, ses->winy, newWidth, 1, newCharacters);
+
+  if (prefs.trackScreenScroll && oldCharacters &&
+      (newScreen == oldScreen) && (newWidth == oldWidth) &&
+      (ses->winy == oldY)) {
+    int y = ses->winy;
+
+    while (y > 0) {
+      if (ses->winy == scr.posx) break;
+
+      if (isSameRow(oldCharacters, newCharacters, newWidth, isSameCharacter)) {
+        ses->winy = y;
+        break;
+      }
+
+      readScreen(0, --y, newWidth, 1, newCharacters);
+    }
+  }
+
+  {
+    size_t newSize = newWidth * sizeof(*oldCharacters);
+
+    if (newSize > oldSize) {
+      ScreenCharacter *newBuffer = malloc(newSize);
+
+      if (!newBuffer) {
+        logMallocError();
+        return;
+      }
+
+      oldCharacters = newBuffer;
+      oldSize = newSize;
+    }
+
+    memcpy(oldCharacters, newCharacters, newSize);
+  }
+
+  oldScreen = newScreen;
+  oldY = ses->winy;
+  oldWidth = newWidth;
+}
+
 void
 reportBrailleWindowMoved (void) {
   const BrailleWindowMovedReport data = {
@@ -654,9 +708,13 @@ doUpdate (void) {
           ses->spky = ses->trky = scr.posy;
         } else if (checkScreenPointer()) {
           screenPointerMoved = 1;
+        } else {
+          trackScreenScroll();
         }
       }
     }
+  } else {
+    trackScreenScroll();
   }
 
 #ifdef ENABLE_SPEECH_SUPPORT

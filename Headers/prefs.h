@@ -210,6 +210,7 @@ typedef struct {
   unsigned char autoreleaseTime;
   unsigned char touchNavigation;
   unsigned char cursorTrackingDelay;
+  unsigned char trackScreenScroll;
 
   unsigned char saveOnExit;
   unsigned char showSubmenuSizes;
