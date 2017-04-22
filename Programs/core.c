@@ -737,7 +737,7 @@ trackScreenCursor (int place) {
       int length = scr.posx + 1;
       ScreenCharacter characters[length];
       int onspace = 1;
-      readScreen(0, ses->winy, length, 1, characters);
+      readScreenRow(ses->winy, length, characters);
       while (length) {
         if ((iswspace(characters[--length].text) != 0) != onspace) {
           if (onspace) {

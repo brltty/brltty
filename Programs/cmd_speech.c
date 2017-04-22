@@ -192,7 +192,7 @@ handleSpeechCommands (int command, void *data) {
       ScreenCharacter characters[scr.cols];
       int column;
 
-      readScreen(0, ses->spky, scr.cols, 1, characters);
+      readScreenRow(ses->spky, scr.cols, characters);
       if ((column = findFirstNonSpaceCharacter(characters, scr.cols)) >= 0) {
         ses->spkx = column;
         speakDone(characters, column, 1, 0);
@@ -207,7 +207,7 @@ handleSpeechCommands (int command, void *data) {
       ScreenCharacter characters[scr.cols];
       int column;
 
-      readScreen(0, ses->spky, scr.cols, 1, characters);
+      readScreenRow(ses->spky, scr.cols, characters);
       if ((column = findLastNonSpaceCharacter(characters, scr.cols)) >= 0) {
         ses->spkx = column;
         speakDone(characters, column, 1, 0);
@@ -255,7 +255,7 @@ handleSpeechCommands (int command, void *data) {
         int to = from + 1;
 
       findWord:
-        readScreen(0, row, scr.cols, 1, characters);
+        readScreenRow(row, scr.cols, characters);
         type = (row == ses->spky)? getScreenCharacterType(&characters[column]): SCT_SPACE;
         onCurrentWord = type != SCT_SPACE;
 
@@ -375,10 +375,10 @@ handleSpeechCommands (int command, void *data) {
           ScreenCharacter current[scr.cols];
           unsigned int count = 0;
 
-          readScreen(0, ses->spky, scr.cols, 1, original);
+          readScreenRow(ses->spky, scr.cols, original);
 
           do {
-            readScreen(0, ses->spky+=increment, scr.cols, 1, current);
+            readScreenRow(ses->spky+=increment, scr.cols, current);
             if (!isSameRow(original, current, scr.cols, isSameText)) break;
             alertLineSkipped(&count);
           } while (ses->spky != limit);
@@ -397,7 +397,7 @@ handleSpeechCommands (int command, void *data) {
       int row = 0;
 
       while (row < scr.rows) {
-        readScreen(0, row, scr.cols, 1, characters);
+        readScreenRow(row, scr.cols, characters);
         if (!isAllSpaceCharacters(characters, scr.cols)) break;
         row += 1;
       }
@@ -418,7 +418,7 @@ handleSpeechCommands (int command, void *data) {
       int row = scr.rows - 1;
 
       while (row >= 0) {
-        readScreen(0, row, scr.cols, 1, characters);
+        readScreenRow(row, scr.cols, characters);
         if (!isAllSpaceCharacters(characters, scr.cols)) break;
         row -= 1;
       }

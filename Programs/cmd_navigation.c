@@ -161,7 +161,7 @@ static int
 testIndent (int column, int row, void *data UNUSED) {
   int count = column+1;
   ScreenCharacter characters[count];
-  readScreen(0, row, count, 1, characters);
+  readScreenRow(row, count, characters);
   while (column >= 0) {
     wchar_t text = characters[column].text;
     if (text != WC_C(' ')) return 1;
@@ -175,7 +175,7 @@ testPrompt (int column, int row, void *data) {
   const ScreenCharacter *prompt = data;
   int count = column+1;
   ScreenCharacter characters[count];
-  readScreen(0, row, count, 1, characters);
+  readScreenRow(row, count, characters);
   return isSameRow(characters, prompt, count, isSameText);
 }
 
@@ -357,7 +357,7 @@ handleNavigationCommands (int command, void *data) {
       while (1) {
         int isBlankLine;
 
-        readScreen(0, line, scr.cols, 1, characters);
+        readScreenRow(line, scr.cols, characters);
         isBlankLine = isAllSpaceCharacters(characters, scr.cols);
 
         switch (state) {
@@ -401,7 +401,7 @@ handleNavigationCommands (int command, void *data) {
       int line = ses->winy;
 
       while (line <= (int)(scr.rows - brl.textRows)) {
-        readScreen(0, line, scr.cols, 1, characters);
+        readScreenRow(line, scr.cols, characters);
 
         if (isAllSpaceCharacters(characters, scr.cols) == findBlankLine) {
           if (!findBlankLine) {
@@ -432,7 +432,7 @@ handleNavigationCommands (int command, void *data) {
       {
         ScreenCharacter characters[scr.cols];
         size_t length = 0;
-        readScreen(0, ses->winy, scr.cols, 1, characters);
+        readScreenRow(ses->winy, scr.cols, characters);
         while (length < scr.cols) {
           if (characters[length].text == WC_C(' ')) break;
           ++length;
@@ -521,7 +521,7 @@ handleNavigationCommands (int command, void *data) {
               int charIndex;
               ScreenCharacter characters[charCount];
 
-              readScreen(0, ses->winy, charCount, 1, characters);
+              readScreenRow(ses->winy, charCount, characters);
 
               for (charIndex=0; charIndex<charCount; charIndex+=1) {
                 wchar_t text = characters[charIndex].text;
@@ -553,7 +553,7 @@ handleNavigationCommands (int command, void *data) {
           int charIndex;
           ScreenCharacter characters[scr.cols];
 
-          readScreen(0, ses->winy, scr.cols, 1, characters);
+          readScreenRow(ses->winy, scr.cols, characters);
 
           for (charIndex=scr.cols-1; charIndex>0; charIndex-=1) {
             wchar_t text = characters[charIndex].text;

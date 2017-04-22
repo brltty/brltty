@@ -132,9 +132,9 @@ static const CursorAxisEntry cursorAxisTable[] = {
 #define logRouting(...) logMessage(LOG_CATEGORY(CURSOR_ROUTING), __VA_ARGS__)
 
 static int
-readScreenRow (RoutingData *routing, ScreenCharacter *buffer, int row) {
+readRow (RoutingData *routing, ScreenCharacter *buffer, int row) {
   if (!buffer) buffer = routing->rowBuffer;
-  return readScreen(0, row, routing->screenColumns, 1, buffer);
+  return readScreenRow(row, routing->screenColumns, buffer);
 }
 
 static int
@@ -171,7 +171,7 @@ getCurrentPosition (RoutingData *routing) {
   routing->cury = description.posy - routing->verticalDelta;
   routing->curx = description.posx;
 
-  if (readScreenRow(routing, NULL, description.posy)) return 1;
+  if (readRow(routing, NULL, description.posy)) return 1;
   logRouting("read failed: row=%d", description.posy);
 
 error:
@@ -227,7 +227,7 @@ awaitCursorMotion (RoutingData *routing, int direction, const CursorAxisEntry *a
 
       do {
         ScreenCharacter buffer[routing->screenColumns];
-        if (!readScreenRow(routing, buffer, row)) break;
+        if (!readRow(routing, buffer, row)) break;
 
         {
           int before = routing->curx;

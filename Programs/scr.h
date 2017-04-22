@@ -47,6 +47,11 @@ extern int userVirtualTerminal (int number);
 extern int handleScreenCommands (int command, void *data);
 extern KeyTableCommandContext getScreenCommandContext (void);
 
+static inline int
+readScreenRow (int row, int width, ScreenCharacter *buffer) {
+  return readScreen(0, row, width, 1, buffer);
+}
+
 /* Routines which apply to the routing screen.
  * An extra `thread' for the cursor routing subprocess.
  * This is needed because the forked subprocess shares its parent's
