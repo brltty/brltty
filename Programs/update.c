@@ -23,6 +23,7 @@
 
 #include "parameters.h"
 #include "log.h"
+#include "alert.h"
 #include "report.h"
 #include "strfmt.h"
 #include "update.h"
@@ -345,17 +346,21 @@ trackScreenScroll (void) {
   if (prefs.trackScreenScroll && oldCharacters &&
       (newScreen == oldScreen) && (newWidth == oldWidth) &&
       (ses->winy == oldY)) {
-    int y = ses->winy;
+    int newY = ses->winy;
 
-    while (y > 0) {
-      if (y == scr.posy) break;
+    while (newY > 0) {
+      if (newY == scr.posy) break;
 
       if (isSameRow(oldCharacters, newCharacters, newWidth, isSameCharacter)) {
-        ses->winy = y;
+        if (newY != ses->winy) {
+          ses->winy = newY;
+          alert(ALERT_SCROLL_UP);
+        }
+
         break;
       }
 
-      readScreenRow(--y, newWidth, newCharacters);
+      readScreenRow(--newY, newWidth, newCharacters);
     }
   }
 

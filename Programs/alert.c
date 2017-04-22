@@ -168,6 +168,10 @@ static const AlertEntry alertTable[] = {
     .message = strtext("Autorelease"),
     .tune = "c6@50 b- g e- p50 c@100 c c"
   },
+
+  [ALERT_SCROLL_UP] = {
+    .tune = "b5@30 d6 f6"
+  },
 };
 
 static ToneElement *tuneTable[ARRAY_COUNT(alertTable)] = {NULL};
