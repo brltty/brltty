@@ -28,6 +28,9 @@ install-systemd uninstall-systemd:
 install-udev uninstall-udev:
 	cd Autostart/Udev && $(MAKE) $(@:-udev=)
 
+install-appstream uninstall-appstream:
+	cd Autostart/AppStream && $(MAKE) $(@:-appstream=)
+
 ARCHIVE_NAME = $(PACKAGE_TARNAME)-$(PACKAGE_VERSION)
 TAR_EXTENSION = tar
 GZIP_EXTENSION = gz
@@ -94,6 +97,7 @@ ITERATE = \
    $(MSG_DIR) \
    Autostart/Systemd \
    Autostart/Udev \
+   Autostart/AppStream \
    Android/Application \
    ; do (cd $$directory && $(MAKE) $@); done
 

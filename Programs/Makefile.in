@@ -930,7 +930,7 @@ check-all: check-text-tables check-attributes-tables check-contraction-tables ch
 
 ###############################################################################
 
-install:: install-programs install-tables $(INSTALL_DRIVERS) install-core-headers $(INSTALL_MESSAGES) install-manpages install-metainfo $(INSTALL_API)
+install:: install-programs install-tables $(INSTALL_DRIVERS) install-core-headers $(INSTALL_MESSAGES) install-manpages $(INSTALL_API)
 
 install-programs: brltty$X brltty-trtxt$X brltty-ttb$X brltty-atb$X brltty-ctb$X brltty-ktb$X brltty-tune$X install-program-directory install-writable-directory
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY) 
@@ -999,10 +999,6 @@ install-documents: install-document-directory brltty-ktb$X $(BRAILLE_DRIVERS)
 	cd $(BLD_TOP)$(DOC_DIR) && $(MAKE) all
 	$(SRC_TOP)mkdocs -o $(INSTALL_DOCUMENT_DIRECTORY) -s $(SRC_TOP) -b $(BLD_TOP) -d $(DOC_DIR) -t $(TBL_DIR)
 
-METAINFO_FILE = org.a11y.brltty.metainfo.xml
-install-metainfo: install-metainfo-directory
-	$(INSTALL_DATA) $(SRC_TOP)Autostart/AppStream/$(METAINFO_FILE) $(INSTALL_METAINFO_DIRECTORY)
-
 install-api: $(INSTALL_API_LIBRARIES) install-api-headers install-api-manpages install-api-key install-api-policy $(INSTALL_XBRLAPI) $(INSTALL_API_BINDINGS)
 
 install-api-libraries: $(API_LIB) $(API_ARC) install-apilib-directory install-apisoc-directory
@@ -1044,7 +1040,7 @@ install-api-policy: install-apipol-directory
 
 ###############################################################################
 
-uninstall:: uninstall-programs uninstall-tables uninstall-drivers uninstall-messages uninstall-manpages uninstall-documents uninstall-headers uninstall-metainfo uninstall-api-bindings uninstall-api-files
+uninstall:: uninstall-programs uninstall-tables uninstall-drivers uninstall-messages uninstall-manpages uninstall-documents uninstall-headers uninstall-api-bindings uninstall-api-files
 
 uninstall-programs:
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty$X
@@ -1080,9 +1076,6 @@ uninstall-headers:
 	-rm -f $(INSTALL_APIHDR_DIRECTORY)/brlapi.h
 	-rm -f $(INSTALL_APIHDR_DIRECTORY)/brlapi_*.h
 	-[ ! -d $(INSTALL_INCLUDE_DIRECTORY) ] || rm -f -r $(INSTALL_INCLUDE_DIRECTORY)
-
-uninstall-metainfo:
-	-rm -f $(INSTALL_METAINFO_DIRECTORY)/$(METAINFO_FILE)
 
 uninstall-api-libraries:
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_LIB)
