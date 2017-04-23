@@ -106,8 +106,8 @@ POLKIT_PACKAGE = @polkit_package@
 POLKIT_INCLUDES = @polkit_includes@
 POLKIT_LIBS = @polkit_libs@
 
-LOU_INCLUDES = @lou_includes@
-LOU_LIBS = @lou_libs@
+LOUIS_INCLUDES = @louis_includes@
+LOUIS_LIBS = @louis_libs@
 
 ICU_INCLUDES = @icu_includes@
 ICU_LIBS = @icu_libs@

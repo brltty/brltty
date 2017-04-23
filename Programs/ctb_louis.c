@@ -18,6 +18,6 @@
 
 #include "prologue.h"
 
-#ifdef LIBLOUIS_TABLES_DIRECTORY
+#ifdef LOUIS_TABLES_DIRECTORY
 #include <liblouis.h>
-#endif /* LIBLOUIS_TABLES_DIRECTORY */
+#endif /* LOUIS_TABLES_DIRECTORY */

@@ -507,8 +507,8 @@ ctb_compile.$O:
 ctb_translate.$O:
 	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ctb_translate.c
 
-ctb_liblouis.$O:
-	$(CC) $(LIBCFLAGS) $(LOU_INCLUDES) -c $(SRC_DIR)/ctb_liblouis.c
+ctb_louis.$O:
+	$(CC) $(LIBCFLAGS) $(LOUIS_INCLUDES) -c $(SRC_DIR)/ctb_louis.c
 
 BRLTTY_CTB_OBJECTS = brltty-ctb.$O $(PROGRAM_OBJECTS) $(PREFS_OBJECTS) dataarea.$O $(TTB_OBJECTS) ctb_compile.$O ctb_translate.$O
 
@@ -743,7 +743,7 @@ learn.$O:
 ###############################################################################
 
 BRLTTY_OBJECTS = brltty.$O $(CORE_OBJECTS)
-BRLTTY_LIBRARIES = $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(SERVICE_LIBS) $(PCM_LIBS) $(MIDI_LIBS) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LOU_LIBS) $(POLKIT_LIBS) $(LDLIBS)
+BRLTTY_LIBRARIES = $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(SERVICE_LIBS) $(PCM_LIBS) $(MIDI_LIBS) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LOUIS_LIBS) $(POLKIT_LIBS) $(LDLIBS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRLTTY_LIBRARIES)

@@ -273,7 +273,7 @@ extern "C" {
 #undef TABLES_DIRECTORY
 
 /* Define this to be a string containing the path to the LibLouis tables directory. */
-#undef LIBLOUIS_TABLES_DIRECTORY
+#undef LOUIS_TABLES_DIRECTORY
 
 /* Define this to be a string containing the path to the configuration directory. */
 #undef CONFIGURATION_DIRECTORY
