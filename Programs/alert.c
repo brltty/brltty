@@ -170,7 +170,7 @@ static const AlertEntry alertTable[] = {
   },
 
   [ALERT_SCROLL_UP] = {
-    .tune = "b5@30 d6 f6"
+    .tune = "b6@10 d7"
   },
 };
 
