@@ -346,8 +346,13 @@ contractText_external (BrailleContractionData *bcd) {
   return 0;
 }
 
+static void
+finishCharacterEntry_external (BrailleContractionData *bcd, CharacterEntry *entry) {
+}
+
 static const BrailleContractionMethods externalBrailleContractionMethods = {
-  .contractText = contractText_external
+  .contractText = contractText_external,
+  .finishCharacterEntry = finishCharacterEntry_external
 };
 
 const BrailleContractionMethods *

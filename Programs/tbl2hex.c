@@ -251,3 +251,15 @@ main (int argc, char *argv[]) {
 
   return exitStatus;
 }
+
+#include "ctb_internal.h"
+
+const BrailleContractionMethods *
+getBrailleContractionMethods_native (void) {
+  return NULL;
+}
+
+const BrailleContractionMethods *
+getBrailleContractionMethods_external (void) {
+  return NULL;
+}

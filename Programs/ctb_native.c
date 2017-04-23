@@ -525,94 +525,6 @@ setAlwaysRule (wchar_t character, void *data) {
   return 0;
 }
 
-CharacterEntry *
-getCharacterEntry (BrailleContractionData *bcd, wchar_t character) {
-  int first = 0;
-  int last = bcd->table->characters.count - 1;
-
-  while (first <= last) {
-    int current = (first + last) / 2;
-    CharacterEntry *entry = &bcd->table->characters.array[current];
-
-    if (entry->value < character) {
-      first = current + 1;
-    } else if (entry->value > character) {
-      last = current - 1;
-    } else {
-      return entry;
-    }
-  }
-
-  if (bcd->table->characters.count == bcd->table->characters.size) {
-    int newSize = bcd->table->characters.size;
-    newSize = newSize? newSize<<1: 0X80;
-
-    {
-      CharacterEntry *newArray = realloc(bcd->table->characters.array, (newSize * sizeof(*newArray)));
-
-      if (!newArray) {
-        logMallocError();
-        return NULL;
-      }
-
-      bcd->table->characters.array = newArray;
-      bcd->table->characters.size = newSize;
-    }
-  }
-
-  memmove(&bcd->table->characters.array[first+1],
-          &bcd->table->characters.array[first],
-          (bcd->table->characters.count - first) * sizeof(*bcd->table->characters.array));
-  bcd->table->characters.count += 1;
-
-  {
-    CharacterEntry *entry = &bcd->table->characters.array[first];
-    memset(entry, 0, sizeof(*entry));
-    entry->value = entry->uppercase = entry->lowercase = character;
-
-    if (iswspace(character)) {
-      entry->attributes |= CTC_Space;
-    } else if (iswalpha(character)) {
-      entry->attributes |= CTC_Letter;
-
-      if (iswupper(character)) {
-        entry->attributes |= CTC_UpperCase;
-        entry->lowercase = towlower(character);
-      }
-
-      if (iswlower(character)) {
-        entry->attributes |= CTC_LowerCase;
-        entry->uppercase = towupper(character);
-      }
-    } else if (iswdigit(character)) {
-      entry->attributes |= CTC_Digit;
-    } else if (iswpunct(character)) {
-      entry->attributes |= CTC_Punctuation;
-    }
-
-    if (!bcd->table->command) {
-      {
-        const ContractionTableCharacter *ctc = getContractionTableCharacter(bcd, character);
-
-        if (ctc) entry->attributes |= ctc->attributes;
-      }
-
-      {
-        SetAlwaysRuleData sar = {
-          .bcd = bcd,
-          .character = entry
-        };
-
-        if (!handleBestCharacter(character, setAlwaysRule, &sar)) {
-          entry->always = NULL;
-        }
-      }
-    }
-
-    return entry;
-  }
-}
-
 static const ContractionTableRule *
 getAlwaysRule (BrailleContractionData *bcd, wchar_t character) {
   const CharacterEntry *entry = getCharacterEntry(bcd, character);
@@ -1162,8 +1074,31 @@ done:
   return 1;
 }
 
+static void
+finishCharacterEntry_native (BrailleContractionData *bcd, CharacterEntry *entry) {
+  wchar_t character = entry->value;
+
+  {
+    const ContractionTableCharacter *ctc = getContractionTableCharacter(bcd, character);
+
+    if (ctc) entry->attributes |= ctc->attributes;
+  }
+
+  {
+    SetAlwaysRuleData sar = {
+      .bcd = bcd,
+      .character = entry
+    };
+
+    if (!handleBestCharacter(character, setAlwaysRule, &sar)) {
+      entry->always = NULL;
+    }
+  }
+}
+
 static const BrailleContractionMethods nativeBrailleContractionMethods = {
-  .contractText = contractText_native
+  .contractText = contractText_native,
+  .finishCharacterEntry = finishCharacterEntry_native
 };
 
 const BrailleContractionMethods *

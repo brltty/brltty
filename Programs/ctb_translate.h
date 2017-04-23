@@ -60,6 +60,7 @@ typedef struct {
 
 struct BrailleContractionMethodsStruct {
   int (*contractText) (BrailleContractionData *bcd);
+  void (*finishCharacterEntry) (BrailleContractionData *bcd, CharacterEntry *entry);
 };
 
 static inline unsigned int
