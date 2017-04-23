@@ -23,7 +23,7 @@
 #include "log.h"
 #include "io_generic.h"
 #include "gio_internal.h"
-#include "device.h"
+#include "parse.h"
 
 struct GioHandleStruct {
   int place_holder;
@@ -69,7 +69,7 @@ isNullSupported (const GioDescriptor *descriptor) {
 
 static int
 testNullIdentifier (const char **identifier) {
-  return isQualifiedDevice(identifier, "null");
+  return hasQualifier(identifier, "null");
 }
 
 static const GioOptions *

@@ -342,6 +342,31 @@ validateFloat (float *value, const char *string, const float *minimum, const flo
 }
 #endif /* NO_FLOAT */
 
+int
+hasQualifier (const char **identifier, const char *qualifier) {
+  const char *delimiter = strchr(*identifier, PARAMETER_QUALIFIER_CHARACTER);
+
+  if (delimiter) {
+    size_t count = delimiter - *identifier;
+
+    if (!qualifier) return 1;
+
+    if (count) {
+      if (strncasecmp(*identifier, qualifier, count) == 0) {
+        *identifier += count + 1;
+        return 1;
+      }
+    }
+  }
+
+  return 0;
+}
+
+int
+hasNoQualifier (const char *identifier) {
+  return !hasQualifier(&identifier, NULL);
+}
+
 static int
 parseParameters (
   char **values,

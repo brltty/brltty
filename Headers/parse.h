@@ -89,6 +89,9 @@ extern int validateFloat (float *value, const char *string, const float *minimum
 #define PARAMETER_ASSIGNMENT_CHARACTER '='
 #define PARAMETER_QUALIFIER_CHARACTER  ':'
 
+extern int hasQualifier (const char **identifier, const char *qualifier);
+extern int hasNoQualifier (const char *identifier);
+
 extern char **getParameters (const char *const *names, const char *qualifier, const char *parameters);
 extern void logParameters (const char *const *names, char **values, const char *description);
 

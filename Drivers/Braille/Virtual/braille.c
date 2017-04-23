@@ -57,7 +57,6 @@
 
 #include "log.h"
 #include "io_misc.h"
-#include "device.h"
 #include "parse.h"
 #include "async_wait.h"
 #include "charset.h"
@@ -958,7 +957,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   inputEnd = 0;
   outputLength = 0;
 
-  if (isQualifiedDevice(&device, "client")) {
+  if (hasQualifier(&device, "client")) {
     static const ModeEntry clientModeEntry = {
 #ifdef AF_LOCAL
       requestLocalConnection,
@@ -971,7 +970,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       requestInetConnection
     };
     mode = &clientModeEntry;
-  } else if (isQualifiedDevice(&device, "server")) {
+  } else if (hasQualifier(&device, "server")) {
     static const ModeEntry serverModeEntry = {
 #ifdef AF_LOCAL
       acceptLocalConnection,

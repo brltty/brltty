@@ -36,9 +36,6 @@ extern char *getDevicePath (const char *device);
 extern const char *resolveDeviceName (const char *const *names, const char *description);
 
 #define DEVICE_PARAMETER_SEPARATOR '+'
-
-extern int isQualifiedDevice (const char **identifier, const char *qualifier);
-extern int isUnqualifiedDevice (const char *identifier);
 extern char **getDeviceParameters (const char *const *names, const char *identifier);
 
 #undef ALLOW_DOS_DEVICE_NAMES

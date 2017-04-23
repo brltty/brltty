@@ -167,31 +167,6 @@ resolveDeviceName (const char *const *names, const char *description) {
   return device;
 }
 
-int
-isQualifiedDevice (const char **identifier, const char *qualifier) {
-  const char *delimiter = strchr(*identifier, PARAMETER_QUALIFIER_CHARACTER);
-
-  if (delimiter) {
-    size_t count = delimiter - *identifier;
-
-    if (!qualifier) return 1;
-
-    if (count) {
-      if (strncasecmp(*identifier, qualifier, count) == 0) {
-        *identifier += count + 1;
-        return 1;
-      }
-    }
-  }
-
-  return 0;
-}
-
-int
-isUnqualifiedDevice (const char *identifier) {
-  return !isQualifiedDevice(&identifier, NULL);
-}
-
 char **
 getDeviceParameters (const char *const *names, const char *identifier) {
   char parameters[strlen(names[0]) + 1 + strlen(identifier) + 1];

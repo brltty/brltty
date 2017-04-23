@@ -871,7 +871,7 @@ isSerialDeviceIdentifier (const char **identifier) {
   if (isDosDevice(*identifier, "COM")) return 1;
 #endif /* ALLOW_DOS_DEVICE_NAMES */
 
-  if (isQualifiedDevice(identifier, "serial")) return 1;
-  if (isUnqualifiedDevice(*identifier)) return 1;
+  if (hasQualifier(identifier, "serial")) return 1;
+  if (hasNoQualifier(*identifier)) return 1;
   return 0;
 }
