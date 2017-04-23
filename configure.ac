@@ -1087,7 +1087,7 @@ BRLTTY_ARG_DISABLE(
 [dnl
    AC_DEFINE([ENABLE_CONTRACTED_BRAILLE], [1],
              [Define this to include contraction table support.])
-   contracted_braille_objects='ctb_compile.$O ctb_translate.$O'
+   contracted_braille_objects='ctb_compile.$O ctb_translate.$O ctb_native.$O ctb_external.$O'
    install_contraction_tables=install-contraction-tables
 
    louis_includes=""

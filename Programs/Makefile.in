@@ -507,10 +507,16 @@ ctb_compile.$O:
 ctb_translate.$O:
 	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ctb_translate.c
 
+ctb_native.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ctb_native.c
+
+ctb_external.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ctb_external.c
+
 ctb_louis.$O:
 	$(CC) $(LIBCFLAGS) $(LOUIS_INCLUDES) -c $(SRC_DIR)/ctb_louis.c
 
-BRLTTY_CTB_OBJECTS = brltty-ctb.$O $(PROGRAM_OBJECTS) $(PREFS_OBJECTS) dataarea.$O $(TTB_OBJECTS) ctb_compile.$O ctb_translate.$O
+BRLTTY_CTB_OBJECTS = brltty-ctb.$O $(PROGRAM_OBJECTS) $(PREFS_OBJECTS) dataarea.$O $(TTB_OBJECTS) $(CTB_OBJECTS)
 
 brltty-ctb$X: $(BRLTTY_CTB_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_CTB_OBJECTS) $(LDLIBS)

@@ -18,6 +18,8 @@
 
 #include "prologue.h"
 
+#include "ctb_translate.h"
+
 #ifdef LOUIS_TABLES_DIRECTORY
 #include <liblouis.h>
 #endif /* LOUIS_TABLES_DIRECTORY */
