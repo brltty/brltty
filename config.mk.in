@@ -106,6 +106,9 @@ POLKIT_PACKAGE = @polkit_package@
 POLKIT_INCLUDES = @polkit_includes@
 POLKIT_LIBS = @polkit_libs@
 
+LOU_INCLUDES = @lou_includes@
+LOU_LIBS = @lou_libs@
+
 ICU_INCLUDES = @icu_includes@
 ICU_LIBS = @icu_libs@
 
@@ -248,7 +251,7 @@ LIBCXXFLAGS = $(CXXFLAGS) @LIBCXXFLAGS@
 
 LD = @LD@
 LDFLAGS = @LDFLAGS@
-LDLIBS = $(ICU_LIBS) $(POLKIT_LIBS) $(SYSTEM_LIBS) @LIBS@
+LDLIBS = $(ICU_LIBS) $(SYSTEM_LIBS) @LIBS@
 
 MKOBJ = @MKOBJ@
 MKMOD = @MKMOD@

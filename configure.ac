@@ -1089,6 +1089,26 @@ BRLTTY_ARG_DISABLE(
              [Define this to include contraction table support.])
    contracted_braille_objects='ctb_compile.$O ctb_translate.$O'
    install_contraction_tables=install-contraction-tables
+
+   lou_includes=""
+   lou_libs=""
+   BRLTTY_ARG_DISABLE(
+      [liblouis],
+      [support for LibLouis-based contracted braille],
+      [],
+   [dnl
+      BRLTTY_HAVE_PACKAGE([lou], [liblouis], [dnl
+         liblouisTablesDirectory=`${PKG_CONFIG} --variable=tablesdir liblouis`
+         if test -n "${liblouisTablesDirectory}"
+         then
+            AC_DEFINE_UNQUOTED([LIBLOUIS_TABLES_DIRECTORY], ["${liblouisTablesDirectory}"],
+                               [Define this to be a string containing the path to the LibLouis tables directory.])
+            contracted_braille_objects="${contracted_braille_objects} ctb_liblouis.\$O"
+         fi
+      ])
+   ])
+   AC_SUBST([lou_includes])
+   AC_SUBST([lou_libs])
 ])
 AC_SUBST([contracted_braille_objects])
 AC_SUBST([install_contraction_tables])
