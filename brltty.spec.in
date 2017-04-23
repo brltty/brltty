@@ -51,6 +51,7 @@ BuildRequires: /usr/bin/awk
 BuildRequires: tcl
 BuildRequires: glibc-devel
 BuildRequires: libicu-devel
+BuildRequires: liblouis-devel
 BuildRequires: ncurses-devel
 BuildRequires: alsa-lib-devel
 BuildRequires: bluez-libs-devel
@@ -494,7 +495,7 @@ make
 
 %install
 make install install-documents install-messages
-make install-systemd install-udev
+make install-systemd install-udev install-appstream
 install -m 644 Documents/brltty.conf "${RPM_BUILD_ROOT}%{_sysconfdir}"
 %find_lang %{name}
 
