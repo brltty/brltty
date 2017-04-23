@@ -253,7 +253,6 @@ contractText (
     int contracted;
 
     {
-      int (*const contract) (BrailleContractionData *bcd) = bcd.table->command? contractText_external: contractText_native;
       const size_t size = getInputCount(&bcd);
       wchar_t buffer[size];
       unsigned int map[size + 1];
@@ -281,7 +280,7 @@ contractText (
           }
         }
 
-        contracted = contract(&bcd);
+        contracted = contractionTable->methods->contractText(&bcd);
 
         if (bcd.input.offsets) {
           size_t mapIndex = length;
@@ -304,7 +303,7 @@ contractText (
         bcd.input.current = bcd.input.begin + map[bcd.input.current - buffer];
         bcd.input.end = oldEnd;
       } else {
-        contracted = contract(&bcd);
+        contracted = contractionTable->methods->contractText(&bcd);
       }
     }
 

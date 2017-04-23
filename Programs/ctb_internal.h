@@ -119,7 +119,15 @@ typedef struct {
   const ContractionTableRule *always;
 } CharacterEntry;
 
+typedef struct BrailleContractionMethodsStruct BrailleContractionMethods;
+
+typedef const BrailleContractionMethods *GetBrailleContractionMethodsFunction (void);
+extern GetBrailleContractionMethodsFunction getBrailleContractionMethods_native;
+extern GetBrailleContractionMethodsFunction getBrailleContractionMethods_external;
+
 struct ContractionTableStruct {
+  const BrailleContractionMethods *methods;
+
   struct {
     CharacterEntry *array;
     int size;

@@ -329,7 +329,7 @@ getExternalResponses (BrailleContractionData *bcd) {
   return 0;
 }
 
-int
+static int
 contractText_external (BrailleContractionData *bcd) {
   setOffset(bcd);
   while (++bcd->input.current < bcd->input.end) clearOffset(bcd);
@@ -344,4 +344,13 @@ contractText_external (BrailleContractionData *bcd) {
 
   stopContractionCommand(bcd->table);
   return 0;
+}
+
+static const BrailleContractionMethods externalBrailleContractionMethods = {
+  .contractText = contractText_external
+};
+
+const BrailleContractionMethods *
+getBrailleContractionMethods_external (void) {
+  return &externalBrailleContractionMethods;
 }

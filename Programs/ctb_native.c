@@ -951,7 +951,7 @@ putSequence (BrailleContractionData *bcd, ContractionTableOffset offset) {
   return putCells(bcd, sequence+1, *sequence);
 }
 
-int
+static int
 contractText_native (BrailleContractionData *bcd) {
   const wchar_t *srcword = NULL;
   BYTE *destword = NULL;
@@ -1160,4 +1160,13 @@ done:
   }
 
   return 1;
+}
+
+static const BrailleContractionMethods nativeBrailleContractionMethods = {
+  .contractText = contractText_native
+};
+
+const BrailleContractionMethods *
+getBrailleContractionMethods_native (void) {
+  return &nativeBrailleContractionMethods;
 }

@@ -562,7 +562,12 @@ stopContractionCommand (ContractionTable *table) {
 }
 
 static void
-initializeCommonFields (ContractionTable *table) {
+initializeCommonFields (
+  ContractionTable *table,
+  const BrailleContractionMethods *methods
+) {
+  table->methods = methods;
+
   table->characters.array = NULL;
   table->characters.size = 0;
   table->characters.count = 0;
@@ -589,7 +594,7 @@ compileContractionTable (const char *fileName) {
       memset(table, 0, sizeof(*table));
 
       if ((table->command = strdup(fileName))) {
-        initializeCommonFields(table);
+        initializeCommonFields(table, getBrailleContractionMethods_external());
         table->data.external.commandStarted = 0;
 
         table->data.external.input.buffer = NULL;
@@ -641,7 +646,7 @@ compileContractionTable (const char *fileName) {
           if (processDataFile(fileName, &parameters)) {
             if (saveCharacterTable(&ctd)) {
               if ((table = malloc(sizeof(*table)))) {
-                initializeCommonFields(table);
+                initializeCommonFields(table, getBrailleContractionMethods_native());
                 table->command = NULL;
 
                 table->data.internal.header.fields = getContractionTableHeader(&ctd);

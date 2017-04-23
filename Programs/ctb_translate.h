@@ -58,6 +58,10 @@ typedef struct {
   } previous;
 } BrailleContractionData;
 
+struct BrailleContractionMethodsStruct {
+  int (*contractText) (BrailleContractionData *bcd);
+};
+
 static inline unsigned int
 getInputCount (BrailleContractionData *bcd) {
   return bcd->input.end - bcd->input.begin;
@@ -135,10 +139,6 @@ static inline int
 testAfter (BrailleContractionData *bcd, ContractionTableCharacterAttributes attributes) {
   return testCharacter(bcd, bcd->current.after, attributes);
 }
-
-typedef int ContractTextFunction (BrailleContractionData *bcd);
-extern ContractTextFunction contractText_native;
-extern ContractTextFunction contractText_external;
 
 #ifdef __cplusplus
 }
