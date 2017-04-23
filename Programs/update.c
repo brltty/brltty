@@ -321,6 +321,7 @@ saveScreenCharacters (
       return 0;
     }
 
+    if (*buffer) free(*buffer);
     *buffer = newBuffer;
     *size = newSize;
   }
