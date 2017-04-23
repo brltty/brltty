@@ -151,7 +151,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   short ModelID = MODEL;
   unsigned char buffer[DIM_BRL_ID + 6];
 
-  if (!isSerialDevice(&device)) {
+  if (!isSerialDeviceIdentifier(&device)) {
     unsupportedDevice(device);
     return 0;
   }

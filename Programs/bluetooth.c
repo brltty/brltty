@@ -636,6 +636,6 @@ bthGetDriverCodes (const char *identifier, int timeout) {
 }
 
 int
-isBluetoothDevice (const char **identifier) {
+isBluetoothDeviceIdentifier (const char **identifier) {
   return isQualifiedDevice(identifier, "bluetooth");
 }

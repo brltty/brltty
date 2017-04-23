@@ -79,7 +79,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       serialBaud = baudTable[0];
   }
 
-  if (!isSerialDevice(&device)) {
+  if (!isSerialDeviceIdentifier(&device)) {
     unsupportedDevice(device);
     return 0;
   }

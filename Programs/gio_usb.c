@@ -289,7 +289,7 @@ isUsbSupported (const GioDescriptor *descriptor) {
 
 static int
 testUsbIdentifier (const char **identifier) {
-  return isUsbDevice(identifier);
+  return isUsbDeviceIdentifier(identifier);
 }
 
 static const GioOptions *

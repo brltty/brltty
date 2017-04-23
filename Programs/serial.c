@@ -866,7 +866,7 @@ serialGetStream (SerialDevice *serial) {
 }
 
 int
-isSerialDevice (const char **identifier) {
+isSerialDeviceIdentifier (const char **identifier) {
 #ifdef ALLOW_DOS_DEVICE_NAMES
   if (isDosDevice(*identifier, "COM")) return 1;
 #endif /* ALLOW_DOS_DEVICE_NAMES */

@@ -113,7 +113,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   const char *characterSet = getLocaleCharset();
 #endif /* HAVE_ICONV_H */
 
-  if (!isSerialDevice(&device)) {
+  if (!isSerialDeviceIdentifier(&device)) {
     unsupportedDevice(device);
     return 0;
   }

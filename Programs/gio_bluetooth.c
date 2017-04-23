@@ -92,7 +92,7 @@ isBluetoothSupported (const GioDescriptor *descriptor) {
 
 static int
 testBluetoothIdentifier (const char **identifier) {
-  return isBluetoothDevice(identifier);
+  return isBluetoothDeviceIdentifier(identifier);
 }
 
 static const GioOptions *

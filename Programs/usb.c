@@ -1640,6 +1640,6 @@ usbCloseChannel (UsbChannel *channel) {
 }
 
 int
-isUsbDevice (const char **identifier) {
+isUsbDeviceIdentifier (const char **identifier) {
   return isQualifiedDevice(identifier, "usb");
 }

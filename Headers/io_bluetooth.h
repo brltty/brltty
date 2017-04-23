@@ -58,7 +58,7 @@ extern ssize_t bthReadData (
 
 extern ssize_t bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size);
 
-extern int isBluetoothDevice (const char **identifier);
+extern int isBluetoothDeviceIdentifier (const char **identifier);
 
 #ifdef __cplusplus
 }

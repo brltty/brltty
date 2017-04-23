@@ -95,7 +95,7 @@ isSerialSupported (const GioDescriptor *descriptor) {
 
 static int
 testSerialIdentifier (const char **identifier) {
-  return isSerialDevice(identifier);
+  return isSerialDeviceIdentifier(identifier);
 }
 
 static const GioOptions *

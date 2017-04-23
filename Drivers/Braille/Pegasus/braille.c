@@ -473,9 +473,9 @@ static const InputOutputOperations usbOperations = {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  if (isSerialDevice(&device)) {
+  if (isSerialDeviceIdentifier(&device)) {
     io = &serialOperations;
-  } else if (isUsbDevice(&device)) {
+  } else if (isUsbDeviceIdentifier(&device)) {
     io = &usbOperations;
   } else {
     unsupportedDevice(device);

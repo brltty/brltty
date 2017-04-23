@@ -339,7 +339,7 @@ resetInputMode (void) {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  if (!isSerialDevice(&device)) {
+  if (!isSerialDeviceIdentifier(&device)) {
     unsupportedDevice(device);
     return 0;
   }

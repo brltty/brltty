@@ -294,7 +294,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
       logMessage(LOG_WARNING, "%s: %s", "invalid keyboard emulation setting", parameters[PARM_KBEMU]);
   kbemu = !!kbemu;
 
-  if (!isSerialDevice(&device)) {
+  if (!isSerialDeviceIdentifier(&device)) {
     unsupportedDevice(device);
     return 0;
   }

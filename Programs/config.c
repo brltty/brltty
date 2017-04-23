@@ -1508,19 +1508,19 @@ activateBrailleDriver (int verify) {
     {
       const char *dev = brailleDevice;
 
-      if (isSerialDevice(&dev)) {
+      if (isSerialDeviceIdentifier(&dev)) {
         static const char *const serialDrivers[] = {
           "md", "pm", "ts", "ht", "bn", "al", "bm", "pg", "sk",
           NULL
         };
         autodetectableDrivers = serialDrivers;
-      } else if (isUsbDevice(&dev)) {
+      } else if (isUsbDeviceIdentifier(&dev)) {
         static const char *const usbDrivers[] = {
           "al", "bm", "bn", "eu", "fs", "hd", "hm", "ht", "hw", "mt", "pg", "pm", "sk", "vo",
           NULL
         };
         autodetectableDrivers = usbDrivers;
-      } else if (isBluetoothDevice(&dev)) {
+      } else if (isBluetoothDeviceIdentifier(&dev)) {
         if (!(autodetectableDrivers = bthGetDriverCodes(dev, BLUETOOTH_DEVICE_NAME_OBTAIN_TIMEOUT))) {
           static const char *bluetoothDrivers[] = {
             "np", "ht", "al", "bm",
