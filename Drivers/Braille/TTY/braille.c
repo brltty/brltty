@@ -114,7 +114,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 #endif /* HAVE_ICONV_H */
 
   if (!isSerialDeviceIdentifier(&device)) {
-    unsupportedDevice(device);
+    unsupportedDeviceIdentifier(device);
     return 0;
   }
 

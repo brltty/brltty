@@ -200,7 +200,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   }
 
   if (!isSerialDeviceIdentifier(&device)) {
-    unsupportedDevice(device);
+    unsupportedDeviceIdentifier(device);
     return 0;
   }
   if (!(serialDevice = serialOpenDevice(device))) return 0;

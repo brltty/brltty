@@ -444,7 +444,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   } else if (isUsbDeviceIdentifier(&device)) {
     io = &usbOperations;
   } else {
-    unsupportedDevice(device);
+    unsupportedDeviceIdentifier(device);
     return 0;
   }
 

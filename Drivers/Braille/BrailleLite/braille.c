@@ -295,7 +295,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
   kbemu = !!kbemu;
 
   if (!isSerialDeviceIdentifier(&device)) {
-    unsupportedDevice(device);
+    unsupportedDeviceIdentifier(device);
     return 0;
   }
 

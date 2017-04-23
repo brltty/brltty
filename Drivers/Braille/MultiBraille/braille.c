@@ -99,7 +99,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 	TimePeriod period;
 
 	if (!isSerialDeviceIdentifier(&device)) {
-		unsupportedDevice(device);
+		unsupportedDeviceIdentifier(device);
 		return 0;
 	}
 

@@ -172,7 +172,7 @@ setTable (BrailleDisplay *brl, int table) {
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if (!isSerialDeviceIdentifier(&device)) {
-    unsupportedDevice(device);
+    unsupportedDeviceIdentifier(device);
     return 0;
   }
 

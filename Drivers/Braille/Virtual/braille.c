@@ -985,7 +985,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     };
     mode = &serverModeEntry;
   } else {
-    unsupportedDevice(device);
+    unsupportedDeviceIdentifier(device);
     goto failed;
   }
   if (!*device) device = VR_DEFAULT_SOCKET;

@@ -22,8 +22,8 @@
 #include "driver.h"
 
 void
-unsupportedDevice (const char *identifier) {
-  logMessage(LOG_WARNING, "unsupported device: %s", identifier);
+unsupportedDeviceIdentifier (const char *identifier) {
+  logMessage(LOG_WARNING, "unsupported device identifier: %s", identifier);
 }
 
 void
