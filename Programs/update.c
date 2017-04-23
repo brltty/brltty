@@ -331,7 +331,7 @@ saveScreenCharacters (
 }
 
 static void
-trackScreenScroll (void) {
+checkScreenScroll (int track) {
   static int oldScreen = -1;
   static int oldY = -1;
   static int oldWidth = 0;
@@ -344,7 +344,7 @@ trackScreenScroll (void) {
 
   readScreenRow(ses->winy, newWidth, newCharacters);
 
-  if (prefs.trackScreenScroll && oldCharacters &&
+  if (track && prefs.trackScreenScroll && oldCharacters &&
       (newScreen == oldScreen) && (newWidth == oldWidth) &&
       (ses->winy == oldY)) {
     int newY = ses->winy;
@@ -632,8 +632,6 @@ writeBrailleWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static void
 doUpdate (void) {
-  int screenPointerMoved = 0;
-
   logMessage(LOG_CATEGORY(UPDATE_EVENTS), "starting");
   unrequireAllBlinkDescriptors();
   refreshScreen();
@@ -672,6 +670,9 @@ doUpdate (void) {
     }
   }
 
+  int screenPointerHasMoved = 0;
+  int trackScreenScroll = 0;
+
   if (ses->trackScreenCursor) {
 #ifdef ENABLE_SPEECH_SUPPORT
     if (!spk.track.isActive)
@@ -704,15 +705,17 @@ doUpdate (void) {
           ses->spkx = ses->trkx = scr.posx;
           ses->spky = ses->trky = scr.posy;
         } else if (checkScreenPointer()) {
-          screenPointerMoved = 1;
+          screenPointerHasMoved = 1;
         } else {
-          trackScreenScroll();
+          trackScreenScroll = 1;
         }
       }
     }
   } else {
-    trackScreenScroll();
+    trackScreenScroll = 1;
   }
+
+  checkScreenScroll(trackScreenScroll);
 
 #ifdef ENABLE_SPEECH_SUPPORT
   if (spk.canAutospeak) {
@@ -730,7 +733,7 @@ doUpdate (void) {
 
   /* There are a few things to take care of if the display has moved. */
   if ((ses->winx != oldwinx) || (ses->winy != oldwiny)) {
-    if (!screenPointerMoved) highlightBrailleWindowLocation();
+    if (!screenPointerHasMoved) highlightBrailleWindowLocation();
 
     /* Attributes are blinking.
      * We could check to see if we changed screen, but that doesn't
