@@ -18,13 +18,73 @@
 
 #include "prologue.h"
 
+#include "log.h"
 #include "ctb_translate.h"
 
 #include <liblouis.h>
 
+static void
+initialize (void) {
+  static unsigned char initialized = 0;
+
+  if (!initialized) {
+    int logLevel = LOG_INFO;
+
+    logMessage(logLevel, "LibLouis version: %s", lou_version());
+    logMessage(logLevel, "LibLouis Data Directory: %s", lou_getDataPath());
+    logMessage(logLevel, "LibLouis Character Size: %d", lou_charSize());
+
+    initialized = 1;
+  }
+}
+
 static int
 contractText_louis (BrailleContractionData *bcd) {
-  return 0;
+  initialize();
+
+  int inputLength = getInputCount(bcd);
+  widechar inputBuffer[inputLength];
+
+  {
+    const wchar_t *source = bcd->input.begin;
+    widechar *target = inputBuffer;
+
+    while (source < bcd->input.end) {
+      *target++ = *source++;
+    }
+  }
+
+  int outputLength = getOutputCount(bcd);
+  widechar outputBuffer[outputLength];
+
+  char *typeForm = NULL;
+  char *spacing = NULL;
+  int *outputOffsets = NULL;
+  int *inputOffsets = NULL;
+  int *cursor = NULL;
+  int mode = dotsIO | ucBrl;
+
+  int translated = lou_translate(
+    bcd->table->data.louis.tableList,
+    inputBuffer, &inputLength, outputBuffer, &outputLength,
+    typeForm, spacing, outputOffsets, inputOffsets, cursor, mode
+  );
+
+  if (translated) {
+    bcd->input.current = bcd->input.begin + inputLength;
+    bcd->output.current = bcd->output.begin + outputLength;
+
+    {
+      const widechar *source = outputBuffer;
+      BYTE *target = bcd->output.begin;
+
+      while (target < bcd->output.current) {
+        *target++ = *source++ & 0XFF;
+      }
+    }
+  }
+
+  return translated;
 }
 
 static void

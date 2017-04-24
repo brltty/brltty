@@ -519,7 +519,7 @@ ctb_louis.$O:
 BRLTTY_CTB_OBJECTS = brltty-ctb.$O $(PROGRAM_OBJECTS) $(PREFS_OBJECTS) dataarea.$O $(TTB_OBJECTS) $(CTB_OBJECTS)
 
 brltty-ctb$X: $(BRLTTY_CTB_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_CTB_OBJECTS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_CTB_OBJECTS) $(LOUIS_LIBS) $(LDLIBS)
 
 brltty-ctb.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-ctb.c
