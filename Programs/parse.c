@@ -345,31 +345,18 @@ validateFloat (float *value, const char *string, const float *minimum, const flo
 int
 hasQualifier (const char **identifier, const char *qualifier) {
   const char *delimiter = strchr(*identifier, PARAMETER_QUALIFIER_CHARACTER);
+  if (!delimiter) return 0;
 
-  {
-    const char *limit = strchr(*identifier, FILE_PATH_DELIMITER);
-    if (limit && (delimiter > limit)) return 0;
+  size_t count = delimiter - *identifier;
+  if (memchr(*identifier, FILE_PATH_DELIMITER, count)) return 0;
+
+  if (qualifier) {
+    if (count != strlen(qualifier)) return 0;
+    if (strncasecmp(*identifier, qualifier, count) != 0) return 0;
   }
 
-  if (delimiter) {
-    size_t count = delimiter - *identifier;
-    int found = 0;
-
-    if (!qualifier) {
-      found = 1;
-    } else if (count) {
-      if (strncasecmp(*identifier, qualifier, count) == 0) {
-        found = 1;
-      }
-    }
-
-    if (found) {
-      *identifier += count + 1;
-      return 1;
-    }
-  }
-
-  return 0;
+  *identifier += count + 1;
+  return 1;
 }
 
 int
