@@ -20,6 +20,23 @@
 
 #include "ctb_translate.h"
 
-#ifdef LOUIS_TABLES_DIRECTORY
 #include <liblouis.h>
-#endif /* LOUIS_TABLES_DIRECTORY */
+
+static int
+contractText_louis (BrailleContractionData *bcd) {
+  return 0;
+}
+
+static void
+finishCharacterEntry_louis (BrailleContractionData *bcd, CharacterEntry *entry) {
+}
+
+static const ContractionTableTranslationMethods louisTranslationMethods = {
+  .contractText = contractText_louis,
+  .finishCharacterEntry = finishCharacterEntry_louis
+};
+
+const ContractionTableTranslationMethods *
+getContractionTableTranslationMethods_louis (void) {
+  return &louisTranslationMethods;
+}

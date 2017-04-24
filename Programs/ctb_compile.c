@@ -23,6 +23,7 @@
 #include <errno.h>
  
 #include "log.h"
+#include "parse.h"
 #include "file.h"
 #include "ctb.h"
 #include "ctb_internal.h"
@@ -723,16 +724,55 @@ compileContractionTable_external (const char *fileName) {
   return NULL;
 }
 
-typedef ContractionTable *CompileContractionTableFunction (const char *fileName);
+static void
+destroyContractionTable_louis (ContractionTable *table) {
+  destroyCommonFields(table);
+}
+
+static const ContractionTableManagementMethods louisManagementMethods = {
+  .destroy = destroyContractionTable_louis
+};
+
+static ContractionTable *
+compileContractionTable_louis (const char *fileName) {
+  return NULL;
+}
+
+typedef ContractionTable *ContractionTableCompileFunction (const char *fileName);
+
+typedef struct {
+  const char *qualifier;
+  ContractionTableCompileFunction *compile;
+} ContractionTableQualifierEntry;
+
+static const ContractionTableQualifierEntry contractionTableQualifierTable[] = {
+  { .qualifier = "louis",
+    .compile = &compileContractionTable_louis
+  },
+
+  { .qualifier = NULL }
+};
 
 ContractionTable *
 compileContractionTable (const char *fileName) {
-  CompileContractionTableFunction *compile;
+  ContractionTableCompileFunction *compile = NULL;
+  const ContractionTableQualifierEntry *entry = contractionTableQualifierTable;
 
-  if (testProgramPath(fileName)) {
-    compile = &compileContractionTable_external;
-  } else {
-    compile = &compileContractionTable_native;
+  while (entry) {
+    if (hasQualifier(&fileName, entry->qualifier)) {
+      compile = entry->compile;
+      break;
+    }
+
+    entry += 1;
+  }
+
+  if (!compile) {
+    if (testProgramPath(fileName)) {
+      compile = &compileContractionTable_external;
+    } else {
+      compile = &compileContractionTable_native;
+    }
   }
 
   return compile(fileName);
