@@ -42,7 +42,7 @@
 
 int
 isPathDelimiter (const char character) {
-  return character == '/';
+  return character == FILE_PATH_DELIMITER;
 }
 
 int

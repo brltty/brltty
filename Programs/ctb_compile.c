@@ -679,10 +679,11 @@ stopContractionCommand (ContractionTable *table) {
 
 static void
 destroyContractionTable_external (ContractionTable *table) {
-  destroyCommonFields(table);
   stopContractionCommand(table);
   if (table->data.external.input.buffer) free(table->data.external.input.buffer);
   free(table->data.external.command);
+
+  destroyCommonFields(table);
   free(table);
 }
 
@@ -727,8 +728,9 @@ compileContractionTable_external (const char *fileName) {
 #ifdef LOUIS_TABLES_DIRECTORY
 static void
 destroyContractionTable_louis (ContractionTable *table) {
-  destroyCommonFields(table);
   free(table->data.louis.tableList);
+
+  destroyCommonFields(table);
   free(table);
 }
 
@@ -779,21 +781,26 @@ static const ContractionTableQualifierEntry contractionTableQualifierTable[] = {
   { .qualifier = NULL }
 };
 
-ContractionTable *
-compileContractionTable (const char *fileName) {
-  ContractionTableCompileFunction *compile = NULL;
+const ContractionTableQualifierEntry *
+getContractionTableQualifierEntry (const char **fileName) {
   const ContractionTableQualifierEntry *entry = contractionTableQualifierTable;
 
-  while (entry) {
-    if (hasQualifier(&fileName, entry->qualifier)) {
-      compile = entry->compile;
-      break;
-    }
-
+  while (entry->qualifier) {
+    if (hasQualifier(fileName, entry->qualifier)) return entry;
     entry += 1;
   }
 
-  if (!compile) {
+  return NULL;
+}
+
+ContractionTable *
+compileContractionTable (const char *fileName) {
+  ContractionTableCompileFunction *compile = NULL;
+  const ContractionTableQualifierEntry *entry = getContractionTableQualifierEntry(&fileName);
+
+  if (entry) {
+    compile = entry->compile;
+  } else {
     if (!hasNoQualifier(fileName)) {
       logMessage(LOG_ERR, "unsupported contraction table: %s", fileName);
       return NULL;

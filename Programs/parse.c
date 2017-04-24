@@ -346,16 +346,26 @@ int
 hasQualifier (const char **identifier, const char *qualifier) {
   const char *delimiter = strchr(*identifier, PARAMETER_QUALIFIER_CHARACTER);
 
+  {
+    const char *limit = strchr(*identifier, FILE_PATH_DELIMITER);
+    if (limit && (delimiter > limit)) return 0;
+  }
+
   if (delimiter) {
     size_t count = delimiter - *identifier;
+    int found = 0;
 
-    if (!qualifier) return 1;
-
-    if (count) {
+    if (!qualifier) {
+      found = 1;
+    } else if (count) {
       if (strncasecmp(*identifier, qualifier, count) == 0) {
-        *identifier += count + 1;
-        return 1;
+        found = 1;
       }
+    }
+
+    if (found) {
+      *identifier += count + 1;
+      return 1;
     }
   }
 

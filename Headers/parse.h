@@ -85,6 +85,7 @@ extern int isFloat (float *value, const char *string);
 extern int validateFloat (float *value, const char *string, const float *minimum, const float *maximum);
 #endif /* NO_FLOAT */
 
+#define FILE_PATH_DELIMITER  '/'
 #define PARAMETER_SEPARATOR_CHARACTER  ','
 #define PARAMETER_ASSIGNMENT_CHARACTER '='
 #define PARAMETER_QUALIFIER_CHARACTER  ':'
