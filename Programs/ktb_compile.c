@@ -1032,7 +1032,7 @@ static DATA_OPERANDS_PROCESSOR(processIfNotKeyOperands) {
 }
 
 static DATA_CONDITION_TESTER(testPlatformName) {
-  const wchar_t *const platforms[] = {
+  static const wchar_t *const platforms[] = {
 #ifdef __ANDROID__
     WS_C("android"),
 #endif /* __ANDROID__ */
@@ -1067,7 +1067,12 @@ static DATA_CONDITION_TESTER(testPlatformName) {
   const wchar_t *const *platform = platforms;
 
   while (*platform) {
-    if (wcsncmp(*platform, identifier->characters, identifier->length) == 0) return 1;
+    if (identifier->length == wcslen(*platform)) {
+      if (wcsncmp(*platform, identifier->characters, identifier->length) == 0) {
+        return 1;
+      }
+    }
+
     platform += 1;
   }
 
