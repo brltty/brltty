@@ -20,6 +20,7 @@
 
 #include "log.h"
 #include "ctb_translate.h"
+#include "prefs.h"
 
 #include <liblouis.h>
 
@@ -61,8 +62,17 @@ contractText_louis (BrailleContractionData *bcd) {
 
   char *typeForm = NULL;
   char *spacing = NULL;
+
   int *cursor = NULL;
+  int position;
+
+  if (bcd->input.cursor) {
+    position = bcd->input.cursor - bcd->input.begin;
+    if ((position >= 0) && (position < inputLength)) cursor = &position;
+  }
+
   int translationMode = dotsIO | ucBrl;
+  if (prefs.expandCurrentWord) translationMode |= compbrlAtCursor;
 
   int translated = lou_translate(
     bcd->table->data.louis.tableList,
