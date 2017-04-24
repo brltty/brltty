@@ -529,6 +529,123 @@ static DATA_OPERANDS_PROCESSOR(processContractionTableOperands) {
   return processDirectiveOperand(file, &directives, "contraction table directive", data);
 }
 
+static void
+initializeCommonFields (ContractionTable *table) {
+  table->characters.array = NULL;
+  table->characters.size = 0;
+  table->characters.count = 0;
+
+  table->cache.input.characters = NULL;
+  table->cache.input.size = 0;
+  table->cache.input.count = 0;
+
+  table->cache.output.cells = NULL;
+  table->cache.output.size = 0;
+  table->cache.output.count = 0;
+
+  table->cache.offsets.array = NULL;
+  table->cache.offsets.size = 0;
+  table->cache.offsets.count = 0;
+}
+
+static void
+destroyCommonFields (ContractionTable *table) {
+  if (table->characters.array) {
+    free(table->characters.array);
+    table->characters.array = NULL;
+  }
+
+  if (table->cache.input.characters) {
+    free(table->cache.input.characters);
+    table->cache.input.characters = NULL;
+  }
+
+  if (table->cache.output.cells) {
+    free(table->cache.output.cells);
+    table->cache.output.cells = NULL;
+  }
+
+  if (table->cache.offsets.array) {
+    free(table->cache.offsets.array);
+    table->cache.offsets.array = NULL;
+  }
+}
+
+static void
+destroyContractionTable_native (ContractionTable *table) {
+  destroyCommonFields(table);
+
+  if (table->data.internal.size) {
+    free(table->data.internal.header.fields);
+    free(table);
+  }
+}
+
+static const ContractionTableMethods nativeContractionTableMethods = {
+  .destroy = destroyContractionTable_native
+};
+
+static ContractionTable *
+compileContractionTable_native (const char *fileName) {
+  ContractionTable *table = NULL;
+
+  if (setTableDataVariables(CONTRACTION_TABLE_EXTENSION, CONTRACTION_SUBTABLE_EXTENSION)) {
+    ContractionTableData ctd;
+    memset(&ctd, 0, sizeof(ctd));
+
+    ctd.characterTable = NULL;
+    ctd.characterTableSize = 0;
+    ctd.characterEntryCount = 0;
+
+    ctd.characterClasses = NULL;
+    ctd.characterClassAttribute = 1;
+
+    {
+      ContractionTableOpcode opcode;
+
+      for (opcode=0; opcode<CTO_None; opcode+=1)
+        ctd.opcodeNameLengths[opcode] = wcslen(opcodeNames[opcode]);
+    }
+
+    if ((ctd.area = newDataArea())) {
+      if (allocateDataItem(ctd.area, NULL, sizeof(ContractionTableHeader), __alignof__(ContractionTableHeader))) {
+        if (allocateCharacterClasses(&ctd)) {
+          const DataFileParameters parameters = {
+            .processOperands = processContractionTableOperands,
+            .data = &ctd
+          };
+
+          if (processDataFile(fileName, &parameters)) {
+            if (saveCharacterTable(&ctd)) {
+              if ((table = malloc(sizeof(*table)))) {
+                table->tableMethods = &nativeContractionTableMethods;
+                table->contractionMethods = getBrailleContractionMethods_native();
+                initializeCommonFields(table);
+
+                table->command = NULL;
+
+                table->data.internal.header.fields = getContractionTableHeader(&ctd);
+                table->data.internal.size = getDataSize(ctd.area);
+                resetDataArea(ctd.area);
+              } else {
+                logMallocError();
+              }
+            }
+          }
+
+          deallocateCharacterClasses(&ctd);
+        }
+      }
+
+      destroyDataArea(ctd.area);
+    }
+
+    if (ctd.characterTable) free(ctd.characterTable);
+  }
+
+  return table;
+}
+
 int
 startContractionCommand (ContractionTable *table) {
   if (!table->data.external.commandStarted) {
@@ -562,148 +679,70 @@ stopContractionCommand (ContractionTable *table) {
 }
 
 static void
-initializeCommonFields (
-  ContractionTable *table,
-  const BrailleContractionMethods *methods
-) {
-  table->methods = methods;
-
-  table->characters.array = NULL;
-  table->characters.size = 0;
-  table->characters.count = 0;
-
-  table->cache.input.characters = NULL;
-  table->cache.input.size = 0;
-  table->cache.input.count = 0;
-
-  table->cache.output.cells = NULL;
-  table->cache.output.size = 0;
-  table->cache.output.count = 0;
-
-  table->cache.offsets.array = NULL;
-  table->cache.offsets.size = 0;
-  table->cache.offsets.count = 0;
+destroyContractionTable_external (ContractionTable *table) {
+  destroyCommonFields(table);
+  stopContractionCommand(table);
+  if (table->data.external.input.buffer) free(table->data.external.input.buffer);
+  free(table->command);
+  free(table);
 }
 
-ContractionTable *
-compileContractionTable (const char *fileName) {
-  ContractionTable *table = NULL;
+static const ContractionTableMethods externalContractionTableMethods = {
+  .destroy = destroyContractionTable_external
+};
 
-  if (testProgramPath(fileName)) {
-    if ((table = malloc(sizeof(*table)))) {
-      memset(table, 0, sizeof(*table));
+static ContractionTable *
+compileContractionTable_external (const char *fileName) {
+  ContractionTable *table;
 
-      if ((table->command = strdup(fileName))) {
-        initializeCommonFields(table, getBrailleContractionMethods_external());
-        table->data.external.commandStarted = 0;
+  if ((table = malloc(sizeof(*table)))) {
+    memset(table, 0, sizeof(*table));
 
-        table->data.external.input.buffer = NULL;
-        table->data.external.input.size = 0;
+    if ((table->command = strdup(fileName))) {
+      table->tableMethods = &externalContractionTableMethods;
+      table->contractionMethods = getBrailleContractionMethods_external();
+      initializeCommonFields(table);
 
-        if (startContractionCommand(table)) {
-          return table;
-        }
+      table->data.external.commandStarted = 0;
 
-        free(table->command);
-      } else {
-        logMallocError();
+      table->data.external.input.buffer = NULL;
+      table->data.external.input.size = 0;
+
+      if (startContractionCommand(table)) {
+        return table;
       }
 
-      free(table);
+      free(table->command);
     } else {
       logMallocError();
     }
 
-    return NULL;
+    free(table);
+  } else {
+    logMallocError();
   }
 
-  if (setTableDataVariables(CONTRACTION_TABLE_EXTENSION, CONTRACTION_SUBTABLE_EXTENSION)) {
-    ContractionTableData ctd;
-    memset(&ctd, 0, sizeof(ctd));
+  return NULL;
+}
 
-    ctd.characterTable = NULL;
-    ctd.characterTableSize = 0;
-    ctd.characterEntryCount = 0;
+typedef ContractionTable *CompileContractionTableFunction (const char *fileName);
 
-    ctd.characterClasses = NULL;
-    ctd.characterClassAttribute = 1;
+ContractionTable *
+compileContractionTable (const char *fileName) {
+  CompileContractionTableFunction *compile;
 
-    {
-      ContractionTableOpcode opcode;
-
-      for (opcode=0; opcode<CTO_None; opcode+=1)
-        ctd.opcodeNameLengths[opcode] = wcslen(opcodeNames[opcode]);
-    }
-
-    if ((ctd.area = newDataArea())) {
-      if (allocateDataItem(ctd.area, NULL, sizeof(ContractionTableHeader), __alignof__(ContractionTableHeader))) {
-        if (allocateCharacterClasses(&ctd)) {
-          const DataFileParameters parameters = {
-            .processOperands = processContractionTableOperands,
-            .data = &ctd
-          };
-
-          if (processDataFile(fileName, &parameters)) {
-            if (saveCharacterTable(&ctd)) {
-              if ((table = malloc(sizeof(*table)))) {
-                initializeCommonFields(table, getBrailleContractionMethods_native());
-                table->command = NULL;
-
-                table->data.internal.header.fields = getContractionTableHeader(&ctd);
-                table->data.internal.size = getDataSize(ctd.area);
-                resetDataArea(ctd.area);
-              } else {
-                logMallocError();
-              }
-            }
-          }
-
-          deallocateCharacterClasses(&ctd);
-        }
-      }
-
-      destroyDataArea(ctd.area);
-    }
-
-    if (ctd.characterTable) free(ctd.characterTable);
+  if (testProgramPath(fileName)) {
+    compile = &compileContractionTable_external;
+  } else {
+    compile = &compileContractionTable_native;
   }
 
-  return table;
+  return compile(fileName);
 }
 
 void
 destroyContractionTable (ContractionTable *table) {
-  if (table->characters.array) {
-    free(table->characters.array);
-    table->characters.array = NULL;
-  }
-
-  if (table->cache.input.characters) {
-    free(table->cache.input.characters);
-    table->cache.input.characters = NULL;
-  }
-
-  if (table->cache.output.cells) {
-    free(table->cache.output.cells);
-    table->cache.output.cells = NULL;
-  }
-
-  if (table->cache.offsets.array) {
-    free(table->cache.offsets.array);
-    table->cache.offsets.array = NULL;
-  }
-
-  if (table->command) {
-    stopContractionCommand(table);
-    if (table->data.external.input.buffer) free(table->data.external.input.buffer);
-    free(table->command);
-    free(table);
-  } else {
-    if (table->data.internal.size) {
-      free(table->data.internal.header.fields);
-      free(table);
-    }
-  }
+  table->tableMethods->destroy(table);
 }
 
 char *
