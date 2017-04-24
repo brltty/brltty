@@ -109,7 +109,7 @@ putExternalRequests (BrailleContractionData *bcd) {
         break;
 
       default:
-        logMessage(LOG_WARNING, "unimplemented external contraction request property type: %s: %u (%s)", bcd->table->command, req->type, req->name);
+        logMessage(LOG_WARNING, "unimplemented external contraction request property type: %s: %u (%s)", bcd->table->data.external.command, req->type, req->name);
         return 0;
     }
 
@@ -121,7 +121,7 @@ putExternalRequests (BrailleContractionData *bcd) {
   return 1;
 
 outputError:
-  logMessage(LOG_WARNING, "external contraction output error: %s: %s", bcd->table->command, strerror(errno));
+  logMessage(LOG_WARNING, "external contraction output error: %s: %s", bcd->table->data.external.command, strerror(errno));
   return 0;
 }
 
@@ -321,11 +321,11 @@ getExternalResponses (BrailleContractionData *bcd) {
       *delimiter = oldDelimiter;
     }
 
-    if (!ok) logMessage(LOG_WARNING, "unexpected external contraction response: %s: %s", bcd->table->command, bcd->table->data.external.input.buffer);
+    if (!ok) logMessage(LOG_WARNING, "unexpected external contraction response: %s: %s", bcd->table->data.external.command, bcd->table->data.external.input.buffer);
     if (stop) return 1;
   }
 
-  logMessage(LOG_WARNING, "incomplete external contraction response: %s", bcd->table->command);
+  logMessage(LOG_WARNING, "incomplete external contraction response: %s", bcd->table->data.external.command);
   return 0;
 }
 

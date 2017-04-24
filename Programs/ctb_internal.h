@@ -164,8 +164,6 @@ struct ContractionTableStruct {
     unsigned char capitalizationMode;
   } cache;
 
-  char *command;
-
   union {
     struct {
       union {
@@ -177,9 +175,10 @@ struct ContractionTableStruct {
     } internal;
 
     struct {
-      unsigned commandStarted:1;
+      char *command;
       FILE *standardInput;
       FILE *standardOutput;
+      unsigned commandStarted:1;
 
       struct {
         char *buffer;

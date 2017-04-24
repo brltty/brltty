@@ -622,8 +622,6 @@ compileContractionTable_native (const char *fileName) {
                 table->translationMethods = getContractionTableTranslationMethods_native();
                 initializeCommonFields(table);
 
-                table->command = NULL;
-
                 table->data.internal.header.fields = getContractionTableHeader(&ctd);
                 table->data.internal.size = getDataSize(ctd.area);
                 resetDataArea(ctd.area);
@@ -649,7 +647,7 @@ compileContractionTable_native (const char *fileName) {
 int
 startContractionCommand (ContractionTable *table) {
   if (!table->data.external.commandStarted) {
-    const char *command[] = {table->command, NULL};
+    const char *command[] = {table->data.external.command, NULL};
     HostCommandOptions options;
 
     initializeHostCommandOptions(&options);
@@ -657,9 +655,9 @@ startContractionCommand (ContractionTable *table) {
     options.standardInput = &table->data.external.standardInput;
     options.standardOutput = &table->data.external.standardOutput;
 
-    logMessage(LOG_DEBUG, "starting external contraction table: %s", table->command);
+    logMessage(LOG_DEBUG, "starting external contraction table: %s", table->data.external.command);
     if (runHostCommand(command, &options) != 0) return 0;
-    logMessage(LOG_DEBUG, "external contraction table started: %s", table->command);
+    logMessage(LOG_DEBUG, "external contraction table started: %s", table->data.external.command);
 
     table->data.external.commandStarted = 1;
   }
@@ -673,7 +671,7 @@ stopContractionCommand (ContractionTable *table) {
     fclose(table->data.external.standardInput);
     fclose(table->data.external.standardOutput);
 
-    logMessage(LOG_DEBUG, "external contraction table stopped: %s", table->command);
+    logMessage(LOG_DEBUG, "external contraction table stopped: %s", table->data.external.command);
     table->data.external.commandStarted = 0;
   }
 }
@@ -683,7 +681,7 @@ destroyContractionTable_external (ContractionTable *table) {
   destroyCommonFields(table);
   stopContractionCommand(table);
   if (table->data.external.input.buffer) free(table->data.external.input.buffer);
-  free(table->command);
+  free(table->data.external.command);
   free(table);
 }
 
@@ -698,7 +696,7 @@ compileContractionTable_external (const char *fileName) {
   if ((table = malloc(sizeof(*table)))) {
     memset(table, 0, sizeof(*table));
 
-    if ((table->command = strdup(fileName))) {
+    if ((table->data.external.command = strdup(fileName))) {
       table->managementMethods = &externalManagementMethods;
       table->translationMethods = getContractionTableTranslationMethods_external();
       initializeCommonFields(table);
@@ -712,7 +710,7 @@ compileContractionTable_external (const char *fileName) {
         return table;
       }
 
-      free(table->command);
+      free(table->data.external.command);
     } else {
       logMallocError();
     }
