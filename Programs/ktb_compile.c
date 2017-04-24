@@ -1037,6 +1037,14 @@ static DATA_CONDITION_TESTER(testPlatformName) {
     WS_C("android"),
 #endif /* __ANDROID__ */
 
+#ifdef __APPLE__
+    WS_C("apple"),
+#endif /* __APPLE__ */
+
+#ifdef __CYGWIN__
+    WS_C("cygwin"),
+#endif /* __CYGWIN__ */
+
 #ifdef __MSDOS__
     WS_C("dos"),
 #endif /* __MSDOS__ */
@@ -1056,6 +1064,14 @@ static DATA_CONDITION_TESTER(testPlatformName) {
 #ifdef __MINGW64__
     WS_C("mingw64"),
 #endif /* __MINGW64__ */
+
+#ifdef __OpenBSD__
+    WS_C("openbsd"),
+#endif /* __OpenBSD__ */
+
+#ifdef __sun__
+    WS_C("sun"),
+#endif /* __sun__ */
 
 #ifdef WINDOWS
     WS_C("windows"),
