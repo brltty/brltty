@@ -60,9 +60,6 @@ contractText_louis (BrailleContractionData *bcd) {
   widechar outputBuffer[outputLength];
   int inputOffsets[outputLength];
 
-  char *typeForm = NULL;
-  char *spacing = NULL;
-
   int *cursor = NULL;
   int position;
 
@@ -77,7 +74,8 @@ contractText_louis (BrailleContractionData *bcd) {
   int translated = lou_translate(
     bcd->table->data.louis.tableList,
     inputBuffer, &inputLength, outputBuffer, &outputLength,
-    typeForm, spacing, outputOffsets, inputOffsets, cursor, translationMode
+    NULL /* typeForm */, NULL /* spacing */,
+    outputOffsets, inputOffsets, cursor, translationMode
   );
 
   if (translated) {
