@@ -769,12 +769,14 @@ typedef ContractionTable *ContractionTableCompileFunction (const char *fileName)
 typedef struct {
   const char *qualifier;
   ContractionTableCompileFunction *compile;
+  const char *directory;
 } ContractionTableQualifierEntry;
 
 static const ContractionTableQualifierEntry contractionTableQualifierTable[] = {
 #ifdef LOUIS_TABLES_DIRECTORY
   { .qualifier = "louis",
-    .compile = &compileContractionTable_louis
+    .compile = &compileContractionTable_louis,
+    .directory = LOUIS_TABLES_DIRECTORY
   },
 #endif /* LOUIS_TABLES_DIRECTORY */
 
@@ -796,10 +798,10 @@ getContractionTableQualifierEntry (const char **fileName) {
 ContractionTable *
 compileContractionTable (const char *fileName) {
   ContractionTableCompileFunction *compile = NULL;
-  const ContractionTableQualifierEntry *entry = getContractionTableQualifierEntry(&fileName);
+  const ContractionTableQualifierEntry *ctq = getContractionTableQualifierEntry(&fileName);
 
-  if (entry) {
-    compile = entry->compile;
+  if (ctq) {
+    compile = ctq->compile;
   } else {
     if (!hasNoQualifier(fileName)) {
       logMessage(LOG_ERR, "unsupported contraction table: %s", fileName);
@@ -828,13 +830,40 @@ ensureContractionTableExtension (const char *path) {
 
 char *
 makeContractionTablePath (const char *directory, const char *name) {
-  char *subdirectory = makePath(directory, CONTRACTION_TABLES_SUBDIRECTORY);
+  const char *qualifier = name;
+  const ContractionTableQualifierEntry *ctq = getContractionTableQualifierEntry(&name);
+  if (!ctq) hasQualifier(&name, NULL);
+  int qualifierLength = name - qualifier;
 
-  if (subdirectory) {
-    char *file = makeFilePath(subdirectory, name, CONTRACTION_TABLE_EXTENSION);
+  char *path;
+  const char *extension;
 
-    free(subdirectory);
-    if (file) return file;
+  if (ctq && ctq->directory) {
+    if (!(path = strdup(ctq->directory))) logMallocError();
+    extension = NULL;
+  } else {
+    path = makePath(directory, CONTRACTION_TABLES_SUBDIRECTORY);
+    extension = CONTRACTION_TABLE_EXTENSION;
+  }
+
+  if (path) {
+    char *file = makeFilePath(path, name, extension);
+
+    free(path);
+    path = NULL;
+
+    if (file) {
+      if (qualifierLength) {
+        char buffer[qualifierLength + strlen(file) + 1];
+        snprintf(buffer, sizeof(buffer), "%.*s%s",
+                 qualifierLength, qualifier, file);
+
+        free(file);
+        if (!(file = strdup(buffer))) logMallocError();
+      }
+
+      if (file) return file;
+    }
   }
 
   return NULL;
