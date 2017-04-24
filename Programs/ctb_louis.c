@@ -44,6 +44,7 @@ contractText_louis (BrailleContractionData *bcd) {
 
   int inputLength = getInputCount(bcd);
   widechar inputBuffer[inputLength];
+  int outputOffsets[inputLength];
 
   {
     const wchar_t *source = bcd->input.begin;
@@ -56,18 +57,17 @@ contractText_louis (BrailleContractionData *bcd) {
 
   int outputLength = getOutputCount(bcd);
   widechar outputBuffer[outputLength];
+  int inputOffsets[outputLength];
 
   char *typeForm = NULL;
   char *spacing = NULL;
-  int *outputOffsets = NULL;
-  int *inputOffsets = NULL;
   int *cursor = NULL;
-  int mode = dotsIO | ucBrl;
+  int translationMode = dotsIO | ucBrl;
 
   int translated = lou_translate(
     bcd->table->data.louis.tableList,
     inputBuffer, &inputLength, outputBuffer, &outputLength,
-    typeForm, spacing, outputOffsets, inputOffsets, cursor, mode
+    typeForm, spacing, outputOffsets, inputOffsets, cursor, translationMode
   );
 
   if (translated) {
@@ -81,6 +81,24 @@ contractText_louis (BrailleContractionData *bcd) {
       while (target < bcd->output.current) {
         *target++ = *source++ & 0XFF;
       }
+    }
+
+    if (bcd->input.offsets) {
+      const int *source = outputOffsets;
+      int *target = bcd->input.offsets;
+      const int *end = target + inputLength;
+      int previousOffset = -1;
+
+      while (target < end) {
+        int offset = *source++;
+        int same = offset == previousOffset;
+
+        *target++ = same? CTB_NO_OFFSET: offset;
+        previousOffset = offset;
+      }
+
+      end += bcd->input.end - bcd->input.current;
+      while (target < end) *target++ = CTB_NO_OFFSET;
     }
   }
 
