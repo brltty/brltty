@@ -18,7 +18,7 @@
 
 title EuroBraille Esytime
 
-include routing.kti
+include common.kti
 
 note The four keys below the left joystick, from top to bottom, are:
 note * L1, Escape, Tab, Shift.

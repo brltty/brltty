@@ -31,6 +31,7 @@
 #include "ascii.h"
 #include "brldefs-eu.h"
 #include "eu_protocol.h"
+#include "eu_protocoldef.h"
 
 #define MAXIMUM_DISPLAY_SIZE 80
 
@@ -46,11 +47,6 @@ BEGIN_KEY_NAME_TABLE(linear)
   COMMAND_KEY_ENTRY(L6, "L6"),
   COMMAND_KEY_ENTRY(L7, "L7"),
   COMMAND_KEY_ENTRY(L8, "L8"),
-END_KEY_NAME_TABLE
-
-BEGIN_KEY_NAME_TABLE(linear15)
-  COMMAND_KEY_ENTRY(L1, "L1"),
-  COMMAND_KEY_ENTRY(L5, "L5"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(arrow)
@@ -167,7 +163,8 @@ END_KEY_NAME_TABLES
 BEGIN_KEY_NAME_TABLES(esytime)
   KEY_NAME_TABLE(joystick1),
   KEY_NAME_TABLE(joystick2),
-  KEY_NAME_TABLE(linear15),
+  KEY_NAME_TABLE(linear),
+  KEY_NAME_TABLE(keyboard),   // For braille keyboard when not in usb-hid mode.
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
@@ -478,16 +475,16 @@ handleSystemInformation (BrailleDisplay *brl, unsigned char *packet) {
   enum {Unknown, End, String, Dec8, Dec16, Hex32} infoType;
 
   switch(packet[0]) {
-    case 'H': 
+    case LP_SYSTEM_SHORTNAME: 
       infoType = String;
       infoDescription = "Short Name";
       break;
 
-    case 'I': 
+    case LP_SYSTEM_IDENTITY: 
       infoType = End;
       break;
 
-    case 'G': 
+    case LP_SYSTEM_DISPLAY_LENGTH: 
       if (haveSystemInformation) brl->resizeRequired = 1;
       brl->textColumns = packet[1];
 
@@ -495,12 +492,12 @@ handleSystemInformation (BrailleDisplay *brl, unsigned char *packet) {
       infoDescription = "Cell Count";
       break;
 
-    case 'L': 
+    case LP_SYSTEM_LANGUAGE: 
       infoType = String;
       infoDescription = "Country Code";
       break;
 
-    case 'M': 
+    case LP_SYSTEM_FRAME_LENGTH: 
       maximumFrameLength = (packet[1] << 8)
                          | (packet[2] << 0)
                          ;
@@ -509,12 +506,12 @@ handleSystemInformation (BrailleDisplay *brl, unsigned char *packet) {
       infoDescription = "Maximum Frame Length";
       break;
 
-    case 'N': 
+    case LP_SYSTEM_NAME: 
       infoType = String;
       infoDescription = "Long Name";
       break;
 
-    case 'O': 
+    case LP_SYSTEM_OPTION: 
       deviceOptions = (packet[1] << 24)
                     | (packet[2] << 16)
                     | (packet[3] <<  8)
@@ -525,7 +522,7 @@ handleSystemInformation (BrailleDisplay *brl, unsigned char *packet) {
       infoDescription = "Device Options";
       break;
 
-    case 'P': 
+    case LP_SYSTEM_PROTOCOL: 
       protocolVersion = ((packet[1] - '0') << 16)
                       | ((packet[3] - '0') <<  8)
                       | ((packet[4] - '0') <<  0)
@@ -535,12 +532,12 @@ handleSystemInformation (BrailleDisplay *brl, unsigned char *packet) {
       infoDescription = "Protocol Version";
       break;
 
-    case 'S': 
+    case LP_SYSTEM_SERIAL: 
       infoType = String;
       infoDescription = "Serial Number";
       break;
 
-    case 'T':
+    case LP_SYSTEM_TYPE:
       {
         unsigned char identifier = packet[1];
 
@@ -553,7 +550,7 @@ handleSystemInformation (BrailleDisplay *brl, unsigned char *packet) {
       infoDescription = "Model Identifier";
       break;
 
-    case 'W': 
+    case LP_SYSTEM_SOFTWARE: 
       firmwareVersion = ((packet[1] - '0') << 16)
                       | ((packet[3] - '0') <<  8)
                       | ((packet[4] - '0') <<  0)
@@ -706,26 +703,25 @@ makeKeyboardCommand (BrailleDisplay *brl, const unsigned char *packet) {
 static int
 handleKeyEvent (BrailleDisplay *brl, unsigned char *packet) {
   switch (packet[0]) {
-    case 'B': {
+    case LP_KEY_BRAILLE: {
       KeyNumberSet keys = ((packet[1] << 8) | packet[2]) & 0X3Ff;
-
       enqueueKeys(brl, keys, EU_GRP_BrailleKeys, 0);
       return 1;
     }
 
-    case 'I': {
+    case LP_KEY_INTERACTIVE: {
       unsigned char key = packet[2];
 
       if ((key > 0) && (key <= brl->textColumns)) {
         key -= 1;
 
         switch (packet[1]) {
-          case 1: // single click
+          case INTERACTIVE_SINGLE_CLIC: // single click
             enqueueKey(brl, EU_GRP_RoutingKeys1, key);
-          case 2: // repeat
+          case INTERACTIVE_REPETITION: // repeat
             return 1;
 
-          case 3: // double click
+          case INTERACTIVE_DOUBLE_CLIC: // double click
             enqueueKey(brl, EU_GRP_RoutingKeys2, key);
             return 1;
 
@@ -737,7 +733,7 @@ handleKeyEvent (BrailleDisplay *brl, unsigned char *packet) {
       break;
     }
 
-    case 'C': {
+    case LP_KEY_COMMAND: {
       KeyNumberSet keys;
 
       if (model->isIris) {
@@ -755,7 +751,7 @@ handleKeyEvent (BrailleDisplay *brl, unsigned char *packet) {
       return 1;
     }
 
-    case 'Z': {
+    case LP_KEY_PC: {
       int command = makeKeyboardCommand(brl, packet);
 
       enqueueCommand(command);
@@ -777,22 +773,22 @@ readCommand (BrailleDisplay *brl, KeyTableCommandContext ctx) {
 
   while ((length = readPacket(brl, packet, sizeof(packet))) > 0) {
     switch (packet[3]) {
-      case 'S':
+      case LP_SYSTEM:
         if (handleSystemInformation(brl, packet+4)) haveSystemInformation = 1;
         continue;
 
-      case 'K':
+      case LP_KEY:
         if (handleKeyEvent(brl, packet+4)) continue;
         break;
 
-      case 'R':
-        if (packet[4] == 'P') {
+      case LP_MODE:
+        if (packet[4] == LP_MODE_PILOT) {
           /* return from internal menu */
           forceRewrite();
         }
         continue;
 
-      case 'V':
+      case LP_VISU:
         /* ignore visualization */
         continue;
 
@@ -825,7 +821,7 @@ initializeDevice (BrailleDisplay *brl) {
 
   do {
     {
-      static const unsigned char packet[] = {'S', 'I'};
+      static const unsigned char packet[] = {LP_SYSTEM, LP_SYSTEM_IDENTITY};
       if (writePacket(brl, packet, sizeof(packet)) == -1) return 0;
     }
 
@@ -866,8 +862,8 @@ writeWindow (BrailleDisplay *brl) {
     unsigned char data[size + 2];
     unsigned char *byte = data;
 
-    *byte++ = 'B';
-    *byte++ = 'S';
+    *byte++ = LP_BRAILLE_DISPLAY;
+    *byte++ = LP_BRAILLE_DISPLAY_STATIC;
     byte = translateOutputCells(byte, brl->buffer, size);
 
     if (writePacket(brl, data, byte-data) == -1) return 0;
@@ -892,8 +888,8 @@ writeVisual (BrailleDisplay *brl, const wchar_t *text) {
         unsigned char data[size + 2];
         unsigned char *byte = data;
 
-        *byte++ = 'L';
-        *byte++ = 'T';
+        *byte++ = LP_LCD_DISPLAY;
+        *byte++ = LP_LCD_DISPLAY_TEXT;
 
         {
           const wchar_t *character = text;
@@ -914,7 +910,7 @@ writeVisual (BrailleDisplay *brl, const wchar_t *text) {
 
       if (cursorHasChanged(&previousCursor, brl->cursor, &forceCursorRewrite )) {
         const unsigned char packet[] = {
-          'L', 'C', ((brl->cursor != BRL_NO_CURSOR)? (brl->cursor + 1): 0)
+          LP_LCD_DISPLAY, LP_LCD_DISPLAY_CARET, ((brl->cursor != BRL_NO_CURSOR)? (brl->cursor + 1): 0)
         };
 
         if (writePacket(brl, packet, sizeof(packet)) == -1) return 0;
