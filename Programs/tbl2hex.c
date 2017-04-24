@@ -263,3 +263,8 @@ const ContractionTableTranslationMethods *
 getContractionTableTranslationMethods_external (void) {
   return NULL;
 }
+
+const ContractionTableTranslationMethods *
+getContractionTableTranslationMethods_louis (void) {
+  return NULL;
+}

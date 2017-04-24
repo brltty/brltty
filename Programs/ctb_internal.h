@@ -186,6 +186,12 @@ struct ContractionTableStruct {
         size_t size;
       } input;
     } external;
+
+#ifdef LOUIS_TABLES_DIRECTORY
+    struct {
+      char *tableList;
+    } louis;
+#endif /* LOUIS_TABLES_DIRECTORY */
   } data;
 };
 

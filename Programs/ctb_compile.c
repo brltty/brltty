@@ -724,9 +724,12 @@ compileContractionTable_external (const char *fileName) {
   return NULL;
 }
 
+#ifdef LOUIS_TABLES_DIRECTORY
 static void
 destroyContractionTable_louis (ContractionTable *table) {
   destroyCommonFields(table);
+  free(table->data.louis.tableList);
+  free(table);
 }
 
 static const ContractionTableManagementMethods louisManagementMethods = {
@@ -735,8 +738,29 @@ static const ContractionTableManagementMethods louisManagementMethods = {
 
 static ContractionTable *
 compileContractionTable_louis (const char *fileName) {
+  ContractionTable *table;
+
+  if ((table = malloc(sizeof(*table)))) {
+    memset(table, 0, sizeof(*table));
+
+    if ((table->data.louis.tableList = strdup(fileName))) {
+      table->managementMethods = &louisManagementMethods;
+      table->translationMethods = getContractionTableTranslationMethods_louis();
+      initializeCommonFields(table);
+
+      return table;
+    } else {
+      logMallocError();
+    }
+
+    free(table);
+  } else {
+    logMallocError();
+  }
+
   return NULL;
 }
+#endif /* LOUIS_TABLES_DIRECTORY */
 
 typedef ContractionTable *ContractionTableCompileFunction (const char *fileName);
 
@@ -746,9 +770,11 @@ typedef struct {
 } ContractionTableQualifierEntry;
 
 static const ContractionTableQualifierEntry contractionTableQualifierTable[] = {
+#ifdef LOUIS_TABLES_DIRECTORY
   { .qualifier = "louis",
     .compile = &compileContractionTable_louis
   },
+#endif /* LOUIS_TABLES_DIRECTORY */
 
   { .qualifier = NULL }
 };
@@ -768,6 +794,11 @@ compileContractionTable (const char *fileName) {
   }
 
   if (!compile) {
+    if (!hasNoQualifier(fileName)) {
+      logMessage(LOG_ERR, "unsupported contraction table: %s", fileName);
+      return NULL;
+    }
+
     if (testProgramPath(fileName)) {
       compile = &compileContractionTable_external;
     } else {
