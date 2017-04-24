@@ -1031,6 +1031,62 @@ static DATA_OPERANDS_PROCESSOR(processIfNotKeyOperands) {
   return processKeyTestOperands(file, 0, data);
 }
 
+static DATA_CONDITION_TESTER(testPlatformName) {
+  const wchar_t *const platforms[] = {
+#ifdef __ANDROID__
+    WS_C("android"),
+#endif /* __ANDROID__ */
+
+#ifdef __MSDOS__
+    WS_C("dos"),
+#endif /* __MSDOS__ */
+
+#ifdef GRUB_RUNTIME
+    WS_C("grub"),
+#endif /* GRUB_RUNTIME */
+
+#ifdef __linux__
+    WS_C("linux"),
+#endif /* __linux__ */
+
+#ifdef __MINGW32__
+    WS_C("mingw32"),
+#endif /* __MINGW32__ */
+
+#ifdef __MINGW64__
+    WS_C("mingw64"),
+#endif /* __MINGW64__ */
+
+#ifdef WINDOWS
+    WS_C("windows"),
+#endif /* WINDOWS */
+
+    NULL
+  };
+
+  const wchar_t *const *platform = platforms;
+
+  while (*platform) {
+    if (wcsncmp(*platform, identifier->characters, identifier->length) == 0) return 1;
+    platform += 1;
+  }
+
+  return 0;
+}
+
+static int
+processPlatformTestOperands (DataFile *file, int isDefined, void *data) {
+  return processConditionOperands(file, testPlatformName, !isDefined, "platform name", data);
+}
+
+static DATA_OPERANDS_PROCESSOR(processIfPlatformOperands) {
+  return processPlatformTestOperands(file, 1, data);
+}
+
+static DATA_OPERANDS_PROCESSOR(processIfNotPlatformOperands) {
+  return processPlatformTestOperands(file, 0, data);
+}
+
 static DATA_OPERANDS_PROCESSOR(processIncludeWrapper) {
   KeyTableData *ktd = data;
   int result;
@@ -1178,6 +1234,8 @@ static DATA_OPERANDS_PROCESSOR(processKeyTableOperands) {
     {.name=WS_C("hotkey"), .processor=processHotkeyOperands},
     {.name=WS_C("ifkey"), .processor=processIfKeyOperands, .unconditional=1},
     {.name=WS_C("ifnotkey"), .processor=processIfNotKeyOperands, .unconditional=1},
+    {.name=WS_C("ifplatform"), .processor=processIfPlatformOperands, .unconditional=1},
+    {.name=WS_C("ifnotplatform"), .processor=processIfNotPlatformOperands, .unconditional=1},
     {.name=WS_C("ignore"), .processor=processIgnoreOperands},
     {.name=WS_C("include"), .processor=processIncludeWrapper},
     {.name=WS_C("map"), .processor=processMapOperands},
