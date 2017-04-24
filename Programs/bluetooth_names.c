@@ -46,6 +46,7 @@ BLUETOOTH_NAME_DRIVERS(Braillino, "ht");
 BLUETOOTH_NAME_DRIVERS(B2G, "bm");
 BLUETOOTH_NAME_DRIVERS(Conny, "bm");
 BLUETOOTH_NAME_DRIVERS(EL12, "al", "vo");
+BLUETOOTH_NAME_DRIVERS(Eurobraille, "eu");
 BLUETOOTH_NAME_DRIVERS(Focus, "fs");
 BLUETOOTH_NAME_DRIVERS(HWGBrailliant, "bm");
 BLUETOOTH_NAME_DRIVERS(MB248, "md");
@@ -156,6 +157,10 @@ const BluetoothNameEntry bluetoothNameTable[] = {
 
   { .namePrefix = "EL12-",
     .driverCodes = bluetoothNameDrivers_EL12
+  },
+
+  { .namePrefix = "Esys-",
+    .driverCodes = bluetoothNameDrivers_Eurobraille
   },
 
   { .namePrefix = "Focus",
