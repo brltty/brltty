@@ -121,16 +121,16 @@ typedef struct {
 
 typedef struct {
   void (*destroy) (ContractionTable *table);
-} ContractionTableMethods;
+} ContractionTableManagementMethods;
 
-typedef struct BrailleContractionMethodsStruct BrailleContractionMethods;
-typedef const BrailleContractionMethods *GetBrailleContractionMethodsFunction (void);
-extern GetBrailleContractionMethodsFunction getBrailleContractionMethods_native;
-extern GetBrailleContractionMethodsFunction getBrailleContractionMethods_external;
+typedef struct ContractionTableTranslationMethodsStruct ContractionTableTranslationMethods;
+typedef const ContractionTableTranslationMethods *GetContractionTableTranslationMethodsFunction (void);
+extern GetContractionTableTranslationMethodsFunction getContractionTableTranslationMethods_native;
+extern GetContractionTableTranslationMethodsFunction getContractionTableTranslationMethods_external;
 
 struct ContractionTableStruct {
-  const ContractionTableMethods *tableMethods;
-  const BrailleContractionMethods *contractionMethods;
+  const ContractionTableManagementMethods *managementMethods;
+  const ContractionTableTranslationMethods *translationMethods;
 
   struct {
     CharacterEntry *array;

@@ -581,7 +581,7 @@ destroyContractionTable_native (ContractionTable *table) {
   }
 }
 
-static const ContractionTableMethods nativeContractionTableMethods = {
+static const ContractionTableManagementMethods nativeManagementMethods = {
   .destroy = destroyContractionTable_native
 };
 
@@ -618,8 +618,8 @@ compileContractionTable_native (const char *fileName) {
           if (processDataFile(fileName, &parameters)) {
             if (saveCharacterTable(&ctd)) {
               if ((table = malloc(sizeof(*table)))) {
-                table->tableMethods = &nativeContractionTableMethods;
-                table->contractionMethods = getBrailleContractionMethods_native();
+                table->managementMethods = &nativeManagementMethods;
+                table->translationMethods = getContractionTableTranslationMethods_native();
                 initializeCommonFields(table);
 
                 table->command = NULL;
@@ -687,7 +687,7 @@ destroyContractionTable_external (ContractionTable *table) {
   free(table);
 }
 
-static const ContractionTableMethods externalContractionTableMethods = {
+static const ContractionTableManagementMethods externalManagementMethods = {
   .destroy = destroyContractionTable_external
 };
 
@@ -699,8 +699,8 @@ compileContractionTable_external (const char *fileName) {
     memset(table, 0, sizeof(*table));
 
     if ((table->command = strdup(fileName))) {
-      table->tableMethods = &externalContractionTableMethods;
-      table->contractionMethods = getBrailleContractionMethods_external();
+      table->managementMethods = &externalManagementMethods;
+      table->translationMethods = getContractionTableTranslationMethods_external();
       initializeCommonFields(table);
 
       table->data.external.commandStarted = 0;
@@ -742,7 +742,7 @@ compileContractionTable (const char *fileName) {
 
 void
 destroyContractionTable (ContractionTable *table) {
-  table->tableMethods->destroy(table);
+  table->managementMethods->destroy(table);
 }
 
 char *

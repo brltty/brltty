@@ -58,7 +58,7 @@ typedef struct {
   } previous;
 } BrailleContractionData;
 
-struct BrailleContractionMethodsStruct {
+struct ContractionTableTranslationMethodsStruct {
   int (*contractText) (BrailleContractionData *bcd);
   void (*finishCharacterEntry) (BrailleContractionData *bcd, CharacterEntry *entry);
 };

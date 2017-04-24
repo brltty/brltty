@@ -350,12 +350,12 @@ static void
 finishCharacterEntry_external (BrailleContractionData *bcd, CharacterEntry *entry) {
 }
 
-static const BrailleContractionMethods externalBrailleContractionMethods = {
+static const ContractionTableTranslationMethods externalTranslationMethods = {
   .contractText = contractText_external,
   .finishCharacterEntry = finishCharacterEntry_external
 };
 
-const BrailleContractionMethods *
-getBrailleContractionMethods_external (void) {
-  return &externalBrailleContractionMethods;
+const ContractionTableTranslationMethods *
+getContractionTableTranslationMethods_external (void) {
+  return &externalTranslationMethods;
 }

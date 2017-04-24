@@ -1096,12 +1096,12 @@ finishCharacterEntry_native (BrailleContractionData *bcd, CharacterEntry *entry)
   }
 }
 
-static const BrailleContractionMethods nativeBrailleContractionMethods = {
+static const ContractionTableTranslationMethods nativeTranslationMethods = {
   .contractText = contractText_native,
   .finishCharacterEntry = finishCharacterEntry_native
 };
 
-const BrailleContractionMethods *
-getBrailleContractionMethods_native (void) {
-  return &nativeBrailleContractionMethods;
+const ContractionTableTranslationMethods *
+getContractionTableTranslationMethods_native (void) {
+  return &nativeTranslationMethods;
 }

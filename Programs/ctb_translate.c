@@ -174,7 +174,7 @@ getCharacterEntry (BrailleContractionData *bcd, wchar_t character) {
       entry->attributes |= CTC_Punctuation;
     }
 
-    bcd->table->contractionMethods->finishCharacterEntry(bcd, entry);
+    bcd->table->translationMethods->finishCharacterEntry(bcd, entry);
     return entry;
   }
 }
@@ -350,7 +350,7 @@ contractText (
           }
         }
 
-        contracted = contractionTable->contractionMethods->contractText(&bcd);
+        contracted = contractionTable->translationMethods->contractText(&bcd);
 
         if (bcd.input.offsets) {
           size_t mapIndex = length;
@@ -373,7 +373,7 @@ contractText (
         bcd.input.current = bcd.input.begin + map[bcd.input.current - buffer];
         bcd.input.end = oldEnd;
       } else {
-        contracted = contractionTable->contractionMethods->contractText(&bcd);
+        contracted = contractionTable->translationMethods->contractText(&bcd);
       }
     }
 

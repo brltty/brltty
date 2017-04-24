@@ -254,12 +254,12 @@ main (int argc, char *argv[]) {
 
 #include "ctb_internal.h"
 
-const BrailleContractionMethods *
-getBrailleContractionMethods_native (void) {
+const ContractionTableTranslationMethods *
+getContractionTableTranslationMethods_native (void) {
   return NULL;
 }
 
-const BrailleContractionMethods *
-getBrailleContractionMethods_external (void) {
+const ContractionTableTranslationMethods *
+getContractionTableTranslationMethods_external (void) {
   return NULL;
 }
