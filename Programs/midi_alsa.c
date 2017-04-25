@@ -23,7 +23,6 @@
 #include "log.h"
 #include "parse.h"
 #include "timing.h"
-#include "dynld.h"
 #include "midi.h"
 
 struct MidiDeviceStruct {

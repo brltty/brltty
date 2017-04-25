@@ -23,7 +23,6 @@
 
 #include "log.h"
 #include "timing.h"
-#include "dynld.h"
 #include "pcm.h"
 
 struct PcmDeviceStruct {
