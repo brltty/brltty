@@ -35,43 +35,9 @@ struct PcmDeviceStruct {
   unsigned int periodTime;
 };
 
-#define PCM_ALSA_SYMBOL(name) static typeof(snd_##name) *pcmAlsa_##name
-#define PCM_ALSA_LOCATE(name) findSharedSymbol(pcmAlsaLibrary, "snd_"#name, &pcmAlsa_##name)
-
-static void *pcmAlsaLibrary = NULL;
-PCM_ALSA_SYMBOL(strerror);
-PCM_ALSA_SYMBOL(pcm_open);
-PCM_ALSA_SYMBOL(pcm_close);
-PCM_ALSA_SYMBOL(pcm_nonblock);
-PCM_ALSA_SYMBOL(pcm_hw_params_malloc);
-PCM_ALSA_SYMBOL(pcm_hw_params_any);
-PCM_ALSA_SYMBOL(pcm_hw_params_set_access);
-PCM_ALSA_SYMBOL(pcm_hw_params_get_rate);
-PCM_ALSA_SYMBOL(pcm_hw_params_get_sbits);
-PCM_ALSA_SYMBOL(pcm_hw_params_get_format);
-PCM_ALSA_SYMBOL(pcm_hw_params_set_format);
-PCM_ALSA_SYMBOL(pcm_hw_params_get_rate_min);
-PCM_ALSA_SYMBOL(pcm_hw_params_get_rate_max);
-PCM_ALSA_SYMBOL(pcm_hw_params_set_rate_near);
-PCM_ALSA_SYMBOL(pcm_hw_params_get_channels);
-PCM_ALSA_SYMBOL(pcm_hw_params_get_channels_min);
-PCM_ALSA_SYMBOL(pcm_hw_params_get_channels_max);
-PCM_ALSA_SYMBOL(pcm_hw_params_set_channels_near);
-PCM_ALSA_SYMBOL(pcm_hw_params_set_buffer_time_near);
-PCM_ALSA_SYMBOL(pcm_hw_params_set_period_time_near);
-PCM_ALSA_SYMBOL(pcm_hw_params);
-PCM_ALSA_SYMBOL(pcm_hw_params_get_sbits);
-PCM_ALSA_SYMBOL(pcm_hw_params_get_period_size);
-PCM_ALSA_SYMBOL(pcm_hw_params_free);
-PCM_ALSA_SYMBOL(pcm_prepare);
-PCM_ALSA_SYMBOL(pcm_writei);
-PCM_ALSA_SYMBOL(pcm_drain);
-PCM_ALSA_SYMBOL(pcm_drop);
-PCM_ALSA_SYMBOL(pcm_resume);
-
 static void
 logPcmError (int level, const char *action, int code) {
-  logMessage(level, "ALSA PCM %s error: %s", action, pcmAlsa_strerror(code));
+  logMessage(level, "ALSA PCM %s error: %s", action, snd_strerror(code));
 }
 
 static int
@@ -85,7 +51,7 @@ configurePcmSampleFormat (PcmDevice *pcm, int errorLevel) {
   const snd_pcm_format_t *format = formats;
 
   while (*format != SND_PCM_FORMAT_UNKNOWN) {
-    int result = pcmAlsa_pcm_hw_params_set_format(pcm->handle, pcm->hardwareParameters, *format);
+    int result = snd_pcm_hw_params_set_format(pcm->handle, pcm->hardwareParameters, *format);
     if (result >= 0) return 1;
 
     if (result != -EINVAL) {
@@ -106,12 +72,12 @@ configurePcmSampleRate (PcmDevice *pcm, int errorLevel) {
   unsigned int minimum;
   unsigned int maximum;
 
-  if ((result = pcmAlsa_pcm_hw_params_get_rate_min(pcm->hardwareParameters, &minimum, NULL)) < 0) {
+  if ((result = snd_pcm_hw_params_get_rate_min(pcm->hardwareParameters, &minimum, NULL)) < 0) {
     logPcmError(errorLevel, "get rate min", result);
     return 0;
   }
 
-  if ((result = pcmAlsa_pcm_hw_params_get_rate_max(pcm->hardwareParameters, &maximum, NULL)) < 0) {
+  if ((result = snd_pcm_hw_params_get_rate_max(pcm->hardwareParameters, &maximum, NULL)) < 0) {
     logPcmError(errorLevel, "get rate max", result);
     return 0;
   }
@@ -122,7 +88,7 @@ configurePcmSampleRate (PcmDevice *pcm, int errorLevel) {
   }
 
   pcm->sampleRate = MIN(MAX(16000, minimum), maximum);
-  if ((result = pcmAlsa_pcm_hw_params_set_rate_near(pcm->handle, pcm->hardwareParameters, &pcm->sampleRate, NULL)) < 0) {
+  if ((result = snd_pcm_hw_params_set_rate_near(pcm->handle, pcm->hardwareParameters, &pcm->sampleRate, NULL)) < 0) {
     logPcmError(errorLevel, "set rate near", result);
     return 0;
   }
@@ -136,12 +102,12 @@ configurePcmChannelCount (PcmDevice *pcm, int errorLevel) {
   unsigned int minimum;
   unsigned int maximum;
 
-  if ((result = pcmAlsa_pcm_hw_params_get_channels_min(pcm->hardwareParameters, &minimum)) < 0) {
+  if ((result = snd_pcm_hw_params_get_channels_min(pcm->hardwareParameters, &minimum)) < 0) {
     logPcmError(errorLevel, "get channels min", result);
     return 0;
   }
 
-  if ((result = pcmAlsa_pcm_hw_params_get_channels_max(pcm->hardwareParameters, &maximum)) < 0) {
+  if ((result = snd_pcm_hw_params_get_channels_max(pcm->hardwareParameters, &maximum)) < 0) {
     logPcmError(errorLevel, "get channels max", result);
     return 0;
   }
@@ -152,7 +118,7 @@ configurePcmChannelCount (PcmDevice *pcm, int errorLevel) {
   }
 
   pcm->channelCount = minimum;
-  if ((result = pcmAlsa_pcm_hw_params_set_channels_near(pcm->handle, pcm->hardwareParameters, &pcm->channelCount)) < 0) {
+  if ((result = snd_pcm_hw_params_set_channels_near(pcm->handle, pcm->hardwareParameters, &pcm->channelCount)) < 0) {
     logPcmError(errorLevel, "set channels near", result);
     return 0;
   }
@@ -164,61 +130,24 @@ PcmDevice *
 openPcmDevice (int errorLevel, const char *device) {
   PcmDevice *pcm;
 
-  if (!pcmAlsaLibrary) {
-    if (!(pcmAlsaLibrary = loadSharedObject("libasound.so.2"))) {
-      logMessage(LOG_ERR, "Unable to load ALSA PCM library.");
-      return NULL;
-    }
-
-    PCM_ALSA_LOCATE(strerror);
-    PCM_ALSA_LOCATE(pcm_open);
-    PCM_ALSA_LOCATE(pcm_close);
-    PCM_ALSA_LOCATE(pcm_nonblock);
-    PCM_ALSA_LOCATE(pcm_hw_params_malloc);
-    PCM_ALSA_LOCATE(pcm_hw_params_any);
-    PCM_ALSA_LOCATE(pcm_hw_params_set_access);
-    PCM_ALSA_LOCATE(pcm_hw_params_get_channels);
-    PCM_ALSA_LOCATE(pcm_hw_params_get_channels_min);
-    PCM_ALSA_LOCATE(pcm_hw_params_get_channels_max);
-    PCM_ALSA_LOCATE(pcm_hw_params_set_channels_near);
-    PCM_ALSA_LOCATE(pcm_hw_params_get_format);
-    PCM_ALSA_LOCATE(pcm_hw_params_set_format);
-    PCM_ALSA_LOCATE(pcm_hw_params_get_rate);
-    PCM_ALSA_LOCATE(pcm_hw_params_get_sbits);
-    PCM_ALSA_LOCATE(pcm_hw_params_get_rate_min);
-    PCM_ALSA_LOCATE(pcm_hw_params_get_rate_max);
-    PCM_ALSA_LOCATE(pcm_hw_params_get_period_size);
-    PCM_ALSA_LOCATE(pcm_hw_params_set_rate_near);
-    PCM_ALSA_LOCATE(pcm_hw_params_set_buffer_time_near);
-    PCM_ALSA_LOCATE(pcm_hw_params_set_period_time_near);
-    PCM_ALSA_LOCATE(pcm_hw_params);
-    PCM_ALSA_LOCATE(pcm_hw_params_get_sbits);
-    PCM_ALSA_LOCATE(pcm_hw_params_free);
-    PCM_ALSA_LOCATE(pcm_prepare);
-    PCM_ALSA_LOCATE(pcm_writei);
-    PCM_ALSA_LOCATE(pcm_drain);
-    PCM_ALSA_LOCATE(pcm_drop);
-    PCM_ALSA_LOCATE(pcm_resume);
-  }
-
   if ((pcm = malloc(sizeof(*pcm)))) {
     int result;
 
     if (!*device) device = "default";
-    if ((result = pcmAlsa_pcm_open(&pcm->handle, device, SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK)) >= 0) {
-      pcmAlsa_pcm_nonblock(pcm->handle, 0);
+    if ((result = snd_pcm_open(&pcm->handle, device, SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK)) >= 0) {
+      snd_pcm_nonblock(pcm->handle, 0);
 
-      if ((result = pcmAlsa_pcm_hw_params_malloc(&pcm->hardwareParameters)) >= 0) {
-        if ((result = pcmAlsa_pcm_hw_params_any(pcm->handle, pcm->hardwareParameters)) >= 0) {
-          if ((result = pcmAlsa_pcm_hw_params_set_access(pcm->handle, pcm->hardwareParameters, SND_PCM_ACCESS_RW_INTERLEAVED)) >= 0) {
+      if ((result = snd_pcm_hw_params_malloc(&pcm->hardwareParameters)) >= 0) {
+        if ((result = snd_pcm_hw_params_any(pcm->handle, pcm->hardwareParameters)) >= 0) {
+          if ((result = snd_pcm_hw_params_set_access(pcm->handle, pcm->hardwareParameters, SND_PCM_ACCESS_RW_INTERLEAVED)) >= 0) {
             if (configurePcmSampleFormat(pcm, errorLevel)) {
               if (configurePcmSampleRate(pcm, errorLevel)) {
                 if (configurePcmChannelCount(pcm, errorLevel)) {
                   pcm->bufferTime = 500000;
-                  if ((result = pcmAlsa_pcm_hw_params_set_buffer_time_near(pcm->handle, pcm->hardwareParameters, &pcm->bufferTime, NULL)) >= 0) {
+                  if ((result = snd_pcm_hw_params_set_buffer_time_near(pcm->handle, pcm->hardwareParameters, &pcm->bufferTime, NULL)) >= 0) {
                     pcm->periodTime = pcm->bufferTime / 8;
-                    if ((result = pcmAlsa_pcm_hw_params_set_period_time_near(pcm->handle, pcm->hardwareParameters, &pcm->periodTime, NULL)) >= 0) {
-                      if ((result = pcmAlsa_pcm_hw_params(pcm->handle, pcm->hardwareParameters)) >= 0) {
+                    if ((result = snd_pcm_hw_params_set_period_time_near(pcm->handle, pcm->hardwareParameters, &pcm->periodTime, NULL)) >= 0) {
+                      if ((result = snd_pcm_hw_params(pcm->handle, pcm->hardwareParameters)) >= 0) {
                         logMessage(LOG_DEBUG, "ALSA PCM: Chan=%u Rate=%u BufTim=%u PerTim=%u", pcm->channelCount, pcm->sampleRate, pcm->bufferTime, pcm->periodTime);
                         return pcm;
                       } else {
@@ -240,12 +169,12 @@ openPcmDevice (int errorLevel, const char *device) {
           logPcmError(errorLevel, "get hardware parameters", result);
         }
 
-        pcmAlsa_pcm_hw_params_free(pcm->hardwareParameters);
+        snd_pcm_hw_params_free(pcm->hardwareParameters);
       } else {
         logPcmError(errorLevel, "hardware parameters allocation", result);
       }
 
-      pcmAlsa_pcm_close(pcm->handle);
+      snd_pcm_close(pcm->handle);
     } else {
       logPcmError(errorLevel, "open", result);
     }
@@ -261,14 +190,14 @@ openPcmDevice (int errorLevel, const char *device) {
 void
 closePcmDevice (PcmDevice *pcm) {
   awaitPcmOutput(pcm);
-  pcmAlsa_pcm_close(pcm->handle);
-  pcmAlsa_pcm_hw_params_free(pcm->hardwareParameters);
+  snd_pcm_close(pcm->handle);
+  snd_pcm_hw_params_free(pcm->hardwareParameters);
   free(pcm);
 }
 
 static int
 getPcmFrameSize (PcmDevice *pcm) {
-  return getPcmChannelCount(pcm) * (pcmAlsa_pcm_hw_params_get_sbits(pcm->hardwareParameters) / 8);
+  return getPcmChannelCount(pcm) * (snd_pcm_hw_params_get_sbits(pcm->hardwareParameters) / 8);
 }
 
 int
@@ -279,23 +208,23 @@ writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count) {
   while (framesLeft > 0) {
     int result;
 
-    if ((result = pcmAlsa_pcm_writei(pcm->handle, buffer, framesLeft)) > 0) {
+    if ((result = snd_pcm_writei(pcm->handle, buffer, framesLeft)) > 0) {
       framesLeft -= result;
       buffer += result * frameSize;
     } else {
       switch (result) {
         case -EPIPE:
-          if ((result = pcmAlsa_pcm_prepare(pcm->handle)) < 0) {
+          if ((result = snd_pcm_prepare(pcm->handle)) < 0) {
             logPcmError(LOG_WARNING, "underrun recovery - prepare", result);
             return 0;
           }
           continue;
 
         case -ESTRPIPE:
-          while ((result = pcmAlsa_pcm_resume(pcm->handle)) == -EAGAIN) approximateDelay(1);
+          while ((result = snd_pcm_resume(pcm->handle)) == -EAGAIN) approximateDelay(1);
 
           if (result < 0) {
-            if ((result = pcmAlsa_pcm_prepare(pcm->handle)) < 0) {
+            if ((result = snd_pcm_prepare(pcm->handle)) < 0) {
               logPcmError(LOG_WARNING, "resume - prepare", result);
               return 0;
             }
@@ -312,7 +241,7 @@ getPcmBlockSize (PcmDevice *pcm) {
   snd_pcm_uframes_t frames;
   int result;
 
-  if ((result = pcmAlsa_pcm_hw_params_get_period_size(pcm->hardwareParameters, &frames, NULL)) >= 0) {
+  if ((result = snd_pcm_hw_params_get_period_size(pcm->hardwareParameters, &frames, NULL)) >= 0) {
     return frames * getPcmFrameSize(pcm);
   } else {
     logPcmError(LOG_ERR, "get period size", result);
@@ -330,7 +259,7 @@ setPcmSampleRate (PcmDevice *pcm, int rate) {
   int result;
 
   pcm->sampleRate = rate;
-  if ((result = pcmAlsa_pcm_hw_params_set_rate_near(pcm->handle, pcm->hardwareParameters, &pcm->sampleRate, NULL)) < 0) {
+  if ((result = snd_pcm_hw_params_set_rate_near(pcm->handle, pcm->hardwareParameters, &pcm->sampleRate, NULL)) < 0) {
     logPcmError(LOG_ERR, "set rate near", result);
   }
 
@@ -347,7 +276,7 @@ setPcmChannelCount (PcmDevice *pcm, int channels) {
   int result;
 
   pcm->channelCount = channels;
-  if ((result = pcmAlsa_pcm_hw_params_set_channels_near(pcm->handle, pcm->hardwareParameters, &pcm->channelCount)) < 0) {
+  if ((result = snd_pcm_hw_params_set_channels_near(pcm->handle, pcm->hardwareParameters, &pcm->channelCount)) < 0) {
     logPcmError(LOG_ERR, "set channels near", result);
   }
 
@@ -374,7 +303,7 @@ getPcmAmplitudeFormat (PcmDevice *pcm) {
   snd_pcm_format_t format;
   int result;
 
-  if ((result = pcmAlsa_pcm_hw_params_get_format(pcm->hardwareParameters, &format)) < 0) {
+  if ((result = snd_pcm_hw_params_get_format(pcm->hardwareParameters, &format)) < 0) {
     logPcmError(LOG_ERR, "get format", result);
   } else {
     const AmplitudeFormatEntry *entry = amplitudeFormatTable;
@@ -396,7 +325,7 @@ setPcmAmplitudeFormat (PcmDevice *pcm, PcmAmplitudeFormat format) {
     ++entry;
   }
 
-  if ((result = pcmAlsa_pcm_hw_params_set_format(pcm->handle, pcm->hardwareParameters, entry->external)) < 0) {
+  if ((result = snd_pcm_hw_params_set_format(pcm->handle, pcm->hardwareParameters, entry->external)) < 0) {
     logPcmError(LOG_ERR, "set format", result);
     return getPcmAmplitudeFormat(pcm);
   }
@@ -411,11 +340,11 @@ forcePcmOutput (PcmDevice *pcm) {
 void
 awaitPcmOutput (PcmDevice *pcm) {
   int result;
-  if ((result = pcmAlsa_pcm_drain(pcm->handle)) < 0) logPcmError(LOG_WARNING, "drain", result);
+  if ((result = snd_pcm_drain(pcm->handle)) < 0) logPcmError(LOG_WARNING, "drain", result);
 }
 
 void
 cancelPcmOutput (PcmDevice *pcm) {
   int result;
-  if ((result = pcmAlsa_pcm_drop(pcm->handle)) < 0) logPcmError(LOG_WARNING, "drop", result);
+  if ((result = snd_pcm_drop(pcm->handle)) < 0) logPcmError(LOG_WARNING, "drop", result);
 }

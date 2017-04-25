@@ -35,59 +35,28 @@ struct MidiDeviceStruct {
   unsigned char note;
 };
 
-#define MIDI_ALSA_SYMBOL(name) static typeof(snd_##name) *midiAlsa_##name
-#define MIDI_ALSA_LOCATE(name) findSharedSymbol(midiAlsaLibrary, "snd_"#name, &midiAlsa_##name)
-
-static void *midiAlsaLibrary = NULL;
-MIDI_ALSA_SYMBOL(strerror);
-MIDI_ALSA_SYMBOL(seq_alloc_queue);
-MIDI_ALSA_SYMBOL(seq_client_info_get_client);
-MIDI_ALSA_SYMBOL(seq_client_info_get_name);
-MIDI_ALSA_SYMBOL(seq_client_info_set_client);
-MIDI_ALSA_SYMBOL(seq_client_info_sizeof);
-MIDI_ALSA_SYMBOL(seq_close);
-MIDI_ALSA_SYMBOL(seq_connect_to);
-MIDI_ALSA_SYMBOL(seq_control_queue);
-MIDI_ALSA_SYMBOL(seq_create_simple_port);
-MIDI_ALSA_SYMBOL(seq_drain_output);
-MIDI_ALSA_SYMBOL(seq_event_output);
-MIDI_ALSA_SYMBOL(seq_get_queue_status);
-MIDI_ALSA_SYMBOL(seq_open);
-MIDI_ALSA_SYMBOL(seq_port_info_get_capability);
-MIDI_ALSA_SYMBOL(seq_port_info_get_name);
-MIDI_ALSA_SYMBOL(seq_port_info_get_port);
-MIDI_ALSA_SYMBOL(seq_port_info_set_client);
-MIDI_ALSA_SYMBOL(seq_port_info_set_port);
-MIDI_ALSA_SYMBOL(seq_port_info_sizeof);
-MIDI_ALSA_SYMBOL(seq_query_next_client);
-MIDI_ALSA_SYMBOL(seq_query_next_port);
-MIDI_ALSA_SYMBOL(seq_queue_status_free);
-MIDI_ALSA_SYMBOL(seq_queue_status_get_real_time);
-MIDI_ALSA_SYMBOL(seq_queue_status_malloc);
-MIDI_ALSA_SYMBOL(seq_set_client_name);
-
-#define snd_seq_control_queue midiAlsa_seq_control_queue
+#define snd_seq_control_queue snd_seq_control_queue
 
 static int
 findMidiDevice (MidiDevice *midi, int errorLevel, int *client, int *port) {
-  snd_seq_client_info_t *clientInformation = malloc(midiAlsa_seq_client_info_sizeof());
+  snd_seq_client_info_t *clientInformation = malloc(snd_seq_client_info_sizeof());
 
   if (clientInformation) {
-    memset(clientInformation, 0, midiAlsa_seq_client_info_sizeof());
-    midiAlsa_seq_client_info_set_client(clientInformation, -1);
+    memset(clientInformation, 0, snd_seq_client_info_sizeof());
+    snd_seq_client_info_set_client(clientInformation, -1);
 
-    while (midiAlsa_seq_query_next_client(midi->sequencer, clientInformation) >= 0) {
-      int clientIdentifier = midiAlsa_seq_client_info_get_client(clientInformation);
-      snd_seq_port_info_t *portInformation = malloc(midiAlsa_seq_port_info_sizeof());
+    while (snd_seq_query_next_client(midi->sequencer, clientInformation) >= 0) {
+      int clientIdentifier = snd_seq_client_info_get_client(clientInformation);
+      snd_seq_port_info_t *portInformation = malloc(snd_seq_port_info_sizeof());
 
       if (portInformation) {
-        memset(portInformation, 0, midiAlsa_seq_port_info_sizeof());
-        midiAlsa_seq_port_info_set_client(portInformation, clientIdentifier);
-        midiAlsa_seq_port_info_set_port(portInformation, -1);
+        memset(portInformation, 0, snd_seq_port_info_sizeof());
+        snd_seq_port_info_set_client(portInformation, clientIdentifier);
+        snd_seq_port_info_set_port(portInformation, -1);
 
-        while (midiAlsa_seq_query_next_port(midi->sequencer, portInformation) >= 0) {
-          int portIdentifier = midiAlsa_seq_port_info_get_port(portInformation);
-          int actualCapabilities = midiAlsa_seq_port_info_get_capability(portInformation);
+        while (snd_seq_query_next_port(midi->sequencer, portInformation) >= 0) {
+          int portIdentifier = snd_seq_port_info_get_port(portInformation);
+          int actualCapabilities = snd_seq_port_info_get_capability(portInformation);
           const int neededCapabilties = SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE;
 
           if (((actualCapabilities & neededCapabilties) == neededCapabilties) &&
@@ -95,8 +64,8 @@ findMidiDevice (MidiDevice *midi, int errorLevel, int *client, int *port) {
             *client = clientIdentifier;
             *port = portIdentifier;
             logMessage(LOG_DEBUG, "Using ALSA MIDI device: %d[%s] %d[%s]",
-                       clientIdentifier, midiAlsa_seq_client_info_get_name(clientInformation),
-                       portIdentifier, midiAlsa_seq_port_info_get_name(portInformation));
+                       clientIdentifier, snd_seq_client_info_get_name(clientInformation),
+                       portIdentifier, snd_seq_port_info_get_name(portInformation));
 
             free(portInformation);
             free(clientInformation);
@@ -139,17 +108,17 @@ parseMidiDevice (MidiDevice *midi, int errorLevel, const char *device, int *clie
           if (isInteger(&clientIdentifier, clientSpecifier)) {
             if ((clientIdentifier >= 0) && (clientIdentifier <= 0XFFFF)) clientOk = 1;
           } else {
-            snd_seq_client_info_t *info = malloc(midiAlsa_seq_client_info_sizeof());
+            snd_seq_client_info_t *info = malloc(snd_seq_client_info_sizeof());
 
             if (info) {
-              memset(info, 0, midiAlsa_seq_client_info_sizeof());
-              midiAlsa_seq_client_info_set_client(info, -1);
+              memset(info, 0, snd_seq_client_info_sizeof());
+              snd_seq_client_info_set_client(info, -1);
 
-              while (midiAlsa_seq_query_next_client(midi->sequencer, info) >= 0) {
-                const char *name = midiAlsa_seq_client_info_get_name(info);
+              while (snd_seq_query_next_client(midi->sequencer, info) >= 0) {
+                const char *name = snd_seq_client_info_get_name(info);
 
                 if (strstr(name, clientSpecifier)) {
-                  clientIdentifier = midiAlsa_seq_client_info_get_client(info);
+                  clientIdentifier = snd_seq_client_info_get_client(info);
                   clientOk = 1;
                   logMessage(LOG_INFO, "Using ALSA MIDI client: %d[%s]",
                              clientIdentifier, name);
@@ -170,18 +139,18 @@ parseMidiDevice (MidiDevice *midi, int errorLevel, const char *device, int *clie
             if (isInteger(&portIdentifier, portSpecifier)) {
               if ((portIdentifier >= 0) && (portIdentifier <= 0XFFFF)) portOk = 1;
             } else {
-              snd_seq_port_info_t *info = malloc(midiAlsa_seq_port_info_sizeof());
+              snd_seq_port_info_t *info = malloc(snd_seq_port_info_sizeof());
 
               if (info) {
-                memset(info, 0, midiAlsa_seq_port_info_sizeof());
-                midiAlsa_seq_port_info_set_client(info, clientIdentifier);
-                midiAlsa_seq_port_info_set_port(info, -1);
+                memset(info, 0, snd_seq_port_info_sizeof());
+                snd_seq_port_info_set_client(info, clientIdentifier);
+                snd_seq_port_info_set_port(info, -1);
 
-                while (midiAlsa_seq_query_next_port(midi->sequencer, info) >= 0) {
-                  const char *name = midiAlsa_seq_port_info_get_name(info);
+                while (snd_seq_query_next_port(midi->sequencer, info) >= 0) {
+                  const char *name = snd_seq_port_info_get_name(info);
 
                   if (strstr(name, portSpecifier)) {
-                    portIdentifier = midiAlsa_seq_port_info_get_port(info);
+                    portIdentifier = snd_seq_port_info_get_port(info);
                     portOk = 1;
                     logMessage(LOG_INFO, "Using ALSA MIDI port: %d[%s]",
                                portIdentifier, name);
@@ -227,14 +196,14 @@ parseMidiDevice (MidiDevice *midi, int errorLevel, const char *device, int *clie
 
 static void
 updateMidiStatus (MidiDevice *midi) {
-  midiAlsa_seq_get_queue_status(midi->sequencer, midi->queue, midi->status);
+  snd_seq_get_queue_status(midi->sequencer, midi->queue, midi->status);
 }
 
 static void
 startMidiTimer (MidiDevice *midi) {
   if (!midi->time.tv_sec && !midi->time.tv_nsec) {
     updateMidiStatus(midi);
-    midi->time = *midiAlsa_seq_queue_status_get_real_time(midi->status);
+    midi->time = *snd_seq_queue_status_get_real_time(midi->status);
   }
 }
 
@@ -248,52 +217,18 @@ MidiDevice *
 openMidiDevice (int errorLevel, const char *device) {
   MidiDevice *midi;
 
-  if (!midiAlsaLibrary) {
-    if (!(midiAlsaLibrary = loadSharedObject("libasound.so.2"))) {
-      logMessage(LOG_ERR, "Unable to load ALSA MIDI library.");
-      return NULL;
-    }
-
-    MIDI_ALSA_LOCATE(strerror);
-    MIDI_ALSA_LOCATE(seq_alloc_queue);
-    MIDI_ALSA_LOCATE(seq_client_info_get_client);
-    MIDI_ALSA_LOCATE(seq_client_info_get_name);
-    MIDI_ALSA_LOCATE(seq_client_info_set_client);
-    MIDI_ALSA_LOCATE(seq_client_info_sizeof);
-    MIDI_ALSA_LOCATE(seq_close);
-    MIDI_ALSA_LOCATE(seq_connect_to);
-    MIDI_ALSA_LOCATE(seq_control_queue);
-    MIDI_ALSA_LOCATE(seq_create_simple_port);
-    MIDI_ALSA_LOCATE(seq_drain_output);
-    MIDI_ALSA_LOCATE(seq_event_output);
-    MIDI_ALSA_LOCATE(seq_get_queue_status);
-    MIDI_ALSA_LOCATE(seq_open);
-    MIDI_ALSA_LOCATE(seq_port_info_get_capability);
-    MIDI_ALSA_LOCATE(seq_port_info_get_name);
-    MIDI_ALSA_LOCATE(seq_port_info_get_port);
-    MIDI_ALSA_LOCATE(seq_port_info_set_client);
-    MIDI_ALSA_LOCATE(seq_port_info_set_port);
-    MIDI_ALSA_LOCATE(seq_port_info_sizeof);
-    MIDI_ALSA_LOCATE(seq_query_next_client);
-    MIDI_ALSA_LOCATE(seq_query_next_port);
-    MIDI_ALSA_LOCATE(seq_queue_status_free);
-    MIDI_ALSA_LOCATE(seq_queue_status_get_real_time);
-    MIDI_ALSA_LOCATE(seq_queue_status_malloc);
-    MIDI_ALSA_LOCATE(seq_set_client_name);
-  }
-
   if ((midi = malloc(sizeof(*midi)))) {
     const char *sequencerName = "default";
     int result;
 
-    if ((result = midiAlsa_seq_open(&midi->sequencer, sequencerName, SND_SEQ_OPEN_OUTPUT, 0)) >= 0) {
-      midiAlsa_seq_set_client_name(midi->sequencer, PACKAGE_NAME);
+    if ((result = snd_seq_open(&midi->sequencer, sequencerName, SND_SEQ_OPEN_OUTPUT, 0)) >= 0) {
+      snd_seq_set_client_name(midi->sequencer, PACKAGE_NAME);
 
-      if ((midi->port = midiAlsa_seq_create_simple_port(midi->sequencer, "out0",
+      if ((midi->port = snd_seq_create_simple_port(midi->sequencer, "out0",
                                                         SND_SEQ_PORT_CAP_READ|SND_SEQ_PORT_CAP_SUBS_READ,
                                                         SND_SEQ_PORT_TYPE_APPLICATION)) >= 0) {
-        if ((midi->queue = midiAlsa_seq_alloc_queue(midi->sequencer)) >= 0) {
-          if ((result = midiAlsa_seq_queue_status_malloc(&midi->status)) >= 0) {
+        if ((midi->queue = snd_seq_alloc_queue(midi->sequencer)) >= 0) {
+          if ((result = snd_seq_queue_status_malloc(&midi->status)) >= 0) {
             int client = 0;
             int port = 0;
             int deviceOk;
@@ -307,38 +242,38 @@ openMidiDevice (int errorLevel, const char *device) {
             if (deviceOk) {
               logMessage(LOG_DEBUG, "Connecting to ALSA MIDI device: %d:%d", client, port);
 
-              if ((result = midiAlsa_seq_connect_to(midi->sequencer, midi->port, client, port)) >= 0) {
+              if ((result = snd_seq_connect_to(midi->sequencer, midi->port, client, port)) >= 0) {
                 if ((result = snd_seq_start_queue(midi->sequencer, midi->queue, NULL)) >= 0) {
                   stopMidiTimer(midi);
                   return midi;
                 } else {
                   logMessage(errorLevel, "Cannot start ALSA MIDI queue: %d:%d: %s",
-                             client, port, midiAlsa_strerror(result));
+                             client, port, snd_strerror(result));
                 }
               } else {
                 logMessage(errorLevel, "Cannot connect to ALSA MIDI device: %d:%d: %s",
-                           client, port, midiAlsa_strerror(result));
+                           client, port, snd_strerror(result));
               }
             }
 
-            midiAlsa_seq_queue_status_free(midi->status);
+            snd_seq_queue_status_free(midi->status);
           } else {
             logMessage(errorLevel, "Cannot allocate ALSA MIDI queue status container: %s",
-                       midiAlsa_strerror(result));
+                       snd_strerror(result));
           }
         } else {
           logMessage(errorLevel, "Cannot allocate ALSA MIDI queue: %s",
-                     midiAlsa_strerror(result));
+                     snd_strerror(result));
         }
       } else {
         logMessage(errorLevel, "Cannot create ALSA MIDI output port: %s",
-                   midiAlsa_strerror(midi->port));
+                   snd_strerror(midi->port));
       }
 
-      midiAlsa_seq_close(midi->sequencer);
+      snd_seq_close(midi->sequencer);
     } else {
       logMessage(errorLevel, "Cannot open ALSA sequencer: %s: %s",
-                 sequencerName, midiAlsa_strerror(result));
+                 sequencerName, snd_strerror(result));
     }
 
     free(midi);
@@ -350,8 +285,8 @@ openMidiDevice (int errorLevel, const char *device) {
 
 void
 closeMidiDevice (MidiDevice *midi) {
-  midiAlsa_seq_queue_status_free(midi->status);
-  midiAlsa_seq_close(midi->sequencer);
+  snd_seq_queue_status_free(midi->status);
+  snd_seq_close(midi->sequencer);
   free(midi);
 }
 
@@ -362,7 +297,7 @@ flushMidiDevice (MidiDevice *midi) {
 
     updateMidiStatus(midi);
     {
-      const snd_seq_real_time_t *time = midiAlsa_seq_queue_status_get_real_time(midi->status);
+      const snd_seq_real_time_t *time = snd_seq_queue_status_get_real_time(midi->status);
       int seconds = midi->time.tv_sec - time->tv_sec;
       int nanoseconds = midi->time.tv_nsec - time->tv_nsec;
       duration = (seconds * 1000) + (nanoseconds / 1000000);
@@ -392,11 +327,11 @@ static int
 sendMidiEvent (MidiDevice *midi, snd_seq_event_t *event) {
   int result;
 
-  if ((result = midiAlsa_seq_event_output(midi->sequencer, event)) >= 0) {
-    midiAlsa_seq_drain_output(midi->sequencer);
+  if ((result = snd_seq_event_output(midi->sequencer, event)) >= 0) {
+    snd_seq_drain_output(midi->sequencer);
     return 1;
   } else {
-    logMessage(LOG_ERR, "ALSA MIDI write error: %s", midiAlsa_strerror(result));
+    logMessage(LOG_ERR, "ALSA MIDI write error: %s", snd_strerror(result));
   }
   return 0;
 }
