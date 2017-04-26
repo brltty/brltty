@@ -332,40 +332,50 @@ saveScreenCharacters (
 
 static void
 checkScreenScroll (int track) {
+  const int lines = 3;
+
   static int oldScreen = -1;
   static int oldY = -1;
   static int oldWidth = 0;
-  static ScreenCharacter *oldCharacters = NULL;
   static size_t oldSize = 0;
+  static ScreenCharacter *oldCharacters = NULL;
 
   int newScreen = scr.number;
   int newWidth = scr.cols;
-  ScreenCharacter newCharacters[newWidth];
+  size_t newSize = newWidth * lines;
+  ScreenCharacter newCharacters[newSize];
 
-  readScreenRow(ses->winy, newWidth, newCharacters);
+  if (ses->winy < lines) {
+    newSize = 0;
+  } else {
+    int oldTop = ses->winy - (lines - 1);
+    readScreen(0, oldTop, newWidth, lines, newCharacters);
 
-  if (track && prefs.trackScreenScroll && oldCharacters &&
-      (newScreen == oldScreen) && (newWidth == oldWidth) &&
-      (ses->winy == oldY)) {
-    int newY = ses->winy;
+    if (track && prefs.trackScreenScroll && oldCharacters &&
+        (newScreen == oldScreen) && (newWidth == oldWidth) &&
+        (ses->winy == oldY)) {
+      int newY = ses->winy;
+      int newTop = oldTop;
 
-    while (newY > 0) {
-      if (newY == scr.posy) break;
+      while (newTop > 0) {
+        if ((scr.posy >= newTop) && (scr.posy <= newY)) break;
 
-      if (isSameRow(oldCharacters, newCharacters, newWidth, isSameCharacter)) {
-        if (newY != ses->winy) {
-          ses->winy = newY;
-          alert(ALERT_SCROLL_UP);
+        if (isSameRow(oldCharacters, newCharacters, newSize, isSameCharacter)) {
+          if (newY != ses->winy) {
+            ses->winy = newY;
+            alert(ALERT_SCROLL_UP);
+          }
+
+          break;
         }
 
-        break;
+        readScreen(0, --newTop, newWidth, lines, newCharacters);
+        newY -= 1;
       }
-
-      readScreenRow(--newY, newWidth, newCharacters);
     }
   }
 
-  if (saveScreenCharacters(&oldCharacters, &oldSize, newCharacters, newWidth)) {
+  if (saveScreenCharacters(&oldCharacters, &oldSize, newCharacters, newSize)) {
     oldScreen = newScreen;
     oldY = ses->winy;
     oldWidth = newWidth;
