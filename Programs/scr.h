@@ -48,8 +48,13 @@ extern int handleScreenCommands (int command, void *data);
 extern KeyTableCommandContext getScreenCommandContext (void);
 
 static inline int
+readScreenRows (int row, int width, int height, ScreenCharacter *buffer) {
+  return readScreen(0, row, width, height, buffer);
+}
+
+static inline int
 readScreenRow (int row, int width, ScreenCharacter *buffer) {
-  return readScreen(0, row, width, 1, buffer);
+  return readScreenRows(row, width, 1, buffer);
 }
 
 /* Routines which apply to the routing screen.
