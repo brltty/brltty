@@ -177,14 +177,14 @@ asyncNewAbsoluteAlarm (
 int
 asyncNewRelativeAlarm (
   AsyncHandle *handle,
-  int interval,
+  int milliseconds,
   AsyncAlarmCallback *callback,
   void *data
 ) {
   TimeValue time;
 
   getMonotonicTime(&time);
-  adjustTimeValue(&time, interval);
+  adjustTimeValue(&time, milliseconds);
   return asyncNewAbsoluteAlarm(handle, &time, callback, data);
 }
 
@@ -209,22 +209,22 @@ asyncResetAlarmTo (AsyncHandle handle, const TimeValue *time) {
 }
 
 int
-asyncResetAlarmIn (AsyncHandle handle, int interval) {
+asyncResetAlarmIn (AsyncHandle handle, int milliseconds) {
   TimeValue time;
 
   getMonotonicTime(&time);
-  adjustTimeValue(&time, interval);
+  adjustTimeValue(&time, milliseconds);
   return asyncResetAlarmTo(handle, &time);
 }
 
 int
-asyncResetAlarmEvery (AsyncHandle handle, int interval) {
+asyncResetAlarmEvery (AsyncHandle handle, int milliseconds) {
   Element *element = getAlarmElement(handle);
 
   if (element) {
     AlarmEntry *alarm = getElementItem(element);
 
-    alarm->interval = interval;
+    alarm->interval = milliseconds;
     alarm->reschedule = 1;
     return 1;
   }

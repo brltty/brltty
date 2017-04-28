@@ -43,14 +43,14 @@ extern int asyncNewAbsoluteAlarm (
 
 extern int asyncNewRelativeAlarm (
   AsyncHandle *handle,
-  int interval,
+  int milliseconds,
   AsyncAlarmCallback *callback,
   void *data
 );
 
 extern int asyncResetAlarmTo (AsyncHandle handle, const TimeValue *time);
-extern int asyncResetAlarmIn (AsyncHandle handle, int interval);
-extern int asyncResetAlarmEvery (AsyncHandle handle, int interval);
+extern int asyncResetAlarmIn (AsyncHandle handle, int milliseconds);
+extern int asyncResetAlarmEvery (AsyncHandle handle, int milliseconds);
 
 #ifdef __cplusplus
 }
