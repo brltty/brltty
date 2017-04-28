@@ -214,7 +214,7 @@ prepareActivity (ActivityObject *activity) {
 
 static int
 scheduleActivity (ActivityObject *activity) {
-  if (asyncSetAlarmIn(&activity->startAlarm, 0, handleActivityStartAlarm, activity)) {
+  if (asyncNewRelativeAlarm(&activity->startAlarm, 0, handleActivityStartAlarm, activity)) {
     if (asyncResetAlarmEvery(activity->startAlarm, activity->methods->retryInterval)) {
       setActivityState(activity, ACT_SCHEDULED);
       return 1;

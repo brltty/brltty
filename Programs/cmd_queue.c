@@ -226,7 +226,7 @@ setCommandAlarm (void *data) {
       Queue *queue = getCommandQueue(0);
 
       if (queue && (getQueueSize(queue) > 0)) {
-        asyncSetAlarmIn(&commandAlarm, 0, handleCommandAlarm, data);
+        asyncNewRelativeAlarm(&commandAlarm, 0, handleCommandAlarm, data);
       }
     }
   }

@@ -76,8 +76,8 @@ setAutoreleaseAlarm (KeyTable *table) {
   } else if (table->autorelease.alarm) {
     asyncResetAlarmIn(table->autorelease.alarm, table->autorelease.time);
   } else {
-    asyncSetAlarmIn(&table->autorelease.alarm, table->autorelease.time,
-                    handleKeyAutoreleaseAlarm, table);
+    asyncNewRelativeAlarm(&table->autorelease.alarm, table->autorelease.time,
+                          handleKeyAutoreleaseAlarm, table);
   }
 }
 
@@ -389,8 +389,8 @@ ASYNC_ALARM_CALLBACK(handleLongPressAlarm) {
 
 static void
 setLongPressAlarm (KeyTable *table, unsigned char when) {
-  asyncSetAlarmIn(&table->longPress.alarm, PREFERENCES_TIME(when),
-                  handleLongPressAlarm, table);
+  asyncNewRelativeAlarm(&table->longPress.alarm, PREFERENCES_TIME(when),
+                        handleLongPressAlarm, table);
 }
 
 static int

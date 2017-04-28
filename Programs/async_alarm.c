@@ -175,7 +175,7 @@ asyncSetAlarmTo (
 }
 
 int
-asyncSetAlarmIn (
+asyncNewRelativeAlarm (
   AsyncHandle *handle,
   int interval,
   AsyncAlarmCallback *callback,

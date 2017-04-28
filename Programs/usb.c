@@ -1119,8 +1119,8 @@ usbSchedulePendingInputRequest (UsbEndpoint *endpoint) {
     if (!*delay) *delay = 1;
     *delay = MIN(*delay, USB_INPUT_INTERRUPT_DELAY_MAXIMUM);
 
-    asyncSetAlarmIn(&endpoint->direction.input.pending.alarm, *delay,
-                    usbHandleSchedulePendingInputRequest, endpoint);
+    asyncNewRelativeAlarm(&endpoint->direction.input.pending.alarm, *delay,
+                          usbHandleSchedulePendingInputRequest, endpoint);
 
     *delay += 1;
   }

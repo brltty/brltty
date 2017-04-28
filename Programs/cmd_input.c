@@ -93,9 +93,9 @@ setModifierTimeout (InputCommandData *icd) {
   return icd->modifiers.timeout?
          asyncResetAlarmIn(icd->modifiers.timeout,
                            INPUT_STICKY_MODIFIERS_TIMEOUT):
-         asyncSetAlarmIn(&icd->modifiers.timeout,
-                         INPUT_STICKY_MODIFIERS_TIMEOUT,
-                         handleStickyModifiersTimeout, icd);
+         asyncNewRelativeAlarm(&icd->modifiers.timeout,
+                               INPUT_STICKY_MODIFIERS_TIMEOUT,
+                               handleStickyModifiersTimeout, icd);
 }
 
 static void

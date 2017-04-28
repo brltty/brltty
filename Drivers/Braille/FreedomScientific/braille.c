@@ -479,7 +479,7 @@ ASYNC_ALARM_CALLBACK(handleMissingAcknowledgementAlarm) {
 static int
 setMissingAcknowledgementAlarm (BrailleDisplay *brl, int timeout) {
   if (!brl->data->missingAcknowledgementAlarm) {
-    if (!asyncSetAlarmIn(&brl->data->missingAcknowledgementAlarm, timeout,
+    if (!asyncNewRelativeAlarm(&brl->data->missingAcknowledgementAlarm, timeout,
                          handleMissingAcknowledgementAlarm, brl)) {
       return 0;
     }

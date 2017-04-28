@@ -45,9 +45,9 @@ ASYNC_ALARM_CALLBACK(handleFreezeReminderAlarm) {
 static int
 startFreezeReminderAlarm (void) {
   if (freezeReminderAlarm) return 1;
-  return asyncSetAlarmIn(&freezeReminderAlarm,
-                         SCREEN_FREEZE_REMINDER_INTERVAL,
-                         handleFreezeReminderAlarm, NULL);
+  return asyncNewRelativeAlarm(&freezeReminderAlarm,
+                               SCREEN_FREEZE_REMINDER_INTERVAL,
+                               handleFreezeReminderAlarm, NULL);
 }
 
 static void

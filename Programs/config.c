@@ -1798,8 +1798,8 @@ ASYNC_ALARM_CALLBACK(handleAutospeakDelayAlarm) {
 
 static void
 beginAutospeakDelay (int duration) {
-  if (asyncSetAlarmIn(&autospeakDelayAlarm, duration,
-                      handleAutospeakDelayAlarm, NULL)) {
+  if (asyncNewRelativeAlarm(&autospeakDelayAlarm, duration,
+                            handleAutospeakDelayAlarm, NULL)) {
     spk.canAutospeak = 0;
   }
 }
@@ -2326,7 +2326,7 @@ tryPidFile (void) {
   } else if (errno == EEXIST) {
     return 0;
   } else {
-    asyncSetAlarmIn(NULL, PID_FILE_CREATE_RETRY_INTERVAL, retryPidFile, NULL);
+    asyncNewRelativeAlarm(NULL, PID_FILE_CREATE_RETRY_INTERVAL, retryPidFile, NULL);
   }
 
   return 1;

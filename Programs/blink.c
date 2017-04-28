@@ -109,7 +109,7 @@ ASYNC_ALARM_CALLBACK(handleBlinkAlarm) {
 
 static void
 setBlinkAlarm (BlinkDescriptor *blink) {
-  asyncSetAlarmIn(&blink->alarmHandle, getBlinkDuration(blink), handleBlinkAlarm, blink);
+  asyncNewRelativeAlarm(&blink->alarmHandle, getBlinkDuration(blink), handleBlinkAlarm, blink);
 }
 
 static void

@@ -41,7 +41,7 @@ extern int asyncSetAlarmTo (
   void *data
 );
 
-extern int asyncSetAlarmIn (
+extern int asyncNewRelativeAlarm (
   AsyncHandle *handle,
   int interval,
   AsyncAlarmCallback *callback,

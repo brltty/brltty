@@ -365,8 +365,8 @@ setBrailleMessageAlarm (BrailleDisplay *brl) {
   if (brl->acknowledgements.alarm) {
     asyncResetAlarmIn(brl->acknowledgements.alarm, brl->acknowledgements.missing.timeout);
   } else {
-    asyncSetAlarmIn(&brl->acknowledgements.alarm, brl->acknowledgements.missing.timeout,
-                    handleBrailleMessageTimeout, brl);
+    asyncNewRelativeAlarm(&brl->acknowledgements.alarm, brl->acknowledgements.missing.timeout,
+                          handleBrailleMessageTimeout, brl);
   }
 }
 

@@ -880,9 +880,9 @@ ASYNC_INPUT_CALLBACK(handleKobjectUeventString) {
                   snprintf(path, sizeof(path), "/dev/input/event%d", event);
 
                   if ((kio->kix->device.path = strdup(path))) {
-                    if (asyncSetAlarmIn(&kio->kix->udevDelay,
-                                        LINUX_INPUT_DEVICE_OPEN_DELAY,
-                                        openLinuxInputDevice, kio)) {
+                    if (asyncNewRelativeAlarm(&kio->kix->udevDelay,
+                                              LINUX_INPUT_DEVICE_OPEN_DELAY,
+                                              openLinuxInputDevice, kio)) {
                       break;
                     }
                   } else {

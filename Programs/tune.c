@@ -76,7 +76,7 @@ openTuneDevice (void) {
 
   if (noteMethods) {
     if ((noteDevice = noteMethods->construct(openErrorLevel)) != NULL) {
-      asyncSetAlarmIn(&tuneDeviceCloseTimer, timeout, handleTuneDeviceCloseTimeout, NULL);
+      asyncNewRelativeAlarm(&tuneDeviceCloseTimer, timeout, handleTuneDeviceCloseTimeout, NULL);
       return 1;
     }
   }

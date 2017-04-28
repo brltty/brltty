@@ -720,8 +720,8 @@ trackScreenCursor (int place) {
     ses->dcty = ses->trky;
 
     int delay = 250 << (prefs.cursorTrackingDelay - 1);
-    asyncSetAlarmIn(&delayedCursorTrackingAlarm, delay,
-                    handleDelayedCursorTrackingAlarm, NULL);
+    asyncNewRelativeAlarm(&delayedCursorTrackingAlarm, delay,
+                          handleDelayedCursorTrackingAlarm, NULL);
 
     return 1;
   }

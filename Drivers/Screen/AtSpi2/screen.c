@@ -1089,7 +1089,7 @@ ASYNC_ALARM_CALLBACK(a2ProcessTimeout)
   a2Timeout->monitor = NULL;
   if (dbus_timeout_get_enabled(timeout))
     /* Still enabled, requeue it */
-    asyncSetAlarmIn(&a2Timeout->monitor, dbus_timeout_get_interval(timeout), a2ProcessTimeout, a2Timeout);
+    asyncNewRelativeAlarm(&a2Timeout->monitor, dbus_timeout_get_interval(timeout), a2ProcessTimeout, a2Timeout);
 }
 
 dbus_bool_t a2AddTimeout(DBusTimeout *timeout, void *data)
@@ -1097,7 +1097,7 @@ dbus_bool_t a2AddTimeout(DBusTimeout *timeout, void *data)
   struct a2Timeout *a2Timeout = calloc(1, sizeof(*a2Timeout));
   a2Timeout->timeout = timeout;
   if (dbus_timeout_get_enabled(timeout))
-    asyncSetAlarmIn(&a2Timeout->monitor, dbus_timeout_get_interval(timeout), a2ProcessTimeout, a2Timeout);
+    asyncNewRelativeAlarm(&a2Timeout->monitor, dbus_timeout_get_interval(timeout), a2ProcessTimeout, a2Timeout);
   dbus_timeout_set_data(timeout, a2Timeout, NULL);
   return TRUE;
 }

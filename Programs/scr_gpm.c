@@ -62,7 +62,7 @@ gpmOpenConnection (void) {
 
       if (Gpm_Open(&options, -1) == -1) {
         logMessage(LOG_DEBUG, "GPM open error: %s", strerror(errno));
-        asyncSetAlarmIn(NULL, GPM_CONNECTION_RESET_DELAY, gpmResetConnection, NULL);
+        asyncNewRelativeAlarm(NULL, GPM_CONNECTION_RESET_DELAY, gpmResetConnection, NULL);
         gpmConnectionState = GCS_FAILED;
         return 0;
       }
