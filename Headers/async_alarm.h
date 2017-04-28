@@ -34,7 +34,7 @@ typedef struct {
 #define ASYNC_ALARM_CALLBACK(name) void name (const AsyncAlarmCallbackParameters *parameters)
 typedef ASYNC_ALARM_CALLBACK(AsyncAlarmCallback);
 
-extern int asyncSetAlarmTo (
+extern int asyncNewAbsoluteAlarm (
   AsyncHandle *handle,
   const TimeValue *time,
   AsyncAlarmCallback *callback,

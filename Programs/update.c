@@ -1084,7 +1084,7 @@ ASYNC_ALARM_CALLBACK(handleUpdateAlarm) {
 static void
 setUpdateAlarm (void) {
   if (!updateSuspendCount && !updateAlarm) {
-    asyncSetAlarmTo(&updateAlarm, &updateTime, handleUpdateAlarm, NULL);
+    asyncNewAbsoluteAlarm(&updateAlarm, &updateTime, handleUpdateAlarm, NULL);
   }
 }
 

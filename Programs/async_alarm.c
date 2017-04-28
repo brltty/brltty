@@ -159,7 +159,7 @@ newAlarmElement (const void *parameters) {
 }
 
 int
-asyncSetAlarmTo (
+asyncNewAbsoluteAlarm (
   AsyncHandle *handle,
   const TimeValue *time,
   AsyncAlarmCallback *callback,
@@ -185,7 +185,7 @@ asyncNewRelativeAlarm (
 
   getMonotonicTime(&time);
   adjustTimeValue(&time, interval);
-  return asyncSetAlarmTo(handle, &time, callback, data);
+  return asyncNewAbsoluteAlarm(handle, &time, callback, data);
 }
 
 static Element *
