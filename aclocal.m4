@@ -96,8 +96,8 @@ AC_SUBST([$1_table])])
 
 AC_DEFUN([BRLTTY_ARG_PARAMETERS], [dnl
 BRLTTY_ARG_WITH(
-   [$1-parameters], [DRIVER:PARAMETER=SETTING... (comma-separated)],
-   [default parameters for the $1 driver(s)],
+   [$1-parameters], [$3PARAMETER=SETTING... (comma-separated)],
+   [default parameters for the $2],
    [$1_parameters], [""]
 )
 if test "${$1_parameters}" = "no"
@@ -108,7 +108,7 @@ then
    $1_parameters=""
 fi
 AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE_TRANSLATE([$1_parameters]), ["${$1_parameters}"],
-                   [Define this to be a string containing the default $2 parameters.])
+                   [Define this to be a string containing the default parameters for the $2.])
 BRLTTY_SUMMARY_ITEM([$1-parameters], [$1_parameters])])
 
 AC_DEFUN([BRLTTY_ARG_PACKAGE], [dnl
@@ -456,7 +456,7 @@ then
    fi
 
    BRLTTY_SUMMARY_ITEM([internal-$1-drivers], [brltty_internal_codes_$1])
-   BRLTTY_ARG_PARAMETERS([$1], [$1 driver])
+   BRLTTY_ARG_PARAMETERS([$1], [$1 driver(s)], [DRIVER:])
 fi
 
 for brltty_driver in ${brltty_item_names_$1}

@@ -302,7 +302,7 @@ extern "C" {
 /* Define this to be a string containing a list of the braille driver codes. */
 #undef BRAILLE_DRIVER_CODES
 
-/* Define this to be a string containing the default braille driver parameters. */
+/* Define this to be a string containing the default parameters for the braille driver(s). */
 #undef BRAILLE_PARAMETERS
 
 /* Define this to be a string containing the path to the directory containing the devices. */
@@ -469,7 +469,7 @@ extern "C" {
 /* Define this to be a string containing a list of the speech driver codes. */
 #undef SPEECH_DRIVER_CODES
 
-/* Define this to be a string containing the default speech driver parameters. */
+/* Define this to be a string containing the default parameters for the speech driver(s). */
 #undef SPEECH_PARAMETERS
 
 /* Define this to be a string containing the default screen driver code. */
@@ -478,7 +478,7 @@ extern "C" {
 /* Define this to be a string containing a list of the screen driver codes. */
 #undef SCREEN_DRIVER_CODES
 
-/* Define this to be a string containing the default screen driver parameters. */
+/* Define this to be a string containing the default parameters for the screen driver(s). */
 #undef SCREEN_PARAMETERS
 
 /* Define this to include contraction table support. */
@@ -508,7 +508,7 @@ extern "C" {
 /* Define this if the application programming interface is to be included. */
 #undef ENABLE_API
 
-/* Define this to be a string containing the default application programming interface parameters. */
+/* Define this to be a string containing the default parameters for the application programming interface. */
 #undef API_PARAMETERS
 
 /* Define this if shared object support is to be included. */
