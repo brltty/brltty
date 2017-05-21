@@ -2338,16 +2338,6 @@ THREAD_FUNCTION(runServer) {
     FD_ZERO(&sockset);
     fdmax=0;
 
-    for (i=0;i<serverSocketCount;i++) {
-      if (socketInfo[i].fd>=0) {
-	FD_SET(socketInfo[i].fd, &sockset);
-
-	if (socketInfo[i].fd>fdmax) {
-	  fdmax = socketInfo[i].fd;
-        }
-      }
-    }
-
     lockMutex(&apiConnectionsMutex);
     addTtyFds(&sockset, &fdmax, &notty);
     addTtyFds(&sockset, &fdmax, &ttys);
@@ -2357,6 +2347,16 @@ THREAD_FUNCTION(runServer) {
       struct timeval tv, *timeout;
 
       lockMutex(&serverSocketsMutex);
+	for (i=0;i<serverSocketCount;i++) {
+	  if (socketInfo[i].fd>=0) {
+	    FD_SET(socketInfo[i].fd, &sockset);
+
+	    if (socketInfo[i].fd>fdmax) {
+	      fdmax = socketInfo[i].fd;
+	    }
+	  }
+	}
+
         if (unauthConnections || serverSocketsPending) {
           memset(&tv, 0, sizeof(tv));
           tv.tv_sec = SERVER_SELECT_TIMEOUT;
