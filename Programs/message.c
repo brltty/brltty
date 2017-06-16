@@ -76,9 +76,6 @@ handleMessageCommands (int command, void *data) {
   MessageData *mgd = data;
 
   switch (command & BRL_MSK_CMD) {
-    case BRL_CMD_NOOP:
-      return 1;
-
     case BRL_CMD_LNUP:
     case BRL_CMD_PRDIFLN:
     case BRL_CMD_FWINLTSKIP:
