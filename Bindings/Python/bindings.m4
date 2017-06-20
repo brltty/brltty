@@ -18,6 +18,7 @@
 ###############################################################################
 
 AC_DEFUN([BRLTTY_PYTHON_BINDINGS], [dnl
+export PYTHONCOERCECLOCALE=0
 PYTHON_OK=true
 
 AC_PATH_PROG([PYTHON], [python])
