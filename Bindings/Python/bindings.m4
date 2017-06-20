@@ -18,8 +18,17 @@
 ###############################################################################
 
 AC_DEFUN([BRLTTY_PYTHON_BINDINGS], [dnl
-export PYTHONCOERCECLOCALE=0
 PYTHON_OK=true
+
+# Suppress a new warning introduced in Python 3.6:
+#
+#    Python runtime initialized with LC_CTYPE=C
+#    (a locale with default ASCII encoding),
+#    which may cause Unicode compatibility problems.
+#    Using C.UTF-8, C.utf8, or UTF-8 (if available)
+#    as alternative Unicode-compatible locales is recommended.
+#
+export PYTHONCOERCECLOCALE=0
 
 AC_PATH_PROG([PYTHON], [python])
 if test -z "${PYTHON}"
