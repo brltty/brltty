@@ -18,7 +18,7 @@ dnl Process this file with autoconf 2.53 to produce a configure script.
 ###############################################################################
 
 AC_PREREQ([2.64])
-AC_INIT([BRLTTY], [5.5], [brltty@mielke.cc], [brltty], [http://brltty.com/])
+AC_INIT([BRLTTY], [5.5], [brltty@brltty.com], [brltty], [http://brltty.com/])
 AC_CONFIG_SRCDIR([Programs/brltty.c])
 
 AC_SUBST([api_major], [0])
