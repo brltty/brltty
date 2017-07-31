@@ -820,9 +820,9 @@ typedef struct {
  * \note The given codes should be raw keycodes (i.e. some driver name was given
  * to brlapi_enterTtyMode()) */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int BRLAPI_STDCALL brlapi_ignoreKeyRanges(brlapi_range_t ranges[], unsigned int count);
+int BRLAPI_STDCALL brlapi_ignoreKeyRanges(const brlapi_range_t ranges[], unsigned int count);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int BRLAPI_STDCALL brlapi__ignoreKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], unsigned int count);
+int BRLAPI_STDCALL brlapi__ignoreKeyRanges(brlapi_handle_t *handle, const brlapi_range_t ranges[], unsigned int count);
 
 /* brlapi_acceptKeyRanges */
 /** Accept some key presses from the braille keyboard
@@ -836,9 +836,9 @@ int BRLAPI_STDCALL brlapi__ignoreKeyRanges(brlapi_handle_t *handle, brlapi_range
  * \note The given codes should be raw keycodes (i.e. some driver name was given
  * to brlapi_enterTtyMode()) */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int BRLAPI_STDCALL brlapi_acceptKeyRanges(brlapi_range_t ranges[], unsigned int count);
+int BRLAPI_STDCALL brlapi_acceptKeyRanges(const brlapi_range_t ranges[], unsigned int count);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int BRLAPI_STDCALL brlapi__acceptKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], unsigned int count);
+int BRLAPI_STDCALL brlapi__acceptKeyRanges(brlapi_handle_t *handle, const brlapi_range_t ranges[], unsigned int count);
 /** @} */
 
 /** \defgroup brlapi_driverspecific Driver-Specific modes

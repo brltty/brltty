@@ -1702,7 +1702,7 @@ done:
 /* Function : ignore_accept_key_range */
 /* Common tasks for ignoring and unignoring key ranges */
 /* what = 0 for ignoring !0 for unignoring */
-static int ignore_accept_key_ranges(brlapi_handle_t *handle, int what, brlapi_range_t ranges[], unsigned int n)
+static int ignore_accept_key_ranges(brlapi_handle_t *handle, int what, const brlapi_range_t ranges[], unsigned int n)
 {
   uint32_t ints[n][4];
   unsigned int i, remaining, todo;
@@ -1756,12 +1756,12 @@ static int ignore_accept_keys(brlapi_handle_t *handle, int what, brlapi_rangeTyp
 }
 
 /* Function : brlapi_acceptKeyRanges */
-int BRLAPI_STDCALL brlapi__acceptKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], unsigned int n)
+int BRLAPI_STDCALL brlapi__acceptKeyRanges(brlapi_handle_t *handle, const brlapi_range_t ranges[], unsigned int n)
 {
   return ignore_accept_key_ranges(handle, !0, ranges, n);
 }
 
-int BRLAPI_STDCALL brlapi_acceptKeyRanges(brlapi_range_t ranges[], unsigned int n)
+int BRLAPI_STDCALL brlapi_acceptKeyRanges(const brlapi_range_t ranges[], unsigned int n)
 {
   return brlapi__acceptKeyRanges(&defaultHandle, ranges, n);
 }
@@ -1778,12 +1778,12 @@ int BRLAPI_STDCALL brlapi_acceptKeys(brlapi_rangeType_t r, const brlapi_keyCode_
 }
 
 /* Function : brlapi_ignoreKeyRanges */
-int BRLAPI_STDCALL brlapi__ignoreKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], unsigned int n)
+int BRLAPI_STDCALL brlapi__ignoreKeyRanges(brlapi_handle_t *handle, const brlapi_range_t ranges[], unsigned int n)
 {
   return ignore_accept_key_ranges(handle, 0, ranges, n);
 }
 
-int BRLAPI_STDCALL brlapi_ignoreKeyRanges(brlapi_range_t ranges[], unsigned int n)
+int BRLAPI_STDCALL brlapi_ignoreKeyRanges(const brlapi_range_t ranges[], unsigned int n)
 {
   return brlapi__ignoreKeyRanges(&defaultHandle, ranges, n);
 }
