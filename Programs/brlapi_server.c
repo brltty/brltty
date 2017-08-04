@@ -2476,7 +2476,9 @@ finished:
 /* to let the user read the screen in case theree is an error */
 static int initializeAcceptedKeys(Connection *c, int how)
 {
-  if (how != BRL_KEYCODES) {
+  if (how == BRL_KEYCODES) {
+    if (c && addKeyrange(0, BRLAPI_KEY_MAX, &c->acceptedKeys) == -1) return -1;
+  } else {
     if (c) {
       typedef struct {
         int (*action) (brlapi_keyCode_t first, brlapi_keyCode_t last, KeyrangeList **list);
