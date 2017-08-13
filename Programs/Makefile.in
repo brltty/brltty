@@ -16,15 +16,23 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-all: all-brltty brltty-trtxt$X brltty-ttb$X brltty-atb$X brltty-ctb$X all-brltty-ktb brltty-tune$X $(ALL_API_BINDINGS) $(ALL_XBRLAPI)
-everything: all all-brltest all-scrtest all-spktest $(ALL_API)
+all: all-brltty all-brltty-trtxt all-brltty-ttb all-brltty-atb $(ALL_BRLTTY_CTB) all-brltty-ktb all-brltty-tune $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
 all-brltty: brltty$X $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
+all-brltty-trtxt: brltty-trtxt$X
+all-brltty-ttb: brltty-ttb$X
+all-brltty-atb: brltty-atb$X
+all-brltty-ctb: brltty-ctb$X
+all-brltty-ktb: brltty-ktb$X $(BRAILLE_DRIVERS)
+all-brltty-tune: brltty-tune$X
+all-xbrlapi: xbrlapi$X
+
+everything: all all-brltest all-scrtest all-spktest $(ALL_API)
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
 all-spktest: spktest$X $(SPEECH_DRIVERS)
 all-scrtest: scrtest$X $(SCREEN_DRIVERS)
-all-brltty-ktb: brltty-ktb$X $(BRAILLE_DRIVERS)
-all-api: apitest$X $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
-all-xbrlapi: xbrlapi$X
+
+all-api: all-apitest
+all-apitest: apitest$X
 
 ###############################################################################
 
@@ -941,15 +949,17 @@ check-all: check-text-tables check-attributes-tables check-contraction-tables ch
 
 install:: install-programs install-tables $(INSTALL_DRIVERS) install-core-headers $(INSTALL_MESSAGES) install-manpages $(INSTALL_API)
 
-install-programs: brltty$X brltty-trtxt$X brltty-ttb$X brltty-atb$X brltty-ctb$X brltty-ktb$X brltty-tune$X install-program-directory install-writable-directory
+install-programs: brltty$X brltty-trtxt$X brltty-ttb$X brltty-atb$X $(INSTALL_BRLTTY_CTB) brltty-ktb$X brltty-tune$X install-program-directory install-writable-directory
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-trtxt$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-ttb$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-atb$X $(INSTALL_PROGRAM_DIRECTORY) 
-	$(INSTALL_PROGRAM) brltty-ctb$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-ktb$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-tune$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_DATA) $(BLD_TOP)config.sh $(INSTALL_PROGRAM_DIRECTORY)/brltty-config
+
+install-brltty-ctb: brltty-ctb$X install-program-directory
+	$(INSTALL_PROGRAM) brltty-ctb$X $(INSTALL_PROGRAM_DIRECTORY) 
 
 XBRLAPI_X11_AUTOSTART_FILE = 60xbrlapi
 XBRLAPI_GDM_AUTOSTART_FILE = xbrlapi.desktop

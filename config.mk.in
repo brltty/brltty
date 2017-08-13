@@ -415,3 +415,6 @@ INSTALL_API_BINDINGS = @install_api_bindings@
 ALL_XBRLAPI = @all_xbrlapi@
 INSTALL_XBRLAPI = @install_xbrlapi@
 
+ALL_BRLTTY_CTB = @all_brltty_ctb@
+INSTALL_BRLTTY_CTB = @install_brltty_ctb@
+
