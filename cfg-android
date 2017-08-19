@@ -81,6 +81,7 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
 "${sourceRoot}/configure" \
    --disable-gpm \
    --disable-icu \
+   --disable-liblouis \
    --disable-polkit \
    --disable-x \
    \
