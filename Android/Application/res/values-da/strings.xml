@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <string name="app_name">BRLTTY</string>
+  <string name="app_description">BRLTTY understøtter braille enheder.</string>
+
+  <string name="input_service_name">BRLTTY Input Service</string>
+  <string name="input_service_type">Tastaturer på Braille enheder</string>
+
+  <string name="VIRTUAL_BUTTON_NOTIFICATIONS">Notifikationer</string>
+  <string name="VIRTUAL_BUTTON_QUICK_SETTINGS">Hurtig Indstillinger</string>
+  <string name="VIRTUAL_BUTTON_BACK">Tilbage</string>
+  <string name="VIRTUAL_BUTTON_HOME">Hjem</string>
+  <string name="VIRTUAL_BUTTON_RECENT_APPS">Seneste Apps</string>
+
+  <string name="SETTINGS_SCREEN_MAIN">BRLTTY Indstillinger</string>
+  <string name="SETTINGS_SCREEN_GENERAL">Generalle indstillinger</string>
+  <string name="SETTINGS_SCREEN_DEVICES">Håndter enheder</string>
+  <string name="SETTINGS_SCREEN_ADVANCED">Advancerede indstillinger</string>
+
+  <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Navigationstilstand</string>
+  <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Taleunderstøttelse</string>
+
+  <string name="SETTINGS_BUTTON_TEXT_TABLE">Teksttabel</string>
+  <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Attributtabel</string>
+  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Forkortelsestabel</string>
+  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tastaturtabel</string>
+
+  <string name="SETTINGS_BUTTON_LOG_LEVEL">Log Niveau</string>
+  <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Log Kategori</string>
+  <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Log Tilgængelighedshændelser</string>
+  <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">Log Fremkaldt skærm</string>
+  <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Log Tastaturhændelser</string>
+
+  <string name="DEVICES_BUTTON_SELECTED">Valgte enhed</string>
+  <string name="DEVICES_BUTTON_ADD">Tilføj enhed</string>
+  <string name="DEVICES_BUTTON_REMOVE">Fjern enhed</string>
+
+  <string name="SELECTED_DEVICE_NONE">Ingen enheder</string>
+  <string name="SELECTED_DEVICE_UNSELECTED">Enhed ikke valgt</string>
+
+  <string name="ADD_DEVICE_NAME">Enhedsnavn</string>
+  <string name="ADD_DEVICE_METHOD">Kommunikationsmetode</string>
+  <string name="ADD_DEVICE_SELECT">Vælg enhed</string>
+  <string name="ADD_DEVICE_DRIVER">Braille driver</string>
+  <string name="ADD_DEVICE_DONE">Udført</string>
+  <string name="ADD_DEVICE_UNSELECTED_METHOD">kommunikationsmetode ikke valgt</string>
+  <string name="ADD_DEVICE_UNSELECTED_DEVICE">enhed ikke valgt</string>
+  <string name="ADD_DEVICE_UNSELECTED_DRIVER">braille driver ikke valgt</string>
+  <string name="ADD_DEVICE_NO_DEVICES">ingen enheder</string>
+  <string name="ADD_DEVICE_DUPLICATE_NAME">enhedsnavn allerede i brug</string>
+
+  <string name="REMOVE_DEVICE_ASK">Vil du virkelig gerne fjerne denne enhed ?</string>
+
+  <string name="SET_SELECTION_NONE">ingen valgt</string>
+
+  <string name="NAVIGATION_MODE_LABEL_List">Vertikal liste</string>
+  <string name="NAVIGATION_MODE_LABEL_Grid">To dimensionelt gitter</string>
+
+  <string name="SPEECH_SUPPORT_LABEL_None">Ingen</string>
+  <string name="SPEECH_SUPPORT_LABEL_Native">Medfødt</string>
+
+  <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
+  <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>
+  <string name="COMMUNICATION_METHOD_LABEL_Serial">Seriel</string>
+
+  <string name="LOG_LEVEL_LABEL_debug">Aflus</string>
+  <string name="LOG_LEVEL_LABEL_information">Information</string>
+  <string name="LOG_LEVEL_LABEL_notice">Opmærksomhed</string>
+  <string name="LOG_LEVEL_LABEL_warning">Advarsel</string>
+  <string name="LOG_LEVEL_LABEL_error">Fejl</string>
+  <string name="LOG_LEVEL_LABEL_critical">Kirtisk</string>
+  <string name="LOG_LEVEL_LABEL_alert">Alarm</string>
+  <string name="LOG_LEVEL_LABEL_emergency">Uheld</string>
+
+  <string name="LOG_CATEGORY_LABEL_ingio">Generisk input</string>
+  <string name="LOG_CATEGORY_LABEL_inpkts">Input pakker</string>
+  <string name="LOG_CATEGORY_LABEL_outpkts">Output pakker</string>
+  <string name="LOG_CATEGORY_LABEL_brlkeys">Braille enhed nøglehændelser</string>
+  <string name="LOG_CATEGORY_LABEL_kbdkeys">Tastatur nøglehændelser</string>
+  <string name="LOG_CATEGORY_LABEL_csrtrk">Markør følgning</string>
+  <string name="LOG_CATEGORY_LABEL_csrrtg">Markør ruteplanlægning</string>
+  <string name="LOG_CATEGORY_LABEL_update">Opdateringshændelser</string>
+  <string name="LOG_CATEGORY_LABEL_speech">Talehændelser</string>
+  <string name="LOG_CATEGORY_LABEL_async">Asynkrone hændelser</string>
+  <string name="LOG_CATEGORY_LABEL_server">Server hændelser</string>
+  <string name="LOG_CATEGORY_LABEL_serial">Serielt I/O</string>
+  <string name="LOG_CATEGORY_LABEL_usb">USB I/O</string>
+  <string name="LOG_CATEGORY_LABEL_bluetooth">Bluetooth I/O</string>
+  <string name="LOG_CATEGORY_LABEL_brldrv">Braille-driver hændelser</string>
+  <string name="LOG_CATEGORY_LABEL_spkdrv">Tale-driver hændelser</string>
+  <string name="LOG_CATEGORY_LABEL_scrdrv">Skærm-river hændelser</string>
+
+  <string name="BRAILLE_DRIVER_LABEL_auto">autofind</string>
+
+  <string name="TEXT_TABLE_LABEL_auto">lokal-baseret autovælg</string>
+  <string name="TEXT_TABLE_LABEL_ar">Arabisk (generisk)</string>
+  <string name="TEXT_TABLE_LABEL_as">Assamese</string>
+  <string name="TEXT_TABLE_LABEL_awa">Awadhi</string>
+  <string name="TEXT_TABLE_LABEL_bg">Bulgarsk</string>
+  <string name="TEXT_TABLE_LABEL_bh">Bihari</string>
+  <string name="TEXT_TABLE_LABEL_bn">Bengali</string>
+  <string name="TEXT_TABLE_LABEL_bo">Tibetansk</string>
+  <string name="TEXT_TABLE_LABEL_bra">Braj</string>
+  <string name="TEXT_TABLE_LABEL_brf">Braille Ready Format (for at vise .brf files i en editor eller fremviser)</string>
+  <string name="TEXT_TABLE_LABEL_cs">Tjekkisk</string>
+  <string name="TEXT_TABLE_LABEL_cy">Welsk</string>
+  <string name="TEXT_TABLE_LABEL_da_1252">Dansk (Svend Thougaard, 2002-11-18)</string>
+  <string name="TEXT_TABLE_LABEL_da">Dansk</string>
+  <string name="TEXT_TABLE_LABEL_da_lt">Dansk (LogText)</string>
+  <string name="TEXT_TABLE_LABEL_de">Tysk</string>
+  <string name="TEXT_TABLE_LABEL_dra">Dravidian</string>
+  <string name="TEXT_TABLE_LABEL_el">Græsk</string>
+  <string name="TEXT_TABLE_LABEL_en_CA">Engelsk (Canada)</string>
+  <string name="TEXT_TABLE_LABEL_en">Engelsk</string>
+  <string name="TEXT_TABLE_LABEL_en_GB">Engelsk (United Kingdom)</string>
+  <string name="TEXT_TABLE_LABEL_en_nabcc">Engelsk (Nord Amerikansk Braille Computer Code)</string>
+  <string name="TEXT_TABLE_LABEL_en_US">Engelsk (United States)</string>
+  <string name="TEXT_TABLE_LABEL_eo">Esperanto</string>
+  <string name="TEXT_TABLE_LABEL_es">Spansk</string>
+  <string name="TEXT_TABLE_LABEL_et">Estisk</string>
+  <string name="TEXT_TABLE_LABEL_fi">Finsk</string>
+  <string name="TEXT_TABLE_LABEL_fr_2007">Fransk (unified 2007)</string>
+  <string name="TEXT_TABLE_LABEL_fr_CA">Fransk (Canada)</string>
+  <string name="TEXT_TABLE_LABEL_fr_cbifs">Fransk (Code Braille Informatique Français Standard)</string>
+  <string name="TEXT_TABLE_LABEL_fr">Fransk</string>
+  <string name="TEXT_TABLE_LABEL_fr_FR">Fransk (Frankrig)</string>
+  <string name="TEXT_TABLE_LABEL_fr_vs">Fransk (VisioBraille)</string>
+  <string name="TEXT_TABLE_LABEL_ga">Irsk</string>
+  <string name="TEXT_TABLE_LABEL_gd">Gaelic</string>
+  <string name="TEXT_TABLE_LABEL_gon">Gondi</string>
+  <string name="TEXT_TABLE_LABEL_gu">Gujarati</string>
+  <string name="TEXT_TABLE_LABEL_he">Hebraisk</string>
+  <string name="TEXT_TABLE_LABEL_hi">Hindi</string>
+  <string name="TEXT_TABLE_LABEL_hr">Kroatisk</string>
+  <string name="TEXT_TABLE_LABEL_hu">Ungarnsk</string>
+  <string name="TEXT_TABLE_LABEL_hy">Armenisk</string>
+  <string name="TEXT_TABLE_LABEL_is">Islandsk</string>
+  <string name="TEXT_TABLE_LABEL_it">Italiensk</string>
+  <string name="TEXT_TABLE_LABEL_kha">Khasi</string>
+  <string name="TEXT_TABLE_LABEL_kn">Kannada</string>
+  <string name="TEXT_TABLE_LABEL_kok">Konkani</string>
+  <string name="TEXT_TABLE_LABEL_kru">Kurukh</string>
+  <string name="TEXT_TABLE_LABEL_lt">Litauisk</string>
+  <string name="TEXT_TABLE_LABEL_lv">Lettisk</string>
+  <string name="TEXT_TABLE_LABEL_mg">Malagasy</string>
+  <string name="TEXT_TABLE_LABEL_mi">Maori</string>
+  <string name="TEXT_TABLE_LABEL_ml">Malayalam</string>
+  <string name="TEXT_TABLE_LABEL_mni">Manipuri</string>
+  <string name="TEXT_TABLE_LABEL_mr">Marathi</string>
+  <string name="TEXT_TABLE_LABEL_mt">Maltese</string>
+  <string name="TEXT_TABLE_LABEL_mun">Munda</string>
+  <string name="TEXT_TABLE_LABEL_mwr">Marwari</string>
+  <string name="TEXT_TABLE_LABEL_ne">Nepalesisk</string>
+  <string name="TEXT_TABLE_LABEL_new">Newari</string>
+  <string name="TEXT_TABLE_LABEL_nl_BE">Belgisk (Belgien)</string>
+  <string name="TEXT_TABLE_LABEL_nl">Belgisk</string>
+  <string name="TEXT_TABLE_LABEL_nl_NL">Hollansk (Holland)</string>
+  <string name="TEXT_TABLE_LABEL_no_generic">Norsk (med understøttelse for andre sprog)</string>
+  <string name="TEXT_TABLE_LABEL_no">Norsk</string>
+  <string name="TEXT_TABLE_LABEL_no_oup">Norsk (Offentlig utvalg for punktskrift)</string>
+  <string name="TEXT_TABLE_LABEL_nwc">Newari (old)</string>
+  <string name="TEXT_TABLE_LABEL_or">Oriya</string>
+  <string name="TEXT_TABLE_LABEL_pa">Panjabi</string>
+  <string name="TEXT_TABLE_LABEL_pi">Pali</string>
+  <string name="TEXT_TABLE_LABEL_pl">Polsk</string>
+  <string name="TEXT_TABLE_LABEL_pt">Portugisisk</string>
+  <string name="TEXT_TABLE_LABEL_ro">Romansk</string>
+  <string name="TEXT_TABLE_LABEL_ru">Russisk</string>
+  <string name="TEXT_TABLE_LABEL_sa">Sanskrit</string>
+  <string name="TEXT_TABLE_LABEL_sat">Santali</string>
+  <string name="TEXT_TABLE_LABEL_sd">Sindhi</string>
+  <string name="TEXT_TABLE_LABEL_sk">Slovakisk</string>
+  <string name="TEXT_TABLE_LABEL_sl">Slovensk</string>
+  <string name="TEXT_TABLE_LABEL_sv_1989">Svensk (1989 standard)</string>
+  <string name="TEXT_TABLE_LABEL_sv_1996">Svensk (1996 standard)</string>
+  <string name="TEXT_TABLE_LABEL_sv">Svensk</string>
+  <string name="TEXT_TABLE_LABEL_sw">Swahili</string>
+  <string name="TEXT_TABLE_LABEL_ta">Tamil</string>
+  <string name="TEXT_TABLE_LABEL_te">Telugu</string>
+  <string name="TEXT_TABLE_LABEL_tr">Tyrkisk</string>
+  <string name="TEXT_TABLE_LABEL_vi">Vietnamesisk</string>
+
+  <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">inverteret forgrundsfarve i venstre søjle og baggrundsfarve i højre søjle</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_left_right">forgrundsfarve i venstre søjle og baggrundsfarve i højre søjle</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">forgrundsfarve i øverste firkant og baggrundsfarve i nederste firkant</string>
+
+  <string name="CONTRACTION_TABLE_LABEL_af">Afrikaans (forkortet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_am">Amharic (uforkortet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_basis">Tysk (uforkortet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift">Tysk (forkortet - 1998 standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">Tysk (basis forkortelser)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">Engelsk (Unified English Braille, grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_us_g2">Engelsk (US, grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_es">Spansk (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_abrege">Fransk (forkortet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_integral">Fransk (uforkortet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ha">Hausa (forkortet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_id">Indonesisk (forkortet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ipa">Intertionale aonetiske alfabet</string>
+  <string name="CONTRACTION_TABLE_LABEL_ja">Japansk (uforkortet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g1">Koreansk (grade 1)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g2">Koreansk (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko">Koreansk (uforkortet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_mg">Malaisisk (forkortet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_mun">Munda (forkortet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_nl">Belgisk (forkortet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ny">Chichewa (forkortet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_pt">Portugiskisk (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_si">Sinhalese (uforkortet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (forkortet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_th">Thailandsk (Forkortet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_tw">Kinesisk (Taiwan, uforkortet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">Kinesisk (Taiwan, Unique Chinese Braille)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (forkortet)</string>
+
+  <string name="KEYBOARD_TABLE_LABEL_braille">genveje for braille tastaturer</string>
+  <string name="KEYBOARD_TABLE_LABEL_desktop">genveje for hele tastaturer</string>
+  <string name="KEYBOARD_TABLE_LABEL_keypad">genveje for taste-baseret navigation</string>
+  <string name="KEYBOARD_TABLE_LABEL_laptop">genveje for tastaturer uden nummerisk tastatur</string>
+  <string name="KEYBOARD_TABLE_LABEL_sun_type6">genveje for Sun Type 6 tastaturer</string>
+</resources>
