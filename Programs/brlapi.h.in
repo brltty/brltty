@@ -307,6 +307,23 @@ int BRLAPI_STDCALL brlapi_getDriverName(char *buffer, size_t size);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
 int BRLAPI_STDCALL brlapi__getDriverName(brlapi_handle_t *handle, char *buffer, size_t size);
 
+/* brlapi_getModelIdentifier */
+/** Return an identifier for the device model used by \e brltty
+ *
+ * This function fills its argument with the whole identifier of the braille
+ * device model if available, terminated with a '\\0'.
+ *
+ * \param buffer is the buffer given by the application;
+ * \param size is the maximum size for the identifier buffer.
+ *
+ * \return -1 on error, or a positive value giving the size of the needed
+ * buffer, if the supplied one is too small (same as snprintf()).
+*/
+#ifndef BRLAPI_NO_SINGLE_SESSION
+int BRLAPI_STDCALL brlapi_getModelIdentifier(char *buffer, size_t size);
+#endif /* BRLAPI_NO_SINGLE_SESSION */
+int BRLAPI_STDCALL brlapi__getModelIdentifier(brlapi_handle_t *handle, char *buffer, size_t size);
+
 /* brlapi_getDisplaySize */
 /** Return the size of the braille display */
 #ifndef BRLAPI_NO_SINGLE_SESSION

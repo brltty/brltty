@@ -538,6 +538,7 @@ typedef int(*PacketHandler)(Connection *, brlapi_packetType_t, brlapi_packet_t *
 
 typedef struct { /* packet handlers */
   PacketHandler getDriverName;
+  PacketHandler getModelIdentifier;
   PacketHandler getDisplaySize;
   PacketHandler enterTtyMode;
   PacketHandler setFocus;
@@ -804,6 +805,11 @@ static int handleGetDriver(Connection *c, brlapi_packetType_t type, size_t size,
 static int handleGetDriverName(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
   return handleGetDriver(c, type, size, braille->definition.name);
+}
+
+static int handleGetModelIdentifier(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
+{
+  return handleGetDriver(c, type, size, disp->keyBindings);
 }
 
 static int handleGetDisplaySize(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
@@ -1226,7 +1232,7 @@ static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_pa
 }
 
 static PacketHandlers packetHandlers = {
-  handleGetDriverName, handleGetDisplaySize,
+  handleGetDriverName, handleGetModelIdentifier, handleGetDisplaySize,
   handleEnterTtyMode, handleSetFocus, handleLeaveTtyMode,
   handleKeyRanges, handleKeyRanges, handleWrite,
   handleEnterRawMode, handleLeaveRawMode, handlePacket,
@@ -1415,6 +1421,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
   }
   switch (type) {
     case BRLAPI_PACKET_GETDRIVERNAME: p = handlers->getDriverName; break;
+    case BRLAPI_PACKET_GETMODELID: p = handlers->getModelIdentifier; break;
     case BRLAPI_PACKET_GETDISPLAYSIZE: p = handlers->getDisplaySize; break;
     case BRLAPI_PACKET_ENTERTTYMODE: p = handlers->enterTtyMode; break;
     case BRLAPI_PACKET_SETFOCUS: p = handlers->setFocus; break;

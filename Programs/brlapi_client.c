@@ -974,6 +974,20 @@ int BRLAPI_STDCALL brlapi_getDriverName(char *name, size_t n)
   return brlapi__getDriverName(&defaultHandle, name, n);
 }
 
+/* Function : brlapi_getModelIdentifier */
+/* An identifier for the model of the device used by brltty */
+int BRLAPI_STDCALL brlapi__getModelIdentifier(brlapi_handle_t *handle, char *identifier, size_t n)
+{
+  ssize_t res = brlapi__request(handle, BRLAPI_PACKET_GETMODELID, identifier, n);
+  if ((res>0) && (res<=n)) identifier[res-1] = '\0';
+  return res;
+}
+
+int BRLAPI_STDCALL brlapi_getModelIdentifier(char *identifier, size_t n)
+{
+  return brlapi__getModelIdentifier(&defaultHandle, identifier, n);
+}
+
 /* Function : brlapi_getDisplaySize */
 /* Returns the size of the braille display */
 int BRLAPI_STDCALL brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned int *y)

@@ -40,6 +40,7 @@ static char *opt_auth;
 static int opt_learnMode;
 static int opt_showDots;
 static int opt_showName;
+static int opt_showModelIdentifier;
 static int opt_showSize;
 static int opt_showKeyCodes;
 static int opt_suspendMode;
@@ -50,6 +51,13 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.flag = &opt_showName,
     .description = "Show the name of the braille driver."
   },
+
+  { .letter = 'm',
+    .word = "model",
+    .setting.flag = &opt_showModelIdentifier,
+    .description = "Show the model identifier of the braille device."
+  },
+
 
   { .letter = 'w',
     .word = "window",
@@ -116,6 +124,17 @@ static void showDriverName(void)
     exit(PROG_EXIT_FATAL);
   }
   fprintf(stderr, "%s\n", name);
+}
+
+static void showModelIdentifier(void)
+{
+  char identifier[30];
+  fprintf(stderr, "Getting model identifier: ");
+  if (brlapi_getModelIdentifier(identifier, sizeof(identifier))<0) {
+    brlapi_perror("failed");
+    exit(PROG_EXIT_FATAL);
+  }
+  fprintf(stderr, "%s\n", identifier);
 }
 
 #define DOTS_TEXT "dots: "
@@ -286,6 +305,10 @@ main (int argc, char *argv[]) {
 
     if (opt_showName) {
       showDriverName();
+    }
+
+    if (opt_showModelIdentifier) {
+      showModelIdentifier();
     }
 
     if (opt_showSize) {

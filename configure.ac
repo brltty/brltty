@@ -23,7 +23,7 @@ AC_CONFIG_SRCDIR([Programs/brltty.c])
 
 AC_SUBST([api_major], [0])
 AC_SUBST([api_minor], [6])
-AC_SUBST([api_revision], [6])
+AC_SUBST([api_revision], [7])
 
 AC_SUBST([api_version], [${api_major}.${api_minor}])
 AC_SUBST([api_release], [${api_version}.${api_revision}])

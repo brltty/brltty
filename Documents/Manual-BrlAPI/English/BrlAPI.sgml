@@ -1392,10 +1392,16 @@ the credentials sufficient.
 Note: when the Operating system permits it, the server may use implicit
 credential check, and then advertise the <tt/none/ method.
 
-u<sect2><tt/BRLAPI_PACKET_GETDRIVERNAME/ (see <em/brlapi_getDriverName()/)
+<sect2><tt/BRLAPI_PACKET_GETDRIVERNAME/ (see <em/brlapi_getDriverName()/)
 <p>
 This should be sent by the client when it needs the full name of
 the current <tt/brltty/ driver. The returned string is \0 terminated.
+
+<sect2><tt/BRLAPI_PACKET_GETMODELID/ (see <em/brlapi_getModelIdentifier()/)
+<p>
+This should be sent by the client when it needs to identify
+which model of braille display is currently used by <tt/brltty/.
+The returned string is \0 terminated.
 
 <sect2><tt/BRLAPI_PACKET_GETDISPLAYSIZE/ (see <em/brlapi_getDisplaySize()/)
 <p>

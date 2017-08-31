@@ -58,6 +58,7 @@ extern "C" {
 #define BRLAPI_PACKET_VERSION         'v'   /**< Version                     */
 #define BRLAPI_PACKET_AUTH            'a'   /**< Authorization               */
 #define BRLAPI_PACKET_GETDRIVERNAME   'n'   /**< Ask which driver is used    */
+#define BRLAPI_PACKET_GETMODELID      'd'   /**< Ask which model is used     */
 #define BRLAPI_PACKET_GETDISPLAYSIZE  's'   /**< Dimensions of brl display   */
 #define BRLAPI_PACKET_ENTERTTYMODE    't'   /**< Asks for a specified tty    */
 #define BRLAPI_PACKET_SETFOCUS        'F'   /**< Set current tty focus       */
