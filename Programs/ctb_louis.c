@@ -18,11 +18,11 @@
 
 #include "prologue.h"
 
+#include <liblouis.h>
+
 #include "log.h"
 #include "ctb_translate.h"
 #include "prefs.h"
-
-#include <liblouis.h>
 
 static void
 initialize (void) {
