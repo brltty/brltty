@@ -210,8 +210,18 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
 
 static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
+  BEGIN_USB_CHANNEL_DEFINITIONS
+    { /* all models */
+      .vendor=0X045E, .product=0X930A,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2
+    },
+  END_USB_CHANNEL_DEFINITIONS
+
   GioDescriptor descriptor;
   gioInitializeDescriptor(&descriptor);
+
+  descriptor.usb.channelDefinitions = usbChannelDefinitions;
 
   descriptor.bluetooth.channelNumber = 1;
 
