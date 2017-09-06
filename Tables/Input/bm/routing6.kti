@@ -18,7 +18,7 @@
 
 # This key subtable is for Baum displays which have routing keys and 6 display keys.
 
-bind RoutingKey ROUTE
+include routing.kti
 
 bind Display1+RoutingKey CLIP_NEW
 bind Display2+RoutingKey CLIP_ADD

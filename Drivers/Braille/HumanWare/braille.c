@@ -30,25 +30,11 @@
 #include "brl_driver.h"
 #include "brldefs-hw.h"
 
-BEGIN_KEY_NAME_TABLE(nav)
-  KEY_NAME_ENTRY(HW_KEY_Reset, "Reset"),
-
-  KEY_NAME_ENTRY(HW_KEY_Command1, "Display1"),
-  KEY_NAME_ENTRY(HW_KEY_Command2, "Display2"),
-  KEY_NAME_ENTRY(HW_KEY_Command3, "Display3"),
-  KEY_NAME_ENTRY(HW_KEY_Command4, "Display4"),
-  KEY_NAME_ENTRY(HW_KEY_Command5, "Display5"),
-  KEY_NAME_ENTRY(HW_KEY_Command6, "Display6"),
-
-  KEY_NAME_ENTRY(HW_KEY_Thumb1, "Thumb1"),
-  KEY_NAME_ENTRY(HW_KEY_Thumb2, "Thumb2"),
-  KEY_NAME_ENTRY(HW_KEY_Thumb3, "Thumb3"),
-  KEY_NAME_ENTRY(HW_KEY_Thumb4, "Thumb4"),
-
+BEGIN_KEY_NAME_TABLE(routing)
   KEY_GROUP_ENTRY(HW_GRP_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(kbd)
+BEGIN_KEY_NAME_TABLE(braille)
   KEY_NAME_ENTRY(HW_KEY_Dot1, "Dot1"),
   KEY_NAME_ENTRY(HW_KEY_Dot2, "Dot2"),
   KEY_NAME_ENTRY(HW_KEY_Dot3, "Dot3"),
@@ -60,21 +46,75 @@ BEGIN_KEY_NAME_TABLE(kbd)
   KEY_NAME_ENTRY(HW_KEY_Space, "Space"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLES(mb1)
-  KEY_NAME_TABLE(nav),
+BEGIN_KEY_NAME_TABLE(command)
+  KEY_NAME_ENTRY(HW_KEY_Command1, "Display1"),
+  KEY_NAME_ENTRY(HW_KEY_Command2, "Display2"),
+  KEY_NAME_ENTRY(HW_KEY_Command3, "Display3"),
+  KEY_NAME_ENTRY(HW_KEY_Command4, "Display4"),
+  KEY_NAME_ENTRY(HW_KEY_Command5, "Display5"),
+  KEY_NAME_ENTRY(HW_KEY_Command6, "Display6"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(joystick)
+  KEY_NAME_ENTRY(HW_KEY_Up, "Up"),
+  KEY_NAME_ENTRY(HW_KEY_Down, "Down"),
+  KEY_NAME_ENTRY(HW_KEY_Left, "Left"),
+  KEY_NAME_ENTRY(HW_KEY_Right, "Right"),
+  KEY_NAME_ENTRY(HW_KEY_Action, "Action"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(thumb)
+  KEY_NAME_ENTRY(HW_KEY_Thumb1, "Thumb1"),
+  KEY_NAME_ENTRY(HW_KEY_Thumb2, "Thumb2"),
+  KEY_NAME_ENTRY(HW_KEY_Thumb3, "Thumb3"),
+  KEY_NAME_ENTRY(HW_KEY_Thumb4, "Thumb4"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLES(BI14)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(thumb),
+  KEY_NAME_TABLE(braille),
+  KEY_NAME_TABLE(joystick),
 END_KEY_NAME_TABLES
 
-BEGIN_KEY_NAME_TABLES(mb2)
-  KEY_NAME_TABLE(nav),
-  KEY_NAME_TABLE(kbd),
+BEGIN_KEY_NAME_TABLES(BI32)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(thumb),
+  KEY_NAME_TABLE(command),
+  KEY_NAME_TABLE(braille),
 END_KEY_NAME_TABLES
 
-DEFINE_KEY_TABLE(mb1)
-DEFINE_KEY_TABLE(mb2)
+BEGIN_KEY_NAME_TABLES(BI40)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(thumb),
+  KEY_NAME_TABLE(command),
+  KEY_NAME_TABLE(braille),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(B80)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(thumb),
+  KEY_NAME_TABLE(command),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(touch)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(thumb),
+  KEY_NAME_TABLE(braille),
+END_KEY_NAME_TABLES
+
+DEFINE_KEY_TABLE(BI14)
+DEFINE_KEY_TABLE(BI32)
+DEFINE_KEY_TABLE(BI40)
+DEFINE_KEY_TABLE(B80)
+DEFINE_KEY_TABLE(touch)
 
 BEGIN_KEY_TABLE_LIST
-  &KEY_TABLE_DEFINITION(mb1),
-  &KEY_TABLE_DEFINITION(mb2),
+  &KEY_TABLE_DEFINITION(BI14),
+  &KEY_TABLE_DEFINITION(BI32),
+  &KEY_TABLE_DEFINITION(BI40),
+  &KEY_TABLE_DEFINITION(B80),
+  &KEY_TABLE_DEFINITION(touch),
 END_KEY_TABLE_LIST
 
 #define OPEN_READY_DELAY 100
@@ -93,6 +133,7 @@ END_KEY_TABLE_LIST
 #define BRAILLE_KEY_COUNT (8 + 1)
 #define COMMAND_KEY_COUNT 6
 #define THUMB_KEY_COUNT 4
+#define JOYSTICK_KEY_COUNT 5
 
 typedef struct {
   const char *name;
@@ -105,6 +146,7 @@ typedef struct {
 struct BrailleDataStruct {
   const ProtocolEntry *protocol;
   uint32_t firmwareVersion;
+  unsigned isTouch:1;
   unsigned isOffline:1;
 
   struct {
@@ -158,8 +200,9 @@ setFirmwareVersion (BrailleDisplay *brl, unsigned char major, unsigned char mino
 }
 
 static int
-hasBrailleKeyboard (BrailleDisplay *brl) {
-  if (brl->textColumns == 18) return 1;
+hasBrailleKeys (BrailleDisplay *brl) {
+  if (brl->data->isTouch) return 1;
+  if (brl->textColumns == 14) return 1;
   if (brl->textColumns == 32) return 1;
   if (brl->textColumns == 40) return 1;
   return 0;
@@ -167,6 +210,7 @@ hasBrailleKeyboard (BrailleDisplay *brl) {
 
 static int
 hasSecondThumbKeys (BrailleDisplay *brl) {
+  if (brl->data->isTouch) return 0;
   if (brl->textColumns == 80) return 1;
   return 0;
 }
@@ -363,6 +407,12 @@ probeSerialDisplay (BrailleDisplay *brl) {
                response.fields.data.init.modelIdentifier,
                response.fields.data.init.cellCount);
 
+    switch (response.fields.data.init.modelIdentifier) {
+      case HW_MODEL_TOUCH:
+        brl->data->isTouch = 1;
+        break;
+    }
+
     brl->textColumns = response.fields.data.init.cellCount;
 
     writeSerialRequest(brl, HW_MSG_GET_FIRMWARE_VERSION);
@@ -544,7 +594,7 @@ probeHidDisplay (BrailleDisplay *brl) {
   {
     unsigned char *size = &brl->data->hid.pressedKeys.reportSize;
     *size = 1 + THUMB_KEY_COUNT + COMMAND_KEY_COUNT + brl->textColumns;
-    if (hasBrailleKeyboard(brl)) *size += BRAILLE_KEY_COUNT;
+    if (hasBrailleKeys(brl)) *size += BRAILLE_KEY_COUNT;
     if (hasSecondThumbKeys(brl)) *size += THUMB_KEY_COUNT;
   }
 
@@ -679,10 +729,33 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (connectResource(brl, device)) {
       if (brl->data->protocol->probeDisplay(brl)) {
         {
-          const KeyTableDefinition *ktd =
-            hasBrailleKeyboard(brl)?
-            &KEY_TABLE_DEFINITION(mb2):
-            &KEY_TABLE_DEFINITION(mb1);
+          const KeyTableDefinition *ktd;
+
+          if (brl->data->isTouch) {
+            ktd = &KEY_TABLE_DEFINITION(touch);
+          } else {
+            switch (brl->textColumns) {
+              case 14:
+                ktd = &KEY_TABLE_DEFINITION(BI14);
+                break;
+
+              case 32:
+                ktd = &KEY_TABLE_DEFINITION(BI32);
+                break;
+
+              case 40:
+                ktd = &KEY_TABLE_DEFINITION(BI40);
+                break;
+
+              case 80:
+                ktd = &KEY_TABLE_DEFINITION(B80);
+                break;
+
+              default:
+                ktd = NULL;
+                break;
+            }
+          }
 
           setBrailleKeyTable(brl, ktd);
         }

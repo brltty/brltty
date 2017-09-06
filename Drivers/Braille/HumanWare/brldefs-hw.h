@@ -39,6 +39,10 @@ typedef enum {
   HW_MSG_POWERING_OFF          = 0X10
 } HW_MessageType;
 
+typedef enum {
+  HW_MODEL_TOUCH = 0X10
+} HW_ModelIdentifier;
+
 typedef union {
   unsigned char bytes[3 + 0XFF];
 
@@ -153,6 +157,12 @@ typedef enum {
   HW_KEY_Thumb2    = 18,
   HW_KEY_Thumb3    = 19,
   HW_KEY_Thumb4    = 20,
+
+  HW_KEY_Up        = 21,
+  HW_KEY_Down      = 22,
+  HW_KEY_Left      = 23,
+  HW_KEY_Right     = 24,
+  HW_KEY_Action    = 25,
 
   HW_KEY_CAL_OK    = 30,
   HW_KEY_CAL_FAIL  = 31,

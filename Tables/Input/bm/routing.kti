@@ -16,6 +16,4 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title HumanWare Brailliant B (has no keyboard)
-
-include nav.kti
+bind RoutingKey ROUTE
