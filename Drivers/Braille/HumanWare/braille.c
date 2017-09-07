@@ -156,17 +156,6 @@ static const ModelEntry modelEntry_touch = {
   .keyTable = &KEY_TABLE_DEFINITION(touch)
 };
 
-static const ModelEntry *
-getModelEntry (unsigned int cells) {
-  switch (cells) {
-    case 14: return &modelEntry_BI14;
-    case 32: return &modelEntry_BI32;
-    case 40: return &modelEntry_BI40;
-    case 80: return &modelEntry_B80;
-    default: return NULL;
-  }
-}
-
 #define OPEN_READY_DELAY 100
 
 #define SERIAL_PROBE_RESPONSE_TIMEOUT 1000
@@ -223,6 +212,19 @@ struct BrailleDataStruct {
     } pressedKeys;
   } hid;
 };
+
+static const ModelEntry *
+getModelEntry (BrailleDisplay *brl) {
+  if (brl->data->isTouch) return &modelEntry_touch;
+
+  switch (brl->textColumns) {
+    case 14: return &modelEntry_BI14;
+    case 32: return &modelEntry_BI32;
+    case 40: return &modelEntry_BI40;
+    case 80: return &modelEntry_B80;
+    default: return NULL;
+  }
+}
 
 static int
 getDecimalValue (const char *digits, unsigned int count) {
@@ -766,13 +768,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
     if (connectResource(brl, device)) {
       if (brl->data->protocol->probeDisplay(brl)) {
-        if (brl->data->isTouch) {
-          brl->data->model = &modelEntry_touch;
-        } else {
-          brl->data->model = getModelEntry(brl->textColumns);
-        }
-
+        brl->data->model = getModelEntry(brl);
         setBrailleKeyTable(brl, brl->data->model->keyTable);
+
         makeOutputTable(dotsTable_ISO11548_1);
         brl->data->text.rewrite = 1;
         return 1;
