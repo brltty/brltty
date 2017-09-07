@@ -40,14 +40,14 @@ BEGIN_KEY_NAME_TABLE(navigation)
   KEY_NAME_ENTRY(IV_KEY_Dot7, "Dot7"),
   KEY_NAME_ENTRY(IV_KEY_Dot8, "Dot8"),
 
-  KEY_NAME_ENTRY(IV_KEY_RightPrevious, "RightPrevious"),
-  KEY_NAME_ENTRY(IV_KEY_RightNext, "RightNext"),
-  KEY_NAME_ENTRY(IV_KEY_LeftPrevious, "LeftPrevious"),
-  KEY_NAME_ENTRY(IV_KEY_LeftNext, "LeftNext"),
+  KEY_NAME_ENTRY(IV_KEY_LeftUp, "LeftUp"),
+  KEY_NAME_ENTRY(IV_KEY_LeftDown, "LeftDown"),
+  KEY_NAME_ENTRY(IV_KEY_RightUp, "RightUp"),
+  KEY_NAME_ENTRY(IV_KEY_RightDown, "RightDown"),
 
   KEY_NAME_ENTRY(IV_KEY_Back, "Back"),
   KEY_NAME_ENTRY(IV_KEY_Space, "Space"),
-  KEY_NAME_ENTRY(IV_KEY_Shift, "Shift"),
+  KEY_NAME_ENTRY(IV_KEY_Enter, "Enter"),
 
   KEY_GROUP_ENTRY(IV_GRP_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
