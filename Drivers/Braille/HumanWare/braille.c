@@ -226,6 +226,11 @@ getModelEntry (BrailleDisplay *brl) {
   }
 }
 
+static void
+setModel (BrailleDisplay *brl) {
+  brl->data->model = getModelEntry(brl);
+}
+
 static int
 getDecimalValue (const char *digits, unsigned int count) {
   unsigned int result = 0;
@@ -452,6 +457,7 @@ probeSerialDisplay (BrailleDisplay *brl) {
     }
 
     brl->textColumns = response.fields.data.init.cellCount;
+    setModel(brl);
 
     writeSerialRequest(brl, HW_MSG_GET_FIRMWARE_VERSION);
     writeSerialRequest(brl, HW_MSG_GET_KEYS);
@@ -628,6 +634,7 @@ probeHidDisplay (BrailleDisplay *brl) {
     getDecimalValue(&capabilities.version.build[0], 2));
 
   brl->textColumns = capabilities.cellCount;
+  setModel(brl);
 
   {
     unsigned char *size = &brl->data->hid.pressedKeys.reportSize;
@@ -768,9 +775,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
     if (connectResource(brl, device)) {
       if (brl->data->protocol->probeDisplay(brl)) {
-        brl->data->model = getModelEntry(brl);
         setBrailleKeyTable(brl, brl->data->model->keyTable);
-
         makeOutputTable(dotsTable_ISO11548_1);
         brl->data->text.rewrite = 1;
         return 1;
