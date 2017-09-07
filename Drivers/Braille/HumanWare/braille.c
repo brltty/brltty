@@ -80,15 +80,15 @@ END_KEY_NAME_TABLES
 BEGIN_KEY_NAME_TABLES(BI32)
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(thumb),
-  KEY_NAME_TABLE(command),
   KEY_NAME_TABLE(braille),
+  KEY_NAME_TABLE(command),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(BI40)
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(thumb),
-  KEY_NAME_TABLE(command),
   KEY_NAME_TABLE(braille),
+  KEY_NAME_TABLE(command),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(B80)
@@ -101,6 +101,7 @@ BEGIN_KEY_NAME_TABLES(touch)
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(thumb),
   KEY_NAME_TABLE(braille),
+  KEY_NAME_TABLE(command),
 END_KEY_NAME_TABLES
 
 DEFINE_KEY_TABLE(BI14)
@@ -116,6 +117,55 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(B80),
   &KEY_TABLE_DEFINITION(touch),
 END_KEY_TABLE_LIST
+
+typedef struct {
+  const KeyTableDefinition *keyTable;
+  unsigned hasBrailleKeys:1;
+  unsigned hasCommandKeys:1;
+  unsigned hasJoystick:1;
+  unsigned hasSecondThumbKeys:1;
+} ModelEntry;
+
+static const ModelEntry modelEntry_BI14 = {
+  .hasBrailleKeys = 1,
+  .hasJoystick = 1,
+  .keyTable = &KEY_TABLE_DEFINITION(BI14)
+};
+
+static const ModelEntry modelEntry_BI32 = {
+  .hasBrailleKeys = 1,
+  .hasCommandKeys = 1,
+  .keyTable = &KEY_TABLE_DEFINITION(BI32)
+};
+
+static const ModelEntry modelEntry_BI40 = {
+  .hasBrailleKeys = 1,
+  .hasCommandKeys = 1,
+  .keyTable = &KEY_TABLE_DEFINITION(BI40)
+};
+
+static const ModelEntry modelEntry_B80 = {
+  .hasCommandKeys = 1,
+  .hasSecondThumbKeys = 1,
+  .keyTable = &KEY_TABLE_DEFINITION(B80)
+};
+
+static const ModelEntry modelEntry_touch = {
+  .hasBrailleKeys = 1,
+  .hasCommandKeys = 1,
+  .keyTable = &KEY_TABLE_DEFINITION(touch)
+};
+
+static const ModelEntry *
+getModelEntry (unsigned char size) {
+  switch (size) {
+    case 14: return &modelEntry_BI14;
+    case 32: return &modelEntry_BI32;
+    case 40: return &modelEntry_BI40;
+    case 80: return &modelEntry_B80;
+    default: return NULL;
+  }
+}
 
 #define OPEN_READY_DELAY 100
 
@@ -145,6 +195,8 @@ typedef struct {
 
 struct BrailleDataStruct {
   const ProtocolEntry *protocol;
+  const ModelEntry *model;
+
   uint32_t firmwareVersion;
   unsigned isTouch:1;
   unsigned isOffline:1;
@@ -197,22 +249,6 @@ static void
 setFirmwareVersion (BrailleDisplay *brl, unsigned char major, unsigned char minor, unsigned char build) {
   logMessage(LOG_INFO, "Firmware Version: %u.%u.%u", major, minor, build);
   brl->data->firmwareVersion = (major << 16) | (minor << 8) << (build << 0);
-}
-
-static int
-hasBrailleKeys (BrailleDisplay *brl) {
-  if (brl->data->isTouch) return 1;
-  if (brl->textColumns == 14) return 1;
-  if (brl->textColumns == 32) return 1;
-  if (brl->textColumns == 40) return 1;
-  return 0;
-}
-
-static int
-hasSecondThumbKeys (BrailleDisplay *brl) {
-  if (brl->data->isTouch) return 0;
-  if (brl->textColumns == 80) return 1;
-  return 0;
 }
 
 static int
@@ -593,9 +629,11 @@ probeHidDisplay (BrailleDisplay *brl) {
 
   {
     unsigned char *size = &brl->data->hid.pressedKeys.reportSize;
-    *size = 1 + THUMB_KEY_COUNT + COMMAND_KEY_COUNT + brl->textColumns;
-    if (hasBrailleKeys(brl)) *size += BRAILLE_KEY_COUNT;
-    if (hasSecondThumbKeys(brl)) *size += THUMB_KEY_COUNT;
+    *size = 1 + THUMB_KEY_COUNT + brl->textColumns;
+    if (brl->data->model->hasBrailleKeys) *size += BRAILLE_KEY_COUNT;
+    if (brl->data->model->hasCommandKeys) *size += COMMAND_KEY_COUNT;
+    if (brl->data->model->hasJoystick) *size += JOYSTICK_KEY_COUNT;
+    if (brl->data->model->hasSecondThumbKeys) *size += THUMB_KEY_COUNT;
   }
 
   return 1;
@@ -728,38 +766,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
     if (connectResource(brl, device)) {
       if (brl->data->protocol->probeDisplay(brl)) {
-        {
-          const KeyTableDefinition *ktd;
-
-          if (brl->data->isTouch) {
-            ktd = &KEY_TABLE_DEFINITION(touch);
-          } else {
-            switch (brl->textColumns) {
-              case 14:
-                ktd = &KEY_TABLE_DEFINITION(BI14);
-                break;
-
-              case 32:
-                ktd = &KEY_TABLE_DEFINITION(BI32);
-                break;
-
-              case 40:
-                ktd = &KEY_TABLE_DEFINITION(BI40);
-                break;
-
-              case 80:
-                ktd = &KEY_TABLE_DEFINITION(B80);
-                break;
-
-              default:
-                ktd = NULL;
-                break;
-            }
-          }
-
-          setBrailleKeyTable(brl, ktd);
+        if (brl->data->isTouch) {
+          brl->data->model = &modelEntry_touch;
+        } else {
+          brl->data->model = getModelEntry(brl->textColumns);
         }
 
+        setBrailleKeyTable(brl, brl->data->model->keyTable);
         makeOutputTable(dotsTable_ISO11548_1);
         brl->data->text.rewrite = 1;
         return 1;

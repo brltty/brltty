@@ -20,3 +20,4 @@ title HumanWare BrailleNote Touch
 
 include thumb.kti
 include braille.kti
+include command.kti
