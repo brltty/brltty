@@ -157,8 +157,8 @@ static const ModelEntry modelEntry_touch = {
 };
 
 static const ModelEntry *
-getModelEntry (unsigned char size) {
-  switch (size) {
+getModelEntry (unsigned int cells) {
+  switch (cells) {
     case 14: return &modelEntry_BI14;
     case 32: return &modelEntry_BI32;
     case 40: return &modelEntry_BI40;
