@@ -40,7 +40,7 @@ typedef enum {
 } HW_MessageType;
 
 typedef enum {
-  HW_MODEL_TOUCH = 0X10
+  HW_MODEL_BrailleNoteTouch = 0X10
 } HW_ModelIdentifier;
 
 typedef union {

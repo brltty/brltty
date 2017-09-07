@@ -119,7 +119,7 @@ BEGIN_KEY_TABLE_LIST
 END_KEY_TABLE_LIST
 
 typedef struct {
-  const KeyTableDefinition *keyTable;
+  const KeyTableDefinition *keyTableDefinition;
   unsigned hasBrailleKeys:1;
   unsigned hasCommandKeys:1;
   unsigned hasJoystick:1;
@@ -129,31 +129,31 @@ typedef struct {
 static const ModelEntry modelEntry_BI14 = {
   .hasBrailleKeys = 1,
   .hasJoystick = 1,
-  .keyTable = &KEY_TABLE_DEFINITION(BI14)
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(BI14)
 };
 
 static const ModelEntry modelEntry_BI32 = {
   .hasBrailleKeys = 1,
   .hasCommandKeys = 1,
-  .keyTable = &KEY_TABLE_DEFINITION(BI32)
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(BI32)
 };
 
 static const ModelEntry modelEntry_BI40 = {
   .hasBrailleKeys = 1,
   .hasCommandKeys = 1,
-  .keyTable = &KEY_TABLE_DEFINITION(BI40)
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(BI40)
 };
 
 static const ModelEntry modelEntry_B80 = {
   .hasCommandKeys = 1,
   .hasSecondThumbKeys = 1,
-  .keyTable = &KEY_TABLE_DEFINITION(B80)
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(B80)
 };
 
 static const ModelEntry modelEntry_touch = {
   .hasBrailleKeys = 1,
   .hasCommandKeys = 1,
-  .keyTable = &KEY_TABLE_DEFINITION(touch)
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(touch)
 };
 
 #define OPEN_READY_DELAY 100
@@ -187,7 +187,7 @@ struct BrailleDataStruct {
   const ModelEntry *model;
 
   uint32_t firmwareVersion;
-  unsigned isTouch:1;
+  unsigned isBrailleNoteTouch:1;
   unsigned isOffline:1;
 
   struct {
@@ -215,7 +215,7 @@ struct BrailleDataStruct {
 
 static const ModelEntry *
 getModelEntry (BrailleDisplay *brl) {
-  if (brl->data->isTouch) return &modelEntry_touch;
+  if (brl->data->isBrailleNoteTouch) return &modelEntry_touch;
 
   switch (brl->textColumns) {
     case 14: return &modelEntry_BI14;
@@ -451,8 +451,8 @@ probeSerialDisplay (BrailleDisplay *brl) {
                response.fields.data.init.cellCount);
 
     switch (response.fields.data.init.modelIdentifier) {
-      case HW_MODEL_TOUCH:
-        brl->data->isTouch = 1;
+      case HW_MODEL_BrailleNoteTouch:
+        brl->data->isBrailleNoteTouch = 1;
         break;
     }
 
@@ -775,7 +775,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
     if (connectResource(brl, device)) {
       if (brl->data->protocol->probeDisplay(brl)) {
-        setBrailleKeyTable(brl, brl->data->model->keyTable);
+        setBrailleKeyTable(brl, brl->data->model->keyTableDefinition);
         makeOutputTable(dotsTable_ISO11548_1);
         brl->data->text.rewrite = 1;
         return 1;
