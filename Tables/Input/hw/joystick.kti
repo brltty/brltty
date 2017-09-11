@@ -16,4 +16,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+note There's a five-way joystick between the Dot1 and Dot4 keys.
+note * The four directions are intuitively named: Up, Down, Left, Right.
+note * Pressing the joystick is named: Action.
+
 include ../bm/routing.kti

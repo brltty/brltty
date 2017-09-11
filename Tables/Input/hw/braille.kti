@@ -16,6 +16,9 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+note There's an eight-key braille keyboard near the back of the top.
+note * From left to right, its keys are: Dot7, Dot3, Dot2, Dot1, Dot4, Dot5, Dot6, Dot8.
+
 assign chord Space+
 include ../chords.kti
 
@@ -28,11 +31,11 @@ map Dot6 DOT6
 map Dot7 DOT7
 map Dot8 DOT8
 map Space SPACE
-map Thumb2 META
-map Thumb3 CONTROL
+map Back META
+map Advance CONTROL
 
 bind Space+RoutingKey KEY_FUNCTION
-bind Thumb2+Space+RoutingKey KEY_FUNCTION+meta
-bind Thumb3+Space+RoutingKey KEY_FUNCTION+control
-bind Thumb2+Thumb3+Space+RoutingKey KEY_FUNCTION+meta+control
+bind Back+Space+RoutingKey KEY_FUNCTION+meta
+bind Advance+Space+RoutingKey KEY_FUNCTION+control
+bind Back+Advance+Space+RoutingKey KEY_FUNCTION+meta+control
 
