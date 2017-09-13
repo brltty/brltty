@@ -1584,6 +1584,7 @@ startBrailleDriver (void) {
   if (activateBrailleDriver(0)) {
     if (oldPreferencesEnabled) {
       if (!loadPreferencesFile(oldPreferencesFile)) resetPreferences();
+      setPreferenceOverrides();
       applyAllPreferences();
     } else {
       applyBraillePreferences();
