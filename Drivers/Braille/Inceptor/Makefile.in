@@ -16,11 +16,11 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-DRIVER_CODE = iv
-DRIVER_NAME = Innovision
-DRIVER_COMMENT = 
+DRIVER_CODE = ic
+DRIVER_NAME = Inceptor
+DRIVER_COMMENT = BrailleMe
 DRIVER_VERSION = 
-DRIVER_DEVELOPERS = 
+DRIVER_DEVELOPERS = Dave Mielke <dave@mielke.cc>, Vipul Kute <vipul.kute@gmail.com>
 include $(SRC_TOP)braille.mk
 
 braille.$O:

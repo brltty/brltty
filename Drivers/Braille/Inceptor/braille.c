@@ -24,32 +24,32 @@
 #include "log.h"
 
 #include "brl_driver.h"
-#include "brldefs-iv.h"
+#include "brldefs-ic.h"
 
 #define PROBE_RETRY_LIMIT 2
 #define PROBE_INPUT_TIMEOUT 1000
 #define MAXIMUM_TEXT_CELLS 0XFF
 
 BEGIN_KEY_NAME_TABLE(navigation)
-  KEY_NAME_ENTRY(IV_KEY_Dot1, "Dot1"),
-  KEY_NAME_ENTRY(IV_KEY_Dot2, "Dot2"),
-  KEY_NAME_ENTRY(IV_KEY_Dot3, "Dot3"),
-  KEY_NAME_ENTRY(IV_KEY_Dot4, "Dot4"),
-  KEY_NAME_ENTRY(IV_KEY_Dot5, "Dot5"),
-  KEY_NAME_ENTRY(IV_KEY_Dot6, "Dot6"),
-  KEY_NAME_ENTRY(IV_KEY_Dot7, "Dot7"),
-  KEY_NAME_ENTRY(IV_KEY_Dot8, "Dot8"),
+  KEY_NAME_ENTRY(IC_KEY_Dot1, "Dot1"),
+  KEY_NAME_ENTRY(IC_KEY_Dot2, "Dot2"),
+  KEY_NAME_ENTRY(IC_KEY_Dot3, "Dot3"),
+  KEY_NAME_ENTRY(IC_KEY_Dot4, "Dot4"),
+  KEY_NAME_ENTRY(IC_KEY_Dot5, "Dot5"),
+  KEY_NAME_ENTRY(IC_KEY_Dot6, "Dot6"),
+  KEY_NAME_ENTRY(IC_KEY_Dot7, "Dot7"),
+  KEY_NAME_ENTRY(IC_KEY_Dot8, "Dot8"),
 
-  KEY_NAME_ENTRY(IV_KEY_LeftUp, "LeftUp"),
-  KEY_NAME_ENTRY(IV_KEY_LeftDown, "LeftDown"),
-  KEY_NAME_ENTRY(IV_KEY_RightUp, "RightUp"),
-  KEY_NAME_ENTRY(IV_KEY_RightDown, "RightDown"),
+  KEY_NAME_ENTRY(IC_KEY_LeftUp, "LeftUp"),
+  KEY_NAME_ENTRY(IC_KEY_LeftDown, "LeftDown"),
+  KEY_NAME_ENTRY(IC_KEY_RightUp, "RightUp"),
+  KEY_NAME_ENTRY(IC_KEY_RightDown, "RightDown"),
 
-  KEY_NAME_ENTRY(IV_KEY_Back, "Back"),
-  KEY_NAME_ENTRY(IV_KEY_Space, "Space"),
-  KEY_NAME_ENTRY(IV_KEY_Enter, "Enter"),
+  KEY_NAME_ENTRY(IC_KEY_Back, "Back"),
+  KEY_NAME_ENTRY(IC_KEY_Space, "Space"),
+  KEY_NAME_ENTRY(IC_KEY_Enter, "Enter"),
 
-  KEY_GROUP_ENTRY(IV_GRP_RoutingKeys, "RoutingKey"),
+  KEY_GROUP_ENTRY(IC_GRP_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(all)
@@ -346,7 +346,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       case 0X00: {
         unsigned char key = packet.fields.data;
 
-        enqueueKey(brl, IV_GRP_RoutingKeys, key);
+        enqueueKey(brl, IC_GRP_RoutingKeys, key);
         continue;
       }
 
@@ -356,7 +356,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                           | (packet.fields.reserved[2] << 0X10)
                           | (packet.fields.reserved[3] << 0X18);
 
-        enqueueKeys(brl, bits, IV_GRP_NavigationKeys, 0);
+        enqueueKeys(brl, bits, IC_GRP_NavigationKeys, 0);
         continue;
       }
 
