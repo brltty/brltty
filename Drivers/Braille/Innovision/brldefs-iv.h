@@ -40,8 +40,8 @@ typedef enum {
   IV_KEY_Dot4          =  3,
   IV_KEY_Dot5          =  4,
   IV_KEY_Dot6          =  5,
-  IV_KEY_Back          =  6,
-  IV_KEY_Enter         =  7,
+  IV_KEY_Dot7          =  6,
+  IV_KEY_Dot8          =  7,
 
   IV_KEY_Space         =  8,
   IV_KEY_LeftUp        =  9,
@@ -49,8 +49,8 @@ typedef enum {
   IV_KEY_RightUp       = 11,
   IV_KEY_RightDown     = 12,
 
-  IV_KEY_Dot7          = 16,
-  IV_KEY_Dot8          = 17,
+  IV_KEY_Back          = 13,
+  IV_KEY_Enter         = 14,
 } IV_NavigationKey;
 
 typedef enum {

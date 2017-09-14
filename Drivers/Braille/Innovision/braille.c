@@ -212,7 +212,7 @@ static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
   BEGIN_USB_CHANNEL_DEFINITIONS
     { /* all models */
-      .vendor=0X045E, .product=0X930A,
+      .vendor=0X1209, .product=0XABC0,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2
     },
