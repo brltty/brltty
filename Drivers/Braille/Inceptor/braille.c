@@ -224,6 +224,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
 
   descriptor.bluetooth.channelNumber = 1;
+  descriptor.bluetooth.discoverChannel = 1;
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
     return 1;
