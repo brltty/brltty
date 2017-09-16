@@ -20,6 +20,7 @@
   <string name="BRAILLE_DRIVER_LABEL_hm">HIMS</string>
   <string name="BRAILLE_DRIVER_LABEL_ht">HandyTech</string>
   <string name="BRAILLE_DRIVER_LABEL_hw">HumanWare</string>
+  <string name="BRAILLE_DRIVER_LABEL_ic">Inceptor</string>
   <string name="BRAILLE_DRIVER_LABEL_ir">Iris</string>
   <string name="BRAILLE_DRIVER_LABEL_lb">Libbraille</string>
   <string name="BRAILLE_DRIVER_LABEL_lt">LogText</string>
@@ -61,6 +62,7 @@
     <item>@string/BRAILLE_DRIVER_LABEL_hm</item>
     <item>@string/BRAILLE_DRIVER_LABEL_ht</item>
     <item>@string/BRAILLE_DRIVER_LABEL_hw</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_ic</item>
     <item>@string/BRAILLE_DRIVER_LABEL_ir</item>
     <item>@string/BRAILLE_DRIVER_LABEL_lb</item>
     <item>@string/BRAILLE_DRIVER_LABEL_lt</item>
@@ -103,6 +105,7 @@
     <item>hm</item>
     <item>ht</item>
     <item>hw</item>
+    <item>ic</item>
     <item>ir</item>
     <item>lb</item>
     <item>lt</item>
