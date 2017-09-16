@@ -54,6 +54,7 @@ BLUETOOTH_NAME_DRIVERS(MB248, "md");
 BLUETOOTH_NAME_DRIVERS(OrbitReader, "bm");
 BLUETOOTH_NAME_DRIVERS(Pronto, "bm");
 BLUETOOTH_NAME_DRIVERS(Refreshabraille, "bm");
+BLUETOOTH_NAME_DRIVERS(SmartBeetle, "hm");
 BLUETOOTH_NAME_DRIVERS(SuperVario, "bm");
 BLUETOOTH_NAME_DRIVERS(TSM, "sk");
 BLUETOOTH_NAME_DRIVERS(VarioConnect, "bm");
@@ -190,6 +191,10 @@ const BluetoothNameEntry bluetoothNameTable[] = {
 
   { .namePrefix = "Refreshabraille",
     .driverCodes = bluetoothNameDrivers_Refreshabraille
+  },
+
+  { .namePrefix = "SmartBeetle",
+    .driverCodes = bluetoothNameDrivers_SmartBeetle
   },
 
   { .namePrefix = "SuperVario",
