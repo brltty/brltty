@@ -87,6 +87,10 @@ brltty 0x0003 0x045e 0x930a
 # HIMS [Braille Edge]
 brltty 0x0003 0x045e 0x930b
 
+# Device: 0483:A1D3
+# Baum [Orbit 20 (20 cells)]
+brltty 0x0003 0x0483 0xa1d3
+
 # Device: 06B0:0001
 # Alva [Satellite (5nn)]
 brltty 0x0003 0x06b0 0x0001
@@ -160,6 +164,7 @@ brltty 0x0003 0x0904 0x2016
 brltty 0x0003 0x0904 0x3000
 
 # Device: 0904:3001
+# Baum [Orbit in Refreshabraille Emulation Mode (18 cells)]
 # Baum [Refreshabraille 18 (18 cells)]
 brltty 0x0003 0x0904 0x3001
 
@@ -281,6 +286,10 @@ brltty 0x0003 0x10c4 0xea80
 # Device: 1148:0301
 # BrailleMemo [Smart]
 brltty 0x0003 0x1148 0x0301
+
+# Device: 1209:ABC0
+# Inceptor [all models]
+brltty 0x0003 0x1209 0xabc0
 
 # Device: 1C71:C004
 # BrailleNote [HumanWare APEX]

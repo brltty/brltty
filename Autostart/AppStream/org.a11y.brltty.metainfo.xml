@@ -107,6 +107,10 @@
     <!-- HIMS [Braille Edge] -->
     <modalias>usb:v045Ep930B*</modalias>
 
+    <!-- Device: 0483:A1D3 -->
+    <!-- Baum [Orbit 20 (20 cells)] -->
+    <modalias>usb:v0483pA1D3*</modalias>
+
     <!-- Device: 06B0:0001 -->
     <!-- Alva [Satellite (5nn)] -->
     <modalias>usb:v06B0p0001*</modalias>
@@ -180,6 +184,7 @@
     <modalias>usb:v0904p3000*</modalias>
 
     <!-- Device: 0904:3001 -->
+    <!-- Baum [Orbit in Refreshabraille Emulation Mode (18 cells)] -->
     <!-- Baum [Refreshabraille 18 (18 cells)] -->
     <modalias>usb:v0904p3001*</modalias>
 
@@ -301,6 +306,10 @@
     <!-- Device: 1148:0301 -->
     <!-- BrailleMemo [Smart] -->
     <modalias>usb:v1148p0301*</modalias>
+
+    <!-- Device: 1209:ABC0 -->
+    <!-- Inceptor [all models] -->
+    <modalias>usb:v1209pABC0*</modalias>
 
     <!-- Device: 1C71:C004 -->
     <!-- BrailleNote [HumanWare APEX] -->

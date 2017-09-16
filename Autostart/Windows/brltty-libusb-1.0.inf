@@ -90,6 +90,9 @@ HKR,,Icon,,-20
 ; Device: 045E:930B
 "LibUSB-1.0: HIMS [Braille Edge]"=LIBUSB_DEV, USB\VID_045E&PID_930B
 
+; Device: 0483:A1D3
+"LibUSB-1.0: Baum [Orbit 20 (20 cells)]"=LIBUSB_DEV, USB\VID_0483&PID_A1D3
+
 ; Device: 06B0:0001
 "LibUSB-1.0: Alva [Satellite (5nn)]"=LIBUSB_DEV, USB\VID_06B0&PID_0001
 
@@ -145,7 +148,7 @@ HKR,,Icon,,-20
 "LibUSB-1.0: Baum [Refreshabraille 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_3000
 
 ; Device: 0904:3001
-"LibUSB-1.0: Baum [Refreshabraille 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_3001
+"LibUSB-1.0: Baum [Orbit in Refreshabraille Emulation Mode (18 cells)], Baum [Refreshabraille 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_3001
 
 ; Device: 0904:4004
 "LibUSB-1.0: Baum [Pronto! V3 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_4004
@@ -236,6 +239,9 @@ HKR,,Icon,,-20
 
 ; Device: 1148:0301
 "LibUSB-1.0: BrailleMemo [Smart]"=LIBUSB_DEV, USB\VID_1148&PID_0301
+
+; Device: 1209:ABC0
+"LibUSB-1.0: Inceptor [all models]"=LIBUSB_DEV, USB\VID_1209&PID_ABC0
 
 ; Device: 1C71:C004
 "LibUSB-1.0: BrailleNote [HumanWare APEX]"=LIBUSB_DEV, USB\VID_1C71&PID_C004
@@ -401,6 +407,9 @@ HKR,,Icon,,-20
 ; Device: 045E:930B
 "LibUSB-1.0: HIMS [Braille Edge]"=LIBUSB_DEV, USB\VID_045E&PID_930B
 
+; Device: 0483:A1D3
+"LibUSB-1.0: Baum [Orbit 20 (20 cells)]"=LIBUSB_DEV, USB\VID_0483&PID_A1D3
+
 ; Device: 06B0:0001
 "LibUSB-1.0: Alva [Satellite (5nn)]"=LIBUSB_DEV, USB\VID_06B0&PID_0001
 
@@ -456,7 +465,7 @@ HKR,,Icon,,-20
 "LibUSB-1.0: Baum [Refreshabraille 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_3000
 
 ; Device: 0904:3001
-"LibUSB-1.0: Baum [Refreshabraille 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_3001
+"LibUSB-1.0: Baum [Orbit in Refreshabraille Emulation Mode (18 cells)], Baum [Refreshabraille 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_3001
 
 ; Device: 0904:4004
 "LibUSB-1.0: Baum [Pronto! V3 18 (18 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_4004
@@ -547,6 +556,9 @@ HKR,,Icon,,-20
 
 ; Device: 1148:0301
 "LibUSB-1.0: BrailleMemo [Smart]"=LIBUSB_DEV, USB\VID_1148&PID_0301
+
+; Device: 1209:ABC0
+"LibUSB-1.0: Inceptor [all models]"=LIBUSB_DEV, USB\VID_1209&PID_ABC0
 
 ; Device: 1C71:C004
 "LibUSB-1.0: BrailleNote [HumanWare APEX]"=LIBUSB_DEV, USB\VID_1C71&PID_C004

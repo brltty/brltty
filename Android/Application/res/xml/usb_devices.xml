@@ -72,6 +72,10 @@
   <!-- HIMS [Braille Edge] -->
   <usb-device vendor-id="1118" product-id="37643" />
 
+  <!-- Device: 0483:A1D3 -->
+  <!-- Baum [Orbit 20 (20 cells)] -->
+  <usb-device vendor-id="1155" product-id="41427" />
+
   <!-- Device: 06B0:0001 -->
   <!-- Alva [Satellite (5nn)] -->
   <usb-device vendor-id="1712" product-id="1" />
@@ -145,6 +149,7 @@
   <usb-device vendor-id="2308" product-id="12288" />
 
   <!-- Device: 0904:3001 -->
+  <!-- Baum [Orbit in Refreshabraille Emulation Mode (18 cells)] -->
   <!-- Baum [Refreshabraille 18 (18 cells)] -->
   <usb-device vendor-id="2308" product-id="12289" />
 
@@ -266,6 +271,10 @@
   <!-- Device: 1148:0301 -->
   <!-- BrailleMemo [Smart] -->
   <usb-device vendor-id="4424" product-id="769" />
+
+  <!-- Device: 1209:ABC0 -->
+  <!-- Inceptor [all models] -->
+  <usb-device vendor-id="4617" product-id="43968" />
 
   <!-- Device: 1C71:C004 -->
   <!-- BrailleNote [HumanWare APEX] -->

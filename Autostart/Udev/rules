@@ -94,6 +94,10 @@ ENV{PRODUCT}=="45e/930a/*", ENV{BRLTTY_BRAILLE_DRIVER}="hm", GOTO="brltty_usb_ru
 # HIMS [Braille Edge]
 ENV{PRODUCT}=="45e/930b/*", ENV{BRLTTY_BRAILLE_DRIVER}="hm", GOTO="brltty_usb_run"
 
+# Device: 0483:A1D3
+# Baum [Orbit 20 (20 cells)]
+ENV{PRODUCT}=="483/a1d3/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+
 # Device: 06B0:0001
 # Alva [Satellite (5nn)]
 ENV{PRODUCT}=="6b0/1/*", ENV{BRLTTY_BRAILLE_DRIVER}="al", GOTO="brltty_usb_run"
@@ -167,6 +171,7 @@ ENV{PRODUCT}=="904/2016/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_ru
 ENV{PRODUCT}=="904/3000/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
 
 # Device: 0904:3001
+# Baum [Orbit in Refreshabraille Emulation Mode (18 cells)]
 # Baum [Refreshabraille 18 (18 cells)]
 ENV{PRODUCT}=="904/3001/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
 
@@ -288,6 +293,10 @@ ENV{PRODUCT}=="10c4/ea80/*", ENV{BRLTTY_BRAILLE_DRIVER}="sk", GOTO="brltty_usb_r
 # Device: 1148:0301
 # BrailleMemo [Smart]
 ENV{PRODUCT}=="1148/301/*", ENV{BRLTTY_BRAILLE_DRIVER}="mm", GOTO="brltty_usb_run"
+
+# Device: 1209:ABC0
+# Inceptor [all models]
+ENV{PRODUCT}=="1209/abc0/*", ENV{BRLTTY_BRAILLE_DRIVER}="ic", GOTO="brltty_usb_run"
 
 # Device: 1C71:C004
 # BrailleNote [HumanWare APEX]
