@@ -218,6 +218,9 @@ extern "C" {
 /* Define this if the function hstrerror exists. */
 #undef HAVE_HSTRERROR
 
+/* Define this if the function newlocale exists. */
+#undef HAVE_NEWLOCALE
+
 /* Define this if the function realpath exists. */
 #undef HAVE_REALPATH
 

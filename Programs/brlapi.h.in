@@ -452,8 +452,8 @@ int BRLAPI_STDCALL brlapi__setFocus(brlapi_handle_t *handle, int tty);
  *
  * If the string is too long, it is truncated. If it's too short,
  * it is padded with spaces. The text is assumed to be in the current
- * locale charset, or latin1 if locales have not been initialized.
- * To initialize locales, use setlocale(3).
+ * locale charset set by setlocale(3) if it was called, or the locale charset
+ * from the locale environment variables if setlocale(3) was not called.
  *
  * \param cursor gives the cursor position; if equal to ::BRLAPI_CURSOR_OFF, no cursor is shown at
  * all; if cursor==::BRLAPI_CURSOR_LEAVE, the cursor is left where it is
