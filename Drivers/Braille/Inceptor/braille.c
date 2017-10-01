@@ -312,7 +312,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
     int cursor;
 
     translateOutputCells(cells, brl->data->braille.cells, cellCount);
-    memset(attributes, sizeof(attributes), 0);
+    memset(attributes, 0, sizeof(attributes));
     cursor = 0;
 
     for (int i=0; i<cellCount; i+=1) {
