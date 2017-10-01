@@ -155,7 +155,7 @@ static brlapi_error_t brlapiserver_error;
 
 #define BRLAPI(fun) brlapiserver_ ## fun
 #include "brlapi_common.h"
- 
+
 /** ask for \e brltty commands */
 #define BRL_COMMANDS 0
 /** ask for raw driver keycodes */
@@ -192,7 +192,7 @@ typedef struct {
   PacketState state;
   int readBytes; /* Already read bytes */
   unsigned char *p; /* Where read() should load datas */
-  int n; /* Value to give so read() */ 
+  int n; /* Value to give so read() */
 #ifdef __MINGW32__
   OVERLAPPED overl;
 #endif /* __MINGW32__ */
@@ -545,7 +545,7 @@ typedef struct { /* packet handlers */
   PacketHandler ignoreKeyRanges;
   PacketHandler acceptKeyRanges;
   PacketHandler write;
-  PacketHandler enterRawMode;  
+  PacketHandler enterRawMode;
   PacketHandler leaveRawMode;
   PacketHandler packet;
   PacketHandler suspendDriver;
@@ -757,7 +757,7 @@ static inline Tty *newTty(Tty *father, int number)
     tty->next->prevnext = &tty->next;
   father->subttys = tty;
   return tty;
-  
+
 outtty:
   free(tty);
 out:
@@ -893,7 +893,7 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
         unlockMutex(&apiConnectionsMutex);
         WERR(c->fd,BRLAPI_ERROR_NOMEM, "no memory for new tty");
         freeBrailleWindow(&c->brailleWindow);
-  	return 0;
+        return 0;
       }
       logMessage(LOG_CATEGORY(SERVER_EVENTS), "allocated tty %#010lx",(unsigned long)ntohl(*ptty));
     }
@@ -1404,12 +1404,12 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
   }
   size = c->packet.header.size;
   type = c->packet.header.type;
-  
+
   if (c->auth!=1) return handleUnauthorizedConnection(c, type, packet, size);
 
   if (size>BRLAPI_MAXPACKETSIZE) {
     logMessage(LOG_WARNING, "Discarding too large packet of type %s on fd %"PRIfd,brlapiserver_getPacketTypeName(type), c->fd);
-    return 0;    
+    return 0;
   }
   switch (type) {
     case BRLAPI_PACKET_GETDRIVERNAME: p = handlers->getDriverName; break;
@@ -1441,7 +1441,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
  * There is one server thread which first launches binding threads and then
  * enters infinite loop trying to accept connections, read packets, etc.
  *
- * Binding threads loop trying to establish some socket, waiting for 
+ * Binding threads loop trying to establish some socket, waiting for
  * filesystems to be read/write or network to be configured.
  *
  * On windows, WSAEventSelect() is emulated by a standalone thread.
@@ -1859,7 +1859,7 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
   tmppath[lpath+2+lport+1]=0;
   lockpath[lpath+2+lport]=0;
 
-  while ((lock = open(tmppath, O_WRONLY|O_CREAT|O_EXCL, 
+  while ((lock = open(tmppath, O_WRONLY|O_CREAT|O_EXCL,
                       (permissions & (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)))) == -1) {
     if (errno == EROFS) {
       approximateDelay(1000);
@@ -2002,7 +2002,7 @@ static void closeSockets(void *arg)
 {
   int i;
   struct socketInfo *info;
-  
+
   for (i=0;i<serverSocketCount;i++) {
 #ifdef __MINGW32__
     pthread_cancel(socketThreads[i]);
@@ -2291,7 +2291,7 @@ THREAD_FUNCTION(runServer) {
     } else {
       /* Windows doesn't have trouble with local sockets on read-only
        * filesystems, but it has with inter-thread overlapped operations,
-       * so call from here 
+       * so call from here
        */
       createSocket(i);
     }
@@ -3199,7 +3199,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
   }
 
   return 1;
-  
+
 noServerThread:
   asyncDiscardEvent(flushEvent);
 noFlushEvent:

@@ -15,7 +15,7 @@
  *
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
- 
+
 #include "prologue.h"
 
 /* Source file for range list management module */

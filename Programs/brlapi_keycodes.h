@@ -44,7 +44,7 @@ extern "C" {
  *
  * The third part is itself split into two parts: a command number and a command
  * value.  The relative sizes of these parts vary according to the key type.
- * 
+ *
  * For a braille command, bits 28-16 (BRLAPI_KEY_CMD_BLK_MASK) hold the braille
  * command number, while bits 15-0 (BRLAPI_KEY_CMD_ARG_MASK) hold the command
  * value.

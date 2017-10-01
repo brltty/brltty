@@ -55,4 +55,3 @@ BEGIN {
   apiRangeType(substr($1, 18), $1, apiRangeTypeCount++, "")
   next
 }
-
