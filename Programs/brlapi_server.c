@@ -945,7 +945,7 @@ static int handleSetFocus(Connection *c, brlapi_packetType_t type, brlapi_packet
 static void doLeaveTty(Connection *c)
 {
   Tty *tty = c->tty;
-  logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd"releasing tty %#010x",c->fd,tty->number);
+  logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" releasing tty %#010x",c->fd,tty->number);
   c->tty = NULL;
   lockMutex(&apiConnectionsMutex);
   __removeConnection(c);
@@ -1106,6 +1106,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
       if (coreCharset) unlockCharset();
       lockMutex(&c->brailleWindowMutex);
       memcpy(c->brailleWindow.text+rbeg-1,textBuf,rsiz*sizeof(wchar_t));
+      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" wrote %d characters %d bytes",c->fd,rsiz,textLen);
     } else
 #endif /* HAVE_ICONV_H */
     {
@@ -1115,6 +1116,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
 	/* assume latin1 */
         c->brailleWindow.text[rbeg-1+i] = text[i];
       }
+      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" wrote %d characters %d bytes",c->fd,rsiz,rsiz);
     }
     if (!andAttr) memset(c->brailleWindow.andAttr+rbeg-1,0xFF,rsiz);
     if (!orAttr)  memset(c->brailleWindow.orAttr+rbeg-1,0x00,rsiz);
