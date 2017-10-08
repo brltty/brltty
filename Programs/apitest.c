@@ -34,6 +34,8 @@
 #include "brlapi.h"
 
 static brlapi_connectionSettings_t settings;
+static char *opt_host;
+static char *opt_auth;
 
 static int opt_learnMode;
 static int opt_showDots;
@@ -82,14 +84,14 @@ BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'b',
     .word = "brlapi",
     .argument = "[host][:port]",
-    .setting.string = &settings.host,
+    .setting.string = &opt_host,
     .description = "BrlAPIa host and/or port to connect to."
   },
 
   { .letter = 'a',
     .word = "auth",
     .argument = "file",
-    .setting.string = &settings.auth,
+    .setting.string = &opt_auth,
     .description = "BrlAPI authorization/authentication string."
   },
 END_OPTION_TABLE
@@ -266,7 +268,6 @@ int
 main (int argc, char *argv[]) {
   ProgramExitStatus exitStatus = PROG_EXIT_SUCCESS;
   brlapi_fileDescriptor fd;
-  settings.host = NULL; settings.auth = NULL;
 
   {
     static const OptionsDescriptor descriptor = {
@@ -276,6 +277,8 @@ main (int argc, char *argv[]) {
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
 
+  settings.host = opt_host;
+  settings.auth = opt_auth;
   fprintf(stderr, "Connecting to BrlAPI... ");
   if ((fd=brlapi_openConnection(&settings, &settings)) != (brlapi_fileDescriptor)(-1)) {
     fprintf(stderr, "done (fd=%"PRIfd")\n", fd);
