@@ -61,7 +61,7 @@
 ;Pages
 
 	!insertmacro MUI_PAGE_WELCOME
-	!insertmacro MUI_PAGE_LICENSE "${DISTDIR}\LICENSE-GPL.txt"
+	!insertmacro MUI_PAGE_LICENSE "${DISTDIR}\LICENSE-LGPL.txt"
 	!insertmacro MUI_PAGE_DIRECTORY
 
 ;--------------------------------
