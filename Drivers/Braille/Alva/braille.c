@@ -16,9 +16,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* Alva/brlmain.cc - Braille display library for Alva braille displays
+/* Alva/braille.cc - Braille display library for Alva braille displays
  * Copyright (C) 1995-2002 by Nicolas Pitre <nico@fluxnic.net>
- * See the GNU Public license for details in the LICENSE-GPL file
+ * See the GNU Lesser Public license for details in the LICENSE-LGPL file
  *
  */
 

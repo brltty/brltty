@@ -62,11 +62,11 @@
 
 <sect1>Licence<p>
 Ce programme est un logiciel libre. Vous pouvez le redistribuer et/ou
-le modifier sous les termes de la <htmlurl url="http://www.gnu.org/licenses/licenses.html#GPL" name="GNU General Public License">
-stipulée par la <htmlurl url="http://www.gnu.org/fsf/fsf.html" name="Free Software Foundation">. Vous pouvez utiliser une version 2 (ou supérieure) de la licence.
+le modifier sous les termes de la <htmlurl url="http://www.gnu.org/licenses/licenses.html#LGPL" name="GNU Lesser General Public License">
+stipulée par la <htmlurl url="http://www.gnu.org/fsf/fsf.html" name="Free Software Foundation">. Vous pouvez utiliser une version 2,1 (ou supérieure) de la licence.
 
 Vous devriez avoir reçu une copie de la licence avec le
-programme. Elle devrait être dans le fichier <tt/LICENSE-GPL/ du
+programme. Elle devrait être dans le fichier <tt/LICENSE-LGPL/ du
 répertoire principal. Si ce n'est pas le cas, écrivez à la Free Software
 Foundation Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 

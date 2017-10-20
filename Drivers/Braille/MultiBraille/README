@@ -8,8 +8,8 @@ Copyright (C) 2000 by Wolfgang Astleitner.
 )
 
 This driver is part of BRLTTY, and as such it is placed under the
-terms of the GNU General Public License, as published by the Free
-Software Foundation.  Please see the file LICENSE-GPL in the top-level
+terms of the GNU Lesser General Public License, as published by the Free
+Software Foundation.  Please see the file LICENSE-LGPL in the top-level
 directory for details.
 
 This driver is maintained by Wolfgang Astleitner <wolfgang.astleitner@liwest.at>.
