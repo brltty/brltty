@@ -18,7 +18,7 @@
 
 /* Alva/braille.cc - Braille display library for Alva braille displays
  * Copyright (C) 1995-2002 by Nicolas Pitre <nico@fluxnic.net>
- * See the GNU Lesser Public license for details in the LICENSE-LGPL file
+ * See the GNU Lesser General Public License for details in the LICENSE-LGPL file
  *
  */
 
