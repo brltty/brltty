@@ -226,9 +226,9 @@ struct brlapi_handle_t { /* Connection-specific information */
   int state;
   pthread_mutex_t state_mutex;
 
-#ifdef HAVE_NEWLOCALE
+#ifdef LC_GLOBAL_LOCALE
   locale_t default_locale;
-#endif /* HAVE_NEWLOCALE */
+#endif /* LC_GLOBAL_LOCALE */
 
   /* key presses buffer, for when key presses are received instead of
    * acknowledgements for instance
@@ -273,9 +273,9 @@ static void brlapi_initializeHandle(brlapi_handle_t *handle)
   handle->state = 0;
   pthread_mutex_init(&handle->state_mutex, NULL);
 
-#ifdef HAVE_NEWLOCALE
+#ifdef LC_GLOBAL_LOCALE
   handle->default_locale = LC_GLOBAL_LOCALE;
-#endif /* HAVE_NEWLOCALE */
+#endif /* LC_GLOBAL_LOCALE */
 
   memset(handle->keybuf, 0, sizeof(handle->keybuf));
   handle->keybuf_next = 0;
@@ -792,11 +792,11 @@ void BRLAPI_STDCALL brlapi__closeConnection(brlapi_handle_t *handle)
   handle->fileDescriptor = INVALID_FILE_DESCRIPTOR;
   pthread_mutex_unlock(&handle->fileDescriptor_mutex);
 
-#ifdef HAVE_NEWLOCALE
+#ifdef LC_GLOBAL_LOCALE
   if (handle->default_locale != LC_GLOBAL_LOCALE) {
     freelocale(handle->default_locale);
   }
-#endif /* HAVE_NEWLOCALE */
+#endif /* LC_GLOBAL_LOCALE */
 
 #ifdef __MINGW32__
   WSACleanup();
@@ -1125,7 +1125,7 @@ int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *tt
   pthread_mutex_unlock(&handle->state_mutex);
 
   /* Determine default charset if application did not call setlocale.  */
-#ifdef HAVE_NEWLOCALE
+#ifdef LC_GLOBAL_LOCALE
   const char *locale = setlocale(LC_CTYPE, NULL);
 
   if (!locale || !strcmp(locale, "C")) {
@@ -1133,7 +1133,7 @@ int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *tt
     locale_t default_locale = newlocale(LC_CTYPE_MASK, "", 0);
     if (default_locale) handle->default_locale = default_locale;
   }
-#endif /* HAVE_NEWLOCALE */
+#endif /* LC_GLOBAL_LOCALE */
 
   return res;
 }
@@ -1199,9 +1199,9 @@ static size_t getCharset(brlapi_handle_t *handle, void *buffer, int wide) {
     *p++ = length;
     p = mempcpy(p, WCHAR_CHARSET, length);
   } else if ((locale && strcmp(locale, "C"))
-#ifdef HAVE_NEWLOCALE
+#ifdef LC_GLOBAL_LOCALE
              || (handle->default_locale != LC_GLOBAL_LOCALE)
-#endif /* HAVE_NEWLOCALE */
+#endif /* LC_GLOBAL_LOCALE */
             ) {
     /* not default locale, tell charset to server */
 #ifdef WINDOWS
@@ -1238,7 +1238,7 @@ static int brlapi___writeText(brlapi_handle_t *handle, int cursor, const void *s
   int res;
   size_t len;
 
-#ifdef HAVE_NEWLOCALE
+#ifdef LC_GLOBAL_LOCALE
   locale_t old_locale = 0;
 
   if (handle->default_locale != LC_GLOBAL_LOCALE) {
@@ -1247,9 +1247,9 @@ static int brlapi___writeText(brlapi_handle_t *handle, int cursor, const void *s
   }
 
   locale = "default locale";
-#else /* HAVE_NEWLOCALE */
+#else /* LC_GLOBAL_LOCALE */
   locale = setlocale(LC_CTYPE,NULL);
-#endif /* HAVE_NEWLOCALE */
+#endif /* LC_GLOBAL_LOCALE */
 
   wa->flags = BRLAPI_WF_REGION;
   *((uint32_t *) p) = htonl(1); p += sizeof(uint32_t);
@@ -1285,12 +1285,12 @@ static int brlapi___writeText(brlapi_handle_t *handle, int cursor, const void *s
 	    brlapi_libcerrno = errno;
 	    brlapi_errfun = "mbrlen";
 	    brlapi_errno = BRLAPI_ERROR_LIBCERR;
-#ifdef HAVE_NEWLOCALE
+#ifdef LC_GLOBAL_LOCALE
 	    if (handle->default_locale != LC_GLOBAL_LOCALE) {
 	      /* Restore application locale */
 	      uselocale(old_locale);
             }
-#endif /* HAVE_NEWLOCALE */
+#endif /* LC_GLOBAL_LOCALE */
 	    return -1;
 	  case 0:
 	    goto endcount;
@@ -1335,12 +1335,12 @@ endcount:
   res = brlapi_writePacket(handle->fileDescriptor,BRLAPI_PACKET_WRITE,&packet,sizeof(wa->flags)+(p-&wa->data));
   pthread_mutex_unlock(&handle->fileDescriptor_mutex);
 
-#ifdef HAVE_NEWLOCALE
+#ifdef LC_GLOBAL_LOCALE
   if (handle->default_locale != LC_GLOBAL_LOCALE) {
     /* Restore application locale */
     uselocale(old_locale);
   }
-#endif /* HAVE_NEWLOCALE */
+#endif /* LC_GLOBAL_LOCALE */
 
   return res;
 }
@@ -1498,26 +1498,26 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeArguments_t *s)
 
   if (s->charset) {
     if (!*s->charset) {
-#ifdef HAVE_NEWLOCALE
+#ifdef LC_GLOBAL_LOCALE
       locale_t old_locale = 0;
 
       if (handle->default_locale != LC_GLOBAL_LOCALE) {
 	/* Temporarily load the default locale.  */
 	old_locale = uselocale(handle->default_locale);
       }
-#endif /* HAVE_NEWLOCALE */
+#endif /* LC_GLOBAL_LOCALE */
 
       if ((strLen = getCharset(handle, p, wide))) {
 	wa->flags |= BRLAPI_WF_CHARSET;
 	p += strLen;
       }
 
-#ifdef HAVE_NEWLOCALE
+#ifdef LC_GLOBAL_LOCALE
       if (handle->default_locale != LC_GLOBAL_LOCALE) {
 	/* Restore application locale */
 	uselocale(old_locale);
       }
-#endif /* HAVE_NEWLOCALE */
+#endif /* LC_GLOBAL_LOCALE */
     } else {
       strLen = strlen(s->charset);
       *p++ = strLen;

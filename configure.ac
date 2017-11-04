@@ -816,7 +816,7 @@ AC_CHECK_HEADERS([linux/input.h], [
 #include <linux/input.h>
 ])])
 
-AC_CHECK_FUNCS([getopt_long hstrerror newlocale realpath vsyslog])
+AC_CHECK_FUNCS([getopt_long hstrerror realpath vsyslog])
 AC_CHECK_FUNCS([pause])
 AC_CHECK_FUNCS([fchdir fchmod])
 AC_CHECK_FUNCS([shmget shm_open])
