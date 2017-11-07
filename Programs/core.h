@@ -94,7 +94,9 @@ extern char *opt_keyboardTable;
 
 extern int opt_releaseDevice;
 
-extern void slideBrailleWindowVertically (int y);
+extern int isWordBreak (const ScreenCharacter *characters, int y, int x);
+extern int getWordWrapLength (int row, int from, int count);
+extern void setWordWrapStart (int start);
 
 extern void placeRightEdge (int column);
 extern void placeBrailleWindowRight (void);
@@ -103,9 +105,10 @@ extern void placeBrailleWindowHorizontally (int x);
 extern int moveBrailleWindowLeft (unsigned int amount);
 extern int moveBrailleWindowRight (unsigned int amount);
 
-extern int getWordWrapLength (int row, int from, int count);
 extern int shiftBrailleWindowLeft (unsigned int amount);
 extern int shiftBrailleWindowRight (unsigned int amount);
+
+extern void slideBrailleWindowVertically (int y);
 
 extern int showScreenCursor (void);
 extern int trackScreenCursor (int place);

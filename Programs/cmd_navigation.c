@@ -510,10 +510,9 @@ handleNavigationCommands (int command, void *data) {
 
         if (shiftBrailleWindowLeft(fullWindowShift)) {
           if (skipBlankBrailleWindows) {
-            int charCount;
-
             if (prefs.skipBlankBrailleWindowsMode == sbwEndOfLine) goto skipEndOfLine;
-            charCount = MIN(scr.cols, ses->winx+textCount);
+            int charCount = MIN(scr.cols, ses->winx+textCount);
+
             if (!showScreenCursor() ||
                 (scr.posy != ses->winy) ||
                 (scr.posx < 0) ||
@@ -539,7 +538,6 @@ handleNavigationCommands (int command, void *data) {
       wrapUp:
         if (ses->winy == 0) {
           ses->winx = oldX;
-
           alert(ALERT_BOUNCE);
           break;
         }
@@ -550,23 +548,18 @@ handleNavigationCommands (int command, void *data) {
 
       skipEndOfLine:
         if (skipBlankBrailleWindows && (prefs.skipBlankBrailleWindowsMode == sbwEndOfLine)) {
-          int charIndex;
           ScreenCharacter characters[scr.cols];
-
           readScreenRow(ses->winy, scr.cols, characters);
+          int last = scr.cols;
 
-          for (charIndex=scr.cols-1; charIndex>0; charIndex-=1) {
-            wchar_t text = characters[charIndex].text;
-
-            if (text != WC_C(' ')) break;
+          while (last > 0) {
+            if (!isWordBreak(characters, ses->winy, --last)) break;
           }
 
-          if (showScreenCursor() && (scr.posy == ses->winy) && SCR_COLUMN_OK(scr.posx)) {
-            charIndex = MAX(charIndex, scr.posx);
-          }
-
-          if (charIndex < ses->winx) placeRightEdge(charIndex);
+          if (ses->winx > last) placeRightEdge(last);
         }
+
+        if (prefs.wordWrap) setWordWrapStart(ses->winx);
       }
 
       break;

@@ -556,6 +556,12 @@ getTimeFormattingData (TimeFormattingData *fmt) {
 }
 
 int
+isWordBreak (const ScreenCharacter *characters, int y, int x) {
+  if (!iswspace(characters[x].text)) return 0;
+  return !(showScreenCursor() && (y == scr.posy) && (x == scr.posx));
+}
+
+int
 getWordWrapLength (int row, int from, int count) {
   int width = scr.cols;
   if (from >= width) return 0;
@@ -565,23 +571,24 @@ getWordWrapLength (int row, int from, int count) {
 
   ScreenCharacter characters[width];
   readScreenRow(row, width, characters);
-  int onSpace = iswspace(characters[to].text);
+  int onWordBreak = iswspace(characters[to].text);
 
-  if (!onSpace) {
+  if (!onWordBreak) {
     int index = to;
 
     while (index > from) {
-      if (iswspace(characters[--index].text)) {
+      if (isWordBreak(characters, ses->winy, --index)) {
         to = index;
-        onSpace = 1;
+        onWordBreak = 1;
         break;
       }
     }
   }
 
-  if (onSpace) {
-    while (++to < width) {
-      if (!iswspace(characters[to].text)) break;
+  if (onWordBreak) {
+    while (to < width) {
+      if (!isWordBreak(characters, ses->winy, to)) break;
+      to += 1;
     }
   }
 
@@ -589,11 +596,38 @@ getWordWrapLength (int row, int from, int count) {
 }
 
 void
-slideBrailleWindowVertically (int y) {
-  if (y < ses->winy)
-    ses->winy = y;
-  else if (y >= (int)(ses->winy + brl.textRows))
-    ses->winy = y - (brl.textRows - 1);
+setWordWrapStart (int start) {
+  if (start < 0) start = 0;
+  ses->winx = start;
+
+  if (start > 0) {
+    int end = start + textCount;
+    if (end > scr.cols) end = scr.cols;
+
+    ScreenCharacter characters[end];
+    readScreenRow(ses->winy, end, characters);
+
+    while (end > 0) {
+      if (!isWordBreak(characters, ses->winy, --end)) {
+        end += 1;
+        break;
+      }
+    }
+
+    if (!isWordBreak(characters, ses->winy, start-1)) {
+      while (start < end) {
+        if (isWordBreak(characters, ses->winy, start)) break;
+        start += 1;
+      }
+    }
+
+    while (start < end) {
+      if (!isWordBreak(characters, ses->winy, start)) break;
+      start += 1;
+    }
+
+    if (start < end) ses->winx = start;
+  }
 }
 
 void 
@@ -680,43 +714,7 @@ shiftBrailleWindowLeft (unsigned int amount) {
 
   if (prefs.wordWrap) {
     if (ses->winx < 1) return 0;
-    int from = ses->winx - amount;
-
-    if (from < 1) {
-      ses->winx = 0;
-    } else {
-      int to = ses->winx;
-      ScreenCharacter characters[scr.cols];
-      readScreenRow(ses->winy, scr.cols, characters);
-
-      while (to > 0) {
-        if (!iswspace(characters[--to].text)) {
-          to += 1;
-          break;
-        }
-      }
-
-      from = to - amount;
-      if (from < 0) from = 0;
-      ses->winx = from;
-
-      if (from > 0) {
-        if (!iswspace(characters[from-1].text)) {
-          while (from < to) {
-            if (iswspace(characters[from].text)) break;
-            from += 1;
-          }
-        }
-
-        while (from < to) {
-          if (!iswspace(characters[from].text)) break;
-          from += 1;
-        }
-      }
-
-      if (from < to) ses->winx = from;
-    }
-
+    setWordWrapStart(ses->winx - amount);
     return 1;
   }
 
@@ -735,6 +733,15 @@ shiftBrailleWindowRight (unsigned int amount) {
   }
 
   return moveBrailleWindowRight(amount);
+}
+
+void
+slideBrailleWindowVertically (int y) {
+  if (y < ses->winy) {
+    ses->winy = y;
+  } else if (y >= (int)(ses->winy + brl.textRows)) {
+    ses->winy = y - (brl.textRows - 1);
+  }
 }
 
 static int
