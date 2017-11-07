@@ -466,10 +466,10 @@ handleNavigationCommands (int command, void *data) {
     }
 
     case BRL_CMD_CHRLT:
-      if (!moveWindowLeft(1)) alert(ALERT_BOUNCE);
+      if (!moveBrailleWindowLeft(1)) alert(ALERT_BOUNCE);
       break;
     case BRL_CMD_CHRRT:
-      if (!moveWindowRight(1)) alert(ALERT_BOUNCE);
+      if (!moveBrailleWindowRight(1)) alert(ALERT_BOUNCE);
       break;
 
     case BRL_CMD_HWINLT:
@@ -685,7 +685,7 @@ handleNavigationCommands (int command, void *data) {
             arg = rescaleInteger(arg, BRL_MSK_ARG, scr.rows-1);
           }
           if (arg < scr.rows) {
-            slideWindowVertically(arg);
+            slideBrailleWindowVertically(arg);
             oldwiny = -1;
           } else {
             alert(ALERT_COMMAND_REJECTED);

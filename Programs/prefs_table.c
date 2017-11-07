@@ -249,6 +249,12 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.capitalsInvisibleTime
   },
 
+  { .name = "word-wrap",
+    .defaultValue = DEFAULT_WORD_WRAP,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.wordWrap
+  },
+
   { .name = "skip-identical-lines",
     .defaultValue = DEFAULT_SKIP_IDENTICAL_LINES,
     .settingNames = &preferenceStringTable_boolean,

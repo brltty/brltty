@@ -209,6 +209,8 @@ typedef struct {
 
   unsigned char autoreleaseTime;
   unsigned char touchNavigation;
+
+  unsigned char wordWrap;
   unsigned char cursorTrackingDelay;
   unsigned char trackScreenScroll;
 

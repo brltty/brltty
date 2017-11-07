@@ -888,9 +888,15 @@ doUpdate (void) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
       {
         int windowColumns = MIN(textCount, scr.cols-ses->winx);
-        ScreenCharacter characters[textLength];
 
+        ScreenCharacter characters[textLength];
         readScreen(ses->winx, ses->winy, windowColumns, brl.textRows, characters);
+
+        if (prefs.wordWrap) {
+          int columns = getWordWrapLength(ses->winy, ses->winx, windowColumns);
+          if (columns < windowColumns) windowColumns = columns;
+        }
+
         if (windowColumns < textCount) {
           /* We got a rectangular piece of text with readScreen but the display
            * is in an off-right position with some cells at the end blank

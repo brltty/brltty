@@ -178,7 +178,7 @@ postprocessCommand (void *state, int command, int handled) {
               describeScreen(&description);
 
               if (description.number == scr.number) {
-                slideWindowVertically(description.posy);
+                slideBrailleWindowVertically(description.posy);
                 placeBrailleWindowHorizontally(description.posx);
               }
             }
@@ -555,8 +555,41 @@ getTimeFormattingData (TimeFormattingData *fmt) {
   fmt->meridian = getMeridianString(&fmt->components.hour);
 }
 
-void 
-slideWindowVertically (int y) {
+int
+getWordWrapLength (int row, int from, int count) {
+  int width = scr.cols;
+  if (from >= width) return 0;
+
+  int to = from + count;
+  if (to >= width) return width - from;
+
+  ScreenCharacter characters[width];
+  readScreenRow(row, width, characters);
+  int onSpace = iswspace(characters[to].text);
+
+  if (!onSpace) {
+    int index = to;
+
+    while (index > from) {
+      if (iswspace(characters[--index].text)) {
+        to = index;
+        onSpace = 1;
+        break;
+      }
+    }
+  }
+
+  if (onSpace) {
+    while (++to < width) {
+      if (!iswspace(characters[to].text)) break;
+    }
+  }
+
+  return to - from;
+}
+
+void
+slideBrailleWindowVertically (int y) {
   if (y < ses->winy)
     ses->winy = y;
   else if (y >= (int)(ses->winy + brl.textRows))
@@ -599,7 +632,7 @@ placeBrailleWindowRight (void) {
 }
 
 int
-moveWindowLeft (unsigned int amount) {
+moveBrailleWindowLeft (unsigned int amount) {
   if (ses->winx < 1) return 0;
   if (amount < 1) return 0;
 
@@ -608,15 +641,13 @@ moveWindowLeft (unsigned int amount) {
 }
 
 int
-moveWindowRight (unsigned int amount) {
+moveBrailleWindowRight (unsigned int amount) {
+  if (amount < 1) return 0;
   int newx = ses->winx + amount;
+  if (newx >= scr.cols) return 0;
 
-  if ((newx > ses->winx) && (newx < scr.cols)) {
-    ses->winx = newx;
-    return 1;
-  }
-
-  return 0;
+  ses->winx = newx;
+  return 1;
 }
 
 int
@@ -647,16 +678,63 @@ shiftBrailleWindowLeft (unsigned int amount) {
   }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-  return moveWindowLeft(amount);
+  if (prefs.wordWrap) {
+    if (ses->winx < 1) return 0;
+    int from = ses->winx - amount;
+
+    if (from < 1) {
+      ses->winx = 0;
+    } else {
+      int to = ses->winx;
+      ScreenCharacter characters[scr.cols];
+      readScreenRow(ses->winy, scr.cols, characters);
+
+      while (to > 0) {
+        if (!iswspace(characters[--to].text)) {
+          to += 1;
+          break;
+        }
+      }
+
+      from = to - amount;
+      if (from < 0) from = 0;
+      ses->winx = from;
+
+      if (from > 0) {
+        if (!iswspace(characters[from-1].text)) {
+          while (from < to) {
+            if (iswspace(characters[from].text)) break;
+            from += 1;
+          }
+        }
+
+        while (from < to) {
+          if (!iswspace(characters[from].text)) break;
+          from += 1;
+        }
+      }
+
+      if (from < to) ses->winx = from;
+    }
+
+    return 1;
+  }
+
+  return moveBrailleWindowLeft(amount);
 }
 
 int
 shiftBrailleWindowRight (unsigned int amount) {
 #ifdef ENABLE_CONTRACTED_BRAILLE
-  if (isContracting()) amount = getContractedLength(amount);
+  if (isContracting()) {
+    amount = getContractedLength(amount);
+  } else
 #endif /* ENABLE_CONTRACTED_BRAILLE */
+  if (prefs.wordWrap) {
+    amount = getWordWrapLength(ses->winy, ses->winx, amount);
+  }
 
-  return moveWindowRight(amount);
+  return moveBrailleWindowRight(amount);
 }
 
 static int
@@ -775,7 +853,7 @@ trackScreenCursor (int place) {
     ses->winx += (scr.posx - ses->winx) / textCount * textCount;
   }
 
-  slideWindowVertically(scr.posy);
+  slideBrailleWindowVertically(scr.posy);
   return 1;
 }
 
@@ -821,7 +899,7 @@ volatile SpeechSynthesizer spk;
 void
 trackSpeech (void) {
   placeBrailleWindowHorizontally(spk.track.speechLocation % scr.cols);
-  slideWindowVertically(spk.track.firstLine + (spk.track.speechLocation / scr.cols));
+  slideBrailleWindowVertically(spk.track.firstLine + (spk.track.speechLocation / scr.cols));
   scheduleUpdate("speech tracked");
 }
 

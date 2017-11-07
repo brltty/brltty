@@ -65,7 +65,7 @@ speakDone (const ScreenCharacter *line, int column, int count, int spell) {
 
   speakCharacters(line, count, spell);
   placeBrailleWindowHorizontally(ses->spkx);
-  slideWindowVertically(ses->spky);
+  slideBrailleWindowVertically(ses->spky);
   suppressAutospeak();
 }
 

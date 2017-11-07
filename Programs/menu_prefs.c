@@ -717,6 +717,10 @@ makePreferencesMenu (void) {
     SUBMENU(navigationSubmenu, rootMenu, strtext("Navigation Options"));
 
     {
+      NAME(strtext("Word Wrap"));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.wordWrap, &itemName));
+    }
+    {
       NAME(strtext("Skip Identical Lines"));
       ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.skipIdenticalLines, &itemName));
     }
