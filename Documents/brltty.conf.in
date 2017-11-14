@@ -215,6 +215,7 @@
 #text-table	ta	# Tamil
 #text-table	te	# Telugu
 #text-table	tr	# Turkish
+#text-table	uk	# Ukrainian
 #text-table	vi	# Vietnamese
 
 # The attributes-table directive specifies which attributes table to use.
