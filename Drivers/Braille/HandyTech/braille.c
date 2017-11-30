@@ -1560,7 +1560,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                   case HT_EXTPKT_Scancode: {
                     while (length--)
                       enqueueCommand(BRL_CMD_BLK(PASSAT) | BRL_ARG_PUT(*bytes++));
-                    break;
+                    continue;
                   }
 
                   case HT_EXTPKT_GetRTC: {
