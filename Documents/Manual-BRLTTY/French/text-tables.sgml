@@ -64,7 +64,7 @@ nl&lowbar;BE|Autrichien (Belge)@
 nl&lowbar;NL|Autrichien (Pays-Bas)@
 no|Norvégien@
 no-generic|Norvégien (avec le support des autres langues)@
-no-oub|Norvégien (Offentlig Utvalg for Blindeskrift)@
+no-oup|Norvégien (Offentlig Utvalg for punktskrift)@
 nwc|Newari (ancien)@
 or|Oriya@
 pa|Panjabi@
@@ -77,6 +77,7 @@ sa|Sanscrit@
 sat|Santali@
 sd|Sindhi@
 sk|Slovaque@
+sl|Slovène@
 sv|Suédois@
 sv-1989|Suédois (standard 1989)@
 sv-1996|Suédois (standard 1996)@
@@ -84,4 +85,5 @@ sw|Swahili@
 ta|Tamoul@
 te|Telugu@
 tr|Turc@
+uk|Ukrainien@
 vi|Vietnamien@

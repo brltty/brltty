@@ -1714,6 +1714,7 @@ BRLTTY_TEXT_TABLE([sw], [Swahili])
 BRLTTY_TEXT_TABLE([ta], [Tamil])
 BRLTTY_TEXT_TABLE([te], [Telugu])
 BRLTTY_TEXT_TABLE([tr], [Turkish])
+BRLTTY_TEXT_TABLE([uk], [Ukrainian])
 BRLTTY_TEXT_TABLE([vi], [Vietnamese])
 BRLTTY_ARG_TABLE([text], [en-nabcc], [ttb])
 
