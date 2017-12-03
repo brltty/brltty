@@ -206,7 +206,7 @@ typedef enum {
 #include "braille.h"
 
 #define MAXLINES 3
-#define MAXCOLS 80
+#define MAXCOLS 88
 #define WHOLESIZE (MAXLINES * MAXCOLS)
 static int cols,lines;
 static int input;
