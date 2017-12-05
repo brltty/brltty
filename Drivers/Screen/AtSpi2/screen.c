@@ -720,15 +720,19 @@ static int recurseFindTerm(const char *sender, const char *path, int active, int
   dbus_message_iter_recurse (&iter, &iter_array);
   while (dbus_message_iter_get_arg_type (&iter_array) != DBUS_TYPE_INVALID)
   {
-    const char *sender, *path;
+    const char *childsender, *childpath;
     dbus_message_iter_recurse (&iter_array, &iter_struct);
-    dbus_message_iter_get_basic (&iter_struct, &sender);
+    dbus_message_iter_get_basic (&iter_struct, &childsender);
     dbus_message_iter_next (&iter_struct);
-    dbus_message_iter_get_basic (&iter_struct, &path);
-    if (findTerm(sender, path, active, depth))
+    dbus_message_iter_get_basic (&iter_struct, &childpath);
+    /* Make sure that the child is not the same as the parent, to avoid recursing indefinitely.  */
+    if (strcmp(path, childpath))
     {
-      res = 1;
-      goto out;
+      if (findTerm(childsender, childpath, active, depth))
+      {
+	res = 1;
+	goto out;
+      }
     }
     dbus_message_iter_next (&iter_array);
   }
