@@ -18,27 +18,172 @@
 
 # BRLTTY Text Table - Lituanian
 #
-# Samuel Thibault <samuel.thibault@ens-lyon.org>
-# 
-# This table is based on the Unesco report on the progress of unification of
-# braille writing « L'ÉCRITURE BRAILLE DANS LE MONDE », by Sir Clutha
-# MACKENZIE: http://unesdoc.unesco.org/images/0013/001352/135251fo.pdf
-# The document is dated 1954, so this table may be quite outdated.
+# Copyright (C) 2017 Rimas Kudelis <rq@akl.lt>
+#
+# The Lithuanian 8-dot Braille writing system is described in a decree of the Minister of
+# Social Security and Labor, called "Dėl vieningos aštuonių taškų Brailio rašto sistemos
+# naudojimo tvarkos aprašo patvirtinimo", which is in effect since 2011-04-13. Document
+# number is A1-183. At the time of writing this file, the document was accessible at
+# https://www.e-tar.lt/portal/lt/legalAct/TAR.443D667CA047 .
+# The document is referred to as "the standard" below.
+#
+# The standard maps ISO-8859-13 character set to 8-dot Braille writing system. However,
+# even though it defines different mappings for literary and computer braille modes, it
+# doesn't seem like the authors had a good understanding of why these two modes exist
+# and how they differ. Furthermore, the standard contains a few errors (incorrectly named
+# characters as well as mapping conflicts). I would say it needs further improvements.
+#
+# This file is based on the standard, but does not exactly follow it. Some standard
+# definitions are commented out, some changed, and some extra ones are added.
+#
+# This table is based on the respective liblouis table.
 
-# the standard representations for the letters of the Latin alphabet
+
+###
+### LETTERS
+###
+
+# Standard representations for the letters of the Latin alphabet
 include ltr-latin.tti
 
-# lowercase accented letters
+# Lowercase accented letters
+char \u0105	(1    6  )  # ⠡ ą [LATIN SMALL LETTER A WITH OGONEK]
 char \u010D	(1  4 6  )  # ⠩ č [LATIN SMALL LETTER C WITH CARON]
+char \u0119	(1   56  )  # ⠱ ę [LATIN SMALL LETTER E WITH OGONEK]
+char \u0117	(  345   )  # ⠜ ė [LATIN SMALL LETTER E WITH DOT ABOVE]
+char \u012F	( 2 4 6  )  # ⠪ į [LATIN SMALL LETTER I WITH OGONEK]
 char \u0161	( 234 6  )  # ⠮ š [LATIN SMALL LETTER S WITH CARON]
+char \u0173	(  34 6  )  # ⠬ ų [LATIN SMALL LETTER U WITH OGONEK]
+char \u016B	(12  56  )  # ⠳ ū [LATIN SMALL LETTER U WITH MACRON]
+char \u017E	(12   6  )  # ⠣ ž [LATIN SMALL LETTER Z WITH MACRON]
 
-# lowercase accented letters
+# Uppercase accented letters
+char \u0104	(1    67 )  # ⡡ Ą [LATIN CAPITAL LETTER A WITH OGONEK]
 char \u010C	(1  4 67 )  # ⡩ Č [LATIN CAPITAL LETTER C WITH CARON]
+char \u0118	(1   567 )  # ⡱ Ę [LATIN CAPITAL LETTER E WITH OGONEK]
+char \u0116	(  345 7 )  # ⡜ Ė [LATIN CAPITAL LETTER E WITH DOT ABOVE]
+char \u012E	( 2 4 67 )  # ⡪ Į [LATIN CAPITAL LETTER I WITH OGONEK]
 char \u0160	( 234 67 )  # ⡮ Š [LATIN CAPITAL LETTER S WITH CARON]
+char \u0172	(  34 67 )  # ⡬ Ų [LATIN CAPITAL LETTER U WITH OGONEK]
+char \u016A	(12  567 )  # ⡳ Ū [LATIN CAPITAL LETTER U WITH MACRON]
+char \u017D	(12   67 )  # ⡣ Ž [LATIN CAPITAL LETTER Z WITH CARON]
 
-# the numbers 0-9 are represented by the letters j,a-i with dot 8 added
+
+###
+### DIGITS
+###
+
+# Digits 0-9 are represented by the letters j,a-i with dot 8 added
 include num-dot8.tti
 
-include punc-basic.tti
+
+###
+### PUNCTUATION
+###
+
+char \x2C	( 2      )  # ⠂ , [COMMA]
+char \x2E	( 2  56  )  # ⠲ . [FULL STOP]
+char \x3F	( 2   6  )  # ⠢ ? [QUESTION MARK]
+char \x21	( 23 5   )  # ⠖ ! [EXCLAMATION MARK]
+char \x3A	( 2  5   )  # ⠒ : [COLON]
+char \x3B	( 23     )  # ⠆ ; [SEMICOLON]
+char \x22	(   4    )  # ⠈ " [QUOTATION MARK]
+char \x27	(  3     )  # ⠄ ' [APOSTROPHE]
+# The following character is defined as 134568 in the standard, but that is hardly useful.
+# According to Unicode, it is the preferred character to use for apostrophe, hence
+# defining it as one here.
+alias \u2019	\x27        #   ’ [RIGHT SINGLE QUOTATION MARK]
+
+char \x28	( 23 567 )  # ⡶ ( [LEFT PARENTHESIS]
+char \x29	( 23 56 8)  # ⢶ ) [RIGHT PARENTHESIS]
+char \x5B	(123 56  )  # ⠷ [ LEFT SQUARE BRACKET
+char \x5D	( 23456  )  # ⠾ ] RIGHT SQUARE BRACKET
+char \x7B	( 2 4 678)  # ⣪ { LEFT CURLY BRACKET
+char \x7D	(1 3 5 78)  # ⣕ } RIGHT CURLY BRACKET
+
+char \x2D	(  3  6  )  # ⠤ - [HYPHEN-MINUS]
+# Soft hyphen is defined as 368 in the standard.
+alias \xAD	\x2D        #   ­ [SOFT HYPHEN]
+# The following characters are not defined in the standard.
+alias \u2010	\x2D        #   ‐ [HYPHEN]
+alias \u2011	\x2D        #   ‑ [NON-BREAKING HYPHEN]
+alias \u2012	\x2D        #   ‒ [FIGURE DASH]
+alias \u2013	\x2D        #   – [EN DASH]
+alias \u2014	\x2D        #   — [EM DASH]
+alias \u2015	\x2D        #   ― [HORIZONTAL BAR]
+
+# These are the typographically correct quotes in Lithuanian texts.
+char \u201E	( 23  67 )  # ⡦ „ [DOUBLE LOW-9 QUOTATION MARK]
+char \u201C	(  3 567 )  # ⡴ “ [LEFT DOUBLE QUOTATION MARK]
+# The following characters are defined in the standard, because they exist in ISO-8859-13
+# character set, even though they should not be used in Lithuanian texts.
+char \u201D	(  3  67 )  # ⡤ ” [RIGHT DOUBLE QUOTATION MARK]
+char \xAB	(    5678)  # ⣰ « [LEFT-POINTING DOUBLE ANGLE QUOTATION MARK]
+char \xBB	(   45 78)  # ⣘ » [RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK]
+
+
+###
+### MATHEMATICAL SYMBOLS
+###
+
+char \x2B	( 23 5  8)  # ⢖ + [PLUS SIGN]
+# Real minus is not defined in the standard.
+alias \u2212	\x2D        #   − [MINUS SIGN]
+char \x3C	( 2 4 6 8)  # ⢪ < [LESS-THAN SIGN]
+char \x3D	( 23 56  )  # ⠶ = [EQUALS SIGN]
+char \x3E	(1 3 5  8)  # ⢕ > [GREATER-THAN SIGN]
+char \xB1	( 23 5 78)  # ⣖ ± [PLUS-MINUS SIGN]
+char \xD7	( 234   8)  # ⢎ × MULTIPLICATION SIGN]
+char \xF7	(12  5678)  # ⣳ ÷ [DIVISION SIGN]
+
+
+###
+### OTHER CHARACTERS
+###
+
+char \x23	(  3456  )  # ⠼ # [NUMBER SIGN]
+char \x24	(   4 6  )  # ⠨ $ [DOLLAR SIGN]
+char \x25	(123456  )  # ⠿ % [PERCENT SIGN]
+char \x26	(1234 6  )  # ⠯ & [AMPERSAND]
+char \x2A	(  3 5   )  # ⠔ * [ASTERISK]
+char \x2F	(  34    )  # ⠌ / [SOLIDUS]
+char \x40	(  345 78)  # ⣜ @ [COMMERCIAL AT]
+char \x5C	(  34  7 )  # ⡌ \ [REVERSE SOLIDUS]
+char \x5E	( 2  56 8)  # ⢲ ^ [CIRCUMFLEX ACCENT]
+char \x5F	(   4567 )  # ⡸ _ [LOW LINE]
+char \x7C	(   456  )  # ⠸ | [VERTICAL LINE]
+char \xA6	(1  456  )  # ⠹ ¦ [BROKEN BAR]
+char \xA7	(  34 6 8)  # ⢬ § [SECTION SIGN]
+char \xAC	(    5   )  # ⠐ ¬ [NOT SIGN]
+char \xB5	(1 34   8)  # ⢍ µ [MICRO SIGN]
+char \xB6	(1234   8)  # ⢏ ¶ [PILCROW SIGN]
+
+char \x60	(     6  )  # ⠠ ` [GRAVE ACCENT]
+char \x7E	( 2   6 8)  # ⢢ ~ [TILDE]
+
+char \xA2	(    5  8)  # ⢐ ¢ [CENT SIGN]
+char \xA3	(   4 67 )  # ⡨ £ [POUND SIGN]
+# Euro sign is not defined in the standard, but codepoint 0x80 of ISO-8859-13 is.
+# In Windows-1257, 0x80 is the Euro sign.
+# The unofficially distributed Lithuanian JAWS table specified all characters as
+# ANSI codes, thus rendering Euro as 457.
+# Not sure if I want to replicate that here though: who knows how this table will
+# end up being used and for how long. Aliasing to E instead.
+# char \u20AC	(   45 7 )  # ⡘ € [EURO SIGN]
+alias \u20AC	\x45        #   € [EURO SIGN]
+
+char \xA4	(   4 678)  # ⣨ ¤ [CURRENCY SIGN]
+
+char \xA9	(1234 6 8)  # ⢯ © COPYRIGHT SIGN
+char \xAE	(123 5  8)  # ⢗ ® [REGISTERED SIGN]
+
+# Middle dot is unlikely to appear in text, except perhaps as a multiplication sign (dot operator).
+char \xB7	(  3   7 )  # ⡄ · [MIDDLE DOT]
+
+char \xB0	(   456 8)  # ⢸ ° [DEGREE SIGN]
+
+char \xB9	(1     78)  # ⣁ ¹ [SUPERSCRIPT ONE]
+char \xB2	(12    78)  # ⣃ ² [SUPERSCRIPT TWO]
+char \xB3	(1  4  78)  # ⣉ ³ [SUPERSCRIPT THREE]
 
 include common.tti
