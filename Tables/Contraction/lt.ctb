@@ -40,6 +40,15 @@
 # This table is based on the respective liblouis table.
 
 ###
+### WHITESPACE
+###
+
+include spaces.cti
+
+always \x09 0-0             U+0009 CHARACTER TABULATION
+
+
+###
 ### LETTERS
 ###
 
@@ -87,6 +96,17 @@ always 0 245
 ### PUNCTUATION
 ###
 
+always , 2
+always . 256
+always ? 26
+always ! 235
+always : 25
+always ; 23
+always " 4
+always ' 3
+# According to Unicode, this is the preferred character to use for apostrophe.
+always ’ 3                  U+2019 RIGHT SINGLE QUOTATION MARK
+
 always ( 2356
 always ) 2356
 always [ 12356
@@ -94,7 +114,14 @@ always ] 23456
 always { 6-246
 always } 6-135
 
-always – 6-36               U+2013 EN DASH
+always \x2D 36              U+002D - HYPHEN-MINUS
+always \u2013 6-36          U+2013 – EN DASH
+always \xAD 36              U+00AD [SOFT HYPHEN]
+always \u2010 36            U+2010 ‐ HYPHEN
+always \u2011 36            U+2011 ‑ NON-BREAKING HYPHEN
+always \u2012 36            U+2012 ‒ FIGURE DASH
+always \u2014 36            U+2014 — EM DASH
+always \u2015 36            U+2015 ― HORIZONTAL BAR
 
 # These are the typographically correct quotes in Lithuanian texts.
 always „ 236                U+201E DOUBLE LOW-9 QUOTATION MARK
@@ -138,13 +165,17 @@ always ∕ 34                 U+2215 DIVISION SLASH
 
 always # 6-3456
 always $ 6-46
+always % 123456
+always & 12346
+always * 35
+always / 34
 always @ 6-345
 always \\ 6-34
 always ^ 6-256
 always _ 1456
 always | 6-456
 #always ¦ 6-1456
-always § 6-345
+always § 6-346
 #always ¬ 6-235
 always µ 6-134
 #always ¶ 6-1234
@@ -179,6 +210,8 @@ always ℉ 5-356-46-124       U+2109 DEGREE FAHRENHEIT
 ###
 ### INDICATOR AND SPECIAL SYMBOL DIRECTIVES
 ###
+
+#always \uFFFD 7             U+FFFD � REPLACEMENT CHARACTER
 
 numsign 3456  number sign, just one operand
 letsign 56
