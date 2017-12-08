@@ -154,22 +154,22 @@ putCharacter (unsigned char character, void *data) {
 }
 
 static int
-putBrailleCell (wchar_t cell, void *data) {
+putCellCharacter (wchar_t character, void *data) {
   Utf8Buffer utf8;
-  size_t utfs = convertWcharToUtf8(cell, utf8);
+  size_t utfs = convertWcharToUtf8(character, utf8);
 
   fprintf(outputStream, "%.*s", (int)utfs, utf8);
   return checkOutputStream(data);
 }
 
 static int
-putMappedCell (unsigned char cell, void *data) {
-  return putBrailleCell(convertDotsToCharacter(textTable, cell), data);
+putTextCell (unsigned char cell, void *data) {
+  return putCellCharacter(convertDotsToCharacter(textTable, cell), data);
 }
 
 static int
-putUnicodeCell (unsigned char cell, void *data) {
-  return putBrailleCell((UNICODE_BRAILLE_ROW | cell), data);
+putBrailleCell (unsigned char cell, void *data) {
+  return putCellCharacter((UNICODE_BRAILLE_ROW | cell), data);
 }
 
 static int
@@ -476,7 +476,7 @@ main (int argc, char *argv[]) {
         if (*opt_textTable) {
           char *textTablePath;
 
-          putCell = putMappedCell;
+          putCell = putTextCell;
 
           if ((textTablePath = makeTextTablePath(opt_tablesDirectory, opt_textTable))) {
             exitStatus = (textTable = compileTextTable(textTablePath))? PROG_EXIT_SUCCESS: PROG_EXIT_FATAL;
@@ -485,7 +485,7 @@ main (int argc, char *argv[]) {
             exitStatus = PROG_EXIT_FATAL;
           }
         } else {
-          putCell = putUnicodeCell;
+          putCell = putBrailleCell;
           exitStatus = PROG_EXIT_SUCCESS;
         }
 
