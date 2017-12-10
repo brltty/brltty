@@ -101,6 +101,8 @@ Release: 1
 Group: System Environment/Daemons
 License: GPL
 
+Requires: libX11
+
 BuildRequires: xorg-x11-proto-devel
 BuildRequires: libX11-devel
 BuildRequires: libXt-devel
@@ -210,8 +212,11 @@ Group: System Environment/Daemons
 License: GPL
 
 Requires: at-spi
+Requires: libX11
 
 BuildRequires: at-spi-devel
+BuildRequires: libX11-devel
+BuildRequires: xorg-x11-proto-devel
 
 AutoProv: no
 AutoReq: yes
@@ -234,6 +239,8 @@ License: GPL
 Requires: dbus
 
 BuildRequires: at-spi2-core-devel
+BuildRequires: xorg-x11-proto-devel
+BuildRequires: dbus-devel
 
 AutoProv: no
 AutoReq: yes
@@ -466,6 +473,8 @@ Version: @api_release@
 Release: 1
 Group: Applications/System
 License: LGPL
+
+Requires: libX11
 
 BuildRequires: xorg-x11-proto-devel
 BuildRequires: libX11-devel
