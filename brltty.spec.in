@@ -133,7 +133,6 @@ BuildRequires: espeak-devel
 
 AutoProv: no
 AutoReq: yes
-Requires: espeak
 
 Summary: eSpeak speech driver for BRLTTY.
 %description -n brltty-speech-espeak
@@ -153,7 +152,6 @@ Requires: festival
 
 AutoProv: no
 AutoReq: yes
-Requires: festival
 
 Summary: Festival speech driver for BRLTTY.
 %description -n brltty-speech-festival
@@ -175,7 +173,6 @@ BuildRequires: flite-devel
 
 AutoProv: no
 AutoReq: yes
-Requires: flite
 
 Summary: Festival Lite speech driver for BRLTTY.
 %description -n brltty-speech-flite
@@ -197,7 +194,6 @@ BuildRequires: speech-dispatcher-devel
 
 AutoProv: no
 AutoReq: yes
-Requires: speech-dispatcher
 
 Summary: Speech Dispatcher speech driver for BRLTTY.
 %description -n brltty-speech-speechd
@@ -219,7 +215,6 @@ BuildRequires: at-spi-devel
 
 AutoProv: no
 AutoReq: yes
-Requires: at-spi
 
 Summary: AT-SPI screen driver for BRLTTY.
 %description -n brltty-screen-atspi
@@ -242,7 +237,6 @@ BuildRequires: at-spi2-core-devel
 
 AutoProv: no
 AutoReq: yes
-Requires: dbus
 
 Summary: AT-SPI2 screen driver for BRLTTY.
 %description -n brltty-screen-atspi2
