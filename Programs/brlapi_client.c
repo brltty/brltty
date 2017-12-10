@@ -76,6 +76,7 @@
 #endif /* HAVE_ALLOCA_H */
 
 #ifdef linux
+#include <sys/sysmacros.h>
 #include <linux/major.h>
 #include <linux/tty.h>
 #include <linux/vt.h>
