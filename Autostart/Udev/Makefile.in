@@ -47,3 +47,6 @@ uninstall:
 	-rm -f $(UDEV_RULES_DIRECTORY)/?*-$(PACKAGE_TARNAME).$(UDEV_RULES_EXTENSION)
 	-rm -f $(UDEV_LIBRARY_DIRECTORY)/$(PACKAGE_TARNAME)-*
 
+reload:
+	udevadm control --reload
+

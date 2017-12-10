@@ -40,3 +40,6 @@ uninstall:
 	-rm -f $(SYSTEMD_UNITS_DIRECTORY)/$(PACKAGE_TARNAME)@.*
 	-rm -f $(SYSTEMD_SCRIPTS_DIRECTORY)/$(PACKAGE_TARNAME)-systemd-*
 
+reload:
+	systemctl daemon-reload
+
