@@ -1297,7 +1297,7 @@ client then doesn't need to send a <tt/BRLAPI_PACKET_AUTH/ packet.
 <item>normal mode: the client is authorized to use the server, but didn't ask for a tty
 or raw mode. The client can send either of these types of packet:
   <itemize>
-  <item><tt/BRLAPI_PACKET_GETDRIVERID/, <tt/BRLAPI_PACKET_GETDRIVERNAME/
+  <item><tt/BRLAPI_PACKET_GETDRIVERNAME/
   or <tt/BRLAPI_PACKET_GETDISPLAYSIZE/ to get pieces of information from the server,
   <item><tt/BRLAPI_PACKET_ENTERTTY/MODE to enter tty handling mode,
   <item><tt/BRLAPI_PACKET_ENTERRAWMODE/ to enter raw mode,
@@ -1315,7 +1315,7 @@ display and keypresses. For this, it can send either of these types of packet:
   <item><tt/BRLAPI_PACKET_IGNOREKEYRANGE/ and <tt/BRLAPI_PACKET_ACCEPTKEYRANGE/ to mask and unmask keys,
   <item><tt/BRLAPI_PACKET_WRITE/ to display text on this tty,
   <item><tt/BRLAPI_PACKET_ENTERRAWMODE/ to enter raw mode,
-  <item><tt/BRLAPI_PACKET_GETDRIVERID/, <tt/BRLAPI_PACKET_GETDRIVERNAME/
+  <item><tt/BRLAPI_PACKET_GETDRIVERNAME/
   or <tt/BRLAPI_PACKET_GETDISPLAYSIZE/ to get pieces of information from the server,
   </itemize>
 And the server might send <tt/BRLAPI_PACKET_KEY/ packets to signal key presses.
@@ -1392,12 +1392,7 @@ the credentials sufficient.
 Note: when the Operating system permits it, the server may use implicit
 credential check, and then advertise the <tt/none/ method.
 
-<sect2><tt/BRLAPI_PACKET_GETDRIVERID/ (see <em/brlapi_getDriverId()/)
-<p>
-This should be sent by the client when it needs the 2-char identifier of
-the current <tt/brltty/ driver. The returned string is \0 terminated.
-
-<sect2><tt/BRLAPI_PACKET_GETDRIVERNAME/ (see <em/brlapi_getDriverName()/)
+u<sect2><tt/BRLAPI_PACKET_GETDRIVERNAME/ (see <em/brlapi_getDriverName()/)
 <p>
 This should be sent by the client when it needs the full name of
 the current <tt/brltty/ driver. The returned string is \0 terminated.

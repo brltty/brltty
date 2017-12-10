@@ -245,7 +245,6 @@ ssize_t brlapi_readPacket(brlapi_fileDescriptor fd, brlapi_packetType_t *type, v
  * - brlapi_leaveRawMode()
  * - brlapi_sendRaw()
  * - brlapi_recvRaw()
- * - brlapi_getDriverId()
  * - brlapi_getDriverName()
  * - brlapi_getDisplaySize()
  * - brlapi_enterTtyMode()
