@@ -25,7 +25,7 @@ install-units-directory:
 	$(INSTALL_DIRECTORY) $(SYSTEMD_UNITS_DIRECTORY)
 
 install-units: install-units-directory
-	for extension in service target; do \
+	for extension in service path; do \
 	$(INSTALL_DATA) $(SRC_DIR)/*.$$extension $(SYSTEMD_UNITS_DIRECTORY); \
 	done
 

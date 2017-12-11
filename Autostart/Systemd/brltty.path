@@ -17,8 +17,12 @@
 ###############################################################################
 
 [Unit]
-Description=BRLTTY (using configuration file /etc/brltty_%I.conf)
-Requires=brltty@-etc-brltty_%i.conf.service
+Description=Default BRLTTY Instance
+Requires=brltty@-etc-brltty.conf.service
+
+[Path]
+PathExists=/etc/brltty.conf
+Unit=brltty@-etc-brltty.conf.service
 
 [Install]
 WantedBy=sysinit.target

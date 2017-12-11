@@ -12,7 +12,7 @@ Using Systemd Service Management
 Initial Setup
 =============
 
-A set of Systemd service and target units needs to be installed
+A set of Systemd service and path units needs to be installed
 into the |unit directory| directory,
 and a wrapper script needs to be installed
 into the |wrapper directory| directory.
@@ -52,29 +52,29 @@ The Default Instance
 
 The default BRLTTY instance is the one that's configured
 via the file ``/etc/brltty.conf``.
-It's managed by applying standard Systemd commands to BRLTTY's target unit.
+It's managed by applying standard Systemd commands to BRLTTY's path unit.
 For example::
 
-  systemctl enable brltty.target
-  systemctl start brltty.target
-  systemctl stop brltty.target
-  systemctl disable brltty.target
+  systemctl enable brltty.path
+  systemctl start brltty.path
+  systemctl stop brltty.path
+  systemctl disable brltty.path
 
 Additional Instances
 --------------------
 
-Additional BRLTTY instances can be managed via target instance references.
+Additional BRLTTY instances can be managed via path instance references.
 Each of them has its own configuration file.
 
 If, for example, the name of an instance is ``iname``, then
-its Systemd target name would be ``brltty@iname``,
+its Systemd path name would be ``brltty@iname``,
 its configuration file would be ``/etc/brltty_iname.conf``,
 and it'd be managed via Systemd commands like these::
 
-  systemctl enable brltty@iname.target
-  systemctl start brltty@iname.target
-  systemctl stop brltty@iname.target
-  systemctl disable brltty@iname.target
+  systemctl enable brltty@iname.path
+  systemctl start brltty@iname.path
+  systemctl stop brltty@iname.path
+  systemctl disable brltty@iname.path
 
 Any number of instances may be managed in this way.
 
