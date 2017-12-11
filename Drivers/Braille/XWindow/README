@@ -43,6 +43,13 @@ mycomputer$ DISPLAY=othercomputer:0 brltty -b xw -B input=on
 
 More fine-grain access control can be achieved by using xauth.
 
+Another way, which might be easier depending on your configuration, is to
+forward X through ssh:
+
+othercomputer$ ssh -X mycomputer
+mycomputer$ brltty -b xw -B input=on
+
+
 The input=on option makes the keypresses in the device window get simulated
 on mycomputer, just like a real braille device.
 
