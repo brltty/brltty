@@ -1,8 +1,14 @@
+Description
+===========
+
 This driver lets use a Graphical User Interface as BrlTTY device:
 it behaves just like a real braille device, its cost excepted :)
 
 It is mostly intended for sighted developers who don't have access to a real
 device, but still want to have an idea of the accessiblity of their application.
+
+How to run basically
+====================
 
 Assuming you're under X, first launch brltty:
 $ brltty -b xw -x as -A auth=none
@@ -20,12 +26,31 @@ will show up most of VisioBraille device's keys.
 
 You should configure your window manager not to let the BRLTTY window get
 keyboard focus, so as to be able to simulate keypresses by pressing buttons.
-Or you may use the -display tkparameter option to display the emulated device
-on another X server and add the input=on option so that keypresses in the
-device window will get simulated in the original display.
 
-*** Don't set input=on without using -display too on a different display,
-because else emulated keypresses will just loop ! ***
+Redirecting the output
+======================
+
+The output of this virtual braille device can be shown on another computer, by
+redirecting the X output. Let's say you will run brltty on "mycomputer", with
+the output on "othercomputer". First you have to let mycomputer connect to
+othercomputer's X server:
+
+othercomputer$ xhost +mycomputer
+
+And then you can start brltty on mycomputer:
+
+mycomputer$ DISPLAY=othercomputer:0 brltty -b xw -B input=on
+
+More fine-grain access control can be achieved by using xauth.
+
+The input=on option makes the keypresses in the device window get simulated
+on mycomputer, just like a real braille device.
+
+*** Don't set input=on without using DISPLAY with a different display,
+because otherwise emulated keypresses will just loop ! ***
+
+Braille cells
+=============
 
 If you want braille display as well, you'll need the ClearlyU font
 (included in recent xfonts-base packages) and a UTF-8 locale for
@@ -34,6 +59,6 @@ prepended LC_CTYPE:
 
 LC_CTYPE=en_US.UTF-8 brltty ...
 
-In order to use this driver on Windows, you need to copy the file UBraille.ttf 
-into the C:\Windows\Fonts\ folder. It can be found in this directory as well as 
-in the Fonts\ top-level folder of BRLTTY's Windows installed files hierarchy.
+On windows, you need to copy the file UBraille.ttf into the C:\Windows\Fonts\
+folder. It can be found in this directory as well as in the Fonts\ top-level
+folder of BRLTTY's Windows installed files hierarchy.
