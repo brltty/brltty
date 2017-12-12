@@ -23,22 +23,31 @@ readonly programName="${0##*/}"
 
 programMessage() {
   local message="${1}"
+  local level="${2}"
 
+  logger -p "daemon.${level:-info}" -t "${programName}" -- "${1}" &&
+  [ ! -t 2 ] ||
   echo >&2 "${programName}: ${message}"
+}
+
+errorMessage() {
+  local message="${1}"
+  local code="${2}"
+
+  programMessage "${message}" err
+  exit "${code:-1}"
 }
 
 syntaxError() {
   local message="${1}"
 
-  programMessage "${message}"
-  exit 2
+  errorMessage "${message}" 2
 }
 
 semanticError() {
   local message="${1}"
 
-  programMessage "${message}"
-  exit 3
+  errorMessage "${message}" 3
 }
 
 readonly currentInstance="${BRLTTY_SYSTEMD_INSTANCE:-${defaultInstance}}"
@@ -75,6 +84,6 @@ else
 fi
 
 set -- "${BRLTTY_EXECUTABLE_PATH:-brltty}" -E ${BRLTTY_EXECUTABLE_ARGUMENTS} "${@}"
-programMessage "starting executable: ${*}"
+programMessage "starting executable: ${*}" info
 exec "${@}"
 exit "${?}"
