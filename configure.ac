@@ -1472,7 +1472,9 @@ BRLTTY_ARG_PACKAGE([ports], [I/O ports], [], [dnl
       ports_package="kfreebsd"
       ;;
    linux*)
-      ports_package="glibc"
+      AC_CHECK_FUNC([ioperm], [
+         ports_package="glibc"
+      ])
       ;;
    mingw*)
       ports_package="windows"
