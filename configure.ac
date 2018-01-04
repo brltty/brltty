@@ -428,6 +428,16 @@ AC_SUBST([can_make_manual])
 test "${DOXYGEN}" = "false" && can_make_BrlAPIref=no || can_make_BrlAPIref=yes
 AC_SUBST([can_make_BrlAPIref])
 
+AC_CACHE_CHECK([for make relocatable object command], [brltty_cv_prog_mkobj], [dnl
+case "${host_os}"
+in
+   *)
+      brltty_cv_prog_mkobj="\$(LD) -r -o"
+      ;;
+esac])
+MKOBJ="${brltty_cv_prog_mkobj}"
+AC_SUBST([MKOBJ])
+
 AC_CACHE_CHECK([for loadable module creation command], [brltty_cv_prog_mkmod], [dnl
 case "${host_os}"
 in
