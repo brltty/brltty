@@ -23,7 +23,7 @@ SCR_MOD_NAME = $(BLD_TOP)$(DRV_DIR)/$(MOD_NAME)x$(DRIVER_CODE)
 SCR_MOD_FILE = $(SCR_MOD_NAME).$(MOD_EXT)
 $(SCR_MOD_FILE): screen.$O
 	$(INSTALL_DIRECTORY) $(@D)
-	$(MKMOD) $(@) screen.$O $(SCR_OBJS)
+	$(MKSHR) $(@) screen.$O $(SCR_OBJS)
 screen-driver: $(SCR_MOD_FILE)
 
 install::

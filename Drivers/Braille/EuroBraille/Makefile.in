@@ -28,7 +28,7 @@ SRC_FILES = eu_braille.c eu_clio.c eu_esysiris.c
 OBJ_FILES = $(SRC_FILES:.c=.$O)
 
 braille.$O: $(OBJ_FILES)
-	$(MKOBJ)  $@ $(OBJ_FILES)
+	$(MKREL) $@ $(OBJ_FILES)
 
 %.$O: $(SRC_DIR)/%.c
 	$(CC) $(BRL_CFLAGS) -o $@ -c $<

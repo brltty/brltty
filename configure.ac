@@ -428,40 +428,30 @@ AC_SUBST([can_make_manual])
 test "${DOXYGEN}" = "false" && can_make_BrlAPIref=no || can_make_BrlAPIref=yes
 AC_SUBST([can_make_BrlAPIref])
 
-AC_CACHE_CHECK([for make relocatable object command], [brltty_cv_prog_mkobj], [dnl
-case "${host_os}"
-in
-   *)
-      brltty_cv_prog_mkobj="\$(LD) -r -o"
-      ;;
-esac])
-MKOBJ="${brltty_cv_prog_mkobj}"
-AC_SUBST([MKOBJ])
-
-AC_CACHE_CHECK([for loadable module creation command], [brltty_cv_prog_mkmod], [dnl
+AC_CACHE_CHECK([for shared object creation command], [brltty_cv_prog_make_object_shared], [dnl
 case "${host_os}"
 in
    linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*|cygwin*|mingw*|elf*)
-      brltty_mkmod_ld_make="-shared"
+      brltty_mkshr_ld_make="-shared"
       ;;
    solaris*)
-      brltty_mkmod_ld_make="-G"
+      brltty_mkshr_ld_make="-G"
       ;;
    hpux*)
-      brltty_mkmod_ld_make="-b"
+      brltty_mkshr_ld_make="-b"
       ;;
    osf*)
-      brltty_mkmod_ld_make="-shared"
+      brltty_mkshr_ld_make="-shared"
       ;;
    darwin*)
-      brltty_mkmod_ld_make="-bundle"
-      brltty_mkmod_ld_options="-flat_namespace -undefined suppress"
-      brltty_mkmod_gcc_make="-bundle"
+      brltty_mkshr_ld_make="-bundle"
+      brltty_mkshr_ld_options="-flat_namespace -undefined suppress"
+      brltty_mkshr_gcc_make="-bundle"
       ;;
    msdos*)
-      brltty_mkmod_ld_make="not_supported_on_msdos"
-      brltty_mkmod_ld_options="not_supported_on_msdos"
-      brltty_mkmod_gcc_make="not_supported_on_msdos"
+      brltty_mkshr_ld_make="not_supported_on_msdos"
+      brltty_mkshr_ld_options="not_supported_on_msdos"
+      brltty_mkshr_gcc_make="not_supported_on_msdos"
       ;;
    *)
       AC_MSG_ERROR([loadable module creation command not configured for ${host_os}])
@@ -469,11 +459,21 @@ in
 esac
 if test "${GCC}" = "yes"
 then
-   brltty_cv_prog_mkmod="\$(CC) ${brltty_mkmod_gcc_make=-shared} BRLTTY_OPTIONS_LD2CC([${brltty_mkmod_ld_options}]) -o"
+   brltty_cv_prog_make_object_shared="\$(CC) ${brltty_mkshr_gcc_make=-shared} BRLTTY_OPTIONS_LD2CC([${brltty_mkshr_ld_options}]) -o"
 else
-   brltty_cv_prog_mkmod="\$(LD) ${brltty_mkmod_ld_make} ${brltty_mkmod_ld_options} -o"
+   brltty_cv_prog_make_object_shared="\$(LD) ${brltty_mkshr_ld_make} ${brltty_mkshr_ld_options} -o"
 fi])
-AC_SUBST([MKMOD], ["${brltty_cv_prog_mkmod}"])
+AC_SUBST([MKSHR], ["${brltty_cv_prog_make_object_shared}"])
+
+AC_CACHE_CHECK([for make relocatable object command], [brltty_cv_prog_make_object_relocatable], [dnl
+case "${host_os}"
+in
+   *)
+      brltty_cv_prog_make_object_relocatable="\$(LD) -r -o"
+      ;;
+esac])
+MKREL="${brltty_cv_prog_make_object_relocatable}"
+AC_SUBST([MKREL])
 
 AC_CACHE_CHECK([for dynamic library creation command], [brltty_cv_prog_mklib], [dnl
 case "${host_os}"

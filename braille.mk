@@ -27,7 +27,7 @@ BRL_MOD_NAME = $(BLD_TOP)$(DRV_DIR)/$(MOD_NAME)b$(DRIVER_CODE)
 BRL_MOD_FILE = $(BRL_MOD_NAME).$(MOD_EXT)
 $(BRL_MOD_FILE): braille.$O
 	$(INSTALL_DIRECTORY) $(@D)
-	$(MKMOD) $(@) braille.$O $(BRL_OBJS)
+	$(MKSHR) $(@) braille.$O $(BRL_OBJS)
 braille-driver: $(BRL_MOD_FILE)
 
 install-api::

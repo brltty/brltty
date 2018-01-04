@@ -23,7 +23,7 @@ SPK_MOD_NAME = $(BLD_TOP)$(DRV_DIR)/$(MOD_NAME)s$(DRIVER_CODE)
 SPK_MOD_FILE = $(SPK_MOD_NAME).$(MOD_EXT)
 $(SPK_MOD_FILE): speech.$O
 	$(INSTALL_DIRECTORY) $(@D)
-	$(MKMOD) $(@) speech.$O $(SPK_OBJS)
+	$(MKSHR) $(@) speech.$O $(SPK_OBJS)
 speech-driver: $(SPK_MOD_FILE)
 
 install::
