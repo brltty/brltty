@@ -215,11 +215,10 @@ handleToggleCommands (int command, void *data) {
       break;
 
     case BRL_CMD_INFO:
-      if ((prefs.statusPosition == spNone) || !prefs.statusCount || haveStatusCells()) {
+      if (haveStatusCells() || !(textMaximized || statusCount)) {
         toggleModeSetting(&infoMode, command);
       } else {
         ToggleResult result = toggleModeSetting(&textMaximized, command);
-
         if (result > TOGGLE_SAME) reconfigureBrailleWindow();
       }
       break;
