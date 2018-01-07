@@ -715,10 +715,12 @@ typedef struct {
 } ResourceData;
 
 static const ResourceData resourceData_serial = {
+  .isTouch = 0, // probing detects if it's a Touch or not
   .protocol = &serialProtocol
 };
 
 static const ResourceData resourceData_HID = {
+  .isTouch = 0, // only for non-Touch models
   .protocol = &hidProtocol
 };
 
