@@ -712,17 +712,17 @@ static const ProtocolEntry hidProtocol = {
 typedef struct {
   const ProtocolEntry *protocol;
   unsigned isTouch:1;
-} UsbData;
+} ResourceData;
 
-static const UsbData usbData_serial = {
+static const ResourceData resourceData_serial = {
   .protocol = &serialProtocol
 };
 
-static const UsbData usbData_HID = {
+static const ResourceData resourceData_HID = {
   .protocol = &hidProtocol
 };
 
-static const UsbData usbData_touch = {
+static const ResourceData resourceData_touch = {
   .isTouch = 1,
   .protocol = &hidProtocol
 };
@@ -741,21 +741,21 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=2, .outputEndpoint=3,
       .serial = &serialParameters,
-      .data = &usbData_serial
+      .data = &resourceData_serial
     },
 
     { /* all models (HID protocol) */
       .vendor=0X1C71, .product=0XC006,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1,
-      .data = &usbData_HID
+      .data = &resourceData_HID
     },
 
     { /* BrailleNote Touch (HID protocol) */
       .vendor=0X1C71, .product=0XC00A,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1,
-      .data = &usbData_touch
+      .data = &resourceData_touch
     },
   END_USB_CHANNEL_DEFINITIONS
 
@@ -763,20 +763,20 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   gioInitializeDescriptor(&descriptor);
 
   descriptor.serial.parameters = &serialParameters;
-  descriptor.serial.options.applicationData = &serialProtocol;
+  descriptor.serial.options.applicationData = &resourceData_serial;
   descriptor.serial.options.readyDelay = OPEN_READY_DELAY;
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
   descriptor.usb.options.readyDelay = OPEN_READY_DELAY;
 
   descriptor.bluetooth.channelNumber = 1;
-  descriptor.bluetooth.options.applicationData = &serialProtocol;
+  descriptor.bluetooth.options.applicationData = &resourceData_serial;
   descriptor.bluetooth.options.readyDelay = OPEN_READY_DELAY;
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
-    const UsbData *usbData = gioGetApplicationData(brl->gioEndpoint);
-    brl->data->protocol = usbData->protocol;
-    brl->data->isBrailleNoteTouch = usbData->isTouch;
+    const ResourceData *resourceData = gioGetApplicationData(brl->gioEndpoint);
+    brl->data->protocol = resourceData->protocol;
+    brl->data->isBrailleNoteTouch = resourceData->isTouch;
     return 1;
   }
 
