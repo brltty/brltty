@@ -746,7 +746,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .data = &resourceData_serial
     },
 
-    { /* all models (HID protocol) */
+    { /* non-Touch models (HID protocol) */
       .vendor=0X1C71, .product=0XC006,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1,
