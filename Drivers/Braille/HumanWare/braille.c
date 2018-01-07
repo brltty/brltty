@@ -709,6 +709,24 @@ static const ProtocolEntry hidProtocol = {
   .keepAwake = keepHidAwake
 };
 
+typedef struct {
+  const ProtocolEntry *protocol;
+  unsigned isTouch:1;
+} UsbData;
+
+static const UsbData usbData_serial = {
+  .protocol = &serialProtocol
+};
+
+static const UsbData usbData_HID = {
+  .protocol = &hidProtocol
+};
+
+static const UsbData usbData_touch = {
+  .isTouch = 1,
+  .protocol = &hidProtocol
+};
+
 static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
   static const SerialParameters serialParameters = {
@@ -723,21 +741,21 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=2, .outputEndpoint=3,
       .serial = &serialParameters,
-      .data = &serialProtocol
+      .data = &usbData_serial
     },
 
     { /* all models (HID protocol) */
       .vendor=0X1C71, .product=0XC006,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1,
-      .data = &hidProtocol
+      .data = &usbData_HID
     },
 
     { /* BrailleNote Touch (HID protocol) */
       .vendor=0X1C71, .product=0XC00A,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1,
-      .data = &hidProtocol
+      .data = &usbData_touch
     },
   END_USB_CHANNEL_DEFINITIONS
 
@@ -756,7 +774,9 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   descriptor.bluetooth.options.readyDelay = OPEN_READY_DELAY;
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
-    brl->data->protocol = gioGetApplicationData(brl->gioEndpoint);
+    const UsbData *usbData = gioGetApplicationData(brl->gioEndpoint);
+    brl->data->protocol = usbData->protocol;
+    brl->data->isBrailleNoteTouch = usbData->isTouch;
     return 1;
   }
 
