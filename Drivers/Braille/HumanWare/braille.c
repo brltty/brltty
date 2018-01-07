@@ -649,6 +649,12 @@ probeHidDisplay (BrailleDisplay *brl) {
 }
 
 static int
+probeNoteTouch (BrailleDisplay *brl) {
+  brl->data->isBrailleNoteTouch = 1;
+  return probeHidDisplay(brl);
+}
+
+static int
 writeHidCells (BrailleDisplay *brl, const unsigned char *cells, unsigned char count) {
   unsigned char buffer[4 + count];
   unsigned char *byte = buffer;
@@ -709,6 +715,14 @@ static const ProtocolEntry hidProtocol = {
   .keepAwake = keepHidAwake
 };
 
+static const ProtocolEntry touchProtocol = {
+  .name = "HID",
+  .probeDisplay = probeNoteTouch,
+  .writeCells = writeHidCells,
+  .processInputPacket = processHidInputPacket,
+  .keepAwake = keepHidAwake
+};
+
 static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
   static const SerialParameters serialParameters = {
@@ -737,7 +751,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .vendor=0X1C71, .product=0XC00A,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1,
-      .data = &hidProtocol
+      .data = &touchProtocol
     },
   END_USB_CHANNEL_DEFINITIONS
 
