@@ -152,7 +152,7 @@ static const ModelEntry modelEntry_B80 = {
 
 static const ModelEntry modelEntry_touch = {
   .hasBrailleKeys = 1,
-  .hasCommandKeys = 1,
+  .hasCommandKeys = 0,
   .keyTableDefinition = &KEY_TABLE_DEFINITION(touch)
 };
 
