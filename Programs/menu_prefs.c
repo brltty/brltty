@@ -341,6 +341,7 @@ changedStatusField (unsigned char index, unsigned char setting) {
       if (!haveStatusCells()) return 0;
       if (!braille->statusFields) return 0;
       if (*braille->statusFields != sfGeneric) return 0;
+      /* fall through */
 
     case sfEnd:
       if (prefs.statusFields[index+1] != sfEnd) return 0;
