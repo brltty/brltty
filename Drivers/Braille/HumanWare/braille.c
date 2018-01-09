@@ -232,20 +232,19 @@ setModel (BrailleDisplay *brl) {
 
 static int
 getDecimalValue (const char *digits, unsigned int count) {
+  const char *end = digits + count;
   unsigned int result = 0;
-
   const char zero = '0';
-  const char nine = '9';
 
-  const char *digit = digits;
-  const char *end = digit + count;
+  while (digits < end) {
+    char digit = *digits++;
+    if (digit >= zero) digit -= zero;
 
-  while (digit < end) {
-    if (*digit < zero) return 0;
-    if (*digit > nine) return 0;
+    if (digit < 0) return 0;
+    if (digit > 9) return 0;
 
     result *= 10;
-    result += *digit++ - zero;
+    result += digit;
   }
 
   return result;
