@@ -194,6 +194,44 @@ moveCursor (RoutingData *routing, const CursorDirectionEntry *direction) {
 #endif /* SIGUSR1 */
 }
 
+static void
+handleVerticalScrolling (RoutingData *routing, int direction) {
+  int row = routing->cury + routing->verticalDelta;
+  int bestRow = row;
+  int bestLength = 0;
+
+  do {
+    ScreenCharacter buffer[routing->screenColumns];
+    if (!readRow(routing, buffer, row)) break;
+
+    {
+      int before = routing->curx;
+      int after = before;
+
+      while (buffer[before].text == routing->rowBuffer[before].text)
+        if (--before < 0)
+          break;
+
+      while (buffer[after].text == routing->rowBuffer[after].text)
+        if (++after >= routing->screenColumns)
+          break;
+
+      {
+        int length = after - before - 1;
+
+        if (length > bestLength) {
+          bestRow = row;
+          if ((bestLength = length) == routing->screenColumns) break;
+        }
+      }
+    }
+
+    row -= direction;
+  } while ((row >= 0) && (row < routing->screenRows));
+
+  routing->verticalDelta = bestRow - routing->cury;
+}
+
 static int
 awaitCursorMotion (RoutingData *routing, int direction, const CursorAxisEntry *axis) {
   int moved = 0;
@@ -210,54 +248,15 @@ awaitCursorMotion (RoutingData *routing, int direction, const CursorAxisEntry *a
   getMonotonicTime(&start);
 
   while (1) {
-    long int time;
-    TimeValue now;
-
-    int oldy;
-    int oldx;
-
     asyncWait(ROUTING_INTERVAL);
+
+    TimeValue now;
     getMonotonicTime(&now);
-    time = millisecondsBetween(&start, &now) + 1;
+    long int time = millisecondsBetween(&start, &now) + 1;
 
-    {
-      int row = routing->cury + routing->verticalDelta;
-      int bestRow = row;
-      int bestLength = 0;
-
-      do {
-        ScreenCharacter buffer[routing->screenColumns];
-        if (!readRow(routing, buffer, row)) break;
-
-        {
-          int before = routing->curx;
-          int after = before;
-
-          while (buffer[before].text == routing->rowBuffer[before].text)
-            if (--before < 0)
-              break;
-
-          while (buffer[after].text == routing->rowBuffer[after].text)
-            if (++after >= routing->screenColumns)
-              break;
-
-          {
-            int length = after - before - 1;
-            if (length > bestLength) {
-              bestRow = row;
-              if ((bestLength = length) == routing->screenColumns) break;
-            }
-          }
-        }
-
-        row -= direction;
-      } while ((row >= 0) && (row < routing->screenRows));
-
-      routing->verticalDelta = bestRow - routing->cury;
-    }
-
-    oldy = routing->cury;
-    oldx = routing->curx;
+    handleVerticalScrolling(routing, direction);
+    int oldy = routing->cury;
+    int oldx = routing->curx;
     if (!getCurrentPosition(routing)) return 0;
 
     if ((routing->cury != oldy) || (routing->curx != oldx)) {
