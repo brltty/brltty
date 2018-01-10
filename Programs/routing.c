@@ -204,26 +204,22 @@ handleVerticalScrolling (RoutingData *routing, int direction) {
     ScreenCharacter buffer[routing->screenColumns];
     if (!readRow(routing, buffer, row)) break;
 
-    {
-      int before = routing->curx;
-      int after = before;
+    int before = routing->curx;
+    int after = before;
 
-      while (buffer[before].text == routing->rowBuffer[before].text)
-        if (--before < 0)
-          break;
+    while (buffer[before].text == routing->rowBuffer[before].text)
+      if (--before < 0)
+        break;
 
-      while (buffer[after].text == routing->rowBuffer[after].text)
-        if (++after >= routing->screenColumns)
-          break;
+    while (buffer[after].text == routing->rowBuffer[after].text)
+      if (++after >= routing->screenColumns)
+        break;
 
-      {
-        int length = after - before - 1;
+    int length = after - before - 1;
 
-        if (length > bestLength) {
-          bestRow = row;
-          if ((bestLength = length) == routing->screenColumns) break;
-        }
-      }
+    if (length > bestLength) {
+      bestRow = row;
+      if ((bestLength = length) == routing->screenColumns) break;
     }
 
     row -= direction;
