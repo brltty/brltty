@@ -134,7 +134,9 @@ static const CursorAxisEntry cursorAxisTable[] = {
 static int
 readRow (RoutingData *routing, ScreenCharacter *buffer, int row) {
   if (!buffer) buffer = routing->rowBuffer;
-  return readScreenRow(row, routing->screenColumns, buffer);
+  if (readScreenRow(row, routing->screenColumns, buffer)) return 1;
+  logRouting("read failed: row=%d", row);
+  return 0;
 }
 
 static int
@@ -153,7 +155,7 @@ getCurrentPosition (RoutingData *routing) {
     routing->screenColumns = description.cols;
     routing->verticalDelta = 0;
 
-    if (!(routing->rowBuffer = calloc(routing->screenColumns, sizeof(*routing->rowBuffer)))) {
+    if (!(routing->rowBuffer = malloc(ARRAY_SIZE(routing->rowBuffer, routing->screenColumns)))) {
       logMallocError();
       goto error;
     }
@@ -170,28 +172,11 @@ getCurrentPosition (RoutingData *routing) {
 
   routing->cury = description.posy - routing->verticalDelta;
   routing->curx = description.posx;
-
   if (readRow(routing, NULL, description.posy)) return 1;
-  logRouting("read failed: row=%d", description.posy);
 
 error:
   routing->screenNumber = -1;
   return 0;
-}
-
-static void
-moveCursor (RoutingData *routing, const CursorDirectionEntry *direction) {
-#ifdef SIGUSR1
-  sigset_t oldMask;
-  sigprocmask(SIG_BLOCK, &routing->signalMask, &oldMask);
-#endif /* SIGUSR1 */
-
-  logRouting("move: %s", direction->name);
-  insertScreenKey(direction->key);
-
-#ifdef SIGUSR1
-  sigprocmask(SIG_SETMASK, &oldMask, NULL);
-#endif /* SIGUSR1 */
 }
 
 static void
@@ -233,18 +218,18 @@ handleVerticalScrolling (RoutingData *routing, int direction) {
 
 static int
 awaitCursorMotion (RoutingData *routing, int direction, const CursorAxisEntry *axis) {
-  int moved = 0;
-  long int timeout = routing->timeSum / routing->timeCount;
-  TimeValue start;
-
   int trgy = routing->cury;
   int trgx = routing->curx;
+  axis->adjustCoordinate(&trgy, &trgx, direction);
 
   routing->oldy = routing->cury;
   routing->oldx = routing->curx;
 
-  axis->adjustCoordinate(&trgy, &trgx, direction);
+  TimeValue start;
   getMonotonicTime(&start);
+
+  int moved = 0;
+  long int timeout = routing->timeSum / routing->timeCount;
 
   while (1) {
     asyncWait(ROUTING_INTERVAL);
@@ -285,6 +270,21 @@ awaitCursorMotion (RoutingData *routing, int direction, const CursorAxisEntry *a
   }
 
   return 1;
+}
+
+static void
+moveCursor (RoutingData *routing, const CursorDirectionEntry *direction) {
+#ifdef SIGUSR1
+  sigset_t oldMask;
+  sigprocmask(SIG_BLOCK, &routing->signalMask, &oldMask);
+#endif /* SIGUSR1 */
+
+  logRouting("move: %s", direction->name);
+  insertScreenKey(direction->key);
+
+#ifdef SIGUSR1
+  sigprocmask(SIG_SETMASK, &oldMask, NULL);
+#endif /* SIGUSR1 */
 }
 
 static RoutingResult
