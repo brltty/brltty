@@ -141,7 +141,7 @@ getCurrentPosition (RoutingData *routing) {
   describeScreen(&description);
 
   if (description.number != routing->screen.number) {
-    logRouting("screen changed: %d->%d", routing->screen.number, description.number);
+    logRouting("screen changed: %d -> %d", routing->screen.number, description.number);
     routing->screen.number = description.number;
     return 0;
   }
@@ -218,7 +218,7 @@ handleVerticalScrolling (RoutingData *routing, int direction) {
 }
 
 static int
-awaitCursorMotion (RoutingData *routing, int direction, const CursorAxisEntry *axis) {
+awaitCursorMotion (RoutingData *routing, int direction) {
   routing->oldy = routing->cury;
   routing->oldx = routing->curx;
 
@@ -306,7 +306,7 @@ adjustCursorPosition (RoutingData *routing, int where, int trgy, int trgx, const
 
     /* tell the cursor to move in the needed direction */
     if (!moveCursor(routing, ((dir > 0)? axis->forward: axis->backward))) return CRR_FAIL;
-    if (!awaitCursorMotion(routing, dir, axis)) return CRR_FAIL;
+    if (!awaitCursorMotion(routing, dir)) return CRR_FAIL;
 
     if (routing->cury != routing->oldy) {
       if (routing->oldy != trgy) {
@@ -344,7 +344,7 @@ adjustCursorPosition (RoutingData *routing, int where, int trgy, int trgx, const
      * the nearest ever reached.
      */
     if (!moveCursor(routing, ((dir > 0)? axis->backward: axis->forward))) return CRR_FAIL;
-    return awaitCursorMotion(routing, -dir, axis)? CRR_NEAR: CRR_FAIL;
+    return awaitCursorMotion(routing, -dir)? CRR_NEAR: CRR_FAIL;
   }
 }
 
