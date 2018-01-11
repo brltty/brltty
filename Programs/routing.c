@@ -75,8 +75,15 @@ typedef struct {
     ScreenCharacter *buffer;
   } vertical;
 
-  int cury, curx;
-  int oldy, oldx;
+  struct {
+    int column;
+    int row;
+  } current;
+
+  struct {
+    int column;
+    int row;
+  } previous;
 
   struct {
     long sum;
@@ -167,8 +174,8 @@ getCurrentPosition (RoutingData *routing) {
     goto error;
   }
 
-  routing->cury = description.posy + routing->vertical.scroll;
-  routing->curx = description.posx;
+  routing->current.row = description.posy + routing->vertical.scroll;
+  routing->current.column = description.posx;
   return 1;
 
 error:
@@ -190,7 +197,7 @@ handleVerticalScrolling (RoutingData *routing, int direction) {
 
     int length;
     {
-      int before = routing->curx;
+      int before = routing->current.column;
       int after = before;
 
       while (buffer[before].text == routing->vertical.buffer[before].text)
@@ -214,13 +221,13 @@ handleVerticalScrolling (RoutingData *routing, int direction) {
 
   int delta = bestRow - firstRow;
   routing->vertical.scroll -= delta;
-  routing->cury -= delta;
+  routing->current.row -= delta;
 }
 
 static int
 awaitCursorMotion (RoutingData *routing, int direction) {
-  routing->oldy = routing->cury;
-  routing->oldx = routing->curx;
+  routing->previous.column = routing->current.column;
+  routing->previous.row = routing->current.row;
 
   TimeValue start;
   getMonotonicTime(&start);
@@ -235,13 +242,13 @@ awaitCursorMotion (RoutingData *routing, int direction) {
     getMonotonicTime(&now);
     long int time = millisecondsBetween(&start, &now) + 1;
 
-    int oldy = routing->cury;
-    int oldx = routing->curx;
+    int oldy = routing->current.row;
+    int oldx = routing->current.column;
     if (!getCurrentPosition(routing)) return 0;
 
-    if ((routing->cury != oldy) || (routing->curx != oldx)) {
+    if ((routing->current.row != oldy) || (routing->current.column != oldx)) {
       logRouting("moved: [%d,%d] -> [%d,%d] (%ldms)",
-                 oldx, oldy, routing->curx, routing->cury, time);
+                 oldx, oldy, routing->current.column, routing->current.row, time);
 
       if (!moved) {
         moved = 1;
@@ -268,7 +275,7 @@ awaitCursorMotion (RoutingData *routing, int direction) {
 
 static int
 moveCursor (RoutingData *routing, const CursorDirectionEntry *direction) {
-  routing->vertical.row = routing->cury - routing->vertical.scroll;
+  routing->vertical.row = routing->current.row - routing->vertical.scroll;
   if (!readRow(routing, NULL, routing->vertical.row)) return 0;
 
 #ifdef SIGUSR1
@@ -291,8 +298,8 @@ adjustCursorPosition (RoutingData *routing, int where, int trgy, int trgx, const
   logRouting("to: [%d,%d]", trgx, trgy);
 
   while (1) {
-    int dify = trgy - routing->cury;
-    int difx = (trgx < 0)? 0: (trgx - routing->curx);
+    int dify = trgy - routing->current.row;
+    int difx = (trgx < 0)? 0: (trgx - routing->current.column);
     int dir;
 
     /* determine which direction the cursor needs to move in */
@@ -308,29 +315,29 @@ adjustCursorPosition (RoutingData *routing, int where, int trgy, int trgx, const
     if (!moveCursor(routing, ((dir > 0)? axis->forward: axis->backward))) return CRR_FAIL;
     if (!awaitCursorMotion(routing, dir)) return CRR_FAIL;
 
-    if (routing->cury != routing->oldy) {
-      if (routing->oldy != trgy) {
-        if (((routing->cury - routing->oldy) * dir) > 0) {
-          int dif = trgy - routing->cury;
+    if (routing->current.row != routing->previous.row) {
+      if (routing->previous.row != trgy) {
+        if (((routing->current.row - routing->previous.row) * dir) > 0) {
+          int dif = trgy - routing->current.row;
           if ((dif * dify) >= 0) continue;
           if (where > 0) {
-            if (routing->cury > trgy) return CRR_NEAR;
+            if (routing->current.row > trgy) return CRR_NEAR;
           } else if (where < 0) {
-            if (routing->cury < trgy) return CRR_NEAR;
+            if (routing->current.row < trgy) return CRR_NEAR;
           } else {
             if ((dif * dif) < (dify * dify)) return CRR_NEAR;
           }
         }
       }
-    } else if (routing->curx != routing->oldx) {
-      if (((routing->curx - routing->oldx) * dir) > 0) {
-        int dif = trgx - routing->curx;
-        if (routing->cury != trgy) continue;
+    } else if (routing->current.column != routing->previous.column) {
+      if (((routing->current.column - routing->previous.column) * dir) > 0) {
+        int dif = trgx - routing->current.column;
+        if (routing->current.row != trgy) continue;
         if ((dif * difx) >= 0) continue;
         if (where > 0) {
-          if (routing->curx > trgx) return CRR_NEAR;
+          if (routing->current.column > trgx) return CRR_NEAR;
         } else if (where < 0) {
-          if (routing->curx < trgx) return CRR_NEAR;
+          if (routing->current.column < trgx) return CRR_NEAR;
         } else {
           if ((dif * dif) < (difx * difx)) return CRR_NEAR;
         }
@@ -382,15 +389,15 @@ routeCursor (const RoutingParameters *parameters) {
   routing.time.count = 1;
 
   if (getCurrentPosition(&routing)) {
-    logRouting("from: [%d,%d]", routing.curx, routing.cury);
+    logRouting("from: [%d,%d]", routing.current.column, routing.current.row);
 
     if (parameters->column < 0) {
       adjustCursorVertically(&routing, 0, parameters->row);
     } else {
       if (adjustCursorVertically(&routing, -1, parameters->row) != CRR_FAIL) {
         if (adjustCursorHorizontally(&routing, 0, parameters->row, parameters->column) == CRR_NEAR) {
-          if (routing.cury < parameters->row) {
-            if (adjustCursorVertically(&routing, 1, routing.cury+1) != CRR_FAIL) {
+          if (routing.current.row < parameters->row) {
+            if (adjustCursorVertically(&routing, 1, routing.current.row+1) != CRR_FAIL) {
               adjustCursorHorizontally(&routing, 0, parameters->row, parameters->column);
             }
           }
@@ -402,8 +409,8 @@ routeCursor (const RoutingParameters *parameters) {
   if (routing.vertical.buffer) free(routing.vertical.buffer);
 
   if (routing.screen.number != parameters->screen) return ROUTING_ERROR;
-  if (routing.cury != parameters->row) return ROUTING_WRONG_ROW;
-  if ((parameters->column >= 0) && (routing.curx != parameters->column)) return ROUTING_WRONG_COLUMN;
+  if (routing.current.row != parameters->row) return ROUTING_WRONG_ROW;
+  if ((parameters->column >= 0) && (routing.current.column != parameters->column)) return ROUTING_WRONG_COLUMN;
   return ROUTING_DONE;
 }
 
