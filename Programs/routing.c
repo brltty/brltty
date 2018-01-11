@@ -65,8 +65,11 @@ typedef struct {
   int screenRows;
   int screenColumns;
 
-  int verticalDelta;
-  ScreenCharacter *rowBuffer;
+  struct {
+    int scroll;
+    int row;
+    ScreenCharacter *buffer;
+  } vertical;
 
   int cury, curx;
   int oldy, oldx;
@@ -99,33 +102,20 @@ typedef enum {
   CURSOR_AXIS_VERTICAL
 } CursorAxis;
 
-static void
-adjustHorizontalCoordinate (int *y, int *x, int amount) {
-  *x += amount;
-}
-
-static void
-adjustVerticalCoordinate (int *y, int *x, int amount) {
-  *y += amount;
-}
-
 typedef struct {
   const CursorDirectionEntry *forward;
   const CursorDirectionEntry *backward;
-  void (*adjustCoordinate) (int *y, int *x, int amount);
 } CursorAxisEntry;
 
 static const CursorAxisEntry cursorAxisTable[] = {
   [CURSOR_AXIS_HORIZONTAL] = {
     .forward  = &cursorDirectionTable[CURSOR_DIR_RIGHT],
-    .backward = &cursorDirectionTable[CURSOR_DIR_LEFT],
-    .adjustCoordinate = adjustHorizontalCoordinate
+    .backward = &cursorDirectionTable[CURSOR_DIR_LEFT]
   }
   ,
   [CURSOR_AXIS_VERTICAL] = {
     .forward  = &cursorDirectionTable[CURSOR_DIR_DOWN],
-    .backward = &cursorDirectionTable[CURSOR_DIR_UP],
-    .adjustCoordinate = adjustVerticalCoordinate
+    .backward = &cursorDirectionTable[CURSOR_DIR_UP]
   }
 };
 
@@ -133,7 +123,7 @@ static const CursorAxisEntry cursorAxisTable[] = {
 
 static int
 readRow (RoutingData *routing, ScreenCharacter *buffer, int row) {
-  if (!buffer) buffer = routing->rowBuffer;
+  if (!buffer) buffer = routing->vertical.buffer;
   if (readScreenRow(row, routing->screenColumns, buffer)) return 1;
   logRouting("read failed: row=%d", row);
   return 0;
@@ -150,12 +140,12 @@ getCurrentPosition (RoutingData *routing) {
     return 0;
   }
 
-  if (!routing->rowBuffer) {
+  if (!routing->vertical.buffer) {
     routing->screenRows = description.rows;
     routing->screenColumns = description.cols;
-    routing->verticalDelta = 0;
+    routing->vertical.scroll = 0;
 
-    if (!(routing->rowBuffer = malloc(ARRAY_SIZE(routing->rowBuffer, routing->screenColumns)))) {
+    if (!(routing->vertical.buffer = malloc(ARRAY_SIZE(routing->vertical.buffer, routing->screenColumns)))) {
       logMallocError();
       goto error;
     }
@@ -170,9 +160,9 @@ getCurrentPosition (RoutingData *routing) {
     goto error;
   }
 
-  routing->cury = description.posy - routing->verticalDelta;
+  routing->cury = description.posy + routing->vertical.scroll;
   routing->curx = description.posx;
-  if (readRow(routing, NULL, description.posy)) return 1;
+  return 1;
 
 error:
   routing->screenNumber = -1;
@@ -181,24 +171,26 @@ error:
 
 static void
 handleVerticalScrolling (RoutingData *routing, int direction) {
-  int row = routing->cury + routing->verticalDelta;
-  int bestRow = row;
+  int firstRow = routing->vertical.row;
+  int currentRow = firstRow;
+
+  int bestRow = firstRow;
   int bestLength = 0;
 
   do {
     ScreenCharacter buffer[routing->screenColumns];
-    if (!readRow(routing, buffer, row)) break;
+    if (!readRow(routing, buffer, currentRow)) break;
 
     int length;
     {
       int before = routing->curx;
       int after = before;
 
-      while (buffer[before].text == routing->rowBuffer[before].text)
+      while (buffer[before].text == routing->vertical.buffer[before].text)
         if (--before < 0)
           break;
 
-      while (buffer[after].text == routing->rowBuffer[after].text)
+      while (buffer[after].text == routing->vertical.buffer[after].text)
         if (++after >= routing->screenColumns)
           break;
 
@@ -206,22 +198,20 @@ handleVerticalScrolling (RoutingData *routing, int direction) {
     }
 
     if (length > bestLength) {
-      bestRow = row;
+      bestRow = currentRow;
       if ((bestLength = length) == routing->screenColumns) break;
     }
 
-    row -= direction;
-  } while ((row >= 0) && (row < routing->screenRows));
+    currentRow -= direction;
+  } while ((currentRow >= 0) && (currentRow < routing->screenRows));
 
-  routing->verticalDelta = bestRow - routing->cury;
+  int delta = bestRow - firstRow;
+  routing->vertical.scroll -= delta;
+  routing->cury -= delta;
 }
 
 static int
 awaitCursorMotion (RoutingData *routing, int direction, const CursorAxisEntry *axis) {
-  int trgy = routing->cury;
-  int trgx = routing->curx;
-  axis->adjustCoordinate(&trgy, &trgx, direction);
-
   routing->oldy = routing->cury;
   routing->oldx = routing->curx;
 
@@ -238,7 +228,6 @@ awaitCursorMotion (RoutingData *routing, int direction, const CursorAxisEntry *a
     getMonotonicTime(&now);
     long int time = millisecondsBetween(&start, &now) + 1;
 
-    handleVerticalScrolling(routing, direction);
     int oldy = routing->cury;
     int oldx = routing->curx;
     if (!getCurrentPosition(routing)) return 0;
@@ -255,8 +244,6 @@ awaitCursorMotion (RoutingData *routing, int direction, const CursorAxisEntry *a
         routing->timeCount += 1;
       }
 
-      if ((routing->cury == trgy) && (routing->curx == trgx)) break;
-
       if (ROUTING_INTERVAL) {
         start = now;
       } else {
@@ -264,16 +251,19 @@ awaitCursorMotion (RoutingData *routing, int direction, const CursorAxisEntry *a
         getMonotonicTime(&start);
       }
     } else if (time > timeout) {
-      if (!moved) logRouting("timed out: %ldms", timeout);
       break;
     }
   }
 
+  handleVerticalScrolling(routing, direction);
   return 1;
 }
 
-static void
+static int
 moveCursor (RoutingData *routing, const CursorDirectionEntry *direction) {
+  routing->vertical.row = routing->cury - routing->vertical.scroll;
+  if (!readRow(routing, NULL, routing->vertical.row)) return 0;
+
 #ifdef SIGUSR1
   sigset_t oldMask;
   sigprocmask(SIG_BLOCK, &routing->signalMask, &oldMask);
@@ -285,6 +275,8 @@ moveCursor (RoutingData *routing, const CursorDirectionEntry *direction) {
 #ifdef SIGUSR1
   sigprocmask(SIG_SETMASK, &oldMask, NULL);
 #endif /* SIGUSR1 */
+
+  return 1;
 }
 
 static RoutingResult
@@ -306,7 +298,7 @@ adjustCursorPosition (RoutingData *routing, int where, int trgy, int trgx, const
     }
 
     /* tell the cursor to move in the needed direction */
-    moveCursor(routing, ((dir > 0)? axis->forward: axis->backward));
+    if (!moveCursor(routing, ((dir > 0)? axis->forward: axis->backward))) return CRR_FAIL;
     if (!awaitCursorMotion(routing, dir, axis)) return CRR_FAIL;
 
     if (routing->cury != routing->oldy) {
@@ -344,7 +336,7 @@ adjustCursorPosition (RoutingData *routing, int where, int trgy, int trgx, const
      * try going back to the previous position since it was obviously
      * the nearest ever reached.
      */
-    moveCursor(routing, ((dir > 0)? axis->backward: axis->forward));
+    if (!moveCursor(routing, ((dir > 0)? axis->backward: axis->forward))) return CRR_FAIL;
     return awaitCursorMotion(routing, -dir, axis)? CRR_NEAR: CRR_FAIL;
   }
 }
@@ -378,7 +370,7 @@ routeCursor (const RoutingParameters *parameters) {
 
   /* initialize the routing data structure */
   routing.screenNumber = parameters->screen;
-  routing.rowBuffer = NULL;
+  routing.vertical.buffer = NULL;
   routing.timeSum = ROUTING_TIMEOUT;
   routing.timeCount = 1;
 
@@ -400,7 +392,7 @@ routeCursor (const RoutingParameters *parameters) {
     }
   }
 
-  if (routing.rowBuffer) free(routing.rowBuffer);
+  if (routing.vertical.buffer) free(routing.vertical.buffer);
 
   if (routing.screenNumber != parameters->screen) return ROUTING_ERROR;
   if (routing.cury != parameters->row) return ROUTING_WRONG_ROW;
