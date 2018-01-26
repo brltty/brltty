@@ -721,6 +721,10 @@ BRLTTY_PACKAGE_CHOOSE([curses],
    [pdcursesu curses.h],
    [curses curses.h],
    [pdcurses curses.h])
+if test -n "${curses_package}"
+then
+   AC_CHECK_LIB([tinfo], [intrflush])
+fi
 curses_libs="${LIBS%${brltty_curses_libs_save}}"
 LIBS="${brltty_curses_libs_save}"
 AC_SUBST([curses_libs])
