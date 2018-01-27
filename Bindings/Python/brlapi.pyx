@@ -350,6 +350,19 @@ cdef class Connection:
 			else:
 				return name
 
+	property modelIdentifier:
+		"""Get the identifier for the model of the braille display
+		See brlapi_getModelIdentifier(3)."""
+		def __get__(self):
+			cdef char identifier[21]
+			cdef int retval
+			with nogil:
+				retval = c_brlapi.brlapi__getModelIdentifier(self.h, identifier, sizeof(identifier))
+			if retval == -1:
+				raise OperationError()
+			else:
+				return identifier
+
 	def enterTtyMode(self, tty = TTY_DEFAULT, driver = None):
 		"""Ask for some tty, with some key mechanism
 

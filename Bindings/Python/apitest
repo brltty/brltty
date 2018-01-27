@@ -96,6 +96,7 @@ if __name__ == "__main__":
 
     try:
       writeProperty("Driver", brl.driverName)
+      writeProperty("Model", brl.modelIdentifier)
       writeProperty("Columns", str(brl.displaySize[0]))
       writeProperty("Rows", str(brl.displaySize[1]))
 

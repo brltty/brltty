@@ -62,6 +62,7 @@ cdef extern from "Programs/brlapi.h":
 
 	int brlapi__getDisplaySize(brlapi_handle_t *, unsigned int*, unsigned int *y) nogil
 	int brlapi__getDriverName(brlapi_handle_t *, char*, int) nogil
+	int brlapi__getModelIdentifier(brlapi_handle_t *, char*, int) nogil
 
 	int brlapi__enterTtyMode(brlapi_handle_t *, int, char*) nogil
 	int brlapi__enterTtyModeWithPath(brlapi_handle_t *, int *, int, char*) nogil
