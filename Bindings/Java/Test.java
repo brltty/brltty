@@ -55,6 +55,9 @@ public class Test implements Constants {
       System.out.print("Driver is " + brlapi.getDriverName());
       System.out.println();
 
+      System.out.print("Model is " + brlapi.getModelIdentifier());
+      System.out.println();
+
       DisplaySize size = brlapi.getDisplaySize();
       System.out.println("Display size is " + size.getWidth() + "x" + size.getHeight());
 

@@ -33,6 +33,7 @@ public class Native {
   public native void closeConnection ();
 
   public native String getDriverName () throws Error;
+  public native DisplaySize getModelIdentifier () throws Error;
   public native DisplaySize getDisplaySize () throws Error;
   
   public native int enterTtyMode (int tty, String driver) throws Error;

@@ -251,6 +251,21 @@ JNIEXPORT jstring JNICALL Java_org_a11y_BrlAPI_Native_getDriverName(JNIEnv *jenv
   return (*jenv)->NewStringUTF(jenv, name);
 }
 
+JNIEXPORT jstring JNICALL Java_org_a11y_BrlAPI_Native_getModelIdentifier(JNIEnv *jenv, jobject jobj) {
+  char identifier[32];
+  GET_HANDLE(jenv, jobj, NULL);
+
+  env = jenv;
+
+  if (brlapi__getModelIdentifier(handle, identifier, sizeof(identifier)) < 0) {
+    ThrowError(jenv, __func__);
+    return NULL;
+  }
+
+  identifier[sizeof(identifier)-1] = 0;
+  return (*jenv)->NewStringUTF(jenv, identifier);
+}
+
 JNIEXPORT jobject JNICALL Java_org_a11y_BrlAPI_Native_getDisplaySize(JNIEnv *jenv, jobject jobj) {
   unsigned int x, y;
   jclass jcsize;
