@@ -52,6 +52,9 @@ puts "FileDescriptor: $fileDescriptor"
 set driverName [$session getDriverName]
 puts "DriverName: $driverName"
 
+set modelIdentifier [$session getModelIdentifier]
+puts "ModelIdentifier: $modelIdentifier"
+
 set displaySize [$session getDisplaySize]
 puts "DisplaySize: [expandList $displaySize width height]"
 

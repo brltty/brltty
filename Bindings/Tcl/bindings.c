@@ -365,6 +365,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     "getDriverName",
     "getFileDescriptor",
     "getHost",
+    "getModelIdentifier",
     "ignoreKeyRanges",
     "ignoreKeys",
     "leaveRawMode",
@@ -392,6 +393,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     FCN_getDriverName,
     FCN_getFileDescriptor,
     FCN_getHost,
+    FCN_getModelIdentifier,
     FCN_ignoreKeyRanges,
     FCN_ignoreKeys,
     FCN_leaveRawMode,
@@ -461,6 +463,32 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       while (1) {
         char buffer[size];
         int result = brlapi__getDriverName(session->handle, buffer, size);
+
+        if (result == -1) {
+          setBrlapiError(interp);
+          return TCL_ERROR;
+        }
+
+        if (result <= size) {
+          setStringResult(interp, buffer, result-1);
+          return TCL_OK;
+        }
+
+        size = result;
+      }
+    }
+
+    case FCN_getModelIdentifier: {
+      size_t size = 0X10;
+
+      if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 2, objv, NULL);
+        return TCL_ERROR;
+      }
+
+      while (1) {
+        char buffer[size];
+        int result = brlapi__getModelIdentifier(session->handle, buffer, size);
 
         if (result == -1) {
           setBrlapiError(interp);
