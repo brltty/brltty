@@ -3030,7 +3030,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .vendor=0X0904, .product=0X4004,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .data=&baumHid2Operations
+      .data=&baumHid1Operations
     },
 
     { /* Pronto! V3 40 (40 cells) */
