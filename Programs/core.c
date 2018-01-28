@@ -702,6 +702,17 @@ shiftBrailleWindowLeft (unsigned int amount) {
       }
     }
 
+    if (first > 0) {
+      ScreenCharacter characters[reference];
+      readScreenRow(ses->winy, reference, characters);
+
+      if (!isWordBreak(characters, ses->winy, first-1)) {
+        while (!isWordBreak(characters, ses->winy, first)) first += 1;
+      }
+
+      while (isWordBreak(characters, ses->winy, first)) first += 1;
+    }
+
     if (first == reference) {
       if (!first) return 0;
       first -= 1;
