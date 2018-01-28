@@ -123,6 +123,12 @@ Return a DISPLAY object which can further be used to interact with BRLTTY."
     (foreign-funcall "brlapi__getDriverName" :pointer (display-handle obj)
                      :string str :int str-size brlapi-code)))
 
+(defmethod model-identifier ((obj display))
+  "Return the currently used display model."
+  (with-foreign-pointer-as-string ((str str-size) 64)
+    (foreign-funcall "brlapi__getModelIdentifier" :pointer (display-handle obj)
+                     :string str :int str-size brlapi-code)))
+
 (defmethod display-size ((obj display))
   "Return the dimensions of DISPLAY as multiple values.
 The first value represents the x dimension and the second the y dimension."
