@@ -46,7 +46,6 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if (connectResource(brl, "null:")) {
-    brl->keyBindings = NULL;
     return 1;
   }
 
