@@ -18,24 +18,29 @@
 (require 'asdf)
 (require 'sb-posix)
 
-(pushnew
+(defun current-directory ()
+  "The current working directory as a directory path."
   (concatenate 'string (sb-posix:getcwd) "/")
-  asdf:*central-registry*
-  :test #'equal
 )
 
+(pushnew (current-directory) asdf:*central-registry* :test #'equal)
 (asdf:operate 'asdf:load-op 'brlapi)
-(require 'brlapi)
 
 (defun brlapi-test (&optional)
   "Perform a test of various BrlAPI functiins."
 
   (let (
       (display (brlapi:open-connection))
+      (output *standard-output*)
     )
 
-    (brlapi:print-object display *standard-output*)
-    (brlapi:close-connection display)
+    (if (brlapi:is-connected display)
+      (progn
+        (brlapi:print-object display output)
+        (brlapi:close-connection display)
+      )
+      (format output "not connected")
+    )
   )
 )
 

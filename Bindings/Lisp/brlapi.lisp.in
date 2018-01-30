@@ -23,7 +23,8 @@
 
 (defpackage :brlapi
   (:use :common-lisp :cffi)
-  (:export #:open-connection #:close-connection #:print-object
+  (:export #:open-connection #:close-connection
+           #:is-connected #:print-object
 	   #:driver-name #:model-identifier #:display-size
            #:enter-tty-mode #:leave-tty-mode
            #:write-text #:write-dots #:write-region
@@ -47,9 +48,17 @@
    (host :initarg :host :reader display-host)
    (tty :initform nil :reader display-tty)))
 
+(defmethod is-connected ((obj display))
+  (and
+    obj
+    (display-file-descriptor obj)
+    (not (< (display-file-descriptor obj) 0))
+  )
+)
+
 (defmethod print-object ((obj display) stream)
   (print-unreadable-object (obj stream :type t)
-    (if (not (display-file-descriptor obj))
+    (if (not (is-connected obj))
       (format stream "disconnected")
       (apply #'format stream "fd=~D host=~A driver=~A model=~A size=~Dx~D"
         (concatenate 'list
