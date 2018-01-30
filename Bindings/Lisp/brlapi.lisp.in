@@ -51,8 +51,10 @@
 (defmethod is-connected ((obj display))
   (and
     obj
-    (display-file-descriptor obj)
-    (not (< (display-file-descriptor obj) 0))
+    (let
+      ((fd (display-file-descriptor obj)))
+      (and fd (numberp fd) (not (< fd 0)))
+    )
   )
 )
 
