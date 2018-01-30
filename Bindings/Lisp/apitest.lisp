@@ -18,11 +18,10 @@
 (require 'asdf)
 (require 'sb-posix)
 
-(setf asdf:*central-registry*
-  (list*
-    (concatenate 'string (sb-posix:getcwd) "/")
-    asdf:*central-registry*
-  )
+(pushnew
+  (concatenate 'string (sb-posix:getcwd) "/")
+  asdf:*central-registry*
+  :test #'equal
 )
 
 (asdf:operate 'asdf:load-op 'brlapi)
