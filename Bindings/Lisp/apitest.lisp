@@ -1,8 +1,9 @@
 (require 'asdf)
+(require 'sb-posix)
 
 (setf asdf:*central-registry*
   (list*
-    #p"/home/dave/brltty/Bindings/Lisp/"
+    (concatenate 'string (sb-posix:getcwd) "/")
     asdf:*central-registry*
   )
 )
