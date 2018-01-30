@@ -1,0 +1,6 @@
+#!/bin/sh
+
+#clisp -q -q -on-error exit apitest.lisp
+sbcl --script apitest.lisp --end-toplevel-options "${@}"
+
+exit "${?}"

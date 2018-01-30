@@ -23,8 +23,8 @@
 
 (defpackage :brlapi
   (:use :common-lisp :cffi)
-  (:export #:open-connection #:close-connection
-	   #:driver-name #:display-size
+  (:export #:open-connection #:close-connection #:print-object
+	   #:driver-name #:model-identifier #:display-size
            #:enter-tty-mode #:leave-tty-mode
            #:write-text #:write-dots #:write-region
            #:read-key #:expand-key))
