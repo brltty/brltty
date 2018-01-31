@@ -16,12 +16,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-programName="$(basename "${0}")"
-programDirectory="$(cd "$(dirname "${0}")" && pwd)"
-currentDirectory="$(pwd)"
-
-export LD_PRELOAD="${currentDirectory}/../../Programs/libbrlapi.so"
-
-sbcl --script apitest.lisp "${@}"
-
+. "${0%/*}/../../apitest.sh"
+sbcl --script "${programDirectory}/apitest.lisp" "${@}"
 exit "${?}"
