@@ -26,7 +26,7 @@
 (pushnew (current-directory) asdf:*central-registry* :test #'equal)
 (asdf:operate 'asdf:load-op 'brlapi)
 
-(defun brlapi-test (&key auth host)
+(defun brlapi-test (&key auth host tty)
   "Perform a test of various BrlAPI functiins."
 
   (let (
@@ -37,6 +37,18 @@
     (if (brlapi:is-connected display)
       (progn
         (brlapi:print-properties display output)
+        (format output "~%")
+
+        (if tty
+          (progn
+            (brlapi:enter-tty-mode display (parse-integer tty))
+            (brlapi:write-text display "Press any key to continue...")
+            (apply #'format output "; Command: ~A, argument: ~D, flags: ~D"
+                   (multiple-value-list (brlapi:expand-key (brlapi:read-key display t))))
+            (brlapi:leave-tty-mode display)
+          )
+        )
+
         (brlapi:close-connection display)
       )
       (format output "not connected")
