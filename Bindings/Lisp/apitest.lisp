@@ -51,7 +51,7 @@
 
         (brlapi:close-connection display)
       )
-      (format output "not connected")
+      (format output "not connected~%")
     )
   )
 )
@@ -62,12 +62,18 @@
   sb-ext:*posix-argv*
 )
 
+(defun string->keyword (string)
+  "Convert a string to a keyword."
+
+  (values (intern string "KEYWORD"))
+)
+
 (defun arguments->keyword-options (arguments)
   "Convert a list of argument strings into a list of keyword options."
 
   (loop
     for cons on arguments by #'cddr
-    append (list (intern (string-upcase (car cons)) "KEYWORD") (car (cdr cons)))
+    append (list (string->keyword (string-upcase (car cons))) (car (cdr cons)))
   )
 )
 
