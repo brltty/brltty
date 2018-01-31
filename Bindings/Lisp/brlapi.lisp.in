@@ -43,7 +43,7 @@
 
 (defclass display ()
   ((handle :initarg :handle :reader display-handle)
-   (fd :initarg :fd :reader display-file-descriptor)
+   (fd :initarg :fd :reader file-descriptor)
    (auth :initarg :auth :reader display-auth)
    (host :initarg :host :reader display-host)
    (tty :initform nil :reader display-tty)))
@@ -52,7 +52,7 @@
   (and
     obj
     (let
-      ((fd (display-file-descriptor obj)))
+      ((fd (file-descriptor obj)))
       (and fd (numberp fd) (not (< fd 0)))
     )
   )
@@ -65,7 +65,7 @@
       (apply #'format stream "fd=~D host=~A driver=~A model=~A size=~Dx~D"
         (concatenate 'list
           (list
-            (display-file-descriptor obj)
+            (file-descriptor obj)
             (display-host obj)
             (driver-name obj)
             (model-identifier obj)
