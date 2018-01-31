@@ -109,7 +109,7 @@
   (auth :string)
   (host :string))
 
-(defun open-connection (&optional auth host)
+(defun open-connection (&key auth host)
   "Open a new connection to BRLTTY on HOST usng AUTH for authorization.
 Return a DISPLAY object which can further be used to interact with BRLTTY."
   (with-foreign-object (settings 'settings)
