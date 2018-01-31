@@ -17,5 +17,5 @@
 ###############################################################################
 
 . "${0%/*}/../../apitest.sh"
-sbcl --script "${programDirectory}/apitest.lisp" "${@}"
+exec sbcl --script "${programDirectory}/apitest.lisp" "${@}"
 exit "${?}"

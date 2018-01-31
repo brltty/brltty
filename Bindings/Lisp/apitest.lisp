@@ -26,11 +26,11 @@
 (pushnew (current-directory) asdf:*central-registry* :test #'equal)
 (asdf:operate 'asdf:load-op 'brlapi)
 
-(defun brlapi-test (&optional)
+(defun brlapi-test (&key auth host)
   "Perform a test of various BrlAPI functiins."
 
   (let (
-      (display (brlapi:open-connection))
+      (display (brlapi:open-connection :auth auth :host host))
       (output *standard-output*)
     )
 
@@ -44,4 +44,20 @@
   )
 )
 
-(brlapi-test)
+(defun program-arguments ()
+  "The command-line arguments."
+
+  sb-ext:*posix-argv*
+)
+
+(defun arguments->keyword-options (arguments)
+  "Convert a list of argument strings into a list of keyword options."
+
+  (loop
+    for cons on arguments by #'cddr
+    append (list (intern (string-upcase (car cons)) "KEYWORD") (car (cdr cons)))
+  )
+)
+
+(apply #'brlapi-test (arguments->keyword-options (cdr (program-arguments))))
+(exit)
