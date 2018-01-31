@@ -1,4 +1,4 @@
-#!/bin/bash -p
+#!/bin/sh
 ###############################################################################
 # libbrlapi - A library providing access to braille terminals for applications.
 #
@@ -18,10 +18,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-currentDirectory="$(pwd)"
-
-export LD_LIBRARY_PATH="${currentDirectory}"
-export LD_PRELOAD="${currentDirectory}/../../Programs/libbrlapi.so"
-
-exec java -classpath "${currentDirectory}/classes" org.a11y.BrlAPI.Test "${@}"
+. "${0%/*}/../../apitest.sh"
+exec java -classpath "${programDirectory}/classes" org.a11y.BrlAPI.Test "${@}"
 exit "${?}"
