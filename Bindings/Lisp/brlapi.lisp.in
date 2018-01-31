@@ -23,8 +23,8 @@
 
 (defpackage :brlapi
   (:use :common-lisp :cffi)
-  (:export #:open-connection #:close-connection
-           #:is-connected #:print-object
+  (:export #:open-connection #:close-connection #:is-connected
+           #:print-properties #:print-object
 	   #:driver-name #:model-identifier #:display-size
            #:enter-tty-mode #:leave-tty-mode
            #:write-text #:write-dots #:write-region
@@ -58,22 +58,26 @@
   )
 )
 
+(defmethod print-properties ((obj display) stream)
+  (apply #'format stream "fd=~D host=~A driver=~A model=~A size=~Dx~D"
+    (concatenate 'list
+      (list
+        (file-descriptor obj)
+        (display-host obj)
+        (driver-name obj)
+        (model-identifier obj)
+      )
+
+      (multiple-value-list (display-size obj))
+    )
+  )
+)
+
 (defmethod print-object ((obj display) stream)
   (print-unreadable-object (obj stream :type t)
-    (if (not (is-connected obj))
+    (if (is-connected obj)
+      (print-properties obj stream)
       (format stream "disconnected")
-      (apply #'format stream "fd=~D host=~A driver=~A model=~A size=~Dx~D"
-        (concatenate 'list
-          (list
-            (file-descriptor obj)
-            (display-host obj)
-            (driver-name obj)
-            (model-identifier obj)
-          )
-
-          (multiple-value-list (display-size obj))
-        )
-      )
     )
   )
 )

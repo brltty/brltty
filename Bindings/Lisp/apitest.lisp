@@ -36,7 +36,7 @@
 
     (if (brlapi:is-connected display)
       (progn
-        (brlapi:print-object display output)
+        (brlapi:print-properties display output)
         (brlapi:close-connection display)
       )
       (format output "not connected")
