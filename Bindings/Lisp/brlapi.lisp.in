@@ -163,12 +163,12 @@ The first value represents the x dimension and the second the y dimension."
 
 (defmethod display-width ((obj display))
   "Return the width of the display."
-  (nth 0 (multiple-value-list (display-size obj)))
+  (first (multiple-value-list (display-size obj)))
 )
 
 (defmethod display-height ((obj display))
   "Return the height of the display."
-  (nth 1 (multiple-value-list (display-size obj)))
+  (second (multiple-value-list (display-size obj)))
 )
 
 ;;;; * TTY mode

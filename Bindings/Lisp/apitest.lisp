@@ -74,7 +74,7 @@
 
   (loop
     for cons on arguments by #'cddr
-    append (list (string->keyword (string-upcase (car cons))) (car (cdr cons)))
+    append (list (string->keyword (string-upcase (first cons))) (second cons))
   )
 )
 
