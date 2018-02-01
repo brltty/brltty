@@ -25,7 +25,8 @@
   (:use :common-lisp :cffi)
   (:export #:open-connection #:close-connection #:is-connected
            #:print-properties #:print-object
-	   #:driver-name #:model-identifier #:display-size
+	   #:driver-name #:model-identifier
+           #:display-size #:display-width #:display-height
            #:enter-tty-mode #:leave-tty-mode
            #:write-text #:write-dots #:write-region
            #:read-key #:expand-key))
@@ -59,16 +60,14 @@
 )
 
 (defmethod print-properties ((obj display) stream)
-  (apply #'format stream "fd=~D host=~A driver=~A model=~A size=~Dx~D"
-    (concatenate 'list
-      (list
-        (file-descriptor obj)
-        (display-host obj)
-        (driver-name obj)
-        (model-identifier obj)
-      )
-
-      (multiple-value-list (display-size obj))
+  (apply #'format stream "fd=~D host=~A driver=~A model=~A width=~D height=~D"
+    (list
+      (file-descriptor obj)
+      (display-host obj)
+      (driver-name obj)
+      (model-identifier obj)
+      (display-width obj)
+      (display-height obj)
     )
   )
 )
@@ -162,6 +161,15 @@ The first value represents the x dimension and the second the y dimension."
     (foreign-funcall "brlapi__getDisplaySize" :pointer (display-handle obj) :pointer x :pointer y brlapi-code)
     (values (mem-ref x :int) (mem-ref y :int))))
 
+(defmethod display-width ((obj display))
+  "Return the width of the display."
+  (nth 0 (multiple-value-list (display-size obj)))
+)
+
+(defmethod display-height ((obj display))
+  "Return the height of the display."
+  (nth 1 (multiple-value-list (display-size obj)))
+)
 
 ;;;; * TTY mode
 
