@@ -60,7 +60,7 @@
 )
 
 (defmethod print-properties ((obj display) stream)
-  (funcall #'format stream
+  (format stream
     "fd=~D auth=~A host=~A driver=~A model=~A width=~D height=~D"
     (file-descriptor obj)
     (display-auth obj)
