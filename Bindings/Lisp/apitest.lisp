@@ -26,6 +26,16 @@
 (pushnew (current-directory) asdf:*central-registry* :test #'equal)
 (asdf:operate 'asdf:load-op 'brlapi)
 
+(defun brlapi-test-tty (output session tty)
+  "Perform a test of BrlAPI's input functions."
+
+  (brlapi:enter-tty-mode session tty)
+  (brlapi:write-text session "Press any key to continue...")
+  (apply #'format output "; Command: ~A, argument: ~D, flags: ~D"
+         (multiple-value-list (brlapi:expand-key (brlapi:read-key session t))))
+  (brlapi:leave-tty-mode session)
+)
+
 (defun brlapi-test (&key auth host tty)
   "Perform a test of various BrlAPI functiins."
 
@@ -40,15 +50,7 @@
         (brlapi:print-properties session output)
         (format output "~%")
 
-        (if tty
-          (progn
-            (brlapi:enter-tty-mode session (parse-integer tty))
-            (brlapi:write-text session "Press any key to continue...")
-            (apply #'format output "; Command: ~A, argument: ~D, flags: ~D"
-                   (multiple-value-list (brlapi:expand-key (brlapi:read-key session t))))
-            (brlapi:leave-tty-mode session)
-          )
-        )
+        (if tty (brlapi-test-tty output session (parse-integer tty)))
       )
       (format output "connection failure~%")
     )
