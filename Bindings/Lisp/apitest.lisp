@@ -36,6 +36,7 @@
 
     (if (brlapi:is-connected display)
       (progn
+        (format output "Properties: ")
         (brlapi:print-properties display output)
         (format output "~%")
 
