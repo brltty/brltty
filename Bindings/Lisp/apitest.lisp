@@ -73,8 +73,8 @@
   "Convert a list of argument strings into a list of keyword options."
 
   (loop
-    for cons on arguments by #'cddr
-    append (list (string->keyword (string-upcase (first cons))) (second cons))
+    for (option value) on arguments by #'cddr
+    append (list (string->keyword (string-upcase option)) value)
   )
 )
 
