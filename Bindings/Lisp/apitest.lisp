@@ -30,30 +30,30 @@
   "Perform a test of various BrlAPI functiins."
 
   (let (
-      (display (brlapi:open-connection :auth auth :host host))
       (output *standard-output*)
+      (session (brlapi:open-connection :auth auth :host host))
     )
 
-    (if (brlapi:is-connected display)
+    (if (brlapi:is-connected session)
       (progn
         (format output "Properties: ")
-        (brlapi:print-properties display output)
+        (brlapi:print-properties session output)
         (format output "~%")
 
         (if tty
           (progn
-            (brlapi:enter-tty-mode display (parse-integer tty))
-            (brlapi:write-text display "Press any key to continue...")
+            (brlapi:enter-tty-mode session (parse-integer tty))
+            (brlapi:write-text session "Press any key to continue...")
             (apply #'format output "; Command: ~A, argument: ~D, flags: ~D"
-                   (multiple-value-list (brlapi:expand-key (brlapi:read-key display t))))
-            (brlapi:leave-tty-mode display)
+                   (multiple-value-list (brlapi:expand-key (brlapi:read-key session t))))
+            (brlapi:leave-tty-mode session)
           )
         )
-
-        (brlapi:close-connection display)
       )
       (format output "connection failure~%")
     )
+
+    (brlapi:close-connection session)
   )
 )
 
