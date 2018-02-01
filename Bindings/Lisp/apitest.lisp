@@ -52,7 +52,7 @@
 
         (brlapi:close-connection display)
       )
-      (format output "not connected~%")
+      (format output "connection failure~%")
     )
   )
 )
