@@ -43,11 +43,11 @@
 ;;;; * The DISPLAY class
 
 (defclass display ()
-  ((handle :initarg :handle :reader display-handle)
+  ((handle :initarg :handle :reader connection-handle)
    (fd :initarg :fd :reader file-descriptor)
-   (auth :initarg :auth :reader display-auth)
-   (host :initarg :host :reader display-host)
-   (tty :initform nil :reader display-tty)))
+   (auth :initarg :auth :reader server-auth)
+   (host :initarg :host :reader server-host)
+   (tty :initform nil :reader entered-tty)))
 
 (defmethod is-connected ((obj display))
   (and
@@ -63,8 +63,8 @@
   (format stream
     "fd=~D auth=~A host=~A driver=~A model=~A width=~D height=~D"
     (file-descriptor obj)
-    (display-auth obj)
-    (display-host obj)
+    (server-auth obj)
+    (server-host obj)
     (driver-name obj)
     (model-identifier obj)
     (display-width obj)
@@ -135,9 +135,9 @@ Return a DISPLAY object which can further be used to interact with BRLTTY."
       display)))
 
 (defmethod close-connection ((obj display))
-  (foreign-funcall "brlapi__closeConnection" :pointer (display-handle obj) :void)
+  (foreign-funcall "brlapi__closeConnection" :pointer (connection-handle obj) :void)
   (setf (slot-value obj 'fd) nil)
-  (foreign-free (display-handle obj))
+  (foreign-free (connection-handle obj))
   (setf (slot-value obj 'handle) nil))
 
 ;;;; * Querying the display
@@ -145,20 +145,20 @@ Return a DISPLAY object which can further be used to interact with BRLTTY."
 (defmethod driver-name ((obj display))
   "Return the currently used driver name."
   (with-foreign-pointer-as-string ((str str-size) 64)
-    (foreign-funcall "brlapi__getDriverName" :pointer (display-handle obj)
+    (foreign-funcall "brlapi__getDriverName" :pointer (connection-handle obj)
                      :string str :int str-size brlapi-code)))
 
 (defmethod model-identifier ((obj display))
   "Return the currently used display model."
   (with-foreign-pointer-as-string ((str str-size) 64)
-    (foreign-funcall "brlapi__getModelIdentifier" :pointer (display-handle obj)
+    (foreign-funcall "brlapi__getModelIdentifier" :pointer (connection-handle obj)
                      :string str :int str-size brlapi-code)))
 
 (defmethod display-size ((obj display))
   "Return the dimensions of DISPLAY as multiple values.
 The first value represents the x dimension and the second the y dimension."
   (with-foreign-objects ((x :int) (y :int))
-    (foreign-funcall "brlapi__getDisplaySize" :pointer (display-handle obj) :pointer x :pointer y brlapi-code)
+    (foreign-funcall "brlapi__getDisplaySize" :pointer (connection-handle obj) :pointer x :pointer y brlapi-code)
     (values (mem-ref x :int) (mem-ref y :int))))
 
 (defmethod display-width ((obj display))
@@ -176,10 +176,10 @@ The first value represents the x dimension and the second the y dimension."
 (defmethod enter-tty-mode ((obj display) tty &optional (driver ""))
   (declare (integer tty))
   (declare (string driver))
-  (setf (slot-value obj 'tty) (foreign-funcall "brlapi__enterTtyMode" :pointer (display-handle obj) :int tty :string driver brlapi-code)))
+  (setf (slot-value obj 'tty) (foreign-funcall "brlapi__enterTtyMode" :pointer (connection-handle obj) :int tty :string driver brlapi-code)))
 
 (defmethod leave-tty-mode ((obj display))
-  (foreign-funcall "brlapi__leaveTtyMode" :pointer (display-handle obj) brlapi-code)
+  (foreign-funcall "brlapi__leaveTtyMode" :pointer (connection-handle obj) brlapi-code)
   (setf (slot-value obj 'tty) nil))
 
 
@@ -190,7 +190,7 @@ The first value represents the x dimension and the second the y dimension."
   (declare (string text))
   (declare (integer cursor))
   (if (eql (foreign-funcall "brlapi__writeText"
-                            :pointer (display-handle obj)
+                            :pointer (connection-handle obj)
                             :int cursor :string text
                             brlapi-code)
            0)
@@ -206,7 +206,7 @@ The first value represents the x dimension and the second the y dimension."
                    (foreign-bitfield-value 'dots (nth i dots-list))))
     (loop for i from (length dots-list) below (display-size obj)
           do (setf (mem-aref dots 'dots i) 0))
-    (foreign-funcall "brlapi__writeDots" :pointer (display-handle obj) :pointer dots brlapi-code)))
+    (foreign-funcall "brlapi__writeDots" :pointer (connection-handle obj) :pointer dots brlapi-code)))
 
 (defcstruct write-struct
   (display-number :int)
@@ -248,7 +248,7 @@ The first value represents the x dimension and the second the y dimension."
             (foreign-slot-value ws 'write-struct 'text) txt
             (foreign-slot-value ws 'write-struct 'attr-or) attro
             (foreign-slot-value ws 'write-struct 'attr-and) attra)
-      (eql (foreign-funcall "brlapi__write" :pointer (display-handle obj) :pointer ws brlapi-code) 0))))
+      (eql (foreign-funcall "brlapi__write" :pointer (connection-handle obj) :pointer ws brlapi-code) 0))))
 
 
 ;;;; * Input
@@ -256,7 +256,7 @@ The first value represents the x dimension and the second the y dimension."
 (defctype key-code :uint64)
 (defmethod read-key ((obj display) &optional block)
   (with-foreign-object (key 'key-code)
-    (case (foreign-funcall "brlapi__readKey" :pointer (display-handle obj) :boolean block :pointer key brlapi-code)
+    (case (foreign-funcall "brlapi__readKey" :pointer (connection-handle obj) :boolean block :pointer key brlapi-code)
       (0 nil)
       (1 (mem-ref key 'key-code)))))
 
