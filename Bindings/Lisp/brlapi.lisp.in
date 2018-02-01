@@ -60,9 +60,10 @@
 )
 
 (defmethod print-properties ((obj display) stream)
-  (apply #'format stream "fd=~D host=~A driver=~A model=~A width=~D height=~D"
+  (apply #'format stream "fd=~D auth=~A host=~A driver=~A model=~A width=~D height=~D"
     (list
       (file-descriptor obj)
+      (display-auth obj)
       (display-host obj)
       (driver-name obj)
       (model-identifier obj)
