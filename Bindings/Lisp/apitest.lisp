@@ -46,7 +46,7 @@
 
     (if (brlapi:is-connected session)
       (progn
-        (format output "Properties: ")
+        (format output "Session: ")
         (brlapi:print-properties session output)
         (format output "~%")
 

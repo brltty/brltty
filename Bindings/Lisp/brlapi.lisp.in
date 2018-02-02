@@ -274,8 +274,8 @@ The first value represents the x dimension and the second the y dimension."
   (command-name :string)
   (argument-value :int)
   (flags-value :int)
-  (flag-names :string :count 64)
-  (field-values :int :count 4)
+  (flag-names :string :count 32)
+  (field-values expanded-key-code)
 )
 
 (defun expand-key-code (code)
@@ -284,8 +284,19 @@ The first value represents the x dimension and the second the y dimension."
     (setf result (foreign-funcall "brlapi_describeKeyCode"
                   key-code code :pointer description :int))
     (with-foreign-slots
-      ((type-name command-name argument-value flags-value) description key-code-description)
-      (list type-name command-name argument-value flags-value)
+      ((type-name command-name argument-value flags-value flag-names) description key-code-description)
+
+      (setf fields (foreign-slot-value description 'key-code-description 'field-values))
+      (with-foreign-slots
+        ((type command argument flags) fields expanded-key-code)
+
+        (list 
+          (values type-name type)
+          (values command-name command)
+          (values argument-value)
+          (values flags-value)
+        )
+      )
     )
   )
 )
