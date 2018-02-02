@@ -29,7 +29,7 @@
            #:display-size #:display-width #:display-height
            #:enter-tty-mode #:leave-tty-mode
            #:write-text #:write-dots #:write-region
-           #:read-key #:expand-key))
+           #:read-key #:expand-key-code))
 (in-package :brlapi)
 
 
@@ -260,18 +260,35 @@ The first value represents the x dimension and the second the y dimension."
       (0 nil)
       (1 (mem-ref key 'key-code)))))
 
-(defun expand-key (code)
-  (with-foreign-objects ((command :int) (arg :int) (flags :int))
-    (foreign-funcall "brlapi_expandKeyCode"
-                     key-code code
-                     :pointer command :pointer arg :pointer flags
-                     :int)
-    (values (intern (foreign-funcall "brlapi_getKeyName"
-                                     :int (mem-ref command :int)
-                                     :int (mem-ref arg :int)
-                                     :string))
-            (mem-ref arg :int)
-            (mem-ref flags :int))))
+(defcstruct expanded-key-code
+  "A key code broken down into its individual fields."
+  (type :int)
+  (command :int)
+  (argument :int)
+  (flags :int)
+)
+
+(defcstruct key-code-description
+  "The description of a key code."
+  (type-name :string)
+  (command-name :string)
+  (argument-value :int)
+  (flags-value :int)
+  (flag-names :string :count 64)
+  (field-values :int :count 4)
+)
+
+(defun expand-key-code (code)
+  "Expand a key code into its fields."
+  (with-foreign-object (description 'key-code-description)
+    (setf result (foreign-funcall "brlapi_describeKeyCode"
+                  key-code code :pointer description :int))
+    (with-foreign-slots
+      ((type-name command-name argument-value flags-value) description key-code-description)
+      (list type-name command-name argument-value flags-value)
+    )
+  )
+)
 
 ;;;; * Example usage
 

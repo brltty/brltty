@@ -31,8 +31,8 @@
 
   (brlapi:enter-tty-mode session tty)
   (brlapi:write-text session "Press any key to continue...")
-  (apply #'format output "; Command: ~A, argument: ~D, flags: ~D"
-         (multiple-value-list (brlapi:expand-key (brlapi:read-key session t))))
+  (apply #'format output "Key: type=~A command=~A argument=~D flags=~D~%"
+         (brlapi:expand-key-code (brlapi:read-key session t)))
   (brlapi:leave-tty-mode session)
 )
 
