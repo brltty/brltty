@@ -59,7 +59,7 @@
 )
 
 (defmethod print-properties ((obj display) stream)
-  (let ((size (multiple-value-list (display-size obj))))
+  (multiple-value-bind (width height) (display-size obj)
     (format stream
       "fd=~D auth=~A host=~A driver=~A model=~A width=~D height=~D"
       (file-descriptor obj)
@@ -67,8 +67,8 @@
       (server-host obj)
       (driver-name obj)
       (model-identifier obj)
-      (first size)
-      (second size)
+      width
+      height
     )
   )
 )
@@ -270,27 +270,24 @@ The first value represents the x dimension and the second the y dimension."
 )
 
 (defun expand-key-code (code)
-  "Expand a key code into its fields."
+  "Return the individual fields of the key code as a list.
+The list contains:
+  type (a string),
+  command (a string),
+  argument (a non-negative integer),
+  flags (a list of strings)."
+
   (with-foreign-object (description 'key-code-description)
     (setf result (foreign-funcall "brlapi_describeKeyCode"
                   key-code code :pointer description :int))
     (with-foreign-slots
       ((type-name command-name argument-value flag-count flag-names) description key-code-description)
 
-      (setf fields (foreign-slot-value description 'key-code-description 'field-values))
-      (with-foreign-slots
-        ((type command argument flags) fields expanded-key-code)
-
-        (list 
-          (values type-name type)
-          (values command-name command)
-          (values argument-value argument)
-          (values
-            (loop
-              for index below flag-count
-              collect (mem-aref (foreign-slot-pointer description 'key-code-description 'flag-names) :string index))
-            flags)
-        )
+      (list 
+        type-name command-name argument-value
+        (loop
+          for index below flag-count
+          collect (mem-aref (foreign-slot-pointer description 'key-code-description 'flag-names) :string index))
       )
     )
   )
