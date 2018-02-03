@@ -25,8 +25,7 @@
   (:use :common-lisp :cffi)
   (:export #:open-connection #:close-connection #:is-connected
            #:print-properties #:print-object
-	   #:driver-name #:model-identifier
-           #:display-size #:display-width #:display-height
+	   #:driver-name #:model-identifier #:display-size
            #:enter-tty-mode #:leave-tty-mode
            #:write-text #:write-dots #:write-region
            #:read-key #:expand-key-code))
@@ -60,15 +59,17 @@
 )
 
 (defmethod print-properties ((obj display) stream)
-  (format stream
-    "fd=~D auth=~A host=~A driver=~A model=~A width=~D height=~D"
-    (file-descriptor obj)
-    (server-auth obj)
-    (server-host obj)
-    (driver-name obj)
-    (model-identifier obj)
-    (display-width obj)
-    (display-height obj)
+  (let ((size (multiple-value-list (display-size obj))))
+    (format stream
+      "fd=~D auth=~A host=~A driver=~A model=~A width=~D height=~D"
+      (file-descriptor obj)
+      (server-auth obj)
+      (server-host obj)
+      (driver-name obj)
+      (model-identifier obj)
+      (first size)
+      (second size)
+    )
   )
 )
 
@@ -160,16 +161,6 @@ The first value represents the x dimension and the second the y dimension."
   (with-foreign-objects ((x :int) (y :int))
     (foreign-funcall "brlapi__getDisplaySize" :pointer (connection-handle obj) :pointer x :pointer y brlapi-code)
     (values (mem-ref x :int) (mem-ref y :int))))
-
-(defmethod display-width ((obj display))
-  "Return the width of the display."
-  (first (multiple-value-list (display-size obj)))
-)
-
-(defmethod display-height ((obj display))
-  "Return the height of the display."
-  (second (multiple-value-list (display-size obj)))
-)
 
 ;;;; * TTY mode
 
@@ -294,7 +285,11 @@ The first value represents the x dimension and the second the y dimension."
           (values type-name type)
           (values command-name command)
           (values argument-value)
-          (values (loop for index below flag-count collect index) flags)
+          (values
+            (loop
+              for index below flag-count
+              collect index)
+            flags)
         )
       )
     )
