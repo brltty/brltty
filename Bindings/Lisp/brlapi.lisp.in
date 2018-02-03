@@ -272,10 +272,10 @@ The first value represents the x dimension and the second the y dimension."
 (defun expand-key-code (code)
   "Return the individual fields of the key code as a list.
 The list contains:
-  type (a string),
-  command (a string),
-  argument (a non-negative integer),
-  flags (a list of strings)."
+  0: type (a string)
+  1: command (a string)
+  2: argument (a non-negative integer)
+  3: flags (a list of strings)"
 
   (with-foreign-object (description 'key-code-description)
     (setf result (foreign-funcall "brlapi_describeKeyCode"
