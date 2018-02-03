@@ -284,11 +284,11 @@ The first value represents the x dimension and the second the y dimension."
         (list 
           (values type-name type)
           (values command-name command)
-          (values argument-value)
+          (values argument-value argument)
           (values
             (loop
               for index below flag-count
-              collect index)
+              collect (mem-aref (foreign-slot-pointer description 'key-code-description 'flag-names) :string index))
             flags)
         )
       )
