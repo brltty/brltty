@@ -49,6 +49,7 @@ export LDFLAGS=""
    --disable-api \
    --disable-gpm \
    --disable-icu \
+   --disable-liblouis \
    --disable-polkit \
    --disable-x \
    \
