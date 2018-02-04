@@ -15,16 +15,7 @@
 ; This software is maintained by Dave Mielke <dave@mielke.cc>.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(require 'asdf)
-(require 'sb-posix)
-
-(defun current-directory ()
-  "The current working directory as a directory path."
-  (concatenate 'string (sb-posix:getcwd) "/")
-)
-
-(pushnew (current-directory) asdf:*central-registry* :test #'equal)
-(asdf:operate 'asdf:load-op 'brlapi)
+(load "apisetup.lisp")
 
 (defun brlapi-test-tty (output session tty)
   "Perform a test of BrlAPI's input functions."
