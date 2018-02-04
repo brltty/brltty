@@ -86,7 +86,7 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
    --disable-x \
    \
    --without-libbraille \
-   --with-braille-driver=-ba,-bg,-tt,-vr,al,at,bm,ce,eu,fs,hm,ht,hw,ic,ir,mm,md,mt,np,pg,pm,sk,vo \
+   --with-braille-driver=-ba,-bg,-tt,-vr,al,at,bm,bn,ce,eu,fs,hm,ht,hw,ic,ir,md,mm,mt,np,pg,pm,sk,vo \
    \
    --without-espeak \
    --without-flite \
