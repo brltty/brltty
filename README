@@ -2,7 +2,7 @@ BRLTTY is a background process (daemon) providing access to the Linux/Unix
 console (when in text mode) for a blind person using a refreshable braille
 display.
 
-Version 5.5, Apr 2017
+Version 5.6, Feb 2018
 
 Copyright (C) 1995-2018 by The BRLTTY Developers.
 

@@ -1,6 +1,55 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+February 5, 2018:
+ - BRLTTY 5.6 released:
+   General updates:
+      BRLTTY has been relicensed to the LGPL (from the GPL).
+      Better cursor routing handling of status line updates and vertical scrolling.
+      The Track Screen Scroll setting has been added.
+      The Word Wrap setting has been added.
+      Panning left when using a contraction table now word wraps.
+      Typing dismisses an alert message.
+      The test for when INFO does text maximization instead has been fixed.
+      Overrides are now applied when the preferences haven't yet been saved.
+      The Inceptor braille driver (from Innovision) has been added.
+   The Baum braille driver:
+      On models with B9 and B10 by the joystick, both are interpreted as Space.
+      Input packet handling for Pronto! V3 models has been fixed.
+   The EuroBraille braille driver:
+      Improved autodetection when using Bluetooth.
+      The Esytime braille keyboard can be used over Bluetooth and USB.
+      For Esytime models, B5 has been renamed to B8.
+   The HIMS braille driver:
+      The Smart Beetle is now recognized when using Bluetooth.
+   The HumanWare braille driver:
+      The BrailleNote Touch is recognized when using USB.
+   BrlAPI changes:
+      The version is now 0.6.7 (it was 0.6.6).
+      The brlapi_getModelIdentifier() function has been added to the API.
+      The default character set is now based on the user's locale.
+      Sessions would occasionally hang when connecting.
+      PolKit authentication is no longer attempted when it isn't available.
+      Reading raw key codes no longer uses key ranges.
+   Text tables:
+      The lt (Lithuanian) table has been updated.
+      The uk (Ukrainian) table has been added.
+   Contraction tables:
+      The fr-abrege (French) table has been updated.
+      The lt (Lithuanian) table has been added.
+      Support has been added for LibLouis tables.
+      brltty-ctb's output is now UTF-8 (rather than ASCII).
+   Key tables:
+      The ifPlatform and ifNotPlatform directives have been added.
+   Systemd changes:
+      Path (rather than target) units are now used to manage BRLTTY instances.
+   Android changes:
+      Danish translations have been added.
+   Build features:
+      Add the reload target to the make files for Systemd and Udev.
+      A make file for install/uninstall of the AppStream rules has been added.
+      Python 3.6 is supported.
+
 April 18, 2017:
  - BRLTTY 5.5 released:
    General changes:
