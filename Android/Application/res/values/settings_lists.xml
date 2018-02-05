@@ -214,6 +214,7 @@
   <string name="TEXT_TABLE_LABEL_ta">Tamil</string>
   <string name="TEXT_TABLE_LABEL_te">Telugu</string>
   <string name="TEXT_TABLE_LABEL_tr">Turkish</string>
+  <string name="TEXT_TABLE_LABEL_uk">Ukrainian</string>
   <string name="TEXT_TABLE_LABEL_vi">Vietnamese</string>
 
   <string-array name="TEXT_TABLE_LABELS">
@@ -303,6 +304,7 @@
     <item>@string/TEXT_TABLE_LABEL_ta</item>
     <item>@string/TEXT_TABLE_LABEL_te</item>
     <item>@string/TEXT_TABLE_LABEL_tr</item>
+    <item>@string/TEXT_TABLE_LABEL_uk</item>
     <item>@string/TEXT_TABLE_LABEL_vi</item>
   </string-array>
 
@@ -393,6 +395,7 @@
     <item>ta</item>
     <item>te</item>
     <item>tr</item>
+    <item>uk</item>
     <item>vi</item>
   </string-array>
 
@@ -429,6 +432,7 @@
   <string name="CONTRACTION_TABLE_LABEL_ko">Korean (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Korean (grade 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Korean (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_lt">Lithuanian (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_mg">Malagasy (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_mun">Munda (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_nl">Dutch (contracted)</string>
@@ -459,6 +463,7 @@
     <item>@string/CONTRACTION_TABLE_LABEL_ko</item>
     <item>@string/CONTRACTION_TABLE_LABEL_ko_g1</item>
     <item>@string/CONTRACTION_TABLE_LABEL_ko_g2</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_lt</item>
     <item>@string/CONTRACTION_TABLE_LABEL_mg</item>
     <item>@string/CONTRACTION_TABLE_LABEL_mun</item>
     <item>@string/CONTRACTION_TABLE_LABEL_nl</item>
@@ -490,6 +495,7 @@
     <item>ko</item>
     <item>ko-g1</item>
     <item>ko-g2</item>
+    <item>lt</item>
     <item>mg</item>
     <item>mun</item>
     <item>nl</item>
