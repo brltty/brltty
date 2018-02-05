@@ -320,7 +320,7 @@
     <modalias>usb:v1C71pC005*</modalias>
 
     <!-- Device: 1C71:C006 -->
-    <!-- HumanWare [all models (HID protocol)] -->
+    <!-- HumanWare [non-Touch models (HID protocol)] -->
     <modalias>usb:v1C71pC006*</modalias>
 
     <!-- Device: 1C71:C00A -->

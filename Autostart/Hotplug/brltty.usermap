@@ -300,7 +300,7 @@ brltty 0x0003 0x1c71 0xc004
 brltty 0x0003 0x1c71 0xc005
 
 # Device: 1C71:C006
-# HumanWare [all models (HID protocol)]
+# HumanWare [non-Touch models (HID protocol)]
 brltty 0x0003 0x1c71 0xc006
 
 # Device: 1C71:C00A

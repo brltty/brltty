@@ -285,7 +285,7 @@
   <usb-device vendor-id="7281" product-id="49157" />
 
   <!-- Device: 1C71:C006 -->
-  <!-- HumanWare [all models (HID protocol)] -->
+  <!-- HumanWare [non-Touch models (HID protocol)] -->
   <usb-device vendor-id="7281" product-id="49158" />
 
   <!-- Device: 1C71:C00A -->

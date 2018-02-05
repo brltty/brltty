@@ -307,7 +307,7 @@ ENV{PRODUCT}=="1c71/c004/*", ENV{BRLTTY_BRAILLE_DRIVER}="bn", GOTO="brltty_usb_r
 ENV{PRODUCT}=="1c71/c005/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_run"
 
 # Device: 1C71:C006
-# HumanWare [all models (HID protocol)]
+# HumanWare [non-Touch models (HID protocol)]
 ENV{PRODUCT}=="1c71/c006/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_run"
 
 # Device: 1C71:C00A

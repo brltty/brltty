@@ -337,7 +337,7 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: HumanWare [all models (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C005
 
 ; Device: 1C71:C006
-"LibUSB-Win32: HumanWare [all models (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C006
+"LibUSB-Win32: HumanWare [non-Touch models (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C006
 
 ; Device: 1C71:C00A
 "LibUSB-Win32: HumanWare [BrailleNote Touch (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C00A
@@ -654,7 +654,7 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: HumanWare [all models (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C005
 
 ; Device: 1C71:C006
-"LibUSB-Win32: HumanWare [all models (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C006
+"LibUSB-Win32: HumanWare [non-Touch models (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C006
 
 ; Device: 1C71:C00A
 "LibUSB-Win32: HumanWare [BrailleNote Touch (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C00A
@@ -971,7 +971,7 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: HumanWare [all models (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C005
 
 ; Device: 1C71:C006
-"LibUSB-Win32: HumanWare [all models (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C006
+"LibUSB-Win32: HumanWare [non-Touch models (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C006
 
 ; Device: 1C71:C00A
 "LibUSB-Win32: HumanWare [BrailleNote Touch (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C00A
