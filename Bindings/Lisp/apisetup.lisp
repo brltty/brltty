@@ -23,11 +23,16 @@
   (concatenate 'string (sb-posix:getcwd) "/")
 )
 
+(defun add-package-directory (path)
+  "Add a directory from which packages can be loaded."
+  (pushnew path asdf:*central-registry* :test #'equal)
+)
+
 (defun load-package (name)
   "Load a package."
   (asdf:operate 'asdf:load-op name)
 )
 
-(pushnew (current-directory) asdf:*central-registry* :test #'equal)
+(add-package-directory (current-directory))
 (load-package 'brlapi)
 
