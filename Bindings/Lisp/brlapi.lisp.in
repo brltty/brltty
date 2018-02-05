@@ -28,7 +28,8 @@
 	   #:driver-name #:model-identifier #:display-size
            #:enter-tty-mode #:leave-tty-mode
            #:write-text #:write-dots #:write-region
-           #:read-key #:expand-key-code))
+           #:read-key #:expand-key-code
+           #:error-message))
 (in-package :brlapi)
 
 
@@ -47,16 +48,6 @@
    (auth :initarg :auth :reader server-auth)
    (host :initarg :host :reader server-host)
    (tty :initform nil :reader entered-tty)))
-
-(defmethod is-connected ((obj display))
-  (and
-    obj
-    (let
-      ((fd (file-descriptor obj)))
-      (and fd (numberp fd) (not (< fd 0)))
-    )
-  )
-)
 
 (defmethod print-properties ((obj display) stream)
   (multiple-value-bind (width height) (display-size obj)
@@ -93,20 +84,32 @@
                      (brlapi-error-text c))))
   (:documentation "Signalled when a libbrlapi function answers with -1."))
 
+(defmethod error-message ()
+  "The message for the most recent error."
+  (foreign-funcall "brlapi_strerror"
+    :pointer (foreign-funcall "brlapi_error_location" :pointer)
+    :string)
+)
+
 (defmethod translate-from-foreign (value (name (eql 'brlapi-code)))
   "Raise a BRLAPI-ERROR if VALUE, a brlapi-code, is -1."
   (declare (integer value))
   (if (eql value -1)
-      (error 'brlapi-error
-             :text (foreign-funcall "brlapi_strerror"
-                                    :pointer
-                                    (foreign-funcall "brlapi_error_location"
-                                                     :pointer)
-                                    :string))
-    value))
+      (error 'brlapi-error :text (error-message))
+      value))
 
 
 ;;;; * Connection management
+
+(defmethod is-connected ((obj display))
+  (and
+    obj
+    (let
+      ((fd (file-descriptor obj)))
+      (and fd (numberp fd) (not (< fd 0)))
+    )
+  )
+)
 
 (defcstruct settings
   "Connection setting structure."

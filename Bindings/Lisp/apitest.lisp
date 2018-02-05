@@ -43,7 +43,7 @@
 
         (if tty (brlapi-test-tty output session (parse-integer tty)))
       )
-      (format output "connection failure~%")
+      (format output "connection failure: ~A~%" (brlapi:error-message))
     )
 
     (brlapi:close-connection session)
