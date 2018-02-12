@@ -350,7 +350,7 @@ AC_PATH_TOOL([RANLIB], [ranlib])
 AC_PROG_AWK
 AC_PROG_LN_S
 
-AC_PATH_PROG([PKG_CONFIG], [pkg-config], [false])
+AC_PATH_TOOL([PKG_CONFIG], [pkg-config], [false])
 
 AC_PATH_PROG([MSGMERGE], [msgmerge], [false])
 AC_PATH_PROG([MSGFMT], [msgfmt], [false])
