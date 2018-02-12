@@ -141,17 +141,22 @@ typedef struct {
   const char *help;
 } OptionEntry;
 
-static void
+static int
 makeOptionNames (const OptionEntry *options, const char ***names) {
   if (!*names) {
     const OptionEntry *option = options;
     const char **name;
+
     while (option->name) ++option;
-    *names = name = allocateMemory(((option - options) + 1) * sizeof(*name));
+    *names = name = allocateMemory(((option - options) + 1) * sizeof(*names));
+    if (!*names) return 0;
+
     option = options;
     while (option->name) *name++ = option++->name;
     *name = NULL;
   }
+
+  return 1;
 }
 
 static int
@@ -160,7 +165,7 @@ processOptions (
   Tcl_Obj *const objv[], int objc, int start,
   const OptionEntry *options, const char ***names
 ) {
-  makeOptionNames(options, names);
+  if (!makeOptionNames(options, names)) return TCL_ERROR;
 
   objv += start;
   objc -= start;
