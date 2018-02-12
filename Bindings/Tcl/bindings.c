@@ -1080,30 +1080,37 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         }
       END_OPTIONS(2)
 
-      {
-        BrlapiSession *session = allocateMemory(sizeof(*session));
-        session->handle = allocateMemory(brlapi_getHandleSize());
-        int result = brlapi__openConnection(session->handle, &options.settings, &session->settings);
+      BrlapiSession *session = allocateMemory(sizeof(*session));
+      if (session) {
+        if ((session->handle = allocateMemory(brlapi_getHandleSize()))) {
+          int result = brlapi__openConnection(session->handle, &options.settings, &session->settings);
 
-        if (result != -1) {
-          session->fileDescriptor = result;
+          if (result != -1) {
+            session->fileDescriptor = result;
 
-          {
-            static unsigned int suffix = 0;
             char name[0X20];
-            snprintf(name, sizeof(name), "brlapi%u", suffix++);
-            Tcl_CreateObjCommand(interp, name, brlapiSessionCommand, session, endSession);
-            setStringResult(interp, name, -1);
+            Tcl_Command command;
+
+            {
+              static unsigned int suffix = 0;
+              snprintf(name, sizeof(name), "brlapi%u", suffix++);
+              command = Tcl_CreateObjCommand(interp, name, brlapiSessionCommand, session, endSession);
+            }
+
+            if (command) {
+              setStringResult(interp, name, -1);
+              return TCL_OK;
+            }
+          } else {
+            setBrlapiError(interp);
           }
 
-          return TCL_OK;
-        } else {
-          setBrlapiError(interp);
+          deallocateMemory(session->handle);
         }
 
-        deallocateMemory(session->handle);
         deallocateMemory(session);
       }
+
       return TCL_ERROR;
     }
 
