@@ -31,15 +31,18 @@
 
 static int
 setArrayElement (Tcl_Interp *interp, const char *array, const char *element, Tcl_Obj *value) {
-  if (!value) return 0;
+  if (!value) return TCL_ERROR;
   Tcl_IncrRefCount(value);
   Tcl_Obj *result = Tcl_SetVar2Ex(interp, array, element, value, TCL_LEAVE_ERR_MSG);
   Tcl_DecrRefCount(value);
-  return !!result;
+  return result? TCL_OK: TCL_ERROR;
 }
 
 #define SET_ARRAY_ELEMENT(element, object) \
-  if (!setArrayElement(interp, array, element, object)) return TCL_ERROR;
+do { \
+  int result = setArrayElement(interp, array, element, object); \
+  if (result != TCL_OK) return result; \
+} while (0)
 
 typedef struct {
   brlapi_connectionSettings_t settings;
@@ -147,7 +150,7 @@ makeOptionNames (const OptionEntry *options, const char ***names) {
     const OptionEntry *option = options;
     while (option->name) ++option;
     *names = allocateMemory(((option - options) + 1) * sizeof(*names));
-    if (!*names) return 0;
+    if (!*names) return TCL_ERROR;
 
     option = options;
     const char **name = *names;
@@ -155,7 +158,7 @@ makeOptionNames (const OptionEntry *options, const char ***names) {
     *name = NULL;
   }
 
-  return 1;
+  return TCL_OK;
 }
 
 static int
@@ -164,7 +167,10 @@ processOptions (
   Tcl_Obj *const objv[], int objc, int start,
   const OptionEntry *options, const char ***names
 ) {
-  if (!makeOptionNames(options, names)) return TCL_ERROR;
+  {
+    int result = makeOptionNames(options, names);
+    if (result != TCL_OK) return result;
+  }
 
   objv += start;
   objc -= start;
