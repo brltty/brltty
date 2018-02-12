@@ -145,13 +145,12 @@ static int
 makeOptionNames (const OptionEntry *options, const char ***names) {
   if (!*names) {
     const OptionEntry *option = options;
-    const char **name;
-
     while (option->name) ++option;
-    *names = name = allocateMemory(((option - options) + 1) * sizeof(*names));
+    *names = allocateMemory(((option - options) + 1) * sizeof(*names));
     if (!*names) return 0;
 
     option = options;
+    const char **name = *names;
     while (option->name) *name++ = option++->name;
     *name = NULL;
   }
