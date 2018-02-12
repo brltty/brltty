@@ -31,6 +31,7 @@
 
 static int
 setArrayElement (Tcl_Interp *interp, const char *array, const char *element, Tcl_Obj *value) {
+  if (!value) return 0;
   Tcl_IncrRefCount(value);
   Tcl_Obj *result = Tcl_SetVar2Ex(interp, array, element, value, TCL_LEAVE_ERR_MSG);
   Tcl_DecrRefCount(value);
@@ -593,9 +594,8 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
       if (count) {
         int path[count];
-        int index;
 
-        for (index=0; index<count; ++index) {
+        for (int index=0; index<count; index+=1) {
           int result = Tcl_GetIntFromObj(interp, elements[index], &path[index]);
           if (result != TCL_OK) return result;
         }
@@ -676,6 +676,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
     case FCN_ignoreKeys:
       ignore = 1;
+      goto doKeys;
 
     doKeys:
       if ((objc < 3) || (objc > 4)) {
@@ -729,9 +730,8 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
         if (codeCount) {
           brlapi_keyCode_t codes[codeCount];
-          int codeIndex;
 
-          for (codeIndex=0; codeIndex<codeCount; ++codeIndex) {
+          for (int codeIndex=0; codeIndex<codeCount; codeIndex+=1) {
             Tcl_WideInt code;
             int result = Tcl_GetWideIntFromObj(interp, codeElements[codeIndex], &code);
             if (result != TCL_OK) return result;
@@ -771,6 +771,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
     case FCN_ignoreKeyRanges:
       ignore = 1;
+      goto doKeyRanges;
 
     doKeyRanges:
       if (objc != 3) {
@@ -785,9 +786,8 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
       if (rangeCount) {
         brlapi_range_t ranges[rangeCount];
-        int rangeIndex;
 
-        for (rangeIndex=0; rangeIndex<rangeCount; ++rangeIndex) {
+        for (int rangeIndex=0; rangeIndex<rangeCount; rangeIndex+=1) {
           brlapi_range_t *range = &ranges[rangeIndex];
           Tcl_Obj **codeElements;
           int codeCount;
@@ -804,9 +804,8 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
           {
             Tcl_WideInt codes[codeCount];
-            int codeIndex;
 
-            for (codeIndex=0; codeIndex<codeCount; ++codeIndex) {
+            for (int codeIndex=0; codeIndex<codeCount; codeIndex+=1) {
               int result = Tcl_GetWideIntFromObj(interp, codeElements[codeIndex], &codes[codeIndex]);
               if (result != TCL_OK) return result;
             }
@@ -1262,11 +1261,9 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         Tcl_Obj *flags = Tcl_NewListObj(0, NULL);
         SET_ARRAY_ELEMENT("flags", flags);
 
-        {
-          int index;
-          for (index=0; index<dkc.flags; ++index) {
-            Tcl_ListObjAppendElement(interp, flags, Tcl_NewStringObj(dkc.flag[index], -1));
-          }
+        for (int index=0; index<dkc.flags; index+=1) {
+          int result = Tcl_ListObjAppendElement(interp, flags, Tcl_NewStringObj(dkc.flag[index], -1));
+          if (result != TCL_OK) return result;
         }
       }
 
@@ -1289,9 +1286,8 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
       if (elementCount) {
         BrlDots cells[elementCount];
-        int elementIndex;
 
-        for (elementIndex=0; elementIndex<elementCount; ++elementIndex) {
+        for (int elementIndex=0; elementIndex<elementCount; elementIndex+=1) {
           BrlDots *cell = &cells[elementIndex];
           Tcl_Obj *element = elements[elementIndex];
           int numberCount;
@@ -1299,8 +1295,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
           *cell = 0;
           if ((numberCount != 1) || (numbers[0] != '0')) {
-            int numberIndex;
-            for (numberIndex=0; numberIndex<numberCount; ++numberIndex) {
+            for (int numberIndex=0; numberIndex<numberCount; numberIndex+=1) {
               char number = numbers[numberIndex];
               BrlDots dot = brlNumberToDot(number);
 
