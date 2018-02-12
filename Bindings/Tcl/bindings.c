@@ -130,6 +130,35 @@ getDisplaySize (
 #define BEGIN_FUNCTIONS static const char *functions[] = {
 #define END_FUNCTIONS NULL };
 
+static int
+testArgumentCount (
+  Tcl_Interp *interp, Tcl_Obj *const objv[], int objc,
+  int start, int required, int optional,
+  const char *syntax
+) {
+  int minimum = start + required;
+  int maximum = (optional < 0)? objc: (minimum + optional);
+
+  if ((objc >= minimum) && (objc <= maximum)) return TCL_OK;
+  Tcl_WrongNumArgs(interp, start, objv, syntax);
+  return TCL_ERROR;
+}
+
+#define TEST_ARGUMENT_COUNT(start,required,optional,syntax) \
+  TEST_TCL_OK(testArgumentCount(interp, objv, objc, (start), (required), (optional), (syntax)))
+
+#define TEST_COMMAND_ARGUMENTS() \
+  TEST_ARGUMENT_COUNT(1, 1, -1, "<function> [<arg> ...]")
+
+#define TEST_FUNCTION_ARGUMENT() \
+  int function; \
+  TEST_TCL_OK(Tcl_GetIndexFromObj(interp, objv[1], functions, "function", 0, &function))
+
+#define TEST_FUNCTION_ARGUMENTS(required,optional,syntax) \
+  TEST_ARGUMENT_COUNT(2, (required), (optional), (syntax))
+
+#define TEST_FUNCTION_NO_ARGUMENTS() TEST_FUNCTION_ARGUMENTS(0, 0, NULL)
+
 #define OPTION_HANDLER_RETURN int
 #define OPTION_HANDLER_PARAMETERS (Tcl_Interp *interp, Tcl_Obj *const objv[], void *data)
 #define OPTION_HANDLER_NAME(command,function,option) optionHandler_##command##_##function##_##option
@@ -178,21 +207,15 @@ processOptions (
   while (objc > 0) {
     int index;
     TEST_TCL_OK(Tcl_GetIndexFromObj(interp, objv[0], *names, "option", 0, &index));
+    const OptionEntry *option = &options[index];
 
-    {
-      const OptionEntry *option = &options[index];
-      int count = option->operands + 1;
+    int count = option->operands;
+    TEST_ARGUMENT_COUNT(1, count, -1, option->help);
+    TEST_TCL_OK(option->handler(interp, objv, data));
 
-      if (count > objc) {
-        Tcl_WrongNumArgs(interp, 1, objv, option->help);
-        return TCL_ERROR;
-      }
-
-      TEST_TCL_OK(option->handler(interp, objv, data));
-
-      objv += count;
-      objc -= count;
-    }
+    count += 1;
+    objv += count;
+    objc -= count;
   }
 
   return TCL_OK;
@@ -410,53 +433,32 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
   };
 
   BrlapiSession *session = data;
-  int function;
 
-  if (objc < 2) {
-    Tcl_WrongNumArgs(interp, 1, objv, "<function> [<arg> ...]");
-    return TCL_ERROR;
-  }
-
-  TEST_TCL_OK(Tcl_GetIndexFromObj(interp, objv[1], functions, "function", 0, &function));
+  TEST_COMMAND_ARGUMENTS();
+  TEST_FUNCTION_ARGUMENT();
 
   switch (function) {
     case FCN_getHost: {
-      if (objc != 2) {
-        Tcl_WrongNumArgs(interp, 2, objv, NULL);
-        return TCL_ERROR;
-      }
-
+      TEST_FUNCTION_NO_ARGUMENTS();
       setStringResult(interp, session->settings.host, -1);
       return TCL_OK;
     }
 
     case FCN_getAuth: {
-      if (objc != 2) {
-        Tcl_WrongNumArgs(interp, 2, objv, NULL);
-        return TCL_ERROR;
-      }
-
+      TEST_FUNCTION_NO_ARGUMENTS();
       setStringResult(interp, session->settings.auth, -1);
       return TCL_OK;
     }
 
     case FCN_getFileDescriptor: {
-      if (objc != 2) {
-        Tcl_WrongNumArgs(interp, 2, objv, NULL);
-        return TCL_ERROR;
-      }
-
+      TEST_FUNCTION_NO_ARGUMENTS();
       setIntResult(interp, session->fileDescriptor);
       return TCL_OK;
     }
 
     case FCN_getDriverName: {
+      TEST_FUNCTION_NO_ARGUMENTS();
       size_t size = 0X10;
-
-      if (objc != 2) {
-        Tcl_WrongNumArgs(interp, 2, objv, NULL);
-        return TCL_ERROR;
-      }
 
       while (1) {
         char buffer[size];
@@ -477,12 +479,8 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
 
     case FCN_getModelIdentifier: {
+      TEST_FUNCTION_NO_ARGUMENTS();
       size_t size = 0X10;
-
-      if (objc != 2) {
-        Tcl_WrongNumArgs(interp, 2, objv, NULL);
-        return TCL_ERROR;
-      }
 
       while (1) {
         char buffer[size];
@@ -503,13 +501,9 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
 
     case FCN_getDisplaySize: {
+      TEST_FUNCTION_NO_ARGUMENTS();
+
       unsigned int width, height;
-
-      if (objc != 2) {
-        Tcl_WrongNumArgs(interp, 2, objv, NULL);
-        return TCL_ERROR;
-      }
-
       TEST_TCL_OK(getDisplaySize(interp, session, &width, &height));
 
       {
@@ -517,8 +511,10 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
           Tcl_NewIntObj(width),
           Tcl_NewIntObj(height)
         };
+
         Tcl_SetObjResult(interp, Tcl_NewListObj(2, elements));
       }
+
       return TCL_OK;
     }
 
@@ -560,8 +556,6 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         .path = NULL,
         .driver = NULL
       };
-      Tcl_Obj **elements;
-      int count;
 
       BEGIN_OPTIONS
         { OPTION(session, enterTtyModeWithPath, events),
@@ -577,9 +571,13 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         }
       END_OPTIONS(2)
 
+      Tcl_Obj **elements;
+      int count;
+
       if (options.path) {
         TEST_TCL_OK(Tcl_ListObjGetElements(interp, options.path, &count, &elements));
       } else {
+        elements = NULL;
         count = 0;
       }
 
@@ -600,10 +598,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
 
     case FCN_leaveTtyMode: {
-      if (objc != 2) {
-        Tcl_WrongNumArgs(interp, 2, objv, NULL);
-        return TCL_ERROR;
-      }
+      TEST_FUNCTION_NO_ARGUMENTS();
 
       if (brlapi__leaveTtyMode(session->handle) != -1) return TCL_OK;
       setBrlapiError(interp);
@@ -611,13 +606,9 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
 
     case FCN_setFocus: {
+      TEST_FUNCTION_ARGUMENTS(1, 0, "<ttyNumber>");
+
       int tty;
-
-      if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<ttyNumber>");
-        return TCL_ERROR;
-      }
-
       TEST_TCL_OK(Tcl_GetIntFromObj(interp, objv[2], &tty));
 
       if (brlapi__setFocus(session->handle, tty) != -1) return TCL_OK;
@@ -626,13 +617,9 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
 
     case FCN_readKey: {
+      TEST_FUNCTION_ARGUMENTS(1, 0, "<wait>");
+
       int wait;
-
-      if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<wait>");
-        return TCL_ERROR;
-      }
-
       TEST_TCL_OK(Tcl_GetBooleanFromObj(interp, objv[2], &wait));
 
       {
@@ -663,10 +650,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       goto doKeys;
 
     doKeys:
-      if ((objc < 3) || (objc > 4)) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<rangeType> [<keyCodeList>]");
-        return TCL_ERROR;
-      }
+      TEST_FUNCTION_ARGUMENTS(1, 1, "<rangeType> [<keyCodeList>]");
 
       {
         static const char *rangeNames[] = {
@@ -753,11 +737,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       goto doKeyRanges;
 
     doKeyRanges:
-      if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<keyRangeList>");
-        return TCL_ERROR;
-      }
-
+      TEST_FUNCTION_ARGUMENTS(1, 0, "<keyRangeList>");
       TEST_TCL_OK(Tcl_ListObjGetElements(interp, objv[2], &rangeCount, &rangeElements));
 
       if (rangeCount) {
@@ -808,11 +788,6 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       FunctionData_session_write options = {
         .arguments = BRLAPI_WRITEARGUMENTS_INITIALIZER
       };
-
-      if (objc < 2) {
-        Tcl_WrongNumArgs(interp, 2, objv, "[<option> ...]");
-        return TCL_ERROR;
-      }
 
       BEGIN_OPTIONS
         { OPTION(session, write, andMask),
@@ -943,13 +918,9 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
 
     case FCN_writeDots: {
+      TEST_FUNCTION_ARGUMENTS(1, 0, "<dots>");
+
       int size;
-
-      if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<dots>");
-        return TCL_ERROR;
-      }
-
       {
         unsigned int width, height;
         TEST_TCL_OK(getDisplaySize(interp, session, &width, &height));
@@ -974,25 +945,18 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
 
     case FCN_enterRawMode: {
-      if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<driver>");
-        return TCL_ERROR;
-      }
+      TEST_FUNCTION_ARGUMENTS(1, 0, "<driver>");
 
-      {
-        const char *driver = Tcl_GetString(objv[2]);
+      const char *driver = Tcl_GetString(objv[2]);
+      if (!driver) return TCL_ERROR;
 
-        if (brlapi__enterRawMode(session->handle, driver) != -1) return TCL_OK;
-        setBrlapiError(interp);
-        return TCL_ERROR;
-      }
+      if (brlapi__enterRawMode(session->handle, driver) != -1) return TCL_OK;
+      setBrlapiError(interp);
+      return TCL_ERROR;
     }
 
     case FCN_leaveRawMode: {
-      if (objc != 2) {
-        Tcl_WrongNumArgs(interp, 2, objv, NULL);
-        return TCL_ERROR;
-      }
+      TEST_FUNCTION_NO_ARGUMENTS();
 
       if (brlapi__leaveRawMode(session->handle) != -1) return TCL_OK;
       setBrlapiError(interp);
@@ -1000,13 +964,9 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
 
     case FCN_recvRaw: {
+      TEST_FUNCTION_ARGUMENTS(1, 0, "<maximumLength>");
+
       int size;
-
-      if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<maximumLength>");
-        return TCL_ERROR;
-      }
-
       TEST_TCL_OK(Tcl_GetIntFromObj(interp, objv[2], &size));
 
       {
@@ -1024,10 +984,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
 
     case FCN_sendRaw: {
-      if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<packet>");
-        return TCL_ERROR;
-      }
+      TEST_FUNCTION_ARGUMENTS(1, 0, "<packet>");
 
       {
         int count;
@@ -1040,25 +997,18 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
 
     case FCN_suspendDriver: {
-      if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<driver>");
-        return TCL_ERROR;
-      }
+      TEST_FUNCTION_ARGUMENTS(1, 0, "<driver>");
 
-      {
-        const char *driver = Tcl_GetString(objv[2]);
+      const char *driver = Tcl_GetString(objv[2]);
+      if (!driver) return TCL_ERROR;
 
-        if (brlapi__suspendDriver(session->handle, driver) != -1) return TCL_OK;
-        setBrlapiError(interp);
-        return TCL_ERROR;
-      }
+      if (brlapi__suspendDriver(session->handle, driver) != -1) return TCL_OK;
+      setBrlapiError(interp);
+      return TCL_ERROR;
     }
 
     case FCN_resumeDriver: {
-      if (objc != 2) {
-        Tcl_WrongNumArgs(interp, 2, objv, NULL);
-        return TCL_ERROR;
-      }
+      TEST_FUNCTION_NO_ARGUMENTS();
 
       if (brlapi__resumeDriver(session->handle) != -1) return TCL_OK;
       setBrlapiError(interp);
@@ -1066,10 +1016,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
 
     case FCN_closeConnection: {
-      if (objc != 2) {
-        Tcl_WrongNumArgs(interp, 2, objv, NULL);
-        return TCL_ERROR;
-      }
+      TEST_FUNCTION_NO_ARGUMENTS();
 
       Tcl_DeleteCommand(interp, Tcl_GetString(objv[0]));
       return TCL_OK;
@@ -1114,14 +1061,8 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     FCN_openConnection
   };
 
-  int function;
-
-  if (objc < 2) {
-    Tcl_WrongNumArgs(interp, 1, objv, "<function> [<arg> ...]");
-    return TCL_ERROR;
-  }
-
-  TEST_TCL_OK(Tcl_GetIndexFromObj(interp, objv[1], functions, "function", 0, &function));
+  TEST_COMMAND_ARGUMENTS();
+  TEST_FUNCTION_ARGUMENT();
 
   switch (function) {
     case FCN_openConnection: {
@@ -1131,11 +1072,11 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
       BEGIN_OPTIONS
         { OPTION(general, openConnection, auth),
-          OPERANDS(1, "<file>")
+          OPERANDS(1, "<scheme>[:<arg>],...")
         },
 
         { OPTION(general, openConnection, host),
-          OPERANDS(1, "<hostSpec>")
+          OPERANDS(1, "[<host>][:<port>]")
         }
       END_OPTIONS(2)
 
@@ -1143,6 +1084,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         BrlapiSession *session = allocateMemory(sizeof(*session));
         session->handle = allocateMemory(brlapi_getHandleSize());
         int result = brlapi__openConnection(session->handle, &options.settings, &session->settings);
+
         if (result != -1) {
           session->fileDescriptor = result;
 
@@ -1166,18 +1108,15 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
 
     case FCN_expandKeyCode: {
+      TEST_FUNCTION_ARGUMENTS(2, 0, "<keyCode> <arrayName>");
+
       Tcl_WideInt keyCode;
-      brlapi_expandedKeyCode_t ekc;
-      const char *array;
-
-      if (objc != 4) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<keyCode> <arrayName>");
-        return TCL_ERROR;
-      }
-
       TEST_TCL_OK(Tcl_GetWideIntFromObj(interp, objv[2], &keyCode));
-      if (!(array = Tcl_GetString(objv[3]))) return TCL_ERROR;
 
+      const char *array = Tcl_GetString(objv[3]);
+      if (!array) return TCL_ERROR;
+
+      brlapi_expandedKeyCode_t ekc;
       if (brlapi_expandKeyCode(keyCode, &ekc) == -1) {
         setBrlapiError(interp);
         return TCL_ERROR;
@@ -1191,18 +1130,15 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
 
     case FCN_describeKeyCode: {
+      TEST_FUNCTION_ARGUMENTS(2, 0, "<keyCode> <arrayName>");
+
       Tcl_WideInt keyCode;
-      brlapi_describedKeyCode_t dkc;
-      const char *array;
-
-      if (objc != 4) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<keyCode> <arrayName>");
-        return TCL_ERROR;
-      }
-
       TEST_TCL_OK(Tcl_GetWideIntFromObj(interp, objv[2], &keyCode));
-      if (!(array = Tcl_GetString(objv[3]))) return TCL_ERROR;
 
+      const char *array = Tcl_GetString(objv[3]);
+      if (!array) return TCL_ERROR;
+
+      brlapi_describedKeyCode_t dkc;
       if (brlapi_describeKeyCode(keyCode, &dkc) == -1) {
         setBrlapiError(interp);
         return TCL_ERROR;
@@ -1227,14 +1163,10 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
 
     case FCN_makeDots: {
+      TEST_FUNCTION_ARGUMENTS(1, 0, "<dotNumberList>");
+
       Tcl_Obj **elements;
       int elementCount;
-
-      if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<numbersList>");
-        return TCL_ERROR;
-      }
-
       TEST_TCL_OK(Tcl_ListObjGetElements(interp, objv[2], &elementCount, &elements));
 
       if (elementCount) {
@@ -1274,10 +1206,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
 
     case FCN_getHandleSize: {
-      if (objc != 2) {
-        Tcl_WrongNumArgs(interp, 2, objv, NULL);
-        return TCL_ERROR;
-      }
+      TEST_FUNCTION_NO_ARGUMENTS();
 
       setIntResult(interp, brlapi_getHandleSize());
       return TCL_OK;
