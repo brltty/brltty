@@ -95,6 +95,7 @@ proc handleCommand {session} {
       append text " $property:$properties($property)"
    }
 
+   puts $text
    $session write -text $text
    resetTimeout
 }

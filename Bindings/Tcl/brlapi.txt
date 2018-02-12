@@ -1,7 +1,11 @@
 brlapi <function> [<arg> ...]
    openConnection [<option> ...]
-      -host <hostSpec>
-      -auth <file>
+      -host [<host>][:<port>]
+      -auth <setting>,...
+         keyfile:<file>
+         user:<name>
+         group:<name>
+         polkit
    expandKeyCode <keyCode> <arrayName>
    describeKeyCode <keyCode> <arrayName>
    makeDots <numbersList>
@@ -12,6 +16,7 @@ brlapi<sessionNumber> function [arg ...]
    getAuth
    getFileDescriptor
    getDriverName
+   getModelIdentifier
    getDisplaySize
    enterTtyMode [<option> ...]
       -tty {default | <number>}

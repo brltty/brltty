@@ -29,16 +29,16 @@
 #define allocateMemory(size) ((void *)ckalloc((size)))
 #define deallocateMemory(address) ckfree((void *)(address))
 
+static int
+setArrayElement (Tcl_Interp *interp, const char *array, const char *element, Tcl_Obj *value) {
+  Tcl_IncrRefCount(value);
+  Tcl_Obj *result = Tcl_SetVar2Ex(interp, array, element, value, TCL_LEAVE_ERR_MSG);
+  Tcl_DecrRefCount(value);
+  return !!result;
+}
+
 #define SET_ARRAY_ELEMENT(element, object) \
-do { \
-  const char *name = (element); \
-  Tcl_Obj *value = (object); \
-  Tcl_Obj *result; \
-  Tcl_IncrRefCount(value); \
-  result = Tcl_SetVar2Ex(interp, array, name, value, TCL_LEAVE_ERR_MSG); \
-  Tcl_DecrRefCount(value); \
-  if (!result) return TCL_ERROR; \
-} while (0)
+  if (!setArrayElement(interp, array, element, object)) return TCL_ERROR;
 
 typedef struct {
   brlapi_connectionSettings_t settings;
@@ -119,6 +119,9 @@ getDisplaySize (
   setBrlapiError(interp);
   return TCL_ERROR;
 }
+
+#define BEGIN_FUNCTIONS static const char *functions[] = {
+#define END_FUNCTIONS NULL };
 
 #define OPTION_HANDLER_RETURN int
 #define OPTION_HANDLER_PARAMETERS (Tcl_Interp *interp, Tcl_Obj *const objv[], void *data)
@@ -353,7 +356,7 @@ endSession (ClientData data) {
 
 static int
 brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
-  static const char *functions[] = {
+  BEGIN_FUNCTIONS
     "acceptKeyRanges",
     "acceptKeys",
     "closeConnection",
@@ -378,8 +381,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     "suspendDriver",
     "write",
     "writeDots",
-    NULL
-  };
+  END_FUNCTIONS
 
   enum {
     FCN_acceptKeyRanges,
@@ -417,7 +419,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
   }
 
   {
-    int result = Tcl_GetIndexFromObj(interp, objv[1], functions,"function", 0, &function);
+    int result = Tcl_GetIndexFromObj(interp, objv[1], functions, "function", 0, &function);
     if (result != TCL_OK) return result;
   }
 
@@ -1131,14 +1133,13 @@ OPTION_HANDLER(general, openConnection, host) {
 
 static int
 brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
-  static const char *functions[] = {
+  BEGIN_FUNCTIONS
     "describeKeyCode",
     "expandKeyCode",
     "getHandleSize",
     "makeDots",
     "openConnection",
-    NULL
-  };
+  END_FUNCTIONS
 
   enum {
     FCN_describeKeyCode,
