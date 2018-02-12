@@ -29,6 +29,12 @@
 #define allocateMemory(size) ((void *)ckalloc((size)))
 #define deallocateMemory(address) ckfree((void *)(address))
 
+#define TEST_TCL_OK(expression) \
+do { \
+  int result = (expression); \
+  if (result != TCL_OK) return result; \
+} while (0)
+
 static int
 setArrayElement (Tcl_Interp *interp, const char *array, const char *element, Tcl_Obj *value) {
   if (!value) return TCL_ERROR;
@@ -39,10 +45,7 @@ setArrayElement (Tcl_Interp *interp, const char *array, const char *element, Tcl
 }
 
 #define SET_ARRAY_ELEMENT(element, object) \
-do { \
-  int result = setArrayElement(interp, array, element, object); \
-  if (result != TCL_OK) return result; \
-} while (0)
+  TEST_TCL_OK(setArrayElement(interp, array, element, object))
 
 typedef struct {
   brlapi_connectionSettings_t settings;
@@ -167,20 +170,14 @@ processOptions (
   Tcl_Obj *const objv[], int objc, int start,
   const OptionEntry *options, const char ***names
 ) {
-  {
-    int result = makeOptionNames(options, names);
-    if (result != TCL_OK) return result;
-  }
+  TEST_TCL_OK(makeOptionNames(options, names));
 
   objv += start;
   objc -= start;
 
   while (objc > 0) {
     int index;
-    {
-      int result = Tcl_GetIndexFromObj(interp, objv[0], *names, "option", 0, &index);
-      if (result != TCL_OK) return result;
-    }
+    TEST_TCL_OK(Tcl_GetIndexFromObj(interp, objv[0], *names, "option", 0, &index));
 
     {
       const OptionEntry *option = &options[index];
@@ -191,10 +188,7 @@ processOptions (
         return TCL_ERROR;
       }
 
-      {
-        int result = option->handler(interp, objv, data);
-        if (result != TCL_OK) return result;
-      }
+      TEST_TCL_OK(option->handler(interp, objv, data));
 
       objv += count;
       objc -= count;
@@ -208,8 +202,7 @@ processOptions (
 #define END_OPTIONS(start) \
   , {.name = NULL} }; \
   static const char **optionNames = NULL; \
-  int result = processOptions(interp, &options, objv, objc, (start), optionTable, &optionNames); \
-  if (result != TCL_OK) return result; \
+  TEST_TCL_OK(processOptions(interp, &options, objv, objc, (start), optionTable, &optionNames)); \
 }
 #define OPTION(command,function,option) \
   .name = "-" #option, .handler = OPTION_HANDLER_NAME(command, function, option)
@@ -226,8 +219,8 @@ parseCursorOperand (Tcl_Interp *interp, Tcl_Obj *obj, int *cursor) {
     *cursor = BRLAPI_CURSOR_LEAVE;
   } else {
     int number;
-    int result = Tcl_GetIntFromObj(interp, obj, &number);
-    if (result != TCL_OK) return result;
+    TEST_TCL_OK(Tcl_GetIntFromObj(interp, obj, &number));
+
     if (number < 1) number = 1;
     *cursor = number;
   }
@@ -260,8 +253,7 @@ OPTION_HANDLER(session, enterTtyMode, tty) {
   if (strcmp(string, "default") == 0) {
     options->tty = BRLAPI_TTY_DEFAULT;
   } else {
-    int result = Tcl_GetIntFromObj(interp, obj, &options->tty);
-    if (result != TCL_OK) return result;
+    TEST_TCL_OK(Tcl_GetIntFromObj(interp, obj, &options->tty));
   }
 
   return TCL_OK;
@@ -308,11 +300,7 @@ OPTION_HANDLER(session, write, andMask) {
 OPTION_HANDLER(session, write, begin) {
   FunctionData_session_write *options = data;
   int offset;
-
-  {
-    int result = Tcl_GetIntFromObj(interp, objv[1], &offset);
-    if (result != TCL_OK) return result;
-  }
+  TEST_TCL_OK(Tcl_GetIntFromObj(interp, objv[1], &offset));
 
   if (offset < 0) offset = 0;
   options->arguments.regionBegin = offset;
@@ -333,8 +321,8 @@ OPTION_HANDLER(session, write, displayNumber) {
     options->arguments.displayNumber = BRLAPI_DISPLAY_DEFAULT;
   } else {
     int number;
-    int result = Tcl_GetIntFromObj(interp, obj, &number);
-    if (result != TCL_OK) return result;
+    TEST_TCL_OK(Tcl_GetIntFromObj(interp, obj, &number));
+
     if (number < 0) number = 0;
     options->arguments.displayNumber = number;
   }
@@ -429,10 +417,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     return TCL_ERROR;
   }
 
-  {
-    int result = Tcl_GetIndexFromObj(interp, objv[1], functions, "function", 0, &function);
-    if (result != TCL_OK) return result;
-  }
+  TEST_TCL_OK(Tcl_GetIndexFromObj(interp, objv[1], functions, "function", 0, &function));
 
   switch (function) {
     case FCN_getHost: {
@@ -525,10 +510,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         return TCL_ERROR;
       }
 
-      {
-        int result = getDisplaySize(interp, session, &width, &height);
-        if (result != TCL_OK) return result;
-      }
+      TEST_TCL_OK(getDisplaySize(interp, session, &width, &height));
 
       {
         Tcl_Obj *const elements[] = {
@@ -596,8 +578,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       END_OPTIONS(2)
 
       if (options.path) {
-        int result = Tcl_ListObjGetElements(interp, options.path, &count, &elements);
-        if (result != TCL_OK) return result;
+        TEST_TCL_OK(Tcl_ListObjGetElements(interp, options.path, &count, &elements));
       } else {
         count = 0;
       }
@@ -606,8 +587,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         int path[count];
 
         for (int index=0; index<count; index+=1) {
-          int result = Tcl_GetIntFromObj(interp, elements[index], &path[index]);
-          if (result != TCL_OK) return result;
+          TEST_TCL_OK(Tcl_GetIntFromObj(interp, elements[index], &path[index]));
         }
 
         if (brlapi__enterTtyModeWithPath(session->handle, path, count, options.driver) != -1) return TCL_OK;
@@ -638,10 +618,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         return TCL_ERROR;
       }
 
-      {
-        int result = Tcl_GetIntFromObj(interp, objv[2], &tty);
-        if (result != TCL_OK) return result;
-      }
+      TEST_TCL_OK(Tcl_GetIntFromObj(interp, objv[2], &tty));
 
       if (brlapi__setFocus(session->handle, tty) != -1) return TCL_OK;
       setBrlapiError(interp);
@@ -656,10 +633,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         return TCL_ERROR;
       }
 
-      {
-        int result = Tcl_GetBooleanFromObj(interp, objv[2], &wait);
-        if (result != TCL_OK) return result;
-      }
+      TEST_TCL_OK(Tcl_GetBooleanFromObj(interp, objv[2], &wait));
 
       {
         brlapi_keyCode_t key;
@@ -713,8 +687,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         };
 
         int rangeIndex;
-        int result = Tcl_GetIndexFromObj(interp, objv[2], rangeNames, "range type", 0, &rangeIndex);
-        if (result != TCL_OK) return result;
+        TEST_TCL_OK(Tcl_GetIndexFromObj(interp, objv[2], rangeNames, "range type", 0, &rangeIndex));
         rangeType = rangeTypes[rangeIndex];
       }
 
@@ -733,18 +706,14 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
           return TCL_ERROR;
         }
 
-        {
-          int result = Tcl_ListObjGetElements(interp, codeList, &codeCount, &codeElements);
-          if (result != TCL_OK) return result;
-        }
+        TEST_TCL_OK(Tcl_ListObjGetElements(interp, codeList, &codeCount, &codeElements));
 
         if (codeCount) {
           brlapi_keyCode_t codes[codeCount];
 
           for (int codeIndex=0; codeIndex<codeCount; codeIndex+=1) {
             Tcl_WideInt code;
-            int result = Tcl_GetWideIntFromObj(interp, codeElements[codeIndex], &code);
-            if (result != TCL_OK) return result;
+            TEST_TCL_OK(Tcl_GetWideIntFromObj(interp, codeElements[codeIndex], &code));
             codes[codeIndex] = code;
           }
 
@@ -789,10 +758,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         return TCL_ERROR;
       }
 
-      {
-        int result = Tcl_ListObjGetElements(interp, objv[2], &rangeCount, &rangeElements);
-        if (result != TCL_OK) return result;
-      }
+      TEST_TCL_OK(Tcl_ListObjGetElements(interp, objv[2], &rangeCount, &rangeElements));
 
       if (rangeCount) {
         brlapi_range_t ranges[rangeCount];
@@ -801,11 +767,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
           brlapi_range_t *range = &ranges[rangeIndex];
           Tcl_Obj **codeElements;
           int codeCount;
-
-          {
-            int result = Tcl_ListObjGetElements(interp, rangeElements[rangeIndex], &codeCount, &codeElements);
-            if (result != TCL_OK) return result;
-          }
+          TEST_TCL_OK(Tcl_ListObjGetElements(interp, rangeElements[rangeIndex], &codeCount, &codeElements));
 
           if (codeCount != 2) {
             setStringResult(interp, "key range element is not a two-element list", -1);
@@ -816,8 +778,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
             Tcl_WideInt codes[codeCount];
 
             for (int codeIndex=0; codeIndex<codeCount; codeIndex+=1) {
-              int result = Tcl_GetWideIntFromObj(interp, codeElements[codeIndex], &codes[codeIndex]);
-              if (result != TCL_OK) return result;
+              TEST_TCL_OK(Tcl_GetWideIntFromObj(interp, codeElements[codeIndex], &codes[codeIndex]));
             }
 
             range->first = codes[0];
@@ -918,8 +879,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
         {
           unsigned int width, height;
-          int result = getDisplaySize(interp, session, &width, &height);
-          if (result != TCL_OK) return result;
+          TEST_TCL_OK(getDisplaySize(interp, session, &width, &height));
           size = width * height;
         }
 
@@ -992,8 +952,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
       {
         unsigned int width, height;
-        int result = getDisplaySize(interp, session, &width, &height);
-        if (result != TCL_OK) return result;
+        TEST_TCL_OK(getDisplaySize(interp, session, &width, &height));
         size = width * height;
       }
 
@@ -1048,10 +1007,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         return TCL_ERROR;
       }
 
-      {
-        int result = Tcl_GetIntFromObj(interp, objv[2], &size);
-        if (result != TCL_OK) return result;
-      }
+      TEST_TCL_OK(Tcl_GetIntFromObj(interp, objv[2], &size));
 
       {
         unsigned char buffer[size];
@@ -1165,10 +1121,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     return TCL_ERROR;
   }
 
-  {
-    int result = Tcl_GetIndexFromObj(interp, objv[1], functions, "function", 0, &function);
-    if (result != TCL_OK) return result;
-  }
+  TEST_TCL_OK(Tcl_GetIndexFromObj(interp, objv[1], functions, "function", 0, &function));
 
   switch (function) {
     case FCN_openConnection: {
@@ -1222,11 +1175,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         return TCL_ERROR;
       }
 
-      {
-        int result = Tcl_GetWideIntFromObj(interp, objv[2], &keyCode);
-        if (result != TCL_OK) return result;
-      }
-
+      TEST_TCL_OK(Tcl_GetWideIntFromObj(interp, objv[2], &keyCode));
       if (!(array = Tcl_GetString(objv[3]))) return TCL_ERROR;
 
       if (brlapi_expandKeyCode(keyCode, &ekc) == -1) {
@@ -1251,11 +1200,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         return TCL_ERROR;
       }
 
-      {
-        int result = Tcl_GetWideIntFromObj(interp, objv[2], &keyCode);
-        if (result != TCL_OK) return result;
-      }
-
+      TEST_TCL_OK(Tcl_GetWideIntFromObj(interp, objv[2], &keyCode));
       if (!(array = Tcl_GetString(objv[3]))) return TCL_ERROR;
 
       if (brlapi_describeKeyCode(keyCode, &dkc) == -1) {
@@ -1272,8 +1217,9 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         SET_ARRAY_ELEMENT("flags", flags);
 
         for (int index=0; index<dkc.flags; index+=1) {
-          int result = Tcl_ListObjAppendElement(interp, flags, Tcl_NewStringObj(dkc.flag[index], -1));
-          if (result != TCL_OK) return result;
+          Tcl_Obj *flag = Tcl_NewStringObj(dkc.flag[index], -1);
+          if (!flag) return TCL_ERROR;
+          TEST_TCL_OK(Tcl_ListObjAppendElement(interp, flags, flag));
         }
       }
 
@@ -1289,10 +1235,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         return TCL_ERROR;
       }
 
-      {
-        int result = Tcl_ListObjGetElements(interp, objv[2], &elementCount, &elements);
-        if (result != TCL_OK) return result;
-      }
+      TEST_TCL_OK(Tcl_ListObjGetElements(interp, objv[2], &elementCount, &elements));
 
       if (elementCount) {
         BrlDots cells[elementCount];
