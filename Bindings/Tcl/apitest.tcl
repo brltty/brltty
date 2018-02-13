@@ -116,8 +116,8 @@ if {[catch [list eval brlapi openConnection $connectionSettings] session] == 0} 
                unset description($property)
             }
 
-            foreach name [lsort [array names description]] {
-               lappend properties [formatProperty $name $description($property)]
+            foreach property [lsort [array names description]] {
+               lappend properties [formatProperty $property $description($property)]
             }
 
             set text [join $properties " "]
