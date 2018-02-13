@@ -120,14 +120,20 @@ if {[catch [list eval brlapi openConnection $connectionSettings] session] == 0} 
             resetTimeout
          }
 
-         set channel [dup $fileDescriptor]
-         fileevent $channel readable [list showKey $session]
+         proc showKeys {} {
+            global session fileDescriptor
 
-         $session write -text "The TCL bindings for BrlAPI seem to be working."
-         setTimeout
-         vwait returnCode
-         fileevent $channel readable ""
+            set channel [dup $fileDescriptor]
+            fileevent $channel readable [list showKey $session]
 
+            $session write -text "The TCL bindings for BrlAPI seem to be working."
+            setTimeout
+
+            vwait returnCode
+            fileevent $channel readable ""
+         }
+
+         showKeys
          $session leaveTtyMode
       } else {
          writeProgramMessage "invalid tty: $tty"
