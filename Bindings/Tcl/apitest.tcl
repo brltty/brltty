@@ -73,21 +73,23 @@ if {[catch [list eval brlapi openConnection $connectionSettings] session] == 0} 
       if {[catch [list $session enterTtyMode -tty $optionValues(tty)] tty] == 0} {
          putProperties "TTY Number" $tty
 
-         proc setTimeout {} {
-            global timeoutEvent
-            set timeoutEvent [after 10000 [list set returnCode 0]]
+         proc ttySetTimeout {} {
+            global ttyTimeoutEvent
+            set ttyTimeoutEvent [after 10000 [list set ttyReturnCode 0]]
          }
 
-         proc resetTimeout {} {
-            global timeoutEvent
-
-            after cancel $timeoutEvent
-            unset timeoutEvent
-
-            setTimeout
+         proc ttyCancelTimeout {} {
+            global ttyTimeoutEvent
+            after cancel $ttyTimeoutEvent
+            unset ttyTimeoutEvent
          }
 
-         proc showKey {session} {
+         proc ttyResetTimeout {} {
+            ttyCancelTimeout
+            ttySetTimeout
+         }
+
+         proc ttyShowKey {session} {
             set properties [list]
 
             set code [$session readKey 0]
@@ -117,23 +119,23 @@ if {[catch [list eval brlapi openConnection $connectionSettings] session] == 0} 
             putProperties Key $text
             $session write -text $text
 
-            resetTimeout
+            ttyResetTimeout
          }
 
-         proc showKeys {} {
+         proc ttyShowKeys {} {
             global session fileDescriptor
 
             set channel [dup $fileDescriptor]
-            fileevent $channel readable [list showKey $session]
+            fileevent $channel readable [list ttyShowKey $session]
 
             $session write -text "The TCL bindings for BrlAPI seem to be working."
-            setTimeout
+            ttySetTimeout
 
-            vwait returnCode
+            vwait ttyReturnCode
             fileevent $channel readable ""
          }
 
-         showKeys
+         ttyShowKeys
          $session leaveTtyMode
       } else {
          writeProgramMessage "invalid tty: $tty"
