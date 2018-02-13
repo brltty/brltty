@@ -1060,6 +1060,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     "describeKeyCode",
     "expandKeyCode",
     "getHandleSize",
+    "getVersionString",
     "makeDots",
     "openConnection",
   END_FUNCTIONS
@@ -1068,6 +1069,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     FCN_describeKeyCode,
     FCN_expandKeyCode,
     FCN_getHandleSize,
+    FCN_getVersionString,
     FCN_makeDots,
     FCN_openConnection
   };
@@ -1076,6 +1078,13 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
   TEST_FUNCTION_ARGUMENT();
 
   switch (function) {
+    case FCN_getVersionString: {
+      TEST_FUNCTION_NO_ARGUMENTS();
+
+      setStringResult(interp, BRLAPI_RELEASE, -1);
+      return TCL_OK;
+    }
+
     case FCN_openConnection: {
       FunctionData_general_connect options = {
         .settings = BRLAPI_SETTINGS_INITIALIZER

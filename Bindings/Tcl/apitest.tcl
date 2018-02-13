@@ -17,8 +17,9 @@
 ###############################################################################
 
 source [file join [file dirname $argv0] prologue.tcl]
+
 processProgramOptions optionValues {
-   {host string "where the BrlAPI server is [name][:port]"}
+   {host string "where the BrlAPI server is [host][:port]"}
 }
 
 load libbrlapi_tcl.so
@@ -26,17 +27,23 @@ load libbrlapi_tcl.so
 proc expandList {list args} {
    set result ""
    set delimiter ""
+
    foreach field $args value $list {
       append result "$delimiter$field=$value"
       set delimiter " "
    }
+
    return $result
 }
 
+puts "Version: [brlapi getVersionString]"
+
 set connectionSettings [list]
+
 if {[info exists optionValues(host)]} {
    lappend connectionSettings -host $optionValues(host)
 }
+
 set session [eval brlapi openConnection $connectionSettings]
 puts "Object: $session"
 
