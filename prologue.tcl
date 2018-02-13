@@ -105,9 +105,11 @@ proc getProgramName {} {
 }
 
 proc writeProgramMessage {message} {
-   set stream stderr
-   puts $stream "[getProgramName]: $message"
-   flush $stream
+   if {[string length $message] > 0} {
+      set stream stderr
+      puts $stream "[getProgramName]: $message"
+      flush $stream
+   }
 }
 
 makeEnumeration logLevels {
@@ -131,18 +133,12 @@ proc logMessage {level message} {
 }
 
 proc syntaxError {{message ""}} {
-   if {[string length $message] > 0} {
-      writeProgramMessage $message
-   }
-
+   writeProgramMessage $message
    exit 2
 }
 
 proc semanticError {{message ""}} {
-   if {[string length $message] > 0} {
-      writeProgramMessage $message
-   }
-
+   writeProgramMessage $message
    exit 3
 }
 
@@ -205,13 +201,13 @@ proc processOptions {valuesArray argumentsVariable definitions} {
          break
       }
 
-      if {[string length [set name [string range $argument 1 end]]] == 0} {
+      set arguments [lreplace $arguments 0 0]
+
+      if {[string equal $argument $prefix]} {
          break
       }
 
-      set arguments [lreplace $arguments 0 0]
-
-      if {[string equal $name $prefix]} {
+      if {[string equal [set name [string range $argument 1 end]] $prefix]} {
          break
       }
 
@@ -268,3 +264,11 @@ proc processOptions {valuesArray argumentsVariable definitions} {
 
    return 1
 }
+
+proc processProgramOptions {valuesArray definitions} {
+   global argv
+   upvar 1 $valuesArray values
+
+   return [processOptions values argv $definitions]
+}
+

@@ -20,10 +20,14 @@ source [file join [file dirname $argv0] prologue.tcl]
 load libbrlapi_tcl.so
 package require Tclx
 
-processProgramOptions optionValues {
-   {auth string "which authorization schemes to use (scheme,...)"}
-   {host string "where the BrlAPI server is ([{name | address}][:port])"}
-   {tty string "which virtual terminal to claim ({default | number})"}
+set optionDefinitions {
+   {auth untyped}
+   {host untyped}
+   {tty untyped}
+}
+
+if {![processProgramOptions optionValues $optionDefinitions]} {
+   syntaxError
 }
 
 proc putProperties {label properties} {
