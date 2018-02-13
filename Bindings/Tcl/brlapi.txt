@@ -1,7 +1,7 @@
 brlapi <function> [<arg> ...]
    openConnection [<option> ...]
       -host [<host>][:<port>]
-      -auth <setting>,...
+      -auth {none | <scheme>,...}
          keyfile:<file>
          user:<name>
          group:<name>

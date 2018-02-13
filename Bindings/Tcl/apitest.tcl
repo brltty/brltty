@@ -80,19 +80,23 @@ proc resetTimeout {} {
 }
 
 proc handleCommand {session} {
-   set code [$session readKey 0]
-   set text "code:$code"
-   brlapi describeKeyCode $code properties
+   set text "Key:"
 
-   foreach {property name} {type type command cmd argument arg flags flg} {
-      if {[info exists properties($property)]} {
-         append text " $name:$properties($property)"
-         unset properties($property)
-      }
+   set code [$session readKey 0]
+   brlapi describeKeyCode $code properties
+   set properties(code) [format "0X%X" $code]
+
+   foreach property {flags} {
+      set properties($property) [join $properties($property) ","]
+   }
+
+   foreach {property name} {code code type type command cmd argument arg flags flg} {
+      append text " $name=$properties($property)"
+      unset properties($property)
    }
 
    foreach property [lsort [array names properties]] {
-      append text " $property:$properties($property)"
+      append text " $property=$properties($property)"
    }
 
    puts $text

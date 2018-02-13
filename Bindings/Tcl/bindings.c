@@ -235,6 +235,7 @@ processOptions (
 static int
 parseCursorOperand (Tcl_Interp *interp, Tcl_Obj *obj, int *cursor) {
   const char *string = Tcl_GetString(obj);
+  if (!string) return TCL_ERROR;
 
   if (strcmp(string, "off") == 0) {
     *cursor = BRLAPI_CURSOR_OFF;
@@ -258,8 +259,7 @@ typedef struct {
 
 OPTION_HANDLER(session, enterTtyMode, events) {
   FunctionData_session_enterTtyMode *options = data;
-  options->driver = Tcl_GetString(objv[1]);
-  return TCL_OK;
+  return (options->driver = Tcl_GetString(objv[1]))? TCL_OK: TCL_ERROR;
 }
 
 OPTION_HANDLER(session, enterTtyMode, keyCodes) {
@@ -271,7 +271,9 @@ OPTION_HANDLER(session, enterTtyMode, keyCodes) {
 OPTION_HANDLER(session, enterTtyMode, tty) {
   FunctionData_session_enterTtyMode *options = data;
   Tcl_Obj *obj = objv[1];
+
   const char *string = Tcl_GetString(obj);
+  if (!string) return TCL_ERROR;
 
   if (strcmp(string, "default") == 0) {
     options->tty = BRLAPI_TTY_DEFAULT;
@@ -289,8 +291,7 @@ typedef struct {
 
 OPTION_HANDLER(session, enterTtyModeWithPath, events) {
   FunctionData_session_enterTtyModeWithPath *options = data;
-  options->driver = Tcl_GetString(objv[1]);
-  return TCL_OK;
+  return (options->driver = Tcl_GetString(objv[1]))? TCL_OK: TCL_ERROR;
 }
 
 OPTION_HANDLER(session, enterTtyModeWithPath, keyCodes) {
@@ -338,7 +339,9 @@ OPTION_HANDLER(session, write, cursor) {
 OPTION_HANDLER(session, write, displayNumber) {
   FunctionData_session_write *options = data;
   Tcl_Obj *obj = objv[1];
+
   const char *string = Tcl_GetString(obj);
+  if (!string) return TCL_ERROR;
 
   if (strcmp(string, "default") == 0) {
     options->arguments.displayNumber = BRLAPI_DISPLAY_DEFAULT;
@@ -638,8 +641,6 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
     {
       int ignore;
-      brlapi_rangeType_t rangeType;
-      Tcl_Obj *codeList;
 
     case FCN_acceptKeys:
       ignore = 0;
@@ -652,6 +653,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     doKeys:
       TEST_FUNCTION_ARGUMENTS(1, 1, "<rangeType> [<keyCodeList>]");
 
+      brlapi_rangeType_t rangeType;
       {
         static const char *rangeNames[] = {
           "all",
@@ -675,21 +677,16 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         rangeType = rangeTypes[rangeIndex];
       }
 
-      if (objc < 4) {
-        codeList = NULL;
-      } else {
-        codeList = objv[3];
-      }
+      Tcl_Obj *codeList = (objc < 4)? NULL: objv[3];
 
       if (rangeType != brlapi_rangeType_all) {
-        Tcl_Obj **codeElements;
-        int codeCount;
-
         if (!codeList) {
           setStringResult(interp, "no key code list", -1);
           return TCL_ERROR;
         }
 
+        Tcl_Obj **codeElements;
+        int codeCount;
         TEST_TCL_OK(Tcl_ListObjGetElements(interp, codeList, &codeCount, &codeElements));
 
         if (codeCount) {
@@ -704,6 +701,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
           {
             int result = ignore? brlapi__ignoreKeys(session->handle, rangeType, codes, codeCount):
                                  brlapi__acceptKeys(session->handle, rangeType, codes, codeCount);
+
             if (result != -1) return TCL_OK;
             setBrlapiError(interp);
             return TCL_ERROR;
@@ -717,6 +715,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       {
         int result = ignore? brlapi__ignoreKeys(session->handle, rangeType, NULL, 0):
                              brlapi__acceptKeys(session->handle, rangeType, NULL, 0);
+                             brlapi__acceptKeys(session->handle, rangeType, NULL, 0);
         if (result != -1) return TCL_OK;
         setBrlapiError(interp);
         return TCL_ERROR;
@@ -725,8 +724,6 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
     {
       int ignore;
-      Tcl_Obj **rangeElements;
-      int rangeCount;
 
     case FCN_acceptKeyRanges:
       ignore = 0;
@@ -738,6 +735,9 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
     doKeyRanges:
       TEST_FUNCTION_ARGUMENTS(1, 0, "<keyRangeList>");
+
+      Tcl_Obj **rangeElements;
+      int rangeCount;
       TEST_TCL_OK(Tcl_ListObjGetElements(interp, objv[2], &rangeCount, &rangeElements));
 
       if (rangeCount) {
@@ -1018,7 +1018,10 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     case FCN_closeConnection: {
       TEST_FUNCTION_NO_ARGUMENTS();
 
-      Tcl_DeleteCommand(interp, Tcl_GetString(objv[0]));
+      const char *name = Tcl_GetString(objv[0]);
+      if (!name) return TCL_ERROR;
+
+      Tcl_DeleteCommand(interp, name);
       return TCL_OK;
     }
   }
@@ -1033,14 +1036,12 @@ typedef struct {
 
 OPTION_HANDLER(general, openConnection, auth) {
   FunctionData_general_connect *options = data;
-  options->settings.auth = Tcl_GetString(objv[1]);
-  return TCL_OK;
+  return (options->settings.auth = Tcl_GetString(objv[1]))? TCL_OK: TCL_ERROR;
 }
 
 OPTION_HANDLER(general, openConnection, host) {
   FunctionData_general_connect *options = data;
-  options->settings.host = Tcl_GetString(objv[1]);
-  return TCL_OK;
+  return (options->settings.host = Tcl_GetString(objv[1]))? TCL_OK: TCL_ERROR;
 }
 
 static int
@@ -1072,7 +1073,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
       BEGIN_OPTIONS
         { OPTION(general, openConnection, auth),
-          OPERANDS(1, "<scheme>[:<arg>],...")
+          OPERANDS(1, "{none | <scheme>,...}")
         },
 
         { OPTION(general, openConnection, host),
