@@ -1106,7 +1106,7 @@ BRLTTY_ARG_DISABLE(
       [],
    [dnl
       BRLTTY_HAVE_PACKAGE([louis], [liblouis], [dnl
-         louisTablesDirectory=`${PKG_CONFIG} --variable=tablesdir liblouis`
+         louisTablesDirectory=`${PKG_CONFIG} --variable=tablesdir ${louis_package}`
          if test -n "${louisTablesDirectory}"
          then
             AC_DEFINE_UNQUOTED([LOUIS_TABLES_DIRECTORY], ["${louisTablesDirectory}"],
