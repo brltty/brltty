@@ -149,9 +149,7 @@ proc getDependencies {file} {
 set optionDefinitions {
 }
 
-if {![processOptions optionValues argv $optionDefinitions]} {
-   syntaxError
-}
+processProgramOptions optionValues $optionDefinitions
 
 if {[llength $argv] > 0} {
    syntaxError "too many parameters"

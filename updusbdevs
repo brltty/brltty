@@ -651,18 +651,11 @@ set genericDevices [makeGenericDeviceTable {
 }]
 
 set optionDefinitions {
-   {quiet     counter}
-   {verbose   counter}
-   {test      flag}
-   {nogeneric flag}
+   {test      flag "don't update the files"}
+   {nogeneric flag "don't include generic USB to serial adapters"}
 }
 
-if {![processOptions optionValues argv $optionDefinitions]} {
-   syntaxError
-}
-
-incr logLevel $optionValues(quiet)
-incr logLevel -$optionValues(verbose)
+processProgramOptions optionValues $optionDefinitions
 
 if {[llength $argv] == 0} {
    lappend argv "android:[file join $sourceDirectory Android Application res xml usb_devices.xml]"

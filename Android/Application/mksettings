@@ -132,9 +132,7 @@ set outputFile [file join $sourceDirectory "Android" "Application" "res" "values
 set optionDefinitions {
 }
 
-if {![processOptions optionValues argv $optionDefinitions]} {
-   syntaxError
-}
+processProgramOptions optionValues $optionDefinitions
 
 if {[llength $argv] == 0} {
    lappend argv "braille-driver"

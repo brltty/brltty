@@ -142,6 +142,68 @@ proc semanticError {{message ""}} {
    exit 3
 }
 
+proc formatColumns {rows} {
+   set lines [list]
+
+   foreach row $rows {
+      set index 0
+
+      foreach cell $row {
+         if {![info exists widths($index)]} {
+            set widths($index) 0
+         }
+
+         set widths($index) [max $widths($index) [string length $cell]]
+         incr index
+      }
+   }
+
+   foreach row $rows {
+      set line ""
+      set index 0
+
+      foreach cell $row {
+         if {[set width $widths($index)] > 0} {
+            append line $cell
+            append line [string repeat " " [expr {$width - [string length $cell]}]]
+            append line " "
+         }
+
+         incr index
+      }
+
+      if {[string length $lines] > 0} {
+         append lines "\n"
+      }
+
+      append lines [string trimright $line]
+   }
+
+   return $lines
+}
+
+proc showOptions {options} {
+   set rows [list]
+
+   foreach name [lsort [dict keys $options]] {
+      set option [dict get $options $name]
+      set row [list]
+      lappend row "-$name"
+
+      foreach property {operand summary} {
+         if {[dict exists $option $property]} {
+            lappend row [dict get $option $property]
+         } else {
+            lappend row ""
+         }
+      }
+
+      lappend rows $row
+   }
+
+   puts [formatColumns $rows]
+}
+
 proc nextOperand {operandsVariable {operandVariable ""}} {
    upvar 1 $operandsVariable operands
 
@@ -157,16 +219,16 @@ proc nextOperand {operandsVariable {operandVariable ""}} {
    return 1
 }
 
-proc processOptions {valuesArray argumentsVariable definitions} {
+proc processOptions {valuesArray argumentsVariable definitions {optionsVariable ""}} {
    upvar 1 $valuesArray values
    upvar 1 $argumentsVariable arguments
 
    set prefix -
    set options [dict create]
-   set index 0
+   set optionIndex 0
 
    foreach definition $definitions {
-      set description "option\[$index\]"
+      set description "option\[$optionIndex\]"
 
       if {![nextOperand definition name]} {
          return -code error "name not specified for $description"
@@ -182,14 +244,32 @@ proc processOptions {valuesArray argumentsVariable definitions} {
 
       if {[lsearch -exact {counter flag toggle} $type] >= 0} {
          set values($name) 0
-      } elseif {[lsearch -exact {untyped} $type] < 0} {
-         if {[catch [list string is $type ""]] != 0} {
-            return -code error "invalid type for $description: $type"
+      } else {
+         if {[set index [string first . $type]] < 0} {
+            set operand $type
+         } else {
+            set operand [string range $type $index+1 end]
+            set type [string range $type 0 $index-1]
          }
+
+         if {[lsearch -exact {untyped} $type] < 0} {
+            if {[catch [list string is $type ""]] != 0} {
+               return -code error "invalid type for $description: $type"
+            }
+         }
+         dict set options $name operand $operand
+      }
+      dict set options $name type $type
+
+      if {[nextOperand definition summary]} {
+         dict set options $name summary $summary
       }
 
-      dict set options $name type $type
-      incr index
+      incr optionIndex
+   }
+
+   if {[string length $optionsVariable] > 0} {
+      uplevel 1 [list set $optionsVariable $options]
    }
 
    while {[llength $arguments] > 0} {
@@ -269,6 +349,21 @@ proc processProgramOptions {valuesArray definitions} {
    global argv
    upvar 1 $valuesArray values
 
-   return [processOptions values argv $definitions]
+   lappend definitions {help flag "show a usage summary and then exit"}
+   lappend definitions {quiet counter "decrease verbosity"}
+   lappend definitions {verbose counter "increase verbosity"}
+
+   if {![processOptions values argv $definitions options]} {
+      syntaxError
+   }
+
+   global logLevel
+   incr logLevel $values(quiet)
+   incr logLevel -$values(verbose)
+
+   if {$values(help)} {
+      showOptions $options
+      exit 0
+   }
 }
 

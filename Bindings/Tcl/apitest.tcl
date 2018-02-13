@@ -108,14 +108,12 @@ proc ttyShowKeys {session} {
 
 proc mainProgram {} {
    set optionDefinitions {
-      {host untyped}
-      {auth untyped}
-      {tty untyped}
+      {host untyped.server  "which server to connect to"}
+      {auth untyped.schemes "which authorization schemes to use"}
+      {tty  untyped.number  "which virtual terminal to claim"}
    }
 
-   if {![processProgramOptions optionValues $optionDefinitions]} {
-      syntaxError
-   }
+   processProgramOptions optionValues $optionDefinitions
 
    putProperties "BrlAPI Version" [brlapi getVersionString]
 
