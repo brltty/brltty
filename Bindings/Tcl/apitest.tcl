@@ -73,20 +73,25 @@ if {[catch [list eval brlapi openConnection $connectionSettings] session] == 0} 
       if {[catch [list $session enterTtyMode -tty $optionValues(tty)] tty] == 0} {
          putProperties "TTY Number" $tty
 
-         proc ttySetTimeout {} {
-            global ttyTimeoutEvent
-            set ttyTimeoutEvent [after 10000 [list set ttyReturnCode 0]]
+         proc ttyHandleTimeout {} {
+            global ttyTimeoutEvent ttyReturnCode
+            unset ttyTimeoutEvent
+            set ttyReturnCode 0
          }
 
          proc ttyCancelTimeout {} {
             global ttyTimeoutEvent
-            after cancel $ttyTimeoutEvent
-            unset ttyTimeoutEvent
+
+            if {[info exists ttyTimeoutEvent]} {
+               after cancel $ttyTimeoutEvent
+               unset ttyTimeoutEvent
+            }
          }
 
-         proc ttyResetTimeout {} {
+         proc ttySetTimeout {} {
+            global ttyTimeoutEvent
             ttyCancelTimeout
-            ttySetTimeout
+            set ttyTimeoutEvent [after 10000 [list ttyHandleTimeout]]
          }
 
          proc ttyShowKey {session} {
@@ -119,7 +124,7 @@ if {[catch [list eval brlapi openConnection $connectionSettings] session] == 0} 
             putProperties Key $text
             $session write -text $text
 
-            ttyResetTimeout
+            ttySetTimeout
          }
 
          proc ttyShowKeys {} {
@@ -133,6 +138,7 @@ if {[catch [list eval brlapi openConnection $connectionSettings] session] == 0} 
 
             vwait ttyReturnCode
             fileevent $channel readable ""
+            ttyCancelTimeout
          }
 
          ttyShowKeys
