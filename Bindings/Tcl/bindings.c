@@ -51,6 +51,9 @@ typedef struct {
   brlapi_connectionSettings_t settings;
   brlapi_handle_t *handle;
   brlapi_fileDescriptor fileDescriptor;
+
+  unsigned int displayWidth;
+  unsigned int displayHeight;
 } BrlapiSession;
 
 static void
@@ -121,13 +124,28 @@ setBrlapiError (Tcl_Interp *interp) {
 }
 
 static int
-getDisplaySize (
-  Tcl_Interp *interp, BrlapiSession *session,
-  unsigned int *width, unsigned int *height
-) {
-  if (brlapi__getDisplaySize(session->handle, width, height) != -1) return TCL_OK;
+getDisplaySize (Tcl_Interp *interp, BrlapiSession *session) {
+  int result = brlapi__getDisplaySize(
+    session->handle,
+    &session->displayWidth,
+    &session->displayHeight
+  );
+
+  if (result != -1) return TCL_OK;
   setBrlapiError(interp);
   return TCL_ERROR;
+}
+
+static int
+getCellCount (
+  Tcl_Interp *interp, BrlapiSession *session, unsigned int *count
+) {
+  if (!(session->displayWidth && session->displayHeight)) {
+    TEST_TCL_OK(getDisplaySize(interp, session));
+  }
+
+  *count = session->displayWidth * session->displayHeight;
+  return TCL_OK;
 }
 
 #define BEGIN_FUNCTIONS static const char *functions[] = {
@@ -508,19 +526,19 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
     case FCN_getDisplaySize: {
       TEST_FUNCTION_NO_ARGUMENTS();
+      TEST_TCL_OK(getDisplaySize(interp, session));
 
-      unsigned int width, height;
-      TEST_TCL_OK(getDisplaySize(interp, session, &width, &height));
+      Tcl_Obj *width = Tcl_NewIntObj(session->displayWidth);
+      if (!width) return TCL_ERROR;
 
-      {
-        Tcl_Obj *const elements[] = {
-          Tcl_NewIntObj(width),
-          Tcl_NewIntObj(height)
-        };
+      Tcl_Obj *height = Tcl_NewIntObj(session->displayHeight);
+      if (!height) return TCL_ERROR;
 
-        Tcl_SetObjResult(interp, Tcl_NewListObj(2, elements));
-      }
+      Tcl_Obj *const elements[] = {width, height};
+      Tcl_Obj *list = Tcl_NewListObj(2, elements);
+      if (!list) return TCL_ERROR;
 
+      Tcl_SetObjResult(interp, list);
       return TCL_OK;
     }
 
@@ -846,20 +864,15 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
             }
           }
 
-          ++current;
+          current += 1;
         }
 
         if (first) options.arguments.regionSize = first->value;
       }
 
       if (!options.arguments.regionBegin) {
-        int size;
-
-        {
-          unsigned int width, height;
-          TEST_TCL_OK(getDisplaySize(interp, session, &width, &height));
-          size = width * height;
-        }
+        unsigned int size;
+        TEST_TCL_OK(getCellCount(interp, session, &size));
 
         {
           unsigned char andMask[size];
@@ -881,7 +894,6 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
             if (options.textObject) {
               if (Tcl_IsShared(options.textObject)) {
                 if (!(options.textObject = Tcl_DuplicateObj(options.textObject))) {
-                  setBrlapiError(interp);
                   return TCL_ERROR;
                 }
               }
@@ -893,7 +905,6 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
           } else if (options.arguments.regionSize > size) {
             if (options.textObject) {
               if (!(options.textObject = Tcl_GetRange(options.textObject, 0, options.arguments.regionSize-1))) {
-                setBrlapiError(interp);
                 return TCL_ERROR;
               }
             }
@@ -923,12 +934,8 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     case FCN_writeDots: {
       TEST_FUNCTION_ARGUMENTS(1, 0, "<dots>");
 
-      int size;
-      {
-        unsigned int width, height;
-        TEST_TCL_OK(getDisplaySize(interp, session, &width, &height));
-        size = width * height;
-      }
+      unsigned int size;
+      TEST_TCL_OK(getCellCount(interp, session, &size));
 
       {
         unsigned char buffer[size];
