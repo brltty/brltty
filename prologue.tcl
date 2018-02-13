@@ -217,7 +217,7 @@ proc processOptions {valuesArray argumentsVariable definitions} {
       }
 
       if {$count > 1} {
-         writeProgramMessage "ambiguous option: $prefix$name"
+         writeProgramMessage "ambiguous option: $prefix$name ([join [lsort [dict keys $subset]] ", "])"
          return 0
       }
 
