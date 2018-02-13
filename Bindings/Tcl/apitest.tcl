@@ -108,8 +108,8 @@ proc ttyShowKeys {session} {
 
 proc mainProgram {} {
    set optionDefinitions {
-      {auth untyped}
       {host untyped}
+      {auth untyped}
       {tty untyped}
    }
 
@@ -144,12 +144,14 @@ proc mainProgram {} {
          } else {
             writeProgramMessage "invalid tty: $tty"
          }
+         unset tty
       }
 
-      $session closeConnection; unset session
+      $session closeConnection
    } else {
       writeProgramMessage "connection failure: $session"
    }
+   unset session
 }
 
 mainProgram
