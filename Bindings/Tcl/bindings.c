@@ -126,7 +126,17 @@ setBrlapiError (Tcl_Interp *interp) {
     Tcl_SetObjErrorCode(interp, Tcl_NewListObj(4, elements));
   }
 
-  setStringsResult(interp, "BrlAPI error: ", text, NULL);
+  Tcl_Obj *result = Tcl_GetObjResult(interp);
+  Tcl_SetStringObj(result, "BrlAPI error: ", -1);
+  size_t length = strlen(text);
+
+  while (length > 0) {
+    size_t end = length - 1;
+    if (text[end] != '\n') break;
+    length = end;
+  }
+
+  Tcl_AppendToObj(result, text, length);
 }
 
 static int
