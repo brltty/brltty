@@ -1,5 +1,5 @@
 # autoconf input for Objective Caml programs
-# Copyright (C) 2001 Jean-Christophe Filli‚tre
+# Copyright (C) 2001 Jean-Christophe Filli√¢tre
 #   from a first script by Georges Mariano 
 # 
 # Modified to be an autoconf m4 function in 2006
