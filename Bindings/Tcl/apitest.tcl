@@ -20,16 +20,6 @@ source [file join [file dirname $argv0] prologue.tcl]
 load libbrlapi_tcl.so
 package require Tclx
 
-set optionDefinitions {
-   {auth untyped}
-   {host untyped}
-   {tty untyped}
-}
-
-if {![processProgramOptions optionValues $optionDefinitions]} {
-   syntaxError
-}
-
 proc putProperties {label properties} {
    puts stdout "$label: $properties"
 }
@@ -50,107 +40,117 @@ proc formatValues {values args} {
    return $result
 }
 
-putProperties "BrlAPI Version" [brlapi getVersionString]
-
-set connectionSettings [list]
-if {[info exists optionValues(host)]} {
-   lappend connectionSettings -host $optionValues(host)
-}
-if {[info exists optionValues(auth)]} {
-   lappend connectionSettings -auth $optionValues(auth)
+proc ttyHandleTimeout {} {
+   global ttyTimeoutEvent ttyReturnCode
+   unset ttyTimeoutEvent
+   set ttyReturnCode 0
 }
 
-if {[catch [list eval brlapi openConnection $connectionSettings] session] == 0} {
-   putProperties "Session Command" $session
-   putProperties "Server Host" [$session getHost]
-   putProperties "Authorization Schemes" [$session getAuth]
-   putProperties "File Descriptor" [set fileDescriptor [$session getFileDescriptor]]
-   putProperties "Driver Name" [$session getDriverName]
-   putProperties "Model Identifier" [$session getModelIdentifier]
-   putProperties "Display Size" [formatValues [$session getDisplaySize] width height]
+proc ttyCancelTimeout {} {
+   global ttyTimeoutEvent
 
-   if {[info exists optionValues(tty)]} {
-      if {[catch [list $session enterTtyMode -tty $optionValues(tty)] tty] == 0} {
-         putProperties "TTY Number" $tty
+   if {[info exists ttyTimeoutEvent]} {
+      after cancel $ttyTimeoutEvent
+      unset ttyTimeoutEvent
+   }
+}
 
-         proc ttyHandleTimeout {} {
-            global ttyTimeoutEvent ttyReturnCode
-            unset ttyTimeoutEvent
-            set ttyReturnCode 0
-         }
+proc ttySetTimeout {} {
+   global ttyTimeoutEvent
+   ttyCancelTimeout
+   set ttyTimeoutEvent [after 10000 [list ttyHandleTimeout]]
+}
 
-         proc ttyCancelTimeout {} {
-            global ttyTimeoutEvent
+proc ttyShowKey {session} {
+   set properties [list]
 
-            if {[info exists ttyTimeoutEvent]} {
-               after cancel $ttyTimeoutEvent
-               unset ttyTimeoutEvent
-            }
-         }
+   set code [$session readKey 0]
+   brlapi describeKeyCode $code description
+   set description(code) [format "0X%X" $code]
 
-         proc ttySetTimeout {} {
-            global ttyTimeoutEvent
-            ttyCancelTimeout
-            set ttyTimeoutEvent [after 10000 [list ttyHandleTimeout]]
-         }
-
-         proc ttyShowKey {session} {
-            set properties [list]
-
-            set code [$session readKey 0]
-            brlapi describeKeyCode $code description
-            set description(code) [format "0X%X" $code]
-
-            foreach property {flags} {
-               set description($property) [join $description($property) ","]
-            }
-
-            foreach {property name} {
-               code     code
-               type     type
-               command  cmd
-               argument arg
-               flags    flg
-            } {
-               lappend properties [formatProperty $name $description($property)]
-               unset description($property)
-            }
-
-            foreach property [lsort [array names description]] {
-               lappend properties [formatProperty $property $description($property)]
-            }
-
-            set text [join $properties " "]
-            putProperties Key $text
-            $session write -text $text
-
-            ttySetTimeout
-         }
-
-         proc ttyShowKeys {} {
-            global session fileDescriptor
-
-            set channel [dup $fileDescriptor]
-            fileevent $channel readable [list ttyShowKey $session]
-
-            $session write -text "The TCL bindings for BrlAPI seem to be working."
-            ttySetTimeout
-
-            vwait ttyReturnCode
-            fileevent $channel readable ""
-            ttyCancelTimeout
-         }
-
-         ttyShowKeys
-         $session leaveTtyMode
-      } else {
-         writeProgramMessage "invalid tty: $tty"
-      }
+   foreach property {flags} {
+      set description($property) [join $description($property) ","]
    }
 
-   $session closeConnection; unset session
-} else {
-   writeProgramMessage "connection failure: $session"
+   foreach {property name} {
+      code     code
+      type     type
+      command  cmd
+      argument arg
+      flags    flg
+   } {
+      lappend properties [formatProperty $name $description($property)]
+      unset description($property)
+   }
+
+   foreach property [lsort [array names description]] {
+      lappend properties [formatProperty $property $description($property)]
+   }
+
+   set text [join $properties " "]
+   putProperties Key $text
+   $session write -text $text
+
+   ttySetTimeout
 }
 
+proc ttyShowKeys {session} {
+   set channel [dup [$session getFileDescriptor]]
+   fileevent $channel readable [list ttyShowKey $session]
+
+   $session write -text "The TCL bindings for BrlAPI seem to be working."
+   ttySetTimeout
+
+   vwait ttyReturnCode
+   fileevent $channel readable ""
+   ttyCancelTimeout
+}
+
+proc mainProgram {} {
+   set optionDefinitions {
+      {auth untyped}
+      {host untyped}
+      {tty untyped}
+   }
+
+   if {![processProgramOptions optionValues $optionDefinitions]} {
+      syntaxError
+   }
+
+   putProperties "BrlAPI Version" [brlapi getVersionString]
+
+   set connectionSettings [list]
+   if {[info exists optionValues(host)]} {
+      lappend connectionSettings -host $optionValues(host)
+   }
+   if {[info exists optionValues(auth)]} {
+      lappend connectionSettings -auth $optionValues(auth)
+   }
+
+   if {[catch [list eval brlapi openConnection $connectionSettings] session] == 0} {
+      putProperties "Session Command" $session
+      putProperties "Server Host" [$session getHost]
+      putProperties "Authorization Schemes" [$session getAuth]
+      putProperties "File Descriptor" [$session getFileDescriptor]
+      putProperties "Driver Name" [$session getDriverName]
+      putProperties "Model Identifier" [$session getModelIdentifier]
+      putProperties "Display Size" [formatValues [$session getDisplaySize] width height]
+
+      if {[info exists optionValues(tty)]} {
+         if {[catch [list $session enterTtyMode -tty $optionValues(tty)] tty] == 0} {
+            putProperties "TTY Number" $tty
+            ttyShowKeys $session
+            $session leaveTtyMode
+         } else {
+            writeProgramMessage "invalid tty: $tty"
+         }
+      }
+
+      $session closeConnection; unset session
+   } else {
+      writeProgramMessage "connection failure: $session"
+   }
+}
+
+mainProgram
 exit 0
