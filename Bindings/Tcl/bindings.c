@@ -70,6 +70,8 @@ setStringResult (Tcl_Interp *interp, const char *string, int length) {
 
 static void
 setStringsResult (Tcl_Interp *interp, ...) {
+  Tcl_ResetResult(interp);
+
   va_list arguments;
   va_start(arguments, interp);
   Tcl_AppendStringsToObjVA(Tcl_GetObjResult(interp), arguments);
@@ -111,10 +113,11 @@ setBrlapiError (Tcl_Interp *interp) {
       Tcl_NewIntObj(number),
       Tcl_NewStringObj(text, -1)
     };
+
     Tcl_SetObjErrorCode(interp, Tcl_NewListObj(4, elements));
   }
 
-  setStringResult(interp, text, -1);
+  setStringsResult(interp, "BrlAPI error: ", text, NULL);
 }
 
 static int
@@ -1171,7 +1174,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
 
     case FCN_makeDots: {
-      TEST_FUNCTION_ARGUMENTS(1, 0, "<dotNumberList>");
+      TEST_FUNCTION_ARGUMENTS(1, 0, "<dotNumbersList>");
 
       Tcl_Obj **elements;
       int elementCount;
@@ -1181,12 +1184,14 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         BrlDots cells[elementCount];
 
         for (int elementIndex=0; elementIndex<elementCount; elementIndex+=1) {
-          BrlDots *cell = &cells[elementIndex];
           Tcl_Obj *element = elements[elementIndex];
+          BrlDots *cell = &cells[elementIndex];
+          *cell = 0;
+
           int numberCount;
           const char *numbers = Tcl_GetStringFromObj(element, &numberCount);
+          if (!numbers) return TCL_ERROR;
 
-          *cell = 0;
           if ((numberCount != 1) || (numbers[0] != '0')) {
             for (int numberIndex=0; numberIndex<numberCount; numberIndex+=1) {
               char number = numbers[numberIndex];
@@ -1208,6 +1213,8 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         }
 
         setByteArrayResult(interp, cells, elementCount);
+      } else {
+        setByteArrayResult(interp, NULL, elementCount);
       }
 
       return TCL_OK;

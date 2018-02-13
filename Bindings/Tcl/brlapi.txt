@@ -8,7 +8,7 @@ brlapi <function> [<arg> ...]
          polkit
    expandKeyCode <keyCode> <arrayName>
    describeKeyCode <keyCode> <arrayName>
-   makeDots <numbersList>
+   makeDots <dotNumbersList>
    getHandleSize
 
 brlapi<sessionNumber> function [arg ...]
