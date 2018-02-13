@@ -86,6 +86,12 @@ setByteArrayResult (Tcl_Interp *interp, const unsigned char *bytes, int count) {
   Tcl_SetByteArrayObj(Tcl_GetObjResult(interp), bytes, count);
 }
 
+#define UNIMPLEMENTED_FUNCTION \
+do { \
+  setStringsResult(interp, "unimplemented function: ", functions[function], NULL); \
+  return TCL_ERROR; \
+} while (0)
+
 static void
 setBrlapiError (Tcl_Interp *interp) {
   const char *text = brlapi_strerror(&brlapi_error);
@@ -392,6 +398,31 @@ OPTION_HANDLER(session, write, text) {
   return TCL_OK;
 }
 
+static int
+getSessionStringProperty (
+  Tcl_Interp *interp, BrlapiSession *session,
+  int BRLAPI_STDCALL (*getProperty) (brlapi_handle_t *handle, char *buffer, size_t size)
+) {
+  size_t size = 0X10;
+
+  while (1) {
+    char buffer[size];
+    int result = getProperty(session->handle, buffer, size);
+
+    if (result == -1) {
+      setBrlapiError(interp);
+      return TCL_ERROR;
+    }
+
+    if (result <= size) {
+      setStringResult(interp, buffer, result-1);
+      return TCL_OK;
+    }
+
+    size = result;
+  }
+}
+
 static void
 endSession (ClientData data) {
   BrlapiSession *session = data;
@@ -482,46 +513,12 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
     case FCN_getDriverName: {
       TEST_FUNCTION_NO_ARGUMENTS();
-      size_t size = 0X10;
-
-      while (1) {
-        char buffer[size];
-        int result = brlapi__getDriverName(session->handle, buffer, size);
-
-        if (result == -1) {
-          setBrlapiError(interp);
-          return TCL_ERROR;
-        }
-
-        if (result <= size) {
-          setStringResult(interp, buffer, result-1);
-          return TCL_OK;
-        }
-
-        size = result;
-      }
+      return getSessionStringProperty(interp, session, brlapi__getDriverName);
     }
 
     case FCN_getModelIdentifier: {
       TEST_FUNCTION_NO_ARGUMENTS();
-      size_t size = 0X10;
-
-      while (1) {
-        char buffer[size];
-        int result = brlapi__getModelIdentifier(session->handle, buffer, size);
-
-        if (result == -1) {
-          setBrlapiError(interp);
-          return TCL_ERROR;
-        }
-
-        if (result <= size) {
-          setStringResult(interp, buffer, result-1);
-          return TCL_OK;
-        }
-
-        size = result;
-      }
+      return getSessionStringProperty(interp, session, brlapi__getModelIdentifier);
     }
 
     case FCN_getDisplaySize: {
@@ -1036,8 +1033,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
   }
 
-  setStringResult(interp, "unimplemented function", -1);
-  return TCL_ERROR;
+  UNIMPLEMENTED_FUNCTION;
 }
 
 typedef struct {
@@ -1244,8 +1240,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
   }
 
-  setStringResult(interp, "unimplemented function", -1);
-  return TCL_ERROR;
+  UNIMPLEMENTED_FUNCTION;
 }
 
 int
