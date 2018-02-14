@@ -227,7 +227,7 @@ typedef struct {
   const char *name;
   OptionHandler handler;
   int operands;
-  const char *help;
+  const char *syntax;
 } OptionEntry;
 
 static int
@@ -245,7 +245,7 @@ processOptions (
     const OptionEntry *option = &options[index];
 
     int count = option->operands;
-    TEST_ARGUMENT_COUNT(1, count, -1, option->help);
+    TEST_ARGUMENT_COUNT(1, count, -1, option->syntax);
     TEST_TCL_OK(option->handler(interp, objv, data));
 
     count += 1;
@@ -264,7 +264,7 @@ processOptions (
 #define OPTION(command,function,option) \
   .name = "-" #option, .handler = OPTION_HANDLER_NAME(command, function, option)
 #define OPERANDS(count,text) \
-  .operands = (count), .help = ((count)? (text): NULL)
+  .operands = (count), .syntax = ((count)? (text): NULL)
 
 static int
 parseCursorOperand (Tcl_Interp *interp, Tcl_Obj *obj, int *cursor) {
@@ -852,10 +852,9 @@ FUNCTION_HANDLER(session, writeDots) {
 
 static int
 changeKeys (
-  Tcl_Interp *interp, Tcl_Obj *const objv[], int objc, void *data,
+  Tcl_Interp *interp, Tcl_Obj *const objv[], int objc, BrlapiSession *session,
   int BRLAPI_STDCALL (*change) (brlapi_handle_t *handle, brlapi_rangeType_t type, const brlapi_keyCode_t keys[], unsigned int count)
 ) {
-  BrlapiSession *session = data;
   TEST_FUNCTION_ARGUMENTS(1, 1, "<rangeType> [<keyCodeList>]");
 
   brlapi_rangeType_t rangeType;
@@ -926,19 +925,20 @@ changeKeys (
 }
 
 FUNCTION_HANDLER(session, acceptKeys) {
-  return changeKeys(interp, objv, objc, data, brlapi__acceptKeys);
+  BrlapiSession *session = data;
+  return changeKeys(interp, objv, objc, session, brlapi__acceptKeys);
 }
 
 FUNCTION_HANDLER(session, ignoreKeys) {
-  return changeKeys(interp, objv, objc, data, brlapi__ignoreKeys);
+  BrlapiSession *session = data;
+  return changeKeys(interp, objv, objc, session, brlapi__ignoreKeys);
 }
 
 static int
 changeKeyRanges (
-  Tcl_Interp *interp, Tcl_Obj *const objv[], int objc, void *data,
+  Tcl_Interp *interp, Tcl_Obj *const objv[], int objc, BrlapiSession *session,
   int BRLAPI_STDCALL (*change) (brlapi_handle_t *handle, const brlapi_range_t ranges[], unsigned int count)
 ) {
-  BrlapiSession *session = data;
   TEST_FUNCTION_ARGUMENTS(1, 0, "<keyRangeList>");
 
   Tcl_Obj **rangeElements;
@@ -990,11 +990,13 @@ changeKeyRanges (
 }
 
 FUNCTION_HANDLER(session, acceptKeyRanges) {
-  return changeKeyRanges(interp, objv, objc, data, brlapi__acceptKeyRanges);
+  BrlapiSession *session = data;
+  return changeKeyRanges(interp, objv, objc, session, brlapi__acceptKeyRanges);
 }
 
 FUNCTION_HANDLER(session, ignoreKeyRanges) {
-  return changeKeyRanges(interp, objv, objc, data, brlapi__ignoreKeyRanges);
+  BrlapiSession *session = data;
+  return changeKeyRanges(interp, objv, objc, session, brlapi__ignoreKeyRanges);
 }
 
 static void
@@ -1232,7 +1234,13 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
 int
 Brlapi_tcl_Init (Tcl_Interp *interp) {
-  Tcl_CreateObjCommand(interp, "brlapi", brlapiGeneralCommand, NULL, NULL);
-  Tcl_PkgProvide(interp, "Brlapi", BRLAPI_RELEASE);
-  return TCL_OK;
+  int result = TCL_ERROR;
+  Tcl_Command command = Tcl_CreateObjCommand(interp, "brlapi", brlapiGeneralCommand, NULL, NULL);
+
+  if (command) {
+    result = Tcl_PkgProvide(interp, "Brlapi", BRLAPI_RELEASE);
+    if (result != TCL_OK) Tcl_DeleteCommandFromToken(interp, command);
+  }
+
+  return result;
 }
