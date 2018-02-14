@@ -86,12 +86,6 @@ setByteArrayResult (Tcl_Interp *interp, const unsigned char *bytes, int count) {
   Tcl_SetByteArrayObj(Tcl_GetObjResult(interp), bytes, count);
 }
 
-#define UNIMPLEMENTED_FUNCTION \
-do { \
-  setStringsResult(interp, "unimplemented function: ", functions[function], NULL); \
-  return TCL_ERROR; \
-} while (0)
-
 static void
 setBrlapiError (Tcl_Interp *interp) {
   const char *text = brlapi_strerror(&brlapi_error);
@@ -164,8 +158,21 @@ getCellCount (
   return TCL_OK;
 }
 
-#define BEGIN_FUNCTIONS static const char *functions[] = {
-#define END_FUNCTIONS NULL };
+typedef struct {
+  const char *name;
+} FunctionEntry;
+
+#define FUNCTION(function) \
+  { .name=#function }
+
+#define BEGIN_FUNCTIONS static const FunctionEntry functions[] = {
+#define END_FUNCTIONS { .name=NULL }};
+
+#define UNIMPLEMENTED_FUNCTION \
+do { \
+  setStringsResult(interp, "unimplemented function: ", functions[function], NULL); \
+  return TCL_ERROR; \
+} while (0)
 
 static int
 testArgumentCount (
@@ -189,7 +196,7 @@ testArgumentCount (
 
 #define TEST_FUNCTION_ARGUMENT() \
   int function; \
-  TEST_TCL_OK(Tcl_GetIndexFromObj(interp, objv[1], functions, "function", 0, &function))
+  TEST_TCL_OK(Tcl_GetIndexFromObjStruct(interp, objv[1], functions, sizeof(functions[0]), "function", 0, &function))
 
 #define TEST_FUNCTION_ARGUMENTS(required,optional,syntax) \
   TEST_ARGUMENT_COUNT(2, (required), (optional), (syntax))
@@ -214,36 +221,17 @@ typedef struct {
 } OptionEntry;
 
 static int
-makeOptionNames (const OptionEntry *options, const char ***names) {
-  if (!*names) {
-    const OptionEntry *option = options;
-    while (option->name) ++option;
-    *names = allocateMemory(((option - options) + 1) * sizeof(*names));
-    if (!*names) return TCL_ERROR;
-
-    option = options;
-    const char **name = *names;
-    while (option->name) *name++ = option++->name;
-    *name = NULL;
-  }
-
-  return TCL_OK;
-}
-
-static int
 processOptions (
   Tcl_Interp *interp, void *data,
   Tcl_Obj *const objv[], int objc, int start,
-  const OptionEntry *options, const char ***names
+  const OptionEntry *options
 ) {
-  TEST_TCL_OK(makeOptionNames(options, names));
-
   objv += start;
   objc -= start;
 
   while (objc > 0) {
     int index;
-    TEST_TCL_OK(Tcl_GetIndexFromObj(interp, objv[0], *names, "option", 0, &index));
+    TEST_TCL_OK(Tcl_GetIndexFromObjStruct(interp, objv[0], options, sizeof(*options), "option", 0, &index));
     const OptionEntry *option = &options[index];
 
     int count = option->operands;
@@ -261,8 +249,7 @@ processOptions (
 #define BEGIN_OPTIONS { static const OptionEntry optionTable[] = {
 #define END_OPTIONS(start) \
   , {.name = NULL} }; \
-  static const char **optionNames = NULL; \
-  TEST_TCL_OK(processOptions(interp, &options, objv, objc, (start), optionTable, &optionNames)); \
+  TEST_TCL_OK(processOptions(interp, &options, objv, objc, (start), optionTable)); \
 }
 #define OPTION(command,function,option) \
   .name = "-" #option, .handler = OPTION_HANDLER_NAME(command, function, option)
@@ -444,30 +431,30 @@ endSession (ClientData data) {
 static int
 brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   BEGIN_FUNCTIONS
-    "acceptKeyRanges",
-    "acceptKeys",
-    "closeConnection",
-    "enterRawMode",
-    "enterTtyMode",
-    "enterTtyModeWithPath",
-    "getAuth",
-    "getDisplaySize",
-    "getDriverName",
-    "getFileDescriptor",
-    "getHost",
-    "getModelIdentifier",
-    "ignoreKeyRanges",
-    "ignoreKeys",
-    "leaveRawMode",
-    "leaveTtyMode",
-    "readKey",
-    "recvRaw",
-    "resumeDriver",
-    "sendRaw",
-    "setFocus",
-    "suspendDriver",
-    "write",
-    "writeDots",
+    FUNCTION(acceptKeyRanges),
+    FUNCTION(acceptKeys),
+    FUNCTION(closeConnection),
+    FUNCTION(enterRawMode),
+    FUNCTION(enterTtyMode),
+    FUNCTION(enterTtyModeWithPath),
+    FUNCTION(getAuth),
+    FUNCTION(getDisplaySize),
+    FUNCTION(getDriverName),
+    FUNCTION(getFileDescriptor),
+    FUNCTION(getHost),
+    FUNCTION(getModelIdentifier),
+    FUNCTION(ignoreKeyRanges),
+    FUNCTION(ignoreKeys),
+    FUNCTION(leaveRawMode),
+    FUNCTION(leaveTtyMode),
+    FUNCTION(readKey),
+    FUNCTION(recvRaw),
+    FUNCTION(resumeDriver),
+    FUNCTION(sendRaw),
+    FUNCTION(setFocus),
+    FUNCTION(suspendDriver),
+    FUNCTION(write),
+    FUNCTION(writeDots),
   END_FUNCTIONS
 
   enum {
@@ -1063,12 +1050,12 @@ OPTION_HANDLER(general, openConnection, host) {
 static int
 brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   BEGIN_FUNCTIONS
-    "describeKeyCode",
-    "expandKeyCode",
-    "getHandleSize",
-    "getVersionString",
-    "makeDots",
-    "openConnection",
+    FUNCTION(describeKeyCode),
+    FUNCTION(expandKeyCode),
+    FUNCTION(getHandleSize),
+    FUNCTION(getVersionString),
+    FUNCTION(makeDots),
+    FUNCTION(openConnection),
   END_FUNCTIONS
 
   enum {
