@@ -195,18 +195,24 @@ testArgumentCount (
 #define TEST_ARGUMENT_COUNT(start,required,optional,syntax) \
   TEST_TCL_OK(testArgumentCount(interp, objv, objc, (start), (required), (optional), (syntax)))
 
-#define TEST_COMMAND_ARGUMENTS() \
-  TEST_ARGUMENT_COUNT(1, 1, -1, "<function> [<arg> ...]")
-
-#define TEST_FUNCTION_ARGUMENT() \
-  int functionIndex; \
-  TEST_TCL_OK(Tcl_GetIndexFromObjStruct(interp, objv[1], functions, sizeof(functions[0]), "function", 0, &functionIndex)); \
-  const FunctionEntry *function = &functions[functionIndex];
-
 #define TEST_FUNCTION_ARGUMENTS(required,optional,syntax) \
   TEST_ARGUMENT_COUNT(2, (required), (optional), (syntax))
 
 #define TEST_FUNCTION_NO_ARGUMENTS() TEST_FUNCTION_ARGUMENTS(0, 0, NULL)
+
+static int
+invokeFunction (Tcl_Interp *interp, Tcl_Obj *const objv[], int objc, const FunctionEntry *functions, void *data) {
+  TEST_ARGUMENT_COUNT(1, 1, -1, "<function> [<arg> ...]");
+  const FunctionEntry *function;
+
+  {
+    int index;
+    TEST_TCL_OK(Tcl_GetIndexFromObjStruct(interp, objv[1], functions, sizeof(*functions), "function", 0, &index));
+    function = functions + index;
+  }
+
+  return function->handler(interp, objv, objc, data);
+}
 
 #define OPTION_HANDLER_RETURN int
 #define OPTION_HANDLER_PARAMETERS (Tcl_Interp *interp, Tcl_Obj *const objv[], void *data)
@@ -1028,9 +1034,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     FUNCTION(session, writeDots),
   END_FUNCTIONS
 
-  TEST_COMMAND_ARGUMENTS();
-  TEST_FUNCTION_ARGUMENT();
-  return function->handler(interp, objv, objc, data);
+  return invokeFunction(interp, objv, objc, functions, data);
 }
 
 FUNCTION_HANDLER(general, describeKeyCode) {
@@ -1223,9 +1227,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     FUNCTION(general, openConnection),
   END_FUNCTIONS
 
-  TEST_COMMAND_ARGUMENTS();
-  TEST_FUNCTION_ARGUMENT();
-  return function->handler(interp, objv, objc, data);
+  return invokeFunction(interp, objv, objc, functions, data);
 }
 
 int
