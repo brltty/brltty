@@ -650,16 +650,12 @@ set genericDevices [makeGenericDeviceTable {
    }
 }]
 
-proc getProgramPositionalArgumentsUsageSummary {} {
-   return "\[scheme:file ...\]"
-}
-
 set optionDefinitions {
    {test      flag "don't update the files"}
    {nogeneric flag "don't include generic USB to serial adapters"}
 }
 
-processProgramArguments optionValues $optionDefinitions positionalArguments
+processProgramArguments optionValues $optionDefinitions positionalArguments "\[scheme:file ...\]"
 
 if {[llength $positionalArguments] == 0} {
    lappend positionalArguments "android:[file join $sourceDirectory Android Application res xml usb_devices.xml]"

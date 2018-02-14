@@ -158,6 +158,7 @@ proc nextElement {listVariable {elementVariable ""}} {
 }
 
 proc formatColumns {rows} {
+   set spacer [string repeat " " 2]
    set lines [list]
 
    foreach row $rows {
@@ -181,7 +182,7 @@ proc formatColumns {rows} {
          if {[set width $widths($index)] > 0} {
             append line $cell
             append line [string repeat " " [expr {$width - [string length $cell]}]]
-            append line " "
+            append line $spacer
          }
 
          incr index
@@ -241,8 +242,8 @@ proc processCommandOptions {valuesArray argumentsVariable definitions {optionsVa
       }
       dict set options $name type $type
 
-      if {[nextElement definition summary]} {
-         dict set options $name summary $summary
+      if {[nextElement definition usage]} {
+         dict set options $name usage $usage
       }
 
       incr optionIndex
@@ -325,7 +326,7 @@ proc processCommandOptions {valuesArray argumentsVariable definitions {optionsVa
    return 1
 }
 
-proc formatCommandOptionsUsageSummary {options} {
+proc formatCommandOptionsUsage {options} {
    set rows [list]
 
    foreach name [lsort [dict keys $options]] {
@@ -333,7 +334,7 @@ proc formatCommandOptionsUsageSummary {options} {
       set row [list]
       lappend row "-$name"
 
-      foreach property {operand summary} {
+      foreach property {operand usage} {
          if {[dict exists $option $property]} {
             lappend row [dict get $option $property]
          } else {
@@ -347,8 +348,8 @@ proc formatCommandOptionsUsageSummary {options} {
    return [formatColumns $rows]
 }
 
-proc showCommandUsageSummary {name options positional} {
-   set options [formatCommandOptionsUsageSummary $options]
+proc showCommandUsage {name options positional} {
+   set options [formatCommandOptionsUsage $options]
    set usage "Usage: $name"
 
    if {[string length $options] > 0} {
@@ -372,15 +373,15 @@ proc noMorePositionalArguments {arguments} {
    }
 }
 
-proc getProgramPositionalArgumentsUsageSummary {} {
-   return ""
-}
-
-proc processProgramArguments {optionValuesArray optionDefinitions {positionalArgumentsVariable ""}} {
+proc processProgramArguments {
+   optionValuesArray optionDefinitions
+   {positionalArgumentsVariable ""}
+   {positionalArgumentsUsage ""}
+} {
    upvar 1 $optionValuesArray optionValues
    set arguments $::argv
 
-   lappend optionDefinitions {help flag "show a usage summary and then exit"}
+   lappend optionDefinitions {help flag "show this usage summary and then exit"}
    lappend optionDefinitions {quiet counter "decrease verbosity"}
    lappend optionDefinitions {verbose counter "increase verbosity"}
 
@@ -393,7 +394,7 @@ proc processProgramArguments {optionValuesArray optionDefinitions {positionalArg
    incr logLevel -$optionValues(verbose)
 
    if {$optionValues(help)} {
-      showCommandUsageSummary [getProgramName] $options [getProgramPositionalArgumentsUsageSummary]
+      showCommandUsage [getProgramName] $options $positionalArgumentsUsage
       exit 0
    }
 

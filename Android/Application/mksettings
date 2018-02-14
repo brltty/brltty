@@ -129,14 +129,10 @@ proc writeProperties {file lines} {
 set inputFile [file join $sourceDirectory "Documents" "brltty.conf"]
 set outputFile [file join $sourceDirectory "Android" "Application" "res" "values" "settings_lists.xml"]
 
-proc getProgramPositionalArgumentsUsageSummary {} {
-   return "\[property ...\]"
-}
-
 set optionDefinitions {
 }
 
-processProgramArguments optionValues $optionDefinitions positionalArguments
+processProgramArguments optionValues $optionDefinitions positionalArguments "\[property ...\]"
 
 if {[llength $positionalArguments] == 0} {
    lappend positionalArguments "braille-driver"
