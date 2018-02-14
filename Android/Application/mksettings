@@ -129,22 +129,26 @@ proc writeProperties {file lines} {
 set inputFile [file join $sourceDirectory "Documents" "brltty.conf"]
 set outputFile [file join $sourceDirectory "Android" "Application" "res" "values" "settings_lists.xml"]
 
+proc getProgramPositionalArgumentsSummary {} {
+   return "\[property ...\]"
+}
+
 set optionDefinitions {
 }
 
-processProgramOptions optionValues $optionDefinitions
+processProgramArguments optionValues $optionDefinitions positionalArguments
 
-if {[llength $argv] == 0} {
-   lappend argv "braille-driver"
-   lappend argv "text-table"
-   lappend argv "attributes-table"
-   lappend argv "contraction-table"
-   lappend argv "keyboard-table"
+if {[llength $positionalArguments] == 0} {
+   lappend positionalArguments "braille-driver"
+   lappend positionalArguments "text-table"
+   lappend positionalArguments "attributes-table"
+   lappend positionalArguments "contraction-table"
+   lappend positionalArguments "keyboard-table"
 }
 
-if {[llength $argv] == 0} {
+if {[llength $positionalArguments] == 0} {
    syntaxError "properties not specified"
 }
 
-writeProperties $outputFile [makeResources [getProperties [file join $sourceDirectory $inputFile] $argv]]
+writeProperties $outputFile [makeResources [getProperties [file join $sourceDirectory $inputFile] $positionalArguments]]
 exit 0

@@ -650,28 +650,32 @@ set genericDevices [makeGenericDeviceTable {
    }
 }]
 
+proc getProgramPositionalArgumentsSummary {} {
+   return "\[scheme:file ...\]"
+}
+
 set optionDefinitions {
    {test      flag "don't update the files"}
    {nogeneric flag "don't include generic USB to serial adapters"}
 }
 
-processProgramOptions optionValues $optionDefinitions
+processProgramArguments optionValues $optionDefinitions positionalArguments
 
-if {[llength $argv] == 0} {
-   lappend argv "android:[file join $sourceDirectory Android Application res xml usb_devices.xml]"
-   lappend argv "hotplug:[file join $sourceDirectory Autostart Hotplug brltty.usermap]"
-   lappend argv "metainfo:[file join $sourceDirectory Autostart AppStream org.a11y.brltty.metainfo.xml]"
-   lappend argv "udev:[file join $sourceDirectory Autostart Udev rules]"
-   lappend argv "windows:[file join $sourceDirectory Autostart Windows brltty-libusb.inf]"
-   lappend argv "windows:[file join $sourceDirectory Autostart Windows brltty-libusb-1.0.inf]"
+if {[llength $positionalArguments] == 0} {
+   lappend positionalArguments "android:[file join $sourceDirectory Android Application res xml usb_devices.xml]"
+   lappend positionalArguments "hotplug:[file join $sourceDirectory Autostart Hotplug brltty.usermap]"
+   lappend positionalArguments "metainfo:[file join $sourceDirectory Autostart AppStream org.a11y.brltty.metainfo.xml]"
+   lappend positionalArguments "udev:[file join $sourceDirectory Autostart Udev rules]"
+   lappend positionalArguments "windows:[file join $sourceDirectory Autostart Windows brltty-libusb.inf]"
+   lappend positionalArguments "windows:[file join $sourceDirectory Autostart Windows brltty-libusb-1.0.inf]"
 }
 
-if {[llength $argv] == 0} {
+if {[llength $positionalArguments] == 0} {
    syntaxError "files not specified"
 }
 
 set schemes [getSchemes]
-parseFileArguments files $schemes $argv
+parseFileArguments files $schemes $positionalArguments
 makeLines lines [array names files] [makeDeviceTable [parseDrivers]]
 updateFiles files lines
 exit 0

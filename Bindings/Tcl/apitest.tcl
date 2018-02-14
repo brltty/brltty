@@ -113,7 +113,7 @@ proc mainProgram {} {
       {tty  untyped.number  "which virtual terminal to claim"}
    }
 
-   processProgramOptions optionValues $optionDefinitions
+   processProgramArguments optionValues $optionDefinitions
 
    putProperties "BrlAPI Version" [brlapi getVersionString]
 

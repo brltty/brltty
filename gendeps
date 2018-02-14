@@ -149,11 +149,7 @@ proc getDependencies {file} {
 set optionDefinitions {
 }
 
-processProgramOptions optionValues $optionDefinitions
-
-if {[llength $argv] > 0} {
-   syntaxError "too many parameters"
-}
+processProgramArguments optionValues $optionDefinitions
 
 set sourceExtensions {c cc y}
 set sourceExtensionsGlob "{[join $sourceExtensions ,]}"

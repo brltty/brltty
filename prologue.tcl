@@ -184,7 +184,7 @@ proc formatColumns {rows} {
    return $lines
 }
 
-proc showOptions {options} {
+proc showOptionUsageSummary {options} {
    set rows [list]
 
    foreach name [lsort [dict keys $options]] {
@@ -349,25 +349,48 @@ proc processOptions {valuesArray argumentsVariable definitions {optionsVariable 
    return 1
 }
 
-proc processProgramOptions {valuesArray definitions} {
-   global argv
-   upvar 1 $valuesArray values
+proc noMorePositionalArguments {arguments} {
+   if {[nextOperand arguments]} {
+      syntaxError "excess positional arguments: [join $arguments " "]"
+   }
+}
 
-   lappend definitions {help flag "show a usage summary and then exit"}
-   lappend definitions {quiet counter "decrease verbosity"}
-   lappend definitions {verbose counter "increase verbosity"}
+proc getProgramPositionalArgumentsSummary {} {
+   return ""
+}
 
-   if {![processOptions values argv $definitions options]} {
+proc processProgramArguments {optionValuesArray optionDefinitions {positionalArgumentsVariable ""}} {
+   upvar 1 $optionValuesArray optionValues
+   set arguments $::argv
+
+   lappend optionDefinitions {help flag "show a usage summary and then exit"}
+   lappend optionDefinitions {quiet counter "decrease verbosity"}
+   lappend optionDefinitions {verbose counter "increase verbosity"}
+
+   if {![processOptions optionValues arguments $optionDefinitions options]} {
       syntaxError
    }
 
    global logLevel
-   incr logLevel $values(quiet)
-   incr logLevel -$values(verbose)
+   incr logLevel $optionValues(quiet)
+   incr logLevel -$optionValues(verbose)
 
-   if {$values(help)} {
-      showOptions $options
+   if {$optionValues(help)} {
+      set usage "Usage: [getProgramName]"
+
+      if {[string length [set summary [getProgramPositionalArgumentsSummary]]] > 0} {
+         append usage " $summary"
+      }
+
+      puts stdout $usage
+      showOptionUsageSummary $options
       exit 0
+   }
+
+   if {[string length $positionalArgumentsVariable] > 0} {
+      uplevel 1 [list set $positionalArgumentsVariable $arguments]
+   } else {
+      noMorePositionalArguments $arguments
    }
 }
 
