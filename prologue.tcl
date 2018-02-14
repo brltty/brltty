@@ -172,11 +172,13 @@ proc formatColumns {rows} {
          incr index
       }
 
-      if {[string length $lines] > 0} {
-         append lines "\n"
-      }
+      if {[string length [set line [string trimright $line]]] > 0} {
+         if {[string length $lines] > 0} {
+            append lines "\n"
+         }
 
-      append lines [string trimright $line]
+         append lines $line
+      }
    }
 
    return $lines
@@ -201,7 +203,9 @@ proc showOptions {options} {
       lappend rows $row
    }
 
-   puts [formatColumns $rows]
+   if {[string length [set lines [formatColumns $rows]]] > 0} {
+      puts stdout "The following options may be specified:\n$lines"
+   }
 }
 
 proc nextOperand {operandsVariable {operandVariable ""}} {
