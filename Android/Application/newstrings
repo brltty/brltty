@@ -39,6 +39,11 @@ proc getStrings {directory args} {
    return $strings
 }
 
+set optionDefinitions {
+}
+
+processProgramOptions optionValues $optionDefinitions
+
 set stringsDirectory [file join $sourceDirectory Android Application res values]
 set defaultStrings [getStrings $stringsDirectory strings.xml settings_strings.xml settings_lists.xml]
 
