@@ -650,7 +650,7 @@ set genericDevices [makeGenericDeviceTable {
    }
 }]
 
-proc getProgramPositionalArgumentsSummary {} {
+proc getProgramPositionalArgumentsUsageSummary {} {
    return "\[scheme:file ...\]"
 }
 

@@ -142,6 +142,21 @@ proc semanticError {{message ""}} {
    exit 3
 }
 
+proc nextElement {listVariable {elementVariable ""}} {
+   upvar 1 $listVariable list
+
+   if {[llength $list] == 0} {
+      return 0
+   }
+
+   if {[string length $elementVariable] > 0} {
+      uplevel 1 [list set $elementVariable [lindex $list 0]]
+      set list [lreplace $list 0 0]
+   }
+
+   return 1
+}
+
 proc formatColumns {rows} {
    set lines [list]
 
@@ -184,46 +199,7 @@ proc formatColumns {rows} {
    return $lines
 }
 
-proc showOptionUsageSummary {options} {
-   set rows [list]
-
-   foreach name [lsort [dict keys $options]] {
-      set option [dict get $options $name]
-      set row [list]
-      lappend row "-$name"
-
-      foreach property {operand summary} {
-         if {[dict exists $option $property]} {
-            lappend row [dict get $option $property]
-         } else {
-            lappend row ""
-         }
-      }
-
-      lappend rows $row
-   }
-
-   if {[string length [set lines [formatColumns $rows]]] > 0} {
-      puts stdout "The following options may be specified:\n$lines"
-   }
-}
-
-proc nextElement {listVariable {elementVariable ""}} {
-   upvar 1 $listVariable list
-
-   if {[llength $list] == 0} {
-      return 0
-   }
-
-   if {[string length $elementVariable] > 0} {
-      uplevel 1 [list set $elementVariable [lindex $list 0]]
-      set list [lreplace $list 0 0]
-   }
-
-   return 1
-}
-
-proc processOptions {valuesArray argumentsVariable definitions {optionsVariable ""}} {
+proc processCommandOptions {valuesArray argumentsVariable definitions {optionsVariable ""}} {
    upvar 1 $valuesArray values
    upvar 1 $argumentsVariable arguments
 
@@ -349,13 +325,54 @@ proc processOptions {valuesArray argumentsVariable definitions {optionsVariable 
    return 1
 }
 
+proc formatCommandOptionsUsageSummary {options} {
+   set rows [list]
+
+   foreach name [lsort [dict keys $options]] {
+      set option [dict get $options $name]
+      set row [list]
+      lappend row "-$name"
+
+      foreach property {operand summary} {
+         if {[dict exists $option $property]} {
+            lappend row [dict get $option $property]
+         } else {
+            lappend row ""
+         }
+      }
+
+      lappend rows $row
+   }
+
+   return [formatColumns $rows]
+}
+
+proc showCommandUsageSummary {name options positional} {
+   set options [formatCommandOptionsUsageSummary $options]
+   set usage "Usage: $name"
+
+   if {[string length $options] > 0} {
+      append usage " \[-option ...\]"
+   }
+
+   if {[string length $positional] > 0} {
+      append usage " $positional"
+   }
+
+   if {[string length $options] > 0} {
+      append usage "\nThe following options may be specified:\n$options"
+   }
+
+   puts stdout $usage
+}
+
 proc noMorePositionalArguments {arguments} {
    if {[nextElement arguments]} {
       syntaxError "excess positional arguments: [join $arguments " "]"
    }
 }
 
-proc getProgramPositionalArgumentsSummary {} {
+proc getProgramPositionalArgumentsUsageSummary {} {
    return ""
 }
 
@@ -367,7 +384,7 @@ proc processProgramArguments {optionValuesArray optionDefinitions {positionalArg
    lappend optionDefinitions {quiet counter "decrease verbosity"}
    lappend optionDefinitions {verbose counter "increase verbosity"}
 
-   if {![processOptions optionValues arguments $optionDefinitions options]} {
+   if {![processCommandOptions optionValues arguments $optionDefinitions options]} {
       syntaxError
    }
 
@@ -376,14 +393,7 @@ proc processProgramArguments {optionValuesArray optionDefinitions {positionalArg
    incr logLevel -$optionValues(verbose)
 
    if {$optionValues(help)} {
-      set usage "Usage: [getProgramName]"
-
-      if {[string length [set summary [getProgramPositionalArgumentsSummary]]] > 0} {
-         append usage " $summary"
-      }
-
-      puts stdout $usage
-      showOptionUsageSummary $options
+      showCommandUsageSummary [getProgramName] $options [getProgramPositionalArgumentsUsageSummary]
       exit 0
    }
 

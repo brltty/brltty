@@ -129,7 +129,7 @@ proc writeProperties {file lines} {
 set inputFile [file join $sourceDirectory "Documents" "brltty.conf"]
 set outputFile [file join $sourceDirectory "Android" "Application" "res" "values" "settings_lists.xml"]
 
-proc getProgramPositionalArgumentsSummary {} {
+proc getProgramPositionalArgumentsUsageSummary {} {
    return "\[property ...\]"
 }
 
