@@ -208,16 +208,16 @@ proc showOptionUsageSummary {options} {
    }
 }
 
-proc nextOperand {operandsVariable {operandVariable ""}} {
-   upvar 1 $operandsVariable operands
+proc nextElement {listVariable {elementVariable ""}} {
+   upvar 1 $listVariable list
 
-   if {[llength $operands] == 0} {
+   if {[llength $list] == 0} {
       return 0
    }
 
-   if {[string length $operandVariable] > 0} {
-      uplevel 1 [list set $operandVariable [lindex $operands 0]]
-      set operands [lreplace $operands 0 0]
+   if {[string length $elementVariable] > 0} {
+      uplevel 1 [list set $elementVariable [lindex $list 0]]
+      set list [lreplace $list 0 0]
    }
 
    return 1
@@ -234,7 +234,7 @@ proc processOptions {valuesArray argumentsVariable definitions {optionsVariable 
    foreach definition $definitions {
       set description "option\[$optionIndex\]"
 
-      if {![nextOperand definition name]} {
+      if {![nextElement definition name]} {
          return -code error "name not specified for $description"
       }
 
@@ -242,7 +242,7 @@ proc processOptions {valuesArray argumentsVariable definitions {optionsVariable 
          return -code error "duplicate name for $description: $name"
       }
 
-      if {![nextOperand definition type]} {
+      if {![nextElement definition type]} {
          return -code error "type not specified for $description"
       }
 
@@ -265,7 +265,7 @@ proc processOptions {valuesArray argumentsVariable definitions {optionsVariable 
       }
       dict set options $name type $type
 
-      if {[nextOperand definition summary]} {
+      if {[nextElement definition summary]} {
          dict set options $name summary $summary
       }
 
@@ -350,7 +350,7 @@ proc processOptions {valuesArray argumentsVariable definitions {optionsVariable 
 }
 
 proc noMorePositionalArguments {arguments} {
-   if {[nextOperand arguments]} {
+   if {[nextElement arguments]} {
       syntaxError "excess positional arguments: [join $arguments " "]"
    }
 }
