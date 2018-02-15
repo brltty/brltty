@@ -133,17 +133,18 @@ setBrlapiError (Tcl_Interp *interp) {
   Tcl_AppendToObj(result, text, length);
 }
 
+#define TEST_BRLAPI_OK(expression) \
+do { \
+  if ((expression) == -1) { \
+    setBrlapiError(interp); \
+    return TCL_ERROR; \
+  } \
+} while (0)
+
 static int
 getDisplaySize (Tcl_Interp *interp, BrlapiSession *session) {
-  int result = brlapi__getDisplaySize(
-    session->handle,
-    &session->displayWidth,
-    &session->displayHeight
-  );
-
-  if (result != -1) return TCL_OK;
-  setBrlapiError(interp);
-  return TCL_ERROR;
+  TEST_BRLAPI_OK(brlapi__getDisplaySize(session->handle, &session->displayWidth, &session->displayHeight));
+  return TCL_OK;
 }
 
 static int
@@ -296,11 +297,7 @@ getSessionStringProperty (
   while (1) {
     char buffer[size];
     int result = getProperty(session->handle, buffer, size);
-
-    if (result == -1) {
-      setBrlapiError(interp);
-      return TCL_ERROR;
-    }
+    TEST_BRLAPI_OK(result);
 
     if (result <= size) {
       setStringResult(interp, buffer, result-1);
@@ -329,9 +326,8 @@ FUNCTION_HANDLER(session, enterRawMode) {
   const char *driver = Tcl_GetString(objv[2]);
   if (!driver) return TCL_ERROR;
 
-  if (brlapi__enterRawMode(session->handle, driver) != -1) return TCL_OK;
-  setBrlapiError(interp);
-  return TCL_ERROR;
+  TEST_BRLAPI_OK(brlapi__enterRawMode(session->handle, driver));
+  return TCL_OK;
 }
 
 typedef struct {
@@ -390,11 +386,7 @@ FUNCTION_HANDLER(session, enterTtyMode) {
 
   {
     int result = brlapi__enterTtyMode(session->handle, options.tty, options.driver);
-
-    if (result == -1) {
-      setBrlapiError(interp);
-      return TCL_ERROR;
-    }
+    TEST_BRLAPI_OK(result);
 
     setIntResult(interp, result);
     return TCL_OK;
@@ -462,13 +454,12 @@ FUNCTION_HANDLER(session, enterTtyModeWithPath) {
       TEST_TCL_OK(Tcl_GetIntFromObj(interp, elements[index], &path[index]));
     }
 
-    if (brlapi__enterTtyModeWithPath(session->handle, path, count, options.driver) != -1) return TCL_OK;
-  } else if (brlapi__enterTtyModeWithPath(session->handle, NULL, 0, options.driver) != -1) {
-    return TCL_OK;
+    TEST_BRLAPI_OK(brlapi__enterTtyModeWithPath(session->handle, path, count, options.driver));
+  } else {
+    TEST_BRLAPI_OK(brlapi__enterTtyModeWithPath(session->handle, NULL, 0, options.driver));
   }
 
-  setBrlapiError(interp);
-  return TCL_ERROR;
+  return TCL_OK;
 }
 
 FUNCTION_HANDLER(session, getAuth) {
@@ -530,18 +521,16 @@ FUNCTION_HANDLER(session, leaveRawMode) {
   BrlapiSession *session = data;
   TEST_FUNCTION_NO_ARGUMENTS();
 
-  if (brlapi__leaveRawMode(session->handle) != -1) return TCL_OK;
-  setBrlapiError(interp);
-  return TCL_ERROR;
+  TEST_BRLAPI_OK(brlapi__leaveRawMode(session->handle));
+  return TCL_OK;
 }
 
 FUNCTION_HANDLER(session, leaveTtyMode) {
   BrlapiSession *session = data;
   TEST_FUNCTION_NO_ARGUMENTS();
 
-  if (brlapi__leaveTtyMode(session->handle) != -1) return TCL_OK;
-  setBrlapiError(interp);
-  return TCL_ERROR;
+  TEST_BRLAPI_OK(brlapi__leaveTtyMode(session->handle));
+  return TCL_OK;
 }
 
 FUNCTION_HANDLER(session, readKey) {
@@ -551,18 +540,12 @@ FUNCTION_HANDLER(session, readKey) {
   int wait;
   TEST_TCL_OK(Tcl_GetBooleanFromObj(interp, objv[2], &wait));
 
-  {
-    brlapi_keyCode_t key;
-    int result = brlapi__readKey(session->handle, wait, &key);
+  brlapi_keyCode_t key;
+  int result = brlapi__readKey(session->handle, wait, &key);
+  TEST_BRLAPI_OK(result);
 
-    if (result == -1) {
-      setBrlapiError(interp);
-      return TCL_ERROR;
-    }
-
-    if (result == 1) setWideIntResult(interp, key);
-    return TCL_OK;
-  }
+  if (result == 1) setWideIntResult(interp, key);
+  return TCL_OK;
 }
 
 FUNCTION_HANDLER(session, recvRaw) {
@@ -572,41 +555,31 @@ FUNCTION_HANDLER(session, recvRaw) {
   int size;
   TEST_TCL_OK(Tcl_GetIntFromObj(interp, objv[2], &size));
 
-  {
-    unsigned char buffer[size];
-    int result = brlapi__recvRaw(session->handle, buffer, size);
+  unsigned char buffer[size];
+  int result = brlapi__recvRaw(session->handle, buffer, size);
+  TEST_BRLAPI_OK(result);
 
-    if (result != -1) {
-      setByteArrayResult(interp, buffer, result);
-      return TCL_OK;
-    }
-
-    setBrlapiError(interp);
-    return TCL_ERROR;
-  }
+  setByteArrayResult(interp, buffer, result);
+  return TCL_OK;
 }
 
 FUNCTION_HANDLER(session, resumeDriver) {
   BrlapiSession *session = data;
   TEST_FUNCTION_NO_ARGUMENTS();
 
-  if (brlapi__resumeDriver(session->handle) != -1) return TCL_OK;
-  setBrlapiError(interp);
-  return TCL_ERROR;
+  TEST_BRLAPI_OK(brlapi__resumeDriver(session->handle));
+  return TCL_OK;
 }
 
 FUNCTION_HANDLER(session, sendRaw) {
   BrlapiSession *session = data;
   TEST_FUNCTION_ARGUMENTS(1, 0, "<packet>");
 
-  {
-    int count;
-    const unsigned char *bytes = Tcl_GetByteArrayFromObj(objv[2], &count);
+  int count;
+  const unsigned char *bytes = Tcl_GetByteArrayFromObj(objv[2], &count);
 
-    if (brlapi__sendRaw(session->handle, bytes, count) != -1) return TCL_OK;
-    setBrlapiError(interp);
-    return TCL_ERROR;
-  }
+  TEST_BRLAPI_OK(brlapi__sendRaw(session->handle, bytes, count));
+  return TCL_OK;
 }
 
 FUNCTION_HANDLER(session, setFocus) {
@@ -616,9 +589,8 @@ FUNCTION_HANDLER(session, setFocus) {
   int tty;
   TEST_TCL_OK(Tcl_GetIntFromObj(interp, objv[2], &tty));
 
-  if (brlapi__setFocus(session->handle, tty) != -1) return TCL_OK;
-  setBrlapiError(interp);
-  return TCL_ERROR;
+  TEST_BRLAPI_OK(brlapi__setFocus(session->handle, tty));
+  return TCL_OK;
 }
 
 FUNCTION_HANDLER(session, suspendDriver) {
@@ -628,9 +600,8 @@ FUNCTION_HANDLER(session, suspendDriver) {
   const char *driver = Tcl_GetString(objv[2]);
   if (!driver) return TCL_ERROR;
 
-  if (brlapi__suspendDriver(session->handle, driver) != -1) return TCL_OK;
-  setBrlapiError(interp);
-  return TCL_ERROR;
+  TEST_BRLAPI_OK(brlapi__suspendDriver(session->handle, driver));
+  return TCL_OK;
 }
 
 typedef struct {
@@ -765,65 +736,64 @@ FUNCTION_HANDLER(session, write) {
     if (first) options.arguments.regionSize = first->value;
   }
 
-  if (!options.arguments.regionBegin) {
-    unsigned int size;
-    TEST_TCL_OK(getCellCount(interp, session, &size));
-
-    {
-      unsigned char andMask[size];
-      unsigned char orMask[size];
-
-      if (options.arguments.regionSize < size) {
-        if (options.arguments.andMask) {
-          memset(andMask, 0XFF, size);
-          memcpy(andMask, options.arguments.andMask, options.arguments.regionSize);
-          options.arguments.andMask = andMask;
-        }
-
-        if (options.arguments.orMask) {
-          memset(orMask, 0X00, size);
-          memcpy(orMask, options.arguments.orMask, options.arguments.regionSize);
-          options.arguments.orMask = orMask;
-        }
-
-        if (options.textObject) {
-          if (Tcl_IsShared(options.textObject)) {
-            if (!(options.textObject = Tcl_DuplicateObj(options.textObject))) {
-              return TCL_ERROR;
-            }
-          }
-
-          do {
-            Tcl_AppendToObj(options.textObject, " ", -1);
-          } while (Tcl_GetCharLength(options.textObject) < size);
-        }
-      } else if (options.arguments.regionSize > size) {
-        if (options.textObject) {
-          if (!(options.textObject = Tcl_GetRange(options.textObject, 0, options.arguments.regionSize-1))) {
-            return TCL_ERROR;
-          }
-        }
-      }
-
-      options.arguments.regionSize = 0;
-      if (options.textObject) {
-        int length;
-        options.arguments.text = Tcl_GetStringFromObj(options.textObject, &length);
-      }
-
-      if (brlapi__write(session->handle, &options.arguments) != -1) return TCL_OK;
-    }
-  } else {
+  if (options.arguments.regionBegin) {
     if (options.textObject) {
       int length;
       options.arguments.text = Tcl_GetStringFromObj(options.textObject, &length);
+      if (!options.arguments.text) return TCL_ERROR;
     }
 
-    if (brlapi__write(session->handle, &options.arguments) != -1) return TCL_OK;
+    TEST_BRLAPI_OK(brlapi__write(session->handle, &options.arguments));
+  } else {
+    unsigned int size;
+    TEST_TCL_OK(getCellCount(interp, session, &size));
+
+    unsigned char andMask[size];
+    unsigned char orMask[size];
+
+    if (options.arguments.regionSize < size) {
+      if (options.arguments.andMask) {
+        memset(andMask, 0XFF, size);
+        memcpy(andMask, options.arguments.andMask, options.arguments.regionSize);
+        options.arguments.andMask = andMask;
+      }
+
+      if (options.arguments.orMask) {
+        memset(orMask, 0X00, size);
+        memcpy(orMask, options.arguments.orMask, options.arguments.regionSize);
+        options.arguments.orMask = orMask;
+      }
+
+      if (options.textObject) {
+        if (Tcl_IsShared(options.textObject)) {
+          if (!(options.textObject = Tcl_DuplicateObj(options.textObject))) {
+            return TCL_ERROR;
+          }
+        }
+
+        do {
+          Tcl_AppendToObj(options.textObject, " ", -1);
+        } while (Tcl_GetCharLength(options.textObject) < size);
+      }
+    } else if (options.arguments.regionSize > size) {
+      if (options.textObject) {
+        if (!(options.textObject = Tcl_GetRange(options.textObject, 0, options.arguments.regionSize-1))) {
+          return TCL_ERROR;
+        }
+      }
+    }
+
+    options.arguments.regionSize = 0;
+    if (options.textObject) {
+      int length;
+      options.arguments.text = Tcl_GetStringFromObj(options.textObject, &length);
+      if (!options.arguments.text) return TCL_ERROR;
+    }
+
+    TEST_BRLAPI_OK(brlapi__write(session->handle, &options.arguments));
   }
 
-  setBrlapiError(interp);
-  return TCL_ERROR;
+  return TCL_OK;
 }
 
 FUNCTION_HANDLER(session, writeDots) {
@@ -833,21 +803,18 @@ FUNCTION_HANDLER(session, writeDots) {
   unsigned int size;
   TEST_TCL_OK(getCellCount(interp, session, &size));
 
-  {
-    unsigned char buffer[size];
-    int count;
-    const unsigned char *cells = Tcl_GetByteArrayFromObj(objv[2], &count);
+  unsigned char buffer[size];
+  int count;
+  const unsigned char *cells = Tcl_GetByteArrayFromObj(objv[2], &count);
 
-    if (count < size) {
-      memcpy(buffer, cells, count);
-      memset(&buffer[count], 0, size-count);
-      cells = buffer;
-    }
-
-    if (brlapi__writeDots(session->handle, cells) != -1) return TCL_OK;
-    setBrlapiError(interp);
-    return TCL_ERROR;
+  if (count < size) {
+    memcpy(buffer, cells, count);
+    memset(&buffer[count], 0, size-count);
+    cells = buffer;
   }
+
+  TEST_BRLAPI_OK(brlapi__writeDots(session->handle, cells));
+  return TCL_OK;
 }
 
 static int
@@ -902,26 +869,16 @@ changeKeys (
         codes[codeIndex] = code;
       }
 
-      {
-        int result = change(session->handle, rangeType, codes, codeCount);
-        if (result != -1) return TCL_OK;
-
-        setBrlapiError(interp);
-        return TCL_ERROR;
-      }
+      TEST_BRLAPI_OK(change(session->handle, rangeType, codes, codeCount));
+      return TCL_OK;
     }
   } else if (codeList) {
     setStringResult(interp, "unexpected key code list", -1);
     return TCL_ERROR;
   }
 
-  {
-    int result = change(session->handle, rangeType, NULL, 0);
-    if (result != -1) return TCL_OK;
-                         brlapi__acceptKeys(session->handle, rangeType, NULL, 0);
-    setBrlapiError(interp);
-    return TCL_ERROR;
-  }
+  TEST_BRLAPI_OK(change(session->handle, rangeType, NULL, 0));
+  return TCL_OK;
 }
 
 FUNCTION_HANDLER(session, acceptKeys) {
@@ -971,22 +928,12 @@ changeKeyRanges (
       }
     }
 
-    {
-      int result = change(session->handle, ranges, rangeCount);
-      if (result != -1) return TCL_OK;
-
-      setBrlapiError(interp);
-      return TCL_ERROR;
-    }
+    TEST_BRLAPI_OK(change(session->handle, ranges, rangeCount));
+    return TCL_OK;
   }
 
-  {
-    int result = change(session->handle, NULL, 0);
-    if (result != -1) return TCL_OK;
-
-    setBrlapiError(interp);
-    return TCL_ERROR;
-  }
+  TEST_BRLAPI_OK(change(session->handle, NULL, 0));
+  return TCL_OK;
 }
 
 FUNCTION_HANDLER(session, acceptKeyRanges) {
@@ -1049,10 +996,7 @@ FUNCTION_HANDLER(general, describeKeyCode) {
   if (!array) return TCL_ERROR;
 
   brlapi_describedKeyCode_t dkc;
-  if (brlapi_describeKeyCode(keyCode, &dkc) == -1) {
-    setBrlapiError(interp);
-    return TCL_ERROR;
-  }
+  TEST_BRLAPI_OK(brlapi_describeKeyCode(keyCode, &dkc));
 
   SET_ARRAY_ELEMENT("type", Tcl_NewStringObj(dkc.type, -1));
   SET_ARRAY_ELEMENT("command", Tcl_NewStringObj(dkc.command, -1));
@@ -1082,10 +1026,7 @@ FUNCTION_HANDLER(general, expandKeyCode) {
   if (!array) return TCL_ERROR;
 
   brlapi_expandedKeyCode_t ekc;
-  if (brlapi_expandKeyCode(keyCode, &ekc) == -1) {
-    setBrlapiError(interp);
-    return TCL_ERROR;
-  }
+  TEST_BRLAPI_OK(brlapi_expandKeyCode(keyCode, &ekc));
 
   SET_ARRAY_ELEMENT("type", Tcl_NewIntObj(ekc.type));
   SET_ARRAY_ELEMENT("command", Tcl_NewIntObj(ekc.command));
@@ -1096,7 +1037,6 @@ FUNCTION_HANDLER(general, expandKeyCode) {
 
 FUNCTION_HANDLER(general, getHandleSize) {
   TEST_FUNCTION_NO_ARGUMENTS();
-
   setIntResult(interp, brlapi_getHandleSize());
   return TCL_OK;
 }
