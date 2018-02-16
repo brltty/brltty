@@ -619,16 +619,6 @@ OPTION_HANDLER(session, write, andMask) {
   return TCL_OK;
 }
 
-OPTION_HANDLER(session, write, begin) {
-  WriteOptions *options = data;
-  int offset;
-  TEST_TCL_OK(Tcl_GetIntFromObj(interp, objv[1], &offset));
-
-  if (offset < 0) offset = 0;
-  options->arguments.regionBegin = offset;
-  return TCL_OK;
-}
-
 OPTION_HANDLER(session, write, cursor) {
   WriteOptions *options = data;
   return parseCursorOperand(interp, objv[1], &options->arguments.cursor);
@@ -661,6 +651,20 @@ OPTION_HANDLER(session, write, orMask) {
   return TCL_OK;
 }
 
+OPTION_HANDLER(session, write, region) {
+  WriteOptions *options = data;
+
+  int start;
+  TEST_TCL_OK(Tcl_GetIntFromObj(interp, objv[1], &start));
+
+  int size;
+  TEST_TCL_OK(Tcl_GetIntFromObj(interp, objv[2], &size));
+
+  options->arguments.regionBegin = start + 1;
+  options->arguments.regionSize = size;
+  return TCL_OK;
+}
+
 OPTION_HANDLER(session, write, text) {
   WriteOptions *options = data;
   options->textObject = objv[1];
@@ -681,10 +685,6 @@ FUNCTION_HANDLER(session, write) {
       OPERANDS(1, "<dots>")
     },
 
-    { OPTION(session, write, begin),
-      OPERANDS(1, "<offset>")
-    },
-
     { OPTION(session, write, cursor),
       OPERANDS(1, "{leave | off | <offset>}")
     },
@@ -695,6 +695,10 @@ FUNCTION_HANDLER(session, write) {
 
     { OPTION(session, write, orMask),
       OPERANDS(1, "<dots>")
+    },
+
+    { OPTION(session, write, region),
+      OPERANDS(2, "<start> <size>")
     },
 
     { OPTION(session, write, text),
@@ -751,12 +755,20 @@ FUNCTION_HANDLER(session, write) {
   TEST_TCL_OK(getCellCount(interp, session, &cellCount));
 
   if (options.arguments.regionBegin) {
-    if (options.arguments.regionBegin >= cellCount) return TCL_OK;
-    cellCount -= options.arguments.regionBegin - 1;
-  }
+    int begin = options.arguments.regionBegin;
+    int size = options.arguments.regionSize;
 
-  if (characterCount > cellCount) {
-    characterCount = cellCount;
+    if ((begin < 1) || (begin >= cellCount)) {
+      setStringResult(interp, "beginning of region out of range", -1);
+      return TCL_ERROR;
+    }
+
+    if ((size < 1) || (((begin - 1) + size) > cellCount)) {
+      setStringResult(interp, "size of region out of range", -1);
+      return TCL_ERROR;
+    }
+
+    cellCount = size;
   }
 
   unsigned char andMask[cellCount];

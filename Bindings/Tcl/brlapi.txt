@@ -38,7 +38,7 @@ brlapi<sessionNumber> function [arg ...]
       -text <string>
       -andMask <dots>
       -orMask <dots>
-      -begin <offset>
+      -region <start> <size>
       -cursor {leave | off | <offset>}
       -displayNumber {default | <number>}
    writeDots <dots>
