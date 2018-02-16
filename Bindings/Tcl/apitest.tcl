@@ -88,8 +88,8 @@ proc ttyShowKey {session} {
    }
 
    set text [join $properties " "]
-   putProperties Key $text
    $session write -text $text
+   putProperties Key $text
 
    ttySetTimeout
 }

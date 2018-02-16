@@ -702,29 +702,40 @@ FUNCTION_HANDLER(session, write) {
     }
   END_OPTIONS(2)
 
-  if (options.textObject) options.arguments.charset = "UTF-8";
-
   {
     typedef struct {
       const char *name;
-      int value;
+      const void *address;
+      int length;
     } LengthEntry;
 
     const LengthEntry lengths[] = {
-      {.name="text", .value=options.textLength},
-      {.name="andMask", .value=options.andLength},
-      {.name="orMask", .value=options.orLength},
-      {.name=NULL}
+      { .name = "text",
+        .address = options.textObject,
+        .length = options.textLength
+      },
+
+      { .name = "andMask",
+        .address = options.arguments.andMask,
+        .length = options.andLength
+      },
+
+      { .name = "orMask",
+        .address = options.arguments.orMask,
+        .length = options.orLength
+      },
+
+      { .name = NULL }
     };
 
     const LengthEntry *current = lengths;
     const LengthEntry *first = NULL;
 
     while (current->name) {
-      if (current->value) {
+      if (current->address) {
         if (!first) {
           first = current;
-        } else if (current->value != first->value) {
+        } else if (current->length != first->length) {
           setStringsResult(interp, first->name, "/", current->name, " length mismatch", NULL);
           return TCL_ERROR;
         }
@@ -733,66 +744,67 @@ FUNCTION_HANDLER(session, write) {
       current += 1;
     }
 
-    if (first) options.arguments.regionSize = first->value;
+    if (first) options.arguments.regionSize = first->length;
   }
 
+  unsigned int cellCount;
+  TEST_TCL_OK(getCellCount(interp, session, &cellCount));
+
   if (options.arguments.regionBegin) {
-    if (options.textObject) {
-      int length;
-      options.arguments.text = Tcl_GetStringFromObj(options.textObject, &length);
-      if (!options.arguments.text) return TCL_ERROR;
+    if (options.arguments.regionBegin >= cellCount) return TCL_OK;
+    cellCount -= options.arguments.regionBegin - 1;
+  }
+
+  if (options.arguments.regionSize > cellCount) {
+    options.arguments.regionSize = cellCount;
+  }
+
+  unsigned char andMask[cellCount];
+  unsigned char orMask[cellCount];
+
+  if (options.arguments.regionSize < cellCount) {
+    if (options.arguments.andMask) {
+      memset(andMask, 0XFF, cellCount);
+      memcpy(andMask, options.arguments.andMask, options.arguments.regionSize);
+      options.arguments.andMask = andMask;
     }
 
-    TEST_BRLAPI_OK(brlapi__write(session->handle, &options.arguments));
-  } else {
-    unsigned int size;
-    TEST_TCL_OK(getCellCount(interp, session, &size));
+    if (options.arguments.orMask) {
+      memset(orMask, 0X00, cellCount);
+      memcpy(orMask, options.arguments.orMask, options.arguments.regionSize);
+      options.arguments.orMask = orMask;
+    }
 
-    unsigned char andMask[size];
-    unsigned char orMask[size];
-
-    if (options.arguments.regionSize < size) {
-      if (options.arguments.andMask) {
-        memset(andMask, 0XFF, size);
-        memcpy(andMask, options.arguments.andMask, options.arguments.regionSize);
-        options.arguments.andMask = andMask;
-      }
-
-      if (options.arguments.orMask) {
-        memset(orMask, 0X00, size);
-        memcpy(orMask, options.arguments.orMask, options.arguments.regionSize);
-        options.arguments.orMask = orMask;
-      }
-
-      if (options.textObject) {
-        if (Tcl_IsShared(options.textObject)) {
-          if (!(options.textObject = Tcl_DuplicateObj(options.textObject))) {
-            return TCL_ERROR;
-          }
-        }
-
-        do {
-          Tcl_AppendToObj(options.textObject, " ", -1);
-        } while (Tcl_GetCharLength(options.textObject) < size);
-      }
-    } else if (options.arguments.regionSize > size) {
-      if (options.textObject) {
-        if (!(options.textObject = Tcl_GetRange(options.textObject, 0, options.arguments.regionSize-1))) {
+    if (options.textObject) {
+      if (Tcl_IsShared(options.textObject)) {
+        if (!(options.textObject = Tcl_DuplicateObj(options.textObject))) {
           return TCL_ERROR;
         }
       }
-    }
 
-    options.arguments.regionSize = 0;
+      do {
+        Tcl_AppendToObj(options.textObject, " ", -1);
+      } while (Tcl_GetCharLength(options.textObject) < cellCount);
+    }
+  } else if (options.arguments.regionSize > cellCount) {
     if (options.textObject) {
-      int length;
-      options.arguments.text = Tcl_GetStringFromObj(options.textObject, &length);
-      if (!options.arguments.text) return TCL_ERROR;
+      if (!(options.textObject = Tcl_GetRange(options.textObject, 0, options.arguments.regionSize-1))) {
+        return TCL_ERROR;
+      }
     }
-
-    TEST_BRLAPI_OK(brlapi__write(session->handle, &options.arguments));
   }
 
+  options.arguments.regionSize = 0;
+
+  if (options.textObject) {
+    int length;
+    options.arguments.text = Tcl_GetStringFromObj(options.textObject, &length);
+    if (!options.arguments.text) return TCL_ERROR;
+
+    options.arguments.charset = "UTF-8";
+  }
+
+  TEST_BRLAPI_OK(brlapi__write(session->handle, &options.arguments));
   return TCL_OK;
 }
 
