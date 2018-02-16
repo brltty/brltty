@@ -610,6 +610,7 @@ typedef struct {
   int textLength;
   int andLength;
   int orLength;
+  unsigned regionSpecified:1;
 } WriteOptions;
 
 OPTION_HANDLER(session, write, andMask) {
@@ -662,6 +663,7 @@ OPTION_HANDLER(session, write, region) {
 
   options->arguments.regionBegin = start + 1;
   options->arguments.regionSize = size;
+  options->regionSpecified = 1;
   return TCL_OK;
 }
 
@@ -754,7 +756,7 @@ FUNCTION_HANDLER(session, write) {
   unsigned int cellCount;
   TEST_TCL_OK(getCellCount(interp, session, &cellCount));
 
-  if (options.arguments.regionBegin) {
+  if (options.regionSpecified) {
     int begin = options.arguments.regionBegin;
     int size = options.arguments.regionSize;
 
