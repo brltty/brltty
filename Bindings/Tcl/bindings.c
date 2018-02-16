@@ -593,8 +593,8 @@ typedef struct {
   int andLength;
   int orLength;
 
-  unsigned cursorSpecified:1;
-  unsigned displaySpecified:1;
+  unsigned numericCursor:1;
+  unsigned numericDisplay:1;
   unsigned regionSpecified:1;
 } WriteOptions;
 
@@ -607,6 +607,7 @@ OPTION_HANDLER(session, write, and) {
 
 OPTION_HANDLER(session, write, cursor) {
   WriteOptions *options = data;
+  int isNumeric = 0;
 
   Tcl_Obj *object = objv[1];
   const char *operand = Tcl_GetString(object);
@@ -621,14 +622,16 @@ OPTION_HANDLER(session, write, cursor) {
     TEST_TCL_OK(Tcl_GetIntFromObj(interp, object, &position));
 
     options->arguments.cursor = position + 1;
-    options->cursorSpecified = 1;
+    isNumeric = 1;
   }
 
+  options->numericCursor = isNumeric;
   return TCL_OK;
 }
 
 OPTION_HANDLER(session, write, display) {
   WriteOptions *options = data;
+  int isNumeric = 0;
 
   Tcl_Obj *object = objv[1];
   const char *operand = Tcl_GetString(object);
@@ -641,9 +644,10 @@ OPTION_HANDLER(session, write, display) {
     TEST_TCL_OK(Tcl_GetIntFromObj(interp, object, &number));
 
     options->arguments.displayNumber = number;
-    options->displaySpecified = 1;
+    isNumeric = 1;
   }
 
+  options->numericDisplay = isNumeric;
   return TCL_OK;
 }
 
@@ -710,7 +714,7 @@ FUNCTION_HANDLER(session, write) {
     }
   END_OPTIONS(2)
 
-  if (options.displaySpecified) {
+  if (options.numericDisplay) {
     if (options.arguments.displayNumber < 0) {
       setStringResult(interp, "display number out of range", -1);
       return TCL_ERROR;
@@ -765,7 +769,7 @@ FUNCTION_HANDLER(session, write) {
   unsigned int cellCount;
   TEST_TCL_OK(getCellCount(interp, session, &cellCount));
 
-  if (options.cursorSpecified) {
+  if (options.numericCursor) {
     int position = options.arguments.cursor - 1;
 
     if ((position < 0) || (position >= cellCount)) {
@@ -827,15 +831,49 @@ FUNCTION_HANDLER(session, write) {
   }
 
   if (options.textObject) {
-    int length;
-    options.arguments.text = Tcl_GetStringFromObj(options.textObject, &length);
-    if (!options.arguments.text) return TCL_ERROR;
-
     options.arguments.charset = "UTF-8";
+    options.textLength = Tcl_GetCharLength(options.textObject);
+
+    options.arguments.text = Tcl_GetString(options.textObject);
+    if (!options.arguments.text) return TCL_ERROR;
   }
 
-  TEST_BRLAPI_OK(brlapi__write(session->handle, &options.arguments));
-  return TCL_OK;
+  // TCL uses C0,80 as the UTF-8 representation for NUL.
+  // This causes problems for BrlAPI.
+  {
+    const char *text = options.arguments.text;
+    size_t length = text? strlen(text): 0;
+    char buffer[length? length: 1];
+
+    if (text) {
+      const char *from = text;
+      char *to = buffer;
+
+      while (1) {
+        const char *nul = strstr(from, "\xC0\x80");
+
+        if (!nul) {
+          if (to != buffer) {
+            strcpy(to, from);
+            options.arguments.text = buffer;
+          }
+
+          break;
+        }
+
+        size_t count = nul - from;
+        memcpy(to, from, count);
+        to += count;
+        *to++ = 0;
+        from += count + 2;
+        length -= 1;
+      }
+    }
+
+    options.arguments.textSize = length;
+    TEST_BRLAPI_OK(brlapi__write(session->handle, &options.arguments));
+    return TCL_OK;
+  }
 }
 
 FUNCTION_HANDLER(session, writeDots) {
