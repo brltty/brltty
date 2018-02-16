@@ -800,7 +800,7 @@ FUNCTION_HANDLER(session, write) {
     }
   } else if (characterCount > cellCount) {
     if (options.textObject) {
-      if (!(options.textObject = Tcl_GetRange(options.textObject, 0, characterCount-1))) {
+      if (!(options.textObject = Tcl_GetRange(options.textObject, 0, cellCount-1))) {
         return TCL_ERROR;
       }
     }
