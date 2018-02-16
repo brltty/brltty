@@ -268,26 +268,6 @@ processOptions (
   .operands = (count), .syntax = ((count)? (text): NULL)
 
 static int
-parseCursorOperand (Tcl_Interp *interp, Tcl_Obj *obj, int *cursor) {
-  const char *string = Tcl_GetString(obj);
-  if (!string) return TCL_ERROR;
-
-  if (strcmp(string, "off") == 0) {
-    *cursor = BRLAPI_CURSOR_OFF;
-  } else if (strcmp(string, "leave") == 0) {
-    *cursor = BRLAPI_CURSOR_LEAVE;
-  } else {
-    int number;
-    TEST_TCL_OK(Tcl_GetIntFromObj(interp, obj, &number));
-
-    if (number < 1) number = 1;
-    *cursor = number;
-  }
-
-  return TCL_OK;
-}
-
-static int
 getSessionStringProperty (
   Tcl_Interp *interp, BrlapiSession *session,
   int BRLAPI_STDCALL (*getProperty) (brlapi_handle_t *handle, char *buffer, size_t size)
@@ -606,14 +586,19 @@ FUNCTION_HANDLER(session, suspendDriver) {
 
 typedef struct {
   brlapi_writeArguments_t arguments;
+
   Tcl_Obj *textObject;
   int textLength;
+
   int andLength;
   int orLength;
+
+  unsigned cursorSpecified:1;
+  unsigned displaySpecified:1;
   unsigned regionSpecified:1;
 } WriteOptions;
 
-OPTION_HANDLER(session, write, andMask) {
+OPTION_HANDLER(session, write, and) {
   WriteOptions *options = data;
   options->arguments.andMask = Tcl_GetByteArrayFromObj(objv[1], &options->andLength);
   if (!options->andLength) options->arguments.andMask = NULL;
@@ -622,30 +607,47 @@ OPTION_HANDLER(session, write, andMask) {
 
 OPTION_HANDLER(session, write, cursor) {
   WriteOptions *options = data;
-  return parseCursorOperand(interp, objv[1], &options->arguments.cursor);
-}
 
-OPTION_HANDLER(session, write, displayNumber) {
-  WriteOptions *options = data;
-  Tcl_Obj *obj = objv[1];
+  Tcl_Obj *object = objv[1];
+  const char *operand = Tcl_GetString(object);
+  if (!operand) return TCL_ERROR;
 
-  const char *string = Tcl_GetString(obj);
-  if (!string) return TCL_ERROR;
-
-  if (strcmp(string, "default") == 0) {
-    options->arguments.displayNumber = BRLAPI_DISPLAY_DEFAULT;
+  if (strcmp(operand, "off") == 0) {
+    options->arguments.cursor = BRLAPI_CURSOR_OFF;
+  } else if (strcmp(operand, "leave") == 0) {
+    options->arguments.cursor = BRLAPI_CURSOR_LEAVE;
   } else {
-    int number;
-    TEST_TCL_OK(Tcl_GetIntFromObj(interp, obj, &number));
+    int position;
+    TEST_TCL_OK(Tcl_GetIntFromObj(interp, object, &position));
 
-    if (number < 0) number = 0;
-    options->arguments.displayNumber = number;
+    options->arguments.cursor = position + 1;
+    options->cursorSpecified = 1;
   }
 
   return TCL_OK;
 }
 
-OPTION_HANDLER(session, write, orMask) {
+OPTION_HANDLER(session, write, display) {
+  WriteOptions *options = data;
+
+  Tcl_Obj *object = objv[1];
+  const char *operand = Tcl_GetString(object);
+  if (!operand) return TCL_ERROR;
+
+  if (strcmp(operand, "default") == 0) {
+    options->arguments.displayNumber = BRLAPI_DISPLAY_DEFAULT;
+  } else {
+    int number;
+    TEST_TCL_OK(Tcl_GetIntFromObj(interp, object, &number));
+
+    options->arguments.displayNumber = number;
+    options->displaySpecified = 1;
+  }
+
+  return TCL_OK;
+}
+
+OPTION_HANDLER(session, write, or) {
   WriteOptions *options = data;
   options->arguments.orMask = Tcl_GetByteArrayFromObj(objv[1], &options->orLength);
   if (!options->orLength) options->arguments.orMask = NULL;
@@ -657,12 +659,12 @@ OPTION_HANDLER(session, write, region) {
 
   int start;
   TEST_TCL_OK(Tcl_GetIntFromObj(interp, objv[1], &start));
+  options->arguments.regionBegin = start + 1;
 
   int size;
   TEST_TCL_OK(Tcl_GetIntFromObj(interp, objv[2], &size));
-
-  options->arguments.regionBegin = start + 1;
   options->arguments.regionSize = size;
+
   options->regionSpecified = 1;
   return TCL_OK;
 }
@@ -683,7 +685,7 @@ FUNCTION_HANDLER(session, write) {
   };
 
   BEGIN_OPTIONS
-    { OPTION(session, write, andMask),
+    { OPTION(session, write, and),
       OPERANDS(1, "<dots>")
     },
 
@@ -691,11 +693,11 @@ FUNCTION_HANDLER(session, write) {
       OPERANDS(1, "{leave | off | <offset>}")
     },
 
-    { OPTION(session, write, displayNumber),
+    { OPTION(session, write, display),
       OPERANDS(1, "{default | <number>}")
     },
 
-    { OPTION(session, write, orMask),
+    { OPTION(session, write, or),
       OPERANDS(1, "<dots>")
     },
 
@@ -707,6 +709,13 @@ FUNCTION_HANDLER(session, write) {
       OPERANDS(1, "<string>")
     }
   END_OPTIONS(2)
+
+  if (options.displaySpecified) {
+    if (options.arguments.displayNumber < 0) {
+      setStringResult(interp, "display number out of range", -1);
+      return TCL_ERROR;
+    }
+  }
 
   int characterCount = 0;
   {
@@ -755,6 +764,15 @@ FUNCTION_HANDLER(session, write) {
 
   unsigned int cellCount;
   TEST_TCL_OK(getCellCount(interp, session, &cellCount));
+
+  if (options.cursorSpecified) {
+    int position = options.arguments.cursor - 1;
+
+    if ((position < 0) || (position >= cellCount)) {
+      setStringResult(interp, "cursor position out of range", -1);
+      return TCL_ERROR;
+    }
+  }
 
   if (options.regionSpecified) {
     int begin = options.arguments.regionBegin;
