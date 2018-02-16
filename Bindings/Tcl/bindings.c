@@ -702,6 +702,7 @@ FUNCTION_HANDLER(session, write) {
     }
   END_OPTIONS(2)
 
+  int characterCount = 0;
   {
     typedef struct {
       const char *name;
@@ -735,6 +736,7 @@ FUNCTION_HANDLER(session, write) {
       if (current->address) {
         if (!first) {
           first = current;
+          characterCount = current->length;
         } else if (current->length != first->length) {
           setStringsResult(interp, first->name, "/", current->name, " length mismatch", NULL);
           return TCL_ERROR;
@@ -743,8 +745,6 @@ FUNCTION_HANDLER(session, write) {
 
       current += 1;
     }
-
-    if (first) options.arguments.regionSize = first->length;
   }
 
   unsigned int cellCount;
@@ -755,23 +755,23 @@ FUNCTION_HANDLER(session, write) {
     cellCount -= options.arguments.regionBegin - 1;
   }
 
-  if (options.arguments.regionSize > cellCount) {
-    options.arguments.regionSize = cellCount;
+  if (characterCount > cellCount) {
+    characterCount = cellCount;
   }
 
   unsigned char andMask[cellCount];
   unsigned char orMask[cellCount];
 
-  if (options.arguments.regionSize < cellCount) {
+  if (characterCount < cellCount) {
     if (options.arguments.andMask) {
       memset(andMask, 0XFF, cellCount);
-      memcpy(andMask, options.arguments.andMask, options.arguments.regionSize);
+      memcpy(andMask, options.arguments.andMask, characterCount);
       options.arguments.andMask = andMask;
     }
 
     if (options.arguments.orMask) {
       memset(orMask, 0X00, cellCount);
-      memcpy(orMask, options.arguments.orMask, options.arguments.regionSize);
+      memcpy(orMask, options.arguments.orMask, characterCount);
       options.arguments.orMask = orMask;
     }
 
@@ -786,15 +786,13 @@ FUNCTION_HANDLER(session, write) {
         Tcl_AppendToObj(options.textObject, " ", -1);
       } while (Tcl_GetCharLength(options.textObject) < cellCount);
     }
-  } else if (options.arguments.regionSize > cellCount) {
+  } else if (characterCount > cellCount) {
     if (options.textObject) {
-      if (!(options.textObject = Tcl_GetRange(options.textObject, 0, options.arguments.regionSize-1))) {
+      if (!(options.textObject = Tcl_GetRange(options.textObject, 0, characterCount-1))) {
         return TCL_ERROR;
       }
     }
   }
-
-  options.arguments.regionSize = 0;
 
   if (options.textObject) {
     int length;
