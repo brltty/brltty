@@ -2061,6 +2061,7 @@ void BRLAPI_STDCALL brlapi__defaultExceptionHandler(brlapi_handle_t *handle, int
   char str[0X100];
   brlapi_strexception(str,0X100, err, type, packet, size);
   fprintf(stderr, "BrlAPI exception: %s\nYou may wish to add the -ldebug option to the brltty command line in order to get additional information in the system log\n", str);
+  fprintf(stderr, "Crashing the client now. You may want to use brlapi_setExceptionHandler to define your own exception handling.\n");
   abort();
 }
 
