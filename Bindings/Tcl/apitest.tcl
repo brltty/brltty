@@ -43,7 +43,7 @@ proc formatValues {values args} {
 proc ttyHandleTimeout {} {
    global ttyTimeoutEvent ttyReturnCode
    unset ttyTimeoutEvent
-   set ttyReturnCode 0
+   set ttyReturnCode TIMEOUT
 }
 
 proc ttyCancelTimeout {} {
@@ -61,10 +61,9 @@ proc ttySetTimeout {} {
    set ttyTimeoutEvent [after 10000 [list ttyHandleTimeout]]
 }
 
-proc ttyShowKey {session} {
+proc ttyShowKeyCode {session code} {
    set properties [list]
 
-   set code [$session readKey 0]
    brlapi describeKeyCode $code description
    set description(code) [format "0X%X" $code]
 
@@ -90,7 +89,10 @@ proc ttyShowKey {session} {
    set text [join $properties " "]
    $session write -text $text
    putProperties Key $text
+}
 
+proc ttyShowKey {session} {
+   ttyShowKeyCode $session [$session readKey 0]
    ttySetTimeout
 }
 
