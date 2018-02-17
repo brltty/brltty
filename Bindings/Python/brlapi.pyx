@@ -363,6 +363,16 @@ cdef class Connection:
 			else:
 				return identifier
 
+	def getLibraryVersion(self):
+		"""Get the BrlAPI version as a three-element list (major, minor, revision).
+		See brlapi_getLibraryVersion(3)."""
+		cdef int major
+		cdef int minor
+		cdef int revision
+		with nogil:
+			c_brlapi.brlapi_getLibraryVersion(&major, &minor, &revision)
+		return (major, minor, revision)
+
 	def enterTtyMode(self, tty = TTY_DEFAULT, driver = None):
 		"""Ask for some tty, with some key mechanism
 

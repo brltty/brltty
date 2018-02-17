@@ -56,11 +56,12 @@ cdef extern from "Programs/brlapi.h":
 
 	ctypedef unsigned long long brlapi_keyCode_t
 
+	void brlapi_getLibraryVersion(int *major, int *minor, int *revision) nogil
 	size_t brlapi_getHandleSize()
 	void brlapi__closeConnection(brlapi_handle_t *)
 	int brlapi__openConnection(brlapi_handle_t *, brlapi_connectionSettings_t*, brlapi_connectionSettings_t*) nogil
 
-	int brlapi__getDisplaySize(brlapi_handle_t *, unsigned int*, unsigned int *y) nogil
+	int brlapi__getDisplaySize(brlapi_handle_t *, unsigned int*x, unsigned int *y) nogil
 	int brlapi__getDriverName(brlapi_handle_t *, char*, int) nogil
 	int brlapi__getModelIdentifier(brlapi_handle_t *, char*, int) nogil
 

@@ -94,10 +94,14 @@ if __name__ == "__main__":
     brl = brlapi.Connection()
 
     try:
-      writeProperty("Driver", brl.driverName)
-      writeProperty("Model", brl.modelIdentifier)
-      writeProperty("Columns", str(brl.displaySize[0]))
-      writeProperty("Rows", str(brl.displaySize[1]))
+      writeProperty("BrlAPI Version", ".".join(map(str, brl.getLibraryVersion())))
+      writeProperty("File Descriptor", str(brl.fileDescriptor))
+      writeProperty("Server Host", brl.host)
+      writeProperty("Authorization Schemes", brl.auth)
+      writeProperty("Driver Name", brl.driverName)
+      writeProperty("Model Identifier", brl.modelIdentifier)
+      writeProperty("Display Width", str(brl.displaySize[0]))
+      writeProperty("Display Height", str(brl.displaySize[1]))
 
       brl.enterTtyMode()
       brl.writeText("The Python bindings for BrlAPI seem to be working.")
