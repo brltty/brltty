@@ -24,12 +24,17 @@ public class Native {
     System.loadLibrary("brlapi_java");
   }
 
+  public native static int getMajorVersion ();
+  public native static int getMinorVersion ();
+  public native static int getRevision ();
+
   protected long handle;
 
   protected native int openConnection (
     ConnectionSettings desiredSettings,
-    ConnectionSettings actualSettings)
-    throws Error;
+    ConnectionSettings actualSettings
+  ) throws Error;
+
   public native void closeConnection ();
 
   public native String getDriverName () throws Error;

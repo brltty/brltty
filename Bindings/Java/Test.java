@@ -19,8 +19,19 @@
 
 package org.a11y.BrlAPI;
 
+import java.io.PrintStream;
+
 public class Test implements Constants {
-  public static void main(String argv[]) {
+  private static void writeProperty (String name, String format, Object... values) {
+    PrintStream stream = System.out;
+
+    stream.print(name);
+    stream.print(": ");
+    stream.print(String.format(format, values));
+    stream.println();
+  }
+
+  public static void main (String argv[]) {
     ConnectionSettings settings = new ConnectionSettings();
 
     {
@@ -43,26 +54,26 @@ public class Test implements Constants {
       }
     }
 
+    writeProperty("BrlAPI Version", "%d.%d.%d",
+      Native.getMajorVersion(),
+      Native.getMinorVersion(),
+      Native.getRevision()
+    );
+
     try {
-      System.out.print("Connecting to BrlAPI... ");
       Brlapi brlapi = new Brlapi(settings);
-      System.out.println("done (fd=" + brlapi.getFileDescriptor() + ")");
 
-      System.out.print("Connected to " + brlapi.getHost());
-      System.out.print(" using key file " + brlapi.getAuth());
-      System.out.println();
-
-      System.out.print("Driver is " + brlapi.getDriverName());
-      System.out.println();
-
-      System.out.print("Model is " + brlapi.getModelIdentifier());
-      System.out.println();
+      writeProperty("File Descriptor", "%d", brlapi.getFileDescriptor());
+      writeProperty("Server Host", "%s", brlapi.getServerHost());
+      writeProperty("Authorization Schemes", "%s", brlapi.getAuthorizationSchemes());
+      writeProperty("Driver Name", "%s", brlapi.getDriverName());
+      writeProperty("Model Identifier", "%s", brlapi.getModelIdentifier());
 
       DisplaySize size = brlapi.getDisplaySize();
-      System.out.println("Display size is " + size.getWidth() + "x" + size.getHeight());
+      writeProperty("Display Size",  "%dx%d", size.getWidth(), size.getHeight());
 
       int tty = brlapi.enterTtyMode();
-      System.out.println("TTY is " + tty);
+      writeProperty("TTY Number", "%d", tty);
 
       brlapi.writeText("ok !! €", Brlapi.CURSOR_OFF);
       brlapi.writeText(null, 1);

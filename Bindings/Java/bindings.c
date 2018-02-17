@@ -115,6 +115,32 @@ static void BRLAPI_STDCALL exceptionHandler(brlapi_handle_t *handle, int err, br
   return;
 }
 
+static int gotVersionNumbers = 0;
+static int majorVersion, minorVersion, revision;
+
+static void
+getVersionNumbers (void) {
+  if (!gotVersionNumbers) {
+    brlapi_getLibraryVersion(&majorVersion, &minorVersion, &revision);
+    gotVersionNumbers = 1;
+  }
+}
+
+JNIEXPORT jint JNICALL Java_org_a11y_BrlAPI_Native_getMajorVersion(JNIEnv *jenv, jobject jobj) {
+  getVersionNumbers();
+  return majorVersion;
+}
+
+JNIEXPORT jint JNICALL Java_org_a11y_BrlAPI_Native_getMinorVersion(JNIEnv *jenv, jobject jobj) {
+  getVersionNumbers();
+  return minorVersion;
+}
+
+JNIEXPORT jint JNICALL Java_org_a11y_BrlAPI_Native_getRevision(JNIEnv *jenv, jobject jobj) {
+  getVersionNumbers();
+  return revision;
+}
+
 #define GET_CLASS(jenv, class, obj, ret) \
   if (!((class) = (*(jenv))->GetObjectClass((jenv), (obj)))) { \
     ThrowException((jenv), ERR_NULLPTR, #obj " -> " #class); \

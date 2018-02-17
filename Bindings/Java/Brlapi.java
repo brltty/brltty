@@ -32,11 +32,11 @@ public class Brlapi extends Native implements Constants {
     closeConnection();
   }
 
-  public String getHost () {
+  public String getServerHost () {
     return settings.host;
   }
 
-  public String getAuth () {
+  public String getAuthorizationSchemes () {
     return settings.auth;
   }
 
