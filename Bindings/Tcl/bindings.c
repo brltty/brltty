@@ -1027,6 +1027,21 @@ FUNCTION_HANDLER(session, ignoreKeyRanges) {
 }
 
 static void
+handleBrlapiException (
+  brlapi_handle_t *handle,
+  int error, brlapi_packetType_t type,
+  const void *packet, size_t size
+) {
+  char message[0X100];
+
+  brlapi__strexception(
+    handle, message, sizeof(message), error, type, packet, size
+  );
+
+  fprintf(stderr, "BrlAPI exception: %s\n", message);
+}
+
+static void
 endSession (ClientData data) {
   BrlapiSession *session = data;
   brlapi__closeConnection(session->handle);
@@ -1223,6 +1238,7 @@ FUNCTION_HANDLER(general, openConnection) {
 
         if (command) {
           setStringResult(interp, name, -1);
+          brlapi__setExceptionHandler(session->handle, handleBrlapiException);
           return TCL_OK;
         }
       } else {
