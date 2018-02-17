@@ -51,17 +51,18 @@
    (tty :initform nil :reader entered-tty)))
 
 (defmethod print-properties ((obj display) stream)
-  (multiple-value-bind (width height) (display-size obj)
-    (format stream
-      "vers=~{~A~^.~} fd=~D host=~A auth=~A driver=~A model=~A width=~D height=~D"
-      (multiple-value-list (library-version))
-      (file-descriptor obj)
-      (server-host obj)
-      (server-auth obj)
-      (driver-name obj)
-      (model-identifier obj)
-      width
-      height
+  (format stream "version=~{~D~^.~}" (multiple-value-list (library-version)))
+  (if (is-connected obj)
+    (progn
+      (format stream " fd=~D" (file-descriptor obj))
+      (format stream " host=~A" (server-host obj))
+      (format stream " auth=~A" (server-auth obj))
+      (format stream " driver=~A" (driver-name obj))
+      (format stream " model=~A" (model-identifier obj))
+      (multiple-value-bind (width height) (display-size obj)
+        (format stream " width=~D" width)
+        (format stream " height=~D" height)
+      )
     )
   )
 )
