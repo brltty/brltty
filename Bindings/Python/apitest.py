@@ -94,7 +94,7 @@ if __name__ == "__main__":
     brl = brlapi.Connection()
 
     try:
-      writeProperty("BrlAPI Version", ".".join(map(str, brl.getLibraryVersion())))
+      writeProperty("BrlAPI Version", ".".join(map(str, brlapi.getLibraryVersion())))
       writeProperty("File Descriptor", str(brl.fileDescriptor))
       writeProperty("Server Host", brl.host)
       writeProperty("Authorization Schemes", brl.auth)
@@ -113,7 +113,7 @@ if __name__ == "__main__":
           target = handleTimeout
         )
 
-        properties = brl.expandKeyCode(key)
+        properties = brlapi.expandKeyCode(key)
         line = "Key:%ld (Typ:%x Cmd:%x Arg:%x Flg:%x)" % (
           key,
           properties["type"],

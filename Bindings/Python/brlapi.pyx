@@ -23,7 +23,7 @@ try:
   b.writeText("Press home, winup/dn or tab to continue ... ¤")
   key = b.readKey()
 
-  k = b.expandKeyCode(key)
+  k = brlapi.expandKeyCode(key)
   b.writeText("Key %ld (%x %x %x %x) !" % (key, k["type"], k["command"], k["argument"], k["flags"]))
   b.writeText(None,1)
   b.readKey()
@@ -77,6 +77,16 @@ except brlapi.ConnectionError as e:
 cimport c_brlapi
 import errno
 include "constants.auto.pyx"
+
+def getLibraryVersion():
+	"""Get the BrlAPI version as a three-element list (major, minor, revision).
+	See brlapi_getLibraryVersion(3)."""
+	cdef int major
+	cdef int minor
+	cdef int revision
+	with nogil:
+		c_brlapi.brlapi_getLibraryVersion(&major, &minor, &revision)
+	return (major, minor, revision)
 
 class OperationError(Exception):
 	"""Error while performing some operation"""
@@ -133,6 +143,17 @@ class ConnectionError(OperationError):
 	def auth(self):
 		"""Authentication method used"""
 		return self.settings.auth
+
+def expandKeyCode(code):
+	"""Expand a keycode into its individual components.
+	See brlapi_expandKeyCode(3)."""
+	cdef c_brlapi.brlapi_expandedKeyCode_t ekc
+	cdef int retval
+	retval = c_brlapi.brlapi_expandKeyCode(code, &ekc)
+	if retval == -1:
+		raise OperationError()
+	else:
+		return { "type":ekc.type, "command":ekc.command, "argument":ekc.argument, "flags":ekc.flags }
 
 cdef class WriteStruct:
 	"""Structure containing arguments to be given to Connection.write()
@@ -363,16 +384,6 @@ cdef class Connection:
 			else:
 				return identifier
 
-	def getLibraryVersion(self):
-		"""Get the BrlAPI version as a three-element list (major, minor, revision).
-		See brlapi_getLibraryVersion(3)."""
-		cdef int major
-		cdef int minor
-		cdef int revision
-		with nogil:
-			c_brlapi.brlapi_getLibraryVersion(&major, &minor, &revision)
-		return (major, minor, revision)
-
 	def enterTtyMode(self, tty = TTY_DEFAULT, driver = None):
 		"""Ask for some tty, with some key mechanism
 
@@ -569,17 +580,6 @@ cdef class Connection:
 		else:
 			return code
 
-	def expandKeyCode(self, code):
-		"""Expand a keycode into its individual components.
-		See brlapi_expandKeyCode(3)."""
-		cdef c_brlapi.brlapi_expandedKeyCode_t ekc
-		cdef int retval
-		retval = c_brlapi.brlapi_expandKeyCode(code, &ekc)
-		if retval == -1:
-			raise OperationError()
-		else:
-			return { "type":ekc.type, "command":ekc.command, "argument":ekc.argument, "flags":ekc.flags }
-	
 	def ignoreKeys(self, key_type, set):
 		"""Ignore some key presses from the braille keyboard.
 		See brlapi_ignoreKeys(3).
