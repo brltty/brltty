@@ -90,11 +90,12 @@ if __name__ == "__main__":
   def writeProperty (name, value):
     sys.stdout.write(name + ": " + value + "\n")
 
+  writeProperty("BrlAPI Version", ".".join(map(str, brlapi.getLibraryVersion())))
+
   try:
     brl = brlapi.Connection()
 
     try:
-      writeProperty("BrlAPI Version", ".".join(map(str, brlapi.getLibraryVersion())))
       writeProperty("File Descriptor", str(brl.fileDescriptor))
       writeProperty("Server Host", brl.host)
       writeProperty("Authorization Schemes", brl.auth)
@@ -107,23 +108,24 @@ if __name__ == "__main__":
       brl.writeText("The Python bindings for BrlAPI seem to be working.")
 
       while True:
-        key = readKey(
+        code = readKey(
           connection = brl,
           timeout = 10,
           target = handleTimeout
         )
 
-        properties = brlapi.expandKeyCode(key)
-        line = "Key:%ld (Typ:%x Cmd:%x Arg:%x Flg:%x)" % (
-          key,
+        properties = brlapi.expandKeyCode(code)
+
+        text = "code=0X%X type=%X cmd=%X arg=%X flg=%X" % (
+          code,
           properties["type"],
           properties["command"],
           properties["argument"],
           properties["flags"]
         )
 
-        brl.writeText(line)
-        sys.stdout.write(line + "\n")
+        brl.writeText(text)
+        writeProperty("Key", text);
 
       brl.leaveTtyMode()
     finally:

@@ -88,6 +88,17 @@ def getLibraryVersion():
 		c_brlapi.brlapi_getLibraryVersion(&major, &minor, &revision)
 	return (major, minor, revision)
 
+def expandKeyCode(code):
+	"""Expand a keycode into its individual components.
+	See brlapi_expandKeyCode(3)."""
+	cdef c_brlapi.brlapi_expandedKeyCode_t ekc
+	cdef int retval
+	retval = c_brlapi.brlapi_expandKeyCode(code, &ekc)
+	if retval == -1:
+		raise OperationError()
+	else:
+		return { "type":ekc.type, "command":ekc.command, "argument":ekc.argument, "flags":ekc.flags }
+
 class OperationError(Exception):
 	"""Error while performing some operation"""
 	def __init__(self):
@@ -143,17 +154,6 @@ class ConnectionError(OperationError):
 	def auth(self):
 		"""Authentication method used"""
 		return self.settings.auth
-
-def expandKeyCode(code):
-	"""Expand a keycode into its individual components.
-	See brlapi_expandKeyCode(3)."""
-	cdef c_brlapi.brlapi_expandedKeyCode_t ekc
-	cdef int retval
-	retval = c_brlapi.brlapi_expandKeyCode(code, &ekc)
-	if retval == -1:
-		raise OperationError()
-	else:
-		return { "type":ekc.type, "command":ekc.command, "argument":ekc.argument, "flags":ekc.flags }
 
 cdef class WriteStruct:
 	"""Structure containing arguments to be given to Connection.write()
@@ -579,6 +579,12 @@ cdef class Connection:
 			return None
 		else:
 			return code
+
+	def expandKeyCode(self, code):
+		"""Expand a keycode into its individual components.
+		This is a stub to maintain backward compatibility.
+		Call brlapi.expandKeyCode(code) instead."""
+		return expandKeyCode(code)
 
 	def ignoreKeys(self, key_type, set):
 		"""Ignore some key presses from the braille keyboard.
