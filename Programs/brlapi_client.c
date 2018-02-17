@@ -243,6 +243,7 @@ struct brlapi_handle_t { /* Connection-specific information */
     brlapi__exceptionHandler_t withHandle;
   } exceptionHandler;
   pthread_mutex_t exceptionHandler_mutex;
+  void *clientData; /* Private client data */
 };
 
 /* Function brlapi_getLibraryVersion */
@@ -294,6 +295,7 @@ static void brlapi_initializeHandle(brlapi_handle_t *handle)
   else
     handle->exceptionHandler.withHandle = brlapi__defaultExceptionHandler;
   pthread_mutex_init(&handle->exceptionHandler_mutex, NULL);
+  handle->clientData = NULL;
 }
 
 /* brlapi_doWaitForPacket */
@@ -815,6 +817,28 @@ void BRLAPI_STDCALL brlapi__closeConnection(brlapi_handle_t *handle)
 void BRLAPI_STDCALL brlapi_closeConnection(void)
 {
   brlapi__closeConnection(&defaultHandle);
+}
+
+/* brlapi__setClientData */
+void BRLAPI_STDCALL brlapi__setClientData(brlapi_handle_t *handle, void *data)
+{
+  handle->clientData = data;
+}
+
+void BRLAPI_STDCALL brlapi_setClientData(void *data)
+{
+  brlapi__setClientData(&defaultHandle, data);
+}
+
+/* brlapi__getClientData */
+void * BRLAPI_STDCALL brlapi__getClientData(brlapi_handle_t *handle)
+{
+  return handle->clientData;
+}
+
+void * BRLAPI_STDCALL brlapi_getClientData(void)
+{
+  return brlapi__getClientData(&defaultHandle);
 }
 
 /* brlapi_getDriverSpecific */

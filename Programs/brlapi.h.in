@@ -278,6 +278,34 @@ void BRLAPI_STDCALL brlapi__closeConnection(brlapi_handle_t *handle);
 
 /** @} */
 
+/** \defgroup brlapi_clientData Setting and getting client data
+ *
+ * Clients can register a pointer to data that can then be used
+ * e.g. in exception handlers.
+ * @{ */
+
+/* brlapi__setClientData */
+/** Register a pointer to client data
+ *
+ * \param data The pointer to the private client data
+ */
+#ifndef BRLAPI_NO_SINGLE_SESSION
+void BRLAPI_STDCALL brlapi_setClientData(void *data);
+#endif /* BRLAPI_NO_SINGLE_SESSION */
+void BRLAPI_STDCALL brlapi__setClientData(brlapi_handle_t *handle, void *data);
+
+/* brlapi__getClientData */
+/** Retrieves the pointer to the private client data
+ *
+ * \return the pointer to the private client data
+ */
+#ifndef BRLAPI_NO_SINGLE_SESSION
+void * BRLAPI_STDCALL brlapi_getClientData(void);
+#endif /* BRLAPI_NO_SINGLE_SESSION */
+void * BRLAPI_STDCALL brlapi__getClientData(brlapi_handle_t *handle);
+
+/** @} */
+
 /** \defgroup brlapi_info Getting Terminal information
  * \brief How to get information about the connected Terminal
  *
