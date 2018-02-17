@@ -25,6 +25,7 @@
   (:use :common-lisp :cffi)
   (:export #:open-connection #:close-connection #:is-connected
            #:print-properties #:print-object
+           #:library-version
 	   #:driver-name #:model-identifier #:display-size
            #:enter-tty-mode #:leave-tty-mode
            #:write-text #:write-dots #:write-region
@@ -52,10 +53,11 @@
 (defmethod print-properties ((obj display) stream)
   (multiple-value-bind (width height) (display-size obj)
     (format stream
-      "fd=~D auth=~A host=~A driver=~A model=~A width=~D height=~D"
+      "vers=~{~A~^.~} fd=~D host=~A auth=~A driver=~A model=~A width=~D height=~D"
+      (multiple-value-list (library-version))
       (file-descriptor obj)
-      (server-auth obj)
       (server-host obj)
+      (server-auth obj)
       (driver-name obj)
       (model-identifier obj)
       width
@@ -145,6 +147,17 @@ Return a DISPLAY object which can further be used to interact with BRLTTY."
   (setf (slot-value obj 'handle) nil))
 
 ;;;; * Querying the display
+
+(defmethod library-version ()
+  "Return the version of the API as multiple values (major, minor, revision)."
+  (with-foreign-objects ((major :int) (minor :int) (revision :int))
+    (foreign-funcall "brlapi_getLibraryVersion"
+      :pointer major :pointer minor :pointer revision
+      :void
+    )
+    (values (mem-ref major :int) (mem-ref minor :int) (mem-ref revision :int))
+  )
+)
 
 (defmethod driver-name ((obj display))
   "Return the currently used driver name."
