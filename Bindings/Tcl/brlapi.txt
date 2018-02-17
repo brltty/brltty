@@ -1,5 +1,6 @@
 brlapi <function> [<arg> ...]
    getVersionString
+   getVersionNumbers
    openConnection [<option> ...]
       -host [<host>][:<port>]
       -auth {none | <scheme>,...}

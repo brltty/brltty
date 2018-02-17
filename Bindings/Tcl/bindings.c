@@ -1136,6 +1136,29 @@ FUNCTION_HANDLER(general, getHandleSize) {
   return TCL_OK;
 }
 
+FUNCTION_HANDLER(general, getVersionNumbers) {
+  TEST_FUNCTION_NO_ARGUMENTS();
+
+  int majorNumber, minorNumber, revisionNumber;
+  brlapi_getLibraryVersion(&majorNumber, &minorNumber, &revisionNumber);
+
+  Tcl_Obj *majorObject = Tcl_NewIntObj(majorNumber);
+  if (!majorObject) return TCL_ERROR;
+
+  Tcl_Obj *minorObject = Tcl_NewIntObj(minorNumber);
+  if (!minorObject) return TCL_ERROR;
+
+  Tcl_Obj *revisionObject = Tcl_NewIntObj(revisionNumber);
+  if (!revisionObject) return TCL_ERROR;
+
+  Tcl_Obj *const elements[] = {majorObject, minorObject, revisionObject};
+  Tcl_Obj *list = Tcl_NewListObj(3, elements);
+  if (!list) return TCL_ERROR;
+
+  Tcl_SetObjResult(interp, list);
+  return TCL_OK;
+}
+
 FUNCTION_HANDLER(general, getVersionString) {
   TEST_FUNCTION_NO_ARGUMENTS();
 
@@ -1260,6 +1283,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     FUNCTION(general, describeKeyCode),
     FUNCTION(general, expandKeyCode),
     FUNCTION(general, getHandleSize),
+    FUNCTION(general, getVersionNumbers),
     FUNCTION(general, getVersionString),
     FUNCTION(general, makeDots),
     FUNCTION(general, openConnection),
