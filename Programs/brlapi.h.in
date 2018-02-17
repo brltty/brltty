@@ -45,6 +45,9 @@ extern "C" {
 /** Library revision. */
 #undef BRLAPI_REVISION
 
+/** Returns the version of the library */
+void brlapi_getLibraryVersion(int *major, int *minor, int *revision);
+
 /** @} */
 
 /* Types are defined there */

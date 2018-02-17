@@ -245,6 +245,14 @@ struct brlapi_handle_t { /* Connection-specific information */
   pthread_mutex_t exceptionHandler_mutex;
 };
 
+/* Function brlapi_getLibraryVersion */
+void brlapi_getLibraryVersion(int *major, int *minor, int *revision)
+{
+  *major = BRLAPI_MAJOR;
+  *minor = BRLAPI_MINOR;
+  *revision = BRLAPI_REVISION;
+}
+
 /* Function brlapi_getHandleSize */
 size_t BRLAPI_STDCALL brlapi_getHandleSize(void)
 {
