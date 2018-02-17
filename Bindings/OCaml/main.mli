@@ -118,6 +118,8 @@ Idem: proto
 *)
 external getDriverName :
   ?h:handle -> unit -> string = "brlapiml_getDriverName"
+external getModelIdentifier :
+  ?h:handle -> unit -> string = "brlapiml_getModelIdentifier"
 external getDisplaySize :
   ?h:handle -> unit -> int * int = "brlapiml_getDisplaySize"
 

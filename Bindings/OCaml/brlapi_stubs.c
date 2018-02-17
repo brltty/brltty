@@ -230,6 +230,14 @@ CAMLprim value brlapiml_getDriverName(value handle, value unit)
   CAMLreturn(caml_copy_string(name));
 }
 
+CAMLprim value brlapiml_getModelIdentifier(value handle, value unit)
+{
+  CAMLparam2(handle, unit);
+  char identifier[BRLAPI_MAXNAMELENGTH];
+  brlapiCheckError(getModelIdentifier, identifier, sizeof(identifier));
+  CAMLreturn(caml_copy_string(identifier));
+}
+
 CAMLprim value brlapiml_getDisplaySize(value handle, value unit)
 {
   CAMLparam2(handle, unit);
