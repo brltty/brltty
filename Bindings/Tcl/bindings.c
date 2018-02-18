@@ -54,6 +54,9 @@ typedef struct {
 
   unsigned int displayWidth;
   unsigned int displayHeight;
+
+  Tcl_Interp *tclInterpreter;
+  Tcl_Command tclCommand;
 } BrlapiSession;
 
 static void
@@ -289,13 +292,9 @@ getSessionStringProperty (
 }
 
 FUNCTION_HANDLER(session, closeConnection) {
-//BrlapiSession *session = data;
+  BrlapiSession *session = data;
   TEST_FUNCTION_NO_ARGUMENTS();
-
-  const char *name = Tcl_GetString(objv[0]);
-  if (!name) return TCL_ERROR;
-
-  Tcl_DeleteCommand(interp, name);
+  Tcl_DeleteCommandFromToken(interp, session->tclCommand);
   return TCL_OK;
 }
 
@@ -1027,26 +1026,30 @@ FUNCTION_HANDLER(session, ignoreKeyRanges) {
 }
 
 static void
+endSession (ClientData data) {
+  BrlapiSession *session = data;
+  brlapi__closeConnection(session->handle);
+  deallocateMemory(session->handle);
+  deallocateMemory(session);
+}
+
+static void
 handleBrlapiException (
   brlapi_handle_t *handle,
   int error, brlapi_packetType_t type,
   const void *packet, size_t size
 ) {
+  BrlapiSession *session = brlapi__getClientData(handle);
+  Tcl_Interp *interp = session->tclInterpreter;
   char message[0X100];
 
   brlapi__strexception(
     handle, message, sizeof(message), error, type, packet, size
   );
 
-  fprintf(stderr, "BrlAPI exception: %s\n", message);
-}
-
-static void
-endSession (ClientData data) {
-  BrlapiSession *session = data;
-  brlapi__closeConnection(session->handle);
-  deallocateMemory(session->handle);
-  deallocateMemory(session);
+  const char *name = Tcl_GetCommandName(interp, session->tclCommand);
+  fprintf(stderr, "BrlAPI session failure: %s: %s\n", name, message);
+  exit(1);
 }
 
 static int
@@ -1244,24 +1247,27 @@ FUNCTION_HANDLER(general, openConnection) {
 
   BrlapiSession *session = allocateMemory(sizeof(*session));
   if (session) {
+    memset(session, 0, sizeof(*session));
+    session->tclInterpreter = interp;
+
     if ((session->handle = allocateMemory(brlapi_getHandleSize()))) {
       int result = brlapi__openConnection(session->handle, &options.settings, &session->settings);
 
       if (result != -1) {
         session->fileDescriptor = result;
 
-        char name[0X20];
-        Tcl_Command command;
+        brlapi__setClientData(session->handle, session);
+        brlapi__setExceptionHandler(session->handle, handleBrlapiException);
 
+        char name[0X20];
         {
           static unsigned int suffix = 0;
           snprintf(name, sizeof(name), "brlapi%u", suffix++);
-          command = Tcl_CreateObjCommand(interp, name, brlapiSessionCommand, session, endSession);
+          session->tclCommand = Tcl_CreateObjCommand(interp, name, brlapiSessionCommand, session, endSession);
         }
 
-        if (command) {
+        if (session->tclCommand) {
           setStringResult(interp, name, -1);
-          brlapi__setExceptionHandler(session->handle, handleBrlapiException);
           return TCL_OK;
         }
       } else {
