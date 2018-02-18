@@ -97,7 +97,31 @@ def expandKeyCode(code):
 	if retval == -1:
 		raise OperationError()
 	else:
-		return { "type":ekc.type, "command":ekc.command, "argument":ekc.argument, "flags":ekc.flags }
+		return {
+			"type": ekc.type,
+			"command": ekc.command,
+			"argument": ekc.argument,
+			"flags": ekc.flags
+		}
+
+def describeKeyCode(code):
+	"""Describe the individual components of a keycode symbolically.
+	See brlapi_describeKeyCode(3)."""
+	cdef c_brlapi.brlapi_describedKeyCode_t dkc
+	cdef int retval
+	retval = c_brlapi.brlapi_describeKeyCode(code, &dkc)
+	if retval == -1:
+		raise OperationError()
+	else:
+		flags = ()
+		for flag in range(dkc.flags):
+			flags += (dkc.flag[flag], )
+		return {
+			"type": dkc.type,
+			"command": dkc.command,
+			"argument": dkc.argument,
+			"flags": flags
+		}
 
 class OperationError(Exception):
 	"""Error while performing some operation"""

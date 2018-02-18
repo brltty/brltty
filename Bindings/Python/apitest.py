@@ -114,16 +114,20 @@ if __name__ == "__main__":
           target = handleTimeout
         )
 
-        properties = brlapi.expandKeyCode(code)
+        properties = brlapi.describeKeyCode(code)
+        properties["code"] = "0X%X" % code
 
-        text = "code=0X%X type=%X cmd=%X arg=%X flg=%X" % (
-          code,
-          properties["type"],
-          properties["command"],
-          properties["argument"],
-          properties["flags"]
-        )
+        for name in ("flags", ):
+                properties[name] = ",".join(properties[name])
 
+        properties["cmd"] = properties["command"]
+        properties["arg"] = properties["argument"]
+        properties["flg"] = properties["flags"]
+
+        names = ("code", "type", "cmd", "arg", "flg")
+        values = map(lambda name: ("%s=%s" % (name, str(properties[name]))), names)
+
+        text = " ".join(values)
         brl.writeText(text)
         writeProperty("Key", text);
 
