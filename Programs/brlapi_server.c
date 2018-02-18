@@ -177,27 +177,6 @@ typedef struct {
 
 typedef enum { TODISPLAY, EMPTY } BrlBufState;
 
-typedef enum {
-#ifdef __MINGW32__
-  READY, /* but no pending ReadFile */
-#endif /* __MINGW32__ */
-  READING_HEADER,
-  READING_CONTENT,
-  DISCARDING
-} PacketState;
-
-typedef struct {
-  brlapi_header_t header;
-  uint32_t content[BRLAPI_MAXPACKETSIZE/sizeof(uint32_t)+1]; /* +1 for additional \0 */
-  PacketState state;
-  int readBytes; /* Already read bytes */
-  unsigned char *p; /* Where read() should load datas */
-  int n; /* Value to give so read() */
-#ifdef __MINGW32__
-  OVERLAPPED overl;
-#endif /* __MINGW32__ */
-} Packet;
-
 typedef struct Connection {
   struct Connection *prev, *next;
   FileDescriptor fd;
@@ -426,114 +405,6 @@ static void writeKey(FileDescriptor fd, brlapi_keyCode_t key) {
   brlapiserver_writePacket(fd,BRLAPI_PACKET_KEY,&buf,sizeof(buf));
 }
 
-/* Function: resetPacket */
-/* Resets a Packet structure */
-static void resetPacket(Packet *packet)
-{
-#ifdef __MINGW32__
-  packet->state = READY;
-#else /* __MINGW32__ */
-  packet->state = READING_HEADER;
-#endif /* __MINGW32__ */
-  packet->readBytes = 0;
-  packet->p = (unsigned char *) &packet->header;
-  packet->n = sizeof(packet->header);
-#ifdef __MINGW32__
-  SetEvent(packet->overl.hEvent);
-#endif /* __MINGW32__ */
-}
-
-/* Function: initializePacket */
-/* Prepares a Packet structure */
-/* returns 0 on success, -1 on failure */
-static int initializePacket(Packet *packet)
-{
-#ifdef __MINGW32__
-  memset(&packet->overl,0,sizeof(packet->overl));
-  if (!(packet->overl.hEvent = CreateEvent(NULL, TRUE, TRUE, NULL))) {
-    logWindowsSystemError("CreateEvent for readPacket");
-    return -1;
-  }
-#endif /* __MINGW32__ */
-  resetPacket(packet);
-  return 0;
-}
-
-/* Function : readPacket */
-/* Reads a packet for the given connection */
-/* Returns -2 on EOF, -1 on error, 0 if the reading is not complete, */
-/* 1 if the packet has been read. */
-static int readPacket(Connection *c)
-{
-  Packet *packet = &c->packet;
-#ifdef __MINGW32__
-  DWORD res;
-  if (packet->state!=READY) {
-    /* pending read */
-    if (!GetOverlappedResult(c->fd,&packet->overl,&res,FALSE)) {
-      switch (GetLastError()) {
-        case ERROR_IO_PENDING: return 0;
-        case ERROR_HANDLE_EOF:
-        case ERROR_BROKEN_PIPE: return -2;
-        default: logWindowsSystemError("GetOverlappedResult"); setSystemErrno(); return -1;
-      }
-    }
-read:
-#else /* __MINGW32__ */
-  int res;
-read:
-  res = read(c->fd, packet->p, packet->n);
-  if (res==-1) {
-    switch (errno) {
-      case EINTR: goto read;
-      case EAGAIN: return 0;
-      default: return -1;
-    }
-  }
-#endif /* __MINGW32__ */
-  if (res==0) return -2; /* EOF */
-  packet->readBytes += res;
-  if ((packet->state==READING_HEADER) && (packet->readBytes==BRLAPI_HEADERSIZE)) {
-    packet->header.size = ntohl(packet->header.size);
-    packet->header.type = ntohl(packet->header.type);
-    if (packet->header.size==0) goto out;
-    packet->readBytes = 0;
-    if (packet->header.size<=BRLAPI_MAXPACKETSIZE) {
-      packet->state = READING_CONTENT;
-      packet->n = packet->header.size;
-    } else {
-      packet->state = DISCARDING;
-      packet->n = BRLAPI_MAXPACKETSIZE;
-    }
-    packet->p = (unsigned char*) packet->content;
-  } else if ((packet->state == READING_CONTENT) && (packet->readBytes==packet->header.size)) goto out;
-  else if (packet->state==DISCARDING) {
-    packet->p = (unsigned char *) packet->content;
-    packet->n = MIN(packet->header.size-packet->readBytes, BRLAPI_MAXPACKETSIZE);
-  } else {
-    packet->n -= res;
-    packet->p += res;
-  }
-#ifdef __MINGW32__
-  } else packet->state = READING_HEADER;
-  if (!ResetEvent(packet->overl.hEvent))
-    logWindowsSystemError("ResetEvent in readPacket");
-  if (!ReadFile(c->fd, packet->p, packet->n, &res, &packet->overl)) {
-    switch (GetLastError()) {
-      case ERROR_IO_PENDING: return 0;
-      case ERROR_HANDLE_EOF:
-      case ERROR_BROKEN_PIPE: return -2;
-      default: logWindowsSystemError("ReadFile"); setSystemErrno(); return -1;
-    }
-  }
-#endif /* __MINGW32__ */
-  goto read;
-
-out:
-  resetPacket(packet);
-  return 1;
-}
-
 typedef int(*PacketHandler)(Connection *, brlapi_packetType_t, brlapi_packet_t *, size_t);
 
 typedef struct { /* packet handlers */
@@ -666,7 +537,7 @@ static Connection *createConnection(FileDescriptor fd, time_t currentTime)
   c->brailleWindow.text = NULL;
   c->brailleWindow.andAttr = NULL;
   c->brailleWindow.orAttr = NULL;
-  if (initializePacket(&c->packet))
+  if (brlapi_initializePacket(&c->packet))
     goto outmalloc;
   return c;
 
@@ -1367,7 +1238,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
   ssize_t size;
   brlapi_packet_t *packet = (brlapi_packet_t *) c->packet.content;
   brlapi_packetType_t type;
-  res = readPacket(c);
+  res = brlapi__readPacket(&c->packet, c->fd);
   if (res==0) return 0; /* No packet ready */
   if (res<0) {
     if (res==-1) logMessage(LOG_WARNING,"read : %s (connection on fd %"PRIfd")",strerror(errno),c->fd);

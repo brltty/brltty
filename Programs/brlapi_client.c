@@ -215,6 +215,7 @@ struct brlapi_handle_t { /* Connection-specific information */
   /* Only two threads might want to take it: one that already got
   * brlapi_req_mutex, or one that got key_mutex */
   pthread_mutex_t read_mutex;
+  Packet packet;
   /* when someone is already reading (reading==1), put expected type,
    * address/size of buffer, and address of return value, then wait on semaphore,
    * the buffer gets filled, altRes too */
@@ -274,6 +275,7 @@ static void brlapi_initializeHandle(brlapi_handle_t *handle)
   pthread_mutex_init(&handle->req_mutex, NULL);
   pthread_mutex_init(&handle->key_mutex, NULL);
   pthread_mutex_init(&handle->read_mutex, NULL);
+  brlapi_initializePacket(&handle->packet);
   handle->reading = 0;
   handle->altExpectedPacketType = 0;
   handle->altPacket = NULL;
@@ -305,40 +307,79 @@ static void brlapi_initializeHandle(brlapi_handle_t *handle)
 /* Returns -2 on end of file */
 /* Returns -3 if the available packet was not for us */
 /* Calls the exception handler if an exception is encountered */
-static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetType_t expectedPacketType, void *packet, size_t size)
+static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetType_t expectedPacketType, void *packet, size_t packetSize)
 {
-  static brlapi_packet_t localPacket;
-  uint32_t *uint32Packet = (uint32_t *) &localPacket;
-  brlapi_packetType_t type;
-  ssize_t res;
-  static const brlapi_errorPacket_t *errorPacket = &localPacket.error;
+  uint32_t *uint32Packet = handle->packet.content;
+  const brlapi_packet_t *localPacket = (brlapi_packet_t *) uint32Packet;
+  const brlapi_errorPacket_t *errorPacket = &localPacket->error;
 
-  res = brlapi_readPacketHeader(handle->fileDescriptor, &type);
-  if (res<0) return res; /* reports EINTR too */
+  uint32_t size;
+  brlapi_packetType_t type;
+  int ret;
+
+  do {
+#ifdef __MINGW32__
+    DWORD dw;
+    dw = WaitForSingleObject(handle->packet.overl.hEvent, INFINITE);
+    if (dw == WAIT_FAILED) {
+      setSystemErrno();
+      LibcError("waiting for packet");
+      return -2;
+    }
+
+    if (dw == WAIT_OBJECT_0)
+#else /* __MINGW32__ */
+    fd_set sockset;
+
+    FD_ZERO(&sockset);
+    FD_SET(handle->fileDescriptor, &sockset);
+    if (select(handle->fileDescriptor+1, &sockset, NULL, NULL, NULL) < 0) {
+      LibcError("waiting for packet");
+      return -2;
+    }
+
+    if (FD_ISSET(handle->fileDescriptor, &sockset))
+#endif /* __MINGW32__ */
+    {
+      /* Some data is here, read it */
+      ret = brlapi__readPacket(&handle->packet, handle->fileDescriptor);
+      if (ret == -1) {
+	LibcError("reading packet");
+      }
+      if (ret < 0) {
+	/* error or end of file */
+	return -2;
+      }
+    }
+  } while (ret == 0);
+
+  /* Got a packet, process it.  */
+  size = handle->packet.header.size;
+  type = handle->packet.header.type;
+
   if (type==expectedPacketType)
-    /* For us, just read */
-    return brlapi_readPacketContent(handle->fileDescriptor, res, packet, size);
+  {
+    /* For us, just copy */
+    memcpy(packet, handle->packet.content, MIN(packetSize, size));
+    return size;
+  }
 
   /* Not for us. For alternate reader? */
   pthread_mutex_lock(&handle->read_mutex);
   if (handle->altSem && type==handle->altExpectedPacketType) {
     /* Yes, put packet content there */
-    *handle->altRes = res = brlapi_readPacketContent(handle->fileDescriptor, res, handle->altPacket, handle->altSize);
+    memcpy(handle->altPacket, handle->packet.content, MIN(handle->altSize, size));
+    *handle->altRes = size;
 #ifndef WINDOWS
     if (sem_post)
 #endif /* WINDOWS */
       sem_post(handle->altSem);
     handle->altSem = NULL;
     pthread_mutex_unlock(&handle->read_mutex);
-    if (res < 0) return res;
     return -3;
   }
   /* No alternate reader, read it locally... */
-  if ((res = brlapi_readPacketContent(handle->fileDescriptor, res, &localPacket, sizeof(localPacket))) < 0) {
-    pthread_mutex_unlock(&handle->read_mutex);
-    return res;
-  }
-  if ((type==BRLAPI_PACKET_KEY) && (handle->state & STCONTROLLINGTTY) && (res==sizeof(brlapi_keyCode_t))) {
+  if ((type==BRLAPI_PACKET_KEY) && (handle->state & STCONTROLLINGTTY) && (size==sizeof(brlapi_keyCode_t))) {
     /* keypress, buffer it */
     if (handle->keybuf_nb>=BRL_KEYBUF_SIZE) {
       syslog(LOG_WARNING,"lost key: 0X%8lx%8lx\n",(unsigned long)ntohl(uint32Packet[0]),(unsigned long)ntohl(uint32Packet[1]));
@@ -361,10 +402,10 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
     size_t esize;
     int hdrSize = sizeof(errorPacket->code)+sizeof(errorPacket->type);
 
-    if (res<hdrSize)
+    if (size<hdrSize)
       esize = 0;
     else
-      esize = res-hdrSize;
+      esize = size-hdrSize;
 
     pthread_mutex_lock(&handle->fileDescriptor_mutex);
     closeFileDescriptor(handle->fileDescriptor);
@@ -379,7 +420,7 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
     return -2;
   }
 
-  syslog(LOG_ERR,"(brlapi_waitForPacket) Received unexpected packet of type %s and size %ld\n",brlapi_getPacketTypeName(type),(long)res);
+  syslog(LOG_ERR,"(brlapi_waitForPacket) Received unexpected packet of type %s and size %ld\n",brlapi_getPacketTypeName(type),(long)size);
   return -3;
 }
 
@@ -505,7 +546,7 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
       memcpy(path+lpath, port, lport+1);
 
       while ((pipefd = CreateFile(path,GENERIC_READ|GENERIC_WRITE,
-	      FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,SECURITY_IMPERSONATION,NULL))
+	      FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,SECURITY_IMPERSONATION|FILE_FLAG_OVERLAPPED,NULL))
 	  == INVALID_HANDLE_VALUE) {
 	if (GetLastError() != ERROR_PIPE_BUSY) {
 	  brlapi_errfun = "CreateFile";
