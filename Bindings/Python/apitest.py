@@ -81,7 +81,6 @@ def readKey (connection, timeout=0, interval=0.1, target=None, args=(), kwargs={
   return None
 
 def handleTimeout ():
-  logMessage("done")
   exit(0)
 
 if __name__ == "__main__":
@@ -118,11 +117,16 @@ if __name__ == "__main__":
         properties["code"] = "0X%X" % code
 
         for name in ("flags", ):
-                properties[name] = ",".join(properties[name])
+          properties[name] = ",".join(properties[name])
 
-        properties["cmd"] = properties["command"]
-        properties["arg"] = properties["argument"]
-        properties["flg"] = properties["flags"]
+        for property in (
+          ("command" , "cmd"),
+          ("argument", "arg"),
+          ("flags"   , "flg"),
+        ):
+          (oldName, newName) = property
+          properties[newName] = properties[oldName]
+          del properties[oldName]
 
         names = ("code", "type", "cmd", "arg", "flg")
         values = map(lambda name: ("%s=%s" % (name, str(properties[name]))), names)
