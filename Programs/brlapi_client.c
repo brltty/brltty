@@ -65,11 +65,10 @@
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
-#else /* HAVE_SYS_SELECT_H */
-#include <sys/time.h>
 #endif /* HAVE_SYS_SELECT_H */
-
 #endif /* __MINGW32__ */
+
+#include <sys/time.h>
 
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>
@@ -302,12 +301,14 @@ static void brlapi_initializeHandle(brlapi_handle_t *handle)
 
 /* brlapi_doWaitForPacket */
 /* Waits for the specified type of packet: must be called with brlapi_req_mutex locked */
+/* deadline can be used to stop waiting after a given date, or wait forever (NULL) */
 /* If the right packet type arrives, returns its size */
 /* Returns -1 if a non-fatal error is encountered */
 /* Returns -2 on end of file */
 /* Returns -3 if the available packet was not for us */
+/* Returns -4 on timeout (if deadline is not NULL) */
 /* Calls the exception handler if an exception is encountered */
-static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetType_t expectedPacketType, void *packet, size_t packetSize)
+static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetType_t expectedPacketType, void *packet, size_t packetSize, struct timeval *deadline)
 {
   uint32_t *uint32Packet = handle->packet.content;
   const brlapi_packet_t *localPacket = (brlapi_packet_t *) uint32Packet;
@@ -317,10 +318,22 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
   brlapi_packetType_t type;
   int ret;
 
+  struct timeval now;
+  int delay = 0;
+
   do {
+    if (deadline) {
+      gettimeofday(&now, NULL);
+      delay = (deadline->tv_sec  - now.tv_sec ) * 1000 +
+	      (deadline->tv_usec - now.tv_usec) / 1000;
+      if (delay < 0) {
+	/* The deadline has expired, don't wait more */
+	return -4;
+      }
+    }
 #ifdef __MINGW32__
     DWORD dw;
-    dw = WaitForSingleObject(handle->packet.overl.hEvent, INFINITE);
+    dw = WaitForSingleObject(handle->packet.overl.hEvent, deadline ? delay : INFINITE);
     if (dw == WAIT_FAILED) {
       setSystemErrno();
       LibcError("waiting for packet");
@@ -330,10 +343,16 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
     if (dw == WAIT_OBJECT_0)
 #else /* __MINGW32__ */
     fd_set sockset;
+    struct timeval timeout, *ptimeout = NULL;
+    if (deadline) {
+      timeout.tv_sec = delay / 1000;
+      timeout.tv_usec = (delay % 1000) * 1000;
+      ptimeout = &timeout;
+    }
 
     FD_ZERO(&sockset);
     FD_SET(handle->fileDescriptor, &sockset);
-    if (select(handle->fileDescriptor+1, &sockset, NULL, NULL, NULL) < 0) {
+    if (select(handle->fileDescriptor+1, &sockset, NULL, NULL, ptimeout) < 0) {
       LibcError("waiting for packet");
       return -2;
     }
@@ -426,9 +445,11 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
 
 /* brlapi_waitForPacket */
 /* same as brlapi_doWaitForPacket, but sleeps instead of reading if another
+ * and timeout_ms expressed as relative ms delay instead of absolute deadline.
+ * timeout_ms set to -1 means no deadline.
  * thread is already reading. Never returns -2. If loop is 1, never returns -3.
  */
-static ssize_t brlapi__waitForPacket(brlapi_handle_t *handle, brlapi_packetType_t expectedPacketType, void *packet, size_t size, int loop) {
+static ssize_t brlapi__waitForPacket(brlapi_handle_t *handle, brlapi_packetType_t expectedPacketType, void *packet, size_t size, int loop, int timeout_ms) {
   int doread = 0;
   ssize_t res;
   sem_t sem;
@@ -458,8 +479,19 @@ again:
   }
   pthread_mutex_unlock(&handle->read_mutex);
   if (doread) {
+    struct timeval deadline, *pdeadline = NULL;
+    if (timeout_ms >= 0) {
+      gettimeofday(&deadline, NULL);
+      deadline.tv_sec += timeout_ms / 1000;
+      deadline.tv_usec += (timeout_ms % 1000) * 1000;
+      if (deadline.tv_usec >= 1000000) {
+	deadline.tv_sec++;
+	deadline.tv_usec -= 1000000;
+      }
+      pdeadline = &deadline;
+    }
     do {
-      res = brlapi__doWaitForPacket(handle, expectedPacketType, packet, size);
+      res = brlapi__doWaitForPacket(handle, expectedPacketType, packet, size, pdeadline);
     } while (loop && (res == -3 || (res == -1 && brlapi_errno == BRLAPI_ERROR_LIBCERR && (
 	  brlapi_libcerrno == EINTR ||
 #ifdef EWOULDBLOCK
@@ -494,7 +526,7 @@ again:
 /* Wait for an acknowledgement, must be called with brlapi_req_mutex locked */
 static int brlapi__waitForAck(brlapi_handle_t *handle)
 {
-  return brlapi__waitForPacket(handle, BRLAPI_PACKET_ACK, NULL, 0, 1);
+  return brlapi__waitForPacket(handle, BRLAPI_PACKET_ACK, NULL, 0, 1, -1);
 }
 
 /* brlapi_writePacketWaitForAck */
@@ -767,7 +799,7 @@ brlapi_fileDescriptor BRLAPI_STDCALL brlapi__openConnection(brlapi_handle_t *han
     if (usedSettings) usedSettings->host = settings.host;
   }
 
-  if ((len = brlapi__waitForPacket(handle, BRLAPI_PACKET_VERSION, &serverPacket, sizeof(serverPacket), 1)) < 0)
+  if ((len = brlapi__waitForPacket(handle, BRLAPI_PACKET_VERSION, &serverPacket, sizeof(serverPacket), 1, -1)) < 0)
     goto outfd;
 
   if (version->protocolVersion != htonl(BRLAPI_PROTOCOL_VERSION)) {
@@ -778,7 +810,7 @@ brlapi_fileDescriptor BRLAPI_STDCALL brlapi__openConnection(brlapi_handle_t *han
   if (brlapi_writePacket(handle->fileDescriptor, BRLAPI_PACKET_VERSION, version, sizeof(*version)) < 0)
     goto outfd;
 
-  if ((len = brlapi__waitForPacket(handle, BRLAPI_PACKET_AUTH, &serverPacket, sizeof(serverPacket), 1)) < 0)
+  if ((len = brlapi__waitForPacket(handle, BRLAPI_PACKET_AUTH, &serverPacket, sizeof(serverPacket), 1, -1)) < 0)
     return INVALID_FILE_DESCRIPTOR;
 
   for (type = &authServer->type[0]; type < &authServer->type[len / sizeof(authServer->type[0])]; type++) {
@@ -979,7 +1011,7 @@ ssize_t BRLAPI_STDCALL brlapi__recvRaw(brlapi_handle_t *handle, void *buf, size_
     brlapi_errno = BRLAPI_ERROR_ILLEGAL_INSTRUCTION;
     return -1;
   }
-  res = brlapi__waitForPacket(handle, BRLAPI_PACKET_PACKET, buf, size, 0);
+  res = brlapi__waitForPacket(handle, BRLAPI_PACKET_PACKET, buf, size, 0, -1);
   if (res == -3) {
     brlapi_libcerrno = EINTR;
     brlapi_errno = BRLAPI_ERROR_LIBCERR;
@@ -1028,7 +1060,7 @@ static ssize_t brlapi__request(brlapi_handle_t *handle, brlapi_packetType_t requ
     pthread_mutex_unlock(&handle->req_mutex);
     return -1;
   }
-  res = brlapi__waitForPacket(handle, request, packet, size, 1);
+  res = brlapi__waitForPacket(handle, request, packet, size, 1, -1);
   pthread_mutex_unlock(&handle->req_mutex);
   return res;
 }
@@ -1640,41 +1672,9 @@ int brlapi_write(const brlapi_writeArguments_t *s)
 }
 #endif /* WINDOWS */
 
-/* Function : packetReady */
-/* Tests wether a packet is ready on file descriptor fd */
-/* Returns -1 if an error occurs, 0 if no packet is ready, 1 if there is a */
-/* packet ready to be read */
-static int packetReady(brlapi_handle_t *handle)
-{
-#ifdef __MINGW32__
-  if (handle->addrfamily == PF_LOCAL) {
-    DWORD avail;
-    if (!PeekNamedPipe(handle->fileDescriptor, NULL, 0, NULL, &avail, NULL)) {
-      brlapi_errfun = "packetReady";
-      brlapi_errno = BRLAPI_ERROR_LIBCERR;
-      brlapi_libcerrno = errno;
-      return -1;
-    }
-    return avail!=0;
-  } else {
-    SOCKET fd = (SOCKET) handle->fileDescriptor;
-#else /* __MINGW32__ */
-  int fd = handle->fileDescriptor;
-#endif /* __MINGW32__ */
-  fd_set set;
-  struct timeval timeout;
-  memset(&timeout, 0, sizeof(timeout));
-  FD_ZERO(&set);
-  FD_SET(fd, &set);
-  return select(fd+1, &set, NULL, NULL, &timeout);
-#ifdef __MINGW32__
-  }
-#endif /* __MINGW32__ */
-}
-
 /* Function : brlapi_readKey */
 /* Reads a key from the braille keyboard */
-int BRLAPI_STDCALL brlapi__readKey(brlapi_handle_t *handle, int block, brlapi_keyCode_t *code)
+int BRLAPI_STDCALL brlapi__readKeyTimeout(brlapi_handle_t *handle, int timeout_ms, brlapi_keyCode_t *code)
 {
   ssize_t res;
   uint32_t buf[2];
@@ -1698,32 +1698,37 @@ int BRLAPI_STDCALL brlapi__readKey(brlapi_handle_t *handle, int block, brlapi_ke
   pthread_mutex_unlock(&handle->read_mutex);
 
   pthread_mutex_lock(&handle->key_mutex);
-  if (!block) {
-    res = packetReady(handle);
-    if (res<=0) {
-      if (res<0)
-	brlapi_errno = BRLAPI_ERROR_LIBCERR;
-      pthread_mutex_unlock(&handle->key_mutex);
-      return res;
-    }
-  }
-  res=brlapi__waitForPacket(handle,BRLAPI_PACKET_KEY, buf, sizeof(buf), 0);
+  res=brlapi__waitForPacket(handle,BRLAPI_PACKET_KEY, buf, sizeof(buf), 0, timeout_ms);
   pthread_mutex_unlock(&handle->key_mutex);
   if (res == -3) {
-    if (!block) return 0;
+    if (timeout_ms == 0) return 0;
     brlapi_libcerrno = EINTR;
     brlapi_errno = BRLAPI_ERROR_LIBCERR;
     brlapi_errfun = "waitForPacket";
     return -1;
+  }
+  if (res == -4) {
+    /* Timeout */
+    return -2;
   }
   if (res < 0) return -1;
   *code = ((brlapi_keyCode_t)ntohl(buf[0]) << 32) | ntohl(buf[1]);
   return 1;
 }
 
+int BRLAPI_STDCALL brlapi_readKeyTimeout(int timeout_ms, brlapi_keyCode_t *code)
+{
+  return brlapi__readKeyTimeout(&defaultHandle, timeout_ms, code);
+}
+
+int BRLAPI_STDCALL brlapi__readKey(brlapi_handle_t *handle, int block, brlapi_keyCode_t *code)
+{
+  return brlapi__readKeyTimeout(handle, block ? -1 : 0, code);
+}
+
 int BRLAPI_STDCALL brlapi_readKey(int block, brlapi_keyCode_t *code)
 {
-  return brlapi__readKey(&defaultHandle, block, code) ;
+  return brlapi__readKeyTimeout(&defaultHandle, block ? -1 : 0, code);
 }
 
 typedef struct {

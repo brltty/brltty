@@ -773,6 +773,27 @@ int BRLAPI_STDCALL brlapi_readKey(int wait, brlapi_keyCode_t *code);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
 int BRLAPI_STDCALL brlapi__readKey(brlapi_handle_t *handle, int wait, brlapi_keyCode_t *code);
 
+/* brlapi_readKeyTimeout */
+/** Read a key from the braille keyboard, unless a timeout expires
+ *
+ * This function works like brlapi_readKey, except that parameter \e wait is
+ * replaced by a \e timeout_ms parameter
+ *
+ * \param timeout_ms specifies how long the function should wait for a keypress.
+ *
+ * If the timeout expires without any key being pressed, -2 is returned.
+ *
+ * If timeout_ms is set to 0, this function looks for key events that have been
+ * already received, but does not wait at all if no event was received.
+ *
+ * If timeout_ms is set to a negative value, this function behaves like
+ * brlapi_readKey, i.e. it uses an infinite timeout.
+ */
+#ifndef BRLAPI_NO_SINGLE_SESSION
+int BRLAPI_STDCALL brlapi_readKeyTimeout(int timeout_ms, brlapi_keyCode_t *code);
+#endif /* BRLAPI_NO_SINGLE_SESSION */
+int BRLAPI_STDCALL brlapi__readKeyTimeout(brlapi_handle_t *handle, int timeout_ms, brlapi_keyCode_t *code);
+
 /** types of key ranges */
 typedef enum {
   brlapi_rangeType_all,	/**< all keys, code must be 0 */
