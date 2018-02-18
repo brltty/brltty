@@ -23,12 +23,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>
+#ifdef __MINGW32__
+#include "win_pthread.h"
+#else
+#include <pthread.h>
+#endif
 
 #include "options.h"
 #include "brl_cmds.h"
 #include "brl_dots.h"
 #include "cmd.h"
 #include "cmd_brlapi.h"
+#include "async_wait.h"
 
 #define BRLAPI_NO_DEPRECATED
 #include "brlapi.h"
@@ -44,6 +50,7 @@ static int opt_showModelIdentifier;
 static int opt_showSize;
 static int opt_showKeyCodes;
 static int opt_suspendMode;
+static int opt_threadMode;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'n',
@@ -87,6 +94,12 @@ BEGIN_OPTION_TABLE(programOptions)
     .word = "suspend",
     .setting.flag = &opt_suspendMode,
     .description = "Suspend the braille driver (press ^C or send SIGUSR1 to resume)."
+  },
+
+  { .letter = 't',
+    .word = "thread",
+    .setting.flag = &opt_threadMode,
+    .description = "Exercise threaded use"
   },
 
   { .letter = 'b',
@@ -283,6 +296,43 @@ static void suspendDriver(void)
   }
 }
 
+volatile int thread_done;
+static void *thread_fun(void *foo)
+{
+  brlapi_keyCode_t code;
+  do {
+    brlapi_readKey(1, &code);
+    printf("got key %"PRIx64"\n", code);
+  } while (code != (BRLAPI_KEY_TYPE_CMD | BRL_CMD_HOME));
+  thread_done = 1;
+  return NULL;
+}
+
+static void exerciseThreads(void)
+{
+  pthread_t thread;
+  unsigned x, y;
+  unsigned i = 0;
+  if (brlapi_getDisplaySize(&x, &y)<0) {
+    brlapi_perror("failed");
+    exit(PROG_EXIT_FATAL);
+  }
+  if (brlapi_enterTtyMode(-1, NULL)<0) {
+    brlapi_perror("enterTtyMode");
+    exit(PROG_EXIT_FATAL);
+  }
+  pthread_create(&thread, NULL, thread_fun, NULL);
+  while (!thread_done) {
+    char buf[x+1];
+    snprintf(buf, sizeof(buf), "counting %d", i);
+    buf[x] = 0;
+    brlapi_writeText(BRLAPI_CURSOR_OFF, buf);
+    asyncWait(1000);
+    i++;
+  }
+  pthread_join(thread, NULL);
+}
+
 int
 main (int argc, char *argv[]) {
   ProgramExitStatus exitStatus = PROG_EXIT_SUCCESS;
@@ -329,6 +379,10 @@ main (int argc, char *argv[]) {
 
     if (opt_suspendMode) {
       suspendDriver();
+    }
+
+    if (opt_threadMode) {
+      exerciseThreads();
     }
 
     brlapi_closeConnection();
