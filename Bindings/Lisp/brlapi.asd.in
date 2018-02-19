@@ -28,7 +28,7 @@
   :depends-on (:cffi)
   :serial t
   :components ((:file "brlapi_prologue")
-               (:file "brlapi_config")
-               (:file "brlapi" :depends-on ("brlapi_prologue" "brlapi_config"))))
+               (:file "brlapi_config" :depends-on ("brlapi_prologue"))
+               (:file "brlapi" :depends-on ("brlapi_config"))))
 
 ;;;;@include "brlapi.lisp"
