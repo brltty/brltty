@@ -1,4 +1,3 @@
-; @configure_input@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; libbrlapi - A library providing access to braille terminals for applications.
 ;
@@ -19,28 +18,8 @@
 (eval-when (:compile-toplevel)
   (declaim (optimize (safety 3) (debug 3))))
 
-;;;; * Package definition
-
-(defpackage :brlapi
-  (:use :common-lisp :cffi)
-  (:export #:open-connection #:close-connection #:is-connected
-           #:print-properties #:print-object
-           #:library-version
-	   #:driver-name #:model-identifier #:display-size
-           #:enter-tty-mode #:leave-tty-mode
-           #:write-text #:write-dots #:write-region
-           #:read-key #:expand-key-code
-           #:error-message))
 (in-package :brlapi)
-
 
-;;;; * C BrlAPI Library loading
-
-(define-foreign-library libbrlapi
-  (:unix (:or "libbrlapi.@library_extension@.@api_release@" "libbrlapi.@library_extension@.@api_version@"))
-  (t (:default "libbrlapi")))
-(use-foreign-library libbrlapi)
-
 ;;;; * The DISPLAY class
 
 (defclass display ()
@@ -295,8 +274,7 @@ The list contains:
   3: flags (a list of strings)"
 
   (with-foreign-object (description 'key-code-description)
-    (setf result (foreign-funcall "brlapi_describeKeyCode"
-                  key-code code :pointer description :int))
+    (foreign-funcall "brlapi_describeKeyCode" key-code code :pointer description :int)
     (with-foreign-slots
       ((type-name command-name argument-value flag-count flag-names) description key-code-description)
 
@@ -318,7 +296,7 @@ The list contains:
     (enter-tty-mode display tty)
     (write-text display "Press any key to continue...")
     (apply #'format t "; Command: ~A, argument: ~D, flags: ~D"
-           (multiple-value-list (expand-key (read-key display t))))
+           (multiple-value-list (expand-key-code (read-key display t))))
     (leave-tty-mode display)
     (close-connection display)))
 

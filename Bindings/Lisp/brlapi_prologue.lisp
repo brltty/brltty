@@ -1,7 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; libbrlapi - A library providing access to braille terminals for applications.
 ;
-; Copyright (C) 2006-2018 by Mario Lang <mlang@blind.guru>
+; Copyright (C) 2006-2018 by Mario Lang <mlang@delysid.org>
 ;
 ; libbrlapi comes with ABSOLUTELY NO WARRANTY.
 ;
@@ -15,13 +15,21 @@
 ; This software is maintained by Dave Mielke <dave@mielke.cc>.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;;; * BrlAPI System Definition
+(eval-when (:compile-toplevel)
+  (declaim (optimize (safety 3) (debug 3))))
+
+;;;; * Package definition
 
-(asdf:defsystem :brlapi
-  :name "brlapi"
-  :author "Mario Lang <mlang@delysid.org>"
-  :depends-on (:cffi)
-  :serial t
-  :components ((:file "brlapi")))
+(defpackage :brlapi
+  (:use :common-lisp :cffi)
+  (:export #:open-connection #:close-connection #:is-connected
+           #:print-properties #:print-object
+           #:library-version
+	   #:driver-name #:model-identifier #:display-size
+           #:enter-tty-mode #:leave-tty-mode
+           #:write-text #:write-dots #:write-region
+           #:read-key #:expand-key-code
+           #:error-message))
 
-;;;;@include "brlapi.lisp"
+(in-package :brlapi)
+

@@ -24,5 +24,6 @@ install: all
 uninstall:
 
 distclean::
-	-rm -f brlapi.lisp
+	-rm -f brlapi.asd
+	-rm -f brlapi_config.lisp
 

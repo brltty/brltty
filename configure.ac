@@ -1948,7 +1948,8 @@ AC_OUTPUT([
    Documents/brltty.conf
    Documents/brltty.1
    Documents/BrlAPIref.doxy
-   Bindings/Lisp/brlapi.lisp
+   Bindings/Lisp/brlapi.asd
+   Bindings/Lisp/brlapi_config.lisp
    Bindings/Python/setup.py
    Android/Application/res/values/configured.xml:Android/Application/res.strings.in
    Autostart/Systemd/brltty@.service

@@ -1,1 +1,2 @@
-/brlapi.lisp
+/brlapi.asd
+/brlapi_config.lisp
