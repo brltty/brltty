@@ -264,6 +264,19 @@ The first value represents the x dimension and the second the y dimension."
 )
 
 (defun expand-key-code (code)
+  "Return the individual fields of a key code as a list of numeric values.
+The list contains, in order, the type, command, argument, and flags."
+
+  (with-foreign-object (expansion 'expanded-key-code)
+    (foreign-funcall "brlapi_expandKeyCode" key-code code :pointer expansion :int)
+    (with-foreign-slots
+      ((type command argument flags) expansion expanded-key-code)
+      (list type command argument flags)
+    )
+  )
+)
+
+(defun describe-key-code (code)
   "Return the individual fields of the key code as a list.
 The list contains:
   0: type (a string)
