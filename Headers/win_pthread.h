@@ -29,8 +29,13 @@
 #include <windows.h>
 #include <stdio.h>
 #include <errno.h>
+#include <sys/time.h>
 
 #include "timing.h"
+
+#ifndef ETIMEDOUT
+#define ETIMEDOUT EAGAIN
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,6 +44,24 @@ extern "C" {
 #define winPthreadAssertWindows(expr) do { if (!(expr)) { setSystemErrno(); return errno; } } while (0)
 #define winPthreadAssertPthread(expr) do { int ret = (expr); if (ret) return ret; } while (0)
 #define winPthreadAssert(expr) do { if (!(expr)) return EIO; } while (0)
+
+#if !defined(__struct_timespec_defined) && !defined(__MINGW64_VERSION_MAJOR)
+struct timespec {
+  time_t  tv_sec;  /* Seconds */
+  long    tv_nsec; /* Nanoseconds */
+};
+#endif /* struct timespec */
+
+static inline DWORD pthread_gettimeout_np(const struct timespec *abs_timeout) {
+  struct timeval now;
+  LONG timeout;
+  gettimeofday(&now, NULL);
+  timeout = (abs_timeout->tv_sec  - now.tv_sec) * 1000 +
+            (abs_timeout->tv_nsec - now.tv_usec * 1000) / 1000000;
+  if (timeout < 0)
+    timeout = 0;
+  return timeout;
+}
 
 /***********
  * threads *
@@ -251,6 +274,10 @@ static inline int do_sem_wait(sem_t *sem, DWORD timeout) {
 #define sem_wait(sem) do_sem_wait(sem, INFINITE)
 #define sem_trywait(sem) do_sem_wait(sem, 0)
 
+static inline int sem_timedwait(sem_t *sem, const struct timespec *abs_timeout) {
+  return do_sem_wait(sem, pthread_gettimeout_np(abs_timeout));
+}
+
 static inline int sem_post(sem_t *sem) {
   winPthreadAssertWindows(ReleaseSemaphore(*sem, 1, NULL));
   return 0;
@@ -271,13 +298,6 @@ typedef struct {
 } pthread_cond_t;
 #define PTHREAD_COND_INITIALIZER { NULL, 0}
 
-#if !defined(__struct_timespec_defined) && !defined(__MINGW64_VERSION_MAJOR)
-struct timespec {
-  time_t  tv_sec;  /* Seconds */
-  long    tv_nsec; /* Nanoseconds */
-};
-#endif /* struct timespec */
-
 typedef unsigned pthread_condattr_t;
 
 static inline int pthread_cond_init (pthread_cond_t *cond, const pthread_condattr_t *attr) {
@@ -293,15 +313,15 @@ static inline int pthread_cond_timedwait (pthread_cond_t *cond, pthread_mutex_t 
     winPthreadAssertPthread(pthread_cond_init(cond,NULL));
   cond->nbwait++;
   winPthreadAssertPthread(pthread_mutex_unlock(mutex));
-again:
-  switch (WaitForSingleObject(cond->sem, time->tv_sec*1000+time->tv_nsec/1000)) {
+  switch (WaitForSingleObject(cond->sem, pthread_gettimeout_np(time))) {
     default:
     case WAIT_FAILED:
       setSystemErrno();
       winPthreadAssertPthread(pthread_mutex_lock(mutex));
       return errno;
     case WAIT_TIMEOUT:
-      goto again;
+      winPthreadAssertPthread(pthread_mutex_lock(mutex));
+      return ETIMEDOUT;
     case WAIT_ABANDONED:
     case WAIT_OBJECT_0:
       break;
