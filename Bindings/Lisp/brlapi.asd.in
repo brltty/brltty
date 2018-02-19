@@ -21,6 +21,9 @@
 (asdf:defsystem :brlapi
   :name "brlapi"
   :version "@api_release@"
+  :homepage "@PACKAGE_URL@"
+  :mailto "@PACKAGE_BUGREPORT@"
+  :description "BrlAPI client bindings for Common Lisp."
   :author "Mario Lang <MLang@blind.guru>"
   :depends-on (:cffi)
   :serial t
