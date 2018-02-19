@@ -161,6 +161,8 @@ external readKey :
   ?h:handle -> unit -> int64 option = "brlapiml_readKey"
 external waitKey :
   ?h:handle -> unit -> int64 = "brlapiml_waitKey"
+external readKeyWithTimeout :
+  ?h:handle -> int -> int64 option = "brlapiml_readKeyWithTimeout"
 
 type expandedKeyCode = {
   type_ : int32;

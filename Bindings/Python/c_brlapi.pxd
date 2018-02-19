@@ -96,6 +96,7 @@ cdef extern from "Programs/brlapi.h":
 	int brlapi__ignoreKeyRanges(brlapi_handle_t *, brlapi_range_t *, unsigned int) nogil
 	int brlapi__acceptKeyRanges(brlapi_handle_t *, brlapi_range_t *, unsigned int) nogil
 	int brlapi__readKey(brlapi_handle_t *, int, brlapi_keyCode_t*) nogil
+	int brlapi__readKeyWithTimeout(brlapi_handle_t *, int, brlapi_keyCode_t*) nogil
 	int brlapi_expandKeyCode(brlapi_keyCode_t, brlapi_expandedKeyCode_t *)
 	int brlapi_describeKeyCode(brlapi_keyCode_t, brlapi_describedKeyCode_t *)
 

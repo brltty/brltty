@@ -536,6 +536,24 @@ JNIEXPORT jlong JNICALL Java_org_a11y_BrlAPI_Native_readKey(JNIEnv *jenv, jobjec
   return (jlong)code;
 }
 
+JNIEXPORT jlong JNICALL Java_org_a11y_BrlAPI_Native_readKeyWithTimeout(JNIEnv *jenv, jobject jobj, jint timeout_ms) {
+  brlapi_keyCode_t code;
+  int result;
+  GET_HANDLE(jenv, jobj, -1);
+
+  env = jenv;
+
+  result = brlapi__readKeyWithTimeout(handle, timeout_ms, &code);
+
+  if (result < 0) {
+    ThrowError(jenv, __func__);
+    return -1;
+  }
+
+  if (!result) return (jlong)(-1);
+  return (jlong)code;
+}
+
 JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_ignoreKeys(JNIEnv *jenv, jobject jobj, jlong jrange, jlongArray js) {
   jlong *s;
   unsigned int n;

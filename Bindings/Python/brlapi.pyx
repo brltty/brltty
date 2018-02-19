@@ -20,6 +20,10 @@ try:
   # Accept the tab key
   b.acceptKeys(brlapi.rangeType_key,[brlapi.KEY_TYPE_SYM|Xlib.keysymdef.miscellany.XK_Tab])
 
+  b.writeText("Trying to get a key within one second")
+  key = b.readKeyWithTimeout(1000)
+  print("got " + str(key))
+
   b.writeText("Press home, winup/dn or tab to continue ... ¤")
   key = b.readKey()
 
@@ -600,6 +604,24 @@ cdef class Connection:
 		if retval == -1:
 			raise OperationError()
 		elif retval <= 0 and wait == False:
+			return None
+		else:
+			return code
+
+	def readKeyWithTimeout(self, timeout_ms = -1):
+		"""Read a key from the braille keyboard.
+		See brlapi_readKeyWithtimeout(3).
+
+                This function works like brlapi_readKey, except that parameter wait is replaced by a timeout_ms parameter."""
+		cdef c_brlapi.brlapi_keyCode_t code
+		cdef int retval
+		cdef int c_timeout_ms
+		c_timeout_ms = timeout_ms
+		with nogil:
+			retval = c_brlapi.brlapi__readKeyWithTimeout(self.h, c_timeout_ms, <c_brlapi.brlapi_keyCode_t*>&code)
+		if retval == -1:
+			raise OperationError()
+		elif retval <= 0 and timeout_ms >= 0:
 			return None
 		else:
 			return code

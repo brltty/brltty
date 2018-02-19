@@ -333,6 +333,19 @@ CAMLprim value brlapiml_readKey(value handle, value unit)
   CAMLreturn(retVal);
 }
 
+CAMLprim value brlapiml_readKeyWithTimeout(value handle, value timeout_ms)
+{
+  CAMLparam2(handle, timeout_ms);
+  int res;
+  brlapi_keyCode_t keyCode;
+  CAMLlocal1(retVal);
+  brlapiCheckErrorWithCode(readKeyWithTimeout, &res, Int_val(timeout_ms), &keyCode);
+  if (res==0) CAMLreturn(Val_int(0));
+  retVal = caml_alloc(1, 1);
+  Store_field(retVal, 0, caml_copy_int64(keyCode));
+  CAMLreturn(retVal);
+}
+
 CAMLprim value brlapiml_waitKey(value handle, value unit)
 {
   CAMLparam2(handle, unit);
