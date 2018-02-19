@@ -516,14 +516,49 @@ FUNCTION_HANDLER(session, readKey) {
   BrlapiSession *session = data;
   TEST_FUNCTION_ARGUMENTS(1, 0, "<wait>");
 
+  int length;
+  const char *operand = Tcl_GetStringFromObj(objv[2], &length);
+  if (!operand) return TCL_ERROR;
+
   int wait;
-  TEST_TCL_OK(Tcl_GetBooleanFromObj(interp, objv[2], &wait));
+  TEST_TCL_OK(Tcl_GetBoolean(interp, operand, &wait));
 
   brlapi_keyCode_t key;
   int result = brlapi__readKey(session->handle, wait, &key);
   TEST_BRLAPI_OK(result);
 
   if (result == 1) setWideIntResult(interp, key);
+  return TCL_OK;
+}
+
+FUNCTION_HANDLER(session, readKeyWithTimeout) {
+  BrlapiSession *session = data;
+  TEST_FUNCTION_ARGUMENTS(1, 0, "{infinite | <seconds>}");
+
+  int length;
+  const char *operand = Tcl_GetStringFromObj(objv[2], &length);
+  if (!operand) return TCL_ERROR;
+  int timeout;
+
+  if (strcmp(operand, "infinite") == 0) {
+    timeout = -1;
+  } else {
+    int seconds;
+    TEST_TCL_OK(Tcl_GetInt(interp, operand, &seconds));
+
+    if (seconds < 0) {
+      setStringsResult(interp, "negative timeout ", operand, NULL);
+      return TCL_ERROR;
+    }
+
+    timeout = seconds * 1000;
+  }
+
+  brlapi_keyCode_t code;
+  int result = brlapi__readKeyWithTimeout(session->handle, timeout, &code);
+  TEST_BRLAPI_OK(result);
+
+  if (result == 1) setWideIntResult(interp, code);
   return TCL_OK;
 }
 
@@ -1072,6 +1107,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     FUNCTION(session, leaveRawMode),
     FUNCTION(session, leaveTtyMode),
     FUNCTION(session, readKey),
+    FUNCTION(session, readKeyWithTimeout),
     FUNCTION(session, recvRaw),
     FUNCTION(session, resumeDriver),
     FUNCTION(session, sendRaw),

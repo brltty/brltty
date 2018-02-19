@@ -18,7 +18,6 @@
 
 source [file join [file dirname $argv0] prologue.tcl]
 load libbrlapi_tcl.so
-package require Tclx
 
 proc putProperties {label properties} {
    puts stdout "$label: $properties"
@@ -38,27 +37,6 @@ proc formatValues {values args} {
    }
 
    return $result
-}
-
-proc ttyHandleTimeout {} {
-   global ttyTimeoutEvent ttyReturnCode
-   unset ttyTimeoutEvent
-   set ttyReturnCode TIMEOUT
-}
-
-proc ttyCancelTimeout {} {
-   global ttyTimeoutEvent
-
-   if {[info exists ttyTimeoutEvent]} {
-      after cancel $ttyTimeoutEvent
-      unset ttyTimeoutEvent
-   }
-}
-
-proc ttySetTimeout {} {
-   global ttyTimeoutEvent
-   ttyCancelTimeout
-   set ttyTimeoutEvent [after 10000 [list ttyHandleTimeout]]
 }
 
 proc ttyShowKeyCode {session code} {
@@ -91,21 +69,12 @@ proc ttyShowKeyCode {session code} {
    putProperties Key $text
 }
 
-proc ttyShowKey {session} {
-   ttyShowKeyCode $session [$session readKey 0]
-   ttySetTimeout
-}
+proc ttyShowKeys {session timeout} {
+   $session write -text "press keys (timeout is $timeout seconds)"
 
-proc ttyShowKeys {session} {
-   set channel [dup [$session getFileDescriptor]]
-   fileevent $channel readable [list ttyShowKey $session]
-
-   $session write -text "The TCL bindings for BrlAPI seem to be working."
-   ttySetTimeout
-
-   vwait ttyReturnCode
-   fileevent $channel readable ""
-   ttyCancelTimeout
+   while {[string length [set code [$session readKeyWithTimeout $timeout]]] > 0} {
+      ttyShowKeyCode $session $code
+   }
 }
 
 proc mainProgram {} {
@@ -139,7 +108,7 @@ proc mainProgram {} {
       if {[info exists optionValues(tty)]} {
          if {[catch [list $session enterTtyMode -tty $optionValues(tty)] tty] == 0} {
             putProperties "TTY Number" $tty
-            ttyShowKeys $session
+            ttyShowKeys $session 10
             $session leaveTtyMode
          } else {
             writeProgramMessage "invalid tty: $tty"
