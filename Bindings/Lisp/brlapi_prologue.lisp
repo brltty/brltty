@@ -26,7 +26,8 @@
 	   #:driver-name #:model-identifier #:display-size
            #:enter-tty-mode #:leave-tty-mode
            #:write-text #:write-dots #:write-region
-           #:read-key #:expand-key-code #:describe-key-code
+           #:read-key read-key-with-timeout
+           #:expand-key-code #:describe-key-code
            #:error-message))
 
 (in-package :brlapi)

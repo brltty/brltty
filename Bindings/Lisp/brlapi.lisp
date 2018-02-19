@@ -251,6 +251,12 @@ The first value represents the x dimension and the second the y dimension."
       (0 nil)
       (1 (mem-ref key 'key-code)))))
 
+(defmethod read-key-with-timeout ((obj display) &optional (timeout -1))
+  (with-foreign-object (key 'key-code)
+    (case (foreign-funcall "brlapi__readKeyWithTimeout" :pointer (connection-handle obj) :int (* timeout 1000) :pointer key brlapi-code)
+      (0 nil)
+      (1 (mem-ref key 'key-code)))))
+
 (defcstruct expanded-key-code
   "A key code broken down into its individual fields."
   (type :int)

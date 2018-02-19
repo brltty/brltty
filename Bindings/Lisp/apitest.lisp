@@ -17,17 +17,30 @@
 
 (load "apisetup.lisp")
 
-(defun brlapi-test-tty (output session tty)
+(defun brlapi-test-tty (output session &key tty timeout)
   "Perform a test of BrlAPI's input functions."
 
+  (setf tty (if tty  (parse-integer tty) -1))
+  (setf timeout (if timeout  (parse-integer timeout) 10))
+
   (brlapi:enter-tty-mode session tty)
-  (brlapi:write-text session "Press any key to continue...")
-  (apply #'format output "Key: type=~A command=~A argument=~D flags=~{~A~^,~}~%"
-         (brlapi:describe-key-code (brlapi:read-key session t)))
+  (brlapi:write-text session (format nil "press keys (timeout is ~D seconds)" timeout))
+
+  (loop
+    with code
+    with text
+    while (setf code (brlapi:read-key-with-timeout session timeout))
+    do (setf text
+         (apply #'format nil
+           "code=0X~X type=~A cmd=~A arg=~D flg=~{~A~^,~}"
+           (list* code (brlapi:describe-key-code code))))
+       (format output "Key: ~A~%" text)
+       (brlapi:write-text session text)
+  )
   (brlapi:leave-tty-mode session)
 )
 
-(defun brlapi-test (&key auth host tty)
+(defun brlapi-test (&key host auth tty timeout)
   "Perform a test of various BrlAPI functiins."
 
   (let (
@@ -42,7 +55,8 @@
 
     (if (brlapi:is-connected session)
       (progn
-        (if tty (brlapi-test-tty output session (parse-integer tty)))
+        (if (or tty timeout)
+          (brlapi-test-tty output session :tty tty :timeout timeout))
       )
       (format output "connection failure: ~A~%" (brlapi:error-message))
     )
