@@ -27,18 +27,22 @@
    (host :initarg :host :reader server-host)
    (tty :initform nil :reader entered-tty)))
 
-(defmethod print-properties ((obj display) stream)
-  (format stream "version=~{~D~^.~}" (multiple-value-list (library-version)))
-  (if (is-connected obj)
-    (progn
-      (format stream " fd=~D" (file-descriptor obj))
-      (format stream " host=~A" (server-host obj))
-      (format stream " auth=~A" (server-auth obj))
-      (format stream " driver=~A" (driver-name obj))
-      (format stream " model=~A" (model-identifier obj))
+(defmethod property-list ((obj display))
+  "Return various properties as a lsit of three-element lists.
+The sublist for each returned property contains, in order, its name, its value, and its format string."
+  (list*
+    (list "version" (multiple-value-list (library-version)) "~{~D~^.~}")
+    (if (is-connected obj)
       (multiple-value-bind (width height) (display-size obj)
-        (format stream " width=~D" width)
-        (format stream " height=~D" height)
+        (list
+          (list "host" (server-host obj) "~A")
+          (list "auth" (server-auth obj) "~A")
+          (list "fd" (file-descriptor obj) "~D")
+          (list "driver" (driver-name obj) "~A")
+          (list "model" (model-identifier obj) "~A")
+          (list "width" width "~D")
+          (list "height" height "~D")
+        )
       )
     )
   )
@@ -46,9 +50,11 @@
 
 (defmethod print-object ((obj display) stream)
   (print-unreadable-object (obj stream :type t)
-    (if (is-connected obj)
-      (print-properties obj stream)
-      (format stream "disconnected")
+    (format stream "~{~A~^ ~}"
+      (loop
+        for (name value format) in (property-list obj) by #'cdr
+        append (list (format nil "~A=~A" name (format nil format value)))
+      )
     )
   )
 )

@@ -21,7 +21,7 @@
 (defpackage :brlapi
   (:use :common-lisp :cffi)
   (:export #:open-connection #:close-connection #:is-connected
-           #:print-properties #:print-object
+           #:property-list #:print-object
            #:library-version
 	   #:driver-name #:model-identifier #:display-size
            #:enter-tty-mode #:leave-tty-mode

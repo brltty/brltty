@@ -35,12 +35,13 @@
       (session (brlapi:open-connection :auth auth :host host))
     )
 
+    (loop
+      for (name value format) in (brlapi:property-list session) by #'cdr
+      do (format output "~A: ~A~%" name (format nil format value))
+    )
+
     (if (brlapi:is-connected session)
       (progn
-        (format output "Session: ")
-        (brlapi:print-properties session output)
-        (format output "~%")
-
         (if tty (brlapi-test-tty output session (parse-integer tty)))
       )
       (format output "connection failure: ~A~%" (brlapi:error-message))
