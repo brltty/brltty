@@ -453,6 +453,17 @@ static ssize_t brlapi__waitForPacket(brlapi_handle_t *handle, brlapi_packetType_
   int doread = 0;
   ssize_t res;
   sem_t sem;
+  struct timeval deadline, *pdeadline = NULL;
+  if (timeout_ms >= 0) {
+    gettimeofday(&deadline, NULL);
+    deadline.tv_sec += timeout_ms / 1000;
+    deadline.tv_usec += (timeout_ms % 1000) * 1000;
+    if (deadline.tv_usec >= 1000000) {
+      deadline.tv_sec++;
+      deadline.tv_usec -= 1000000;
+    }
+    pdeadline = &deadline;
+  }
 again:
   pthread_mutex_lock(&handle->read_mutex);
   if (!handle->reading) {
@@ -479,17 +490,6 @@ again:
   }
   pthread_mutex_unlock(&handle->read_mutex);
   if (doread) {
-    struct timeval deadline, *pdeadline = NULL;
-    if (timeout_ms >= 0) {
-      gettimeofday(&deadline, NULL);
-      deadline.tv_sec += timeout_ms / 1000;
-      deadline.tv_usec += (timeout_ms % 1000) * 1000;
-      if (deadline.tv_usec >= 1000000) {
-	deadline.tv_sec++;
-	deadline.tv_usec -= 1000000;
-      }
-      pdeadline = &deadline;
-    }
     do {
       res = brlapi__doWaitForPacket(handle, expectedPacketType, packet, size, pdeadline);
     } while (loop && (res == -3 || (res == -1 && brlapi_errno == BRLAPI_ERROR_LIBCERR && (
@@ -510,10 +510,30 @@ again:
     handle->reading = 0;
     pthread_mutex_unlock(&handle->read_mutex);
   } else {
-    sem_wait(&sem);
+    int ret;
+    if (timeout_ms == 0) {
+      ret = sem_trywait(&sem);
+    } else if (timeout_ms > 0) {
+      struct timespec abs_timeout;
+      abs_timeout.tv_sec = deadline.tv_sec;
+      abs_timeout.tv_nsec = deadline.tv_usec * 1000;
+      ret = sem_timedwait(&sem, &abs_timeout);
+    } else {
+      do {
+	ret = sem_wait(&sem);
+      } while (ret && errno == EINTR);
+    }
+    if (ret) {
+      /* Timeout, drop our semaphore */
+      pthread_mutex_lock(&handle->read_mutex);
+      handle->altSem = NULL;
+      pthread_mutex_unlock(&handle->read_mutex);
+      res = -4;
+    }
     sem_destroy(&sem);
-    if (res < 0 && (res != -3 || loop)) goto again;
-      /* reader hadn't any packet for us, or error */
+    if (res == -1 /* He got an error, we want to read it too */
+	|| (res == -3 && loop)) /* reader hadn't any packet for us */
+      goto again;
   }
   if (res==-2) {
     res = -1;
