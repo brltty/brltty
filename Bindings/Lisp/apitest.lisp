@@ -37,7 +37,7 @@
 
     (loop
       for (name value format) in (brlapi:property-list session) by #'cdr
-      do (format output "~A: ~A~%" name (format nil format value))
+      do (format output "~A: ~@?~%" name format value)
     )
 
     (if (brlapi:is-connected session)

@@ -53,7 +53,7 @@ The sublist for each returned property contains, in order, its name, its value, 
     (format stream "~{~A~^ ~}"
       (loop
         for (name value format) in (property-list obj) by #'cdr
-        append (list (format nil "~A=~A" name (format nil format value)))
+        append (list (format nil "~A=~@?" name format value))
       )
     )
   )
