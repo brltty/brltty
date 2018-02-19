@@ -1674,7 +1674,7 @@ int brlapi_write(const brlapi_writeArguments_t *s)
 
 /* Function : brlapi_readKey */
 /* Reads a key from the braille keyboard */
-int BRLAPI_STDCALL brlapi__readKeyTimeout(brlapi_handle_t *handle, int timeout_ms, brlapi_keyCode_t *code)
+int BRLAPI_STDCALL brlapi__readKeyWithTimeout(brlapi_handle_t *handle, int timeout_ms, brlapi_keyCode_t *code)
 {
   ssize_t res;
   uint32_t buf[2];
@@ -1709,26 +1709,26 @@ int BRLAPI_STDCALL brlapi__readKeyTimeout(brlapi_handle_t *handle, int timeout_m
   }
   if (res == -4) {
     /* Timeout */
-    return -2;
+    return 0;
   }
   if (res < 0) return -1;
   *code = ((brlapi_keyCode_t)ntohl(buf[0]) << 32) | ntohl(buf[1]);
   return 1;
 }
 
-int BRLAPI_STDCALL brlapi_readKeyTimeout(int timeout_ms, brlapi_keyCode_t *code)
+int BRLAPI_STDCALL brlapi_readKeyWithTimeout(int timeout_ms, brlapi_keyCode_t *code)
 {
-  return brlapi__readKeyTimeout(&defaultHandle, timeout_ms, code);
+  return brlapi__readKeyWithTimeout(&defaultHandle, timeout_ms, code);
 }
 
 int BRLAPI_STDCALL brlapi__readKey(brlapi_handle_t *handle, int block, brlapi_keyCode_t *code)
 {
-  return brlapi__readKeyTimeout(handle, block ? -1 : 0, code);
+  return brlapi__readKeyWithTimeout(handle, block ? -1 : 0, code);
 }
 
 int BRLAPI_STDCALL brlapi_readKey(int block, brlapi_keyCode_t *code)
 {
-  return brlapi__readKeyTimeout(&defaultHandle, block ? -1 : 0, code);
+  return brlapi__readKeyWithTimeout(&defaultHandle, block ? -1 : 0, code);
 }
 
 typedef struct {

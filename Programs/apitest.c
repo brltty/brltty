@@ -303,7 +303,7 @@ static void *thread_fun(void *foo)
   do {
     brlapi_readKey(1, &code);
     printf("got key %"PRIx64"\n", code);
-    if (brlapi_readKeyTimeout(1000, &code) == -2) {
+    if (brlapi_readKeyWithTimeout(1000, &code) != 1) {
       printf("didn't get a key within the 1s delay\n");
     } else {
       printf("got key %"PRIx64" within the 1s delay\n", code);
