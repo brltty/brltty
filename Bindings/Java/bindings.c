@@ -126,17 +126,26 @@ getVersionNumbers (void) {
   }
 }
 
-JNIEXPORT jint JNICALL Java_org_a11y_BrlAPI_Native_getMajorVersion(JNIEnv *jenv, jobject jobj) {
+#define JAVA_METHOD(object,name,type) \
+  JNIEXPORT type JNICALL Java_ ## object ## _ ## name (JNIEnv *jenv
+
+#define JAVA_INSTANCE_METHOD(object,name,type,...) \
+  JAVA_METHOD(object,name,type), jobject jobj, ## __VA_ARGS__)
+
+#define JAVA_STATIC_METHOD(object,name,type,...) \
+  JAVA_METHOD(object,name,type), jclass jcls, ## __VA_ARGS__)
+
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, getMajorVersion, jint) {
   getVersionNumbers();
   return majorVersion;
 }
 
-JNIEXPORT jint JNICALL Java_org_a11y_BrlAPI_Native_getMinorVersion(JNIEnv *jenv, jobject jobj) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, getMinorVersion, jint) {
   getVersionNumbers();
   return minorVersion;
 }
 
-JNIEXPORT jint JNICALL Java_org_a11y_BrlAPI_Native_getRevision(JNIEnv *jenv, jobject jobj) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, getRevision, jint) {
   getVersionNumbers();
   return revision;
 }
@@ -163,7 +172,7 @@ JNIEXPORT jint JNICALL Java_org_a11y_BrlAPI_Native_getRevision(JNIEnv *jenv, job
     return ret; \
   }
 
-JNIEXPORT jint JNICALL Java_org_a11y_BrlAPI_Native_openConnection(JNIEnv *jenv, jobject jobj, jobject JclientSettings , jobject JusedSettings) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, openConnection, jint, jobject JclientSettings , jobject JusedSettings) {
   jclass jcclientSettings, jcusedSettings;
   jfieldID clientAuthID = NULL, clientHostID = NULL, usedAuthID, usedHostID;
   brlapi_connectionSettings_t clientSettings,  usedSettings,
@@ -253,7 +262,7 @@ JNIEXPORT jint JNICALL Java_org_a11y_BrlAPI_Native_openConnection(JNIEnv *jenv, 
   return (jint) result;
 }
 
-JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_closeConnection(JNIEnv *jenv, jobject jobj) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, closeConnection, void) {
   env = jenv;
   GET_HANDLE(jenv, jobj, );
 
@@ -262,7 +271,7 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_closeConnection(JNIEnv *jenv,
   (*jenv)->SetLongField(jenv, jobj, handleID, (jlong) (intptr_t) NULL);
 }
 
-JNIEXPORT jstring JNICALL Java_org_a11y_BrlAPI_Native_getDriverName(JNIEnv *jenv, jobject jobj) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, getDriverName, jstring) {
   char name[32];
   GET_HANDLE(jenv, jobj, NULL);
 
@@ -277,7 +286,7 @@ JNIEXPORT jstring JNICALL Java_org_a11y_BrlAPI_Native_getDriverName(JNIEnv *jenv
   return (*jenv)->NewStringUTF(jenv, name);
 }
 
-JNIEXPORT jstring JNICALL Java_org_a11y_BrlAPI_Native_getModelIdentifier(JNIEnv *jenv, jobject jobj) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, getModelIdentifier, jstring) {
   char identifier[32];
   GET_HANDLE(jenv, jobj, NULL);
 
@@ -292,7 +301,7 @@ JNIEXPORT jstring JNICALL Java_org_a11y_BrlAPI_Native_getModelIdentifier(JNIEnv 
   return (*jenv)->NewStringUTF(jenv, identifier);
 }
 
-JNIEXPORT jobject JNICALL Java_org_a11y_BrlAPI_Native_getDisplaySize(JNIEnv *jenv, jobject jobj) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, getDisplaySize, jobject) {
   unsigned int x, y;
   jclass jcsize;
   jmethodID jinit;
@@ -322,7 +331,7 @@ JNIEXPORT jobject JNICALL Java_org_a11y_BrlAPI_Native_getDisplaySize(JNIEnv *jen
   return jsize;
 }
 
-JNIEXPORT jint JNICALL Java_org_a11y_BrlAPI_Native_enterTtyMode(JNIEnv *jenv, jobject jobj, jint jtty, jstring jdriver) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, enterTtyMode, jint, jint jtty, jstring jdriver) {
   int tty ;
   char *driver;
   int result;
@@ -348,7 +357,7 @@ JNIEXPORT jint JNICALL Java_org_a11y_BrlAPI_Native_enterTtyMode(JNIEnv *jenv, jo
   return (jint) result;
 }
 
-JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_enterTtyModeWithPath(JNIEnv *jenv, jobject jobj, jintArray jttys, jstring jdriver) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, enterTtyModeWithPath, void, jintArray jttys, jstring jdriver) {
   jint *ttys ;
   char *driver;
   int result;
@@ -380,7 +389,7 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_enterTtyModeWithPath(JNIEnv *
   }
 }
 
-JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_leaveTtyMode(JNIEnv *jenv, jobject jobj) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, leaveTtyMode, void) {
   env = jenv;
   GET_HANDLE(jenv, jobj, );
 
@@ -390,7 +399,7 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_leaveTtyMode(JNIEnv *jenv, jo
   }
 }
 
-JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_setFocus(JNIEnv *jenv, jobject jobj, jint jarg1) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, setFocus, void, jint jarg1) {
   int arg1 ;
   GET_HANDLE(jenv, jobj, );
   
@@ -403,7 +412,7 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_setFocus(JNIEnv *jenv, jobjec
   }
 }
 
-JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_writeText(JNIEnv *jenv, jobject jobj, jint jarg1, jstring jarg2) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, writeText, void, jint jarg1, jstring jarg2) {
   brlapi_writeArguments_t s = BRLAPI_WRITEARGUMENTS_INITIALIZER;
   int result;
   GET_HANDLE(jenv, jobj, );
@@ -433,7 +442,7 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_writeText(JNIEnv *jenv, jobje
   }
 }
 
-JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_writeDots(JNIEnv *jenv, jobject jobj, jbyteArray jarg1) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, writeDots, void, jbyteArray jarg1) {
   jbyte *arg1;
   int result;
   GET_HANDLE(jenv, jobj, );
@@ -459,7 +468,7 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_writeDots(JNIEnv *jenv, jobje
   }
 }
 
-JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_write(JNIEnv *jenv, jobject jobj, jobject jarguments) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, write, void, jobject jarguments) {
   brlapi_writeArguments_t arguments = BRLAPI_WRITEARGUMENTS_INITIALIZER;
   int result;
   jstring text, andMask, orMask;
@@ -518,7 +527,7 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_write(JNIEnv *jenv, jobject j
   }
 }
 
-JNIEXPORT jlong JNICALL Java_org_a11y_BrlAPI_Native_readKey(JNIEnv *jenv, jobject jobj, jboolean jblock) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, readKey, jlong, jboolean jblock) {
   brlapi_keyCode_t code;
   int result;
   GET_HANDLE(jenv, jobj, -1);
@@ -536,7 +545,7 @@ JNIEXPORT jlong JNICALL Java_org_a11y_BrlAPI_Native_readKey(JNIEnv *jenv, jobjec
   return (jlong)code;
 }
 
-JNIEXPORT jlong JNICALL Java_org_a11y_BrlAPI_Native_readKeyWithTimeout(JNIEnv *jenv, jobject jobj, jint timeout_ms) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, readKeyWithTimeout, jlong, jint timeout_ms) {
   brlapi_keyCode_t code;
   int result;
   GET_HANDLE(jenv, jobj, -1);
@@ -554,7 +563,7 @@ JNIEXPORT jlong JNICALL Java_org_a11y_BrlAPI_Native_readKeyWithTimeout(JNIEnv *j
   return (jlong)code;
 }
 
-JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_ignoreKeys(JNIEnv *jenv, jobject jobj, jlong jrange, jlongArray js) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, ignoreKeys, void, jlong jrange, jlongArray js) {
   jlong *s;
   unsigned int n;
   int result;
@@ -580,7 +589,7 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_ignoreKeys(JNIEnv *jenv, jobj
   }
 }
 
-JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_acceptKeys(JNIEnv *jenv, jobject jobj, jlong jrange, jlongArray js) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, acceptKeys, void, jlong jrange, jlongArray js) {
   jlong *s;
   unsigned int n;
   int result;
@@ -606,21 +615,21 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_acceptKeys(JNIEnv *jenv, jobj
   }
 }
 
-JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_ignoreAllKeys(JNIEnv *jenv, jobject jobj) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, ignoreAllKeys, void) {
   GET_HANDLE(jenv, jobj, );
 
   if (brlapi__ignoreAllKeys(handle) < 0)
     ThrowError(jenv, __func__);
 }
 
-JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_acceptAllKeys(JNIEnv *jenv, jobject jobj) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, acceptAllKeys, void) {
   GET_HANDLE(jenv, jobj, );
 
   if (brlapi__acceptAllKeys(handle) < 0)
     ThrowError(jenv, __func__);
 }
 
-JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_ignoreKeyRanges(JNIEnv *jenv, jobject jobj, jobjectArray js) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, ignoreKeyRanges, void, jobjectArray js) {
   unsigned int n;
   GET_HANDLE(jenv, jobj, );
 
@@ -651,7 +660,7 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_ignoreKeyRanges(JNIEnv *jenv,
   }
 }
 
-JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_acceptKeyRanges(JNIEnv *jenv, jobject jobj, jobjectArray js) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, acceptKeyRanges, void, jobjectArray js) {
   unsigned int n;
   GET_HANDLE(jenv, jobj, );
 
@@ -682,7 +691,7 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_acceptKeyRanges(JNIEnv *jenv,
   }
 }
 
-JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_enterRawMode(JNIEnv *jenv, jobject jobj, jstring jdriver) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, enterRawMode, void, jstring jdriver) {
   env = jenv;
   char *driver;
   int res;
@@ -702,7 +711,7 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_enterRawMode(JNIEnv *jenv, jo
   }
 }
 
-JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_leaveRawMode(JNIEnv *jenv, jobject jobj) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, leaveRawMode, void) {
   env = jenv;
   GET_HANDLE(jenv, jobj, );
 
@@ -712,7 +721,7 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_leaveRawMode(JNIEnv *jenv, jo
   }
 }
 
-JNIEXPORT jint JNICALL Java_org_a11y_BrlAPI_Native_sendRaw(JNIEnv *jenv, jobject jobj, jbyteArray jbuf) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, sendRaw, jint, jbyteArray jbuf) {
   jbyte *buf;
   unsigned int n;
   int result;
@@ -739,7 +748,7 @@ JNIEXPORT jint JNICALL Java_org_a11y_BrlAPI_Native_sendRaw(JNIEnv *jenv, jobject
   return (jint) result;
 }
 
-JNIEXPORT jint JNICALL Java_org_a11y_BrlAPI_Native_recvRaw(JNIEnv *jenv, jobject jobj, jbyteArray jbuf) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Native, recvRaw, jint, jbyteArray jbuf) {
   jbyte *buf;
   unsigned int n;
   int result;
@@ -767,7 +776,7 @@ JNIEXPORT jint JNICALL Java_org_a11y_BrlAPI_Native_recvRaw(JNIEnv *jenv, jobject
   return (jint) result;
 }
 
-JNIEXPORT jstring JNICALL Java_org_a11y_BrlAPI_Native_getPacketTypeName(JNIEnv *jenv, jclass jcls, jlong jtype) {
+JAVA_STATIC_METHOD(org_a11y_BrlAPI_Native, getPacketTypeName, jstring, jlong jtype) {
   const char *type;
 
   env = jenv;
@@ -780,7 +789,7 @@ JNIEXPORT jstring JNICALL Java_org_a11y_BrlAPI_Native_getPacketTypeName(JNIEnv *
   return (*jenv)->NewStringUTF(jenv, type);
 }
 
-JNIEXPORT jstring JNICALL Java_org_a11y_BrlAPI_Error_toString (JNIEnv *jenv, jobject jerr) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Error, toString, jstring) {
   jclass jcerr;
   jfieldID brlerrnoID, libcerrnoID, gaierrnoID, errfunID;
   jstring jerrfun;
@@ -789,16 +798,16 @@ JNIEXPORT jstring JNICALL Java_org_a11y_BrlAPI_Error_toString (JNIEnv *jenv, job
 
   env = jenv;
 
-  GET_CLASS(jenv, jcerr, jerr, NULL);
+  GET_CLASS(jenv, jcerr, jobj, NULL);
   GET_ID(jenv, brlerrnoID,  jcerr, "brlerrno",  "I", NULL);
   GET_ID(jenv, libcerrnoID, jcerr, "libcerrno", "I", NULL);
   GET_ID(jenv, gaierrnoID,  jcerr, "gaierrno",  "I", NULL);
   GET_ID(jenv, errfunID,    jcerr, "errfun",    "Ljava/lang/String;", NULL);
 
-  error.brlerrno  = (*jenv)->GetIntField(jenv, jerr, brlerrnoID);
-  error.libcerrno = (*jenv)->GetIntField(jenv, jerr, libcerrnoID);
-  error.gaierrno  = (*jenv)->GetIntField(jenv, jerr, gaierrnoID);
-  if (!(jerrfun = (*jenv)->GetObjectField(jenv, jerr, errfunID))) {
+  error.brlerrno  = (*jenv)->GetIntField(jenv, jobj, brlerrnoID);
+  error.libcerrno = (*jenv)->GetIntField(jenv, jobj, libcerrnoID);
+  error.gaierrno  = (*jenv)->GetIntField(jenv, jobj, gaierrnoID);
+  if (!(jerrfun = (*jenv)->GetObjectField(jenv, jobj, errfunID))) {
     error.errfun = NULL;
   } else if (!(error.errfun = (char *)(*jenv)->GetStringUTFChars(jenv, jerrfun, NULL))) {
     ThrowException(jenv, ERR_OUTOFMEM, __func__);
@@ -810,7 +819,7 @@ JNIEXPORT jstring JNICALL Java_org_a11y_BrlAPI_Error_toString (JNIEnv *jenv, job
   return (*jenv)->NewStringUTF(jenv, res);
 }
 
-JNIEXPORT jstring JNICALL Java_org_a11y_BrlAPI_Exception_toString (JNIEnv *jenv, jobject jerr) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Exception, toString, jstring) {
   jclass jcerr;
   jfieldID handleID, errnoID, typeID, bufID;
   jarray jbuf;
@@ -822,19 +831,19 @@ JNIEXPORT jstring JNICALL Java_org_a11y_BrlAPI_Exception_toString (JNIEnv *jenv,
 
   env = jenv;
 
-  if (!jerr) {
+  if (!jobj) {
     ThrowException(jenv, ERR_NULLPTR, __func__);
     return NULL;
   }
-  GET_CLASS(jenv, jcerr, jerr, NULL);
+  GET_CLASS(jenv, jcerr, jobj, NULL);
   GET_ID(jenv, handleID, jcerr, "handle", "I", NULL);
   GET_ID(jenv, errnoID,  jcerr, "errno",  "I", NULL);
   GET_ID(jenv, typeID,   jcerr, "type",   "I", NULL);
   GET_ID(jenv, bufID,    jcerr, "buf",    "I", NULL);
 
-  handle = (void*)(intptr_t)(*jenv)->GetLongField(jenv, jerr, handleID);
-  type  = (*jenv)->GetIntField(jenv, jerr, typeID);
-  if (!(jbuf  = (*jenv)->GetObjectField(jenv, jerr, typeID))) {
+  handle = (void*)(intptr_t)(*jenv)->GetLongField(jenv, jobj, handleID);
+  type  = (*jenv)->GetIntField(jenv, jobj, typeID);
+  if (!(jbuf  = (*jenv)->GetObjectField(jenv, jobj, typeID))) {
     ThrowException(jenv, ERR_NULLPTR, __func__);
     return NULL;
   }
@@ -846,21 +855,21 @@ JNIEXPORT jstring JNICALL Java_org_a11y_BrlAPI_Exception_toString (JNIEnv *jenv,
   return (*jenv)->NewStringUTF(jenv, errmsg);
 }
 
-JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Key_expandKeyCode (JNIEnv *jenv, jobject obj, jlong jkey) {
+JAVA_INSTANCE_METHOD(org_a11y_BrlAPI_Key, expandKeyCode, void, jlong jkey) {
   jclass jckey;
   jfieldID typeID, commandID, argumentID, flagsID;
   brlapi_keyCode_t key = jkey;
   brlapi_expandedKeyCode_t ekc;
 
-  GET_CLASS(jenv, jckey, obj, );
+  GET_CLASS(jenv, jckey, jobj, );
   GET_ID(jenv, typeID,     jckey, "typeValue",     "I", );
   GET_ID(jenv, commandID,  jckey, "commandValue",  "I", );
   GET_ID(jenv, argumentID, jckey, "argumentValue", "I", );
   GET_ID(jenv, flagsID,    jckey, "flagsValue",    "I", );
 
   brlapi_expandKeyCode(key, &ekc);
-  (*jenv)->SetIntField(jenv, obj, typeID,     ekc.type);
-  (*jenv)->SetIntField(jenv, obj, commandID,  ekc.command);
-  (*jenv)->SetIntField(jenv, obj, argumentID, ekc.argument);
-  (*jenv)->SetIntField(jenv, obj, flagsID,    ekc.flags);
+  (*jenv)->SetIntField(jenv, jobj, typeID,     ekc.type);
+  (*jenv)->SetIntField(jenv, jobj, commandID,  ekc.command);
+  (*jenv)->SetIntField(jenv, jobj, argumentID, ekc.argument);
+  (*jenv)->SetIntField(jenv, jobj, flagsID,    ekc.flags);
 }
