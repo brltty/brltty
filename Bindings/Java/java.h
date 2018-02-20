@@ -51,14 +51,20 @@ extern "C" {
 
 #define JAVA_SIG_STRING JAVA_SIG_OBJECT(JAVA_OBJECT_STRING)
 
-#define JAVA_METHOD(object,name,type) \
-  JNIEXPORT type JNICALL Java_ ## object ## _ ## name (JNIEnv *jenv
+#define JAVA_METHOD(object,name,returns) \
+  JNIEXPORT returns JNICALL Java_ ## object ## _ ## name (JNIEnv *env
 
-#define JAVA_INSTANCE_METHOD(object,name,type,...) \
-  JAVA_METHOD(object,name,type), jobject this, ## __VA_ARGS__)
+#define JAVA_INSTANCE_METHOD(object,name,returns,...) \
+  JAVA_METHOD(object,name,returns), jobject this, ## __VA_ARGS__)
 
-#define JAVA_STATIC_METHOD(object,name,type,...) \
-  JAVA_METHOD(object,name,type), jclass class, ## __VA_ARGS__)
+#define JAVA_STATIC_METHOD(object,name,returns,...) \
+  JAVA_METHOD(object,name,returns), jclass class, ## __VA_ARGS__)
+
+#define GET_VALUE(env,type,object,field) \
+  (*(env))->Get ## type ## Field((env), (object), (field))
+
+#define SET_VALUE(env,type,object,field,value) \
+   (*(env))->Set ## type ## Field((env), (object), (field), (value));
 
 #ifdef __cplusplus
 }
