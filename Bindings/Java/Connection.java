@@ -19,7 +19,7 @@
 
 package org.a11y.BrlAPI;
 
-public class Connection extends Native implements Constants {
+public class Connection extends Native {
   protected final ConnectionSettings settings;
   protected final int fileDescriptor;
 
@@ -49,7 +49,7 @@ public class Connection extends Native implements Constants {
   }
 
   public int enterTtyMode (String driver) throws Error {
-    return enterTtyMode(TTY_DEFAULT, driver);
+    return enterTtyMode(Constants.TTY_DEFAULT, driver);
   }
 
   public int enterTtyMode () throws Error {
@@ -79,7 +79,7 @@ public class Connection extends Native implements Constants {
   }
 
   public void writeText (String text) throws Error {
-    writeText(CURSOR_OFF, text);
+    writeText(Constants.CURSOR_OFF, text);
   }
 
   public void writeText (String text, int cursor) throws Error {
