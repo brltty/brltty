@@ -37,7 +37,8 @@ typedef enum {
 /* TODO: threads */
 static JNIEnv *env;
 
-static void ThrowException(JNIEnv *jenv, int code, const char *msg) {
+static void
+throwException(JNIEnv *jenv, int code, const char *msg) {
   jclass excep;
   const char *exception;
 
@@ -56,7 +57,8 @@ static void ThrowException(JNIEnv *jenv, int code, const char *msg) {
     fprintf(stderr,"couldn't find exception %s !\n",exception);
 }
 
-static void ThrowError(JNIEnv *jenv, const char *msg) {
+static void
+throwError(JNIEnv *jenv, const char *msg) {
   const char *error = brlapi_strerror(&brlapi_error);
   int lenmsg = strlen(msg);
   int lenerr = strlen(error);
@@ -70,17 +72,17 @@ static void ThrowError(JNIEnv *jenv, const char *msg) {
     snprintf(message, sizeof(message), "%s: %s", msg, error);
 
     if (!(jcexcep = (*jenv)->FindClass(jenv, "org/a11y/BrlAPI/Error"))) {
-      ThrowException(jenv, ERR_NULL_POINTER, "ThrowBrlapiErrorFindClass");
+      throwException(jenv, ERR_NULL_POINTER, "ThrowBrlapiErrorFindClass");
       return;
     }
     if (!(jinit = (*jenv)->GetMethodID(jenv, jcexcep, "<init>", "(IIILjava/lang/String;)V"))) {
-      ThrowException(jenv, ERR_NULL_POINTER, "ThrowBrlapiErrorGetMethodID");
+      throwException(jenv, ERR_NULL_POINTER, "ThrowBrlapiErrorGetMethodID");
       return;
     }
     if (brlapi_errfun)
       errfun = (*jenv)->NewStringUTF(jenv, brlapi_errfun);
     if (!(jexcep = (*jenv)->NewObject(jenv, jcexcep, jinit, brlapi_errno, brlapi_libcerrno, brlapi_gaierrno, errfun))) {
-      ThrowException(jenv, ERR_NULL_POINTER, "ThrowBrlapiErrorNewObject");
+      throwException(jenv, ERR_NULL_POINTER, "ThrowBrlapiErrorNewObject");
       return;
     }
     (*jenv)->ExceptionClear(jenv);
@@ -95,21 +97,21 @@ static void BRLAPI_STDCALL exceptionHandler(brlapi_handle_t *handle, int err, br
   jthrowable jexcep;
 
   if (!(jbuf = (*env)->NewByteArray(env, size))) {
-    ThrowException(env, ERR_NO_MEMORY, __func__);
+    throwException(env, ERR_NO_MEMORY, __func__);
     return;
   }
   (*env)->SetByteArrayRegion(env, jbuf, 0, size, (jbyte *) buf);
 
   if (!(jcexcep = (*env)->FindClass(env, "org/a11y/BrlAPI/Exception"))) {
-    ThrowException(env, ERR_NULL_POINTER, "exceptionHandlerFindClass");
+    throwException(env, ERR_NULL_POINTER, "exceptionHandlerFindClass");
     return;
   }
   if (!(jinit = (*env)->GetMethodID(env, jcexcep, "<init>", "(JII[B)V"))) {
-    ThrowException(env, ERR_NULL_POINTER, "exceptionHandlerGetMethodID");
+    throwException(env, ERR_NULL_POINTER, "exceptionHandlerGetMethodID");
     return;
   }
   if (!(jexcep = (*env)->NewObject(env, jcexcep, jinit, (jlong)(intptr_t) handle, err, type, jbuf))) {
-    ThrowException(env, ERR_NULL_POINTER, "exceptionHandlerNewObject");
+    throwException(env, ERR_NULL_POINTER, "exceptionHandlerNewObject");
     return;
   }
   (*env)->ExceptionClear(env);
@@ -159,48 +161,53 @@ JAVA_INSTANCE_METHOD(
 }
 
 #define GET_CLASS(jenv, class, obj, ret) \
-  if (!((class) = (*(jenv))->GetObjectClass((jenv), (obj)))) { \
-    ThrowException((jenv), ERR_NULL_POINTER, #obj " -> " #class); \
-    return ret; \
-  }
+  jclass class; \
+  do { \
+    if (!((class) = (*(jenv))->GetObjectClass((jenv), (obj)))) { \
+      throwException((jenv), ERR_NULL_POINTER, #obj " -> " #class); \
+      return ret; \
+    } \
+  } while (0)
 
-#define GET_ID(jenv, id, class, field, sig, ret) \
-  if (!((id) = (*(jenv))->GetFieldID((jenv), (class), (field), (sig)))) {\
-    ThrowException((jenv), ERR_NULL_POINTER, #class "." field); \
-    return ret; \
-  }
+#define GET_FIELD(jenv, field, class, name, signature, ret) \
+  jfieldID field; \
+  do { \
+    if (!(field = (*(jenv))->GetFieldID((jenv), (class), (name), (signature)))) {\
+      throwException((jenv), ERR_NULL_POINTER, #class "." name); \
+      return ret; \
+    } \
+  } while (0)
+
 #define GET_HANDLE(jenv, jobj, ret) \
   brlapi_handle_t *handle; \
-  jclass jcls; \
   jfieldID handleID; \
-  GET_CLASS(jenv, jcls, jobj, ret); \
-  GET_ID(jenv, handleID, jcls, "handle", "J", ret); \
-  handle = (void*) (intptr_t) (*jenv)->GetLongField(jenv, jobj, handleID); \
-  if (!handle) { \
-    ThrowException((jenv), ERR_NULL_POINTER, "connection has been closed"); \
-    return ret; \
-  }
+  do { \
+    GET_CLASS(jenv, jcls, jobj, ret); \
+    GET_FIELD(jenv, id, jcls, "handle", "J", ret); \
+    handleID = id; \
+    handle = (void*) (intptr_t) (*jenv)->GetLongField(jenv, jobj, handleID); \
+    if (!handle) { \
+      throwException((jenv), ERR_NULL_POINTER, "connection has been closed"); \
+      return ret; \
+    } \
+  } while (0)
 
 JAVA_INSTANCE_METHOD(
   org_a11y_BrlAPI_Native, openConnection, jint,
   jobject JclientSettings , jobject JusedSettings
 ) {
-  jclass jcclientSettings, jcusedSettings;
-  jfieldID clientAuthID = NULL, clientHostID = NULL, usedAuthID, usedHostID;
   brlapi_connectionSettings_t clientSettings,  usedSettings,
             *PclientSettings, *PusedSettings;
   int result;
   jstring auth = NULL, host = NULL;
   const char *str;
-  jfieldID handleID;
   brlapi_handle_t *handle;
-  jclass jcls;
 
   GET_CLASS(jenv, jcls, jobj, -1);
-  GET_ID(jenv, handleID, jcls, "handle", "J", -1);
+  GET_FIELD(jenv, handleID, jcls, "handle", "J", -1);
   handle = malloc(brlapi_getHandleSize());
   if (!handle) {
-    ThrowException(jenv, ERR_NO_MEMORY, __func__);
+    throwException(jenv, ERR_NO_MEMORY, __func__);
     return -1;
   }
 
@@ -210,19 +217,19 @@ JAVA_INSTANCE_METHOD(
 
   if (JclientSettings) {
     GET_CLASS(jenv, jcclientSettings, JclientSettings, -1);
-    GET_ID(jenv, clientAuthID, jcclientSettings, "auth", "Ljava/lang/String;", -1);
-    GET_ID(jenv, clientHostID, jcclientSettings, "host", "Ljava/lang/String;", -1);
+    GET_FIELD(jenv, clientAuthID, jcclientSettings, "auth", "Ljava/lang/String;", -1);
+    GET_FIELD(jenv, clientHostID, jcclientSettings, "host", "Ljava/lang/String;", -1);
 
     PclientSettings = &clientSettings;
     if ((auth = (*jenv)->GetObjectField(jenv, JclientSettings, clientAuthID))) {
       if (!(clientSettings.auth = (char *)(*jenv)->GetStringUTFChars(jenv, auth, NULL))) {
-	ThrowException(jenv, ERR_NO_MEMORY, __func__);
+	throwException(jenv, ERR_NO_MEMORY, __func__);
 	return -1;
       }
     } else clientSettings.auth = NULL;
     if ((host = (*jenv)->GetObjectField(jenv, JclientSettings, clientHostID))) {
       if (!(clientSettings.host = (char *)(*jenv)->GetStringUTFChars(jenv, host, NULL))) {
-	ThrowException(jenv, ERR_NO_MEMORY, __func__);
+	throwException(jenv, ERR_NO_MEMORY, __func__);
 	return -1;
       }
     } else clientSettings.host = NULL;
@@ -234,7 +241,7 @@ JAVA_INSTANCE_METHOD(
     PusedSettings = NULL;
 
   if ((result = brlapi__openConnection(handle, PclientSettings, PusedSettings)) < 0) {
-    ThrowError(jenv, __func__);
+    throwError(jenv, __func__);
     return -1;
   }
 
@@ -249,25 +256,25 @@ JAVA_INSTANCE_METHOD(
 
   if (PusedSettings) {
     GET_CLASS(jenv, jcusedSettings, JusedSettings, -1);
-    GET_ID(jenv, usedAuthID, jcusedSettings, "auth", "Ljava/lang/String;", -1);
-    GET_ID(jenv, usedHostID, jcusedSettings, "host", "Ljava/lang/String;", -1);
+    GET_FIELD(jenv, usedAuthID, jcusedSettings, "auth", "Ljava/lang/String;", -1);
+    GET_FIELD(jenv, usedHostID, jcusedSettings, "host", "Ljava/lang/String;", -1);
 
     auth = (*jenv)->NewStringUTF(jenv, usedSettings.auth);
     if (!auth) {
-      ThrowException(jenv, ERR_NO_MEMORY, __func__);
+      throwException(jenv, ERR_NO_MEMORY, __func__);
       return -1;
     }
     str = (*jenv)->GetStringUTFChars(jenv, auth, NULL);
-    (*jenv)->SetObjectField(jenv, JusedSettings, clientAuthID, auth);
+    (*jenv)->SetObjectField(jenv, JusedSettings, usedAuthID, auth);
     (*jenv)->ReleaseStringUTFChars(jenv, auth, str);
 
     host = (*jenv)->NewStringUTF(jenv, usedSettings.host);
     if (!host) {
-      ThrowException(jenv, ERR_NO_MEMORY, __func__);
+      throwException(jenv, ERR_NO_MEMORY, __func__);
       return -1;
     }
     str = (*jenv)->GetStringUTFChars(jenv, host, NULL);
-    (*jenv)->SetObjectField(jenv, JusedSettings, clientHostID, host);
+    (*jenv)->SetObjectField(jenv, JusedSettings, usedHostID, host);
     (*jenv)->ReleaseStringUTFChars(jenv, host, str);
   }
 
@@ -294,7 +301,7 @@ JAVA_INSTANCE_METHOD(
   env = jenv;
 
   if (brlapi__getDriverName(handle, name, sizeof(name)) < 0) {
-    ThrowError(jenv, __func__);
+    throwError(jenv, __func__);
     return NULL;
   }
 
@@ -311,7 +318,7 @@ JAVA_INSTANCE_METHOD(
   env = jenv;
 
   if (brlapi__getModelIdentifier(handle, identifier, sizeof(identifier)) < 0) {
-    ThrowError(jenv, __func__);
+    throwError(jenv, __func__);
     return NULL;
   }
 
@@ -331,20 +338,20 @@ JAVA_INSTANCE_METHOD(
   env = jenv;
 
   if (brlapi__getDisplaySize(handle, &x, &y) < 0) {
-    ThrowError(jenv, __func__);
+    throwError(jenv, __func__);
     return NULL;
   }
 
   if (!(jcsize = (*jenv)->FindClass(jenv, "org/a11y/BrlAPI/DisplaySize"))) {
-    ThrowException(jenv, ERR_NULL_POINTER, __func__);
+    throwException(jenv, ERR_NULL_POINTER, __func__);
     return NULL;
   }
   if (!(jinit = (*jenv)->GetMethodID(jenv, jcsize, "<init>", "(II)V"))) {
-    ThrowException(jenv, ERR_NULL_POINTER, __func__);
+    throwException(jenv, ERR_NULL_POINTER, __func__);
     return NULL;
   }
   if (!(jsize = (*jenv)->NewObject(jenv, jcsize, jinit, x, y))) {
-    ThrowException(jenv, ERR_NULL_POINTER, __func__);
+    throwException(jenv, ERR_NULL_POINTER, __func__);
     return NULL;
   }
 
@@ -367,13 +374,13 @@ JAVA_INSTANCE_METHOD(
     driver = NULL;
   else
     if (!(driver = (char *)(*jenv)->GetStringUTFChars(jenv, jdriver, NULL))) {
-      ThrowException(jenv, ERR_NO_MEMORY, __func__);
+      throwException(jenv, ERR_NO_MEMORY, __func__);
       return -1;
     }
 
   result = brlapi__enterTtyMode(handle, tty,driver);
   if (result < 0) {
-    ThrowError(jenv, __func__);
+    throwError(jenv, __func__);
     return -1;
   }
 
@@ -392,25 +399,25 @@ JAVA_INSTANCE_METHOD(
   env = jenv;
 
   if (!jttys) {
-    ThrowException(jenv, ERR_NULL_POINTER, __func__);
+    throwException(jenv, ERR_NULL_POINTER, __func__);
     return;
   }
   if (!(ttys = (*jenv)->GetIntArrayElements(jenv, jttys, NULL))) {
-    ThrowException(jenv, ERR_NO_MEMORY, __func__);
+    throwException(jenv, ERR_NO_MEMORY, __func__);
     return;
   }
 
   if (!jdriver) {
     driver = NULL;
   } else if (!(driver = (char *)(*jenv)->GetStringUTFChars(jenv, jdriver, NULL))) {
-    ThrowException(jenv, ERR_NO_MEMORY, __func__);
+    throwException(jenv, ERR_NO_MEMORY, __func__);
     return;
   }
 
   result = brlapi__enterTtyModeWithPath(handle, ttys,(*jenv)->GetArrayLength(jenv,jttys),driver);
   (*jenv)->ReleaseIntArrayElements(jenv, jttys, ttys, JNI_ABORT);
   if (result < 0) {
-    ThrowError(jenv, __func__);
+    throwError(jenv, __func__);
     return;
   }
 }
@@ -422,7 +429,7 @@ JAVA_INSTANCE_METHOD(
   GET_HANDLE(jenv, jobj, );
 
   if (brlapi__leaveTtyMode(handle) < 0) {
-    ThrowError(jenv, __func__);
+    throwError(jenv, __func__);
     return;
   }
 }
@@ -438,7 +445,7 @@ JAVA_INSTANCE_METHOD(
 
   arg1 = (int)jarg1; 
   if (brlapi__setFocus(handle, arg1) < 0) {
-    ThrowError(jenv, __func__);
+    throwError(jenv, __func__);
     return;
   }
 }
@@ -460,7 +467,7 @@ JAVA_INSTANCE_METHOD(
     s.regionSize = (*jenv)->GetStringLength(jenv, jarg2);
 
     if (!(s.text = (char *)(*jenv)->GetStringUTFChars(jenv, jarg2, NULL))) {
-      ThrowException(jenv, ERR_NO_MEMORY, __func__);
+      throwException(jenv, ERR_NO_MEMORY, __func__);
       return;
     }
     s.charset = "UTF-8";
@@ -471,7 +478,7 @@ JAVA_INSTANCE_METHOD(
     (*jenv)->ReleaseStringUTFChars(jenv, jarg2, s.text); 
 
   if (result < 0) {
-    ThrowError(jenv, __func__);
+    throwError(jenv, __func__);
     return;
   }
 }
@@ -487,12 +494,12 @@ JAVA_INSTANCE_METHOD(
   env = jenv;
 
   if (!jarg1) {
-    ThrowException(jenv, ERR_NULL_POINTER, __func__);
+    throwException(jenv, ERR_NULL_POINTER, __func__);
     return;
   }
   arg1 = (*jenv)->GetByteArrayElements(jenv, jarg1, NULL);
   if (!arg1) {
-    ThrowException(jenv, ERR_NO_MEMORY, __func__);
+    throwException(jenv, ERR_NO_MEMORY, __func__);
     return;
   }
 
@@ -500,7 +507,7 @@ JAVA_INSTANCE_METHOD(
   (*jenv)->ReleaseByteArrayElements(jenv, jarg1, arg1, JNI_ABORT); 
   
   if (result < 0) {
-    ThrowError(jenv, __func__);
+    throwError(jenv, __func__);
     return;
   }
 }
@@ -512,27 +519,24 @@ JAVA_INSTANCE_METHOD(
   brlapi_writeArguments_t arguments = BRLAPI_WRITEARGUMENTS_INITIALIZER;
   int result;
   jstring text, andMask, orMask;
-  jclass jcwriteArguments;
-  jfieldID displayNumberID, regionBeginID, regionSizeID,
-	   textID, andMaskID, orMaskID, cursorID; 
   GET_HANDLE(jenv, jobj, );
 
   env = jenv;
 
   if (!jarguments) {
-    ThrowException(jenv, ERR_NULL_POINTER, __func__);
+    throwException(jenv, ERR_NULL_POINTER, __func__);
     return;
   }
 
   GET_CLASS(jenv, jcwriteArguments, jarguments,);
 
-  GET_ID(jenv, displayNumberID,jcwriteArguments, "displayNumber", "I",);
-  GET_ID(jenv, regionBeginID,  jcwriteArguments, "regionBegin",   "I",);
-  GET_ID(jenv, regionSizeID,   jcwriteArguments, "regionSize",    "I",);
-  GET_ID(jenv, textID,         jcwriteArguments, "text",          "Ljava/lang/String;",);
-  GET_ID(jenv, andMaskID,      jcwriteArguments, "andMask",       "[B",);
-  GET_ID(jenv, orMaskID,       jcwriteArguments, "orMask",        "[B",);
-  GET_ID(jenv, cursorID,       jcwriteArguments, "cursor",        "I",);
+  GET_FIELD(jenv, displayNumberID,jcwriteArguments, "displayNumber", "I",);
+  GET_FIELD(jenv, regionBeginID,  jcwriteArguments, "regionBegin",   "I",);
+  GET_FIELD(jenv, regionSizeID,   jcwriteArguments, "regionSize",    "I",);
+  GET_FIELD(jenv, textID,         jcwriteArguments, "text",          "Ljava/lang/String;",);
+  GET_FIELD(jenv, andMaskID,      jcwriteArguments, "andMask",       "[B",);
+  GET_FIELD(jenv, orMaskID,       jcwriteArguments, "orMask",        "[B",);
+  GET_FIELD(jenv, cursorID,       jcwriteArguments, "cursor",        "I",);
 
   arguments.displayNumber = (*jenv)->GetIntField(jenv, jarguments, displayNumberID);
   arguments.regionBegin   = (*jenv)->GetIntField(jenv, jarguments, regionBeginID);
@@ -562,7 +566,7 @@ JAVA_INSTANCE_METHOD(
     (*jenv)->ReleaseByteArrayElements(jenv, orMask,  (jbyte*) arguments.orMask,  JNI_ABORT); 
 
   if (result < 0) {
-    ThrowError(jenv, __func__);
+    throwError(jenv, __func__);
     return;
   }
 }
@@ -580,7 +584,7 @@ JAVA_INSTANCE_METHOD(
   result = brlapi__readKey(handle, (int) jblock, &code);
 
   if (result < 0) {
-    ThrowError(jenv, __func__);
+    throwError(jenv, __func__);
     return -1;
   }
 
@@ -601,7 +605,7 @@ JAVA_INSTANCE_METHOD(
   result = brlapi__readKeyWithTimeout(handle, timeout_ms, &code);
 
   if (result < 0) {
-    ThrowError(jenv, __func__);
+    throwError(jenv, __func__);
     return -1;
   }
 
@@ -621,7 +625,7 @@ JAVA_INSTANCE_METHOD(
   env = jenv;
 
   if (!js) {
-    ThrowException(jenv, ERR_NULL_POINTER, __func__);
+    throwException(jenv, ERR_NULL_POINTER, __func__);
     return;
   }
 
@@ -633,7 +637,7 @@ JAVA_INSTANCE_METHOD(
   (*jenv)->ReleaseLongArrayElements(jenv, js, s, JNI_ABORT);
   
   if (result < 0) {
-    ThrowError(jenv, __func__);
+    throwError(jenv, __func__);
     return;
   }
 }
@@ -650,7 +654,7 @@ JAVA_INSTANCE_METHOD(
   env = jenv;
 
   if (!js) {
-    ThrowException(jenv, ERR_NULL_POINTER, __func__);
+    throwException(jenv, ERR_NULL_POINTER, __func__);
     return;
   }
 
@@ -662,7 +666,7 @@ JAVA_INSTANCE_METHOD(
   (*jenv)->ReleaseLongArrayElements(jenv, js, s, JNI_ABORT);
 
   if (result < 0) {
-    ThrowError(jenv, __func__);
+    throwError(jenv, __func__);
     return;
   }
 }
@@ -673,7 +677,7 @@ JAVA_INSTANCE_METHOD(
   GET_HANDLE(jenv, jobj, );
 
   if (brlapi__ignoreAllKeys(handle) < 0)
-    ThrowError(jenv, __func__);
+    throwError(jenv, __func__);
 }
 
 JAVA_INSTANCE_METHOD(
@@ -682,7 +686,7 @@ JAVA_INSTANCE_METHOD(
   GET_HANDLE(jenv, jobj, );
 
   if (brlapi__acceptAllKeys(handle) < 0)
-    ThrowError(jenv, __func__);
+    throwError(jenv, __func__);
 }
 
 JAVA_INSTANCE_METHOD(
@@ -695,7 +699,7 @@ JAVA_INSTANCE_METHOD(
   env = jenv;
 
   if (!js) {
-    ThrowException(jenv, ERR_NULL_POINTER, __func__);
+    throwException(jenv, ERR_NULL_POINTER, __func__);
     return;
   }
 
@@ -713,7 +717,7 @@ JAVA_INSTANCE_METHOD(
       (*jenv)->ReleaseLongArrayElements(jenv, jl, l, JNI_ABORT);
     }
     if (brlapi__ignoreKeyRanges(handle, s, n)) {
-      ThrowError(jenv, __func__);
+      throwError(jenv, __func__);
       return;
     }
   }
@@ -729,7 +733,7 @@ JAVA_INSTANCE_METHOD(
   env = jenv;
 
   if (!js) {
-    ThrowException(jenv, ERR_NULL_POINTER, __func__);
+    throwException(jenv, ERR_NULL_POINTER, __func__);
     return;
   }
 
@@ -747,7 +751,7 @@ JAVA_INSTANCE_METHOD(
       (*jenv)->ReleaseLongArrayElements(jenv, jl, l, JNI_ABORT);
     }
     if (brlapi__acceptKeyRanges(handle, s, n)) {
-      ThrowError(jenv, __func__);
+      throwError(jenv, __func__);
       return;
     }
   }
@@ -765,13 +769,13 @@ JAVA_INSTANCE_METHOD(
   if (!jdriver) {
     driver = NULL;
   } else if (!(driver = (char *)(*jenv)->GetStringUTFChars(jenv, jdriver, NULL))) {
-    ThrowException(jenv, ERR_NULL_POINTER, __func__);
+    throwException(jenv, ERR_NULL_POINTER, __func__);
     return;
   }
   res = brlapi__enterRawMode(handle, driver);
   if (jdriver) (*jenv)->ReleaseStringUTFChars(jenv, jdriver, driver);
   if (res < 0) {
-    ThrowError(jenv, __func__);
+    throwError(jenv, __func__);
     return;
   }
 }
@@ -783,7 +787,7 @@ JAVA_INSTANCE_METHOD(
   GET_HANDLE(jenv, jobj, );
 
   if (brlapi__leaveRawMode(handle) < 0) {
-    ThrowError(jenv, __func__);
+    throwError(jenv, __func__);
     return;
   }
 }
@@ -800,7 +804,7 @@ JAVA_INSTANCE_METHOD(
   env = jenv;
 
   if (!jbuf) {
-    ThrowException(jenv, ERR_NULL_POINTER, __func__);
+    throwException(jenv, ERR_NULL_POINTER, __func__);
     return -1;
   }
 
@@ -811,7 +815,7 @@ JAVA_INSTANCE_METHOD(
   (*jenv)->ReleaseByteArrayElements(jenv, jbuf, buf, JNI_ABORT);
 
   if (result < 0) {
-    ThrowError(jenv, __func__);
+    throwError(jenv, __func__);
     return -1;
   }
 
@@ -830,7 +834,7 @@ JAVA_INSTANCE_METHOD(
   env = jenv;
 
   if (!jbuf) {
-    ThrowException(jenv, ERR_NULL_POINTER, __func__);
+    throwException(jenv, ERR_NULL_POINTER, __func__);
     return -1;
   }
 
@@ -841,7 +845,7 @@ JAVA_INSTANCE_METHOD(
 
   if (result < 0) {
     (*jenv)->ReleaseByteArrayElements(jenv, jbuf, buf, JNI_ABORT);
-    ThrowError(jenv, __func__);
+    throwError(jenv, __func__);
     return -1;
   }
 
@@ -858,7 +862,7 @@ JAVA_STATIC_METHOD(
   env = jenv;
 
   if (!(type = brlapi_getPacketTypeName((brlapi_packetType_t) jtype))) {
-    ThrowError(jenv, __func__);
+    throwError(jenv, __func__);
     return NULL;
   }
 
@@ -868,8 +872,6 @@ JAVA_STATIC_METHOD(
 JAVA_INSTANCE_METHOD(
   org_a11y_BrlAPI_Error, toString, jstring
 ) {
-  jclass jcerr;
-  jfieldID brlerrnoID, libcerrnoID, gaierrnoID, errfunID;
   jstring jerrfun;
   brlapi_error_t error;
   const char *res;
@@ -877,10 +879,10 @@ JAVA_INSTANCE_METHOD(
   env = jenv;
 
   GET_CLASS(jenv, jcerr, jobj, NULL);
-  GET_ID(jenv, brlerrnoID,  jcerr, "brlerrno",  "I", NULL);
-  GET_ID(jenv, libcerrnoID, jcerr, "libcerrno", "I", NULL);
-  GET_ID(jenv, gaierrnoID,  jcerr, "gaierrno",  "I", NULL);
-  GET_ID(jenv, errfunID,    jcerr, "errfun",    "Ljava/lang/String;", NULL);
+  GET_FIELD(jenv, brlerrnoID,  jcerr, "brlerrno",  "I", NULL);
+  GET_FIELD(jenv, libcerrnoID, jcerr, "libcerrno", "I", NULL);
+  GET_FIELD(jenv, gaierrnoID,  jcerr, "gaierrno",  "I", NULL);
+  GET_FIELD(jenv, errfunID,    jcerr, "errfun",    "Ljava/lang/String;", NULL);
 
   error.brlerrno  = (*jenv)->GetIntField(jenv, jobj, brlerrnoID);
   error.libcerrno = (*jenv)->GetIntField(jenv, jobj, libcerrnoID);
@@ -888,7 +890,7 @@ JAVA_INSTANCE_METHOD(
   if (!(jerrfun = (*jenv)->GetObjectField(jenv, jobj, errfunID))) {
     error.errfun = NULL;
   } else if (!(error.errfun = (char *)(*jenv)->GetStringUTFChars(jenv, jerrfun, NULL))) {
-    ThrowException(jenv, ERR_NO_MEMORY, __func__);
+    throwException(jenv, ERR_NO_MEMORY, __func__);
     return NULL;
   }
   res = brlapi_strerror(&error);
@@ -900,8 +902,6 @@ JAVA_INSTANCE_METHOD(
 JAVA_INSTANCE_METHOD(
   org_a11y_BrlAPI_Exception, toString, jstring
 ) {
-  jclass jcerr;
-  jfieldID handleID, errnoID, typeID, bufID;
   jarray jbuf;
   brlapi_handle_t *handle;
   long type;
@@ -912,19 +912,19 @@ JAVA_INSTANCE_METHOD(
   env = jenv;
 
   if (!jobj) {
-    ThrowException(jenv, ERR_NULL_POINTER, __func__);
+    throwException(jenv, ERR_NULL_POINTER, __func__);
     return NULL;
   }
   GET_CLASS(jenv, jcerr, jobj, NULL);
-  GET_ID(jenv, handleID, jcerr, "handle", "I", NULL);
-  GET_ID(jenv, errnoID,  jcerr, "errno",  "I", NULL);
-  GET_ID(jenv, typeID,   jcerr, "type",   "I", NULL);
-  GET_ID(jenv, bufID,    jcerr, "buf",    "I", NULL);
+  GET_FIELD(jenv, handleID, jcerr, "handle", "I", NULL);
+  GET_FIELD(jenv, errnoID,  jcerr, "errno",  "I", NULL);
+  GET_FIELD(jenv, typeID,   jcerr, "type",   "I", NULL);
+  GET_FIELD(jenv, bufID,    jcerr, "buf",    "I", NULL);
 
   handle = (void*)(intptr_t)(*jenv)->GetLongField(jenv, jobj, handleID);
   type  = (*jenv)->GetIntField(jenv, jobj, typeID);
   if (!(jbuf  = (*jenv)->GetObjectField(jenv, jobj, typeID))) {
-    ThrowException(jenv, ERR_NULL_POINTER, __func__);
+    throwException(jenv, ERR_NULL_POINTER, __func__);
     return NULL;
   }
   size  = (*jenv)->GetArrayLength(jenv, jbuf);
@@ -939,16 +939,14 @@ JAVA_INSTANCE_METHOD(
   org_a11y_BrlAPI_Key, expandKeyCode, void,
   jlong jkey
 ) {
-  jclass jckey;
-  jfieldID typeID, commandID, argumentID, flagsID;
   brlapi_keyCode_t key = jkey;
   brlapi_expandedKeyCode_t ekc;
 
   GET_CLASS(jenv, jckey, jobj, );
-  GET_ID(jenv, typeID,     jckey, "typeValue",     "I", );
-  GET_ID(jenv, commandID,  jckey, "commandValue",  "I", );
-  GET_ID(jenv, argumentID, jckey, "argumentValue", "I", );
-  GET_ID(jenv, flagsID,    jckey, "flagsValue",    "I", );
+  GET_FIELD(jenv, typeID,     jckey, "typeValue",     "I", );
+  GET_FIELD(jenv, commandID,  jckey, "commandValue",  "I", );
+  GET_FIELD(jenv, argumentID, jckey, "argumentValue", "I", );
+  GET_FIELD(jenv, flagsID,    jckey, "flagsValue",    "I", );
 
   brlapi_expandKeyCode(key, &ekc);
   (*jenv)->SetIntField(jenv, jobj, typeID,     ekc.type);
