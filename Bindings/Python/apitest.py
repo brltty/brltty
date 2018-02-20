@@ -61,28 +61,6 @@ sys.path.insert(0, getBuildDirectory("lib"))
 library = loadLibrary(getLibraryDirectory(), "brlapi")
 import brlapi
 
-def readKey (connection, timeout=0, interval=0.1, target=None, args=(), kwargs={}):
-  start = time.time()
-
-  while True:
-    key = connection.readKey(wait=0)
-
-    if key != None:
-      return key
-
-    if (time.time() - start) >= timeout:
-      break
-
-    time.sleep(interval)
-
-  if target != None:
-    return target(*args, **kwargs)
-
-  return None
-
-def handleTimeout ():
-  exit(0)
-
 if __name__ == "__main__":
   import errno
 
@@ -104,14 +82,12 @@ if __name__ == "__main__":
       writeProperty("Display Height", str(brl.displaySize[1]))
 
       brl.enterTtyMode()
-      brl.writeText("The Python bindings for BrlAPI seem to be working.")
+      timeout = 10
+      brl.writeText("press keys (timeout is %d seconds)" % (timeout, ))
 
       while True:
-        code = readKey(
-          connection = brl,
-          timeout = 10,
-          target = handleTimeout
-        )
+        code = brl.readKeyWithTimeout(timeout * 1000)
+        if not code: break
 
         properties = brlapi.describeKeyCode(code)
         properties["code"] = "0X%X" % code
