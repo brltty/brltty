@@ -31,6 +31,20 @@ public class Test implements Constants {
     stream.println();
   }
 
+  private static void showKey (Key key, Brlapi brlapi) {
+    String text = String.format(
+      "code=0X%X type=%X cmd=%X arg=%X flg=%X",
+      key.getCode(), key.getType(), key.getCommand(), key.getArgument(), key.getFlags()
+    );
+
+    writeProperty("Key", text);
+    if (brlapi != null) brlapi.writeText(text);
+  }
+
+  private static void showKey (Key key) {
+    showKey(key, null);
+  }
+
   public static void main (String argv[]) {
     ConnectionSettings settings = new ConnectionSettings();
 
@@ -75,9 +89,6 @@ public class Test implements Constants {
       int tty = brlapi.enterTtyMode();
       writeProperty("TTY Number", "%d", tty);
 
-      brlapi.writeText("ok !! €", Brlapi.CURSOR_OFF);
-      brlapi.writeText(null, 1);
-
       long key[] = {0};
       brlapi.ignoreKeys(Brlapi.rangeType_all, key);
       key[0] = Constants.KEY_TYPE_CMD;
@@ -85,45 +96,16 @@ public class Test implements Constants {
       long keys[][] = {{0,2},{5,7}};
       brlapi.ignoreKeyRanges(keys);
 
-      printKey(new Key(brlapi.readKey(true)));
-
       {
-        WriteArguments args = new WriteArguments();
-        args.regionBegin = 10;
-        args.regionSize = 20;
-        args.text = "Key Pressed €       ";
-        args.andMask = "????????????????????".getBytes();
-        args.cursor = 3;
-        brlapi.write(args);
+        int timeout = 10;
+        brlapi.writeText(String.format("press keys (timeout is %d seconds)", timeout), Brlapi.CURSOR_OFF);
+
+        while (true) {
+          long code = brlapi.readKeyWithTimeout((timeout * 1000));
+          if (code < 0) break;
+          showKey(new Key(code), brlapi);
+        }
       }
-
-      printKey(new Key(brlapi.readKey(true)));
-
-      {
-        byte[] dots = new byte[] {
-          /* o */ DOT1 | DOT3 | DOT5,
-          /* t */ DOT2 | DOT3 | DOT4 | DOT5,
-          /* h */ DOT1 | DOT2 | DOT5,
-          /* e */ DOT1 | DOT5,
-          /* r */ DOT1 | DOT2 | DOT3 | DOT5,
-          /*   */ 0,
-          /* k */ DOT1 | DOT3,
-          /* e */ DOT1 | DOT5,
-          /* y */ DOT1 | DOT3 | DOT4 | DOT5 | DOT6,
-          /*   */ 0,
-          /* p */ DOT1 | DOT2 | DOT3 | DOT4,
-          /* r */ DOT1 | DOT2 | DOT3 | DOT5,
-          /* e */ DOT1 | DOT5,
-          /* s */ DOT2 | DOT3 | DOT4,
-          /* s */ DOT2 | DOT3 | DOT4,
-          /* e */ DOT1 | DOT5,
-          /* d */ DOT1 | DOT4 | DOT5
-        };
-
-        brlapi.writeDots(dots);
-      }
-
-      printKey(new Key(brlapi.readKey(true)));
 
       brlapi.leaveTtyMode();
       brlapi.closeConnection();
@@ -131,13 +113,5 @@ public class Test implements Constants {
       System.out.println("got error: " + error);
       System.exit(3);
     }
-  }
-
-  private static void printKey (Key key) {
-    System.out.println("got key " + Long.toHexString(key.getCode()) + " (" +
-                       Integer.toHexString(key.getType()) + "," +
-                       Integer.toHexString(key.getCommand()) + "," +
-                       Integer.toHexString(key.getArgument()) + "," +
-                       Integer.toHexString(key.getFlags()) + ")");
   }
 }

@@ -51,7 +51,7 @@ public class Native {
   public native void write (WriteArguments arguments) throws Error;
 
   public native long readKey (boolean wait) throws Error;
-  public native long readKeyWithTimeout (int wait) throws Error;
+  public native long readKeyWithTimeout (int milliseconds) throws Error;
   public native void ignoreKeys (long type, long[] keys) throws Error;
   public native void acceptKeys (long type, long[] keys) throws Error;
 
