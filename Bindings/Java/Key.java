@@ -20,36 +20,36 @@
 package org.a11y.BrlAPI;
 
 public class Key {
-  protected final long code;
-  protected int type;
-  protected int command;
-  protected int argument;
-  protected int flags;
+  private final long keyCode;
+  private int typeValue;
+  private int commandValue;
+  private int argumentValue;
+  private int flagsValue;
 
-  public final native void expandKeyCode (long code);
+  private final native void expandKeyCode (long code);
 
   public Key (long code) {
-    this.code = code;
+    keyCode = code;
     expandKeyCode(code);
   }
 
-  public long getCode () {
-    return code;
+  public final long getKeyCode () {
+    return keyCode;
   }
 
-  public int getType () {
-    return type;
+  public final int getTypeValue () {
+    return typeValue;
   }
 
-  public int getCommand () {
-    return command;
+  public final int getCommandValue () {
+    return commandValue;
   }
 
-  public int getArgument () {
-    return argument;
+  public final int getArgumentValue () {
+    return argumentValue;
   }
 
-  public int getFlags () {
-    return flags;
+  public final int getFlagsValue () {
+    return flagsValue;
   }
 }

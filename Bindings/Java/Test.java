@@ -34,7 +34,11 @@ public class Test implements Constants {
   private static void showKey (Key key, Brlapi brlapi) {
     String text = String.format(
       "code=0X%X type=%X cmd=%X arg=%X flg=%X",
-      key.getCode(), key.getType(), key.getCommand(), key.getArgument(), key.getFlags()
+      key.getKeyCode(),
+      key.getTypeValue(),
+      key.getCommandValue(),
+      key.getArgumentValue(),
+      key.getFlagsValue()
     );
 
     writeProperty("Key", text);

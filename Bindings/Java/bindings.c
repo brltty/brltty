@@ -853,10 +853,10 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Key_expandKeyCode (JNIEnv *jenv, job
   brlapi_expandedKeyCode_t ekc;
 
   GET_CLASS(jenv, jckey, obj, );
-  GET_ID(jenv, typeID,     jckey, "type",     "I", );
-  GET_ID(jenv, commandID,  jckey, "command",  "I", );
-  GET_ID(jenv, argumentID, jckey, "argument", "I", );
-  GET_ID(jenv, flagsID,    jckey, "flags",    "I", );
+  GET_ID(jenv, typeID,     jckey, "typeValue",     "I", );
+  GET_ID(jenv, commandID,  jckey, "commandValue",  "I", );
+  GET_ID(jenv, argumentID, jckey, "argumentValue", "I", );
+  GET_ID(jenv, flagsID,    jckey, "flagsValue",    "I", );
 
   brlapi_expandKeyCode(key, &ekc);
   (*jenv)->SetIntField(jenv, obj, typeID,     ekc.type);
