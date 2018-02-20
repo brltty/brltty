@@ -90,7 +90,8 @@ throwError(JNIEnv *jenv, const char *msg) {
   }
 }
 
-static void BRLAPI_STDCALL exceptionHandler(brlapi_handle_t *handle, int err, brlapi_packetType_t type, const void *buf, size_t size) {
+static void BRLAPI_STDCALL
+exceptionHandler (brlapi_handle_t *handle, int err, brlapi_packetType_t type, const void *buf, size_t size) {
   jarray jbuf;
   jclass jcexcep;
   jmethodID jinit;
@@ -117,47 +118,6 @@ static void BRLAPI_STDCALL exceptionHandler(brlapi_handle_t *handle, int err, br
   (*env)->ExceptionClear(env);
   (*env)->Throw(env, jexcep);
   return;
-}
-
-static int gotVersionNumbers = 0;
-static int majorVersion, minorVersion, revision;
-
-static void
-getVersionNumbers (void) {
-  if (!gotVersionNumbers) {
-    brlapi_getLibraryVersion(&majorVersion, &minorVersion, &revision);
-    gotVersionNumbers = 1;
-  }
-}
-
-#define JAVA_METHOD(object,name,type) \
-  JNIEXPORT type JNICALL Java_ ## object ## _ ## name (JNIEnv *jenv
-
-#define JAVA_INSTANCE_METHOD(object,name,type,...) \
-  JAVA_METHOD(object,name,type), jobject jobj, ## __VA_ARGS__)
-
-#define JAVA_STATIC_METHOD(object,name,type,...) \
-  JAVA_METHOD(object,name,type), jclass jcls, ## __VA_ARGS__)
-
-JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, getMajorVersion, jint
-) {
-  getVersionNumbers();
-  return majorVersion;
-}
-
-JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, getMinorVersion, jint
-) {
-  getVersionNumbers();
-  return minorVersion;
-}
-
-JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, getRevision, jint
-) {
-  getVersionNumbers();
-  return revision;
 }
 
 #define GET_CLASS(jenv, class, obj, ret) \
@@ -192,6 +152,47 @@ JAVA_INSTANCE_METHOD(
     } \
   } while (0)
 
+#define JAVA_METHOD(object,name,type) \
+  JNIEXPORT type JNICALL Java_ ## object ## _ ## name (JNIEnv *jenv
+
+#define JAVA_INSTANCE_METHOD(object,name,type,...) \
+  JAVA_METHOD(object,name,type), jobject this, ## __VA_ARGS__)
+
+#define JAVA_STATIC_METHOD(object,name,type,...) \
+  JAVA_METHOD(object,name,type), jclass class, ## __VA_ARGS__)
+
+static int gotVersionNumbers = 0;
+static int majorVersion, minorVersion, revision;
+
+static void
+getVersionNumbers (void) {
+  if (!gotVersionNumbers) {
+    brlapi_getLibraryVersion(&majorVersion, &minorVersion, &revision);
+    gotVersionNumbers = 1;
+  }
+}
+
+JAVA_STATIC_METHOD(
+  org_a11y_BrlAPI_Native, getMajorVersion, jint
+) {
+  getVersionNumbers();
+  return majorVersion;
+}
+
+JAVA_STATIC_METHOD(
+  org_a11y_BrlAPI_Native, getMinorVersion, jint
+) {
+  getVersionNumbers();
+  return minorVersion;
+}
+
+JAVA_STATIC_METHOD(
+  org_a11y_BrlAPI_Native, getRevision, jint
+) {
+  getVersionNumbers();
+  return revision;
+}
+
 JAVA_INSTANCE_METHOD(
   org_a11y_BrlAPI_Native, openConnection, jint,
   jobject JclientSettings , jobject JusedSettings
@@ -203,7 +204,7 @@ JAVA_INSTANCE_METHOD(
   const char *str;
   brlapi_handle_t *handle;
 
-  GET_CLASS(jenv, jcls, jobj, -1);
+  GET_CLASS(jenv, jcls, this, -1);
   GET_FIELD(jenv, handleID, jcls, "handle", "J", -1);
   handle = malloc(brlapi_getHandleSize());
   if (!handle) {
@@ -211,7 +212,7 @@ JAVA_INSTANCE_METHOD(
     return -1;
   }
 
-  (*jenv)->SetLongField(jenv, jobj, handleID, (jlong) (intptr_t) handle);
+  (*jenv)->SetLongField(jenv, this, handleID, (jlong) (intptr_t) handle);
 
   env = jenv;
 
@@ -285,18 +286,18 @@ JAVA_INSTANCE_METHOD(
   org_a11y_BrlAPI_Native, closeConnection, void
 ) {
   env = jenv;
-  GET_HANDLE(jenv, jobj, );
+  GET_HANDLE(jenv, this, );
 
   brlapi__closeConnection(handle);
   free((void*) (intptr_t) handle);
-  (*jenv)->SetLongField(jenv, jobj, handleID, (jlong) (intptr_t) NULL);
+  (*jenv)->SetLongField(jenv, this, handleID, (jlong) (intptr_t) NULL);
 }
 
 JAVA_INSTANCE_METHOD(
   org_a11y_BrlAPI_Native, getDriverName, jstring
 ) {
   char name[32];
-  GET_HANDLE(jenv, jobj, NULL);
+  GET_HANDLE(jenv, this, NULL);
 
   env = jenv;
 
@@ -313,7 +314,7 @@ JAVA_INSTANCE_METHOD(
   org_a11y_BrlAPI_Native, getModelIdentifier, jstring
 ) {
   char identifier[32];
-  GET_HANDLE(jenv, jobj, NULL);
+  GET_HANDLE(jenv, this, NULL);
 
   env = jenv;
 
@@ -333,7 +334,7 @@ JAVA_INSTANCE_METHOD(
   jclass jcsize;
   jmethodID jinit;
   jobject jsize;
-  GET_HANDLE(jenv, jobj, NULL);
+  GET_HANDLE(jenv, this, NULL);
 
   env = jenv;
 
@@ -365,7 +366,7 @@ JAVA_INSTANCE_METHOD(
   int tty ;
   char *driver;
   int result;
-  GET_HANDLE(jenv, jobj, -1);
+  GET_HANDLE(jenv, this, -1);
   
   env = jenv;
 
@@ -394,7 +395,7 @@ JAVA_INSTANCE_METHOD(
   jint *ttys ;
   char *driver;
   int result;
-  GET_HANDLE(jenv, jobj, );
+  GET_HANDLE(jenv, this, );
   
   env = jenv;
 
@@ -426,7 +427,7 @@ JAVA_INSTANCE_METHOD(
   org_a11y_BrlAPI_Native, leaveTtyMode, void
 ) {
   env = jenv;
-  GET_HANDLE(jenv, jobj, );
+  GET_HANDLE(jenv, this, );
 
   if (brlapi__leaveTtyMode(handle) < 0) {
     throwError(jenv, __func__);
@@ -439,7 +440,7 @@ JAVA_INSTANCE_METHOD(
   jint jarg1
 ) {
   int arg1 ;
-  GET_HANDLE(jenv, jobj, );
+  GET_HANDLE(jenv, this, );
   
   env = jenv;
 
@@ -456,7 +457,7 @@ JAVA_INSTANCE_METHOD(
 ) {
   brlapi_writeArguments_t s = BRLAPI_WRITEARGUMENTS_INITIALIZER;
   int result;
-  GET_HANDLE(jenv, jobj, );
+  GET_HANDLE(jenv, this, );
   
   env = jenv;
 
@@ -489,7 +490,7 @@ JAVA_INSTANCE_METHOD(
 ) {
   jbyte *arg1;
   int result;
-  GET_HANDLE(jenv, jobj, );
+  GET_HANDLE(jenv, this, );
   
   env = jenv;
 
@@ -519,7 +520,7 @@ JAVA_INSTANCE_METHOD(
   brlapi_writeArguments_t arguments = BRLAPI_WRITEARGUMENTS_INITIALIZER;
   int result;
   jstring text, andMask, orMask;
-  GET_HANDLE(jenv, jobj, );
+  GET_HANDLE(jenv, this, );
 
   env = jenv;
 
@@ -577,7 +578,7 @@ JAVA_INSTANCE_METHOD(
 ) {
   brlapi_keyCode_t code;
   int result;
-  GET_HANDLE(jenv, jobj, -1);
+  GET_HANDLE(jenv, this, -1);
 
   env = jenv;
 
@@ -598,7 +599,7 @@ JAVA_INSTANCE_METHOD(
 ) {
   brlapi_keyCode_t code;
   int result;
-  GET_HANDLE(jenv, jobj, -1);
+  GET_HANDLE(jenv, this, -1);
 
   env = jenv;
 
@@ -620,7 +621,7 @@ JAVA_INSTANCE_METHOD(
   jlong *s;
   unsigned int n;
   int result;
-  GET_HANDLE(jenv, jobj, );
+  GET_HANDLE(jenv, this, );
 
   env = jenv;
 
@@ -649,7 +650,7 @@ JAVA_INSTANCE_METHOD(
   jlong *s;
   unsigned int n;
   int result;
-  GET_HANDLE(jenv, jobj, );
+  GET_HANDLE(jenv, this, );
 
   env = jenv;
 
@@ -674,7 +675,7 @@ JAVA_INSTANCE_METHOD(
 JAVA_INSTANCE_METHOD(
   org_a11y_BrlAPI_Native, ignoreAllKeys, void
 ) {
-  GET_HANDLE(jenv, jobj, );
+  GET_HANDLE(jenv, this, );
 
   if (brlapi__ignoreAllKeys(handle) < 0)
     throwError(jenv, __func__);
@@ -683,7 +684,7 @@ JAVA_INSTANCE_METHOD(
 JAVA_INSTANCE_METHOD(
   org_a11y_BrlAPI_Native, acceptAllKeys, void
 ) {
-  GET_HANDLE(jenv, jobj, );
+  GET_HANDLE(jenv, this, );
 
   if (brlapi__acceptAllKeys(handle) < 0)
     throwError(jenv, __func__);
@@ -694,7 +695,7 @@ JAVA_INSTANCE_METHOD(
   jobjectArray js
 ) {
   unsigned int n;
-  GET_HANDLE(jenv, jobj, );
+  GET_HANDLE(jenv, this, );
 
   env = jenv;
 
@@ -728,7 +729,7 @@ JAVA_INSTANCE_METHOD(
   jobjectArray js
 ) {
   unsigned int n;
-  GET_HANDLE(jenv, jobj, );
+  GET_HANDLE(jenv, this, );
 
   env = jenv;
 
@@ -764,7 +765,7 @@ JAVA_INSTANCE_METHOD(
   env = jenv;
   char *driver;
   int res;
-  GET_HANDLE(jenv, jobj, );
+  GET_HANDLE(jenv, this, );
 
   if (!jdriver) {
     driver = NULL;
@@ -784,7 +785,7 @@ JAVA_INSTANCE_METHOD(
   org_a11y_BrlAPI_Native, leaveRawMode, void
 ) {
   env = jenv;
-  GET_HANDLE(jenv, jobj, );
+  GET_HANDLE(jenv, this, );
 
   if (brlapi__leaveRawMode(handle) < 0) {
     throwError(jenv, __func__);
@@ -799,7 +800,7 @@ JAVA_INSTANCE_METHOD(
   jbyte *buf;
   unsigned int n;
   int result;
-  GET_HANDLE(jenv, jobj, -1);
+  GET_HANDLE(jenv, this, -1);
 
   env = jenv;
 
@@ -829,7 +830,7 @@ JAVA_INSTANCE_METHOD(
   jbyte *buf;
   unsigned int n;
   int result;
-  GET_HANDLE(jenv, jobj, -1);
+  GET_HANDLE(jenv, this, -1);
 
   env = jenv;
 
@@ -854,8 +855,8 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_BrlAPI_Native, getPacketTypeName,
-  jstring, jlong jtype
+  org_a11y_BrlAPI_Native, getPacketTypeName, jstring,
+  jlong jtype
 ) {
   const char *type;
 
@@ -878,16 +879,16 @@ JAVA_INSTANCE_METHOD(
 
   env = jenv;
 
-  GET_CLASS(jenv, jcerr, jobj, NULL);
+  GET_CLASS(jenv, jcerr, this, NULL);
   GET_FIELD(jenv, brlerrnoID,  jcerr, "brlerrno",  "I", NULL);
   GET_FIELD(jenv, libcerrnoID, jcerr, "libcerrno", "I", NULL);
   GET_FIELD(jenv, gaierrnoID,  jcerr, "gaierrno",  "I", NULL);
   GET_FIELD(jenv, errfunID,    jcerr, "errfun",    "Ljava/lang/String;", NULL);
 
-  error.brlerrno  = (*jenv)->GetIntField(jenv, jobj, brlerrnoID);
-  error.libcerrno = (*jenv)->GetIntField(jenv, jobj, libcerrnoID);
-  error.gaierrno  = (*jenv)->GetIntField(jenv, jobj, gaierrnoID);
-  if (!(jerrfun = (*jenv)->GetObjectField(jenv, jobj, errfunID))) {
+  error.brlerrno  = (*jenv)->GetIntField(jenv, this, brlerrnoID);
+  error.libcerrno = (*jenv)->GetIntField(jenv, this, libcerrnoID);
+  error.gaierrno  = (*jenv)->GetIntField(jenv, this, gaierrnoID);
+  if (!(jerrfun = (*jenv)->GetObjectField(jenv, this, errfunID))) {
     error.errfun = NULL;
   } else if (!(error.errfun = (char *)(*jenv)->GetStringUTFChars(jenv, jerrfun, NULL))) {
     throwException(jenv, ERR_NO_MEMORY, __func__);
@@ -911,19 +912,19 @@ JAVA_INSTANCE_METHOD(
 
   env = jenv;
 
-  if (!jobj) {
+  if (!this) {
     throwException(jenv, ERR_NULL_POINTER, __func__);
     return NULL;
   }
-  GET_CLASS(jenv, jcerr, jobj, NULL);
+  GET_CLASS(jenv, jcerr, this, NULL);
   GET_FIELD(jenv, handleID, jcerr, "handle", "I", NULL);
   GET_FIELD(jenv, errnoID,  jcerr, "errno",  "I", NULL);
   GET_FIELD(jenv, typeID,   jcerr, "type",   "I", NULL);
   GET_FIELD(jenv, bufID,    jcerr, "buf",    "I", NULL);
 
-  handle = (void*)(intptr_t)(*jenv)->GetLongField(jenv, jobj, handleID);
-  type  = (*jenv)->GetIntField(jenv, jobj, typeID);
-  if (!(jbuf  = (*jenv)->GetObjectField(jenv, jobj, typeID))) {
+  handle = (void*)(intptr_t)(*jenv)->GetLongField(jenv, this, handleID);
+  type  = (*jenv)->GetIntField(jenv, this, typeID);
+  if (!(jbuf  = (*jenv)->GetObjectField(jenv, this, typeID))) {
     throwException(jenv, ERR_NULL_POINTER, __func__);
     return NULL;
   }
@@ -942,15 +943,15 @@ JAVA_INSTANCE_METHOD(
   brlapi_keyCode_t key = jkey;
   brlapi_expandedKeyCode_t ekc;
 
-  GET_CLASS(jenv, jckey, jobj, );
+  GET_CLASS(jenv, jckey, this, );
   GET_FIELD(jenv, typeID,     jckey, "typeValue",     "I", );
   GET_FIELD(jenv, commandID,  jckey, "commandValue",  "I", );
   GET_FIELD(jenv, argumentID, jckey, "argumentValue", "I", );
   GET_FIELD(jenv, flagsID,    jckey, "flagsValue",    "I", );
 
   brlapi_expandKeyCode(key, &ekc);
-  (*jenv)->SetIntField(jenv, jobj, typeID,     ekc.type);
-  (*jenv)->SetIntField(jenv, jobj, commandID,  ekc.command);
-  (*jenv)->SetIntField(jenv, jobj, argumentID, ekc.argument);
-  (*jenv)->SetIntField(jenv, jobj, flagsID,    ekc.flags);
+  (*jenv)->SetIntField(jenv, this, typeID,     ekc.type);
+  (*jenv)->SetIntField(jenv, this, commandID,  ekc.command);
+  (*jenv)->SetIntField(jenv, this, argumentID, ekc.argument);
+  (*jenv)->SetIntField(jenv, this, flagsID,    ekc.flags);
 }
