@@ -20,13 +20,13 @@
 package org.a11y.BrlAPI;
 
 public class WriteArguments {
-  public int displayNumber = Brlapi.DISPLAY_DEFAULT;
+  public int displayNumber = Constants.DISPLAY_DEFAULT;
   public int regionBegin = 0;
   public int regionSize = 0;
   public String text = null;
   public byte andMask[] = null;
   public byte orMask[] = null;
-  public int cursor = Brlapi.CURSOR_LEAVE;
+  public int cursor = Constants.CURSOR_LEAVE;
 
   public WriteArguments () {
   }

@@ -31,7 +31,7 @@ public class Test implements Constants {
     stream.println();
   }
 
-  private static void showKey (Key key, Brlapi brlapi) {
+  private static void showKey (Key key, Connection connection) {
     String text = String.format(
       "code=0X%X type=%X cmd=%X arg=%X flg=%X",
       key.getKeyCode(),
@@ -42,33 +42,38 @@ public class Test implements Constants {
     );
 
     writeProperty("Key", text);
-    if (brlapi != null) brlapi.writeText(text);
+    if (connection != null) connection.writeText(text);
   }
 
   private static void showKey (Key key) {
     showKey(key, null);
   }
 
-  public static void main (String argv[]) {
+  private static void syntaxError (String message) {
+    System.err.println(message);
+    System.exit(2);
+  }
+
+  public static void main (String arguments[]) {
     ConnectionSettings settings = new ConnectionSettings();
 
     {
-      int argi = 0;
-      while (argi < argv.length) {
-        String arg = argv[argi++];
+      int argumentCount = arguments.length;
+      int argumentIndex = 0;
 
-        if (arg.equals("-host")) {
-          if (argi == argv.length) {
-            System.err.println("Missing host specification.");
-            System.exit(2);
+      while (argumentIndex < argumentCount) {
+        String argument = arguments[argumentIndex++];
+
+        if (argument.equals("-host")) {
+          if (argumentIndex == argumentCount) {
+            syntaxError("missing host specification");
           }
 
-          settings.host = argv[argi++];
+          settings.serverHost = arguments[argumentIndex++];
           continue;
         }
 
-        System.err.println("Invalid option: " + arg);
-        System.exit(2);
+        syntaxError("unrecognized option: " + argument);
       }
     }
 
@@ -79,40 +84,40 @@ public class Test implements Constants {
     );
 
     try {
-      Brlapi brlapi = new Brlapi(settings);
+      Connection connection = new Connection(settings);
 
-      writeProperty("File Descriptor", "%d", brlapi.getFileDescriptor());
-      writeProperty("Server Host", "%s", brlapi.getServerHost());
-      writeProperty("Authorization Schemes", "%s", brlapi.getAuthorizationSchemes());
-      writeProperty("Driver Name", "%s", brlapi.getDriverName());
-      writeProperty("Model Identifier", "%s", brlapi.getModelIdentifier());
+      writeProperty("File Descriptor", "%d", connection.getFileDescriptor());
+      writeProperty("Server Host", "%s", connection.getServerHost());
+      writeProperty("Authorization Schemes", "%s", connection.getAuthorizationSchemes());
+      writeProperty("Driver Name", "%s", connection.getDriverName());
+      writeProperty("Model Identifier", "%s", connection.getModelIdentifier());
 
-      DisplaySize size = brlapi.getDisplaySize();
+      DisplaySize size = connection.getDisplaySize();
       writeProperty("Display Size",  "%dx%d", size.getWidth(), size.getHeight());
 
-      int tty = brlapi.enterTtyMode();
+      int tty = connection.enterTtyMode();
       writeProperty("TTY Number", "%d", tty);
 
       long key[] = {0};
-      brlapi.ignoreKeys(Brlapi.rangeType_all, key);
+      connection.ignoreKeys(Constants.rangeType_all, key);
       key[0] = Constants.KEY_TYPE_CMD;
-      brlapi.acceptKeys(Brlapi.rangeType_type, key);
+      connection.acceptKeys(Constants.rangeType_type, key);
       long keys[][] = {{0,2},{5,7}};
-      brlapi.ignoreKeyRanges(keys);
+      connection.ignoreKeyRanges(keys);
 
       {
         int timeout = 10;
-        brlapi.writeText(String.format("press keys (timeout is %d seconds)", timeout), Brlapi.CURSOR_OFF);
+        connection.writeText(String.format("press keys (timeout is %d seconds)", timeout), Constants.CURSOR_OFF);
 
         while (true) {
-          long code = brlapi.readKeyWithTimeout((timeout * 1000));
+          long code = connection.readKeyWithTimeout((timeout * 1000));
           if (code < 0) break;
-          showKey(new Key(code), brlapi);
+          showKey(new Key(code), connection);
         }
       }
 
-      brlapi.leaveTtyMode();
-      brlapi.closeConnection();
+      connection.leaveTtyMode();
+      connection.closeConnection();
     } catch (Error error) {
       System.out.println("got error: " + error);
       System.exit(3);

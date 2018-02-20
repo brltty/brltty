@@ -20,12 +20,12 @@
 package org.a11y.BrlAPI;
 
 public class ConnectionSettings {
-  public String host;
-  public String auth;
+  public String serverHost;
+  public String authorizationSchemes;
 
-  public ConnectionSettings (String host, String auth) {
-    this.host = host;
-    this.auth = auth;
+  public ConnectionSettings (String host, String authorization) {
+    serverHost = host;
+    authorizationSchemes = authorization;
   }
 
   public ConnectionSettings (String host) {

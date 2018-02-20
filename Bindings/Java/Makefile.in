@@ -37,7 +37,7 @@ JAVA_JNI_DESTDIR = $(INSTALL_ROOT)
 
 all: jar jni doc
 
-JAVA_SOURCES = $(SRC_DIR)/Brlapi.java \
+JAVA_SOURCES = $(SRC_DIR)/Connection.java \
 	$(SRC_DIR)/ConnectionSettings.java \
 	$(SRC_DIR)/DisplaySize.java \
 	$(SRC_DIR)/Error.java \

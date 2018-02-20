@@ -19,11 +19,11 @@
 
 package org.a11y.BrlAPI;
 
-public class Brlapi extends Native implements Constants {
+public class Connection extends Native implements Constants {
   protected final ConnectionSettings settings;
   protected final int fileDescriptor;
 
-  public Brlapi (ConnectionSettings settings) throws Error {
+  public Connection (ConnectionSettings settings) throws Error {
     this.settings = new ConnectionSettings();
     fileDescriptor = openConnection(settings, this.settings);
   }
@@ -33,11 +33,11 @@ public class Brlapi extends Native implements Constants {
   }
 
   public String getServerHost () {
-    return settings.host;
+    return settings.serverHost;
   }
 
   public String getAuthorizationSchemes () {
-    return settings.auth;
+    return settings.authorizationSchemes;
   }
 
   public int getFileDescriptor () {

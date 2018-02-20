@@ -217,8 +217,8 @@ JAVA_INSTANCE_METHOD(
 
   if (JclientSettings) {
     GET_CLASS(jenv, jcclientSettings, JclientSettings, -1);
-    GET_FIELD(jenv, clientAuthID, jcclientSettings, "auth", "Ljava/lang/String;", -1);
-    GET_FIELD(jenv, clientHostID, jcclientSettings, "host", "Ljava/lang/String;", -1);
+    GET_FIELD(jenv, clientAuthID, jcclientSettings, "authorizationSchemes", "Ljava/lang/String;", -1);
+    GET_FIELD(jenv, clientHostID, jcclientSettings, "serverHost", "Ljava/lang/String;", -1);
 
     PclientSettings = &clientSettings;
     if ((auth = (*jenv)->GetObjectField(jenv, JclientSettings, clientAuthID))) {
@@ -256,8 +256,8 @@ JAVA_INSTANCE_METHOD(
 
   if (PusedSettings) {
     GET_CLASS(jenv, jcusedSettings, JusedSettings, -1);
-    GET_FIELD(jenv, usedAuthID, jcusedSettings, "auth", "Ljava/lang/String;", -1);
-    GET_FIELD(jenv, usedHostID, jcusedSettings, "host", "Ljava/lang/String;", -1);
+    GET_FIELD(jenv, usedAuthID, jcusedSettings, "authorizationSchemes", "Ljava/lang/String;", -1);
+    GET_FIELD(jenv, usedHostID, jcusedSettings, "serverHost", "Ljava/lang/String;", -1);
 
     auth = (*jenv)->NewStringUTF(jenv, usedSettings.auth);
     if (!auth) {
