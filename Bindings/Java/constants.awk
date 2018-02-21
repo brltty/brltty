@@ -18,7 +18,7 @@
 ###############################################################################
 
 BEGIN {
-  print "package org.a11y.BrlAPI;"
+  print "package org.a11y.brlapi;"
   print ""
   print "public interface Constants {"
 }

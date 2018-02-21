@@ -17,7 +17,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.BrlAPI;
+package org.a11y.brlapi;
 
 public class Error extends java.lang.Error {
   public native String toString ();

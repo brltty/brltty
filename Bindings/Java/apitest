@@ -19,5 +19,5 @@
 ###############################################################################
 
 . "${0%/*}/../../apitest.sh"
-exec java -classpath "${programDirectory}/classes" org.a11y.BrlAPI.Test "${@}"
+exec java -classpath "${programDirectory}/classes" org.a11y.brlapi.Test "${@}"
 exit "${?}"

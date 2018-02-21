@@ -28,7 +28,7 @@
 #define BRLAPI_NO_DEPRECATED
 #define BRLAPI_NO_SINGLE_SESSION
 #include "brlapi.h"
-#define BRLAPI_OBJECT(name) "org/a11y/BrlAPI/" name
+#define BRLAPI_OBJECT(name) "org/a11y/brlapi/" name
 
 /* TODO: threads */
 static JNIEnv *globalJavaEnvironment;
@@ -174,28 +174,28 @@ getVersionNumbers (void) {
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_BrlAPI_Version, getMajor, jint
+  org_a11y_brlapi_Version, getMajor, jint
 ) {
   getVersionNumbers();
   return majorVersion;
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_BrlAPI_Version, getMinor, jint
+  org_a11y_brlapi_Version, getMinor, jint
 ) {
   getVersionNumbers();
   return minorVersion;
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_BrlAPI_Version, getRevision, jint
+  org_a11y_brlapi_Version, getRevision, jint
 ) {
   getVersionNumbers();
   return revision;
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, openConnection, jint,
+  org_a11y_brlapi_BasicConnection, openConnection, jint,
   jobject JclientSettings , jobject JusedSettings
 ) {
   brlapi_connectionSettings_t clientSettings,  usedSettings,
@@ -282,7 +282,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, closeConnection, void
+  org_a11y_brlapi_BasicConnection, closeConnection, void
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
   GET_HANDLE(env, this, );
@@ -292,7 +292,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, getDriverName, jstring
+  org_a11y_brlapi_BasicConnection, getDriverName, jstring
 ) {
   char name[32];
   GET_HANDLE(env, this, NULL);
@@ -309,7 +309,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, getModelIdentifier, jstring
+  org_a11y_brlapi_BasicConnection, getModelIdentifier, jstring
 ) {
   char identifier[32];
   GET_HANDLE(env, this, NULL);
@@ -326,7 +326,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, getDisplaySize, jobject
+  org_a11y_brlapi_BasicConnection, getDisplaySize, jobject
 ) {
   unsigned int x, y;
   jclass jcsize;
@@ -358,7 +358,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, enterTtyMode, jint,
+  org_a11y_brlapi_BasicConnection, enterTtyMode, jint,
   jint jtty, jstring jdriver
 ) {
   int tty ;
@@ -387,7 +387,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, enterTtyModeWithPath, void,
+  org_a11y_brlapi_BasicConnection, enterTtyModeWithPath, void,
   jintArray jttys, jstring jdriver
 ) {
   jint *ttys ;
@@ -422,7 +422,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, leaveTtyMode, void
+  org_a11y_brlapi_BasicConnection, leaveTtyMode, void
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
   GET_HANDLE(env, this, );
@@ -434,7 +434,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, setFocus, void,
+  org_a11y_brlapi_BasicConnection, setFocus, void,
   jint jarg1
 ) {
   int arg1 ;
@@ -450,7 +450,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, writeText, void,
+  org_a11y_brlapi_BasicConnection, writeText, void,
   jint jarg1, jstring jarg2
 ) {
   brlapi_writeArguments_t s = BRLAPI_WRITEARGUMENTS_INITIALIZER;
@@ -483,7 +483,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, writeDots, void,
+  org_a11y_brlapi_BasicConnection, writeDots, void,
   jbyteArray jarg1
 ) {
   jbyte *arg1;
@@ -512,7 +512,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, write, void,
+  org_a11y_brlapi_BasicConnection, write, void,
   jobject jarguments
 ) {
   brlapi_writeArguments_t arguments = BRLAPI_WRITEARGUMENTS_INITIALIZER;
@@ -577,7 +577,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, readKey, jlong,
+  org_a11y_brlapi_BasicConnection, readKey, jlong,
   jboolean jblock
 ) {
   brlapi_keyCode_t code;
@@ -598,7 +598,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, readKeyWithTimeout, jlong,
+  org_a11y_brlapi_BasicConnection, readKeyWithTimeout, jlong,
   jint timeout_ms
 ) {
   brlapi_keyCode_t code;
@@ -619,7 +619,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, ignoreKeys, void,
+  org_a11y_brlapi_BasicConnection, ignoreKeys, void,
   jlong jrange, jlongArray js
 ) {
   jlong *s;
@@ -648,7 +648,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, acceptKeys, void,
+  org_a11y_brlapi_BasicConnection, acceptKeys, void,
   jlong jrange, jlongArray js
 ) {
   jlong *s;
@@ -677,7 +677,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, ignoreAllKeys, void
+  org_a11y_brlapi_BasicConnection, ignoreAllKeys, void
 ) {
   GET_HANDLE(env, this, );
 
@@ -686,7 +686,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, acceptAllKeys, void
+  org_a11y_brlapi_BasicConnection, acceptAllKeys, void
 ) {
   GET_HANDLE(env, this, );
 
@@ -695,7 +695,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, ignoreKeyRanges, void,
+  org_a11y_brlapi_BasicConnection, ignoreKeyRanges, void,
   jobjectArray js
 ) {
   unsigned int n;
@@ -729,7 +729,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, acceptKeyRanges, void,
+  org_a11y_brlapi_BasicConnection, acceptKeyRanges, void,
   jobjectArray js
 ) {
   unsigned int n;
@@ -763,7 +763,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, enterRawMode, void,
+  org_a11y_brlapi_BasicConnection, enterRawMode, void,
   jstring jdriver
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
@@ -786,7 +786,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, leaveRawMode, void
+  org_a11y_brlapi_BasicConnection, leaveRawMode, void
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
   GET_HANDLE(env, this, );
@@ -798,7 +798,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, sendRaw, jint,
+  org_a11y_brlapi_BasicConnection, sendRaw, jint,
   jbyteArray jbuf
 ) {
   jbyte *buf;
@@ -828,7 +828,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_BasicConnection, recvRaw, jint,
+  org_a11y_brlapi_BasicConnection, recvRaw, jint,
   jbyteArray jbuf
 ) {
   jbyte *buf;
@@ -859,7 +859,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Error, toString, jstring
+  org_a11y_brlapi_Error, toString, jstring
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
@@ -905,7 +905,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Exception, toString, jstring
+  org_a11y_brlapi_Exception, toString, jstring
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
@@ -948,7 +948,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_BrlAPI_Exception, getPacketTypeName, jstring,
+  org_a11y_brlapi_Exception, getPacketTypeName, jstring,
   jint type
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
@@ -966,7 +966,7 @@ JAVA_STATIC_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Key, expandKeyCode, void,
+  org_a11y_brlapi_Key, expandKeyCode, void,
   jlong jkey
 ) {
   brlapi_keyCode_t key = jkey;

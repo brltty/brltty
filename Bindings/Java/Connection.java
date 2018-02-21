@@ -17,7 +17,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.BrlAPI;
+package org.a11y.brlapi;
 
 public class Connection extends BasicConnection {
   public Connection (ConnectionSettings settings) throws Error {
