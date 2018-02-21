@@ -90,7 +90,7 @@ throwConnectionError (JNIEnv *env) {
     } \
   } while (0)
 
-#define GET_FIELD(env, field, class, name, signature, ret) \
+#define FIND_FIELD(env, field, class, name, signature, ret) \
   jfieldID field; \
   do { \
     if (!(field = (*(env))->GetFieldID((env), (class), (name), (signature)))) {\
@@ -103,8 +103,8 @@ throwConnectionError (JNIEnv *env) {
   brlapi_handle_t *handle; \
   do { \
     GET_CLASS((env), class, (object), ret); \
-    GET_FIELD((env), field, class, "handle", JAVA_SIG_LONG, ret); \
-    handle = (void*) (intptr_t) GET_VALUE((env), Long, (object), field); \
+    FIND_FIELD((env), field, class, "handle", JAVA_SIG_LONG, ret); \
+    handle = (void*) (intptr_t) GET_FIELD((env), Long, (object), field); \
     if (!handle) { \
       throwJavaError((env), JAVA_OBJECT_NULL_POINTER_EXCEPTION, "connection has been closed"); \
       return ret; \
@@ -114,8 +114,8 @@ throwConnectionError (JNIEnv *env) {
 #define SET_HANDLE(env, object, value, ret) \
   do { \
     GET_CLASS((env), class, (object), ret); \
-    GET_FIELD((env), field, class, "handle", JAVA_SIG_LONG, ret); \
-    SET_VALUE((env), Long, (object), field, (jlong) (intptr_t) (value)); \
+    FIND_FIELD((env), field, class, "handle", JAVA_SIG_LONG, ret); \
+    SET_FIELD((env), Long, (object), field, (jlong) (intptr_t) (value)); \
   } while (0)
 
 static void BRLAPI_STDCALL
@@ -204,17 +204,17 @@ JAVA_INSTANCE_METHOD(
 
   if (JclientSettings) {
     GET_CLASS(env, jcclientSettings, JclientSettings, -1);
-    GET_FIELD(env, clientAuthID, jcclientSettings, "authorizationSchemes", "Ljava/lang/String;", -1);
-    GET_FIELD(env, clientHostID, jcclientSettings, "serverHost", "Ljava/lang/String;", -1);
+    FIND_FIELD(env, clientAuthID, jcclientSettings, "authorizationSchemes", "Ljava/lang/String;", -1);
+    FIND_FIELD(env, clientHostID, jcclientSettings, "serverHost", "Ljava/lang/String;", -1);
 
     PclientSettings = &clientSettings;
-    if ((auth = GET_VALUE(env, Object, JclientSettings, clientAuthID))) {
+    if ((auth = GET_FIELD(env, Object, JclientSettings, clientAuthID))) {
       if (!(clientSettings.auth = (char *)(*env)->GetStringUTFChars(env, auth, NULL))) {
 	throwJavaError(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
 	return -1;
       }
     } else clientSettings.auth = NULL;
-    if ((host = GET_VALUE(env, Object, JclientSettings, clientHostID))) {
+    if ((host = GET_FIELD(env, Object, JclientSettings, clientHostID))) {
       if (!(clientSettings.host = (char *)(*env)->GetStringUTFChars(env, host, NULL))) {
 	throwJavaError(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
 	return -1;
@@ -243,8 +243,8 @@ JAVA_INSTANCE_METHOD(
 
   if (PusedSettings) {
     GET_CLASS(env, jcusedSettings, JusedSettings, -1);
-    GET_FIELD(env, usedAuthID, jcusedSettings, "authorizationSchemes", "Ljava/lang/String;", -1);
-    GET_FIELD(env, usedHostID, jcusedSettings, "serverHost", "Ljava/lang/String;", -1);
+    FIND_FIELD(env, usedAuthID, jcusedSettings, "authorizationSchemes", "Ljava/lang/String;", -1);
+    FIND_FIELD(env, usedHostID, jcusedSettings, "serverHost", "Ljava/lang/String;", -1);
 
     auth = (*env)->NewStringUTF(env, usedSettings.auth);
     if (!auth) {
@@ -252,7 +252,7 @@ JAVA_INSTANCE_METHOD(
       return -1;
     }
     str = (*env)->GetStringUTFChars(env, auth, NULL);
-    SET_VALUE(env, Object, JusedSettings, usedAuthID, auth);
+    SET_FIELD(env, Object, JusedSettings, usedAuthID, auth);
     (*env)->ReleaseStringUTFChars(env, auth, str);
 
     host = (*env)->NewStringUTF(env, usedSettings.host);
@@ -261,7 +261,7 @@ JAVA_INSTANCE_METHOD(
       return -1;
     }
     str = (*env)->GetStringUTFChars(env, host, NULL);
-    SET_VALUE(env, Object, JusedSettings, usedHostID, host);
+    SET_FIELD(env, Object, JusedSettings, usedHostID, host);
     (*env)->ReleaseStringUTFChars(env, host, str);
   }
 
@@ -513,37 +513,37 @@ JAVA_INSTANCE_METHOD(
   }
 
   GET_CLASS(env, jcwriteArguments, jarguments, );
-  GET_FIELD(env, displayNumberID, jcwriteArguments,
-            "displayNumber", JAVA_SIG_INT, );
-  GET_FIELD(env, regionBeginID, jcwriteArguments,
-            "regionBegin", JAVA_SIG_INT, );
-  GET_FIELD(env, regionSizeID, jcwriteArguments,
-            "regionSize", JAVA_SIG_INT, );
-  GET_FIELD(env, textID, jcwriteArguments,
-            "text", JAVA_SIG_STRING, );
-  GET_FIELD(env, andMaskID, jcwriteArguments,
-            "andMask", JAVA_SIG_ARRAY(JAVA_SIG_BYTE), );
-  GET_FIELD(env, orMaskID, jcwriteArguments,
-            "orMask", JAVA_SIG_ARRAY(JAVA_SIG_BYTE), );
-  GET_FIELD(env, cursorID, jcwriteArguments, 
-            "cursorPosition", JAVA_SIG_INT, );
+  FIND_FIELD(env, displayNumberID, jcwriteArguments,
+             "displayNumber", JAVA_SIG_INT, );
+  FIND_FIELD(env, regionBeginID, jcwriteArguments,
+             "regionBegin", JAVA_SIG_INT, );
+  FIND_FIELD(env, regionSizeID, jcwriteArguments,
+             "regionSize", JAVA_SIG_INT, );
+  FIND_FIELD(env, textID, jcwriteArguments,
+             "text", JAVA_SIG_STRING, );
+  FIND_FIELD(env, andMaskID, jcwriteArguments,
+             "andMask", JAVA_SIG_ARRAY(JAVA_SIG_BYTE), );
+  FIND_FIELD(env, orMaskID, jcwriteArguments,
+             "orMask", JAVA_SIG_ARRAY(JAVA_SIG_BYTE), );
+  FIND_FIELD(env, cursorID, jcwriteArguments, 
+             "cursorPosition", JAVA_SIG_INT, );
 
-  arguments.displayNumber = GET_VALUE(env, Int, jarguments, displayNumberID);
-  arguments.regionBegin   = GET_VALUE(env, Int, jarguments, regionBeginID);
-  arguments.regionSize    = GET_VALUE(env, Int, jarguments, regionSizeID);
-  if ((text  = GET_VALUE(env, Object, jarguments, textID)))
+  arguments.displayNumber = GET_FIELD(env, Int, jarguments, displayNumberID);
+  arguments.regionBegin   = GET_FIELD(env, Int, jarguments, regionBeginID);
+  arguments.regionSize    = GET_FIELD(env, Int, jarguments, regionSizeID);
+  if ((text  = GET_FIELD(env, Object, jarguments, textID)))
     arguments.text   = (char *)(*env)->GetStringUTFChars(env, text, NULL);
   else 
     arguments.text  = NULL;
-  if ((andMask = GET_VALUE(env, Object, jarguments, andMaskID)))
+  if ((andMask = GET_FIELD(env, Object, jarguments, andMaskID)))
     arguments.andMask  = (unsigned char *)(*env)->GetByteArrayElements(env, andMask, NULL);
   else
     arguments.andMask = NULL;
-  if ((orMask  = GET_VALUE(env, Object, jarguments, orMaskID)))
+  if ((orMask  = GET_FIELD(env, Object, jarguments, orMaskID)))
     arguments.orMask   = (unsigned char *)(*env)->GetByteArrayElements(env, orMask, NULL);
   else
     arguments.orMask  = NULL;
-  arguments.cursor     = GET_VALUE(env, Int, jarguments, cursorID);
+  arguments.cursor     = GET_FIELD(env, Int, jarguments, cursorID);
   arguments.charset = "UTF-8";
 
   result = brlapi__write(handle, &arguments);
@@ -852,17 +852,17 @@ JAVA_INSTANCE_METHOD(
   brlapi_error_t error;
   memset(&error, 0, sizeof(error));
 
-  GET_FIELD(env, apiErrorID, class, "apiError", JAVA_SIG_INT, NULL);
-  error.brlerrno = GET_VALUE(env, Int, this, apiErrorID);
+  FIND_FIELD(env, apiErrorID, class, "apiError", JAVA_SIG_INT, NULL);
+  error.brlerrno = GET_FIELD(env, Int, this, apiErrorID);
 
-  GET_FIELD(env, osErrorID, class, "osError", JAVA_SIG_INT, NULL);
-  error.libcerrno = GET_VALUE(env, Int, this, osErrorID);
+  FIND_FIELD(env, osErrorID, class, "osError", JAVA_SIG_INT, NULL);
+  error.libcerrno = GET_FIELD(env, Int, this, osErrorID);
 
-  GET_FIELD(env, gaiErrorID, class, "gaiError", JAVA_SIG_INT, NULL);
-  error.gaierrno = GET_VALUE(env, Int, this, gaiErrorID);
+  FIND_FIELD(env, gaiErrorID, class, "gaiError", JAVA_SIG_INT, NULL);
+  error.gaierrno = GET_FIELD(env, Int, this, gaiErrorID);
 
-  GET_FIELD(env, functionID, class, "functionName", JAVA_SIG_STRING, NULL);
-  jstring jFunction = GET_VALUE(env, Object, this, functionID);
+  FIND_FIELD(env, functionID, class, "functionName", JAVA_SIG_STRING, NULL);
+  jstring jFunction = GET_FIELD(env, Object, this, functionID);
 
   if (!jFunction) {
     error.errfun = NULL;
@@ -904,14 +904,14 @@ JAVA_INSTANCE_METHOD(
   GET_HANDLE(env, this, NULL);
   GET_CLASS(env, class, this, NULL);
 
-  GET_FIELD(env, errorID, class, "errorNumber", JAVA_SIG_INT, NULL);
-  jint error = GET_VALUE(env, Int, this, errorID);
+  FIND_FIELD(env, errorID, class, "errorNumber", JAVA_SIG_INT, NULL);
+  jint error = GET_FIELD(env, Int, this, errorID);
 
-  GET_FIELD(env, typeID, class, "packetType", JAVA_SIG_INT, NULL);
-  jint type = GET_VALUE(env, Int, this, typeID);
+  FIND_FIELD(env, typeID, class, "packetType", JAVA_SIG_INT, NULL);
+  jint type = GET_FIELD(env, Int, this, typeID);
 
-  GET_FIELD(env, packetID, class, "failedPacket", JAVA_SIG_ARRAY(JAVA_SIG_BYTE), NULL);
-  jbyteArray jPacket = GET_VALUE(env, Object, this, packetID);
+  FIND_FIELD(env, packetID, class, "failedPacket", JAVA_SIG_ARRAY(JAVA_SIG_BYTE), NULL);
+  jbyteArray jPacket = GET_FIELD(env, Object, this, packetID);
 
   if (!jPacket) {
     throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
@@ -955,15 +955,15 @@ JAVA_INSTANCE_METHOD(
   brlapi_expandKeyCode((brlapi_keyCode_t) code, &ekc);
   GET_CLASS(env, class, this, );
 
-  GET_FIELD(env, typeID, class, "typeValue", JAVA_SIG_INT, );
-  SET_VALUE(env, Int, this, typeID, ekc.type);
+  FIND_FIELD(env, typeID, class, "typeValue", JAVA_SIG_INT, );
+  SET_FIELD(env, Int, this, typeID, ekc.type);
 
-  GET_FIELD(env, commandID, class, "commandValue", JAVA_SIG_INT, );
-  SET_VALUE(env, Int, this, commandID, ekc.command);
+  FIND_FIELD(env, commandID, class, "commandValue", JAVA_SIG_INT, );
+  SET_FIELD(env, Int, this, commandID, ekc.command);
 
-  GET_FIELD(env, argumentID, class, "argumentValue", JAVA_SIG_INT, );
-  SET_VALUE(env, Int, this, argumentID, ekc.argument);
+  FIND_FIELD(env, argumentID, class, "argumentValue", JAVA_SIG_INT, );
+  SET_FIELD(env, Int, this, argumentID, ekc.argument);
 
-  GET_FIELD(env, flagsID, class, "flagsValue", JAVA_SIG_INT, );
-  SET_VALUE(env, Int, this, flagsID, ekc.flags);
+  FIND_FIELD(env, flagsID, class, "flagsValue", JAVA_SIG_INT, );
+  SET_FIELD(env, Int, this, flagsID, ekc.flags);
 }

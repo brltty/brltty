@@ -58,10 +58,10 @@ extern "C" {
 #define JAVA_STATIC_METHOD(object,name,returns,...) \
   JAVA_METHOD(object,name,returns), jclass class, ## __VA_ARGS__)
 
-#define GET_VALUE(env,type,object,field) \
+#define GET_FIELD(env,type,object,field) \
   (*(env))->Get ## type ## Field((env), (object), (field))
 
-#define SET_VALUE(env,type,object,field,value) \
+#define SET_FIELD(env,type,object,field,value) \
    (*(env))->Set ## type ## Field((env), (object), (field), (value));
 
 #ifdef __cplusplus
