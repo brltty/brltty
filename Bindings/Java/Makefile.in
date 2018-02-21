@@ -38,6 +38,7 @@ JAVA_JNI_DESTDIR = $(INSTALL_ROOT)
 all: jar jni doc
 
 JAVA_SOURCES = \
+	$(SRC_DIR)/Version.java \
 	$(SRC_DIR)/Connection.java \
 	$(SRC_DIR)/BasicConnection.java \
 	$(SRC_DIR)/ConnectionSettings.java \
@@ -45,7 +46,7 @@ JAVA_SOURCES = \
 	$(SRC_DIR)/Error.java \
 	$(SRC_DIR)/Exception.java \
 	$(SRC_DIR)/Key.java \
-	$(SRC_DIR)/Native.java \
+	$(SRC_DIR)/NativeLibrary.java \
 	$(SRC_DIR)/Test.java \
 	$(SRC_DIR)/WriteArguments.java \
 	Constants.java

@@ -78,9 +78,9 @@ public class Test implements Constants {
     }
 
     writeProperty("BrlAPI Version", "%d.%d.%d",
-      Native.getMajorVersion(),
-      Native.getMinorVersion(),
-      Native.getRevision()
+      Version.getMajor(),
+      Version.getMinor(),
+      Version.getRevision()
     );
 
     try {

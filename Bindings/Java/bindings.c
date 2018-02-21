@@ -174,21 +174,21 @@ getVersionNumbers (void) {
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_BrlAPI_Native, getMajorVersion, jint
+  org_a11y_BrlAPI_Version, getMajor, jint
 ) {
   getVersionNumbers();
   return majorVersion;
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_BrlAPI_Native, getMinorVersion, jint
+  org_a11y_BrlAPI_Version, getMinor, jint
 ) {
   getVersionNumbers();
   return minorVersion;
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_BrlAPI_Native, getRevision, jint
+  org_a11y_BrlAPI_Version, getRevision, jint
 ) {
   getVersionNumbers();
   return revision;

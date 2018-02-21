@@ -19,15 +19,11 @@
 
 package org.a11y.BrlAPI;
 
-public abstract class Native {
+public abstract class NativeLibrary {
   static {
     System.loadLibrary("brlapi_java");
   }
 
-  public native static int getMajorVersion ();
-  public native static int getMinorVersion ();
-  public native static int getRevision ();
-
-  protected Native () {
+  protected NativeLibrary () {
   }
 }

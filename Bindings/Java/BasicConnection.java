@@ -19,7 +19,7 @@
 
 package org.a11y.BrlAPI;
 
-public class BasicConnection extends Native {
+public class BasicConnection extends NativeLibrary {
   protected long handle;
 
   protected native int openConnection (
