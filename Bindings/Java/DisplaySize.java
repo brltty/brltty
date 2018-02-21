@@ -20,19 +20,19 @@
 package org.a11y.BrlAPI;
 
 public class DisplaySize {
-  protected final int width;
-  protected final int height;
+  private final int displayWidth;
+  private final int displayHeight;
 
   public DisplaySize (int width, int height) {
-    this.width = width;
-    this.height = height; 
+    displayWidth = width;
+    displayHeight = height; 
   }
 
   public int getWidth () {
-    return width;
+    return displayWidth;
   }
 
   public int getHeight () {
-    return height;
+    return displayHeight;
   }
 }

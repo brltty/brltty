@@ -20,14 +20,83 @@
 package org.a11y.BrlAPI;
 
 public class WriteArguments {
-  public int displayNumber = Constants.DISPLAY_DEFAULT;
-  public int regionBegin = 0;
-  public int regionSize = 0;
-  public String text = null;
-  public byte andMask[] = null;
-  public byte orMask[] = null;
-  public int cursor = Constants.CURSOR_LEAVE;
+  private String text = null;
+  private byte andMask[] = null;
+  private byte orMask[] = null;
+  private int regionBegin = 0;
+  private int regionSize = 0;
+  private int cursorPosition = Constants.CURSOR_LEAVE;
+  private int displayNumber = Constants.DISPLAY_DEFAULT;
 
   public WriteArguments () {
+  }
+
+  public String getText () {
+    return text;
+  }
+
+  public WriteArguments setText (String text) {
+    this.text = text;
+    return this;
+  }
+
+  public byte[] getAndMask () {
+    return andMask;
+  }
+
+  public WriteArguments setAndMask (byte[] mask) {
+    andMask = mask;
+    return this;
+  }
+
+  public byte[] getOrMask () {
+    return orMask;
+  }
+
+  public WriteArguments setOrMask (byte[] mask) {
+    orMask = mask;
+    return this;
+  }
+
+  public int getRegionBegin () {
+    return regionBegin;
+  }
+
+  public WriteArguments setRegionBegin (int begin) {
+    regionBegin = begin;
+    return this;
+  }
+
+  public int getRegionSize () {
+    return regionSize;
+  }
+
+  public WriteArguments setRegionSize (int size) {
+    regionSize = size;
+    return this;
+  }
+
+  public WriteArguments setRegion (int begin, int size) {
+    setRegionBegin(begin);
+    setRegionSize(size);
+    return this;
+  }
+
+  public int getCursorPosition () {
+    return cursorPosition;
+  }
+
+  public WriteArguments setCursorPosition (int position) {
+    cursorPosition = position;
+    return this;
+  }
+
+  public int getDisplayNumber () {
+    return displayNumber;
+  }
+
+  public WriteArguments setDisplayNumber (int number) {
+    displayNumber = number;
+    return this;
   }
 }

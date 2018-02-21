@@ -541,7 +541,7 @@ JAVA_INSTANCE_METHOD(
   GET_FIELD(env, orMaskID, jcwriteArguments,
             "orMask", JAVA_SIG_ARRAY(JAVA_SIG_BYTE), );
   GET_FIELD(env, cursorID, jcwriteArguments, 
-            "cursor", JAVA_SIG_INT, );
+            "cursorPosition", JAVA_SIG_INT, );
 
   arguments.displayNumber = GET_VALUE(env, Int, jarguments, displayNumberID);
   arguments.regionBegin   = GET_VALUE(env, Int, jarguments, regionBeginID);
