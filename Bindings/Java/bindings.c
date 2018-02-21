@@ -863,24 +863,14 @@ JAVA_INSTANCE_METHOD(
   } else {
     const char *cFunction = (*env)->GetStringUTFChars(env, jFunction, NULL);
 
-    if (!cFunction) {
-      throwJavaError(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
-      return NULL;
-    }
-
+    if (!cFunction) return NULL;
     error.errfun = cFunction;
   }
 
-  const char *message = brlapi_strerror(&error);
+  const char *cMessage = brlapi_strerror(&error);
   if (error.errfun) (*env)->ReleaseStringUTFChars(env, jFunction, error.errfun);
-  jstring string = (*env)->NewStringUTF(env, message);
 
-  if (!string) {
-    throwJavaError(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
-    return NULL;
-  }
-
-  return string;
+  return (*env)->NewStringUTF(env, cMessage);
 }
 
 JAVA_INSTANCE_METHOD(
@@ -917,11 +907,6 @@ JAVA_INSTANCE_METHOD(
   brlapi__strexception(handle, buffer, sizeof(buffer), error, type, cPacket, size); 
   jstring message = (*env)->NewStringUTF(env, buffer);
   (*env)->ReleaseByteArrayElements(env, jPacket, cPacket, JNI_ABORT);
-
-  if (!message) {
-    throwJavaError(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
-    return NULL;
-  }
 
   return message;
 }
