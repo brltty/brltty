@@ -25,44 +25,44 @@ public class BasicConnection extends NativeLibrary {
   protected native int openConnection (
     ConnectionSettings desiredSettings,
     ConnectionSettings actualSettings
-  ) throws Error;
+  );
 
   public native void closeConnection ();
 
-  public native String getDriverName () throws Error;
-  public native String getModelIdentifier () throws Error;
-  public native DisplaySize getDisplaySize () throws Error;
+  public native String getDriverName ();
+  public native String getModelIdentifier ();
+  public native DisplaySize getDisplaySize ();
   
-  public native int enterTtyMode (int tty, String driver) throws Error;
-  public native void enterTtyModeWithPath (int[] ttys, String driver) throws Error;
-  public native void leaveTtyMode () throws Error;
-  public native void setFocus (int tty) throws Error;
+  public native int enterTtyMode (int tty, String driver);
+  public native void enterTtyModeWithPath (int[] ttys, String driver);
+  public native void leaveTtyMode ();
+  public native void setFocus (int tty);
 
-  protected native void writeText (int cursor, String text) throws Error;
-  public native void writeDots (byte[] dots) throws Error;
-  public native void write (WriteArguments arguments) throws Error;
+  protected native void writeText (int cursor, String text);
+  public native void writeDots (byte[] dots);
+  public native void write (WriteArguments arguments);
 
-  public native long readKey (boolean wait) throws Error;
-  public native long readKeyWithTimeout (int milliseconds) throws Error;
+  public native long readKey (boolean wait);
+  public native long readKeyWithTimeout (int milliseconds);
 
-  public native void ignoreKeys (long type, long[] keys) throws Error;
-  public native void acceptKeys (long type, long[] keys) throws Error;
+  public native void ignoreKeys (long type, long[] keys);
+  public native void acceptKeys (long type, long[] keys);
 
-  public native void ignoreAllKeys () throws Error;
-  public native void acceptAllKeys () throws Error;
+  public native void ignoreAllKeys ();
+  public native void acceptAllKeys ();
 
-  public native void ignoreKeyRanges (long[][] ranges) throws Error;
-  public native void acceptKeyRanges (long[][] ranges) throws Error;
+  public native void ignoreKeyRanges (long[][] ranges);
+  public native void acceptKeyRanges (long[][] ranges);
 
-  public native void enterRawMode (String driver) throws Error;
-  public native void leaveRawMode () throws Error;
-  public native int sendRaw (byte[] buffer) throws Error;
-  public native int recvRaw (byte[] buffer) throws Error;
+  public native void enterRawMode (String driver);
+  public native void leaveRawMode ();
+  public native int sendRaw (byte[] buffer);
+  public native int recvRaw (byte[] buffer);
 
   protected final ConnectionSettings connectionSettings;
   protected final int fileDescriptor;
 
-  public BasicConnection (ConnectionSettings settings) throws Error {
+  public BasicConnection (ConnectionSettings settings) {
     super();
     connectionSettings = new ConnectionSettings();
     fileDescriptor = openConnection(settings, connectionSettings);

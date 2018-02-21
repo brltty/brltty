@@ -19,7 +19,7 @@
 
 package org.a11y.brlapi;
 
-public class Exception extends java.lang.Exception {
+public class Exception extends RuntimeException {
   public native String toString ();
 
   private final long handle;

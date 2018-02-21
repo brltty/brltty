@@ -20,7 +20,7 @@
 package org.a11y.brlapi;
 
 public class Connection extends BasicConnection {
-  public Connection (ConnectionSettings settings) throws Error {
+  public Connection (ConnectionSettings settings) {
     super(settings);
   }
 
@@ -29,23 +29,23 @@ public class Connection extends BasicConnection {
     return size.getWidth() * size.getHeight();
   }
 
-  public int enterTtyMode (int tty) throws Error {
+  public int enterTtyMode (int tty) {
     return enterTtyMode(tty, null);
   }
 
-  public int enterTtyMode (String driver) throws Error {
+  public int enterTtyMode (String driver) {
     return enterTtyMode(Constants.TTY_DEFAULT, driver);
   }
 
-  public int enterTtyMode () throws Error {
+  public int enterTtyMode () {
     return enterTtyMode(null);
   }
 
-  public void enterTtyModeWithPath (int[] ttys) throws Error {
+  public void enterTtyModeWithPath (int[] ttys) {
     enterTtyModeWithPath(ttys, null);
   }
 
-  public void writeDots (byte[] dots) throws Error {
+  public void writeDots (byte[] dots) {
     int count = getCellCount();
 
     if (dots.length != count) {
@@ -58,7 +58,7 @@ public class Connection extends BasicConnection {
     super.writeDots(dots);
   }
 
-  public void writeText (int cursor, String text) throws Error {
+  public void writeText (int cursor, String text) {
     if (text != null) {
       int count = getCellCount();
 
@@ -74,15 +74,15 @@ public class Connection extends BasicConnection {
     super.writeText(cursor, text);
   }
 
-  public void writeText (String text, int cursor) throws Error {
+  public void writeText (String text, int cursor) {
     writeText(cursor, text);
   }
 
-  public void writeText (int cursor) throws Error {
+  public void writeText (int cursor) {
     writeText(cursor, null);
   }
 
-  public void writeText (String text) throws Error {
+  public void writeText (String text) {
     writeText(Constants.CURSOR_OFF, text);
   }
 }
