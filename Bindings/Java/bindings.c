@@ -48,7 +48,7 @@ throwJavaError (JNIEnv *env, const char *object, const char *message) {
 }
 
 static void
-throwConnectionError (JNIEnv *env, const char *function) {
+throwConnectionError (JNIEnv *env) {
   jclass class = (*env)->FindClass(env, BRLAPI_OBJECT("ConnectionError"));
   if (!class) return;
 
@@ -61,17 +61,23 @@ throwConnectionError (JNIEnv *env, const char *function) {
       JAVA_SIG_STRING // function name
     )
   );
-  if (!constructor) return;
 
-  jstring jFunction = (*env)->NewStringUTF(env, function);
-  if (!jFunction) return;
+  if (!constructor) return;
+  jstring jFunction;
+
+  if (!brlapi_errfun) {
+    jFunction = NULL;
+  } else if (!(jFunction = (*env)->NewStringUTF(env, brlapi_errfun))) {
+    return;
+  }
+
   jobject object = (*env)->NewObject(env, class, constructor, brlapi_errno, brlapi_libcerrno, brlapi_gaierrno, jFunction);
 
   if (object) {
     (*env)->ExceptionClear(env);
     (*env)->Throw(env, object);
   } else if (jFunction) {
-    (*env)->ReleaseStringUTFChars(env, jFunction, function);
+    (*env)->ReleaseStringUTFChars(env, jFunction, brlapi_errfun);
   }
 }
 
@@ -222,7 +228,7 @@ JAVA_INSTANCE_METHOD(
     PusedSettings = NULL;
 
   if ((result = brlapi__openConnection(handle, PclientSettings, PusedSettings)) < 0) {
-    throwConnectionError(env, __func__);
+    throwConnectionError(env);
     return -1;
   }
 
@@ -281,7 +287,7 @@ JAVA_INSTANCE_METHOD(
   char name[0X20];
 
   if (brlapi__getDriverName(handle, name, sizeof(name)) < 0) {
-    throwConnectionError(env, __func__);
+    throwConnectionError(env);
     return NULL;
   }
 
@@ -298,7 +304,7 @@ JAVA_INSTANCE_METHOD(
   char identifier[0X20];
 
   if (brlapi__getModelIdentifier(handle, identifier, sizeof(identifier)) < 0) {
-    throwConnectionError(env, __func__);
+    throwConnectionError(env);
     return NULL;
   }
 
@@ -315,7 +321,7 @@ JAVA_INSTANCE_METHOD(
 
   unsigned int width, height;
   if (brlapi__getDisplaySize(handle, &width, &height) < 0) {
-    throwConnectionError(env, __func__);
+    throwConnectionError(env);
     return NULL;
   }
 
@@ -358,7 +364,7 @@ JAVA_INSTANCE_METHOD(
 
   result = brlapi__enterTtyMode(handle, tty,driver);
   if (result < 0) {
-    throwConnectionError(env, __func__);
+    throwConnectionError(env);
     return -1;
   }
 
@@ -395,7 +401,7 @@ JAVA_INSTANCE_METHOD(
   result = brlapi__enterTtyModeWithPath(handle, ttys,(*env)->GetArrayLength(env,jttys),driver);
   (*env)->ReleaseIntArrayElements(env, jttys, ttys, JNI_ABORT);
   if (result < 0) {
-    throwConnectionError(env, __func__);
+    throwConnectionError(env);
     return;
   }
 }
@@ -407,7 +413,7 @@ JAVA_INSTANCE_METHOD(
   GET_HANDLE(env, this, );
 
   if (brlapi__leaveTtyMode(handle) < 0) {
-    throwConnectionError(env, __func__);
+    throwConnectionError(env);
     return;
   }
 }
@@ -423,7 +429,7 @@ JAVA_INSTANCE_METHOD(
 
   arg1 = (int)jarg1; 
   if (brlapi__setFocus(handle, arg1) < 0) {
-    throwConnectionError(env, __func__);
+    throwConnectionError(env);
     return;
   }
 }
@@ -456,7 +462,7 @@ JAVA_INSTANCE_METHOD(
     (*env)->ReleaseStringUTFChars(env, jarg2, s.text); 
 
   if (result < 0) {
-    throwConnectionError(env, __func__);
+    throwConnectionError(env);
     return;
   }
 }
@@ -485,7 +491,7 @@ JAVA_INSTANCE_METHOD(
   (*env)->ReleaseByteArrayElements(env, jarg1, arg1, JNI_ABORT); 
   
   if (result < 0) {
-    throwConnectionError(env, __func__);
+    throwConnectionError(env);
     return;
   }
 }
@@ -550,7 +556,7 @@ JAVA_INSTANCE_METHOD(
     (*env)->ReleaseByteArrayElements(env, orMask,  (jbyte*) arguments.orMask,  JNI_ABORT); 
 
   if (result < 0) {
-    throwConnectionError(env, __func__);
+    throwConnectionError(env);
     return;
   }
 }
@@ -568,7 +574,7 @@ JAVA_INSTANCE_METHOD(
   result = brlapi__readKey(handle, (int) jblock, &code);
 
   if (result < 0) {
-    throwConnectionError(env, __func__);
+    throwConnectionError(env);
     return -1;
   }
 
@@ -589,7 +595,7 @@ JAVA_INSTANCE_METHOD(
   result = brlapi__readKeyWithTimeout(handle, timeout_ms, &code);
 
   if (result < 0) {
-    throwConnectionError(env, __func__);
+    throwConnectionError(env);
     return -1;
   }
 
@@ -621,7 +627,7 @@ JAVA_INSTANCE_METHOD(
   (*env)->ReleaseLongArrayElements(env, js, s, JNI_ABORT);
   
   if (result < 0) {
-    throwConnectionError(env, __func__);
+    throwConnectionError(env);
     return;
   }
 }
@@ -650,7 +656,7 @@ JAVA_INSTANCE_METHOD(
   (*env)->ReleaseLongArrayElements(env, js, s, JNI_ABORT);
 
   if (result < 0) {
-    throwConnectionError(env, __func__);
+    throwConnectionError(env);
     return;
   }
 }
@@ -661,7 +667,7 @@ JAVA_INSTANCE_METHOD(
   GET_HANDLE(env, this, );
 
   if (brlapi__ignoreAllKeys(handle) < 0)
-    throwConnectionError(env, __func__);
+    throwConnectionError(env);
 }
 
 JAVA_INSTANCE_METHOD(
@@ -670,7 +676,7 @@ JAVA_INSTANCE_METHOD(
   GET_HANDLE(env, this, );
 
   if (brlapi__acceptAllKeys(handle) < 0)
-    throwConnectionError(env, __func__);
+    throwConnectionError(env);
 }
 
 JAVA_INSTANCE_METHOD(
@@ -701,7 +707,7 @@ JAVA_INSTANCE_METHOD(
       (*env)->ReleaseLongArrayElements(env, jl, l, JNI_ABORT);
     }
     if (brlapi__ignoreKeyRanges(handle, s, n)) {
-      throwConnectionError(env, __func__);
+      throwConnectionError(env);
       return;
     }
   }
@@ -735,7 +741,7 @@ JAVA_INSTANCE_METHOD(
       (*env)->ReleaseLongArrayElements(env, jl, l, JNI_ABORT);
     }
     if (brlapi__acceptKeyRanges(handle, s, n)) {
-      throwConnectionError(env, __func__);
+      throwConnectionError(env);
       return;
     }
   }
@@ -759,7 +765,7 @@ JAVA_INSTANCE_METHOD(
   res = brlapi__enterRawMode(handle, driver);
   if (jdriver) (*env)->ReleaseStringUTFChars(env, jdriver, driver);
   if (res < 0) {
-    throwConnectionError(env, __func__);
+    throwConnectionError(env);
     return;
   }
 }
@@ -771,7 +777,7 @@ JAVA_INSTANCE_METHOD(
   GET_HANDLE(env, this, );
 
   if (brlapi__leaveRawMode(handle) < 0) {
-    throwConnectionError(env, __func__);
+    throwConnectionError(env);
     return;
   }
 }
@@ -799,7 +805,7 @@ JAVA_INSTANCE_METHOD(
   (*env)->ReleaseByteArrayElements(env, jbuf, buf, JNI_ABORT);
 
   if (result < 0) {
-    throwConnectionError(env, __func__);
+    throwConnectionError(env);
     return -1;
   }
 
@@ -829,7 +835,7 @@ JAVA_INSTANCE_METHOD(
 
   if (result < 0) {
     (*env)->ReleaseByteArrayElements(env, jbuf, buf, JNI_ABORT);
-    throwConnectionError(env, __func__);
+    throwConnectionError(env);
     return -1;
   }
 
