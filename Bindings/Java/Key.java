@@ -19,14 +19,14 @@
 
 package org.a11y.BrlAPI;
 
-public class Key {
+public class Key extends NativeLibrary {
+  private native void expandKeyCode (long code);
+
   private final long keyCode;
   private int typeValue;
   private int commandValue;
   private int argumentValue;
   private int flagsValue;
-
-  private final native void expandKeyCode (long code);
 
   public Key (long code) {
     keyCode = code;
