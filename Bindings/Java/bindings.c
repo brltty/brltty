@@ -275,10 +275,10 @@ JAVA_INSTANCE_METHOD(
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, getDriverName, jstring
 ) {
-  char name[32];
-  GET_HANDLE(env, this, NULL);
-
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
+
+  GET_HANDLE(env, this, NULL);
+  char name[0X20];
 
   if (brlapi__getDriverName(handle, name, sizeof(name)) < 0) {
     throwConnectionError(env, __func__);
@@ -292,10 +292,10 @@ JAVA_INSTANCE_METHOD(
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, getModelIdentifier, jstring
 ) {
-  char identifier[32];
-  GET_HANDLE(env, this, NULL);
-
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
+
+  GET_HANDLE(env, this, NULL);
+  char identifier[0X20];
 
   if (brlapi__getModelIdentifier(handle, identifier, sizeof(identifier)) < 0) {
     throwConnectionError(env, __func__);
@@ -870,6 +870,23 @@ JAVA_INSTANCE_METHOD(
   const char *cMessage = brlapi_strerror(&error);
   if (error.errfun) (*env)->ReleaseStringUTFChars(env, jFunction, error.errfun);
 
+  size_t length = strlen(cMessage);
+  char buffer[length + 1];
+  int copy = 0;
+
+  while (length > 0) {
+    size_t last = length - 1;
+    if (cMessage[last] != '\n') break;
+    length = last;
+    copy = 1;
+  }
+
+  if (copy) {
+    memcpy(buffer, cMessage, length);
+    buffer[length] = 0;
+    cMessage = buffer;
+  }
+
   return (*env)->NewStringUTF(env, cMessage);
 }
 
@@ -917,34 +934,30 @@ JAVA_STATIC_METHOD(
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
-  const char *cName = brlapi_getPacketTypeName((brlapi_packetType_t) type);
-  if (!cName) return NULL;
-  jstring jName = (*env)->NewStringUTF(env, cName);
-
-  if (!jName) {
-    throwJavaError(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
-    return NULL;
-  }
-
-  return jName;
+  const char *name = brlapi_getPacketTypeName((brlapi_packetType_t) type);
+  if (!name) return NULL;
+  return (*env)->NewStringUTF(env, name);
 }
 
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_Key, expandKeyCode, void,
-  jlong jkey
+  jlong code
 ) {
-  brlapi_keyCode_t key = jkey;
+  SET_GLOBAL_JAVA_ENVIRONMENT(env);
+
   brlapi_expandedKeyCode_t ekc;
+  brlapi_expandKeyCode((brlapi_keyCode_t) code, &ekc);
+  GET_CLASS(env, class, this, );
 
-  GET_CLASS(env, jckey, this, );
-  GET_FIELD(env, typeID,     jckey, "typeValue",     JAVA_SIG_INT, );
-  GET_FIELD(env, commandID,  jckey, "commandValue",  JAVA_SIG_INT, );
-  GET_FIELD(env, argumentID, jckey, "argumentValue", JAVA_SIG_INT, );
-  GET_FIELD(env, flagsID,    jckey, "flagsValue",    JAVA_SIG_INT, );
+  GET_FIELD(env, typeID, class, "typeValue", JAVA_SIG_INT, );
+  SET_VALUE(env, Int, this, typeID, ekc.type);
 
-  brlapi_expandKeyCode(key, &ekc);
-  SET_VALUE(env, Int, this, typeID,     ekc.type);
-  SET_VALUE(env, Int, this, commandID,  ekc.command);
+  GET_FIELD(env, commandID, class, "commandValue", JAVA_SIG_INT, );
+  SET_VALUE(env, Int, this, commandID, ekc.command);
+
+  GET_FIELD(env, argumentID, class, "argumentValue", JAVA_SIG_INT, );
   SET_VALUE(env, Int, this, argumentID, ekc.argument);
-  SET_VALUE(env, Int, this, flagsID,    ekc.flags);
+
+  GET_FIELD(env, flagsID, class, "flagsValue", JAVA_SIG_INT, );
+  SET_VALUE(env, Int, this, flagsID, ekc.flags);
 }
