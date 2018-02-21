@@ -128,7 +128,7 @@ exceptionHandler (brlapi_handle_t *handle, int error, brlapi_packetType_t type, 
   }
   (*env)->SetByteArrayRegion(env, jPacket, 0, size, (jbyte *) packet);
 
-  jclass class = (*env)->FindClass(env, BRLAPI_OBJECT("Exception"));
+  jclass class = (*env)->FindClass(env, BRLAPI_OBJECT("ConnectionException"));
   if (!class) {
     throwException(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, "exceptionHandlerFindClass");
     return;
@@ -136,7 +136,7 @@ exceptionHandler (brlapi_handle_t *handle, int error, brlapi_packetType_t type, 
 
   jmethodID constructor = (*env)->GetMethodID(env, class,
     JAVA_CONSTRUCTOR_NAME,
-    JAVA_SIG_METHOD(JAVA_SIG_VOID,
+    JAVA_SIG_CONSTRUCTOR(
       JAVA_SIG_LONG // handle
       JAVA_SIG_INT // error
       JAVA_SIG_INT // type
@@ -859,7 +859,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_Error, toString, jstring
+  org_a11y_brlapi_ConnectionError, toString, jstring
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
@@ -905,7 +905,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_Exception, toString, jstring
+  org_a11y_brlapi_ConnectionException, toString, jstring
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
@@ -948,7 +948,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_brlapi_Exception, getPacketTypeName, jstring,
+  org_a11y_brlapi_ConnectionException, getPacketTypeName, jstring,
   jint type
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);

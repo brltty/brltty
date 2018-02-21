@@ -30,7 +30,6 @@ extern "C" {
 #define JAVA_OBJECT_NULL_POINTER_EXCEPTION JAVA_OBJECT("NullPointerException")
 #define JAVA_OBJECT_OUT_OF_MEMORY_ERROR JAVA_OBJECT("OutOfMemoryError")
 #define JAVA_OBJECT_STRING JAVA_OBJECT("String")
-#define JAVA_OBJECT_UNKNOWN_ERROR JAVA_OBJECT("UnknownError")
 
 #define JAVA_SIG_BYTE                      "B"
 #define JAVA_SIG_CHAR                      "C"

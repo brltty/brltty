@@ -19,7 +19,7 @@
 
 package org.a11y.brlapi;
 
-public class Exception extends RuntimeException {
+public class ConnectionException extends RuntimeException {
   public native String toString ();
 
   private final long handle;
@@ -27,7 +27,7 @@ public class Exception extends RuntimeException {
   private final int packetType;
   private final byte[] failedPacket;
 
-  public Exception (long handle, int error, int type, byte[] packet) {
+  public ConnectionException (long handle, int error, int type, byte[] packet) {
     this.handle = handle;
     errorNumber = error;
     packetType = type;
