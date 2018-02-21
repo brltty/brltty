@@ -862,13 +862,13 @@ JAVA_INSTANCE_METHOD(
     error.errfun = NULL;
   } else {
     const char *cFunction = (*env)->GetStringUTFChars(env, jFunction, NULL);
-
     if (!cFunction) return NULL;
     error.errfun = cFunction;
   }
 
   const char *cMessage = brlapi_strerror(&error);
-  if (error.errfun) (*env)->ReleaseStringUTFChars(env, jFunction, error.errfun);
+  if (jFunction) (*env)->ReleaseStringUTFChars(env, jFunction, error.errfun);
+  if (!cMessage) return NULL;
 
   size_t length = strlen(cMessage);
   char buffer[length + 1];
