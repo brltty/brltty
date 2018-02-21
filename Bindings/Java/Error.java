@@ -20,17 +20,34 @@
 package org.a11y.BrlAPI;
 
 public class Error extends java.lang.Error {
-  static final long serialVersionUID = 0;
-  int brlerrno;
-  int libcerrno;
-  int gaierrno;
-  String errfun;
-  public final native String toString ();
-  public Error (int brlerrno, int libcerrno, int gaierrno, String errfun) {
-    this.brlerrno = brlerrno;
-    this.libcerrno = libcerrno;
-    this.gaierrno = gaierrno;
-    this.errfun = errfun;
+  public native String toString ();
+
+  private final int apiError;
+  private final int osError;
+  private final int gaiError;
+  private final String functionName;
+
+  public Error (int api, int os, int gai, String function) {
+    apiError = api;
+    osError = os;
+    gaiError = gai;
+    functionName = function;
+  }
+
+  public final int getApiError () {
+    return apiError;
+  }
+
+  public final int getOsError () {
+    return osError;
+  }
+
+  public final int getGaiError () {
+    return gaiError;
+  }
+
+  public final String getFunctionName () {
+    return functionName;
   }
 
   public final static int SUCCESS             =  0; /* Success */

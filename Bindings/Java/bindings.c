@@ -118,34 +118,48 @@ throwError(JNIEnv *env, const char *msg) {
   } while (0)
 
 static void BRLAPI_STDCALL
-exceptionHandler (brlapi_handle_t *handle, int err, brlapi_packetType_t type, const void *buf, size_t size) {
+exceptionHandler (brlapi_handle_t *handle, int error, brlapi_packetType_t type, const void *packet, size_t size) {
   GET_GLOBAL_JAVA_ENVIRONMENT(env);
-  jarray jbuf;
-  jclass jcexcep;
-  jmethodID jinit;
-  jthrowable jexcep;
 
-  if (!(jbuf = (*env)->NewByteArray(env, size))) {
+  jbyteArray jPacket = (*env)->NewByteArray(env, size);
+  if (!jPacket) {
     throwException(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
     return;
   }
-  (*env)->SetByteArrayRegion(env, jbuf, 0, size, (jbyte *) buf);
+  (*env)->SetByteArrayRegion(env, jPacket, 0, size, (jbyte *) packet);
 
-  if (!(jcexcep = (*env)->FindClass(env, BRLAPI_OBJECT("Exception")))) {
+  jclass class = (*env)->FindClass(env, BRLAPI_OBJECT("Exception"));
+  if (!class) {
     throwException(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, "exceptionHandlerFindClass");
     return;
   }
-  if (!(jinit = (*env)->GetMethodID(env, jcexcep, JAVA_CONSTRUCTOR_NAME, "(JII[B)V"))) {
+
+  jmethodID constructor = (*env)->GetMethodID(env, class,
+    JAVA_CONSTRUCTOR_NAME,
+    JAVA_SIG_METHOD(JAVA_SIG_VOID,
+      JAVA_SIG_LONG // handle
+      JAVA_SIG_INT // error
+      JAVA_SIG_INT // type
+      JAVA_SIG_ARRAY(JAVA_SIG_BYTE) // packet
+    )
+  );
+
+  if (!constructor) {
     throwException(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, "exceptionHandlerGetMethodID");
     return;
   }
-  if (!(jexcep = (*env)->NewObject(env, jcexcep, jinit, (jlong)(intptr_t) handle, err, type, jbuf))) {
+
+  jclass object = (*env)->NewObject(env, class, constructor,
+    (jlong) (intptr_t) handle, error, type, jPacket
+  );
+
+  if (!object) {
     throwException(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, "exceptionHandlerNewObject");
     return;
   }
+
   (*env)->ExceptionClear(env);
-  (*env)->Throw(env, jexcep);
-  return;
+  (*env)->Throw(env, object);
 }
 
 static int gotVersionNumbers = 0;
@@ -863,65 +877,90 @@ JAVA_STATIC_METHOD(
 JAVA_INSTANCE_METHOD(
   org_a11y_BrlAPI_Error, toString, jstring
 ) {
-  jstring jerrfun;
-  brlapi_error_t error;
-  const char *res;
-
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
-  GET_CLASS(env, jcerr, this, NULL);
-  GET_FIELD(env, brlerrnoID,  jcerr, "brlerrno",  JAVA_SIG_INT,    NULL);
-  GET_FIELD(env, libcerrnoID, jcerr, "libcerrno", JAVA_SIG_INT,    NULL);
-  GET_FIELD(env, gaierrnoID,  jcerr, "gaierrno",  JAVA_SIG_INT,    NULL);
-  GET_FIELD(env, errfunID,    jcerr, "errfun",    JAVA_SIG_STRING, NULL);
+  GET_CLASS(env, class, this, NULL);
+  brlapi_error_t error;
+  memset(&error, 0, sizeof(error));
 
-  error.brlerrno  = GET_VALUE(env, Int, this, brlerrnoID);
-  error.libcerrno = GET_VALUE(env, Int, this, libcerrnoID);
-  error.gaierrno  = GET_VALUE(env, Int, this, gaierrnoID);
-  if (!(jerrfun = GET_VALUE(env, Object, this, errfunID))) {
+  GET_FIELD(env, apiErrorID, class, "apiError", JAVA_SIG_INT, NULL);
+  error.brlerrno = GET_VALUE(env, Int, this, apiErrorID);
+
+  GET_FIELD(env, osErrorID, class, "osError", JAVA_SIG_INT, NULL);
+  error.libcerrno = GET_VALUE(env, Int, this, osErrorID);
+
+  GET_FIELD(env, gaiErrorID, class, "gaiError", JAVA_SIG_INT, NULL);
+  error.gaierrno = GET_VALUE(env, Int, this, gaiErrorID);
+
+  GET_FIELD(env, functionID, class, "functionName", JAVA_SIG_STRING, NULL);
+  jstring jFunction = GET_VALUE(env, Object, this, functionID);
+
+  if (!jFunction) {
     error.errfun = NULL;
-  } else if (!(error.errfun = (char *)(*env)->GetStringUTFChars(env, jerrfun, NULL))) {
+  } else {
+    const char *cFunction = (*env)->GetStringUTFChars(env, jFunction, NULL);
+
+    if (!cFunction) {
+      throwException(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
+      return NULL;
+    }
+
+    error.errfun = cFunction;
+  }
+
+  const char *message = brlapi_strerror(&error);
+  if (error.errfun) (*env)->ReleaseStringUTFChars(env, jFunction, error.errfun);
+  jstring string = (*env)->NewStringUTF(env, message);
+
+  if (!string) {
     throwException(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
     return NULL;
   }
-  res = brlapi_strerror(&error);
-  if (jerrfun)
-    (*env)->ReleaseStringUTFChars(env, jerrfun, error.errfun);
-  return (*env)->NewStringUTF(env, res);
+
+  return string;
 }
 
 JAVA_INSTANCE_METHOD(
   org_a11y_BrlAPI_Exception, toString, jstring
 ) {
-  jarray jbuf;
-  long type;
-  jbyte *buf;
-  int size;
-  char errmsg[256];
-
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
-  if (!this) {
-    throwException(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
-    return NULL;
-  }
-  GET_CLASS(env, jcerr, this, NULL);
-  GET_FIELD(env, errnoID,  jcerr, "errno",  JAVA_SIG_INT, NULL);
-  GET_FIELD(env, typeID,   jcerr, "type",   JAVA_SIG_INT, NULL);
-  GET_FIELD(env, bufID,    jcerr, "buf",    JAVA_SIG_INT, NULL);
-
   GET_HANDLE(env, this, NULL);
-  type  = GET_VALUE(env, Int, this, typeID);
-  if (!(jbuf  = GET_VALUE(env, Object, this, typeID))) {
+  GET_CLASS(env, class, this, NULL);
+
+  GET_FIELD(env, errorID, class, "errorNumber", JAVA_SIG_INT, NULL);
+  jint error = GET_VALUE(env, Int, this, errorID);
+
+  GET_FIELD(env, typeID, class, "packetType", JAVA_SIG_INT, NULL);
+  jint type = GET_VALUE(env, Int, this, typeID);
+
+  GET_FIELD(env, packetID, class, "failedPacket", JAVA_SIG_ARRAY(JAVA_SIG_BYTE), NULL);
+  jbyteArray jPacket = GET_VALUE(env, Object, this, packetID);
+
+  if (!jPacket) {
     throwException(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
     return NULL;
   }
-  size  = (*env)->GetArrayLength(env, jbuf);
-  buf = (*env)->GetByteArrayElements(env, jbuf, NULL);
 
-  brlapi__strexception(handle, errmsg, sizeof(errmsg), errno, type, buf, size); 
+  jint size = (*env)->GetArrayLength(env, jPacket);
+  jbyte *cPacket = (*env)->GetByteArrayElements(env, jPacket, NULL);
 
-  return (*env)->NewStringUTF(env, errmsg);
+  if (!cPacket) {
+    throwException(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
+    return NULL;
+  }
+
+  char buffer[0X100];
+  brlapi__strexception(handle, buffer, sizeof(buffer), error, type, cPacket, size); 
+  jstring message = (*env)->NewStringUTF(env, buffer);
+  (*env)->ReleaseByteArrayElements(env, jPacket, cPacket, JNI_ABORT);
+
+  if (!message) {
+    throwException(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
+    return NULL;
+  }
+
+  return message;
 }
 
 JAVA_INSTANCE_METHOD(

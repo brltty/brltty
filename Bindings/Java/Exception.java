@@ -20,16 +20,29 @@
 package org.a11y.BrlAPI;
 
 public class Exception extends java.lang.Exception {
-  static final long serialVersionUID = 0;
-  long handle;
-  int errno;
-  long packettype;
-  byte buf[];
-  public final native String toString ();
-  public Exception (long handle, int errno, int packettype, byte buf[]) {
+  public native String toString ();
+
+  private final long handle;
+  private final int errorNumber;
+  private final int packetType;
+  private final byte[] failedPacket;
+
+  public Exception (long handle, int error, int type, byte[] packet) {
     this.handle = handle;
-    this.errno = errno;
-    this.packettype = packettype;
-    this.buf = buf;
+    errorNumber = error;
+    packetType = type;
+    failedPacket = packet;
+  }
+
+  public final int getErrorNumber () {
+    return errorNumber;
+  }
+
+  public final int getPacketType () {
+    return packetType;
+  }
+
+  public final byte[] getFailedPacket () {
+    return failedPacket;
   }
 }
