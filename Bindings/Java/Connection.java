@@ -19,29 +19,14 @@
 
 package org.a11y.BrlAPI;
 
-public class Connection extends Native {
-  protected final ConnectionSettings settings;
-  protected final int fileDescriptor;
-
+public class Connection extends BasicConnection {
   public Connection (ConnectionSettings settings) throws Error {
-    this.settings = new ConnectionSettings();
-    fileDescriptor = openConnection(settings, this.settings);
+    super(settings);
   }
 
-  protected void finalize () {
-    closeConnection();
-  }
-
-  public String getServerHost () {
-    return settings.serverHost;
-  }
-
-  public String getAuthorizationSchemes () {
-    return settings.authorizationSchemes;
-  }
-
-  public int getFileDescriptor () {
-    return fileDescriptor;
+  public int getCellCount () {
+    DisplaySize size = getDisplaySize();
+    return size.getWidth() * size.getHeight();
   }
 
   public int enterTtyMode (int tty) throws Error {
@@ -61,8 +46,7 @@ public class Connection extends Native {
   }
 
   public void writeDots (byte[] dots) throws Error {
-    DisplaySize size = getDisplaySize();
-    int count = size.getWidth() * size.getHeight();
+    int count = getCellCount();
 
     if (dots.length != count) {
       byte[] d = new byte[count];
@@ -74,25 +58,12 @@ public class Connection extends Native {
     super.writeDots(dots);
   }
 
-  public void writeText (int cursor) throws Error {
-    writeText(cursor, null);
-  }
-
-  public void writeText (String text) throws Error {
-    writeText(Constants.CURSOR_OFF, text);
-  }
-
-  public void writeText (String text, int cursor) throws Error {
-    writeText(cursor, text);
-  }
-
   public void writeText (int cursor, String text) throws Error {
     if (text != null) {
-      DisplaySize size = getDisplaySize();
-      int count = size.getWidth() * size.getHeight();
+      int count = getCellCount();
 
       {
-        StringBuffer sb = new StringBuffer(text);
+        StringBuilder sb = new StringBuilder(text);
         while (sb.length() < count) sb.append(' ');
         text = sb.toString();
       }
@@ -101,5 +72,17 @@ public class Connection extends Native {
     }
 
     super.writeText(cursor, text);
+  }
+
+  public void writeText (String text, int cursor) throws Error {
+    writeText(cursor, text);
+  }
+
+  public void writeText (int cursor) throws Error {
+    writeText(cursor, null);
+  }
+
+  public void writeText (String text) throws Error {
+    writeText(Constants.CURSOR_OFF, text);
   }
 }

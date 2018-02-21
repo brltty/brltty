@@ -69,7 +69,7 @@ public class Test implements Constants {
             syntaxError("missing host specification");
           }
 
-          settings.serverHost = arguments[argumentIndex++];
+          settings.setServerHost(arguments[argumentIndex++]);
           continue;
         }
 

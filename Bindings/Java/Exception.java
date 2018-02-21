@@ -45,4 +45,6 @@ public class Exception extends java.lang.Exception {
   public final byte[] getFailedPacket () {
     return failedPacket;
   }
+
+  public static native String getPacketTypeName (int type);
 }

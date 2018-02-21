@@ -20,19 +20,27 @@
 package org.a11y.BrlAPI;
 
 public class ConnectionSettings {
-  public String serverHost;
-  public String authorizationSchemes;
-
-  public ConnectionSettings (String host, String authorization) {
-    serverHost = host;
-    authorizationSchemes = authorization;
-  }
-
-  public ConnectionSettings (String host) {
-    this(host, null);
-  }
+  private String serverHost;
+  private String authorizationSchemes;
 
   public ConnectionSettings () {
-    this(null);
+  }
+
+  public String getServerHost () {
+    return serverHost;
+  }
+
+  public ConnectionSettings setServerHost (String host) {
+    serverHost = host;
+    return this;
+  }
+
+  public String getAuthorizationSchemes () {
+    return authorizationSchemes;
+  }
+
+  public ConnectionSettings setAuthorizationSchemes (String authorization) {
+    authorizationSchemes = authorization;
+    return this;
   }
 }

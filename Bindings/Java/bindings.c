@@ -195,7 +195,7 @@ JAVA_STATIC_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, openConnection, jint,
+  org_a11y_BrlAPI_BasicConnection, openConnection, jint,
   jobject JclientSettings , jobject JusedSettings
 ) {
   brlapi_connectionSettings_t clientSettings,  usedSettings,
@@ -282,7 +282,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, closeConnection, void
+  org_a11y_BrlAPI_BasicConnection, closeConnection, void
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
   GET_HANDLE(env, this, );
@@ -292,7 +292,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, getDriverName, jstring
+  org_a11y_BrlAPI_BasicConnection, getDriverName, jstring
 ) {
   char name[32];
   GET_HANDLE(env, this, NULL);
@@ -309,7 +309,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, getModelIdentifier, jstring
+  org_a11y_BrlAPI_BasicConnection, getModelIdentifier, jstring
 ) {
   char identifier[32];
   GET_HANDLE(env, this, NULL);
@@ -326,7 +326,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, getDisplaySize, jobject
+  org_a11y_BrlAPI_BasicConnection, getDisplaySize, jobject
 ) {
   unsigned int x, y;
   jclass jcsize;
@@ -358,7 +358,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, enterTtyMode, jint,
+  org_a11y_BrlAPI_BasicConnection, enterTtyMode, jint,
   jint jtty, jstring jdriver
 ) {
   int tty ;
@@ -387,7 +387,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, enterTtyModeWithPath, void,
+  org_a11y_BrlAPI_BasicConnection, enterTtyModeWithPath, void,
   jintArray jttys, jstring jdriver
 ) {
   jint *ttys ;
@@ -422,7 +422,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, leaveTtyMode, void
+  org_a11y_BrlAPI_BasicConnection, leaveTtyMode, void
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
   GET_HANDLE(env, this, );
@@ -434,7 +434,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, setFocus, void,
+  org_a11y_BrlAPI_BasicConnection, setFocus, void,
   jint jarg1
 ) {
   int arg1 ;
@@ -450,7 +450,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, writeText, void,
+  org_a11y_BrlAPI_BasicConnection, writeText, void,
   jint jarg1, jstring jarg2
 ) {
   brlapi_writeArguments_t s = BRLAPI_WRITEARGUMENTS_INITIALIZER;
@@ -483,7 +483,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, writeDots, void,
+  org_a11y_BrlAPI_BasicConnection, writeDots, void,
   jbyteArray jarg1
 ) {
   jbyte *arg1;
@@ -512,7 +512,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, write, void,
+  org_a11y_BrlAPI_BasicConnection, write, void,
   jobject jarguments
 ) {
   brlapi_writeArguments_t arguments = BRLAPI_WRITEARGUMENTS_INITIALIZER;
@@ -577,7 +577,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, readKey, jlong,
+  org_a11y_BrlAPI_BasicConnection, readKey, jlong,
   jboolean jblock
 ) {
   brlapi_keyCode_t code;
@@ -598,7 +598,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, readKeyWithTimeout, jlong,
+  org_a11y_BrlAPI_BasicConnection, readKeyWithTimeout, jlong,
   jint timeout_ms
 ) {
   brlapi_keyCode_t code;
@@ -619,7 +619,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, ignoreKeys, void,
+  org_a11y_BrlAPI_BasicConnection, ignoreKeys, void,
   jlong jrange, jlongArray js
 ) {
   jlong *s;
@@ -648,7 +648,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, acceptKeys, void,
+  org_a11y_BrlAPI_BasicConnection, acceptKeys, void,
   jlong jrange, jlongArray js
 ) {
   jlong *s;
@@ -677,7 +677,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, ignoreAllKeys, void
+  org_a11y_BrlAPI_BasicConnection, ignoreAllKeys, void
 ) {
   GET_HANDLE(env, this, );
 
@@ -686,7 +686,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, acceptAllKeys, void
+  org_a11y_BrlAPI_BasicConnection, acceptAllKeys, void
 ) {
   GET_HANDLE(env, this, );
 
@@ -695,7 +695,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, ignoreKeyRanges, void,
+  org_a11y_BrlAPI_BasicConnection, ignoreKeyRanges, void,
   jobjectArray js
 ) {
   unsigned int n;
@@ -729,7 +729,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, acceptKeyRanges, void,
+  org_a11y_BrlAPI_BasicConnection, acceptKeyRanges, void,
   jobjectArray js
 ) {
   unsigned int n;
@@ -763,7 +763,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, enterRawMode, void,
+  org_a11y_BrlAPI_BasicConnection, enterRawMode, void,
   jstring jdriver
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
@@ -786,7 +786,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, leaveRawMode, void
+  org_a11y_BrlAPI_BasicConnection, leaveRawMode, void
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
   GET_HANDLE(env, this, );
@@ -798,7 +798,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, sendRaw, jint,
+  org_a11y_BrlAPI_BasicConnection, sendRaw, jint,
   jbyteArray jbuf
 ) {
   jbyte *buf;
@@ -828,7 +828,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_BrlAPI_Native, recvRaw, jint,
+  org_a11y_BrlAPI_BasicConnection, recvRaw, jint,
   jbyteArray jbuf
 ) {
   jbyte *buf;
@@ -856,22 +856,6 @@ JAVA_INSTANCE_METHOD(
 
   (*env)->ReleaseByteArrayElements(env, jbuf, buf, 0);
   return (jint) result;
-}
-
-JAVA_STATIC_METHOD(
-  org_a11y_BrlAPI_Native, getPacketTypeName, jstring,
-  jlong jtype
-) {
-  const char *type;
-
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
-
-  if (!(type = brlapi_getPacketTypeName((brlapi_packetType_t) jtype))) {
-    throwError(env, __func__);
-    return NULL;
-  }
-
-  return (*env)->NewStringUTF(env, type);
 }
 
 JAVA_INSTANCE_METHOD(
@@ -961,6 +945,24 @@ JAVA_INSTANCE_METHOD(
   }
 
   return message;
+}
+
+JAVA_STATIC_METHOD(
+  org_a11y_BrlAPI_Exception, getPacketTypeName, jstring,
+  jint type
+) {
+  SET_GLOBAL_JAVA_ENVIRONMENT(env);
+
+  const char *cName = brlapi_getPacketTypeName((brlapi_packetType_t) type);
+  if (!cName) return NULL;
+  jstring jName = (*env)->NewStringUTF(env, cName);
+
+  if (!jName) {
+    throwException(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
+    return NULL;
+  }
+
+  return jName;
 }
 
 JAVA_INSTANCE_METHOD(
