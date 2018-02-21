@@ -47,7 +47,7 @@ JAVA_SOURCES = \
 	$(SRC_DIR)/Exception.java \
 	$(SRC_DIR)/Key.java \
 	$(SRC_DIR)/NativeLibrary.java \
-	$(SRC_DIR)/Test.java \
+	$(SRC_DIR)/TestProgram.java \
 	$(SRC_DIR)/WriteArguments.java \
 	Constants.java
 

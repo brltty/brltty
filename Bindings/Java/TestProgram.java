@@ -21,7 +21,7 @@ package org.a11y.brlapi;
 
 import java.io.PrintStream;
 
-public class Test implements Constants {
+public class TestProgram implements Constants {
   private static void writeProperty (String name, String format, Object... values) {
     PrintStream stream = System.out;
 
