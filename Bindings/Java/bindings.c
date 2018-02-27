@@ -71,7 +71,10 @@ throwConnectionError (JNIEnv *env) {
     return;
   }
 
-  jobject object = (*env)->NewObject(env, class, constructor, brlapi_errno, brlapi_libcerrno, brlapi_gaierrno, jFunction);
+  jobject object = (*env)->NewObject(
+    env, class, constructor,
+    brlapi_errno, brlapi_libcerrno, brlapi_gaierrno, jFunction
+  );
 
   if (object) {
     (*env)->ExceptionClear(env);
@@ -81,40 +84,36 @@ throwConnectionError (JNIEnv *env) {
   }
 }
 
-#define GET_CLASS(env, class, obj, ret) \
+#define GET_CLASS(env, class, object, ret) \
   jclass class; \
   do { \
-    if (!((class) = (*(env))->GetObjectClass((env), (obj)))) { \
-      throwJavaError((env), JAVA_OBJECT_NULL_POINTER_EXCEPTION, #obj " -> " #class); \
-      return ret; \
-    } \
+    if (!((class) = (*(env))->GetObjectClass((env), (object)))) return ret; \
   } while (0)
 
 #define FIND_FIELD(env, field, class, name, signature, ret) \
   jfieldID field; \
   do { \
-    if (!(field = (*(env))->GetFieldID((env), (class), (name), (signature)))) {\
-      throwJavaError((env), JAVA_OBJECT_NULL_POINTER_EXCEPTION, #class "." name); \
-      return ret; \
-    } \
+    if (!(field = (*(env))->GetFieldID((env), (class), (name), (signature)))) return ret; \
   } while (0)
+
+#define FIND_CONNECTION_HANDLE(env, object, ret) \
+  GET_CLASS((env), class, (object), ret); \
+  FIND_FIELD((env), field, class, "connectionHandle", JAVA_SIG_LONG, ret);
 
 #define GET_CONNECTION_HANDLE(env, object, ret) \
   brlapi_handle_t *handle; \
   do { \
-    GET_CLASS((env), class, (object), ret); \
-    FIND_FIELD((env), field, class, "connectionHandle", JAVA_SIG_LONG, ret); \
+    FIND_CONNECTION_HANDLE((env), (object), ret); \
     handle = (void*) (intptr_t) GET_JAVA_FIELD((env), Long, (object), field); \
     if (!handle) { \
-      throwJavaError((env), JAVA_OBJECT_NULL_POINTER_EXCEPTION, "connection has been closed"); \
+      throwJavaError((env), JAVA_OBJECT_ILLEGAL_STATE_EXCEPTION, "connection has been closed"); \
       return ret; \
     } \
   } while (0)
 
 #define SET_CONNECTION_HANDLE(env, object, value, ret) \
   do { \
-    GET_CLASS((env), class, (object), ret); \
-    FIND_FIELD((env), field, class, "connectionHandle", JAVA_SIG_LONG, ret); \
+    FIND_CONNECTION_HANDLE((env), (object), ret); \
     SET_JAVA_FIELD((env), Long, (object), field, (jlong) (intptr_t) (value)); \
   } while (0)
 
@@ -140,7 +139,8 @@ exceptionHandler (brlapi_handle_t *handle, int error, brlapi_packetType_t type, 
   );
   if (!constructor) return;
 
-  jclass object = (*env)->NewObject(env, class, constructor,
+  jclass object = (*env)->NewObject(
+    env, class, constructor,
     (jlong) (intptr_t) handle, error, type, jPacket
   );
   if (!object) return;
@@ -187,63 +187,67 @@ JAVA_INSTANCE_METHOD(
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
-  brlapi_connectionSettings_t cRequestedSettings, *pRequestedSettings;
-  memset(&cRequestedSettings, 0, sizeof(cRequestedSettings));
-  jstring jRequestedAuth, jRequestedHost;
-
-  if (jRequestedSettings) {
-    GET_CLASS(env, class, jRequestedSettings, -1);
-
-    {
-      FIND_FIELD(env, field, class, "authorizationSchemes", JAVA_SIG_STRING, -1);
-
-      if (!(jRequestedAuth = GET_JAVA_FIELD(env, Object, jRequestedSettings, field))) {
-        cRequestedSettings.auth = NULL;
-      } else if (!(cRequestedSettings.auth = (char *) (*env)->GetStringUTFChars(env, jRequestedAuth, NULL))) {
-        return -1;
-      }
-    }
-
-    {
-      FIND_FIELD(env, field, class, "serverHost", JAVA_SIG_STRING, -1);
-
-      if (!(jRequestedHost = GET_JAVA_FIELD(env, Object, jRequestedSettings, field))) {
-        cRequestedSettings.host = NULL;
-      } else if (!(cRequestedSettings.host = (char *) (*env)->GetStringUTFChars(env, jRequestedHost, NULL))) {
-        return -1;
-      }
-    }
-
-    pRequestedSettings = &cRequestedSettings;
-  } else {
-    pRequestedSettings = NULL;
-    jRequestedAuth = NULL;
-    jRequestedHost = NULL;
-  }
+  brlapi_handle_t *handle;
+  int fileDescriptor;
 
   brlapi_connectionSettings_t cActualSettings, *pActualSettings;
   pActualSettings = jActualSettings? &cActualSettings: NULL;
 
-  brlapi_handle_t *handle;
-  int result;
+  {
+    brlapi_connectionSettings_t cRequestedSettings, *pRequestedSettings;
+    memset(&cRequestedSettings, 0, sizeof(cRequestedSettings));
 
-  if (!(handle = malloc(brlapi_getHandleSize()))) {
-    throwJavaError(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
-    return -1;
-  }
+    jstring jRequestedAuth;
+    jstring jRequestedHost;
 
-  if ((result = brlapi__openConnection(handle, pRequestedSettings, pActualSettings)) < 0) {
-    throwConnectionError(env);
-    return -1;
-  }
+    if (jRequestedSettings) {
+      GET_CLASS(env, class, jRequestedSettings, -1);
 
-  if (pRequestedSettings) {
-    if (cRequestedSettings.auth) {
-      (*env)->ReleaseStringUTFChars(env, jRequestedAuth,  cRequestedSettings.auth); 
+      {
+        FIND_FIELD(env, field, class, "authorizationSchemes", JAVA_SIG_STRING, -1);
+
+        if (!(jRequestedAuth = GET_JAVA_FIELD(env, Object, jRequestedSettings, field))) {
+          cRequestedSettings.auth = NULL;
+        } else if (!(cRequestedSettings.auth = (char *) (*env)->GetStringUTFChars(env, jRequestedAuth, NULL))) {
+          return -1;
+        }
+      }
+
+      {
+        FIND_FIELD(env, field, class, "serverHost", JAVA_SIG_STRING, -1);
+
+        if (!(jRequestedHost = GET_JAVA_FIELD(env, Object, jRequestedSettings, field))) {
+          cRequestedSettings.host = NULL;
+        } else if (!(cRequestedSettings.host = (char *) (*env)->GetStringUTFChars(env, jRequestedHost, NULL))) {
+          return -1;
+        }
+      }
+
+      pRequestedSettings = &cRequestedSettings;
+    } else {
+      pRequestedSettings = NULL;
+      jRequestedAuth = NULL;
+      jRequestedHost = NULL;
     }
 
-    if (cRequestedSettings.host) {
-      (*env)->ReleaseStringUTFChars(env, jRequestedHost, cRequestedSettings.host); 
+    if (!(handle = malloc(brlapi_getHandleSize()))) {
+      throwJavaError(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
+      return -1;
+    }
+
+    if ((fileDescriptor = brlapi__openConnection(handle, pRequestedSettings, pActualSettings)) < 0) {
+      throwConnectionError(env);
+      return -1;
+    }
+
+    if (pRequestedSettings) {
+      if (cRequestedSettings.auth) {
+        (*env)->ReleaseStringUTFChars(env, jRequestedAuth,  cRequestedSettings.auth); 
+      }
+
+      if (cRequestedSettings.host) {
+        (*env)->ReleaseStringUTFChars(env, jRequestedHost, cRequestedSettings.host); 
+      }
     }
   }
 
@@ -267,11 +271,9 @@ JAVA_INSTANCE_METHOD(
     }
   }
 
-  {
-    brlapi__setExceptionHandler(handle, exceptionHandler);
-    SET_CONNECTION_HANDLE(env, this, handle, -1);
-    return (jint) result;
-  }
+  brlapi__setExceptionHandler(handle, exceptionHandler);
+  SET_CONNECTION_HANDLE(env, this, handle, -1);
+  return (jint) fileDescriptor;
 }
 
 JAVA_INSTANCE_METHOD(

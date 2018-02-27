@@ -27,6 +27,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #define JAVA_OBJECT(name) "java/lang/" name
+#define JAVA_OBJECT_ILLEGAL_STATE_EXCEPTION JAVA_OBJECT("IllegalStateException")
 #define JAVA_OBJECT_NULL_POINTER_EXCEPTION JAVA_OBJECT("NullPointerException")
 #define JAVA_OBJECT_OUT_OF_MEMORY_ERROR JAVA_OBJECT("OutOfMemoryError")
 #define JAVA_OBJECT_STRING JAVA_OBJECT("String")
