@@ -183,89 +183,95 @@ JAVA_STATIC_METHOD(
 
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, openConnection, jint,
-  jobject JclientSettings , jobject JusedSettings
+  jobject jRequestedSettings, jobject jActualSettings
 ) {
-  brlapi_connectionSettings_t clientSettings,  usedSettings,
-            *PclientSettings, *PusedSettings;
-  int result;
-  jstring auth = NULL, host = NULL;
-  const char *str;
-  brlapi_handle_t *handle;
+  SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
-  handle = malloc(brlapi_getHandleSize());
-  if (!handle) {
+  brlapi_connectionSettings_t cRequestedSettings, *pRequestedSettings;
+  memset(&cRequestedSettings, 0, sizeof(cRequestedSettings));
+  jstring jAuth, jHost;
+
+  if (jRequestedSettings) {
+    GET_CLASS(env, class, jRequestedSettings, -1);
+
+    {
+      FIND_FIELD(env, field, class, "authorizationSchemes", JAVA_SIG_STRING, -1);
+
+      if (!(jAuth = GET_JAVA_FIELD(env, Object, jRequestedSettings, field))) {
+        cRequestedSettings.auth = NULL;
+      } else if (!(cRequestedSettings.auth = (char *) (*env)->GetStringUTFChars(env, jAuth, NULL))) {
+        return -1;
+      }
+    }
+
+    {
+      FIND_FIELD(env, field, class, "serverHost", JAVA_SIG_STRING, -1);
+
+      if (!(jHost = GET_JAVA_FIELD(env, Object, jRequestedSettings, field))) {
+        cRequestedSettings.host = NULL;
+      } else if (!(cRequestedSettings.host = (char *) (*env)->GetStringUTFChars(env, jHost, NULL))) {
+        return -1;
+      }
+    }
+
+    pRequestedSettings = &cRequestedSettings;
+  } else {
+    pRequestedSettings = NULL;
+    jAuth = NULL;
+    jHost = NULL;
+  }
+
+  brlapi_connectionSettings_t cActualSettings, *pActualSettings;
+  pActualSettings = jActualSettings? &cActualSettings: NULL;
+
+  brlapi_handle_t *handle;
+  int result;
+
+  if (!(handle = malloc(brlapi_getHandleSize()))) {
     throwJavaError(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
     return -1;
   }
 
-  SET_CONNECTION_HANDLE(env, this, handle, -1);
-
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
-
-  if (JclientSettings) {
-    GET_CLASS(env, jcclientSettings, JclientSettings, -1);
-    FIND_FIELD(env, clientAuthID, jcclientSettings, "authorizationSchemes", "Ljava/lang/String;", -1);
-    FIND_FIELD(env, clientHostID, jcclientSettings, "serverHost", "Ljava/lang/String;", -1);
-
-    PclientSettings = &clientSettings;
-    if ((auth = GET_JAVA_FIELD(env, Object, JclientSettings, clientAuthID))) {
-      if (!(clientSettings.auth = (char *)(*env)->GetStringUTFChars(env, auth, NULL))) {
-	throwJavaError(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
-	return -1;
-      }
-    } else clientSettings.auth = NULL;
-    if ((host = GET_JAVA_FIELD(env, Object, JclientSettings, clientHostID))) {
-      if (!(clientSettings.host = (char *)(*env)->GetStringUTFChars(env, host, NULL))) {
-	throwJavaError(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
-	return -1;
-      }
-    } else clientSettings.host = NULL;
-  } else PclientSettings = NULL;
-
-  if (JusedSettings)
-    PusedSettings = &usedSettings;
-  else
-    PusedSettings = NULL;
-
-  if ((result = brlapi__openConnection(handle, PclientSettings, PusedSettings)) < 0) {
+  if ((result = brlapi__openConnection(handle, pRequestedSettings, pActualSettings)) < 0) {
     throwConnectionError(env);
     return -1;
   }
 
-  (void) brlapi__setExceptionHandler(handle, exceptionHandler);
+  if (pRequestedSettings) {
+    if (cRequestedSettings.auth) {
+      (*env)->ReleaseStringUTFChars(env, jAuth,  cRequestedSettings.auth); 
+    }
 
-  if (JclientSettings) {
-    if (clientSettings.auth)
-      (*env)->ReleaseStringUTFChars(env, auth,  clientSettings.auth); 
-    if (clientSettings.host)
-      (*env)->ReleaseStringUTFChars(env, host, clientSettings.host); 
+    if (cRequestedSettings.host) {
+      (*env)->ReleaseStringUTFChars(env, jHost, cRequestedSettings.host); 
+    }
   }
 
-  if (PusedSettings) {
-    GET_CLASS(env, jcusedSettings, JusedSettings, -1);
-    FIND_FIELD(env, usedAuthID, jcusedSettings, "authorizationSchemes", "Ljava/lang/String;", -1);
-    FIND_FIELD(env, usedHostID, jcusedSettings, "serverHost", "Ljava/lang/String;", -1);
+  if (pActualSettings) {
+    GET_CLASS(env, class, jActualSettings, -1);
 
-    auth = (*env)->NewStringUTF(env, usedSettings.auth);
-    if (!auth) {
-      throwJavaError(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
-      return -1;
-    }
-    str = (*env)->GetStringUTFChars(env, auth, NULL);
-    SET_JAVA_FIELD(env, Object, JusedSettings, usedAuthID, auth);
-    (*env)->ReleaseStringUTFChars(env, auth, str);
+    if (cActualSettings.auth) {
+      jstring auth = (*env)->NewStringUTF(env, cActualSettings.auth);
+      if (!auth) return -1;
 
-    host = (*env)->NewStringUTF(env, usedSettings.host);
-    if (!host) {
-      throwJavaError(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
-      return -1;
+      FIND_FIELD(env, field, class, "authorizationSchemes", JAVA_SIG_STRING, -1);
+      SET_JAVA_FIELD(env, Object, jActualSettings, field, auth);
     }
-    str = (*env)->GetStringUTFChars(env, host, NULL);
-    SET_JAVA_FIELD(env, Object, JusedSettings, usedHostID, host);
-    (*env)->ReleaseStringUTFChars(env, host, str);
+
+    if (cActualSettings.host) {
+      jstring host = (*env)->NewStringUTF(env, cActualSettings.host);
+      if (!host) return -1;
+
+      FIND_FIELD(env, field, class, "serverHost", JAVA_SIG_STRING, -1);
+      SET_JAVA_FIELD(env, Object, jActualSettings, field, host);
+    }
   }
 
-  return (jint) result;
+  {
+    brlapi__setExceptionHandler(handle, exceptionHandler);
+    SET_CONNECTION_HANDLE(env, this, handle, -1);
+    return (jint) result;
+  }
 }
 
 JAVA_INSTANCE_METHOD(
