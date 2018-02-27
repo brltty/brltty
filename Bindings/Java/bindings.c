@@ -189,7 +189,7 @@ JAVA_INSTANCE_METHOD(
 
   brlapi_connectionSettings_t cRequestedSettings, *pRequestedSettings;
   memset(&cRequestedSettings, 0, sizeof(cRequestedSettings));
-  jstring jAuth, jHost;
+  jstring jRequestedAuth, jRequestedHost;
 
   if (jRequestedSettings) {
     GET_CLASS(env, class, jRequestedSettings, -1);
@@ -197,9 +197,9 @@ JAVA_INSTANCE_METHOD(
     {
       FIND_FIELD(env, field, class, "authorizationSchemes", JAVA_SIG_STRING, -1);
 
-      if (!(jAuth = GET_JAVA_FIELD(env, Object, jRequestedSettings, field))) {
+      if (!(jRequestedAuth = GET_JAVA_FIELD(env, Object, jRequestedSettings, field))) {
         cRequestedSettings.auth = NULL;
-      } else if (!(cRequestedSettings.auth = (char *) (*env)->GetStringUTFChars(env, jAuth, NULL))) {
+      } else if (!(cRequestedSettings.auth = (char *) (*env)->GetStringUTFChars(env, jRequestedAuth, NULL))) {
         return -1;
       }
     }
@@ -207,9 +207,9 @@ JAVA_INSTANCE_METHOD(
     {
       FIND_FIELD(env, field, class, "serverHost", JAVA_SIG_STRING, -1);
 
-      if (!(jHost = GET_JAVA_FIELD(env, Object, jRequestedSettings, field))) {
+      if (!(jRequestedHost = GET_JAVA_FIELD(env, Object, jRequestedSettings, field))) {
         cRequestedSettings.host = NULL;
-      } else if (!(cRequestedSettings.host = (char *) (*env)->GetStringUTFChars(env, jHost, NULL))) {
+      } else if (!(cRequestedSettings.host = (char *) (*env)->GetStringUTFChars(env, jRequestedHost, NULL))) {
         return -1;
       }
     }
@@ -217,8 +217,8 @@ JAVA_INSTANCE_METHOD(
     pRequestedSettings = &cRequestedSettings;
   } else {
     pRequestedSettings = NULL;
-    jAuth = NULL;
-    jHost = NULL;
+    jRequestedAuth = NULL;
+    jRequestedHost = NULL;
   }
 
   brlapi_connectionSettings_t cActualSettings, *pActualSettings;
@@ -239,11 +239,11 @@ JAVA_INSTANCE_METHOD(
 
   if (pRequestedSettings) {
     if (cRequestedSettings.auth) {
-      (*env)->ReleaseStringUTFChars(env, jAuth,  cRequestedSettings.auth); 
+      (*env)->ReleaseStringUTFChars(env, jRequestedAuth,  cRequestedSettings.auth); 
     }
 
     if (cRequestedSettings.host) {
-      (*env)->ReleaseStringUTFChars(env, jHost, cRequestedSettings.host); 
+      (*env)->ReleaseStringUTFChars(env, jRequestedHost, cRequestedSettings.host); 
     }
   }
 
