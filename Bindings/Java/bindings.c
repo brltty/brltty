@@ -43,7 +43,7 @@ throwJavaError (JNIEnv *env, const char *object, const char *message) {
   if (class) {
     (*env)->ThrowNew(env, class, message);
   } else {
-    fprintf(stderr,"couldn't find exception object: %s: %s!\n", object, message);
+    fprintf(stderr,"couldn't find object: %s: %s!\n", object, message);
   }
 }
 
@@ -52,14 +52,11 @@ throwConnectionError (JNIEnv *env) {
   jclass class = (*env)->FindClass(env, BRLAPI_OBJECT("ConnectionError"));
   if (!class) return;
 
-  jmethodID constructor = (*env)->GetMethodID(env, class,
-    JAVA_CONSTRUCTOR_NAME,
-    JAVA_SIG_CONSTRUCTOR(
-      JAVA_SIG_INT // api error
-      JAVA_SIG_INT // os error
-      JAVA_SIG_INT // gai error
-      JAVA_SIG_STRING // function name
-    )
+  jmethodID constructor = JAVA_GET_CONSTRUCTOR(env, class,
+    JAVA_SIG_INT // api error
+    JAVA_SIG_INT // os error
+    JAVA_SIG_INT // gai error
+    JAVA_SIG_STRING // function name
   );
 
   if (!constructor) return;
@@ -104,7 +101,7 @@ throwConnectionError (JNIEnv *env) {
   brlapi_handle_t *handle; \
   do { \
     FIND_CONNECTION_HANDLE((env), (object), ret); \
-    handle = (void*) (intptr_t) GET_JAVA_FIELD((env), Long, (object), field); \
+    handle = (void*) (intptr_t) JAVA_GET_FIELD((env), Long, (object), field); \
     if (!handle) { \
       throwJavaError((env), JAVA_OBJECT_ILLEGAL_STATE_EXCEPTION, "connection has been closed"); \
       return ret; \
@@ -114,7 +111,7 @@ throwConnectionError (JNIEnv *env) {
 #define SET_CONNECTION_HANDLE(env, object, value, ret) \
   do { \
     FIND_CONNECTION_HANDLE((env), (object), ret); \
-    SET_JAVA_FIELD((env), Long, (object), field, (jlong) (intptr_t) (value)); \
+    JAVA_SET_FIELD((env), Long, (object), field, (jlong) (intptr_t) (value)); \
   } while (0)
 
 static void BRLAPI_STDCALL
@@ -128,14 +125,11 @@ exceptionHandler (brlapi_handle_t *handle, int error, brlapi_packetType_t type, 
   jclass class = (*env)->FindClass(env, BRLAPI_OBJECT("ConnectionException"));
   if (!class) return;
 
-  jmethodID constructor = (*env)->GetMethodID(env, class,
-    JAVA_CONSTRUCTOR_NAME,
-    JAVA_SIG_CONSTRUCTOR(
-      JAVA_SIG_LONG // handle
-      JAVA_SIG_INT // error
-      JAVA_SIG_INT // type
-      JAVA_SIG_ARRAY(JAVA_SIG_BYTE) // packet
-    )
+  jmethodID constructor = JAVA_GET_CONSTRUCTOR(env, class,
+    JAVA_SIG_LONG // handle
+    JAVA_SIG_INT // error
+    JAVA_SIG_INT // type
+    JAVA_SIG_ARRAY(JAVA_SIG_BYTE) // packet
   );
   if (!constructor) return;
 
@@ -206,7 +200,7 @@ JAVA_INSTANCE_METHOD(
       {
         FIND_FIELD(env, field, class, "authorizationSchemes", JAVA_SIG_STRING, -1);
 
-        if (!(jRequestedAuth = GET_JAVA_FIELD(env, Object, jRequestedSettings, field))) {
+        if (!(jRequestedAuth = JAVA_GET_FIELD(env, Object, jRequestedSettings, field))) {
           cRequestedSettings.auth = NULL;
         } else if (!(cRequestedSettings.auth = (char *) (*env)->GetStringUTFChars(env, jRequestedAuth, NULL))) {
           return -1;
@@ -216,7 +210,7 @@ JAVA_INSTANCE_METHOD(
       {
         FIND_FIELD(env, field, class, "serverHost", JAVA_SIG_STRING, -1);
 
-        if (!(jRequestedHost = GET_JAVA_FIELD(env, Object, jRequestedSettings, field))) {
+        if (!(jRequestedHost = JAVA_GET_FIELD(env, Object, jRequestedSettings, field))) {
           cRequestedSettings.host = NULL;
         } else if (!(cRequestedSettings.host = (char *) (*env)->GetStringUTFChars(env, jRequestedHost, NULL))) {
           return -1;
@@ -259,7 +253,7 @@ JAVA_INSTANCE_METHOD(
       if (!auth) return -1;
 
       FIND_FIELD(env, field, class, "authorizationSchemes", JAVA_SIG_STRING, -1);
-      SET_JAVA_FIELD(env, Object, jActualSettings, field, auth);
+      JAVA_SET_FIELD(env, Object, jActualSettings, field, auth);
     }
 
     if (cActualSettings.host) {
@@ -267,7 +261,7 @@ JAVA_INSTANCE_METHOD(
       if (!host) return -1;
 
       FIND_FIELD(env, field, class, "serverHost", JAVA_SIG_STRING, -1);
-      SET_JAVA_FIELD(env, Object, jActualSettings, field, host);
+      JAVA_SET_FIELD(env, Object, jActualSettings, field, host);
     }
   }
 
@@ -336,12 +330,9 @@ JAVA_INSTANCE_METHOD(
   jclass class = (*env)->FindClass(env, BRLAPI_OBJECT("DisplaySize"));
   if (!class) return NULL;
 
-  jmethodID constructor = (*env)->GetMethodID(env, class,
-    JAVA_CONSTRUCTOR_NAME,
-    JAVA_SIG_CONSTRUCTOR(
-      JAVA_SIG_INT // width
-      JAVA_SIG_INT // height
-    )
+  jmethodID constructor = JAVA_GET_CONSTRUCTOR(env, class,
+    JAVA_SIG_INT // width
+    JAVA_SIG_INT // height
   );
   if (!constructor) return NULL;
 
@@ -521,24 +512,24 @@ JAVA_INSTANCE_METHOD(
 
   {
     FIND_FIELD(env, field, class, "displayNumber", JAVA_SIG_INT, );
-    cArguments.displayNumber = GET_JAVA_FIELD(env, Int, jArguments, field);
+    cArguments.displayNumber = JAVA_GET_FIELD(env, Int, jArguments, field);
   }
 
   {
     FIND_FIELD(env, field, class, "regionBegin", JAVA_SIG_INT, );
-    cArguments.regionBegin = GET_JAVA_FIELD(env, Int, jArguments, field);
+    cArguments.regionBegin = JAVA_GET_FIELD(env, Int, jArguments, field);
   }
 
   {
     FIND_FIELD(env, field, class, "regionSize", JAVA_SIG_INT, );
-    cArguments.regionSize = GET_JAVA_FIELD(env, Int, jArguments, field);
+    cArguments.regionSize = JAVA_GET_FIELD(env, Int, jArguments, field);
   }
 
   jstring jText;
   {
     FIND_FIELD(env, field, class, "text", JAVA_SIG_STRING, );
 
-    if ((jText = GET_JAVA_FIELD(env, Object, jArguments, field))) {
+    if ((jText = JAVA_GET_FIELD(env, Object, jArguments, field))) {
       cArguments.text = (char *) (*env)->GetStringUTFChars(env, jText, NULL);
     } else {
       cArguments.text = NULL;
@@ -549,7 +540,7 @@ JAVA_INSTANCE_METHOD(
   {
     FIND_FIELD(env, field, class, "andMask", JAVA_SIG_ARRAY(JAVA_SIG_BYTE), );
 
-    if ((jAndMask = GET_JAVA_FIELD(env, Object, jArguments, field))) {
+    if ((jAndMask = JAVA_GET_FIELD(env, Object, jArguments, field))) {
       cArguments.andMask = (unsigned char *) (*env)->GetByteArrayElements(env, jAndMask, NULL);
     } else {
       cArguments.andMask = NULL;
@@ -560,7 +551,7 @@ JAVA_INSTANCE_METHOD(
   {
     FIND_FIELD(env, field, class, "orMask", JAVA_SIG_ARRAY(JAVA_SIG_BYTE), );
 
-    if ((jOrMask = GET_JAVA_FIELD(env, Object, jArguments, field))) {
+    if ((jOrMask = JAVA_GET_FIELD(env, Object, jArguments, field))) {
       cArguments.orMask = (unsigned char *) (*env)->GetByteArrayElements(env, jOrMask, NULL);
     } else {
       cArguments.orMask = NULL;
@@ -569,7 +560,7 @@ JAVA_INSTANCE_METHOD(
 
   {
     FIND_FIELD(env, field, class, "cursorPosition", JAVA_SIG_INT, );
-    cArguments.cursor = GET_JAVA_FIELD(env, Int, jArguments, field);
+    cArguments.cursor = JAVA_GET_FIELD(env, Int, jArguments, field);
   }
 
   cArguments.charset = "UTF-8";
@@ -875,24 +866,24 @@ JAVA_INSTANCE_METHOD(
 
   {
     FIND_FIELD(env, field, class, "apiError", JAVA_SIG_INT, NULL);
-    error.brlerrno = GET_JAVA_FIELD(env, Int, this, field);
+    error.brlerrno = JAVA_GET_FIELD(env, Int, this, field);
   }
 
   {
     FIND_FIELD(env, field, class, "osError", JAVA_SIG_INT, NULL);
-    error.libcerrno = GET_JAVA_FIELD(env, Int, this, field);
+    error.libcerrno = JAVA_GET_FIELD(env, Int, this, field);
   }
 
   {
     FIND_FIELD(env, field, class, "gaiError", JAVA_SIG_INT, NULL);
-    error.gaierrno = GET_JAVA_FIELD(env, Int, this, field);
+    error.gaierrno = JAVA_GET_FIELD(env, Int, this, field);
   }
 
   jstring jFunction;
   {
     FIND_FIELD(env, field, class, "functionName", JAVA_SIG_STRING, NULL);
 
-    if ((jFunction = GET_JAVA_FIELD(env, Object, this, field))) {
+    if ((jFunction = JAVA_GET_FIELD(env, Object, this, field))) {
       const char *cFunction = (*env)->GetStringUTFChars(env, jFunction, NULL);
       if (!cFunction) return NULL;
       error.errfun = cFunction;
@@ -936,20 +927,20 @@ JAVA_INSTANCE_METHOD(
   jint error;
   {
     FIND_FIELD(env, field, class, "errorNumber", JAVA_SIG_INT, NULL);
-    error = GET_JAVA_FIELD(env, Int, this, field);
+    error = JAVA_GET_FIELD(env, Int, this, field);
   }
 
   jint type;
   {
     FIND_FIELD(env, field, class, "packetType", JAVA_SIG_INT, NULL);
-    type = GET_JAVA_FIELD(env, Int, this, field);
+    type = JAVA_GET_FIELD(env, Int, this, field);
   }
 
   jbyteArray jPacket;
   {
     FIND_FIELD(env, field, class, "failedPacket", JAVA_SIG_ARRAY(JAVA_SIG_BYTE), NULL);
 
-    if (!(jPacket = GET_JAVA_FIELD(env, Object, this, field))) {
+    if (!(jPacket = JAVA_GET_FIELD(env, Object, this, field))) {
       throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
       return NULL;
     }
@@ -994,21 +985,21 @@ JAVA_INSTANCE_METHOD(
 
   {
     FIND_FIELD(env, field, class, "typeValue", JAVA_SIG_INT, );
-    SET_JAVA_FIELD(env, Int, this, field, ekc.type);
+    JAVA_SET_FIELD(env, Int, this, field, ekc.type);
   }
 
   {
     FIND_FIELD(env, field, class, "commandValue", JAVA_SIG_INT, );
-    SET_JAVA_FIELD(env, Int, this, field, ekc.command);
+    JAVA_SET_FIELD(env, Int, this, field, ekc.command);
   }
 
   {
     FIND_FIELD(env, field, class, "argumentValue", JAVA_SIG_INT, );
-    SET_JAVA_FIELD(env, Int, this, field, ekc.argument);
+    JAVA_SET_FIELD(env, Int, this, field, ekc.argument);
   }
 
   {
     FIND_FIELD(env, field, class, "flagsValue", JAVA_SIG_INT, );
-    SET_JAVA_FIELD(env, Int, this, field, ekc.flags);
+    JAVA_SET_FIELD(env, Int, this, field, ekc.flags);
   }
 }

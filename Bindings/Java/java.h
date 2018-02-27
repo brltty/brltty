@@ -48,6 +48,9 @@ extern "C" {
 #define JAVA_CONSTRUCTOR_NAME "<init>"
 #define JAVA_SIG_CONSTRUCTOR(arguments) JAVA_SIG_METHOD(JAVA_SIG_VOID, arguments)
 
+#define JAVA_GET_CONSTRUCTOR(env,class,arguments) \
+  ((*(env))->GetMethodID((env), (class), JAVA_CONSTRUCTOR_NAME, JAVA_SIG_CONSTRUCTOR(arguments)))
+
 #define JAVA_SIG_STRING JAVA_SIG_OBJECT(JAVA_OBJECT_STRING)
 
 #define JAVA_METHOD(object,name,returns) \
@@ -59,11 +62,11 @@ extern "C" {
 #define JAVA_STATIC_METHOD(object,name,returns,...) \
   JAVA_METHOD(object,name,returns), jclass class, ## __VA_ARGS__)
 
-#define GET_JAVA_FIELD(env,type,object,field) \
-  (*(env))->Get ## type ## Field((env), (object), (field))
+#define JAVA_GET_FIELD(env,type,object,field) \
+  ((*(env))->Get ## type ## Field((env), (object), (field)))
 
-#define SET_JAVA_FIELD(env,type,object,field,value) \
-   (*(env))->Set ## type ## Field((env), (object), (field), (value));
+#define JAVA_SET_FIELD(env,type,object,field,value) \
+   ((*(env))->Set ## type ## Field((env), (object), (field), (value)))
 
 #ifdef __cplusplus
 }
