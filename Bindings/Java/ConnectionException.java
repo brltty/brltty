@@ -22,13 +22,13 @@ package org.a11y.brlapi;
 public class ConnectionException extends RuntimeException {
   public native String toString ();
 
-  private final long handle;
+  private final long connectionHandle;
   private final int errorNumber;
   private final int packetType;
   private final byte[] failedPacket;
 
   public ConnectionException (long handle, int error, int type, byte[] packet) {
-    this.handle = handle;
+    connectionHandle = handle;
     errorNumber = error;
     packetType = type;
     failedPacket = packet;

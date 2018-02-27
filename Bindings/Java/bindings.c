@@ -99,23 +99,23 @@ throwConnectionError (JNIEnv *env) {
     } \
   } while (0)
 
-#define GET_HANDLE(env, object, ret) \
+#define GET_CONNECTION_HANDLE(env, object, ret) \
   brlapi_handle_t *handle; \
   do { \
     GET_CLASS((env), class, (object), ret); \
-    FIND_FIELD((env), field, class, "handle", JAVA_SIG_LONG, ret); \
-    handle = (void*) (intptr_t) GET_FIELD((env), Long, (object), field); \
+    FIND_FIELD((env), field, class, "connectionHandle", JAVA_SIG_LONG, ret); \
+    handle = (void*) (intptr_t) GET_JAVA_FIELD((env), Long, (object), field); \
     if (!handle) { \
       throwJavaError((env), JAVA_OBJECT_NULL_POINTER_EXCEPTION, "connection has been closed"); \
       return ret; \
     } \
   } while (0)
 
-#define SET_HANDLE(env, object, value, ret) \
+#define SET_CONNECTION_HANDLE(env, object, value, ret) \
   do { \
     GET_CLASS((env), class, (object), ret); \
-    FIND_FIELD((env), field, class, "handle", JAVA_SIG_LONG, ret); \
-    SET_FIELD((env), Long, (object), field, (jlong) (intptr_t) (value)); \
+    FIND_FIELD((env), field, class, "connectionHandle", JAVA_SIG_LONG, ret); \
+    SET_JAVA_FIELD((env), Long, (object), field, (jlong) (intptr_t) (value)); \
   } while (0)
 
 static void BRLAPI_STDCALL
@@ -198,7 +198,7 @@ JAVA_INSTANCE_METHOD(
     return -1;
   }
 
-  SET_HANDLE(env, this, handle, -1);
+  SET_CONNECTION_HANDLE(env, this, handle, -1);
 
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
@@ -208,13 +208,13 @@ JAVA_INSTANCE_METHOD(
     FIND_FIELD(env, clientHostID, jcclientSettings, "serverHost", "Ljava/lang/String;", -1);
 
     PclientSettings = &clientSettings;
-    if ((auth = GET_FIELD(env, Object, JclientSettings, clientAuthID))) {
+    if ((auth = GET_JAVA_FIELD(env, Object, JclientSettings, clientAuthID))) {
       if (!(clientSettings.auth = (char *)(*env)->GetStringUTFChars(env, auth, NULL))) {
 	throwJavaError(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
 	return -1;
       }
     } else clientSettings.auth = NULL;
-    if ((host = GET_FIELD(env, Object, JclientSettings, clientHostID))) {
+    if ((host = GET_JAVA_FIELD(env, Object, JclientSettings, clientHostID))) {
       if (!(clientSettings.host = (char *)(*env)->GetStringUTFChars(env, host, NULL))) {
 	throwJavaError(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
 	return -1;
@@ -252,7 +252,7 @@ JAVA_INSTANCE_METHOD(
       return -1;
     }
     str = (*env)->GetStringUTFChars(env, auth, NULL);
-    SET_FIELD(env, Object, JusedSettings, usedAuthID, auth);
+    SET_JAVA_FIELD(env, Object, JusedSettings, usedAuthID, auth);
     (*env)->ReleaseStringUTFChars(env, auth, str);
 
     host = (*env)->NewStringUTF(env, usedSettings.host);
@@ -261,7 +261,7 @@ JAVA_INSTANCE_METHOD(
       return -1;
     }
     str = (*env)->GetStringUTFChars(env, host, NULL);
-    SET_FIELD(env, Object, JusedSettings, usedHostID, host);
+    SET_JAVA_FIELD(env, Object, JusedSettings, usedHostID, host);
     (*env)->ReleaseStringUTFChars(env, host, str);
   }
 
@@ -272,10 +272,10 @@ JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, closeConnection, void
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
-  GET_HANDLE(env, this, );
+  GET_CONNECTION_HANDLE(env, this, );
   brlapi__closeConnection(handle);
   free(handle);
-  SET_HANDLE(env, this, NULL, );
+  SET_CONNECTION_HANDLE(env, this, NULL, );
 }
 
 JAVA_INSTANCE_METHOD(
@@ -283,7 +283,7 @@ JAVA_INSTANCE_METHOD(
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
-  GET_HANDLE(env, this, NULL);
+  GET_CONNECTION_HANDLE(env, this, NULL);
   char name[0X20];
 
   if (brlapi__getDriverName(handle, name, sizeof(name)) < 0) {
@@ -300,7 +300,7 @@ JAVA_INSTANCE_METHOD(
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
-  GET_HANDLE(env, this, NULL);
+  GET_CONNECTION_HANDLE(env, this, NULL);
   char identifier[0X20];
 
   if (brlapi__getModelIdentifier(handle, identifier, sizeof(identifier)) < 0) {
@@ -317,7 +317,7 @@ JAVA_INSTANCE_METHOD(
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
-  GET_HANDLE(env, this, NULL);
+  GET_CONNECTION_HANDLE(env, this, NULL);
 
   unsigned int width, height;
   if (brlapi__getDisplaySize(handle, &width, &height) < 0) {
@@ -349,7 +349,7 @@ JAVA_INSTANCE_METHOD(
   int tty ;
   char *driver;
   int result;
-  GET_HANDLE(env, this, -1);
+  GET_CONNECTION_HANDLE(env, this, -1);
   
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
@@ -378,7 +378,7 @@ JAVA_INSTANCE_METHOD(
   jint *ttys ;
   char *driver;
   int result;
-  GET_HANDLE(env, this, );
+  GET_CONNECTION_HANDLE(env, this, );
   
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
@@ -410,7 +410,7 @@ JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, leaveTtyMode, void
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
-  GET_HANDLE(env, this, );
+  GET_CONNECTION_HANDLE(env, this, );
 
   if (brlapi__leaveTtyMode(handle) < 0) {
     throwConnectionError(env);
@@ -423,7 +423,7 @@ JAVA_INSTANCE_METHOD(
   jint jarg1
 ) {
   int arg1 ;
-  GET_HANDLE(env, this, );
+  GET_CONNECTION_HANDLE(env, this, );
   
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
@@ -440,7 +440,7 @@ JAVA_INSTANCE_METHOD(
 ) {
   brlapi_writeArguments_t s = BRLAPI_WRITEARGUMENTS_INITIALIZER;
   int result;
-  GET_HANDLE(env, this, );
+  GET_CONNECTION_HANDLE(env, this, );
   
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
@@ -473,7 +473,7 @@ JAVA_INSTANCE_METHOD(
 ) {
   jbyte *arg1;
   int result;
-  GET_HANDLE(env, this, );
+  GET_CONNECTION_HANDLE(env, this, );
   
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
@@ -498,67 +498,80 @@ JAVA_INSTANCE_METHOD(
 
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, write, void,
-  jobject jarguments
+  jobject jArguments
 ) {
-  brlapi_writeArguments_t arguments = BRLAPI_WRITEARGUMENTS_INITIALIZER;
-  int result;
-  jstring text, andMask, orMask;
-  GET_HANDLE(env, this, );
-
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
-  if (!jarguments) {
+  if (!jArguments) {
     throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
     return;
   }
 
-  GET_CLASS(env, jcwriteArguments, jarguments, );
-  FIND_FIELD(env, displayNumberID, jcwriteArguments,
-             "displayNumber", JAVA_SIG_INT, );
-  FIND_FIELD(env, regionBeginID, jcwriteArguments,
-             "regionBegin", JAVA_SIG_INT, );
-  FIND_FIELD(env, regionSizeID, jcwriteArguments,
-             "regionSize", JAVA_SIG_INT, );
-  FIND_FIELD(env, textID, jcwriteArguments,
-             "text", JAVA_SIG_STRING, );
-  FIND_FIELD(env, andMaskID, jcwriteArguments,
-             "andMask", JAVA_SIG_ARRAY(JAVA_SIG_BYTE), );
-  FIND_FIELD(env, orMaskID, jcwriteArguments,
-             "orMask", JAVA_SIG_ARRAY(JAVA_SIG_BYTE), );
-  FIND_FIELD(env, cursorID, jcwriteArguments, 
-             "cursorPosition", JAVA_SIG_INT, );
+  GET_CONNECTION_HANDLE(env, this, );
+  GET_CLASS(env, class, jArguments, );
+  brlapi_writeArguments_t cArguments = BRLAPI_WRITEARGUMENTS_INITIALIZER;
 
-  arguments.displayNumber = GET_FIELD(env, Int, jarguments, displayNumberID);
-  arguments.regionBegin   = GET_FIELD(env, Int, jarguments, regionBeginID);
-  arguments.regionSize    = GET_FIELD(env, Int, jarguments, regionSizeID);
-  if ((text  = GET_FIELD(env, Object, jarguments, textID)))
-    arguments.text   = (char *)(*env)->GetStringUTFChars(env, text, NULL);
-  else 
-    arguments.text  = NULL;
-  if ((andMask = GET_FIELD(env, Object, jarguments, andMaskID)))
-    arguments.andMask  = (unsigned char *)(*env)->GetByteArrayElements(env, andMask, NULL);
-  else
-    arguments.andMask = NULL;
-  if ((orMask  = GET_FIELD(env, Object, jarguments, orMaskID)))
-    arguments.orMask   = (unsigned char *)(*env)->GetByteArrayElements(env, orMask, NULL);
-  else
-    arguments.orMask  = NULL;
-  arguments.cursor     = GET_FIELD(env, Int, jarguments, cursorID);
-  arguments.charset = "UTF-8";
-
-  result = brlapi__write(handle, &arguments);
-
-  if (text)
-    (*env)->ReleaseStringUTFChars(env, text, arguments.text); 
-  if (andMask)
-    (*env)->ReleaseByteArrayElements(env, andMask, (jbyte*) arguments.andMask, JNI_ABORT); 
-  if (orMask)
-    (*env)->ReleaseByteArrayElements(env, orMask,  (jbyte*) arguments.orMask,  JNI_ABORT); 
-
-  if (result < 0) {
-    throwConnectionError(env);
-    return;
+  {
+    FIND_FIELD(env, field, class, "displayNumber", JAVA_SIG_INT, );
+    cArguments.displayNumber = GET_JAVA_FIELD(env, Int, jArguments, field);
   }
+
+  {
+    FIND_FIELD(env, field, class, "regionBegin", JAVA_SIG_INT, );
+    cArguments.regionBegin = GET_JAVA_FIELD(env, Int, jArguments, field);
+  }
+
+  {
+    FIND_FIELD(env, field, class, "regionSize", JAVA_SIG_INT, );
+    cArguments.regionSize = GET_JAVA_FIELD(env, Int, jArguments, field);
+  }
+
+  jstring jText;
+  {
+    FIND_FIELD(env, field, class, "text", JAVA_SIG_STRING, );
+
+    if ((jText = GET_JAVA_FIELD(env, Object, jArguments, field))) {
+      cArguments.text = (char *) (*env)->GetStringUTFChars(env, jText, NULL);
+    } else {
+      cArguments.text = NULL;
+    }
+  }
+
+  jbyteArray jAndMask;
+  {
+    FIND_FIELD(env, field, class, "andMask", JAVA_SIG_ARRAY(JAVA_SIG_BYTE), );
+
+    if ((jAndMask = GET_JAVA_FIELD(env, Object, jArguments, field))) {
+      cArguments.andMask = (unsigned char *) (*env)->GetByteArrayElements(env, jAndMask, NULL);
+    } else {
+      cArguments.andMask = NULL;
+    }
+  }
+
+  jbyteArray jOrMask;
+  {
+    FIND_FIELD(env, field, class, "orMask", JAVA_SIG_ARRAY(JAVA_SIG_BYTE), );
+
+    if ((jOrMask = GET_JAVA_FIELD(env, Object, jArguments, field))) {
+      cArguments.orMask = (unsigned char *) (*env)->GetByteArrayElements(env, jOrMask, NULL);
+    } else {
+      cArguments.orMask = NULL;
+    }
+  }
+
+  {
+    FIND_FIELD(env, field, class, "cursorPosition", JAVA_SIG_INT, );
+    cArguments.cursor = GET_JAVA_FIELD(env, Int, jArguments, field);
+  }
+
+  cArguments.charset = "UTF-8";
+  int result = brlapi__write(handle, &cArguments);
+
+  if (jText) (*env)->ReleaseStringUTFChars(env, jText, cArguments.text); 
+  if (jAndMask) (*env)->ReleaseByteArrayElements(env, jAndMask, (jbyte*) cArguments.andMask, JNI_ABORT); 
+  if (jOrMask) (*env)->ReleaseByteArrayElements(env, jOrMask, (jbyte*) cArguments.orMask, JNI_ABORT); 
+
+  if (result < 0) throwConnectionError(env);
 }
 
 JAVA_INSTANCE_METHOD(
@@ -567,7 +580,7 @@ JAVA_INSTANCE_METHOD(
 ) {
   brlapi_keyCode_t code;
   int result;
-  GET_HANDLE(env, this, -1);
+  GET_CONNECTION_HANDLE(env, this, -1);
 
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
@@ -588,7 +601,7 @@ JAVA_INSTANCE_METHOD(
 ) {
   brlapi_keyCode_t code;
   int result;
-  GET_HANDLE(env, this, -1);
+  GET_CONNECTION_HANDLE(env, this, -1);
 
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
@@ -610,7 +623,7 @@ JAVA_INSTANCE_METHOD(
   jlong *s;
   unsigned int n;
   int result;
-  GET_HANDLE(env, this, );
+  GET_CONNECTION_HANDLE(env, this, );
 
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
@@ -639,7 +652,7 @@ JAVA_INSTANCE_METHOD(
   jlong *s;
   unsigned int n;
   int result;
-  GET_HANDLE(env, this, );
+  GET_CONNECTION_HANDLE(env, this, );
 
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
@@ -664,7 +677,7 @@ JAVA_INSTANCE_METHOD(
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, ignoreAllKeys, void
 ) {
-  GET_HANDLE(env, this, );
+  GET_CONNECTION_HANDLE(env, this, );
 
   if (brlapi__ignoreAllKeys(handle) < 0)
     throwConnectionError(env);
@@ -673,7 +686,7 @@ JAVA_INSTANCE_METHOD(
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, acceptAllKeys, void
 ) {
-  GET_HANDLE(env, this, );
+  GET_CONNECTION_HANDLE(env, this, );
 
   if (brlapi__acceptAllKeys(handle) < 0)
     throwConnectionError(env);
@@ -684,7 +697,7 @@ JAVA_INSTANCE_METHOD(
   jobjectArray js
 ) {
   unsigned int n;
-  GET_HANDLE(env, this, );
+  GET_CONNECTION_HANDLE(env, this, );
 
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
@@ -718,7 +731,7 @@ JAVA_INSTANCE_METHOD(
   jobjectArray js
 ) {
   unsigned int n;
-  GET_HANDLE(env, this, );
+  GET_CONNECTION_HANDLE(env, this, );
 
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
@@ -754,7 +767,7 @@ JAVA_INSTANCE_METHOD(
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
   char *driver;
   int res;
-  GET_HANDLE(env, this, );
+  GET_CONNECTION_HANDLE(env, this, );
 
   if (!jdriver) {
     driver = NULL;
@@ -774,7 +787,7 @@ JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, leaveRawMode, void
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
-  GET_HANDLE(env, this, );
+  GET_CONNECTION_HANDLE(env, this, );
 
   if (brlapi__leaveRawMode(handle) < 0) {
     throwConnectionError(env);
@@ -789,7 +802,7 @@ JAVA_INSTANCE_METHOD(
   jbyte *buf;
   unsigned int n;
   int result;
-  GET_HANDLE(env, this, -1);
+  GET_CONNECTION_HANDLE(env, this, -1);
 
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
@@ -819,7 +832,7 @@ JAVA_INSTANCE_METHOD(
   jbyte *buf;
   unsigned int n;
   int result;
-  GET_HANDLE(env, this, -1);
+  GET_CONNECTION_HANDLE(env, this, -1);
 
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
@@ -852,24 +865,32 @@ JAVA_INSTANCE_METHOD(
   brlapi_error_t error;
   memset(&error, 0, sizeof(error));
 
-  FIND_FIELD(env, apiErrorID, class, "apiError", JAVA_SIG_INT, NULL);
-  error.brlerrno = GET_FIELD(env, Int, this, apiErrorID);
+  {
+    FIND_FIELD(env, field, class, "apiError", JAVA_SIG_INT, NULL);
+    error.brlerrno = GET_JAVA_FIELD(env, Int, this, field);
+  }
 
-  FIND_FIELD(env, osErrorID, class, "osError", JAVA_SIG_INT, NULL);
-  error.libcerrno = GET_FIELD(env, Int, this, osErrorID);
+  {
+    FIND_FIELD(env, field, class, "osError", JAVA_SIG_INT, NULL);
+    error.libcerrno = GET_JAVA_FIELD(env, Int, this, field);
+  }
 
-  FIND_FIELD(env, gaiErrorID, class, "gaiError", JAVA_SIG_INT, NULL);
-  error.gaierrno = GET_FIELD(env, Int, this, gaiErrorID);
+  {
+    FIND_FIELD(env, field, class, "gaiError", JAVA_SIG_INT, NULL);
+    error.gaierrno = GET_JAVA_FIELD(env, Int, this, field);
+  }
 
-  FIND_FIELD(env, functionID, class, "functionName", JAVA_SIG_STRING, NULL);
-  jstring jFunction = GET_FIELD(env, Object, this, functionID);
+  jstring jFunction;
+  {
+    FIND_FIELD(env, field, class, "functionName", JAVA_SIG_STRING, NULL);
 
-  if (!jFunction) {
-    error.errfun = NULL;
-  } else {
-    const char *cFunction = (*env)->GetStringUTFChars(env, jFunction, NULL);
-    if (!cFunction) return NULL;
-    error.errfun = cFunction;
+    if ((jFunction = GET_JAVA_FIELD(env, Object, this, field))) {
+      const char *cFunction = (*env)->GetStringUTFChars(env, jFunction, NULL);
+      if (!cFunction) return NULL;
+      error.errfun = cFunction;
+    } else {
+      error.errfun = NULL;
+    }
   }
 
   const char *cMessage = brlapi_strerror(&error);
@@ -901,21 +922,29 @@ JAVA_INSTANCE_METHOD(
 ) {
   SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
-  GET_HANDLE(env, this, NULL);
+  GET_CONNECTION_HANDLE(env, this, NULL);
   GET_CLASS(env, class, this, NULL);
 
-  FIND_FIELD(env, errorID, class, "errorNumber", JAVA_SIG_INT, NULL);
-  jint error = GET_FIELD(env, Int, this, errorID);
+  jint error;
+  {
+    FIND_FIELD(env, field, class, "errorNumber", JAVA_SIG_INT, NULL);
+    error = GET_JAVA_FIELD(env, Int, this, field);
+  }
 
-  FIND_FIELD(env, typeID, class, "packetType", JAVA_SIG_INT, NULL);
-  jint type = GET_FIELD(env, Int, this, typeID);
+  jint type;
+  {
+    FIND_FIELD(env, field, class, "packetType", JAVA_SIG_INT, NULL);
+    type = GET_JAVA_FIELD(env, Int, this, field);
+  }
 
-  FIND_FIELD(env, packetID, class, "failedPacket", JAVA_SIG_ARRAY(JAVA_SIG_BYTE), NULL);
-  jbyteArray jPacket = GET_FIELD(env, Object, this, packetID);
+  jbyteArray jPacket;
+  {
+    FIND_FIELD(env, field, class, "failedPacket", JAVA_SIG_ARRAY(JAVA_SIG_BYTE), NULL);
 
-  if (!jPacket) {
-    throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
-    return NULL;
+    if (!(jPacket = GET_JAVA_FIELD(env, Object, this, field))) {
+      throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
+      return NULL;
+    }
   }
 
   jint size = (*env)->GetArrayLength(env, jPacket);
@@ -955,15 +984,23 @@ JAVA_INSTANCE_METHOD(
   brlapi_expandKeyCode((brlapi_keyCode_t) code, &ekc);
   GET_CLASS(env, class, this, );
 
-  FIND_FIELD(env, typeID, class, "typeValue", JAVA_SIG_INT, );
-  SET_FIELD(env, Int, this, typeID, ekc.type);
+  {
+    FIND_FIELD(env, field, class, "typeValue", JAVA_SIG_INT, );
+    SET_JAVA_FIELD(env, Int, this, field, ekc.type);
+  }
 
-  FIND_FIELD(env, commandID, class, "commandValue", JAVA_SIG_INT, );
-  SET_FIELD(env, Int, this, commandID, ekc.command);
+  {
+    FIND_FIELD(env, field, class, "commandValue", JAVA_SIG_INT, );
+    SET_JAVA_FIELD(env, Int, this, field, ekc.command);
+  }
 
-  FIND_FIELD(env, argumentID, class, "argumentValue", JAVA_SIG_INT, );
-  SET_FIELD(env, Int, this, argumentID, ekc.argument);
+  {
+    FIND_FIELD(env, field, class, "argumentValue", JAVA_SIG_INT, );
+    SET_JAVA_FIELD(env, Int, this, field, ekc.argument);
+  }
 
-  FIND_FIELD(env, flagsID, class, "flagsValue", JAVA_SIG_INT, );
-  SET_FIELD(env, Int, this, flagsID, ekc.flags);
+  {
+    FIND_FIELD(env, field, class, "flagsValue", JAVA_SIG_INT, );
+    SET_JAVA_FIELD(env, Int, this, field, ekc.flags);
+  }
 }

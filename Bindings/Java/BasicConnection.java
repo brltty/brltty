@@ -20,7 +20,7 @@
 package org.a11y.brlapi;
 
 public class BasicConnection extends NativeLibrary {
-  protected long handle;
+  protected long connectionHandle;
 
   protected native int openConnection (
     ConnectionSettings desiredSettings,
