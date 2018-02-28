@@ -343,8 +343,8 @@
 #speech-driver	an	# Android (text to speech engine)
 #speech-driver	bl	# BrailleLite
 #speech-driver	cb	# CombiBraille
-#speech-driver	es	# eSpeak (text to speech engine)
 #speech-driver	en	# eSpeak-NG (text to speech engine)
+#speech-driver	es	# eSpeak (text to speech engine)
 #speech-driver	fl	# FestivalLite (text to speech engine)
 #speech-driver	fv	# Festival (text to speech engine)
 #speech-driver	gs	# GenericSay (pipes to /usr/local/bin/say)

@@ -5578,7 +5578,6 @@ B. Sintetizadores de Fala Suportados:
       BrailleLite
       CombiBraille
       eSpeak           text to speech engine
-      eSpeak-NG        text to speech engine
       ExternalSpeech   runs /usr/local/bin/externalspeech
       Festival         text to speech engine
       FestivalLite     text to speech engine
@@ -5609,8 +5608,6 @@ ec
 EcoBraille
 es
 eSpeak
-en
-eSpeak-NG
 eu
 EuroBraille
 fl
@@ -5774,7 +5771,6 @@ selecionar a opção padrão do sistema Hurd.
       cb     CombiBraille
       ec     EcoBraille
       es     eSpeak
-      en     eSpeak-NG
       eu     EuroBraille
       fl     FestivalLite
       fs     FreedomScientific

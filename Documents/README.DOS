@@ -285,9 +285,9 @@ You should be able to use a configure command like this one::
       --disable-api --disable-icu --disable-x \
       --without-usb-package --without-bluetooth-package \
       --without-libbraille --with-braille-driver=-vr,all \
-      --without-espeak --without-flite \
-      --without-espeak-ng \
-      --without-speechd --with-speech-driver=all \
+      --without-espeak --without-espeak-ng \
+      --without-flite --without-speechd \
+      --with-speech-driver=all \
       --with-screen-driver=pb,-all
 
 The ``cfg-dos`` Script

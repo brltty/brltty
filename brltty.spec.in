@@ -533,8 +533,8 @@ rm -fr "${RPM_BUILD_ROOT}"
 %{_libdir}/brltty
 %exclude %{_libdir}/brltty/libbrlttybba.so
 %exclude %{_libdir}/brltty/libbrlttybxw.so
-%exclude %{_libdir}/brltty/libbrlttyses.so
 %exclude %{_libdir}/brltty/libbrlttysen.so
+%exclude %{_libdir}/brltty/libbrlttyses.so
 %exclude %{_libdir}/brltty/libbrlttysfl.so
 %exclude %{_libdir}/brltty/libbrlttysfv.so
 %exclude %{_libdir}/brltty/libbrlttyssd.so
