@@ -57,6 +57,7 @@ export LDFLAGS=""
    --with-braille-driver=-vr,all \
    \
    --without-espeak \
+   --without-espeak-ng \
    --without-flite \
    --without-mikropuhe \
    --without-speechd \

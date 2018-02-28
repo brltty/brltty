@@ -344,6 +344,7 @@
 #speech-driver	bl	# BrailleLite
 #speech-driver	cb	# CombiBraille
 #speech-driver	es	# eSpeak (text to speech engine)
+#speech-driver	en	# eSpeak-NG (text to speech engine)
 #speech-driver	fl	# FestivalLite (text to speech engine)
 #speech-driver	fv	# Festival (text to speech engine)
 #speech-driver	gs	# GenericSay (pipes to /usr/local/bin/say)
@@ -382,6 +383,12 @@
 #speech-parameters es:Path=
 #speech-parameters es:PunctList=
 #speech-parameters es:Voice=default
+
+# eSpeak-NG Speech Driver Parameters
+#speech-parameters en:MaxRate=450 # [80-]
+#speech-parameters en:Path=
+#speech-parameters en:PunctList=
+#speech-parameters en:Voice=en
 
 # ExternalSpeech Speech Driver Parameters
 #speech-parameters xs:Program=/usr/local/bin/externalspeech

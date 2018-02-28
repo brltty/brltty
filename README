@@ -210,6 +210,7 @@ The following speech synthesizers are supported:
 -  BrailleLite
 -  CombiBraille
 -  eSpeak [text to speech engine]
+-  eSpeak-NG [text to speech engine]
 -  ExternalSpeech [runs /usr/local/bin/externalspeech]
 -  Festival [text to speech engine]
 -  FestivalLite [text to speech engine]

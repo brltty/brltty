@@ -144,6 +144,27 @@ Install this package if you would like to be able to use the
 eSpeak text-to-speech engine.
 
 
+%package -n brltty-speech-espeak-ng
+Version: @PACKAGE_VERSION@
+Release: 1
+Group: System Environment/Daemons
+License: GPL
+
+Requires: espeak-ng
+
+BuildRequires: espeak-ng-devel
+
+AutoProv: no
+AutoReq: yes
+
+Summary: eSpeak-NG speech driver for BRLTTY.
+%description -n brltty-speech-espeak-ng
+This package provides the eSpeak-NG speech driver for BRLTTY.
+
+Install this package if you would like to be able to use the
+eSpeak-NG text-to-speech engine.
+
+
 %package -n brltty-speech-festival
 Version: @PACKAGE_VERSION@
 Release: 1
@@ -513,6 +534,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %exclude %{_libdir}/brltty/libbrlttybba.so
 %exclude %{_libdir}/brltty/libbrlttybxw.so
 %exclude %{_libdir}/brltty/libbrlttyses.so
+%exclude %{_libdir}/brltty/libbrlttysen.so
 %exclude %{_libdir}/brltty/libbrlttysfl.so
 %exclude %{_libdir}/brltty/libbrlttysfv.so
 %exclude %{_libdir}/brltty/libbrlttyssd.so
@@ -540,6 +562,9 @@ rm -fr "${RPM_BUILD_ROOT}"
 
 %files -n brltty-speech-espeak
 %{_libdir}/brltty/libbrlttyses.so
+
+%files -n brltty-speech-espeak-ng
+%{_libdir}/brltty/libbrlttysen.so
 
 %files -n brltty-speech-festival
 %{_libdir}/brltty/libbrlttysfv.so

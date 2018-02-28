@@ -89,6 +89,7 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
    --with-braille-driver=-ba,-bg,-tt,-vr,al,at,bm,bn,ce,eu,fs,hm,ht,hw,ic,ir,md,mm,mt,np,pg,pm,sk,vo \
    \
    --without-espeak \
+   --without-espeak-ng \
    --without-flite \
    --without-mikropuhe \
    --without-speechd \

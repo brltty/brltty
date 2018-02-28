@@ -1746,6 +1746,10 @@ BRLTTY_ARG_DISABLE(
       BRLTTY_SPEECH_DRIVER([es], [eSpeak], [-L$(ESPEAK_ROOT)/lib -lespeak])
    ])
 
+   BRLTTY_IF_PACKAGE([eSpeak-NG], [espeak_ng], [include/espeak-ng/speak_lib.h], [dnl
+      BRLTTY_SPEECH_DRIVER([en], [eSpeak-NG], [-L$(ESPEAK_NG_ROOT)/lib -lespeak-ng])
+   ])
+
    BRLTTY_IF_PACKAGE([FestivalLite], [flite], [include/flite/flite.h], [dnl
       BRLTTY_ARG_REQUIRED(
          [flite-language], [LANGUAGE],

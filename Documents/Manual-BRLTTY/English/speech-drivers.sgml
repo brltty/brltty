@@ -8,6 +8,8 @@ CombiBraille
   |@
 eSpeak
   |text to speech engine@
+eSpeak-NG
+  |text to speech engine@
 ExternalSpeech
   |runs /usr/local/bin/externalspeech@
 Festival

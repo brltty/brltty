@@ -25,6 +25,7 @@
    --without-libbraille \
    \
    --without-espeak \
+   --without-espeak-ng \
    --without-flite \
    --without-mikropuhe \
    --without-speechd \

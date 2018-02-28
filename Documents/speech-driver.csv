@@ -4,6 +4,7 @@
 "bl","BrailleLite"
 "cb","CombiBraille"
 "es","eSpeak (text to speech engine)"
+"en","eSpeak-NG (text to speech engine)"
 "fl","FestivalLite (text to speech engine)"
 "fv","Festival (text to speech engine)"
 "gs","GenericSay (pipes to /usr/local/bin/say)"

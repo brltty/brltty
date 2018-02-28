@@ -717,6 +717,9 @@ EcoBraille
 .B es
 eSpeak
 .TP 4
+.B en
+eSpeak-NG
+.TP 4
 .B eu
 EuroBraille
 .TP 4

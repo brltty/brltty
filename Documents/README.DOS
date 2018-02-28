@@ -286,6 +286,7 @@ You should be able to use a configure command like this one::
       --without-usb-package --without-bluetooth-package \
       --without-libbraille --with-braille-driver=-vr,all \
       --without-espeak --without-flite \
+      --without-espeak-ng \
       --without-speechd --with-speech-driver=all \
       --with-screen-driver=pb,-all
 
