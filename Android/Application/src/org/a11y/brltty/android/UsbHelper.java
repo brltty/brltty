@@ -121,12 +121,9 @@ public class UsbHelper {
   }
 
   private static boolean obtainPermission (UsbDevice device) {
-    if (usbManager.hasPermission(device)) {
-      Log.d(LOG_TAG, "permission already granted for USB device: " + device);
-      return true;
-    }
-
+    if (usbManager.hasPermission(device)) return true;
     Log.d(LOG_TAG, "requesting permission for USB device: " + device);
+
     synchronized (permissionReceiver) {
       usbManager.requestPermission(device, permissionIntent);
 
