@@ -380,6 +380,7 @@ bthProcessDiscoveredDevices (
     jint count = (*env)->CallStaticIntMethod(env, connectionClass, getPairedDeviceCountMethod);
 
     for (jint index=0; index<count; index+=1) {
+      int found = 0;
       jstring jAddress = (*env)->CallStaticObjectMethod(env, connectionClass, getPairedDeviceAddressMethod, index);
 
       if (jAddress) {
@@ -392,19 +393,24 @@ bthProcessDiscoveredDevices (
             jstring jName = (*env)->CallStaticObjectMethod(env, connectionClass, getPairedDeviceNameMethod, index);
             const char *cName = jName? (*env)->GetStringUTFChars(env, jName, NULL): NULL;
 
-            DiscoveredBluetoothDevice device = {
+            const DiscoveredBluetoothDevice device = {
               .address = address,
               .name = cName,
               .paired = 1
             };
 
-            int found = testDevice(&device, data);
+            if (testDevice(&device, data)) found = 1;
             if (cName) (*env)->ReleaseStringUTFChars(env, jName, cName);
-            (*env)->ReleaseStringUTFChars(env, jAddress, cAddress);
-            if (found) break;
+            if (jName) (*env)->DeleteLocalRef(env, jName);
           }
+
+          (*env)->ReleaseStringUTFChars(env, jAddress, cAddress);
         }
+
+        (*env)->DeleteLocalRef(env, jAddress);
       }
+
+      if (found) break;
     }
   }
 }
