@@ -238,7 +238,7 @@ public class BluetoothConnection {
 
         return true;
       } catch (IOException openException) {
-        Log.e(LOG_TAG, "Bluetooth connect failed: " + bluetoothAddress + ": " + openException.getMessage());
+        Log.d(LOG_TAG, "Bluetooth connect failed: " + bluetoothAddress + ": " + openException.getMessage());
       }
     }
 
