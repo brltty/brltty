@@ -43,143 +43,204 @@ import java.util.ArrayList;
 
 public class ArgumentsBuilder {
   private boolean foregroundExecution = false;
-  public boolean setForegroundExecution (boolean newValue) {
-    boolean oldValue = foregroundExecution;
-    foregroundExecution = newValue;
-    return oldValue;
-  }
-
   private boolean releaseDevice = false;
-  public boolean setReleaseDevice (boolean newValue) {
-    boolean oldValue = releaseDevice;
-    releaseDevice = newValue;
-    return oldValue;
-  }
-
   private String logLevel = null;
-  public String setLogLevel (String newValue) {
-    String oldValue = logLevel;
-    logLevel = newValue;
-    return oldValue;
-  }
-
   private String logFile = null;
-  public String setLogFile (String newValue) {
-    String oldValue = logFile;
-    logFile = newValue;
-    return oldValue;
-  }
-
   private String configurationFile = null;
-  public String setConfigurationFile (String newValue) {
-    String oldValue = configurationFile;
-    configurationFile = newValue;
-    return oldValue;
-  }
-
   private String preferencesFile = null;
-  public String setPreferencesFile (String newValue) {
-    String oldValue = preferencesFile;
-    preferencesFile = newValue;
-    return oldValue;
-  }
-
   private String driversDirectory = null;
-  public String setDriversDirectory (String newValue) {
-    String oldValue = driversDirectory;
-    driversDirectory = newValue;
-    return oldValue;
-  }
-
   private String writableDirectory = null;
-  public String setWritableDirectory (String newValue) {
-    String oldValue = writableDirectory;
-    writableDirectory = newValue;
-    return oldValue;
-  }
-
   private String updatableDirectory = null;
-  public String setUpdatableDirectory (String newValue) {
-    String oldValue = updatableDirectory;
-    updatableDirectory = newValue;
-    return oldValue;
-  }
-
   private String tablesDirectory = null;
-  public String setTablesDirectory (String newValue) {
-    String oldValue = tablesDirectory;
-    tablesDirectory = newValue;
-    return oldValue;
-  }
-
   private String textTable = null;
-  public String setTextTable (String newValue) {
-    String oldValue = textTable;
-    textTable = newValue;
-    return oldValue;
-  }
-
   private String attributesTable = null;
-  public String setAttributesTable (String newValue) {
-    String oldValue = attributesTable;
-    attributesTable = newValue;
-    return oldValue;
-  }
-
   private String contractionTable = null;
-  public String setContractionTable (String newValue) {
-    String oldValue = contractionTable;
-    contractionTable = newValue;
-    return oldValue;
-  }
-
   private String keyboardTable = null;
-  public String setKeyboardTable (String newValue) {
-    String oldValue = keyboardTable;
-    keyboardTable = newValue;
-    return oldValue;
-  }
-
   private String brailleDriver = null;
-  public String setBrailleDriver (String newValue) {
-    String oldValue = brailleDriver;
-    brailleDriver = newValue;
-    return oldValue;
-  }
-
   private String brailleDevice = null;
-  public String setBrailleDevice (String newValue) {
-    String oldValue = brailleDevice;
-    brailleDevice = newValue;
-    return oldValue;
-  }
-
   private String speechDriver = null;
-  public String setSpeechDriver (String newValue) {
-    String oldValue = speechDriver;
-    speechDriver = newValue;
-    return oldValue;
-  }
-
   private boolean quietIfNoBraille = false;
-  public boolean setQuietIfNoBraille (boolean newValue) {
-    boolean oldValue = quietIfNoBraille;
-    quietIfNoBraille = newValue;
-    return oldValue;
-  }
-
   private boolean apiEnabled = false;
-  public boolean setApiEnabled (boolean newValue) {
-    boolean oldValue = apiEnabled;
-    apiEnabled = newValue;
-    return oldValue;
+  private String apiParameters = null;
+
+  public final boolean getForegroundExecution () {
+    return  foregroundExecution;
   }
 
-  private String apiParameters = null;
-  public String setApiParameters (String newValue) {
-    String oldValue = apiParameters;
-    apiParameters = newValue;
-    return oldValue;
+  public final ArgumentsBuilder setForegroundExecution (boolean value) {
+    foregroundExecution = value;
+    return this;
+  }
+
+  public final boolean getReleaseDevice () {
+    return  releaseDevice;
+  }
+
+  public final ArgumentsBuilder setReleaseDevice (boolean value) {
+    releaseDevice = value;
+    return this;
+  }
+
+  public final String getLogLevel () {
+    return  logLevel;
+  }
+
+  public final ArgumentsBuilder setLogLevel (String value) {
+    logLevel = value;
+    return this;
+  }
+
+  public final String getLogFile () {
+    return  logFile;
+  }
+
+  public final ArgumentsBuilder setLogFile (String value) {
+    logFile = value;
+    return this;
+  }
+
+  public final String getConfigurationFile () {
+    return  configurationFile;
+  }
+
+  public final ArgumentsBuilder setConfigurationFile (String value) {
+    configurationFile = value;
+    return this;
+  }
+
+  public final String getPreferencesFile () {
+    return  preferencesFile;
+  }
+
+  public final ArgumentsBuilder setPreferencesFile (String value) {
+    preferencesFile = value;
+    return this;
+  }
+
+  public final String getDriversDirectory () {
+    return  driversDirectory;
+  }
+
+  public final ArgumentsBuilder setDriversDirectory (String value) {
+    driversDirectory = value;
+    return this;
+  }
+
+  public final String getWritableDirectory () {
+    return  writableDirectory;
+  }
+
+  public final ArgumentsBuilder setWritableDirectory (String value) {
+    writableDirectory = value;
+    return this;
+  }
+
+  public final String getUpdatableDirectory () {
+    return  updatableDirectory;
+  }
+
+  public final ArgumentsBuilder setUpdatableDirectory (String value) {
+    updatableDirectory = value;
+    return this;
+  }
+
+  public final String getTablesDirectory () {
+    return  tablesDirectory;
+  }
+
+  public final ArgumentsBuilder setTablesDirectory (String value) {
+    tablesDirectory = value;
+    return this;
+  }
+
+  public final String getTextTable () {
+    return  textTable;
+  }
+
+  public final ArgumentsBuilder setTextTable (String value) {
+    textTable = value;
+    return this;
+  }
+
+  public final String getAttributesTable () {
+    return  attributesTable;
+  }
+
+  public final ArgumentsBuilder setAttributesTable (String value) {
+    attributesTable = value;
+    return this;
+  }
+
+  public final String getContractionTable () {
+    return  contractionTable;
+  }
+
+  public final ArgumentsBuilder setContractionTable (String value) {
+    contractionTable = value;
+    return this;
+  }
+
+  public final String getKeyboardTable () {
+    return  keyboardTable;
+  }
+
+  public final ArgumentsBuilder setKeyboardTable (String value) {
+    keyboardTable = value;
+    return this;
+  }
+
+  public final String getBrailleDriver () {
+    return  brailleDriver;
+  }
+
+  public final ArgumentsBuilder setBrailleDriver (String value) {
+    brailleDriver = value;
+    return this;
+  }
+
+  public final String getBrailleDevice () {
+    return  brailleDevice;
+  }
+
+  public final ArgumentsBuilder setBrailleDevice (String value) {
+    brailleDevice = value;
+    return this;
+  }
+
+  public final String getSpeechDriver () {
+    return  speechDriver;
+  }
+
+  public final ArgumentsBuilder setSpeechDriver (String value) {
+    speechDriver = value;
+    return this;
+  }
+
+  public final boolean getQuietIfNoBraille () {
+    return  quietIfNoBraille;
+  }
+
+  public final ArgumentsBuilder setQuietIfNoBraille (boolean value) {
+    quietIfNoBraille = value;
+    return this;
+  }
+
+  public final boolean getApiEnabled () {
+    return  apiEnabled;
+  }
+
+  public final ArgumentsBuilder setApiEnabled (boolean value) {
+    apiEnabled = value;
+    return this;
+  }
+
+  public final String getApiParameters () {
+    return apiParameters;
+  }
+
+  public final ArgumentsBuilder setApiParameters (String value) {
+    apiParameters = value;
+    return this;
   }
 
   protected void addOption (List<String> arguments, String option, String value) {
