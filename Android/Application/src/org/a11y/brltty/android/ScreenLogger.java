@@ -18,9 +18,6 @@
 
 package org.a11y.brltty.android;
 
-import java.util.List;
-import java.util.ArrayList;
-
 import android.os.Build;
 import android.util.Log;
 
@@ -32,191 +29,162 @@ import android.graphics.Rect;
 public class ScreenLogger {
   private final String logTag;
 
-  private static final String ROOT_NODE_NAME = "root";
-
-  public static String getRootNodeName () {
-    return ROOT_NODE_NAME;
+  public ScreenLogger (String tag) {
+    logTag = tag;
   }
+
+  private static final String ROOT_NODE_NAME = "root";
 
   public final void log (String message) {
     Log.d(logTag, message);
   }
 
-  public final void addValue (
-    List<CharSequence> values,
-    boolean condition,
-    CharSequence onValue,
-    CharSequence offValue
-  ) {
-    CharSequence value = condition? onValue: offValue;
+  public final void log (String label, String data) {
+    log((label + ": " + data));
+  }
 
+  private static final void add (StringBuilder sb, String value) {
     if (value != null) {
-      values.add(value);
+      if (sb.length() > 0) sb.append(' ');
+      sb.append(value);
     }
   }
 
-  public final void addValue (
-    List<CharSequence> values,
-    boolean condition,
-    CharSequence onValue
-  ) {
-    addValue(values, condition, onValue, null);
+  private static final void add (StringBuilder sb, boolean condition, String trueValue, String falseValue) {
+    add(sb, (condition? trueValue: falseValue));
   }
 
-  public final void addValue (
-    List<CharSequence> values,
-    CharSequence value
-  ) {
-    addValue(values, true, value);
+  private static final void add (StringBuilder sb, boolean condition, String trueValue) {
+    add(sb, condition, trueValue, null);
   }
 
-  public final void logProperty (CharSequence name, CharSequence ... values) {
-    if (values.length > 0) {
-      StringBuilder sb = new StringBuilder();
-
-      sb.append(name);
-      sb.append(':');
-
-      for (CharSequence value : values) {
-        sb.append(' ');
-
-        if (value == null) {
-          sb.append("null");
-        } else if (value.length() == 0) {
-          sb.append("nil");
-        } else {
-          sb.append(value);
-        }
-      }
-
-      log(sb.toString());
-    }
+  private static final void add (StringBuilder sb, String label, CharSequence value) {
+    add(sb, String.format("%s=%s", label, value));
   }
 
-  public final void logProperty (CharSequence name, List<CharSequence> values) {
-    logProperty(name, values.toArray(new CharSequence[values.size()]));
+  private static final void add (StringBuilder sb, String label, int value) {
+    add(sb, String.format("%s=%d", label, value));
   }
 
-  public final void logProperty (CharSequence name, int value) {
-    logProperty(name, Integer.toString(value));
-  }
+  public final void logNode (AccessibilityNodeInfo node, String name) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(node.getClassName());
 
-  public final void logNodeProperties (AccessibilityNodeInfo node) {
     {
-      List<CharSequence> values = new ArrayList<CharSequence>();
+      String text = ScreenUtilities.getNodeText(node);
 
-      {
-        AccessibilityNodeInfo parent = node.getParent();
-
-        if (parent != null) {
-          parent.recycle();
-          parent = null;
-        } else {
-          addValue(values, ROOT_NODE_NAME);
-        }
+      if ((text != null) && (text.length() > 0)) {
+        sb.append(' ');
+        sb.append('"');
+        sb.append(text);
+        sb.append('"');
       }
+    }
 
-      {
-        int count = node.getChildCount();
-        addValue(values, count>0, "cld=" + count);
+    {
+      CharSequence description = node.getContentDescription();
+
+      if ((description != null) && (description.length() > 0)) {
+        sb.append(' ');
+        sb.append('(');
+        sb.append(description);
+        sb.append(')');
+      }
+    }
+
+    {
+      AccessibilityNodeInfo parent = node.getParent();
+
+      if (parent != null) {
+        parent.recycle();
+        parent = null;
+      } else {
+        add(sb, ROOT_NODE_NAME);
+      }
+    }
+
+    {
+      int count = node.getChildCount();
+      if (count > 0) add(sb, "cld", count);
+    }
+
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+      add(sb, !node.isVisibleToUser(), "inv");
+    }
+
+    add(sb, !node.isEnabled(), "dsb");
+    add(sb, node.isSelected(), "sld");
+    add(sb, node.isScrollable(), "scb");
+    add(sb, node.isFocusable(), "ifb");
+    add(sb, node.isFocused(), "ifd");
+
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+      add(sb, node.isAccessibilityFocused(), "afd");
+    }
+
+    add(sb, node.isClickable(), "clb");
+    add(sb, node.isLongClickable(), "lcb");
+    add(sb, node.isCheckable(), "ckb");
+    add(sb, node.isChecked(), "ckd");
+    add(sb, node.isPassword(), "pwd");
+
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+      add(sb, node.isEditable(), "edb");
+    }
+
+    {
+      int actions = node.getActions();
+
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_CLICK) != 0), "clk");
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_LONG_CLICK) != 0), "lck");
       }
 
       if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-        addValue(values, node.isVisibleToUser(), "vis", "inv");
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_SCROLL_FORWARD) != 0), "scf");
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) != 0), "scb");
       }
-
-      addValue(values, node.isEnabled(), "enb", "dsb");
-      addValue(values, node.isSelected(), "sld");
-      addValue(values, node.isScrollable(), "scb");
-      addValue(values, node.isFocusable(), "ifb");
-      addValue(values, node.isFocused(), "ifd");
 
       if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-        addValue(values, node.isAccessibilityFocused(), "afd");
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY) != 0), "mvn");
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY) != 0), "mvp");
       }
 
-      addValue(values, node.isClickable(), "clb");
-      addValue(values, node.isLongClickable(), "lcb");
-      addValue(values, node.isCheckable(), "ckb");
-      addValue(values, node.isChecked(), "ckd");
-      addValue(values, node.isPassword(), "pwd");
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT) != 0), "mhn");
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT) != 0), "mhp");
+      }
+
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_SELECT) != 0), "sls");
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_SELECTION) != 0), "slc");
+      }
+
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_FOCUS) != 0), "ifs");
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_FOCUS) != 0), "ifc");
+      }
+
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS) != 0), "afs");
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS) != 0), "afc");
+      }
 
       if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
-        addValue(values, node.isEditable(), "edb");
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_SET_SELECTION) != 0), "sel");
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_COPY) != 0), "cpy");
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_CUT) != 0), "cut");
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_PASTE) != 0), "pst");
       }
-
-      logProperty("flgs", values);
     }
-
-    {
-      List<CharSequence> values = new ArrayList<CharSequence>();
-
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
-        List<AccessibilityNodeInfo.AccessibilityAction> actions = node.getActionList();
-
-        for (AccessibilityNodeInfo.AccessibilityAction action : actions) {
-          addValue(values, action.getLabel());
-        }
-      } else {
-        int actions = node.getActions();
-
-        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-          addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLICK) != 0), "clk");
-          addValue(values, ((actions & AccessibilityNodeInfo.ACTION_LONG_CLICK) != 0), "lng");
-        }
-
-        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-          addValue(values, ((actions & AccessibilityNodeInfo.ACTION_SCROLL_FORWARD) != 0), "scf");
-          addValue(values, ((actions & AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) != 0), "scb");
-        }
-
-        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-          addValue(values, ((actions & AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY) != 0), "mvn");
-          addValue(values, ((actions & AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY) != 0), "mvp");
-        }
-
-        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-          addValue(values, ((actions & AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT) != 0), "mhn");
-          addValue(values, ((actions & AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT) != 0), "mhp");
-        }
-
-        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
-          addValue(values, ((actions & AccessibilityNodeInfo.ACTION_SELECT) != 0), "sls");
-          addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_SELECTION) != 0), "slc");
-        }
-
-        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
-          addValue(values, ((actions & AccessibilityNodeInfo.ACTION_FOCUS) != 0), "ifs");
-          addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_FOCUS) != 0), "ifc");
-        }
-
-        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-          addValue(values, ((actions & AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS) != 0), "afs");
-          addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS) != 0), "afc");
-        }
-
-        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
-          addValue(values, ((actions & AccessibilityNodeInfo.ACTION_SET_SELECTION) != 0), "sel");
-          addValue(values, ((actions & AccessibilityNodeInfo.ACTION_COPY) != 0), "cpy");
-          addValue(values, ((actions & AccessibilityNodeInfo.ACTION_CUT) != 0), "cut");
-          addValue(values, ((actions & AccessibilityNodeInfo.ACTION_PASTE) != 0), "pst");
-        }
-      }
-
-      logProperty("actn", values);
-    }
-
-    logProperty("desc", node.getContentDescription());
-    logProperty("text", node.getText());
-    logProperty("obj", node.getClassName());
-    logProperty("app", node.getPackageName());
 
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR1)) {
       AccessibilityNodeInfo subnode = node.getLabelFor();
 
       if (subnode != null) {
-        logProperty("lbl", ScreenUtilities.getNodeText(subnode));
+        add(sb, "lbf", ScreenUtilities.getNodeText(subnode));
         subnode.recycle();
+        subnode = null;
       }
     }
 
@@ -224,95 +192,69 @@ public class ScreenLogger {
       AccessibilityNodeInfo subnode = node.getLabeledBy();
 
       if (subnode != null) {
-        logProperty("lbd", ScreenUtilities.getNodeText(subnode));
+        add(sb, "lbd", ScreenUtilities.getNodeText(subnode));
         subnode.recycle();
+        subnode = null;
       }
     }
 
     {
       Rect location = new Rect();
       node.getBoundsInScreen(location);
-      logProperty("locn", location.toShortString());
+      sb.append(' ');
+      sb.append(location.toShortString());
     }
+
+    add(sb, "app", node.getPackageName());
+
+    log(name, sb.toString());
   }
 
-  public final void logTreeProperties (
-    AccessibilityNodeInfo root,
-    CharSequence name
-  ) {
-    logProperty("name", name);
-
+  private final void logTree (AccessibilityNodeInfo root, String name) {
     if (root != null) {
-      logNodeProperties(root);
+      logNode(root, name);
+      int childCount = root.getChildCount();
 
-      {
-        int childCount = root.getChildCount();
+      for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+        AccessibilityNodeInfo child = root.getChild(childIndex);
 
-        for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-          AccessibilityNodeInfo child = root.getChild(childIndex);
-
-          if (child != null) {
-            logTreeProperties(child, name + "." + childIndex);
-
-            child.recycle();
-            child = null;
-          }
+        if (child != null) {
+          logTree(child, (name + "." + childIndex));
+          child.recycle();
+          child = null;
         }
       }
     }
   }
 
-  public final void logTreeProperties (AccessibilityNodeInfo root) {
-    logTreeProperties(root, ROOT_NODE_NAME);
-  }
-
-  public final void logNodeIdentity (AccessibilityNodeInfo node, String description) {
-    StringBuilder sb = new StringBuilder();
-
-    sb.append(description);
-    sb.append(": ");
-
-    if (node == null) {
-      sb.append("null");
-    } else {
-      String text = ScreenUtilities.getNodeText(node);
-
-      if ((text != null) && (text.length() > 0)) {
-        sb.append(text);
-      } else {
-        sb.append(node.getClassName());
-      }
-
-      Rect location = new Rect();
-      node.getBoundsInScreen(location);
-      sb.append(' ');
-      sb.append(location.toShortString());
-    }
-
-    log(sb.toString());
+  public final void logTree (AccessibilityNodeInfo root) {
+    log("begin screen log");
+    logTree(root, ROOT_NODE_NAME);
+    log("end screen log");
   }
 
   public final void logEvent (AccessibilityEvent event) {
-    logProperty("accessibility event", event.toString());
+    log("accessibility event", event.toString());
 
-    AccessibilityNodeInfo node = event.getSource();
-    if (node != null) {
-      logProperty("current window", node.getWindowId());
-      logNodeIdentity(node, "event node");
+    {
+      AccessibilityNodeInfo node = event.getSource();
 
-      AccessibilityNodeInfo root = ScreenUtilities.findRootNode(node);
-      if (root != null) {
-        logTreeProperties(root);
-        root.recycle();
-        root = null;
+      if (node != null) {
+        logNode(node, "event node");
+
+        {
+          AccessibilityNodeInfo root = ScreenUtilities.findRootNode(node);
+
+          if (root != null) {
+            logTree(root);
+            root.recycle();
+            root = null;
+          }
+        }
+
+        node.recycle();
+        node = null;
       }
-
-      node.recycle();
-      node = null;
     }
-  }
-
-  public ScreenLogger (String tag) {
-    logTag = tag;
   }
 }
