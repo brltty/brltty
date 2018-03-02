@@ -351,7 +351,8 @@ mbsinit (const mbstate_t *ps) {
 static inline void *
 mempcpy (void *dest, const void *src, size_t size) {
   extern void *memcpy (void *dest, const void *src, size_t size);
-  return (char *)memcpy(dest, src, size) + size;
+  char *address = memcpy(dest, src, size);
+  return address + size;
 }
 #endif /* HAVE_MEMPCPY */
 
