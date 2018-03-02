@@ -1353,7 +1353,7 @@ static size_t getCharset(brlapi_handle_t *handle, void *buffer, int wide) {
       *p++ = length;
       p += length;
     }
-#elif defined(CODESET)
+#elif defined(HAVE_NL_LANGINFO)
     char *language = nl_langinfo(CODESET);
     size_t length = strlen(language);
 

@@ -60,8 +60,10 @@ getLocaleCharset (void) {
   const char *locale = setlocale(LC_ALL, "");
 
   if (locale && !isPosixLocale(locale)) {
+#ifdef HAVE_NL_LANGINFO
     /* some 8-bit locale is set, assume its charset is correct */
     return nl_langinfo(CODESET);
+#endif /* HAVE_NL_LANGINFO */
   }
 
   return defaultCharset;

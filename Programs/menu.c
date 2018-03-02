@@ -26,7 +26,7 @@
 #include <sys/stat.h>
 
 #undef CAN_GLOB
-#if defined(HAVE_GLOB_H)
+#if defined(HAVE_GLOB)
 #define CAN_GLOB
 #include <glob.h>
 
@@ -52,7 +52,7 @@ typedef struct {
   char *current;
   unsigned none:1;
 
-#if defined(HAVE_GLOB_H)
+#if defined(HAVE_GLOB)
   glob_t glob;
 #elif defined(__MINGW32__)
   char **names;
@@ -483,7 +483,7 @@ beginItem_files (MenuItem *item) {
 #endif /* HAVE_FCHDIR */
     {
       if (chdir(files->directory) != -1) {
-#if defined(HAVE_GLOB_H)
+#if defined(HAVE_GLOB)
         memset(&files->glob, 0, sizeof(files->glob));
         files->glob.gl_offs = files->count;
 
@@ -580,7 +580,7 @@ endItem_files (MenuItem *item, int deallocating) {
   if (files->current) free(files->current);
   files->current = deallocating? NULL: strdup(files->paths[files->setting]);
 
-#if defined(HAVE_GLOB_H)
+#if defined(HAVE_GLOB)
   if (files->glob.gl_pathc) {
     int i;
 

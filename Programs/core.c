@@ -390,20 +390,20 @@ showBrailleText (const char *mode, const char *text, int minimumDelay) {
 
 static inline const char *
 getMeridianString_am (void) {
-#ifdef AM_STR
+#ifdef HAVE_NL_LANGINFO
   return nl_langinfo(AM_STR);
-#else /* AM_STR */
+#else /* HAVE_NL_LANGINFO */
   return "am";
-#endif /* AM_STR */
+#endif /* HAVE_NL_LANGINFO */
 }
 
 static inline const char *
 getMeridianString_pm (void) {
-#ifdef PM_STR
+#ifdef HAVE_NL_LANGINFO
   return nl_langinfo(PM_STR);
-#else /* PM_STR */
+#else /* HAVE_NL_LANGINFO */
   return "pm";
-#endif /* PM_STR */
+#endif /* HAVE_NL_LANGINFO */
 }
 
 static const char *

@@ -25,10 +25,6 @@
 #include <limits.h>
 #include <locale.h>
 
-#ifdef HAVE_LANGINFO_H
-#include <langinfo.h>
-#endif /* HAVE_LANGINFO_H */
-
 #ifdef __MINGW32__
 #include "win_pthread.h"
 #else /* __MINGW32__ */

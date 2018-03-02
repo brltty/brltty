@@ -614,7 +614,7 @@ static void toX_f(const char *display) {
   netWmNameAtom = XInternAtom(dpy,"_NET_WM_NAME",False);
   utf8StringAtom = XInternAtom(dpy,"UTF8_STRING",False);
 
-#ifdef HAVE_ICONV_H
+#if defined(HAVE_NL_LANGINFO) && defined(HAVE_ICONV_H)
   {
     char *localCharset = nl_langinfo(CODESET);
     if (strcmp(localCharset, "UTF-8")) {
@@ -624,7 +624,7 @@ static void toX_f(const char *display) {
         utf8Conv = iconv_open(localCharset, "UTF-8");
     }
   }
-#endif /* HAVE_ICONV_H */
+#endif /* defined(HAVE_NL_LANGINFO) && defined(HAVE_ICONV_H) */
 
   for (i=0;i<ScreenCount(dpy);i++) {
     root=RootWindow(dpy,i);
