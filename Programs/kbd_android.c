@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include <string.h>
 #include <android/keycodes.h>
 
 #include "log.h"

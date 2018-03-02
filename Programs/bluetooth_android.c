@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include <string.h>
 #include <errno.h>
 
 #include "io_bluetooth.h"
