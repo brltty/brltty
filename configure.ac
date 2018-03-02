@@ -597,6 +597,14 @@ AC_CHECK_FUNC([wcslen], [AC_CHECK_HEADERS([wchar.h], [dnl
    AC_CHECK_FUNCS([wcwidth])
 ])])
 
+BRLTTY_ARG_DISABLE(
+   [glob],
+   [support for file system path globbing],
+   [],
+[dnl
+   AC_CHECK_HEADERS([glob.h])
+])
+
 icu_includes=""
 icu_libs=""
 BRLTTY_ARG_DISABLE(
@@ -808,7 +816,7 @@ AC_CHECK_FUNCS([select])
 AC_CHECK_HEADERS([signal.h sys/signalfd.h])
 AC_CHECK_FUNCS([sigaction])
 
-AC_CHECK_HEADERS([alloca.h getopt.h glob.h langinfo.h regex.h])
+AC_CHECK_HEADERS([alloca.h getopt.h langinfo.h regex.h])
 AC_CHECK_HEADERS([syslog.h execinfo.h])
 AC_CHECK_HEADERS([sys/file.h sys/socket.h])
 AC_CHECK_HEADERS([pwd.h grp.h])

@@ -19,7 +19,7 @@
 
 . "`dirname "${0}"`/prologue.sh"
 
-androidPlatform=android-14
+androidPlatform=android-21
 androidArchitecture=arm
 hostSystem=arm-linux-androideabi
 
@@ -79,7 +79,9 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
 # xw (by --disable-x)
 
 "${sourceRoot}/configure" \
+   --disable-glob \
    --disable-gpm \
+   --disable-iconv \
    --disable-icu \
    --disable-liblouis \
    --disable-polkit \

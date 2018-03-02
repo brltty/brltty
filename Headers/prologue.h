@@ -348,7 +348,11 @@ mbsinit (const mbstate_t *ps) {
 #define WCHAR_CHARSET ("UCS-" SIZEOF_WCHAR_T_STR CHARSET_ENDIAN_SUFFIX)
 
 #ifndef HAVE_MEMPCPY
-#define mempcpy(dest,src,size) (void *)((char *)memcpy((dest), (src), (size)) + (size))
+static inline void *
+mempcpy (void *dest, const void *src, size_t size) {
+  extern void *memcpy (void *dest, const void *src, size_t size);
+  return (char *)memcpy(dest, src, size) + size;
+}
 #endif /* HAVE_MEMPCPY */
 
 #ifndef HAVE_WMEMPCPY
