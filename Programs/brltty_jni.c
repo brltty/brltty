@@ -231,7 +231,7 @@ loadCoreLibrary (JNIEnv *env) {
   return 0;
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, coreConstruct, jint,
   jobjectArray arguments, jobject classLoader
 ) {
@@ -245,7 +245,7 @@ JAVA_METHOD (
   return PROG_EXIT_FATAL;
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, coreDestruct, jboolean
 ) {
   jboolean result = brlttyDestruct_p()? JNI_TRUE: JNI_FALSE;
@@ -289,26 +289,26 @@ JAVA_METHOD (
   return result;
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, coreEnableInterrupt, jboolean
 ) {
   return brlttyEnableInterrupt_p()? JNI_TRUE: JNI_FALSE;
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, coreDisableInterrupt, jboolean
 ) {
   return brlttyDisableInterrupt_p()? JNI_TRUE: JNI_FALSE;
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, coreInterrupt, jboolean,
   jboolean stop
 ) {
   return brlttyInterrupt_p((stop != JNI_FALSE)? WAIT_STOP: WAIT_CONTINUE)? JNI_TRUE: JNI_FALSE;
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, coreWait, jboolean,
   jint duration
 ) {
@@ -330,119 +330,119 @@ changeStringValue (JNIEnv *env, int (*change) (const char *cValue), jstring jVal
   return result;
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, changeLogLevel, jboolean,
   jstring level
 ) {
   return changeStringValue(env, changeLogLevel_p, level);
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, changeLogCategories, jboolean,
   jstring categories
 ) {
   return changeStringValue(env, changeLogCategories_p, categories);
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, changeTextTable, jboolean,
   jstring name
 ) {
   return changeStringValue(env, changeTextTable_p, name);
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, changeAttributesTable, jboolean,
   jstring name
 ) {
   return changeStringValue(env, changeAttributesTable_p, name);
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, changeContractionTable, jboolean,
   jstring name
 ) {
   return changeStringValue(env, changeContractionTable_p, name);
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, changeKeyboardTable, jboolean,
   jstring name
 ) {
   return changeStringValue(env, changeKeyboardTable_p, name);
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, restartBrailleDriver, jboolean
 ) {
   restartBrailleDriver_p();
   return JNI_TRUE;
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, changeBrailleDriver, jboolean,
   jstring driver
 ) {
   return changeStringValue(env, changeBrailleDriver_p, driver);
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, changeBrailleParameters, jboolean,
   jstring parameters
 ) {
   return changeStringValue(env, changeBrailleParameters_p, parameters);
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, changeBrailleDevice, jboolean,
   jstring device
 ) {
   return changeStringValue(env, changeBrailleDevice_p, device);
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, restartSpeechDriver, jboolean
 ) {
   restartSpeechDriver_p();
   return JNI_TRUE;
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, changeSpeechDriver, jboolean,
   jstring driver
 ) {
   return changeStringValue(env, changeSpeechDriver_p, driver);
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, changeSpeechParameters, jboolean,
   jstring parameters
 ) {
   return changeStringValue(env, changeSpeechParameters_p, parameters);
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, restartScreenDriver, jboolean
 ) {
   restartScreenDriver_p();
   return JNI_TRUE;
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, changeScreenDriver, jboolean,
   jstring driver
 ) {
   return changeStringValue(env, changeScreenDriver_p, driver);
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, changeScreenParameters, jboolean,
   jstring parameters
 ) {
   return changeStringValue(env, changeScreenParameters_p, parameters);
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_core_CoreWrapper, setEnvironmentVariable, jboolean,
   jstring jName, jstring jValue
 ) {

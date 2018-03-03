@@ -402,7 +402,7 @@ forwardKeyEvent (KeyboardInstanceObject *kio, int code, int press) {
   return 0;
 }
 
-JAVA_METHOD (
+JAVA_INSTANCE_METHOD (
   org_a11y_brltty_android_InputService, handleKeyEvent, jboolean,
   jint code, jboolean press
 ) {

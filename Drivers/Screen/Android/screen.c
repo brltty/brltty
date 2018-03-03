@@ -67,13 +67,13 @@ poll_AndroidScreen (void) {
   return 0;
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_android_ScreenDriver, screenUpdated, void
 ) {
   mainScreenUpdated();
 }
 
-JAVA_METHOD (
+JAVA_STATIC_METHOD (
   org_a11y_brltty_android_ScreenDriver, exportScreenProperties, void,
   jint number,
   jint columns, jint rows,

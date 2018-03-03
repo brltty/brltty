@@ -31,9 +31,14 @@ extern "C" {
 #define JAVA_JNI_VERSION JNI_VERSION_1_6
 #endif /* __ANDROID__ */
 
-#define JAVA_METHOD(object, name, type, ...) \
-  JNIEXPORT type JNICALL Java_ ## object ## _ ## name \
-  (JNIEnv *env, jclass this, ## __VA_ARGS__)
+#define JAVA_METHOD(object, name, type) \
+  JNIEXPORT type JNICALL Java_ ## object ## _ ## name (JNIEnv *env,
+
+#define JAVA_INSTANCE_METHOD(object, name, type, ...) \
+  JAVA_METHOD(object, name, type) jclass this, ## __VA_ARGS__)
+
+#define JAVA_STATIC_METHOD(object, name, type, ...) \
+  JAVA_METHOD(object, name, type) jclass class, ## __VA_ARGS__)
 
 extern JavaVM *getJavaInvocationInterface (void);
 extern JNIEnv *getJavaNativeInterface (void);
