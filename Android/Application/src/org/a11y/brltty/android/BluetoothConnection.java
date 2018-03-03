@@ -43,8 +43,9 @@ public class BluetoothConnection {
   );
 
   protected static final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-  protected final BluetoothDevice bluetoothDevice;
-  protected final String bluetoothAddress;
+  protected final long remoteAddressValue;
+  protected final byte[] remoteAddressBytes = new byte[6];
+  protected final String remoteAddressString;
 
   protected BluetoothSocket bluetoothSocket = null;
   protected InputStream inputStream = null;
@@ -56,7 +57,7 @@ public class BluetoothConnection {
     volatile boolean stop = false;
 
     InputThread () {
-      super("bluetooth-input-" + bluetoothAddress);
+      super(("bluetooth-input-" + remoteAddressString));
     }
 
     @Override
@@ -70,7 +71,7 @@ public class BluetoothConnection {
           try {
             byteCount = inputStream.read(buffer);
           } catch (IOException exception) {
-            Log.d(LOG_TAG, "Bluetooth input exception: " + bluetoothAddress + ": " + exception.getMessage());
+            Log.d(LOG_TAG, ("Bluetooth input exception: " + remoteAddressString + ": " + exception.getMessage()));
             break;
           }
 
@@ -78,51 +79,58 @@ public class BluetoothConnection {
             pipeStream.write(buffer, 0, byteCount);
             pipeStream.flush();
           } else if (byteCount < 0) {
-            Log.d(LOG_TAG, "Bluetooth input end: " + bluetoothAddress);
+            Log.d(LOG_TAG, ("Bluetooth input end: " + remoteAddressString));
             break;
           }
         }
       } catch (Throwable cause) {
-        Log.e(LOG_TAG, "Bluetooth input failed: " + bluetoothAddress, cause);
+        Log.e(LOG_TAG, ("Bluetooth input failed: " + remoteAddressString), cause);
       }
 
       closePipeStream();
     }
   }
 
-  public static BluetoothDevice getDevice (long deviceAddress) {
-    byte[] hardwareAddress = new byte[6];
+  public final BluetoothDevice getDevice () {
+    if (bluetoothAdapter == null) return null;
+    if (!bluetoothAdapter.isEnabled()) return null;
+
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+      return bluetoothAdapter.getRemoteDevice(remoteAddressBytes);
+    } else {
+      return bluetoothAdapter.getRemoteDevice(remoteAddressString);
+    }
+  }
+
+  public final String getName (long deviceAddress) {
+    BluetoothDevice device = getDevice();
+    if (device == null) return null;
+    return device.getName();
+  }
+
+  public BluetoothConnection (long address) {
+    remoteAddressValue = address;
 
     {
-      int i = hardwareAddress.length;
+      long value = remoteAddressValue;
+      int i = remoteAddressBytes.length;
 
       while (i > 0) {
-        hardwareAddress[--i] = (byte)(deviceAddress & 0XFF);
-        deviceAddress >>= 8;
+        remoteAddressBytes[--i] = (byte)(value & 0XFF);
+        value >>= 8;
       }
     }
 
-    if (!ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+    {
       StringBuilder sb = new StringBuilder();
 
-      for (byte octet : hardwareAddress) {
+      for (byte octet : remoteAddressBytes) {
         if (sb.length() > 0) sb.append(':');
         sb.append(String.format("%02X", octet));
       }
 
-      return bluetoothAdapter.getRemoteDevice(sb.toString());
+      remoteAddressString = sb.toString();
     }
-
-    return bluetoothAdapter.getRemoteDevice(hardwareAddress);
-  }
-
-  public static String getName (long deviceAddress) {
-    return getDevice(deviceAddress).getName();
-  }
-
-  public BluetoothConnection (long deviceAddress) {
-    bluetoothDevice = getDevice(deviceAddress);
-    bluetoothAddress = bluetoothDevice.getAddress();
   }
 
   private void closeBluetoothSocket () {
@@ -130,7 +138,7 @@ public class BluetoothConnection {
       try {
         bluetoothSocket.close();
       } catch (IOException exception) {
-        Log.w(LOG_TAG, "Bluetooth socket close failure: " + bluetoothAddress, exception);
+        Log.w(LOG_TAG, ("Bluetooth socket close failure: " + remoteAddressString), exception);
       }
 
       bluetoothSocket = null;
@@ -142,7 +150,7 @@ public class BluetoothConnection {
       try {
         inputStream.close();
       } catch (IOException exception) {
-        Log.w(LOG_TAG, "Bluetooth input stream close failure: " + bluetoothAddress, exception);
+        Log.w(LOG_TAG, ("Bluetooth input stream close failure: " + remoteAddressString), exception);
       }
 
       inputStream = null;
@@ -154,7 +162,7 @@ public class BluetoothConnection {
       try {
         outputStream.close();
       } catch (IOException exception) {
-        Log.w(LOG_TAG, "Bluetooth output stream close failure: " + bluetoothAddress, exception);
+        Log.w(LOG_TAG, ("Bluetooth output stream close failure: " + remoteAddressString), exception);
       }
 
       outputStream = null;
@@ -166,7 +174,7 @@ public class BluetoothConnection {
       try {
         pipeStream.close();
       } catch (IOException exception) {
-        Log.w(LOG_TAG, "Bluetooth pipe stream close failure: " + bluetoothAddress, exception);
+        Log.w(LOG_TAG, ("Bluetooth pipe stream close failure: " + remoteAddressString), exception);
       }
 
       pipeStream = null;
@@ -209,16 +217,19 @@ public class BluetoothConnection {
   }
 
   public boolean open (int inputPipe, int channel, boolean secure) {
+    BluetoothDevice device = getDevice();
+    if (device == null) return false;
+
     if (channel == 0) {
       try {
-        bluetoothSocket = secure? bluetoothDevice.createRfcommSocketToServiceRecord(SERIAL_PROFILE_UUID):
-                                  bluetoothDevice.createInsecureRfcommSocketToServiceRecord(SERIAL_PROFILE_UUID);
+        bluetoothSocket = secure? device.createRfcommSocketToServiceRecord(SERIAL_PROFILE_UUID):
+                                  device.createInsecureRfcommSocketToServiceRecord(SERIAL_PROFILE_UUID);
       } catch (IOException exception) {
-        Log.e(LOG_TAG, "Bluetooth UUID resolution failed: " + bluetoothAddress + ": " + exception.getMessage());
+        Log.e(LOG_TAG, ("Bluetooth UUID resolution failed: " + remoteAddressString + ": " + exception.getMessage()));
         bluetoothSocket = null;
       }
     } else {
-      bluetoothSocket = createRfcommSocket(bluetoothDevice, channel);
+      bluetoothSocket = createRfcommSocket(device, channel);
     }
 
     if (bluetoothSocket != null) {
@@ -238,7 +249,7 @@ public class BluetoothConnection {
 
         return true;
       } catch (IOException openException) {
-        Log.d(LOG_TAG, "Bluetooth connect failed: " + bluetoothAddress + ": " + openException.getMessage());
+        Log.d(LOG_TAG, ("Bluetooth connect failed: " + remoteAddressString + ": " + openException.getMessage()));
       }
     }
 
@@ -252,7 +263,7 @@ public class BluetoothConnection {
       outputStream.flush();
       return true;
     } catch (IOException exception) {
-      Log.e(LOG_TAG, "Bluetooth write failed: " + bluetoothAddress, exception);
+      Log.e(LOG_TAG, ("Bluetooth write failed: " + remoteAddressString), exception);
     }
 
     return false;
