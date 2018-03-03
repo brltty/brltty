@@ -46,7 +46,7 @@ bthGetConnectionConstructor (JNIEnv *env) {
   return findJavaConstructor(
     env, &connectionConstructor, connectionClass,
     JAVA_SIG_CONSTRUCTOR(
-      JAVA_SIG_LONG // deviceAddress
+      JAVA_SIG_LONG // address
     )
   );
 }
