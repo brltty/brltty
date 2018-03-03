@@ -91,9 +91,14 @@ public class BluetoothConnection {
     }
   }
 
+  public static boolean isUp () {
+    if (bluetoothAdapter == null) return false;
+    if (!bluetoothAdapter.isEnabled()) return false;
+    return true;
+  }
+
   public final BluetoothDevice getDevice () {
-    if (bluetoothAdapter == null) return null;
-    if (!bluetoothAdapter.isEnabled()) return null;
+    if (!isUp()) return null;
 
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       return bluetoothAdapter.getRemoteDevice(remoteAddressBytes);
@@ -272,7 +277,7 @@ public class BluetoothConnection {
   private static BluetoothDevice[] pairedDevices = null;
 
   public static int getPairedDeviceCount () {
-    if (bluetoothAdapter != null) {
+    if (isUp()) {
       Set<BluetoothDevice> devices = bluetoothAdapter.getBondedDevices();
 
       if (devices != null) {
