@@ -29,6 +29,12 @@
 #include "usb_internal.h"
 #include "system_java.h"
 
+#define JAVA_SIG_USB(name) JAVA_SIG_OBJECT("android/hardware/usb/Usb" name)
+#define JAVA_SIG_USB_DEVICE JAVA_SIG_USB("Device")
+#define JAVA_SIG_USB_DEVICE_CONNECTION JAVA_SIG_USB("DeviceConnection")
+#define JAVA_SIG_USB_ENDPOINT JAVA_SIG_USB("Endpoint")
+#define JAVA_SIG_USB_INTERFACE JAVA_SIG_USB("Interface")
+
 typedef struct {
   JNIEnv *env;
   jobject device;
@@ -64,7 +70,7 @@ usbGetDeviceIterator (JNIEnv *env) {
     static jmethodID method = 0;
 
     if (findJavaStaticMethod(env, &method, usbHelperClass, "getDeviceIterator",
-                             JAVA_SIG_METHOD(JAVA_SIG_OBJECT(java/util/Iterator), ))) {
+                             JAVA_SIG_METHOD(JAVA_SIG_ITERATOR, ))) {
       jobject iterator = (*env)->CallStaticObjectMethod(env, usbHelperClass, method);
 
       if (iterator) return iterator;
@@ -82,7 +88,7 @@ usbGetNextDevice (JNIEnv *env, jobject iterator) {
     static jmethodID method = 0;
 
     if (findJavaStaticMethod(env, &method, usbHelperClass, "getNextDevice",
-                             JAVA_SIG_METHOD(JAVA_SIG_OBJECT(android/hardware/usb/UsbDevice), JAVA_SIG_OBJECT(java/util/Iterator)))) {
+                             JAVA_SIG_METHOD(JAVA_SIG_USB_DEVICE, JAVA_SIG_ITERATOR))) {
       jobject device = (*env)->CallStaticObjectMethod(env, usbHelperClass, method, iterator);
 
       if (device) return device;
@@ -99,8 +105,8 @@ usbGetDeviceInterface (JNIEnv *env, jobject device, jint identifier) {
     static jmethodID method = 0;
 
     if (findJavaStaticMethod(env, &method, usbHelperClass, "getDeviceInterface",
-                             JAVA_SIG_METHOD(JAVA_SIG_OBJECT(android/hardware/usb/UsbInterface),
-                                             JAVA_SIG_OBJECT(android/hardware/usb/UsbDevice) // device
+                             JAVA_SIG_METHOD(JAVA_SIG_USB_INTERFACE,
+                                             JAVA_SIG_USB_DEVICE // device
                                              JAVA_SIG_INT // identifier
                                             ))) {
       jobject interface = (*env)->CallStaticObjectMethod(env, usbHelperClass, method, device, identifier);
@@ -120,8 +126,8 @@ usbGetInterfaceEndpoint (JNIEnv *env, jobject interface, jint address) {
     static jmethodID method = 0;
 
     if (findJavaStaticMethod(env, &method, usbHelperClass, "getInterfaceEndpoint",
-                             JAVA_SIG_METHOD(JAVA_SIG_OBJECT(android/hardware/usb/UsbEndpoint),
-                                             JAVA_SIG_OBJECT(android/hardware/usb/UsbInterface) // interface
+                             JAVA_SIG_METHOD(JAVA_SIG_USB_ENDPOINT,
+                                             JAVA_SIG_USB_INTERFACE // interface
                                              JAVA_SIG_INT // address
                                             ))) {
       jobject endpoint = (*env)->CallStaticObjectMethod(env, usbHelperClass, method, interface, address);
@@ -143,7 +149,7 @@ usbOpenDeviceConnection (JNIEnv *env, jobject device) {
     static jmethodID method = 0;
 
     if (findJavaStaticMethod(env, &method, usbHelperClass, "openDeviceConnection",
-                             JAVA_SIG_METHOD(JAVA_SIG_OBJECT(android/hardware/usb/UsbDeviceConnection), JAVA_SIG_OBJECT(android/hardware/usb/UsbDevice)))) {
+                             JAVA_SIG_METHOD(JAVA_SIG_USB_DEVICE_CONNECTION, JAVA_SIG_USB_DEVICE))) {
       jobject connection = (*env)->CallStaticObjectMethod(env, usbHelperClass, method, device);
 
       if (connection) return connection;
@@ -274,7 +280,7 @@ usbDoClaimInterface (JNIEnv *env, jobject connection, jobject interface) {
 
     if (findJavaInstanceMethod(env, &method, usbConnectionClass, "claimInterface",
                                JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
-                                               JAVA_SIG_OBJECT(android/hardware/usb/UsbInterface) // interface
+                                               JAVA_SIG_USB_INTERFACE // interface
                                                JAVA_SIG_BOOLEAN // force
                                               ))) {
       jboolean result = (*env)->CallBooleanMethod(env, connection, method, interface, JNI_TRUE);
@@ -299,7 +305,7 @@ usbDoReleaseInterface (JNIEnv *env, jobject connection, jobject interface) {
 
     if (findJavaInstanceMethod(env, &method, usbConnectionClass, "releaseInterface",
                                JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
-                                               JAVA_SIG_OBJECT(android/hardware/usb/UsbInterface) // interface
+                                               JAVA_SIG_USB_INTERFACE // interface
                                               ))) {
       jboolean result = (*env)->CallBooleanMethod(env, connection, method, interface);
 
@@ -357,7 +363,7 @@ usbDoBulkTransfer (
 
     if (findJavaInstanceMethod(env, &method, usbConnectionClass, "bulkTransfer",
                                JAVA_SIG_METHOD(JAVA_SIG_INT,
-                                               JAVA_SIG_OBJECT(android/hardware/usb/UsbEndpoint) // endpoint
+                                               JAVA_SIG_USB_ENDPOINT // endpoint
                                                JAVA_SIG_ARRAY(JAVA_SIG_BYTE) // buffer
                                                JAVA_SIG_INT // length
                                                JAVA_SIG_INT // timeout

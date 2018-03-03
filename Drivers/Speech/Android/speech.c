@@ -69,7 +69,7 @@ static void
 spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
   if (findDriverMethod(spk, &spk->driver.data->sayMethod, "say",
                        JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
-                                       JAVA_SIG_OBJECT(java/lang/String) // text
+                                       JAVA_SIG_STRING // text
                                       ))) {
     jstring string = (*spk->driver.data->env)->NewStringUTF(spk->driver.data->env, (const char *)buffer);
     if (string) {

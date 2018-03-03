@@ -53,10 +53,18 @@ extern int clearJavaException (JNIEnv *env, int describe);
 #define JAVA_SIG_LONG                      "J"
 #define JAVA_SIG_FLOAT                     "F"
 #define JAVA_SIG_DOUBLE                    "D"
-#define JAVA_SIG_OBJECT(path)              "L" #path ";"
+#define JAVA_SIG_OBJECT(path)              "L" path ";"
 #define JAVA_SIG_ARRAY(element)            "[" element
 #define JAVA_SIG_METHOD(returns,arguments) "(" arguments ")" returns
 #define JAVA_SIG_CONSTRUCTOR(arguments)    JAVA_SIG_METHOD(JAVA_SIG_VOID, arguments)
+
+#define JAVA_SIG_LANG(name) JAVA_SIG_OBJECT("java/lang/" name)
+#define JAVA_SIG_CLASS JAVA_SIG_LANG("Class")
+#define JAVA_SIG_STRING JAVA_SIG_LANG("String")
+
+#define JAVA_SIG_UTIL(name) JAVA_SIG_OBJECT("java/util/" name)
+#define JAVA_SIG_ITERATOR JAVA_SIG_UTIL("Iterator")
+#define JAVA_SIG_LOCALE JAVA_SIG_UTIL("Locale")
 
 FUNCTION_DECLARE(setJavaClassLoader, int, (JNIEnv *env, jobject instance));
 extern int findJavaClass (JNIEnv *env, jclass *class, const char *path);

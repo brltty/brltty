@@ -119,8 +119,8 @@ setJavaClassLoader (JNIEnv *env, jobject instance) {
 
         if (javaClassLoaderClass) {
           jmethodID method = (*env)->GetMethodID(env, javaClassLoaderClass, "loadClass",
-                                                 JAVA_SIG_METHOD(JAVA_SIG_OBJECT(java/lang/Class),
-                                                                 JAVA_SIG_OBJECT(java/lang/String) // className
+                                                 JAVA_SIG_METHOD(JAVA_SIG_CLASS,
+                                                                 JAVA_SIG_STRING // className
                                                                 ));
 
           if (method) {
@@ -303,7 +303,7 @@ getJavaLocaleName (void) {
       jmethodID Locale_getDefault = 0;
 
       if (findJavaStaticMethod(env, &Locale_getDefault, Locale_class, "getDefault",
-                               JAVA_SIG_METHOD(JAVA_SIG_OBJECT(java/util/Locale), 
+                               JAVA_SIG_METHOD(JAVA_SIG_LOCALE, 
                                               ))) {
         jobject locale = (*env)->CallStaticObjectMethod(env, Locale_class, Locale_getDefault);
 
@@ -311,7 +311,7 @@ getJavaLocaleName (void) {
           jmethodID Locale_toString = 0;
 
           if (findJavaInstanceMethod(env, &Locale_toString, Locale_class, "toString",
-                                     JAVA_SIG_METHOD(JAVA_SIG_OBJECT(java/lang/String), 
+                                     JAVA_SIG_METHOD(JAVA_SIG_STRING, 
                                                     ))) {
             jstring jName = (*env)->CallObjectMethod(env, locale, Locale_toString);
 
