@@ -107,10 +107,14 @@ public class BluetoothConnection {
     }
   }
 
-  public final String getName (long deviceAddress) {
+  public final String getName () {
     BluetoothDevice device = getDevice();
     if (device == null) return null;
     return device.getName();
+  }
+
+  public static String getName (long address) {
+    return new BluetoothConnection(address).getName();
   }
 
   public BluetoothConnection (long address) {

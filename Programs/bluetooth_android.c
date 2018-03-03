@@ -292,7 +292,7 @@ bthObtainDeviceName (uint64_t bda, int timeout) {
 
       if (findJavaStaticMethod(env, &method, connectionClass, "getName",
                                JAVA_SIG_METHOD(JAVA_SIG_OBJECT(java/lang/String),
-                                               JAVA_SIG_LONG // deviceAddress
+                                               JAVA_SIG_LONG // address
                                               ))) {
         jstring jName = (*env)->CallStaticObjectMethod(env, connectionClass, method, bda);
 
