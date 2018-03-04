@@ -26,7 +26,6 @@ extern "C" {
 #define PACKAGE_COPYRIGHT "Copyright (C) 1995-2018 by The BRLTTY Developers."
 
 #undef HAVE_BUILTIN_POPCOUNT
-
 #ifdef __has_builtin
 #if __has_builtin(__builtin_popcount)
 #define HAVE_BUILTIN_POPCOUNT
@@ -74,6 +73,10 @@ extern "C" {
 #include "config.h"
 #endif /* FOR_BUILD */
 #endif /* HAVE_CONFIG_H */
+
+#ifdef __ANDROID__
+#define __ANDROID_API__ 19
+#endif /* __ANDROID__ */
 
 #if defined(__CYGWIN__) || defined(__MINGW32__)
 #define WINDOWS
