@@ -237,7 +237,17 @@ setPcmAmplitudeFormat (PcmDevice *pcm, PcmAmplitudeFormat format) {
 }
 
 void
-forcePcmOutput (PcmDevice *pcm) {
+pushPcmOutput (PcmDevice *pcm) {
+  if (findPcmDeviceClass(pcm->env)) {
+    static jmethodID method = 0;
+
+    if (findJavaInstanceMethod(pcm->env, &method, pcmDeviceClass, "push",
+                               JAVA_SIG_METHOD(JAVA_SIG_VOID,
+                                              ))) {
+      (*pcm->env)->CallVoidMethod(pcm->env, pcm->device, method);
+      clearJavaException(pcm->env, 1);
+    }
+  }
 }
 
 void

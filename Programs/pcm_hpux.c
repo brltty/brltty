@@ -180,7 +180,7 @@ setPcmAmplitudeFormat (PcmDevice *pcm, PcmAmplitudeFormat format) {
 }
 
 void
-forcePcmOutput (PcmDevice *pcm) {
+pushPcmOutput (PcmDevice *pcm) {
 }
 
 void

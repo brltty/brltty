@@ -69,7 +69,7 @@ extern PcmAmplitudeFormat getPcmAmplitudeFormat (PcmDevice *pcm);
 extern PcmAmplitudeFormat setPcmAmplitudeFormat (PcmDevice *pcm, PcmAmplitudeFormat format);
 
 extern int writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count);
-extern void forcePcmOutput (PcmDevice *pcm);
+extern void pushPcmOutput (PcmDevice *pcm);
 extern void awaitPcmOutput (PcmDevice *pcm);
 extern void cancelPcmOutput (PcmDevice *pcm);
 

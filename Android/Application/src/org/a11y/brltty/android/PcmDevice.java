@@ -39,6 +39,10 @@ public final class PcmDevice {
     return audioTrack != null;
   }
 
+  public boolean isPlaying () {
+    return audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING;
+  }
+
   public int getSampleRate () {
     return sampleRate;
   }
@@ -97,19 +101,24 @@ public final class PcmDevice {
     int length = samples.length;
 
     while (length > 0) {
-      int result = audioTrack.write(samples, offset, length);
-      if (result < 1) return false;
+      int count = audioTrack.write(samples, offset, length);
+      if (count < 1) return false;
 
-      audioTrack.play();
-      offset += result;
-      length -= result;
+      offset += count;
+      length -= count;
+
+      if (!isPlaying()) audioTrack.play();
     }
 
     return true;
   }
 
+  public void push () {
+    if (isPlaying()) audioTrack.stop();
+  }
+
   public void cancel () {
-    audioTrack.pause();
+    if (isPlaying()) audioTrack.pause();
     audioTrack.flush();
   }
 

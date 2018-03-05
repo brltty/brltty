@@ -171,7 +171,7 @@ setPcmAmplitudeFormat (PcmDevice *pcm, PcmAmplitudeFormat format) {
 }
 
 void
-forcePcmOutput (PcmDevice *pcm) {
+pushPcmOutput (PcmDevice *pcm) {
   ioctl(pcm->fileDescriptor, SNDCTL_DSP_POST, 0);
 }
 

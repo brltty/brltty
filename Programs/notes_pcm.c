@@ -254,7 +254,9 @@ pcmNote (NoteDevice *device, unsigned int duration, unsigned char note) {
 
 static int
 pcmFlush (NoteDevice *device) {
-  return pcmFlushBlock(device);
+  int ok = pcmFlushBlock(device);
+  if (ok) pushPcmOutput(device->pcm);
+  return ok;
 }
 
 const NoteMethods pcmNoteMethods = {
