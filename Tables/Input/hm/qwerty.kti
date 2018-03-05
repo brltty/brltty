@@ -135,7 +135,9 @@ endVariables
 
 beginVariables
 assign keys Dot7+
-assign flags +meta
+# these conflict with shifted letters
+#assign flags +meta
+assign flags +shift
 include letters.kti
 endVariables
 
