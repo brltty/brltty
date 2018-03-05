@@ -106,7 +106,6 @@ extern int findJavaStaticField (
 );
 
 extern char *getJavaLocaleName (void);
-extern char *getJavaThreadName (void);
 
 #ifdef __cplusplus
 }
