@@ -61,7 +61,7 @@ static jclass usbConnectionClass = NULL;
 
 static int
 usbFindHelperClass (JNIEnv *env) {
-  return findJavaClass(env, &usbHelperClass, "org/a11y/brltty/android/UsbHelper");
+  return findJavaClass(env, &usbHelperClass, JAVA_OBJ_BRLTTY("UsbHelper"));
 }
 
 static jobject

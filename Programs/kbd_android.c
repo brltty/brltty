@@ -382,7 +382,7 @@ int
 forwardKeyEvent (KeyboardInstanceObject *kio, int code, int press) {
   KeyboardInstanceExtension *kix = kio->kix;
 
-  if (findJavaClass(kix->env, &kix->inputService, "org/a11y/brltty/android/InputService")) {
+  if (findJavaClass(kix->env, &kix->inputService, JAVA_OBJ_BRLTTY("InputService"))) {
     if (findJavaInstanceMethod(kix->env, &kix->forwardKeyEvent, kix->inputService, "forwardKeyEvent",
                                JAVA_SIG_METHOD(JAVA_SIG_VOID,
                                                JAVA_SIG_INT // code

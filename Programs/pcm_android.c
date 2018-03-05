@@ -33,7 +33,7 @@ static jclass pcmDeviceClass = NULL;
 
 static int
 findPcmDeviceClass (JNIEnv *env) {
-  return findJavaClass(env, &pcmDeviceClass, "org/a11y/brltty/android/PcmDevice");
+  return findJavaClass(env, &pcmDeviceClass, JAVA_OBJ_BRLTTY("PcmDevice"));
 }
 
 PcmDevice *

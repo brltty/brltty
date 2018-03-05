@@ -40,7 +40,7 @@ struct SpeechDataStruct {
 
 static int
 findDriverClass (volatile SpeechSynthesizer *spk) {
-  return findJavaClass(spk->driver.data->env, &spk->driver.data->driverClass, "org/a11y/brltty/android/SpeechDriver");
+  return findJavaClass(spk->driver.data->env, &spk->driver.data->driverClass, JAVA_OBJ_BRLTTY("SpeechDriver"));
 }
 
 static void

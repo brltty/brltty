@@ -49,17 +49,17 @@ static const char *problemText;
 
 static int
 findScreenDriverClass (void) {
-  return findJavaClass(env, &screenDriverClass, "org/a11y/brltty/android/ScreenDriver");
+  return findJavaClass(env, &screenDriverClass, JAVA_OBJ_BRLTTY("ScreenDriver"));
 }
 
 static int
 findInputServiceClass (void) {
-  return findJavaClass(env, &inputServiceClass, "org/a11y/brltty/android/InputService");
+  return findJavaClass(env, &inputServiceClass, JAVA_OBJ_BRLTTY("InputService"));
 }
 
 static int
 findLockUtilitiesClass (void) {
-  return findJavaClass(env, &lockUtilitiesClass, "org/a11y/brltty/android/LockUtilities");
+  return findJavaClass(env, &lockUtilitiesClass, JAVA_OBJ_BRLTTY("LockUtilities"));
 }
 
 static int

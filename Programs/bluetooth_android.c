@@ -37,7 +37,7 @@ static jmethodID writeMethod = 0;
 static int
 bthGetConnectionClass (JNIEnv *env) {
   return findJavaClass(
-    env, &connectionClass, "org/a11y/brltty/android/BluetoothConnection"
+    env, &connectionClass, JAVA_OBJ_BRLTTY("BluetoothConnection")
   );
 }
 

@@ -29,6 +29,7 @@ extern "C" {
 
 #ifdef __ANDROID__
 #define JAVA_JNI_VERSION JNI_VERSION_1_6
+#define JAVA_OBJ_BRLTTY(name) "org/a11y/brltty/android/" name
 #endif /* __ANDROID__ */
 
 #define JAVA_METHOD(object, name, type) \
