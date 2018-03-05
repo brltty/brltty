@@ -43,15 +43,36 @@ getJavaInvocationInterface (void) {
   return javaVirtualMachine;
 }
 
+typedef struct {
+  JavaVM *virtualMachine;
+  JNIEnv *nativeInterface;
+  char *threadName;
+} ThreadSpecificData;
+
 static THREAD_SPECIFIC_DATA_NEW(tsdJavaNativeThread) {
-  return getJavaInvocationInterface();
+  ThreadSpecificData *tsd;
+
+  if ((tsd = malloc(sizeof(*tsd)))) {
+    memset(tsd, 0, sizeof(*tsd));
+    return tsd;
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
 }
 
 static THREAD_SPECIFIC_DATA_DESTROY(tsdJavaNativeThread) {
-  JavaVM *vm = data;
+  ThreadSpecificData *tsd = data;
 
-  (*vm)->DetachCurrentThread(vm);
-  logMessage(LOG_DEBUG, "thread detached from Java VM");
+  {
+    JavaVM *vm = tsd->virtualMachine;
+    (*vm)->DetachCurrentThread(vm);
+  }
+
+  logMessage(LOG_DEBUG, "thread detached from Java VM: %s", tsd->threadName);
+  free(tsd->threadName);
+  free(tsd);
 }
 
 THREAD_SPECIFIC_DATA_CONTROL(tsdJavaNativeThread);
@@ -75,8 +96,12 @@ getJavaNativeInterface (void) {
         if ((result = (*vm)->AttachCurrentThread(vm, &env, &args)) < 0) {
           logMessage(LOG_WARNING, "Java AttachCurrentThread error: %d", result);
         } else {
-          logMessage(LOG_DEBUG, "thread attached to Java VM");
-          getThreadSpecificData(&tsdJavaNativeThread);
+          ThreadSpecificData *tsd = getThreadSpecificData(&tsdJavaNativeThread);
+          tsd->virtualMachine = vm;
+          tsd->nativeInterface = env;
+          tsd->threadName = getJavaThreadName();
+
+          logMessage(LOG_DEBUG, "thread attached to Java VM: %s", tsd->threadName);
         }
       } else {
         logMessage(LOG_WARNING, "Java GetEnv error: %d", result);
@@ -329,6 +354,52 @@ getJavaLocaleName (void) {
           }
 
           (*env)->DeleteLocalRef(env, locale);
+        }
+      }
+    }
+  }
+
+  return name;
+}
+
+char *
+getJavaThreadName (void) {
+  char *name = NULL;
+  JNIEnv *env;
+
+  if ((env = getJavaNativeInterface())) {
+    jclass Thread_class = NULL;
+
+    if (findJavaClass(env, &Thread_class, JAVA_OBJ_THREAD)) {
+      jmethodID Thread_currentThread = 0;
+
+      if (findJavaStaticMethod(env, &Thread_currentThread, Thread_class, "currentThread",
+                               JAVA_SIG_METHOD(JAVA_SIG_THREAD, 
+                                              ))) {
+        jobject thread = (*env)->CallStaticObjectMethod(env, Thread_class, Thread_currentThread);
+
+        if (!clearJavaException(env, 1)) {
+          jmethodID Thread_getName = 0;
+
+          if (findJavaInstanceMethod(env, &Thread_getName, Thread_class, "getName",
+                                     JAVA_SIG_METHOD(JAVA_SIG_STRING, 
+                                                    ))) {
+            jstring jName = (*env)->CallObjectMethod(env, thread, Thread_getName);
+
+            if (!clearJavaException(env, 1)) {
+              jboolean isCopy;
+              const char *cName = (*env)->GetStringUTFChars(env, jName, &isCopy);
+
+              if (!(name = strdup(cName))) {
+                logMallocError();
+              }
+
+              (*env)->ReleaseStringUTFChars(env, jName, cName);
+              (*env)->DeleteLocalRef(env, jName);
+            }
+          }
+
+          (*env)->DeleteLocalRef(env, thread);
         }
       }
     }

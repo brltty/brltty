@@ -74,6 +74,9 @@ extern int clearJavaException (JNIEnv *env, int describe);
 #define JAVA_OBJ_STRING JAVA_OBJ_LANG("String")
 #define JAVA_SIG_STRING JAVA_SIG_OBJECT(JAVA_OBJ_STRING)
 
+#define JAVA_OBJ_THREAD JAVA_OBJ_LANG("Thread")
+#define JAVA_SIG_THREAD JAVA_SIG_OBJECT(JAVA_OBJ_THREAD)
+
 FUNCTION_DECLARE(setJavaClassLoader, int, (JNIEnv *env, jobject instance));
 extern int findJavaClass (JNIEnv *env, jclass *class, const char *path);
 
@@ -103,6 +106,7 @@ extern int findJavaStaticField (
 );
 
 extern char *getJavaLocaleName (void);
+extern char *getJavaThreadName (void);
 
 #ifdef __cplusplus
 }
