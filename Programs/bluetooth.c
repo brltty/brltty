@@ -33,8 +33,6 @@
 
 static int
 bthDiscoverSerialPortChannel (uint8_t *channel, BluetoothConnectionExtension *bcx, int timeout) {
-  int discovered;
-
   static const uint8_t uuid[] = {
     0X00, 0X00, 0X11, 0X01,
     0X00, 0X00,
@@ -44,7 +42,7 @@ bthDiscoverSerialPortChannel (uint8_t *channel, BluetoothConnectionExtension *bc
   };
 
   logMessage(LOG_CATEGORY(BLUETOOTH_IO), "discovering serial port channel");
-  discovered = bthDiscoverChannel(channel, bcx, uuid, sizeof(uuid), timeout);
+  int discovered = bthDiscoverChannel(channel, bcx, uuid, sizeof(uuid), timeout);
 
   if (discovered) {
     logMessage(LOG_CATEGORY(BLUETOOTH_IO), "serial port channel discovered: %u", *channel);
