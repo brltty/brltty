@@ -966,33 +966,27 @@ makeBrailleKeyTablePath (void) {
 
 static void
 makeBrailleHelpPage (const char *keyTablePath) {
-  if (!brl.keyTable) {
-    char *keyHelpPath = replaceFileExtension(keyTablePath, KEY_HELP_EXTENSION);
+  if (enableBrailleHelpPage()) {
+    if (brl.keyTable) {
+      listKeyTable(brl.keyTable, NULL, handleWcharHelpLine, NULL);
+    } else {
+      char *keyHelpPath = replaceFileExtension(keyTablePath, KEY_HELP_EXTENSION);
 
-    if (keyHelpPath) {
-      int loaded = 0;
-
-      if (enableBrailleHelpPage()) {
+      if (keyHelpPath) {
         if (loadHelpFile(keyHelpPath)) {
-          loaded = 1;
+          logMessage(LOG_INFO, "%s: %s", gettext("Key Help"), keyHelpPath);
+        } else {
+          logMessage(LOG_WARNING, "%s: %s", gettext("cannot open key help"), keyHelpPath);
         }
-      }
 
-      if (loaded) {
-        logMessage(LOG_INFO, "%s: %s", gettext("Key Help"), keyHelpPath);
-      } else {
-        logMessage(LOG_WARNING, "%s: %s", gettext("cannot open key help"), keyHelpPath);
+        free(keyHelpPath);
       }
-
-      free(keyHelpPath);
     }
-  } else if (enableBrailleHelpPage()) {
-    listKeyTable(brl.keyTable, NULL, handleWcharHelpLine, NULL);
-  }
 
-  if (!getHelpLineCount()) {
-    addHelpLine(WS_C("help not available"));
-    message(NULL, gettext("no key bindings"), 0);
+    if (!getHelpLineCount()) {
+      addHelpLine(WS_C("help not available"));
+      message(NULL, gettext("no key bindings"), 0);
+    }
   }
 }
 
