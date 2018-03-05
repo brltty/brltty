@@ -59,13 +59,20 @@ extern int clearJavaException (JNIEnv *env, int describe);
 #define JAVA_SIG_METHOD(returns,arguments) "(" arguments ")" returns
 #define JAVA_SIG_CONSTRUCTOR(arguments)    JAVA_SIG_METHOD(JAVA_SIG_VOID, arguments)
 
-#define JAVA_SIG_LANG(name) JAVA_SIG_OBJECT("java/lang/" name)
-#define JAVA_SIG_CLASS JAVA_SIG_LANG("Class")
-#define JAVA_SIG_STRING JAVA_SIG_LANG("String")
+#define JAVA_OBJ_LANG(name) "java/lang/" name
+#define JAVA_OBJ_UTIL(name) "java/util/" name
 
-#define JAVA_SIG_UTIL(name) JAVA_SIG_OBJECT("java/util/" name)
-#define JAVA_SIG_ITERATOR JAVA_SIG_UTIL("Iterator")
-#define JAVA_SIG_LOCALE JAVA_SIG_UTIL("Locale")
+#define JAVA_OBJ_CLASS JAVA_OBJ_LANG("Class")
+#define JAVA_SIG_CLASS JAVA_SIG_OBJECT(JAVA_OBJ_CLASS)
+
+#define JAVA_OBJ_ITERATOR JAVA_OBJ_UTIL("Iterator")
+#define JAVA_SIG_ITERATOR JAVA_SIG_OBJECT(JAVA_OBJ_ITERATOR)
+
+#define JAVA_OBJ_LOCALE JAVA_OBJ_UTIL("Locale")
+#define JAVA_SIG_LOCALE JAVA_SIG_OBJECT(JAVA_OBJ_LOCALE)
+
+#define JAVA_OBJ_STRING JAVA_OBJ_LANG("String")
+#define JAVA_SIG_STRING JAVA_SIG_OBJECT(JAVA_OBJ_STRING)
 
 FUNCTION_DECLARE(setJavaClassLoader, int, (JNIEnv *env, jobject instance));
 extern int findJavaClass (JNIEnv *env, jclass *class, const char *path);

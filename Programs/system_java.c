@@ -299,7 +299,7 @@ getJavaLocaleName (void) {
   if ((env = getJavaNativeInterface())) {
     jclass Locale_class = NULL;
 
-    if (findJavaClass(env, &Locale_class, "java/util/Locale")) {
+    if (findJavaClass(env, &Locale_class, JAVA_OBJ_LOCALE)) {
       jmethodID Locale_getDefault = 0;
 
       if (findJavaStaticMethod(env, &Locale_getDefault, Locale_class, "getDefault",
