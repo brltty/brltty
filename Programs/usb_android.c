@@ -29,11 +29,16 @@
 #include "usb_internal.h"
 #include "system_java.h"
 
-#define JAVA_SIG_USB(name) JAVA_SIG_OBJECT("android/hardware/usb/Usb" name)
-#define JAVA_SIG_USB_DEVICE JAVA_SIG_USB("Device")
-#define JAVA_SIG_USB_DEVICE_CONNECTION JAVA_SIG_USB("DeviceConnection")
-#define JAVA_SIG_USB_ENDPOINT JAVA_SIG_USB("Endpoint")
-#define JAVA_SIG_USB_INTERFACE JAVA_SIG_USB("Interface")
+#define JAVA_OBJ_USB(name) "android/hardware/usb/Usb" name
+#define JAVA_OBJ_USB_DEVICE JAVA_OBJ_USB("Device")
+#define JAVA_OBJ_USB_INTERFACE JAVA_OBJ_USB("Interface")
+#define JAVA_OBJ_USB_ENDPOINT JAVA_OBJ_USB("Endpoint")
+#define JAVA_OBJ_USB_CONNECTION JAVA_OBJ_USB("DeviceConnection")
+
+#define JAVA_SIG_USB_DEVICE JAVA_SIG_OBJECT(JAVA_OBJ_USB_DEVICE)
+#define JAVA_SIG_USB_INTERFACE JAVA_SIG_OBJECT(JAVA_OBJ_USB_INTERFACE)
+#define JAVA_SIG_USB_ENDPOINT JAVA_SIG_OBJECT(JAVA_OBJ_USB_ENDPOINT)
+#define JAVA_SIG_USB_CONNECTION JAVA_SIG_OBJECT(JAVA_OBJ_USB_CONNECTION)
 
 typedef struct {
   JNIEnv *env;
@@ -149,7 +154,7 @@ usbOpenDeviceConnection (JNIEnv *env, jobject device) {
     static jmethodID method = 0;
 
     if (findJavaStaticMethod(env, &method, usbHelperClass, "openDeviceConnection",
-                             JAVA_SIG_METHOD(JAVA_SIG_USB_DEVICE_CONNECTION, JAVA_SIG_USB_DEVICE))) {
+                             JAVA_SIG_METHOD(JAVA_SIG_USB_CONNECTION, JAVA_SIG_USB_DEVICE))) {
       jobject connection = (*env)->CallStaticObjectMethod(env, usbHelperClass, method, device);
 
       if (connection) return connection;
@@ -163,7 +168,7 @@ usbOpenDeviceConnection (JNIEnv *env, jobject device) {
 
 static int
 usbFindDeviceClass (JNIEnv *env) {
-  return findJavaClass(env, &usbDeviceClass, "android/hardware/usb/UsbDevice");
+  return findJavaClass(env, &usbDeviceClass, JAVA_OBJ_USB_DEVICE);
 }
 
 static int
@@ -243,7 +248,7 @@ usbGetDeviceProtocol (JNIEnv *env, jobject device, UsbDeviceDescriptor *descript
 
 static int
 usbFindInterfaceClass (JNIEnv *env) {
-  return findJavaClass(env, &usbInterfaceClass, "android/hardware/usb/UsbInterface");
+  return findJavaClass(env, &usbInterfaceClass, JAVA_OBJ_USB_INTERFACE);
 }
 
 static int
@@ -270,7 +275,7 @@ usbGetInterfaceIdentifier (JNIEnv *env, uint8_t *identifier, jobject interface) 
 
 static int
 usbFindConnectionClass (JNIEnv *env) {
-  return findJavaClass(env, &usbConnectionClass, "android/hardware/usb/UsbDeviceConnection");
+  return findJavaClass(env, &usbConnectionClass, JAVA_OBJ_USB_CONNECTION);
 }
 
 static int
