@@ -21,7 +21,7 @@ Name: @PACKAGE_TARNAME@
 Version: @PACKAGE_VERSION@
 Release: 1
 Group: System Environment/Daemons
-License: GPL
+License: LGPL
 
 Vendor: The BRLTTY Developers
 Packager: Dave Mielke <dave@mielke.cc>
@@ -81,7 +81,7 @@ Install this package if you use a refreshable braille display.
 Version: @PACKAGE_VERSION@
 Release: 1
 Group: System Environment/Daemons
-License: GPL
+License: LGPL
 
 AutoProv: no
 AutoReq: yes
@@ -99,7 +99,7 @@ of the braille device.
 Version: @PACKAGE_VERSION@
 Release: 1
 Group: System Environment/Daemons
-License: GPL
+License: LGPL
 
 Requires: libX11
 
@@ -127,7 +127,7 @@ application would be by a blind person using a braille device.
 Version: @PACKAGE_VERSION@
 Release: 1
 Group: System Environment/Daemons
-License: GPL
+License: LGPL
 
 Requires: espeak
 
@@ -148,7 +148,7 @@ eSpeak text-to-speech engine.
 Version: @PACKAGE_VERSION@
 Release: 1
 Group: System Environment/Daemons
-License: GPL
+License: LGPL
 
 Requires: espeak-ng
 
@@ -169,7 +169,7 @@ eSpeak-NG text-to-speech engine.
 Version: @PACKAGE_VERSION@
 Release: 1
 Group: System Environment/Daemons
-License: GPL
+License: LGPL
 
 Requires: festival
 
@@ -188,7 +188,7 @@ Festival text-to-speech engine.
 Version: @PACKAGE_VERSION@
 Release: 1
 Group: System Environment/Daemons
-License: GPL
+License: LGPL
 
 Requires: flite
 
@@ -209,7 +209,7 @@ Festival Lite text-to-speech engine.
 Version: @PACKAGE_VERSION@
 Release: 1
 Group: System Environment/Daemons
-License: GPL
+License: LGPL
 
 Requires: speech-dispatcher
 
@@ -230,7 +230,7 @@ Speech Dispatcher text-to-speech server.
 Version: @PACKAGE_VERSION@
 Release: 1
 Group: System Environment/Daemons
-License: GPL
+License: LGPL
 
 Requires: at-spi
 Requires: libX11
@@ -255,7 +255,7 @@ Technology Service Provider Interface.
 Version: @PACKAGE_VERSION@
 Release: 1
 Group: System Environment/Daemons
-License: GPL
+License: LGPL
 
 Requires: dbus
 
@@ -279,7 +279,7 @@ the Assistive Technology Service Provider Interface.
 Version: @PACKAGE_VERSION@
 Release: 1
 Group: System Environment/Daemons
-License: GPL
+License: LGPL
 
 AutoProv: no
 AutoReq: yes
@@ -298,7 +298,7 @@ screen program.
 Version: @PACKAGE_VERSION@
 Release: 1
 Group: Development/Tools
-License: GPL
+License: LGPL
 
 BuildRequires: ncurses-devel
 
@@ -314,7 +314,7 @@ This package provides a set of commands for maintaining BRLTTY's datafiles.
 Version: @PACKAGE_VERSION@
 Release: 1
 Group: Development/Tools
-License: GPL
+License: LGPL
 
 AutoProv: no
 AutoReq: yes
@@ -334,7 +334,7 @@ interpret key codes as delivered by BrlAPI's raw mode.
 Version: @PACKAGE_VERSION@
 Release: 1
 Group: System Environment/Daemons
-License: GPL
+License: LGPL
 BuildArch: noarch
 
 AutoProv: no
@@ -351,7 +351,7 @@ Install this package if you'd like to manage BRLTTY processes via Systemd.
 Version: @PACKAGE_VERSION@
 Release: 1
 Group: System Environment/Daemons
-License: GPL
+License: LGPL
 BuildArch: noarch
 
 AutoProv: no
