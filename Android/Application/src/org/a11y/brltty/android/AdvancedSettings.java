@@ -138,7 +138,7 @@ public final class AdvancedSettings extends SettingsFragment {
       new Preference.OnPreferenceClickListener() {
         @Override
         public boolean onPreferenceClick (Preference preference) {
-          ApplicationParameters.LOG_ACCESSIBILITY_EVENTS = isChecked(preference);
+          ApplicationSettings.LOG_ACCESSIBILITY_EVENTS = isChecked(preference);
           return true;
         }
       }
@@ -148,7 +148,7 @@ public final class AdvancedSettings extends SettingsFragment {
       new Preference.OnPreferenceClickListener() {
         @Override
         public boolean onPreferenceClick (Preference preference) {
-          ApplicationParameters.LOG_RENDERED_SCREEN = isChecked(preference);
+          ApplicationSettings.LOG_RENDERED_SCREEN = isChecked(preference);
           return true;
         }
       }
@@ -158,7 +158,7 @@ public final class AdvancedSettings extends SettingsFragment {
       new Preference.OnPreferenceClickListener() {
         @Override
         public boolean onPreferenceClick (Preference preference) {
-          ApplicationParameters.LOG_KEYBOARD_EVENTS = isChecked(preference);
+          ApplicationSettings.LOG_KEYBOARD_EVENTS = isChecked(preference);
           return true;
         }
       }

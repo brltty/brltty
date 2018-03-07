@@ -20,18 +20,11 @@ package org.a11y.brltty.android;
 
 import android.os.Build;
 
-public abstract class ApplicationParameters {
-  private ApplicationParameters () {
+public abstract class ApplicationSettings {
+  private ApplicationSettings () {
   }
 
-  public static final int BRAILLE_COLUMN_SPACING = 2;
-  public static final int BRAILLE_ROW_SPACING = 0;
-
-  public static final int CORE_WAIT_DURATION = Integer.MAX_VALUE;
-
-  public static final int KEY_RETRY_TIMEOUT = 1000;
-  public static final int KEY_RETRY_INTERVAL = 100;
-  public static final int LONG_PRESS_DELAY = 100;
-
-  public static final int SDK_VERSION = Build.VERSION.SDK_INT;
+  public static volatile boolean LOG_ACCESSIBILITY_EVENTS = false;
+  public static volatile boolean LOG_RENDERED_SCREEN = false;
+  public static volatile boolean LOG_KEYBOARD_EVENTS = false;
 }

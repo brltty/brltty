@@ -82,7 +82,7 @@ public class InputService extends InputMethodService {
   }
 
   public static void logKeyEvent (int code, boolean press, String description) {
-    if (ApplicationParameters.LOG_KEYBOARD_EVENTS) {
+    if (ApplicationSettings.LOG_KEYBOARD_EVENTS) {
       StringBuilder sb = new StringBuilder();
 
       sb.append("key ");

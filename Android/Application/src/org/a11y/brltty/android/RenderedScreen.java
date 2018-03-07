@@ -363,7 +363,7 @@ public class RenderedScreen {
     screenWidth = findScreenWidth();
     cursorNode = findCursorNode();
 
-    if (ApplicationParameters.LOG_RENDERED_SCREEN) {
+    if (ApplicationSettings.LOG_RENDERED_SCREEN) {
       logRenderedScreen();
     }
   }

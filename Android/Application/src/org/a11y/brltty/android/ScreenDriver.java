@@ -123,7 +123,7 @@ public final class ScreenDriver {
   public static void onAccessibilityEvent (AccessibilityEvent event) {
     AccessibilityNodeInfo sourceNode = event.getSource();
 
-    if (ApplicationParameters.LOG_ACCESSIBILITY_EVENTS) {
+    if (ApplicationSettings.LOG_ACCESSIBILITY_EVENTS) {
       currentLogger.logEvent(event);
     }
 
