@@ -197,17 +197,17 @@ public class CoreThread extends Thread {
       String name = getStringSetting(R.string.PREF_KEY_SELECTED_DEVICE);
 
       if (name.length() > 0) {
-        Map<String, String> properties = SettingsFragment.getProperties(
+        Map<String, String> properties = DeviceManager.getProperties(
           name,
-          SettingsFragment.devicePropertyKeys,
-          ApplicationUtilities.getSharedPreferences()
+          ApplicationUtilities.getSharedPreferences(),
+          DeviceManager.devicePropertyKeys
         );
 
-        String qualifier = properties.get(SettingsFragment.PREF_KEY_DEVICE_QUALIFIER);
+        String qualifier = properties.get(DeviceManager.PREF_KEY_DEVICE_QUALIFIER);
         if (qualifier.length() > 0) {
-          String reference = properties.get(SettingsFragment.PREF_KEY_DEVICE_REFERENCE);
+          String reference = properties.get(DeviceManager.PREF_KEY_DEVICE_REFERENCE);
           if (reference.length() > 0) {
-            String driver = properties.get(SettingsFragment.PREF_KEY_DEVICE_DRIVER);
+            String driver = properties.get(DeviceManager.PREF_KEY_DEVICE_DRIVER);
             if (driver.length() > 0) {
               builder.setBrailleDevice(qualifier + ":" + reference);
               builder.setBrailleDriver(driver);

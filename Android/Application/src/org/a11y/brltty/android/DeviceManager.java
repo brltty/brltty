@@ -55,6 +55,16 @@ public final class DeviceManager extends SettingsFragment {
 
   protected static final String PREF_KEY_DEVICE_NAMES = "device-names";
 
+  public static final String PREF_KEY_DEVICE_QUALIFIER = "device-qualifier-%1$s";
+  public static final String PREF_KEY_DEVICE_REFERENCE = "device-reference-%1$s";
+  public static final String PREF_KEY_DEVICE_DRIVER = "device-driver-%1$s";
+
+  public static final String[] devicePropertyKeys = {
+    PREF_KEY_DEVICE_QUALIFIER,
+    PREF_KEY_DEVICE_REFERENCE,
+    PREF_KEY_DEVICE_DRIVER
+  };
+
   private void updateRemoveDeviceScreen (String selectedDevice) {
     boolean on = false;
 
@@ -218,8 +228,8 @@ public final class DeviceManager extends SettingsFragment {
             public void run () {
               Map<String, String> properties = getProperties(
                 newSelectedDevice,
-                devicePropertyKeys,
-                ApplicationUtilities.getSharedPreferences()
+                ApplicationUtilities.getSharedPreferences(),
+                devicePropertyKeys
               );
 
               String qualifier = properties.get(PREF_KEY_DEVICE_QUALIFIER);
@@ -307,7 +317,7 @@ public final class DeviceManager extends SettingsFragment {
             properties.put(PREF_KEY_DEVICE_QUALIFIER, deviceCollection.getMethodQualifier());
             properties.put(PREF_KEY_DEVICE_REFERENCE, deviceCollection.makeDeviceReference(deviceIdentifierList.getValue()));
             properties.put(PREF_KEY_DEVICE_DRIVER, deviceDriverList.getValue());
-            putProperties(name, properties, editor);
+            putProperties(name, editor, properties);
 
             editor.putStringSet(PREF_KEY_DEVICE_NAMES, deviceNames);
             editor.commit();
@@ -334,7 +344,7 @@ public final class DeviceManager extends SettingsFragment {
             {
               SharedPreferences.Editor editor = preference.getEditor();
               editor.putStringSet(PREF_KEY_DEVICE_NAMES, deviceNames);
-              removeProperties(name, devicePropertyKeys, editor);
+              removeProperties(name, editor, devicePropertyKeys);
               editor.commit();
             }
           }

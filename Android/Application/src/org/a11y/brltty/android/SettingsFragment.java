@@ -45,17 +45,7 @@ import android.preference.MultiSelectListPreference;
 public abstract class SettingsFragment extends PreferenceFragment {
   protected static final String LOG_TAG = SettingsFragment.class.getName();
 
-  public static final String PREF_KEY_DEVICE_QUALIFIER = "device-qualifier-%1$s";
-  public static final String PREF_KEY_DEVICE_REFERENCE = "device-reference-%1$s";
-  public static final String PREF_KEY_DEVICE_DRIVER = "device-driver-%1$s";
-
-  public static final String[] devicePropertyKeys = {
-    PREF_KEY_DEVICE_QUALIFIER,
-    PREF_KEY_DEVICE_REFERENCE,
-    PREF_KEY_DEVICE_DRIVER
-  };
-
-  public static Map<String, String> getProperties (String owner, String[] keys, SharedPreferences prefs) {
+  public static Map<String, String> getProperties (String owner, SharedPreferences prefs, String... keys) {
     Map<String, String> properties = new LinkedHashMap();
 
     for (String key : keys) {
@@ -65,13 +55,13 @@ public abstract class SettingsFragment extends PreferenceFragment {
     return properties;
   }
 
-  public static void putProperties (String owner, Map<String, String> properties, SharedPreferences.Editor editor) {
+  public static void putProperties (String owner, SharedPreferences.Editor editor, Map<String, String> properties) {
     for (Map.Entry<String, String> property : properties.entrySet()) {
       editor.putString(String.format(property.getKey(), owner), property.getValue());
     }
   }
 
-  public static void removeProperties (String owner, String[] keys, SharedPreferences.Editor editor) {
+  public static void removeProperties (String owner, SharedPreferences.Editor editor, String... keys) {
     for (String key : keys) {
       editor.remove(String.format(key, owner));
     }
