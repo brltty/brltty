@@ -71,8 +71,11 @@ public class BrailleService extends AccessibilityService {
               .setSmallIcon(R.drawable.ic_launcher)
               .setContentTitle("BRLTTY")
               .setContentText("Running")
+              .setSubText("Tap for Settings.")
               .setContentIntent(contentIntent)
               .setPriority(Notification.PRIORITY_LOW)
+              .setOngoing(true)
+              .setOnlyAlertOnce(true)
               .build();
   }
 
