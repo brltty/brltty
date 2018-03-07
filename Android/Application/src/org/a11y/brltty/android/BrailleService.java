@@ -26,6 +26,8 @@ import android.accessibilityservice.AccessibilityService;
 import android.view.accessibility.AccessibilityEvent;
 
 import android.content.Intent;
+import android.app.PendingIntent;
+import android.app.Notification;
 
 public class BrailleService extends AccessibilityService {
   private static final String LOG_TAG = BrailleService.class.getName();
@@ -37,20 +39,6 @@ public class BrailleService extends AccessibilityService {
     return brailleService;
   }
 
-  public boolean launchSettingsActivity () {
-    Intent intent = new Intent(this, SettingsActivity.class);
-
-    intent.addFlags(
-      Intent.FLAG_ACTIVITY_NEW_TASK |
-      Intent.FLAG_ACTIVITY_CLEAR_TOP |
-      Intent.FLAG_ACTIVITY_SINGLE_TOP |
-      Intent.FLAG_FROM_BACKGROUND
-    );
-
-    startActivity(intent);
-    return true;
-  }
-
   @Override
   public void onCreate () {
     super.onCreate();
@@ -60,14 +48,38 @@ public class BrailleService extends AccessibilityService {
 
   @Override
   public void onDestroy () {
-    brailleService = null;
-    super.onDestroy();
-    Log.d(LOG_TAG, "braille service stopped");
+    try {
+      brailleService = null;
+      Log.d(LOG_TAG, "braille service stopped");
+    } finally {
+      super.onDestroy();
+    }
+  }
+
+  private final Intent makeSettingsIntent () {
+    Intent intent = new Intent(this, SettingsActivity.class);
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    return intent;
+  }
+
+  private final Notification makeForegroundNotification () {
+    Intent settingsIntent = makeSettingsIntent();
+    settingsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+    PendingIntent contentIntent = PendingIntent.getActivity(this, 0, makeSettingsIntent(), 0);
+
+    return new Notification.Builder(this)
+              .setSmallIcon(R.drawable.ic_launcher)
+              .setContentTitle("BRLTTY")
+              .setContentText("Running")
+              .setContentIntent(contentIntent)
+              .setPriority(Notification.PRIORITY_LOW)
+              .build();
   }
 
   @Override
   protected void onServiceConnected () {
     Log.d(LOG_TAG, "braille service connected");
+    startForeground(1, makeForegroundNotification());
 
     coreThread = new CoreThread();
     coreThread.start();
@@ -96,5 +108,18 @@ public class BrailleService extends AccessibilityService {
 
   @Override
   public void onInterrupt () {
+  }
+
+  public boolean launchSettingsActivity () {
+    Intent intent = makeSettingsIntent();
+
+    intent.addFlags(
+      Intent.FLAG_ACTIVITY_CLEAR_TOP |
+      Intent.FLAG_ACTIVITY_SINGLE_TOP |
+      Intent.FLAG_FROM_BACKGROUND
+    );
+
+    startActivity(intent);
+    return true;
   }
 }
