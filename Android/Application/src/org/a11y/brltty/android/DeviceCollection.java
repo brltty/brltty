@@ -29,7 +29,7 @@ public abstract class DeviceCollection {
   public abstract String makeDeviceReference (String identifier);
 
   protected static interface StringMaker<T> {
-    String makeString (T object);
+    public String makeString (T object);
   }
 
   protected static <T> String[] makeStringArray (Collection<T> collection, StringMaker<T> stringMaker) {

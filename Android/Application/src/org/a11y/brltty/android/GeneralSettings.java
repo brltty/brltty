@@ -24,6 +24,8 @@ import android.preference.Preference;
 import android.preference.ListPreference;
 
 public final class GeneralSettings extends SettingsFragment {
+  private static final String LOG_TAG = GeneralSettings.class.getName();
+
   protected ListPreference navigationModeList;
   protected ListPreference textTableList;
   protected ListPreference contractionTableList;

@@ -43,7 +43,7 @@ import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
 
 public abstract class SettingsFragment extends PreferenceFragment {
-  protected static final String LOG_TAG = SettingsFragment.class.getName();
+  private static final String LOG_TAG = SettingsFragment.class.getName();
 
   public static Map<String, String> getProperties (String owner, SharedPreferences prefs, String... keys) {
     Map<String, String> properties = new LinkedHashMap();

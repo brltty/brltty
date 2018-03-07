@@ -36,6 +36,8 @@ import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 
 public final class DeviceManager extends SettingsFragment {
+  private static final String LOG_TAG = DeviceManager.class.getName();
+
   protected Set<String> deviceNames;
   protected DeviceCollection deviceCollection;
 

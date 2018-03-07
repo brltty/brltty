@@ -106,7 +106,7 @@ refresh_AndroidScreen (void) {
       jboolean result = (*env)->CallStaticBooleanMethod(env, screenDriverClass, method);
 
       if (clearJavaException(env, 1)) {
-        problemText = "java exception";
+        problemText = "Java exception";
       } else if (result == JNI_FALSE) {
         problemText = "device locked";
       } else {
