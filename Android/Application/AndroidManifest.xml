@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.a11y.brltty.android"
-    android:versionCode="7"
-    android:versionName="@string/app_version"
-    >
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="org.a11y.brltty.android"
+  android:versionCode="7"
+  android:versionName="@string/app_version"
+  >
 
   <uses-sdk android:targetSdkVersion="21" />
   <uses-sdk android:minSdkVersion="14" />
@@ -17,24 +16,24 @@
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
   <application
-      android:label="@string/app_name"
-      android:icon="@drawable/ic_launcher"
-      android:persistent="true"
-      >
+    android:label="@string/app_name"
+    android:icon="@drawable/ic_launcher"
+    android:persistent="true"
+    >
 
     <service
-        android:name="BrailleService"
-        android:label="@string/app_name"
-        android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-        >
+      android:name=".BrailleService"
+      android:label="@string/app_name"
+      android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+      >
 
       <intent-filter>
         <action android:name="android.accessibilityservice.AccessibilityService" />
       </intent-filter>
 
       <meta-data
-          android:name="android.accessibilityservice"
-          android:resource="@xml/accessibility_service"
+        android:name="android.accessibilityservice"
+        android:resource="@xml/accessibility_service"
        />
 
       <intent-filter>
@@ -48,10 +47,10 @@
     </service>
 
     <service
-        android:name=".InputService"
-        android:label="@string/input_service_name"
-        android:permission="android.permission.BIND_INPUT_METHOD"
-        >
+      android:name=".InputService"
+      android:label="@string/input_service_name"
+      android:permission="android.permission.BIND_INPUT_METHOD"
+      >
 
       <intent-filter>
         <action android:name="android.view.InputMethod" />
@@ -64,9 +63,9 @@
     </service>
 
     <activity
-        android:name="SettingsActivity"
-        android:label="Settings"
-        >
+      android:name=".SettingsActivity"
+      android:label="@string/SETTINGS_SCREEN_MAIN"
+      >
     </activity>
   </application>
 </manifest>

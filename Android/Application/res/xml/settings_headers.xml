@@ -5,17 +5,17 @@
   >
 
   <header
-    android:fragment="org.a11y.brltty.android.SettingsActivity$GeneralSettings"
+    android:fragment="org.a11y.brltty.android.GeneralSettings"
     android:title="@string/SETTINGS_SCREEN_GENERAL"
    />
 
   <header
-    android:fragment="org.a11y.brltty.android.SettingsActivity$DeviceManager"
+    android:fragment="org.a11y.brltty.android.DeviceManager"
     android:title="@string/SETTINGS_SCREEN_DEVICES"
    />
 
   <header
-    android:fragment="org.a11y.brltty.android.SettingsActivity$AdvancedSettings"
+    android:fragment="org.a11y.brltty.android.AdvancedSettings"
     android:title="@string/SETTINGS_SCREEN_ADVANCED"
    />
 </preference-headers>

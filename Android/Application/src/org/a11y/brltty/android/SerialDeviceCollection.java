@@ -18,6 +18,30 @@
 
 package org.a11y.brltty.android;
 
-interface StringMaker<T> {
-  String makeString (T object);
+import android.content.Context;
+
+public final class SerialDeviceCollection extends DeviceCollection {
+  public SerialDeviceCollection (Context context) {
+    super();
+  }
+
+  @Override
+  public String[] getIdentifierValues () {
+    return new String[0];
+  }
+
+  @Override
+  public String[] getIdentifierLabels () {
+    return new String[0];
+  }
+
+  @Override
+  public String getMethodQualifier () {
+    return "serial";
+  }
+
+  @Override
+  public String makeDeviceReference (String identifier) {
+    return identifier;
+  }
 }
