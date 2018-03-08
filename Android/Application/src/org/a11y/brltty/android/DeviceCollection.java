@@ -23,10 +23,8 @@ import java.util.List;
 import java.util.ArrayList;
 
 public abstract class DeviceCollection {
-  public abstract String[] getIdentifierValues ();
-  public abstract String[] getIdentifierLabels ();
-  public abstract String getMethodQualifier ();
-  public abstract String makeDeviceReference (String identifier);
+  protected DeviceCollection () {
+  }
 
   protected static interface StringMaker<T> {
     public String makeString (T object);
@@ -41,4 +39,9 @@ public abstract class DeviceCollection {
 
     return strings.toArray(new String[strings.size()]);
   }
+
+  public abstract String[] getIdentifierValues ();
+  public abstract String[] getIdentifierLabels ();
+  public abstract String getMethodQualifier ();
+  public abstract String makeDeviceReference (String identifier);
 }

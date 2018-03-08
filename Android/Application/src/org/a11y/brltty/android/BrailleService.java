@@ -17,9 +17,9 @@
  */
 
 package org.a11y.brltty.android;
-
 import org.a11y.brltty.core.*;
 
+import android.os.Build;
 import android.util.Log;
 
 import android.accessibilityservice.AccessibilityService;
@@ -62,27 +62,36 @@ public class BrailleService extends AccessibilityService {
     return intent;
   }
 
-  private final Notification makeForegroundNotification () {
+  private final Notification makeServiceNotification () {
     Intent settingsIntent = makeSettingsIntent();
     settingsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
     PendingIntent contentIntent = PendingIntent.getActivity(this, 0, makeSettingsIntent(), 0);
 
-    return new Notification.Builder(this)
-              .setSmallIcon(R.drawable.ic_launcher)
-              .setContentTitle("BRLTTY")
-              .setContentText("Running")
-              .setSubText("Tap for Settings.")
-              .setContentIntent(contentIntent)
-              .setPriority(Notification.PRIORITY_LOW)
-              .setOngoing(true)
-              .setOnlyAlertOnce(true)
-              .build();
+    Notification.Builder nb = new Notification.Builder(this)
+      .setSmallIcon(R.drawable.ic_launcher)
+      .setContentTitle("BRLTTY")
+      .setOngoing(true)
+      .setOnlyAlertOnce(true)
+      .setPriority(Notification.PRIORITY_LOW)
+      .setSubText("Tap for Settings.")
+      .setContentIntent(contentIntent);
+
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR1)) {
+      nb.setShowWhen(false);
+    }
+
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+      nb.setCategory(Notification.CATEGORY_SERVICE);
+    }
+
+    nb.setContentText("Running");
+    return nb.build();
   }
 
   @Override
   protected void onServiceConnected () {
     Log.d(LOG_TAG, "braille service connected");
-    startForeground(1, makeForegroundNotification());
+    startForeground(1, makeServiceNotification());
 
     coreThread = new CoreThread();
     coreThread.start();
