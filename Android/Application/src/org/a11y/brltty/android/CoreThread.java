@@ -42,6 +42,11 @@ public class CoreThread extends Thread {
 
   private final Context coreContext;
 
+  CoreThread () {
+    super("Core");
+    coreContext = ApplicationHooks.getContext();
+  }
+
   public static final int DATA_MODE = Context.MODE_PRIVATE;
   public static final String DATA_TYPE_TABLES = "tables";
   public static final String DATA_TYPE_DRIVERS = "drivers";
@@ -139,11 +144,6 @@ public class CoreThread extends Thread {
     Log.d(LOG_TAG, "assets extracted");
   }
 
-  CoreThread () {
-    super("Core");
-    coreContext = ApplicationHooks.getContext();
-  }
-
   private String getStringResource (int resource) {
     return coreContext.getResources().getString(resource);
   }
@@ -170,6 +170,32 @@ public class CoreThread extends Thread {
 
   private Set<String> getStringSetSetting (int key) {
     return ApplicationUtilities.getSharedPreferences().getStringSet(getStringResource(key), Collections.EMPTY_SET);
+  }
+
+  private final void updateDataFiles () {
+    SharedPreferences prefs = ApplicationUtilities.getSharedPreferences();
+    File file = new File(coreContext.getPackageCodePath());
+
+    String prefKey_size = getStringResource(R.string.PREF_KEY_PACKAGE_SIZE);
+    long oldSize = prefs.getLong(prefKey_size, -1);
+    long newSize = file.length();
+
+    String prefKey_time = getStringResource(R.string.PREF_KEY_PACKAGE_TIME);
+    long oldTime = prefs.getLong(prefKey_time, -1);
+    long newTime = file.lastModified();
+
+    if ((newSize != oldSize) || (newTime != oldTime)) {
+      Log.d(LOG_TAG, "package size: " + oldSize + " -> " + newSize);
+      Log.d(LOG_TAG, "package time: " + oldTime + " -> " + newTime);
+      extractAssets();
+
+      {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putLong(prefKey_size, newSize);
+        editor.putLong(prefKey_time, newTime);
+        editor.apply();
+      }
+    }
   }
 
   private String[] makeArguments () {
@@ -241,40 +267,18 @@ public class CoreThread extends Thread {
     return builder.getArguments();
   }
 
-  @Override
-  public void run () {
-    {
-      SharedPreferences prefs = ApplicationUtilities.getSharedPreferences();
-      File file = new File(coreContext.getPackageCodePath());
-
-      String prefKey_size = getStringResource(R.string.PREF_KEY_PACKAGE_SIZE);
-      long oldSize = prefs.getLong(prefKey_size, -1);
-      long newSize = file.length();
-
-      String prefKey_time = getStringResource(R.string.PREF_KEY_PACKAGE_TIME);
-      long oldTime = prefs.getLong(prefKey_time, -1);
-      long newTime = file.lastModified();
-
-      if ((newSize != oldSize) || (newTime != oldTime)) {
-        Log.d(LOG_TAG, "package size: " + oldSize + " -> " + newSize);
-        Log.d(LOG_TAG, "package time: " + oldTime + " -> " + newTime);
-        extractAssets();
-
-        {
-          SharedPreferences.Editor editor = prefs.edit();
-          editor.putLong(prefKey_size, newSize);
-          editor.putLong(prefKey_time, newTime);
-          editor.commit();
-        }
-      }
-    }
-
+  private final void restoreSettings () {
     BrailleRenderer.setBrailleRenderer(getStringSetting(R.string.PREF_KEY_NAVIGATION_MODE, R.string.DEFAULT_NAVIGATION_MODE));
-
     ApplicationSettings.RELEASE_BRAILLE_DEVICE = getBooleanSetting(R.string.PREF_KEY_RELEASE_BRAILLE_DEVICE);
     ApplicationSettings.LOG_ACCESSIBILITY_EVENTS = getBooleanSetting(R.string.PREF_KEY_LOG_ACCESSIBILITY_EVENTS);
     ApplicationSettings.LOG_RENDERED_SCREEN = getBooleanSetting(R.string.PREF_KEY_LOG_RENDERED_SCREEN);
     ApplicationSettings.LOG_KEYBOARD_EVENTS = getBooleanSetting(R.string.PREF_KEY_LOG_KEYBOARD_EVENTS);
+  }
+
+  @Override
+  public void run () {
+    restoreSettings();
+    updateDataFiles();
 
     UsbHelper.begin();
     CoreWrapper.run(makeArguments(), ApplicationParameters.CORE_WAIT_DURATION);
