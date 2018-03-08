@@ -21,6 +21,7 @@ import org.a11y.brltty.core.*;
 
 import android.os.Bundle;
 import android.preference.Preference;
+import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 
 public final class GeneralSettings extends SettingsFragment {
@@ -30,6 +31,7 @@ public final class GeneralSettings extends SettingsFragment {
   protected ListPreference textTableList;
   protected ListPreference contractionTableList;
   protected ListPreference speechSupportList;
+  protected CheckBoxPreference releaseBrailleDeviceCheckBox;
 
   @Override
   public void onCreate (Bundle savedInstanceState) {
@@ -41,6 +43,7 @@ public final class GeneralSettings extends SettingsFragment {
     textTableList = getListPreference(R.string.PREF_KEY_TEXT_TABLE);
     contractionTableList = getListPreference(R.string.PREF_KEY_CONTRACTION_TABLE);
     speechSupportList = getListPreference(R.string.PREF_KEY_SPEECH_SUPPORT);
+    releaseBrailleDeviceCheckBox = getCheckBoxPreference(R.string.PREF_KEY_RELEASE_BRAILLE_DEVICE);
 
     sortList(textTableList, 1);
     sortList(contractionTableList);
@@ -116,6 +119,16 @@ public final class GeneralSettings extends SettingsFragment {
           });
 
           showListSelection(speechSupportList, newSpeechSupport);
+          return true;
+        }
+      }
+    );
+
+    releaseBrailleDeviceCheckBox.setOnPreferenceChangeListener(
+      new Preference.OnPreferenceChangeListener() {
+        @Override
+        public boolean onPreferenceChange (Preference preference, Object newValue) {
+          ApplicationSettings.RELEASE_BRAILLE_DEVICE = (Boolean)newValue;
           return true;
         }
       }

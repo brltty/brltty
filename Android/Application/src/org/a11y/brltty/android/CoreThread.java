@@ -271,6 +271,7 @@ public class CoreThread extends Thread {
 
     BrailleRenderer.setBrailleRenderer(getStringSetting(R.string.PREF_KEY_NAVIGATION_MODE, R.string.DEFAULT_NAVIGATION_MODE));
 
+    ApplicationSettings.RELEASE_BRAILLE_DEVICE = getBooleanSetting(R.string.PREF_KEY_RELEASE_BRAILLE_DEVICE);
     ApplicationSettings.LOG_ACCESSIBILITY_EVENTS = getBooleanSetting(R.string.PREF_KEY_LOG_ACCESSIBILITY_EVENTS);
     ApplicationSettings.LOG_RENDERED_SCREEN = getBooleanSetting(R.string.PREF_KEY_LOG_RENDERED_SCREEN);
     ApplicationSettings.LOG_KEYBOARD_EVENTS = getBooleanSetting(R.string.PREF_KEY_LOG_KEYBOARD_EVENTS);

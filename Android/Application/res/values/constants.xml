@@ -14,6 +14,7 @@
   <string name="PREF_KEY_LOG_KEYBOARD_EVENTS">log-keyboard-events</string>
 
   <string name="PREF_KEY_NAVIGATION_MODE">navigation-mode</string>
+  <string name="PREF_KEY_RELEASE_BRAILLE_DEVICE">release-braille-device</string>
   <string name="PREF_KEY_SPEECH_SUPPORT">speech-support</string>
 
   <string name="PREF_KEY_TEXT_TABLE">text-table</string>

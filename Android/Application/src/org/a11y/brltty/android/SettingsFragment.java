@@ -74,35 +74,31 @@ public abstract class SettingsFragment extends PreferenceFragment {
     super.onCreate(savedInstanceState);
   }
 
-  protected Preference getPreference (int key) {
+  protected final Preference getPreference (int key) {
     return findPreference(getResources().getString(key));
   }
 
-  protected PreferenceScreen getPreferenceScreen (int key) {
+  protected final PreferenceScreen getPreferenceScreen (int key) {
     return (PreferenceScreen)getPreference(key);
   }
 
-  protected CheckBoxPreference getCheckBoxPreference (int key) {
+  protected final CheckBoxPreference getCheckBoxPreference (int key) {
     return (CheckBoxPreference)getPreference(key);
   }
 
-  protected EditTextPreference getEditTextPreference (int key) {
+  protected final EditTextPreference getEditTextPreference (int key) {
     return (EditTextPreference)getPreference(key);
   }
 
-  protected ListPreference getListPreference (int key) {
+  protected final ListPreference getListPreference (int key) {
     return (ListPreference)getPreference(key);
   }
 
-  protected MultiSelectListPreference getMultiSelectListPreference (int key) {
+  protected final MultiSelectListPreference getMultiSelectListPreference (int key) {
     return (MultiSelectListPreference)getPreference(key);
   }
 
-  protected boolean isChecked (Preference preference) {
-    return ((CheckBoxPreference)preference).isChecked();
-  }
-
-  protected void showListSelection (ListPreference list) {
+  protected final void showListSelection (ListPreference list) {
     CharSequence label = list.getEntry();
 
     if (label == null) {
@@ -112,19 +108,19 @@ public abstract class SettingsFragment extends PreferenceFragment {
     list.setSummary(label);
   }
 
-  protected void showListSelection (ListPreference list, int index) {
+  protected final void showListSelection (ListPreference list, int index) {
     list.setSummary(list.getEntries()[index]);
   }
 
-  protected int getListIndex (ListPreference list, String value) {
+  protected final int getListIndex (ListPreference list, String value) {
     return Arrays.asList(list.getEntryValues()).indexOf(value);
   }
 
-  protected void showListSelection (ListPreference list, String value) {
+  protected final void showListSelection (ListPreference list, String value) {
     showListSelection(list, getListIndex(list, value));
   }
 
-  protected void showSetSelections (MultiSelectListPreference set, Set<String> values) {
+  protected final void showSetSelections (MultiSelectListPreference set, Set<String> values) {
     StringBuilder label = new StringBuilder();
 
     if (values.size() > 0) {
@@ -146,25 +142,25 @@ public abstract class SettingsFragment extends PreferenceFragment {
     set.setSummary(label.toString());
   }
 
-  protected void showSetSelections (MultiSelectListPreference set) {
+  protected final void showSetSelections (MultiSelectListPreference set) {
     showSetSelections(set, set.getValues());
   }
 
-  protected void resetList (ListPreference list) {
+  protected final void resetList (ListPreference list) {
     list.setValueIndex(0);
     showListSelection(list);
   }
 
-  protected void setListElements (ListPreference list, String[] values, String[] labels) {
+  protected final void setListElements (ListPreference list, String[] values, String[] labels) {
     list.setEntryValues(values);
     list.setEntries(labels);
   }
 
-  protected void setListElements (ListPreference list, String[] values) {
+  protected final void setListElements (ListPreference list, String[] values) {
     setListElements(list, values, values);
   }
 
-  protected void sortList (ListPreference list, int fromIndex) {
+  protected final void sortList (ListPreference list, int fromIndex) {
     if (localeCollator == null) {
       localeCollator = Collator.getInstance();
       localeCollator.setStrength(Collator.PRIMARY);
@@ -195,11 +191,11 @@ public abstract class SettingsFragment extends PreferenceFragment {
     setListElements(list, values, labels);
   }
 
-  protected void sortList (ListPreference list) {
+  protected final void sortList (ListPreference list) {
     sortList(list, 0);
   }
 
-  protected SharedPreferences getSharedPreferences () {
+  protected final SharedPreferences getSharedPreferences () {
     return getPreferenceManager().getDefaultSharedPreferences(getActivity());
   }
 }

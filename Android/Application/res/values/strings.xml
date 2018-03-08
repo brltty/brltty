@@ -19,6 +19,7 @@
   <string name="SETTINGS_SCREEN_ADVANCED">Advanced Settings</string>
 
   <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Navigation Mode</string>
+  <string name="SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE">Release Braille Device</string>
   <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Speech Support</string>
 
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Text Table</string>

@@ -40,4 +40,10 @@
     android:entryValues="@array/SPEECH_SUPPORT_VALUES"
     android:defaultValue="@string/DEFAULT_SPEECH_SUPPORT"
    />
+
+  <CheckBoxPreference
+    android:key="@string/PREF_KEY_RELEASE_BRAILLE_DEVICE"
+    android:persistent="true"
+    android:title="@string/SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE"
+   />
 </PreferenceScreen>

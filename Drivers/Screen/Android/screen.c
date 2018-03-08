@@ -101,14 +101,16 @@ refresh_AndroidScreen (void) {
     static jmethodID method = 0;
 
     if (findJavaStaticMethod(env, &method, screenDriverClass, "refreshScreen",
-                             JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                             JAVA_SIG_METHOD(JAVA_SIG_CHAR,
                                             ))) {
-      jboolean result = (*env)->CallStaticBooleanMethod(env, screenDriverClass, method);
+      jchar result = (*env)->CallStaticCharMethod(env, screenDriverClass, method);
 
       if (clearJavaException(env, 1)) {
         problemText = "Java exception";
-      } else if (result == JNI_FALSE) {
-        problemText = "device locked";
+      } else if (result == 'l') {
+        problemText = "Android locked";
+      } else if (result == 'r') {
+        problemText = "braille released";
       } else {
         problemText = NULL;
       }

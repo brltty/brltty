@@ -309,8 +309,9 @@ public final class ScreenDriver {
     exportScreenProperties();
   }
 
-  public static boolean refreshScreen () {
-    if (LockUtilities.isLocked()) return false;
+  public static char refreshScreen () {
+    if (ApplicationSettings.RELEASE_BRAILLE_DEVICE) return 'r';
+    if (LockUtilities.isLocked()) return 'l';
 
     AccessibilityNodeInfo node;
     synchronized (eventLock) {
@@ -329,7 +330,7 @@ public final class ScreenDriver {
       exportScreenProperties();
     }
 
-    return true;
+    return 0;
   }
 
   public static void getRowText (char[] textBuffer, int rowIndex, int columnIndex) {

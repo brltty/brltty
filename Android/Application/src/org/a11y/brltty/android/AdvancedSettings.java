@@ -136,31 +136,31 @@ public final class AdvancedSettings extends SettingsFragment {
       }
     );
 
-    logAccessibilityEventsCheckBox.setOnPreferenceClickListener(
-      new Preference.OnPreferenceClickListener() {
+    logAccessibilityEventsCheckBox.setOnPreferenceChangeListener(
+      new Preference.OnPreferenceChangeListener() {
         @Override
-        public boolean onPreferenceClick (Preference preference) {
-          ApplicationSettings.LOG_ACCESSIBILITY_EVENTS = isChecked(preference);
+        public boolean onPreferenceChange (Preference preference, Object newValue) {
+          ApplicationSettings.LOG_ACCESSIBILITY_EVENTS = (Boolean)newValue;
           return true;
         }
       }
     );
 
-    logRenderedScreenCheckBox.setOnPreferenceClickListener(
-      new Preference.OnPreferenceClickListener() {
+    logRenderedScreenCheckBox.setOnPreferenceChangeListener(
+      new Preference.OnPreferenceChangeListener() {
         @Override
-        public boolean onPreferenceClick (Preference preference) {
-          ApplicationSettings.LOG_RENDERED_SCREEN = isChecked(preference);
+        public boolean onPreferenceChange (Preference preference, Object newValue) {
+          ApplicationSettings.LOG_RENDERED_SCREEN = (Boolean)newValue;
           return true;
         }
       }
     );
 
-    logKeyboardEventsCheckBox.setOnPreferenceClickListener(
-      new Preference.OnPreferenceClickListener() {
+    logKeyboardEventsCheckBox.setOnPreferenceChangeListener(
+      new Preference.OnPreferenceChangeListener() {
         @Override
-        public boolean onPreferenceClick (Preference preference) {
-          ApplicationSettings.LOG_KEYBOARD_EVENTS = isChecked(preference);
+        public boolean onPreferenceChange (Preference preference, Object newValue) {
+          ApplicationSettings.LOG_KEYBOARD_EVENTS = (Boolean)newValue;
           return true;
         }
       }
