@@ -28,6 +28,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.content.Intent;
 import android.app.PendingIntent;
 import android.app.Notification;
+import android.app.NotificationManager;
 
 public class BrailleService extends AccessibilityService {
   private static final String LOG_TAG = BrailleService.class.getName();
@@ -57,41 +58,66 @@ public class BrailleService extends AccessibilityService {
   }
 
   private final Intent makeSettingsIntent () {
-    Intent intent = new Intent(this, SettingsActivity.class);
-    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    return intent;
+    return new Intent(this, SettingsActivity.class)
+      .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      ;
   }
 
-  private final Notification makeServiceNotification () {
-    Intent settingsIntent = makeSettingsIntent();
-    settingsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-    PendingIntent contentIntent = PendingIntent.getActivity(this, 0, makeSettingsIntent(), 0);
+  private static final Integer notificationIdentifier = 1;
+  private static Notification.Builder notificationBuilder = null;
+  private static NotificationManager notificationManager = null;
 
-    Notification.Builder nb = new Notification.Builder(this)
-      .setSmallIcon(R.drawable.ic_launcher)
-      .setContentTitle("BRLTTY")
-      .setOngoing(true)
-      .setOnlyAlertOnce(true)
-      .setPriority(Notification.PRIORITY_LOW)
-      .setSubText("Tap for Settings.")
-      .setContentIntent(contentIntent);
+  private final Notification makeNotification () {
+    synchronized (notificationIdentifier) {
+      if (notificationBuilder == null) {
+        notificationBuilder = new Notification.Builder(this)
+          .setSmallIcon(R.drawable.ic_launcher)
+          .setContentTitle("BRLTTY")
+          .setSubText("Tap for Settings.")
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR1)) {
-      nb.setShowWhen(false);
+          .setContentIntent(
+            PendingIntent.getActivity(
+              this,
+              0,
+              makeSettingsIntent().addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK),
+              0
+            )
+          )
+
+          .setPriority(Notification.PRIORITY_LOW)
+          .setOngoing(true)
+          .setOnlyAlertOnce(true)
+          ;
+
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR1)) {
+          notificationBuilder.setShowWhen(false);
+        }
+
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+          notificationBuilder.setCategory(Notification.CATEGORY_SERVICE);
+        }
+      }
+
+      notificationBuilder.setContentText("Starting");
+      return notificationBuilder.build();
     }
+  }
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
-      nb.setCategory(Notification.CATEGORY_SERVICE);
+  public final void updateNotification (String text) {
+    synchronized (notificationIdentifier) {
+      if (notificationManager == null) {
+        notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+      }
+
+      notificationBuilder.setContentText(text);
+      notificationManager.notify(notificationIdentifier, notificationBuilder.build());
     }
-
-    nb.setContentText("Running");
-    return nb.build();
   }
 
   @Override
   protected void onServiceConnected () {
     Log.d(LOG_TAG, "braille service connected");
-    startForeground(1, makeServiceNotification());
+    startForeground(1, makeNotification());
 
     coreThread = new CoreThread();
     coreThread.start();
