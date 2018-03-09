@@ -41,8 +41,6 @@ static unsigned int reportCount = 0;
 
 static int
 findReportEntry (ReportIdentifier identifier, int *position) {
-  int found = 0;
-
   int first = 0;
   int last = reportCount - 1;
 
@@ -55,13 +53,13 @@ findReportEntry (ReportIdentifier identifier, int *position) {
     } else if (report->identifier > identifier) {
       last = current - 1;
     } else {
-      found = 1;
-      break;
+      *position = current;
+      return 1;
     }
   }
 
   *position = first;
-  return found;
+  return 0;
 }
 
 static ReportEntry *
