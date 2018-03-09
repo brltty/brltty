@@ -67,7 +67,7 @@ public class BrailleService extends AccessibilityService {
   private static Notification.Builder notificationBuilder = null;
   private static NotificationManager notificationManager = null;
 
-  private final Notification makeNotification () {
+  public final void showState () {
     synchronized (notificationIdentifier) {
       if (notificationBuilder == null) {
         notificationBuilder = new Notification.Builder(this)
@@ -98,26 +98,36 @@ public class BrailleService extends AccessibilityService {
         }
       }
 
-      notificationBuilder.setContentText("Starting");
-      return notificationBuilder.build();
-    }
-  }
+      {
+        String state;
 
-  public final void updateNotification (String text) {
-    synchronized (notificationIdentifier) {
-      if (notificationManager == null) {
-        notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        if (ApplicationSettings.RELEASE_BRAILLE_DEVICE) {
+          state = "released";
+        } else if (ApplicationSettings.BRAILLE_DEVICE_ONLINE) {
+          state = "connected";
+        } else {
+          state = "waiting";
+        }
+
+        notificationBuilder.setContentText(state);
       }
 
-      notificationBuilder.setContentText(text);
-      notificationManager.notify(notificationIdentifier, notificationBuilder.build());
+      {
+        Notification notification = notificationBuilder.build();
+
+        if (notificationManager == null) {
+          startForeground(notificationIdentifier, notification);
+          notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        } else {
+          notificationManager.notify(notificationIdentifier, notification);
+        }
+      }
     }
   }
 
   @Override
   protected void onServiceConnected () {
     Log.d(LOG_TAG, "braille service connected");
-    startForeground(1, makeNotification());
 
     coreThread = new CoreThread();
     coreThread.start();

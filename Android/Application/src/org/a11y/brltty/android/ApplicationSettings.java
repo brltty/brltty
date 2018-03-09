@@ -28,4 +28,6 @@ public abstract class ApplicationSettings {
   public static volatile boolean LOG_ACCESSIBILITY_EVENTS = false;
   public static volatile boolean LOG_RENDERED_SCREEN = false;
   public static volatile boolean LOG_KEYBOARD_EVENTS = false;
+
+  public static volatile boolean BRAILLE_DEVICE_ONLINE = false;
 }

@@ -22,6 +22,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "report.h"
 #include "brl_cmds.h"
 #include "unicode.h"
 
@@ -60,6 +61,57 @@ findInputServiceClass (void) {
 static int
 findLockUtilitiesClass (void) {
   return findJavaClass(env, &lockUtilitiesClass, JAVA_OBJ_BRLTTY("LockUtilities"));
+}
+
+REPORT_LISTENER(androidScreenDriverReportListener) {
+  char *event = parameters->listenerData;
+
+  if (findScreenDriverClass()) {
+    static jmethodID method = 0;
+
+    if (findJavaStaticMethod(env, &method, screenDriverClass, "reportEvent",
+                             JAVA_SIG_METHOD(JAVA_SIG_VOID,
+                                             JAVA_SIG_CHAR // event
+                                            ))) {
+      (*env)->CallStaticVoidMethod(env, screenDriverClass, method, *event);
+      clearJavaException(env, 1);
+    }
+  }
+}
+
+typedef struct {
+  ReportListenerInstance *listener;
+  ReportIdentifier identifier;
+  char character;
+} ReportEntry;
+
+static ReportEntry reportEntries[] = {
+  { .character = 'b',
+    .identifier = REPORT_BRAILLE_ONLINE
+  },
+
+  { .character = 'B',
+    .identifier = REPORT_BRAILLE_OFFLINE
+  },
+
+  { .character = 0 }
+};
+
+static int
+construct_AndroidScreen (void) {
+  for (ReportEntry *rpt=reportEntries; rpt->character; rpt+=1) {
+    rpt->listener = registerReportListener(rpt->identifier, androidScreenDriverReportListener, &rpt->character);
+  }
+
+  return 1;
+}
+
+static void
+destruct_AndroidScreen (void) {
+  for (ReportEntry *rpt=reportEntries; rpt->character; rpt+=1) {
+    unregisterReportListener(rpt->listener);
+    rpt->listener = NULL;
+  }
 }
 
 static int
@@ -367,5 +419,7 @@ scr_initialize (MainScreen *main) {
   main->base.handleCommand = handleCommand_AndroidScreen;
   main->base.routeCursor = routeCursor_AndroidScreen;
   main->base.insertKey = insertKey_AndroidScreen;
+  main->construct = construct_AndroidScreen;
+  main->destruct = destruct_AndroidScreen;
   env = getJavaNativeInterface();
 }

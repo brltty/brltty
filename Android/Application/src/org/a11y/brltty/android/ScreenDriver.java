@@ -350,6 +350,20 @@ public final class ScreenDriver {
     return currentScreen.performAction(column, row);
   }
 
+  public static void reportEvent (char event) {
+    switch (event) {
+      case 'b':
+        ApplicationSettings.BRAILLE_DEVICE_ONLINE = true;
+        BrailleService.getBrailleService().showState();
+        break;
+
+      case 'B':
+        ApplicationSettings.BRAILLE_DEVICE_ONLINE = false;
+        BrailleService.getBrailleService().showState();
+        break;
+    }
+  }
+
   private ScreenDriver () {
   }
 
