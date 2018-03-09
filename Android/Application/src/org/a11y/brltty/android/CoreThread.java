@@ -222,10 +222,9 @@ public class CoreThread extends Thread {
       String name = getStringSetting(R.string.PREF_KEY_SELECTED_DEVICE);
 
       if (name.length() > 0) {
-        Map<String, String> properties = DeviceManager.getProperties(
-          name,
+        Map<String, String> properties = SettingsFragment.getProperties(
           ApplicationUtilities.getSharedPreferences(),
-          DeviceManager.devicePropertyKeys
+          name, DeviceManager.DEVICE_PROPERTY_KEYS
         );
 
         String qualifier = properties.get(DeviceManager.PREF_KEY_DEVICE_QUALIFIER);

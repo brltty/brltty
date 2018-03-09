@@ -45,25 +45,29 @@ import android.preference.MultiSelectListPreference;
 public abstract class SettingsFragment extends PreferenceFragment {
   private static final String LOG_TAG = SettingsFragment.class.getName();
 
-  public static Map<String, String> getProperties (String owner, SharedPreferences prefs, String... keys) {
+  private static String makePropertyKey (String name, String key) {
+    return key + '-' + name;
+  }
+
+  public static Map<String, String> getProperties (SharedPreferences prefs, String name, String... keys) {
     Map<String, String> properties = new LinkedHashMap();
 
     for (String key : keys) {
-      properties.put(key, prefs.getString(String.format(key, owner), ""));
+      properties.put(key, prefs.getString(makePropertyKey(name, key), ""));
     }
 
     return properties;
   }
 
-  public static void putProperties (String owner, SharedPreferences.Editor editor, Map<String, String> properties) {
+  public static void putProperties (SharedPreferences.Editor editor, String name, Map<String, String> properties) {
     for (Map.Entry<String, String> property : properties.entrySet()) {
-      editor.putString(String.format(property.getKey(), owner), property.getValue());
+      editor.putString(makePropertyKey(name, property.getKey()), property.getValue());
     }
   }
 
-  public static void removeProperties (String owner, SharedPreferences.Editor editor, String... keys) {
+  public static void removeProperties (SharedPreferences.Editor editor, String name, String... keys) {
     for (String key : keys) {
-      editor.remove(String.format(key, owner));
+      editor.remove(makePropertyKey(name, key));
     }
   }
 
