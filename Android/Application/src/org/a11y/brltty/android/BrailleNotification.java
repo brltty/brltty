@@ -45,7 +45,7 @@ public abstract class BrailleNotification {
 
       notificationBuilder = new Notification.Builder(context)
         .setSmallIcon(R.drawable.ic_launcher)
-        .setSubText("Tap for Settings.")
+        .setSubText(context.getString(R.string.braille_state_tap))
 
         .setContentIntent(
           PendingIntent.getActivity(
