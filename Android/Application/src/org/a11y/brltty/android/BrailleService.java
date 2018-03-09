@@ -19,7 +19,6 @@
 package org.a11y.brltty.android;
 import org.a11y.brltty.core.*;
 
-import android.os.Build;
 import android.util.Log;
 import android.content.Intent;
 

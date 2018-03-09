@@ -40,8 +40,15 @@ public class SettingsActivity extends PreferenceActivity {
   }
 
   public static Intent makeIntent () {
-    return new Intent(ApplicationHooks.getContext(), SettingsActivity.class)
-      .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-      ;
+    Intent intent = new Intent(
+      ApplicationHooks.getContext(),
+      SettingsActivity.class
+    );
+
+    intent.addFlags(
+      Intent.FLAG_ACTIVITY_NEW_TASK
+    );
+
+    return intent;
   }
 }

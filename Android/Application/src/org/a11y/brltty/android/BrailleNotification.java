@@ -31,35 +31,43 @@ public abstract class BrailleNotification {
   private BrailleNotification () {
   }
 
-  private static Context getContext () {
-    return ApplicationHooks.getContext();
-  }
-
+  private static Context applicationContext = null;
   private static final Integer notificationIdentifier = 1;
   private static Notification.Builder notificationBuilder = null;
   private static NotificationManager notificationManager = null;
+
+  private static Context getContext () {
+    if (applicationContext == null) {
+      applicationContext = ApplicationHooks.getContext();
+    }
+
+    return applicationContext;
+  }
+
+  private static String getString (int identifier) {
+    return getContext().getString(identifier);
+  }
 
   private static Notification.Builder getNotificationBuilder () {
     if (notificationBuilder == null) {
       Context context = getContext();
 
       notificationBuilder = new Notification.Builder(context)
+        .setPriority(Notification.PRIORITY_LOW)
+        .setOngoing(true)
+        .setOnlyAlertOnce(true)
+
         .setSmallIcon(R.drawable.ic_launcher)
-        .setSubText(context.getString(R.string.braille_state_tap))
+        .setSubText(getString(R.string.braille_state_tap))
 
         .setContentIntent(
           PendingIntent.getActivity(
             context,
-            0,
+            0, // request code
             SettingsActivity.makeIntent().addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK),
-            0
+            0 // flags
           )
-        )
-
-        .setPriority(Notification.PRIORITY_LOW)
-        .setOngoing(true)
-        .setOnlyAlertOnce(true)
-        ;
+        );
 
       if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR1)) {
         notificationBuilder.setShowWhen(false);
@@ -75,7 +83,8 @@ public abstract class BrailleNotification {
 
   private static NotificationManager getNotificationManager () {
     if (notificationManager == null) {
-      notificationManager = (NotificationManager)getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+      notificationManager = (NotificationManager)
+                            getContext().getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
     return notificationManager;
@@ -96,7 +105,7 @@ public abstract class BrailleNotification {
       state = R.string.braille_state_waiting;
     }
 
-    nb.setContentTitle(getContext().getString(state));
+    nb.setContentTitle(getString(state));
   }
 
   public static void setState () {
@@ -109,7 +118,7 @@ public abstract class BrailleNotification {
 
   private static void setDevice (Notification.Builder nb, String device) {
     if (device == null) device = "";
-    if (device.isEmpty()) device = getContext().getString(R.string.SELECTED_DEVICE_UNSELECTED);
+    if (device.isEmpty()) device = getString(R.string.SELECTED_DEVICE_UNSELECTED);
     nb.setContentText(device);
   }
 
@@ -126,10 +135,9 @@ public abstract class BrailleNotification {
   }
 
   private static String getDevice () {
+    String key = getContext().getResources().getString(R.string.PREF_KEY_SELECTED_DEVICE);
     return ApplicationUtilities.getSharedPreferences()
-                               .getString(getContext().getResources()
-                                                      .getString(R.string.PREF_KEY_SELECTED_DEVICE),
-                                          null);
+                               .getString(key, null);
   }
 
   public static void initialize () {
@@ -137,7 +145,9 @@ public abstract class BrailleNotification {
       Notification.Builder nb = getNotificationBuilder();
       setState(nb);
       setDevice(nb, getDevice());
-      updateNotification(nb);
+
+      BrailleService.getBrailleService()
+                    .startForeground(notificationIdentifier, nb.build());
     }
   }
 }
