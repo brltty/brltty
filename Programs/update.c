@@ -1094,9 +1094,9 @@ setUpdateAlarm (void) {
   }
 }
 
-static ReportListenerInstance *updateBrailleOnlineListener = NULL;
+static ReportListenerInstance *updateBrailleDeviceOnlineListener = NULL;
 
-REPORT_LISTENER(handleUpdateBrailleOnline) {
+REPORT_LISTENER(handleUpdateBrailleDeviceOnline) {
   scheduleUpdate("braille online");
 }
 
@@ -1117,7 +1117,7 @@ beginUpdates (void) {
   wasAutospeaking = 0;
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  updateBrailleOnlineListener = registerReportListener(REPORT_BRAILLE_ONLINE, handleUpdateBrailleOnline, NULL);
+  updateBrailleDeviceOnlineListener = registerReportListener(REPORT_BRAILLE_DEVICE_ONLINE, handleUpdateBrailleDeviceOnline, NULL);
 }
 
 void

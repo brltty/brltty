@@ -2911,7 +2911,7 @@ static void brlResize(BrailleDisplay *brl)
 
 REPORT_LISTENER(brlapi_handleReports)
 {
-  if (parameters->reportIdentifier == REPORT_BRAILLE_ONLINE) {
+  if (parameters->reportIdentifier == REPORT_BRAILLE_DEVICE_ONLINE) {
     BrailleDisplay *brl = parameters->listenerData;
     api_flush(brl);
     resetAllBlinkDescriptors();
@@ -2942,7 +2942,7 @@ void api_link(BrailleDisplay *brl)
   lockMutex(&apiConnectionsMutex);
   broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP, BRL_COMMANDS);
   unlockMutex(&apiConnectionsMutex);
-  api_reportListener = registerReportListener(REPORT_BRAILLE_ONLINE, brlapi_handleReports, brl);
+  api_reportListener = registerReportListener(REPORT_BRAILLE_DEVICE_ONLINE, brlapi_handleReports, brl);
 }
 
 /* Function : api_unlink */

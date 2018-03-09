@@ -1017,7 +1017,7 @@ static int ps2KeyPressed;
 #endif /* HAVE_LINUX_INPUT_H */
 
 static UinputObject *uinputKeyboard = NULL;
-static ReportListenerInstance *brailleOfflineListener;
+static ReportListenerInstance *brailleDeviceOfflineListener;
 
 static void
 closeKeyboard (void) {
@@ -1103,7 +1103,7 @@ releaseParameters_LinuxScreen (void) {
   deallocateCharsetEntries();
 }
 
-REPORT_LISTENER(lxBrailleOfflineListener) {
+REPORT_LISTENER(lxBrailleDeviceOfflineListener) {
   resetKeyboard();
 }
 
@@ -1121,7 +1121,7 @@ construct_LinuxScreen (void) {
   inTextMode = 1;
   startTimePeriod(&mappingRecalculationTimer, 4000);
 
-  brailleOfflineListener = NULL;
+  brailleDeviceOfflineListener = NULL;
 
 #ifdef HAVE_LINUX_INPUT_H
   xtKeys = linuxKeyMap_xt00;
@@ -1135,7 +1135,7 @@ construct_LinuxScreen (void) {
       if (openMainConsole()) {
         if (setCurrentScreen(virtualTerminal)) {
           openKeyboard();
-          brailleOfflineListener = registerReportListener(REPORT_BRAILLE_OFFLINE, lxBrailleOfflineListener, NULL);
+          brailleDeviceOfflineListener = registerReportListener(REPORT_BRAILLE_DEVICE_OFFLINE, lxBrailleDeviceOfflineListener, NULL);
           return 1;
         }
       }
@@ -1150,9 +1150,9 @@ construct_LinuxScreen (void) {
 
 static void
 destruct_LinuxScreen (void) {
-  if (brailleOfflineListener) {
-    unregisterReportListener(brailleOfflineListener);
-    brailleOfflineListener = NULL;
+  if (brailleDeviceOfflineListener) {
+    unregisterReportListener(brailleDeviceOfflineListener);
+    brailleDeviceOfflineListener = NULL;
   }
 
   closeCurrentConsole();

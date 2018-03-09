@@ -48,7 +48,7 @@ setBrailleOffline (BrailleDisplay *brl) {
       if (keyTable) releaseAllKeys(keyTable);
     }
 
-    report(REPORT_BRAILLE_OFFLINE, NULL);
+    report(REPORT_BRAILLE_DEVICE_OFFLINE, NULL);
   }
 }
 
@@ -59,7 +59,7 @@ setBrailleOnline (BrailleDisplay *brl) {
     brl->writeDelay = 0;
 
     logMessage(LOG_DEBUG, "braille online");
-    report(REPORT_BRAILLE_ONLINE, NULL);
+    report(REPORT_BRAILLE_DEVICE_ONLINE, NULL);
   }
 }
 

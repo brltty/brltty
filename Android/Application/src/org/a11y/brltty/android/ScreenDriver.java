@@ -352,12 +352,12 @@ public final class ScreenDriver {
 
   public static void reportEvent (char event) {
     switch (event) {
-      case 'b': // braille online
+      case 'b': // braille device online
         ApplicationSettings.BRAILLE_DEVICE_ONLINE = true;
         BrailleService.getBrailleService().showState();
         break;
 
-      case 'B': // braille offline
+      case 'B': // braille device offline
         ApplicationSettings.BRAILLE_DEVICE_ONLINE = false;
         BrailleService.getBrailleService().showState();
         break;

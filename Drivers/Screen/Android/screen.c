@@ -87,11 +87,11 @@ typedef struct {
 
 static ReportEntry reportEntries[] = {
   { .character = 'b',
-    .identifier = REPORT_BRAILLE_ONLINE
+    .identifier = REPORT_BRAILLE_DEVICE_ONLINE
   },
 
   { .character = 'B',
-    .identifier = REPORT_BRAILLE_OFFLINE
+    .identifier = REPORT_BRAILLE_DEVICE_OFFLINE
   },
 
   { .character = 0 }

@@ -366,7 +366,7 @@ addInputCommands (void) {
     initializeModifierTimeout(icd);
     initializeModifierFlags(icd);
 
-    if ((icd->resetListener = registerReportListener(REPORT_BRAILLE_ONLINE, inputCommandDataResetListener, icd))) {
+    if ((icd->resetListener = registerReportListener(REPORT_BRAILLE_DEVICE_ONLINE, inputCommandDataResetListener, icd))) {
       if (pushCommandHandler("input", KTB_CTX_DEFAULT,
                              handleInputCommands, destroyInputCommandData, icd)) {
         return 1;
