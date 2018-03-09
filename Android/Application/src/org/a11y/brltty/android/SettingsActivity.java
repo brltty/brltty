@@ -21,6 +21,8 @@ package org.a11y.brltty.android;
 import java.util.List;
 
 import android.os.Bundle;
+import android.content.Context;
+import android.content.Intent;
 import android.preference.PreferenceActivity;
 
 public class SettingsActivity extends PreferenceActivity {
@@ -35,5 +37,11 @@ public class SettingsActivity extends PreferenceActivity {
   @Override
   public void onBuildHeaders (List<Header> headers) {
     loadHeadersFromResource(R.xml.settings_headers, headers);
+  }
+
+  public static Intent makeIntent () {
+    return new Intent(ApplicationHooks.getContext(), SettingsActivity.class)
+      .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      ;
   }
 }

@@ -129,7 +129,7 @@ public final class GeneralSettings extends SettingsFragment {
         @Override
         public boolean onPreferenceChange (Preference preference, Object newValue) {
           ApplicationSettings.RELEASE_BRAILLE_DEVICE = (Boolean)newValue;
-          BrailleService.getBrailleService().showState();
+          BrailleNotification.setState();
           return true;
         }
       }

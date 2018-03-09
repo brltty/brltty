@@ -224,6 +224,7 @@ public final class DeviceManager extends SettingsFragment {
         @Override
         public boolean onPreferenceChange (Preference preference, Object newValue) {
           final String newSelectedDevice = (String)newValue;
+          BrailleNotification.setDevice(newSelectedDevice);
 
           CoreWrapper.runOnCoreThread(new Runnable() {
             @Override
@@ -322,7 +323,7 @@ public final class DeviceManager extends SettingsFragment {
             putProperties(name, editor, properties);
 
             editor.putStringSet(PREF_KEY_DEVICE_NAMES, deviceNames);
-            editor.commit();
+            editor.apply();
           }
 
           addDeviceScreen.getDialog().dismiss();
@@ -338,6 +339,7 @@ public final class DeviceManager extends SettingsFragment {
           String name = selectedDeviceList.getValue();
 
           if (name != null) {
+            BrailleNotification.unsetDevice();
             deviceNames.remove(name);
             selectedDeviceList.setValue("");
             updateSelectedDeviceList();
@@ -347,7 +349,7 @@ public final class DeviceManager extends SettingsFragment {
               SharedPreferences.Editor editor = preference.getEditor();
               editor.putStringSet(PREF_KEY_DEVICE_NAMES, deviceNames);
               removeProperties(name, editor, devicePropertyKeys);
-              editor.commit();
+              editor.apply();
             }
           }
 

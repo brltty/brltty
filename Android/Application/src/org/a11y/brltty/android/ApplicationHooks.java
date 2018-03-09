@@ -22,7 +22,7 @@ import android.content.Context;
 
 public abstract class ApplicationHooks {
   public static Context getContext () {
-    return BrailleService.getBrailleService();
+    return BrailleService.getBrailleService().getApplicationContext();
   }
 
   private ApplicationHooks () {

@@ -21,14 +21,10 @@ import org.a11y.brltty.core.*;
 
 import android.os.Build;
 import android.util.Log;
+import android.content.Intent;
 
 import android.accessibilityservice.AccessibilityService;
 import android.view.accessibility.AccessibilityEvent;
-
-import android.content.Intent;
-import android.app.PendingIntent;
-import android.app.Notification;
-import android.app.NotificationManager;
 
 public class BrailleService extends AccessibilityService {
   private static final String LOG_TAG = BrailleService.class.getName();
@@ -54,74 +50,6 @@ public class BrailleService extends AccessibilityService {
       Log.d(LOG_TAG, "braille service stopped");
     } finally {
       super.onDestroy();
-    }
-  }
-
-  private final Intent makeSettingsIntent () {
-    return new Intent(this, SettingsActivity.class)
-      .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-      ;
-  }
-
-  private static final Integer notificationIdentifier = 1;
-  private static Notification.Builder notificationBuilder = null;
-  private static NotificationManager notificationManager = null;
-
-  public final void showState () {
-    synchronized (notificationIdentifier) {
-      if (notificationBuilder == null) {
-        notificationBuilder = new Notification.Builder(this)
-          .setSmallIcon(R.drawable.ic_launcher)
-          .setContentTitle("BRLTTY")
-          .setSubText("Tap for Settings.")
-
-          .setContentIntent(
-            PendingIntent.getActivity(
-              this,
-              0,
-              makeSettingsIntent().addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK),
-              0
-            )
-          )
-
-          .setPriority(Notification.PRIORITY_LOW)
-          .setOngoing(true)
-          .setOnlyAlertOnce(true)
-          ;
-
-        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR1)) {
-          notificationBuilder.setShowWhen(false);
-        }
-
-        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
-          notificationBuilder.setCategory(Notification.CATEGORY_SERVICE);
-        }
-      }
-
-      {
-        int state;
-
-        if (ApplicationSettings.RELEASE_BRAILLE_DEVICE) {
-          state = R.string.braille_state_released;
-        } else if (ApplicationSettings.BRAILLE_DEVICE_ONLINE) {
-          state = R.string.braille_state_connected;
-        } else {
-          state = R.string.braille_state_waiting;
-        }
-
-        notificationBuilder.setContentText(getString(state));
-      }
-
-      {
-        Notification notification = notificationBuilder.build();
-
-        if (notificationManager == null) {
-          startForeground(notificationIdentifier, notification);
-          notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-        } else {
-          notificationManager.notify(notificationIdentifier, notification);
-        }
-      }
     }
   }
 
@@ -159,7 +87,7 @@ public class BrailleService extends AccessibilityService {
   }
 
   public boolean launchSettingsActivity () {
-    Intent intent = makeSettingsIntent();
+    Intent intent = SettingsActivity.makeIntent();
 
     intent.addFlags(
       Intent.FLAG_ACTIVITY_CLEAR_TOP |
