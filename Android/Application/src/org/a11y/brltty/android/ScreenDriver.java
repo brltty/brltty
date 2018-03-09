@@ -361,6 +361,10 @@ public final class ScreenDriver {
         ApplicationSettings.BRAILLE_DEVICE_ONLINE = false;
         BrailleNotification.setState();
         break;
+
+      case 'k': // braille key event
+        LockUtilities.resetTimer();
+        break;
     }
   }
 

@@ -32,7 +32,6 @@
 static JNIEnv *env = NULL;
 static jclass screenDriverClass = NULL;
 static jclass inputServiceClass = NULL;
-static jclass lockUtilitiesClass = NULL;
 
 static jint screenNumber;
 static jint screenColumns;
@@ -56,11 +55,6 @@ findScreenDriverClass (void) {
 static int
 findInputServiceClass (void) {
   return findJavaClass(env, &inputServiceClass, JAVA_OBJ_BRLTTY("InputService"));
-}
-
-static int
-findLockUtilitiesClass (void) {
-  return findJavaClass(env, &lockUtilitiesClass, JAVA_OBJ_BRLTTY("LockUtilities"));
 }
 
 REPORT_LISTENER(androidScreenDriverReportListener) {
@@ -92,6 +86,10 @@ static ReportEntry reportEntries[] = {
 
   { .character = 'B',
     .identifier = REPORT_BRAILLE_DEVICE_OFFLINE
+  },
+
+  { .character = 'k',
+    .identifier = REPORT_BRAILLE_KEY_EVENT
   },
 
   { .character = 0 }
@@ -284,29 +282,6 @@ readCharacters_AndroidScreen (const ScreenBox *box, ScreenCharacter *buffer) {
 }
 
 static int
-resetLockTimer (void) {
-  if (findLockUtilitiesClass()) {
-    static jmethodID method = 0;
-
-    if (findJavaStaticMethod(env, &method, lockUtilitiesClass, "resetTimer",
-                             JAVA_SIG_METHOD(JAVA_SIG_VOID,
-                                            ))) {
-      (*env)->CallStaticVoidMethod(env, lockUtilitiesClass, method);
-      if (!clearJavaException(env, 1)) return 1;
-      errno = EIO;
-    }
-  }
-
-  return 0;
-}
-
-static int
-handleCommand_AndroidScreen (int command) {
-  resetLockTimer();
-  return 0;
-}
-
-static int
 routeCursor_AndroidScreen (int column, int row, int screen) {
   if (findScreenDriverClass()) {
     static jmethodID method = 0;
@@ -422,7 +397,6 @@ scr_initialize (MainScreen *main) {
   main->base.refresh = refresh_AndroidScreen;
   main->base.describe = describe_AndroidScreen;
   main->base.readCharacters = readCharacters_AndroidScreen;
-  main->base.handleCommand = handleCommand_AndroidScreen;
   main->base.routeCursor = routeCursor_AndroidScreen;
   main->base.insertKey = insertKey_AndroidScreen;
   main->construct = construct_AndroidScreen;

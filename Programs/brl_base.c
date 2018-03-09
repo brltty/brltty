@@ -22,6 +22,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "report.h"
 #include "queue.h"
 #include "async_alarm.h"
 #include "brl_base.h"
@@ -520,6 +521,8 @@ enqueueKeyEvent (
   BrailleDisplay *brl,
   KeyGroup group, KeyNumber number, int press
 ) {
+  report(REPORT_BRAILLE_KEY_EVENT, NULL);
+
   if (brl->api) {
     if (brl->api->handleKeyEvent(group, number, press)) {
       return 1;

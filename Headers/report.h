@@ -28,6 +28,7 @@ typedef enum {
   REPORT_BRAILLE_DEVICE_OFFLINE,
   REPORT_BRAILLE_WINDOW_MOVED,
   REPORT_BRAILLE_WINDOW_UPDATED,
+  REPORT_BRAILLE_KEY_EVENT,
 } ReportIdentifier;
 
 extern void report (ReportIdentifier identiier, const void *data);
