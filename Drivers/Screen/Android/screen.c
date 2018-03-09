@@ -100,7 +100,11 @@ static ReportEntry reportEntries[] = {
 static int
 construct_AndroidScreen (void) {
   for (ReportEntry *rpt=reportEntries; rpt->character; rpt+=1) {
-    rpt->listener = registerReportListener(rpt->identifier, androidScreenDriverReportListener, &rpt->character);
+    rpt->listener = registerReportListener(
+      rpt->identifier, androidScreenDriverReportListener, &rpt->character
+    );
+
+    if (!rpt->listener) break;
   }
 
   return 1;
@@ -109,8 +113,10 @@ construct_AndroidScreen (void) {
 static void
 destruct_AndroidScreen (void) {
   for (ReportEntry *rpt=reportEntries; rpt->character; rpt+=1) {
-    unregisterReportListener(rpt->listener);
-    rpt->listener = NULL;
+    if (rpt->listener) {
+      unregisterReportListener(rpt->listener);
+      rpt->listener = NULL;
+    }
   }
 }
 

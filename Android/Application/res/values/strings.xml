@@ -7,6 +7,10 @@
   <string name="input_service_name">BRLTTY Input Service</string>
   <string name="input_service_type">Keyboards on Braille Devices</string>
 
+  <string name="braille_state_waiting">waiting</string>
+  <string name="braille_state_connected">connected</string>
+  <string name="braille_state_released">released</string>
+
   <string name="VIRTUAL_BUTTON_NOTIFICATIONS">Notifications</string>
   <string name="VIRTUAL_BUTTON_QUICK_SETTINGS">Quick Settings</string>
   <string name="VIRTUAL_BUTTON_BACK">Back</string>

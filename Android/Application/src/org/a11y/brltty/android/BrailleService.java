@@ -99,17 +99,17 @@ public class BrailleService extends AccessibilityService {
       }
 
       {
-        String state;
+        int state;
 
         if (ApplicationSettings.RELEASE_BRAILLE_DEVICE) {
-          state = "released";
+          state = R.string.braille_state_released;
         } else if (ApplicationSettings.BRAILLE_DEVICE_ONLINE) {
-          state = "connected";
+          state = R.string.braille_state_connected;
         } else {
-          state = "waiting";
+          state = R.string.braille_state_waiting;
         }
 
-        notificationBuilder.setContentText(state);
+        notificationBuilder.setContentText(getString(state));
       }
 
       {
