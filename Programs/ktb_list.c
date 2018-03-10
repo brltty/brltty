@@ -552,7 +552,7 @@ listBindingLines (ListGenerationData *lgd, const KeyContext *ctx) {
             const BindingLine *bl = lgd->binding.lines[current];
             int command = bl->command->value & BRL_MSK_CMD;
 
-            if (cmd->command > command) {
+            if (cmd->code > command) {
               first = current + 1;
             } else {
               last = current - 1;
@@ -560,7 +560,7 @@ listBindingLines (ListGenerationData *lgd, const KeyContext *ctx) {
           }
 
           {
-            int currentCommand = cmd->command;
+            int currentCommand = cmd->code;
             int isSame = 0;
 
             while (first < lgd->binding.count) {

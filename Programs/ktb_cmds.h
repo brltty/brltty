@@ -29,7 +29,7 @@ extern CommandGroupHook commandGroupHook_keyboardFunctions;
 extern CommandGroupHook commandGroupHook_hotkeys;
 
 typedef struct {
-  int command;
+  int code;
 } CommandListEntry;
 
 typedef struct {

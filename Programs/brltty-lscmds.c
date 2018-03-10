@@ -50,22 +50,8 @@ endLine (void) {
 }
 
 static void
-endHeader (char character, size_t length) {
-  endLine();
-  writeCharacters(character, length);
-  endLine();
-  endLine();
-}
-
-static void
 writeString (const char *string) {
   while (*string) writeCharacter(*string++);
-}
-
-static void
-writeStringHeader (const char *header, char character) {
-  writeString(header);
-  endHeader(character, strlen(header));
 }
 
 static void
@@ -73,10 +59,37 @@ writeText (const wchar_t *text) {
   printf("%ls", text);
 }
 
+static const char headerCharacters[] = {'=', '-', '~'};
+static unsigned char headerLevel = 0;
+
 static void
-writeTextHeader (const wchar_t *header, char character) {
+incrementHeaderLevel (void) {
+  headerLevel += 1;
+}
+
+static void
+decrementHeaderLevel (void) {
+  headerLevel -= 1;
+}
+
+static void
+endHeader (size_t length) {
+  endLine();
+  writeCharacters(headerCharacters[headerLevel], length);
+  endLine();
+  endLine();
+}
+
+static void
+writeStringHeader (const char *header) {
+  writeString(header);
+  endHeader(strlen(header));
+}
+
+static void
+writeTextHeader (const wchar_t *header) {
   writeText(header);
-  endHeader(character, wcslen(header));
+  endHeader(wcslen(header));
 }
 
 void
@@ -113,11 +126,12 @@ listModifiers (int include, const char *type, int *started, const CommandModifie
 }
 
 static void
-listCommand (const CommandEntry *cmd) {
-  writeStringHeader(cmd->name, '~');
+listCommand (const CommandEntry *command) {
+  incrementHeaderLevel();
+  writeStringHeader(command->name);
 
   {
-    const char *description = cmd->description;
+    const char *description = command->description;
     writeCharacter(toupper(*description++));
     printf("%s.\n\n", description);
   }
@@ -125,74 +139,79 @@ listCommand (const CommandEntry *cmd) {
   {
     int started = 0;
 
-    listModifiers(cmd->isColumn, "a column number", &started, NULL);
-    listModifiers(cmd->isOffset, "an offset", &started, NULL);
+    listModifiers(command->isColumn, "a column number", &started, NULL);
+    listModifiers(command->isOffset, "an offset", &started, NULL);
 
     listModifiers(
-      cmd->isToggle, "Toggle", &started,
+      command->isToggle, "Toggle", &started,
       commandModifierTable_toggle
     );
 
     listModifiers(
-      cmd->isMotion, "Motion", &started,
+      command->isMotion, "Motion", &started,
       commandModifierTable_motion
     );
 
     listModifiers(
-      cmd->isRow, "Row", &started,
+      command->isRow, "Row", &started,
       commandModifierTable_row
     );
 
     listModifiers(
-      cmd->isVertical, "Vertical", &started,
+      command->isVertical, "Vertical", &started,
       commandModifierTable_vertical
     );
 
     listModifiers(
-      cmd->isInput, "Input", &started,
+      command->isInput, "Input", &started,
       commandModifierTable_input
     );
 
     listModifiers(
-      (cmd->isCharacter || cmd->isBraille), "Character", &started,
+      (command->isCharacter || command->isBraille), "Character", &started,
       commandModifierTable_character
     );
 
     listModifiers(
-      cmd->isBraille, "Braille", &started,
+      command->isBraille, "Braille", &started,
       commandModifierTable_braille
     );
 
     listModifiers(
-      cmd->isKeyboard, "Keyboard", &started,
+      command->isKeyboard, "Keyboard", &started,
       commandModifierTable_keyboard
     );
 
     if (started) endLine();
   }
+
+  decrementHeaderLevel();
 }
 
 static void
-listCommandGroup (const CommandGroupEntry *grp) {
-  writeTextHeader(grp->name, '-');
+listGroup (const CommandGroupEntry *group) {
+  incrementHeaderLevel();
+  writeTextHeader(group->name);
 
-  const CommandListEntry *cmd = grp->commands.table;
-  const CommandListEntry *cmdEnd = cmd + grp->commands.count;
+  const CommandListEntry *command = group->commands.table;
+  const CommandListEntry *end = command + group->commands.count;
 
-  while (cmd < cmdEnd) {
-    listCommand(findCommandEntry(cmd->command));
-    cmd += 1;
+  while (command < end) {
+    listCommand(findCommandEntry(command->code));
+    command += 1;
   }
+
+  decrementHeaderLevel();
 }
 
 static void
-listCommandGroups (void) {
-  const CommandGroupEntry *grp = commandGroupTable;
-  const CommandGroupEntry *grpEnd = grp + commandGroupCount;
+listGroups (void) {
+  const CommandGroupEntry *group = commandGroupTable;
+  const CommandGroupEntry *end = group + commandGroupCount;
 
-  while (grp < grpEnd) {
-    listCommandGroup(grp);
-    grp += 1;
+  while (group < end) {
+    listGroup(group);
+    group += 1;
   }
 }
 
@@ -208,9 +227,9 @@ main (int argc, char *argv[]) {
   }
 fflush(stdout);
 
-  writeStringHeader("BRLTTY Command List", '=');
+  writeStringHeader("BRLTTY Command List");
   writeString(".. contents::\n\n");
 
-  listCommandGroups();
+  listGroups();
   return PROG_EXIT_SUCCESS;
 }
