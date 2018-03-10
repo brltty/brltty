@@ -21,7 +21,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include <wchar.h>
 
 #include "program.h"
 #include "options.h"
@@ -54,11 +53,6 @@ writeString (const char *string) {
   while (*string) writeCharacter(*string++);
 }
 
-static void
-writeText (const wchar_t *text) {
-  printf("%ls", text);
-}
-
 static const char headerCharacters[] = {'=', '-', '~'};
 static unsigned char headerLevel = 0;
 
@@ -73,23 +67,13 @@ decrementHeaderLevel (void) {
 }
 
 static void
-endHeader (size_t length) {
-  endLine();
-  writeCharacters(headerCharacters[headerLevel], length);
-  endLine();
-  endLine();
-}
-
-static void
-writeStringHeader (const char *header) {
+writeHeader (const char *header) {
   writeString(header);
-  endHeader(strlen(header));
-}
+  endLine();
 
-static void
-writeTextHeader (const wchar_t *header) {
-  writeText(header);
-  endHeader(wcslen(header));
+  writeCharacters(headerCharacters[headerLevel], strlen(header));
+  endLine();
+  endLine();
 }
 
 void
@@ -128,7 +112,7 @@ listModifiers (int include, const char *type, int *started, const CommandModifie
 static void
 listCommand (const CommandEntry *command) {
   incrementHeaderLevel();
-  writeStringHeader(command->name);
+  writeHeader(command->name);
 
   {
     const char *description = command->description;
@@ -191,7 +175,7 @@ listCommand (const CommandEntry *command) {
 static void
 listGroup (const CommandGroupEntry *group) {
   incrementHeaderLevel();
-  writeTextHeader(group->name);
+  writeHeader(group->name);
 
   const CommandListEntry *command = group->commands.table;
   const CommandListEntry *end = command + group->commands.count;
@@ -227,7 +211,7 @@ main (int argc, char *argv[]) {
   }
 fflush(stdout);
 
-  writeStringHeader("BRLTTY Command List");
+  writeHeader("BRLTTY Command List");
   writeString(".. contents::\n\n");
 
   listGroups();

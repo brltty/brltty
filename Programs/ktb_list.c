@@ -164,8 +164,15 @@ endLine (ListGenerationData *lgd) {
   }
 
   if (lgd->listHeader) {
-    if (!writeHeader(lgd, lgd->listHeader, 2)) return 0;
+    const char *string = lgd->listHeader;
     lgd->listHeader = NULL;
+
+    size_t size = strlen(string) + 1;
+    wchar_t characters[size];
+    wchar_t *character = characters;
+
+    convertUtf8ToWchars(&string, &character, size);
+    if (!writeHeader(lgd, characters, 2)) return 0;
   }
 
   if (!finishLine(lgd)) return 0;
@@ -175,7 +182,7 @@ endLine (ListGenerationData *lgd) {
 }
 
 static int
-beginList (ListGenerationData *lgd, const wchar_t *header) {
+beginList (ListGenerationData *lgd, const char *header) {
   lgd->listHeader = header;
   return 1;
 }
@@ -590,7 +597,7 @@ listBindingLines (ListGenerationData *lgd, const KeyContext *ctx) {
       {
         int isSame = 0;
 
-        if (!beginList(lgd, WS_C("Uncategorized Bindings"))) return 0;
+        if (!beginList(lgd, "Uncategorized Bindings")) return 0;
 
         while (lgd->binding.count > 0) {
           if (!listBindingLine(lgd, 0, &isSame)) return 0;
@@ -737,7 +744,7 @@ static int
 listKeyTableNotes (ListGenerationData *lgd) {
   unsigned int noteIndex;
 
-  if (!beginList(lgd, WS_C("Notes"))) return 0;
+  if (!beginList(lgd, "Notes")) return 0;
 
   for (noteIndex=0; noteIndex<lgd->keyTable->notes.count; noteIndex+=1) {
     const wchar_t *line = lgd->keyTable->notes.table[noteIndex];

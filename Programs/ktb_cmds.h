@@ -38,7 +38,7 @@ typedef struct {
     unsigned int count;
   } commands;
 
-  const wchar_t *name;
+  const char *name;
   CommandGroupHook *before;
   CommandGroupHook *after;
 } CommandGroupEntry;

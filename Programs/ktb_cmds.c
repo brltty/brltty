@@ -237,52 +237,52 @@ static const CommandListEntry commandList_internal[] = {
 const CommandGroupEntry commandGroupTable[] = {
   { COMMAND_LIST(modes),
     .after = commandGroupHook_hotkeys,
-    .name = WS_C("Special Modes")
+    .name = "Special Modes"
   },
 
   { COMMAND_LIST(cursor),
-    .name = WS_C("Cursor Functions")
+    .name = "Cursor Functions"
   },
 
   { COMMAND_LIST(vertical),
-    .name = WS_C("Vertical Navigation")
+    .name = "Vertical Navigation"
   },
 
   { COMMAND_LIST(horizontal),
-    .name = WS_C("Horizontal Navigation")
+    .name = "Horizontal Navigation"
   },
 
   { COMMAND_LIST(clipboard),
-    .name = WS_C("Clipboard Functions")
+    .name = "Clipboard Functions"
   },
 
   { COMMAND_LIST(feature),
-    .name = WS_C("Configuration Functions")
+    .name = "Configuration Functions"
   },
 
   { COMMAND_LIST(menu),
-    .name = WS_C("Menu Operations")
+    .name = "Menu Operations"
   },
 
   { COMMAND_LIST(say),
-    .name = WS_C("Speech Functions")
+    .name = "Speech Functions"
   },
 
   { COMMAND_LIST(speak),
-    .name = WS_C("Speech Navigation")
+    .name = "Speech Navigation"
   },
 
   { COMMAND_LIST(input),
     .before = commandGroupHook_keyboardFunctions,
-    .name = WS_C("Keyboard Input")
+    .name = "Keyboard Input"
   },
 
   { COMMAND_LIST(special),
-    .name = WS_C("Special Functions")
+    .name = "Special Functions"
   },
 
   { COMMAND_LIST(internal),
-    .name = WS_C("Internal Functions")
+    .name = "Internal Functions"
   },
 };
 
