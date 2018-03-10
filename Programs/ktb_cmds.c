@@ -18,8 +18,7 @@
 
 #include "prologue.h"
 
-#include "ktb.h"
-#include "ktb_list.h"
+#include "ktb_cmds.h"
 #include "brl_cmds.h"
 
 static const CommandListEntry commandList_modes[] = {
@@ -237,7 +236,7 @@ static const CommandListEntry commandList_internal[] = {
 
 const CommandGroupEntry commandGroupTable[] = {
   { COMMAND_LIST(modes),
-    .listAfter = listHotkeys,
+    .after = commandGroupHook_hotkeys,
     .name = WS_C("Special Modes")
   },
 
@@ -274,7 +273,7 @@ const CommandGroupEntry commandGroupTable[] = {
   },
 
   { COMMAND_LIST(input),
-    .listBefore = listKeyboardFunctions,
+    .before = commandGroupHook_keyboardFunctions,
     .name = WS_C("Keyboard Input")
   },
 

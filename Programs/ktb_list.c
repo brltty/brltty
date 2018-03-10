@@ -28,6 +28,30 @@
 #include "brl_cmds.h"
 #include "ktb.h"
 #include "ktb_list.h"
+#include "ktb_cmds.h"
+
+struct CommandGroupHookDataStruct {
+  ListGenerationData *const lgd;
+  const KeyContext *const ctx;
+
+  int ok;
+};
+
+static inline void
+listCommandSubgroup (
+  int (*list) (ListGenerationData *lgd, const KeyContext *ctx),
+  CommandGroupHookData *cgh
+) {
+  cgh->ok = list(cgh->lgd, cgh->ctx);
+}
+
+static int
+handleCommandGroupHook (CommandGroupHook *handler, CommandGroupHookData *cgh) {
+  if (!handler) return 1;
+  cgh->ok = 0;
+  handler(cgh);
+  return cgh->ok;
+}
 
 static void *
 getMethodData (ListGenerationData *lgd) {
@@ -292,7 +316,7 @@ putKeyboardFunction (ListGenerationData *lgd, const KeyboardFunction *kbf) {
   return 1;
 }
 
-int
+static int
 listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
   if (ctx->mappedKeys.count > 0) {
     for (unsigned int index=0; index<ctx->mappedKeys.count; index+=1) {
@@ -326,6 +350,11 @@ listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
   return 1;
 }
 
+void
+commandGroupHook_keyboardFunctions (CommandGroupHookData *cgh) {
+  listCommandSubgroup(listKeyboardFunctions, cgh);
+}
+
 static int
 listHotkeyEvent (ListGenerationData *lgd, const KeyValue *keyValue, const char *event, const BoundCommand *cmd) {
   if (cmd->value != BRL_CMD_NOOP) {
@@ -350,7 +379,7 @@ listHotkeyEvent (ListGenerationData *lgd, const KeyValue *keyValue, const char *
   return 1;
 }
 
-int
+static int
 listHotkeys (ListGenerationData *lgd, const KeyContext *ctx) {
   const HotkeyEntry *hotkey = ctx->hotkeys.table;
   unsigned int count = ctx->hotkeys.count;
@@ -367,10 +396,9 @@ listHotkeys (ListGenerationData *lgd, const KeyContext *ctx) {
   return 1;
 }
 
-static int
-listCommandSubgroup (ListGenerationData *lgd, const KeyContext *ctx, CommandSubgroupLister *list) {
-  if (!list) return 1;
-  return list(lgd, ctx);
+void
+commandGroupHook_hotkeys (CommandGroupHookData *cgh) {
+  listCommandSubgroup(listHotkeys, cgh);
 }
 
 static int
@@ -507,8 +535,13 @@ listBindingLines (ListGenerationData *lgd, const KeyContext *ctx) {
         const CommandListEntry *cmd = grp->commands.table;
         const CommandListEntry *cmdEnd = cmd + grp->commands.count;
 
+        CommandGroupHookData cgh = {
+          .lgd = lgd,
+          .ctx = ctx
+        };
+
         if (!beginList(lgd, grp->name)) return 0;
-        if (!listCommandSubgroup(lgd, ctx, grp->listBefore)) return 0;
+        if (!handleCommandGroupHook(grp->before, &cgh)) return 0;
 
         while (cmd < cmdEnd) {
           int first = 0;
@@ -549,7 +582,7 @@ listBindingLines (ListGenerationData *lgd, const KeyContext *ctx) {
           cmd += 1;
         }
 
-        if (!listCommandSubgroup(lgd, ctx, grp->listAfter)) return 0;
+        if (!handleCommandGroupHook(grp->after, &cgh)) return 0;
         if (!endList(lgd)) return 0;
         grp += 1;
       }

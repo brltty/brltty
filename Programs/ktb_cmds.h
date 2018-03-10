@@ -16,55 +16,38 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_KTB_LIST
-#define BRLTTY_INCLUDED_KTB_LIST
-
-#include "ktb_internal.h"
-#include "ktb_inspect.h"
+#ifndef BRLTTY_INCLUDED_KTB_CMDS
+#define BRLTTY_INCLUDED_KTB_CMDS
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct {
-  const BoundCommand *command;
-  size_t order;
-  size_t keysOffset;
-  size_t length;
-  wchar_t text[0];
-} BindingLine;
+typedef struct CommandGroupHookDataStruct CommandGroupHookData;
+typedef void CommandGroupHook (CommandGroupHookData *data);
+extern CommandGroupHook commandGroupHook_keyboardFunctions;
+extern CommandGroupHook commandGroupHook_hotkeys;
 
 typedef struct {
-  KeyTable *const keyTable;
+  int command;
+} CommandListEntry;
 
-  const wchar_t *topicHeader;
-  const wchar_t *listHeader;
-
+typedef struct {
   struct {
-    wchar_t *characters;
-    size_t size;
-    size_t length;
-  } line;
+    const CommandListEntry *table;
+    unsigned int count;
+  } commands;
 
-  struct {
-    const KeyTableListMethods *const methods;
-    KeyTableWriteLineMethod *const writeLine;
-    void *const data;
-    const unsigned internal:1;
+  const wchar_t *name;
+  CommandGroupHook *before;
+  CommandGroupHook *after;
+} CommandGroupEntry;
 
-    unsigned int elementLevel;
-    wchar_t elementBullet;
-  } list;
-
-  struct {
-    BindingLine **lines;
-    size_t size;
-    size_t count;
-  } binding;
-} ListGenerationData;
+extern const CommandGroupEntry commandGroupTable[];
+extern const unsigned char commandGroupCount;
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_KTB_LIST */
+#endif /* BRLTTY_INCLUDED_KTB_CMDS */
