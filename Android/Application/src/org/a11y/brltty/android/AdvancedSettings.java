@@ -30,13 +30,13 @@ import android.preference.MultiSelectListPreference;
 public final class AdvancedSettings extends SettingsFragment {
   private static final String LOG_TAG = AdvancedSettings.class.getName();
 
-  protected ListPreference keyboardTableList;
-  protected ListPreference attributesTableList;
-  protected ListPreference logLevelList;
-  protected MultiSelectListPreference logCategorySet;
-  protected CheckBoxPreference logAccessibilityEventsCheckBox;
-  protected CheckBoxPreference logRenderedScreenCheckBox;
-  protected CheckBoxPreference logKeyboardEventsCheckBox;
+  private ListPreference keyboardTableList;
+  private ListPreference attributesTableList;
+  private ListPreference logLevelList;
+  private MultiSelectListPreference logCategorySet;
+  private CheckBoxPreference logAccessibilityEventsCheckBox;
+  private CheckBoxPreference logRenderedScreenCheckBox;
+  private CheckBoxPreference logKeyboardEventsCheckBox;
 
   @Override
   public void onCreate (Bundle savedInstanceState) {

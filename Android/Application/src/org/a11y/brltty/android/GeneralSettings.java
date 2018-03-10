@@ -27,11 +27,11 @@ import android.preference.ListPreference;
 public final class GeneralSettings extends SettingsFragment {
   private static final String LOG_TAG = GeneralSettings.class.getName();
 
-  protected ListPreference navigationModeList;
-  protected ListPreference textTableList;
-  protected ListPreference contractionTableList;
-  protected ListPreference speechSupportList;
-  protected CheckBoxPreference releaseBrailleDeviceCheckBox;
+  private ListPreference navigationModeList;
+  private ListPreference textTableList;
+  private ListPreference contractionTableList;
+  private ListPreference speechSupportList;
+  private CheckBoxPreference releaseBrailleDeviceCheckBox;
 
   @Override
   public void onCreate (Bundle savedInstanceState) {

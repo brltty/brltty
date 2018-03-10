@@ -38,34 +38,42 @@ import android.preference.ListPreference;
 public final class DeviceManager extends SettingsFragment {
   private static final String LOG_TAG = DeviceManager.class.getName();
 
-  protected Set<String> deviceNames;
-  protected DeviceCollection deviceCollection;
+  private Set<String> deviceNames;
+  private DeviceCollection deviceCollection;
 
-  protected ListPreference selectedDeviceList;
-  protected PreferenceScreen addDeviceScreen;
-  protected PreferenceScreen removeDeviceScreen;
+  private ListPreference selectedDeviceList;
+  private PreferenceScreen addDeviceScreen;
+  private PreferenceScreen removeDeviceScreen;
 
-  protected EditTextPreference deviceNameEditor;
-  protected ListPreference deviceMethodList;
-  protected ListPreference deviceIdentifierList;
-  protected ListPreference deviceDriverList;
-  protected Preference addDeviceButton;
+  private EditTextPreference deviceNameEditor;
+  private ListPreference deviceMethodList;
+  private ListPreference deviceIdentifierList;
+  private ListPreference deviceDriverList;
+  private Preference addDeviceButton;
 
-  protected Preference removeDeviceButton_ASK;
-  protected Preference removeDeviceButton_YES;
-  protected Preference removeDeviceButton_NO;
+  private Preference removeDeviceButton_ASK;
+  private Preference removeDeviceButton_YES;
+  private Preference removeDeviceButton_NO;
 
-  protected static final String PREF_KEY_DEVICE_NAMES = "device-names";
+  private static final String PREF_KEY_DEVICE_NAMES = "device-names";
 
   public static final String PREF_KEY_DEVICE_QUALIFIER = "device-qualifier";
   public static final String PREF_KEY_DEVICE_REFERENCE = "device-reference";
   public static final String PREF_KEY_DEVICE_DRIVER = "device-driver";
 
-  public static final String[] DEVICE_PROPERTY_KEYS = {
+  private static final String[] DEVICE_PROPERTY_KEYS = {
     PREF_KEY_DEVICE_QUALIFIER,
     PREF_KEY_DEVICE_REFERENCE,
     PREF_KEY_DEVICE_DRIVER
   };
+
+  public static Map<String, String> getDeviceProperties (SharedPreferences prefs, String name) {
+    return getProperties(prefs, name, DEVICE_PROPERTY_KEYS);
+  }
+
+  private static void removeDeviceProperties (SharedPreferences.Editor editor, String name) {
+    removeProperties(editor, name, DEVICE_PROPERTY_KEYS);
+  }
 
   private void updateRemoveDeviceScreen (String selectedDevice) {
     boolean on = false;
@@ -229,10 +237,9 @@ public final class DeviceManager extends SettingsFragment {
           CoreWrapper.runOnCoreThread(new Runnable() {
             @Override
             public void run () {
-              Map<String, String> properties = getProperties(
+              Map<String, String> properties = getDeviceProperties(
                 ApplicationUtilities.getSharedPreferences(),
-                newSelectedDevice,
-                DEVICE_PROPERTY_KEYS
+                newSelectedDevice
               );
 
               String qualifier = properties.get(PREF_KEY_DEVICE_QUALIFIER);
@@ -348,7 +355,7 @@ public final class DeviceManager extends SettingsFragment {
             {
               SharedPreferences.Editor editor = preference.getEditor();
               editor.putStringSet(PREF_KEY_DEVICE_NAMES, deviceNames);
-              removeProperties(editor, name, DEVICE_PROPERTY_KEYS);
+              removeDeviceProperties(editor, name);
               editor.apply();
             }
           }

@@ -49,7 +49,13 @@ public abstract class SettingsFragment extends PreferenceFragment {
     return key + '-' + name;
   }
 
-  public static Map<String, String> getProperties (SharedPreferences prefs, String name, String... keys) {
+  protected static void putProperties (SharedPreferences.Editor editor, String name, Map<String, String> properties) {
+    for (Map.Entry<String, String> property : properties.entrySet()) {
+      editor.putString(makePropertyKey(name, property.getKey()), property.getValue());
+    }
+  }
+
+  protected static Map<String, String> getProperties (SharedPreferences prefs, String name, String... keys) {
     Map<String, String> properties = new LinkedHashMap();
 
     for (String key : keys) {
@@ -59,13 +65,7 @@ public abstract class SettingsFragment extends PreferenceFragment {
     return properties;
   }
 
-  public static void putProperties (SharedPreferences.Editor editor, String name, Map<String, String> properties) {
-    for (Map.Entry<String, String> property : properties.entrySet()) {
-      editor.putString(makePropertyKey(name, property.getKey()), property.getValue());
-    }
-  }
-
-  public static void removeProperties (SharedPreferences.Editor editor, String name, String... keys) {
+  protected static void removeProperties (SharedPreferences.Editor editor, String name, String... keys) {
     for (String key : keys) {
       editor.remove(makePropertyKey(name, key));
     }
