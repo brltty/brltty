@@ -30,11 +30,6 @@
 #include "brlapi.h"
 #define BRLAPI_OBJECT(name) "org/a11y/brlapi/" name
 
-/* TODO: threads */
-static JNIEnv *globalJavaEnvironment;
-#define SET_GLOBAL_JAVA_ENVIRONMENT(env) (globalJavaEnvironment = (env))
-#define GET_GLOBAL_JAVA_ENVIRONMENT(env) JNIEnv *env = globalJavaEnvironment
-
 static void
 throwJavaError (JNIEnv *env, const char *object, const char *message) {
   (*env)->ExceptionClear(env);
@@ -114,9 +109,88 @@ throwConnectionError (JNIEnv *env) {
     JAVA_SET_FIELD((env), Long, (object), field, (jlong) (intptr_t) (value)); \
   } while (0)
 
+static void
+logJavaVirtualMachineError (jint error, const char *method) {
+  const char *message;
+
+  switch (error) {
+    case JNI_OK:
+      message = "success";
+      break;
+
+    default:
+#ifdef JNI_ERR
+    case JNI_ERR:
+#endif /* JNI_ERR */
+      message = "unknown error";
+      break;
+
+#ifdef JNI_EDETACHED
+    case JNI_EDETACHED:
+      message = "thread not attached to virtual machine";
+      break;
+#endif /* JNI_EDETACHED */
+
+#ifdef JNI_EVERSION
+    case JNI_EVERSION:
+      message = "version error";
+      break;
+#endif /* JNI_EVERSION */
+
+#ifdef JNI_ENOMEM
+    case JNI_ENOMEM:
+      message = "not enough memory";
+      break;
+#endif /* JNI_ENOMEM */
+
+#ifdef JNI_EEXIST
+    case JNI_EEXIST:
+      message = "virtual machine already created";
+      break;
+#endif /* JNI_EEXIST */
+
+#ifdef JNI_EINVAL
+    case JNI_EINVAL:
+      message = "invalid argument";
+      break;
+#endif /* JNI_EINVAL */
+  }
+
+  fprintf(stderr, "Java virtual machine error %d in %s: %s\n", error, method, message);
+}
+
+static JNIEnv *
+getJavaEnvironment (brlapi_handle_t *handle) {
+  JavaVM *vm = brlapi__getClientData(handle);
+  jint version = JNI_VERSION_1_6;
+  void *env = NULL;
+
+  if (vm) {
+    jint result = (*vm)->GetEnv(vm, &env, version);
+
+    if (result != JNI_OK) {
+      if (result == JNI_EDETACHED) {
+        JavaVMAttachArgs args = {
+          .version = version,
+          .name = NULL,
+          .group = NULL
+        };
+
+        if ((result = (*vm)->AttachCurrentThread(vm, &env, &args)) != JNI_OK) {
+          logJavaVirtualMachineError(result, "AttachCurrentThread");
+        }
+      } else {
+        logJavaVirtualMachineError(result, "GetEnv");
+      }
+    }
+  }
+
+  return env;
+}
+
 static void BRLAPI_STDCALL
-exceptionHandler (brlapi_handle_t *handle, int error, brlapi_packetType_t type, const void *packet, size_t size) {
-  GET_GLOBAL_JAVA_ENVIRONMENT(env);
+handleConnectionException (brlapi_handle_t *handle, int error, brlapi_packetType_t type, const void *packet, size_t size) {
+  JNIEnv *env = getJavaEnvironment(handle);
 
   jbyteArray jPacket = (*env)->NewByteArray(env, size);
   if (!jPacket) return;
@@ -179,8 +253,6 @@ JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, openConnection, jint,
   jobject jRequestedSettings, jobject jActualSettings
 ) {
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
-
   brlapi_handle_t *handle;
   int fileDescriptor;
 
@@ -265,7 +337,13 @@ JAVA_INSTANCE_METHOD(
     }
   }
 
-  brlapi__setExceptionHandler(handle, exceptionHandler);
+  {
+    JavaVM *vm;
+    (*env)->GetJavaVM(env, &vm);
+    brlapi__setClientData(handle, vm);
+  }
+
+  brlapi__setExceptionHandler(handle, handleConnectionException);
   SET_CONNECTION_HANDLE(env, this, handle, -1);
   return (jint) fileDescriptor;
 }
@@ -273,7 +351,6 @@ JAVA_INSTANCE_METHOD(
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, closeConnection, void
 ) {
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
   GET_CONNECTION_HANDLE(env, this, );
   brlapi__closeConnection(handle);
   free(handle);
@@ -283,8 +360,6 @@ JAVA_INSTANCE_METHOD(
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, getDriverName, jstring
 ) {
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
-
   GET_CONNECTION_HANDLE(env, this, NULL);
   char name[0X20];
 
@@ -300,8 +375,6 @@ JAVA_INSTANCE_METHOD(
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, getModelIdentifier, jstring
 ) {
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
-
   GET_CONNECTION_HANDLE(env, this, NULL);
   char identifier[0X20];
 
@@ -317,8 +390,6 @@ JAVA_INSTANCE_METHOD(
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, getDisplaySize, jobject
 ) {
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
-
   GET_CONNECTION_HANDLE(env, this, NULL);
 
   unsigned int width, height;
@@ -350,8 +421,6 @@ JAVA_INSTANCE_METHOD(
   int result;
   GET_CONNECTION_HANDLE(env, this, -1);
   
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
-
   tty = (int)jtty; 
   if (!jdriver)
     driver = NULL;
@@ -379,8 +448,6 @@ JAVA_INSTANCE_METHOD(
   int result;
   GET_CONNECTION_HANDLE(env, this, );
   
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
-
   if (!jttys) {
     throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
     return;
@@ -408,7 +475,6 @@ JAVA_INSTANCE_METHOD(
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, leaveTtyMode, void
 ) {
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
   GET_CONNECTION_HANDLE(env, this, );
 
   if (brlapi__leaveTtyMode(handle) < 0) {
@@ -424,8 +490,6 @@ JAVA_INSTANCE_METHOD(
   int arg1 ;
   GET_CONNECTION_HANDLE(env, this, );
   
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
-
   arg1 = (int)jarg1; 
   if (brlapi__setFocus(handle, arg1) < 0) {
     throwConnectionError(env);
@@ -441,8 +505,6 @@ JAVA_INSTANCE_METHOD(
   int result;
   GET_CONNECTION_HANDLE(env, this, );
   
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
-
   s.cursor = (int)jarg1; 
 
   if (jarg2) {
@@ -474,8 +536,6 @@ JAVA_INSTANCE_METHOD(
   int result;
   GET_CONNECTION_HANDLE(env, this, );
   
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
-
   if (!jarg1) {
     throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
     return;
@@ -499,8 +559,6 @@ JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, write, void,
   jobject jArguments
 ) {
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
-
   if (!jArguments) {
     throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
     return;
@@ -581,8 +639,6 @@ JAVA_INSTANCE_METHOD(
   int result;
   GET_CONNECTION_HANDLE(env, this, -1);
 
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
-
   result = brlapi__readKey(handle, (int) jblock, &code);
 
   if (result < 0) {
@@ -601,8 +657,6 @@ JAVA_INSTANCE_METHOD(
   brlapi_keyCode_t code;
   int result;
   GET_CONNECTION_HANDLE(env, this, -1);
-
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
   result = brlapi__readKeyWithTimeout(handle, timeout_ms, &code);
 
@@ -623,8 +677,6 @@ JAVA_INSTANCE_METHOD(
   unsigned int n;
   int result;
   GET_CONNECTION_HANDLE(env, this, );
-
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
   if (!js) {
     throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
@@ -652,8 +704,6 @@ JAVA_INSTANCE_METHOD(
   unsigned int n;
   int result;
   GET_CONNECTION_HANDLE(env, this, );
-
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
   if (!js) {
     throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
@@ -698,8 +748,6 @@ JAVA_INSTANCE_METHOD(
   unsigned int n;
   GET_CONNECTION_HANDLE(env, this, );
 
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
-
   if (!js) {
     throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
     return;
@@ -732,8 +780,6 @@ JAVA_INSTANCE_METHOD(
   unsigned int n;
   GET_CONNECTION_HANDLE(env, this, );
 
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
-
   if (!js) {
     throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
     return;
@@ -763,7 +809,6 @@ JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, enterRawMode, void,
   jstring jdriver
 ) {
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
   char *driver;
   int res;
   GET_CONNECTION_HANDLE(env, this, );
@@ -785,7 +830,6 @@ JAVA_INSTANCE_METHOD(
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, leaveRawMode, void
 ) {
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
   GET_CONNECTION_HANDLE(env, this, );
 
   if (brlapi__leaveRawMode(handle) < 0) {
@@ -802,8 +846,6 @@ JAVA_INSTANCE_METHOD(
   unsigned int n;
   int result;
   GET_CONNECTION_HANDLE(env, this, -1);
-
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
 
   if (!jbuf) {
     throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
@@ -833,8 +875,6 @@ JAVA_INSTANCE_METHOD(
   int result;
   GET_CONNECTION_HANDLE(env, this, -1);
 
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
-
   if (!jbuf) {
     throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
     return -1;
@@ -858,8 +898,6 @@ JAVA_INSTANCE_METHOD(
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_ConnectionError, toString, jstring
 ) {
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
-
   GET_CLASS(env, class, this, NULL);
   brlapi_error_t error;
   memset(&error, 0, sizeof(error));
@@ -919,8 +957,6 @@ JAVA_INSTANCE_METHOD(
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_ConnectionException, toString, jstring
 ) {
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
-
   GET_CONNECTION_HANDLE(env, this, NULL);
   GET_CLASS(env, class, this, NULL);
 
@@ -966,8 +1002,6 @@ JAVA_STATIC_METHOD(
   org_a11y_brlapi_ConnectionException, getPacketTypeName, jstring,
   jint type
 ) {
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
-
   const char *name = brlapi_getPacketTypeName((brlapi_packetType_t) type);
   if (!name) return NULL;
   return (*env)->NewStringUTF(env, name);
@@ -977,8 +1011,6 @@ JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_Key, expandKeyCode, void,
   jlong code
 ) {
-  SET_GLOBAL_JAVA_ENVIRONMENT(env);
-
   brlapi_expandedKeyCode_t ekc;
   brlapi_expandKeyCode((brlapi_keyCode_t) code, &ekc);
   GET_CLASS(env, class, this, );
