@@ -123,8 +123,9 @@ listCommand (const CommandEntry *command) {
   {
     int started = 0;
 
-    listModifiers(command->isColumn, "a column number", &started, NULL);
     listModifiers(command->isOffset, "an offset", &started, NULL);
+    listModifiers(command->isColumn, "a column number", &started, NULL);
+    listModifiers(command->isCharacter, "a single character", &started, NULL);
 
     listModifiers(
       command->isToggle, "Toggle", &started,
