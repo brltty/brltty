@@ -212,7 +212,7 @@ main (int argc, char *argv[]) {
   }
 fflush(stdout);
 
-  writeHeader("BRLTTY Command List");
+  writeHeader("BRLTTY Command Reference");
   writeString(".. contents::\n\n");
 
   listGroups();
