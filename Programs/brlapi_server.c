@@ -1723,6 +1723,8 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
 
     /* read-only, or not mounted yet, wait */
     approximateDelay(1000);
+    /* and potentially escape from initrd root */
+    chdir("/");
   }
 
   if (!adjustPermissions(BRLAPI_SOCKETPATH)) {
