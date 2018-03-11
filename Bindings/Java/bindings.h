@@ -17,8 +17,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLAPI_INCLUDED_JAVA_BINDINGS
-#define BRLAPI_INCLUDED_JAVA_BINDINGS
+#ifndef BRLAPI_INCLUDED_BINDINGS
+#define BRLAPI_INCLUDED_BINDINGS
 
 #include "common_java.h"
 
@@ -39,4 +39,4 @@ extern "C" {
 }
 #endif /* __cplusplus */
 
-#endif /* BRLAPI_INCLUDED_JAVA_BINDINGS */
+#endif /* BRLAPI_INCLUDED_BINDINGS */

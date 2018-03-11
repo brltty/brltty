@@ -23,7 +23,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "java.h"
+#include "bindings.h"
 
 #define BRLAPI_NO_DEPRECATED
 #define BRLAPI_NO_SINGLE_SESSION
