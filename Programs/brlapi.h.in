@@ -780,6 +780,7 @@ int BRLAPI_STDCALL brlapi__readKey(brlapi_handle_t *handle, int wait, brlapi_key
  * replaced by a \e timeout_ms parameter
  *
  * \param timeout_ms specifies how long the function should wait for a keypress.
+ * \param code holds the key code if a key press is indeed read.
  *
  * If the timeout expires without any key being pressed, 0 is returned.
  *
