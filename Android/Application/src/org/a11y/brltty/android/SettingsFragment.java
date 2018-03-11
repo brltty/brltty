@@ -45,6 +45,11 @@ import android.preference.MultiSelectListPreference;
 public abstract class SettingsFragment extends PreferenceFragment {
   private static final String LOG_TAG = SettingsFragment.class.getName();
 
+  @Override
+  public void onCreate (Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+  }
+
   private static String makePropertyKey (String name, String key) {
     return key + '-' + name;
   }
@@ -73,9 +78,8 @@ public abstract class SettingsFragment extends PreferenceFragment {
 
   private static Collator localeCollator = null;
 
-  @Override
-  public void onCreate (Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
+  protected final SharedPreferences getSharedPreferences () {
+    return getPreferenceManager().getDefaultSharedPreferences(getActivity());
   }
 
   protected final Preference getPreference (int key) {
@@ -88,6 +92,14 @@ public abstract class SettingsFragment extends PreferenceFragment {
 
   protected final CheckBoxPreference getCheckBoxPreference (int key) {
     return (CheckBoxPreference)getPreference(key);
+  }
+
+  protected final void showSelection (CheckBoxPreference checkbox, boolean isChecked) {
+    checkbox.setSummary(isChecked? "On": "Off");
+  }
+
+  protected final void showSelection (CheckBoxPreference checkbox) {
+    showSelection(checkbox, checkbox.isChecked());
   }
 
   protected final EditTextPreference getEditTextPreference (int key) {
@@ -104,11 +116,7 @@ public abstract class SettingsFragment extends PreferenceFragment {
 
   protected final void showListSelection (ListPreference list) {
     CharSequence label = list.getEntry();
-
-    if (label == null) {
-      label = "";
-    }
-
+    if (label == null) label = "";
     list.setSummary(label);
   }
 
@@ -197,9 +205,5 @@ public abstract class SettingsFragment extends PreferenceFragment {
 
   protected final void sortList (ListPreference list) {
     sortList(list, 0);
-  }
-
-  protected final SharedPreferences getSharedPreferences () {
-    return getPreferenceManager().getDefaultSharedPreferences(getActivity());
   }
 }

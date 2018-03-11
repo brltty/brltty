@@ -59,21 +59,26 @@ public final class AdvancedSettings extends SettingsFragment {
     showListSelection(attributesTableList);
     showListSelection(logLevelList);
     showSetSelections(logCategorySet);
+    showSelection(logAccessibilityEventsCheckBox);
+    showSelection(logRenderedScreenCheckBox);
+    showSelection(logKeyboardEventsCheckBox);
 
     keyboardTableList.setOnPreferenceChangeListener(
       new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final String newKeyboardTable = (String)newValue;
+          final String newTable = (String)newValue;
 
-          CoreWrapper.runOnCoreThread(new Runnable() {
-            @Override
-            public void run () {
-              CoreWrapper.changeKeyboardTable(newKeyboardTable);
+          CoreWrapper.runOnCoreThread(
+            new Runnable() {
+              @Override
+              public void run () {
+                CoreWrapper.changeKeyboardTable(newTable);
+              }
             }
-          });
+          );
 
-          showListSelection(keyboardTableList, newKeyboardTable);
+          showListSelection(keyboardTableList, newTable);
           return true;
         }
       }
@@ -83,16 +88,18 @@ public final class AdvancedSettings extends SettingsFragment {
       new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final String newAttributesTable = (String)newValue;
+          final String newTable = (String)newValue;
 
-          CoreWrapper.runOnCoreThread(new Runnable() {
-            @Override
-            public void run () {
-              CoreWrapper.changeAttributesTable(newAttributesTable);
+          CoreWrapper.runOnCoreThread(
+            new Runnable() {
+              @Override
+              public void run () {
+                CoreWrapper.changeAttributesTable(newTable);
+              }
             }
-          });
+          );
 
-          showListSelection(attributesTableList, newAttributesTable);
+          showListSelection(attributesTableList, newTable);
           return true;
         }
       }
@@ -102,16 +109,18 @@ public final class AdvancedSettings extends SettingsFragment {
       new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final String newLogLevel = (String)newValue;
+          final String newLevel = (String)newValue;
 
-          CoreWrapper.runOnCoreThread(new Runnable() {
-            @Override
-            public void run () {
-              CoreWrapper.changeLogLevel(newLogLevel);
+          CoreWrapper.runOnCoreThread(
+            new Runnable() {
+              @Override
+              public void run () {
+                CoreWrapper.changeLogLevel(newLevel);
+              }
             }
-          });
+          );
 
-          showListSelection(logLevelList, newLogLevel);
+          showListSelection(logLevelList, newLevel);
           return true;
         }
       }
@@ -121,16 +130,18 @@ public final class AdvancedSettings extends SettingsFragment {
       new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final Set<String> newLogCategories = (Set<String>)newValue;
+          final Set<String> newCategories = (Set<String>)newValue;
 
-          CoreWrapper.runOnCoreThread(new Runnable() {
-            @Override
-            public void run () {
-              CoreWrapper.changeLogCategories(newLogCategories);
+          CoreWrapper.runOnCoreThread(
+            new Runnable() {
+              @Override
+              public void run () {
+                CoreWrapper.changeLogCategories(newCategories);
+              }
             }
-          });
+          );
 
-          showSetSelections(logCategorySet, newLogCategories);
+          showSetSelections(logCategorySet, newCategories);
           return true;
         }
       }
@@ -140,7 +151,10 @@ public final class AdvancedSettings extends SettingsFragment {
       new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange (Preference preference, Object newValue) {
-          ApplicationSettings.LOG_ACCESSIBILITY_EVENTS = (Boolean)newValue;
+          final boolean newSetting = (Boolean)newValue;
+          ApplicationSettings.LOG_ACCESSIBILITY_EVENTS = newSetting;
+
+          showSelection(logAccessibilityEventsCheckBox, newSetting);
           return true;
         }
       }
@@ -150,7 +164,10 @@ public final class AdvancedSettings extends SettingsFragment {
       new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange (Preference preference, Object newValue) {
-          ApplicationSettings.LOG_RENDERED_SCREEN = (Boolean)newValue;
+          final boolean newSetting = (Boolean)newValue;
+          ApplicationSettings.LOG_RENDERED_SCREEN = newSetting;
+
+          showSelection(logRenderedScreenCheckBox, newSetting);
           return true;
         }
       }
@@ -160,7 +177,10 @@ public final class AdvancedSettings extends SettingsFragment {
       new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange (Preference preference, Object newValue) {
-          ApplicationSettings.LOG_KEYBOARD_EVENTS = (Boolean)newValue;
+          final boolean newSetting = (Boolean)newValue;
+          ApplicationSettings.LOG_KEYBOARD_EVENTS = newSetting;
+
+          showSelection(logKeyboardEventsCheckBox, newSetting);
           return true;
         }
       }

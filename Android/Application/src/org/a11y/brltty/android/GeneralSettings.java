@@ -52,15 +52,16 @@ public final class GeneralSettings extends SettingsFragment {
     showListSelection(textTableList);
     showListSelection(contractionTableList);
     showListSelection(speechSupportList);
+    showSelection(releaseBrailleDeviceCheckBox);
 
     navigationModeList.setOnPreferenceChangeListener(
       new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final String newNavigationMode = (String)newValue;
+          final String newMode = (String)newValue;
 
-          showListSelection(navigationModeList, newNavigationMode);
-          BrailleRenderer.setBrailleRenderer(newNavigationMode);
+          showListSelection(navigationModeList, newMode);
+          BrailleRenderer.setBrailleRenderer(newMode);
           return true;
         }
       }
@@ -70,16 +71,18 @@ public final class GeneralSettings extends SettingsFragment {
       new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final String newTextTable = (String)newValue;
+          final String newTable = (String)newValue;
 
-          CoreWrapper.runOnCoreThread(new Runnable() {
-            @Override
-            public void run () {
-              CoreWrapper.changeTextTable(newTextTable);
+          CoreWrapper.runOnCoreThread(
+            new Runnable() {
+              @Override
+              public void run () {
+                CoreWrapper.changeTextTable(newTable);
+              }
             }
-          });
+          );
 
-          showListSelection(textTableList, newTextTable);
+          showListSelection(textTableList, newTable);
           return true;
         }
       }
@@ -89,16 +92,18 @@ public final class GeneralSettings extends SettingsFragment {
       new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final String newContractionTable = (String)newValue;
+          final String newTable = (String)newValue;
 
-          CoreWrapper.runOnCoreThread(new Runnable() {
-            @Override
-            public void run () {
-              CoreWrapper.changeContractionTable(newContractionTable);
+          CoreWrapper.runOnCoreThread(
+            new Runnable() {
+              @Override
+              public void run () {
+                CoreWrapper.changeContractionTable(newTable);
+              }
             }
-          });
+          );
 
-          showListSelection(contractionTableList, newContractionTable);
+          showListSelection(contractionTableList, newTable);
           return true;
         }
       }
@@ -108,17 +113,19 @@ public final class GeneralSettings extends SettingsFragment {
       new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final String newSpeechSupport = (String)newValue;
+          final String newDriver = (String)newValue;
 
-          CoreWrapper.runOnCoreThread(new Runnable() {
-            @Override
-            public void run () {
-              CoreWrapper.changeSpeechDriver(newSpeechSupport);
-              CoreWrapper.restartSpeechDriver();
+          CoreWrapper.runOnCoreThread(
+            new Runnable() {
+              @Override
+              public void run () {
+                CoreWrapper.changeSpeechDriver(newDriver);
+                CoreWrapper.restartSpeechDriver();
+              }
             }
-          });
+          );
 
-          showListSelection(speechSupportList, newSpeechSupport);
+          showListSelection(speechSupportList, newDriver);
           return true;
         }
       }
@@ -128,8 +135,12 @@ public final class GeneralSettings extends SettingsFragment {
       new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange (Preference preference, Object newValue) {
-          ApplicationSettings.RELEASE_BRAILLE_DEVICE = (Boolean)newValue;
+          final boolean newSetting = (Boolean)newValue;
+
+          ApplicationSettings.RELEASE_BRAILLE_DEVICE = newSetting;
           BrailleNotification.setState();
+
+          showSelection(releaseBrailleDeviceCheckBox, newSetting);
           return true;
         }
       }
