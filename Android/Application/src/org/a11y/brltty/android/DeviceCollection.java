@@ -44,7 +44,7 @@ public abstract class DeviceCollection {
   public static final char QUALIFIER_DELIMITER = ':';
 
   public abstract String getQualifier ();
-  public abstract String[] getValues ();
+  public abstract String[] getIdentifiers ();
   public abstract String[] getLabels ();
-  public abstract String makeDeviceReference (String identifier);
+  public abstract String makeReference (String identifier);
 }

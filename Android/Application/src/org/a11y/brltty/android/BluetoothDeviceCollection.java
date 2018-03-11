@@ -41,7 +41,7 @@ public final class BluetoothDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  public String[] getValues () {
+  public String[] getIdentifiers () {
     StringMaker<BluetoothDevice> stringMaker = new StringMaker<BluetoothDevice>() {
       @Override
       public String makeString (BluetoothDevice device) {
@@ -65,7 +65,7 @@ public final class BluetoothDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  public String makeDeviceReference (String identifier) {
+  public String makeReference (String identifier) {
     return "address=" + identifier;
   }
 }

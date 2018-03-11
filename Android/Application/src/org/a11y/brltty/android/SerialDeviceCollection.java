@@ -33,7 +33,7 @@ public final class SerialDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  public String[] getValues () {
+  public String[] getIdentifiers () {
     return new String[0];
   }
 
@@ -43,7 +43,7 @@ public final class SerialDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  public String makeDeviceReference (String identifier) {
+  public String makeReference (String identifier) {
     return identifier;
   }
 }

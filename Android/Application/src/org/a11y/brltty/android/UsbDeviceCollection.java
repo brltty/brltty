@@ -21,6 +21,7 @@ package org.a11y.brltty.android;
 import java.util.Collection;
 import java.util.Map;
 
+import android.os.Build;
 import android.content.Context;
 import android.hardware.usb.*;
 
@@ -43,8 +44,39 @@ public final class UsbDeviceCollection extends DeviceCollection {
     devices = map.values();
   }
 
+  private final String getManufacturerName (UsbDevice device) {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+      return device.getManufacturerName();
+    } else {
+      return null;
+    }
+  }
+
+  private final String getProductName (UsbDevice device) {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+      return device.getProductName();
+    } else {
+      return null;
+    }
+  }
+
+  private final String getSerialNumber (UsbDevice device) {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+      return device.getSerialNumber();
+    } else {
+      UsbDeviceConnection connection = manager.openDevice(device);
+      if (connection == null) return null;
+
+      try {
+        return connection.getSerial();
+      } finally {
+        connection.close();
+      }
+    }
+  }
+
   @Override
-  public String[] getValues () {
+  public String[] getIdentifiers () {
     StringMaker<UsbDevice> stringMaker = new StringMaker<UsbDevice>() {
       @Override
       public String makeString (UsbDevice device) {
@@ -68,18 +100,19 @@ public final class UsbDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  public String makeDeviceReference (String identifier) {
+  public String makeReference (String identifier) {
     UsbDevice device = map.get(identifier);
-    UsbDeviceConnection connection = manager.openDevice(device);
+    String serialNumber = getSerialNumber(device);
 
-    if (connection != null) {
-      String serialNumber = connection.getSerial();
-      connection.close();
+    String reference = String.format(
+      "vendorIdentifier=0X%04X+productIdentifier=0X%04X",
+      device.getVendorId(), device.getProductId()
+    );
 
-      return String.format("vendorIdentifier=0X%04X+productIdentifier=0X%04X+serialNumber=%s",
-                           device.getVendorId(), device.getProductId(), serialNumber);
+    if ((serialNumber != null) && !serialNumber.isEmpty()) {
+      reference += "+serialNumber=" + serialNumber;
     }
 
-    return null;
+    return reference;
   }
 }

@@ -200,7 +200,7 @@ public final class DeviceManager extends SettingsFragment {
 
     setListElements(
       deviceIdentifierList,
-      deviceCollection.getValues(), 
+      deviceCollection.getIdentifiers(), 
       deviceCollection.getLabels()
     );
 
@@ -383,7 +383,7 @@ public final class DeviceManager extends SettingsFragment {
 
             Map<String, String> properties = new LinkedHashMap();
             properties.put(PREF_KEY_DEVICE_QUALIFIER, deviceCollection.getQualifier());
-            properties.put(PREF_KEY_DEVICE_REFERENCE, deviceCollection.makeDeviceReference(deviceIdentifierList.getValue()));
+            properties.put(PREF_KEY_DEVICE_REFERENCE, deviceCollection.makeReference(deviceIdentifierList.getValue()));
             properties.put(PREF_KEY_DEVICE_DRIVER, deviceDriverList.getValue());
             putProperties(editor, name, properties);
 
