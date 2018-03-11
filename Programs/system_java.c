@@ -122,7 +122,12 @@ getJavaThreadName (JNIEnv *env) {
 JNIEnv *
 getJavaNativeInterface (void) {
   JavaVM *vm = getJavaInvocationInterface();
+
+#ifdef __ANDROID__
+  JNIEnv *env = NULL;
+#else /* __ANDROID__ */
   void *env = NULL;
+#endif /* __ANDROID__ */
 
   if (vm) {
     jint result = (*vm)->GetEnv(vm, (void **)&env, JAVA_JNI_VERSION);
