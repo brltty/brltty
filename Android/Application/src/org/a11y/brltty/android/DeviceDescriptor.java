@@ -18,32 +18,20 @@
 
 package org.a11y.brltty.android;
 
-import android.content.Context;
+public final class DeviceDescriptor {
+  private final String deviceIdentifier;
+  private final String brailleDriver;
 
-public final class SerialDeviceCollection extends DeviceCollection {
-  public static final String DEVICE_QUALIFIER = "serial";
-
-  @Override
-  public String getQualifier () {
-    return DEVICE_QUALIFIER;
+  public DeviceDescriptor (String identifier, String driver) {
+    deviceIdentifier = identifier;
+    brailleDriver = driver;
   }
 
-  public SerialDeviceCollection (Context context) {
-    super();
+  public final String getIdentifier () {
+    return deviceIdentifier;
   }
 
-  @Override
-  public String[] getValues () {
-    return new String[0];
-  }
-
-  @Override
-  public String[] getLabels () {
-    return new String[0];
-  }
-
-  @Override
-  public String makeDeviceReference (String identifier) {
-    return identifier;
+  public final String getDriver () {
+    return brailleDriver;
   }
 }

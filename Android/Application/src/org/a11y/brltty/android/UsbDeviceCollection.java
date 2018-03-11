@@ -25,6 +25,13 @@ import android.content.Context;
 import android.hardware.usb.*;
 
 public final class UsbDeviceCollection extends DeviceCollection {
+  public static final String DEVICE_QUALIFIER = "usb";
+
+  @Override
+  public String getQualifier () {
+    return DEVICE_QUALIFIER;
+  }
+
   private final UsbManager manager;
   private final Map<String, UsbDevice> map;
   private final Collection<UsbDevice> devices;
@@ -37,7 +44,7 @@ public final class UsbDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  public String[] getIdentifierValues () {
+  public String[] getValues () {
     StringMaker<UsbDevice> stringMaker = new StringMaker<UsbDevice>() {
       @Override
       public String makeString (UsbDevice device) {
@@ -49,7 +56,7 @@ public final class UsbDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  public String[] getIdentifierLabels () {
+  public String[] getLabels () {
     StringMaker<UsbDevice> stringMaker = new StringMaker<UsbDevice>() {
       @Override
       public String makeString (UsbDevice device) {
@@ -58,11 +65,6 @@ public final class UsbDeviceCollection extends DeviceCollection {
     };
 
     return makeStringArray(devices, stringMaker);
-  }
-
-  @Override
-  public String getMethodQualifier () {
-    return "usb";
   }
 
   @Override

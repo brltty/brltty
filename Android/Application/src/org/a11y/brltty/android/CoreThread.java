@@ -222,21 +222,9 @@ public class CoreThread extends Thread {
       String name = getStringSetting(R.string.PREF_KEY_SELECTED_DEVICE);
 
       if (name.length() > 0) {
-        Map<String, String> properties = DeviceManager.getDeviceProperties(
-          ApplicationUtilities.getSharedPreferences(), name
-        );
-
-        String qualifier = properties.get(DeviceManager.PREF_KEY_DEVICE_QUALIFIER);
-        if (qualifier.length() > 0) {
-          String reference = properties.get(DeviceManager.PREF_KEY_DEVICE_REFERENCE);
-          if (reference.length() > 0) {
-            String driver = properties.get(DeviceManager.PREF_KEY_DEVICE_DRIVER);
-            if (driver.length() > 0) {
-              builder.setBrailleDevice(qualifier + ":" + reference);
-              builder.setBrailleDriver(driver);
-            }
-          }
-        }
+        DeviceDescriptor device = DeviceManager.getDeviceDescriptor(name);
+        builder.setBrailleDevice(device.getIdentifier());
+        builder.setBrailleDriver(device.getDriver());
       }
     }
 

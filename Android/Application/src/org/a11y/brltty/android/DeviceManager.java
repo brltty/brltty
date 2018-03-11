@@ -56,22 +56,60 @@ public final class DeviceManager extends SettingsFragment {
   private Preference removeDeviceButton_NO;
 
   private static final String PREF_KEY_DEVICE_NAMES = "device-names";
-  public static final String PREF_KEY_DEVICE_QUALIFIER = "device-qualifier";
-  public static final String PREF_KEY_DEVICE_REFERENCE = "device-reference";
-  public static final String PREF_KEY_DEVICE_DRIVER = "device-driver";
+  private static final String PREF_KEY_DEVICE_IDENTIFIER = "device-identifier";
+  private static final String PREF_KEY_DEVICE_QUALIFIER = "device-qualifier";
+  private static final String PREF_KEY_DEVICE_REFERENCE = "device-reference";
+  private static final String PREF_KEY_DEVICE_DRIVER = "device-driver";
 
   private static final String[] DEVICE_PROPERTY_KEYS = {
+    PREF_KEY_DEVICE_IDENTIFIER,
     PREF_KEY_DEVICE_QUALIFIER,
     PREF_KEY_DEVICE_REFERENCE,
     PREF_KEY_DEVICE_DRIVER
   };
 
-  public static Map<String, String> getDeviceProperties (SharedPreferences prefs, String name) {
+  private static Map<String, String> getDeviceProperties (SharedPreferences prefs, String name) {
     return getProperties(prefs, name, DEVICE_PROPERTY_KEYS);
   }
 
   private static void removeDeviceProperties (SharedPreferences.Editor editor, String name) {
     removeProperties(editor, name, DEVICE_PROPERTY_KEYS);
+  }
+
+  private static DeviceDescriptor getDeviceDescriptor (SharedPreferences prefs, String name) {
+    Map<String, String> properties = getDeviceProperties(prefs, name);
+    String identifier = properties.get(PREF_KEY_DEVICE_IDENTIFIER);
+
+    if (identifier.isEmpty()) {
+      String qualifier = properties.get(PREF_KEY_DEVICE_QUALIFIER);
+
+      if (!qualifier.isEmpty()) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(qualifier);
+        sb.append(DeviceCollection.QUALIFIER_DELIMITER);
+        sb.append(properties.get(PREF_KEY_DEVICE_REFERENCE));
+        identifier = sb.toString();
+      }
+    }
+
+    if (identifier.isEmpty()) {
+      StringBuilder sb = new StringBuilder();
+      sb.append(BluetoothDeviceCollection.DEVICE_QUALIFIER);
+      sb.append(DeviceCollection.QUALIFIER_DELIMITER);
+      sb.append(DeviceCollection.IDENTIFIER_DELIMITER);
+      sb.append(UsbDeviceCollection.DEVICE_QUALIFIER);
+      sb.append(DeviceCollection.QUALIFIER_DELIMITER);
+      identifier = sb.toString();
+    }
+
+    String driver = properties.get(PREF_KEY_DEVICE_DRIVER);
+    if (driver.isEmpty()) driver = "auto";
+
+    return new DeviceDescriptor(identifier, driver);
+  }
+
+  public static DeviceDescriptor getDeviceDescriptor (String name) {
+    return getDeviceDescriptor(getSharedPreferences(), name);
   }
 
   private void updateRemoveDeviceScreen (String selectedDevice) {
@@ -141,8 +179,8 @@ public final class DeviceManager extends SettingsFragment {
 
     setListElements(
       deviceIdentifierList,
-      deviceCollection.getIdentifierValues(), 
-      deviceCollection.getIdentifierLabels()
+      deviceCollection.getValues(), 
+      deviceCollection.getLabels()
     );
 
     sortList(deviceIdentifierList);
@@ -324,7 +362,7 @@ public final class DeviceManager extends SettingsFragment {
             SharedPreferences.Editor editor = preference.getEditor();
 
             Map<String, String> properties = new LinkedHashMap();
-            properties.put(PREF_KEY_DEVICE_QUALIFIER, deviceCollection.getMethodQualifier());
+            properties.put(PREF_KEY_DEVICE_QUALIFIER, deviceCollection.getQualifier());
             properties.put(PREF_KEY_DEVICE_REFERENCE, deviceCollection.makeDeviceReference(deviceIdentifierList.getValue()));
             properties.put(PREF_KEY_DEVICE_DRIVER, deviceDriverList.getValue());
             putProperties(editor, name, properties);

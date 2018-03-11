@@ -25,6 +25,13 @@ import android.content.Context;
 import android.bluetooth.*;
 
 public final class BluetoothDeviceCollection extends DeviceCollection {
+  public static final String DEVICE_QUALIFIER = "bluetooth";
+
+  @Override
+  public String getQualifier () {
+    return DEVICE_QUALIFIER;
+  }
+
   private final Collection<BluetoothDevice> devices;
 
   public BluetoothDeviceCollection (Context context) {
@@ -34,7 +41,7 @@ public final class BluetoothDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  public String[] getIdentifierValues () {
+  public String[] getValues () {
     StringMaker<BluetoothDevice> stringMaker = new StringMaker<BluetoothDevice>() {
       @Override
       public String makeString (BluetoothDevice device) {
@@ -46,7 +53,7 @@ public final class BluetoothDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  public String[] getIdentifierLabels () {
+  public String[] getLabels () {
     StringMaker<BluetoothDevice> stringMaker = new StringMaker<BluetoothDevice>() {
       @Override
       public String makeString (BluetoothDevice device) {
@@ -55,11 +62,6 @@ public final class BluetoothDeviceCollection extends DeviceCollection {
     };
 
     return makeStringArray(devices, stringMaker);
-  }
-
-  @Override
-  public String getMethodQualifier () {
-    return "bluetooth";
   }
 
   @Override

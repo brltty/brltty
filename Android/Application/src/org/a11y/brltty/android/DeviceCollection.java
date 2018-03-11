@@ -40,8 +40,11 @@ public abstract class DeviceCollection {
     return strings.toArray(new String[strings.size()]);
   }
 
-  public abstract String[] getIdentifierValues ();
-  public abstract String[] getIdentifierLabels ();
-  public abstract String getMethodQualifier ();
+  public static final char IDENTIFIER_DELIMITER = ',';
+  public static final char QUALIFIER_DELIMITER = ':';
+
+  public abstract String getQualifier ();
+  public abstract String[] getValues ();
+  public abstract String[] getLabels ();
   public abstract String makeDeviceReference (String identifier);
 }
