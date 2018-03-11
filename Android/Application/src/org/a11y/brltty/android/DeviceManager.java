@@ -77,18 +77,24 @@ public final class DeviceManager extends SettingsFragment {
   }
 
   private static DeviceDescriptor getDeviceDescriptor (SharedPreferences prefs, String name) {
-    Map<String, String> properties = getDeviceProperties(prefs, name);
-    String identifier = properties.get(PREF_KEY_DEVICE_IDENTIFIER);
+    String identifier = "";
+    String driver = "";
 
-    if (identifier.isEmpty()) {
-      String qualifier = properties.get(PREF_KEY_DEVICE_QUALIFIER);
+    if (!name.isEmpty()) {
+      Map<String, String> properties = getDeviceProperties(prefs, name);
+      identifier = properties.get(PREF_KEY_DEVICE_IDENTIFIER);
+      driver = properties.get(PREF_KEY_DEVICE_DRIVER);
 
-      if (!qualifier.isEmpty()) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(qualifier);
-        sb.append(DeviceCollection.QUALIFIER_DELIMITER);
-        sb.append(properties.get(PREF_KEY_DEVICE_REFERENCE));
-        identifier = sb.toString();
+      if (identifier.isEmpty()) {
+        String qualifier = properties.get(PREF_KEY_DEVICE_QUALIFIER);
+
+        if (!qualifier.isEmpty()) {
+          StringBuilder sb = new StringBuilder();
+          sb.append(qualifier);
+          sb.append(DeviceCollection.QUALIFIER_DELIMITER);
+          sb.append(properties.get(PREF_KEY_DEVICE_REFERENCE));
+          identifier = sb.toString();
+        }
       }
     }
 
@@ -102,14 +108,18 @@ public final class DeviceManager extends SettingsFragment {
       identifier = sb.toString();
     }
 
-    String driver = properties.get(PREF_KEY_DEVICE_DRIVER);
-    if (driver.isEmpty()) driver = "auto";
+    if (driver.isEmpty()) {
+      driver = "auto";
+    }
 
     return new DeviceDescriptor(identifier, driver);
   }
 
-  public static DeviceDescriptor getDeviceDescriptor (String name) {
-    return getDeviceDescriptor(getSharedPreferences(), name);
+  public static DeviceDescriptor getDeviceDescriptor (SharedPreferences prefs) {
+    Context context = ApplicationHooks.getContext();
+    String key = context.getResources().getString(R.string.PREF_KEY_SELECTED_DEVICE);
+    String name = prefs.getString(key, "");
+    return getDeviceDescriptor(prefs, name);
   }
 
   private void updateRemoveDeviceScreen (String selectedDevice) {

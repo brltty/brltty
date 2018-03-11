@@ -148,8 +148,12 @@ public class CoreThread extends Thread {
     return coreContext.getResources().getString(resource);
   }
 
+  private SharedPreferences getPreferences () {
+    return ApplicationUtilities.getSharedPreferences();
+  }
+
   private boolean getBooleanSetting (int key, boolean defaultValue) {
-    return ApplicationUtilities.getSharedPreferences().getBoolean(getStringResource(key), defaultValue);
+    return getPreferences().getBoolean(getStringResource(key), defaultValue);
   }
 
   private boolean getBooleanSetting (int key) {
@@ -157,7 +161,7 @@ public class CoreThread extends Thread {
   }
 
   private String getStringSetting (int key, String defaultValue) {
-    return ApplicationUtilities.getSharedPreferences().getString(getStringResource(key), defaultValue);
+    return getPreferences().getString(getStringResource(key), defaultValue);
   }
 
   private String getStringSetting (int key, int defaultValue) {
@@ -169,11 +173,11 @@ public class CoreThread extends Thread {
   }
 
   private Set<String> getStringSetSetting (int key) {
-    return ApplicationUtilities.getSharedPreferences().getStringSet(getStringResource(key), Collections.EMPTY_SET);
+    return getPreferences().getStringSet(getStringResource(key), Collections.EMPTY_SET);
   }
 
   private final void updateDataFiles () {
-    SharedPreferences prefs = ApplicationUtilities.getSharedPreferences();
+    SharedPreferences prefs = getPreferences();
     File file = new File(coreContext.getPackageCodePath());
 
     String prefKey_size = getStringResource(R.string.PREF_KEY_PACKAGE_SIZE);
@@ -219,13 +223,11 @@ public class CoreThread extends Thread {
     builder.setKeyboardTable(getStringSetting(R.string.PREF_KEY_KEYBOARD_TABLE, R.string.DEFAULT_KEYBOARD_TABLE));
 
     {
-      String name = getStringSetting(R.string.PREF_KEY_SELECTED_DEVICE);
+      SharedPreferences prefs = getPreferences();
+      DeviceDescriptor device = DeviceManager.getDeviceDescriptor(prefs);
 
-      if (name.length() > 0) {
-        DeviceDescriptor device = DeviceManager.getDeviceDescriptor(name);
-        builder.setBrailleDevice(device.getIdentifier());
-        builder.setBrailleDriver(device.getDriver());
-      }
+      builder.setBrailleDevice(device.getIdentifier());
+      builder.setBrailleDriver(device.getDriver());
     }
 
     builder.setSpeechDriver(getStringSetting(R.string.PREF_KEY_SPEECH_SUPPORT, R.string.DEFAULT_SPEECH_SUPPORT));
