@@ -240,7 +240,7 @@ JAVA_STATIC_METHOD(
     FIND_CONNECTION_HANDLE((env), (object), ret); \
     handle = (void*) (intptr_t) JAVA_GET_FIELD((env), Long, (object), field); \
     if (!handle) { \
-      throwJavaError((env), JAVA_OBJECT_ILLEGAL_STATE_EXCEPTION, "connection has been closed"); \
+      throwJavaError((env), JAVA_OBJ_ILLEGAL_STATE_EXCEPTION, "connection has been closed"); \
       return ret; \
     } \
   } while (0)
@@ -299,7 +299,7 @@ JAVA_INSTANCE_METHOD(
     }
 
     if (!(handle = malloc(brlapi_getHandleSize()))) {
-      throwJavaError(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
+      throwJavaError(env, JAVA_OBJ_OUT_OF_MEMORY_ERROR, __func__);
       return -1;
     }
 
@@ -428,7 +428,7 @@ JAVA_INSTANCE_METHOD(
     driver = NULL;
   else
     if (!(driver = (char *)(*env)->GetStringUTFChars(env, jdriver, NULL))) {
-      throwJavaError(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
+      throwJavaError(env, JAVA_OBJ_OUT_OF_MEMORY_ERROR, __func__);
       return -1;
     }
 
@@ -451,18 +451,18 @@ JAVA_INSTANCE_METHOD(
   GET_CONNECTION_HANDLE(env, this, );
   
   if (!jttys) {
-    throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
+    throwJavaError(env, JAVA_OBJ_NULL_POINTER_EXCEPTION, __func__);
     return;
   }
   if (!(ttys = (*env)->GetIntArrayElements(env, jttys, NULL))) {
-    throwJavaError(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
+    throwJavaError(env, JAVA_OBJ_OUT_OF_MEMORY_ERROR, __func__);
     return;
   }
 
   if (!jdriver) {
     driver = NULL;
   } else if (!(driver = (char *)(*env)->GetStringUTFChars(env, jdriver, NULL))) {
-    throwJavaError(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
+    throwJavaError(env, JAVA_OBJ_OUT_OF_MEMORY_ERROR, __func__);
     return;
   }
 
@@ -514,7 +514,7 @@ JAVA_INSTANCE_METHOD(
     s.regionSize = (*env)->GetStringLength(env, jarg2);
 
     if (!(s.text = (char *)(*env)->GetStringUTFChars(env, jarg2, NULL))) {
-      throwJavaError(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
+      throwJavaError(env, JAVA_OBJ_OUT_OF_MEMORY_ERROR, __func__);
       return;
     }
     s.charset = "UTF-8";
@@ -539,12 +539,12 @@ JAVA_INSTANCE_METHOD(
   GET_CONNECTION_HANDLE(env, this, );
   
   if (!jarg1) {
-    throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
+    throwJavaError(env, JAVA_OBJ_NULL_POINTER_EXCEPTION, __func__);
     return;
   }
   arg1 = (*env)->GetByteArrayElements(env, jarg1, NULL);
   if (!arg1) {
-    throwJavaError(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
+    throwJavaError(env, JAVA_OBJ_OUT_OF_MEMORY_ERROR, __func__);
     return;
   }
 
@@ -562,7 +562,7 @@ JAVA_INSTANCE_METHOD(
   jobject jArguments
 ) {
   if (!jArguments) {
-    throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
+    throwJavaError(env, JAVA_OBJ_NULL_POINTER_EXCEPTION, __func__);
     return;
   }
 
@@ -681,7 +681,7 @@ JAVA_INSTANCE_METHOD(
   GET_CONNECTION_HANDLE(env, this, );
 
   if (!js) {
-    throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
+    throwJavaError(env, JAVA_OBJ_NULL_POINTER_EXCEPTION, __func__);
     return;
   }
 
@@ -708,7 +708,7 @@ JAVA_INSTANCE_METHOD(
   GET_CONNECTION_HANDLE(env, this, );
 
   if (!js) {
-    throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
+    throwJavaError(env, JAVA_OBJ_NULL_POINTER_EXCEPTION, __func__);
     return;
   }
 
@@ -751,7 +751,7 @@ JAVA_INSTANCE_METHOD(
   GET_CONNECTION_HANDLE(env, this, );
 
   if (!js) {
-    throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
+    throwJavaError(env, JAVA_OBJ_NULL_POINTER_EXCEPTION, __func__);
     return;
   }
 
@@ -783,7 +783,7 @@ JAVA_INSTANCE_METHOD(
   GET_CONNECTION_HANDLE(env, this, );
 
   if (!js) {
-    throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
+    throwJavaError(env, JAVA_OBJ_NULL_POINTER_EXCEPTION, __func__);
     return;
   }
 
@@ -818,7 +818,7 @@ JAVA_INSTANCE_METHOD(
   if (!jdriver) {
     driver = NULL;
   } else if (!(driver = (char *)(*env)->GetStringUTFChars(env, jdriver, NULL))) {
-    throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
+    throwJavaError(env, JAVA_OBJ_NULL_POINTER_EXCEPTION, __func__);
     return;
   }
   res = brlapi__enterRawMode(handle, driver);
@@ -850,7 +850,7 @@ JAVA_INSTANCE_METHOD(
   GET_CONNECTION_HANDLE(env, this, -1);
 
   if (!jbuf) {
-    throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
+    throwJavaError(env, JAVA_OBJ_NULL_POINTER_EXCEPTION, __func__);
     return -1;
   }
 
@@ -878,7 +878,7 @@ JAVA_INSTANCE_METHOD(
   GET_CONNECTION_HANDLE(env, this, -1);
 
   if (!jbuf) {
-    throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
+    throwJavaError(env, JAVA_OBJ_NULL_POINTER_EXCEPTION, __func__);
     return -1;
   }
 
@@ -979,7 +979,7 @@ JAVA_INSTANCE_METHOD(
     FIND_FIELD(env, field, class, "failedPacket", JAVA_SIG_ARRAY(JAVA_SIG_BYTE), NULL);
 
     if (!(jPacket = JAVA_GET_FIELD(env, Object, this, field))) {
-      throwJavaError(env, JAVA_OBJECT_NULL_POINTER_EXCEPTION, __func__);
+      throwJavaError(env, JAVA_OBJ_NULL_POINTER_EXCEPTION, __func__);
       return NULL;
     }
   }
@@ -988,7 +988,7 @@ JAVA_INSTANCE_METHOD(
   jbyte *cPacket = (*env)->GetByteArrayElements(env, jPacket, NULL);
 
   if (!cPacket) {
-    throwJavaError(env, JAVA_OBJECT_OUT_OF_MEMORY_ERROR, __func__);
+    throwJavaError(env, JAVA_OBJ_OUT_OF_MEMORY_ERROR, __func__);
     return NULL;
   }
 

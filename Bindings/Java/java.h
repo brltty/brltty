@@ -20,47 +20,14 @@
 #ifndef BRLAPI_INCLUDED_JAVA_BINDINGS
 #define BRLAPI_INCLUDED_JAVA_BINDINGS
 
-#include <jni.h>
+#include "common_java.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-#define JAVA_OBJECT(name) "java/lang/" name
-#define JAVA_OBJECT_ILLEGAL_STATE_EXCEPTION JAVA_OBJECT("IllegalStateException")
-#define JAVA_OBJECT_NULL_POINTER_EXCEPTION JAVA_OBJECT("NullPointerException")
-#define JAVA_OBJECT_OUT_OF_MEMORY_ERROR JAVA_OBJECT("OutOfMemoryError")
-#define JAVA_OBJECT_STRING JAVA_OBJECT("String")
-
-#define JAVA_SIG_BYTE                      "B"
-#define JAVA_SIG_CHAR                      "C"
-#define JAVA_SIG_DOUBLE                    "D"
-#define JAVA_SIG_FLOAT                     "F"
-#define JAVA_SIG_INT                       "I"
-#define JAVA_SIG_LONG                      "J"
-#define JAVA_SIG_OBJECT(path)              "L" path ";"
-#define JAVA_SIG_SHORT                     "S"
-#define JAVA_SIG_VOID                      "V"
-#define JAVA_SIG_BOOLEAN                   "Z"
-#define JAVA_SIG_ARRAY(type)               "[" type
-#define JAVA_SIG_METHOD(returns,arguments) "(" arguments ")" returns
-
-#define JAVA_CONSTRUCTOR_NAME "<init>"
-#define JAVA_SIG_CONSTRUCTOR(arguments) JAVA_SIG_METHOD(JAVA_SIG_VOID, arguments)
-
 #define JAVA_GET_CONSTRUCTOR(env,class,arguments) \
   ((*(env))->GetMethodID((env), (class), JAVA_CONSTRUCTOR_NAME, JAVA_SIG_CONSTRUCTOR(arguments)))
-
-#define JAVA_SIG_STRING JAVA_SIG_OBJECT(JAVA_OBJECT_STRING)
-
-#define JAVA_METHOD(object,name,returns) \
-  JNIEXPORT returns JNICALL Java_ ## object ## _ ## name (JNIEnv *env
-
-#define JAVA_INSTANCE_METHOD(object,name,returns,...) \
-  JAVA_METHOD(object,name,returns), jobject this, ## __VA_ARGS__)
-
-#define JAVA_STATIC_METHOD(object,name,returns,...) \
-  JAVA_METHOD(object,name,returns), jclass class, ## __VA_ARGS__)
 
 #define JAVA_GET_FIELD(env,type,object,field) \
   ((*(env))->Get ## type ## Field((env), (object), (field)))

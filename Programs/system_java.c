@@ -21,9 +21,9 @@
 #include <string.h>
 
 #include "log.h"
+#include "thread.h"
 #include "system.h"
 #include "system_java.h"
-#include "thread.h"
 
 static JavaVM *javaVirtualMachine = NULL;
 
@@ -121,8 +121,8 @@ getJavaThreadName (JNIEnv *env) {
 
 JNIEnv *
 getJavaNativeInterface (void) {
-  JNIEnv *env = NULL;
   JavaVM *vm = getJavaInvocationInterface();
+  void *env = NULL;
 
   if (vm) {
     jint result = (*vm)->GetEnv(vm, (void **)&env, JAVA_JNI_VERSION);
@@ -319,7 +319,7 @@ findJavaConstructor (
   JNIEnv *env, jmethodID *constructor,
   jclass class, const char *signature
 ) {
-  return findJavaInstanceMethod(env, constructor, class, "<init>", signature);
+  return findJavaInstanceMethod(env, constructor, class, JAVA_CONSTRUCTOR_NAME, signature);
 }
 
 int
