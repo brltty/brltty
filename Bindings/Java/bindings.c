@@ -42,103 +42,6 @@ JAVA_INSTANCE_METHOD(
   brlapi_getLibraryVersion(&majorVersion, &minorVersion, &revision);
 }
 
-JAVA_STATIC_METHOD(
-  org_a11y_brlapi_Version, getMajor, jint
-) {
-  return majorVersion;
-}
-
-JAVA_STATIC_METHOD(
-  org_a11y_brlapi_Version, getMinor, jint
-) {
-  return minorVersion;
-}
-
-JAVA_STATIC_METHOD(
-  org_a11y_brlapi_Version, getRevision, jint
-) {
-  return revision;
-}
-
-static void
-throwJavaError (JNIEnv *env, const char *object, const char *message) {
-  (*env)->ExceptionClear(env);
-  jclass class = (*env)->FindClass(env, object);
-
-  if (class) {
-    (*env)->ThrowNew(env, class, message);
-  } else {
-    fprintf(stderr,"couldn't find object: %s: %s!\n", object, message);
-  }
-}
-
-static void
-throwConnectionError (JNIEnv *env) {
-  jclass class = (*env)->FindClass(env, BRLAPI_OBJECT("ConnectionError"));
-  if (!class) return;
-
-  jmethodID constructor = JAVA_GET_CONSTRUCTOR(env, class,
-    JAVA_SIG_INT // api error
-    JAVA_SIG_INT // os error
-    JAVA_SIG_INT // gai error
-    JAVA_SIG_STRING // function name
-  );
-
-  if (!constructor) return;
-  jstring jFunction;
-
-  if (!brlapi_errfun) {
-    jFunction = NULL;
-  } else if (!(jFunction = (*env)->NewStringUTF(env, brlapi_errfun))) {
-    return;
-  }
-
-  jobject object = (*env)->NewObject(
-    env, class, constructor,
-    brlapi_errno, brlapi_libcerrno, brlapi_gaierrno, jFunction
-  );
-
-  if (object) {
-    (*env)->ExceptionClear(env);
-    (*env)->Throw(env, object);
-  } else if (jFunction) {
-    (*env)->ReleaseStringUTFChars(env, jFunction, brlapi_errfun);
-  }
-}
-
-#define GET_CLASS(env, class, object, ret) \
-  jclass class; \
-  do { \
-    if (!((class) = (*(env))->GetObjectClass((env), (object)))) return ret; \
-  } while (0)
-
-#define FIND_FIELD(env, field, class, name, signature, ret) \
-  jfieldID field; \
-  do { \
-    if (!(field = (*(env))->GetFieldID((env), (class), (name), (signature)))) return ret; \
-  } while (0)
-
-#define FIND_CONNECTION_HANDLE(env, object, ret) \
-  GET_CLASS((env), class, (object), ret); \
-  FIND_FIELD((env), field, class, "connectionHandle", JAVA_SIG_LONG, ret);
-
-#define GET_CONNECTION_HANDLE(env, object, ret) \
-  brlapi_handle_t *handle; \
-  do { \
-    FIND_CONNECTION_HANDLE((env), (object), ret); \
-    handle = (void*) (intptr_t) JAVA_GET_FIELD((env), Long, (object), field); \
-    if (!handle) { \
-      throwJavaError((env), JAVA_OBJECT_ILLEGAL_STATE_EXCEPTION, "connection has been closed"); \
-      return ret; \
-    } \
-  } while (0)
-
-#define SET_CONNECTION_HANDLE(env, object, value, ret) \
-  do { \
-    FIND_CONNECTION_HANDLE((env), (object), ret); \
-    JAVA_SET_FIELD((env), Long, (object), field, (jlong) (intptr_t) (value)); \
-  } while (0)
-
 static void
 logJavaVirtualMachineError (jint error, const char *method) {
   const char *message;
@@ -245,6 +148,103 @@ handleConnectionException (brlapi_handle_t *handle, int error, brlapi_packetType
   (*env)->ExceptionClear(env);
   (*env)->Throw(env, object);
 }
+
+static void
+throwJavaError (JNIEnv *env, const char *object, const char *message) {
+  (*env)->ExceptionClear(env);
+  jclass class = (*env)->FindClass(env, object);
+
+  if (class) {
+    (*env)->ThrowNew(env, class, message);
+  } else {
+    fprintf(stderr,"couldn't find object: %s: %s!\n", object, message);
+  }
+}
+
+static void
+throwConnectionError (JNIEnv *env) {
+  jclass class = (*env)->FindClass(env, BRLAPI_OBJECT("ConnectionError"));
+  if (!class) return;
+
+  jmethodID constructor = JAVA_GET_CONSTRUCTOR(env, class,
+    JAVA_SIG_INT // api error
+    JAVA_SIG_INT // os error
+    JAVA_SIG_INT // gai error
+    JAVA_SIG_STRING // function name
+  );
+
+  if (!constructor) return;
+  jstring jFunction;
+
+  if (!brlapi_errfun) {
+    jFunction = NULL;
+  } else if (!(jFunction = (*env)->NewStringUTF(env, brlapi_errfun))) {
+    return;
+  }
+
+  jobject object = (*env)->NewObject(
+    env, class, constructor,
+    brlapi_errno, brlapi_libcerrno, brlapi_gaierrno, jFunction
+  );
+
+  if (object) {
+    (*env)->ExceptionClear(env);
+    (*env)->Throw(env, object);
+  } else if (jFunction) {
+    (*env)->ReleaseStringUTFChars(env, jFunction, brlapi_errfun);
+  }
+}
+
+JAVA_STATIC_METHOD(
+  org_a11y_brlapi_Version, getMajor, jint
+) {
+  return majorVersion;
+}
+
+JAVA_STATIC_METHOD(
+  org_a11y_brlapi_Version, getMinor, jint
+) {
+  return minorVersion;
+}
+
+JAVA_STATIC_METHOD(
+  org_a11y_brlapi_Version, getRevision, jint
+) {
+  return revision;
+}
+
+#define GET_CLASS(env, class, object, ret) \
+  jclass class; \
+  do { \
+    if (!((class) = (*(env))->GetObjectClass((env), (object)))) return ret; \
+  } while (0)
+
+#define FIND_FIELD(env, field, class, name, signature, ret) \
+  jfieldID field; \
+  do { \
+    if (!(field = (*(env))->GetFieldID((env), (class), (name), (signature)))) return ret; \
+  } while (0)
+
+#define FIND_CONNECTION_HANDLE(env, object, ret) \
+  GET_CLASS((env), class, (object), ret); \
+  FIND_FIELD((env), field, class, "connectionHandle", JAVA_SIG_LONG, ret);
+
+#define GET_CONNECTION_HANDLE(env, object, ret) \
+  brlapi_handle_t *handle; \
+  do { \
+    FIND_CONNECTION_HANDLE((env), (object), ret); \
+    handle = (void*) (intptr_t) JAVA_GET_FIELD((env), Long, (object), field); \
+    if (!handle) { \
+      throwJavaError((env), JAVA_OBJECT_ILLEGAL_STATE_EXCEPTION, "connection has been closed"); \
+      return ret; \
+    } \
+  } while (0)
+
+#define SET_CONNECTION_HANDLE(env, object, value, ret) \
+  do { \
+    FIND_CONNECTION_HANDLE((env), (object), ret); \
+    JAVA_SET_FIELD((env), Long, (object), field, (jlong) (intptr_t) (value)); \
+  } while (0)
 
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, openConnection, jint,
