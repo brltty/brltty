@@ -223,7 +223,7 @@ public final class DeviceManager extends SettingsFragment {
     }
 
     updateSelectedDeviceList();
-    showListSelection(deviceMethodList);
+    showSelection(deviceMethodList);
     updateDeviceIdentifierList(getDeviceMethod());
     updateDeviceName();
 
@@ -277,7 +277,7 @@ public final class DeviceManager extends SettingsFragment {
         public boolean onPreferenceChange (Preference preference, Object newValue) {
           final String newDeviceMethod = (String)newValue;
 
-          showListSelection(deviceMethodList, newDeviceMethod);
+          showSelection(deviceMethodList, newDeviceMethod);
           updateDeviceIdentifierList(newDeviceMethod);
           updateDeviceName();
           return true;
@@ -291,7 +291,7 @@ public final class DeviceManager extends SettingsFragment {
         public boolean onPreferenceChange (Preference preference, Object newValue) {
           final String newDeviceIdentifier = (String)newValue;
 
-          showListSelection(deviceIdentifierList, newDeviceIdentifier);
+          showSelection(deviceIdentifierList, newDeviceIdentifier);
           updateDeviceName();
           return true;
         }
@@ -304,7 +304,7 @@ public final class DeviceManager extends SettingsFragment {
         public boolean onPreferenceChange (Preference preference, Object newValue) {
           final String newDeviceDriver = (String)newValue;
 
-          showListSelection(deviceDriverList, newDeviceDriver);
+          showSelection(deviceDriverList, newDeviceDriver);
           updateDeviceName();
           return true;
         }

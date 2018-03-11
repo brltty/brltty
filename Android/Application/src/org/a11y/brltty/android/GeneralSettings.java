@@ -48,10 +48,10 @@ public final class GeneralSettings extends SettingsFragment {
     sortList(textTableList, 1);
     sortList(contractionTableList);
 
-    showListSelection(navigationModeList);
-    showListSelection(textTableList);
-    showListSelection(contractionTableList);
-    showListSelection(speechSupportList);
+    showSelection(navigationModeList);
+    showSelection(textTableList);
+    showSelection(contractionTableList);
+    showSelection(speechSupportList);
     showSelection(releaseBrailleDeviceCheckBox);
 
     navigationModeList.setOnPreferenceChangeListener(
@@ -60,7 +60,7 @@ public final class GeneralSettings extends SettingsFragment {
         public boolean onPreferenceChange (Preference preference, Object newValue) {
           final String newMode = (String)newValue;
 
-          showListSelection(navigationModeList, newMode);
+          showSelection(navigationModeList, newMode);
           BrailleRenderer.setBrailleRenderer(newMode);
           return true;
         }
@@ -82,7 +82,7 @@ public final class GeneralSettings extends SettingsFragment {
             }
           );
 
-          showListSelection(textTableList, newTable);
+          showSelection(textTableList, newTable);
           return true;
         }
       }
@@ -103,7 +103,7 @@ public final class GeneralSettings extends SettingsFragment {
             }
           );
 
-          showListSelection(contractionTableList, newTable);
+          showSelection(contractionTableList, newTable);
           return true;
         }
       }
@@ -125,7 +125,7 @@ public final class GeneralSettings extends SettingsFragment {
             }
           );
 
-          showListSelection(speechSupportList, newDriver);
+          showSelection(speechSupportList, newDriver);
           return true;
         }
       }

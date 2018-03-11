@@ -55,10 +55,10 @@ public final class AdvancedSettings extends SettingsFragment {
     sortList(keyboardTableList);
     sortList(attributesTableList);
 
-    showListSelection(keyboardTableList);
-    showListSelection(attributesTableList);
-    showListSelection(logLevelList);
-    showSetSelections(logCategorySet);
+    showSelection(keyboardTableList);
+    showSelection(attributesTableList);
+    showSelection(logLevelList);
+    showSelection(logCategorySet);
     showSelection(logAccessibilityEventsCheckBox);
     showSelection(logRenderedScreenCheckBox);
     showSelection(logKeyboardEventsCheckBox);
@@ -78,7 +78,7 @@ public final class AdvancedSettings extends SettingsFragment {
             }
           );
 
-          showListSelection(keyboardTableList, newTable);
+          showSelection(keyboardTableList, newTable);
           return true;
         }
       }
@@ -99,7 +99,7 @@ public final class AdvancedSettings extends SettingsFragment {
             }
           );
 
-          showListSelection(attributesTableList, newTable);
+          showSelection(attributesTableList, newTable);
           return true;
         }
       }
@@ -120,7 +120,7 @@ public final class AdvancedSettings extends SettingsFragment {
             }
           );
 
-          showListSelection(logLevelList, newLevel);
+          showSelection(logLevelList, newLevel);
           return true;
         }
       }
@@ -141,7 +141,7 @@ public final class AdvancedSettings extends SettingsFragment {
             }
           );
 
-          showSetSelections(logCategorySet, newCategories);
+          showSelection(logCategorySet, newCategories);
           return true;
         }
       }

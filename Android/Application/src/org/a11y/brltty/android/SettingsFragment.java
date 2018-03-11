@@ -76,8 +76,6 @@ public abstract class SettingsFragment extends PreferenceFragment {
     }
   }
 
-  private static Collator localeCollator = null;
-
   protected final SharedPreferences getSharedPreferences () {
     return getPreferenceManager().getDefaultSharedPreferences(getActivity());
   }
@@ -110,29 +108,29 @@ public abstract class SettingsFragment extends PreferenceFragment {
     return (ListPreference)getPreference(key);
   }
 
-  protected final MultiSelectListPreference getMultiSelectListPreference (int key) {
-    return (MultiSelectListPreference)getPreference(key);
-  }
-
-  protected final void showListSelection (ListPreference list) {
+  protected final void showSelection (ListPreference list) {
     CharSequence label = list.getEntry();
     if (label == null) label = "";
     list.setSummary(label);
   }
 
-  protected final void showListSelection (ListPreference list, int index) {
+  protected final void showSelection (ListPreference list, int index) {
     list.setSummary(list.getEntries()[index]);
   }
 
-  protected final int getListIndex (ListPreference list, String value) {
+  protected final int getSelection (ListPreference list, String value) {
     return Arrays.asList(list.getEntryValues()).indexOf(value);
   }
 
-  protected final void showListSelection (ListPreference list, String value) {
-    showListSelection(list, getListIndex(list, value));
+  protected final void showSelection (ListPreference list, String value) {
+    showSelection(list, getSelection(list, value));
   }
 
-  protected final void showSetSelections (MultiSelectListPreference set, Set<String> values) {
+  protected final MultiSelectListPreference getMultiSelectListPreference (int key) {
+    return (MultiSelectListPreference)getPreference(key);
+  }
+
+  protected final void showSelection (MultiSelectListPreference set, Set<String> values) {
     StringBuilder label = new StringBuilder();
 
     if (values.size() > 0) {
@@ -140,10 +138,7 @@ public abstract class SettingsFragment extends PreferenceFragment {
 
       for (String value : values) {
         if (value.length() > 0) {
-          if (label.length() > 0) {
-            label.append('\n');
-          }
-
+          if (label.length() > 0) label.append('\n');
           label.append(labels[set.findIndexOfValue(value)]);
         }
       }
@@ -154,13 +149,13 @@ public abstract class SettingsFragment extends PreferenceFragment {
     set.setSummary(label.toString());
   }
 
-  protected final void showSetSelections (MultiSelectListPreference set) {
-    showSetSelections(set, set.getValues());
+  protected final void showSelection (MultiSelectListPreference set) {
+    showSelection(set, set.getValues());
   }
 
   protected final void resetList (ListPreference list) {
     list.setValueIndex(0);
-    showListSelection(list);
+    showSelection(list);
   }
 
   protected final void setListElements (ListPreference list, String[] values, String[] labels) {
@@ -173,11 +168,9 @@ public abstract class SettingsFragment extends PreferenceFragment {
   }
 
   protected final void sortList (ListPreference list, int fromIndex) {
-    if (localeCollator == null) {
-      localeCollator = Collator.getInstance();
-      localeCollator.setStrength(Collator.PRIMARY);
-      localeCollator.setDecomposition(Collator.CANONICAL_DECOMPOSITION);
-    }
+    Collator collator = Collator.getInstance();
+    collator.setStrength(Collator.PRIMARY);
+    collator.setDecomposition(Collator.CANONICAL_DECOMPOSITION);
 
     String[] values = LanguageUtilities.newStringArray(list.getEntryValues());
     String[] labels = LanguageUtilities.newStringArray(list.getEntries());
@@ -189,7 +182,7 @@ public abstract class SettingsFragment extends PreferenceFragment {
     for (int i=0; i<size; i+=1) {
       String label = labels[i];
       map.put(label, values[i]);
-      keys[i] = localeCollator.getCollationKey(label);
+      keys[i] = collator.getCollationKey(label);
     }
 
     Arrays.sort(keys, fromIndex, keys.length);
