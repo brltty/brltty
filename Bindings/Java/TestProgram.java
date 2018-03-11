@@ -77,10 +77,10 @@ public class TestProgram implements Constants {
       }
     }
 
-    writeProperty("BrlAPI Version", "%d.%d.%d",
-      Version.getMajor(),
-      Version.getMinor(),
-      Version.getRevision()
+    writeProperty("Library Version", "%d.%d.%d",
+      LibraryVersion.getMajor(),
+      LibraryVersion.getMinor(),
+      LibraryVersion.getRevision()
     );
 
     try {

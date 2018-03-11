@@ -31,15 +31,20 @@
 #define BRLAPI_OBJECT(name) "org/a11y/brlapi/" name
 
 static jint jniVersion = 0;
-static int majorVersion = 0;
-static int minorVersion = 0;
-static int revision = 0;
+static int libraryVersion_major = 0;
+static int libraryVersion_minor = 0;
+static int libraryVersion_revision = 0;
 
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_NativeLibrary, initializeNativeData, void
 ) {
   jniVersion = (*env)->GetVersion(env);
-  brlapi_getLibraryVersion(&majorVersion, &minorVersion, &revision);
+
+  brlapi_getLibraryVersion(
+    &libraryVersion_major,
+    &libraryVersion_minor,
+    &libraryVersion_revision
+  );
 }
 
 static void
@@ -196,21 +201,21 @@ throwConnectionError (JNIEnv *env) {
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_brlapi_Version, getMajor, jint
+  org_a11y_brlapi_LibraryVersion, getMajor, jint
 ) {
-  return majorVersion;
+  return libraryVersion_major;
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_brlapi_Version, getMinor, jint
+  org_a11y_brlapi_LibraryVersion, getMinor, jint
 ) {
-  return minorVersion;
+  return libraryVersion_minor;
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_brlapi_Version, getRevision, jint
+  org_a11y_brlapi_LibraryVersion, getRevision, jint
 ) {
-  return revision;
+  return libraryVersion_revision;
 }
 
 #define GET_CLASS(env, class, object, ret) \
