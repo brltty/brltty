@@ -92,7 +92,38 @@ public final class UsbDeviceCollection extends DeviceCollection {
     StringMaker<UsbDevice> stringMaker = new StringMaker<UsbDevice>() {
       @Override
       public String makeString (UsbDevice device) {
-        return String.format("%04X:%04X", device.getVendorId(), device.getProductId());
+        StringBuilder label = new StringBuilder();
+
+        label.append(
+          String.format(
+            "[%04X:%04X]",
+            device.getVendorId(),
+            device.getProductId()
+          )
+        );
+
+        boolean first = true;
+        String[] components = new String[] {
+          getManufacturerName(device),
+          getProductName(device),
+          getSerialNumber(device)
+        };
+
+        for (String component : components) {
+          if (component == null) continue;
+          if (component.isEmpty()) continue;
+
+          if (first) {
+            first = false;
+          } else {
+            label.append(',');
+          }
+
+          label.append(' ');
+          label.append(component);
+        }
+
+        return label.toString();
       }
     };
 
