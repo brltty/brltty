@@ -134,17 +134,11 @@ public abstract class BrailleNotification {
     setDevice(null);
   }
 
-  private static String getDevice () {
-    String key = getContext().getResources().getString(R.string.PREF_KEY_SELECTED_DEVICE);
-    return ApplicationUtilities.getSharedPreferences()
-                               .getString(key, null);
-  }
-
   public static void initialize () {
     synchronized (notificationIdentifier) {
       Notification.Builder nb = getNotificationBuilder();
       setState(nb);
-      setDevice(nb, getDevice());
+      setDevice(nb, DeviceManager.getDeviceName());
 
       BrailleService.getBrailleService()
                     .startForeground(notificationIdentifier, nb.build());

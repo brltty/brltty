@@ -148,8 +148,8 @@ public class CoreThread extends Thread {
     return coreContext.getResources().getString(resource);
   }
 
-  private SharedPreferences getPreferences () {
-    return ApplicationUtilities.getSharedPreferences();
+  private static SharedPreferences getPreferences () {
+    return ApplicationUtilities.getPreferences();
   }
 
   private boolean getBooleanSetting (int key, boolean defaultValue) {
@@ -223,9 +223,7 @@ public class CoreThread extends Thread {
     builder.setKeyboardTable(getStringSetting(R.string.PREF_KEY_KEYBOARD_TABLE, R.string.DEFAULT_KEYBOARD_TABLE));
 
     {
-      SharedPreferences prefs = getPreferences();
-      DeviceDescriptor device = DeviceManager.getDeviceDescriptor(prefs);
-
+      DeviceDescriptor device = DeviceManager.getDeviceDescriptor();
       builder.setBrailleDevice(device.getIdentifier());
       builder.setBrailleDriver(device.getDriver());
     }

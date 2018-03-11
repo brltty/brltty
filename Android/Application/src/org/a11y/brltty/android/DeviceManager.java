@@ -76,6 +76,16 @@ public final class DeviceManager extends SettingsFragment {
     removeProperties(editor, name, DEVICE_PROPERTY_KEYS);
   }
 
+  private static String getDeviceName (SharedPreferences prefs) {
+    Context context = ApplicationContext.get();
+    String key = context.getResources().getString(R.string.PREF_KEY_SELECTED_DEVICE);
+    return prefs.getString(key, "");
+  }
+
+  public static String getDeviceName () {
+    return getDeviceName(ApplicationUtilities.getPreferences());
+  }
+
   private static DeviceDescriptor getDeviceDescriptor (SharedPreferences prefs, String name) {
     String identifier = "";
     String driver = "";
@@ -115,11 +125,12 @@ public final class DeviceManager extends SettingsFragment {
     return new DeviceDescriptor(identifier, driver);
   }
 
-  public static DeviceDescriptor getDeviceDescriptor (SharedPreferences prefs) {
-    Context context = ApplicationContext.get();
-    String key = context.getResources().getString(R.string.PREF_KEY_SELECTED_DEVICE);
-    String name = prefs.getString(key, "");
-    return getDeviceDescriptor(prefs, name);
+  private static DeviceDescriptor getDeviceDescriptor (SharedPreferences prefs) {
+    return getDeviceDescriptor(prefs, getDeviceName(prefs));
+  }
+
+  public static DeviceDescriptor getDeviceDescriptor () {
+    return getDeviceDescriptor(ApplicationUtilities.getPreferences());
   }
 
   private void updateRemoveDeviceScreen (String selectedDevice) {

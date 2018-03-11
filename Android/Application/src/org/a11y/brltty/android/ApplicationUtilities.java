@@ -54,7 +54,7 @@ public abstract class ApplicationUtilities {
     return getSecureSetting(Settings.Secure.DEFAULT_INPUT_METHOD);
   }
 
-  public static SharedPreferences getSharedPreferences () {
+  public static SharedPreferences getPreferences () {
     return PreferenceManager.getDefaultSharedPreferences(ApplicationContext.get());
   }
 
