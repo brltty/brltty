@@ -62,7 +62,7 @@ public class SpeechDriver {
     synchronized (listener) {
       Log.d(LOG_TAG, "starting text to speech engine");
       state = state.STOPPED;
-      tts = new TextToSpeech(BrailleService.getBrailleService(), listener);
+      tts = new TextToSpeech(ApplicationContext.get(), listener);
 
       while (state == state.STOPPED) {
         try {

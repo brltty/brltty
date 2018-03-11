@@ -47,15 +47,19 @@ public class InputService extends InputMethodService {
   @Override
   public void onCreate () {
     super.onCreate();
-    Log.d(LOG_TAG, "input service started");
+    ApplicationContext.set(this);
     inputService = this;
+    Log.d(LOG_TAG, "input service started");
   }
 
   @Override
   public void onDestroy () {
-    super.onDestroy();
-    Log.d(LOG_TAG, "input service stopped");
-    inputService = null;
+    try {
+      inputService = null;
+      Log.d(LOG_TAG, "input service stopped");
+    } finally {
+      super.onDestroy();
+    }
   }
 
   @Override
@@ -149,18 +153,20 @@ public class InputService extends InputMethodService {
       return false;
     }
 
-    CoreWrapper.runOnCoreThread(new Runnable() {
-      @Override
-      public void run () {
-        logKeyEvent(code, press, "delivered");
+    CoreWrapper.runOnCoreThread(
+      new Runnable() {
+        @Override
+        public void run () {
+          logKeyEvent(code, press, "delivered");
 
-        if (handleKeyEvent(code, press)) {
-          logKeyEvent(code, press, "handled");
-        } else {
-          forwardKeyEvent(code, press);
+          if (handleKeyEvent(code, press)) {
+            logKeyEvent(code, press, "handled");
+          } else {
+            forwardKeyEvent(code, press);
+          }
         }
       }
-    });
+    );
 
     return true;
   }

@@ -204,12 +204,14 @@ public final class ScreenDriver {
       }
     }
 
-    CoreWrapper.runOnCoreThread(new Runnable() {
-      @Override
-      public void run () {
-        screenUpdated();
+    CoreWrapper.runOnCoreThread(
+      new Runnable() {
+        @Override
+        public void run () {
+          screenUpdated();
+        }
       }
-    });
+    );
   }
 
   public static native void exportScreenProperties (
