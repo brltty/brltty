@@ -31,6 +31,7 @@ public class SettingsActivity extends PreferenceActivity {
   @Override
   protected void onCreate (Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    ApplicationContext.set(this);
     setTitle(R.string.SETTINGS_SCREEN_MAIN);
   }
 
@@ -40,10 +41,7 @@ public class SettingsActivity extends PreferenceActivity {
   }
 
   public static Intent makeIntent () {
-    Intent intent = new Intent(
-      ApplicationHooks.getContext(),
-      SettingsActivity.class
-    );
+    Intent intent = new Intent(ApplicationContext.get(), SettingsActivity.class);
 
     intent.addFlags(
       Intent.FLAG_ACTIVITY_NEW_TASK

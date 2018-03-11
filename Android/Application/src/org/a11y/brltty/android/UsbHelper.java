@@ -78,7 +78,7 @@ public class UsbHelper {
   }
 
   public static void begin () {
-    usbContext = ApplicationHooks.getContext();
+    usbContext = ApplicationContext.get();
     usbManager = ApplicationUtilities.getUsbManager();
     makePermissionReceiver();
   }

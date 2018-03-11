@@ -20,11 +20,27 @@ package org.a11y.brltty.android;
 
 import android.content.Context;
 
-public abstract class ApplicationHooks {
-  public static Context getContext () {
-    return BrailleService.getBrailleService().getApplicationContext();
+public abstract class ApplicationContext {
+  private ApplicationContext () {
   }
 
-  private ApplicationHooks () {
+  private static Context applicationContext = null;
+
+  public static boolean set (Context context) {
+    context = context.getApplicationContext();
+
+    synchronized (context) {
+      if (applicationContext != null) {
+        if (context == applicationContext) return false;
+        throw new IllegalArgumentException("application context mismatch");
+      }
+
+      applicationContext = context;
+      return true;
+    }
+  }
+
+  public static Context get () {
+    return applicationContext;
   }
 }

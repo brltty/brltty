@@ -39,11 +39,11 @@ public abstract class ApplicationUtilities {
   }
 
   public static String getResourceString (int identifier) {
-    return ApplicationHooks.getContext().getString(identifier);
+    return ApplicationContext.get().getString(identifier);
   }
 
   public static ContentResolver getContentResolver () {
-    return ApplicationHooks.getContext().getContentResolver();
+    return ApplicationContext.get().getContentResolver();
   }
 
   public static String getSecureSetting (String setting) {
@@ -55,7 +55,7 @@ public abstract class ApplicationUtilities {
   }
 
   public static SharedPreferences getSharedPreferences () {
-    return PreferenceManager.getDefaultSharedPreferences(ApplicationHooks.getContext());
+    return PreferenceManager.getDefaultSharedPreferences(ApplicationContext.get());
   }
 
   private static final SingletonReference<PowerManager> powerManagerReference

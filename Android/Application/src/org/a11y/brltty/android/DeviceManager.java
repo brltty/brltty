@@ -116,7 +116,7 @@ public final class DeviceManager extends SettingsFragment {
   }
 
   public static DeviceDescriptor getDeviceDescriptor (SharedPreferences prefs) {
-    Context context = ApplicationHooks.getContext();
+    Context context = ApplicationContext.get();
     String key = context.getResources().getString(R.string.PREF_KEY_SELECTED_DEVICE);
     String name = prefs.getString(key, "");
     return getDeviceDescriptor(prefs, name);
@@ -264,7 +264,7 @@ public final class DeviceManager extends SettingsFragment {
     sortList(deviceDriverList, 1);
 
     {
-      SharedPreferences prefs = getSharedPreferences();
+      SharedPreferences prefs = getPreferences();
       deviceNames = new TreeSet<String>(prefs.getStringSet(PREF_KEY_DEVICE_NAMES, Collections.EMPTY_SET));
     }
 
@@ -285,8 +285,7 @@ public final class DeviceManager extends SettingsFragment {
               @Override
               public void run () {
                 Map<String, String> properties = getDeviceProperties(
-                  ApplicationUtilities.getSharedPreferences(),
-                  newSelectedDevice
+                  getPreferences(), newSelectedDevice
                 );
 
                 String qualifier = properties.get(PREF_KEY_DEVICE_QUALIFIER);

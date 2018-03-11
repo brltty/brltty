@@ -24,7 +24,7 @@ public final class LockUtilities {
   private static final PowerManager.WakeLock wakeLock =
     ApplicationUtilities.getPowerManager().newWakeLock(
       PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE,
-      ApplicationHooks.getContext().getString(R.string.app_name)
+      ApplicationContext.get().getString(R.string.app_name)
     );
 
   public static boolean isLocked () {

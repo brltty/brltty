@@ -38,8 +38,9 @@ public class BrailleService extends AccessibilityService {
   @Override
   public void onCreate () {
     super.onCreate();
-    Log.d(LOG_TAG, "braille service started");
+    ApplicationContext.set(this);
     brailleService = this;
+    Log.d(LOG_TAG, "braille service started");
   }
 
   @Override
@@ -56,7 +57,7 @@ public class BrailleService extends AccessibilityService {
   protected void onServiceConnected () {
     Log.d(LOG_TAG, "braille service connected");
 
-    coreThread = new CoreThread();
+    coreThread = new CoreThread(this);
     coreThread.start();
   }
 

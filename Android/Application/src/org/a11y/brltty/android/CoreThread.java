@@ -42,9 +42,9 @@ public class CoreThread extends Thread {
 
   private final Context coreContext;
 
-  CoreThread () {
+  CoreThread (Context context) {
     super("Core");
-    coreContext = ApplicationHooks.getContext();
+    coreContext = context;
   }
 
   public static final int DATA_MODE = Context.MODE_PRIVATE;
