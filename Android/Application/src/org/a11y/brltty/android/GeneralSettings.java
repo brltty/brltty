@@ -36,7 +36,6 @@ public final class GeneralSettings extends SettingsFragment {
   @Override
   public void onCreate (Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
     addPreferencesFromResource(R.xml.settings_general);
 
     navigationModeList = getListPreference(R.string.PREF_KEY_NAVIGATION_MODE);

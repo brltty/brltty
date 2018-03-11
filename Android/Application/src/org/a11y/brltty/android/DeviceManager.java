@@ -56,7 +56,6 @@ public final class DeviceManager extends SettingsFragment {
   private Preference removeDeviceButton_NO;
 
   private static final String PREF_KEY_DEVICE_NAMES = "device-names";
-
   public static final String PREF_KEY_DEVICE_QUALIFIER = "device-qualifier";
   public static final String PREF_KEY_DEVICE_REFERENCE = "device-reference";
   public static final String PREF_KEY_DEVICE_DRIVER = "device-driver";
@@ -198,7 +197,6 @@ public final class DeviceManager extends SettingsFragment {
   @Override
   public void onCreate (Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
     addPreferencesFromResource(R.xml.settings_devices);
 
     selectedDeviceList = getListPreference(R.string.PREF_KEY_SELECTED_DEVICE);
@@ -234,23 +232,25 @@ public final class DeviceManager extends SettingsFragment {
           final String newSelectedDevice = (String)newValue;
           BrailleNotification.setDevice(newSelectedDevice);
 
-          CoreWrapper.runOnCoreThread(new Runnable() {
-            @Override
-            public void run () {
-              Map<String, String> properties = getDeviceProperties(
-                ApplicationUtilities.getSharedPreferences(),
-                newSelectedDevice
-              );
+          CoreWrapper.runOnCoreThread(
+            new Runnable() {
+              @Override
+              public void run () {
+                Map<String, String> properties = getDeviceProperties(
+                  ApplicationUtilities.getSharedPreferences(),
+                  newSelectedDevice
+                );
 
-              String qualifier = properties.get(PREF_KEY_DEVICE_QUALIFIER);
-              String reference = properties.get(PREF_KEY_DEVICE_REFERENCE);
-              String driver = properties.get(PREF_KEY_DEVICE_DRIVER);
+                String qualifier = properties.get(PREF_KEY_DEVICE_QUALIFIER);
+                String reference = properties.get(PREF_KEY_DEVICE_REFERENCE);
+                String driver = properties.get(PREF_KEY_DEVICE_DRIVER);
 
-              CoreWrapper.changeBrailleDevice(qualifier, reference);
-              CoreWrapper.changeBrailleDriver(driver);
-              CoreWrapper.restartBrailleDriver();
+                CoreWrapper.changeBrailleDevice(qualifier, reference);
+                CoreWrapper.changeBrailleDriver(driver);
+                CoreWrapper.restartBrailleDriver();
+              }
             }
-          });
+          );
 
           selectedDeviceList.setSummary(newSelectedDevice);
           updateRemoveDeviceScreen(newSelectedDevice);

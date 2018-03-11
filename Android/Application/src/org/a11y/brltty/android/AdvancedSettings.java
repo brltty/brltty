@@ -41,7 +41,6 @@ public final class AdvancedSettings extends SettingsFragment {
   @Override
   public void onCreate (Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
     addPreferencesFromResource(R.xml.settings_advanced);
 
     keyboardTableList = getListPreference(R.string.PREF_KEY_KEYBOARD_TABLE);

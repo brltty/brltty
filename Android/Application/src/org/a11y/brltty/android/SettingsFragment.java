@@ -93,7 +93,11 @@ public abstract class SettingsFragment extends PreferenceFragment {
   }
 
   protected final void showSelection (CheckBoxPreference checkbox, boolean isChecked) {
-    checkbox.setSummary(isChecked? "On": "Off");
+    checkbox.setSummary(
+      isChecked?
+      R.string.checkbox_state_checked:
+      R.string.checkbox_state_unchecked
+    );
   }
 
   protected final void showSelection (CheckBoxPreference checkbox) {
