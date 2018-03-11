@@ -19,11 +19,14 @@
 
 package org.a11y.brlapi;
 
-public abstract class NativeLibrary {
-  static {
-    System.loadLibrary("brlapi_java");
-  }
+public class NativeLibrary {
+  private final native void initializeNativeData ();
 
   protected NativeLibrary () {
+  }
+
+  static {
+    System.loadLibrary("brlapi_java");
+    new NativeLibrary().initializeNativeData();
   }
 }

@@ -30,6 +30,36 @@
 #include "brlapi.h"
 #define BRLAPI_OBJECT(name) "org/a11y/brlapi/" name
 
+static jint jniVersion = 0;
+static int majorVersion = 0;
+static int minorVersion = 0;
+static int revision = 0;
+
+JAVA_INSTANCE_METHOD(
+  org_a11y_brlapi_NativeLibrary, initializeNativeData, void
+) {
+  jniVersion = (*env)->GetVersion(env);
+  brlapi_getLibraryVersion(&majorVersion, &minorVersion, &revision);
+}
+
+JAVA_STATIC_METHOD(
+  org_a11y_brlapi_Version, getMajor, jint
+) {
+  return majorVersion;
+}
+
+JAVA_STATIC_METHOD(
+  org_a11y_brlapi_Version, getMinor, jint
+) {
+  return minorVersion;
+}
+
+JAVA_STATIC_METHOD(
+  org_a11y_brlapi_Version, getRevision, jint
+) {
+  return revision;
+}
+
 static void
 throwJavaError (JNIEnv *env, const char *object, const char *message) {
   (*env)->ExceptionClear(env);
@@ -162,16 +192,15 @@ logJavaVirtualMachineError (jint error, const char *method) {
 static JNIEnv *
 getJavaEnvironment (brlapi_handle_t *handle) {
   JavaVM *vm = brlapi__getClientData(handle);
-  jint version = JNI_VERSION_1_6;
   void *env = NULL;
 
   if (vm) {
-    jint result = (*vm)->GetEnv(vm, &env, version);
+    jint result = (*vm)->GetEnv(vm, &env, jniVersion);
 
     if (result != JNI_OK) {
       if (result == JNI_EDETACHED) {
         JavaVMAttachArgs args = {
-          .version = version,
+          .version = jniVersion,
           .name = NULL,
           .group = NULL
         };
@@ -215,38 +244,6 @@ handleConnectionException (brlapi_handle_t *handle, int error, brlapi_packetType
 
   (*env)->ExceptionClear(env);
   (*env)->Throw(env, object);
-}
-
-static int gotVersionNumbers = 0;
-static int majorVersion, minorVersion, revision;
-
-static void
-getVersionNumbers (void) {
-  if (!gotVersionNumbers) {
-    brlapi_getLibraryVersion(&majorVersion, &minorVersion, &revision);
-    gotVersionNumbers = 1;
-  }
-}
-
-JAVA_STATIC_METHOD(
-  org_a11y_brlapi_Version, getMajor, jint
-) {
-  getVersionNumbers();
-  return majorVersion;
-}
-
-JAVA_STATIC_METHOD(
-  org_a11y_brlapi_Version, getMinor, jint
-) {
-  getVersionNumbers();
-  return minorVersion;
-}
-
-JAVA_STATIC_METHOD(
-  org_a11y_brlapi_Version, getRevision, jint
-) {
-  getVersionNumbers();
-  return revision;
 }
 
 JAVA_INSTANCE_METHOD(
