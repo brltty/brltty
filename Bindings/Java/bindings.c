@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <pthread.h>
 
 #include "bindings.h"
 
@@ -97,6 +98,26 @@ logJavaVirtualMachineError (jint error, const char *method) {
   fprintf(stderr, "Java virtual machine error %d in %s: %s\n", error, method, message);
 }
 
+static pthread_key_t threadKey_vm;
+
+static void
+destroyThreadKey_vm (void *value) {
+  JavaVM *vm = value;
+  (*vm)->DetachCurrentThread(vm);
+}
+
+static void
+createThreadKey_vm (void) {
+  pthread_key_create(&threadKey_vm, destroyThreadKey_vm);
+}
+
+static void
+setThreadExitHandler (JavaVM *vm) {
+  static pthread_once_t once = PTHREAD_ONCE_INIT;
+  pthread_once(&once, createThreadKey_vm);
+  pthread_setspecific(threadKey_vm, vm);
+}
+
 static JNIEnv *
 getJavaEnvironment (brlapi_handle_t *handle) {
   JavaVM *vm = brlapi__getClientData(handle);
@@ -113,7 +134,9 @@ getJavaEnvironment (brlapi_handle_t *handle) {
           .group = NULL
         };
 
-        if ((result = (*vm)->AttachCurrentThread(vm, &env, &args)) != JNI_OK) {
+        if ((result = (*vm)->AttachCurrentThread(vm, &env, &args)) == JNI_OK) {
+          setThreadExitHandler(env);
+        } else {
           logJavaVirtualMachineError(result, "AttachCurrentThread");
         }
       } else {
