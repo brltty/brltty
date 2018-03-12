@@ -29,7 +29,7 @@ public final class UsbDeviceCollection extends DeviceCollection {
   public static final String DEVICE_QUALIFIER = "usb";
 
   @Override
-  public String getQualifier () {
+  public final String getQualifier () {
     return DEVICE_QUALIFIER;
   }
 
@@ -76,7 +76,7 @@ public final class UsbDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  public String[] getIdentifiers () {
+  public final String[] getIdentifiers () {
     StringMaker<UsbDevice> stringMaker = new StringMaker<UsbDevice>() {
       @Override
       public String makeString (UsbDevice device) {
@@ -88,7 +88,7 @@ public final class UsbDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  public String[] getLabels () {
+  public final String[] getLabels () {
     StringMaker<UsbDevice> stringMaker = new StringMaker<UsbDevice>() {
       @Override
       public String makeString (UsbDevice device) {
@@ -131,19 +131,10 @@ public final class UsbDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  public String makeReference (String identifier) {
+  protected final void fillParameters (Map<String, String> parameters, String identifier) {
     UsbDevice device = map.get(identifier);
-    String serialNumber = getSerialNumber(device);
-
-    String reference = String.format(
-      "vendorIdentifier=0X%04X+productIdentifier=0X%04X",
-      device.getVendorId(), device.getProductId()
-    );
-
-    if ((serialNumber != null) && !serialNumber.isEmpty()) {
-      reference += "+serialNumber=" + serialNumber;
-    }
-
-    return reference;
+    parameters.put("vendorIdentifier", String.format("0X%04X", device.getVendorId()));
+    parameters.put("productIdentifier", String.format("0X%04X", device.getProductId()));
+    parameters.put("serialNumber", getSerialNumber(device));
   }
 }

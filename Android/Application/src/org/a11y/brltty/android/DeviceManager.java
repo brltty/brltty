@@ -381,11 +381,26 @@ public final class DeviceManager extends SettingsFragment {
           {
             SharedPreferences.Editor editor = preference.getEditor();
 
-            Map<String, String> properties = new LinkedHashMap();
-            properties.put(PREF_KEY_DEVICE_QUALIFIER, deviceCollection.getQualifier());
-            properties.put(PREF_KEY_DEVICE_REFERENCE, deviceCollection.makeReference(deviceIdentifierList.getValue()));
-            properties.put(PREF_KEY_DEVICE_DRIVER, deviceDriverList.getValue());
-            putProperties(editor, name, properties);
+            {
+              Map<String, String> properties = new LinkedHashMap();
+
+              properties.put(
+                PREF_KEY_DEVICE_QUALIFIER,
+                deviceCollection.getQualifier()
+              );
+
+              properties.put(
+                PREF_KEY_DEVICE_REFERENCE,
+                deviceCollection.makeReference(deviceIdentifierList.getValue())
+              );
+
+              properties.put(
+                PREF_KEY_DEVICE_DRIVER,
+                deviceDriverList.getValue()
+              );
+
+              putProperties(editor, name, properties);
+            }
 
             editor.putStringSet(PREF_KEY_DEVICE_NAMES, deviceNames);
             editor.apply();

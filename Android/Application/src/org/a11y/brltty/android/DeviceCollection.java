@@ -19,6 +19,10 @@
 package org.a11y.brltty.android;
 
 import java.util.Collection;
+
+import java.util.Map;
+import java.util.LinkedHashMap;
+
 import java.util.List;
 import java.util.ArrayList;
 
@@ -46,5 +50,25 @@ public abstract class DeviceCollection {
   public abstract String getQualifier ();
   public abstract String[] getIdentifiers ();
   public abstract String[] getLabels ();
-  public abstract String makeReference (String identifier);
+  protected abstract void fillParameters (Map<String, String> parameters, String identifier);
+
+  public final String makeReference (String identifier) {
+    Map<String, String> parameters = new LinkedHashMap<String, String>();
+    fillParameters(parameters, identifier);
+    StringBuilder reference = new StringBuilder();
+
+    for (String key : parameters.keySet()) {
+      String value = parameters.get(key);
+      if (value == null) continue;
+      if (value.isEmpty()) continue;
+
+      if (reference.length() > 0) reference.append('+');
+      reference.append(key);
+      reference.append('=');
+      reference.append(value);
+    }
+
+    if (reference.length() == 0) return null;
+    return reference.toString();
+  }
 }

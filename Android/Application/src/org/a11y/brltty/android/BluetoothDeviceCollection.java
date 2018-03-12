@@ -20,6 +20,7 @@ package org.a11y.brltty.android;
 
 import java.util.Collections;
 import java.util.Collection;
+import java.util.Map;
 
 import android.content.Context;
 import android.bluetooth.*;
@@ -28,7 +29,7 @@ public final class BluetoothDeviceCollection extends DeviceCollection {
   public static final String DEVICE_QUALIFIER = "bluetooth";
 
   @Override
-  public String getQualifier () {
+  public final String getQualifier () {
     return DEVICE_QUALIFIER;
   }
 
@@ -41,7 +42,7 @@ public final class BluetoothDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  public String[] getIdentifiers () {
+  public final String[] getIdentifiers () {
     StringMaker<BluetoothDevice> stringMaker = new StringMaker<BluetoothDevice>() {
       @Override
       public String makeString (BluetoothDevice device) {
@@ -53,7 +54,7 @@ public final class BluetoothDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  public String[] getLabels () {
+  public final String[] getLabels () {
     StringMaker<BluetoothDevice> stringMaker = new StringMaker<BluetoothDevice>() {
       @Override
       public String makeString (BluetoothDevice device) {
@@ -65,7 +66,7 @@ public final class BluetoothDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  public String makeReference (String identifier) {
-    return "address=" + identifier;
+  protected final void fillParameters (Map<String, String> parameters, String identifier) {
+    parameters.put("address", identifier);
   }
 }

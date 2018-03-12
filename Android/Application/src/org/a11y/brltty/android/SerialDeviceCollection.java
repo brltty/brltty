@@ -18,13 +18,15 @@
 
 package org.a11y.brltty.android;
 
+import java.util.Map;
+
 import android.content.Context;
 
 public final class SerialDeviceCollection extends DeviceCollection {
   public static final String DEVICE_QUALIFIER = "serial";
 
   @Override
-  public String getQualifier () {
+  public final String getQualifier () {
     return DEVICE_QUALIFIER;
   }
 
@@ -33,17 +35,16 @@ public final class SerialDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  public String[] getIdentifiers () {
+  public final String[] getIdentifiers () {
     return new String[0];
   }
 
   @Override
-  public String[] getLabels () {
+  public final String[] getLabels () {
     return new String[0];
   }
 
   @Override
-  public String makeReference (String identifier) {
-    return identifier;
+  protected final void fillParameters (Map<String, String> parameters, String identifier) {
   }
 }
