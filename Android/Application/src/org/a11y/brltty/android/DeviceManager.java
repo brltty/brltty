@@ -200,7 +200,7 @@ public final class DeviceManager extends SettingsFragment {
 
     setListElements(
       deviceIdentifierList,
-      deviceCollection.getIdentifiers(), 
+      deviceCollection.getValues(), 
       deviceCollection.getLabels()
     );
 

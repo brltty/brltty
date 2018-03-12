@@ -42,7 +42,7 @@ public final class BluetoothDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  public final String[] getIdentifiers () {
+  public final String[] getValues () {
     StringMaker<BluetoothDevice> stringMaker = new StringMaker<BluetoothDevice>() {
       @Override
       public String makeString (BluetoothDevice device) {
@@ -66,7 +66,7 @@ public final class BluetoothDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  protected final void fillParameters (Map<String, String> parameters, String identifier) {
-    parameters.put("address", identifier);
+  protected final void putParameters (Map<String, String> parameters, String value) {
+    parameters.put("address", value);
   }
 }

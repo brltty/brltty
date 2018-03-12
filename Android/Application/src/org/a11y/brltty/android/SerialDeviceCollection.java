@@ -35,7 +35,7 @@ public final class SerialDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  public final String[] getIdentifiers () {
+  public final String[] getValues () {
     return new String[0];
   }
 
@@ -45,6 +45,6 @@ public final class SerialDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  protected final void fillParameters (Map<String, String> parameters, String identifier) {
+  protected final void putParameters (Map<String, String> parameters, String value) {
   }
 }

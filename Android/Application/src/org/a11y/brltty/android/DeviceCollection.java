@@ -48,13 +48,11 @@ public abstract class DeviceCollection {
   public static final char QUALIFIER_DELIMITER = ':';
 
   public abstract String getQualifier ();
-  public abstract String[] getIdentifiers ();
+  public abstract String[] getValues ();
   public abstract String[] getLabels ();
-  protected abstract void fillParameters (Map<String, String> parameters, String identifier);
+  protected abstract void putParameters (Map<String, String> parameters, String value);
 
-  public final String makeReference (String identifier) {
-    Map<String, String> parameters = new LinkedHashMap<String, String>();
-    fillParameters(parameters, identifier);
+  public static String makeReference (Map<String, String> parameters) {
     StringBuilder reference = new StringBuilder();
 
     for (String key : parameters.keySet()) {
@@ -70,5 +68,17 @@ public abstract class DeviceCollection {
 
     if (reference.length() == 0) return null;
     return reference.toString();
+  }
+
+  public final String makeReference (String value) {
+    Map<String, String> parameters = new LinkedHashMap<String, String>();
+    putParameters(parameters, value);
+    return makeReference(parameters);
+  }
+
+  public final String makeIdentifier (String value) {
+    String reference = makeReference(value);
+    if (reference == null) return null;
+    return getQualifier() + QUALIFIER_DELIMITER + reference;
   }
 }

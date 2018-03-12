@@ -76,7 +76,7 @@ public final class UsbDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  public final String[] getIdentifiers () {
+  public final String[] getValues () {
     StringMaker<UsbDevice> stringMaker = new StringMaker<UsbDevice>() {
       @Override
       public String makeString (UsbDevice device) {
@@ -131,8 +131,8 @@ public final class UsbDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  protected final void fillParameters (Map<String, String> parameters, String identifier) {
-    UsbDevice device = map.get(identifier);
+  protected final void putParameters (Map<String, String> parameters, String value) {
+    UsbDevice device = map.get(value);
     parameters.put("vendorIdentifier", String.format("0X%04X", device.getVendorId()));
     parameters.put("productIdentifier", String.format("0X%04X", device.getProductId()));
     parameters.put("serialNumber", getSerialNumber(device));
