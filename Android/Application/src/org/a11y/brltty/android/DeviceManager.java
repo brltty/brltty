@@ -52,8 +52,8 @@ public final class DeviceManager extends SettingsFragment {
   private Preference addDeviceButton;
 
   private Preference removeDeviceButton_ASK;
-  private Preference removeDeviceButton_YES;
   private Preference removeDeviceButton_NO;
+  private Preference removeDeviceButton_YES;
 
   private static final String PREF_KEY_DEVICE_NAMES = "device-names";
   private static final String PREF_KEY_DEVICE_IDENTIFIER = "device-identifier";
@@ -192,7 +192,9 @@ public final class DeviceManager extends SettingsFragment {
       getActivity()
     };
 
-    return (DeviceCollection)LanguageUtilities.newInstance(className, argumentTypes, arguments);
+    return (DeviceCollection)LanguageUtilities.newInstance(
+      className, argumentTypes, arguments
+    );
   }
 
   private void updateDeviceIdentifierList (String deviceMethod) {
@@ -257,6 +259,7 @@ public final class DeviceManager extends SettingsFragment {
   public void onCreate (Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     addPreferencesFromResource(R.xml.settings_devices);
+    SharedPreferences prefs = getPreferences();
 
     selectedDeviceList = getListPreference(R.string.PREF_KEY_SELECTED_DEVICE);
     addDeviceScreen = getPreferenceScreen(R.string.PREF_KEY_ADD_DEVICE);
@@ -269,15 +272,11 @@ public final class DeviceManager extends SettingsFragment {
     addDeviceButton = getPreference(R.string.PREF_KEY_DEVICE_ADD);
 
     removeDeviceButton_ASK = getPreference(R.string.PREF_KEY_REMOVE_DEVICE_ASK);
-    removeDeviceButton_YES = getPreference(R.string.PREF_KEY_REMOVE_DEVICE_YES);
     removeDeviceButton_NO = getPreference(R.string.PREF_KEY_REMOVE_DEVICE_NO);
+    removeDeviceButton_YES = getPreference(R.string.PREF_KEY_REMOVE_DEVICE_YES);
 
     sortList(deviceDriverList, 1);
-
-    {
-      SharedPreferences prefs = getPreferences();
-      deviceNames = new TreeSet<String>(prefs.getStringSet(PREF_KEY_DEVICE_NAMES, Collections.EMPTY_SET));
-    }
+    deviceNames = new TreeSet<String>(prefs.getStringSet(PREF_KEY_DEVICE_NAMES, Collections.EMPTY_SET));
 
     updateSelectedDeviceList();
     showSelection(deviceMethodList);
@@ -412,6 +411,16 @@ public final class DeviceManager extends SettingsFragment {
       }
     );
 
+    removeDeviceButton_NO.setOnPreferenceClickListener(
+      new Preference.OnPreferenceClickListener() {
+        @Override
+        public boolean onPreferenceClick (Preference preference) {
+          removeDeviceScreen.getDialog().dismiss();
+          return true;
+        }
+      }
+    );
+
     removeDeviceButton_YES.setOnPreferenceClickListener(
       new Preference.OnPreferenceClickListener() {
         @Override
@@ -433,16 +442,6 @@ public final class DeviceManager extends SettingsFragment {
             }
           }
 
-          removeDeviceScreen.getDialog().dismiss();
-          return true;
-        }
-      }
-    );
-
-    removeDeviceButton_NO.setOnPreferenceClickListener(
-      new Preference.OnPreferenceClickListener() {
-        @Override
-        public boolean onPreferenceClick (Preference preference) {
           removeDeviceScreen.getDialog().dismiss();
           return true;
         }

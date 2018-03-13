@@ -62,13 +62,13 @@
      />
 
     <Preference
-      android:key="@string/PREF_KEY_REMOVE_DEVICE_YES"
-      android:title="@string/android:yes"
+      android:key="@string/PREF_KEY_REMOVE_DEVICE_NO"
+      android:title="@string/android:no"
      />
 
     <Preference
-      android:key="@string/PREF_KEY_REMOVE_DEVICE_NO"
-      android:title="@string/android:no"
+      android:key="@string/PREF_KEY_REMOVE_DEVICE_YES"
+      android:title="@string/android:yes"
      />
   </PreferenceScreen>
 </PreferenceScreen>
