@@ -138,7 +138,7 @@ public abstract class BrailleNotification {
     synchronized (notificationIdentifier) {
       Notification.Builder nb = getNotificationBuilder();
       setState(nb);
-      setDevice(nb, DeviceManager.getDeviceName());
+      setDevice(nb, DeviceManager.getSelectedDevice());
 
       BrailleService.getBrailleService()
                     .startForeground(notificationIdentifier, nb.build());

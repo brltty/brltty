@@ -223,9 +223,9 @@ public class CoreThread extends Thread {
     builder.setKeyboardTable(getStringSetting(R.string.PREF_KEY_KEYBOARD_TABLE, R.string.DEFAULT_KEYBOARD_TABLE));
 
     {
-      DeviceDescriptor device = DeviceManager.getDeviceDescriptor();
-      builder.setBrailleDevice(device.getIdentifier());
-      builder.setBrailleDriver(device.getDriver());
+      DeviceDescriptor descriptor = DeviceManager.getDeviceDescriptor();
+      builder.setBrailleDevice(descriptor.getIdentifier());
+      builder.setBrailleDriver(descriptor.getDriver());
     }
 
     builder.setSpeechDriver(getStringSetting(R.string.PREF_KEY_SPEECH_SUPPORT, R.string.DEFAULT_SPEECH_SUPPORT));

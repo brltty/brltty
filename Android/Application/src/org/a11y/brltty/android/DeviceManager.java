@@ -77,22 +77,22 @@ public final class DeviceManager extends SettingsFragment {
     removeProperties(editor, name, DEVICE_PROPERTY_KEYS);
   }
 
-  private static String getDeviceName (SharedPreferences prefs) {
+  private static String getSelectedDevice (SharedPreferences prefs) {
     Context context = ApplicationContext.get();
     String key = context.getResources().getString(R.string.PREF_KEY_SELECTED_DEVICE);
     return prefs.getString(key, "");
   }
 
-  public static String getDeviceName () {
-    return getDeviceName(ApplicationUtilities.getPreferences());
+  public static String getSelectedDevice () {
+    return getSelectedDevice(ApplicationUtilities.getPreferences());
   }
 
-  private static DeviceDescriptor getDeviceDescriptor (SharedPreferences prefs, String name) {
+  private static DeviceDescriptor getDeviceDescriptor (SharedPreferences prefs, String device) {
     String identifier = "";
     String driver = "";
 
-    if (!name.isEmpty()) {
-      Map<String, String> properties = getDeviceProperties(prefs, name);
+    if (!device.isEmpty()) {
+      Map<String, String> properties = getDeviceProperties(prefs, device);
       identifier = properties.get(PREF_KEY_DEVICE_IDENTIFIER);
       driver = properties.get(PREF_KEY_DEVICE_DRIVER);
 
@@ -127,7 +127,7 @@ public final class DeviceManager extends SettingsFragment {
   }
 
   private static DeviceDescriptor getDeviceDescriptor (SharedPreferences prefs) {
-    return getDeviceDescriptor(prefs, getDeviceName(prefs));
+    return getDeviceDescriptor(prefs, getSelectedDevice(prefs));
   }
 
   public static DeviceDescriptor getDeviceDescriptor () {
@@ -256,6 +256,20 @@ public final class DeviceManager extends SettingsFragment {
     updateDeviceName(deviceNameEditor.getEditText().getText().toString());
   }
 
+  private static void restartBrailleDriver (final SharedPreferences prefs, final String device) {
+    CoreWrapper.runOnCoreThread(
+      new Runnable() {
+        @Override
+        public void run () {
+          DeviceDescriptor descriptor = getDeviceDescriptor(prefs, device);
+          CoreWrapper.changeBrailleDevice(descriptor.getIdentifier());
+          CoreWrapper.changeBrailleDriver(descriptor.getDriver());
+          CoreWrapper.restartBrailleDriver();
+        }
+      }
+    );
+  }
+
   @Override
   public void onCreate (Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -290,21 +304,9 @@ public final class DeviceManager extends SettingsFragment {
         public boolean onPreferenceChange (Preference preference, Object newValue) {
           final String newDevice = (String)newValue;
           BrailleNotification.setDevice(newDevice);
-
-          CoreWrapper.runOnCoreThread(
-            new Runnable() {
-              @Override
-              public void run () {
-                DeviceDescriptor device = getDeviceDescriptor(prefs, newDevice);
-                CoreWrapper.changeBrailleDevice(device.getIdentifier());
-                CoreWrapper.changeBrailleDriver(device.getDriver());
-                CoreWrapper.restartBrailleDriver();
-              }
-            }
-          );
-
           selectedDeviceList.setSummary(newDevice);
           updateRemoveDeviceScreen(newDevice);
+          restartBrailleDriver(prefs, newDevice);
           return true;
         }
       }
@@ -429,6 +431,8 @@ public final class DeviceManager extends SettingsFragment {
               removeDeviceProperties(editor, name);
               editor.apply();
             }
+
+            restartBrailleDriver(prefs, "");
           }
 
           removeDeviceScreen.getDialog().dismiss();
