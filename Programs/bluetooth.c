@@ -404,25 +404,22 @@ bthTestDeviceName (const void *item, void *data) {
 
   if (gda->driver.length) {
     const char *const *code = name->driverCodes;
-    int found = 0;
 
     while (*code) {
       if (strncmp(*code, gda->driver.address, gda->driver.length) == 0) {
-        found = 1;
-        break;
+        logMessage(LOG_CATEGORY(BLUETOOTH_IO), "found");
+        return 1;
       }
 
       code += 1;
     }
 
-    if (!found) {
-      logMessage(LOG_CATEGORY(BLUETOOTH_IO), "ineligible driver");
-      return 0;
-    }
+    logMessage(LOG_CATEGORY(BLUETOOTH_IO), "ineligible driver");
+    return 0;
   }
 
-  logMessage(LOG_CATEGORY(BLUETOOTH_IO), "found");
-  return 1;
+  logMessage(LOG_CATEGORY(BLUETOOTH_IO), "driver not specified");
+  return 0;
 }
 
 static int
@@ -613,6 +610,101 @@ bthGetNameAtAddress (const char *address, int timeout) {
   return NULL;
 }
 
+static struct {
+  const char **table;
+  unsigned int count;
+  unsigned int size;
+} driverCodes = {
+  .table = NULL,
+  .count = 0,
+  .size = 0
+};
+
+static int
+bthFindDriverCode (unsigned int *position, const char *code) {
+  int first = 0;
+  int last = driverCodes.count - 1;
+
+  while (first <= last) {
+    unsigned int current = (first + last) / 2;
+    int relation = strcmp(code, driverCodes.table[current]);
+
+    if (relation < 0) {
+      last = current - 1;
+    } else if (relation > 0) {
+      first = current + 1;
+    } else {
+      *position = current;
+      return 1;
+    }
+  }
+
+  *position = first;
+  return 0;
+}
+
+static int
+bthEnsureDriverCodeTableSize (void) {
+  if (driverCodes.count < driverCodes.size) return 1;
+
+  unsigned int newSize = driverCodes.size + 0X10;
+  const char **newTable = realloc(driverCodes.table, ARRAY_SIZE(driverCodes.table, newSize));
+
+  if (!newTable) {
+    logMallocError();
+    return 0;
+  }
+
+  driverCodes.table = newTable;
+  driverCodes.size = newSize;
+  return 1;
+}
+
+static int
+bthAddDriverCode (const char *code) {
+  unsigned int position;
+  if (bthFindDriverCode(&position, code)) return 1;
+  if (!bthEnsureDriverCodeTableSize()) return 0;
+
+  memmove(&driverCodes.table[position+1], &driverCodes.table[position],
+          ARRAY_SIZE(driverCodes.table, (driverCodes.count - position)));
+
+  driverCodes.count += 1;
+  driverCodes.table[position] = code;
+  return 1;
+}
+
+static const char *const *
+bthGetAllDriverCodes (void) {
+  if (driverCodes.table) return driverCodes.table;
+  const BluetoothNameEntry *entry = bluetoothNameTable;
+
+  while (entry->namePrefix) {
+    const char *const *code = entry->driverCodes;
+
+    while (*code) {
+      if (!bthAddDriverCode(*code)) goto failure;
+      code += 1;
+    }
+
+    entry += 1;
+  }
+
+  if (bthEnsureDriverCodeTableSize()) {
+    driverCodes.table[driverCodes.count] = NULL;
+    return driverCodes.table;
+  }
+
+failure:
+  if (driverCodes.table) {
+    free(driverCodes.table);
+    memset(&driverCodes, 0, sizeof(driverCodes));
+  }
+
+  static const char *const *noDriverCodes = {NULL};
+  return noDriverCodes;
+}
+
 const char *const *
 bthGetDriverCodes (const char *identifier, int timeout) {
   const char *const *codes = NULL;
@@ -630,6 +722,7 @@ bthGetDriverCodes (const char *identifier, int timeout) {
     deallocateStrings(parameters);
   }
 
+  if (!codes) codes = bthGetAllDriverCodes();
   return codes;
 }
 
