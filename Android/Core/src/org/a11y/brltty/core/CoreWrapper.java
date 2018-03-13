@@ -61,10 +61,6 @@ public class CoreWrapper {
     return changeLogCategories(sb.toString());
   }
 
-  public static boolean changeBrailleDevice (String qualifier, String reference) {
-    return changeBrailleDevice(qualifier + ":" + reference);
-  }
-
   private static final AbstractQueue<Runnable> runQueue = new LinkedBlockingDeque<Runnable>();
 
   public static void clearRunQueue () {

@@ -27,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.TreeSet;
 
+import android.util.Log;
 import android.os.Bundle;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -259,7 +260,7 @@ public final class DeviceManager extends SettingsFragment {
   public void onCreate (Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     addPreferencesFromResource(R.xml.settings_devices);
-    SharedPreferences prefs = getPreferences();
+    final SharedPreferences prefs = getPreferences();
 
     selectedDeviceList = getListPreference(R.string.PREF_KEY_SELECTED_DEVICE);
     addDeviceScreen = getPreferenceScreen(R.string.PREF_KEY_ADD_DEVICE);
@@ -287,30 +288,23 @@ public final class DeviceManager extends SettingsFragment {
       new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final String newSelectedDevice = (String)newValue;
-          BrailleNotification.setDevice(newSelectedDevice);
+          final String newDevice = (String)newValue;
+          BrailleNotification.setDevice(newDevice);
 
           CoreWrapper.runOnCoreThread(
             new Runnable() {
               @Override
               public void run () {
-                Map<String, String> properties = getDeviceProperties(
-                  getPreferences(), newSelectedDevice
-                );
-
-                String qualifier = properties.get(PREF_KEY_DEVICE_QUALIFIER);
-                String reference = properties.get(PREF_KEY_DEVICE_REFERENCE);
-                String driver = properties.get(PREF_KEY_DEVICE_DRIVER);
-
-                CoreWrapper.changeBrailleDevice(qualifier, reference);
-                CoreWrapper.changeBrailleDriver(driver);
+                DeviceDescriptor device = getDeviceDescriptor(prefs, newDevice);
+                CoreWrapper.changeBrailleDevice(device.getIdentifier());
+                CoreWrapper.changeBrailleDriver(device.getDriver());
                 CoreWrapper.restartBrailleDriver();
               }
             }
           );
 
-          selectedDeviceList.setSummary(newSelectedDevice);
-          updateRemoveDeviceScreen(newSelectedDevice);
+          selectedDeviceList.setSummary(newDevice);
+          updateRemoveDeviceScreen(newDevice);
           return true;
         }
       }
@@ -320,9 +314,9 @@ public final class DeviceManager extends SettingsFragment {
       new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final String newDeviceName = (String)newValue;
+          final String newName = (String)newValue;
 
-          updateDeviceName(newDeviceName);
+          updateDeviceName(newName);
           return true;
         }
       }
@@ -332,10 +326,10 @@ public final class DeviceManager extends SettingsFragment {
       new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final String newDeviceMethod = (String)newValue;
+          final String newMethod = (String)newValue;
 
-          showSelection(deviceMethodList, newDeviceMethod);
-          updateDeviceIdentifierList(newDeviceMethod);
+          showSelection(deviceMethodList, newMethod);
+          updateDeviceIdentifierList(newMethod);
           updateDeviceName();
           return true;
         }
@@ -346,9 +340,9 @@ public final class DeviceManager extends SettingsFragment {
       new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final String newDeviceIdentifier = (String)newValue;
+          final String newIdentifier = (String)newValue;
 
-          showSelection(deviceIdentifierList, newDeviceIdentifier);
+          showSelection(deviceIdentifierList, newIdentifier);
           updateDeviceName();
           return true;
         }
@@ -359,9 +353,9 @@ public final class DeviceManager extends SettingsFragment {
       new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final String newDeviceDriver = (String)newValue;
+          final String newDriver = (String)newValue;
 
-          showSelection(deviceDriverList, newDeviceDriver);
+          showSelection(deviceDriverList, newDriver);
           updateDeviceName();
           return true;
         }
@@ -384,13 +378,8 @@ public final class DeviceManager extends SettingsFragment {
               Map<String, String> properties = new LinkedHashMap();
 
               properties.put(
-                PREF_KEY_DEVICE_QUALIFIER,
-                deviceCollection.getQualifier()
-              );
-
-              properties.put(
-                PREF_KEY_DEVICE_REFERENCE,
-                deviceCollection.makeReference(deviceIdentifierList.getValue())
+                PREF_KEY_DEVICE_IDENTIFIER,
+                deviceCollection.makeIdentifier(deviceIdentifierList.getValue())
               );
 
               properties.put(
