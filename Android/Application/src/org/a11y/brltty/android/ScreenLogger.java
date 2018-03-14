@@ -18,11 +18,15 @@
 
 package org.a11y.brltty.android;
 
+import java.util.Map;
+import java.util.HashMap;
+
 import android.os.Build;
 import android.util.Log;
 
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowInfo;
 
 import android.graphics.Rect;
 
@@ -64,6 +68,16 @@ public class ScreenLogger {
 
   private static final void add (StringBuilder sb, String label, int value) {
     add(sb, String.format("%s=%d", label, value));
+  }
+
+  private static final void add (StringBuilder sb, String label, int value, Map<Integer, String> names) {
+    String name = names.get(value);
+
+    if (name != null) {
+      add(sb, label, name);
+    } else {
+      add(sb, label, value);
+    }
   }
 
   public final void logNode (AccessibilityNodeInfo node, String name) {
@@ -201,11 +215,11 @@ public class ScreenLogger {
     {
       Rect location = new Rect();
       node.getBoundsInScreen(location);
-      sb.append(' ');
-      sb.append(location.toShortString());
+      add(sb, location.toShortString());
     }
 
     add(sb, "app", node.getPackageName());
+    add(sb, "win", node.getWindowId());
 
     log(name, sb.toString());
   }
@@ -228,8 +242,84 @@ public class ScreenLogger {
   }
 
   public final void logTree (AccessibilityNodeInfo root) {
-    log("begin screen log");
     logTree(root, ROOT_NODE_NAME);
+  }
+
+  private static final Map<Integer, String> windowTypeNames =
+               new HashMap<Integer, String>()
+  {
+    {
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+        put(AccessibilityWindowInfo.TYPE_APPLICATION, "app");
+        put(AccessibilityWindowInfo.TYPE_INPUT_METHOD, "im");
+        put(AccessibilityWindowInfo.TYPE_SYSTEM, "sys");
+      }
+    }
+  };
+
+  private final void logTree (AccessibilityWindowInfo root, String name) {
+    StringBuilder sb = new StringBuilder();
+    add(sb, "id", root.getId());
+
+    {
+      AccessibilityWindowInfo parent = root.getParent();
+
+      if (parent != null) {
+        parent.recycle();
+        parent = null;
+      } else {
+        add(sb, ROOT_NODE_NAME);
+      }
+    }
+
+    {
+      int count = root.getChildCount();
+      if (count > 0) add(sb, "cld", count);
+    }
+
+    add(sb, "layer", root.getLayer());
+    add(sb, "type", root.getType(), windowTypeNames);
+    add(sb, root.isActive(), "act");
+    add(sb, root.isFocused(), "ifd");
+    add(sb, root.isAccessibilityFocused(), "afd");
+
+    {
+      Rect location = new Rect();
+      root.getBoundsInScreen(location);
+      add(sb, location.toShortString());
+    }
+
+    log(name, sb.toString());
+    logTree(root.getRoot());
+
+    {
+      int count = root.getChildCount();
+
+      for (int index=0; index<count; index+=1) {
+        AccessibilityWindowInfo child = root.getChild(index);
+
+        if (child != null) {
+          logTree(child, (name + '.' + index));
+          child.recycle();
+        }
+      }
+    }
+  }
+
+  public final void logScreen () {
+    log("begin screen log");
+
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+      int index = 0;
+
+      for (AccessibilityWindowInfo window : BrailleService.getBrailleService().getWindows()) {
+        logTree(window, ("window." + index));
+        index += 1;
+      }
+    } else if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+      logTree(BrailleService.getBrailleService().getRootInActiveWindow(), ROOT_NODE_NAME);
+    }
+
     log("end screen log");
   }
 
