@@ -256,7 +256,7 @@ public abstract class ScreenLogger {
     }
   };
 
-  private static void log (AccessibilityWindowInfo window, String name, boolean descend) {
+  private static void log (AccessibilityWindowInfo window, String name, boolean descend, boolean nodes) {
     StringBuilder sb = new StringBuilder();
     add(sb, "id", window.getId());
 
@@ -290,7 +290,7 @@ public abstract class ScreenLogger {
 
     log(name, sb.toString());
 
-    {
+    if (nodes) {
       AccessibilityNodeInfo root = window.getRoot();
 
       if (root != null) {
@@ -307,7 +307,7 @@ public abstract class ScreenLogger {
         AccessibilityWindowInfo child = window.getChild(childIndex);
 
         if (child != null) {
-          log(child, (name + '.' + childIndex), true);
+          log(child, (name + '.' + childIndex), true, nodes);
           child.recycle();
           child = null;
         }
@@ -322,7 +322,7 @@ public abstract class ScreenLogger {
       int index = 0;
 
       for (AccessibilityWindowInfo window : BrailleService.getBrailleService().getWindows()) {
-        log(window, ("window." + index), true);
+        log(window, ("window." + index), true, true);
         index += 1;
       }
     } else if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
@@ -351,7 +351,7 @@ public abstract class ScreenLogger {
           AccessibilityWindowInfo window = node.getWindow();
 
           if (window != null) {
-            log(window, "window", true);
+            log(window, "window", true, true);
             window.recycle();
             window = null;
           }
