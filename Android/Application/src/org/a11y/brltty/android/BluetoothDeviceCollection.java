@@ -42,7 +42,7 @@ public final class BluetoothDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  public final String[] getValues () {
+  public final String[] makeValues () {
     StringMaker<BluetoothDevice> stringMaker = new StringMaker<BluetoothDevice>() {
       @Override
       public String makeString (BluetoothDevice device) {
@@ -54,7 +54,7 @@ public final class BluetoothDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  public final String[] getLabels () {
+  public final String[] makeLabels () {
     StringMaker<BluetoothDevice> stringMaker = new StringMaker<BluetoothDevice>() {
       @Override
       public String makeString (BluetoothDevice device) {

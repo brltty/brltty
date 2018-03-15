@@ -35,12 +35,12 @@ public final class SerialDeviceCollection extends DeviceCollection {
   }
 
   @Override
-  public final String[] getValues () {
+  public final String[] makeValues () {
     return new String[0];
   }
 
   @Override
-  public final String[] getLabels () {
+  public final String[] makeLabels () {
     return new String[0];
   }
 

@@ -48,8 +48,8 @@ public abstract class DeviceCollection {
   public static final char QUALIFIER_DELIMITER = ':';
 
   public abstract String getQualifier ();
-  public abstract String[] getValues ();
-  public abstract String[] getLabels ();
+  public abstract String[] makeValues ();
+  public abstract String[] makeLabels ();
   protected abstract void putParameters (Map<String, String> parameters, String value);
 
   public static String makeReference (Map<String, String> parameters) {

@@ -203,8 +203,8 @@ public final class DeviceManager extends SettingsFragment {
 
     setListElements(
       deviceIdentifierList,
-      deviceCollection.getValues(), 
-      deviceCollection.getLabels()
+      deviceCollection.makeValues(), 
+      deviceCollection.makeLabels()
     );
 
     sortList(deviceIdentifierList);
