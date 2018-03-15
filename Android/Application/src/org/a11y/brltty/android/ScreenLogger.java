@@ -41,7 +41,7 @@ public class ScreenLogger {
     Log.d(logTag, message);
   }
 
-  public final void log (String label, String data) {
+  private final void log (String label, String data) {
     log((label + ": " + data));
   }
 
@@ -65,7 +65,7 @@ public class ScreenLogger {
   }
 
   private static final void add (StringBuilder sb, String label, int value) {
-    add(sb, String.format("%s=%d", label, value));
+    add(sb, label, Integer.toString(value));
   }
 
   private static final void add (StringBuilder sb, String label, int value, Map<Integer, String> names) {
@@ -332,7 +332,13 @@ public class ScreenLogger {
         index += 1;
       }
     } else if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-      logTree(BrailleService.getBrailleService().getRootInActiveWindow());
+      AccessibilityNodeInfo root = BrailleService.getBrailleService().getRootInActiveWindow();
+
+      if (root != null) {
+        logTree(root);
+        root.recycle();
+        root = null;
+      }
     }
 
     log("end screen log");
@@ -349,10 +355,12 @@ public class ScreenLogger {
 
         if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
           AccessibilityWindowInfo window = node.getWindow();
-          logTree(window, "window");
 
-          window.recycle();
-          window = null;
+          if (window != null) {
+            logTree(window, "window");
+            window.recycle();
+            window = null;
+          }
         } else {
           AccessibilityNodeInfo root = ScreenUtilities.findRootNode(node);
 
