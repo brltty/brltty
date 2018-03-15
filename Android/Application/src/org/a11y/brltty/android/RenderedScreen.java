@@ -332,24 +332,27 @@ public class RenderedScreen {
     return root;
   }
 
-  public void logRenderedScreen () {
-    ScreenLogger logger = ScreenDriver.getLogger();
-    logger.log("begin rendered screen");
+  private static void log (String message) {
+    Log.d(LOG_TAG, message);
+  }
 
-    logger.log("screen element count: " + screenElements.size());
+  public void logRenderedScreen () {
+    log("begin rendered screen");
+
+    log("screen element count: " + screenElements.size());
 
     for (ScreenElement element : screenElements) {
-      logger.log("screen element: " + element.getElementText());
+      log("screen element: " + element.getElementText());
     }
 
-    logger.log("screen row count: " + screenRows.size());
-    logger.log("screen width: " + screenWidth);
+    log("screen row count: " + screenRows.size());
+    log("screen width: " + screenWidth);
 
     for (CharSequence row : screenRows) {
-      logger.log("screen row: " + row.toString());
+      log("screen row: " + row.toString());
     }
 
-    logger.log("end rendered screen");
+    log("end rendered screen");
   }
 
   public RenderedScreen (AccessibilityNodeInfo node) {

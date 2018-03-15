@@ -24,7 +24,10 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import android.graphics.Rect;
 
-public final class ScreenUtilities {
+public abstract class ScreenUtilities {
+  private ScreenUtilities () {
+  }
+
   public static boolean isVisible (AccessibilityNodeInfo node) {
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       return node.isVisibleToUser();
@@ -240,12 +243,5 @@ public final class ScreenUtilities {
     }
 
     return null;
-  }
-
-  public static void logScreen () {
-    ScreenDriver.getLogger().logScreen();
-  }
-
-  private ScreenUtilities () {
   }
 }

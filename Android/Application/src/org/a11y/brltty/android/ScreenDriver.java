@@ -21,6 +21,7 @@ import org.a11y.brltty.core.*;
 
 import android.os.Build;
 import android.os.SystemClock;
+import android.util.Log;
 
 import android.accessibilityservice.AccessibilityService;
 import android.view.accessibility.AccessibilityEvent;
@@ -30,17 +31,23 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import android.graphics.Rect;
 import android.graphics.Point;
 
-public final class ScreenDriver {
+public abstract class ScreenDriver {
+  private static final String LOG_TAG = ScreenDriver.class.getName();
+
+  private ScreenDriver () {
+  }
+
   private final static Object eventLock = new Object();
   private volatile static AccessibilityNodeInfo eventNode = null;
 
-  private static ScreenLogger currentLogger = new ScreenLogger(ScreenDriver.class.getName());
+  static {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+      eventNode = BrailleService.getBrailleService().getRootInActiveWindow();
+    }
+  }
+
   private static ScreenWindow currentWindow = new ScreenWindow(0);
   private static RenderedScreen currentScreen = null;
-
-  public static ScreenLogger getLogger () {
-    return currentLogger;
-  }
 
   public static ScreenWindow getWindow () {
     return currentWindow;
@@ -123,7 +130,7 @@ public final class ScreenDriver {
     AccessibilityNodeInfo sourceNode = event.getSource();
 
     if (ApplicationSettings.LOG_ACCESSIBILITY_EVENTS) {
-      currentLogger.logEvent(event);
+      ScreenLogger.log(event);
     }
 
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
@@ -326,7 +333,7 @@ public final class ScreenDriver {
       long start = SystemClock.uptimeMillis();
       refreshScreen(node);
       long duration = SystemClock.uptimeMillis() - start;
-      currentLogger.log("screen refresh time: " + duration + "ms");
+      Log.d(LOG_TAG, ("screen refresh time: " + duration + "ms"));
     } else if (currentScreen == null) {
       currentScreen = new RenderedScreen(null);
       exportScreenProperties();
@@ -367,15 +374,6 @@ public final class ScreenDriver {
       case 'k': // braille key event
         LockUtilities.resetTimer();
         break;
-    }
-  }
-
-  private ScreenDriver () {
-  }
-
-  static {
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-      eventNode = BrailleService.getBrailleService().getRootInActiveWindow();
     }
   }
 }

@@ -30,19 +30,10 @@ import android.view.accessibility.AccessibilityWindowInfo;
 
 import android.graphics.Rect;
 
-public class ScreenLogger {
-  private final String logTag;
+public abstract class ScreenLogger {
+  private static final String LOG_TAG = ScreenLogger.class.getName();
 
-  public ScreenLogger (String tag) {
-    logTag = tag;
-  }
-
-  public final void log (String message) {
-    Log.d(logTag, message);
-  }
-
-  private final void log (String label, String data) {
-    log((label + ": " + data));
+  private ScreenLogger () {
   }
 
   private static final void add (StringBuilder sb, String value) {
@@ -78,7 +69,15 @@ public class ScreenLogger {
     }
   }
 
-  public final void logNode (AccessibilityNodeInfo node, String name) {
+  private static void log (String message) {
+    Log.d(LOG_TAG, message);
+  }
+
+  private static void log (String label, String data) {
+    log((label + ": " + data));
+  }
+
+  private static void log (AccessibilityNodeInfo node, String name, boolean descend) {
     StringBuilder sb = new StringBuilder();
 
     {
@@ -224,20 +223,16 @@ public class ScreenLogger {
     add(sb, "obj", node.getClassName());
     add(sb, "pkg", node.getPackageName());
     add(sb, "win", node.getWindowId());
-
     log(name, sb.toString());
-  }
 
-  private final void logTree (AccessibilityNodeInfo root, String name) {
-    if (root != null) {
-      logNode(root, name);
-      int childCount = root.getChildCount();
+    if (descend) {
+      int childCount = node.getChildCount();
 
       for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-        AccessibilityNodeInfo child = root.getChild(childIndex);
+        AccessibilityNodeInfo child = node.getChild(childIndex);
 
         if (child != null) {
-          logTree(child, (name + "." + childIndex));
+          log(child, (name + "." + childIndex), true);
           child.recycle();
           child = null;
         }
@@ -245,8 +240,8 @@ public class ScreenLogger {
     }
   }
 
-  public final void logTree (AccessibilityNodeInfo root) {
-    logTree(root, "root");
+  private static void log (AccessibilityNodeInfo root) {
+    log(root, "root", true);
   }
 
   private static final Map<Integer, String> windowTypeNames =
@@ -261,7 +256,7 @@ public class ScreenLogger {
     }
   };
 
-  private final void logWindow (AccessibilityWindowInfo window, String name) {
+  private static void log (AccessibilityWindowInfo window, String name, boolean descend) {
     StringBuilder sb = new StringBuilder();
     add(sb, "id", window.getId());
 
@@ -299,43 +294,42 @@ public class ScreenLogger {
       AccessibilityNodeInfo root = window.getRoot();
 
       if (root != null) {
-        logTree(root);
+        log(root);
         root.recycle();
         root = null;
       }
     }
-  }
 
-  private final void logTree (AccessibilityWindowInfo root, String name) {
-    logWindow(root, name);
-    int childCount = root.getChildCount();
+    if (descend) {
+      int childCount = window.getChildCount();
 
-    for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-      AccessibilityWindowInfo child = root.getChild(childIndex);
+      for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+        AccessibilityWindowInfo child = window.getChild(childIndex);
 
-      if (child != null) {
-        logTree(child, (name + '.' + childIndex));
-        child.recycle();
-        child = null;
+        if (child != null) {
+          log(child, (name + '.' + childIndex), true);
+          child.recycle();
+          child = null;
+        }
       }
     }
   }
 
-  public final void logScreen () {
+  public static void log () {
     log("begin screen log");
 
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
       int index = 0;
 
       for (AccessibilityWindowInfo window : BrailleService.getBrailleService().getWindows()) {
-        logTree(window, ("window." + index));
+        log(window, ("window." + index), true);
         index += 1;
       }
     } else if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       AccessibilityNodeInfo root = BrailleService.getBrailleService().getRootInActiveWindow();
 
       if (root != null) {
-        logTree(root);
+        log(root);
         root.recycle();
         root = null;
       }
@@ -344,20 +338,20 @@ public class ScreenLogger {
     log("end screen log");
   }
 
-  public final void logEvent (AccessibilityEvent event) {
+  public static void log (AccessibilityEvent event) {
     log("accessibility event", event.toString());
 
     {
       AccessibilityNodeInfo node = event.getSource();
 
       if (node != null) {
-        logNode(node, "event node");
+        log(node, "event node", false);
 
         if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
           AccessibilityWindowInfo window = node.getWindow();
 
           if (window != null) {
-            logTree(window, "window");
+            log(window, "window", true);
             window.recycle();
             window = null;
           }
@@ -365,7 +359,7 @@ public class ScreenLogger {
           AccessibilityNodeInfo root = ScreenUtilities.findRootNode(node);
 
           if (root != null) {
-            logTree(root);
+            log(root);
             root.recycle();
             root = null;
           }
