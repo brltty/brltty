@@ -242,6 +242,10 @@ public final class ScreenUtilities {
     return null;
   }
 
+  public static void logScreen () {
+    ScreenDriver.getLogger().logScreen();
+  }
+
   private ScreenUtilities () {
   }
 }

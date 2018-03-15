@@ -37,8 +37,6 @@ public class ScreenLogger {
     logTag = tag;
   }
 
-  private static final String ROOT_NODE_NAME = "root";
-
   public final void log (String message) {
     Log.d(logTag, message);
   }
@@ -82,7 +80,12 @@ public class ScreenLogger {
 
   public final void logNode (AccessibilityNodeInfo node, String name) {
     StringBuilder sb = new StringBuilder();
-    sb.append(node.getClassName());
+
+    {
+      String object = node.getClassName().toString();
+      int index = object.lastIndexOf(".");
+      sb.append(object.substring(index+1));
+    }
 
     {
       String text = ScreenUtilities.getNodeText(node);
@@ -113,7 +116,7 @@ public class ScreenLogger {
         parent.recycle();
         parent = null;
       } else {
-        add(sb, ROOT_NODE_NAME);
+        add(sb, "root");
       }
     }
 
@@ -218,7 +221,8 @@ public class ScreenLogger {
       add(sb, location.toShortString());
     }
 
-    add(sb, "app", node.getPackageName());
+    add(sb, "obj", node.getClassName());
+    add(sb, "pkg", node.getPackageName());
     add(sb, "win", node.getWindowId());
 
     log(name, sb.toString());
@@ -242,7 +246,7 @@ public class ScreenLogger {
   }
 
   public final void logTree (AccessibilityNodeInfo root) {
-    logTree(root, ROOT_NODE_NAME);
+    logTree(root, "node");
   }
 
   private static final Map<Integer, String> windowTypeNames =
@@ -268,7 +272,7 @@ public class ScreenLogger {
         parent.recycle();
         parent = null;
       } else {
-        add(sb, ROOT_NODE_NAME);
+        add(sb, "root");
       }
     }
 
@@ -290,7 +294,7 @@ public class ScreenLogger {
     }
 
     log(name, sb.toString());
-    logTree(root.getRoot());
+    logTree(root.getRoot(), "root");
 
     {
       int count = root.getChildCount();
@@ -317,7 +321,7 @@ public class ScreenLogger {
         index += 1;
       }
     } else if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-      logTree(BrailleService.getBrailleService().getRootInActiveWindow(), ROOT_NODE_NAME);
+      logTree(BrailleService.getBrailleService().getRootInActiveWindow(), "root");
     }
 
     log("end screen log");
