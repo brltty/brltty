@@ -246,7 +246,7 @@ public class ScreenLogger {
   }
 
   public final void logTree (AccessibilityNodeInfo root) {
-    logTree(root, "node");
+    logTree(root, "root");
   }
 
   private static final Map<Integer, String> windowTypeNames =
@@ -261,12 +261,12 @@ public class ScreenLogger {
     }
   };
 
-  private final void logTree (AccessibilityWindowInfo root, String name) {
+  private final void logWindow (AccessibilityWindowInfo window, String name) {
     StringBuilder sb = new StringBuilder();
-    add(sb, "id", root.getId());
+    add(sb, "id", window.getId());
 
     {
-      AccessibilityWindowInfo parent = root.getParent();
+      AccessibilityWindowInfo parent = window.getParent();
 
       if (parent != null) {
         parent.recycle();
@@ -277,35 +277,46 @@ public class ScreenLogger {
     }
 
     {
-      int count = root.getChildCount();
+      int count = window.getChildCount();
       if (count > 0) add(sb, "cld", count);
     }
 
-    add(sb, "layer", root.getLayer());
-    add(sb, "type", root.getType(), windowTypeNames);
-    add(sb, root.isActive(), "act");
-    add(sb, root.isFocused(), "ifd");
-    add(sb, root.isAccessibilityFocused(), "afd");
+    add(sb, "layer", window.getLayer());
+    add(sb, "type", window.getType(), windowTypeNames);
+    add(sb, window.isActive(), "act");
+    add(sb, window.isFocused(), "ifd");
+    add(sb, window.isAccessibilityFocused(), "afd");
 
     {
       Rect location = new Rect();
-      root.getBoundsInScreen(location);
+      window.getBoundsInScreen(location);
       add(sb, location.toShortString());
     }
 
     log(name, sb.toString());
-    logTree(root.getRoot(), "root");
 
     {
-      int count = root.getChildCount();
+      AccessibilityNodeInfo root = window.getRoot();
 
-      for (int index=0; index<count; index+=1) {
-        AccessibilityWindowInfo child = root.getChild(index);
+      if (root != null) {
+        logTree(root);
+        root.recycle();
+        root = null;
+      }
+    }
+  }
 
-        if (child != null) {
-          logTree(child, (name + '.' + index));
-          child.recycle();
-        }
+  private final void logTree (AccessibilityWindowInfo root, String name) {
+    logWindow(root, name);
+    int childCount = root.getChildCount();
+
+    for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+      AccessibilityWindowInfo child = root.getChild(childIndex);
+
+      if (child != null) {
+        logTree(child, (name + '.' + childIndex));
+        child.recycle();
+        child = null;
       }
     }
   }
@@ -321,7 +332,7 @@ public class ScreenLogger {
         index += 1;
       }
     } else if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-      logTree(BrailleService.getBrailleService().getRootInActiveWindow(), "root");
+      logTree(BrailleService.getBrailleService().getRootInActiveWindow());
     }
 
     log("end screen log");
@@ -336,7 +347,13 @@ public class ScreenLogger {
       if (node != null) {
         logNode(node, "event node");
 
-        {
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+          AccessibilityWindowInfo window = node.getWindow();
+          logTree(window, "window");
+
+          window.recycle();
+          window = null;
+        } else {
           AccessibilityNodeInfo root = ScreenUtilities.findRootNode(node);
 
           if (root != null) {
