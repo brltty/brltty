@@ -113,7 +113,7 @@ public final class DeviceManager extends SettingsFragment {
       StringBuilder sb = new StringBuilder();
       sb.append(BluetoothDeviceCollection.DEVICE_QUALIFIER);
       sb.append(DeviceCollection.QUALIFIER_DELIMITER);
-      sb.append(DeviceCollection.IDENTIFIER_DELIMITER);
+      sb.append(DeviceCollection.IDENTIFIER_SEPARATOR);
       sb.append(UsbDeviceCollection.DEVICE_QUALIFIER);
       sb.append(DeviceCollection.QUALIFIER_DELIMITER);
       identifier = sb.toString();

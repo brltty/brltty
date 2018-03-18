@@ -44,8 +44,10 @@ public abstract class DeviceCollection {
     return strings.toArray(new String[strings.size()]);
   }
 
-  public static final char IDENTIFIER_DELIMITER = ',';
+  public static final char IDENTIFIER_SEPARATOR = ',';
   public static final char QUALIFIER_DELIMITER = ':';
+  public static final char PARAMETER_SEPARATOR = '+';
+  public static final char ASSIGNMENT_DELIMITER = '=';
 
   public abstract String getQualifier ();
   public abstract String[] makeValues ();
@@ -60,9 +62,12 @@ public abstract class DeviceCollection {
       if (value == null) continue;
       if (value.isEmpty()) continue;
 
-      if (reference.length() > 0) reference.append('+');
+      if (value.indexOf(PARAMETER_SEPARATOR) >= 0) continue;
+      if (value.indexOf(IDENTIFIER_SEPARATOR) >= 0) continue;
+
+      if (reference.length() > 0) reference.append(PARAMETER_SEPARATOR);
       reference.append(key);
-      reference.append('=');
+      reference.append(ASSIGNMENT_DELIMITER);
       reference.append(value);
     }
 
