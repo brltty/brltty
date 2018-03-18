@@ -57,7 +57,7 @@ public abstract class BrailleNotification {
         .setOngoing(true)
         .setOnlyAlertOnce(true)
 
-        .setSmallIcon(R.drawable.ic_launcher)
+        .setSmallIcon(R.drawable.braille_notification)
         .setSubText(getString(R.string.braille_hint_tap))
 
         .setContentIntent(

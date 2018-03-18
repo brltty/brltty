@@ -17,7 +17,7 @@
 
   <application
     android:label="@string/app_name"
-    android:icon="@drawable/brltty"
+    android:icon="@drawable/braille_service"
     android:persistent="true"
     >
 
