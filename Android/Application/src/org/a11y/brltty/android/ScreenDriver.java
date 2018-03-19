@@ -20,7 +20,6 @@ package org.a11y.brltty.android;
 import org.a11y.brltty.core.*;
 
 import android.os.Build;
-import android.os.SystemClock;
 import android.util.Log;
 
 import android.accessibilityservice.AccessibilityService;
@@ -35,15 +34,6 @@ public abstract class ScreenDriver {
   private static final String LOG_TAG = ScreenDriver.class.getName();
 
   private ScreenDriver () {
-  }
-
-  private final static Object eventLock = new Object();
-  private volatile static AccessibilityNodeInfo eventNode = null;
-
-  static {
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-      eventNode = BrailleService.getBrailleService().getRootInActiveWindow();
-    }
   }
 
   private static ScreenWindow currentWindow = new ScreenWindow(0);
@@ -124,25 +114,35 @@ public abstract class ScreenDriver {
     return done;
   }
 
-  public static native void screenUpdated ();
+  private static native void screenUpdated ();
+  private final static Object eventLock = new Object();
+  private volatile static AccessibilityNodeInfo currentNode = null;
+
+  static {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+      currentNode = BrailleService.getBrailleService().getRootInActiveWindow();
+    }
+  }
 
   public static void onAccessibilityEvent (AccessibilityEvent event) {
-    AccessibilityNodeInfo sourceNode = event.getSource();
+    AccessibilityNodeInfo newNode = event.getSource();
 
     if (ApplicationSettings.LOG_ACCESSIBILITY_EVENTS) {
       ScreenLogger.log(event);
     }
 
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
-      if (sourceNode != null) {
-        AccessibilityWindowInfo window = sourceNode.getWindow();
+      if (newNode != null) {
+        AccessibilityWindowInfo window = newNode.getWindow();
 
         if (window != null) {
           boolean ignore = !window.isActive();
           window.recycle();
+          window = null;
 
           if (ignore) {
-            sourceNode.recycle();
+            newNode.recycle();
+            newNode = null;
             return;
           }
         }
@@ -154,8 +154,8 @@ public abstract class ScreenDriver {
         break;
 
       case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED: {
-        if (sourceNode != null) {
-          goToFirstClickableSubnode(sourceNode);
+        if (newNode != null) {
+          goToFirstClickableSubnode(newNode);
         }
 
         break;
@@ -174,16 +174,16 @@ public abstract class ScreenDriver {
         break;
 
       case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED: {
-        if (sourceNode != null) {
-          ScreenTextEditor.get(sourceNode, true).setCursorLocation(event.getFromIndex() + event.getAddedCount());
+        if (newNode != null) {
+          ScreenTextEditor.get(newNode, true).setCursorLocation(event.getFromIndex() + event.getAddedCount());
         }
 
         break;
       }
 
       case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED: {
-        if (sourceNode != null) {
-          ScreenTextEditor editor = ScreenTextEditor.get(sourceNode, true);
+        if (newNode != null) {
+          ScreenTextEditor editor = ScreenTextEditor.get(newNode, true);
 
           editor.setSelectedRegion(event.getFromIndex(), event.getToIndex());
           editor.setCursorLocation(event.getToIndex());
@@ -192,17 +192,22 @@ public abstract class ScreenDriver {
         break;
       }
 
-      default:
-        if (sourceNode != null) sourceNode.recycle();
+      default: {
+        if (newNode != null) {
+          newNode.recycle();
+          newNode = null;
+        }
+
         return;
+      }
     }
 
     {
       AccessibilityNodeInfo oldNode;
 
       synchronized (eventLock) {
-        oldNode = eventNode;
-        eventNode = sourceNode;
+        oldNode = currentNode;
+        currentNode = newNode;
       }
 
       if (oldNode != null) {
@@ -221,7 +226,7 @@ public abstract class ScreenDriver {
     );
   }
 
-  public static native void exportScreenProperties (
+  private static native void exportScreenProperties (
     int number,
     int columns, int rows,
     int column, int row,
@@ -305,7 +310,7 @@ public abstract class ScreenDriver {
     );
   }
 
-  public static void refreshScreen (AccessibilityNodeInfo node) {
+  private static void refreshScreen (AccessibilityNodeInfo node) {
     {
       int identifier = node.getWindowId();
 
@@ -321,19 +326,18 @@ public abstract class ScreenDriver {
   public static char refreshScreen () {
     if (ApplicationSettings.RELEASE_BRAILLE_DEVICE) return 'r';
     if (LockUtilities.isLocked()) return 'l';
-
     AccessibilityNodeInfo node;
+
     synchronized (eventLock) {
-      if ((node = eventNode) != null) {
-        eventNode = null;
+      if ((node = currentNode) != null) {
+        currentNode = null;
       }
     }
 
     if (node != null) {
-      long start = SystemClock.uptimeMillis();
       refreshScreen(node);
-      long duration = SystemClock.uptimeMillis() - start;
-      Log.d(LOG_TAG, ("screen refresh time: " + duration + "ms"));
+      node.recycle();
+      node = null;
     } else if (currentScreen == null) {
       currentScreen = new RenderedScreen(null);
       exportScreenProperties();
