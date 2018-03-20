@@ -336,22 +336,37 @@ public class RenderedScreen {
     Log.d(LOG_TAG, message);
   }
 
-  public void logRenderedScreen () {
-    log("begin rendered screen");
-
-    log("screen element count: " + screenElements.size());
+  private void logRenderedElements () {
+    log(("screen element count: " + screenElements.size()));
+    int elementIndex = 0;
 
     for (ScreenElement element : screenElements) {
-      log("screen element: " + element.getElementText());
+      log(
+        String.format(
+          "screen element %d: %s", elementIndex++, element.getElementText()
+        )
+      );
     }
+  }
 
-    log("screen row count: " + screenRows.size());
-    log("screen width: " + screenWidth);
+  private void logRenderedRows () {
+    log(("screen row count: " + screenRows.size()));
+    log(("screen width: " + screenWidth));
+    int rowIndex = 0;
 
     for (CharSequence row : screenRows) {
-      log("screen row: " + row.toString());
+      log(
+        String.format(
+          "screen row %d: %s", rowIndex++, row.toString()
+        )
+      );
     }
+  }
 
+  public void logRenderedScreen () {
+    log("begin rendered screen");
+    logRenderedElements();
+    logRenderedRows();
     log("end rendered screen");
   }
 

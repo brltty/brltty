@@ -241,7 +241,9 @@ public abstract class ScreenLogger {
   }
 
   private static void log (AccessibilityNodeInfo root) {
+    log("begin node log");
     log(root, "root", true);
+    log("end node log");
   }
 
   private static final Map<Integer, String> windowTypeNames =
