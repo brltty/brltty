@@ -87,9 +87,15 @@ public abstract class ScreenLogger {
     }
 
     {
-      String text = ScreenUtilities.getNodeText(node);
+      CharSequence text = node.getText();
 
-      if ((text != null) && (text.length() > 0)) {
+      if (node.isEditable()) {
+        if (text == null) text = "";
+      } else if ((text != null) && (text.length() == 0)) {
+        text = null;
+      }
+
+      if (text != null) {
         sb.append(' ');
         sb.append('"');
         sb.append(text);
@@ -130,7 +136,7 @@ public abstract class ScreenLogger {
 
     add(sb, !node.isEnabled(), "dsb");
     add(sb, node.isSelected(), "sld");
-    add(sb, node.isScrollable(), "scb");
+    add(sb, node.isScrollable(), "scr");
     add(sb, node.isFocusable(), "ifb");
     add(sb, node.isFocused(), "ifd");
 
@@ -172,7 +178,7 @@ public abstract class ScreenLogger {
       }
 
       if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_SELECT) != 0), "sls");
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_SELECT) != 0), "sel");
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_SELECTION) != 0), "slc");
       }
 
@@ -187,7 +193,7 @@ public abstract class ScreenLogger {
       }
 
       if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_SET_SELECTION) != 0), "sel");
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_SET_SELECTION) != 0), "sls");
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_COPY) != 0), "cpy");
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_CUT) != 0), "cut");
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_PASTE) != 0), "pst");
