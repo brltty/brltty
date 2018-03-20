@@ -614,16 +614,21 @@ setWordWrapStart (int start) {
       }
     }
 
-    if (!isWordBreak(characters, ses->winy, start-1)) {
+    start = end - textCount;
+    if (start < 0) start = 0;
+
+    if (start > 0) {
+      if (!isWordBreak(characters, ses->winy, start-1)) {
+        while (start < end) {
+          if (isWordBreak(characters, ses->winy, start)) break;
+          start += 1;
+        }
+      }
+
       while (start < end) {
-        if (isWordBreak(characters, ses->winy, start)) break;
+        if (!isWordBreak(characters, ses->winy, start)) break;
         start += 1;
       }
-    }
-
-    while (start < end) {
-      if (!isWordBreak(characters, ses->winy, start)) break;
-      start += 1;
     }
 
     if (start < end) ses->winx = start;
