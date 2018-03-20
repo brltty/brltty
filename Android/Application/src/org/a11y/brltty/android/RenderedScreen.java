@@ -274,8 +274,16 @@ public class RenderedScreen {
 
         if (node != null) {
           root.recycle();
-          root = null;
-          return node;
+          root = node;
+          node = ScreenUtilities.findTextNode(root);
+
+          if (node != null) {
+            root.recycle();
+            root = node;
+            node = null;
+          }
+
+          return root;
         }
       }
 
