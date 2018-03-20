@@ -158,17 +158,22 @@ public class RenderedScreen {
     return false;
   }
 
-  static final int SIGNIFICANT_NODE_ACTIONS = AccessibilityNodeInfo.ACTION_CLICK
-                                            | AccessibilityNodeInfo.ACTION_LONG_CLICK
-                                            | AccessibilityNodeInfo.ACTION_SCROLL_FORWARD
-                                            | AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD
-                                            ;
+  private static final int SIGNIFICANT_NODE_ACTIONS
+    = AccessibilityNodeInfo.ACTION_CLICK
+    | AccessibilityNodeInfo.ACTION_LONG_CLICK
+    | AccessibilityNodeInfo.ACTION_SCROLL_FORWARD
+    | AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD
+    ;
 
   private static int getSignificantActions (AccessibilityNodeInfo node) {
     return node.getActions() & SIGNIFICANT_NODE_ACTIONS;
   }
 
-  private boolean hasInnerText (AccessibilityNodeInfo root) {
+  private static boolean hasSignificantActions (AccessibilityNodeInfo node) {
+    return getSignificantActions(node) != 0;
+  }
+
+  private static boolean hasInnerText (AccessibilityNodeInfo root) {
     int childCount = root.getChildCount();
 
     for (int childIndex=0; childIndex<childCount; childIndex+=1) {
@@ -177,7 +182,7 @@ public class RenderedScreen {
       if (child != null) {
         boolean found;
 
-        if (getSignificantActions(child) != 0) {
+        if (hasSignificantActions(child)) {
           found = false;
         } else if (child.getText() != null) {
           found = true;
@@ -186,11 +191,47 @@ public class RenderedScreen {
         }
 
         child.recycle();
+        child = null;
+
         if (found) return true;
       }
     }
 
     return false;
+  }
+
+  private static String getDescription (AccessibilityNodeInfo node) {
+    {
+      String description = ScreenUtilities.normalizeText(node.getContentDescription());
+      if (description != null) return description;
+    }
+
+    {
+      StringBuilder sb = new StringBuilder();
+      int childCount = node.getChildCount();
+
+      for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+        AccessibilityNodeInfo child = node.getChild(childIndex);
+
+        if (child != null) {
+          if (!hasSignificantActions(child)) {
+            String description = ScreenUtilities.normalizeText(child.getContentDescription());
+
+            if (description != null) {
+              if (sb.length() > 0) sb.append(' ');
+              sb.append(description);
+            }
+          }
+
+          child.recycle();
+          child = null;
+        }
+      }
+
+      if (sb.length() > 0) return sb.toString();
+    }
+
+    return null;
   }
 
   private final int addScreenElements (AccessibilityNodeInfo root) {
@@ -216,20 +257,11 @@ public class RenderedScreen {
       }
 
       if (ScreenUtilities.isVisible(root)) {
-        String text = null;
-
-        {
-          CharSequence actualText = root.getText();
-
-          if (actualText != null) {
-            text = actualText.toString();
-            if (!ScreenUtilities.isEditable(root)) text = text.trim();
-          }
-        }
+        String text = ScreenUtilities.getText(root);
 
         if (text == null) {
           if ((actions != 0) && !hasInnerText(root)) {
-            if ((text = ScreenUtilities.normalizeText(root.getContentDescription())) == null) {
+            if ((text = getDescription(root)) == null) {
               text = root.getClassName().toString();
               int index = text.lastIndexOf('.');
               if (index >= 0) text = text.substring(index+1);

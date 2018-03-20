@@ -218,30 +218,17 @@ public abstract class ScreenUtilities {
   public static String normalizeText (CharSequence text) {
     if (text != null) {
       String string = text.toString().trim();
-
-      if (string.length() > 0) {
-        return string;
-      }
+      if (string.length() > 0) return string;
     }
 
     return null;
   }
 
-  public static String getNodeText (AccessibilityNodeInfo node) {
-    String text;
+  public static String getText (AccessibilityNodeInfo node) {
+    CharSequence text = node.getText();
+    if (!isEditable(node)) return normalizeText(text);
 
-    if ((text = normalizeText(node.getText())) != null) {
-      return text;
-    }
-
-    if ((text = normalizeText(node.getContentDescription())) != null) {
-      return text;
-    }
-
-    if (node.getActions() != 0) {
-      return "";
-    }
-
-    return null;
+    if (text == null) return "";
+    return text.toString();
   }
 }

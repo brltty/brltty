@@ -36,6 +36,12 @@ public abstract class ScreenLogger {
   private ScreenLogger () {
   }
 
+  private static String getText (AccessibilityNodeInfo node) {
+    String text = ScreenUtilities.getText(node);
+    if (text != null) return text;
+    return ScreenUtilities.normalizeText(node.getContentDescription());
+  }
+
   private static final void add (StringBuilder sb, String value) {
     if (value != null) {
       if (sb.length() > 0) sb.append(' ');
@@ -89,7 +95,7 @@ public abstract class ScreenLogger {
     {
       CharSequence text = node.getText();
 
-      if (node.isEditable()) {
+      if (ScreenUtilities.isEditable(node)) {
         if (text == null) text = "";
       } else if ((text != null) && (text.length() == 0)) {
         text = null;
@@ -151,7 +157,7 @@ public abstract class ScreenLogger {
     add(sb, node.isPassword(), "pwd");
 
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
-      add(sb, node.isEditable(), "edb");
+      add(sb, ScreenUtilities.isEditable(node), "edb");
     }
 
     {
@@ -204,7 +210,7 @@ public abstract class ScreenLogger {
       AccessibilityNodeInfo subnode = node.getLabelFor();
 
       if (subnode != null) {
-        add(sb, "lbf", ScreenUtilities.getNodeText(subnode));
+        add(sb, "lbf", getText(subnode));
         subnode.recycle();
         subnode = null;
       }
@@ -214,7 +220,7 @@ public abstract class ScreenLogger {
       AccessibilityNodeInfo subnode = node.getLabeledBy();
 
       if (subnode != null) {
-        add(sb, "lbd", ScreenUtilities.getNodeText(subnode));
+        add(sb, "lbd", getText(subnode));
         subnode.recycle();
         subnode = null;
       }
