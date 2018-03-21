@@ -136,9 +136,44 @@ public class ScreenElement {
     if (isCheckable()) {
       StringBuilder sb = new StringBuilder();
 
-      sb.append('[');
-      sb.append((isChecked()? "X": " "));
-      sb.append(']');
+      {
+        char begin = Unicode.BRAILLE_ROW
+                   | Unicode.BRAILLE_DOT4
+                   | Unicode.BRAILLE_DOT1
+                   | Unicode.BRAILLE_DOT2
+                   | Unicode.BRAILLE_DOT3
+                   | Unicode.BRAILLE_DOT7
+                   | Unicode.BRAILLE_DOT8
+                   ;
+
+        sb.append(begin);
+      }
+
+      if (isChecked()) {
+        char mark = Unicode.BRAILLE_ROW
+                  | Unicode.BRAILLE_DOT2
+                  | Unicode.BRAILLE_DOT3
+                  | Unicode.BRAILLE_DOT5
+                  | Unicode.BRAILLE_DOT6
+                  ;
+
+        sb.append(mark);
+      } else {
+        sb.append(' ');
+      }
+
+      {
+        char end = Unicode.BRAILLE_ROW
+                 | Unicode.BRAILLE_DOT1
+                 | Unicode.BRAILLE_DOT4
+                 | Unicode.BRAILLE_DOT5
+                 | Unicode.BRAILLE_DOT6
+                 | Unicode.BRAILLE_DOT8
+                 | Unicode.BRAILLE_DOT7
+                 ;
+
+        sb.append(end);
+      }
 
       if (text != null) {
         sb.append(' ');
