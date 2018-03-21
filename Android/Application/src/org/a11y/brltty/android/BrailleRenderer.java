@@ -91,7 +91,9 @@ public abstract class BrailleRenderer {
 
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
       elements.addAtBottom(
-        R.string.VIRTUAL_BUTTON_RECENT_APPS,
+        ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)?
+          R.string.VIRTUAL_BUTTON_OVERVIEW:
+          R.string.VIRTUAL_BUTTON_RECENT_APPS,
         AccessibilityService.GLOBAL_ACTION_RECENTS
       );
     }
