@@ -556,9 +556,9 @@ getTimeFormattingData (TimeFormattingData *fmt) {
 }
 
 int
-isWordBreak (const ScreenCharacter *characters, int y, int x) {
+isWordBreak (const ScreenCharacter *characters, int x) {
   if (!iswspace(characters[x].text)) return 0;
-  return !(showScreenCursor() && (y == scr.posy) && (x == scr.posx));
+  return !((ses->winy == scr.posy) && (x == scr.posx) && showScreenCursor());
 }
 
 int
@@ -577,7 +577,7 @@ getWordWrapLength (int row, int from, int count) {
     int index = to;
 
     while (index > from) {
-      if (isWordBreak(characters, ses->winy, --index)) {
+      if (isWordBreak(characters, --index)) {
         to = index;
         onWordBreak = 1;
         break;
@@ -587,7 +587,7 @@ getWordWrapLength (int row, int from, int count) {
 
   if (onWordBreak) {
     while (to < width) {
-      if (!isWordBreak(characters, ses->winy, to)) break;
+      if (!isWordBreak(characters, to)) break;
       to += 1;
     }
   }
@@ -608,7 +608,7 @@ setWordWrapStart (int start) {
     readScreenRow(ses->winy, end, characters);
 
     while (end > 0) {
-      if (!isWordBreak(characters, ses->winy, --end)) {
+      if (!isWordBreak(characters, --end)) {
         end += 1;
         break;
       }
@@ -618,15 +618,15 @@ setWordWrapStart (int start) {
     if (start < 0) start = 0;
 
     if (start > 0) {
-      if (!isWordBreak(characters, ses->winy, start-1)) {
+      if (!isWordBreak(characters, start-1)) {
         while (start < end) {
-          if (isWordBreak(characters, ses->winy, start)) break;
+          if (isWordBreak(characters, start)) break;
           start += 1;
         }
       }
 
       while (start < end) {
-        if (!isWordBreak(characters, ses->winy, start)) break;
+        if (!isWordBreak(characters, start)) break;
         start += 1;
       }
     }
@@ -711,11 +711,11 @@ shiftBrailleWindowLeft (unsigned int amount) {
       ScreenCharacter characters[reference];
       readScreenRow(ses->winy, reference, characters);
 
-      if (!isWordBreak(characters, ses->winy, first-1)) {
-        while (!isWordBreak(characters, ses->winy, first)) first += 1;
+      if (!isWordBreak(characters, first-1)) {
+        while (!isWordBreak(characters, first)) first += 1;
       }
 
-      while (isWordBreak(characters, ses->winy, first)) first += 1;
+      while (isWordBreak(characters, first)) first += 1;
     }
 
     if (first == reference) {

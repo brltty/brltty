@@ -94,7 +94,7 @@ extern char *opt_keyboardTable;
 
 extern int opt_releaseDevice;
 
-extern int isWordBreak (const ScreenCharacter *characters, int y, int x);
+extern int isWordBreak (const ScreenCharacter *characters, int x);
 extern int getWordWrapLength (int row, int from, int count);
 extern void setWordWrapStart (int start);
 

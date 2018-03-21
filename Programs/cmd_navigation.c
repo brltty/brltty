@@ -553,7 +553,7 @@ handleNavigationCommands (int command, void *data) {
           int last = scr.cols;
 
           while (last > 0) {
-            if (!isWordBreak(characters, ses->winy, --last)) break;
+            if (!isWordBreak(characters, --last)) break;
           }
 
           if (ses->winx > last) placeRightEdge(last);
