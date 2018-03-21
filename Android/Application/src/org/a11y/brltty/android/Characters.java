@@ -56,4 +56,32 @@ public abstract class Characters {
                                         | BRAILLE_DOT8
                                         | BRAILLE_DOT7
                                         ;
+
+  public static final char SWITCH_BEGIN = BRAILLE_ROW
+                                        | BRAILLE_DOT4
+                                        | BRAILLE_DOT2
+                                        | BRAILLE_DOT3
+                                        | BRAILLE_DOT8
+                                        ;
+
+  public static final char SWITCH_OFF = BRAILLE_ROW
+                                      | BRAILLE_DOT3
+                                      | BRAILLE_DOT7
+                                      | BRAILLE_DOT6
+                                      | BRAILLE_DOT8
+                                      ;
+
+  public static final char SWITCH_ON = BRAILLE_ROW
+                                     | BRAILLE_DOT1
+                                     | BRAILLE_DOT2
+                                     | BRAILLE_DOT4
+                                     | BRAILLE_DOT5
+                                     ;
+
+  public static final char SWITCH_END = BRAILLE_ROW
+                                      | BRAILLE_DOT1
+                                      | BRAILLE_DOT5
+                                      | BRAILLE_DOT6
+                                      | BRAILLE_DOT7
+                                      ;
 }

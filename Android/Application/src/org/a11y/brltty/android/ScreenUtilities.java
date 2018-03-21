@@ -38,11 +38,23 @@ public abstract class ScreenUtilities {
     return ScreenDriver.getWindow().contains(location);
   }
 
+  public static final boolean isSubclassOf (AccessibilityNodeInfo node, Class type) {
+    return LanguageUtilities.canAssign(type, node.getClassName().toString());
+  }
+
+  public static boolean isCheckBox (AccessibilityNodeInfo node) {
+    return isSubclassOf(node, android.widget.CheckBox.class);
+  }
+
+  public static boolean isSwitch (AccessibilityNodeInfo node) {
+    return isSubclassOf(node, android.widget.Switch.class);
+  }
+
   public static boolean isEditable (AccessibilityNodeInfo node) {
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
       return node.isEditable();
     } else {
-      return LanguageUtilities.canAssign(android.widget.EditText.class, node.getClassName().toString());
+      return isSubclassOf(node, android.widget.EditText.class);
     }
   }
 
