@@ -135,45 +135,9 @@ public class ScreenElement {
   protected String[] makeBrailleText (String text) {
     if (isCheckable()) {
       StringBuilder sb = new StringBuilder();
-
-      {
-        char begin = Unicode.BRAILLE_ROW
-                   | Unicode.BRAILLE_DOT4
-                   | Unicode.BRAILLE_DOT1
-                   | Unicode.BRAILLE_DOT2
-                   | Unicode.BRAILLE_DOT3
-                   | Unicode.BRAILLE_DOT7
-                   | Unicode.BRAILLE_DOT8
-                   ;
-
-        sb.append(begin);
-      }
-
-      if (isChecked()) {
-        char mark = Unicode.BRAILLE_ROW
-                  | Unicode.BRAILLE_DOT2
-                  | Unicode.BRAILLE_DOT3
-                  | Unicode.BRAILLE_DOT5
-                  | Unicode.BRAILLE_DOT6
-                  ;
-
-        sb.append(mark);
-      } else {
-        sb.append(' ');
-      }
-
-      {
-        char end = Unicode.BRAILLE_ROW
-                 | Unicode.BRAILLE_DOT1
-                 | Unicode.BRAILLE_DOT4
-                 | Unicode.BRAILLE_DOT5
-                 | Unicode.BRAILLE_DOT6
-                 | Unicode.BRAILLE_DOT8
-                 | Unicode.BRAILLE_DOT7
-                 ;
-
-        sb.append(end);
-      }
+      sb.append(Characters.CHECKBOX_BEGIN);
+      sb.append(isChecked()? Characters.CHECKBOX_MARK: ' ');
+      sb.append(Characters.CHECKBOX_END);
 
       if (text != null) {
         sb.append(' ');
