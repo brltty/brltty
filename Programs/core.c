@@ -558,7 +558,7 @@ getTimeFormattingData (TimeFormattingData *fmt) {
 int
 isWordBreak (const ScreenCharacter *characters, int x) {
   if (!iswspace(characters[x].text)) return 0;
-  return !((ses->winy == scr.posy) && (x == scr.posx) && showScreenCursor());
+  return !((x == scr.posx) && (ses->winy == scr.posy) && showScreenCursor());
 }
 
 int
