@@ -120,7 +120,7 @@ public abstract class BrailleRenderer {
     }
   }
 
-  public final void renderScreenElements (List<CharSequence> rows, ScreenElementList elements) {
+  public final void renderScreenElements (ScreenElementList elements, List<CharSequence> rows) {
     setBrailleLocations(elements);
     addVirtualElements(elements);
 

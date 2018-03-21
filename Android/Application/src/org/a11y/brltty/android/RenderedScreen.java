@@ -288,10 +288,7 @@ public class RenderedScreen {
 
     for (CharSequence row : screenRows) {
       int length = row.length();
-
-      if (length > width) {
-        width = length;
-      }
+      if (length > width) width = length;
     }
 
     return width;
@@ -417,7 +414,8 @@ public class RenderedScreen {
     rootNode = ScreenUtilities.findRootNode(node);
 
     addScreenElements(rootNode);
-    BrailleRenderer.getBrailleRenderer().renderScreenElements(screenRows, screenElements);
+    BrailleRenderer.getBrailleRenderer().renderScreenElements(screenElements, screenRows);
+
     screenWidth = findScreenWidth();
     cursorNode = findCursorNode();
 

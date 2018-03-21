@@ -290,8 +290,8 @@ public abstract class ScreenLogger {
       if (count > 0) add(sb, "cld", count);
     }
 
-    add(sb, "layer", window.getLayer());
     add(sb, "type", window.getType(), windowTypeNames);
+    add(sb, "layer", window.getLayer());
     add(sb, window.isActive(), "act");
     add(sb, window.isFocused(), "ifd");
     add(sb, window.isAccessibilityFocused(), "afd");
