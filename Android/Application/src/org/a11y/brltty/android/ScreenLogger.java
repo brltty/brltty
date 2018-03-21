@@ -204,6 +204,16 @@ public abstract class ScreenLogger {
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_CUT) != 0), "cut");
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_PASTE) != 0), "pst");
       }
+
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.KITKAT)) {
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_DISMISS) != 0), "dsm");
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_COLLAPSE) != 0), "col");
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_EXPAND) != 0), "exp");
+      }
+
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_SET_TEXT) != 0), "txs");
+      }
     }
 
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR1)) {
@@ -253,9 +263,9 @@ public abstract class ScreenLogger {
   }
 
   private static void log (AccessibilityNodeInfo root) {
-    log("begin node log");
+    log("begin node tree");
     log(root, "root", true);
-    log("end node log");
+    log("end node tree");
   }
 
   private static final Map<Integer, String> windowTypeNames =
