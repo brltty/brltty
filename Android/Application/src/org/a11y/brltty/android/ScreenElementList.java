@@ -163,8 +163,7 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
 
   public final ScreenElement find (
     ScreenElement.LocationGetter locationGetter,
-    int left, int top,
-    int right, int bottom
+    int left, int top, int right, int bottom
   ) {
     ScreenElement bestElement = null;
     Rect bestLocation = null;
@@ -199,7 +198,12 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
   }
 
   public final ScreenElement findByBrailleLocation (int column, int row) {
-    return findByBrailleLocation(column, row, column, row);
+    do {
+      ScreenElement element = findByBrailleLocation(column, row, column, row);
+      if (element != null) return element;
+    } while (--column >= 0);
+
+    return null;
   }
 
   public final void add (String text, AccessibilityNodeInfo node) {
