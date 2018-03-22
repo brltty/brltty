@@ -97,7 +97,7 @@ public class RealScreenElement extends ScreenElement {
         if (accessibilityNode.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, arguments)) return true;
       }
 
-      return InputService.inputCursor(offset);
+      return InputService.placeCursor(offset);
     }
 
     return super.performAction(x, y);

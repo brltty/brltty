@@ -31,7 +31,7 @@
 
 static JNIEnv *env = NULL;
 static jclass screenDriverClass = NULL;
-static jclass inputServiceClass = NULL;
+static jclass inputHandlersClass = NULL;
 
 static jint screenNumber;
 static jint screenColumns;
@@ -53,8 +53,8 @@ findScreenDriverClass (void) {
 }
 
 static int
-findInputServiceClass (void) {
-  return findJavaClass(env, &inputServiceClass, JAVA_OBJ_BRLTTY("InputService"));
+findInputHandlersClass (void) {
+  return findJavaClass(env, &inputHandlersClass, JAVA_OBJ_BRLTTY("InputHandlers"));
 }
 
 REPORT_LISTENER(androidScreenDriverReportListener) {
@@ -306,7 +306,7 @@ routeCursor_AndroidScreen (int column, int row, int screen) {
 
 static int
 insertKey_AndroidScreen (ScreenKey key) {
-  if (findInputServiceClass()) {
+  if (findInputHandlersClass()) {
     wchar_t character = key & SCR_KEY_CHAR_MASK;
 
     setScreenKeyModifiers(&key, 0);
@@ -314,11 +314,11 @@ insertKey_AndroidScreen (ScreenKey key) {
     if (!isSpecialKey(key)) {
       static jmethodID method = 0;
 
-      if (findJavaStaticMethod(env, &method, inputServiceClass, "inputCharacter",
+      if (findJavaStaticMethod(env, &method, inputHandlersClass, "inputCharacter",
                                JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                                JAVA_SIG_CHAR // character
                                               ))) {
-        jboolean result = (*env)->CallStaticBooleanMethod(env, inputServiceClass, method, character);
+        jboolean result = (*env)->CallStaticBooleanMethod(env, inputHandlersClass, method, character);
 
         if (!clearJavaException(env, 1)) {
           if (result != JNI_FALSE) {
@@ -357,10 +357,10 @@ insertKey_AndroidScreen (ScreenKey key) {
 #undef SIZE
 #undef KEY
 
-      if (findJavaStaticMethod(env, methodIdentifier, inputServiceClass, methodName,
+      if (findJavaStaticMethod(env, methodIdentifier, inputHandlersClass, methodName,
                                JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                               ))) {
-        jboolean result = (*env)->CallStaticBooleanMethod(env, inputServiceClass, *methodIdentifier);
+        jboolean result = (*env)->CallStaticBooleanMethod(env, inputHandlersClass, *methodIdentifier);
 
         if (!clearJavaException(env, 1)) {
           if (result != JNI_FALSE) {
@@ -371,11 +371,11 @@ insertKey_AndroidScreen (ScreenKey key) {
     } else {
       static jmethodID method = 0;
 
-      if (findJavaStaticMethod(env, &method, inputServiceClass, "inputKey_function",
+      if (findJavaStaticMethod(env, &method, inputHandlersClass, "inputKey_function",
                                JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                                JAVA_SIG_INT // key
                                               ))) {
-        jboolean result = (*env)->CallStaticBooleanMethod(env, inputServiceClass, method, character-SCR_KEY_FUNCTION);
+        jboolean result = (*env)->CallStaticBooleanMethod(env, inputHandlersClass, method, character-SCR_KEY_FUNCTION);
 
         if (!clearJavaException(env, 1)) {
           if (result != JNI_FALSE) {
