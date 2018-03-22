@@ -20,24 +20,19 @@ package org.a11y.brltty.android;
 import org.a11y.brltty.core.*;
 
 import android.util.Log;
-import android.view.ViewConfiguration;
-
 import android.os.Build;
-import android.os.Bundle;
-
-import android.accessibilityservice.AccessibilityService;
-import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.ViewConfiguration;
 
 import android.inputmethodservice.InputMethodService;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.EditorInfo;
 
-import android.view.View;
-import android.view.KeyEvent;
+import android.accessibilityservice.AccessibilityService;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import android.text.Editable;
-import android.text.SpannableStringBuilder;
+import android.view.KeyEvent;
 
 public class InputService extends InputMethodService {
   private static final String LOG_TAG = InputService.class.getName();
