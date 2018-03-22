@@ -20,9 +20,10 @@ package org.a11y.brltty.android;
 import org.a11y.brltty.core.*;
 
 import android.util.Log;
+import android.view.ViewConfiguration;
 
 import android.os.Build;
-import android.view.ViewConfiguration;
+import android.os.Bundle;
 
 import android.accessibilityservice.AccessibilityService;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -34,6 +35,9 @@ import android.view.inputmethod.EditorInfo;
 
 import android.view.View;
 import android.view.KeyEvent;
+
+import android.text.Editable;
+import android.text.SpannableStringBuilder;
 
 public class InputService extends InputMethodService {
   private static final String LOG_TAG = InputService.class.getName();
@@ -385,16 +389,26 @@ public class InputService extends InputMethodService {
     return false;
   }
 
-  public static boolean inputCharacter (char character) {
-    InputConnection connection = getInputConnection();
+  public static boolean inputCharacter (final char character) {
+    try {
+      return new InputTextEditor() {
+        @Override
+        protected Integer performEdit (Editable editor, int start, int end) {
+          editor.replace(start, end, Character.toString(character));
+          return start + 1;
+        }
+      }.wasPerformed();
+    } catch (UnsupportedOperationException exception) {
+      InputConnection connection = getInputConnection();
 
-    if (connection != null) {
-      if (connection.commitText(Character.toString(character), 1)) {
-        return true;
+      if (connection != null) {
+        if (connection.commitText(Character.toString(character), 1)) {
+          return true;
+        }
       }
-    }
 
-    return false;
+      return false;
+    }
   }
 
   public static boolean inputKey (int keyCode, boolean longPress) {
@@ -449,15 +463,27 @@ public class InputService extends InputMethodService {
   }
 
   public static boolean inputKey_backspace () {
-    InputConnection connection = getInputConnection();
+    try {
+      return new InputTextEditor() {
+        @Override
+        protected Integer performEdit (Editable editor, int start, int end) {
+          if (start < 1) return null;
+          if (start == end) start -= 1;
+          editor.delete(start, end);
+          return start;
+        }
+      }.wasPerformed();
+    } catch (UnsupportedOperationException exception) {
+      InputConnection connection = getInputConnection();
 
-    if (connection != null) {
-      if (connection.deleteSurroundingText(1, 0)) {
-        return true;
+      if (connection != null) {
+        if (connection.deleteSurroundingText(1, 0)) {
+          return true;
+        }
       }
-    }
 
-    return false;
+      return false;
+    }
   }
 
   public static boolean inputKey_escape () {
