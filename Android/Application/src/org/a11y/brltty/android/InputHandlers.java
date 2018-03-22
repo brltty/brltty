@@ -48,10 +48,8 @@ public abstract class InputHandlers {
         int start = node.getTextSelectionStart();
         int end = node.getTextSelectionEnd();
 
-        if (text == null) {
-          text = "";
-          start = end = 0;
-        }
+        if (text == null) text = "";
+        if (text.length() == 0) start = end = 0;
 
         Editable editor = (text instanceof Editable)?
                           (Editable)text:
@@ -300,7 +298,7 @@ public abstract class InputHandlers {
       }
     };
 
-  public static boolean changeFocus (RenderedScreen.ChangeFocusDirection direction) {
+  public static boolean moveFocus (RenderedScreen.ChangeFocusDirection direction) {
     RenderedScreen screen = ScreenDriver.getScreen();
 
     if (screen != null) {
@@ -312,19 +310,19 @@ public abstract class InputHandlers {
     return false;
   }
 
-  private final static FunctionKeyAction backwardAction =
+  private final static FunctionKeyAction moveBackwardAction =
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
-        return changeFocus(RenderedScreen.ChangeFocusDirection.BACKWARD);
+        return moveFocus(RenderedScreen.ChangeFocusDirection.BACKWARD);
       }
     };
 
-  private final static FunctionKeyAction forwardAction =
+  private final static FunctionKeyAction moveForwardAction =
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
-        return changeFocus(RenderedScreen.ChangeFocusDirection.FORWARD);
+        return moveFocus(RenderedScreen.ChangeFocusDirection.FORWARD);
       }
     };
 
@@ -344,8 +342,8 @@ public abstract class InputHandlers {
       recentApplicationsAction,
       brlttySettingsAction,
       quickSettingsAction,
-      backwardAction,
-      forwardAction,
+      moveBackwardAction,
+      moveForwardAction,
       powerDialogAction,
       menuAction,
       logScreenAction
