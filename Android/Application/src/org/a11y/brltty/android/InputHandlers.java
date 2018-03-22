@@ -157,11 +157,29 @@ public abstract class InputHandlers {
 
   public static boolean inputKey_enter () {
     return new KeyHandler(KeyEvent.KEYCODE_ENTER) {
+      @Override
+      protected boolean performNavigationAction () {
+        return super.performNavigationAction();
+      }
+
+      @Override
+      protected boolean performEditAction () {
+        return super.performEditAction();
+      }
     }.handleKey();
   }
 
   public static boolean inputKey_tab () {
     return new KeyHandler(KeyEvent.KEYCODE_TAB) {
+      @Override
+      protected boolean performNavigationAction () {
+        return super.performNavigationAction();
+      }
+
+      @Override
+      protected boolean performEditAction () {
+        return super.performEditAction();
+      }
     }.handleKey();
   }
 
@@ -194,46 +212,127 @@ public abstract class InputHandlers {
 
   public static boolean inputKey_cursorLeft () {
     return new KeyHandler(KeyEvent.KEYCODE_DPAD_LEFT) {
+      @Override
+      protected boolean performNavigationAction () {
+        return super.performNavigationAction();
+      }
+
+      @Override
+      protected boolean performEditAction () {
+        return super.performEditAction();
+      }
     }.handleKey();
   }
 
   public static boolean inputKey_cursorRight () {
     return new KeyHandler(KeyEvent.KEYCODE_DPAD_RIGHT) {
+      @Override
+      protected boolean performNavigationAction () {
+        return super.performNavigationAction();
+      }
+
+      @Override
+      protected boolean performEditAction () {
+        return super.performEditAction();
+      }
     }.handleKey();
   }
 
   public static boolean inputKey_cursorUp () {
     return new KeyHandler(KeyEvent.KEYCODE_DPAD_UP) {
+      @Override
+      protected boolean performNavigationAction () {
+        return super.performNavigationAction();
+      }
+
+      @Override
+      protected boolean performEditAction () {
+        return super.performEditAction();
+      }
     }.handleKey();
   }
 
   public static boolean inputKey_cursorDown () {
     return new KeyHandler(KeyEvent.KEYCODE_DPAD_DOWN) {
+      @Override
+      protected boolean performNavigationAction () {
+        return super.performNavigationAction();
+      }
+
+      @Override
+      protected boolean performEditAction () {
+        return super.performEditAction();
+      }
     }.handleKey();
   }
 
   public static boolean inputKey_pageUp () {
     return new KeyHandler(KeyEvent.KEYCODE_PAGE_UP) {
+      @Override
+      protected boolean performNavigationAction () {
+        return super.performNavigationAction();
+      }
+
+      @Override
+      protected boolean performEditAction () {
+        return super.performEditAction();
+      }
     }.handleKey();
   }
 
   public static boolean inputKey_pageDown () {
     return new KeyHandler(KeyEvent.KEYCODE_PAGE_DOWN) {
+      @Override
+      protected boolean performNavigationAction () {
+        return super.performNavigationAction();
+      }
+
+      @Override
+      protected boolean performEditAction () {
+        return super.performEditAction();
+      }
     }.handleKey();
   }
 
   public static boolean inputKey_home () {
     return new KeyHandler(KeyEvent.KEYCODE_MOVE_HOME) {
+      @Override
+      protected boolean performNavigationAction () {
+        return super.performNavigationAction();
+      }
+
+      @Override
+      protected boolean performEditAction () {
+        return super.performEditAction();
+      }
     }.handleKey();
   }
 
   public static boolean inputKey_end () {
     return new KeyHandler(KeyEvent.KEYCODE_MOVE_END) {
+      @Override
+      protected boolean performNavigationAction () {
+        return super.performNavigationAction();
+      }
+
+      @Override
+      protected boolean performEditAction () {
+        return super.performEditAction();
+      }
     }.handleKey();
   }
 
   public static boolean inputKey_insert () {
     return new KeyHandler(KeyEvent.KEYCODE_INSERT) {
+      @Override
+      protected boolean performNavigationAction () {
+        return super.performNavigationAction();
+      }
+
+      @Override
+      protected boolean performEditAction () {
+        return super.performEditAction();
+      }
     }.handleKey();
   }
 
