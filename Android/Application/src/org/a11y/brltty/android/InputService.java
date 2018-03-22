@@ -467,8 +467,11 @@ public class InputService extends InputMethodService {
       return new InputTextEditor() {
         @Override
         protected Integer performEdit (Editable editor, int start, int end) {
-          if (start < 1) return null;
-          if (start == end) start -= 1;
+          if (start == end) {
+            if (start < 1) return null;
+            start -= 1;
+          }
+
           editor.delete(start, end);
           return start;
         }
@@ -527,15 +530,30 @@ public class InputService extends InputMethodService {
   }
 
   public static boolean inputKey_delete () {
-    InputConnection connection = getInputConnection();
+    try {
+      return new InputTextEditor() {
+        @Override
+        protected Integer performEdit (Editable editor, int start, int end) {
+          if (start == end) {
+            if (end == editor.length()) return null;
+            end += 1;
+          }
 
-    if (connection != null) {
-      if (connection.deleteSurroundingText(0, 1)) {
-        return true;
+          editor.delete(start, end);
+          return start;
+        }
+      }.wasPerformed();
+    } catch (UnsupportedOperationException exception) {
+      InputConnection connection = getInputConnection();
+
+      if (connection != null) {
+        if (connection.deleteSurroundingText(0, 1)) {
+          return true;
+        }
       }
-    }
 
-    return false;
+      return false;
+    }
   }
 
   private final static Action[] functionKeyActions = new Action[] {
