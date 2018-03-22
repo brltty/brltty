@@ -170,7 +170,7 @@ public class RealScreenElement extends ScreenElement {
 
     if (node != null) {
       if (node.isFocused()) {
-        if (InputService.inputKey(keyCode, longPress)) done = true;
+        if (InputService.pressKey(keyCode, longPress)) done = true;
       } else if (node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)) {
         final long start = SystemClock.uptimeMillis();
 
@@ -183,7 +183,7 @@ public class RealScreenElement extends ScreenElement {
 
               if (refreshed.isFocused()) {
                 stop = true;
-                if (InputService.inputKey(keyCode, longPress)) done = true;
+                if (InputService.pressKey(keyCode, longPress)) done = true;
               }
 
               refreshed.recycle();

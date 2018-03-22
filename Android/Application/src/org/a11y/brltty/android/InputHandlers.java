@@ -42,7 +42,7 @@ public abstract class InputHandlers {
   }
 
   private static boolean inputKey (int code) {
-    return InputService.inputKey(code);
+    return InputService.pressKey(code);
   }
 
   public static boolean inputKey_enter () {
