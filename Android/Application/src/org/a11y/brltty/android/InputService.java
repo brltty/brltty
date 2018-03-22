@@ -428,19 +428,27 @@ public class InputService extends InputMethodService {
     }
   };
 
+  private final static Action logScreenAction = new Action() {
+    @Override
+    public boolean performAction () {
+      ScreenLogger.log();
+      return true;
+    }
+  };
+
   public static boolean inputKey (int keyCode) {
     return inputKey(keyCode, false);
   }
 
-  public static boolean inputKeyEnter () {
+  public static boolean inputKey_enter () {
     return inputKey(KeyEvent.KEYCODE_ENTER);
   }
 
-  public static boolean inputKeyTab () {
+  public static boolean inputKey_tab () {
     return inputKey(KeyEvent.KEYCODE_TAB);
   }
 
-  public static boolean inputKeyBackspace () {
+  public static boolean inputKey_backspace () {
     InputConnection connection = getInputConnection();
 
     if (connection != null) {
@@ -452,47 +460,47 @@ public class InputService extends InputMethodService {
     return false;
   }
 
-  public static boolean inputKeyEscape () {
+  public static boolean inputKey_escape () {
     return inputKey(KeyEvent.KEYCODE_ESCAPE);
   }
 
-  public static boolean inputKeyCursorLeft () {
+  public static boolean inputKey_cursorLeft () {
     return inputKey(KeyEvent.KEYCODE_DPAD_LEFT);
   }
 
-  public static boolean inputKeyCursorRight () {
+  public static boolean inputKey_cursorRight () {
     return inputKey(KeyEvent.KEYCODE_DPAD_RIGHT);
   }
 
-  public static boolean inputKeyCursorUp () {
+  public static boolean inputKey_cursorUp () {
     return inputKey(KeyEvent.KEYCODE_DPAD_UP);
   }
 
-  public static boolean inputKeyCursorDown () {
+  public static boolean inputKey_cursorDown () {
     return inputKey(KeyEvent.KEYCODE_DPAD_DOWN);
   }
 
-  public static boolean inputKeyPageUp () {
+  public static boolean inputKey_pageUp () {
     return inputKey(KeyEvent.KEYCODE_PAGE_UP);
   }
 
-  public static boolean inputKeyPageDown () {
+  public static boolean inputKey_pageDown () {
     return inputKey(KeyEvent.KEYCODE_PAGE_DOWN);
   }
 
-  public static boolean inputKeyHome () {
+  public static boolean inputKey_home () {
     return inputKey(KeyEvent.KEYCODE_MOVE_HOME);
   }
 
-  public static boolean inputKeyEnd () {
+  public static boolean inputKey_end () {
     return inputKey(KeyEvent.KEYCODE_MOVE_END);
   }
 
-  public static boolean inputKeyInsert () {
+  public static boolean inputKey_insert () {
     return inputKey(KeyEvent.KEYCODE_INSERT);
   }
 
-  public static boolean inputKeyDelete () {
+  public static boolean inputKey_delete () {
     InputConnection connection = getInputConnection();
 
     if (connection != null) {
@@ -514,10 +522,11 @@ public class InputService extends InputMethodService {
     backwardAction,
     forwardAction,
     powerDialogAction,
-    menuAction
+    menuAction,
+    logScreenAction
   };
 
-  public static boolean inputKeyFunction (int key) {
+  public static boolean inputKey_function (int key) {
     if (key < 0) return false;
     if (key >= functionKeyActions.length) return false;
 

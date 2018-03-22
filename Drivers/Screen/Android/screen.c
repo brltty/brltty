@@ -331,20 +331,20 @@ insertKey_AndroidScreen (ScreenKey key) {
 #define KEY(key,method) [UNICODE_CELL_NUMBER(SCR_KEY_##key)] = method
 
       static const char *const methodNames[SIZE] = {
-        KEY(ENTER, "inputKeyEnter"),
-        KEY(TAB, "inputKeyTab"),
-        KEY(BACKSPACE, "inputKeyBackspace"),
-        KEY(ESCAPE, "inputKeyEscape"),
-        KEY(CURSOR_LEFT, "inputKeyCursorLeft"),
-        KEY(CURSOR_RIGHT, "inputKeyCursorRight"),
-        KEY(CURSOR_UP, "inputKeyCursorUp"),
-        KEY(CURSOR_DOWN, "inputKeyCursorDown"),
-        KEY(PAGE_UP, "inputKeyPageUp"),
-        KEY(PAGE_DOWN, "inputKeyPageDown"),
-        KEY(HOME, "inputKeyHome"),
-        KEY(END, "inputKeyEnd"),
-        KEY(INSERT, "inputKeyInsert"),
-        KEY(DELETE, "inputKeyDelete"),
+        KEY(ENTER, "inputKey_enter"),
+        KEY(TAB, "inputKey_tab"),
+        KEY(BACKSPACE, "inputKey_backspace"),
+        KEY(ESCAPE, "inputKey_escape"),
+        KEY(CURSOR_LEFT, "inputKey_cursorLeft"),
+        KEY(CURSOR_RIGHT, "inputKey_cursorRight"),
+        KEY(CURSOR_UP, "inputKey_cursorUp"),
+        KEY(CURSOR_DOWN, "inputKey_cursorDown"),
+        KEY(PAGE_UP, "inputKey_pageUp"),
+        KEY(PAGE_DOWN, "inputKey_pageDown"),
+        KEY(HOME, "inputKey_home"),
+        KEY(END, "inputKey_end"),
+        KEY(INSERT, "inputKey_insert"),
+        KEY(DELETE, "inputKey_delete"),
       };
 
       const unsigned int key = UNICODE_CELL_NUMBER(character);
@@ -371,7 +371,7 @@ insertKey_AndroidScreen (ScreenKey key) {
     } else {
       static jmethodID method = 0;
 
-      if (findJavaStaticMethod(env, &method, inputServiceClass, "inputKeyFunction",
+      if (findJavaStaticMethod(env, &method, inputServiceClass, "inputKey_function",
                                JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                                JAVA_SIG_INT // key
                                               ))) {
