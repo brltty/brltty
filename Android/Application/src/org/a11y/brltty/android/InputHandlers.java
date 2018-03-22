@@ -19,17 +19,89 @@
 package org.a11y.brltty.android;
 
 import android.os.Build;
+import android.os.Bundle;
+
 import android.accessibilityservice.AccessibilityService;
+import android.view.accessibility.AccessibilityNodeInfo;
+
 import android.view.KeyEvent;
+
 import android.text.Editable;
+import android.text.SpannableStringBuilder;
 
 public abstract class InputHandlers {
   private InputHandlers () {
   }
 
+  private static abstract class TextEditor {
+    private final boolean editWasPerformed;
+
+    public final boolean wasPerformed () {
+      return editWasPerformed;
+    }
+
+    protected abstract Integer performEdit (Editable editor, int start, int end);
+
+    private final boolean performEdit (AccessibilityNodeInfo node) {
+      if (node.isFocused()) {
+        CharSequence text = node.getText();
+        int start = node.getTextSelectionStart();
+        int end = node.getTextSelectionEnd();
+
+        if (text == null) {
+          text = "";
+          start = end = 0;
+        }
+
+        Editable editor = (text instanceof Editable)?
+                          (Editable)text:
+                          new SpannableStringBuilder(text);
+
+        if ((0 <= start) && (start <= end) && (end <= text.length())) {
+          Integer position = performEdit(editor, start, end);
+
+          if (position != null) {
+            Bundle arguments = new Bundle();
+            arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, editor);
+
+            if (node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments)) {
+              if (position == editor.length()) return true;
+
+              arguments.clear();
+              arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, position);
+              arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, position);
+              return node.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, arguments);
+            }
+          }
+        }
+      }
+
+      return false;
+    }
+
+    public TextEditor () {
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+        RenderedScreen screen = ScreenDriver.getScreen();
+
+        if (screen != null) {
+          AccessibilityNodeInfo node = screen.getCursorNode();
+
+          if (node != null) {
+            if (node.isEditable()) {
+              editWasPerformed = performEdit(node);
+              return;
+            }
+          }
+        }
+      }
+
+      throw new UnsupportedOperationException();
+    }
+  }
+
   public static boolean inputCharacter (final char character) {
     try {
-      return new InputTextEditor() {
+      return new TextEditor() {
         @Override
         protected Integer performEdit (Editable editor, int start, int end) {
           editor.replace(start, end, Character.toString(character));
@@ -55,7 +127,7 @@ public abstract class InputHandlers {
 
   public static boolean inputKey_backspace () {
     try {
-      return new InputTextEditor() {
+      return new TextEditor() {
         @Override
         protected Integer performEdit (Editable editor, int start, int end) {
           if (start == end) {
@@ -114,7 +186,7 @@ public abstract class InputHandlers {
 
   public static boolean inputKey_delete () {
     try {
-      return new InputTextEditor() {
+      return new TextEditor() {
         @Override
         protected Integer performEdit (Editable editor, int start, int end) {
           if (start == end) {
@@ -131,86 +203,102 @@ public abstract class InputHandlers {
     }
   }
 
-  private interface Action {
+  private interface FunctionKeyAction {
     public boolean performAction ();
   }
 
-  private final static Action brlttySettingsAction = new Action() {
-    @Override
-    public boolean performAction () {
-      return BrailleService.getBrailleService().launchSettingsActivity();
-    }
-  };
+  private final static FunctionKeyAction logScreenAction =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        ScreenLogger.log();
+        return true;
+      }
+    };
+
+  private final static FunctionKeyAction brlttySettingsAction =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        return BrailleService.getBrailleService().launchSettingsActivity();
+      }
+    };
 
   private static boolean performGlobalAction (int action) {
     return BrailleService.getBrailleService().performGlobalAction(action);
   }
 
-  private final static Action backAction = new Action() {
-    @Override
-    public boolean performAction () {
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-        return performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
+  private final static FunctionKeyAction backAction =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+          return performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
+        }
+
+        return false;
       }
+    };
 
-      return false;
-    }
-  };
+  private final static FunctionKeyAction homeAction =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+          return performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME);
+        }
 
-  private final static Action homeAction = new Action() {
-    @Override
-    public boolean performAction () {
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-        return performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME);
+        return false;
       }
+    };
 
-      return false;
-    }
-  };
+  private final static FunctionKeyAction notificationsAction =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+          return performGlobalAction(AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS);
+        }
 
-  private final static Action notificationsAction = new Action() {
-    @Override
-    public boolean performAction () {
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-        return performGlobalAction(AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS);
+        return false;
       }
+    };
 
-      return false;
-    }
-  };
+  private final static FunctionKeyAction powerDialogAction =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+          return performGlobalAction(AccessibilityService.GLOBAL_ACTION_POWER_DIALOG);
+        }
 
-  private final static Action powerDialogAction = new Action() {
-    @Override
-    public boolean performAction () {
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
-        return performGlobalAction(AccessibilityService.GLOBAL_ACTION_POWER_DIALOG);
+        return false;
       }
+    };
 
-      return false;
-    }
-  };
+  private final static FunctionKeyAction quickSettingsAction =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR1)) {
+          return performGlobalAction(AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS);
+        }
 
-  private final static Action quickSettingsAction = new Action() {
-    @Override
-    public boolean performAction () {
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR1)) {
-        return performGlobalAction(AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS);
+        return false;
       }
+    };
 
-      return false;
-    }
-  };
+  private final static FunctionKeyAction recentApplicationsAction =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+          return performGlobalAction(AccessibilityService.GLOBAL_ACTION_RECENTS);
+        }
 
-  private final static Action recentApplicationsAction = new Action() {
-    @Override
-    public boolean performAction () {
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
-        return performGlobalAction(AccessibilityService.GLOBAL_ACTION_RECENTS);
+        return false;
       }
-
-      return false;
-    }
-  };
+    };
 
   public static boolean changeFocus (RenderedScreen.ChangeFocusDirection direction) {
     RenderedScreen screen = ScreenDriver.getScreen();
@@ -224,54 +312,50 @@ public abstract class InputHandlers {
     return false;
   }
 
-  private final static Action backwardAction = new Action() {
-    @Override
-    public boolean performAction () {
-      return changeFocus(RenderedScreen.ChangeFocusDirection.BACKWARD);
-    }
-  };
+  private final static FunctionKeyAction backwardAction =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        return changeFocus(RenderedScreen.ChangeFocusDirection.BACKWARD);
+      }
+    };
 
-  private final static Action forwardAction = new Action() {
-    @Override
-    public boolean performAction () {
-      return changeFocus(RenderedScreen.ChangeFocusDirection.FORWARD);
-    }
-  };
+  private final static FunctionKeyAction forwardAction =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        return changeFocus(RenderedScreen.ChangeFocusDirection.FORWARD);
+      }
+    };
 
-  private final static Action menuAction = new Action() {
-    @Override
-    public boolean performAction () {
-      return inputKey(KeyEvent.KEYCODE_MENU);
-    }
-  };
+  private final static FunctionKeyAction menuAction =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        return inputKey(KeyEvent.KEYCODE_MENU);
+      }
+    };
 
-  private final static Action logScreenAction = new Action() {
-    @Override
-    public boolean performAction () {
-      ScreenLogger.log();
-      return true;
-    }
-  };
-
-  private final static Action[] functionKeyActions = new Action[] {
-    homeAction,
-    backAction,
-    notificationsAction,
-    recentApplicationsAction,
-    brlttySettingsAction,
-    quickSettingsAction,
-    backwardAction,
-    forwardAction,
-    powerDialogAction,
-    menuAction,
-    logScreenAction
-  };
+  private final static FunctionKeyAction[] functionKeyActions =
+    new FunctionKeyAction[] {
+      homeAction,
+      backAction,
+      notificationsAction,
+      recentApplicationsAction,
+      brlttySettingsAction,
+      quickSettingsAction,
+      backwardAction,
+      forwardAction,
+      powerDialogAction,
+      menuAction,
+      logScreenAction
+    };
 
   public static boolean inputKey_function (int key) {
     if (key < 0) return false;
     if (key >= functionKeyActions.length) return false;
 
-    Action action = functionKeyActions[key];
+    FunctionKeyAction action = functionKeyActions[key];
     if (action == null) return false;
     return action.performAction();
   }
