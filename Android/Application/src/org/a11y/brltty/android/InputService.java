@@ -309,7 +309,7 @@ public class InputService extends InputMethodService {
     return false;
   }
 
-  public static boolean pressKey (int keyCode, boolean longPress) {
+  public static boolean injectKey (int keyCode, boolean longPress) {
     InputConnection connection = getInputConnection();
 
     if (connection != null) {
@@ -333,7 +333,7 @@ public class InputService extends InputMethodService {
     return false;
   }
 
-  public static boolean pressKey (int keyCode) {
-    return pressKey(keyCode, false);
+  public static boolean injectKey (int keyCode) {
+    return injectKey(keyCode, false);
   }
 }
