@@ -37,30 +37,32 @@ public abstract class InputTextEditor {
   private final boolean performEdit (AccessibilityNodeInfo node) {
     if (node.isFocused()) {
       CharSequence text = node.getText();
+      int start = node.getTextSelectionStart();
+      int end = node.getTextSelectionEnd();
 
-      if (text != null) {
-        int start = node.getTextSelectionStart();
-        int end = node.getTextSelectionEnd();
+      if (text == null) {
+        text = "";
+        start = end = 0;
+      }
 
-        if ((0 <= start) && (start <= end) && (end <= text.length())) {
-          Editable editor = (text instanceof Editable)?
-                             (Editable)text:
-                             new SpannableStringBuilder(text);
+      Editable editor = (text instanceof Editable)?
+                        (Editable)text:
+                        new SpannableStringBuilder(text);
 
-          Integer position = performEdit(editor, start, end);
+      if ((0 <= start) && (start <= end) && (end <= text.length())) {
+        Integer position = performEdit(editor, start, end);
 
-          if (position != null) {
-            Bundle arguments = new Bundle();
-            arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, editor);
+        if (position != null) {
+          Bundle arguments = new Bundle();
+          arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, editor);
 
-            if (node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments)) {
-              if (position == editor.length()) return true;
+          if (node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments)) {
+            if (position == editor.length()) return true;
 
-              arguments.clear();
-              arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, position);
-              arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, position);
-              return node.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, arguments);
-            }
+            arguments.clear();
+            arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, position);
+            arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, position);
+            return node.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, arguments);
           }
         }
       }
@@ -78,10 +80,8 @@ public abstract class InputTextEditor {
 
         if (node != null) {
           if (node.isEditable()) {
-            if (!node.isPassword()) {
-              editWasPerformed = performEdit(node);
-              return;
-            }
+            editWasPerformed = performEdit(node);
+            return;
           }
         }
       }
