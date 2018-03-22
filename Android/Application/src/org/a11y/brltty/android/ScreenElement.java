@@ -132,7 +132,7 @@ public class ScreenElement {
     }
   }
 
-  public boolean setAccessibilityFocus () {
+  public boolean bringCursor () {
     return false;
   }
 

@@ -124,7 +124,7 @@ public class RenderedScreen {
             int size = screenElements.size();
 
             while (++index < size) {
-              if (screenElements.get(index).setAccessibilityFocus()) return true;
+              if (screenElements.get(index).bringCursor()) return true;
             }
 
             break;
@@ -132,7 +132,7 @@ public class RenderedScreen {
 
           case BACKWARD: {
             while (--index >= 0) {
-              if (screenElements.get(index).setAccessibilityFocus()) return true;
+              if (screenElements.get(index).bringCursor()) return true;
             }
 
             break;
