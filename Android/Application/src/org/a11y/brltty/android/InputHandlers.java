@@ -33,6 +33,10 @@ public abstract class InputHandlers {
   private InputHandlers () {
   }
 
+  private static boolean performGlobalAction (int action) {
+    return BrailleService.getBrailleService().performGlobalAction(action);
+  }
+
   private static AccessibilityNodeInfo getCursorNode () {
     RenderedScreen screen = ScreenDriver.getScreen();
     if (screen == null) return null;
@@ -181,8 +185,11 @@ public abstract class InputHandlers {
   }
 
   public static boolean inputKey_escape () {
-    return new KeyHandler(KeyEvent.KEYCODE_ESCAPE) {
-    }.handleKey();
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+      return performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
+    }
+
+    return injectKey(KeyEvent.KEYCODE_ESCAPE);
   }
 
   public static boolean inputKey_cursorLeft () {
@@ -269,10 +276,6 @@ public abstract class InputHandlers {
         return BrailleService.getBrailleService().launchSettingsActivity();
       }
     };
-
-  private static boolean performGlobalAction (int action) {
-    return BrailleService.getBrailleService().performGlobalAction(action);
-  }
 
   private final static FunctionKeyAction backAction =
     new FunctionKeyAction() {
