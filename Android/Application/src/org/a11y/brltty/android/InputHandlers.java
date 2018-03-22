@@ -34,15 +34,9 @@ public abstract class InputHandlers {
   }
 
   private static abstract class TextEditor {
-    private final boolean editWasPerformed;
+    protected abstract Integer editText (Editable editor, int start, int end);
 
-    public final boolean wasPerformed () {
-      return editWasPerformed;
-    }
-
-    protected abstract Integer performEdit (Editable editor, int start, int end);
-
-    private final boolean performEdit (AccessibilityNodeInfo node) {
+    private final boolean editText (AccessibilityNodeInfo node) {
       if (node.isFocused()) {
         CharSequence text = node.getText();
         int start = node.getTextSelectionStart();
@@ -56,7 +50,7 @@ public abstract class InputHandlers {
                           new SpannableStringBuilder(text);
 
         if ((0 <= start) && (start <= end) && (end <= text.length())) {
-          Integer position = performEdit(editor, start, end);
+          Integer position = editText(editor, start, end);
 
           if (position != null) {
             Bundle arguments = new Bundle();
@@ -77,7 +71,7 @@ public abstract class InputHandlers {
       return false;
     }
 
-    public TextEditor () {
+    public final boolean editText () {
       if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
         RenderedScreen screen = ScreenDriver.getScreen();
 
@@ -86,8 +80,7 @@ public abstract class InputHandlers {
 
           if (node != null) {
             if (node.isEditable()) {
-              editWasPerformed = performEdit(node);
-              return;
+              return editText(node);
             }
           }
         }
@@ -95,39 +88,42 @@ public abstract class InputHandlers {
 
       throw new UnsupportedOperationException();
     }
+
+    public TextEditor () {
+    }
   }
 
   public static boolean inputCharacter (final char character) {
     try {
       return new TextEditor() {
         @Override
-        protected Integer performEdit (Editable editor, int start, int end) {
+        protected Integer editText (Editable editor, int start, int end) {
           editor.replace(start, end, Character.toString(character));
           return start + 1;
         }
-      }.wasPerformed();
+      }.editText();
     } catch (UnsupportedOperationException exception) {
       return InputService.insertCharacter(character);
     }
   }
 
-  private static boolean inputKey (int code) {
+  private static boolean injectKey (int code) {
     return InputService.injectKey(code);
   }
 
   public static boolean inputKey_enter () {
-    return inputKey(KeyEvent.KEYCODE_ENTER);
+    return injectKey(KeyEvent.KEYCODE_ENTER);
   }
 
   public static boolean inputKey_tab () {
-    return inputKey(KeyEvent.KEYCODE_TAB);
+    return injectKey(KeyEvent.KEYCODE_TAB);
   }
 
   public static boolean inputKey_backspace () {
     try {
       return new TextEditor() {
         @Override
-        protected Integer performEdit (Editable editor, int start, int end) {
+        protected Integer editText (Editable editor, int start, int end) {
           if (start == end) {
             if (start < 1) return null;
             start -= 1;
@@ -136,57 +132,57 @@ public abstract class InputHandlers {
           editor.delete(start, end);
           return start;
         }
-      }.wasPerformed();
+      }.editText();
     } catch (UnsupportedOperationException exception) {
       return InputService.deletePreviousCharacter();
     }
   }
 
   public static boolean inputKey_escape () {
-    return inputKey(KeyEvent.KEYCODE_ESCAPE);
+    return injectKey(KeyEvent.KEYCODE_ESCAPE);
   }
 
   public static boolean inputKey_cursorLeft () {
-    return inputKey(KeyEvent.KEYCODE_DPAD_LEFT);
+    return injectKey(KeyEvent.KEYCODE_DPAD_LEFT);
   }
 
   public static boolean inputKey_cursorRight () {
-    return inputKey(KeyEvent.KEYCODE_DPAD_RIGHT);
+    return injectKey(KeyEvent.KEYCODE_DPAD_RIGHT);
   }
 
   public static boolean inputKey_cursorUp () {
-    return inputKey(KeyEvent.KEYCODE_DPAD_UP);
+    return injectKey(KeyEvent.KEYCODE_DPAD_UP);
   }
 
   public static boolean inputKey_cursorDown () {
-    return inputKey(KeyEvent.KEYCODE_DPAD_DOWN);
+    return injectKey(KeyEvent.KEYCODE_DPAD_DOWN);
   }
 
   public static boolean inputKey_pageUp () {
-    return inputKey(KeyEvent.KEYCODE_PAGE_UP);
+    return injectKey(KeyEvent.KEYCODE_PAGE_UP);
   }
 
   public static boolean inputKey_pageDown () {
-    return inputKey(KeyEvent.KEYCODE_PAGE_DOWN);
+    return injectKey(KeyEvent.KEYCODE_PAGE_DOWN);
   }
 
   public static boolean inputKey_home () {
-    return inputKey(KeyEvent.KEYCODE_MOVE_HOME);
+    return injectKey(KeyEvent.KEYCODE_MOVE_HOME);
   }
 
   public static boolean inputKey_end () {
-    return inputKey(KeyEvent.KEYCODE_MOVE_END);
+    return injectKey(KeyEvent.KEYCODE_MOVE_END);
   }
 
   public static boolean inputKey_insert () {
-    return inputKey(KeyEvent.KEYCODE_INSERT);
+    return injectKey(KeyEvent.KEYCODE_INSERT);
   }
 
   public static boolean inputKey_delete () {
     try {
       return new TextEditor() {
         @Override
-        protected Integer performEdit (Editable editor, int start, int end) {
+        protected Integer editText (Editable editor, int start, int end) {
           if (start == end) {
             if (end == editor.length()) return null;
             end += 1;
@@ -195,7 +191,7 @@ public abstract class InputHandlers {
           editor.delete(start, end);
           return start;
         }
-      }.wasPerformed();
+      }.editText();
     } catch (UnsupportedOperationException exception) {
       return InputService.deleteNextCharacter();
     }
@@ -298,7 +294,7 @@ public abstract class InputHandlers {
       }
     };
 
-  public static boolean moveFocus (RenderedScreen.ChangeFocusDirection direction) {
+  private static boolean moveFocus (RenderedScreen.ChangeFocusDirection direction) {
     RenderedScreen screen = ScreenDriver.getScreen();
 
     if (screen != null) {
@@ -330,7 +326,7 @@ public abstract class InputHandlers {
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
-        return inputKey(KeyEvent.KEYCODE_MENU);
+        return injectKey(KeyEvent.KEYCODE_MENU);
       }
     };
 
