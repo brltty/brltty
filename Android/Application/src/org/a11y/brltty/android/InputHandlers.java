@@ -33,7 +33,16 @@ public abstract class InputHandlers {
   private InputHandlers () {
   }
 
-  private static abstract class TextEditor {
+  private static AccessibilityNodeInfo getCursorNode () {
+    RenderedScreen screen = ScreenDriver.getScreen();
+    if (screen == null) return null;
+    return screen.getCursorNode();
+  }
+
+  private abstract static class TextEditor {
+    public TextEditor () {
+    }
+
     protected abstract Integer editText (Editable editor, int start, int end);
 
     private final boolean editText (AccessibilityNodeInfo node) {
@@ -73,23 +82,19 @@ public abstract class InputHandlers {
 
     public final boolean editText () {
       if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
-        RenderedScreen screen = ScreenDriver.getScreen();
+        AccessibilityNodeInfo node = getCursorNode();
 
-        if (screen != null) {
-          AccessibilityNodeInfo node = screen.getCursorNode();
-
-          if (node != null) {
-            if (node.isEditable()) {
-              return editText(node);
-            }
+        if (node != null) {
+          try {
+            if (node.isEditable()) return editText(node);
+          } finally {
+            node.recycle();
+            node = null;
           }
         }
       }
 
       throw new UnsupportedOperationException();
-    }
-
-    public TextEditor () {
     }
   }
 
@@ -111,12 +116,49 @@ public abstract class InputHandlers {
     return InputService.injectKey(code);
   }
 
+  private abstract static class KeyHandler {
+    private final int keyCode;
+
+    public KeyHandler (int code) {
+      keyCode = code;
+    }
+
+    protected boolean performNavigationAction () {
+      throw new UnsupportedOperationException();
+    }
+
+    protected boolean performEditAction () {
+      throw new UnsupportedOperationException();
+    }
+
+    public final boolean handleKey () {
+      try {
+        AccessibilityNodeInfo node = getCursorNode();
+
+        if (node != null) {
+          try {
+            return node.isEditable()? performEditAction(): performNavigationAction();
+          } finally {
+            node.recycle();
+            node = null;
+          }
+        }
+
+        throw new UnsupportedOperationException();
+      } catch (UnsupportedOperationException exception) {
+        return injectKey(keyCode);
+      }
+    }
+  }
+
   public static boolean inputKey_enter () {
-    return injectKey(KeyEvent.KEYCODE_ENTER);
+    return new KeyHandler(KeyEvent.KEYCODE_ENTER) {
+    }.handleKey();
   }
 
   public static boolean inputKey_tab () {
-    return injectKey(KeyEvent.KEYCODE_TAB);
+    return new KeyHandler(KeyEvent.KEYCODE_TAB) {
+    }.handleKey();
   }
 
   public static boolean inputKey_backspace () {
@@ -139,43 +181,53 @@ public abstract class InputHandlers {
   }
 
   public static boolean inputKey_escape () {
-    return injectKey(KeyEvent.KEYCODE_ESCAPE);
+    return new KeyHandler(KeyEvent.KEYCODE_ESCAPE) {
+    }.handleKey();
   }
 
   public static boolean inputKey_cursorLeft () {
-    return injectKey(KeyEvent.KEYCODE_DPAD_LEFT);
+    return new KeyHandler(KeyEvent.KEYCODE_DPAD_LEFT) {
+    }.handleKey();
   }
 
   public static boolean inputKey_cursorRight () {
-    return injectKey(KeyEvent.KEYCODE_DPAD_RIGHT);
+    return new KeyHandler(KeyEvent.KEYCODE_DPAD_RIGHT) {
+    }.handleKey();
   }
 
   public static boolean inputKey_cursorUp () {
-    return injectKey(KeyEvent.KEYCODE_DPAD_UP);
+    return new KeyHandler(KeyEvent.KEYCODE_DPAD_UP) {
+    }.handleKey();
   }
 
   public static boolean inputKey_cursorDown () {
-    return injectKey(KeyEvent.KEYCODE_DPAD_DOWN);
+    return new KeyHandler(KeyEvent.KEYCODE_DPAD_DOWN) {
+    }.handleKey();
   }
 
   public static boolean inputKey_pageUp () {
-    return injectKey(KeyEvent.KEYCODE_PAGE_UP);
+    return new KeyHandler(KeyEvent.KEYCODE_PAGE_UP) {
+    }.handleKey();
   }
 
   public static boolean inputKey_pageDown () {
-    return injectKey(KeyEvent.KEYCODE_PAGE_DOWN);
+    return new KeyHandler(KeyEvent.KEYCODE_PAGE_DOWN) {
+    }.handleKey();
   }
 
   public static boolean inputKey_home () {
-    return injectKey(KeyEvent.KEYCODE_MOVE_HOME);
+    return new KeyHandler(KeyEvent.KEYCODE_MOVE_HOME) {
+    }.handleKey();
   }
 
   public static boolean inputKey_end () {
-    return injectKey(KeyEvent.KEYCODE_MOVE_END);
+    return new KeyHandler(KeyEvent.KEYCODE_MOVE_END) {
+    }.handleKey();
   }
 
   public static boolean inputKey_insert () {
-    return injectKey(KeyEvent.KEYCODE_INSERT);
+    return new KeyHandler(KeyEvent.KEYCODE_INSERT) {
+    }.handleKey();
   }
 
   public static boolean inputKey_delete () {
@@ -326,7 +378,8 @@ public abstract class InputHandlers {
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
-        return injectKey(KeyEvent.KEYCODE_MENU);
+        return new KeyHandler(KeyEvent.KEYCODE_MENU) {
+        }.handleKey();
       }
     };
 
