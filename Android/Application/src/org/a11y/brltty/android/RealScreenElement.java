@@ -72,9 +72,7 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean performAction (int x, int y) {
-    ScreenTextEditor editor = ScreenTextEditor.getIfFocused(accessibilityNode);
-
-    if (editor != null) {
+    if (accessibilityNode.isFocused()) {
       if (!onBringCursor()) return false;
 
       String[] lines = getBrailleText();
@@ -90,7 +88,16 @@ public class RealScreenElement extends ScreenElement {
         index += 1;
       }
 
-      return InputService.inputCursor(offset + Math.min(x, (line.length() - 1)));
+      offset += Math.min(x, (line.length() - 1));
+
+      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+        Bundle arguments = new Bundle();
+        arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, offset);
+        arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, offset);
+        if (accessibilityNode.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, arguments)) return true;
+      }
+
+      return InputService.inputCursor(offset);
     }
 
     return super.performAction(x, y);
