@@ -286,13 +286,13 @@ public class RenderedScreen {
                 break;
             }
 
+            sb.append("@");
             sb.append(String.format(format, range.getCurrent()));
-            sb.append(' ');
-            sb.append('(');
+            sb.append(" (");
             sb.append(String.format(format, range.getMin()));
             sb.append(" - ");
             sb.append(String.format(format, range.getMax()));
-            sb.append(')');
+            sb.append(")");
 
             text = sb.toString();
           }
