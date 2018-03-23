@@ -259,6 +259,45 @@ public class RenderedScreen {
       if (ScreenUtilities.isVisible(root)) {
         String text = ScreenUtilities.getText(root);
 
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.KITKAT)) {
+          AccessibilityNodeInfo.RangeInfo range = root.getRangeInfo();
+
+          if (range != null) {
+            StringBuilder sb = new StringBuilder();
+            String format;
+
+            if (text != null) {
+              sb.append(text);
+              sb.append(' ');
+            }
+
+            switch (range.getType()) {
+              case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INT:
+                format = "%.0f";
+                break;
+
+              case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_PERCENT:
+                format = "%.0f%";
+                break;
+
+              default:
+              case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT:
+                format = "%.2f";
+                break;
+            }
+
+            sb.append(String.format(format, range.getCurrent()));
+            sb.append(' ');
+            sb.append('(');
+            sb.append(String.format(format, range.getMin()));
+            sb.append(" - ");
+            sb.append(String.format(format, range.getMax()));
+            sb.append(')');
+
+            text = sb.toString();
+          }
+        }
+
         if (text == null) {
           if ((actions != 0) && !hasInnerText(root)) {
             if ((text = getDescription(root)) == null) {
