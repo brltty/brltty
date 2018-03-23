@@ -85,18 +85,6 @@ public class ScreenElement {
     return null;
   }
 
-  public boolean isCheckable () {
-    return false;
-  }
-
-  public boolean isChecked () {
-    return false;
-  }
-
-  public boolean isSwitch () {
-    return false;
-  }
-
   public boolean isEditable () {
     return false;
   }
@@ -137,27 +125,6 @@ public class ScreenElement {
   }
 
   protected String[] makeBrailleText (String text) {
-    if (isCheckable()) {
-      StringBuilder sb = new StringBuilder();
-
-      if (isSwitch()) {
-        sb.append(Characters.SWITCH_BEGIN);
-        sb.append(isChecked()? Characters.SWITCH_ON: Characters.SWITCH_OFF);
-        sb.append(Characters.SWITCH_END);
-      } else {
-        sb.append(Characters.CHECKBOX_BEGIN);
-        sb.append(isChecked()? Characters.CHECKBOX_MARK: ' ');
-        sb.append(Characters.CHECKBOX_END);
-      }
-
-      if (text != null) {
-        sb.append(' ');
-        sb.append(text);
-      }
-
-      text = sb.toString();
-    }
-
     if (text == null) return null;
     List<String> lines = new ArrayList<String>();
 

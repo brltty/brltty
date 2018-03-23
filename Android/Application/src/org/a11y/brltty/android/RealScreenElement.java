@@ -51,21 +51,6 @@ public class RealScreenElement extends ScreenElement {
   }
 
   @Override
-  public boolean isCheckable () {
-    return accessibilityNode.isCheckable();
-  }
-
-  @Override
-  public boolean isChecked () {
-    return accessibilityNode.isChecked();
-  }
-
-  @Override
-  public boolean isSwitch () {
-    return ScreenUtilities.isSwitch(accessibilityNode);
-  }
-
-  @Override
   public boolean isEditable () {
     return ScreenUtilities.isEditable(accessibilityNode);
   }

@@ -200,6 +200,68 @@ public class RenderedScreen {
     return false;
   }
 
+  private static String getText (AccessibilityNodeInfo node) {
+    StringBuilder sb = new StringBuilder();
+
+    if (node.isCheckable()) {
+      if (sb.length() > 0) sb.append(' ');
+
+      if (ScreenUtilities.isSwitch(node)) {
+        sb.append(Characters.SWITCH_BEGIN);
+        sb.append(node.isChecked()? Characters.SWITCH_ON: Characters.SWITCH_OFF);
+        sb.append(Characters.SWITCH_END);
+      } else {
+        sb.append(Characters.CHECKBOX_BEGIN);
+        sb.append(node.isChecked()? Characters.CHECKBOX_MARK: ' ');
+        sb.append(Characters.CHECKBOX_END);
+      }
+    }
+
+    {
+      String text = ScreenUtilities.getText(node);
+
+      if (text != null) {
+        if (sb.length() > 0) sb.append(' ');
+        sb.append(text);
+      }
+    }
+
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.KITKAT)) {
+      AccessibilityNodeInfo.RangeInfo range = node.getRangeInfo();
+
+      if (range != null) {
+        String format;
+
+        switch (range.getType()) {
+          case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INT:
+            format = "%.0f";
+            break;
+
+          case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_PERCENT:
+            format = "%.0f%";
+            break;
+
+          default:
+          case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT:
+            format = "%.2f";
+            break;
+        }
+
+        if (sb.length() > 0) sb.append(' ');
+        sb.append("@");
+        sb.append(String.format(format, range.getCurrent()));
+        sb.append(" (");
+        sb.append(String.format(format, range.getMin()));
+        sb.append(" - ");
+        sb.append(String.format(format, range.getMax()));
+        sb.append(")");
+      }
+    }
+
+    if (sb.length() == 0) return null;
+    return sb.toString();
+  }
+
   private static String getDescription (AccessibilityNodeInfo node) {
     {
       String description = ScreenUtilities.normalizeText(node.getContentDescription());
@@ -257,46 +319,7 @@ public class RenderedScreen {
       }
 
       if (ScreenUtilities.isVisible(root)) {
-        String text = ScreenUtilities.getText(root);
-
-        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.KITKAT)) {
-          AccessibilityNodeInfo.RangeInfo range = root.getRangeInfo();
-
-          if (range != null) {
-            StringBuilder sb = new StringBuilder();
-            String format;
-
-            if (text != null) {
-              sb.append(text);
-              sb.append(' ');
-            }
-
-            switch (range.getType()) {
-              case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INT:
-                format = "%.0f";
-                break;
-
-              case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_PERCENT:
-                format = "%.0f%";
-                break;
-
-              default:
-              case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT:
-                format = "%.2f";
-                break;
-            }
-
-            sb.append("@");
-            sb.append(String.format(format, range.getCurrent()));
-            sb.append(" (");
-            sb.append(String.format(format, range.getMin()));
-            sb.append(" - ");
-            sb.append(String.format(format, range.getMax()));
-            sb.append(")");
-
-            text = sb.toString();
-          }
-        }
+        String text = getText(root);
 
         if (text == null) {
           if ((actions != 0) && !hasInnerText(root)) {
