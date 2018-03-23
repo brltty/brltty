@@ -202,6 +202,7 @@ public class RenderedScreen {
 
   private static String getText (AccessibilityNodeInfo node) {
     StringBuilder sb = new StringBuilder();
+    boolean hasText = false;
 
     if (node.isCheckable()) {
       if (sb.length() > 0) sb.append(' ');
@@ -221,8 +222,12 @@ public class RenderedScreen {
       String text = ScreenUtilities.getText(node);
 
       if (text != null) {
-        if (sb.length() > 0) sb.append(' ');
-        sb.append(text);
+        hasText = true;
+
+        if (text.length() > 0) {
+          if (sb.length() > 0) sb.append(' ');
+          sb.append(text);
+        }
       }
     }
 
@@ -258,7 +263,7 @@ public class RenderedScreen {
       }
     }
 
-    if (sb.length() == 0) return null;
+    if (!(hasText || (sb.length() > 0))) return null;
     return sb.toString();
   }
 
