@@ -134,7 +134,7 @@ public abstract class BrailleNotification {
     setDevice(null);
   }
 
-  public static void initialize () {
+  public static void create () {
     synchronized (notificationIdentifier) {
       Notification.Builder nb = getNotificationBuilder();
       setState(nb);
@@ -142,6 +142,12 @@ public abstract class BrailleNotification {
 
       BrailleService.getBrailleService()
                     .startForeground(notificationIdentifier, nb.build());
+    }
+  }
+
+  public static void remove () {
+    synchronized (notificationIdentifier) {
+      getNotificationManager().cancel(notificationIdentifier);
     }
   }
 }

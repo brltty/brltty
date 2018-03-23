@@ -259,7 +259,6 @@ public class CoreThread extends Thread {
     ApplicationSettings.LOG_ACCESSIBILITY_EVENTS = getBooleanSetting(R.string.PREF_KEY_LOG_ACCESSIBILITY_EVENTS);
     ApplicationSettings.LOG_RENDERED_SCREEN = getBooleanSetting(R.string.PREF_KEY_LOG_RENDERED_SCREEN);
     ApplicationSettings.LOG_KEYBOARD_EVENTS = getBooleanSetting(R.string.PREF_KEY_LOG_KEYBOARD_EVENTS);
-    BrailleNotification.initialize();
   }
 
   @Override
@@ -267,8 +266,16 @@ public class CoreThread extends Thread {
     restoreSettings();
     updateDataFiles();
 
-    UsbHelper.begin();
-    CoreWrapper.run(makeArguments(), ApplicationParameters.CORE_WAIT_DURATION);
-    UsbHelper.end();
+    BrailleNotification.create();
+    try {
+      UsbHelper.begin();
+      try {
+        CoreWrapper.run(makeArguments(), ApplicationParameters.CORE_WAIT_DURATION);
+      } finally {
+        UsbHelper.end();
+      }
+    } finally {
+      BrailleNotification.remove();
+    }
   }
 }
