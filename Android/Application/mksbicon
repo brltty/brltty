@@ -1,0 +1,18 @@
+#!/bin/sh
+
+iconFile="${1}"
+
+label='⠃⠗⠇
+⠞⠞⠽'
+
+convert \
+  -size 32x32 \
+  -gravity center \
+  -channel RGBA \
+  -background transparent \
+  -fill white \
+  -font assets/UBraille.ttf \
+  label:"${label}" \
+  "${iconFile}"
+
+exit 0

@@ -1,6 +1,8 @@
 /local.properties
 
-/assets/
+/assets/tables/
+/assets/drivers/
+
 /bin/
 /libs/
 /gen/
