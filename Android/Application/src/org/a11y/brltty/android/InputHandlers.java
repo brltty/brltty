@@ -43,6 +43,17 @@ public abstract class InputHandlers {
     return screen.getCursorNode();
   }
 
+  private static boolean placeCursor (AccessibilityNodeInfo node, int position) {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+      Bundle arguments = new Bundle();
+      arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, position);
+      arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, position);
+      return node.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, arguments);
+    }
+
+    return false;
+  }
+
   private abstract static class TextEditor {
     public TextEditor () {
     }
@@ -71,11 +82,7 @@ public abstract class InputHandlers {
 
             if (node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments)) {
               if (position == editor.length()) return true;
-
-              arguments.clear();
-              arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, position);
-              arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, position);
-              return node.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, arguments);
+              return placeCursor(node, position);
             }
           }
         }
