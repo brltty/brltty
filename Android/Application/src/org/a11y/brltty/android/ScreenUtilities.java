@@ -269,4 +269,35 @@ public abstract class ScreenUtilities {
     if (text == null) return "";
     return text.toString();
   }
+
+  public static String getRangeValueFormat (AccessibilityNodeInfo.RangeInfo range) {
+    switch (range.getType()) {
+      case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INT:
+        return "%.0f";
+
+      case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_PERCENT:
+        return "%.0f%";
+
+      default:
+      case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT:
+        return "%.2f";
+    }
+  }
+
+  public static String getSelectionMode (AccessibilityNodeInfo.CollectionInfo collection) {
+    if (ApplicationUtilities.haveLollipop) {
+      switch (collection.getSelectionMode()) {
+        case AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_NONE:
+          return "none";
+
+        case AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_SINGLE:
+          return "sngl";
+
+        case AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_MULTIPLE:
+          return "mult";
+      }
+    }
+
+    return null;
+  }
 }

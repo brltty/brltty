@@ -156,7 +156,84 @@ public abstract class ScreenLogger {
     add(sb, node.isPassword(), "pwd");
 
     if (ApplicationUtilities.haveJellyBeanMR2) {
-      add(sb, ScreenUtilities.isEditable(node), "edb");
+      add(sb, ScreenUtilities.isEditable(node), "edt");
+    }
+
+    if (ApplicationUtilities.haveKitkat) {
+      {
+        AccessibilityNodeInfo.RangeInfo range = node.getRangeInfo();
+
+        if (range != null) {
+          add(sb, "rng");
+          String format = ScreenUtilities.getRangeValueFormat(range);
+
+          sb.append('(');
+          sb.append(String.format(format, range.getMin()));
+          sb.append("..");
+          sb.append(String.format(format, range.getMax()));
+          sb.append('@');
+          sb.append(String.format(format, range.getCurrent()));
+          sb.append(')');
+        }
+      }
+
+      {
+        AccessibilityNodeInfo.CollectionInfo collection = node.getCollectionInfo();
+
+        if (collection != null) {
+          add(sb, "col");
+          sb.append('(');
+
+          sb.append(collection.getColumnCount());
+          sb.append('x');
+          sb.append(collection.getRowCount());
+
+          sb.append(',');
+          sb.append(collection.isHierarchical()? "tree": "flat");
+
+          {
+            String mode = ScreenUtilities.getSelectionMode(collection);
+
+            if (mode != null) {
+              sb.append(',');
+              sb.append(mode);
+            }
+          }
+
+          sb.append(')');
+        }
+      }
+
+      {
+        AccessibilityNodeInfo.CollectionItemInfo item = node.getCollectionItemInfo();
+
+        if (item != null) {
+          add(sb, "itm");
+          sb.append('(');
+
+          sb.append(item.getColumnSpan());
+          sb.append('x');
+          sb.append(item.getRowSpan());
+          sb.append('+');
+          sb.append(item.getColumnIndex());
+          sb.append('+');
+          sb.append(item.getRowIndex());
+
+          if (item.isHeading()) {
+            sb.append(',');
+            sb.append("hdg");
+          }
+
+          if (ApplicationUtilities.haveLollipop) {
+            if (item.isSelected()) {
+              sb.append(',');
+              sb.append("sel");
+            }
+          }
+
+          sb.append(')');
+        }
+      }
     }
 
     {
@@ -183,7 +260,7 @@ public abstract class ScreenLogger {
       }
 
       if (ApplicationUtilities.haveIceCreamSandwich) {
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_SELECT) != 0), "sel");
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_SELECT) != 0), "sls");
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_SELECTION) != 0), "slc");
       }
 
@@ -198,16 +275,16 @@ public abstract class ScreenLogger {
       }
 
       if (ApplicationUtilities.haveJellyBeanMR2) {
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_SET_SELECTION) != 0), "sls");
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_SET_SELECTION) != 0), "sel");
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_COPY) != 0), "cpy");
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_CUT) != 0), "cut");
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_PASTE) != 0), "pst");
       }
 
       if (ApplicationUtilities.haveKitkat) {
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_DISMISS) != 0), "dsm");
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_COLLAPSE) != 0), "col");
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_EXPAND) != 0), "exp");
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_DISMISS) != 0), "dsms");
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_COLLAPSE) != 0), "clps");
+        add(sb, ((actions & AccessibilityNodeInfo.ACTION_EXPAND) != 0), "xpnd");
       }
 
       if (ApplicationUtilities.haveLollipop) {

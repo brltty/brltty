@@ -224,7 +224,7 @@ public class RenderedScreen {
     return false;
   }
 
-  private static String getText (AccessibilityNodeInfo node) {
+  private static String makeText (AccessibilityNodeInfo node) {
     StringBuilder sb = new StringBuilder();
     boolean hasText = false;
 
@@ -259,24 +259,9 @@ public class RenderedScreen {
       AccessibilityNodeInfo.RangeInfo range = node.getRangeInfo();
 
       if (range != null) {
-        String format;
-
-        switch (range.getType()) {
-          case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INT:
-            format = "%.0f";
-            break;
-
-          case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_PERCENT:
-            format = "%.0f%";
-            break;
-
-          default:
-          case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT:
-            format = "%.2f";
-            break;
-        }
-
         if (sb.length() > 0) sb.append(' ');
+        String format = ScreenUtilities.getRangeValueFormat(range);
+
         sb.append("@");
         sb.append(String.format(format, range.getCurrent()));
         sb.append(" (");
@@ -348,7 +333,7 @@ public class RenderedScreen {
       }
 
       if (ScreenUtilities.isVisible(root)) {
-        String text = getText(root);
+        String text = makeText(root);
 
         if (text == null) {
           if ((actions != 0) && !hasInnerText(root)) {
