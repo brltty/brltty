@@ -18,8 +18,6 @@
 
 package org.a11y.brltty.android;
 
-import android.os.Build;
-
 public abstract class ApplicationParameters {
   private ApplicationParameters () {
   }
@@ -32,6 +30,4 @@ public abstract class ApplicationParameters {
   public static final int KEY_RETRY_TIMEOUT = 1000;
   public static final int KEY_RETRY_INTERVAL = 100;
   public static final int LONG_PRESS_DELAY = 100;
-
-  public static final int SDK_VERSION = Build.VERSION.SDK_INT;
 }

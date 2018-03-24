@@ -34,8 +34,11 @@ import android.view.WindowManager;
 import android.hardware.usb.UsbManager;
 
 public abstract class ApplicationUtilities {
-  public static boolean haveSdkVersion (int version) {
-    return ApplicationParameters.SDK_VERSION >= version;
+  private ApplicationUtilities () {
+  }
+
+  public static boolean haveSdkVersion (int level) {
+    return Build.VERSION.SDK_INT >= level;
   }
 
   public static String getResourceString (int identifier) {
@@ -86,8 +89,5 @@ public abstract class ApplicationUtilities {
     = new SystemServiceReference<UsbManager>(Context.USB_SERVICE);
   public static UsbManager getUsbManager () {
     return usbManagerReference.get();
-  }
-
-  private ApplicationUtilities () {
   }
 }
