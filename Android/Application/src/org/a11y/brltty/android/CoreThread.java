@@ -275,7 +275,7 @@ public class CoreThread extends Thread {
         UsbHelper.end();
       }
     } finally {
-      BrailleNotification.remove();
+      BrailleNotification.destroy();
     }
   }
 }

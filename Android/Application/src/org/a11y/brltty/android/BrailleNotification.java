@@ -145,7 +145,7 @@ public abstract class BrailleNotification {
     }
   }
 
-  public static void remove () {
+  public static void destroy () {
     synchronized (notificationIdentifier) {
       getNotificationManager().cancel(notificationIdentifier);
     }
