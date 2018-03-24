@@ -17,7 +17,6 @@ $(ANDROID_LOCAL_FILES):
 
 clean::
 	-rm -f $(ANDROID_LOCAL_FILES)
-	-rm -f -r $(ANDROID_ASSETS_DIRECTORY)
 	-rm -f -r $(ANDROID_BINARIES_DIRECTORY)
 	-rm -f -r $(ANDROID_LIBRARIES_DIRECTORY)
 	-rm -f -r gen

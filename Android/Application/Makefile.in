@@ -36,6 +36,10 @@ speech-drivers: drivers-directory
 screen-drivers: drivers-directory
 	$(INSTALL_DATA) $(BLD_TOP)$(DRV_DIR)/$(MOD_NAME)x?*.$(MOD_EXT) $(ANDROID_DRIVERS_DIRECTORY)
 
+clean::
+	-rm -f -r $(ANDROID_TABLES_DIRECTORY)
+	-rm -f -r $(ANDROID_DRIVERS_DIRECTORY)
+
 distclean::
 	-rm res/values/configured.xml
 
