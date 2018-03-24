@@ -55,7 +55,7 @@ public class RealScreenElement extends ScreenElement {
   }
 
   @Override
-  public boolean performAction (int x, int y) {
+  public boolean performAction (int column, int row) {
     if (accessibilityNode.isFocused()) {
       if (!onBringCursor()) return false;
 
@@ -66,13 +66,13 @@ public class RealScreenElement extends ScreenElement {
 
       while (true) {
         line = lines[index];
-        if (index == y) break;
+        if (index == row) break;
 
         offset += line.length();
         index += 1;
       }
 
-      offset += Math.min(x, (line.length() - 1));
+      offset += Math.min(column, (line.length() - 1));
 
       if (ApplicationUtilities.haveJellyBeanMR2) {
         Bundle arguments = new Bundle();
@@ -84,7 +84,7 @@ public class RealScreenElement extends ScreenElement {
       return InputService.placeCursor(offset);
     }
 
-    return super.performAction(x, y);
+    return super.performAction(column, row);
   }
 
   @Override
@@ -101,51 +101,15 @@ public class RealScreenElement extends ScreenElement {
     return lines;
   }
 
-  private AccessibilityNodeInfo getActionableNode (int action) {
-    AccessibilityNodeInfo node = getAccessibilityNode();
-    Rect inner = getVisualLocation();
-
-    while (true) {
-      if (node.isEnabled()) {
-        if ((node.getActions() & action) != 0) {
-          return node;
-        }
-      }
-
-      AccessibilityNodeInfo parent = node.getParent();
-      if (parent == null) break;
-
-      Rect outer = new Rect();
-      parent.getBoundsInScreen(outer);
-
-      if (!Rect.intersects(outer, inner)) {
-        parent.recycle();
-        parent = null;
-        break;
-      }
-
-      inner = outer;
-      node.recycle();
-      node = parent;
-    }
-
-    node.recycle();
-    node = null;
-    return null;
-  }
-
   private AccessibilityNodeInfo getFocusableNode () {
-    return getActionableNode(AccessibilityNodeInfo.ACTION_FOCUS | AccessibilityNodeInfo.ACTION_CLEAR_FOCUS);
+    return ScreenUtilities.findActionableNode(accessibilityNode,
+      AccessibilityNodeInfo.ACTION_FOCUS |
+      AccessibilityNodeInfo.ACTION_CLEAR_FOCUS
+    );
   }
 
-  private boolean doAction (int action) {
-    AccessibilityNodeInfo node = getActionableNode(action);
-    if (node == null) return false;
-
-    boolean performed = node.performAction(action);
-    node.recycle();
-    node = null;
-    return performed;
+  private boolean performNodeAction (int action) {
+    return ScreenUtilities.performAction(accessibilityNode, action);
   }
 
   public boolean doKey (int keyCode, boolean longPress) {
@@ -209,7 +173,7 @@ public class RealScreenElement extends ScreenElement {
         }
       }
 
-      if (doAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS)) return true;
+      if (performNodeAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS)) return true;
     }
 
     if (ApplicationUtilities.haveIceCreamSandwich) {
@@ -238,12 +202,12 @@ public class RealScreenElement extends ScreenElement {
   public boolean onClick () {
     if (ApplicationUtilities.haveIceCreamSandwich) {
       if (isEditable()) {
-        return doAction(AccessibilityNodeInfo.ACTION_FOCUS);
+        return performNodeAction(AccessibilityNodeInfo.ACTION_FOCUS);
       }
     }
 
     if (ApplicationUtilities.haveJellyBean) {
-      return doAction(AccessibilityNodeInfo.ACTION_CLICK);
+      return performNodeAction(AccessibilityNodeInfo.ACTION_CLICK);
     }
 
     if (ApplicationUtilities.haveIceCreamSandwich) {
@@ -256,7 +220,7 @@ public class RealScreenElement extends ScreenElement {
   @Override
   public boolean onLongClick () {
     if (ApplicationUtilities.haveJellyBean) {
-      return doAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
+      return performNodeAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
     }
 
     if (ApplicationUtilities.haveIceCreamSandwich) {
@@ -269,7 +233,7 @@ public class RealScreenElement extends ScreenElement {
   @Override
   public boolean onScrollBackward () {
     if (ApplicationUtilities.haveJellyBean) {
-      return doAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+      return performNodeAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
     }
 
     if (ApplicationUtilities.haveIceCreamSandwich) {
@@ -282,7 +246,7 @@ public class RealScreenElement extends ScreenElement {
   @Override
   public boolean onScrollForward () {
     if (ApplicationUtilities.haveJellyBean) {
-      return doAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+      return performNodeAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
     }
 
     if (ApplicationUtilities.haveIceCreamSandwich) {
@@ -294,7 +258,7 @@ public class RealScreenElement extends ScreenElement {
 
   public boolean bringCursor () {
     if (ApplicationUtilities.haveJellyBean) {
-      return doAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
+      return performNodeAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
     }
 
     return false;

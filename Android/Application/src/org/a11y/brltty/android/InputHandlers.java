@@ -36,31 +36,6 @@ public abstract class InputHandlers {
     return BrailleService.getBrailleService().performGlobalAction(action);
   }
 
-  private static boolean performNodeAction (AccessibilityNodeInfo node, int action) {
-    node = AccessibilityNodeInfo.obtain(node);
-
-    while (node != null) {
-      AccessibilityNodeInfo parent;
-
-      try {
-        if ((node.getActions() & action) != 0) {
-          return node.performAction(action);
-        }
-
-        parent = node.getParent();
-      } finally {
-        node.recycle();
-        node = null;
-      }
-
-      if (parent == null) break;
-      node = parent;
-      parent = null;
-    }
-
-    return false;
-  }
-
   private static boolean moveFocus (RenderedScreen.SearchDirection direction) {
     RenderedScreen screen = ScreenDriver.getScreen();
 
@@ -242,7 +217,7 @@ public abstract class InputHandlers {
       @Override
       protected boolean performNavigationAction (AccessibilityNodeInfo node) {
         if (ApplicationUtilities.haveJellyBean) {
-          return performNodeAction(node, AccessibilityNodeInfo.ACTION_CLICK);
+          return ScreenUtilities.performAction(node, AccessibilityNodeInfo.ACTION_CLICK);
         }
 
         return super.performNavigationAction(node);
@@ -402,7 +377,7 @@ public abstract class InputHandlers {
       @Override
       protected boolean performNavigationAction (AccessibilityNodeInfo node) {
         if (ApplicationUtilities.haveJellyBean) {
-          return performNodeAction(node, AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+          return ScreenUtilities.performAction(node, AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
         }
 
         return super.performNavigationAction(node);
@@ -429,7 +404,7 @@ public abstract class InputHandlers {
       @Override
       protected boolean performNavigationAction (AccessibilityNodeInfo node) {
         if (ApplicationUtilities.haveJellyBean) {
-          return performNodeAction(node, AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+          return ScreenUtilities.performAction(node, AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
         }
 
         return super.performNavigationAction(node);

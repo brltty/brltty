@@ -109,8 +109,8 @@ public class ScreenElement {
     return false;
   }
 
-  public boolean performAction (int x, int y) {
-    switch (x) {
+  public boolean performAction (int column, int row) {
+    switch (column) {
       case  0: return onBringCursor();
       case  1: return onClick();
       case  2: return onLongClick();

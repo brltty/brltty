@@ -108,7 +108,7 @@ public class RenderedScreen {
     LAST,
   }
 
-  public boolean moveFocus (SearchDirection direction) {
+  public final boolean moveFocus (SearchDirection direction) {
     AccessibilityNodeInfo node = getCursorNode();
 
     if (node != null) {
@@ -176,16 +176,10 @@ public class RenderedScreen {
 
   public final boolean performAction (int column, int row) {
     ScreenElement element = screenElements.findByBrailleLocation(column, row);
+    if (element == null) return false;
 
-    if (element != null) {
-      Rect location = element.getBrailleLocation();
-
-      if (element.performAction((column - location.left), (row - location.top))) {
-        return true;
-      }
-    }
-
-    return false;
+    Rect location = element.getBrailleLocation();
+    return element.performAction((column - location.left), (row - location.top));
   }
 
   private static final int SIGNIFICANT_NODE_ACTIONS
@@ -470,7 +464,7 @@ public class RenderedScreen {
     Log.d(LOG_TAG, message);
   }
 
-  private void logRenderedElements () {
+  private final void logRenderedElements () {
     log(("screen element count: " + screenElements.size()));
     int elementIndex = 0;
 
@@ -483,7 +477,7 @@ public class RenderedScreen {
     }
   }
 
-  private void logRenderedRows () {
+  private final void logRenderedRows () {
     log(("screen row count: " + screenRows.size()));
     log(("screen width: " + screenWidth));
     int rowIndex = 0;
@@ -497,7 +491,7 @@ public class RenderedScreen {
     }
   }
 
-  public void logRenderedScreen () {
+  public final void logRenderedScreen () {
     log("begin rendered screen");
     logRenderedElements();
     logRenderedRows();

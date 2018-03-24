@@ -36,7 +36,7 @@ public abstract class ScreenUtilities {
     return ScreenDriver.getWindow().contains(location);
   }
 
-  public static final boolean isSubclassOf (AccessibilityNodeInfo node, Class type) {
+  public static boolean isSubclassOf (AccessibilityNodeInfo node, Class type) {
     return LanguageUtilities.canAssign(type, node.getClassName().toString());
   }
 
@@ -223,6 +223,33 @@ public abstract class ScreenUtilities {
     };
 
     return findNode(root, tester);
+  }
+
+  public static AccessibilityNodeInfo findActionableNode (AccessibilityNodeInfo node, int actions) {
+    node = AccessibilityNodeInfo.obtain(node);
+
+    while (true) {
+      if ((node.getActions() & actions) != 0) return node;
+
+      AccessibilityNodeInfo parent = node.getParent();
+      if (parent == null) return null;
+
+      node.recycle();
+      node = parent;
+      parent = null;
+    }
+  }
+
+  public static boolean performAction (AccessibilityNodeInfo node, int action) {
+    node = findActionableNode(node, action);
+    if (node == null) return false;
+
+    try {
+      return node.performAction(action);
+    } finally {
+      node.recycle();
+      node = null;
+    }
   }
 
   public static String normalizeText (CharSequence text) {
