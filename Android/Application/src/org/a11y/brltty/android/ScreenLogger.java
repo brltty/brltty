@@ -82,6 +82,41 @@ public abstract class ScreenLogger {
     log((label + ": " + data));
   }
 
+  private static class ActionEntry {
+    public final String actionName;
+    public final int actionValue;
+
+    public ActionEntry (String name, int value) {
+      actionName = name;
+      actionValue = value;
+    }
+  }
+
+  private final static ActionEntry[] actionTable = new ActionEntry[] {
+    new ActionEntry("clk", AccessibilityNodeInfo.ACTION_CLICK),
+    new ActionEntry("lck", AccessibilityNodeInfo.ACTION_LONG_CLICK),
+    new ActionEntry("scf", AccessibilityNodeInfo.ACTION_SCROLL_FORWARD),
+    new ActionEntry("scb", AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD),
+    new ActionEntry("mvn", AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY),
+    new ActionEntry("mvp", AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY),
+    new ActionEntry("mhn", AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT),
+    new ActionEntry("mhp", AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT),
+    new ActionEntry("sls", AccessibilityNodeInfo.ACTION_SELECT),
+    new ActionEntry("slc", AccessibilityNodeInfo.ACTION_CLEAR_SELECTION),
+    new ActionEntry("ifs", AccessibilityNodeInfo.ACTION_FOCUS),
+    new ActionEntry("ifc", AccessibilityNodeInfo.ACTION_CLEAR_FOCUS),
+    new ActionEntry("afs", AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS),
+    new ActionEntry("afc", AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS),
+    new ActionEntry("sel", AccessibilityNodeInfo.ACTION_SET_SELECTION),
+    new ActionEntry("cpy", AccessibilityNodeInfo.ACTION_COPY),
+    new ActionEntry("cut", AccessibilityNodeInfo.ACTION_CUT),
+    new ActionEntry("pst", AccessibilityNodeInfo.ACTION_PASTE),
+    new ActionEntry("dsms", AccessibilityNodeInfo.ACTION_DISMISS),
+    new ActionEntry("clps", AccessibilityNodeInfo.ACTION_COLLAPSE),
+    new ActionEntry("xpnd", AccessibilityNodeInfo.ACTION_EXPAND),
+    new ActionEntry("txs", AccessibilityNodeInfo.ACTION_SET_TEXT)
+  };
+
   private static void log (AccessibilityNodeInfo node, String name, boolean descend) {
     StringBuilder sb = new StringBuilder();
 
@@ -239,56 +274,8 @@ public abstract class ScreenLogger {
     {
       int actions = node.getActions();
 
-      if (ApplicationUtilities.haveJellyBean) {
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_CLICK) != 0), "clk");
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_LONG_CLICK) != 0), "lck");
-      }
-
-      if (ApplicationUtilities.haveJellyBean) {
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_SCROLL_FORWARD) != 0), "scf");
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) != 0), "scb");
-      }
-
-      if (ApplicationUtilities.haveJellyBean) {
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY) != 0), "mvn");
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY) != 0), "mvp");
-      }
-
-      if (ApplicationUtilities.haveJellyBean) {
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT) != 0), "mhn");
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT) != 0), "mhp");
-      }
-
-      if (ApplicationUtilities.haveIceCreamSandwich) {
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_SELECT) != 0), "sls");
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_SELECTION) != 0), "slc");
-      }
-
-      if (ApplicationUtilities.haveIceCreamSandwich) {
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_FOCUS) != 0), "ifs");
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_FOCUS) != 0), "ifc");
-      }
-
-      if (ApplicationUtilities.haveJellyBean) {
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS) != 0), "afs");
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS) != 0), "afc");
-      }
-
-      if (ApplicationUtilities.haveJellyBeanMR2) {
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_SET_SELECTION) != 0), "sel");
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_COPY) != 0), "cpy");
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_CUT) != 0), "cut");
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_PASTE) != 0), "pst");
-      }
-
-      if (ApplicationUtilities.haveKitkat) {
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_DISMISS) != 0), "dsms");
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_COLLAPSE) != 0), "clps");
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_EXPAND) != 0), "xpnd");
-      }
-
-      if (ApplicationUtilities.haveLollipop) {
-        add(sb, ((actions & AccessibilityNodeInfo.ACTION_SET_TEXT) != 0), "txs");
+      for (ActionEntry action : actionTable) {
+        add(sb, ((actions & action.actionValue) != 0), action.actionName);
       }
     }
 
