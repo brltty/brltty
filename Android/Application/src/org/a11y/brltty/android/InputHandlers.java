@@ -448,7 +448,7 @@ public abstract class InputHandlers {
     return new KeyHandler(KeyEvent.KEYCODE_MOVE_HOME) {
       @Override
       protected boolean performNavigationAction (AccessibilityNodeInfo node) {
-        return super.performNavigationAction(node);
+        return moveFocus(RenderedScreen.SearchDirection.FIRST);
       }
 
       @Override
@@ -473,7 +473,7 @@ public abstract class InputHandlers {
     return new KeyHandler(KeyEvent.KEYCODE_MOVE_END) {
       @Override
       protected boolean performNavigationAction (AccessibilityNodeInfo node) {
-        return super.performNavigationAction(node);
+        return moveFocus(RenderedScreen.SearchDirection.LAST);
       }
 
       @Override

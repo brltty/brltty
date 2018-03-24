@@ -104,7 +104,10 @@ public class RenderedScreen {
 
   public enum SearchDirection {
     FORWARD,
-    BACKWARD
+    BACKWARD,
+
+    FIRST,
+    LAST,
   }
 
   public boolean moveFocus (SearchDirection direction) {
@@ -117,15 +120,15 @@ public class RenderedScreen {
       node = null;
 
       if (element != null) {
+        int count = screenElements.size();
         int index = screenElements.indexOf(element);
-        int size = screenElements.size();
 
         switch (direction) {
           case FORWARD: {
             int start = index;
 
             while (true) {
-              if (++index == size) index = 0;
+              if (++index == count) index = 0;
               if (index == start) break;
               if (screenElements.get(index).bringCursor()) return true;
             }
@@ -137,9 +140,31 @@ public class RenderedScreen {
             int start = index;
 
             while (true) {
-              if (--index < 0) index += size;
+              if (--index < 0) index += count;
               if (index == start) break;
               if (screenElements.get(index).bringCursor()) return true;
+            }
+
+            break;
+          }
+
+          case FIRST: {
+            int first = 0;
+
+            while (first < index) {
+              if (screenElements.get(first).bringCursor()) return true;
+              first += 1;
+            }
+
+            break;
+          }
+
+          case LAST: {
+            int last = count - 1;
+
+            while (last > index) {
+              if (screenElements.get(last).bringCursor()) return true;
+              last -= 1;
             }
 
             break;
