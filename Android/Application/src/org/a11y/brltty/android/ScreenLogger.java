@@ -21,7 +21,6 @@ package org.a11y.brltty.android;
 import java.util.Map;
 import java.util.HashMap;
 
-import android.os.Build;
 import android.util.Log;
 
 import android.view.accessibility.AccessibilityEvent;
@@ -136,7 +135,7 @@ public abstract class ScreenLogger {
       if (count > 0) add(sb, "cld", count);
     }
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+    if (ApplicationUtilities.haveJellyBean) {
       add(sb, !node.isVisibleToUser(), "inv");
     }
 
@@ -146,7 +145,7 @@ public abstract class ScreenLogger {
     add(sb, node.isFocusable(), "ifb");
     add(sb, node.isFocused(), "ifd");
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+    if (ApplicationUtilities.haveJellyBean) {
       add(sb, node.isAccessibilityFocused(), "afd");
     }
 
@@ -156,67 +155,67 @@ public abstract class ScreenLogger {
     add(sb, node.isChecked(), "ckd");
     add(sb, node.isPassword(), "pwd");
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+    if (ApplicationUtilities.haveJellyBeanMR2) {
       add(sb, ScreenUtilities.isEditable(node), "edb");
     }
 
     {
       int actions = node.getActions();
 
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+      if (ApplicationUtilities.haveJellyBean) {
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_CLICK) != 0), "clk");
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_LONG_CLICK) != 0), "lck");
       }
 
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+      if (ApplicationUtilities.haveJellyBean) {
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_SCROLL_FORWARD) != 0), "scf");
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) != 0), "scb");
       }
 
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+      if (ApplicationUtilities.haveJellyBean) {
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY) != 0), "mvn");
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY) != 0), "mvp");
       }
 
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+      if (ApplicationUtilities.haveJellyBean) {
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT) != 0), "mhn");
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT) != 0), "mhp");
       }
 
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+      if (ApplicationUtilities.haveIceCreamSandwich) {
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_SELECT) != 0), "sel");
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_SELECTION) != 0), "slc");
       }
 
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+      if (ApplicationUtilities.haveIceCreamSandwich) {
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_FOCUS) != 0), "ifs");
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_FOCUS) != 0), "ifc");
       }
 
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+      if (ApplicationUtilities.haveJellyBean) {
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS) != 0), "afs");
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS) != 0), "afc");
       }
 
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+      if (ApplicationUtilities.haveJellyBeanMR2) {
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_SET_SELECTION) != 0), "sls");
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_COPY) != 0), "cpy");
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_CUT) != 0), "cut");
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_PASTE) != 0), "pst");
       }
 
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.KITKAT)) {
+      if (ApplicationUtilities.haveKitkat) {
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_DISMISS) != 0), "dsm");
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_COLLAPSE) != 0), "col");
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_EXPAND) != 0), "exp");
       }
 
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+      if (ApplicationUtilities.haveLollipop) {
         add(sb, ((actions & AccessibilityNodeInfo.ACTION_SET_TEXT) != 0), "txs");
       }
     }
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR1)) {
+    if (ApplicationUtilities.haveJellyBeanMR1) {
       AccessibilityNodeInfo subnode = node.getLabelFor();
 
       if (subnode != null) {
@@ -226,7 +225,7 @@ public abstract class ScreenLogger {
       }
     }
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR1)) {
+    if (ApplicationUtilities.haveJellyBeanMR1) {
       AccessibilityNodeInfo subnode = node.getLabeledBy();
 
       if (subnode != null) {
@@ -272,7 +271,7 @@ public abstract class ScreenLogger {
                new HashMap<Integer, String>()
   {
     {
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+      if (ApplicationUtilities.haveLollipop) {
         put(AccessibilityWindowInfo.TYPE_APPLICATION, "app");
         put(AccessibilityWindowInfo.TYPE_INPUT_METHOD, "im");
         put(AccessibilityWindowInfo.TYPE_SYSTEM, "sys");
@@ -342,14 +341,14 @@ public abstract class ScreenLogger {
   public static void log () {
     log("begin screen log");
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+    if (ApplicationUtilities.haveLollipop) {
       int index = 0;
 
       for (AccessibilityWindowInfo window : BrailleService.getBrailleService().getWindows()) {
         log(window, ("window." + index), true, true);
         index += 1;
       }
-    } else if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+    } else if (ApplicationUtilities.haveJellyBean) {
       AccessibilityNodeInfo root = BrailleService.getBrailleService().getRootInActiveWindow();
 
       if (root != null) {
@@ -371,7 +370,7 @@ public abstract class ScreenLogger {
       if (node != null) {
         log(node, "event node", false);
 
-        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+        if (ApplicationUtilities.haveLollipop) {
           AccessibilityWindowInfo window = node.getWindow();
 
           if (window != null) {

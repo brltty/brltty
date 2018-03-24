@@ -21,7 +21,6 @@ package org.a11y.brltty.android;
 import java.util.Collection;
 import java.util.Map;
 
-import android.os.Build;
 import android.content.Context;
 import android.hardware.usb.*;
 
@@ -45,7 +44,7 @@ public final class UsbDeviceCollection extends DeviceCollection {
   }
 
   private final String getManufacturerName (UsbDevice device) {
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+    if (ApplicationUtilities.haveLollipop) {
       return device.getManufacturerName();
     } else {
       return null;
@@ -53,7 +52,7 @@ public final class UsbDeviceCollection extends DeviceCollection {
   }
 
   private final String getProductName (UsbDevice device) {
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+    if (ApplicationUtilities.haveLollipop) {
       return device.getProductName();
     } else {
       return null;
@@ -61,7 +60,7 @@ public final class UsbDeviceCollection extends DeviceCollection {
   }
 
   private final String getSerialNumber (UsbDevice device) {
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+    if (ApplicationUtilities.haveLollipop) {
       return device.getSerialNumber();
     } else {
       UsbDeviceConnection connection = manager.openDevice(device);

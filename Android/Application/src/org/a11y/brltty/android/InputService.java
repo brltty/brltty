@@ -20,7 +20,6 @@ package org.a11y.brltty.android;
 import org.a11y.brltty.core.*;
 
 import android.util.Log;
-import android.os.Build;
 
 import android.view.KeyEvent;
 import android.view.ViewConfiguration;
@@ -91,11 +90,9 @@ public class InputService extends InputMethodService {
       sb.append(": ");
       sb.append(code);
 
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.HONEYCOMB_MR1)) {
-        sb.append(" (");
-        sb.append(KeyEvent.keyCodeToString(code));
-        sb.append(")");
-      }
+      sb.append(" (");
+      sb.append(KeyEvent.keyCodeToString(code));
+      sb.append(")");
 
       Log.d(LOG_TAG, sb.toString());
     }

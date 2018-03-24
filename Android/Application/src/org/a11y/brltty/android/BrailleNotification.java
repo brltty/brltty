@@ -18,8 +18,6 @@
 
 package org.a11y.brltty.android;
 
-import android.os.Build;
-
 import android.content.Context;
 import android.content.Intent;
 import android.app.PendingIntent;
@@ -69,11 +67,11 @@ public abstract class BrailleNotification {
           )
         );
 
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR1)) {
+      if (ApplicationUtilities.haveJellyBeanMR1) {
         notificationBuilder.setShowWhen(false);
       }
 
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+      if (ApplicationUtilities.haveLollipop) {
         notificationBuilder.setCategory(Notification.CATEGORY_SERVICE);
       }
     }

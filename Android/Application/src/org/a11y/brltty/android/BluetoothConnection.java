@@ -28,7 +28,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.UUID;
 
-import android.os.Build;
 import android.util.Log;
 
 import android.bluetooth.BluetoothAdapter;
@@ -100,7 +99,7 @@ public class BluetoothConnection {
   public final BluetoothDevice getDevice () {
     if (!isUp()) return null;
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+    if (ApplicationUtilities.haveJellyBean) {
       return bluetoothAdapter.getRemoteDevice(remoteAddressBytes);
     } else {
       return bluetoothAdapter.getRemoteDevice(remoteAddressString);

@@ -22,7 +22,6 @@ import java.util.List;
 
 import android.util.Log;
 
-import android.os.Build;
 import android.accessibilityservice.AccessibilityService;
 import android.view.KeyEvent;
 
@@ -61,37 +60,37 @@ public abstract class BrailleRenderer {
   }
 
   private void addVirtualElements (ScreenElementList elements) {
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+    if (ApplicationUtilities.haveJellyBean) {
       elements.addAtTop(
         R.string.VIRTUAL_BUTTON_NOTIFICATIONS,
         AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS
       );
     }
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+    if (ApplicationUtilities.haveJellyBean) {
       elements.addAtTop(
         R.string.VIRTUAL_BUTTON_QUICK_SETTINGS,
         AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS
       );
     }
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+    if (ApplicationUtilities.haveJellyBean) {
       elements.addAtBottom(
         R.string.VIRTUAL_BUTTON_BACK,
         AccessibilityService.GLOBAL_ACTION_BACK
       );
     }
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+    if (ApplicationUtilities.haveJellyBean) {
       elements.addAtBottom(
         R.string.VIRTUAL_BUTTON_HOME,
         AccessibilityService.GLOBAL_ACTION_HOME
       );
     }
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+    if (ApplicationUtilities.haveJellyBean) {
       elements.addAtBottom(
-        ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)?
+        ApplicationUtilities.haveLollipop?
           R.string.VIRTUAL_BUTTON_OVERVIEW:
           R.string.VIRTUAL_BUTTON_RECENT_APPS,
         AccessibilityService.GLOBAL_ACTION_RECENTS

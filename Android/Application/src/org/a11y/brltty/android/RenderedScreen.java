@@ -23,8 +23,6 @@ import android.util.Log;
 import java.util.List;
 import java.util.ArrayList;
 
-import android.os.Build;
-
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import android.graphics.Rect;
@@ -263,7 +261,7 @@ public class RenderedScreen {
       }
     }
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.KITKAT)) {
+    if (ApplicationUtilities.haveKitkat) {
       AccessibilityNodeInfo.RangeInfo range = node.getRangeInfo();
 
       if (range != null) {
@@ -397,7 +395,7 @@ public class RenderedScreen {
     AccessibilityNodeInfo root = getRootNode();
 
     if (root != null) {
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+      if (ApplicationUtilities.haveJellyBean) {
         AccessibilityNodeInfo node = root.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
 
         if (node != null) {
@@ -418,17 +416,17 @@ public class RenderedScreen {
       {
         AccessibilityNodeInfo node;
 
-        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+        if (ApplicationUtilities.haveJellyBean) {
           node = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
-        } else if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+        } else if (ApplicationUtilities.haveIceCreamSandwich) {
           node = ScreenUtilities.findFocusedNode(root);
         } else {
           node = null;
         }
 
-        if (!ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+        if (!ApplicationUtilities.haveJellyBean) {
           if (node == null) {
-            if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+            if (ApplicationUtilities.haveIceCreamSandwich) {
               if ((node = ScreenUtilities.findFocusableNode(root)) != null) {
                 if (!node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)) {
                   node.recycle();

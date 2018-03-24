@@ -20,7 +20,6 @@ package org.a11y.brltty.android;
 
 import android.util.Log;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 
@@ -75,7 +74,7 @@ public class RealScreenElement extends ScreenElement {
 
       offset += Math.min(x, (line.length() - 1));
 
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+      if (ApplicationUtilities.haveJellyBeanMR2) {
         Bundle arguments = new Bundle();
         arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, offset);
         arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, offset);
@@ -198,7 +197,7 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean onBringCursor () {
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+    if (ApplicationUtilities.haveJellyBean) {
       {
         AccessibilityNodeInfo focusedNode = accessibilityNode.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
 
@@ -213,7 +212,7 @@ public class RealScreenElement extends ScreenElement {
       if (doAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS)) return true;
     }
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+    if (ApplicationUtilities.haveIceCreamSandwich) {
       AccessibilityNodeInfo node = getFocusableNode();
 
       if (node != null) {
@@ -237,17 +236,17 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean onClick () {
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+    if (ApplicationUtilities.haveIceCreamSandwich) {
       if (isEditable()) {
         return doAction(AccessibilityNodeInfo.ACTION_FOCUS);
       }
     }
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+    if (ApplicationUtilities.haveJellyBean) {
       return doAction(AccessibilityNodeInfo.ACTION_CLICK);
     }
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+    if (ApplicationUtilities.haveIceCreamSandwich) {
       return doKey(KeyEvent.KEYCODE_DPAD_CENTER, false);
     }
 
@@ -256,11 +255,11 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean onLongClick () {
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+    if (ApplicationUtilities.haveJellyBean) {
       return doAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
     }
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+    if (ApplicationUtilities.haveIceCreamSandwich) {
       return doKey(KeyEvent.KEYCODE_DPAD_CENTER, true);
     }
 
@@ -269,11 +268,11 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean onScrollBackward () {
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+    if (ApplicationUtilities.haveJellyBean) {
       return doAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
     }
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+    if (ApplicationUtilities.haveIceCreamSandwich) {
       return doKey(KeyEvent.KEYCODE_PAGE_UP, false);
     }
 
@@ -282,11 +281,11 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean onScrollForward () {
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+    if (ApplicationUtilities.haveJellyBean) {
       return doAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
     }
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.ICE_CREAM_SANDWICH)) {
+    if (ApplicationUtilities.haveIceCreamSandwich) {
       return doKey(KeyEvent.KEYCODE_PAGE_DOWN, false);
     }
 
@@ -294,7 +293,7 @@ public class RealScreenElement extends ScreenElement {
   }
 
   public boolean bringCursor () {
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+    if (ApplicationUtilities.haveJellyBean) {
       return doAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
     }
 

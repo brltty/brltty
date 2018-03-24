@@ -18,8 +18,6 @@
 
 package org.a11y.brltty.android;
 
-import android.os.Build;
-
 import android.view.KeyEvent;
 
 public class VirtualScreenElement extends ScreenElement {
@@ -28,7 +26,7 @@ public class VirtualScreenElement extends ScreenElement {
 
   @Override
   public boolean onClick () {
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+    if (ApplicationUtilities.haveJellyBean) {
       return BrailleService.getBrailleService().performGlobalAction(globalAction);
     }
 

@@ -18,8 +18,6 @@
 
 package org.a11y.brltty.android;
 
-import android.os.Build;
-
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import android.graphics.Rect;
@@ -29,7 +27,7 @@ public abstract class ScreenUtilities {
   }
 
   public static boolean isVisible (AccessibilityNodeInfo node) {
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+    if (ApplicationUtilities.haveJellyBean) {
       return node.isVisibleToUser();
     }
 
@@ -51,7 +49,7 @@ public abstract class ScreenUtilities {
   }
 
   public static boolean isEditable (AccessibilityNodeInfo node) {
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+    if (ApplicationUtilities.haveJellyBeanMR2) {
       return node.isEditable();
     } else {
       return isSubclassOf(node, android.widget.EditText.class);
@@ -60,7 +58,7 @@ public abstract class ScreenUtilities {
 
   public static AccessibilityNodeInfo getRefreshedNode (AccessibilityNodeInfo node) {
     if (node != null) {
-      if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+      if (ApplicationUtilities.haveJellyBeanMR2) {
         node = AccessibilityNodeInfo.obtain(node);
 
         if (!node.refresh()) {

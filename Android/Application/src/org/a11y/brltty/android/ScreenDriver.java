@@ -19,7 +19,6 @@
 package org.a11y.brltty.android;
 import org.a11y.brltty.core.*;
 
-import android.os.Build;
 import android.util.Log;
 
 import android.accessibilityservice.AccessibilityService;
@@ -48,7 +47,7 @@ public abstract class ScreenDriver {
   }
 
   private static AccessibilityNodeInfo findFirstClickableSubnode (AccessibilityNodeInfo node) {
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+    if (ApplicationUtilities.haveJellyBean) {
       final int actions = AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS
                         | AccessibilityNodeInfo.ACTION_CLICK;
 
@@ -86,7 +85,7 @@ public abstract class ScreenDriver {
   private static boolean goToFirstClickableSubnode (AccessibilityNodeInfo root) {
     boolean done = false;
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+    if (ApplicationUtilities.haveJellyBean) {
       AccessibilityNodeInfo node = findFirstClickableSubnode(root);
 
       if (node != null) {
@@ -119,7 +118,7 @@ public abstract class ScreenDriver {
   private volatile static AccessibilityNodeInfo currentNode = null;
 
   static {
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+    if (ApplicationUtilities.haveJellyBean) {
       currentNode = BrailleService.getBrailleService().getRootInActiveWindow();
     }
   }
@@ -131,7 +130,7 @@ public abstract class ScreenDriver {
       ScreenLogger.log(event);
     }
 
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+    if (ApplicationUtilities.haveLollipop) {
       if (newNode != null) {
         AccessibilityWindowInfo window = newNode.getWindow();
 
