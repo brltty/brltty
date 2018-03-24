@@ -232,9 +232,10 @@ public abstract class ScreenUtilities {
       if ((node.getActions() & actions) != 0) return node;
 
       AccessibilityNodeInfo parent = node.getParent();
-      if (parent == null) return null;
-
       node.recycle();
+      node = null;
+
+      if (parent == null) return null;
       node = parent;
       parent = null;
     }
