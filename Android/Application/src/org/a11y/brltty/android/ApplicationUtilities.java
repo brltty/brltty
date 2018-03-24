@@ -37,27 +37,27 @@ public abstract class ApplicationUtilities {
   private ApplicationUtilities () {
   }
 
-  public static boolean haveAPILevel (int level) {
+  private static boolean haveAPILevel (int level) {
     return Build.VERSION.SDK_INT >= level;
   }
 
-  public static final boolean haveIceCreamSandwich =
-    haveAPILevel(Build.VERSION_CODES.ICE_CREAM_SANDWICH);
+  public static final boolean haveIceCreamSandwich
+  = haveAPILevel(Build.VERSION_CODES.ICE_CREAM_SANDWICH);
 
-  public static final boolean haveJellyBean =
-    haveAPILevel(Build.VERSION_CODES.JELLY_BEAN);
+  public static final boolean haveJellyBean
+  = haveAPILevel(Build.VERSION_CODES.JELLY_BEAN);
 
-  public static final boolean haveJellyBeanMR1 =
-    haveAPILevel(Build.VERSION_CODES.JELLY_BEAN_MR1);
+  public static final boolean haveJellyBeanMR1
+  = haveAPILevel(Build.VERSION_CODES.JELLY_BEAN_MR1);
 
-  public static final boolean haveJellyBeanMR2 =
-    haveAPILevel(Build.VERSION_CODES.JELLY_BEAN_MR2);
+  public static final boolean haveJellyBeanMR2
+  = haveAPILevel(Build.VERSION_CODES.JELLY_BEAN_MR2);
 
-  public static final boolean haveKitkat =
-    haveAPILevel(Build.VERSION_CODES.KITKAT);
+  public static final boolean haveKitkat
+  = haveAPILevel(Build.VERSION_CODES.KITKAT);
 
-  public static final boolean haveLollipop =
-    haveAPILevel(Build.VERSION_CODES.LOLLIPOP);
+  public static final boolean haveLollipop
+  = haveAPILevel(Build.VERSION_CODES.LOLLIPOP);
 
   public static String getResourceString (int identifier) {
     return ApplicationContext.get().getString(identifier);
