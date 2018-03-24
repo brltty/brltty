@@ -54,6 +54,18 @@ public abstract class InputHandlers {
     return false;
   }
 
+  private static boolean moveFocus (RenderedScreen.SearchDirection direction) {
+    RenderedScreen screen = ScreenDriver.getScreen();
+
+    if (screen != null) {
+      if (screen.moveFocus(direction)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   private abstract static class TextEditor {
     public TextEditor () {
     }
@@ -139,7 +151,7 @@ public abstract class InputHandlers {
     }
 
     protected boolean performEditAction (AccessibilityNodeInfo node) {
-      throw new UnsupportedOperationException();
+      return performNavigationAction(node);
     }
 
     public final boolean handleKey () {
@@ -168,11 +180,19 @@ public abstract class InputHandlers {
     return new KeyHandler(KeyEvent.KEYCODE_ENTER) {
       @Override
       protected boolean performNavigationAction (AccessibilityNodeInfo node) {
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN)) {
+          return node.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+        }
+
         return super.performNavigationAction(node);
       }
 
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.LOLLIPOP)) {
+          return inputCharacter('\n');
+        }
+
         return super.performEditAction(node);
       }
     }.handleKey();
@@ -182,12 +202,7 @@ public abstract class InputHandlers {
     return new KeyHandler(KeyEvent.KEYCODE_TAB) {
       @Override
       protected boolean performNavigationAction (AccessibilityNodeInfo node) {
-        return super.performNavigationAction(node);
-      }
-
-      @Override
-      protected boolean performEditAction (AccessibilityNodeInfo node) {
-        return super.performEditAction(node);
+        return moveFocus(RenderedScreen.SearchDirection.FORWARD);
       }
     }.handleKey();
   }
@@ -333,15 +348,6 @@ public abstract class InputHandlers {
 
   public static boolean inputKey_insert () {
     return new KeyHandler(KeyEvent.KEYCODE_INSERT) {
-      @Override
-      protected boolean performNavigationAction (AccessibilityNodeInfo node) {
-        return super.performNavigationAction(node);
-      }
-
-      @Override
-      protected boolean performEditAction (AccessibilityNodeInfo node) {
-        return super.performEditAction(node);
-      }
     }.handleKey();
   }
 
@@ -457,23 +463,11 @@ public abstract class InputHandlers {
       }
     };
 
-  private static boolean moveFocus (RenderedScreen.ChangeFocusDirection direction) {
-    RenderedScreen screen = ScreenDriver.getScreen();
-
-    if (screen != null) {
-      if (screen.changeFocus(direction)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
   private final static FunctionKeyAction moveBackwardAction =
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
-        return moveFocus(RenderedScreen.ChangeFocusDirection.BACKWARD);
+        return moveFocus(RenderedScreen.SearchDirection.BACKWARD);
       }
     };
 
@@ -481,7 +475,7 @@ public abstract class InputHandlers {
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
-        return moveFocus(RenderedScreen.ChangeFocusDirection.FORWARD);
+        return moveFocus(RenderedScreen.SearchDirection.FORWARD);
       }
     };
 
