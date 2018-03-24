@@ -80,6 +80,16 @@ public abstract class InputHandlers {
     return screen.getCursorNode();
   }
 
+  private static int getTextStartOffset (AccessibilityNodeInfo node) {
+    return node.getTextSelectionStart();
+  }
+
+  private static int getTextEndOffset (AccessibilityNodeInfo node) {
+    int position = node.getTextSelectionEnd();
+    if (position != node.getTextSelectionStart()) position -= 1;
+    return position;
+  }
+
   private static boolean placeTextCursor (AccessibilityNodeInfo node, int position) {
     if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
       Bundle arguments = new Bundle();
@@ -338,7 +348,7 @@ public abstract class InputHandlers {
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
         if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
-          int offset = node.getTextSelectionStart();
+          int offset = getTextStartOffset(node);
 
           CharSequence text = node.getText();
           int current = findCurrentLine(text, offset);
@@ -366,8 +376,7 @@ public abstract class InputHandlers {
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
         if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
-          int offset = node.getTextSelectionEnd();
-          if (offset != node.getTextSelectionStart()) offset -= 1;
+          int offset = getTextEndOffset(node);
 
           CharSequence text = node.getText();
           Integer next = findNextLine(text, offset);
@@ -403,7 +412,7 @@ public abstract class InputHandlers {
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
         if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
-          int from = node.getTextSelectionStart();
+          int from = getTextStartOffset(node);
 
           final int to = 0;
           if (to == from) return false;
@@ -430,8 +439,7 @@ public abstract class InputHandlers {
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
         if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
-          int from = node.getTextSelectionEnd();
-          if (from != node.getTextSelectionStart()) from -= 1;
+          int from = getTextEndOffset(node);
 
           final int to = node.getText().length();
           if (to == from) return false;
@@ -454,7 +462,7 @@ public abstract class InputHandlers {
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
         if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
-          int from = node.getTextSelectionStart();
+          int from = getTextStartOffset(node);
           if (from == 0) return false;
 
           CharSequence text = node.getText();
@@ -479,8 +487,7 @@ public abstract class InputHandlers {
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
         if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
-          int from = node.getTextSelectionEnd();
-          if (from != node.getTextSelectionStart()) from -= 1;
+          int from = getTextEndOffset(node);
 
           CharSequence text = node.getText();
           Integer next = findNextLine(text, from);
