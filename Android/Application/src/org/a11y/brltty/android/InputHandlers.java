@@ -32,6 +32,8 @@ public abstract class InputHandlers {
   private InputHandlers () {
   }
 
+  private final static int NO_SELECTION = -1;
+
   private static boolean performGlobalAction (int action) {
     return BrailleService.getBrailleService().performGlobalAction(action);
   }
@@ -55,20 +57,23 @@ public abstract class InputHandlers {
   }
 
   private static int getTextStartOffset (AccessibilityNodeInfo node) {
-    return node.getTextSelectionStart();
+    int offset = node.getTextSelectionStart();
+    if (offset == NO_SELECTION) return 0;
+    return offset;
   }
 
   private static int getTextEndOffset (AccessibilityNodeInfo node) {
-    int position = node.getTextSelectionEnd();
-    if (position != node.getTextSelectionStart()) position -= 1;
-    return position;
+    int offset = node.getTextSelectionEnd();
+    if (offset == NO_SELECTION) return 0;
+    if (offset != getTextStartOffset(node)) offset -= 1;
+    return offset;
   }
 
-  private static boolean placeTextCursor (AccessibilityNodeInfo node, int position) {
+  private static boolean placeTextCursor (AccessibilityNodeInfo node, int offset) {
     if (ApplicationUtilities.haveJellyBeanMR2) {
       Bundle arguments = new Bundle();
-      arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, position);
-      arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, position);
+      arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, offset);
+      arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, offset);
       return node.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, arguments);
     }
 
@@ -114,6 +119,7 @@ public abstract class InputHandlers {
         int start = node.getTextSelectionStart();
         int end = node.getTextSelectionEnd();
 
+        if (start == NO_SELECTION) text = null;
         if (text == null) text = "";
         if (text.length() == 0) start = end = 0;
 
@@ -122,15 +128,15 @@ public abstract class InputHandlers {
                           new SpannableStringBuilder(text);
 
         if ((0 <= start) && (start <= end) && (end <= text.length())) {
-          Integer position = editText(editor, start, end);
+          Integer offset = editText(editor, start, end);
 
-          if (position != null) {
+          if (offset != null) {
             Bundle arguments = new Bundle();
             arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, editor);
 
             if (node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments)) {
-              if (position == editor.length()) return true;
-              return placeTextCursor(node, position);
+              if (offset == editor.length()) return true;
+              return placeTextCursor(node, offset);
             }
           }
         }
@@ -280,10 +286,11 @@ public abstract class InputHandlers {
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
         if (ApplicationUtilities.haveJellyBeanMR2) {
-          int position = node.getTextSelectionStart();
-          if (position == node.getTextSelectionEnd()) position -= 1;
-          if (position < 0) return false;
-          return placeTextCursor(node, position);
+          int offset = node.getTextSelectionStart();
+          if (offset == NO_SELECTION) return false;
+          if (offset == node.getTextSelectionEnd()) offset -= 1;
+          if (offset < 0) return false;
+          return placeTextCursor(node, offset);
         }
 
         return super.performEditAction(node);
@@ -301,10 +308,11 @@ public abstract class InputHandlers {
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
         if (ApplicationUtilities.haveJellyBeanMR2) {
-          int position = node.getTextSelectionEnd();
-          if (position == node.getTextSelectionStart()) position += 1;
-          if (position > node.getText().length()) return false;
-          return placeTextCursor(node, position);
+          int offset = node.getTextSelectionEnd();
+          if (offset == NO_SELECTION) return false;
+          if (offset == node.getTextSelectionStart()) offset += 1;
+          if (offset > node.getText().length()) return false;
+          return placeTextCursor(node, offset);
         }
 
         return super.performEditAction(node);
