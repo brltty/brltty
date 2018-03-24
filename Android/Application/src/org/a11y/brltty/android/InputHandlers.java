@@ -37,23 +37,6 @@ public abstract class InputHandlers {
     return BrailleService.getBrailleService().performGlobalAction(action);
   }
 
-  private static AccessibilityNodeInfo getCursorNode () {
-    RenderedScreen screen = ScreenDriver.getScreen();
-    if (screen == null) return null;
-    return screen.getCursorNode();
-  }
-
-  private static boolean placeCursor (AccessibilityNodeInfo node, int position) {
-    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
-      Bundle arguments = new Bundle();
-      arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, position);
-      arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, position);
-      return node.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, arguments);
-    }
-
-    return false;
-  }
-
   private static boolean moveFocus (RenderedScreen.SearchDirection direction) {
     RenderedScreen screen = ScreenDriver.getScreen();
 
@@ -64,6 +47,50 @@ public abstract class InputHandlers {
     }
 
     return false;
+  }
+
+  private static AccessibilityNodeInfo getCursorNode () {
+    RenderedScreen screen = ScreenDriver.getScreen();
+    if (screen == null) return null;
+    return screen.getCursorNode();
+  }
+
+  private static boolean placeTextCursor (AccessibilityNodeInfo node, int position) {
+    if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+      Bundle arguments = new Bundle();
+      arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, position);
+      arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, position);
+      return node.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, arguments);
+    }
+
+    return false;
+  }
+
+  private static Integer findNextLine (CharSequence text, int offset) {
+    int length = text.length();
+
+    while (offset < length) {
+      if (text.charAt(offset++) == '\n') return offset;
+    }
+
+    return null;
+  }
+
+  private static int findCurrentLine (CharSequence text, int offset) {
+    while (offset > 0) {
+      if (text.charAt(--offset) == '\n') {
+        offset += 1;
+        break;
+      }
+    }
+
+    return offset;
+  }
+
+  private static Integer findPreviousLine (CharSequence text, int offset) {
+    offset = findCurrentLine(text, offset);
+    if (offset == 0) return null;
+    return findCurrentLine(text, offset-1);
   }
 
   private abstract static class TextEditor {
@@ -94,7 +121,7 @@ public abstract class InputHandlers {
 
             if (node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments)) {
               if (position == editor.length()) return true;
-              return placeCursor(node, position);
+              return placeTextCursor(node, position);
             }
           }
         }
@@ -243,6 +270,13 @@ public abstract class InputHandlers {
 
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+          int position = node.getTextSelectionStart();
+          if (position == node.getTextSelectionEnd()) position -= 1;
+          if (position < 0) return false;
+          return placeTextCursor(node, position);
+        }
+
         return super.performEditAction(node);
       }
     }.handleKey();
@@ -257,6 +291,13 @@ public abstract class InputHandlers {
 
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+          int position = node.getTextSelectionEnd();
+          if (position == node.getTextSelectionStart()) position += 1;
+          if (position > node.getText().length()) return false;
+          return placeTextCursor(node, position);
+        }
+
         return super.performEditAction(node);
       }
     }.handleKey();
@@ -271,6 +312,20 @@ public abstract class InputHandlers {
 
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+          int offset = node.getTextSelectionStart();
+
+          CharSequence text = node.getText();
+          int current = findCurrentLine(text, offset);
+          if (current == 0) return false;
+
+          int end = current - 1;
+          int previous = findCurrentLine(text, end);
+
+          int position = Math.min(offset-current, end-previous);
+          return placeTextCursor(node, previous+position);
+        }
+
         return super.performEditAction(node);
       }
     }.handleKey();
@@ -285,6 +340,25 @@ public abstract class InputHandlers {
 
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+          int offset = node.getTextSelectionEnd();
+          if (offset != node.getTextSelectionStart()) offset -= 1;
+
+          CharSequence text = node.getText();
+          Integer next = findNextLine(text, offset);
+          if (next == null) return false;
+
+          int current = findCurrentLine(text, offset);
+          int position = offset - current;
+
+          current = next;
+          next = findNextLine(text, current);
+
+          int end = ((next != null)? next-1: text.length()) - current;
+          if (position > end) position = end;
+          return placeTextCursor(node, current+position);
+        }
+
         return super.performEditAction(node);
       }
     }.handleKey();
@@ -299,6 +373,15 @@ public abstract class InputHandlers {
 
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+          int from = node.getTextSelectionStart();
+
+          final int to = 0;
+          if (to == from) return false;
+
+          return placeTextCursor(node, to);
+        }
+
         return super.performEditAction(node);
       }
     }.handleKey();
@@ -313,6 +396,16 @@ public abstract class InputHandlers {
 
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+          int from = node.getTextSelectionEnd();
+          if (from != node.getTextSelectionStart()) from -= 1;
+
+          final int to = node.getText().length();
+          if (to == from) return false;
+
+          return placeTextCursor(node, to);
+        }
+
         return super.performEditAction(node);
       }
     }.handleKey();
@@ -327,6 +420,17 @@ public abstract class InputHandlers {
 
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+          int from = node.getTextSelectionStart();
+          if (from == 0) return false;
+
+          CharSequence text = node.getText();
+          int to = findCurrentLine(text, from);
+          if (to == from) return false;
+
+          return placeTextCursor(node, to);
+        }
+
         return super.performEditAction(node);
       }
     }.handleKey();
@@ -341,6 +445,19 @@ public abstract class InputHandlers {
 
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
+        if (ApplicationUtilities.haveSdkVersion(Build.VERSION_CODES.JELLY_BEAN_MR2)) {
+          int from = node.getTextSelectionEnd();
+          if (from != node.getTextSelectionStart()) from -= 1;
+
+          CharSequence text = node.getText();
+          Integer next = findNextLine(text, from);
+
+          int to = (next != null)? next-1: text.length();
+          if (from == to) return false;
+
+          return placeTextCursor(node, to);
+        }
+
         return super.performEditAction(node);
       }
     }.handleKey();
