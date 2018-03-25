@@ -193,6 +193,24 @@ public abstract class ScreenLogger {
 
     if (ApplicationUtilities.haveJellyBeanMR2) {
       add(sb, ScreenUtilities.isEditable(node), "edt");
+
+      {
+        int start = node.getTextSelectionStart();
+        int end = node.getTextSelectionEnd();
+
+        if (!((start == -1) && (end == -1))) {
+          add(sb, "sel");
+          sb.append('(');
+          sb.append(start);
+
+          if (end != start) {
+            sb.append("..");
+            sb.append(end);
+          }
+
+          sb.append(')');
+        }
+      }
     }
 
     if (ApplicationUtilities.haveKitkat) {
