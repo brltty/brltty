@@ -263,7 +263,19 @@ public abstract class ScreenUtilities {
   }
 
   public static String getText (AccessibilityNodeInfo node) {
-    CharSequence text = node.getText();
+    CharSequence text = null;
+
+    {
+      TextField field = TextField.get(node, false);
+
+      if (field != null) {
+        synchronized (field) {
+          text = field.getAccessibilityText();
+        }
+      }
+    }
+
+    if (text == null) text = node.getText();
     if (!isEditable(node)) return normalizeText(text);
 
     if (text == null) return "";
