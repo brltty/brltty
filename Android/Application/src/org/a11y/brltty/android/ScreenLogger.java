@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 import android.util.Log;
+import android.os.Bundle;
 
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -308,6 +309,18 @@ public abstract class ScreenLogger {
     add(sb, "obj", node.getClassName());
     add(sb, "pkg", node.getPackageName());
     add(sb, "win", node.getWindowId());
+
+    if (ApplicationUtilities.haveKitkat) {
+      Bundle extras = node.getExtras();
+
+      if (extras != null) {
+        if (extras.size() > 0) {
+          add(sb, "extras: ");
+          sb.append(extras.toString());
+        }
+      }
+    }
+
     log(name, sb.toString());
 
     if (descend) {

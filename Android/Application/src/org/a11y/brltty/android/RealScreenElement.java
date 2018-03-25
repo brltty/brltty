@@ -92,7 +92,7 @@ public class RealScreenElement extends ScreenElement {
     String[] lines = super.makeBrailleText(text);
     if (lines == null) return null;
 
-    if (ScreenTextEditor.getIfFocused(accessibilityNode) != null) {
+    if (TextField.getIfFocused(accessibilityNode) != null) {
       for (int i=0; i<lines.length; i+=1) {
         lines[i] += ' ';
       }
@@ -267,9 +267,6 @@ public class RealScreenElement extends ScreenElement {
   public RealScreenElement (String text, AccessibilityNodeInfo node) {
     super(text);
     accessibilityNode = AccessibilityNodeInfo.obtain(node);
-
-    if (isEditable()) {
-      ScreenTextEditor.get(accessibilityNode, true);
-    }
+    if (isEditable()) TextField.get(accessibilityNode, true);
   }
 }

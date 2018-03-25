@@ -174,7 +174,7 @@ public abstract class ScreenDriver {
 
       case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED: {
         if (newNode != null) {
-          ScreenTextEditor.get(newNode, true).setCursorLocation(event.getFromIndex() + event.getAddedCount());
+          TextField.get(newNode, true).setCursorOffset(event.getFromIndex() + event.getAddedCount());
         }
 
         break;
@@ -182,10 +182,9 @@ public abstract class ScreenDriver {
 
       case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED: {
         if (newNode != null) {
-          ScreenTextEditor editor = ScreenTextEditor.get(newNode, true);
-
-          editor.setSelectedRegion(event.getFromIndex(), event.getToIndex());
-          editor.setCursorLocation(event.getToIndex());
+          TextField field = TextField.get(newNode, true);
+          field.setSelectedRegion(event.getFromIndex(), event.getToIndex());
+          field.setCursorOffset(event.getToIndex());
         }
 
         break;
@@ -257,12 +256,12 @@ public abstract class ScreenDriver {
         cursorRow = location.top;
 
         {
-          ScreenTextEditor editor = ScreenTextEditor.getIfFocused(node);
+          TextField field = TextField.getIfFocused(node);
 
-          if (editor != null) {
+          if (field != null) {
             {
-              int from = editor.getSelectedFrom();
-              int to = editor.getSelectedTo();
+              int from = field.getSelectionStart();
+              int to = field.getSelectionEnd();
 
               if (to > from) {
                 Point topLeft = element.getBrailleCoordinate(from);
@@ -283,7 +282,7 @@ public abstract class ScreenDriver {
             }
 
             {
-              Point cursor = element.getBrailleCoordinate(editor.getCursorOffset());
+              Point cursor = element.getBrailleCoordinate(field.getCursorOffset());
 
               if (cursor != null) {
                 cursorColumn += cursor.x;
