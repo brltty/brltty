@@ -27,18 +27,8 @@ public class TextField {
   public TextField () {
   }
 
-  private int cursorOffset = 0;
   private int selectionStart = 0;
   private int selectionEnd = 0;
-
-  public final int getCursorOffset () {
-    return cursorOffset;
-  }
-
-  public final TextField setCursorOffset (int offset) {
-    cursorOffset = offset;
-    return this;
-  }
 
   public final int getSelectionStart () {
     return selectionStart;
@@ -48,10 +38,14 @@ public class TextField {
     return selectionEnd;
   }
 
-  public final TextField setSelectedRegion (int start, int end) {
+  public final TextField setSelection (int start, int end) {
     selectionStart = start;
     selectionEnd = end;
     return this;
+  }
+
+  public final TextField setCursor (int offset) {
+    return setSelection(offset, offset);
   }
 
   private static final Map<AccessibilityNodeInfo, TextField> textFields =

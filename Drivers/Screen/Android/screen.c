@@ -36,14 +36,10 @@ static jclass inputHandlersClass = NULL;
 static jint screenNumber;
 static jint screenColumns;
 static jint screenRows;
-static jint cursorColumn;
-static jint cursorRow;
-static jint selectedFrom;
-static jint selectedTo;
-static jint selectedLeft;
-static jint selectedTop;
-static jint selectedRight;
-static jint selectedBottom;
+static jint selectionLeft;
+static jint selectionTop;
+static jint selectionRight;
+static jint selectionBottom;
 
 static const char *problemText;
 
@@ -133,22 +129,16 @@ JAVA_STATIC_METHOD (
   org_a11y_brltty_android_ScreenDriver, exportScreenProperties, void,
   jint number,
   jint columns, jint rows,
-  jint column, jint row,
-  jint from, jint to,
   jint left, jint top,
   int right, int bottom
 ) {
   screenNumber = number;
   screenColumns = columns;
   screenRows = rows;
-  cursorColumn = column;
-  cursorRow = row;
-  selectedFrom = from;
-  selectedTo = to;
-  selectedLeft = left;
-  selectedTop = top;
-  selectedRight = right;
-  selectedBottom = bottom;
+  selectionLeft = left;
+  selectionTop = top;
+  selectionRight = right;
+  selectionBottom = bottom;
 }
 
 static int
@@ -189,11 +179,13 @@ describe_AndroidScreen (ScreenDescription *description) {
     description->posy = 0;
     description->number = 0;
   } else {
+    description->number = screenNumber;
     description->cols = screenColumns;
     description->rows = screenRows;
-    description->posx = cursorColumn;
-    description->posy = cursorRow;
-    description->number = screenNumber;
+
+    description->cursor = selectionLeft == selectionRight;
+    description->posx = selectionLeft;
+    description->posy = selectionTop;
   }
 }
 
@@ -215,8 +207,8 @@ getRowCharacters (ScreenCharacter *characters, jint rowNumber, jint columnNumber
 
         if (!clearJavaException(env, 1)) {
           jchar buffer[columnCount];
-
           (*env)->GetCharArrayRegion(env, textBuffer, 0, columnCount, buffer);
+
           (*env)->DeleteLocalRef(env, textBuffer);
           textBuffer = NULL;
 
@@ -232,16 +224,16 @@ getRowCharacters (ScreenCharacter *characters, jint rowNumber, jint columnNumber
             }
           }
 
-          if ((rowNumber >= selectedTop) && (rowNumber < selectedBottom)) {
-            int from = MAX(selectedLeft, columnNumber);
-            int to = MIN(selectedRight, columnNumber+columnCount);
-
-            if (rowNumber == selectedTop) from += selectedFrom - selectedLeft;
-            if (rowNumber == (selectedBottom - 1)) to -= selectedRight - selectedTo - 1;
+          if ((rowNumber >= selectionTop) && (rowNumber < selectionBottom)) {
+            int from = MAX(selectionLeft, columnNumber);
+            int to = MIN(selectionRight, columnNumber+columnCount);
 
             if (from < to) {
-              ScreenCharacter *target = characters + (from - columnNumber);
-              const ScreenCharacter *end = target + (to - from);
+              from -= columnNumber;
+              to -= columnNumber;
+
+              ScreenCharacter *target = characters + from;
+              const ScreenCharacter *end = target + to;
 
               while (target < end) {
                 target->attributes = SCR_COLOUR_FG_BLACK | SCR_COLOUR_BG_LIGHT_GREY;

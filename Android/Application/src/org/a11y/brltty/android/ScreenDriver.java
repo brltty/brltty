@@ -174,7 +174,8 @@ public abstract class ScreenDriver {
 
       case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED: {
         if (newNode != null) {
-          TextField.get(newNode, true).setCursorOffset(event.getFromIndex() + event.getAddedCount());
+          TextField field = TextField.get(newNode, true);
+          field.setCursor(event.getFromIndex() + event.getAddedCount());
         }
 
         break;
@@ -183,8 +184,7 @@ public abstract class ScreenDriver {
       case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED: {
         if (newNode != null) {
           TextField field = TextField.get(newNode, true);
-          field.setSelectedRegion(event.getFromIndex(), event.getToIndex());
-          field.setCursorOffset(event.getToIndex());
+          field.setSelection(event.getFromIndex(), event.getToIndex());
         }
 
         break;
@@ -227,84 +227,63 @@ public abstract class ScreenDriver {
   private static native void exportScreenProperties (
     int number,
     int columns, int rows,
-    int column, int row,
-    int from, int to,
     int left, int top,
     int right, int bottom
   );
 
   private static void exportScreenProperties () {
-    int cursorColumn = 0;
-    int cursorRow = 0;
-
-    int selectedFrom = 0;
-    int selectedTo = 0;
-    int selectedLeft = 0;
-    int selectedTop = 0;
-    int selectedRight = 0;
-    int selectedBottom = 0;
-
     AccessibilityNodeInfo node = currentScreen.getCursorNode();
 
+    int selectionLeft = 0;
+    int selectionTop = 0;
+    int selectionRight = 0;
+    int selectionBottom = 0;
+
     if (node != null) {
-      ScreenElement element = currentScreen.findRenderedScreenElement(node);
+      try {
+        ScreenElement element = currentScreen.findRenderedScreenElement(node);
 
-      if (element != null) {
-        Rect location = element.getBrailleLocation();
-
-        cursorColumn = location.left;
-        cursorRow = location.top;
-
-        {
+        if (element != null) {
+          Rect location = element.getBrailleLocation();
+          selectionLeft = selectionRight = location.left;
+          selectionTop = selectionBottom = location.top;
           TextField field = TextField.getIfFocused(node);
 
           if (field != null) {
-            {
-              int from = field.getSelectionStart();
-              int to = field.getSelectionEnd();
+            int start = field.getSelectionStart();
+            int end = field.getSelectionEnd();
 
-              if (to > from) {
-                Point topLeft = element.getBrailleCoordinate(from);
+            if (start < end) {
+              Point topLeft = element.getBrailleCoordinate(start);
 
-                if (topLeft != null) {
-                  Point bottomRight = element.getBrailleCoordinate(to-1);
+              if (topLeft != null) {
+                Point bottomRight = element.getBrailleCoordinate(end-1);
 
-                  if (bottomRight != null) {
-                    selectedFrom = cursorColumn + topLeft.x;
-                    selectedTo = cursorColumn + bottomRight.x;
-                    selectedLeft = location.left;
-                    selectedTop = cursorRow + topLeft.y;
-                    selectedRight = location.right + 1;
-                    selectedBottom = cursorRow + bottomRight.y + 1;
-                  }
+                if (bottomRight != null) {
+                  bottomRight.x += 1;
+                  bottomRight.y += 1;
+
+                  selectionLeft = location.left + topLeft.x;
+                  selectionTop = location.top + topLeft.y;
+                  selectionRight = location.left + bottomRight.x;
+                  selectionBottom = location.top + bottomRight.y;
                 }
-              }
-            }
-
-            {
-              Point cursor = element.getBrailleCoordinate(field.getCursorOffset());
-
-              if (cursor != null) {
-                cursorColumn += cursor.x;
-                cursorRow += cursor.y;
               }
             }
           }
         }
+      } finally {
+        node.recycle();
+        node = null;
       }
-
-      node.recycle();
-      node = null;
     }
 
     exportScreenProperties(
       currentWindow.getWindowIdentifier(),
       currentScreen.getScreenWidth(),
       currentScreen.getScreenHeight(),
-      cursorColumn, cursorRow,
-      selectedFrom, selectedTo,
-      selectedLeft, selectedTop,
-      selectedRight, selectedBottom
+      selectionLeft, selectionTop,
+      selectionRight, selectionBottom
     );
   }
 
