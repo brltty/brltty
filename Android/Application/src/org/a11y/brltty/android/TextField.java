@@ -107,6 +107,10 @@ android.util.Log.d("evt-txt", "/" + line + "/");
     }
   }
 
+  public static TextField get (AccessibilityNodeInfo node) {
+    return get(node, false);
+  }
+
   public static TextField getIfFocused (AccessibilityNodeInfo node) {
     return node.isFocused()? get(node, false): null;
   }

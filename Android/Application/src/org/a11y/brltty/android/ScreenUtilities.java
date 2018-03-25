@@ -266,7 +266,7 @@ public abstract class ScreenUtilities {
     CharSequence text = null;
 
     {
-      TextField field = TextField.get(node, false);
+      TextField field = TextField.get(node);
 
       if (field != null) {
         synchronized (field) {
