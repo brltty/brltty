@@ -229,7 +229,11 @@ public abstract class ScreenUtilities {
     node = AccessibilityNodeInfo.obtain(node);
 
     while (true) {
-      if ((node.getActions() & actions) != 0) return node;
+      if (node.isEnabled()) {
+        if ((node.getActions() & actions) != 0) {
+          return node;
+        }
+      }
 
       AccessibilityNodeInfo parent = node.getParent();
       node.recycle();
@@ -251,6 +255,22 @@ public abstract class ScreenUtilities {
       node.recycle();
       node = null;
     }
+  }
+
+  public static boolean performClick (AccessibilityNodeInfo node) {
+    return performAction(node, AccessibilityNodeInfo.ACTION_CLICK);
+  }
+
+  public static boolean performLongClick (AccessibilityNodeInfo node) {
+    return performAction(node, AccessibilityNodeInfo.ACTION_LONG_CLICK);
+  }
+
+  public static boolean performScrollForward (AccessibilityNodeInfo node) {
+    return performAction(node, AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+  }
+
+  public static boolean performScrollBackward (AccessibilityNodeInfo node) {
+    return performAction(node, AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
   }
 
   public static String normalizeText (CharSequence text) {

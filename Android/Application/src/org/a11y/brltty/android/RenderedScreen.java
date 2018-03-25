@@ -346,7 +346,10 @@ public class RenderedScreen {
           }
         }
 
-        if (text != null) screenElements.add(text, root);
+        if (text != null) {
+          if (!root.isEnabled()) text += " (disabled)";
+          screenElements.add(text, root);
+        }
       }
 
       propagatedActions &= ~actions;

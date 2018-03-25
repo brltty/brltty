@@ -223,7 +223,7 @@ public abstract class InputHandlers {
       @Override
       protected boolean performNavigationAction (AccessibilityNodeInfo node) {
         if (ApplicationUtilities.haveJellyBean) {
-          return ScreenUtilities.performAction(node, AccessibilityNodeInfo.ACTION_CLICK);
+          return ScreenUtilities.performClick(node);
         }
 
         return super.performNavigationAction(node);
@@ -385,7 +385,7 @@ public abstract class InputHandlers {
       @Override
       protected boolean performNavigationAction (AccessibilityNodeInfo node) {
         if (ApplicationUtilities.haveJellyBean) {
-          return ScreenUtilities.performAction(node, AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+          return ScreenUtilities.performScrollBackward(node);
         }
 
         return super.performNavigationAction(node);
@@ -412,7 +412,7 @@ public abstract class InputHandlers {
       @Override
       protected boolean performNavigationAction (AccessibilityNodeInfo node) {
         if (ApplicationUtilities.haveJellyBean) {
-          return ScreenUtilities.performAction(node, AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+          return ScreenUtilities.performScrollForward(node);
         }
 
         return super.performNavigationAction(node);
