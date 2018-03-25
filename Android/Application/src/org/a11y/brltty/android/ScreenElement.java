@@ -89,6 +89,10 @@ public class ScreenElement {
     return false;
   }
 
+  public boolean bringCursor () {
+    return false;
+  }
+
   public boolean onBringCursor () {
     return false;
   }
@@ -118,10 +122,6 @@ public class ScreenElement {
       case  4: return onScrollForward();
       default: return false;
     }
-  }
-
-  public boolean bringCursor () {
-    return false;
   }
 
   protected String[] makeBrailleText (String text) {

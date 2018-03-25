@@ -258,11 +258,11 @@ public class InputService extends InputMethodService {
     return null;
   }
 
-  public static boolean placeCursor (int position) {
+  public static boolean placeCursor (int offset) {
     InputConnection connection = getInputConnection();
 
     if (connection != null) {
-      if (connection.setSelection(position, position)) {
+      if (connection.setSelection(offset, offset)) {
         return true;
       }
     }

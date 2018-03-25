@@ -54,55 +54,6 @@ public class RealScreenElement extends ScreenElement {
     return ScreenUtilities.isEditable(accessibilityNode);
   }
 
-  @Override
-  public boolean performAction (int column, int row) {
-    if (ScreenUtilities.isEditable(accessibilityNode)) {
-      if (!onBringCursor()) return false;
-
-      String[] lines = getBrailleText();
-      String line;
-      int index = 0;
-      int offset = 0;
-
-      while (true) {
-        line = lines[index];
-        if (index == row) break;
-
-        offset += line.length();
-        index += 1;
-      }
-
-      offset += Math.min(column, (line.length() - 1));
-
-      if (ApplicationUtilities.haveJellyBeanMR2) {
-        Bundle arguments = new Bundle();
-        arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, offset);
-        arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, offset);
-        if (accessibilityNode.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, arguments)) return true;
-      }
-
-      return InputService.placeCursor(offset);
-    }
-
-    return super.performAction(column, row);
-  }
-
-  @Override
-  protected String[] makeBrailleText (String text) {
-    String[] lines = super.makeBrailleText(text);
-    if (lines == null) return null;
-
-    if (ScreenUtilities.isEditable(accessibilityNode)) {
-      int count = lines.length;
-
-      for (int index=0; index<count; index+=1) {
-        lines[index] += ' ';
-      }
-    }
-
-    return lines;
-  }
-
   private AccessibilityNodeInfo getFocusableNode () {
     return ScreenUtilities.findActionableNode(accessibilityNode,
       AccessibilityNodeInfo.ACTION_FOCUS |
@@ -114,7 +65,7 @@ public class RealScreenElement extends ScreenElement {
     return ScreenUtilities.performAction(accessibilityNode, action);
   }
 
-  public boolean doKey (int keyCode, boolean longPress) {
+  public boolean injectKey (int keyCode, boolean longPress) {
     boolean done = false;
     AccessibilityNodeInfo node = getFocusableNode();
 
@@ -162,16 +113,27 @@ public class RealScreenElement extends ScreenElement {
   }
 
   @Override
+  public boolean bringCursor () {
+    if (ApplicationUtilities.haveJellyBean) {
+      return performNodeAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
+    }
+
+    return false;
+  }
+
+  @Override
   public boolean onBringCursor () {
     if (ApplicationUtilities.haveJellyBean) {
       {
-        AccessibilityNodeInfo focusedNode = accessibilityNode.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
+        AccessibilityNodeInfo node = accessibilityNode.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
 
-        if (focusedNode != null) {
-          boolean done = focusedNode.equals(accessibilityNode);
-          focusedNode.recycle();
-          focusedNode = null;
-          if (done) return true;
+        if (node != null) {
+          try {
+            return node.equals(accessibilityNode);
+          } finally {
+            node.recycle();
+            node = null;
+          }
         }
       }
 
@@ -213,7 +175,7 @@ public class RealScreenElement extends ScreenElement {
     }
 
     if (ApplicationUtilities.haveIceCreamSandwich) {
-      return doKey(KeyEvent.KEYCODE_DPAD_CENTER, false);
+      return injectKey(KeyEvent.KEYCODE_DPAD_CENTER, false);
     }
 
     return super.onClick();
@@ -226,7 +188,7 @@ public class RealScreenElement extends ScreenElement {
     }
 
     if (ApplicationUtilities.haveIceCreamSandwich) {
-      return doKey(KeyEvent.KEYCODE_DPAD_CENTER, true);
+      return injectKey(KeyEvent.KEYCODE_DPAD_CENTER, true);
     }
 
     return super.onLongClick();
@@ -239,7 +201,7 @@ public class RealScreenElement extends ScreenElement {
     }
 
     if (ApplicationUtilities.haveIceCreamSandwich) {
-      return doKey(KeyEvent.KEYCODE_PAGE_UP, false);
+      return injectKey(KeyEvent.KEYCODE_PAGE_UP, false);
     }
 
     return super.onScrollBackward();
@@ -252,18 +214,51 @@ public class RealScreenElement extends ScreenElement {
     }
 
     if (ApplicationUtilities.haveIceCreamSandwich) {
-      return doKey(KeyEvent.KEYCODE_PAGE_DOWN, false);
+      return injectKey(KeyEvent.KEYCODE_PAGE_DOWN, false);
     }
 
     return super.onScrollForward();
   }
 
-  public boolean bringCursor () {
-    if (ApplicationUtilities.haveJellyBean) {
-      return performNodeAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
+  @Override
+  public boolean performAction (int column, int row) {
+    if (ScreenUtilities.isEditable(accessibilityNode)) {
+      if (!onBringCursor()) return false;
+
+      String[] lines = getBrailleText();
+      String line;
+      int index = 0;
+      int offset = 0;
+
+      while (true) {
+        line = lines[index];
+        if (index == row) break;
+
+        offset += line.length();
+        index += 1;
+      }
+
+      offset += Math.min(column, (line.length() - 1));
+      return InputHandlers.placeTextCursor(accessibilityNode, offset);
     }
 
-    return false;
+    return super.performAction(column, row);
+  }
+
+  @Override
+  protected String[] makeBrailleText (String text) {
+    String[] lines = super.makeBrailleText(text);
+    if (lines == null) return null;
+
+    if (ScreenUtilities.isEditable(accessibilityNode)) {
+      int count = lines.length;
+
+      for (int index=0; index<count; index+=1) {
+        lines[index] += ' ';
+      }
+    }
+
+    return lines;
   }
 
   public RealScreenElement (String text, AccessibilityNodeInfo node) {

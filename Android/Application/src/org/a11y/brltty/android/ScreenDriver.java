@@ -247,34 +247,37 @@ public abstract class ScreenDriver {
           Rect location = element.getBrailleLocation();
           selectionLeft = selectionRight = location.left;
           selectionTop = selectionBottom = location.top;
-          TextField field = TextField.getIfFocused(node);
 
-          if (field != null) {
-            int start;
-            int end;
+          if (ScreenUtilities.isEditable(node)) {
+            TextField field = TextField.get(node);
 
-            synchronized (field) {
-              start = field.getSelectionStart();
-              end = field.getSelectionEnd();
-            }
+            if (field != null) {
+              int start;
+              int end;
 
-            {
-              Point topLeft = element.getBrailleCoordinate(start);
+              synchronized (field) {
+                start = field.getSelectionStart();
+                end = field.getSelectionEnd();
+              }
 
-              if (topLeft != null) {
-                if (start == end) {
-                  selectionLeft += topLeft.x;
-                  selectionTop += topLeft.y;
-                  selectionRight += topLeft.x;
-                  selectionBottom += topLeft.y;
-                } else {
-                  Point bottomRight = element.getBrailleCoordinate(end-1);
+              {
+                Point topLeft = element.getBrailleCoordinate(start);
 
-                  if (bottomRight != null) {
+                if (topLeft != null) {
+                  if (start == end) {
                     selectionLeft += topLeft.x;
                     selectionTop += topLeft.y;
-                    selectionRight += bottomRight.x + 1;
-                    selectionBottom += bottomRight.y + 1;
+                    selectionRight += topLeft.x;
+                    selectionBottom += topLeft.y;
+                  } else {
+                    Point bottomRight = element.getBrailleCoordinate(end-1);
+
+                    if (bottomRight != null) {
+                      selectionLeft += topLeft.x;
+                      selectionTop += topLeft.y;
+                      selectionRight += bottomRight.x + 1;
+                      selectionBottom += bottomRight.y + 1;
+                    }
                   }
                 }
               }

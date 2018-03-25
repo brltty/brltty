@@ -69,7 +69,7 @@ public abstract class InputHandlers {
     return offset;
   }
 
-  private static boolean placeTextCursor (AccessibilityNodeInfo node, int offset) {
+  public static boolean placeTextCursor (AccessibilityNodeInfo node, int offset) {
     if (ApplicationUtilities.haveJellyBeanMR2) {
       Bundle arguments = new Bundle();
       arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, offset);
@@ -77,7 +77,7 @@ public abstract class InputHandlers {
       return node.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, arguments);
     }
 
-    return false;
+    return InputService.placeCursor(offset);
   }
 
   private static Integer findNextLine (CharSequence text, int offset) {
