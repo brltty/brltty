@@ -250,23 +250,32 @@ public abstract class ScreenDriver {
           TextField field = TextField.getIfFocused(node);
 
           if (field != null) {
-            int start = field.getSelectionStart();
-            int end = field.getSelectionEnd();
+            int start;
+            int end;
 
-            if (start < end) {
+            synchronized (field) {
+              start = field.getSelectionStart();
+              end = field.getSelectionEnd();
+            }
+
+            {
               Point topLeft = element.getBrailleCoordinate(start);
 
               if (topLeft != null) {
-                Point bottomRight = element.getBrailleCoordinate(end-1);
+                if (start == end) {
+                  selectionLeft += topLeft.x;
+                  selectionTop += topLeft.y;
+                  selectionRight += topLeft.x;
+                  selectionBottom += topLeft.y;
+                } else {
+                  Point bottomRight = element.getBrailleCoordinate(end-1);
 
-                if (bottomRight != null) {
-                  bottomRight.x += 1;
-                  bottomRight.y += 1;
-
-                  selectionLeft = location.left + topLeft.x;
-                  selectionTop = location.top + topLeft.y;
-                  selectionRight = location.left + bottomRight.x;
-                  selectionBottom = location.top + bottomRight.y;
+                  if (bottomRight != null) {
+                    selectionLeft += topLeft.x;
+                    selectionTop += topLeft.y;
+                    selectionRight += bottomRight.x + 1;
+                    selectionBottom += bottomRight.y + 1;
+                  }
                 }
               }
             }

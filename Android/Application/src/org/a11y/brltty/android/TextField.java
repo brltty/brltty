@@ -39,8 +39,11 @@ public class TextField {
   }
 
   public final TextField setSelection (int start, int end) {
-    selectionStart = start;
-    selectionEnd = end;
+    synchronized (this) {
+      selectionStart = start;
+      selectionEnd = end;
+    }
+
     return this;
   }
 
