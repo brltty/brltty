@@ -335,16 +335,16 @@ public abstract class ScreenDriver {
     return 0;
   }
 
-  public static void getRowText (char[] textBuffer, int rowIndex, int columnIndex) {
-    CharSequence rowText = (rowIndex < currentScreen.getScreenHeight())? currentScreen.getScreenRow(rowIndex): null;
-    int rowLength = (rowText != null)? rowText.length(): 0;
+  public static char[] getRowText (int row, int column) {
+    String text = (row < currentScreen.getScreenHeight())? currentScreen.getScreenRow(row): "";
+    int length = text.length();
 
-    int textLength = textBuffer.length;
-    int textIndex = 0;
+    if (column > length) column = length;
+    int count = length - column;
 
-    while (textIndex < textLength) {
-      textBuffer[textIndex++] = (columnIndex < rowLength)? rowText.charAt(columnIndex++): ' ';
-    }
+    char[] characters = new char[count];
+    text.getChars(column, length, characters, 0);
+    return characters;
   }
 
   public static boolean routeCursor (int column, int row) {

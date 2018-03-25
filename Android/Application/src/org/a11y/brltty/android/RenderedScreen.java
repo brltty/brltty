@@ -34,7 +34,7 @@ public class RenderedScreen {
   private final AccessibilityNodeInfo rootNode;
 
   private final ScreenElementList screenElements = new ScreenElementList();
-  private final List<CharSequence> screenRows = new ArrayList<CharSequence>();
+  private final List<String> screenRows = new ArrayList<String>();
 
   private final int screenWidth;
   private final AccessibilityNodeInfo cursorNode;
@@ -56,7 +56,7 @@ public class RenderedScreen {
     return screenRows.size();
   }
 
-  public final CharSequence getScreenRow (int index) {
+  public final String getScreenRow (int index) {
     return screenRows.get(index);
   }
 
@@ -365,7 +365,7 @@ public class RenderedScreen {
       screenRows.add("waiting for screen update");
     }
 
-    for (CharSequence row : screenRows) {
+    for (String row : screenRows) {
       int length = row.length();
       if (length > width) width = length;
     }
@@ -470,7 +470,7 @@ public class RenderedScreen {
     log(("screen width: " + screenWidth));
     int rowIndex = 0;
 
-    for (CharSequence row : screenRows) {
+    for (String row : screenRows) {
       log(
         String.format(
           "screen row %d: %s", rowIndex++, row.toString()

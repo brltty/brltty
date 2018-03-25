@@ -190,75 +190,72 @@ describe_AndroidScreen (ScreenDescription *description) {
 }
 
 static int
-getRowCharacters (ScreenCharacter *characters, jint rowNumber, jint columnNumber, jint columnCount) {
+getRowCharacters (ScreenCharacter *characters, jint rowIndex, jint columnIndex, jint columnCount) {
   if (findScreenDriverClass()) {
     static jmethodID method = 0;
 
     if (findJavaStaticMethod(env, &method, screenDriverClass, "getRowText",
-                             JAVA_SIG_METHOD(JAVA_SIG_VOID, 
-                                             JAVA_SIG_ARRAY(JAVA_SIG_CHAR) // textBuffer
-                                             JAVA_SIG_INT // rowNumber
-                                             JAVA_SIG_INT // columnNumber
+                             JAVA_SIG_METHOD(JAVA_SIG_ARRAY(JAVA_SIG_CHAR),
+                                             JAVA_SIG_INT // row
+                                             JAVA_SIG_INT // column
                                             ))) {
-      jcharArray textBuffer = (*env)->NewCharArray(env, columnCount);
+      jcharArray jCharacters = (*env)->CallStaticObjectMethod(
+        env, screenDriverClass, method, rowIndex, columnIndex
+      );
 
-      if (textBuffer) {
-        (*env)->CallStaticVoidMethod(env, screenDriverClass, method, textBuffer, rowNumber, columnNumber);
+      if (!clearJavaException(env, 1)) {
+        jint characterCount = (*env)->GetArrayLength(env, jCharacters);
+        jchar cCharacters[characterCount];
+        (*env)->GetCharArrayRegion(env, jCharacters, 0, characterCount, cCharacters);
 
-        if (!clearJavaException(env, 1)) {
-          jchar buffer[columnCount];
-          (*env)->GetCharArrayRegion(env, textBuffer, 0, columnCount, buffer);
+        (*env)->DeleteLocalRef(env, jCharacters);
+        jCharacters = NULL;
 
-          (*env)->DeleteLocalRef(env, textBuffer);
-          textBuffer = NULL;
+        {
+          const jchar *source = cCharacters;
+          const jchar *sourceEnd = source + characterCount;
+          ScreenCharacter *target = characters;
+          ScreenCharacter *targetEnd = target + columnCount;
 
-          {
-            const jchar *source = buffer;
-            const jchar *end = source + columnCount;
-            ScreenCharacter *target = characters;
+          while (target < targetEnd) {
+            target->text = (source < sourceEnd)? *source++: ' ';
+            target->attributes = SCR_COLOUR_DEFAULT;
+            target += 1;
+          }
+        }
 
-            while (source < end) {
-              target->text = *source++;
-              target->attributes = SCR_COLOUR_DEFAULT;
+        if ((rowIndex >= selectionTop) && (rowIndex < selectionBottom)) {
+          int from = columnIndex;
+          int to = columnIndex + columnCount;
+
+          if (rowIndex == selectionTop) {
+            if (selectionLeft > from) {
+              from = selectionLeft;
+            }
+          }
+
+          if ((rowIndex + 1) == selectionBottom) {
+            if (selectionRight < to) {
+              to = selectionRight;
+            }
+          }
+
+          if (from < to) {
+            from -= columnIndex;
+            to -= columnIndex;
+            if (to > characterCount) to = characterCount;
+
+            ScreenCharacter *target = characters + from;
+            const ScreenCharacter *targetEnd = characters + to;
+
+            while (target < targetEnd) {
+              target->attributes = SCR_COLOUR_FG_BLACK | SCR_COLOUR_BG_LIGHT_GREY;
               target += 1;
             }
           }
-
-          if ((rowNumber >= selectionTop) && (rowNumber < selectionBottom)) {
-            int from = columnNumber;
-            int to = columnNumber + columnCount;
-
-            if (rowNumber == selectionTop) {
-              if (selectionLeft > from) {
-                from = selectionLeft;
-              }
-            }
-
-            if ((rowNumber + 1) == selectionBottom) {
-              if (selectionRight < to) {
-                to = selectionRight;
-              }
-            }
-
-            if (from < to) {
-              from -= columnNumber;
-              to -= columnNumber;
-
-              ScreenCharacter *target = characters + from;
-              const ScreenCharacter *end = target + to;
-
-              while (target < end) {
-                target->attributes = SCR_COLOUR_FG_BLACK | SCR_COLOUR_BG_LIGHT_GREY;
-                target += 1;
-              }
-            }
-          }
-
-          return 1;
         }
-      } else {
-        logMallocError();
-        clearJavaException(env, 0);
+
+        return 1;
       }
     }
   }

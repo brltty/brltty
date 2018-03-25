@@ -98,7 +98,7 @@ public abstract class BrailleRenderer {
     }
   }
 
-  private void setScreenRegion (List<CharSequence> rows, Rect location, String[] lines) {
+  private void setScreenRegion (List<String> rows, Rect location, String[] lines) {
     int width = location.right - location.left + 1;
 
     while (rows.size() <= location.bottom) {
@@ -121,7 +121,7 @@ public abstract class BrailleRenderer {
     }
   }
 
-  public final void renderScreenElements (ScreenElementList elements, List<CharSequence> rows) {
+  public final void renderScreenElements (ScreenElementList elements, List<String> rows) {
     setBrailleLocations(elements);
     addVirtualElements(elements);
 
