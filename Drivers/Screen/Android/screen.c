@@ -225,8 +225,20 @@ getRowCharacters (ScreenCharacter *characters, jint rowNumber, jint columnNumber
           }
 
           if ((rowNumber >= selectionTop) && (rowNumber < selectionBottom)) {
-            int from = MAX(selectionLeft, columnNumber);
-            int to = MIN(selectionRight, columnNumber+columnCount);
+            int from = columnNumber;
+            int to = columnNumber + columnCount;
+
+            if (rowNumber == selectionTop) {
+              if (selectionLeft > from) {
+                from = selectionLeft;
+              }
+            }
+
+            if ((rowNumber + 1) == selectionBottom) {
+              if (selectionRight < to) {
+                to = selectionRight;
+              }
+            }
 
             if (from < to) {
               from -= columnNumber;
