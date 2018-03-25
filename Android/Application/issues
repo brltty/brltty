@@ -1,4 +1,5 @@
-cursor navigation
+cursor key navigation
 check action performability better (e.g. setting/clearing input/access focus)
-password fields
-dispmd crashes
+password input shows bullets
+dispmd crashes when navigating off the top
+input service icon
