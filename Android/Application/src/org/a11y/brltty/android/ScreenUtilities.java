@@ -68,7 +68,7 @@ public abstract class ScreenUtilities {
       }
     }
 
-    return node.isChecked()?
+    return node.isCheckable()?
            AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_MULTIPLE:
            AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_NONE;
   }
