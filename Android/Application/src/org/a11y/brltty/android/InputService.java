@@ -270,42 +270,6 @@ public class InputService extends InputMethodService {
     return false;
   }
 
-  public static boolean insertCharacter (char character) {
-    InputConnection connection = getInputConnection();
-
-    if (connection != null) {
-      if (connection.commitText(Character.toString(character), 1)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  public static boolean deletePreviousCharacter () {
-    InputConnection connection = getInputConnection();
-
-    if (connection != null) {
-      if (connection.deleteSurroundingText(1, 0)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  public static boolean deleteNextCharacter () {
-    InputConnection connection = getInputConnection();
-
-    if (connection != null) {
-      if (connection.deleteSurroundingText(0, 1)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
   public static boolean injectKey (int keyCode, boolean longPress) {
     InputConnection connection = getInputConnection();
 

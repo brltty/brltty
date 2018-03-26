@@ -30,6 +30,7 @@ import android.accessibilityservice.AccessibilityService;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 
+import android.view.inputmethod.InputConnection;
 import android.view.KeyEvent;
 
 import android.text.Editable;
@@ -199,6 +200,7 @@ public abstract class InputHandlers {
     public TextEditor () {
     }
 
+    protected abstract boolean editText (InputConnection connection);
     protected abstract Integer editText (Editable editor, int start, int end);
 
     private final boolean editText (AccessibilityNodeInfo node) {
@@ -234,12 +236,21 @@ public abstract class InputHandlers {
     }
 
     public final boolean editText () {
+      {
+        InputConnection connection = InputService.getInputConnection();
+        if (connection != null) return editText(connection);
+      }
+
       if (ApplicationUtilities.haveLollipop) {
         AccessibilityNodeInfo node = getCursorNode();
 
         if (node != null) {
           try {
-            if (node.isEditable()) return editText(node);
+            if (node.isEditable()) {
+              if (!node.isPassword()) {
+                return editText(node);
+              }
+            }
           } finally {
             node.recycle();
             node = null;
@@ -247,22 +258,23 @@ public abstract class InputHandlers {
         }
       }
 
-      throw new UnsupportedOperationException();
+      return false;
     }
   }
 
   public static boolean inputCharacter (final char character) {
-    try {
-      return new TextEditor() {
-        @Override
-        protected Integer editText (Editable editor, int start, int end) {
-          editor.replace(start, end, Character.toString(character));
-          return start + 1;
-        }
-      }.editText();
-    } catch (UnsupportedOperationException exception) {
-      return InputService.insertCharacter(character);
-    }
+    return new TextEditor() {
+      @Override
+      protected boolean editText (InputConnection connection) {
+        return connection.commitText(Character.toString(character), 1);
+      }
+
+      @Override
+      protected Integer editText (Editable editor, int start, int end) {
+        editor.replace(start, end, Character.toString(character));
+        return start + 1;
+      }
+    }.editText();
   }
 
   private static boolean injectKey (int code) {
@@ -338,22 +350,23 @@ public abstract class InputHandlers {
   }
 
   public static boolean inputKey_backspace () {
-    try {
-      return new TextEditor() {
-        @Override
-        protected Integer editText (Editable editor, int start, int end) {
-          if (start == end) {
-            if (start < 1) return null;
-            start -= 1;
-          }
+    return new TextEditor() {
+      @Override
+      protected boolean editText (InputConnection connection) {
+        return connection.deleteSurroundingText(1, 0);
+      }
 
-          editor.delete(start, end);
-          return start;
+      @Override
+      protected Integer editText (Editable editor, int start, int end) {
+        if (start == end) {
+          if (start < 1) return null;
+          start -= 1;
         }
-      }.editText();
-    } catch (UnsupportedOperationException exception) {
-      return InputService.deletePreviousCharacter();
-    }
+
+        editor.delete(start, end);
+        return start;
+      }
+    }.editText();
   }
 
   public static boolean inputKey_escape () {
@@ -579,22 +592,23 @@ public abstract class InputHandlers {
   }
 
   public static boolean inputKey_delete () {
-    try {
-      return new TextEditor() {
-        @Override
-        protected Integer editText (Editable editor, int start, int end) {
-          if (start == end) {
-            if (end == editor.length()) return null;
-            end += 1;
-          }
+    return new TextEditor() {
+      @Override
+      protected boolean editText (InputConnection connection) {
+        return connection.deleteSurroundingText(0, 1);
+      }
 
-          editor.delete(start, end);
-          return start;
+      @Override
+      protected Integer editText (Editable editor, int start, int end) {
+        if (start == end) {
+          if (end == editor.length()) return null;
+          end += 1;
         }
-      }.editText();
-    } catch (UnsupportedOperationException exception) {
-      return InputService.deleteNextCharacter();
-    }
+
+        editor.delete(start, end);
+        return start;
+      }
+    }.editText();
   }
 
   private interface FunctionKeyAction {
