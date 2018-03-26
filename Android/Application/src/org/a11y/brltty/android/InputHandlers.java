@@ -18,10 +18,17 @@
 
 package org.a11y.brltty.android;
 
+import java.util.Arrays;
+import java.util.Comparator;
+
+import java.util.Collections;
+import java.util.List;
+
 import android.os.Bundle;
 
 import android.accessibilityservice.AccessibilityService;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowInfo;
 
 import android.view.KeyEvent;
 
@@ -38,6 +45,85 @@ public abstract class InputHandlers {
     return BrailleService.getBrailleService().performGlobalAction(action);
   }
 
+  private static AccessibilityNodeInfo getCursorNode () {
+    RenderedScreen screen = ScreenDriver.getScreen();
+    if (screen == null) return null;
+    return screen.getCursorNode();
+  }
+
+  private static List<AccessibilityWindowInfo> getVisibleWindows () {
+    if (ApplicationUtilities.haveLollipop) {
+      return BrailleService.getBrailleService().getWindows();
+    } else {
+      return Collections.EMPTY_LIST;
+    }
+  }
+
+  private static AccessibilityWindowInfo[] getVisibleWindows (final Comparator<Integer> comparator) {
+    List<AccessibilityWindowInfo> list = getVisibleWindows();
+    AccessibilityWindowInfo[] array = list.toArray(new AccessibilityWindowInfo[list.size()]);
+
+    Arrays.sort(array,
+      new Comparator<AccessibilityWindowInfo>() {
+        @Override
+        public int compare (AccessibilityWindowInfo window1, AccessibilityWindowInfo window2) {
+          return comparator.compare(window1.getId(), window2.getId());
+        }
+      }
+    );
+
+    return array;
+  }
+
+  private static boolean switchWindow (Comparator<Integer> comparator) {
+    boolean found = false;
+    AccessibilityNodeInfo cursorNode = getCursorNode();
+
+    if (cursorNode != null) {
+      try {
+        int referenceIdentifier = cursorNode.getWindowId();
+        for (AccessibilityWindowInfo window : getVisibleWindows(comparator)) {
+          try {
+            if (!found) {
+              if (comparator.compare(window.getId(), referenceIdentifier) > 0) {
+                AccessibilityNodeInfo rootNode = window.getRoot();
+
+                if (rootNode != null) {
+                  try {
+                    AccessibilityNodeInfo focusableNode = ScreenUtilities.findFocusableNode(rootNode);
+
+                    if (focusableNode != null) {
+                      try {
+                        if (focusableNode.performAction(AccessibilityNodeInfo.ACTION_FOCUS)) {
+                          found = true;
+                          focusableNode.performAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
+                        }
+                      } finally {
+                        focusableNode.recycle();
+                        focusableNode = null;
+                      }
+                    }
+                  } finally {
+                    rootNode.recycle();
+                    rootNode = null;
+                  }
+                }
+              }
+            }
+          } finally {
+            window.recycle();
+            window = null;
+          }
+        }
+      } finally {
+        cursorNode.recycle();
+        cursorNode = null;
+      }
+    }
+
+    return found;
+  }
+
   private static boolean moveFocus (RenderedScreen.SearchDirection direction) {
     RenderedScreen screen = ScreenDriver.getScreen();
 
@@ -48,12 +134,6 @@ public abstract class InputHandlers {
     }
 
     return false;
-  }
-
-  private static AccessibilityNodeInfo getCursorNode () {
-    RenderedScreen screen = ScreenDriver.getScreen();
-    if (screen == null) return null;
-    return screen.getCursorNode();
   }
 
   private static int getTextStartOffset (AccessibilityNodeInfo node) {
@@ -513,24 +593,7 @@ public abstract class InputHandlers {
     public boolean performAction ();
   }
 
-  private final static FunctionKeyAction logScreenAction =
-    new FunctionKeyAction() {
-      @Override
-      public boolean performAction () {
-        ScreenLogger.log();
-        return true;
-      }
-    };
-
-  private final static FunctionKeyAction brlttySettingsAction =
-    new FunctionKeyAction() {
-      @Override
-      public boolean performAction () {
-        return BrailleService.getBrailleService().launchSettingsActivity();
-      }
-    };
-
-  private final static FunctionKeyAction backAction =
+  private final static FunctionKeyAction functionKeyAction_backButton =
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
@@ -542,7 +605,7 @@ public abstract class InputHandlers {
       }
     };
 
-  private final static FunctionKeyAction homeAction =
+  private final static FunctionKeyAction functionKeyAction_homeScreen =
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
@@ -554,7 +617,32 @@ public abstract class InputHandlers {
       }
     };
 
-  private final static FunctionKeyAction notificationsAction =
+  private final static FunctionKeyAction functionKeyAction_logScreen =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        ScreenLogger.log();
+        return true;
+      }
+    };
+
+  private final static FunctionKeyAction functionKeyAction_moveBackward =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        return moveFocus(RenderedScreen.SearchDirection.BACKWARD);
+      }
+    };
+
+  private final static FunctionKeyAction functionKeyAction_moveForward =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        return moveFocus(RenderedScreen.SearchDirection.FORWARD);
+      }
+    };
+
+  private final static FunctionKeyAction functionKeyAction_notificationsShade =
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
@@ -566,7 +654,16 @@ public abstract class InputHandlers {
       }
     };
 
-  private final static FunctionKeyAction powerDialogAction =
+  private final static FunctionKeyAction functionKeyAction_optionsMenu =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        return new KeyHandler(KeyEvent.KEYCODE_MENU) {
+        }.handleKey();
+      }
+    };
+
+  private final static FunctionKeyAction functionKeyAction_powerDialog =
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
@@ -578,7 +675,7 @@ public abstract class InputHandlers {
       }
     };
 
-  private final static FunctionKeyAction quickSettingsAction =
+  private final static FunctionKeyAction functionKeyAction_quickSettings =
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
@@ -590,7 +687,7 @@ public abstract class InputHandlers {
       }
     };
 
-  private final static FunctionKeyAction recentApplicationsAction =
+  private final static FunctionKeyAction functionKeyAction_recentApplications =
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
@@ -602,44 +699,64 @@ public abstract class InputHandlers {
       }
     };
 
-  private final static FunctionKeyAction moveBackwardAction =
+  private final static FunctionKeyAction functionKeyAction_serviceSettings =
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
-        return moveFocus(RenderedScreen.SearchDirection.BACKWARD);
+        return BrailleService.getBrailleService().launchSettingsActivity();
       }
     };
 
-  private final static FunctionKeyAction moveForwardAction =
+  private final static FunctionKeyAction functionKeyAction_previousWindow =
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
-        return moveFocus(RenderedScreen.SearchDirection.FORWARD);
+        Comparator<Integer> comparator =
+          new Comparator<Integer>() {
+            @Override
+            public int compare (Integer id1, Integer id2) {
+              return -Integer.compare(id1, id2);
+            }
+          };
+
+        return switchWindow(comparator);
       }
     };
 
-  private final static FunctionKeyAction menuAction =
+  private final static FunctionKeyAction functionKeyAction_nextWindow =
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
-        return new KeyHandler(KeyEvent.KEYCODE_MENU) {
-        }.handleKey();
+        Comparator<Integer> comparator =
+          new Comparator<Integer>() {
+            @Override
+            public int compare (Integer id1, Integer id2) {
+              return Integer.compare(id1, id2);
+            }
+          };
+
+        return switchWindow(comparator);
       }
     };
 
   private final static FunctionKeyAction[] functionKeyActions =
     new FunctionKeyAction[] {
-      homeAction,
-      backAction,
-      notificationsAction,
-      recentApplicationsAction,
-      brlttySettingsAction,
-      quickSettingsAction,
-      moveBackwardAction,
-      moveForwardAction,
-      powerDialogAction,
-      menuAction,
-      logScreenAction
+      /* F1  */ functionKeyAction_homeScreen,
+      /* F2  */ functionKeyAction_backButton,
+      /* F3  */ functionKeyAction_notificationsShade,
+      /* F4  */ functionKeyAction_recentApplications,
+      /* F5  */ functionKeyAction_serviceSettings,
+      /* F6  */ functionKeyAction_quickSettings,
+      /* F7  */ functionKeyAction_moveBackward,
+      /* F8  */ functionKeyAction_moveForward,
+      /* F9  */ functionKeyAction_powerDialog,
+      /* F10 */ functionKeyAction_optionsMenu,
+      /* F11 */ null,
+      /* F12 */ null,
+      /* F13 */ null,
+      /* F14 */ functionKeyAction_previousWindow,
+      /* F15 */ functionKeyAction_nextWindow,
+      /* F16 */ functionKeyAction_logScreen
     };
 
   public static boolean inputKey_function (int key) {
@@ -648,6 +765,7 @@ public abstract class InputHandlers {
 
     FunctionKeyAction action = functionKeyActions[key];
     if (action == null) return false;
+
     return action.performAction();
   }
 }
