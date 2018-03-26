@@ -48,6 +48,36 @@ public abstract class ScreenUtilities {
     return isSubclassOf(node, android.widget.Switch.class);
   }
 
+  private static boolean isSelectionMode (AccessibilityNodeInfo node, int mode) {
+    if (ApplicationUtilities.haveLollipop) {
+      if (node.getCollectionItemInfo() != null) {
+        AccessibilityNodeInfo parent = node.getParent();
+
+        if (parent != null) {
+          try {
+            AccessibilityNodeInfo.CollectionInfo collection = parent.getCollectionInfo();
+
+            if (collection != null) {
+              if (collection.getSelectionMode() == mode) {
+                return true;
+              }
+            }
+          } finally {
+            parent.recycle();
+            parent = null;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  public static boolean isRadioButton (AccessibilityNodeInfo node) {
+    if (isSelectionMode(node, AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_SINGLE)) return true;
+    return false;
+  }
+
   public static boolean isEditable (AccessibilityNodeInfo node) {
     if (ApplicationUtilities.haveJellyBeanMR2) {
       return node.isEditable();

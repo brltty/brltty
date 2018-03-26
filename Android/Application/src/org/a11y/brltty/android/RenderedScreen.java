@@ -235,6 +235,10 @@ public class RenderedScreen {
         sb.append(Characters.SWITCH_BEGIN);
         sb.append(node.isChecked()? Characters.SWITCH_ON: Characters.SWITCH_OFF);
         sb.append(Characters.SWITCH_END);
+      } else if (ScreenUtilities.isRadioButton(node)) {
+        sb.append(Characters.RADIO_BEGIN);
+        sb.append(node.isChecked()? Characters.RADIO_MARK: ' ');
+        sb.append(Characters.RADIO_END);
       } else {
         sb.append(Characters.CHECKBOX_BEGIN);
         sb.append(node.isChecked()? Characters.CHECKBOX_MARK: ' ');

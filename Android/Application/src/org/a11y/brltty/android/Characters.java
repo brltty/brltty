@@ -57,6 +57,27 @@ public abstract class Characters {
                                         | BRAILLE_DOT7
                                         ;
 
+  public static final char RADIO_BEGIN = BRAILLE_ROW
+                                       | BRAILLE_DOT4
+                                       | BRAILLE_DOT2
+                                       | BRAILLE_DOT3
+                                       | BRAILLE_DOT8
+                                       ;
+
+  public static final char RADIO_MARK = BRAILLE_ROW
+                                      | BRAILLE_DOT2
+                                      | BRAILLE_DOT5
+                                      | BRAILLE_DOT3
+                                      | BRAILLE_DOT6
+                                      ;
+
+  public static final char RADIO_END = BRAILLE_ROW
+                                     | BRAILLE_DOT1
+                                     | BRAILLE_DOT5
+                                     | BRAILLE_DOT6
+                                     | BRAILLE_DOT7
+                                     ;
+
   public static final char SWITCH_BEGIN = BRAILLE_ROW
                                         | BRAILLE_DOT4
                                         | BRAILLE_DOT5
