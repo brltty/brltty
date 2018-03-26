@@ -75,7 +75,34 @@ public abstract class InputHandlers {
     return array;
   }
 
-  private static boolean switchWindow (Comparator<Integer> comparator) {
+  private static boolean switchToWindow (AccessibilityWindowInfo window) {
+    AccessibilityNodeInfo rootNode = window.getRoot();
+
+    if (rootNode != null) {
+      try {
+        AccessibilityNodeInfo focusableNode = ScreenUtilities.findFocusableNode(rootNode);
+
+        if (focusableNode != null) {
+          try {
+            if (focusableNode.performAction(AccessibilityNodeInfo.ACTION_FOCUS)) {
+              focusableNode.performAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
+              return true;
+            }
+          } finally {
+            focusableNode.recycle();
+            focusableNode = null;
+          }
+        }
+      } finally {
+        rootNode.recycle();
+        rootNode = null;
+      }
+    }
+
+    return false;
+  }
+
+  private static boolean switchToWindow (Comparator<Integer> comparator) {
     boolean found = false;
     AccessibilityNodeInfo cursorNode = getCursorNode();
 
@@ -86,27 +113,8 @@ public abstract class InputHandlers {
           try {
             if (!found) {
               if (comparator.compare(window.getId(), referenceIdentifier) > 0) {
-                AccessibilityNodeInfo rootNode = window.getRoot();
-
-                if (rootNode != null) {
-                  try {
-                    AccessibilityNodeInfo focusableNode = ScreenUtilities.findFocusableNode(rootNode);
-
-                    if (focusableNode != null) {
-                      try {
-                        if (focusableNode.performAction(AccessibilityNodeInfo.ACTION_FOCUS)) {
-                          found = true;
-                          focusableNode.performAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
-                        }
-                      } finally {
-                        focusableNode.recycle();
-                        focusableNode = null;
-                      }
-                    }
-                  } finally {
-                    rootNode.recycle();
-                    rootNode = null;
-                  }
+                if (switchToWindow(window)) {
+                  found = true;
                 }
               }
             }
@@ -719,7 +727,7 @@ public abstract class InputHandlers {
             }
           };
 
-        return switchWindow(comparator);
+        return switchToWindow(comparator);
       }
     };
 
@@ -735,7 +743,7 @@ public abstract class InputHandlers {
             }
           };
 
-        return switchWindow(comparator);
+        return switchToWindow(comparator);
       }
     };
 
