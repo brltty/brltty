@@ -240,7 +240,7 @@ public class RealScreenElement extends ScreenElement {
       }
 
       offset += Math.min(column, (line.length() - 1));
-      return InputHandlers.placeTextCursor(accessibilityNode, offset);
+      return InputHandlers.placeCursor(accessibilityNode, offset);
     }
 
     return super.performAction(column, row);

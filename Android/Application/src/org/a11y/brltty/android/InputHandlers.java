@@ -158,17 +158,6 @@ public abstract class InputHandlers {
     return offset;
   }
 
-  public static boolean placeTextCursor (AccessibilityNodeInfo node, int offset) {
-    if (ApplicationUtilities.haveJellyBeanMR2) {
-      Bundle arguments = new Bundle();
-      arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, offset);
-      arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, offset);
-      return node.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, arguments);
-    }
-
-    return InputService.placeCursor(offset);
-  }
-
   private static Integer findNextLine (CharSequence text, int offset) {
     int length = text.length();
 
@@ -194,6 +183,26 @@ public abstract class InputHandlers {
     offset = findCurrentLine(text, offset);
     if (offset == 0) return null;
     return findCurrentLine(text, offset-1);
+  }
+
+  public static boolean setSelection (AccessibilityNodeInfo node, int start, int end) {
+    {
+      InputConnection connection = InputService.getInputConnection();
+      if (connection != null) return connection.setSelection(start, end);
+    }
+
+    if (ApplicationUtilities.haveJellyBeanMR2) {
+      Bundle arguments = new Bundle();
+      arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, start);
+      arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, end);
+      return node.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, arguments);
+    }
+
+    return false;
+  }
+
+  public static boolean placeCursor (AccessibilityNodeInfo node, int offset) {
+    return setSelection(node, offset, offset);
   }
 
   private abstract static class TextEditor {
@@ -226,7 +235,7 @@ public abstract class InputHandlers {
 
             if (node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments)) {
               if (offset == editor.length()) return true;
-              return placeTextCursor(node, offset);
+              return placeCursor(node, offset);
             }
           }
         }
@@ -391,7 +400,7 @@ public abstract class InputHandlers {
           if (offset == NO_SELECTION) return false;
           if (offset == node.getTextSelectionEnd()) offset -= 1;
           if (offset < 0) return false;
-          return placeTextCursor(node, offset);
+          return placeCursor(node, offset);
         }
 
         return super.performEditAction(node);
@@ -413,7 +422,7 @@ public abstract class InputHandlers {
           if (offset == NO_SELECTION) return false;
           if (offset == node.getTextSelectionStart()) offset += 1;
           if (offset > node.getText().length()) return false;
-          return placeTextCursor(node, offset);
+          return placeCursor(node, offset);
         }
 
         return super.performEditAction(node);
@@ -441,7 +450,7 @@ public abstract class InputHandlers {
           int previous = findCurrentLine(text, end);
 
           int position = Math.min(offset-current, end-previous);
-          return placeTextCursor(node, previous+position);
+          return placeCursor(node, previous+position);
         }
 
         return super.performEditAction(node);
@@ -473,7 +482,7 @@ public abstract class InputHandlers {
 
           int end = ((next != null)? next-1: text.length()) - current;
           if (position > end) position = end;
-          return placeTextCursor(node, current+position);
+          return placeCursor(node, current+position);
         }
 
         return super.performEditAction(node);
@@ -500,7 +509,7 @@ public abstract class InputHandlers {
           final int to = 0;
           if (to == from) return false;
 
-          return placeTextCursor(node, to);
+          return placeCursor(node, to);
         }
 
         return super.performEditAction(node);
@@ -527,7 +536,7 @@ public abstract class InputHandlers {
           final int to = node.getText().length();
           if (to == from) return false;
 
-          return placeTextCursor(node, to);
+          return placeCursor(node, to);
         }
 
         return super.performEditAction(node);
@@ -552,7 +561,7 @@ public abstract class InputHandlers {
           int to = findCurrentLine(text, from);
           if (to == from) return false;
 
-          return placeTextCursor(node, to);
+          return placeCursor(node, to);
         }
 
         return super.performEditAction(node);
@@ -578,7 +587,7 @@ public abstract class InputHandlers {
           int to = (next != null)? next-1: text.length();
           if (from == to) return false;
 
-          return placeTextCursor(node, to);
+          return placeCursor(node, to);
         }
 
         return super.performEditAction(node);
