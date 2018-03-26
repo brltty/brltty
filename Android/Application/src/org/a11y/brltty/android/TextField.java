@@ -55,7 +55,6 @@ public class TextField {
       for (CharSequence line : lines) {
         if (line == null) continue;
 
-android.util.Log.d("evt-txt", "/" + line + "/");
         if (first) {
           first = false;
         } else {

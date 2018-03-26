@@ -200,6 +200,13 @@ public abstract class ScreenDriver {
       }
     }
 
+    if (newNode != null) {
+      if (newNode.isPassword()) {
+        TextField field = TextField.get(newNode, true);
+        field.setAccessibilityText(event.getText());
+      }
+    }
+
     {
       AccessibilityNodeInfo oldNode;
 

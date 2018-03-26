@@ -224,6 +224,7 @@ public class RealScreenElement extends ScreenElement {
   public boolean performAction (int column, int row) {
     if (ScreenUtilities.isEditable(accessibilityNode)) {
       if (!onBringCursor()) return false;
+      accessibilityNode.performAction(AccessibilityNodeInfo.ACTION_FOCUS);
 
       String[] lines = getBrailleText();
       String line;
