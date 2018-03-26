@@ -48,7 +48,7 @@ public abstract class ScreenUtilities {
     return isSubclassOf(node, android.widget.Switch.class);
   }
 
-  private static boolean isSelectionMode (AccessibilityNodeInfo node, int mode) {
+  public static int getSelectionMode (AccessibilityNodeInfo node) {
     if (ApplicationUtilities.haveLollipop) {
       if (node.getCollectionItemInfo() != null) {
         AccessibilityNodeInfo parent = node.getParent();
@@ -58,9 +58,7 @@ public abstract class ScreenUtilities {
             AccessibilityNodeInfo.CollectionInfo collection = parent.getCollectionInfo();
 
             if (collection != null) {
-              if (collection.getSelectionMode() == mode) {
-                return true;
-              }
+              return collection.getSelectionMode();
             }
           } finally {
             parent.recycle();
@@ -70,11 +68,17 @@ public abstract class ScreenUtilities {
       }
     }
 
-    return false;
+    return node.isChecked()?
+           AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_MULTIPLE:
+           AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_NONE;
+  }
+
+  public static boolean hasSelectionMode (AccessibilityNodeInfo item, int mode) {
+    return getSelectionMode(item) == mode;
   }
 
   public static boolean isRadioButton (AccessibilityNodeInfo node) {
-    if (isSelectionMode(node, AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_SINGLE)) return true;
+    if (hasSelectionMode(node, AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_SINGLE)) return true;
     return false;
   }
 
