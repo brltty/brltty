@@ -186,16 +186,16 @@ public abstract class InputHandlers {
   }
 
   public static boolean setSelection (AccessibilityNodeInfo node, int start, int end) {
-    {
-      InputConnection connection = InputService.getInputConnection();
-      if (connection != null) return connection.setSelection(start, end);
-    }
-
     if (ApplicationUtilities.haveJellyBeanMR2) {
       Bundle arguments = new Bundle();
       arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, start);
       arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, end);
       return node.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, arguments);
+    }
+
+    {
+      InputConnection connection = InputService.getInputConnection();
+      if (connection != null) return connection.setSelection(start, end);
     }
 
     return false;
