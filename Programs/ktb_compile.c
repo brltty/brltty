@@ -102,15 +102,13 @@ findKeyValue (
     const KeyValue *value = &values[current];
     int relation = compareKeyValues(target, value);
 
-    if (!relation) {
-      *position = current;
-      return 1;
-    }
-
     if (relation < 0) {
       last = current - 1;
-    } else {
+    } else if (relation > 0) {
       first = current + 1;
+    } else {
+      *position = current;
+      return 1;
     }
   }
 
@@ -862,6 +860,55 @@ getCommandOperand (DataFile *file, BoundCommand *cmd, KeyTableData *ktd) {
 }
 
 static int
+compareKeyCombinations (const KeyCombination *combination1, const KeyCombination *combination2) {
+  if (combination1->flags & KCF_IMMEDIATE_KEY) {
+    if (combination2->flags & KCF_IMMEDIATE_KEY) {
+      int relation = compareKeyValues(&combination1->immediateKey, &combination2->immediateKey);
+      if (relation) return relation;
+    } else {
+      return -1;
+    }
+  } else if (combination2->flags & KCF_IMMEDIATE_KEY) {
+    return 1;
+  }
+
+  return compareKeyArrays(combination1->modifierCount, combination1->modifierKeys,
+                          combination2->modifierCount, combination2->modifierKeys);
+}
+
+int
+compareKeyBindings (const KeyBinding *binding1, const KeyBinding *binding2) {
+  return compareKeyCombinations(&binding1->keyCombination, &binding2->keyCombination);
+}
+
+static int
+findKeyBinding (
+  const KeyBinding *bindings, unsigned int count,
+  const KeyBinding *target, unsigned int *position
+) {
+  int first = 0;
+  int last = count - 1;
+
+  while (first <= last) {
+    int current = (first + last) / 2;
+    const KeyBinding *binding = &bindings[current];
+    int relation = compareKeyBindings(target, binding);
+
+    if (relation < 0) {
+      last = current - 1;
+    } else if (relation > 0) {
+      first = current + 1;
+    } else {
+      *position = current;
+      return 1;
+    }
+  }
+
+  *position = first;
+  return 0;
+}
+
+static int
 addKeyBinding (KeyContext *ctx, const KeyBinding *binding) {
   if (ctx->keyBindings.count == ctx->keyBindings.size) {
     unsigned int newSize = ctx->keyBindings.size? ctx->keyBindings.size<<1: 0X10;
@@ -876,7 +923,18 @@ addKeyBinding (KeyContext *ctx, const KeyBinding *binding) {
     ctx->keyBindings.size = newSize;
   }
 
-  ctx->keyBindings.table[ctx->keyBindings.count++] = *binding;
+  {
+    unsigned int position;
+
+    if (!findKeyBinding(ctx->keyBindings.table, ctx->keyBindings.count, binding, &position)) {
+      memmove(&ctx->keyBindings.table[position+1],
+              &ctx->keyBindings.table[position],
+              (ctx->keyBindings.count++ - position) * sizeof(*binding));
+    }
+
+    ctx->keyBindings.table[position] = *binding;
+  }
+
   return 1;
 }
 
@@ -1293,28 +1351,6 @@ resetKeyTable (KeyTable *table) {
 }
 
 static int
-compareKeyCombinations (const KeyCombination *combination1, const KeyCombination *combination2) {
-  if (combination1->flags & KCF_IMMEDIATE_KEY) {
-    if (combination2->flags & KCF_IMMEDIATE_KEY) {
-      int relation = compareKeyValues(&combination1->immediateKey, &combination2->immediateKey);
-      if (relation) return relation;
-    } else {
-      return -1;
-    }
-  } else if (combination2->flags & KCF_IMMEDIATE_KEY) {
-    return 1;
-  }
-
-  return compareKeyArrays(combination1->modifierCount, combination1->modifierKeys,
-                          combination2->modifierCount, combination2->modifierKeys);
-}
-
-int
-compareKeyBindings (const KeyBinding *binding1, const KeyBinding *binding2) {
-  return compareKeyCombinations(&binding1->keyCombination, &binding2->keyCombination);
-}
-
-static int
 sortKeyBindings (const void *element1, const void *element2) {
   const KeyBinding *const *binding1 = element1;
   const KeyBinding *const *binding2 = element2;
@@ -1339,12 +1375,13 @@ addBindingIndex (
     int current = (first + last) / 2;
     const KeyCombination *combination = &ctx->keyBindings.table[ibd->indexTable[current]].keyCombination;
     int relation = compareKeyArrays(count, keys, combination->modifierCount, combination->modifierKeys);
-    if (!relation) return 1;
 
     if (relation < 0) {
       last = current - 1;
-    } else {
+    } else if (relation > 0) {
       first = current + 1;
+    } else {
+      return 1;
     }
   }
 
