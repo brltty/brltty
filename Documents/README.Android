@@ -455,6 +455,11 @@ You can get it from `The Android SDK Web Page`_.
 You need the Android NDK (Native Development Kit) if you want to do your own
 builds. You can get it from `The Android NDK Web Page`_.
 
+BRLTTY is currently being built using:
+
+* Version 21.1.2 of the SDK build tools.
+* Version r16b of the NDK.
+
 The SDK initially only includes support for the current Android API
 (Application Programming Interface) level. BRLTTY, however, needs to support
 earlier API levels so that it can run on older releases of Android. Support for
