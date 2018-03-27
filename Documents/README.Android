@@ -129,10 +129,10 @@ indicator that says ``On`` if that service is currently running, and ``Off`` if
 it isn't.
 
 Find ``BRLTTY`` and tap on it. This brings up a window with two items in it.
-One is a "switch" (which accessibility services present as a checkbox) for
-turning BRLTTY on and off. The other is a button that takes you to BRLTTY's
-``Settings`` screen. You should go through BRLTTY's settings, making changes as
-desired, as well as define your braille device(s), before starting BRLTTY.
+One is a "switch" for turning BRLTTY on and off. The other is a button that
+takes you to BRLTTY's ``Settings`` screen. You should go through BRLTTY's
+settings, making changes as desired, as well as define your braille device(s),
+before starting BRLTTY.
 
 Connecting and Defining Your Braille Device
 -------------------------------------------
@@ -196,8 +196,8 @@ You can enable BRLTTY's braille keyboard support ahead of time by launching the
 ``Settings`` application, and then tapping on ``Language and Input``. The
 ``Keyboard and Input Methods`` section of this screen contains a selector
 labeled ``Default`` (that's used to select the current input method), as well
-as a checkbox for each installed input method. An input method is enabled if
-its checkbox is checked, and can only be selected if it has been enabled.
+as a check box for each installed input method. An input method is enabled if
+its check box is checked, and can only be selected if it has been enabled.
 
 BRLTTY's input method is called ``BRLTTY Input Service``. While you may wish to
 enable it ahead of time, you probably don't want to select it ahead of time.
@@ -212,14 +212,17 @@ of radio buttons - one for each currently enabled input method. If there's no
 radio button for BRLTTY's input method then it hasn't been enabled yet.
 
 To enable it, tap the button within the dialog labeled ``Set up input
-methods``. This screen contains a checkbox for each installed input method.
-Check the checkbox for BRLTTY's input method to enable it. Then tap the
+methods``. This screen contains a check box for each installed input method.
+Check the check box for BRLTTY's input method to enable it. Then tap the
 ``Back`` button to return to the ``Language and Input`` screen, find the
 ``Keyboard and Input Methods`` section of that screen, and set the ``Default``
 input method to BRLTTY's input method.
 
 Navigating the Screen
 ---------------------
+
+Using Multiple Hosts
+~~~~~~~~~~~~~~~~~~~~
 
 BRLTTY only remains connected to your braille device while your Android device
 is unlocked or while its screen is on. If your Android device is locked and its
@@ -240,6 +243,9 @@ that your Android device will stay awake and unlocked even though you're only
 controlling it from your braille device, and that it'll also still
 automatically lock once you're no longer using it.
 
+Accessibility Focus
+~~~~~~~~~~~~~~~~~~~
+
 The "accessibility focus" feature of Android is used for cursor tracking and
 routing. It's a soft cursor, not visible on the screen, that can be 
 programmatically associated with any screen element. All screen readers that
@@ -248,11 +254,17 @@ cooperate reasonably seamlessly with one another.
 
 The cursor is usually placed on the first character of the screen element that
 currently has accessibility focus. The one exception to this is within an
-editable input area. If that area has input focus then the cursor is placed at
+input area. If that area has input focus then the cursor is placed at
 the location within it where input will be inserted.
 
+When a home screen folder is opened, BRLTTY automatically sets accessibility
+focus to that folder's first entry. This eliminates the need to search for it.
+
+The Cursor Routing Keys
+~~~~~~~~~~~~~~~~~~~~~~~
+
 The cursor routing keys of the braille device perform their usual function when
-within an editable input area if it has input focus - the key above a given
+within an input area if it has input focus - the key above a given
 character brings the cursor to that character. In any other context, however, a
 cursor routing key performs an action on the screen element under it. Starting
 with the leftmost routing key over a screen element, which we'll call key #1,
@@ -264,20 +276,94 @@ these actions are as follows:
 4) scroll backward (or up)
 5) scroll forward (or down)
 
-When an editable input area has input focus, BRLTTY's attribute underlining
+Input Areas
+~~~~~~~~~~~
+
+When an input area has input focus, BRLTTY's attribute underlining
 feature is used to highlight the selected text region.
 
-When a home screen folder is opened, BRLTTY automatically sets accessibility
-focus to that folder's first entry. This eliminates the need to search for it.
+Widget Representation
+~~~~~~~~~~~~~~~~~~~~~
 
-A checkbox is rendered as a pair of [square brackets]. A space between them
-means that the box isn't checked, and an ``X`` between them means that it is
-checked.
+Check Boxes
+```````````
 
-A two-position switch is rendered as though it were a checkbox. The box isn't
-checked if the switch is in its ``off`` position, and is checked if the switch
-is in its ``on`` position. The label associated with the switch's current
-position appears just after the [square brackets].
+A check box is rendered as a three-cell symbol:
+
+1) dots 123478 (the left side o the box)
+2) dots 2356 (the check mark)
+3) dots 145678 (the right side o the box)
+
+The check mark is present if the box is checked and absent if it isn't.
+If the check box has a label then it appears to the right of the symbol.
+The braille representations are:
+
+* ⣏⠶⣹ checked
+* ⣏ ⣹ not checked
+
+Radio Buttons
+`````````````
+
+A radio button is rendered as a three-cell symbol:
+
+1) dots 2348 (the left side o the button)
+2) dots 2356 (the check mark)
+3) dots 1567 (the right side o the button)
+
+The check mark shows which of the radio buttons is currently selected.
+The label for each radio button appears to the right of its symbol.
+The braille representations are:
+
+* ⢎⠶⡱ selected
+* ⢎ ⡱ not selected
+
+Switches
+````````
+
+A (two-position) switch is rendered as a three-cell symbol:
+
+1) dots 4568 (the left side o the switch)
+2) dots 1478 (the top and bottom of the switch)
+3) dots 1237 (the right side o the switch)
+
+Dots 25 are added to the middle cell if the switch is on,
+and dots 36 are added to the middle cell if the switch is off.
+The label for the switch's current state appears to the right of the symbol.
+The braille representations are:
+
+* ⢸⣛⡇ on
+* ⢸⣭⡇ off
+
+Range Controls
+``````````````
+
+A range control is one which can be adjusted (rather than set or edited).
+They include widgets like progress bars, volume sliders, etc.
+They're rendered as a three-value summary::
+
+* An at sign followed by the current setting.
+* The minimum and maximum settings, separated by a dash, within parentheses.
+
+The developer of an application can choose which value range a given control uses.
+For example, a 16-position volume control currently set to 75% might look like this::
+
+  @11 (0 - 15)
+
+It could, however, also look like this::
+
+  @75% (0% - 100%)
+
+Disabled Controls
+`````````````````
+
+If a control is currently disabled then the word ``disabled``,
+enclosed within parentheses, appears to the right of its label.
+For example::
+
+  Connect <disabled)
+
+Global Actions
+~~~~~~~~~~~~~~
 
 Android supports a number of global actions that can be performed by pressing
 special hardware buttons and/or by touching reserved areas on the screen.
@@ -479,7 +565,7 @@ line. Tap on ``Build Nubmer`` seven times and your device will officially
 declare you to be a developer. You should then be able to find ``Developer
 Options`` on the ``Settings`` screen.
 
-There's a checkbox at the top-right of the ``Developer Options`` screen. It
+There's a check box at the top-right of the ``Developer Options`` screen. It
 needs to be checked so that all of the other controls on that screen will be
 enabled. After doing that, check the ``USB Debugging`` checkebox (which can be
 found within the ``Debugging`` section). This enables the ``adb`` (Android
