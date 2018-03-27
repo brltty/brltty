@@ -363,12 +363,12 @@ public abstract class ScreenDriver {
     switch (event) {
       case 'b': // braille device online
         ApplicationSettings.BRAILLE_DEVICE_ONLINE = true;
-        BrailleNotification.setState();
+        BrailleNotification.updateState();
         break;
 
       case 'B': // braille device offline
         ApplicationSettings.BRAILLE_DEVICE_ONLINE = false;
-        BrailleNotification.setState();
+        BrailleNotification.updateState();
         break;
 
       case 'k': // braille key event

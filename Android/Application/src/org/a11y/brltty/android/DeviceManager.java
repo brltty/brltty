@@ -303,7 +303,7 @@ public final class DeviceManager extends SettingsFragment {
         @Override
         public boolean onPreferenceChange (Preference preference, Object newValue) {
           final String newDevice = (String)newValue;
-          BrailleNotification.setDevice(newDevice);
+          BrailleNotification.updateDevice(newDevice);
           selectedDeviceList.setSummary(newDevice);
           updateRemoveDeviceScreen(newDevice);
           restartBrailleDriver(prefs, newDevice);
@@ -419,7 +419,7 @@ public final class DeviceManager extends SettingsFragment {
           String name = selectedDeviceList.getValue();
 
           if (name != null) {
-            BrailleNotification.unsetDevice();
+            BrailleNotification.updateDevice(null);
             deviceNames.remove(name);
             selectedDeviceList.setValue("");
             updateSelectedDeviceList();

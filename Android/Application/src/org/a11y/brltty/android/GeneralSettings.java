@@ -137,7 +137,7 @@ public final class GeneralSettings extends SettingsFragment {
           final boolean newSetting = (Boolean)newValue;
 
           ApplicationSettings.RELEASE_BRAILLE_DEVICE = newSetting;
-          BrailleNotification.setState();
+          BrailleNotification.updateState();
 
           showSelection(releaseBrailleDeviceCheckBox, newSetting);
           return true;
