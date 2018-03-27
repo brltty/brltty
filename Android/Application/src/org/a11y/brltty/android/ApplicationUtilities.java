@@ -19,6 +19,7 @@
 package org.a11y.brltty.android;
 
 import android.os.Build;
+import android.os.SystemClock;
 
 import android.content.Context;
 import android.content.ContentResolver;
@@ -58,6 +59,14 @@ public abstract class ApplicationUtilities {
 
   public static final boolean haveLollipop
   = haveAPILevel(Build.VERSION_CODES.LOLLIPOP);
+
+  public static long getAbsoluteTime () {
+    return SystemClock.uptimeMillis();
+  }
+
+  public static long getRelativeTime (long from) {
+    return getAbsoluteTime() - from;
+  }
 
   public static String getResourceString (int identifier) {
     return ApplicationContext.get().getString(identifier);

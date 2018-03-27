@@ -21,7 +21,6 @@ package org.a11y.brltty.android;
 import android.util.Log;
 
 import android.os.Bundle;
-import android.os.SystemClock;
 
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.graphics.Rect;
@@ -58,9 +57,14 @@ public class RealScreenElement extends ScreenElement {
     if (node.isFocused()) return true;
 
     if (!node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)) return false;
-    final long start = SystemClock.uptimeMillis();
+    final long startTime = ApplicationUtilities.getAbsoluteTime();
 
     while (true) {
+      try {
+        Thread.sleep(ApplicationParameters.FOCUS_WAIT_INTERVAL);
+      } catch (InterruptedException exception) {
+      }
+
       {
         AccessibilityNodeInfo refreshed = ScreenUtilities.getRefreshedNode(node);
 
@@ -74,13 +78,8 @@ public class RealScreenElement extends ScreenElement {
         }
       }
 
-      if ((SystemClock.uptimeMillis() - start) >= ApplicationParameters.KEY_RETRY_TIMEOUT) {
+      if (ApplicationUtilities.getRelativeTime(startTime) >= ApplicationParameters.FOCUS_WAIT_TIMEOUT) {
         return false;
-      }
-
-      try {
-        Thread.sleep(ApplicationParameters.KEY_RETRY_INTERVAL);
-      } catch (InterruptedException exception) {
       }
     }
   }

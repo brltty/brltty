@@ -463,28 +463,12 @@ public abstract class ScreenLogger {
       AccessibilityNodeInfo node = event.getSource();
 
       if (node != null) {
-        log(node, "event node", false);
-
-        if (ApplicationUtilities.haveLollipop) {
-          AccessibilityWindowInfo window = node.getWindow();
-
-          if (window != null) {
-            log(window, "window", true, true);
-            window.recycle();
-            window = null;
-          }
-        } else {
-          AccessibilityNodeInfo root = ScreenUtilities.findRootNode(node);
-
-          if (root != null) {
-            log(root);
-            root.recycle();
-            root = null;
-          }
+        try {
+          log(node);
+        } finally {
+          node.recycle();
+          node = null;
         }
-
-        node.recycle();
-        node = null;
       }
     }
   }
