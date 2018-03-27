@@ -54,6 +54,52 @@ public class RealScreenElement extends ScreenElement {
     return ScreenUtilities.isEditable(accessibilityNode);
   }
 
+  private static boolean setInputFocus (AccessibilityNodeInfo node) {
+    if (node.isFocused()) return true;
+
+    if (!node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)) return false;
+    final long start = SystemClock.uptimeMillis();
+
+    while (true) {
+      {
+        AccessibilityNodeInfo refreshed = ScreenUtilities.getRefreshedNode(node);
+
+        if (refreshed != null) {
+          try {
+            if (refreshed.isFocused()) return true;
+          } finally {
+            refreshed.recycle();
+            refreshed = null;
+          }
+        }
+      }
+
+      if ((SystemClock.uptimeMillis() - start) >= ApplicationParameters.KEY_RETRY_TIMEOUT) {
+        return false;
+      }
+
+      try {
+        Thread.sleep(ApplicationParameters.KEY_RETRY_INTERVAL);
+      } catch (InterruptedException exception) {
+      }
+    }
+  }
+
+  private final boolean setInputFocus () {
+    AccessibilityNodeInfo node = ScreenUtilities.getRefreshedNode(accessibilityNode);
+
+    if (node != null) {
+      try {
+        return setInputFocus(node);
+      } finally {
+        node.recycle();
+        node = null;
+      }
+    }
+
+    return false;
+  }
+
   private AccessibilityNodeInfo getFocusableNode () {
     return ScreenUtilities.findActionableNode(accessibilityNode,
       AccessibilityNodeInfo.ACTION_FOCUS |
@@ -66,50 +112,22 @@ public class RealScreenElement extends ScreenElement {
   }
 
   public boolean injectKey (int keyCode, boolean longPress) {
-    boolean done = false;
     AccessibilityNodeInfo node = getFocusableNode();
 
     if (node != null) {
-      if (node.isFocused()) {
-        if (InputService.injectKey(keyCode, longPress)) done = true;
-      } else if (node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)) {
-        final long start = SystemClock.uptimeMillis();
-
-        while (true) {
-          {
-            AccessibilityNodeInfo refreshed = ScreenUtilities.getRefreshedNode(node);
-
-            if (refreshed != null) {
-              boolean stop = false;
-
-              if (refreshed.isFocused()) {
-                stop = true;
-                if (InputService.injectKey(keyCode, longPress)) done = true;
-              }
-
-              refreshed.recycle();
-              refreshed = null;
-
-              if (stop) break;
-            }
-          }
-
-          if ((SystemClock.uptimeMillis() - start) >= ApplicationParameters.KEY_RETRY_TIMEOUT) {
-            break;
-          }
-
-          try {
-            Thread.sleep(ApplicationParameters.KEY_RETRY_INTERVAL);
-          } catch (InterruptedException exception) {
+      try {
+        if (setInputFocus(node)) {
+          if (InputService.injectKey(keyCode, longPress)) {
+            return true;
           }
         }
+      } finally {
+        node.recycle();
+        node = null;
       }
-
-      node.recycle();
-      node = null;
     }
 
-    return done;
+    return false;
   }
 
   @Override
@@ -224,7 +242,7 @@ public class RealScreenElement extends ScreenElement {
   public boolean performAction (int column, int row) {
     if (ScreenUtilities.isEditable(accessibilityNode)) {
       if (!onBringCursor()) return false;
-      accessibilityNode.performAction(AccessibilityNodeInfo.ACTION_FOCUS);
+      setInputFocus();
 
       String[] lines = getBrailleText();
       String line;
