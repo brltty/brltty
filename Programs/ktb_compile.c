@@ -910,31 +910,87 @@ findKeyBinding (
 
 static int
 addKeyBinding (KeyContext *ctx, const KeyBinding *binding) {
-  if (ctx->keyBindings.count == ctx->keyBindings.size) {
-    unsigned int newSize = ctx->keyBindings.size? ctx->keyBindings.size<<1: 0X10;
-    KeyBinding *newTable = realloc(ctx->keyBindings.table, ARRAY_SIZE(newTable, newSize));
+  unsigned int position;
 
-    if (!newTable) {
-      logMallocError();
-      return 0;
+  if (!findKeyBinding(ctx->keyBindings.table, ctx->keyBindings.count, binding, &position)) {
+    if (ctx->keyBindings.count == ctx->keyBindings.size) {
+      unsigned int newSize = ctx->keyBindings.size? ctx->keyBindings.size<<1: 0X10;
+      KeyBinding *newTable = realloc(ctx->keyBindings.table, ARRAY_SIZE(newTable, newSize));
+
+      if (!newTable) {
+        logMallocError();
+        return 0;
+      }
+
+      ctx->keyBindings.table = newTable;
+      ctx->keyBindings.size = newSize;
     }
 
-    ctx->keyBindings.table = newTable;
-    ctx->keyBindings.size = newSize;
+    memmove(&ctx->keyBindings.table[position+1],
+            &ctx->keyBindings.table[position],
+            (ctx->keyBindings.count++ - position) * sizeof(*binding));
   }
 
-  {
-    unsigned int position;
+  ctx->keyBindings.table[position] = *binding;
+  return 1;
+}
 
-    if (!findKeyBinding(ctx->keyBindings.table, ctx->keyBindings.count, binding, &position)) {
-      memmove(&ctx->keyBindings.table[position+1],
-              &ctx->keyBindings.table[position],
-              (ctx->keyBindings.count++ - position) * sizeof(*binding));
+static int
+compareMappedKeyEntries (const MappedKeyEntry *map1, const MappedKeyEntry *map2) {
+  return compareKeyValues(&map1->keyValue, &map2->keyValue);
+}
+
+static int
+findMappedKeyEntry (
+  const MappedKeyEntry *mappedKeyEntries, unsigned int count,
+  const MappedKeyEntry *target, unsigned int *position
+) {
+  int first = 0;
+  int last = count - 1;
+
+  while (first <= last) {
+    int current = (first + last) / 2;
+    const MappedKeyEntry *map = &mappedKeyEntries[current];
+    int relation = compareMappedKeyEntries(target, map);
+
+    if (relation < 0) {
+      last = current - 1;
+    } else if (relation > 0) {
+      first = current + 1;
+    } else {
+      *position = current;
+      return 1;
+    }
+  }
+
+  *position = first;
+  return 0;
+}
+
+static int
+addMappedKey (KeyContext *ctx, const MappedKeyEntry *map) {
+  unsigned int position;
+
+  if (!findMappedKeyEntry(ctx->mappedKeys.table, ctx->mappedKeys.count, map, &position)) {
+    if (ctx->mappedKeys.count == ctx->mappedKeys.size) {
+      unsigned int newSize = ctx->mappedKeys.size? ctx->mappedKeys.size<<1: 0X8;
+      MappedKeyEntry *newTable = realloc(ctx->mappedKeys.table, ARRAY_SIZE(newTable, newSize));
+
+      if (!newTable) {
+        logMallocError();
+        return 0;
+      }
+
+      ctx->mappedKeys.table = newTable;
+      ctx->mappedKeys.size = newSize;
     }
 
-    ctx->keyBindings.table[position] = *binding;
+    memmove(&ctx->mappedKeys.table[position+1],
+            &ctx->mappedKeys.table[position],
+            (ctx->mappedKeys.count++ - position) * sizeof(*map));
   }
 
+  ctx->mappedKeys.table[position] = *map;
   return 1;
 }
 
@@ -1196,17 +1252,9 @@ static DATA_OPERANDS_PROCESSOR(processMapOperands) {
         KeyContext *ctx = getCurrentKeyContext(ktd);
 
         if (ctx) {
-          unsigned int newCount = ctx->mappedKeys.count + 1;
-          MappedKeyEntry *newTable = realloc(ctx->mappedKeys.table, ARRAY_SIZE(newTable, newCount));
-
-          if (!newTable) {
-            logMallocError();
-            return 0;
+          if (addMappedKey(ctx, &map)) {
+            return 1;
           }
-
-          ctx->mappedKeys.table = newTable;
-          ctx->mappedKeys.table[ctx->mappedKeys.count++] = map;
-          return 1;
         }
 
         return 0;
@@ -1579,8 +1627,7 @@ static int
 sortMappedKeyEntries (const void *element1, const void *element2) {
   const MappedKeyEntry *const *map1 = element1;
   const MappedKeyEntry *const *map2 = element2;
-
-  return compareKeyValues(&(*map1)->keyValue, &(*map2)->keyValue);
+  return compareMappedKeyEntries(*map1, *map2);
 }
 
 static int
