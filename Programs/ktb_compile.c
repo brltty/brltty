@@ -936,6 +936,65 @@ addKeyBinding (KeyContext *ctx, const KeyBinding *binding) {
 }
 
 static int
+compareHotkeyEntries (const HotkeyEntry *hotkey1, const HotkeyEntry *hotkey2) {
+  return compareKeyValues(&hotkey1->keyValue, &hotkey2->keyValue);
+}
+
+static int
+findHotkeyEntry (
+  const HotkeyEntry *hotkeyEntries, unsigned int count,
+  const HotkeyEntry *target, unsigned int *position
+) {
+  int first = 0;
+  int last = count - 1;
+
+  while (first <= last) {
+    int current = (first + last) / 2;
+    const HotkeyEntry *hotkey = &hotkeyEntries[current];
+    int relation = compareHotkeyEntries(target, hotkey);
+
+    if (relation < 0) {
+      last = current - 1;
+    } else if (relation > 0) {
+      first = current + 1;
+    } else {
+      *position = current;
+      return 1;
+    }
+  }
+
+  *position = first;
+  return 0;
+}
+
+static int
+addHotkey (KeyContext *ctx, const HotkeyEntry *hotkey) {
+  unsigned int position;
+
+  if (!findHotkeyEntry(ctx->hotkeys.table, ctx->hotkeys.count, hotkey, &position)) {
+    if (ctx->hotkeys.count == ctx->hotkeys.size) {
+      unsigned int newSize = ctx->hotkeys.size? ctx->hotkeys.size<<1: 0X8;
+      HotkeyEntry *newTable = realloc(ctx->hotkeys.table, ARRAY_SIZE(newTable, newSize));
+
+      if (!newTable) {
+        logMallocError();
+        return 0;
+      }
+
+      ctx->hotkeys.table = newTable;
+      ctx->hotkeys.size = newSize;
+    }
+
+    memmove(&ctx->hotkeys.table[position+1],
+            &ctx->hotkeys.table[position],
+            (ctx->hotkeys.count++ - position) * sizeof(*hotkey));
+  }
+
+  ctx->hotkeys.table[position] = *hotkey;
+  return 1;
+}
+
+static int
 compareMappedKeyEntries (const MappedKeyEntry *map1, const MappedKeyEntry *map2) {
   return compareKeyValues(&map1->keyValue, &map2->keyValue);
 }
@@ -1071,26 +1130,6 @@ static DATA_OPERANDS_PROCESSOR(processHideOperands) {
   return 1;
 }
 
-static int
-addHotkey (const HotkeyEntry *hotkey, KeyTableData *ktd) {
-  KeyContext *ctx = getCurrentKeyContext(ktd);
-
-  if (ctx) {
-    unsigned int newCount = ctx->hotkeys.count + 1;
-    HotkeyEntry *newTable = realloc(ctx->hotkeys.table, ARRAY_SIZE(newTable, newCount));
-
-    if (newTable) {
-      ctx->hotkeys.table = newTable;
-      ctx->hotkeys.table[ctx->hotkeys.count++] = *hotkey;
-      return 1;
-    } else {
-      logMallocError();
-    }
-  }
-
-  return 0;
-}
-
 static DATA_OPERANDS_PROCESSOR(processHotkeyOperands) {
   KeyTableData *ktd = data;
   HotkeyEntry hotkey;
@@ -1101,9 +1140,15 @@ static DATA_OPERANDS_PROCESSOR(processHotkeyOperands) {
   if (getKeyOperand(file, &hotkey.keyValue, ktd)) {
     if (getCommandOperand(file, &hotkey.pressCommand, ktd)) {
       if (getCommandOperand(file, &hotkey.releaseCommand, ktd)) {
-        if (!addHotkey(&hotkey, ktd)) {
-          return 0;
+        KeyContext *ctx = getCurrentKeyContext(ktd);
+
+        if (ctx) {
+          if (addHotkey(ctx, &hotkey)) {
+            return 1;
+          }
         }
+
+        return 0;
       }
     }
   }
@@ -1120,9 +1165,15 @@ static DATA_OPERANDS_PROCESSOR(processIgnoreOperands) {
   hotkey.pressCommand = hotkey.releaseCommand = ktd->nullBoundCommand;
 
   if (getKeyOperand(file, &hotkey.keyValue, ktd)) {
-    if (!addHotkey(&hotkey, ktd)) {
-      return 0;
+    KeyContext *ctx = getCurrentKeyContext(ktd);
+
+    if (ctx) {
+      if (addHotkey(ctx, &hotkey)) {
+        return 1;
+      }
     }
+
+    return 0;
   }
 
   return 1;
@@ -1594,8 +1645,7 @@ static int
 sortHotkeyEntries (const void *element1, const void *element2) {
   const HotkeyEntry *const *hotkey1 = element1;
   const HotkeyEntry *const *hotkey2 = element2;
-
-  return compareKeyValues(&(*hotkey1)->keyValue, &(*hotkey2)->keyValue);
+  return compareHotkeyEntries(*hotkey1, *hotkey2);
 }
 
 static int
