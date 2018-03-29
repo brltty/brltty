@@ -234,23 +234,20 @@ public class InputService extends InputMethodService {
 
   public static InputConnection getInputConnection () {
     InputService service = InputService.getInputService();
+
     if (service != null) {
       InputConnection connection = service.getCurrentInputConnection();
-
-      if (connection != null) {
-        return connection;
-      } else {
-        Log.w(LOG_TAG, "input service not connected");
-      }
-    } else if (!isInputServiceEnabled()) {
-      Log.w(LOG_TAG, "input service not enabled");
-    } else if (!isInputServiceSelected()) {
-      Log.w(LOG_TAG, "input service not selected");
-    } else {
+      if (connection != null) return connection;
+      Log.w(LOG_TAG, "input service not connected");
+    } else if (isInputServiceSelected()) {
       Log.w(LOG_TAG, "input service not started");
-    }
+    } else {
+      if (isInputServiceEnabled()) {
+        Log.w(LOG_TAG, "input service not selected");
+      } else {
+        Log.w(LOG_TAG, "input service not enabled");
+      }
 
-    if (!isInputServiceSelected()) {
       Log.w(LOG_TAG, "showing input method picker");
       ApplicationUtilities.getInputMethodManager().showInputMethodPicker();
     }
