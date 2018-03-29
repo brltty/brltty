@@ -234,12 +234,17 @@ public abstract class ScreenDriver {
   private static native void exportScreenProperties (
     int number,
     int columns, int rows,
-    int left, int top,
-    int right, int bottom
+    int locationLeft, int locationTop, int locationRight, int locationBottom,
+    int selectionLeft, int selectionTop, int selectionRight, int selectionBottom
   );
 
   private static void exportScreenProperties () {
     AccessibilityNodeInfo node = currentScreen.getCursorNode();
+
+    int locationLeft = 0;
+    int locationTop = 0;
+    int locationRight = 0;
+    int locationBottom = 0;
 
     int selectionLeft = 0;
     int selectionTop = 0;
@@ -252,8 +257,10 @@ public abstract class ScreenDriver {
 
         if (element != null) {
           Rect location = element.getBrailleLocation();
-          selectionLeft = selectionRight = location.left;
-          selectionTop = selectionBottom = location.top;
+          locationLeft = location.left;
+          locationTop = location.top;
+          locationRight = location.right;
+          locationBottom = location.bottom;
 
           if (ScreenUtilities.isEditable(node)) {
             TextField field = TextField.get(node);
@@ -272,18 +279,16 @@ public abstract class ScreenDriver {
 
                 if (topLeft != null) {
                   if (start == end) {
-                    selectionLeft += topLeft.x;
-                    selectionTop += topLeft.y;
-                    selectionRight += topLeft.x;
-                    selectionBottom += topLeft.y;
+                    selectionLeft = selectionRight = topLeft.x;
+                    selectionTop = selectionBottom = topLeft.y;
                   } else {
                     Point bottomRight = element.getBrailleCoordinate(end-1);
 
                     if (bottomRight != null) {
-                      selectionLeft += topLeft.x;
-                      selectionTop += topLeft.y;
-                      selectionRight += bottomRight.x + 1;
-                      selectionBottom += bottomRight.y + 1;
+                      selectionLeft = topLeft.x;
+                      selectionTop = topLeft.y;
+                      selectionRight = bottomRight.x + 1;
+                      selectionBottom = bottomRight.y + 1;
                     }
                   }
                 }
@@ -301,8 +306,8 @@ public abstract class ScreenDriver {
       currentWindow.getWindowIdentifier(),
       currentScreen.getScreenWidth(),
       currentScreen.getScreenHeight(),
-      selectionLeft, selectionTop,
-      selectionRight, selectionBottom
+      locationLeft, locationTop, locationRight, locationBottom,
+      selectionLeft, selectionTop, selectionRight, selectionBottom
     );
   }
 

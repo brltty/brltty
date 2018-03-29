@@ -33,13 +33,9 @@ static JNIEnv *env = NULL;
 static jclass screenDriverClass = NULL;
 static jclass inputHandlersClass = NULL;
 
-static jint screenNumber;
-static jint screenColumns;
-static jint screenRows;
-static jint selectionLeft;
-static jint selectionTop;
-static jint selectionRight;
-static jint selectionBottom;
+static jint screenNumber, screenColumns, screenRows;
+static jint locationLeft, locationTop, locationRight, locationBottom;
+static jint selectionLeft, selectionTop, selectionRight, selectionBottom;
 
 static const char *problemText;
 
@@ -127,18 +123,23 @@ JAVA_STATIC_METHOD (
 
 JAVA_STATIC_METHOD (
   org_a11y_brltty_android_ScreenDriver, exportScreenProperties, void,
-  jint number,
-  jint columns, jint rows,
-  jint left, jint top,
-  int right, int bottom
+  jint number, jint columns, jint rows,
+  jint locLeft, jint locTop, int locRight, int locBottom,
+  jint selLeft, jint selTop, int selRight, int selBottom
 ) {
   screenNumber = number;
   screenColumns = columns;
   screenRows = rows;
-  selectionLeft = left;
-  selectionTop = top;
-  selectionRight = right;
-  selectionBottom = bottom;
+
+  locationLeft = locLeft;
+  locationTop = locTop;
+  locationRight = locRight;
+  locationBottom = locBottom;
+
+  selectionLeft = selLeft;
+  selectionTop = selTop;
+  selectionRight = selRight;
+  selectionBottom = selBottom;
 }
 
 static int
@@ -184,8 +185,8 @@ describe_AndroidScreen (ScreenDescription *description) {
     description->rows = screenRows;
 
     description->cursor = selectionLeft == selectionRight;
-    description->posx = selectionLeft;
-    description->posy = selectionTop;
+    description->posx = locationLeft + selectionLeft;
+    description->posy = locationTop + selectionTop;
   }
 }
 
@@ -224,20 +225,21 @@ getRowCharacters (ScreenCharacter *characters, jint rowIndex, jint columnIndex, 
           }
         }
 
-        if ((rowIndex >= selectionTop) && (rowIndex < selectionBottom)) {
-          int from = columnIndex;
-          int to = columnIndex + columnCount;
+        int top = locationTop + selectionTop;
+        int bottom = locationTop + selectionBottom;
 
-          if (rowIndex == selectionTop) {
-            if (selectionLeft > from) {
-              from = selectionLeft;
-            }
+        if ((rowIndex >= top) && (rowIndex < bottom)) {
+          int from = MAX(locationLeft, columnIndex);
+          int to = MIN(locationRight, (columnIndex + columnCount));
+
+          if (rowIndex == top) {
+            int left = locationLeft + selectionLeft;
+            if (left > from) from = left;
           }
 
-          if ((rowIndex + 1) == selectionBottom) {
-            if (selectionRight < to) {
-              to = selectionRight;
-            }
+          if ((rowIndex + 1) == bottom) {
+            int right = locationLeft + selectionRight;
+            if (right < to) to = right;
           }
 
           if (from < to) {
