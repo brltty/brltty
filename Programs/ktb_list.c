@@ -248,7 +248,6 @@ putKeyName (ListGenerationData *lgd, const KeyValue *value) {
   return putUtf8String(lgd, string);
 }
 
-static
 STR_BEGIN_FORMATTER(formatKeyCombination, KeyTable *table, const KeyCombination *combination)
   char keyDelimiter = 0;
   unsigned char dotCount = 0;

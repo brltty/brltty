@@ -194,6 +194,7 @@ extern int deleteKeyValue (KeyValue *values, unsigned int *count, const KeyValue
 extern int compareKeyBindings (const KeyBinding *binding1, const KeyBinding *binding2);
 
 extern STR_DECLARE_FORMATTER(formatKeyName, KeyTable *table, const KeyValue *value);
+extern STR_DECLARE_FORMATTER(formatKeyCombination, KeyTable *table, const KeyCombination *combination);
 
 extern void resetLongPressData (KeyTable *table);
 

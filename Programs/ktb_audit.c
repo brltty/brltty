@@ -26,29 +26,6 @@
 #include "ktb_internal.h"
 #include "ktb_inspect.h"
 
-static
-STR_BEGIN_FORMATTER(formatKeyCombination, KeyTable *table, const KeyCombination *combination)
-  char delimiter = 0;
-
-  for (unsigned char index=0; index<combination->modifierCount; index+=1) {
-    if (delimiter) {
-      STR_PRINTF("%c", delimiter);
-    } else {
-      delimiter = '+';
-    }
-
-    STR_FORMAT(formatKeyName, table,
-               &combination->modifierKeys[combination->modifierPositions[index]]);
-  }
-
-  if (combination->flags & KCF_IMMEDIATE_KEY) {
-    if (delimiter) STR_PRINTF("%c", delimiter);
-    STR_PRINTF("!");
-
-    STR_FORMAT(formatKeyName, table, &combination->immediateKey);
-  }
-STR_END_FORMATTER
-
 typedef struct {
   KeyTable *table;
   const KeyContext *ctx;
