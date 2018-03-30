@@ -189,6 +189,8 @@ extern void removeKeyValue (KeyValue *values, unsigned int *count, unsigned int 
 extern int deleteKeyValue (KeyValue *values, unsigned int *count, const KeyValue *value);
 
 extern int compareKeyBindings (const KeyBinding *binding1, const KeyBinding *binding2);
+extern int compareHotkeyEntries (const HotkeyEntry *hotkey1, const HotkeyEntry *hotkey2);
+extern int compareMappedKeyEntries (const MappedKeyEntry *map1, const MappedKeyEntry *map2);
 
 extern STR_DECLARE_FORMATTER(formatKeyName, KeyTable *table, const KeyValue *value);
 extern STR_DECLARE_FORMATTER(formatKeyCombination, KeyTable *table, const KeyCombination *combination);

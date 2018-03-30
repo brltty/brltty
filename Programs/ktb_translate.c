@@ -105,49 +105,53 @@ static const KeyBinding *
 findKeyBinding (KeyTable *table, unsigned char context, const KeyValue *immediate, int *isIncomplete) {
   const KeyContext *ctx = getKeyContext(table, context);
 
-  if (ctx && ctx->keyBindings.table &&
-      (table->pressedKeys.count <= MAX_MODIFIERS_PER_COMBINATION)) {
-    KeyBinding target = {
-      .keyCombination.modifierCount = table->pressedKeys.count
-    };
+  if (!ctx) return NULL;
+  if (!ctx->keyBindings.table) return NULL;
+  if (table->pressedKeys.count > MAX_MODIFIERS_PER_COMBINATION) return NULL;
 
-    if (immediate) {
-      target.keyCombination.immediateKey = *immediate;
-      target.keyCombination.flags |= KCF_IMMEDIATE_KEY;
-    }
+  KeyBinding target = {
+    .keyCombination.modifierCount = table->pressedKeys.count
+  };
 
-    while (1) {
-      unsigned int all = (1 << table->pressedKeys.count) - 1;
+  if (immediate) {
+    target.keyCombination.immediateKey = *immediate;
+    target.keyCombination.flags |= KCF_IMMEDIATE_KEY;
+  }
 
-      for (unsigned int bits=0; bits<=all; bits+=1) {
-        {
-          unsigned int index;
-          unsigned int bit;
+  while (1) {
+    unsigned int all = (1 << table->pressedKeys.count) - 1;
 
-          for (index=0, bit=1; index<table->pressedKeys.count; index+=1, bit<<=1) {
-            KeyValue *modifier = &target.keyCombination.modifierKeys[index];
+    for (unsigned int bits=0; bits<=all; bits+=1) {
+      {
+        unsigned int index;
+        unsigned int bit;
 
-            *modifier = table->pressedKeys.table[index];
-            if (bits & bit) modifier->number = KTB_KEY_ANY;
-          }
-        }
+        for (index=0, bit=1; index<table->pressedKeys.count; index+=1, bit<<=1) {
+          KeyValue *modifier = &target.keyCombination.modifierKeys[index];
 
-        qsort(target.keyCombination.modifierKeys, table->pressedKeys.count, sizeof(*target.keyCombination.modifierKeys), sortModifierKeys);
-
-        {
-          const KeyBinding *binding = bsearch(&target, ctx->keyBindings.table, ctx->keyBindings.count, sizeof(*ctx->keyBindings.table), searchKeyBinding);
-
-          if (binding) {
-            if (binding->primaryCommand.value != EOF) return binding;
-            *isIncomplete = 1;
-          }
+          *modifier = table->pressedKeys.table[index];
+          if (bits & bit) modifier->number = KTB_KEY_ANY;
         }
       }
 
-      if (!(target.keyCombination.flags & KCF_IMMEDIATE_KEY)) break;
-      if (target.keyCombination.immediateKey.number == KTB_KEY_ANY) break;
-      target.keyCombination.immediateKey.number = KTB_KEY_ANY;
+      qsort(
+        target.keyCombination.modifierKeys, table->pressedKeys.count,
+        sizeof(*target.keyCombination.modifierKeys), sortModifierKeys
+      );
+
+      {
+        const KeyBinding *binding = bsearch(&target, ctx->keyBindings.table, ctx->keyBindings.count, sizeof(*ctx->keyBindings.table), searchKeyBinding);
+
+        if (binding) {
+          if (binding->primaryCommand.value != EOF) return binding;
+          *isIncomplete = 1;
+        }
+      }
     }
+
+    if (!(target.keyCombination.flags & KCF_IMMEDIATE_KEY)) break;
+    if (target.keyCombination.immediateKey.number == KTB_KEY_ANY) break;
+    target.keyCombination.immediateKey.number = KTB_KEY_ANY;
   }
 
   return NULL;
@@ -157,44 +161,46 @@ static int
 searchHotkeyEntry (const void *target, const void *element) {
   const HotkeyEntry *reference = target;
   const HotkeyEntry *hotkey = element;
-  return compareKeyValues(&reference->keyValue, &hotkey->keyValue);
+  return compareHotkeyEntries(reference, hotkey);
 }
 
 static const HotkeyEntry *
 findHotkeyEntry (KeyTable *table, unsigned char context, const KeyValue *keyValue) {
   const KeyContext *ctx = getKeyContext(table, context);
 
-  if (ctx && ctx->hotkeys.table) {
-    HotkeyEntry target = {
-      .keyValue = *keyValue
-    };
+  if (!ctx) return NULL;
+  if (!ctx->hotkeys.table) return NULL;
 
-    const HotkeyEntry *hotkey = bsearch(&target, ctx->hotkeys.table, ctx->hotkeys.count, sizeof(*ctx->hotkeys.table), searchHotkeyEntry);
-    if (hotkey) return hotkey;
-  }
+  HotkeyEntry target = {
+    .keyValue = *keyValue
+  };
 
-  return NULL;
+  return bsearch(
+    &target, ctx->hotkeys.table, ctx->hotkeys.count,
+    sizeof(*ctx->hotkeys.table), searchHotkeyEntry
+  );
 }
 
 static int
 searchMappedKeyEntry (const void *target, const void *element) {
   const MappedKeyEntry *reference = target;
   const MappedKeyEntry *map = element;
-  return compareKeyValues(&reference->keyValue, &map->keyValue);
+  return compareMappedKeyEntries(reference, map);
 }
 
 static const MappedKeyEntry *
 findMappedKeyEntry (const KeyContext *ctx, const KeyValue *keyValue) {
-  if (ctx && ctx->mappedKeys.table) {
-    MappedKeyEntry target = {
-      .keyValue = *keyValue
-    };
+  if (!ctx) return NULL;
+  if (!ctx->mappedKeys.table) return NULL;
 
-    const MappedKeyEntry *map = bsearch(&target, ctx->mappedKeys.table, ctx->mappedKeys.count, sizeof(*ctx->mappedKeys.table), searchMappedKeyEntry);
-    if (map) return map;
-  }
+  MappedKeyEntry target = {
+    .keyValue = *keyValue
+  };
 
-  return NULL;
+  return bsearch(
+    &target, ctx->mappedKeys.table, ctx->mappedKeys.count,
+    sizeof(*ctx->mappedKeys.table), searchMappedKeyEntry
+  );
 }
 
 static int

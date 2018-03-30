@@ -937,7 +937,7 @@ addKeyBinding (KeyContext *ctx, const KeyBinding *binding, int incomplete) {
   return 1;
 }
 
-static int
+int
 compareHotkeyEntries (const HotkeyEntry *hotkey1, const HotkeyEntry *hotkey2) {
   return compareKeyValues(&hotkey1->keyValue, &hotkey2->keyValue);
 }
@@ -996,7 +996,7 @@ addHotkey (KeyContext *ctx, const HotkeyEntry *hotkey) {
   return 1;
 }
 
-static int
+int
 compareMappedKeyEntries (const MappedKeyEntry *map1, const MappedKeyEntry *map2) {
   return compareKeyValues(&map1->keyValue, &map2->keyValue);
 }
