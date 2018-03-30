@@ -86,17 +86,11 @@ static KEY_TABLE_AUDITOR(reportKeyContextProblems) {
 
 static KEY_TABLE_AUDITOR(reportDuplicateKeyBindings) {
   int ok = 1;
-  const KeyBinding *current = kta->ctx->keyBindings.table;
-  const KeyBinding *end = current + kta->ctx->keyBindings.count;
-  int reported = 0;
+  const KeyBinding *binding = kta->ctx->keyBindings.table;
+  const KeyBinding *end = binding + kta->ctx->keyBindings.count;
 
-  while (++current < end) {
-    const KeyBinding *previous = current - 1;
-
-    if (compareKeyBindings(current, previous) != 0) {
-      reported = 0;
-    } else if (!reported) {
-      reported = 1;
+  while (binding < end) {
+    if (binding->flags & KBF_DUPLICATE) {
       ok = 0;
 
       char audit[0X100];
@@ -104,11 +98,13 @@ static KEY_TABLE_AUDITOR(reportDuplicateKeyBindings) {
 
       STR_FORMAT(formatKeyTableAuditPrefix, kta, "duplicate key binding");
       STR_PRINTF(": ");
-      STR_FORMAT(formatKeyCombination, kta->table, &current->keyCombination);
+      STR_FORMAT(formatKeyCombination, kta->table, &binding->keyCombination);
 
       STR_END;
       reportKeyTableAudit(audit);
     }
+
+    binding += 1;
   }
 
   return ok;
@@ -129,21 +125,16 @@ reportKeyProblem (const KeyTableAuditorParameters *kta, const KeyValue *key, con
 
 static KEY_TABLE_AUDITOR(reportDuplicateHotkeys) {
   int ok = 1;
-  const HotkeyEntry *current = kta->ctx->hotkeys.table;
-  const HotkeyEntry *end = current + kta->ctx->hotkeys.count;
-  int reported = 0;
+  const HotkeyEntry *hotkey = kta->ctx->hotkeys.table;
+  const HotkeyEntry *end = hotkey + kta->ctx->hotkeys.count;
 
-  while (++current < end) {
-    const HotkeyEntry *previous = current - 1;
-
-    if (compareKeyValues(&current->keyValue, &previous->keyValue) != 0) {
-      reported = 0;
-    } else if (!reported) {
-      reported = 1;
+  while (hotkey < end) {
+    if (hotkey->flags & HKF_DUPLICATE) {
       ok = 0;
-
-      reportKeyProblem(kta, &current->keyValue, "duplicate hotkey");
+      reportKeyProblem(kta, &hotkey->keyValue, "duplicate hotkey");
     }
+
+    hotkey += 1;
   }
 
   return ok;
@@ -151,21 +142,16 @@ static KEY_TABLE_AUDITOR(reportDuplicateHotkeys) {
 
 static KEY_TABLE_AUDITOR(reportDuplicateMappedKeys) {
   int ok = 1;
-  const MappedKeyEntry *current = kta->ctx->mappedKeys.table;
-  const MappedKeyEntry *end = current + kta->ctx->mappedKeys.count;
-  int reported = 0;
+  const MappedKeyEntry *map = kta->ctx->mappedKeys.table;
+  const MappedKeyEntry *end = map + kta->ctx->mappedKeys.count;
 
-  while (++current < end) {
-    const MappedKeyEntry *previous = current - 1;
-
-    if (compareKeyValues(&current->keyValue, &previous->keyValue) != 0) {
-      reported = 0;
-    } else if (!reported) {
-      reported = 1;
+  while (map < end) {
+    if (map->flags & MKF_DUPLICATE) {
       ok = 0;
-
-      reportKeyProblem(kta, &current->keyValue, "duplicate mapped key");
+      reportKeyProblem(kta, &map->keyValue, "duplicate mapped key");
     }
+
+    map += 1;
   }
 
   return ok;

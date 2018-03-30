@@ -56,7 +56,8 @@ typedef struct {
 } BoundCommand;
 
 typedef enum {
-  KBF_HIDDEN   = 0X01,
+  KBF_HIDDEN    = 0X01,
+  KBF_DUPLICATE = 0X80
 } KeyBindingFlag;
 
 typedef struct {
@@ -67,7 +68,8 @@ typedef struct {
 } KeyBinding;
 
 typedef enum {
-  HKF_HIDDEN = 0X01
+  HKF_HIDDEN    = 0X01,
+  HKF_DUPLICATE = 0X80
 } HotkeyFlag;
 
 typedef struct {
@@ -78,7 +80,8 @@ typedef struct {
 } HotkeyEntry;
 
 typedef enum {
-  MKF_HIDDEN   = 0X01,
+  MKF_HIDDEN    = 0X01,
+  MKF_DUPLICATE = 0X80
 } MappedKeyFlag;
 
 typedef struct {

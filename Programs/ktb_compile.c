@@ -929,11 +929,16 @@ addKeyBinding (KeyContext *ctx, const KeyBinding *binding, int incomplete) {
     memmove(&ctx->keyBindings.table[position+1],
             &ctx->keyBindings.table[position],
             (ctx->keyBindings.count++ - position) * sizeof(*binding));
-  } else if (found) {
+  } else if (incomplete) {
     return 1;
   }
 
-  ctx->keyBindings.table[position] = *binding;
+  {
+    KeyBinding *kb = &ctx->keyBindings.table[position];
+    *kb = *binding;
+    if (found) kb->flags |= KBF_DUPLICATE;
+  }
+
   return 1;
 }
 
@@ -972,8 +977,9 @@ findHotkeyEntry (
 static int
 addHotkey (KeyContext *ctx, const HotkeyEntry *hotkey) {
   unsigned int position;
+  int found = findHotkeyEntry(ctx->hotkeys.table, ctx->hotkeys.count, hotkey, &position);
 
-  if (!findHotkeyEntry(ctx->hotkeys.table, ctx->hotkeys.count, hotkey, &position)) {
+  if (!found) {
     if (ctx->hotkeys.count == ctx->hotkeys.size) {
       unsigned int newSize = ctx->hotkeys.size? ctx->hotkeys.size<<1: 0X8;
       HotkeyEntry *newTable = realloc(ctx->hotkeys.table, ARRAY_SIZE(newTable, newSize));
@@ -992,7 +998,12 @@ addHotkey (KeyContext *ctx, const HotkeyEntry *hotkey) {
             (ctx->hotkeys.count++ - position) * sizeof(*hotkey));
   }
 
-  ctx->hotkeys.table[position] = *hotkey;
+  {
+    HotkeyEntry *hk = &ctx->hotkeys.table[position];
+    *hk = *hotkey;
+    if (found) hk->flags |= HKF_DUPLICATE;
+  }
+
   return 1;
 }
 
@@ -1031,8 +1042,9 @@ findMappedKeyEntry (
 static int
 addMappedKey (KeyContext *ctx, const MappedKeyEntry *map) {
   unsigned int position;
+  int found = findMappedKeyEntry(ctx->mappedKeys.table, ctx->mappedKeys.count, map, &position);
 
-  if (!findMappedKeyEntry(ctx->mappedKeys.table, ctx->mappedKeys.count, map, &position)) {
+  if (!found) {
     if (ctx->mappedKeys.count == ctx->mappedKeys.size) {
       unsigned int newSize = ctx->mappedKeys.size? ctx->mappedKeys.size<<1: 0X8;
       MappedKeyEntry *newTable = realloc(ctx->mappedKeys.table, ARRAY_SIZE(newTable, newSize));
@@ -1051,7 +1063,12 @@ addMappedKey (KeyContext *ctx, const MappedKeyEntry *map) {
             (ctx->mappedKeys.count++ - position) * sizeof(*map));
   }
 
-  ctx->mappedKeys.table[position] = *map;
+  {
+    MappedKeyEntry *mk = &ctx->mappedKeys.table[position];
+    *mk = *map;
+    if (found) mk->flags |= MKF_DUPLICATE;
+  }
+
   return 1;
 }
 
