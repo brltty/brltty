@@ -651,6 +651,7 @@ listKeyBinding (ListGenerationData *lgd, const KeyBinding *binding, int longPres
         if (!putCharacterString(lgd, WS_C("switch to "))) return 0;
         if (!putCharacterString(lgd, c->title)) return 0;
         if (!putCharacterString(lgd, WS_C(": "))) return 0;
+        keysOffset = lgd->line.length;
         if (!putCharacterString(lgd, keys)) return 0;
         if (!saveBindingLine(lgd, cmd, keysOffset)) return 0;
       }
