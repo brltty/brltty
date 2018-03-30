@@ -140,7 +140,10 @@ findKeyBinding (KeyTable *table, unsigned char context, const KeyValue *immediat
       );
 
       {
-        const KeyBinding *binding = bsearch(&target, ctx->keyBindings.table, ctx->keyBindings.count, sizeof(*ctx->keyBindings.table), searchKeyBinding);
+        const KeyBinding *binding = bsearch(&target, ctx->keyBindings.table,
+                                            ctx->keyBindings.count,
+                                            sizeof(*ctx->keyBindings.table),
+                                            searchKeyBinding);
 
         if (binding) {
           if (binding->primaryCommand.value != EOF) return binding;
@@ -175,10 +178,8 @@ findHotkeyEntry (KeyTable *table, unsigned char context, const KeyValue *keyValu
     .keyValue = *keyValue
   };
 
-  return bsearch(
-    &target, ctx->hotkeys.table, ctx->hotkeys.count,
-    sizeof(*ctx->hotkeys.table), searchHotkeyEntry
-  );
+  return bsearch(&target, ctx->hotkeys.table, ctx->hotkeys.count,
+                 sizeof(*ctx->hotkeys.table), searchHotkeyEntry);
 }
 
 static int
@@ -197,10 +198,8 @@ findMappedKeyEntry (const KeyContext *ctx, const KeyValue *keyValue) {
     .keyValue = *keyValue
   };
 
-  return bsearch(
-    &target, ctx->mappedKeys.table, ctx->mappedKeys.count,
-    sizeof(*ctx->mappedKeys.table), searchMappedKeyEntry
-  );
+  return bsearch(&target, ctx->mappedKeys.table, ctx->mappedKeys.count,
+                 sizeof(*ctx->mappedKeys.table), searchMappedKeyEntry);
 }
 
 static int

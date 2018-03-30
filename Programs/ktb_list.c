@@ -367,10 +367,10 @@ listHotkeyEvent (ListGenerationData *lgd, const KeyValue *keyValue, const char *
     if (!beginElement(lgd, 1)) return 0;
 
     if ((cmd->value & BRL_MSK_BLK) == BRL_CMD_BLK(CONTEXT)) {
-      const KeyContext *c = getKeyContext(lgd->keyTable, (KTB_CTX_DEFAULT + (cmd->value & BRL_MSK_ARG)));
-      if (!c) return 0;
+      const KeyContext *ctx = getKeyContext(lgd->keyTable, (KTB_CTX_DEFAULT + (cmd->value & BRL_MSK_ARG)));
+      if (!ctx) return 0;
       if (!putUtf8String(lgd, "switch to ")) return 0;
-      if (!putCharacterString(lgd, c->title)) return 0;
+      if (!putCharacterString(lgd, ctx->title)) return 0;
     } else {
       if (!putCommandDescription(lgd, cmd, (keyValue->number != KTB_KEY_ANY))) return 0;
     }
@@ -634,8 +634,8 @@ listKeyBinding (ListGenerationData *lgd, const KeyBinding *binding, int longPres
   if (!putKeyCombination(lgd, &binding->keyCombination)) return 0;
 
   if ((cmd->value & BRL_MSK_BLK) == BRL_CMD_BLK(CONTEXT)) {
-    const KeyContext *c = getKeyContext(lgd->keyTable, (KTB_CTX_DEFAULT + (cmd->value & BRL_MSK_ARG)));
-    if (!c) return 0;
+    const KeyContext *ctx = getKeyContext(lgd->keyTable, (KTB_CTX_DEFAULT + (cmd->value & BRL_MSK_ARG)));
+    if (!ctx) return 0;
 
     {
       size_t length = lgd->line.length - keysOffset;
@@ -645,11 +645,11 @@ listKeyBinding (ListGenerationData *lgd, const KeyBinding *binding, int longPres
       keys[length] = 0;
       clearLine(lgd);
 
-      if (isTemporaryKeyContext(lgd->keyTable, c)) {
-        if (!listKeyBindings(lgd, c, keys)) return 0;
+      if (isTemporaryKeyContext(lgd->keyTable, ctx)) {
+        if (!listKeyBindings(lgd, ctx, keys)) return 0;
       } else {
         if (!putCharacterString(lgd, WS_C("switch to "))) return 0;
-        if (!putCharacterString(lgd, c->title)) return 0;
+        if (!putCharacterString(lgd, ctx->title)) return 0;
         if (!putCharacterString(lgd, WS_C(": "))) return 0;
         keysOffset = lgd->line.length;
         if (!putCharacterString(lgd, keys)) return 0;
