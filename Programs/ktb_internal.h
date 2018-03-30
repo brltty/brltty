@@ -105,7 +105,6 @@ typedef struct {
     HotkeyEntry *table;
     unsigned int size;
     unsigned int count;
-    const HotkeyEntry **sorted;
   } hotkeys;
 
   struct {

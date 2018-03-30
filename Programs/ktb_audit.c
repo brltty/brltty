@@ -130,13 +130,13 @@ reportKeyProblem (const KeyTableAuditorParameters *kta, const KeyValue *key, con
 
 static KEY_TABLE_AUDITOR(reportDuplicateHotkeys) {
   int ok = 1;
-  const HotkeyEntry *const *hotkey = kta->ctx->hotkeys.sorted;
-  const HotkeyEntry *const *end = hotkey + kta->ctx->hotkeys.count;
+  const HotkeyEntry *hotkey = kta->ctx->hotkeys.table;
+  const HotkeyEntry *end = hotkey + kta->ctx->hotkeys.count;
   int reported = 0;
 
   while (++hotkey < end) {
-    const HotkeyEntry *current = *hotkey;
-    const HotkeyEntry *previous = *(hotkey - 1);
+    const HotkeyEntry *current = hotkey;
+    const HotkeyEntry *previous = current - 1;
 
     if (compareKeyValues(&current->keyValue, &previous->keyValue) != 0) {
       reported = 0;
