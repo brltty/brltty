@@ -909,16 +909,9 @@ findKeyBinding (
 }
 
 static int
-addKeyBinding (KeyContext *ctx, const KeyBinding *binding, int replace) {
+addKeyBinding (KeyContext *ctx, const KeyBinding *binding, int incomplete) {
   unsigned int position;
-  int found;
-
-  if (replace) {
-    found = findKeyBinding(ctx->keyBindings.table, ctx->keyBindings.count, binding, &position);
-  } else {
-    found = 0;
-    position = ctx->keyBindings.count;
-  }
+  int found = findKeyBinding(ctx->keyBindings.table, ctx->keyBindings.count, binding, &position);
 
   if (!found) {
     if (ctx->keyBindings.count == ctx->keyBindings.size) {
@@ -937,6 +930,8 @@ addKeyBinding (KeyContext *ctx, const KeyBinding *binding, int replace) {
     memmove(&ctx->keyBindings.table[position+1],
             &ctx->keyBindings.table[position],
             (ctx->keyBindings.count++ - position) * sizeof(*binding));
+  } else if (found) {
+    return 1;
   }
 
   ctx->keyBindings.table[position] = *binding;
@@ -1079,7 +1074,7 @@ static DATA_OPERANDS_PROCESSOR(processBindOperands) {
       KeyContext *ctx = getCurrentKeyContext(ktd);
 
       if (ctx) {
-        if (addKeyBinding(ctx, &binding, 1)) {
+        if (addKeyBinding(ctx, &binding, 0)) {
           return 1;
         }
       }
@@ -1464,79 +1459,30 @@ sortKeyBindings (const void *element1, const void *element2) {
   return compareKeyBindings(*binding1, *binding2);
 }
 
-typedef struct {
-  struct {
-    unsigned int *table;
-    unsigned int size;
-    unsigned int count;
-  } index;
-} IncompleteBindingData;
-
 static int
-addBindingIndex (
-  KeyContext *ctx, const KeyValue *keys, unsigned char count,
-  unsigned int index, IncompleteBindingData *ibd
-) {
-  int first = 0;
-  int last = ibd->index.count - 1;
+addIncompleteBinding (KeyContext *ctx, const KeyValue *keys, unsigned char count) {
+  static const BoundCommand command = {
+    .entry = NULL,
+    .value = EOF
+  };
 
-  while (first <= last) {
-    int current = (first + last) / 2;
-    const KeyCombination *combination = &ctx->keyBindings.table[ibd->index.table[current]].keyCombination;
-    int relation = compareKeyArrays(count, keys, combination->modifierCount, combination->modifierKeys);
+  KeyBinding binding = {
+    .flags = KBF_HIDDEN,
 
-    if (relation < 0) {
-      last = current - 1;
-    } else if (relation > 0) {
-      first = current + 1;
-    } else {
-      return 1;
+    .primaryCommand = command,
+    .secondaryCommand = command,
+
+    .keyCombination = {
+      .modifierCount = count
     }
-  }
+  };
 
-  if (ibd->index.count == ibd->index.size) {
-    unsigned int newSize = ibd->index.size? ibd->index.size<<1: 0X40;
-    unsigned int *newTable = realloc(ibd->index.table, ARRAY_SIZE(newTable, newSize));
-
-    if (!newTable) {
-      logMallocError();
-      return 0;
-    }
-
-    ibd->index.table = newTable;
-    ibd->index.size = newSize;
-  }
-
-  if (index == ctx->keyBindings.count) {
-    static const BoundCommand command = {
-      .entry = NULL,
-      .value = EOF
-    };
-
-    KeyBinding binding = {
-      .flags = KBF_HIDDEN,
-
-      .primaryCommand = command,
-      .secondaryCommand = command,
-
-      .keyCombination = {
-        .modifierCount = count
-      }
-    };
-
-    copyKeyValues(binding.keyCombination.modifierKeys, keys, count);
-
-    if (!addKeyBinding(ctx, &binding, 0)) return 0;
-  }
-
-  memmove(&ibd->index.table[first+1], &ibd->index.table[first],
-          (ibd->index.count++ - first) * sizeof(*ibd->index.table));
-  ibd->index.table[first] = index;
-  return 1;
+  copyKeyValues(binding.keyCombination.modifierKeys, keys, count);
+  return addKeyBinding(ctx, &binding, 1);
 }
 
 static int
-addSubbindingIndexes (KeyContext *ctx, const KeyValue *keys, unsigned char count, IncompleteBindingData *ibd) {
+addIncompleteSubbindings (KeyContext *ctx, const KeyValue *keys, unsigned char count) {
   if (count > 1) {
     KeyValue values[--count];
     unsigned int index = 0;
@@ -1544,8 +1490,8 @@ addSubbindingIndexes (KeyContext *ctx, const KeyValue *keys, unsigned char count
     copyKeyValues(values, &keys[1], count);
 
     while (1) {
-      if (!addBindingIndex(ctx, values, count, ctx->keyBindings.count, ibd)) return 0;
-      if (!addSubbindingIndexes(ctx, values, count, ibd)) return 0;
+      if (!addIncompleteBinding(ctx, values, count)) return 0;
+      if (!addIncompleteSubbindings(ctx, values, count)) return 0;
       if (index == count) break;
       values[index] = keys[index];
       index += 1;
@@ -1557,50 +1503,13 @@ addSubbindingIndexes (KeyContext *ctx, const KeyValue *keys, unsigned char count
 
 static int
 addIncompleteBindings (KeyContext *ctx) {
-  int ok = 1;
-
-  IncompleteBindingData ibd = {
-    .index = {
-      .table = NULL,
-      .size = 0,
-      .count = 0
-    }
-  };
-
   for (unsigned int index=0; index<ctx->keyBindings.count; index+=1) {
     const KeyCombination *combination = &ctx->keyBindings.table[index].keyCombination;
-
-    if (!(combination->flags & KCF_IMMEDIATE_KEY)) {
-      if (!addBindingIndex(ctx, combination->modifierKeys, combination->modifierCount, index, &ibd)) {
-        ok = 0;
-        goto done;
-      }
-    }
+    if (!addIncompleteBinding(ctx, combination->modifierKeys, combination->modifierCount)) return 0;
+    if (!addIncompleteSubbindings(ctx, combination->modifierKeys, combination->modifierCount)) return 0;
   }
 
-  {
-    unsigned int count = ctx->keyBindings.count;
-
-    for (unsigned int index=0; index<count; index+=1) {
-      const KeyCombination combination = ctx->keyBindings.table[index].keyCombination;
-
-      if ((combination.flags & KCF_IMMEDIATE_KEY)) {
-        if (!addBindingIndex(ctx, combination.modifierKeys, combination.modifierCount, ctx->keyBindings.count, &ibd)) {
-          ok = 0;
-          goto done;
-        }
-      }
-
-      if (!addSubbindingIndexes(ctx, combination.modifierKeys, combination.modifierCount, &ibd)) {
-        ok = 0;
-        goto done;
-      }
-    }
-  }
-
-done:
-  if (ibd.index.table) free(ibd.index.table);
-  return ok;
+  return 1;
 }
 
 static int
