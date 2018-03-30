@@ -97,16 +97,15 @@ sortModifierKeys (const void *element1, const void *element2) {
 static int
 searchKeyBinding (const void *target, const void *element) {
   const KeyBinding *reference = target;
-  const KeyBinding *const *binding = element;
-  return compareKeyBindings(reference, *binding);
+  const KeyBinding *binding = element;
+  return compareKeyBindings(reference, binding);
 }
 
 static const KeyBinding *
 findKeyBinding (KeyTable *table, unsigned char context, const KeyValue *immediate, int *isIncomplete) {
   const KeyContext *ctx = getKeyContext(table, context);
 
-  if (ctx && ctx->keyBindings.sorted &&
-      (table->pressedKeys.count <= MAX_MODIFIERS_PER_COMBINATION)) {
+  if (ctx && (table->pressedKeys.count <= MAX_MODIFIERS_PER_COMBINATION)) {
     KeyBinding target;
     memset(&target, 0, sizeof(target));
 
@@ -135,10 +134,10 @@ findKeyBinding (KeyTable *table, unsigned char context, const KeyValue *immediat
         qsort(target.keyCombination.modifierKeys, table->pressedKeys.count, sizeof(*target.keyCombination.modifierKeys), sortModifierKeys);
 
         {
-          const KeyBinding *const *binding = bsearch(&target, ctx->keyBindings.sorted, ctx->keyBindings.count, sizeof(*ctx->keyBindings.sorted), searchKeyBinding);
+          const KeyBinding *binding = bsearch(&target, ctx->keyBindings.table, ctx->keyBindings.count, sizeof(*ctx->keyBindings.table), searchKeyBinding);
 
           if (binding) {
-            if ((*binding)->primaryCommand.value != EOF) return *binding;
+            if (binding->primaryCommand.value != EOF) return binding;
             *isIncomplete = 1;
           }
         }

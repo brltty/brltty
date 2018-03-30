@@ -186,13 +186,14 @@ getKeyContext (KeyTableData *ktd, unsigned char context) {
       ctx->keyBindings.table = NULL;
       ctx->keyBindings.size = 0;
       ctx->keyBindings.count = 0;
-      ctx->keyBindings.sorted = NULL;
 
       ctx->hotkeys.table = NULL;
+      ctx->hotkeys.size = 0;
       ctx->hotkeys.count = 0;
       ctx->hotkeys.sorted = NULL;
 
       ctx->mappedKeys.table = NULL;
+      ctx->mappedKeys.size = 0;
       ctx->mappedKeys.count = 0;
       ctx->mappedKeys.sorted = NULL;
       ctx->mappedKeys.superimpose = 0;
@@ -1453,13 +1454,6 @@ resetKeyTable (KeyTable *table) {
 }
 
 static int
-sortKeyBindings (const void *element1, const void *element2) {
-  const KeyBinding *const *binding1 = element1;
-  const KeyBinding *const *binding2 = element2;
-  return compareKeyBindings(*binding1, *binding2);
-}
-
-static int
 addIncompleteBinding (KeyContext *ctx, const KeyValue *keys, unsigned char count) {
   static const BoundCommand command = {
     .entry = NULL,
@@ -1532,26 +1526,6 @@ prepareKeyBindings (KeyContext *ctx) {
     }
 
     ctx->keyBindings.size = ctx->keyBindings.count;
-  }
-
-  if (ctx->keyBindings.count) {
-    if (!(ctx->keyBindings.sorted = malloc(ARRAY_SIZE(ctx->keyBindings.sorted, ctx->keyBindings.count)))) {
-      logMallocError();
-      return 0;
-    }
-
-    {
-      KeyBinding *source = ctx->keyBindings.table;
-      const KeyBinding **target = ctx->keyBindings.sorted;
-      unsigned int count = ctx->keyBindings.count;
-
-      while (count) {
-        *target++ = source++;
-        count -= 1;
-      }
-    }
-
-    qsort(ctx->keyBindings.sorted, ctx->keyBindings.count, sizeof(*ctx->keyBindings.sorted), sortKeyBindings);
   }
 
   return 1;
@@ -1772,7 +1746,6 @@ destroyKeyTable (KeyTable *table) {
     if (ctx->title) free(ctx->title);
 
     if (ctx->keyBindings.table) free(ctx->keyBindings.table);
-    if (ctx->keyBindings.sorted) free(ctx->keyBindings.sorted);
 
     if (ctx->hotkeys.table) free(ctx->hotkeys.table);
     if (ctx->hotkeys.sorted) free(ctx->hotkeys.sorted);

@@ -99,20 +99,19 @@ typedef struct {
     KeyBinding *table;
     unsigned int size;
     unsigned int count;
-    const KeyBinding **sorted;
   } keyBindings;
 
   struct {
     HotkeyEntry *table;
-    unsigned int count;
     unsigned int size;
+    unsigned int count;
     const HotkeyEntry **sorted;
   } hotkeys;
 
   struct {
     MappedKeyEntry *table;
-    unsigned int count;
     unsigned int size;
+    unsigned int count;
     const MappedKeyEntry **sorted;
     int superimpose;
   } mappedKeys;

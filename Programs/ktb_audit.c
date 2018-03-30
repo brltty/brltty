@@ -86,13 +86,13 @@ static KEY_TABLE_AUDITOR(reportKeyContextProblems) {
 
 static KEY_TABLE_AUDITOR(reportDuplicateKeyBindings) {
   int ok = 1;
-  const KeyBinding *const *binding = kta->ctx->keyBindings.sorted;
-  const KeyBinding *const *end = binding + kta->ctx->keyBindings.count;
+  const KeyBinding *binding = kta->ctx->keyBindings.table;
+  const KeyBinding *end = binding + kta->ctx->keyBindings.count;
   int reported = 0;
 
   while (++binding < end) {
-    const KeyBinding *current = *binding;
-    const KeyBinding *previous = *(binding - 1);
+    const KeyBinding *current = binding;
+    const KeyBinding *previous = current - 1;
 
     if (compareKeyBindings(current, previous) != 0) {
       reported = 0;
