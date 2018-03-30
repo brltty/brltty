@@ -290,9 +290,9 @@ Check Boxes
 
 A check box is rendered as a three-cell symbol:
 
-1) dots 123478 (the left side o the box)
+1) dots 123478 (the left side of the box)
 2) dots 2356 (the check mark)
-3) dots 145678 (the right side o the box)
+3) dots 145678 (the right side of the box)
 
 The check mark is present if the box is checked and absent if it isn't.
 If the check box has a label then it appears to the right of the symbol.
@@ -306,9 +306,9 @@ Radio Buttons
 
 A radio button is rendered as a three-cell symbol:
 
-1) dots 2348 (the left side o the button)
+1) dots 2348 (the left side of the button)
 2) dots 2356 (the check mark)
-3) dots 1567 (the right side o the button)
+3) dots 1567 (the right side of the button)
 
 The check mark shows which of the radio buttons is currently selected.
 The label for each radio button appears to the right of its symbol.
@@ -322,12 +322,13 @@ Switches
 
 A (two-position) switch is rendered as a three-cell symbol:
 
-1) dots 4568 (the left side o the switch)
+1) dots 4568 (the left side of the switch)
 2) dots 1478 (the top and bottom of the switch)
-3) dots 1237 (the right side o the switch)
+3) dots 1237 (the right side of the switch)
 
 Dots 25 are added to the middle cell if the switch is on,
 and dots 36 are added to the middle cell if the switch is off.
+In other words, the switch is up when on and down when off.
 The label for the switch's current state appears to the right of the symbol.
 The braille representations are:
 
