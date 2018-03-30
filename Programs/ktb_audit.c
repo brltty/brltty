@@ -86,12 +86,11 @@ static KEY_TABLE_AUDITOR(reportKeyContextProblems) {
 
 static KEY_TABLE_AUDITOR(reportDuplicateKeyBindings) {
   int ok = 1;
-  const KeyBinding *binding = kta->ctx->keyBindings.table;
-  const KeyBinding *end = binding + kta->ctx->keyBindings.count;
+  const KeyBinding *current = kta->ctx->keyBindings.table;
+  const KeyBinding *end = current + kta->ctx->keyBindings.count;
   int reported = 0;
 
-  while (++binding < end) {
-    const KeyBinding *current = binding;
+  while (++current < end) {
     const KeyBinding *previous = current - 1;
 
     if (compareKeyBindings(current, previous) != 0) {
@@ -130,12 +129,11 @@ reportKeyProblem (const KeyTableAuditorParameters *kta, const KeyValue *key, con
 
 static KEY_TABLE_AUDITOR(reportDuplicateHotkeys) {
   int ok = 1;
-  const HotkeyEntry *hotkey = kta->ctx->hotkeys.table;
-  const HotkeyEntry *end = hotkey + kta->ctx->hotkeys.count;
+  const HotkeyEntry *current = kta->ctx->hotkeys.table;
+  const HotkeyEntry *end = current + kta->ctx->hotkeys.count;
   int reported = 0;
 
-  while (++hotkey < end) {
-    const HotkeyEntry *current = hotkey;
+  while (++current < end) {
     const HotkeyEntry *previous = current - 1;
 
     if (compareKeyValues(&current->keyValue, &previous->keyValue) != 0) {
@@ -153,12 +151,11 @@ static KEY_TABLE_AUDITOR(reportDuplicateHotkeys) {
 
 static KEY_TABLE_AUDITOR(reportDuplicateMappedKeys) {
   int ok = 1;
-  const MappedKeyEntry *map = kta->ctx->mappedKeys.table;
-  const MappedKeyEntry *end = map + kta->ctx->mappedKeys.count;
+  const MappedKeyEntry *current = kta->ctx->mappedKeys.table;
+  const MappedKeyEntry *end = current + kta->ctx->mappedKeys.count;
   int reported = 0;
 
-  while (++map < end) {
-    const MappedKeyEntry *current = map;
+  while (++current < end) {
     const MappedKeyEntry *previous = current - 1;
 
     if (compareKeyValues(&current->keyValue, &previous->keyValue) != 0) {
