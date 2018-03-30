@@ -195,7 +195,6 @@ getKeyContext (KeyTableData *ktd, unsigned char context) {
       ctx->mappedKeys.table = NULL;
       ctx->mappedKeys.size = 0;
       ctx->mappedKeys.count = 0;
-      ctx->mappedKeys.sorted = NULL;
       ctx->mappedKeys.superimpose = 0;
     }
   }
@@ -1563,46 +1562,12 @@ prepareHotkeyEntries (KeyContext *ctx) {
   return 1;
 }
 
-static int
-sortMappedKeyEntries (const void *element1, const void *element2) {
-  const MappedKeyEntry *const *map1 = element1;
-  const MappedKeyEntry *const *map2 = element2;
-  return compareMappedKeyEntries(*map1, *map2);
-}
-
-static int
-prepareMappedKeyEntries (KeyContext *ctx) {
-  if (ctx->mappedKeys.count) {
-    if (!(ctx->mappedKeys.sorted = malloc(ARRAY_SIZE(ctx->mappedKeys.sorted, ctx->mappedKeys.count)))) {
-      logMallocError();
-      return 0;
-    }
-
-    {
-      const MappedKeyEntry *source = ctx->mappedKeys.table;
-      const MappedKeyEntry **target = ctx->mappedKeys.sorted;
-      unsigned int count = ctx->mappedKeys.count;
-
-      while (count) {
-        *target++ = source++;
-        count -= 1;
-      }
-    }
-
-    qsort(ctx->mappedKeys.sorted, ctx->mappedKeys.count, sizeof(*ctx->mappedKeys.sorted), sortMappedKeyEntries);
-  }
-
-  return 1;
-}
-
 int
 finishKeyTable (KeyTableData *ktd) {
   for (unsigned int context=0; context<ktd->table->keyContexts.count; context+=1) {
     KeyContext *ctx = &ktd->table->keyContexts.table[context];
-
     if (!prepareKeyBindings(ctx)) return 0;
     if (!prepareHotkeyEntries(ctx)) return 0;
-    if (!prepareMappedKeyEntries(ctx)) return 0;
   }
 
   qsort(ktd->table->keyNames.table, ktd->table->keyNames.count, sizeof(*ktd->table->keyNames.table), sortKeyValues);
@@ -1751,7 +1716,6 @@ destroyKeyTable (KeyTable *table) {
     if (ctx->hotkeys.sorted) free(ctx->hotkeys.sorted);
 
     if (ctx->mappedKeys.table) free(ctx->mappedKeys.table);
-    if (ctx->mappedKeys.sorted) free(ctx->mappedKeys.sorted);
   }
 
   if (table->keyContexts.table) free(table->keyContexts.table);

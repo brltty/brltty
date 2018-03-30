@@ -112,7 +112,6 @@ typedef struct {
     MappedKeyEntry *table;
     unsigned int size;
     unsigned int count;
-    const MappedKeyEntry **sorted;
     int superimpose;
   } mappedKeys;
 } KeyContext;

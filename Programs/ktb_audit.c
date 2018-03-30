@@ -153,13 +153,13 @@ static KEY_TABLE_AUDITOR(reportDuplicateHotkeys) {
 
 static KEY_TABLE_AUDITOR(reportDuplicateMappedKeys) {
   int ok = 1;
-  const MappedKeyEntry *const *map = kta->ctx->mappedKeys.sorted;
-  const MappedKeyEntry *const *end = map + kta->ctx->mappedKeys.count;
+  const MappedKeyEntry *map = kta->ctx->mappedKeys.table;
+  const MappedKeyEntry *end = map + kta->ctx->mappedKeys.count;
   int reported = 0;
 
   while (++map < end) {
-    const MappedKeyEntry *current = *map;
-    const MappedKeyEntry *previous = *(map - 1);
+    const MappedKeyEntry *current = map;
+    const MappedKeyEntry *previous = current - 1;
 
     if (compareKeyValues(&current->keyValue, &previous->keyValue) != 0) {
       reported = 0;

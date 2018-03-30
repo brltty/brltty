@@ -180,24 +180,20 @@ findHotkeyEntry (KeyTable *table, unsigned char context, const KeyValue *keyValu
 static int
 searchMappedKeyEntry (const void *target, const void *element) {
   const MappedKeyEntry *reference = target;
-  const MappedKeyEntry *const *map = element;
-  return compareKeyValues(&reference->keyValue, &(*map)->keyValue);
+  const MappedKeyEntry *map = element;
+  return compareKeyValues(&reference->keyValue, &map->keyValue);
 }
 
 static const MappedKeyEntry *
 findMappedKeyEntry (const KeyContext *ctx, const KeyValue *keyValue) {
-  if (ctx->mappedKeys.sorted) {
-    MappedKeyEntry target = {
-      .keyValue = *keyValue
-    };
+  MappedKeyEntry target = {
+    .keyValue = *keyValue
+  };
 
-    {
-      const MappedKeyEntry *const *map = bsearch(&target, ctx->mappedKeys.sorted, ctx->mappedKeys.count, sizeof(*ctx->mappedKeys.sorted), searchMappedKeyEntry);
-      if (map) return *map;
-    }
-  }
-
-  return NULL;
+  return bsearch(
+    &target, ctx->mappedKeys.table, ctx->mappedKeys.count,
+    sizeof(*ctx->mappedKeys.table), searchMappedKeyEntry
+  );
 }
 
 static int
