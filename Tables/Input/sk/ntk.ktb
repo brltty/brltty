@@ -127,9 +127,9 @@ bind Backspace+RightJoystickRight SAY_LINE
 bind Backspace+RightJoystickPress SPKHOME
 
 
-####################
-# Default Bindings #
-####################
+#################
+# Menu Bindings #
+#################
 
 context menu
 
