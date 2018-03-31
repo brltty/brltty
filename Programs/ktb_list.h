@@ -28,7 +28,7 @@ extern "C" {
 
 typedef struct {
   const BoundCommand *command;
-  size_t order;
+  const KeyCombination *keyCombination;
   size_t keysOffset;
   size_t length;
   wchar_t text[0];

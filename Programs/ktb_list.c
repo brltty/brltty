@@ -408,17 +408,21 @@ commandGroupHook_hotkeys (CommandGroupHookData *cgh) {
 }
 
 static int
-saveBindingLine (ListGenerationData *lgd, const BoundCommand *command, size_t keysOffset) {
+saveBindingLine (
+  ListGenerationData *lgd, size_t keysOffset,
+  const BoundCommand *command, const KeyBinding *binding
+) {
   if (lgd->binding.count == lgd->binding.size) {
     size_t newSize = lgd->binding.size? (lgd->binding.size << 1): 0X10;
-    BindingLine **newLines;
+    BindingLine **newLines = realloc(lgd->binding.lines, ARRAY_SIZE(newLines, newSize));
 
-    if (!(newLines = realloc(lgd->binding.lines, ARRAY_SIZE(newLines, newSize)))) {
+    if (!newLines) {
       logMallocError();
       return 0;
     }
 
     lgd->binding.lines = newLines;
+
     while (lgd->binding.size < newSize) {
       lgd->binding.lines[lgd->binding.size++] = NULL;
     }
@@ -434,7 +438,7 @@ saveBindingLine (ListGenerationData *lgd, const BoundCommand *command, size_t ke
     }
 
     line->command = command;
-    line->order = lgd->binding.count;
+    line->keyCombination = &binding->keyCombination;
     line->keysOffset = keysOffset;
     wmemcpy(line->text, lgd->line.characters, (line->length = lgd->line.length));
     lgd->binding.lines[lgd->binding.count++] = line;
@@ -473,19 +477,21 @@ sortBindingLines (const void *element1, const void *element2) {
   int command1 = (*line1)->command->value;
   int command2 = (*line2)->command->value;
 
-  {
-    int cmd1 = command1 & BRL_MSK_CMD;
-    int cmd2 = command2 & BRL_MSK_CMD;
-
-    if (cmd1 < cmd2) return -1;
-    if (cmd1 > cmd2) return 1;
-  }
+  int cmd1 = command1 & BRL_MSK_CMD;
+  int cmd2 = command2 & BRL_MSK_CMD;
+  if (cmd1 < cmd2) return -1;
+  if (cmd1 > cmd2) return 1;
 
   if (command1 < command2) return -1;
   if (command1 > command2) return 1;
 
-  if ((*line1)->order < (*line2)->order) return -1;
-  if ((*line1)->order > (*line2)->order) return 1;
+  const KeyCombination *combination1 = (*line1)->keyCombination;
+  const KeyCombination *combination2 = (*line2)->keyCombination;
+  if (combination1->anyKeyCount < combination2->anyKeyCount) return -1;
+  if (combination1->anyKeyCount > combination2->anyKeyCount) return 1;
+
+  if (combination1 < combination2) return -1;
+  if (combination1 > combination2) return 1;
   return 0;
 }
 
@@ -505,13 +511,17 @@ listBindingLine (ListGenerationData *lgd, int index, int *isSame) {
     int next = index + 1;
 
     if (next < lgd->binding.count) {
-      if (bl->command->value == lgd->binding.lines[next]->command->value) {
-        if (!asList) {
-          if (!endLine(lgd)) return 0;
-        }
+      const BindingLine *nl = lgd->binding.lines[next];
 
-        asList = 1;
-        *isSame = 1;
+      if (bl->command->value == nl->command->value) {
+        if (bl->keyCombination->anyKeyCount == nl->keyCombination->anyKeyCount) {
+          if (!asList) {
+            if (!endLine(lgd)) return 0;
+          }
+
+          asList = 1;
+          *isSame = 1;
+        }
       }
     }
   }
@@ -558,31 +568,29 @@ listBindingLines (ListGenerationData *lgd, const KeyContext *ctx) {
             const BindingLine *bl = lgd->binding.lines[current];
             int command = bl->command->value & BRL_MSK_CMD;
 
-            if (cmd->code > command) {
+            if (command < cmd->code) {
               first = current + 1;
             } else {
               last = current - 1;
             }
           }
 
-          {
-            int currentCommand = cmd->code;
-            int isSame = 0;
+          int isSame = 0;
+          int current = cmd->code;
 
-            while (first < lgd->binding.count) {
-              {
-                const BindingLine *bl = lgd->binding.lines[first];
-                int nextCommand = bl->command->value;
+          // Binding lines are removed as they're processed, so, even though
+          // first isn't being incremented, the count will be decremented.
+          while (first < lgd->binding.count) {
+            const BindingLine *bl = lgd->binding.lines[first];
+            int next = bl->command->value;
 
-                if ((nextCommand & BRL_MSK_CMD) != currentCommand) {
-                  int blk = nextCommand & BRL_MSK_BLK;
-
-                  if (!blk || (blk != (currentCommand & BRL_MSK_BLK))) break;
-                }
-              }
-
-              if (!listBindingLine(lgd, first, &isSame)) return 0;
+            if ((next & BRL_MSK_CMD) != current) {
+              int blk = next & BRL_MSK_BLK;
+              if (!blk) break;
+              if (blk != (current & BRL_MSK_BLK)) break;
             }
+
+            if (!listBindingLine(lgd, first, &isSame)) return 0;
           }
 
           cmd += 1;
@@ -653,11 +661,11 @@ listKeyBinding (ListGenerationData *lgd, const KeyBinding *binding, int longPres
         if (!putCharacterString(lgd, WS_C(": "))) return 0;
         keysOffset = lgd->line.length;
         if (!putCharacterString(lgd, keys)) return 0;
-        if (!saveBindingLine(lgd, cmd, keysOffset)) return 0;
+        if (!saveBindingLine(lgd, keysOffset, cmd, binding)) return 0;
       }
     }
   } else {
-    if (!saveBindingLine(lgd, cmd, keysOffset)) return 0;
+    if (!saveBindingLine(lgd, keysOffset, cmd, binding)) return 0;
   }
 
   return 1;
