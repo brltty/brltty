@@ -187,6 +187,11 @@ public abstract class ScreenLogger {
 
     add(sb, node.isClickable(), "clb");
     add(sb, node.isLongClickable(), "lcb");
+
+    if (ApplicationUtilities.haveMarshmallow) {
+      add(sb, node.isContextClickable(), "ccb");
+    }
+       
     add(sb, node.isCheckable(), "ckb");
     add(sb, node.isChecked(), "ckd");
     add(sb, node.isPassword(), "pwd");
