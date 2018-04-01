@@ -371,11 +371,10 @@ public abstract class ScreenLogger {
                new HashMap<Integer, String>()
   {
     {
-      if (ApplicationUtilities.haveLollipop) {
-        put(AccessibilityWindowInfo.TYPE_APPLICATION, "app");
-        put(AccessibilityWindowInfo.TYPE_INPUT_METHOD, "im");
-        put(AccessibilityWindowInfo.TYPE_SYSTEM, "sys");
-      }
+      put(AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY, "acc");
+      put(AccessibilityWindowInfo.TYPE_APPLICATION, "app");
+      put(AccessibilityWindowInfo.TYPE_INPUT_METHOD, "ime");
+      put(AccessibilityWindowInfo.TYPE_SYSTEM, "sys");
     }
   };
 
