@@ -60,6 +60,12 @@ public abstract class ApplicationUtilities {
   public static final boolean haveLollipop
   = haveAPILevel(Build.VERSION_CODES.LOLLIPOP);
 
+  public static final boolean haveLollipopMR1
+  = haveAPILevel(Build.VERSION_CODES.LOLLIPOP_MR1);
+
+  public static final boolean haveMarshmallow
+  = haveAPILevel(Build.VERSION_CODES.M);
+
   public static long getAbsoluteTime () {
     return SystemClock.uptimeMillis();
   }

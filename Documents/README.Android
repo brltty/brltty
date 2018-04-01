@@ -271,10 +271,11 @@ with the leftmost routing key over a screen element, which we'll call key #1,
 these actions are as follows:
 
 1) set accessibility focus (used for cursor tracking and routing)
-2) tap (or click)
-3) hold (or long click)
-4) scroll backward (or up)
-5) scroll forward (or down)
+2) tap (click)
+3) hold (long click)
+4) scroll backward (up or left)
+5) scroll forward (down or right)
+6) context click
 
 Input Areas
 ~~~~~~~~~~~

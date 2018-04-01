@@ -110,6 +110,10 @@ public class RealScreenElement extends ScreenElement {
     return ScreenUtilities.performAction(accessibilityNode, action);
   }
 
+  private boolean performNodeAction (AccessibilityNodeInfo.AccessibilityAction action) {
+    return performNodeAction(action.getId());
+  }
+
   public boolean injectKey (int keyCode, boolean longPress) {
     AccessibilityNodeInfo node = getFocusableNode();
 
@@ -235,6 +239,15 @@ public class RealScreenElement extends ScreenElement {
     }
 
     return super.onScrollForward();
+  }
+
+  @Override
+  public boolean onContextClick () {
+    if (ApplicationUtilities.haveMarshmallow) {
+      return performNodeAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CONTEXT_CLICK);
+    }
+
+    return super.onContextClick();
   }
 
   @Override
