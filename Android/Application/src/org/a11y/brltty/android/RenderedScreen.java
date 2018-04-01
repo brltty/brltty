@@ -263,6 +263,11 @@ public class RenderedScreen {
       AccessibilityNodeInfo.RangeInfo range = node.getRangeInfo();
 
       if (range != null) {
+        if (sb.length() == 0) {
+          CharSequence description = node.getContentDescription();
+          if (description != null) sb.append(description);
+        }
+
         if (sb.length() > 0) sb.append(' ');
         String format = ScreenUtilities.getRangeValueFormat(range);
 
