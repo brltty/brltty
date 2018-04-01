@@ -20,6 +20,7 @@ package org.a11y.brltty.android;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import android.util.Log;
 import android.os.Bundle;
@@ -83,39 +84,46 @@ public abstract class ScreenLogger {
     log((label + ": " + data));
   }
 
-  private static class ActionEntry {
-    public final String actionName;
-    public final int actionValue;
+  private static class ActionLabelMap extends LinkedHashMap<Integer, String> {
+    public final void put (String name, int action) {
+      put(action, name);
+    }
 
-    public ActionEntry (String name, int value) {
-      actionName = name;
-      actionValue = value;
+    public final void put (String name, AccessibilityNodeInfo.AccessibilityAction action) {
+      put(name, action.getId());
     }
   }
 
-  private final static ActionEntry[] actionTable = new ActionEntry[] {
-    new ActionEntry("clk", AccessibilityNodeInfo.ACTION_CLICK),
-    new ActionEntry("lck", AccessibilityNodeInfo.ACTION_LONG_CLICK),
-    new ActionEntry("scf", AccessibilityNodeInfo.ACTION_SCROLL_FORWARD),
-    new ActionEntry("scb", AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD),
-    new ActionEntry("mvn", AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY),
-    new ActionEntry("mvp", AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY),
-    new ActionEntry("mhn", AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT),
-    new ActionEntry("mhp", AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT),
-    new ActionEntry("sls", AccessibilityNodeInfo.ACTION_SELECT),
-    new ActionEntry("slc", AccessibilityNodeInfo.ACTION_CLEAR_SELECTION),
-    new ActionEntry("ifs", AccessibilityNodeInfo.ACTION_FOCUS),
-    new ActionEntry("ifc", AccessibilityNodeInfo.ACTION_CLEAR_FOCUS),
-    new ActionEntry("afs", AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS),
-    new ActionEntry("afc", AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS),
-    new ActionEntry("sel", AccessibilityNodeInfo.ACTION_SET_SELECTION),
-    new ActionEntry("cbc", AccessibilityNodeInfo.ACTION_COPY),
-    new ActionEntry("cbx", AccessibilityNodeInfo.ACTION_CUT),
-    new ActionEntry("cbp", AccessibilityNodeInfo.ACTION_PASTE),
-    new ActionEntry("dsms", AccessibilityNodeInfo.ACTION_DISMISS),
-    new ActionEntry("clps", AccessibilityNodeInfo.ACTION_COLLAPSE),
-    new ActionEntry("xpnd", AccessibilityNodeInfo.ACTION_EXPAND),
-    new ActionEntry("txs", AccessibilityNodeInfo.ACTION_SET_TEXT)
+  private final static ActionLabelMap actionLabels = new ActionLabelMap()
+  {
+    {
+      put("clk", AccessibilityNodeInfo.ACTION_CLICK);
+      put("lck", AccessibilityNodeInfo.ACTION_LONG_CLICK);
+      put("scf", AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+      put("scb", AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+      put("mvn", AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
+      put("mvp", AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
+      put("mhn", AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT);
+      put("mhp", AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT);
+      put("sls", AccessibilityNodeInfo.ACTION_SELECT);
+      put("slc", AccessibilityNodeInfo.ACTION_CLEAR_SELECTION);
+      put("ifs", AccessibilityNodeInfo.ACTION_FOCUS);
+      put("ifc", AccessibilityNodeInfo.ACTION_CLEAR_FOCUS);
+      put("afs", AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
+      put("afc", AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
+      put("sel", AccessibilityNodeInfo.ACTION_SET_SELECTION);
+      put("cbc", AccessibilityNodeInfo.ACTION_COPY);
+      put("cbx", AccessibilityNodeInfo.ACTION_CUT);
+      put("cbp", AccessibilityNodeInfo.ACTION_PASTE);
+      put("dsms", AccessibilityNodeInfo.ACTION_DISMISS);
+      put("clps", AccessibilityNodeInfo.ACTION_COLLAPSE);
+      put("xpnd", AccessibilityNodeInfo.ACTION_EXPAND);
+      put("txs", AccessibilityNodeInfo.ACTION_SET_TEXT);
+
+      if (ApplicationUtilities.haveMarshmallow) {
+        put("cck", AccessibilityNodeInfo.AccessibilityAction.ACTION_CONTEXT_CLICK);
+      }
+    }
   };
 
   private static void log (AccessibilityNodeInfo node, String name, boolean descend) {
@@ -295,11 +303,18 @@ public abstract class ScreenLogger {
       }
     }
 
-    {
+    if (ApplicationUtilities.haveLollipop) {
+      for (AccessibilityNodeInfo.AccessibilityAction action : node.getActionList()) {
+        String label = actionLabels.get(action.getId());
+        if (label != null) add(sb, label);
+      }
+    } else {
       int actions = node.getActions();
 
-      for (ActionEntry action : actionTable) {
-        add(sb, ((actions & action.actionValue) != 0), action.actionName);
+      for (Integer action : actionLabels.keySet()) {
+        if ((actions & action) != 0) {
+          add(sb, actionLabels.get(action));
+        }
       }
     }
 
