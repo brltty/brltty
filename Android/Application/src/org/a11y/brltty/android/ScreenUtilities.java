@@ -18,6 +18,9 @@
 
 package org.a11y.brltty.android;
 
+import java.util.Arrays;
+import java.util.Comparator;
+
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import android.graphics.Rect;
@@ -175,7 +178,7 @@ public abstract class ScreenUtilities {
     return node;
   }
 
-  public static AccessibilityNodeInfo findNode (AccessibilityNodeInfo root, ScreenNodeTester tester) {
+  public static AccessibilityNodeInfo findNode (AccessibilityNodeInfo root, NodeTester tester) {
     if (root != null) {
       if (tester.testNode(root)) return AccessibilityNodeInfo.obtain(root);
 
@@ -199,7 +202,7 @@ public abstract class ScreenUtilities {
   }
 
   public static AccessibilityNodeInfo findSelectedNode (AccessibilityNodeInfo root) {
-    ScreenNodeTester tester = new ScreenNodeTester() {
+    NodeTester tester = new NodeTester() {
       @Override
       public boolean testNode (AccessibilityNodeInfo node) {
         return node.isSelected();
@@ -210,7 +213,7 @@ public abstract class ScreenUtilities {
   }
 
   public static AccessibilityNodeInfo findFocusedNode (AccessibilityNodeInfo root) {
-    ScreenNodeTester tester = new ScreenNodeTester() {
+    NodeTester tester = new NodeTester() {
       @Override
       public boolean testNode (AccessibilityNodeInfo node) {
         return node.isFocused();
@@ -221,7 +224,7 @@ public abstract class ScreenUtilities {
   }
 
   public static AccessibilityNodeInfo findFocusableNode (AccessibilityNodeInfo root) {
-    ScreenNodeTester tester = new ScreenNodeTester() {
+    NodeTester tester = new NodeTester() {
       @Override
       public boolean testNode (AccessibilityNodeInfo node) {
         if (node.isFocusable()) {
@@ -238,7 +241,7 @@ public abstract class ScreenUtilities {
   }
 
   public static AccessibilityNodeInfo findTextNode (AccessibilityNodeInfo root) {
-    ScreenNodeTester tester = new ScreenNodeTester() {
+    NodeTester tester = new NodeTester() {
       @Override
       public boolean testNode (AccessibilityNodeInfo node) {
         return node.getText() != null;
@@ -249,7 +252,7 @@ public abstract class ScreenUtilities {
   }
 
   public static AccessibilityNodeInfo findDescribedNode (AccessibilityNodeInfo root) {
-    ScreenNodeTester tester = new ScreenNodeTester() {
+    NodeTester tester = new NodeTester() {
       @Override
       public boolean testNode (AccessibilityNodeInfo node) {
         return node.getContentDescription() != null;
@@ -259,12 +262,12 @@ public abstract class ScreenUtilities {
     return findNode(root, tester);
   }
 
-  public static AccessibilityNodeInfo findActionableNode (AccessibilityNodeInfo node, int actions) {
+  public static AccessibilityNodeInfo findActionableNode (AccessibilityNodeInfo node, NodeTester tester) {
     node = AccessibilityNodeInfo.obtain(node);
 
     while (true) {
       if (node.isEnabled()) {
-        if ((node.getActions() & actions) != 0) {
+        if (tester.testNode(node)) {
           return node;
         }
       }
@@ -277,6 +280,17 @@ public abstract class ScreenUtilities {
       node = parent;
       parent = null;
     }
+  }
+
+  public static AccessibilityNodeInfo findActionableNode (AccessibilityNodeInfo node, final int actions) {
+    NodeTester tester = new NodeTester() {
+      @Override
+      public boolean testNode (AccessibilityNodeInfo node) {
+        return (node.getActions() & actions) != 0;
+      }
+    };
+
+    return findActionableNode(node, tester);
   }
 
   public static boolean performAction (AccessibilityNodeInfo node, int action) {
@@ -305,6 +319,53 @@ public abstract class ScreenUtilities {
 
   public static boolean performScrollBackward (AccessibilityNodeInfo node) {
     return performAction(node, AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+  }
+
+  public static AccessibilityNodeInfo findActionableNode (
+    AccessibilityNodeInfo node,
+    AccessibilityNodeInfo.AccessibilityAction... actions
+  ) {
+    final Comparator<AccessibilityNodeInfo.AccessibilityAction> comparator =
+      new Comparator<AccessibilityNodeInfo.AccessibilityAction>() {
+        @Override
+        public int compare (
+          AccessibilityNodeInfo.AccessibilityAction action1,
+          AccessibilityNodeInfo.AccessibilityAction action2
+        ) {
+          return Integer.compare(action1.getId(), action2.getId());
+        }
+      };
+
+    final AccessibilityNodeInfo.AccessibilityAction[] array = Arrays.copyOf(actions, actions.length);
+    Arrays.sort(array, 0, array.length, comparator);
+
+    NodeTester tester = new NodeTester() {
+      @Override
+      public boolean testNode (AccessibilityNodeInfo node) {
+        for (AccessibilityNodeInfo.AccessibilityAction action : node.getActionList()) {
+          if (Arrays.binarySearch(array, 0, array.length, action, comparator) >= 0) return true;
+        }
+
+        return false;
+      }
+    };
+
+    return findActionableNode(node, tester);
+  }
+
+  public static boolean performAction (
+    AccessibilityNodeInfo node,
+    AccessibilityNodeInfo.AccessibilityAction action
+  ) {
+    node = findActionableNode(node, action);
+    if (node == null) return false;
+
+    try {
+      return node.performAction(action.getId());
+    } finally {
+      node.recycle();
+      node = null;
+    }
   }
 
   public static String normalizeText (CharSequence text) {

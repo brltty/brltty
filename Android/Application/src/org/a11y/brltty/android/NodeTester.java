@@ -20,6 +20,6 @@ package org.a11y.brltty.android;
 
 import android.view.accessibility.AccessibilityNodeInfo;
 
-public interface ScreenNodeTester {
+public interface NodeTester {
   public boolean testNode (AccessibilityNodeInfo node);
 }

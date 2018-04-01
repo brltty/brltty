@@ -111,7 +111,7 @@ public class RealScreenElement extends ScreenElement {
   }
 
   private boolean performNodeAction (AccessibilityNodeInfo.AccessibilityAction action) {
-    return performNodeAction(action.getId());
+    return ScreenUtilities.performAction(accessibilityNode, action);
   }
 
   public boolean injectKey (int keyCode, boolean longPress) {
