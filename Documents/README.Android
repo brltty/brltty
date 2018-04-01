@@ -277,6 +277,9 @@ these actions are as follows:
 5) scroll forward (down or right)
 6) context click
 
+A range control (progress bar, volume slider, etc) can be adjusted up/down
+via the scroll forward/backward actions.
+
 Input Areas
 ~~~~~~~~~~~
 
