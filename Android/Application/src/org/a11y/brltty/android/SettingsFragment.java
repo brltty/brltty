@@ -19,15 +19,9 @@
 package org.a11y.brltty.android;
 
 import java.util.Arrays;
-import java.util.Collection;
-
-import java.util.List;
-import java.util.ArrayList;
-
+import java.util.Set;
 import java.util.Map;
 import java.util.LinkedHashMap;
-
-import java.util.Set;
 
 import java.text.Collator;
 import java.text.CollationKey;
