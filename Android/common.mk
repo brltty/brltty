@@ -21,10 +21,10 @@ clean::
 	-rm -f -r $(ANDROID_LIBRARIES_DIRECTORY)
 	-rm -f -r gen
 
-install: all
+install:
 	adb install $(ANDROID_PACKAGE_FILE)
 
-reinstall: all
+reinstall:
 	adb install -r $(ANDROID_PACKAGE_FILE)
 
 uninstall:

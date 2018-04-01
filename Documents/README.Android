@@ -477,7 +477,7 @@ builds. You can get it from `The Android NDK Web Page`_.
 
 BRLTTY is currently being built using:
 
-* Version 21.1.2 of the SDK build tools.
+* Version 26.0.1 of the SDK build tools.
 * Version r16b of the NDK.
 
 The SDK initially only includes support for the current Android API

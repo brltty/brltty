@@ -66,6 +66,15 @@ public abstract class ApplicationUtilities {
   public static final boolean haveMarshmallow
   = haveAPILevel(Build.VERSION_CODES.M);
 
+  public static final boolean haveNougat
+  = haveAPILevel(Build.VERSION_CODES.N);
+
+  public static final boolean haveNougatMR1
+  = haveAPILevel(Build.VERSION_CODES.N_MR1);
+
+  public static final boolean haveOreo
+  = haveAPILevel(Build.VERSION_CODES.O);
+
   public static long getAbsoluteTime () {
     return SystemClock.uptimeMillis();
   }
