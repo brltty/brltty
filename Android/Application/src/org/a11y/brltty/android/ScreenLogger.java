@@ -389,6 +389,7 @@ public abstract class ScreenLogger {
       put(AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY, "acc");
       put(AccessibilityWindowInfo.TYPE_APPLICATION, "app");
       put(AccessibilityWindowInfo.TYPE_INPUT_METHOD, "ime");
+      put(AccessibilityWindowInfo.TYPE_SPLIT_SCREEN_DIVIDER, "ssd");
       put(AccessibilityWindowInfo.TYPE_SYSTEM, "sys");
     }
   };
@@ -396,6 +397,19 @@ public abstract class ScreenLogger {
   private static void log (AccessibilityWindowInfo window, String name, boolean descend, boolean nodes) {
     StringBuilder sb = new StringBuilder();
     add(sb, "id", window.getId());
+
+    if (ApplicationUtilities.haveNougat) {
+      CharSequence title = window.getTitle();
+
+      if (title != null) {
+        if (title.length() > 0) {
+          sb.append(' ');
+          sb.append('"');
+          sb.append(title);
+          sb.append('"');
+        }
+      }
+    }
 
     {
       AccessibilityWindowInfo parent = window.getParent();
@@ -418,6 +432,10 @@ public abstract class ScreenLogger {
     add(sb, window.isActive(), "act");
     add(sb, window.isFocused(), "ifd");
     add(sb, window.isAccessibilityFocused(), "afd");
+
+    if (ApplicationUtilities.haveOreo) {
+      add(sb, window.isInPictureInPictureMode(), "pip");
+    }
 
     {
       Rect location = new Rect();
