@@ -21,80 +21,119 @@ package org.a11y.brltty.android;
 import android.util.Log;
 
 import android.media.AudioManager;
-import android.media.AudioFormat;
 import android.media.AudioTrack;
+import android.media.AudioFormat;
+import android.media.AudioAttributes;
 
 public final class PcmDevice {
-  private static final String LOG_TAG = PcmDevice.class.getName();
+  private final static String LOG_TAG = PcmDevice.class.getName();
 
-  private static final int streamType = AudioManager.STREAM_NOTIFICATION;
-  private static final int trackMode = AudioTrack.MODE_STREAM;
-  private static final int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
+  private final static int streamType = AudioManager.STREAM_NOTIFICATION;
+  private final static int trackMode = AudioTrack.MODE_STREAM;
+  private final static int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
 
   private int sampleRate = 8000;
-  private int channelConfiguration = AudioFormat.CHANNEL_OUT_MONO;
+  private int channelCount = 1;
   private AudioTrack audioTrack = null;
 
-  public boolean isStarted () {
+  public final boolean isStarted () {
     return audioTrack != null;
   }
 
-  public boolean isPlaying () {
+  public final boolean isPlaying () {
     return audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING;
   }
 
-  public int getSampleRate () {
+  public final int getSampleRate () {
     return sampleRate;
   }
 
-  public void setSampleRate (int rate) {
+  public final void setSampleRate (int rate) {
     if (!isStarted()) sampleRate = rate;
   }
 
-  public int getChannelConfiguration () {
-    return channelConfiguration;
-  }
+  public final int getChannelPositionMask () {
+    switch (channelCount) {
+      case 1:
+        return AudioFormat.CHANNEL_OUT_MONO;
 
-  public int getChannelCount () {
-    switch (getChannelConfiguration()) {
+      case 2:
+        return AudioFormat.CHANNEL_OUT_STEREO;
+
+      case 3:
+        return AudioFormat.CHANNEL_OUT_STEREO | AudioFormat.CHANNEL_OUT_FRONT_CENTER;
+
+      case 4:
+        return AudioFormat.CHANNEL_OUT_QUAD;
+
+      case 5:
+        return AudioFormat.CHANNEL_OUT_QUAD | AudioFormat.CHANNEL_OUT_FRONT_CENTER;
+
+      case 6:
+        return AudioFormat.CHANNEL_OUT_5POINT1;
+
+      case 7:
+        return AudioFormat.CHANNEL_OUT_5POINT1 | AudioFormat.CHANNEL_OUT_BACK_CENTER;
+
+      case 8:
+        return AudioFormat.CHANNEL_OUT_7POINT1_SURROUND;
+
       default:
-      case AudioFormat.CHANNEL_OUT_MONO:
-        return 1;
-
-      case AudioFormat.CHANNEL_OUT_STEREO:
-        return 2;
+        return 0;
     }
   }
 
-  public void setChannelCount (int count) {
+  public final int getChannelCount () {
+    return channelCount;
+  }
+
+  public final void setChannelCount (int count) {
     if (!isStarted()) {
-      switch (count) {
-        default:
-        case 1:
-          channelConfiguration = AudioFormat.CHANNEL_OUT_MONO;
-          break;
-
-        case 2:
-          channelConfiguration = AudioFormat.CHANNEL_OUT_STEREO;
-          break;
-      }
+      channelCount = count;
     }
   }
 
-  public int getBufferSize () {
-    return AudioTrack.getMinBufferSize(getSampleRate(), getChannelConfiguration(), audioFormat);
+  public final int getBufferSize () {
+    return AudioTrack.getMinBufferSize(getSampleRate(),
+                                       getChannelPositionMask(),
+                                       audioEncoding);
   }
 
-  private AudioTrack newAudioTrack () {
-    return new AudioTrack(streamType, getSampleRate(), getChannelConfiguration(),
-                          audioFormat, getBufferSize(), trackMode);
+  private final AudioTrack newAudioTrack () {
+    if (ApplicationUtilities.haveOreo) {
+      AudioAttributes attributes =
+        new AudioAttributes.Builder()
+                           .setUsage(AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY)
+                           .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                           .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
+                           .build();
+
+      AudioFormat format =
+        new AudioFormat.Builder()
+                       .setEncoding(audioEncoding)
+                       .setSampleRate(getSampleRate())
+                       .setChannelMask(getChannelPositionMask())
+                       .build();
+
+      return new AudioTrack.Builder()
+                           .setAudioAttributes(attributes)
+                           .setAudioFormat(format)
+                           .setBufferSizeInBytes(getBufferSize())
+                           .setTransferMode(AudioTrack.MODE_STREAM)
+                           .setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
+                           .build();
+    }
+
+    return new AudioTrack(streamType, getSampleRate(),
+                          getChannelPositionMask(), audioEncoding,
+                          getBufferSize(), trackMode);
   }
 
-  protected void start () {
+  protected final void start () {
     if (!isStarted()) audioTrack = newAudioTrack();
   }
 
-  public boolean write (short[] samples) {
+  public final boolean write (short[] samples) {
     start();
 
     int offset = 0;
@@ -113,16 +152,16 @@ public final class PcmDevice {
     return true;
   }
 
-  public void push () {
+  public final void push () {
     if (isPlaying()) audioTrack.stop();
   }
 
-  public void cancel () {
+  public final void cancel () {
     if (isPlaying()) audioTrack.pause();
     audioTrack.flush();
   }
 
-  public void close () {
+  public final void close () {
     cancel();
     audioTrack.release();
     audioTrack = null;
