@@ -24,13 +24,16 @@ import android.app.PendingIntent;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.NotificationChannel;
 
 public abstract class BrailleNotification {
   private BrailleNotification () {
   }
 
+  private final static Integer NOTIFICATION_IDENTIFIER = 1;
+  private final static String NOTIFICATION_CHANNEL = "braille";
+
   private static Context applicationContext = null;
-  private final static Integer notificationIdentifier = 1;
   private static NotificationManager notificationManager = null;
   private static Notification.Builder notificationBuilder = null;
 
@@ -62,7 +65,26 @@ public abstract class BrailleNotification {
   private static void makeBuilder () {
     Context context = getContext();
 
-    notificationBuilder = new Notification.Builder(context)
+    if (ApplicationUtilities.haveOreo) {
+      NotificationManager nm = getManager();
+      NotificationChannel channel = nm.getNotificationChannel(NOTIFICATION_CHANNEL);
+
+      if (channel == null) {
+        channel = new NotificationChannel(
+          NOTIFICATION_CHANNEL,
+          getString(R.string.braille_channel_name),
+          NotificationManager.IMPORTANCE_LOW
+        );
+
+        nm.createNotificationChannel(channel);
+      }
+
+      notificationBuilder = new Notification.Builder(context, NOTIFICATION_CHANNEL);
+    } else {
+      notificationBuilder = new Notification.Builder(context);
+    }
+
+    notificationBuilder
       .setPriority(Notification.PRIORITY_LOW)
       .setOngoing(true)
       .setOnlyAlertOnce(true)
@@ -93,7 +115,7 @@ public abstract class BrailleNotification {
   }
 
   private static void updateNotification () {
-    getManager().notify(notificationIdentifier, buildNotification());
+    getManager().notify(NOTIFICATION_IDENTIFIER, buildNotification());
   }
 
   private static void setState () {
@@ -111,7 +133,7 @@ public abstract class BrailleNotification {
   }
 
   public static void updateState () {
-    synchronized (notificationIdentifier) {
+    synchronized (NOTIFICATION_IDENTIFIER) {
       if (isActive()) {
         setState();
         updateNotification();
@@ -126,7 +148,7 @@ public abstract class BrailleNotification {
   }
 
   public static void updateDevice (String device) {
-    synchronized (notificationIdentifier) {
+    synchronized (NOTIFICATION_IDENTIFIER) {
       if (isActive()) {
         setDevice(device);
         updateNotification();
@@ -135,7 +157,7 @@ public abstract class BrailleNotification {
   }
 
   public static void create () {
-    synchronized (notificationIdentifier) {
+    synchronized (NOTIFICATION_IDENTIFIER) {
       if (isActive()) {
         throw new IllegalStateException("already active");
       }
@@ -145,18 +167,18 @@ public abstract class BrailleNotification {
       setDevice(DeviceManager.getSelectedDevice());
 
       BrailleService.getBrailleService()
-                    .startForeground(notificationIdentifier, buildNotification());
+                    .startForeground(NOTIFICATION_IDENTIFIER, buildNotification());
     }
   }
 
   public static void destroy () {
-    synchronized (notificationIdentifier) {
+    synchronized (NOTIFICATION_IDENTIFIER) {
       if (!isActive()) {
         throw new IllegalStateException("not active");
       }
 
       notificationBuilder = null;
-      getManager().cancel(notificationIdentifier);
+      getManager().cancel(NOTIFICATION_IDENTIFIER);
     }
   }
 }

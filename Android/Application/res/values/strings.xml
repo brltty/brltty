@@ -10,6 +10,7 @@
   <string name="checkbox_state_unchecked">Off</string>
   <string name="checkbox_state_checked">On</string>
 
+  <string name="braille_channel_name">Braille Device State</string>
   <string name="braille_hint_tap">Tap for settings.</string>
   <string name="braille_state_released">Released</string>
   <string name="braille_state_waiting">Waiting</string>
@@ -28,8 +29,8 @@
   <string name="SETTINGS_SCREEN_ADVANCED">Advanced Settings</string>
 
   <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Navigation Mode</string>
-  <string name="SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE">Release Braille Device</string>
   <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Speech Support</string>
+  <string name="SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE">Release Braille Device</string>
 
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Text Table</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Attributes Table</string>
