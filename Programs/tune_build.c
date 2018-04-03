@@ -129,26 +129,27 @@ parseNumber (
   const TuneNumber minimum, const TuneNumber maximum,
   const char *name
 ) {
+  const wchar_t *const start = *operand;
+  const wchar_t zero = WC_C('0');
+  unsigned long value = 0;
   const char *problem = "invalid";
 
-  if (isdigit(**operand)) {
-    errno = 0;
-    wchar_t *end;
-    unsigned long ul = wcstoul(*operand, &end, 10);
-
-    if (errno) goto PROBLEM_ENCOUNTERED;
-    if (ul > UINT_MAX) goto PROBLEM_ENCOUNTERED;
-
-    if (ul < minimum) goto PROBLEM_ENCOUNTERED;
-    if (ul > maximum) goto PROBLEM_ENCOUNTERED;
-
-    *number = ul;
-    *operand = end;
-    return 1;
+  while (iswdigit(**operand)) {
+    if (!value && (*operand > start)) goto PROBLEM_ENCOUNTERED;
+    value *= 10;
+    value += **operand - zero;
+    *operand += 1;
   }
 
-  if (!required) return 1;
-  problem = "missing";
+  if (*operand > start) {
+    if (value < minimum) goto PROBLEM_ENCOUNTERED;
+    if (value > maximum) goto PROBLEM_ENCOUNTERED;
+    *number = value;
+  } else if (required) {
+    problem = "missing";
+  }
+
+  return 1;
 
 PROBLEM_ENCOUNTERED:
   if (name) {
@@ -297,7 +298,7 @@ parseMode (TuneBuilder *tb, int *accidentals, const wchar_t **operand) {
   if (!isalpha(*from)) return 1;
 
   const wchar_t *to = from;
-  while (isalpha(*++to));
+  while (iswalpha(*++to));
   unsigned int length = to - from;
 
   const ModeEntry *mode = NULL;
