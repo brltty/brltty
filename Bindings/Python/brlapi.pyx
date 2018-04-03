@@ -44,6 +44,7 @@ try:
   b.readKey()
 
   b.leaveTtyMode()
+  b.closeConnection()
 
 except brlapi.ConnectionError as e:
   if e.brlerrno == brlapi.ERROR_CONNREFUSED:
@@ -352,9 +353,16 @@ cdef class Connection:
 			c_brlapi.free(self.h)
 			raise ConnectionError(self.settings.host, self.settings.auth)
 
-	def __del__(self):
+	def closeConnection(self):
 		"""Close the BrlAPI connection"""
-		c_brlapi.brlapi__closeConnection(self.h)
+		if self.fd != -1:
+			c_brlapi.brlapi__closeConnection(self.h)
+			self.fd = -1
+
+	def __del__(self):
+		"""Release resources used by the connection"""
+		if self.fd != -1:
+			c_brlapi.brlapi__closeConnection(self.h)
 		c_brlapi.free(self.h)
 
 	property host:
