@@ -112,8 +112,7 @@ if __name__ == "__main__":
         writeProperty("Key", text);
 
       brl.leaveTtyMode()
-    finally:
-      del brl
+      brl.closeConnection()
   except brlapi.ConnectionError as e:
     if e.brlerrno == brlapi.ERROR_CONNREFUSED:
       logMessage("Connection to %s refused. BRLTTY is too busy..." % e.host)
