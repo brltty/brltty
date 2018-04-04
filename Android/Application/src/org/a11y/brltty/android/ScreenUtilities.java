@@ -82,7 +82,7 @@ public abstract class ScreenUtilities {
 
   public static boolean isRadioButton (AccessibilityNodeInfo node) {
     if (hasSelectionMode(node, AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_SINGLE)) return true;
-    return false;
+    return isSubclassOf(node, android.widget.RadioButton.class);
   }
 
   public static boolean isEditable (AccessibilityNodeInfo node) {
