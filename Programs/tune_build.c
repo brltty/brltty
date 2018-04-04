@@ -130,14 +130,20 @@ parseNumber (
   const char *name
 ) {
   const wchar_t *const start = *operand;
-  const wchar_t zero = WC_C('0');
   unsigned long value = 0;
   const char *problem = "invalid";
 
-  while (iswdigit(**operand)) {
+  while (1) {
     if (!value && (*operand > start)) goto PROBLEM_ENCOUNTERED;
+
+    long int digit = **operand - WC_C('0');
+    if (digit < 0) break;
+    if (digit > 9) break;
+
     value *= 10;
-    value += **operand - zero;
+    value += digit;
+    if (value > UINT_MAX) goto PROBLEM_ENCOUNTERED;
+
     *operand += 1;
   }
 
@@ -147,6 +153,7 @@ parseNumber (
     *number = value;
   } else if (required) {
     problem = "missing";
+    goto PROBLEM_ENCOUNTERED;
   }
 
   return 1;
