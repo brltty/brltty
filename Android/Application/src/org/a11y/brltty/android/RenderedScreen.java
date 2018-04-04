@@ -259,6 +259,19 @@ public class RenderedScreen {
       }
     }
 
+    if (!hasText) {
+      if (sb.length() > 0) {
+        CharSequence description = node.getContentDescription();
+
+        if (description != null) {
+          if (description.length() > 0) {
+            sb.append(' ');
+            sb.append(description);
+          }
+        }
+      }
+    }
+
     if (ApplicationUtilities.haveKitkat) {
       AccessibilityNodeInfo.RangeInfo range = node.getRangeInfo();
 
