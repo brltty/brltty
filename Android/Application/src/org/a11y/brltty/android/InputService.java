@@ -20,6 +20,7 @@ package org.a11y.brltty.android;
 import org.a11y.brltty.core.*;
 
 import android.util.Log;
+import android.content.Context;
 
 import android.view.KeyEvent;
 import android.view.ViewConfiguration;
@@ -237,10 +238,10 @@ public class InputService extends InputMethodService {
     ApplicationUtilities.getInputMethodManager().showInputMethodPicker();
   }
 
-  private static void reportInputProblem (int string) {
-    String message = ApplicationContext.get().getString(string);
-    Log.w(LOG_TAG, message);
-    CoreWrapper.showMessage(message);
+  private static void reportInputProblem (int message) {
+    Context context = ApplicationContext.get();
+    Log.w(LOG_TAG, context.getResources().getString(message));
+    CoreWrapper.showMessage(context.getString(message));
   }
 
   public static InputConnection getInputConnection () {
