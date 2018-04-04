@@ -254,7 +254,7 @@ processParameters_AtSpi2Screen (char **parameters) {
     }
   }
 
-  typeFlags[TYPE_TEXT] = 1;
+  typeFlags[TYPE_TEXT] = 0;
   typeFlags[TYPE_TERMINAL] = 1;
   typeFlags[TYPE_ALL] = 0;
   {

@@ -48,7 +48,7 @@ typedef enum {
 
 #include "scr_driver.h"
 
-static int typeText = 1, typeTerminal = 1, typeAll = 0;
+static int typeText = 0, typeTerminal = 1, typeAll = 0;
 static AccessibleText *curTerm;
 static Accessible *curFocus;
 
