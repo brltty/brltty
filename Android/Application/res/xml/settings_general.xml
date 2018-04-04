@@ -46,4 +46,9 @@
     android:persistent="true"
     android:title="@string/SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE"
    />
+
+  <Preference
+    android:key="@string/PREF_KEY_SWITCH_INPUT_METHOD"
+    android:title="@string/SETTINGS_BUTTON_SWITCH_INPUT_METHOD"
+   />
 </PreferenceScreen>

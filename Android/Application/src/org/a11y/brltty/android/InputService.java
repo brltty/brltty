@@ -216,11 +216,11 @@ public class InputService extends InputMethodService {
     return getInputMethodInfo(InputService.class);
   }
 
-  public static boolean isInputServiceEnabled () {
+  public static boolean isThisServiceEnabled () {
     return getInputMethodInfo() != null;
   }
 
-  public static boolean isInputServiceSelected () {
+  public static boolean isThisServiceSelected () {
     InputMethodInfo info = getInputMethodInfo();
 
     if (info != null) {
@@ -232,6 +232,11 @@ public class InputService extends InputMethodService {
     return false;
   }
 
+  public static void switchInputMethod () {
+    Log.w(LOG_TAG, "showing input method picker");
+    ApplicationUtilities.getInputMethodManager().showInputMethodPicker();
+  }
+
   public static InputConnection getInputConnection () {
     InputService service = InputService.getInputService();
 
@@ -239,17 +244,16 @@ public class InputService extends InputMethodService {
       InputConnection connection = service.getCurrentInputConnection();
       if (connection != null) return connection;
       Log.w(LOG_TAG, "input service not connected");
-    } else if (isInputServiceSelected()) {
+    } else if (isThisServiceSelected()) {
       Log.w(LOG_TAG, "input service not started");
     } else {
-      if (isInputServiceEnabled()) {
+      if (isThisServiceEnabled()) {
         Log.w(LOG_TAG, "input service not selected");
       } else {
         Log.w(LOG_TAG, "input service not enabled");
       }
 
-      Log.w(LOG_TAG, "showing input method picker");
-      ApplicationUtilities.getInputMethodManager().showInputMethodPicker();
+      switchInputMethod();
     }
 
     return null;

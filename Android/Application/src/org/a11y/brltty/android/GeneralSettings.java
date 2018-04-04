@@ -32,6 +32,7 @@ public final class GeneralSettings extends SettingsFragment {
   private ListPreference contractionTableList;
   private ListPreference speechSupportList;
   private CheckBoxPreference releaseBrailleDeviceCheckBox;
+  private Preference switchInputMethodButton;
 
   @Override
   public void onCreate (Bundle savedInstanceState) {
@@ -43,6 +44,7 @@ public final class GeneralSettings extends SettingsFragment {
     contractionTableList = getListPreference(R.string.PREF_KEY_CONTRACTION_TABLE);
     speechSupportList = getListPreference(R.string.PREF_KEY_SPEECH_SUPPORT);
     releaseBrailleDeviceCheckBox = getCheckBoxPreference(R.string.PREF_KEY_RELEASE_BRAILLE_DEVICE);
+    switchInputMethodButton = getPreference(R.string.PREF_KEY_SWITCH_INPUT_METHOD);
 
     sortList(textTableList, 1);
     sortList(contractionTableList);
@@ -140,6 +142,16 @@ public final class GeneralSettings extends SettingsFragment {
           BrailleNotification.updateState();
 
           showSelection(releaseBrailleDeviceCheckBox, newSetting);
+          return true;
+        }
+      }
+    );
+
+    switchInputMethodButton.setOnPreferenceClickListener(
+      new Preference.OnPreferenceClickListener() {
+        @Override
+        public boolean onPreferenceClick (Preference preference) {
+          InputService.switchInputMethod();
           return true;
         }
       }
