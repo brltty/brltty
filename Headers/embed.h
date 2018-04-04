@@ -60,6 +60,8 @@ FUNCTION_DECLARE(restartScreenDriver, void, (void));
 FUNCTION_DECLARE(changeScreenDriver, int, (const char *driver));
 FUNCTION_DECLARE(changeScreenParameters, int, (const char *parameters));
 
+FUNCTION_DECLARE(showMessage, void, (const char *text));
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -6,6 +6,10 @@
 
   <string name="input_service_name">BRLTTY Input Service</string>
   <string name="input_service_type">Keyboards on Braille Devices</string>
+  <string name="input_service_not_enabled">input service not enabled</string>
+  <string name="input_service_not_selected">input service not selected</string>
+  <string name="input_service_not_started">input service not started</string>
+  <string name="input_service_not_connected">input service not connected</string>
 
   <string name="checkbox_state_unchecked">Off</string>
   <string name="checkbox_state_checked">On</string>

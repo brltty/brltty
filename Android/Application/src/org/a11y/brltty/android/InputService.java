@@ -216,11 +216,11 @@ public class InputService extends InputMethodService {
     return getInputMethodInfo(InputService.class);
   }
 
-  public static boolean isThisServiceEnabled () {
+  public static boolean isEnabled () {
     return getInputMethodInfo() != null;
   }
 
-  public static boolean isThisServiceSelected () {
+  public static boolean isSelected () {
     InputMethodInfo info = getInputMethodInfo();
 
     if (info != null) {
@@ -237,23 +237,25 @@ public class InputService extends InputMethodService {
     ApplicationUtilities.getInputMethodManager().showInputMethodPicker();
   }
 
+  private static void reportInputProblem (int string) {
+    String message = ApplicationContext.get().getString(string);
+    Log.w(LOG_TAG, message);
+    CoreWrapper.showMessage(message);
+  }
+
   public static InputConnection getInputConnection () {
     InputService service = InputService.getInputService();
 
     if (service != null) {
       InputConnection connection = service.getCurrentInputConnection();
       if (connection != null) return connection;
-      Log.w(LOG_TAG, "input service not connected");
-    } else if (isThisServiceSelected()) {
-      Log.w(LOG_TAG, "input service not started");
+      reportInputProblem(R.string.input_service_not_connected);
+    } else if (isSelected()) {
+      reportInputProblem(R.string.input_service_not_started);
+    } else if (isEnabled()) {
+      reportInputProblem(R.string.input_service_not_selected);
     } else {
-      if (isThisServiceEnabled()) {
-        Log.w(LOG_TAG, "input service not selected");
-      } else {
-        Log.w(LOG_TAG, "input service not enabled");
-      }
-
-      switchInputMethod();
+      reportInputProblem(R.string.input_service_not_enabled);
     }
 
     return null;

@@ -29,8 +29,8 @@ public class CoreWrapper {
 
   public static native boolean coreEnableInterrupt ();
   public static native boolean coreDisableInterrupt ();
-  public static native boolean coreInterrupt (boolean stop);
 
+  public static native boolean coreInterrupt (boolean stop);
   public static native boolean coreWait (int duration);
 
   public static native boolean changeLogLevel (String level);
@@ -43,11 +43,18 @@ public class CoreWrapper {
 
   public static native boolean restartBrailleDriver ();
   public static native boolean changeBrailleDriver (String driver);
+  public static native boolean changeBrailleParameters (String parameters);
   public static native boolean changeBrailleDevice (String device);
 
   public static native boolean restartSpeechDriver ();
   public static native boolean changeSpeechDriver (String driver);
+  public static native boolean changeSpeechParameters (String parameters);
 
+  public static native boolean restartScreenDriver ();
+  public static native boolean changeScreenDriver (String driver);
+  public static native boolean changeScreenParameters (String parameters);
+
+  public static native void showMessage (String text);
   public static native boolean setEnvironmentVariable (String name, String value);
 
   public static boolean changeLogCategories (Set<String> categories) {

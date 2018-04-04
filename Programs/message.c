@@ -20,6 +20,7 @@
 
 #include <string.h>
 
+#include "embed.h"
 #include "log.h"
 #include "log_history.h"
 #include "message.h"
@@ -256,4 +257,9 @@ message (const char *mode, const char *text, MessageOptions options) {
   }
 
   return presented;
+}
+
+void
+showMessage (const char *text) {
+  message(NULL, text, 0);
 }

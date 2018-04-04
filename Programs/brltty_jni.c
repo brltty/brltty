@@ -68,6 +68,8 @@ SYMBOL_POINTER(restartScreenDriver);
 SYMBOL_POINTER(changeScreenDriver);
 SYMBOL_POINTER(changeScreenParameters);
 
+SYMBOL_POINTER(showMessage);
+
 typedef struct {
   const char *name;
   void *pointer;
@@ -108,6 +110,8 @@ BEGIN_SYMBOL_TABLE
   SYMBOL_ENTRY(restartScreenDriver),
   SYMBOL_ENTRY(changeScreenDriver),
   SYMBOL_ENTRY(changeScreenParameters),
+
+  SYMBOL_ENTRY(showMessage),
 END_SYMBOL_TABLE
 
 static void *coreHandle = NULL;
@@ -440,6 +444,20 @@ JAVA_STATIC_METHOD (
   jstring parameters
 ) {
   return changeStringValue(env, changeScreenParameters_p, parameters);
+}
+
+JAVA_STATIC_METHOD (
+  org_a11y_brltty_core_CoreWrapper, showMessage, void,
+  jstring jMessage
+) {
+  const char *cMessage = (*env)->GetStringUTFChars(env, jMessage, NULL);
+
+  if (cMessage) {
+    showMessage_p(cMessage);
+    (*env)->ReleaseStringUTFChars(env, jMessage, cMessage);
+  } else {
+    reportOutOfMemory(env, "C new value string");
+  }
 }
 
 JAVA_STATIC_METHOD (
