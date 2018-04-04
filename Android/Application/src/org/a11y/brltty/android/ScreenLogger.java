@@ -136,13 +136,7 @@ public abstract class ScreenLogger {
     }
 
     {
-      CharSequence text = node.getText();
-
-      if (ScreenUtilities.isEditable(node)) {
-        if (text == null) text = "";
-      } else if ((text != null) && (text.length() == 0)) {
-        text = null;
-      }
+      CharSequence text = ScreenUtilities.getText(node);
 
       if (text != null) {
         sb.append(' ');
