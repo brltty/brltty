@@ -11,8 +11,8 @@
   <string name="input_service_not_started">input service not started</string>
   <string name="input_service_not_connected">input service not connected</string>
 
-  <string name="checkbox_state_unchecked">Off</string>
-  <string name="checkbox_state_checked">On</string>
+  <string name="checkbox_state_unchecked">No</string>
+  <string name="checkbox_state_checked">Yes</string>
 
   <string name="braille_channel_name">Braille Device State</string>
   <string name="braille_hint_tap">Tap for settings.</string>
@@ -33,8 +33,8 @@
   <string name="SETTINGS_SCREEN_ADVANCED">Advanced Settings</string>
 
   <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Navigation Mode</string>
-  <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Speech Support</string>
   <string name="SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE">Release Braille Device</string>
+  <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Speech Support</string>
   <string name="SETTINGS_BUTTON_SWITCH_INPUT_METHOD">Switch Input Method</string>
 
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Text Table</string>

@@ -7,21 +7,21 @@
   <string name="PREF_KEY_PACKAGE_SIZE">package-size</string>
   <string name="PREF_KEY_PACKAGE_TIME">package-time</string>
 
-  <string name="PREF_KEY_LOG_LEVEL">log-level</string>
-  <string name="PREF_KEY_LOG_CATEGORIES">log-categories</string>
-  <string name="PREF_KEY_LOG_ACCESSIBILITY_EVENTS">log-accessibility-events</string>
-  <string name="PREF_KEY_LOG_RENDERED_SCREEN">log-rendered-screen</string>
-  <string name="PREF_KEY_LOG_KEYBOARD_EVENTS">log-keyboard-events</string>
-
   <string name="PREF_KEY_NAVIGATION_MODE">navigation-mode</string>
   <string name="PREF_KEY_RELEASE_BRAILLE_DEVICE">release-braille-device</string>
-  <string name="PREF_KEY_SWITCH_INPUT_METHOD">switch-input-method</string>
   <string name="PREF_KEY_SPEECH_SUPPORT">speech-support</string>
+  <string name="PREF_KEY_SWITCH_INPUT_METHOD">switch-input-method</string>
 
   <string name="PREF_KEY_TEXT_TABLE">text-table</string>
   <string name="PREF_KEY_ATTRIBUTES_TABLE">attributes-table</string>
   <string name="PREF_KEY_CONTRACTION_TABLE">contraction-table</string>
   <string name="PREF_KEY_KEYBOARD_TABLE">keyboard-table</string>
+
+  <string name="PREF_KEY_LOG_LEVEL">log-level</string>
+  <string name="PREF_KEY_LOG_CATEGORIES">log-categories</string>
+  <string name="PREF_KEY_LOG_ACCESSIBILITY_EVENTS">log-accessibility-events</string>
+  <string name="PREF_KEY_LOG_RENDERED_SCREEN">log-rendered-screen</string>
+  <string name="PREF_KEY_LOG_KEYBOARD_EVENTS">log-keyboard-events</string>
 
   <string name="PREF_KEY_SELECTED_DEVICE">selected-device</string>
   <string name="PREF_KEY_ADD_DEVICE">add-device</string>

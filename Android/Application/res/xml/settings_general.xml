@@ -4,6 +4,12 @@
   android:title="@string/SETTINGS_SCREEN_GENERAL"
   >
 
+  <CheckBoxPreference
+    android:key="@string/PREF_KEY_RELEASE_BRAILLE_DEVICE"
+    android:persistent="true"
+    android:title="@string/SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE"
+   />
+
   <ListPreference
     android:key="@string/PREF_KEY_NAVIGATION_MODE"
     android:persistent="true"
@@ -38,12 +44,6 @@
     android:entries="@array/SPEECH_SUPPORT_LABELS"
     android:entryValues="@array/SPEECH_SUPPORT_VALUES"
     android:defaultValue="@string/DEFAULT_SPEECH_SUPPORT"
-   />
-
-  <CheckBoxPreference
-    android:key="@string/PREF_KEY_RELEASE_BRAILLE_DEVICE"
-    android:persistent="true"
-    android:title="@string/SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE"
    />
 
   <Preference

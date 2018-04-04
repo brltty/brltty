@@ -27,11 +27,11 @@ import android.preference.ListPreference;
 public final class GeneralSettings extends SettingsFragment {
   private static final String LOG_TAG = GeneralSettings.class.getName();
 
+  private CheckBoxPreference releaseBrailleDeviceCheckBox;
   private ListPreference navigationModeList;
   private ListPreference textTableList;
   private ListPreference contractionTableList;
   private ListPreference speechSupportList;
-  private CheckBoxPreference releaseBrailleDeviceCheckBox;
   private Preference switchInputMethodButton;
 
   @Override
@@ -39,21 +39,36 @@ public final class GeneralSettings extends SettingsFragment {
     super.onCreate(savedInstanceState);
     addPreferencesFromResource(R.xml.settings_general);
 
+    releaseBrailleDeviceCheckBox = getCheckBoxPreference(R.string.PREF_KEY_RELEASE_BRAILLE_DEVICE);
     navigationModeList = getListPreference(R.string.PREF_KEY_NAVIGATION_MODE);
     textTableList = getListPreference(R.string.PREF_KEY_TEXT_TABLE);
     contractionTableList = getListPreference(R.string.PREF_KEY_CONTRACTION_TABLE);
     speechSupportList = getListPreference(R.string.PREF_KEY_SPEECH_SUPPORT);
-    releaseBrailleDeviceCheckBox = getCheckBoxPreference(R.string.PREF_KEY_RELEASE_BRAILLE_DEVICE);
     switchInputMethodButton = getPreference(R.string.PREF_KEY_SWITCH_INPUT_METHOD);
 
     sortList(textTableList, 1);
     sortList(contractionTableList);
 
+    showSelection(releaseBrailleDeviceCheckBox);
     showSelection(navigationModeList);
     showSelection(textTableList);
     showSelection(contractionTableList);
     showSelection(speechSupportList);
-    showSelection(releaseBrailleDeviceCheckBox);
+
+    releaseBrailleDeviceCheckBox.setOnPreferenceChangeListener(
+      new Preference.OnPreferenceChangeListener() {
+        @Override
+        public boolean onPreferenceChange (Preference preference, Object newValue) {
+          final boolean newSetting = (Boolean)newValue;
+
+          ApplicationSettings.RELEASE_BRAILLE_DEVICE = newSetting;
+          BrailleNotification.updateState();
+
+          showSelection(releaseBrailleDeviceCheckBox, newSetting);
+          return true;
+        }
+      }
+    );
 
     navigationModeList.setOnPreferenceChangeListener(
       new Preference.OnPreferenceChangeListener() {
@@ -127,21 +142,6 @@ public final class GeneralSettings extends SettingsFragment {
           );
 
           showSelection(speechSupportList, newDriver);
-          return true;
-        }
-      }
-    );
-
-    releaseBrailleDeviceCheckBox.setOnPreferenceChangeListener(
-      new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final boolean newSetting = (Boolean)newValue;
-
-          ApplicationSettings.RELEASE_BRAILLE_DEVICE = newSetting;
-          BrailleNotification.updateState();
-
-          showSelection(releaseBrailleDeviceCheckBox, newSetting);
           return true;
         }
       }
