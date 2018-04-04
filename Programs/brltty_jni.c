@@ -159,7 +159,7 @@ reportProblem (
 
 static void
 reportOutOfMemory (JNIEnv *env, const char *description) {
-  reportProblem(env, "java/lang/OutOfMemoryError", "cannot allocate %s", description);
+  reportProblem(env, JAVA_OBJ_OUT_OF_MEMORY_ERROR, "cannot allocate %s", description);
 }
 
 static int
@@ -231,7 +231,7 @@ loadCoreLibrary (JNIEnv *env) {
     if (allFound) return 1;
   }
 
-  reportProblem(env, "java/lang/UnsatisfiedLinkError", "%s", dlerror());
+  reportProblem(env, JAVA_OBJ_UNSATISFIED_LINK_ERROR, "%s", dlerror());
   return 0;
 }
 
