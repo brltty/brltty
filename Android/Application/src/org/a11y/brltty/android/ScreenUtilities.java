@@ -29,6 +29,73 @@ public abstract class ScreenUtilities {
   private ScreenUtilities () {
   }
 
+  public static AccessibilityNodeInfo getRefreshedNode (AccessibilityNodeInfo node) {
+    if (node != null) {
+      if (ApplicationUtilities.haveJellyBeanMR2) {
+        node = AccessibilityNodeInfo.obtain(node);
+
+        if (!node.refresh()) {
+          node.recycle();
+          node = null;
+        }
+
+        return node;
+      }
+
+      {
+        int childCount = node.getChildCount();
+
+        for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+          AccessibilityNodeInfo child = node.getChild(childIndex);
+
+          if (child != null) {
+            AccessibilityNodeInfo parent = child.getParent();
+
+            child.recycle();
+            child = null;
+
+            if (node.equals(parent)) {
+              return parent;
+            }
+
+            if (parent != null) {
+              parent.recycle();
+              parent = null;
+            }
+          }
+        }
+      }
+
+      {
+        AccessibilityNodeInfo parent = node.getParent();
+
+        if (parent != null) {
+          int childCount = parent.getChildCount();
+
+          for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+            AccessibilityNodeInfo child = parent.getChild(childIndex);
+
+            if (node.equals(child)) {
+              parent.recycle();
+              parent = null;
+              return child;
+            }
+
+            if (child != null) {
+              child.recycle();
+              child = null;
+            }
+          }
+
+          parent.recycle();
+          parent = null;
+        }
+      }
+    }
+
+    return null;
+  }
+
   public static boolean isVisible (AccessibilityNodeInfo node) {
     if (ApplicationUtilities.haveJellyBean) {
       return node.isVisibleToUser();
@@ -93,67 +160,64 @@ public abstract class ScreenUtilities {
     }
   }
 
-  public static AccessibilityNodeInfo getRefreshedNode (AccessibilityNodeInfo node) {
-    if (node != null) {
-      if (ApplicationUtilities.haveJellyBeanMR2) {
-        node = AccessibilityNodeInfo.obtain(node);
+  public static String normalizeText (CharSequence text) {
+    if (text != null) {
+      String string = text.toString().trim();
+      if (string.length() > 0) return string;
+    }
 
-        if (!node.refresh()) {
-          node.recycle();
-          node = null;
-        }
+    return null;
+  }
 
-        return node;
-      }
+  public static String getText (AccessibilityNodeInfo node) {
+    CharSequence text = null;
 
-      {
-        int childCount = node.getChildCount();
+    {
+      TextField field = TextField.get(node);
 
-        for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-          AccessibilityNodeInfo child = node.getChild(childIndex);
-
-          if (child != null) {
-            AccessibilityNodeInfo parent = child.getParent();
-
-            child.recycle();
-            child = null;
-
-            if (node.equals(parent)) {
-              return parent;
-            }
-
-            if (parent != null) {
-              parent.recycle();
-              parent = null;
-            }
-          }
+      if (field != null) {
+        synchronized (field) {
+          text = field.getAccessibilityText();
         }
       }
+    }
 
-      {
-        AccessibilityNodeInfo parent = node.getParent();
+    if (text == null) text = node.getText();
+    if (!isEditable(node)) return normalizeText(text);
 
-        if (parent != null) {
-          int childCount = parent.getChildCount();
+    if (text == null) return "";
+    return text.toString();
+  }
 
-          for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-            AccessibilityNodeInfo child = parent.getChild(childIndex);
+  public static String getDescription (AccessibilityNodeInfo node) {
+    return normalizeText(node.getContentDescription());
+  }
 
-            if (node.equals(child)) {
-              parent.recycle();
-              parent = null;
-              return child;
-            }
+  public static String getRangeValueFormat (AccessibilityNodeInfo.RangeInfo range) {
+    switch (range.getType()) {
+      case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INT:
+        return "%.0f";
 
-            if (child != null) {
-              child.recycle();
-              child = null;
-            }
-          }
+      case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_PERCENT:
+        return "%.0f%";
 
-          parent.recycle();
-          parent = null;
-        }
+      default:
+      case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT:
+        return "%.2f";
+    }
+  }
+
+  public static String getSelectionMode (AccessibilityNodeInfo.CollectionInfo collection) {
+    if (ApplicationUtilities.haveLollipop) {
+      switch (collection.getSelectionMode()) {
+        case AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_NONE:
+          return "none";
+
+        case AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_SINGLE:
+          return "sngl";
+
+        case AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_MULTIPLE:
+          return "mult";
       }
     }
 
@@ -255,7 +319,7 @@ public abstract class ScreenUtilities {
     NodeTester tester = new NodeTester() {
       @Override
       public boolean testNode (AccessibilityNodeInfo node) {
-        return node.getContentDescription() != null;
+        return getDescription(node) != null;
       }
     };
 
@@ -366,65 +430,5 @@ public abstract class ScreenUtilities {
       node.recycle();
       node = null;
     }
-  }
-
-  public static String normalizeText (CharSequence text) {
-    if (text != null) {
-      String string = text.toString().trim();
-      if (string.length() > 0) return string;
-    }
-
-    return null;
-  }
-
-  public static String getText (AccessibilityNodeInfo node) {
-    CharSequence text = null;
-
-    {
-      TextField field = TextField.get(node);
-
-      if (field != null) {
-        synchronized (field) {
-          text = field.getAccessibilityText();
-        }
-      }
-    }
-
-    if (text == null) text = node.getText();
-    if (!isEditable(node)) return normalizeText(text);
-
-    if (text == null) return "";
-    return text.toString();
-  }
-
-  public static String getRangeValueFormat (AccessibilityNodeInfo.RangeInfo range) {
-    switch (range.getType()) {
-      case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INT:
-        return "%.0f";
-
-      case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_PERCENT:
-        return "%.0f%";
-
-      default:
-      case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT:
-        return "%.2f";
-    }
-  }
-
-  public static String getSelectionMode (AccessibilityNodeInfo.CollectionInfo collection) {
-    if (ApplicationUtilities.haveLollipop) {
-      switch (collection.getSelectionMode()) {
-        case AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_NONE:
-          return "none";
-
-        case AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_SINGLE:
-          return "sngl";
-
-        case AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_MULTIPLE:
-          return "mult";
-      }
-    }
-
-    return null;
   }
 }

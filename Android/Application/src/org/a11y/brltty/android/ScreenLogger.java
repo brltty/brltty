@@ -40,7 +40,7 @@ public abstract class ScreenLogger {
   private static String getText (AccessibilityNodeInfo node) {
     String text = ScreenUtilities.getText(node);
     if (text != null) return text;
-    return ScreenUtilities.normalizeText(node.getContentDescription());
+    return ScreenUtilities.getDescription(node);
   }
 
   private static final void add (StringBuilder sb, String value) {
@@ -147,9 +147,9 @@ public abstract class ScreenLogger {
     }
 
     {
-      CharSequence description = node.getContentDescription();
+      String description = ScreenUtilities.getDescription(node);
 
-      if ((description != null) && (description.length() > 0)) {
+      if (description != null) {
         sb.append(' ');
         sb.append('(');
         sb.append(description);

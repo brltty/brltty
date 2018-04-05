@@ -261,13 +261,11 @@ public class RenderedScreen {
 
     if (!hasText) {
       if (sb.length() > 0) {
-        CharSequence description = node.getContentDescription();
+        String description = ScreenUtilities.getDescription(node);
 
         if (description != null) {
-          if (description.length() > 0) {
-            sb.append(' ');
-            sb.append(description);
-          }
+          sb.append(' ');
+          sb.append(description);
         }
       }
     }
@@ -277,7 +275,7 @@ public class RenderedScreen {
 
       if (range != null) {
         if (sb.length() == 0) {
-          CharSequence description = node.getContentDescription();
+          CharSequence description = ScreenUtilities.getDescription(node);
           if (description != null) sb.append(description);
         }
 
@@ -300,7 +298,7 @@ public class RenderedScreen {
 
   private static String getDescription (AccessibilityNodeInfo node) {
     {
-      String description = ScreenUtilities.normalizeText(node.getContentDescription());
+      String description = ScreenUtilities.getDescription(node);
       if (description != null) return description;
     }
 
@@ -313,7 +311,7 @@ public class RenderedScreen {
 
         if (child != null) {
           if (!hasSignificantActions(child)) {
-            String description = ScreenUtilities.normalizeText(child.getContentDescription());
+            String description = ScreenUtilities.getDescription(child);
 
             if (description != null) {
               if (sb.length() > 0) sb.append(' ');
