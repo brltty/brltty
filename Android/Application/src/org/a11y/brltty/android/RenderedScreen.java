@@ -208,7 +208,7 @@ public class RenderedScreen {
 
         if (hasSignificantActions(child)) {
           found = false;
-        } else if (child.getText() != null) {
+        } else if (ScreenUtilities.getText(child) != null) {
           found = true;
         } else {
           found = hasInnerText(child);

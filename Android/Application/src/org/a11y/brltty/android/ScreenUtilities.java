@@ -308,7 +308,7 @@ public abstract class ScreenUtilities {
     NodeTester tester = new NodeTester() {
       @Override
       public boolean testNode (AccessibilityNodeInfo node) {
-        return node.getText() != null;
+        return getText(node) != null;
       }
     };
 
