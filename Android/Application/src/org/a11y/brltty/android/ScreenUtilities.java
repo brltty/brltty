@@ -18,10 +18,12 @@
 
 package org.a11y.brltty.android;
 
+import java.util.List;
 import java.util.Arrays;
 import java.util.Comparator;
 
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityWindowInfo;
 
 import android.graphics.Rect;
 
@@ -193,32 +195,9 @@ public abstract class ScreenUtilities {
     return normalizeText(node.getContentDescription());
   }
 
-  public static String getRangeValueFormat (AccessibilityNodeInfo.RangeInfo range) {
-    switch (range.getType()) {
-      case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INT:
-        return "%.0f";
-
-      case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_PERCENT:
-        return "%.0f%";
-
-      default:
-      case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT:
-        return "%.2f";
-    }
-  }
-
-  public static String getSelectionMode (AccessibilityNodeInfo.CollectionInfo collection) {
-    if (ApplicationUtilities.haveLollipop) {
-      switch (collection.getSelectionMode()) {
-        case AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_NONE:
-          return "none";
-
-        case AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_SINGLE:
-          return "sngl";
-
-        case AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_MULTIPLE:
-          return "mult";
-      }
+  public static AccessibilityNodeInfo getRootNode () {
+    if (ApplicationUtilities.haveJellyBean) {
+      return BrailleService.getBrailleService().getRootInActiveWindow();
     }
 
     return null;
@@ -430,5 +409,58 @@ public abstract class ScreenUtilities {
       node.recycle();
       node = null;
     }
+  }
+
+  public static List<AccessibilityWindowInfo> getWindows () {
+    return BrailleService.getBrailleService().getWindows();
+  }
+
+  public static AccessibilityWindowInfo findWindow (int identifier) {
+    AccessibilityWindowInfo found = null;
+
+    for (AccessibilityWindowInfo window : getWindows()) {
+      if (found == null) {
+        if (window.getId() == identifier) {
+          found = window;
+          continue;
+        }
+      }
+
+      window.recycle();
+      window = null;
+    }
+
+    return found;
+  }
+
+  public static String getRangeValueFormat (AccessibilityNodeInfo.RangeInfo range) {
+    switch (range.getType()) {
+      case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INT:
+        return "%.0f";
+
+      case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_PERCENT:
+        return "%.0f%";
+
+      default:
+      case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT:
+        return "%.2f";
+    }
+  }
+
+  public static String getSelectionModeLabel (AccessibilityNodeInfo.CollectionInfo collection) {
+    if (ApplicationUtilities.haveLollipop) {
+      switch (collection.getSelectionMode()) {
+        case AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_NONE:
+          return "none";
+
+        case AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_SINGLE:
+          return "sngl";
+
+        case AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_MULTIPLE:
+          return "mult";
+      }
+    }
+
+    return null;
   }
 }

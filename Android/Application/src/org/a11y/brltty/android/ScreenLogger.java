@@ -253,7 +253,7 @@ public abstract class ScreenLogger {
           sb.append(collection.isHierarchical()? "tree": "flat");
 
           {
-            String mode = ScreenUtilities.getSelectionMode(collection);
+            String mode = ScreenUtilities.getSelectionModeLabel(collection);
 
             if (mode != null) {
               sb.append(',');
@@ -470,12 +470,12 @@ public abstract class ScreenLogger {
     if (ApplicationUtilities.haveLollipop) {
       int index = 0;
 
-      for (AccessibilityWindowInfo window : BrailleService.getBrailleService().getWindows()) {
+      for (AccessibilityWindowInfo window : ScreenUtilities.getWindows()) {
         log(window, ("window." + index), true, true);
         index += 1;
       }
     } else if (ApplicationUtilities.haveJellyBean) {
-      AccessibilityNodeInfo root = BrailleService.getBrailleService().getRootInActiveWindow();
+      AccessibilityNodeInfo root = ScreenUtilities.getRootNode();
 
       if (root != null) {
         log(root);

@@ -115,15 +115,10 @@ public abstract class ScreenDriver {
 
   private static native void screenUpdated ();
   private final static Object eventLock = new Object();
-  private volatile static AccessibilityNodeInfo currentNode = null;
-
-  static {
-    if (ApplicationUtilities.haveJellyBean) {
-      currentNode = BrailleService.getBrailleService().getRootInActiveWindow();
-    }
-  }
+  private volatile static AccessibilityNodeInfo currentNode = ScreenUtilities.getRootNode();
 
   public static void onAccessibilityEvent (AccessibilityEvent event) {
+    int eventType = event.getEventType();
     AccessibilityNodeInfo newNode = event.getSource();
 
     if (ApplicationSettings.LOG_ACCESSIBILITY_EVENTS) {
@@ -135,20 +130,25 @@ public abstract class ScreenDriver {
         AccessibilityWindowInfo window = newNode.getWindow();
 
         if (window != null) {
-          boolean ignore = !window.isActive();
-          window.recycle();
-          window = null;
-
-          if (ignore) {
-            newNode.recycle();
-            newNode = null;
-            return;
+          try {
+            if (!window.isActive()) {
+              newNode.recycle();
+              newNode = null;
+              return;
+            }
+          } finally {
+            window.recycle();
+            window = null;
           }
         }
       }
     }
 
-    switch (event.getEventType()) {
+    switch (eventType) {
+      case AccessibilityEvent.TYPE_WINDOWS_CHANGED:
+        newNode = ScreenUtilities.getRootNode();
+        break;
+
       case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
         break;
 
