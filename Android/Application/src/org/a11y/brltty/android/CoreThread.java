@@ -104,7 +104,6 @@ public class CoreThread extends Thread {
       String[] names = assets.list(asset);
 
       if (names.length == 0) {
-      //Log.d(LOG_TAG, "extracting asset: " + asset + " -> " + path);
         extractAsset(assets, asset, path);
 
         if (executable) {
@@ -112,7 +111,6 @@ public class CoreThread extends Thread {
         }
       } else {
         if (!path.exists()) {
-        //Log.d(LOG_TAG, "creating directory: " + path);
           path.mkdir();
         } else if (!path.isDirectory()) {
           Log.d(LOG_TAG, "not a directory: " + path);
