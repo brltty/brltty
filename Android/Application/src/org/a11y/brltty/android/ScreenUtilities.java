@@ -223,7 +223,11 @@ public abstract class ScreenUtilities {
 
   public static AccessibilityNodeInfo findNode (AccessibilityNodeInfo root, NodeTester tester) {
     if (root != null) {
-      if (tester.testNode(root)) return AccessibilityNodeInfo.obtain(root);
+      if (isVisible(root)) {
+        if (tester.testNode(root)) {
+          return AccessibilityNodeInfo.obtain(root);
+        }
+      }
 
       {
         int childCount = root.getChildCount();

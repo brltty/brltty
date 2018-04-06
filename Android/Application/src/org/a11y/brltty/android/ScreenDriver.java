@@ -46,71 +46,35 @@ public abstract class ScreenDriver {
     return currentScreen;
   }
 
-  private static AccessibilityNodeInfo findFirstClickableSubnode (AccessibilityNodeInfo node) {
+  private static boolean goToFirstUsableSubnode (AccessibilityNodeInfo root) {
     if (ApplicationUtilities.haveJellyBean) {
-      final int actions = AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS
-                        | AccessibilityNodeInfo.ACTION_CLICK;
+      AccessibilityNodeInfo node = ScreenUtilities.findTextNode(root);
+      if (node == null) node = ScreenUtilities.findDescribedNode(root);
 
       if (node != null) {
-        if (node.isVisibleToUser()) {
-          if (node.isEnabled()) {
-            if ((node.getActions() & actions) == actions) {
-              return AccessibilityNodeInfo.obtain(node);
-            }
-          }
-        }
-
-        {
-          int childCount = node.getChildCount();
-
-          for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-            AccessibilityNodeInfo child = node.getChild(childIndex);
-
-            if (child != null) {
-              AccessibilityNodeInfo subnode = findFirstClickableSubnode(child);
-
-              child.recycle();
-              child = null;
-
-              if (subnode != null) return subnode;
-            }
-          }
-        }
-      }
-    }
-
-    return null;
-  }
-
-  private static boolean goToFirstClickableSubnode (AccessibilityNodeInfo root) {
-    boolean done = false;
-
-    if (ApplicationUtilities.haveJellyBean) {
-      AccessibilityNodeInfo node = findFirstClickableSubnode(root);
-
-      if (node != null) {
-        boolean hasFocus;
-
-        {
+        try {
           AccessibilityNodeInfo subnode = node.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
-          hasFocus = subnode != null;
 
           if (subnode != null) {
-            subnode.recycle();
-            subnode = null;
+            try {
+              return true;
+            } finally {
+              subnode.recycle();
+              subnode = null;
+            }
           }
-        }
 
-        if (!hasFocus) {
-          if (node.performAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS)) done = true;
+          if (node.performAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS)) {
+            return true;
+          }
+        } finally {
+          node.recycle();
+          node = null;
         }
-
-        node.recycle();
-        node = null;
       }
     }
 
-    return done;
+    return false;
   }
 
   private static native void screenUpdated ();
@@ -152,13 +116,9 @@ public abstract class ScreenDriver {
       case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
         break;
 
-      case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED: {
-        if (newNode != null) {
-          goToFirstClickableSubnode(newNode);
-        }
-
+      case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
+        goToFirstUsableSubnode(newNode);
         break;
-      }
 
       case AccessibilityEvent.TYPE_VIEW_SCROLLED:
         break;
