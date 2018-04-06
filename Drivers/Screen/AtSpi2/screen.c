@@ -693,8 +693,17 @@ static int reinitTerm(const char *sender, const char *path) {
 }
 
 /* Try to find an active object among children of the given object */
-static int findTerm(const char *sender, const char *path, int active, int depth);
-static int recurseFindTerm(const char *sender, const char *path, int active, int depth) {
+
+/* We need to take care of bogus applications which have children loops, so we
+ * need to compare newly found children with the list of ancestors */
+struct pathList {
+  const char *sender;
+  const char *path;
+  struct pathList *prev;
+  int loop;
+};
+static int findTerm(const char *sender, const char *path, int active, int depth, struct pathList *list);
+static int recurseFindTerm(const char *sender, const char *path, int active, int depth, struct pathList *list) {
   DBusMessage *msg, *reply;
   DBusMessageIter iter, iter_array, iter_struct;
   int res = 0;
@@ -717,19 +726,42 @@ static int recurseFindTerm(const char *sender, const char *path, int active, int
   while (dbus_message_iter_get_arg_type (&iter_array) != DBUS_TYPE_INVALID)
   {
     const char *childsender, *childpath;
+    struct pathList *cur;
+
     dbus_message_iter_recurse (&iter_array, &iter_struct);
     dbus_message_iter_get_basic (&iter_struct, &childsender);
     dbus_message_iter_next (&iter_struct);
     dbus_message_iter_get_basic (&iter_struct, &childpath);
-    /* Make sure that the child is not the same as the parent, to avoid recursing indefinitely.  */
-    if (strcmp(path, childpath))
+
+    /* Make sure that the child is not the same as an ancestor, to avoid
+     * recursing indefinitely.  */
+    for (cur = list; cur; cur = cur->prev)
+      if (!strcmp(childsender, cur->sender) && !strcmp(childpath, cur->path))
+      {
+	/* Loop detected, avoid continuing looking at this part of the tree
+	which is not actually a tree! */
+	cur->loop = 1;
+	break;
+      }
+    if (! cur)
     {
-      if (findTerm(childsender, childpath, active, depth))
+      struct pathList me = {
+	.sender = sender,
+	.path = path,
+	.prev = list,
+      };
+      if (findTerm(childsender, childpath, active, depth, &me))
       {
 	res = 1;
 	goto out;
       }
+      if (me.loop) {
+        /* There is a loop up to us.  Avoid continuing looking here which may
+         * entail an exponential number of lookups. */
+	break;
+      }
     }
+
     dbus_message_iter_next (&iter_array);
   }
 
@@ -739,7 +771,7 @@ out:
 }
 
 /* Test whether this object is active, and if not recurse in its children */
-static int findTerm(const char *sender, const char *path, int active, int depth) {
+static int findTerm(const char *sender, const char *path, int active, int depth, struct pathList *list) {
   dbus_uint32_t *states = getState(sender, path);
 
   if (!states)
@@ -760,12 +792,12 @@ static int findTerm(const char *sender, const char *path, int active, int depth)
   }
 
   free(states);
-  return recurseFindTerm(sender, path, active, depth+1);
+  return recurseFindTerm(sender, path, active, depth+1, list);
 }
 
 /* Find out currently focused terminal, starting from registry */
 static void initTerm(void) {
-  recurseFindTerm(SPI2_DBUS_INTERFACE_REG, SPI2_DBUS_PATH_ROOT, 0, 0);
+  recurseFindTerm(SPI2_DBUS_INTERFACE_REG, SPI2_DBUS_PATH_ROOT, 0, 0, NULL);
 }
 
 /* Handle incoming events */
