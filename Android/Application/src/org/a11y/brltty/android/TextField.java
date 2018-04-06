@@ -18,14 +18,10 @@
 
 package org.a11y.brltty.android;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.HashMap;
 
 import android.view.accessibility.AccessibilityNodeInfo;
-
-import android.text.Editable;
-import android.text.SpannableStringBuilder;
 
 public class TextField {
   public TextField () {
@@ -42,29 +38,6 @@ public class TextField {
   public final TextField setAccessibilityText (CharSequence text) {
     synchronized (this) {
       accessibilityText = text;
-    }
-
-    return this;
-  }
-
-  public final TextField setAccessibilityText (Collection<CharSequence> lines) {
-    if (lines != null) {
-      Editable text = new SpannableStringBuilder();
-      boolean first = true;
-
-      for (CharSequence line : lines) {
-        if (line == null) continue;
-
-        if (first) {
-          first = false;
-        } else {
-          text.append('\n');
-        }
-
-        text.append(line);
-      }
-
-      setAccessibilityText(text.subSequence(0, text.length()));
     }
 
     return this;

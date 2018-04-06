@@ -19,7 +19,12 @@
 package org.a11y.brltty.android;
 import org.a11y.brltty.core.*;
 
+import java.util.Collection;
+import java.util.ArrayList;
+
 import android.util.Log;
+import android.os.Bundle;
+import android.app.Notification;
 
 import android.accessibilityservice.AccessibilityService;
 import android.view.accessibility.AccessibilityEvent;
@@ -28,6 +33,7 @@ import android.view.accessibility.AccessibilityWindowInfo;
 
 import android.graphics.Rect;
 import android.graphics.Point;
+import android.text.TextUtils;
 
 public abstract class ScreenDriver {
   private static final String LOG_TAG = ScreenDriver.class.getName();
@@ -46,7 +52,84 @@ public abstract class ScreenDriver {
     return currentScreen;
   }
 
-  private static boolean goToFirstUsableSubnode (AccessibilityNodeInfo root) {
+  private static String toText (Collection<CharSequence> lines) {
+    if (lines == null) return null;
+
+    StringBuilder text = new StringBuilder();
+    boolean first = true;
+
+    for (CharSequence line : lines) {
+      if (line == null) continue;
+
+      if (first) {
+        first = false;
+      } else {
+        text.append('\n');
+      }
+
+      text.append(line);
+    }
+
+    if (text.length() == 0) return null;
+    return text.toString();
+  }
+
+  private static String toText (Notification notification) {
+    if (notification == null) return null;
+
+    Collection<CharSequence> lines = new ArrayList<CharSequence>();
+    CharSequence tickerText = notification.tickerText;
+
+    if (ApplicationUtilities.haveKitkat) {
+      Bundle extras = notification.extras;
+
+      if (extras != null) {
+        {
+          CharSequence title = extras.getCharSequence("android.title");
+          if (!TextUtils.isEmpty(title)) lines.add(title);
+        }
+
+        {
+          CharSequence text = extras.getCharSequence("android.text");
+
+          if (!TextUtils.isEmpty(text)) {
+            lines.add(text);
+            tickerText = null;
+          }
+        }
+      }
+    }
+
+    if (!TextUtils.isEmpty(tickerText)) lines.add(tickerText);
+    if (lines.isEmpty()) return null;
+    return toText(lines);
+  }
+
+  private static String toText (AccessibilityEvent event) {
+    return toText(event.getText());
+  }
+
+  private static void showNotification (AccessibilityEvent event) {
+    if (ApplicationSettings.SHOW_NOTIFICATIONS) {
+      String text = toText((Notification)event.getParcelableData());
+      if (text == null) text = toText(event);
+
+      if (text != null) {
+        final String message = text;
+
+        CoreWrapper.runOnCoreThread(
+          new Runnable() {
+            @Override
+            public void run () {
+              CoreWrapper.showMessage(message);
+            }
+          }
+        );
+      }
+    }
+  }
+
+  private static boolean goToFirstTextSubnode (AccessibilityNodeInfo root) {
     if (ApplicationUtilities.haveJellyBean) {
       AccessibilityNodeInfo node = ScreenUtilities.findTextNode(root);
       if (node == null) node = ScreenUtilities.findDescribedNode(root);
@@ -117,7 +200,7 @@ public abstract class ScreenDriver {
         break;
 
       case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
-        goToFirstUsableSubnode(newNode);
+        goToFirstTextSubnode(newNode);
         break;
 
       case AccessibilityEvent.TYPE_VIEW_SCROLLED:
@@ -150,6 +233,10 @@ public abstract class ScreenDriver {
         break;
       }
 
+      case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
+        showNotification(event);
+        break;
+
       default: {
         if (newNode != null) {
           newNode.recycle();
@@ -163,7 +250,7 @@ public abstract class ScreenDriver {
     if (newNode != null) {
       if (newNode.isPassword()) {
         TextField field = TextField.get(newNode, true);
-      //field.setAccessibilityText(event.getText());
+      //field.setAccessibilityText(toText(event));
       }
     }
 
