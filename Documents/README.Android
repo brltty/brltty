@@ -2,6 +2,10 @@
 BRLTTY on Android
 ~~~~~~~~~~~~~~~~~
 
+.. |SDK build tools version| replace:: 26.0.1
+.. |NDK version| replace:: r16b
+.. |JDK version| replace:: 1.8
+
 .. include:: prologue.rst
 
 Using BRLTTY
@@ -199,39 +203,44 @@ Using a Braille Keyboard
 
 Braille device keyboard input is supported, but, like all Android input
 methods, it must be explicitly enabled, and then explicitly selected. BRLTTY
-cannot do either of these automatically on your behalf. Although this might be
-inconvenient, Android imposes this manual process so that you're very
+isn't permitted to do either of these automatically on your behalf. Although
+it's inconvenient, Android imposes this manual process so that you're very
 consciously aware of which input methods can process, and which input method
 is currently processing, whatever you're typing. Such applications, after all,
 handle extremely sensitive personal data (such as passwords, credit card
 numbers, etc), so it's crucial that you make your own decisions regarding which
 of them you're willing to trust.
 
-You can enable BRLTTY's braille keyboard support ahead of time by launching the
-``Settings`` application, and then tapping on ``Language and Input``. The
-``Keyboard and Input Methods`` section of this screen contains a selector
-labeled ``Default`` (that's used to select the current input method), as well
-as a check box for each installed input method. An input method is enabled if
-its check box is checked, and can only be selected if it has been enabled.
+If you type on your braille device's keyboard when BRLTTY's input method is
+either disabled or enabled but not selected, then an alert message will appear
+on your braille display that explains the problem. You may wish to enable
+BRLTTY's keyboard support ahead of time, but you probably don't want to select
+it ahead of time. The reason for this is that Android only allows exactly one
+input method to be in use at a time. When you explicitly select BRLTTY's input
+method, therefore, you're also implicitly deselecting the on-screen keyboard.
 
-BRLTTY's input method is called ``BRLTTY Input Service``. While you may wish to
-enable it ahead of time, you probably don't want to select it ahead of time.
-The reason for this is that Android only allows exactly one input method to be
-in use at a time. When you explicitly select BRLTTY's input method, therefore,
-you're also implicitly deselecting the on-screen keyboard.
+You can enable BRLTTY's keyboard support in one of the following ways:
 
-If you use a braille keyboard when BRLTTY's input method is either disabled or
-enabled but not selected, Android's input method picker will be automatically
-displayed. This dialog asks you to select an input method, and presents a set
-of radio buttons - one for each currently enabled input method. If there's no
-radio button for BRLTTY's input method then it hasn't been enabled yet.
+* Launch Android's ``Settings`` application and tap on ``Language and Input``.
+  The ``Keyboard and Input Methods`` section of this screen shows the
+  ``Default`` (currently selected) input method, and contains a check box for
+  each installed input method. An input method is enabled if its check box is
+  checked, so, to enable BRLTTY's keyboard support, check the box labeled
+  ``BRLTTY Input Service``. Once it's been enabled, you can select it at any
+  time by adjusting the ``Default`` setting.
 
-To enable it, tap the button within the dialog labeled ``Set up input
-methods``. This screen contains a check box for each installed input method.
-Check the check box for BRLTTY's input method to enable it. Then tap the
-``Back`` button to return to the ``Language and Input`` screen, find the
-``Keyboard and Input Methods`` section of that screen, and set the ``Default``
-input method to BRLTTY's input method.
+* If BRLTTY is running then open Android's Notifications shade and tap on
+  BRLTTY's service notification. This takes you to BRLTTY's main Settings
+  screen. Tap on General Settings, and then on Switch Input Method. This brings
+  up Android's Input Method Picker. It asks you to select an input method, and
+  presents a set of radio buttons - one for each enabled input method. If
+  there's no radio button for BRLTTY's input method then it hasn't been enabled
+  yet. To enable it, tap the button labeled ``Set up input methods``. This
+  screen contains a check box for each installed input method. Check the box
+  labeled ``BRLTTY Input Service``. Then tap the ``Back`` button to return to
+  the ``Language and Input`` screen, find the ``Keyboard and Input Methods``
+  section of that screen, and set the ``Default`` input method to BRLTTY's
+  input method.
 
 Navigating the Screen
 ---------------------
@@ -465,6 +474,12 @@ Building BRLTTY
 Preparing Your Host Environment
 -------------------------------
 
+BRLTTY is currently being built using:
+
+* Version |SDK build tools version| of the Android SDK build tools.
+* Version |NDK version| of the Android NDK.
+* Version |JDK version| of OpenJDK.
+
 You need the Android SDK (Software Development Kit) for:
 
 *  installing an application onto your device
@@ -474,11 +489,6 @@ You can get it from `The Android SDK Web Page`_.
 
 You need the Android NDK (Native Development Kit) if you want to do your own
 builds. You can get it from `The Android NDK Web Page`_.
-
-BRLTTY is currently being built using:
-
-* Version 26.0.1 of the SDK build tools.
-* Version r16b of the NDK.
 
 The SDK initially only includes support for the current Android API
 (Application Programming Interface) level. BRLTTY, however, needs to support
