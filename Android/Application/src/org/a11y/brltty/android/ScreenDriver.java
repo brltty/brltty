@@ -85,12 +85,12 @@ public abstract class ScreenDriver {
 
       if (extras != null) {
         {
-          CharSequence title = extras.getCharSequence("android.title");
+          CharSequence title = extras.getCharSequence(Notification.EXTRA_TITLE);
           if (!TextUtils.isEmpty(title)) lines.add(title);
         }
 
         {
-          CharSequence text = extras.getCharSequence("android.text");
+          CharSequence text = extras.getCharSequence(Notification.EXTRA_TEXT);
 
           if (!TextUtils.isEmpty(text)) {
             lines.add(text);
