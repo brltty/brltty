@@ -273,10 +273,12 @@ cdef class WriteStruct:
 	property attrAnd:
 		"""And attributes; applied first"""
 		def __get__(self):
+			cdef char *c_val
 			if (not self.props.andMask):
 				return None
 			else:
-				return <char*>self.props.andMask
+				c_val = <char*>self.props.andMask
+				return c_val[:self.regionSize]
 		def __set__(self, val):
 			cdef c_brlapi.size_t size
 			cdef char *c_val
@@ -287,19 +289,20 @@ cdef class WriteStruct:
 					val = val.encode('latin1')
 				size = len(val)
 				c_val = val
-				self.props.andMask = <unsigned char*>c_brlapi.malloc(size+1)
+				self.props.andMask = <unsigned char*>c_brlapi.malloc(size)
 				c_brlapi.memcpy(<void*>self.props.andMask,<void*>c_val,size)
-				self.props.andMask[size] = 0
 			else:
 				self.props.andMask = NULL
 
 	property attrOr:
 		"""Or attributes; applied after ANDing"""
 		def __get__(self):
+			cdef char *c_val
 			if (not self.props.orMask):
 				return None
 			else:
-				return <char*>self.props.orMask
+				c_val = <char*>self.props.orMask
+				return c_val[:self.regionSize]
 		def __set__(self, val):
 			cdef c_brlapi.size_t size
 			cdef char *c_val
@@ -310,9 +313,8 @@ cdef class WriteStruct:
 					val = val.encode('latin1')
 				size = len(val)
 				c_val = val
-				self.props.orMask = <unsigned char*>c_brlapi.malloc(size+1)
+				self.props.orMask = <unsigned char*>c_brlapi.malloc(size)
 				c_brlapi.memcpy(<void*>self.props.orMask,<void*>c_val,size)
-				self.props.orMask[size] = 0
 			else:
 				self.props.orMask = NULL
 
