@@ -178,30 +178,30 @@ public abstract class ScreenDriver {
         TextField field = TextField.get(newNode, true);
       //field.setAccessibilityText(toText(event));
       }
-    }
 
-    {
-      AccessibilityNodeInfo oldNode;
+      {
+        AccessibilityNodeInfo oldNode;
 
-      synchronized (eventLock) {
-        oldNode = currentNode;
-        currentNode = newNode;
-      }
+        synchronized (eventLock) {
+          oldNode = currentNode;
+          currentNode = newNode;
+        }
 
-      if (oldNode != null) {
-        oldNode.recycle();
-        oldNode = null;
-      }
-    }
-
-    CoreWrapper.runOnCoreThread(
-      new Runnable() {
-        @Override
-        public void run () {
-          screenUpdated();
+        if (oldNode != null) {
+          oldNode.recycle();
+          oldNode = null;
         }
       }
-    );
+
+      CoreWrapper.runOnCoreThread(
+        new Runnable() {
+          @Override
+          public void run () {
+            screenUpdated();
+          }
+        }
+      );
+    }
   }
 
   static {
@@ -214,84 +214,82 @@ public abstract class ScreenDriver {
   }
 
   public static void onAccessibilityEvent (AccessibilityEvent event) {
-    AccessibilityNodeInfo node = event.getSource();
+    int eventType = event.getEventType();
 
     if (ApplicationSettings.LOG_ACCESSIBILITY_EVENTS) {
       ScreenLogger.log(event);
     }
 
-    if (ApplicationUtilities.haveLollipop) {
-      if (node != null) {
-        AccessibilityWindowInfo window = node.getWindow();
-
-        if (window != null) {
-          try {
-            if (!window.isActive()) {
-              node.recycle();
-              node = null;
-              return;
-            }
-          } finally {
-            window.recycle();
-            window = null;
-          }
-        }
-      }
-    }
-
-    switch (event.getEventType()) {
-      case AccessibilityEvent.TYPE_WINDOWS_CHANGED:
-        node = ScreenUtilities.getRootNode();
-        break;
-
-      case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
-        break;
-
-      case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
-        setFocus(node);
-        break;
-
-      case AccessibilityEvent.TYPE_VIEW_SCROLLED:
-        break;
-
-      case AccessibilityEvent.TYPE_VIEW_SELECTED:
-        break;
-
-      case AccessibilityEvent.TYPE_VIEW_FOCUSED:
-        break;
-
-      case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
-        break;
-
-      case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED: {
-        if (node != null) {
-          TextField field = TextField.get(node, true);
-          field.setCursor(event.getFromIndex() + event.getAddedCount());
-        }
-
-        break;
-      }
-
-      case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED: {
-        if (node != null) {
-          TextField field = TextField.get(node, true);
-          field.setSelection(event.getFromIndex(), event.getToIndex());
-        }
-
-        break;
-      }
-
+    switch (eventType) {
       case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
         showNotification(event);
         break;
 
+      case AccessibilityEvent.TYPE_WINDOWS_CHANGED:
+        setCurrentNode(ScreenUtilities.getRootNode());
+        break;
+
       default: {
-        if (node != null) {
-          node.recycle();
-          node = null;
+        AccessibilityNodeInfo node = event.getSource();
+        if (node == null) return;
+
+        if (ApplicationUtilities.haveLollipop) {
+          AccessibilityWindowInfo window = node.getWindow();
+
+          if (window != null) {
+            try {
+              if (!window.isActive()) {
+                node.recycle();
+                node = null;
+                return;
+              }
+            } finally {
+              window.recycle();
+              window = null;
+            }
+          }
         }
 
-        return;
+        switch (eventType) {
+          case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
+            setFocus(node);
+            break;
+
+          case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
+            break;
+
+          case AccessibilityEvent.TYPE_VIEW_SCROLLED:
+            break;
+
+          case AccessibilityEvent.TYPE_VIEW_SELECTED:
+            break;
+
+          case AccessibilityEvent.TYPE_VIEW_FOCUSED:
+            break;
+
+          case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
+            break;
+
+          case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED: {
+            TextField field = TextField.get(node, true);
+            field.setCursor(event.getFromIndex() + event.getAddedCount());
+            break;
+          }
+
+          case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED: {
+            TextField field = TextField.get(node, true);
+            field.setSelection(event.getFromIndex(), event.getToIndex());
+            break;
+          }
+
+          default:
+            node.recycle();
+            node = null;
+            return;
+        }
+
+        setCurrentNode(node);
+        break;
       }
     }
   }
