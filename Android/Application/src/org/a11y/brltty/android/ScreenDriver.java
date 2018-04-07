@@ -123,7 +123,7 @@ public abstract class ScreenDriver {
       if (text == null) text = toText(event);
 
       if (text != null) {
-        final String message = text;
+        final String message = text.replace('\n', ' ');
 
         CoreWrapper.runOnCoreThread(
           new Runnable() {
