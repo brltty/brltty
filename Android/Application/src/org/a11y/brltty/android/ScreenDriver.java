@@ -36,7 +36,7 @@ import android.graphics.Point;
 import android.text.TextUtils;
 
 public abstract class ScreenDriver {
-  private static final String LOG_TAG = ScreenDriver.class.getName();
+  private final static String LOG_TAG = ScreenDriver.class.getName();
 
   private ScreenDriver () {
   }
@@ -168,7 +168,7 @@ public abstract class ScreenDriver {
     return false;
   }
 
-  private static native void screenUpdated ();
+  private native static void screenUpdated ();
   private final static Object eventLock = new Object();
   private volatile static AccessibilityNodeInfo currentNode = null;
 
@@ -266,14 +266,20 @@ public abstract class ScreenDriver {
         break;
 
       case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED: {
-        TextField field = TextField.get(node, true);
-        field.setCursor(event.getFromIndex() + event.getAddedCount());
+        if (!ApplicationUtilities.haveJellyBeanMR2) {
+          TextField field = TextField.get(node, true);
+          field.setCursor(event.getFromIndex() + event.getAddedCount());
+        }
+
         break;
       }
 
       case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED: {
-        TextField field = TextField.get(node, true);
-        field.setSelection(event.getFromIndex(), event.getToIndex());
+        if (!ApplicationUtilities.haveJellyBeanMR2) {
+          TextField field = TextField.get(node, true);
+          field.setSelection(event.getFromIndex(), event.getToIndex());
+        }
+
         break;
       }
 
@@ -291,7 +297,7 @@ public abstract class ScreenDriver {
     setCurrentNode(node);
   }
 
-  private static native void exportScreenProperties (
+  private native static void exportScreenProperties (
     int number,
     int columns, int rows,
     int locationLeft, int locationTop, int locationRight, int locationBottom,
@@ -323,33 +329,38 @@ public abstract class ScreenDriver {
           locationBottom = location.bottom;
 
           if (ScreenUtilities.isEditable(node)) {
-            TextField field = TextField.get(node);
+            int start = -1;
+            int end = -1;
 
-            if (field != null) {
-              int start;
-              int end;
+            if (ApplicationUtilities.haveJellyBeanMR2) {
+              start = node.getTextSelectionStart();
+              end = node.getTextSelectionEnd();
+            } else {
+              TextField field = TextField.get(node);
 
-              synchronized (field) {
-                start = field.getSelectionStart();
-                end = field.getSelectionEnd();
+              if (field != null) {
+                synchronized (field) {
+                  start = field.getSelectionStart();
+                  end = field.getSelectionEnd();
+                }
               }
+            }
 
-              {
-                Point topLeft = element.getBrailleCoordinate(start);
+            if ((0 <= start) && (start <= end)) {
+              Point topLeft = element.getBrailleCoordinate(start);
 
-                if (topLeft != null) {
-                  if (start == end) {
-                    selectionLeft = selectionRight = topLeft.x;
-                    selectionTop = selectionBottom = topLeft.y;
-                  } else {
-                    Point bottomRight = element.getBrailleCoordinate(end-1);
+              if (topLeft != null) {
+                if (start == end) {
+                  selectionLeft = selectionRight = topLeft.x;
+                  selectionTop = selectionBottom = topLeft.y;
+                } else {
+                  Point bottomRight = element.getBrailleCoordinate(end-1);
 
-                    if (bottomRight != null) {
-                      selectionLeft = topLeft.x;
-                      selectionTop = topLeft.y;
-                      selectionRight = bottomRight.x + 1;
-                      selectionBottom = bottomRight.y + 1;
-                    }
+                  if (bottomRight != null) {
+                    selectionLeft = topLeft.x;
+                    selectionTop = topLeft.y;
+                    selectionRight = bottomRight.x + 1;
+                    selectionBottom = bottomRight.y + 1;
                   }
                 }
               }
@@ -408,7 +419,6 @@ public abstract class ScreenDriver {
   }
 
   public static char[] getRowText (int row, int column) {
-Log.d("get-row", String.format("get row: %d %d", row, column));
     String text = (row < currentScreen.getScreenHeight())? currentScreen.getScreenRow(row): "";
     int length = text.length();
 
