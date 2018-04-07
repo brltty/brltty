@@ -139,22 +139,22 @@ public abstract class ScreenDriver {
 
   private static boolean setFocus (AccessibilityNodeInfo root) {
     if (ApplicationUtilities.haveJellyBean) {
-      AccessibilityNodeInfo node = ScreenUtilities.findTextNode(root);
+      AccessibilityNodeInfo node = root.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
+
+      if (node != null) {
+        try {
+          return true;
+        } finally {
+          node.recycle();
+          node = null;
+        }
+      }
+
+      node = ScreenUtilities.findTextNode(root);
       if (node == null) node = ScreenUtilities.findDescribedNode(root);
 
       if (node != null) {
         try {
-          AccessibilityNodeInfo subnode = node.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
-
-          if (subnode != null) {
-            try {
-              return true;
-            } finally {
-              subnode.recycle();
-              subnode = null;
-            }
-          }
-
           if (node.performAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS)) {
             return true;
           }
