@@ -111,7 +111,15 @@ public abstract class ScreenDriver {
 
   private static void showNotification (AccessibilityEvent event) {
     if (ApplicationSettings.SHOW_NOTIFICATIONS) {
-      String text = toText((Notification)event.getParcelableData());
+      String text = null;
+      Notification notification = (Notification)event.getParcelableData();
+
+      if (notification != null) {
+        if (!ApplicationUtilities.haveJellyBean) return;
+        if (notification.priority < Notification.PRIORITY_DEFAULT) return;
+        text = toText(notification);
+      }
+
       if (text == null) text = toText(event);
 
       if (text != null) {
