@@ -174,11 +174,6 @@ public abstract class ScreenDriver {
 
   private static void setCurrentNode (AccessibilityNodeInfo newNode) {
     if (newNode != null) {
-      if (newNode.isPassword()) {
-        TextField field = TextField.get(newNode, true);
-      //field.setAccessibilityText(toText(event));
-      }
-
       {
         AccessibilityNodeInfo oldNode;
 
@@ -223,75 +218,77 @@ public abstract class ScreenDriver {
     switch (eventType) {
       case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
         showNotification(event);
-        break;
+        return;
 
       case AccessibilityEvent.TYPE_WINDOWS_CHANGED:
         setCurrentNode(ScreenUtilities.getRootNode());
-        break;
+        return;
+    }
 
-      default: {
-        AccessibilityNodeInfo node = event.getSource();
-        if (node == null) return;
+    AccessibilityNodeInfo node = event.getSource();
+    if (node == null) return;
 
-        if (ApplicationUtilities.haveLollipop) {
-          AccessibilityWindowInfo window = node.getWindow();
+    if (ApplicationUtilities.haveLollipop) {
+      AccessibilityWindowInfo window = node.getWindow();
 
-          if (window != null) {
-            try {
-              if (!window.isActive()) {
-                node.recycle();
-                node = null;
-                return;
-              }
-            } finally {
-              window.recycle();
-              window = null;
-            }
-          }
-        }
-
-        switch (eventType) {
-          case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
-            setFocus(node);
-            break;
-
-          case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
-            break;
-
-          case AccessibilityEvent.TYPE_VIEW_SCROLLED:
-            break;
-
-          case AccessibilityEvent.TYPE_VIEW_SELECTED:
-            break;
-
-          case AccessibilityEvent.TYPE_VIEW_FOCUSED:
-            break;
-
-          case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
-            break;
-
-          case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED: {
-            TextField field = TextField.get(node, true);
-            field.setCursor(event.getFromIndex() + event.getAddedCount());
-            break;
-          }
-
-          case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED: {
-            TextField field = TextField.get(node, true);
-            field.setSelection(event.getFromIndex(), event.getToIndex());
-            break;
-          }
-
-          default:
+      if (window != null) {
+        try {
+          if (!window.isActive()) {
             node.recycle();
             node = null;
             return;
+          }
+        } finally {
+          window.recycle();
+          window = null;
         }
-
-        setCurrentNode(node);
-        break;
       }
     }
+
+    switch (eventType) {
+      case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
+        setFocus(node);
+        break;
+
+      case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
+        break;
+
+      case AccessibilityEvent.TYPE_VIEW_SCROLLED:
+        break;
+
+      case AccessibilityEvent.TYPE_VIEW_SELECTED:
+        break;
+
+      case AccessibilityEvent.TYPE_VIEW_FOCUSED:
+        break;
+
+      case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
+        break;
+
+      case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED: {
+        TextField field = TextField.get(node, true);
+        field.setCursor(event.getFromIndex() + event.getAddedCount());
+        break;
+      }
+
+      case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED: {
+        TextField field = TextField.get(node, true);
+        field.setSelection(event.getFromIndex(), event.getToIndex());
+        break;
+      }
+
+      default:
+        node.recycle();
+        node = null;
+        return;
+    }
+
+    if (false && node.isPassword()) {
+      TextField field = TextField.get(node, true);
+      field.setAccessibilityText(toText(event));
+    }
+
+    setCurrentNode(node);
   }
 
   private static native void exportScreenProperties (
@@ -411,6 +408,7 @@ public abstract class ScreenDriver {
   }
 
   public static char[] getRowText (int row, int column) {
+Log.d("get-row", String.format("get row: %d %d", row, column));
     String text = (row < currentScreen.getScreenHeight())? currentScreen.getScreenRow(row): "";
     int length = text.length();
 
