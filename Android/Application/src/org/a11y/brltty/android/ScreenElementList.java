@@ -20,8 +20,12 @@ package org.a11y.brltty.android;
 
 import java.util.Collections;
 import java.util.Comparator;
+
 import java.util.List;
 import java.util.ArrayList;
+
+import java.util.Map;
+import java.util.HashMap;
 
 import android.util.Log;
 
@@ -32,7 +36,40 @@ import android.graphics.Rect;
 public class ScreenElementList extends ArrayList<ScreenElement> {
   private static final String LOG_TAG = ScreenElementList.class.getName();
 
+  public ScreenElementList () {
+    super();
+  }
+
+  private final Map<AccessibilityNodeInfo, ScreenElement> nodes =
+        new HashMap<AccessibilityNodeInfo, ScreenElement>();
+
+  public final void add (String text, AccessibilityNodeInfo node) {
+    ScreenElement element = new RealScreenElement(text, node);
+    add(element);
+    nodes.put(node, element);
+  }
+
+  public final ScreenElement find (AccessibilityNodeInfo node) {
+    return nodes.get(node);
+  }
+
   private int atTopCount = 0;
+
+  public final void addAtTop (int text, int action, int key) {
+    add(atTopCount++, new VirtualScreenElement(text, action, key));
+  }
+
+  public final void addAtTop (int text, int action) {
+    add(atTopCount++, new VirtualScreenElement(text, action));
+  }
+
+  public final void addAtBottom (int text, int action, int key) {
+    add(new VirtualScreenElement(text, action, key));
+  }
+
+  public final void addAtBottom (int text, int action) {
+    add(new VirtualScreenElement(text, action));
+  }
 
   public void logElements () {
     Log.d(LOG_TAG, "begin screen element list");
@@ -146,21 +183,6 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
     }
   }
 
-  public final ScreenElement find (AccessibilityNodeInfo node) {
-    for (ScreenElement element : this) {
-      AccessibilityNodeInfo candidate = element.getAccessibilityNode();
-
-      if (candidate != null) {
-        boolean found = node.equals(candidate);
-        candidate.recycle();
-        candidate = null;
-        if (found) return element;
-      }
-    }
-
-    return null;
-  }
-
   public final ScreenElement find (
     ScreenElement.LocationGetter locationGetter,
     int left, int top, int right, int bottom
@@ -204,29 +226,5 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
     } while (--column >= 0);
 
     return null;
-  }
-
-  public final void add (String text, AccessibilityNodeInfo node) {
-    add(new RealScreenElement(text, node));
-  }
-
-  public final void addAtTop (int text, int action, int key) {
-    add(atTopCount++, new VirtualScreenElement(text, action, key));
-  }
-
-  public final void addAtTop (int text, int action) {
-    add(atTopCount++, new VirtualScreenElement(text, action));
-  }
-
-  public final void addAtBottom (int text, int action, int key) {
-    add(new VirtualScreenElement(text, action, key));
-  }
-
-  public final void addAtBottom (int text, int action) {
-    add(new VirtualScreenElement(text, action));
-  }
-
-  public ScreenElementList () {
-    super();
   }
 }
