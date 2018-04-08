@@ -18,35 +18,84 @@
 
 package org.a11y.brltty.android;
 
+import java.util.Map;
+import java.util.HashMap;
+
+import android.view.accessibility.AccessibilityWindowInfo;
+import android.view.accessibility.AccessibilityNodeInfo;
+
 import android.graphics.Point;
 import android.graphics.Rect;
 
 public class ScreenWindow {
-  private final int windowIdentifier;
+  private final static Map<Integer, ScreenWindow> windows =
+               new HashMap<Integer, ScreenWindow>();
 
-  private final Point windowSize = new Point();
-  private final Rect windowRectangle = new Rect();
+  private final Integer windowIdentifier;
+  private AccessibilityWindowInfo windowObject = null;
 
-  public final int getWindowIdentifier () {
+  private ScreenWindow (Integer identifier) {
+    windowIdentifier = identifier;
+  }
+
+  public static ScreenWindow get (Integer identifier) {
+    synchronized (windows) {
+      ScreenWindow window = windows.get(identifier);
+      if (window != null) return window;
+
+      window = new ScreenWindow(identifier);
+      windows.put(identifier, window);
+      return window;
+    }
+  }
+
+  public static ScreenWindow get (AccessibilityWindowInfo object) {
+    ScreenWindow window = get(object.getId());
+
+    synchronized (window.windowIdentifier) {
+      if (window.windowObject != null) window.windowObject.recycle();
+      window.windowObject = AccessibilityWindowInfo.obtain(object);
+    }
+
+    return window;
+  }
+
+  public static ScreenWindow get (AccessibilityNodeInfo node) {
+    if (ApplicationUtilities.haveLollipop) {
+      AccessibilityWindowInfo window = node.getWindow();
+
+      try {
+        return get(window);
+      } finally {
+        window.recycle();
+        window = null;
+      }
+    } else {
+      return get(node.getWindowId());
+    }
+  }
+
+  public final int getIdentifier () {
     return windowIdentifier;
   }
 
-  public int getWindowWidth () {
-    return windowSize.x;
-  }
+  public final Rect getLocation () {
+    synchronized (windowIdentifier) {
+      Rect location = new Rect();
 
-  public int getWindowHeight () {
-    return windowSize.y;
+      if (windowObject != null) {
+        windowObject.getBoundsInScreen(location);
+      } else {
+        Point size = new Point();
+        ApplicationUtilities.getWindowManager().getDefaultDisplay().getSize(size);
+        location.set(0, 0, size.x, size.y);
+      }
+
+      return location;
+    }
   }
 
   public boolean contains (Rect location) {
-    return windowRectangle.contains(location);
-  }
-
-  public ScreenWindow (int identifier) {
-    windowIdentifier = identifier;
-
-    ApplicationUtilities.getWindowManager().getDefaultDisplay().getSize(windowSize);
-    windowRectangle.set(0, 0, getWindowWidth(), getWindowHeight());
+    return getLocation().contains(location);
   }
 }

@@ -41,7 +41,7 @@ public abstract class ScreenDriver {
   private ScreenDriver () {
   }
 
-  private static ScreenWindow currentWindow = new ScreenWindow(0);
+  private static ScreenWindow currentWindow = ScreenWindow.get(0);
   private static RenderedScreen currentScreen = null;
 
   public static ScreenWindow getWindow () {
@@ -384,7 +384,7 @@ public abstract class ScreenDriver {
     }
 
     exportScreenProperties(
-      currentWindow.getWindowIdentifier(),
+      currentWindow.getIdentifier(),
       currentScreen.getScreenWidth(),
       currentScreen.getScreenHeight(),
       locationLeft, locationTop, locationRight, locationBottom,
@@ -393,14 +393,7 @@ public abstract class ScreenDriver {
   }
 
   private static void refreshScreen (AccessibilityNodeInfo node) {
-    {
-      int identifier = node.getWindowId();
-
-      if (identifier != currentWindow.getWindowIdentifier()) {
-        currentWindow = new ScreenWindow(identifier);
-      }
-    }
-
+    currentWindow = ScreenWindow.get(node);
     currentScreen = new RenderedScreen(node);
     exportScreenProperties();
   }
