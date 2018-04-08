@@ -137,40 +137,48 @@ public abstract class ScreenDriver {
     }
   }
 
-  private static boolean setFocus (AccessibilityNodeInfo root) {
+  private static boolean setFocus (AccessibilityNodeInfo node) {
     if (ApplicationUtilities.haveJellyBean) {
-      AccessibilityNodeInfo node = root.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
+      if (node.isAccessibilityFocused()) return true;
+      node = AccessibilityNodeInfo.obtain(node);
 
-      if (node != null) {
-        try {
-          return true;
-        } finally {
+      {
+        AccessibilityNodeInfo subnode = node.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
+
+        if (subnode != null) {
           node.recycle();
-          node = null;
+          node = subnode;
+          subnode = null;
         }
       }
 
-      node = ScreenUtilities.findTextNode(root);
-      if (node == null) node = ScreenUtilities.findDescribedNode(root);
+      {
+        AccessibilityNodeInfo subnode = ScreenUtilities.findTextNode(node);
+        if (subnode == null) subnode = ScreenUtilities.findDescribedNode(node);
 
-      if (node != null) {
-        try {
-          if (node.performAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS)) {
-            return true;
-          }
-        } finally {
+        if (subnode != null) {
           node.recycle();
-          node = null;
+          node = subnode;
+          subnode = null;
         }
+      }
+
+      try {
+        if (node.isAccessibilityFocused()) return true;
+
+        if (node.performAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS)) {
+          return true;
+        }
+      } finally {
+        node.recycle();
+        node = null;
       }
     }
 
     return false;
   }
 
-  private final static Object EVENT_LOCK = new Object();
   private native static void screenUpdated ();
-
   private final static Object NODE_LOCK = new Object();
   private volatile static AccessibilityNodeInfo currentNode = null;
 
@@ -202,105 +210,101 @@ public abstract class ScreenDriver {
   }
 
   static {
-    synchronized (EVENT_LOCK) {
-      AccessibilityNodeInfo root = ScreenUtilities.getRootNode();
+    AccessibilityNodeInfo root = ScreenUtilities.getRootNode();
 
-      if (root != null) {
-        setFocus(root);
-        setCurrentNode(root);
-      }
+    if (root != null) {
+      setFocus(root);
+      setCurrentNode(root);
     }
   }
 
   public static void onAccessibilityEvent (AccessibilityEvent event) {
-    synchronized (EVENT_LOCK) {
-      int eventType = event.getEventType();
+    int eventType = event.getEventType();
 
-      if (ApplicationSettings.LOG_ACCESSIBILITY_EVENTS) {
-        ScreenLogger.log(event);
-      }
-
-      switch (eventType) {
-        case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
-          showNotification(event);
-          return;
-
-        case AccessibilityEvent.TYPE_WINDOWS_CHANGED:
-          setCurrentNode(ScreenUtilities.getRootNode());
-          return;
-      }
-
-      AccessibilityNodeInfo node = event.getSource();
-      if (node == null) return;
-
-      if (ApplicationUtilities.haveLollipop) {
-        AccessibilityWindowInfo window = node.getWindow();
-
-        if (window != null) {
-          try {
-            if (!window.isActive()) {
-              node.recycle();
-              node = null;
-              return;
-            }
-          } finally {
-            window.recycle();
-            window = null;
-          }
-        }
-      }
-
-      switch (eventType) {
-        case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
-          setFocus(node);
-          break;
-
-        case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
-          break;
-
-        case AccessibilityEvent.TYPE_VIEW_SCROLLED:
-          break;
-
-        case AccessibilityEvent.TYPE_VIEW_SELECTED:
-          break;
-
-        case AccessibilityEvent.TYPE_VIEW_FOCUSED:
-          break;
-
-        case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
-          break;
-
-        case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED: {
-          if (!ApplicationUtilities.haveJellyBeanMR2) {
-            TextField field = TextField.get(node, true);
-            field.setCursor(event.getFromIndex() + event.getAddedCount());
-          }
-
-          break;
-        }
-
-        case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED: {
-          if (!ApplicationUtilities.haveJellyBeanMR2) {
-            TextField field = TextField.get(node, true);
-            field.setSelection(event.getFromIndex(), event.getToIndex());
-          }
-
-          break;
-        }
-
-        default:
-          node.recycle();
-          node = null;
-          return;
-      }
-
-      if (false && node.isPassword()) {
-        TextField field = TextField.get(node, true);
-        field.setAccessibilityText(toText(event));
-      }
-
-      setCurrentNode(node);
+    if (ApplicationSettings.LOG_ACCESSIBILITY_EVENTS) {
+      ScreenLogger.log(event);
     }
+
+    switch (eventType) {
+      case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
+        showNotification(event);
+        return;
+
+      case AccessibilityEvent.TYPE_WINDOWS_CHANGED:
+        setCurrentNode(ScreenUtilities.getRootNode());
+        return;
+    }
+
+    AccessibilityNodeInfo node = event.getSource();
+    if (node == null) return;
+
+    if (ApplicationUtilities.haveLollipop) {
+      AccessibilityWindowInfo window = node.getWindow();
+
+      if (window != null) {
+        try {
+          if (!window.isActive()) {
+            node.recycle();
+            node = null;
+            return;
+          }
+        } finally {
+          window.recycle();
+          window = null;
+        }
+      }
+    }
+
+    switch (eventType) {
+      case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
+        setFocus(node);
+        break;
+
+      case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
+        break;
+
+      case AccessibilityEvent.TYPE_VIEW_SCROLLED:
+        break;
+
+      case AccessibilityEvent.TYPE_VIEW_SELECTED:
+        break;
+
+      case AccessibilityEvent.TYPE_VIEW_FOCUSED:
+        break;
+
+      case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
+        break;
+
+      case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED: {
+        if (!ApplicationUtilities.haveJellyBeanMR2) {
+          TextField field = TextField.get(node, true);
+          field.setCursor(event.getFromIndex() + event.getAddedCount());
+        }
+
+        break;
+      }
+
+      case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED: {
+        if (!ApplicationUtilities.haveJellyBeanMR2) {
+          TextField field = TextField.get(node, true);
+          field.setSelection(event.getFromIndex(), event.getToIndex());
+        }
+
+        break;
+      }
+
+      default:
+        node.recycle();
+        node = null;
+        return;
+    }
+
+    if (false && node.isPassword()) {
+      TextField field = TextField.get(node, true);
+      field.setAccessibilityText(toText(event));
+    }
+
+    setCurrentNode(node);
   }
 
   private native static void exportScreenProperties (
@@ -405,26 +409,24 @@ public abstract class ScreenDriver {
     if (ApplicationSettings.RELEASE_BRAILLE_DEVICE) return 'r';
     if (LockUtilities.isLocked()) return 'l';
 
-    synchronized (EVENT_LOCK) {
-      AccessibilityNodeInfo node;
+    AccessibilityNodeInfo node;
 
-      synchronized (NODE_LOCK) {
-        if ((node = currentNode) != null) {
-          currentNode = null;
-        }
+    synchronized (NODE_LOCK) {
+      if ((node = currentNode) != null) {
+        currentNode = null;
       }
+    }
 
-      if (node != null) {
-        try {
-          refreshScreen(node);
-        } finally {
-          node.recycle();
-          node = null;
-        }
-      } else if (currentScreen == null) {
-        currentScreen = new RenderedScreen(null);
-        exportScreenProperties();
+    if (node != null) {
+      try {
+        refreshScreen(node);
+      } finally {
+        node.recycle();
+        node = null;
       }
+    } else if (currentScreen == null) {
+      currentScreen = new RenderedScreen(null);
+      exportScreenProperties();
     }
 
     return 0;
