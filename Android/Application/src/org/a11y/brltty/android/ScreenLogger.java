@@ -126,7 +126,7 @@ public abstract class ScreenLogger {
     }
   };
 
-  private static void log (AccessibilityNodeInfo node, String name, boolean descend) {
+  public static String toString (AccessibilityNodeInfo node) {
     StringBuilder sb = new StringBuilder();
 
     {
@@ -353,7 +353,11 @@ public abstract class ScreenLogger {
       }
     }
 
-    log(name, sb.toString());
+    return sb.toString();
+  }
+
+  private static void log (AccessibilityNodeInfo node, String name, boolean descend) {
+    log(name, toString(node));
 
     if (descend) {
       int childCount = node.getChildCount();
@@ -388,7 +392,7 @@ public abstract class ScreenLogger {
     }
   };
 
-  private static void log (AccessibilityWindowInfo window, String name, boolean descend, boolean nodes) {
+  public static String toString (AccessibilityWindowInfo window) {
     StringBuilder sb = new StringBuilder();
     add(sb, "id", window.getId());
 
@@ -437,7 +441,11 @@ public abstract class ScreenLogger {
       add(sb, location.toShortString());
     }
 
-    log(name, sb.toString());
+    return sb.toString();
+  }
+
+  private static void log (AccessibilityWindowInfo window, String name, boolean descend, boolean nodes) {
+    log(name, toString(window));
 
     if (nodes) {
       AccessibilityNodeInfo root = window.getRoot();
