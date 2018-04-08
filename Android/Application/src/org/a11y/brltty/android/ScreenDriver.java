@@ -41,10 +41,10 @@ public abstract class ScreenDriver {
   private ScreenDriver () {
   }
 
-  private static ScreenWindow currentWindow = ScreenWindow.get(0);
+  private static Window currentWindow = Window.get(0);
   private static RenderedScreen currentScreen = null;
 
-  public static ScreenWindow getWindow () {
+  public static Window getWindow () {
     return currentWindow;
   }
 
@@ -393,7 +393,7 @@ public abstract class ScreenDriver {
   }
 
   private static void refreshScreen (AccessibilityNodeInfo node) {
-    currentWindow = ScreenWindow.get(node);
+    currentWindow = Window.get(node);
     currentScreen = new RenderedScreen(node);
     exportScreenProperties();
   }

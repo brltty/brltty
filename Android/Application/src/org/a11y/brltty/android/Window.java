@@ -27,31 +27,31 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
 
-public class ScreenWindow {
-  private final static Map<Integer, ScreenWindow> windows =
-               new HashMap<Integer, ScreenWindow>();
+public class Window {
+  private final static Map<Integer, Window> windows =
+               new HashMap<Integer, Window>();
 
   private final int windowIdentifier;
   private AccessibilityWindowInfo windowObject = null;
   private RenderedScreen renderedScreen = null;
 
-  private ScreenWindow (int identifier) {
+  private Window (int identifier) {
     windowIdentifier = identifier;
   }
 
-  public static ScreenWindow get (Integer identifier) {
+  public static Window get (Integer identifier) {
     synchronized (windows) {
-      ScreenWindow window = windows.get(identifier);
+      Window window = windows.get(identifier);
       if (window != null) return window;
 
-      window = new ScreenWindow(identifier);
+      window = new Window(identifier);
       windows.put(identifier, window);
       return window;
     }
   }
 
-  public static ScreenWindow get (AccessibilityWindowInfo object) {
-    ScreenWindow window = get(object.getId());
+  public static Window get (AccessibilityWindowInfo object) {
+    Window window = get(object.getId());
 
     synchronized (window) {
       if (window.windowObject != null) window.windowObject.recycle();
@@ -61,7 +61,7 @@ public class ScreenWindow {
     return window;
   }
 
-  public static ScreenWindow get (AccessibilityNodeInfo node) {
+  public static Window get (AccessibilityNodeInfo node) {
     if (ApplicationUtilities.haveLollipop) {
       AccessibilityWindowInfo object = node.getWindow();
 
@@ -104,7 +104,7 @@ public class ScreenWindow {
     return renderedScreen;
   }
 
-  public final ScreenWindow setScreen (RenderedScreen screen) {
+  public final Window setScreen (RenderedScreen screen) {
     renderedScreen = screen;
     return this;
   }
