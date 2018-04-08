@@ -18,12 +18,9 @@
 
 package org.a11y.brltty.android;
 
-import java.util.Collections;
-import java.util.Comparator;
-
+import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
-
 import java.util.Map;
 import java.util.HashMap;
 
@@ -40,17 +37,18 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
     super();
   }
 
-  private final Map<AccessibilityNodeInfo, ScreenElement> nodes =
+  private final Map<AccessibilityNodeInfo, ScreenElement> nodeToScreenElement =
         new HashMap<AccessibilityNodeInfo, ScreenElement>();
 
   public final void add (String text, AccessibilityNodeInfo node) {
+    node = AccessibilityNodeInfo.obtain(node);
     ScreenElement element = new RealScreenElement(text, node);
     add(element);
-    nodes.put(node, element);
+    nodeToScreenElement.put(node, element);
   }
 
   public final ScreenElement find (AccessibilityNodeInfo node) {
-    return nodes.get(node);
+    return nodeToScreenElement.get(node);
   }
 
   private int atTopCount = 0;
@@ -118,71 +116,6 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
     return isContainer(outer.getAccessibilityNode(), inner.getAccessibilityNode());
   }
 
-  public final void sortByVisualLocation () {
-    Comparator<ScreenElement> comparator = new Comparator<ScreenElement>() {
-      @Override
-      public int compare (ScreenElement element1, ScreenElement element2) {
-        Rect location1 = element1.getVisualLocation();
-        Rect location2 = element2.getVisualLocation();
-        return (location1.top < location2.top)? -1:
-               (location1.top > location2.top)? 1:
-               (location1.left < location2.left)? -1:
-               (location1.left > location2.left)? 1:
-               (location1.right > location2.right)? -1:
-               (location1.right < location2.right)? 1:
-               (location1.bottom > location2.bottom)? -1:
-               (location1.bottom < location2.bottom)? 1:
-               0;
-      }
-    };
-
-    Collections.sort(this, comparator);
-  }
-
-  public final void groupByContainer () {
-    List<ScreenElement> elements = this;
-
-    while (true) {
-      int count = elements.size();
-      if (count < 3) break;
-
-      ScreenElement container = elements.get(0);
-      Rect outer = container.getVisualLocation();
-      List<ScreenElement> containedElements = new ScreenElementList();
-
-      int index = 1;
-      int to = 0;
-
-      while (index < elements.size()) {
-        ScreenElement containee = elements.get(index);
-        boolean contained = Rect.intersects(outer, containee.getVisualLocation());
-
-        if (contained) {
-          if (!isContainer(container, containee)) {
-            contained = false;
-          }
-        }
-
-        if (to == 0) {
-          if (!contained) {
-            to = index;
-          }
-        } else if (contained) {
-          containedElements.add(elements.remove(index));
-          continue;
-        }
-
-        index += 1;
-      }
-
-      if (to > 0) {
-        elements.addAll(to, containedElements);
-      }
-
-      elements = elements.subList(1, count);
-    }
-  }
-
   public final ScreenElement find (
     ScreenElement.LocationGetter locationGetter,
     int left, int top, int right, int bottom
@@ -226,5 +159,98 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
     } while (--column >= 0);
 
     return null;
+  }
+
+  private final void addByContainer (NodeComparator nodeComparator, AccessibilityNodeInfo... nodes) {
+    {
+      final int count = nodes.length;
+      if (count == 0) return;
+      if (count > 1) Arrays.sort(nodes, nodeComparator);
+    }
+
+    for (AccessibilityNodeInfo node : nodes) {
+      if (node == null) break;
+
+      try {
+        {
+          ScreenElement element = find(node);
+          if (element != null) add(element);
+        }
+
+        {
+          int count = node.getChildCount();
+
+          if (count > 0) {
+            AccessibilityNodeInfo[] children = new AccessibilityNodeInfo[count];
+
+            for (int index=0; index<count; index+=1) {
+              children[index] = node.getChild(index);
+            }
+
+            addByContainer(nodeComparator, children);
+          }
+        }
+      } finally {
+        node.recycle();
+        node = null;
+      }
+    }
+  }
+
+  public final void sortByVisualLocation () {
+    if (size() < 2) return;
+    AccessibilityNodeInfo node = get(0).getAccessibilityNode();
+
+    try {
+      AccessibilityNodeInfo root = ScreenUtilities.findRootNode(node);
+
+      if (root != null) {
+        NodeComparator comparator = new NodeComparator() {
+          private final Map<AccessibilityNodeInfo, Rect> nodeLocations =
+                new HashMap<AccessibilityNodeInfo, Rect>();
+
+          private final Rect getLocation (AccessibilityNodeInfo node) {
+            synchronized (nodeLocations) {
+              Rect location = nodeLocations.get(node);
+              if (location != null) return location;
+
+              location = new Rect();
+              node.getBoundsInScreen(location);
+
+              nodeLocations.put(node, location);
+              return location;
+            }
+          }
+
+          @Override
+          public int compare (AccessibilityNodeInfo node1, AccessibilityNodeInfo node2) {
+            if (node1 == null) {
+              return (node2 == null)? 0: 1;
+            } else if (node2 == null) {
+              return -1;
+            }
+
+            Rect location1 = getLocation(node1);
+            Rect location2 = getLocation(node2);
+
+            return (location1.top < location2.top)? -1:
+                   (location1.top > location2.top)? 1:
+                   (location1.left < location2.left)? -1:
+                   (location1.left > location2.left)? 1:
+                   (location1.right > location2.right)? -1:
+                   (location1.right < location2.right)? 1:
+                   (location1.bottom > location2.bottom)? -1:
+                   (location1.bottom < location2.bottom)? 1:
+                   0;
+          }
+        };
+
+        clear();
+        addByContainer(comparator, root);
+      }
+    } finally {
+      node.recycle();
+      node = null;
+    }
   }
 }

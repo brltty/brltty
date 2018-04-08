@@ -18,30 +18,9 @@
 
 package org.a11y.brltty.android;
 
-import android.graphics.Rect;
+import java.util.Comparator;
+import android.view.accessibility.AccessibilityNodeInfo;
 
-public class ListBrailleRenderer extends BrailleRenderer {
-  @Override
-  protected final void setBrailleLocations (ScreenElementList elements) {
-    elements.sortByVisualLocation();
-
-    int left = 0;
-    int top = 0;
-
-    for (ScreenElement element : elements) {
-      String[] text = element.getBrailleText();
-
-      if (text != null) {
-        int right = left + getTextWidth(text) - 1;
-        int bottom = top + text.length - 1;
-
-        element.setBrailleLocation(left, top, right, bottom);
-        top = bottom + 1;
-      }
-    }
-  }
-
-  public ListBrailleRenderer () {
-    super();
-  }
+public interface NodeComparator extends Comparator<AccessibilityNodeInfo> {
+  public int compare (AccessibilityNodeInfo node1, AccessibilityNodeInfo node2);
 }
