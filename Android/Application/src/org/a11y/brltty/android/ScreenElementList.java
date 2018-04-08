@@ -37,28 +37,28 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
     super();
   }
 
-  private final Map<AccessibilityNodeInfo, ScreenElement> nodeToScreenElement =
-        new HashMap<AccessibilityNodeInfo, ScreenElement>();
+  public void log () {
+    Log.d(LOG_TAG, "begin screen element list");
 
-  public final void add (String text, AccessibilityNodeInfo node) {
-    node = AccessibilityNodeInfo.obtain(node);
-    ScreenElement element = new RealScreenElement(text, node);
-    add(element);
-    nodeToScreenElement.put(node, element);
-  }
+    for (ScreenElement element : this) {
+      Log.d(LOG_TAG, "screen element: " + element.getElementText());
+    }
 
-  public final ScreenElement find (AccessibilityNodeInfo node) {
-    return nodeToScreenElement.get(node);
+    Log.d(LOG_TAG, "end screen element list");
   }
 
   private int atTopCount = 0;
 
+  public final void addAtTop (VirtualScreenElement element) {
+    add(atTopCount++, element);
+  }
+
   public final void addAtTop (int text, int action, int key) {
-    add(atTopCount++, new VirtualScreenElement(text, action, key));
+    addAtTop(new VirtualScreenElement(text, action, key));
   }
 
   public final void addAtTop (int text, int action) {
-    add(atTopCount++, new VirtualScreenElement(text, action));
+    addAtTop(new VirtualScreenElement(text, action));
   }
 
   public final void addAtBottom (int text, int action, int key) {
@@ -69,14 +69,111 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
     add(new VirtualScreenElement(text, action));
   }
 
-  public void logElements () {
-    Log.d(LOG_TAG, "begin screen element list");
+  private final Map<AccessibilityNodeInfo, ScreenElement> nodeToScreenElement =
+        new HashMap<AccessibilityNodeInfo, ScreenElement>();
 
-    for (ScreenElement element : this) {
-      Log.d(LOG_TAG, "screen element: " + element.getElementText());
+  public final void add (String text, AccessibilityNodeInfo node) {
+    node = AccessibilityNodeInfo.obtain(node);
+    ScreenElement element = new RealScreenElement(text, node);
+    add(element);
+    nodeToScreenElement.put(node, element);
+  }
+
+  public final ScreenElement get (AccessibilityNodeInfo node) {
+    return nodeToScreenElement.get(node);
+  }
+
+  private final void addByContainer (NodeComparator nodeComparator, AccessibilityNodeInfo... nodes) {
+    {
+      final int count = nodes.length;
+      if (count == 0) return;
+      if (count > 1) Arrays.sort(nodes, nodeComparator);
     }
 
-    Log.d(LOG_TAG, "end screen element list");
+    for (AccessibilityNodeInfo node : nodes) {
+      if (node == null) break;
+
+      try {
+        {
+          ScreenElement element = get(node);
+          if (element != null) add(element);
+        }
+
+        {
+          int count = node.getChildCount();
+
+          if (count > 0) {
+            AccessibilityNodeInfo[] children = new AccessibilityNodeInfo[count];
+
+            for (int index=0; index<count; index+=1) {
+              children[index] = node.getChild(index);
+            }
+
+            addByContainer(nodeComparator, children);
+          }
+        }
+      } finally {
+        node.recycle();
+        node = null;
+      }
+    }
+  }
+
+  public final void sortByVisualLocation () {
+    if (size() < 2) return;
+    AccessibilityNodeInfo node = get(0).getAccessibilityNode();
+
+    try {
+      AccessibilityNodeInfo root = ScreenUtilities.findRootNode(node);
+
+      if (root != null) {
+        NodeComparator comparator = new NodeComparator() {
+          private final Map<AccessibilityNodeInfo, Rect> nodeLocations =
+                new HashMap<AccessibilityNodeInfo, Rect>();
+
+          private final Rect getLocation (AccessibilityNodeInfo node) {
+            synchronized (nodeLocations) {
+              Rect location = nodeLocations.get(node);
+              if (location != null) return location;
+
+              location = new Rect();
+              node.getBoundsInScreen(location);
+
+              nodeLocations.put(node, location);
+              return location;
+            }
+          }
+
+          @Override
+          public int compare (AccessibilityNodeInfo node1, AccessibilityNodeInfo node2) {
+            if (node1 == null) {
+              return (node2 == null)? 0: 1;
+            } else if (node2 == null) {
+              return -1;
+            }
+
+            Rect location1 = getLocation(node1);
+            Rect location2 = getLocation(node2);
+
+            return (location1.top < location2.top)? -1:
+                   (location1.top > location2.top)? 1:
+                   (location1.left < location2.left)? -1:
+                   (location1.left > location2.left)? 1:
+                   (location1.right > location2.right)? -1:
+                   (location1.right < location2.right)? 1:
+                   (location1.bottom > location2.bottom)? -1:
+                   (location1.bottom < location2.bottom)? 1:
+                   0;
+          }
+        };
+
+        clear();
+        addByContainer(comparator, root);
+      }
+    } finally {
+      node.recycle();
+      node = null;
+    }
   }
 
   private static boolean isContainer (Rect outer, int left, int top, int right, int bottom) {
@@ -159,98 +256,5 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
     } while (--column >= 0);
 
     return null;
-  }
-
-  private final void addByContainer (NodeComparator nodeComparator, AccessibilityNodeInfo... nodes) {
-    {
-      final int count = nodes.length;
-      if (count == 0) return;
-      if (count > 1) Arrays.sort(nodes, nodeComparator);
-    }
-
-    for (AccessibilityNodeInfo node : nodes) {
-      if (node == null) break;
-
-      try {
-        {
-          ScreenElement element = find(node);
-          if (element != null) add(element);
-        }
-
-        {
-          int count = node.getChildCount();
-
-          if (count > 0) {
-            AccessibilityNodeInfo[] children = new AccessibilityNodeInfo[count];
-
-            for (int index=0; index<count; index+=1) {
-              children[index] = node.getChild(index);
-            }
-
-            addByContainer(nodeComparator, children);
-          }
-        }
-      } finally {
-        node.recycle();
-        node = null;
-      }
-    }
-  }
-
-  public final void sortByVisualLocation () {
-    if (size() < 2) return;
-    AccessibilityNodeInfo node = get(0).getAccessibilityNode();
-
-    try {
-      AccessibilityNodeInfo root = ScreenUtilities.findRootNode(node);
-
-      if (root != null) {
-        NodeComparator comparator = new NodeComparator() {
-          private final Map<AccessibilityNodeInfo, Rect> nodeLocations =
-                new HashMap<AccessibilityNodeInfo, Rect>();
-
-          private final Rect getLocation (AccessibilityNodeInfo node) {
-            synchronized (nodeLocations) {
-              Rect location = nodeLocations.get(node);
-              if (location != null) return location;
-
-              location = new Rect();
-              node.getBoundsInScreen(location);
-
-              nodeLocations.put(node, location);
-              return location;
-            }
-          }
-
-          @Override
-          public int compare (AccessibilityNodeInfo node1, AccessibilityNodeInfo node2) {
-            if (node1 == null) {
-              return (node2 == null)? 0: 1;
-            } else if (node2 == null) {
-              return -1;
-            }
-
-            Rect location1 = getLocation(node1);
-            Rect location2 = getLocation(node2);
-
-            return (location1.top < location2.top)? -1:
-                   (location1.top > location2.top)? 1:
-                   (location1.left < location2.left)? -1:
-                   (location1.left > location2.left)? 1:
-                   (location1.right > location2.right)? -1:
-                   (location1.right < location2.right)? 1:
-                   (location1.bottom > location2.bottom)? -1:
-                   (location1.bottom < location2.bottom)? 1:
-                   0;
-          }
-        };
-
-        clear();
-        addByContainer(comparator, root);
-      }
-    } finally {
-      node.recycle();
-      node = null;
-    }
   }
 }

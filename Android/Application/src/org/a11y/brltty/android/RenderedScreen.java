@@ -64,15 +64,13 @@ public class RenderedScreen {
     return getNode(cursorNode);
   }
 
-  public final ScreenElement findScreenElement (AccessibilityNodeInfo node) {
+  public final ScreenElement getScreenElement (AccessibilityNodeInfo node) {
     if (node == null) return null;
-    Rect location = new Rect();
-    node.getBoundsInScreen(location);
-    return screenElements.findByVisualLocation(location);
+    return screenElements.get(node);
   }
 
   public final ScreenElement findRenderedScreenElement (AccessibilityNodeInfo node) {
-    ScreenElement element = findScreenElement(node);
+    ScreenElement element = getScreenElement(node);
 
     if (element != null) {
       if (element.getBrailleLocation() != null) {
@@ -112,7 +110,7 @@ public class RenderedScreen {
     AccessibilityNodeInfo node = getCursorNode();
 
     if (node != null) {
-      ScreenElement element = findScreenElement(node);
+      ScreenElement element = getScreenElement(node);
 
       node.recycle();
       node = null;
@@ -513,6 +511,7 @@ public class RenderedScreen {
     rootNode = ScreenUtilities.findRootNode(node);
 
     addScreenElements(rootNode);
+    screenElements.sortByVisualLocation();
     BrailleRenderer.getBrailleRenderer().renderScreenElements(screenElements, screenRows);
 
     screenWidth = findScreenWidth();

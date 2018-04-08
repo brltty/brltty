@@ -23,8 +23,6 @@ import android.graphics.Rect;
 public class ListBrailleRenderer extends BrailleRenderer {
   @Override
   protected final void setBrailleLocations (ScreenElementList elements) {
-    elements.sortByVisualLocation();
-
     int left = 0;
     int top = 0;
 
