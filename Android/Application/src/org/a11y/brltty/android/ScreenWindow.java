@@ -31,10 +31,11 @@ public class ScreenWindow {
   private final static Map<Integer, ScreenWindow> windows =
                new HashMap<Integer, ScreenWindow>();
 
-  private final Integer windowIdentifier;
+  private final int windowIdentifier;
   private AccessibilityWindowInfo windowObject = null;
+  private RenderedScreen renderedScreen = null;
 
-  private ScreenWindow (Integer identifier) {
+  private ScreenWindow (int identifier) {
     windowIdentifier = identifier;
   }
 
@@ -52,7 +53,7 @@ public class ScreenWindow {
   public static ScreenWindow get (AccessibilityWindowInfo object) {
     ScreenWindow window = get(object.getId());
 
-    synchronized (window.windowIdentifier) {
+    synchronized (window) {
       if (window.windowObject != null) window.windowObject.recycle();
       window.windowObject = AccessibilityWindowInfo.obtain(object);
     }
@@ -62,13 +63,13 @@ public class ScreenWindow {
 
   public static ScreenWindow get (AccessibilityNodeInfo node) {
     if (ApplicationUtilities.haveLollipop) {
-      AccessibilityWindowInfo window = node.getWindow();
+      AccessibilityWindowInfo object = node.getWindow();
 
       try {
-        return get(window);
+        return get(object);
       } finally {
-        window.recycle();
-        window = null;
+        object.recycle();
+        object = null;
       }
     } else {
       return get(node.getWindowId());
@@ -80,7 +81,7 @@ public class ScreenWindow {
   }
 
   public final Rect getLocation () {
-    synchronized (windowIdentifier) {
+    synchronized (this) {
       Rect location = new Rect();
 
       if (windowObject != null) {
@@ -97,5 +98,14 @@ public class ScreenWindow {
 
   public boolean contains (Rect location) {
     return getLocation().contains(location);
+  }
+
+  public final RenderedScreen getScreen () {
+    return renderedScreen;
+  }
+
+  public final ScreenWindow setScreen (RenderedScreen screen) {
+    renderedScreen = screen;
+    return this;
   }
 }
