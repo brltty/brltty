@@ -108,4 +108,10 @@ public class Window {
     renderedScreen = screen;
     return this;
   }
+
+  public static Window setScreen (AccessibilityNodeInfo node) {
+    Window window = get(node);
+    window.setScreen(new RenderedScreen(node));
+    return window;
+  }
 }

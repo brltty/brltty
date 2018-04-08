@@ -41,17 +41,6 @@ public abstract class ScreenDriver {
   private ScreenDriver () {
   }
 
-  private static Window currentWindow = Window.get(0);
-  private static RenderedScreen currentScreen = null;
-
-  public static Window getWindow () {
-    return currentWindow;
-  }
-
-  public static RenderedScreen getScreen () {
-    return currentScreen;
-  }
-
   private static String toText (Collection<CharSequence> lines) {
     if (lines == null) return null;
 
@@ -218,6 +207,17 @@ public abstract class ScreenDriver {
     }
   }
 
+  private static Window currentWindow = Window.get(0)
+                                       .setScreen(new RenderedScreen(null));
+
+  public static Window getWindow () {
+    return currentWindow;
+  }
+
+  public static RenderedScreen getScreen () {
+    return getWindow().getScreen();
+  }
+
   public static void onAccessibilityEvent (AccessibilityEvent event) {
     int eventType = event.getEventType();
 
@@ -315,7 +315,8 @@ public abstract class ScreenDriver {
   );
 
   private static void exportScreenProperties () {
-    AccessibilityNodeInfo node = currentScreen.getCursorNode();
+    RenderedScreen screen = getScreen();
+    AccessibilityNodeInfo node = screen.getCursorNode();
 
     int locationLeft = 0;
     int locationTop = 0;
@@ -329,7 +330,7 @@ public abstract class ScreenDriver {
 
     if (node != null) {
       try {
-        ScreenElement element = currentScreen.findRenderedScreenElement(node);
+        ScreenElement element = screen.findRenderedScreenElement(node);
 
         if (element != null) {
           Rect location = element.getBrailleLocation();
@@ -385,16 +386,19 @@ public abstract class ScreenDriver {
 
     exportScreenProperties(
       currentWindow.getIdentifier(),
-      currentScreen.getScreenWidth(),
-      currentScreen.getScreenHeight(),
+      screen.getScreenWidth(),
+      screen.getScreenHeight(),
       locationLeft, locationTop, locationRight, locationBottom,
       selectionLeft, selectionTop, selectionRight, selectionBottom
     );
   }
 
+  static {
+    exportScreenProperties();
+  }
+
   private static void refreshScreen (AccessibilityNodeInfo node) {
-    currentWindow = Window.get(node);
-    currentScreen = new RenderedScreen(node);
+    currentWindow = Window.setScreen(node);
     exportScreenProperties();
   }
 
@@ -417,16 +421,14 @@ public abstract class ScreenDriver {
         node.recycle();
         node = null;
       }
-    } else if (currentScreen == null) {
-      currentScreen = new RenderedScreen(null);
-      exportScreenProperties();
     }
 
     return 0;
   }
 
   public static char[] getRowText (int row, int column) {
-    String text = (row < currentScreen.getScreenHeight())? currentScreen.getScreenRow(row): "";
+    RenderedScreen screen = getScreen();
+    String text = (row < screen.getScreenHeight())? screen.getScreenRow(row): "";
     int length = text.length();
 
     if (column > length) column = length;
@@ -439,7 +441,7 @@ public abstract class ScreenDriver {
 
   public static boolean routeCursor (int column, int row) {
     if (row == -1) return false;
-    return currentScreen.performAction(column, row);
+    return getScreen().performAction(column, row);
   }
 
   public static void reportEvent (char event) {
