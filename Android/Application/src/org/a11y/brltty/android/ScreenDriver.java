@@ -315,7 +315,8 @@ public abstract class ScreenDriver {
   );
 
   private static void exportScreenProperties () {
-    RenderedScreen screen = getScreen();
+    Window window = getWindow();
+    RenderedScreen screen = window.getScreen();
     AccessibilityNodeInfo node = screen.getCursorNode();
 
     int locationLeft = 0;
@@ -385,9 +386,8 @@ public abstract class ScreenDriver {
     }
 
     exportScreenProperties(
-      currentWindow.getIdentifier(),
-      screen.getScreenWidth(),
-      screen.getScreenHeight(),
+      window.getIdentifier(),
+      screen.getScreenWidth(), screen.getScreenHeight(),
       locationLeft, locationTop, locationRight, locationBottom,
       selectionLeft, selectionTop, selectionRight, selectionBottom
     );
