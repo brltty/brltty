@@ -41,22 +41,6 @@ public abstract class ScreenDriver {
   private ScreenDriver () {
   }
 
-  private static void showMessage (String text) {
-    if (text == null) return;
-    text = text.replace('\n', ' ').trim();
-    if (text.isEmpty()) return;
-    final String message = text;
-
-    CoreWrapper.runOnCoreThread(
-      new Runnable() {
-        @Override
-        public void run () {
-          CoreWrapper.showMessage(message);
-        }
-      }
-    );
-  }
-
   private static String toText (Collection<CharSequence> lines) {
     if (lines == null) return null;
 
@@ -112,6 +96,26 @@ public abstract class ScreenDriver {
 
   private static String toText (AccessibilityEvent event) {
     return toText(event.getText());
+  }
+
+  private static void showMessage (String text) {
+    if (text == null) return;
+    text = text.replace('\n', ' ').trim();
+    if (text.isEmpty()) return;
+    final String message = text;
+
+    CoreWrapper.runOnCoreThread(
+      new Runnable() {
+        @Override
+        public void run () {
+          CoreWrapper.showMessage(message);
+        }
+      }
+    );
+  }
+
+  private static void showMessage (AccessibilityEvent event) {
+    showMessage(toText(event));
   }
 
   private static void showNotification (AccessibilityEvent event) {
@@ -223,96 +227,96 @@ public abstract class ScreenDriver {
   }
 
   public static void onAccessibilityEvent (AccessibilityEvent event) {
-    int eventType = event.getEventType();
-
     if (ApplicationSettings.LOG_ACCESSIBILITY_EVENTS) {
       ScreenLogger.log(event);
     }
 
-    switch (eventType) {
-      case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
-        showNotification(event);
-        return;
-
-      case AccessibilityEvent.TYPE_ANNOUNCEMENT:
-        showMessage(toText(event));
-        return;
-
-      case AccessibilityEvent.TYPE_WINDOWS_CHANGED:
-        setCurrentNode(ScreenUtilities.getRootNode());
-        return;
-    }
-
+    int eventType = event.getEventType();
     AccessibilityNodeInfo node = event.getSource();
-    if (node == null) return;
 
-    if (ApplicationUtilities.haveLollipop) {
-      AccessibilityWindowInfo window = node.getWindow();
+    if (node == null) {
+      switch (eventType) {
+        case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
+          showNotification(event);
+          break;
 
-      if (window != null) {
-        try {
-          if (!window.isActive()) {
-            node.recycle();
-            node = null;
-            return;
+        case AccessibilityEvent.TYPE_ANNOUNCEMENT:
+          showMessage(event);
+          break;
+
+        case AccessibilityEvent.TYPE_WINDOWS_CHANGED:
+          setCurrentNode(ScreenUtilities.getRootNode());
+          break;
+      }
+    } else {
+      if (ApplicationUtilities.haveLollipop) {
+        AccessibilityWindowInfo window = node.getWindow();
+
+        if (window != null) {
+          try {
+            if (!window.isActive()) {
+              node.recycle();
+              node = null;
+              return;
+            }
+          } finally {
+            window.recycle();
+            window = null;
           }
-        } finally {
-          window.recycle();
-          window = null;
         }
       }
-    }
 
-    switch (eventType) {
-      case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
-        setFocus(node);
-        break;
+      switch (eventType) {
+        case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
+          setFocus(node);
+          break;
 
-      case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
-        break;
+        case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
+          break;
 
-      case AccessibilityEvent.TYPE_VIEW_SCROLLED:
-        break;
+        case AccessibilityEvent.TYPE_VIEW_SCROLLED:
+          break;
 
-      case AccessibilityEvent.TYPE_VIEW_SELECTED:
-        break;
+        case AccessibilityEvent.TYPE_VIEW_SELECTED:
+          break;
 
-      case AccessibilityEvent.TYPE_VIEW_FOCUSED:
-        break;
+        case AccessibilityEvent.TYPE_VIEW_FOCUSED:
+          break;
 
-      case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
-        break;
+        case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
+          break;
 
-      case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED: {
-        if (!ApplicationUtilities.haveJellyBeanMR2) {
-          TextField field = TextField.get(node, true);
-          field.setCursor(event.getFromIndex() + event.getAddedCount());
+        case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED: {
+          if (!ApplicationUtilities.haveJellyBeanMR2) {
+            TextField field = TextField.get(node, true);
+            field.setCursor(event.getFromIndex() + event.getAddedCount());
+          }
+
+          break;
         }
 
-        break;
-      }
+        case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED: {
+          if (!ApplicationUtilities.haveJellyBeanMR2) {
+            TextField field = TextField.get(node, true);
+            field.setSelection(event.getFromIndex(), event.getToIndex());
+          }
 
-      case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED: {
-        if (!ApplicationUtilities.haveJellyBeanMR2) {
-          TextField field = TextField.get(node, true);
-          field.setSelection(event.getFromIndex(), event.getToIndex());
+          break;
         }
 
-        break;
+        default:
+          node.recycle();
+          node = null;
+          return;
       }
 
-      default:
-        node.recycle();
-        node = null;
-        return;
-    }
+      if (false && node.isPassword()) {
+        TextField field = TextField.get(node, true);
+        field.setAccessibilityText(toText(event));
+      }
 
-    if (false && node.isPassword()) {
-      TextField field = TextField.get(node, true);
-      field.setAccessibilityText(toText(event));
+      setCurrentNode(node);
     }
-
-    setCurrentNode(node);
   }
 
   private native static void exportScreenProperties (
