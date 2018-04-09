@@ -41,6 +41,22 @@ public abstract class ScreenDriver {
   private ScreenDriver () {
   }
 
+  private static void showMessage (String text) {
+    if (text == null) return;
+    text = text.replace('\n', ' ').trim();
+    if (text.isEmpty()) return;
+    final String message = text;
+
+    CoreWrapper.runOnCoreThread(
+      new Runnable() {
+        @Override
+        public void run () {
+          CoreWrapper.showMessage(message);
+        }
+      }
+    );
+  }
+
   private static String toText (Collection<CharSequence> lines) {
     if (lines == null) return null;
 
@@ -110,19 +126,7 @@ public abstract class ScreenDriver {
       }
 
       if (text == null) text = toText(event);
-
-      if (text != null) {
-        final String message = text.replace('\n', ' ');
-
-        CoreWrapper.runOnCoreThread(
-          new Runnable() {
-            @Override
-            public void run () {
-              CoreWrapper.showMessage(message);
-            }
-          }
-        );
-      }
+      showMessage(text);
     }
   }
 
@@ -228,6 +232,10 @@ public abstract class ScreenDriver {
     switch (eventType) {
       case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
         showNotification(event);
+        return;
+
+      case AccessibilityEvent.TYPE_ANNOUNCEMENT:
+        showMessage(toText(event));
         return;
 
       case AccessibilityEvent.TYPE_WINDOWS_CHANGED:
