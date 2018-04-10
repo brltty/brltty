@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+  android:title="@string/SETTINGS_SCREEN_MESSAGE"
+  >
+
+  <CheckBoxPreference
+    android:key="@string/PREF_KEY_SHOW_NOTIFICATIONS"
+    android:persistent="true"
+    android:title="@string/SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS"
+   />
+
+  <CheckBoxPreference
+    android:key="@string/PREF_KEY_SHOW_TOASTS"
+    android:persistent="true"
+    android:title="@string/SETTINGS_CHECKBOX_SHOW_TOASTS"
+   />
+
+  <CheckBoxPreference
+    android:key="@string/PREF_KEY_SHOW_ANNOUNCEMENTS"
+    android:persistent="true"
+    android:title="@string/SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS"
+   />
+</PreferenceScreen>

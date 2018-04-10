@@ -29,12 +29,12 @@
 
   <string name="SETTINGS_SCREEN_MAIN">BRLTTY Settings</string>
   <string name="SETTINGS_SCREEN_GENERAL">General Settings</string>
+  <string name="SETTINGS_SCREEN_MESSAGE">Message Settings</string>
   <string name="SETTINGS_SCREEN_DEVICES">Manage Devices</string>
   <string name="SETTINGS_SCREEN_ADVANCED">Advanced Settings</string>
 
   <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Navigation Mode</string>
   <string name="SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE">Release Braille Device</string>
-  <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Show Notifications</string>
   <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Speech Support</string>
   <string name="SETTINGS_BUTTON_SWITCH_INPUT_METHOD">Switch Input Method</string>
 
@@ -43,11 +43,16 @@
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Contraction Table</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Keyboard Table</string>
 
+  <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Show Announcements</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Show Notifications</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">Show Alerts</string>
+
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Log Level</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Log Categories</string>
   <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Log Accessibility Events</string>
   <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">Log Rendered Screen</string>
   <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Log Keyboard Events</string>
+  <string name="SETTINGS_CHECKBOX_LOG_UNHANDLED_EVENTS">Log Unhandled Events</string>
 
   <string name="DEVICES_BUTTON_SELECTED">Selected Device</string>
   <string name="DEVICES_BUTTON_ADD">Add Device</string>

@@ -28,7 +28,6 @@ public final class GeneralSettings extends SettingsFragment {
   private static final String LOG_TAG = GeneralSettings.class.getName();
 
   private CheckBoxPreference releaseBrailleDeviceCheckBox;
-  private CheckBoxPreference showNotificationsCheckBox;
   private ListPreference navigationModeList;
   private ListPreference textTableList;
   private ListPreference contractionTableList;
@@ -41,7 +40,6 @@ public final class GeneralSettings extends SettingsFragment {
     addPreferencesFromResource(R.xml.settings_general);
 
     releaseBrailleDeviceCheckBox = getCheckBoxPreference(R.string.PREF_KEY_RELEASE_BRAILLE_DEVICE);
-    showNotificationsCheckBox = getCheckBoxPreference(R.string.PREF_KEY_SHOW_NOTIFICATIONS);
     navigationModeList = getListPreference(R.string.PREF_KEY_NAVIGATION_MODE);
     textTableList = getListPreference(R.string.PREF_KEY_TEXT_TABLE);
     contractionTableList = getListPreference(R.string.PREF_KEY_CONTRACTION_TABLE);
@@ -52,7 +50,6 @@ public final class GeneralSettings extends SettingsFragment {
     sortList(contractionTableList);
 
     showSelection(releaseBrailleDeviceCheckBox);
-    showSelection(showNotificationsCheckBox);
     showSelection(navigationModeList);
     showSelection(textTableList);
     showSelection(contractionTableList);
@@ -68,19 +65,6 @@ public final class GeneralSettings extends SettingsFragment {
           BrailleNotification.updateState();
 
           showSelection(releaseBrailleDeviceCheckBox, newSetting);
-          return true;
-        }
-      }
-    );
-
-    showNotificationsCheckBox.setOnPreferenceChangeListener(
-      new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final boolean newSetting = (Boolean)newValue;
-
-          showSelection(showNotificationsCheckBox, newSetting);
-          ApplicationSettings.SHOW_NOTIFICATIONS = newSetting;
           return true;
         }
       }

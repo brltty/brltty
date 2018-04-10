@@ -9,6 +9,11 @@
    />
 
   <header
+    android:fragment="org.a11y.brltty.android.MessageSettings"
+    android:title="@string/SETTINGS_SCREEN_MESSAGE"
+   />
+
+  <header
     android:fragment="org.a11y.brltty.android.DeviceManager"
     android:title="@string/SETTINGS_SCREEN_DEVICES"
    />

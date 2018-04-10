@@ -10,12 +10,6 @@
     android:title="@string/SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE"
    />
 
-  <CheckBoxPreference
-    android:key="@string/PREF_KEY_SHOW_NOTIFICATIONS"
-    android:persistent="true"
-    android:title="@string/SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS"
-   />
-
   <ListPreference
     android:key="@string/PREF_KEY_NAVIGATION_MODE"
     android:persistent="true"

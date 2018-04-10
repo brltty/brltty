@@ -119,18 +119,35 @@ public abstract class ScreenDriver {
   }
 
   private static void showNotification (AccessibilityEvent event) {
-    if (ApplicationSettings.SHOW_NOTIFICATIONS) {
-      String text = null;
-      Notification notification = (Notification)event.getParcelableData();
+    String text = null;
+    Notification notification = (Notification)event.getParcelableData();
 
-      if (notification != null) {
-        if (!ApplicationUtilities.haveJellyBean) return;
-        if (notification.priority < Notification.PRIORITY_DEFAULT) return;
-        text = toText(notification);
+    if (notification != null) {
+      if (!ApplicationSettings.SHOW_NOTIFICATIONS) return;
+      if (!ApplicationUtilities.haveJellyBean) return;
+      if (notification.priority < Notification.PRIORITY_DEFAULT) return;
+      text = toText(notification);
+    } else if (!ApplicationSettings.SHOW_TOASTS) {
+      return;
+    }
+
+    if (text == null) text = toText(event);
+    showMessage(text);
+  }
+
+  private static void logUnhandledEvent (AccessibilityEvent event, AccessibilityNodeInfo node) {
+    if (ApplicationSettings.LOG_UNHANDLED_EVENTS) {
+      StringBuilder log = new StringBuilder();
+
+      log.append("unhandled accessibility event: ");
+      log.append(event.toString());
+
+      if (node != null) {
+        log.append(" Source: ");
+        log.append(ScreenLogger.toString(node));
       }
 
-      if (text == null) text = toText(event);
-      showMessage(text);
+      Log.w(LOG_TAG, log.toString());
     }
   }
 
@@ -241,11 +258,15 @@ public abstract class ScreenDriver {
           break;
 
         case AccessibilityEvent.TYPE_ANNOUNCEMENT:
-          showMessage(event);
+          if (ApplicationSettings.SHOW_ANNOUNCEMENTS) showMessage(event);
           break;
 
         case AccessibilityEvent.TYPE_WINDOWS_CHANGED:
           setCurrentNode(ScreenUtilities.getRootNode());
+          break;
+
+        default:
+          logUnhandledEvent(event, null);
           break;
       }
     } else {
@@ -305,6 +326,7 @@ public abstract class ScreenDriver {
         }
 
         default:
+          logUnhandledEvent(event, node);
           node.recycle();
           node = null;
           return;

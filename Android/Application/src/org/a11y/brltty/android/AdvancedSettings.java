@@ -37,6 +37,7 @@ public final class AdvancedSettings extends SettingsFragment {
   private CheckBoxPreference logAccessibilityEventsCheckBox;
   private CheckBoxPreference logRenderedScreenCheckBox;
   private CheckBoxPreference logKeyboardEventsCheckBox;
+  private CheckBoxPreference logUnhandledEventsCheckBox;
 
   @Override
   public void onCreate (Bundle savedInstanceState) {
@@ -50,6 +51,7 @@ public final class AdvancedSettings extends SettingsFragment {
     logAccessibilityEventsCheckBox = getCheckBoxPreference(R.string.PREF_KEY_LOG_ACCESSIBILITY_EVENTS);
     logRenderedScreenCheckBox = getCheckBoxPreference(R.string.PREF_KEY_LOG_RENDERED_SCREEN);
     logKeyboardEventsCheckBox = getCheckBoxPreference(R.string.PREF_KEY_LOG_KEYBOARD_EVENTS);
+    logUnhandledEventsCheckBox = getCheckBoxPreference(R.string.PREF_KEY_LOG_UNHANDLED_EVENTS);
 
     sortList(keyboardTableList);
     sortList(attributesTableList);
@@ -61,6 +63,7 @@ public final class AdvancedSettings extends SettingsFragment {
     showSelection(logAccessibilityEventsCheckBox);
     showSelection(logRenderedScreenCheckBox);
     showSelection(logKeyboardEventsCheckBox);
+    showSelection(logUnhandledEventsCheckBox);
 
     keyboardTableList.setOnPreferenceChangeListener(
       new Preference.OnPreferenceChangeListener() {
@@ -180,6 +183,19 @@ public final class AdvancedSettings extends SettingsFragment {
           ApplicationSettings.LOG_KEYBOARD_EVENTS = newSetting;
 
           showSelection(logKeyboardEventsCheckBox, newSetting);
+          return true;
+        }
+      }
+    );
+
+    logUnhandledEventsCheckBox.setOnPreferenceChangeListener(
+      new Preference.OnPreferenceChangeListener() {
+        @Override
+        public boolean onPreferenceChange (Preference preference, Object newValue) {
+          final boolean newSetting = (Boolean)newValue;
+          ApplicationSettings.LOG_UNHANDLED_EVENTS = newSetting;
+
+          showSelection(logUnhandledEventsCheckBox, newSetting);
           return true;
         }
       }
