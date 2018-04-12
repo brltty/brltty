@@ -31,6 +31,20 @@ public abstract class ScreenUtilities {
   private ScreenUtilities () {
   }
 
+  public static String getClassPath (AccessibilityNodeInfo node) {
+    CharSequence path = node.getClassName();
+    if (path == null) return null;
+    return path.toString();
+  }
+
+  public static String getClassName (AccessibilityNodeInfo node) {
+    String path = getClassPath(node);
+    if (path == null) return null;
+
+    int index = path.lastIndexOf('.');
+    return path.substring(index+1);
+  }
+
   public static AccessibilityNodeInfo getRefreshedNode (AccessibilityNodeInfo node) {
     if (node != null) {
       if (ApplicationUtilities.haveJellyBeanMR2) {
@@ -109,7 +123,9 @@ public abstract class ScreenUtilities {
   }
 
   public static boolean isSubclassOf (AccessibilityNodeInfo node, Class type) {
-    return LanguageUtilities.canAssign(type, node.getClassName().toString());
+    String name = getClassName(node);
+    if (name == null) return false;
+    return LanguageUtilities.canAssign(type, name);
   }
 
   public static boolean isCheckBox (AccessibilityNodeInfo node) {

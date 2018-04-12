@@ -356,9 +356,8 @@ public class RenderedScreen {
         if (text == null) {
           if ((actions != 0) && !hasInnerText(root)) {
             if ((text = getDescription(root)) == null) {
-              text = root.getClassName().toString();
-              int index = text.lastIndexOf('.');
-              if (index >= 0) text = text.substring(index+1);
+              text = ScreenUtilities.getClassName(root);
+              if (text == null) text = "?";
               text = "(" + text + ")";
             }
           }

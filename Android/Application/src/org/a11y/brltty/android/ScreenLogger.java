@@ -59,7 +59,7 @@ public abstract class ScreenLogger {
   }
 
   private static final void add (StringBuilder sb, String label, CharSequence value) {
-    add(sb, String.format("%s=%s", label, value));
+    if (value != null) add(sb, String.format("%s=%s", label, value));
   }
 
   private static final void add (StringBuilder sb, String label, int value) {
@@ -128,12 +128,7 @@ public abstract class ScreenLogger {
 
   public static String toString (AccessibilityNodeInfo node) {
     StringBuilder sb = new StringBuilder();
-
-    {
-      String object = node.getClassName().toString();
-      int index = object.lastIndexOf(".");
-      sb.append(object.substring(index+1));
-    }
+    add(sb, ScreenUtilities.getClassName(node));
 
     {
       CharSequence text = ScreenUtilities.getText(node);
