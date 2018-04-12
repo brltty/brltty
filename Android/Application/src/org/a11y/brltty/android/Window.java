@@ -65,15 +65,17 @@ public class Window {
     if (ApplicationUtilities.haveLollipop) {
       AccessibilityWindowInfo object = node.getWindow();
 
-      try {
-        return get(object);
-      } finally {
-        object.recycle();
-        object = null;
+      if (object != null) {
+        try {
+          return get(object);
+        } finally {
+          object.recycle();
+          object = null;
+        }
       }
-    } else {
-      return get(node.getWindowId());
     }
+
+    return get(node.getWindowId());
   }
 
   public final int getIdentifier () {
