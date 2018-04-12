@@ -25,7 +25,6 @@ import java.util.LinkedHashMap;
 import android.util.Log;
 import android.os.Bundle;
 
-import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 
@@ -369,7 +368,7 @@ public abstract class ScreenLogger {
     }
   }
 
-  private static void log (AccessibilityNodeInfo root) {
+  public static void log (AccessibilityNodeInfo root) {
     log("begin node tree");
     log(root, "root", true);
     log("end node tree");
@@ -488,22 +487,5 @@ public abstract class ScreenLogger {
     }
 
     log("end screen log");
-  }
-
-  public static void log (AccessibilityEvent event) {
-    log("accessibility event", event.toString());
-
-    {
-      AccessibilityNodeInfo node = event.getSource();
-
-      if (node != null) {
-        try {
-          log(node);
-        } finally {
-          node.recycle();
-          node = null;
-        }
-      }
-    }
   }
 }

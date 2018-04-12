@@ -245,7 +245,7 @@ public abstract class ScreenDriver {
 
   public static void onAccessibilityEvent (AccessibilityEvent event) {
     if (ApplicationSettings.LOG_ACCESSIBILITY_EVENTS) {
-      ScreenLogger.log(event);
+      Log.d(LOG_TAG, ("accessibility event: " + event.toString()));
     }
 
     int eventType = event.getEventType();
@@ -280,6 +280,10 @@ public abstract class ScreenDriver {
           break;
       }
     } else {
+      if (ApplicationSettings.LOG_ACCESSIBILITY_EVENTS) {
+        ScreenLogger.log(node);
+      }
+
       if (ApplicationUtilities.haveLollipop) {
         AccessibilityWindowInfo window = node.getWindow();
 
