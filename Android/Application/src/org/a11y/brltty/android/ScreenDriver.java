@@ -244,9 +244,8 @@ public abstract class ScreenDriver {
   }
 
   public static void onAccessibilityEvent (AccessibilityEvent event) {
-    if (ApplicationSettings.LOG_ACCESSIBILITY_EVENTS) {
-      Log.d(LOG_TAG, ("accessibility event: " + event.toString()));
-    }
+    final boolean log = ApplicationSettings.LOG_ACCESSIBILITY_EVENTS;
+    if (log) Log.d(LOG_TAG, ("accessibility event: " + event.toString()));
 
     int eventType = event.getEventType();
     AccessibilityNodeInfo node = event.getSource();
@@ -280,9 +279,7 @@ public abstract class ScreenDriver {
           break;
       }
     } else {
-      if (ApplicationSettings.LOG_ACCESSIBILITY_EVENTS) {
-        ScreenLogger.log(node);
-      }
+      if (log) ScreenLogger.log(node);
 
       if (ApplicationUtilities.haveLollipop) {
         AccessibilityWindowInfo window = node.getWindow();
@@ -344,6 +341,9 @@ public abstract class ScreenDriver {
         case AccessibilityEvent.TYPE_VIEW_HOVER_ENTER:
         case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT:
         case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED:
+        case AccessibilityEvent.TYPE_VIEW_CLICKED:
+        case AccessibilityEvent.TYPE_VIEW_LONG_CLICKED:
+        case AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY:
           node.recycle();
           node = null;
           return;
