@@ -143,7 +143,7 @@ public abstract class ScreenDriver {
       log.append(event.toString());
 
       if (node != null) {
-        log.append(" Source: ");
+        log.append("; Source: ");
         log.append(ScreenLogger.toString(node));
       }
 
@@ -267,6 +267,16 @@ public abstract class ScreenDriver {
 
         default:
           logUnhandledEvent(event, null);
+        case AccessibilityEvent.TYPE_TOUCH_INTERACTION_START:
+        case AccessibilityEvent.TYPE_TOUCH_INTERACTION_END:
+        case AccessibilityEvent.TYPE_GESTURE_DETECTION_START:
+        case AccessibilityEvent.TYPE_GESTURE_DETECTION_END:
+        case AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START:
+        case AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END:
+        case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
+        case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
+        case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED:
+        case AccessibilityEvent.TYPE_VIEW_CLICKED:
           break;
       }
     } else {
@@ -327,6 +337,9 @@ public abstract class ScreenDriver {
 
         default:
           logUnhandledEvent(event, node);
+        case AccessibilityEvent.TYPE_VIEW_HOVER_ENTER:
+        case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT:
+        case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED:
           node.recycle();
           node = null;
           return;
