@@ -424,8 +424,6 @@ connectSocket (
           errno = error;
         }
       }
-
-      close(socketDescriptor);
     }
 #endif /* EINPROGRESS */
   }
