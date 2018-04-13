@@ -123,9 +123,9 @@ public abstract class ScreenUtilities {
   }
 
   public static boolean isSubclassOf (AccessibilityNodeInfo node, Class type) {
-    String name = getClassName(node);
-    if (name == null) return false;
-    return LanguageUtilities.canAssign(type, name);
+    String path = getClassPath(node);
+    if (path == null) return false;
+    return LanguageUtilities.canAssign(type, path);
   }
 
   public static boolean isCheckBox (AccessibilityNodeInfo node) {
