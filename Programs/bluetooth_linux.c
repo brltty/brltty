@@ -219,6 +219,17 @@ bthNewL2capConnection (const bdaddr_t *address, int timeout) {
       }
     }
 
+    {
+      struct linger linger = {
+        .l_onoff = 1,
+        .l_linger = 0
+      };
+
+      if (setsockopt(socketDescriptor, SOL_SOCKET, SO_LINGER, &linger, sizeof(linger)) == -1) {
+        logSystemError("setsockopt[SO_LINGER]");
+      }
+    }
+
     close(socketDescriptor);
   } else {
     logSystemError("L2CAP socket");
