@@ -23,42 +23,72 @@ import java.util.Set;
 import java.util.AbstractQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
-public class CoreWrapper {
-  public static native int coreConstruct (String[] arguments, ClassLoader classLoader);
-  public static native boolean coreDestruct ();
+public abstract class CoreWrapper {
+  private CoreWrapper () {
+  }
 
-  public static native boolean coreEnableInterrupt ();
-  public static native boolean coreDisableInterrupt ();
+  private static void setOverrideDirectories () {
+    StringBuilder sb = new StringBuilder();
 
-  public static native boolean coreInterrupt (boolean stop);
-  public static native boolean coreWait (int duration);
+    String[] names = new String[] {
+      "EXTERNAL_STORAGE",
+      "SECONDARY_STORAGE"
+    };
 
-  public static native boolean changeLogLevel (String level);
-  public static native boolean changeLogCategories (String categories);
+    for (String name : names) {
+      String value = System.getenv(name);
 
-  public static native boolean changeTextTable (String name);
-  public static native boolean changeAttributesTable (String name);
-  public static native boolean changeContractionTable (String name);
-  public static native boolean changeKeyboardTable (String name);
+      if (value == null) continue;
+      if (value.isEmpty()) continue;
 
-  public static native boolean restartBrailleDriver ();
-  public static native boolean changeBrailleDriver (String driver);
-  public static native boolean changeBrailleParameters (String parameters);
-  public static native boolean changeBrailleDevice (String device);
+      if (sb.length() > 0) sb.append(':');
+      sb.append(value);
+    }
 
-  public static native boolean restartSpeechDriver ();
-  public static native boolean changeSpeechDriver (String driver);
-  public static native boolean changeSpeechParameters (String parameters);
+    setEnvironmentVariable("XDG_CONFIG_DIRS", sb.toString());
+  }
 
-  public static native boolean restartScreenDriver ();
-  public static native boolean changeScreenDriver (String driver);
-  public static native boolean changeScreenParameters (String parameters);
+  static {
+    System.loadLibrary("brltty_core");
+    System.loadLibrary("brltty_jni");
+    setOverrideDirectories();
+  }
 
-  public static native void showMessage (String text);
-  public static native boolean setEnvironmentVariable (String name, String value);
+  public native static int coreConstruct (String[] arguments, ClassLoader classLoader);
+  public native static boolean coreDestruct ();
+
+  public native static boolean coreEnableInterrupt ();
+  public native static boolean coreDisableInterrupt ();
+
+  public native static boolean coreInterrupt (boolean stop);
+  public native static boolean coreWait (int duration);
+
+  public native static boolean changeLogLevel (String level);
+  public native static boolean changeLogCategories (String categories);
+
+  public native static boolean changeTextTable (String name);
+  public native static boolean changeAttributesTable (String name);
+  public native static boolean changeContractionTable (String name);
+  public native static boolean changeKeyboardTable (String name);
+
+  public native static boolean restartBrailleDriver ();
+  public native static boolean changeBrailleDriver (String driver);
+  public native static boolean changeBrailleParameters (String parameters);
+  public native static boolean changeBrailleDevice (String device);
+
+  public native static boolean restartSpeechDriver ();
+  public native static boolean changeSpeechDriver (String driver);
+  public native static boolean changeSpeechParameters (String parameters);
+
+  public native static boolean restartScreenDriver ();
+  public native static boolean changeScreenDriver (String driver);
+  public native static boolean changeScreenParameters (String parameters);
+
+  public native static void showMessage (String text);
+  public native static boolean setEnvironmentVariable (String name, String value);
 
   public static boolean changeLogCategories (Set<String> categories) {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
 
     for (String category : categories) {
       if (sb.length() > 0) sb.append(',');
@@ -68,7 +98,8 @@ public class CoreWrapper {
     return changeLogCategories(sb.toString());
   }
 
-  private static final AbstractQueue<Runnable> runQueue = new LinkedBlockingDeque<Runnable>();
+  private static Thread coreThread = null;
+  private final static AbstractQueue<Runnable> runQueue = new LinkedBlockingDeque<Runnable>();
 
   public static void clearRunQueue () {
     runQueue.clear();
@@ -113,37 +144,5 @@ public class CoreWrapper {
 
   public static void main (String[] arguments) {
     System.exit(run(arguments, Integer.MAX_VALUE));
-  }
-
-  private static void setOverrideDirectories () {
-    String[] names = new String[] {
-      "EXTERNAL_STORAGE",
-      "SECONDARY_STORAGE"
-    };
-
-    StringBuilder sb = new StringBuilder();
-    boolean first = true;
-
-    for (String name : names) {
-      String value = System.getenv(name);
-
-      if ((value != null) && (!value.isEmpty())) {
-        if (first) {
-          first = false;
-        } else {
-          sb.append(':');
-        }
-
-        sb.append(value);
-      }
-    }
-
-    setEnvironmentVariable("XDG_CONFIG_DIRS", sb.toString());
-  }
-
-  static {
-    System.loadLibrary("brltty_core");
-    System.loadLibrary("brltty_jni");
-    setOverrideDirectories();
   }
 }
