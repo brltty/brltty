@@ -241,7 +241,7 @@ public class InputService extends InputMethodService {
   private static void reportInputProblem (int message) {
     Context context = ApplicationContext.get();
     Log.w(LOG_TAG, context.getResources().getString(message));
-    CoreWrapper.showMessage(context.getString(message));
+    Message.show(Message.Type.WARNING, context.getString(message));
   }
 
   public static InputConnection getInputConnection () {

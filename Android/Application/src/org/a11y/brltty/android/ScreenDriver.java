@@ -98,27 +98,12 @@ public abstract class ScreenDriver {
     return toText(event.getText());
   }
 
-  private static void showMessage (String text) {
-    if (text == null) return;
-    text = text.replace('\n', ' ').trim();
-    if (text.isEmpty()) return;
-    final String message = text;
-
-    CoreWrapper.runOnCoreThread(
-      new Runnable() {
-        @Override
-        public void run () {
-          CoreWrapper.showMessage(message);
-        }
-      }
-    );
-  }
-
-  private static void showMessage (AccessibilityEvent event) {
-    showMessage(toText(event));
+  private static void showEventText (Message.Type type, AccessibilityEvent event) {
+    Message.show(type, toText(event));
   }
 
   private static void showNotification (AccessibilityEvent event) {
+    Message.Type type;
     String text = null;
     Notification notification = (Notification)event.getParcelableData();
 
@@ -126,13 +111,16 @@ public abstract class ScreenDriver {
       if (!ApplicationSettings.SHOW_NOTIFICATIONS) return;
       if (!ApplicationUtilities.haveJellyBean) return;
       if (notification.priority < Notification.PRIORITY_DEFAULT) return;
+
+      type = Message.Type.NOTIFICATION;
       text = toText(notification);
-    } else if (!ApplicationSettings.SHOW_TOASTS) {
-      return;
+    } else {
+      if (!ApplicationSettings.SHOW_TOASTS) return;
+      type = Message.Type.TOAST;
     }
 
     if (text == null) text = toText(event);
-    showMessage(text);
+    Message.show(type, text);
   }
 
   private static void logUnhandledEvent (AccessibilityEvent event, AccessibilityNodeInfo node) {
@@ -257,7 +245,7 @@ public abstract class ScreenDriver {
           break;
 
         case AccessibilityEvent.TYPE_ANNOUNCEMENT:
-          if (ApplicationSettings.SHOW_ANNOUNCEMENTS) showMessage(event);
+          if (ApplicationSettings.SHOW_ANNOUNCEMENTS) showEventText(Message.Type.ANNOUNCEMENT, event);
           break;
 
         case AccessibilityEvent.TYPE_WINDOWS_CHANGED:
@@ -272,8 +260,9 @@ public abstract class ScreenDriver {
         case AccessibilityEvent.TYPE_GESTURE_DETECTION_END:
         case AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START:
         case AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END:
-        case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
         case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
+        case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
+        case AccessibilityEvent.TYPE_VIEW_FOCUSED:
         case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED:
         case AccessibilityEvent.TYPE_VIEW_CLICKED:
           break;
