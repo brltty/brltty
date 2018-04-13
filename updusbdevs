@@ -339,6 +339,25 @@ proc makeLines_android {vendor product drivers descriptions exclude} {
    return $lines
 }
 
+proc makeComment_c {comment} {
+   return "// $comment"
+}
+
+proc makeLines_c {vendor product drivers descriptions exclude} {
+   set lines [list]
+   set codes [list]
+
+   foreach driver $drivers {
+      lappend codes "\"$driver\""
+   }
+
+   lappend lines [format "\{ .vendor=0X%04X, .product=0X%04X," $vendor $product]
+   lappend lines "  .drivers=(const char *const \[\])\{[join $codes ", "]\}"
+   lappend lines "\},"
+
+   return $lines
+}
+
 proc makeComment_hotplug {comment} {
    return "# $comment"
 }
@@ -659,6 +678,7 @@ processProgramArguments optionValues $optionDefinitions positionalArguments "\[s
 
 if {[llength $positionalArguments] == 0} {
    lappend positionalArguments "android:[file join $sourceDirectory Android Application res xml usb_devices.xml]"
+   lappend positionalArguments "c:[file join $sourceDirectory Programs usb_devices.c]"
    lappend positionalArguments "hotplug:[file join $sourceDirectory Autostart Hotplug brltty.usermap]"
    lappend positionalArguments "metainfo:[file join $sourceDirectory Autostart AppStream org.a11y.brltty.metainfo.xml]"
    lappend positionalArguments "udev:[file join $sourceDirectory Autostart Udev rules]"
