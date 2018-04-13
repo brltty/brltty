@@ -257,14 +257,14 @@ public class RenderedScreen {
       }
     }
 
-    if (!hasText) {
-      if (sb.length() > 0) {
-        String description = ScreenUtilities.getDescription(node);
+    if (sb.length() > 0) {
+      String description = ScreenUtilities.getDescription(node);
 
-        if (description != null) {
-          sb.append(' ');
-          sb.append(description);
-        }
+      if (description != null) {
+        sb.append(' ');
+        sb.append('[');
+        sb.append(description);
+        sb.append(']');
       }
     }
 
