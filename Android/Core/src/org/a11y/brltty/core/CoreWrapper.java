@@ -111,8 +111,13 @@ public abstract class CoreWrapper {
   }
 
   public static boolean runOnCoreThread (Runnable runnable) {
-    if (!runQueue.offer(runnable)) return false;
-    coreInterrupt(false);
+    if (Thread.currentThread() == coreThread) {
+      runnable.run();
+    } else {
+      if (!runQueue.offer(runnable)) return false;
+      coreInterrupt(false);
+    }
+
     return true;
   }
 
@@ -122,24 +127,30 @@ public abstract class CoreWrapper {
 
   public static int run (String[] arguments, int waitDuration) {
     clearRunQueue();
+    coreThread = Thread.currentThread();
 
-    int exitStatus = coreConstruct(arguments, CoreWrapper.class.getClassLoader());
-    if (exitStatus == ProgramExitStatus.SUCCESS.value) {
-      boolean interruptEnabled = coreEnableInterrupt();
+    try {
+      int exitStatus = coreConstruct(arguments, CoreWrapper.class.getClassLoader());
 
-      while (coreWait(waitDuration)) {
-        processRunQueue();
+      if (exitStatus == ProgramExitStatus.SUCCESS.value) {
+        boolean interruptEnabled = coreEnableInterrupt();
+
+        while (coreWait(waitDuration)) {
+          processRunQueue();
+        }
+
+        if (interruptEnabled) {
+          coreDisableInterrupt();
+        }
+      } else if (exitStatus == ProgramExitStatus.FORCE.value) {
+        exitStatus = ProgramExitStatus.SUCCESS.value;
       }
 
-      if (interruptEnabled) {
-        coreDisableInterrupt();
-      }
-    } else if (exitStatus == ProgramExitStatus.FORCE.value) {
-      exitStatus = ProgramExitStatus.SUCCESS.value;
+      coreDestruct();
+      return exitStatus;
+    } finally {
+      coreThread = null;
     }
-
-    coreDestruct();
-    return exitStatus;
   }
 
   public static void main (String[] arguments) {
