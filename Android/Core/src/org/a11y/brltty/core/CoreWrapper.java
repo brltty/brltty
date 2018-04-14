@@ -27,31 +27,9 @@ public abstract class CoreWrapper {
   private CoreWrapper () {
   }
 
-  private static void setOverrideDirectories () {
-    StringBuilder sb = new StringBuilder();
-
-    String[] names = new String[] {
-      "EXTERNAL_STORAGE",
-      "SECONDARY_STORAGE"
-    };
-
-    for (String name : names) {
-      String value = System.getenv(name);
-
-      if (value == null) continue;
-      if (value.isEmpty()) continue;
-
-      if (sb.length() > 0) sb.append(':');
-      sb.append(value);
-    }
-
-    setEnvironmentVariable("XDG_CONFIG_DIRS", sb.toString());
-  }
-
   static {
     System.loadLibrary("brltty_core");
     System.loadLibrary("brltty_jni");
-    setOverrideDirectories();
   }
 
   public native static int coreConstruct (String[] arguments, ClassLoader classLoader);

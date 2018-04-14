@@ -266,9 +266,31 @@ public class CoreThread extends Thread {
     ApplicationSettings.LOG_UNHANDLED_EVENTS = getBooleanSetting(R.string.PREF_KEY_LOG_UNHANDLED_EVENTS);
   }
 
+  private static void setOverrideDirectories () {
+    StringBuilder sb = new StringBuilder();
+
+    String[] names = new String[] {
+      "EXTERNAL_STORAGE",
+      "SECONDARY_STORAGE"
+    };
+
+    for (String name : names) {
+      String value = System.getenv(name);
+
+      if (value == null) continue;
+      if (value.isEmpty()) continue;
+
+      if (sb.length() > 0) sb.append(':');
+      sb.append(value);
+    }
+
+    CoreWrapper.setEnvironmentVariable("XDG_CONFIG_DIRS", sb.toString());
+  }
+
   @Override
   public void run () {
     restoreSettings();
+    setOverrideDirectories();
     updateDataFiles();
 
     BrailleNotification.create();
