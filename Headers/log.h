@@ -113,7 +113,10 @@ extern void vlogMessage (int level, const char *format, va_list *arguments);
 extern void logBytes (int level, const char *label, const void *data, size_t length, ...) PRINTF(2, 5);
 extern void logSymbol (int level, void *address, const char *format, ...) PRINTF(3, 4);
 
+extern void logActionProblem (int level, int error, const char *action);
 extern void logActionError (int error, const char *action);
+
+extern void logSystemProblem (int level, const char *action);
 extern void logSystemError (const char *action);
 extern void logMallocError (void);
 

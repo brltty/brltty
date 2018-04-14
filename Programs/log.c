@@ -565,13 +565,23 @@ logSymbol (int level, void *address, const char *format, ...) {
 }
 
 void
+logActionProblem (int level, int error, const char *action) {
+  logMessage(level, "%s error %d: %s", action, error, strerror(error));
+}
+
+void
 logActionError (int error, const char *action) {
-  logMessage(LOG_ERR, "%s error %d: %s.", action, error, strerror(error));
+  logActionProblem(LOG_ERR, error, action);
+}
+
+void
+logSystemProblem (int level, const char *action) {
+  logActionProblem(level, errno, action);
 }
 
 void
 logSystemError (const char *action) {
-  logActionError(errno, action);
+  logSystemProblem(LOG_ERR, action);
 }
 
 void

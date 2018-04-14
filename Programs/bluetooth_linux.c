@@ -82,8 +82,8 @@ bthNewConnectionExtension (uint64_t bda) {
     bcx->localAddress.rc_family = AF_BLUETOOTH;
     bcx->localAddress.rc_channel = 0;
     bacpy(&bcx->localAddress.rc_bdaddr, BDADDR_ANY); /* Any HCI. No support for explicit
-                                               * interface specification yet.
-                                                 */
+                                                      * interface specification yet.
+                                                      */
 
     bcx->remoteAddress.rc_family = AF_BLUETOOTH;
     bcx->remoteAddress.rc_channel = 0;
@@ -113,6 +113,18 @@ bthReleaseConnectionExtension (BluetoothConnectionExtension *bcx) {
   free(bcx);
 }
 
+static int
+bthGetConnectLogLevel (int error) {
+  switch (error) {
+    case EHOSTUNREACH:
+    case EHOSTDOWN:
+      return LOG_CATEGORY(BLUETOOTH_IO);
+
+    default:
+      return LOG_ERR;
+  }
+}
+
 int
 bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout) {
   bcx->remoteAddress.rc_channel = channel;
@@ -129,13 +141,8 @@ bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout)
                                       (struct sockaddr *)&bcx->remoteAddress,
                                       sizeof(bcx->remoteAddress));
 
-        if (connectResult != -1) {
-          return 1;
-        } else if ((errno != EHOSTDOWN) && (errno != EHOSTUNREACH)) {
-          logSystemError("RFCOMM connect");
-        } else {
-          logMessage(LOG_CATEGORY(BLUETOOTH_IO), "connect error: %s", strerror(errno));
-        }
+        if (connectResult != -1) return 1;
+        logSystemProblem(bthGetConnectLogLevel(errno), "RFCOMM connect");
       }
     } else {
       logSystemError("RFCOMM bind");
@@ -212,11 +219,13 @@ bthNewL2capConnection (const bdaddr_t *address, int timeout) {
         .l2_psm = htobs(SDP_PSM)
       };
 
-      if (connectSocket(socketDescriptor, (struct sockaddr *)&socketAddress, sizeof(socketAddress), timeout) != -1) {
-        return socketDescriptor;
-      } else {
-        logSystemError("L2CAP connect");
-      }
+      int connectResult = connectSocket(socketDescriptor,
+                                        (struct sockaddr *)&socketAddress,
+                                        sizeof(socketAddress),
+                                        timeout);
+
+      if (connectResult != -1) return socketDescriptor;
+      logSystemProblem(bthGetConnectLogLevel(errno), "L2CAP connect");
     }
 
     {
