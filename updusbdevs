@@ -345,8 +345,12 @@ proc makeComment_c {comment} {
 
 proc makeLines_c {vendor product drivers descriptions exclude} {
    set lines [list]
-   set codes [list]
 
+   foreach description $descriptions {
+      lappend lines [makeComment_c $description]
+   }
+
+   set codes [list]
    foreach driver $drivers {
       lappend codes "\"$driver\""
    }
