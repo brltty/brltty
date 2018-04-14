@@ -37,7 +37,7 @@ const BluetoothNameEntry bluetoothNameTable[] = {
   BLUETOOTH_NAME_ENTRY("ALVA BC", "al"),
 
   // HumanWare: Braille Note Apex
-  BLUETOOTH_NAME_ENTRY("Apex", "bn"),
+//BLUETOOTH_NAME_ENTRY("Apex", "bn"),
 
   // HandyTech: Basic Braille
   BLUETOOTH_NAME_ENTRY("Basic Braille BB", "ht"),
