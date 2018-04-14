@@ -20,198 +20,124 @@
 
 #include "bluetooth_internal.h"
 
-#define BLUETOOTH_NAME_DRIVERS(name, ...) static const char *const bluetoothNameDrivers_##name[] = {__VA_ARGS__, NULL}
-BLUETOOTH_NAME_DRIVERS(Actilino, "ht");
-BLUETOOTH_NAME_DRIVERS(ActiveBraille, "ht");
-BLUETOOTH_NAME_DRIVERS(ActiveStar, "ht");
-BLUETOOTH_NAME_DRIVERS(AlvaBC, "al");
-BLUETOOTH_NAME_DRIVERS(Apex, "bn");
-BLUETOOTH_NAME_DRIVERS(BasicBraille, "ht");
-BLUETOOTH_NAME_DRIVERS(BaumConny, "bm");
-BLUETOOTH_NAME_DRIVERS(BaumPocketVario, "bm");
-BLUETOOTH_NAME_DRIVERS(BaumSuperVario, "bm");
-BLUETOOTH_NAME_DRIVERS(BaumSVario, "bm");
-BLUETOOTH_NAME_DRIVERS(BrailleConnect, "bm");
-BLUETOOTH_NAME_DRIVERS(BrailleEdge, "hm");
-BLUETOOTH_NAME_DRIVERS(BrailleMe, "ic");
-BLUETOOTH_NAME_DRIVERS(BrailleMemoPocket, "mm");
-BLUETOOTH_NAME_DRIVERS(BrailleMemoSmart, "mm");
-BLUETOOTH_NAME_DRIVERS(BrailleMemo32, "mm");
-BLUETOOTH_NAME_DRIVERS(BrailleNoteTouch, "hw");
-BLUETOOTH_NAME_DRIVERS(BrailleSense, "hm");
-BLUETOOTH_NAME_DRIVERS(BrailleStar, "ht");
-BLUETOOTH_NAME_DRIVERS(Braillex, "pm");
-BLUETOOTH_NAME_DRIVERS(BrailliantBI, "hw");
-BLUETOOTH_NAME_DRIVERS(Brailliant80, "hw");
-BLUETOOTH_NAME_DRIVERS(Braillino, "ht");
-BLUETOOTH_NAME_DRIVERS(B2G, "bm");
-BLUETOOTH_NAME_DRIVERS(Conny, "bm");
-BLUETOOTH_NAME_DRIVERS(EL12, "al", "vo");
-BLUETOOTH_NAME_DRIVERS(Eurobraille, "eu");
-BLUETOOTH_NAME_DRIVERS(Focus, "fs");
-BLUETOOTH_NAME_DRIVERS(HWGBrailliant, "bm");
-BLUETOOTH_NAME_DRIVERS(MB248, "md");
-BLUETOOTH_NAME_DRIVERS(OrbitReader, "bm");
-BLUETOOTH_NAME_DRIVERS(Pronto, "bm");
-BLUETOOTH_NAME_DRIVERS(Refreshabraille, "bm");
-BLUETOOTH_NAME_DRIVERS(SmartBeetle, "hm");
-BLUETOOTH_NAME_DRIVERS(SuperVario, "bm");
-BLUETOOTH_NAME_DRIVERS(TSM, "sk");
-BLUETOOTH_NAME_DRIVERS(VarioConnect, "bm");
-BLUETOOTH_NAME_DRIVERS(VarioUltra, "bm");
+#define BLUETOOTH_NAME_ENTRY(name,...) \
+  {.namePrefix=name, .driverCodes=(const char *const []){__VA_ARGS__, NULL}}
 
 const BluetoothNameEntry bluetoothNameTable[] = {
-  { .namePrefix = "Actilino ALO",
-    .driverCodes = bluetoothNameDrivers_Actilino
-  },
+  // HandyTech: Actilino
+  BLUETOOTH_NAME_ENTRY("Actilino ALO", "ht"),
 
-  { .namePrefix = "Active Braille AB",
-    .driverCodes = bluetoothNameDrivers_ActiveBraille
-  },
+  // HandyTech: Active Braille
+  BLUETOOTH_NAME_ENTRY("Active Braille AB", "ht"),
 
-  { .namePrefix = "Active Star AS",
-    .driverCodes = bluetoothNameDrivers_ActiveStar
-  },
+  // HandyTech: Active Star
+  BLUETOOTH_NAME_ENTRY("Active Star AS", "ht"),
 
-  { .namePrefix = "ALVA BC",
-    .driverCodes = bluetoothNameDrivers_AlvaBC
-  },
+  // Alva: Basic Controller (6nn)
+  BLUETOOTH_NAME_ENTRY("ALVA BC", "al"),
 
-  { .namePrefix = "Apex",
-    .driverCodes = bluetoothNameDrivers_Apex
-  },
+  // HumanWare: Braille Note Apex
+  BLUETOOTH_NAME_ENTRY("Apex", "bn"),
 
-  { .namePrefix = "Basic Braille BB",
-    .driverCodes = bluetoothNameDrivers_BasicBraille
-  },
+  // HandyTech: Basic Braille
+  BLUETOOTH_NAME_ENTRY("Basic Braille BB", "ht"),
 
-  { .namePrefix = "BAUM Conny",
-    .driverCodes = bluetoothNameDrivers_BaumConny
-  },
+  // Baum: Conny
+  BLUETOOTH_NAME_ENTRY("BAUM Conny", "bm"),
 
-  { .namePrefix = "Baum PocketVario",
-    .driverCodes = bluetoothNameDrivers_BaumPocketVario
-  },
+  // Baum: Pocket Vario
+  BLUETOOTH_NAME_ENTRY("Baum PocketVario", "bm"),
 
-  { .namePrefix = "Baum SuperVario",
-    .driverCodes = bluetoothNameDrivers_BaumSuperVario
-  },
+  // Baum: Super Vario
+  BLUETOOTH_NAME_ENTRY("Baum SuperVario", "bm"),
 
-  { .namePrefix = "Baum SVario",
-    .driverCodes = bluetoothNameDrivers_BaumSVario
-  },
+  // Baum: Super Vario
+  BLUETOOTH_NAME_ENTRY("Baum SVario", "bm"),
 
-  { .namePrefix = "BrailleConnect",
-    .driverCodes = bluetoothNameDrivers_BrailleConnect
-  },
+  // Baum: Braille Connect
+  BLUETOOTH_NAME_ENTRY("BrailleConnect", "bm"),
 
-  { .namePrefix = "BrailleEDGE",
-    .driverCodes = bluetoothNameDrivers_BrailleEdge
-  },
+  // HIMS: Braille Edge
+  BLUETOOTH_NAME_ENTRY("BrailleEDGE", "hm"),
 
-  { .namePrefix = "BrailleMe",
-    .driverCodes = bluetoothNameDrivers_BrailleMe
-  },
+  // Inceptor: Braille Me
+  BLUETOOTH_NAME_ENTRY("BrailleMe", "ic"),
 
-  { .namePrefix = "BMpk",
-    .driverCodes = bluetoothNameDrivers_BrailleMemoPocket
-  },
+  // KGS: Braille Memo Pocket
+  BLUETOOTH_NAME_ENTRY("BMpk", "mm"),
 
-  { .namePrefix = "BMsmart",
-    .driverCodes = bluetoothNameDrivers_BrailleMemoSmart
-  },
+  // KGS: Braille Memo Smart
+  BLUETOOTH_NAME_ENTRY("BMsmart", "mm"),
 
-  { .namePrefix = "BM32",
-    .driverCodes = bluetoothNameDrivers_BrailleMemo32
-  },
+  // KGS: Braille Memo 32
+  BLUETOOTH_NAME_ENTRY("BM32", "mm"),
 
-  { .namePrefix = "BrailleNote Touch",
-    .driverCodes = bluetoothNameDrivers_BrailleNoteTouch
-  },
+  // HumanWare: Braille Note Touch
+  BLUETOOTH_NAME_ENTRY("BrailleNote Touch", "hw"),
 
-  { .namePrefix = "BrailleSense",
-    .driverCodes = bluetoothNameDrivers_BrailleSense
-  },
+  // HIMS: Braille Sense
+  BLUETOOTH_NAME_ENTRY("BrailleSense", "hm"),
 
-  { .namePrefix = "Braille Star",
-    .driverCodes = bluetoothNameDrivers_BrailleStar
-  },
+  // HandyTech: Braille Star
+  BLUETOOTH_NAME_ENTRY("Braille Star", "ht"),
 
-  { .namePrefix = "Braillex",
-    .driverCodes = bluetoothNameDrivers_Braillex
-  },
+  // Papenmeier
+  BLUETOOTH_NAME_ENTRY("Braillex", "pm"),
 
-  { .namePrefix = "Brailliant BI",
-    .driverCodes = bluetoothNameDrivers_BrailliantBI
-  },
+  // HumanWare: Brailliant BI
+  BLUETOOTH_NAME_ENTRY("Brailliant BI", "hw"),
 
-  { .namePrefix = "Brailliant 80",
-    .driverCodes = bluetoothNameDrivers_Brailliant80
-  },
+  // HumanWare: Brailliant B 80
+  BLUETOOTH_NAME_ENTRY("Brailliant 80", "hw"),
 
-  { .namePrefix = "Braillino BL",
-    .driverCodes = bluetoothNameDrivers_Braillino
-  },
+  // HandyTech: Braillino
+  BLUETOOTH_NAME_ENTRY("Braillino BL", "ht"),
 
-  { .namePrefix = "B2G",
-    .driverCodes = bluetoothNameDrivers_B2G
-  },
+  // National Braille Press: B2G
+  BLUETOOTH_NAME_ENTRY("B2G", "bm"),
 
-  { .namePrefix = "Conny",
-    .driverCodes = bluetoothNameDrivers_Conny
-  },
+  // Baum: Conny
+  BLUETOOTH_NAME_ENTRY("Conny", "bm"),
 
-  { .namePrefix = "EL12-",
-    .driverCodes = bluetoothNameDrivers_EL12
-  },
+  // Alva: EL12
+  // Harpo: Braille Pen
+  BLUETOOTH_NAME_ENTRY("EL12-", "al", "vo"),
 
-  { .namePrefix = "Esys-",
-    .driverCodes = bluetoothNameDrivers_Eurobraille
-  },
+  // EuroBraille
+  BLUETOOTH_NAME_ENTRY("Esys-", "eu"),
 
-  { .namePrefix = "Focus",
-    .driverCodes = bluetoothNameDrivers_Focus
-  },
+  // Freedom Scientific: Focus
+  BLUETOOTH_NAME_ENTRY("Focus", "fs"),
 
-  { .namePrefix = "HWG Brailliant",
-    .driverCodes = bluetoothNameDrivers_HWGBrailliant
-  },
+  // HumanWare: Brailliant
+  BLUETOOTH_NAME_ENTRY("HWG Brailliant", "bm"),
 
-  { .namePrefix = "MB248",
-    .driverCodes = bluetoothNameDrivers_MB248
-  },
+  // MDV
+  BLUETOOTH_NAME_ENTRY("MB248", "md"),
 
-  { .namePrefix = "Orbit Reader",
-    .driverCodes = bluetoothNameDrivers_OrbitReader
-  },
+  // American Printing House: Orbit Reader
+  BLUETOOTH_NAME_ENTRY("Orbit Reader", "bm"),
 
-  { .namePrefix = "Pronto!",
-    .driverCodes = bluetoothNameDrivers_Pronto
-  },
+  // Baum: Pronto!
+  BLUETOOTH_NAME_ENTRY("Pronto!", "bm"),
 
-  { .namePrefix = "Refreshabraille",
-    .driverCodes = bluetoothNameDrivers_Refreshabraille
-  },
+  // American Printing House: Refreshabraille
+  BLUETOOTH_NAME_ENTRY("Refreshabraille", "bm"),
 
-  { .namePrefix = "SmartBeetle",
-    .driverCodes = bluetoothNameDrivers_SmartBeetle
-  },
+  // HIMS: Smart Beetle
+  BLUETOOTH_NAME_ENTRY("SmartBeetle", "hm"),
 
-  { .namePrefix = "SuperVario",
-    .driverCodes = bluetoothNameDrivers_SuperVario
-  },
+  // Baum: Super Vario
+  BLUETOOTH_NAME_ENTRY("SuperVario", "bm"),
 
-  { .namePrefix = "TSM",
-    .driverCodes = bluetoothNameDrivers_TSM
-  },
+  // Seika: Note Taker
+  BLUETOOTH_NAME_ENTRY("TSM", "sk"),
 
-  { .namePrefix = "VarioConnect",
-    .driverCodes = bluetoothNameDrivers_VarioConnect
-  },
+  // Baum: Vario Connect
+  BLUETOOTH_NAME_ENTRY("VarioConnect", "bm"),
 
-  { .namePrefix = "VarioUltra",
-    .driverCodes = bluetoothNameDrivers_VarioUltra
-  },
+  // Baum: Vario Ultra
+  BLUETOOTH_NAME_ENTRY("VarioUltra", "bm"),
 
   { .namePrefix = NULL }
 };
