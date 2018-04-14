@@ -65,6 +65,9 @@ getSocketOption (
 ) {
   return getsockopt(socketDescriptor, level, option, value, length);
 }
+
+extern int setSocketLingerTime (SocketDescriptor socketDescriptor, int seconds);
+extern int setSocketNoLinger (SocketDescriptor socketDescriptor);
 #endif /* GOT_SOCKETS */
 
 extern int changeOpenFlags (FileDescriptor fileDescriptor, int flagsToClear, int flagsToSet);

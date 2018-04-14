@@ -431,6 +431,23 @@ connectSocket (
   return result;
 }
 
+int
+setSocketLingerTime (SocketDescriptor socketDescriptor, int seconds) {
+  struct linger linger = {
+    .l_onoff = 1,
+    .l_linger = seconds
+  };
+
+  if (setsockopt(socketDescriptor, SOL_SOCKET, SO_LINGER, &linger, sizeof(linger)) != -1) return 1;
+  logSystemError("setsockopt[SO_LINGER]");
+  return 0;
+}
+
+int
+setSocketNoLinger (SocketDescriptor socketDescriptor) {
+  return setSocketLingerTime(socketDescriptor, 0);
+}
+
 #else /* have sockets */
 #warning sockets not supported on this platform
 #endif /* GOT_SOCKETS */

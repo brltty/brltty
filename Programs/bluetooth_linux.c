@@ -148,6 +148,7 @@ bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout)
       logSystemError("RFCOMM bind");
     }
 
+    setSocketNoLinger(bcx->socketDescriptor);
     close(bcx->socketDescriptor);
     bcx->socketDescriptor = INVALID_SOCKET_DESCRIPTOR;
   } else {
@@ -228,17 +229,7 @@ bthNewL2capConnection (const bdaddr_t *address, int timeout) {
       logSystemProblem(bthGetConnectLogLevel(errno), "L2CAP connect");
     }
 
-    {
-      struct linger linger = {
-        .l_onoff = 1,
-        .l_linger = 0
-      };
-
-      if (setsockopt(socketDescriptor, SOL_SOCKET, SO_LINGER, &linger, sizeof(linger)) == -1) {
-        logSystemError("setsockopt[SO_LINGER]");
-      }
-    }
-
+    setSocketNoLinger(socketDescriptor);
     close(socketDescriptor);
   } else {
     logSystemError("L2CAP socket");
