@@ -19,10 +19,16 @@
 #include "prologue.h"
 
 typedef struct {
-  const char *const *drivers;
-  uint16_t vendor;
-  uint16_t product;
+  const char *const *driverCodes;
+  uint16_t vendorIdentifier;
+  uint16_t productIdentifier;
 } UsbDeviceEntry;
+
+#define USB_DEVICE_ENTRY(vendor,product,...) \
+  { .vendorIdentifier = vendor, \
+    .productIdentifier = product, \
+    .driverCodes = (const char *const []){__VA_ARGS__, NULL} \
+  }
 
 static const UsbDeviceEntry usbDeviceTable[] = {
 // BEGIN_USB_DEVICES
@@ -31,515 +37,313 @@ static const UsbDeviceEntry usbDeviceTable[] = {
 // Generic Identifier
 // Vendor: Future Technology Devices International, Ltd
 // Product: FT232 USB-Serial (UART) IC
-{ .vendor=0X0403, .product=0X6001,
-  .drivers=(const char *const []){"at", "ce", "hm", "ht", "md"}
-},
+USB_DEVICE_ENTRY(0X0403, 0X6001, "at", "ce", "hm", "ht", "md"),
 
 // Device: 0403:DE58
-{ .vendor=0X0403, .product=0XDE58,
-  .drivers=(const char *const []){"hd"}
-},
+USB_DEVICE_ENTRY(0X0403, 0XDE58, "hd"),
 
 // Device: 0403:DE59
-{ .vendor=0X0403, .product=0XDE59,
-  .drivers=(const char *const []){"hd"}
-},
+USB_DEVICE_ENTRY(0X0403, 0XDE59, "hd"),
 
 // Device: 0403:F208
-{ .vendor=0X0403, .product=0XF208,
-  .drivers=(const char *const []){"pm"}
-},
+USB_DEVICE_ENTRY(0X0403, 0XF208, "pm"),
 
 // Device: 0403:FE70
-{ .vendor=0X0403, .product=0XFE70,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0403, 0XFE70, "bm"),
 
 // Device: 0403:FE71
-{ .vendor=0X0403, .product=0XFE71,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0403, 0XFE71, "bm"),
 
 // Device: 0403:FE72
-{ .vendor=0X0403, .product=0XFE72,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0403, 0XFE72, "bm"),
 
 // Device: 0403:FE73
-{ .vendor=0X0403, .product=0XFE73,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0403, 0XFE73, "bm"),
 
 // Device: 0403:FE74
-{ .vendor=0X0403, .product=0XFE74,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0403, 0XFE74, "bm"),
 
 // Device: 0403:FE75
-{ .vendor=0X0403, .product=0XFE75,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0403, 0XFE75, "bm"),
 
 // Device: 0403:FE76
-{ .vendor=0X0403, .product=0XFE76,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0403, 0XFE76, "bm"),
 
 // Device: 0403:FE77
-{ .vendor=0X0403, .product=0XFE77,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0403, 0XFE77, "bm"),
 
 // Device: 0452:0100
-{ .vendor=0X0452, .product=0X0100,
-  .drivers=(const char *const []){"mt"}
-},
+USB_DEVICE_ENTRY(0X0452, 0X0100, "mt"),
 
 // Device: 045E:930A
-{ .vendor=0X045E, .product=0X930A,
-  .drivers=(const char *const []){"hm"}
-},
+USB_DEVICE_ENTRY(0X045E, 0X930A, "hm"),
 
 // Device: 045E:930B
-{ .vendor=0X045E, .product=0X930B,
-  .drivers=(const char *const []){"hm"}
-},
+USB_DEVICE_ENTRY(0X045E, 0X930B, "hm"),
 
 // Device: 0483:A1D3
-{ .vendor=0X0483, .product=0XA1D3,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0483, 0XA1D3, "bm"),
 
 // Device: 06B0:0001
-{ .vendor=0X06B0, .product=0X0001,
-  .drivers=(const char *const []){"al"}
-},
+USB_DEVICE_ENTRY(0X06B0, 0X0001, "al"),
 
 // Device: 0798:0001
-{ .vendor=0X0798, .product=0X0001,
-  .drivers=(const char *const []){"vo"}
-},
+USB_DEVICE_ENTRY(0X0798, 0X0001, "vo"),
 
 // Device: 0798:0600
-{ .vendor=0X0798, .product=0X0600,
-  .drivers=(const char *const []){"al"}
-},
+USB_DEVICE_ENTRY(0X0798, 0X0600, "al"),
 
 // Device: 0798:0624
-{ .vendor=0X0798, .product=0X0624,
-  .drivers=(const char *const []){"al"}
-},
+USB_DEVICE_ENTRY(0X0798, 0X0624, "al"),
 
 // Device: 0798:0640
-{ .vendor=0X0798, .product=0X0640,
-  .drivers=(const char *const []){"al"}
-},
+USB_DEVICE_ENTRY(0X0798, 0X0640, "al"),
 
 // Device: 0798:0680
-{ .vendor=0X0798, .product=0X0680,
-  .drivers=(const char *const []){"al"}
-},
+USB_DEVICE_ENTRY(0X0798, 0X0680, "al"),
 
 // Device: 0904:2000
-{ .vendor=0X0904, .product=0X2000,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X2000, "bm"),
 
 // Device: 0904:2001
-{ .vendor=0X0904, .product=0X2001,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X2001, "bm"),
 
 // Device: 0904:2002
-{ .vendor=0X0904, .product=0X2002,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X2002, "bm"),
 
 // Device: 0904:2007
-{ .vendor=0X0904, .product=0X2007,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X2007, "bm"),
 
 // Device: 0904:2008
-{ .vendor=0X0904, .product=0X2008,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X2008, "bm"),
 
 // Device: 0904:2009
-{ .vendor=0X0904, .product=0X2009,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X2009, "bm"),
 
 // Device: 0904:2010
-{ .vendor=0X0904, .product=0X2010,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X2010, "bm"),
 
 // Device: 0904:2011
-{ .vendor=0X0904, .product=0X2011,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X2011, "bm"),
 
 // Device: 0904:2014
-{ .vendor=0X0904, .product=0X2014,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X2014, "bm"),
 
 // Device: 0904:2015
-{ .vendor=0X0904, .product=0X2015,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X2015, "bm"),
 
 // Device: 0904:2016
-{ .vendor=0X0904, .product=0X2016,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X2016, "bm"),
 
 // Device: 0904:3000
-{ .vendor=0X0904, .product=0X3000,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X3000, "bm"),
 
 // Device: 0904:3001
-{ .vendor=0X0904, .product=0X3001,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X3001, "bm"),
 
 // Device: 0904:4004
-{ .vendor=0X0904, .product=0X4004,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X4004, "bm"),
 
 // Device: 0904:4005
-{ .vendor=0X0904, .product=0X4005,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X4005, "bm"),
 
 // Device: 0904:4007
-{ .vendor=0X0904, .product=0X4007,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X4007, "bm"),
 
 // Device: 0904:4008
-{ .vendor=0X0904, .product=0X4008,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X4008, "bm"),
 
 // Device: 0904:6001
-{ .vendor=0X0904, .product=0X6001,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X6001, "bm"),
 
 // Device: 0904:6002
-{ .vendor=0X0904, .product=0X6002,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X6002, "bm"),
 
 // Device: 0904:6003
-{ .vendor=0X0904, .product=0X6003,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X6003, "bm"),
 
 // Device: 0904:6004
-{ .vendor=0X0904, .product=0X6004,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X6004, "bm"),
 
 // Device: 0904:6005
-{ .vendor=0X0904, .product=0X6005,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X6005, "bm"),
 
 // Device: 0904:6006
-{ .vendor=0X0904, .product=0X6006,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X6006, "bm"),
 
 // Device: 0904:6007
-{ .vendor=0X0904, .product=0X6007,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X6007, "bm"),
 
 // Device: 0904:6008
-{ .vendor=0X0904, .product=0X6008,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X6008, "bm"),
 
 // Device: 0904:6009
-{ .vendor=0X0904, .product=0X6009,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X6009, "bm"),
 
 // Device: 0904:600A
-{ .vendor=0X0904, .product=0X600A,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X600A, "bm"),
 
 // Device: 0904:6011
-{ .vendor=0X0904, .product=0X6011,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X6011, "bm"),
 
 // Device: 0904:6012
-{ .vendor=0X0904, .product=0X6012,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X6012, "bm"),
 
 // Device: 0904:6013
-{ .vendor=0X0904, .product=0X6013,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X6013, "bm"),
 
 // Device: 0904:6101
-{ .vendor=0X0904, .product=0X6101,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X6101, "bm"),
 
 // Device: 0904:6102
-{ .vendor=0X0904, .product=0X6102,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X6102, "bm"),
 
 // Device: 0904:6103
-{ .vendor=0X0904, .product=0X6103,
-  .drivers=(const char *const []){"bm"}
-},
+USB_DEVICE_ENTRY(0X0904, 0X6103, "bm"),
 
 // Device: 0921:1200
-{ .vendor=0X0921, .product=0X1200,
-  .drivers=(const char *const []){"ht"}
-},
+USB_DEVICE_ENTRY(0X0921, 0X1200, "ht"),
 
 // Device: 0F4E:0100
-{ .vendor=0X0F4E, .product=0X0100,
-  .drivers=(const char *const []){"fs"}
-},
+USB_DEVICE_ENTRY(0X0F4E, 0X0100, "fs"),
 
 // Device: 0F4E:0111
-{ .vendor=0X0F4E, .product=0X0111,
-  .drivers=(const char *const []){"fs"}
-},
+USB_DEVICE_ENTRY(0X0F4E, 0X0111, "fs"),
 
 // Device: 0F4E:0112
-{ .vendor=0X0F4E, .product=0X0112,
-  .drivers=(const char *const []){"fs"}
-},
+USB_DEVICE_ENTRY(0X0F4E, 0X0112, "fs"),
 
 // Device: 0F4E:0114
-{ .vendor=0X0F4E, .product=0X0114,
-  .drivers=(const char *const []){"fs"}
-},
+USB_DEVICE_ENTRY(0X0F4E, 0X0114, "fs"),
 
 // Device: 10C4:EA60
 // Generic Identifier
 // Vendor: Cygnal Integrated Products, Inc.
 // Product: CP210x UART Bridge / myAVR mySmartUSB light
-{ .vendor=0X10C4, .product=0XEA60,
-  .drivers=(const char *const []){"mm", "sk"}
-},
+USB_DEVICE_ENTRY(0X10C4, 0XEA60, "mm", "sk"),
 
 // Device: 10C4:EA80
 // Generic Identifier
 // Vendor: Cygnal Integrated Products, Inc.
 // Product: CP210x UART Bridge
-{ .vendor=0X10C4, .product=0XEA80,
-  .drivers=(const char *const []){"sk"}
-},
+USB_DEVICE_ENTRY(0X10C4, 0XEA80, "sk"),
 
 // Device: 1148:0301
-{ .vendor=0X1148, .product=0X0301,
-  .drivers=(const char *const []){"mm"}
-},
+USB_DEVICE_ENTRY(0X1148, 0X0301, "mm"),
 
 // Device: 1209:ABC0
-{ .vendor=0X1209, .product=0XABC0,
-  .drivers=(const char *const []){"ic"}
-},
+USB_DEVICE_ENTRY(0X1209, 0XABC0, "ic"),
 
 // Device: 1C71:C004
-{ .vendor=0X1C71, .product=0XC004,
-  .drivers=(const char *const []){"bn"}
-},
+USB_DEVICE_ENTRY(0X1C71, 0XC004, "bn"),
 
 // Device: 1C71:C005
-{ .vendor=0X1C71, .product=0XC005,
-  .drivers=(const char *const []){"hw"}
-},
+USB_DEVICE_ENTRY(0X1C71, 0XC005, "hw"),
 
 // Device: 1C71:C006
-{ .vendor=0X1C71, .product=0XC006,
-  .drivers=(const char *const []){"hw"}
-},
+USB_DEVICE_ENTRY(0X1C71, 0XC006, "hw"),
 
 // Device: 1C71:C00A
-{ .vendor=0X1C71, .product=0XC00A,
-  .drivers=(const char *const []){"hw"}
-},
+USB_DEVICE_ENTRY(0X1C71, 0XC00A, "hw"),
 
 // Device: 1FE4:0003
-{ .vendor=0X1FE4, .product=0X0003,
-  .drivers=(const char *const []){"ht"}
-},
+USB_DEVICE_ENTRY(0X1FE4, 0X0003, "ht"),
 
 // Device: 1FE4:0044
-{ .vendor=0X1FE4, .product=0X0044,
-  .drivers=(const char *const []){"ht"}
-},
+USB_DEVICE_ENTRY(0X1FE4, 0X0044, "ht"),
 
 // Device: 1FE4:0054
-{ .vendor=0X1FE4, .product=0X0054,
-  .drivers=(const char *const []){"ht"}
-},
+USB_DEVICE_ENTRY(0X1FE4, 0X0054, "ht"),
 
 // Device: 1FE4:0055
-{ .vendor=0X1FE4, .product=0X0055,
-  .drivers=(const char *const []){"ht"}
-},
+USB_DEVICE_ENTRY(0X1FE4, 0X0055, "ht"),
 
 // Device: 1FE4:0061
-{ .vendor=0X1FE4, .product=0X0061,
-  .drivers=(const char *const []){"ht"}
-},
+USB_DEVICE_ENTRY(0X1FE4, 0X0061, "ht"),
 
 // Device: 1FE4:0064
-{ .vendor=0X1FE4, .product=0X0064,
-  .drivers=(const char *const []){"ht"}
-},
+USB_DEVICE_ENTRY(0X1FE4, 0X0064, "ht"),
 
 // Device: 1FE4:0074
-{ .vendor=0X1FE4, .product=0X0074,
-  .drivers=(const char *const []){"ht"}
-},
+USB_DEVICE_ENTRY(0X1FE4, 0X0074, "ht"),
 
 // Device: 1FE4:0081
-{ .vendor=0X1FE4, .product=0X0081,
-  .drivers=(const char *const []){"ht"}
-},
+USB_DEVICE_ENTRY(0X1FE4, 0X0081, "ht"),
 
 // Device: 1FE4:0082
-{ .vendor=0X1FE4, .product=0X0082,
-  .drivers=(const char *const []){"ht"}
-},
+USB_DEVICE_ENTRY(0X1FE4, 0X0082, "ht"),
 
 // Device: 1FE4:0083
-{ .vendor=0X1FE4, .product=0X0083,
-  .drivers=(const char *const []){"ht"}
-},
+USB_DEVICE_ENTRY(0X1FE4, 0X0083, "ht"),
 
 // Device: 1FE4:0084
-{ .vendor=0X1FE4, .product=0X0084,
-  .drivers=(const char *const []){"ht"}
-},
+USB_DEVICE_ENTRY(0X1FE4, 0X0084, "ht"),
 
 // Device: 1FE4:0086
-{ .vendor=0X1FE4, .product=0X0086,
-  .drivers=(const char *const []){"ht"}
-},
+USB_DEVICE_ENTRY(0X1FE4, 0X0086, "ht"),
 
 // Device: 1FE4:0087
-{ .vendor=0X1FE4, .product=0X0087,
-  .drivers=(const char *const []){"ht"}
-},
+USB_DEVICE_ENTRY(0X1FE4, 0X0087, "ht"),
 
 // Device: 1FE4:008A
-{ .vendor=0X1FE4, .product=0X008A,
-  .drivers=(const char *const []){"ht"}
-},
+USB_DEVICE_ENTRY(0X1FE4, 0X008A, "ht"),
 
 // Device: 1FE4:008B
-{ .vendor=0X1FE4, .product=0X008B,
-  .drivers=(const char *const []){"ht"}
-},
+USB_DEVICE_ENTRY(0X1FE4, 0X008B, "ht"),
 
 // Device: 4242:0001
-{ .vendor=0X4242, .product=0X0001,
-  .drivers=(const char *const []){"pg"}
-},
+USB_DEVICE_ENTRY(0X4242, 0X0001, "pg"),
 
 // Device: C251:1122
-{ .vendor=0XC251, .product=0X1122,
-  .drivers=(const char *const []){"eu"}
-},
+USB_DEVICE_ENTRY(0XC251, 0X1122, "eu"),
 
 // Device: C251:1123
-{ .vendor=0XC251, .product=0X1123,
-  .drivers=(const char *const []){"eu"}
-},
+USB_DEVICE_ENTRY(0XC251, 0X1123, "eu"),
 
 // Device: C251:1124
-{ .vendor=0XC251, .product=0X1124,
-  .drivers=(const char *const []){"eu"}
-},
+USB_DEVICE_ENTRY(0XC251, 0X1124, "eu"),
 
 // Device: C251:1125
-{ .vendor=0XC251, .product=0X1125,
-  .drivers=(const char *const []){"eu"}
-},
+USB_DEVICE_ENTRY(0XC251, 0X1125, "eu"),
 
 // Device: C251:1126
-{ .vendor=0XC251, .product=0X1126,
-  .drivers=(const char *const []){"eu"}
-},
+USB_DEVICE_ENTRY(0XC251, 0X1126, "eu"),
 
 // Device: C251:1127
-{ .vendor=0XC251, .product=0X1127,
-  .drivers=(const char *const []){"eu"}
-},
+USB_DEVICE_ENTRY(0XC251, 0X1127, "eu"),
 
 // Device: C251:1128
-{ .vendor=0XC251, .product=0X1128,
-  .drivers=(const char *const []){"eu"}
-},
+USB_DEVICE_ENTRY(0XC251, 0X1128, "eu"),
 
 // Device: C251:1129
-{ .vendor=0XC251, .product=0X1129,
-  .drivers=(const char *const []){"eu"}
-},
+USB_DEVICE_ENTRY(0XC251, 0X1129, "eu"),
 
 // Device: C251:112A
-{ .vendor=0XC251, .product=0X112A,
-  .drivers=(const char *const []){"eu"}
-},
+USB_DEVICE_ENTRY(0XC251, 0X112A, "eu"),
 
 // Device: C251:112B
-{ .vendor=0XC251, .product=0X112B,
-  .drivers=(const char *const []){"eu"}
-},
+USB_DEVICE_ENTRY(0XC251, 0X112B, "eu"),
 
 // Device: C251:112C
-{ .vendor=0XC251, .product=0X112C,
-  .drivers=(const char *const []){"eu"}
-},
+USB_DEVICE_ENTRY(0XC251, 0X112C, "eu"),
 
 // Device: C251:112D
-{ .vendor=0XC251, .product=0X112D,
-  .drivers=(const char *const []){"eu"}
-},
+USB_DEVICE_ENTRY(0XC251, 0X112D, "eu"),
 
 // Device: C251:112E
-{ .vendor=0XC251, .product=0X112E,
-  .drivers=(const char *const []){"eu"}
-},
+USB_DEVICE_ENTRY(0XC251, 0X112E, "eu"),
 
 // Device: C251:112F
-{ .vendor=0XC251, .product=0X112F,
-  .drivers=(const char *const []){"eu"}
-},
+USB_DEVICE_ENTRY(0XC251, 0X112F, "eu"),
 
 // Device: C251:1130
-{ .vendor=0XC251, .product=0X1130,
-  .drivers=(const char *const []){"eu"}
-},
+USB_DEVICE_ENTRY(0XC251, 0X1130, "eu"),
 
 // Device: C251:1131
-{ .vendor=0XC251, .product=0X1131,
-  .drivers=(const char *const []){"eu"}
-},
+USB_DEVICE_ENTRY(0XC251, 0X1131, "eu"),
 
 // Device: C251:1132
-{ .vendor=0XC251, .product=0X1132,
-  .drivers=(const char *const []){"eu"}
-},
+USB_DEVICE_ENTRY(0XC251, 0X1132, "eu"),
 
 // END_USB_DEVICES
 };

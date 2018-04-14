@@ -351,10 +351,7 @@ proc makeLines_c {vendor product drivers descriptions exclude} {
       lappend codes "\"$driver\""
    }
 
-   lappend lines [format "\{ .vendor=0X%04X, .product=0X%04X," $vendor $product]
-   lappend lines "  .drivers=(const char *const \[\])\{[join $codes ", "]\}"
-   lappend lines "\},"
-
+   lappend lines [format "USB_DEVICE_ENTRY(0X%04X, 0X%04X, [join $codes ", "])," $vendor $product]
    return $lines
 }
 
