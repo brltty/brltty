@@ -16,13 +16,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include "prologue.h"
-
-typedef struct {
-  const char *const *driverCodes;
-  uint16_t vendorIdentifier;
-  uint16_t productIdentifier;
-} UsbDeviceEntry;
+#include "usb_devices.h"
 
 #define USB_DEVICE_ENTRY(vendor,product,...) \
   { .vendorIdentifier = vendor, \
@@ -30,7 +24,7 @@ typedef struct {
     .driverCodes = (const char *const []){__VA_ARGS__, NULL} \
   }
 
-static const UsbDeviceEntry usbDeviceTable[] = {
+const UsbDeviceEntry usbDeviceTable[] = {
 // BEGIN_USB_DEVICES
 
 // Device: 0403:6001
@@ -458,5 +452,5 @@ USB_DEVICE_ENTRY(0XC251, 0X1132, "eu"),
 // END_USB_DEVICES
 };
 
-static const uint16_t usbDeviceCount = ARRAY_COUNT(usbDeviceTable);
+const uint16_t usbDeviceCount = ARRAY_COUNT(usbDeviceTable);
 

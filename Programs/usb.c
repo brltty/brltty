@@ -42,6 +42,7 @@
 #include "io_misc.h"
 #include "io_usb.h"
 #include "usb_internal.h"
+#include "usb_devices.h"
 #include "usb_serial.h"
 
 ssize_t
@@ -268,15 +269,17 @@ int
 usbStringMatches (const char *reference, const char *value) {
   int ok = 0;
 
-#ifdef HAVE_REGEX_H
+#ifdef REG_EXTENDED
   regex_t expression;
+
   if (regcomp(&expression, value, REG_EXTENDED|REG_NOSUB) == 0) {
     if (regexec(&expression, reference, 0, NULL, 0) == 0) {
       ok = 1;
     }
+
     regfree(&expression);
   }
-#endif /* HAVE_REGEX_H */
+#endif /* REG_EXTENDED */
 
   return ok;
 }
@@ -1637,6 +1640,42 @@ void
 usbCloseChannel (UsbChannel *channel) {
   usbCloseDevice(channel->device);
   free(channel);
+}
+
+static int
+usbCompareDeviceEntries (const void *element1, const void *element2) {
+  const UsbDeviceEntry *entry1 = element1;
+  const UsbDeviceEntry *entry2 = element2;
+
+  if (entry1->vendorIdentifier < entry2->vendorIdentifier) return -1;
+  if (entry1->vendorIdentifier > entry2->vendorIdentifier) return 1;
+
+  if (entry1->productIdentifier < entry2->productIdentifier) return -1;
+  if (entry1->productIdentifier > entry2->productIdentifier) return 1;
+
+  return 0;
+}
+
+static int
+usbSearchDeviceEntry (const void *target, const void *element) {
+  const UsbDeviceEntry *entry1 = target;
+  const UsbDeviceEntry *entry2 = element;
+  return usbCompareDeviceEntries(entry1, entry2);
+}
+
+const char *const *
+usbGetDriverCodes (uint16_t vendor, uint16_t product) {
+  const UsbDeviceEntry target = {
+    .vendorIdentifier = vendor,
+    .productIdentifier = product
+  };
+
+  const UsbDeviceEntry *entry = bsearch(&target, usbDeviceTable,
+                                        usbDeviceCount,
+                                        sizeof(usbDeviceTable[0]),
+                                        usbSearchDeviceEntry);
+
+  return entry? entry->driverCodes: NULL;
 }
 
 int
