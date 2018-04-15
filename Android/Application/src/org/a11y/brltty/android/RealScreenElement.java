@@ -31,16 +31,15 @@ public class RealScreenElement extends ScreenElement {
 
   private final AccessibilityNodeInfo accessibilityNode;
 
-  @Override
-  public Rect getVisualLocation () {
-    synchronized (this) {
-      if (visualLocation == null) {
-        visualLocation = new Rect();
-        accessibilityNode.getBoundsInScreen(visualLocation);
-      }
-    }
+  public RealScreenElement (String text, AccessibilityNodeInfo node) {
+    super(text);
+    accessibilityNode = AccessibilityNodeInfo.obtain(node);
 
-    return visualLocation;
+    {
+      Rect location = new Rect();
+      node.getBoundsInScreen(location);
+      setVisualLocation(location);
+    }
   }
 
   @Override
@@ -290,11 +289,5 @@ public class RealScreenElement extends ScreenElement {
     }
 
     return lines;
-  }
-
-  public RealScreenElement (String text, AccessibilityNodeInfo node) {
-    super(text);
-    accessibilityNode = AccessibilityNodeInfo.obtain(node);
-    if (isEditable()) TextField.get(accessibilityNode, true);
   }
 }

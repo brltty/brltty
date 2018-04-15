@@ -218,8 +218,8 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
       if (row < location.top) continue;
       if (row > location.bottom) continue;
 
-      if (column > location.right) continue;
-      if (column >= location.left) return element;
+      if (column < location.left) continue;
+      if (column <= location.right) return element;
 
       if (location.left > bestLeft) {
         bestLeft = location.left;
