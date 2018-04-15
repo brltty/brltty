@@ -119,7 +119,7 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
     }
   }
 
-  public final void sortByVisualLocation () {
+  private final void sortByVisualLocation () {
     if (size() < 2) return;
     AccessibilityNodeInfo node = get(0).getAccessibilityNode();
 
@@ -174,6 +174,37 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
       node.recycle();
       node = null;
     }
+  }
+
+  private ScreenElement firstElement = null;
+  private ScreenElement lastElement = null;
+
+  public final ScreenElement getFirstElement () {
+    return firstElement;
+  }
+
+  public final ScreenElement getLastElement () {
+    return lastElement;
+  }
+
+  private final void linkElements () {
+    int count = size();
+    if (count == 0) return;
+
+    firstElement = get(0);
+    lastElement = get(count-1);
+    ScreenElement previousElement = lastElement;
+
+    for (ScreenElement nextElement : this) {
+      nextElement.setPreviousElement(previousElement);
+      previousElement.setNextElement(nextElement);
+      previousElement = nextElement;
+    }
+  }
+
+  public final void finish () {
+    sortByVisualLocation();
+    linkElements();
   }
 
   private static boolean isContainer (Rect outer, int left, int top, int right, int bottom) {

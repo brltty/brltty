@@ -29,13 +29,42 @@ import android.graphics.Point;
 public class ScreenElement {
   private final String elementText;
 
+  public ScreenElement (String text) {
+    elementText = text;
+  }
+
+  public ScreenElement (int text) {
+    this(ApplicationUtilities.getResourceString(text));
+  }
+
+  public final String getElementText () {
+    return elementText;
+  }
+
+  private ScreenElement previousElement = null;
+  private ScreenElement nextElement = null;
+
+  public final ScreenElement getPreviousElement () {
+    return previousElement;
+  }
+
+  public final ScreenElement setPreviousElement (ScreenElement element) {
+    previousElement = element;
+    return this;
+  }
+
+  public final ScreenElement getNextElement () {
+    return nextElement;
+  }
+
+  public final ScreenElement setNextElement (ScreenElement element) {
+    nextElement = element;
+    return this;
+  }
+
   private String[] brailleText = null;
   protected Rect visualLocation = null;
   private Rect brailleLocation = null;
-
-  public String getElementText () {
-    return elementText;
-  }
 
   public final String[] getBrailleText () {
     synchronized (this) {
@@ -149,14 +178,6 @@ public class ScreenElement {
     }
 
     return lines.toArray(new String[lines.size()]);
-  }
-
-  public ScreenElement (String text) {
-    elementText = text;
-  }
-
-  public ScreenElement (int text) {
-    this(ApplicationUtilities.getResourceString(text));
   }
 
   public interface LocationGetter {

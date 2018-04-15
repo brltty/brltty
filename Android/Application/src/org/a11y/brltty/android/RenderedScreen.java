@@ -98,6 +98,48 @@ public class RenderedScreen {
     return null;
   }
 
+  private static interface NextElementGetter {
+    public ScreenElement getNextElement (ScreenElement element);
+  }
+
+  private final boolean moveFocus (
+    ScreenElement element, boolean inclusive, NextElementGetter getter
+  ) {
+    ScreenElement end = element;
+
+    while (true) {
+      if (inclusive) {
+        inclusive = false;
+      } else if ((element = getter.getNextElement(element)) == end) {
+        return false;
+      }
+
+      if (element.bringCursor()) return true;
+    }
+  }
+
+  private final boolean moveFocusForward (ScreenElement element, boolean inclusive) {
+    return moveFocus(element, inclusive,
+      new NextElementGetter() {
+        @Override
+        public ScreenElement getNextElement (ScreenElement element) {
+          return element.getNextElement();
+        }
+      }
+    );
+  }
+
+  private final boolean moveFocusBackward (ScreenElement element, boolean inclusive) {
+    return moveFocus(element, inclusive,
+      new NextElementGetter() {
+        @Override
+        public ScreenElement getNextElement (ScreenElement element) {
+          return element.getPreviousElement();
+        }
+      }
+    );
+  }
+
   public enum SearchDirection {
     FORWARD,
     BACKWARD,
@@ -108,68 +150,38 @@ public class RenderedScreen {
 
   public final boolean moveFocus (SearchDirection direction) {
     AccessibilityNodeInfo node = getCursorNode();
+    if (node == null) return false;
 
-    if (node != null) {
+    try {
       ScreenElement element = getScreenElement(node);
+      if (element == null) return false;
 
+      switch (direction) {
+        case FORWARD:
+          return moveFocusForward(element, false);
+
+        case BACKWARD:
+          return moveFocusBackward(element, false);
+
+        case FIRST: {
+          ScreenElement first = screenElements.getFirstElement();
+          if (element == first) return false;
+          return moveFocusForward(first, true);
+        }
+
+        case LAST: {
+          ScreenElement last = screenElements.getLastElement();
+          if (element == last) return false;
+          return moveFocusBackward(last, true);
+        }
+
+        default:
+          return false;
+      }
+    } finally {
       node.recycle();
       node = null;
-
-      if (element != null) {
-        int count = screenElements.size();
-        int index = screenElements.indexOf(element);
-
-        switch (direction) {
-          case FORWARD: {
-            int start = index;
-
-            while (true) {
-              if (++index == count) index = 0;
-              if (index == start) break;
-              if (screenElements.get(index).bringCursor()) return true;
-            }
-
-            break;
-          }
-
-          case BACKWARD: {
-            int start = index;
-
-            while (true) {
-              if (--index < 0) index += count;
-              if (index == start) break;
-              if (screenElements.get(index).bringCursor()) return true;
-            }
-
-            break;
-          }
-
-          case FIRST: {
-            int first = 0;
-
-            while (first < index) {
-              if (screenElements.get(first).bringCursor()) return true;
-              first += 1;
-            }
-
-            break;
-          }
-
-          case LAST: {
-            int last = count - 1;
-
-            while (last > index) {
-              if (screenElements.get(last).bringCursor()) return true;
-              last -= 1;
-            }
-
-            break;
-          }
-        }
-      }
     }
-
-    return false;
   }
 
   public final boolean performAction (int column, int row) {
@@ -202,20 +214,14 @@ public class RenderedScreen {
       AccessibilityNodeInfo child = root.getChild(childIndex);
 
       if (child != null) {
-        boolean found;
-
-        if (hasSignificantActions(child)) {
-          found = false;
-        } else if (ScreenUtilities.getText(child) != null) {
-          found = true;
-        } else {
-          found = hasInnerText(child);
+        try {
+          if (hasSignificantActions(child)) return false;
+          if (ScreenUtilities.getText(child) != null) return true;
+          return hasInnerText(child);
+        } finally {
+          child.recycle();
+          child = null;
         }
-
-        child.recycle();
-        child = null;
-
-        if (found) return true;
       }
     }
 
@@ -512,7 +518,7 @@ public class RenderedScreen {
     rootNode = ScreenUtilities.findRootNode(node);
 
     addScreenElements(rootNode);
-    screenElements.sortByVisualLocation();
+    screenElements.finish();
     BrailleRenderer.getBrailleRenderer().renderScreenElements(screenElements, screenRows);
 
     screenWidth = findScreenWidth();
