@@ -419,7 +419,7 @@ connectSocket (
         int error;
         socklen_t length = sizeof(error);
 
-        if (getSocketOption(socketDescriptor, SOL_SOCKET, SO_ERROR, &error, &length) != -1) {
+        if (getsockopt(socketDescriptor, SOL_SOCKET, SO_ERROR, &error, &length) != -1) {
           if (!error) return 0;
           errno = error;
         }
