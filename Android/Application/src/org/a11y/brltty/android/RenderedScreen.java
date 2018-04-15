@@ -103,14 +103,16 @@ public class RenderedScreen {
   }
 
   private final boolean moveFocus (
-    ScreenElement element, boolean inclusive, NextElementGetter getter
+    ScreenElement element, boolean inclusive, NextElementGetter nextElementGetter
   ) {
     ScreenElement end = element;
 
     while (true) {
       if (inclusive) {
         inclusive = false;
-      } else if ((element = getter.getNextElement(element)) == end) {
+      } else if ((element = nextElementGetter.getNextElement(element)) == end) {
+        return false;
+      } else if (element == null) {
         return false;
       }
 
@@ -123,7 +125,7 @@ public class RenderedScreen {
       new NextElementGetter() {
         @Override
         public ScreenElement getNextElement (ScreenElement element) {
-          return element.getNextElement();
+          return element.getForwardElement();
         }
       }
     );
@@ -134,18 +136,17 @@ public class RenderedScreen {
       new NextElementGetter() {
         @Override
         public ScreenElement getNextElement (ScreenElement element) {
-          return element.getPreviousElement();
+          return element.getBackwardElement();
         }
       }
     );
   }
 
   public enum SearchDirection {
-    FORWARD,
-    BACKWARD,
-
-    FIRST,
-    LAST,
+    FIRST, LAST,
+    FORWARD, BACKWARD,
+    UP, DOWN,
+    LEFT, RIGHT,
   }
 
   public final boolean moveFocus (SearchDirection direction) {
@@ -157,12 +158,6 @@ public class RenderedScreen {
       if (element == null) return false;
 
       switch (direction) {
-        case FORWARD:
-          return moveFocusForward(element, false);
-
-        case BACKWARD:
-          return moveFocusBackward(element, false);
-
         case FIRST: {
           ScreenElement first = screenElements.getFirstElement();
           if (element == first) return false;
@@ -174,6 +169,12 @@ public class RenderedScreen {
           if (element == last) return false;
           return moveFocusBackward(last, true);
         }
+
+        case FORWARD:
+          return moveFocusForward(element, false);
+
+        case BACKWARD:
+          return moveFocusBackward(element, false);
 
         default:
           return false;

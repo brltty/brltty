@@ -187,7 +187,7 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
     return lastElement;
   }
 
-  private final void linkElements () {
+  private final void makeTraversalLinks () {
     int count = size();
     if (count == 0) return;
 
@@ -196,15 +196,15 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
     ScreenElement previousElement = lastElement;
 
     for (ScreenElement nextElement : this) {
-      nextElement.setPreviousElement(previousElement);
-      previousElement.setNextElement(nextElement);
+      nextElement.setBackwardElement(previousElement);
+      previousElement.setForwardElement(nextElement);
       previousElement = nextElement;
     }
   }
 
   public final void finish () {
     sortByVisualLocation();
-    linkElements();
+    makeTraversalLinks();
   }
 
   public final ScreenElement findByBrailleLocation (int column, int row) {

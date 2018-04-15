@@ -390,7 +390,7 @@ public abstract class InputHandlers {
     return new KeyHandler(KeyEvent.KEYCODE_DPAD_LEFT) {
       @Override
       protected boolean performNavigationAction (AccessibilityNodeInfo node) {
-        return super.performNavigationAction(node);
+        return moveFocus(RenderedScreen.SearchDirection.LEFT);
       }
 
       @Override
@@ -412,7 +412,7 @@ public abstract class InputHandlers {
     return new KeyHandler(KeyEvent.KEYCODE_DPAD_RIGHT) {
       @Override
       protected boolean performNavigationAction (AccessibilityNodeInfo node) {
-        return super.performNavigationAction(node);
+        return moveFocus(RenderedScreen.SearchDirection.RIGHT);
       }
 
       @Override
@@ -434,7 +434,7 @@ public abstract class InputHandlers {
     return new KeyHandler(KeyEvent.KEYCODE_DPAD_UP) {
       @Override
       protected boolean performNavigationAction (AccessibilityNodeInfo node) {
-        return super.performNavigationAction(node);
+        return moveFocus(RenderedScreen.SearchDirection.UP);
       }
 
       @Override
@@ -462,7 +462,7 @@ public abstract class InputHandlers {
     return new KeyHandler(KeyEvent.KEYCODE_DPAD_DOWN) {
       @Override
       protected boolean performNavigationAction (AccessibilityNodeInfo node) {
-        return super.performNavigationAction(node);
+        return moveFocus(RenderedScreen.SearchDirection.DOWN);
       }
 
       @Override

@@ -41,24 +41,64 @@ public class ScreenElement {
     return elementText;
   }
 
-  private ScreenElement previousElement = null;
-  private ScreenElement nextElement = null;
+  private ScreenElement backwardElement = null;
+  private ScreenElement forwardElement = null;
+  private ScreenElement upwardElement = null;
+  private ScreenElement downwardElement = null;
+  private ScreenElement leftwardElement = null;
+  private ScreenElement rightwardElement = null;
 
-  public final ScreenElement getPreviousElement () {
-    return previousElement;
+  public final ScreenElement getBackwardElement () {
+    return backwardElement;
   }
 
-  public final ScreenElement setPreviousElement (ScreenElement element) {
-    previousElement = element;
+  public final ScreenElement setBackwardElement (ScreenElement element) {
+    backwardElement = element;
     return this;
   }
 
-  public final ScreenElement getNextElement () {
-    return nextElement;
+  public final ScreenElement getForwardElement () {
+    return forwardElement;
   }
 
-  public final ScreenElement setNextElement (ScreenElement element) {
-    nextElement = element;
+  public final ScreenElement setForwardElement (ScreenElement element) {
+    forwardElement = element;
+    return this;
+  }
+
+  public final ScreenElement getUpwardElement () {
+    return upwardElement;
+  }
+
+  public final ScreenElement setUpwardElement (ScreenElement element) {
+    upwardElement = element;
+    return this;
+  }
+
+  public final ScreenElement getDownwardElement () {
+    return downwardElement;
+  }
+
+  public final ScreenElement setDownwardElement (ScreenElement element) {
+    downwardElement = element;
+    return this;
+  }
+
+  public final ScreenElement getLeftwardElement () {
+    return leftwardElement;
+  }
+
+  public final ScreenElement setLeftwardElement (ScreenElement element) {
+    leftwardElement = element;
+    return this;
+  }
+
+  public final ScreenElement getRightwardElement () {
+    return rightwardElement;
+  }
+
+  public final ScreenElement setRightwardElement (ScreenElement element) {
+    rightwardElement = element;
     return this;
   }
 
