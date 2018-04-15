@@ -187,32 +187,6 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
     return isContainer(outer, inner.left, inner.top, inner.right, inner.bottom);
   }
 
-  public static boolean isContainer (AccessibilityNodeInfo outer, AccessibilityNodeInfo inner) {
-    if ((outer == null) || (inner == null)) return false;
-
-    boolean found = true;
-    inner = AccessibilityNodeInfo.obtain(inner);
-
-    while (inner != outer) {
-      AccessibilityNodeInfo parent = inner.getParent();
-
-      if (parent == null) {
-        found = false;
-        break;
-      }
-
-      inner.recycle();
-      inner = parent;
-    }
-
-    inner.recycle();
-    return found;
-  }
-
-  public static boolean isContainer (ScreenElement outer, ScreenElement inner) {
-    return isContainer(outer.getAccessibilityNode(), inner.getAccessibilityNode());
-  }
-
   public final ScreenElement find (
     ScreenElement.LocationGetter locationGetter,
     int left, int top, int right, int bottom
@@ -235,14 +209,6 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
     }
 
     return bestElement;
-  }
-
-  public final ScreenElement findByVisualLocation (int left, int top, int right, int bottom) {
-    return find(ScreenElement.visualLocationGetter, left, top, right, bottom);
-  }
-
-  public final ScreenElement findByVisualLocation (Rect location) {
-    return findByVisualLocation(location.left, location.top, location.right, location.bottom);
   }
 
   public final ScreenElement findByBrailleLocation (int left, int top, int right, int bottom) {
