@@ -179,22 +179,4 @@ public class ScreenElement {
 
     return lines.toArray(new String[lines.size()]);
   }
-
-  public interface LocationGetter {
-    public Rect getLocation (ScreenElement element);
-  }
-
-  public static final LocationGetter visualLocationGetter = new LocationGetter() {
-    @Override
-    public Rect getLocation (ScreenElement element) {
-      return element.getVisualLocation();
-    }
-  };
-
-  public static final LocationGetter brailleLocationGetter = new LocationGetter() {
-    @Override
-    public Rect getLocation (ScreenElement element) {
-      return element.getBrailleLocation();
-    }
-  };
 }

@@ -207,51 +207,26 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
     linkElements();
   }
 
-  private static boolean isContainer (Rect outer, int left, int top, int right, int bottom) {
-    return (left >= outer.left) &&
-           (right <= outer.right) &&
-           (top >= outer.top) &&
-           (bottom <= outer.bottom);
-  }
-
-  private static boolean isContainer (Rect outer, Rect inner) {
-    return isContainer(outer, inner.left, inner.top, inner.right, inner.bottom);
-  }
-
-  public final ScreenElement find (
-    ScreenElement.LocationGetter locationGetter,
-    int left, int top, int right, int bottom
-  ) {
+  public final ScreenElement findByBrailleLocation (int column, int row) {
     ScreenElement bestElement = null;
-    Rect bestLocation = null;
+    int bestLeft = -1;
 
     for (ScreenElement element : this) {
-      Rect location = locationGetter.getLocation(element);
+      Rect location = element.getBrailleLocation();
+      if (location == null) continue;
 
-      if (location != null) {
-        if (isContainer(location, left, top, right, bottom)) {
-          if ((bestLocation == null) ||
-              isContainer(bestLocation, location)) {
-            bestLocation = location;
-            bestElement = element;
-          }
-        }
+      if (row < location.top) continue;
+      if (row > location.bottom) continue;
+
+      if (column > location.right) continue;
+      if (column >= location.left) return element;
+
+      if (location.left > bestLeft) {
+        bestLeft = location.left;
+        bestElement = element;
       }
     }
 
     return bestElement;
-  }
-
-  public final ScreenElement findByBrailleLocation (int left, int top, int right, int bottom) {
-    return find(ScreenElement.brailleLocationGetter, left, top, right, bottom);
-  }
-
-  public final ScreenElement findByBrailleLocation (int column, int row) {
-    do {
-      ScreenElement element = findByBrailleLocation(column, row, column, row);
-      if (element != null) return element;
-    } while (--column >= 0);
-
-    return null;
   }
 }
