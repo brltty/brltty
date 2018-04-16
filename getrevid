@@ -20,6 +20,7 @@
 . "`dirname "${0}"`/prologue.sh"
 addProgramOption d string.anything defaultIdentifier "specify a default identifier"
 addProgramOption f string.file outputFile "specify a file in which to write the identifier" "standard output"
+addProgramOption i flag packedInteger "render the identifier as a 32-bit integer"
 addProgramOption s flag quotedString "render the identifier as a quoted string"
 addProgramParameter source sourceRoot "top-level directory of source tree"
 parseProgramArguments "${@}"
@@ -45,6 +46,28 @@ fi
 [ -n "${revisionIdentifier}" ] || {
   [ -n "${defaultIdentifier}" ] || semanticError "revision identifier not known"
   revisionIdentifier="${defaultIdentifier}"
+}
+
+"${packedInteger}" && {
+  makeInteger() {
+    set -- `echo "${revisionIdentifier}" | sed -e 's/-/ /g'`
+    local commitCount="${3:-0}"
+
+    revisionIdentifier=0
+    local width=6
+    local shift=30
+    local number
+
+    for number in `echo "${2}" | sed -e 's/\./ /g'`
+    do
+      shift=$((shift - width))
+      revisionIdentifier=$((revisionIdentifier | (number << shift)))
+    done
+
+    revisionIdentifier=$((revisionIdentifier | commitCount))
+  }
+
+  makeInteger
 }
 
 "${quotedString}" && revisionIdentifier='"'"${revisionIdentifier}"'"'
