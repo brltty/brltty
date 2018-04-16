@@ -1,5 +1,3 @@
-diredtional cursor key node navigation
 check action performability better (e.g. setting/clearing input/access focus)
 dispmd crashes when navigating off the top
 icon for input service
-cursor position and text selection when field isn't at the left braille edge
