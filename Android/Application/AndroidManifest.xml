@@ -2,7 +2,7 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   package="org.a11y.brltty.android"
-  android:versionCode="7"
+  android:versionCode="@string/app_version_code"
   android:versionName="@string/app_version"
   >
 

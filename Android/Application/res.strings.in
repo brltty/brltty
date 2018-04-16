@@ -3,4 +3,5 @@
 
 <resources>
   <string name="app_version">@PACKAGE_VERSION@</string>
+  <string name="app_version_code">@PACKAGE_VERSION_INTEGER@</string>
 </resources>
