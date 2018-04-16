@@ -20,7 +20,6 @@ dnl Process this file with autoconf 2.53 to produce a configure script.
 AC_PREREQ([2.64])
 AC_INIT([BRLTTY], [5.6], [brltty@brltty.com], [brltty], [http://brltty.com/])
 AC_CONFIG_SRCDIR([Programs/brltty.c])
-AC_SUBST([PACKAGE_VERSION_INTEGER], [`"${srcdir}/getrevid" -i "${srcdir}"`])
 
 AC_SUBST([api_major], [0])
 AC_SUBST([api_minor], [6])

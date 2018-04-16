@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<project name="custom_rules" default="help">
+  <target name="custom-get-version-code">
+    <exec
+      executable="../../getrevid"
+      outputproperty="custom.version.code"
+      >
+
+      <arg value="-i" />
+      <arg value="../.." />
+    </exec>
+  </target>
+
+  <target name="custom-update-manifest" depends="custom-get-version-code">
+    <exec executable="sed">
+      <arg value="-e" />
+      <arg value="/android:versionCode=/s/0/${custom.version.code}/" />
+      <arg value="-i" />
+      <arg value="${out.manifest.abs.file}" />
+    </exec>
+  </target>
+
+  <target name="-pre-compile" depends="custom-update-manifest" />
+</project>
