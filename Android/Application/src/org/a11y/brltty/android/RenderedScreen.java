@@ -480,7 +480,9 @@ public class RenderedScreen {
       Rect fromLocation = from.getVisualLocation();
       if (fromLocation == null) return null;
 
-      double bestDistance = -1d;
+      double bestDistance = Double.MAX_VALUE;
+      double bestAngle = Double.MAX_VALUE;
+
       int fromEdge = further? getGreaterEdge(fromLocation):
                               getLesserEdge(fromLocation);
 
@@ -490,22 +492,29 @@ public class RenderedScreen {
         Rect toLocation = to.getVisualLocation();
         if (toLocation == null) continue;
 
-        double distance = further? (getLesserEdge(toLocation) - fromEdge):
-                                   (fromEdge - getGreaterEdge(toLocation));
+        double edgeDistance = further? (getLesserEdge(toLocation) - fromEdge):
+                                       (fromEdge - getGreaterEdge(toLocation));
 
-        if (distance < 0d) continue;
-        double offset = getLesserSide(fromLocation) - getGreaterSide(toLocation);
-        if (offset < 0d) offset = getLesserSide(toLocation) - getGreaterSide(fromLocation);
-        if (offset > distance) continue;
-        if (offset > 0d) distance = Math.hypot(distance, offset);
+        if (edgeDistance < 0d) continue;
+        double sideDistance = getLesserSide(fromLocation) - getGreaterSide(toLocation);
+        if (sideDistance < 0d) sideDistance = getLesserSide(toLocation) - getGreaterSide(fromLocation);
+        if (sideDistance < 0d) sideDistance = 0d;
+
+        double angle = Math.atan2(sideDistance, edgeDistance);
+        double distance = Math.hypot(sideDistance, edgeDistance);
 
         if (element != null) {
-          if (distance > bestDistance) {
-            continue;
+          if (angle > bestAngle) continue;
+
+          if (angle == bestAngle) {
+            if (distance >= bestDistance) {
+              continue;
+            }
           }
         }
 
         bestDistance = distance;
+        bestAngle = angle;
         element = to;
       }
 

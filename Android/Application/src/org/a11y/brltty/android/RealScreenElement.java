@@ -38,6 +38,8 @@ public class RealScreenElement extends ScreenElement {
     {
       Rect location = new Rect();
       node.getBoundsInScreen(location);
+      location.right -= 1;
+      location.bottom -= 1;
       setVisualLocation(location);
     }
   }
