@@ -98,93 +98,6 @@ public class RenderedScreen {
     return null;
   }
 
-  private static interface NextElementGetter {
-    public ScreenElement getNextElement (ScreenElement element);
-  }
-
-  private final boolean moveFocus (
-    ScreenElement element, boolean inclusive, NextElementGetter nextElementGetter
-  ) {
-    ScreenElement end = element;
-
-    while (true) {
-      if (inclusive) {
-        inclusive = false;
-      } else if ((element = nextElementGetter.getNextElement(element)) == end) {
-        return false;
-      } else if (element == null) {
-        return false;
-      }
-
-      if (element.bringCursor()) return true;
-    }
-  }
-
-  private final boolean moveFocusForward (ScreenElement element, boolean inclusive) {
-    return moveFocus(element, inclusive,
-      new NextElementGetter() {
-        @Override
-        public ScreenElement getNextElement (ScreenElement element) {
-          return element.getForwardElement();
-        }
-      }
-    );
-  }
-
-  private final boolean moveFocusBackward (ScreenElement element, boolean inclusive) {
-    return moveFocus(element, inclusive,
-      new NextElementGetter() {
-        @Override
-        public ScreenElement getNextElement (ScreenElement element) {
-          return element.getBackwardElement();
-        }
-      }
-    );
-  }
-
-  public enum SearchDirection {
-    FIRST, LAST,
-    FORWARD, BACKWARD,
-    UP, DOWN,
-    LEFT, RIGHT,
-  }
-
-  public final boolean moveFocus (SearchDirection direction) {
-    AccessibilityNodeInfo node = getCursorNode();
-    if (node == null) return false;
-
-    try {
-      ScreenElement element = getScreenElement(node);
-      if (element == null) return false;
-
-      switch (direction) {
-        case FIRST: {
-          ScreenElement first = screenElements.getFirstElement();
-          if (element == first) return false;
-          return moveFocusForward(first, true);
-        }
-
-        case LAST: {
-          ScreenElement last = screenElements.getLastElement();
-          if (element == last) return false;
-          return moveFocusBackward(last, true);
-        }
-
-        case FORWARD:
-          return moveFocusForward(element, false);
-
-        case BACKWARD:
-          return moveFocusBackward(element, false);
-
-        default:
-          return false;
-      }
-    } finally {
-      node.recycle();
-      node = null;
-    }
-  }
-
   public final boolean performAction (int column, int row) {
     ScreenElement element = screenElements.findByBrailleLocation(column, row);
     if (element == null) return false;
@@ -527,6 +440,192 @@ public class RenderedScreen {
 
     if (ApplicationSettings.LOG_RENDERED_SCREEN) {
       logRenderedScreen();
+    }
+  }
+
+  private abstract static class NextElementGetter {
+    public abstract ScreenElement getNextElement (ScreenElement from);
+  }
+
+  private final static NextElementGetter forwardElementGetter =
+    new NextElementGetter() {
+      @Override
+      public final ScreenElement getNextElement (ScreenElement from) {
+        return from.getForwardElement();
+      }
+    };
+
+  private final static NextElementGetter backwardElementGetter =
+    new NextElementGetter() {
+      @Override
+      public final ScreenElement getNextElement (ScreenElement from) {
+        return from.getBackwardElement();
+      }
+    };
+
+  private abstract static class NextElementFinder extends NextElementGetter {
+    protected abstract ScreenElement getNearestElement (ScreenElement from);
+    protected abstract void setNearestElement (ScreenElement from, ScreenElement to);
+
+    protected abstract int getLesserSide (Rect location);
+    protected abstract int getGreaterSide (Rect location);
+
+    @Override
+    public final ScreenElement getNextElement (ScreenElement from) {
+      ScreenElement element = getNearestElement(from);
+      if (element != null) return element;
+
+      setNearestElement(from, element);
+      return element;
+    }
+  }
+
+  private abstract static class VerticalElementFinder extends NextElementFinder {
+    @Override
+    protected final int getLesserSide (Rect location) {
+      return location.left;
+    }
+
+    @Override
+    protected final int getGreaterSide (Rect location) {
+      return location.right;
+    }
+  }
+
+  private final static NextElementGetter upwardElementFinder =
+    new VerticalElementFinder() {
+      @Override
+      protected final ScreenElement getNearestElement (ScreenElement from) {
+        return from.getUpwardElement();
+      }
+
+      @Override
+      protected final void setNearestElement (ScreenElement from, ScreenElement to) {
+        from.setUpwardElement(to);
+      }
+    };
+
+  private final static NextElementGetter downwardElementFinder =
+    new VerticalElementFinder() {
+      @Override
+      protected final ScreenElement getNearestElement (ScreenElement from) {
+        return from.getDownwardElement();
+      }
+
+      @Override
+      protected final void setNearestElement (ScreenElement from, ScreenElement to) {
+        from.setDownwardElement(to);
+      }
+    };
+
+  private abstract static class HorizontalElementFinder extends NextElementFinder {
+    @Override
+    protected final int getLesserSide (Rect location) {
+      return location.top;
+    }
+
+    @Override
+    protected final int getGreaterSide (Rect location) {
+      return location.bottom;
+    }
+  }
+
+  private final static NextElementGetter leftwardElementFinder =
+    new HorizontalElementFinder() {
+      @Override
+      protected final ScreenElement getNearestElement (ScreenElement from) {
+        return from.getLeftwardElement();
+      }
+
+      @Override
+      protected final void setNearestElement (ScreenElement from, ScreenElement to) {
+        from.setLeftwardElement(to);
+      }
+    };
+
+  private final static NextElementGetter rightwardElementFinder =
+    new HorizontalElementFinder() {
+      @Override
+      protected final ScreenElement getNearestElement (ScreenElement from) {
+        return from.getRightwardElement();
+      }
+
+      @Override
+      protected final void setNearestElement (ScreenElement from, ScreenElement to) {
+        from.setRightwardElement(to);
+      }
+    };
+
+  private final boolean moveFocus (
+    ScreenElement element, NextElementGetter nextElementGetter, boolean inclusive
+  ) {
+    ScreenElement end = element;
+
+    while (true) {
+      if (inclusive) {
+        inclusive = false;
+      } else if ((element = nextElementGetter.getNextElement(element)) == end) {
+        return false;
+      } else if (element == null) {
+        return false;
+      }
+
+      if (element.bringCursor()) return true;
+    }
+  }
+
+  public enum SearchDirection {
+    FIRST, LAST,
+    FORWARD, BACKWARD,
+    UP, DOWN,
+    LEFT, RIGHT,
+  }
+
+  public final boolean moveFocus (SearchDirection direction) {
+    AccessibilityNodeInfo node = getCursorNode();
+    if (node == null) return false;
+
+    try {
+      ScreenElement element = getScreenElement(node);
+      if (element == null) return false;
+
+      switch (direction) {
+        case FIRST: {
+          ScreenElement first = screenElements.getFirstElement();
+          if (element == first) return false;
+          return moveFocus(first, forwardElementGetter, true);
+        }
+
+        case LAST: {
+          ScreenElement last = screenElements.getLastElement();
+          if (element == last) return false;
+          return moveFocus(last, backwardElementGetter, true);
+        }
+
+        case FORWARD:
+          return moveFocus(element, forwardElementGetter, false);
+
+        case BACKWARD:
+          return moveFocus(element, backwardElementGetter, false);
+
+        case UP:
+          return moveFocus(element, upwardElementFinder, false);
+
+        case DOWN:
+          return moveFocus(element, downwardElementFinder, false);
+
+        case LEFT:
+          return moveFocus(element, leftwardElementFinder, false);
+
+        case RIGHT:
+          return moveFocus(element, rightwardElementFinder, false);
+
+        default:
+          return false;
+      }
+    } finally {
+      node.recycle();
+      node = null;
     }
   }
 }
