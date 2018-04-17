@@ -466,11 +466,10 @@ public class RenderedScreen {
   private abstract class NextElementFinder extends NextElementGetter {
     protected abstract ScreenElement getCachedElement (ScreenElement from);
     protected abstract void setCachedElement (ScreenElement from, ScreenElement to);
-    protected abstract boolean goForward ();
 
+    protected abstract boolean goForward ();
     protected abstract int getLesserEdge (Rect location);
     protected abstract int getGreaterEdge (Rect location);
-
     protected abstract int getLesserSide (Rect location);
     protected abstract int getGreaterSide (Rect location);
 
