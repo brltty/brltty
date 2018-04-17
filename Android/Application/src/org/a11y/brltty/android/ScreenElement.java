@@ -43,10 +43,6 @@ public class ScreenElement {
 
   private ScreenElement backwardElement = null;
   private ScreenElement forwardElement = null;
-  private ScreenElement upwardElement = null;
-  private ScreenElement downwardElement = null;
-  private ScreenElement leftwardElement = null;
-  private ScreenElement rightwardElement = null;
 
   public final ScreenElement getBackwardElement () {
     return backwardElement;
@@ -65,6 +61,13 @@ public class ScreenElement {
     forwardElement = element;
     return this;
   }
+
+  // Since null needs to be a valid cached value, use a self reference
+  // to mean that the correct value hasn't been determined yet.
+  private ScreenElement upwardElement = this;
+  private ScreenElement downwardElement = this;
+  private ScreenElement leftwardElement = this;
+  private ScreenElement rightwardElement = this;
 
   public final ScreenElement getUpwardElement () {
     return upwardElement;

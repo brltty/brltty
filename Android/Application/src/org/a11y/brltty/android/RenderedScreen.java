@@ -473,9 +473,10 @@ public class RenderedScreen {
     protected abstract int getLesserSide (Rect location);
     protected abstract int getGreaterSide (Rect location);
 
-    public final ScreenElement getNextElement (ScreenElement from, boolean further) {
+    protected final ScreenElement getNextElement (ScreenElement from, boolean further) {
       ScreenElement element = getNearestElement(from);
-      if (element != null) return element;
+      if (element != from) return element;
+      element = null;
 
       Rect fromLocation = from.getVisualLocation();
       if (fromLocation == null) return null;
