@@ -466,6 +466,7 @@ public class RenderedScreen {
   private abstract class NextElementFinder extends NextElementGetter {
     protected abstract ScreenElement getCachedElement (ScreenElement from);
     protected abstract void setCachedElement (ScreenElement from, ScreenElement to);
+    protected abstract boolean goForward ();
 
     protected abstract int getLesserEdge (Rect location);
     protected abstract int getGreaterEdge (Rect location);
@@ -473,16 +474,17 @@ public class RenderedScreen {
     protected abstract int getLesserSide (Rect location);
     protected abstract int getGreaterSide (Rect location);
 
-    private final ScreenElement findElement (ScreenElement from, boolean further) {
-      Rect fromLocation = from.getVisualLocation();
+    private final ScreenElement findNextElement (ScreenElement from) {
+      final Rect fromLocation = from.getVisualLocation();
       if (fromLocation == null) return null;
+
+      final boolean forward = goForward();
+      final int fromEdge = forward? getGreaterEdge(fromLocation):
+                                    getLesserEdge(fromLocation);
 
       double bestAngle = Double.MAX_VALUE;
       double bestDistance = Double.MAX_VALUE;
       ScreenElement bestElement = null;
-
-      int fromEdge = further? getGreaterEdge(fromLocation):
-                              getLesserEdge(fromLocation);
 
       for (ScreenElement to : screenElements) {
         if (to == from) continue;
@@ -490,7 +492,7 @@ public class RenderedScreen {
         Rect toLocation = to.getVisualLocation();
         if (toLocation == null) continue;
 
-        double edgeDistance = further? (getLesserEdge(toLocation) - fromEdge):
+        double edgeDistance = forward? (getLesserEdge(toLocation) - fromEdge):
                                        (fromEdge - getGreaterEdge(toLocation));
 
         if (edgeDistance < 0d) continue;
@@ -519,11 +521,12 @@ public class RenderedScreen {
       return bestElement;
     }
 
-    protected final ScreenElement getElement (ScreenElement from, boolean further) {
+    @Override
+    public final ScreenElement getNextElement (ScreenElement from) {
       ScreenElement to = getCachedElement(from);
 
       if (to == from) {
-        to = findElement(from, further);
+        to = findNextElement(from);
         setCachedElement(from, to);
       }
 
@@ -566,8 +569,8 @@ public class RenderedScreen {
       }
 
       @Override
-      public final ScreenElement getNextElement (ScreenElement from) {
-        return getElement(from, false);
+      protected final boolean goForward () {
+        return false;
       }
     };
 
@@ -584,8 +587,8 @@ public class RenderedScreen {
       }
 
       @Override
-      public final ScreenElement getNextElement (ScreenElement from) {
-        return getElement(from, true);
+      protected final boolean goForward () {
+        return true;
       }
     };
 
@@ -624,8 +627,8 @@ public class RenderedScreen {
       }
 
       @Override
-      public final ScreenElement getNextElement (ScreenElement from) {
-        return getElement(from, false);
+      protected final boolean goForward () {
+        return false;
       }
     };
 
@@ -642,8 +645,8 @@ public class RenderedScreen {
       }
 
       @Override
-      public final ScreenElement getNextElement (ScreenElement from) {
-        return getElement(from, true);
+      protected final boolean goForward () {
+        return true;
       }
     };
 
