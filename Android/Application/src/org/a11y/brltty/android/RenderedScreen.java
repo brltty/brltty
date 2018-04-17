@@ -464,8 +464,8 @@ public class RenderedScreen {
     };
 
   private abstract class NextElementFinder extends NextElementGetter {
-    protected abstract ScreenElement getNearestElement (ScreenElement from);
-    protected abstract void setNearestElement (ScreenElement from, ScreenElement to);
+    protected abstract ScreenElement getCachedElement (ScreenElement from);
+    protected abstract void setCachedElement (ScreenElement from, ScreenElement to);
 
     protected abstract int getLesserEdge (Rect location);
     protected abstract int getGreaterEdge (Rect location);
@@ -473,16 +473,13 @@ public class RenderedScreen {
     protected abstract int getLesserSide (Rect location);
     protected abstract int getGreaterSide (Rect location);
 
-    protected final ScreenElement getNextElement (ScreenElement from, boolean further) {
-      ScreenElement element = getNearestElement(from);
-      if (element != from) return element;
-      element = null;
-
+    private final ScreenElement findElement (ScreenElement from, boolean further) {
       Rect fromLocation = from.getVisualLocation();
       if (fromLocation == null) return null;
 
-      double bestDistance = Double.MAX_VALUE;
       double bestAngle = Double.MAX_VALUE;
+      double bestDistance = Double.MAX_VALUE;
+      ScreenElement bestElement = null;
 
       int fromEdge = further? getGreaterEdge(fromLocation):
                               getLesserEdge(fromLocation);
@@ -504,7 +501,7 @@ public class RenderedScreen {
         double angle = Math.atan2(sideDistance, edgeDistance);
         double distance = Math.hypot(sideDistance, edgeDistance);
 
-        if (element != null) {
+        if (bestElement != null) {
           if (angle > bestAngle) continue;
 
           if (angle == bestAngle) {
@@ -514,13 +511,23 @@ public class RenderedScreen {
           }
         }
 
-        bestDistance = distance;
         bestAngle = angle;
-        element = to;
+        bestDistance = distance;
+        bestElement = to;
       }
 
-      if (element != null) setNearestElement(from, element);
-      return element;
+      return bestElement;
+    }
+
+    protected final ScreenElement getElement (ScreenElement from, boolean further) {
+      ScreenElement to = getCachedElement(from);
+
+      if (to == from) {
+        to = findElement(from, further);
+        setCachedElement(from, to);
+      }
+
+      return to;
     }
   }
 
@@ -549,36 +556,36 @@ public class RenderedScreen {
   private final NextElementGetter upwardElementFinder =
     new VerticalElementFinder() {
       @Override
-      protected final ScreenElement getNearestElement (ScreenElement from) {
+      protected final ScreenElement getCachedElement (ScreenElement from) {
         return from.getUpwardElement();
       }
 
       @Override
-      protected final void setNearestElement (ScreenElement from, ScreenElement to) {
+      protected final void setCachedElement (ScreenElement from, ScreenElement to) {
         from.setUpwardElement(to);
       }
 
       @Override
       public final ScreenElement getNextElement (ScreenElement from) {
-        return getNextElement(from, false);
+        return getElement(from, false);
       }
     };
 
   private final NextElementGetter downwardElementFinder =
     new VerticalElementFinder() {
       @Override
-      protected final ScreenElement getNearestElement (ScreenElement from) {
+      protected final ScreenElement getCachedElement (ScreenElement from) {
         return from.getDownwardElement();
       }
 
       @Override
-      protected final void setNearestElement (ScreenElement from, ScreenElement to) {
+      protected final void setCachedElement (ScreenElement from, ScreenElement to) {
         from.setDownwardElement(to);
       }
 
       @Override
       public final ScreenElement getNextElement (ScreenElement from) {
-        return getNextElement(from, true);
+        return getElement(from, true);
       }
     };
 
@@ -607,36 +614,36 @@ public class RenderedScreen {
   private final NextElementGetter leftwardElementFinder =
     new HorizontalElementFinder() {
       @Override
-      protected final ScreenElement getNearestElement (ScreenElement from) {
+      protected final ScreenElement getCachedElement (ScreenElement from) {
         return from.getLeftwardElement();
       }
 
       @Override
-      protected final void setNearestElement (ScreenElement from, ScreenElement to) {
+      protected final void setCachedElement (ScreenElement from, ScreenElement to) {
         from.setLeftwardElement(to);
       }
 
       @Override
       public final ScreenElement getNextElement (ScreenElement from) {
-        return getNextElement(from, false);
+        return getElement(from, false);
       }
     };
 
   private final NextElementGetter rightwardElementFinder =
     new HorizontalElementFinder() {
       @Override
-      protected final ScreenElement getNearestElement (ScreenElement from) {
+      protected final ScreenElement getCachedElement (ScreenElement from) {
         return from.getRightwardElement();
       }
 
       @Override
-      protected final void setNearestElement (ScreenElement from, ScreenElement to) {
+      protected final void setCachedElement (ScreenElement from, ScreenElement to) {
         from.setRightwardElement(to);
       }
 
       @Override
       public final ScreenElement getNextElement (ScreenElement from) {
-        return getNextElement(from, true);
+        return getElement(from, true);
       }
     };
 
