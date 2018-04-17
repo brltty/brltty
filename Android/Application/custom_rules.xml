@@ -30,13 +30,17 @@
     <echo>Version Name: ${custom.version.name}</echo>
   </target>
 
-  <target name="custom-get-version-code">
+  <target name="custom-get-version-code" depends="custom-get-version-string">
     <exec
       executable="${custom.dir.top}/getrevid"
       outputproperty="custom.version.code"
       >
 
+      <arg value="-r" />
+      <arg value="${custom.version.string}" />
+
       <arg value="-i" />
+
       <arg value="${custom.dir.top}" />
     </exec>
 

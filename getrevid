@@ -18,11 +18,12 @@
 ###############################################################################
 
 . "`dirname "${0}"`/prologue.sh"
-addProgramOption d string.anything defaultIdentifier "specify a default identifier"
-addProgramOption f string.file outputFile "specify a file in which to write the identifier" "standard output"
-addProgramOption i flag packedInteger "render the identifier as a 32-bit integer"
-addProgramOption s flag quotedString "render the identifier as a quoted string"
-addProgramParameter source sourceRoot "top-level directory of source tree"
+addProgramOption d string.anything defaultIdentifier "the default revision identifier"
+addProgramOption f string.file outputFile "the file in which to write the revision identifier" "standard output"
+addProgramOption i flag asInteger "render the revision identifier as a 32-bit integer"
+addProgramOption r string.anything revisionIdentifier "the revision identifier"
+addProgramOption s flag asString "render the revision identifier as a quoted string"
+addProgramParameter source sourceRoot "the top-level directory of the source tree"
 parseProgramArguments "${@}"
 
 [ -e "${sourceRoot}" ] || semanticError "directory not found: ${sourceRoot}"
@@ -31,24 +32,25 @@ parseProgramArguments "${@}"
 export GIT_WORK_TREE="${sourceRoot}"
 export GIT_DIR="${GIT_WORK_TREE}/.git"
 
-if [ -d "${GIT_DIR}" ]
-then
-   revisionIdentifier="`git describe --tags --abbrev=8 --dirty='M' --match='BRLTTY-*' 2>/dev/null`"
-elif [ -d "${sourceRoot}/.svn" ]
-then
-   revisionIdentifier="`svnversion -n "${sourceRoot}" 2>/dev/null`"
-   [ "${revisionIdentifier}" != "exported" ] || revisionIdentifier=""
-else
-   logMessage warning "unrecognized source repository type: ${sourceRoot}"
-   revisionIdentifier=""
-fi
+[ -n "${revisionIdentifier}" ] || {
+  if [ -d "${GIT_DIR}" ]
+  then
+     revisionIdentifier="`git describe --tags --abbrev=8 --dirty='M' --match='BRLTTY-*' 2>/dev/null`"
+  elif [ -d "${sourceRoot}/.svn" ]
+  then
+     revisionIdentifier="`svnversion -n "${sourceRoot}" 2>/dev/null`"
+     [ "${revisionIdentifier}" != "exported" ] || revisionIdentifier=""
+  else
+     logMessage warning "unrecognized source repository type: ${sourceRoot}"
+  fi
+}
 
 [ -n "${revisionIdentifier}" ] || {
   [ -n "${defaultIdentifier}" ] || semanticError "revision identifier not known"
   revisionIdentifier="${defaultIdentifier}"
 }
 
-"${packedInteger}" && {
+"${asInteger}" && {
   makeInteger() {
     set -- `echo "${revisionIdentifier}" | sed -e 's/-/ /g'`
     local commitCount="${3:-0}"
@@ -70,7 +72,7 @@ fi
   makeInteger
 }
 
-"${quotedString}" && revisionIdentifier='"'"${revisionIdentifier}"'"'
+"${asString}" && revisionIdentifier='"'"${revisionIdentifier}"'"'
 
 if [ -z "${outputFile}" ]
 then
