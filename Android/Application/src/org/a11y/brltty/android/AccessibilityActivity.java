@@ -20,11 +20,20 @@ package org.a11y.brltty.android;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.View;
 
 public class AccessibilityActivity extends Activity {
   @Override
   protected void onCreate (Bundle savedState) {
     super.onCreate(savedState);
     setContentView(R.layout.accessibility_activity);
+  }
+
+  public void switchInputMethod (View view) {
+    InputService.switchInputMethod();
+  }
+
+  public void launchSettingsActivity (View view) {
+    ApplicationUtilities.launchSettingsActivity();
   }
 }

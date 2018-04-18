@@ -6,4 +6,17 @@
   android:layout_width="match_parent"
   >
 
+  <Button
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:text="@string/SETTINGS_BUTTON_SWITCH_INPUT_METHOD"
+    android:onClick="switchInputMethod"
+   />
+
+  <Button
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:text="@string/SETTINGS_SCREEN_MAIN"
+    android:onClick="launchSettingsActivity"
+   />
 </LinearLayout>
