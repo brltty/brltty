@@ -183,17 +183,21 @@ public class ScreenElement {
 
   protected String[] makeBrailleText (String text) {
     if (text == null) return null;
+
     List<String> lines = new ArrayList<String>();
+    int start = 0;
 
-    while (text != null) {
-      int index = text.indexOf('\n');
-      if (index == -1) break;
+    while (true) {
+      int end = text.indexOf('\n', start);
+      if (end == -1) break;
 
-      lines.add(text.substring(0, index));
-      text = text.substring(index+1);
+      lines.add(text.substring(start, end));
+      start = end + 1;
     }
 
+    if (start > 0) text = text.substring(start);
     lines.add(text);
+
     return lines.toArray(new String[lines.size()]);
   }
 
