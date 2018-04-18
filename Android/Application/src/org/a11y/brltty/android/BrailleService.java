@@ -30,6 +30,7 @@ public class BrailleService extends AccessibilityService {
 
   private static volatile BrailleService brailleService = null;
   private Thread coreThread = null;
+  private AccessibilityButton accessibilityButton = null;
 
   public static BrailleService getBrailleService () {
     return brailleService;
@@ -59,19 +60,34 @@ public class BrailleService extends AccessibilityService {
 
     coreThread = new CoreThread(this);
     coreThread.start();
+
+    if (ApplicationUtilities.haveOreo) {
+      accessibilityButton = new AccessibilityButton();
+      getAccessibilityButtonController().registerAccessibilityButtonCallback(accessibilityButton);
+    }
   }
 
   @Override
   public boolean onUnbind (Intent intent) {
     Log.d(LOG_TAG, "braille service disconnected");
-    CoreWrapper.stop();
+
+    if (accessibilityButton != null) {
+      getAccessibilityButtonController().unregisterAccessibilityButtonCallback(accessibilityButton);
+      accessibilityButton = null;
+    }
 
     try {
-      Log.d(LOG_TAG, "waiting for core to finish");
-      coreThread.join();
-      Log.d(LOG_TAG, "core finished");
-    } catch (InterruptedException exception) {
-      Log.d(LOG_TAG, "core join failed", exception);
+      CoreWrapper.stop();
+      Log.d(LOG_TAG, "waiting for core to stop");
+
+      try {
+        coreThread.join();
+        Log.d(LOG_TAG, "core stopped");
+      } catch (InterruptedException exception) {
+        Log.w(LOG_TAG, "core thread join interrupted", exception);
+      }
+    } finally {
+      coreThread = null;
     }
 
     return false;
