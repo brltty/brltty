@@ -121,27 +121,6 @@ public class RenderedScreen {
     return getSignificantActions(node) != 0;
   }
 
-  private static boolean hasInnerText (AccessibilityNodeInfo root) {
-    int childCount = root.getChildCount();
-
-    for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-      AccessibilityNodeInfo child = root.getChild(childIndex);
-
-      if (child != null) {
-        try {
-          if (hasSignificantActions(child)) return false;
-          if (ScreenUtilities.getText(child) != null) return true;
-          return hasInnerText(child);
-        } finally {
-          child.recycle();
-          child = null;
-        }
-      }
-    }
-
-    return false;
-  }
-
   private static String makeText (AccessibilityNodeInfo node) {
     StringBuilder sb = new StringBuilder();
     boolean allowZeroLength = false;
@@ -251,32 +230,35 @@ public class RenderedScreen {
   }
 
   private final int addScreenElements (AccessibilityNodeInfo root) {
-    int propagatedActions = SIGNIFICANT_NODE_ACTIONS;
+    int propagatedActions = 0;
 
     if (root != null) {
-      int actions = getSignificantActions(root);
-      int childCount = root.getChildCount();
-
-      if (childCount > 0) {
-        propagatedActions = 0;
+      {
+        int childCount = root.getChildCount();
 
         for (int childIndex=0; childIndex<childCount; childIndex+=1) {
           AccessibilityNodeInfo child = root.getChild(childIndex);
 
           if (child != null) {
-            propagatedActions |= addScreenElements(child);
-
-            child.recycle();
-            child = null;
+            try {
+              propagatedActions |= addScreenElements(child);
+            } finally {
+              child.recycle();
+              child = null;
+            }
           }
         }
       }
+
+      int actions = getSignificantActions(root);
+      boolean hasActions = (actions & ~propagatedActions) != 0;
+      propagatedActions &= ~actions;
 
       if (ScreenUtilities.isVisible(root)) {
         String text = makeText(root);
 
         if (text == null) {
-          if ((actions != 0) && !hasInnerText(root)) {
+          if (hasActions) {
             if ((text = getDescription(root)) == null) {
               text = ScreenUtilities.getClassName(root);
               if (text == null) text = "?";
@@ -286,12 +268,11 @@ public class RenderedScreen {
         }
 
         if (text != null) {
+          propagatedActions |= SIGNIFICANT_NODE_ACTIONS & ~actions;
           if (!root.isEnabled()) text += " (disabled)";
           screenElements.add(text, root);
         }
       }
-
-      propagatedActions &= ~actions;
     }
 
     return propagatedActions;
