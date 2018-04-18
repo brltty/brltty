@@ -26,6 +26,7 @@
   <string name="VIRTUAL_BUTTON_HOME">Home</string>
   <string name="VIRTUAL_BUTTON_RECENT_APPS">Recent Apps</string>
   <string name="VIRTUAL_BUTTON_OVERVIEW">Overview</string>
+  <string name="VIRTUAL_BUTTON_SWITCH_INPUT_METHOD">Switch Input Method</string>
 
   <string name="SETTINGS_SCREEN_MAIN">BRLTTY Settings</string>
   <string name="SETTINGS_SCREEN_GENERAL">General Settings</string>
@@ -33,10 +34,9 @@
   <string name="SETTINGS_SCREEN_DEVICES">Manage Devices</string>
   <string name="SETTINGS_SCREEN_ADVANCED">Advanced Settings</string>
 
-  <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Navigation Mode</string>
   <string name="SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE">Release Braille Device</string>
+  <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Navigation Mode</string>
   <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Speech Support</string>
-  <string name="SETTINGS_BUTTON_SWITCH_INPUT_METHOD">Switch Input Method</string>
 
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Text Table</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Attributes Table</string>

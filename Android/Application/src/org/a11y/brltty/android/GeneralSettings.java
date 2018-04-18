@@ -32,7 +32,6 @@ public final class GeneralSettings extends SettingsFragment {
   private ListPreference textTableList;
   private ListPreference contractionTableList;
   private ListPreference speechSupportList;
-  private Preference switchInputMethodButton;
 
   @Override
   public void onCreate (Bundle savedInstanceState) {
@@ -44,7 +43,6 @@ public final class GeneralSettings extends SettingsFragment {
     textTableList = getListPreference(R.string.PREF_KEY_TEXT_TABLE);
     contractionTableList = getListPreference(R.string.PREF_KEY_CONTRACTION_TABLE);
     speechSupportList = getListPreference(R.string.PREF_KEY_SPEECH_SUPPORT);
-    switchInputMethodButton = getPreference(R.string.PREF_KEY_SWITCH_INPUT_METHOD);
 
     sortList(textTableList, 1);
     sortList(contractionTableList);
@@ -142,16 +140,6 @@ public final class GeneralSettings extends SettingsFragment {
           );
 
           showSelection(speechSupportList, newDriver);
-          return true;
-        }
-      }
-    );
-
-    switchInputMethodButton.setOnPreferenceClickListener(
-      new Preference.OnPreferenceClickListener() {
-        @Override
-        public boolean onPreferenceClick (Preference preference) {
-          InputService.switchInputMethod();
           return true;
         }
       }

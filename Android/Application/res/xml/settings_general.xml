@@ -45,9 +45,4 @@
     android:entryValues="@array/SPEECH_SUPPORT_VALUES"
     android:defaultValue="@string/DEFAULT_SPEECH_SUPPORT"
    />
-
-  <Preference
-    android:key="@string/PREF_KEY_SWITCH_INPUT_METHOD"
-    android:title="@string/SETTINGS_BUTTON_SWITCH_INPUT_METHOD"
-   />
 </PreferenceScreen>

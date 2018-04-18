@@ -9,7 +9,7 @@
   <Button
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
-    android:text="@string/SETTINGS_BUTTON_SWITCH_INPUT_METHOD"
+    android:text="@string/VIRTUAL_BUTTON_SWITCH_INPUT_METHOD"
     android:onClick="switchInputMethod"
    />
 
