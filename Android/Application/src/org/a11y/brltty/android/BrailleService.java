@@ -101,17 +101,4 @@ public class BrailleService extends AccessibilityService {
   @Override
   public void onInterrupt () {
   }
-
-  public boolean launchSettingsActivity () {
-    Intent intent = SettingsActivity.makeIntent();
-
-    intent.addFlags(
-      Intent.FLAG_ACTIVITY_CLEAR_TOP |
-      Intent.FLAG_ACTIVITY_SINGLE_TOP |
-      Intent.FLAG_FROM_BACKGROUND
-    );
-
-    startActivity(intent);
-    return true;
-  }
 }

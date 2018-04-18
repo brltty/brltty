@@ -22,6 +22,9 @@ import android.os.Build;
 import android.os.SystemClock;
 
 import android.content.Context;
+import android.content.Intent;
+import android.app.Activity;
+
 import android.content.ContentResolver;
 import android.provider.Settings;
 
@@ -131,5 +134,27 @@ public abstract class ApplicationUtilities {
     = new SystemServiceReference<UsbManager>(Context.USB_SERVICE);
   public static UsbManager getUsbManager () {
     return usbManagerReference.get();
+  }
+
+  public static void launchActivity (Class<? extends Activity> activityClass) {
+    Context context = ApplicationContext.get();
+    Intent intent = new Intent(context, activityClass);
+
+    intent.addFlags(
+      Intent.FLAG_ACTIVITY_NEW_TASK |
+      Intent.FLAG_ACTIVITY_CLEAR_TOP |
+      Intent.FLAG_ACTIVITY_SINGLE_TOP |
+      Intent.FLAG_FROM_BACKGROUND
+    );
+
+    context.startActivity(intent);
+  }
+
+  public static void launchSettingsActivity () {
+    launchActivity(SettingsActivity.class);
+  }
+
+  public static void launchAccessibilityActivity () {
+    launchActivity(AccessibilityActivity.class);
   }
 }

@@ -21,6 +21,7 @@ package org.a11y.brltty.android;
 import android.content.Context;
 import android.content.Intent;
 import android.app.PendingIntent;
+import android.app.Activity;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -47,6 +48,18 @@ public abstract class BrailleNotification {
 
   private static String getString (int identifier) {
     return getContext().getString(identifier);
+  }
+
+  private static PendingIntent newPendingIntent (Class<? extends Activity> activityClass) {
+    Context context = getContext();
+    Intent intent = new Intent(context, activityClass);
+
+    intent.addFlags(
+      Intent.FLAG_ACTIVITY_CLEAR_TASK |
+      Intent.FLAG_ACTIVITY_NEW_TASK
+    );
+
+    return PendingIntent.getActivity(context, 0, intent, 0);
   }
 
   private static NotificationManager getManager () {
@@ -91,15 +104,8 @@ public abstract class BrailleNotification {
 
       .setSmallIcon(R.drawable.braille_notification)
       .setSubText(getString(R.string.braille_hint_tap))
-
-      .setContentIntent(
-        PendingIntent.getActivity(
-          context,
-          0, // request code
-          SettingsActivity.makeIntent().addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK),
-          0 // flags
-        )
-      );
+      .setContentIntent(newPendingIntent(SettingsActivity.class))
+      ;
 
     if (ApplicationUtilities.haveJellyBeanMR1) {
       notificationBuilder.setShowWhen(false);

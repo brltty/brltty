@@ -23,6 +23,7 @@ import android.accessibilityservice.AccessibilityButtonController;
 public class AccessibilityButton extends AccessibilityButtonController.AccessibilityButtonCallback {
   @Override
   public void onClicked (AccessibilityButtonController controller) {
+    ApplicationUtilities.launchAccessibilityActivity();
   }
 
   @Override

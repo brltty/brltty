@@ -18,24 +18,13 @@
 
 package org.a11y.brltty.android;
 
-import java.util.List;
-
+import android.app.Activity;
 import android.os.Bundle;
-import android.content.Context;
-import android.preference.PreferenceActivity;
 
-public class SettingsActivity extends PreferenceActivity {
-  private static final String LOG_TAG = SettingsActivity.class.getName();
-
+public class AccessibilityActivity extends Activity {
   @Override
-  protected void onCreate (Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    ApplicationContext.set(this);
-    setTitle(R.string.SETTINGS_SCREEN_MAIN);
-  }
-
-  @Override
-  public void onBuildHeaders (List<Header> headers) {
-    loadHeadersFromResource(R.xml.settings_headers, headers);
+  protected void onCreate (Bundle savedState) {
+    super.onCreate(savedState);
+    setContentView(R.layout.accessibility_activity);
   }
 }

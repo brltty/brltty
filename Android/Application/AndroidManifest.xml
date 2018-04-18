@@ -67,5 +67,11 @@
       android:label="@string/SETTINGS_SCREEN_MAIN"
       >
     </activity>
+
+    <activity
+      android:name=".AccessibilityActivity"
+      android:label="@string/app_name"
+      >
+    </activity>
   </application>
 </manifest>
