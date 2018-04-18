@@ -104,7 +104,7 @@ public abstract class BrailleNotification {
 
       .setSmallIcon(R.drawable.braille_notification)
       .setSubText(getString(R.string.braille_hint_tap))
-      .setContentIntent(newPendingIntent(SettingsActivity.class))
+      .setContentIntent(newPendingIntent(BrailleActivity.class))
       ;
 
     if (ApplicationUtilities.haveJellyBeanMR1) {

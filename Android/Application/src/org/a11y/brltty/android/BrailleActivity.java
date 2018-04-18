@@ -22,11 +22,11 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 
-public class AccessibilityActivity extends Activity {
+public class BrailleActivity extends Activity {
   @Override
   protected void onCreate (Bundle savedState) {
     super.onCreate(savedState);
-    setContentView(R.layout.accessibility_activity);
+    setContentView(R.layout.braille_activity);
   }
 
   public void switchInputMethod (View view) {
@@ -34,6 +34,10 @@ public class AccessibilityActivity extends Activity {
   }
 
   public void launchSettingsActivity (View view) {
-    ApplicationUtilities.launchSettingsActivity();
+    SettingsActivity.launch();
+  }
+
+  public static void launch () {
+    ApplicationUtilities.launch(BrailleActivity.class);
   }
 }

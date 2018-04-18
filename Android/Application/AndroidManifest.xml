@@ -69,7 +69,7 @@
     </activity>
 
     <activity
-      android:name=".AccessibilityActivity"
+      android:name=".BrailleActivity"
       android:label="@string/app_name"
       >
     </activity>

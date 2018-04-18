@@ -38,4 +38,8 @@ public class SettingsActivity extends PreferenceActivity {
   public void onBuildHeaders (List<Header> headers) {
     loadHeadersFromResource(R.xml.settings_headers, headers);
   }
+
+  public static void launch () {
+    ApplicationUtilities.launch(SettingsActivity.class);
+  }
 }

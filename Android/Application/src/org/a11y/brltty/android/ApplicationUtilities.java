@@ -136,7 +136,7 @@ public abstract class ApplicationUtilities {
     return usbManagerReference.get();
   }
 
-  public static void launchActivity (Class<? extends Activity> activityClass) {
+  public static void launch (Class<? extends Activity> activityClass) {
     Context context = ApplicationContext.get();
     Intent intent = new Intent(context, activityClass);
 
@@ -148,13 +148,5 @@ public abstract class ApplicationUtilities {
     );
 
     context.startActivity(intent);
-  }
-
-  public static void launchSettingsActivity () {
-    launchActivity(SettingsActivity.class);
-  }
-
-  public static void launchAccessibilityActivity () {
-    launchActivity(AccessibilityActivity.class);
   }
 }
