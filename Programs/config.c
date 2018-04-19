@@ -2614,6 +2614,9 @@ brlttyStart (void) {
 
   logProperty(opt_configurationFile, "configurationFile", gettext("Configuration File"));
   logProperty(opt_preferencesFile, "preferencesFile", gettext("Preferences File"));
+
+  constructBrailleDisplay(&brl);
+  constructSpeechSynthesizer(&spk);
   loadPreferences();
 
   logProperty(opt_updatableDirectory, "updatableDirectory", gettext("Updatable Directory"));
