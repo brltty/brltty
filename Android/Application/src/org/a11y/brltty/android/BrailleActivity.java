@@ -40,11 +40,11 @@ public class BrailleActivity extends Activity {
     SettingsActivity.launch();
   }
 
-  public void browseHomePage (View view) {
+  public void browseWebSite (View view) {
     ApplicationUtilities.launch(R.string.home_page_url);
   }
 
-  public void postPublicMessage (View view) {
+  public void postCommunityMessage (View view) {
     Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"));
 
     {

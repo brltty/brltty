@@ -23,14 +23,14 @@
   <Button
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
-    android:text="@string/GLOBAL_BUTTON_BROWSE_HOME_PAGE"
-    android:onClick="browseHomePage"
+    android:text="@string/GLOBAL_BUTTON_BROWSE_WEB_SITE"
+    android:onClick="browseWebSite"
    />
 
   <Button
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
-    android:text="@string/GLOBAL_BUTTON_POST_PUBLIC_MESSAGE"
-    android:onClick="postPublicMessage"
+    android:text="@string/GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE"
+    android:onClick="postCommunityMessage"
    />
 </LinearLayout>
