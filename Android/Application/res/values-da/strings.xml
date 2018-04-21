@@ -7,11 +7,11 @@
   <string name="input_service_name">BRLTTY Input Service</string>
   <string name="input_service_type">Tastaturer på Braille enheder</string>
 
-  <string name="VIRTUAL_BUTTON_NOTIFICATIONS">Notifikationer</string>
-  <string name="VIRTUAL_BUTTON_QUICK_SETTINGS">Hurtig Indstillinger</string>
-  <string name="VIRTUAL_BUTTON_BACK">Tilbage</string>
-  <string name="VIRTUAL_BUTTON_HOME">Hjem</string>
-  <string name="VIRTUAL_BUTTON_RECENT_APPS">Seneste Apps</string>
+  <string name="GLOBAL_BUTTON_NOTIFICATIONS">Notifikationer</string>
+  <string name="GLOBAL_BUTTON_QUICK_SETTINGS">Hurtig Indstillinger</string>
+  <string name="GLOBAL_BUTTON_BACK">Tilbage</string>
+  <string name="GLOBAL_BUTTON_HOME">Hjem</string>
+  <string name="GLOBAL_BUTTON_RECENT_APPS">Seneste Apps</string>
 
   <string name="SETTINGS_SCREEN_MAIN">BRLTTY Indstillinger</string>
   <string name="SETTINGS_SCREEN_GENERAL">Generalle indstillinger</string>

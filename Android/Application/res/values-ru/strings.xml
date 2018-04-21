@@ -7,11 +7,11 @@
   <string name="input_service_name">Служба ввода BRLTTY</string>
   <string name="input_service_type">Клавиатуры на брайлевских устройствах</string>
 
-  <string name="VIRTUAL_BUTTON_NOTIFICATIONS">Уведомления</string>
-  <string name="VIRTUAL_BUTTON_QUICK_SETTINGS">Быстрые настройки</string>
-  <string name="VIRTUAL_BUTTON_BACK">Назад</string>
-  <string name="VIRTUAL_BUTTON_HOME">Главная страница</string>
-  <string name="VIRTUAL_BUTTON_RECENT_APPS">Недавние приложения</string>
+  <string name="GLOBAL_BUTTON_NOTIFICATIONS">Уведомления</string>
+  <string name="GLOBAL_BUTTON_QUICK_SETTINGS">Быстрые настройки</string>
+  <string name="GLOBAL_BUTTON_BACK">Назад</string>
+  <string name="GLOBAL_BUTTON_HOME">Главная страница</string>
+  <string name="GLOBAL_BUTTON_RECENT_APPS">Недавние приложения</string>
 
   <string name="SETTINGS_SCREEN_MAIN">Настройки BRLTTY</string>
   <string name="SETTINGS_SCREEN_GENERAL">Общие настройки</string>

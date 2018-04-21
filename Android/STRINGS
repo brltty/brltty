@@ -4,11 +4,11 @@ app_description BRLTTY supports braille devices.
 input_service_name BRLTTY Input Service
 input_service_type Keyboards on Braille Devices
 
-VIRTUAL_BUTTON_NOTIFICATIONS Notifications
-VIRTUAL_BUTTON_QUICK_SETTINGS Quick Settings
-VIRTUAL_BUTTON_BACK Back
-VIRTUAL_BUTTON_HOME Home
-VIRTUAL_BUTTON_RECENT_APPS Recent Apps
+GLOBAL_BUTTON_NOTIFICATIONS Notifications
+GLOBAL_BUTTON_QUICK_SETTINGS Quick Settings
+GLOBAL_BUTTON_BACK Back
+GLOBAL_BUTTON_HOME Home
+GLOBAL_BUTTON_RECENT_APPS Recent Apps
 
 SETTINGS_SCREEN_MAIN BRLTTY Settings
 SETTINGS_SCREEN_GENERAL General Settings

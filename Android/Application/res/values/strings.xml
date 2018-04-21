@@ -20,13 +20,14 @@
   <string name="braille_state_waiting">Waiting</string>
   <string name="braille_state_connected">Connected</string>
 
-  <string name="VIRTUAL_BUTTON_NOTIFICATIONS">Notifications</string>
-  <string name="VIRTUAL_BUTTON_QUICK_SETTINGS">Quick Settings</string>
-  <string name="VIRTUAL_BUTTON_BACK">Back</string>
-  <string name="VIRTUAL_BUTTON_HOME">Home</string>
-  <string name="VIRTUAL_BUTTON_RECENT_APPS">Recent Apps</string>
-  <string name="VIRTUAL_BUTTON_OVERVIEW">Overview</string>
-  <string name="VIRTUAL_BUTTON_SWITCH_INPUT_METHOD">Switch Input Method</string>
+  <string name="GLOBAL_BUTTON_NOTIFICATIONS">Notifications</string>
+  <string name="GLOBAL_BUTTON_QUICK_SETTINGS">Quick Settings</string>
+  <string name="GLOBAL_BUTTON_BACK">Back</string>
+  <string name="GLOBAL_BUTTON_HOME">Home</string>
+  <string name="GLOBAL_BUTTON_RECENT_APPS">Recent Apps</string>
+  <string name="GLOBAL_BUTTON_OVERVIEW">Overview</string>
+  <string name="GLOBAL_BUTTON_SWITCH_INPUT_METHOD">Switch Input Method</string>
+  <string name="GLOBAL_BUTTON_BROWSE_HOME_PAGE">Browse Home Page</string>
 
   <string name="SETTINGS_SCREEN_MAIN">BRLTTY Settings</string>
   <string name="SETTINGS_SCREEN_GENERAL">General Settings</string>

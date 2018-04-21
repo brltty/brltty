@@ -62,28 +62,28 @@ public abstract class BrailleRenderer {
   private void addVirtualElements (ScreenElementList elements) {
     if (ApplicationUtilities.haveJellyBean) {
       elements.addAtTop(
-        R.string.VIRTUAL_BUTTON_NOTIFICATIONS,
+        R.string.GLOBAL_BUTTON_NOTIFICATIONS,
         AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS
       );
     }
 
     if (ApplicationUtilities.haveJellyBean) {
       elements.addAtTop(
-        R.string.VIRTUAL_BUTTON_QUICK_SETTINGS,
+        R.string.GLOBAL_BUTTON_QUICK_SETTINGS,
         AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS
       );
     }
 
     if (ApplicationUtilities.haveJellyBean) {
       elements.addAtBottom(
-        R.string.VIRTUAL_BUTTON_BACK,
+        R.string.GLOBAL_BUTTON_BACK,
         AccessibilityService.GLOBAL_ACTION_BACK
       );
     }
 
     if (ApplicationUtilities.haveJellyBean) {
       elements.addAtBottom(
-        R.string.VIRTUAL_BUTTON_HOME,
+        R.string.GLOBAL_BUTTON_HOME,
         AccessibilityService.GLOBAL_ACTION_HOME
       );
     }
@@ -91,8 +91,8 @@ public abstract class BrailleRenderer {
     if (ApplicationUtilities.haveJellyBean) {
       elements.addAtBottom(
         ApplicationUtilities.haveLollipop?
-          R.string.VIRTUAL_BUTTON_OVERVIEW:
-          R.string.VIRTUAL_BUTTON_RECENT_APPS,
+          R.string.GLOBAL_BUTTON_OVERVIEW:
+          R.string.GLOBAL_BUTTON_RECENT_APPS,
         AccessibilityService.GLOBAL_ACTION_RECENTS
       );
     }

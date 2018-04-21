@@ -37,6 +37,10 @@ public class BrailleActivity extends Activity {
     SettingsActivity.launch();
   }
 
+  public void browseHomePage (View view) {
+    ApplicationUtilities.launch(R.string.home_page_url);
+  }
+
   public static void launch () {
     ApplicationUtilities.launch(BrailleActivity.class);
   }

@@ -7,11 +7,11 @@
   <string name="input_service_name">BRLTTY Servizio in Ingresso</string>
   <string name="input_service_type">Tastiere su Dispositivi Braille</string>
 
-  <string name="VIRTUAL_BUTTON_NOTIFICATIONS">Notifiche</string>
-  <string name="VIRTUAL_BUTTON_QUICK_SETTINGS">Impostazioni Rapide</string>
-  <string name="VIRTUAL_BUTTON_BACK">Indietro</string>
-  <string name="VIRTUAL_BUTTON_HOME">Home</string>
-  <string name="VIRTUAL_BUTTON_RECENT_APPS">Applicazioni Recenti</string>
+  <string name="GLOBAL_BUTTON_NOTIFICATIONS">Notifiche</string>
+  <string name="GLOBAL_BUTTON_QUICK_SETTINGS">Impostazioni Rapide</string>
+  <string name="GLOBAL_BUTTON_BACK">Indietro</string>
+  <string name="GLOBAL_BUTTON_HOME">Home</string>
+  <string name="GLOBAL_BUTTON_RECENT_APPS">Applicazioni Recenti</string>
 
   <string name="SETTINGS_SCREEN_MAIN">Impostazioni BRLTTY</string>
   <string name="SETTINGS_SCREEN_GENERAL">Impostazioni Generali</string>

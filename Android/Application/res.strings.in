@@ -3,4 +3,6 @@
 
 <resources>
   <string name="app_version">@PACKAGE_VERSION@</string>
+  <string name="home_page_url">@PACKAGE_URL@</string>
+  <string name="mailing_list_address">@PACKAGE_BUGREPORT@</string>
 </resources>

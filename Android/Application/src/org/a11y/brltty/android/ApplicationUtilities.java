@@ -18,13 +18,11 @@
 
 package org.a11y.brltty.android;
 
+import android.util.Log;
 import android.os.Build;
 import android.os.SystemClock;
 
 import android.content.Context;
-import android.content.Intent;
-import android.app.Activity;
-
 import android.content.ContentResolver;
 import android.provider.Settings;
 
@@ -37,7 +35,14 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.WindowManager;
 import android.hardware.usb.UsbManager;
 
+import android.content.Intent;
+import android.net.Uri;
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
+
 public abstract class ApplicationUtilities {
+  private final static String LOG_TAG = ApplicationUtilities.class.getName();
+
   private ApplicationUtilities () {
   }
 
@@ -136,9 +141,16 @@ public abstract class ApplicationUtilities {
     return usbManagerReference.get();
   }
 
+  public static void launch (Intent intent) {
+    try {
+      ApplicationContext.get().startActivity(intent);
+    } catch (ActivityNotFoundException exception) {
+      Log.w(LOG_TAG, "activity not found", exception);
+    }
+  }
+
   public static void launch (Class<? extends Activity> activityClass) {
-    Context context = ApplicationContext.get();
-    Intent intent = new Intent(context, activityClass);
+    Intent intent = new Intent(ApplicationContext.get(), activityClass);
 
     intent.addFlags(
       Intent.FLAG_ACTIVITY_NEW_TASK |
@@ -147,6 +159,18 @@ public abstract class ApplicationUtilities {
       Intent.FLAG_FROM_BACKGROUND
     );
 
-    context.startActivity(intent);
+    launch(intent);
+  }
+
+  public static void launch (Uri uri) {
+    launch(new Intent(Intent.ACTION_VIEW, uri));
+  }
+
+  public static void launch (String url) {
+    launch(Uri.parse(url));
+  }
+
+  public static void launch (int url) {
+    launch(ApplicationContext.get().getResources().getString(url));
   }
 }

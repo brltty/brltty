@@ -7,11 +7,11 @@
   <string name="input_service_name">BRLTTY Storitev Vnosa</string>
   <string name="input_service_type">Tipkovnice na Brajevih Vrsticah</string>
 
-  <string name="VIRTUAL_BUTTON_NOTIFICATIONS">Obvestila</string>
-  <string name="VIRTUAL_BUTTON_QUICK_SETTINGS">Hitre Nastavitve</string>
-  <string name="VIRTUAL_BUTTON_BACK">Nazaj</string>
-  <string name="VIRTUAL_BUTTON_HOME">Domov</string>
-  <string name="VIRTUAL_BUTTON_RECENT_APPS">Trenutne Aplikacije</string>
+  <string name="GLOBAL_BUTTON_NOTIFICATIONS">Obvestila</string>
+  <string name="GLOBAL_BUTTON_QUICK_SETTINGS">Hitre Nastavitve</string>
+  <string name="GLOBAL_BUTTON_BACK">Nazaj</string>
+  <string name="GLOBAL_BUTTON_HOME">Domov</string>
+  <string name="GLOBAL_BUTTON_RECENT_APPS">Trenutne Aplikacije</string>
 
   <string name="SETTINGS_SCREEN_MAIN">BRLTTY Settings</string>
   <string name="SETTINGS_SCREEN_GENERAL">Splošne Nastavitve</string>

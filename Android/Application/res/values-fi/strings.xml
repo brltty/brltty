@@ -7,11 +7,11 @@
   <string name="input_service_name">BRLTTY:n syötepalvelu</string>
   <string name="input_service_type">Pistenäyttöjen näppäimistöt</string>
 
-  <string name="VIRTUAL_BUTTON_NOTIFICATIONS">Ilmoitukset</string>
-  <string name="VIRTUAL_BUTTON_QUICK_SETTINGS">Pika-asetukset</string>
-  <string name="VIRTUAL_BUTTON_BACK">Takaisin</string>
-  <string name="VIRTUAL_BUTTON_HOME">Koti</string>
-  <string name="VIRTUAL_BUTTON_RECENT_APPS">Viimeisimmät sovellukset</string>
+  <string name="GLOBAL_BUTTON_NOTIFICATIONS">Ilmoitukset</string>
+  <string name="GLOBAL_BUTTON_QUICK_SETTINGS">Pika-asetukset</string>
+  <string name="GLOBAL_BUTTON_BACK">Takaisin</string>
+  <string name="GLOBAL_BUTTON_HOME">Koti</string>
+  <string name="GLOBAL_BUTTON_RECENT_APPS">Viimeisimmät sovellukset</string>
 
   <string name="SETTINGS_SCREEN_MAIN">BRLTTY:n asetukset</string>
   <string name="SETTINGS_SCREEN_GENERAL">Yleiset</string>

@@ -9,7 +9,7 @@
   <Button
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
-    android:text="@string/VIRTUAL_BUTTON_SWITCH_INPUT_METHOD"
+    android:text="@string/GLOBAL_BUTTON_SWITCH_INPUT_METHOD"
     android:onClick="switchInputMethod"
    />
 
@@ -18,5 +18,12 @@
     android:layout_width="match_parent"
     android:text="@string/SETTINGS_SCREEN_MAIN"
     android:onClick="launchSettingsActivity"
+   />
+
+  <Button
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:text="@string/GLOBAL_BUTTON_BROWSE_HOME_PAGE"
+    android:onClick="browseHomePage"
    />
 </LinearLayout>
