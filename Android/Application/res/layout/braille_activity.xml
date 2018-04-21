@@ -26,4 +26,11 @@
     android:text="@string/GLOBAL_BUTTON_BROWSE_HOME_PAGE"
     android:onClick="browseHomePage"
    />
+
+  <Button
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:text="@string/GLOBAL_BUTTON_POST_PUBLIC_MESSAGE"
+    android:onClick="postPublicMessage"
+   />
 </LinearLayout>

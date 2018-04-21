@@ -22,6 +22,9 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 
+import android.content.Intent;
+import android.net.Uri;
+
 public class BrailleActivity extends Activity {
   @Override
   protected void onCreate (Bundle savedState) {
@@ -39,6 +42,22 @@ public class BrailleActivity extends Activity {
 
   public void browseHomePage (View view) {
     ApplicationUtilities.launch(R.string.home_page_url);
+  }
+
+  public void postPublicMessage (View view) {
+    Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"));
+
+    {
+      StringBuilder recipient = new StringBuilder();
+      recipient.append("BRLTTY Mailing List");
+      recipient.append(' ');
+      recipient.append('<');
+      recipient.append(ApplicationContext.get().getResources().getString(R.string.mailing_list_address));
+      recipient.append('>');
+      intent.putExtra(Intent.EXTRA_EMAIL, new String[] {recipient.toString()});
+    }
+
+    ApplicationUtilities.launch(intent);
   }
 
   public static void launch () {
