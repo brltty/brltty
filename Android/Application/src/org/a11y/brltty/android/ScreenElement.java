@@ -211,17 +211,17 @@ public class ScreenElement {
     return brailleText;
   }
 
-  public final Point getBrailleCoordinate (int offset) {
+  public final Point getBrailleCoordinates (int offset) {
     String[] lines = getBrailleText();
 
     if (lines != null) {
-      int y = 0;
+      int row = 0;
 
       for (String line : lines) {
         int length = line.length();
-        if (offset < length) return new Point(offset, y);
+        if (offset < length) return new Point(offset, row);
 
-        y += 1;
+        row += 1;
         offset -= length;
       }
     }

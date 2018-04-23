@@ -375,9 +375,9 @@ public class GridBrailleRenderer extends BrailleRenderer {
       node.recycle();
       node = null;
 
-      int x = location.left;
-      int y = leaf? ((location.top + location.bottom) / 2): location.top;
-      return new Point(x, y);
+      int column = location.left;
+      int row = leaf? ((location.top + location.bottom) / 2): location.top;
+      return new Point(column, row);
     }
 
     public final Cell addCell (ScreenElement element) {

@@ -399,14 +399,14 @@ public abstract class ScreenDriver {
             }
 
             if ((0 <= start) && (start <= end)) {
-              Point topLeft = element.getBrailleCoordinate(start);
+              Point topLeft = element.getBrailleCoordinates(start);
 
               if (topLeft != null) {
                 if (start == end) {
                   selectionLeft = selectionRight = topLeft.x;
                   selectionTop = selectionBottom = topLeft.y;
                 } else {
-                  Point bottomRight = element.getBrailleCoordinate(end-1);
+                  Point bottomRight = element.getBrailleCoordinates(end-1);
 
                   if (bottomRight != null) {
                     selectionLeft = topLeft.x;
