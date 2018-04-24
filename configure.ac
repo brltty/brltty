@@ -377,7 +377,7 @@ in
    solaris* ) LDFLAGS_DYNAMIC="";;
    *) AC_MSG_ERROR([dynamic linkage not supported for ${host_os}]);;
 esac
-LDFLAGS_DYNAMIC="${LDFLAGS} BRLTTY_OPTIONS_LD2CC([${LDFLAGS_DYNAMIC}])"
+LDFLAGS_DYNAMIC="BRLTTY_OPTIONS_LD2CC([${LDFLAGS_DYNAMIC}])"
 
 if test "${GCC}" = "yes"
 then
@@ -404,6 +404,7 @@ else
 fi
 
 pkgconfig_flags_libs="--libs"
+
 BRLTTY_ARG_ENABLE(
    [standalone-programs],
    [statically linked executables],
@@ -429,40 +430,42 @@ test "${DOXYGEN}" = "false" && can_make_BrlAPIref=no || can_make_BrlAPIref=yes
 AC_SUBST([can_make_BrlAPIref])
 
 AC_CACHE_CHECK([for shared object creation command], [brltty_cv_prog_make_object_shared], [dnl
-case "${host_os}"
-in
-   linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*|cygwin*|mingw*|elf*)
-      brltty_mkshr_ld_make="-shared"
-      ;;
-   solaris*)
-      brltty_mkshr_ld_make="-G"
-      ;;
-   hpux*)
-      brltty_mkshr_ld_make="-b"
-      ;;
-   osf*)
-      brltty_mkshr_ld_make="-shared"
-      ;;
-   darwin*)
-      brltty_mkshr_ld_make="-bundle"
-      brltty_mkshr_ld_options="-flat_namespace -undefined suppress"
-      brltty_mkshr_gcc_make="-bundle"
-      ;;
-   msdos*)
-      brltty_mkshr_ld_make="not_supported_on_msdos"
-      brltty_mkshr_ld_options="not_supported_on_msdos"
-      brltty_mkshr_gcc_make="not_supported_on_msdos"
-      ;;
-   *)
-      AC_MSG_ERROR([loadable module creation command not configured for ${host_os}])
-      ;;
-esac
-if test "${GCC}" = "yes"
-then
-   brltty_cv_prog_make_object_shared="\$(CC) ${brltty_mkshr_gcc_make=-shared} BRLTTY_OPTIONS_LD2CC([${brltty_mkshr_ld_options}]) -o"
-else
-   brltty_cv_prog_make_object_shared="\$(LD) ${brltty_mkshr_ld_make} ${brltty_mkshr_ld_options} -o"
-fi])
+   case "${host_os}"
+   in
+      linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*|cygwin*|mingw*|elf*)
+         brltty_mkshr_ld_make="-shared"
+         ;;
+      solaris*)
+         brltty_mkshr_ld_make="-G"
+         ;;
+      hpux*)
+         brltty_mkshr_ld_make="-b"
+         ;;
+      osf*)
+         brltty_mkshr_ld_make="-shared"
+         ;;
+      darwin*)
+         brltty_mkshr_ld_make="-bundle"
+         brltty_mkshr_ld_options="-flat_namespace -undefined suppress"
+         brltty_mkshr_gcc_make="-bundle"
+         ;;
+      *)
+         AC_MSG_ERROR([loadable module creation command not configured for ${host_os}])
+         brltty_mkshr_ld_make="NOT_SUPPORTED"
+         brltty_mkshr_ld_options="NOT_SUPPORTED"
+         brltty_mkshr_gcc_make="NOT_SUPPORTED"
+         ;;
+   esac
+
+   if test "${GCC}" = "yes"
+   then
+      brltty_cv_prog_make_object_shared="\$(CC) ${brltty_mkshr_gcc_make=-shared} BRLTTY_OPTIONS_LD2CC([${brltty_mkshr_ld_options}])"
+   else
+      brltty_cv_prog_make_object_shared="\$(LD) ${brltty_mkshr_ld_make} ${brltty_mkshr_ld_options}"
+   fi
+
+   brltty_cv_prog_make_object_shared="${brltty_cv_prog_make_object_shared} ${LDFLAGS} -o"
+])
 AC_SUBST([MKSHR], ["${brltty_cv_prog_make_object_shared}"])
 
 AC_CACHE_CHECK([for make relocatable object command], [brltty_cv_prog_make_object_relocatable], [dnl
