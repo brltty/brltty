@@ -581,6 +581,11 @@ static void toX_f(const char *display) {
   unsigned int keysym, keycode, modifiers, next_modifiers = 0;
   Bool haveXTest;
   int eventBase, errorBase, majorVersion, minorVersion;
+  XkbDescPtr xkb = NULL;
+  XkbMapChangesRec changes = { .changed = XkbKeyTypesMask|XkbKeySymsMask };
+  int oneGroupType[XkbNumKbdGroups] = { XkbOneLevelIndex };
+  Status status;
+  int last_remap_keycode = -1, remap_keycode;
 #endif /* CAN_SIMULATE_KEY_PRESSES */
 
   Xdisplay = display;
@@ -591,7 +596,6 @@ static void toX_f(const char *display) {
 
 #ifdef CAN_SIMULATE_KEY_PRESSES
   haveXTest = XTestQueryExtension(dpy, &eventBase, &errorBase, &majorVersion, &minorVersion);
-#endif /* CAN_SIMULATE_KEY_PRESSES */
 
   {
     int foo;
@@ -601,6 +605,7 @@ static void toX_f(const char *display) {
     if (!XkbQueryExtension(dpy, &foo, &foo, &foo, &major, &minor))
       fatal(gettext("Incompatible XKB server support\n"));
   }
+#endif /* CAN_SIMULATE_KEY_PRESSES */
 
   X_fd = XConnectionNumber(dpy);
 
@@ -796,9 +801,10 @@ static void toX_f(const char *display) {
 	    modifiers = ((code & BRLAPI_KEY_FLAGS_MASK) >> BRLAPI_KEY_FLAGS_SHIFT) & 0xFF;
 	    keysym = code & BRLAPI_KEY_CODE_MASK;
 	    keycode = XKeysymToKeycode(dpy,keysym);
+	    remap_keycode = -1;
 	    if (keycode == NoSymbol) {
-	      fprintf(stderr,gettext("xbrlapi: Couldn't translate keysym %08X to keycode.\n"),keysym);
-	      continue;
+	      debugf(gettext("xbrlapi: Couldn't translate keysym %08X to keycode.\n"),keysym);
+	      goto needRemap;
 	    }
 
 	    {
@@ -821,21 +827,80 @@ static void toX_f(const char *display) {
 		if (tryModifiers(keycode, &modifiers, *try, keysym)) goto foundModifiers;
 	      } while (*++try);
 
-	      fprintf(stderr,gettext("xbrlapi: Couldn't find modifiers to apply to %d for getting keysym %08X\n"),keycode,keysym);
-	      continue;
+	      debugf(gettext("xbrlapi: Couldn't find modifiers to apply to %d for getting keysym %08X\n"),keycode,keysym);
 	    }
-	  foundModifiers:
 
+	  needRemap:
+	    {
+	      /* Try tofind an unassigned keycode to remap it temporarily to the requested keysym. */
+	      xkb = XkbGetMap(dpy,XkbKeyTypesMask|XkbKeySymsMask,XkbUseCoreKbd);
+	      /* Start from big keycodes, usually unassigned. */
+	      for (i = xkb->max_key_code;
+		   i >= xkb->min_key_code && (XkbKeyNumGroups(xkb,i) != 0 || i == last_remap_keycode);
+		   i--)
+		;
+	      if (i < xkb->min_key_code) {
+		fprintf(stderr,gettext("xbrlapi: Couldn't find a keycode to remap for simulating unbound keysym %08X\n"),keysym);
+		goto abortRemap;
+	      }
+	      remap_keycode = keycode = i;
+	      next_modifiers = modifiers = 0;
+
+	      /* Remap this keycode. */
+	      changes.first_key_sym = keycode;
+	      changes.num_key_syms = 1;
+	      if ((status = XkbChangeTypesOfKey(xkb,keycode,1,XkbGroup1Mask,oneGroupType,&changes))) {
+		debugf("Error while changing client keymap: %d\n", status);
+		goto abortRemap;
+	      }
+	      XkbKeySymEntry(xkb,keycode,0,0) = keysym;
+	      if (!XkbChangeMap(dpy,xkb,&changes)) {
+		debugf("Error while changing server keymap\n");
+		goto abortRemap;
+	      }
+	      XkbFreeKeyboard(xkb,0,True);
+	      debugf("Remapped keycode %d to keysym %08X\n",keycode,keysym);
+	    }
+
+	  foundModifiers:
 	    debugf("key %08X: (%d,%x,%x)\n", keysym, keycode, next_modifiers, modifiers);
 	    modifiers |= next_modifiers;
 	    next_modifiers = 0;
 	    if (modifiers)
 	      XkbLockModifiers(dpy, XkbUseCoreKbd, modifiers, modifiers);
-	    XTestFakeKeyEvent(dpy,keycode,True,CurrentTime);
-	    XTestFakeKeyEvent(dpy,keycode,False,CurrentTime);
+	    XTestFakeKeyEvent(dpy,keycode,True,1);
+	    XTestFakeKeyEvent(dpy,keycode,False,1);
 	    if (modifiers)
 	      XkbLockModifiers(dpy, XkbUseCoreKbd, modifiers, 0);
+
+	    /* Remove previous keycode mapping */
+	    if (last_remap_keycode != -1) {
+	      /* Note: since X11 is asynchronous, we should not immediately
+	       * unmap the just-mapped keycode, otherwise when the client
+	       * eventually gets to read the new Xkb state from the server,
+	       * the key might have been synthesized and the keycode unmapped
+	       * already. We just hope the user does not type too fast for the
+	       * application to catch up. */
+	      xkb = XkbGetMap(dpy,XkbKeyTypesMask|XkbKeySymsMask,XkbUseCoreKbd);
+	      changes.first_key_sym = last_remap_keycode;
+	      changes.num_key_syms = 1;
+	      if ((status = XkbChangeTypesOfKey(xkb,last_remap_keycode,0,XkbGroup1Mask,NULL,&changes))) {
+		debugf("Oops, error while restoring client keymap: %d\n", status);
+	      } else {
+		XkbChangeMap(dpy,xkb,&changes);
+		debugf("restored last keycode %d\n", last_remap_keycode);
+	      }
+	      XkbFreeKeyboard(xkb,0,True);
+	    }
+	    XFlush(dpy);
+	    last_remap_keycode = remap_keycode;
 	    break;
+
+	  abortRemap:
+	    XkbFreeKeyboard(xkb, 0, True);
+	    xkb = NULL;
+	    break;
+
 	  default:
 	    fprintf(stderr, "xbrlapi: %s: %" BRLAPI_PRIxKEYCODE "\n",
 		    gettext("unexpected block type"), code);
