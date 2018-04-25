@@ -1498,6 +1498,13 @@ usbChooseChannel (UsbDevice *device, UsbChooseChannelData *data) {
   const UsbDeviceDescriptor *descriptor = &device->descriptor;
   const UsbChannelDefinition *definition = data->definition;
 
+  {
+    uint16_t vendor = getLittleEndian16(descriptor->idVendor);
+    uint16_t product = getLittleEndian16(descriptor->idProduct);
+    const char *const *drivers = usbGetDriverCodes(vendor, product);
+    if (!drivers) return 0;
+  }
+
   if (!(descriptor->iManufacturer ||
         descriptor->iProduct ||
         descriptor->iSerialNumber)) {
