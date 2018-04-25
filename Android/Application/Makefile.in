@@ -43,7 +43,3 @@ clean::
 distclean::
 	-rm res/values/configured.xml
 
-NOTIFICATION_ICON_FILE = res/drawable/braille_notification.png
-status-bar-icon:
-	./mksbicon $(NOTIFICATION_ICON_FILE)
-
