@@ -157,8 +157,12 @@ usbOpenDeviceConnection (JNIEnv *env, jobject device) {
                              JAVA_SIG_METHOD(JAVA_SIG_USB_CONNECTION, JAVA_SIG_USB_DEVICE))) {
       jobject connection = (*env)->CallStaticObjectMethod(env, usbHelperClass, method, device);
 
-      if (connection) return connection;
-      clearJavaException(env, 1);
+      if (!clearJavaException(env, 1)) {
+        if (connection) {
+          return connection;
+        }
+      }
+
       errno = EIO;
     }
   }
