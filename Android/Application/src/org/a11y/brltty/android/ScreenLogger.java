@@ -336,6 +336,10 @@ public abstract class ScreenLogger {
     add(sb, "pkg", node.getPackageName());
     add(sb, "win", node.getWindowId());
 
+    if (ApplicationUtilities.haveJellyBeanMR2) {
+      add(sb, "vrn", node.getViewIdResourceName());
+    }
+
     if (ApplicationUtilities.haveKitkat) {
       Bundle extras = node.getExtras();
 
