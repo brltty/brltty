@@ -94,11 +94,12 @@ public abstract class BrailleNotification {
 
       notificationBuilder = new Notification.Builder(context, NOTIFICATION_CHANNEL);
     } else {
-      notificationBuilder = new Notification.Builder(context);
+      notificationBuilder = new Notification.Builder(context)
+        .setPriority(Notification.PRIORITY_LOW)
+        ;
     }
 
     notificationBuilder
-      .setPriority(Notification.PRIORITY_LOW)
       .setOngoing(true)
       .setOnlyAlertOnce(true)
 
