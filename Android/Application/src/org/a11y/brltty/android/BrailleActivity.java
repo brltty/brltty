@@ -72,6 +72,10 @@ public class BrailleActivity extends Activity {
     ApplicationUtilities.launch(R.string.application_package_url);
   }
 
+  public void launchAboutActivity (View view) {
+    AboutActivity.launch();
+  }
+
   public static void launch () {
     ApplicationUtilities.launch(BrailleActivity.class);
   }

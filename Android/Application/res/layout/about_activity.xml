@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_height="match_parent"
+  android:layout_width="match_parent"
+  >
+
+  <TableRow>
+    <TextView android:text="@string/application_name_label" />
+    <TextView android:text="@string/app_name" />
+  </TableRow>
+
+  <TableRow>
+    <TextView android:text="@string/application_version_label" />
+    <TextView android:text="@string/app_version" />
+  </TableRow>
+
+  <TableRow>
+    <TextView android:text="@string/application_copyright_label" />
+    <TextView android:text="@string/application_copyright_value" />
+  </TableRow>
+</TableLayout>

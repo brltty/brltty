@@ -73,5 +73,11 @@
       android:label="@string/app_name"
       >
     </activity>
+
+    <activity
+      android:name=".AboutActivity"
+      android:label="@string/about_activity_label"
+      >
+    </activity>
   </application>
 </manifest>

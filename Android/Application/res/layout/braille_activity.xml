@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  android:orientation="vertical"
   android:layout_height="match_parent"
   android:layout_width="match_parent"
+  android:orientation="vertical"
   >
 
   <Button
@@ -53,5 +53,12 @@
     android:layout_width="match_parent"
     android:text="@string/GLOBAL_BUTTON_UPDATE_APPLICATION"
     android:onClick="updateApplication"
+   />
+
+  <Button
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:text="@string/about_activity_label"
+    android:onClick="launchAboutActivity"
    />
 </LinearLayout>
