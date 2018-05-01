@@ -28,7 +28,10 @@
   <string name="GLOBAL_BUTTON_OVERVIEW">Overview</string>
   <string name="GLOBAL_BUTTON_SWITCH_INPUT_METHOD">Switch Input Method</string>
   <string name="GLOBAL_BUTTON_BROWSE_WEB_SITE">Browse Web Site</string>
+  <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">Browse Community Messages</string>
   <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Post Community Message</string>
+  <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Manage Community Membership</string>
+  <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Update BRLTTY</string>
 
   <string name="SETTINGS_SCREEN_MAIN">BRLTTY Settings</string>
   <string name="SETTINGS_SCREEN_GENERAL">General Settings</string>

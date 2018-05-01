@@ -30,7 +30,28 @@
   <Button
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
+    android:text="@string/GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES"
+    android:onClick="browseCommunityMessages"
+   />
+
+  <Button
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
     android:text="@string/GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE"
     android:onClick="postCommunityMessage"
+   />
+
+  <Button
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:text="@string/GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP"
+    android:onClick="manageCommunityMembership"
+   />
+
+  <Button
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:text="@string/GLOBAL_BUTTON_UPDATE_APPLICATION"
+    android:onClick="updateApplication"
    />
 </LinearLayout>

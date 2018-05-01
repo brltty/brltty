@@ -41,7 +41,11 @@ public class BrailleActivity extends Activity {
   }
 
   public void browseWebSite (View view) {
-    ApplicationUtilities.launch(R.string.home_page_url);
+    ApplicationUtilities.launch(R.string.web_site_url);
+  }
+
+  public void browseCommunityMessages (View view) {
+    ApplicationUtilities.launch(R.string.community_messages_url);
   }
 
   public void postCommunityMessage (View view) {
@@ -52,12 +56,20 @@ public class BrailleActivity extends Activity {
       recipient.append("BRLTTY Mailing List");
       recipient.append(' ');
       recipient.append('<');
-      recipient.append(ApplicationContext.get().getResources().getString(R.string.mailing_list_address));
+      recipient.append(ApplicationContext.get().getResources().getString(R.string.community_message_address));
       recipient.append('>');
       intent.putExtra(Intent.EXTRA_EMAIL, new String[] {recipient.toString()});
     }
 
     ApplicationUtilities.launch(intent);
+  }
+
+  public void manageCommunityMembership (View view) {
+    ApplicationUtilities.launch(R.string.community_membership_url);
+  }
+
+  public void updateApplication (View view) {
+    ApplicationUtilities.launch(R.string.application_package_url);
   }
 
   public static void launch () {
