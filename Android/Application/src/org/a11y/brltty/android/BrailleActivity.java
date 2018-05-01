@@ -40,6 +40,10 @@ public class BrailleActivity extends Activity {
     SettingsActivity.launch();
   }
 
+  public void viewUserGuide (View view) {
+    ApplicationUtilities.launch(R.string.user_guide_url);
+  }
+
   public void browseWebSite (View view) {
     ApplicationUtilities.launch(R.string.web_site_url);
   }

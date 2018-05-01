@@ -23,6 +23,13 @@
   <Button
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
+    android:text="@string/GLOBAL_BUTTON_VIEW_USER_GUIDE"
+    android:onClick="viewUserGuide"
+   />
+
+  <Button
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
     android:text="@string/GLOBAL_BUTTON_BROWSE_WEB_SITE"
     android:onClick="browseWebSite"
    />
