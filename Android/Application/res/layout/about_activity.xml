@@ -12,7 +12,7 @@
 
   <TableRow>
     <TextView android:text="@string/application_version_label" />
-    <TextView android:text="@string/app_version" />
+    <TextView android:text="@string/app_version" android:id="@+id/application_version_value" />
   </TableRow>
 
   <TableRow>

@@ -18,14 +18,37 @@
 
 package org.a11y.brltty.android;
 
+import android.util.Log;
+
 import android.app.Activity;
 import android.os.Bundle;
 
+import android.content.pm.PackageManager;
+import android.content.pm.PackageInfo;
+
+import android.view.View;
+import android.widget.TextView;
+
 public class AboutActivity extends Activity {
+  private final static String LOG_TAG = AboutActivity.class.getName();
+
+  private final void setText (int view, CharSequence text) {
+    ((TextView)findViewById(view)).setText(text);
+  }
+
   @Override
   protected void onCreate (Bundle savedState) {
     super.onCreate(savedState);
     setContentView(R.layout.about_activity);
+
+    String name = getPackageName();
+    try {
+      PackageInfo info = getPackageManager().getPackageInfo(name, 0);
+
+      setText(R.id.application_version_value, info.versionName);
+    } catch (PackageManager.NameNotFoundException exception) {
+      Log.w(LOG_TAG, ("package information not found: " + name));
+    }
   }
 
   public static void launch () {
