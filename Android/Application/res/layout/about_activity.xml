@@ -17,6 +17,6 @@
 
   <TableRow>
     <TextView android:text="@string/application_copyright_label" />
-    <TextView android:text="@string/application_copyright_value" />
+    <TextView android:text="@string/PACKAGE_COPYRIGHT" />
   </TableRow>
 </TableLayout>

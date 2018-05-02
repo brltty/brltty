@@ -21,6 +21,11 @@ AC_PREREQ([2.64])
 AC_INIT([BRLTTY], [5.6], [brltty@brltty.com], [brltty], [http://brltty.com/])
 AC_CONFIG_SRCDIR([Programs/brltty.c])
 
+copyright="© 1995-2018 by The BRLTTY Developers"
+AC_SUBST([PACKAGE_COPYRIGHT], ["${copyright}"])
+AC_DEFINE_UNQUOTED([PACKAGE_COPYRIGHT], ["${copyright}"],
+                   [Define this to be a string containing the copyright notice.])
+
 AC_SUBST([api_major], [0])
 AC_SUBST([api_minor], [6])
 AC_SUBST([api_revision], [7])

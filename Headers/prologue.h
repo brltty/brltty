@@ -23,8 +23,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#define PACKAGE_COPYRIGHT "Copyright (C) 1995-2018 by The BRLTTY Developers."
-
 #undef HAVE_BUILTIN_POPCOUNT
 #ifdef __has_builtin
 #if __has_builtin(__builtin_popcount)

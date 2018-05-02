@@ -2524,7 +2524,7 @@ brlttyStart (void) {
   }
 
   if (opt_version) {
-    logMessage(LOG_INFO, "%s", PACKAGE_COPYRIGHT);
+    logMessage(LOG_INFO, "Copyright %s", PACKAGE_COPYRIGHT);
     identifyScreenDrivers(1);
 
 #ifdef ENABLE_API
