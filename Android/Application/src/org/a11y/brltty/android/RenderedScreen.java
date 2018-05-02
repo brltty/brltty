@@ -267,14 +267,17 @@ public class RenderedScreen {
           }
         }
 
+        {
+          String label = ChromeRole.getLabel(root);
+
+          if (label != null) {
+            if (text != null) label += ' ' + text;
+            text = label;
+          }
+        }
+
         if (text != null) {
           propagatedActions |= SIGNIFICANT_NODE_ACTIONS & ~actions;
-
-          {
-            String label = ChromeRole.getLabel(root);
-            if (label != null) text = label + ' ' + text;
-          }
-
           if (!root.isEnabled()) text += " (disabled)";
           screenElements.add(text, root);
         }

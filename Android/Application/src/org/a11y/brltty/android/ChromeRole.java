@@ -35,22 +35,29 @@ public enum ChromeRole {
   ),
 
   link("lnk"),
+  splitter("--------"),
   ; // end of enumeration
 
-  private final String generalLabel;
-  private final Map<String, String> specificLabels = new HashMap<String, String>();
+  private final String genericLabel;
+  private final Map<String, String> descriptionLabels;
 
-  ChromeRole (String general, String... specific) {
-    generalLabel = general;
+  ChromeRole (String generic, String... descriptions) {
+    genericLabel = generic;
 
     {
-      int count = specific.length;
-      int index = 0;
+      int count = descriptions.length;
 
-      while (index < count) {
-        String name = specific[index++];
-        String label = specific[index++];
-        specificLabels.put(name, label);
+      if (count > 0) {
+        descriptionLabels = new HashMap<String, String>();
+        int index = 0;
+
+        while (index < count) {
+          String description = descriptions[index++];
+          String label = descriptions[index++];
+          descriptionLabels.put(description, label);
+        }
+      } else {
+        descriptionLabels = null;
       }
     }
   }
@@ -68,13 +75,16 @@ public enum ChromeRole {
       return null;
     }
 
-    final String description = extras.getString("AccessibilityNodeInfo.roleDescription");
-    if (description != null) {
-      final String label = role.specificLabels.get(description);
-      if (label != null) return label;
+    if (role.descriptionLabels != null) {
+      final String description = extras.getString("AccessibilityNodeInfo.roleDescription");
+
+      if (description != null) {
+        final String label = role.descriptionLabels.get(description);
+        if (label != null) return label;
+      }
     }
 
-    return role.generalLabel;
+    return role.genericLabel;
   }
 
   public static String getLabel (AccessibilityNodeInfo node) {
