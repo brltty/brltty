@@ -269,6 +269,12 @@ public class RenderedScreen {
 
         if (text != null) {
           propagatedActions |= SIGNIFICANT_NODE_ACTIONS & ~actions;
+
+          {
+            String label = ChromeRole.getLabel(root);
+            if (label != null) text = label + ' ' + text;
+          }
+
           if (!root.isEnabled()) text += " (disabled)";
           screenElements.add(text, root);
         }
