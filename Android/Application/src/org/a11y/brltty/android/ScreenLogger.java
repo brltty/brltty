@@ -42,6 +42,25 @@ public abstract class ScreenLogger {
     return ScreenUtilities.getDescription(node);
   }
 
+  private static String shrinkText (String text) {
+    final int threshold = 50;
+    final char delimiter = '\n';
+
+    int length = text.length();
+    int to = text.lastIndexOf(delimiter);
+    int from = (to == -1)? length: text.indexOf(delimiter);
+    to += 1;
+
+    from = Math.min(from, threshold);
+    to = Math.max(to, (length - threshold));
+
+    if (from < to) {
+      text = text.substring(0, from) + "[...]" + text.substring(to);
+    }
+
+    return text;
+  }
+
   private static final void add (StringBuilder sb, String value) {
     if (value != null) {
       if (sb.length() > 0) sb.append(' ');
@@ -130,12 +149,12 @@ public abstract class ScreenLogger {
     add(sb, ScreenUtilities.getClassName(node));
 
     {
-      CharSequence text = ScreenUtilities.getText(node);
+      String text = ScreenUtilities.getText(node);
 
       if (text != null) {
         sb.append(' ');
         sb.append('"');
-        sb.append(text);
+        sb.append(shrinkText(text));
         sb.append('"');
       }
     }
@@ -146,7 +165,7 @@ public abstract class ScreenLogger {
       if (description != null) {
         sb.append(' ');
         sb.append('(');
-        sb.append(description);
+        sb.append(shrinkText(description));
         sb.append(')');
       }
     }
