@@ -23,7 +23,7 @@ import android.accessibilityservice.AccessibilityButtonController;
 public class AccessibilityButton extends AccessibilityButtonController.AccessibilityButtonCallback {
   @Override
   public void onClicked (AccessibilityButtonController controller) {
-    BrailleActivity.launch();
+    ActionsActivity.launch();
   }
 
   @Override

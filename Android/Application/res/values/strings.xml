@@ -21,7 +21,7 @@
   <string name="checkbox_state_checked">Yes</string>
 
   <string name="braille_channel_name">Braille Device State</string>
-  <string name="braille_hint_tap">Tap for settings.</string>
+  <string name="braille_hint_tap">tap for actions</string>
   <string name="braille_state_released">Released</string>
   <string name="braille_state_waiting">Waiting</string>
   <string name="braille_state_connected">Connected</string>

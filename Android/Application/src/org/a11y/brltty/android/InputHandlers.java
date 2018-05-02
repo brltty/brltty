@@ -742,7 +742,7 @@ public abstract class InputHandlers {
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
-        BrailleActivity.launch();
+        ActionsActivity.launch();
         return true;
       }
     };

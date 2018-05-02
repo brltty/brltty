@@ -25,11 +25,11 @@ import android.view.View;
 import android.content.Intent;
 import android.net.Uri;
 
-public class BrailleActivity extends Activity {
+public class ActionsActivity extends Activity {
   @Override
   protected void onCreate (Bundle savedState) {
     super.onCreate(savedState);
-    setContentView(R.layout.braille_activity);
+    setContentView(R.layout.actions_activity);
   }
 
   public void switchInputMethod (View view) {
@@ -81,6 +81,6 @@ public class BrailleActivity extends Activity {
   }
 
   public static void launch () {
-    ApplicationUtilities.launch(BrailleActivity.class);
+    ApplicationUtilities.launch(ActionsActivity.class);
   }
 }
