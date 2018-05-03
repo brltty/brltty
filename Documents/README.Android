@@ -38,8 +38,8 @@ capabilities. The required permissions are as follows:
    with your braille device.
 
 ``BLUETOOTH_ADMIN``
-   This permission is required on Android 4.0 (ICS) so that BRLTTY can use
-   Bluetooth to communicate with your braille device.
+   This permission is required on Android 4.0 (Ice Cream Sandwich) so that
+   BRLTTY can use Bluetooth to communicate with your braille device.
 
 ``INTERNET``
    This permission is required so that BRLTTY can listen on a TCP/IP port for
@@ -62,10 +62,10 @@ On Your Computer
 
 1) Go to `BRLTTY's Web Site`_.
 
-2) Find the ``Download`` link and press enter on it.
+2) Find the ``Download`` link and press Enter on it.
 
-3) Find the ``Android`` heading, down-arrow from there to the link that says
-   ``Latest APK``, and press enter on it.
+3) Go to the ``Android`` section, down-arrow from there to the link that says
+   ``Latest APK``, and press Enter on it.
 
 4) You'll be prompted to open or save the file at this point. Save it.
 
@@ -73,37 +73,36 @@ On Your Computer
    find the ``brltty-latest.apk`` file.
 
 6) If the file has been saved on your computer as ``brltty-latest.zip``,
-   then press the ``Context`` key, arrow to and press enter on
-   ``Rename``, and change the file extension from ``zip`` to
-   ``apk``. Don't worry if you get a warning about the possibility of
-   rendering the file unusable. Go ahead with the rename.
+   then press the ``Context`` key, arrow to and press Enter on ``Rename``,
+   and change the file extension from ``zip`` to ``apk``. Don't worry if you
+   get a warning about the possibility of rendering the file unusable. Go
+   ahead with the rename.
 
 On Your Android Device
 ~~~~~~~~~~~~~~~~~~~~~~
 
-1) Go into ``Settings`` -> ``Security``, and tap to check ``Unknown
-   Sources``. This option says something like:
+1) Go into ``Settings`` -> ``Security``, and ensure that ``Unknown Sources``
+   is enabled. This option says something like:
    
       Allow the installation of apps from unknown sources
       
    This is a one-time step. Once the box has been checked, it stays checked.
 
-2) Copy the ``apk`` file to your device. There are a number of ways to do
-   this:
+2) Copy the ``apk`` file to your device. There are a number of ways to do this:
 
-   *  The easiest way may be to email it to yourself as a file attachment so
-      that it will go to the email on your Android device.
+   * The easiest way may be to email it to yourself as a file attachment so
+     that it will go to the email on your Android device.
 
-   *  Another option is to save the file in Dropbox on your computer, and
-      then wait for it to show up in Dropbox on your Android device.
+   * Another option is to save the file in Dropbox on your computer, and
+     then wait for it to show up in Dropbox on your Android device.
 
-   *  Another option is to connect your Android device to your computer via
-      a USB cable, and then to copy the file to it in the same way that
-      you'd copy a file to a thumb drive.
+   * Another option is to connect your Android device to your computer via
+     a USB cable, and then to copy the file to it in the same way that
+     you'd copy a file to a thumb drive.
 
-3) Tap the ``brltty-latest.apk`` file to start installation, and answer any
-   prompts. If you use the Dropbox method, you may need to tap on the file
-   twice - once to download it, and a second time to start installation.
+3) Tap the ``brltty-latest.apk`` file to start its installation, and answer any
+   prompts. If you use the Dropbox method, you might need to tap on the file
+   twice - once to download it, and a second time to install it.
 
 4) Tap ``OK`` when installation is complete.
 
@@ -111,37 +110,38 @@ Activation and Configuration
 ----------------------------
 
 At this point, BRLTTY has been installed. Next, you'll need to go into
-``Settings`` -> ``Accessibility`` -> ``BRLTTY`` in order to turn the ``BRLTTY``
-accessibility service on, adjust its settings, and select your braille device.
+``Settings`` -> ``Accessibility`` -> ``BRLTTY`` in order to start the ``BRLTTY``
+accessibility service, adjust its settings, and select your braille device.
 
 If you'll be connecting to your braille device via Bluetooth,
 see `Connecting Via Bluetooth`_.
 
-If you'll be connecting to your braille device via USB, see
-`Connecting Via USB`_.
+If you'll be connecting to your braille device via USB,
+see `Connecting Via USB`_.
 
-If your braille device has a braille keyboard, see `Using a Braille Keyboard`_.
+If your braille device has a braille keyboard,
+see `Using a Braille Keyboard`_.
 
 Starting and Stopping BRLTTY
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 BRLTTY isn't a regular Android application - it's an accessibility service. As
-such, it can't be started and stopped in the usual way - from the launcher. In
-fact, it can't even be found within the applications list.
+such, it can't be started and stopped in the usual way, i.e. from the launcher.
+In fact, it can't even be found within the applications list.
 
-BRLTTY must be started and stopped from within the ``Accessibility Settings``
-screen. To get there, launch the ``Settings`` application, and then tap on
-``Accessibility`` (near the bottom). This window contains a "Services" section,
-which lists all of the accessibility services that are currently installed on
+BRLTTY must be started and stopped from the ``Accessibility Settings`` screen.
+To get there, launch the ``Settings`` application, and then tap on
+``Accessibility`` (near the bottom). This screen contains a "Services" section
+that lists all of the accessibility services that are currently installed on
 the device. For each installed accessibility service, there's an associated
 indicator that says ``On`` if that service is currently running, and ``Off`` if
 it isn't.
 
 Find ``BRLTTY`` and tap on it. This brings up a window with two items in it.
 One is a "switch" for turning BRLTTY on and off. The other is a button that
-takes you to BRLTTY's ``Settings`` screen. You should go through BRLTTY's
+takes you to BRLTTY's ``Settings`` screen. You can go through BRLTTY's
 settings, making changes as desired, as well as define your braille device(s),
-before starting BRLTTY.
+either before starting BRLTTY or while it's running.
 
 Connecting Your Braille Device
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -149,16 +149,17 @@ Connecting Your Braille Device
 Connecting Via Bluetooth
 ````````````````````````
 
-In order to use a Bluetooth braille devic, you'll need to first "pair" it with
+In order to use a Bluetooth braille device, you'll need to first "pair" it with
 your Android device. Go into ``Settings`` -> ``Bluetooth``. If your braille
 device is already listed within the ``Paired Devices`` section of that screen
-then it has already been paired. If you still need to pair it then tap ``Search
-for Devices``. This will add an ``Available Devices`` section to the screen. If
-your braille device isn't listed then you may need to perform a model-specific
-action on it in order to make it visible (also known as discoverable) - see its
-manual for details. After doing that, tap ``Search for Devices`` again. Tap on
-your braille device to begin a Bluetooth Pairing Request, enter its PIN (see
-its manual for details), and tap ``OK``.
+then it has already been paired. If you still need to pair it then tap
+``Search for Devices``. This will add an ``Available Devices`` section to the
+screen. If your braille device isn't listed then you'll probably need to
+perform a model-specific action on it in order to make it visible
+(also known as discoverable) - see its manual for details. After doing that,
+tap ``Search for Devices`` again. Tap on your braille device to begin the
+Bluetooth Pairing Request, enter its PIN (see its manual for details), and tap
+``OK``.
 
 Connecting Via USB
 ``````````````````
@@ -169,7 +170,7 @@ Android device usually acts as a "device" (rather than as a "host") port. This
 is so that, for example, you can control your Android device from your
 computer. The Micro USB Host Adapter has a special plug, known as an OTG
 (on-the-go) connector, that, when inserted into the Android device's USB port,
-instructs Android to act as a USB host.
+instructs Android to act as the USB host.
 
 The Micro USB Host Adapter also allows you to connect any other USB 
 device (keyboard, mouse, printer, hub, etc) to your Android device. Be aware,
@@ -177,23 +178,31 @@ though, that if any such device, including your braille device, draws power via
 its USB port then your Android device's battery will become the source of that
 power. If portability isn't an issue, you may wish to consider using your Micro
 USB Host Adapter to connect your Android device to a powered hub so that your
-devices will draw power from the hub rather than from your Android device's
+USB devices will draw power from the hub rather than from your Android device's
 battery. You may also wish to consider disabling USB charging on any devices
-which offer this capability.
+that offer this capability.
 
 Defining Your Braille Device
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You don't actually need to define your braille device, but BRLTTY will connect
-to it faster if you do. If you don't, BRLTTY will search through all of the
-devices that have been connected via eitehr Bluetooth or USB
+to it much faster if you do. If you don't, BRLTTY will search through all of
+the devices that have been connected via either Bluetooth or USB
 (see `Connecting Your Braille Device`_) for one that it recognizes. If there's
 more than one, it'll select the first one that it finds.
 
-To define your braille device, go to BRLTTY's ``Settings`` screen and tap on
-``Manage Devices``. From there, find your braille device, and then tap ``Add``.
-To find your device, select its communication method, then select the device
-from the list that's presented, and then select the correct braille driver.
+To define your braille device, go to BRLTTY's ``Settings`` screen, tap on
+``Manage Devices``, and then on ``Add Device``. From there, find your braille
+device, and then tap ``Add``. To find your braille device:
+
+1) Select its communication method (Bluetooth, USB).
+
+2) Select your device from the list that's presented.
+
+3) Select the correct braille driver.
+   This step is optional, i.e. you can usually leave it set to ``autodetect``.
+   Going through the effort of selecting the correct driver, however,
+   ensures a fast and reliable connection.
 
 After you've added your braille device to BRLTTY, tap on ``Selected Device``
 and select it from the list of devices that BRLTTY knows about.
@@ -202,21 +211,21 @@ Using a Braille Keyboard
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Braille device keyboard input is supported, but, like all Android input
-methods, it must be explicitly enabled, and then explicitly selected. BRLTTY
-isn't permitted to do either of these automatically on your behalf. Although
-it's inconvenient, Android imposes this manual process so that you're very
-consciously aware of which input methods can process, and which input method
-is currently processing, whatever you're typing. Such applications, after all,
-handle extremely sensitive personal data (such as passwords, credit card
-numbers, etc), so it's crucial that you make your own decisions regarding which
-of them you're willing to trust.
+methods, it must be explicitly enabled, and then explicitly selected. Android
+doesn't permit BRLTTY to do either of these automatically on your behalf.
+Although it's inconvenient, Android imposes this manual process so that you're
+very consciously aware of which input methods can process, and which input
+method is currently processing, whatever you're typing. Such applications,
+after all, handle extremely sensitive personal data (such as passwords, credit
+card numbers, etc), so it's crucial that you make your own decisions regarding
+which of them you're willing to trust.
 
 If you type on your braille device's keyboard when BRLTTY's input method is
-either disabled or enabled but not selected, then an alert message will appear
-on your braille display that explains the problem. You may wish to enable
-BRLTTY's keyboard support ahead of time, but you probably don't want to select
-it ahead of time. The reason for this is that Android only allows exactly one
-input method to be in use at a time. When you explicitly select BRLTTY's input
+either disabled or enabled but not selected, then BRLTTY will alert you to this
+fact via a message on your braille display. You may wish to enable BRLTTY's
+keyboard support ahead of time, but you probably don't want to select it ahead
+of time. The reason for this is that Android only allows exactly one input
+method to be in use at a time. When you explicitly select BRLTTY's input
 method, therefore, you're also implicitly deselecting the on-screen keyboard.
 
 You can enable BRLTTY's keyboard support in one of the following ways:
@@ -229,18 +238,51 @@ You can enable BRLTTY's keyboard support in one of the following ways:
   ``BRLTTY Input Service``. Once it's been enabled, you can select it at any
   time by adjusting the ``Default`` setting.
 
-* If BRLTTY is running then open Android's Notifications shade and tap on
-  BRLTTY's service notification. This takes you to BRLTTY's main Settings
-  screen. Tap on General Settings, and then on Switch Input Method. This brings
-  up Android's Input Method Picker. It asks you to select an input method, and
-  presents a set of radio buttons - one for each enabled input method. If
-  there's no radio button for BRLTTY's input method then it hasn't been enabled
-  yet. To enable it, tap the button labeled ``Set up input methods``. This
-  screen contains a check box for each installed input method. Check the box
-  labeled ``BRLTTY Input Service``. Then tap the ``Back`` button to return to
-  the ``Language and Input`` screen, find the ``Keyboard and Input Methods``
-  section of that screen, and set the ``Default`` input method to BRLTTY's
-  input method.
+* If BRLTTY is running then switching between input methods is much easier.
+  Go to `BRLTTY's Actions Screen`_ and tap ``Switch Input Method``. This
+  brings up Android's Input Method Picker, which presents a set of radio
+  buttons - one for each enabled input method. If there's no radio button for
+  BRLTTY's input method then it hasn't been enabled yet. To enable it, tap the
+  button labeled ``Set up input methods``. This screen contains a check box for
+  each installed input method. Check the box labeled ``BRLTTY Input Service``.
+  Then tap the ``Back`` button to return to the ``Language and Input`` screen,
+  find the ``Keyboard and Input Methods`` section, and set the ``Default``
+  input method to BRLTTY's input method.
+
+BRLTTY's Actions Screen
+~~~~~~~~~~~~~~~~~~~~~~~
+
+This screen presents several common actions that you may wish to perform:
+
+* Switch Input Method
+* BRLTTY Settings
+* View User Guide
+* Browse Web Site
+* Browse Community Messages
+* Post Community Message
+* Manage Community Membership
+* Update Application
+* About Application
+
+You can get to this screen using any of the following methods:
+
+* From your braille device via global action #5.
+  See `Performing Global Actions`_ for details.
+
+* From the notifications shade.
+  Open it by dragging the status bar downward:
+
+  * With two fingers if Explore By Touch is active.
+  * With one finger if Explore By Touch isn't active.
+
+  Then find BRLTTY's service notification and tap it.
+
+* Via the Accessibility button within the system navigation area.
+  This capability was introduced in Android 8.0 (Oreo).
+  The button may not be visible for a number of reasons, for example:
+
+  * The device's system navigation area isn't rendered via software.
+  * An application has chosen to hide the system navigation area.
 
 Navigating the Screen
 ---------------------
@@ -391,8 +433,8 @@ For example::
 
   Connect <disabled)
 
-Global Actions
-~~~~~~~~~~~~~~
+Performing Global Actions
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Android supports a number of global actions that can be performed by pressing
 special hardware buttons and/or by touching reserved areas on the screen.
@@ -404,20 +446,20 @@ Since Android doesn't use the keyboard function keys (commonly named ``F1``
 through ``F12``), BRLTTY uses them to perform global Android actions according
 to the following table:
 
-  =======  =====================  ===================
-  Key      Actgion                Android Release
-  -------  ---------------------  -------------------
-  ``F1``   Home                   4.1 (Jellybean)
-  ``F2``   Back                   4.1 (Jellybean)
-  ``F3``   Notifications          4.1 (Jellybean)
-  ``F4``   Recent Apps            4.1 (Jellybean)
-  ``F5``   BRLTTY Settings        *
-  ``F6``   Quick Settings         4.2 (Jellybean MR1)
-  ``F7``   Move to Previous Item  *
-  ``F8``   Move to Next Item      *
-  ``F9``   Power Dialog           5.0 (Lollipop)
-  ``F10``  Menu Key               *
-  =======  =====================  ===================
+  =======  ==========================  ===================
+  Key      Action                      Android Release
+  -------  --------------------------  -------------------
+  ``F1``   Home                        4.1 (Jelly Bean)
+  ``F2``   Back                        4.1 (Jelly Bean)
+  ``F3``   Notifications               4.1 (Jelly Bean)
+  ``F4``   Overview (Recent Apps)      4.1 (Jelly Bean)
+  ``F5``   `BRLTTY's Actions Screen`_  \*
+  ``F6``   Quick Settings              4.2 (Jelly Bean MR1)
+  ``F7``   Move to Previous Item       \*
+  ``F8``   Move to Next Item           \*
+  ``F9``   Power Off Dialog            5.0 (Lollipop)
+  ``F10``  Menu Key                    \*
+  =======  ==========================  ===================
 
 The way a braille device emulates keyboard function keys differs from model to
 model, so you should check the BRLTTY documentation for your braille device.
@@ -482,8 +524,8 @@ BRLTTY is currently being built using:
 
 You need the Android SDK (Software Development Kit) for:
 
-*  installing an application onto your device
-*  removing an application from your device
+* installing an application onto your device
+* removing an application from your device
 
 You can get it from `The Android SDK Web Page`_.
 
@@ -508,10 +550,10 @@ The 64-bit versions of the SDK and NDK depend on 32-bit system libraries. If
 you're using a 64-bit version then you need to first ensure that these are
 installed on your system. This at least includes:
 
-*  libc6
-*  libz
-*  libstdc++6
-*  libncurses
+* libc6
+* libz
+* libstdc++6
+* libncurses
 
 If you're using a modern Debian GNU/Linux system (``Wheezy`` or later), you can
 install these packages for a foreign architecture (in this case, i386) with the
@@ -543,7 +585,7 @@ to unpack an officially released BRLTTY archive. It doesn't yet know anything
 about the specifics of your system. It also doesn't yet know anything about the
 platform you intend to build BRLTTY for.
 
-Adding information to BRLTTY's source tree regarding the spefiics of your
+Adding information to BRLTTY's source tree regarding the specifics of your
 system, as well as of your intent to build BRLTTY for Android, is done as
 follows::
 
@@ -591,18 +633,18 @@ Preparing Your Android Device
 You need ``USB Debugging`` to be enabled. This is done from the ``Developer
 Options`` screen. You can get to it from the ``Settings`` screen.
 
-Launch the ``Settings`` aplication, and look, near the bottom, for ``Developer
+Launch the ``Settings`` application, and look, near the bottom, for ``Developer
 Options``. If you can't find it, the most likely cause is a new feature that
 was introduced in Android 4.2 (Jelly Bean). If you need to enable it, tap on
 ``About Phone``, which, again, can be found near the bottom of the ``Settings``
 screen. Then, on the ``About Phone`` screen, look for the ``Build Number``
-line. Tap on ``Build Nubmer`` seven times and your device will officially
+line. Tap on ``Build Number`` seven times and your device will officially
 declare you to be a developer. You should then be able to find ``Developer
 Options`` on the ``Settings`` screen.
 
 There's a check box at the top-right of the ``Developer Options`` screen. It
 needs to be checked so that all of the other controls on that screen will be
-enabled. After doing that, check the ``USB Debugging`` checkebox (which can be
+enabled. After doing that, check the ``USB Debugging`` check box (which can be
 found within the ``Debugging`` section). This enables the ``adb`` (Android
 Debug Bridge) tool to perform functions on your Android device.
 
@@ -645,9 +687,9 @@ The host command for reinstalling an Android application is::
 
    adb install -r /path/to/file
 
-The host command for removing an Android appliation is::
+The host command for removing an Android application is::
 
-   adb uninstall appliation.package.name
+   adb uninstall application.package.name
 
 So, to remove BRLTTY, the host command is::
 
