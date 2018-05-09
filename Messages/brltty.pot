@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: brltty 5.5\n"
-"Report-Msgid-Bugs-To: brltty@brltty.com\n"
+"Report-Msgid-Bugs-To: brltty@brltty.app\n"
 "POT-Creation-Date: 2018-01-04 14:10+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"

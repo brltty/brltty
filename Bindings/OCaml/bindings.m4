@@ -3,7 +3,7 @@
 #   from a first script by Georges Mariano 
 # 
 # Modified to be an autoconf m4 function in 2006
-# for BRLTTY [http://brltty.com/]
+# for BRLTTY [http://brltty.app/]
 # by Dave Mielke <dave@mielke.cc>
 # 
 # This library is free software; you can redistribute it and/or

@@ -12,13 +12,13 @@ dnl Process this file with autoconf 2.53 to produce a configure script.
 # Foundation; either version 2.1 of the License, or (at your option) any
 # later version. Please see the file LICENSE-LGPL for details.
 #
-# Web Page: http://brltty.com/
+# Web Page: http://brltty.app/
 #
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
 AC_PREREQ([2.64])
-AC_INIT([BRLTTY], [5.6], [brltty@brltty.com], [brltty], [http://brltty.com/])
+AC_INIT([BRLTTY], [5.6], [BRLTTY@brltty.app], [brltty], [http://brltty.app/])
 AC_CONFIG_SRCDIR([Programs/brltty.c])
 
 copyright="© 1995-2018 by The BRLTTY Developers"

@@ -7,7 +7,7 @@
 
 <policyconfig>
   <vendor>The BRLTTY Developers</vendor>
-  <vendor_url>http://brltty.com/</vendor_url>
+  <vendor_url>http://brltty.app/</vendor_url>
 
   <action id="org.a11y.brlapi.write-display">
     <description>Write to the braille display</description>

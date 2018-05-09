@@ -6,7 +6,7 @@ Version 5.6, Feb 2018
 
 Copyright (C) 1995-2018 by The BRLTTY Developers.
 
-Web Page: http://brltty.com/
+Web Page: http://brltty.app/
 
 BRLTTY is free software. It comes with ABSOLUTELY NO WARRANTY.
 
@@ -31,8 +31,8 @@ Contacting Us
 =============
 
 We recommend that you contact us via BRLTTY's mailing list. You can post to the
-list by sending an e-mail to <BRLTTY@brltty.com>. To subscribe, go to the list's
-Information Page at [http://brltty.com/mailman/listinfo/brltty].
+list by sending an e-mail to <BRLTTY@brltty.app>. To subscribe, go to the list's
+Information Page at [http://brltty.app/mailman/listinfo/brltty].
 
 If you have any interest in BRLTTY, please drop us a note. We're interested in
 knowing who BRLTTY's users are. Even if all goes well and you have no problems

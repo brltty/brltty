@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-  <string name="application_package_url">http://brltty.com/archive/Android/brltty-latest.apk</string>
-  <string name="user_guide_url">http://brltty.com/archive/Android/brltty-on-android.html</string>
-  <string name="community_messages_url">http://brltty.com/pipermail/brltty/</string>
-  <string name="community_membership_url">http://brltty.com/mailman/listinfo/brltty</string>
+  <string name="application_package_url">http://brltty.app/archive/Android/brltty-latest.apk</string>
+  <string name="user_guide_url">http://brltty.app/archive/Android/brltty-on-android.html</string>
+  <string name="community_messages_url">http://brltty.app/pipermail/brltty/</string>
+  <string name="community_membership_url">http://brltty.app/mailman/listinfo/brltty</string>
 
   <string-array name="EMPTY_STRING_ARRAY">
   </string-array>
