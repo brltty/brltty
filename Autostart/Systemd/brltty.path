@@ -19,6 +19,7 @@
 [Unit]
 Description=Default BRLTTY Instance
 Requires=brltty@-etc-brltty.conf.service
+DefaultDependencies=no
 
 [Path]
 PathExists=/etc/brltty.conf
