@@ -23,6 +23,9 @@ import android.util.Log;
 import java.util.List;
 import java.util.ArrayList;
 
+import java.util.Set;
+import java.util.HashSet;
+
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import android.graphics.Rect;
@@ -105,6 +108,12 @@ public class RenderedScreen {
     Rect location = element.getBrailleLocation();
     return element.performAction((column - location.left), (row - location.top));
   }
+
+  private final static Set<String> significantElements = new HashSet<String>() {
+    {
+      add("com.samsung.android.messaging:id/base_list_item_data");
+    }
+  };
 
   private static final int SIGNIFICANT_NODE_ACTIONS
     = AccessibilityNodeInfo.ACTION_CLICK
@@ -191,7 +200,19 @@ public class RenderedScreen {
       }
     }
 
-    if (!(allowZeroLength || (sb.length() > 0))) return null;
+    if (!(allowZeroLength || (sb.length() > 0))) {
+      String name = node.getViewIdResourceName();
+
+      if (name != null) {
+        if (significantElements.contains(name)) {
+          String description = ScreenUtilities.getDescription(node);
+          if (description != null) sb.append(description);
+        }
+      }
+
+      if (sb.length() == 0) return null;
+    }
+
     return sb.toString();
   }
 
