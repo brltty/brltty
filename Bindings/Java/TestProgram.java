@@ -85,39 +85,44 @@ public class TestProgram implements Constants {
 
     try {
       Connection connection = new Connection(settings);
+      try {
+        writeProperty("File Descriptor", "%d", connection.getFileDescriptor());
+        writeProperty("Server Host", "%s", connection.getServerHost());
+        writeProperty("Authorization Schemes", "%s", connection.getAuthorizationSchemes());
+        writeProperty("Driver Name", "%s", connection.getDriverName());
+        writeProperty("Model Identifier", "%s", connection.getModelIdentifier());
 
-      writeProperty("File Descriptor", "%d", connection.getFileDescriptor());
-      writeProperty("Server Host", "%s", connection.getServerHost());
-      writeProperty("Authorization Schemes", "%s", connection.getAuthorizationSchemes());
-      writeProperty("Driver Name", "%s", connection.getDriverName());
-      writeProperty("Model Identifier", "%s", connection.getModelIdentifier());
+        DisplaySize size = connection.getDisplaySize();
+        writeProperty("Display Size",  "%dx%d", size.getWidth(), size.getHeight());
 
-      DisplaySize size = connection.getDisplaySize();
-      writeProperty("Display Size",  "%dx%d", size.getWidth(), size.getHeight());
+        int tty = connection.enterTtyMode();
+        try {
+          writeProperty("TTY Number", "%d", tty);
 
-      int tty = connection.enterTtyMode();
-      writeProperty("TTY Number", "%d", tty);
+          long key[] = {0};
+          connection.ignoreKeys(Constants.rangeType_all, key);
+          key[0] = Constants.KEY_TYPE_CMD;
+          connection.acceptKeys(Constants.rangeType_type, key);
+          long keys[][] = {{0,2},{5,7}};
+          connection.ignoreKeyRanges(keys);
 
-      long key[] = {0};
-      connection.ignoreKeys(Constants.rangeType_all, key);
-      key[0] = Constants.KEY_TYPE_CMD;
-      connection.acceptKeys(Constants.rangeType_type, key);
-      long keys[][] = {{0,2},{5,7}};
-      connection.ignoreKeyRanges(keys);
+          {
+            int timeout = 10;
+            connection.writeText(String.format("press keys (timeout is %d seconds)", timeout), Constants.CURSOR_OFF);
 
-      {
-        int timeout = 10;
-        connection.writeText(String.format("press keys (timeout is %d seconds)", timeout), Constants.CURSOR_OFF);
-
-        while (true) {
-          long code = connection.readKeyWithTimeout((timeout * 1000));
-          if (code < 0) break;
-          showKey(new Key(code), connection);
+            while (true) {
+              long code = connection.readKeyWithTimeout((timeout * 1000));
+              if (code < 0) break;
+              showKey(new Key(code), connection);
+            }
+          }
+        } finally {
+          connection.leaveTtyMode();
         }
+      } finally {
+        connection.closeConnection();
+        connection = null;
       }
-
-      connection.leaveTtyMode();
-      connection.closeConnection();
     } catch (Error error) {
       System.out.println("got error: " + error);
       System.exit(3);

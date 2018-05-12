@@ -79,12 +79,4 @@ public class BasicConnection extends NativeLibrary {
   public int getFileDescriptor () {
     return fileDescriptor;
   }
-
-  protected void finalize () throws Throwable {
-    try {
-      closeConnection();
-    } finally {
-      super.finalize();
-    }
-  }
 }
