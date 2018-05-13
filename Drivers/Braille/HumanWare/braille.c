@@ -22,7 +22,6 @@
 #include <errno.h>
 
 #include "log.h"
-#include "ktb.h"
 #include "ascii.h"
 #include "bitmask.h"
 #include "async_wait.h"
@@ -283,7 +282,7 @@ isCalibrationKey (BrailleDisplay *brl, unsigned char key) {
       break;
   }
 
-  releaseAllKeys(brl->keyTable);
+  releaseBrailleKeys(brl);
   BITMASK_ZERO(brl->data->pressedKeys.mask);
   brl->data->pressedKeys.count = 0;
   return 1;
