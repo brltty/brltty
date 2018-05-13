@@ -155,9 +155,10 @@ extern int probeBrailleDisplay (
   BrailleResponseHandler *handleResponse
 );
 
+extern void releaseBrailleKeys (BrailleDisplay *brl);
+
 typedef uint32_t KeyNumberSet;
 #define KEY_NUMBER_BIT(number) (UINT32_C(1) << (number))
-
 extern KeyNumberSet makeKeyNumberSet (KEY_NAME_TABLES_REFERENCE keys, KeyGroup group);
 
 extern int enqueueKeyEvent (

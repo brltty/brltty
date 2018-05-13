@@ -1514,6 +1514,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
     switch (packet.fields.type) {
       case HT_PKT_OK:
         if (packet.fields.data.ok.model == brl->data->model->identifier) {
+          releaseBrailleKeys(brl);
           brl->data->updateRequired = 1;
           continue;
         }

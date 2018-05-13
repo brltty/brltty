@@ -487,6 +487,11 @@ probeBrailleDisplay (
   return 0;
 }
 
+void
+releaseBrailleKeys (BrailleDisplay *brl) {
+  releaseAllKeys(brl->keyTable);
+}
+
 typedef struct {
   const KeyGroup group;
 
