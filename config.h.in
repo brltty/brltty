@@ -77,6 +77,9 @@ extern "C" {
 /* Define this if Unicode-based internationalization support is to be included. */
 #undef HAVE_ICU
 
+/* Define this if the header file unicode/unorm2.h exists. */
+#undef HAVE_UNICODE_UNORM2_H
+
 /* Define this if the header file iconv.h exists. */
 #undef HAVE_ICONV_H
 

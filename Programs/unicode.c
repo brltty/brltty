@@ -24,7 +24,12 @@
 
 #ifdef HAVE_ICU
 #include <unicode/uchar.h>
+
+#ifdef HAVE_UNICODE_UNORM2_H
+#include <unicode/unorm2.h>
+#else /* unorm */
 #include <unicode/unorm.h>
+#endif /* unorm */
 
 static int
 isUcharCompatible (wchar_t character) {
@@ -133,14 +138,26 @@ getBaseCharacter (wchar_t character) {
     UChar resultBuffer[resultLength];
     UErrorCode error = U_ZERO_ERROR;
 
+#ifdef HAVE_UNICODE_UNORM2_H
+    static const UNormalizer2 *normalizer = NULL;
+
+    if (!normalizer) {
+      normalizer = unorm2_getNFDInstance(&error);
+      if (!U_SUCCESS(error)) return 0;
+    }
+
+    unorm2_normalize(normalizer,
+                     source, ARRAY_COUNT(source),
+                     resultBuffer, resultLength,
+                     &error);
+#else /* unorm */
     unorm_normalize(source, ARRAY_COUNT(source),
                     UNORM_NFD, 0,
                     resultBuffer, resultLength,
                     &error);
+#endif /* unorm */
 
-    if (U_SUCCESS(error)) {
-      return resultBuffer[0];
-    }
+    if (U_SUCCESS(error)) return resultBuffer[0];
   }
 #endif /* HAVE_ICU */
 

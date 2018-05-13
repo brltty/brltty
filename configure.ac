@@ -621,6 +621,7 @@ BRLTTY_ARG_DISABLE(
    [],
 [dnl
    BRLTTY_HAVE_PACKAGE([icu], [icu-uc], [dnl
+      AC_CHECK_HEADERS([unicode/unorm2.h])
       AC_DEFINE_UNQUOTED([HAVE_ICU], [1],
                          [Define this if Unicode-based internationalization support is to be included.])
 
