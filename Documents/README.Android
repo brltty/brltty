@@ -550,9 +550,9 @@ The 64-bit versions of the SDK and NDK depend on 32-bit system libraries. If
 you're using a 64-bit version then you need to first ensure that these are
 installed on your system. This at least includes:
 
-* libc6
-* libz
-* libstdc++6
+* libc6 (or glibc)
+* libz (or zlib)
+* libstdc++6 (or libstdc++)
 * libncurses
 
 If you're using a modern Debian GNU/Linux system (``Wheezy`` or later), you can
