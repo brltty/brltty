@@ -80,10 +80,10 @@ THREAD_SPECIFIC_DATA_CONTROL(tsdJavaNativeThread);
 static char *
 getJavaThreadName (JNIEnv *env) {
   char *name = NULL;
-  jclass Thread_class = NULL;
+  static jclass Thread_class = NULL;
 
   if (findJavaClass(env, &Thread_class, JAVA_OBJ_THREAD)) {
-    jmethodID Thread_currentThread = 0;
+    static jmethodID Thread_currentThread = 0;
 
     if (findJavaStaticMethod(env, &Thread_currentThread, Thread_class, "currentThread",
                              JAVA_SIG_METHOD(JAVA_SIG_THREAD, 
@@ -91,7 +91,7 @@ getJavaThreadName (JNIEnv *env) {
       jobject thread = (*env)->CallStaticObjectMethod(env, Thread_class, Thread_currentThread);
 
       if (!clearJavaException(env, 1)) {
-        jmethodID Thread_getName = 0;
+        static jmethodID Thread_getName = 0;
 
         if (findJavaInstanceMethod(env, &Thread_getName, Thread_class, "getName",
                                    JAVA_SIG_METHOD(JAVA_SIG_STRING, 
