@@ -55,13 +55,13 @@ OCAML_FILES = $(OCAML_MISC) $(OCAML_CLIBS) $(OCAML_BCLIB) $(OCAML_NCLIB)
 all : $(OCAML_FILES)
 
 $(OCAML_CLIBS) : brlapi_stubs.$O brlapi
-	$(OCAMLMKLIB) $(API_LDFLAGS) -oc $(OCAML_LIB)_stubs brlapi_stubs.$O
+	$(OCAMLMKLIB) -ldopt "$(LDFLAGS)" $(API_LDFLAGS) -oc $(OCAML_LIB)_stubs brlapi_stubs.$O
 
 $(OCAML_BCLIB) : $(OCAML_CLIBS) brlapi.cmo
 	$(OCAMLC) -a $(OCAMLMKLIB_FLAGS) -o $(OCAML_LIB).cma brlapi.cmo
 
 $(OCAML_NCLIB) : $(OCAML_CLIBS) brlapi.cmx
-	$(OCAMLMKLIB) $(OCAMLMKLIBOPT_FLAGS) -o $(OCAML_LIB) brlapi.cmx
+	$(OCAMLMKLIB) -ldopt "$(LDFLAGS)" $(OCAMLMKLIBOPT_FLAGS) -o $(OCAML_LIB) brlapi.cmx
 
 brlapi.cmi: brlapi.mli
 	$(OCAMLC) -o $@ -c brlapi.mli
