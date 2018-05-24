@@ -6,7 +6,7 @@ Using Systemd Service Management
 
 .. |configuration directory| replace:: /usr/lib
 .. |unit directory| replace:: |configuration directory|/systemd/system
-.. |wrapper directory| replace:: /sbin
+.. |wrapper directory| replace:: /usr/libexec
 .. |build subdirectory| replace:: Autostart/Systemd
 
 Initial Setup
