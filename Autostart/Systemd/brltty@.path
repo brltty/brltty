@@ -25,5 +25,5 @@ PathExists=/etc/brltty_%I.conf
 Unit=brltty@-etc-brltty_%i.conf.service
 
 [Install]
-WantedBy=multi-user.target rescue.target emergency.target
+WantedBy=default.target rescue.target emergency.target
 
