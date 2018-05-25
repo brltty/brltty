@@ -210,7 +210,6 @@ main (int argc, char *argv[]) {
 
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
-fflush(stdout);
 
   writeHeader("BRLTTY Command Reference");
   writeString(".. contents::\n\n");

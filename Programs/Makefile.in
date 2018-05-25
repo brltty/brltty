@@ -16,9 +16,10 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-all: all-brltty all-brltty-lscmds all-brltty-trtxt all-brltty-ttb all-brltty-atb $(ALL_BRLTTY_CTB) all-brltty-ktb all-brltty-tune $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
+all: all-brltty all-brltty-lscmds all-brltty-lsinc all-brltty-trtxt all-brltty-ttb all-brltty-atb $(ALL_BRLTTY_CTB) all-brltty-ktb all-brltty-tune $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
 all-brltty: brltty$X $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 all-brltty-lscmds: brltty-lscmds$X
+all-brltty-lsinc: brltty-lsinc$X
 all-brltty-trtxt: brltty-trtxt$X
 all-brltty-ttb: brltty-ttb$X
 all-brltty-atb: brltty-atb$X
@@ -819,6 +820,16 @@ brltty-lscmds.$O:
 
 ###############################################################################
 
+BRLTTY_LSINC_OBJECTS = brltty-lsinc.$O $(PROGRAM_OBJECTS)
+
+brltty-lsinc$X: $(BRLTTY_LSINC_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_LSINC_OBJECTS) $(LDLIBS)
+
+brltty-lsinc.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-lsinc.c
+
+###############################################################################
+
 BRLTEST_OBJECTS = brltest.$O $(PROGRAM_OBJECTS) report.$O $(TTB_OBJECTS) $(KTB_OBJECTS) dataarea.$O cmd.$O cmd_queue.$O drivers.$O driver.$O $(BRAILLE_OBJECTS) $(PREFS_OBJECTS) hidkeys.$O learn.$O
 
 brltest$X: $(BRLTEST_OBJECTS)
@@ -963,9 +974,10 @@ check-all: check-text-tables check-attributes-tables check-contraction-tables ch
 
 install:: install-programs install-tables $(INSTALL_DRIVERS) install-core-headers $(INSTALL_MESSAGES) install-manpages $(INSTALL_API)
 
-install-programs: brltty$X brltty-lscmds$X brltty-trtxt$X brltty-ttb$X brltty-atb$X $(INSTALL_BRLTTY_CTB) brltty-ktb$X brltty-tune$X install-program-directory install-writable-directory
+install-programs: brltty$X brltty-lscmds$X brltty-lsinc$X brltty-trtxt$X brltty-ttb$X brltty-atb$X $(INSTALL_BRLTTY_CTB) brltty-ktb$X brltty-tune$X install-program-directory install-writable-directory
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-lscmds$X $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_PROGRAM) brltty-lsinc$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-trtxt$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-ttb$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-atb$X $(INSTALL_PROGRAM_DIRECTORY) 
@@ -1151,6 +1163,7 @@ distclean clean::
 
 clean::
 	-rm -f brltty$X brltty-lscmds$X brltty-trtxt$X brltty-ttb$X brltty-atb$X brltty-ctb$X brltty-tune$X xbrlapi$X
+	-rm -f brltty$X brltty-lsinc$X brltty-trtxt$X brltty-ttb$X brltty-atb$X brltty-ctb$X brltty-tune$X xbrlapi$X
 	-rm -f tbl2hex$(X_FOR_BUILD) *test$X *-static$X
 	-rm -f brlapi_constants.h *.$(LIB_EXT) *.$(LIB_EXT).* *.$(ARC_EXT) *.def *.class *.jar
 	-rm -f $(BLD_TOP)$(DRV_DIR)/*

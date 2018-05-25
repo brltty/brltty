@@ -1262,8 +1262,13 @@ processDataStream (
   FILE *stream, const char *name,
   const DataFileParameters *parameters
 ) {
-  logMessage(LOG_DEBUG, "including data file: %s", name);
   int ok = 0;
+
+  if (parameters->logFileName) {
+    parameters->logFileName(name, parameters->data);
+  } else {
+    logMessage(LOG_DEBUG, "including data file: %s", name);
+  }
 
   DataFile file = {
     .name = name,

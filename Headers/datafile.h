@@ -43,6 +43,7 @@ typedef enum {
 
 typedef struct {
   DataOperandsProcessor *processOperands;
+  void (*logFileName) (const char *name, void *data);
   void *data;
   unsigned char options;
 } DataFileParameters;
