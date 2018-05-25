@@ -19,6 +19,8 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <string.h>
+#include <search.h>
 
 #include "log.h"
 #include "program.h"
@@ -28,8 +30,26 @@ BEGIN_OPTION_TABLE(programOptions)
 END_OPTION_TABLE
 
 static void
+noMemory (void) {
+  fprintf(stderr, "%s: insufficient memory\n", programName);
+  exit(PROG_EXIT_FATAL);
+}
+
+static int
+compareStrings (const void *string1, const void *string2) {
+  return strcmp(string1, string2);
+}
+
+static void
 logFileName (const char *name, void *data) {
-  printf("%s\n", name);
+  static void *namesTree = NULL;
+
+  if (!tfind(name, &namesTree, compareStrings)) {
+    name = strdup(name);
+    if (!name) noMemory();
+    if (!tsearch(name, &namesTree, compareStrings)) noMemory();
+    printf("%s\n", name);
+  }
 }
 
 static DATA_OPERANDS_PROCESSOR(processUnknownDirective) {
