@@ -226,31 +226,6 @@ Install this package if you would like to be able to use the
 Speech Dispatcher text-to-speech server.
 
 
-%package -n brltty-screen-atspi
-Version: @PACKAGE_VERSION@
-Release: 1
-Group: System Environment/Daemons
-License: LGPL
-
-Requires: at-spi
-Requires: libX11
-
-BuildRequires: at-spi-devel
-BuildRequires: libX11-devel
-BuildRequires: xorg-x11-proto-devel
-
-AutoProv: no
-AutoReq: yes
-
-Summary: AT-SPI screen driver for BRLTTY.
-%description -n brltty-screen-atspi
-This package provides the AT-SPI screen driver for BRLTTY.
-
-Install this package if you would like to be able to
-access GTK-based applications via the Assistive
-Technology Service Provider Interface.
-
-
 %package -n brltty-screen-atspi2
 Version: @PACKAGE_VERSION@
 Release: 1
@@ -574,9 +549,6 @@ rm -fr "${RPM_BUILD_ROOT}"
 
 %files -n brltty-speech-speechd
 %{_libdir}/brltty/libbrlttyssd.so
-
-%files -n brltty-screen-atspi
-%{_libdir}/brltty/libbrlttyxas.so
 
 %files -n brltty-screen-atspi2
 %{_libdir}/brltty/libbrlttyxa2.so
