@@ -34,7 +34,8 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
 %define _libdir /lib
 %define _datadir /usr/share
 %define _sysconfdir /etc
-%define _systemddir %{_libdir}/systemd/system
+%define _systemdunitdir %{_libdir}/systemd/system
+%define _systemdscriptdir %{_libexecdir}
 %define _udevlibdir %{_libdir}/udev
 %define _udevrulesdir %{_udevlibdir}/rules.d
 
@@ -386,7 +387,7 @@ Release: 1
 Group: System Environment/Libraries
 License: LGPL
 
-BuildRequires: gcc-java
+BuildRequires: java
 
 AutoProv: no
 AutoReq: yes
@@ -513,7 +514,6 @@ rm -fr "${RPM_BUILD_ROOT}"
 %exclude %{_libdir}/brltty/libbrlttysfl.so
 %exclude %{_libdir}/brltty/libbrlttysfv.so
 %exclude %{_libdir}/brltty/libbrlttyssd.so
-%exclude %{_libdir}/brltty/libbrlttyxas.so
 %exclude %{_libdir}/brltty/libbrlttyxa2.so
 %exclude %{_libdir}/brltty/libbrlttyxsc.so
 %{_sysconfdir}/brltty
@@ -563,8 +563,8 @@ rm -fr "${RPM_BUILD_ROOT}"
 %{_includedir}/brltty
 
 %files -n brltty-systemd
-%{_systemddir}/*
-%{_sbindir}/brltty-systemd-*
+%{_systemdunitdir}/*
+%{_systemdscriptdir}/brltty-systemd-*
 
 %files -n brltty-udev
 %{_udevlibdir}/*
