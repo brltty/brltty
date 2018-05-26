@@ -37,7 +37,6 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
 %define _systemdunitdir %{_libdir}/systemd/system
 %define _systemdscriptdir %{_libexecdir}
 %define _udevlibdir %{_libdir}/udev
-%define _udevrulesdir %{_udevlibdir}/rules.d
 
 Requires: libicu
 
@@ -569,7 +568,6 @@ rm -fr "${RPM_BUILD_ROOT}"
 
 %files -n brltty-udev
 %{_udevlibdir}/*
-%{_udevrulesdir}/*
 
 %files -n brlapi
 %defattr(-,root,root)
