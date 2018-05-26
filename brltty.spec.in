@@ -428,8 +428,8 @@ Release: 1
 Group: System Environment/Libraries
 License: LGPL
 
-BuildRequires: python
-BuildRequires: python-devel
+BuildRequires: python2
+BuildRequires: python2-devel
 BuildRequires: Cython
 
 AutoProv: no
@@ -490,6 +490,7 @@ This package provides a set of commands for maintaining BRLTTY's datafiles.
 %setup -n @PACKAGE_TARNAME@-@PACKAGE_VERSION@
 
 %build
+export PYTHON=python2
 %configure --disable-relocatable-install --with-install-root="${RPM_BUILD_ROOT}" --disable-gpm --without-mikropuhe --without-swift --without-theta --without-viavoice --without-libbraille --with-braille-driver=-tt,-vr
 make
 
