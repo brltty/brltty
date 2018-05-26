@@ -39,9 +39,10 @@ else
    PYTHON_PROLOGUE=""
    for python_module in sys distutils.sysconfig
    do
-      if test -n "`${PYTHON} -c "import ${python_module};" 2>&1`"
+      python_error="`${PYTHON} -c "import ${python_module};" 2>&1`"
+      if test -n "${python_error}"
       then
-         AC_MSG_WARN([Python module not found: ${python_module}])
+         AC_MSG_WARN([Python module not found: ${python_module}: ${python_error}])
          PYTHON_OK=false
       else
          PYTHON_PROLOGUE="${PYTHON_PROLOGUE}import ${python_module}; "
