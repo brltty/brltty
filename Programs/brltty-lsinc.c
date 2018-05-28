@@ -25,6 +25,7 @@
 #include "log.h"
 #include "program.h"
 #include "options.h"
+#include "file.h"
 
 BEGIN_OPTION_TABLE(programOptions)
 END_OPTION_TABLE
@@ -52,7 +53,21 @@ logFileName (const char *name, void *data) {
   }
 }
 
+static DATA_CONDITION_TESTER(testConditionOperand) {
+  return 1;
+}
+
 static DATA_OPERANDS_PROCESSOR(processUnknownDirective) {
+  DataOperand directive;
+
+  if (getDataOperand(file, &directive, NULL)) {
+    if (directive.length >= 2) {
+      if (isKeyword(WS_C("if"), directive.characters, 2)) {
+        return processConditionOperands(file, testConditionOperand, 0, NULL, data);
+      }
+    }
+  }
+
   return 1;
 }
 
@@ -92,7 +107,11 @@ main (int argc, char *argv[]) {
       .logFileName = logFileName
     };
 
-    processDataFile(path, &parameters);
+    if (testProgramPath(path)) {
+      logFileName(path, parameters.data);
+    } else {
+      processDataFile(path, &parameters);
+    }
   } while (argc);
 
   return PROG_EXIT_SUCCESS;
