@@ -477,6 +477,91 @@ controlMainConsole (int operation, void *argument) {
   return controlConsole(&mainConsoleDescriptor, MAIN_CONSOLE, operation, argument);
 }
 
+static const char *unicodeName = NULL;
+
+static int
+setUnicodeName (void) {
+  static const char *const names[] = {"vcsu", "vcsu0", NULL};
+  return setDeviceName(&unicodeName, names, "unicode");
+}
+
+static void
+closeUnicode (int *fd) {
+  if (*fd != -1) {
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER), "closing unicode: fd=%d", *fd);
+    if (close(*fd) == -1) logSystemError("close[unicode]");
+    *fd = -1;
+  }
+}
+
+static int
+openUnicode (int *fd, int vt) {
+  int opened = 0;
+  char *name = vtName(unicodeName, vt);
+
+  if (name) {
+    int unicode = openCharacterDevice(name, O_RDWR|O_NOCTTY, VCS_MAJOR, 0X40|vt);
+
+    if (unicode != -1) {
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+                 "unicode opened: %s: fd=%d", name, unicode);
+
+      closeUnicode(fd);
+      *fd = unicode;
+      opened = 1;
+    }
+
+    free(name);
+  }
+
+  return opened;
+}
+
+static int unicodeDescriptor;
+
+static void
+closeCurrentUnicode (void) {
+  closeUnicode(&unicodeDescriptor);
+}
+
+static int
+openCurrentUnicode (void) {
+  return openUnicode(&unicodeDescriptor, virtualTerminal);
+}
+
+static size_t
+readUnicodeDevice (off_t offset, void *buffer, size_t size) {
+  if (openCurrentUnicode()) {
+    const ssize_t count = pread(unicodeDescriptor, buffer, size, offset);
+
+    if (count == -1) {
+      logSystemError("unicode read");
+    } else {
+      return count;
+    }
+  }
+
+  return 0;
+}
+
+static int
+readUnicodeData (off_t offset, void *buffer, size_t size) {
+  size_t count = (readUnicodeDevice)(offset, buffer, size);
+  if (count == size) return 1;
+
+  logMessage(LOG_ERR,
+             "truncated unicode data: expected %zu bytes but read %zu",
+             size, count);
+  return 0;
+}
+
+static int
+readUnicodeContent (off_t offset, uint32_t *buffer, size_t count) {
+  count *= sizeof(*buffer);
+  offset *= sizeof(*buffer);
+  return readUnicodeData(offset, buffer, count);
+}
+
 static const char *screenName = NULL;
 static int screenDescriptor;
 
@@ -576,6 +661,7 @@ setCurrentScreen (unsigned char vt) {
   if (!openScreenDevice(&screen, vt)) return 0;
 
   closeCurrentConsole();
+  closeCurrentUnicode();
   closeCurrentScreen();
   screenDescriptor = screen;
   virtualTerminal = vt;
@@ -934,39 +1020,46 @@ setTranslationTable (int force) {
 
 static int
 readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) {
-  uint16_t line[size];
+  uint16_t vgaBuffer[size];
+  uint32_t textBuffer[size];
+  off_t offset = row * size;
   int column = 0;
 
-  if (readScreenContent((row * size), line, size)) {
-    const uint16_t *source = line;
-    const uint16_t *end = source + size;
+  if (readScreenContent(offset, vgaBuffer, size)) {
+    const uint16_t *vga = vgaBuffer;
+    const uint16_t *end = vga + size;
+    const uint32_t *text = readUnicodeContent(offset, textBuffer, size)? textBuffer: NULL;
     ScreenCharacter *character = characters;
 
-    while (source != end) {
-      uint16_t position = *source & 0XFF;
-      wint_t wc;
+    while (vga != end) {
+      if (character) {
+        character->attributes = ((*vga & unshiftedAttributesMask) |
+                                 ((*vga & shiftedAttributesMask) >> 1)) >> 8;
 
-      if (*source & fontAttributesMask) position |= 0X100;
-      if ((wc = convertCharacter(&translationTable[position])) != WEOF) {
-        if (character) {
-          character->text = wc;
-          character->attributes = ((*source & unshiftedAttributesMask) |
-                                   ((*source & shiftedAttributesMask) >> 1)) >> 8;
-          character += 1;
+        if (text) {
+          character->text = *text++;
+        } else {
+          uint16_t position = *vga & 0XFF;
+          if (*vga & fontAttributesMask) position |= 0X100;
+
+          wint_t wc = convertCharacter(&translationTable[position]);
+          character->text = (wc != WEOF)? wc: WC_C(' ');
         }
 
-        if (offsets) offsets[column++] = source - line;
+        character += 1;
       }
 
-      source += 1;
+      if (offsets) offsets[column++] = vga - vgaBuffer;
+      vga += 1;
     }
 
     {
       wint_t wc;
+
       while ((wc = convertCharacter(NULL)) != WEOF) {
         if (character) {
           character->text = wc;
-          character->attributes = 0X07;
+          character->attributes = SCR_COLOUR_DEFAULT;
           character += 1;
         }
 
@@ -1112,6 +1205,7 @@ construct_LinuxScreen (void) {
   mainConsoleDescriptor = -1;
   screenDescriptor = -1;
   consoleDescriptor = -1;
+  unicodeDescriptor = -1;
 
   screenUpdated = 0;
   cacheBuffer = NULL;
@@ -1132,11 +1226,13 @@ construct_LinuxScreen (void) {
 
   if (setScreenName()) {
     if (setConsoleName()) {
-      if (openMainConsole()) {
-        if (setCurrentScreen(virtualTerminal)) {
-          openKeyboard();
-          brailleDeviceOfflineListener = registerReportListener(REPORT_BRAILLE_DEVICE_OFFLINE, lxBrailleDeviceOfflineListener, NULL);
-          return 1;
+      if (setUnicodeName()) {
+        if (openMainConsole()) {
+          if (setCurrentScreen(virtualTerminal)) {
+            openKeyboard();
+            brailleDeviceOfflineListener = registerReportListener(REPORT_BRAILLE_DEVICE_OFFLINE, lxBrailleDeviceOfflineListener, NULL);
+            return 1;
+          }
         }
       }
     }
