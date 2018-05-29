@@ -547,7 +547,7 @@ readUnicodeDevice (off_t offset, void *buffer, size_t size) {
 
 static unsigned char *unicodeCacheBuffer;
 static size_t unicodeCacheSize;
-static ssize_t unicodeCacheUsed;
+static size_t unicodeCacheUsed;
 
 static size_t
 readUnicodeCache (off_t offset, void *buffer, size_t size) {
@@ -605,7 +605,7 @@ refreshUnicodeCache (size_t size) {
     unicodeCacheSize = size;
   }
 
-  unicodeCacheUsed = readUnicodeDevice(0, unicodeCacheBuffer, size);
+  unicodeCacheUsed = readUnicodeDevice(0, unicodeCacheBuffer, unicodeCacheSize);
   return 1;
 }
 
@@ -1076,7 +1076,7 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
     ScreenCharacter *character = characters;
 
     if (1) {
-      if (unicodeCacheUsed != -1) {
+      if (unicodeCacheUsed) {
         if (readUnicodeContent(offset, textBuffer, size)) {
           text = textBuffer;
         }
@@ -1265,7 +1265,7 @@ construct_LinuxScreen (void) {
 
   unicodeCacheBuffer = NULL;
   unicodeCacheSize = 0;
-  unicodeCacheUsed = -1;
+  unicodeCacheUsed = 0;
 
   currentConsoleNumber = 0;
   inTextMode = 1;
@@ -1325,6 +1325,7 @@ destruct_LinuxScreen (void) {
     screenCacheBuffer = NULL;
   }
   screenCacheSize = 0;
+  screenCacheUsed = 0;
 
   if (unicodeCacheBuffer) {
     free(unicodeCacheBuffer);
