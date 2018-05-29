@@ -544,14 +544,33 @@ readUnicodeDevice (off_t offset, void *buffer, size_t size) {
   return 0;
 }
 
+static unsigned char *unicodeCacheBuffer;
+static size_t unicodeCacheSize;
+
+static size_t
+readUnicodeCache (off_t offset, void *buffer, size_t size) {
+  if (offset <= unicodeCacheSize) {
+    size_t left = unicodeCacheSize - offset;
+
+    if (size > left) size = left;
+    memcpy(buffer, &unicodeCacheBuffer[offset], size);
+    return size;
+  } else {
+    logMessage(LOG_ERR, "invalid unicode cache offset: %u", (unsigned int)offset);
+  }
+
+  return 0;
+}
+
 static int
 readUnicodeData (off_t offset, void *buffer, size_t size) {
-  size_t count = (readUnicodeDevice)(offset, buffer, size);
+  size_t count = (unicodeCacheBuffer? readUnicodeCache: readUnicodeDevice)(offset, buffer, size);
   if (count == size) return 1;
 
   logMessage(LOG_ERR,
              "truncated unicode data: expected %zu bytes but read %zu",
              size, count);
+
   return 0;
 }
 
@@ -562,6 +581,29 @@ readUnicodeContent (off_t offset, uint32_t *buffer, size_t count) {
   return readUnicodeData(offset, buffer, count);
 }
 
+static int
+refreshUnicodeBuffer (size_t size, unsigned char **unicodeBuffer, size_t *unicodeSize) {
+  size *= 4;
+
+  if (size > *unicodeSize) {
+    size |= 0XFF;
+    size += 0X100;
+    unsigned char *buffer = malloc(size);
+
+    if (!buffer) {
+      logMallocError();
+      return 0;
+    }
+
+    if (*unicodeBuffer) free(*unicodeBuffer);
+    *unicodeBuffer = buffer;
+    *unicodeSize = size;
+  }
+
+  size_t count = readUnicodeDevice(0, *unicodeBuffer, size);
+  return count == size;
+}
+
 static const char *screenName = NULL;
 static int screenDescriptor;
 
@@ -569,8 +611,6 @@ static int isMonitorable;
 static THREAD_LOCAL AsyncHandle screenMonitor = NULL;
 
 static int screenUpdated;
-static unsigned char *cacheBuffer;
-static size_t cacheSize;
 
 static int currentConsoleNumber;
 static int inTextMode;
@@ -689,13 +729,16 @@ readScreenDevice (off_t offset, void *buffer, size_t size) {
   return 0;
 }
 
+static unsigned char *screenCacheBuffer;
+static size_t screenCacheSize;
+
 static size_t
 readScreenCache (off_t offset, void *buffer, size_t size) {
-  if (offset <= cacheSize) {
-    size_t left = cacheSize - offset;
+  if (offset <= screenCacheSize) {
+    size_t left = screenCacheSize - offset;
 
     if (size > left) size = left;
-    memcpy(buffer, &cacheBuffer[offset], size);
+    memcpy(buffer, &screenCacheBuffer[offset], size);
     return size;
   } else {
     logMessage(LOG_ERR, "invalid screen cache offset: %u", (unsigned int)offset);
@@ -706,12 +749,13 @@ readScreenCache (off_t offset, void *buffer, size_t size) {
 
 static int
 readScreenData (off_t offset, void *buffer, size_t size) {
-  size_t count = (cacheBuffer? readScreenCache: readScreenDevice)(offset, buffer, size);
+  size_t count = (screenCacheBuffer? readScreenCache: readScreenDevice)(offset, buffer, size);
   if (count == size) return 1;
 
   logMessage(LOG_ERR,
              "truncated screen data: expected %zu bytes but read %zu",
              size, count);
+
   return 0;
 }
 
@@ -738,7 +782,7 @@ getScreenBufferSize (const ScreenSize *screenSize) {
   return (screenSize->columns * screenSize->rows * 2) + sizeof(ScreenHeader);
 }
 
-static int
+static size_t
 refreshScreenBuffer (unsigned char **screenBuffer, size_t *screenSize) {
   if (!*screenBuffer) {
     ScreenHeader header;
@@ -746,7 +790,6 @@ refreshScreenBuffer (unsigned char **screenBuffer, size_t *screenSize) {
     {
       size_t size = sizeof(header);
       size_t count = readScreenDevice(0, &header, size);
-
       if (!count) return 0;
 
       if (count < size) {
@@ -781,7 +824,7 @@ refreshScreenBuffer (unsigned char **screenBuffer, size_t *screenSize) {
     {
       ScreenHeader *header = (void *)*screenBuffer;
       size_t size = getScreenBufferSize(&header->size);
-      if (count >= size) return 1;
+      if (count >= size) return header->size.columns * header->size.rows;
 
       {
         unsigned char *buffer = realloc(*screenBuffer, size);
@@ -1208,8 +1251,10 @@ construct_LinuxScreen (void) {
   unicodeDescriptor = -1;
 
   screenUpdated = 0;
-  cacheBuffer = NULL;
-  cacheSize = 0;
+  screenCacheBuffer = NULL;
+  screenCacheSize = 0;
+  unicodeCacheBuffer = NULL;
+  unicodeCacheSize = 0;
 
   currentConsoleNumber = 0;
   inTextMode = 1;
@@ -1264,11 +1309,17 @@ destruct_LinuxScreen (void) {
   screenFontMapSize = 0;
   screenFontMapCount = 0;
 
-  if (cacheBuffer) {
-    free(cacheBuffer);
-    cacheBuffer = NULL;
+  if (screenCacheBuffer) {
+    free(screenCacheBuffer);
+    screenCacheBuffer = NULL;
   }
-  cacheSize = 0;
+  screenCacheSize = 0;
+
+  if (unicodeCacheBuffer) {
+    free(unicodeCacheBuffer);
+    unicodeCacheBuffer = NULL;
+  }
+  unicodeCacheSize = 0;
 
   closeMainConsole();
 }
@@ -1314,10 +1365,10 @@ isUnusedConsole (int vt) {
     const uint16_t *to = (void *)(buffer + getScreenBufferSize(&header->size));
 
     if (from < to) {
-      const uint16_t character = *from++;
+      const uint16_t vga = *from++;
 
       while (from < to) {
-        if (*from++ != character) {
+        if (*from++ != vga) {
           isUnused = 0;
           break;
         }
@@ -1402,8 +1453,10 @@ testTextMode (void) {
 }
 
 static int
-refreshCacheBuffer (void) {
-  return refreshScreenBuffer(&cacheBuffer, &cacheSize);
+refreshCache (void) {
+  size_t size = refreshScreenBuffer(&screenCacheBuffer, &screenCacheSize);
+  if (!size) return 0;
+  return refreshUnicodeBuffer(size, &unicodeCacheBuffer, &unicodeCacheSize);
 }
 
 static int
@@ -1412,7 +1465,7 @@ refresh_LinuxScreen (void) {
     while (1) {
       problemText = NULL;
 
-      if (!refreshCacheBuffer()) {
+      if (!refreshCache()) {
         problemText = "can't read screen content";
         return 0;
       }
@@ -1457,7 +1510,7 @@ getScreenDescription (ScreenDescription *description) {
 
 static void
 describe_LinuxScreen (ScreenDescription *description) {
-  if (!cacheBuffer) {
+  if (!screenCacheBuffer) {
     problemText = NULL;
     currentConsoleNumber = getConsoleNumber();
     inTextMode = testTextMode();
