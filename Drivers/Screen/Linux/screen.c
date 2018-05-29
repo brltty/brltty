@@ -496,6 +496,9 @@ closeUnicode (int *fd) {
 
 static int
 openUnicode (int *fd, int vt) {
+  if (!unicodeName) return 0;
+  if (*fd != -1) return 1;
+
   int opened = 0;
   char *name = vtName(unicodeName, vt);
 
@@ -509,6 +512,8 @@ openUnicode (int *fd, int vt) {
       closeUnicode(fd);
       *fd = unicode;
       opened = 1;
+    } else {
+      unicodeName = NULL;
     }
 
     free(name);
@@ -533,12 +538,8 @@ static size_t
 readUnicodeDevice (off_t offset, void *buffer, size_t size) {
   if (openCurrentUnicode()) {
     const ssize_t count = pread(unicodeDescriptor, buffer, size, offset);
-
-    if (count == -1) {
-      logSystemError("unicode read");
-    } else {
-      return count;
-    }
+    if (count != -1) return count;
+    logSystemError("unicode read");
   }
 
   return 0;
@@ -546,6 +547,7 @@ readUnicodeDevice (off_t offset, void *buffer, size_t size) {
 
 static unsigned char *unicodeCacheBuffer;
 static size_t unicodeCacheSize;
+static ssize_t unicodeCacheUsed;
 
 static size_t
 readUnicodeCache (off_t offset, void *buffer, size_t size) {
@@ -582,12 +584,15 @@ readUnicodeContent (off_t offset, uint32_t *buffer, size_t count) {
 }
 
 static int
-refreshUnicodeBuffer (size_t size, unsigned char **unicodeBuffer, size_t *unicodeSize) {
+refreshUnicodeCache (size_t size) {
   size *= 4;
 
-  if (size > *unicodeSize) {
-    size |= 0XFF;
-    size += 0X100;
+  if (size > unicodeCacheSize) {
+    const unsigned int bits = 10;
+    const unsigned int mask = (1 << bits) - 1;
+
+    size |= mask;
+    size += 1;
     unsigned char *buffer = malloc(size);
 
     if (!buffer) {
@@ -595,13 +600,13 @@ refreshUnicodeBuffer (size_t size, unsigned char **unicodeBuffer, size_t *unicod
       return 0;
     }
 
-    if (*unicodeBuffer) free(*unicodeBuffer);
-    *unicodeBuffer = buffer;
-    *unicodeSize = size;
+    if (unicodeCacheBuffer) free(unicodeCacheBuffer);
+    unicodeCacheBuffer = buffer;
+    unicodeCacheSize = size;
   }
 
-  size_t count = readUnicodeDevice(0, *unicodeBuffer, size);
-  return count == size;
+  unicodeCacheUsed = readUnicodeDevice(0, unicodeCacheBuffer, size);
+  return 1;
 }
 
 static const char *screenName = NULL;
@@ -719,13 +724,9 @@ setCurrentScreen (unsigned char vt) {
 static size_t
 readScreenDevice (off_t offset, void *buffer, size_t size) {
   const ssize_t count = pread(screenDescriptor, buffer, size, offset);
+  if (count != -1) return count;
 
-  if (count == -1) {
-    logSystemError("screen read");
-  } else {
-    return count;
-  }
-
+  logSystemError("screen read");
   return 0;
 }
 
@@ -1071,8 +1072,16 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
   if (readScreenContent(offset, vgaBuffer, size)) {
     const uint16_t *vga = vgaBuffer;
     const uint16_t *end = vga + size;
-    const uint32_t *text = readUnicodeContent(offset, textBuffer, size)? textBuffer: NULL;
+    const uint32_t *text = NULL;
     ScreenCharacter *character = characters;
+
+    if (1) {
+      if (unicodeCacheUsed != -1) {
+        if (readUnicodeContent(offset, textBuffer, size)) {
+          text = textBuffer;
+        }
+      }
+    }
 
     while (vga != end) {
       if (character) {
@@ -1253,8 +1262,10 @@ construct_LinuxScreen (void) {
   screenUpdated = 0;
   screenCacheBuffer = NULL;
   screenCacheSize = 0;
+
   unicodeCacheBuffer = NULL;
   unicodeCacheSize = 0;
+  unicodeCacheUsed = -1;
 
   currentConsoleNumber = 0;
   inTextMode = 1;
@@ -1320,6 +1331,7 @@ destruct_LinuxScreen (void) {
     unicodeCacheBuffer = NULL;
   }
   unicodeCacheSize = 0;
+  unicodeCacheUsed = 0;
 
   closeMainConsole();
 }
@@ -1456,7 +1468,8 @@ static int
 refreshCache (void) {
   size_t size = refreshScreenBuffer(&screenCacheBuffer, &screenCacheSize);
   if (!size) return 0;
-  return refreshUnicodeBuffer(size, &unicodeCacheBuffer, &unicodeCacheSize);
+  if (!refreshUnicodeCache(size)) return 0;
+  return 1;
 }
 
 static int
