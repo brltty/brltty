@@ -199,7 +199,15 @@ usbSetAlternative (
 
 int
 usbResetDevice (UsbDevice *device) {
-  logUnsupportedFunction();
+  UsbDeviceExtension *devx = device->extension;
+
+  if (usbGetHandle(devx)) {
+    logMessage(LOG_CATEGORY(USB_IO), "reset device");
+    int result = libusb_reset_device(devx->handle);
+    if (result == LIBUSB_SUCCESS) return 1;
+    usbSetErrno(result, "libusb_reset_device");
+  }
+
   return 0;
 }
 
@@ -208,10 +216,8 @@ usbClearHalt (UsbDevice *device, unsigned char endpointAddress) {
   UsbDeviceExtension *devx = device->extension;
 
   if (usbGetHandle(devx)) {
-    int result;
-
-    logMessage(LOG_CATEGORY(USB_IO), "clearing endpoint: %02X", endpointAddress);
-    result = libusb_clear_halt(devx->handle, endpointAddress);
+    logMessage(LOG_CATEGORY(USB_IO), "clear halt: %02X", endpointAddress);
+    int result = libusb_clear_halt(devx->handle, endpointAddress);
     if (result == LIBUSB_SUCCESS) return 1;
     usbSetErrno(result, "libusb_clear_halt");
   }

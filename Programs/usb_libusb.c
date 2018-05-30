@@ -150,17 +150,23 @@ usbSetAlternative (
 
 int
 usbResetDevice (UsbDevice *device) {
-  logUnsupportedFunction();
+  logMessage(LOG_CATEGORY(USB_IO), "reset device");
+
+  UsbDeviceExtension *devx = device->extension;
+  int result = usb_reset(devx->handle);
+  if (result >= 0) return 1;
+
+  errno = -result;
+  logSystemError("USB device reset");
   return 0;
 }
 
 int
 usbClearHalt (UsbDevice *device, unsigned char endpointAddress) {
-  UsbDeviceExtension *devx = device->extension;
-  int result;
+  logMessage(LOG_CATEGORY(USB_IO), "clear halt: %02X", endpointAddress);
 
-  logMessage(LOG_CATEGORY(USB_IO), "clearing endpoint: %02X", endpointAddress);
-  result = usb_clear_halt(devx->handle, endpointAddress);
+  UsbDeviceExtension *devx = device->extension;
+  int result = usb_clear_halt(devx->handle, endpointAddress);
   if (result >= 0) return 1;
 
   errno = -result;
