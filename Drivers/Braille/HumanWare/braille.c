@@ -740,7 +740,8 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=2, .outputEndpoint=3,
       .serial = &serialParameters,
-      .data = &resourceData_serial
+      .data = &resourceData_serial,
+      .resetDevice = 1
     },
 
     { /* non-Touch models (HID protocol) */

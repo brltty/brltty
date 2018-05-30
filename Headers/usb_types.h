@@ -322,6 +322,7 @@ typedef struct {
   unsigned disableAutosuspend:1;
   unsigned disableEndpointReset:1;
   unsigned verifyInterface:1;
+  unsigned resetDevice:1;
 } UsbChannelDefinition;
 
 #define BEGIN_USB_CHANNEL_DEFINITIONS static const UsbChannelDefinition usbChannelDefinitions[] = {

@@ -1013,6 +1013,7 @@ usbOpenDevice (UsbDeviceExtension *extension) {
     device->extension = extension;
     device->serial.operations = NULL;
     device->serial.data = NULL;
+    device->resetDevice = 0;
     device->disableEndpointReset = 0;
 
     if ((device->endpoints = newQueue(usbDeallocateEndpoint, NULL))) {
@@ -1381,11 +1382,16 @@ usbPrepareChannel (UsbChannel *channel) {
   const UsbChannelDefinition *definition = channel->definition;
   UsbDevice *device = channel->device;
 
+  device->resetDevice = definition->resetDevice;
   device->disableEndpointReset = definition->disableEndpointReset;
 
   if (definition->disableAutosuspend) {
     logMessage(LOG_CATEGORY(USB_IO), "disabling autosuspend");
     usbDisableAutosuspend(device);
+  }
+
+  if (device->resetDevice) {
+    usbResetDevice(device);
   }
 
   if (usbConfigureDevice(device, definition->configuration)) {

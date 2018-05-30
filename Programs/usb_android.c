@@ -526,6 +526,12 @@ usbSetAlternative (
 }
 
 int
+usbResetDevice (UsbDevice *device) {
+  logUnsupportedFunction();
+  return 0;
+}
+
+int
 usbClearHalt (UsbDevice *device, unsigned char endpointAddress) {
   logMessage(LOG_CATEGORY(USB_IO), "clear halt: %02X", endpointAddress);
   logUnsupportedFunction();

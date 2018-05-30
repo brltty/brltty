@@ -101,6 +101,12 @@ usbSetAlternative (
 }
 
 int
+usbResetDevice (UsbDevice *device) {
+  logUnsupportedFunction();
+  return 0;
+}
+
+int
 usbClearHalt (UsbDevice *device, unsigned char endpointAddress) {
   logUnsupportedFunction();
   return 0;

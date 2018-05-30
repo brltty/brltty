@@ -311,6 +311,22 @@ usbSetAlternative (
 }
 
 int
+usbResetDevice (UsbDevice *device) {
+  UsbDeviceExtension *devx = device->extension;
+
+  logMessage(LOG_CATEGORY(USB_IO), "reset device");
+
+  if (usbOpenUsbfsFile(devx)) {
+    unsigned int arg = 0;
+
+    if (ioctl(devx->usbfsFile, USBDEVFS_RESET, &arg) != -1) return 1;
+    logSystemError("USB device reset");
+  }
+
+  return 0;
+}
+
+int
 usbClearHalt (UsbDevice *device, unsigned char endpointAddress) {
   UsbDeviceExtension *devx = device->extension;
 

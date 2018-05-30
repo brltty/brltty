@@ -79,6 +79,7 @@ extern void usbCloseInterface (
   UsbDevice *device
 );
 
+extern int usbResetDevice (UsbDevice *device);
 extern int usbClearHalt (UsbDevice *device, unsigned char endpointAddress);
 
 extern ssize_t usbControlRead (
