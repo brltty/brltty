@@ -50,18 +50,20 @@
 
 typedef enum {
   PARM_CHARSET,
-  PARM_DEBUGSFM,
   PARM_HFB,
+  PARM_LOG_SFM,
+  PARM_UNICODE,
   PARM_VT,
 } ScreenParameters;
-#define SCRPARMS "charset", "debugsfm", "hfb", "vt"
+#define SCRPARMS "charset", "hfb", "logsfm", "unicode", "vt"
 
 #include "scr_driver.h"
 #include "screen.h"
 
 static const char *problemText;
-static unsigned int debugScreenFontMap;
-static int virtualTerminal;
+static unsigned int logScreenFontMap;
+static unsigned int directUnicode;
+static int virtualTerminalNumber;
 
 #define UNICODE_ROW_DIRECT 0XF000
 
@@ -407,13 +409,13 @@ closeCurrentConsole (void) {
 
 static int
 openCurrentConsole (void) {
-  return openConsole(&consoleDescriptor, virtualTerminal);
+  return openConsole(&consoleDescriptor, virtualTerminalNumber);
 }
 
 static int
 controlCurrentConsole (int operation, void *argument) {
   if (consoleDescriptor != -1) {
-    return controlConsole(&consoleDescriptor, virtualTerminal, operation, argument);
+    return controlConsole(&consoleDescriptor, virtualTerminalNumber, operation, argument);
   }
 
   switch (operation) {
@@ -531,7 +533,7 @@ closeCurrentUnicode (void) {
 
 static int
 openCurrentUnicode (void) {
-  return openUnicode(&unicodeDescriptor, virtualTerminal);
+  return openUnicode(&unicodeDescriptor, virtualTerminalNumber);
 }
 
 static size_t
@@ -709,7 +711,7 @@ setCurrentScreen (unsigned char vt) {
   closeCurrentUnicode();
   closeCurrentScreen();
   screenDescriptor = screen;
-  virtualTerminal = vt;
+  virtualTerminalNumber = vt;
 
   isMonitorable = canMonitorScreen();
   logMessage(LOG_CATEGORY(SCREEN_DRIVER),
@@ -891,7 +893,7 @@ setScreenFontMap (int force) {
   logMessage(LOG_CATEGORY(SCREEN_DRIVER),
              "Font Map Size: %d", screenFontMapCount);
 
-  if (debugScreenFontMap) {
+  if (logScreenFontMap) {
     for (unsigned int i=0; i<screenFontMapCount; i+=1) {
       const struct unipair *map = &screenFontMapTable[i];
 
@@ -1075,7 +1077,7 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
     const uint32_t *text = NULL;
     ScreenCharacter *character = characters;
 
-    if (1) {
+    if (directUnicode) {
       if (unicodeCacheUsed) {
         if (readUnicodeContent(offset, textBuffer, size)) {
           text = textBuffer;
@@ -1201,32 +1203,53 @@ processParameters_LinuxScreen (char **parameters) {
     if (!allocateCharsetEntries(names)) return 0;
   }
 
-  debugScreenFontMap = 0;
-  if (!validateYesNo(&debugScreenFontMap, parameters[PARM_DEBUGSFM])) {
-    logMessage(LOG_WARNING, "%s: %s", "invalid screen font map debug setting", parameters[PARM_DEBUGSFM]);
-  }
-
   highFontBit = 0;
-  if (parameters[PARM_HFB] && *parameters[PARM_HFB]) {
-    int bit = 0;
+  {
+    const char *parameter = parameters[PARM_HFB];
 
-    static const int minimum = 0;
-    static const int maximum = 7;
+    if (parameter && *parameter) {
+      int bit = 0;
 
-    static const char *choices[] = {"auto", "vga", "fb", NULL};
-    unsigned int choice;
+      static const int minimum = 0;
+      static const int maximum = 7;
 
-    if (validateInteger(&bit, parameters[PARM_HFB], &minimum, &maximum)) {
-      highFontBit = 1 << (bit + 8);
-    } else if (!validateChoice(&choice, parameters[PARM_HFB], choices)) {
-      logMessage(LOG_WARNING, "%s: %s", "invalid high font bit", parameters[PARM_HFB]);
-    } else if (choice) {
-      static const unsigned short bits[] = {0X0800, 0X0100};
-      highFontBit = bits[choice-1];
+      static const char *choices[] = {"auto", "vga", "fb", NULL};
+      unsigned int choice;
+
+      if (validateInteger(&bit, parameter, &minimum, &maximum)) {
+        highFontBit = 1 << (bit + 8);
+      } else if (!validateChoice(&choice, parameter, choices)) {
+        logMessage(LOG_WARNING, "%s: %s", "invalid high font bit", parameter);
+      } else if (choice) {
+        static const unsigned short bits[] = {0X0800, 0X0100};
+        highFontBit = bits[choice-1];
+      }
     }
   }
 
-  virtualTerminal = 0;
+  logScreenFontMap = 0;
+  {
+    const char *parameter = parameters[PARM_LOG_SFM];
+
+    if (parameter && *parameter) {
+      if (!validateYesNo(&logScreenFontMap, parameter)) {
+        logMessage(LOG_WARNING, "%s: %s", "invalid log screen font map setting", parameter);
+      }
+    }
+  }
+
+  directUnicode = 1;
+  {
+    const char *parameter = parameters[PARM_UNICODE];
+
+    if (parameter && *parameter) {
+      if (!validateYesNo(&directUnicode, parameter)) {
+        logMessage(LOG_WARNING, "%s: %s", "invalid direct unicode setting", parameter);
+      }
+    }
+  }
+
+  virtualTerminalNumber = 0;
   {
     const char *parameter = parameters[PARM_VT];
 
@@ -1234,7 +1257,7 @@ processParameters_LinuxScreen (char **parameters) {
       static const int minimum = 0;
       static const int maximum = MAX_NR_CONSOLES;
 
-      if (!validateInteger(&virtualTerminal, parameter, &minimum, &maximum)) {
+      if (!validateInteger(&virtualTerminalNumber, parameter, &minimum, &maximum)) {
         logMessage(LOG_WARNING, "%s: %s", "invalid virtual terminal number", parameter);
       }
     }
@@ -1284,7 +1307,7 @@ construct_LinuxScreen (void) {
     if (setConsoleName()) {
       if (setUnicodeName()) {
         if (openMainConsole()) {
-          if (setCurrentScreen(virtualTerminal)) {
+          if (setCurrentScreen(virtualTerminalNumber)) {
             openKeyboard();
             brailleDeviceOfflineListener = registerReportListener(REPORT_BRAILLE_DEVICE_OFFLINE, lxBrailleDeviceOfflineListener, NULL);
             return 1;
@@ -1325,7 +1348,6 @@ destruct_LinuxScreen (void) {
     screenCacheBuffer = NULL;
   }
   screenCacheSize = 0;
-  screenCacheUsed = 0;
 
   if (unicodeCacheBuffer) {
     free(unicodeCacheBuffer);
@@ -1401,7 +1423,7 @@ canOpenCurrentConsole (void) {
   struct vt_stat state;
   if (!getConsoleState(&state)) return 0;
 
-  int console = virtualTerminal;
+  int console = virtualTerminalNumber;
   if (!console) console = state.v_active;
   OpenableConsoles bit = 1 << console;
 
@@ -1424,8 +1446,8 @@ static int
 getConsoleNumber (void) {
   int console;
 
-  if (virtualTerminal) {
-    console = virtualTerminal;
+  if (virtualTerminalNumber) {
+    console = virtualTerminalNumber;
   } else {
     struct vt_stat state;
     if (!getConsoleState(&state)) return NO_CONSOLE;
@@ -2182,7 +2204,7 @@ validateVt (int vt) {
 
 static int
 selectVirtualTerminal_LinuxScreen (int vt) {
-  if (vt == virtualTerminal) return 1;
+  if (vt == virtualTerminalNumber) return 1;
   if (vt && !validateVt(vt)) return 0;
   return setCurrentScreen(vt);
 }

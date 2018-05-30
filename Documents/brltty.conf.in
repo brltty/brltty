@@ -303,7 +303,7 @@
 #braille-parameters lb:Table=us.tbl # 
 
 # TSI Braille Driver Parameters
-#braille-parameters ts:HighBaud=yes # [no,yes]
+#braille-parameters ts:HighBaud=yes # [yes,no]
 #braille-parameters ts:SetBaud=9600 # [4800,9600,19200]
 
 # TTY Braille Driver Parameters
@@ -642,8 +642,9 @@
 
 # Linux Screen Driver Parameters
 #screen-parameters lx:Charset=name+... # []
-#screen-parameters lx:DebugSfm=no # [no,yes]
 #screen-parameters lx:HFB=auto # [auto,vga,fb,0-7]
+#screen-parameters lx:logSFM=no # [no,yes]
+#screen-parameters lx:Unicode=yes # [yes,no]
 #screen-parameters lx:VT=0 # [0-63]
 
 # Windows Screen Driver Parameters
