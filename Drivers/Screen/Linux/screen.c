@@ -541,7 +541,7 @@ readUnicodeDevice (off_t offset, void *buffer, size_t size) {
   if (openCurrentUnicode()) {
     const ssize_t count = pread(unicodeDescriptor, buffer, size, offset);
     if (count != -1) return count;
-    logSystemError("unicode read");
+    if (errno != ENODATA) logSystemError("unicode read");
   }
 
   return 0;
