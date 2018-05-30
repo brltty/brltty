@@ -88,7 +88,7 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "brltty-lsinc",
-      .argumentsSummary = "[file ...]"
+      .argumentsSummary = "file ..."
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);
