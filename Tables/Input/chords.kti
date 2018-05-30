@@ -103,6 +103,9 @@ bind \{chord}Dot5+Dot8 ALTGR
 bind \{chord}Dot6+Dot8 UPPER
 bind \{chord}Dot7+Dot8 UNSTICK
 
+bind \{chord}Dot3+Dot7 BRLUCDOTS+off
+bind \{chord}Dot6+Dot8 BRLUCDOTS+on
+
 ifNotVar noUnchorded
 assignDefault commandDot7 KEY_BACKSPACE
 assignDefault commandDot8 KEY_ENTER
