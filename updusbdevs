@@ -85,7 +85,9 @@ proc getDriverCode {driverDirectory} {
    return [getDriverProperty $driverDirectory DRIVER_CODE]
 }
 
-proc parseChannelDefinition {channelVariable lines location} {
+proc parseChannelDefinition {channelVariable lines location stringsArray} {
+   upvar 1 $stringsArray strings
+
    set channel [dict create]
    set ok 1
 
@@ -95,12 +97,20 @@ proc parseChannelDefinition {channelVariable lines location} {
          continue
       }
 
-      if {[regexp {\.vendor\s*=\s*(\S*?)\s*,} $line x vendor]} {
-         dict set channel vendor $vendor
+      if {[regexp {\.vendor\s*=\s*(\S*?)\s*,} $line x identifier]} {
+         dict set channel vendor $identifier
       }
 
-      if {[regexp {\.product\s*=\s*(\S*?)\s*,} $line x vendor]} {
-         dict set channel product $vendor
+      if {[regexp {\.product\s*=\s*(\S*?)\s*,} $line x identifier]} {
+         dict set channel product $identifier
+      }
+
+      if {[regexp {\.manufacturers\s*=\s*(\S*?)\s*,} $line x name]} {
+         dict set channel manufacturers $strings($name)
+      }
+
+      if {[regexp {\.products\s*=\s*(\S*?)\s*,} $line x name]} {
+         dict set channel products $strings($name)
       }
    }
 
@@ -131,14 +141,16 @@ proc parseChannelDefinition {channelVariable lines location} {
    return 0
 }
 
-proc parseChannelDefinitions {channelsVariable lines location} {
+proc parseChannelDefinitions {channelsVariable lines location stringsArray} {
    upvar 1 $channelsVariable channels
+   upvar 1 $stringsArray strings
+
    set lineNumber [dict get $location line]
 
    foreach lineText $lines {
       if {[info exists definition]} {
          if {[regexp {\}} $lineText]} {
-            if {[parseChannelDefinition channel $definition $location]} {
+            if {[parseChannelDefinition channel $definition $location strings]} {
                lappend channels $channel
             }
 
@@ -168,14 +180,24 @@ proc parseSourceFile {channelsVariable file} {
 
          if {[info exists definitions]} {
             if {[regexp {^\s*END_USB_CHANNEL_DEFINITIONS} $lineText]} {
-               parseChannelDefinitions channels $definitions $location
+               parseChannelDefinitions channels $definitions $location strings
                unset definitions
             } else {
                lappend definitions $lineText
             }
-         } elseif {[regexp {\sBEGIN_USB_CHANNEL_DEFINITIONS} $lineText]} {
+         } elseif {[info exists stringsList]} {
+            if {[regexp {^\s*END_USB_STRING_LIST} $lineText]} {
+               set strings($stringsName) $stringsList
+               unset stringsList
+               unset stringsName
+            } elseif {[regexp {^\s*"(.*)"\s*,} $lineText x string]} {
+               lappend stringsList $string
+            }
+         } elseif {[regexp {^\s*BEGIN_USB_CHANNEL_DEFINITIONS} $lineText]} {
             set definitions [list]
             dict set location line [expr {$lineNumber + 1}]
+         } elseif {[regexp {^\s*BEGIN_USB_STRING_LIST\s*\(\s*(.*?)\s*\)} $lineText x stringsName]} {
+            set stringsList [list]
          }
       }
 
