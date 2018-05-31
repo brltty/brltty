@@ -37,7 +37,7 @@
   <string name="GLOBAL_BUTTON_BROWSE_WEB_SITE">Naviga Sito Web</string>
   <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">Visualizza i Messaggi della Community</string>
   <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Posta un Messaggio alla Community</string>
-  <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIGestisci">Iscrizione alla Community</string>
+  <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Gestisci Iscrizione alla Community</string>
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Aggiorna Applicazione</string>
 
   <string name="SETTINGS_SCREEN_MAIN">Impostazioni BRLTTY</string>
