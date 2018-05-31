@@ -4,20 +4,49 @@
   <string name="app_name">BRLTTY</string>
   <string name="app_description">BRLTTY 支援點字顯示器</string>
 
+  <string name="about_activity_label">關於軟體</string>
+  <string name="application_name_label">名稱</string>
+  <string name="application_version_label">版本</string>
+  <string name="application_copyright_label">版權</string>
+
   <string name="input_service_name">BRLTTY 點字鍵盤輸入</string>
   <string name="input_service_type">點顯器上的鍵盤</string>
+  <string name="input_service_not_enabled">輸入服務尚未啟用</string>
+  <string name="input_service_not_selected">輸入服務尚未選用</string>
+  <string name="input_service_not_started">輸入服務尚未開始</string>
+  <string name="input_service_not_connected">輸入服務尚未連線</string>
+
+  <string name="checkbox_state_unchecked">否</string>
+  <string name="checkbox_state_checked">市</string>
+
+  <string name="braille_channel_name">點字設備狀態</string>
+  <string name="braille_hint_tap">點擊啟用</string>
+  <string name="braille_state_released">已釋放</string>
+  <string name="braille_state_waiting">等待中</string>
+  <string name="braille_state_connected">已連接</string>
 
   <string name="GLOBAL_BUTTON_NOTIFICATIONS">通知</string>
   <string name="GLOBAL_BUTTON_QUICK_SETTINGS">快速設定</string>
   <string name="GLOBAL_BUTTON_BACK">返回</string>
   <string name="GLOBAL_BUTTON_HOME">主頁</string>
   <string name="GLOBAL_BUTTON_RECENT_APPS">最近開啟的應用城市</string>
+  <string name="GLOBAL_BUTTON_OVERVIEW">概覽</string>
+
+  <string name="GLOBAL_BUTTON_SWITCH_INPUT_METHOD">切換輸入法</string>
+  <string name="GLOBAL_BUTTON_VIEW_USER_GUIDE">觀看使用說明</string>
+  <string name="GLOBAL_BUTTON_BROWSE_WEB_SITE">瀏覽網站</string>
+  <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">瀏覽社群訊息</string>
+  <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">張貼社群訊息</string>
+  <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">管理社群會員</string>
+  <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">更新軟體</string>
 
   <string name="SETTINGS_SCREEN_MAIN">BRLTTY 設定</string>
   <string name="SETTINGS_SCREEN_GENERAL">一般設定</string>
+  <string name="SETTINGS_SCREEN_MESSAGE">訊息設定</string>
   <string name="SETTINGS_SCREEN_DEVICES">點顯器設定</string>
   <string name="SETTINGS_SCREEN_ADVANCED">進階設定</string>
 
+  <string name="SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE">釋放的點字設備</string>
   <string name="SETTINGS_BUTTON_NAVIGATION_MODE">尋懶模式</string>
   <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">語音支援</string>
 
@@ -26,11 +55,16 @@
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">縮寫點字</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">鍵盤對應表</string>
 
+  <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">顯示提醒</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">顯示通知</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">顯示警示</string>
+
   <string name="SETTINGS_BUTTON_LOG_LEVEL">紀錄等級</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">紀錄分類</string>
   <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">紀錄無障礙事件</string>
   <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">紀錄捨棄的畫面</string>
   <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">紀錄鍵盤事件</string>
+  <string name="SETTINGS_CHECKBOX_LOG_UNHANDLED_EVENTS">紀錄未受控制事件</string>
 
   <string name="DEVICES_BUTTON_SELECTED">選用的點顯器</string>
   <string name="DEVICES_BUTTON_ADD">新增點顯器</string>
@@ -179,6 +213,7 @@
   <string name="TEXT_TABLE_LABEL_ta">坦米爾</string>
   <string name="TEXT_TABLE_LABEL_te">泰盧固語</string>
   <string name="TEXT_TABLE_LABEL_tr">土耳其</string>
+  <string name="TEXT_TABLE_LABEL_uk">烏克蘭語</string>
   <string name="TEXT_TABLE_LABEL_vi">越南</string>
 
   <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">對調左邊欄位的前景顏色與右邊欄位的背景顏色</string>
@@ -202,6 +237,7 @@
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">韓文一級</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">韓文二級</string>
   <string name="CONTRACTION_TABLE_LABEL_ko">韓文無縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_lt">立陶宛語 (沒縮寫)</string>
   <string name="CONTRACTION_TABLE_LABEL_mg">馬達加斯加語縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_mun">蒙達語縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_nl">荷蘭語縮寫</string>
