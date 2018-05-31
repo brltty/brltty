@@ -84,6 +84,8 @@ static DATA_OPERANDS_PROCESSOR(processOperands) {
 
 int
 main (int argc, char *argv[]) {
+  ProgramExitStatus exitStatus;
+
   {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
@@ -95,25 +97,27 @@ main (int argc, char *argv[]) {
   }
 
   if (argc == 0) {
-    logMessage(LOG_ERR, "missing table file.");
-    return PROG_EXIT_SYNTAX;
+    logMessage(LOG_ERR, "missing file");
+    exitStatus = PROG_EXIT_SYNTAX;
+  } else {
+    exitStatus = PROG_EXIT_SUCCESS;
+
+    do {
+      const char *path = *argv++;
+      argc -= 1;
+
+      const DataFileParameters parameters = {
+        .processOperands = processOperands,
+        .logFileName = logFileName
+      };
+
+      if (testProgramPath(path)) {
+        logFileName(path, parameters.data);
+      } else if (!processDataFile(path, &parameters)) {
+        exitStatus = PROG_EXIT_SEMANTIC;
+      }
+    } while (argc);
   }
 
-  do {
-    const char *path = *argv++;
-    argc -= 1;
-
-    const DataFileParameters parameters = {
-      .processOperands = processOperands,
-      .logFileName = logFileName
-    };
-
-    if (testProgramPath(path)) {
-      logFileName(path, parameters.data);
-    } else {
-      processDataFile(path, &parameters);
-    }
-  } while (argc);
-
-  return PROG_EXIT_SUCCESS;
+  return exitStatus;
 }
