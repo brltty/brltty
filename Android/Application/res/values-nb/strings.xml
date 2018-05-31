@@ -4,20 +4,49 @@
   <string name="app_name">BRLTTY</string>
   <string name="app_description">BRLTTY støtter punktskriftenheter.</string>
 
+  <string name="about_activity_label">Om programmet</string>
+  <string name="application_name_label">Navn</string>
+  <string name="application_version_label">Versjon</string>
+  <string name="application_copyright_label">Opphavsrett</string>
+
   <string name="input_service_name">Inndatatjeneste for BRLTTY</string>
   <string name="input_service_type">Tastatur på punktskriftenheter</string>
+  <string name="input_service_not_enabled">inndatatjenesten er ikke aktivert</string>
+  <string name="input_service_not_selected">inndatatjenesten er ikke valgt</string>
+  <string name="input_service_not_started">inndatatjenesten er ikke startet</string>
+  <string name="input_service_not_connected">inndatatjenesten er ikke tilkoblet</string>
+
+  <string name="checkbox_state_unchecked">nei</string>
+  <string name="checkbox_state_checked">ja</string>
+
+  <string name="braille_channel_name">Braille Enhetsstatus</string>
+  <string name="braille_hint_tap">trykk for handlinger</string>
+  <string name="braille_state_released">Frigjort</string>
+  <string name="braille_state_waiting">Venter</string>
+  <string name="braille_state_connected">Tilkoblet</string>
 
   <string name="GLOBAL_BUTTON_NOTIFICATIONS">Varslinger</string>
   <string name="GLOBAL_BUTTON_QUICK_SETTINGS">Hurtiginnstillinger</string>
   <string name="GLOBAL_BUTTON_BACK">Tilbake</string>
   <string name="GLOBAL_BUTTON_HOME">Hjem</string>
   <string name="GLOBAL_BUTTON_RECENT_APPS">Nylig brukte apper</string>
+  <string name="GLOBAL_BUTTON_OVERVIEW">Oversikt</string>
+
+  <string name="GLOBAL_BUTTON_SWITCH_INPUT_METHOD">Skift inndatametode</string>
+  <string name="GLOBAL_BUTTON_VIEW_USER_GUIDE">Vis brukerveiledning</string>
+  <string name="GLOBAL_BUTTON_BROWSE_WEB_SITE">Bla gjennom nettstedet</string>
+  <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">Bla gjennom fellesskapsmeldinger</string>
+  <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Post fellesskapsmelding</string>
+  <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Administrer fellesskapsmedlemskap</string>
+  <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Oppdater programmet</string>
 
   <string name="SETTINGS_SCREEN_MAIN">Innstillinger for BRLTTY</string>
   <string name="SETTINGS_SCREEN_GENERAL">Generelle innstillinger</string>
+  <string name="SETTINGS_SCREEN_MESSAGE">Meldingsinnstillinger</string>
   <string name="SETTINGS_SCREEN_DEVICES">Administrere enheter</string>
   <string name="SETTINGS_SCREEN_ADVANCED">Avanserte innstillinger</string>
 
+  <string name="SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE">Frigjør punktskriftenheten</string>
   <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Navigasjonsmmodus</string>
   <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Støtte for tale</string>
 
@@ -26,11 +55,16 @@
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Kortskrifttabell</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tastaturtabell</string>
 
+  <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Vis kunngjøringer</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Vis varsler</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">Vis advarsler</string>
+
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Loggenivå</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Loggekategorier</string>
   <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Logge tilgjengelighetshendelser</string>
   <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">Logge gjengitt skjermbilde</string>
   <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Logge tastaturhendelser</string>
+  <string name="SETTINGS_CHECKBOX_LOG_UNHANDLED_EVENTS">Logg ikke-håndterte hendelser</string>
 
   <string name="DEVICES_BUTTON_SELECTED">Valgt enhet</string>
   <string name="DEVICES_BUTTON_ADD">Legg til enhet</string>
@@ -179,6 +213,7 @@
   <string name="TEXT_TABLE_LABEL_ta">tamil</string>
   <string name="TEXT_TABLE_LABEL_te">telugu</string>
   <string name="TEXT_TABLE_LABEL_tr">tyrkisk</string>
+  <string name="TEXT_TABLE_LABEL_uk">ukrainsk</string>
   <string name="TEXT_TABLE_LABEL_vi">vietnamesisk</string>
 
   <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">omvendt forgrunnsfarge i venstre kolonne og bakgrunnsfarge i høyre kolonne</string>
@@ -202,6 +237,7 @@
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">koreansk (grade 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">koreansk (grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko">koreansk (fullskrift)</string>
+  <string name="CONTRACTION_TABLE_LABEL_lt">latvisk (uforkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_mg">madagassisk (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_mun">munda (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_nl">nederlandsk (kortskrift)</string>
