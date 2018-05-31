@@ -4,20 +4,49 @@
   <string name="app_name">BRLTTY</string>
   <string name="app_description">BRLTTY поддерживает брайлевские устройства.</string>
 
+  <string name="about_activity_label">О приложении</string>
+  <string name="application_name_label">Название</string>
+  <string name="application_version_label">Версия</string>
+  <string name="application_copyright_label">Авторские права</string>
+
   <string name="input_service_name">Служба ввода BRLTTY</string>
   <string name="input_service_type">Клавиатуры на брайлевских устройствах</string>
+  <string name="input_service_not_enabled">служба ввода не включена</string>
+  <string name="input_service_not_selected">служба ввода не выбрана</string>
+  <string name="input_service_not_started">служба ввода не запущена</string>
+  <string name="input_service_not_connected">служба ввода не подключена</string>
+
+  <string name="checkbox_state_unchecked">Нет</string>
+  <string name="checkbox_state_checked">Да</string>
+
+  <string name="braille_channel_name">Состояние брайлевского устройства</string>
+  <string name="braille_hint_tap">нажмите для выполнения действия</string>
+  <string name="braille_state_released">Разъединено</string>
+  <string name="braille_state_waiting">Ожидание</string>
+  <string name="braille_state_connected">Подключено</string>
 
   <string name="GLOBAL_BUTTON_NOTIFICATIONS">Уведомления</string>
   <string name="GLOBAL_BUTTON_QUICK_SETTINGS">Быстрые настройки</string>
   <string name="GLOBAL_BUTTON_BACK">Назад</string>
   <string name="GLOBAL_BUTTON_HOME">Главная страница</string>
   <string name="GLOBAL_BUTTON_RECENT_APPS">Недавние приложения</string>
+  <string name="GLOBAL_BUTTON_OVERVIEW">Обзор</string>
+
+  <string name="GLOBAL_BUTTON_SWITCH_INPUT_METHOD">Переключение метода ввода</string>
+  <string name="GLOBAL_BUTTON_VIEW_USER_GUIDE">Просмотр руководства пользователя</string>
+  <string name="GLOBAL_BUTTON_BROWSE_WEB_SITE">Просмотр web-сайта</string>
+  <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">Просмотр сообщений сообщества</string>
+  <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Отправка сообщений сообщества</string>
+  <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Управление членством в сообществе</string>
+  <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Обновление приложения</string>
 
   <string name="SETTINGS_SCREEN_MAIN">Настройки BRLTTY</string>
   <string name="SETTINGS_SCREEN_GENERAL">Общие настройки</string>
+  <string name="SETTINGS_SCREEN_MESSAGE">Настройки сообщений</string>
   <string name="SETTINGS_SCREEN_DEVICES">Управление устройствами</string>
   <string name="SETTINGS_SCREEN_ADVANCED">Расширенные настройки</string>
 
+  <string name="SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE">Разъединение брайлевского устройства</string>
   <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Режим навигации</string>
   <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Поддержка речи</string>
 
@@ -26,11 +55,16 @@
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Таблица краткописи</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Клавиатурная таблица</string>
 
+  <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Показывать извещения</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Показывать уведомления</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">Показывать предупреждения</string>
+
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Уровень журнала</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Категории журнала</string>
   <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Log событий доступности</string>
   <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">Log экранного представления</string>
   <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Log клавиатурных событий</string>
+  <string name="SETTINGS_CHECKBOX_LOG_UNHANDLED_EVENTS">Журнал необработанных событий</string>
 
   <string name="DEVICES_BUTTON_SELECTED">Выбранное устройство</string>
   <string name="DEVICES_BUTTON_ADD">Добавить устройство</string>
@@ -179,6 +213,7 @@
   <string name="TEXT_TABLE_LABEL_ta">Тамил</string>
   <string name="TEXT_TABLE_LABEL_te">Телугу</string>
   <string name="TEXT_TABLE_LABEL_tr">Турецкий</string>
+  <string name="TEXT_TABLE_LABEL_uk">Украинский</string>
   <string name="TEXT_TABLE_LABEL_vi">Вьетнамский</string>
 
   <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">инверсный цвет переднего плана в левой колонке и цвет фона в правой колонке</string>
@@ -202,6 +237,7 @@
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Корейский (ступень 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Корейский (ступень 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko">Корейский (несокращённый)</string>
+  <string name="CONTRACTION_TABLE_LABEL_lt">Литовский (несокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_mg">Малагасийский (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_mun">Мунда (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_nl">Голландский (сокращённый)</string>
