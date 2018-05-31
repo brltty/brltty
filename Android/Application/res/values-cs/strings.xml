@@ -4,20 +4,49 @@
   <string name="app_name">BRLTTY</string>
   <string name="app_description">BRLTTY podporuje braillské řádky.</string>
 
+  <string name="about_activity_label">O aplikaci</string>
+  <string name="application_name_label">Název</string>
+  <string name="application_version_label">Verze</string>
+  <string name="application_copyright_label">Copyright</string>
+
   <string name="input_service_name">Služba vstupu BRLTTY</string>
   <string name="input_service_type">Klávesnice braillských zařízení</string>
+  <string name="input_service_not_enabled">sluba vstupu nepovolena</string>
+  <string name="input_service_not_selected">sluba vstupu nevybrána</string>
+  <string name="input_service_not_started">sluba vstupu nesputìna</string>
+  <string name="input_service_not_connected">sluba vstupu nepøipojena</string>
+
+  <string name="checkbox_state_unchecked">Vypnuto</string>
+  <string name="checkbox_state_checked">Zapnuto</string>
+
+  <string name="braille_channel_name">Stav braillského zaøízení</string>
+  <string name="braille_hint_tap">klepnìte pro akce</string>
+  <string name="braille_state_released">Uvolnìno</string>
+  <string name="braille_state_waiting">Èeká</string>
+  <string name="braille_state_connected">Pøipojeno</string>
 
   <string name="GLOBAL_BUTTON_NOTIFICATIONS">Oznámení</string>
   <string name="GLOBAL_BUTTON_QUICK_SETTINGS">Rychlé nastavení</string>
   <string name="GLOBAL_BUTTON_BACK">Zpět</string>
   <string name="GLOBAL_BUTTON_HOME">Domů</string>
   <string name="GLOBAL_BUTTON_RECENT_APPS">Poslední Aplikace</string>
+  <string name="GLOBAL_BUTTON_OVERVIEW">Poslední aplikace</string>
+
+  <string name="GLOBAL_BUTTON_SWITCH_INPUT_METHOD">Pøepnout metodu vstupu</string>
+  <string name="GLOBAL_BUTTON_VIEW_USER_GUIDE">Zobrazit uivatelskou pøíruèku</string>
+  <string name="GLOBAL_BUTTON_BROWSE_WEB_SITE">Otevøít webovou stránku</string>
+  <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">Projít zprávy komunity</string>
+  <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Napsat zprávu komunitì</string>
+  <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Spravovat èlenství v komunitì</string>
+  <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Aktualizovat aplikaci</string>
 
   <string name="SETTINGS_SCREEN_MAIN">Nastavení BRLTTY</string>
   <string name="SETTINGS_SCREEN_GENERAL">Obecná nastavení</string>
+  <string name="SETTINGS_SCREEN_MESSAGE">Nastavení zpráv</string>
   <string name="SETTINGS_SCREEN_DEVICES">Správa zařízení</string>
   <string name="SETTINGS_SCREEN_ADVANCED">Pokročilá nastavení</string>
 
+  <string name="SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE">Uvolnit braillské zaøízení</string>
   <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Režim navigace</string>
   <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Hlasová podpora</string>
 
@@ -26,11 +55,16 @@
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Tabulka zkratkopisu</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tabulka klávesnice</string>
 
+  <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Zobrazovat hláení</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Zobrazovat oznámení</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">Zobrazovat výstrahy</string>
+
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Úroveň protokolu</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Kategorie protokolu událostí</string>
   <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Zaznamenávat události usnadnění</string>
   <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">Zaznamenávat vykreslený obsah obrazovky</string>
   <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Zaznamenávat události klávesnice</string>
+  <string name="SETTINGS_CHECKBOX_LOG_UNHANDLED_EVENTS">Zaznamenávat nezpracované události</string>
 
   <string name="DEVICES_BUTTON_SELECTED">Vybrané zařízení</string>
   <string name="DEVICES_BUTTON_ADD">Přidat zařízení</string>
@@ -179,6 +213,7 @@
   <string name="TEXT_TABLE_LABEL_ta">Tamilština</string>
   <string name="TEXT_TABLE_LABEL_te">Telugština</string>
   <string name="TEXT_TABLE_LABEL_tr">Turečtina</string>
+  <string name="TEXT_TABLE_LABEL_uk">Ukrajintina</string>
   <string name="TEXT_TABLE_LABEL_vi">Vietnamština</string>
 
   <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">Invertovaná (barva popředí v levém sloupci a barva pozadí v pravém sloupci)</string>
@@ -202,6 +237,7 @@
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Korejština (grade 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Korejština (grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko">Korejština (plnopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_lt">Litevtina (plnopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_mg">Malgaština (zkratkopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_mun">Mundské jazyky (zkratkopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_nl">Nizozemština (zkratkopis)</string>
