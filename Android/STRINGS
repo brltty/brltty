@@ -1,20 +1,49 @@
 app_name BRLTTY
 app_description BRLTTY supports braille devices.
 
+about_activity_label About Application
+application_name_label Name
+application_version_label Version
+application_copyright_label Copyright
+
 input_service_name BRLTTY Input Service
 input_service_type Keyboards on Braille Devices
+input_service_not_enabled input service not enabled
+input_service_not_selected input service not selected
+input_service_not_started input service not started
+input_service_not_connected input service not connected
+
+checkbox_state_unchecked No
+checkbox_state_checked Yes
+
+braille_channel_name Braille Device State
+braille_hint_tap tap for actions
+braille_state_released Released
+braille_state_waiting Waiting
+braille_state_connected Connected
 
 GLOBAL_BUTTON_NOTIFICATIONS Notifications
 GLOBAL_BUTTON_QUICK_SETTINGS Quick Settings
 GLOBAL_BUTTON_BACK Back
 GLOBAL_BUTTON_HOME Home
 GLOBAL_BUTTON_RECENT_APPS Recent Apps
+GLOBAL_BUTTON_OVERVIEW Overview
+
+GLOBAL_BUTTON_SWITCH_INPUT_METHOD Switch Input Method
+GLOBAL_BUTTON_VIEW_USER_GUIDE View User Guide
+GLOBAL_BUTTON_BROWSE_WEB_SITE Browse Web Site
+GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES Browse Community Messages
+GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE Post Community Message
+GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP Manage Community Membership
+GLOBAL_BUTTON_UPDATE_APPLICATION Update Application
 
 SETTINGS_SCREEN_MAIN BRLTTY Settings
 SETTINGS_SCREEN_GENERAL General Settings
+SETTINGS_SCREEN_MESSAGE Message Settings
 SETTINGS_SCREEN_DEVICES Manage Devices
 SETTINGS_SCREEN_ADVANCED Advanced Settings
 
+SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE Release Braille Device
 SETTINGS_BUTTON_NAVIGATION_MODE Navigation Mode
 SETTINGS_BUTTON_SPEECH_SUPPORT Speech Support
 
@@ -23,11 +52,16 @@ SETTINGS_BUTTON_ATTRIBUTES_TABLE Attributes Table
 SETTINGS_BUTTON_CONTRACTION_TABLE Contraction Table
 SETTINGS_BUTTON_KEYBOARD_TABLE Keyboard Table
 
+SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS Show Announcements
+SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS Show Notifications
+SETTINGS_CHECKBOX_SHOW_TOASTS Show Alerts
+
 SETTINGS_BUTTON_LOG_LEVEL Log Level
 SETTINGS_BUTTON_LOG_CATEGORIES Log Categories
 SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS Log Accessibility Events
 SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN Log Rendered Screen
 SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS Log Keyboard Events
+SETTINGS_CHECKBOX_LOG_UNHANDLED_EVENTS Log Unhandled Events
 
 DEVICES_BUTTON_SELECTED Selected Device
 DEVICES_BUTTON_ADD Add Device
@@ -176,6 +210,7 @@ TEXT_TABLE_LABEL_sw Swahili
 TEXT_TABLE_LABEL_ta Tamil
 TEXT_TABLE_LABEL_te Telugu
 TEXT_TABLE_LABEL_tr Turkish
+TEXT_TABLE_LABEL_uk Ukrainian
 TEXT_TABLE_LABEL_vi Vietnamese
 
 ATTRIBUTES_TABLE_LABEL_invleft_right inverse foreground colour in the left column and background colour in the right column
@@ -199,6 +234,7 @@ CONTRACTION_TABLE_LABEL_ja Japanese (uncontracted)
 CONTRACTION_TABLE_LABEL_ko_g1 Korean (grade 1)
 CONTRACTION_TABLE_LABEL_ko_g2 Korean (grade 2)
 CONTRACTION_TABLE_LABEL_ko Korean (uncontracted)
+CONTRACTION_TABLE_LABEL_lt Lithuanian (uncontracted)
 CONTRACTION_TABLE_LABEL_mg Malagasy (contracted)
 CONTRACTION_TABLE_LABEL_mun Munda (contracted)
 CONTRACTION_TABLE_LABEL_nl Dutch (contracted)
