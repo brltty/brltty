@@ -4,20 +4,49 @@
   <string name="app_name">BRLTTY</string>
   <string name="app_description">BRLTTY tukee pistenäyttöjä.</string>
 
+  <string name="about_activity_label">Tietoa sovelluksesta</string>
+  <string name="application_name_label">Nimi</string>
+  <string name="application_version_label">Versio</string>
+  <string name="application_copyright_label">Tekijänoikeus</string>
+
   <string name="input_service_name">BRLTTY:n syötepalvelu</string>
   <string name="input_service_type">Pistenäyttöjen näppäimistöt</string>
+  <string name="input_service_not_enabled">Syötepalvelu ei ole käytössä</string>
+  <string name="input_service_not_selected">Syötepalvelua ei ole valittu</string>
+  <string name="input_service_not_started">Syötepalvelua ei ole käynnistetty</string>
+  <string name="input_service_not_connected">Syötepalvelua ei ole yhdistetty</string>
+
+  <string name="checkbox_state_unchecked">Ei</string>
+  <string name="checkbox_state_checked">Kyllä</string>
+
+  <string name="braille_channel_name">Pistekirjoituslaitteen tila</string>
+  <string name="braille_hint_tap">Napauta saadaksesi toimintoja</string>
+  <string name="braille_state_released">Vapautettu</string>
+  <string name="braille_state_waiting">Odottaa</string>
+  <string name="braille_state_connected">Yhdistetty</string>
 
   <string name="GLOBAL_BUTTON_NOTIFICATIONS">Ilmoitukset</string>
   <string name="GLOBAL_BUTTON_QUICK_SETTINGS">Pika-asetukset</string>
   <string name="GLOBAL_BUTTON_BACK">Takaisin</string>
   <string name="GLOBAL_BUTTON_HOME">Koti</string>
   <string name="GLOBAL_BUTTON_RECENT_APPS">Viimeisimmät sovellukset</string>
+  <string name="GLOBAL_BUTTON_OVERVIEW">Yleiskatsaus</string>
+
+  <string name="GLOBAL_BUTTON_SWITCH_INPUT_METHOD">Vaihda syöttömenetelmää</string>
+  <string name="GLOBAL_BUTTON_VIEW_USER_GUIDE">Näytä käyttöopas</string>
+  <string name="GLOBAL_BUTTON_BROWSE_WEB_SITE">Selaa verkkosivustoa</string>
+  <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">Selaa yhteisön viestejä</string>
+  <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Lähetä yhteisöviesti</string>
+  <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Hallinnoi yhteisöjäsenyyttä</string>
+  <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Päivitä sovellus</string>
 
   <string name="SETTINGS_SCREEN_MAIN">BRLTTY:n asetukset</string>
   <string name="SETTINGS_SCREEN_GENERAL">Yleiset</string>
+  <string name="SETTINGS_SCREEN_MESSAGE">Viestiasetukset</string>
   <string name="SETTINGS_SCREEN_DEVICES">Laitteiden hallinta</string>
   <string name="SETTINGS_SCREEN_ADVANCED">Lisäasetukset</string>
 
+  <string name="SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE">Vapauta pistekirjoituslaite</string>
   <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Navigointitila</string>
   <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Puhetuki</string>
 
@@ -26,11 +55,16 @@
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Lyhennetaulukko</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Näppäintaulukko</string>
 
+  <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Näytä tiedotukset</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Näytä ilmoitukset</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">Näytä hälytykset</string>
+
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Lokitaso</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Lokikategoriat</string>
   <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Tallenna saavutettavuustapahtumat lokiin</string>
   <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">Tallenna hahmonnettu näyttö lokiin</string>
   <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Tallenna näppäimistötapahtumat lokiin</string>
+  <string name="SETTINGS_CHECKBOX_LOG_UNHANDLED_EVENTS">Log Käsittelemättömät tapahtumat</string>
 
   <string name="DEVICES_BUTTON_SELECTED">Valittu laite</string>
   <string name="DEVICES_BUTTON_ADD">Lisää laite</string>
@@ -179,6 +213,7 @@
   <string name="TEXT_TABLE_LABEL_ta">tamili</string>
   <string name="TEXT_TABLE_LABEL_te">telugu</string>
   <string name="TEXT_TABLE_LABEL_tr">turkki</string>
+  <string name="TEXT_TABLE_LABEL_uk">ukraina</string>
   <string name="TEXT_TABLE_LABEL_vi">vietnam</string>
 
   <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">käänteinen edustan väri vasemmassa sarakkeessa ja taustaväri oikeassa sarakkeessa</string>
@@ -202,6 +237,7 @@
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">korea (taso 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">korea (taso 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko">korea (tavallinen kirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_lt">liettua (tavallinen kirjoitus)</string>
   <string name="CONTRACTION_TABLE_LABEL_mg">malagassi (lyhennekirjoitus)</string>
   <string name="CONTRACTION_TABLE_LABEL_mun">munda (lyhennekirjoitus)</string>
   <string name="CONTRACTION_TABLE_LABEL_nl">hollanti (lyhennekirjoitus)</string>
