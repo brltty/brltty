@@ -19,7 +19,7 @@
   <string name="checkbox_state_unchecked">nei</string>
   <string name="checkbox_state_checked">ja</string>
 
-  <string name="braille_channel_name">Braille Enhetsstatus</string>
+  <string name="braille_channel_name">Punktskriftenhetsstatus</string>
   <string name="braille_hint_tap">trykk for handlinger</string>
   <string name="braille_state_released">Frigjort</string>
   <string name="braille_state_waiting">Venter</string>
@@ -32,7 +32,7 @@
   <string name="GLOBAL_BUTTON_RECENT_APPS">Nylig brukte apper</string>
   <string name="GLOBAL_BUTTON_OVERVIEW">Oversikt</string>
 
-  <string name="GLOBAL_BUTTON_SWITCH_INPUT_METHOD">Skift inndatametode</string>
+  <string name="GLOBAL_BUTTON_SWITCH_INPUT_METHOD">Bytt inndatametode</string>
   <string name="GLOBAL_BUTTON_VIEW_USER_GUIDE">Vis brukerveiledning</string>
   <string name="GLOBAL_BUTTON_BROWSE_WEB_SITE">Bla gjennom nettstedet</string>
   <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">Bla gjennom fellesskapsmeldinger</string>
@@ -47,7 +47,7 @@
   <string name="SETTINGS_SCREEN_ADVANCED">Avanserte innstillinger</string>
 
   <string name="SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE">Frigjør punktskriftenheten</string>
-  <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Navigasjonsmmodus</string>
+  <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Navigasjonsmodus</string>
   <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Støtte for tale</string>
 
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Teksttabell</string>
@@ -61,9 +61,9 @@
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Loggenivå</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Loggekategorier</string>
-  <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Logge tilgjengelighetshendelser</string>
-  <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">Logge gjengitt skjermbilde</string>
-  <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Logge tastaturhendelser</string>
+  <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Logg tilgjengelighetshendelser</string>
+  <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">Logg gjengitt skjermbilde</string>
+  <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Logg tastaturhendelser</string>
   <string name="SETTINGS_CHECKBOX_LOG_UNHANDLED_EVENTS">Logg ikke-håndterte hendelser</string>
 
   <string name="DEVICES_BUTTON_SELECTED">Valgt enhet</string>
@@ -71,7 +71,7 @@
   <string name="DEVICES_BUTTON_REMOVE">Fjern enhet</string>
 
   <string name="SELECTED_DEVICE_NONE">ingen enheter</string>
-  <string name="SELECTED_DEVICE_UNSELECTED">enhet er ikke valgt</string>
+  <string name="SELECTED_DEVICE_UNSELECTED">enheten er ikke valgt</string>
 
   <string name="ADD_DEVICE_NAME">Enhetsnavn</string>
   <string name="ADD_DEVICE_METHOD">Kommunikasjonsmetode</string>
@@ -89,7 +89,7 @@
   <string name="SET_SELECTION_NONE">ingenting er valgt</string>
 
   <string name="NAVIGATION_MODE_LABEL_List">Vertikal liste</string>
-  <string name="NAVIGATION_MODE_LABEL_Grid">Todimensjonelt rutenett</string>
+  <string name="NAVIGATION_MODE_LABEL_Grid">Todimensjonalt rutenett</string>
 
   <string name="SPEECH_SUPPORT_LABEL_None">ingen</string>
   <string name="SPEECH_SUPPORT_LABEL_Native">original</string>
@@ -189,7 +189,7 @@
   <string name="TEXT_TABLE_LABEL_new">newari</string>
   <string name="TEXT_TABLE_LABEL_nl_BE">nederlandsk (Belgia)</string>
   <string name="TEXT_TABLE_LABEL_nl">nederlandsk</string>
-  <string name="TEXT_TABLE_LABEL_nl_NL">nederlandsk</string>
+  <string name="TEXT_TABLE_LABEL_nl_NL">nederlandsk (Nederland)</string>
   <string name="TEXT_TABLE_LABEL_no_generic">norsk (med støtte for andre språk)</string>
   <string name="TEXT_TABLE_LABEL_no">norsk</string>
   <string name="TEXT_TABLE_LABEL_no_oup">norsk (Offentlig utvalg for punktskrift)</string>
