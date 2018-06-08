@@ -13,47 +13,49 @@ depends() {
 
 # called by dracut
 install() {
-	local required_libs="$(ldd /usr/bin/brltty | awk '{print $1}' | sed 's/\..*/.so\*/g')"
+	local word
 
-	for word in $required_libs; do
-		if [ -e $word ]; then
+	# get the shared libraries that the brltty executable requires
+	local required_libraries="$(ldd /usr/bin/brltty | awk '{print $1}' | sed 's/\..*/.so\*/g')"
+	for word in ${required_libraries}
+	do
+		if [ -e $word ]
+		then
 			inst_libdir_file "$word"
 		fi
 	done
 
+	# install the Linux screen driver
 	inst_libdir_file "brltty/libbrlttyxlx.so*"
 
-	local brltty_report="$(LC_ALL="$BRLTTY_LOCALE" brltty -Evel7 2>&1)"
+	export BRLTTY_CONFIGURATION_FILE=/etc/brltty.conf
+	local brltty_report="$(LC_ALL="$BRLTTY_LOCALE" brltty -E -v -e -ldebug 2>&1)"
 	
-	local checked_braille_drivers=$(echo "$brltty_report" | grep "checking for braille driver:" | awk '{print $NF}')
-
-	for word in $checked_braille_drivers; do
+	local required_braille_drivers=$(echo "$brltty_report" | awk '/checking for braille driver:/ {print $NF}')
+	for word in $required_braille_drivers
+	do
 		inst_libdir_file "brltty/libbrlttyb$word.so*"
+		brlttyIncludeInputTables "$word"
 	done
 
-	local text_tables=$(echo "$brltty_report" | grep -E "compiling text table|including data file"| awk '{print $NF}')
-		
-	for word in $text_tables; do
+	local required_data_files=$(echo "$brltty_report" | awk '/including data file:/ {print $NF}')
+	for word in $required_data_files
+	do
 		inst "$word"
 	done	
 
-	local attributes=$(echo "$brltty_report" | grep "Attributes Table" | awk '{print $NF}')	
-
-	for word in $attributes; do
-		inst "/etc/brltty/Attributes/$word.atb"
-	done
-
-	if [ "$BRLTTY_DRACUT_INCLUDE_DRIVERS" ]; then
-		for word in $BRLTTY_DRACUT_INCLUDE_DRIVERS; do
-			inst_libdir_file "brltty/libbrltty$word.so*"
+	if [ -n "$BRLTTY_DRACUT_INCLUDE_BRAILLE_DRIVERS" ]
+	then
+		for word in $BRLTTY_DRACUT_INCLUDE_BRAILLE_DRIVERS
+		do
+			inst_libdir_file "brltty/libbrlttyb$word.so*"
+			brlttyIncludeInputTables "$word"
 		done
 	fi
 		
-	if [ "$BRLTTY_DRACUT_INCLUDE_TEXT_FILES" ]; then
-		for word in $BRLTTY_DRACUT_INCLUDE_TEXT_FILES; do
-			inst "/etc/brltty/Text/$word"
-		done
-	fi
+	brlttyIncludeTables Text ttb $BRLTTY_DRACUT_INCLUDE_TEXT_TABLES
+	brlttyIncludeTables Attributes atb $BRLTTY_DRACUT_INCLUDE_ATTRIBUTES_TABLES
+	brlttyIncludeTables Contraction ctb $BRLTTY_DRACUT_INCLUDE_CONTRACTION_TABLES
 
 	inst_hook cmdline 99 "$moddir/brltty-parse-options.sh"
 	inst_hook initqueue 99 "$moddir/brltty-start.sh"
@@ -64,3 +66,29 @@ install() {
 
 	dracut_need_initqueue
 }
+
+brlttyIncludeTables() {
+	local subdirectory="$1"
+	local extension="$2"
+	shift 2
+	local name
+
+	for name
+	do
+		brlttyIncludeDataFile "/etc/brltty/$subdirectory/$name.$extension"
+	done
+}
+
+brlttyIncludeInputTables() {
+	brlttyIncludeDataFile "/etc/brltty/Input/$1/"*.ktb
+}
+
+brlttyIncludeDataFile() {
+	local file
+
+	while read -r file
+	do
+		inst "$file"
+	done < <( brltty-lsinc "$@" )
+}
+
