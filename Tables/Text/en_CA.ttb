@@ -55,11 +55,6 @@ char \x19	(1 345678)  # ⣽   [END OF MEDIUM]
 char \x1A	(1 3 5678)  # ⣵   [SUBSTITUTE]
 
 # equivalents to \x2D [HYPHEN-MINUS]
-char \xAD	(  3  6  )  # ⠤ ­ [SOFT HYPHEN]
-char \u2010	(  3  6  )  # ⠤ ‐ [HYPHEN]
-char \u2011	(  3  6  )  # ⠤ ‑ [NON-BREAKING HYPHEN]
-char \u2013	(  3  6  )  # ⠤ – [EN DASH]
-char \u2212	(  3  6  )  # ⠤ − [MINUS SIGN]
 
 # equivalents to \x7C [VERTICAL LINE]
 char \xA6	(12  56  )  # ⠳ ¦ [BROKEN BAR]

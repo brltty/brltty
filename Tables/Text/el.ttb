@@ -29,9 +29,6 @@ glyph	\t	(        )	# 09 [CHARACTER TABULATION]
 glyph	\r	(        )	# 0D [CARRIAGE RETURN (CR)]
 
 char	\x2D	(  3  6  )	# ⠤ - [HYPHEN-MINUS]
-glyph	\u2010	(  3  6  )	# ⠤ ‐ [HYPHEN]
-glyph	\u2011	(  3  6  )	# ⠤ ‑ [NON-BREAKING HYPHEN]
-glyph	\u2013	(  3  6  )	# ⠤ – [EN DASH]
 
 char	\x27	(  3     )	# ⠄ ' [APOSTROPHE]
 char	\x2C	( 2      )	# ⠂ , [COMMA]

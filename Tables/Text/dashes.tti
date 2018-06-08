@@ -39,3 +39,5 @@ alias	\u2212	\x2D	# minus sign
 alias	\uFE63	\x2D	# small hyphen-minus
 alias	\uFF0D	\x2D	# fullwidth hyphen-minus
 
+alias	\u2015	\x2D	# horizontal bar
+
