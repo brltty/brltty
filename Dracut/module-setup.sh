@@ -38,8 +38,7 @@ install() {
 	local required_braille_drivers=$(echo "$brltty_report" | awk '/checking for braille driver:/ {print $NF}')
 	for word in $required_braille_drivers
 	do
-		inst_libdir_file "brltty/libbrlttyb$word.so*"
-		brlttyIncludeInputTables "$word"
+		brlttyIncludeBrailleDriver "$word"
 	done
 
 	local required_data_files=$(echo "$brltty_report" | awk '/including data file:/ {print $NF}')
@@ -52,8 +51,7 @@ install() {
 	then
 		for word in $BRLTTY_DRACUT_INCLUDE_BRAILLE_DRIVERS
 		do
-			inst_libdir_file "brltty/libbrlttyb$word.so*"
-			brlttyIncludeInputTables "$word"
+			brlttyIncludeBrailleDriver "$word"
 		done
 	fi
 		
@@ -78,6 +76,11 @@ brlttyIncludeTables() {
 	do
 		brlttyIncludeDataFile "/etc/brltty/$subdirectory/$name.$extension"
 	done
+}
+
+brlttyIncludeBrailleDriver() {
+	inst_libdir_file "brltty/libbrlttyb$1.so*"
+	brlttyIncludeInputTables "$1"
 }
 
 brlttyIncludeInputTables() {
