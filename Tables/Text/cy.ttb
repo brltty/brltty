@@ -92,7 +92,6 @@ char \xFC	(1 3  6  )  # FC ⠥ ü [LATIN SMALL LETTER U WITH DIAERESIS]
 char \xFD	(1 3456  )  # FD ⠽ ý [LATIN SMALL LETTER Y WITH ACUTE]
 char \u0177	(1 3456  )  # FE ⠽ ŷ [LATIN SMALL LETTER Y WITH CIRCUMFLEX]
 char \xFF	(1 3456  )  # FF ⠽ ÿ [LATIN SMALL LETTER Y WITH DIAERESIS]
-char \u2010	(  3  6  )  #    ⠤ ‐ [HYPHEN]
 char \u2011	( 234  78)  #    ⣎ ‑ [NON-BREAKING HYPHEN]
 
 include common.tti
