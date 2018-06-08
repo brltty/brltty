@@ -11,7 +11,7 @@ depends() {
 	return 0
 }
 
-#called by dracut
+# called by dracut
 install() {
 	local required_libs="$(ldd /usr/bin/brltty | awk '{print $1}' | sed 's/\..*/.so\*/g')"
 
@@ -55,7 +55,7 @@ install() {
 		done
 	fi
 
-	inst_hook cmdline 99 "$moddir/parse-brltty-opts.sh"
+	inst_hook cmdline 99 "$moddir/brltty-parse-options.sh"
 	inst_hook initqueue 99 "$moddir/brltty-start.sh"
 	inst_hook cleanup 99 "$moddir/brltty-cleanup.sh"
 
