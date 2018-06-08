@@ -45,13 +45,13 @@ install() {
 
 	if [ "$BRLTTY_DRACUT_INCLUDE_DRIVERS" ]; then
 		for word in $BRLTTY_DRACUT_INCLUDE_DRIVERS; do
-			inst_libdir_file "brltty/libbrltty$BRLTTY_DRACUT_INCLUDE_DRIVERS.so*"
+			inst_libdir_file "brltty/libbrltty$word.so*"
 		done
 	fi
 		
 	if [ "$BRLTTY_DRACUT_INCLUDE_TEXT_FILES" ]; then
 		for word in $BRLTTY_DRACUT_INCLUDE_TEXT_FILES; do
-			inst "/etc/brltty/Text/$BRLTTY_DRACUT_INCLUDE_DATA_FILES"
+			inst "/etc/brltty/Text/$word"
 		done
 	fi
 
