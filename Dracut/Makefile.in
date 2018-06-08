@@ -1,0 +1,14 @@
+MODULE_NAME = 99brltty
+MODULES_DIRECTORY = /usr/lib/dracut/modules.d
+MODULE_DIRECTORY = $(INSTALL_ROOT)$(MODULES_DIRECTORY)/$(MODULE_NAME)
+
+install:
+	$(INSTALL_DIRECTORY) $(MODULE_DIRECTORY)
+	$(INSTALL_DATA) README $(MODULE_DIRECTORY)
+	for file in *.sh; \
+	do $(INSTALL_SCRIPT) $$file $(MODULE_DIRECTORY); \
+	done
+
+uninstall:
+	-rm -f -r  $(MODULE_DIRECTORY)
+
