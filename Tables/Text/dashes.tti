@@ -16,16 +16,26 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# This BRLTTY text subtable is included by all general purpose text tables. Its
-# sole purpose is to be a common place wherein to include text subtables which
-# define braille representations that are generally useful in all contexts.
+# This BRLTTY text subtable aliases all of the dash and hyphen characters
+# to the ASCII hyphen-minus.
 
-# space characters
-include spaces.tti
-include dashes.tti
+char	\x2D	36	# hyphen-minus
 
-# box drawing characters
-include boxes.tti
+alias	\u2012	\x2D	# figure dash
+alias	\u2013	\x2D	# en dash
+alias	\u2014	\x2D	# em dash
+alias	\u2448	\x2D	# ocr dash
+alias	\u301C	\x2D	# wave dash
+alias	\u3030	\x2D	# wavy dash
+alias	\uFE58	\x2D	# small em dash
 
-# block characters
-include blocks.tti
+alias	\xAD	\x2D	# soft hyphen
+alias	\u2010	\x2D	# hyphen
+alias	\u2011	\x2D	# non-breaking hyphen
+
+alias	\u2052	\x2D	# commercial minus sign
+alias	\u2212	\x2D	# minus sign
+
+alias	\uFE63	\x2D	# small hyphen-minus
+alias	\uFF0D	\x2D	# fullwidth hyphen-minus
+
