@@ -29,7 +29,11 @@ install() {
 	inst_libdir_file "brltty/libbrlttyxlx.so*"
 
 	export BRLTTY_CONFIGURATION_FILE=/etc/brltty.conf
-	local brltty_report="$(LC_ALL="$BRLTTY_LOCALE" brltty -E -v -e -ldebug 2>&1)"
+	inst_simple "$BRLTTY_CONFIGURATION_FILE"
+
+	local BRLTTY_EXECUTABLE_PATH="/usr/bin/brltty"
+	inst_simple "$BRLTTY_EXECUTABLE_PATH"
+	local brltty_report="$(LC_ALL="$BRLTTY_LOCALE" "$BRLTTY_EXECUTABLE_PATH" -E -v -e -ldebug 2>&1)"
 	
 	local required_braille_drivers=$(echo "$brltty_report" | awk '/checking for braille driver:/ {print $NF}')
 	for word in $required_braille_drivers
@@ -60,9 +64,6 @@ install() {
 	inst_hook cmdline 99 "$moddir/brltty-parse-options.sh"
 	inst_hook initqueue 99 "$moddir/brltty-start.sh"
 	inst_hook cleanup 99 "$moddir/brltty-cleanup.sh"
-
-	inst_simple "/etc/brltty.conf"
-	inst_simple "/usr/bin/brltty"
 
 	dracut_need_initqueue
 }
