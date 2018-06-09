@@ -40,13 +40,13 @@ install() {
 	inst_simple "$BRLTTY_EXECUTABLE_PATH"
 	local brltty_report="$(LC_ALL="${BRLTTY_DRACUT_LOCALE:-${LANG}}" "$BRLTTY_EXECUTABLE_PATH" -E -v -e -ldebug 2>&1)"
 	
-	local required_braille_drivers=$(echo "$brltty_report" | awk '/checking for braille driver:/ {print $NF}')
+	local required_braille_drivers=$(brlttyGetProperty "checking for braille driver")
 	for word in $required_braille_drivers
 	do
 		brlttyIncludeBrailleDriver "$word"
 	done
 
-	local required_data_files=$(echo "$brltty_report" | awk '/including data file:/ {print $NF}')
+	local required_data_files=$(brlttyGetProperty "including data file")
 	for word in $required_data_files
 	do
 		inst "$word"
@@ -64,11 +64,33 @@ install() {
 	brlttyIncludeTables Attributes atb $BRLTTY_DRACUT_ATTRIBUTES_TABLES
 	brlttyIncludeTables Contraction ctb $BRLTTY_DRACUT_CONTRACTION_TABLES
 
+	local preferences_file=$(brlttyGetProperty "Preferences File")
+	if [ -n "${preferences_file}" ]
+	then
+		if [ "${preferences_file}" = "${preferences_file#/}" ]
+		then
+			local updatable_directory=$(brlttyGetProperty "Updatable Directory")
+			if [ -n "${updatable_directory}" ]
+			then
+				preferences_file="${updatable_directory}/${preferences_file}"
+			fi
+		fi
+
+		if [ -f "${preferences_file}" ]
+		then
+			inst_simple "${preferences_file}" "/etc/brltty.prefs"
+		fi
+	fi
+
 	inst_hook cmdline 99 "$moddir/brltty-parse-options.sh"
 	inst_hook initqueue 99 "$moddir/brltty-start.sh"
 	inst_hook cleanup 99 "$moddir/brltty-cleanup.sh"
 
 	dracut_need_initqueue
+}
+
+brlttyGetProperty() {
+	echo "${brltty_report}" | awk "/: ${1}:/ {print \$NF}"
 }
 
 brlttyIncludeTables() {

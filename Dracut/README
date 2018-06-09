@@ -3,8 +3,8 @@ Braille Support for Dracut
 
 This module provides braille accessibility within the initial ramdisk image.
 If BRLTTY is installed (/usr/bin/brltty exists) then it is added to the image.
-All of the braille drivers, text tables, attributes tables, and contraction
-tables configured via /etc/brltty.conf are included.
+The braille drivers, text tables, attributes tables, contraction tables, and
+preferences file configured via /etc/brltty.conf are included.
 
 Note
   The earliest phase at which this module is known to be reliably functional is
@@ -57,12 +57,18 @@ variables are supported (see man brltty for the full list). For example, the
 parameter brltty.braille_driver=vo is mapped to the environment variable
 assignment BRLTTY_BRAILLE_DRIVER=vo. Some of the more interesting ones are:
 
-  brltty.braille_driver
-  brltty.braille_device
-  brltty.braille_parameters
-  brltty.text_table
-  brltty.attributes_table
-  brltty.contraction_table
-  brltty.log_file
-  brltty.log_level
+  =========================  ===========================
+  Kernel Parameter           Default Value
+  -------------------------  ---------------------------
+  brltty.braille_driver      setting in /etc/brltty.conf
+  brltty.braille_device      setting in /etc/brltty.conf
+  brltty.braille_parameters  setting in /etc/brltty.conf
+  brltty.text_table          setting in /etc/brltty.conf
+  brltty.attributes_table    setting in /etc/brltty.conf
+  brltty.contraction_table   setting in /etc/brltty.conf
+  brltty.configuration_file  /etc/brltty.conf
+  brltty.preferences_file    /etc/brltty.prefs
+  brltty.log_file            /run/initramfs/brltty.log
+  brltty.log_level           setting in /etc/brltty.conf
+  =========================  ===========================
 
