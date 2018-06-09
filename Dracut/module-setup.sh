@@ -33,7 +33,7 @@ install() {
 
 	local BRLTTY_EXECUTABLE_PATH="/usr/bin/brltty"
 	inst_simple "$BRLTTY_EXECUTABLE_PATH"
-	local brltty_report="$(LC_ALL="$BRLTTY_LOCALE" "$BRLTTY_EXECUTABLE_PATH" -E -v -e -ldebug 2>&1)"
+	local brltty_report="$(LC_ALL="${BRLTTY_DRACUT_LOCALE:-${LANG}}" "$BRLTTY_EXECUTABLE_PATH" -E -v -e -ldebug 2>&1)"
 	
 	local required_braille_drivers=$(echo "$brltty_report" | awk '/checking for braille driver:/ {print $NF}')
 	for word in $required_braille_drivers
@@ -47,17 +47,17 @@ install() {
 		inst "$word"
 	done	
 
-	if [ -n "$BRLTTY_DRACUT_INCLUDE_BRAILLE_DRIVERS" ]
+	if [ -n "$BRLTTY_DRACUT_BRAILLE_DRIVERS" ]
 	then
-		for word in $BRLTTY_DRACUT_INCLUDE_BRAILLE_DRIVERS
+		for word in $BRLTTY_DRACUT_BRAILLE_DRIVERS
 		do
 			brlttyIncludeBrailleDriver "$word"
 		done
 	fi
 		
-	brlttyIncludeTables Text ttb $BRLTTY_DRACUT_INCLUDE_TEXT_TABLES
-	brlttyIncludeTables Attributes atb $BRLTTY_DRACUT_INCLUDE_ATTRIBUTES_TABLES
-	brlttyIncludeTables Contraction ctb $BRLTTY_DRACUT_INCLUDE_CONTRACTION_TABLES
+	brlttyIncludeTables Text ttb $BRLTTY_DRACUT_TEXT_TABLES
+	brlttyIncludeTables Attributes atb $BRLTTY_DRACUT_ATTRIBUTES_TABLES
+	brlttyIncludeTables Contraction ctb $BRLTTY_DRACUT_CONTRACTION_TABLES
 
 	inst_hook cmdline 99 "$moddir/brltty-parse-options.sh"
 	inst_hook initqueue 99 "$moddir/brltty-start.sh"
