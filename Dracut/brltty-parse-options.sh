@@ -7,6 +7,8 @@ export BRLTTY_UPDATABLE_DIRECTORY="/etc"
 export BRLTTY_PREFERENCES_FILE="${BRLTTY_UPDATABLE_DIRECTORY}/brltty.prefs"
 
 export BRLTTY_PID_FILE="/var/run/brltty.pid"
+export BRLTTY_SPEECH_DRIVER="no"
+export BRLTTY_SCREEN_DRIVER="lx"
 
 brlttyParseOptions() {
 	local option

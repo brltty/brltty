@@ -1,3 +1,3 @@
 #!/bin/bash
 
-brltty -E -xlx
+brltty -E
