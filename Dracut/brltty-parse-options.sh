@@ -6,6 +6,8 @@ export BRLTTY_LOG_FILE="${BRLTTY_WRITABLE_DIRECTORY}/brltty.log"
 export BRLTTY_UPDATABLE_DIRECTORY="/etc"
 export BRLTTY_PREFERENCES_FILE="${BRLTTY_UPDATABLE_DIRECTORY}/brltty.prefs"
 
+export BRLTTY_PID_FILE="/var/run/brltty.pid"
+
 brlttyParseOptions() {
 	local option
 
