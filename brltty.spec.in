@@ -314,6 +314,7 @@ BuildArch: noarch
 
 AutoProv: no
 AutoReq: yes
+Requires: systemd
 
 Summary: Systemd units and wrappers for BRLTTY.
 %description -n brltty-systemd
@@ -331,12 +332,31 @@ BuildArch: noarch
 
 AutoProv: no
 AutoReq: yes
+Requires: systemd-udev
 
 Summary: Udev rules for BRLTTY.
 %description -n brltty-udev
 This package provides the rules and wrapper for managing BRLTTY via Udev.
 
 Install this package if you'd like to manage BRLTTY processes via Udev.
+
+
+%package -n brltty-dracut
+Version: @PACKAGE_VERSION@
+Release: 1
+Group: System Environment/Daemons
+License: LGPL
+BuildArch: noarch
+
+AutoProv: no
+AutoReq: yes
+Requires: dracut
+
+Summary: Dracut module for BRLTTY.
+%description -n brltty-dracut
+This package provides the module for adding BRLTTY to an initial ramdisk image.
+
+Install this package if you'd like to have braille accessibility BRLTTY processes via Udev.
 
 
 %package -n brlapi
@@ -355,6 +375,26 @@ Programming Interface to BRLTTY.
 
 Install this package if you have an application
 which directly accesses a refreshable braille display.
+
+
+%package -n brlapi-utils
+Version: @api_release@
+Release: 1
+Group: Applications/System
+License: LGPL
+
+Requires: libX11
+
+BuildRequires: xorg-x11-proto-devel
+BuildRequires: libX11-devel
+BuildRequires: libXtst-devel
+
+AutoProv: no
+AutoReq: yes
+
+Summary: Appliation Programming Interface for BRLTTY.
+%description -n brlapi-utils
+This package provides a set of commands that use the BrlAPI interface.
 
 
 %package -n brlapi-devel
@@ -464,26 +504,6 @@ Install this package if you have a Tcl application
 which directly accesses a refreshable braille display.
 
 
-%package -n brlapi-utils
-Version: @api_release@
-Release: 1
-Group: Applications/System
-License: LGPL
-
-Requires: libX11
-
-BuildRequires: xorg-x11-proto-devel
-BuildRequires: libX11-devel
-BuildRequires: libXtst-devel
-
-AutoProv: no
-AutoReq: yes
-
-Summary: Appliation Programming Interface for BRLTTY.
-%description -n brlapi-utils
-This package provides a set of commands for maintaining BRLTTY's datafiles.
-
-
 %prep
 # %setup -n %{name}-%{version}
 %setup -n @PACKAGE_TARNAME@-@PACKAGE_VERSION@
@@ -494,8 +514,13 @@ export PYTHON=python2
 make
 
 %install
-make install install-documents install-messages
-make install-systemd install-udev install-appstream
+make install
+make install-documents
+make install-messages
+make install-appstream
+make install-systemd
+make install-udev
+make install-dracut
 install -m 644 Documents/brltty.conf "${RPM_BUILD_ROOT}%{_sysconfdir}"
 %find_lang %{name}
 
@@ -569,11 +594,33 @@ rm -fr "${RPM_BUILD_ROOT}"
 %files -n brltty-udev
 %{_udevlibdir}/*
 
+%files -n brltty-dracut
+/usr/lib/dracut/modules.d/99brltty
+
 %files -n brlapi
 %defattr(-,root,root)
 %{_libdir}/libbrlapi.so.*
 %{_datadir}/polkit-1/actions/org.a11y.brlapi.policy
 %doc %{_docdir}/*/Manual-BrlAPI
+
+%files -n brlapi-utils
+%{_bindir}/xbrlapi
+%doc %{_mandir}/man1/xbrlapi.1.gz
+%{_datadir}/gdm/greeter/autostart/xbrlapi.desktop
+%{_sysconfdir}/X11/Xsession.d/60xbrlapi
+%{_bindir}/eutp
+%doc %{_mandir}/man1/eutp.1.gz
+%{_bindir}/vstp
+%doc %{_mandir}/man1/vstp.1.gz
+
+%files -n brlapi-devel
+%defattr(-,root,root)
+%{_libdir}/libbrlapi.a
+%{_libdir}/libbrlapi.so
+%{_includedir}/brlapi.h
+%{_includedir}/brlapi_*.h
+%doc %{_mandir}/man3/*
+%doc %{_docdir}/*/BrlAPIref
 
 %files -n java-brlapi
 @JAVA_JAR_DIR@/*
@@ -588,25 +635,6 @@ rm -fr "${RPM_BUILD_ROOT}"
 %files -n tcl-brlapi
 @TCL_DIR@/brlapi-@api_release@/libbrlapi_tcl.so
 @TCL_DIR@/brlapi-@api_release@/pkgIndex.tcl
-
-%files -n brlapi-devel
-%defattr(-,root,root)
-%{_libdir}/libbrlapi.a
-%{_libdir}/libbrlapi.so
-%{_includedir}/brlapi.h
-%{_includedir}/brlapi_*.h
-%doc %{_mandir}/man3/*
-%doc %{_docdir}/*/BrlAPIref
-
-%files -n brlapi-utils
-%{_bindir}/xbrlapi
-%{_bindir}/eutp
-%{_bindir}/vstp
-%doc %{_mandir}/man1/xbrlapi.1.gz
-%doc %{_mandir}/man1/eutp.1.gz
-%doc %{_mandir}/man1/vstp.1.gz
-%{_sysconfdir}/X11/Xsession.d/60xbrlapi
-%{_datadir}/gdm/greeter/autostart/xbrlapi.desktop
 
 
 %changelog

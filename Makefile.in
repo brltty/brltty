@@ -22,14 +22,17 @@ all install uninstall install-documents:
 install-messages uninstall-messages:
 	cd $(MSG_DIR) && $(MAKE) $(@:-messages=)
 
+install-appstream uninstall-appstream:
+	cd Autostart/AppStream && $(MAKE) $(@:-appstream=)
+
 install-systemd uninstall-systemd:
 	cd Autostart/Systemd && $(MAKE) $(@:-systemd=)
 
 install-udev uninstall-udev:
 	cd Autostart/Udev && $(MAKE) $(@:-udev=)
 
-install-appstream uninstall-appstream:
-	cd Autostart/AppStream && $(MAKE) $(@:-appstream=)
+install-dracut uninstall-dracut:
+	cd Dracut && $(MAKE) $(@:-dracut=)
 
 ARCHIVE_NAME = $(PACKAGE_TARNAME)-$(PACKAGE_VERSION)
 TAR_EXTENSION = tar
