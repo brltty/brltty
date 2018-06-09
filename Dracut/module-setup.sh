@@ -12,6 +12,11 @@ depends() {
 }
 
 # called by dracut
+installkernel() {
+	instmods pcspkr
+}
+
+# called by dracut
 install() {
 	local word
 
