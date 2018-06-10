@@ -4,7 +4,8 @@ Braille Support for Dracut
 This module provides braille accessibility within the initial ramdisk image.
 If BRLTTY is installed (/usr/bin/brltty exists) then it is added to the image.
 The braille drivers, text tables, attributes tables, contraction tables, and
-preferences file configured via /etc/brltty.conf are included.
+preferences file configured via /etc/brltty.conf are included. Local
+customizations in /etc/xdg/brltty/ are also included.
 
 Note
   The earliest phase at which this module is known to be reliably functional is

@@ -64,7 +64,8 @@ install() {
 	brlttyIncludeTables Attributes atb ${BRLTTY_DRACUT_ATTRIBUTES_TABLES}
 	brlttyIncludeTables Contraction ctb ${BRLTTY_DRACUT_CONTRACTION_TABLES}
 
-	# install the preferences file (relative to the updatable directory)
+	# install the preferences file
+	# a relative path is to the updatable directory
 	local preferences_file=$(brlttyGetProperty "Preferences File")
 
 	if [ -n "${preferences_file}" ]
@@ -86,7 +87,9 @@ install() {
 	fi
 
 	# install local customizations
-	inst_dir "/etc/xdg/brltty"
+	local customization_directory="/etc/xdg/brltty"
+	inst_dir "${customization_directory}"
+	inst -o -a "${customization_directory}/"*
 
 	inst_hook cmdline 99 "${moddir}/brltty-parse-options.sh"
 	inst_hook initqueue 99 "${moddir}/brltty-start.sh"
