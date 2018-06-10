@@ -89,7 +89,7 @@ install() {
 	# install local customizations
 	local customization_directory="/etc/xdg/brltty"
 	inst_dir "${customization_directory}"
-	inst -o -a "${customization_directory}/"*
+	inst_multiple -o "${customization_directory}/"*
 
 	inst_hook cmdline 99 "${moddir}/brltty-parse-options.sh"
 	inst_hook initqueue 99 "${moddir}/brltty-start.sh"
