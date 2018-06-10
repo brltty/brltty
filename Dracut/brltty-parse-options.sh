@@ -1,14 +1,14 @@
 #!/bin/bash
 
-export BRLTTY_WRITABLE_DIRECTORY="/run/initramfs"
-export BRLTTY_LOG_FILE="${BRLTTY_WRITABLE_DIRECTORY}/brltty.log"
+export BRLTTY_SCREEN_DRIVER="lx"
+export BRLTTY_SPEECH_DRIVER="no"
+
+export BRLTTY_WRITABLE_DIRECTORY="/run"
+export BRLTTY_PID_FILE="${BRLTTY_WRITABLE_DIRECTORY}/brltty.pid"
+export BRLTTY_LOG_FILE="${BRLTTY_WRITABLE_DIRECTORY}/initramfs/brltty.log"
 
 export BRLTTY_UPDATABLE_DIRECTORY="/etc"
 export BRLTTY_PREFERENCES_FILE="${BRLTTY_UPDATABLE_DIRECTORY}/brltty.prefs"
-
-export BRLTTY_PID_FILE="/var/run/brltty.pid"
-export BRLTTY_SPEECH_DRIVER="no"
-export BRLTTY_SCREEN_DRIVER="lx"
 
 brlttyParseOptions() {
 	local option
