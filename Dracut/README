@@ -53,23 +53,24 @@ installed into the initramfs:
     BRLTTY_DRACUT_LOCALE="$LANG"
 
 This module interprets kernel command line parameters that begin with the
-brltty. prefix. All of BRLTTY's options that can be specified via environment
-variables are supported (see man brltty for the full list). For example, the
-parameter brltty.braille_driver=vo is mapped to the environment variable
-assignment BRLTTY_BRAILLE_DRIVER=vo. Some of the more interesting ones are:
+rd.brltty. prefix. All of BRLTTY's options that can be specified via
+environment variables are supported (see man brltty for the full list). For
+example, the parameter rd.brltty.braille_driver=vo is mapped to the environment
+variable assignment BRLTTY_BRAILLE_DRIVER=vo. Some of the more interesting ones
+are:
 
-  =========================  ===========================
-  Kernel Parameter           Default Value
-  -------------------------  ---------------------------
-  brltty.braille_driver      setting in /etc/brltty.conf
-  brltty.braille_device      setting in /etc/brltty.conf
-  brltty.braille_parameters  setting in /etc/brltty.conf
-  brltty.text_table          setting in /etc/brltty.conf
-  brltty.attributes_table    setting in /etc/brltty.conf
-  brltty.contraction_table   setting in /etc/brltty.conf
-  brltty.configuration_file  /etc/brltty.conf
-  brltty.preferences_file    /etc/brltty.prefs
-  brltty.log_file            /run/initramfs/brltty.log
-  brltty.log_level           setting in /etc/brltty.conf
-  =========================  ===========================
+  ============================  ===========================
+  Kernel Parameter              Default Value
+  ----------------------------  ---------------------------
+  rd.brltty.braille_driver      setting in /etc/brltty.conf
+  rd.brltty.braille_device      setting in /etc/brltty.conf
+  rd.brltty.braille_parameters  setting in /etc/brltty.conf
+  rd.brltty.text_table          setting in /etc/brltty.conf
+  rd.brltty.attributes_table    setting in /etc/brltty.conf
+  rd.brltty.contraction_table   setting in /etc/brltty.conf
+  rd.brltty.configuration_file  /etc/brltty.conf
+  rd.brltty.preferences_file    /etc/brltty.prefs
+  rd.brltty.log_file            /run/initramfs/brltty.log
+  rd.brltty.log_level           setting in /etc/brltty.conf
+  ============================  ===========================
 

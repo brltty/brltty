@@ -15,7 +15,7 @@ brlttyParseOptions() {
 
    for option
    do
-      if [[ "${option}" =~ ^("brltty."[[:alpha:]_]+)"="(.+) ]]
+      if [[ "${option}" =~ ^"rd."("brltty."[[:alpha:]_]+)"="(.+) ]]
       then
          local name="${BASH_REMATCH[1]}"
          local value="${BASH_REMATCH[2]}"
