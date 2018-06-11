@@ -11,21 +11,21 @@ export BRLTTY_UPDATABLE_DIRECTORY="/etc"
 export BRLTTY_PREFERENCES_FILE="${BRLTTY_UPDATABLE_DIRECTORY}/brltty.prefs"
 
 brlttyParseOptions() {
-	local option
+   local option
 
-	for option
-	do
-		if [[ "${option}" =~ ^("brltty."[[:alpha:]_]+)"="(.+) ]]
-		then
-                        local name="${BASH_REMATCH[1]}"
-                        local value="${BASH_REMATCH[2]}"
+   for option
+   do
+      if [[ "${option}" =~ ^("brltty."[[:alpha:]_]+)"="(.+) ]]
+      then
+         local name="${BASH_REMATCH[1]}"
+         local value="${BASH_REMATCH[2]}"
 
-			name="${name^^?}" # convert to uppercase
-			name="${name/./_}" # translate . to _
+         name="${name^^?}" # convert to uppercase
+         name="${name/./_}" # translate . to _
 
-			export "${name}=${value}"
-		fi
-	done
+         export "${name}=${value}"
+      fi
+   done
 }
 
 brlttyParseOptions $(getcmdline)
