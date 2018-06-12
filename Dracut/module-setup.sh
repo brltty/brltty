@@ -18,8 +18,6 @@ installkernel() {
 
 # called by dracut
 install() {
-   local word
-
    local BRLTTY_EXECUTABLE_PATH="/usr/bin/brltty"
    inst_binary "${BRLTTY_EXECUTABLE_PATH}"
    local brltty_report="$(LC_ALL="${BRLTTY_DRACUT_LOCALE:-${LANG}}" "${BRLTTY_EXECUTABLE_PATH}" -E -v -e -ldebug 2>&1)"
@@ -27,28 +25,14 @@ install() {
    export BRLTTY_CONFIGURATION_FILE=/etc/brltty.conf
    inst_simple "${BRLTTY_CONFIGURATION_FILE}"
 
-   # install the Linux screen driver
-   inst_libdir_file "brltty/libbrlttyxlx.so*"
+   brlttyIncludeDataFiles $(brlttyGetProperty "including data file")
+   brlttyIncludeScreenDrivers lx
 
-   local required_braille_drivers=$(brlttyGetProperty "checking for braille driver")
-   for word in ${required_braille_drivers}
-   do
-      brlttyIncludeBrailleDriver "${word}"
-   done
+   brlttyIncludeBrailleDrivers $(brlttyGetDrivers braille)
+   brlttyIncludeBrailleDrivers ${BRLTTY_DRACUT_BRAILLE_DRIVERS}
 
-   local required_data_files=$(brlttyGetProperty "including data file")
-   for word in ${required_data_files}
-   do
-      inst_simple "${word}"
-   done   
-
-   if [ -n "${BRLTTY_DRACUT_BRAILLE_DRIVERS}" ]
-   then
-      for word in ${BRLTTY_DRACUT_BRAILLE_DRIVERS}
-      do
-         brlttyIncludeBrailleDriver "${word}"
-      done
-   fi
+   brlttyIncludeSpeechDrivers $(brlttyGetDrivers speech)
+   brlttyIncludeSpeechDrivers ${BRLTTY_DRACUT_SPEECH_DRIVERS}
       
    brlttyIncludeTables Text ttb ${BRLTTY_DRACUT_TEXT_TABLES}
    brlttyIncludeTables Attributes atb ${BRLTTY_DRACUT_ATTRIBUTES_TABLES}
@@ -88,8 +72,34 @@ install() {
    dracut_need_initqueue
 }
 
-brlttyGetProperty() {
-   echo "${brltty_report}" | awk "/: ${1}:/ {print \$NF}"
+brlttyIncludeBrailleDrivers() {
+   brlttyIncludeDrivers b "${@}"
+   local code
+
+   for code
+   do
+      brlttyIncludeDataFiles "/etc/brltty/Input/${code}/"*.ktb
+   done
+}
+
+brlttyIncludeSpeechDrivers() {
+   brlttyIncludeDrivers s "${@}"
+}
+
+brlttyIncludeScreenDrivers() {
+   brlttyIncludeDrivers x "${@}"
+}
+
+brlttyIncludeDrivers() {
+   local type="${1}"
+   shift 1
+   local code
+
+   for code
+   do
+      [ "${code}" = "no" ] && continue
+      inst_libdir_file "brltty/libbrltty${type}${code}.so*"
+   done
 }
 
 brlttyIncludeTables() {
@@ -100,25 +110,28 @@ brlttyIncludeTables() {
 
    for name
    do
-      brlttyIncludeDataFile "/etc/brltty/${subdirectory}/${name}.${extension}"
+      brlttyIncludeDataFiles "/etc/brltty/${subdirectory}/${name}.${extension}"
    done
 }
 
-brlttyIncludeBrailleDriver() {
-   inst_libdir_file "brltty/libbrlttyb$1.so*"
-   brlttyIncludeInputTables "$1"
-}
-
-brlttyIncludeInputTables() {
-   brlttyIncludeDataFile "/etc/brltty/Input/$1/"*.ktb
-}
-
-brlttyIncludeDataFile() {
+brlttyIncludeDataFiles() {
    local file
 
    while read -r file
    do
       inst_simple "${file}"
    done < <(brltty-lsinc "${@}")
+}
+
+brlttyGetDrivers() {
+   local category="${1}"
+
+   brlttyGetProperty "checking for ${category} driver"
+}
+
+brlttyGetProperty() {
+   local name="${1}"
+
+   echo "${brltty_report}" | awk "/: *${name} *:/ {print \$NF}"
 }
 
