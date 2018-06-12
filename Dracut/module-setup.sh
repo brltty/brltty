@@ -12,6 +12,18 @@ depends() {
 }
 
 # called by dracut
+cmdline() {
+   brlttyLoadConfigurationFile
+   set -- ${BRLTTY_DRACUT_KERNEL_PARAMETERS}
+   local parameter
+
+   for parameter
+   do
+      echo -n " rd.brltty.${parameter}"
+   done
+}
+
+# called by dracut
 installkernel() {
    instmods pcspkr
 }
