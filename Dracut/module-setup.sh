@@ -18,6 +18,8 @@ installkernel() {
 
 # called by dracut
 install() {
+   brlttyLoadConfigurationFile
+
    local BRLTTY_EXECUTABLE_PATH="/usr/bin/brltty"
    inst_binary "${BRLTTY_EXECUTABLE_PATH}"
    local brltty_report="$(LC_ALL="${BRLTTY_DRACUT_LOCALE:-${LANG}}" "${BRLTTY_EXECUTABLE_PATH}" -E -v -e -ldebug 2>&1)"
@@ -133,5 +135,10 @@ brlttyGetProperty() {
    local name="${1}"
 
    echo "${brltty_report}" | awk "/: *${name} *:/ {print \$NF}"
+}
+
+brlttyLoadConfigurationFile() {
+   local configuration_file="/etc/brltty/dracut.conf"
+   [ -f "${configuration_file}" ] && . "${configuration_file}"
 }
 

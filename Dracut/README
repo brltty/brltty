@@ -11,8 +11,12 @@ Note
   The earliest phase at which this module is known to be reliably functional is
   pre-mount. It's our plan to eventually resolve this limitation.
 
-The following environment variables may be used to influence how BRLTTY is
-installed into the initramfs:
+A number of environment variables may be used to influence how BRLTTY is
+installed into the initramfs. In addition to setting them temporarily within
+the current environment, they may also be set persistently within the file
+/etc/brltty/dracut.conf.
+
+The following environment varialbes are supported:
 
 * BRLTTY_DRACUT_BRAILLE_DRIVERS
   A space-separated list of additional braille drivers to include. For example:

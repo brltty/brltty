@@ -2,12 +2,24 @@ MODULE_NAME = 99brltty
 MODULES_DIRECTORY = /usr/lib/dracut/modules.d
 MODULE_DIRECTORY = $(INSTALL_ROOT)$(MODULES_DIRECTORY)/$(MODULE_NAME)
 
-install:
-	$(INSTALL_DIRECTORY) $(MODULE_DIRECTORY)
-	$(INSTALL_DATA) README $(MODULE_DIRECTORY)
+install: install-module install-documentation install-configuration-file
+
+install-module: install-module-directory
 	for file in *.sh; \
 	do $(INSTALL_SCRIPT) $$file $(MODULE_DIRECTORY); \
 	done
+
+install-documentation: install-module-directory
+	$(INSTALL_DATA) README $(MODULE_DIRECTORY)
+
+install-module-directory:
+	$(INSTALL_DIRECTORY) $(MODULE_DIRECTORY)
+
+CONFIGURATION_FILE = dracut.conf
+
+install-configuration-file: install-tables-directory
+	$(INSTALL_DATA) $(CONFIGURATION_FILE) $(INSTALL_TABLES_DIRECTORY)
+	sed -e '/^ *BRLTTY_DRACUT_LOCALE *= *"/s/".*"/"${LANG}"/' -i $(INSTALL_TABLES_DIRECTORY)/$(CONFIGURATION_FILE)
 
 uninstall:
 	-rm -f -r  $(MODULE_DIRECTORY)
