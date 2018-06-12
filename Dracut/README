@@ -70,8 +70,10 @@ are:
   rd.brltty.braille_driver      setting in /etc/brltty.conf
   rd.brltty.braille_device      setting in /etc/brltty.conf
   rd.brltty.braille_parameters  setting in /etc/brltty.conf
-  rd.brltty.speech_driver       setting in /etc/brltty.conf
+  rd.brltty.speech_driver       no
   rd.brltty.speech_parameters   setting in /etc/brltty.conf
+  rd.brltty.screen_driver       lx
+  rd.brltty.screen_parameters   setting in /etc/brltty.conf
   rd.brltty.text_table          setting in /etc/brltty.conf
   rd.brltty.attributes_table    setting in /etc/brltty.conf
   rd.brltty.contraction_table   setting in /etc/brltty.conf
