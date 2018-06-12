@@ -542,6 +542,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %exclude %{_libdir}/brltty/libbrlttyxa2.so
 %exclude %{_libdir}/brltty/libbrlttyxsc.so
 %{_sysconfdir}/brltty
+%exclude %{_sysconfdir}/brltty/dracut.conf
 %{_datadir}/metainfo/org.a11y.brltty.metainfo.xml
 %doc %{_mandir}/man1/brltty.1.gz
 %doc %{_docdir}/*/LICENSE*
@@ -596,6 +597,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 
 %files -n brltty-dracut
 /usr/lib/dracut/modules.d/99brltty
+%config(noreplace) %verify(not size md5 mtime) %{_sysconfdir}/brltty/dracut.conf
 
 %files -n brlapi
 %defattr(-,root,root)
