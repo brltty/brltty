@@ -20,26 +20,16 @@ installkernel() {
 install() {
    local word
 
-   # get the shared libraries that the brltty executable requires
-   local required_libraries="$(ldd /usr/bin/brltty | awk '{print $1}' | sed 's/\..*/.so\*/g')"
-   for word in ${required_libraries}
-   do
-      if [ -e "${word}" ]
-      then
-         inst_libdir_file "${word}"
-      fi
-   done
-
-   # install the Linux screen driver
-   inst_libdir_file "brltty/libbrlttyxlx.so*"
-
-   export BRLTTY_CONFIGURATION_FILE=/etc/brltty.conf
-   inst_simple "${BRLTTY_CONFIGURATION_FILE}"
-
    local BRLTTY_EXECUTABLE_PATH="/usr/bin/brltty"
    inst_binary "${BRLTTY_EXECUTABLE_PATH}"
    local brltty_report="$(LC_ALL="${BRLTTY_DRACUT_LOCALE:-${LANG}}" "${BRLTTY_EXECUTABLE_PATH}" -E -v -e -ldebug 2>&1)"
    
+   export BRLTTY_CONFIGURATION_FILE=/etc/brltty.conf
+   inst_simple "${BRLTTY_CONFIGURATION_FILE}"
+
+   # install the Linux screen driver
+   inst_libdir_file "brltty/libbrlttyxlx.so*"
+
    local required_braille_drivers=$(brlttyGetProperty "checking for braille driver")
    for word in ${required_braille_drivers}
    do
