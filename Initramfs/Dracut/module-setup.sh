@@ -52,38 +52,44 @@ install() {
    brlttyIncludeTables Attributes atb ${BRLTTY_DRACUT_ATTRIBUTES_TABLES}
    brlttyIncludeTables Contraction ctb ${BRLTTY_DRACUT_CONTRACTION_TABLES}
 
-   # install the preferences file
-   # a relative path is to the updatable directory
-   local preferences_file=$(brlttyGetProperty "Preferences File")
-
-   if [ -n "${preferences_file}" ]
-   then
-      if [ "${preferences_file}" = "${preferences_file#/}" ]
-      then
-         local updatable_directory=$(brlttyGetProperty "Updatable Directory")
-
-         if [ -n "${updatable_directory}" ]
-         then
-            preferences_file="${updatable_directory}/${preferences_file}"
-         fi
-      fi
-
-      if [ -f "${preferences_file}" ]
-      then
-         inst_simple "${preferences_file}" "/etc/brltty.prefs"
-      fi
-   fi
-
-   # install local customizations
-   local customization_directory="/etc/xdg/brltty"
-   inst_dir "${customization_directory}"
-   inst_multiple -o "${customization_directory}/"*
+   brlttyInstallPreferencesFile "/etc/brltty.prefs"
+   brlttyInstallDirectory "/etc/xdg/brltty"
 
    inst_hook cmdline 99 "${moddir}/brltty-parse-options.sh"
    inst_hook initqueue 99 "${moddir}/brltty-start.sh"
    inst_hook cleanup 99 "${moddir}/brltty-stop.sh"
 
    dracut_need_initqueue
+}
+
+brlttyInstallPreferencesFile() {
+   local path="${1}"
+   local file=$(brlttyGetProperty "Preferences File")
+
+   if [ -n "${file}" ]
+   then
+      if [ "${file}" = "${file#/}" ]
+      then
+         local directory=$(brlttyGetProperty "Updatable Directory")
+
+         if [ -n "${directory}" ]
+         then
+            file="${directory}/${file}"
+         fi
+      fi
+
+      if [ -f "${file}" ]
+      then
+         inst_simple "${file}" "${path}"
+      fi
+   fi
+}
+
+brlttyInstallDirectory() {
+   local path="${1}"
+
+   inst_dir "${path}"
+   inst_multiple -o "${path}/"*
 }
 
 brlttyIncludeBrailleDrivers() {
