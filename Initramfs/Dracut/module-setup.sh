@@ -48,9 +48,10 @@ install() {
    brlttyIncludeSpeechDrivers $(brlttyGetDrivers speech)
    brlttyIncludeSpeechDrivers ${BRLTTY_DRACUT_SPEECH_DRIVERS}
       
-   brlttyIncludeTables Text ttb ${BRLTTY_DRACUT_TEXT_TABLES}
-   brlttyIncludeTables Attributes atb ${BRLTTY_DRACUT_ATTRIBUTES_TABLES}
+   brlttyIncludeTables Text        ttb ${BRLTTY_DRACUT_TEXT_TABLES}
+   brlttyIncludeTables Attributes  atb ${BRLTTY_DRACUT_ATTRIBUTES_TABLES}
    brlttyIncludeTables Contraction ctb ${BRLTTY_DRACUT_CONTRACTION_TABLES}
+   brlttyIncludeTables Keyboard    ktb ${BRLTTY_DRACUT_KEYBOARD_TABLES}
 
    brlttyInstallPreferencesFile "/etc/brltty.prefs"
    brlttyInstallDirectory "/etc/xdg/brltty"

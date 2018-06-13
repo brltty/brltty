@@ -45,6 +45,11 @@ The following environment varialbes are supported:
 
     BRLTTY_DRACUT_CONTRACTION_TABLES="de-kurzschrift fr-abrege"
 
+* BRLTTY_DRACUT_KEYBOARD_TABLES
+  A space-separated list of additional keyboard tables to include. For example:
+
+    BRLTTY_DRACUT_KEYBOARD_TABLES="keypad desktop"
+
 * BRLTTY_DRACUT_LOCALE
   The preferred locale (used to determine the default text and contraction
   tables). For example:
