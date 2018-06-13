@@ -351,6 +351,7 @@ BuildArch: noarch
 AutoProv: no
 AutoReq: yes
 Requires: dracut
+Requires: brltty-utils
 
 Summary: Dracut module for BRLTTY.
 %description -n brltty-dracut
