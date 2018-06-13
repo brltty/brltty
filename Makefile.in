@@ -32,7 +32,7 @@ install-udev uninstall-udev:
 	cd Autostart/Udev && $(MAKE) $(@:-udev=)
 
 install-dracut uninstall-dracut:
-	cd Dracut && $(MAKE) $(@:-dracut=)
+	cd Initramfs/Dracut && $(MAKE) $(@:-dracut=)
 
 ARCHIVE_NAME = $(PACKAGE_TARNAME)-$(PACKAGE_VERSION)
 TAR_EXTENSION = tar
@@ -98,10 +98,10 @@ ITERATE = \
    -for directory in \
    $(PGM_DIR) \
    $(MSG_DIR) \
+   Autostart/AppStream \
    Autostart/Systemd \
    Autostart/Udev \
-   Autostart/AppStream \
-   Dracut \
+   Initramfs/Dracut \
    Android/Application \
    ; do (cd $$directory && $(MAKE) $@); done
 

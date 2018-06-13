@@ -43,15 +43,18 @@ AC_DEFINE_UNQUOTED([BRLAPI_REVISION], [${api_revision}],
                    [Define this to be the API library revision number.])
 
 BRLTTY_SUMMARY_BEGIN
-brltty_build_directories=". Programs Documents Messages Dracut Android/Core Android/Application"
+brltty_build_directories=". Programs Documents Messages"
 brltty_source_directory="`dirname "${0}"`"
 brltty_manual_directories=""
 
-for brltty_autostart_directory in `(cd "${brltty_source_directory}" && echo Autostart/*)`
+for brltty_directory in Autostart Initramfs Android
 do
-   test -f "${brltty_source_directory}/${brltty_autostart_directory}/Makefile.in" && {
-      brltty_build_directories="${brltty_build_directories} ${brltty_autostart_directory}"
-   }
+   for brltty_subdirectory in `echo "${brltty_source_directory}/${brltty_directory}/"*`
+   do
+      test -f "${brltty_subdirectory}/Makefile.in" && {
+         brltty_build_directories="${brltty_build_directories} ${brltty_subdirectory}"
+      }
+   done
 done
 
 for brltty_manual_directory in `(cd "${brltty_source_directory}" && echo Documents/Manual-*/*)`
@@ -1972,7 +1975,7 @@ AC_OUTPUT([
    Bindings/Lisp/brlapi.asd
    Bindings/Lisp/brlapi_config.lisp
    Bindings/Python/setup.py
-   Android/Application/res/values/configured.xml:Android/Application/res.strings.in
    Autostart/Systemd/brltty@.service
+   Android/Application/res/values/configured.xml:Android/Application/res.strings.in
    ${brltty_make_files}
 ])
