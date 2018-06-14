@@ -56,8 +56,7 @@ install() {
    brlttyInstallPreferencesFile "/etc/brltty.prefs"
    brlttyInstallDirectory "/etc/xdg/brltty"
 
-   inst_hook cmdline 99 "${moddir}/brltty-parse-options.sh"
-   inst_hook initqueue 99 "${moddir}/brltty-start.sh"
+   inst_hook cmdline 99 "${moddir}/brltty-start.sh"
    inst_hook cleanup 99 "${moddir}/brltty-stop.sh"
 
    dracut_need_initqueue
