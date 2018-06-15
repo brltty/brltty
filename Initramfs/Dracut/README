@@ -25,13 +25,13 @@ BRLTTY_DRACUT_ prefix. In addition to exporting them from the current
 environment, they may be defined within the file /etc/brltty/dracut.conf.
 Within this file:
 
-* Blank lines are ignroed.
+* Blank lines are ignored.
 * Lines that start with a hash (#) are comments.
 * All other lines should be simple shell-style assignments. For example:
 
   NAME="string"
 
-The following environment varialbes are supported:
+The following environment variables are supported:
 
 * BRLTTY_DRACUT_LOCALE
   The preferred locale (used to determine the default text and contraction
@@ -40,7 +40,7 @@ The following environment varialbes are supported:
     BRLTTY_DRACUT_LOCALE=cs_CZ.UTF-8
 
   If needed, i.e. if the text and contraction tables haven't both been
-  configured via /etc/brltty.conf, this information must be expicitly set
+  configured via /etc/brltty.conf, this information must be explicitly set
   because it can't be determined from the system configuration when building
   the image (see https://bugzilla.redhat.com/show_bug.cgi?id=1584036).
 
