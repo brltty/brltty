@@ -1,32 +1,53 @@
 Braille Support for Dracut
 ==========================
 
-This module provides braille accessibility within the initial ramdisk image.
-If BRLTTY is installed (/usr/bin/brltty exists) then it is added to the image.
-The braille drivers, speech drivers, text tables, attributes tables,
-contraction tables, and preferences file configured via /etc/brltty.conf are
-included. Local customizations in /etc/xdg/brltty/ are also included.
+This module provides braille accessibility within the initramfs (initial
+ramdisk image). If BRLTTY is installed (/usr/bin/brltty exists) then it is
+added to the image. The braille drivers, speech drivers, text tables,
+attributes tables, contraction tables, and preferences file configured via
+/etc/brltty.conf are included. Local customizations (within /etc/xdg/brltty/)
+are also included.
 
-Note
-  The earliest phase at which this module is known to be reliably functional is
-  pre-mount. It's our plan to eventually resolve this limitation.
+BRLTTY is started as early as possible by the initramfs so that braille
+accessibility will be active when (should the need arise) control is
+transferred to the emergency shell due to a problem preparing the root file
+system. Additionally, braille accessibility is active at any of the specifiable
+initramfs breakpoints (see the rd.break= kernel parameter) accept for the one
+named cmdline because it occurs earlier than the point at which BRLTTY is
+started.
+
+Environment Variables
+---------------------
 
 A number of environment variables may be used to influence how BRLTTY is
-installed into the initramfs. In addition to setting them temporarily within
-the current environment, they may also be set persistently within the file
-/etc/brltty/dracut.conf.
+installed into the initramfs image. Their names all begin with the
+BRLTTY_DRACUT_ prefix. In addition to exporting them from the current
+environment, they may be defined within the file /etc/brltty/dracut.conf.
+Within this file:
+
+* Blank lines are ignroed.
+* Lines that start with a hash (#) are comments.
+* All other lines should be simple shell-style assignments. For example:
+
+  NAME="string"
 
 The following environment varialbes are supported:
+
+* BRLTTY_DRACUT_LOCALE
+  The preferred locale (used to determine the default text and contraction
+  tables). For example:
+
+    BRLTTY_DRACUT_LOCALE=cs_CZ.UTF-8
+
+  If needed, i.e. if the text and contraction tables haven't both been
+  configured via /etc/brltty.conf, this information must be expicitly set
+  because it can't be determined from the system configuration when building
+  the image (see https://bugzilla.redhat.com/show_bug.cgi?id=1584036).
 
 * BRLTTY_DRACUT_BRAILLE_DRIVERS
   A space-separated list of additional braille drivers to include. For example:
 
     BRLTTY_DRACUT_BRAILLE_DRIVERS="pm eu"
-
-* BRLTTY_DRACUT_SPEECH_DRIVERS
-  A space-separated list of additional speech drivers to include. For example:
-
-    BRLTTY_DRACUT_SPEECH_DRIVERS="es fl"
 
 * BRLTTY_DRACUT_TEXT_TABLES
   A space-separated list of additional text tables to include. For example:
@@ -50,28 +71,20 @@ The following environment varialbes are supported:
 
     BRLTTY_DRACUT_KEYBOARD_TABLES="keypad desktop"
 
-* BRLTTY_DRACUT_LOCALE
-  The preferred locale (used to determine the default text and contraction
-  tables). For example:
+* BRLTTY_DRACUT_SPEECH_DRIVERS
+  A space-separated list of additional speech drivers to include. For example:
 
-    BRLTTY_DRACUT_LOCALE=cs_CZ.UTF-8
+    BRLTTY_DRACUT_SPEECH_DRIVERS="es fl"
 
-  If needed, i.e. if the text and contraction tables haven't been configured
-  via /etc/brltty.conf, this information must be expicitly set because it can't
-  be determined from the system configuration when building the image. See:
-
-    https://bugzilla.redhat.com/show_bug.cgi?id=1584036
-
-  To pass through your system's currently configured locale, set:
-
-    BRLTTY_DRACUT_LOCALE="$LANG"
+Kernel Parameters
+-----------------
 
 This module interprets kernel command line parameters that begin with the
 rd.brltty. prefix. All of BRLTTY's options that can be specified via
 environment variables are supported (see man brltty for the full list). For
-example, the parameter rd.brltty.braille_driver=vo is mapped to the environment
-variable assignment BRLTTY_BRAILLE_DRIVER=vo. Some of the more interesting ones
-are:
+example, the kernel parameter rd.brltty.braille_driver=vo is mapped to the
+environment variable assignment BRLTTY_BRAILLE_DRIVER=vo. Some of the more
+interesting ones are:
 
   ============================  ===========================
   Kernel Parameter              Default Value
@@ -79,13 +92,14 @@ are:
   rd.brltty.braille_driver      setting in /etc/brltty.conf
   rd.brltty.braille_device      setting in /etc/brltty.conf
   rd.brltty.braille_parameters  setting in /etc/brltty.conf
+  rd.brltty.text_table          setting in /etc/brltty.conf
+  rd.brltty.attributes_table    setting in /etc/brltty.conf
+  rd.brltty.contraction_table   setting in /etc/brltty.conf
+  rd.brltty.keyboard_table      setting in /etc/brltty.conf
   rd.brltty.speech_driver       no
   rd.brltty.speech_parameters   setting in /etc/brltty.conf
   rd.brltty.screen_driver       lx
   rd.brltty.screen_parameters   setting in /etc/brltty.conf
-  rd.brltty.text_table          setting in /etc/brltty.conf
-  rd.brltty.attributes_table    setting in /etc/brltty.conf
-  rd.brltty.contraction_table   setting in /etc/brltty.conf
   rd.brltty.configuration_file  /etc/brltty.conf
   rd.brltty.preferences_file    /etc/brltty.prefs
   rd.brltty.log_file            /run/initramfs/brltty.log
