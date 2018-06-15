@@ -2,11 +2,11 @@ Braille Support for Dracut
 ==========================
 
 This module implements braille accessibility within the initramfs (initial
-ramdisk image). If BRLTTY is installed (``/usr/bin/brltty`` exists) then it is
-added to the image. The braille drivers, speech drivers, text tables,
-attributes tables, contraction tables, and preferences file configured via
-``/etc/brltty.conf`` are included. Customizations (within ``/etc/xdg/brltty/``)
-are also included.
+ramdisk file system). If BRLTTY is installed (``/usr/bin/brltty`` exists) then
+it is added to the image. The braille drivers, text tables, attributes tables,
+contraction tables, keyboard tables, speech drivers, and preferences file
+configured via ``/etc/brltty.conf`` are included. Local customizations within
+``/etc/xdg/brltty/`` are also included.
 
 BRLTTY is started as early as possible by the initramfs so that braille
 accessibility will be active when (should the need arise) control is
@@ -98,12 +98,6 @@ interesting ones are:
   ``rd.brltty.attributes_table``    setting in ``/etc/brltty.conf``
   ``rd.brltty.contraction_table``   setting in ``/etc/brltty.conf``
   ``rd.brltty.keyboard_table``      setting in ``/etc/brltty.conf``
-  ``rd.brltty.speech_driver``       ``no``
-  ``rd.brltty.speech_parameters``   setting in ``/etc/brltty.conf``
-  ``rd.brltty.screen_driver``       ``lx``
-  ``rd.brltty.screen_parameters``   setting in ``/etc/brltty.conf``
-  ``rd.brltty.configuration_file``  ``/etc/brltty.conf``
-  ``rd.brltty.preferences_file``    ``/etc/brltty.prefs``
   ``rd.brltty.log_file``            ``/run/initramfs/brltty.log``
   ``rd.brltty.log_level``           setting in ``/etc/brltty.conf``
   ================================  ===============================
