@@ -1,5 +1,9 @@
 #!/bin/bash
 
+BRLTTY_OVERRIDE_PREFERENCE="braille-keyboard-enabled=yes"
+BRLTTY_OVERRIDE_PREFERENCE+=",braille-input-mode=text"
+export BRLTTY_OVERRIDE_PREFERENCE
+
 export BRLTTY_SCREEN_DRIVER="lx"
 export BRLTTY_SPEECH_DRIVER="no"
 
