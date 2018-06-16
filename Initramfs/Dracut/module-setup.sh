@@ -88,8 +88,7 @@ brlttyInstallPreferencesFile() {
 brlttyInstallDirectory() {
    local path="${1}"
 
-   inst_dir "${path}"
-   inst_multiple -o "${path}/"*
+   [ -d "${path}" ] && inst_multiple $(find "${path}" -print)
 }
 
 brlttyIncludeBrailleDrivers() {
