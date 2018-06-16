@@ -102,12 +102,23 @@ brlttyIncludeBrailleDrivers() {
 
    for code
    do
-      brlttyIncludeDataFiles "/etc/brltty/Input/${code}/"*.ktb
+      local directory="/etc/brltty/Input/${code}"
+      brlttyIncludeDataFiles "${directory}/"*.ktb
+      inst_multiple -o "${directory}/"*.txt
    done
 }
 
 brlttyIncludeSpeechDrivers() {
    brlttyIncludeDrivers s "${@}"
+   local code
+
+   for code
+   do
+      case "${code}"
+      in
+         es) brlttyInstallDirectory "/usr/share/espeak-data";;
+      esac
+   done
 }
 
 brlttyIncludeScreenDrivers() {
@@ -167,17 +178,44 @@ brlttyLoadConfigurationFile() {
 brlttyIncludeBluetoothSupport() {
    brlttyInstallDirectory /var/lib/bluetooth
    inst_multiple -o bluetoothctl hciconfig hcitool sdptool
+   inst_hook initqueue 99 "${moddir}/bluetooth-start.sh"
+   brlttyInstallMessageBus
+}
+
+brlttyInstallMessageBus() {
+   local file name
+
+   for file in passwd group
+   do
+      local source="/etc/${file}"
+      local target="${initdir}${source}"
+
+      for name in dbus systemd-network systemd-resolve colord
+      do
+         grep -q -e "^${name}:" "${target}" || {
+            local line="$(grep "^${name}:" "${source}")"
+            [ -n "${line}" ] && echo >>"${target}" "${line}"
+         }
+      done
+   done
+
+   brlttyInstallDirectory /usr/share/dbus-1
+   inst_multiple dbus-daemon dbus-send
+   inst_simple /usr/lib/systemd/system/dbus.service
+   inst_simple /usr/lib/systemd/system/dbus.socket
+   inst_hook initqueue 99 "${moddir}/dbus-start.sh"
 }
 
 brlttyIncludeSoundSupport() {
    brlttyInstallDirectory /etc/alsa
+   rm -f "${initdir}/etc/alsa/conf.d/"*
+
    brlttyInstallDirectory /usr/share/alsa
    brlttyInstallDirectory /usr/lib/alsa
    brlttyInstallDirectory /usr/lib64/alsa-lib
+
    inst_multiple -o alsactl alsaucm alsamixer amixer aplay
    inst_script alsaunmute
-
-   brlttyInstallDirectory /etc/pulse
-   inst_multiple -o pulseaudio pactl pacmd
+   inst_hook initqueue 99 "${moddir}/sound-start.sh"
 }
 
