@@ -102,3 +102,16 @@ interesting ones are:
   ``rd.brltty.log_level``           setting in ``/etc/brltty.conf``
   ================================  ===============================
 
+What Isn't Supported?
+---------------------
+
+Braille device communication via Bluetooth isn't supported because Bluetooth
+kernel modules aren't included within the initramfs.
+
+Speech drivers aren't supported because ALSA (sound) kernel modules aren't
+included within the initramfs.
+
+Braille accessibility isn't active yet at the ``cmdline`` breakpoint because
+it occurs before the ``cmdline`` hook, which is used to start BRLTTY, is
+executed.
+
