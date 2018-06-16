@@ -26,6 +26,8 @@ cmdline() {
 # called by dracut
 installkernel() {
    instmods pcspkr
+   [ -d "/var/lib/bluetooth" ] && instmods =drivers/bluetooth =net/bluetooth
+   [ -d "/etc/alsa" ] && instmods =sound
 }
 
 # called by dracut
@@ -34,7 +36,7 @@ install() {
 
    local BRLTTY_EXECUTABLE_PATH="/usr/bin/brltty"
    inst_binary "${BRLTTY_EXECUTABLE_PATH}"
-   local brltty_report="$(LC_ALL="${BRLTTY_DRACUT_LOCALE:-${LANG}}" "${BRLTTY_EXECUTABLE_PATH}" -E -v -e -ldebug 2>&1)"
+   local brlttyLog="$(LC_ALL="${BRLTTY_DRACUT_LOCALE:-${LANG}}" "${BRLTTY_EXECUTABLE_PATH}" -E -v -e -ldebug 2>&1)"
    
    export BRLTTY_CONFIGURATION_FILE=/etc/brltty.conf
    inst_simple "${BRLTTY_CONFIGURATION_FILE}"
@@ -55,6 +57,9 @@ install() {
 
    brlttyInstallPreferencesFile "/etc/brltty.prefs"
    brlttyInstallDirectory "/etc/xdg/brltty"
+
+   [ "${BRLTTY_DRACUT_BLUETOOTH_SUPPORT}" = "yes" ] && brlttyIncludeBluetoothSupport
+   [ "${BRLTTY_DRACUT_SOUND_SUPPORT}" = "yes" ] && brlttyIncludeSoundSupport
 
    inst_hook cmdline 99 "${moddir}/brltty-start.sh"
    inst_hook cleanup 99 "${moddir}/brltty-stop.sh"
@@ -151,11 +156,28 @@ brlttyGetDrivers() {
 brlttyGetProperty() {
    local name="${1}"
 
-   echo "${brltty_report}" | awk "/: *${name} *:/ {print \$NF}"
+   echo "${brlttyLog}" | awk "/: *${name} *:/ {print \$NF}"
 }
 
 brlttyLoadConfigurationFile() {
-   local configuration_file="/etc/brltty/dracut.conf"
-   [ -f "${configuration_file}" ] && . "${configuration_file}"
+   local file="/etc/brltty/dracut.conf"
+   [ -f "${file}" ] && . "${file}"
+}
+
+brlttyIncludeBluetoothSupport() {
+   brlttyInstallDirectory /var/lib/bluetooth
+   inst_multiple -o bluetoothctl hciconfig hcitool sdptool
+}
+
+brlttyIncludeSoundSupport() {
+   brlttyInstallDirectory /etc/alsa
+   brlttyInstallDirectory /usr/share/alsa
+   brlttyInstallDirectory /usr/lib/alsa
+   brlttyInstallDirectory /usr/lib64/alsa-lib
+   inst_multiple -o alsactl alsaucm alsamixer amixer aplay
+   inst_script alsaunmute
+
+   brlttyInstallDirectory /etc/pulse
+   inst_multiple -o pulseaudio pactl pacmd
 }
 
