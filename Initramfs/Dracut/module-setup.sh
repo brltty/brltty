@@ -2,7 +2,7 @@
 
 # called by dracut
 check() {
-   require_binaries brltty || return 1
+   require_binaries brltty brltty-lsinc || return 1
    return 0
 }
 
@@ -38,19 +38,19 @@ install() {
    inst_binary "${BRLTTY_EXECUTABLE_PATH}"
    local brlttyLog="$(LC_ALL="${BRLTTY_DRACUT_LOCALE:-${LANG}}" "${BRLTTY_EXECUTABLE_PATH}" -E -v -e -ldebug 2>&1)"
    
-   export BRLTTY_CONFIGURATION_FILE=/etc/brltty.conf
+   export BRLTTY_CONFIGURATION_FILE="/etc/brltty.conf"
    inst_simple "${BRLTTY_CONFIGURATION_FILE}"
 
    brlttyIncludeDataFiles $(brlttyGetProperty "including data file")
    brlttyIncludeScreenDrivers lx
 
-   brlttyIncludeBrailleDrivers $(brlttyGetDrivers braille)
+   brlttyIncludeBrailleDrivers $(brlttyGetConfiguredDrivers braille)
    brlttyIncludeBrailleDrivers ${BRLTTY_DRACUT_BRAILLE_DRIVERS}
 
-   local haveSpeechDrivers=false
-   brlttyIncludeSpeechDrivers $(brlttyGetDrivers speech)
+   local includingSpeechDrivers=false
+   brlttyIncludeSpeechDrivers $(brlttyGetConfiguredDrivers speech)
    brlttyIncludeSpeechDrivers ${BRLTTY_DRACUT_SPEECH_DRIVERS}
-   "${haveSpeechDrivers}" && brlttyIncludeSoundSupport
+   "${includingSpeechDrivers}" && brlttyIncludeSoundSupport
       
    brlttyIncludeTables Text        ttb ${BRLTTY_DRACUT_TEXT_TABLES}
    brlttyIncludeTables Attributes  atb ${BRLTTY_DRACUT_ATTRIBUTES_TABLES}
@@ -113,7 +113,7 @@ brlttyIncludeSpeechDrivers() {
    for code
    do
       brlttyIncludeDriver s "${code}" || continue
-      haveSpeechDrivers=true
+      includingSpeechDrivers=true
 
       case "${code}"
       in
@@ -131,7 +131,6 @@ brlttyIncludeSpeechDrivers() {
 }
 
 brlttyIncludeScreenDrivers() {
-   brlttyIncludeDriver x "${@}"
    local code
 
    for code
@@ -150,8 +149,8 @@ brlttyIncludeDriver() {
 }
 
 brlttyIncludeTables() {
-   local subdirectory="$1"
-   local extension="$2"
+   local subdirectory="${1}"
+   local extension="${2}"
    shift 2
    local name
 
@@ -170,15 +169,13 @@ brlttyIncludeDataFiles() {
    done < <(brltty-lsinc "${@}")
 }
 
-brlttyGetDrivers() {
+brlttyGetConfiguredDrivers() {
    local category="${1}"
-
    brlttyGetProperty "checking for ${category} driver"
 }
 
 brlttyGetProperty() {
    local name="${1}"
-
    echo "${brlttyLog}" | awk "/: *${name} *:/ {print \$NF}"
 }
 
@@ -192,8 +189,8 @@ brlttyIncludeBluetoothSupport() {
 
    brlttyInstallDirectories /var/lib/bluetooth
    brlttyInstallDirectories /etc/bluetooth
-   inst_multiple -o bluetoothctl hciconfig hcitool sdptool
 
+   inst_multiple -o bluetoothctl hciconfig hcitool sdptool
    inst_binary /usr/libexec/bluetooth/bluetoothd
    brlttyInstallSystemdUnits bluetooth.service bluetooth.target
 
@@ -220,12 +217,19 @@ brlttyInstallMessageBus() {
    brlttyInstallDirectories /etc/dbus-1
    brlttyInstallDirectories /usr/share/dbus-1
    brlttyInstallDirectories /usr/libexec/dbus-1
+
    inst_multiple dbus-daemon dbus-send dbus-cleanup-sockets dbus-monitor
    brlttyInstallSystemdUnits dbus.service dbus.socket
+
    inst_hook initqueue 99 "${moddir}/dbus-start.sh"
 }
 
 brlttyIncludeSoundSupport() {
+   brlttyIncludeAlsaSupport
+   brlttyIncludePulseAudioSupport
+}
+
+brlttyIncludeAlsaSupport() {
    brlttyInstallDirectories /etc/alsa
    rm -f "${initdir}/etc/alsa/conf.d/"*
 
@@ -235,7 +239,13 @@ brlttyIncludeSoundSupport() {
 
    inst_multiple -o alsactl alsaucm alsamixer amixer aplay
    inst_script alsaunmute
-   inst_hook initqueue 99 "${moddir}/sound-start.sh"
+
+   inst_hook initqueue 99 "${moddir}/alsa-start.sh"
+}
+
+brlttyIncludePulseAudioSupport() {
+   inst_multiple -o pulseaudio pactl pacmd
+   inst_multiple -o pamon paplay parec parecord
 }
 
 brlttyInstallSystemdUnits() {
