@@ -57,8 +57,8 @@ BRLTTY_DRACUT_BLUETOOTH_SUPPORT
     BRLTTY_DRACUT_BLUETOOTH_SUPPORT=no
 
   Set this variable to ``yes`` if communication with your braille device is via
-  Bluetooth. Note that this option is insecure because your Bluetoth link keys
-  will be stored, unencrypted, within the initramfs image.
+  Bluetooth. Note that this option is insecure because the link keys for all of
+  your paired Bluetooth devices will be stored within the initramfs image.
 
 BRLTTY_DRACUT_TEXT_TABLES
   A space-separated list of additional text tables to include. For example::
