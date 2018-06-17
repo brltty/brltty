@@ -631,7 +631,7 @@ logDBusError (const char *action, const DBusError *error) {
     if (character != '\n') break;
   }
 
-  logMessage(LOG_ERR,
+  logMessage(LOG_CATEGORY(BLUETOOTH_IO),
              "DBus error: %s: %s: %.*s",
              action, error->name, length, message);
 }
