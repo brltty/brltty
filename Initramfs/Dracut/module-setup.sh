@@ -56,7 +56,7 @@ install() {
    brlttyIncludeTables Keyboard    ktb ${BRLTTY_DRACUT_KEYBOARD_TABLES}
 
    brlttyInstallPreferencesFile "/etc/brltty.prefs"
-   brlttyInstallDirectory "/etc/xdg/brltty"
+   brlttyInstallDirectories "/etc/xdg/brltty"
 
    [ "${BRLTTY_DRACUT_BLUETOOTH_SUPPORT}" = "yes" ] && brlttyIncludeBluetoothSupport
    [ "${BRLTTY_DRACUT_SOUND_SUPPORT}" = "yes" ] && brlttyIncludeSoundSupport
@@ -112,11 +112,11 @@ brlttyIncludeSpeechDrivers() {
       in
          en)
             inst_binary espeak-ng
-#skip       brlttyInstallDirectory "/usr/share/espeak-ng-data"
+#skip       brlttyInstallDirectories "/usr/share/espeak-ng-data"
             ;;
          es)
             inst_binary espeak
-            brlttyInstallDirectory "/usr/share/espeak-data"
+            brlttyInstallDirectories "/usr/share/espeak-data"
             ;;
       esac
    done
@@ -179,8 +179,8 @@ brlttyLoadConfigurationFile() {
 brlttyIncludeBluetoothSupport() {
    brlttyInstallMessageBus
 
-   brlttyInstallDirectory /var/lib/bluetooth
-   brlttyInstallDirectory /etc/bluetooth
+   brlttyInstallDirectories /var/lib/bluetooth
+   brlttyInstallDirectories /etc/bluetooth
    inst_multiple -o bluetoothctl hciconfig hcitool sdptool
 
    inst_binary /usr/libexec/bluetooth/bluetoothd
@@ -206,21 +206,21 @@ brlttyInstallMessageBus() {
       done
    done
 
-   brlttyInstallDirectory /etc/dbus-1
-   brlttyInstallDirectory /usr/share/dbus-1
-   brlttyInstallDirectory /usr/libexec/dbus-1
+   brlttyInstallDirectories /etc/dbus-1
+   brlttyInstallDirectories /usr/share/dbus-1
+   brlttyInstallDirectories /usr/libexec/dbus-1
    inst_multiple dbus-daemon dbus-send dbus-cleanup-sockets dbus-monitor
    brlttyInstallSystemdUnits dbus.service dbus.socket
    inst_hook initqueue 99 "${moddir}/dbus-start.sh"
 }
 
 brlttyIncludeSoundSupport() {
-   brlttyInstallDirectory /etc/alsa
+   brlttyInstallDirectories /etc/alsa
    rm -f "${initdir}/etc/alsa/conf.d/"*
 
-   brlttyInstallDirectory /usr/share/alsa
-   brlttyInstallDirectory /usr/lib/alsa
-   brlttyInstallDirectory /usr/lib64/alsa-lib
+   brlttyInstallDirectories /usr/share/alsa
+   brlttyInstallDirectories /usr/lib/alsa
+   brlttyInstallDirectories /usr/lib*/alsa-lib
 
    inst_multiple -o alsactl alsaucm alsamixer amixer aplay
    inst_script alsaunmute
@@ -236,8 +236,14 @@ brlttyInstallSystemdUnits() {
    done
 }
 
-brlttyInstallDirectory() {
-   local path="${1}"
-   [ -d "${path}" ] && inst_multiple $(find "${path}" -print)
+brlttyInstallDirectories() {
+   local directory
+
+   for directory
+   do
+      [ -d "${directory}" ] && {
+         inst_multiple $(find "${directory}" -print)
+      }
+   done
 }
 
