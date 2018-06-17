@@ -50,6 +50,16 @@ BRLTTY_DRACUT_BRAILLE_DRIVERS
 
     BRLTTY_DRACUT_BRAILLE_DRIVERS="pm eu"
 
+BRLTTY_DRACUT_BLUETOOTH_SUPPORT
+  Whether or not Bluetooth support should be included within the initramfs. For
+  example::
+
+    BRLTTY_DRACUT_BLUETOOTH_SUPPORT=no
+
+  Set this variable to ``yes`` if communication with your braille device is via
+  Bluetooth. Note that this option is insecure because your Bluetoth link keys
+  will be stored, unencrypted, within the initramfs image.
+
 BRLTTY_DRACUT_TEXT_TABLES
   A space-separated list of additional text tables to include. For example::
 
@@ -92,8 +102,8 @@ interesting ones are:
   Kernel Parameter                  Default Value
   --------------------------------  -------------------------------
   ``rd.brltty.braille_driver``      setting in ``/etc/brltty.conf``
-  ``rd.brltty.braille_device``      setting in ``/etc/brltty.conf``
   ``rd.brltty.braille_parameters``  setting in ``/etc/brltty.conf``
+  ``rd.brltty.braille_device``      setting in ``/etc/brltty.conf``
   ``rd.brltty.text_table``          setting in ``/etc/brltty.conf``
   ``rd.brltty.attributes_table``    setting in ``/etc/brltty.conf``
   ``rd.brltty.contraction_table``   setting in ``/etc/brltty.conf``
