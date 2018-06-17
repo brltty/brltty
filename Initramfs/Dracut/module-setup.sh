@@ -209,6 +209,7 @@ brlttyIncludeBluetoothSupport() {
 }
 
 brlttyInstallMessageBus() {
+   set -- dbus $(sed -n -r -e 's/^.* user="([^"]*)".*$/\1/p' /usr/share/dbus-1/system.d/* | sort -u)
    local file name
 
    for file in passwd group
@@ -216,7 +217,7 @@ brlttyInstallMessageBus() {
       local source="/etc/${file}"
       local target="${initdir}${source}"
 
-      for name in dbus systemd-network systemd-resolve colord
+      for name
       do
          grep -q -e "^${name}:" "${target}" || {
             local line="$(grep "^${name}:" "${source}")"
