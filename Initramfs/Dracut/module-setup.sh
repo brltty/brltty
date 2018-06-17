@@ -13,7 +13,7 @@ depends() {
 
 # called by dracut
 cmdline() {
-   brlttyGetInstallOptions
+   brlttyImportInstallOptions
    set -- ${BRLTTY_DRACUT_KERNEL_PARAMETERS}
    local parameter
 
@@ -26,13 +26,13 @@ cmdline() {
 # called by dracut
 installkernel() {
    instmods pcspkr uinput
-   [ -d "${initdir}/var/lib/bluetooth" ] && instmods =drivers/bluetooth =net/bluetooth
-   [ -d "${initdir}/etc/alsa" ] && instmods =sound
+   [ ! -d "${initdir}/var/lib/bluetooth" ] || instmods =drivers/bluetooth =net/bluetooth
+   [ ! -d "${initdir}/etc/alsa" ] || instmods =sound
 }
 
 # called by dracut
 install() {
-   brlttyGetInstallOptions
+   brlttyImportInstallOptions
 
    local BRLTTY_EXECUTABLE_PATH="/usr/bin/brltty"
    inst_binary "${BRLTTY_EXECUTABLE_PATH}"
@@ -119,7 +119,7 @@ brlttyIncludeSpeechDrivers() {
       in
          en)
             inst_binary espeak-ng
-#skip       brlttyInstallDirectories "/usr/share/espeak-ng-data"
+            brlttyInstallDirectories "/usr/share/espeak-ng-data"
             ;;
 
          es)
@@ -190,7 +190,7 @@ brlttyGetProperty() {
    echo "${brlttyLog}" | awk "/: *${name} *:/ {print \$NF}"
 }
 
-brlttyGetInstallOptions() {
+brlttyImportInstallOptions() {
    local file="/etc/brltty/dracut.conf"
    [ -f "${file}" ] && . "${file}"
 }
@@ -274,7 +274,8 @@ brlttyInstallDirectories() {
    for directory
    do
       [ -d "${directory}" ] && {
-         inst_multiple $(find "${directory}" -print)
+         eval set -- $(find "${directory}" -printf "'%p'\n")
+         inst_multiple "${@}"
       }
    done
 }
