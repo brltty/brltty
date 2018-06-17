@@ -90,12 +90,6 @@ brlttyInstallPreferencesFile() {
    fi
 }
 
-brlttyInstallDirectory() {
-   local path="${1}"
-
-   [ -d "${path}" ] && inst_multiple $(find "${path}" -print)
-}
-
 brlttyIncludeBrailleDrivers() {
    brlttyIncludeDrivers b "${@}"
    local code
@@ -116,7 +110,14 @@ brlttyIncludeSpeechDrivers() {
    do
       case "${code}"
       in
-         es) brlttyInstallDirectory "/usr/share/espeak-data";;
+         en)
+            inst_binary espeak-ng
+#skip       brlttyInstallDirectory "/usr/share/espeak-ng-data"
+            ;;
+         es)
+            inst_binary espeak
+            brlttyInstallDirectory "/usr/share/espeak-data"
+            ;;
       esac
    done
 }
@@ -176,10 +177,15 @@ brlttyLoadConfigurationFile() {
 }
 
 brlttyIncludeBluetoothSupport() {
+   brlttyInstallMessageBus
+
    brlttyInstallDirectory /var/lib/bluetooth
    inst_multiple -o bluetoothctl hciconfig hcitool sdptool
+
+   inst_binary /usr/libexec/bluetooth/bluetoothd
+   brlttyInstallSystemdUnits bluetooth.service bluetooth.target
+
    inst_hook initqueue 99 "${moddir}/bluetooth-start.sh"
-   brlttyInstallMessageBus
 }
 
 brlttyInstallMessageBus() {
@@ -201,8 +207,7 @@ brlttyInstallMessageBus() {
 
    brlttyInstallDirectory /usr/share/dbus-1
    inst_multiple dbus-daemon dbus-send
-   inst_simple /usr/lib/systemd/system/dbus.service
-   inst_simple /usr/lib/systemd/system/dbus.socket
+   brlttyInstallSystemdUnits dbus.service dbus.socket
    inst_hook initqueue 99 "${moddir}/dbus-start.sh"
 }
 
@@ -217,5 +222,19 @@ brlttyIncludeSoundSupport() {
    inst_multiple -o alsactl alsaucm alsamixer amixer aplay
    inst_script alsaunmute
    inst_hook initqueue 99 "${moddir}/sound-start.sh"
+}
+
+brlttyInstallSystemdUnits() {
+   local unit
+
+   for unit
+   do
+      inst_simple "/usr/lib/systemd/system/${unit}"
+   done
+}
+
+brlttyInstallDirectory() {
+   local path="${1}"
+   [ -d "${path}" ] && inst_multiple $(find "${path}" -print)
 }
 

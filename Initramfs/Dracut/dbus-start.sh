@@ -1,3 +1,3 @@
 #!/bin/bash
 
-systemctl start dbus
+systemctl --no-block start dbus
