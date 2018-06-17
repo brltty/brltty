@@ -25,7 +25,7 @@ cmdline() {
 
 # called by dracut
 installkernel() {
-   instmods pcspkr
+   instmods pcspkr uinput
    [ -d "/var/lib/bluetooth" ] && instmods =drivers/bluetooth =net/bluetooth
    [ -d "/etc/alsa" ] && instmods =sound
 }
@@ -180,6 +180,7 @@ brlttyIncludeBluetoothSupport() {
    brlttyInstallMessageBus
 
    brlttyInstallDirectory /var/lib/bluetooth
+   brlttyInstallDirectory /etc/bluetooth
    inst_multiple -o bluetoothctl hciconfig hcitool sdptool
 
    inst_binary /usr/libexec/bluetooth/bluetoothd
@@ -205,8 +206,10 @@ brlttyInstallMessageBus() {
       done
    done
 
+   brlttyInstallDirectory /etc/dbus-1
    brlttyInstallDirectory /usr/share/dbus-1
-   inst_multiple dbus-daemon dbus-send
+   brlttyInstallDirectory /usr/libexec/dbus-1
+   inst_multiple dbus-daemon dbus-send dbus-cleanup-sockets dbus-monitor
    brlttyInstallSystemdUnits dbus.service dbus.socket
    inst_hook initqueue 99 "${moddir}/dbus-start.sh"
 }
