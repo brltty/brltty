@@ -47,8 +47,10 @@ install() {
    brlttyIncludeBrailleDrivers $(brlttyGetDrivers braille)
    brlttyIncludeBrailleDrivers ${BRLTTY_DRACUT_BRAILLE_DRIVERS}
 
+   local haveSpeechDrivers=false
    brlttyIncludeSpeechDrivers $(brlttyGetDrivers speech)
    brlttyIncludeSpeechDrivers ${BRLTTY_DRACUT_SPEECH_DRIVERS}
+   "${haveSpeechDrivers}" && brlttyIncludeSoundSupport
       
    brlttyIncludeTables Text        ttb ${BRLTTY_DRACUT_TEXT_TABLES}
    brlttyIncludeTables Attributes  atb ${BRLTTY_DRACUT_ATTRIBUTES_TABLES}
@@ -58,8 +60,10 @@ install() {
    brlttyInstallPreferencesFile "/etc/brltty.prefs"
    brlttyInstallDirectories "/etc/xdg/brltty"
 
-   [ "${BRLTTY_DRACUT_BLUETOOTH_SUPPORT}" = "yes" ] && brlttyIncludeBluetoothSupport
-   [ "${BRLTTY_DRACUT_SOUND_SUPPORT}" = "yes" ] && brlttyIncludeSoundSupport
+   if [ "${BRLTTY_DRACUT_BLUETOOTH_SUPPORT}" = "yes" ]
+   then
+      brlttyIncludeBluetoothSupport
+   fi
 
    inst_hook cmdline 99 "${moddir}/brltty-start.sh"
    inst_hook cleanup 99 "${moddir}/brltty-stop.sh"
@@ -91,11 +95,12 @@ brlttyInstallPreferencesFile() {
 }
 
 brlttyIncludeBrailleDrivers() {
-   brlttyIncludeDrivers b "${@}"
    local code
 
    for code
    do
+      brlttyIncludeDriver b "${code}" || continue
+
       local directory="/etc/brltty/Input/${code}"
       brlttyIncludeDataFiles "${directory}/"*.ktb
       inst_multiple -o "${directory}/"*.txt
@@ -103,17 +108,20 @@ brlttyIncludeBrailleDrivers() {
 }
 
 brlttyIncludeSpeechDrivers() {
-   brlttyIncludeDrivers s "${@}"
    local code
 
    for code
    do
+      brlttyIncludeDriver s "${code}" || continue
+      haveSpeechDrivers=true
+
       case "${code}"
       in
          en)
             inst_binary espeak-ng
 #skip       brlttyInstallDirectories "/usr/share/espeak-ng-data"
             ;;
+
          es)
             inst_binary espeak
             brlttyInstallDirectories "/usr/share/espeak-data"
@@ -123,19 +131,22 @@ brlttyIncludeSpeechDrivers() {
 }
 
 brlttyIncludeScreenDrivers() {
-   brlttyIncludeDrivers x "${@}"
-}
-
-brlttyIncludeDrivers() {
-   local type="${1}"
-   shift 1
+   brlttyIncludeDriver x "${@}"
    local code
 
    for code
    do
-      [ "${code}" = "no" ] && continue
-      inst_libdir_file "brltty/libbrltty${type}${code}.so*"
+      brlttyIncludeDriver x "${code}" || continue
    done
+}
+
+brlttyIncludeDriver() {
+   local type="${1}"
+   local code="${2}"
+
+   [ "${code}" = "no" ] && return 1
+   inst_libdir_file "brltty/libbrltty${type}${code}.so*"
+   return 0
 }
 
 brlttyIncludeTables() {
