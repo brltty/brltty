@@ -256,6 +256,14 @@ brlttyIncludeAlsaSupport() {
 }
 
 brlttyIncludePulseAudioSupport() {
+   inst_simple /etc/dbus-1/system.d/pulseaudio-system.conf
+
+   brlttyInstallDirectories /etc/pulse
+   brlttyInstallDirectories /usr/share/pulseaudio
+   brlttyInstallDirectories /usr/lib*/pulseaudio
+   brlttyInstallDirectories /usr/lib*/pulse-*
+   brlttyInstallDirectories /usr/libexec/pulse
+
    inst_multiple -o pulseaudio pactl pacmd
    inst_multiple -o pamon paplay parec parecord
 }
