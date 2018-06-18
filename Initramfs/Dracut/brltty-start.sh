@@ -33,4 +33,5 @@ brlttyParseOptions() {
 }
 
 brlttyParseOptions $(getcmdline)
-brltty -E +n
+getargbool 1 rd.brltty.sound || export BRLTTY_SPEECH_DRIVER="no"
+getargbool 1 rd.brltty && brltty -E +n

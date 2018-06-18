@@ -88,8 +88,27 @@ BRLTTY_DRACUT_SPEECH_DRIVERS
 
     BRLTTY_DRACUT_SPEECH_DRIVERS="es fl"
 
-Kernel Parameters
------------------
+Kernel Command Line Parameters
+------------------------------
+
+Disabling BRLTTY
+````````````````
+
+Given that BRLTTY is a rather complex application, a number of kernel command
+line parameters have been introduced so that its various components can be
+selectively disabled. In all cases, if any of these parameters isn't specified
+then it defaults to ``1`` (enabled). They are:
+
+  =========================  =========================================
+  Kernel Parameter           Effect
+  -------------------------  -----------------------------------------
+  ``rd.brltty=0``            Completely disable BRLTTY.
+  ``rd.brltty.bluetooth=0``  Disable Bluetooth support.
+  ``rd.brltty.sound=0``      Disable speech drivers and sound support.
+  =========================  =========================================
+
+Specifying BRLTTY options
+`````````````````````````
 
 This module interprets kernel command line parameters that begin with the
 ``rd.brltty.`` prefix. All of BRLTTY's options that can be specified via
