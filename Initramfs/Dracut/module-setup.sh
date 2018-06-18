@@ -26,8 +26,9 @@ cmdline() {
 # called by dracut
 installkernel() {
    instmods pcspkr uinput
-   [ ! -d "${initdir}/var/lib/bluetooth" ] || instmods =drivers/bluetooth =net/bluetooth
-   [ ! -d "${initdir}/etc/alsa" ] || instmods =sound
+   [ -d "${initdir}/var/lib/bluetooth" ] && instmods =drivers/bluetooth =net/bluetooth
+   [ -d "${initdir}/etc/alsa" ] && instmods =sound
+   return 0
 }
 
 # called by dracut
@@ -208,26 +209,6 @@ brlttyIncludeBluetoothSupport() {
    inst_hook initqueue 99 "${moddir}/bluetooth-start.sh"
 }
 
-brlttyIncludeMessageBus() {
-   brlttyAddMessageBusUsers /usr/share/dbus-1/system.d/*
-   brlttyAddMessageBusUsers /etc/dbus-1/system.d/*
-
-   brlttyInstallDirectories /etc/dbus-1
-   brlttyInstallDirectories /usr/share/dbus-1
-   brlttyInstallDirectories /usr/libexec/dbus-1
-
-   inst_multiple dbus-daemon dbus-send dbus-cleanup-sockets dbus-monitor
-   brlttyInstallSystemdUnits dbus.service dbus.socket
-
-   inst_hook initqueue 99 "${moddir}/dbus-start.sh"
-}
-
-brlttyAddMessageBusUsers() {
-   set -- dbus $(sed -n -r -e 's/^.* user="([^"]*)".*$/\1/p' "${@}" | sort -u)
-   brlttyAddUserEntries "${@}"
-   brlttyAddGroupEntries "${@}"
-}
-
 brlttyIncludeSoundSupport() {
    brlttyIncludeAlsaSupport
    brlttyIncludePulseAudioSupport
@@ -248,6 +229,8 @@ brlttyIncludeAlsaSupport() {
 }
 
 brlttyIncludePulseAudioSupport() {
+   brlttyIncludeMessageBus
+
    brlttyAddUserEntries pulse
    brlttyAddGroupEntries pulse pulse-access pulse-rt
 
@@ -267,25 +250,26 @@ brlttyIncludePulseAudioSupport() {
    inst_hook cleanup 99 "${moddir}/pulse-stop.sh"
 }
 
-brlttyInstallSystemdUnits() {
-   local unit
+brlttyIncludeMessageBus() {
+   [ -d "${initdir}/etc/dbus-1" ] && return 0
 
-   for unit
-   do
-      inst_simple "/usr/lib/systemd/system/${unit}"
-   done
+   brlttyAddMessageBusUsers /usr/share/dbus-1/system.d/*
+   brlttyAddMessageBusUsers /etc/dbus-1/system.d/*
+
+   brlttyInstallDirectories /etc/dbus-1
+   brlttyInstallDirectories /usr/share/dbus-1
+   brlttyInstallDirectories /usr/libexec/dbus-1
+
+   inst_multiple dbus-daemon dbus-send dbus-cleanup-sockets dbus-monitor
+   brlttyInstallSystemdUnits dbus.service dbus.socket
+
+   inst_hook initqueue 99 "${moddir}/dbus-start.sh"
 }
 
-brlttyInstallDirectories() {
-   local directory
-
-   for directory
-   do
-      [ -d "${directory}" ] && {
-         eval set -- $(find "${directory}" -printf "'%p'\n")
-         inst_multiple "${@}"
-      }
-   done
+brlttyAddMessageBusUsers() {
+   set -- dbus $(sed -n -r -e 's/^.* user="([^"]*)".*$/\1/p' "${@}" | sort -u)
+   brlttyAddUserEntries "${@}"
+   brlttyAddGroupEntries "${@}"
 }
 
 brlttyAddUserEntries() {
@@ -309,6 +293,27 @@ brlttyAddEntries() {
       grep -q -e "^${name}:" "${target}" || {
          local line="$(grep "^${name}:" "${source}")"
          [ -n "${line}" ] && echo >>"${target}" "${line}"
+      }
+   done
+}
+
+brlttyInstallSystemdUnits() {
+   local unit
+
+   for unit
+   do
+      inst_simple "/usr/lib/systemd/system/${unit}"
+   done
+}
+
+brlttyInstallDirectories() {
+   local directory
+
+   for directory
+   do
+      [ -d "${directory}" ] && {
+         eval set -- $(find "${directory}" -printf "'%p'\n")
+         inst_multiple "${@}"
       }
    done
 }
