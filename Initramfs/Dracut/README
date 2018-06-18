@@ -105,7 +105,8 @@ then it defaults to ``1`` (enabled). They are:
   ``rd.brltty=0``            Completely disable BRLTTY.
   ``rd.brltty.bluetooth=0``  Disable Bluetooth support.
   ``rd.brltty.sound=0``      Disable speech drivers and sound support.
-  ``rd.brltty.pulse=0``      Disable Pulse Audio support.
+  ``rd.brltty.pulse=0``      Disable the Pulse Audio server.
+  ``rd.brltty.speechd=0``    Disable the Speech Dispatcher server.
   =========================  =========================================
 
 Specifying BRLTTY options

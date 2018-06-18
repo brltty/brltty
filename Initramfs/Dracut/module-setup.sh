@@ -138,6 +138,17 @@ brlttyIncludeSpeechDrivers() {
             brlttyInstallDirectories /usr/lib*/festival
             brlttyInstallDirectories /usr/share/festival/lib
             ;;
+
+         sd)
+            inst_binary speech-dispatcher
+            brlttyInstallDirectories /etc/speech-dispatcher
+            brlttyInstallDirectories /usr/lib*/speech-dispatcher
+            brlttyInstallDirectories /usr/lib*/speech-dispatcher-modules
+            brlttyInstallDirectories /usr/share/speech-dispatcher
+            brlttyInstallDirectories /usr/share/sounds/speech-dispatcher
+            brlttyInstallSystemdUnits speech-dispatcherd.service
+            inst_hook initqueue 98 "${moddir}/speechd-start.sh"
+            ;;
       esac
    done
 }
@@ -206,7 +217,7 @@ brlttyIncludeBluetoothSupport() {
    inst_binary /usr/libexec/bluetooth/bluetoothd
    brlttyInstallSystemdUnits bluetooth.service bluetooth.target
 
-   inst_hook initqueue 99 "${moddir}/bluetooth-start.sh"
+   inst_hook initqueue 97 "${moddir}/bluetooth-start.sh"
 }
 
 brlttyIncludeSoundSupport() {
@@ -225,7 +236,7 @@ brlttyIncludeAlsaSupport() {
    inst_multiple -o alsactl alsaucm alsamixer amixer aplay
    inst_script alsaunmute
 
-   inst_hook initqueue 98 "${moddir}/alsa-start.sh"
+   inst_hook initqueue 96 "${moddir}/alsa-start.sh"
 }
 
 brlttyIncludePulseAudioSupport() {
@@ -246,8 +257,8 @@ brlttyIncludePulseAudioSupport() {
    inst_multiple -o pamon paplay parec parecord
 
    inst_binary chmod
-   inst_hook initqueue 99 "${moddir}/pulse-start.sh"
-   inst_hook cleanup 99 "${moddir}/pulse-stop.sh"
+   inst_hook initqueue 97 "${moddir}/pulse-start.sh"
+   inst_hook cleanup 98 "${moddir}/pulse-stop.sh"
 }
 
 brlttyIncludeMessageBus() {
@@ -263,7 +274,7 @@ brlttyIncludeMessageBus() {
    inst_multiple dbus-daemon dbus-send dbus-cleanup-sockets dbus-monitor
    brlttyInstallSystemdUnits dbus.service dbus.socket
 
-   inst_hook initqueue 98 "${moddir}/dbus-start.sh"
+   inst_hook initqueue 96 "${moddir}/dbus-start.sh"
 }
 
 brlttyAddMessageBusUsers() {
