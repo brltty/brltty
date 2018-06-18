@@ -34,6 +34,7 @@ installkernel() {
 # called by dracut
 install() {
    brlttyImportInstallOptions
+   local -A includedDrivers
 
    local BRLTTY_EXECUTABLE_PATH="/usr/bin/brltty"
    inst_binary "${BRLTTY_EXECUTABLE_PATH}"
@@ -167,7 +168,12 @@ brlttyIncludeDriver() {
    local code="${2}"
 
    [ "${code}" = "no" ] && return 1
-   inst_libdir_file "brltty/libbrltty${type}${code}.so*"
+   local driver="${type}${code}"
+
+   [ -n "${includedDrivers[${driver}]}" ] && return 2
+   includedDrivers[${driver}]=1
+
+   inst_libdir_file "brltty/libbrltty${driver}.so*"
    return 0
 }
 
