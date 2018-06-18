@@ -66,8 +66,8 @@ install() {
       brlttyIncludeBluetoothSupport
    fi
 
-   inst_hook cmdline 99 "${moddir}/brltty-start.sh"
-   inst_hook cleanup 99 "${moddir}/brltty-stop.sh"
+   inst_hook cmdline 05 "${moddir}/brltty-start.sh"
+   inst_hook cleanup 95 "${moddir}/brltty-stop.sh"
 
    dracut_need_initqueue
 }
@@ -225,7 +225,7 @@ brlttyIncludeAlsaSupport() {
    inst_multiple -o alsactl alsaucm alsamixer amixer aplay
    inst_script alsaunmute
 
-   inst_hook initqueue 99 "${moddir}/alsa-start.sh"
+   inst_hook initqueue 98 "${moddir}/alsa-start.sh"
 }
 
 brlttyIncludePulseAudioSupport() {
@@ -263,7 +263,7 @@ brlttyIncludeMessageBus() {
    inst_multiple dbus-daemon dbus-send dbus-cleanup-sockets dbus-monitor
    brlttyInstallSystemdUnits dbus.service dbus.socket
 
-   inst_hook initqueue 99 "${moddir}/dbus-start.sh"
+   inst_hook initqueue 98 "${moddir}/dbus-start.sh"
 }
 
 brlttyAddMessageBusUsers() {
