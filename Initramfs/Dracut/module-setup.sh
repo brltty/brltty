@@ -196,7 +196,7 @@ brlttyImportInstallOptions() {
 }
 
 brlttyIncludeBluetoothSupport() {
-   brlttyInstallMessageBus
+   brlttyIncludeMessageBus
 
    brlttyInstallDirectories /var/lib/bluetooth
    brlttyInstallDirectories /etc/bluetooth
@@ -208,23 +208,9 @@ brlttyIncludeBluetoothSupport() {
    inst_hook initqueue 99 "${moddir}/bluetooth-start.sh"
 }
 
-brlttyInstallMessageBus() {
-   set -- dbus $(sed -n -r -e 's/^.* user="([^"]*)".*$/\1/p' /usr/share/dbus-1/system.d/* | sort -u)
-   local file name
-
-   for file in passwd group
-   do
-      local source="/etc/${file}"
-      local target="${initdir}${source}"
-
-      for name
-      do
-         grep -q -e "^${name}:" "${target}" || {
-            local line="$(grep "^${name}:" "${source}")"
-            [ -n "${line}" ] && echo >>"${target}" "${line}"
-         }
-      done
-   done
+brlttyIncludeMessageBus() {
+   brlttyAddMessageBusUsers /usr/share/dbus-1/system.d/*
+   brlttyAddMessageBusUsers /etc/dbus-1/system.d/*
 
    brlttyInstallDirectories /etc/dbus-1
    brlttyInstallDirectories /usr/share/dbus-1
@@ -234,6 +220,12 @@ brlttyInstallMessageBus() {
    brlttyInstallSystemdUnits dbus.service dbus.socket
 
    inst_hook initqueue 99 "${moddir}/dbus-start.sh"
+}
+
+brlttyAddMessageBusUsers() {
+   set -- dbus $(sed -n -r -e 's/^.* user="([^"]*)".*$/\1/p' "${@}" | sort -u)
+   brlttyAddUserEntries "${@}"
+   brlttyAddGroupEntries "${@}"
 }
 
 brlttyIncludeSoundSupport() {
@@ -256,6 +248,8 @@ brlttyIncludeAlsaSupport() {
 }
 
 brlttyIncludePulseAudioSupport() {
+   brlttyAddUserEntries pulse
+   brlttyAddGroupEntries pulse pulse-access pulse-rt
    inst_simple /etc/dbus-1/system.d/pulseaudio-system.conf
 
    brlttyInstallDirectories /etc/pulse
@@ -285,6 +279,31 @@ brlttyInstallDirectories() {
       [ -d "${directory}" ] && {
          eval set -- $(find "${directory}" -printf "'%p'\n")
          inst_multiple "${@}"
+      }
+   done
+}
+
+brlttyAddUserEntries() {
+   brlttyAddEntries passwd "${@}"
+}
+
+brlttyAddGroupEntries() {
+   brlttyAddEntries group "${@}"
+}
+
+brlttyAddEntries() {
+   local file="${1}"
+   shift 1
+
+   local source="/etc/${file}"
+   local target="${initdir}${source}"
+   local name
+
+   for name
+   do
+      grep -q -e "^${name}:" "${target}" || {
+         local line="$(grep "^${name}:" "${source}")"
+         [ -n "${line}" ] && echo >>"${target}" "${line}"
       }
    done
 }
