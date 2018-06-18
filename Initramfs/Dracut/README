@@ -105,6 +105,7 @@ then it defaults to ``1`` (enabled). They are:
   ``rd.brltty=0``            Completely disable BRLTTY.
   ``rd.brltty.bluetooth=0``  Disable Bluetooth support.
   ``rd.brltty.sound=0``      Disable speech drivers and sound support.
+  ``rd.brltty.pulse=0``      Disable Pulse Audio support.
   =========================  =========================================
 
 Specifying BRLTTY options
@@ -130,6 +131,44 @@ interesting ones are:
   ``rd.brltty.log_file``            ``/run/initramfs/brltty.log``
   ``rd.brltty.log_level``           setting in ``/etc/brltty.conf``
   ================================  ===============================
+
+Speech Drivers
+--------------
+
+Since speech drivers, by their very nature, require sound:
+
+* None of them can start until the ``initqueue`` hook has been executed.
+
+* None of them can start if sound has been disabled (via the rd.brltty.sound=0
+  kernel parameter).
+
+As of the time this was written, here's how well each of the speech drivers
+works:
+
+en
+  The ``en`` [eSpeak-NG] speech driver works.
+
+es
+  The ``es`` [eSpeak] speech driver works. It requires Pulse Audio, so:
+
+  * It doesn't start until the ``initqueue`` hook has been executed.
+
+  * It can't start if Pulse Audio fails to start or has been disabled (via
+    the rd.brltty.pulse=0 kernel parameter).
+
+fl
+  The ``fl`` [Festival Lite] speech driver doesn't work - it runs but doesn't
+  speak. This appears to be due to a bug within Festival Lite itself because
+  it also remains silent when tested on the full system.
+
+fv
+  The ``fv`` [Festival] speech driver doesn't work - it crashes. This appears
+  to be due to a bug within Festival itself because it also crashes when tested
+  on the full system.
+
+sd
+  The ``sd`` [Speech Dispatcher] speech driver hasn't been tested and probably
+  won't work.
 
 What Isn't Supported?
 ---------------------

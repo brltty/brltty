@@ -250,6 +250,7 @@ brlttyIncludeAlsaSupport() {
 brlttyIncludePulseAudioSupport() {
    brlttyAddUserEntries pulse
    brlttyAddGroupEntries pulse pulse-access pulse-rt
+
    inst_simple /etc/dbus-1/system.d/pulseaudio-system.conf
 
    brlttyInstallDirectories /etc/pulse
@@ -260,6 +261,10 @@ brlttyIncludePulseAudioSupport() {
 
    inst_multiple -o pulseaudio pactl pacmd
    inst_multiple -o pamon paplay parec parecord
+
+   inst_binary chmod
+   inst_hook initqueue 99 "${moddir}/pulse-start.sh"
+   inst_hook cleanup 99 "${moddir}/pulse-stop.sh"
 }
 
 brlttyInstallSystemdUnits() {
