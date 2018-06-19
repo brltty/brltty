@@ -16,6 +16,19 @@ initramfs breakpoints (see the ``rd.break`` kernel parameter) except for the
 one named ``cmdline`` because it occurs earlier than the point at which BRLTTY
 is started.
 
+The braille driver can start immediately if either serial or USB communication
+is being used. If Bluetooth communication is being used then the braille driver
+won't start until the ``initqueue`` phase because the Systemd service manager
+isn't available until then.
+
+Bluetooth support within the initramfs is disabled by default because it's
+insecure. The reason for this is that the link keys for those devices that have
+already been paired on the full system are copied into the initramfs image so
+that repairing won't be necessary. If you absolutely must use Bluetooth
+communication, or if you just want to and this issue is of no concern to you,
+then enable the ``BRLTTY_DRACUT_BLUETOOTH_SUPPORT`` option within the file
+``dracut.conf`` (which is in ``/etc/brltty/Initramfs/``).
+
 Environment Variables
 ---------------------
 
@@ -192,17 +205,4 @@ fv
 sd
   The ``sd`` [Speech Dispatcher] speech driver hasn't been tested and probably
   won't work.
-
-What Isn't Supported?
----------------------
-
-Braille device communication via Bluetooth isn't supported because Bluetooth
-kernel modules aren't included within the initramfs.
-
-Speech drivers aren't supported because ALSA (sound) kernel modules aren't
-included within the initramfs.
-
-Braille accessibility isn't active yet at the ``cmdline`` breakpoint because
-it occurs before the ``cmdline`` hook, which is used to start BRLTTY, is
-executed.
 
