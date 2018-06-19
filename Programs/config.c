@@ -270,7 +270,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("text"),
     .setting.string = &opt_startMessage,
-    .description = strtext("The message to show when starting.")
+    .description = strtext("The text to be shown when the braille driver starts and to be spoken when the speech driver starts.")
   },
 
   { .letter = 'Z',
@@ -278,7 +278,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("text"),
     .setting.string = &opt_stopMessage,
-    .description = strtext("The message to show when terminating.")
+    .description = strtext("The text to be shown when the braille driver stops.")
   },
 
   { .letter = 'E',

@@ -425,13 +425,13 @@ then the rightmost specification is used.
 Parameter names may be abbreviated.
 .TP
 \fB\-Y \fItext\fR (\fB\-\-start\-message=\fR)
-The text that's to be shown when the braille driver starts
-and spoken when the speech driver starts.
+The text to be shown when the braille driver starts
+and to be spoken when the speech driver starts.
 The built-in default is
 .RB "@PACKAGE_NAME@ @PACKAGE_VERSION@" "."
 .TP
 \fB\-Z \fItext\fR (\fB\-\-stop\-message=\fR)
-The text that's to be shown when the braille driver stops.
+The text to be shown when the braille driver stops.
 The built-in default is
 .RB "@PACKAGE_NAME@ stopped" "."
 .SS "Environment Variables"

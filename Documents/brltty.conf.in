@@ -584,14 +584,14 @@
 # (can be overridden with the -T [--tables-directory=] option)
 #tables-directory @TABLES_DIRECTORY@
 
-# The start-message directive specifies the text that's to be shown when the
-# braille driver starts and to be spoken when the speech driver starts. If not
+# The start-message directive specifies the text to be shown when the braille
+# driver starts and to be spoken when the speech driver starts. If not
 # specified, "@PACKAGE_NAME@ @PACKAGE_VERSION@" will be used.
 # (can be overridden with the -Y [--start-message=] option)
 #start-message @PACKAGE_NAME@\s@PACKAGE_VERSION@
 
-# The stop-message directive specifies the text that's to be shown when the
-# braille driver stops. If not specified, "@PACKAGE_NAME@ stopped" will be used.
+# The stop-message directive specifies the text to be shown when the braille
+# driver stops. If not specified, "@PACKAGE_NAME@ stopped" will be used.
 # (can be overridden with the -Z [--stop-message=] option)
 #stop-message @PACKAGE_NAME@\sstopped
 
