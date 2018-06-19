@@ -178,8 +178,15 @@ Since speech drivers, by their very nature, require sound:
 * None of them can start if sound has been disabled (via the rd.brltty.sound=0
   kernel parameter).
 
-As of the time this was written, here's how well each of the speech drivers
-works:
+Speech defaults to being off even if a speech driver has been configured via
+``/etc/brltty.conf``. This is because your preferred speech driver may not work
+all that well, or may even cause problems, when used within the more primitive
+initramfs environment. If you'd like to use speech then you need to explicitly
+set the driver. While you can do so via the ``rd.brltty.speech_driver`` kernel
+command line parameter, the easiest way to configure a persistent setting is
+via the ``speech_driver`` option in ``/etc/brltty/Initramfs/cmdline``.
+
+Here's how well each of the speech drivers works:
 
 en
   The ``en`` [eSpeak-NG] speech driver works.
