@@ -209,8 +209,8 @@ brlttyGetProperty() {
 }
 
 brlttyImportInstallOptions() {
-   local file="/etc/brltty/dracut.conf"
-   [ -f "${file}" ] && . "${file}"
+   local file="/etc/brltty/Initramfs/dracut.conf"
+   [ -f "${file}" ] && [ -r "${file}" ] && . "${file}"
 }
 
 brlttyIncludeBluetoothSupport() {

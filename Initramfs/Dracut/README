@@ -22,8 +22,8 @@ Environment Variables
 A number of environment variables may be used to influence how BRLTTY is
 installed into the initramfs image. Their names all begin with the
 ``BRLTTY_DRACUT_`` prefix. In addition to exporting them from the current
-environment, they may be defined within the file ``/etc/brltty/dracut.conf``.
-Within this file:
+environment, they may be defined within the file ``dracut.conf`` (which is in
+``/etc/brltty/Initramfs``). Within this file:
 
 * Blank lines are ignored.
 * Lines that start with a hash [``#``] are comments.
@@ -129,6 +129,8 @@ interesting ones are:
   ``rd.brltty.attributes_table``    setting in ``/etc/brltty.conf``
   ``rd.brltty.contraction_table``   setting in ``/etc/brltty.conf``
   ``rd.brltty.keyboard_table``      setting in ``/etc/brltty.conf``
+  ``rd.brltty.speech_driver``       setting in ``/etc/brltty.conf``
+  ``rd.brltty.speech_parameters``   setting in ``/etc/brltty.conf``
   ``rd.brltty.log_file``            ``/run/initramfs/brltty.log``
   ``rd.brltty.log_level``           setting in ``/etc/brltty.conf``
   ================================  ===============================
