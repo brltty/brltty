@@ -2,7 +2,7 @@ MODULE_NAME = 99brltty
 MODULES_DIRECTORY = /usr/lib/dracut/modules.d
 MODULE_DIRECTORY = $(INSTALL_ROOT)$(MODULES_DIRECTORY)/$(MODULE_NAME)
 
-install: install-module install-documentation install-configuration-file
+install: install-module install-documentation install-configuration-files
 
 install-module: install-module-directory
 	for file in *.sh; \
@@ -15,6 +15,7 @@ install-documentation: install-module-directory
 install-module-directory:
 	$(INSTALL_DIRECTORY) $(MODULE_DIRECTORY)
 
+OPTIONS_FILE = cmdline
 CONFIGURATION_FILE = dracut.conf
 INITRAMFS_SUBDIRECTORY = Initramfs
 INITRAMFS_DIRECTORY = $(TABLES_DIRECTORY)/$(INITRAMFS_SUBDIRECTORY)
@@ -23,7 +24,8 @@ INSTALL_INITRAMFS_DIRECTORY = $(INSTALL_ROOT)$(INITRAMFS_DIRECTORY)
 install-initramfs-directory:
 	$(INSTALL_DIRECTORY) $(INSTALL_INITRAMFS_DIRECTORY)
 
-install-configuration-file: install-initramfs-directory
+install-configuration-files: install-initramfs-directory
+	$(INSTALL_DATA) $(OPTIONS_FILE) $(INSTALL_INITRAMFS_DIRECTORY)
 	$(INSTALL_DATA) $(CONFIGURATION_FILE) $(INSTALL_INITRAMFS_DIRECTORY)
 	sed -e '/^ *BRLTTY_DRACUT_LOCALE *= *"/s/".*"/"${LANG}"/' -i $(INSTALL_INITRAMFS_DIRECTORY)/$(CONFIGURATION_FILE)
 

@@ -14,24 +14,55 @@ export BRLTTY_LOG_FILE="${BRLTTY_WRITABLE_DIRECTORY}/initramfs/brltty.log"
 export BRLTTY_UPDATABLE_DIRECTORY="/etc"
 export BRLTTY_PREFERENCES_FILE="${BRLTTY_UPDATABLE_DIRECTORY}/brltty.prefs"
 
-brlttyParseOptions() {
+brlttySetOption() {
+   local option="${1}"
+   local name="${option%%=*}"
+
+   if [ "${name}" = "${option}" ]
+   then
+      local value="yes"
+   else
+      local value="${option#*=}"
+   fi
+
+   [ -z "${name}" ] || {
+      name="${name^^?}"
+      export "BRLTTY_${name}=${value}"
+   }
+}
+
+brlttySetConfiguredOptions() {
+   local file="/etc/brltty/Initramfs/cmdline"
+
+   [ -f "${file}" ] && [ -r "${file}" ] && {
+      local line
+
+      while read line
+      do
+         set -- ${line%%#*}
+         local option
+
+         for option
+         do
+            brlttySetOption "${option}"
+         done
+      done <"${file}"
+   }
+}
+
+brlttySetExplicitOptions() {
    local option
 
    for option
    do
-      if [[ "${option}" =~ ^"rd."("brltty."[[:alpha:]_]+)"="(.+) ]]
-      then
-         local name="${BASH_REMATCH[1]}"
-         local value="${BASH_REMATCH[2]}"
-
-         name="${name^^?}" # convert to uppercase
-         name="${name/./_}" # translate . to _
-
-         export "${name}=${value}"
-      fi
+      [[ "${option}" =~ ^"rd.brltty."(.*) ]] && {
+         brlttySetOption "${BASH_REMATCH[1]}"
+      }
    done
 }
 
-brlttyParseOptions $(getcmdline)
+brlttySetConfiguredOptions
+brlttySetExplicitOptions $(getcmdline)
+
 getargbool 1 rd.brltty.sound || export BRLTTY_SPEECH_DRIVER="no"
 getargbool 1 rd.brltty && brltty -E +n

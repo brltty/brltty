@@ -22,8 +22,8 @@ Environment Variables
 A number of environment variables may be used to influence how BRLTTY is
 installed into the initramfs image. Their names all begin with the
 ``BRLTTY_DRACUT_`` prefix. In addition to exporting them from the current
-environment, they may be defined within the file ``dracut.conf`` (which is in
-``/etc/brltty/Initramfs``). Within this file:
+environment, they may be defined within the optional file ``dracut.conf``
+(which is in ``/etc/brltty/Initramfs/``). Within this file:
 
 * Blank lines are ignored.
 * Lines that start with a hash [``#``] are comments.
@@ -91,13 +91,34 @@ BRLTTY_DRACUT_SPEECH_DRIVERS
 Kernel Command Line Parameters
 ------------------------------
 
+This module interprets kernel command line parameters that begin with the
+``rd.brltty.`` prefix. Explicit values for these parameters can, of course, be
+specified on the kernel command line (e.g. within ``grub.cfg`` or within
+``/etc/default/grub``). In addition, default values for them can be defined
+within the optional file ``cmdline`` (which is in ``/etc/brltty/Initramfs/``).
+
+The order of precedence, from lowest to highest, for a value is:
+
+* BRLTTY built-in default
+* ``/etc/brltty.conf``
+* initramfs override
+* ``/etc/brltty/Initramfs/cmdline``
+* kernel command line
+
+Blank lines are ignored. A hash [``#``] anywhere on a line begins a comment
+which continues till the end of that line - only those characters before it are
+significant. Any number of space-separated options may be specified on a line.
+The syntax for an option is ``name=value`` (without the ``rd.brltty.`` prefix).
+The ``=value`` part is optional - if there's no ``=`` then the value is
+``yes``.
+
 Disabling BRLTTY
 ````````````````
 
-Given that BRLTTY is a rather complex application, a number of kernel command
-line parameters have been introduced so that its various components can be
-selectively disabled. In all cases, if any of these parameters isn't specified
-then it defaults to ``1`` (enabled). They are:
+Given that BRLTTY is a rather complex application, there are a number of kernel
+parameters that can be used to selectively disable a number of its components.
+In all cases, if any of these parameters isn't specified then it defaults to
+``1`` (enabled). They are:
 
   =========================  =========================================
   Kernel Parameter           Effect
@@ -112,9 +133,8 @@ then it defaults to ``1`` (enabled). They are:
 Specifying BRLTTY options
 `````````````````````````
 
-This module interprets kernel command line parameters that begin with the
-``rd.brltty.`` prefix. All of BRLTTY's options that can be specified via
-environment variables are supported (see ``man brltty`` for the full list). For
+All of BRLTTY's options that can be specified via environment variables (see
+``man brltty`` for the full list) can be specified via kernel parameters. For
 example, the kernel parameter ``rd.brltty.braille_driver=vo`` is mapped to the
 environment variable assignment ``BRLTTY_BRAILLE_DRIVER=vo``. Some of the more
 interesting ones are:

@@ -41,7 +41,7 @@ install() {
    local brlttyLog="$(LC_ALL="${BRLTTY_DRACUT_LOCALE:-${LANG}}" "${BRLTTY_EXECUTABLE_PATH}" -E -v -e -ldebug 2>&1)"
    
    export BRLTTY_CONFIGURATION_FILE="/etc/brltty.conf"
-   inst_simple "${BRLTTY_CONFIGURATION_FILE}"
+   brlttyIncludeDataFiles "${BRLTTY_CONFIGURATION_FILE}"
 
    brlttyIncludeDataFiles $(brlttyGetProperty "including data file")
    brlttyIncludeScreenDrivers lx
@@ -61,6 +61,7 @@ install() {
 
    brlttyInstallPreferencesFile "/etc/brltty.prefs"
    brlttyInstallDirectories "/etc/xdg/brltty"
+   inst_simple "/etc/brltty/Initramfs/cmdline"
 
    if [ "${BRLTTY_DRACUT_BLUETOOTH_SUPPORT}" = "yes" ]
    then

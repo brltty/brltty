@@ -1,0 +1,16 @@
+# This file is where you can specify any rd.brltty. kernel parameters that are
+# to be included within the initramfs image and applied as default values.
+
+# The order of precedence, from lowest to highest, for an option's value is:
+# * BRLTTY built-in default
+# * /etc/brltty.conf
+# * initramfs override
+# * this file
+# * kernel command line
+
+# Blank lines are ignored. A hash [#] anywhere on a line begins a comment which
+# continues till the end of that line - only those characters before it are
+# significant. Any number of space-separated options may be specified on a
+# line. The syntax for an option is name=value (without the rd.brltty. prefix).
+# The =value part is optional - if there's no = then the value is yes.
+
