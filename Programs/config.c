@@ -145,6 +145,9 @@ static const char *const optionStrings_RemoveService[] = {
   NULL
 };
 
+static char *opt_startMessage;
+static char *opt_stopMessage;
+
 static int opt_version;
 static int opt_verify;
 static int opt_quiet;
@@ -262,6 +265,22 @@ static const char *const optionStrings_SpeechDriver[] = {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 BEGIN_OPTION_TABLE(programOptions)
+  { .letter = 'Y',
+    .word = "start-message",
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .argument = strtext("text"),
+    .setting.string = &opt_startMessage,
+    .description = strtext("The message to show when starting.")
+  },
+
+  { .letter = 'Z',
+    .word = "stop-message",
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .argument = strtext("text"),
+    .setting.string = &opt_stopMessage,
+    .description = strtext("The message to show when terminating.")
+  },
+
   { .letter = 'E',
     .word = "environment-variables",
     .flags = OPT_Hidden,
@@ -1598,9 +1617,14 @@ startBrailleDriver (void) {
 
       {
         char banner[0X100];
+        const char *text = opt_startMessage;
 
-        makeProgramBanner(banner, sizeof(banner), 0);
-        if (message(NULL, banner, MSG_SILENT)) return 1;
+        if (!*text) {
+          makeProgramBanner(banner, sizeof(banner), 0);
+          text = banner;
+        }
+
+        if (message(NULL, text, MSG_SILENT)) return 1;
       }
     }
 
@@ -1647,8 +1671,11 @@ static ActivityObject *brailleDriverActivity = NULL;
 static void
 exitBrailleDriver (void *data) {
   if (brailleConstructed) {
+    const char *text = opt_stopMessage;
+    if (!*text) text = gettext("BRLTTY stopped");
+
     clearStatusCells(&brl);
-    message(NULL, gettext("BRLTTY stopped"), MSG_NODELAY|MSG_SILENT|MSG_SYNC);
+    message(NULL, text, (MSG_NODELAY | MSG_SILENT | MSG_SYNC));
     brl.noDisplay = 1;
   }
 
@@ -1935,9 +1962,14 @@ startSpeechDriver (void) {
 
   if (!opt_quiet && spk.sayBanner) {
     char banner[0X100];
+    const char *text = opt_startMessage;
 
-    makeProgramBanner(banner, sizeof(banner), 0);
-    sayString(&spk, banner, SAY_OPT_MUTE_FIRST);
+    if (!*text) {
+      makeProgramBanner(banner, sizeof(banner), 0);
+      text = banner;
+    }
+
+    sayString(&spk, text, SAY_OPT_MUTE_FIRST);
     beginAutospeakDelay(SPEECH_DRIVER_START_AUTOSPEAK_DELAY);
   } else if (isAutospeakActive()) {
     autospeak(AUTOSPEAK_FORCE);
