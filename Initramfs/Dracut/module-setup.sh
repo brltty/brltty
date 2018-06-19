@@ -12,18 +12,6 @@ depends() {
 }
 
 # called by dracut
-cmdline() {
-   brlttyImportInstallOptions
-   set -- ${BRLTTY_DRACUT_KERNEL_PARAMETERS}
-   local parameter
-
-   for parameter
-   do
-      echo -n " rd.brltty.${parameter}"
-   done
-}
-
-# called by dracut
 installkernel() {
    instmods pcspkr uinput
    [ -d "${initdir}/var/lib/bluetooth" ] && instmods =drivers/bluetooth =net/bluetooth
