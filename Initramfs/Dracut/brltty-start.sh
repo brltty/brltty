@@ -1,5 +1,8 @@
 #!/bin/bash
 
+export BRLTTY_START_MESSAGE="initramfs starting"
+export BRLTTY_STOP_MESSAGE="initramfs finished"
+
 BRLTTY_OVERRIDE_PREFERENCE="braille-keyboard-enabled=yes"
 BRLTTY_OVERRIDE_PREFERENCE+=",braille-input-mode=text"
 export BRLTTY_OVERRIDE_PREFERENCE
