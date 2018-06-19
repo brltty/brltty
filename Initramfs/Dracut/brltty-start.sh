@@ -63,6 +63,13 @@ brlttySetExplicitOptions() {
 
 brlttySetConfiguredOptions
 brlttySetExplicitOptions $(getcmdline)
-
 getargbool 1 rd.brltty.sound || export BRLTTY_SPEECH_DRIVER="no"
-getargbool 1 rd.brltty && brltty -E +n
+
+getargbool 1 rd.brltty && (
+   # Give the kernel a bit of time to finish creating the /dev/input/ devices
+   # (e.g. so that brltty can perform keyboard discovery for keyboard tables)
+   # without delaying the boot.
+
+   sleep 1
+   brltty -E +n
+) &
