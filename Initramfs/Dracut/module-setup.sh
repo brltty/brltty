@@ -139,7 +139,7 @@ brlttyIncludeSpeechDrivers() {
             ;;
       esac
 
-      brlttyIncludeSoundSupport
+      brlttyIncludeAlsaSupport
    done
 }
 
@@ -216,10 +216,6 @@ brlttyIncludeBluetoothSupport() {
    brlttyIncludeMessageBusSupport
 }
 
-brlttyIncludeSoundSupport() {
-   brlttyIncludeAlsaSupport
-}
-
 brlttyIncludeAlsaSupport() {
    [ -d "${initdir}/etc/alsa" ] && return 0;
 
@@ -251,6 +247,7 @@ brlttyIncludePulseAudioSupport() {
    brlttyAddUserEntries pulse
    brlttyAddGroupEntries pulse pulse-access pulse-rt
 
+   brlttyIncludeAlsaSupport
    brlttyIncludeMessageBusSupport
    inst_simple /etc/dbus-1/system.d/pulseaudio-system.conf
 
