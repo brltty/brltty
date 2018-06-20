@@ -598,7 +598,8 @@ rm -fr "${RPM_BUILD_ROOT}"
 
 %files -n brltty-dracut
 /usr/lib/dracut/modules.d/99brltty
-%config(noreplace) %verify(not size md5 mtime) %{_sysconfdir}/brltty/dracut.conf
+%config(noreplace) %verify(not size md5 mtime) %{_sysconfdir}/brltty/Initramfs/dracut.conf
+%config(noreplace) %verify(not size md5 mtime) %{_sysconfdir}/brltty/Initramfs/cmdline
 
 %files -n brlapi
 %defattr(-,root,root)
