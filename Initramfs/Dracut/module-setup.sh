@@ -116,6 +116,7 @@ brlttyIncludeSpeechDrivers() {
          es)
             inst_binary espeak
             brlttyInstallDirectories "/usr/share/espeak-data"
+            brlttyIncludePulseAudioSupport
             ;;
 
          fl)
@@ -217,7 +218,6 @@ brlttyIncludeBluetoothSupport() {
 
 brlttyIncludeSoundSupport() {
    brlttyIncludeAlsaSupport
-   brlttyIncludePulseAudioSupport
 }
 
 brlttyIncludeAlsaSupport() {
@@ -235,12 +235,7 @@ brlttyIncludeAlsaSupport() {
 }
 
 brlttyIncludePulseAudioSupport() {
-   brlttyIncludeMessageBus
-
-   brlttyAddUserEntries pulse
-   brlttyAddGroupEntries pulse pulse-access pulse-rt
-
-   inst_simple /etc/dbus-1/system.d/pulseaudio-system.conf
+   [ -d "${initdir}/etc/pulse" ] && return 0
 
    brlttyInstallDirectories /etc/pulse
    brlttyInstallDirectories /usr/share/pulseaudio
@@ -250,6 +245,12 @@ brlttyIncludePulseAudioSupport() {
 
    inst_multiple -o pulseaudio pactl pacmd
    inst_multiple -o pamon paplay parec parecord
+
+   brlttyAddUserEntries pulse
+   brlttyAddGroupEntries pulse pulse-access pulse-rt
+
+   brlttyIncludeMessageBus
+   inst_simple /etc/dbus-1/system.d/pulseaudio-system.conf
 
    inst_binary chmod
    inst_hook initqueue 97 "${moddir}/pulse-start.sh"
