@@ -202,36 +202,6 @@ brlttyImportInstallOptions() {
    [ -f "${file}" ] && [ -r "${file}" ] && . "${file}"
 }
 
-brlttyIncludeBluetoothSupport() {
-   [ -d "${initdir}/etc/bluetooth" ] && return 0
-
-   brlttyInstallDirectories /etc/bluetooth
-   brlttyInstallDirectories /var/lib/bluetooth
-
-   inst_multiple -o bluetoothctl hciconfig hcitool sdptool
-   inst_binary /usr/libexec/bluetooth/bluetoothd
-   brlttyInstallSystemdUnits bluetooth.service bluetooth.target
-
-   inst_hook initqueue 97 "${moddir}/bluetooth-start.sh"
-   brlttyIncludeMessageBusSupport
-}
-
-brlttyIncludeAlsaSupport() {
-   [ -d "${initdir}/etc/alsa" ] && return 0;
-
-   brlttyInstallDirectories /etc/alsa
-   rm -f "${initdir}/etc/alsa/conf.d/"*
-
-   brlttyInstallDirectories /usr/share/alsa
-   brlttyInstallDirectories /usr/lib/alsa
-   brlttyInstallDirectories /usr/lib*/alsa-lib
-
-   inst_multiple -o alsactl alsaucm alsamixer amixer aplay
-   inst_script alsaunmute
-
-   inst_hook initqueue 96 "${moddir}/alsa-start.sh"
-}
-
 brlttyIncludePulseAudioSupport() {
    [ -d "${initdir}/etc/pulse" ] && return 0
 
@@ -254,6 +224,36 @@ brlttyIncludePulseAudioSupport() {
    inst_binary chmod
    inst_hook initqueue 97 "${moddir}/pulse-start.sh"
    inst_hook cleanup 98 "${moddir}/pulse-stop.sh"
+}
+
+brlttyIncludeAlsaSupport() {
+   [ -d "${initdir}/etc/alsa" ] && return 0;
+
+   brlttyInstallDirectories /etc/alsa
+   rm -f "${initdir}/etc/alsa/conf.d/"*
+
+   brlttyInstallDirectories /usr/share/alsa
+   brlttyInstallDirectories /usr/lib/alsa
+   brlttyInstallDirectories /usr/lib*/alsa-lib
+
+   inst_multiple -o alsactl alsaucm alsamixer amixer aplay
+   inst_script alsaunmute
+
+   inst_hook initqueue 96 "${moddir}/alsa-start.sh"
+}
+
+brlttyIncludeBluetoothSupport() {
+   [ -d "${initdir}/etc/bluetooth" ] && return 0
+
+   brlttyInstallDirectories /etc/bluetooth
+   brlttyInstallDirectories /var/lib/bluetooth
+
+   inst_multiple -o bluetoothctl hciconfig hcitool sdptool
+   inst_binary /usr/libexec/bluetooth/bluetoothd
+   brlttyInstallSystemdUnits bluetooth.service bluetooth.target
+
+   inst_hook initqueue 97 "${moddir}/bluetooth-start.sh"
+   brlttyIncludeMessageBusSupport
 }
 
 brlttyIncludeMessageBusSupport() {
