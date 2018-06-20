@@ -14,7 +14,7 @@ depends() {
 # called by dracut
 installkernel() {
    instmods pcspkr uinput
-   [ -d "${initdir}/var/lib/bluetooth" ] && instmods =drivers/bluetooth =net/bluetooth
+   [ -d "${initdir}/etc/bluetooth" ] && instmods =drivers/bluetooth =net/bluetooth
    [ -d "${initdir}/etc/alsa" ] && instmods =sound
    return 0
 }
@@ -37,10 +37,8 @@ install() {
    brlttyIncludeBrailleDrivers $(brlttyGetConfiguredDrivers braille)
    brlttyIncludeBrailleDrivers ${BRLTTY_DRACUT_BRAILLE_DRIVERS}
 
-   local includingSpeechDrivers=false
    brlttyIncludeSpeechDrivers $(brlttyGetConfiguredDrivers speech)
    brlttyIncludeSpeechDrivers ${BRLTTY_DRACUT_SPEECH_DRIVERS}
-   "${includingSpeechDrivers}" && brlttyIncludeSoundSupport
       
    brlttyIncludeTables Text        ttb ${BRLTTY_DRACUT_TEXT_TABLES}
    brlttyIncludeTables Attributes  atb ${BRLTTY_DRACUT_ATTRIBUTES_TABLES}
@@ -104,7 +102,6 @@ brlttyIncludeSpeechDrivers() {
    for code
    do
       brlttyIncludeDriver s "${code}" || continue
-      includingSpeechDrivers=true
 
       case "${code}"
       in
@@ -141,6 +138,8 @@ brlttyIncludeSpeechDrivers() {
             inst_hook initqueue 98 "${moddir}/speechd-start.sh"
             ;;
       esac
+
+      brlttyIncludeSoundSupport
    done
 }
 
@@ -204,16 +203,17 @@ brlttyImportInstallOptions() {
 }
 
 brlttyIncludeBluetoothSupport() {
-   brlttyIncludeMessageBus
+   [ -d "${initdir}/etc/bluetooth" ] && return 0
 
-   brlttyInstallDirectories /var/lib/bluetooth
    brlttyInstallDirectories /etc/bluetooth
+   brlttyInstallDirectories /var/lib/bluetooth
 
    inst_multiple -o bluetoothctl hciconfig hcitool sdptool
    inst_binary /usr/libexec/bluetooth/bluetoothd
    brlttyInstallSystemdUnits bluetooth.service bluetooth.target
 
    inst_hook initqueue 97 "${moddir}/bluetooth-start.sh"
+   brlttyIncludeMessageBusSupport
 }
 
 brlttyIncludeSoundSupport() {
@@ -221,6 +221,8 @@ brlttyIncludeSoundSupport() {
 }
 
 brlttyIncludeAlsaSupport() {
+   [ -d "${initdir}/etc/alsa" ] && return 0;
+
    brlttyInstallDirectories /etc/alsa
    rm -f "${initdir}/etc/alsa/conf.d/"*
 
@@ -249,7 +251,7 @@ brlttyIncludePulseAudioSupport() {
    brlttyAddUserEntries pulse
    brlttyAddGroupEntries pulse pulse-access pulse-rt
 
-   brlttyIncludeMessageBus
+   brlttyIncludeMessageBusSupport
    inst_simple /etc/dbus-1/system.d/pulseaudio-system.conf
 
    inst_binary chmod
@@ -257,7 +259,7 @@ brlttyIncludePulseAudioSupport() {
    inst_hook cleanup 98 "${moddir}/pulse-stop.sh"
 }
 
-brlttyIncludeMessageBus() {
+brlttyIncludeMessageBusSupport() {
    [ -d "${initdir}/etc/dbus-1" ] && return 0
 
    brlttyAddMessageBusUsers /usr/share/dbus-1/system.d/*
