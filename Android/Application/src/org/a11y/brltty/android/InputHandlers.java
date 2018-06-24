@@ -341,7 +341,9 @@ public abstract class InputHandlers {
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
         if (ApplicationUtilities.haveLollipop) {
-          return inputCharacter('\n');
+          if (node.isMultiLine()) {
+            return inputCharacter('\n');
+          }
         }
 
         return super.performEditAction(node);
