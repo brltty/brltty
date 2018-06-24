@@ -49,10 +49,11 @@ brltty_manual_directories=""
 
 for brltty_directory in Autostart Initramfs Android
 do
-   for brltty_subdirectory in `echo "${brltty_source_directory}/${brltty_directory}/"*`
+   for brltty_subdirectory in `cd "${brltty_source_directory}/${brltty_directory}" && echo *`
    do
-      test -f "${brltty_subdirectory}/Makefile.in" && {
-         brltty_build_directories="${brltty_build_directories} ${brltty_subdirectory}"
+      brltty_path="${brltty_directory}/${brltty_subdirectory}"
+      test -f "${brltty_source_directory}/${brltty_path}/Makefile.in" && {
+         brltty_build_directories="${brltty_build_directories} ${brltty_path}"
       }
    done
 done
