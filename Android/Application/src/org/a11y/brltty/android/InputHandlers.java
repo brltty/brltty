@@ -346,7 +346,7 @@ public abstract class InputHandlers {
           }
         }
 
-        return super.performEditAction(node);
+        throw new UnsupportedOperationException();
       }
     }.handleKey();
   }
