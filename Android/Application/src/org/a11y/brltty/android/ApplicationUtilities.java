@@ -36,9 +36,7 @@ import android.view.WindowManager;
 import android.hardware.usb.UsbManager;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 
 public abstract class ApplicationUtilities {
   private final static String LOG_TAG = ApplicationUtilities.class.getName();
@@ -141,36 +139,15 @@ public abstract class ApplicationUtilities {
     return usbManagerReference.get();
   }
 
-  public static void launch (Intent intent) {
-    try {
-      ApplicationContext.get().startActivity(intent);
-    } catch (ActivityNotFoundException exception) {
-      Log.w(LOG_TAG, "activity not found", exception);
-    }
-  }
-
   public static void launch (Class<? extends Activity> activityClass) {
     Intent intent = new Intent(ApplicationContext.get(), activityClass);
 
     intent.addFlags(
       Intent.FLAG_ACTIVITY_NEW_TASK |
       Intent.FLAG_ACTIVITY_CLEAR_TOP |
-      Intent.FLAG_ACTIVITY_SINGLE_TOP |
       Intent.FLAG_FROM_BACKGROUND
     );
 
-    launch(intent);
-  }
-
-  public static void launch (Uri uri) {
-    launch(new Intent(Intent.ACTION_VIEW, uri));
-  }
-
-  public static void launch (String url) {
-    launch(Uri.parse(url));
-  }
-
-  public static void launch (int url) {
-    launch(ApplicationContext.get().getResources().getString(url));
+    ApplicationContext.get().startActivity(intent);
   }
 }

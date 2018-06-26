@@ -20,7 +20,6 @@ package org.a11y.brltty.android;
 
 import android.util.Log;
 
-import android.app.Activity;
 import android.os.Bundle;
 
 import android.content.pm.PackageManager;
@@ -29,7 +28,7 @@ import android.content.pm.PackageInfo;
 import android.view.View;
 import android.widget.TextView;
 
-public class AboutActivity extends Activity {
+public class AboutActivity extends InternalActivity {
   private final static String LOG_TAG = AboutActivity.class.getName();
 
   private final void setText (int view, CharSequence text) {

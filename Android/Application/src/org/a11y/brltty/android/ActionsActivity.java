@@ -18,14 +18,13 @@
 
 package org.a11y.brltty.android;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 
 import android.content.Intent;
 import android.net.Uri;
 
-public class ActionsActivity extends Activity {
+public class ActionsActivity extends InternalActivity {
   @Override
   protected void onCreate (Bundle savedState) {
     super.onCreate(savedState);
@@ -41,15 +40,15 @@ public class ActionsActivity extends Activity {
   }
 
   public void viewUserGuide (View view) {
-    ApplicationUtilities.launch(R.string.user_guide_url);
+    launch(R.string.user_guide_url);
   }
 
   public void browseWebSite (View view) {
-    ApplicationUtilities.launch(R.string.web_site_url);
+    launch(R.string.web_site_url);
   }
 
   public void browseCommunityMessages (View view) {
-    ApplicationUtilities.launch(R.string.community_messages_url);
+    launch(R.string.community_messages_url);
   }
 
   public void postCommunityMessage (View view) {
@@ -60,20 +59,20 @@ public class ActionsActivity extends Activity {
       recipient.append("BRLTTY Mailing List");
       recipient.append(' ');
       recipient.append('<');
-      recipient.append(ApplicationContext.get().getResources().getString(R.string.community_message_address));
+      recipient.append(getResources().getString(R.string.community_message_address));
       recipient.append('>');
       intent.putExtra(Intent.EXTRA_EMAIL, new String[] {recipient.toString()});
     }
 
-    ApplicationUtilities.launch(intent);
+    launch(intent);
   }
 
   public void manageCommunityMembership (View view) {
-    ApplicationUtilities.launch(R.string.community_membership_url);
+    launch(R.string.community_membership_url);
   }
 
   public void updateApplication (View view) {
-    ApplicationUtilities.launch(R.string.application_package_url);
+    launch(R.string.application_package_url);
   }
 
   public void launchAboutActivity (View view) {
