@@ -1001,6 +1001,16 @@ static DBusHandlerResult AtSpi2Filter(DBusConnection *connection, DBusMessage *m
   if (type == DBUS_MESSAGE_TYPE_SIGNAL) {
     if (!strncmp(interface, SPI2_DBUS_INTERFACE_EVENT".", strlen(SPI2_DBUS_INTERFACE_EVENT"."))) {
       AtSpi2HandleEvent(interface + strlen(SPI2_DBUS_INTERFACE_EVENT"."), message);
+    } else if (!strcmp(interface, DBUS_INTERFACE_LOCAL) &&
+               !strcmp(member, "Disconnected")) {
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+                 "DBus disconnected signal, shutting down");
+#ifdef SIGTERM
+      raise(SIGTERM);
+#endif
+#ifdef SIGINT
+      raise(SIGINT);
+#endif
     } else {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
                  "unknown signal: Intf:%s Msg:%s", interface, member);
