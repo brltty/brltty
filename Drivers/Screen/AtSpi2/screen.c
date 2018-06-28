@@ -1003,12 +1003,13 @@ static DBusHandlerResult AtSpi2Filter(DBusConnection *connection, DBusMessage *m
                !strcmp(member, "Disconnected")) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
                  "DBus disconnected signal, shutting down");
-#ifdef SIGTERM
+#if defined(SIGTERM)
       raise(SIGTERM);
-#endif
-#ifdef SIGINT
+#elif defined(SIGINT)
       raise(SIGINT);
-#endif
+#else /* termination signal */
+#warning no defined termination signal
+#endif /* termination signal */
     } else {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
                  "unknown signal: Intf:%s Msg:%s", interface, member);
