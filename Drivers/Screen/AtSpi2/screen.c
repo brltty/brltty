@@ -47,8 +47,6 @@
 #define SPI2_DBUS_INTERFACE_TREE	SPI2_DBUS_INTERFACE".Tree"
 #define SPI2_DBUS_INTERFACE_TEXT	SPI2_DBUS_INTERFACE".Text"
 #define SPI2_DBUS_INTERFACE_ACCESSIBLE	SPI2_DBUS_INTERFACE".Accessible"
-#define FREEDESKTOP_DBUS_INTERFACE	"org.freedesktop.DBus"
-#define FREEDESKTOP_DBUS_INTERFACE_PROP	FREEDESKTOP_DBUS_INTERFACE".Properties"
 
 
 #define ATSPI_STATE_ACTIVE 1
@@ -465,7 +463,7 @@ static dbus_int32_t getCaret(const char *sender, const char *path) {
   const char *property = "CaretOffset";
   DBusMessageIter iter, iter_variant;
 
-  msg = new_method_call(sender, path, FREEDESKTOP_DBUS_INTERFACE_PROP, "Get");
+  msg = new_method_call(sender, path, DBUS_INTERFACE_PROPERTIES, "Get");
   if (!msg)
     return -1;
   dbus_message_append_args(msg, DBUS_TYPE_STRING, &interface, DBUS_TYPE_STRING, &property, DBUS_TYPE_INVALID);
@@ -626,7 +624,7 @@ static int checkActiveParent(const char *sender, const char *path) {
   const char *property = "Parent";
   dbus_uint32_t *states;
 
-  msg = new_method_call(sender, path, FREEDESKTOP_DBUS_INTERFACE_PROP, "Get");
+  msg = new_method_call(sender, path, DBUS_INTERFACE_PROPERTIES, "Get");
   if (!msg)
     return 0;
   dbus_message_append_args(msg, DBUS_TYPE_STRING, &interface, DBUS_TYPE_STRING, &property, DBUS_TYPE_INVALID);
