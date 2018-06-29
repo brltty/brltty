@@ -59,7 +59,7 @@ public class ActionsActivity extends InternalActivity {
       recipient.append("BRLTTY Mailing List");
       recipient.append(' ');
       recipient.append('<');
-      recipient.append(getResources().getString(R.string.community_message_address));
+      recipient.append(getResourceString(R.string.community_message_address));
       recipient.append('>');
       intent.putExtra(Intent.EXTRA_EMAIL, new String[] {recipient.toString()});
     }

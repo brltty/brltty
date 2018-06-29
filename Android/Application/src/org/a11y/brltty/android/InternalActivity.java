@@ -28,7 +28,11 @@ import android.net.Uri;
 public abstract class InternalActivity extends Activity {
   private final static String LOG_TAG = InternalActivity.class.getName();
 
-  protected void launch (Intent intent) {
+  protected final String getResourceString (int identifier) {
+    return getResources().getString(identifier);
+  }
+
+  protected final void launch (Intent intent) {
     try {
       startActivity(intent);
     } catch (ActivityNotFoundException exception) {
@@ -36,15 +40,15 @@ public abstract class InternalActivity extends Activity {
     }
   }
 
-  protected void launch (Uri uri) {
+  protected final void launch (Uri uri) {
     launch(new Intent(Intent.ACTION_VIEW, uri));
   }
 
-  protected void launch (String url) {
+  protected final void launch (String url) {
     launch(Uri.parse(url));
   }
 
-  protected void launch (int url) {
-    launch(getResources().getString(url));
+  protected final void launch (int url) {
+    launch(getResourceString(url));
   }
 }
