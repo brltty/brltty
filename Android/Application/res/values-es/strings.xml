@@ -4,20 +4,49 @@
   <string name="app_name">BRLTTY</string>
   <string name="app_description">BRLTTY apoya dispositivos de braille.</string>
 
+  <string name="about_activity_label">Acerca de aplicación</string>
+  <string name="application_name_label">Nombre</string>
+  <string name="application_version_label">Versión</string>
+  <string name="application_copyright_label">Derechos de autor</string>
+
   <string name="input_service_name">BRLTTY Servicio de Entrada</string>
   <string name="input_service_type">Teclados En Dispositivos de Braille</string>
+  <string name="input_service_not_enabled">servicio de entrada no habilitado</string>
+  <string name="input_service_not_selected">servicio de entrada no seleccionado</string>
+  <string name="input_service_not_started">servicio de entrada no iniciado</string>
+  <string name="input_service_not_connected">servicio de entrada no conectado</string>
+
+  <string name="checkbox_state_unchecked">No</string>
+  <string name="checkbox_state_checked">Sí</string>
+
+  <string name="braille_channel_name">Estado del dispositivo Braille</string>
+  <string name="braille_hint_tap">Toca para acciones</string>
+  <string name="braille_state_released">Liberado</string>
+  <string name="braille_state_waiting">Esperando</string>
+  <string name="braille_state_connected">Conectado</string>
 
   <string name="GLOBAL_BUTTON_NOTIFICATIONS">Notificaciones</string>
   <string name="GLOBAL_BUTTON_QUICK_SETTINGS">Ajustos Lijeros</string>
   <string name="GLOBAL_BUTTON_BACK">De Vuelta</string>
   <string name="GLOBAL_BUTTON_HOME">Hogar</string>
   <string name="GLOBAL_BUTTON_RECENT_APPS">Aplicaciones Recientes</string>
+  <string name="GLOBAL_BUTTON_OVERVIEW">Visión de conjunto</string>
+
+  <string name="GLOBAL_BUTTON_SWITCH_INPUT_METHOD">Cambia método de entrada</string>
+  <string name="GLOBAL_BUTTON_VIEW_USER_GUIDE">Mira la guía del usuario</string>
+  <string name="GLOBAL_BUTTON_BROWSE_WEB_SITE">Navega por sitio web</string>
+  <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">Navega por mensajes de comunidad</string>
+  <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Publica mensaje de comunidad</string>
+  <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Administra membresía de comunidad</string>
+  <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Actualiza aplicación</string>
 
   <string name="SETTINGS_SCREEN_MAIN">Ajustos de BRLTTY</string>
   <string name="SETTINGS_SCREEN_GENERAL">Configuración General</string>
+  <string name="SETTINGS_SCREEN_MESSAGE">Configuraciones de mensaje</string>
   <string name="SETTINGS_SCREEN_DEVICES">Administre Dispositivos</string>
   <string name="SETTINGS_SCREEN_ADVANCED">Configuración Avanzada</string>
 
+  <string name="SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE">Libera dispositivo Braille</string>
   <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Moda de Navigacción</string>
   <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Supporte del Habla</string>
 
@@ -26,11 +55,16 @@
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Tabla de Contracciones</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tabla de Teclados</string>
 
+  <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Mostra anuncios</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Mostra notificaciones</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">Mostra alertas</string>
+
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Nivel de Registro</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Categorías de Registro</string>
   <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Registra Eventos de Accesibilidad</string>
   <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">Registra Pantalla Renderizada</string>
   <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Registra Eventos de Teclado</string>
+  <string name="SETTINGS_CHECKBOX_LOG_UNHANDLED_EVENTS">Registra eventos no gestionados</string>
 
   <string name="DEVICES_BUTTON_SELECTED">Dispositivo Seleccionado</string>
   <string name="DEVICES_BUTTON_ADD">Añada un Dispositivo</string>
@@ -179,6 +213,7 @@
   <string name="TEXT_TABLE_LABEL_ta">Tamil</string>
   <string name="TEXT_TABLE_LABEL_te">Telugu</string>
   <string name="TEXT_TABLE_LABEL_tr">Turco</string>
+  <string name="TEXT_TABLE_LABEL_uk">ucranio</string>
   <string name="TEXT_TABLE_LABEL_vi">Vietnamita</string>
 
   <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">color inverso del primer plano en la columna isquierda y color del fondo en la columna isquierda</string>
@@ -202,6 +237,7 @@
   <string name="CONTRACTION_TABLE_LABEL_ko">Coreano (sin contracciones)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Coreano (grado 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Coreano (grado 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_lt">Lituano (sin contracciones)</string>
   <string name="CONTRACTION_TABLE_LABEL_mg">Malagasy (contraccionado)</string>
   <string name="CONTRACTION_TABLE_LABEL_mun">Munda (contraccionado)</string>
   <string name="CONTRACTION_TABLE_LABEL_nl">Islandés (contraccionado)</string>
