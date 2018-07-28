@@ -20,4 +20,64 @@ note There's a five-way joystick between the Dot1 and Dot4 keys.
 note * The four directions are intuitively named: Up, Down, Left, Right.
 note * Pressing the joystick is named: Action.
 
+bind Up LNUP
+bind Down LNDN
+bind Left FWINLT
+bind Right FWINRT
+bind Action HOME
+
+bind Dot1+Up TOP
+bind Dot1+Down BOT
+bind Dot1+Left LNBEG
+bind Dot1+Right LNEND
+bind Dot1+Action BACK
+
+bind Dot2+Up KEY_CURSOR_UP
+bind Dot2+Down KEY_CURSOR_DOWN
+bind Dot2+Left KEY_CURSOR_LEFT
+bind Dot2+Right KEY_CURSOR_RIGHT
+bind Dot2+Action KEY_DELETE
+
+bind Dot3+Up KEY_PAGE_UP
+bind Dot3+Down KEY_PAGE_DOWN
+bind Dot3+Left KEY_HOME
+bind Dot3+Right KEY_END
+bind Dot3+Action KEY_INSERT
+
+bind Dot4+Up PRPROMPT
+bind Dot4+Down NXPROMPT
+bind Dot4+Left PRPGRPH
+bind Dot4+Right NXPGRPH
+bind Dot4+Action CSRTRK
+
+bind Dot5+Up PRDIFLN
+bind Dot5+Down NXDIFLN
+bind Dot5+Left FWINLTSKIP
+bind Dot5+Right FWINRTSKIP
+bind Dot5+Action CSRVIS
+
+bind Dot6+Up ATTRUP
+bind Dot6+Down ATTRDN
+bind Dot6+Left CHRLT
+bind Dot6+Right CHRRT
+bind Dot6+Action ATTRVIS
+
+bind Dot7+Up SAY_ABOVE
+bind Dot7+Down SAY_BELOW
+bind Dot7+Left MUTE
+bind Dot7+Right SAY_LINE
+bind Dot7+Action AUTOSPEAK
+
+bind Dot8+Up SAY_LOUDER
+bind Dot8+Down SAY_SOFTER
+bind Dot8+Left SAY_SLOWER
+bind Dot8+Right SAY_FASTER
+bind Dot8+Action SPKHOME
+
+bind RoutingKey+Up PRINDENT
+bind RoutingKey+Down NXINDENT
+bind RoutingKey+Left PRDIFCHAR
+bind RoutingKey+Right NXDIFCHAR
+bind RoutingKey+Action DESCCHAR
+
 include ../bm/routing.kti
