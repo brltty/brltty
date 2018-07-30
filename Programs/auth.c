@@ -531,7 +531,7 @@ authPolkit_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
         logMessage(LOG_DEBUG, "polkit_authority_check_authorization_sync returned %d", isAuthorized);
         return isAuthorized;
       } else {
-        logSystemError("polkit_authority_check_authorization_sync");
+        logMessage(LOG_ERR, "polkit_authority_check_authorization_sync error: %s", error_local->message);
         g_error_free(error_local);
       }
     } else {
