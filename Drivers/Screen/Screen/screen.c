@@ -285,8 +285,9 @@ insertKey_ScreenScreen (ScreenKey key) {
 
 static int
 switchVirtualTerminal_ScreenScreen (int vt) {
+  if ((vt -= 1) < 0) return 0;
   char number[0X10];
-  snprintf(number, sizeof(number), "%d", vt-1);
+  snprintf(number, sizeof(number), "%d", vt);
   return doScreenCommand("select", number, NULL);
 }
 
