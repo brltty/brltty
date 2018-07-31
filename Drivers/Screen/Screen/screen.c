@@ -283,6 +283,13 @@ insertKey_ScreenScreen (ScreenKey key) {
   return doScreenCommand("stuff", sequence, NULL);
 }
 
+static int
+switchVirtualTerminal_ScreenScreen (int vt) {
+  char number[0X10];
+  snprintf(number, sizeof(number), "%d", vt-1);
+  return doScreenCommand("select", number, NULL);
+}
+
 static void
 destruct_ScreenScreen (void) {
 #ifdef HAVE_SHMGET
@@ -309,6 +316,7 @@ scr_initialize (MainScreen *main) {
   main->base.describe = describe_ScreenScreen;
   main->base.readCharacters = readCharacters_ScreenScreen;
   main->base.insertKey = insertKey_ScreenScreen;
+  main->base.switchVirtualTerminal = switchVirtualTerminal_ScreenScreen;
   main->construct = construct_ScreenScreen;
   main->destruct = destruct_ScreenScreen;
   main->userVirtualTerminal = userVirtualTerminal_ScreenScreen;
