@@ -567,16 +567,6 @@ destruct_AtSpiScreen (void) {
 }
 
 static int
-selectVirtualTerminal_AtSpiScreen (int vt) {
-  return 0;
-}
-
-static int
-switchVirtualTerminal_AtSpiScreen (int vt) {
-  return 0;
-}
-
-static int
 currentVirtualTerminal_AtSpiScreen (void) {
   return curTerm? 0: -1;
 }
@@ -753,8 +743,6 @@ scr_initialize (MainScreen *main) {
   main->base.describe = describe_AtSpiScreen;
   main->base.readCharacters = readCharacters_AtSpiScreen;
   main->base.insertKey = insertKey_AtSpiScreen;
-  main->base.selectVirtualTerminal = selectVirtualTerminal_AtSpiScreen;
-  main->base.switchVirtualTerminal = switchVirtualTerminal_AtSpiScreen;
   main->base.currentVirtualTerminal = currentVirtualTerminal_AtSpiScreen;
   main->processParameters = processParameters_AtSpiScreen;
   main->construct = construct_AtSpiScreen;

@@ -31,18 +31,25 @@ extern void setScreenKeyModifiers (ScreenKey *key, ScreenKey which);
 
 typedef struct {
   const char * (*getTitle) (void);
+
   int (*poll) (void);
   int (*refresh) (void);
   void (*describe) (ScreenDescription *);
+
   int (*readCharacters) (const ScreenBox *box, ScreenCharacter *buffer);
   int (*insertKey) (ScreenKey key);
   int (*routeCursor) (int column, int row, int screen);
+
   int (*highlightRegion) (int left, int right, int top, int bottom);
   int (*unhighlightRegion) (void);
   int (*getPointer) (int *column, int *row);
+
+  int (*currentVirtualTerminal) (void);
   int (*selectVirtualTerminal) (int vt);
   int (*switchVirtualTerminal) (int vt);
-  int (*currentVirtualTerminal) (void);
+  int (*nextVirtualTerminal) (void);
+  int (*previousVirtualTerminal) (void);
+
   int (*handleCommand) (int command);
   KeyTableCommandContext (*getCommandContext) (void);
 } BaseScreen;

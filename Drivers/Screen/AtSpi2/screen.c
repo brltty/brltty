@@ -1298,16 +1298,6 @@ destruct_AtSpi2Screen (void) {
 }
 
 static int
-selectVirtualTerminal_AtSpi2Screen (int vt) {
-  return 0;
-}
-
-static int
-switchVirtualTerminal_AtSpi2Screen (int vt) {
-  return 0;
-}
-
-static int
 currentVirtualTerminal_AtSpi2Screen (void) {
   return (curPath || !releaseScreen)? 0: SCR_NO_VT;
 }
@@ -1534,8 +1524,6 @@ scr_initialize (MainScreen *main) {
   main->base.describe = describe_AtSpi2Screen;
   main->base.readCharacters = readCharacters_AtSpi2Screen;
   main->base.insertKey = insertKey_AtSpi2Screen;
-  main->base.selectVirtualTerminal = selectVirtualTerminal_AtSpi2Screen;
-  main->base.switchVirtualTerminal = switchVirtualTerminal_AtSpi2Screen;
   main->base.currentVirtualTerminal = currentVirtualTerminal_AtSpi2Screen;
   main->processParameters = processParameters_AtSpi2Screen;
   main->construct = construct_AtSpi2Screen;

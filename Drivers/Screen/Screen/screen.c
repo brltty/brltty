@@ -290,6 +290,16 @@ switchVirtualTerminal_ScreenScreen (int vt) {
   return doScreenCommand("select", number, NULL);
 }
 
+static int
+nextVirtualTerminal_ScreenScreen (void) {
+  return doScreenCommand("next", NULL);
+}
+
+static int
+previousVirtualTerminal_ScreenScreen (void) {
+  return doScreenCommand("prev", NULL);
+}
+
 static void
 destruct_ScreenScreen (void) {
 #ifdef HAVE_SHMGET
@@ -317,6 +327,8 @@ scr_initialize (MainScreen *main) {
   main->base.readCharacters = readCharacters_ScreenScreen;
   main->base.insertKey = insertKey_ScreenScreen;
   main->base.switchVirtualTerminal = switchVirtualTerminal_ScreenScreen;
+  main->base.nextVirtualTerminal = nextVirtualTerminal_ScreenScreen;
+  main->base.previousVirtualTerminal = previousVirtualTerminal_ScreenScreen;
   main->construct = construct_ScreenScreen;
   main->destruct = destruct_ScreenScreen;
   main->userVirtualTerminal = userVirtualTerminal_ScreenScreen;

@@ -109,16 +109,6 @@ destruct_WindowsScreen (void) {
   closeStdHandles();
 }
 
-static int
-selectVirtualTerminal_WindowsScreen (int vt) {
-  return 0;
-}
-
-static int
-switchVirtualTerminal_WindowsScreen (int vt) {
-  return 0;
-}
-
 static ALTTABINFO altTabInfo;
 static HWND altTab;
 static char altTabName[128];
@@ -564,8 +554,6 @@ do_send:
 static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
-  main->base.selectVirtualTerminal = selectVirtualTerminal_WindowsScreen;
-  main->base.switchVirtualTerminal = switchVirtualTerminal_WindowsScreen;
   main->base.currentVirtualTerminal = currentVirtualTerminal_WindowsScreen;
   main->base.describe = describe_WindowsScreen;
   main->base.readCharacters = readCharacters_WindowsScreen;

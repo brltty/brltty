@@ -118,17 +118,13 @@ insertKey (ScreenKey key, int flags) {
   return insertScreenKey(key);
 }
 
-static int
-switchVirtualTerminal (int vt) {
-  int switched = switchScreenVirtualTerminal(vt);
-
+static void
+handleVirtualTerminalSwitched (int switched) {
   if (switched) {
     updateSessionAttributes();
   } else {
     alert(ALERT_COMMAND_REJECTED);
   }
-
-  return switched;
 }
 
 static int
@@ -209,11 +205,11 @@ handleInputCommands (int command, void *data) {
     }
 
     case BRL_CMD_SWITCHVT_PREV:
-      switchVirtualTerminal(scr.number-1);
+      handleVirtualTerminalSwitched(previousScreenVirtualTerminal());
       break;
 
     case BRL_CMD_SWITCHVT_NEXT:
-      switchVirtualTerminal(scr.number+1);
+      handleVirtualTerminalSwitched(nextScreenVirtualTerminal());
       break;
 
     case BRL_CMD_SELECTVT_PREV:
@@ -318,7 +314,7 @@ handleInputCommands (int command, void *data) {
         }
 
         case BRL_CMD_BLK(SWITCHVT):
-          switchVirtualTerminal(arg+1);
+          handleVirtualTerminalSwitched(switchScreenVirtualTerminal(arg+1));
           break;
 
         case BRL_CMD_BLK(SELECTVT):

@@ -152,6 +152,11 @@ getScreenPointer (int *column, int *row) {
 }
 
 int
+currentVirtualTerminal (void) {
+  return currentScreen->currentVirtualTerminal();
+}
+
+int
 selectScreenVirtualTerminal (int vt) {
   return currentScreen->selectVirtualTerminal(vt);
 }
@@ -162,8 +167,13 @@ switchScreenVirtualTerminal (int vt) {
 }
 
 int
-currentVirtualTerminal (void) {
-  return currentScreen->currentVirtualTerminal();
+nextScreenVirtualTerminal (void) {
+  return currentScreen->nextVirtualTerminal();
+}
+
+int
+previousScreenVirtualTerminal (void) {
+  return currentScreen->previousVirtualTerminal();
 }
 
 int
