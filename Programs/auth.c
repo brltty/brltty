@@ -510,7 +510,7 @@ authPolkit_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
   if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &cred, &length) != -1) {
     logMessage(LOG_DEBUG, "attempting to authenticate pid %d via polkit", cred.pid);
 
-    PolkitSubject *subject = polkit_unix_process_new_for_owner(cred.pid, -1, cred.uid);
+    PolkitSubject *subject = polkit_unix_process_new_for_owner(cred.pid, 0, cred.uid);
     if (subject) {
       GError *error_local = NULL;
 
