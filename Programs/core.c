@@ -884,6 +884,12 @@ trackScreenCursor (int place) {
     ses->winx += (scr.posx - ses->winx) / textCount * textCount;
   }
 
+  if (prefs.wordWrap) {
+    int length = getWordWrapLength(ses->winy, ses->winx, textCount);
+    int next = ses->winx + length;
+    if (scr.posx >= next) ses->winx = next;
+  }
+
   slideBrailleWindowVertically(scr.posy);
   return 1;
 }
