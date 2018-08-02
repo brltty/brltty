@@ -71,11 +71,17 @@ isTextOffset (int *arg, int end, int relaxed) {
         result = index;
       }
     }
-    if (end && (index == contractedLength)) result = contractedLength - 1;
 
+    if (end && (index == contractedLength)) result = contractedLength - 1;
     value = result;
-  }
+  } else
 #endif /* ENABLE_CONTRACTED_BRAILLE */
+
+  if (prefs.wordWrap) {
+    int length = getWordWrapLength(ses->winy, ses->winx, textCount);
+    if (length > textCount) length = textCount;
+    if (value >= length) value = length - 1;
+  }
 
   *arg = value;
   return 1;
@@ -92,6 +98,7 @@ getCharacterCoordinates (int arg, int *column, int *row, int end, int relaxed) {
     *column = ses->winx + arg;
     *row = ses->winy;
   }
+
   return 1;
 }
 
