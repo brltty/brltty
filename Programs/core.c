@@ -556,9 +556,14 @@ getTimeFormattingData (TimeFormattingData *fmt) {
 }
 
 int
+isCursorPosition (int x) {
+  return (x == scr.posx) && (ses->winy == scr.posy) && showScreenCursor();
+}
+
+int
 isWordBreak (const ScreenCharacter *characters, int x) {
   if (!iswspace(characters[x].text)) return 0;
-  return !((x == scr.posx) && (ses->winy == scr.posy) && showScreenCursor());
+  return !isCursorPosition(x);
 }
 
 int
@@ -566,18 +571,20 @@ getWordWrapLength (int row, int from, int count) {
   int width = scr.cols;
   if (from >= width) return 0;
 
-  int to = from + count;
-  if (to >= width) return width - from;
+  int end = from + count;
+  if (end >= width) return width - from;
 
   ScreenCharacter characters[width];
   readScreenRow(row, width, characters);
+
+  int to = end;
   int onWordBreak = iswspace(characters[to].text);
 
   if (!onWordBreak) {
     int index = to;
 
     while (index > from) {
-      if (isWordBreak(characters, --index)) {
+      if (iswspace(characters[--index].text)) {
         to = index;
         onWordBreak = 1;
         break;
@@ -587,7 +594,8 @@ getWordWrapLength (int row, int from, int count) {
 
   if (onWordBreak) {
     while (to < width) {
-      if (!isWordBreak(characters, to)) break;
+      if (!iswspace(characters[to].text)) break;
+      if ((to >= end) && isCursorPosition(to)) break;
       to += 1;
     }
   }
