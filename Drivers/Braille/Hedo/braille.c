@@ -263,6 +263,14 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .serial = &serialParameters_MobilLine,
       .data = &modelEntry_MobilLine
     },
+
+    { /* MobilLine */
+      .vendor=0X0403, .product=0X6001,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .serial = &serialParameters_MobilLine,
+      .data = &modelEntry_MobilLine
+    },
   END_USB_CHANNEL_DEFINITIONS
 
   GioDescriptor descriptor;
