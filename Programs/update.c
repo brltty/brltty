@@ -902,49 +902,42 @@ doUpdate (void) {
            * is in an off-right position with some cells at the end blank
            * so we'll insert these cells and blank them.
            */
-          int i;
 
-          for (i=brl.textRows-1; i>0; i--) {
-            memmove(characters + (i * textCount),
-                    characters + (i * windowColumns),
+          for (int row=brl.textRows-1; row>0; row-=1) {
+            memmove(characters + (row * textCount),
+                    characters + (row * windowColumns),
                     windowColumns * sizeof(*characters));
           }
 
-          for (i=0; i<brl.textRows; i++) {
-            clearScreenCharacters(characters + (i * textCount) + windowColumns,
+          for (int row=0; row<brl.textRows; row+=1) {
+            clearScreenCharacters(characters + (row * textCount) + windowColumns,
                                   textCount-windowColumns);
           }
         }
 
         /* convert to dots using the current translation table */
         if (ses->displayMode) {
-          int row;
-
-          for (row=0; row<brl.textRows; row+=1) {
+          for (int row=0; row<brl.textRows; row+=1) {
             const ScreenCharacter *source = &characters[row * textCount];
             unsigned int start = (row * brl.textColumns) + textStart;
             unsigned char *target = &brl.buffer[start];
             wchar_t *text = &textBuffer[start];
-            int column;
 
-            for (column=0; column<textCount; column+=1) {
+            for (int column=0; column<textCount; column+=1) {
               text[column] = UNICODE_BRAILLE_ROW | (target[column] = convertAttributesToDots(attributesTable, source[column].attributes));
             }
           }
         } else {
-          unsigned int row;
-
-          for (row=0; row<brl.textRows; row+=1) {
+          for (unsigned int row=0; row<brl.textRows; row+=1) {
             const ScreenCharacter *source = &characters[row * textCount];
             unsigned int start = (row * brl.textColumns) + textStart;
             unsigned char *target = &brl.buffer[start];
             wchar_t *text = &textBuffer[start];
-            unsigned int column;
 
-            for (column=0; column<textCount; column+=1) {
+            for (unsigned int column=0; column<textCount; column+=1) {
               const ScreenCharacter *character = &source[column];
-              unsigned char *dots = &target[column];
 
+              unsigned char *dots = &target[column];
               *dots = convertCharacterToDots(textTable, character->text);
 
               if (iswupper(character->text)) {
