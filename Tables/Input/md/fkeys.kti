@@ -16,6 +16,10 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+note There are five square keys at each end of the front surface.
+note * The ones at the left, from left to right, are named: F5, F4, F3, F2, F1.
+note * The ones at the right, from left to right, are named: F6, F7, F8, F9, F10.
+
 bind F3 CHRLT
 bind F8 CHRRT
 
@@ -43,11 +47,18 @@ bind Long+F6 ATTRBLINK
 
 bind F7 SKPBLNKWINS
 
+bind F9 HELP
+bind Shift+F9 LEARN
+bind Long+F9 TIME
+
 bind F10 PREFMENU
 bind Shift+F10 PASTE
+bind long+F10 PREFLOAD
+bind Shift+long+F10 PREFSAVE
 
 context menu
 
-bind F9 MENU_PREV_SETTING
-bind F10 MENU_NEXT_SETTING
+bind F9 MENU_NEXT_SETTING
+bind Shift+F9 MENU_PREV_SETTING
+bind Shift+F10 MENU_PREV_LEVEL
 

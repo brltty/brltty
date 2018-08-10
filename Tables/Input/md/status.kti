@@ -16,5 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+note StatusKey refers to any of the keys immediately behind the status cells.
+
 hotkey StatusKey.1 CSRHIDE+on CSRHIDE+off
 
