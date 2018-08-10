@@ -136,14 +136,14 @@ TEXT_TABLE_LABEL_bra Braj
 TEXT_TABLE_LABEL_brf Braille Ready Format (for viewing .brf files within an editor or pager)
 TEXT_TABLE_LABEL_cs Czech
 TEXT_TABLE_LABEL_cy Welsh
-TEXT_TABLE_LABEL_da_1252 Danish (Svend Thougaard, 2002-11-18)
 TEXT_TABLE_LABEL_da Danish
+TEXT_TABLE_LABEL_da_1252 Danish (Svend Thougaard, 2002-11-18)
 TEXT_TABLE_LABEL_da_lt Danish (LogText)
 TEXT_TABLE_LABEL_de German
 TEXT_TABLE_LABEL_dra Dravidian
 TEXT_TABLE_LABEL_el Greek
-TEXT_TABLE_LABEL_en_CA English (Canada)
 TEXT_TABLE_LABEL_en English
+TEXT_TABLE_LABEL_en_CA English (Canada)
 TEXT_TABLE_LABEL_en_GB English (United Kingdom)
 TEXT_TABLE_LABEL_en_nabcc English (North American Braille Computer Code)
 TEXT_TABLE_LABEL_en_US English (United States)
@@ -151,10 +151,10 @@ TEXT_TABLE_LABEL_eo Esperanto
 TEXT_TABLE_LABEL_es Spanish
 TEXT_TABLE_LABEL_et Estonian
 TEXT_TABLE_LABEL_fi Finnish
+TEXT_TABLE_LABEL_fr French
 TEXT_TABLE_LABEL_fr_2007 French (unified 2007)
 TEXT_TABLE_LABEL_fr_CA French (Canada)
 TEXT_TABLE_LABEL_fr_cbifs French (Code Braille Informatique Français Standard)
-TEXT_TABLE_LABEL_fr French
 TEXT_TABLE_LABEL_fr_FR French (France)
 TEXT_TABLE_LABEL_fr_vs French (VisioBraille)
 TEXT_TABLE_LABEL_ga Irish
@@ -184,11 +184,11 @@ TEXT_TABLE_LABEL_mun Munda
 TEXT_TABLE_LABEL_mwr Marwari
 TEXT_TABLE_LABEL_ne Nepali
 TEXT_TABLE_LABEL_new Newari
-TEXT_TABLE_LABEL_nl_BE Dutch (Belgium)
 TEXT_TABLE_LABEL_nl Dutch
+TEXT_TABLE_LABEL_nl_BE Dutch (Belgium)
 TEXT_TABLE_LABEL_nl_NL Dutch (Netherlands)
-TEXT_TABLE_LABEL_no_generic Norwegian (with support for other languages)
 TEXT_TABLE_LABEL_no Norwegian
+TEXT_TABLE_LABEL_no_generic Norwegian (with support for other languages)
 TEXT_TABLE_LABEL_no_oup Norwegian (Offentlig utvalg for punktskrift)
 TEXT_TABLE_LABEL_nwc Newari (old)
 TEXT_TABLE_LABEL_or Oriya
@@ -203,9 +203,9 @@ TEXT_TABLE_LABEL_sat Santali
 TEXT_TABLE_LABEL_sd Sindhi
 TEXT_TABLE_LABEL_sk Slovak
 TEXT_TABLE_LABEL_sl Slovenian
+TEXT_TABLE_LABEL_sv Swedish
 TEXT_TABLE_LABEL_sv_1989 Swedish (1989 standard)
 TEXT_TABLE_LABEL_sv_1996 Swedish (1996 standard)
-TEXT_TABLE_LABEL_sv Swedish
 TEXT_TABLE_LABEL_sw Swahili
 TEXT_TABLE_LABEL_ta Tamil
 TEXT_TABLE_LABEL_te Telugu
@@ -231,9 +231,9 @@ CONTRACTION_TABLE_LABEL_ha Hausa (contracted)
 CONTRACTION_TABLE_LABEL_id Indonesian (contracted)
 CONTRACTION_TABLE_LABEL_ipa International Phonetic Alphabet
 CONTRACTION_TABLE_LABEL_ja Japanese (uncontracted)
+CONTRACTION_TABLE_LABEL_ko Korean (uncontracted)
 CONTRACTION_TABLE_LABEL_ko_g1 Korean (grade 1)
 CONTRACTION_TABLE_LABEL_ko_g2 Korean (grade 2)
-CONTRACTION_TABLE_LABEL_ko Korean (uncontracted)
 CONTRACTION_TABLE_LABEL_lt Lithuanian (uncontracted)
 CONTRACTION_TABLE_LABEL_mg Malagasy (contracted)
 CONTRACTION_TABLE_LABEL_mun Munda (contracted)

@@ -105,8 +105,8 @@
   <string name="TEXT_TABLE_LABEL_brf">za Brajev Izpis Pripravljena Oblika (Namenjena Pregledovanju .brf datotek v urejevalniku ali pregledovalniku)</string>
   <string name="TEXT_TABLE_LABEL_cs">Češka</string>
   <string name="TEXT_TABLE_LABEL_cy">Valižanska</string>
-  <string name="TEXT_TABLE_LABEL_da_1252">Danska (Svend Thougaard, 2002-11-18)</string>
   <string name="TEXT_TABLE_LABEL_da">Danska</string>
+  <string name="TEXT_TABLE_LABEL_da_1252">Danska (Svend Thougaard, 2002-11-18)</string>
   <string name="TEXT_TABLE_LABEL_da_lt">Danska (LogText)</string>
   <string name="TEXT_TABLE_LABEL_de">Nemška</string>
   <string name="TEXT_TABLE_LABEL_dra">Dravidska</string>
@@ -120,10 +120,10 @@
   <string name="TEXT_TABLE_LABEL_es">Španska</string>
   <string name="TEXT_TABLE_LABEL_et">Estonska</string>
   <string name="TEXT_TABLE_LABEL_fi">Finnska</string>
+  <string name="TEXT_TABLE_LABEL_fr">Francoska</string>
   <string name="TEXT_TABLE_LABEL_fr_2007">Francoska (združena 2007)</string>
   <string name="TEXT_TABLE_LABEL_fr_CA">Francoska (Kanada)</string>
   <string name="TEXT_TABLE_LABEL_fr_cbifs">Francoska (Standardna Francoska Brajeva Računalniška Koda)</string>
-  <string name="TEXT_TABLE_LABEL_fr">Francoska</string>
   <string name="TEXT_TABLE_LABEL_fr_FR">Francoska(Francija)</string>
   <string name="TEXT_TABLE_LABEL_fr_vs">French (VisioBraille)</string>
   <string name="TEXT_TABLE_LABEL_ga">Irska</string>
@@ -153,11 +153,11 @@
   <string name="TEXT_TABLE_LABEL_mwr">Marwari</string>
   <string name="TEXT_TABLE_LABEL_ne">Nepalska</string>
   <string name="TEXT_TABLE_LABEL_new">Newari</string>
-  <string name="TEXT_TABLE_LABEL_nl_BE">Nizozemska (Belgijska)</string>
   <string name="TEXT_TABLE_LABEL_nl">Nizozemska</string>
+  <string name="TEXT_TABLE_LABEL_nl_BE">Nizozemska (Belgijska)</string>
   <string name="TEXT_TABLE_LABEL_nl_NL">Nizozemska (Nizozemska)</string>
-  <string name="TEXT_TABLE_LABEL_no_generic">Norveška (s podporo za druge jezike)</string>
   <string name="TEXT_TABLE_LABEL_no">Norveška</string>
+  <string name="TEXT_TABLE_LABEL_no_generic">Norveška (s podporo za druge jezike)</string>
   <string name="TEXT_TABLE_LABEL_no_oup">Norveška (Offentlig utvalg for punktskrift)</string>
   <string name="TEXT_TABLE_LABEL_nwc">Newari (old)</string>
   <string name="TEXT_TABLE_LABEL_or">Oriya</string>
@@ -172,9 +172,9 @@
   <string name="TEXT_TABLE_LABEL_sd">Sindhi</string>
   <string name="TEXT_TABLE_LABEL_sk">Slovaška</string>
   <string name="TEXT_TABLE_LABEL_sl">Slovenščina</string>
+  <string name="TEXT_TABLE_LABEL_sv">Švedska</string>
   <string name="TEXT_TABLE_LABEL_sv_1989">Švedska (1989 standard)</string>
   <string name="TEXT_TABLE_LABEL_sv_1996">Švedska (1996 standard)</string>
-  <string name="TEXT_TABLE_LABEL_sv">Švedska</string>
   <string name="TEXT_TABLE_LABEL_sw">Swahili</string>
   <string name="TEXT_TABLE_LABEL_ta">Tamil</string>
   <string name="TEXT_TABLE_LABEL_te">Telugu</string>
@@ -199,9 +199,9 @@
   <string name="CONTRACTION_TABLE_LABEL_id">Indonezijska(s krajšavami)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">Mednarodna Fonetična Abeceda</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">Japonska(brez krajšav)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko">Korejska (brez krajšav)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Korejska (razvrstitev 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Korejska (razvrstitev 2)</string>
-  <string name="CONTRACTION_TABLE_LABEL_ko">Korejska (brez krajšav)</string>
   <string name="CONTRACTION_TABLE_LABEL_mg">Malagasy (s krajšavami)</string>
   <string name="CONTRACTION_TABLE_LABEL_mun">Munda (s krajšavami)</string>
   <string name="CONTRACTION_TABLE_LABEL_nl">Nizozemska(s krajšavami)</string>
