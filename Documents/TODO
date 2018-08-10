@@ -16,10 +16,6 @@ Your help is welcome.
   to add new ones. See if we could optimize the use of the console resource.
   Implement .au and .wav sounds (through a soundcard).
 
-- Scroll tracking: wouldn't it be great if you could continue reading the
-  line you're on even when new text is printed and the screen scrolls up?
-  Like in IRC for instance...
-
 - Better speech support.
 
 - Support for more Braille displays.
