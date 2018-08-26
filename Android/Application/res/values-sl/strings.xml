@@ -4,20 +4,49 @@
   <string name="app_name">BRLTTY</string>
   <string name="app_description">BRLTTY podpira brajeve naprave.</string>
 
+  <string name="about_activity_label">O Programu</string>
+  <string name="application_name_label">Ime</string>
+  <string name="application_version_label">Različica</string>
+  <string name="application_copyright_label">Avtorske Pravice</string>
+
   <string name="input_service_name">BRLTTY Storitev Vnosa</string>
   <string name="input_service_type">Tipkovnice na Brajevih Vrsticah</string>
+  <string name="input_service_not_enabled">storitev vnosa ni omogočena</string>
+  <string name="input_service_not_selected">storitev vnosa ni izbrana</string>
+  <string name="input_service_not_started">storitev vnosa ni zagnana</string>
+  <string name="input_service_not_connected">storitev vnosa ni priključena</string>
+
+  <string name="checkbox_state_unchecked">Ne</string>
+  <string name="checkbox_state_checked">Da</string>
+
+  <string name="braille_channel_name">Stanje Brajeve Naprave</string>
+  <string name="braille_hint_tap">tapnite za dejanja</string>
+  <string name="braille_state_released">Sproščena</string>
+  <string name="braille_state_waiting">Čakajoča</string>
+  <string name="braille_state_connected">Priključena</string>
 
   <string name="GLOBAL_BUTTON_NOTIFICATIONS">Obvestila</string>
   <string name="GLOBAL_BUTTON_QUICK_SETTINGS">Hitre Nastavitve</string>
   <string name="GLOBAL_BUTTON_BACK">Nazaj</string>
   <string name="GLOBAL_BUTTON_HOME">Domov</string>
   <string name="GLOBAL_BUTTON_RECENT_APPS">Trenutne Aplikacije</string>
+  <string name="GLOBAL_BUTTON_OVERVIEW">Pregled</string>
+
+  <string name="GLOBAL_BUTTON_SWITCH_INPUT_METHOD">Preklopi Vnosno Metodo</string>
+  <string name="GLOBAL_BUTTON_VIEW_USER_GUIDE">Glej Uporabniški Vodič</string>
+  <string name="GLOBAL_BUTTON_BROWSE_WEB_SITE">Prebrskaj Spletno Mesto</string>
+  <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">Prebrskaj Sporočila Skupnosti</string>
+  <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Objavi Sporočilo Skupnosti</string>
+  <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Upravljaj Članstvo v Skupnosti</string>
+  <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Posodobi Program</string>
 
   <string name="SETTINGS_SCREEN_MAIN">BRLTTY Settings</string>
   <string name="SETTINGS_SCREEN_GENERAL">Splošne Nastavitve</string>
+  <string name="SETTINGS_SCREEN_MESSAGE">Nastavitve Sporočila</string>
   <string name="SETTINGS_SCREEN_DEVICES">Upravljaj Naprave</string>
   <string name="SETTINGS_SCREEN_ADVANCED">Napredne Nastavitve</string>
 
+  <string name="SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE">Sprosti Brajevo Napravo</string>
   <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Delovanje krmarjenja</string>
   <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Govorna Podpora</string>
 
@@ -26,11 +55,16 @@
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Tabela Krajšav</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tabela Tipk</string>
 
+  <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Pokaži Naznanila</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Pokaži Obvestila</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">Pokaži Opozorila</string>
+
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Nivo Dnevnika</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Kategorije Dnevnikov</string>
   <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Beleži Dogodke Dostopnosti</string>
   <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">Beleži Dogodke v Zvezi z Upodabljanjem na Zaslon</string>
   <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Beleži Dogodke s Tipkovnico</string>
+  <string name="SETTINGS_CHECKBOX_LOG_UNHANDLED_EVENTS">Zabeleži Neobravnavane Dogodke</string>
 
   <string name="DEVICES_BUTTON_SELECTED">Izbrana Naprava</string>
   <string name="DEVICES_BUTTON_ADD">Dodaj Napravo</string>
@@ -179,6 +213,7 @@
   <string name="TEXT_TABLE_LABEL_ta">Tamil</string>
   <string name="TEXT_TABLE_LABEL_te">Telugu</string>
   <string name="TEXT_TABLE_LABEL_tr">Turška</string>
+  <string name="TEXT_TABLE_LABEL_uk">Ukrajinska</string>
   <string name="TEXT_TABLE_LABEL_vi">Vijetnamska</string>
 
   <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">Obrni barvo ospredja v levem stolpcu in barvo ozadja v desnem stolpcu</string>
@@ -202,6 +237,7 @@
   <string name="CONTRACTION_TABLE_LABEL_ko">Korejska (brez krajšav)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Korejska (razvrstitev 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Korejska (razvrstitev 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_lt">Letonska (neskrajšana)</string>
   <string name="CONTRACTION_TABLE_LABEL_mg">Malagasy (s krajšavami)</string>
   <string name="CONTRACTION_TABLE_LABEL_mun">Munda (s krajšavami)</string>
   <string name="CONTRACTION_TABLE_LABEL_nl">Nizozemska(s krajšavami)</string>
