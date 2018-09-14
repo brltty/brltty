@@ -80,6 +80,9 @@ bind \{chord}Dot1+Dot3+Dot4+Dot6+\{toggleOn} CLIP_SAVE
 bind \{chord}Dot2+Dot3+Dot5 SIXDOTS+on
 bind \{chord}Dot2+Dot3+Dot6 SIXDOTS+off
 
+bind \{chord}Dot4+Dot6+Dot7 BRLUCDOTS+off
+bind \{chord}Dot4+Dot6+Dot8 BRLUCDOTS+on
+
 bind \{chord}Dot3 KEY_CURSOR_LEFT
 bind \{chord}Dot6 KEY_CURSOR_RIGHT
 bind \{chord}Dot2 KEY_HOME
@@ -102,9 +105,6 @@ bind \{chord}Dot4+Dot8 SHIFT
 bind \{chord}Dot5+Dot8 ALTGR
 bind \{chord}Dot6+Dot8 UPPER
 bind \{chord}Dot7+Dot8 UNSTICK
-
-bind \{chord}Dot3+Dot7 BRLUCDOTS+off
-bind \{chord}Dot6+Dot8 BRLUCDOTS+on
 
 ifNotVar noUnchorded
 assignDefault commandDot7 KEY_BACKSPACE
