@@ -37,4 +37,5 @@ bind \{kpSpeak}+\{kpAlt}+!\{kpNine} SPEAK_LAST_LINE
 bind \{kpSpeak}+!\{kpDivide} SPEAK_CURR_LOCN
 bind \{kpSpeak}+\{kpAlt}+!\{kpDivide} SHOW_CURR_LOCN
 bind \{kpSpeak}+!\{kpMultiply} ROUTE_CURR_LOCN
+bind \{kpSpeak}+\{kpAlt}+!\{kpMultiply} SPEAK_INDENT
 

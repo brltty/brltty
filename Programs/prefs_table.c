@@ -509,6 +509,12 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.autospeakCompletedWords
   },
 
+  { .name = "autospeak-line-indent",
+    .defaultValue = DEFAULT_AUTOSPEAK_LINE_INDENT,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.autospeakLineIndent
+  },
+
   { .name = "show-speech-cursor",
     .defaultValue = DEFAULT_SHOW_SPEECH_CURSOR,
     .settingNames = &preferenceStringTable_boolean,

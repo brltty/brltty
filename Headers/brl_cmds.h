@@ -230,6 +230,9 @@ typedef enum {
 
   BRL_CMD_TOUCH_NAV /* set touch navigation on/off */,
 
+  BRL_CMD_SPEAK_INDENT /* speak current indent */,
+  BRL_CMD_ASPK_INDENT /* set autospeak indent on/off */,
+
   BRL_basicCommandCount /* must be last */
 } BRL_BasicCommand;
 

@@ -190,6 +190,7 @@ typedef struct {
   unsigned char autospeakDeletedCharacters;
   unsigned char autospeakReplacedCharacters;
   unsigned char autospeakCompletedWords;
+  unsigned char autospeakLineIndent;
 
   unsigned char showSpeechCursor;
   unsigned char speechCursorStyle;

@@ -1036,6 +1036,21 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
     sayScreenCharacters(characters, count, sayOptions);
   }
 }
+
+void
+speakIndent (void) {
+  int count = scr.cols;
+  ScreenCharacter characters[count];
+  readScreenRow(ses->spky, count, characters);
+
+  int indent = findFirstNonSpaceCharacter(characters, count);
+  if (indent < 0) indent = count;
+
+  char message[50];
+  snprintf(message, sizeof(message),
+           "%s %d", gettext("indent"), indent);
+  sayString(&spk, message, SAY_OPT_MUTE_FIRST);
+}
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 #ifdef ENABLE_CONTRACTED_BRAILLE

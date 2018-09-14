@@ -458,6 +458,10 @@ handleSpeechCommands (int command, void *data) {
       break;
     }
 
+    case BRL_CMD_SPEAK_INDENT:
+      speakIndent();
+      break;
+
     default:
       return 0;
   }

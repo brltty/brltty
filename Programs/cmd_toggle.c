@@ -210,6 +210,10 @@ handleToggleCommands (int command, void *data) {
       toggleFeatureSetting(&prefs.autospeakCompletedWords, command);
       break;
 
+    case BRL_CMD_ASPK_INDENT:
+      toggleFeatureSetting(&prefs.autospeakLineIndent, command);
+      break;
+
     case BRL_CMD_SHOW_CURR_LOCN:
       toggleFeatureSetting(&prefs.showSpeechCursor, command);
       break;
