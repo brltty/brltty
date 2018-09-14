@@ -16,12 +16,9 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# Key subtable for HandyTech: Actilino, Activator
+title HandyTech Activator
 
-bind Left KEY_CURSOR_LEFT
-bind Right KEY_CURSOR_RIGHT
-bind Up KEY_CURSOR_UP
-bind Down KEY_CURSOR_DOWN
-bind Action KEY_ENTER
+bind B1+B4+SpaceLeft TOUCH_NAV
 
-
+include joystick.kti
+include bs.kti

@@ -237,6 +237,14 @@ BEGIN_KEY_NAME_TABLES(alo)
   KEY_NAME_TABLE(joystick),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLES(ac4)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(rockers),
+  KEY_NAME_TABLE(brailleStar),
+  KEY_NAME_TABLE(joystick),
+END_KEY_NAME_TABLES
+
 typedef enum {
   HT_BWK_Backward = 0X01,
   HT_BWK_Forward = 0X08,
@@ -271,6 +279,7 @@ DEFINE_KEY_TABLE(wave)
 DEFINE_KEY_TABLE(easy)
 DEFINE_KEY_TABLE(bb)
 DEFINE_KEY_TABLE(alo)
+DEFINE_KEY_TABLE(ac4)
 DEFINE_KEY_TABLE(bkwm)
 
 BEGIN_KEY_TABLE_LIST
@@ -288,6 +297,7 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(easy),
   &KEY_TABLE_DEFINITION(bb),
   &KEY_TABLE_DEFINITION(alo),
+  &KEY_TABLE_DEFINITION(ac4),
   &KEY_TABLE_DEFINITION(bkwm),
 END_KEY_TABLE_LIST
 
@@ -472,6 +482,19 @@ static const ModelEntry modelTable[] = {
     .textCells = 16,
     .statusCells = 0,
     .keyTableDefinition = &KEY_TABLE_DEFINITION(alo),
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_Evolution,
+    .setFirmness = setFirmness,
+    .setSensitivity = setSensitivity_ActiveBraille,
+    .hasATC = 1,
+    .hasTime = 1
+  },
+
+  { .identifier = HT_MODEL_Activator,
+    .name = "Activator",
+    .textCells = 40,
+    .statusCells = 0,
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(ac4),
     .interpretByte = interpretByte_key,
     .writeCells = writeCells_Evolution,
     .setFirmness = setFirmness,
@@ -1242,6 +1265,13 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
     { /* Actilino */
       .vendor=0X1FE4, .product=0X0061,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    },
+
+    { /* Activator */
+      .vendor=0X1FE4, .product=0X00A4,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .data=&usbOperations3

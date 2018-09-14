@@ -46,7 +46,8 @@ typedef enum {
   HT_MODEL_Modular20           = 0X80,
   HT_MODEL_Modular80           = 0X88,
   HT_MODEL_Modular40           = 0X89,
-  HT_MODEL_Bookworm            = 0X90
+  HT_MODEL_Bookworm            = 0X90,
+  HT_MODEL_Activator           = 0XA4
 } HT_ModelIdentifier;
 
 /* Packet definition */

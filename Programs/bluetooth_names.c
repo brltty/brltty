@@ -27,6 +27,9 @@ const BluetoothNameEntry bluetoothNameTable[] = {
   // HandyTech: Actilino
   BLUETOOTH_NAME_ENTRY("Actilino ALO", "ht"),
 
+  // HandyTech: Activator
+  BLUETOOTH_NAME_ENTRY("Activator AC4", "ht"),
+
   // HandyTech: Active Braille
   BLUETOOTH_NAME_ENTRY("Active Braille AB", "ht"),
 
