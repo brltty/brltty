@@ -1082,6 +1082,12 @@ makePreferencesMenu (void) {
     }
 
     {
+      NAME(strtext("Speak Line Indent"));
+      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakLineIndent, &itemName));
+      TEST(Autospeak);
+    }
+
+    {
       NAME(strtext("Show Speech Cursor"));
       ITEM(newBooleanMenuItem(speechSubmenu, &prefs.showSpeechCursor, &itemName));
     }
