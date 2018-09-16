@@ -108,6 +108,7 @@ assign kpEight I
 assign kpNine O
 assign kpDivide Eight
 assign kpMultiply Nine
+assign kpMinus Zero
 
 assign kpSay CapsLock+ShiftLeft
 include kp_say.kti

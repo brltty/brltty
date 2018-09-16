@@ -94,6 +94,7 @@ assign kpEight KP8
 assign kpNine KP9
 assign kpDivide KPDivide
 assign kpMultiply KPMultiply
+assign kpMinus KPMinus
 
 assign kpSay KPEnter
 include kp_say.kti
