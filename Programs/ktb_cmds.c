@@ -149,6 +149,7 @@ static const CommandListEntry commandList_say[] = {
   { .code = BRL_CMD_ASPK_DEL_CHARS },
   { .code = BRL_CMD_ASPK_REP_CHARS },
   { .code = BRL_CMD_ASPK_CMP_WORDS },
+  { .code = BRL_CMD_ASPK_INDENT },
 };
 
 static const CommandListEntry commandList_speak[] = {
@@ -169,6 +170,7 @@ static const CommandListEntry commandList_speak[] = {
   { .code = BRL_CMD_SPEAK_LAST_LINE },
   { .code = BRL_CMD_SPEAK_CURR_LOCN },
   { .code = BRL_CMD_SHOW_CURR_LOCN },
+  { .code = BRL_CMD_SPEAK_INDENT },
 };
 
 static const CommandListEntry commandList_input[] = {
