@@ -168,9 +168,9 @@ static const CommandListEntry commandList_speak[] = {
   { .code = BRL_CMD_SPEAK_NEXT_LINE },
   { .code = BRL_CMD_SPEAK_FRST_LINE },
   { .code = BRL_CMD_SPEAK_LAST_LINE },
+  { .code = BRL_CMD_SPEAK_INDENT },
   { .code = BRL_CMD_SPEAK_CURR_LOCN },
   { .code = BRL_CMD_SHOW_CURR_LOCN },
-  { .code = BRL_CMD_SPEAK_INDENT },
 };
 
 static const CommandListEntry commandList_input[] = {
