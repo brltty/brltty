@@ -1039,17 +1039,22 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
 
 void
 speakIndent (void) {
-  int count = scr.cols;
-  ScreenCharacter characters[count];
-  readScreenRow(ses->spky, count, characters);
+  int length = scr.cols;
+  ScreenCharacter characters[length];
+  readScreenRow(ses->spky, length, characters);
+  int indent = findFirstNonSpaceCharacter(characters, length);
 
-  int indent = findFirstNonSpaceCharacter(characters, count);
-  if (indent < 0) indent = count;
+  char buffer[50];
+  const char *announcement = buffer;
 
-  char message[50];
-  snprintf(message, sizeof(message),
-           "%s %d", gettext("indent"), indent);
-  sayString(&spk, message, SAY_OPT_MUTE_FIRST);
+  if (indent < 0) {
+    announcement = gettext("blank line");
+  } else {
+    snprintf(buffer, sizeof(buffer),
+             "%s %d", gettext("indent"), indent);
+  }
+
+  sayString(&spk, announcement, SAY_OPT_MUTE_FIRST);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
