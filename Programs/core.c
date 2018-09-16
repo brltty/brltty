@@ -1062,7 +1062,12 @@ speakIndent (const ScreenCharacter *characters, int count, int evenIfBlank) {
     text = NULL;
   }
 
-  if (text) sayString(&spk, text, SAY_OPT_MUTE_FIRST);
+  if (text) {
+    logMessage(LOG_CATEGORY(SPEECH_EVENTS),
+               "line indent: %d", indent);
+
+    sayString(&spk, text, SAY_OPT_MUTE_FIRST);
+  }
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
