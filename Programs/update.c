@@ -406,6 +406,7 @@ autospeak (AutospeakMode mode) {
     const ScreenCharacter *characters = newCharacters;
     int column = 0;
     int count = newWidth;
+    int indent = 0;
     const char *reason = NULL;
 
     if (mode == AUTOSPEAK_FORCE) {
@@ -416,6 +417,7 @@ autospeak (AutospeakMode mode) {
     } else if ((newScreen != oldScreen) || (ses->winy != oldwiny) || (newWidth != oldWidth)) {
       if (!prefs.autospeakSelectedLine) count = 0;
       reason = "line selected";
+      if (prefs.autospeakLineIndent) indent = 1;
     } else {
       int onScreen = (newX >= 0) && (newX < newWidth);
 
@@ -581,15 +583,21 @@ autospeak (AutospeakMode mode) {
   autospeak:
     if (mode == AUTOSPEAK_SILENT) count = 0;
 
-    if (count) {
-      characters += column;
+    characters += column;
+    int interrupt = 1;
 
+    if (indent) {
+      speakIndent(characters, count, 0);
+      interrupt = 0;
+    }
+
+    if (count) {
       if (!reason) reason = "unknown reason";
       logMessage(LOG_CATEGORY(SPEECH_EVENTS),
                  "autospeak: %s: [%d,%d] %d.%d",
                  reason, ses->winx, ses->winy, column, count);
 
-      speakCharacters(characters, count, 0);
+      speakCharacters(characters, count, 0, interrupt);
     }
   }
 

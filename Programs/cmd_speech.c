@@ -63,7 +63,7 @@ speakDone (const ScreenCharacter *line, int column, int count, int spell) {
     line = internalBuffer;
   }
 
-  speakCharacters(line, count, spell);
+  speakCharacters(line, count, spell, 1);
   placeBrailleWindowHorizontally(ses->spkx);
   slideBrailleWindowVertically(ses->spky);
   suppressAutospeak();
@@ -459,7 +459,7 @@ handleSpeechCommands (int command, void *data) {
     }
 
     case BRL_CMD_SPEAK_INDENT:
-      speakIndent();
+      speakIndent(NULL, 0, 1);
       break;
 
     default:

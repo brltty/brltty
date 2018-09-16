@@ -970,8 +970,9 @@ sayScreenCharacters (const ScreenCharacter *characters, size_t count, SayOptions
 }
 
 void
-speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
-  SayOptions sayOptions = SAY_OPT_MUTE_FIRST;
+speakCharacters (const ScreenCharacter *characters, size_t count, int spell, int interrupt) {
+  SayOptions sayOptions = 0;
+  if (interrupt) sayOptions |= SAY_OPT_MUTE_FIRST;
 
   if (isAllSpaceCharacters(characters, count)) {
     switch (prefs.speechWhitespaceIndicator) {
@@ -1038,23 +1039,30 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell) {
 }
 
 void
-speakIndent (void) {
+speakIndent (const ScreenCharacter *characters, int count, int evenIfBlank) {
   int length = scr.cols;
-  ScreenCharacter characters[length];
-  readScreenRow(ses->spky, length, characters);
-  int indent = findFirstNonSpaceCharacter(characters, length);
+  ScreenCharacter buffer[length];
 
-  char buffer[50];
-  const char *announcement = buffer;
-
-  if (indent < 0) {
-    announcement = gettext("blank line");
-  } else {
-    snprintf(buffer, sizeof(buffer),
-             "%s %d", gettext("indent"), indent);
+  if (!characters) {
+    readScreenRow(ses->spky, length, buffer);
+    characters = buffer;
+    count = length;
   }
 
-  sayString(&spk, announcement, SAY_OPT_MUTE_FIRST);
+  int indent = findFirstNonSpaceCharacter(characters, count);
+  char message[50];
+  const char *text = message;
+
+  if (indent >= 0) {
+    snprintf(message, sizeof(message),
+             "%s %d", gettext("indent"), indent);
+  } else if (evenIfBlank) {
+    text = gettext("blank line");
+  } else {
+    text = NULL;
+  }
+
+  if (text) sayString(&spk, text, SAY_OPT_MUTE_FIRST);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
