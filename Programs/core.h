@@ -187,7 +187,7 @@ extern int isAutospeakActive (void);
 
 extern void sayScreenCharacters (const ScreenCharacter *characters, size_t count, SayOptions options);
 extern void speakCharacters (const ScreenCharacter *characters, size_t count, int spell, int interrupt);
-extern void speakIndent (const ScreenCharacter *characters, int count, int evenIfBlank);
+extern int speakIndent (const ScreenCharacter *characters, int count, int evenIfNoIndent);
 extern void trackSpeech (void);
 
 extern void enableSpeechDriver (int sayBanner);

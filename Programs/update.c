@@ -406,8 +406,8 @@ autospeak (AutospeakMode mode) {
     const ScreenCharacter *characters = newCharacters;
     int column = 0;
     int count = newWidth;
-    int indent = 0;
     const char *reason = NULL;
+    int indent = 0;
 
     if (mode == AUTOSPEAK_FORCE) {
       reason = "current line";
@@ -587,8 +587,9 @@ autospeak (AutospeakMode mode) {
     int interrupt = 1;
 
     if (indent) {
-      speakIndent(characters, count, 0);
-      interrupt = 0;
+      if (speakIndent(characters, count, 0)) {
+        interrupt = 0;
+      }
     }
 
     if (count) {

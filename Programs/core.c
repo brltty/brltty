@@ -1038,8 +1038,8 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell, int
   }
 }
 
-void
-speakIndent (const ScreenCharacter *characters, int count, int evenIfBlank) {
+int
+speakIndent (const ScreenCharacter *characters, int count, int evenIfNoIndent) {
   int length = scr.cols;
   ScreenCharacter buffer[length];
 
@@ -1050,24 +1050,23 @@ speakIndent (const ScreenCharacter *characters, int count, int evenIfBlank) {
   }
 
   int indent = findFirstNonSpaceCharacter(characters, count);
+  if ((indent < 1) && !evenIfNoIndent) return 0;
+
   char message[50];
   const char *text = message;
 
-  if (indent >= 0) {
-    snprintf(message, sizeof(message),
-             "%s %d", gettext("indent"), indent);
-  } else if (evenIfBlank) {
+  if (indent < 0) {
     text = gettext("blank line");
   } else {
-    text = NULL;
+    snprintf(message, sizeof(message),
+             "%s %d", gettext("indent"), indent);
   }
 
-  if (text) {
-    logMessage(LOG_CATEGORY(SPEECH_EVENTS),
-               "line indent: %d", indent);
+  logMessage(LOG_CATEGORY(SPEECH_EVENTS),
+             "line indent: %d", indent);
 
-    sayString(&spk, text, SAY_OPT_MUTE_FIRST);
-  }
+  sayString(&spk, text, SAY_OPT_MUTE_FIRST);
+  return 1;
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
