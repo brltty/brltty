@@ -285,7 +285,6 @@ installFile "Drivers/BrlAPI/WindowEyes/webrloem109.dll" "WindowEyes/"
 installFile "Bindings/Python/dist/Brlapi-${BRLAPI_RELEASE}.win32.exe" "Python/"
 
 cd "${sourceRoot}"
-installFile "LICENSE-GPL" "LICENSE-GPL.txt"
 installFile "LICENSE-LGPL" "LICENSE-LGPL.txt"
 installFile "README" "${documentDirectory}/BRLTTY.txt"
 installFile "Drivers/Braille/XWindow/UBraille.ttf" "Fonts/"
