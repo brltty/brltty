@@ -1503,7 +1503,7 @@ refresh_LinuxScreen (void) {
 
       if (!refreshCache()) {
         problemText = "can't read screen content";
-        return 0;
+        return 1;
       }
 
       {
