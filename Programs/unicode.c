@@ -37,57 +37,68 @@ isUcharCompatible (wchar_t character) {
 
   return uc == character;
 }
+
+static int
+getName (wchar_t character, char *buffer, size_t size, UCharNameChoice choice) {
+  UErrorCode error = U_ZERO_ERROR;
+  u_charName(character, choice, buffer, size, &error);
+  return U_SUCCESS(error) && *buffer;
+}
+
+static int
+getByName (wchar_t *character, const char *name, UCharNameChoice choice) {
+  UErrorCode error = U_ZERO_ERROR;
+  UChar uc = u_charFromName(choice, name, &error);
+  if (!U_SUCCESS(error)) return 0;
+
+  *character = uc;
+  return 1;
+}
+
+static int
+hasBinaryProperty (wchar_t character, UProperty property) {
+  return u_hasBinaryProperty(character, property);
+}
 #endif /* HAVE_ICU */
 
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
 #endif /* HAVE_ICONV_H */
 
-static int
-getName (wchar_t character, char *buffer, size_t size, UCharNameChoice choice) {
-#ifdef HAVE_ICU
-  UErrorCode error = U_ZERO_ERROR;
-
-  u_charName(character, choice, buffer, size, &error);
-  if (U_SUCCESS(error) && *buffer) return 1;
-#endif /* HAVE_ICU */
-
-  return 0;
-}
-
 int
 getCharacterName (wchar_t character, char *buffer, size_t size) {
-  return getName(character, buffer, size, U_EXTENDED_CHAR_NAME);
-}
-
-int
-getCharacterAlias (wchar_t character, char *buffer, size_t size) {
-  return getName(character, buffer, size, U_CHAR_NAME_ALIAS);
-}
-
-static int
-getFromName (wchar_t *character, const char *name, UCharNameChoice choice) {
 #ifdef HAVE_ICU
-  UErrorCode error = U_ZERO_ERROR;
-  UChar uc = u_charFromName(choice, name, &error);
-
-  if (U_SUCCESS(error)) {
-    *character = uc;
-    return 1;
-  }
-#endif /* HAVE_ICU */
-
+  return getName(character, buffer, size, U_EXTENDED_CHAR_NAME);
+#else /* HAVE_ICU */
   return 0;
+#endif /* HAVE_ICU */
 }
 
 int
 getCharacterByName (wchar_t *character, const char *name) {
-  return getFromName(character, name, U_EXTENDED_CHAR_NAME);
+#ifdef HAVE_ICU
+  return getByName(character, name, U_EXTENDED_CHAR_NAME);
+#else /* HAVE_ICU */
+  return 0;
+#endif /* HAVE_ICU */
+}
+
+int
+getCharacterAlias (wchar_t character, char *buffer, size_t size) {
+#ifdef HAVE_ICU
+  return getName(character, buffer, size, U_CHAR_NAME_ALIAS);
+#else /* HAVE_ICU */
+  return 0;
+#endif /* HAVE_ICU */
 }
 
 int
 getCharacterByAlias (wchar_t *character, const char *alias) {
-  return getFromName(character, alias, U_CHAR_NAME_ALIAS);
+#ifdef HAVE_ICU
+  return getByName(character, alias, U_CHAR_NAME_ALIAS);
+#else /* HAVE_ICU */
+  return 0;
+#endif /* HAVE_ICU */
 }
 
 int
@@ -149,18 +160,13 @@ isBrailleCharacter (wchar_t character) {
   return (character & ~UNICODE_CELL_MASK) == UNICODE_BRAILLE_ROW;
 }
 
-static int
-hasBinaryProperty (wchar_t character, UProperty property) {
+int
+isEmojiCharacter (wchar_t character) {
 #ifdef HAVE_ICU
-  if (u_hasBinaryProperty(character, property)) return 1;
+  if (hasBinaryProperty(character, UCHAR_EMOJI)) return 1;
 #endif /* HAVE_ICU */
 
   return 0;
-}
-
-int
-isEmojiCharacter (wchar_t character) {
-  return hasBinaryProperty(character, UCHAR_EMOJI);
 }
 
 wchar_t
