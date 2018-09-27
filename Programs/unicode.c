@@ -56,20 +56,20 @@ getName (wchar_t character, char *buffer, size_t size, UCharNameChoice choice) {
 }
 
 int
-getCharacterAlias (wchar_t character, char *buffer, size_t size) {
-  return getName(character, buffer, size, U_CHAR_NAME_ALIAS);
-}
-
-int
 getCharacterName (wchar_t character, char *buffer, size_t size) {
   return getName(character, buffer, size, U_EXTENDED_CHAR_NAME);
 }
 
 int
-getCharacterByName (wchar_t *character, const char *name) {
+getCharacterAlias (wchar_t character, char *buffer, size_t size) {
+  return getName(character, buffer, size, U_CHAR_NAME_ALIAS);
+}
+
+static int
+getFromName (wchar_t *character, const char *name, UCharNameChoice choice) {
 #ifdef HAVE_ICU
   UErrorCode error = U_ZERO_ERROR;
-  UChar uc = u_charFromName(U_EXTENDED_CHAR_NAME, name, &error);
+  UChar uc = u_charFromName(choice, name, &error);
 
   if (U_SUCCESS(error)) {
     *character = uc;
@@ -78,6 +78,16 @@ getCharacterByName (wchar_t *character, const char *name) {
 #endif /* HAVE_ICU */
 
   return 0;
+}
+
+int
+getCharacterByName (wchar_t *character, const char *name) {
+  return getFromName(character, name, U_EXTENDED_CHAR_NAME);
+}
+
+int
+getCharacterByAlias (wchar_t *character, const char *alias) {
+  return getFromName(character, alias, U_CHAR_NAME_ALIAS);
 }
 
 int
