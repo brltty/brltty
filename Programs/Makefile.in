@@ -304,8 +304,8 @@ timing.$O:
 queue.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/queue.c
 
-rabiables.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/rabiables.c
+regexobj.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/regexobj.c
 
 datafile.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/datafile.c
