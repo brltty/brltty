@@ -29,7 +29,7 @@
 #include "datafile.h"
 #include "charset.h"
 
-#define DEFAULT_OUTPUT_FORMAT "%s: %n\\n"
+#define DEFAULT_OUTPUT_FORMAT "%s\\t%n\\n"
 
 static char *opt_outputFormat;
 
@@ -212,7 +212,7 @@ main (int argc, char *argv[]) {
   }
 
   if (argc < 1) {
-    fprintf(stderr, "missing annotations file name\n");
+    logMessage(LOG_ERR, "missing annotations file name");
     return PROG_EXIT_SYNTAX;
   }
 
@@ -220,7 +220,7 @@ main (int argc, char *argv[]) {
   argc -= 1;
 
   if (argc > 0) {
-    fprintf(stderr, "too many parameters\n");
+    logMessage(LOG_ERR, "too many parameters");
     return PROG_EXIT_SYNTAX;
   }
 
