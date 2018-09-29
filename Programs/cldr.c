@@ -145,9 +145,15 @@ handleElementEnd (void *userData, const char *name) {
 
       if (!dpd->caller.handler(&parameters)) {
         abortParser(dpd);
+        return;
       }
+
+      free(dpd->annotation.name);
       dpd->annotation.name = NULL;
     }
+
+    free(dpd->annotation.sequence);
+    dpd->annotation.sequence = NULL;
 
     dpd->annotation.depth = 0;
   }
