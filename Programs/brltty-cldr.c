@@ -26,8 +26,10 @@
 #include "options.h"
 #include "log.h"
 #include "cldr.h"
+#include "datafile.h"
+#include "charset.h"
 
-#define DEFAULT_OUTPUT_FORMAT "%n\\n"
+#define DEFAULT_OUTPUT_FORMAT "%s: %n\\n"
 
 static char *opt_outputFormat;
 
@@ -52,6 +54,25 @@ putCharacter (int character) {
 static void
 putString (const char *string) {
   while (*string) putCharacter(*string++ & 0XFF);
+}
+
+static void
+putHexadecimal (const char *string) {
+  const char *byte = string;
+  size_t size = strlen(byte) + 1;
+  wchar_t characters[size];
+  wchar_t *character = characters;
+  wchar_t *end = character;
+  convertUtf8ToWchars(&byte, &end, size);
+
+  while (character < end) {
+    if (writeHexadecimalCharacter(stdout, *character) == EOF) {
+      logMessage(LOG_ERR, "output error %d: %s", errno, strerror(errno));
+      exit(PROG_EXIT_FATAL);
+    }
+
+    character += 1;
+  }
 }
 
 static
@@ -90,6 +111,10 @@ CLDR_ANNOTATION_HANDLER(handleAnnotation) {
 
           case 's':
             putString(parameters->sequence);
+            break;
+
+          case 'x':
+            putHexadecimal(parameters->sequence);
             break;
 
           case '%':
