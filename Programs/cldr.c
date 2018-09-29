@@ -47,20 +47,20 @@ typedef struct {
     char *name;
     unsigned int depth;
   } annotation;
-} DocumentParseData;
+} DocumentParserObject;
 
 static void
-abortParser (DocumentParseData *dpd) {
-  XML_StopParser(dpd->document.parser, 0);
+abortParser (DocumentParserObject *dpo) {
+  XML_StopParser(dpo->document.parser, 0);
 }
 
 static void
 appendAnnotationText (void *userData, const char *characters, int count) {
-  DocumentParseData *dpd = userData;
+  DocumentParserObject *dpo = userData;
 
-  if (dpd->document.depth == dpd->annotation.depth) {
+  if (dpo->document.depth == dpo->annotation.depth) {
     if (count > 0) {
-      char *name = dpd->annotation.name;
+      char *name = dpo->annotation.name;
 
       if (name) {
         size_t oldLength = strlen(name);
@@ -69,7 +69,7 @@ appendAnnotationText (void *userData, const char *characters, int count) {
 
         if (!newName) {
           logMallocError();
-          abortParser(dpd);
+          abortParser(dpo);
           return;
         }
 
@@ -79,7 +79,7 @@ appendAnnotationText (void *userData, const char *characters, int count) {
       } else {
         if (!(name = malloc(count+1))) {
           logMallocError();
-          abortParser(dpd);
+          abortParser(dpo);
           return;
         }
 
@@ -87,19 +87,19 @@ appendAnnotationText (void *userData, const char *characters, int count) {
         name[count] = 0;
       }
 
-      dpd->annotation.name = name;
+      dpo->annotation.name = name;
     }
   }
 }
 
 static void
 handleElementStart (void *userData, const char *element, const char **attributes) {
-  DocumentParseData *dpd = userData;
-  dpd->document.depth += 1;
+  DocumentParserObject *dpo = userData;
+  dpo->document.depth += 1;
 
-  if (dpd->annotation.depth) {
+  if (dpo->annotation.depth) {
     logMessage(LOG_WARNING, "nested annotation");
-    abortParser(dpd);
+    abortParser(dpo);
     return;
   }
 
@@ -120,11 +120,11 @@ handleElementStart (void *userData, const char *element, const char **attributes
 
     if (tts) {
       if (sequence) {
-        if ((dpd->annotation.sequence = strdup(sequence))) {
-          dpd->annotation.depth = dpd->document.depth;
+        if ((dpo->annotation.sequence = strdup(sequence))) {
+          dpo->annotation.depth = dpo->document.depth;
         } else {
           logMallocError();
-          abortParser(dpd);
+          abortParser(dpo);
         }
       }
     }
@@ -133,32 +133,101 @@ handleElementStart (void *userData, const char *element, const char **attributes
 
 static void
 handleElementEnd (void *userData, const char *name) {
-  DocumentParseData *dpd = userData;
+  DocumentParserObject *dpo = userData;
 
-  if (dpd->document.depth == dpd->annotation.depth) {
-    if (dpd->annotation.name) {
+  if (dpo->document.depth == dpo->annotation.depth) {
+    if (dpo->annotation.name) {
       CLDR_AnnotationHandlerParameters parameters = {
-        .sequence = dpd->annotation.sequence,
-        .name = dpd->annotation.name,
-        .data = dpd->caller.data
+        .sequence = dpo->annotation.sequence,
+        .name = dpo->annotation.name,
+        .data = dpo->caller.data
       };
 
-      if (!dpd->caller.handler(&parameters)) {
-        abortParser(dpd);
+      if (!dpo->caller.handler(&parameters)) {
+        abortParser(dpo);
         return;
       }
 
-      free(dpd->annotation.name);
-      dpd->annotation.name = NULL;
+      free(dpo->annotation.name);
+      dpo->annotation.name = NULL;
     }
 
-    free(dpd->annotation.sequence);
-    dpd->annotation.sequence = NULL;
+    free(dpo->annotation.sequence);
+    dpo->annotation.sequence = NULL;
 
-    dpd->annotation.depth = 0;
+    dpo->annotation.depth = 0;
   }
 
-  dpd->document.depth -= 1;
+  dpo->document.depth -= 1;
+}
+
+DocumentParserObject *
+cldrNewDocumentParser (CLDR_AnnotationHandler *handler, void *data) {
+  DocumentParserObject *dpo;
+
+  if ((dpo = malloc(sizeof(*dpo)))) {
+    memset(dpo, 0, sizeof(*dpo));
+
+    dpo->caller.handler = handler;
+    dpo->caller.data = data;
+
+    dpo->document.depth = 0;
+
+    dpo->annotation.sequence = NULL;
+    dpo->annotation.name = NULL;
+    dpo->annotation.depth = 0;
+
+    if ((dpo->document.parser = XML_ParserCreate(NULL))) {
+      XML_SetUserData(dpo->document.parser, dpo);
+      XML_SetElementHandler(dpo->document.parser, handleElementStart, handleElementEnd);
+      XML_SetCharacterDataHandler(dpo->document.parser, appendAnnotationText);
+      return dpo;
+    } else {
+      logMallocError();
+    }
+
+    free(dpo);
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
+
+void
+cldrDestroyDocumentParser (DocumentParserObject *dpo) {
+  if (dpo->annotation.sequence) {
+    free(dpo->annotation.sequence);
+    dpo->annotation.sequence = NULL;
+  }
+
+  if (dpo->annotation.name) {
+    free(dpo->annotation.name);
+    dpo->annotation.name = NULL;
+  }
+
+  XML_ParserFree(dpo->document.parser);
+  free(dpo);
+}
+
+int
+cldrParseText (DocumentParserObject *dpo, const char *text, size_t size, int final) {
+  enum XML_Status status = XML_Parse(dpo->document.parser, text, size, final);
+
+  switch (status) {
+    case XML_STATUS_OK:
+      return 1;
+
+    case XML_STATUS_ERROR:
+      logMessage(LOG_WARNING, "CLDR parse error: %s", XML_ErrorString(XML_GetErrorCode(dpo->document.parser)));
+      break;
+
+    default:
+      logMessage(LOG_WARNING, "unrecognized CLDR parse status: %d", status);
+      break;
+  }
+
+  return 0;
 }
 
 int
@@ -167,60 +236,11 @@ cldrParseDocument (
   CLDR_AnnotationHandler *handler, void *data
 ) {
   int ok = 0;
-  XML_Parser parser = XML_ParserCreate(NULL);
+  DocumentParserObject *dpo = cldrNewDocumentParser(handler, data);
 
-  if (parser) {
-    DocumentParseData dpd = {
-      .caller = {
-        .handler = handler,
-        .data = data
-      },
-
-      .document = {
-        .parser = parser,
-        .depth = 0
-      },
-
-      .annotation = {
-        .sequence = NULL,
-        .name = NULL,
-        .depth = 0
-      }
-    };
-
-    XML_SetUserData(parser, &dpd);
-    XML_SetElementHandler(parser, handleElementStart, handleElementEnd);
-    XML_SetCharacterDataHandler(parser, appendAnnotationText);
-    enum XML_Status status = XML_Parse(parser, document, size, 0);
-
-    switch (status) {
-      case XML_STATUS_OK:
-        ok = 1;
-        break;
-
-      case XML_STATUS_ERROR:
-        logMessage(LOG_WARNING, "CLDR parse error: %s", XML_ErrorString(XML_GetErrorCode(parser)));
-        break;
-
-      default:
-        logMessage(LOG_WARNING, "unrecognized CLDR parse status: %d", status);
-        break;
-    }
-
-    if (dpd.annotation.sequence) {
-      free(dpd.annotation.sequence);
-      dpd.annotation.sequence = NULL;
-    }
-
-    if (dpd.annotation.name) {
-      free(dpd.annotation.name);
-      dpd.annotation.name = NULL;
-    }
-
-    XML_ParserFree(parser);
-    parser = NULL;
-  } else {
-    logMallocError();
+  if (dpo) {
+    if (cldrParseText(dpo, document, size, 1)) ok = 1;
+    cldrDestroyDocumentParser(dpo);
   }
 
   return ok;
@@ -238,20 +258,29 @@ cldrParseFile (
     int fd = open(path, O_RDONLY);
 
     if (fd != -1) {
-      struct stat status;
+      DocumentParserObject *dpo = cldrNewDocumentParser(handler, data);
 
-      if (fstat(fd, &status) != -1) {
-        size_t size = status.st_size;
-        char buffer[size];
-        ssize_t count = read(fd, buffer, size);
+      if (dpo) {
+        while (1) {
+          char buffer[0X2000];
+          size_t size = sizeof(buffer);
+          ssize_t count = read(fd, buffer, size);
 
-        if (count != -1) {
-          if (cldrParseDocument(buffer, count, handler, data)) ok = 1;
-        } else {
-          logMessage(LOG_WARNING, "CLDR read error: %s: %s", strerror(errno), path);
+          if (count == -1) {
+            logMessage(LOG_WARNING, "CLDR read error: %s: %s", strerror(errno), path);
+            break;
+          }
+
+          int final = count == 0;
+          if (!cldrParseText(dpo, buffer, count, final)) break;
+
+          if (final) {
+            ok = 1;
+            break;
+          }
         }
-      } else {
-        logMessage(LOG_WARNING, "CLDR fstat error: %s: %s", strerror(errno), path);
+
+        cldrDestroyDocumentParser(dpo);
       }
 
       close(fd);
