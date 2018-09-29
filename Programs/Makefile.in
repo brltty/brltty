@@ -523,9 +523,6 @@ ctb_translate.$O:
 ctb_native.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ctb_native.c
 
-cldr.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cldr.c
-
 ctb_external.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ctb_external.c
 
@@ -663,6 +660,19 @@ uninstall-api-bindings:
 	for language \
 	do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) uninstall); \
 	done
+
+###############################################################################
+
+BRLTTY_CLDR_OBJECTS = brltty-cldr.$O cldr.$O $(PROGRAM_OBJECTS)
+
+brltty-cldr$X: $(BRLTTY_CLDR_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_CLDR_OBJECTS) -lexpat $(LDLIBS)
+
+brltty-cldr.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brltty-cldr.c
+
+cldr.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cldr.c
 
 ###############################################################################
 
