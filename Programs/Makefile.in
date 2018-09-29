@@ -523,6 +523,9 @@ ctb_translate.$O:
 ctb_native.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ctb_native.c
 
+ctb_cldr.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ctb_cldr.c
+
 ctb_external.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ctb_external.c
 
