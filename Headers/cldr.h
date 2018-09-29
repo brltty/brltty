@@ -16,12 +16,15 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_CTB_CLDR
-#define BRLTTY_INCLUDED_CTB_CLDR
+#ifndef BRLTTY_INCLUDED_CLDR
+#define BRLTTY_INCLUDED_CLDR
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+extern const char cldrDefaultDirectory[];
+extern const char cldrDefaultExtension[];
 
 typedef struct {
   const char *sequence;
@@ -38,7 +41,7 @@ extern int cldrParseDocument (
 );
 
 extern int cldrParseFile (
-  const char *path,
+  const char *name,
   CLDR_AnnotationHandler *handler, void *data
 );
 
@@ -46,4 +49,4 @@ extern int cldrParseFile (
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_CTB_CLDR */
+#endif /* BRLTTY_INCLUDED_CLDR */

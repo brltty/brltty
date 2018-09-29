@@ -25,7 +25,11 @@
 #include <expat.h>
 
 #include "log.h"
-#include "ctb_cldr.h"
+#include "cldr.h"
+#include "file.h"
+
+const char cldrDefaultDirectory[] = "/usr/share/unicode/cldr/common/annotations";
+const char cldrDefaultExtension[] = ".xml";
 
 typedef struct {
   struct {
@@ -217,34 +221,39 @@ cldrParseDocument (
 
 int
 cldrParseFile (
-  const char *path,
+  const char *name,
   CLDR_AnnotationHandler *handler, void *data
 ) {
   int ok = 0;
-  int fd = open(path, O_RDONLY);
+  char *path = makeFilePath(cldrDefaultDirectory, name, cldrDefaultExtension);
 
-  if (fd != -1) {
-    struct stat status;
+  if (path) {
+    int fd = open(path, O_RDONLY);
 
-    if (fstat(fd, &status) != -1) {
-      size_t size = status.st_size;
-      char buffer[size];
-      ssize_t count = read(fd, buffer, size);
+    if (fd != -1) {
+      struct stat status;
 
-      if (count != -1) {
-        if (cldrParseDocument(buffer, count, handler, data)) ok = 1;
+      if (fstat(fd, &status) != -1) {
+        size_t size = status.st_size;
+        char buffer[size];
+        ssize_t count = read(fd, buffer, size);
+
+        if (count != -1) {
+          if (cldrParseDocument(buffer, count, handler, data)) ok = 1;
+        } else {
+          logMessage(LOG_WARNING, "CLDR read error: %s: %s", strerror(errno), path);
+        }
       } else {
-        logMessage(LOG_WARNING, "CLDR read error: %s: %s", strerror(errno), path);
+        logMessage(LOG_WARNING, "CLDR fstat error: %s: %s", strerror(errno), path);
       }
+
+      close(fd);
+      fd = -1;
     } else {
-      logMessage(LOG_WARNING, "CLDR fstat error: %s: %s", strerror(errno), path);
+      logMessage(LOG_WARNING, "CLDR open error: %s: %s", strerror(errno), path);
     }
 
-    close(fd);
-    fd = -1;
-  } else if (errno != EEXIST) {
-    int level = (errno == ENOENT)? LOG_DEBUG: LOG_WARNING;
-    logMessage(level, "CLDR open error: %s: %s", strerror(errno), path);
+    free(path);
   }
 
   return ok;
