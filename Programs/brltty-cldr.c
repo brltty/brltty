@@ -44,33 +44,50 @@ BEGIN_OPTION_TABLE(programOptions)
 END_OPTION_TABLE
 
 static void
-putCharacter (int character) {
-  if (putchar(character) == EOF) {
-    logMessage(LOG_ERR, "output error %d: %s", errno, strerror(errno));
-    exit(PROG_EXIT_FATAL);
-  }
+onFormatError (void) {
+  exit(PROG_EXIT_SYNTAX);
+}
+
+static void
+onMissingCharacter (const char *type) {
+  logMessage(LOG_ERR, "missing %s character", type);
+  onFormatError();
+}
+
+static void
+onUnrecognizedCharacter (const char *type, int byte) {
+  logMessage(LOG_ERR, "unrecognized %s character: %c", type, byte);
+  onFormatError();
+}
+
+static void
+onOutputError (void) {
+  logMessage(LOG_ERR, "output error %d: %s", errno, strerror(errno));
+  exit(PROG_EXIT_FATAL);
+}
+
+static void
+putByte (int byte) {
+  if (fputc(byte, stdout) == EOF) onOutputError();
 }
 
 static void
 putString (const char *string) {
-  while (*string) putCharacter(*string++ & 0XFF);
+  if (fputs(string, stdout) == EOF) onOutputError();
 }
 
 static void
 putHexadecimal (const char *string) {
-  const char *byte = string;
-  size_t size = strlen(byte) + 1;
+  size_t size = strlen(string) + 1;
   wchar_t characters[size];
+
+  const char *byte = string;
   wchar_t *character = characters;
   wchar_t *end = character;
   convertUtf8ToWchars(&byte, &end, size);
 
   while (character < end) {
-    if (writeHexadecimalCharacter(stdout, *character) == EOF) {
-      logMessage(LOG_ERR, "output error %d: %s", errno, strerror(errno));
-      exit(PROG_EXIT_FATAL);
-    }
-
+    if (writeHexadecimalCharacter(stdout, *character) == EOF) onOutputError();
     character += 1;
   }
 }
@@ -82,11 +99,11 @@ CLDR_ANNOTATION_HANDLER(handleAnnotation) {
   const char *format = opt_outputFormat;
 
   while (*format) {
-    int character = *format & 0XFF;
+    int byte = *format & 0XFF;
 
     switch (state) {
       case LITERAL: {
-        switch (character) {
+        switch (byte) {
           case '%':
             state = FORMAT;
             break;
@@ -96,7 +113,7 @@ CLDR_ANNOTATION_HANDLER(handleAnnotation) {
             break;
 
           default:
-            putCharacter(character);
+            putByte(byte);
             break;
         }
 
@@ -104,7 +121,7 @@ CLDR_ANNOTATION_HANDLER(handleAnnotation) {
       }
 
       case FORMAT: {
-        switch (character) {
+        switch (byte) {
           case 'n':
             putString(parameters->name);
             break;
@@ -118,12 +135,12 @@ CLDR_ANNOTATION_HANDLER(handleAnnotation) {
             break;
 
           case '%':
-            putCharacter(character);
+            putByte(byte);
             break;
 
           default:
-            logMessage(LOG_ERR, "unrecognized format character: %c", character);
-            exit(PROG_EXIT_SYNTAX);
+            onUnrecognizedCharacter("format", byte);
+            return 0;
         }
 
         state = LITERAL;
@@ -143,19 +160,19 @@ CLDR_ANNOTATION_HANDLER(handleAnnotation) {
           ['\\'] = '\\'
         };
 
-        switch (character) {
+        switch (byte) {
           default: {
-            if (character < ARRAY_COUNT(escapes)) {
-              char escape = escapes[character];
+            if (byte < ARRAY_COUNT(escapes)) {
+              char escape = escapes[byte];
 
               if (escape) {
-                putCharacter(escape);
+                putByte(escape);
                 break;
               }
             }
 
-            logMessage(LOG_ERR, "unrecognized escape character: %c", character);
-            exit(PROG_EXIT_SYNTAX);
+            onUnrecognizedCharacter("escape", byte);
+            return 0;
           }
         }
 
@@ -172,15 +189,15 @@ CLDR_ANNOTATION_HANDLER(handleAnnotation) {
       return 1;
 
     case FORMAT:
-      logMessage(LOG_ERR, "missing format character");
+      onMissingCharacter("format");
       break;
 
     case ESCAPE:
-      logMessage(LOG_ERR, "missing escape character");
+      onMissingCharacter("escape");
       break;
   }
 
-  exit(PROG_EXIT_SYNTAX);
+  return 0;
 }
 
 int
