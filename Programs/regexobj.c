@@ -33,17 +33,24 @@ struct RegularExpressionObjectStruct {
 
 typedef struct {
   char *expression;
-  regex_t *matcher;
+  regex_t matcher;
   size_t submatches;
   RegularExpressionHandler *handler;
   void *data;
 } RegularExpressionPattern;
 
 static void
+logRegularExpressionError (const RegularExpressionPattern *pattern, int error) {
+  char message[0X100];
+  regerror(error, &pattern->matcher, message, sizeof(message));
+  logMessage(LOG_WARNING, "regular expression error: %s", message);
+}
+
+static void
 deallocateRegularExpressionPattern (void *item, void *data) {
   RegularExpressionPattern *pattern = item;
 
-  regfree(pattern->matcher);
+  regfree(&pattern->matcher);
   free(pattern->expression);
   free(pattern);
 }
@@ -65,18 +72,16 @@ addRegularExpression (
     pattern->data = data;
 
     if ((pattern->expression = strdup(expression))) {
-      int result = regcomp(pattern->matcher, expression, regex->compileFlags);
+      int error = regcomp(&pattern->matcher, expression, regex->compileFlags);
 
-      if (!result) {
+      if (!error) {
         if (enqueueItem(regex->patterns, pattern)) {
           return 1;
         }
 
-        regfree(pattern->matcher);
+        regfree(&pattern->matcher);
       } else {
-        char message[0X100];
-        regerror(result, pattern->matcher, message, sizeof(message));
-        logMessage(LOG_WARNING, "regular expression error: %s", message);
+        logRegularExpressionError(pattern, error);
       }
 
       free(pattern->expression);
@@ -92,28 +97,27 @@ addRegularExpression (
   return 0;
 }
 
-typedef struct {
-  const char *string;
-  RegularExpressionHandlerParameters *parameters;
-} TestRegularExpressionPatternData;
-
 static int
 testRegularExpressionPattern (const void *item, void *data) {
   const RegularExpressionPattern *pattern = item;
-  TestRegularExpressionPatternData *tpd = data;
+  RegularExpressionHandlerParameters *parameters = data;
 
   size_t matches = pattern->submatches + 1;
   regmatch_t match[matches];
-  int result = regexec(pattern->matcher, tpd->string, matches, match, 0);
+  int error = regexec(&pattern->matcher, parameters->string, matches, match, 0);
 
-  if (!result) {
-    RegularExpressionHandlerParameters *parameters = tpd->parameters;
+  if (!error) {
+    parameters->expression = pattern->expression;
     parameters->patternData = pattern->data;
+
+    parameters->matches.array = match;
+    parameters->matches.size = matches;
 
     pattern->handler(parameters);
     return 1;
   }
 
+  if (error != REG_NOMATCH) logRegularExpressionError(pattern, error);
   return 0;
 }
 
@@ -124,16 +128,28 @@ matchRegularExpressions (
   void *data
 ) {
   RegularExpressionHandlerParameters parameters = {
+    .string = string,
     .objectData = regex->data,
     .matchData = data
   };
 
-  TestRegularExpressionPatternData tpd = {
-    .string = string,
-    .parameters = &parameters
-  };
+  return !!findElement(regex->patterns, testRegularExpressionPattern, &parameters);
+}
 
-  return !!findElement(regex->patterns, testRegularExpressionPattern, &tpd);
+int
+getRegularExpressionMatch (
+  const RegularExpressionHandlerParameters *parameters,
+  unsigned int index, int *start, int *end
+) {
+  if (index < 0) return 0;
+  if (index >= parameters->matches.size) return 0;
+
+  const regmatch_t *matches = parameters->matches.array;
+  const regmatch_t *match = &matches[index];
+
+  if ((*start = match->rm_so) == -1) return 0;
+  if ((*end = match->rm_eo) == -1) return 0;
+  return 1;
 }
 
 RegularExpressionObject *
