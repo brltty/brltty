@@ -22,7 +22,7 @@
 #include <regex.h>
 
 #include "log.h"
-#include "regexobj.h"
+#include "rgx.h"
 #include "queue.h"
 
 struct RegularExpressionObjectStruct {
@@ -57,7 +57,7 @@ deallocateRegularExpressionPattern (void *item, void *data) {
 
 int
 addRegularExpression (
-  RegularExpressionObject *regex,
+  RegularExpressionObject *rgx,
   const char *expression,
   size_t submatches,
   RegularExpressionHandler *handler,
@@ -72,10 +72,10 @@ addRegularExpression (
     pattern->data = data;
 
     if ((pattern->expression = strdup(expression))) {
-      int error = regcomp(&pattern->matcher, expression, regex->compileFlags);
+      int error = regcomp(&pattern->matcher, expression, rgx->compileFlags);
 
       if (!error) {
-        if (enqueueItem(regex->patterns, pattern)) {
+        if (enqueueItem(rgx->patterns, pattern)) {
           return 1;
         }
 
@@ -123,17 +123,17 @@ testRegularExpressionPattern (const void *item, void *data) {
 
 int
 matchRegularExpressions (
-  RegularExpressionObject *regex,
+  RegularExpressionObject *rgx,
   const char *string,
   void *data
 ) {
   RegularExpressionHandlerParameters parameters = {
     .string = string,
-    .objectData = regex->data,
+    .objectData = rgx->data,
     .matchData = data
   };
 
-  return !!findElement(regex->patterns, testRegularExpressionPattern, &parameters);
+  return !!findElement(rgx->patterns, testRegularExpressionPattern, &parameters);
 }
 
 int
@@ -154,20 +154,20 @@ getRegularExpressionMatch (
 
 RegularExpressionObject *
 newRegularExpressionObject (void *data) {
-  RegularExpressionObject *regex;
+  RegularExpressionObject *rgx;
 
-  if ((regex = malloc(sizeof(*regex)))) {
-    memset(regex, 0, sizeof(*regex));
-    regex->data = data;
+  if ((rgx = malloc(sizeof(*rgx)))) {
+    memset(rgx, 0, sizeof(*rgx));
+    rgx->data = data;
 
-    regex->compileFlags = 0;
-    regex->compileFlags |= REG_EXTENDED;
+    rgx->compileFlags = 0;
+    rgx->compileFlags |= REG_EXTENDED;
 
-    if ((regex->patterns = newQueue(deallocateRegularExpressionPattern, NULL))) {
-      return regex;
+    if ((rgx->patterns = newQueue(deallocateRegularExpressionPattern, NULL))) {
+      return rgx;
     }
 
-    free(regex);
+    free(rgx);
   } else {
     logMallocError();
   }
@@ -176,7 +176,7 @@ newRegularExpressionObject (void *data) {
 }
 
 void
-destroyRegularExpressionObject (RegularExpressionObject *regex) {
-  deallocateQueue(regex->patterns);
-  free(regex);
+destroyRegularExpressionObject (RegularExpressionObject *rgx) {
+  deallocateQueue(rgx->patterns);
+  free(rgx);
 }

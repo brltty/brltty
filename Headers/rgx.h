@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_REGEXOBJ
-#define BRLTTY_INCLUDED_REGEXOBJ
+#ifndef BRLTTY_INCLUDED_RGX
+#define BRLTTY_INCLUDED_RGX
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,7 +26,7 @@ extern "C" {
 typedef struct RegularExpressionObjectStruct RegularExpressionObject;
 
 extern RegularExpressionObject *newRegularExpressionObject (void *data);
-extern void destroyRegularExpressionObject (RegularExpressionObject *regex);
+extern void destroyRegularExpressionObject (RegularExpressionObject *rgx);
 
 typedef struct {
   const char *string;
@@ -46,7 +46,7 @@ typedef struct {
 typedef REGULAR_EXPRESSION_HANDLER(RegularExpressionHandler);
 
 extern int addRegularExpression (
-  RegularExpressionObject *regex,
+  RegularExpressionObject *rgx,
   const char *expression,
   size_t submatches,
   RegularExpressionHandler *handler,
@@ -54,7 +54,7 @@ extern int addRegularExpression (
 );
 
 extern int matchRegularExpressions (
-  RegularExpressionObject *regex,
+  RegularExpressionObject *rgx,
   const char *string,
   void *data
 );
@@ -68,4 +68,4 @@ extern int getRegularExpressionMatch (
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_REGEXOBJ */
+#endif /* BRLTTY_INCLUDED_RGX */
