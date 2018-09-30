@@ -28,6 +28,7 @@ midendword iell 24-15-12345 shouldn't use the ie-contraction
 always indien 35-145-24-14 shouldn't use the ie-contraction
 always medien 134-15-145-24-14 shouldn't use the ie-contraction
 always propriet 12345-1234-1235-24-15-2345 proprietär shouldn't use the ie-contraction
+always spezies 234-1234-15-1356-24-123456 shouldn't use the ie-contraction
 
 class e e
 class g g
@@ -622,6 +623,7 @@ sufword kunter 13-256-2345-12456 shouldn't use the unter-contraction
 sufword kunterbunter 13-256-2345-12456-12-256-2345-12456
 sufword munter 134-256-2345-12456 shouldn't use the unter-contraction
 sufword untereinander 256-2-1246
+always virus =
 word voll 12345
 always voll 2-12345
 sufword vollständ 12345-5-23456
@@ -1115,12 +1117,17 @@ always selbständig 234-13456-12-5-23456-45 shouldn't use the selbst-contraction
 always selbstaendig 234-13456-12-5-23456-45 shouldn't use the selbst-contraction
 always setz 2-15
 sufword sesam 234-123456-1-134 shouldn't use the sam-contraction
-always sind 234-145
+word sind 234-145
 contraction sd
 always sindex 234-35-145-15-6-1346
 always sindik 234-35-145-24-13
 always sindiz 234-35-145-24-1356
 always sindustr 234-35-145-136-23456-1235
+always gesinde 12346-234-35-145-15
+always gesindel 12346-234-35-145-13456
+always gesindes 12346-234-35-145-123456
+always gesindest 12346-234-35-145-15-23456
+
 always sitz 2-24
 always sitzbein 2-24-12-146-1345 shouldn't use the bei-contraction
 always solch 234-1456
