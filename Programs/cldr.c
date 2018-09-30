@@ -267,6 +267,7 @@ cldrParseFile (
           ssize_t count = read(fd, buffer, size);
 
           if (count == -1) {
+            if (errno == EINTR) continue;
             logMessage(LOG_WARNING, "CLDR read error: %s: %s", strerror(errno), path);
             break;
           }
