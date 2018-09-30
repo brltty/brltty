@@ -35,6 +35,21 @@ typedef struct {
 #define CLDR_ANNOTATION_HANDLER(name) int name (const CLDR_AnnotationHandlerParameters *parameters)
 typedef CLDR_ANNOTATION_HANDLER(CLDR_AnnotationHandler);
 
+typedef struct CLDR_DocumentParserObjectStruct CLDR_DocumentParserObject;
+
+extern CLDR_DocumentParserObject *cldrNewDocumentParser (
+  CLDR_AnnotationHandler *handler, void *data
+);
+
+extern void cldrDestroyDocumentParser (
+  CLDR_DocumentParserObject *dpo
+);
+
+extern int cldrParseText (
+  CLDR_DocumentParserObject *dpo,
+  const char *text, size_t size, int final
+);
+
 extern int cldrParseDocument (
   const char *document, size_t size,
   CLDR_AnnotationHandler *handler, void *data

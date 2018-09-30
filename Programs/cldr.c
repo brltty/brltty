@@ -31,7 +31,7 @@
 const char cldrDefaultDirectory[] = "/usr/share/unicode/cldr/common/annotations";
 const char cldrDefaultExtension[] = ".xml";
 
-typedef struct {
+struct CLDR_DocumentParserObjectStruct {
   struct {
     CLDR_AnnotationHandler *handler;
     void *data;
@@ -47,16 +47,16 @@ typedef struct {
     char *name;
     unsigned int depth;
   } annotation;
-} DocumentParserObject;
+};
 
 static void
-abortParser (DocumentParserObject *dpo) {
+abortParser (CLDR_DocumentParserObject *dpo) {
   XML_StopParser(dpo->document.parser, 0);
 }
 
 static void
 appendAnnotationText (void *userData, const char *characters, int count) {
-  DocumentParserObject *dpo = userData;
+  CLDR_DocumentParserObject *dpo = userData;
 
   if (dpo->document.depth == dpo->annotation.depth) {
     if (count > 0) {
@@ -94,7 +94,7 @@ appendAnnotationText (void *userData, const char *characters, int count) {
 
 static void
 handleElementStart (void *userData, const char *element, const char **attributes) {
-  DocumentParserObject *dpo = userData;
+  CLDR_DocumentParserObject *dpo = userData;
   dpo->document.depth += 1;
 
   if (dpo->annotation.depth) {
@@ -133,7 +133,7 @@ handleElementStart (void *userData, const char *element, const char **attributes
 
 static void
 handleElementEnd (void *userData, const char *name) {
-  DocumentParserObject *dpo = userData;
+  CLDR_DocumentParserObject *dpo = userData;
 
   if (dpo->document.depth == dpo->annotation.depth) {
     if (dpo->annotation.name) {
@@ -161,9 +161,9 @@ handleElementEnd (void *userData, const char *name) {
   dpo->document.depth -= 1;
 }
 
-DocumentParserObject *
+CLDR_DocumentParserObject *
 cldrNewDocumentParser (CLDR_AnnotationHandler *handler, void *data) {
-  DocumentParserObject *dpo;
+  CLDR_DocumentParserObject *dpo;
 
   if ((dpo = malloc(sizeof(*dpo)))) {
     memset(dpo, 0, sizeof(*dpo));
@@ -195,7 +195,7 @@ cldrNewDocumentParser (CLDR_AnnotationHandler *handler, void *data) {
 }
 
 void
-cldrDestroyDocumentParser (DocumentParserObject *dpo) {
+cldrDestroyDocumentParser (CLDR_DocumentParserObject *dpo) {
   if (dpo->annotation.sequence) {
     free(dpo->annotation.sequence);
     dpo->annotation.sequence = NULL;
@@ -211,7 +211,7 @@ cldrDestroyDocumentParser (DocumentParserObject *dpo) {
 }
 
 int
-cldrParseText (DocumentParserObject *dpo, const char *text, size_t size, int final) {
+cldrParseText (CLDR_DocumentParserObject *dpo, const char *text, size_t size, int final) {
   enum XML_Status status = XML_Parse(dpo->document.parser, text, size, final);
 
   switch (status) {
@@ -236,7 +236,7 @@ cldrParseDocument (
   CLDR_AnnotationHandler *handler, void *data
 ) {
   int ok = 0;
-  DocumentParserObject *dpo = cldrNewDocumentParser(handler, data);
+  CLDR_DocumentParserObject *dpo = cldrNewDocumentParser(handler, data);
 
   if (dpo) {
     if (cldrParseText(dpo, document, size, 1)) ok = 1;
@@ -258,7 +258,7 @@ cldrParseFile (
     int fd = open(path, O_RDONLY);
 
     if (fd != -1) {
-      DocumentParserObject *dpo = cldrNewDocumentParser(handler, data);
+      CLDR_DocumentParserObject *dpo = cldrNewDocumentParser(handler, data);
 
       if (dpo) {
         while (1) {
