@@ -65,12 +65,14 @@ midword eh 2356
 before h always kohle =
 before m always kohle =
 always ein 1246
+always einnen 15-35-1345-14 ⠨⠯⠓⠌⠎⠑⠔⠝⠉⠎⠩⠦ ⠨⠯⠓⠌⠎⠑⠔⠝⠉⠞⠷⠏⠻⠁⠞⠥⠗ ⠨⠧⠊⠵⠑⠔⠝⠉⠍⠔⠊⠾⠻
 always lateinisch 123-1-2345-1246-1345-24-156
 always el 13456
 begmidword elineal 15-123-35-15-25
 endword elineal 15-123-35-15-1-123
 always eleist 15-123-146-23456
 always em 12356
+always temperatur 2345-12356-1234-12456-1-2345-136-1235 prefer em-contraction over te-contraction
 always emach 15-134-56
 before e always emachs 12356-56-234 Systemachse
 always en 14
@@ -159,6 +161,7 @@ always sselbständ 234-234-13456-12-5-23456 shouldn't use the selbst-contraction
 always sselbstaend 234-234-13456-12-5-23456 shouldn't use the selbst-contraction
 after konsonant always ssetz 234-2-15
 after konsonant midendword ssesam 234-234-123456-1-134 shouldn't use the sam-contraction
+always ssicher 234-234-3456-12456
 after konsonant always ssitz 234-2-24
 always ssolch 234-234-1456
 after konsonant midendword ssoll 234-2-234
@@ -282,6 +285,10 @@ begword unger 256-12346-1235
 sufword ungerecht 256-12346-1235-2345
 sufword zuge 2-1356-12346
 endword ges 1245-123456 shouldn't use the ge-contraction
+always sieges 234-346-1245-123456
+always euthanasie 126-2345-125-235-1-234-346
+always antasie 235-2345-1-234-346
+endword antasien 235-2345-1-234-24-14
 midendword ien 24-14 shouldn't use the ie-contraction
 always erschien 12456-156-346-1345
 prfword industrien 35-145-136-23456-1235-15-14
@@ -340,7 +347,9 @@ before s midword ations 5-1345-234
 midendword ativ 5-1236
 after st always ion 245
 always religion 1235-13456-45-245
-after st before s always ions 245-234
+after st before st always ions 245-234
+always action 1-6-14-2345-245
+midword ionstricht 245-234-2345-1235-3456-2345
 endword ismus 5-24
 midendword istisch 5-156
 endword nismus 1345-5-24 shouldn't use the nis-contraction
