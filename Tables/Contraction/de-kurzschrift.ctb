@@ -66,7 +66,7 @@ before h always kohle =
 before m always kohle =
 always ein 1246
 always einnen 15-35-1345-14 ⠨⠯⠓⠌⠎⠑⠔⠝⠉⠎⠩⠦ ⠨⠯⠓⠌⠎⠑⠔⠝⠉⠞⠷⠏⠻⠁⠞⠥⠗ ⠨⠧⠊⠵⠑⠔⠝⠉⠍⠔⠊⠾⠻
-always lateinisch 123-1-2345-1246-1345-24-156
+always lateinisch 123-1-2345-146-1345-24-156 shouldn't use the ein-contraction
 always el 13456
 begmidword elineal 15-123-35-15-25
 endword elineal 15-123-35-15-1-123
@@ -91,15 +91,21 @@ prfword gehenden 1245-2356-14-145-14
 prfword gehender 1245-2356-14-145-12456
 prfword gehendes 1245-2356-14-145-123456
 before konsonant always geh 1245-2356
+always umgehung 136-134-1245-2356-136 shouldn't use the ge-contraction
 before konsonant always bel 12-13456 Übelkeit shouldn't use the be-contraction
 word bel 12-13456
 before konsonant always bem 12-12356
 before konsonant always ben 12-14
 before konsonant always ber 12-12456
 before konsonant always gel 1245-13456 klingelton shouldn't use the ge-contraction
+always ziegel 1356-346-1245-13456 shouldn't use the ge-contraction
 before konsonant always gen 1245-14
 before konsonant always ten 2345-14
 before konsonant always ter 2345-12456
+always güter 1245-1256-2345-12456 should use the er-contraction
+always güteregel 1245-1256-236-1235-15-1245-13456
+always gütericht 1245-1256-236-2-3456
+always theater 2345-125-15-1-2345-12456 shouldn't use the te-contraction
 midendword ich 3456
 midendword ig 45
 always in 35
@@ -207,6 +213,7 @@ always tten 2345-2345-14 shouldn't use the te-contraction
 always tter 2345-2345-12456 shouldn't use the te-contraction
 always daten 145-1-2345-14 
 always karten 13-356-2345-14
+midendword maten 134-1-2345-14 shouldn't use the te-contraction
 endword tenem 2345-14-12356
 endword tenen 2345-14-14
 endword tener 2345-14-12456
@@ -291,7 +298,7 @@ always antasie 235-2345-1-234-346
 endword antasien 235-2345-1-234-24-14
 midendword ien 24-14 shouldn't use the ie-contraction
 always erschien 12456-156-346-1345
-prfword industrien 35-145-136-23456-1235-15-14
+prfword industrien 35-145-136-23456-1235-24-14
 before n always industrie 35-145-136-23456-1235-346 industrienation shouldn't use the en-contraction
 begmidword anomal 235-135-134-25 shouldn't use the mal-contraction
 endword anomal 235-135-134-1-123 shouldn't use the mal-contraction
@@ -1128,10 +1135,6 @@ always setz 2-15
 sufword sesam 234-123456-1-134 shouldn't use the sam-contraction
 word sind 234-145
 contraction sd
-always sindex 234-35-145-15-6-1346
-always sindik 234-35-145-24-13
-always sindiz 234-35-145-24-1356
-always sindustr 234-35-145-136-23456-1235
 always gesinde 12346-234-35-145-15
 always gesindel 12346-234-35-145-13456
 always gesindes 12346-234-35-145-123456
