@@ -30,6 +30,8 @@
 #include "datafile.h"
 #include "dataarea.h"
 #include "brl_dots.h"
+#include "cldr.h"
+#include "charset.h"
 #include "hostcmd.h"
 
 static const wchar_t *const characterClassNames[] = {
@@ -85,7 +87,9 @@ static const wchar_t *const opcodeNames[CTO_None] = {
 
   [CTO_Class] = WS_C("class"),
   [CTO_After] = WS_C("after"),
-  [CTO_Before] = WS_C("before")
+  [CTO_Before] = WS_C("before"),
+
+  [CTO_CLDR] = WS_C("cldr")
 };
 
 typedef struct {
@@ -211,8 +215,18 @@ addRule (
       if (newRule->findlen == 1) {
         ContractionTableCharacter *character = getCharacterEntry(newRule->findrep[0], ctd);
         if (!character) return NULL;
-        if (newRule->opcode == CTO_Always) character->always = ruleOffset;
         offsetAddress = &character->rules;
+
+        switch (newRule->opcode) {
+          case CTO_Repeatable:
+            if (character->always) break;
+            /* fall through */
+          case CTO_Always:
+            character->always = ruleOffset;
+            /* fall through */
+          default:
+            break;
+        }
       } else {
         offsetAddress = &getContractionTableHeader(ctd)->rules[CTH(newRule->findrep)];
       }
@@ -244,6 +258,61 @@ addRule (
   }
 
   return NULL;
+}
+
+typedef struct {
+  DataFile *file;
+  ContractionTableData *ctd;
+  ContractionTableCharacterAttributes after;
+  ContractionTableCharacterAttributes before;
+} AnnotationHandlerData;
+
+static CLDR_ANNOTATION_HANDLER(handleAnnotation) {
+  const AnnotationHandlerData *ahd = parameters->data;
+  DataFile *file = ahd->file;
+  ContractionTableData *ctd = ahd->ctd;
+
+  DataString find;
+  const char *findUTF8 = parameters->sequence;
+  size_t findSize = strlen(findUTF8) + 1;
+  wchar_t findCharacters[findSize];
+
+  {
+    const char *byte = findUTF8;
+    wchar_t *character = findCharacters;
+    convertUtf8ToWchars(&byte, &character, findSize);
+
+    find.length = character - findCharacters;
+    wmemcpy(find.characters, findCharacters, find.length);
+  }
+
+  ByteOperand replace = {
+    .length = 0
+  };
+
+  {
+    const char *utf8 = parameters->name;
+
+    while (*utf8) {
+      size_t utfs;
+      wint_t wc = convertUtf8ToWchar(&utf8, &utfs);
+      if (wc == WEOF) break;
+
+      ContractionTableCharacter *character = getCharacterEntry(wc, ctd);
+      if (!character) break;
+
+      if (!character->always) break;
+      ContractionTableRule *rule = getDataItem(ctd->area, character->always);
+
+      {
+        const char *byte = (char *)&rule->findrep[rule->findlen];
+        const char *end = byte + rule->replen;
+        while (byte < end) replace.bytes[replace.length++] = *byte++;
+      }
+    }
+  }
+
+  return !!addRule(file, CTO_Always, &find, &replace, ahd->after, ahd->before, ctd);
 }
 
 static const struct CharacterClass *
@@ -509,6 +578,28 @@ static DATA_OPERANDS_PROCESSOR(processContractionTableDirective) {
           *attributes |= class->attribute;
           continue;
         }
+        break;
+      }
+
+      case CTO_CLDR: {
+        DataOperand operand;
+
+        if (getDataOperand(file, &operand, "CLDR file name")) {
+          char *name = makeUtf8FromWchars(operand.characters, operand.length, NULL);
+
+          if (name) {
+            AnnotationHandlerData ahd = {
+              .file = file,
+              .ctd = ctd,
+              .after = after,
+              .before = before
+            };
+
+            cldrParseFile(name, handleAnnotation, &ahd);
+            free(name);
+          }
+        }
+
         break;
       }
 
