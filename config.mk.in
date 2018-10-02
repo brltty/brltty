@@ -106,6 +106,9 @@ POLKIT_PACKAGE = @polkit_package@
 POLKIT_INCLUDES = @polkit_includes@
 POLKIT_LIBS = @polkit_libs@
 
+EXPAT_INCLUDES = @expat_includes@
+EXPAT_LIBS = @expat_libs@
+
 LOUIS_INCLUDES = @louis_includes@
 LOUIS_LIBS = @louis_libs@
 

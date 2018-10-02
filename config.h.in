@@ -83,6 +83,9 @@ extern "C" {
 /* Define this if the header file iconv.h exists. */
 #undef HAVE_ICONV_H
 
+/* Define this if XML parsing support is to be included. */
+#undef HAVE_EXPAT
+
 /* Define this if the header file pwd.h exists. */
 #undef HAVE_PWD_H
 

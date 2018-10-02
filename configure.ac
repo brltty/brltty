@@ -1105,6 +1105,21 @@ BRLTTY_ARG_PACKAGE([system], [base system], [], [dnl
       ;;
 ])
 
+expat_includes=""
+expat_libs=""
+BRLTTY_ARG_DISABLE(
+   [expat],
+   [support for XML parsing (CLDR)],
+   [],
+[dnl
+   BRLTTY_HAVE_PACKAGE([expat], [expat], [dnl
+      AC_DEFINE_UNQUOTED([HAVE_EXPAT], [1],
+                         [Define this if XML parsing support is to be included.])
+   ])
+])
+AC_SUBST([expat_includes])
+AC_SUBST([expat_libs])
+
 BRLTTY_ARG_DISABLE(
    [contracted-braille],
    [in-line contracted braille],
@@ -1116,7 +1131,7 @@ BRLTTY_ARG_DISABLE(
    all_brltty_ctb="all-brltty-ctb"
    install_brltty_ctb="install-brltty-ctb"
 
-   contracted_braille_objects='ctb_compile.$O ctb_translate.$O ctb_native.$O ctb_external.$O'
+   contracted_braille_objects='ctb_compile.$O cldr.$O ctb_translate.$O ctb_native.$O ctb_external.$O'
    install_contraction_tables=install-contraction-tables
 
    louis_includes=""

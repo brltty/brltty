@@ -532,7 +532,7 @@ ctb_louis.$O:
 BRLTTY_CTB_OBJECTS = brltty-ctb.$O $(PROGRAM_OBJECTS) $(PREFS_OBJECTS) dataarea.$O $(TTB_OBJECTS) $(CTB_OBJECTS)
 
 brltty-ctb$X: $(BRLTTY_CTB_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_CTB_OBJECTS) $(LOUIS_LIBS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_CTB_OBJECTS) $(LOUIS_LIBS) $(EXPAT_LIBS) $(LDLIBS)
 
 brltty-ctb.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-ctb.c
@@ -666,7 +666,7 @@ uninstall-api-bindings:
 BRLTTY_CLDR_OBJECTS = brltty-cldr.$O cldr.$O $(PROGRAM_OBJECTS)
 
 brltty-cldr$X: $(BRLTTY_CLDR_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_CLDR_OBJECTS) -lexpat $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_CLDR_OBJECTS) $(EXPAT_LIBS) $(LDLIBS)
 
 brltty-cldr.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brltty-cldr.c
@@ -775,7 +775,7 @@ learn.$O:
 ###############################################################################
 
 BRLTTY_OBJECTS = brltty.$O $(CORE_OBJECTS)
-BRLTTY_LIBRARIES = $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(SERVICE_LIBS) $(PCM_LIBS) $(MIDI_LIBS) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LOUIS_LIBS) $(POLKIT_LIBS) $(LDLIBS)
+BRLTTY_LIBRARIES = $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(SERVICE_LIBS) $(PCM_LIBS) $(MIDI_LIBS) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LOUIS_LIBS) $(EXPAT_LIBS) $(POLKIT_LIBS) $(LDLIBS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRLTTY_LIBRARIES)
@@ -952,11 +952,11 @@ xbrlapi.$O:
 
 ###############################################################################
 
-TBL2HEX_OBJECTS_FOR_BUILD = tbl2hex.$(O_FOR_BUILD) $(PROGRAM_OBJECTS_FOR_BUILD) dataarea.$(O_FOR_BUILD) ttb_compile.$(O_FOR_BUILD) ttb_native.$(O_FOR_BUILD) atb_compile.$(O_FOR_BUILD) ctb_compile.$(O_FOR_BUILD)
+TBL2HEX_OBJECTS_FOR_BUILD = tbl2hex.$(O_FOR_BUILD) $(PROGRAM_OBJECTS_FOR_BUILD) dataarea.$(O_FOR_BUILD) ttb_compile.$(O_FOR_BUILD) ttb_native.$(O_FOR_BUILD) atb_compile.$(O_FOR_BUILD) ctb_compile.$(O_FOR_BUILD) cldr.$(O_FOR_BUILD)
 TBL2HEX_OBJECTS = $(TBL2HEX_OBJECTS_FOR_BUILD:.$(O_FOR_BUILD)=.$B)
 
 tbl2hex$(X_FOR_BUILD): $(TBL2HEX_OBJECTS)
-	$(CC_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@ $(TBL2HEX_OBJECTS) $(LDLIBS_FOR_BUILD)
+	$(CC_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@ $(TBL2HEX_OBJECTS) $(EXPAT_LIBS_FOR_BUILD) $(LDLIBS_FOR_BUILD)
 
 ###############################################################################
 

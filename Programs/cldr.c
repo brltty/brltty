@@ -22,11 +22,13 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <expat.h>
 
 #include "log.h"
 #include "cldr.h"
 #include "file.h"
+
+#ifdef HAVE_EXPAT
+#include <expat.h>
 
 const char cldrDefaultDirectory[] = "/usr/share/unicode/cldr/common/annotations";
 const char cldrDefaultExtension[] = ".xml";
@@ -160,9 +162,11 @@ handleElementEnd (void *userData, const char *name) {
 
   dpo->document.depth -= 1;
 }
+#endif /* HAVE_EXPAT */
 
 CLDR_DocumentParserObject *
 cldrNewDocumentParser (CLDR_AnnotationHandler *handler, void *data) {
+#ifdef HAVE_EXPAT
   CLDR_DocumentParserObject *dpo;
 
   if ((dpo = malloc(sizeof(*dpo)))) {
@@ -190,12 +194,14 @@ cldrNewDocumentParser (CLDR_AnnotationHandler *handler, void *data) {
   } else {
     logMallocError();
   }
+#endif /* HAVE_EXPAT */
 
   return NULL;
 }
 
 void
 cldrDestroyDocumentParser (CLDR_DocumentParserObject *dpo) {
+#ifdef HAVE_EXPAT
   if (dpo->annotation.sequence) {
     free(dpo->annotation.sequence);
     dpo->annotation.sequence = NULL;
@@ -208,10 +214,12 @@ cldrDestroyDocumentParser (CLDR_DocumentParserObject *dpo) {
 
   XML_ParserFree(dpo->document.parser);
   free(dpo);
+#endif /* HAVE_EXPAT */
 }
 
 int
 cldrParseText (CLDR_DocumentParserObject *dpo, const char *text, size_t size, int final) {
+#ifdef HAVE_EXPAT
   enum XML_Status status = XML_Parse(dpo->document.parser, text, size, final);
 
   switch (status) {
@@ -226,6 +234,7 @@ cldrParseText (CLDR_DocumentParserObject *dpo, const char *text, size_t size, in
       logMessage(LOG_WARNING, "unrecognized CLDR parse status: %d", status);
       break;
   }
+#endif /* HAVE_EXPAT */
 
   return 0;
 }
@@ -255,6 +264,7 @@ cldrParseFile (
   char *path = makeFilePath(cldrDefaultDirectory, name, cldrDefaultExtension);
 
   if (path) {
+    logMessage(LOG_DEBUG, "processing CLDR annotations file: %s", path);
     int fd = open(path, O_RDONLY);
 
     if (fd != -1) {
