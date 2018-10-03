@@ -194,6 +194,8 @@ cldrNewDocumentParser (CLDR_AnnotationHandler *handler, void *data) {
   } else {
     logMallocError();
   }
+#else /* HAVE_EXPAT */
+  logMessage(LOG_WARNING, "XML parsing support has not been included");
 #endif /* HAVE_EXPAT */
 
   return NULL;

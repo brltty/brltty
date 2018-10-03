@@ -296,15 +296,22 @@ static CLDR_ANNOTATION_HANDLER(handleAnnotation) {
     while (*utf8) {
       size_t utfs;
       wint_t wc = convertUtf8ToWchar(&utf8, &utfs);
-      if (wc == WEOF) break;
+
+      if (wc == WEOF) {
+        reportDataError(file, "malformed UTF-8 character");
+        break;
+      }
 
       ContractionTableCharacter *character = getCharacterEntry(wc, ctd);
-      if (!character) break;
+      if (!character) return 0;
 
-      if (!character->always) break;
-      ContractionTableRule *rule = getDataItem(ctd->area, character->always);
+      if (!character->always) {
+        reportDataError(file, "character not defined: U+%04X", wc);
+        continue;
+      }
 
       {
+        ContractionTableRule *rule = getDataItem(ctd->area, character->always);
         const char *byte = (char *)&rule->findrep[rule->findlen];
         const char *end = byte + rule->replen;
         while (byte < end) replace.bytes[replace.length++] = *byte++;
