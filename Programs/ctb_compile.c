@@ -281,9 +281,14 @@ static CLDR_ANNOTATION_HANDLER(handleAnnotation) {
     const char *byte = findUTF8;
     wchar_t *character = findCharacters;
     convertUtf8ToWchars(&byte, &character, findSize);
+    size_t length = character - findCharacters;
 
-    find.length = character - findCharacters;
-    wmemcpy(find.characters, findCharacters, find.length);
+    if (length > ARRAY_COUNT(find.characters)) {
+      reportDataError(file, "CLDR match too long");
+      return 1;
+    }
+
+    wmemcpy(find.characters, findCharacters, (find.length = length));
   }
 
   ByteOperand replace = {
@@ -314,11 +319,20 @@ static CLDR_ANNOTATION_HANDLER(handleAnnotation) {
         ContractionTableRule *rule = getDataItem(ctd->area, character->always);
         const char *byte = (char *)&rule->findrep[rule->findlen];
         const char *end = byte + rule->replen;
-        while (byte < end) replace.bytes[replace.length++] = *byte++;
+
+        while (byte < end) {
+          if (replace.length == ARRAY_COUNT(replace.bytes)) {
+            reportDataError(file, "CLDR name too long");
+            goto done;
+          }
+
+          replace.bytes[replace.length++] = *byte++;
+        }
       }
     }
   }
 
+done:
   return !!addRule(file, CTO_Always, &find, &replace, ahd->after, ahd->before, ctd);
 }
 
