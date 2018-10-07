@@ -21,15 +21,6 @@
 
 include de-vollschrift.ctb
 
-# Ausnahmen für Vokalgruppen aus de-vollschrift.ctb
-always barrier 12-356-1235-24-12456 shouldn't use the ie-contraction
-always bankier 12-235-13-24-12456 shouldn't use the ie-contraction
-midendword iell 24-15-12345 shouldn't use the ie-contraction
-always indien 35-145-24-14 shouldn't use the ie-contraction
-always medien 134-15-145-24-14 shouldn't use the ie-contraction
-always propriet 12345-1234-1235-24-15-2345 proprietär shouldn't use the ie-contraction
-always spezies 234-1234-15-1356-24-123456 shouldn't use the ie-contraction
-
 class e e
 class g g
 class h h
@@ -38,6 +29,18 @@ class n n
 class r r
 class st st
 class konsonant bcdfghjklmnpqrstvwxyz
+
+# Ausnahmen für Vokalgruppen aus de-vollschrift.ctb
+before e always arteri 356-2345-12456-24
+always barrier 12-356-1235-24-12456 shouldn't use the ie-contraction
+always bankier 12-235-13-24-12456 shouldn't use the ie-contraction
+midendword iell 24-15-12345 shouldn't use the ie-contraction
+always indien 35-145-24-14 shouldn't use the ie-contraction
+always karrier 13-356-1235-24-12456
+always medien 134-15-145-24-14 shouldn't use the ie-contraction
+always propriet 12345-1234-1235-24-15-2345 proprietär shouldn't use the ie-contraction
+endword serie 234-12456-24-15
+always spezies 234-1234-15-1356-24-123456 shouldn't use the ie-contraction
 
 # Due to their low usage frequency in typical german text the letters
 # c, q, x and y are reused for the en-, ll-, ex/mm/nis- and el-contractions.
@@ -50,6 +53,72 @@ always x 6-1346
 always X 6-1346
 always y 6-13456
 always Y 6-13456
+
+always europa 126-1235-135-1234-1
+begword neuro 1345-126-1235-135
+always olympia =
+
+# Doppelvokale
+always frisbee 124-1235-24-234-12-15-15
+always kaffee 13-1-124-124-15-15
+always coffee 6-14-135-124-124-15-15
+always toffee 2345-135-124-124-15-15
+always dragee 145-1235-1-1245-15-15
+always bungee 12-256-1245-15-15
+always dorothee 145-26-135-2345-125-15-15
+always cheese 1456-15-15-234-15
+always pappmaschee 1234-1-1234-1234-134-1-156-15-15
+always klischee 13-123-24-156-15-15
+always yankee 6-13456-235-13-15-15
+
+always gelee 1245-13456-15-15
+prfword geleerte 12346-123-15-15-1235-236
+always geleert 12346-123-15-15-1235-2345
+
+always soufflee =
+always defilee 145-15-124-24-123-15-15
+always klee 13-123-15-15
+always renommee 1235-14-135-1346-15-15
+always armee 356-134-15-15
+always resümee 1235-123456-1256-134-15-15
+always schnee 156-1345-15-15
+always trainee 2345-1235-1-24-1345-15-15
+always pralinee 1234-1235-1-123-35-15-15
+always portmonee 1234-26-2345-134-135-1345-15-15
+always kanapee 13-235-1-1234-15-15
+always portepee 1234-26-236-1234-15-15
+always separee 234-15-1234-356-15-15
+always referee 1235-15-124-12456-15-15
+always schikoree 156-24-13-26-15-15
+always spree 234-1234-1235-15-15
+always karree 13-356-1235-15-15
+always porree 1234-26-1235-15-15
+always püree 1234-1256-1235-15-15
+always frikassee 124-1235-24-13-1-2346-15-15
+always plissee 1234-123-24-2346-15-15
+always varietee 1236-356-24-15-2345-15-15
+always komitee 13-135-134-24-2345-15-15
+always trustee 2345-1235-136-23456-15-15
+always frottee 124-1235-135-2345-2345-15-15
+always queen =
+always halloween 125-1-12345-135-2456-15-15-1345
+
+always hawaii 125-1-2456-1-24-24
+always ascii 1-234-6-14-24-24
+
+always boom 12-135-135-134
+always voodoo 1236-135-135-145-135-135
+always yahoo 6-13456-1-125-135-135
+always waterloo 2456-1-2345-12456-123-135-135
+always shampoo 234-125-1-134-1234-135-135
+always tattoo 2345-1-2345-2345-135-135
+always daewoo 145-1-15-2456-135-135
+always zoo 1356-135-135
+
+always erdbeer 12456-145-12-15-15-1235
+always zwergerdbeer 1356-2456-12456-1245-12456-145-12-15-15-1235
+always ägypten 345-1245-6-13456-1234-2345-14 shouldn't use the te-contraction
+always aegypten 345-1245-6-13456-1234-2345-14 shouldn't use the te-contraction
 
 # Lautgruppenkürzungen
 midendword ach 56
@@ -106,12 +175,15 @@ before konsonant always ber 12-12456
 before konsonant always gel 1245-13456 klingelton shouldn't use the ge-contraction
 always ziegel 1356-346-1245-13456 shouldn't use the ge-contraction
 before konsonant always gen 1245-14
+begword lungen 123-256-1245-14 shouldn't use the ge-contraction
+begword magen 134-1-1245-14 shouldn't use the ge-contraction
 before konsonant always ten 2345-14
 always elefant 13456-15-124-235-2345
 before konsonant always ter 2345-12456
 always güter 1245-1256-2345-12456 should use the er-contraction
 always güteregel 1245-1256-236-1235-15-1245-13456
 always gütericht 1245-1256-236-2-3456
+always schulter 156-136-123-2345-12456 shouldn't use the te-contraction
 always theater 2345-125-15-1-2345-12456 shouldn't use the te-contraction
 midendword ich 3456
 midendword ig 45
@@ -436,7 +508,47 @@ word was 2456
 
 # Einformige Kürzungen, alleinstehend oder in Wortverbindungen
 word aber 1
-begword aber 2-1
+always aber 2-1
+always aberdeen 1-12-12456-145-15-15-1345
+midword aberech 1-23-1235-15-1456
+midendword abereich 1-23-1235-146-1456
+midendword abericht 1-23-2-3456
+begmidword aberkann 1-12-12456-13-235-1345
+always aberkenn 1-12-12456-13-14-1345
+begmidword abernt 1-12-12456-1345-2345
+prfword abernte 1-12-12456-1345-236
+prfword aberntest 1-12-12456-1345-236-23456
+prfword aberntet 1-12-12456-1345-236-2345
+prfword aberntete 1-12-12456-1345-236-236
+prfword abernteten 1-12-12456-1345-236-2345-14
+prfword aberntetest 1-12-12456-1345-236-236-23456
+prfword aberntetet 1-12-12456-1345-236-236-2345
+always aberrans 1-12-12456-1235-235-234
+always aberratio 1-12-12456-1235-1-2345-24-135
+always aberration 1-12-12456-1235-5-1345
+always aberrier 1-12-12456-1235-346-1235
+always aberzieh 1-12-12456-1356-346-125
+always aaberg 1-1-12-12456-1245
+always cabernet 6-14-1-12-12456-1345-15-2345
+sufword faber 124-1-12-12456
+midword gaber 1245-1-23-1235
+always gaberecht 1245-1-23-1235-2345
+always gaberegel 1245-1-23-1235-15-1245-13456
+sufword haber 125-1-12-12456
+always pharmaberat 1234-125-356-134-1-23-1235-1-2345
+always schaber 156-1-12-12456
+always eisschaber 146-234-156-1-12-12456
+always makaber 134-1-13-1-12-12456
+always kandelaber 13-235-145-13456-1-12-12456
+always laber 123-1-12-12456
+always annaberg 235-1345-1-12-12456-1245
+always araber 356-1-12-12456
+always graber 1245-1235-1-12-12456
+always traber 2345-1235-1-12-12456
+begmidword tabern 2345-1-12-12456-1345
+always waber 2456-1-12-12456
+always bergzabern 12-12456-1245-1356-1-12-12456-1345
+
 word auf 16
 always auf 2-16
 sufword aufbrauch 16-2-34
@@ -504,7 +616,10 @@ endword beins 12-1246-234 shouldn't use the bei-contraction
 before t always beinhal 23-35-125-25 shouldn't use the bei-contraction
 always beinhalter 12-1246-125-25-2345-12456 should use the ei-contraction
 always darmbein 145-356-134-12-1246
+always gabeinvent 1245-1-23-35-1236-14-2345 Übergabeinventar shouldn't use the bei-contraction
+always kreuzbein 13-1235-126-1356-12-1246
 always schienbein 156-346-1345-12-1246
+always schlüsselbein 156-123-1256-2346-13456-12-1246 shouldn't use the bei-contraction
 
 word dem 12356
 always dem 2-12356
@@ -1227,6 +1342,7 @@ contraction vl
 word vielleicht 1236-2345
 always volk 1236-13
 contraction vk
+always völk 5-1236-13
 word vom 1236-134
 contraction vm
 
