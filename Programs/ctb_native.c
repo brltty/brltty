@@ -681,6 +681,7 @@ selectRule (BrailleContractionData *bcd, int length) {
           case CTO_Always:
           case CTO_Repeatable:
           case CTO_Literal:
+          case CTO_Replace:
             return 1;
 
           case CTO_LargeSign:
@@ -976,7 +977,28 @@ contractText_native (BrailleContractionData *bcd) {
       if (bcd->current.rule->replen &&
           !((bcd->current.opcode == CTO_Always) && (bcd->current.length == 1))) {
         const wchar_t *srcnxt = bcd->input.current + bcd->current.length;
-        if (!putReplace(bcd, bcd->current.rule, *bcd->input.current)) goto done;
+
+        switch (bcd->current.opcode) {
+          case CTO_Replace: {
+            const ContractionTableRule *rule = bcd->current.rule;
+            const wchar_t *inputBuffer = &rule->findrep[rule->findlen];
+            int inputLength = rule->replen / sizeof(*inputBuffer);
+            int outputLength = bcd->output.end - bcd->output.current;
+
+            contractText(
+              bcd->table, inputBuffer, &inputLength,
+              bcd->output.current, &outputLength, NULL, CTB_NO_CURSOR
+            );
+
+            bcd->output.current += outputLength;
+            break;
+          }
+
+          default:
+            if (!putReplace(bcd, bcd->current.rule, *bcd->input.current)) goto done;
+            break;
+        }
+
         while (++bcd->input.current != srcnxt) clearOffset(bcd);
       } else {
         const wchar_t *srclim = bcd->input.current + bcd->current.length;

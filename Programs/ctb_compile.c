@@ -89,7 +89,7 @@ static const wchar_t *const opcodeNames[CTO_None] = {
   [CTO_After] = WS_C("after"),
   [CTO_Before] = WS_C("before"),
 
-  [CTO_CLDR] = WS_C("cldr")
+  [CTO_Replace] = WS_C("replace")
 };
 
 typedef struct {
@@ -173,11 +173,11 @@ saveCharacterTable (ContractionTableData *ctd) {
 }
 
 static ContractionTableRule *
-addRule (
+addByteRule (
   DataFile *file,
   ContractionTableOpcode opcode,
-  DataString *find,
-  ByteOperand *replace,
+  const DataString *find,
+  const ByteOperand *replace,
   ContractionTableCharacterAttributes after,
   ContractionTableCharacterAttributes before,
   ContractionTableData *ctd
@@ -260,80 +260,26 @@ addRule (
   return NULL;
 }
 
-typedef struct {
-  DataFile *file;
-  ContractionTableData *ctd;
-  ContractionTableCharacterAttributes after;
-  ContractionTableCharacterAttributes before;
-} AnnotationHandlerData;
+static ContractionTableRule *
+addTextRule (
+  DataFile *file,
+  ContractionTableOpcode opcode,
+  const DataString *find,
+  const DataString *replace,
+  ContractionTableCharacterAttributes after,
+  ContractionTableCharacterAttributes before,
+  ContractionTableData *ctd
+) {
+  ByteOperand text;
+  size_t length = replace->length * sizeof(replace->characters[0]);
 
-static CLDR_ANNOTATION_HANDLER(handleAnnotation) {
-  const AnnotationHandlerData *ahd = parameters->data;
-  DataFile *file = ahd->file;
-  ContractionTableData *ctd = ahd->ctd;
-
-  DataString find;
-  const char *findUTF8 = parameters->sequence;
-  size_t findSize = strlen(findUTF8) + 1;
-  wchar_t findCharacters[findSize];
-
-  {
-    const char *byte = findUTF8;
-    wchar_t *character = findCharacters;
-    convertUtf8ToWchars(&byte, &character, findSize);
-    size_t length = character - findCharacters;
-
-    if (length > ARRAY_COUNT(find.characters)) {
-      reportDataError(file, "CLDR match too long");
-      return 1;
-    }
-
-    wmemcpy(find.characters, findCharacters, (find.length = length));
+  if (length > ARRAY_COUNT(text.bytes)) {
+    reportDataError(file, "replace text too long");
+    length = ARRAY_COUNT(text.bytes);
   }
 
-  ByteOperand replace = {
-    .length = 0
-  };
-
-  {
-    const char *utf8 = parameters->name;
-
-    while (*utf8) {
-      size_t utfs;
-      wint_t wc = convertUtf8ToWchar(&utf8, &utfs);
-
-      if (wc == WEOF) {
-        reportDataError(file, "malformed UTF-8 character");
-        break;
-      }
-
-      ContractionTableCharacter *character = getCharacterEntry(wc, ctd);
-      if (!character) return 0;
-
-      if (!character->always) {
-        reportDataError(file, "character not defined: U+%04X", wc);
-        continue;
-      }
-
-      {
-        ContractionTableRule *rule = getDataItem(ctd->area, character->always);
-        const char *byte = (char *)&rule->findrep[rule->findlen];
-        const char *end = byte + rule->replen;
-
-        while (byte < end) {
-          if (replace.length == ARRAY_COUNT(replace.bytes)) {
-            reportDataError(file, "CLDR name too long");
-            goto done;
-          }
-
-          replace.bytes[replace.length++] = *byte++;
-        }
-      }
-    }
-  }
-
-done:
-  return !!addRule(file, CTO_Always, &find, &replace, ahd->after, ahd->before, ctd);
+  memcpy(text.bytes, replace->characters, (text.length = length));
+  return addByteRule(file, opcode, find, &text, after, before, ctd);
 }
 
 static const struct CharacterClass *
@@ -457,6 +403,11 @@ getFindText (DataFile *file, DataString *find) {
   return getDataString(file, find, 0, "find text");
 }
 
+static int
+getReplaceText (DataFile *file, DataString *replace) {
+  return getDataString(file, replace, 0, "replace text");
+}
+
 static DATA_OPERANDS_PROCESSOR(processContractionTableDirective) {
   ContractionTableData *ctd = data;
 
@@ -493,7 +444,7 @@ static DATA_OPERANDS_PROCESSOR(processContractionTableDirective) {
         ByteOperand replace;
         if (getFindText(file, &find))
           if (getReplacePattern(file, &replace))
-            if (!addRule(file, opcode, &find, &replace, after, before, ctd))
+            if (!addByteRule(file, opcode, &find, &replace, after, before, ctd))
               return 0;
         break;
       }
@@ -502,7 +453,7 @@ static DATA_OPERANDS_PROCESSOR(processContractionTableDirective) {
       case CTO_Literal: {
         DataString find;
         if (getFindText(file, &find))
-          if (!addRule(file, opcode, &find, NULL, after, before, ctd))
+          if (!addByteRule(file, opcode, &find, NULL, after, before, ctd))
             return 0;
         break;
       }
@@ -602,22 +553,16 @@ static DATA_OPERANDS_PROCESSOR(processContractionTableDirective) {
         break;
       }
 
-      case CTO_CLDR: {
-        DataOperand operand;
+      case CTO_Replace: {
+        DataString find;
 
-        if (getDataOperand(file, &operand, "CLDR file name")) {
-          char *name = makeUtf8FromWchars(operand.characters, operand.length, NULL);
+        if (getFindText(file, &find)) {
+          DataString replace;
 
-          if (name) {
-            AnnotationHandlerData ahd = {
-              .file = file,
-              .ctd = ctd,
-              .after = after,
-              .before = before
-            };
-
-            cldrParseFile(name, handleAnnotation, &ahd);
-            free(name);
+          if (getReplaceText(file, &replace)) {
+            if (!addTextRule(file, opcode, &find, &replace, after, before, ctd)) {
+              return 0;
+            }
           }
         }
 
@@ -633,9 +578,80 @@ static DATA_OPERANDS_PROCESSOR(processContractionTableDirective) {
   }
 }
 
+typedef struct {
+  DataFile *file;
+  ContractionTableData *ctd;
+} AnnotationHandlerData;
+
+static CLDR_ANNOTATION_HANDLER(handleAnnotation) {
+  const AnnotationHandlerData *ahd = parameters->data;
+  DataFile *file = ahd->file;
+  ContractionTableData *ctd = ahd->ctd;
+
+  DataString find;
+  const char *findUTF8 = parameters->sequence;
+  size_t findSize = strlen(findUTF8) + 1;
+  wchar_t findCharacters[findSize];
+  {
+    const char *byte = findUTF8;
+    wchar_t *character = findCharacters;
+    convertUtf8ToWchars(&byte, &character, findSize);
+    size_t length = character - findCharacters;
+
+    if (length > ARRAY_COUNT(find.characters)) {
+      reportDataError(file, "CLDR sequence too long");
+      return 1;
+    }
+
+    wmemcpy(find.characters, findCharacters, (find.length = length));
+  }
+
+  DataString replace;
+  const char *repUTF8 = parameters->name;
+  size_t repSize = strlen(repUTF8) + 1;
+  wchar_t repCharacters[repSize];
+  {
+    const char *byte = repUTF8;
+    wchar_t *character = repCharacters;
+    convertUtf8ToWchars(&byte, &character, repSize);
+    size_t length = character - repCharacters;
+
+    if (length > ARRAY_COUNT(replace.characters)) {
+      reportDataError(file, "CLDR name too long");
+      return 1;
+    }
+
+    wmemcpy(replace.characters, repCharacters, (replace.length = length));
+  }
+
+  return !!addTextRule(file, CTO_Replace, &find, &replace, 0, 0, ctd);
+}
+
+static DATA_OPERANDS_PROCESSOR(processCLDROperands) {
+  ContractionTableData *ctd = data;
+  DataOperand operand;
+
+  if (getDataOperand(file, &operand, "CLDR annotations file name/path")) {
+    char *name = makeUtf8FromWchars(operand.characters, operand.length, NULL);
+
+    if (name) {
+      AnnotationHandlerData ahd = {
+        .file = file,
+        .ctd = ctd
+      };
+
+      cldrParseFile(name, handleAnnotation, &ahd);
+      free(name);
+    }
+  }
+
+  return 1;
+}
+
 static DATA_OPERANDS_PROCESSOR(processContractionTableOperands) {
   BEGIN_DATA_DIRECTIVE_TABLE
     DATA_NESTING_DIRECTIVES,
+    {.name=WS_C("cldr"), .processor=processCLDROperands},
     {.name=NULL, .processor=processContractionTableDirective},
   END_DATA_DIRECTIVE_TABLE
 
