@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <string name="app_name">BRLTTY</string>
+  <string name="app_description">BRLTTY از دستگاههای خط بریل پشتیبانی میکند .</string>
+
+  <string name="about_activity_label">درباره نرم‌افزار</string>
+  <string name="application_name_label">نام</string>
+  <string name="application_version_label">نسخه</string>
+  <string name="application_copyright_label">حق انتشار</string>
+
+  <string name="input_service_name">BRLTTY خدمات ورودی</string>
+  <string name="input_service_type">صفحه کلیدهای دستگاه بریل</string>
+  <string name="input_service_not_enabled">خدمات ورودی فعال نشده است</string>
+  <string name="input_service_not_selected">خدمات ورودی انتخاب نشده است</string>
+  <string name="input_service_not_started">خدمات ورودی اجرا نشده است</string>
+  <string name="input_service_not_connected">خدمات ورودی وصل نیست</string>
+
+  <string name="checkbox_state_unchecked">خیر</string>
+  <string name="checkbox_state_checked">بله</string>
+
+  <string name="braille_channel_name">وضعیت دستگاه بریل</string>
+  <string name="braille_hint_tap">برای راهنمایی این نقطه را بفشارید</string>
+  <string name="braille_state_released">وضعیت انتشار دستگاه</string>
+  <string name="braille_state_waiting">صبر کنید</string>
+  <string name="braille_state_connected">متصل شد</string>
+
+  <string name="GLOBAL_BUTTON_NOTIFICATIONS">اعلانها</string>
+  <string name="GLOBAL_BUTTON_QUICK_SETTINGS">تنظیمات سریع</string>
+  <string name="GLOBAL_BUTTON_BACK">بازگشت</string>
+  <string name="GLOBAL_BUTTON_HOME">خانه</string>
+  <string name="GLOBAL_BUTTON_RECENT_APPS">نرم‌افزار های اخیر</string>
+  <string name="GLOBAL_BUTTON_OVERVIEW">گزارش کلی</string>
+
+  <string name="GLOBAL_BUTTON_SWITCH_INPUT_METHOD">روش تغییر ورودی</string>
+  <string name="GLOBAL_BUTTON_VIEW_USER_GUIDE">نمایش راهنمای کاربر</string>
+  <string name="GLOBAL_BUTTON_BROWSE_WEB_SITE">گشتن در وب سایت</string>
+  <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGE">گشتن در پیام‌های گروه</string>
+  <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">ارسال پیام در گروه</string>
+  <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">مدیریت عضویت در گروه</string>
+  <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">به‌روز رسانی نرم‌افزار</string>
+
+  <string name="SETTINGS_SCREEN_MAIN">BRLTTY تنظیمات</string>
+  <string name="SETTINGS_SCREEN_GENERAL">تنظیمات عمومی</string>
+  <string name="SETTINGS_SCREEN_MESSAGE">تنظیمات پیام</string>
+  <string name="SETTINGS_SCREEN_DEVICES">مدیریت دستگاه‌ها</string>
+  <string name="SETTINGS_SCREEN_ADVANCED">تنظیمات پیشرفته</string>
+
+  <string name="SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE">انتشار دستگاه بریل</string>
+  <string name="SETTINGS_BUTTON_NAVIGATION_MODE">حالت مسیریابی</string>
+  <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">پشتیبانی از گفتار</string>
+
+  <string name="SETTINGS_BUTTON_TEXT_TABLE">جدول نوشته</string>
+  <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">صفات جدول</string>
+  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">اختصار جدول</string>
+  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">جدول صفحه کلید</string>
+
+  <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">نمایش اعلامیه ها</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">نمایش اعلان ها</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">نمایش اخطارها</string>
+
+  <string name="SETTINGS_BUTTON_LOG_LEVEL">سطح گزارش</string>
+  <string name="SETTINGS_BUTTON_LOG_CATEGORIES">دسته بندی های گزارش</string>
+  <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">گزارش لحظات دسترسی</string>
+  <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">گزارش رندر صفحه</string>
+  <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">گزارش لحظات صفحه کلید</string>
+  <string name="SETTINGS_CHECKBOX_LOG_UNHANDLED_EVENTS">گزارش لحظات غیر مترقبه</string>
+
+  <string name="DEVICES_BUTTON_SELECTED">دستگاه انتخاب شده</string>
+  <string name="DEVICES_BUTTON_ADD">اضافه کردن دستگاه</string>
+  <string name="DEVICES_BUTTON_REMOVE">حذف دستگاه</string>
+
+  <string name="SELECTED_DEVICE_NONE">دستگاهی یافت نشد</string>
+  <string name="SELECTED_DEVICE_UNSELECTED">دستگاهی انتخاب نشد</string>
+
+  <string name="ADD_DEVICE_NAME">نام دستگاه</string>
+  <string name="ADD_DEVICE_METHOD">روش ارتباط دستگاه</string>
+  <string name="ADD_DEVICE_SELECT">دستگاهی را انتخاب کنید</string>
+  <string name="ADD_DEVICE_DRIVER">راه انداز بریل را انتخاب کنید</string>
+  <string name="ADD_DEVICE_DONE">با موفقیت انجام شد</string>
+  <string name="ADD_DEVICE_UNSELECTED_METHOD">روش ارتباط انتخاب نشد</string>
+  <string name="ADD_DEVICE_UNSELECTED_DEVICE">دستگاه انتخاب نشد</string>
+  <string name="ADD_DEVICE_UNSELECTED_DRIVER">راه انداز بریل انتخاب نشد</string>
+  <string name="ADD_DEVICE_NO_DEVICES">دستگاهی یافت نشد</string>
+  <string name="ADD_DEVICE_DUPLICATE_NAME">نام دستگاه تکراری است</string>
+
+  <string name="REMOVE_DEVICE_ASK">آیا واقعا مایلید که این دستگاه را حذف کنید؟</string>
+
+  <string name="SET_SELECTION_NONE">چیزی انتخاب نشده</string>
+
+  <string name="NAVIGATION_MODE_LABEL_List">لیست عمودی</string>
+  <string name="NAVIGATION_MODE_LABEL_Grid">خط کشی دو بعدی</string>
+
+  <string name="SPEECH_SUPPORT_LABEL_None">هیچ</string>
+  <string name="SPEECH_SUPPORT_LABEL_Native">سازگار</string>
+
+  <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">بلوتوث</string>
+  <string name="COMMUNICATION_METHOD_LABEL_Usb">یو اس بی</string>
+  <string name="COMMUNICATION_METHOD_LABEL_Serial">پورت سریال</string>
+
+  <string name="LOG_LEVEL_LABEL_debug">عیب یابی</string>
+  <string name="LOG_LEVEL_LABEL_information">اطلاعات</string>
+  <string name="LOG_LEVEL_LABEL_notice">توجه</string>
+  <string name="LOG_LEVEL_LABEL_warning">هشدار</string>
+  <string name="LOG_LEVEL_LABEL_error">خطا</string>
+  <string name="LOG_LEVEL_LABEL_critical">بحرانی</string>
+  <string name="LOG_LEVEL_LABEL_alert">اخطار</string>
+  <string name="LOG_LEVEL_LABEL_emergency">ضروری</string>
+
+  <string name="LOG_CATEGORY_LABEL_ingio">ورودی عمومی</string>
+  <string name="LOG_CATEGORY_LABEL_inpkts">بسته های ورودی</string>
+  <string name="LOG_CATEGORY_LABEL_outpkts">بسته های خروجی</string>
+  <string name="LOG_CATEGORY_LABEL_brlkeys">لحظات کلیدهای دستگاه بریل</string>
+  <string name="LOG_CATEGORY_LABEL_kbdkeys">لحظات کلیدهای صفحه کلید</string>
+  <string name="LOG_CATEGORY_LABEL_csrtrk">Cursor پیگیری</string>
+  <string name="LOG_CATEGORY_LABEL_csrrtg">Cursor مسیر سنجی</string>
+  <string name="LOG_CATEGORY_LABEL_update">به روز رسانی لحظات</string>
+  <string name="LOG_CATEGORY_LABEL_speech">لحظات گفتار</string>
+  <string name="LOG_CATEGORY_LABEL_async">Async لحظات</string>
+  <string name="LOG_CATEGORY_LABEL_server">لحظات سرویس دهنده</string>
+  <string name="LOG_CATEGORY_LABEL_serial">فعالیت سریال</string>
+  <string name="LOG_CATEGORY_LABEL_usb">فعالیت یو اس بی</string>
+  <string name="LOG_CATEGORY_LABEL_bluetooth">فعالیت بلوتوث</string>
+  <string name="LOG_CATEGORY_LABEL_brldrv">لحظات راه انداز بریل</string>
+  <string name="LOG_CATEGORY_LABEL_spkdrv">لحظات راه انداز گفتار</string>
+  <string name="LOG_CATEGORY_LABEL_scrdrv">لحظات راه انداز صفحه</string>
+
+  <string name="BRAILLE_DRIVER_LABEL_auto">شناسایی اتوماتیک</string>
+
+  <string name="TEXT_TABLE_LABEL_auto">انتخاب اتوماتیک بر مبنای محل</string>
+  <string name="TEXT_TABLE_LABEL_ar">عربی</string>
+  <string name="TEXT_TABLE_LABEL_as">Assamese</string>
+  <string name="TEXT_TABLE_LABEL_awa">Awadhi</string>
+  <string name="TEXT_TABLE_LABEL_bg">بلغاری</string>
+  <string name="TEXT_TABLE_LABEL_bh">Bihari</string>
+  <string name="TEXT_TABLE_LABEL_bn">بنگالی</string>
+  <string name="TEXT_TABLE_LABEL_bo">Tibetan</string>
+  <string name="TEXT_TABLE_LABEL_bra">Braj</string>
+  <string name="TEXT_TABLE_LABEL_brf">Braille Ready Format (for viewing .brf files within an editor or pager)</string>
+  <string name="TEXT_TABLE_LABEL_cs">چک</string>
+  <string name="TEXT_TABLE_LABEL_cy">ولزی</string>
+  <string name="TEXT_TABLE_LABEL_da_1252">Danish (Svend Thougaard, 2002-11-18)</string>
+  <string name="TEXT_TABLE_LABEL_da">دانمارکی</string>
+  <string name="TEXT_TABLE_LABEL_da_lt">Danish (LogText)</string>
+  <string name="TEXT_TABLE_LABEL_de">آلمانی</string>
+  <string name="TEXT_TABLE_LABEL_dra">Dravidian</string>
+  <string name="TEXT_TABLE_LABEL_el">یونانی</string>
+  <string name="TEXT_TABLE_LABEL_en_CA">انگلیسی (کانادا)</string>
+  <string name="TEXT_TABLE_LABEL_en">انگلیسی</string>
+  <string name="TEXT_TABLE_LABEL_en_GB">انگلیسی (انگلستان)</string>
+  <string name="TEXT_TABLE_LABEL_en_nabcc">انگلیسی (شمال آمریکا)</string>
+  <string name="TEXT_TABLE_LABEL_en_US">انگلیسی (ایالات متحده آمریکا)</string>
+  <string name="TEXT_TABLE_LABEL_eo">Esperanto</string>
+  <string name="TEXT_TABLE_LABEL_es">اسپانیایی</string>
+  <string name="TEXT_TABLE_LABEL_et">استونیایی</string>
+  <string name="TEXT_TABLE_LABEL_fi">فنلاندی</string>
+  <string name="TEXT_TABLE_LABEL_fr_2007">French (unified 2007)</string>
+  <string name="TEXT_TABLE_LABEL_fr_CA">فرانسوی (کانادا)</string>
+  <string name="TEXT_TABLE_LABEL_fr_cbifs">French (Code Braille Informatique Français Standard)</string>
+  <string name="TEXT_TABLE_LABEL_fr">فرانسوی</string>
+  <string name="TEXT_TABLE_LABEL_fr_FR">فرانسوی (فرانسه)</string>
+  <string name="TEXT_TABLE_LABEL_fr_vs">French (VisioBraille)</string>
+  <string name="TEXT_TABLE_LABEL_ga">ایرلندی</string>
+  <string name="TEXT_TABLE_LABEL_gd">Gaelic</string>
+  <string name="TEXT_TABLE_LABEL_gon">Gondi</string>
+  <string name="TEXT_TABLE_LABEL_gu">Gujarati</string>
+  <string name="TEXT_TABLE_LABEL_he">عبری</string>
+  <string name="TEXT_TABLE_LABEL_hi">هندی</string>
+  <string name="TEXT_TABLE_LABEL_hr">کرواسیایی</string>
+  <string name="TEXT_TABLE_LABEL_hu">مجاری</string>
+  <string name="TEXT_TABLE_LABEL_hy">ارمنی</string>
+  <string name="TEXT_TABLE_LABEL_is">ایسلندی</string>
+  <string name="TEXT_TABLE_LABEL_it">ایتالیایی</string>
+  <string name="TEXT_TABLE_LABEL_kha">Khasi</string>
+  <string name="TEXT_TABLE_LABEL_kn">Kannada</string>
+  <string name="TEXT_TABLE_LABEL_kok">Konkani</string>
+  <string name="TEXT_TABLE_LABEL_kru">Kurukh</string>
+  <string name="TEXT_TABLE_LABEL_lt">لیتوانیایی</string>
+  <string name="TEXT_TABLE_LABEL_lv">لتونیایی</string>
+  <string name="TEXT_TABLE_LABEL_mg">Malagasy</string>
+  <string name="TEXT_TABLE_LABEL_mi">Maori</string>
+  <string name="TEXT_TABLE_LABEL_ml">Malayalam</string>
+  <string name="TEXT_TABLE_LABEL_mni">Manipuri</string>
+  <string name="TEXT_TABLE_LABEL_mr">Marathi</string>
+  <string name="TEXT_TABLE_LABEL_mt">Maltese</string>
+  <string name="TEXT_TABLE_LABEL_mun">Munda</string>
+  <string name="TEXT_TABLE_LABEL_mwr">Marwari</string>
+  <string name="TEXT_TABLE_LABEL_ne">نپالی</string>
+  <string name="TEXT_TABLE_LABEL_new">Newari</string>
+  <string name="TEXT_TABLE_LABEL_nl_BE">Dutch (Belgium)</string>
+  <string name="TEXT_TABLE_LABEL_nl">Dutch</string>
+  <string name="TEXT_TABLE_LABEL_nl_NL">Dutch (Netherlands)</string>
+  <string name="TEXT_TABLE_LABEL_no_generic">Norwegian (with support for other languages)</string>
+  <string name="TEXT_TABLE_LABEL_no">Norwegian</string>
+  <string name="TEXT_TABLE_LABEL_no_oup">Norwegian (Offentlig utvalg for punktskrift)</string>
+  <string name="TEXT_TABLE_LABEL_nwc">Newari (old)</string>
+  <string name="TEXT_TABLE_LABEL_or">Oriya</string>
+  <string name="TEXT_TABLE_LABEL_pa">پنجابی</string>
+  <string name="TEXT_TABLE_LABEL_pi">Pali</string>
+  <string name="TEXT_TABLE_LABEL_pl">لهستانی</string>
+  <string name="TEXT_TABLE_LABEL_pt">پرتغالی</string>
+  <string name="TEXT_TABLE_LABEL_ro">Romanian</string>
+  <string name="TEXT_TABLE_LABEL_ru">روسی</string>
+  <string name="TEXT_TABLE_LABEL_sa">Sanskrit</string>
+  <string name="TEXT_TABLE_LABEL_sat">Santali</string>
+  <string name="TEXT_TABLE_LABEL_sd">Sindhi</string>
+  <string name="TEXT_TABLE_LABEL_sk">Slovak</string>
+  <string name="TEXT_TABLE_LABEL_sl">اسلونیایی</string>
+  <string name="TEXT_TABLE_LABEL_sv_1989">Swedish (1989 standard)</string>
+  <string name="TEXT_TABLE_LABEL_sv_1996">Swedish (1996 standard)</string>
+  <string name="TEXT_TABLE_LABEL_sv">سوئدی</string>
+  <string name="TEXT_TABLE_LABEL_sw">Swahili</string>
+  <string name="TEXT_TABLE_LABEL_ta">Tamil</string>
+  <string name="TEXT_TABLE_LABEL_te">Telugu</string>
+  <string name="TEXT_TABLE_LABEL_tr">ترکی</string>
+  <string name="TEXT_TABLE_LABEL_uk">اکراینی</string>
+  <string name="TEXT_TABLE_LABEL_vi">ویتنامی</string>
+
+  <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">جابه جایی رنگ پیش زمینه در ستون چپ با رنگ پس زمینه در ستون راست</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_left_right">رنگ پیش زمینه در ستون چپ و رنگ پس زمینه در ستون راست</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">رنگ پیش زمینه در مربع بالایی و رنگ پس زمینه در مربع پایینی</string>
+
+  <string name="CONTRACTION_TABLE_LABEL_af">آفریقایی (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_am">Amharic (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_basis">German (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift">German (contracted - 1998 standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">German (basic contractions)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">English (Unified English Braille, grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_us_g2">English (US, grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_es">Spanish (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_abrege">French (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_integral">French (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ha">Hausa (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_id">Indonesian (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ipa">International Phonetic Alphabet</string>
+  <string name="CONTRACTION_TABLE_LABEL_ja">Japanese (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g1">Korean (grade 1)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g2">Korean (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko">Korean (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_lt">Lithuanian (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_mg">Malagasy (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_mun">Munda (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_nl">Dutch (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ny">Chichewa (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_pt">Portuguese (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_si">Sinhalese (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_th">Thai (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_tw">Chinese (Taiwan, uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">Chinese (Taiwan, Unique Chinese Braille)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (contracted)</string>
+
+  <string name="KEYBOARD_TABLE_LABEL_پیبوست">بریل برای صفحه کلید بریل</string>
+  <string name="KEYBOARD_TABLE_LABEL_پیوست">دسکتاپ برای صفحه کلید کامل</string>
+  <string name="KEYBOARD_TABLE_LABEL_پیوست">کلید ماشین حساب برای مسیریابی بر پایه کلید ماشین حساب</string>
+  <string name="KEYBOARD_TABLE_LABEL_پیوست">لبتاپ برای کیبردهای بدون ماشین حساب</string>
+  <string name="KEYBOARD_TABLE_LABEL_sun_type6">پیوست برای صفحه کلید 6 گانه خورشیدی</string>
+</resources>
