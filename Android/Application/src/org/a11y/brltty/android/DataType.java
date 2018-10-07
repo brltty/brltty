@@ -3,6 +3,9 @@ package org.a11y.brltty.android;
 import java.io.File;
 import android.content.Context;
 
+import android.preference.PreferenceManager;
+import android.content.SharedPreferences;
+
 public enum DataType {
   TABLES,
   DRIVERS,
@@ -37,6 +40,10 @@ public enum DataType {
     }
 
     return dataContext;
+  }
+
+  public static SharedPreferences getPreferences () {
+    return PreferenceManager.getDefaultSharedPreferences(getContext());
   }
 
   private final static Integer DIRECTORY_MODE = Context.MODE_PRIVATE;

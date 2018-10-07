@@ -26,9 +26,6 @@ import android.content.Context;
 import android.content.ContentResolver;
 import android.provider.Settings;
 
-import android.preference.PreferenceManager;
-import android.content.SharedPreferences;
-
 import android.os.PowerManager;
 import android.app.KeyguardManager;
 import android.view.inputmethod.InputMethodManager;
@@ -103,10 +100,6 @@ public abstract class ApplicationUtilities {
 
   public static String getSelectedInputMethodIdentifier () {
     return getSecureSetting(Settings.Secure.DEFAULT_INPUT_METHOD);
-  }
-
-  public static SharedPreferences getPreferences () {
-    return PreferenceManager.getDefaultSharedPreferences(ApplicationContext.get());
   }
 
   private static final SingletonReference<PowerManager> powerManagerReference

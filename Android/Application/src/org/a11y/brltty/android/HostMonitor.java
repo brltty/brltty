@@ -6,6 +6,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import android.preference.PreferenceManager;
+
 import java.io.IOException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -61,6 +63,11 @@ public class HostMonitor extends BroadcastReceiver {
     Context toContext = DataType.getContext();
 
     if (toContext != fromContext) {
+      toContext.moveSharedPreferencesFrom(
+        fromContext,
+        PreferenceManager.getDefaultSharedPreferencesName(fromContext)
+      );
+
       for (DataType type : DataType.values()) {
         migrateData(
           fromContext.getDir(type.getName(), Context.MODE_PRIVATE),

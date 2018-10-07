@@ -84,7 +84,7 @@ public final class DeviceManager extends SettingsFragment {
   }
 
   public static String getSelectedDevice () {
-    return getSelectedDevice(ApplicationUtilities.getPreferences());
+    return getSelectedDevice(DataType.getPreferences());
   }
 
   private static DeviceDescriptor getDeviceDescriptor (SharedPreferences prefs, String device) {
@@ -131,7 +131,7 @@ public final class DeviceManager extends SettingsFragment {
   }
 
   public static DeviceDescriptor getDeviceDescriptor () {
-    return getDeviceDescriptor(ApplicationUtilities.getPreferences());
+    return getDeviceDescriptor(DataType.getPreferences());
   }
 
   private void updateRemoveDeviceScreen (String selectedDevice) {

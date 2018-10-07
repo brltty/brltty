@@ -138,7 +138,7 @@ public class CoreThread extends Thread {
   }
 
   private static SharedPreferences getPreferences () {
-    return ApplicationUtilities.getPreferences();
+    return DataType.getPreferences();
   }
 
   private boolean getBooleanSetting (int key, boolean defaultValue) {

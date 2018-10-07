@@ -71,7 +71,7 @@ public abstract class SettingsFragment extends PreferenceFragment {
   }
 
   protected final SharedPreferences getPreferences () {
-    return getPreferenceManager().getDefaultSharedPreferences(getActivity());
+    return DataType.getPreferences();
   }
 
   protected final Preference getPreference (int key) {
