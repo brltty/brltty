@@ -79,6 +79,7 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
 # xw (by --disable-x)
 
 "${sourceRoot}/configure" \
+   --disable-expat \
    --disable-gpm \
    --disable-iconv \
    --disable-icu \
