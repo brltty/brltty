@@ -23,9 +23,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern const char cldrDefaultDirectory[];
-extern const char cldrDefaultExtension[];
-
 typedef struct {
   const char *sequence;
   const char *name;
@@ -54,6 +51,9 @@ extern int cldrParseDocument (
   const char *document, size_t size,
   CLDR_AnnotationHandler *handler, void *data
 );
+
+extern const char cldrDefaultDirectory[];
+extern const char cldrDefaultExtension[];
 
 extern int cldrParseFile (
   const char *name,

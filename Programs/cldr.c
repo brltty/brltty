@@ -30,9 +30,6 @@
 #ifdef HAVE_EXPAT
 #include <expat.h>
 
-const char cldrDefaultDirectory[] = "/usr/share/unicode/cldr/common/annotations";
-const char cldrDefaultExtension[] = ".xml";
-
 struct CLDR_DocumentParserObjectStruct {
   struct {
     CLDR_AnnotationHandler *handler;
@@ -256,6 +253,9 @@ cldrParseDocument (
 
   return ok;
 }
+
+const char cldrDefaultDirectory[] = "/usr/share/unicode/cldr/common/annotations";
+const char cldrDefaultExtension[] = ".xml";
 
 int
 cldrParseFile (
