@@ -254,8 +254,8 @@ cldrParseDocument (
   return ok;
 }
 
-const char cldrDefaultDirectory[] = "/usr/share/unicode/cldr/common/annotations";
-const char cldrDefaultExtension[] = ".xml";
+const char cldrAnnotationsDirectory[] = "/usr/share/unicode/cldr/common/annotations";
+const char cldrAnnotationsExtension[] = ".xml";
 
 int
 cldrParseFile (
@@ -263,7 +263,7 @@ cldrParseFile (
   CLDR_AnnotationHandler *handler, void *data
 ) {
   int ok = 0;
-  char *path = makeFilePath(cldrDefaultDirectory, name, cldrDefaultExtension);
+  char *path = makeFilePath(cldrAnnotationsDirectory, name, cldrAnnotationsExtension);
 
   if (path) {
     logMessage(LOG_DEBUG, "processing CLDR annotations file: %s", path);
@@ -300,6 +300,14 @@ cldrParseFile (
       fd = -1;
     } else {
       logMessage(LOG_WARNING, "CLDR open error: %s: %s", strerror(errno), path);
+
+      if (errno == ENOENT) {
+        if (!isAbsolutePath(name)) {
+          if (!testDirectoryPath(cldrAnnotationsDirectory)) {
+            logPossibleCause("the package that defines the CLDR annotations directory is not installed");
+          }
+        }
+      }
     }
 
     free(path);

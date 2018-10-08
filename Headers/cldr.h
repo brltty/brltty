@@ -52,8 +52,8 @@ extern int cldrParseDocument (
   CLDR_AnnotationHandler *handler, void *data
 );
 
-extern const char cldrDefaultDirectory[];
-extern const char cldrDefaultExtension[];
+extern const char cldrAnnotationsDirectory[];
+extern const char cldrAnnotationsExtension[];
 
 extern int cldrParseFile (
   const char *name,
