@@ -31,6 +31,7 @@
 #include "dataarea.h"
 #include "brl_dots.h"
 #include "cldr.h"
+#include "unicode.h"
 #include "charset.h"
 #include "hostcmd.h"
 
@@ -639,6 +640,14 @@ static CLDR_ANNOTATION_HANDLER(handleAnnotation) {
     }
 
     wmemcpy(replace.characters, repCharacters, (replace.length = length));
+  }
+
+  {
+    size_t length = find.length;
+
+    if (normalizeCharacters(&length, find.characters, find.characters, NULL)) {
+      find.length = length;
+    }
   }
 
   return !!addTextRule(file, CTO_Replace, &find, &replace, 0, 0, ctd);

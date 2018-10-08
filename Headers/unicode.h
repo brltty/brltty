@@ -83,6 +83,11 @@ extern int getCharacterWidth (wchar_t character);
 extern int isBrailleCharacter (wchar_t character);
 extern int isEmojiCharacter (wchar_t character);
 
+extern int normalizeCharacters (
+  size_t *length, const wchar_t *characters,
+  wchar_t *buffer, unsigned int *map
+);
+
 extern wchar_t getBaseCharacter (wchar_t character);
 extern wchar_t getTransliteratedCharacter (wchar_t character);
 

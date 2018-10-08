@@ -23,110 +23,8 @@
 #include "log.h"
 #include "ctb_translate.h"
 #include "ttb.h"
+#include "unicode.h"
 #include "prefs.h"
-
-#ifdef HAVE_ICU
-#include <unicode/uchar.h>
-
-#ifdef HAVE_UNICODE_UNORM2_H
-#include <unicode/unorm2.h>
-#else /* unorm */
-#include <unicode/unorm.h>
-#endif /* unorm */
-
-static int
-nextBaseCharacter (const UChar **current, const UChar *end) {
-  do {
-    if (*current == end) return 0;
-  } while (u_getCombiningClass(*(*current)++));
-
-  return 1;
-}
-
-static int
-normalizeText (
-  BrailleContractionData *bcd,
-  const wchar_t *begin, const wchar_t *end,
-  wchar_t *buffer, size_t *length,
-  unsigned int *map
-) {
-  const size_t size = end - begin;
-  UChar source[size];
-  UChar target[size];
-  int32_t count;
-
-  {
-    const wchar_t *wc = begin;
-    UChar *uc = source;
-
-    while (wc < end) {
-      *uc++ = *wc++;
-    }
-  }
-
-  {
-    UErrorCode error = U_ZERO_ERROR;
-
-#ifdef HAVE_UNICODE_UNORM2_H
-    static const UNormalizer2 *normalizer = NULL;
-
-    if (!normalizer) {
-      normalizer = unorm2_getNFCInstance(&error);
-      if (!U_SUCCESS(error)) return 0;
-    }
-
-    count = unorm2_normalize(normalizer,
-                             source, ARRAY_COUNT(source),
-                             target, ARRAY_COUNT(target),
-                             &error);
-#else /* unorm */
-    count = unorm_normalize(source, ARRAY_COUNT(source),
-                            UNORM_NFC, 0,
-                            target, ARRAY_COUNT(target),
-                            &error);
-#endif /* unorm */
-
-    if (!U_SUCCESS(error)) return 0;
-  }
-
-  if (count == size) {
-    if (memcmp(source, target, (count * sizeof(source[0]))) == 0) {
-      return 0;
-    }
-  }
-
-  {
-    const UChar *src = source;
-    const UChar *srcEnd = src + ARRAY_COUNT(source);
-    const UChar *trg = target;
-    const UChar *trgEnd = target + count;
-    wchar_t *out = buffer;
-
-    while (trg < trgEnd) {
-      if (!nextBaseCharacter(&src, srcEnd)) return 0;
-      *map++ = src - source - 1;
-      *out++ = *trg++;
-    }
-
-    if (nextBaseCharacter(&src, srcEnd)) return 0;
-    *map = src - source;
-  }
-
-  *length = count;
-  return 1;
-}
-
-#else /* HAVE_ICU */
-static int
-normalizeText (
-  BrailleContractionData *bcd,
-  const wchar_t *begin, const wchar_t *end,
-  wchar_t *buffer, size_t *length,
-  unsigned int *map
-) {
-  return 0;
-}
-#endif /* HAVE_ICU */
 
 CharacterEntry *
 getCharacterEntry (BrailleContractionData *bcd, wchar_t character) {
@@ -342,12 +240,11 @@ contractText (
     int contracted;
 
     {
-      const size_t size = getInputCount(&bcd);
-      wchar_t buffer[size];
-      unsigned int map[size + 1];
-      size_t length;
+      size_t length = getInputCount(&bcd);
+      wchar_t buffer[length];
+      unsigned int map[length + 1];
 
-      if (normalizeText(&bcd, bcd.input.begin, bcd.input.end, buffer, &length, map)) {
+      if (normalizeCharacters(&length, bcd.input.begin, buffer, map)) {
         const wchar_t *oldBegin = bcd.input.begin;
         const wchar_t *oldEnd = bcd.input.end;
 

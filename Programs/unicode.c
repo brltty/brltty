@@ -18,6 +18,8 @@
 
 #include "prologue.h"
 
+#include <string.h>
+
 #include "log.h"
 #include "unicode.h"
 #include "ascii.h"
@@ -58,6 +60,15 @@ getByName (wchar_t *character, const char *name, UCharNameChoice choice) {
 static int
 hasBinaryProperty (wchar_t character, UProperty property) {
   return u_hasBinaryProperty(character, property);
+}
+
+static int
+nextBaseCharacter (const UChar **current, const UChar *end) {
+  do {
+    if (*current == end) return 0;
+  } while (u_getCombiningClass(*(*current)++));
+
+  return 1;
 }
 #endif /* HAVE_ICU */
 
@@ -167,6 +178,83 @@ isEmojiCharacter (wchar_t character) {
 #endif /* HAVE_ICU */
 
   return 0;
+}
+
+int
+normalizeCharacters (
+  size_t *length, const wchar_t *characters,
+  wchar_t *buffer, unsigned int *map
+) {
+#ifdef HAVE_ICU
+  if (*length < 2) return 0;
+
+  UChar source[*length];
+  UChar target[*length];
+  int32_t count;
+
+  {
+    const wchar_t *src = characters;
+    const wchar_t *end = src + *length;
+    UChar *trg = source;
+
+    while (src < end) {
+      *trg++ = *src++;
+    }
+  }
+
+  {
+    UErrorCode error = U_ZERO_ERROR;
+
+#ifdef HAVE_UNICODE_UNORM2_H
+    static const UNormalizer2 *normalizer = NULL;
+
+    if (!normalizer) {
+      normalizer = unorm2_getNFCInstance(&error);
+      if (!U_SUCCESS(error)) return 0;
+    }
+
+    count = unorm2_normalize(normalizer,
+                             source, ARRAY_COUNT(source),
+                             target, ARRAY_COUNT(target),
+                             &error);
+#else /* unorm */
+    count = unorm_normalize(source, ARRAY_COUNT(source),
+                            UNORM_NFC, 0,
+                            target, ARRAY_COUNT(target),
+                            &error);
+#endif /* unorm */
+
+    if (!U_SUCCESS(error)) return 0;
+  }
+
+  if (count == *length) {
+    if (memcmp(source, target, (*length * sizeof(source[0]))) == 0) {
+      return 0;
+    }
+  }
+
+  {
+    const UChar *src = source;
+    const UChar *srcEnd = src + ARRAY_COUNT(source);
+    const UChar *trg = target;
+    const UChar *trgEnd = target + count;
+    wchar_t *out = buffer;
+
+    while (trg < trgEnd) {
+      if (!nextBaseCharacter(&src, srcEnd)) return 0;
+      if (map) *map++ = src - source - 1;
+      *out++ = *trg++;
+    }
+
+    if (nextBaseCharacter(&src, srcEnd)) return 0;
+    if (map) *map = src - source;
+  }
+
+  *length = count;
+  return 1;
+#else /* HAVE_ICU */
+  return 0;
+#endif /* HAVE_ICU */
 }
 
 wchar_t
