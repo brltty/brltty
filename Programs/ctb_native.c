@@ -864,6 +864,12 @@ putSequence (BrailleContractionData *bcd, ContractionTableOffset offset) {
   return putCells(bcd, sequence+1, *sequence);
 }
 
+static void
+clearRemainingOffsets (BrailleContractionData *bcd) {
+  const wchar_t *next = bcd->input.current + bcd->current.length;
+  while (++bcd->input.current < next) clearOffset(bcd);
+}
+
 static int
 contractText_native (BrailleContractionData *bcd) {
   const wchar_t *srcword = NULL;
@@ -911,6 +917,22 @@ contractText_native (BrailleContractionData *bcd) {
           }
         }
 
+        continue;
+      }
+
+      if (bcd->current.opcode == CTO_Replace) {
+        const ContractionTableRule *rule = bcd->current.rule;
+        const wchar_t *inputBuffer = &rule->findrep[rule->findlen];
+        int inputLength = rule->replen / sizeof(*inputBuffer);
+        int outputLength = bcd->output.end - bcd->output.current;
+
+        contractText(
+          bcd->table, inputBuffer, &inputLength,
+          bcd->output.current, &outputLength, NULL, CTB_NO_CURSOR
+        );
+
+        bcd->output.current += outputLength;
+        clearRemainingOffsets(bcd);
         continue;
       }
 
@@ -976,30 +998,8 @@ contractText_native (BrailleContractionData *bcd) {
 
       if (bcd->current.rule->replen &&
           !((bcd->current.opcode == CTO_Always) && (bcd->current.length == 1))) {
-        const wchar_t *srcnxt = bcd->input.current + bcd->current.length;
-
-        switch (bcd->current.opcode) {
-          case CTO_Replace: {
-            const ContractionTableRule *rule = bcd->current.rule;
-            const wchar_t *inputBuffer = &rule->findrep[rule->findlen];
-            int inputLength = rule->replen / sizeof(*inputBuffer);
-            int outputLength = bcd->output.end - bcd->output.current;
-
-            contractText(
-              bcd->table, inputBuffer, &inputLength,
-              bcd->output.current, &outputLength, NULL, CTB_NO_CURSOR
-            );
-
-            bcd->output.current += outputLength;
-            break;
-          }
-
-          default:
-            if (!putReplace(bcd, bcd->current.rule, *bcd->input.current)) goto done;
-            break;
-        }
-
-        while (++bcd->input.current != srcnxt) clearOffset(bcd);
+        if (!putReplace(bcd, bcd->current.rule, *bcd->input.current)) goto done;
+        clearRemainingOffsets(bcd);
       } else {
         const wchar_t *srclim = bcd->input.current + bcd->current.length;
         while (1) {
@@ -1022,11 +1022,8 @@ contractText_native (BrailleContractionData *bcd) {
             destbeg = destlast;
 
             while ((bcd->input.current <= srclim) && checkCurrentRule(bcd, bcd->input.current)) {
-              const wchar_t *srcnxt = bcd->input.current + bcd->current.length;
-
-              do {
-                clearOffset(bcd);
-              } while (++bcd->input.current != srcnxt);
+              clearOffset(bcd);
+              clearRemainingOffsets(bcd);
             }
 
             break;
