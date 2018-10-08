@@ -354,6 +354,11 @@ allocateCharacterClasses (ContractionTableData *ctd) {
   return 1;
 }
 
+const wchar_t *
+getContractionTableOpcodeName (ContractionTableOpcode opcode) {
+  return opcodeNames[opcode];
+}
+
 static ContractionTableOpcode
 getOpcode (DataFile *file, ContractionTableData *ctd) {
   DataOperand operand;

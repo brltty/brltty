@@ -92,6 +92,8 @@ typedef enum {
   CTO_None /*for internal use only*/
 } ContractionTableOpcode;
 
+extern const wchar_t *getContractionTableOpcodeName (ContractionTableOpcode opcode);
+
 typedef struct {
   ContractionTableOffset next; /*next entry*/
   ContractionTableOpcode opcode; /*rule for testing validity of replacement*/
