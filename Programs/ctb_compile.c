@@ -134,7 +134,11 @@ getCharacterEntry (wchar_t character, ContractionTableData *ctd) {
 
     {
       ContractionTableCharacter *newTable = realloc(ctd->characterTable, (newSize * sizeof(*newTable)));
-      if (!newTable) return NULL;
+
+      if (!newTable) {
+        logMallocError();
+        return NULL;
+      }
 
       ctd->characterTable = newTable;
       ctd->characterTableSize = newSize;
@@ -213,20 +217,26 @@ addByteRule (
       ContractionTableOffset *offsetAddress;
 
       if (newRule->findlen == 1) {
-        ContractionTableCharacter *character = getCharacterEntry(newRule->findrep[0], ctd);
-        if (!character) return NULL;
-        offsetAddress = &character->rules;
+        ContractionTableCharacter *ctc = getCharacterEntry(newRule->findrep[0], ctd);
+        if (!ctc) return NULL;
 
         switch (newRule->opcode) {
           case CTO_Repeatable:
-            if (character->always) break;
+            if (ctc->always) break;
             /* fall through */
           case CTO_Always:
-            character->always = ruleOffset;
+            ctc->always = ruleOffset;
             /* fall through */
           default:
             break;
         }
+
+        if (iswupper(ctc->value)) {
+          ctc = getCharacterEntry(towlower(ctc->value), ctd);
+          if (!ctc) return NULL;
+        }
+
+        offsetAddress = &ctc->rules;
       } else {
         offsetAddress = &getContractionTableHeader(ctd)->rules[CTH(newRule->findrep)];
       }
@@ -312,10 +322,13 @@ addCharacterClass (DataFile *file, const wchar_t *name, int length, ContractionT
       class->next = ctd->characterClasses;
       ctd->characterClasses = class;
       return class;
+    } else {
+      logMallocError();
     }
+  } else {
+    reportDataError(file, "character class table overflow: %.*" PRIws, length, name);
   }
 
-  reportDataError(file, "character class table overflow: %.*" PRIws, length, name);
   return NULL;
 }
 
@@ -349,8 +362,10 @@ allocateCharacterClasses (ContractionTableData *ctd) {
       deallocateCharacterClasses(ctd);
       return 0;
     }
-    ++name;
+
+    name += 1;
   }
+
   return 1;
 }
 
@@ -447,10 +462,12 @@ static DATA_OPERANDS_PROCESSOR(processContractionTableDirective) {
       case CTO_Repeatable: {
         DataString find;
         ByteOperand replace;
+
         if (getFindText(file, &find))
           if (getReplacePattern(file, &replace))
             if (!addByteRule(file, opcode, &find, &replace, after, before, ctd))
               return 0;
+
         break;
       }
 
@@ -526,9 +543,7 @@ static DATA_OPERANDS_PROCESSOR(processContractionTableDirective) {
             DataString characters;
 
             if (getDataString(file, &characters, 0, "characters")) {
-              int index;
-
-              for (index=0; index<characters.length; index+=1) {
+              for (int index=0; index<characters.length; index+=1) {
                 wchar_t character = characters.characters[index];
                 ContractionTableCharacter *entry = getCharacterEntry(character, ctd);
                 if (!entry) return 0;
@@ -537,6 +552,7 @@ static DATA_OPERANDS_PROCESSOR(processContractionTableDirective) {
             }
           }
         }
+
         break;
       }
 
@@ -560,16 +576,12 @@ static DATA_OPERANDS_PROCESSOR(processContractionTableDirective) {
 
       case CTO_Replace: {
         DataString find;
+        DataString replace;
 
-        if (getFindText(file, &find)) {
-          DataString replace;
-
-          if (getReplaceText(file, &replace)) {
-            if (!addTextRule(file, opcode, &find, &replace, after, before, ctd)) {
+        if (getFindText(file, &find))
+          if (getReplaceText(file, &replace))
+            if (!addTextRule(file, opcode, &find, &replace, after, before, ctd))
               return 0;
-            }
-          }
-        }
 
         break;
       }
