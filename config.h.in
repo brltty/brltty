@@ -86,6 +86,12 @@ extern "C" {
 /* Define this if XML parsing support is to be included. */
 #undef HAVE_EXPAT
 
+/* Define this if PCR2 support is to be included. */
+#undef HAVE_PCRE
+
+/* Define this if PCRE2 support is to be included. */
+#undef HAVE_PCRE2
+
 /* Define this if the header file pwd.h exists. */
 #undef HAVE_PWD_H
 

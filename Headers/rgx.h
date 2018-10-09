@@ -29,34 +29,62 @@ extern RegularExpressionObject *newRegularExpressionObject (void *data);
 extern void destroyRegularExpressionObject (RegularExpressionObject *rgx);
 
 typedef struct {
-  const char *string;
-  const char *expression;
+  struct {
+    const wchar_t *characters;
+    void *internal;
+    size_t length;
+  } string;
 
   struct {
-    const void *array;
-    size_t size;
+    const wchar_t *characters;
+    size_t length;
+  } expression;
+
+  struct {
+    void *internal;
+    size_t count;
   } matches;
 
-  void *objectData;
-  void *patternData;
-  void *matchData;
+  struct {
+    void *object;
+    void *pattern;
+    void *match;
+  } data;
 } RegularExpressionHandlerParameters;
 
 #define REGULAR_EXPRESSION_HANDLER(name) void name (const RegularExpressionHandlerParameters *parameters)
 typedef REGULAR_EXPRESSION_HANDLER(RegularExpressionHandler);
 
-extern int addRegularExpression (
+extern int addRegularExpressionCharacters (
   RegularExpressionObject *rgx,
-  const char *expression,
-  size_t submatches,
-  RegularExpressionHandler *handler,
+  const wchar_t *characters, size_t length,
+  RegularExpressionHandler *handler, void *data
+);
+
+extern int
+addRegularExpressionString (
+  RegularExpressionObject *rgx,
+  const wchar_t *string,
+  RegularExpressionHandler *handler, void *data
+);
+
+extern int matchRegularExpressionsCharacters (
+  RegularExpressionObject *rgx,
+  const wchar_t *characters,
+  size_t length,
   void *data
 );
 
-extern int matchRegularExpressions (
+extern int
+matchRegularExpressionsString (
   RegularExpressionObject *rgx,
-  const char *string,
+  const wchar_t *string,
   void *data
+);
+
+extern unsigned int
+getRegularExpressionMatchCount (
+  const RegularExpressionHandlerParameters *parameters
 );
 
 extern int getRegularExpressionMatch (

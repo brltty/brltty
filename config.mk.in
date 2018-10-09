@@ -109,6 +109,9 @@ POLKIT_LIBS = @polkit_libs@
 EXPAT_INCLUDES = @expat_includes@
 EXPAT_LIBS = @expat_libs@
 
+PCRE_INCLUDES = @pcre_includes@
+PCRE_LIBS = @pcre_libs@
+
 LOUIS_INCLUDES = @louis_includes@
 LOUIS_LIBS = @louis_libs@
 
