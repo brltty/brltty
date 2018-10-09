@@ -491,7 +491,7 @@ main (int argc, char *argv[]) {
 
         if (exitStatus == PROG_EXIT_SUCCESS) {
           if (opt_verificationTable && *opt_verificationTable) {
-            if ((verificationTablePath = makeFilePath(opt_tablesDirectory, opt_verificationTable, VERIFICATION_TABLE_EXTENSION))) {
+            if ((verificationTablePath = makeFilePath(NULL, opt_verificationTable, VERIFICATION_TABLE_EXTENSION))) {
               const char *verificationTableMode = (argc > 0)? "w": "r";
 
               if ((verificationTableStream = openDataFile(verificationTablePath, verificationTableMode, 0))) {
