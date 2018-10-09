@@ -23,10 +23,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct RegularExpressionObjectStruct RegularExpressionObject;
+typedef struct RGX_ObjectStruct RGX_Object;
 
-extern RegularExpressionObject *newRegularExpressionObject (void *data);
-extern void destroyRegularExpressionObject (RegularExpressionObject *rgx);
+extern RGX_Object *rgxNewObject (void *data);
+extern void rgxDestroyObject (RGX_Object *rgx);
 
 typedef struct {
   struct {
@@ -50,45 +50,41 @@ typedef struct {
     void *pattern;
     void *match;
   } data;
-} RegularExpressionHandlerParameters;
+} RGX_MatchHandlerParameters;
 
-#define REGULAR_EXPRESSION_HANDLER(name) void name (const RegularExpressionHandlerParameters *parameters)
-typedef REGULAR_EXPRESSION_HANDLER(RegularExpressionHandler);
+#define RGX_MATCH_HANDLER(name) void name (const RGX_MatchHandlerParameters *parameters)
+typedef RGX_MATCH_HANDLER(RGX_MatchHandler);
 
-extern int addRegularExpressionCharacters (
-  RegularExpressionObject *rgx,
+extern int rgxAddPatternCharacters (
+  RGX_Object *rgx,
   const wchar_t *characters, size_t length,
-  RegularExpressionHandler *handler, void *data
+  RGX_MatchHandler *handler, void *data
 );
 
-extern int
-addRegularExpressionString (
-  RegularExpressionObject *rgx,
+extern int rgxAddPatternString (
+  RGX_Object *rgx,
   const wchar_t *string,
-  RegularExpressionHandler *handler, void *data
+  RGX_MatchHandler *handler, void *data
 );
 
-extern int matchRegularExpressionsCharacters (
-  RegularExpressionObject *rgx,
-  const wchar_t *characters,
-  size_t length,
+extern int rgxMatchPatternsCharacters (
+  RGX_Object *rgx,
+  const wchar_t *characters, size_t length,
   void *data
 );
 
-extern int
-matchRegularExpressionsString (
-  RegularExpressionObject *rgx,
+extern int rgxMatchPatternsString (
+  RGX_Object *rgx,
   const wchar_t *string,
   void *data
 );
 
-extern unsigned int
-getRegularExpressionMatchCount (
-  const RegularExpressionHandlerParameters *parameters
+extern unsigned int rgxGetMatchCount (
+  const RGX_MatchHandlerParameters *parameters
 );
 
-extern int getRegularExpressionMatch (
-  const RegularExpressionHandlerParameters *parameters,
+extern int rgxGetMatch (
+  const RGX_MatchHandlerParameters *parameters,
   unsigned int index, int *start, int *end
 );
 

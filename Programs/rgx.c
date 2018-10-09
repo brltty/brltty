@@ -31,7 +31,7 @@
 #include "rgx.h"
 #include "queue.h"
 
-struct RegularExpressionObjectStruct {
+struct RGX_ObjectStruct {
   uint32_t options;
   Queue *patterns;
   void *data;
@@ -49,12 +49,12 @@ typedef struct {
   } compiled;
 
   uint32_t options;
-  RegularExpressionHandler *handler;
+  RGX_MatchHandler *handler;
   void *data;
-} RegularExpressionPattern;
+} RGX_Pattern;
 
 static void
-logRegularExpressionError (const RegularExpressionPattern *pattern, int error) {
+rgxLogError (const RGX_Pattern *pattern, int error) {
   size_t size = 0X100;
   PCRE2_UCHAR message[size];
   pcre2_get_error_message(error, message, size);
@@ -73,8 +73,8 @@ logRegularExpressionError (const RegularExpressionPattern *pattern, int error) {
 }
 
 static void
-deallocateRegularExpressionPattern (void *item, void *data) {
-  RegularExpressionPattern *pattern = item;
+rgxDeallocatePattern (void *item, void *data) {
+  RGX_Pattern *pattern = item;
 
   pcre2_match_data_free(pattern->compiled.matches);
   pcre2_code_free(pattern->compiled.code);
@@ -83,12 +83,12 @@ deallocateRegularExpressionPattern (void *item, void *data) {
 }
 
 int
-addRegularExpressionCharacters (
-  RegularExpressionObject *rgx,
+rgxAddPatternCharacters (
+  RGX_Object *rgx,
   const wchar_t *characters, size_t length,
-  RegularExpressionHandler *handler, void *data
+  RGX_MatchHandler *handler, void *data
 ) {
-  RegularExpressionPattern *pattern;
+  RGX_Pattern *pattern;
 
   if ((pattern = malloc(sizeof(*pattern)))) {
     memset(pattern, 0, sizeof(*pattern));
@@ -136,7 +136,7 @@ addRegularExpressionCharacters (
 
         pcre2_code_free(pattern->compiled.code);
       } else {
-        logRegularExpressionError(pattern, error);
+        rgxLogError(pattern, error);
       }
 
       free(pattern->expression.characters);
@@ -153,18 +153,18 @@ addRegularExpressionCharacters (
 }
 
 int
-addRegularExpressionString (
-  RegularExpressionObject *rgx,
+rgxAddPatternString (
+  RGX_Object *rgx,
   const wchar_t *string,
-  RegularExpressionHandler *handler, void *data
+  RGX_MatchHandler *handler, void *data
 ) {
-  return addRegularExpressionCharacters(rgx, string, wcslen(string), handler, data);
+  return rgxAddPatternCharacters(rgx, string, wcslen(string), handler, data);
 }
 
 static int
-testRegularExpressionPattern (const void *item, void *data) {
-  const RegularExpressionPattern *pattern = item;
-  RegularExpressionHandlerParameters *parameters = data;
+rgxTestPattern (const void *item, void *data) {
+  const RGX_Pattern *pattern = item;
+  RGX_MatchHandlerParameters *parameters = data;
 
   int matches = pcre2_match(
     pattern->compiled.code,
@@ -185,15 +185,14 @@ testRegularExpressionPattern (const void *item, void *data) {
     return 1;
   }
 
-  if (matches != PCRE2_ERROR_NOMATCH) logRegularExpressionError(pattern, matches);
+  if (matches != PCRE2_ERROR_NOMATCH) rgxLogError(pattern, matches);
   return 0;
 }
 
 int
-matchRegularExpressionsCharacters (
-  RegularExpressionObject *rgx,
-  const wchar_t *characters,
-  size_t length,
+rgxMatchPatternsCharacters (
+  RGX_Object *rgx,
+  const wchar_t *characters, size_t length,
   void *data
 ) {
   PCRE2_UCHAR internal[length];
@@ -202,7 +201,7 @@ matchRegularExpressionsCharacters (
     internal[index] = characters[index];
   }
 
-  RegularExpressionHandlerParameters parameters = {
+  RGX_MatchHandlerParameters parameters = {
     .string = {
       .characters = characters,
       .internal = internal,
@@ -215,28 +214,28 @@ matchRegularExpressionsCharacters (
     }
   };
 
-  return !!findElement(rgx->patterns, testRegularExpressionPattern, &parameters);
+  return !!findElement(rgx->patterns, rgxTestPattern, &parameters);
 }
 
 int
-matchRegularExpressionsString (
-  RegularExpressionObject *rgx,
+rgxMatchPatternsString (
+  RGX_Object *rgx,
   const wchar_t *string,
   void *data
 ) {
-  return matchRegularExpressionsCharacters(rgx, string, wcslen(string), data);
+  return rgxMatchPatternsCharacters(rgx, string, wcslen(string), data);
 }
 
 unsigned int
-getRegularExpressionMatchCount (
-  const RegularExpressionHandlerParameters *parameters
+rgxGetMatchCount (
+  const RGX_MatchHandlerParameters *parameters
 ) {
   return parameters->matches.count;
 }
 
 int
-getRegularExpressionMatch (
-  const RegularExpressionHandlerParameters *parameters,
+rgxGetMatch (
+  const RGX_MatchHandlerParameters *parameters,
   unsigned int index, int *start, int *end
 ) {
   if (index < 0) return 0;
@@ -250,16 +249,16 @@ getRegularExpressionMatch (
   return 1;
 }
 
-RegularExpressionObject *
-newRegularExpressionObject (void *data) {
-  RegularExpressionObject *rgx;
+RGX_Object *
+rgxNewObject (void *data) {
+  RGX_Object *rgx;
 
   if ((rgx = malloc(sizeof(*rgx)))) {
     memset(rgx, 0, sizeof(*rgx));
     rgx->data = data;
     rgx->options = 0;
 
-    if ((rgx->patterns = newQueue(deallocateRegularExpressionPattern, NULL))) {
+    if ((rgx->patterns = newQueue(rgxDeallocatePattern, NULL))) {
       return rgx;
     }
 
@@ -272,7 +271,7 @@ newRegularExpressionObject (void *data) {
 }
 
 void
-destroyRegularExpressionObject (RegularExpressionObject *rgx) {
+rgxDestroyObject (RGX_Object *rgx) {
   deallocateQueue(rgx->patterns);
   free(rgx);
 }
