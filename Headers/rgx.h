@@ -67,6 +67,12 @@ extern int rgxAddPatternString (
   RGX_MatchHandler *handler, void *data
 );
 
+extern int rgxAddPatternUTF8 (
+  RGX_Object *rgx,
+  const char *string,
+  RGX_MatchHandler *handler, void *data
+);
+
 extern int rgxMatchPatternsCharacters (
   RGX_Object *rgx,
   const wchar_t *characters, size_t length,
@@ -77,6 +83,12 @@ extern int rgxMatchPatternsString (
   RGX_Object *rgx,
   const wchar_t *string,
   void *data
+);
+
+extern int rgxAddPatternUTF8 (
+  RGX_Object *rgx,
+  const char *string,
+  RGX_MatchHandler *handler, void *data
 );
 
 extern unsigned int rgxGetMatchCount (

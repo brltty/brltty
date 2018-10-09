@@ -29,6 +29,7 @@
 
 #include "log.h"
 #include "rgx.h"
+#include "charset.h"
 #include "queue.h"
 
 struct RGX_ObjectStruct {
@@ -161,6 +162,24 @@ rgxAddPatternString (
   return rgxAddPatternCharacters(rgx, string, wcslen(string), handler, data);
 }
 
+int
+rgxAddPatternUTF8 (
+  RGX_Object *rgx,
+  const char *string,
+  RGX_MatchHandler *handler, void *data
+) {
+  size_t size = strlen(string) + 1;
+  wchar_t characters[size];
+
+  const char *from = string;
+  wchar_t *to = characters;
+  convertUtf8ToWchars(&from, &to, size);
+
+  return rgxAddPatternCharacters(
+    rgx, characters, (to - characters), handler, data
+  );
+}
+
 static int
 rgxTestPattern (const void *item, void *data) {
   const RGX_Pattern *pattern = item;
@@ -224,6 +243,24 @@ rgxMatchPatternsString (
   void *data
 ) {
   return rgxMatchPatternsCharacters(rgx, string, wcslen(string), data);
+}
+
+int
+rgxMatchPatternsUTF8 (
+  RGX_Object *rgx,
+  const char *string,
+  void *data
+) {
+  size_t size = strlen(string) + 1;
+  wchar_t characters[size];
+
+  const char *from = string;
+  wchar_t *to = characters;
+  convertUtf8ToWchars(&from, &to, size);
+
+  return rgxMatchPatternsCharacters(
+    rgx, characters, (to - characters), data
+  );
 }
 
 unsigned int
