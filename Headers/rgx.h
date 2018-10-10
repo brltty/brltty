@@ -24,7 +24,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct RGX_ObjectStruct RGX_Object;
-typedef struct RGX_PatternStruct RGX_Pattern;
+typedef struct RGX_MatcherStruct RGX_Matcher;
 
 extern RGX_Object *rgxNewObject (void *data);
 extern void rgxDestroyObject (RGX_Object *rgx);
@@ -42,7 +42,7 @@ typedef struct {
   } text;
 
   struct {
-    void *internal;
+    void *data;
     size_t count;
   } captures;
 
@@ -56,19 +56,19 @@ typedef struct {
 #define RGX_MATCH_HANDLER(name) void name (const RGX_Match *match)
 typedef RGX_MATCH_HANDLER(RGX_MatchHandler);
 
-extern RGX_Pattern *rgxAddPatternCharacters (
+extern RGX_Matcher *rgxAddPatternCharacters (
   RGX_Object *rgx,
   const wchar_t *characters, size_t length,
   RGX_MatchHandler *handler, void *data
 );
 
-extern RGX_Pattern *rgxAddPatternString (
+extern RGX_Matcher *rgxAddPatternString (
   RGX_Object *rgx,
   const wchar_t *string,
   RGX_MatchHandler *handler, void *data
 );
 
-extern RGX_Pattern *rgxAddPatternUTF8 (
+extern RGX_Matcher *rgxAddPatternUTF8 (
   RGX_Object *rgx,
   const char *string,
   RGX_MatchHandler *handler, void *data
@@ -98,7 +98,7 @@ extern size_t rgxGetCaptureCount (
 
 extern int rgxGetCaptureBounds (
   const RGX_Match *match,
-  unsigned int index, int *from, int *to
+  size_t index, size_t *from, size_t *to
 );
 
 typedef enum {
@@ -109,10 +109,11 @@ typedef enum {
 } RGX_OptionAction;
 
 typedef enum {
-  RGX_COMPILE_IGNORE_CASE,
-  RGX_COMPILE_LITERAL_TEXT,
   RGX_COMPILE_ANCHOR_START,
   RGX_COMPILE_ANCHOR_END,
+
+  RGX_COMPILE_IGNORE_CASE,
+  RGX_COMPILE_LITERAL_TEXT,
   RGX_COMPILE_UNICODE_PROPERTIES,
 } RGX_CompileOption;
 
@@ -128,7 +129,7 @@ typedef enum {
 } RGX_MatchOption;
 
 extern int rgxMatchOption (
-  RGX_Pattern *pattern,
+  RGX_Matcher *matcher,
   RGX_OptionAction action,
   RGX_MatchOption option
 );

@@ -198,12 +198,12 @@ addPromptPattern (const char *string) {
     rgxCompileOption(promptPatterns, RGX_OPTION_SET, RGX_COMPILE_ANCHOR_START);
   }
 
-  RGX_Pattern *pattern = rgxAddPatternUTF8(
+  RGX_Matcher *matcher = rgxAddPatternUTF8(
     promptPatterns, string,
     handlePromptMatch, NULL
   );
 
-  if (!pattern) return 0;
+  if (!matcher) return 0;
   return 1;
 }
 
