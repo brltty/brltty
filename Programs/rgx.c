@@ -205,7 +205,12 @@ rgxTestMatcher (const void *item, void *data) {
     0, matcher->options, matcher->compiled.data, NULL
   );
 
-  if (count > 0) {
+  if (count < 1) {
+    if (count != PCRE2_ERROR_NOMATCH) rgxLogError(matcher, count, NULL);
+    return 0;
+  }
+
+  {
     RGX_MatchHandler *handler = matcher->handler;
 
     if (handler) {
@@ -218,12 +223,9 @@ rgxTestMatcher (const void *item, void *data) {
       match->data.pattern = matcher->data;
       handler(match);
     }
-
-    return 1;
   }
 
-  if (count != PCRE2_ERROR_NOMATCH) rgxLogError(matcher, count, NULL);
-  return 0;
+  return 1;
 }
 
 int
