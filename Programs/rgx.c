@@ -42,6 +42,8 @@ struct RGX_ObjectStruct {
 };
 
 struct RGX_MatcherStruct {
+  void *data;
+  RGX_MatchHandler *handler;
   RGX_OptionsType options;
 
   struct {
@@ -53,11 +55,6 @@ struct RGX_MatcherStruct {
     pcre2_code *code;
     pcre2_match_data *data;
   } compiled;
-
-  struct {
-    void *data;
-    RGX_MatchHandler *function;
-  } handler;
 };
 
 static void
@@ -106,10 +103,9 @@ rgxAddPatternCharacters (
 
   if ((matcher = malloc(sizeof(*matcher)))) {
     memset(matcher, 0, sizeof(*matcher));
+    matcher->data = data;
+    matcher->handler = handler;
     matcher->options = 0;
-
-    matcher->handler.data = data;
-    matcher->handler.function = handler;
 
     matcher->pattern.characters = calloc(
       (matcher->pattern.length = length),
@@ -204,17 +200,17 @@ rgxTestMatcher (const void *item, void *data) {
   );
 
   if (count > 0) {
-    match->data.pattern = matcher->handler.data;
+    RGX_MatchHandler *handler = matcher->handler;
 
-    match->pattern.characters = matcher->pattern.characters;
-    match->pattern.length = matcher->pattern.length;
+    if (handler) {
+      match->captures.count = count - 1;
+      match->captures.data = matcher->compiled.data;
 
-    match->captures.data = matcher->compiled.data;
-    match->captures.count = count - 1;
+      match->pattern.characters = matcher->pattern.characters;
+      match->pattern.length = matcher->pattern.length;
 
-    {
-      RGX_MatchHandler *handler = matcher->handler.function;
-      if (handler) handler(match);
+      match->data.pattern = matcher->data;
+      handler(match);
     }
 
     return 1;
@@ -308,8 +304,8 @@ rgxNewObject (void *data) {
 
   if ((rgx = malloc(sizeof(*rgx)))) {
     memset(rgx, 0, sizeof(*rgx));
-    rgx->options = 0;
     rgx->data = data;
+    rgx->options = 0;
 
     if ((rgx->matchers = newQueue(rgxDeallocateMatcher, NULL))) {
       return rgx;
