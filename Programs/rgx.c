@@ -79,6 +79,12 @@ rgxLogError (const RGX_Matcher *matcher, int error, PCRE2_SIZE *offset) {
     }
   }
 
+  if (matcher) {
+    STR_PRINTF(
+      ": %.*"PRIws, (int)matcher->pattern.length, matcher->pattern.characters
+    );
+  }
+
   STR_END;
   logMessage(LOG_WARNING, "%s", log);
 }
