@@ -23,22 +23,24 @@
 #ifdef HAVE_PCRE2
 #define PCRE2_CODE_UNIT_WIDTH 32
 #include <pcre2.h>
+
 #else /* Unicode regular expression support */
 #warning Unicode regular expression support has not been included
 #endif /* Unicode regular expression support */
 
 #include "log.h"
+#include "strfmt.h"
 #include "rgx.h"
 #include "charset.h"
 #include "queue.h"
 
 struct RGX_ObjectStruct {
-  uint32_t options;
-  Queue *patterns;
   void *data;
+  Queue *patterns;
+  uint32_t options;
 };
 
-typedef struct {
+struct RGX_PatternStruct {
   struct {
     wchar_t *characters;
     size_t length;
@@ -49,28 +51,37 @@ typedef struct {
     pcre2_match_data *matches;
   } compiled;
 
-  uint32_t options;
-  RGX_MatchHandler *handler;
-  void *data;
-} RGX_Pattern;
+  struct {
+    void *data;
+    RGX_MatchHandler *handler;
+    uint32_t options;
+  } match;
+};
 
 static void
-rgxLogError (const RGX_Pattern *pattern, int error) {
-  size_t size = 0X100;
-  PCRE2_UCHAR message[size];
-  pcre2_get_error_message(error, message, size);
-  wchar_t characters[size];
+rgxLogError (const RGX_Pattern *pattern, int error, PCRE2_SIZE *offset) {
+  char log[0X100];
+  STR_BEGIN(log, sizeof(log));
+
+  STR_PRINTF("regular expression error %d", error);
+  if (offset) STR_PRINTF(" at offset %"PRIsize, *offset);
 
   {
-    const PCRE2_UCHAR *from = message;
-    wchar_t *to = characters;
-    while ((*to++ = *from++));
+    size_t size = 0X100;
+    PCRE2_UCHAR message[size];
+    int length = pcre2_get_error_message(error, message, size);
+
+    if (length > 0) {
+      STR_PRINTF(": ");
+
+      for (unsigned int index=0; index<length; index+=1) {
+        STR_PRINTF("%"PRIwc, message[index]);
+      }
+    }
   }
 
-  logMessage(LOG_WARNING,
-    "regular expression error %d: %"PRIws,
-    error, characters
-  );
+  STR_END;
+  logMessage(LOG_WARNING, "%s", log);
 }
 
 static void
@@ -83,7 +94,7 @@ rgxDeallocatePattern (void *item, void *data) {
   free(pattern);
 }
 
-int
+RGX_Pattern *
 rgxAddPatternCharacters (
   RGX_Object *rgx,
   const wchar_t *characters, size_t length,
@@ -94,9 +105,9 @@ rgxAddPatternCharacters (
   if ((pattern = malloc(sizeof(*pattern)))) {
     memset(pattern, 0, sizeof(*pattern));
 
-    pattern->options = 0;
-    pattern->handler = handler;
-    pattern->data = data;
+    pattern->match.data = data;
+    pattern->match.handler = handler;
+    pattern->match.options = 0;
 
     pattern->expression.characters = calloc(
       (pattern->expression.length = length),
@@ -127,7 +138,7 @@ rgxAddPatternCharacters (
 
         if (pattern->compiled.matches) {
           if (enqueueItem(rgx->patterns, pattern)) {
-            return 1;
+            return pattern;
           }
 
           pcre2_match_data_free(pattern->compiled.matches);
@@ -137,7 +148,7 @@ rgxAddPatternCharacters (
 
         pcre2_code_free(pattern->compiled.code);
       } else {
-        rgxLogError(pattern, error);
+        rgxLogError(pattern, error, &offset);
       }
 
       free(pattern->expression.characters);
@@ -150,10 +161,10 @@ rgxAddPatternCharacters (
     logMallocError();
   }
 
-  return 0;
+  return NULL;
 }
 
-int
+RGX_Pattern *
 rgxAddPatternString (
   RGX_Object *rgx,
   const wchar_t *string,
@@ -162,7 +173,7 @@ rgxAddPatternString (
   return rgxAddPatternCharacters(rgx, string, wcslen(string), handler, data);
 }
 
-int
+RGX_Pattern *
 rgxAddPatternUTF8 (
   RGX_Object *rgx,
   const char *string,
@@ -183,33 +194,32 @@ rgxAddPatternUTF8 (
 static int
 rgxTestPattern (const void *item, void *data) {
   const RGX_Pattern *pattern = item;
-  RGX_MatchHandlerParameters *parameters = data;
+  RGX_Match *match = data;
 
-  int matches = pcre2_match(
-    pattern->compiled.code,
-    parameters->string.internal, parameters->string.length,
-    0, pattern->options, pattern->compiled.matches, NULL
+  int count = pcre2_match(
+    pattern->compiled.code, match->text.internal, match->text.length,
+    0, pattern->match.options, pattern->compiled.matches, NULL
   );
 
-  if (matches > 0) {
-    parameters->data.pattern = pattern->data;
+  if (count > 0) {
+    match->data.pattern = pattern->match.data;
 
-    parameters->expression.characters = pattern->expression.characters;
-    parameters->expression.length = pattern->expression.length;
+    match->pattern.characters = pattern->expression.characters;
+    match->pattern.length = pattern->expression.length;
 
-    parameters->matches.internal = pattern->compiled.matches;
-    parameters->matches.count = matches - 1;
+    match->captures.internal = pattern->compiled.matches;
+    match->captures.count = count - 1;
 
-    pattern->handler(parameters);
+    pattern->match.handler(match);
     return 1;
   }
 
-  if (matches != PCRE2_ERROR_NOMATCH) rgxLogError(pattern, matches);
+  if (count != PCRE2_ERROR_NOMATCH) rgxLogError(pattern, count, NULL);
   return 0;
 }
 
 int
-rgxMatchPatternsCharacters (
+rgxMatchTextCharacters (
   RGX_Object *rgx,
   const wchar_t *characters, size_t length,
   void *data
@@ -220,10 +230,10 @@ rgxMatchPatternsCharacters (
     internal[index] = characters[index];
   }
 
-  RGX_MatchHandlerParameters parameters = {
-    .string = {
-      .characters = characters,
+  RGX_Match match = {
+    .text = {
       .internal = internal,
+      .characters = characters,
       .length = length
     },
 
@@ -233,20 +243,20 @@ rgxMatchPatternsCharacters (
     }
   };
 
-  return !!findElement(rgx->patterns, rgxTestPattern, &parameters);
+  return !!findElement(rgx->patterns, rgxTestPattern, &match);
 }
 
 int
-rgxMatchPatternsString (
+rgxMatchTextString (
   RGX_Object *rgx,
   const wchar_t *string,
   void *data
 ) {
-  return rgxMatchPatternsCharacters(rgx, string, wcslen(string), data);
+  return rgxMatchTextCharacters(rgx, string, wcslen(string), data);
 }
 
 int
-rgxMatchPatternsUTF8 (
+rgxMatchTextUTF8 (
   RGX_Object *rgx,
   const char *string,
   void *data
@@ -258,31 +268,31 @@ rgxMatchPatternsUTF8 (
   wchar_t *to = characters;
   convertUtf8ToWchars(&from, &to, size);
 
-  return rgxMatchPatternsCharacters(
+  return rgxMatchTextCharacters(
     rgx, characters, (to - characters), data
   );
 }
 
-unsigned int
-rgxGetMatchCount (
-  const RGX_MatchHandlerParameters *parameters
+size_t
+rgxGetCaptureCount (
+  const RGX_Match *match
 ) {
-  return parameters->matches.count;
+  return match->captures.count;
 }
 
 int
-rgxGetMatch (
-  const RGX_MatchHandlerParameters *parameters,
-  unsigned int index, int *start, int *end
+rgxGetCaptureBounds (
+  const RGX_Match *match,
+  unsigned int index, int *from, int *to
 ) {
   if (index < 0) return 0;
-  if (index > parameters->matches.count) return 0;
+  if (index > match->captures.count) return 0;
 
-  PCRE2_SIZE *matches = pcre2_get_ovector_pointer(parameters->matches.internal);
-  matches += index * 2;
+  const PCRE2_SIZE *offsets = pcre2_get_ovector_pointer(match->captures.internal);
+  offsets += index * 2;
 
-  if ((*start = matches[0]) == -1) return 0;
-  if ((*end = matches[1]) == -1) return 0;
+  if ((*from = offsets[0]) == PCRE2_UNSET) return 0;
+  if ((*to = offsets[1]) == PCRE2_UNSET) return 0;
   return 1;
 }
 

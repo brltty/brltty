@@ -24,6 +24,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct RGX_ObjectStruct RGX_Object;
+typedef struct RGX_PatternStruct RGX_Pattern;
 
 extern RGX_Object *rgxNewObject (void *data);
 extern void rgxDestroyObject (RGX_Object *rgx);
@@ -31,73 +32,73 @@ extern void rgxDestroyObject (RGX_Object *rgx);
 typedef struct {
   struct {
     const wchar_t *characters;
-    void *internal;
     size_t length;
-  } string;
+  } pattern;
 
   struct {
+    void *internal;
     const wchar_t *characters;
     size_t length;
-  } expression;
+  } text;
 
   struct {
     void *internal;
     size_t count;
-  } matches;
+  } captures;
 
   struct {
     void *object;
     void *pattern;
     void *match;
   } data;
-} RGX_MatchHandlerParameters;
+} RGX_Match;
 
-#define RGX_MATCH_HANDLER(name) void name (const RGX_MatchHandlerParameters *parameters)
+#define RGX_MATCH_HANDLER(name) void name (const RGX_Match *match)
 typedef RGX_MATCH_HANDLER(RGX_MatchHandler);
 
-extern int rgxAddPatternCharacters (
+extern RGX_Pattern *rgxAddPatternCharacters (
   RGX_Object *rgx,
   const wchar_t *characters, size_t length,
   RGX_MatchHandler *handler, void *data
 );
 
-extern int rgxAddPatternString (
+extern RGX_Pattern *rgxAddPatternString (
   RGX_Object *rgx,
   const wchar_t *string,
   RGX_MatchHandler *handler, void *data
 );
 
-extern int rgxAddPatternUTF8 (
+extern RGX_Pattern *rgxAddPatternUTF8 (
   RGX_Object *rgx,
   const char *string,
   RGX_MatchHandler *handler, void *data
 );
 
-extern int rgxMatchPatternsCharacters (
+extern int rgxMatchTextCharacters (
   RGX_Object *rgx,
   const wchar_t *characters, size_t length,
   void *data
 );
 
-extern int rgxMatchPatternsString (
+extern int rgxMatchTextString (
   RGX_Object *rgx,
   const wchar_t *string,
   void *data
 );
 
-extern int rgxAddPatternUTF8 (
+extern int rgxMatchTextUTF8 (
   RGX_Object *rgx,
   const char *string,
-  RGX_MatchHandler *handler, void *data
+  void *data
 );
 
-extern unsigned int rgxGetMatchCount (
-  const RGX_MatchHandlerParameters *parameters
+extern size_t rgxGetCaptureCount (
+  const RGX_Match *match
 );
 
-extern int rgxGetMatch (
-  const RGX_MatchHandlerParameters *parameters,
-  unsigned int index, int *start, int *end
+extern int rgxGetCaptureBounds (
+  const RGX_Match *match,
+  unsigned int index, int *from, int *to
 );
 
 #ifdef __cplusplus
