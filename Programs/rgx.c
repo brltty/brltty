@@ -26,8 +26,25 @@
 #include "queue.h"
 #include "strfmt.h"
 
+#define RGX_BEGIN_OPTION_MAP(name) static const RGX_OptionsType name[] = {
+#define RGX_END_OPTION_MAP };
+
 #ifdef HAVE_PCRE2
 #include "rgx_pcre2.h"
+
+RGX_BEGIN_OPTION_MAP(rgxCompileOptionMap)
+  [RGX_COMPILE_ANCHOR_START] = PCRE2_ANCHORED,
+  [RGX_COMPILE_ANCHOR_END] = PCRE2_ENDANCHORED,
+
+  [RGX_COMPILE_IGNORE_CASE] = PCRE2_CASELESS,
+  [RGX_COMPILE_LITERAL_TEXT] = PCRE2_LITERAL,
+  [RGX_COMPILE_UNICODE_PROPERTIES] = PCRE2_UCP,
+RGX_END_OPTION_MAP
+
+RGX_BEGIN_OPTION_MAP(rgxMatchOptionMap)
+  [RGX_MATCH_ANCHOR_START] = PCRE2_ANCHORED,
+  [RGX_MATCH_ANCHOR_END] = PCRE2_ENDANCHORED,
+RGX_END_OPTION_MAP
 
 #else /* Unicode regular expression support */
 #warning Unicode regular expression support has not been included
@@ -366,17 +383,9 @@ rgxCompileOption (
   RGX_OptionAction action,
   RGX_CompileOption option
 ) {
-  static const RGX_OptionsType map[] = {
-    [RGX_COMPILE_ANCHOR_START] = PCRE2_ANCHORED,
-    [RGX_COMPILE_ANCHOR_END] = PCRE2_ENDANCHORED,
-
-    [RGX_COMPILE_IGNORE_CASE] = PCRE2_CASELESS,
-    [RGX_COMPILE_LITERAL_TEXT] = PCRE2_LITERAL,
-    [RGX_COMPILE_UNICODE_PROPERTIES] = PCRE2_UCP,
-  };
-
   return rgxOption(
-    action, option, &rgx->options, map, ARRAY_COUNT(map)
+    action, option, &rgx->options,
+    rgxCompileOptionMap, ARRAY_COUNT(rgxCompileOptionMap)
   );
 }
 
@@ -386,12 +395,8 @@ rgxMatchOption (
   RGX_OptionAction action,
   RGX_MatchOption option
 ) {
-  static const RGX_OptionsType map[] = {
-    [RGX_MATCH_ANCHOR_START] = PCRE2_ANCHORED,
-    [RGX_MATCH_ANCHOR_END] = PCRE2_ENDANCHORED,
-  };
-
   return rgxOption(
-    action, option, &matcher->options, map, ARRAY_COUNT(map)
+    action, option, &matcher->options,
+    rgxMatchOptionMap, ARRAY_COUNT(rgxMatchOptionMap)
   );
 }
