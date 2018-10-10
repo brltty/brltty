@@ -68,4 +68,13 @@ rgxBounds (
 }
 
 STR_BEGIN_FORMATTER(rgxFormatErrorMessage, int error)
+  switch (error) {
+    case RGX_NO_MATCH:
+      STR_PRINTF("no match");
+      break;
+
+    default:
+      STR_PRINTF("unknown problem");
+      break;
+  }
 STR_END_FORMATTER
