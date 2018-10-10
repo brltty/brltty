@@ -101,6 +101,38 @@ extern int rgxGetCaptureBounds (
   unsigned int index, int *from, int *to
 );
 
+typedef enum {
+  RGX_OPTION_CLEAR,
+  RGX_OPTION_SET,
+  RGX_OPTION_TOGGLE,
+  RGX_OPTION_TEST
+} RGX_OptionAction;
+
+typedef enum {
+  RGX_COMPILE_IGNORE_CASE,
+  RGX_COMPILE_LITERAL_TEXT,
+  RGX_COMPILE_ANCHOR_START,
+  RGX_COMPILE_ANCHOR_END,
+  RGX_COMPILE_UNICODE_PROPERTIES,
+} RGX_CompileOption;
+
+extern int rgxCompileOption (
+  RGX_Object *rgx,
+  RGX_OptionAction action,
+  RGX_CompileOption option
+);
+
+typedef enum {
+  RGX_MATCH_ANCHOR_START,
+  RGX_MATCH_ANCHOR_END,
+} RGX_MatchOption;
+
+extern int rgxMatchOption (
+  RGX_Pattern *pattern,
+  RGX_OptionAction action,
+  RGX_MatchOption option
+);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

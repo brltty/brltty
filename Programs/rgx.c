@@ -322,3 +322,70 @@ rgxDestroyObject (RGX_Object *rgx) {
   deallocateQueue(rgx->patterns);
   free(rgx);
 }
+
+static int
+rgxOption (
+  RGX_OptionAction action, RGX_CompileOption option,
+  uint32_t *bits, const uint32_t *map, size_t count
+) {
+  uint32_t bit = 0;
+  if ((option >= 0) && (option < count)) bit = map[option];
+  int wasSet = !!(*bits & bit);
+
+  if (action == RGX_OPTION_TOGGLE) {
+    action = wasSet? RGX_OPTION_CLEAR: RGX_OPTION_SET;
+  }
+
+  switch (action) {
+    case RGX_OPTION_SET:
+      *bits |= bit;
+      break;
+
+    case RGX_OPTION_CLEAR:
+      *bits &= ~bit;
+      break;
+
+    default:
+      logMessage(LOG_WARNING, "unimplemented regular expression option action: %d", action);
+      /* fall through */
+    case RGX_OPTION_TEST:
+      break;
+  }
+
+  return wasSet;
+}
+
+int
+rgxCompileOption (
+  RGX_Object *rgx,
+  RGX_OptionAction action,
+  RGX_CompileOption option
+) {
+  static const uint32_t map[] = {
+    [RGX_COMPILE_IGNORE_CASE] = PCRE2_CASELESS,
+    [RGX_COMPILE_LITERAL_TEXT] = PCRE2_LITERAL,
+    [RGX_COMPILE_ANCHOR_START] = PCRE2_ANCHORED,
+    [RGX_COMPILE_ANCHOR_END] = PCRE2_ENDANCHORED,
+    [RGX_COMPILE_UNICODE_PROPERTIES] = PCRE2_UCP,
+  };
+
+  return rgxOption(
+    action, option, &rgx->options, map, ARRAY_COUNT(map)
+  );
+}
+
+int
+rgxMatchOption (
+  RGX_Pattern *pattern,
+  RGX_OptionAction action,
+  RGX_MatchOption option
+) {
+  static const uint32_t map[] = {
+    [RGX_MATCH_ANCHOR_START] = PCRE2_ANCHORED,
+    [RGX_MATCH_ANCHOR_END] = PCRE2_ENDANCHORED,
+  };
+
+  return rgxOption(
+    action, option, &pattern->match.options, map, ARRAY_COUNT(map)
+  );
+}
