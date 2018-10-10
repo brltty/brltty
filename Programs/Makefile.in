@@ -676,11 +676,8 @@ cldr.$O:
 rgx.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/rgx.c
 
-rgx_none.$O:
-	$(CC) $(LIBCFLAGS) $(RGX_INCLUDES) -c $(SRC_DIR)/rgx_none.c
-
-rgx_libpcre2-32.$O:
-	$(CC) $(LIBCFLAGS) $(RGX_INCLUDES) -c $(SRC_DIR)/rgx_libpcre2-32.c
+$(RGX_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(RGX_INCLUDES) -c $(SRC_DIR)/$(RGX_OBJECT).c
 
 ###############################################################################
 
