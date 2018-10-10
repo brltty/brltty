@@ -180,7 +180,6 @@ testIndent (int column, int row, void *data UNUSED) {
 }
 
 static RGX_Object *promptPatterns = NULL;
-static RGX_MATCH_HANDLER(handlePromptMatch) {}
 
 static void
 exitPromptPatterns (void *data) {
@@ -199,8 +198,7 @@ addPromptPattern (const char *string) {
   }
 
   RGX_Matcher *matcher = rgxAddPatternUTF8(
-    promptPatterns, string,
-    handlePromptMatch, NULL
+    promptPatterns, string, NULL, NULL
   );
 
   if (!matcher) return 0;

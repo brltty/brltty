@@ -188,21 +188,16 @@ rgxTestMatcher (const void *item, void *data) {
     return 0;
   }
 
-  {
-    RGX_MatchHandler *handler = matcher->handler;
+  RGX_MatchHandler *handler = matcher->handler;
+  if (!handler) return 1;
 
-    if (handler) {
-      match->captures.data = matcher->compiled.data;
-      match->data.pattern = matcher->data;
+  match->captures.data = matcher->compiled.data;
+  match->data.pattern = matcher->data;
 
-      match->pattern.characters = matcher->pattern.characters;
-      match->pattern.length = matcher->pattern.length;
+  match->pattern.characters = matcher->pattern.characters;
+  match->pattern.length = matcher->pattern.length;
 
-      handler(match);
-    }
-  }
-
-  return 1;
+  return handler(match);
 }
 
 int

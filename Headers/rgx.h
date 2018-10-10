@@ -53,7 +53,7 @@ typedef struct {
   } data;
 } RGX_Match;
 
-#define RGX_MATCH_HANDLER(name) void name (const RGX_Match *match)
+#define RGX_MATCH_HANDLER(name) int name (const RGX_Match *match)
 typedef RGX_MATCH_HANDLER(RGX_MatchHandler);
 
 extern RGX_Matcher *rgxAddPatternCharacters (
