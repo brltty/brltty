@@ -195,6 +195,7 @@ addPromptPattern (const char *string) {
   if (!promptPatterns) {
     if (!(promptPatterns = rgxNewObject(NULL))) return 0;
     onProgramExit("prompt-patterns", exitPromptPatterns, NULL);
+    rgxCompileOption(promptPatterns, RGX_OPTION_SET, RGX_COMPILE_ANCHOR_START);
   }
 
   RGX_Pattern *pattern = rgxAddPatternUTF8(
