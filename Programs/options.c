@@ -302,7 +302,7 @@ processCommandLine (
   {
     struct option *opt = longOptions;
 
-    for (unsigned int index=0; index<info->optionCount; ++index) {
+    for (unsigned int index=0; index<info->optionCount; index+=1) {
       const OptionEntry *entry = &info->optionTable[index];
 
       if (entry->word) {
@@ -352,7 +352,7 @@ processCommandLine (
     char *opt = shortOptions;
     *opt++ = '+';
 
-    for (unsigned int index=0; index<info->optionCount; ++index) {
+    for (unsigned int index=0; index<info->optionCount; index+=1) {
       const OptionEntry *entry = &info->optionTable[index];
       optionEntries[entry->letter] = entry;
 

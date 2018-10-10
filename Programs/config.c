@@ -34,6 +34,7 @@
 #include "activity.h"
 #include "update.h"
 #include "cmd.h"
+#include "cmd_navigation.h"
 #include "brl.h"
 #include "brl_utils.h"
 #include "spk.h"
@@ -169,6 +170,7 @@ static char *opt_pidFile;
 static char *opt_configurationFile;
 static char *opt_preferencesFile;
 static char *opt_preferenceOverrides;
+static char *opt_promptPatterns;
 
 static char *opt_updatableDirectory;
 static char *opt_writableDirectory;
@@ -353,6 +355,14 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("name=value,..."),
     .setting.string = &opt_preferenceOverrides,
     .description = strtext("Explicit preference settings.")
+  },
+
+  { .letter = 'z',
+    .word = "prompt-patterns",
+    .flags = OPT_Extend | OPT_Config | OPT_Environ,
+    .argument = strtext("regexp,..."),
+    .setting.string = &opt_promptPatterns,
+    .description = strtext("Patterns that match command prompts.")
   },
 
   { .letter = 'U',
@@ -2650,6 +2660,19 @@ brlttyStart (void) {
   constructBrailleDisplay(&brl);
   constructSpeechSynthesizer(&spk);
   loadPreferences();
+
+  if (opt_promptPatterns && *opt_promptPatterns) {
+    int count;
+    char **patterns = splitString(opt_promptPatterns, PARAMETER_SEPARATOR_CHARACTER, &count);
+
+    if (patterns) {
+      for (int index=0; index<count; index+=1) {
+        if (!addPromptPattern(patterns[index])) break;
+      }
+
+      deallocateStrings(patterns);
+    }
+  }
 
   logProperty(opt_updatableDirectory, "updatableDirectory", gettext("Updatable Directory"));
   logProperty(opt_writableDirectory, "writableDirectory", gettext("Writable Directory"));

@@ -25,6 +25,8 @@ extern "C" {
 
 extern int addNavigationCommands (void);
 
+extern int addPromptPattern (const char *string);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -21,14 +21,16 @@
 #include <stdio.h>
 
 #include "log.h"
+#include "alert.h"
 #include "parameters.h"
+#include "program.h"
 #include "cmd_queue.h"
 #include "cmd_navigation.h"
 #include "cmd_utils.h"
 #include "brl_cmds.h"
 #include "parse.h"
+#include "rgx.h"
 #include "prefs.h"
-#include "alert.h"
 #include "routing.h"
 #include "scr.h"
 #include "core.h"
@@ -146,14 +148,19 @@ typedef int (*RowTester) (int column, int row, void *data);
 
 static void
 findRow (int column, int increment, RowTester test, void *data) {
-  int row = ses->winy + increment;
-  while ((row >= 0) && (row <= scr.rows-(int)brl.textRows)) {
+  int row = ses->winy;
+
+  while (1) {
+    row += increment;
+    if (row < 0) break;
+    if ((row + brl.textRows) > scr.rows) break;
+
     if (test(column, row, data)) {
       ses->winy = row;
       return;
     }
-    row += increment;
   }
+
   alert(ALERT_BOUNCE);
 }
 
@@ -162,20 +169,61 @@ testIndent (int column, int row, void *data UNUSED) {
   int count = column+1;
   ScreenCharacter characters[count];
   readScreenRow(row, count, characters);
+
   while (column >= 0) {
     wchar_t text = characters[column].text;
     if (text != WC_C(' ')) return 1;
-    --column;
+    column -= 1;
   }
+
   return 0;
+}
+
+static RGX_Object *promptPatterns = NULL;
+static RGX_MATCH_HANDLER(handlePromptMatch) {}
+
+static void
+exitPromptPatterns (void *data) {
+  if (promptPatterns) {
+    rgxDestroyObject(promptPatterns);
+    promptPatterns = NULL;
+  }
+}
+
+int
+addPromptPattern (const char *string) {
+  if (!promptPatterns) {
+    if (!(promptPatterns = rgxNewObject(NULL))) return 0;
+    onProgramExit("prompt-patterns", exitPromptPatterns, NULL);
+  }
+
+  RGX_Pattern *pattern = rgxAddPatternUTF8(
+    promptPatterns, string,
+    handlePromptMatch, NULL
+  );
+
+  if (!pattern) return 0;
+  return 1;
 }
 
 static int
 testPrompt (int column, int row, void *data) {
-  const ScreenCharacter *prompt = data;
-  int count = column+1;
+  int count = column + 1;
   ScreenCharacter characters[count];
   readScreenRow(row, count, characters);
+
+  if (promptPatterns) {
+    wchar_t text[count];
+    wchar_t *to = text;
+
+    const ScreenCharacter *from = characters;
+    const ScreenCharacter *end = from + count;
+
+    while (from < end) *to++ = from++->text;
+    return rgxMatchTextCharacters(promptPatterns, text, count, NULL);
+  }
+
+  const ScreenCharacter *prompt = data;
   return isSameRow(characters, prompt, count, isSameText);
 }
 
@@ -423,26 +471,33 @@ handleNavigationCommands (int command, void *data) {
 
     {
       int increment;
+
     case BRL_CMD_PRPROMPT:
       increment = -1;
       goto findPrompt;
+
     case BRL_CMD_NXPROMPT:
       increment = 1;
+      goto findPrompt;
+
     findPrompt:
       {
         ScreenCharacter characters[scr.cols];
-        size_t length = 0;
         readScreenRow(ses->winy, scr.cols, characters);
+        size_t length = 0;
+
         while (length < scr.cols) {
           if (characters[length].text == WC_C(' ')) break;
-          ++length;
+          length += 1;
         }
+
         if (length < scr.cols) {
           findRow(length, increment, testPrompt, characters);
         } else {
           alert(ALERT_COMMAND_REJECTED);
         }
       }
+
       break;
     }
 
