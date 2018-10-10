@@ -212,7 +212,11 @@ rgxTestMatcher (const void *item, void *data) {
     match->captures.data = matcher->compiled.data;
     match->captures.count = count - 1;
 
-    matcher->handler.function(match);
+    {
+      RGX_MatchHandler *handler = matcher->handler.function;
+      if (handler) handler(match);
+    }
+
     return 1;
   }
 
