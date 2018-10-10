@@ -86,12 +86,6 @@ extern "C" {
 /* Define this if XML parsing support is to be included. */
 #undef HAVE_EXPAT
 
-/* Define this if PCR2 support is to be included. */
-#undef HAVE_PCRE
-
-/* Define this if PCRE2 support is to be included. */
-#undef HAVE_PCRE2
-
 /* Define this if the header file pwd.h exists. */
 #undef HAVE_PWD_H
 
@@ -359,6 +353,10 @@ extern "C" {
 #undef USE_PKG_DYNLD_GRUB
 #undef USE_PKG_DYNLD_SHL
 #undef USE_PKG_DYNLD_WINDOWS
+
+/* Define only one of the following regular expression packages. */
+#undef USE_PKG_RGX_NONE
+#undef USE_PKG_RGX_LIBPCRE2_32
 
 /* Define only one of the following character set packages. */
 #undef USE_PKG_CHARSET_NONE

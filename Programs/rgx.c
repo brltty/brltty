@@ -22,33 +22,10 @@
 
 #include "log.h"
 #include "rgx.h"
+#include "rgx_internal.h"
 #include "charset.h"
 #include "queue.h"
 #include "strfmt.h"
-
-#define RGX_BEGIN_OPTION_MAP(name) static const RGX_OptionsType name[] = {
-#define RGX_END_OPTION_MAP };
-
-#ifdef HAVE_PCRE2
-#include "rgx_pcre2.h"
-
-RGX_BEGIN_OPTION_MAP(rgxCompileOptionMap)
-  [RGX_COMPILE_ANCHOR_START] = PCRE2_ANCHORED,
-  [RGX_COMPILE_ANCHOR_END] = PCRE2_ENDANCHORED,
-
-  [RGX_COMPILE_IGNORE_CASE] = PCRE2_CASELESS,
-  [RGX_COMPILE_LITERAL_TEXT] = PCRE2_LITERAL,
-  [RGX_COMPILE_UNICODE_PROPERTIES] = PCRE2_UCP,
-RGX_END_OPTION_MAP
-
-RGX_BEGIN_OPTION_MAP(rgxMatchOptionMap)
-  [RGX_MATCH_ANCHOR_START] = PCRE2_ANCHORED,
-  [RGX_MATCH_ANCHOR_END] = PCRE2_ENDANCHORED,
-RGX_END_OPTION_MAP
-
-#else /* Unicode regular expression support */
-#warning Unicode regular expression support has not been included
-#endif /* Unicode regular expression support */
 
 struct RGX_ObjectStruct {
   void *data;
@@ -80,6 +57,7 @@ rgxLogError (const RGX_Matcher *matcher, int error, RGX_OffsetType *offset) {
   STR_PRINTF("regular expression error %d", error);
   if (offset) STR_PRINTF(" at offset %"PRIsize, *offset);
 
+/*
   {
     size_t size = 0X100;
     RGX_CharacterType message[size];
@@ -93,6 +71,7 @@ rgxLogError (const RGX_Matcher *matcher, int error, RGX_OffsetType *offset) {
       }
     }
   }
+*/
 
   if (matcher) {
     STR_PRINTF(
@@ -307,16 +286,7 @@ rgxGetCaptureBounds (
   size_t index, size_t *from, size_t *to
 ) {
   if (index > match->captures.count) return 0;
-
-  const RGX_OffsetType *offsets = pcre2_get_ovector_pointer(match->captures.data);
-  offsets += index * 2;
-
-  if (offsets[0] == PCRE2_UNSET) return 0;
-  if (offsets[1] == PCRE2_UNSET) return 0;
-
-  *from = offsets[0];
-  *to = offsets[1];
-  return 1;
+  return rgxBounds(match->captures.data, index, from, to);
 }
 
 RGX_Object *
@@ -385,7 +355,7 @@ rgxCompileOption (
 ) {
   return rgxOption(
     action, option, &rgx->options,
-    rgxCompileOptionMap, ARRAY_COUNT(rgxCompileOptionMap)
+    rgxCompileOptionsMap, rgxCompileOptionsCount
   );
 }
 
@@ -397,6 +367,6 @@ rgxMatchOption (
 ) {
   return rgxOption(
     action, option, &matcher->options,
-    rgxMatchOptionMap, ARRAY_COUNT(rgxMatchOptionMap)
+    rgxMatchOptionsMap, rgxMatchOptionsCount
   );
 }

@@ -1120,21 +1120,6 @@ BRLTTY_ARG_DISABLE(
 AC_SUBST([expat_includes])
 AC_SUBST([expat_libs])
 
-pcre_includes=""
-pcre_libs=""
-BRLTTY_ARG_DISABLE(
-   [pcre],
-   [support for Perl-compatible regular expressions],
-   [],
-[dnl
-   BRLTTY_HAVE_PACKAGE([pcre], [libpcre2-32], [dnl
-      AC_DEFINE_UNQUOTED([HAVE_PCRE2], [1],
-                         [Define this if PCRE2 support is to be included.])
-   ])
-])
-AC_SUBST([pcre_includes])
-AC_SUBST([pcre_libs])
-
 BRLTTY_ARG_DISABLE(
    [contracted-braille],
    [in-line contracted braille],
@@ -1252,6 +1237,9 @@ BRLTTY_ARG_PACKAGE([dynld], [dynamic loading], [dlfcn dyld], [dnl
          dynld_package="dyld"
       ])
       ;;
+])
+
+BRLTTY_ARG_PACKAGE([rgx], [regular expression], [libpcre2-32], [dnl
 ])
 
 BRLTTY_ARG_PACKAGE([charset], [character set], [iconv], [dnl

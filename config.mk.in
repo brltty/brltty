@@ -109,9 +109,6 @@ POLKIT_LIBS = @polkit_libs@
 EXPAT_INCLUDES = @expat_includes@
 EXPAT_LIBS = @expat_libs@
 
-PCRE_INCLUDES = @pcre_includes@
-PCRE_LIBS = @pcre_libs@
-
 LOUIS_INCLUDES = @louis_includes@
 LOUIS_LIBS = @louis_libs@
 
@@ -141,6 +138,12 @@ DYNLD_OBJECT = dynld_$(DYNLD_PACKAGE)
 DYNLD_OBJECTS = $(DYNLD_OBJECT).$O
 DYNLD_INCLUDES = @dynld_includes@
 DYNLD_LIBS = @dynld_libs@
+
+RGX_PACKAGE = @rgx_package@
+RGX_OBJECT = rgx_$(RGX_PACKAGE)
+RGX_OBJECTS = rgx.$O $(RGX_OBJECT).$O
+RGX_INCLUDES = @rgx_includes@
+RGX_LIBS = @rgx_libs@
 
 CHARSET_PACKAGE = @charset_package@
 CHARSET_OBJECT = charset_$(CHARSET_PACKAGE)

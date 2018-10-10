@@ -16,25 +16,26 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_RGX_PCRE2
-#define BRLTTY_INCLUDED_RGX_PCRE2
+#include "prologue.h"
 
-#define PCRE2_CODE_UNIT_WIDTH 32
-#include <pcre2.h>
+#include "rgx.h"
+#include "rgx_internal.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+RGX_BEGIN_OPTIONS(rgxCompileOptions)
+  [RGX_COMPILE_ANCHOR_START] = PCRE2_ANCHORED,
+  [RGX_COMPILE_ANCHOR_END] = PCRE2_ENDANCHORED,
 
-typedef PCRE2_UCHAR RGX_CharacterType;
-typedef PCRE2_SIZE RGX_OffsetType;
-typedef uint32_t RGX_OptionsType;
-typedef pcre2_code RGX_CodeType;
-typedef pcre2_match_data RGX_DataType;
+  [RGX_COMPILE_IGNORE_CASE] = PCRE2_CASELESS,
+  [RGX_COMPILE_LITERAL_TEXT] = PCRE2_LITERAL,
+  [RGX_COMPILE_UNICODE_PROPERTIES] = PCRE2_UCP,
+RGX_END_OPTIONS(rgxCompileOptions)
 
-#define RGX_NO_MATCH PCRE2_ERROR_NOMATCH
+RGX_BEGIN_OPTIONS(rgxMatchOptions)
+  [RGX_MATCH_ANCHOR_START] = PCRE2_ANCHORED,
+  [RGX_MATCH_ANCHOR_END] = PCRE2_ENDANCHORED,
+RGX_END_OPTIONS(rgxMatchOptions)
 
-static inline RGX_CodeType *
+RGX_CodeType *
 rgxCompile (
   const RGX_CharacterType *characters, size_t length,
   RGX_OptionsType options, RGX_OffsetType *offset,
@@ -45,22 +46,22 @@ rgxCompile (
   );
 }
 
-static inline void
+void
 rgxDeallocateCode (RGX_CodeType *code) {
   pcre2_code_free(code);
 }
 
-static inline RGX_DataType *
+RGX_DataType *
 rgxAllocateData (RGX_CodeType *code) {
   return pcre2_match_data_create_from_pattern(code, NULL);
 }
 
-static inline void
+void
 rgxDeallocateData (RGX_DataType *data) {
   pcre2_match_data_free(data);
 }
 
-static inline int
+int
 rgxMatch (
   const RGX_CharacterType *characters, size_t length,
   RGX_CodeType *code, RGX_DataType *data,
@@ -79,8 +80,17 @@ rgxMatch (
   }
 }
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
+int
+rgxBounds (
+  RGX_DataType *data, size_t index, size_t *from, size_t *to
+) {
+  const RGX_OffsetType *offsets = pcre2_get_ovector_pointer(data);
+  offsets += index * 2;
 
-#endif /* BRLTTY_INCLUDED_RGX_PCRE2 */
+  if (offsets[0] == PCRE2_UNSET) return 0;
+  if (offsets[1] == PCRE2_UNSET) return 0;
+
+  *from = offsets[0];
+  *to = offsets[1];
+  return 1;
+}
