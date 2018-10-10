@@ -19,7 +19,17 @@
 #ifndef BRLTTY_INCLUDED_RGX_INTERNAL
 #define BRLTTY_INCLUDED_RGX_INTERNAL
 
-#if defined(USE_PKG_RGX_LIBPCRE2_32)
+#include "strfmth.h"
+
+#if defined(USE_PKG_RGX_NONE)
+typedef wchar_t RGX_CharacterType;
+typedef size_t RGX_OffsetType;
+typedef int RGX_OptionsType;
+typedef uint8_t RGX_CodeType;
+typedef uint8_t RGX_DataType;
+#define RGX_NO_MATCH 1
+
+#elif defined(USE_PKG_RGX_LIBPCRE2_32)
 #define PCRE2_CODE_UNIT_WIDTH 32
 #include <pcre2.h>
 typedef PCRE2_UCHAR RGX_CharacterType;
@@ -29,14 +39,8 @@ typedef pcre2_code RGX_CodeType;
 typedef pcre2_match_data RGX_DataType;
 #define RGX_NO_MATCH PCRE2_ERROR_NOMATCH
 
-#elif defined(USE_PKG_RGX_NONE)
-typedef wchar_t RGX_CharacterType;
-typedef size_t RGX_OffsetType;
-typedef int RGX_OptionsType;
-typedef uint8_t RGX_CodeType;
-typedef uint8_t RGX_DataType;
-#define RGX_NO_MATCH 1
-
+#else /* regular expression package */
+#error regular expression package not selected
 #endif /* regular expression package */
 
 #ifdef __cplusplus
@@ -62,6 +66,8 @@ extern int rgxMatch (
 extern int rgxBounds (
   RGX_DataType *data, size_t index, size_t *from, size_t *to
 );
+
+extern STR_DECLARE_FORMATTER(rgxFormatErrorMessage, int error);
 
 #define RGX_DECLARE_OPTION_MAP(name) const RGX_OptionsType name##Map[]
 #define RGX_DECLARE_OPTION_COUNT(name) const unsigned char name##Count

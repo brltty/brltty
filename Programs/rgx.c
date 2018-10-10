@@ -56,22 +56,7 @@ rgxLogError (const RGX_Matcher *matcher, int error, RGX_OffsetType *offset) {
 
   STR_PRINTF("regular expression error %d", error);
   if (offset) STR_PRINTF(" at offset %"PRIsize, *offset);
-
-/*
-  {
-    size_t size = 0X100;
-    RGX_CharacterType message[size];
-    int length = pcre2_get_error_message(error, message, size);
-
-    if (length > 0) {
-      STR_PRINTF(": ");
-
-      for (unsigned int index=0; index<length; index+=1) {
-        STR_PRINTF("%"PRIwc, message[index]);
-      }
-    }
-  }
-*/
+  STR_FORMAT(rgxFormatErrorMessage, error);
 
   if (matcher) {
     STR_PRINTF(

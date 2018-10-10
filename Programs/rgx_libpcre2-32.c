@@ -20,6 +20,7 @@
 
 #include "rgx.h"
 #include "rgx_internal.h"
+#include "strfmt.h"
 
 RGX_BEGIN_OPTIONS(rgxCompileOptions)
   [RGX_COMPILE_ANCHOR_START] = PCRE2_ANCHORED,
@@ -94,3 +95,17 @@ rgxBounds (
   *to = offsets[1];
   return 1;
 }
+
+STR_BEGIN_FORMATTER(rgxFormatErrorMessage, int error)
+  size_t size = STR_LEFT;
+  RGX_CharacterType message[size];
+  int length = pcre2_get_error_message(error, message, size);
+
+  if (length > 0) {
+    STR_PRINTF(": ");
+
+    for (unsigned int index=0; index<length; index+=1) {
+      STR_PRINTF("%"PRIwc, message[index]);
+    }
+  }
+STR_END_FORMATTER

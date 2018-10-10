@@ -20,6 +20,7 @@
 
 #include "rgx.h"
 #include "rgx_internal.h"
+#include "strfmt.h"
 
 RGX_BEGIN_OPTIONS(rgxCompileOptions)
 RGX_END_OPTIONS(rgxCompileOptions)
@@ -65,3 +66,6 @@ rgxBounds (
 ) {
   return 0;
 }
+
+STR_BEGIN_FORMATTER(rgxFormatErrorMessage, int error)
+STR_END_FORMATTER
