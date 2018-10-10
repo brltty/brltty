@@ -27,11 +27,7 @@
 #include "strfmt.h"
 
 #ifdef HAVE_PCRE2
-#define PCRE2_CODE_UNIT_WIDTH 32
-#include <pcre2.h>
-typedef PCRE2_UCHAR RGX_CharacterType;
-typedef PCRE2_SIZE RGX_OffsetType;
-typedef uint32_t RGX_OptionsType;
+#include "rgx_pcre2.h"
 
 #else /* Unicode regular expression support */
 #warning Unicode regular expression support has not been included
@@ -54,8 +50,8 @@ struct RGX_MatcherStruct {
   } pattern;
 
   struct {
-    pcre2_code *code;
-    pcre2_match_data *data;
+    RGX_CodeType *code;
+    RGX_DataType *data;
   } compiled;
 };
 
@@ -95,8 +91,8 @@ static void
 rgxDeallocateMatcher (void *item, void *data) {
   RGX_Matcher *matcher = item;
 
-  pcre2_match_data_free(matcher->compiled.data);
-  pcre2_code_free(matcher->compiled.code);
+  rgxDeallocateData(matcher->compiled.data);
+  rgxDeallocateCode(matcher->compiled.code);
   free(matcher->pattern.characters);
   free(matcher);
 }
@@ -132,27 +128,24 @@ rgxAddPatternCharacters (
       int error;
       RGX_OffsetType offset;
 
-      matcher->compiled.code = pcre2_compile(
-        internal, length, rgx->options,
-        &error, &offset, NULL
+      matcher->compiled.code = rgxCompile(
+        internal, length, rgx->options, &offset, &error
       );
 
       if (matcher->compiled.code) {
-        matcher->compiled.data = pcre2_match_data_create_from_pattern(
-          matcher->compiled.code, NULL
-        );
+        matcher->compiled.data = rgxAllocateData(matcher->compiled.code);
 
         if (matcher->compiled.data) {
           if (enqueueItem(rgx->matchers, matcher)) {
             return matcher;
           }
 
-          pcre2_match_data_free(matcher->compiled.data);
+          rgxDeallocateData(matcher->compiled.data);
         } else {
           logMallocError();
         }
 
-        pcre2_code_free(matcher->compiled.code);
+        rgxDeallocateCode(matcher->compiled.code);
       } else {
         rgxLogError(matcher, error, &offset);
       }
@@ -202,13 +195,15 @@ rgxTestMatcher (const void *item, void *data) {
   const RGX_Matcher *matcher = item;
   RGX_Match *match = data;
 
-  int count = pcre2_match(
-    matcher->compiled.code, match->text.internal, match->text.length,
-    0, matcher->options, matcher->compiled.data, NULL
+  int error;
+  int matched = rgxMatch(
+    match->text.internal, match->text.length,
+    matcher->compiled.code, matcher->compiled.data,
+    matcher->options, &match->captures.count, &error
   );
 
-  if (count < 1) {
-    if (count != PCRE2_ERROR_NOMATCH) rgxLogError(matcher, count, NULL);
+  if (!matched) {
+    if (error != RGX_NO_MATCH) rgxLogError(matcher, error, NULL);
     return 0;
   }
 
@@ -216,13 +211,12 @@ rgxTestMatcher (const void *item, void *data) {
     RGX_MatchHandler *handler = matcher->handler;
 
     if (handler) {
-      match->captures.count = count - 1;
       match->captures.data = matcher->compiled.data;
+      match->data.pattern = matcher->data;
 
       match->pattern.characters = matcher->pattern.characters;
       match->pattern.length = matcher->pattern.length;
 
-      match->data.pattern = matcher->data;
       handler(match);
     }
   }
