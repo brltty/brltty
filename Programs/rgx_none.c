@@ -55,6 +55,7 @@ rgxMatch (
   RGX_CodeType *code, RGX_DataType *data,
   RGX_OptionsType options, size_t *count, int *error
 ) {
+  *error = RGX_NO_MATCH;
   return 0;
 }
 
