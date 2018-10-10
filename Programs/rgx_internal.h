@@ -69,17 +69,20 @@ extern int rgxBounds (
 
 extern STR_DECLARE_FORMATTER(rgxFormatErrorMessage, int error);
 
-#define RGX_DECLARE_OPTION_MAP(name) const RGX_OptionsType name##Map[]
-#define RGX_DECLARE_OPTION_COUNT(name) const unsigned char name##Count
+typedef struct {
+  const RGX_OptionsType *array;
+  uint8_t count;
+} RGX_OptionMap;
 
-extern RGX_DECLARE_OPTION_MAP(rgxCompileOptions);
-extern RGX_DECLARE_OPTION_COUNT(rgxCompileOptions);
+extern const RGX_OptionMap rgxCompileOptionsMap;
+extern const RGX_OptionMap rgxMatchOptionsMap;
 
-extern RGX_DECLARE_OPTION_MAP(rgxMatchOptions);
-extern RGX_DECLARE_OPTION_COUNT(rgxMatchOptions);
-
-#define RGX_BEGIN_OPTIONS(name) RGX_DECLARE_OPTION_MAP(name) = {
-#define RGX_END_OPTIONS(name) }; RGX_DECLARE_OPTION_COUNT(name) = ARRAY_COUNT(name##Map);
+#define RGX_BEGIN_OPTION_MAP(name) static const RGX_OptionsType name##Array[] = {
+#define RGX_END_OPTION_MAP(name) }; \
+  const RGX_OptionMap name##Map = { \
+  .array = name##Array, \
+  .count = ARRAY_COUNT(name##Array) \
+};
 
 #ifdef __cplusplus
 }

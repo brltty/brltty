@@ -304,9 +304,9 @@ rgxDestroyObject (RGX_Object *rgx) {
 static int
 rgxOption (
   RGX_OptionAction action, RGX_CompileOption option,
-  RGX_OptionsType *bits, const RGX_OptionsType *map, size_t end
+  RGX_OptionsType *bits, const RGX_OptionMap *map
 ) {
-  RGX_OptionsType bit = ((option >= 0) && (option < end))? map[option]: 0;
+  RGX_OptionsType bit = ((option >= 0) && (option < map->count))? map->array[option]: 0;
   int wasSet = !!(*bits & bit);
 
   if (action == RGX_OPTION_TOGGLE) {
@@ -338,10 +338,7 @@ rgxCompileOption (
   RGX_OptionAction action,
   RGX_CompileOption option
 ) {
-  return rgxOption(
-    action, option, &rgx->options,
-    rgxCompileOptionsMap, rgxCompileOptionsCount
-  );
+  return rgxOption(action, option, &rgx->options, &rgxCompileOptionsMap);
 }
 
 int
@@ -350,8 +347,5 @@ rgxMatchOption (
   RGX_OptionAction action,
   RGX_MatchOption option
 ) {
-  return rgxOption(
-    action, option, &matcher->options,
-    rgxMatchOptionsMap, rgxMatchOptionsCount
-  );
+  return rgxOption(action, option, &matcher->options, &rgxMatchOptionsMap);
 }

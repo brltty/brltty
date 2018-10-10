@@ -22,11 +22,11 @@
 #include "rgx_internal.h"
 #include "strfmt.h"
 
-RGX_BEGIN_OPTIONS(rgxCompileOptions)
-RGX_END_OPTIONS(rgxCompileOptions)
+RGX_BEGIN_OPTION_MAP(rgxCompileOptions)
+RGX_END_OPTION_MAP(rgxCompileOptions)
 
-RGX_BEGIN_OPTIONS(rgxMatchOptions)
-RGX_END_OPTIONS(rgxMatchOptions)
+RGX_BEGIN_OPTION_MAP(rgxMatchOptions)
+RGX_END_OPTION_MAP(rgxMatchOptions)
 
 RGX_CodeType *
 rgxCompile (
