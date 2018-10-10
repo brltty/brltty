@@ -29,6 +29,8 @@
 #ifdef HAVE_PCRE2
 #define PCRE2_CODE_UNIT_WIDTH 32
 #include <pcre2.h>
+typedef PCRE2_UCHAR RGX_CharacterType;
+typedef PCRE2_SIZE RGX_OffsetType;
 typedef uint32_t RGX_OptionsType;
 
 #else /* Unicode regular expression support */
@@ -58,7 +60,7 @@ struct RGX_MatcherStruct {
 };
 
 static void
-rgxLogError (const RGX_Matcher *matcher, int error, PCRE2_SIZE *offset) {
+rgxLogError (const RGX_Matcher *matcher, int error, RGX_OffsetType *offset) {
   char log[0X100];
   STR_BEGIN(log, sizeof(log));
 
@@ -67,7 +69,7 @@ rgxLogError (const RGX_Matcher *matcher, int error, PCRE2_SIZE *offset) {
 
   {
     size_t size = 0X100;
-    PCRE2_UCHAR message[size];
+    RGX_CharacterType message[size];
     int length = pcre2_get_error_message(error, message, size);
 
     if (length > 0) {
@@ -119,7 +121,7 @@ rgxAddPatternCharacters (
     );
 
     if (matcher->pattern.characters) {
-      PCRE2_UCHAR internal[length];
+      RGX_CharacterType internal[length];
 
       for (unsigned int index=0; index<length; index+=1) {
         wchar_t character = characters[index];
@@ -128,7 +130,7 @@ rgxAddPatternCharacters (
       }
 
       int error;
-      PCRE2_SIZE offset;
+      RGX_OffsetType offset;
 
       matcher->compiled.code = pcre2_compile(
         internal, length, rgx->options,
@@ -234,7 +236,7 @@ rgxMatchTextCharacters (
   const wchar_t *characters, size_t length,
   void *data
 ) {
-  PCRE2_UCHAR internal[length];
+  RGX_CharacterType internal[length];
 
   for (unsigned int index=0; index<length; index+=1) {
     internal[index] = characters[index];
@@ -295,7 +297,7 @@ rgxGetCaptureBounds (
 ) {
   if (index > match->captures.count) return 0;
 
-  const PCRE2_SIZE *offsets = pcre2_get_ovector_pointer(match->captures.data);
+  const RGX_OffsetType *offsets = pcre2_get_ovector_pointer(match->captures.data);
   offsets += index * 2;
 
   if (offsets[0] == PCRE2_UNSET) return 0;
