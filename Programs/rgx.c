@@ -242,7 +242,7 @@ rgxMatchTextCharacters (
 
     Block *block;
     size_t size = sizeof(*block);
-    size += length * sizeof(block->text[0]);
+    size += (length + 1) * sizeof(block->text[0]);
 
     if (!(block = malloc(size))) {
       logMallocError();
@@ -253,6 +253,7 @@ rgxMatchTextCharacters (
     block->match.text.internal = NULL;
 
     wmemcpy(block->text, match.text.characters, length);
+    block->text[length] = 0;
     block->match.text.characters = block->text;
 
     *result = &block->match;
