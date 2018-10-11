@@ -694,24 +694,23 @@ getCellsOperand (DataFile *file, ByteOperand *cells, const char *description) {
   return 0;
 }
 
-#define DOT(n) (1 << ((n)-1))
 unsigned char
 getLeftDots (unsigned char cell) {
-  return cell & (DOT(1) | DOT(2) | DOT(3) | DOT(7));
+  return cell & (BRL_DOT(1) | BRL_DOT(2) | BRL_DOT(3) | BRL_DOT(7));
 }
 
 unsigned char
 getRightDots (unsigned char cell) {
-  return cell & (DOT(4) | DOT(5) | DOT(6) | DOT(8));
+  return cell & (BRL_DOT(4) | BRL_DOT(5) | BRL_DOT(6) | BRL_DOT(8));
 }
 
 unsigned char
 getRightDotsToLeftDots (unsigned char cell) {
   unsigned char ret = 0;
-  if (cell & DOT(4)) ret |= DOT(1);
-  if (cell & DOT(5)) ret |= DOT(2);
-  if (cell & DOT(6)) ret |= DOT(3);
-  if (cell & DOT(8)) ret |= DOT(7);
+  if (cell & BRL_DOT(4)) ret |= BRL_DOT(1);
+  if (cell & BRL_DOT(5)) ret |= BRL_DOT(2);
+  if (cell & BRL_DOT(6)) ret |= BRL_DOT(3);
+  if (cell & BRL_DOT(8)) ret |= BRL_DOT(7);
   return ret;
 }
 
@@ -720,14 +719,13 @@ writeDots (FILE *stream, unsigned char cell) {
   unsigned int dot;
 
   for (dot=1; dot<=BRL_DOT_COUNT; dot+=1) {
-    if (cell & DOT(dot)) {
+    if (cell & BRL_DOT(dot)) {
       if (fprintf(stream, "%u", dot) == EOF) return 0;
     }
   }
 
   return 1;
 }
-#undef DOT
 
 int
 writeDotsCell (FILE *stream, unsigned char cell) {

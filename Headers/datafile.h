@@ -101,9 +101,9 @@ typedef struct {
 extern int parseCellsOperand (DataFile *file, ByteOperand *cells, const wchar_t *characters, int length);
 extern int getCellsOperand (DataFile *file, ByteOperand *cells, const char *description);
 
-unsigned char getLeftDots (unsigned char cell);
-unsigned char getRightDots (unsigned char cell);
-unsigned char getRightDotsToLeftDots (unsigned char cell);
+extern unsigned char getLeftDots (unsigned char cell);
+extern unsigned char getRightDots (unsigned char cell);
+extern unsigned char getRightDotsToLeftDots (unsigned char cell);
 
 extern int writeDots (FILE *stream, unsigned char cell);
 extern int writeDotsCell (FILE *stream, unsigned char cell);
