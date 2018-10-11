@@ -59,11 +59,13 @@ typedef unsigned char BrlDots;
 #define BRL_DOT_7 BRL_DOT(7) /* lower-left dot of computer braille cell */
 #define BRL_DOT_8 BRL_DOT(8) /* lower-right dot of computer braille cell */
 
-static inline BrlDots brlNumberToDot (char number) {
+static inline BrlDots
+brlNumberToDot (char number) {
   return ((number >= '1') && (number <= '8'))? BRL_DOT(number - '0'): 0;
 }
 
-static inline char brlDotToNumber (BrlDots dot) {
+static inline char
+brlDotToNumber (BrlDots dot) {
   int shift = ffs(dot);
   return shift? ((char)shift + '0'): 0;
 }
@@ -72,13 +74,16 @@ typedef BrlDots BrlDotTable[BRL_DOT_COUNT];
 
 typedef char BrlDotNumbersBuffer[BRL_DOT_COUNT + 1];
 
-static inline unsigned int brlDotsToNumbers (BrlDots dots, BrlDotNumbersBuffer numbers) {
+static inline unsigned int
+brlDotsToNumbers (BrlDots dots, BrlDotNumbersBuffer numbers) {
   char *number = numbers;
+
   while (dots) {
     int shift = ffs(dots) - 1;
     dots -= 1 << shift;
     *number++ = (char)shift + '1';
   }
+
   *number = 0;
   return (unsigned int)(number - numbers);
 }
