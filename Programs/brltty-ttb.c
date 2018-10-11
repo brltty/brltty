@@ -697,44 +697,56 @@ error:
 }
 
 static int
+writeCharacterDots_XCompose (FILE *file, unsigned char dots) {
+  if (fprintf(file, "<braille_") == EOF) return 0;
+
+  if (!dots) {
+    if (fprintf(file, "blank") == EOF) return 0;
+  } else {
+    if (fprintf(file, "dots_") == EOF) return 0;
+    if (!writeDots(file, dots)) return 0;
+  }
+
+  if (fprintf(file, ">") == EOF) return 0;
+
+  return 1;
+}
+
+static int
+writeCharacterOutput_XCompose (FILE *file, wchar_t character) {
+  switch (character) {
+    case WC_C('\n'):
+      if (fprintf(file, "\\n") == EOF) return 0;
+      break;
+
+    case WC_C('\r'):
+      if (fprintf(file, "\\r") == EOF) return 0;
+      break;
+
+    case WC_C('"'):
+      if (fprintf(file, "\\\"") == EOF) return 0;
+      break;
+
+    case WC_C('\\'):
+      if (fprintf(file, "\\\\") == EOF) return 0;
+      break;
+
+    default:
+      if (fprintf(file, "%lc", (wint_t)character) == EOF) return 0;
+      break;
+  }
+  return 1;
+}
+
+static int
 writeCharacter_XCompose (
   FILE *file, wchar_t character, unsigned char dots,
   const unsigned char *byte, int isPrimary, const void *_data
 ) {
   if (isPrimary) {
-    if (fprintf(file, "<braille_") == EOF) return 0;
-
-    if (!dots) {
-      if (fprintf(file, "blank") == EOF) return 0;
-    } else {
-      if (fprintf(file, "dots_") == EOF) return 0;
-      if (!writeDots(file, dots)) return 0;
-    }
-
-    if (fprintf(file, "> : \"") == EOF) return 0;
-
-    switch (character) {
-      case WC_C('\n'):
-        if (fprintf(file, "\\n") == EOF) return 0;
-        break;
-
-      case WC_C('\r'):
-        if (fprintf(file, "\\r") == EOF) return 0;
-        break;
-
-      case WC_C('"'):
-        if (fprintf(file, "\\\"") == EOF) return 0;
-        break;
-
-      case WC_C('\\'):
-        if (fprintf(file, "\\\\") == EOF) return 0;
-        break;
-
-      default:
-        if (fprintf(file, "%lc", (wint_t)character) == EOF) return 0;
-        break;
-    }
-
+    if (!writeCharacterDots_XCompose (file, dots)) return 0;
+    if (fprintf(file, " : \"") == EOF) return 0;
+    if (!writeCharacterOutput_XCompose(file, character)) return 0;
     if (fprintf(file, "\"\n") == EOF) return 0;
   }
 
@@ -747,6 +759,38 @@ writeTable_XCompose (
 ) {
   if (!writeHeaderComment(file, writeHashComment)) goto error;
   if (!writeCharacters(file, ttd, writeCharacter_XCompose, NULL)) goto error;
+  return 1;
+
+error:
+  return 0;
+}
+
+static int
+writeCharacter_half_XCompose (
+  FILE *file, wchar_t character, unsigned char dots,
+  const unsigned char *byte, int isPrimary, const void *_data
+) {
+  if (isPrimary) {
+    unsigned char leftDots = getLeftDots(dots);
+    unsigned char rightDots = getRightDotsToLeftDots(dots);
+
+    if (!writeCharacterDots_XCompose (file, leftDots)) return 0;
+    if (fprintf(file, " ") == EOF) return 0;
+    if (!writeCharacterDots_XCompose (file, rightDots)) return 0;
+    if (fprintf(file, " : \"") == EOF) return 0;
+    if (!writeCharacterOutput_XCompose(file, character)) return 0;
+    if (fprintf(file, "\"\n") == EOF) return 0;
+  }
+
+  return 1;
+}
+
+static int
+writeTable_half_XCompose (
+  const char *path, FILE *file, TextTableData *ttd, const void *data
+) {
+  if (!writeHeaderComment(file, writeHashComment)) goto error;
+  if (!writeCharacters(file, ttd, writeCharacter_half_XCompose, NULL)) goto error;
   return 1;
 
 error:
@@ -909,6 +953,10 @@ static const FormatEntry formatEntries[] = {
 
   { .name = "XCompose",
     .write = writeTable_XCompose,
+  },
+
+  { .name = "half-XCompose",
+    .write = writeTable_half_XCompose,
   },
 
   { .name = "jbt",
