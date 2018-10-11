@@ -70,12 +70,22 @@ getRightDots (unsigned char cell) {
 }
 
 static inline BrlDots
-getRightDotsToLeftDots (unsigned char cell) {
+getRightDotsToLeftDots (BrlDots cell) {
   unsigned char ret = 0;
   if (cell & BRL_DOT_4) ret |= BRL_DOT_1;
   if (cell & BRL_DOT_5) ret |= BRL_DOT_2;
   if (cell & BRL_DOT_6) ret |= BRL_DOT_3;
   if (cell & BRL_DOT_8) ret |= BRL_DOT_7;
+  return ret;
+}
+
+static inline BrlDots
+getLeftDotsToRightDots (BrlDots cell) {
+  unsigned char ret = 0;
+  if (cell & BRL_DOT_1) ret |= BRL_DOT_4;
+  if (cell & BRL_DOT_2) ret |= BRL_DOT_5;
+  if (cell & BRL_DOT_3) ret |= BRL_DOT_6;
+  if (cell & BRL_DOT_7) ret |= BRL_DOT_8;
   return ret;
 }
 
