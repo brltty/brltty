@@ -60,6 +60,26 @@ typedef unsigned char BrlDots;
 #define BRL_DOT_8 BRL_DOT(8) /* lower-right dot of computer braille cell */
 
 static inline BrlDots
+getLeftDots (unsigned char cell) {
+  return cell & (BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_7);
+}
+
+static inline BrlDots
+getRightDots (unsigned char cell) {
+  return cell & (BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_8);
+}
+
+static inline BrlDots
+getRightDotsToLeftDots (unsigned char cell) {
+  unsigned char ret = 0;
+  if (cell & BRL_DOT_4) ret |= BRL_DOT_1;
+  if (cell & BRL_DOT_5) ret |= BRL_DOT_2;
+  if (cell & BRL_DOT_6) ret |= BRL_DOT_3;
+  if (cell & BRL_DOT_8) ret |= BRL_DOT_7;
+  return ret;
+}
+
+static inline BrlDots
 brlNumberToDot (char number) {
   return ((number >= '1') && (number <= '8'))? BRL_DOT(number - '0'): 0;
 }
