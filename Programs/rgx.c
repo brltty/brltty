@@ -206,7 +206,7 @@ rgxTestMatcher (const void *item, void *data) {
   return handler(match);
 }
 
-int
+RGX_Matcher *
 rgxMatchTextCharacters (
   RGX_Object *rgx,
   const wchar_t *characters, size_t length,
@@ -231,10 +231,13 @@ rgxMatchTextCharacters (
     }
   };
 
-  return !!findElement(rgx->matchers, rgxTestMatcher, &match);
+  Element *element = findElement(rgx->matchers, rgxTestMatcher, &match);
+  if (!element) return NULL;
+
+  return getElementItem(element);
 }
 
-int
+RGX_Matcher *
 rgxMatchTextString (
   RGX_Object *rgx,
   const wchar_t *string,
@@ -243,7 +246,7 @@ rgxMatchTextString (
   return rgxMatchTextCharacters(rgx, string, wcslen(string), data);
 }
 
-int
+RGX_Matcher *
 rgxMatchTextUTF8 (
   RGX_Object *rgx,
   const char *string,
