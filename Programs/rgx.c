@@ -210,7 +210,7 @@ RGX_Matcher *
 rgxMatchTextCharacters (
   RGX_Object *rgx,
   const wchar_t *characters, size_t length,
-  void *data
+  RGX_Match *result, void *data
 ) {
   RGX_CharacterType internal[length];
 
@@ -234,6 +234,11 @@ rgxMatchTextCharacters (
   Element *element = findElement(rgx->matchers, rgxTestMatcher, &match);
   if (!element) return NULL;
 
+  if (result) {
+    *result = match;
+    result->text.internal = NULL;
+  }
+
   return getElementItem(element);
 }
 
@@ -241,16 +246,16 @@ RGX_Matcher *
 rgxMatchTextString (
   RGX_Object *rgx,
   const wchar_t *string,
-  void *data
+  RGX_Match *result, void *data
 ) {
-  return rgxMatchTextCharacters(rgx, string, wcslen(string), data);
+  return rgxMatchTextCharacters(rgx, string, wcslen(string), result, data);
 }
 
 RGX_Matcher *
 rgxMatchTextUTF8 (
   RGX_Object *rgx,
   const char *string,
-  void *data
+  RGX_Match *result, void *data
 ) {
   size_t size = strlen(string) + 1;
   wchar_t characters[size];
@@ -259,7 +264,7 @@ rgxMatchTextUTF8 (
   wchar_t *to = characters;
   convertUtf8ToWchars(&from, &to, size);
 
-  return rgxMatchTextCharacters(rgx, characters, (to - characters), data);
+  return rgxMatchTextCharacters(rgx, characters, (to - characters), result, data);
 }
 
 size_t
@@ -279,7 +284,7 @@ rgxGetCaptureBounds (
 }
 
 int
-rgxGetCaptureCharacters (
+rgxGetCaptureText (
   const RGX_Match *match,
   size_t index, const wchar_t **characters, size_t *length
 ) {

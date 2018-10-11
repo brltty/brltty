@@ -219,7 +219,7 @@ testPrompt (int column, int row, void *data) {
     const ScreenCharacter *end = from + count;
 
     while (from < end) *to++ = from++->text;
-    return !!rgxMatchTextCharacters(promptPatterns, text, count, NULL);
+    return !!rgxMatchTextCharacters(promptPatterns, text, count, NULL, NULL);
   }
 
   const ScreenCharacter *prompt = data;
