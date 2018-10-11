@@ -210,7 +210,7 @@ RGX_Matcher *
 rgxMatchTextCharacters (
   RGX_Object *rgx,
   const wchar_t *characters, size_t length,
-  RGX_Match *result, void *data
+  RGX_Match **result, void *data
 ) {
   RGX_CharacterType internal[length];
 
@@ -235,8 +235,27 @@ rgxMatchTextCharacters (
   if (!element) return NULL;
 
   if (result) {
-    *result = match;
-    result->text.internal = NULL;
+    typedef struct {
+      RGX_Match match;
+      wchar_t text[];
+    } Block;
+
+    Block *block;
+    size_t size = sizeof(*block);
+    size += length * sizeof(block->text[0]);
+
+    if (!(block = malloc(size))) {
+      logMallocError();
+      return NULL;
+    }
+
+    block->match = match;
+    block->match.text.internal = NULL;
+
+    wmemcpy(block->text, match.text.characters, length);
+    block->match.text.characters = block->text;
+
+    *result = &block->match;
   }
 
   return getElementItem(element);
@@ -246,7 +265,7 @@ RGX_Matcher *
 rgxMatchTextString (
   RGX_Object *rgx,
   const wchar_t *string,
-  RGX_Match *result, void *data
+  RGX_Match **result, void *data
 ) {
   return rgxMatchTextCharacters(rgx, string, wcslen(string), result, data);
 }
@@ -255,7 +274,7 @@ RGX_Matcher *
 rgxMatchTextUTF8 (
   RGX_Object *rgx,
   const char *string,
-  RGX_Match *result, void *data
+  RGX_Match **result, void *data
 ) {
   size_t size = strlen(string) + 1;
   wchar_t characters[size];

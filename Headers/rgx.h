@@ -77,19 +77,19 @@ extern RGX_Matcher *rgxAddPatternUTF8 (
 extern RGX_Matcher *rgxMatchTextCharacters (
   RGX_Object *rgx,
   const wchar_t *characters, size_t length,
-  RGX_Match *result, void *data
+  RGX_Match **result, void *data
 );
 
 extern RGX_Matcher *rgxMatchTextString (
   RGX_Object *rgx,
   const wchar_t *string,
-  RGX_Match *result, void *data
+  RGX_Match **result, void *data
 );
 
 extern RGX_Matcher *rgxMatchTextUTF8 (
   RGX_Object *rgx,
   const char *string,
-  RGX_Match *result, void *data
+  RGX_Match **result, void *data
 );
 
 extern size_t rgxGetCaptureCount (
