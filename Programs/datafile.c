@@ -696,21 +696,21 @@ getCellsOperand (DataFile *file, ByteOperand *cells, const char *description) {
 
 unsigned char
 getLeftDots (unsigned char cell) {
-  return cell & (BRL_DOT(1) | BRL_DOT(2) | BRL_DOT(3) | BRL_DOT(7));
+  return cell & (BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_7);
 }
 
 unsigned char
 getRightDots (unsigned char cell) {
-  return cell & (BRL_DOT(4) | BRL_DOT(5) | BRL_DOT(6) | BRL_DOT(8));
+  return cell & (BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_8);
 }
 
 unsigned char
 getRightDotsToLeftDots (unsigned char cell) {
   unsigned char ret = 0;
-  if (cell & BRL_DOT(4)) ret |= BRL_DOT(1);
-  if (cell & BRL_DOT(5)) ret |= BRL_DOT(2);
-  if (cell & BRL_DOT(6)) ret |= BRL_DOT(3);
-  if (cell & BRL_DOT(8)) ret |= BRL_DOT(7);
+  if (cell & BRL_DOT_4) ret |= BRL_DOT_1;
+  if (cell & BRL_DOT_5) ret |= BRL_DOT_2;
+  if (cell & BRL_DOT_6) ret |= BRL_DOT_3;
+  if (cell & BRL_DOT_8) ret |= BRL_DOT_7;
   return ret;
 }
 
