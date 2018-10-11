@@ -99,11 +99,12 @@ rgxAddPatternCharacters (
     matcher->options = 0;
 
     matcher->pattern.characters = calloc(
-      (matcher->pattern.length = length),
+      (matcher->pattern.length = length) + 1,
       sizeof(*matcher->pattern.characters)
     );
 
     if (matcher->pattern.characters) {
+      matcher->pattern.characters[length] = 0;
       RGX_CharacterType internal[length];
 
       for (unsigned int index=0; index<length; index+=1) {
