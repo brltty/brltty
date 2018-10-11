@@ -54,9 +54,15 @@ rgxLogError (const RGX_Matcher *matcher, int error, RGX_OffsetType *offset) {
   char log[0X100];
   STR_BEGIN(log, sizeof(log));
 
-  STR_PRINTF("regular expression error %d", error);
+  STR_PRINTF("regular expression error");
   if (offset) STR_PRINTF(" at offset %"PRIsize, *offset);
-  STR_FORMAT(rgxFormatErrorMessage, error);
+  STR_PRINTF(": ");
+
+  {
+    size_t left = STR_LEFT;
+    STR_FORMAT(rgxFormatErrorMessage, error);
+    if (STR_LEFT == left) STR_PRINTF("unrecognized error %d", error);
+  }
 
   if (matcher) {
     STR_PRINTF(
@@ -267,6 +273,19 @@ rgxGetCaptureBounds (
 ) {
   if (index > match->captures.count) return 0;
   return rgxBounds(match->captures.data, index, from, to);
+}
+
+int
+rgxGetCaptureCharacters (
+  const RGX_Match *match,
+  size_t index, const wchar_t **characters, size_t *length
+) {
+  size_t from, to;
+  if (!rgxGetCaptureBounds(match, index, &from, &to)) return 0;
+
+  *characters = &match->text.characters[from];
+  *length = to - from;
+  return 1;
 }
 
 RGX_Object *

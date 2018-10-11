@@ -101,6 +101,11 @@ extern int rgxGetCaptureBounds (
   size_t index, size_t *from, size_t *to
 );
 
+extern int rgxGetCaptureCharacters (
+  const RGX_Match *match,
+  size_t index, const wchar_t **characters, size_t *length
+);
+
 typedef enum {
   RGX_OPTION_CLEAR,
   RGX_OPTION_SET,
