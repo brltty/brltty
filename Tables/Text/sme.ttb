@@ -1,0 +1,43 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2018 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.app/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# BRLTTY Text Table - Sami (Northern)
+# Tomas Mårdsjö <tomas.mardsjo@icap.nu>
+
+char	\xC1	(123 567 )	# ⡷ Á [LATIN CAPITAL LETTER A WITH ACUTE]
+char	\xE1	(123 56  )	# ⠷ á [LATIN SMALL LETTER A WITH ACUTE]
+
+char	\u010C	(1  4 67 )	# ⡩ Č [LATIN CAPITAL LETTER C WITH CARON]
+char	\u010D	(1  4 6  )	# ⠩ č [LATIN SMALL LETTER C WITH CARON]
+
+char	\u0110	(1  4567 )	# ⡹ Đ [LATIN CAPITAL LETTER D WITH STROKE]
+char	\u0111	(1  456  )	# ⠹ đ [LATIN SMALL LETTER D WITH STROKE]
+
+char	\u014A	(12 4 67 )	# ⡫ Ŋ [LATIN CAPITAL LETTER ENG]
+char	\u014B	(12 4 6  )	# ⠫ ŋ [LATIN SMALL LETTER ENG]
+
+char	\u0160	(1   567 )	# ⡱ Š [LATIN CAPITAL LETTER S WITH CARON]
+char	\u0161	(1   56  )	# ⠱ š [LATIN SMALL LETTER S WITH CARON]
+
+char	\u0166	(12  567 )	# ⡳ Ŧ [LATIN CAPITAL LETTER T WITH STROKE]
+char	\u0167	(12  56  )	# ⠳ ŧ [LATIN SMALL LETTER T WITH STROKE]
+
+char	\u017D	( 234 67 )	# ⡮ Ž [LATIN CAPITAL LETTER Z WITH CARON]
+char	\u017E	( 234 6  )	# ⠮ ž [LATIN SMALL LETTER Z WITH CARON]
+
+include no-oup.ttb
