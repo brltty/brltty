@@ -19,7 +19,40 @@
 # This BRLTTY text subtable defines aliases to/from Windows-1252 characters.
 # Dave Mielke <dave@mielke.cc>
 
-# Some text tables define Windows-1252 (rather than Unicode) characters.
+################
+# Introduction #
+################
+
+# Windows-1252 defines characters within the ISO-8859-1 C1 range (\x80-\x9F).
+# Since BRLTTY uses Unicode characters internally, the traditional use of
+# Windows-1252 characters has caused confusion within at least two areas:
+#
+# *  Some braille standards have been developed around, and, therefore, their
+#    tables have been written using, Windows-1252 character values.
+#
+# *  Some programs write Windows-1252 characters to the screen.
+#
+# This text subtable seeks to resolve these issues (see its sections below):
+
+# Windows-1252 doesn't define five of the 32 ISO-8859-1 C1 characters:
+#
+#    \x81, \x8D, \x8F, \x90, \x9D
+#
+# Wikipedia says:
+# 
+#    “According to the information on Microsoft's and the Unicode Consortium's
+#    websites, positions 81, 8D, 8F, 90, and 9D are unused; however, the
+#    Windows API MultiByteToWideChar maps these to the corresponding C1 control
+#    codes. The "best fit" mapping documents this behavior, too.”
+
+
+##############################################################
+# Braille Tables Written Using Windows-1252 Character Values #
+##############################################################
+
+# Alias each relevant Unicode character to its corresponding Windows-1252
+# value so that its braille representation will be found.
+
 alias	\u20AC	\x80	# € [EURO SIGN]
 #alias	\u0081	\x81	# ? (not defined)
 alias	\u201A	\x82	# ‚ [SINGLE LOW-9 QUOTATION MARK]
@@ -53,7 +86,14 @@ alias	\u0153	\x9C	# œ [LATIN SMALL LIGATURE OE]
 alias	\u017E	\x9E	# ž [LATIN SMALL LETTER Z WITH CARON]
 alias	\u0178	\x9F	# Ÿ [LATIN CAPITAL LETTER Y WITH DIAERESIS]
 
-# Programs may write Windows-1252 (rather than Unicode) characters to the screen.
+
+#################################################
+# Windows-1252 characters Written to the Screen #
+#################################################
+
+# Alias the Windows-1252 characters to their corresponding Unicode values so
+# that their braille representations can be found.
+
 alias	\x80	\u20AC	# € [EURO SIGN]
 #alias	\x81	\u0081	# ? (not defined)
 alias	\x82	\u201A	# ‚ [SINGLE LOW-9 QUOTATION MARK]
@@ -86,4 +126,5 @@ alias	\x9C	\u0153	# œ [LATIN SMALL LIGATURE OE]
 #alias	\x9D	\u009D	# ? (not defined)
 alias	\x9E	\u017E	# ž [LATIN SMALL LETTER Z WITH CARON]
 alias	\x9F	\u0178	# Ÿ [LATIN CAPITAL LETTER Y WITH DIAERESIS]
+
 
