@@ -29,3 +29,6 @@ include boxes.tti
 
 # block characters
 include blocks.tti
+
+# deal with text tables that define Windows-1252 (rather than Unicode) characters
+include win-1252.tti
