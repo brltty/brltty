@@ -144,16 +144,20 @@ convertCharacterToDots (TextTable *table, wchar_t character) {
 
     case 0XF000: {
       wint_t wc = convertCharToWchar(character & UNICODE_CELL_MASK);
-
       if (wc == WEOF) break;
       character = wc;
+      /* fall through */
     }
 
     default: {
       {
-        unsigned int counter = 0;
+        unsigned int iterationLimit = 0X10;
+        wchar_t characterEncountered[iterationLimit];
+        unsigned int iterationNumber = 0;
 
-        while (++counter < 0X10) {
+        while (iterationNumber < iterationLimit) {
+          if (wmemchr(characterEncountered, character, iterationNumber)) break;
+          characterEncountered[iterationNumber++] = character;
           const UnicodeRowEntry *row = getUnicodeRowEntry(table, character);
 
           if (row) {
