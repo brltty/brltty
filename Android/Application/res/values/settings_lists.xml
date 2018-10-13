@@ -205,6 +205,7 @@
   <string name="TEXT_TABLE_LABEL_sa">Sanskrit</string>
   <string name="TEXT_TABLE_LABEL_sat">Santali</string>
   <string name="TEXT_TABLE_LABEL_sd">Sindhi</string>
+  <string name="TEXT_TABLE_LABEL_se">Sami (Northern)</string>
   <string name="TEXT_TABLE_LABEL_sk">Slovak</string>
   <string name="TEXT_TABLE_LABEL_sl">Slovenian</string>
   <string name="TEXT_TABLE_LABEL_sv">Swedish</string>
@@ -295,6 +296,7 @@
     <item>@string/TEXT_TABLE_LABEL_sa</item>
     <item>@string/TEXT_TABLE_LABEL_sat</item>
     <item>@string/TEXT_TABLE_LABEL_sd</item>
+    <item>@string/TEXT_TABLE_LABEL_se</item>
     <item>@string/TEXT_TABLE_LABEL_sk</item>
     <item>@string/TEXT_TABLE_LABEL_sl</item>
     <item>@string/TEXT_TABLE_LABEL_sv</item>
@@ -386,6 +388,7 @@
     <item>sa</item>
     <item>sat</item>
     <item>sd</item>
+    <item>se</item>
     <item>sk</item>
     <item>sl</item>
     <item>sv</item>
