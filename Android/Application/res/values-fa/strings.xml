@@ -35,7 +35,7 @@
   <string name="GLOBAL_BUTTON_SWITCH_INPUT_METHOD">روش تغییر ورودی</string>
   <string name="GLOBAL_BUTTON_VIEW_USER_GUIDE">نمایش راهنمای کاربر</string>
   <string name="GLOBAL_BUTTON_BROWSE_WEB_SITE">گشتن در وب سایت</string>
-  <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGE">گشتن در پیام‌های گروه</string>
+  <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">گشتن در پیام‌های گروه</string>
   <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">ارسال پیام در گروه</string>
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">مدیریت عضویت در گروه</string>
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">به‌روز رسانی نرم‌افزار</string>
@@ -250,9 +250,9 @@
   <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">Chinese (Taiwan, Unique Chinese Braille)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (contracted)</string>
 
-  <string name="KEYBOARD_TABLE_LABEL_پیبوست">بریل برای صفحه کلید بریل</string>
-  <string name="KEYBOARD_TABLE_LABEL_پیوست">دسکتاپ برای صفحه کلید کامل</string>
-  <string name="KEYBOARD_TABLE_LABEL_پیوست">کلید ماشین حساب برای مسیریابی بر پایه کلید ماشین حساب</string>
-  <string name="KEYBOARD_TABLE_LABEL_پیوست">لبتاپ برای کیبردهای بدون ماشین حساب</string>
+  <string name="KEYBOARD_TABLE_LABEL_braille">بریل برای صفحه کلید بریل</string>
+  <string name="KEYBOARD_TABLE_LABEL_desktop">دسکتاپ برای صفحه کلید کامل</string>
+  <string name="KEYBOARD_TABLE_LABEL_keypad">کلید ماشین حساب برای مسیریابی بر پایه کلید ماشین حساب</string>
+  <string name="KEYBOARD_TABLE_LABEL_laptop">لبتاپ برای کیبردهای بدون ماشین حساب</string>
   <string name="KEYBOARD_TABLE_LABEL_sun_type6">پیوست برای صفحه کلید 6 گانه خورشیدی</string>
 </resources>
