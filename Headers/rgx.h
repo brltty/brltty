@@ -42,9 +42,9 @@ typedef struct {
   } text;
 
   struct {
-    void *data;
+    const RGX_Matcher *matcher;
     size_t count;
-  } captures;
+  } capture;
 
   struct {
     void *object;

@@ -187,7 +187,7 @@ rgxTestMatcher (const void *item, void *data) {
   int matched = rgxMatch(
     match->text.internal, match->text.length,
     matcher->compiled.code, matcher->compiled.data,
-    matcher->options, &match->captures.count, &error
+    matcher->options, &match->capture.count, &error
   );
 
   if (!matched) {
@@ -198,12 +198,10 @@ rgxTestMatcher (const void *item, void *data) {
   RGX_MatchHandler *handler = matcher->handler;
   if (!handler) return 1;
 
-  match->captures.data = matcher->compiled.data;
+  match->capture.matcher = matcher;
   match->data.pattern = matcher->data;
-
   match->pattern.characters = matcher->pattern.characters;
   match->pattern.length = matcher->pattern.length;
-
   return handler(match);
 }
 
@@ -292,7 +290,7 @@ size_t
 rgxGetCaptureCount (
   const RGX_Match *match
 ) {
-  return match->captures.count;
+  return match->capture.count;
 }
 
 int
@@ -300,8 +298,8 @@ rgxGetCaptureBounds (
   const RGX_Match *match,
   size_t index, size_t *from, size_t *to
 ) {
-  if (index > match->captures.count) return 0;
-  return rgxBounds(match->captures.data, index, from, to);
+  if (index > match->capture.count) return 0;
+  return rgxBounds(match->capture.matcher->compiled.data, index, from, to);
 }
 
 int
