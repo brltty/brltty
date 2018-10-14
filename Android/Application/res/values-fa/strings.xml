@@ -204,6 +204,7 @@
   <string name="TEXT_TABLE_LABEL_sa">Sanskrit</string>
   <string name="TEXT_TABLE_LABEL_sat">Santali</string>
   <string name="TEXT_TABLE_LABEL_sd">Sindhi</string>
+  <string name="TEXT_TABLE_LABEL_se">Sami (Northern)</string>
   <string name="TEXT_TABLE_LABEL_sk">Slovak</string>
   <string name="TEXT_TABLE_LABEL_sl">اسلونیایی</string>
   <string name="TEXT_TABLE_LABEL_sv_1989">Swedish (1989 standard)</string>
@@ -250,9 +251,9 @@
   <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">Chinese (Taiwan, Unique Chinese Braille)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (contracted)</string>
 
-  <string name="KEYBOARD_TABLE_LABEL_braille">بریل برای صفحه کلید بریل</string>
-  <string name="KEYBOARD_TABLE_LABEL_desktop">دسکتاپ برای صفحه کلید کامل</string>
-  <string name="KEYBOARD_TABLE_LABEL_keypad">کلید ماشین حساب برای مسیریابی بر پایه کلید ماشین حساب</string>
-  <string name="KEYBOARD_TABLE_LABEL_laptop">لبتاپ برای کیبردهای بدون ماشین حساب</string>
+  <string name="KEYBOARD_TABLE_LABEL_braille">پیوست بریل برای صفحه کلید بریل</string>
+  <string name="KEYBOARD_TABLE_LABEL_desktop">پیوست دسکتاپ برای صفحه کلید کامل</string>
+  <string name="KEYBOARD_TABLE_LABEL_keypad">پیوست کلید ماشین حساب برای مسیریابی بر پایه کلید ماشین حساب</string>
+  <string name="KEYBOARD_TABLE_LABEL_laptop">پیوست لبتاپ برای کیبردهای بدون ماشین حساب</string>
   <string name="KEYBOARD_TABLE_LABEL_sun_type6">پیوست برای صفحه کلید 6 گانه خورشیدی</string>
 </resources>
