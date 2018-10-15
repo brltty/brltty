@@ -22,39 +22,45 @@
 #include "strfmth.h"
 
 #if defined(USE_PKG_RGX_NONE)
+#define RGX_NO_MATCH 1
+#define RGX_NO_NAME 2
+
 typedef wchar_t RGX_CharacterType;
 typedef size_t RGX_OffsetType;
 typedef int RGX_OptionsType;
 typedef uint8_t RGX_CodeType;
 typedef uint8_t RGX_DataType;
-#define RGX_NO_MATCH 1
-#define RGX_NO_NAME 2
 
 #elif defined(USE_PKG_RGX_LIBPCRE32)
 #include <pcre.h>
+
+#define RGX_NO_MATCH PCRE_ERROR_NOMATCH
+#define RGX_NO_NAME PCRE_ERROR_NOSUBSTRING
+
 typedef PCRE_UCHAR32 RGX_CharacterType;
 typedef int RGX_OffsetType;
 typedef int RGX_OptionsType;
 typedef pcre32 RGX_CodeType;
+
 typedef struct {
   pcre32_extra *study;
   size_t matches;
   size_t count;
   RGX_OffsetType offsets[];
 } RGX_DataType;
-#define RGX_NO_MATCH PCRE_ERROR_NOMATCH
-#define RGX_NO_NAME PCRE_ERROR_NOSUBSTRING
 
 #elif defined(USE_PKG_RGX_LIBPCRE2_32)
 #define PCRE2_CODE_UNIT_WIDTH 32
 #include <pcre2.h>
+
+#define RGX_NO_MATCH PCRE2_ERROR_NOMATCH
+#define RGX_NO_NAME PCRE2_ERROR_NOSUBSTRING
+
 typedef PCRE2_UCHAR RGX_CharacterType;
 typedef PCRE2_SIZE RGX_OffsetType;
 typedef uint32_t RGX_OptionsType;
 typedef pcre2_code RGX_CodeType;
 typedef pcre2_match_data RGX_DataType;
-#define RGX_NO_MATCH PCRE2_ERROR_NOMATCH
-#define RGX_NO_NAME PCRE2_ERROR_NOSUBSTRING
 
 #else /* regular expression package */
 #error regular expression package not selected
