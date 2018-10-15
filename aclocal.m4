@@ -160,7 +160,8 @@ test -z "${$1_package}" && {
    test -n "${packages}" && {
       for package in ${packages}
       do
-         BRLTTY_HAVE_PACKAGE([$1], [${package}], [break], [])
+         BRLTTY_HAVE_PACKAGE([$1], [${package}], [], [:])
+         test -n "${$1_package}" && break
 
          ifelse(len([$5]), 0, [], [dnl
             case "${package}"
@@ -617,7 +618,7 @@ do
 done
 
 test -n "${$1_package}" || {
-   ifelse([$#], 4, [:], AC_MSG_WARN([$1 support not available]))
+   ifelse(len([$4]), 0, [AC_MSG_WARN([$1 support not available])], [$4])
 }
 
 AC_SUBST([$1_package])
