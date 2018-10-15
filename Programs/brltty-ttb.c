@@ -767,6 +767,20 @@ error:
 
 static int
 writeCharacter_half_XCompose (
+  FILE *file, wchar_t character,
+  unsigned char leftDots, unsigned char rightDots
+) {
+  if (!writeCharacterDots_XCompose (file, leftDots)) return 0;
+  if (fprintf(file, " ") == EOF) return 0;
+  if (!writeCharacterDots_XCompose (file, rightDots)) return 0;
+  if (fprintf(file, " : \"") == EOF) return 0;
+  if (!writeCharacterOutput_XCompose(file, character)) return 0;
+  if (fprintf(file, "\"\n") == EOF) return 0;
+  return 1;
+}
+
+static int
+writeCharacter_lefthalf_XCompose (
   FILE *file, wchar_t character, unsigned char dots,
   const unsigned char *byte, int isPrimary, const void *_data
 ) {
@@ -774,23 +788,45 @@ writeCharacter_half_XCompose (
     unsigned char leftDots = getLeftDots(dots);
     unsigned char rightDots = getRightDotsToLeftDots(dots);
 
-    if (!writeCharacterDots_XCompose (file, leftDots)) return 0;
-    if (fprintf(file, " ") == EOF) return 0;
-    if (!writeCharacterDots_XCompose (file, rightDots)) return 0;
-    if (fprintf(file, " : \"") == EOF) return 0;
-    if (!writeCharacterOutput_XCompose(file, character)) return 0;
-    if (fprintf(file, "\"\n") == EOF) return 0;
+    if (!writeCharacter_half_XCompose(file, character, leftDots, rightDots)) return 0;
   }
 
   return 1;
 }
 
 static int
-writeTable_half_XCompose (
+writeTable_lefthalf_XCompose (
   const char *path, FILE *file, TextTableData *ttd, const void *data
 ) {
   if (!writeHeaderComment(file, writeHashComment)) goto error;
-  if (!writeCharacters(file, ttd, writeCharacter_half_XCompose, NULL)) goto error;
+  if (!writeCharacters(file, ttd, writeCharacter_lefthalf_XCompose, NULL)) goto error;
+  return 1;
+
+error:
+  return 0;
+}
+
+static int
+writeCharacter_righthalf_XCompose (
+  FILE *file, wchar_t character, unsigned char dots,
+  const unsigned char *byte, int isPrimary, const void *_data
+) {
+  if (isPrimary) {
+    unsigned char leftDots = getLeftDotsToRightDots(dots);
+    unsigned char rightDots = getRightDots(dots);
+
+    if (!writeCharacter_half_XCompose(file, character, leftDots, rightDots)) return 0;
+  }
+
+  return 1;
+}
+
+static int
+writeTable_righthalf_XCompose (
+  const char *path, FILE *file, TextTableData *ttd, const void *data
+) {
+  if (!writeHeaderComment(file, writeHashComment)) goto error;
+  if (!writeCharacters(file, ttd, writeCharacter_righthalf_XCompose, NULL)) goto error;
   return 1;
 
 error:
@@ -955,8 +991,12 @@ static const FormatEntry formatEntries[] = {
     .write = writeTable_XCompose,
   },
 
-  { .name = "half-XCompose",
-    .write = writeTable_half_XCompose,
+  { .name = "lefthalf-XCompose",
+    .write = writeTable_lefthalf_XCompose,
+  },
+
+  { .name = "righthalf-XCompose",
+    .write = writeTable_righthalf_XCompose,
   },
 
   { .name = "jbt",
