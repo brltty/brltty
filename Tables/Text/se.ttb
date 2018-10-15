@@ -18,6 +18,7 @@
 
 # BRLTTY Text Table - Sami (Northern)
 # Tomas Mårdsjö <tomas.mardsjo@icap.nu>
+# see: https://en.wikipedia.org/wiki/Northern_Sami_Braille
 
 char	\xC1	(123 567 )	# ⡷ Á [LATIN CAPITAL LETTER A WITH ACUTE]
 char	\xE1	(123 56  )	# ⠷ á [LATIN SMALL LETTER A WITH ACUTE]
