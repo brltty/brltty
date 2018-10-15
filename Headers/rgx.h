@@ -134,10 +134,8 @@ typedef enum {
 
 typedef enum {
   RGX_COMPILE_ANCHOR_START,
-  RGX_COMPILE_ANCHOR_END,
 
   RGX_COMPILE_IGNORE_CASE,
-  RGX_COMPILE_LITERAL_TEXT,
   RGX_COMPILE_UNICODE_PROPERTIES,
 } RGX_CompileOption;
 
@@ -149,7 +147,6 @@ extern int rgxCompileOption (
 
 typedef enum {
   RGX_MATCH_ANCHOR_START,
-  RGX_MATCH_ANCHOR_END,
 } RGX_MatchOption;
 
 extern int rgxMatchOption (
