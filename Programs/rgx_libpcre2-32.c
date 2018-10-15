@@ -22,22 +22,8 @@
 #include "rgx_internal.h"
 #include "strfmt.h"
 
-RGX_BEGIN_OPTION_MAP(rgxCompileOptions)
-  [RGX_COMPILE_ANCHOR_START] = PCRE2_ANCHORED,
-  [RGX_COMPILE_ANCHOR_END] = PCRE2_ENDANCHORED,
-
-  [RGX_COMPILE_IGNORE_CASE] = PCRE2_CASELESS,
-  [RGX_COMPILE_LITERAL_TEXT] = PCRE2_LITERAL,
-  [RGX_COMPILE_UNICODE_PROPERTIES] = PCRE2_UCP,
-RGX_END_OPTION_MAP(rgxCompileOptions)
-
-RGX_BEGIN_OPTION_MAP(rgxMatchOptions)
-  [RGX_MATCH_ANCHOR_START] = PCRE2_ANCHORED,
-  [RGX_MATCH_ANCHOR_END] = PCRE2_ENDANCHORED,
-RGX_END_OPTION_MAP(rgxMatchOptions)
-
 RGX_CodeType *
-rgxCompile (
+rgxCompilePattern (
   const RGX_CharacterType *characters, size_t length,
   RGX_OptionsType options, RGX_OffsetType *offset,
   int *error
@@ -63,7 +49,7 @@ rgxDeallocateData (RGX_DataType *data) {
 }
 
 int
-rgxMatch (
+rgxMatchText (
   const RGX_CharacterType *characters, size_t length,
   RGX_CodeType *code, RGX_DataType *data,
   RGX_OptionsType options, size_t *count, int *error
@@ -82,11 +68,11 @@ rgxMatch (
 }
 
 int
-rgxBounds (
-  RGX_DataType *data, size_t index, size_t *from, size_t *to
+rgxCaptureBounds (
+  RGX_DataType *data, size_t number, size_t *from, size_t *to
 ) {
   const RGX_OffsetType *offsets = pcre2_get_ovector_pointer(data);
-  offsets += index * 2;
+  offsets += number * 2;
 
   if (offsets[0] == PCRE2_UNSET) return 0;
   if (offsets[1] == PCRE2_UNSET) return 0;
@@ -107,3 +93,17 @@ STR_BEGIN_FORMATTER(rgxFormatErrorMessage, int error)
     }
   }
 STR_END_FORMATTER
+
+RGX_BEGIN_OPTION_MAP(rgxCompileOptions)
+  [RGX_COMPILE_ANCHOR_START] = PCRE2_ANCHORED,
+  [RGX_COMPILE_ANCHOR_END] = PCRE2_ENDANCHORED,
+
+  [RGX_COMPILE_IGNORE_CASE] = PCRE2_CASELESS,
+  [RGX_COMPILE_LITERAL_TEXT] = PCRE2_LITERAL,
+  [RGX_COMPILE_UNICODE_PROPERTIES] = PCRE2_UCP,
+RGX_END_OPTION_MAP(rgxCompileOptions)
+
+RGX_BEGIN_OPTION_MAP(rgxMatchOptions)
+  [RGX_MATCH_ANCHOR_START] = PCRE2_ANCHORED,
+  [RGX_MATCH_ANCHOR_END] = PCRE2_ENDANCHORED,
+RGX_END_OPTION_MAP(rgxMatchOptions)

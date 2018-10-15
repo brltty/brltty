@@ -47,7 +47,7 @@ typedef pcre2_match_data RGX_DataType;
 extern "C" {
 #endif /* __cplusplus */
 
-extern RGX_CodeType *rgxCompile (
+extern RGX_CodeType *rgxCompilePattern (
   const RGX_CharacterType *characters, size_t length,
   RGX_OptionsType options, RGX_OffsetType *offset,
   int *error
@@ -57,14 +57,14 @@ extern void rgxDeallocateCode (RGX_CodeType *code);
 extern RGX_DataType *rgxAllocateData (RGX_CodeType *code);
 extern void rgxDeallocateData (RGX_DataType *data);
 
-extern int rgxMatch (
+extern int rgxMatchText (
   const RGX_CharacterType *characters, size_t length,
   RGX_CodeType *code, RGX_DataType *data,
   RGX_OptionsType options, size_t *count, int *error
 );
 
-extern int rgxBounds (
-  RGX_DataType *data, size_t index, size_t *from, size_t *to
+extern int rgxCaptureBounds (
+  RGX_DataType *data, size_t number, size_t *from, size_t *to
 );
 
 extern STR_DECLARE_FORMATTER(rgxFormatErrorMessage, int error);

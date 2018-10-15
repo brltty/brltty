@@ -22,14 +22,8 @@
 #include "rgx_internal.h"
 #include "strfmt.h"
 
-RGX_BEGIN_OPTION_MAP(rgxCompileOptions)
-RGX_END_OPTION_MAP(rgxCompileOptions)
-
-RGX_BEGIN_OPTION_MAP(rgxMatchOptions)
-RGX_END_OPTION_MAP(rgxMatchOptions)
-
 RGX_CodeType *
-rgxCompile (
+rgxCompilePattern (
   const RGX_CharacterType *characters, size_t length,
   RGX_OptionsType options, RGX_OffsetType *offset,
   int *error
@@ -51,7 +45,7 @@ rgxDeallocateData (RGX_DataType *data) {
 }
 
 int
-rgxMatch (
+rgxMatchText (
   const RGX_CharacterType *characters, size_t length,
   RGX_CodeType *code, RGX_DataType *data,
   RGX_OptionsType options, size_t *count, int *error
@@ -61,8 +55,8 @@ rgxMatch (
 }
 
 int
-rgxBounds (
-  RGX_DataType *data, size_t index, size_t *from, size_t *to
+rgxCaptureBounds (
+  RGX_DataType *data, size_t number, size_t *from, size_t *to
 ) {
   return 0;
 }
@@ -74,3 +68,9 @@ STR_BEGIN_FORMATTER(rgxFormatErrorMessage, int error)
       break;
   }
 STR_END_FORMATTER
+
+RGX_BEGIN_OPTION_MAP(rgxCompileOptions)
+RGX_END_OPTION_MAP(rgxCompileOptions)
+
+RGX_BEGIN_OPTION_MAP(rgxMatchOptions)
+RGX_END_OPTION_MAP(rgxMatchOptions)

@@ -30,6 +30,8 @@ extern RGX_Object *rgxNewObject (void *data);
 extern void rgxDestroyObject (RGX_Object *rgx);
 
 typedef struct {
+  const RGX_Matcher *matcher;
+
   struct {
     const wchar_t *characters;
     size_t length;
@@ -42,7 +44,6 @@ typedef struct {
   } text;
 
   struct {
-    const RGX_Matcher *matcher;
     size_t count;
   } capture;
 
@@ -98,12 +99,12 @@ extern size_t rgxGetCaptureCount (
 
 extern int rgxGetCaptureBounds (
   const RGX_Match *match,
-  size_t index, size_t *from, size_t *to
+  size_t number, size_t *from, size_t *to
 );
 
 extern int rgxGetCaptureText (
   const RGX_Match *match,
-  size_t index, const wchar_t **characters, size_t *length
+  size_t number, const wchar_t **characters, size_t *length
 );
 
 typedef enum {

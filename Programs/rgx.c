@@ -116,7 +116,7 @@ rgxAddPatternCharacters (
       int error;
       RGX_OffsetType offset;
 
-      matcher->compiled.code = rgxCompile(
+      matcher->compiled.code = rgxCompilePattern(
         internal, length, rgx->options, &offset, &error
       );
 
@@ -184,7 +184,7 @@ rgxTestMatcher (const void *item, void *data) {
   RGX_Match *match = data;
 
   int error;
-  int matched = rgxMatch(
+  int matched = rgxMatchText(
     match->text.internal, match->text.length,
     matcher->compiled.code, matcher->compiled.data,
     matcher->options, &match->capture.count, &error
@@ -198,7 +198,7 @@ rgxTestMatcher (const void *item, void *data) {
   RGX_MatchHandler *handler = matcher->handler;
   if (!handler) return 1;
 
-  match->capture.matcher = matcher;
+  match->matcher = matcher;
   match->data.pattern = matcher->data;
   match->pattern.characters = matcher->pattern.characters;
   match->pattern.length = matcher->pattern.length;
@@ -296,19 +296,19 @@ rgxGetCaptureCount (
 int
 rgxGetCaptureBounds (
   const RGX_Match *match,
-  size_t index, size_t *from, size_t *to
+  size_t number, size_t *from, size_t *to
 ) {
-  if (index > match->capture.count) return 0;
-  return rgxBounds(match->capture.matcher->compiled.data, index, from, to);
+  if (number > match->capture.count) return 0;
+  return rgxCaptureBounds(match->matcher->compiled.data, number, from, to);
 }
 
 int
 rgxGetCaptureText (
   const RGX_Match *match,
-  size_t index, const wchar_t **characters, size_t *length
+  size_t number, const wchar_t **characters, size_t *length
 ) {
   size_t from, to;
-  if (!rgxGetCaptureBounds(match, index, &from, &to)) return 0;
+  if (!rgxGetCaptureBounds(match, number, &from, &to)) return 0;
 
   *characters = &match->text.characters[from];
   *length = to - from;
