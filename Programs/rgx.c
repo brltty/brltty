@@ -27,7 +27,7 @@
 #include "queue.h"
 #include "strfmt.h"
 
-#define UTF8_TO_WCHAR \
+#define RGX_UTF8_TO_CHARACTERS \
   size_t size = strlen(string) + 1; \
   wchar_t characters[size]; \
   size_t count; \
@@ -36,6 +36,13 @@
     wchar_t *to = characters; \
     convertUtf8ToWchars(&from, &to, size); \
     count = to - characters; \
+  }
+
+#define RGX_CHARACTERS_TO_INTERNAL \
+  RGX_CharacterType internal[length + 1]; \
+  internal[length] = 0; \
+  for (unsigned int index=0; index<length; index+=1) { \
+    internal[index] = characters[index]; \
   }
 
 struct RGX_ObjectStruct {
@@ -115,17 +122,10 @@ rgxAddPatternCharacters (
     );
 
     if (matcher->pattern.characters) {
+      wmemcpy(matcher->pattern.characters, characters, length);
       matcher->pattern.characters[length] = 0;
 
-      RGX_CharacterType internal[length + 1];
-      internal[length] = 0;
-
-      for (unsigned int index=0; index<length; index+=1) {
-        wchar_t character = characters[index];
-        internal[index] = character;
-        matcher->pattern.characters[index] = character;
-      }
-
+      RGX_CHARACTERS_TO_INTERNAL;
       int error;
       RGX_OffsetType offset;
 
@@ -179,7 +179,7 @@ rgxAddPatternUTF8 (
   const char *string,
   RGX_MatchHandler *handler, void *data
 ) {
-  UTF8_TO_WCHAR;
+  RGX_UTF8_TO_CHARACTERS;
   return rgxAddPatternCharacters(rgx, characters, count, handler, data);
 }
 
@@ -216,11 +216,7 @@ rgxMatchTextCharacters (
   const wchar_t *characters, size_t length,
   RGX_Match **result, void *data
 ) {
-  RGX_CharacterType internal[length];
-
-  for (unsigned int index=0; index<length; index+=1) {
-    internal[index] = characters[index];
-  }
+  RGX_CHARACTERS_TO_INTERNAL;
 
   RGX_Match match = {
     .text = {
@@ -281,7 +277,7 @@ rgxMatchTextUTF8 (
   const char *string,
   RGX_Match **result, void *data
 ) {
-  UTF8_TO_WCHAR;
+  RGX_UTF8_TO_CHARACTERS;
   return rgxMatchTextCharacters(rgx, characters, count, result, data);
 }
 
@@ -291,15 +287,11 @@ rgxGetNameNumberCharacters (
   const wchar_t *characters, size_t length,
   size_t *number
 ) {
-  RGX_CharacterType internal[length + 1];
-  internal[length] = 0;
-
-  for (int index=0; index<length; index+=1) {
-    internal[index] = characters[index];
-  }
+  RGX_CHARACTERS_TO_INTERNAL;
 
   int error;
   if (rgxNameNumber(matcher->compiled.code, internal, number, &error)) return 1;
+
   if (error != RGX_NO_NAME) rgxLogError(matcher, error, NULL);
   return 0;
 }
@@ -319,7 +311,7 @@ rgxGetNameNumberUTF8 (
   const char *string,
   size_t *number
 ) {
-  UTF8_TO_WCHAR;
+  RGX_UTF8_TO_CHARACTERS;
   return rgxGetNameNumberCharacters(matcher, characters, count, number);
 }
 
