@@ -66,7 +66,7 @@ rgxLogError (const RGX_Matcher *matcher, int error, RGX_OffsetType *offset) {
   STR_BEGIN(log, sizeof(log));
 
   STR_PRINTF("regular expression error");
-  if (offset) STR_PRINTF(" at offset %"PRIsize, *offset);
+  if (offset) STR_PRINTF(" at offset %"PRIu32, (uint32_t)*offset);
   STR_PRINTF(": ");
 
   {
@@ -116,7 +116,9 @@ rgxAddPatternCharacters (
 
     if (matcher->pattern.characters) {
       matcher->pattern.characters[length] = 0;
-      RGX_CharacterType internal[length];
+
+      RGX_CharacterType internal[length + 1];
+      internal[length] = 0;
 
       for (unsigned int index=0; index<length; index+=1) {
         wchar_t character = characters[index];

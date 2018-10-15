@@ -356,6 +356,7 @@ extern "C" {
 
 /* Define only one of the following regular expression packages. */
 #undef USE_PKG_RGX_NONE
+#undef USE_PKG_RGX_LIBPCRE32
 #undef USE_PKG_RGX_LIBPCRE2_32
 
 /* Define only one of the following character set packages. */

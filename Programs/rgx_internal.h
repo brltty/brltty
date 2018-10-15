@@ -30,6 +30,21 @@ typedef uint8_t RGX_DataType;
 #define RGX_NO_MATCH 1
 #define RGX_NO_NAME 2
 
+#elif defined(USE_PKG_RGX_LIBPCRE32)
+#include <pcre.h>
+typedef PCRE_UCHAR32 RGX_CharacterType;
+typedef int RGX_OffsetType;
+typedef int RGX_OptionsType;
+typedef pcre32 RGX_CodeType;
+typedef struct {
+  pcre32_extra *study;
+  size_t matches;
+  size_t count;
+  RGX_OffsetType offsets[];
+} RGX_DataType;
+#define RGX_NO_MATCH PCRE_ERROR_NOMATCH
+#define RGX_NO_NAME PCRE_ERROR_NOSUBSTRING
+
 #elif defined(USE_PKG_RGX_LIBPCRE2_32)
 #define PCRE2_CODE_UNIT_WIDTH 32
 #include <pcre2.h>
