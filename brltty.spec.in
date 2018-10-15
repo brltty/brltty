@@ -38,7 +38,13 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
 %define _systemdscriptdir %{_libexecdir}
 %define _udevlibdir %{_libdir}/udev
 
+Requires: dbus-libs
+Requires: polkit-libs
+Requires: libpcre2-utf32
 Requires: libicu
+Requires: liblouis
+Requires: expat
+Requires: cldr-emoji-annotation
 
 BuildRequires: /bin/sh
 BuildRequires: /usr/bin/env
@@ -49,12 +55,17 @@ BuildRequires: coreutils
 BuildRequires: binutils
 BuildRequires: /usr/bin/awk
 BuildRequires: tcl
+BuildRequires: glibc-headers
 BuildRequires: glibc-devel
+BuildRequires: polkit-devel
+BuildRequires: pcre2-devel
+BuildRequires: expat-devel
 BuildRequires: libicu-devel
 BuildRequires: liblouis-devel
 BuildRequires: ncurses-devel
 BuildRequires: alsa-lib-devel
 BuildRequires: bluez-libs-devel
+BuildRequires: dbus-devel
 BuildRequires: polkit-devel
 BuildRequires: systemd-devel
 BuildRequires: linuxdoc-tools
@@ -232,7 +243,7 @@ Release: 1
 Group: System Environment/Daemons
 License: LGPL
 
-Requires: dbus
+Requires: dbus-libs
 
 BuildRequires: at-spi2-core-devel
 BuildRequires: xorg-x11-proto-devel
@@ -275,6 +286,12 @@ Release: 1
 Group: Development/Tools
 License: LGPL
 
+Requires: libicu
+Requires: expat
+Requires: cldr-emoji-annotation
+
+BuildRequires: libicu-devel
+BuildRequires: expat-devel
 BuildRequires: ncurses-devel
 
 AutoProv: no
