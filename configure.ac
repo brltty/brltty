@@ -1239,7 +1239,7 @@ BRLTTY_ARG_PACKAGE([dynld], [dynamic loading], [dlfcn dyld], [dnl
       ;;
 ])
 
-BRLTTY_ARG_PACKAGE([rgx], [regular expression], [libpcre2-32], [dnl
+BRLTTY_ARG_PACKAGE([rgx], [regular expression], [libpcre2-32 libpcre32], [dnl
 ])
 
 BRLTTY_ARG_PACKAGE([charset], [character set], [iconv], [dnl
