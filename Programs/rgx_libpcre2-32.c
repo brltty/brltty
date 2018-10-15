@@ -68,6 +68,22 @@ rgxMatchText (
 }
 
 int
+rgxNameNumber (
+  RGX_CodeType *code, const RGX_CharacterType *name,
+  size_t *number, int *error
+) {
+  int result = pcre2_substring_number_from_name(code, name);
+
+  if (result > 0) {
+    *number = result;
+    return 1;
+  } else {
+    *error = result;
+    return 0;
+  }
+}
+
+int
 rgxCaptureBounds (
   RGX_DataType *data, size_t number, size_t *from, size_t *to
 ) {

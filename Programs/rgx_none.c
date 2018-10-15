@@ -55,6 +55,15 @@ rgxMatchText (
 }
 
 int
+rgxNameNumber (
+  RGX_CodeType *code, const RGX_CharacterType *name,
+  size_t *number, int *error
+) {
+  *error = RGX_NO_NAME;
+  return 0;
+}
+
+int
 rgxCaptureBounds (
   RGX_DataType *data, size_t number, size_t *from, size_t *to
 ) {

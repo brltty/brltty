@@ -28,6 +28,7 @@ typedef int RGX_OptionsType;
 typedef uint8_t RGX_CodeType;
 typedef uint8_t RGX_DataType;
 #define RGX_NO_MATCH 1
+#define RGX_NO_NAME 2
 
 #elif defined(USE_PKG_RGX_LIBPCRE2_32)
 #define PCRE2_CODE_UNIT_WIDTH 32
@@ -38,6 +39,7 @@ typedef uint32_t RGX_OptionsType;
 typedef pcre2_code RGX_CodeType;
 typedef pcre2_match_data RGX_DataType;
 #define RGX_NO_MATCH PCRE2_ERROR_NOMATCH
+#define RGX_NO_NAME PCRE2_ERROR_NOSUBSTRING
 
 #else /* regular expression package */
 #error regular expression package not selected
@@ -61,6 +63,11 @@ extern int rgxMatchText (
   const RGX_CharacterType *characters, size_t length,
   RGX_CodeType *code, RGX_DataType *data,
   RGX_OptionsType options, size_t *count, int *error
+);
+
+extern int rgxNameNumber (
+  RGX_CodeType *code, const RGX_CharacterType *name,
+  size_t *number, int *error
 );
 
 extern int rgxCaptureBounds (

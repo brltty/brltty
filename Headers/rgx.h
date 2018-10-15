@@ -93,6 +93,24 @@ extern RGX_Matcher *rgxMatchTextUTF8 (
   RGX_Match **result, void *data
 );
 
+extern int rgxGetNameNumberCharacters (
+  const RGX_Matcher *matcher,
+  const wchar_t *characters, size_t length,
+  size_t *number
+);
+
+extern int rgxGetNameNumberString (
+  const RGX_Matcher *matcher,
+  const wchar_t *string,
+  size_t *number
+);
+
+extern int rgxGetNameNumberUTF8 (
+  const RGX_Matcher *matcher,
+  const char *string,
+  size_t *number
+);
+
 extern size_t rgxGetCaptureCount (
   const RGX_Match *match
 );

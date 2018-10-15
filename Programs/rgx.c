@@ -27,6 +27,17 @@
 #include "queue.h"
 #include "strfmt.h"
 
+#define UTF8_TO_WCHAR \
+  size_t size = strlen(string) + 1; \
+  wchar_t characters[size]; \
+  size_t count; \
+  { \
+    const char *from = string; \
+    wchar_t *to = characters; \
+    convertUtf8ToWchars(&from, &to, size); \
+    count = to - characters; \
+  }
+
 struct RGX_ObjectStruct {
   void *data;
   Queue *matchers;
@@ -166,16 +177,8 @@ rgxAddPatternUTF8 (
   const char *string,
   RGX_MatchHandler *handler, void *data
 ) {
-  size_t size = strlen(string) + 1;
-  wchar_t characters[size];
-
-  const char *from = string;
-  wchar_t *to = characters;
-  convertUtf8ToWchars(&from, &to, size);
-
-  return rgxAddPatternCharacters(
-    rgx, characters, (to - characters), handler, data
-  );
+  UTF8_TO_WCHAR;
+  return rgxAddPatternCharacters(rgx, characters, count, handler, data);
 }
 
 static int
@@ -276,14 +279,46 @@ rgxMatchTextUTF8 (
   const char *string,
   RGX_Match **result, void *data
 ) {
-  size_t size = strlen(string) + 1;
-  wchar_t characters[size];
+  UTF8_TO_WCHAR;
+  return rgxMatchTextCharacters(rgx, characters, count, result, data);
+}
 
-  const char *from = string;
-  wchar_t *to = characters;
-  convertUtf8ToWchars(&from, &to, size);
+int
+rgxGetNameNumberCharacters (
+  const RGX_Matcher *matcher,
+  const wchar_t *characters, size_t length,
+  size_t *number
+) {
+  RGX_CharacterType internal[length + 1];
+  internal[length] = 0;
 
-  return rgxMatchTextCharacters(rgx, characters, (to - characters), result, data);
+  for (int index=0; index<length; index+=1) {
+    internal[index] = characters[index];
+  }
+
+  int error;
+  if (rgxNameNumber(matcher->compiled.code, internal, number, &error)) return 1;
+  if (error != RGX_NO_NAME) rgxLogError(matcher, error, NULL);
+  return 0;
+}
+
+int
+rgxGetNameNumberString (
+  const RGX_Matcher *matcher,
+  const wchar_t *string,
+  size_t *number
+) {
+  return rgxGetNameNumberCharacters(matcher, string, wcslen(string), number);
+}
+
+int
+rgxGetNameNumberUTF8 (
+  const RGX_Matcher *matcher,
+  const char *string,
+  size_t *number
+) {
+  UTF8_TO_WCHAR;
+  return rgxGetNameNumberCharacters(matcher, characters, count, number);
 }
 
 size_t
