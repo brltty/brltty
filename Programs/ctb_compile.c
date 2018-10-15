@@ -282,14 +282,25 @@ addTextRule (
   ContractionTableData *ctd
 ) {
   ByteOperand text;
-  size_t length = replace->length * sizeof(replace->characters[0]);
+  unsigned char *to = text.bytes;
+  const unsigned char *toEnd = to + ARRAY_COUNT(text.bytes);
 
-  if (length > ARRAY_COUNT(text.bytes)) {
-    reportDataError(file, "replace text too long");
-    length = ARRAY_COUNT(text.bytes);
+  const wchar_t *from = replace->characters;
+  const wchar_t *fromEnd = from + replace->length;
+
+  while (from < fromEnd) {
+    Utf8Buffer buffer;
+    size_t length = convertWcharToUtf8(*from++, buffer);
+
+    if (length > (toEnd - to)) {
+      reportDataError(file, "replace text too long");
+      break;
+    }
+
+    to = mempcpy(to, buffer, length);
   }
 
-  memcpy(text.bytes, replace->characters, (text.length = length));
+  text.length = to - text.bytes;
   return addByteRule(file, opcode, find, &text, after, before, ctd);
 }
 
@@ -624,33 +635,21 @@ static CLDR_ANNOTATION_HANDLER(handleAnnotation) {
     wmemcpy(find.characters, findCharacters, (find.length = length));
   }
 
-  DataString replace;
-  const char *repUTF8 = parameters->name;
-  size_t repSize = strlen(repUTF8) + 1;
-  wchar_t repCharacters[repSize];
+  ByteOperand replace;
   {
-    const char *byte = repUTF8;
-    wchar_t *character = repCharacters;
-    convertUtf8ToWchars(&byte, &character, repSize);
-    size_t length = character - repCharacters;
+    const char *string = parameters->name;
+    size_t length = strlen(string);
+    size_t size = sizeof(replace.bytes);
 
-    if (length > ARRAY_COUNT(replace.characters)) {
+    if (length > size) {
       reportDataError(file, "CLDR name too long");
       return 1;
     }
 
-    wmemcpy(replace.characters, repCharacters, (replace.length = length));
+    memcpy(replace.bytes, string, (replace.length = length));
   }
 
-  {
-    size_t length = find.length;
-
-    if (normalizeCharacters(&length, find.characters, find.characters, NULL)) {
-      find.length = length;
-    }
-  }
-
-  return !!addTextRule(file, CTO_Replace, &find, &replace, 0, 0, ctd);
+  return !!addByteRule(file, CTO_Replace, &find, &replace, 0, 0, ctd);
 }
 
 static DATA_OPERANDS_PROCESSOR(processCLDROperands) {

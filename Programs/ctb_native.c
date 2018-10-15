@@ -27,6 +27,7 @@
 #include "ctb_translate.h"
 #include "brl_dots.h"
 #include "unicode.h"
+#include "charset.h"
 
 #ifdef HAVE_ICU
 #include <unicode/uchar.h>
@@ -922,8 +923,15 @@ contractText_native (BrailleContractionData *bcd) {
 
       if (bcd->current.opcode == CTO_Replace) {
         const ContractionTableRule *rule = bcd->current.rule;
-        const wchar_t *inputBuffer = &rule->findrep[rule->findlen];
-        int inputLength = rule->replen / sizeof(*inputBuffer);
+
+        size_t size = rule->replen + 1;
+        wchar_t characters[size];
+        wchar_t *to = characters;
+        const char *from = (const char *)&rule->findrep[rule->findlen];
+        convertUtf8ToWchars(&from, &to, size);
+
+        const wchar_t *inputBuffer = characters;
+        int inputLength = to - characters;
         int outputLength = bcd->output.end - bcd->output.current;
 
         contractText(
