@@ -116,3 +116,6 @@ always ๖ 1248	  	THAI DIGIT SIX
 always ๗ 12458	  	THAI DIGIT SEVEN
 always ๘ 1258	  	THAI DIGIT EIGHT
 always ๙ 248	  	THAI DIGIT NINE
+
+# inline contraction of emoji descriptions
+cldr th

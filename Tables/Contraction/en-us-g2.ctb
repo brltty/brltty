@@ -1538,3 +1538,6 @@ literal .zip
 
 # when a decimal begins with a period, it should be translated with a 
 # number sign followed by a decimal point, followed by the number.
+
+# inline contraction of emoji descriptions
+cldr en

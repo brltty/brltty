@@ -1787,3 +1787,5 @@ sufword jusqu' 245-12345-3
 sufword lorsqu' 123-12345-3
 sufword parce\squ' 1234-456-12345-3
 
+# inline contraction of emoji descriptions
+cldr fr

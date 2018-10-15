@@ -29,3 +29,6 @@ always ch 1456
 always ij 13456
 always oe 246
 always sch 156
+
+# inline contraction of emoji descriptions
+cldr nl

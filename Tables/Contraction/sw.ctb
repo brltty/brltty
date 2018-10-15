@@ -44,3 +44,6 @@ always ii 35
 always oo 246
 always uu 1256
 always st 34
+
+# inline contraction of emoji descriptions
+cldr sw

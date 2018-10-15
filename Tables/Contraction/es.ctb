@@ -351,3 +351,6 @@ word verdad 1236-145
 word veces 1236-14
 word vosotros 45-1236
 word vuestro 56-1236
+
+# inline contraction of emoji descriptions
+cldr es

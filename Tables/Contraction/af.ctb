@@ -72,3 +72,6 @@ always * 35-35
 always ^ 45
 numsign 3456
 capsign 6
+
+# inline contraction of emoji descriptions
+cldr af
