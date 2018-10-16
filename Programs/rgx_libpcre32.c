@@ -20,9 +20,14 @@
 
 #include <string.h>
 
+#include "log.h"
 #include "rgx.h"
 #include "rgx_internal.h"
 #include "strfmt.h"
+
+static const char *rgxPositiveErrors[100] = {
+  [0] = "no error"
+};
 
 RGX_CodeType *
 rgxCompilePattern (
@@ -32,9 +37,20 @@ rgxCompilePattern (
 ) {
   const char *message;
 
-  return pcre32_compile2(
+  RGX_CodeType *code = pcre32_compile2(
     characters, options, error, &message, offset, NULL
   );
+
+  if (!code) {
+    if (*error > 0) {
+      if (*error < ARRAY_COUNT(rgxPositiveErrors)) {
+        const char **text = &rgxPositiveErrors[*error];
+        if (!*text) *text = message;
+      }
+    }
+  }
+
+  return code;
 }
 
 void
@@ -58,8 +74,17 @@ rgxAllocateData (RGX_CodeType *code) {
   data->count = count;
 
   {
-    const char *message;
+    const char *message = NULL;
     data->study = pcre32_study(code, 0, &message);
+
+    if (message) {
+      logMessage(LOG_WARNING, "pcre study error: %s", message);
+
+      if (data->study) {
+        pcre32_free_study(data->study);
+        data->study = NULL;
+      }
+    }
   }
 
   return data;
@@ -125,148 +150,53 @@ rgxCaptureBounds (
   return 1;
 }
 
+static const char *const rgxNegativeErrors[] = {
+  [0] = "no error",
+   [-PCRE_ERROR_NOMATCH] = "no match",
+   [-PCRE_ERROR_NULL] = "required pointer argument is null",
+   [-PCRE_ERROR_BADOPTION] = "unrecognized option",
+   [-PCRE_ERROR_BADMAGIC] = "magic number not found",
+   [-PCRE_ERROR_UNKNOWN_OPCODE] = "invalid item in compiled pattern",
+   [-PCRE_ERROR_NOMEMORY] = "insufficient memory",
+   [-PCRE_ERROR_NOSUBSTRING] = "no capture with specified number or name",
+   [-PCRE_ERROR_MATCHLIMIT] = "match limit exceeded",
+   [-PCRE_ERROR_CALLOUT] = "error in callout",
+   [-PCRE_ERROR_BADUTF32] = "invalid UTF-32 character",
+   [-PCRE_ERROR_BADUTF16_OFFSET] = "start offset is within a multibyte character",
+   [-PCRE_ERROR_PARTIAL] = "partial match",
+   [-PCRE_ERROR_BADPARTIAL] = "pattern contains item not supported for partial match",
+   [-PCRE_ERROR_INTERNAL] = "internal error",
+   [-PCRE_ERROR_BADCOUNT] = "size of offsets vector is negative",
+   [-PCRE_ERROR_DFA_UITEM] = "pattern contains item not supported for DFA match",
+   [-PCRE_ERROR_DFA_UCOND] = "DFA match uses back reference for condition or test for recursion in specific group",
+   [-PCRE_ERROR_DFA_UMLIMIT] = "match or recursion limit specified for DFA match",
+   [-PCRE_ERROR_DFA_WSSIZE] = "DFA workspace overflow",
+   [-PCRE_ERROR_DFA_RECURSE] = "DFA recursion offsets vector too small",
+   [-PCRE_ERROR_RECURSIONLIMIT] = "recursion limit exceeded",
+   [-PCRE_ERROR_NULLWSLIMIT] = "",
+   [-PCRE_ERROR_BADNEWLINE] = "invalid newline option combination",
+   [-PCRE_ERROR_BADOFFSET] = "start offset out of bounds",
+   [-PCRE_ERROR_SHORTUTF16] = "truncated multibyte character",
+   [-PCRE_ERROR_RECURSELOOP] = "recursion loop detected",
+   [-PCRE_ERROR_JIT_STACKLIMIT] = "JIT stack too small",
+   [-PCRE_ERROR_BADMODE] = "pattern compiled for different character size",
+   [-PCRE_ERROR_BADENDIANNESS] = "pattern compiled for different host endianness",
+   [-PCRE_ERROR_DFA_BADRESTART] = "unable to resume partial DFA match",
+   [-PCRE_ERROR_JIT_BADOPTION] = "invalid JIT option",
+   [-PCRE_ERROR_BADLENGTH] = "text length is negative",
+   [-PCRE_ERROR_UNSET] = "required value not set",
+};
+
 STR_BEGIN_FORMATTER(rgxFormatErrorMessage, int error)
-  const char *message;
+  const char *message = NULL;
 
-  switch (error) {
-    case PCRE_ERROR_NOMATCH:
-      message = "no match";
-      break;
-
-    case PCRE_ERROR_NULL:
-      message = "null";
-      break;
-
-    case PCRE_ERROR_BADOPTION:
-      message = "bad option";
-      break;
-
-    case PCRE_ERROR_BADMAGIC:
-      message = "bad magic";
-      break;
-
-    case PCRE_ERROR_UNKNOWN_OPCODE:
-      message = "unknown opcode";
-      break;
-
-    case PCRE_ERROR_NOMEMORY:
-      message = "no memory";
-      break;
-
-    case PCRE_ERROR_NOSUBSTRING:
-      message = "no substring";
-      break;
-
-    case PCRE_ERROR_MATCHLIMIT:
-      message = "match limit";
-      break;
-
-    case PCRE_ERROR_CALLOUT:
-      message = "call out";
-      break;
-
-    case PCRE_ERROR_BADUTF32:
-      message = "bad UTF32";
-      break;
-
-    case PCRE_ERROR_BADUTF16_OFFSET:
-      message = "bad UTF16 offset";
-      break;
-
-    case PCRE_ERROR_PARTIAL:
-      message = "partial";
-      break;
-
-    case PCRE_ERROR_BADPARTIAL:
-      message = "bad partial";
-      break;
-
-    case PCRE_ERROR_INTERNAL:
-      message = "internal";
-      break;
-
-    case PCRE_ERROR_BADCOUNT:
-      message = "bad count";
-      break;
-
-    case PCRE_ERROR_DFA_UITEM:
-      message = "dfa uitem";
-      break;
-
-    case PCRE_ERROR_DFA_UCOND:
-      message = "dfa ucond";
-      break;
-
-    case PCRE_ERROR_DFA_UMLIMIT:
-      message = "dfa umlimit";
-      break;
-
-    case PCRE_ERROR_DFA_WSSIZE:
-      message = "dfa wssize";
-      break;
-
-    case PCRE_ERROR_DFA_RECURSE:
-      message = "dfa recurse";
-      break;
-
-    case PCRE_ERROR_RECURSIONLIMIT:
-      message = "recursion limit";
-      break;
-
-    case PCRE_ERROR_NULLWSLIMIT:
-      message = "null ws limit";
-      break;
-
-    case PCRE_ERROR_BADNEWLINE:
-      message = "bad newline";
-      break;
-
-    case PCRE_ERROR_BADOFFSET:
-      message = "bad offset";
-      break;
-
-    case PCRE_ERROR_SHORTUTF16:
-      message = "short UTF16";
-      break;
-
-    case PCRE_ERROR_RECURSELOOP:
-      message = "recurse loop";
-      break;
-
-    case PCRE_ERROR_JIT_STACKLIMIT:
-      message = "jit stack limit";
-      break;
-
-    case PCRE_ERROR_BADMODE:
-      message = "bad mode";
-      break;
-
-    case PCRE_ERROR_BADENDIANNESS:
-      message = "bad endianness";
-      break;
-
-    case PCRE_ERROR_DFA_BADRESTART:
-      message = "dfa bad restart";
-      break;
-
-    case PCRE_ERROR_JIT_BADOPTION:
-      message = "jit bad option";
-      break;
-
-    case PCRE_ERROR_BADLENGTH:
-      message = "bad length";
-      break;
-
-    case PCRE_ERROR_UNSET:
-      message = "unset";
-      break;
-
-    default:
-      message = NULL;
-      break;
+  if (error > 0) {
+    if (error < ARRAY_COUNT(rgxPositiveErrors)) message = rgxPositiveErrors[error];
+  } else if ((error = -error) < ARRAY_COUNT(rgxNegativeErrors)) {
+    message = rgxNegativeErrors[error];
   }
 
-  if (message) STR_PRINTF("%s", message);
+  if (message && *message) STR_PRINTF("%s", message);
 STR_END_FORMATTER
 
 RGX_BEGIN_OPTION_MAP(rgxCompileOptions)

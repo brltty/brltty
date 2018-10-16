@@ -68,7 +68,7 @@ struct RGX_MatcherStruct {
 };
 
 static void
-rgxLogError (const RGX_Matcher *matcher, int error, RGX_OffsetType *offset) {
+rgxLogError (int error, const RGX_Matcher *matcher, RGX_OffsetType *offset) {
   char log[0X100];
   STR_BEGIN(log, sizeof(log));
 
@@ -148,7 +148,7 @@ rgxAddPatternCharacters (
 
         rgxDeallocateCode(matcher->compiled.code);
       } else {
-        rgxLogError(matcher, error, &offset);
+        rgxLogError(error, matcher, &offset);
       }
 
       free(matcher->pattern.characters);
@@ -196,7 +196,7 @@ rgxTestMatcher (const void *item, void *data) {
   );
 
   if (!matched) {
-    if (error != RGX_NO_MATCH) rgxLogError(matcher, error, NULL);
+    if (error != RGX_NO_MATCH) rgxLogError(error, matcher, NULL);
     return 0;
   }
 
@@ -292,7 +292,7 @@ rgxGetNameNumberCharacters (
   int error;
   if (rgxNameNumber(matcher->compiled.code, internal, number, &error)) return 1;
 
-  if (error != RGX_NO_NAME) rgxLogError(matcher, error, NULL);
+  if (error != RGX_NO_NAME) rgxLogError(error, matcher, NULL);
   return 0;
 }
 
