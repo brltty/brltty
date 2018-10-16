@@ -25,9 +25,22 @@
 #include "rgx_internal.h"
 #include "strfmt.h"
 
-static const char *rgxPositiveErrors[100] = {
-  [0] = "no error"
-};
+static int savedErrorCode = 0;
+static const char *savedErrorMessage = NULL;
+
+static void
+saveErrorMessage (int error, const char *message) {
+  if (message && *message) {
+    savedErrorCode = error;
+    savedErrorMessage = message;
+  }
+}
+
+static const char *
+getErrorMessage (int error) {
+  if (error == savedErrorCode) return savedErrorMessage;
+  return NULL;
+}
 
 RGX_CodeType *
 rgxCompilePattern (
@@ -41,15 +54,7 @@ rgxCompilePattern (
     characters, options, error, &message, offset, NULL
   );
 
-  if (!code) {
-    if (*error > 0) {
-      if (*error < ARRAY_COUNT(rgxPositiveErrors)) {
-        const char **text = &rgxPositiveErrors[*error];
-        if (!*text) *text = message;
-      }
-    }
-  }
-
+  if (!code) saveErrorMessage(*error, message);
   return code;
 }
 
@@ -188,12 +193,14 @@ static const char *const rgxNegativeErrors[] = {
 };
 
 STR_BEGIN_FORMATTER(rgxFormatErrorMessage, int error)
-  const char *message = NULL;
+  const char *message = getErrorMessage(error);
 
-  if (error > 0) {
-    if (error < ARRAY_COUNT(rgxPositiveErrors)) message = rgxPositiveErrors[error];
-  } else if ((error = -error) < ARRAY_COUNT(rgxNegativeErrors)) {
-    message = rgxNegativeErrors[error];
+  if (!message) {
+    if (error <= 0) {
+      if ((error = -error) < ARRAY_COUNT(rgxNegativeErrors)) {
+        message = rgxNegativeErrors[error];
+      }
+    }
   }
 
   if (message && *message) STR_PRINTF("%s", message);
