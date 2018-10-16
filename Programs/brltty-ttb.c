@@ -780,6 +780,41 @@ writeCharacter_half_XCompose (
 }
 
 static int
+writeCharacter_leftrighthalf_XCompose (
+  FILE *file, wchar_t character, unsigned char dots,
+  const unsigned char *byte, int isPrimary, const void *_data
+) {
+  if (isPrimary) {
+    unsigned char leftDots = getLeftDots(dots);
+    unsigned char rightDots = getRightDots(dots);
+
+    if (!writeCharacter_half_XCompose(file, character, leftDots, rightDots)) return 0;
+    if (!leftDots)
+    {
+      /* Also add shortcut without blank pattern for left part.  */
+      if (!writeCharacterDots_XCompose (file, rightDots)) return 0;
+      if (fprintf(file, " : \"") == EOF) return 0;
+      if (!writeCharacterOutput_XCompose(file, character)) return 0;
+      if (fprintf(file, "\"\n") == EOF) return 0;
+    }
+  }
+
+  return 1;
+}
+
+static int
+writeTable_leftrighthalf_XCompose (
+  const char *path, FILE *file, TextTableData *ttd, const void *data
+) {
+  if (!writeHeaderComment(file, writeHashComment)) goto error;
+  if (!writeCharacters(file, ttd, writeCharacter_leftrighthalf_XCompose, NULL)) goto error;
+  return 1;
+
+error:
+  return 0;
+}
+
+static int
 writeCharacter_lefthalf_XCompose (
   FILE *file, wchar_t character, unsigned char dots,
   const unsigned char *byte, int isPrimary, const void *_data
@@ -989,6 +1024,10 @@ static const FormatEntry formatEntries[] = {
 
   { .name = "XCompose",
     .write = writeTable_XCompose,
+  },
+
+  { .name = "half-XCompose",
+    .write = writeTable_leftrighthalf_XCompose,
   },
 
   { .name = "lefthalf-XCompose",
