@@ -207,23 +207,26 @@ addPromptPattern (const char *string) {
 
 static int
 testPrompt (int column, int row, void *data) {
-  int count = column + 1;
-  ScreenCharacter characters[count];
-  readScreenRow(row, count, characters);
+  int length = scr.cols;
+  ScreenCharacter characters[length];
+  readScreenRow(row, length, characters);
 
   if (promptPatterns) {
-    wchar_t text[count];
-    wchar_t *to = text;
+    wchar_t text[length];
 
-    const ScreenCharacter *from = characters;
-    const ScreenCharacter *end = from + count;
+    {
+      wchar_t *to = text;
+      const ScreenCharacter *from = characters;
+      const ScreenCharacter *end = from + length;
+      while (from < end) *to++ = from++->text;
+    }
 
-    while (from < end) *to++ = from++->text;
-    return !!rgxMatchTextCharacters(promptPatterns, text, count, NULL, NULL);
+    if (rgxMatchTextCharacters(promptPatterns, text, length, NULL, NULL)) return 1;
   }
 
+  if (!column) return 0;
   const ScreenCharacter *prompt = data;
-  return isSameRow(characters, prompt, count, isSameText);
+  return isSameRow(characters, prompt, column+1, isSameText);
 }
 
 static void
@@ -490,11 +493,7 @@ handleNavigationCommands (int command, void *data) {
           length += 1;
         }
 
-        if (length < scr.cols) {
-          findRow(length, increment, testPrompt, characters);
-        } else {
-          alert(ALERT_COMMAND_REJECTED);
-        }
+        findRow(length, increment, testPrompt, characters);
       }
 
       break;
