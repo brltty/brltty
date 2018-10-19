@@ -58,13 +58,14 @@ rgxMatchText (
     code, characters, length, 0, options, data, NULL
   );
 
-  if (result > 0) {
-    *count = result - 1;
-    return 1;
-  } else {
+  if (result < 0) {
     *error = result;
     return 0;
   }
+
+  if (!result) result = pcre2_get_ovector_count(data);
+  *count = result - 1;
+  return 1;
 }
 
 int
