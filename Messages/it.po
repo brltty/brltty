@@ -1,0 +1,3357 @@
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2018 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.app/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+msgid ""
+msgstr ""
+"Project-Id-Version: brltty 5.6\n"
+"Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
+"POT-Creation-Date: 2018-08-10 14:09+0200\n"
+"PO-Revision-Date: 2018-10-22 20:50+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 2.2\n"
+"Last-Translator: Sebastiano Pistore <SebastianoPistore.info@protonmail.ch>\n"
+"Language: it\n"
+"Language-Team: \n"
+
+#: Programs/brltty.c:167
+#, c-format
+msgid "\"%s\" started as \"%s\"\n"
+msgstr ""
+
+#: Programs/menu_prefs.c:443 Programs/menu_prefs.c:444
+#: Programs/menu_prefs.c:446 Programs/menu_prefs.c:447
+#: Programs/menu_prefs.c:450 Programs/menu_prefs.c:451
+#: Programs/menu_prefs.c:452 Programs/menu_prefs.c:454
+#: Programs/menu_prefs.c:455
+msgid "1 cell"
+msgstr ""
+
+#: Programs/menu_prefs.c:767
+msgid "1 second"
+msgstr "1 secondo"
+
+#: Programs/menu_prefs.c:800
+msgid "10 seconds"
+msgstr "10 secondi"
+
+#: Programs/menu_prefs.c:1121
+msgid "12 Hour"
+msgstr "12 ore"
+
+#: Programs/menu_prefs.c:442 Programs/menu_prefs.c:445
+#: Programs/menu_prefs.c:448 Programs/menu_prefs.c:449
+#: Programs/menu_prefs.c:453
+msgid "2 cells"
+msgstr "2 celle"
+
+#: Programs/menu_prefs.c:768
+msgid "2 seconds"
+msgstr "2 secondi"
+
+#: Programs/menu_prefs.c:801
+msgid "20 seconds"
+msgstr "20 secondi"
+
+#: Programs/menu_prefs.c:1120
+msgid "24 Hour"
+msgstr "24 ore"
+
+#: Programs/menu_prefs.c:765
+msgid "250 milliseconds"
+msgstr "250 millisecondi"
+
+#: Programs/menu_prefs.c:802
+msgid "40 seconds"
+msgstr "40 secondi"
+
+#: Programs/menu_prefs.c:799
+msgid "5 seconds"
+msgstr "5 secondi"
+
+#: Programs/menu_prefs.c:766
+msgid "500 milliseconds"
+msgstr "500 millisecondi"
+
+#: Programs/menu_prefs.c:601
+msgid "6-Dot Computer Braille"
+msgstr ""
+
+#: Programs/menu_prefs.c:599
+msgid "8-Dot Computer Braille"
+msgstr ""
+
+#: Programs/brltty-ttb.c:179
+msgid "8-bit character set to use."
+msgstr ""
+
+#: Programs/scr_menu.c:101
+msgid "<off>"
+msgstr ""
+
+#: Programs/config.c:1304
+msgid "API Parameter"
+msgstr ""
+
+#: Programs/cmds.auto.h:1068
+msgid "AT (set 2) keyboard scan code"
+msgstr ""
+
+#: Programs/midi.c:67
+msgid "Accordion"
+msgstr ""
+
+#. Bass
+#: Programs/midi.c:80
+msgid "Acoustic Bass"
+msgstr ""
+
+#. Piano
+#: Programs/midi.c:44
+msgid "Acoustic Grand Piano"
+msgstr ""
+
+#. Guitar
+#: Programs/midi.c:71
+msgid "Acoustic Guitar (nylon)"
+msgstr ""
+
+#: Programs/midi.c:72
+msgid "Acoustic Guitar (steel)"
+msgstr ""
+
+#: Programs/menu_prefs.c:1147
+msgid "After Time"
+msgstr ""
+
+#: Programs/midi.c:171
+msgid "Agogo"
+msgstr ""
+
+#: Programs/menu_prefs.c:1337
+msgid "Alert"
+msgstr "Avviso"
+
+#: Programs/menu_prefs.c:962
+msgid "Alert Dots"
+msgstr ""
+
+#: Programs/menu_prefs.c:967
+msgid "Alert Messages"
+msgstr ""
+
+#: Programs/menu_prefs.c:908
+msgid "Alert Tunes"
+msgstr ""
+
+#: Programs/menu_prefs.c:736 Programs/menu_prefs.c:1001
+msgid "All"
+msgstr ""
+
+#: Programs/menu_prefs.c:454
+msgid "Alphabetic Braille Window Coordinates"
+msgstr ""
+
+#: Programs/menu_prefs.c:455
+msgid "Alphabetic Screen Cursor Coordinates"
+msgstr ""
+
+#: Programs/midi.c:117
+msgid "Alto Sax"
+msgstr ""
+
+#: Programs/midi.c:185
+msgid "Applause"
+msgstr ""
+
+#: Programs/cmd_miscellaneous.c:60
+msgid "April"
+msgstr "Aprile"
+
+#: Programs/log.c:116
+msgid "Async Events"
+msgstr ""
+
+#: Programs/menu_prefs.c:694
+msgid "Attributes Invisible Time"
+msgstr ""
+
+#: Programs/config.c:2696 Programs/menu_prefs.c:1243
+msgid "Attributes Table"
+msgstr ""
+
+#: Programs/menu_prefs.c:688
+msgid "Attributes Visible Time"
+msgstr ""
+
+#: Programs/cmd_miscellaneous.c:64
+msgid "August"
+msgstr "Agosto"
+
+#: Programs/alert.c:168
+msgid "Autorelease"
+msgstr ""
+
+#: Programs/menu_prefs.c:805
+msgid "Autorelease Time"
+msgstr ""
+
+#: Programs/menu_prefs.c:817
+msgid "Autorepeat"
+msgstr ""
+
+#: Programs/menu_prefs.c:829
+msgid "Autorepeat Interval"
+msgstr ""
+
+#: Programs/menu_prefs.c:823
+msgid "Autorepeat Panning"
+msgstr ""
+
+#: Programs/menu_prefs.c:1044
+msgid "Autospeak"
+msgstr ""
+
+#: Programs/config.c:1675
+msgid "BRLTTY stopped"
+msgstr ""
+
+#: Programs/midi.c:166
+msgid "Bag Pipe"
+msgstr ""
+
+#: Programs/midi.c:162
+msgid "Banjo"
+msgstr ""
+
+#: Programs/midi.c:119
+msgid "Baritone Sax"
+msgstr ""
+
+#: Programs/midi.c:28
+msgid "Bass"
+msgstr "Basso"
+
+#: Programs/midi.c:122
+msgid "Bassoon"
+msgstr ""
+
+#: Programs/menu_prefs.c:914
+msgid "Beeper"
+msgstr ""
+
+#: Programs/menu_prefs.c:1146
+msgid "Before Time"
+msgstr ""
+
+#: Programs/midi.c:182
+msgid "Bird Tweet"
+msgstr ""
+
+#: Programs/menu_prefs.c:682
+msgid "Blinking Attributes"
+msgstr ""
+
+#: Programs/menu_prefs.c:700
+msgid "Blinking Capitals"
+msgstr ""
+
+#: Programs/menu_prefs.c:659
+msgid "Blinking Screen Cursor"
+msgstr ""
+
+#: Programs/menu_prefs.c:1096
+msgid "Blinking Speech Cursor"
+msgstr ""
+
+#: Programs/menu_prefs.c:562 Programs/menu_prefs.c:1206
+msgid "Block"
+msgstr ""
+
+#: Programs/midi.c:129
+msgid "Blown Bottle"
+msgstr ""
+
+#: Programs/log.c:140
+msgid "Bluetooth I/O"
+msgstr ""
+
+#: Programs/config.c:1471
+msgid "Braille Device"
+msgstr "Dispositivo braille"
+
+#: Programs/menu_prefs.c:877
+msgid "Braille Display Orientation"
+msgstr ""
+
+#: Programs/config.c:1467
+msgid "Braille Driver"
+msgstr ""
+
+#: Programs/log.c:146
+msgid "Braille Driver Events"
+msgstr ""
+
+#: Programs/menu_prefs.c:637
+msgid "Braille Firmness"
+msgstr ""
+
+#: Programs/menu_prefs.c:867
+msgid "Braille Input Mode"
+msgstr ""
+
+#: Programs/log.c:80
+msgid "Braille Key Events"
+msgstr ""
+
+#: Programs/menu_prefs.c:857
+msgid "Braille Keyboard Enabled"
+msgstr ""
+
+#: Programs/config.c:1470
+msgid "Braille Parameter"
+msgstr ""
+
+#: Programs/menu_prefs.c:595
+msgid "Braille Presentation"
+msgstr ""
+
+#: Programs/menu_prefs.c:1233
+msgid "Braille Tables"
+msgstr ""
+
+#: Programs/menu_prefs.c:443
+msgid "Braille Window Column"
+msgstr ""
+
+#: Programs/menu_prefs.c:442
+msgid "Braille Window Coordinates"
+msgstr ""
+
+#: Programs/menu_prefs.c:757
+msgid "Braille Window Overlap"
+msgstr ""
+
+#: Programs/menu_prefs.c:444
+msgid "Braille Window Row"
+msgstr ""
+
+#: Programs/config.c:413
+#, c-format
+msgid "Braille driver code (%s, %s, or one of {%s})."
+msgstr ""
+
+#: Programs/midi.c:31
+msgid "Brass"
+msgstr ""
+
+#: Programs/midi.c:112
+msgid "Brass Section"
+msgstr ""
+
+#: Programs/midi.c:180
+msgid "Breath Noise"
+msgstr ""
+
+#: Programs/midi.c:45
+msgid "Bright Acoustic Piano"
+msgstr ""
+
+#: Programs/xbrlapi.c:92
+msgid "BrlAPI authorization/authentication string"
+msgstr ""
+
+#: Programs/xbrlapi.c:85
+msgid "BrlAPI host and/or port to connect to"
+msgstr ""
+
+#: Programs/menu_prefs.c:1289
+msgid "Bug Reports"
+msgstr "Segnalazioni bug"
+
+#: Programs/menu_prefs.c:1270
+msgid "Build Information"
+msgstr ""
+
+#: Programs/menu_prefs.c:622
+msgid "Capitalization Mode"
+msgstr ""
+
+#: Programs/menu_prefs.c:711
+msgid "Capitals Invisible Time"
+msgstr ""
+
+#: Programs/menu_prefs.c:705
+msgid "Capitals Visible Time"
+msgstr ""
+
+#: Programs/menu_prefs.c:1360
+msgid "Category Log Level"
+msgstr ""
+
+#. Chromatic Percussion
+#: Programs/midi.c:53
+msgid "Celesta"
+msgstr "Celesta"
+
+#: Programs/midi.c:91
+msgid "Cello"
+msgstr "Violoncello"
+
+#: Programs/midi.c:102
+msgid "Choir Aahs"
+msgstr ""
+
+#: Programs/midi.c:25
+msgid "Chromatic Percussion"
+msgstr ""
+
+#: Programs/midi.c:65
+msgid "Church Organ"
+msgstr "Organo a canne"
+
+#: Programs/midi.c:123
+msgid "Clarinet"
+msgstr ""
+
+#: Programs/midi.c:51
+msgid "Clavi"
+msgstr ""
+
+#: Programs/menu.c:822
+msgid "Close"
+msgstr "Chiudi"
+
+#: Programs/menu_prefs.c:1130
+msgid "Colon"
+msgstr ""
+
+#: Programs/menu_prefs.c:1294
+msgid "Configuration Directory"
+msgstr ""
+
+#: Programs/config.c:2647 Programs/menu_prefs.c:1299
+msgid "Configuration File"
+msgstr ""
+
+#: Programs/alert.c:163
+msgid "Console Bell"
+msgstr ""
+
+#: Programs/menu_prefs.c:894
+msgid "Console Bell Alert"
+msgstr ""
+
+#: Programs/midi.c:92
+msgid "Contrabass"
+msgstr "Contrabasso"
+
+#: Programs/menu_prefs.c:600
+msgid "Contracted Braille"
+msgstr ""
+
+#: Programs/config.c:2703 Programs/menu_prefs.c:1251
+msgid "Contraction Table"
+msgstr ""
+
+#: Programs/brltty-ctb.c:62
+msgid "Contraction table."
+msgstr ""
+
+#: Programs/brltty-ctb.c:76
+msgid "Contraction verification table."
+msgstr ""
+
+#: Programs/menu_prefs.c:1338
+msgid "Critical"
+msgstr ""
+
+#: Programs/log.c:98
+msgid "Cursor Routing"
+msgstr ""
+
+#: Programs/log.c:92
+msgid "Cursor Tracking"
+msgstr ""
+
+#: Programs/menu_prefs.c:771
+msgid "Cursor Tracking Delay"
+msgstr ""
+
+#: Programs/menu_prefs.c:1168
+msgid "Dash"
+msgstr "Trattino"
+
+#: Programs/menu_prefs.c:1161
+msgid "Date Format"
+msgstr "Formato data"
+
+#: Programs/menu_prefs.c:1150
+msgid "Date Position"
+msgstr ""
+
+#: Programs/menu_prefs.c:1173
+msgid "Date Separator"
+msgstr ""
+
+#: Programs/menu_prefs.c:1158
+msgid "Day Month Year"
+msgstr "Giorno mese anno"
+
+#: Programs/menu_prefs.c:1343
+msgid "Debug"
+msgstr "Debug"
+
+#: Programs/cmd_miscellaneous.c:68
+msgid "December"
+msgstr "Dicembre"
+
+#: Programs/config.c:434
+msgid "Device for accessing braille display."
+msgstr ""
+
+#: Programs/config.c:393
+msgid "Disable the application programming interface."
+msgstr ""
+
+#: Programs/midi.c:77
+msgid "Distortion Guitar"
+msgstr "Chitarra con distorsore"
+
+#: Programs/config.c:536
+msgid "Do not autospeak when braille is not being used."
+msgstr ""
+
+#: Programs/xbrlapi.c:105
+msgid "Do not write any text to the braille device"
+msgstr ""
+
+#: Programs/brltty-trtxt.c:83
+msgid "Don't fall back to the Unicode base character."
+msgstr ""
+
+#: Programs/alert.c:52
+msgid "Done"
+msgstr ""
+
+#: Programs/menu_prefs.c:1131 Programs/menu_prefs.c:1170
+msgid "Dot"
+msgstr "Punto"
+
+#: Programs/menu_prefs.c:864
+msgid "Dots via Unicode Braille"
+msgstr ""
+
+#. Organ
+#: Programs/midi.c:62
+msgid "Drawbar Organ"
+msgstr ""
+
+#: Programs/config.c:2656 Programs/menu_prefs.c:1319
+msgid "Drivers Directory"
+msgstr ""
+
+#: Programs/midi.c:60
+msgid "Dulcimer"
+msgstr "Saltèrio"
+
+#: Programs/menu_prefs.c:751
+msgid "Eager Sliding Braille Window"
+msgstr ""
+
+#: Programs/brltty-ttb.c:158
+msgid "Edit table."
+msgstr "Modificare tabella."
+
+#: Programs/midi.c:81
+msgid "Electric Bass (finger)"
+msgstr ""
+
+#: Programs/midi.c:82
+msgid "Electric Bass (pick)"
+msgstr ""
+
+#: Programs/midi.c:46
+msgid "Electric Grand Piano"
+msgstr ""
+
+#: Programs/midi.c:74
+msgid "Electric Guitar (clean)"
+msgstr ""
+
+#: Programs/midi.c:73
+msgid "Electric Guitar (jazz)"
+msgstr ""
+
+#: Programs/midi.c:75
+msgid "Electric Guitar (muted)"
+msgstr ""
+
+#: Programs/midi.c:48
+msgid "Electric Piano 1"
+msgstr ""
+
+#: Programs/midi.c:49
+msgid "Electric Piano 2"
+msgstr ""
+
+#: Programs/menu_prefs.c:1336
+msgid "Emergency"
+msgstr "Emergenza"
+
+#: Programs/menu_prefs.c:441
+msgid "End"
+msgstr "Fine"
+
+#: Programs/menu_prefs.c:737
+msgid "End of Line"
+msgstr ""
+
+#: Programs/midi.c:121
+msgid "English Horn"
+msgstr "Corno inglese"
+
+#: Programs/menu_prefs.c:1036
+msgid "Enqueue"
+msgstr ""
+
+#: Programs/midi.c:30
+msgid "Ensemble"
+msgstr ""
+
+#: Programs/menu_prefs.c:1339
+msgid "Error"
+msgstr "Errore"
+
+#: Programs/midi.c:37
+msgid "Ethnic Instruments"
+msgstr ""
+
+#: Programs/menu_prefs.c:891
+msgid "Event Alerts"
+msgstr ""
+
+#: Programs/menu_prefs.c:610
+msgid "Expand Current Word"
+msgstr ""
+
+#: Programs/config.c:355
+msgid "Explicit preference settings."
+msgstr ""
+
+#: Programs/menu_prefs.c:917
+msgid "FM"
+msgstr "FM"
+
+#: Programs/menu_prefs.c:955
+msgid "FM Volume"
+msgstr "Volume FM"
+
+#. Synth FM
+#: Programs/midi.c:152
+msgid "FX 1 (rain)"
+msgstr ""
+
+#: Programs/midi.c:153
+msgid "FX 2 (soundtrack)"
+msgstr ""
+
+#: Programs/midi.c:154
+msgid "FX 3 (crystal)"
+msgstr ""
+
+#: Programs/midi.c:155
+msgid "FX 4 (atmosphere)"
+msgstr ""
+
+#: Programs/midi.c:156
+msgid "FX 5 (brightness)"
+msgstr ""
+
+#: Programs/midi.c:157
+msgid "FX 6 (goblins)"
+msgstr ""
+
+#: Programs/midi.c:158
+msgid "FX 7 (echoes)"
+msgstr ""
+
+#: Programs/midi.c:159
+msgid "FX 8 (sci-fi)"
+msgstr ""
+
+#: Programs/cmd_miscellaneous.c:58
+msgid "February"
+msgstr "Febbraio"
+
+#: Programs/midi.c:167
+msgid "Fiddle"
+msgstr ""
+
+#: Programs/midi.c:126
+msgid "Flute"
+msgstr "Flauto"
+
+#: Programs/brltty-ctb.c:96
+msgid "Force immediate output."
+msgstr ""
+
+#: Programs/brltty-ttb.c:165
+msgid "Format of input file."
+msgstr ""
+
+#: Programs/brltty-ttb.c:172
+msgid "Format of output file."
+msgstr ""
+
+#: Programs/midi.c:111
+msgid "French Horn"
+msgstr "Corno francese"
+
+#: Programs/midi.c:83
+msgid "Fretless Bass"
+msgstr ""
+
+#: Programs/alert.c:97
+msgid "Frozen"
+msgstr ""
+
+#: Programs/menu_prefs.c:456
+msgid "Generic"
+msgstr "Generico"
+
+#: Programs/log.c:62
+msgid "Generic Input"
+msgstr ""
+
+#: Programs/midi.c:54
+msgid "Glockenspiel"
+msgstr "Glockenspiel"
+
+#: Programs/midi.c:27
+msgid "Guitar"
+msgstr "Chitarra"
+
+#. Sound Effects
+#: Programs/midi.c:179
+msgid "Guitar Fret Noise"
+msgstr ""
+
+#: Programs/midi.c:78
+msgid "Guitar Harmonics"
+msgstr ""
+
+#: Programs/midi.c:186
+msgid "Gunshot"
+msgstr ""
+
+#: Programs/midi.c:68
+msgid "Harmonica"
+msgstr ""
+
+#: Programs/midi.c:50
+msgid "Harpsichord"
+msgstr "Clavicembalo"
+
+#: Programs/midi.c:184
+msgid "Helicopter"
+msgstr "Elicottero"
+
+#: Programs/scr_help.c:215
+msgid "Help Screen"
+msgstr "Schermata di aiuto"
+
+#: Programs/menu_prefs.c:633 Programs/menu_prefs.c:846
+msgid "High"
+msgstr ""
+
+#: Programs/menu_prefs.c:788
+msgid "Highlight Braille Window Location"
+msgstr ""
+
+#: Programs/midi.c:47
+msgid "Honkytonk Piano"
+msgstr ""
+
+#: Programs/menu_prefs.c:1035
+msgid "Immediate"
+msgstr ""
+
+#: Programs/xbrlapi.c:604
+msgid "Incompatible XKB library\n"
+msgstr ""
+
+#: Programs/xbrlapi.c:606
+msgid "Incompatible XKB server support\n"
+msgstr ""
+
+#: Programs/menu_prefs.c:1342
+msgid "Information"
+msgstr "Informazione"
+
+#: Programs/menu_prefs.c:794
+msgid "Input Options"
+msgstr "Opzioni di input"
+
+#: Programs/log.c:68
+msgid "Input Packets"
+msgstr "Pacchetti di input"
+
+#: Programs/config.c:302
+#, c-format
+msgid "Install the %s service, and then exit."
+msgstr ""
+
+#: Programs/menu_prefs.c:1346
+msgid "Internal Parameters"
+msgstr ""
+
+#: Programs/cmd_miscellaneous.c:57
+msgid "January"
+msgstr "Gennaio"
+
+#: Programs/cmd_miscellaneous.c:63
+msgid "July"
+msgstr "Luglio"
+
+#: Programs/cmd_miscellaneous.c:62
+msgid "June"
+msgstr "Giugno"
+
+#: Programs/midi.c:165
+msgid "Kalimba"
+msgstr "Kalimba"
+
+#: Programs/config.c:1395
+msgid "Key Bindings"
+msgstr ""
+
+#: Programs/config.c:996
+msgid "Key Help"
+msgstr ""
+
+#: Programs/config.c:1400 Programs/ktb_list.c:737
+msgid "Key Table"
+msgstr ""
+
+#: Programs/log.c:86
+msgid "Keyboard Key Events"
+msgstr ""
+
+#: Programs/menu_prefs.c:901
+msgid "Keyboard LED Alerts"
+msgstr ""
+
+#: Programs/config.c:2710 Programs/menu_prefs.c:883
+msgid "Keyboard Table"
+msgstr ""
+
+#: Programs/midi.c:164
+msgid "Koto"
+msgstr "Koto"
+
+#: Programs/config.c:2840
+msgid "Language"
+msgstr "Lingua"
+
+#. Synth Lead
+#: Programs/midi.c:134
+msgid "Lead 1 (square)"
+msgstr ""
+
+#: Programs/midi.c:135
+msgid "Lead 2 (sawtooth)"
+msgstr ""
+
+#: Programs/midi.c:136
+msgid "Lead 3 (calliope)"
+msgstr ""
+
+#: Programs/midi.c:137
+msgid "Lead 4 (chiff)"
+msgstr ""
+
+#: Programs/midi.c:138
+msgid "Lead 5 (charang)"
+msgstr ""
+
+#: Programs/midi.c:139
+msgid "Lead 6 (voice)"
+msgstr ""
+
+#: Programs/midi.c:140
+msgid "Lead 7 (fifths)"
+msgstr ""
+
+#: Programs/midi.c:141
+msgid "Lead 8 (bass + lead)"
+msgstr ""
+
+#: Programs/learn.c:101
+msgid "Learn Mode"
+msgstr "Modalità apprendimento"
+
+#: Programs/menu_prefs.c:1185
+msgid "Left"
+msgstr "Sinistra"
+
+#: Programs/brltty-ktb.c:53
+msgid "List key names."
+msgstr ""
+
+#: Programs/brltty-ktb.c:60
+msgid "List key table in help screen format."
+msgstr ""
+
+#: Programs/brltty-ktb.c:67
+msgid "List key table in reStructuredText format."
+msgstr ""
+
+#: Programs/menu_prefs.c:1329
+msgid "Locale Directory"
+msgstr ""
+
+#: Programs/menu_prefs.c:1365
+msgid "Log Categories"
+msgstr ""
+
+#: Programs/config.c:760
+msgid "Log Level"
+msgstr ""
+
+#: Programs/menu_prefs.c:1426
+msgid "Log Messages"
+msgstr "Messaggi di log"
+
+#: Programs/config.c:626
+msgid "Log the versions of the core, API, and built-in drivers, and then exit."
+msgstr ""
+
+#: Programs/config.c:591
+msgid "Log to standard error rather than to the system log."
+msgstr ""
+
+#: Programs/config.c:605
+#, c-format
+msgid ""
+"Logging level (%s or one of {%s}) and/or log categories to enable (any "
+"combination of {%s}, each optionally prefixed by %s to disable)"
+msgstr ""
+
+#: Programs/menu_prefs.c:811
+msgid "Long Press Time"
+msgstr ""
+
+#: Programs/menu_prefs.c:631 Programs/menu_prefs.c:844
+msgid "Low"
+msgstr ""
+
+#: Programs/menu_prefs.c:563
+msgid "Lower Left Dot"
+msgstr ""
+
+#: Programs/menu_prefs.c:564
+msgid "Lower Right Dot"
+msgstr ""
+
+#: Programs/menu_prefs.c:916
+msgid "MIDI"
+msgstr "MIDI"
+
+#: Programs/config.c:575
+msgid "MIDI (Musical Instrument Digital Interface) device specifier."
+msgstr ""
+
+#: Programs/menu_prefs.c:946
+msgid "MIDI Instrument"
+msgstr "Strumento MIDI"
+
+#: Programs/menu_prefs.c:936
+msgid "MIDI Volume"
+msgstr "Volume MIDI"
+
+#: Programs/cmd_miscellaneous.c:59
+msgid "March"
+msgstr "Marzo"
+
+#: Programs/midi.c:57
+msgid "Marimba"
+msgstr "Marimba"
+
+#: Programs/menu_prefs.c:634 Programs/menu_prefs.c:847
+msgid "Maximum"
+msgstr ""
+
+#: Programs/brltty-ctb.c:90
+msgid "Maximum length of an output line."
+msgstr ""
+
+#: Programs/cmd_miscellaneous.c:61
+msgid "May"
+msgstr "Maggio"
+
+#: Programs/menu_prefs.c:632 Programs/menu_prefs.c:845
+msgid "Medium"
+msgstr ""
+
+#: Programs/midi.c:175
+msgid "Melodic Tom"
+msgstr ""
+
+#: Programs/menu_prefs.c:576
+msgid "Menu Options"
+msgstr ""
+
+#: Programs/config.c:584
+msgid "Message hold timeout (in 10ms units)."
+msgstr ""
+
+#: Programs/menu_prefs.c:630 Programs/menu_prefs.c:843
+msgid "Minimum"
+msgstr "Minimo"
+
+#: Programs/menu_prefs.c:1157
+msgid "Month Day Year"
+msgstr "Mese giorno, anno"
+
+#: Programs/midi.c:55
+msgid "Music Box"
+msgstr ""
+
+#: Programs/menu_prefs.c:916
+msgid "Musical Instrument Digital Interface"
+msgstr ""
+
+#: Programs/midi.c:110
+msgid "Muted Trumpet"
+msgstr ""
+
+#: Programs/config.c:475
+msgid "Name of or path to attributes table."
+msgstr ""
+
+#: Programs/config.c:484
+msgid "Name of or path to contraction table."
+msgstr ""
+
+#: Programs/config.c:347
+msgid "Name of or path to default preferences file."
+msgstr ""
+
+#: Programs/config.c:493
+msgid "Name of or path to keyboard table."
+msgstr ""
+
+#: Programs/config.c:529
+msgid "Name of or path to speech input object."
+msgstr ""
+
+#: Programs/config.c:466
+#, c-format
+msgid "Name of or path to text table (or %s)."
+msgstr ""
+
+#: Programs/menu_prefs.c:718
+msgid "Navigation Options"
+msgstr ""
+
+#: Programs/menu.c:449
+msgid "No"
+msgstr "No"
+
+#: Programs/menu_prefs.c:617
+msgid "No Capitalization"
+msgstr ""
+
+#: Programs/menu_prefs.c:764 Programs/menu_prefs.c:999
+#: Programs/menu_prefs.c:1012 Programs/menu_prefs.c:1025
+#: Programs/menu_prefs.c:1145 Programs/menu_prefs.c:1184
+#: Programs/menu_prefs.c:1204
+msgid "None"
+msgstr "Nessuno"
+
+#: Programs/menu_prefs.c:873
+msgid "Normal"
+msgstr "Normale"
+
+#: Programs/menu_prefs.c:1341
+msgid "Notice"
+msgstr "Avviso"
+
+#: Programs/cmd_miscellaneous.c:67
+msgid "November"
+msgstr "Novembre"
+
+#: Programs/midi.c:120
+msgid "Oboe"
+msgstr "Oboe"
+
+#: Programs/midi.c:132
+msgid "Ocarina"
+msgstr "Ocarina"
+
+#: Programs/cmd_miscellaneous.c:66
+msgid "October"
+msgstr "Ottobre"
+
+#: Programs/menu_prefs.c:798
+msgid "Off"
+msgstr "Off"
+
+#: Programs/config.c:1484
+msgid "Old Preferences File"
+msgstr ""
+
+#: Programs/midi.c:105
+msgid "Orchestra Hit"
+msgstr ""
+
+#: Programs/midi.c:95
+msgid "Orchestral Harp"
+msgstr ""
+
+#: Programs/midi.c:26
+msgid "Organ"
+msgstr "Organo"
+
+#: Programs/log.c:74
+msgid "Output Packets"
+msgstr ""
+
+#: Programs/midi.c:76
+msgid "Overdriven Guitar"
+msgstr ""
+
+#: Drivers/Braille/Iris/braille.c:1545
+msgid "PC mode"
+msgstr ""
+
+#: Programs/menu_prefs.c:915
+msgid "PCM"
+msgstr "PCM"
+
+#: Programs/config.c:565
+msgid "PCM (soundcard digital audio) device specifier."
+msgstr ""
+
+#: Programs/menu_prefs.c:928
+msgid "PCM Volume"
+msgstr ""
+
+#: Programs/cmds.auto.h:1082
+msgid "PS/2 (set 3) keyboard scan code"
+msgstr ""
+
+#: Programs/menu_prefs.c:1279
+msgid "Package Revision"
+msgstr ""
+
+#: Programs/menu_prefs.c:1274
+msgid "Package Version"
+msgstr ""
+
+#. Synth Pad
+#: Programs/midi.c:143
+msgid "Pad 1 (new age)"
+msgstr ""
+
+#: Programs/midi.c:144
+msgid "Pad 2 (warm)"
+msgstr ""
+
+#: Programs/midi.c:145
+msgid "Pad 3 (polysynth)"
+msgstr ""
+
+#: Programs/midi.c:146
+msgid "Pad 4 (choir)"
+msgstr ""
+
+#: Programs/midi.c:147
+msgid "Pad 5 (bowed)"
+msgstr ""
+
+#: Programs/midi.c:148
+msgid "Pad 6 (metallic)"
+msgstr ""
+
+#: Programs/midi.c:149
+msgid "Pad 7 (halo)"
+msgstr ""
+
+#: Programs/midi.c:150
+msgid "Pad 8 (sweep)"
+msgstr ""
+
+#: Programs/midi.c:128
+msgid "Pan Flute"
+msgstr "Flauto di Pan"
+
+#: Programs/config.c:402
+msgid "Parameters for the application programming interface."
+msgstr ""
+
+#: Programs/config.c:424
+msgid "Parameters for the braille driver."
+msgstr ""
+
+#: Programs/config.c:556
+msgid "Parameters for the screen driver."
+msgstr ""
+
+#: Programs/config.c:521
+msgid "Parameters for the speech driver."
+msgstr ""
+
+#: Programs/config.c:338
+msgid "Path to default settings file."
+msgstr ""
+
+#: Programs/config.c:385
+msgid "Path to directory containing drivers."
+msgstr ""
+
+#: Programs/brltest.c:68 Programs/brltty-atb.c:36 Programs/brltty-ctb.c:54
+#: Programs/brltty-ktb.c:77 Programs/config.c:456
+msgid "Path to directory containing tables."
+msgstr ""
+
+#: Programs/brltty-ttb.c:152
+msgid "Path to directory containing text tables."
+msgstr ""
+
+#: Programs/brltty-ktb.c:87
+msgid "Path to directory for loading drivers."
+msgstr ""
+
+#: Programs/brltty-trtxt.c:51
+msgid "Path to directory for text tables."
+msgstr ""
+
+#: Programs/brltest.c:78 Programs/config.c:375
+msgid "Path to directory which can be written to."
+msgstr ""
+
+#: Programs/config.c:365
+msgid "Path to directory which contains files that can be updated."
+msgstr ""
+
+#: Programs/brltty-trtxt.c:60
+msgid "Path to input text table."
+msgstr ""
+
+#: Programs/config.c:614
+msgid "Path to log file."
+msgstr ""
+
+#: Programs/brltty-trtxt.c:69
+msgid "Path to output text table."
+msgstr ""
+
+#: Programs/config.c:328
+msgid "Path to process identifier file."
+msgstr ""
+
+#: Programs/midi.c:38
+msgid "Percussive Instruments"
+msgstr ""
+
+#: Programs/midi.c:63
+msgid "Percussive Organ"
+msgstr ""
+
+#: Programs/midi.c:24
+msgid "Piano"
+msgstr "Pianoforte"
+
+#. Pipe
+#: Programs/midi.c:125
+msgid "Piccolo"
+msgstr ""
+
+#: Programs/midi.c:33
+msgid "Pipe"
+msgstr ""
+
+#: Programs/midi.c:94
+msgid "Pizzicato Strings"
+msgstr ""
+
+#: Drivers/Braille/Baum/braille.c:1104
+msgid "Powerdown"
+msgstr ""
+
+#: Programs/config.c:2648 Programs/menu_prefs.c:1309
+msgid "Preferences File"
+msgstr "File delle preferenze"
+
+#: Programs/scr_menu.c:268
+msgid "Preferences Menu"
+msgstr ""
+
+#: Headers/options.h:75
+msgid "Print a usage summary (all options), and then exit."
+msgstr ""
+
+#: Headers/options.h:70
+msgid "Print a usage summary (commonly used options only), and then exit."
+msgstr ""
+
+#: Programs/menu_prefs.c:1260
+msgid "Profiles"
+msgstr "Profili"
+
+#: Programs/config.c:501
+msgid "Properties of eligible keyboards."
+msgstr ""
+
+#: Programs/menu_prefs.c:1016
+msgid "Raise Pitch"
+msgstr ""
+
+#: Programs/config.c:288
+msgid "Recognize environment variables."
+msgstr ""
+
+#: Programs/midi.c:127
+msgid "Recorder"
+msgstr "Registratore"
+
+#: Programs/midi.c:32
+msgid "Reed"
+msgstr ""
+
+#: Programs/midi.c:66
+msgid "Reed Organ"
+msgstr ""
+
+#: Programs/brltty-ctb.c:82
+msgid "Reformat input."
+msgstr ""
+
+#: Programs/config.c:446
+msgid "Release braille device when screen or window is unreadable."
+msgstr ""
+
+#: Programs/config.c:295
+msgid "Remain a foreground process."
+msgstr ""
+
+#: Programs/brltty-trtxt.c:76
+msgid "Remove dots seven and eight."
+msgstr ""
+
+#: Programs/config.c:310
+#, c-format
+msgid "Remove the %s service, and then exit."
+msgstr ""
+
+#: Programs/brltty-ktb.c:46
+msgid "Report problems with the key table."
+msgstr ""
+
+#: Programs/brltty-ttb.c:186
+msgid ""
+"Report the characters within the current screen font that aren't defined "
+"within the text table."
+msgstr ""
+
+#: Programs/menu_prefs.c:738
+msgid "Rest of Line"
+msgstr ""
+
+#: Programs/menu_prefs.c:1408
+msgid "Restart Braille Driver"
+msgstr ""
+
+#: Programs/menu_prefs.c:1420
+msgid "Restart Screen Driver"
+msgstr ""
+
+#: Programs/menu_prefs.c:1414
+msgid "Restart Speech Driver"
+msgstr ""
+
+#: Programs/midi.c:177
+msgid "Reverse Cymbal"
+msgstr ""
+
+#: Programs/menu_prefs.c:1186
+msgid "Right"
+msgstr ""
+
+#: Programs/midi.c:64
+msgid "Rock Organ"
+msgstr ""
+
+#: Programs/menu_prefs.c:874
+msgid "Rotated"
+msgstr ""
+
+#: Programs/menu_prefs.c:571
+msgid "Save on Exit"
+msgstr "Salva all'uscita"
+
+#. "cap" here, used during speech output, is short for "capital".
+#. It is spoken just before an uppercase letter, e.g. "cap A".
+#: Programs/menu_prefs.c:1015
+msgid "Say Cap"
+msgstr ""
+
+#: Programs/menu_prefs.c:1039
+msgid "Say Line Mode"
+msgstr ""
+
+#: Programs/menu_prefs.c:1026
+msgid "Say Space"
+msgstr ""
+
+#: Programs/menu_prefs.c:446
+msgid "Screen Cursor Column"
+msgstr ""
+
+#: Programs/menu_prefs.c:445
+msgid "Screen Cursor Coordinates"
+msgstr ""
+
+#: Programs/menu_prefs.c:671
+msgid "Screen Cursor Invisible Time"
+msgstr ""
+
+#: Programs/menu_prefs.c:447
+msgid "Screen Cursor Row"
+msgstr ""
+
+#: Programs/menu_prefs.c:653
+msgid "Screen Cursor Style"
+msgstr ""
+
+#: Programs/menu_prefs.c:665
+msgid "Screen Cursor Visible Time"
+msgstr ""
+
+#: Programs/menu_prefs.c:448
+msgid "Screen Cursor and Braille Window Column"
+msgstr ""
+
+#: Programs/menu_prefs.c:449
+msgid "Screen Cursor and Braille Window Row"
+msgstr ""
+
+#: Programs/config.c:2139
+msgid "Screen Driver"
+msgstr ""
+
+#: Programs/log.c:158
+msgid "Screen Driver Events"
+msgstr ""
+
+#: Programs/menu_prefs.c:450
+msgid "Screen Number"
+msgstr ""
+
+#: Programs/config.c:2145
+msgid "Screen Parameter"
+msgstr ""
+
+#: Programs/config.c:546
+#, c-format
+msgid "Screen driver code (%s, %s, or one of {%s})."
+msgstr ""
+
+#: Programs/midi.c:181
+msgid "Seashore"
+msgstr "Onde del mare"
+
+#: Programs/cmd_miscellaneous.c:65
+msgid "September"
+msgstr "Settembre"
+
+#: Programs/log.c:128
+msgid "Serial I/O"
+msgstr "I/O seriale"
+
+#: Programs/log.c:122
+msgid "Server Events"
+msgstr ""
+
+#: Programs/midi.c:130
+msgid "Shakuhachi"
+msgstr "Shakuhachi"
+
+#: Programs/midi.c:163
+msgid "Shamisen"
+msgstr "Shamisen"
+
+#: Programs/midi.c:168
+msgid "Shanai"
+msgstr "Shanai"
+
+#: Programs/menu_prefs.c:584
+msgid "Show Advanced Submenus"
+msgstr ""
+
+#: Programs/menu_prefs.c:589
+msgid "Show All Items"
+msgstr ""
+
+#: Programs/menu_prefs.c:677
+msgid "Show Attributes"
+msgstr ""
+
+#: Programs/menu_prefs.c:648
+msgid "Show Screen Cursor"
+msgstr ""
+
+#: Programs/menu_prefs.c:1139
+msgid "Show Seconds"
+msgstr ""
+
+#: Programs/menu_prefs.c:1085
+msgid "Show Speech Cursor"
+msgstr ""
+
+#: Programs/menu_prefs.c:579
+msgid "Show Submenu Sizes"
+msgstr ""
+
+#. Ethnic Instruments
+#: Programs/midi.c:161
+msgid "Sitar"
+msgstr "Sitar"
+
+#: Programs/menu_prefs.c:730
+msgid "Skip Blank Braille Windows"
+msgstr ""
+
+#: Programs/menu_prefs.c:725
+msgid "Skip Identical Lines"
+msgstr ""
+
+#: Programs/menu_prefs.c:741
+msgid "Skip Which Blank Braille Windows"
+msgstr ""
+
+#: Programs/midi.c:84
+msgid "Slap Bass 1"
+msgstr ""
+
+#: Programs/midi.c:85
+msgid "Slap Bass 2"
+msgstr ""
+
+#: Programs/menu_prefs.c:1169
+msgid "Slash"
+msgstr "Barra"
+
+#: Programs/menu_prefs.c:746
+msgid "Sliding Braille Window"
+msgstr ""
+
+#: Programs/menu_prefs.c:1000
+msgid "Some"
+msgstr ""
+
+#. Reed
+#: Programs/midi.c:116
+msgid "Soprano Sax"
+msgstr ""
+
+#: Programs/midi.c:39
+msgid "Sound Effects"
+msgstr "Effetti sonori"
+
+#: Programs/menu_prefs.c:1205
+msgid "Space"
+msgstr "Spazio"
+
+#: Programs/menu_prefs.c:1079
+msgid "Speak Completed Words"
+msgstr ""
+
+#: Programs/menu_prefs.c:1067
+msgid "Speak Deleted Characters"
+msgstr ""
+
+#: Programs/menu_prefs.c:1061
+msgid "Speak Inserted Characters"
+msgstr ""
+
+#: Programs/menu_prefs.c:1073
+msgid "Speak Replaced Characters"
+msgstr ""
+
+#: Programs/menu_prefs.c:1055
+msgid "Speak Selected Character"
+msgstr ""
+
+#: Programs/menu_prefs.c:1049
+msgid "Speak Selected Line"
+msgstr ""
+
+#: Programs/menu_prefs.c:1108
+msgid "Speech Cursor Invisible Time"
+msgstr ""
+
+#: Programs/menu_prefs.c:1090
+msgid "Speech Cursor Style"
+msgstr ""
+
+#: Programs/menu_prefs.c:1102
+msgid "Speech Cursor Visible Time"
+msgstr ""
+
+#: Programs/config.c:1902
+msgid "Speech Driver"
+msgstr ""
+
+#: Programs/log.c:152
+msgid "Speech Driver Events"
+msgstr ""
+
+#: Programs/log.c:110
+msgid "Speech Events"
+msgstr ""
+
+#. Create the file system object for speech input.
+#: Programs/config.c:2750
+msgid "Speech Input"
+msgstr ""
+
+#: Programs/menu_prefs.c:974
+msgid "Speech Options"
+msgstr ""
+
+#: Programs/config.c:1905
+msgid "Speech Parameter"
+msgstr ""
+
+#: Programs/menu_prefs.c:991
+msgid "Speech Pitch"
+msgstr ""
+
+#: Programs/menu_prefs.c:1004
+msgid "Speech Punctuation"
+msgstr ""
+
+#: Programs/menu_prefs.c:984
+msgid "Speech Rate"
+msgstr ""
+
+#: Programs/menu_prefs.c:1019
+msgid "Speech Uppercase Indicator"
+msgstr ""
+
+#: Programs/menu_prefs.c:977
+msgid "Speech Volume"
+msgstr ""
+
+#: Programs/menu_prefs.c:1029
+msgid "Speech Whitespace Indicator"
+msgstr ""
+
+#: Programs/config.c:511
+#, c-format
+msgid "Speech driver code (%s, %s, or one of {%s})."
+msgstr ""
+
+#: Programs/menu_prefs.c:1355
+msgid "Standard Error Log Level"
+msgstr ""
+
+#: Programs/menu_prefs.c:451
+msgid "State Dots"
+msgstr ""
+
+#: Programs/menu_prefs.c:452
+msgid "State Letter"
+msgstr ""
+
+#: Programs/menu_prefs.c:1180
+msgid "Status Cells"
+msgstr ""
+
+#: Programs/menu_prefs.c:1196
+msgid "Status Count"
+msgstr ""
+
+#: Programs/menu_prefs.c:460
+msgid "Status Field"
+msgstr ""
+
+#: Programs/menu_prefs.c:1189
+msgid "Status Position"
+msgstr ""
+
+#: Programs/menu_prefs.c:1211
+msgid "Status Separator"
+msgstr ""
+
+#: Programs/menu_prefs.c:1207
+msgid "Status Side"
+msgstr ""
+
+#: Programs/midi.c:172
+msgid "Steel Drums"
+msgstr ""
+
+#: Programs/config.c:318
+#, c-format
+msgid "Stop an existing instance of %s, and then exit."
+msgstr ""
+
+#. Ensemble
+#: Programs/midi.c:98
+msgid "String Ensemble 1"
+msgstr ""
+
+#: Programs/midi.c:99
+msgid "String Ensemble 2"
+msgstr ""
+
+#: Programs/midi.c:29
+msgid "Strings"
+msgstr "Stringe"
+
+#: Programs/menu_prefs.c:619
+msgid "Superimpose Dot 7"
+msgstr ""
+
+#: Programs/config.c:597
+msgid "Suppress start-up messages."
+msgstr ""
+
+#: Programs/midi.c:86
+msgid "Synth Bass 1"
+msgstr ""
+
+#: Programs/midi.c:87
+msgid "Synth Bass 2"
+msgstr ""
+
+#: Programs/midi.c:176
+msgid "Synth Drum"
+msgstr ""
+
+#: Programs/midi.c:36
+msgid "Synth FM"
+msgstr ""
+
+#: Programs/midi.c:34
+msgid "Synth Lead"
+msgstr ""
+
+#: Programs/midi.c:35
+msgid "Synth Pad"
+msgstr ""
+
+#: Programs/midi.c:104
+msgid "Synth Voice"
+msgstr ""
+
+#: Programs/midi.c:113
+msgid "SynthBrass 1"
+msgstr ""
+
+#: Programs/midi.c:114
+msgid "SynthBrass 2"
+msgstr ""
+
+#: Programs/midi.c:100
+msgid "SynthStrings 1"
+msgstr ""
+
+#: Programs/midi.c:101
+msgid "SynthStrings 2"
+msgstr ""
+
+#: Programs/menu_prefs.c:1350
+msgid "System Log Level"
+msgstr ""
+
+#: Programs/config.c:2657 Programs/menu_prefs.c:1324
+msgid "Tables Directory"
+msgstr ""
+
+#: Programs/midi.c:174
+msgid "Taiko Drum"
+msgstr ""
+
+#: Programs/midi.c:69
+msgid "Tango Accordion"
+msgstr ""
+
+#: Programs/midi.c:183
+msgid "Telephone Ring"
+msgstr ""
+
+#: Programs/midi.c:118
+msgid "Tenor Sax"
+msgstr ""
+
+#: Programs/menu_prefs.c:645
+msgid "Text Indicators"
+msgstr ""
+
+#: Programs/menu_prefs.c:1208
+msgid "Text Side"
+msgstr ""
+
+#: Programs/menu_prefs.c:604
+msgid "Text Style"
+msgstr "Stile testo"
+
+#: Programs/config.c:2682 Programs/menu_prefs.c:1236
+msgid "Text Table"
+msgstr ""
+
+#: Programs/brltty-ctb.c:69
+msgid "Text table."
+msgstr ""
+
+#: Programs/config.c:273
+msgid ""
+"The text to be shown when the braille driver starts and to be spoken when "
+"the speech driver starts."
+msgstr ""
+
+#: Programs/config.c:281
+msgid "The text to be shown when the braille driver stops."
+msgstr ""
+
+#: Programs/menu_prefs.c:453
+msgid "Time"
+msgstr "Orario"
+
+#: Programs/menu_prefs.c:1124
+msgid "Time Format"
+msgstr "Formato dell'oro"
+
+#: Programs/menu_prefs.c:1116
+msgid "Time Presentation"
+msgstr ""
+
+#: Programs/menu_prefs.c:1134
+msgid "Time Separator"
+msgstr ""
+
+#: Programs/midi.c:96
+msgid "Timpani"
+msgstr "Timpani"
+
+#. Percussive Instruments
+#: Programs/midi.c:170
+msgid "Tinkle Bell"
+msgstr ""
+
+#: Programs/menu_prefs.c:1404
+msgid "Tools"
+msgstr "Strumenti"
+
+#: Programs/menu_prefs.c:836
+msgid "Touch Navigation"
+msgstr ""
+
+#: Programs/menu_prefs.c:850
+msgid "Touch Sensitivity"
+msgstr "Sensibilità al tocco"
+
+#: Programs/menu_prefs.c:782
+msgid "Track Screen Pointer"
+msgstr ""
+
+#: Programs/menu_prefs.c:776
+msgid "Track Screen Scroll"
+msgstr ""
+
+#: Programs/menu_prefs.c:863
+msgid "Translated via Text Table"
+msgstr ""
+
+#: Programs/midi.c:93
+msgid "Tremolo Strings"
+msgstr ""
+
+#: Programs/midi.c:108
+msgid "Trombone"
+msgstr ""
+
+#. Brass
+#: Programs/midi.c:107
+msgid "Trumpet"
+msgstr "Tromba"
+
+#: Programs/midi.c:109
+msgid "Tuba"
+msgstr ""
+
+#: Programs/midi.c:59
+msgid "Tubular Bells"
+msgstr ""
+
+#: Programs/menu_prefs.c:920
+msgid "Tune Device"
+msgstr "Accordare dispositivo"
+
+#: Programs/log.c:134
+msgid "USB I/O"
+msgstr ""
+
+#: Programs/menu_prefs.c:561
+msgid "Underline"
+msgstr "Sottolineato"
+
+#: Programs/alert.c:102
+msgid "Unfrozen"
+msgstr ""
+
+#: Programs/config.c:2654 Programs/menu_prefs.c:1304
+msgid "Updatable Directory"
+msgstr ""
+
+#: Programs/log.c:104
+msgid "Update Events"
+msgstr ""
+
+#: Programs/options.c:135
+msgid "Usage"
+msgstr ""
+
+#: Programs/menu_prefs.c:618
+msgid "Use Capital Sign"
+msgstr ""
+
+#: Programs/midi.c:56
+msgid "Vibraphone"
+msgstr ""
+
+#: Programs/midi.c:90
+msgid "Viola"
+msgstr ""
+
+#. Strings
+#: Programs/midi.c:89
+msgid "Violin"
+msgstr "Violino"
+
+#: Programs/midi.c:103
+msgid "Voice Oohs"
+msgstr ""
+
+#: Programs/menu_prefs.c:1340
+msgid "Warning"
+msgstr "Avviso"
+
+#: Programs/menu_prefs.c:1284
+msgid "Web Site"
+msgstr "Sito web"
+
+#: Programs/midi.c:131
+msgid "Whistle"
+msgstr ""
+
+#: Programs/midi.c:173
+msgid "Woodblock"
+msgstr ""
+
+#: Programs/menu_prefs.c:721
+msgid "Word Wrap"
+msgstr "A capo automatico"
+
+#: Programs/config.c:2640
+msgid "Working Directory"
+msgstr "Directory di lavoro"
+
+#: Programs/config.c:2655 Programs/menu_prefs.c:1314
+msgid "Writable Directory"
+msgstr "Directory con accesso in scrittura"
+
+#: Programs/config.c:620
+msgid "Write the start-up logs, and then exit."
+msgstr ""
+
+#: Programs/xbrlapi.c:99
+msgid "X display to connect to"
+msgstr ""
+
+#: Programs/xbrlapi.c:718
+msgid "XFree(wm_name) for change"
+msgstr ""
+
+#: Programs/cmds.auto.h:1075
+msgid "XT (set 1) keyboard scan code"
+msgstr ""
+
+#: Programs/midi.c:58
+msgid "Xylophone"
+msgstr "Xilofono"
+
+#: Programs/menu_prefs.c:1156
+msgid "Year Month Day"
+msgstr "Anno mese giorno"
+
+#: Programs/menu.c:450
+msgid "Yes"
+msgstr "Sì"
+
+#: Programs/xbrlapi.c:83
+msgid "[host][:port]"
+msgstr ""
+
+#: Programs/menu_prefs.c:562
+msgid "all dots"
+msgstr ""
+
+#: Programs/cmd_miscellaneous.c:121
+msgid "and"
+msgstr "e"
+
+#: Programs/cmds.auto.h:989
+msgid "append characters to clipboard"
+msgstr ""
+
+#: Programs/cmds.auto.h:880
+msgid "append to clipboard from character"
+msgstr ""
+
+#: Programs/cmd.c:290
+msgid "at cursor"
+msgstr ""
+
+#: Programs/cmds.auto.h:1117
+msgid "backspace key"
+msgstr ""
+
+#: Drivers/Braille/Baum/braille.c:1095 Drivers/Braille/TSI/braille.c:869
+msgid "battery low"
+msgstr ""
+
+#: Programs/cmds.auto.h:1038
+msgid "bind to specific virtual terminal"
+msgstr ""
+
+#: Programs/cmds.auto.h:835
+msgid "bind to the next virtual terminal"
+msgstr ""
+
+#: Programs/cmds.auto.h:829
+msgid "bind to the previous virtual terminal"
+msgstr ""
+
+#.
+#: Programs/cmd_utils.c:116
+msgid "black"
+msgstr "nero"
+
+#: Programs/cmd_utils.c:140
+msgid "blink"
+msgstr ""
+
+#. B
+#: Programs/cmd_utils.c:117
+msgid "blue"
+msgstr "blu"
+
+#: Programs/config.c:2722
+#, c-format
+msgid "braille device not specified"
+msgstr "dispositivo braille non specificato"
+
+#: Programs/cmds.auto.h:544
+msgid "braille display temporarily unavailable"
+msgstr ""
+
+#: Programs/config.c:1425
+msgid "braille driver initialization failed"
+msgstr ""
+
+#: Programs/config.c:1501
+msgid "braille driver not loadable"
+msgstr ""
+
+#: Programs/cmd_miscellaneous.c:178
+msgid "braille stopped"
+msgstr ""
+
+#: Programs/cmds.auto.h:866
+msgid "bring screen cursor to character"
+msgstr ""
+
+#: Programs/cmds.auto.h:520
+msgid "bring screen cursor to current line"
+msgstr ""
+
+#: Programs/cmds.auto.h:730
+msgid "bring screen cursor to speech cursor"
+msgstr ""
+
+#. RG
+#: Programs/cmd_utils.c:122
+msgid "brown"
+msgstr "marrone"
+
+#: Programs/atb_translate.c:53
+msgid "cannot compile attributes table"
+msgstr ""
+
+#: Programs/config.c:805
+msgid "cannot compile contraction table"
+msgstr ""
+
+#: Programs/config.c:1406
+msgid "cannot compile key table"
+msgstr ""
+
+#: Programs/config.c:1040
+msgid "cannot compile keyboard table"
+msgstr ""
+
+#: Programs/ttb_translate.c:223
+msgid "cannot compile text table"
+msgstr ""
+
+#. This is the first attempt to connect to BRLTTY, and it failed.
+#. * Return the error immediately to the user, to provide feedback to users
+#. * running xbrlapi by hand, but not fill logs, eat battery, spam
+#. * 127.0.0.1 with reconnection attempts.
+#.
+#: Programs/xbrlapi.c:187
+#, c-format
+msgid "cannot connect to braille devices daemon brltty at %s\n"
+msgstr ""
+
+#: Programs/xbrlapi.c:593
+#, c-format
+msgid "cannot connect to display %s\n"
+msgstr ""
+
+#: Programs/file.c:334
+msgid "cannot create directory"
+msgstr ""
+
+#: Programs/program.c:164
+#, c-format
+msgid "cannot determine program directory"
+msgstr ""
+
+#: Programs/config.c:2643 Programs/menu.c:544
+msgid "cannot determine working directory"
+msgstr ""
+
+#: Programs/system_windows.c:60
+msgid "cannot find procedure"
+msgstr ""
+
+#: Programs/program.c:172
+msgid "cannot fix install path"
+msgstr ""
+
+#: Programs/xbrlapi.c:219
+msgid "cannot get tty\n"
+msgstr ""
+
+#: Programs/xbrlapi.c:225
+#, c-format
+msgid "cannot get tty %d\n"
+msgstr ""
+
+#: Programs/file.c:457
+msgid "cannot get working directory"
+msgstr ""
+
+#: Programs/xbrlapi.c:636
+#, c-format
+msgid "cannot grab windows on screen %d\n"
+msgstr ""
+
+#: Programs/xbrlapi.c:232
+msgid "cannot ignore keys\n"
+msgstr ""
+
+#: Programs/atb_translate.c:70
+msgid "cannot load attributes table"
+msgstr ""
+
+#: Programs/system_windows.c:53
+msgid "cannot load library"
+msgstr ""
+
+#: Programs/ttb_translate.c:240
+msgid "cannot load text table"
+msgstr ""
+
+#: Programs/config.c:998
+msgid "cannot open key help"
+msgstr ""
+
+#: Programs/program.c:274
+msgid "cannot open process identifier file"
+msgstr ""
+
+#: Programs/menu.c:542
+msgid "cannot open working directory"
+msgstr ""
+
+#: Programs/prefs.c:351
+msgid "cannot read preferences file"
+msgstr ""
+
+#: Programs/xbrlapi.c:297
+#, c-format
+msgid "cannot set focus to %#010x\n"
+msgstr ""
+
+#: Programs/file.c:471 Programs/menu.c:531
+msgid "cannot set working directory"
+msgstr ""
+
+#: Programs/prefs.c:526
+msgid "cannot write to preferences file"
+msgstr ""
+
+#. "cap" here, used during speech output, is short for "capital".
+#. It is spoken just before an uppercase letter, e.g. "cap A".
+#: Programs/core.c:1003
+msgid "cap"
+msgstr ""
+
+#: Programs/menu_prefs.c:758 Programs/menu_prefs.c:1197
+msgid "cells"
+msgstr ""
+
+#: Programs/cmd_preferences.c:81
+msgid "changes discarded"
+msgstr ""
+
+#: Programs/cmds.auto.h:775
+msgid "clear all sticky input modifiers"
+msgstr ""
+
+#: Programs/cmd_speech.c:456
+msgid "column"
+msgstr "colonna"
+
+#. configuration menu
+#: Drivers/Braille/BrailleLite/braille.c:607
+msgid "config"
+msgstr ""
+
+#: Programs/options.c:756
+msgid "configuration directive specified more than once"
+msgstr ""
+
+#: Drivers/Screen/Linux/screen.c:1463
+msgid "console not in use"
+msgstr ""
+
+#: Programs/menu_prefs.c:914
+msgid "console tone generator"
+msgstr ""
+
+#: Programs/cmds.auto.h:982
+msgid "copy characters to clipboard"
+msgstr ""
+
+#: Programs/config.c:582 Programs/menu_prefs.c:489
+msgid "csecs"
+msgstr ""
+
+#: Programs/cmds.auto.h:1096
+msgid "current reading location"
+msgstr ""
+
+#: Programs/cmds.auto.h:1152
+msgid "cursor-down key"
+msgstr ""
+
+#: Programs/cmds.auto.h:1131
+msgid "cursor-left key"
+msgstr ""
+
+#: Programs/cmds.auto.h:1138
+msgid "cursor-right key"
+msgstr ""
+
+#: Programs/cmds.auto.h:1145
+msgid "cursor-up key"
+msgstr ""
+
+#. GB
+#: Programs/cmd_utils.c:119
+msgid "cyan"
+msgstr ""
+
+#: Programs/cmds.auto.h:781
+msgid "cycle the AltGr (Right Alt) sticky input modifier (next, on, off)"
+msgstr ""
+
+#: Programs/cmds.auto.h:562
+msgid "cycle the Control sticky input modifier (next, on, off)"
+msgstr ""
+
+#: Programs/cmds.auto.h:787
+msgid "cycle the GUI (Windows) sticky input modifier (next, on, off)"
+msgstr ""
+
+#: Programs/cmds.auto.h:568
+msgid "cycle the Meta (Left Alt) sticky input modifier (next, on, off)"
+msgstr ""
+
+#: Programs/cmds.auto.h:550
+msgid "cycle the Shift sticky input modifier (next, on, off)"
+msgstr ""
+
+#: Programs/cmds.auto.h:556
+msgid "cycle the Upper sticky input modifier (next, on, off)"
+msgstr ""
+
+#. L
+#: Programs/cmd_utils.c:124
+msgid "dark grey"
+msgstr "grigio scuro"
+
+#: Programs/cmds.auto.h:483
+msgid "decrease speaking rate"
+msgstr ""
+
+#: Programs/cmds.auto.h:495
+msgid "decrease speaking volume"
+msgstr ""
+
+#: Programs/cmds.auto.h:1194
+msgid "delete key"
+msgstr ""
+
+#: Programs/cmds.auto.h:926
+msgid "describe character"
+msgstr ""
+
+#: Programs/cmds.auto.h:717
+msgid "describe current character"
+msgstr ""
+
+#: Programs/config.c:563 Programs/config.c:573
+msgid "device"
+msgstr ""
+
+#: Programs/brltest.c:64 Programs/brltest.c:74 Programs/brltty-atb.c:32
+#: Programs/brltty-ctb.c:50 Programs/brltty-ktb.c:73 Programs/brltty-ktb.c:83
+#: Programs/brltty-trtxt.c:47 Programs/config.c:361 Programs/config.c:371
+#: Programs/config.c:381 Programs/config.c:452
+msgid "directory"
+msgstr "directory"
+
+#: Programs/xbrlapi.c:97
+msgid "display"
+msgstr ""
+
+#: Programs/cmds.auto.h:4
+msgid "do nothing"
+msgstr "non fare nulla"
+
+#: Programs/learn.c:108
+msgid "done"
+msgstr ""
+
+#: Programs/menu_prefs.c:563
+msgid "dot 7"
+msgstr ""
+
+#: Programs/menu_prefs.c:564
+msgid "dot 8"
+msgstr ""
+
+#: Programs/menu_prefs.c:561
+msgid "dots 7 and 8"
+msgstr ""
+
+#: Drivers/Braille/Baum/braille.c:1092
+msgid "driver request"
+msgstr ""
+
+#: Programs/config.c:410 Programs/config.c:508 Programs/config.c:543
+msgid "driver,..."
+msgstr ""
+
+#: Programs/cmds.auto.h:1180
+msgid "end key"
+msgstr ""
+
+#: Programs/cmds.auto.h:1103
+msgid "enter key"
+msgstr ""
+
+#: Programs/cmds.auto.h:384
+msgid "enter/leave command learn mode"
+msgstr ""
+
+#: Programs/cmds.auto.h:372
+msgid "enter/leave help display"
+msgstr ""
+
+#: Programs/cmds.auto.h:390
+msgid "enter/leave preferences menu"
+msgstr ""
+
+#: Programs/cmds.auto.h:378
+msgid "enter/leave status display"
+msgstr ""
+
+#: Programs/cmds.auto.h:1124
+msgid "escape key"
+msgstr ""
+
+#: Drivers/Braille/Iris/braille.c:1494
+msgid "eurobraille"
+msgstr "eurobraille"
+
+#: Programs/cmd_miscellaneous.c:118
+msgid "exactly"
+msgstr ""
+
+#: Programs/config.c:744
+msgid "excess argument"
+msgstr ""
+
+#. parent
+#: Programs/brltty.c:177
+#, c-format
+msgid "executing \"%s\" (from \"%s\")\n"
+msgstr ""
+
+#. execv() shouldn't return
+#: Programs/brltty.c:184
+#, c-format
+msgid "execution of \"%s\" failed: %s\n"
+msgstr ""
+
+#: Programs/xbrlapi.c:643
+msgid "failed to get first focus\n"
+msgstr ""
+
+#: Programs/brltty-trtxt.c:57 Programs/brltty-trtxt.c:66 Programs/config.c:325
+#: Programs/config.c:334 Programs/config.c:344 Programs/config.c:463
+#: Programs/config.c:473 Programs/config.c:482 Programs/config.c:491
+#: Programs/config.c:527 Programs/config.c:612 Programs/xbrlapi.c:90
+msgid "file"
+msgstr "file"
+
+#: Programs/options.c:942
+#, c-format
+msgid "file '%s' processing error."
+msgstr ""
+
+#. failed
+#: Programs/brltty.c:172
+#, c-format
+msgid "fork of \"%s\" failed: %s\n"
+msgstr ""
+
+#: Programs/cmds.auto.h:1202
+msgid "function key"
+msgstr ""
+
+#: Programs/cmds.auto.h:240
+msgid "go back after cursor tracking"
+msgstr ""
+
+#: Programs/cmds.auto.h:186
+msgid "go backward one braille window"
+msgstr ""
+
+#: Programs/cmds.auto.h:202
+msgid "go backward skipping blank braille windows"
+msgstr ""
+
+#: Programs/cmds.auto.h:843
+msgid "go backward to nearest non-blank braille window"
+msgstr ""
+
+#: Programs/cmds.auto.h:20
+msgid "go down one line"
+msgstr ""
+
+#: Programs/cmds.auto.h:36
+msgid "go down several lines"
+msgstr ""
+
+#: Programs/cmds.auto.h:118
+msgid "go down to first line of next paragraph"
+msgstr ""
+
+#: Programs/cmds.auto.h:418
+msgid "go down to last item"
+msgstr ""
+
+#: Programs/cmds.auto.h:975
+msgid "go down to nearest line with different character"
+msgstr ""
+
+#: Programs/cmds.auto.h:52
+msgid "go down to nearest line with different content"
+msgstr ""
+
+#: Programs/cmds.auto.h:68
+msgid "go down to nearest line with different highlighting"
+msgstr ""
+
+#: Programs/cmds.auto.h:919
+msgid "go down to nearest line with less indent than character"
+msgstr ""
+
+#: Programs/cmds.auto.h:134
+msgid "go down to next command prompt"
+msgstr ""
+
+#: Programs/cmds.auto.h:434
+msgid "go down to next item"
+msgstr ""
+
+#: Programs/cmds.auto.h:194
+msgid "go forward one braille window"
+msgstr ""
+
+#: Programs/cmds.auto.h:210
+msgid "go forward skipping blank braille windows"
+msgstr ""
+
+#: Programs/cmds.auto.h:851
+msgid "go forward to nearest non-blank braille window"
+msgstr ""
+
+#: Programs/cmds.auto.h:170
+msgid "go left half a braille window"
+msgstr ""
+
+#: Programs/cmds.auto.h:154
+msgid "go left one character"
+msgstr ""
+
+#: Programs/cmds.auto.h:178
+msgid "go right half a braille window"
+msgstr ""
+
+#: Programs/cmds.auto.h:162
+msgid "go right one character"
+msgstr ""
+
+#: Programs/cmds.auto.h:690
+msgid "go to and speak first non-blank character on line"
+msgstr ""
+
+#: Programs/cmds.auto.h:704
+msgid "go to and speak first non-blank line on screen"
+msgstr ""
+
+#: Programs/cmds.auto.h:697
+msgid "go to and speak last non-blank character on line"
+msgstr ""
+
+#: Programs/cmds.auto.h:711
+msgid "go to and speak last non-blank line on screen"
+msgstr ""
+
+#: Programs/cmds.auto.h:643
+msgid "go to and speak next character"
+msgstr ""
+
+#: Programs/cmds.auto.h:683
+msgid "go to and speak next line"
+msgstr ""
+
+#: Programs/cmds.auto.h:663
+msgid "go to and speak next word"
+msgstr ""
+
+#: Programs/cmds.auto.h:636
+msgid "go to and speak previous character"
+msgstr ""
+
+#: Programs/cmds.auto.h:676
+msgid "go to and speak previous line"
+msgstr ""
+
+#: Programs/cmds.auto.h:656
+msgid "go to and speak previous word"
+msgstr ""
+
+#: Programs/cmds.auto.h:102
+msgid "go to beginning of bottom line"
+msgstr ""
+
+#: Programs/cmds.auto.h:218
+msgid "go to beginning of line"
+msgstr ""
+
+#: Programs/cmds.auto.h:93
+msgid "go to beginning of top line"
+msgstr ""
+
+#: Programs/cmds.auto.h:84
+msgid "go to bottom line"
+msgstr ""
+
+#: Programs/cmds.auto.h:459
+msgid "go to current speaking position"
+msgstr ""
+
+#: Programs/cmds.auto.h:226
+msgid "go to end of line"
+msgstr ""
+
+#: Programs/cmds.auto.h:581
+msgid "go to previous menu level"
+msgstr ""
+
+#: Programs/cmds.auto.h:948
+msgid "go to remembered braille window position"
+msgstr ""
+
+#: Programs/cmds.auto.h:233
+msgid "go to screen cursor"
+msgstr ""
+
+#: Programs/cmds.auto.h:247
+msgid "go to screen cursor or go back after cursor tracking"
+msgstr ""
+
+#: Programs/cmds.auto.h:957
+msgid "go to selected line"
+msgstr ""
+
+#: Programs/cmds.auto.h:76
+msgid "go to top line"
+msgstr ""
+
+#: Programs/cmds.auto.h:12
+msgid "go up one line"
+msgstr ""
+
+#: Programs/cmds.auto.h:28
+msgid "go up several lines"
+msgstr ""
+
+#: Programs/cmds.auto.h:410
+msgid "go up to first item"
+msgstr ""
+
+#: Programs/cmds.auto.h:110
+msgid "go up to first line of paragraph"
+msgstr ""
+
+#: Programs/cmds.auto.h:966
+msgid "go up to nearest line with different character"
+msgstr ""
+
+#: Programs/cmds.auto.h:44
+msgid "go up to nearest line with different content"
+msgstr ""
+
+#: Programs/cmds.auto.h:60
+msgid "go up to nearest line with different highlighting"
+msgstr ""
+
+#: Programs/cmds.auto.h:910
+msgid "go up to nearest line with less indent than character"
+msgstr ""
+
+#: Programs/cmds.auto.h:126
+msgid "go up to previous command prompt"
+msgstr ""
+
+#: Programs/cmds.auto.h:426
+msgid "go up to previous item"
+msgstr ""
+
+#. G
+#: Programs/cmd_utils.c:118
+msgid "green"
+msgstr "verde"
+
+#: Programs/cmd_miscellaneous.c:230
+msgid "help not available"
+msgstr ""
+
+#: Programs/scr_help.c:229
+msgid "help screen not readable"
+msgstr ""
+
+#: Programs/cmds.auto.h:1173
+msgid "home key"
+msgstr ""
+
+#: Programs/config.c:431
+msgid "identifier,..."
+msgstr ""
+
+#: Drivers/Braille/Baum/braille.c:1094
+msgid "idle timeout"
+msgstr ""
+
+#: Programs/cmds.auto.h:489
+msgid "increase speaking rate"
+msgstr ""
+
+#: Programs/cmds.auto.h:501
+msgid "increase speaking volume"
+msgstr ""
+
+#: Programs/cmds.auto.h:996
+msgid "insert clipboard history entry after screen cursor"
+msgstr ""
+
+#: Programs/cmds.auto.h:526
+msgid "insert clipboard text after screen cursor"
+msgstr ""
+
+#: Programs/cmds.auto.h:1187
+msgid "insert key"
+msgstr ""
+
+#: Programs/program.c:180
+msgid "install path not absolute"
+msgstr ""
+
+#: Programs/options.c:99
+msgid "invalid counter setting"
+msgstr ""
+
+#: Programs/datafile.c:318
+msgid "invalid escape sequence"
+msgstr ""
+
+#: Programs/options.c:92
+msgid "invalid flag setting"
+msgstr ""
+
+#: Programs/config.c:2555
+msgid "invalid message hold timeout"
+msgstr ""
+
+#: Programs/brlapi_server.c:3014
+msgid "invalid thread stack size"
+msgstr ""
+
+#: Drivers/Braille/BrailleLite/braille.c:590
+#: Drivers/Braille/BrailleLite/braille.c:668
+msgid "keyboard emu off"
+msgstr ""
+
+#: Drivers/Braille/BrailleLite/braille.c:589
+msgid "keyboard emu on"
+msgstr ""
+
+#. L  B
+#: Programs/cmd_utils.c:125
+msgid "light blue"
+msgstr ""
+
+#. L GB
+#: Programs/cmd_utils.c:127
+msgid "light cyan"
+msgstr ""
+
+#. L G
+#: Programs/cmd_utils.c:126
+msgid "light green"
+msgstr ""
+
+#. RGB
+#: Programs/cmd_utils.c:123
+msgid "light grey"
+msgstr ""
+
+#. LR B
+#: Programs/cmd_utils.c:129
+msgid "light magenta"
+msgstr ""
+
+#. LR
+#: Programs/cmd_utils.c:128
+msgid "light red"
+msgstr ""
+
+#: Programs/cmd_speech.c:455
+msgid "line"
+msgstr ""
+
+#: Programs/cmds.auto.h:894
+msgid "linear copy to character"
+msgstr ""
+
+#: Programs/config.c:603
+msgid "lvl|cat,..."
+msgstr ""
+
+#. R B
+#: Programs/cmd_utils.c:121
+msgid "magenta"
+msgstr "magenta"
+
+#. An invalid option has been specified.
+#: Programs/options.c:542
+msgid "missing operand"
+msgstr ""
+
+#: Programs/parse.c:428
+msgid "missing parameter name"
+msgstr ""
+
+#: Programs/parse.c:414
+msgid "missing parameter qualifier"
+msgstr ""
+
+#: Programs/parse.c:390
+msgid "missing parameter value"
+msgstr ""
+
+#: Programs/config.c:353 Programs/config.c:399 Programs/config.c:421
+#: Programs/config.c:499 Programs/config.c:518 Programs/config.c:553
+msgid "name=value,..."
+msgstr ""
+
+#: Drivers/Braille/Iris/braille.c:1510
+msgid "native"
+msgstr ""
+
+#: Programs/config.c:1007
+msgid "no key bindings"
+msgstr ""
+
+#: Programs/scr_driver.c:41
+msgid "no screen"
+msgstr ""
+
+#: Programs/config.c:655
+msgid "none"
+msgstr ""
+
+#: Programs/config.c:1274
+msgid "not saved"
+msgstr ""
+
+#: Programs/options.c:139
+msgid "option"
+msgstr ""
+
+#: Programs/cmds.auto.h:1166
+msgid "page-down key"
+msgstr ""
+
+#: Programs/cmds.auto.h:1159
+msgid "page-up key"
+msgstr ""
+
+#: Programs/menu_prefs.c:495
+msgid "percentage"
+msgstr "percentuale"
+
+#: Programs/config.c:2528
+msgid "pid file not specified"
+msgstr ""
+
+#: Programs/program.c:320
+msgid "pid file open error"
+msgstr ""
+
+#: Programs/spk.c:200
+msgid "pitch"
+msgstr ""
+
+#: Programs/cmds.auto.h:933
+msgid "place left end of braille window at character"
+msgstr ""
+
+#: Drivers/Braille/Baum/braille.c:1093
+msgid "power switch"
+msgstr ""
+
+#: Programs/spk.c:186
+msgid "rate"
+msgstr ""
+
+#: Programs/cmds.auto.h:887
+msgid "rectangular copy to character"
+msgstr ""
+
+#. R
+#: Programs/cmd_utils.c:120
+msgid "red"
+msgstr "rosso"
+
+#: Programs/config.c:1723
+#, c-format
+msgid "reinitializing braille driver"
+msgstr ""
+
+#: Programs/config.c:2276
+#, c-format
+msgid "reinitializing screen driver"
+msgstr ""
+
+#: Programs/config.c:2057
+#, c-format
+msgid "reinitializing speech driver"
+msgstr ""
+
+#: Programs/cmds.auto.h:940
+msgid "remember current braille window position"
+msgstr ""
+
+#: Programs/cmds.auto.h:1045
+msgid "render an alert"
+msgstr ""
+
+#: Drivers/Braille/BrailleLite/braille.c:601
+#: Drivers/Braille/BrailleLite/braille.c:780
+#: Drivers/Braille/BrailleLite/braille.c:782
+#: Drivers/Braille/BrailleLite/braille.c:791
+msgid "repeat count"
+msgstr ""
+
+#: Programs/cmds.auto.h:532
+msgid "restart braille driver"
+msgstr ""
+
+#: Programs/cmds.auto.h:538
+msgid "restart speech driver"
+msgstr ""
+
+#: Programs/cmds.auto.h:755
+msgid "restore clipboard from disk"
+msgstr ""
+
+#: Programs/cmds.auto.h:402
+msgid "restore preferences from disk"
+msgstr ""
+
+#: Programs/cmds.auto.h:749
+msgid "save clipboard to disk"
+msgstr ""
+
+#: Programs/cmds.auto.h:396
+msgid "save preferences to disk"
+msgstr ""
+
+#: Programs/config.c:2156
+msgid "screen driver not loadable"
+msgstr ""
+
+#: Drivers/Screen/Linux/screen.c:1486
+msgid "screen not in text mode"
+msgstr ""
+
+#: Programs/cmds.auto.h:140
+msgid "search backward for clipboard text"
+msgstr ""
+
+#: Programs/cmds.auto.h:146
+msgid "search forward for clipboard text"
+msgstr ""
+
+#: Programs/cmd_miscellaneous.c:122
+msgid "second"
+msgid_plural "seconds"
+msgstr[0] "secondo"
+msgstr[1] "secondi"
+
+#: Programs/cmds.auto.h:446
+msgid "select next choice"
+msgstr ""
+
+#: Programs/cmds.auto.h:440
+msgid "select previous choice"
+msgstr ""
+
+#: Programs/cmds.auto.h:352
+msgid "set alert tunes on/off"
+msgstr ""
+
+#: Programs/cmds.auto.h:338
+msgid "set attribute blinking on/off"
+msgstr ""
+
+#: Programs/cmds.auto.h:331
+msgid "set attribute underlining on/off"
+msgstr ""
+
+#: Programs/cmds.auto.h:1010
+msgid "set attributes table"
+msgstr ""
+
+#: Programs/cmds.auto.h:359
+msgid "set autorepeat on/off"
+msgstr ""
+
+#: Programs/cmds.auto.h:623
+msgid "set autospeak completed words on/off"
+msgstr ""
+
+#: Programs/cmds.auto.h:609
+msgid "set autospeak deleted characters on/off"
+msgstr ""
+
+#: Programs/cmds.auto.h:602
+msgid "set autospeak inserted characters on/off"
+msgstr ""
+
+#: Programs/cmds.auto.h:366
+msgid "set autospeak on/off"
+msgstr ""
+
+#: Programs/cmds.auto.h:616
+msgid "set autospeak replaced characters on/off"
+msgstr ""
+
+#: Programs/cmds.auto.h:595
+msgid "set autospeak selected character on/off"
+msgstr ""
+
+#: Programs/cmds.auto.h:588
+msgid "set autospeak selected line on/off"
+msgstr ""
+
+#: Programs/cmds.auto.h:762
+msgid "set braille input mode dots/text"
+msgstr ""
+
+#: Programs/cmds.auto.h:769
+msgid "set braille keyboard enabled/disabled"
+msgstr ""
+
+#: Programs/cmds.auto.h:345
+msgid "set capital letter blinking on/off"
+msgstr ""
+
+#: Programs/cmds.auto.h:1017
+msgid "set contraction table"
+msgstr ""
+
+#: Programs/cmds.auto.h:261
+msgid "set display mode attributes/text"
+msgstr ""
+
+#: Programs/cmds.auto.h:303
+msgid "set hidden screen cursor on/off"
+msgstr ""
+
+#: Programs/cmds.auto.h:1024
+msgid "set keyboard table"
+msgstr ""
+
+#: Programs/cmds.auto.h:1031
+msgid "set language profile"
+msgstr ""
+
+#: Programs/cmds.auto.h:324
+msgid "set screen cursor blinking on/off"
+msgstr ""
+
+#: Programs/cmds.auto.h:317
+msgid "set screen cursor style block/underline"
+msgstr ""
+
+#: Programs/cmds.auto.h:296
+msgid "set screen cursor visibility on/off"
+msgstr ""
+
+#: Programs/cmds.auto.h:254
+msgid "set screen image frozen/unfrozen"
+msgstr ""
+
+#: Programs/cmds.auto.h:289
+msgid "set skipping of blank braille windows on/off"
+msgstr ""
+
+#: Programs/cmds.auto.h:282
+msgid "set skipping of lines with identical content on/off"
+msgstr ""
+
+#: Programs/cmds.auto.h:275
+msgid "set sliding braille window on/off"
+msgstr ""
+
+#: Programs/cmds.auto.h:743
+msgid "set speech cursor visibility on/off"
+msgstr ""
+
+#: Programs/cmds.auto.h:268
+msgid "set text style 6-dot/8-dot"
+msgstr ""
+
+#: Programs/cmds.auto.h:1003
+msgid "set text table"
+msgstr ""
+
+#: Programs/cmds.auto.h:858
+msgid "set touch navigation on/off"
+msgstr ""
+
+#: Programs/cmds.auto.h:310
+msgid "set track screen cursor on/off"
+msgstr ""
+
+#: Programs/cmds.auto.h:574
+msgid "show current date and time"
+msgstr ""
+
+#: Programs/menu_prefs.c:915
+msgid "soundcard digital audio"
+msgstr ""
+
+#: Programs/menu_prefs.c:917
+msgid "soundcard synthesizer"
+msgstr ""
+
+#: Programs/cmd.c:277 Programs/core.c:984
+msgid "space"
+msgstr "spazio"
+
+#: Programs/cmds.auto.h:629
+msgid "speak current character"
+msgstr ""
+
+#: Programs/cmds.auto.h:465 Programs/cmds.auto.h:669
+msgid "speak current line"
+msgstr ""
+
+#: Programs/cmds.auto.h:649
+msgid "speak current word"
+msgstr ""
+
+#: Programs/cmds.auto.h:477
+msgid "speak from current line through bottom of screen"
+msgstr ""
+
+#: Programs/cmds.auto.h:471
+msgid "speak from top of screen through current line"
+msgstr ""
+
+#: Programs/cmds.auto.h:736
+msgid "speak speech cursor location"
+msgstr ""
+
+#: Programs/config.c:1916
+msgid "speech driver not loadable"
+msgstr ""
+
+#: Programs/cmds.auto.h:723
+msgid "spell current word"
+msgstr ""
+
+#: Programs/cmds.auto.h:873
+msgid "start new clipboard at character"
+msgstr ""
+
+#: Programs/cmds.auto.h:799
+msgid "start the braille driver"
+msgstr ""
+
+#: Programs/cmds.auto.h:823
+msgid "start the screen driver"
+msgstr ""
+
+#: Programs/cmds.auto.h:811
+msgid "start the speech driver"
+msgstr ""
+
+#: Programs/cmds.auto.h:452
+msgid "stop speaking"
+msgstr ""
+
+#: Programs/cmds.auto.h:793
+msgid "stop the braille driver"
+msgstr ""
+
+#: Programs/cmds.auto.h:817
+msgid "stop the screen driver"
+msgstr ""
+
+#: Programs/cmds.auto.h:805
+msgid "stop the speech driver"
+msgstr ""
+
+#: Programs/xbrlapi.c:595
+msgid "strange old error handler\n"
+msgstr ""
+
+#: Programs/cmds.auto.h:1089
+msgid "switch to command context"
+msgstr ""
+
+#: Programs/cmds.auto.h:901
+msgid "switch to specific virtual terminal"
+msgstr ""
+
+#: Programs/cmds.auto.h:513
+msgid "switch to the next virtual terminal"
+msgstr ""
+
+#: Programs/cmds.auto.h:507
+msgid "switch to the previous virtual terminal"
+msgstr ""
+
+#: Programs/cmds.auto.h:1110
+msgid "tab key"
+msgstr ""
+
+#: Programs/config.c:271 Programs/config.c:279
+msgid "text"
+msgstr "testo"
+
+#: Programs/cmds.auto.h:1061
+msgid "type braille dots"
+msgstr "tipo punti braille"
+
+#: Programs/cmds.auto.h:1053
+msgid "type unicode character"
+msgstr "tipo caratteri unicode"
+
+#: Programs/xbrlapi.c:906
+msgid "unexpected block type"
+msgstr ""
+
+#: Programs/xbrlapi.c:796
+msgid "unexpected cmd"
+msgstr ""
+
+#: Programs/cmd_queue.c:148
+msgid "unhandled command"
+msgstr ""
+
+#: Programs/cmd.c:198
+msgid "unknown command"
+msgstr ""
+
+#: Programs/options.c:772
+msgid "unknown configuration directive"
+msgstr ""
+
+#: Programs/config.c:675
+msgid "unknown log level or category"
+msgstr ""
+
+#: Programs/options.c:529
+msgid "unknown option"
+msgstr "opzione sconosciuta"
+
+#: Programs/parse.c:457
+msgid "unsupported parameter"
+msgstr ""
+
+#: Programs/spk.c:172
+msgid "volume"
+msgstr "volume"
+
+#. LRGB
+#: Programs/cmd_utils.c:131
+msgid "white"
+msgstr "bianco"
+
+#: Programs/xbrlapi.c:843
+#, c-format
+msgid ""
+"xbrlapi: Couldn't find a keycode to remap for simulating unbound keysym "
+"%08X\n"
+msgstr ""
+
+#: Programs/xbrlapi.c:830
+#, c-format
+msgid ""
+"xbrlapi: Couldn't find modifiers to apply to %d for getting keysym %08X\n"
+msgstr ""
+
+#: Programs/xbrlapi.c:806
+#, c-format
+msgid "xbrlapi: Couldn't translate keysym %08X to keycode.\n"
+msgstr ""
+
+#: Programs/xbrlapi.c:373
+#, c-format
+msgid "xbrlapi: X Error %d, %s on display %s\n"
+msgstr ""
+
+#: Programs/xbrlapi.c:415
+#, c-format
+msgid "xbrlapi: bad format for VT number\n"
+msgstr ""
+
+#: Programs/xbrlapi.c:418
+#, c-format
+msgid "xbrlapi: bad type for VT number\n"
+msgstr ""
+
+#: Programs/xbrlapi.c:397
+#, c-format
+msgid "xbrlapi: cannot get root window XFree86_VT property\n"
+msgstr ""
+
+#: Programs/xbrlapi.c:276
+#, c-format
+msgid "xbrlapi: cannot write window name %s\n"
+msgstr ""
+
+#: Programs/xbrlapi.c:696
+#, c-format
+msgid "xbrlapi: didn't grab parent of %#010lx\n"
+msgstr ""
+
+#: Programs/xbrlapi.c:714
+#, c-format
+msgid "xbrlapi: didn't grab window %#010lx\n"
+msgstr ""
+
+#: Programs/xbrlapi.c:540
+#, c-format
+msgid "xbrlapi: didn't grab window %#010lx but got focus\n"
+msgstr ""
+
+#: Programs/xbrlapi.c:406
+#, c-format
+msgid "xbrlapi: more than one item for VT number\n"
+msgstr ""
+
+#: Programs/xbrlapi.c:391
+#, c-format
+msgid "xbrlapi: no XFree86_VT atom\n"
+msgstr ""
+
+#: Programs/xbrlapi.c:402
+#, c-format
+msgid "xbrlapi: no items for VT number\n"
+msgstr ""
+
+#: Programs/xbrlapi.c:374
+#, c-format
+msgid "xbrlapi: resource %#010lx, req %u:%u\n"
+msgstr ""
+
+#. "shouldn't happen" events
+#: Programs/xbrlapi.c:743
+#, c-format
+msgid "xbrlapi: unhandled event type: %d\n"
+msgstr ""
+
+#: Programs/xbrlapi.c:722
+#, c-format
+msgid "xbrlapi: window %#010lx changed to NULL name\n"
+msgstr ""
+
+#. LRG
+#: Programs/cmd_utils.c:130
+msgid "yellow"
+msgstr "giallo"
