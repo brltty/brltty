@@ -19,7 +19,7 @@
 all:: objects languages
 
 COPYRIGHT_HOLDER = The BRLTTY Developers
-LANGUAGE_CODES = de fr zh
+LANGUAGE_CODES = de fr it zh
 
 TEMPLATE_EXTENSION = pot
 SOURCE_EXTENSION = po
