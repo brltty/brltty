@@ -26,7 +26,9 @@ import java.util.LinkedHashMap;
 import java.text.Collator;
 import java.text.CollationKey;
 
+import android.util.Log;
 import android.os.Bundle;
+
 import android.content.SharedPreferences;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
@@ -42,6 +44,10 @@ public abstract class SettingsFragment extends PreferenceFragment {
   @Override
   public void onCreate (Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
+    if (ApplicationUtilities.haveNougat) {
+      getPreferenceManager().setStorageDeviceProtected();
+    }
   }
 
   private static String makePropertyKey (String name, String key) {
@@ -71,7 +77,7 @@ public abstract class SettingsFragment extends PreferenceFragment {
   }
 
   protected final SharedPreferences getPreferences () {
-    return DataType.getPreferences();
+    return getPreferenceManager().getSharedPreferences();
   }
 
   protected final Preference getPreference (int key) {
