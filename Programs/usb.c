@@ -1502,18 +1502,8 @@ struct UsbChooseChannelDataStruct {
 static int
 usbChooseChannel (UsbDevice *device, UsbChooseChannelData *data) {
   const UsbDeviceDescriptor *descriptor = &device->descriptor;
-  const UsbChannelDefinition *definition = data->definition;
 
-  {
-    uint16_t vendor = getLittleEndian16(descriptor->idVendor);
-    uint16_t product = getLittleEndian16(descriptor->idProduct);
-    const char *const *drivers = usbGetDriverCodes(vendor, product);
-    if (!drivers) return 0;
-  }
-
-  if (!(descriptor->iManufacturer ||
-        descriptor->iProduct ||
-        descriptor->iSerialNumber)) {
+  if (!(descriptor->iManufacturer || descriptor->iProduct || descriptor->iSerialNumber)) {
     UsbDeviceDescriptor actualDescriptor;
     ssize_t result = usbGetDeviceDescriptor(device, &actualDescriptor);
 
@@ -1523,32 +1513,41 @@ usbChooseChannel (UsbDevice *device, UsbChooseChannelData *data) {
     }
   }
 
-  while (definition->vendor) {
-    if (definition->version && (definition->version != getLittleEndian16(descriptor->bcdUSB))) goto nextDefinition;
-    if (!USB_IS_PRODUCT(descriptor, definition->vendor, definition->product)) goto nextDefinition;
+  {
+    uint16_t vendor = getLittleEndian16(descriptor->idVendor);
+    uint16_t product = getLittleEndian16(descriptor->idProduct);
+
+    const char *const *drivers = usbGetDriverCodes(vendor, product);
+    if (!drivers) return 0;
+  }
+
+  for (
+    const UsbChannelDefinition *definition = data->definition;
+    definition->vendor;
+    definition += 1
+  ) {
+    if (definition->version && (definition->version != getLittleEndian16(descriptor->bcdUSB))) continue;
+    if (!USB_IS_PRODUCT(descriptor, definition->vendor, definition->product)) continue;
 
     if (!data->genericDevices) {
       const UsbSerialAdapter *adapter = usbFindSerialAdapter(descriptor);
-      if (adapter && adapter->generic) goto nextDefinition;
+      if (adapter && adapter->generic) continue;
     }
 
-    if (!usbVerifyVendorIdentifier(descriptor, data->vendorIdentifier)) goto nextDefinition;
-    if (!usbVerifyProductIdentifier(descriptor, data->productIdentifier)) goto nextDefinition;
-    if (!usbVerifySerialNumber(device, data->serialNumber)) goto nextDefinition;
+    if (!usbVerifyVendorIdentifier(descriptor, data->vendorIdentifier)) continue;
+    if (!usbVerifyProductIdentifier(descriptor, data->productIdentifier)) continue;
+    if (!usbVerifySerialNumber(device, data->serialNumber)) continue;
 
-    if (!usbVerifyStrings(device, definition->manufacturers, descriptor->iManufacturer)) goto nextDefinition;
-    if (!usbVerifyStrings(device, definition->products, descriptor->iProduct)) goto nextDefinition;
+    if (!usbVerifyStrings(device, definition->manufacturers, descriptor->iManufacturer)) continue;
+    if (!usbVerifyStrings(device, definition->products, descriptor->iProduct)) continue;
 
     if (definition->verifyInterface) {
-      if (!usbConfigureDevice(device, definition->configuration)) goto nextDefinition;
-      if (!usbVerifyInterface(device, definition)) goto nextDefinition;
+      if (!usbConfigureDevice(device, definition->configuration)) continue;
+      if (!usbVerifyInterface(device, definition)) continue;
     }
 
     data->definition = definition;
     return 1;
-
-  nextDefinition:
-    definition += 1;
   }
 
   return 0;
