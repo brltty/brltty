@@ -86,13 +86,13 @@ static const GioMethods gioBluetoothMethods = {
 };
 
 static int
-isBluetoothSupported (const GioDescriptor *descriptor) {
-  return descriptor->bluetooth.channelNumber || descriptor->bluetooth.discoverChannel;
+testBluetoothIdentifier (const char **identifier) {
+  return isBluetoothDeviceIdentifier(identifier);
 }
 
 static int
-testBluetoothIdentifier (const char **identifier) {
-  return isBluetoothDeviceIdentifier(identifier);
+isBluetoothSupported (const GioDescriptor *descriptor) {
+  return descriptor->bluetooth.channelNumber || descriptor->bluetooth.discoverChannel;
 }
 
 static const GioOptions *
@@ -135,14 +135,25 @@ connectBluetoothResource (
   return NULL;
 }
 
-const GioClass gioBluetoothClass = {
-  .isSupported = isBluetoothSupported,
+static const GioPublicProperties gioPublicProperties_bluetooth = {
   .testIdentifier = testBluetoothIdentifier,
+
+  .type = {
+    .name = "Bl;uetooth",
+    .value = GIO_RESOURCE_BLUETOOTH
+  }
+};
+
+static const GioPrivateProperties gioPrivateProperties_bluetooth = {
+  .isSupported = isBluetoothSupported,
 
   .getOptions = getBluetoothOptions,
   .getMethods = getBluetoothMethods,
 
-  .connectResource = connectBluetoothResource,
+  .connectResource = connectBluetoothResource
+};
 
-  .resourceType = GIO_RESOURCE_BLUETOOTH
+const GioProperties gioProperties_bluetooth = {
+  .public = &gioPublicProperties_bluetooth,
+  .private = &gioPrivateProperties_bluetooth
 };

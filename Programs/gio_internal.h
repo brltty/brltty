@@ -129,9 +129,18 @@ struct GioEndpointStruct {
   } input;
 };
 
-typedef int GioIsSupportedMethod (const GioDescriptor *descriptor);
-
 typedef int GioTestIdentifierMethod (const char **identifier);
+
+typedef struct {
+  GioTestIdentifierMethod *testIdentifier;
+
+  struct {
+    const char *name;
+    GioResourceType value;
+  } type;
+} GioPublicProperties;
+
+typedef int GioIsSupportedMethod (const GioDescriptor *descriptor);
 
 typedef const GioOptions *GioGetOptionsMethod (const GioDescriptor *descriptor);
 
@@ -146,22 +155,24 @@ typedef int GioPrepareEndpointMethod (GioEndpoint *endpoint);
 
 typedef struct {
   GioIsSupportedMethod *isSupported;
-  GioTestIdentifierMethod *testIdentifier;
 
   GioGetOptionsMethod *getOptions;
   GioGetMethodsMethod *getMethods;
 
   GioConnectResourceMethod *connectResource;
   GioPrepareEndpointMethod *prepareEndpoint;
+} GioPrivateProperties;
 
-  GioResourceType resourceType;
-} GioClass;
+typedef struct {
+  const GioPublicProperties *public;
+  const GioPrivateProperties *private;
+} GioProperties;
 
-extern const GioClass *const gioClasses[];
-extern const GioClass gioNullClass;
-extern const GioClass gioSerialClass;
-extern const GioClass gioUsbClass;
-extern const GioClass gioBluetoothClass;
+extern const GioProperties *const gioProperties[];
+extern const GioProperties gioProperties_null;
+extern const GioProperties gioProperties_serial;
+extern const GioProperties gioProperties_usb;
+extern const GioProperties gioProperties_bluetooth;
 
 extern void gioSetBytesPerSecond (GioEndpoint *endpoint, const SerialParameters *parameters);
 

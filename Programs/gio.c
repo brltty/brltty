@@ -28,11 +28,11 @@
 #include "gio_internal.h"
 #include "io_serial.h"
 
-const GioClass *const gioClasses[] = {
-  &gioNullClass,
-  &gioSerialClass,
-  &gioUsbClass,
-  &gioBluetoothClass,
+const GioProperties *const gioProperties[] = {
+  &gioProperties_null,
+  &gioProperties_serial,
+  &gioProperties_usb,
+  &gioProperties_bluetooth,
   NULL
 };
 
@@ -92,19 +92,19 @@ gioStartEndpoint (GioEndpoint *endpoint) {
   return 1;
 }
 
-static const GioClass *
-gioGetClass (
+static const GioProperties *
+gioGetProperties (
   const char **identifier,
   const GioDescriptor *descriptor
 ) {
-  const GioClass *const *class = gioClasses;
+  const GioProperties *const *properties = gioProperties;
 
-  while (*class) {
-    if ((*class)->isSupported) {
-      if ((*class)->isSupported(descriptor)) {
-        if ((*class)->testIdentifier) {
-          if ((*class)->testIdentifier(identifier)) {
-            return *class;
+  while (*properties) {
+    if ((*properties)->private->isSupported) {
+      if ((*properties)->private->isSupported(descriptor)) {
+        if ((*properties)->public->testIdentifier) {
+          if ((*properties)->public->testIdentifier(identifier)) {
+            return *properties;
           }
         } else {
           logUnsupportedOperation("testIdentifier");
@@ -114,7 +114,7 @@ gioGetClass (
       logUnsupportedOperation("isSupported");
     }
 
-    class += 1;
+    properties += 1;
   }
 
   errno = ENOSYS;
@@ -127,13 +127,13 @@ gioConnectResource (
   const char *identifier,
   const GioDescriptor *descriptor
 ) {
-  const GioClass *class = gioGetClass(&identifier, descriptor);
+  const GioProperties *properties = gioGetProperties(&identifier, descriptor);
 
-  if (class) {
+  if (properties) {
     GioEndpoint *endpoint;
 
     if ((endpoint = malloc(sizeof(*endpoint)))) {
-      endpoint->resourceType = class->resourceType;
+      endpoint->resourceType = properties->public->type.value;
       endpoint->bytesPerSecond = 0;
 
       endpoint->input.error = 0;
@@ -143,21 +143,21 @@ gioConnectResource (
       endpoint->hidReportItems.address = NULL;
       endpoint->hidReportItems.size = 0;
 
-      if (class->getOptions) {
-        endpoint->options = *class->getOptions(descriptor);
+      if (properties->private->getOptions) {
+        endpoint->options = *properties->private->getOptions(descriptor);
       } else {
         gioInitializeOptions(&endpoint->options);
       }
 
-      if (class->getMethods) {
-        endpoint->methods = class->getMethods();
+      if (properties->private->getMethods) {
+        endpoint->methods = properties->private->getMethods();
       } else {
         endpoint->methods = NULL;
       }
 
-      if (class->connectResource) {
-        if ((endpoint->handle = class->connectResource(identifier, descriptor))) {
-          if (!class->prepareEndpoint || class->prepareEndpoint(endpoint)) {
+      if (properties->private->connectResource) {
+        if ((endpoint->handle = properties->private->connectResource(identifier, descriptor))) {
+          if (!properties->private->prepareEndpoint || properties->private->prepareEndpoint(endpoint)) {
             if (gioStartEndpoint(endpoint)) {
               return endpoint;
             }

@@ -26,15 +26,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct {
-  const void *applicationData;
-  int readyDelay;
-  int inputTimeout;
-  int outputTimeout;
-  int requestTimeout;
-  unsigned ignoreWriteTimeouts:1;
-} GioOptions;
-
 typedef ssize_t GioUsbWriteDataMethod (
   UsbDevice *device, const UsbChannelDefinition *definition,
   const void *data, size_t size, int timeout
@@ -63,6 +54,15 @@ typedef void GioUsbSetConnectionPropertiesMethod (
   GioUsbConnectionProperties *properties,
   const UsbChannelDefinition *definition
 );
+
+typedef struct {
+  const void *applicationData;
+  int readyDelay;
+  int inputTimeout;
+  int outputTimeout;
+  int requestTimeout;
+  unsigned ignoreWriteTimeouts:1;
+} GioOptions;
 
 typedef struct {
   struct {

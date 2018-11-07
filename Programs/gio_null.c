@@ -63,13 +63,13 @@ static const GioMethods gioNullMethods = {
 };
 
 static int
-isNullSupported (const GioDescriptor *descriptor) {
-  return 1;
+testNullIdentifier (const char **identifier) {
+  return hasQualifier(identifier, "null");
 }
 
 static int
-testNullIdentifier (const char **identifier) {
-  return hasQualifier(identifier, "null");
+isNullSupported (const GioDescriptor *descriptor) {
+  return 1;
 }
 
 static const GioOptions *
@@ -100,14 +100,25 @@ connectNullResource (
   return NULL;
 }
 
-const GioClass gioNullClass = {
-  .isSupported = isNullSupported,
+static const GioPublicProperties gioPublicProperties_null = {
   .testIdentifier = testNullIdentifier,
+
+  .type = {
+    .name = "null",
+    .value = GIO_RESOURCE_NULL
+  }
+};
+
+static const GioPrivateProperties gioPrivateProperties_null = {
+  .isSupported = isNullSupported,
 
   .getOptions = getNullOptions,
   .getMethods = getNullMethods,
 
-  .connectResource = connectNullResource,
+  .connectResource = connectNullResource
+};
 
-  .resourceType = GIO_RESOURCE_NULL
+const GioProperties gioProperties_null = {
+  .public = &gioPublicProperties_null,
+  .private = &gioPrivateProperties_null
 };

@@ -283,13 +283,13 @@ static const GioMethods gioUsbMethods = {
 };
 
 static int
-isUsbSupported (const GioDescriptor *descriptor) {
-  return descriptor->usb.channelDefinitions != NULL;
+testUsbIdentifier (const char **identifier) {
+  return isUsbDeviceIdentifier(identifier);
 }
 
 static int
-testUsbIdentifier (const char **identifier) {
-  return isUsbDeviceIdentifier(identifier);
+isUsbSupported (const GioDescriptor *descriptor) {
+  return descriptor->usb.channelDefinitions != NULL;
 }
 
 static const GioOptions *
@@ -366,15 +366,26 @@ prepareUsbEndpoint (GioEndpoint *endpoint) {
   return 1;
 }
 
-const GioClass gioUsbClass = {
-  .isSupported = isUsbSupported,
+static const GioPublicProperties gioPublicProperties_usb = {
   .testIdentifier = testUsbIdentifier,
+
+  .type = {
+    .name = "USB",
+    .value = GIO_RESOURCE_USB
+  }
+};
+
+static const GioPrivateProperties gioPrivateProperties_usb = {
+  .isSupported = isUsbSupported,
 
   .getOptions = getUsbOptions,
   .getMethods = getUsbMethods,
 
   .connectResource = connectUsbResource,
-  .prepareEndpoint = prepareUsbEndpoint,
+  .prepareEndpoint = prepareUsbEndpoint
+};
 
-  .resourceType = GIO_RESOURCE_USB
+const GioProperties gioProperties_usb = {
+  .public = &gioPublicProperties_usb,
+  .private = &gioPrivateProperties_usb
 };

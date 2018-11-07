@@ -89,13 +89,13 @@ static const GioMethods gioSerialMethods = {
 };
 
 static int
-isSerialSupported (const GioDescriptor *descriptor) {
-  return descriptor->serial.parameters != NULL;
+testSerialIdentifier (const char **identifier) {
+  return isSerialDeviceIdentifier(identifier);
 }
 
 static int
-testSerialIdentifier (const char **identifier) {
-  return isSerialDeviceIdentifier(identifier);
+isSerialSupported (const GioDescriptor *descriptor) {
+  return descriptor->serial.parameters != NULL;
 }
 
 static const GioOptions *
@@ -141,15 +141,26 @@ prepareSerialEndpoint (GioEndpoint *endpoint) {
   return 1;
 }
 
-const GioClass gioSerialClass = {
-  .isSupported = isSerialSupported,
+static const GioPublicProperties gioPublicProperties_serial = {
   .testIdentifier = testSerialIdentifier,
+
+  .type = {
+    .name = "serial",
+    .value = GIO_RESOURCE_SERIAL
+  }
+};
+
+static const GioPrivateProperties gioPrivateProperties_serial = {
+  .isSupported = isSerialSupported,
 
   .getOptions = getSerialOptions,
   .getMethods = getSerialMethods,
 
   .connectResource = connectSerialResource,
-  .prepareEndpoint = prepareSerialEndpoint,
+  .prepareEndpoint = prepareSerialEndpoint
+};
 
-  .resourceType = GIO_RESOURCE_SERIAL
+const GioProperties gioProperties_serial = {
+  .public = &gioPublicProperties_serial,
+  .private = &gioPrivateProperties_serial
 };
