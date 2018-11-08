@@ -129,17 +129,6 @@ struct GioEndpointStruct {
   } input;
 };
 
-typedef int GioTestIdentifierMethod (const char **identifier);
-
-typedef struct {
-  GioTestIdentifierMethod *testIdentifier;
-
-  struct {
-    const char *name;
-    GioResourceType value;
-  } type;
-} GioPublicProperties;
-
 typedef int GioIsSupportedMethod (const GioDescriptor *descriptor);
 
 typedef const GioOptions *GioGetOptionsMethod (const GioDescriptor *descriptor);

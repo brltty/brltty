@@ -97,29 +97,38 @@ gioGetProperties (
   const char **identifier,
   const GioDescriptor *descriptor
 ) {
-  const GioProperties *const *properties = gioProperties;
+  for (const GioProperties *const *properties = gioProperties;
+       *properties; properties+=1) {
+    if (descriptor) {
+      GioIsSupportedMethod *method = (*properties)->private->isSupported;
 
-  while (*properties) {
-    if ((*properties)->private->isSupported) {
-      if ((*properties)->private->isSupported(descriptor)) {
-        if ((*properties)->public->testIdentifier) {
-          if ((*properties)->public->testIdentifier(identifier)) {
-            return *properties;
-          }
-        } else {
-          logUnsupportedOperation("testIdentifier");
-        }
+      if (!method) {
+        logUnsupportedOperation("isSupported");
+        continue;
       }
-    } else {
-      logUnsupportedOperation("isSupported");
+
+      if (!method(descriptor)) continue;
     }
 
-    properties += 1;
+    if ((*properties)->public->testIdentifier) {
+      if ((*properties)->public->testIdentifier(identifier)) {
+        return *properties;
+      }
+    } else {
+      logUnsupportedOperation("testIdentifier");
+    }
   }
 
   errno = ENOSYS;
   logMessage(LOG_WARNING, "unsupported generic resource identifier: %s", *identifier);
   return NULL;
+}
+
+const GioPublicProperties *
+gioGetPublicProperties (const char *identifier) {
+  const GioProperties *properties = gioGetProperties(&identifier, NULL);
+  if (properties == NULL) return NULL;
+  return properties->public;
 }
 
 GioEndpoint *

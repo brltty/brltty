@@ -26,6 +26,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+extern const GioPublicProperties *gioGetPublicProperties (const char *identifier);
+
 extern void gioInitializeDescriptor (GioDescriptor *descriptor);
 extern void gioInitializeSerialParameters (SerialParameters *parameters);
 
@@ -116,14 +118,6 @@ extern GioHandleInputObject *gioNewHandleInputObject (
 );
 
 extern void gioDestroyHandleInputObject (GioHandleInputObject *hio);
-
-typedef enum {
-  GIO_RESOURCE_UNTYPED = 0,
-  GIO_RESOURCE_NULL,
-  GIO_RESOURCE_SERIAL,
-  GIO_RESOURCE_USB,
-  GIO_RESOURCE_BLUETOOTH
-} GioResourceType;
 
 extern GioResourceType gioGetResourceType (GioEndpoint *endpoint);
 extern void *gioGetResourceObject (GioEndpoint *endpoint);
