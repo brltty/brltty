@@ -100,22 +100,25 @@ gioGetProperties (
   for (const GioProperties *const *properties = gioProperties;
        *properties; properties+=1) {
     if (descriptor) {
-      GioIsSupportedMethod *method = (*properties)->private->isSupported;
+      GioIsSupportedMethod *isSupported = (*properties)->private->isSupported;
 
-      if (!method) {
+      if (!isSupported) {
         logUnsupportedOperation("isSupported");
         continue;
       }
 
-      if (!method(descriptor)) continue;
+      if (!isSupported(descriptor)) continue;
     }
 
-    if ((*properties)->public->testIdentifier) {
-      if ((*properties)->public->testIdentifier(identifier)) {
-        return *properties;
+    {
+      GioTestIdentifierMethod *testIdentifier = (*properties)->public->testIdentifier;
+
+      if (!testIdentifier) {
+        logUnsupportedOperation("testIdentifier");
+        continue;
       }
-    } else {
-      logUnsupportedOperation("testIdentifier");
+
+      if (testIdentifier(identifier)) return *properties;
     }
   }
 
