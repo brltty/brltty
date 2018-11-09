@@ -73,7 +73,7 @@
 #include "prefs.h"
 #include "charset.h"
 
-#include "io_serial.h"
+#include "io_generic.h"
 #include "io_usb.h"
 #include "io_bluetooth.h"
 
@@ -1523,38 +1523,63 @@ activateBrailleDriver (int verify) {
   if (!oneDevice) verify = 0;
 
   while (*device) {
-    const char *const *autodetectableDrivers;
+    const char *const *autodetectableDrivers = NULL;
 
     brailleDevice = *device;
     logMessage(LOG_DEBUG, "checking braille device: %s", brailleDevice);
 
     {
       const char *dev = brailleDevice;
+      const GioPublicProperties *properties = gioGetPublicProperties(&dev);
 
-      if (isSerialDeviceIdentifier(&dev)) {
-        static const char *const serialDrivers[] = {
-          "md", "pm", "ts", "ht", "bn", "al", "bm", "pg", "sk",
-          NULL
-        };
-        autodetectableDrivers = serialDrivers;
-      } else if (isUsbDeviceIdentifier(&dev)) {
-        static const char *const usbDrivers[] = {
-          "al", "bm", "bn", "eu", "fs", "hd", "hm", "ht", "hw", "ic", "mt", "pg", "pm", "sk", "vo",
-          NULL
-        };
-        autodetectableDrivers = usbDrivers;
-      } else if (isBluetoothDeviceIdentifier(&dev)) {
-        if (!(autodetectableDrivers = bthGetDriverCodes(dev, BLUETOOTH_DEVICE_NAME_OBTAIN_TIMEOUT))) {
-          static const char *bluetoothDrivers[] = {
-            "np", "ht", "al", "bm",
-            NULL
-          };
-          autodetectableDrivers = bluetoothDrivers;
+      if (properties) {
+        logMessage(LOG_DEBUG, "braille device type: %s", properties->type.name);
+
+        switch (properties->type.identifier) {
+          case GIO_TYPE_SERIAL: {
+            static const char *const serialDrivers[] = {
+              "md", "pm", "ts", "ht", "bn", "al", "bm", "pg", "sk",
+              NULL
+            };
+
+            autodetectableDrivers = serialDrivers;
+            break;
+          }
+
+          case GIO_TYPE_USB: {
+            static const char *const usbDrivers[] = {
+              "al", "bm", "bn", "eu", "fs", "hd", "hm", "ht", "hw", "ic", "mt", "pg", "pm", "sk", "vo",
+              NULL
+            };
+
+            autodetectableDrivers = usbDrivers;
+            break;
+          }
+
+          case GIO_TYPE_BLUETOOTH: {
+            if (!(autodetectableDrivers = bthGetDriverCodes(dev, BLUETOOTH_DEVICE_NAME_OBTAIN_TIMEOUT))) {
+              static const char *bluetoothDrivers[] = {
+                "np", "ht", "al", "bm",
+                NULL
+              };
+
+              autodetectableDrivers = bluetoothDrivers;
+            }
+
+            break;
+          }
+
+          default:
+            break;
         }
       } else {
-        static const char *noDrivers[] = {NULL};
-        autodetectableDrivers = noDrivers;
+        logMessage(LOG_DEBUG, "unrecognized braille device type");
       }
+    }
+
+    if (!autodetectableDrivers) {
+      static const char *noDrivers[] = {NULL};
+      autodetectableDrivers = noDrivers;
     }
 
     {

@@ -1521,11 +1521,8 @@ usbChooseChannel (UsbDevice *device, UsbChooseChannelData *data) {
     if (!drivers) return 0;
   }
 
-  for (
-    const UsbChannelDefinition *definition = data->definition;
-    definition->vendor;
-    definition += 1
-  ) {
+  for (const UsbChannelDefinition *definition = data->definition;
+       definition->vendor; definition+=1) {
     if (definition->version && (definition->version != getLittleEndian16(descriptor->bcdUSB))) continue;
     if (!USB_IS_PRODUCT(descriptor, definition->vendor, definition->product)) continue;
 

@@ -93,6 +93,15 @@ testSerialIdentifier (const char **identifier) {
   return isSerialDeviceIdentifier(identifier);
 }
 
+static const GioPublicProperties gioPublicProperties_serial = {
+  .testIdentifier = testSerialIdentifier,
+
+  .type = {
+    .name = "serial",
+    .identifier = GIO_TYPE_SERIAL
+  }
+};
+
 static int
 isSerialSupported (const GioDescriptor *descriptor) {
   return descriptor->serial.parameters != NULL;
@@ -140,15 +149,6 @@ prepareSerialEndpoint (GioEndpoint *endpoint) {
   gioSetBytesPerSecond(endpoint, &endpoint->handle->parameters);
   return 1;
 }
-
-static const GioPublicProperties gioPublicProperties_serial = {
-  .testIdentifier = testSerialIdentifier,
-
-  .type = {
-    .name = "serial",
-    .value = GIO_RESOURCE_SERIAL
-  }
-};
 
 static const GioPrivateProperties gioPrivateProperties_serial = {
   .isSupported = isSerialSupported,

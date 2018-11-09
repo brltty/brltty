@@ -117,7 +117,7 @@ struct GioEndpointStruct {
   GioHandle *handle;
   const GioMethods *methods;
   GioOptions options;
-  GioResourceType resourceType;
+  GioTypeIdentifier resourceType;
   unsigned int bytesPerSecond;
   GioHidReportItemsData hidReportItems;
 

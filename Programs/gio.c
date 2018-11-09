@@ -128,8 +128,8 @@ gioGetProperties (
 }
 
 const GioPublicProperties *
-gioGetPublicProperties (const char *identifier) {
-  const GioProperties *properties = gioGetProperties(&identifier, NULL);
+gioGetPublicProperties (const char **identifier) {
+  const GioProperties *properties = gioGetProperties(identifier, NULL);
   if (properties == NULL) return NULL;
   return properties->public;
 }
@@ -145,7 +145,7 @@ gioConnectResource (
     GioEndpoint *endpoint;
 
     if ((endpoint = malloc(sizeof(*endpoint)))) {
-      endpoint->resourceType = properties->public->type.value;
+      endpoint->resourceType = properties->public->type.identifier;
       endpoint->bytesPerSecond = 0;
 
       endpoint->input.error = 0;
@@ -614,7 +614,7 @@ gioDestroyHandleInputObject (GioHandleInputObject *hio) {
   free(hio);
 }
 
-GioResourceType
+GioTypeIdentifier
 gioGetResourceType (GioEndpoint *endpoint) {
   return endpoint->resourceType;
 }

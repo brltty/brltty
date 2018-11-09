@@ -92,19 +92,19 @@ typedef struct GioEndpointStruct GioEndpoint;
 typedef int GioTestIdentifierMethod (const char **identifier);
 
 typedef enum {
-  GIO_RESOURCE_UNTYPED = 0,
-  GIO_RESOURCE_NULL,
-  GIO_RESOURCE_SERIAL,
-  GIO_RESOURCE_USB,
-  GIO_RESOURCE_BLUETOOTH
-} GioResourceType;
+  GIO_TYPE_UNSPECIFIED = 0,
+  GIO_TYPE_NULL,
+  GIO_TYPE_SERIAL,
+  GIO_TYPE_USB,
+  GIO_TYPE_BLUETOOTH
+} GioTypeIdentifier;
 
 typedef struct {
   GioTestIdentifierMethod *testIdentifier;
 
   struct {
     const char *name;
-    GioResourceType value;
+    GioTypeIdentifier identifier;
   } type;
 } GioPublicProperties;
 

@@ -26,7 +26,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern const GioPublicProperties *gioGetPublicProperties (const char *identifier);
+extern const GioPublicProperties *gioGetPublicProperties (const char **identifier);
 
 extern void gioInitializeDescriptor (GioDescriptor *descriptor);
 extern void gioInitializeSerialParameters (SerialParameters *parameters);
@@ -119,7 +119,7 @@ extern GioHandleInputObject *gioNewHandleInputObject (
 
 extern void gioDestroyHandleInputObject (GioHandleInputObject *hio);
 
-extern GioResourceType gioGetResourceType (GioEndpoint *endpoint);
+extern GioTypeIdentifier gioGetResourceType (GioEndpoint *endpoint);
 extern void *gioGetResourceObject (GioEndpoint *endpoint);
 
 #ifdef __cplusplus

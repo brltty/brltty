@@ -287,6 +287,15 @@ testUsbIdentifier (const char **identifier) {
   return isUsbDeviceIdentifier(identifier);
 }
 
+static const GioPublicProperties gioPublicProperties_usb = {
+  .testIdentifier = testUsbIdentifier,
+
+  .type = {
+    .name = "USB",
+    .identifier = GIO_TYPE_USB
+  }
+};
+
 static int
 isUsbSupported (const GioDescriptor *descriptor) {
   return descriptor->usb.channelDefinitions != NULL;
@@ -365,15 +374,6 @@ prepareUsbEndpoint (GioEndpoint *endpoint) {
 
   return 1;
 }
-
-static const GioPublicProperties gioPublicProperties_usb = {
-  .testIdentifier = testUsbIdentifier,
-
-  .type = {
-    .name = "USB",
-    .value = GIO_RESOURCE_USB
-  }
-};
 
 static const GioPrivateProperties gioPrivateProperties_usb = {
   .isSupported = isUsbSupported,
