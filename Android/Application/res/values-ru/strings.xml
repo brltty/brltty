@@ -225,6 +225,8 @@
   <string name="CONTRACTION_TABLE_LABEL_am">Амхарский (несокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_basis">Немецкий (несокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift">Немецкий (сокращённый - стандарт 1998)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_1998">Немецкий (сокращённый - стандарт 1998)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_2015">Немецкий (сокращённый - стандарт 2015)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">Немецкий (базовые сокращения)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">Английский (унифицированный английский Брайль, ступень 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">Английский (США, ступень 2)</string>

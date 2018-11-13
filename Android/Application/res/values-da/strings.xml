@@ -225,6 +225,8 @@
   <string name="CONTRACTION_TABLE_LABEL_am">Amharic (uforkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_basis">Tysk (uforkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift">Tysk (forkortet - 1998 standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_1998">Tysk (forkortet - 1998 standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_2015">Tysk (forkortet - 2015 standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">Tysk (basis forkortelser)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">Engelsk (Unified English Braille, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">Engelsk (US, grade 2)</string>
