@@ -16,20 +16,9 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# This BRLTTY text subtable is included by all general purpose text tables. Its
-# sole purpose is to be a common place wherein to include text subtables which
-# define braille representations that are generally useful in all contexts.
+# This BRLTTY text subtable aliases all of the characters commonly (mis)used
+# to represent an apostrophe to the ASCII apostrophe.
 
-# space characters
-include spaces.tti
-include dashes.tti
-include apostrophes.tti
+char	\x27	3	# apostrophe
 
-# box drawing characters
-include boxes.tti
-
-# block characters
-include blocks.tti
-
-# deal with text tables that define Windows-1252 (rather than Unicode) characters
-include win-1252.tti
+alias	\u2019	\x27	# right single quotation mark
