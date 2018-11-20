@@ -23,7 +23,7 @@
 # space characters
 include spaces.tti
 include dashes.tti
-include apostrophes.tti
+include alias.tti
 
 # box drawing characters
 include boxes.tti

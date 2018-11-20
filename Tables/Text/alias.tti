@@ -16,9 +16,12 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# This BRLTTY text subtable aliases all of the characters commonly (mis)used
-# to represent an apostrophe to the ASCII apostrophe.
+# This BRLTTY text subtable defines several useful character aliases
 
-char	\x27	3	# apostrophe
-
+# characters commonly (mis)used to represent an apostrophe
 alias	\u2019	\x27	# right single quotation mark
+
+# degree signs
+alias	\u2103	C	# degree Celsius
+alias	\u2109	F	# degree Fahrenheit
+
