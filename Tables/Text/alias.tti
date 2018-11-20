@@ -18,8 +18,47 @@
 
 # This BRLTTY text subtable defines several useful character aliases
 
+# characters that represent a space
+alias	\xA0	\s	# no-break space
+alias	\u2002	\s	# en space
+alias	\u2003	\s	# em space
+alias	\u2004	\s	# three-per-em space
+alias	\u2005	\s	# four-per-em space
+alias	\u2006	\s	# six-per-em space
+alias	\u2007	\s	# figure space
+alias	\u2008	\s	# punctuation space
+alias	\u2009	\s	# thin space
+alias	\u200A	\s	# hair space
+alias	\u202F	\s	# narrow no-break space
+alias	\u205F	\s	# medium mathematical space
+
+# characters that represent a dash
+alias	\u2012	-	# figure dash
+alias	\u2013	-	# en dash
+alias	\u2014	-	# em dash
+alias	\u2448	-	# ocr dash
+alias	\u301C	-	# wave dash
+alias	\u3030	-	# wavy dash
+alias	\uFE58	-	# small em dash
+
+# characters that represent a hyphen
+alias	\xAD	-	# soft hyphen
+alias	\u2010	-	# hyphen
+alias	\u2011	-	# non-breaking hyphen
+
+# characters that represent a minus sign
+alias	\u2052	-	# commercial minus sign
+alias	\u2212	-	# minus sign
+
+# characters that can represent either a hyphen or a minus sign
+alias	\uFE63	-	# small hyphen-minus
+alias	\uFF0D	-	# fullwidth hyphen-minus
+
+# other characters that can look like a dash
+alias	\u2015	-	# horizontal bar
+
 # characters commonly (mis)used to represent an apostrophe
-alias	\u2019	\x27	# right single quotation mark
+alias	\u2019	'	# right single quotation mark
 
 # degree signs
 alias	\u2103	C	# degree Celsius

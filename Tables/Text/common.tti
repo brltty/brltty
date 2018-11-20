@@ -20,16 +20,7 @@
 # sole purpose is to be a common place wherein to include text subtables which
 # define braille representations that are generally useful in all contexts.
 
-# space characters
-include spaces.tti
-include dashes.tti
 include alias.tti
-
-# box drawing characters
 include boxes.tti
-
-# block characters
 include blocks.tti
-
-# deal with text tables that define Windows-1252 (rather than Unicode) characters
 include win-1252.tti
