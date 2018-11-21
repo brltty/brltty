@@ -825,16 +825,16 @@ static DATA_CONDITION_TESTER(testConfigurationDirectiveSet) {
 }
 
 static int
-processConfigurationDirectiveTestOperands (DataFile *file, int isDefined, void *data) {
-  return processConditionOperands(file, testConfigurationDirectiveSet, !isDefined, "configuration directive", data);
+processConfigurationDirectiveTestOperands (DataFile *file, int not, void *data) {
+  return processConditionOperands(file, testConfigurationDirectiveSet, not, "configuration directive", data);
 }
 
 static DATA_OPERANDS_PROCESSOR(processIfSetOperands) {
-  return processConfigurationDirectiveTestOperands(file, 1, data);
+  return processConfigurationDirectiveTestOperands(file,00, data);
 }
 
 static DATA_OPERANDS_PROCESSOR(processIfNotSetOperands) {
-  return processConfigurationDirectiveTestOperands(file, 0, data);
+  return processConfigurationDirectiveTestOperands(file, 1, data);
 }
 
 static DATA_OPERANDS_PROCESSOR(processConfigurationLine) {
@@ -842,8 +842,8 @@ static DATA_OPERANDS_PROCESSOR(processConfigurationLine) {
     DATA_NESTING_DIRECTIVES,
     DATA_VARIABLE_DIRECTIVES,
     DATA_CONDITION_DIRECTIVES,
-    {.name=WS_C("ifset"), .processor=processIfSetOperands},
-    {.name=WS_C("ifnotset"), .processor=processIfNotSetOperands},
+    {.name=WS_C("ifset"), .processor=processIfSetOperands, .unconditional=1},
+    {.name=WS_C("ifnotset"), .processor=processIfNotSetOperands, .unconditional=1},
     {.name=NULL, .processor=processConfigurationOperands},
   END_DATA_DIRECTIVE_TABLE
 

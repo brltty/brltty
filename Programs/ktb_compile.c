@@ -1203,16 +1203,16 @@ static DATA_CONDITION_TESTER(testKeyDefined) {
 }
 
 static int
-processKeyTestOperands (DataFile *file, int isDefined, void *data) {
-  return processConditionOperands(file, testKeyDefined, !isDefined, "key name", data);
+processKeyTestOperands (DataFile *file, int not, void *data) {
+  return processConditionOperands(file, testKeyDefined, not, "key name", data);
 }
 
 static DATA_OPERANDS_PROCESSOR(processIfKeyOperands) {
-  return processKeyTestOperands(file, 1, data);
+  return processKeyTestOperands(file, 0, data);
 }
 
 static DATA_OPERANDS_PROCESSOR(processIfNotKeyOperands) {
-  return processKeyTestOperands(file, 0, data);
+  return processKeyTestOperands(file, 1, data);
 }
 
 static DATA_CONDITION_TESTER(testPlatformName) {
@@ -1280,16 +1280,16 @@ static DATA_CONDITION_TESTER(testPlatformName) {
 }
 
 static int
-processPlatformTestOperands (DataFile *file, int isDefined, void *data) {
-  return processConditionOperands(file, testPlatformName, !isDefined, "platform name", data);
+processPlatformTestOperands (DataFile *file, int not, void *data) {
+  return processConditionOperands(file, testPlatformName, not, "platform name", data);
 }
 
 static DATA_OPERANDS_PROCESSOR(processIfPlatformOperands) {
-  return processPlatformTestOperands(file, 1, data);
+  return processPlatformTestOperands(file, 0, data);
 }
 
 static DATA_OPERANDS_PROCESSOR(processIfNotPlatformOperands) {
-  return processPlatformTestOperands(file, 0, data);
+  return processPlatformTestOperands(file, 1, data);
 }
 
 static DATA_OPERANDS_PROCESSOR(processIncludeWrapper) {

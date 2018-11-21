@@ -1000,16 +1000,16 @@ static DATA_CONDITION_TESTER(testVariableDefined) {
 }
 
 static int
-processVariableTestOperands (DataFile *file, int isDefined, void *data) {
-  return processConditionOperands(file, testVariableDefined, !isDefined, "variable name", data);
+processVariableTestOperands (DataFile *file, int not, void *data) {
+  return processConditionOperands(file, testVariableDefined, not, "variable name", data);
 }
 
 DATA_OPERANDS_PROCESSOR(processIfVarOperands) {
-  return processVariableTestOperands(file, 1, data);
+  return processVariableTestOperands(file, 0, data);
 }
 
 DATA_OPERANDS_PROCESSOR(processIfNotVarOperands) {
-  return processVariableTestOperands(file, 0, data);
+  return processVariableTestOperands(file, 1, data);
 }
 
 DATA_OPERANDS_PROCESSOR(processBeginVariablesOperands) {
