@@ -41,6 +41,15 @@ The precedence for resolving each key press/release event is as follows:
 Directives
 ==========
 
+.. |key operand| replace::
+   The name of the key whose availability is to be tested.
+
+.. |platform operand| replace::
+   The name of a host platform.
+   The following platform names are recognized:
+   android, apple, cygwin, dos, grub, linux,
+   mingw32, mingw64, openbsd, sun, windows.
+
 The Bind Directive
 ------------------
 
@@ -297,7 +306,7 @@ Use this directive to only process one or more directives if the device has a
 particular key.
 
 *key*
-   The name of the key whose availability is to be tested.
+   |key operand|
 
 *directive*
    |directive operand|
@@ -315,7 +324,7 @@ Use this directive to only process one or more directives if the device doesn't
 have a particular key.
 
 *key*
-   The name of the key whose availability is to be tested.
+   |key operand|
 
 *directive*
    |directive operand|
@@ -323,6 +332,42 @@ have a particular key.
 Examples::
 
    ifNotKey Key2 bind Key1 HOME
+
+The IfPlatform Directive
+------------------------
+
+.. parsed-literal:: ifPlatform *platform* *directive*
+
+Use this directive to only process one or more directives if running on the
+named host platform.
+
+*platform*
+   |platform operand|
+
+*directive*
+   |directive operand|
+
+Examples::
+
+   ifPlatform android include android.kti
+
+The IfNotPlatform Directive
+---------------------------
+
+.. parsed-literal:: ifNotPlatform *platform* *directive*
+
+Use this directive to only process one or more directives if not running on
+the named host platform.
+
+*platform*
+   |platform operand|
+
+*directive*
+   |directive operand|
+
+Examples::
+
+   ifNotPlatform grub include advanced.kti
 
 The Ignore Directive
 --------------------
