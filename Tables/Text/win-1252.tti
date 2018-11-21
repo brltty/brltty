@@ -53,38 +53,33 @@
 # Alias each relevant Unicode character to its corresponding Windows-1252
 # value so that its braille representation will be found.
 
-alias	\u20AC	\x80	# € [EURO SIGN]
-#alias	\u0081	\x81	# ? (not defined)
-alias	\u201A	\x82	# ‚ [SINGLE LOW-9 QUOTATION MARK]
-alias	\u0192	\x83	# ƒ [LATIN SMALL LETTER F WITH HOOK]
-alias	\u201E	\x84	# „ [DOUBLE LOW-9 QUOTATION MARK]
-alias	\u2026	\x85	# … [HORIZONTAL ELLIPSIS]
-alias	\u2020	\x86	# † [DAGGER]
-alias	\u2021	\x87	# ‡ [DOUBLE DAGGER]
-alias	\u02C6	\x88	# ˆ [MODIFIER LETTER CIRCUMFLEX ACCENT]
-alias	\u2030	\x89	# ‰ [PER MILLE SIGN]
-alias	\u0160	\x8A	# Š [LATIN CAPITAL LETTER S WITH CARON]
-alias	\u2039	\x8B	# ‹ [SINGLE LEFT-POINTING ANGLE QUOTATION MARK]
-alias	\u0152	\x8C	# Œ [LATIN CAPITAL LIGATURE OE]
-#alias	\u008D	\x8D	# ? (not defined)
-alias	\u017D	\x8E	# Ž [LATIN CAPITAL LETTER Z WITH CARON]
-#alias	\u008F	\x8F	# ? (not defined)
-#alias	\u0090	\x90	# ? (not defined)
-alias	\u2018	\x91	# ‘ [LEFT SINGLE QUOTATION MARK]
-alias	\u2019	\x92	# ’ [RIGHT SINGLE QUOTATION MARK]
-alias	\u201C	\x93	# “ [LEFT DOUBLE QUOTATION MARK]
-alias	\u201D	\x94	# ” [RIGHT DOUBLE QUOTATION MARK]
-alias	\u2022	\x95	# • [BULLET]
-alias	\u2013	\x96	# – [EN DASH]
-alias	\u2014	\x97	# — [EM DASH]
-alias	\u02DC	\x98	# ˜ [SMALL TILDE]
-alias	\u2122	\x99	# ™ [TRADE MARK SIGN]
-alias	\u0161	\x9A	# š [LATIN SMALL LETTER S WITH CARON]
-alias	\u203A	\x9B	# › [SINGLE RIGHT-POINTING ANGLE QUOTATION MARK]
-alias	\u0153	\x9C	# œ [LATIN SMALL LIGATURE OE]
-#alias	\u009D	\x9D	# ? (not defined)
-alias	\u017E	\x9E	# ž [LATIN SMALL LETTER Z WITH CARON]
-alias	\u0178	\x9F	# Ÿ [LATIN CAPITAL LETTER Y WITH DIAERESIS]
+ifGlyph	\x80	alias	\u20AC	\x80	# € [EURO SIGN]
+ifGlyph	\x82	alias	\u201A	\x82	# ‚ [SINGLE LOW-9 QUOTATION MARK]
+ifGlyph	\x83	alias	\u0192	\x83	# ƒ [LATIN SMALL LETTER F WITH HOOK]
+ifGlyph	\x84	alias	\u201E	\x84	# „ [DOUBLE LOW-9 QUOTATION MARK]
+ifGlyph	\x85	alias	\u2026	\x85	# … [HORIZONTAL ELLIPSIS]
+ifGlyph	\x86	alias	\u2020	\x86	# † [DAGGER]
+ifGlyph	\x87	alias	\u2021	\x87	# ‡ [DOUBLE DAGGER]
+ifGlyph	\x88	alias	\u02C6	\x88	# ˆ [MODIFIER LETTER CIRCUMFLEX ACCENT]
+ifGlyph	\x89	alias	\u2030	\x89	# ‰ [PER MILLE SIGN]
+ifGlyph	\x8A	alias	\u0160	\x8A	# Š [LATIN CAPITAL LETTER S WITH CARON]
+ifGlyph	\x8B	alias	\u2039	\x8B	# ‹ [SINGLE LEFT-POINTING ANGLE QUOTATION MARK]
+ifGlyph	\x8C	alias	\u0152	\x8C	# Œ [LATIN CAPITAL LIGATURE OE]
+ifGlyph	\x8E	alias	\u017D	\x8E	# Ž [LATIN CAPITAL LETTER Z WITH CARON]
+ifGlyph	\x91	alias	\u2018	\x91	# ‘ [LEFT SINGLE QUOTATION MARK]
+ifGlyph	\x92	alias	\u2019	\x92	# ’ [RIGHT SINGLE QUOTATION MARK]
+ifGlyph	\x93	alias	\u201C	\x93	# “ [LEFT DOUBLE QUOTATION MARK]
+ifGlyph	\x94	alias	\u201D	\x94	# ” [RIGHT DOUBLE QUOTATION MARK]
+ifGlyph	\x95	alias	\u2022	\x95	# • [BULLET]
+ifGlyph	\x96	alias	\u2013	\x96	# – [EN DASH]
+ifGlyph	\x97	alias	\u2014	\x97	# — [EM DASH]
+ifGlyph	\x98	alias	\u02DC	\x98	# ˜ [SMALL TILDE]
+ifGlyph	\x99	alias	\u2122	\x99	# ™ [TRADE MARK SIGN]
+ifGlyph	\x9A	alias	\u0161	\x9A	# š [LATIN SMALL LETTER S WITH CARON]
+ifGlyph	\x9B	alias	\u203A	\x9B	# › [SINGLE RIGHT-POINTING ANGLE QUOTATION MARK]
+ifGlyph	\x9C	alias	\u0153	\x9C	# œ [LATIN SMALL LIGATURE OE]
+ifGlyph	\x9E	alias	\u017E	\x9E	# ž [LATIN SMALL LETTER Z WITH CARON]
+ifGlyph	\x9F	alias	\u0178	\x9F	# Ÿ [LATIN CAPITAL LETTER Y WITH DIAERESIS]
 
 
 #################################################
@@ -95,7 +90,6 @@ alias	\u0178	\x9F	# Ÿ [LATIN CAPITAL LETTER Y WITH DIAERESIS]
 # that their braille representations can be found.
 
 alias	\x80	\u20AC	# € [EURO SIGN]
-#alias	\x81	\u0081	# ? (not defined)
 alias	\x82	\u201A	# ‚ [SINGLE LOW-9 QUOTATION MARK]
 alias	\x83	\u0192	# ƒ [LATIN SMALL LETTER F WITH HOOK]
 alias	\x84	\u201E	# „ [DOUBLE LOW-9 QUOTATION MARK]
@@ -107,10 +101,7 @@ alias	\x89	\u2030	# ‰ [PER MILLE SIGN]
 alias	\x8A	\u0160	# Š [LATIN CAPITAL LETTER S WITH CARON]
 alias	\x8B	\u2039	# ‹ [SINGLE LEFT-POINTING ANGLE QUOTATION MARK]
 alias	\x8C	\u0152	# Œ [LATIN CAPITAL LIGATURE OE]
-#alias	\x8D	\u008D	# ? (not defined)
 alias	\x8E	\u017D	# Ž [LATIN CAPITAL LETTER Z WITH CARON]
-#alias	\x8F	\u008F	# ? (not defined)
-#alias	\x90	\u0090	# ? (not defined)
 alias	\x91	\u2018	# ‘ [LEFT SINGLE QUOTATION MARK]
 alias	\x92	\u2019	# ’ [RIGHT SINGLE QUOTATION MARK]
 alias	\x93	\u201C	# “ [LEFT DOUBLE QUOTATION MARK]
@@ -123,7 +114,6 @@ alias	\x99	\u2122	# ™ [TRADE MARK SIGN]
 alias	\x9A	\u0161	# š [LATIN SMALL LETTER S WITH CARON]
 alias	\x9B	\u203A	# › [SINGLE RIGHT-POINTING ANGLE QUOTATION MARK]
 alias	\x9C	\u0153	# œ [LATIN SMALL LIGATURE OE]
-#alias	\x9D	\u009D	# ? (not defined)
 alias	\x9E	\u017E	# ž [LATIN SMALL LETTER Z WITH CARON]
 alias	\x9F	\u0178	# Ÿ [LATIN CAPITAL LETTER Y WITH DIAERESIS]
 
