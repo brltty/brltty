@@ -71,14 +71,18 @@ Directives
    The character being defined.
    See `The String Operand`_ for details.
 
-.. |dots operand| replace::
-   The braille representation for the character being defined.
-   See `The Dots Operand`_ for details.
-
 .. |byte operand| replace::
    The character being defined.
    It may be specified in any of the ways supported by `The String Operand`_
    except that the Unicode-specific forms (``\u``, ``\U``, ``\<``) may not be used.
+
+.. |dots operand| replace::
+   The braille representation for the character being defined.
+   See `The Dots Operand`_ for details.
+
+.. |cell operand| replace::
+   The braille representation for the character being tested.
+   See `The Cell Operand`_ for details.
 
 The Char Directive
 ------------------
@@ -189,6 +193,34 @@ Examples::
 
    ifNotGlyph \s glyph \s 0
 
+The IfCell Directive
+---------------------
+
+.. parsed-literal:: ifCell *cell* *directive*
+
+Use this directive to only process one or more directives if a character can be
+entered from a braille keyboard.
+
+*cell*
+   |cell operand|
+
+*directive*
+   |directive operand|
+
+The IfNotCell Directive
+------------------------
+
+.. parsed-literal:: ifNotCell *cell* *directive*
+
+Use this directive to only process one or more directives if a character can't
+be entered from a braille keyboard.
+
+*cell*
+   |cell operand|
+
+*directive*
+   |directive operand|
+
 .. include:: nesting-directives.rst
 .. include:: variable-directives.rst
 .. include:: condition-directives.rst
@@ -208,6 +240,15 @@ as defined by the standard braille dot numbering convention (see
 |README.BrailleDots| for details). The special dot number ``0`` is recognized
 when not enclosed within (parentheses), and means no dots - it may not be used
 in conjunction with any other dot number.
+
+The Cell Operand
+----------------
+
+A *cell* operand is a sequence of one to eight dot numbers. A dot number is
+a digit within the range ``1``-``8`` as defined by the standard braille dot
+numbering convention (see |README.BrailleDots| for details). The special dot
+number ``0`` is recognized, and means no dots - it may not be used in
+conjunction with any other dot number.
 
 Text Table List
 ===============

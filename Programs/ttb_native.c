@@ -234,7 +234,7 @@ static DATA_OPERANDS_PROCESSOR(processIfNotGlyphOperands) {
 
 static const char cellDescription[] = "braille cell";
 
-static DATA_CONDITION_TESTER(testDotsDefined) {
+static DATA_CONDITION_TESTER(testCellDefined) {
   TextTableData *ttd = data;
 
   ByteOperand cells;
@@ -252,16 +252,16 @@ static DATA_CONDITION_TESTER(testDotsDefined) {
 }
 
 static int
-processDotsTestOperands (DataFile *file, int not, void *data) {
-  return processConditionOperands(file, testDotsDefined, not, cellDescription, data);
+processCellTestOperands (DataFile *file, int not, void *data) {
+  return processConditionOperands(file, testCellDefined, not, cellDescription, data);
 }
 
-static DATA_OPERANDS_PROCESSOR(processIfDotsOperands) {
-  return processDotsTestOperands(file, 0, data);
+static DATA_OPERANDS_PROCESSOR(processIfCellOperands) {
+  return processCellTestOperands(file, 0, data);
 }
 
-static DATA_OPERANDS_PROCESSOR(processIfNotDotsOperands) {
-  return processDotsTestOperands(file, 1, data);
+static DATA_OPERANDS_PROCESSOR(processIfNotCellOperands) {
+  return processCellTestOperands(file, 1, data);
 }
 
 static DATA_OPERANDS_PROCESSOR(processNativeTextTableOperands) {
@@ -273,10 +273,10 @@ static DATA_OPERANDS_PROCESSOR(processNativeTextTableOperands) {
     {.name=WS_C("byte"), .processor=processByteOperands},
     {.name=WS_C("char"), .processor=processCharOperands},
     {.name=WS_C("glyph"), .processor=processGlyphOperands},
-    {.name=WS_C("ifglyph"), .processor=processIfGlyphOperands},
-    {.name=WS_C("ifnotglyph"), .processor=processIfNotGlyphOperands},
-    {.name=WS_C("ifdots"), .processor=processIfDotsOperands},
-    {.name=WS_C("ifnotdots"), .processor=processIfNotDotsOperands},
+    {.name=WS_C("ifglyph"), .processor=processIfGlyphOperands, .unconditional=1},
+    {.name=WS_C("ifnotglyph"), .processor=processIfNotGlyphOperands, .unconditional=1},
+    {.name=WS_C("ifcell"), .processor=processIfCellOperands, .unconditional=1},
+    {.name=WS_C("ifnotcell"), .processor=processIfNotCellOperands, .unconditional=1},
   END_DATA_DIRECTIVE_TABLE
 
   return processDirectiveOperand(file, &directives, "text table directive", data);

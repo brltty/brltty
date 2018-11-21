@@ -18,8 +18,16 @@
 
 # This BRLTTY text subtable defines several useful character aliases
 
+# ensure that space is defined
+ifNotGlyph \s
+  ifCell 0
+    glyph \s 0
+  else
+    char \s 0
+  endIf
+endIf
+
 # characters that represent a space
-ifNotGlyph \s glyph \s 0
 alias	\xA0	\s	# no-break space
 alias	\u2002	\s	# en space
 alias	\u2003	\s	# em space
