@@ -19,6 +19,7 @@
 # This BRLTTY text subtable defines several useful character aliases
 
 # characters that represent a space
+ifNotGlyph \s glyph \s 0
 alias	\xA0	\s	# no-break space
 alias	\u2002	\s	# en space
 alias	\u2003	\s	# em space
@@ -32,35 +33,39 @@ alias	\u200A	\s	# hair space
 alias	\u202F	\s	# narrow no-break space
 alias	\u205F	\s	# medium mathematical space
 
-# characters that represent a dash
-alias	\u2012	-	# figure dash
-alias	\u2013	-	# en dash
-alias	\u2014	-	# em dash
-alias	\u2448	-	# ocr dash
-alias	\u301C	-	# wave dash
-alias	\u3030	-	# wavy dash
-alias	\uFE58	-	# small em dash
+ifGlyph '
+  # characters that represent a dash
+  alias	\u2012	-	# figure dash
+  alias	\u2013	-	# en dash
+  alias	\u2014	-	# em dash
+  alias	\u2448	-	# ocr dash
+  alias	\u301C	-	# wave dash
+  alias	\u3030	-	# wavy dash
+  alias	\uFE58	-	# small em dash
 
-# characters that represent a hyphen
-alias	\xAD	-	# soft hyphen
-alias	\u2010	-	# hyphen
-alias	\u2011	-	# non-breaking hyphen
+  # characters that represent a hyphen
+  alias	\xAD	-	# soft hyphen
+  alias	\u2010	-	# hyphen
+  alias	\u2011	-	# non-breaking hyphen
 
-# characters that represent a minus sign
-alias	\u2052	-	# commercial minus sign
-alias	\u2212	-	# minus sign
+  # characters that represent a minus sign
+  alias	\u2052	-	# commercial minus sign
+  alias	\u2212	-	# minus sign
 
-# characters that can represent either a hyphen or a minus sign
-alias	\uFE63	-	# small hyphen-minus
-alias	\uFF0D	-	# fullwidth hyphen-minus
+  # characters that can represent either a hyphen or a minus sign
+  alias	\uFE63	-	# small hyphen-minus
+  alias	\uFF0D	-	# fullwidth hyphen-minus
 
-# other characters that can look like a dash
-alias	\u2015	-	# horizontal bar
+  # other characters that can look like a dash
+  alias	\u2015	-	# horizontal bar
+endIf
 
-# characters commonly (mis)used to represent an apostrophe
-alias	\u2019	'	# right single quotation mark
+ifGlyph '
+  # characters commonly (mis)used to represent an apostrophe
+  alias	\u2019	'	# right single quotation mark
+endIf
 
 # degree signs
-alias	\u2103	C	# degree Celsius
-alias	\u2109	F	# degree Fahrenheit
+ifGlyph	C	alias	\u2103	C	# degree Celsius
+ifGlyph	F	alias	\u2109	F	# degree Fahrenheit
 
