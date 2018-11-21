@@ -41,7 +41,7 @@ alias	\u200A	\s	# hair space
 alias	\u202F	\s	# narrow no-break space
 alias	\u205F	\s	# medium mathematical space
 
-ifGlyph '
+ifGlyph -
   # characters that represent a dash
   alias	\u2012	-	# figure dash
   alias	\u2013	-	# en dash
