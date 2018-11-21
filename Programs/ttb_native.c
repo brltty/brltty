@@ -41,25 +41,38 @@ getByteOperand (DataFile *file, unsigned char *byte) {
   return 0;
 }
 
+static const char characterDescription[] = "Unicode character";
+
+static int
+isCharacterOperand (
+  DataFile *file, wchar_t *character,
+  const wchar_t *characters, int length
+) {
+  if (length == 1) {
+    wchar_t wc = characters[0];
+
+    if (!(wc & ~UNICODE_CHARACTER_MASK)) {
+      *character = wc;
+      return 1;
+    } else {
+      reportDataError(file, "%s out of range: %.*" PRIws,
+                      characterDescription, length, characters);
+    }
+  } else {
+    reportDataError(file, "not a single %s: %.*" PRIws,
+                    characterDescription, length, characters);
+  }
+
+  return 0;
+}
+
 static int
 getCharacterOperand (DataFile *file, wchar_t *character) {
   DataString string;
-  const char *description = "Unicode character";
 
-  if (getDataString(file, &string, 0, description)) {
-    if (string.length == 1) {
-      wchar_t wc = string.characters[0];
-
-      if (!(wc & ~UNICODE_CHARACTER_MASK)) {
-        *character = wc;
-        return 1;
-      } else {
-        reportDataError(file, "%s out of range: %.*" PRIws,
-                        description, string.length, string.characters);
-      }
-    } else {
-      reportDataError(file, "not a single %s: %.*" PRIws,
-                      description, string.length, string.characters);
+  if (getDataString(file, &string, 0, characterDescription)) {
+    if (isCharacterOperand(file, character, string.characters, string.length)) {
+      return 1;
     }
   }
 
@@ -193,6 +206,64 @@ static DATA_OPERANDS_PROCESSOR(processGlyphOperands) {
   return 1;
 }
 
+static DATA_CONDITION_TESTER(testGlyphDefined) {
+  TextTableData *ttd = data;
+
+  wchar_t character;
+  if (!isCharacterOperand(file, &character, identifier->characters, identifier->length)) return 0;
+
+  UnicodeRowEntry *row = getUnicodeRowEntry(ttd, character, 0);
+  if (!row) return 0;
+
+  unsigned int cellNumber = UNICODE_CELL_NUMBER(character);
+  return !!BITMASK_TEST(row->cellDefined, cellNumber);
+}
+
+static int
+processGlyphTestOperands (DataFile *file, int not, void *data) {
+  return processConditionOperands(file, testGlyphDefined, not, characterDescription, data);
+}
+
+static DATA_OPERANDS_PROCESSOR(processIfGlyphOperands) {
+  return processGlyphTestOperands(file, 0, data);
+}
+
+static DATA_OPERANDS_PROCESSOR(processIfNotGlyphOperands) {
+  return processGlyphTestOperands(file, 1, data);
+}
+
+static const char cellDescription[] = "braille cell";
+
+static DATA_CONDITION_TESTER(testDotsDefined) {
+  TextTableData *ttd = data;
+
+  ByteOperand cells;
+  if (!parseCellsOperand(file, &cells, identifier->characters, identifier->length)) return 0;
+
+  if (cells.length != 1) {
+    reportDataError(file, "not a single %s: %.*" PRIws,
+                    cellDescription, identifier->length, identifier->characters);
+
+    return 0;
+  }
+
+  const TextTableHeader *header = getTextTableHeader(ttd);
+  return !!BITMASK_TEST(header->dotsCharacterDefined, cells.bytes[0]);
+}
+
+static int
+processDotsTestOperands (DataFile *file, int not, void *data) {
+  return processConditionOperands(file, testDotsDefined, not, cellDescription, data);
+}
+
+static DATA_OPERANDS_PROCESSOR(processIfDotsOperands) {
+  return processDotsTestOperands(file, 0, data);
+}
+
+static DATA_OPERANDS_PROCESSOR(processIfNotDotsOperands) {
+  return processDotsTestOperands(file, 1, data);
+}
+
 static DATA_OPERANDS_PROCESSOR(processNativeTextTableOperands) {
   BEGIN_DATA_DIRECTIVE_TABLE
     DATA_NESTING_DIRECTIVES,
@@ -202,6 +273,10 @@ static DATA_OPERANDS_PROCESSOR(processNativeTextTableOperands) {
     {.name=WS_C("byte"), .processor=processByteOperands},
     {.name=WS_C("char"), .processor=processCharOperands},
     {.name=WS_C("glyph"), .processor=processGlyphOperands},
+    {.name=WS_C("ifglyph"), .processor=processIfGlyphOperands},
+    {.name=WS_C("ifnotglyph"), .processor=processIfNotGlyphOperands},
+    {.name=WS_C("ifdots"), .processor=processIfDotsOperands},
+    {.name=WS_C("ifnotdots"), .processor=processIfNotDotsOperands},
   END_DATA_DIRECTIVE_TABLE
 
   return processDirectiveOperand(file, &directives, "text table directive", data);

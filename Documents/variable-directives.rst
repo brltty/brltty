@@ -62,10 +62,7 @@ Use this directive to only process one or more directives if a variable exists.
    The name of the variable whose existence is to be tested.
 
 *directive*
-   The directive that is to be conditionally processed. It may contain spaces.
-   This operand is optional. If it isn't supplied then this directive applies
-   to all subsequent lines until `The EndIf Directive`_ or
-   `The Else Directive`_ that is at the same conditional nesting level.
+   |directive operand|
 
 Examples::
 
@@ -83,10 +80,7 @@ exist.
    The name of the variable whose existence is to be tested.
 
 *directive*
-   The directive that is to be conditionally processed. It may contain spaces.
-   This operand is optional. If it isn't supplied then this directive applies
-   to all subsequent lines until `The EndIf Directive`_ or
-   `The Else Directive`_ that is at the same conditional nesting level.
+   |directive operand|
 
 Examples::
 

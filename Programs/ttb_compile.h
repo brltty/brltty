@@ -49,6 +49,8 @@ extern void unsetTextTableCharacter (TextTableData *ttd, wchar_t character);
 extern int setTextTableByte (TextTableData *ttd, unsigned char byte, unsigned char dots);
 extern int addTextTableAlias (TextTableData *ttd, wchar_t from, wchar_t to);
 
+extern UnicodeRowEntry *getUnicodeRowEntry (TextTableData *ttd, wchar_t character, int allocate);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

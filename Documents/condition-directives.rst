@@ -1,3 +1,11 @@
+.. |directive operand| replace::
+   The directive that is to be conditionally processed.
+   It may contain spaces.
+   This operand is optional.
+   If it isn't supplied then this directive applies to all subsequent lines
+   until `The EndIf Directive`_ or `The Else Directive`_
+   that is at the same conditional nesting level.
+
 The EndIf Directive
 -------------------
 

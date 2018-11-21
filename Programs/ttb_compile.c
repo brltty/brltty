@@ -117,7 +117,7 @@ getUnicodeRowOffset (TextTableData *ttd, wchar_t character, int allocate) {
   }
 }
 
-static UnicodeRowEntry *
+UnicodeRowEntry *
 getUnicodeRowEntry (TextTableData *ttd, wchar_t character, int allocate) {
   DataOffset rowOffset = getUnicodeRowOffset(ttd, character, allocate);
   if (!rowOffset) return NULL;
