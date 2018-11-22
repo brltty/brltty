@@ -743,6 +743,8 @@ always		source		=
 sufword		south		=
 always		sowjet		=
 always		soziolo		=
+midword ungsopt 136-234-135-1234-2345 Abendgestaltungsoption shouldn't use the so-contraction
+
 word über 1256
 word ueber 1256
 always über 2-1256

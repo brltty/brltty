@@ -435,6 +435,7 @@ midendword ung 136
 always dschungel 6-145-156-256-1245-13456 shouldn't use the ung-contraction
 midendword terung 2345-12456-136
 before cst midword ungs 136-234 Bindungscharakter, Regierungschef
+
 endword wärts 2456
 
 midendword ation 5-1345
@@ -741,6 +742,8 @@ always		source		=
 sufword		south		=
 always		sowjet		=
 always		soziolo		=
+midword ungsopt 136-234-135-1234-2345 Abendgestaltungsoption shouldn't use the so-contraction
+
 word über 1256
 word ueber 1256
 always über 2-1256
@@ -870,11 +873,13 @@ always arbeit 356-12
 before s always arbeits 356-12-234
 always arben 356-12-14
 always kauf 13-16-124
-always aussprech 16-234-2-2346
+always ausst 16-234-23456 shouldn't use the ss-contraction
 always ausstell 16-234-2-13456
-#always australi 16-23456-1235-25-24 shouldn't use the aus-contraction
-#always austria 16-23456-1235-24-1 shouldn't use the aus-contraction
-#begword äuß 5-34 FIXME: how to deal with äußerst?
+always ausstand 16-234-2-23456
+always ausständ 16-234-5-23456
+
+always australi 16-23456-1235-25-24 australier shouldn't use the ie-contraction
+always lotaustralin 123-135-2345-16-23456-1235-25-35
 
 always ähnlich 345-456
 always aehnlich 345-456
