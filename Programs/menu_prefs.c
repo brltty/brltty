@@ -791,6 +791,30 @@ makePreferencesMenu (void) {
   }
 
   {
+    SUBMENU(typingSubmenu, rootMenu, strtext("Braille Typing"));
+
+    {
+      NAME(strtext("Keyboard Enabled"));
+      ITEM(newBooleanMenuItem(typingSubmenu, &prefs.brailleKeyboardEnabled, &itemName));
+    }
+
+    {
+      static const MenuString strings[] = {
+        {.label=strtext("Translated via Text Table")},
+        {.label=strtext("Dots via Unicode Braille")}
+      };
+
+      NAME(strtext("Input Mode"));
+      ITEM(newEnumeratedMenuItem(typingSubmenu, &prefs.brailleInputMode, &itemName, strings));
+    }
+
+    {
+      NAME(strtext("Quick Space"));
+      ITEM(newBooleanMenuItem(typingSubmenu, &prefs.brailleQuickSpace, &itemName));
+    }
+  }
+
+  {
     SUBMENU(inputSubmenu, rootMenu, strtext("Input Options"));
 
     {
@@ -851,26 +875,6 @@ makePreferencesMenu (void) {
       ITEM(newEnumeratedMenuItem(inputSubmenu, &prefs.touchSensitivity, &itemName, strings));
       TEST(TouchSensitivity);
       CHANGED(TouchSensitivity);
-    }
-
-    {
-      NAME(strtext("Braille Keyboard Enabled"));
-      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.brailleKeyboardEnabled, &itemName));
-    }
-
-    {
-      static const MenuString strings[] = {
-        {.label=strtext("Translated via Text Table")},
-        {.label=strtext("Dots via Unicode Braille")}
-      };
-
-      NAME(strtext("Braille Input Mode"));
-      ITEM(newEnumeratedMenuItem(inputSubmenu, &prefs.brailleInputMode, &itemName, strings));
-    }
-
-    {
-      NAME(strtext("Quick Braille Space"));
-      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.brailleQuickSpace, &itemName));
     }
 
     {
