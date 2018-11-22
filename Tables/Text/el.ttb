@@ -25,9 +25,6 @@
 include greek.tti
 include ltr-latin.tti
 
-glyph	\t	(        )	# 09 [CHARACTER TABULATION]
-glyph	\r	(        )	# 0D [CARRIAGE RETURN (CR)]
-
 char	\x2D	(  3  6  )	# ⠤ - [HYPHEN-MINUS]
 
 char	\x27	(  3     )	# ⠄ ' [APOSTROPHE]
