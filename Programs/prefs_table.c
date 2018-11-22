@@ -366,6 +366,11 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.brailleInputMode
   },
 
+  { .name = "braille-quick-space",
+    .defaultValue = DEFAULT_BRAILLE_QUICK_SPACE,
+    .setting = &prefs.brailleQuickSpace
+  },
+
   { .name = "braille-display-orientation",
     .defaultValue = DEFAULT_BRAILLE_DISPLAY_ORIENTATION,
     .settingNames = &preferenceStringTable_displayOrientation,

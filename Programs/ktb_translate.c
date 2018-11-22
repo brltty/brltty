@@ -33,7 +33,6 @@
 #include "cmd_enqueue.h"
 #include "async_alarm.h"
 
-#define RETAIN_CHORD_KEY 0
 #define ON_FIRST_RELEASE 1
 
 #define BRL_CMD_ALERT(alert) BRL_CMD_ARG(ALERT, ALERT_##alert)
@@ -493,7 +492,7 @@ processKeyEvent (
       const KeyBinding *binding = findKeyBinding(table, context, &keyValue, &isIncomplete);
       int inserted = insertPressedKey(table, &keyValue, keyPosition);
 
-      if (RETAIN_CHORD_KEY && ((command = makeKeyboardCommand(table, context, 1)) != EOF)) {
+      if (prefs.brailleQuickSpace && ((command = makeKeyboardCommand(table, context, 1)) != EOF)) {
         binding = NULL;
         isImmediate = 0;
       } else if (binding) {

@@ -293,6 +293,7 @@ handleInputCommands (int command, void *data) {
 
         case BRL_CMD_BLK(PASSDOTS): {
           wchar_t character;
+          int space = command & BRL_DOTC;
 
           switch (prefs.brailleInputMode) {
             case BRL_INPUT_TEXT:
@@ -309,7 +310,13 @@ handleInputCommands (int command, void *data) {
           }
 
           applyModifierFlags(icd, &flags);
-          if (!insertKey(character, flags)) alert(ALERT_COMMAND_REJECTED);
+
+          if (!insertKey(character, flags)) {
+            alert(ALERT_COMMAND_REJECTED);
+          } else if (space) {
+            if (!insertKey(WC_C(' '), flags)) alert(ALERT_COMMAND_REJECTED);
+          }
+
           break;
         }
 

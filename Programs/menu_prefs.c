@@ -869,6 +869,11 @@ makePreferencesMenu (void) {
     }
 
     {
+      NAME(strtext("Quick Braille Space"));
+      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.brailleQuickSpace, &itemName));
+    }
+
+    {
       static const MenuString strings[] = {
         {.label=strtext("Normal")},
         {.label=strtext("Rotated")}

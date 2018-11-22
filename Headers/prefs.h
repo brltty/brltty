@@ -173,14 +173,17 @@ typedef struct {
   /* No fields above this point should be added, removed, or reordered so that */
   /* backward compatibility with old binary preference files will be retained. */
   /*                                                                           */
-  /* Fields below this point may be modified as needed.                        */
+  /* Fields below this point may be modified as desired.                       */
   /*****************************************************************************/
 
   unsigned char brailleKeyboardEnabled;
   unsigned char brailleInputMode;
+  unsigned char brailleQuickSpace;
   unsigned char brailleDisplayOrientation;
 
+  unsigned char wordWrap;
   unsigned char capitalizationMode;
+
   unsigned char speechUppercaseIndicator;
   unsigned char speechWhitespaceIndicator;
 
@@ -211,7 +214,6 @@ typedef struct {
   unsigned char autoreleaseTime;
   unsigned char touchNavigation;
 
-  unsigned char wordWrap;
   unsigned char cursorTrackingDelay;
   unsigned char trackScreenScroll;
 
