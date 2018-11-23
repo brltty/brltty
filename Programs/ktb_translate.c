@@ -33,8 +33,6 @@
 #include "cmd_enqueue.h"
 #include "async_alarm.h"
 
-#define ON_FIRST_RELEASE 1
-
 #define BRL_CMD_ALERT(alert) BRL_CMD_ARG(ALERT, ALERT_##alert)
 
 ASYNC_ALARM_CALLBACK(handleKeyAutoreleaseAlarm) {
@@ -574,7 +572,7 @@ processKeyEvent (
     } else {
       resetLongPressData(table);
 
-      if (ON_FIRST_RELEASE || (table->pressedKeys.count == 0)) {
+      if (prefs.firstRelease || (table->pressedKeys.count == 0)) {
         int *cmd = &table->release.command;
 
         if (*cmd != BRL_CMD_NOOP) {

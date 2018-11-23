@@ -832,6 +832,11 @@ makePreferencesMenu (void) {
     }
 
     {
+      NAME(strtext("First Release"));
+      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.firstRelease, &itemName));
+    }
+
+    {
       NAME(strtext("Long Press Time"));
       ITEM(newTimeMenuItem(inputSubmenu, &prefs.longPressTime, &itemName));
       CHANGED(AutorepeatDelay);
@@ -844,16 +849,16 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Autorepeat Panning"));
-      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.autorepeatPanning, &itemName));
-      TEST(AutorepeatEnabled);
-    }
-
-    {
       NAME(strtext("Autorepeat Interval"));
       ITEM(newTimeMenuItem(inputSubmenu, &prefs.autorepeatInterval, &itemName));
       TEST(AutorepeatEnabled);
       CHANGED(AutorepeatInterval);
+    }
+
+    {
+      NAME(strtext("Autorepeat Panning"));
+      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.autorepeatPanning, &itemName));
+      TEST(AutorepeatEnabled);
     }
 
     {

@@ -314,6 +314,17 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.highlightBrailleWindowLocation
   },
 
+  { .name = "autorelease-time",
+    .defaultValue = DEFAULT_AUTORELEASE_TIME,
+    .settingNames = &preferenceStringTable_autoreleaseTime,
+    .setting = &prefs.autoreleaseTime
+  },
+
+  { .name = "first-release",
+    .defaultValue = DEFAULT_FIRST_RELEASE,
+    .setting = &prefs.firstRelease
+  },
+
   { .name = "long-press-time",
     .defaultValue = DEFAULT_LONG_PRESS_TIME,
     .setting = &prefs.longPressTime
@@ -325,21 +336,15 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.autorepeatEnabled
   },
 
-  { .name = "autorepeat-panning",
-    .defaultValue = DEFAULT_AUTOREPEAT_PANNING,
-    .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.autorepeatPanning
-  },
-
   { .name = "autorepeat-interval",
     .defaultValue = DEFAULT_AUTOREPEAT_INTERVAL,
     .setting = &prefs.autorepeatInterval
   },
 
-  { .name = "autorelease-time",
-    .defaultValue = DEFAULT_AUTORELEASE_TIME,
-    .settingNames = &preferenceStringTable_autoreleaseTime,
-    .setting = &prefs.autoreleaseTime
+  { .name = "autorepeat-panning",
+    .defaultValue = DEFAULT_AUTOREPEAT_PANNING,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.autorepeatPanning
   },
 
   { .name = "touch-navigation",
