@@ -35,8 +35,9 @@ const UsbDeviceEntry usbDeviceTable[] = {
 // Cebra [all models]
 // HIMS [Sync Braille]
 // HandyTech [FTDI chip]
+// Hedo [MobilLine]
 // MDV [all models]
-USB_DEVICE_ENTRY(0X0403, 0X6001, "at", "ce", "hm", "ht", "md"),
+USB_DEVICE_ENTRY(0X0403, 0X6001, "at", "ce", "hd", "hm", "ht", "md"),
 
 // Device: 0403:DE58
 // Hedo [MobilLine]
@@ -375,6 +376,10 @@ USB_DEVICE_ENTRY(0X1FE4, 0X008A, "ht"),
 // Device: 1FE4:008B
 // HandyTech [Basic Braille 160]
 USB_DEVICE_ENTRY(0X1FE4, 0X008B, "ht"),
+
+// Device: 1FE4:00A4
+// HandyTech [Activator]
+USB_DEVICE_ENTRY(0X1FE4, 0X00A4, "ht"),
 
 // Device: 4242:0001
 // Pegasus [all models]

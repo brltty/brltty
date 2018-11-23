@@ -11,6 +11,7 @@
   <!-- Cebra [all models] -->
   <!-- HIMS [Sync Braille] -->
   <!-- HandyTech [FTDI chip] -->
+  <!-- Hedo [MobilLine] -->
   <!-- MDV [all models] -->
   <usb-device vendor-id="1027" product-id="24577" />
 
@@ -351,6 +352,10 @@
   <!-- Device: 1FE4:008B -->
   <!-- HandyTech [Basic Braille 160] -->
   <usb-device vendor-id="8164" product-id="139" />
+
+  <!-- Device: 1FE4:00A4 -->
+  <!-- HandyTech [Activator] -->
+  <usb-device vendor-id="8164" product-id="164" />
 
   <!-- Device: 4242:0001 -->
   <!-- Pegasus [all models] -->

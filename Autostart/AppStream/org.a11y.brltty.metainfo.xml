@@ -46,6 +46,7 @@
     <!-- Cebra [all models] -->
     <!-- HIMS [Sync Braille] -->
     <!-- HandyTech [FTDI chip] -->
+    <!-- Hedo [MobilLine] -->
     <!-- MDV [all models] -->
     <modalias>usb:v0403p6001*</modalias>
 
@@ -386,6 +387,10 @@
     <!-- Device: 1FE4:008B -->
     <!-- HandyTech [Basic Braille 160] -->
     <modalias>usb:v1FE4p008B*</modalias>
+
+    <!-- Device: 1FE4:00A4 -->
+    <!-- HandyTech [Activator] -->
+    <modalias>usb:v1FE4p00A4*</modalias>
 
     <!-- Device: 4242:0001 -->
     <!-- Pegasus [all models] -->

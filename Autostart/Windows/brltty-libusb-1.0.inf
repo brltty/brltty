@@ -46,7 +46,7 @@ HKR,,Icon,,-20
 ; Generic Identifier
 ; Vendor: Future Technology Devices International, Ltd
 ; Product: FT232 USB-Serial (UART) IC
-"LibUSB-1.0: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip], MDV [all models]"=LIBUSB_DEV, USB\VID_0403&PID_6001
+"LibUSB-1.0: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip], Hedo [MobilLine], MDV [all models]"=LIBUSB_DEV, USB\VID_0403&PID_6001
 
 ; Device: 0403:DE58
 "LibUSB-1.0: Hedo [MobilLine]"=LIBUSB_DEV, USB\VID_0403&PID_DE58
@@ -299,6 +299,9 @@ HKR,,Icon,,-20
 
 ; Device: 1FE4:008B
 "LibUSB-1.0: HandyTech [Basic Braille 160]"=LIBUSB_DEV, USB\VID_1FE4&PID_008B
+
+; Device: 1FE4:00A4
+"LibUSB-1.0: HandyTech [Activator]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A4
 
 ; Device: 4242:0001
 "LibUSB-1.0: Pegasus [all models]"=LIBUSB_DEV, USB\VID_4242&PID_0001
@@ -363,7 +366,7 @@ HKR,,Icon,,-20
 ; Generic Identifier
 ; Vendor: Future Technology Devices International, Ltd
 ; Product: FT232 USB-Serial (UART) IC
-"LibUSB-1.0: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip], MDV [all models]"=LIBUSB_DEV, USB\VID_0403&PID_6001
+"LibUSB-1.0: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip], Hedo [MobilLine], MDV [all models]"=LIBUSB_DEV, USB\VID_0403&PID_6001
 
 ; Device: 0403:DE58
 "LibUSB-1.0: Hedo [MobilLine]"=LIBUSB_DEV, USB\VID_0403&PID_DE58
@@ -616,6 +619,9 @@ HKR,,Icon,,-20
 
 ; Device: 1FE4:008B
 "LibUSB-1.0: HandyTech [Basic Braille 160]"=LIBUSB_DEV, USB\VID_1FE4&PID_008B
+
+; Device: 1FE4:00A4
+"LibUSB-1.0: HandyTech [Activator]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A4
 
 ; Device: 4242:0001
 "LibUSB-1.0: Pegasus [all models]"=LIBUSB_DEV, USB\VID_4242&PID_0001
