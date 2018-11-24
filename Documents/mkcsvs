@@ -46,11 +46,7 @@ do
 
    if [ -f "${file}" ]
    then
-      exec 3<"${file}"
-      read -u 3 -r -N $(( ${#lists["${list}"]} + 1 )) oldText || :
-      exec 3<&-
-
-      [ "${oldText}" != "${lists["${list}"]}" ] || continue
+      cmp -s "${file}" <(echo -n "${lists["${list}"]}") && continue
       logMessage task "updating ${file}"
       fileUpdated=true
 
