@@ -216,16 +216,14 @@ makeKeyboardCommand (KeyTable *table, unsigned char context, int allowChords) {
 
     {
       int space = bits & BRL_DOTC;
-      int dots = bits & (
-        BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 |
-        BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8
-      );
+      int dots = bits & BRL_DOTS;
 
-      if (!(allowChords && ((space | dots) == bits))) {
+      if (!allowChords) {
         if (!space == !dots) return EOF;
-        if (dots) bits |= ctx->mappedKeys.superimpose;
         bits &= ~BRL_DOTC;
       }
+
+      if (dots) bits |= ctx->mappedKeys.superimpose;
     }
 
     return BRL_CMD_BLK(PASSDOTS) | bits;
@@ -482,7 +480,6 @@ processKeyEvent (
     int isImmediate = 1;
     unsigned int keyPosition;
     int wasPressed = findPressedKey(table, &keyValue, &keyPosition);
-
     if (wasPressed) removePressedKey(table, keyPosition);
 
     if (press) {
@@ -490,10 +487,7 @@ processKeyEvent (
       const KeyBinding *binding = findKeyBinding(table, context, &keyValue, &isIncomplete);
       int inserted = insertPressedKey(table, &keyValue, keyPosition);
 
-      if (prefs.brailleQuickSpace && ((command = makeKeyboardCommand(table, context, 1)) != EOF)) {
-        binding = NULL;
-        isImmediate = 0;
-      } else if (binding) {
+      if (binding) {
         command = binding->primaryCommand.value;
       } else if ((binding = findKeyBinding(table, context, NULL, &isIncomplete))) {
         command = binding->primaryCommand.value;
@@ -516,6 +510,15 @@ processKeyEvent (
           isImmediate = 0;
         } else {
           command = EOF;
+        }
+      }
+
+      if (prefs.brailleQuickSpace) {
+        int cmd = makeKeyboardCommand(table, context, 1);
+
+        if (cmd != EOF) {
+          command = cmd;
+          isImmediate = 0;
         }
       }
 
