@@ -216,7 +216,7 @@ makeKeyboardCommand (KeyTable *table, unsigned char context, int allowChords) {
 
     {
       int space = bits & BRL_DOTC;
-      int dots = bits & BRL_DOTS;
+      int dots = bits & BRL_ALL_DOTS;
 
       if (!allowChords) {
         if (!space == !dots) return EOF;
