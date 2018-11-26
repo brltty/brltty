@@ -292,28 +292,26 @@ handleInputCommands (int command, void *data) {
         }
 
         case BRL_CMD_BLK(PASSDOTS): {
+          applyModifierFlags(icd, &flags);
           wchar_t character;
-          int space = command & BRL_DOTC;
 
           switch (prefs.brailleInputMode) {
             case BRL_INPUT_TEXT:
               character = convertDotsToCharacter(textTable, arg);
               break;
 
+            default:
+              logMessage(LOG_WARNING, "unknown braille input mode: %u", prefs.brailleInputMode);
+              /* fall through */
+
             case BRL_INPUT_DOTS:
               character = UNICODE_BRAILLE_ROW | arg;
               break;
-
-            default:
-              character = UNICODE_REPLACEMENT_CHARACTER;
-              break;
           }
-
-          applyModifierFlags(icd, &flags);
 
           if (!insertKey(character, flags)) {
             alert(ALERT_COMMAND_REJECTED);
-          } else if (space) {
+          } else if ((command & BRL_DOTC) && arg) {
             if (!insertKey(WC_C(' '), flags)) alert(ALERT_COMMAND_REJECTED);
           }
 
