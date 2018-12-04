@@ -11,33 +11,33 @@
 
   <string name="input_service_name">Služba vstupu BRLTTY</string>
   <string name="input_service_type">Klávesnice braillských zařízení</string>
-  <string name="input_service_not_enabled">sluba vstupu nepovolena</string>
-  <string name="input_service_not_selected">sluba vstupu nevybrána</string>
-  <string name="input_service_not_started">sluba vstupu nesputìna</string>
-  <string name="input_service_not_connected">sluba vstupu nepøipojena</string>
+  <string name="input_service_not_enabled">služba vstupu nepovolena</string>
+  <string name="input_service_not_selected">služba vstupu nevybrána</string>
+  <string name="input_service_not_started">služba vstupu nespuštěna</string>
+  <string name="input_service_not_connected">služba vstupu nepřipojena</string>
 
   <string name="checkbox_state_unchecked">Vypnuto</string>
   <string name="checkbox_state_checked">Zapnuto</string>
 
-  <string name="braille_channel_name">Stav braillského zaøízení</string>
-  <string name="braille_hint_tap">klepnìte pro akce</string>
-  <string name="braille_state_released">Uvolnìno</string>
-  <string name="braille_state_waiting">Èeká</string>
-  <string name="braille_state_connected">Pøipojeno</string>
+  <string name="braille_channel_name">Stav braillského zařízení</string>
+  <string name="braille_hint_tap">klepněte pro akce</string>
+  <string name="braille_state_released">Uvolněno</string>
+  <string name="braille_state_waiting">Čeká</string>
+  <string name="braille_state_connected">Připojeno</string>
 
   <string name="GLOBAL_BUTTON_NOTIFICATIONS">Oznámení</string>
   <string name="GLOBAL_BUTTON_QUICK_SETTINGS">Rychlé nastavení</string>
   <string name="GLOBAL_BUTTON_BACK">Zpět</string>
   <string name="GLOBAL_BUTTON_HOME">Domů</string>
-  <string name="GLOBAL_BUTTON_RECENT_APPS">Poslední Aplikace</string>
+  <string name="GLOBAL_BUTTON_RECENT_APPS">Poslední aplikace</string>
   <string name="GLOBAL_BUTTON_OVERVIEW">Poslední aplikace</string>
 
-  <string name="GLOBAL_BUTTON_SWITCH_INPUT_METHOD">Pøepnout metodu vstupu</string>
-  <string name="GLOBAL_BUTTON_VIEW_USER_GUIDE">Zobrazit uivatelskou pøíruèku</string>
-  <string name="GLOBAL_BUTTON_BROWSE_WEB_SITE">Otevøít webovou stránku</string>
+  <string name="GLOBAL_BUTTON_SWITCH_INPUT_METHOD">Přepnout metodu vstupu</string>
+  <string name="GLOBAL_BUTTON_VIEW_USER_GUIDE">Zobrazit uživatelskou příručku</string>
+  <string name="GLOBAL_BUTTON_BROWSE_WEB_SITE">Otevřít webovou stránku</string>
   <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">Projít zprávy komunity</string>
-  <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Napsat zprávu komunitì</string>
-  <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Spravovat èlenství v komunitì</string>
+  <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Napsat zprávu komunitě</string>
+  <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Spravovat členství v komunitě</string>
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Aktualizovat aplikaci</string>
 
   <string name="SETTINGS_SCREEN_MAIN">Nastavení BRLTTY</string>
@@ -46,7 +46,7 @@
   <string name="SETTINGS_SCREEN_DEVICES">Správa zařízení</string>
   <string name="SETTINGS_SCREEN_ADVANCED">Pokročilá nastavení</string>
 
-  <string name="SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE">Uvolnit braillské zaøízení</string>
+  <string name="SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE">Uvolnit braillské zařízení</string>
   <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Režim navigace</string>
   <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Hlasová podpora</string>
 
@@ -55,7 +55,7 @@
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Tabulka zkratkopisu</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tabulka klávesnice</string>
 
-  <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Zobrazovat hláení</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Zobrazovat hlášení</string>
   <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Zobrazovat oznámení</string>
   <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">Zobrazovat výstrahy</string>
 
@@ -76,11 +76,11 @@
   <string name="ADD_DEVICE_NAME">Jméno zařízení</string>
   <string name="ADD_DEVICE_METHOD">Způsob komunikace</string>
   <string name="ADD_DEVICE_SELECT">Vybrat zařízení</string>
-  <string name="ADD_DEVICE_DRIVER">braillský ovladač</string>
+  <string name="ADD_DEVICE_DRIVER">Braillský ovladač</string>
   <string name="ADD_DEVICE_DONE">Dokončit</string>
   <string name="ADD_DEVICE_UNSELECTED_METHOD">Způsob komunikace nevybrán</string>
   <string name="ADD_DEVICE_UNSELECTED_DEVICE">Zařízení nevybráno</string>
-  <string name="ADD_DEVICE_UNSELECTED_DRIVER">braillský ovladač nevybrán</string>
+  <string name="ADD_DEVICE_UNSELECTED_DRIVER">Braillský ovladač nevybrán</string>
   <string name="ADD_DEVICE_NO_DEVICES">Žádná zařízení</string>
   <string name="ADD_DEVICE_DUPLICATE_NAME">Jméno zařízení se již používá</string>
 
@@ -157,7 +157,7 @@
   <string name="TEXT_TABLE_LABEL_fr">Francouzština</string>
   <string name="TEXT_TABLE_LABEL_fr_2007">Francouzština (unified 2007)</string>
   <string name="TEXT_TABLE_LABEL_fr_CA">Francouzština (Kanada)</string>
-  <string name="TEXT_TABLE_LABEL_fr_cbifs">Francouzština (Code Braille Informatique FranĂ§ais Standard)</string>
+  <string name="TEXT_TABLE_LABEL_fr_cbifs">Francouzština (Code Braille Informatique Français Standard)</string>
   <string name="TEXT_TABLE_LABEL_fr_FR">Francouzština (Francie)</string>
   <string name="TEXT_TABLE_LABEL_fr_vs">Francouzština (VisioBraille)</string>
   <string name="TEXT_TABLE_LABEL_ga">Irština</string>
@@ -204,7 +204,7 @@
   <string name="TEXT_TABLE_LABEL_sa">Sanskrt</string>
   <string name="TEXT_TABLE_LABEL_sat">Santálština</string>
   <string name="TEXT_TABLE_LABEL_sd">Sindhština</string>
-  <string name="TEXT_TABLE_LABEL_se">sámština (severní)</string>
+  <string name="TEXT_TABLE_LABEL_se">Sámština (severní)</string>
   <string name="TEXT_TABLE_LABEL_sk">Slovenština</string>
   <string name="TEXT_TABLE_LABEL_sl">Slovinština</string>
   <string name="TEXT_TABLE_LABEL_sv">Švédština</string>
@@ -214,7 +214,7 @@
   <string name="TEXT_TABLE_LABEL_ta">Tamilština</string>
   <string name="TEXT_TABLE_LABEL_te">Telugština</string>
   <string name="TEXT_TABLE_LABEL_tr">Turečtina</string>
-  <string name="TEXT_TABLE_LABEL_uk">Ukrajintina</string>
+  <string name="TEXT_TABLE_LABEL_uk">Ukrajinština</string>
   <string name="TEXT_TABLE_LABEL_vi">Vietnamština</string>
 
   <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">Invertovaná (barva popředí v levém sloupci a barva pozadí v pravém sloupci)</string>
@@ -240,7 +240,7 @@
   <string name="CONTRACTION_TABLE_LABEL_ko">Korejština (plnopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Korejština (grade 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Korejština (grade 2)</string>
-  <string name="CONTRACTION_TABLE_LABEL_lt">Litevtina (plnopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_lt">Litevština (plnopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_mg">Malgaština (zkratkopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_mun">Mundské jazyky (zkratkopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_nl">Nizozemština (zkratkopis)</string>
