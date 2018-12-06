@@ -64,16 +64,16 @@ $(OCAML_NCLIB) : $(OCAML_CLIBS) brlapi.cmx
 	$(OCAMLMKLIB) -ldopt "$(LDFLAGS)" $(OCAMLMKLIBOPT_FLAGS) -o $(OCAML_LIB) brlapi.cmx
 
 brlapi.cmi: brlapi.mli
-	$(OCAMLC) -o $@ -c brlapi.mli
+	$(OCAMLC) -ccopt "$(CFLAGS)" -o $@ -c brlapi.mli
 
 brlapi.cmo: brlapi.ml brlapi.cmi
-	$(OCAMLC) -o $@ -c brlapi.ml
+	$(OCAMLC) -ccopt "$(CFLAGS)" -o $@ -c brlapi.ml
 
 brlapi.cmx: brlapi.ml brlapi.cmi
-	$(OCAMLOPT) -o $@ -c brlapi.cmx brlapi.ml
+	$(OCAMLOPT) -ccopt "$(CFLAGS)" -o $@ -c brlapi.cmx brlapi.ml
 
 brlapi_stubs.$O: $(SRC_DIR)/brlapi_stubs.c
-	$(OCAMLC) -I $(BLD_TOP)$(PGM_DIR) -I $(SRC_TOP)$(PGM_DIR) -c $(SRC_DIR)/brlapi_stubs.c
+	$(OCAMLC) -ccopt "$(CFLAGS)" -I $(BLD_TOP)$(PGM_DIR) -I $(SRC_TOP)$(PGM_DIR) -c $(SRC_DIR)/brlapi_stubs.c
 
 brlapi.mli : $(SRC_DIR)/main.mli constants.mli
 	cat $(SRC_DIR)/main.mli constants.mli > $@
