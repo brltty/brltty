@@ -194,11 +194,15 @@ serialPutDataBits (SerialAttributes *attributes, unsigned int bits) {
 
   switch (bits) {
 #ifdef CS5
+#if !defined(CS6) || (CS5 != CS6)
     case 5: size = CS5; break;
+#endif
 #endif /* CS5 */
 
 #ifdef CS6
+#if !defined(CS7) || (CS6 != CS7)
     case 6: size = CS6; break;
+#endif
 #endif /* CS6 */
 
 #ifdef CS7
@@ -334,11 +338,15 @@ serialGetDataBits (const SerialAttributes *attributes) {
 
   switch (size) {
 #ifdef CS5
+#if !defined(CS6) || (CS5 != CS6)
     case CS5: return 5;
+#endif
 #endif /* CS5 */
 
 #ifdef CS6
+#if !defined(CS7) || (CS6 != CS7)
     case CS6: return 6;
+#endif
 #endif /* CS6 */
 
 #ifdef CS7
