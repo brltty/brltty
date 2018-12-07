@@ -1626,6 +1626,9 @@ in
    solaris*)
       brltty_cv_device_serial_first="ttya"
       ;;
+   haiku*)
+      brltty_cv_device_serial_first="ports/pc_serial0"
+      ;;
    hpux*)
       brltty_cv_device_serial_first="tty0p0"
       ;;
