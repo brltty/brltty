@@ -35,6 +35,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #endif /* __MINGW32__ */
+#include "get_select.h"
 
 #if !defined(AF_LOCAL) && defined(AF_UNIX)
 #define AF_LOCAL AF_UNIX
