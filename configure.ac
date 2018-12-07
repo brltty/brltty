@@ -593,7 +593,7 @@ in
       BRLTTY_HAVE_WINDOWS_LIBRARY([gdi32])
       ;;
    *)
-      AC_SEARCH_LIBS([socket], [socket])
+      AC_SEARCH_LIBS([socket], [socket network])
       AC_SEARCH_LIBS([inet_ntoa], [nsl])
       ;;
 esac
