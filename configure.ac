@@ -384,6 +384,7 @@ in
    elf*     ) LDFLAGS_DYNAMIC="";;
    freebsd* ) LDFLAGS_DYNAMIC="-export-dynamic";;
    gnu*     ) LDFLAGS_DYNAMIC="-export-dynamic";;
+   haiku*   ) LDFLAGS_DYNAMIC="-export-dynamic";;
    hpux*    ) LDFLAGS_DYNAMIC="-E +s";;
    kfreebsd*) LDFLAGS_DYNAMIC="-export-dynamic";;
    linux*   ) LDFLAGS_DYNAMIC="-export-dynamic";;
@@ -451,7 +452,7 @@ AC_SUBST([can_make_BrlAPIref])
 AC_CACHE_CHECK([for shared object creation command], [brltty_cv_prog_make_object_shared], [dnl
    case "${host_os}"
    in
-      linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*|cygwin*|mingw*|elf*)
+      linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*|cygwin*|mingw*|elf*|haiku*)
          brltty_mkshr_ld_make="-shared"
          ;;
       solaris*)
@@ -500,7 +501,7 @@ AC_SUBST([MKREL])
 AC_CACHE_CHECK([for dynamic library creation command], [brltty_cv_prog_mklib], [dnl
 case "${host_os}"
 in
-   linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*|elf*)
+   linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*|elf*|haiku*)
       brltty_mklib_ld_make="-shared"
       brltty_mklib_ld_options="-soname"
       ;;
