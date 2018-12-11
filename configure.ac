@@ -1834,7 +1834,7 @@ BRLTTY_ARG_DISABLE(
    ])
 
    BRLTTY_IF_PACKAGE([ViaVoice], [viavoice], [include/eci.h], [dnl
-      BRLTTY_SPEECH_DRIVER([vv], [ViaVoice], [-L$(VIAVOICE_ROOT)/lib -libmeci50])
+      BRLTTY_SPEECH_DRIVER([vv], [ViaVoice], [-L$(VIAVOICE_ROOT)/lib -libmeci])
    ])
 
    BRLTTY_SPEECH_DRIVER([xs], [ExternalSpeech])
