@@ -1833,8 +1833,8 @@ BRLTTY_ARG_DISABLE(
       BRLTTY_SPEECH_DRIVER([th], [Theta], [-L$(THETA_ROOT)/lib -ltheta])
    ])
 
-   BRLTTY_IF_PACKAGE([ViaVoice], [viavoice], [include/eci.h], [dnl
-      BRLTTY_SPEECH_DRIVER([vv], [ViaVoice], [-L$(VIAVOICE_ROOT)/lib -libmeci])
+   AC_CHECK_HEADER([eci.h], [dnl
+      BRLTTY_SPEECH_DRIVER([vv], [ViaVoice], [-libmeci])
    ])
 
    BRLTTY_SPEECH_DRIVER([xs], [ExternalSpeech])

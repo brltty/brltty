@@ -389,7 +389,6 @@ SPEECHD_INCLUDES = @speechd_includes@
 SPEECHD_LIBS = @speechd_libs@
 SWIFT_ROOT = @swift_root@
 THETA_ROOT = @theta_root@
-VIAVOICE_ROOT = @viavoice_root@
 
 INSTALL_TEXT_TABLES = @install_text_tables@
 INSTALL_ATTRIBUTES_TABLES = @install_attributes_tables@

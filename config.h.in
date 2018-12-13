@@ -519,9 +519,6 @@ extern "C" {
 /* Define this to be a string containing the path to the root of the Theta package. */
 #undef THETA_ROOT
 
-/* Define this to be a string containing the path to the root of the ViaVoice package. */
-#undef VIAVOICE_ROOT
-
 /* Define this if internationalization support is to be included. */
 #undef ENABLE_I18N_SUPPORT
 
