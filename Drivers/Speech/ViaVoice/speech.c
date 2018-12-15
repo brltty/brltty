@@ -55,6 +55,9 @@ static int units;
 static char *sayBuffer = NULL;
 static int saySize = 0;
 
+#define MAXIMUM_SAMPLES 0X800
+static short sampleBuffer[MAXIMUM_SAMPLES];
+
 static const int languageMap[] = {
 #ifdef eciGeneralAmericanEnglish
    eciGeneralAmericanEnglish,
@@ -212,6 +215,7 @@ static const int languageMap[] = {
    NODEFINEDCODESET,
 #endif /* NODEFINEDCODESET */
 };
+
 static const char *const languageNames[] = {
 #ifdef eciGeneralAmericanEnglish
    "GeneralAmericanEnglish",
@@ -565,21 +569,28 @@ spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t le
       int onSpace = -1;
       int sayFrom = 0;
       int index;
-      for (index=0; index<length; ++index) {
+
+      for (index=0; index<length; index+=1) {
 	 int isSpace = isspace(buffer[index])? 1: 0;
+
 	 if (isSpace != onSpace) {
 	    onSpace = isSpace;
+
 	    if (index > sayFrom) {
-	       if (!saySegment(eci, buffer, sayFrom, index)) {
-	          break;
-	       }
+	       if (!saySegment(eci, buffer, sayFrom, index)) break;
 	       sayFrom = index;
 	    }
 	 }
       }
+
       if (index == length) {
 	 if (saySegment(eci, buffer, sayFrom, index)) {
 	    if (eciSynthesize(eci)) {
+               if (eciSynchronize(eci)) {
+               } else {
+                  reportError(eci, "eciSynchronize");
+               }
+
 	       return;
 	    } else {
 	       reportError(eci, "eciSynthesize");
@@ -629,6 +640,22 @@ spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting) {
    if (setExternalUnits()) setVoiceParameter (eci, "rate", eciSpeed, (int)(getFloatSpeechRate(setting) * 210.0));
 }
 
+static enum ECICallbackReturn
+clientCallback (ECIHand eci, enum ECIMessage message, long parameter, void *data) {
+   switch (message) {
+      case eciWaveformBuffer: {
+         long count = parameter;
+         logMessage(LOG_NOTICE, "count = %ld", count);
+         break;
+      }
+
+      default:
+         break;
+   }
+
+   return eciDataProcessed;
+}
+
 static int
 spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
    spk->setVolume = spk_setVolume;
@@ -637,8 +664,10 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
    if (!eci) {
       if (setIni(parameters[PARM_IniFile])) {
 	 if ((eci = eciNew()) != NULL_ECI_HAND) {
-            units = 0;
-	    if (eciSetOutputDevice(eci, 0)) {
+            eciRegisterCallback(eci, clientCallback, NULL);
+
+	    if (eciSetOutputBuffer(eci, MAXIMUM_SAMPLES, sampleBuffer)) {
+               units = 0;
 	       const char *sampleRates[] = {"8000", "11025", "22050", NULL};
 	       const char *abbreviationModes[] = {"on", "off", NULL};
 	       const char *numberModes[] = {"word", "year", NULL};
@@ -666,7 +695,7 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
                }
                return 1;
 	    } else {
-	       reportError(eci, "eciSetOutputDevice");
+	       reportError(eci, "eciSetOutputBuffer");
 	    }
             eciDelete(eci);
             eci = NULL_ECI_HAND;
