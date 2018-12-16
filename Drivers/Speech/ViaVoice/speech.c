@@ -27,6 +27,8 @@
 
 #include "log.h"
 #include "parse.h"
+#include "pcm.h"
+#include "notes.h"
 
 typedef enum {
    PARM_IniFile,
@@ -55,8 +57,9 @@ static int units;
 static char *sayBuffer = NULL;
 static int saySize = 0;
 
-#define MAXIMUM_SAMPLES 0X800
-static short sampleBuffer[MAXIMUM_SAMPLES];
+static PcmDevice *pcmDevice = NULL;
+static short *pcmBuffer = NULL;
+static int pcmBufferSize = 0;
 
 static const int languageMap[] = {
 #ifdef eciGeneralAmericanEnglish
@@ -644,8 +647,13 @@ static enum ECICallbackReturn
 clientCallback (ECIHand eci, enum ECIMessage message, long parameter, void *data) {
    switch (message) {
       case eciWaveformBuffer: {
-         long count = parameter;
-         logMessage(LOG_NOTICE, "count = %ld", count);
+         long samples = parameter;
+         int bytes = samples * sizeof(*pcmBuffer);
+
+         if (!writePcmData(pcmDevice, (unsigned char *)pcmBuffer, bytes)) {
+            return eciDataAbort;
+         }
+
          break;
       }
 
@@ -666,41 +674,67 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
 	 if ((eci = eciNew()) != NULL_ECI_HAND) {
             eciRegisterCallback(eci, clientCallback, NULL);
 
-	    if (eciSetOutputBuffer(eci, MAXIMUM_SAMPLES, sampleBuffer)) {
-               units = 0;
-	       const char *sampleRates[] = {"8000", "11025", "22050", NULL};
-	       const char *abbreviationModes[] = {"on", "off", NULL};
-	       const char *numberModes[] = {"word", "year", NULL};
-	       const char *synthModes[] = {"sentence", "none", NULL};
-	       const char *textModes[] = {"talk", "spell", "literal", "phonetic", NULL};
-	       const char *voices[] = {"", "AdultMale", "AdultFemale", "Child", "", "", "", "ElderlyFemale", "ElderlyMale", NULL};
-	       const char *vocalTracts[] = {"male", "female", NULL};
-	       choiceEnvironmentParameter(eci, "sample rate", parameters[PARM_SampleRate], eciSampleRate, sampleRates, NULL);
-	       choiceEnvironmentParameter(eci, "abbreviation mode", parameters[PARM_AbbreviationMode], eciDictionary, abbreviationModes, NULL);
-	       choiceEnvironmentParameter(eci, "number mode", parameters[PARM_NumberMode], eciNumberMode, numberModes, NULL);
-	       choiceEnvironmentParameter(eci, "synth mode", parameters[PARM_SynthMode], eciSynthMode, synthModes, NULL);
-	       choiceEnvironmentParameter(eci, "text mode", parameters[PARM_TextMode], eciTextMode, textModes, NULL);
-	       choiceEnvironmentParameter(eci, "language", parameters[PARM_Language], eciLanguageDialect, languageNames, languageMap);
-	       choiceEnvironmentParameter(eci, "voice", parameters[PARM_Voice], eciNumParams, voices, NULL);
-	       choiceVoiceParameter(eci, "vocal tract", parameters[PARM_VocalTract], eciGender, vocalTracts, NULL);
-	       rangeVoiceParameter(eci, "breathiness", parameters[PARM_Breathiness], eciBreathiness, 0, 100);
-	       rangeVoiceParameter(eci, "head size", parameters[PARM_HeadSize], eciHeadSize, 0, 100);
-	       rangeVoiceParameter(eci, "pitch baseline", parameters[PARM_PitchBaseline], eciPitchBaseline, 0, 100);
-	       rangeVoiceParameter(eci, "pitch fluctuation", parameters[PARM_PitchFluctuation], eciPitchFluctuation, 0, 100);
-	       rangeVoiceParameter(eci, "roughness", parameters[PARM_Roughness], eciRoughness, 0, 100);
+            units = 0;
+
+            const char *sampleRates[] = {"8000", "11025", "22050", NULL};
+            const char *abbreviationModes[] = {"on", "off", NULL};
+            const char *numberModes[] = {"word", "year", NULL};
+            const char *synthModes[] = {"sentence", "none", NULL};
+            const char *textModes[] = {"talk", "spell", "literal", "phonetic", NULL};
+            const char *voices[] = {"", "AdultMale", "AdultFemale", "Child", "", "", "", "ElderlyFemale", "ElderlyMale", NULL};
+            const char *vocalTracts[] = {"male", "female", NULL};
+
+            choiceEnvironmentParameter(eci, "sample rate", parameters[PARM_SampleRate], eciSampleRate, sampleRates, NULL);
+            choiceEnvironmentParameter(eci, "abbreviation mode", parameters[PARM_AbbreviationMode], eciDictionary, abbreviationModes, NULL);
+            choiceEnvironmentParameter(eci, "number mode", parameters[PARM_NumberMode], eciNumberMode, numberModes, NULL);
+            choiceEnvironmentParameter(eci, "synth mode", parameters[PARM_SynthMode], eciSynthMode, synthModes, NULL);
+            choiceEnvironmentParameter(eci, "text mode", parameters[PARM_TextMode], eciTextMode, textModes, NULL);
+            choiceEnvironmentParameter(eci, "language", parameters[PARM_Language], eciLanguageDialect, languageNames, languageMap);
+            choiceEnvironmentParameter(eci, "voice", parameters[PARM_Voice], eciNumParams, voices, NULL);
+            choiceVoiceParameter(eci, "vocal tract", parameters[PARM_VocalTract], eciGender, vocalTracts, NULL);
+
+            rangeVoiceParameter(eci, "breathiness", parameters[PARM_Breathiness], eciBreathiness, 0, 100);
+            rangeVoiceParameter(eci, "head size", parameters[PARM_HeadSize], eciHeadSize, 0, 100);
+            rangeVoiceParameter(eci, "pitch baseline", parameters[PARM_PitchBaseline], eciPitchBaseline, 0, 100);
+            rangeVoiceParameter(eci, "pitch fluctuation", parameters[PARM_PitchFluctuation], eciPitchFluctuation, 0, 100);
+            rangeVoiceParameter(eci, "roughness", parameters[PARM_Roughness], eciRoughness, 0, 100);
+
+            if ((pcmDevice = openPcmDevice(LOG_WARNING, opt_pcmDevice))) {
                {
                   char version[0X80];
                   eciVersion(version);
                   logMessage(LOG_INFO, "ViaVoice Engine: version %s", version);
                }
-               return 1;
-	    } else {
-	       reportError(eci, "eciSetOutputBuffer");
-	    }
+
+               setPcmChannelCount(pcmDevice, 1);
+               setPcmAmplitudeFormat(pcmDevice, PCM_FMT_S16N);
+
+               {
+                  int rate = eciGetParam(eci, eciSampleRate);
+
+                  if (rate >= 0) {
+                     rate = atoi(sampleRates[rate]);
+                     setPcmSampleRate(pcmDevice, rate);
+                  }
+               }
+
+               if ((pcmBuffer = malloc((pcmBufferSize = getPcmBlockSize(pcmDevice))))) {
+                  if (eciSetOutputBuffer(eci, (pcmBufferSize / sizeof(*pcmBuffer)), pcmBuffer)) {
+                     return 1;
+                  } else {
+                  }
+               } else {
+                  logMallocError();
+               }
+
+               closePcmDevice(pcmDevice);
+               pcmDevice = NULL;
+            }
+
             eciDelete(eci);
             eci = NULL_ECI_HAND;
 	 } else {
-	    logMessage(LOG_ERR, "ViaVoice initialization error.");
+	    logMessage(LOG_ERR, "ViaVoice initialization error");
 	 }
       }
    }
@@ -712,5 +746,15 @@ spk_destruct (volatile SpeechSynthesizer *spk) {
    if (eci) {
       eciDelete(eci);
       eci = NULL_ECI_HAND;
+   }
+
+   if (pcmDevice) {
+      closePcmDevice(pcmDevice);
+      pcmDevice = NULL;
+   }
+
+   if (pcmBuffer) {
+      free(pcmBuffer);
+      pcmBuffer = NULL;
    }
 }
