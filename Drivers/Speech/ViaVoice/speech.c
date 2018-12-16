@@ -59,7 +59,6 @@ static int saySize = 0;
 
 static PcmDevice *pcmDevice = NULL;
 static short *pcmBuffer = NULL;
-static int pcmBufferSize = 0;
 
 static const int languageMap[] = {
 #ifdef eciGeneralAmericanEnglish
@@ -648,7 +647,7 @@ static enum ECICallbackReturn
 clientCallback (ECIHand eci, enum ECIMessage message, long parameter, void *data) {
    switch (message) {
       case eciWaveformBuffer: {
-         long samples = parameter;
+         int samples = parameter;
          int bytes = samples * sizeof(*pcmBuffer);
 
          if (!writePcmData(pcmDevice, (unsigned char *)pcmBuffer, bytes)) {
@@ -719,8 +718,11 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
                   }
                }
 
-               if ((pcmBuffer = malloc((pcmBufferSize = getPcmBlockSize(pcmDevice))))) {
-                  if (eciSetOutputBuffer(eci, (pcmBufferSize / sizeof(*pcmBuffer)), pcmBuffer)) {
+               int bytes = getPcmBlockSize(pcmDevice);
+               int samples = bytes / sizeof(*pcmBuffer);
+
+               if ((pcmBuffer = malloc(bytes))) {
+                  if (eciSetOutputBuffer(eci, samples, pcmBuffer)) {
                      return 1;
                   } else {
                   }
