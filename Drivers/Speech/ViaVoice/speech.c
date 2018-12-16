@@ -61,320 +61,87 @@ static PcmDevice *pcmDevice = NULL;
 static short *pcmBuffer = NULL;
 
 static const int languageMap[] = {
-#ifdef eciGeneralAmericanEnglish
    eciGeneralAmericanEnglish,
-#endif /* eciGeneralAmericanEnglish */
-
-#ifdef eciBritishEnglish
    eciBritishEnglish,
-#endif /* eciBritishEnglish */
-
-#ifdef eciCastilianSpanish
    eciCastilianSpanish,
-#endif /* eciCastilianSpanish */
-
-#ifdef eciMexicanSpanish
    eciMexicanSpanish,
-#endif /* eciMexicanSpanish */
-
-#ifdef eciStandardFrench
    eciStandardFrench,
-#endif /* eciStandardFrench */
-
-#ifdef eciCanadianFrench
    eciCanadianFrench,
-#endif /* eciCanadianFrench */
-
-#ifdef eciStandardGerman
    eciStandardGerman,
-#endif /* eciStandardGerman */
-
-#ifdef eciStandardItalian
    eciStandardItalian,
-#endif /* eciStandardItalian */
-
-#ifdef eciMandarinChinese
    eciMandarinChinese,
-#endif /* eciMandarinChinese */
-
-#ifdef eciMandarinChineseGB
    eciMandarinChineseGB,
-#endif /* eciMandarinChineseGB */
-
-#ifdef eciMandarinChinesePinYin
    eciMandarinChinesePinYin,
-#endif /* eciMandarinChinesePinYin */
-
-#ifdef eciMandarinChineseUCS
    eciMandarinChineseUCS,
-#endif /* eciMandarinChineseUCS */
-
-#ifdef eciTaiwaneseMandarin
    eciTaiwaneseMandarin,
-#endif /* eciTaiwaneseMandarin */
-
-#ifdef eciTaiwaneseMandarinBig5
    eciTaiwaneseMandarinBig5,
-#endif /* eciTaiwaneseMandarinBig5 */
-
-#ifdef eciTaiwaneseMandarinZhuYin
    eciTaiwaneseMandarinZhuYin,
-#endif /* eciTaiwaneseMandarinZhuYin */
-
-#ifdef eciTaiwaneseMandarinPinYin
    eciTaiwaneseMandarinPinYin,
-#endif /* eciTaiwaneseMandarinPinYin */
-
-#ifdef eciTaiwaneseMandarinUCS
    eciTaiwaneseMandarinUCS,
-#endif /* eciTaiwaneseMandarinUCS */
-
-#ifdef eciBrazilianPortuguese
    eciBrazilianPortuguese,
-#endif /* eciBrazilianPortuguese */
-
-#ifdef eciStandardJapanese
    eciStandardJapanese,
-#endif /* eciStandardJapanese */
-
-#ifdef eciStandardJapaneseSJIS
    eciStandardJapaneseSJIS,
-#endif /* eciStandardJapaneseSJIS */
-
-#ifdef eciStandardJapaneseUCS
    eciStandardJapaneseUCS,
-#endif /* eciStandardJapaneseUCS */
-
-#ifdef eciStandardFinnish
    eciStandardFinnish,
-#endif /* eciStandardFinnish */
-
-#ifdef eciStandardKorean
    eciStandardKorean,
-#endif /* eciStandardKorean */
-
-#ifdef eciStandardKoreanUHC
    eciStandardKoreanUHC,
-#endif /* eciStandardKoreanUHC */
-
-#ifdef eciStandardKoreanUCS
    eciStandardKoreanUCS,
-#endif /* eciStandardKoreanUCS */
-
-#ifdef eciStandardCantonese
    eciStandardCantonese,
-#endif /* eciStandardCantonese */
-
-#ifdef eciStandardCantoneseGB
    eciStandardCantoneseGB,
-#endif /* eciStandardCantoneseGB */
-
-#ifdef eciStandardCantoneseUCS
    eciStandardCantoneseUCS,
-#endif /* eciStandardCantoneseUCS */
-
-#ifdef eciHongKongCantonese
    eciHongKongCantonese,
-#endif /* eciHongKongCantonese */
-
-#ifdef eciHongKongCantoneseBig5
    eciHongKongCantoneseBig5,
-#endif /* eciHongKongCantoneseBig5 */
-
-#ifdef eciHongKongCantoneseUCS
    eciHongKongCantoneseUCS,
-#endif /* eciHongKongCantoneseUCS */
-
-#ifdef eciStandardDutch
    eciStandardDutch,
-#endif /* eciStandardDutch */
-
-#ifdef eciStandardNorwegian
    eciStandardNorwegian,
-#endif /* eciStandardNorwegian */
-
-#ifdef eciStandardSwedish
    eciStandardSwedish,
-#endif /* eciStandardSwedish */
-
-#ifdef eciStandardDanish
    eciStandardDanish,
-#endif /* eciStandardDanish */
-
-#ifdef eciStandardReserved
    eciStandardReserved,
-#endif /* eciStandardReserved */
-
-#ifdef eciStandardThai
    eciStandardThai,
-#endif /* eciStandardThai */
-
-#ifdef eciStandardThaiTIS
    eciStandardThaiTIS,
-#endif /* eciStandardThaiTIS */
-
-#ifdef NODEFINEDCODESET
-   NODEFINEDCODESET,
-#endif /* NODEFINEDCODESET */
+   NODEFINEDCODESET
 };
 
 static const char *const languageNames[] = {
-#ifdef eciGeneralAmericanEnglish
    "GeneralAmericanEnglish",
-#endif /* eciGeneralAmericanEnglish */
-
-#ifdef eciBritishEnglish
    "BritishEnglish",
-#endif /* eciBritishEnglish */
-
-#ifdef eciCastilianSpanish
    "CastilianSpanish",
-#endif /* eciCastilianSpanish */
-
-#ifdef eciMexicanSpanish
    "MexicanSpanish",
-#endif /* eciMexicanSpanish */
-
-#ifdef eciStandardFrench
    "StandardFrench",
-#endif /* eciStandardFrench */
-
-#ifdef eciCanadianFrench
    "CanadianFrench",
-#endif /* eciCanadianFrench */
-
-#ifdef eciStandardGerman
    "StandardGerman",
-#endif /* eciStandardGerman */
-
-#ifdef eciStandardItalian
    "StandardItalian",
-#endif /* eciStandardItalian */
-
-#ifdef eciMandarinChinese
    "MandarinChinese",
-#endif /* eciMandarinChinese */
-
-#ifdef eciMandarinChineseGB
    "MandarinChineseGB",
-#endif /* eciMandarinChineseGB */
-
-#ifdef eciMandarinChinesePinYin
    "MandarinChinesePinYin",
-#endif /* eciMandarinChinesePinYin */
-
-#ifdef eciMandarinChineseUCS
    "MandarinChineseUCS",
-#endif /* eciMandarinChineseUCS */
-
-#ifdef eciTaiwaneseMandarin
    "TaiwaneseMandarin",
-#endif /* eciTaiwaneseMandarin */
-
-#ifdef eciTaiwaneseMandarinBig5
    "TaiwaneseMandarinBig5",
-#endif /* eciTaiwaneseMandarinBig5 */
-
-#ifdef eciTaiwaneseMandarinZhuYin
    "TaiwaneseMandarinZhuYin",
-#endif /* eciTaiwaneseMandarinZhuYin */
-
-#ifdef eciTaiwaneseMandarinPinYin
    "TaiwaneseMandarinPinYin",
-#endif /* eciTaiwaneseMandarinPinYin */
-
-#ifdef eciTaiwaneseMandarinUCS
    "TaiwaneseMandarinUCS",
-#endif /* eciTaiwaneseMandarinUCS */
-
-#ifdef eciBrazilianPortuguese
    "BrazilianPortuguese",
-#endif /* eciBrazilianPortuguese */
-
-#ifdef eciStandardJapanese
    "StandardJapanese",
-#endif /* eciStandardJapanese */
-
-#ifdef eciStandardJapaneseSJIS
    "StandardJapaneseSJIS",
-#endif /* eciStandardJapaneseSJIS */
-
-#ifdef eciStandardJapaneseUCS
    "StandardJapaneseUCS",
-#endif /* eciStandardJapaneseUCS */
-
-#ifdef eciStandardFinnish
    "StandardFinnish",
-#endif /* eciStandardFinnish */
-
-#ifdef eciStandardKorean
    "StandardKorean",
-#endif /* eciStandardKorean */
-
-#ifdef eciStandardKoreanUHC
    "StandardKoreanUHC",
-#endif /* eciStandardKoreanUHC */
-
-#ifdef eciStandardKoreanUCS
    "StandardKoreanUCS",
-#endif /* eciStandardKoreanUCS */
-
-#ifdef eciStandardCantonese
    "StandardCantonese",
-#endif /* eciStandardCantonese */
-
-#ifdef eciStandardCantoneseGB
    "StandardCantoneseGB",
-#endif /* eciStandardCantoneseGB */
-
-#ifdef eciStandardCantoneseUCS
    "StandardCantoneseUCS",
-#endif /* eciStandardCantoneseUCS */
-
-#ifdef eciHongKongCantonese
    "HongKongCantonese",
-#endif /* eciHongKongCantonese */
-
-#ifdef eciHongKongCantoneseBig5
    "HongKongCantoneseBig5",
-#endif /* eciHongKongCantoneseBig5 */
-
-#ifdef eciHongKongCantoneseUCS
    "HongKongCantoneseUCS",
-#endif /* eciHongKongCantoneseUCS */
-
-#ifdef eciStandardDutch
    "StandardDutch",
-#endif /* eciStandardDutch */
-
-#ifdef eciStandardNorwegian
    "StandardNorwegian",
-#endif /* eciStandardNorwegian */
-
-#ifdef eciStandardSwedish
    "StandardSwedish",
-#endif /* eciStandardSwedish */
-
-#ifdef eciStandardDanish
    "StandardDanish",
-#endif /* eciStandardDanish */
-
-#ifdef eciStandardReserved
    "StandardReserved",
-#endif /* eciStandardReserved */
-
-#ifdef eciStandardThai
    "StandardThai",
-#endif /* eciStandardThai */
-
-#ifdef eciStandardThaiTIS
    "StandardThaiTIS",
-#endif /* eciStandardThaiTIS */
-
-#ifdef NODEFINEDCODESET
    "NoDefinedCodeSet",
-#endif /* NODEFINEDCODESET */
-
    NULL
 };
 
@@ -419,6 +186,7 @@ setEnvironmentParameter (ECIHand eci, const char *description, enum ECIParam par
       if (!ok) reportError(eci, "eciCopyVoice");
       return ok;
    }
+
    return eciSetParam(eci, parameter, setting) >= 0;
 }
 
@@ -426,10 +194,13 @@ static int
 choiceEnvironmentParameter (ECIHand eci, const char *description, const char *value, enum ECIParam parameter, const char *const *choices, const int *map) {
    int ok = 0;
    int assume = 1;
+
    if (*value) {
       unsigned int setting;
+
       if (validateChoice(&setting, value, choices)) {
 	 if (map) setting = map[setting];
+
          if (setEnvironmentParameter(eci, description, parameter, setting)) {
 	    ok = 1;
 	    assume = setting;
@@ -438,6 +209,7 @@ choiceEnvironmentParameter (ECIHand eci, const char *description, const char *va
         logMessage(LOG_WARNING, "invalid %s setting: %s", description, value);
       }
    }
+
    reportEnvironmentParameter(eci, description, parameter, assume, choices, map);
    return ok;
 }
@@ -475,17 +247,18 @@ setVoiceParameter (ECIHand eci, const char *description, enum ECIVoiceParam para
 static int
 choiceVoiceParameter (ECIHand eci, const char *description, const char *value, enum ECIVoiceParam parameter, const char *const *choices, const int *map) {
    int ok = 0;
+
    if (*value) {
       unsigned int setting;
+
       if (validateChoice(&setting, value, choices)) {
 	 if (map) setting = map[setting];
-         if (setVoiceParameter(eci, description, parameter, setting)) {
-	    ok = 1;
-	 }
+         if (setVoiceParameter(eci, description, parameter, setting)) ok = 1;
       } else {
         logMessage(LOG_WARNING, "invalid %s setting: %s", description, value);
       }
    }
+
    reportVoiceParameter(eci, description, parameter, choices, map);
    return ok;
 }
@@ -681,7 +454,7 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
             const char *numberModes[] = {"word", "year", NULL};
             const char *synthModes[] = {"sentence", "none", NULL};
             const char *textModes[] = {"talk", "spell", "literal", "phonetic", NULL};
-            const char *voices[] = {"", "AdultMale", "AdultFemale", "Child", "", "", "", "ElderlyFemale", "ElderlyMale", NULL};
+            const char *voices[] = {"", "dad", "mom", "child", "", "", "", "grandma", "grandpa", NULL};
             const char *vocalTracts[] = {"male", "female", NULL};
 
             choiceEnvironmentParameter(eci, "sample rate", parameters[PARM_SampleRate], eciSampleRate, sampleRates, NULL);
@@ -691,8 +464,8 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
             choiceEnvironmentParameter(eci, "text mode", parameters[PARM_TextMode], eciTextMode, textModes, NULL);
             choiceEnvironmentParameter(eci, "language", parameters[PARM_Language], eciLanguageDialect, languageNames, languageMap);
             choiceEnvironmentParameter(eci, "voice", parameters[PARM_Voice], eciNumParams, voices, NULL);
-            choiceVoiceParameter(eci, "vocal tract", parameters[PARM_VocalTract], eciGender, vocalTracts, NULL);
 
+            choiceVoiceParameter(eci, "vocal tract", parameters[PARM_VocalTract], eciGender, vocalTracts, NULL);
             rangeVoiceParameter(eci, "breathiness", parameters[PARM_Breathiness], eciBreathiness, 0, 100);
             rangeVoiceParameter(eci, "head size", parameters[PARM_HeadSize], eciHeadSize, 0, 100);
             rangeVoiceParameter(eci, "pitch baseline", parameters[PARM_PitchBaseline], eciPitchBaseline, 0, 100);
