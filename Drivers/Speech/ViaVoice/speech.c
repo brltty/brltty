@@ -590,6 +590,7 @@ spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t le
 	 if (saySegment(eci, buffer, sayFrom, index)) {
 	    if (eciSynthesize(eci)) {
                if (eciSynchronize(eci)) {
+                  pushPcmOutput(pcmDevice);
                } else {
                   reportError(eci, "eciSynchronize");
                }
