@@ -258,13 +258,8 @@ setExternalUnits (void) {
    return setUnits(1);
 }
 
-static void
-reportVoiceParameter (ECIHand eci, const char *description, enum ECIVoiceParam parameter, const char *const *choices, const int *map) {
-   reportParameter(description, eciGetVoiceParam(eci, 0, parameter), choices, map);
-}
-
 static int
-setVoiceParameter (ECIHand eci, const char *description, enum ECIVoiceParam parameter, int setting) {
+setParameterUnits (ECIHand eci, enum ECIVoiceParam parameter) {
    switch (parameter) {
       case eciVolume:
          if (!setInternalUnits()) return 0;
@@ -279,6 +274,23 @@ setVoiceParameter (ECIHand eci, const char *description, enum ECIVoiceParam para
          break;
    }
 
+   return 1;
+}
+
+static int
+getVoiceParameter (ECIHand eci, enum ECIVoiceParam parameter) {
+   if (!setParameterUnits(eci, parameter)) return 0;
+   return eciGetVoiceParam(eci, 0, parameter);
+}
+
+static void
+reportVoiceParameter (ECIHand eci, const char *description, enum ECIVoiceParam parameter, const char *const *choices, const int *map) {
+   reportParameter(description, getVoiceParameter(eci, parameter), choices, map);
+}
+
+static int
+setVoiceParameter (ECIHand eci, const char *description, enum ECIVoiceParam parameter, int setting) {
+   if (!setParameterUnits(eci, parameter)) return 0;
    return eciSetVoiceParam(eci, 0, parameter, setting) >= 0;
 }
 
@@ -474,7 +486,7 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
 	 if ((eci = eciNew()) != NULL_ECI_HAND) {
             eciRegisterCallback(eci, clientCallback, NULL);
 
-            currentUnits = -1;
+            currentUnits = eciGetParam(eci, eciRealWorldUnits);
 
             const char *sampleRates[] = {"8000", "11025", "22050", NULL};
             const char *abbreviationModes[] = {"on", "off", NULL};
