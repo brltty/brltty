@@ -22,13 +22,14 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include <ctype.h>
 #include <eci.h>
 
 #include "log.h"
 #include "parse.h"
-#include "pcm.h"
-#include "notes.h"
+
+#define MAXIMUM_SAMPLES 0X800
 
 typedef enum {
    PARM_IniFile,
@@ -57,7 +58,7 @@ static int currentUnits;
 static char *sayBuffer = NULL;
 static int saySize = 0;
 
-static PcmDevice *pcmDevice = NULL;
+static FILE *pcmStream = NULL;
 static short *pcmBuffer = NULL;
 
 static const int languageMap[] = {
@@ -420,7 +421,6 @@ spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t le
 	 if (saySegment(eci, buffer, sayFrom, index)) {
 	    if (eciSynthesize(eci)) {
                if (eciSynchronize(eci)) {
-                  pushPcmOutput(pcmDevice);
                } else {
                   reportError(eci, "eciSynchronize");
                }
@@ -458,16 +458,10 @@ spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting) {
 static enum ECICallbackReturn
 clientCallback (ECIHand eci, enum ECIMessage message, long parameter, void *data) {
    switch (message) {
-      case eciWaveformBuffer: {
-         int samples = parameter;
-         int bytes = samples * sizeof(*pcmBuffer);
-
-         if (!writePcmData(pcmDevice, (unsigned char *)pcmBuffer, bytes)) {
-            return eciDataAbort;
-         }
-
+      case eciWaveformBuffer:
+         fwrite(pcmBuffer, sizeof(*pcmBuffer), parameter, pcmStream);
+         if (ferror(pcmStream)) return eciDataAbort;
          break;
-      }
 
       default:
          break;
@@ -483,6 +477,12 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
 
    if (!eci) {
       if (setIni(parameters[PARM_IniFile])) {
+         {
+            char version[0X80];
+            eciVersion(version);
+            logMessage(LOG_INFO, "ViaVoice Engine: version %s", version);
+         }
+
 	 if ((eci = eciNew()) != NULL_ECI_HAND) {
             eciRegisterCallback(eci, clientCallback, NULL);
 
@@ -511,39 +511,31 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
             rangeVoiceParameter(eci, "pitch fluctuation", parameters[PARM_PitchFluctuation], eciPitchFluctuation, 0, 100);
             rangeVoiceParameter(eci, "roughness", parameters[PARM_Roughness], eciRoughness, 0, 100);
 
-            if ((pcmDevice = openPcmDevice(LOG_WARNING, opt_pcmDevice))) {
-               {
-                  char version[0X80];
-                  eciVersion(version);
-                  logMessage(LOG_INFO, "ViaVoice Engine: version %s", version);
-               }
-
-               setPcmChannelCount(pcmDevice, 1);
-               setPcmAmplitudeFormat(pcmDevice, PCM_FMT_S16N);
-
-               {
+            if ((pcmBuffer = calloc(MAXIMUM_SAMPLES, sizeof(*pcmBuffer)))) {
+               if (eciSetOutputBuffer(eci, MAXIMUM_SAMPLES, pcmBuffer)) {
                   int rate = eciGetParam(eci, eciSampleRate);
+                  if (rate >= 0) rate = atoi(sampleRates[rate]);
 
-                  if (rate >= 0) {
-                     rate = atoi(sampleRates[rate]);
-                     setPcmSampleRate(pcmDevice, rate);
-                  }
-               }
+                  char command[0X100];
+                  snprintf(
+                     command, sizeof(command),
+                     "sox --type raw --channels 1 --bits %" PRIsize " --encoding signed-integer --rate %d - --default-device",
+                     (sizeof(*pcmBuffer) * 8), rate
+                  );
 
-               int bytes = getPcmBlockSize(pcmDevice);
-               int samples = bytes / sizeof(*pcmBuffer);
-
-               if ((pcmBuffer = malloc(bytes))) {
-                  if (eciSetOutputBuffer(eci, samples, pcmBuffer)) {
+                  if ((pcmStream = popen(command, "w"))) {
                      return 1;
                   } else {
+                     logMessage(LOG_WARNING, "can't start command: %s", strerror(errno));
                   }
                } else {
-                  logMallocError();
+                  reportError(eci, "eciSetOutputBuffer");
                }
 
-               closePcmDevice(pcmDevice);
-               pcmDevice = NULL;
+               free(pcmBuffer);
+               pcmBuffer = NULL;
+            } else {
+               logMallocError();
             }
 
             eciDelete(eci);
@@ -563,9 +555,9 @@ spk_destruct (volatile SpeechSynthesizer *spk) {
       eci = NULL_ECI_HAND;
    }
 
-   if (pcmDevice) {
-      closePcmDevice(pcmDevice);
-      pcmDevice = NULL;
+   if (pcmStream) {
+      pclose(pcmStream);
+      pcmStream = NULL;
    }
 
    if (pcmBuffer) {
