@@ -421,6 +421,7 @@ spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t le
 	 if (saySegment(eci, buffer, sayFrom, index)) {
 	    if (eciSynthesize(eci)) {
                if (eciSynchronize(eci)) {
+                  fflush(pcmStream);
                } else {
                   reportError(eci, "eciSynchronize");
                }
@@ -519,7 +520,7 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
                   char command[0X100];
                   snprintf(
                      command, sizeof(command),
-                     "sox --type raw --channels 1 --bits %" PRIsize " --encoding signed-integer --rate %d - --default-device",
+                     "sox -q -t raw -c 1 -b %" PRIsize " -e signed-integer -r %d - -d",
                      (sizeof(*pcmBuffer) * 8), rate
                   );
 
