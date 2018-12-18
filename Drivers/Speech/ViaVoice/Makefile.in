@@ -25,5 +25,5 @@ SPK_OBJS = @speech_libraries_vv@
 include $(SRC_TOP)speech.mk
 
 speech.$O:
-	$(CXX) $(SPK_CXXFLAGS) -c $(SRC_DIR)/speech.c
+	$(CC) $(SPK_CFLAGS) -c $(SRC_DIR)/speech.c
 
