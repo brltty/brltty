@@ -40,14 +40,14 @@ typedef enum {
    PARM_TextMode,
    PARM_Language,
    PARM_Voice,
-   PARM_VocalTract,
+   PARM_Gender,
    PARM_Breathiness,
    PARM_HeadSize,
    PARM_PitchBaseline,
    PARM_PitchFluctuation,
    PARM_Roughness
 } DriverParameter;
-#define SPKPARMS "inifile", "samplerate", "abbreviationmode", "numbermode", "synthmode", "textmode", "language", "voice", "vocaltract", "breathiness", "headsize", "pitchbaseline", "pitchfluctuation", "roughness"
+#define SPKPARMS "inifile", "samplerate", "abbreviationmode", "numbermode", "synthmode", "textmode", "language", "voice", "gender", "breathiness", "headsize", "pitchbaseline", "pitchfluctuation", "roughness"
 
 #include "spk_driver.h"
 #include "speech.h"
@@ -495,7 +495,7 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
             const char *synthModes[] = {"sentence", "none", NULL};
             const char *textModes[] = {"talk", "spell", "literal", "phonetic", NULL};
             const char *voices[] = {"", "dad", "mom", "child", "", "", "", "grandma", "grandpa", NULL};
-            const char *vocalTracts[] = {"male", "female", NULL};
+            const char *genders[] = {"male", "female", NULL};
 
             choiceEnvironmentParameter(eci, "sample rate", parameters[PARM_SampleRate], eciSampleRate, sampleRates, NULL);
             choiceEnvironmentParameter(eci, "abbreviation mode", parameters[PARM_AbbreviationMode], eciDictionary, abbreviationModes, NULL);
@@ -505,7 +505,7 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
             choiceEnvironmentParameter(eci, "language", parameters[PARM_Language], eciLanguageDialect, languageNames, languageMap);
             choiceEnvironmentParameter(eci, "voice", parameters[PARM_Voice], eciNumParams, voices, NULL);
 
-            choiceVoiceParameter(eci, "vocal tract", parameters[PARM_VocalTract], eciGender, vocalTracts, NULL);
+            choiceVoiceParameter(eci, "gender", parameters[PARM_Gender], eciGender, genders, NULL);
             rangeVoiceParameter(eci, "breathiness", parameters[PARM_Breathiness], eciBreathiness, 0, 100);
             rangeVoiceParameter(eci, "head size", parameters[PARM_HeadSize], eciHeadSize, 0, 100);
             rangeVoiceParameter(eci, "pitch baseline", parameters[PARM_PitchBaseline], eciPitchBaseline, 0, 100);
