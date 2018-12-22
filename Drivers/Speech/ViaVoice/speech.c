@@ -29,8 +29,6 @@
 #include "log.h"
 #include "parse.h"
 
-#define MAXIMUM_SAMPLES 0X800
-
 typedef enum {
    PARM_IniFile,
    PARM_SampleRate,
@@ -52,14 +50,18 @@ typedef enum {
 #include "spk_driver.h"
 #include "speech.h"
 
-static ECIHand eci = NULL_ECI_HAND;
+#define USE_SSML 0
+#define MAXIMUM_SAMPLES 0X800
+
+static ECIHand eciHandle = NULL_ECI_HAND;
+static FILE *pcmStream = NULL;
+static short *pcmBuffer = NULL;
+
 static int currentUnits;
+static int currentInputType;
 
 static char *sayBuffer = NULL;
 static int saySize = 0;
-
-static FILE *pcmStream = NULL;
-static short *pcmBuffer = NULL;
 
 static const int languageMap[] = {
    eciGeneralAmericanEnglish,
@@ -219,28 +221,8 @@ choiceEnvironmentParameter (ECIHand eci, const char *description, const char *va
    return ok;
 }
 
-static int rangeEnvironmentParameter (ECIHand eci, const char *description, const char *value, enum ECIParam parameter, int minimum, int maximum) UNUSED;
 static int
-rangeEnvironmentParameter (ECIHand eci, const char *description, const char *value, enum ECIParam parameter, int minimum, int maximum) {
-   int ok = 0;
-   int assume = 1;
-   if (*value) {
-      int setting;
-      if (validateInteger(&setting, value, &minimum, &maximum)) {
-         if (setEnvironmentParameter(eci, description, parameter, setting)) {
-	    ok = 1;
-	    assume = setting;
-	 }
-      } else {
-        logMessage(LOG_WARNING, "invalid %s setting: %s", description, value);
-      }
-   }
-   reportEnvironmentParameter(eci, description, parameter, assume, NULL, NULL);
-   return ok;
-}
-
-static int
-setUnits (int newUnits) {
+setUnits (ECIHand eci, int newUnits) {
    if (newUnits != currentUnits) {
       if (!setEnvironmentParameter(eci, "units", eciRealWorldUnits, newUnits)) return 0;
       currentUnits = newUnits;
@@ -250,25 +232,25 @@ setUnits (int newUnits) {
 }
 
 static int
-setInternalUnits (void) {
-   return setUnits(0);
+useInternalUnits (ECIHand eci) {
+   return setUnits(eci, 0);
 }
 
 static int
-setExternalUnits (void) {
-   return setUnits(1);
+useExternalUnits (ECIHand eci) {
+   return setUnits(eci, 1);
 }
 
 static int
-setParameterUnits (ECIHand eci, enum ECIVoiceParam parameter) {
+useParameterUnits (ECIHand eci, enum ECIVoiceParam parameter) {
    switch (parameter) {
       case eciVolume:
-         if (!setInternalUnits()) return 0;
+         if (!useInternalUnits(eci)) return 0;
          break;
 
       case eciPitchBaseline:
       case eciSpeed:
-         if (!setExternalUnits()) return 0;
+         if (!useExternalUnits(eci)) return 0;
          break;
 
       default:
@@ -280,7 +262,7 @@ setParameterUnits (ECIHand eci, enum ECIVoiceParam parameter) {
 
 static int
 getVoiceParameter (ECIHand eci, enum ECIVoiceParam parameter) {
-   if (!setParameterUnits(eci, parameter)) return 0;
+   if (!useParameterUnits(eci, parameter)) return 0;
    return eciGetVoiceParam(eci, 0, parameter);
 }
 
@@ -291,7 +273,7 @@ reportVoiceParameter (ECIHand eci, const char *description, enum ECIVoiceParam p
 
 static int
 setVoiceParameter (ECIHand eci, const char *description, enum ECIVoiceParam parameter, int setting) {
-   if (!setParameterUnits(eci, parameter)) return 0;
+   if (!useParameterUnits(eci, parameter)) return 0;
    return eciSetVoiceParam(eci, 0, parameter, setting) >= 0;
 }
 
@@ -331,6 +313,198 @@ rangeVoiceParameter (ECIHand eci, const char *description, const char *value, en
    return ok;
 }
 
+static void
+spk_setVolume (volatile SpeechSynthesizer *spk, unsigned char setting) {
+   setVoiceParameter(eciHandle, "volume", eciVolume, getIntegerSpeechVolume(setting, 100));
+}
+
+static void
+spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting) {
+   setVoiceParameter(eciHandle, "rate", eciSpeed, (int)(getFloatSpeechRate(setting) * 210.0));
+}
+
+static int
+setInputType (ECIHand eci, int newInputType) {
+   if (newInputType != currentInputType) {
+      if (!setEnvironmentParameter(eci, "input type", eciInputType, newInputType)) return 0;
+      currentInputType = newInputType;
+   }
+
+   return 1;
+}
+
+static int
+disableAnnotations (ECIHand eci) {
+   return setInputType(eci, 0);
+}
+
+static int
+enableAnnotations (ECIHand eci) {
+   return setInputType(eci, 1);
+}
+
+static int
+addText (ECIHand eci, const char *text) {
+   if (eciAddText(eci, text)) return 1;
+   reportError(eci, "eciAddText");
+   return 0;
+}
+
+static int
+writeAnnotation (ECIHand eci, const char *annotation) {
+   if (!enableAnnotations(eci)) return 0;
+
+   size_t length = strlen(annotation);
+   char text[2 + length + 2];
+   snprintf(text, sizeof(text), " `%s ", annotation);
+   return addText(eci, text);
+}
+
+static int
+ensureSayBuffer (int size) {
+   if (size > saySize) {
+      size |= 0XFF;
+      size += 1;
+      char *newBuffer = malloc(size);
+
+      if (!newBuffer) {
+         logSystemError("speech buffer allocation");
+	 return 0;
+      }
+
+      free(sayBuffer);
+      sayBuffer = newBuffer;
+      saySize = size;
+   }
+
+   return 1;
+}
+
+static int
+addCharacters (ECIHand eci, const unsigned char *buffer, int from, int to) {
+   int length = to - from;
+   if (!length) return 1;
+
+   if (!ensureSayBuffer(length+1)) return 0;
+   memcpy(sayBuffer, &buffer[from], length);
+   sayBuffer[length] = 0;
+   return addText(eci, sayBuffer);
+}
+
+static int
+addSegment (ECIHand eci, const unsigned char *buffer, int from, int to) {
+   if (USE_SSML) {
+      if (!addText(eciHandle, "<speak>")) return 0;
+
+      for (int index=from; index<to; index+=1) {
+         const char *entity = NULL;
+
+         switch (buffer[index]) {
+            case '<':
+               entity = "lt";
+               break;
+
+            case '>':
+               entity = "gt";
+               break;
+
+            case '&':
+               entity = "amp";
+               break;
+
+            case '"':
+               entity = "quot";
+               break;
+
+            case '\'':
+               entity = "apos";
+               break;
+
+            default:
+               continue;
+         }
+
+         if (!addCharacters(eci, buffer, from, index)) return 0;
+         from = index + 1;
+
+         size_t length = strlen(entity);
+         char text[1 + length + 2];
+         snprintf(text, sizeof(text), "&%s;", entity);
+         if (!addText(eci, text)) return 0;
+      }
+   }
+
+   if (!addCharacters(eci, buffer, from, to)) return 0;
+   if (USE_SSML && !addText(eciHandle, "</speak>")) return 0;
+
+   if (eciInsertIndex(eci, to)) return 1;
+   reportError(eci, "eciInsertIndex");
+   return 0;
+}
+
+static int
+addSegments (ECIHand eci, const unsigned char *buffer, size_t length) {
+   int onSpace = -1;
+   int from = 0;
+   int to;
+
+   for (to=0; to<length; to+=1) {
+      int isSpace = isspace(buffer[to])? 1: 0;
+
+      if (isSpace != onSpace) {
+         onSpace = isSpace;
+
+         if (to > from) {
+            if (!addSegment(eci, buffer, from, to)) return 0;
+            from = to;
+         }
+      }
+   }
+
+   return addSegment(eci, buffer, from, to);
+}
+
+static void
+spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
+   if (addSegments(eciHandle, buffer, length)) {
+      if (eciSynthesize(eciHandle)) {
+         if (eciSynchronize(eciHandle)) {
+            fflush(pcmStream);
+            return;
+         } else {
+            reportError(eciHandle, "eciSynchronize");
+         }
+      } else {
+         reportError(eciHandle, "eciSynthesize");
+      }
+   }
+
+   eciStop(eciHandle);
+}
+
+static void
+spk_mute (volatile SpeechSynthesizer *spk) {
+   if (eciStop(eciHandle)) {
+   } else {
+      reportError(eciHandle, "eciStop");
+   }
+}
+
+static enum ECICallbackReturn
+clientCallback (ECIHand eci, enum ECIMessage message, long parameter, void *data) {
+   switch (message) {
+      case eciWaveformBuffer:
+         fwrite(pcmBuffer, sizeof(*pcmBuffer), parameter, pcmStream);
+         if (ferror(pcmStream)) return eciDataAbort;
+         break;
+
+      default:
+         break;
+   }
+
+   return eciDataProcessed;
+}
+
 static int
 setIni (const char *path) {
    const char *variable = INI_VARIABLE;
@@ -355,205 +529,95 @@ isSet:
 }
 
 static int
-ensureSayBuffer (int size) {
-   if (size > saySize) {
-      size |= 0XFF;
-      size += 1;
-      char *newBuffer = malloc(size);
-
-      if (!newBuffer) {
-         logSystemError("speech buffer allocation");
-	 return 0;
-      }
-
-      free(sayBuffer);
-      sayBuffer = newBuffer;
-      saySize = size;
-   }
-
-   return 1;
-}
-
-static int
-saySegment (ECIHand eci, const unsigned char *buffer, int from, int to) {
-   int length = to - from;
-   if (!length) return 1;
-
-   if (ensureSayBuffer(length+1)) {
-      memcpy(sayBuffer, &buffer[from], length);
-      sayBuffer[length] = 0;
-
-      if (eciAddText(eci, sayBuffer)) {
-	 if (eciInsertIndex(eci, to)) {
-	    return 1;
-	 } else {
-	    reportError(eci, "eciInsertIndex");
-	 }
-      } else {
-         reportError(eci, "eciAddText");
-      }
-   }
-
-   return 0;
-}
-
-static void
-spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
-   if (eci) {
-      int onSpace = -1;
-      int sayFrom = 0;
-      int index;
-
-      for (index=0; index<length; index+=1) {
-	 int isSpace = isspace(buffer[index])? 1: 0;
-
-	 if (isSpace != onSpace) {
-	    onSpace = isSpace;
-
-	    if (index > sayFrom) {
-	       if (!saySegment(eci, buffer, sayFrom, index)) break;
-	       sayFrom = index;
-	    }
-	 }
-      }
-
-      if (index == length) {
-	 if (saySegment(eci, buffer, sayFrom, index)) {
-	    if (eciSynthesize(eci)) {
-               if (eciSynchronize(eci)) {
-                  fflush(pcmStream);
-               } else {
-                  reportError(eci, "eciSynchronize");
-               }
-
-	       return;
-	    } else {
-	       reportError(eci, "eciSynthesize");
-	    }
-	 }
-      }
-      eciStop(eci);
-   }
-}
-
-static void
-spk_mute (volatile SpeechSynthesizer *spk) {
-   if (eci) {
-      if (eciStop(eci)) {
-      } else {
-         reportError(eci, "eciStop");
-      }
-   }
-}
-
-static void
-spk_setVolume (volatile SpeechSynthesizer *spk, unsigned char setting) {
-   setVoiceParameter(eci, "volume", eciVolume, getIntegerSpeechVolume(setting, 100));
-}
-
-static void
-spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting) {
-   setVoiceParameter (eci, "rate", eciSpeed, (int)(getFloatSpeechRate(setting) * 210.0));
-}
-
-static enum ECICallbackReturn
-clientCallback (ECIHand eci, enum ECIMessage message, long parameter, void *data) {
-   switch (message) {
-      case eciWaveformBuffer:
-         fwrite(pcmBuffer, sizeof(*pcmBuffer), parameter, pcmStream);
-         if (ferror(pcmStream)) return eciDataAbort;
-         break;
-
-      default:
-         break;
-   }
-
-   return eciDataProcessed;
-}
-
-static int
 spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
    spk->setVolume = spk_setVolume;
    spk->setRate = spk_setRate;
 
-   if (!eci) {
-      if (setIni(parameters[PARM_IniFile])) {
-         {
-            char version[0X80];
-            eciVersion(version);
-            logMessage(LOG_INFO, "ViaVoice Engine: version %s", version);
+   if (setIni(parameters[PARM_IniFile])) {
+      {
+         char version[0X80];
+         eciVersion(version);
+         logMessage(LOG_INFO, "ViaVoice Engine: version %s", version);
+      }
+
+      if ((eciHandle = eciNew()) != NULL_ECI_HAND) {
+         eciRegisterCallback(eciHandle, clientCallback, NULL);
+
+         currentUnits = eciGetParam(eciHandle, eciRealWorldUnits);
+         currentInputType = eciGetParam(eciHandle, eciInputType);
+
+         const char *sampleRates[] = {"8000", "11025", "22050", NULL};
+         const char *abbreviationModes[] = {"on", "off", NULL};
+         const char *numberModes[] = {"word", "year", NULL};
+         const char *synthModes[] = {"sentence", "none", NULL};
+         const char *textModes[] = {"talk", "spell", "literal", "phonetic", NULL};
+         const char *voices[] = {"", "dad", "mom", "child", "", "", "", "grandma", "grandpa", NULL};
+         const char *genders[] = {"male", "female", NULL};
+
+         choiceEnvironmentParameter(eciHandle, "sample rate", parameters[PARM_SampleRate], eciSampleRate, sampleRates, NULL);
+         choiceEnvironmentParameter(eciHandle, "abbreviation mode", parameters[PARM_AbbreviationMode], eciDictionary, abbreviationModes, NULL);
+         choiceEnvironmentParameter(eciHandle, "number mode", parameters[PARM_NumberMode], eciNumberMode, numberModes, NULL);
+         choiceEnvironmentParameter(eciHandle, "synth mode", parameters[PARM_SynthMode], eciSynthMode, synthModes, NULL);
+         choiceEnvironmentParameter(eciHandle, "text mode", parameters[PARM_TextMode], eciTextMode, textModes, NULL);
+         choiceEnvironmentParameter(eciHandle, "language", parameters[PARM_Language], eciLanguageDialect, languageNames, languageMap);
+         choiceEnvironmentParameter(eciHandle, "voice", parameters[PARM_Voice], eciNumParams, voices, NULL);
+
+         choiceVoiceParameter(eciHandle, "gender", parameters[PARM_Gender], eciGender, genders, NULL);
+         rangeVoiceParameter(eciHandle, "breathiness", parameters[PARM_Breathiness], eciBreathiness, 0, 100);
+         rangeVoiceParameter(eciHandle, "head size", parameters[PARM_HeadSize], eciHeadSize, 0, 100);
+         rangeVoiceParameter(eciHandle, "pitch baseline", parameters[PARM_PitchBaseline], eciPitchBaseline, 0, 100);
+         rangeVoiceParameter(eciHandle, "pitch fluctuation", parameters[PARM_PitchFluctuation], eciPitchFluctuation, 0, 100);
+         rangeVoiceParameter(eciHandle, "roughness", parameters[PARM_Roughness], eciRoughness, 0, 100);
+
+         if (USE_SSML) {
+            writeAnnotation(eciHandle, "gfa1");
+            writeAnnotation(eciHandle, "gfa2");
+         // writeAnnotation(eciHandle, "Pf0()?-");
          }
+         disableAnnotations(eciHandle);
 
-	 if ((eci = eciNew()) != NULL_ECI_HAND) {
-            eciRegisterCallback(eci, clientCallback, NULL);
+         if ((pcmBuffer = calloc(MAXIMUM_SAMPLES, sizeof(*pcmBuffer)))) {
+            if (eciSetOutputBuffer(eciHandle, MAXIMUM_SAMPLES, pcmBuffer)) {
+               int rate = eciGetParam(eciHandle, eciSampleRate);
+               if (rate >= 0) rate = atoi(sampleRates[rate]);
 
-            currentUnits = eciGetParam(eci, eciRealWorldUnits);
+               char command[0X100];
+               snprintf(
+                  command, sizeof(command),
+                  "sox -q -t raw -c 1 -b %" PRIsize " -e signed-integer -r %d - -d",
+                  (sizeof(*pcmBuffer) * 8), rate
+               );
 
-            const char *sampleRates[] = {"8000", "11025", "22050", NULL};
-            const char *abbreviationModes[] = {"on", "off", NULL};
-            const char *numberModes[] = {"word", "year", NULL};
-            const char *synthModes[] = {"sentence", "none", NULL};
-            const char *textModes[] = {"talk", "spell", "literal", "phonetic", NULL};
-            const char *voices[] = {"", "dad", "mom", "child", "", "", "", "grandma", "grandpa", NULL};
-            const char *genders[] = {"male", "female", NULL};
-
-            choiceEnvironmentParameter(eci, "sample rate", parameters[PARM_SampleRate], eciSampleRate, sampleRates, NULL);
-            choiceEnvironmentParameter(eci, "abbreviation mode", parameters[PARM_AbbreviationMode], eciDictionary, abbreviationModes, NULL);
-            choiceEnvironmentParameter(eci, "number mode", parameters[PARM_NumberMode], eciNumberMode, numberModes, NULL);
-            choiceEnvironmentParameter(eci, "synth mode", parameters[PARM_SynthMode], eciSynthMode, synthModes, NULL);
-            choiceEnvironmentParameter(eci, "text mode", parameters[PARM_TextMode], eciTextMode, textModes, NULL);
-            choiceEnvironmentParameter(eci, "language", parameters[PARM_Language], eciLanguageDialect, languageNames, languageMap);
-            choiceEnvironmentParameter(eci, "voice", parameters[PARM_Voice], eciNumParams, voices, NULL);
-
-            choiceVoiceParameter(eci, "gender", parameters[PARM_Gender], eciGender, genders, NULL);
-            rangeVoiceParameter(eci, "breathiness", parameters[PARM_Breathiness], eciBreathiness, 0, 100);
-            rangeVoiceParameter(eci, "head size", parameters[PARM_HeadSize], eciHeadSize, 0, 100);
-            rangeVoiceParameter(eci, "pitch baseline", parameters[PARM_PitchBaseline], eciPitchBaseline, 0, 100);
-            rangeVoiceParameter(eci, "pitch fluctuation", parameters[PARM_PitchFluctuation], eciPitchFluctuation, 0, 100);
-            rangeVoiceParameter(eci, "roughness", parameters[PARM_Roughness], eciRoughness, 0, 100);
-
-            if ((pcmBuffer = calloc(MAXIMUM_SAMPLES, sizeof(*pcmBuffer)))) {
-               if (eciSetOutputBuffer(eci, MAXIMUM_SAMPLES, pcmBuffer)) {
-                  int rate = eciGetParam(eci, eciSampleRate);
-                  if (rate >= 0) rate = atoi(sampleRates[rate]);
-
-                  char command[0X100];
-                  snprintf(
-                     command, sizeof(command),
-                     "sox -q -t raw -c 1 -b %" PRIsize " -e signed-integer -r %d - -d",
-                     (sizeof(*pcmBuffer) * 8), rate
-                  );
-
-                  if ((pcmStream = popen(command, "w"))) {
-                     return 1;
-                  } else {
-                     logMessage(LOG_WARNING, "can't start command: %s", strerror(errno));
-                  }
+               if ((pcmStream = popen(command, "w"))) {
+                  return 1;
                } else {
-                  reportError(eci, "eciSetOutputBuffer");
+                  logMessage(LOG_WARNING, "can't start command: %s", strerror(errno));
                }
-
-               free(pcmBuffer);
-               pcmBuffer = NULL;
             } else {
-               logMallocError();
+               reportError(eciHandle, "eciSetOutputBuffer");
             }
 
-            eciDelete(eci);
-            eci = NULL_ECI_HAND;
-	 } else {
-	    logMessage(LOG_ERR, "ViaVoice initialization error");
-	 }
+            free(pcmBuffer);
+            pcmBuffer = NULL;
+         } else {
+            logMallocError();
+         }
+
+         eciDelete(eciHandle);
+         eciHandle = NULL_ECI_HAND;
+      } else {
+         logMessage(LOG_ERR, "ViaVoice initialization error");
       }
    }
+
    return 0;
 }
 
 static void
 spk_destruct (volatile SpeechSynthesizer *spk) {
-   if (eci) {
-      eciDelete(eci);
-      eci = NULL_ECI_HAND;
+   if (eciHandle) {
+      eciDelete(eciHandle);
+      eciHandle = NULL_ECI_HAND;
    }
 
    if (pcmStream) {
