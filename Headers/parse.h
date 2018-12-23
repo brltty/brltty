@@ -35,7 +35,7 @@ extern int isUnsignedInteger (unsigned int *value, const char *string);
 extern int isLogLevel (unsigned int *level, const char *string);
 
 extern int isAbbreviation (const char *actual, const char *supplied);
-extern int comparePhrases (const char *actual, const char *supplied);
+extern int isAbbreviatedPhrase (const char *actual, const char *supplied);
 
 extern int validateInteger (int *value, const char *string, const int *minimum, const int *maximum);
 extern int validateChoice (unsigned int *value, const char *string, const char *const *choices);

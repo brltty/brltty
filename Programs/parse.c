@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "parse.h"
 #include "log.h"
@@ -216,8 +217,22 @@ isAbbreviation (const char *actual, const char *supplied) {
 }
 
 int
-comparePhrases (const char *actual, const char *supplied) {
-  return isAbbreviation(actual, supplied);
+isAbbreviatedPhrase (const char *actual, const char *supplied) {
+  while (1) {
+    if (!*supplied) return 1;
+
+    if (*supplied == '-') {
+      while (*actual != '-') {
+        if (!*actual) return 0;
+        actual += 1;
+      }
+    } else if (tolower(*supplied) != tolower(*actual)) {
+      return 0;
+    }
+
+    actual += 1;
+    supplied += 1;
+  }
 }
 
 int
@@ -247,9 +262,10 @@ validateChoiceEx (unsigned int *value, const char *string, const void *choices, 
     } Entry;
 
     const Entry *entry = choice;
-    if (!entry->name) break;
+    const char *name = entry->name;
+    if (!name) break;
 
-    if (isAbbreviation(entry->name, string)) {
+    if (isAbbreviatedPhrase(name, string)) {
       *value = (choice - choices) / size;
       return 1;
     }

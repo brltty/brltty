@@ -401,7 +401,7 @@ setGeneralParameter (ECIHand eci, const char *description, enum ECIParam paramet
 }
 
 static int
-choiceGeneralParameter (ECIHand eci, const char *description, const char *value, enum ECIParam parameter, const char *const *choices, size_t size, MapFunction *map) {
+choiceGeneralParameter (ECIHand eci, const char *description, const char *value, enum ECIParam parameter, const void *choices, size_t size, MapFunction *map) {
    int ok = 0;
    int assume = 1;
 
@@ -414,6 +414,8 @@ choiceGeneralParameter (ECIHand eci, const char *description, const char *value,
          if (setGeneralParameter(eci, description, parameter, setting)) {
 	    ok = 1;
 	    assume = setting;
+         } else {
+            logMessage(LOG_WARNING, "%s not supported: %s", description, value);
 	 }
       } else {
         logMessage(LOG_WARNING, "invalid %s setting: %s", description, value);
@@ -490,7 +492,12 @@ choiceVoiceParameter (ECIHand eci, const char *description, const char *value, e
 
       if (validateChoice(&setting, value, choices)) {
 	 if (map) setting = map(setting);
-         if (setVoiceParameter(eci, description, parameter, setting)) ok = 1;
+
+         if (setVoiceParameter(eci, description, parameter, setting)) {
+            ok = 1;
+         } else {
+            logMessage(LOG_WARNING, "%s not supported: %s", description, value);
+         }
       } else {
         logMessage(LOG_WARNING, "invalid %s setting: %s", description, value);
       }
