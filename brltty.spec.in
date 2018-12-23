@@ -237,6 +237,27 @@ Install this package if you would like to be able to use the
 Speech Dispatcher text-to-speech server.
 
 
+%package -n brltty-speech-viavoice
+Version: @PACKAGE_VERSION@
+Release: 1
+Group: System Environment/Daemons
+License: LGPL
+
+Requires: libvoxin
+
+BuildRequires: libvoxin-devel
+
+AutoProv: no
+AutoReq: yes
+
+Summary: ViaVoice speech driver for BRLTTY.
+%description -n brltty-speech-viavoice
+This package provides the ViaVoice speech driver for BRLTTY.
+
+Install this package if you would like to be able to use the
+ViaVoice text-to-speech engine.
+
+
 %package -n brltty-screen-atspi2
 Version: @PACKAGE_VERSION@
 Release: 1
@@ -593,6 +614,9 @@ rm -fr "${RPM_BUILD_ROOT}"
 
 %files -n brltty-speech-speechd
 %{_libdir}/brltty/libbrlttyssd.so
+
+%files -n brltty-speech-viavoice
+%{_libdir}/brltty/libbrlttysvv.so
 
 %files -n brltty-screen-atspi2
 %{_libdir}/brltty/libbrlttyxa2.so
