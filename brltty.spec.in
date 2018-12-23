@@ -244,6 +244,7 @@ Group: System Environment/Daemons
 License: LGPL
 
 Requires: libvoxin
+Requires: sox
 
 BuildRequires: libvoxin-devel
 
