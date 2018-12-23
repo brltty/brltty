@@ -471,22 +471,6 @@ instructions supplémentaires spécifiques.
         <tt>/opt/Theta</tt>, ou <tt>/opt/theta</tt>.
         Cela revient à spécifier <tt>--with-theta</tt>.
     </descrip>
-  <tag><tt>--with-viavoice=</tt><em>repertoire</em><label id="build-viavoice"></tag>
-    Spécifie l'emplacement d'installation du paquet Viavoice
-    et compile le pilote pour la synthèse vocale
-    Viavoice (voir <ref id="restrictions-viavoice" name="Restrictions dans la compilation">). L'un des
-    mots suivants peut aussi être utilisé comme opérateur de cette
-    option:
-    <descrip>
-      <tag>no</tag>
-        Ne compile pas le pilote.
-        Cela revient à spécifier <tt>--without-viavoice</tt>.
-      <tag>yes</tag>
-        Compile le pilote si le paquet existe dans <tt>/usr</tt>,
-        <tt>/usr/local</tt>, <tt>/usr/local/ViaVoice</tt>, <tt>/usr/local/viavoice</tt>,
-        <tt>/opt/ViaVoice</tt>, ou <tt>/opt/viavoice</tt>.
-        Cela revient à spécifier <tt>--with-viavoice</tt>.
-    </descrip>
   <tag><tt>--with-screen-driver=</tt><em>pilote</em><label id="build-screen-driver"></tag>
     Spécifie les pilotes pour l'écran qui seront liés à l'exécutable BRLTTY. 
     Ceux qui ne sont pas mentionnés dans cette option sont compilés en tant

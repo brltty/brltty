@@ -31,7 +31,6 @@
    --without-speechd \
    --without-swift \
    --without-theta \
-   --without-viavoice \
    \
    --without-pgmpath-package \
    --without-service-package \

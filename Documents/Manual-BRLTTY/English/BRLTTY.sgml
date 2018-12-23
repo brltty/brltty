@@ -728,25 +728,6 @@ for any additional display-specific instructions.
         or <tt>/opt/theta</>.
         This is equivalent to specifying <tt/--with-theta/.
     </descrip>
-  <tag><tt/--with-viavoice=/<em/directory/<label id="build-viavoice"></tag>
-    Specify the installed location of the ViaVoice text-to-speech package,
-    and build the ViaVoice speech synthesizer driver
-    (see <ref id="restrictions-viavoice" name="Build Restrictions">).
-    Any of the following words can also be used as the operand of this option:
-    <descrip>
-      <tag/no/
-        Don't build the driver.
-        This is equivalent to specifying <tt/--without-viavoice/.
-      <tag/yes/
-        Build the driver if the package can be found in
-        <tt>/usr</>,
-        <tt>/usr/local</>,
-        <tt>/usr/local/ViaVoice</>,
-        <tt>/usr/local/viavoice</>,
-        <tt>/opt/ViaVoice</>,
-        or <tt>/opt/viavoice</>.
-        This is equivalent to specifying <tt/--with-viavoice/.
-    </descrip>
   <tag><tt/--with-screen-driver=/<em/driver/<label id="build-screen-driver"></tag>
     Specify the screen drivers
     which are to be linked into the BRLTTY binary.

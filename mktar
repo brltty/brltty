@@ -51,7 +51,7 @@ cp -p -r -- "${sourceRoot}" "${archiveName}"
 cd "${archiveName}"
 
 ./autogen
-./configure --quiet --without-libbraille --without-flite --without-mikropuhe --without-speechd --without-swift --without-theta --without-viavoice
+./configure --quiet --without-libbraille --without-flite --without-mikropuhe --without-speechd --without-swift --without-theta
 
 cd Documents
 make -s clean

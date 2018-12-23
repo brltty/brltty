@@ -97,7 +97,6 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
    --without-speechd \
    --without-swift \
    --without-theta \
-   --without-viavoice \
    --with-speech-driver=an,-all \
    \
    --with-screen-driver=an,-all \
