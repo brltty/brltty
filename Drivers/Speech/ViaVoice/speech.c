@@ -61,7 +61,7 @@ static int currentUnits;
 static int currentInputType;
 
 static char *sayBuffer = NULL;
-static int saySize = 0;
+static size_t saySize;
 
 static const int languageMap[] = {
    eciGeneralAmericanEnglish,
@@ -469,8 +469,12 @@ spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t le
    if (addSegments(eciHandle, buffer, length)) {
       if (eciSynthesize(eciHandle)) {
          if (eciSynchronize(eciHandle)) {
-            fflush(pcmStream);
-            return;
+            if (fflush(pcmStream) != EOF) {
+               tellSpeechFinished(spk);
+               return;
+            } else {
+               logSystemError("fflush");
+            }
          } else {
             reportError(eciHandle, "eciSynchronize");
          }
@@ -492,10 +496,16 @@ spk_mute (volatile SpeechSynthesizer *spk) {
 
 static enum ECICallbackReturn
 clientCallback (ECIHand eci, enum ECIMessage message, long parameter, void *data) {
+   volatile SpeechSynthesizer *spk = data;
+
    switch (message) {
       case eciWaveformBuffer:
          fwrite(pcmBuffer, sizeof(*pcmBuffer), parameter, pcmStream);
          if (ferror(pcmStream)) return eciDataAbort;
+         break;
+
+      case eciIndexReply:
+         tellSpeechLocation(spk, parameter);
          break;
 
       default:
@@ -533,6 +543,9 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
    spk->setVolume = spk_setVolume;
    spk->setRate = spk_setRate;
 
+   sayBuffer = NULL;
+   saySize = 0;
+
    if (setIni(parameters[PARM_IniFile])) {
       {
          char version[0X80];
@@ -541,7 +554,7 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
       }
 
       if ((eciHandle = eciNew()) != NULL_ECI_HAND) {
-         eciRegisterCallback(eciHandle, clientCallback, NULL);
+         eciRegisterCallback(eciHandle, clientCallback, (void *)spk);
 
          currentUnits = eciGetParam(eciHandle, eciRealWorldUnits);
          currentInputType = eciGetParam(eciHandle, eciInputType);
