@@ -63,6 +63,8 @@ static int currentInputType;
 static char *sayBuffer = NULL;
 static size_t saySize;
 
+typedef int MapFunction (int index);
+
 static const char *sampleRates[] = {"8000", "11025", "22050", NULL};
 static const char *abbreviationModes[] = {"on", "off", NULL};
 static const char *numberModes[] = {"word", "year", NULL};
@@ -342,47 +344,6 @@ static const LanguageEntry languages[] = {
    {  .identifier = NODEFINEDCODESET  }
 };
 
-static const int languageMap[] = {
-   eciGeneralAmericanEnglish,
-   eciBritishEnglish,
-   eciCastilianSpanish,
-   eciMexicanSpanish,
-   eciStandardFrench,
-   eciCanadianFrench,
-   eciStandardGerman,
-   eciStandardItalian,
-   eciMandarinChinese,
-   eciMandarinChineseGB,
-   eciMandarinChinesePinYin,
-   eciMandarinChineseUCS,
-   eciTaiwaneseMandarin,
-   eciTaiwaneseMandarinBig5,
-   eciTaiwaneseMandarinZhuYin,
-   eciTaiwaneseMandarinPinYin,
-   eciTaiwaneseMandarinUCS,
-   eciBrazilianPortuguese,
-   eciStandardJapanese,
-   eciStandardJapaneseSJIS,
-   eciStandardJapaneseUCS,
-   eciStandardFinnish,
-   eciStandardKorean,
-   eciStandardKoreanUHC,
-   eciStandardKoreanUCS,
-   eciStandardCantonese,
-   eciStandardCantoneseGB,
-   eciStandardCantoneseUCS,
-   eciHongKongCantonese,
-   eciHongKongCantoneseBig5,
-   eciHongKongCantoneseUCS,
-   eciStandardDutch,
-   eciStandardNorwegian,
-   eciStandardSwedish,
-   eciStandardDanish,
-   eciStandardThai,
-   eciStandardThaiTIS,
-   NODEFINEDCODESET
-};
-
 static const char *const languageNames[] = {
    "AmericanEnglish",
    "BritishEnglish",
@@ -425,6 +386,11 @@ static const char *const languageNames[] = {
    NULL
 };
 
+static int
+mapLanguage (int index) {
+   return languages[index].identifier;
+}
+
 static void
 reportError (ECIHand eci, const char *routine) {
    int status = eciProgStatus(eci);
@@ -434,7 +400,7 @@ reportError (ECIHand eci, const char *routine) {
 }
 
 static void
-reportParameter (const char *description, int setting, const char *const *choices, const int *map) {
+reportParameter (const char *description, int setting, const char *const *choices, MapFunction *map) {
    char buffer[0X10];
    const char *value = buffer;
 
@@ -444,7 +410,7 @@ reportParameter (const char *description, int setting, const char *const *choice
       int choice = 0;
 
       while (choices[choice]) {
-	 if (setting == (map? map[choice]: choice)) {
+	 if (setting == (map? map(choice): choice)) {
 	    value = choices[choice];
 	    break;
 	 }
@@ -458,7 +424,7 @@ reportParameter (const char *description, int setting, const char *const *choice
 }
 
 static void
-reportGeneralParameter (ECIHand eci, const char *description, enum ECIParam parameter, int setting, const char *const *choices, const int *map) {
+reportGeneralParameter (ECIHand eci, const char *description, enum ECIParam parameter, int setting, const char *const *choices, MapFunction *map) {
    if (parameter != eciNumParams) setting = eciGetParam(eci, parameter);
    reportParameter(description, setting, choices, map);
 }
@@ -477,7 +443,7 @@ setGeneralParameter (ECIHand eci, const char *description, enum ECIParam paramet
 }
 
 static int
-choiceGeneralParameter (ECIHand eci, const char *description, const char *value, enum ECIParam parameter, const char *const *choices, const int *map) {
+choiceGeneralParameter (ECIHand eci, const char *description, const char *value, enum ECIParam parameter, const char *const *choices, MapFunction *map) {
    int ok = 0;
    int assume = 1;
 
@@ -485,7 +451,7 @@ choiceGeneralParameter (ECIHand eci, const char *description, const char *value,
       unsigned int setting;
 
       if (validateChoice(&setting, value, choices)) {
-	 if (map) setting = map[setting];
+	 if (map) setting = map(setting);
 
          if (setGeneralParameter(eci, description, parameter, setting)) {
 	    ok = 1;
@@ -546,7 +512,7 @@ getVoiceParameter (ECIHand eci, enum ECIVoiceParam parameter) {
 }
 
 static void
-reportVoiceParameter (ECIHand eci, const char *description, enum ECIVoiceParam parameter, const char *const *choices, const int *map) {
+reportVoiceParameter (ECIHand eci, const char *description, enum ECIVoiceParam parameter, const char *const *choices, MapFunction *map) {
    reportParameter(description, getVoiceParameter(eci, parameter), choices, map);
 }
 
@@ -558,14 +524,14 @@ setVoiceParameter (ECIHand eci, const char *description, enum ECIVoiceParam para
 }
 
 static int
-choiceVoiceParameter (ECIHand eci, const char *description, const char *value, enum ECIVoiceParam parameter, const char *const *choices, const int *map) {
+choiceVoiceParameter (ECIHand eci, const char *description, const char *value, enum ECIVoiceParam parameter, const char *const *choices, MapFunction *map) {
    int ok = 0;
 
    if (*value) {
       unsigned int setting;
 
       if (validateChoice(&setting, value, choices)) {
-	 if (map) setting = map[setting];
+	 if (map) setting = map(setting);
          if (setVoiceParameter(eci, description, parameter, setting)) ok = 1;
       } else {
         logMessage(LOG_WARNING, "invalid %s setting: %s", description, value);
@@ -835,7 +801,7 @@ setParameters (ECIHand eci, char **parameters) {
    choiceGeneralParameter(eci, "number mode", parameters[PARM_NumberMode], eciNumberMode, numberModes, NULL);
    choiceGeneralParameter(eci, "synth mode", parameters[PARM_SynthMode], eciSynthMode, synthModes, NULL);
    choiceGeneralParameter(eci, "text mode", parameters[PARM_TextMode], eciTextMode, textModes, NULL);
-   choiceGeneralParameter(eci, "language", parameters[PARM_Language], eciLanguageDialect, languageNames, languageMap);
+   choiceGeneralParameter(eci, "language", parameters[PARM_Language], eciLanguageDialect, languageNames, mapLanguage);
    choiceGeneralParameter(eci, "voice", parameters[PARM_Voice], eciNumParams, voices, NULL);
 
    choiceVoiceParameter(eci, "gender", parameters[PARM_Gender], eciGender, genders, NULL);
