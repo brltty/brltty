@@ -310,8 +310,10 @@ choiceVoiceParameter (ECIHand eci, const char *description, const char *value, e
 static int
 rangeVoiceParameter (ECIHand eci, const char *description, const char *value, enum ECIVoiceParam parameter, int minimum, int maximum) {
    int ok = 0;
+
    if (*value) {
       int setting;
+
       if (validateInteger(&setting, value, &minimum, &maximum)) {
          if (setVoiceParameter(eci, description, parameter, setting)) {
 	    ok = 1;
@@ -320,6 +322,7 @@ rangeVoiceParameter (ECIHand eci, const char *description, const char *value, en
         logMessage(LOG_WARNING, "invalid %s setting: %s", description, value);
       }
    }
+
    reportVoiceParameter(eci, description, parameter, NULL, NULL);
    return ok;
 }
@@ -552,6 +555,38 @@ isSet:
    return 1;
 }
 
+static void
+setParameters (ECIHand eci, char **parameters) {
+   currentUnits = eciGetParam(eci, eciRealWorldUnits);
+   currentInputType = eciGetParam(eci, eciInputType);
+
+   choiceGeneralParameter(eci, "sample rate", parameters[PARM_SampleRate], eciSampleRate, sampleRates, NULL);
+   choiceGeneralParameter(eci, "abbreviation mode", parameters[PARM_AbbreviationMode], eciDictionary, abbreviationModes, NULL);
+   choiceGeneralParameter(eci, "number mode", parameters[PARM_NumberMode], eciNumberMode, numberModes, NULL);
+   choiceGeneralParameter(eci, "synth mode", parameters[PARM_SynthMode], eciSynthMode, synthModes, NULL);
+   choiceGeneralParameter(eci, "text mode", parameters[PARM_TextMode], eciTextMode, textModes, NULL);
+   choiceGeneralParameter(eci, "language", parameters[PARM_Language], eciLanguageDialect, languageNames, languageMap);
+   choiceGeneralParameter(eci, "voice", parameters[PARM_Voice], eciNumParams, voices, NULL);
+
+   choiceVoiceParameter(eci, "gender", parameters[PARM_Gender], eciGender, genders, NULL);
+   rangeVoiceParameter(eci, "breathiness", parameters[PARM_Breathiness], eciBreathiness, 0, 100);
+   rangeVoiceParameter(eci, "head size", parameters[PARM_HeadSize], eciHeadSize, 0, 100);
+   rangeVoiceParameter(eci, "pitch baseline", parameters[PARM_PitchBaseline], eciPitchBaseline, 0, 100);
+   rangeVoiceParameter(eci, "pitch fluctuation", parameters[PARM_PitchFluctuation], eciPitchFluctuation, 0, 100);
+   rangeVoiceParameter(eci, "roughness", parameters[PARM_Roughness], eciRoughness, 0, 100);
+}
+
+static void
+writeAnnotations (ECIHand eci) {
+   if (USE_SSML) {
+      writeAnnotation(eciHandle, "gfa1");
+      writeAnnotation(eciHandle, "gfa2");
+      writeAnnotation(eciHandle, "Pf1()?-");
+   }
+
+// disableAnnotations(eciHandle);
+}
+
 static int
 spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
 //setLogCategory("spkdrv");
@@ -585,32 +620,8 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
 
                if ((pcmStream = popen(command, "w"))) {
                   setvbuf(pcmStream, NULL, _IONBF, 0);
-
-                  currentUnits = eciGetParam(eciHandle, eciRealWorldUnits);
-                  currentInputType = eciGetParam(eciHandle, eciInputType);
-
-                  choiceGeneralParameter(eciHandle, "sample rate", parameters[PARM_SampleRate], eciSampleRate, sampleRates, NULL);
-                  choiceGeneralParameter(eciHandle, "abbreviation mode", parameters[PARM_AbbreviationMode], eciDictionary, abbreviationModes, NULL);
-                  choiceGeneralParameter(eciHandle, "number mode", parameters[PARM_NumberMode], eciNumberMode, numberModes, NULL);
-                  choiceGeneralParameter(eciHandle, "synth mode", parameters[PARM_SynthMode], eciSynthMode, synthModes, NULL);
-                  choiceGeneralParameter(eciHandle, "text mode", parameters[PARM_TextMode], eciTextMode, textModes, NULL);
-                  choiceGeneralParameter(eciHandle, "language", parameters[PARM_Language], eciLanguageDialect, languageNames, languageMap);
-                  choiceGeneralParameter(eciHandle, "voice", parameters[PARM_Voice], eciNumParams, voices, NULL);
-
-                  choiceVoiceParameter(eciHandle, "gender", parameters[PARM_Gender], eciGender, genders, NULL);
-                  rangeVoiceParameter(eciHandle, "breathiness", parameters[PARM_Breathiness], eciBreathiness, 0, 100);
-                  rangeVoiceParameter(eciHandle, "head size", parameters[PARM_HeadSize], eciHeadSize, 0, 100);
-                  rangeVoiceParameter(eciHandle, "pitch baseline", parameters[PARM_PitchBaseline], eciPitchBaseline, 0, 100);
-                  rangeVoiceParameter(eciHandle, "pitch fluctuation", parameters[PARM_PitchFluctuation], eciPitchFluctuation, 0, 100);
-                  rangeVoiceParameter(eciHandle, "roughness", parameters[PARM_Roughness], eciRoughness, 0, 100);
-
-                  if (USE_SSML) {
-                     writeAnnotation(eciHandle, "gfa1");
-                     writeAnnotation(eciHandle, "gfa2");
-                     writeAnnotation(eciHandle, "Pf1()?-");
-                  }
-                //disableAnnotations(eciHandle);
-
+                  setParameters(eciHandle, parameters);
+                  writeAnnotations(eciHandle);
                   return 1;
                } else {
                   logMessage(LOG_WARNING, "can't start command: %s", strerror(errno));
