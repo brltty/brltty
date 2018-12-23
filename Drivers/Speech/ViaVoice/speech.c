@@ -50,7 +50,7 @@ typedef enum {
 #include "spk_driver.h"
 #include "speech.h"
 
-#define USE_SSML 0
+#define UTF8_SUPPORT 0
 #define MAXIMUM_SAMPLES 0X800
 
 static ECIHand eciHandle = NULL_ECI_HAND;
@@ -70,6 +70,277 @@ static const char *synthModes[] = {"sentence", "none", NULL};
 static const char *textModes[] = {"talk", "spell", "literal", "phonetic", NULL};
 static const char *voices[] = {"", "dad", "mom", "child", "", "", "", "grandma", "grandpa", NULL};
 static const char *genders[] = {"male", "female", NULL};
+
+typedef struct {
+   const char *description;
+   const char *language;
+   const char *territory;
+   const char *encoding;
+   int identifier;
+} LanguageEntry;
+
+static const LanguageEntry languages[] = {
+   {  .identifier = eciGeneralAmericanEnglish,
+      .description = "American-English",
+      .language = "en",
+      .territory = "US",
+      .encoding = "ISO-8859-1"
+   },
+
+   {  .identifier = eciBritishEnglish,
+      .description = "British-English",
+      .language = "en",
+      .territory = "GB",
+      .encoding = "ISO-8859-1"
+   },
+
+   {  .identifier = eciCastilianSpanish,
+      .description = "Castilian-Spanish",
+      .language = "es",
+      .territory = "ES",
+      .encoding = "ISO-8859-1"
+   },
+
+   {  .identifier = eciMexicanSpanish,
+      .description = "Mexican-Spanish",
+      .language = "es",
+      .territory = "MX",
+      .encoding = "ISO-8859-1"
+   },
+
+   {  .identifier = eciStandardFrench,
+      .description = "Standard-French",
+      .language = "fr",
+      .territory = "FR",
+      .encoding = "ISO-8859-1"
+   },
+
+   {  .identifier = eciCanadianFrench,
+      .description = "Canadian-French",
+      .language = "fr",
+      .territory = "CA",
+      .encoding = "ISO-8859-1"
+   },
+
+   {  .identifier = eciStandardGerman,
+      .description = "Standard-German",
+      .language = "de",
+      .territory = "DE",
+      .encoding = "ISO-8859-1"
+   },
+
+   {  .identifier = eciStandardItalian,
+      .description = "Standard-Italian",
+      .language = "it",
+      .territory = "IT",
+      .encoding = "ISO-8859-1"
+   },
+
+   {  .identifier = eciMandarinChinese,
+      .description = "Standard-Mandarin",
+      .language = "zh",
+      .territory = "CN",
+      .encoding = "GBK"
+   },
+
+   {  .identifier = eciMandarinChineseGB,
+      .description = "Standard-Mandarin-GB",
+      .language = "zh",
+      .territory = "CN_GB",
+      .encoding = "GBK"
+   },
+
+   {  .identifier = eciMandarinChinesePinYin,
+      .description = "Standard-Mandarin-PinYin",
+      .language = "zh",
+      .territory = "CN_PinYin",
+      .encoding = "GBK"
+   },
+
+   {  .identifier = eciMandarinChineseUCS,
+      .description = "Standard-Mandarin-UCS",
+      .language = "zh",
+      .territory = "CN_UCS",
+      .encoding = "UCS2"
+   },
+
+   {  .identifier = eciTaiwaneseMandarin,
+      .description = "Taiwanese-Mandarin",
+      .language = "zh",
+      .territory = "TW",
+      .encoding = "BIG5"
+   },
+
+   {  .identifier = eciTaiwaneseMandarinBig5,
+      .description = "Taiwanese-Mandarin-Big5",
+      .language = "zh",
+      .territory = "TW_Big5",
+      .encoding = "BIG5"
+   },
+
+   {  .identifier = eciTaiwaneseMandarinZhuYin,
+      .description = "Taiwanese-Mandarin-ZhuYin",
+      .language = "zh",
+      .territory = "TW_ZhuYin",
+      .encoding = "BIG5"
+   },
+
+   {  .identifier = eciTaiwaneseMandarinPinYin,
+      .description = "Taiwanese-Mandarin-PinYin",
+      .language = "zh",
+      .territory = "TW_PinYin",
+      .encoding = "BIG5"
+   },
+
+   {  .identifier = eciTaiwaneseMandarinUCS,
+      .description = "Taiwanese-Mandarin-UCS",
+      .language = "zh",
+      .territory = "TW_UCS",
+      .encoding = "UCS2"
+   },
+
+   {  .identifier = eciBrazilianPortuguese,
+      .description = "Brazilian-Portuguese",
+      .language = "pt",
+      .territory = "BR",
+      .encoding = "ISO-8859-1"
+   },
+
+   {  .identifier = eciStandardJapanese,
+      .description = "Standard-Japanese",
+      .language = "ja",
+      .territory = "JP",
+      .encoding = "SJIS"
+   },
+
+   {  .identifier = eciStandardJapaneseSJIS,
+      .description = "Standard-Japanese-SJIS",
+      .language = "ja",
+      .territory = "JP_SJIS",
+      .encoding = "SJIS"
+   },
+
+   {  .identifier = eciStandardJapaneseUCS,
+      .description = "Standard-Japanese-UCS",
+      .language = "ja",
+      .territory = "JP_UCS",
+      .encoding = "UCS2"
+   },
+
+   {  .identifier = eciStandardFinnish,
+      .description = "Standard-Finnish",
+      .language = "fi",
+      .territory = "FI",
+      .encoding = "ISO-8859-1"
+   },
+
+   {  .identifier = eciStandardKorean,
+      .description = "Standard-Korean",
+      .language = "ko",
+      .territory = "KR",
+      .encoding = "UHC"
+   },
+
+   {  .identifier = eciStandardKoreanUHC,
+      .description = "Standard-Korean-UHC",
+      .language = "ko",
+      .territory = "KR_UHC",
+      .encoding = "UHC"
+   },
+
+   {  .identifier = eciStandardKoreanUCS,
+      .description = "Standard-Korean-UCS",
+      .language = "ko",
+      .territory = "KR_UCS",
+      .encoding = "UCS2"
+   },
+
+   {  .identifier = eciStandardCantonese,
+      .description = "Standard-Cantonese",
+      .language = "zh",
+      .territory = "HK",
+      .encoding = "GBK"
+   },
+
+   {  .identifier = eciStandardCantoneseGB,
+      .description = "Standard-Cantonese-GB",
+      .language = "zh",
+      .territory = "HK_GB",
+      .encoding = "GBK"
+   },
+
+   {  .identifier = eciStandardCantoneseUCS,
+      .description = "Standard-Cantonese-UCS",
+      .language = "zh",
+      .territory = "HK_UCS",
+      .encoding = "UCS2"
+   },
+
+   {  .identifier = eciHongKongCantonese,
+      .description = "HongKong-Cantonese",
+      .language = "zh",
+      .territory = "HK",
+      .encoding = "BIG5"
+   },
+
+   {  .identifier = eciHongKongCantoneseBig5,
+      .description = "HongKong-Cantonese-Big5",
+      .language = "zh",
+      .territory = "HK_BIG5",
+      .encoding = "BIG5"
+   },
+
+   {  .identifier = eciHongKongCantoneseUCS,
+      .description = "HongKong-Cantonese-UCS",
+      .language = "zh",
+      .territory = "HK_UCS",
+      .encoding = "UCS-2"
+   },
+
+   {  .identifier = eciStandardDutch,
+      .description = "Standard-Dutch",
+      .language = "nl",
+      .territory = "BE",
+      .encoding = "ISO-8859-1"
+   },
+
+   {  .identifier = eciStandardNorwegian,
+      .description = "Standard-Norwegian",
+      .language = "no",
+      .territory = "NO",
+      .encoding = "ISO-8859-1"
+   },
+
+   {  .identifier = eciStandardSwedish,
+      .description = "Standard-Swedish",
+      .language = "sv",
+      .territory = "SE",
+      .encoding = "ISO-8859-1"
+   },
+
+   {  .identifier = eciStandardDanish,
+      .description = "Standard-Danish",
+      .language = "da",
+      .territory = "DK",
+      .encoding = "ISO-8859-1"
+   },
+
+   {  .identifier = eciStandardThai,
+      .description = "Standard-Thai",
+      .language = "th",
+      .territory = "TH",
+      .encoding = "TIS-620"
+   },
+
+   {  .identifier = eciStandardThaiTIS,
+      .description = "Standard-Thai-TIS",
+      .language = "th",
+      .territory = "TH_TIS",
+      .encoding = "TIS-620"
+   },
+
+   {  .identifier = NODEFINEDCODESET  }
+};
 
 static const int languageMap[] = {
    eciGeneralAmericanEnglish,
@@ -107,14 +378,13 @@ static const int languageMap[] = {
    eciStandardNorwegian,
    eciStandardSwedish,
    eciStandardDanish,
-   eciStandardReserved,
    eciStandardThai,
    eciStandardThaiTIS,
    NODEFINEDCODESET
 };
 
 static const char *const languageNames[] = {
-   "GeneralAmericanEnglish",
+   "AmericanEnglish",
    "BritishEnglish",
    "CastilianSpanish",
    "MexicanSpanish",
@@ -149,7 +419,6 @@ static const char *const languageNames[] = {
    "StandardNorwegian",
    "StandardSwedish",
    "StandardDanish",
-   "StandardReserved",
    "StandardThai",
    "StandardThaiTIS",
    "NoDefinedCodeSet",
@@ -407,7 +676,7 @@ addCharacters (ECIHand eci, const unsigned char *buffer, int from, int to) {
 
 static int
 addSegment (ECIHand eci, const unsigned char *buffer, int from, int to) {
-   if (USE_SSML) {
+   if (UTF8_SUPPORT) {
       for (int index=from; index<to; index+=1) {
          const char *entity = NULL;
 
@@ -455,7 +724,7 @@ addSegment (ECIHand eci, const unsigned char *buffer, int from, int to) {
 
 static int
 addSegments (ECIHand eci, const unsigned char *buffer, size_t length) {
-   if (USE_SSML && !addText(eciHandle, "<speak>")) return 0;
+   if (UTF8_SUPPORT && !addText(eciHandle, "<speak>")) return 0;
 
    int onSpace = -1;
    int from = 0;
@@ -475,7 +744,7 @@ addSegments (ECIHand eci, const unsigned char *buffer, size_t length) {
    }
 
    if (!addSegment(eci, buffer, from, to)) return 0;
-   if (USE_SSML && !addText(eciHandle, "</speak>")) return 0;
+   if (UTF8_SUPPORT && !addText(eciHandle, "</speak>")) return 0;
    return 1;
 }
 
@@ -579,18 +848,17 @@ setParameters (ECIHand eci, char **parameters) {
 
 static void
 writeAnnotations (ECIHand eci) {
-   if (USE_SSML) {
-      writeAnnotation(eciHandle, "gfa1");
+   if (UTF8_SUPPORT) {
+      writeAnnotation(eciHandle, "gfa1"); // enable SSML
       writeAnnotation(eciHandle, "gfa2");
-      writeAnnotation(eciHandle, "Pf1()?-");
    }
 
-// disableAnnotations(eciHandle);
+   disableAnnotations(eciHandle);
 }
 
 static int
 spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
-//setLogCategory("spkdrv");
+// setLogCategory("spkdrv");
    spk->setVolume = spk_setVolume;
    spk->setRate = spk_setRate;
 
