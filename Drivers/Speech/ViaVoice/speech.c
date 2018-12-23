@@ -197,13 +197,13 @@ reportGeneralParameter (ECIHand eci, const char *description, enum ECIParam para
 static int
 setGeneralParameter (ECIHand eci, const char *description, enum ECIParam parameter, int setting) {
    if (parameter == eciNumParams) {
-      logMessage(LOG_CATEGORY(SPEECH_DRIVER), "copy voice: %d",setting);
+      logMessage(LOG_CATEGORY(SPEECH_DRIVER), "copy voice: %d", setting);
       int ok = eciCopyVoice(eci, setting, 0);
       if (!ok) reportError(eci, "eciCopyVoice");
       return ok;
    }
 
-   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "set general parameter: %s: %d=%d",description, parameter, setting);
+   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "set general parameter: %s: %d=%d", description, parameter, setting);
    return eciSetParam(eci, parameter, setting) >= 0;
 }
 
@@ -284,7 +284,7 @@ reportVoiceParameter (ECIHand eci, const char *description, enum ECIVoiceParam p
 static int
 setVoiceParameter (ECIHand eci, const char *description, enum ECIVoiceParam parameter, int setting) {
    if (!useParameterUnits(eci, parameter)) return 0;
-   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "set voice parameter: %s: %d=%d",description, parameter, setting);
+   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "set voice parameter: %s: %d=%d", description, parameter, setting);
    return eciSetVoiceParam(eci, 0, parameter, setting) >= 0;
 }
 
@@ -447,6 +447,7 @@ addSegment (ECIHand eci, const unsigned char *buffer, int from, int to) {
    }
 
    if (!addCharacters(eci, buffer, from, to)) return 0;
+   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "insert index: %d", to);
    if (eciInsertIndex(eci, to)) return 1;
    reportError(eci, "eciInsertIndex");
    return 0;
