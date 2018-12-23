@@ -30,15 +30,16 @@ extern void deallocateStrings (char **array);
 extern char **splitString (const char *string, char delimiter, int *count);
 
 extern int rescaleInteger (int value, int from, int to);
-
-extern int isAbbreviation (const char *actual, const char *supplied);
-
 extern int isInteger (int *value, const char *string);
 extern int isUnsignedInteger (unsigned int *value, const char *string);
 extern int isLogLevel (unsigned int *level, const char *string);
 
+extern int isAbbreviation (const char *actual, const char *supplied);
+extern int comparePhrases (const char *actual, const char *supplied);
+
 extern int validateInteger (int *value, const char *string, const int *minimum, const int *maximum);
 extern int validateChoice (unsigned int *value, const char *string, const char *const *choices);
+extern int validateChoiceEx (unsigned int *value, const char *string, const void *choices, size_t size);
 
 typedef struct {
   const char *true;

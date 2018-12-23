@@ -155,11 +155,6 @@ rescaleInteger (int value, int from, int to) {
 }
 
 int
-isAbbreviation (const char *actual, const char *supplied) {
-  return strncasecmp(actual, supplied, strlen(supplied)) == 0;
-}
-
-int
 isInteger (int *value, const char *string) {
   if (*string) {
     char *end;
@@ -216,6 +211,16 @@ isLogLevel (unsigned int *level, const char *string) {
 }
 
 int
+isAbbreviation (const char *actual, const char *supplied) {
+  return strncasecmp(actual, supplied, strlen(supplied)) == 0;
+}
+
+int
+comparePhrases (const char *actual, const char *supplied) {
+  return isAbbreviation(actual, supplied);
+}
+
+int
 validateInteger (int *value, const char *string, const int *minimum, const int *maximum) {
   if (*string) {
     int i;
@@ -231,27 +236,33 @@ validateInteger (int *value, const char *string, const int *minimum, const int *
 }
 
 int
-validateChoice (unsigned int *value, const char *string, const char *const *choices) {
-  size_t length = strlen(string);
-
+validateChoiceEx (unsigned int *value, const char *string, const void *choices, size_t size) {
   *value = 0;
-  if (!length) return 1;
+  if (!*string) return 1;
+  const void *choice = choices;
 
-  {
-    unsigned int index = 0;
-    const char *choice;
+  while (1) {
+    typedef struct {
+      const char *name;
+    } Entry;
 
-    while ((choice = choices[index])) {
-      if (strncasecmp(string, choice, length) == 0) {
-        *value = index;
-        return 1;
-      }
+    const Entry *entry = choice;
+    if (!entry->name) break;
 
-      index += 1;
+    if (isAbbreviation(entry->name, string)) {
+      *value = (choice - choices) / size;
+      return 1;
     }
+
+    choice += size;
   }
 
   return 0;
+}
+
+int
+validateChoice (unsigned int *value, const char *string, const char *const *choices) {
+  return validateChoiceEx(value, string, choices, sizeof(*choices));
 }
 
 FlagKeywordPair fkpOnOff     = {.true="on"  , .false="off"  };
