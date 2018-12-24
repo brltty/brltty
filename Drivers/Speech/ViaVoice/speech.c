@@ -574,11 +574,41 @@ writeAnnotation (ECIHand eci, const char *annotation) {
    return addText(eci, text);
 }
 
-#if UTF8_SUPPORT == 0
+#if !UTF8_SUPPORT
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
+#define ICONV_NULL ((iconv_t)-1)
+static iconv_t textConverter = ICONV_NULL;
+
+static int
+prepareTextConversion (ECIHand eci) {
+   int language = eciGetParam(eci, eciLanguageDialect);
+   const LanguageEntry *entry = languages;
+
+   while (entry->name) {
+      if (entry->identifier == language) {
+         iconv_t *converter = iconv_open(entry->encoding, "UTF-8");
+
+         if (converter != ICONV_NULL) {
+            textConverter = converter;
+            return 1;
+         }
+
+         logMessage(LOG_WARNING, "character encoding not supported: %s: %s", entry->encoding, strerror(errno));
+         return 0;
+      }
+
+      entry += 1;
+   }
+
+   logMessage(LOG_WARNING, "language identifier not defined: 0X%08X", language);
+   return 0;
+}
+
+#else /* HAVE_ICONV_H */
+#warning iconv is not available
 #endif /* HAVE_ICONV_H */
-#endif /* UTF8_SUPPORT == 0 */
+#endif /* !UTF8_SUPPORT */
 
 static int
 ensureSayBuffer (int size) {
@@ -650,9 +680,28 @@ addSegment (ECIHand eci, const unsigned char *buffer, int from, int to, const in
          snprintf(text, sizeof(text), "&%s;", entity);
          if (!addText(eci, text)) return 0;
       }
+
+      if (!addCharacters(eci, buffer, from, to)) return 0;
+   } else {
+#ifdef ICONV_NULL
+      char *inputStart = (char *)&buffer[from];
+      size_t inputLeft = to - from;
+      size_t outputLeft = inputLeft * 10;
+      char outputBuffer[outputLeft];
+      char *outputStart = outputBuffer;
+      int result = iconv(textConverter, &inputStart, &inputLeft, &outputStart, &outputLeft);
+
+      if (result == -1) {
+         logSystemError("iconv");
+         return 0;
+      }
+
+      if (!addCharacters(eci, (unsigned char *)outputBuffer, 0, (outputStart - outputBuffer))) return 0;
+#else /* ICONV_NULL */
+      if (!addCharacters(eci, buffer, from, to)) return 0;
+#endif /* ICONV_NULL */
    }
 
-   if (!addCharacters(eci, buffer, from, to)) return 0;
    int index = indexMap[to];
    logMessage(LOG_CATEGORY(SPEECH_DRIVER), "insert index: %d", index);
    if (eciInsertIndex(eci, index)) return 1;
@@ -795,6 +844,10 @@ setParameters (ECIHand eci, char **parameters) {
    rangeVoiceParameter(eci, "pitch baseline", parameters[PARM_PitchBaseline], eciPitchBaseline, 0, 100);
    rangeVoiceParameter(eci, "pitch fluctuation", parameters[PARM_PitchFluctuation], eciPitchFluctuation, 0, 100);
    rangeVoiceParameter(eci, "roughness", parameters[PARM_Roughness], eciRoughness, 0, 100);
+
+#ifdef ICONV_NULL
+   prepareTextConversion(eci);
+#endif /* ICONV_NULL */
 }
 
 static void
@@ -882,4 +935,11 @@ spk_destruct (volatile SpeechSynthesizer *spk) {
       free(pcmBuffer);
       pcmBuffer = NULL;
    }
+
+#ifdef ICONV_NULL
+   if (textConverter != ICONV_NULL) {
+      iconv_close(textConverter);
+      textConverter = ICONV_NULL;
+   }
+#endif /* ICONV_NULL */
 }
