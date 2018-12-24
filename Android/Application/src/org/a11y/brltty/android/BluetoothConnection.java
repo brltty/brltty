@@ -227,6 +227,7 @@ public class BluetoothConnection {
   public boolean open (int inputPipe, int channel, boolean secure) {
     BluetoothDevice device = getDevice();
     if (device == null) return false;
+    if (bluetoothAdapter.isDiscovering()) return false;
 
     if (channel == 0) {
       try {
