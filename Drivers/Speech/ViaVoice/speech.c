@@ -50,13 +50,13 @@ typedef enum {
 #include "spk_driver.h"
 #include "speech.h"
 
-#define UTF8_SUPPORT 0
 #define MAXIMUM_SAMPLES 0X800
 
 static ECIHand eciHandle = NULL_ECI_HAND;
 static FILE *pcmStream = NULL;
 static short *pcmBuffer = NULL;
 
+static int useSSML;
 static int currentUnits;
 static int currentInputType;
 
@@ -559,7 +559,7 @@ enableAnnotations (ECIHand eci) {
 
 static int
 addText (ECIHand eci, const char *text) {
-   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "add text: |%s|", text);
+   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "add text: \"%s\"", text);
    if (eciAddText(eci, text)) return 1;
    reportError(eci, "eciAddText");
    return 0;
@@ -574,7 +574,6 @@ writeAnnotation (ECIHand eci, const char *annotation) {
    return addText(eci, text);
 }
 
-#if !UTF8_SUPPORT
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
 #define ICONV_NULL ((iconv_t)-1)
@@ -589,13 +588,13 @@ prepareTextConversion (ECIHand eci) {
       if (entry->identifier == language) {
          iconv_t *converter = iconv_open(entry->encoding, "UTF-8");
 
-         if (converter != ICONV_NULL) {
-            textConverter = converter;
-            return 1;
+         if (converter == ICONV_NULL) {
+            logMessage(LOG_WARNING, "character encoding not supported: %s: %s", entry->encoding, strerror(errno));
+            return 0;
          }
 
-         logMessage(LOG_WARNING, "character encoding not supported: %s: %s", entry->encoding, strerror(errno));
-         return 0;
+         textConverter = converter;
+         return 1;
       }
 
       entry += 1;
@@ -608,7 +607,6 @@ prepareTextConversion (ECIHand eci) {
 #else /* HAVE_ICONV_H */
 #warning iconv is not available
 #endif /* HAVE_ICONV_H */
-#endif /* !UTF8_SUPPORT */
 
 static int
 ensureSayBuffer (int size) {
@@ -643,7 +641,7 @@ addCharacters (ECIHand eci, const unsigned char *buffer, int from, int to) {
 
 static int
 addSegment (ECIHand eci, const unsigned char *buffer, int from, int to, const int *indexMap) {
-   if (UTF8_SUPPORT) {
+   if (useSSML) {
       for (int index=from; index<to; index+=1) {
          const char *entity = NULL;
 
@@ -711,7 +709,7 @@ addSegment (ECIHand eci, const unsigned char *buffer, int from, int to, const in
 
 static int
 addSegments (ECIHand eci, const unsigned char *buffer, size_t length, const int *indexMap) {
-   if (UTF8_SUPPORT && !addText(eciHandle, "<speak>")) return 0;
+   if (useSSML && !addText(eciHandle, "<speak>")) return 0;
 
    int onSpace = -1;
    int from = 0;
@@ -731,7 +729,7 @@ addSegments (ECIHand eci, const unsigned char *buffer, size_t length, const int 
    }
 
    if (!addSegment(eci, buffer, from, to, indexMap)) return 0;
-   if (UTF8_SUPPORT && !addText(eciHandle, "</speak>")) return 0;
+   if (useSSML && !addText(eciHandle, "</speak>")) return 0;
    return 1;
 }
 
@@ -846,13 +844,15 @@ setParameters (ECIHand eci, char **parameters) {
    rangeVoiceParameter(eci, "roughness", parameters[PARM_Roughness], eciRoughness, 0, 100);
 
 #ifdef ICONV_NULL
-   prepareTextConversion(eci);
+   useSSML = !prepareTextConversion(eci);
+#else /* ICONV_NULL */
+   useSSML = 1;
 #endif /* ICONV_NULL */
 }
 
 static void
 writeAnnotations (ECIHand eci) {
-   if (UTF8_SUPPORT) {
+   if (useSSML) {
       writeAnnotation(eciHandle, "gfa1"); // enable SSML
       writeAnnotation(eciHandle, "gfa2");
    }
@@ -862,7 +862,6 @@ writeAnnotations (ECIHand eci) {
 
 static int
 spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
-// setLogCategory("spkdrv");
    spk->setVolume = spk_setVolume;
    spk->setRate = spk_setRate;
 
