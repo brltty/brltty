@@ -581,11 +581,13 @@ static iconv_t textConverter = ICONV_NULL;
 
 static int
 prepareTextConversion (ECIHand eci) {
-   int language = eciGetParam(eci, eciLanguageDialect);
+   textConverter = ICONV_NULL;
+
+   int identifier = eciGetParam(eci, eciLanguageDialect);
    const LanguageEntry *entry = languages;
 
    while (entry->name) {
-      if (entry->identifier == language) {
+      if (entry->identifier == identifier) {
          iconv_t *converter = iconv_open(entry->encoding, "UTF-8");
 
          if (converter == ICONV_NULL) {
@@ -600,7 +602,7 @@ prepareTextConversion (ECIHand eci) {
       entry += 1;
    }
 
-   logMessage(LOG_WARNING, "language identifier not defined: 0X%08X", language);
+   logMessage(LOG_WARNING, "language identifier not defined: 0X%08X", identifier);
    return 0;
 }
 
