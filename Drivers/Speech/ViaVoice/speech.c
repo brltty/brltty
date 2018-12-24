@@ -402,10 +402,10 @@ setGeneralParameter (ECIHand eci, const char *description, enum ECIParam paramet
 
 static int
 choiceGeneralParameter (ECIHand eci, const char *description, const char *value, enum ECIParam parameter, const void *choices, size_t size, MapFunction *map) {
-   int ok = 0;
+   int ok = !*value;
    int assume = 1;
 
-   if (*value) {
+   if (!ok) {
       unsigned int setting;
 
       if (validateChoiceEx(&setting, value, choices, size)) {
@@ -485,9 +485,9 @@ setVoiceParameter (ECIHand eci, const char *description, enum ECIVoiceParam para
 
 static int
 choiceVoiceParameter (ECIHand eci, const char *description, const char *value, enum ECIVoiceParam parameter, const char *const *choices, MapFunction *map) {
-   int ok = 0;
+   int ok = !*value;
 
-   if (*value) {
+   if (!ok) {
       unsigned int setting;
 
       if (validateChoice(&setting, value, choices)) {
@@ -574,6 +574,12 @@ writeAnnotation (ECIHand eci, const char *annotation) {
    return addText(eci, text);
 }
 
+#if UTF8_SUPPORT == 0
+#ifdef HAVE_ICONV_H
+#include <iconv.h>
+#endif /* HAVE_ICONV_H */
+#endif /* UTF8_SUPPORT == 0 */
+
 static int
 ensureSayBuffer (int size) {
    if (size > saySize) {
@@ -606,7 +612,7 @@ addCharacters (ECIHand eci, const unsigned char *buffer, int from, int to) {
 }
 
 static int
-addSegment (ECIHand eci, const unsigned char *buffer, int from, int to) {
+addSegment (ECIHand eci, const unsigned char *buffer, int from, int to, const int *indexMap) {
    if (UTF8_SUPPORT) {
       for (int index=from; index<to; index+=1) {
          const char *entity = NULL;
@@ -647,14 +653,15 @@ addSegment (ECIHand eci, const unsigned char *buffer, int from, int to) {
    }
 
    if (!addCharacters(eci, buffer, from, to)) return 0;
-   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "insert index: %d", to);
-   if (eciInsertIndex(eci, to)) return 1;
+   int index = indexMap[to];
+   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "insert index: %d", index);
+   if (eciInsertIndex(eci, index)) return 1;
    reportError(eci, "eciInsertIndex");
    return 0;
 }
 
 static int
-addSegments (ECIHand eci, const unsigned char *buffer, size_t length) {
+addSegments (ECIHand eci, const unsigned char *buffer, size_t length, const int *indexMap) {
    if (UTF8_SUPPORT && !addText(eciHandle, "<speak>")) return 0;
 
    int onSpace = -1;
@@ -668,20 +675,33 @@ addSegments (ECIHand eci, const unsigned char *buffer, size_t length) {
          onSpace = isSpace;
 
          if (to > from) {
-            if (!addSegment(eci, buffer, from, to)) return 0;
+            if (!addSegment(eci, buffer, from, to, indexMap)) return 0;
             from = to;
          }
       }
    }
 
-   if (!addSegment(eci, buffer, from, to)) return 0;
+   if (!addSegment(eci, buffer, from, to, indexMap)) return 0;
    if (UTF8_SUPPORT && !addText(eciHandle, "</speak>")) return 0;
    return 1;
 }
 
 static void
 spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
-   if (addSegments(eciHandle, buffer, length)) {
+   int indexMap[length + 1];
+   {
+      int from = 0;
+      int to = 0;
+
+      while (from < length) {
+         char character = buffer[from];
+         indexMap[from++] = ((character & 0X80) && !(character & 0X40))? -1: to++;
+      }
+
+      indexMap[from] = to;
+   }
+
+   if (addSegments(eciHandle, buffer, length, indexMap)) {
       logMessage(LOG_CATEGORY(SPEECH_DRIVER), "synthesize");
 
       if (eciSynthesize(eciHandle)) {
