@@ -302,7 +302,7 @@ static const LanguageEntry languages[] = {
    {  .identifier = eciStandardDutch,
       .name = "Standard-Dutch",
       .language = "nl",
-      .territory = "BE",
+      .territory = "NL",
       .encoding = "ISO-8859-1"
    },
 
