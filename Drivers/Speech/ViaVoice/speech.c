@@ -883,14 +883,15 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
          if ((pcmBuffer = calloc(MAXIMUM_SAMPLES, sizeof(*pcmBuffer)))) {
             if (eciSetOutputBuffer(eciHandle, MAXIMUM_SAMPLES, pcmBuffer)) {
                int rate = eciGetParam(eciHandle, eciSampleRate);
-               if (rate >= 0) rate = atoi(sampleRates[rate]);
 
                char command[0X100];
                snprintf(
                   command, sizeof(command),
-                  "sox -q -t raw -c 1 -b %" PRIsize " -e signed-integer -r %d - -d",
-                  (sizeof(*pcmBuffer) * 8), rate
+                  "sox -q -t raw -c 1 -b %" PRIsize " -e signed-integer -r %s - -d",
+                  (sizeof(*pcmBuffer) * 8), sampleRates[rate]
                );
+
+               logMessage(LOG_CATEGORY(SPEECH_DRIVER), "PCM command: %s", command);
 
                if ((pcmStream = popen(command, "w"))) {
                   setvbuf(pcmStream, NULL, _IONBF, 0);
