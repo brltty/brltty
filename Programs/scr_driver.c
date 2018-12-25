@@ -39,25 +39,29 @@ typedef enum {
 #include "scr_driver.h"
 
 static const char defaultScreenMessage[] = strtext("no screen");
-static const char *requestedScreenMessage = defaultScreenMessage;
-static const char *screenMessage = defaultScreenMessage;
+static const char *screenMessageParameter = NULL;
+static const char *screenDriverStoppedReason = NULL;
+static const char *screenMessage = NULL;
 
 void
-setNoScreenMessage (const char *message) {
-  if (!message) message = requestedScreenMessage;
-  screenMessage = message;
+setScreenDriverStoppedReason (const char *reason) {
+  screenDriverStoppedReason = reason;
 }
 
 static int
 processParameters_NoScreen (char **parameters) {
   {
     const char *message = parameters[PARM_MESSAGE];
-    if (!message || !*message) message = defaultScreenMessage;
-    requestedScreenMessage = message;
-    setNoScreenMessage(NULL);
+    if (message && !*message) message = NULL;
+    screenMessageParameter = message;
   }
 
   return 1;
+}
+
+static void
+releaseParameters_NoScreen (void) {
+  screenMessageParameter = NULL;
 }
 
 static int
@@ -67,6 +71,13 @@ currentVirtualTerminal_NoScreen (void) {
 
 static void
 describe_NoScreen (ScreenDescription *description) {
+  {
+    const char *message = screenDriverStoppedReason;
+    if (!message) message = screenMessageParameter;
+    if (!message) message = gettext(defaultScreenMessage);
+    screenMessage = message;
+  }
+
   description->rows = 1;
   description->cols = strlen(screenMessage);
   description->posx = 0;
@@ -98,6 +109,7 @@ scr_initialize (MainScreen *main) {
   main->base.currentVirtualTerminal = currentVirtualTerminal_NoScreen;
 
   main->processParameters = processParameters_NoScreen;
+  main->releaseParameters = releaseParameters_NoScreen;
 }
 
 const ScreenDriver *screen = &noScreen;
