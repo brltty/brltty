@@ -84,6 +84,8 @@ extern void destructScreenDriver (void);
 extern void identifyScreenDriver (const ScreenDriver *driver, int full);
 extern void identifyScreenDrivers (int full);
 
+extern void setNoScreenMessage (const char *message);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

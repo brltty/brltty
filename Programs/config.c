@@ -2332,19 +2332,21 @@ void
 enableScreenDriver (void) {
   ActivityObject *activity = getScreenDriverActivity(1);
 
+  setNoScreenMessage(NULL);
   if (activity) startActivity(activity);
 }
 
 void
-disableScreenDriver (void) {
+disableScreenDriver (const char *reason) {
   ActivityObject *activity = getScreenDriverActivity(0);
 
+  setNoScreenMessage(reason);
   if (activity) stopActivity(activity);
 }
 
 void
 restartScreenDriver (void) {
-  disableScreenDriver();
+  disableScreenDriver(gettext("screen restarting"));
   awaitActivityStopped(screenDriverActivity);
 
   logMessage(LOG_INFO, gettext("reinitializing screen driver"));

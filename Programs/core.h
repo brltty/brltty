@@ -199,7 +199,7 @@ extern void destructSpeechDriver (void);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 extern void enableScreenDriver (void);
-extern void disableScreenDriver (void);
+extern void disableScreenDriver (const char *reason);
 
 #ifdef __MINGW32__
 extern int isWindowsService;

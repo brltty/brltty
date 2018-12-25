@@ -183,7 +183,7 @@ handleMiscellaneousCommands (int command, void *data) {
       break;
 
     case BRL_CMD_SCR_STOP:
-      disableScreenDriver();
+      disableScreenDriver(gettext("screen stopped"));
       break;
 
     case BRL_CMD_SCR_START:

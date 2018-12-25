@@ -39,14 +39,22 @@ typedef enum {
 #include "scr_driver.h"
 
 static const char defaultScreenMessage[] = strtext("no screen");
+static const char *requestedScreenMessage = defaultScreenMessage;
 static const char *screenMessage = defaultScreenMessage;
+
+void
+setNoScreenMessage (const char *message) {
+  if (!message) message = requestedScreenMessage;
+  screenMessage = message;
+}
 
 static int
 processParameters_NoScreen (char **parameters) {
   {
     const char *message = parameters[PARM_MESSAGE];
-
-    screenMessage = (message && *message)? message: gettext(defaultScreenMessage);
+    if (!message || !*message) message = defaultScreenMessage;
+    requestedScreenMessage = message;
+    setNoScreenMessage(NULL);
   }
 
   return 1;
