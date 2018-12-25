@@ -162,7 +162,7 @@ extern unsigned int verticalWindowShift;			/* Window vertical distance */
 extern void setBrailleOn (void);
 extern void setBrailleOff (const char *message);
 extern void enableBrailleDriver (void);
-extern void disableBrailleDriver (const char *message);
+extern void disableBrailleDriver (const char *reason);
 extern int constructBrailleDriver (void);
 extern void destructBrailleDriver (void);
 extern void forgetDevices (void);
@@ -193,7 +193,7 @@ extern int speakIndent (const ScreenCharacter *characters, int count, int evenIf
 extern void trackSpeech (void);
 
 extern void enableSpeechDriver (int sayBanner);
-extern void disableSpeechDriver (void);
+extern void disableSpeechDriver (const char *reason);
 extern int constructSpeechDriver (void);
 extern void destructSpeechDriver (void);
 #endif /* ENABLE_SPEECH_SUPPORT */

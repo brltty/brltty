@@ -1754,11 +1754,11 @@ enableBrailleDriver (void) {
 }
 
 void
-disableBrailleDriver (const char *message) {
+disableBrailleDriver (const char *reason) {
   ActivityObject *activity = getBrailleDriverActivity(0);
 
   if (activity) {
-    if (message) writeBrailleMessage(message);
+    if (reason) writeBrailleMessage(reason);
     stopActivity(activity);
   }
 }
@@ -2108,15 +2108,22 @@ enableSpeechDriver (int sayBanner) {
 }
 
 void
-disableSpeechDriver (void) {
+disableSpeechDriver (const char *reason) {
   ActivityObject *activity = getSpeechDriverActivity(0);
 
-  if (activity) stopActivity(activity);
+  if (activity) {
+    if (reason) {
+      sayString(&spk, reason, SAY_OPT_MUTE_FIRST);
+      drainSpeech(&spk);
+    }
+
+    stopActivity(activity);
+  }
 }
 
 void
 restartSpeechDriver (void) {
-  disableSpeechDriver();
+  disableSpeechDriver(gettext("speech restarting"));
   awaitActivityStopped(speechDriverActivity);
 
   logMessage(LOG_INFO, gettext("reinitializing speech driver"));
@@ -2885,7 +2892,7 @@ static const ProfileProperty languageProfileProperties[] = {
 static int
 beginLanguageProfile (void) {
 #ifdef ENABLE_SPEECH_SUPPORT
-  disableSpeechDriver();
+  disableSpeechDriver(gettext("changing language"));
   awaitActivityStopped(speechDriverActivity);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
