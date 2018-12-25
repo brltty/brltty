@@ -145,6 +145,8 @@ JAVA_STATIC_METHOD (
 
 static int
 refresh_AndroidScreen (void) {
+  problemText = NULL;
+
   if (findScreenDriverClass()) {
     static jmethodID method = 0;
 
@@ -165,8 +167,6 @@ refresh_AndroidScreen (void) {
           setBrailleOff(gettext("braille released"));
           return 1;
         }
-
-        problemText = NULL;
       }
     } else {
       problemText = "method not found";
