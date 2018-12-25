@@ -87,7 +87,7 @@ handleSpeechCommands (int command, void *data) {
       break;
 
     case BRL_CMD_SPK_STOP:
-      disableSpeechDriver(gettext("speech stopped"));
+      disableSpeechDriver(gettext("speech driver stopped"));
       break;
 
     case BRL_CMD_SPK_START:

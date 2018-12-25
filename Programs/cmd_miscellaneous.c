@@ -175,7 +175,7 @@ handleMiscellaneousCommands (int command, void *data) {
       break;
 
     case BRL_CMD_BRL_STOP:
-      disableBrailleDriver(gettext("braille stopped"));
+      disableBrailleDriver(gettext("braille driver stopped"));
       break;
 
     case BRL_CMD_BRL_START:
@@ -183,7 +183,7 @@ handleMiscellaneousCommands (int command, void *data) {
       break;
 
     case BRL_CMD_SCR_STOP:
-      disableScreenDriver(gettext("screen stopped"));
+      disableScreenDriver(gettext("screen driver stopped"));
       break;
 
     case BRL_CMD_SCR_START:

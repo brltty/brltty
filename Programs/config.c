@@ -1779,7 +1779,7 @@ setBrailleOff (const char *message) {
 
 void
 restartBrailleDriver (void) {
-  disableBrailleDriver(gettext("braille restarting"));
+  disableBrailleDriver(gettext("braille driver restarting"));
   awaitActivityStopped(brailleDriverActivity);
   brl.hasFailed = 0;
 
@@ -2123,7 +2123,7 @@ disableSpeechDriver (const char *reason) {
 
 void
 restartSpeechDriver (void) {
-  disableSpeechDriver(gettext("speech restarting"));
+  disableSpeechDriver(gettext("speech driver restarting"));
   awaitActivityStopped(speechDriverActivity);
 
   logMessage(LOG_INFO, gettext("reinitializing speech driver"));
@@ -2346,7 +2346,7 @@ disableScreenDriver (const char *reason) {
 
 void
 restartScreenDriver (void) {
-  disableScreenDriver(gettext("screen restarting"));
+  disableScreenDriver(gettext("screen driver restarting"));
   awaitActivityStopped(screenDriverActivity);
 
   logMessage(LOG_INFO, gettext("reinitializing screen driver"));
