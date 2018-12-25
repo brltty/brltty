@@ -155,13 +155,17 @@ refresh_AndroidScreen (void) {
 
       if (clearJavaException(env, 1)) {
         problemText = "Java exception";
-      } else if (result == 'l') {
-        setBrailleOff(gettext("Android locked"));
-        return 1;
-      } else if (result == 'r') {
-        setBrailleOff(gettext("braille released"));
-        return 1;
       } else {
+        if (result == 'l') {
+          setBrailleOff(gettext("Android locked"));
+          return 1;
+        }
+
+        if (result == 'r') {
+          setBrailleOff(gettext("braille released"));
+          return 1;
+        }
+
         problemText = NULL;
       }
     } else {

@@ -1743,11 +1743,11 @@ getBrailleDriverActivity (int allocate) {
   return brailleDriverActivity;
 }
 
-static int canEnableBraille = 1;
+static int canEnableBrailleDriver = 1;
 
 void
 enableBrailleDriver (void) {
-  if (canEnableBraille) {
+  if (canEnableBrailleDriver) {
     ActivityObject *activity = getBrailleDriverActivity(1);
     if (activity) startActivity(activity);
   }
@@ -1765,15 +1765,15 @@ disableBrailleDriver (const char *message) {
 
 void
 setBrailleOn (void) {
-  if (!canEnableBraille) {
-    canEnableBraille = 1;
+  if (!canEnableBrailleDriver) {
+    canEnableBrailleDriver = 1;
     enableBrailleDriver();
   }
 }
 
 void
 setBrailleOff (const char *message) {
-  canEnableBraille = 0;
+  canEnableBrailleDriver = 0;
   disableBrailleDriver(message);
 }
 
