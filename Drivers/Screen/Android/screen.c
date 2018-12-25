@@ -156,7 +156,7 @@ refresh_AndroidScreen (void) {
       jchar result = (*env)->CallStaticCharMethod(env, screenDriverClass, method);
 
       if (clearJavaException(env, 1)) {
-        problemText = "Java exception";
+        problemText = gettext("Java exception occurred");
       } else {
         if (result == 'l') {
           setBrailleOff(gettext("Android locked"));
@@ -169,10 +169,10 @@ refresh_AndroidScreen (void) {
         }
       }
     } else {
-      problemText = "method not found";
+      problemText = gettext("Java method not found");
     }
   } else {
-    problemText = "class not found";
+    problemText = gettext("Java class not found");
   }
 
   setBrailleOn();
