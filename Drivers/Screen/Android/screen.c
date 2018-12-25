@@ -28,6 +28,7 @@
 
 #include "scr_driver.h"
 #include "system_java.h"
+#include "core.h"
 
 static JNIEnv *env = NULL;
 static jclass screenDriverClass = NULL;
@@ -155,9 +156,11 @@ refresh_AndroidScreen (void) {
       if (clearJavaException(env, 1)) {
         problemText = "Java exception";
       } else if (result == 'l') {
-        problemText = "Android locked";
+        setBrailleOff(gettext("Android locked"));
+        return 1;
       } else if (result == 'r') {
-        problemText = "braille released";
+        setBrailleOff(gettext("braille released"));
+        return 1;
       } else {
         problemText = NULL;
       }
@@ -168,6 +171,7 @@ refresh_AndroidScreen (void) {
     problemText = "class not found";
   }
 
+  setBrailleOn();
   return 1;
 }
 

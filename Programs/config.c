@@ -888,13 +888,15 @@ exitKeyboardMonitor (void *data) {
 }
 
 static ActivityObject *
-getKeyboardMonitorActivity (void) {
+getKeyboardMonitorActivity (int allocate) {
   if (!keyboardMonitorActivity) {
-    if (!(keyboardMonitorActivity = newActivity(&keyboardMonitorActivityMethods, NULL))) {
-      return NULL;
-    }
+    if (allocate) {
+      if (!(keyboardMonitorActivity = newActivity(&keyboardMonitorActivityMethods, NULL))) {
+        return NULL;
+      }
 
-    onProgramExit("keyboard-monitor", exitKeyboardMonitor, NULL);
+      onProgramExit("keyboard-monitor", exitKeyboardMonitor, NULL);
+    }
   }
 
   return keyboardMonitorActivity;
@@ -902,7 +904,7 @@ getKeyboardMonitorActivity (void) {
 
 static void
 enableKeyboardMonitor (void) {
-  ActivityObject *activity = getKeyboardMonitorActivity();
+  ActivityObject *activity = getKeyboardMonitorActivity(1);
 
   if (activity) startActivity(activity);
 }
@@ -910,7 +912,7 @@ enableKeyboardMonitor (void) {
 /*
 static void
 disableKeyboardMonitor (void) {
-  ActivityObject *activity = getKeyboardMonitorActivity();
+  ActivityObject *activity = getKeyboardMonitorActivity(0);
 
   if (activity) stopActivity(activity);
 }
@@ -1704,14 +1706,18 @@ static const ActivityMethods brailleDriverActivityMethods = {
 static ActivityObject *brailleDriverActivity = NULL;
 
 static void
+writeBrailleMessage (const char *text) {
+  clearStatusCells(&brl);
+  message(NULL, text, (MSG_NODELAY | MSG_SILENT | MSG_SYNC));
+  brl.noDisplay = 1;
+}
+
+static void
 exitBrailleDriver (void *data) {
   if (brailleConstructed) {
     const char *text = opt_stopMessage;
     if (!*text) text = gettext("BRLTTY stopped");
-
-    clearStatusCells(&brl);
-    message(NULL, text, (MSG_NODELAY | MSG_SILENT | MSG_SYNC));
-    brl.noDisplay = 1;
+    writeBrailleMessage(text);
   }
 
   if (brailleDriverActivity) {
@@ -1723,35 +1729,57 @@ exitBrailleDriver (void *data) {
 }
 
 static ActivityObject *
-getBrailleDriverActivity (void) {
+getBrailleDriverActivity (int allocate) {
   if (!brailleDriverActivity) {
-    if (!(brailleDriverActivity = newActivity(&brailleDriverActivityMethods, NULL))) {
-      return NULL;
-    }
+    if (allocate) {
+      if (!(brailleDriverActivity = newActivity(&brailleDriverActivityMethods, NULL))) {
+        return NULL;
+      }
 
-    onProgramExit("braille-driver", exitBrailleDriver, NULL);
+      onProgramExit("braille-driver", exitBrailleDriver, NULL);
+    }
   }
 
   return brailleDriverActivity;
 }
 
+static int canEnableBraille = 1;
+
 void
 enableBrailleDriver (void) {
-  ActivityObject *activity = getBrailleDriverActivity();
-
-  if (activity) startActivity(activity);
+  if (canEnableBraille) {
+    ActivityObject *activity = getBrailleDriverActivity(1);
+    if (activity) startActivity(activity);
+  }
 }
 
 void
-disableBrailleDriver (void) {
-  ActivityObject *activity = getBrailleDriverActivity();
+disableBrailleDriver (const char *message) {
+  ActivityObject *activity = getBrailleDriverActivity(0);
 
-  if (activity) stopActivity(activity);
+  if (activity) {
+    if (message) writeBrailleMessage(message);
+    stopActivity(activity);
+  }
+}
+
+void
+setBrailleOn (void) {
+  if (!canEnableBraille) {
+    canEnableBraille = 1;
+    enableBrailleDriver();
+  }
+}
+
+void
+setBrailleOff (const char *message) {
+  canEnableBraille = 0;
+  disableBrailleDriver(message);
 }
 
 void
 restartBrailleDriver (void) {
-  disableBrailleDriver();
+  disableBrailleDriver(gettext("braille restarting"));
   awaitActivityStopped(brailleDriverActivity);
   brl.hasFailed = 0;
 
@@ -2057,13 +2085,15 @@ exitSpeechDriver (void *data) {
 }
 
 static ActivityObject *
-getSpeechDriverActivity (void) {
+getSpeechDriverActivity (int allocate) {
   if (!speechDriverActivity) {
-    if (!(speechDriverActivity = newActivity(&speechDriverActivityMethods, NULL))) {
-      return NULL;
-    }
+    if (allocate) {
+      if (!(speechDriverActivity = newActivity(&speechDriverActivityMethods, NULL))) {
+        return NULL;
+      }
 
-    onProgramExit("speech-driver", exitSpeechDriver, NULL);
+      onProgramExit("speech-driver", exitSpeechDriver, NULL);
+    }
   }
 
   return speechDriverActivity;
@@ -2071,7 +2101,7 @@ getSpeechDriverActivity (void) {
 
 void
 enableSpeechDriver (int sayBanner) {
-  ActivityObject *activity = getSpeechDriverActivity();
+  ActivityObject *activity = getSpeechDriverActivity(1);
 
   spk.sayBanner = sayBanner;
   if (activity) startActivity(activity);
@@ -2079,7 +2109,7 @@ enableSpeechDriver (int sayBanner) {
 
 void
 disableSpeechDriver (void) {
-  ActivityObject *activity = getSpeechDriverActivity();
+  ActivityObject *activity = getSpeechDriverActivity(0);
 
   if (activity) stopActivity(activity);
 }
@@ -2277,13 +2307,15 @@ exitScreenDriver (void *data) {
 }
 
 static ActivityObject *
-getScreenDriverActivity (void) {
+getScreenDriverActivity (int allocate) {
   if (!screenDriverActivity) {
-    if (!(screenDriverActivity = newActivity(&screenDriverActivityMethods, NULL))) {
-      return NULL;
-    }
+    if (allocate) {
+      if (!(screenDriverActivity = newActivity(&screenDriverActivityMethods, NULL))) {
+        return NULL;
+      }
 
-    onProgramExit("screen-driver", exitScreenDriver, NULL);
+      onProgramExit("screen-driver", exitScreenDriver, NULL);
+    }
   }
 
   return screenDriverActivity;
@@ -2291,14 +2323,14 @@ getScreenDriverActivity (void) {
 
 void
 enableScreenDriver (void) {
-  ActivityObject *activity = getScreenDriverActivity();
+  ActivityObject *activity = getScreenDriverActivity(1);
 
   if (activity) startActivity(activity);
 }
 
 void
 disableScreenDriver (void) {
-  ActivityObject *activity = getScreenDriverActivity();
+  ActivityObject *activity = getScreenDriverActivity(0);
 
   if (activity) stopActivity(activity);
 }
