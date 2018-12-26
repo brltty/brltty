@@ -38,14 +38,14 @@ typedef enum {
 #define DRIVER_DEVELOPERS ""
 #include "scr_driver.h"
 
-static const char defaultScreenMessage[] = strtext("no screen");
-static const char *screenMessageParameter = NULL;
-static const char *screenDriverStoppedReason = NULL;
+static const char defaultMessage[] = strtext("no screen");
+static const char *messageParameter = NULL;
+static const char *noDriverReason = NULL;
 static const char *screenMessage = NULL;
 
 void
-setScreenDriverStoppedReason (const char *reason) {
-  screenDriverStoppedReason = reason;
+setNoScreenDriverReason (const char *reason) {
+  noDriverReason = reason;
 }
 
 static int
@@ -53,7 +53,7 @@ processParameters_NoScreen (char **parameters) {
   {
     const char *message = parameters[PARM_MESSAGE];
     if (message && !*message) message = NULL;
-    screenMessageParameter = message;
+    messageParameter = message;
   }
 
   return 1;
@@ -61,7 +61,7 @@ processParameters_NoScreen (char **parameters) {
 
 static void
 releaseParameters_NoScreen (void) {
-  screenMessageParameter = NULL;
+  messageParameter = NULL;
 }
 
 static int
@@ -72,9 +72,9 @@ currentVirtualTerminal_NoScreen (void) {
 static void
 describe_NoScreen (ScreenDescription *description) {
   {
-    const char *message = screenDriverStoppedReason;
-    if (!message) message = screenMessageParameter;
-    if (!message) message = gettext(defaultScreenMessage);
+    const char *message = noDriverReason;
+    if (!message) message = messageParameter;
+    if (!message) message = gettext(defaultMessage);
     screenMessage = message;
   }
 

@@ -2332,7 +2332,7 @@ void
 enableScreenDriver (void) {
   ActivityObject *activity = getScreenDriverActivity(1);
 
-  setScreenDriverStoppedReason(NULL);
+  setNoScreenDriverReason(NULL);
   if (activity) startActivity(activity);
 }
 
@@ -2340,7 +2340,7 @@ void
 disableScreenDriver (const char *reason) {
   ActivityObject *activity = getScreenDriverActivity(0);
 
-  setScreenDriverStoppedReason(reason);
+  setNoScreenDriverReason(reason);
   if (activity) stopActivity(activity);
 }
 
