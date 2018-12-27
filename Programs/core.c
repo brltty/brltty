@@ -935,9 +935,13 @@ volatile SpeechSynthesizer spk;
 
 void
 trackSpeech (void) {
-  placeBrailleWindowHorizontally(spk.track.speechLocation % scr.cols);
-  slideBrailleWindowVertically(spk.track.firstLine + (spk.track.speechLocation / scr.cols));
-  scheduleUpdate("speech tracked");
+  int location = spk.track.speechLocation;
+
+  if (location != SPK_LOC_NONE) {
+    placeBrailleWindowHorizontally(location % scr.cols);
+    slideBrailleWindowVertically(spk.track.firstLine + (location / scr.cols));
+    scheduleUpdate("speech tracked");
+  }
 }
 
 int
