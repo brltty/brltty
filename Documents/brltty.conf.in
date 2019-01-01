@@ -430,11 +430,11 @@
 
 # ViaVoice Speech Driver Parameters
 #speech-parameters vv:IniFile=/usr/lib/ViaVoiceTTS/eci.ini
-#speech-parameters vv:rate= # [8000,11025,22050 Hz]
+#speech-parameters vv:Rate= # [8000,11025,22050 Hz]
+#speech-parameters vv:Mode= # [words,letters,punctuation,phonetic]
+#speech-parameters vv:Expressiveness= # [sentences,none]
 #speech-parameters vv:Abbreviations= # [on,off]
 #speech-parameters vv:Years= # [on,off]
-#speech-parameters vv:Expressiveness= # [sentences,none]
-#speech-parameters vv:TextMode= # [talk,spell,literal,phonetic]
 #speech-parameters vv:Language= # [American-English, British-English, Castilian-Spanish, Mexican-Spanish, Standard-French, Canadian-French, Standard-German, Standard-Italian, Standard-Mandarin, Standard-Mandarin-GB, Standard-Mandarin-PinYin, Standard-Mandarin-UCS, Taiwanese-Mandarin, Taiwanese-Mandarin-Big5, Taiwanese-Mandarin-ZhuYin, Taiwanese-Mandarin-PinYin, Taiwanese-Mandarin-UCS, Brazilian-Portuguese, Standard-Japanese, Standard-Japanese-SJIS, Standard-Japanese-UCS, Standard-Finnish, Standard-Korean, Standard-Korean-UHC, Standard-Korean-UCS, Standard-Cantonese, Standard-Cantonese-GB, Standard-Cantonese-UCS, HongKong-Cantonese, HongKong-Cantonese-Big5, HongKong-Cantonese-UCS, Standard-Dutch, Standard-Norwegian, Standard-Swedish, Standard-Danish, Standard-Thai, Standard-Thai-TIS]
 #speech-parameters vv:Voice= # [Dad,Mom,child,Grandma,Grandpa]
 #speech-parameters vv:Gender= # [male,female]

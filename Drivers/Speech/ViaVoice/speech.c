@@ -39,10 +39,10 @@
 typedef enum {
    PARM_IniFile,
    PARM_Rate,
+   PARM_Mode,
+   PARM_Expressiveness,
    PARM_Abbreviations,
    PARM_Years,
-   PARM_Expressiveness,
-   PARM_TextMode,
    PARM_Language,
    PARM_Voice,
    PARM_Gender,
@@ -54,7 +54,7 @@ typedef enum {
    PARM_Volume,
    PARM_Speed
 } DriverParameter;
-#define SPKPARMS "inifile", "rate", "abbreviations", "years", "expressiveness", "textmode", "language", "voice", "gender", "headsize", "pitchbaseline", "pitchfluctuation", "roughness", "breathiness", "volume", "speed"
+#define SPKPARMS "inifile", "rate", "mode", "expressiveness", "abbreviations", "years", "language", "voice", "gender", "headsize", "pitchbaseline", "pitchfluctuation", "roughness", "breathiness", "volume", "speed"
 
 #include "spk_driver.h"
 #include "speech.h"
@@ -93,7 +93,7 @@ static const char *rateChoices[] = {"8000", "11025", "22050", NULL};
 static const char *abbreviationsChoices[] = {"on", "off", NULL};
 static const char *yearsChoices[] = {"off", "on", NULL};
 static const char *expressivenessChoices[] = {"sentences", "none", NULL};
-static const char *textModes[] = {"talk", "spell", "literal", "phonetic", NULL};
+static const char *modeChoices[] = {"words", "letters", "punctuation", "phonetic", NULL};
 static const char *voiceChoices[] = {"", "Dad", "Mom", "child", "", "", "", "Grandma", "Grandpa", NULL};
 static const char *genderChoices[] = {"male", "female", NULL};
 
@@ -103,9 +103,9 @@ typedef struct {
    const char *territory;
    const char *encoding;
    int identifier;
-} LanguageEntry;
+} LanguageChoice;
 
-static const LanguageEntry languages[] = {
+static const LanguageChoice languageChoices[] = {
    {  .identifier = eciGeneralAmericanEnglish,
       .name = "American-English",
       .language = "en",
@@ -370,7 +370,7 @@ static const LanguageEntry languages[] = {
 
 static int
 mapLanguage (int index) {
-   return languages[index].identifier;
+   return languageChoices[index].identifier;
 }
 
 static void
@@ -730,23 +730,23 @@ prepareTextConversion (volatile SpeechSynthesizer *spk) {
    spk->driver.data->iconv.handle = ICONV_NULL;
 
    int identifier = getGeneralParameter(spk, eciLanguageDialect);
-   const LanguageEntry *entry = languages;
+   const LanguageChoice *choice = languageChoices;
 
-   while (entry->name) {
-      if (entry->identifier == identifier) {
-         iconv_t *handle = iconv_open(entry->encoding, "UTF-8");
+   while (choice->name) {
+      if (choice->identifier == identifier) {
+         iconv_t *handle = iconv_open(choice->encoding, "UTF-8");
 
          if (handle == ICONV_NULL) {
-            logMessage(LOG_WARNING, "character encoding not supported: %s: %s", entry->encoding, strerror(errno));
+            logMessage(LOG_WARNING, "character encoding not supported: %s: %s", choice->encoding, strerror(errno));
             return 0;
          }
 
-         logMessage(LOG_CATEGORY(SPEECH_DRIVER), "using character encoding: %s", entry->encoding);
+         logMessage(LOG_CATEGORY(SPEECH_DRIVER), "using character encoding: %s", choice->encoding);
          spk->driver.data->iconv.handle = handle;
          return 1;
       }
 
-      entry += 1;
+      choice += 1;
    }
 
    logMessage(LOG_WARNING, "language identifier not defined: 0X%08X", identifier);
@@ -943,11 +943,11 @@ isSet:
 static void
 setParameters (volatile SpeechSynthesizer *spk, char **parameters) {
    choiceGeneralParameter(spk, "sample rate", parameters[PARM_Rate], eciSampleRate, rateChoices, sizeof(*rateChoices), NULL);
+   choiceGeneralParameter(spk, "text mode", parameters[PARM_Mode], eciTextMode, modeChoices, sizeof(*modeChoices), NULL);
+   choiceGeneralParameter(spk, "synth mode", parameters[PARM_Expressiveness], eciSynthMode, expressivenessChoices, sizeof(*expressivenessChoices), NULL);
    choiceGeneralParameter(spk, "dictionaries", parameters[PARM_Abbreviations], eciDictionary, abbreviationsChoices, sizeof(*abbreviationsChoices), NULL);
    choiceGeneralParameter(spk, "number mode", parameters[PARM_Years], eciNumberMode, yearsChoices, sizeof(*yearsChoices), NULL);
-   choiceGeneralParameter(spk, "synth mode", parameters[PARM_Expressiveness], eciSynthMode, expressivenessChoices, sizeof(*expressivenessChoices), NULL);
-   choiceGeneralParameter(spk, "text mode", parameters[PARM_TextMode], eciTextMode, textModes, sizeof(*textModes), NULL);
-   choiceGeneralParameter(spk, "language&dialect", parameters[PARM_Language], eciLanguageDialect, languages, sizeof(*languages), mapLanguage);
+   choiceGeneralParameter(spk, "language&dialect", parameters[PARM_Language], eciLanguageDialect, languageChoices, sizeof(*languageChoices), mapLanguage);
    choiceGeneralParameter(spk, "voice name", parameters[PARM_Voice], eciNumParams, voiceChoices, sizeof(*voiceChoices), NULL);
 
    choiceVoiceParameter(spk, "gender", parameters[PARM_Gender], eciGender, genderChoices, NULL);
@@ -999,7 +999,7 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
 
       if (setIni(parameters[PARM_IniFile])) {
          {
-            char version[0X80];
+            char version[20];
             eciVersion(version);
             logMessage(LOG_INFO, "ViaVoice Engine: version %s", version);
          }
