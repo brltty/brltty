@@ -538,6 +538,21 @@ spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting) {
    setVoiceParameter(eciHandle, "rate", eciSpeed, (int)(getFloatSpeechRate(setting) * 210.0));
 }
 
+static void
+stopSpeech (ECIHand eci) {
+   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "stop");
+
+   if (eciStop(eci)) {
+   } else {
+      reportError(eci, "eciStop");
+   }
+}
+
+static void
+spk_mute (volatile SpeechSynthesizer *spk) {
+   stopSpeech(eciHandle);
+}
+
 static int
 pcmMakeCommand (void) {
    int rate = eciGetParam(eciHandle, eciSampleRate);
@@ -808,21 +823,22 @@ addSegments (ECIHand eci, const unsigned char *buffer, size_t length, const int 
 static void
 spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
    int ok = 0;
-   int indexMap[length + 1];
-
-   {
-      int from = 0;
-      int to = 0;
-
-      while (from < length) {
-         char character = buffer[from];
-         indexMap[from++] = ((character & 0X80) && !(character & 0X40))? -1: to++;
-      }
-
-      indexMap[from] = to;
-   }
 
    if (pcmOpenStream()) {
+      int indexMap[length + 1];
+
+      {
+         int from = 0;
+         int to = 0;
+
+         while (from < length) {
+            char character = buffer[from];
+            indexMap[from++] = ((character & 0X80) && !(character & 0X40))? -1: to++;
+         }
+
+         indexMap[from] = to;
+      }
+
       if (addSegments(eciHandle, buffer, length, indexMap)) {
          logMessage(LOG_CATEGORY(SPEECH_DRIVER), "synthesize");
 
@@ -841,16 +857,8 @@ spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t le
          }
       }
 
-      if (!ok) eciStop(eciHandle);
+      if (!ok) stopSpeech(eciHandle);
       pcmCloseStream();
-   }
-}
-
-static void
-spk_mute (volatile SpeechSynthesizer *spk) {
-   if (eciStop(eciHandle)) {
-   } else {
-      reportError(eciHandle, "eciStop");
    }
 }
 
