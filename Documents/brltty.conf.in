@@ -430,7 +430,7 @@
 
 # ViaVoice Speech Driver Parameters
 #speech-parameters vv:IniFile=/usr/lib/ViaVoiceTTS/eci.ini
-#speech-parameters vv:Rate= # [11025,8000,22050 Hz]
+#speech-parameters vv:Quality= # [fair,poor,good]
 #speech-parameters vv:Mode= # [words,letters,punctuation,phonetic]
 #speech-parameters vv:Synthesize= # [sentences,all]
 #speech-parameters vv:Abbreviations= # [on,off]

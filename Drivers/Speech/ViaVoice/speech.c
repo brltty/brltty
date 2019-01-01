@@ -38,7 +38,7 @@
 
 typedef enum {
    PARM_IniFile,
-   PARM_Rate,
+   PARM_Quality,
    PARM_Mode,
    PARM_Synthesize,
    PARM_Abbreviations,
@@ -54,7 +54,7 @@ typedef enum {
    PARM_Volume,
    PARM_Speed
 } DriverParameter;
-#define SPKPARMS "inifile", "rate", "mode", "synthesize", "abbreviations", "years", "language", "voice", "gender", "headsize", "pitch", "expressiveness", "roughness", "breathiness", "volume", "speed"
+#define SPKPARMS "inifile", "quality", "mode", "synthesize", "abbreviations", "years", "language", "voice", "gender", "headsize", "pitch", "expressiveness", "roughness", "breathiness", "volume", "speed"
 
 #include "spk_driver.h"
 #include "speech.h"
@@ -89,7 +89,27 @@ struct SpeechDataStruct {
 
 typedef int MapFunction (int index);
 
-static const char *rateChoices[] = {"8000", "11025", "22050", NULL};
+typedef struct {
+   const char *name; // must be first
+   int rate;
+} QualityChoice;
+
+static const QualityChoice qualityChoices[] = {
+   {  .name = "poor",
+      .rate = 8000
+   },
+
+   {  .name = "fair",
+      .rate = 11025
+   },
+
+   {  .name = "good",
+      .rate = 22050
+   },
+
+   {  .name = NULL  }
+};
+
 static const char *abbreviationsChoices[] = {"on", "off", NULL};
 static const char *yearsChoices[] = {"off", "on", NULL};
 static const char *synthesizeChoices[] = {"sentences", "all", NULL};
@@ -382,22 +402,31 @@ reportError (volatile SpeechSynthesizer *spk, const char *routine) {
 }
 
 static void
-reportParameter (const char *type, const char *description, int setting, const char *const *choices, MapFunction *map, const char *unit) {
+reportParameter (const char *type, const char *description, int setting, const void *choices, size_t size, MapFunction *map, const char *unit) {
    char buffer[0X10];
    const char *value = buffer;
 
    if (setting == -1) {
       value = "unknown";
    } else if (choices) {
-      int choice = 0;
+      const void *choice = choices;
 
-      while (choices[choice]) {
-	 if (setting == (map? map(choice): choice)) {
-	    value = choices[choice];
+      while (1) {
+         typedef struct {
+            const char *name;
+         } Entry;
+
+         const Entry *entry = choice;
+         const char *name = entry->name;
+         if (!name) break;
+         int index = (choice - choices) / size;
+
+	 if (setting == (map? map(index): index)) {
+	    value = name;
 	    break;
 	 }
 
-         choice += 1;
+         choice += size;
       }
    }
 
@@ -414,18 +443,15 @@ getGeneralParameter (volatile SpeechSynthesizer *spk, enum ECIParam parameter) {
 static const char *
 getGeneralParameterUnit (enum ECIParam parameter) {
    switch (parameter) {
-      case eciSampleRate:
-         return "Hz";
-
       default:
          return "";
    }
 }
 
 static void
-reportGeneralParameter (volatile SpeechSynthesizer *spk, const char *description, enum ECIParam parameter, int setting, const char *const *choices, MapFunction *map) {
+reportGeneralParameter (volatile SpeechSynthesizer *spk, const char *description, enum ECIParam parameter, int setting, const void *choices, size_t size, MapFunction *map) {
    if (parameter != eciNumParams) setting = getGeneralParameter(spk, parameter);
-   reportParameter("general", description, setting, choices, map, getGeneralParameterUnit(parameter));
+   reportParameter("general", description, setting, choices, size, map, getGeneralParameterUnit(parameter));
 }
 
 static int
@@ -463,7 +489,7 @@ choiceGeneralParameter (volatile SpeechSynthesizer *spk, const char *description
       }
    }
 
-   reportGeneralParameter(spk, description, parameter, assume, choices, map);
+   reportGeneralParameter(spk, description, parameter, assume, choices, size, map);
    return ok;
 }
 
@@ -531,7 +557,7 @@ getVoiceParameterUnit (enum ECIVoiceParam parameter) {
 
 static void
 reportVoiceParameter (volatile SpeechSynthesizer *spk, const char *description, enum ECIVoiceParam parameter, const char *const *choices, MapFunction *map) {
-   reportParameter("voice", description, getVoiceParameter(spk, parameter), choices, map, getVoiceParameterUnit(parameter));
+   reportParameter("voice", description, getVoiceParameter(spk, parameter), choices, sizeof(*choices), map, getVoiceParameterUnit(parameter));
 }
 
 static int
@@ -617,8 +643,8 @@ pcmMakeCommand (volatile SpeechSynthesizer *spk) {
 
    snprintf(
       buffer, sizeof(buffer),
-      "sox -q -t raw -c 1 -b %" PRIsize " -e signed-integer -r %s - -d",
-      (sizeof(*spk->driver.data->pcm.buffer) * 8), rateChoices[rate]
+      "sox -q -t raw -c 1 -b %" PRIsize " -e signed-integer -r %d - -d",
+      (sizeof(*spk->driver.data->pcm.buffer) * 8), qualityChoices[rate].rate
    );
 
    logMessage(LOG_CATEGORY(SPEECH_DRIVER), "PCM command: %s", buffer);
@@ -942,18 +968,18 @@ isSet:
 
 static void
 setParameters (volatile SpeechSynthesizer *spk, char **parameters) {
-   choiceGeneralParameter(spk, "sample rate", parameters[PARM_Rate], eciSampleRate, rateChoices, sizeof(*rateChoices), NULL);
-   choiceGeneralParameter(spk, "text mode", parameters[PARM_Mode], eciTextMode, modeChoices, sizeof(*modeChoices), NULL);
-   choiceGeneralParameter(spk, "synth mode", parameters[PARM_Synthesize], eciSynthMode, synthesizeChoices, sizeof(*synthesizeChoices), NULL);
-   choiceGeneralParameter(spk, "dictionaries", parameters[PARM_Abbreviations], eciDictionary, abbreviationsChoices, sizeof(*abbreviationsChoices), NULL);
-   choiceGeneralParameter(spk, "number mode", parameters[PARM_Years], eciNumberMode, yearsChoices, sizeof(*yearsChoices), NULL);
-   choiceGeneralParameter(spk, "language&dialect", parameters[PARM_Language], eciLanguageDialect, languageChoices, sizeof(*languageChoices), mapLanguage);
+   choiceGeneralParameter(spk, "quality (sample rate)", parameters[PARM_Quality], eciSampleRate, qualityChoices, sizeof(*qualityChoices), NULL);
+   choiceGeneralParameter(spk, "mode (text mode)", parameters[PARM_Mode], eciTextMode, modeChoices, sizeof(*modeChoices), NULL);
+   choiceGeneralParameter(spk, "synthesize (synth mode)", parameters[PARM_Synthesize], eciSynthMode, synthesizeChoices, sizeof(*synthesizeChoices), NULL);
+   choiceGeneralParameter(spk, "abbreviations (dictionary)", parameters[PARM_Abbreviations], eciDictionary, abbreviationsChoices, sizeof(*abbreviationsChoices), NULL);
+   choiceGeneralParameter(spk, "years (number mode)", parameters[PARM_Years], eciNumberMode, yearsChoices, sizeof(*yearsChoices), NULL);
+   choiceGeneralParameter(spk, "language", parameters[PARM_Language], eciLanguageDialect, languageChoices, sizeof(*languageChoices), mapLanguage);
    choiceGeneralParameter(spk, "voice name", parameters[PARM_Voice], eciNumParams, voiceChoices, sizeof(*voiceChoices), NULL);
 
    choiceVoiceParameter(spk, "gender", parameters[PARM_Gender], eciGender, genderChoices, NULL);
    rangeVoiceParameter(spk, "head size", parameters[PARM_HeadSize], eciHeadSize, 0, 100);
-   rangeVoiceParameter(spk, "pitch baseline", parameters[PARM_Pitch], eciPitchBaseline, 40, 422);
-   rangeVoiceParameter(spk, "pitch fluctuation", parameters[PARM_Expressiveness], eciPitchFluctuation, 0, 100);
+   rangeVoiceParameter(spk, "pitch (pitch baseline)", parameters[PARM_Pitch], eciPitchBaseline, 40, 422);
+   rangeVoiceParameter(spk, "expressiveness (pitch fluctuation)", parameters[PARM_Expressiveness], eciPitchFluctuation, 0, 100);
    rangeVoiceParameter(spk, "roughness", parameters[PARM_Roughness], eciRoughness, 0, 100);
    rangeVoiceParameter(spk, "breathiness", parameters[PARM_Breathiness], eciBreathiness, 0, 100);
    rangeVoiceParameter(spk, "volume", parameters[PARM_Volume], eciVolume, 0, 100);
