@@ -79,7 +79,7 @@ static const char *abbreviationModes[] = {"on", "off", NULL};
 static const char *numberModes[] = {"word", "year", NULL};
 static const char *synthModes[] = {"sentence", "none", NULL};
 static const char *textModes[] = {"talk", "spell", "literal", "phonetic", NULL};
-static const char *voices[] = {"", "dad", "mom", "child", "", "", "", "grandma", "grandpa", NULL};
+static const char *voices[] = {"", "Dad", "Mom", "child", "", "", "", "Grandma", "Grandpa", NULL};
 static const char *genders[] = {"male", "female", NULL};
 
 typedef struct {
@@ -367,7 +367,7 @@ reportError (volatile SpeechSynthesizer *spk, const char *routine) {
 }
 
 static void
-reportParameter (const char *description, int setting, const char *const *choices, MapFunction *map) {
+reportParameter (const char *description, int setting, const char *const *choices, MapFunction *map, const char *unit) {
    char buffer[0X10];
    const char *value = buffer;
 
@@ -387,7 +387,8 @@ reportParameter (const char *description, int setting, const char *const *choice
    }
 
    if (value == buffer) snprintf(buffer, sizeof(buffer), "%d", setting);
-   logMessage(LOG_DEBUG, "ViaVoice Parameter: %s = %s", description, value);
+   if (!unit) unit = "";
+   logMessage(LOG_DEBUG, "ViaVoice Parameter: %s = %s%s", description, value, unit);
 }
 
 static int
@@ -398,7 +399,7 @@ getGeneralParameter (volatile SpeechSynthesizer *spk, enum ECIParam parameter) {
 static void
 reportGeneralParameter (volatile SpeechSynthesizer *spk, const char *description, enum ECIParam parameter, int setting, const char *const *choices, MapFunction *map) {
    if (parameter != eciNumParams) setting = getGeneralParameter(spk, parameter);
-   reportParameter(description, setting, choices, map);
+   reportParameter(description, setting, choices, map, NULL);
 }
 
 static int
@@ -451,25 +452,25 @@ setUnits (volatile SpeechSynthesizer *spk, int newUnits) {
 }
 
 static int
-useInternalUnits (volatile SpeechSynthesizer *spk) {
+useInternalUnit (volatile SpeechSynthesizer *spk) {
    return setUnits(spk, 0);
 }
 
 static int
-useExternalUnits (volatile SpeechSynthesizer *spk) {
+useExternalUnit (volatile SpeechSynthesizer *spk) {
    return setUnits(spk, 1);
 }
 
 static int
-useParameterUnits (volatile SpeechSynthesizer *spk, enum ECIVoiceParam parameter) {
+useParameterUnit (volatile SpeechSynthesizer *spk, enum ECIVoiceParam parameter) {
    switch (parameter) {
       case eciVolume:
-         if (!useInternalUnits(spk)) return 0;
+         if (!useInternalUnit(spk)) return 0;
          break;
 
       case eciPitchBaseline:
       case eciSpeed:
-         if (!useExternalUnits(spk)) return 0;
+         if (!useExternalUnit(spk)) return 0;
          break;
 
       default:
@@ -481,19 +482,36 @@ useParameterUnits (volatile SpeechSynthesizer *spk, enum ECIVoiceParam parameter
 
 static int
 getVoiceParameter (volatile SpeechSynthesizer *spk, enum ECIVoiceParam parameter) {
-   if (!useParameterUnits(spk, parameter)) return 0;
+   if (!useParameterUnit(spk, parameter)) return 0;
    return eciGetVoiceParam(spk->driver.data->eci.handle, 0, parameter);
+}
+
+static const char *
+getVoiceParameterUnit (enum ECIVoiceParam parameter) {
+   switch (parameter) {
+      case eciVolume:
+         return "%";
+
+      case eciPitchBaseline:
+         return "Hz";
+
+      case eciSpeed:
+         return "wpm";
+
+      default:
+         return "";
+   }
 }
 
 static void
 reportVoiceParameter (volatile SpeechSynthesizer *spk, const char *description, enum ECIVoiceParam parameter, const char *const *choices, MapFunction *map) {
-   reportParameter(description, getVoiceParameter(spk, parameter), choices, map);
+   reportParameter(description, getVoiceParameter(spk, parameter), choices, map, getVoiceParameterUnit(parameter));
 }
 
 static int
 setVoiceParameter (volatile SpeechSynthesizer *spk, const char *description, enum ECIVoiceParam parameter, int setting) {
-   if (!useParameterUnits(spk, parameter)) return 0;
-   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "set voice parameter: %s: %d=%d", description, parameter, setting);
+   if (!useParameterUnit(spk, parameter)) return 0;
+   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "set voice parameter: %s: %d=%d%s", description, parameter, setting, getVoiceParameterUnit(parameter));
    return eciSetVoiceParam(spk->driver.data->eci.handle, 0, parameter, setting) >= 0;
 }
 
@@ -934,6 +952,7 @@ writeAnnotations (volatile SpeechSynthesizer *spk) {
 
 static int
 spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
+setLogCategory("spkdrv");
    spk->setVolume = spk_setVolume;
    spk->setRate = spk_setRate;
 
