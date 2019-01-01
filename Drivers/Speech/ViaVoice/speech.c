@@ -59,8 +59,6 @@ typedef enum {
 #include "spk_driver.h"
 #include "speech.h"
 
-#define MAXIMUM_SAMPLES 0X800
-
 struct SpeechDataStruct {
    struct {
       ECIHand handle;
@@ -944,7 +942,7 @@ spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t le
 }
 
 static int
-setIni (const char *path) {
+setInitializationFile (const char *path) {
    const char *variable = INI_VARIABLE;
    logMessage(LOG_DEBUG, "ViaVoice Ini Variable: %s", variable);
 
@@ -954,15 +952,17 @@ setIni (const char *path) {
          path = value;
 	 goto isSet;
       }
+
       value = INI_DEFAULT;
    }
+
    if (setenv(variable, path, 1) == -1) {
       logSystemError("setenv");
       return 0;
    }
-isSet:
 
-   logMessage(LOG_INFO, "ViaVoice Ini File: %s", path);
+isSet:
+   logMessage(LOG_INFO, "ViaVoice Initialization File: %s", path);
    return 1;
 }
 
@@ -1023,7 +1023,7 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
       spk->driver.data->say.buffer = NULL;
       spk->driver.data->say.size = 0;
 
-      if (setIni(parameters[PARM_IniFile])) {
+      if (setInitializationFile(parameters[PARM_IniFile])) {
          {
             char version[20];
             eciVersion(version);

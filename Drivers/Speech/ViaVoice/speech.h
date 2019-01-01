@@ -20,4 +20,5 @@
  */
 
 #define INI_VARIABLE "ECIINI"
-#define INI_DEFAULT "/usr/lib/ViaVoiceTTS/eci.ini"
+#define INI_DEFAULT "/var/opt/IBM/ibmtts/cfg/eci.ini"
+#define MAXIMUM_SAMPLES 0X800
