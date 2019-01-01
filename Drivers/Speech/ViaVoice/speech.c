@@ -38,23 +38,23 @@
 
 typedef enum {
    PARM_IniFile,
-   PARM_SampleRate,
-   PARM_AbbreviationMode,
-   PARM_NumberMode,
-   PARM_SynthMode,
+   PARM_Rate,
+   PARM_Abbreviations,
+   PARM_Years,
+   PARM_Expressiveness,
    PARM_TextMode,
    PARM_Language,
    PARM_Voice,
    PARM_Gender,
-   PARM_Breathiness,
    PARM_HeadSize,
    PARM_PitchBaseline,
    PARM_PitchFluctuation,
    PARM_Roughness,
-   PARM_Speed,
-   PARM_Volume
+   PARM_Breathiness,
+   PARM_Volume,
+   PARM_Speed
 } DriverParameter;
-#define SPKPARMS "inifile", "samplerate", "abbreviationmode", "numbermode", "synthmode", "textmode", "language", "voice", "gender", "breathiness", "headsize", "pitchbaseline", "pitchfluctuation", "roughness", "speed", "volume"
+#define SPKPARMS "inifile", "rate", "abbreviations", "years", "expressiveness", "textmode", "language", "voice", "gender", "headsize", "pitchbaseline", "pitchfluctuation", "roughness", "breathiness", "volume", "speed"
 
 #include "spk_driver.h"
 #include "speech.h"
@@ -89,13 +89,13 @@ struct SpeechDataStruct {
 
 typedef int MapFunction (int index);
 
-static const char *sampleRates[] = {"8000", "11025", "22050", NULL};
-static const char *abbreviationModes[] = {"on", "off", NULL};
-static const char *numberModes[] = {"word", "year", NULL};
-static const char *synthModes[] = {"sentence", "none", NULL};
+static const char *rateChoices[] = {"8000", "11025", "22050", NULL};
+static const char *abbreviationsChoices[] = {"on", "off", NULL};
+static const char *yearsChoices[] = {"off", "on", NULL};
+static const char *expressivenessChoices[] = {"sentences", "none", NULL};
 static const char *textModes[] = {"talk", "spell", "literal", "phonetic", NULL};
-static const char *voiceNames[] = {"", "Dad", "Mom", "child", "", "", "", "Grandma", "Grandpa", NULL};
-static const char *genderNames[] = {"male", "female", NULL};
+static const char *voiceChoices[] = {"", "Dad", "Mom", "child", "", "", "", "Grandma", "Grandpa", NULL};
+static const char *genderChoices[] = {"male", "female", NULL};
 
 typedef struct {
    const char *name; // must be first
@@ -618,7 +618,7 @@ pcmMakeCommand (volatile SpeechSynthesizer *spk) {
    snprintf(
       buffer, sizeof(buffer),
       "sox -q -t raw -c 1 -b %" PRIsize " -e signed-integer -r %s - -d",
-      (sizeof(*spk->driver.data->pcm.buffer) * 8), sampleRates[rate]
+      (sizeof(*spk->driver.data->pcm.buffer) * 8), rateChoices[rate]
    );
 
    logMessage(LOG_CATEGORY(SPEECH_DRIVER), "PCM command: %s", buffer);
@@ -741,6 +741,7 @@ prepareTextConversion (volatile SpeechSynthesizer *spk) {
             return 0;
          }
 
+         logMessage(LOG_CATEGORY(SPEECH_DRIVER), "using character encoding: %s", entry->encoding);
          spk->driver.data->iconv.handle = handle;
          return 1;
       }
@@ -941,28 +942,32 @@ isSet:
 
 static void
 setParameters (volatile SpeechSynthesizer *spk, char **parameters) {
-   choiceGeneralParameter(spk, "sample rate", parameters[PARM_SampleRate], eciSampleRate, sampleRates, sizeof(*sampleRates), NULL);
-   choiceGeneralParameter(spk, "abbreviation mode", parameters[PARM_AbbreviationMode], eciDictionary, abbreviationModes, sizeof(*abbreviationModes), NULL);
-   choiceGeneralParameter(spk, "number mode", parameters[PARM_NumberMode], eciNumberMode, numberModes, sizeof(*numberModes), NULL);
-   choiceGeneralParameter(spk, "synth mode", parameters[PARM_SynthMode], eciSynthMode, synthModes, sizeof(*synthModes), NULL);
+   choiceGeneralParameter(spk, "sample rate", parameters[PARM_Rate], eciSampleRate, rateChoices, sizeof(*rateChoices), NULL);
+   choiceGeneralParameter(spk, "dictionaries", parameters[PARM_Abbreviations], eciDictionary, abbreviationsChoices, sizeof(*abbreviationsChoices), NULL);
+   choiceGeneralParameter(spk, "number mode", parameters[PARM_Years], eciNumberMode, yearsChoices, sizeof(*yearsChoices), NULL);
+   choiceGeneralParameter(spk, "synth mode", parameters[PARM_Expressiveness], eciSynthMode, expressivenessChoices, sizeof(*expressivenessChoices), NULL);
    choiceGeneralParameter(spk, "text mode", parameters[PARM_TextMode], eciTextMode, textModes, sizeof(*textModes), NULL);
-   choiceGeneralParameter(spk, "language", parameters[PARM_Language], eciLanguageDialect, languages, sizeof(*languages), mapLanguage);
-   choiceGeneralParameter(spk, "voice", parameters[PARM_Voice], eciNumParams, voiceNames, sizeof(*voiceNames), NULL);
+   choiceGeneralParameter(spk, "language&dialect", parameters[PARM_Language], eciLanguageDialect, languages, sizeof(*languages), mapLanguage);
+   choiceGeneralParameter(spk, "voice name", parameters[PARM_Voice], eciNumParams, voiceChoices, sizeof(*voiceChoices), NULL);
 
-   choiceVoiceParameter(spk, "gender", parameters[PARM_Gender], eciGender, genderNames, NULL);
-   rangeVoiceParameter(spk, "breathiness", parameters[PARM_Breathiness], eciBreathiness, 0, 100);
+   choiceVoiceParameter(spk, "gender", parameters[PARM_Gender], eciGender, genderChoices, NULL);
    rangeVoiceParameter(spk, "head size", parameters[PARM_HeadSize], eciHeadSize, 0, 100);
    rangeVoiceParameter(spk, "pitch baseline", parameters[PARM_PitchBaseline], eciPitchBaseline, 40, 422);
    rangeVoiceParameter(spk, "pitch fluctuation", parameters[PARM_PitchFluctuation], eciPitchFluctuation, 0, 100);
    rangeVoiceParameter(spk, "roughness", parameters[PARM_Roughness], eciRoughness, 0, 100);
-   rangeVoiceParameter(spk, "speed", parameters[PARM_Speed], eciSpeed, 70, 1297);
+   rangeVoiceParameter(spk, "breathiness", parameters[PARM_Breathiness], eciBreathiness, 0, 100);
    rangeVoiceParameter(spk, "volume", parameters[PARM_Volume], eciVolume, 0, 100);
+   rangeVoiceParameter(spk, "speed", parameters[PARM_Speed], eciSpeed, 70, 1297);
 
 #ifdef ICONV_NULL
    spk->driver.data->eci.useSSML = !prepareTextConversion(spk);
 #else /* ICONV_NULL */
    spk->driver.data->eci.useSSML = 1;
 #endif /* ICONV_NULL */
+
+   if (spk->driver.data->eci.useSSML) {
+      logMessage(LOG_CATEGORY(SPEECH_DRIVER), "using SSML");
+   }
 }
 
 static void
