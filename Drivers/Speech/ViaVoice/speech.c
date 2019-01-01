@@ -26,6 +26,13 @@
 #include <ctype.h>
 #include <eci.h>
 
+#ifdef HAVE_ICONV_H
+#include <iconv.h>
+#define ICONV_NULL ((iconv_t)-1)
+#else /* HAVE_ICONV_H */
+#warning iconv is not available
+#endif /* HAVE_ICONV_H */
+
 #include "log.h"
 #include "parse.h"
 
@@ -70,6 +77,12 @@ struct SpeechDataStruct {
       char *buffer;
       size_t size;
    } say;
+
+#ifdef ICONV_NULL
+   struct {
+      iconv_t handle;
+   } iconv;
+#endif /* ICONV_NULL */
 };
 
 typedef int MapFunction (int index);
@@ -79,8 +92,8 @@ static const char *abbreviationModes[] = {"on", "off", NULL};
 static const char *numberModes[] = {"word", "year", NULL};
 static const char *synthModes[] = {"sentence", "none", NULL};
 static const char *textModes[] = {"talk", "spell", "literal", "phonetic", NULL};
-static const char *voices[] = {"", "Dad", "Mom", "child", "", "", "", "Grandma", "Grandpa", NULL};
-static const char *genders[] = {"male", "female", NULL};
+static const char *voiceNames[] = {"", "Dad", "Mom", "child", "", "", "", "Grandma", "Grandpa", NULL};
+static const char *genderNames[] = {"male", "female", NULL};
 
 typedef struct {
    const char *name; // must be first
@@ -654,6 +667,22 @@ clientCallback (ECIHand eci, enum ECIMessage message, long parameter, void *data
 }
 
 static int
+addText (volatile SpeechSynthesizer *spk, const char *text) {
+   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "add text: \"%s\"", text);
+   if (eciAddText(spk->driver.data->eci.handle, text)) return 1;
+   reportError(spk, "eciAddText");
+   return 0;
+}
+
+static int
+insertIndex (volatile SpeechSynthesizer *spk, int index) {
+   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "insert index: %d", index);
+   if (eciInsertIndex(spk->driver.data->eci.handle, index)) return 1;
+   reportError(spk, "eciInsertIndex");
+   return 0;
+}
+
+static int
 setInputType (volatile SpeechSynthesizer *spk, int newInputType) {
    if (newInputType != spk->driver.data->eci.inputType) {
       if (!setGeneralParameter(spk, "input type", eciInputType, newInputType)) return 0;
@@ -674,14 +703,6 @@ enableAnnotations (volatile SpeechSynthesizer *spk) {
 }
 
 static int
-addText (volatile SpeechSynthesizer *spk, const char *text) {
-   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "add text: \"%s\"", text);
-   if (eciAddText(spk->driver.data->eci.handle, text)) return 1;
-   reportError(spk, "eciAddText");
-   return 0;
-}
-
-static int
 writeAnnotation (volatile SpeechSynthesizer *spk, const char *annotation) {
    if (!enableAnnotations(spk)) return 0;
 
@@ -690,28 +711,24 @@ writeAnnotation (volatile SpeechSynthesizer *spk, const char *annotation) {
    return addText(spk, text);
 }
 
-#ifdef HAVE_ICONV_H
-#include <iconv.h>
-#define ICONV_NULL ((iconv_t)-1)
-static iconv_t textConverter = ICONV_NULL;
-
+#ifdef ICONV_NULL
 static int
 prepareTextConversion (volatile SpeechSynthesizer *spk) {
-   textConverter = ICONV_NULL;
+   spk->driver.data->iconv.handle = ICONV_NULL;
 
    int identifier = getGeneralParameter(spk, eciLanguageDialect);
    const LanguageEntry *entry = languages;
 
    while (entry->name) {
       if (entry->identifier == identifier) {
-         iconv_t *converter = iconv_open(entry->encoding, "UTF-8");
+         iconv_t *handle = iconv_open(entry->encoding, "UTF-8");
 
-         if (converter == ICONV_NULL) {
+         if (handle == ICONV_NULL) {
             logMessage(LOG_WARNING, "character encoding not supported: %s: %s", entry->encoding, strerror(errno));
             return 0;
          }
 
-         textConverter = converter;
+         spk->driver.data->iconv.handle = handle;
          return 1;
       }
 
@@ -721,10 +738,7 @@ prepareTextConversion (volatile SpeechSynthesizer *spk) {
    logMessage(LOG_WARNING, "language identifier not defined: 0X%08X", identifier);
    return 0;
 }
-
-#else /* HAVE_ICONV_H */
-#warning iconv is not available
-#endif /* HAVE_ICONV_H */
+#endif /* ICONV_NULL */
 
 static int
 ensureSayBufferSize (volatile SpeechSynthesizer *spk, size_t size) {
@@ -805,7 +819,7 @@ addSegment (volatile SpeechSynthesizer *spk, const unsigned char *buffer, int fr
       size_t outputLeft = inputLeft * 10;
       char outputBuffer[outputLeft];
       char *outputStart = outputBuffer;
-      int result = iconv(textConverter, &inputStart, &inputLeft, &outputStart, &outputLeft);
+      int result = iconv(spk->driver.data->iconv.handle, &inputStart, &inputLeft, &outputStart, &outputLeft);
 
       if (result == -1) {
          logSystemError("iconv");
@@ -818,11 +832,7 @@ addSegment (volatile SpeechSynthesizer *spk, const unsigned char *buffer, int fr
 #endif /* ICONV_NULL */
    }
 
-   int index = indexMap[to];
-   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "insert index: %d", index);
-   if (eciInsertIndex(spk->driver.data->eci.handle, index)) return 1;
-   reportError(spk, "eciInsertIndex");
-   return 0;
+   return insertIndex(spk, indexMap[to]);
 }
 
 static int
@@ -924,9 +934,9 @@ setParameters (volatile SpeechSynthesizer *spk, char **parameters) {
    choiceGeneralParameter(spk, "synth mode", parameters[PARM_SynthMode], eciSynthMode, synthModes, sizeof(*synthModes), NULL);
    choiceGeneralParameter(spk, "text mode", parameters[PARM_TextMode], eciTextMode, textModes, sizeof(*textModes), NULL);
    choiceGeneralParameter(spk, "language", parameters[PARM_Language], eciLanguageDialect, languages, sizeof(*languages), mapLanguage);
-   choiceGeneralParameter(spk, "voice", parameters[PARM_Voice], eciNumParams, voices, sizeof(*voices), NULL);
+   choiceGeneralParameter(spk, "voice", parameters[PARM_Voice], eciNumParams, voiceNames, sizeof(*voiceNames), NULL);
 
-   choiceVoiceParameter(spk, "gender", parameters[PARM_Gender], eciGender, genders, NULL);
+   choiceVoiceParameter(spk, "gender", parameters[PARM_Gender], eciGender, genderNames, NULL);
    rangeVoiceParameter(spk, "breathiness", parameters[PARM_Breathiness], eciBreathiness, 0, 100);
    rangeVoiceParameter(spk, "head size", parameters[PARM_HeadSize], eciHeadSize, 0, 100);
    rangeVoiceParameter(spk, "pitch baseline", parameters[PARM_PitchBaseline], eciPitchBaseline, 0, 100);
@@ -952,7 +962,6 @@ writeAnnotations (volatile SpeechSynthesizer *spk) {
 
 static int
 spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
-setLogCategory("spkdrv");
    spk->setVolume = spk_setVolume;
    spk->setRate = spk_setRate;
 
@@ -1020,10 +1029,7 @@ spk_destruct (volatile SpeechSynthesizer *spk) {
       pcmCloseStream(spk);
 
 #ifdef ICONV_NULL
-      if (textConverter != ICONV_NULL) {
-         iconv_close(textConverter);
-         textConverter = ICONV_NULL;
-      }
+      if (spk->driver.data->iconv.handle != ICONV_NULL) iconv_close(spk->driver.data->iconv.handle);
 #endif /* ICONV_NULL */
 
       free(spk->driver.data);
