@@ -1,7 +1,7 @@
 /*
  * XBrlAPI - A background process tinkering with X for proper BrlAPI behavior
  *
- * Copyright (C) 2003-2018 by Samuel Thibault <Samuel.Thibault@ens-lyon.org>
+ * Copyright (C) 2003-2019 by Samuel Thibault <Samuel.Thibault@ens-lyon.org>
  *
  * XBrlAPI comes with ABSOLUTELY NO WARRANTY.
  *

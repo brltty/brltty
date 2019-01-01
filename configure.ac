@@ -3,7 +3,7 @@ dnl Process this file with autoconf 2.53 to produce a configure script.
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
 #
-# Copyright (C) 1995-2018 by The BRLTTY Developers.
+# Copyright (C) 1995-2019 by The BRLTTY Developers.
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
@@ -21,7 +21,7 @@ AC_PREREQ([2.64])
 AC_INIT([BRLTTY], [5.6], [BRLTTY@brltty.app], [brltty], [http://brltty.app/])
 AC_CONFIG_SRCDIR([Programs/brltty.c])
 
-copyright="© 1995-2018 by The BRLTTY Developers"
+copyright="© 1995-2019 by The BRLTTY Developers"
 AC_SUBST([PACKAGE_COPYRIGHT], ["${copyright}"])
 AC_DEFINE_UNQUOTED([PACKAGE_COPYRIGHT], ["${copyright}"],
                    [Define this to be a string containing the copyright notice.])
