@@ -53,8 +53,9 @@ typedef enum {
 #define MAXIMUM_SAMPLES 0X800
 
 static ECIHand eciHandle = NULL_ECI_HAND;
-static FILE *pcmStream = NULL;
 static short *pcmBuffer = NULL;
+static char *pcmCommand = NULL;
+static FILE *pcmStream = NULL;
 
 static int useSSML;
 static int currentUnits;
@@ -538,6 +539,75 @@ spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting) {
 }
 
 static int
+pcmMakeCommand (void) {
+   int rate = eciGetParam(eciHandle, eciSampleRate);
+   char buffer[0X100];
+
+   snprintf(
+      buffer, sizeof(buffer),
+      "sox -q -t raw -c 1 -b %" PRIsize " -e signed-integer -r %s - -d",
+      (sizeof(*pcmBuffer) * 8), sampleRates[rate]
+   );
+
+   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "PCM command: %s", buffer);
+   pcmCommand = strdup(buffer);
+   if (pcmCommand) return 1;
+   logMallocError();
+   return 0;
+}
+
+static int
+pcmOpenStream (void) {
+   if (!pcmStream) {
+      if (!pcmCommand) {
+         if (!pcmMakeCommand()) {
+            return 0;
+         }
+      }
+
+      if (!(pcmStream = popen(pcmCommand, "w"))) {
+         logMessage(LOG_WARNING, "can't start command: %s", strerror(errno));
+         return 0;
+      }
+
+      setvbuf(pcmStream, NULL, _IONBF, 0);
+   }
+
+   return 1;
+}
+
+static void
+pcmCloseStream (void) {
+   if (pcmStream) {
+      pclose(pcmStream);
+      pcmStream = NULL;
+   }
+}
+
+static enum ECICallbackReturn
+clientCallback (ECIHand eci, enum ECIMessage message, long parameter, void *data) {
+   volatile SpeechSynthesizer *spk = data;
+
+   switch (message) {
+      case eciWaveformBuffer:
+         logMessage(LOG_CATEGORY(SPEECH_DRIVER), "write samples: %ld", parameter);
+         fwrite(pcmBuffer, sizeof(*pcmBuffer), parameter, pcmStream);
+         if (ferror(pcmStream)) return eciDataAbort;
+         break;
+
+      case eciIndexReply:
+         logMessage(LOG_CATEGORY(SPEECH_DRIVER), "index reply: %ld", parameter);
+         tellSpeechLocation(spk, parameter);
+         break;
+
+      default:
+         break;
+   }
+
+   return eciDataProcessed;
+}
+
+static int
 setInputType (ECIHand eci, int newInputType) {
    if (newInputType != currentInputType) {
       if (!setGeneralParameter(eci, "input type", eciInputType, newInputType)) return 0;
@@ -737,7 +807,9 @@ addSegments (ECIHand eci, const unsigned char *buffer, size_t length, const int 
 
 static void
 spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
+   int ok = 0;
    int indexMap[length + 1];
+
    {
       int from = 0;
       int to = 0;
@@ -750,25 +822,28 @@ spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t le
       indexMap[from] = to;
    }
 
-   if (addSegments(eciHandle, buffer, length, indexMap)) {
-      logMessage(LOG_CATEGORY(SPEECH_DRIVER), "synthesize");
+   if (pcmOpenStream()) {
+      if (addSegments(eciHandle, buffer, length, indexMap)) {
+         logMessage(LOG_CATEGORY(SPEECH_DRIVER), "synthesize");
 
-      if (eciSynthesize(eciHandle)) {
-         logMessage(LOG_CATEGORY(SPEECH_DRIVER), "synchronize");
+         if (eciSynthesize(eciHandle)) {
+            logMessage(LOG_CATEGORY(SPEECH_DRIVER), "synchronize");
 
-         if (eciSynchronize(eciHandle)) {
-            logMessage(LOG_CATEGORY(SPEECH_DRIVER), "finished");
-            tellSpeechFinished(spk);
-            return;
+            if (eciSynchronize(eciHandle)) {
+               logMessage(LOG_CATEGORY(SPEECH_DRIVER), "finished");
+               tellSpeechFinished(spk);
+               ok = 1;
+            } else {
+               reportError(eciHandle, "eciSynchronize");
+            }
          } else {
-            reportError(eciHandle, "eciSynchronize");
+            reportError(eciHandle, "eciSynthesize");
          }
-      } else {
-         reportError(eciHandle, "eciSynthesize");
       }
-   }
 
-   eciStop(eciHandle);
+      if (!ok) eciStop(eciHandle);
+      pcmCloseStream();
+   }
 }
 
 static void
@@ -777,29 +852,6 @@ spk_mute (volatile SpeechSynthesizer *spk) {
    } else {
       reportError(eciHandle, "eciStop");
    }
-}
-
-static enum ECICallbackReturn
-clientCallback (ECIHand eci, enum ECIMessage message, long parameter, void *data) {
-   volatile SpeechSynthesizer *spk = data;
-
-   switch (message) {
-      case eciWaveformBuffer:
-         logMessage(LOG_CATEGORY(SPEECH_DRIVER), "write samples: %ld", parameter);
-         fwrite(pcmBuffer, sizeof(*pcmBuffer), parameter, pcmStream);
-         if (ferror(pcmStream)) return eciDataAbort;
-         break;
-
-      case eciIndexReply:
-         logMessage(LOG_CATEGORY(SPEECH_DRIVER), "index reply: %ld", parameter);
-         tellSpeechLocation(spk, parameter);
-         break;
-
-      default:
-         break;
-   }
-
-   return eciDataProcessed;
 }
 
 static int
@@ -882,25 +934,9 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
 
          if ((pcmBuffer = calloc(MAXIMUM_SAMPLES, sizeof(*pcmBuffer)))) {
             if (eciSetOutputBuffer(eciHandle, MAXIMUM_SAMPLES, pcmBuffer)) {
-               int rate = eciGetParam(eciHandle, eciSampleRate);
-
-               char command[0X100];
-               snprintf(
-                  command, sizeof(command),
-                  "sox -q -t raw -c 1 -b %" PRIsize " -e signed-integer -r %s - -d",
-                  (sizeof(*pcmBuffer) * 8), sampleRates[rate]
-               );
-
-               logMessage(LOG_CATEGORY(SPEECH_DRIVER), "PCM command: %s", command);
-
-               if ((pcmStream = popen(command, "w"))) {
-                  setvbuf(pcmStream, NULL, _IONBF, 0);
-                  setParameters(eciHandle, parameters);
-                  writeAnnotations(eciHandle);
-                  return 1;
-               } else {
-                  logMessage(LOG_WARNING, "can't start command: %s", strerror(errno));
-               }
+               setParameters(eciHandle, parameters);
+               writeAnnotations(eciHandle);
+               return 1;
             } else {
                reportError(eciHandle, "eciSetOutputBuffer");
             }
@@ -928,14 +964,16 @@ spk_destruct (volatile SpeechSynthesizer *spk) {
       eciHandle = NULL_ECI_HAND;
    }
 
-   if (pcmStream) {
-      pclose(pcmStream);
-      pcmStream = NULL;
-   }
+   pcmCloseStream();
 
    if (pcmBuffer) {
       free(pcmBuffer);
       pcmBuffer = NULL;
+   }
+
+   if (pcmCommand) {
+      free(pcmCommand);
+      pcmCommand = NULL;
    }
 
 #ifdef ICONV_NULL
