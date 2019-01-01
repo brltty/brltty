@@ -380,7 +380,7 @@ reportError (volatile SpeechSynthesizer *spk, const char *routine) {
 }
 
 static void
-reportParameter (const char *description, int setting, const char *const *choices, MapFunction *map, const char *unit) {
+reportParameter (const char *type, const char *description, int setting, const char *const *choices, MapFunction *map, const char *unit) {
    char buffer[0X10];
    const char *value = buffer;
 
@@ -401,7 +401,7 @@ reportParameter (const char *description, int setting, const char *const *choice
 
    if (value == buffer) snprintf(buffer, sizeof(buffer), "%d", setting);
    if (!unit) unit = "";
-   logMessage(LOG_DEBUG, "ViaVoice Parameter: %s = %s%s", description, value, unit);
+   logMessage(LOG_DEBUG, "ViaVoice %s parameter: %s = %s%s", type, description, value, unit);
 }
 
 static int
@@ -409,10 +409,21 @@ getGeneralParameter (volatile SpeechSynthesizer *spk, enum ECIParam parameter) {
    return eciGetParam(spk->driver.data->eci.handle, parameter);
 }
 
+static const char *
+getGeneralParameterUnit (enum ECIParam parameter) {
+   switch (parameter) {
+      case eciSampleRate:
+         return "Hz";
+
+      default:
+         return "";
+   }
+}
+
 static void
 reportGeneralParameter (volatile SpeechSynthesizer *spk, const char *description, enum ECIParam parameter, int setting, const char *const *choices, MapFunction *map) {
    if (parameter != eciNumParams) setting = getGeneralParameter(spk, parameter);
-   reportParameter(description, setting, choices, map, NULL);
+   reportParameter("general", description, setting, choices, map, getGeneralParameterUnit(parameter));
 }
 
 static int
@@ -518,7 +529,7 @@ getVoiceParameterUnit (enum ECIVoiceParam parameter) {
 
 static void
 reportVoiceParameter (volatile SpeechSynthesizer *spk, const char *description, enum ECIVoiceParam parameter, const char *const *choices, MapFunction *map) {
-   reportParameter(description, getVoiceParameter(spk, parameter), choices, map, getVoiceParameterUnit(parameter));
+   reportParameter("voice", description, getVoiceParameter(spk, parameter), choices, map, getVoiceParameterUnit(parameter));
 }
 
 static int
