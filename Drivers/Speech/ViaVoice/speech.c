@@ -40,21 +40,21 @@ typedef enum {
    PARM_IniFile,
    PARM_Rate,
    PARM_Mode,
-   PARM_Expressiveness,
+   PARM_Synthesize,
    PARM_Abbreviations,
    PARM_Years,
    PARM_Language,
    PARM_Voice,
    PARM_Gender,
    PARM_HeadSize,
-   PARM_PitchBaseline,
-   PARM_PitchFluctuation,
+   PARM_Pitch,
+   PARM_Expressiveness,
    PARM_Roughness,
    PARM_Breathiness,
    PARM_Volume,
    PARM_Speed
 } DriverParameter;
-#define SPKPARMS "inifile", "rate", "mode", "expressiveness", "abbreviations", "years", "language", "voice", "gender", "headsize", "pitchbaseline", "pitchfluctuation", "roughness", "breathiness", "volume", "speed"
+#define SPKPARMS "inifile", "rate", "mode", "synthesize", "abbreviations", "years", "language", "voice", "gender", "headsize", "pitch", "expressiveness", "roughness", "breathiness", "volume", "speed"
 
 #include "spk_driver.h"
 #include "speech.h"
@@ -92,7 +92,7 @@ typedef int MapFunction (int index);
 static const char *rateChoices[] = {"8000", "11025", "22050", NULL};
 static const char *abbreviationsChoices[] = {"on", "off", NULL};
 static const char *yearsChoices[] = {"off", "on", NULL};
-static const char *expressivenessChoices[] = {"sentences", "none", NULL};
+static const char *synthesizeChoices[] = {"sentences", "all", NULL};
 static const char *modeChoices[] = {"words", "letters", "punctuation", "phonetic", NULL};
 static const char *voiceChoices[] = {"", "Dad", "Mom", "child", "", "", "", "Grandma", "Grandpa", NULL};
 static const char *genderChoices[] = {"male", "female", NULL};
@@ -944,7 +944,7 @@ static void
 setParameters (volatile SpeechSynthesizer *spk, char **parameters) {
    choiceGeneralParameter(spk, "sample rate", parameters[PARM_Rate], eciSampleRate, rateChoices, sizeof(*rateChoices), NULL);
    choiceGeneralParameter(spk, "text mode", parameters[PARM_Mode], eciTextMode, modeChoices, sizeof(*modeChoices), NULL);
-   choiceGeneralParameter(spk, "synth mode", parameters[PARM_Expressiveness], eciSynthMode, expressivenessChoices, sizeof(*expressivenessChoices), NULL);
+   choiceGeneralParameter(spk, "synth mode", parameters[PARM_Synthesize], eciSynthMode, synthesizeChoices, sizeof(*synthesizeChoices), NULL);
    choiceGeneralParameter(spk, "dictionaries", parameters[PARM_Abbreviations], eciDictionary, abbreviationsChoices, sizeof(*abbreviationsChoices), NULL);
    choiceGeneralParameter(spk, "number mode", parameters[PARM_Years], eciNumberMode, yearsChoices, sizeof(*yearsChoices), NULL);
    choiceGeneralParameter(spk, "language&dialect", parameters[PARM_Language], eciLanguageDialect, languageChoices, sizeof(*languageChoices), mapLanguage);
@@ -952,8 +952,8 @@ setParameters (volatile SpeechSynthesizer *spk, char **parameters) {
 
    choiceVoiceParameter(spk, "gender", parameters[PARM_Gender], eciGender, genderChoices, NULL);
    rangeVoiceParameter(spk, "head size", parameters[PARM_HeadSize], eciHeadSize, 0, 100);
-   rangeVoiceParameter(spk, "pitch baseline", parameters[PARM_PitchBaseline], eciPitchBaseline, 40, 422);
-   rangeVoiceParameter(spk, "pitch fluctuation", parameters[PARM_PitchFluctuation], eciPitchFluctuation, 0, 100);
+   rangeVoiceParameter(spk, "pitch baseline", parameters[PARM_Pitch], eciPitchBaseline, 40, 422);
+   rangeVoiceParameter(spk, "pitch fluctuation", parameters[PARM_Expressiveness], eciPitchFluctuation, 0, 100);
    rangeVoiceParameter(spk, "roughness", parameters[PARM_Roughness], eciRoughness, 0, 100);
    rangeVoiceParameter(spk, "breathiness", parameters[PARM_Breathiness], eciBreathiness, 0, 100);
    rangeVoiceParameter(spk, "volume", parameters[PARM_Volume], eciVolume, 0, 100);
