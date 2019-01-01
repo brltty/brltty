@@ -430,7 +430,7 @@
 
 # ViaVoice Speech Driver Parameters
 #speech-parameters vv:IniFile=/usr/lib/ViaVoiceTTS/eci.ini
-#speech-parameters vv:SampleRate= # [8000,11025,22050]
+#speech-parameters vv:SampleRate= # [8000,11025,22050 Hz]
 #speech-parameters vv:AbbreviationMode= # [on,off]
 #speech-parameters vv:NumberMode= # [word,year]
 #speech-parameters vv:SynthMode= # [sentence,none]
@@ -440,9 +440,11 @@
 #speech-parameters vv:Gender= # [male,female]
 #speech-parameters vv:Breathiness= # [0-100]
 #speech-parameters vv:HeadSize= # [0-100]
-#speech-parameters vv:PitchBaseline= # [0-422 Hz]
+#speech-parameters vv:PitchBaseline= # [40-422 Hz]
 #speech-parameters vv:PitchFluctuation= # [0-100]
 #speech-parameters vv:Roughness= # [0-100]
+#speech-parameters vv:Speed= # [70-1297 wpm]
+#speech-parameters vv:Volume= # [0-100 %]
 
 
 #####################

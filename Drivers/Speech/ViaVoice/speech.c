@@ -50,9 +50,11 @@ typedef enum {
    PARM_HeadSize,
    PARM_PitchBaseline,
    PARM_PitchFluctuation,
-   PARM_Roughness
+   PARM_Roughness,
+   PARM_Speed,
+   PARM_Volume
 } DriverParameter;
-#define SPKPARMS "inifile", "samplerate", "abbreviationmode", "numbermode", "synthmode", "textmode", "language", "voice", "gender", "breathiness", "headsize", "pitchbaseline", "pitchfluctuation", "roughness"
+#define SPKPARMS "inifile", "samplerate", "abbreviationmode", "numbermode", "synthmode", "textmode", "language", "voice", "gender", "breathiness", "headsize", "pitchbaseline", "pitchfluctuation", "roughness", "speed", "volume"
 
 #include "spk_driver.h"
 #include "speech.h"
@@ -950,9 +952,11 @@ setParameters (volatile SpeechSynthesizer *spk, char **parameters) {
    choiceVoiceParameter(spk, "gender", parameters[PARM_Gender], eciGender, genderNames, NULL);
    rangeVoiceParameter(spk, "breathiness", parameters[PARM_Breathiness], eciBreathiness, 0, 100);
    rangeVoiceParameter(spk, "head size", parameters[PARM_HeadSize], eciHeadSize, 0, 100);
-   rangeVoiceParameter(spk, "pitch baseline", parameters[PARM_PitchBaseline], eciPitchBaseline, 0, 100);
+   rangeVoiceParameter(spk, "pitch baseline", parameters[PARM_PitchBaseline], eciPitchBaseline, 40, 422);
    rangeVoiceParameter(spk, "pitch fluctuation", parameters[PARM_PitchFluctuation], eciPitchFluctuation, 0, 100);
    rangeVoiceParameter(spk, "roughness", parameters[PARM_Roughness], eciRoughness, 0, 100);
+   rangeVoiceParameter(spk, "speed", parameters[PARM_Speed], eciSpeed, 70, 1297);
+   rangeVoiceParameter(spk, "volume", parameters[PARM_Volume], eciVolume, 0, 100);
 
 #ifdef ICONV_NULL
    spk->driver.data->eci.useSSML = !prepareTextConversion(spk);
