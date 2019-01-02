@@ -61,7 +61,7 @@ typedef enum {
 
 struct SpeechDataStruct {
    struct {
-      int binary;
+      uint32_t binary;
       char text[20];
    } version;
 
@@ -989,11 +989,11 @@ writeAnnotations (volatile SpeechSynthesizer *spk) {
    disableAnnotations(spk);
 }
 
-static int
+static uint32_t
 parseVersion (const char *text) {
-   int result = 0;
-   int width = 8;
-   int shift = width * 4;
+   uint32_t result = 0;
+   const unsigned int width = 8;
+   unsigned int shift = sizeof(result) * 8 / width * width;
 
    while (*text && shift) {
       char *end;
