@@ -429,7 +429,6 @@
 #speech-parameters th:Pitch=0.0 # [-2.0-2.0]
 
 # ViaVoice Speech Driver Parameters
-#speech-parameters vv:IniFile=/var/opt/IBM/ibmtts/cfg/eci.ini
 #speech-parameters vv:Quality= # [fair,poor,good]
 #speech-parameters vv:Mode= # [words,letters,punctuation,phonetic]
 #speech-parameters vv:Synthesize= # [sentences,all]

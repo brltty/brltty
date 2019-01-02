@@ -37,7 +37,6 @@
 #include "parse.h"
 
 typedef enum {
-   PARM_IniFile,
    PARM_Quality,
    PARM_Mode,
    PARM_Synthesize,
@@ -54,29 +53,38 @@ typedef enum {
    PARM_Volume,
    PARM_Speed
 } DriverParameter;
-#define SPKPARMS "inifile", "quality", "mode", "synthesize", "abbreviations", "years", "language", "voice", "gender", "headsize", "pitch", "expressiveness", "roughness", "breathiness", "volume", "speed"
+#define SPKPARMS "quality", "mode", "synthesize", "abbreviations", "years", "language", "voice", "gender", "headsize", "pitch", "expressiveness", "roughness", "breathiness", "volume", "speed"
 
 #include "spk_driver.h"
-#include "speech.h"
+
+#define MAXIMUM_SAMPLES 0X800
 
 struct SpeechDataStruct {
    struct {
+      int binary;
+      char text[20];
+   } version;
+
+   struct {
       ECIHand handle;
-      int units;
-      int inputType;
       unsigned useSSML:1;
    } eci;
 
    struct {
-      char *command;
-      FILE *stream;
       short *buffer;
+      FILE *stream;
+      char *command;
    } pcm;
 
    struct {
       char *buffer;
       size_t size;
    } say;
+
+   struct {
+      int unitType;
+      int inputType;
+   } current;
 
 #ifdef ICONV_NULL
    struct {
@@ -493,9 +501,9 @@ choiceEnvironmentParameter (volatile SpeechSynthesizer *spk, const char *descrip
 
 static int
 setUnits (volatile SpeechSynthesizer *spk, int newUnits) {
-   if (newUnits != spk->driver.data->eci.units) {
+   if (newUnits != spk->driver.data->current.unitType) {
       if (!setEnvironmentParameter(spk, "real world units", eciRealWorldUnits, newUnits)) return 0;
-      spk->driver.data->eci.units = newUnits;
+      spk->driver.data->current.unitType = newUnits;
    }
 
    return 1;
@@ -721,9 +729,9 @@ insertIndex (volatile SpeechSynthesizer *spk, int index) {
 
 static int
 setInputType (volatile SpeechSynthesizer *spk, int newInputType) {
-   if (newInputType != spk->driver.data->eci.inputType) {
+   if (newInputType != spk->driver.data->current.inputType) {
       if (!setEnvironmentParameter(spk, "input type", eciInputType, newInputType)) return 0;
-      spk->driver.data->eci.inputType = newInputType;
+      spk->driver.data->current.inputType = newInputType;
    }
 
    return 1;
@@ -941,31 +949,6 @@ spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t le
    }
 }
 
-static int
-setInitializationFile (const char *path) {
-   const char *variable = INI_VARIABLE;
-   logMessage(LOG_DEBUG, "ViaVoice Ini Variable: %s", variable);
-
-   if (!*path) {
-      const char *value = getenv(variable);
-      if (value) {
-         path = value;
-	 goto isSet;
-      }
-
-      value = INI_DEFAULT;
-   }
-
-   if (setenv(variable, path, 1) == -1) {
-      logSystemError("setenv");
-      return 0;
-   }
-
-isSet:
-   logMessage(LOG_INFO, "ViaVoice Initialization File: %s", path);
-   return 1;
-}
-
 static void
 setParameters (volatile SpeechSynthesizer *spk, char **parameters) {
    choiceEnvironmentParameter(spk, "quality (sample rate)", parameters[PARM_Quality], eciSampleRate, qualityChoices, sizeof(*qualityChoices), NULL);
@@ -1007,6 +990,26 @@ writeAnnotations (volatile SpeechSynthesizer *spk) {
 }
 
 static int
+parseVersion (const char *text) {
+   int result = 0;
+   int width = 8;
+   int shift = width * 4;
+
+   while (*text && shift) {
+      char *end;
+      long digit = strtol(text, &end, 10);
+
+      shift -= width;
+      result |= digit << shift;
+
+      text = end;
+      if (*text) text += 1;
+   }
+
+   return result;
+}
+
+static int
 spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
    spk->setVolume = spk_setVolume;
    spk->setRate = spk_setRate;
@@ -1014,46 +1017,43 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
    if ((spk->driver.data = malloc(sizeof(*spk->driver.data)))) {
       memset(spk->driver.data, 0, sizeof(*spk->driver.data));
 
-      spk->driver.data->eci.handle = NULL_ECI_HAND;
+      eciVersion(spk->driver.data->version.text);
+      logMessage(LOG_INFO, "ViaVoice Engine Version: %s", spk->driver.data->version.text);
+      spk->driver.data->version.binary = parseVersion(spk->driver.data->version.text);
 
-      spk->driver.data->pcm.command = NULL;
-      spk->driver.data->pcm.stream = NULL;
+      spk->driver.data->eci.handle = NULL_ECI_HAND;
+      spk->driver.data->eci.useSSML = 0;
+
       spk->driver.data->pcm.buffer = NULL;
+      spk->driver.data->pcm.stream = NULL;
+      spk->driver.data->pcm.command = NULL;
 
       spk->driver.data->say.buffer = NULL;
       spk->driver.data->say.size = 0;
 
-      if (setInitializationFile(parameters[PARM_IniFile])) {
-         {
-            char version[20];
-            eciVersion(version);
-            logMessage(LOG_INFO, "ViaVoice Engine: version %s", version);
-         }
+      if ((spk->driver.data->eci.handle = eciNew()) != NULL_ECI_HAND) {
+         eciRegisterCallback(spk->driver.data->eci.handle, clientCallback, (void *)spk);
 
-         if ((spk->driver.data->eci.handle = eciNew()) != NULL_ECI_HAND) {
-            eciRegisterCallback(spk->driver.data->eci.handle, clientCallback, (void *)spk);
+         spk->driver.data->current.unitType = getEnvironmentParameter(spk, eciRealWorldUnits);
+         spk->driver.data->current.inputType = getEnvironmentParameter(spk, eciInputType);
 
-            spk->driver.data->eci.units = getEnvironmentParameter(spk, eciRealWorldUnits);
-            spk->driver.data->eci.inputType = getEnvironmentParameter(spk, eciInputType);
-
-            if ((spk->driver.data->pcm.buffer = calloc(MAXIMUM_SAMPLES, sizeof(*spk->driver.data->pcm.buffer)))) {
-               if (eciSetOutputBuffer(spk->driver.data->eci.handle, MAXIMUM_SAMPLES, spk->driver.data->pcm.buffer)) {
-                  setParameters(spk, parameters);
-                  writeAnnotations(spk);
-                  return 1;
-               } else {
-                  reportError(spk, "eciSetOutputBuffer");
-               }
-
-               free(spk->driver.data->pcm.buffer);
+         if ((spk->driver.data->pcm.buffer = calloc(MAXIMUM_SAMPLES, sizeof(*spk->driver.data->pcm.buffer)))) {
+            if (eciSetOutputBuffer(spk->driver.data->eci.handle, MAXIMUM_SAMPLES, spk->driver.data->pcm.buffer)) {
+               setParameters(spk, parameters);
+               writeAnnotations(spk);
+               return 1;
             } else {
-               logMallocError();
+               reportError(spk, "eciSetOutputBuffer");
             }
 
-            eciDelete(spk->driver.data->eci.handle);
+            free(spk->driver.data->pcm.buffer);
          } else {
-            logMessage(LOG_ERR, "ViaVoice initialization error");
+            logMallocError();
          }
+
+         eciDelete(spk->driver.data->eci.handle);
+      } else {
+         logMessage(LOG_ERR, "ViaVoice initialization error");
       }
 
       free(spk->driver.data);
