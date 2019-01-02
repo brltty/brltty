@@ -894,8 +894,8 @@ newUinputObject (const char *name) {
           }
 #endif /* UI_SET_PHYS */
 
-          logMessage(LOG_DEBUG, "uinput opened: %s fd=%d",
-                     device, uinput->fileDescriptor);
+          logMessage(LOG_DEBUG, "uinput opened: %s: %s fd=%d",
+                     device, description.name, uinput->fileDescriptor);
 
           return uinput;
         } else {
