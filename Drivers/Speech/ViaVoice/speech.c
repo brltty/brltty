@@ -427,10 +427,10 @@ reportParameter (const char *type, const char *description, int setting, const v
          if (!name) break;
          int index = (choice - choices) / size;
 
-	 if (setting == (map? map(index): index)) {
-	    value = name;
-	    break;
-	 }
+         if (setting == (map? map(index): index)) {
+            value = name;
+            break;
+         }
 
          choice += size;
       }
@@ -482,14 +482,14 @@ choiceEnvironmentParameter (volatile SpeechSynthesizer *spk, const char *descrip
       unsigned int setting;
 
       if (validateChoiceEx(&setting, value, choices, size)) {
-	 if (map) setting = map(setting);
+         if (map) setting = map(setting);
 
          if (setEnvironmentParameter(spk, description, parameter, setting)) {
-	    ok = 1;
-	    assume = setting;
+            ok = 1;
+            assume = setting;
          } else {
             logMessage(LOG_WARNING, "%s not supported: %s", description, value);
-	 }
+         }
       } else {
         logMessage(LOG_WARNING, "invalid %s setting: %s", description, value);
       }
@@ -500,7 +500,7 @@ choiceEnvironmentParameter (volatile SpeechSynthesizer *spk, const char *descrip
 }
 
 static int
-setUnits (volatile SpeechSynthesizer *spk, int newUnits) {
+setUnitType (volatile SpeechSynthesizer *spk, int newUnits) {
    if (newUnits != spk->driver.data->current.unitType) {
       if (!setEnvironmentParameter(spk, "real world units", eciRealWorldUnits, newUnits)) return 0;
       spk->driver.data->current.unitType = newUnits;
@@ -510,25 +510,25 @@ setUnits (volatile SpeechSynthesizer *spk, int newUnits) {
 }
 
 static int
-useInternalUnit (volatile SpeechSynthesizer *spk) {
-   return setUnits(spk, 0);
+useInternalUnits (volatile SpeechSynthesizer *spk) {
+   return setUnitType(spk, 0);
 }
 
 static int
-useExternalUnit (volatile SpeechSynthesizer *spk) {
-   return setUnits(spk, 1);
+useExternalUnits (volatile SpeechSynthesizer *spk) {
+   return setUnitType(spk, 1);
 }
 
 static int
 useParameterUnit (volatile SpeechSynthesizer *spk, enum ECIVoiceParam parameter) {
    switch (parameter) {
       case eciVolume:
-         if (!useInternalUnit(spk)) return 0;
+         if (!useInternalUnits(spk)) return 0;
          break;
 
       case eciPitchBaseline:
       case eciSpeed:
-         if (!useExternalUnit(spk)) return 0;
+         if (!useExternalUnits(spk)) return 0;
          break;
 
       default:
@@ -581,7 +581,7 @@ choiceVoiceParameter (volatile SpeechSynthesizer *spk, const char *description, 
       unsigned int setting;
 
       if (validateChoice(&setting, value, choices)) {
-	 if (map) setting = map(setting);
+         if (map) setting = map(setting);
 
          if (setVoiceParameter(spk, description, parameter, setting)) {
             ok = 1;
@@ -606,8 +606,8 @@ rangeVoiceParameter (volatile SpeechSynthesizer *spk, const char *description, c
 
       if (validateInteger(&setting, value, &minimum, &maximum)) {
          if (setVoiceParameter(spk, description, parameter, setting)) {
-	    ok = 1;
-	 }
+            ok = 1;
+         }
       } else {
         logMessage(LOG_WARNING, "invalid %s setting: %s", description, value);
       }
@@ -795,7 +795,7 @@ ensureSayBufferSize (volatile SpeechSynthesizer *spk, size_t size) {
 
       if (!newBuffer) {
          logSystemError("speech buffer allocation");
-	 return 0;
+         return 0;
       }
 
       if (spk->driver.data->say.buffer) free(spk->driver.data->say.buffer);
